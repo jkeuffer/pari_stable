@@ -1420,7 +1420,7 @@ squff(GEN a, long klim, long hint)
 }
 
 GEN
-deflate(GEN x0, long *m)
+poldeflate(GEN x0, long *m)
 {
   long d = 0, i, id, lx = lgef(x0)-2;
   GEN x = x0 + 2;
@@ -1442,7 +1442,7 @@ deflate(GEN x0, long *m)
 }
 
 GEN
-inflate(GEN x0, long d)
+polinflate(GEN x0, long d)
 {
   long i, id, ly, lx = lgef(x0)-2;
   GEN x = x0 + 2, z, y;
@@ -1460,7 +1460,7 @@ squff2(GEN x, long klim, long hint)
 {
   GEN L;
   long m;
-  x = deflate(x, &m);
+  x = poldeflate(x, &m);
   L = squff(x, klim, hint);
   if (m > 1)
   {
@@ -1481,7 +1481,7 @@ squff2(GEN x, long klim, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = concatsp(L2, squff(inflate((GEN)L[i], v[k]), klim,hint));
+        L2 = concatsp(L2, squff(polinflate((GEN)L[i], v[k]), klim,hint));
       L = L2;
     }
   }
