@@ -1649,7 +1649,7 @@ get_R(GEN C, long sreg, GEN z, GEN *ptR)
     }
   }
   c = gtodouble(gmul(z, R));
-  if (c < 0.75 || c > 1.3) return RELAT;
+  if (c < 0.8 || c > 1.3) return RELAT;
   *ptR = R; return LARGE;
 }
 
