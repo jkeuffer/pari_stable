@@ -1717,7 +1717,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z=FpXQ_inv(Bn,U,l);
       z=FpXQ_mul(An,z,U,l);
       L=FpXQ_sqrtn(z,ipg,U,l,NULL);
-      if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
+      if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
       B=FqX_Fq_mul(B,L,U,l);
