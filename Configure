@@ -123,8 +123,10 @@ mydlldflags=`echo "$DLLDFLAGS" | \
    sed -e "s/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//" \
        -e "s/\\$(CFLAGS)/$CFLAGS/"`
 
+__LIBS=$LIBS
 if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
 myextradlldflags=`eval echo $EXTRADLLDFLAGS`
+LIBS=$__LIBS
 
 myincludedir=`echo "$includedir" | sed -e 's/\/pari\/*$//'`
 modules_build="$CC -c -o %s.o $CFLAGS -I$myincludedir %s.c && $DLLD -o %s.$DLSUFFIX $mydlldflags %s.o $myextradlldflags"
