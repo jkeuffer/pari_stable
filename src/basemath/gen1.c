@@ -2003,7 +2003,12 @@ gdiv(GEN x, GEN y)
       if (ty!=t_MAT || ly==1 || lg(y[1])!=ly) err(gdiveri,tx,ty);
       l=avma; p1=invmat(y); tetpil=avma;
       return gerepile(l,tetpil,gmul(x,p1));
+     case t_QFI:case t_QFR:
+       break;
+     default:
+       err(typeer,"division");
   }
+  /*Here tx==t_QFI || tx==t_QFR*/
   if (tx==ty)
   {
     l=signe(y[2]); setsigne(y[2],-l);
