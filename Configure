@@ -84,14 +84,14 @@ while test $# -gt 0; do
   --share-prefix=*)
                share_prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --disable-kernel) kernel=no;;
-  -a|-ask)     fastread=no;;
+  -a|-ask|--ask)     fastread=no;;
   -g)          optimization=debugging;;
   -pg)         optimization=profiling;;
   -rdll)       DYNRELOC=yes;;
-  -h|-help|-\?)error=true;;
-  -v|-verbhelp)error=verb;;
+  -h|-help|--help|-\?)error=true;;
+  -v|-verbhelp|--verbhelp)error=verb;;
   -s|--static) static=y;;
-  -graphic)   shift; which_graphic_lib=$1; graph_cmd=yes ;;
+  -graphic|--graphic) shift; which_graphic_lib=$1; graph_cmd=yes ;;
   --graphic=*|--graphi=*|--graph=*|--grap=*|--gra=*|--gr=*|--g=*)
 	       graph_cmd=yes
 	       which_graphic_lib=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
@@ -103,15 +103,16 @@ done
 case "$error" in
 true) cat >&2 <<EOT
 Usage: Configure [-ask|-help|-g|-pg] [ -load <filename> ] [ --prefix=<dir> ]
-Options: names can be abbreviated to one character (e.g -h = -help)
- -ask            interactively ask for answers (defaults are still computed)
- -help           this message
- -verbhelp       a longer help message
- -load           specify a default config file (default $dflt_conf_file)
- --static        build static GP binary only
- --prefix=<dir>  install files in <dir>/... (default $prefix)
- --graphic=<gr>  which graphic library to use (default X11)
-                 (none X11 gnuplot)
+Options: some names can be abbreviated to one character (e.g -h = -help)
+-a, --ask        interactive configuration
+-h, --help       this message
+-l, --load       skip Configure and specify a default config file
+-s, --static     build static GP binary only
+-v, --verbhelp   a longer help message
+--prefix=<dir>        install files in <dir> (default $prefix)
+--share-prefix=<dir>  as 'prefix', for architecture independant files
+--graphic=<gr>        which graphic library to use (default X11)
+                      (none X11 gnuplot)
 
 Additional developer options:
  -g              creates debugging version
