@@ -1180,6 +1180,12 @@ realzero(long prec)
   x[1]=evalexpo(-bit_accuracy(prec));
   x[2]=0; return x;
 }
+GEN
+realun(long prec)
+{
+  GEN x=cgetr(prec); affsr(1,x);
+  return x;
+}
 
 void
 gaffect(GEN x, GEN y)
