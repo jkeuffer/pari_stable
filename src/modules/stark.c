@@ -1916,8 +1916,9 @@ init_cScT(ST_t *T, GEN CHI, long N, long prec)
   clear_cScT(T, N);
 }
 
+/* flag = 1 prevent from using QuadGetST (used by bnrL1) */
 static GEN
-GetST(GEN dataCR, GEN vChar, long prec)
+GetST(GEN dataCR, GEN vChar, long prec, long flag)
 {
   const long cl = lg(dataCR) - 1;
   pari_sp av, av1, av2;
@@ -1930,7 +1931,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
   bnr = gmael(dataCR,1,4);
   nf  = checknf(bnr);
   /* compute S,T differently if nf is quadratic */
-  if (degpol(nf[1]) == 2) return QuadGetST(dataCR, vChar, prec);
+  if (degpol(nf[1]) == 2  && !flag) return QuadGetST(dataCR, vChar, prec);
 
   if (DEBUGLEVEL) (void)timer2();
   /* allocate memory for answer */
@@ -2680,7 +2681,7 @@ LABDOUB:
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
   if (flag >= 0)
   {
-    p1 = GetST(dataCR, vChar, newprec);
+    p1 = GetST(dataCR, vChar, newprec, 0);
     S = (GEN)p1[1];
     T = (GEN)p1[2];
     Lp = cgetg(cl + 1, t_VEC);
@@ -3066,7 +3067,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   dataCR = InitChar(bnr, listCR, prec);
 
   vChar= sortChars(dataCR,0);
-  p1 = GetST(dataCR, vChar, prec);
+  p1 = GetST(dataCR, vChar, prec, 1);
   S = (GEN)p1[1];
   T = (GEN)p1[2];
 
