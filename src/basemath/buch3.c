@@ -786,7 +786,7 @@ minimforunits(GEN nf, long BORNE, long stockmax)
   GEN u,r,S,a,M,p1;
   double p;
   double **q,*v,*y,*z;
-  double eps=0.000001, BOUND = BORNE + eps;
+  double eps=0.000001, BOUND = BORNE * 1.00001;
 
   if (DEBUGLEVEL>=2)
   {
