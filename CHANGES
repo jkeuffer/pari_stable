@@ -86,6 +86,7 @@ XR 47- factorpadic(, not a prime, ) --> SEGV
    48- matrix(2,2,i,i, ...) allowed, with weird result
 BA 49- better arguments checking for galoisfixedfield
    50- psi(I) --> incorrect type in rtodbl
+XR 51- increase precision automatically when needed in quadhilbertreal
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -125,9 +126,11 @@ BA  4- library function FpX_FpXQ_compo (Brent & Kung)
 IZ  7- readline: allow switching readline editing on/off [for commandtools]
 IZ  8- readline: F1 has same effect as M-h, and F1F1 as M-H (short/long help)
     9- function writebin
+XR 10- new error message "precer" (precision too low in...)
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
+XR  2- error message truer2 (superseded by precer)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
