@@ -254,6 +254,8 @@ BA 21- type() does not allow to change object types anymore.
    47- ':' no longer allowed as a substitute for ';' if compatible = 0. Use
        GP2C semantics [ x:int, v:vec ]. For the time being the type
        information is discarded.
+   48- modulargcd() was very inefficient for non-monic t_POLs
+       [ e.g (poltchebi(x) - 1) / (x-1) ]
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

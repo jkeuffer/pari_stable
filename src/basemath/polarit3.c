@@ -3586,12 +3586,29 @@ _gcd(GEN a, GEN b)
   return ggcd(a,b);
 }
 
+/* ceil( || p ||_oo / lc(p) ) */
+static GEN
+maxnorm(GEN p)
+{
+  long i, n = degpol(p), av = avma;
+  GEN x, m = gzero;
+
+  p += 2;
+  for (i=0; i<n; i++)
+  {
+    x = (GEN)p[i];
+    if (absi_cmp(x,m) > 0) m = x;
+  }
+  m = divii(m, (GEN)p[n]);
+  return gerepileuptoint(av, addis(absi(m),1));
+}
+
 /* A0 and B0 in Q[X] */
 GEN
 modulargcd(GEN A0, GEN B0)
 {
-  GEN a,b,Hp,D,A,B,q,qp,H,g;
-  long m,n;
+  GEN a, b, Hp, D, A, B, q, qp, H, g, bound = NULL;
+  long m, n;
   ulong p;
   pari_sp av2, av = avma, avlim = stack_lim(av, 1);
   byteptr d;
@@ -3606,6 +3623,7 @@ modulargcd(GEN A0, GEN B0)
  
   /* A, B in Z[X] */
   g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
+  if (is_pm1(g)) g = NULL;
   if (degpol(A) < degpol(B)) swap(A, B);
   n = 1 + degpol(B); /* > degree(gcd) */
 
@@ -3614,14 +3632,14 @@ modulargcd(GEN A0, GEN B0)
   for(;;)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,d);
-    if (!umodiu(g,p)) continue;
+    if (g && !umodiu(g,p)) continue;
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
     if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
 
-    if (is_pm1(g)) /* make sure lead(H) = g mod p */
+    if (!g) /* make sure lead(H) = g mod p */
       Hp = Flx_normalize(Hp, p);
     else
     {
@@ -3639,11 +3657,23 @@ modulargcd(GEN A0, GEN B0)
     qp = muliu(q,p);
     if (ZX_incremental_CRT(&H, Hp, q, qp, p))
     { /* H stable: check divisibility */
-      if (!is_pm1(g)) H = primpart(H);
-      if (gcmp0(pseudorem(A,H)) && gcmp0(pseudorem(B,H))) break; /* DONE */
-
+      if (g) {
+        if (!bound)
+        {
+          GEN mA = maxnorm(A), mB = maxnorm(B);
+          if (cmpii(mA, mB) > 0) mA = mB;
+          bound = gclone( shifti(mulii(mA, g), n+1) );
+          if (DEBUGLEVEL>5)
+            msgtimer("bound 2^%ld. Goal 2^%ld", expi(q),expi(bound));
+        }
+        if (cmpii(qp, bound) < 0) goto next;
+        H = primpart(H);
+        gunclone(bound); break;
+      }
+      if (gcmp0(grem(A,H)) && gcmp0(grem(B,H))) break; /* DONE */
       if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed");
     }
+next:
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
