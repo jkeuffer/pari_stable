@@ -284,7 +284,7 @@ GetDeg(GEN dataCR)
 /********************************************************************/
 static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
 
-/* The columns of C give the generators of a subgroup of the finite abelian
+/* Columns of C [HNF] give the generators of a subgroup of the finite abelian
  * group A [ in terms of implicit generators ], compute data to work in A/C:
  * 1) order
  * 2) structure
@@ -293,7 +293,7 @@ static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
 static GEN
 InitQuotient(GEN C)
 {
-  GEN z, U, D = smithall(hnf(C), &U, NULL);
+  GEN z, U, D = smithall(C, &U, NULL);
   z = cgetg(5, t_VEC);
   z[1] = (long)dethnf_i(D);
   z[2] = (long)mattodiagonal_i(D);
@@ -525,9 +525,8 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 
   for(;;)
   {
-    /* compute all ideals of norm <= maxnorm */
     disable_dbg(0);
-    listid = ideallist(nf, maxnorm);
+    listid = ideallist(nf, maxnorm); /* all ideals of norm <= maxnorm */
     disable_dbg(-1);
 
     av1 = avma;
@@ -539,13 +538,11 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
       idnormn = (GEN)listid[n];
       nbidnn  = lg(idnormn) - 1;
       for (i = 1; i <= nbidnn; i++)
-      {
-        /* finite part of the conductor */
+      { /* finite part of the conductor */
 	m[1] = (long)idealmul(nf, f, (GEN)idnormn[i]);
 
 	for (s = 1; s <= narch; s++)
-	{
-	  /* infinite part */
+	{ /* infinite part */
 	  arch[N+1-s] = zero;
 
           /* compute Clk(m), check if m is a conductor */
@@ -2762,7 +2759,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
 {
   long N, newprec;
   pari_sp av = avma;
-  GEN bnf, p1, Mcyc, nf, data;
+  GEN bnf, p1, Mcyc, nf, data, dtQ;
 
   /* check the bnr */
   checkbnrgen(bnr);
@@ -2794,19 +2791,25 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (DEBUGLEVEL) (void)timer2();
 
   /* find a suitable extension N */
-  data  = FindModulus(bnr, InitQuotient(subgrp), &newprec, prec);
+  dtQ = InitQuotient(subgrp);
+  data  = FindModulus(bnr, dtQ, &newprec, prec);
 
   if (!data)
   {
-    long i, l = lg(Mcyc);
-    GEN vec = cgetg(l, t_VEC), M;
+    GEN vec, H, cyc = (GEN)dtQ[2], U = (GEN)dtQ[3], M = ginv(U);
+    long i, j = 1, l = lg(M);
+
+    /* M = indep. generators of Cl_f/subgp, restrict to cyclic components */
+    vec = cgetg(l, t_VEC);
     for (i = 1; i < l; i++)
     {
-      M = gcopy(subgrp);
-      coeff(M,i,i) = one;
-      vec[i] = (long)bnrstark(bnr, M, prec);
+      GEN t = (GEN)M[i];
+      if (is_pm1(cyc[i])) continue;
+      M[i] = Mcyc[i]; H = hnf(concatsp(M, Mcyc));
+      M[i] = (long)t;
+      vec[j++] = (long)bnrstark(bnr, H, prec);
     }
-    return vec;
+    setlg(vec, j); return gerepilecopy(av, vec);
   }
 
   if (newprec > prec)
