@@ -83,7 +83,7 @@ specpol(GEN x, long nx)
 
 /* multiplication in Fp[X], p small */
 
-static GEN
+GEN
 u_normalizepol(GEN x, long lx)
 {
   long i;
@@ -1232,26 +1232,26 @@ FpXX_red(GEN z, GEN p)
 /*                             (Fp[X]/(Q))[Y]                      */
 /*                                                                 */
 /*******************************************************************/
-
 extern GEN to_Kronecker(GEN P, GEN Q);
-GEN /*Somewhat copy-pasted...*/
+
 /*Not malloc nor warn-clean.*/
-FpXQX_from_Kronecker(GEN z, GEN pol, GEN p)
+GEN
+FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
 {
-  long i,j,lx,l = lgef(z), N = (degpol(pol)<<1) + 1;
-  GEN x, t = cgetg(N,t_POL);
-  t[1] = pol[1] & VARNBITS;
-  lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
-  if (isonstack(pol)) pol = gcopy(pol);
+  long i,j,lx,l = lgef(Z), N = (degpol(T)<<1) + 1;
+  GEN x, t = cgetg(N,t_POL), z = FpX_red(Z, p);
+  t[1] = T[1] & VARNBITS;
+  lx = (l-2) / (N-2);
+  x = cgetg(lx+3,t_POL);
   for (i=2; i<lx+2; i++)
   {
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    x[i] = (long)FpX_res(normalizepol_i(t,N), pol, p);
+    x[i] = (long)FpX_res(normalizepol_i(t,N), T,p);
   }
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  x[i] = (long)FpX_res(normalizepol_i(t,N), pol, p);
+  x[i] = (long)FpX_res(normalizepol_i(t,N), T,p);
   return normalizepol_i(x, i+1);
 }
 
@@ -1288,7 +1288,6 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
   z = quickmul(ky+2, kx+2, lgef(ky)-2, lgef(kx)-2);
-  z = FpX_red(z,p);
   z = FpXQX_from_Kronecker(z,T,p);
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are not varn-clean*/
   return gerepileupto(ltop,z);
@@ -1301,7 +1300,6 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   long vx=varn(x);
   kx= to_Kronecker(x,T);
   z = quicksqr(kx+2, lgef(kx)-2);
-  z = FpX_red(z,p);
   z = FpXQX_from_Kronecker(z,T,p);
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
   return gerepileupto(ltop,z);
@@ -1374,9 +1372,10 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 
 /*******************************************************************/
 /*                                                                 */
-/*                             Fp[X]/T(X)[Y]/S(Y)                  */
+/*                       (Fp[X]/T(X))[Y] / S(Y)                    */
 /*                                                                 */
 /*******************************************************************/
+/* TODO: merge these 2 (I don't understand the first one) -- KB */
 
 /*Preliminary implementation to speed up Fp_isom*/
 typedef struct {
@@ -1411,9 +1410,9 @@ _FpXQYQ_mul(void *data, GEN x, GEN y)
   return _FpXQYQ_redswap(FpXQX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
 }
 
-/* x,pol in Z[X], p in Z, n in Z, compute lift(x^n mod (p, pol)) */
+/* x,S in Z[X] = pols over Fq = Z[X]/(p,T); compute lift(x^n mod S) */
 GEN
-FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
+_FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
   gpmem_t av = avma;
   FpXQYQ_muldata D;
@@ -1425,6 +1424,48 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   return gerepileupto(av, y);
 }
 
+
+typedef struct {
+  GEN T, p, S;
+  long v;
+} kronecker_muldata;
+
+static GEN
+FpXQYQ_red(void *data, GEN x)
+{
+  kronecker_muldata *D = (kronecker_muldata*)data;
+  GEN t = FpXQX_from_Kronecker(x, D->T,D->p);
+  setvarn(t, D->v);
+  t = FpXQX_divres(t, D->S,D->T,D->p, ONLY_REM);
+  return to_Kronecker(t,D->T);
+}
+static GEN
+FpXQYQ_mul(void *data, GEN x, GEN y) {
+  return FpXQYQ_red(data, gmul(x,y));
+}
+static GEN
+FpXQYQ_sqr(void *data, GEN x) {
+  return FpXQYQ_red(data, gsqr(x));
+}
+
+/* x over Fq, return lift(x^n) mod S */
+GEN
+FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
+{
+  gpmem_t av0 = avma;
+  long v = varn(x);
+  GEN y;
+  kronecker_muldata D;
+
+  x = to_Kronecker(x,T);
+  D.S = S;
+  D.T = T;
+  D.p = p;
+  D.v = v;
+  y = leftright_pow(x, n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
+  y = FpXQX_from_Kronecker(y, T,p);
+  setvarn(y, v); return gerepileupto(av0, y);
+}
 /*******************************************************************/
 /*                                                                 */
 /*                             Fq[X]                               */
@@ -1804,9 +1845,9 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   if (DEBUGLEVEL>=4) msgtimer("matrixpow");
   A=Ap=zeropol(vp);
   B=Bp=zeropol(vq);
-  if (pg>1)
+  if (pg > 1)
   {
-    if (gcmp0(modis(addis(l,-1),pg)))
+    if (smodis(l,pg) == 1)
       /*We do not need to use relative extension in this setting, so
         we don't. (Well,now that we don't in the other case also, it is more
        dubious to treat cases apart...)*/
@@ -1847,8 +1888,8 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       A=intersect_ker(P, MA, U, l); 
       B=intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) timer2();
-      An=(GEN) FpXQYQ_pow(A,stoi(pg),U,P,l)[2];
-      Bn=(GEN) FpXQYQ_pow(B,stoi(pg),U,Q,l)[2];
+      An=(GEN) _FpXQYQ_pow(A,stoi(pg),U,P,l)[2];
+      Bn=(GEN) _FpXQYQ_pow(B,stoi(pg),U,Q,l)[2];
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
       z=FpXQ_inv(Bn,U,l);
       z=FpXQ_mul(An,z,U,l);
@@ -2199,33 +2240,61 @@ pol_to_small(GEN x)
   return a;
 }
 
-/* z in Z[X,Y] representing an elt in F_p[X,Y] mod pol(Y) i.e F_q[X])
+/* z in Z[X,Y] representing an elt in F_p[X,Y] mod T(Y) i.e F_q[X])
  * in Kronecker form. Recover the "real" z, normalized
  * If p = NULL, use generic functions and the coeff. ring implied by the
  * coefficients of z */
 GEN
-FqX_from_Kronecker(GEN z, GEN pol, GEN p)
+FqX_from_Kronecker(GEN z, GEN T, GEN p)
 {
-  long i,j,lx,l = lgef(z), N = (degpol(pol)<<1) + 1;
+  long i,j,lx,l = lgef(z), N = (degpol(T)<<1) + 1;
   GEN a,x, t = cgetg(N,t_POL);
-  t[1] = pol[1] & VARNBITS;
+  t[1] = T[1] & VARNBITS;
   lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
-  if (isonstack(pol)) pol = gcopy(pol);
+  if (isonstack(T)) T = gcopy(T);
   for (i=2; i<lx+2; i++)
   {
     a = cgetg(3,t_POLMOD); x[i] = (long)a;
-    a[1] = (long)pol;
+    a[1] = (long)T;
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    a[2] = (long)FpX_res(normalizepol_i(t,N), pol,p);
+    a[2] = (long)FpX_res(normalizepol_i(t,N), T,p);
   }
   a = cgetg(3,t_POLMOD); x[i] = (long)a;
-  a[1] = (long)pol;
+  a[1] = (long)T;
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  a[2] = (long)FpX_res(normalizepol_i(t,N), pol,p);
+  a[2] = (long)FpX_res(normalizepol_i(t,N), T,p);
   return normalizepol_i(x, i+1);
 }
+
+#if 0
+/* z in Kronecker form representing a polynomial in FqX. Reduce mod (p,T) */
+GEN
+FqX_Kronecker_red(GEN z, GEN T, GEN p)
+{
+  long i,j,lx,l = lgef(z), lT = lgef(T), N = ((dT-3)<<1) + 1;
+  GEN a,x,y, t = cgetg(N,t_POL);
+  t[1] = T[1] & VARNBITS;
+  lx = (l-2) / (N-2); x = cgetg(lx+3,t_POL);
+  x = y = z = FpX_red(z, p);
+  for (i=2; i<lx+2; i++)
+  {
+    for (j=2; j<N; j++) t[j] = z[j];
+    a = FpX_res(normalizepol_i(t,N), T,p);
+    for (j=2; j<lT; j++) y[j] = a[j];
+    for (   ; j<N;  j++) y[j] = zero;
+    z += (N-2);
+    y += (N-2);
+  }
+  N = (l-2) % (N-2) + 2;
+  for (j=2; j<N; j++) t[j] = z[j];
+  a = FpX_res(normalizepol_i(t,N), T,p);
+  for (j=2; j<lT; j++) y[j] = a[j];
+  for (   ; j<N;  j++) y[j] = zero;
+  return normalizepol_i(x, l);
+}
+#endif
 
 /* z in ?[X,Y] mod Q(Y) in Kronecker form ((subst(lift(z), x, y^(2deg(z)-1)))
  * Recover the "real" z, normalized */

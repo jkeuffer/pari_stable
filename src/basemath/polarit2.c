@@ -1274,7 +1274,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
   return res;
 }
 
-extern long split_berlekamp(GEN *t, GEN pp);
+extern long FpX_split_berlekamp(GEN *t, GEN pp);
 #define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
 
 /* Assume a squarefree, degree(a) > 0, a(0) != 0 */
@@ -1364,7 +1364,7 @@ DDF(GEN a, long hint)
     {
       long n = degpol(g)/d;
       famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
-      if (n > 1 && n != split_berlekamp((GEN*)(famod+nft),prime))
+      if (n > 1 && n != FpX_split_berlekamp((GEN*)(famod+nft),prime))
         err(bugparier,"DDF: wrong numbers of factors");
       nft += n;
     }
@@ -1922,7 +1922,7 @@ leftright_pow(GEN x, GEN n, void *data,
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"leftright_pow");
-        y = gerepileupto(av, y);
+        y = gerepilecopy(av, y);
       }
     }
     if (--i == 0) return avma==av? gcopy(y): y;

@@ -122,7 +122,7 @@ poldivres(GEN x, GEN y, GEN *pr)
   GEN (*f)(GEN,GEN);
 
   if (pr == ONLY_DIVIDES_EXACT)
-    { f = gdivexact; pr = ONLY_DIVIDES; } 
+    { f = gdivexact; pr = ONLY_DIVIDES; }
   else
     f = gdiv;
   if (is_scalar_t(ty))
@@ -212,7 +212,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     for (j=i-dy+1; j<=i && j<=dz; j++)
       if (y[i-j] && z[j] != zero) p1 = gadd(p1, gmul((GEN)z[j],(GEN)y[i-j]));
     if (y_lead) p1 = f(p1,y_lead);
-   
+
     if (isexactzero(p1)) { avma=av1; p1 = gzero; }
     else
       p1 = avma==av1? gcopy(p1): gerepileupto(av1,p1);
@@ -291,7 +291,7 @@ factmod_init(GEN *F, GEN pp, long *p)
   f = gmul(f, mod(gun,pp));
   if (!signe(f)) err(zeropoler,"factmod");
   f = lift_intern(f); d = lgef(f);
-  for (i=2; i <d; i++) 
+  for (i=2; i <d; i++)
     if (typ(f[i])!=t_INT) err(impl,"factormod for general polynomials");
   *F = f; return d-3;
 }
@@ -402,7 +402,7 @@ quadsolvemod(GEN x, GEN p, int unknown)
 {
   GEN b = (GEN)x[3], c = (GEN)x[2];
   GEN s,u,D;
-  
+
   if (egalii(p, gdeux))
   {
     if (signe(c)) return NULL;
@@ -411,7 +411,7 @@ quadsolvemod(GEN x, GEN p, int unknown)
   D = subii(sqri(b), shifti(c,2));
   D = resii(D,p);
   if (unknown && kronecker(D,p) == -1) return NULL;
- 
+
   s = mpsqrtmod(D,p);
   if (!s) err(talker,"not a prime in quadsolvemod");
   u = addis(shifti(p,-1), 1); /* = 1/2 */
@@ -475,7 +475,7 @@ rootmod(GEN f, GEN p)
   if (la) y[j+lb] = (long)FpX_normalize(a,p);
   pol = gadd(polx[varn(f)], gun); pol0 = constant_term(pol);
   while (j<=n)
-  { /* cf split_berlekamp */
+  { /* cf FpX_split_berlekamp */
     a = (GEN)y[j]; la = degpol(a);
     if (la==1)
       y[j++] = lsubii(p, constant_term(a));
@@ -522,25 +522,32 @@ rootmod0(GEN f, GEN p, long flag)
 /*                     FACTORISATION MODULO p                      */
 /*                                                                 */
 /*******************************************************************/
+#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
+#define FqX_rem(x,y,T,p) FpXQX_divres((x),(y),(T),(p),ONLY_REM)
+#define FqX_red FpXQX_red
+#define FqX_sqr FpXQX_sqr
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
+extern GEN pol_to_vec(GEN x, long N);
+extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
+extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
+extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
+extern GEN u_normalizepol(GEN x, long lx);
 /* Functions giving information on the factorisation. */
 
 /* u in Z[X], return kernel of (Frob - Id) over Fp[X] / u */
 static GEN
-Berlekamp_ker(GEN u, GEN p)
+FpM_Berlekamp_ker(GEN u, GEN p)
 {
-  long i,j,d,N = degpol(u);
-  GEN vker,v,w,Q,p1,p2;
+  long j,N = degpol(u);
+  GEN vker,v,w,Q,p1;
   if (DEBUGLEVEL > 7) timer2();
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FpXQ_pow(polx[varn(u)],p,u,p);
   for (j=2; j<=N; j++)
   {
-    Q[j] = lgetg(N+1,t_COL); p1 = (GEN)Q[j];
-    d = lgef(w)-1; p2 = w+1;
-    for (i=1; i<d ; i++) p1[i] = p2[i];
-    for (   ; i<=N; i++) p1[i] = zero;
+    p1 = pol_to_vec(w, N);
     p1[j] = laddis((GEN)p1[j], -1);
+    Q[j] = (long)p1;
     if (j < N)
     {
       gpmem_t av = avma;
@@ -549,6 +556,31 @@ Berlekamp_ker(GEN u, GEN p)
   }
   if (DEBUGLEVEL > 7) msgtimer("frobenius");
   vker = FpM_ker(Q,p);
+  if (DEBUGLEVEL > 7) msgtimer("kernel");
+  return vker;
+}
+
+static GEN
+FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
+{
+  long j,N = degpol(u);
+  GEN vker,v,w,Q,p1;
+  if (DEBUGLEVEL > 7) timer2();
+  Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
+  w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
+  for (j=2; j<=N; j++)
+  {
+    p1 = pol_to_vec(w, N);
+    p1[j] = laddgs((GEN)p1[j], -1);
+    Q[j] = (long)p1;
+    if (j < N)
+    {
+      gpmem_t av = avma;
+      w = gerepileupto(av, FpXQX_divres(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
+    }
+  }
+  if (DEBUGLEVEL > 7) msgtimer("frobenius");
+  vker = FqM_ker(Q,T,p);
   if (DEBUGLEVEL > 7) msgtimer("kernel");
   return vker;
 }
@@ -601,7 +633,7 @@ long
 FpX_nbfact(GEN u, GEN p)
 {
   gpmem_t av = avma;
-  GEN vker = Berlekamp_ker(u,p);
+  GEN vker = FpM_Berlekamp_ker(u,p);
   avma = av; return lg(vker)-1;
 }
 
@@ -634,24 +666,6 @@ trivfact(void)
   GEN y=cgetg(3,t_MAT);
   y[1]=lgetg(1,t_COL);
   y[2]=lgetg(1,t_COL); return y;
-}
-
-static void
-fqunclone(GEN x, GEN a, GEN p)
-{
-  long i,j,lx = lgef(x);
-  for (i=2; i<lx; i++)
-  {
-    GEN p1 = (GEN)x[i];
-    if (typ(p1) == t_POLMOD) { p1[1] = (long)a; p1 = (GEN)p1[2]; }
-    if (typ(p1) == t_INTMOD) p1[1] = (long)p;
-    else /* t_POL */
-      for (j = lgef(p1)-1; j > 1; j--)
-      {
-        GEN p2 = (GEN)p1[j];
-        if (typ(p2) == t_INTMOD) p2[1] = (long)p;
-      }
-  }
 }
 
 static GEN
@@ -690,7 +704,7 @@ split(long m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
   {
     if (ps==2)
     {
-      w0=w=gpuigs(polx[v],m-1); m+=2;
+      w0 = w = FpXQ_pow(polx[v], stoi(m-1), *t, gdeux); m += 2;
       for (l=1; l<d; l++)
         w = gadd(w0, spec_FpXQ_pow(w, p, S));
     }
@@ -748,15 +762,15 @@ init_pow_p_mod_pT(GEN p, GEN T)
   S[1] = (long)FpXQ_pow(polx[v], p, T, p);
   /* use as many squarings as possible */
   for (i=2; i < n; i+=2)
-  {     
+  {
     p1 = gsqr((GEN)S[i>>1]);
     S[i]   = (long)FpX_res(p1, T, p);
     if (i == n-1) break;
     p1 = gmul((GEN)S[i], (GEN)S[1]);
     S[i+1] = (long)FpX_res(p1, T, p);
-  }       
+  }
   return S;
-} 
+}
 
 /* compute x^p, S is as above */
 static GEN
@@ -927,7 +941,7 @@ mat_to_vecpol(GEN x, long v)
   return y;
 }
 
-/* matrix whose entries are given by the coeffs of the polynomials in 
+/* matrix whose entries are given by the coeffs of the polynomials in
  * vector v (considered as degree n-1 polynomials) */
 GEN
 vecpol_to_mat(GEN v, long n)
@@ -1017,27 +1031,24 @@ swap_polpol(GEN x, long n, long w)
   return normalizepol_i(y,ly);
 }
 
-
-
 /* set x <-- x + c*y mod p */
 static void
-split_berlekamp_addmul(GEN x, GEN y, long c, long p)
+u_FpX_addmul(GEN x, GEN y, long c, long p)
 {
   long i,lx,ly,l;
   if (!c) return;
   lx = lgef(x); ly = lgef(y); l = min(lx,ly);
   if (p & ~MAXHALFULONG)
   {
-    for (i=2; i<l;  i++) x[i] = ((ulong)x[i]+ (ulong)mulssmod(c,y[i],p)) % p; 
+    for (i=2; i<l;  i++) x[i] = ((ulong)x[i]+ (ulong)mulssmod(c,y[i],p)) % p;
     for (   ; i<ly; i++) x[i] = mulssmod(c,y[i],p);
   }
   else
   {
-    for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + (ulong)(c*y[i])) % p; 
-    for (   ; i<ly; i++) x[i] = (c*y[i]) % p; 
+    for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + (ulong)(c*y[i])) % p;
+    for (   ; i<ly; i++) x[i] = (c*y[i]) % p;
   }
-  do i--; while (i>1 && !x[i]);
-  if (i==1) setsigne(x,0); else { setsigne(x,1); setlgef(x,i+1); }
+  u_normalizepol(x,i);
 }
 
 static long
@@ -1046,17 +1057,37 @@ small_rand(long p)
   return (p==2)? ((mymyrand() & 0x1000) == 0): mymyrand() % p;
 }
 
+GEN
+FpX_rand(long d1, long v, GEN p)
+{
+  long i, d = d1+2;
+  GEN y;
+  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  for (i=2; i<d; i++) y[i] = (long)genrand(p);
+  normalizepol_i(y,d); return y;
+}
+
+/* return a random polynomial in F_q[v], degree < d1 */
+GEN
+FqX_rand(long d1, long v, GEN T, GEN p)
+{
+  long i, d = d1+2, k = degpol(T), w = varn(T);
+  GEN y;
+  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  for (i=2; i<d; i++) y[i] = (long)FpX_rand(k, w, p);
+  normalizepol_i(y,d); return y;
+}
+
 #define set_irred(i) { if ((i)>ir) swap(t[i],t[ir]); ir++;}
 
 long
-split_berlekamp(GEN *t, GEN p)
+FpX_split_berlekamp(GEN *t, GEN p)
 {
   GEN u = *t, a,b,po2,vker,pol;
   long N = degpol(u), d, i, ir, L, la, lb, ps, vu = varn(u);
-  gpmem_t av;
   gpmem_t av0 = avma;
-  
-  vker = Berlekamp_ker(u,p);
+
+  vker = FpM_Berlekamp_ker(u,p);
   vker = mat_to_vecpol(vker,vu);
   d = lg(vker)-1;
   ps = is_bigint(p)? 0: p[2];
@@ -1078,7 +1109,7 @@ split_berlekamp(GEN *t, GEN p)
       pol[2] = small_rand(ps); /* vker[1] = 1 */
       pol[1] = evallgef(pol[2]? 3: 2);
       for (i=2; i<=d; i++)
-        split_berlekamp_addmul(pol,(GEN)vker[i],small_rand(ps), ps);
+        u_FpX_addmul(pol,(GEN)vker[i],small_rand(ps), ps);
       polt = small_to_pol(pol,vu);
     }
     else
@@ -1105,7 +1136,8 @@ split_berlekamp(GEN *t, GEN p)
       }
       else
       {
-        av = avma; b = FpX_res(polt, a, p);
+        gpmem_t av = avma;
+        b = FpX_res(polt, a, p);
         if (degpol(b) == 0) { avma=av; continue; }
         b = ZX_s_add(FpXQ_pow(b,po2, a,p), -1);
         b = FpX_gcd(a,b, p); lb = degpol(b);
@@ -1113,6 +1145,67 @@ split_berlekamp(GEN *t, GEN p)
         {
           b = FpX_normalize(b, p);
           t[L] = FpX_div(a,b,p);
+          t[i]= b; L++;
+        }
+        else avma = av;
+      }
+    }
+  }
+  return d;
+}
+
+static GEN
+FqX_deriv(GEN f, GEN T, GEN p)
+{
+  return FqX_red(derivpol(f), T, p);
+}
+static GEN
+FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
+{
+  GEN g = FpXQX_safegcd(P,Q,T,p);
+  if (!g) err(talker,"factmod9: %Z is reducible mod p!", T);
+  return g;
+}
+
+long
+FqX_split_berlekamp(GEN *t, GEN q, GEN T, GEN p)
+{
+  GEN u = *t, a,b,qo2,vker,pol;
+  long N = degpol(u), vu = varn(u), vT = varn(T), dT = degpol(T);
+  long d, i, ir, L, la, lb;
+
+  vker = FqM_Berlekamp_ker(u,T,q,p);
+  vker = mat_to_vecpol(vker,vu);
+  d = lg(vker)-1;
+  qo2 = shifti(q, -1); /* (p-1) / 2 */
+  pol = cgetg(N+3,t_POL);
+  ir = 0;
+  /* t[i] irreducible for i < ir, still to be treated for i < L */
+  for (L=1; L<d; )
+  {
+    GEN polt;
+    pol[2] = (long)FpX_rand(dT,vT,p);
+    pol[1] = evallgef(signe(pol[2])? 3: 2) | evalvarn(vu);
+    for (i=2; i<=d; i++)
+      pol = gadd(pol, gmul((GEN)vker[i], FpX_rand(dT,vT,p)));
+    polt = FqX_red(pol,T,p);
+    for (i=ir; i<L && L<d; i++)
+    {
+      a = t[i]; la = degpol(a);
+      if (la == 1) { set_irred(i); }
+      else
+      {
+        gpmem_t av = avma;
+        b = FqX_rem(polt, a, T,p);
+        if (!degpol(b)) { avma=av; continue; }
+        b = FpXQYQ_pow(b,qo2, a,T,p);
+        if (!degpol(b)) { avma=av; continue; }
+        b[2] = ladd((GEN)b[2], gun);
+        b = FqX_gcd(a,b, T,p); lb = degpol(b);
+        if (lb && lb < la)
+        {
+          b = FpXQX_normalize(b, T,p);
+          t[L] = FqX_div(a,b,T,p);
           t[i]= b; L++;
         }
         else avma = av;
@@ -1144,17 +1237,17 @@ factmod0(GEN f, GEN pp)
     {
       k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
       p1 = FpX_gcd(f2,g1, pp); u = g1; g1 = p1;
-      if (lgef(p1)!=3)
+      if (degpol(p1))
       {
         u = FpX_div( u,p1,pp);
         f2= FpX_div(f2,p1,pp);
       }
+      /* u is square-free (product of irred. of multiplicity e * k) */
       N = degpol(u);
       if (N)
       {
-        /* here u is square-free (product of irred. of multiplicity e * k) */
         t[nbfact] = FpX_normalize(u,pp);
-        d = (N==1)? 1: split_berlekamp(t+nbfact, pp);
+        d = (N==1)? 1: FpX_split_berlekamp(t+nbfact, pp);
         for (j=0; j<d; j++) ex[nbfact+j] = e*k;
         nbfact += d;
       }
@@ -1251,11 +1344,11 @@ int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
   {
     y[4] = lmodii(p1,pr); r -= v;
   }
-  else 
+  else
   {
     y[4] = zero; v = r; r = 0;
   }
-  y[3] = (long)pr; 
+  y[3] = (long)pr;
   y[2] = (long)p;
   y[1] = evalprecp(r)|evalvalp(v);
   return invlead? gerepileupto(av, gmul(invlead,y)): y;
@@ -1319,10 +1412,10 @@ apprgen_i(GEN f, GEN a)
 {
   GEN fp,u,p,q,P,res,a0,rac;
   long prec,i,j,k;
- 
+
   fp = derivpol(f); u = ggcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
-  p = (GEN)a[2]; 
+  p = (GEN)a[2];
   P = egalii(p,gdeux)? stoi(4): p;
   a0= gmod(a, P);
   prec = gcmp0(a)? valp(a): precp(a);
@@ -1335,7 +1428,7 @@ apprgen_i(GEN f, GEN a)
     res = strict_int_to_padic(res,p,gpowgs(p,prec),prec,NULL);
     return _vec(res);
   }
- 
+
   f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
   f = padic_pol_to_int(f);
   f = gdiv(f, gpowgs(p,ggval(f, p)));
@@ -1477,7 +1570,7 @@ long hensel_lift_accel(long n, long *pmask)
 
 /* STANDARD USE
    There exists p a prime number and a>0 such that
-   q=p^a    
+   q=p^a
    f in ZZ[X], with leading term prime to p.
    S must be a simple root mod p.
 
@@ -1499,7 +1592,7 @@ rootpadiclift(GEN T, GEN S, GEN p, long e)
   W=FpX_eval(deriv(Tr, x),S,q);
   W=mpinvmod(W,q);
   for(i=0;i<nb;i++)
-  {  
+  {
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
     Tr = FpX_red(T,q);
@@ -1553,7 +1646,7 @@ rootpadicliftroots(GEN f, GEN S, GEN q, long e)
  f must have no multiple roots mod p.
 
  return p-adics roots of f with prec pr, as integers (implicitly mod pr)
- 
+
 */
 GEN
 rootpadicfast(GEN f, GEN p, long e)
@@ -1573,7 +1666,7 @@ rootpadicfast(GEN f, GEN p, long e)
   return y;
 }
 /* Same as rootpadiclift for the polynomial X^n-a,
- * but here, n can be much larger. 
+ * but here, n can be much larger.
  * TODO: generalize to sparse polynomials.
  */
 GEN
@@ -1588,7 +1681,7 @@ padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
   W    = modii(mulii(n,powmodulo(S,subii(n,gun),q)),q);
   W    = mpinvmod(W,q);
   for(i=0;i<nb;i++)
-  {  
+  {
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
     Sr = S;
@@ -1637,7 +1730,7 @@ apprgen9(GEN f, GEN a)
   if (gcmp0(f)) err(zeropoler,"apprgen9");
   if (typ(a)==t_PADIC) return apprgen(f,a);
   if (typ(a)!=t_POLMOD || typ(a[2])!=t_POL) err(rootper1);
- 
+
   fp = derivpol(f); u = ggcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   T = (GEN)a[1];
@@ -1673,7 +1766,7 @@ apprgen9(GEN f, GEN a)
   }
   f = poleval(f,gadd(a,gmul(p,polx[varn(f)])));
   f = gdiv(f,gpuigs(p,ggval(f,p)));
- 
+
   d=degpol(T); vecg=cgetg(d+1,t_COL);
   for (i=1; i<=d; i++)
     vecg[i] = (long)setloop(gzero);
@@ -1792,7 +1885,7 @@ factorpadic2(GEN f, GEN p, long prec)
   if (!gcmp1(leading_term(f)))
     err(impl,"factorpadic2 for non-monic polynomial");
   f = padic_pol_to_int(f);
- 
+
   fa = ZX_squff(f, &ex);
   l = lg(fa); n = 0;
   for (i=1; i<l; i++)
@@ -1800,7 +1893,7 @@ factorpadic2(GEN f, GEN p, long prec)
     fa[i] = (long)padicff((GEN)fa[i],p,prec);
     n += lg(fa[i])-1;
   }
- 
+
   y = fact_from_DDF(fa,ex,n);
   return gerepileupto(av, sort_factor(y, cmp_padic));
 }
@@ -1915,9 +2008,9 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 /*                                                                 */
 /*******************************************************************/
 extern GEN to_Kronecker(GEN P, GEN Q);
-extern GEN from_Kronecker(GEN z, GEN pol);
-static GEN spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S);
+static GEN spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p);
 
+#if 0
 static GEN
 to_fq(GEN x, GEN a, GEN p)
 {
@@ -1931,94 +2024,13 @@ to_fq(GEN x, GEN a, GEN p)
   z[1] = (long)a;
   z[2] = (long)pol; return z;
 }
-
-typedef struct {
-  GEN pol, p, mod;
-  long v;
-} kronecker_muldata;
-
-static GEN
-_red(void *data, GEN x)
-{
-  kronecker_muldata *D = (kronecker_muldata*)data;
-  GEN t = from_Kronecker(FpX(x,D->p), D->pol);
-  setvarn(t, D->v);
-  t = gres(t, D->mod);
-  return lift_intern(to_Kronecker(t,D->pol));
-}
-static GEN
-_mul(void *data, GEN x, GEN y) {
-  return _red(data, gmul(x,y));
-}
-static GEN
-_sqr(void *data, GEN x) {
-  return _red(data, gsqr(x));
-}
-
-/* x POLMOD over Fq, return lift(x^n) */
-static GEN
-Kronecker_powmod(GEN x, GEN mod, GEN n)
-{
-  gpmem_t av0 = avma;
-  long i,v = varn(x);
-  GEN y, p1, p = NULL, pol = NULL;
-  kronecker_muldata D;
-
-  for (i=lgef(mod)-1; i>1; i--)
-  {
-    p1 = (GEN)mod[i];
-    if (typ(p1) == t_POLMOD) { pol = (GEN)p1[1] ; break; }
-  }
-  if (!pol) err(talker,"need POLMOD coeffs in Kronecker_powmod");
-  for (i=lgef(pol)-1; i>1; i--)
-  {
-    p1 = (GEN)pol[i];
-    if (typ(p1) == t_INTMOD) { p = (GEN)p1[1] ; break; }
-  }
-  if (!p) err(talker,"need Fq coeffs in Kronecker_powmod");
-  x = lift_intern(to_Kronecker(x,pol));
-
-  D.mod = mod;
-  D.pol = pol;
-  D.p = p;
-  D.v = v;
-  y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
-  y = from_Kronecker(FpX(y,p),pol);
-  setvarn(y, v); return gerepileupto(av0, y);
-}
-
-GEN
-FpX_rand(long d1, long v, GEN p)
-{
-  long i, d = d1+2;
-  GEN y;
-  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
-  for (i=2; i<d; i++) y[i] = (long)genrand(p);
-  normalizepol_i(y,d); return y;
-}
-
-/* return a random polynomial in F_q[v], degree < d1 */
-static GEN
-FqX_rand(long d1, long v, GEN p, GEN a)
-{
-  long i,j, d = d1+2, k = lgef(a)-1;
-  GEN y,t;
-
-  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
-  t = cgetg(k,t_POL); t[1] = a[1];
-  for (i=2; i<d; i++)
-  {
-    for (j=2; j<k; j++) t[j] = (long)genrand(p);
-    normalizepol_i(t,k); y[i]=(long)to_fq(t,a,p);
-  }
-  normalizepol_i(y,d); return y;
-}
+#endif
 
 /* split into r factors of degree d */
 static void
-split9(GEN *t, long d, GEN p, GEN q, GEN a, GEN S)
+FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
 {
-  long l, v, is2, cnt, dt = degpol(*t), da = degpol(a);
+  long l, v, is2, cnt, dt = degpol(*t), dT = degpol(T);
   gpmem_t av;
   GEN w,w0;
 
@@ -2028,32 +2040,36 @@ split9(GEN *t, long d, GEN p, GEN q, GEN a, GEN S)
   av = avma; is2 = egalii(p, gdeux);
   for(cnt = 1;;cnt++)
   { /* splits *t with probability ~ 1 - 2^(1-r) */
-    w = w0 = FqX_rand(dt,v, p,a);
+    w = w0 = FqX_rand(dt,v, T,p);
     for (l=1; l<d; l++) /* sum_{0<i<d} w^(q^i), result in (F_q)^r */
-      w = gadd(w0, spec_Fq_pow_mod_pol(w, p, a, S));
+      w = gadd(w0, spec_Fq_pow_mod_pol(w, S, T, p));
+    w = FqX_red(w, T,p);
     if (is2)
     {
       w0 = w;
-      for (l=1; l<da; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
-        w = gadd(w0, gres(gsqr(w), *t));
+      for (l=1; l<dT; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
+      {
+        w = FqX_rem(FqX_sqr(w,T,p), *t, T,p);
+        w = FqX_red(gadd(w0,w), NULL,p);
+      }
     }
     else
     {
-      w = Kronecker_powmod(w, *t, shifti(q,-1));
+      w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
-      if (lgef(w) == 3) continue;
+      if (!degpol(w)) continue;
       w[2] = ladd((GEN)w[2], gun);
     }
-    w = ggcd(*t,w); l = degpol(w);
+    w = FqX_gcd(*t,w, T,p); l = degpol(w);
     if (l && l != dt) break;
     avma = av;
   }
   w = gerepileupto(av,w);
-  if (DEBUGLEVEL > 6) 
-    fprintferr("[split9] time for splitting: %ld (%ld trials)\n",timer2(),cnt);
-  l /= d; t[l]=gdeuc(*t,w); *t=w;
-  split9(t+l,d,p,q,a,S);
-  split9(t  ,d,p,q,a,S);
+  if (DEBUGLEVEL > 6)
+    fprintferr("[FqX_split] splitting time: %ld (%ld trials)\n",timer2(),cnt);
+  l /= d; t[l] = FqX_div(*t,w, T,p); *t = w;
+  FqX_split(t+l,d,q,S,T,p);
+  FqX_split(t  ,d,q,S,T,p);
 }
 
 /* to "compare" (real) scalars and t_INTMODs */
@@ -2082,53 +2098,52 @@ cmp_pol(GEN x, GEN y)
   return 0;
 }
 
-/* assume n > 1, X a POLMOD over Fq */
-/* return S = [ X^q, X^2q, ... X^(n-1)q ] mod T (in Fq[X]) in Kronecker form */
+/* assume n > 1, X over FqX */
+/* return S = [ X^q, X^2q, ... X^(n-1)q ] mod u (in Fq[X]) in Kronecker form */
 static GEN
-init_pow_q_mod_pT(GEN Xmod, GEN q, GEN a, GEN T)
+init_pow_q_mod_pT(GEN X, GEN q, GEN u, GEN T, GEN p)
 {
-  long i, n = degpol(T);
+  long i, n = degpol(u);
   GEN p1, S = cgetg(n, t_VEC);
 
-  S[1] = (long)Kronecker_powmod((GEN)Xmod[2], (GEN)Xmod[1], q);
+  S[1] = (long)FpXQYQ_pow(X, q, u, T, p);
 #if 1 /* use as many squarings as possible */
   for (i=2; i < n; i+=2)
-  {     
+  {
     p1 = gsqr((GEN)S[i>>1]);
-    S[i]   = lres(p1, T);
+    S[i]   = (long)FqX_rem(p1, u, T,p);
     if (i == n-1) break;
     p1 = gmul((GEN)S[i], (GEN)S[1]);
-    S[i+1] = lres(p1, T);
-  }       
+    S[i+1] = (long)FqX_rem(p1, u, T,p);
+  }
 #else
   for (i=2; i < n; i++)
-  { 
+  {
     p1 = gmul((GEN)S[i-1], (GEN)S[1]);
-    S[i] = lres(p1, T);
-  } 
+    S[i] = (long)FqX_rem(p1, u, T,p);
+  }
 #endif
   for (i=1; i < n; i++)
-    S[i] = (long)lift_intern(to_Kronecker((GEN)S[i], a));
+    S[i] = (long)to_Kronecker((GEN)S[i], T);
   return S;
 }
 
 /* compute x^q, S is as above */
 static GEN
-spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S)
+spec_Fq_pow_mod_pol(GEN x, GEN S, GEN T, GEN p)
 {
   long i, dx = degpol(x);
   gpmem_t av = avma, lim = stack_lim(av, 1);
   GEN x0 = x+2, z,c;
 
-  c = (GEN)x0[0];
-  z = lift_intern(lift(c));
+  z = c = (GEN)x0[0];
   for (i = 1; i <= dx; i++)
   {
     GEN d;
     c = (GEN)x0[i];
     if (gcmp0(c)) continue;
     d = (GEN)S[i];
-    if (!gcmp1(c)) d = gmul(lift_intern(lift(c)),d);
+    if (!gcmp1(c)) d = gmul(c,d);
     z = gadd(z, d);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -2136,68 +2151,52 @@ spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S)
       z = gerepileupto(av, z);
     }
   }
-  z = FpX(z, p);
-  z = from_Kronecker(z, a);
+  z = FpXQX_from_Kronecker(z, T, p);
   setvarn(z, varn(x)); return gerepileupto(av, z);
 }
 
-static long isabsolutepol(GEN f, GEN pp, GEN a)
+static long
+isabsolutepol(GEN f)
 {
-  int i,res=1;
-  GEN c;
-  for(i=2; i<lg(f); i++)
+  int i, l = lgef(f);
+  for(i=2; i<l; i++)
   {
-    c = (GEN) f[i];
-    switch(typ(c))
-    {
-    case t_INT: /* OK*/
-      break;
-    case t_INTMOD:
-      if (gcmp((GEN)c[1],pp))
-	err(typeer,"factmod9");
-      break;
-    case t_POLMOD:
-      if (gcmp((GEN)c[1],a))
-	err(typeer,"factmod9");
-      isabsolutepol((GEN)c[1],pp,gzero);
-      isabsolutepol((GEN)c[2],pp,gzero);
-      if (degpol(c[1])>0)
-	res = 0;
-      break;
-    case t_POL:
-      isabsolutepol(c,pp,gzero);
-      if (degpol(c)>0)
-	res = 0;
-      break;
-    default:
-      err(typeer,"factmod9");
-    }
+    GEN c = (GEN)f[i];
+    if (typ(c) == t_POL && degpol(c) > 0) return 0;
   }
-  return res;
+  return 1;
 }
 
 GEN
-factmod9(GEN f, GEN pp, GEN a)
+factmod9(GEN f, GEN p, GEN T)
 {
-  long p, i, j, k, d, e, vf, va, nbfact, nbf, pk;
+  long pg, i, j, k, d, e, N, vf, va, nbfact, nbf, pk;
   gpmem_t av = avma, tetpil;
-  GEN S,ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,qqd,qq,unfp,unfq, *t;
+  GEN S,ex,y,f2,f3,df1,df2,g1,u,v,q,unfp,unfq, *t;
   GEN frobinv,X;
 
-  if (typ(a)!=t_POL || typ(f)!=t_POL || gcmp0(a)) err(typeer,"factmod9");
-  vf=varn(f); va=varn(a);
-  if (va<=vf) err(talker,"polynomial variable must be of higher priority than finite field\nvariable in factorff");
-  if (isabsolutepol(f, pp, a))
+  if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
+  vf = varn(f);
+  va = varn(T);
+  if (va <= vf)
+    err(talker,"polynomial variable must have higher priority in factorff");
+  unfp = gmodulsg(1,p); T = gmul(unfp,T);
+  unfq = gmodulcp(gmul(unfp,polun[va]), T);
+  f = gmul(unfq,f);
+  if (!signe(f)) err(zeropoler,"factmod9");
+  d = degpol(f); if (!d) { avma = av; return trivfact(); }
+
+  f = simplify(lift_intern(lift_intern(f)));
+  T = lift_intern(T);
+  if (isabsolutepol(f))
   {
-    GEN z= Fp_factor_rel0(simplify(lift(lift(f))), pp, lift(a));
-    GEN t=(GEN)z[1],ex=(GEN)z[2];
-    unfp = gmodulsg(1,pp);
-    unfq = gmodulcp(gmul(unfp, polun[va]), gmul(unfp,a));
-    nbfact=lg(t);
-    tetpil=avma;
-    y=cgetg(3,t_MAT);
-    u=cgetg(nbfact,t_COL); y[1]=(long)u;
-    v=cgetg(nbfact,t_COL); y[2]=(long)v;
+    GEN z = Fp_factor_rel0(f, p, T);
+    GEN t = (GEN)z[1], ex = (GEN)z[2];
+    nbfact = lg(t);
+    tetpil = avma;
+    y = cgetg(3,t_MAT);
+    u = cgetg(nbfact,t_COL); y[1] = (long)u;
+    v = cgetg(nbfact,t_COL); y[2] = (long)v;
     for (j=1; j<nbfact; j++)
     {
       u[j] = lmul((GEN)t[j],unfq);
@@ -2205,57 +2204,66 @@ factmod9(GEN f, GEN pp, GEN a)
     }
     return gerepile(av,tetpil,y);
   }
-  p = is_bigint(pp)? 0: itos(pp);
-  unfp=gmodulsg(1,pp); a=gmul(unfp,a);
-  unfq=gmodulo(gmul(unfp,polun[va]), a); a = (GEN)unfq[1];
-  f = gmul(unfq,f); if (!signe(f)) err(zeropoler,"factmod9");
-  d = degpol(f); if (!d) { avma=av; gunclone(a); return trivfact(); }
 
+  pg = is_bigint(p)? 0: itos(p);
   S = df2  = NULL; /* gcc -Wall */
-  pp = gmael(a,2,1); /* out of the stack */
   t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
 
-  frobinv = gpowgs(pp, lgef(a)-4);
-  xmod = cgetg(3,t_POLMOD);
-  X = gmul(polx[vf],unfq);
-  xmod[2] = (long)X;
-  qq=gpuigs(pp,degpol(a));
+  frobinv = gpowgs(p, degpol(T)-1);
+
+  X = polx[vf];
+  q = gpuigs(p, degpol(T));
   e = nbfact = 1;
-  pk=1; df1=derivpol(f); f3=NULL;
+  pk = 1;
+  f3 = NULL;
+  df1 = FqX_deriv(f, T, p);
   for(;;)
   {
-    long du,dg;
     while (gcmp0(df1))
-    { /* needs d >= pp: p = 0 can't happen  */
-      pk *= p; e=pk;
-      j=(degpol(f))/p+3; setlg(f,j); setlgef(f,j);
-      for (i=2; i<j; i++) f[i] = (long)powgi((GEN)f[p*(i-2)+2], frobinv);
-      df1=derivpol(f); f3=NULL;
+    { /* needs d >= p: pg = 0 can't happen  */
+      pk *= pg; e = pk;
+      j = (degpol(f))/pg+3; setlg(f,j); setlgef(f,j);
+      for (i=2; i<j; i++)
+        f[i] = (long)FpXQ_pow((GEN)f[pg*(i-2)+2], frobinv, T,p);
+      df1 = FqX_deriv(f, T, p); f3 = NULL;
     }
-    f2 = f3? f3: ggcd(f,df1);
-    if (lgef(f2)==3) u = f;
+    f2 = f3? f3: FqX_gcd(f,df1, T,p);
+    if (!degpol(f2)) u = f;
     else
     {
-      g1=gdeuc(f,f2); df2=derivpol(f2);
-      if (gcmp0(df2)) { u=g1; f3=f2; }
+      g1 = FqX_div(f,f2, T,p); df2 = FqX_deriv(f2, T,p);
+      if (gcmp0(df2)) { u = g1; f3 = f2; }
       else
       {
-        f3=ggcd(f2,df2);
-        if (lgef(f3)==3) u=gdeuc(g1,f2);
+        f3 = FqX_gcd(f2,df2, T,p);
+        if (!degpol(f3)) u = FqX_div(g1,f2, T,p);
         else
-          u=gdeuc(g1,gdeuc(f2,f3));
+          u = FqX_div(g1, FqX_div(f2,f3, T,p), T,p);
       }
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
-    qqd=gun; xmod[1]=(long)u;
-    
-    du = degpol(u); v = X;
-    if (du > 1) S = init_pow_q_mod_pT(xmod, qq, a, u);
-    for (d=1; d <= du>>1; d++)
+
+#if 0
+    N = degpol(u);
+    if (N)
     {
-      qqd=mulii(qqd,qq);
-      v = spec_Fq_pow_mod_pol(v, pp, a, S);
-      g = ggcd(gsub(v,X),u);
+      t[nbfact] = FpXQX_normalize(u, T,p);
+      d = (N==1)? 1: FqX_split_berlekamp(t+nbfact, q, T, p);
+      for (j=0; j<d; j++) ex[nbfact+j] = e;
+      nbfact += d;
+    }
+#else
+{
+    GEN qqd = gun, g;
+    long dg;
+
+    N = degpol(u); v = X;
+    if (N > 1) S = init_pow_q_mod_pT(X, q, u, T, p);
+    for (d=1; d <= N>>1; d++)
+    {
+      qqd = mulii(qqd,q);
+      v = spec_Fq_pow_mod_pol(v, S, T, p);
+      g = FqX_gcd(gsub(v,X),u, T,p);
       dg = degpol(g);
       if (dg <= 0) continue;
 
@@ -2263,22 +2271,24 @@ factmod9(GEN f, GEN pp, GEN a)
       j = nbfact+dg/d;
 
       t[nbfact] = g;
-      split9(t+nbfact,d,pp,qq,a,S);
-      for (; nbfact<j; nbfact++) ex[nbfact]=e;
-      du -= dg;
-      u = gdeuc(u,g);
-      v = gres(v,u); xmod[1] = (long)u;
+      FqX_split(t+nbfact,d,q,S,T,p);
+      for (; nbfact<j; nbfact++) ex[nbfact] = e;
+      N -= dg;
+      u = FqX_div(u,g, T,p);
+      v = FqX_rem(v,u, T,p);
     }
-    if (du) { t[nbfact]=u; ex[nbfact++]=e; }
-    if (lgef(f2) == 3) break;
+    if (N) { t[nbfact] = u; ex[nbfact++] = e; }
+}
+#endif
+    if (!degpol(f2)) break;
 
-    f=f2; df1=df2; e += pk;
+    f = f2; df1 = df2; e += pk;
   }
 
-  nbf=nbfact; tetpil=avma; y=cgetg(3,t_MAT);
+  nbf = nbfact;
   for (j=1; j<nbfact; j++)
   {
-    t[j]=gdiv((GEN)t[j],leading_term(t[j]));
+    t[j] = FpXQX_normalize((GEN)t[j], T,p);
     for (k=1; k<j; k++)
       if (ex[k] && gegal(t[j],t[k]))
       {
@@ -2286,25 +2296,19 @@ factmod9(GEN f, GEN pp, GEN a)
         nbf--; break;
       }
   }
-  u=cgetg(nbf,t_COL); y[1]=(long)u;
-  v=cgetg(nbf,t_COL); y[2]=(long)v;
+  tetpil = avma;
+  y = cgetg(3,t_MAT);
+  u = cgetg(nbf,t_COL); y[1] = (long)u;
+  v = cgetg(nbf,t_COL); y[2] = (long)v;
   for (j=1,k=0; j<nbfact; j++)
     if (ex[j])
     {
       k++;
-      u[k]=(long)t[j];
-      v[k]=lstoi(ex[j]);
+      u[k] = lmul((GEN)t[j],unfq);
+      v[k] = lstoi(ex[j]);
     }
   y = gerepile(av,tetpil,y);
-  u=(GEN)y[1];
-  { /* put a back on the stack */
-    GEN tokill = a;
-    a = forcecopy(a);
-    gunclone(tokill);
-  }
-  pp = (GEN)leading_term(a)[1];
-  for (j=1; j<nbf; j++) fqunclone((GEN)u[j], a, pp);
-  (void)sort_factor(y, cmp_pol); return y;
+  return sort_factor(y, cmp_pol);
 }
 /* See also: Isomorphisms between finite field and relative
  * factorization in polarit3.c */
@@ -2926,10 +2930,10 @@ zrhqr(GEN a,long prec)
   long i,j,prec2, n = degpol(a), ex = -bit_accuracy(prec);
   GEN aa,b,p1,rt,rr,hess,x,dx,y,newval,oldval;
 
-  hess = cgetg(n+1,t_MAT); 
+  hess = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    p1 = cgetg(n+1,t_COL); hess[j] = (long)p1; 
+    p1 = cgetg(n+1,t_COL); hess[j] = (long)p1;
     p1[1] = lneg(gdiv((GEN)a[n-j+2],(GEN)a[n+2]));
     for (i=2; i<=n; i++) p1[i] = (i==(j+1))? un: zero;
   }
