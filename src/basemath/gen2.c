@@ -1690,33 +1690,6 @@ sizedigit(GEN x)
   return gcmp0(x)? 0: (long) ((gexpo(x)+1) * L2SL10) + 1;
 }
 
-#if 0
-/* Normalize series x in place.
- * Assumption: x,x[2],...,x[lg(x)-1] have been created in that order.
- * All intermediate objects will be destroyed.
- */
-GEN
-normalize(GEN x)
-{
-  long i,j, lx = lg(x);
-
-  if (typ(x)!=t_SER) err(typeer,"normalize");
-  if (lx==2) { setsigne(x,0); avma = (pari_sp) x; return x; }
-  if (! isexactzero((GEN)x[2])) { setsigne(x,1); return x; }
-
-  for (i=3; i<lx; i++)
-    if (! isexactzero((GEN)x[i]))
-    {
-      pari_sp tetpil = avma;
-      GEN p1 = cgetg(lx-i+2,t_SER);
-      p1[1] = evalsigne(1) | evalvalp(valp(x)+i-2) | evalvarn(varn(x));
-      j=i; i=2; while (j<lx) p1[i++] = lcopy((GEN)x[j++]);
-      return gerepile((pari_sp) (x+lx),tetpil,p1);
-    }
-  avma = (pari_sp) (x+lx); return zeroser(varn(x),lx-2);
-}
-#else
-
 /* normalize series. avma is not updated */
 GEN
 normalize(GEN x)
@@ -1737,7 +1710,6 @@ normalize(GEN x)
     }
   return zeroser(varn(x),lx-2);
 }
-#endif
 
 GEN
 normalizepol_i(GEN x, long lx)
