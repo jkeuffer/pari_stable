@@ -817,7 +817,7 @@ GEN
 lllgramintern(GEN x, long alpha, long flag, long prec)
 {
   GEN xinit,L,h,B,L1,QR;
-  long retry = 2, av = avma,lim,l,i,j,k,k1,lx=lg(x),n,kmax, KMAX = 0;
+  long retry = 2, av = avma,lim,l,i,j,k,k1,lx=lg(x),n,kmax,KMAX;
   long last_prec;
 
   if (typ(x) != t_MAT) err(typeer,"lllgram");
@@ -840,16 +840,18 @@ lllgramintern(GEN x, long alpha, long flag, long prec)
     if (prec < k) prec = k;
     x = gprec_w(x, prec+1);
   }
-  kmax = 1;
+ /* kmax = maximum column index attained during this run 
+  * KMAX = same over all runs (after PRECPB) */
+  kmax = KMAX = 1;
 
-LABLLLGRAM:
+PRECPB:
   switch(retry--)
   {
     case 2: h = idmat(n); break; /* entry */
     case 1:
       if (kmax > 2)
       { /* some progress but precision loss, try again */
-        prec = (prec<<1)-2; KMAX = kmax; kmax = 1;
+        prec = (prec<<1)-2; kmax = 1;
         if (DEBUGLEVEL > 3) fprintferr("\n");
         if (DEBUGLEVEL) err(warnprec,"lllgramintern",prec);
         x = qf_base_change(gprec_w(xinit,prec),h,1);
@@ -885,8 +887,9 @@ LABLLLGRAM:
   {
     if (k>kmax)
     {
-      kmax = k; if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
-      if (!get_Gram_Schmidt(x,L,B,k)) goto LABLLLGRAM;
+      kmax = k; if (KMAX < kmax) KMAX = kmax;
+      if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
+      if (!get_Gram_Schmidt(x,L,B,k)) goto PRECPB;
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
     L1 = gcoeff(L,k,k-1);
@@ -898,17 +901,17 @@ LABLLLGRAM:
 	fprintferr("\nRecomputing Gram-Schmidt, kmax = %ld, prec was %ld\n",
                    kmax,last_prec);
       for (k1=1; k1<=kmax; k1++)
-        if (!get_Gram_Schmidt(x,L,B,k1)) goto LABLLLGRAM;
+        if (!get_Gram_Schmidt(x,L,B,k1)) goto PRECPB;
     }
-    RED(x,h,L,KMAX? KMAX: kmax,k,k-1);
+    RED(x,h,L,KMAX,k,k-1);
     if (do_SWAP(x,h,L,B,kmax,k,QR))
     {
-      if (!B[k]) goto LABLLLGRAM;
+      if (!B[k]) goto PRECPB;
       if (k>2) k--;
     }
     else
     {
-      for (l=k-2; l; l--) RED(x,h,L, KMAX? KMAX: kmax,k,l);
+      for (l=k-2; l; l--) RED(x,h,L,KMAX,k,l);
       if (++k > n) break;
     }
     if (low_stack(lim, stack_lim(av,1)))
