@@ -683,6 +683,19 @@ coinit(long x)
   pariputs(p); return 9 - (p - cha);
 }
 
+/* as above, printing leading 0s, return # significant digits printed */
+static long
+coinit2(long x)
+{
+  char cha[10], *p = cha + 9;
+  int i = 0;
+
+  for (*p = 0; p > cha; x /= 10) *--p = x%10 + '0';
+  while (cha[i] == '0') i++;
+  pariputs(cha); return 9 - i;
+}
+
+
 static void
 comilieu(long x)
 {
@@ -758,7 +771,7 @@ static void wr_exp(GEN x);
 static void
 wr_float(GEN x)
 {
-  long *res, ex,s,d,e,decmax,deceff, dec = decimals;
+  long *res, ex,s,d,e,decmax, dec = decimals;
   GEN p1;
 
   if (dec>0) /* round if needed */
@@ -767,55 +780,41 @@ wr_float(GEN x)
     arrondi[1] = (long) (x[1]-((double)BITS_IN_LONG/pariK)*dec-2);
     arrondi[2] = x[2]; x = addrr(x,arrondi);
   }
-  ex = expo(x);
-  if (ex >= bit_accuracy(lg(x))) { wr_exp(x); return; }
+  ex = expo(x); e = bit_accuracy(lg(x)); /* significant bits */
+  if (ex >= e) { wr_exp(x); return; }
+  decmax = (long) (e * L2SL10); /* significant digits */
+  if (decmax < (ulong)dec) dec = decmax; /* Hack: includes dec < 0 */
 
 /* integer part */
   p1 = gcvtoi(x,&e); s = signe(p1);
   if (e > 0) err(bugparier,"wr_float");
-  if (!s) { pariputc('0'); d=1; }
+  if (!s) { pariputc('0'); d=0; }
   else
   {
-    setsigne(p1,1); res = convi(p1); d = coinit(*--res);
-    setsigne(p1,s);
+    x = subri(x,p1); setsigne(p1,1);
+    res = convi(p1); d = coinit(*--res);
     while (*(--res) >= 0) { d += 9; comilieu(*res); }
-    x = subri(x,p1);
   }
   pariputc('.');
 
 /* fractional part: 0 < x < 1 */
   if (!signe(x))
   {
-    if (dec<0) dec=(long) (-expo(x)*L2SL10+1);
     dec -= d; if (dec>0) zeros(dec);
     return;
   }
+
+  res = confrac(x);
   if (!s)
   {
-    for(;;)
-    {
-      p1=mulsr(1000000000,x); if (expo(p1)>=0) break;
-      pariputs("000000000"); x=p1;
-    }
-    for(;;)
-    {
-      p1=mulsr(10,x); if (expo(p1)>=0) break;
-      pariputc('0'); x=p1;
-    }
-    d=0;
+    while (!*res) { res++; pariputs("000000000"); }
+    d = coinit2(*res++);
   }
-  res = (long *) confrac(x); decmax = d + *res++;
-  if (decmax < (ulong)dec) dec=decmax; /* Hack: includes dec < 0 */
-  deceff = dec-decmax; dec -= d;
-  while (dec>8)
-  {
-    if (dec>deceff) comilieu(*res++); else pariputs("000000000");
-    dec -= 9;
-  }
-  if (dec>0)
-  {
-    if (dec>deceff) cofin(*res,dec); else zeros(dec);
-  }
+
+  /* d = # significant digits already printed */
+  dec -= d;
+  while (dec>8) { comilieu(*res++); dec -= 9; }
+  if (dec>0) cofin(*res,dec);
 }
 
 /* as above in exponential format */

@@ -1518,7 +1518,7 @@ smulss(ulong x, ulong y, ulong *rem)
 #  define DIVCONVI 14
 #endif
 
-/* Conversion entier --> base 10^9. Assume x > 0 */
+/* convert integer --> base 10^9 [assume x > 0] */
 GEN
 convi(GEN x)
 {
@@ -1538,11 +1538,11 @@ convi(GEN x)
 }
 #undef DIVCONVI
 
-/* Conversion partie fractionnaire --> base 10^9 (expo(x)<0) */
+/* convert fractional part --> base 10^9 [assume expo(x) < 0] */
 GEN
 confrac(GEN x)
 {
-  long lx=lg(x), ex = -expo(x)-1, d,m,ly,ey,lr,nbdec,i,j;
+  long lx=lg(x), ex = -expo(x)-1, d,m,ly,ey,lr,i,j;
   GEN y,y1;
 
   ey = ex + bit_accuracy(lx);
@@ -1565,9 +1565,9 @@ confrac(GEN x)
     }
     y1[i] = k;
   }
-  nbdec = (long) (ey*L2SL10)+1; lr=(nbdec+17)/9;
-  y1=new_chunk(lr); *y1=nbdec;
-  for (j=1; j<lr; j++)
+  lr = 1 + ((long) (ey*L2SL10))/9;
+  y1 = new_chunk(lr);
+  for (j=0; j<lr; j++)
   {
     LOCAL_HIREMAINDER;
     hiremainder=0;
