@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
+extern GEN makebasis(GEN nf,GEN pol);
+extern GEN caractducos(GEN p, GEN x, int v);
 
 /* scalar product x.x */
 GEN
@@ -1890,7 +1893,6 @@ canon_pol(GEN z)
   return 0;
 }
 
-extern GEN caractducos(GEN p, GEN x, int v);
 static void
 rescale_pol(GEN P, GEN h)
 {
@@ -2115,21 +2117,37 @@ ordred(GEN x, long prec)
   return gerepileupto(av, allpolred(y,NULL,0,prec));
 }
 
-GEN roots_to_pol_r1r2(GEN a, long r1, long v);
+GEN
+sum(GEN v, long a, long b)
+{
+  GEN p;
+  long i;
+  if (a > b) return gzero;
+  p = (GEN)v[a];
+  for (i=a+1; i<=b; i++) p = gadd(p, (GEN)v[i]);
+  return p;
+}
+
+GEN
+T2_from_embed_norm(GEN x, long r1)
+{
+  GEN p = sum(x, 1, r1);
+  GEN q = sum(x, r1+1, lg(x)-1);
+  if (q != gzero) p = gadd(p, gmul2n(q,1));
+  return p;
+}
+
+GEN
+T2_from_embed(GEN x, long r1)
+{
+  return T2_from_embed_norm(gnorm(x), r1);
+}
 
 /* return T2 norm of the polynomial defining nf */
 static GEN 
 get_Bnf(GEN nf)
 {
-  GEN p = gzero, r = (GEN)nf[6];
-  long i, r1 = nf_get_r1(nf), ru = lg(r)-1;
-  for (i=ru; i>0; i--)
-  {
-    if (i == r1) p = gmul2n(p, 1);
-    p = gadd(p, gnorm((GEN)r[i]));
-  }
-  if (i == r1) p = gmul2n(p, 1);
-  return p;
+  return T2_from_embed((GEN)nf[6], nf_get_r1(nf));
 }
 
 /* characteristic pol of x */
@@ -2440,7 +2458,6 @@ factoredpolred2(GEN x, GEN p, long prec)
   return y;
 }
 
-extern GEN makebasis(GEN nf,GEN pol);
 /* relative polredabs. Returns
  * flag = 0: relative polynomial
  * flag = 1: relative polynomial + element
