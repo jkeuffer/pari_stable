@@ -2457,8 +2457,9 @@ sturmpart(GEN x, GEN a, GEN b)
   sl = gsigne(leading_term(x));
   if (s==4)
   {
-    s = b? gsigne(poleval(x,b)):  sl;
     t = a? gsigne(poleval(x,a)): -sl;
+    if (t == 0) { avma = av; return 0; }
+    s = b? gsigne(poleval(x,b)):  sl;
     avma = av; return (s == t)? 0: 1;
   }
   u=gdiv(x,content(x)); v=derivpol(x);
