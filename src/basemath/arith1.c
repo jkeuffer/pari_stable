@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*********************************************************************/
 #include "pari.h"
 
+extern GEN ishiftr_spec(GEN x, long lx, long n);
+
 /*********************************************************************/
 /**                                                                 **/
 /**                  ARITHMETIC FUNCTION PROTOTYPES                 **/
@@ -2034,9 +2036,9 @@ sfcont(GEN x, long k)
       case t_INT: y = cgetg(2,t_VEC); y[1] = (long)icopy(x); return y;
       case t_REAL:
         av = avma; lx = lg(x);
-	p2 = rcopy(x); settyp(p2,t_INT); setlgefint(p2,lx);
         e = bit_accuracy(lx)-1-expo(x);
-	if (e < 0) err(talker,"integral part not significant in scfont");
+        if (e < 0) err(talker,"integral part not significant in sfcont");
+        p2=ishiftr_spec(x,lx,0);
         p1 = cgetg(3, t_FRACN);
 	p1[1] = (long)p2;
 	p1[2] = lshifti(gun, e);
