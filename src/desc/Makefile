@@ -2,20 +2,21 @@ PERL=perl
 
 HEADERS=../language/init.h ../gp/gp_init.h ../gp/highlvl.h
 HE_DEPS=gen_proto gen_help PARI/822.pm
+DEF=pari.desc
 
 all: $(HEADERS)
 
-Def: ../funclist merge_822 PARI/822.pm
-	$(PERL) merge_822 ../functions/*/* > Def
+$(DEF): ../funclist merge_822 PARI/822.pm
+	$(PERL) merge_822 ../functions/*/* > $(DEF)
 
-../language/init.h: Def $(HE_DEPS)
-	$(PERL) gen_proto basic Def > $@ && $(PERL) gen_help  basic Def >> $@
+../language/init.h: $(DEF) $(HE_DEPS)
+	$(PERL) gen_proto basic $(DEF) > $@ && $(PERL) gen_help  basic $(DEF) >> $@
 
-../gp/gp_init.h: Def $(HE_DEPS)
-	$(PERL) gen_proto gp Def > $@ && $(PERL) gen_help  gp Def >> $@
+../gp/gp_init.h: $(DEF) $(HE_DEPS)
+	$(PERL) gen_proto gp $(DEF) > $@ && $(PERL) gen_help  gp $(DEF) >> $@
 
-../gp/highlvl.h: Def $(HE_DEPS)
-	$(PERL) gen_proto highlevel Def > $@ && $(PERL) gen_help  highlevel Def >> $@
+../gp/highlvl.h: $(DEF) $(HE_DEPS)
+	$(PERL) gen_proto highlevel $(DEF) > $@ && $(PERL) gen_help  highlevel $(DEF) >> $@
 
 veryclean:
-	rm -f Def $(HEADERS)
+	rm -f $(DEF) $(HEADERS)

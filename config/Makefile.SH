@@ -7,6 +7,7 @@ rm -f $file
 case "$config_dir" in /*) cfg=$config_dir ;; *) cfg=../$config_dir ;; esac
 case "$data_dir"   in /*) data=$data_dir ;;  *) data=../$data_dir ;; esac
 case "$doc_dir"    in /*) doc=$doc_dir ;;    *) doc=../$doc_dir ;; esac
+case "$desc_dir"   in /*) desc=$desc_dir ;;  *) desc=../$desc_dir ;; esac
 case "$emacs_dir"  in /*) emx=$emacs_dir ;;  *) emx=../$emacs_dir ;; esac
 case "$examples_dir" in /*) ex=$examples_dir ;; *) ex=../$examples_dir ;; esac
 case "$misc_dir"   in /*) misc=$misc_dir ;;  *) misc=../$misc_dir ;; esac
@@ -251,17 +252,19 @@ STRIPFLAGS =
 
 # Change these installation directories to suit your needs.
 # DESTDIR is used to install to a false hierachy (to build a Debian package)
-INCLUDEDIR = \$(DESTDIR)$includedir
-LIBDIR = \$(DESTDIR)$libdir
-BINDIR = \$(DESTDIR)$bindir
-DATADIR= \$(DESTDIR)$datadir
-MANDIR = \$(DESTDIR)$mandir
-ALLDIR = \$(DESTDIR)$miscdir
+INCLUDEDIR= \$(DESTDIR)$includedir
+LIBDIR    = \$(DESTDIR)$libdir
+BINDIR    = \$(DESTDIR)$bindir
+DATADIR   = \$(DESTDIR)$datadir
+PARICFGDIR= \$(DESTDIR)$paricfgdir
+MANDIR    = \$(DESTDIR)$mandir
+EMACSDIR  = \$(DESTDIR)$emacsdir
+ALLDIR    = \$(DESTDIR)$miscdir
+DESCDIR   = \$(DESTDIR)$descdir
 READMEDIR = \$(ALLDIR)
-DOCDIR  = \$(ALLDIR)/doc
-EMACSDIR= \$(ALLDIR)/emacs
-EXDIR   = \$(ALLDIR)/examples
-MISCDIR = \$(ALLDIR)/misc
+DOCDIR    = \$(ALLDIR)/doc
+EXDIR     = \$(ALLDIR)/examples
+MISCDIR   = \$(ALLDIR)/misc
 
 INSTALL = $cfg/install
 INSTALL_PROGRAM = \$(INSTALL)
@@ -366,7 +369,7 @@ clean: cleanobj cleantest cleanemacs
 .headers: $HEADERS
 	@touch \$@
 
-install: install-lib-$dft install-include install-bin install-man install-misc install-data install-doc install-examples
+install: install-lib-$dft install-include install-bin install-man install-misc install-data install-doc install-examples install-cfg
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)
@@ -427,6 +430,12 @@ install-top::
 	\$(INSTALL_DATA) $TOP/NEW          \$(READMEDIR)
 	\$(INSTALL_DATA) $TOP/README       \$(READMEDIR)
 	\$(INSTALL_DATA) $TOP/TODO         \$(READMEDIR)
+
+install-cfg::
+	-mkdir -p \$(DESCDIR) \$(DESCDIR)/PARI \$(PARICFGDIR)
+	\$(INSTALL_DATA) $desc/pari.desc   \$(DESCDIR)
+	\$(INSTALL_DATA) $desc/PARI/822.pm \$(DESCDIR)/PARI
+	\$(INSTALL_DATA) pari.cfg  \$(PARICFGDIR)
 
 install-doc::
 	-mkdir -p \$(BINDIR) \$(DOCDIR)
@@ -561,7 +570,7 @@ pariinl.h: parilvl0.h parilvl1.h
 $src/funclist::
 	@ls -l $src/functions/*/* > $src/funclist.tmp
 	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
-	@cd $src/desc; \$(MAKE) 
+	@cd $desc && \$(MAKE) 
 
 $src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/funclist
 EOT

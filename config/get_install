@@ -1,5 +1,5 @@
 # Exported variables
-_install_list="prefix share_prefix bindir includedir mandir miscdir libdir datadir"
+_install_list="prefix share_prefix bindir descdir emacsdir includedir mandir miscdir libdir paricfgdir datadir"
 
 dflt=$prefix; rep=
 test "$fastread" = yes || cat <<EOT
@@ -23,9 +23,16 @@ dflt=$share_prefix; . ./myread; share_prefix=$ans
 if test -z "$share_prefix"; then
   dfltman=$prefix/man/man1
   dfltall=$prefix/lib/pari
+  dfltemacs=$prefix/emacs/site-lisp
+  possibleemacs=/usr/share/emacs/site-lisp
+  if test ! -d $dfltemacs -a $prefix = '/usr/local' -a -d $possibleemacs; then
+  # pray this is correct...
+    dfltemacs=$possibleemacs
+  fi
 else
   dfltman=$share_prefix/man/man1
   dfltall=$share_prefix/doc/pari
+  dfltemacs=$share_prefix/emacs/site-lisp
 fi
 
 echo $n ..."\"gp\" executable ? $c"
@@ -37,11 +44,17 @@ dflt=${dfltlibdir:-$prefix/lib}; . ./myread; libdir=$ans
 echo $n ..."include files ? $c"
 dflt=${dlftincludedir:-$prefix/include/pari}; . ./myread; includedir=$ans
 
+echo $n ..."pari.cfg file ? $c"
+dflt=${dfltparicfgdir:-$prefix/lib/pari}; . ./myread; paricfgdir=$ans
+
 echo $n ..."manual pages ? $c"
 dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
 
-echo $n ..."documentation, examples, and emacs macros ? $c"
+echo $n ..."documentation, examples ? $c"
 dflt=${dfltmiscdir:-$dfltall}; . ./myread; miscdir=$ans
+
+echo $n ..."emacs macros ? $c"
+dflt=${dfltemacsdir:-$dfltemacs}; . ./myread; emacsdir=$ans
 
 if test -z "$share_prefix"; then
   dfltdat=$miscdir
@@ -51,3 +64,6 @@ fi
 
 echo $n ..."miscellaneous data (galois resolvents) ? $c"
 dflt=${dfltdatadir:-$dfltdat}; . ./myread; datadir=$ans
+
+echo $n ..."associated to GP's function description system ? $c"
+dflt=${dfltdescdir:-$datadir}; . ./myread; descdir=$ans
