@@ -195,30 +195,52 @@ ggener(GEN m)
   return garith_proto(gener,m,1);
 }
 
+/* assume p prime */
+ulong
+u_gener_fact(ulong p, GEN fa)
+{
+  const pari_sp av = avma;
+  const ulong q = p - 1;
+  int i, x, k ;
+  GEN L;
+  if (p == 2) return 1;
+
+  if (!fa) { fa = L = (GEN)decomp(utoi(q))[1]; k = lg(fa)-1; } 
+  else { fa = (GEN)fa[1]; k = lg(fa)-1; L = cgetg(k + 1, t_VECSMALL); }
+ 
+  for (i=1; i<=k; i++) L[i] = (long)(q / itou((GEN)fa[i]));
+  for (x=2;;x++)
+    if (x % p)
+    {
+      for (i=k; i; i--)
+	if (powuumod(x, (ulong)L[i], p) == 1) break;
+      if (!i) break;
+    }
+  avma = av; return x;
+}
+ulong
+u_gener(ulong p) { return u_gener_fact(p, NULL); }
+
+/* assume p prime */
 GEN
-Fp_gener_fact(GEN p, GEN m)
+Fp_gener_fact(GEN p, GEN fa)
 {
   pari_sp av0 = avma;
   long k, i;
   GEN x, q, V;
   if (egalii(p, gdeux)) return gun;
+  if (lgefint(p) == 3) return utoi(u_gener_fact((ulong)p[2], fa));
+
   q = subis(p, 1);
-  if (!m) /* */
-  {
-    m = V = (GEN)decomp(q)[1];
-  }
-  else
-  {
-    m = (GEN)m[1];
-    V = dummycopy(m);
-  }
-  k = lg(V)-1;
-  for (i=1; i<=k; i++) V[i] = (long)diviiexact(q, (GEN)m[i]);
+  if (!fa) { fa = V = (GEN)decomp(q)[1]; k = lg(fa)-1; }
+  else { fa = (GEN)fa[1]; k = lg(fa)-1; V = cgetg(k + 1, t_VEC); }
+ 
+  for (i=1; i<=k; i++) V[i] = (long)diviiexact(q, (GEN)fa[i]);
   x = utoi(2UL);
   for (;; x[2]++)
   {
     GEN d = mppgcd(p,x);
-    if (is_pm1(d)) continue;
+    if (!is_pm1(d)) continue;
     for (i = k; i; i--) {
       GEN e = powmodulo(x, (GEN)V[i], p);
       if (is_pm1(e)) break;
@@ -267,26 +289,6 @@ gener(GEN m)
     if (gcmp1(powmodulo(x, subis(p,1), M))) x = addii(x,p);
   }
   return gerepileupto(av, gmodulcp(x,m));
-}
-
-/* assume p odd prime */
-ulong
-u_gener(ulong p)
-{
-  const pari_sp av = avma;
-  const ulong q = p - 1;
-  const GEN L = (GEN)decomp(utoi(q))[1];
-  const int k = lg(L) - 1;
-  int i,x;
-
-  for (x=2;;x++)
-    if (x % p)
-    {
-      for (i=k; i; i--)
-	if (powuumod(x, q/itou((GEN)L[i]), p) == 1) break;
-      if (!i) break;
-    }
-  avma = av; return x;
 }
 
 GEN
