@@ -31,6 +31,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define STMT_START	do
 #define STMT_END	while (0)
 /*=====================================================================*/
+/* CATCH(numer) {
+ *   recovery 
+ * } TRY {
+ *   code
+ * } ENDCATCH
+ * will execute 'code', then 'recovery' if exception 'numer' is thrown
+ * [ any exception if numer < 0 ].
+ * RETRY = as TRY, but execute 'recovery', then 'code' again [still catching] */
+#define CATCH(err) {         \
+  VOLATILE long __err = err; \
+  jmp_buf __env;             \
+  void *__catcherr;          \
+  if (setjmp(__env)) 
+
+#define RETRY { __catcherr = err_catch(__err, __env, NULL); {
+#define TRY else { __catcherr = err_catch(__err, __env, NULL); {
+
+#define ENDCATCH }} err_leave(&__catcherr); }
+/*=====================================================================*/
+
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
 
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))

@@ -602,9 +602,8 @@ fnz(GEN x,long j)
 GEN
 allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  VOLATILE GEN w1, w2, a, da, b, db, p1;
-  VOLATILE long n, mf, lw, i, j, k, l;
-  GEN w;
+  GEN w, w1, w2, a, da, p1, ordmax;
+  long n, lw, i, j, k, l;
 
   if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,ptw);
   w = ptw? *ptw: NULL;
@@ -612,17 +611,13 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   w1 = (GEN)w[1];
   w2 = (GEN)w[2];
   n = degpol(f); lw = lg(w1);
-  a = NULL; /* gcc -Wall */
-  da = NULL;
+  ordmax = cgetg(1, t_VEC);
   for (i=1; i<lw; i++)
   {
-    jmp_buf env;
-    void *catcherr;
+    long mf = itos((GEN)w2[i]);
+    if (mf == 1) { ordmax = concatsp(ordmax, gun); continue; }
 
-    mf = itos((GEN)w2[i]); if (mf == 1) continue;
-
-    if (setjmp(env))
-    { /* caught a false prime, update factorization */
+    CATCH(invmoder) { /* caught a false prime, update factorization */
       GEN x = (GEN)global_err_data;
       GEN p = mppgcd((GEN)x[1], (GEN)x[2]);
       if (DEBUGLEVEL) err(warner,"impossible inverse: %Z", x);
@@ -630,12 +625,19 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       w1 = concatsp(w1, diviiexact((GEN)x[1], p));
       w2 = concatsp(w2, (GEN)w2[i]);
       lw++;
-    }
-    catcherr = err_catch(invmoder, env, NULL);
+    } RETRY {
+      if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
+      ordmax = concatsp(ordmax, _vec( maxord((GEN)w1[i],f,mf) ));
+    } ENDCATCH;
+  }
 
-    if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
-
-    b = maxord((GEN)w1[i],f,mf); db = gun;
+  a = NULL; /* gcc -Wall */
+  da = NULL;
+  for (i=1; i<lw; i++)
+  {
+    GEN db, b = (GEN)ordmax[i];
+    if (b == gun) continue;
+    db = gun;
     for (j=1; j<=n; j++)
     {
       p1 = denom(gcoeff(b,j,j));
@@ -662,7 +664,6 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       a = hnfmodid(p1, da);
     }
     if (DEBUGLEVEL>5) fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
-    err_leave(&catcherr);
   }
   *dK = *dx;
   if (da)

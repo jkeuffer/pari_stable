@@ -2865,11 +2865,11 @@ perf(GEN a)
 
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
- * If (flag & 1) return NULL on precision problems (no error).
+ * If (noer) return NULL on precision problems (no error).
  * If (check != NULL consider only vectors passing the check [ assumes
  *   stockmax > 0 and we only want the smallest possible vectors ] */
 static GEN
-smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
+smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
 {
   long N, n, i, j, k, s, epsbit, prec, checkcnt = 1;
   gpmem_t av, av1, lim;
@@ -2881,7 +2881,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
   if (DEBUGLEVEL)
     fprintferr("smallvectors looking for norm <= %Z\n",gprec_w(BORNE,3));
 
-  q = sqred1intern(a,flag&1);
+  q = sqred1intern(a, noer);
   if (q == NULL) return NULL;
   if (DEBUGLEVEL>5) fprintferr("q = %Z",q);
   prec = gprecision(q);
@@ -3061,23 +3061,20 @@ END:
 
 /* solve q(x) = x~.a.x <= bound, a > 0.
  * If check is non-NULL keep x only if check(x).
- * flag & 1, return NULL in case of precision problems (sqred1 or lllgram)
- *   raise an error otherwise.
+ * If noer, return NULL in case of precision problems, raise an error otherwise.
  * If a is a vector, assume a[1] is the LLL-reduced Cholesky form of q */
-GEN
-fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
+static GEN
+_fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK)
 {
-  VOLATILE gpmem_t av = avma;
-  VOLATILE long i,j,l, round = 0;
-  VOLATILE GEN B,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram;
-  VOLATILE GEN bound = B0;
-  void *catcherr = NULL;
+  gpmem_t av = avma;
+  long i,j,l, round = 0;
+  GEN B,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram, bound = B0;
 
   if (DEBUGLEVEL>2) fprintferr("entering fincke_pohst\n");
   if (typ(a) == t_VEC)
   {
-    r = (GEN)a[1]; l = lg(r);
-    u = idmat(l-1);
+    r = (GEN)a[1];
+    u = NULL;
   }
   else
   {
@@ -3086,38 +3083,38 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     if (l == 1)
     {
       if (CHECK) err(talker, "dimension 0 in fincke_pohst");
-      avma = av; z = cgetg(4,t_VEC);
+      z = cgetg(4,t_VEC);
       z[1] = z[2] = zero;
       z[3] = lgetg(1,t_MAT); return z;
     }
     i = gprecision(a);
     if (i) prec = i; else { a = gmul(a,realun(prec)); round = 1; }
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-    u = lllgramintern(a,4,flag&1, (prec<<1)-2);
-    if (!u) goto PRECPB;
+    u = lllgramintern(a,4,noer, (prec<<1)-2);
+    if (!u) return NULL;
     r = qf_base_change(a,u,1);
-    r = sqred1intern(r,flag&1);
-    if (!r) goto PRECPB;
+    r = sqred1intern(r,noer);
+    if (!r) return NULL;
     for (i=1; i<l; i++)
     {
-      GEN p1 = gsqrt(gcoeff(r,i,i), prec);
-      coeff(r,i,i)=(long)p1;
-      for (j=i+1; j<l; j++)
-        coeff(r,i,j) = lmul(p1, gcoeff(r,i,j));
+      GEN s = gsqrt(gcoeff(r,i,i), prec);
+      coeff(r,i,i) = (long)s;
+      for (j=i+1; j<l; j++) coeff(r,i,j) = lmul(s, gcoeff(r,i,j));
     }
   }
   /* now r~ * r = a in LLL basis */
   rinvtrans = gtrans(invmat(r));
   if (DEBUGLEVEL>2)
       fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
-  v = lllintern(rinvtrans, 100, flag&1, 0);
-  if (!v) goto PRECPB;
+  v = lllintern(rinvtrans, 100, noer, 0);
+  if (!v) return NULL;
   rinvtrans = gmul(rinvtrans, v);
 
   v = ZM_inv(gtrans_i(v),gun);
   r = gmul(r,v);
-  u = gmul(u,v);
+  u = u? gmul(u,v): v;
 
+  l = lg(r);
   vnorm = cgetg(l,t_VEC);
   for (j=1; j<l; j++) vnorm[j] = lnorml2((GEN)rinvtrans[j]);
   sperm = cgetg(l,t_MAT);
@@ -3126,38 +3123,45 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
 
   gram = gram_matrix(sperm);
   B = gcoeff(gram,l-1,l-1);
-  if (gexpo(B) >= bit_accuracy(lg(B)-2)) goto PRECPB;
+  if (gexpo(B) >= bit_accuracy(lg(B)-2)) return NULL;
 
-  { /* catch precision problems (truncation error) */
-    jmp_buf env;
-    if (setjmp(env)) goto PRECPB;
-    catcherr = err_catch(precer, env, NULL);
-  }
-  if (CHECK && CHECK->f_init)
-  {
-    bound = CHECK->f_init(CHECK,gram,uperm);
-    if (!bound) goto PRECPB;
-  }
-  if (!bound) bound = gcoeff(gram,1,1);
+  res = NULL;
+  CATCH(precer) { }
+  TRY {
+    if (CHECK && CHECK->f_init)
+    {
+      bound = CHECK->f_init(CHECK,gram,uperm);
+      if (!bound) err(precer,"fincke_pohst");
+    }
+    if (!bound) bound = gcoeff(gram,1,1);
 
-  if (DEBUGLEVEL>2) fprintferr("entering smallvectors\n");
-  for (i=1; i<l; i++)
-  {
-    res = smallvectors(gram, bound, stockmax,flag,CHECK);
-    if (!res) goto PRECPB;
-    if (!CHECK || bound || lg(res[2]) > 1) break;
-    if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
-  }
-  err_leave(&catcherr); catcherr = NULL;
-  if (CHECK) return res;
-
+    if (DEBUGLEVEL>2) fprintferr("entering smallvectors\n");
+    for (i=1; i<l; i++)
+    {
+      res = smallvectors(gram, bound, stockmax,noer,CHECK);
+      if (!res) err(precer,"fincke_pohst");
+      if (!CHECK || bound || lg(res[2]) > 1) break;
+      if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
+    }
+  } ENDCATCH;
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
+  if (CHECK || !res) return res;
+
   z = cgetg(4,t_VEC);
   z[1] = lcopy((GEN)res[1]);
   z[2] = round? lround((GEN)res[2]): lcopy((GEN)res[2]);
   z[3] = lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
-PRECPB:
-  if (catcherr) err_leave(&catcherr);
-  if (!(flag & 1)) err(precer,"fincke_pohst");
-  avma = av; return NULL;
+}
+
+GEN
+fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
+{
+  gpmem_t av = avma;
+  GEN z = _fincke_pohst(a,B0,stockmax,flag & 1,PREC,CHECK);
+  if (!z)
+  {
+    if (!(flag & 1)) err(precer,"fincke_pohst");
+    avma = av;
+  }
+  return z;
 }

@@ -2864,11 +2864,9 @@ LABDOUB:
 GEN
 quadhilbertreal(GEN D, GEN flag, long prec)
 {
-  VOLATILE gpmem_t av = avma;
-  VOLATILE long cl;
-  long newprec;
-  VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
-  void *catcherr = NULL;
+  gpmem_t av = avma;
+  long cl, newprec;
+  GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
 
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
@@ -2887,45 +2885,37 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   pol = quadpoly(D);
   setvarn(pol, fetch_var());
 
- START:
+START:
   /* compute the class group */
   bnf = bnfinit0(pol, 1, NULL, prec);
   nf  = (GEN)bnf[7];
   disable_dbg(-1);
-
   if (DEBUGLEVEL) msgtimer("Compute Cl(k)");
 
   /* if the exponent of the class group is 2, use rather Genus Field Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
   if (gegal(exp, gdeux)) { (void)delete_var(); return GenusField(bnf, prec); }
 
-  { /* catch precision problems (precision too small) */
-    jmp_buf env;
-    if (setjmp(env))
+  CATCH(precer) {
+    prec += EXTRA_PREC; pol = NULL;
+    err (warnprec, "quadhilbertreal", prec);
+  } TRY {
+    /* find the modulus defining N */
+    bnr   = buchrayinitgen(bnf, gun);
+    dataC = InitQuotient(bnr, gzero);
+    bnrh  = FindModulus(dataC, 1, &newprec, prec, gcmp0(flag)? 0: -10);
+
+    if (DEBUGLEVEL) msgtimer("FindModulus");
+
+    if (newprec > prec)
     {
-      prec += EXTRA_PREC;
-      err (warnprec, "quadhilbertreal", prec);
-      goto START;
+      if (DEBUGLEVEL >= 2) fprintferr("new precision: %ld\n", newprec);
+      nf = nfnewprec(nf, newprec);
     }
-    catcherr = err_catch(precer, env, NULL);
-  }
+    pol = AllStark(bnrh, nf, 1, newprec);
+  } ENDCATCH;
+  if (!pol) goto START;
 
-  /* find the modulus defining N */
-  bnr   = buchrayinitgen(bnf, gun);
-  dataC = InitQuotient(bnr, gzero);
-  bnrh  = FindModulus(dataC, 1, &newprec, prec, gcmp0(flag)? 0: -10);
-
-  if (DEBUGLEVEL) msgtimer("FindModulus");
-
-  if (newprec > prec)
-  {
-    if (DEBUGLEVEL >= 2) fprintferr("new precision: %ld\n", newprec);
-    nf = nfnewprec(nf, newprec);
-  }
-
-  /* use the generic function AllStark */
-  pol = AllStark(bnrh, nf, 1, newprec);
-  err_leave(&catcherr);
   pol = makescind(nf, pol, cl);
   (void)delete_var();
   return gerepileupto(av, pol);

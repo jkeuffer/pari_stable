@@ -2383,7 +2383,7 @@ try_pipe(char *cmd, int fl)
 #else
   FILE *file;
   char *f;
-  VOLATILE int flag = fl;
+  int flag = fl;
 
 #  ifdef __EMX__
   if (_osmode == DOS_MODE) /* no pipes under DOS */
@@ -2403,17 +2403,15 @@ try_pipe(char *cmd, int fl)
     if (flag & mf_OUT) flag |= mf_PERM;
     if (flag & (mf_TEST | mf_OUT))
     {
-      jmp_buf env;
-      void *c;
-      int i;
       if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
-      if (setjmp(env)) return NULL;
-
-      c = err_catch(-1, env, NULL);
-      fprintf(file,"\n\n"); fflush(file);
-      for (i=1; i<1000; i++) fprintf(file,"                  \n");
-      fprintf(file,"\n"); fflush(file);
-      err_leave(&c);
+      CATCH(-1) { file = NULL; }
+      TRY {
+        int i;
+        fprintf(file,"\n\n"); fflush(file);
+        for (i=1; i<1000; i++) fprintf(file,"                  \n");
+        fprintf(file,"\n"); fflush(file);
+      } ENDCATCH;
+      if (!file) return NULL;
     }
     f = cmd;
   }

@@ -1208,8 +1208,8 @@ err(long numerr, ...)
 GEN
 trap0(char *e, char *r, char *f)
 {
-  VOLATILE long numerr = -1;
-  VOLATILE GEN x = gnil;
+  long numerr = -1;
+  GEN x = gnil;
   char *F;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
@@ -1222,25 +1222,13 @@ trap0(char *e, char *r, char *f)
 
   if (f && r)
   { /* explicit recovery text */
-    VOLATILE gpmem_t av = avma;
     char *a = get_analyseur();
-    void *catcherr;
-    jmp_buf env;
+    gpmem_t av = avma;
 
-    if (setjmp(env))
-    {
-      avma = av;
-      err_leave(&catcherr);
-      x = lisseq(r);
-    }
-    else
-    {
-      catcherr = err_catch(numerr, env, NULL);
-      x = lisseq(f);
-      err_leave(&catcherr);
-    }
-    set_analyseur(a);
-    return x;
+    CATCH(numerr) { x = NULL; }
+    TRY { x = lisseq(f); } ENDCATCH;
+    if (!x) { avma = av; x = lisseq(r); }
+    set_analyseur(a); return x;
   }
 
   F = f? f: r; /* define a default handler */

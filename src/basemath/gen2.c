@@ -552,19 +552,13 @@ gegal(GEN x, GEN y)
           if (x[i] != y[i]) return 0;
         return 1;
     }
-  {
-    VOLATILE gpmem_t av = avma;
-    jmp_buf env;
-    void *c;
-    if (setjmp(env)) i = 0;
-    else
-    {
-      c = err_catch(-1, env, NULL);
-      i = gcmp0(gadd(x, gneg_i(y)));
-    }
-    err_leave(&c);
+  CATCH(-1) {
+    i = 0;
+  } TRY {
+    av = avma;
+    i = gcmp0(gadd(x, gneg_i(y)));
     avma = av;
-  }
+  } ENDCATCH;
   return i;
 }
 #undef MASK

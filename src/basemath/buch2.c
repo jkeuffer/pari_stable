@@ -2001,17 +2001,10 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
 static GEN
 bestappr_noer(GEN x, GEN k)
 {
-  VOLATILE GEN y;
-  jmp_buf env;
-  void *c;
-  if (setjmp(env))
-    y = NULL;
-  else
-  {
-    c = err_catch(precer, env, NULL);
-    y = bestappr(x,k);
-  }
-  err_leave(&c); return y;
+  GEN y;
+  CATCH(precer) { y = NULL; }
+  TRY { y = bestappr(x,k); } ENDCATCH;
+  return y;
 }
 
 /* Input:
