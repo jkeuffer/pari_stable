@@ -2914,14 +2914,18 @@ will not be recognized.
 \item a prime ideal, i.e.~a 5-component vector in the format output by
 \kbd{idealprimedec}.
 
-\item a \typ{MAT} whose columns represent a basis of the ideal, preferably
-square and in HNF. If strictly less than $N = [K:\Q]$ generators are given,
-it is assumed they form a $\Z_K$-basis. If $N$ or more are given, a
-$\Z$-basis is assumed. If exactly $N$ are given, it is further assumed the
-matrix is in HNF. If any of these assumptions is not correct the behaviour
-of PARI routines is undefined.
+\item a \typ{MAT}, square and in Hermite Normal Form (or at least
+upper triangular with positive coefficients), whose columns represent a basis
+of the ideal.
 
 One may use \kbd{idealhnf} to convert an ideal to the last (preferred) format.
+
+\misctitle{Note.} Some routines accept non-square matrices, but using this
+format is strongly discouraged. Nevertheless, their behaviour is as follows:
+If strictly less than $N = [K:\Q]$ generators are given, it is assumed they
+form a $\Z_K$-basis. If $N$ or more are given, a $\Z$-basis is assumed. If
+exactly $N$ are given, it is further assumed the matrix is in HNF. If any of
+these assumptions is not correct the behaviour of the routine is undefined.
 \medskip
 
 \item an \tev{idele} is a 2-component vector, the first being an ideal as
