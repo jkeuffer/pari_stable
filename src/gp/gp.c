@@ -2357,7 +2357,9 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
       check_filtre(F);
       return 0;
     }
-    /* received ^C  in fgets, retry (as is "\n" were input) */
+    /* received ^C in fgets and comming back from break_loop(),
+     * retry (as if "\n" were input) */
+    handle_C_C = 0;
   }
   (void)input_loop(F,buf,file,prompt);
 
@@ -2479,8 +2481,7 @@ chron(char *s)
 }
 
 /* return 0: can't interpret *buf as a metacommand
- *        1: did interpret *bug as a metacommand
- *        2: empty input */
+ *        1: did interpret *buf as a metacommand */
 static int
 check_meta(char *buf)
 {
@@ -2489,7 +2490,7 @@ check_meta(char *buf)
     case '?': aide(buf, h_REGULAR); break;
     case '#': return chron(buf);
     case '\\': escape(buf); break;
-    case '\0': return 2;
+    case '\0': break;
     default: return 0;
   }
   return 1;
@@ -2697,9 +2698,8 @@ break_loop(long numerr)
   infile = stdin;
   for(;;)
   {
-    int flag;
     if (! read_line("> ", &F)) break;
-    if (!(flag = check_meta(b->buf)))
+    if (! check_meta(b->buf))
     {
       GEN x = lisseq(b->buf);
       if (did_break())
@@ -2716,7 +2716,8 @@ break_loop(long numerr)
       term_color(c_OUTPUT); gp_output(x);
       term_color(c_NONE); pariputc('\n');
     }
-    if (numerr == siginter && flag == 2) { handle_C_C = go_on = 1; break; }
+    /* break loop initiated by ^C. Empty input --> continue computation */
+    if (numerr == siginter && *(b->buf) == 0) { handle_C_C = go_on = 1; break; }
   }
   if (old && !s) _set_analyseur(old);
   b = NULL; infile = oldinfile;
