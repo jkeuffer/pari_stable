@@ -351,7 +351,7 @@ mpaff(GEN x, GEN y)
   if (typ(x)==t_INT)
    { if (typ(y)==t_INT) affii(x,y); else affir(x,y); }
   else
-   { if (typ(y)==t_INT) affri(x,y); else affrr(x,y); }
+   { if (typ(y)==t_INT) err(operf,"",x,y); else affrr(x,y); }
 }
 
 INLINE GEN
