@@ -2144,7 +2144,7 @@ chk_reccoeff(void *data, GEN x)
 }
 
 static GEN
-chk_reccoeff_post(void *data /*@unused@*/, GEN res)
+chk_reccoeff_post(void *data /*unused*/, GEN res)
 {
   return res;
 }

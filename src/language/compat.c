@@ -44,7 +44,7 @@ rounderror(GEN x)
 }
 
 static GEN
-_factpol(GEN x, long t/*@unused@*/, long hint) { return factpol(x,hint); }
+_factpol(GEN x, long t/*unused*/, long hint) { return factpol(x,hint); }
 
 static void
 suppressed(void) {err(talker,"this function has been suppressed");}
