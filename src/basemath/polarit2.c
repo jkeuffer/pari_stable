@@ -473,7 +473,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
 GEN
 hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e)
 {
-  if (lg(Q) == 2) { GEN d = cgetg(2, t_VEC); d[1] = (long)pol; return d; }
+  if (lg(Q) == 2) return _vec(pol);
   pol = FpXQX_normalize(pol, T, pe);
   return MultiLift(pol, Q, T, p, e, 0);
 }
@@ -1491,9 +1491,20 @@ DDF(GEN a, long hint, int fl)
   { /* roots only */
     GEN pe;
     long i, m, e;
+    int split;
     if (lead) a = rescale_pol_to_monic(a);
     e = logint(shifti(root_bound(a), 1), prime, &pe);
-    z = rootpadicfast(a, prime, e);
+    if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
+    z = lift_intern( rootmod(a, prime) );
+    split = (lg(z) - 1 == da);
+    if (split)
+      z = deg1_from_roots(z, varn(a));
+    else
+      z = FpX_div(a, FpV_roots_to_pol(z, prime, varn(a)), prime);
+    z = hensel_lift_fact(a, z, NULL, prime, pe, e);
+    if (!split) setlg(z, lg(z)-1);
+    z = roots_from_deg1(z);
+    if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Z^%ld)", prime,e);
     for (m=1,i=1; i<lg(z); i++)
     {
       GEN r = centermod((GEN)z[i], pe);
@@ -1923,6 +1934,14 @@ deg1_from_roots(GEN L, long v)
   for (i=1; i<l; i++)
     z[i] = (long)deg1pol_i(gun, gneg((GEN)L[i]), v);
   return z;
+}
+GEN
+roots_from_deg1(GEN x)
+{
+  long i,l = lg(x);
+  GEN r = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) r[i] = lneg(constant_term(x[i]));
+  return r;
 }
 
 GEN

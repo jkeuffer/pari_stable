@@ -751,15 +751,6 @@ interpol(GEN H, GEN T, GEN p)
   return FpXQX_FpXQ_mul(p1,p2, T,p);
 }
 
-static GEN
-roots_from_deg1(GEN x)
-{
-  long i,l = lg(x);
-  GEN r = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) r[i] = lneg(constant_term(x[i]));
-  return r;
-}
-
 struct poldata
 {
   GEN pol;
