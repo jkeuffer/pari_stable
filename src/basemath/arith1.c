@@ -2157,7 +2157,10 @@ bestappr(GEN x, GEN k)
       return gerepileupto(av, gdiv(p1,q1));
 
     case t_REAL: {
-      GEN kr = itor(k, lg(x));
+      GEN kr;
+      
+      if (!signe(x)) return gzero; /* faster. Besides itor crashes on x = 0 */
+      kr = itor(k, lg(x));
       y = x;
       p1 = gun; a = p0 = mpent(x); q1 = gzero; q0 = gun;
       while (cmpii(q0,k) <= 0)
