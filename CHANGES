@@ -111,8 +111,9 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"  [ [] in
        stable version, which is also wrong: 2 + O(2^2) ]
    68- one could write() an object to a binary file, corrupting it
-MW 69- ellap(ellinit([0,0,1,-7077,235516]), 1075060289) ==> "zero argument in
+MW 69- ellap(ellinit([0,0,1,-7077,235516]), 1075060289) --> "zero argument in
        an arithmetic function"
+MW 70- ellap(ellinit([0,0,1,-7077,235516]),1135392007) --> SEGV
 
   Changed
 BA  1- improved Fp_isom
