@@ -7,6 +7,21 @@
 /* $Id$ */
 #include "pari.h"
 
+static GEN
+cgetc(long l)
+{
+  GEN u = cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
+  return u;
+}
+
+static GEN
+fix(GEN x, long l)
+{
+  GEN y;
+  if (typ(x) == t_REAL) return x;
+  y = cgetr(l); gaffect(x, y); return y;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                       K BESSEL FUNCTION                           **/
@@ -32,12 +47,9 @@ kbessel(GEN nu, GEN gx, long prec)
   long l,lbin,av,av1,k,k2,l1,n2,n;
 
   if (typ(nu)==t_COMPLEX) return kbessel2(nu,gx,prec);
-  if (typ(gx)!=t_REAL)
-    { l=prec; k=1; }
-  else
-    { l=lg(gx); k=0; x=gx; }
+  l = (typ(gx)==t_REAL)? lg(gx): prec;
   y=cgetr(l); l1=l+1;
-  av=avma; if (k) gaffect(gx,x=cgetr(l));
+  av=avma; x = fix(gx, l);
   u=cgetr(l1); v=cgetr(l1); c=cgetr(l1); d=cgetr(l1);
   e=cgetr(l1); f=cgetr(l1);
   nu2=gmulgs(gsqr(nu),-4);
@@ -114,7 +126,6 @@ kbessel(GEN nu, GEN gx, long prec)
 /**                         ET CAS PARTICULIERS                       **/
 /**                                                                   **/
 /***********************************************************************/
-
 /* Assume gx > 0 and a,b complex */
 /* This might one day be extended to handle complex gx */
 /* see Temme, N. M. "The numerical computation of the confluent        */
@@ -127,24 +138,16 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   long l,lbin,av,av1,av2,k,l1,n,ex;
 
   if(gsigne(gx) <= 0) err(talker,"hyperu's third argument must be positive");
-
-  if (typ(gx)!=t_REAL)
-    { l=prec; k=1; }
-  else
-    { l=lg(gx); k=0; x=gx; }
   ex = (iscomplex(a) || iscomplex(b));
-  if (ex) { y=cgetg(3,t_COMPLEX); y[1]=lgetr(l); y[2]=lgetr(l); }
-  else y=cgetr(l);
-  l1=l+1; av=avma; if (k) gaffect(gx,x=cgetr(l));
+
+  l = (typ(gx)==t_REAL)? lg(gx): prec;
+  if (ex) y=cgetc(l); else y=cgetr(l);
+  l1=l+1; av=avma; x = fix(gx, l);
   a1=gaddsg(1,gsub(a,b));
   if (ex)
   {
-    u=cgetg(3,t_COMPLEX); u[1]=lgetr(l1); u[2]=lgetr(l1);
-    v=cgetg(3,t_COMPLEX); v[1]=lgetr(l1); v[2]=lgetr(l1);
-    c=cgetg(3,t_COMPLEX); c[1]=lgetr(l1); c[2]=lgetr(l1);
-    d=cgetg(3,t_COMPLEX); d[1]=lgetr(l1); d[2]=lgetr(l1);
-    e=cgetg(3,t_COMPLEX); e[1]=lgetr(l1); e[2]=lgetr(l1);
-    f=cgetg(3,t_COMPLEX); f[1]=lgetr(l1); f[2]=lgetr(l1);
+    u=cgetc(l1); v=cgetc(l1); c=cgetc(l1);
+    d=cgetc(l1); e=cgetc(l1); f=cgetc(l1);
   }
   else
   {
@@ -213,9 +216,7 @@ kbessel2(GEN nu, GEN x, long prec)
 
   if (typ(x)==t_REAL) prec = lg(x);
   x2=gshift(x,1); pitemp=mppi(prec);
-  if (gcmp0(gimag(nu))) a=cgetr(prec);
-  else
-  { a=cgetg(3,t_COMPLEX); a[1]=lgetr(prec); a[2]=lgetr(prec); }
+  if (gcmp0(gimag(nu))) a=cgetr(prec); else a=cgetc(prec);
   gaddz(gun,gshift(nu,1),a);
   p1=hyperu(gshift(a,-1),a,x2,prec);
   p1=gmul(gmul(p1,gpui(x2,nu,prec)),mpsqrt(pitemp));
@@ -531,7 +532,7 @@ gerfc(GEN x, long prec)
 static GEN
 czeta(GEN s, long prec)
 {
-  long av,n,p,n1,l,flag1,flag2,flag3,i,i2;
+  long av,n,p,n1,l,flag1,flag2,i,i2;
   double st,sp,sn,ssig,ns,alpha,beta,maxbeta,xinf;
   GEN y,z,res,sig,ms,p1,p2,p3,p31,pitemp;
 
@@ -539,9 +540,8 @@ czeta(GEN s, long prec)
   if (typ(s)==t_COMPLEX)
   {
     if (!l) l=prec;
-    res=cgetg(3,t_COMPLEX); res[1]=lgetr(l); res[2]=lgetr(l);
-    av=avma;
-    p1=cgetg(3,t_COMPLEX); p1[1]=lgetr(l+1); p1[2]=lgetr(l+1);
+    res = cgetc(l); av=avma;
+    p1=cgetc(l+1);
     gaffect(s,p1); s=p1; sig=(GEN)s[1];
   }
   else
@@ -619,21 +619,21 @@ czeta(GEN s, long prec)
       n=(long)ceil(exp(pariC2*(prec-2)/ssig)*pow(sn/(2*ssig),1.0/ssig));
     }
   }
-  if (n < 46340) { flag2=1; n1=n*n; } else flag2=0;
+  if (n < 46340) n1=n*n; else n1=0;
   y=gun; ms=gneg_i(s); p1=cgetr(prec+1); p2=gun;
   for (i=2; i<=n; i++)
   {
     affsr(i,p1); p2 = gexp(gmul(ms,mplog(p1)), prec+1);
     y = gadd(y,p2);
   }
-  flag3 = (2*p < 46340);
+  flag2 = (2*p < 46340);
   mpbern(p,prec+1); p31=cgetr(prec+1); z=gzero;
   for (i=p; i>=1; i--)
   {
     i2=i<<1;
     p1=gmul(gaddsg(i2-1,s),gaddsg(i2,s));
-    p1=flag3? gdivgs(p1,i2*(i2+1)): gdivgs(gdivgs(p1,i2),i2+1);
-    p1=flag2? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
+    p1=flag2? gdivgs(p1,i2*(i2+1)): gdivgs(gdivgs(p1,i2),i2+1);
+    p1=n1? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
     p3 = bern(i);
     if (bernzone[2]>prec+1) { affrr(p3,p31); p3=p31; }
     z=gadd(divrs(p3,i),gmul(p1,z));
@@ -659,6 +659,7 @@ next_bin(GEN y, long n, long k)
   return divrs(mulrs(y, n-k+1), k);
 }
 
+/* assume k != 1 */
 static GEN
 izeta(long k, long prec)
 {
@@ -682,8 +683,9 @@ izeta(long k, long prec)
     return gerepile(av,tetpil,y);
   }
   binom = realun(prec+1);
-  q = mpexp(pitemp); kk = k+1;
+  q = mpexp(pitemp); kk = k+1; /* >= 4 */
   li = -(1+bit_accuracy(prec));
+  y = NULL; /* gcc -Wall */
   if ((k&3)==3)
   {
     for (n=0; n <= kk>>1; n+=2)
@@ -822,8 +824,8 @@ cxpolylog(long m, GEN x, long prec)
 GEN
 polylog(long m, GEN x, long prec)
 {
-  long av,av1,limpile,l,e,i,G;
-  GEN z,p1,p2,n,y,logx;
+  long av,av1,limpile,l,e,i,G,sx;
+  GEN X,z,p1,p2,n,y,logx;
 
   if (m<0) err(talker,"negative index in polylog");
   if (!m) return gneg(ghalf);
@@ -835,28 +837,14 @@ polylog(long m, GEN x, long prec)
   l = precision(x);
   if (!l) { l=prec; x=gmul(x, realun(l)); }
   e = gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
-  if (e > 0)
-  {
-    long sx = gsigne(gimag(x));
-    logx = glog(x,l);
-    if (!sx)
-    {
-      if (m&1) sx = gsigne(gsub(gun,greal(x)));
-      else     sx = - gsigne(greal(x));
-    }
-    z = cgetg(3,t_COMPLEX);
-    z[1] = zero;
-    z[2] = ldivri(mppi(l), mpfact(m-1));
-    if (sx < 0) z[2] = lnegr((GEN)z[2]);
-    x = ginv(x);
-  }
+  X = (e > 0)? ginv(x): x;
   G = -bit_accuracy(l);
   n = icopy(gun);
   av1=avma; limpile=stack_lim(av1,1);
-  y=x; p1=x;
+  y = p1 = X;
   for (i=2; ; i++)
   {
-    n[2] = i; p1 = gmul(x,p1); p2 = gdiv(p1,gpuigs(n,m));
+    n[2] = i; p1 = gmul(X,p1); p2 = gdiv(p1,gpuigs(n,m));
     y = gadd(y,p2);
     if (gexpo(p2) <= G) break;
 
@@ -867,6 +855,18 @@ polylog(long m, GEN x, long prec)
     }
   }
   if (e < 0) return gerepileupto(av, y);
+
+  sx = gsigne(gimag(x));
+  if (!sx)
+  {
+    if (m&1) sx = gsigne(gsub(gun,greal(x)));
+    else     sx = - gsigne(greal(x));
+  }
+  z = cgetg(3,t_COMPLEX);
+  z[1] = zero;
+  z[2] = ldivri(mppi(l), mpfact(m-1));
+  if (sx < 0) z[2] = lnegr((GEN)z[2]);
+  logx = glog(x,l);
 
   if (m == 2)
   { /* same formula as below, written more efficiently */
@@ -896,7 +896,7 @@ dilog(GEN x, long prec)
 GEN
 polylogd0(long m, GEN x, long flag, long prec)
 {
-  long k,l,av,tetpil,fl,m2;
+  long k,l,av,fl,m2;
   GEN p1,p2,p3,y;
 
   m2=m&1; av=avma;
@@ -913,7 +913,7 @@ polylogd0(long m, GEN x, long flag, long prec)
   {
     p2=gdivgs(gmul(p2,p1),k);
     p3=m2?greal(polylog(m-k,x,prec)):gimag(polylog(m-k,x,prec));
-    tetpil=avma; y=gadd(y,gmul(p2,p3));
+    y=gadd(y,gmul(p2,p3));
   }
   if (m2)
   {
@@ -921,10 +921,10 @@ polylogd0(long m, GEN x, long flag, long prec)
       p2 = gdivgs(gmul(p2,p1),-2*m);
     else
       p2 = gdivgs(gmul(glog(gnorm(gsub(gun,x)),prec),p2),2*m);
-    tetpil=avma; y=gadd(y,p2);
+    y=gadd(y,p2);
   }
-  if (fl) { tetpil=avma; return gerepile(av,tetpil,gneg(y)); }
-  return gerepile(av,tetpil,y);
+  if (fl) y = gneg(y);
+  return gerepileupto(av, y);
 }
 
 GEN
@@ -942,7 +942,7 @@ polylogdold(long m, GEN x, long prec)
 GEN
 polylogp(long m, GEN x, long prec)
 {
-  long k,l,av,tetpil,fl,m2;
+  long k,l,av,fl,m2;
   GEN p1,y;
 
   m2=m&1; av=avma;
@@ -958,7 +958,7 @@ polylogp(long m, GEN x, long prec)
 
   if (m==1)
   {
-    p1=gmul2n(p1,-2); tetpil=avma; y=gadd(y,p1);
+    p1=gmul2n(p1,-2); y=gadd(y,p1);
   }
   else
   {
@@ -977,18 +977,18 @@ polylogp(long m, GEN x, long prec)
 	}
 	else p4=gneg_i(gmul2n(p2,-1));
 	p3=polylog(m-k,x,prec); p3=m2?greal(p3):gimag(p3);
-	tetpil=avma; y=gadd(y,gmul(p4,p3));
+	y=gadd(y,gmul(p4,p3));
       }
     }
   }
-  if (fl) { tetpil=avma; return gerepile(av,tetpil,gneg(y)); }
-  return gerepile(av,tetpil,y);
+  if (fl) y = gneg(y);
+  return gerepileupto(av, y);
 }
 
 GEN
 gpolylog(long m, GEN x, long prec)
 {
-  long i,lx,av=avma,tetpil,v,n;
+  long i,lx,av=avma,v,n;
   GEN y,p1,p2;
 
   if (m<=0)
@@ -996,8 +996,8 @@ gpolylog(long m, GEN x, long prec)
     p1=polx[0]; p2=gsub(gun,p1);
     for (i=1; i<=(-m); i++)
       p1=gmul(polx[0],gadd(gmul(p2,derivpol(p1)),gmulsg(i,p1)));
-    p1=gdiv(p1,gpuigs(p2,1-m)); tetpil=avma;
-    return gerepile(av,tetpil,poleval(p1,x));
+    p1=gdiv(p1,gpuigs(p2,1-m));
+    return gerepileupto(av, poleval(p1,x));
   }
 
   switch(typ(x))
@@ -1011,29 +1011,29 @@ gpolylog(long m, GEN x, long prec)
     case t_POLMOD:
       p1=roots((GEN)x[1],prec); lx=lg(p1); p2=cgetg(lx,t_COL);
       for (i=1; i<lx; i++) p2[i]=lpoleval((GEN)x[2],(GEN)p1[i]);
-      tetpil=avma; y=cgetg(lx,t_COL);
+      y=cgetg(lx,t_COL);
       for (i=1; i<lx; i++) y[i]=(long)polylog(m,(GEN)p2[i],prec);
-      return gerepile(av,tetpil,y);
+      return gerepileupto(av, y);
 
     case t_POL: case t_RFRAC: case t_RFRACN:
-      p1=tayl(x,gvar(x),precdl); tetpil=avma;
-      return gerepile(av,tetpil,gpolylog(m,p1,prec));
+      p1=tayl(x,gvar(x),precdl);
+      return gerepileupto(av, gpolylog(m,p1,prec));
 
     case t_SER:
       if (!m) return gneg(ghalf);
       if (m==1)
       {
-	p1=glog(gsub(gun,x),prec); tetpil=avma;
-	return gerepile(av,tetpil,gneg(p1));
+	p1=glog(gsub(gun,x),prec);
+	return gerepileupto(av, gneg(p1));
       }
       if (valp(x)<=0) err(impl,"polylog around a!=0");
       v=varn(x); n=(lg(x)-2)/valp(x); y=ggrando(polx[v],lg(x)-2);
       for (i=n; i>=1; i--)
       {
-	p1=gadd(gpuigs(stoi(i),-m),y); tetpil=avma;
+	p1=gadd(gpuigs(stoi(i),-m),y);
 	y=gmul(x,p1);
       }
-      return gerepile(av,tetpil,y);
+      return gerepileupto(av, y);
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,typ(x));
@@ -1112,7 +1112,8 @@ inteta(GEN q)
   }
   else
   {
-    long l,v, av = avma, lim = stack_lim(av,3);
+    long l = 0, v = 0; /* gcc -Wall */
+    long av = avma, lim = stack_lim(av,3);
 
     if (is_scalar_t(tx)) l = -bit_accuracy(precision(q));
     else
@@ -1346,7 +1347,8 @@ logagm(GEN q)
   if (signe(q)<=0) err(talker,"non positive argument in logagm");
   if (expo(q)<0) s=1; else { q=ginv(q); s=0; }
   lim = - (bit_accuracy(prec) >> 1);
-  for (n=0; expo(q)>=lim ; n++) { q1=q; q=gsqr(q); }
+  q1 = NULL; /* gcc -Wall */
+  for (n=0; expo(q)>=lim; n++) { q1=q; q=gsqr(q); }
   q4=gmul2n(q,2);
   if (!n) q1=gsqrt(q,prec);
   y=divrr(mppi(prec), agm(addsr(1,q4),gmul2n(q1,2),prec));
@@ -1403,6 +1405,7 @@ theta(GEN q, GEN z, long prec)
   if (!l) q=gmul(p1,q);
   if (gexpo(q)>=0) err(thetaer1);
   zy = gimag(z);
+  zold = NULL; /* gcc -Wall */
   if (gcmp0(zy)) k=gzero;
   else
   {

@@ -61,7 +61,7 @@ constpi(long prec)
       if (n1 < SQRTVERYBIGINT)
 	p3 = divrs(divrs(mulsr(n1-4,mulsr(n1*(n1-2),p1)),n*n),n);
       else
-	p3 = divrs(divrs(mulsr(n1-4,mulsr(n1,mulsr(n1-2,p1))),n*n),n);
+	p3 = divrs(divrs(divrs(mulsr(n1-4,mulsr(n1,mulsr(n1-2,p1))),n),n),n);
     }
     p3 = divrs(divrs(p3,100100025), 327843840);
     subisz(p2,k1,p2); subirz(p2,p3,p1);
@@ -229,8 +229,8 @@ puiss0(GEN x)
       break;
     case t_QFR: return real_unit_form(x);
     case t_QFI: return imag_unit_form(x);
-    case t_VEC: case t_COL:
-      err(typeer,"gpowgs");
+    default: err(typeer,"gpowgs");
+      return NULL; /* not reached */
   }
   return y;
 }
@@ -1294,11 +1294,9 @@ static GEN
 mpaut(GEN x)
 {
   long av = avma;
-  GEN p1;
-
-  cgetr(2*lg(x)+3); /* bound for 2*lg(p1)+1 */
-  p1=mulrr(x,addsr(2,x)); setsigne(p1,-signe(p1));
-  avma = av; return mpsqrt(p1); /* safe ! */
+  GEN p1 = mulrr(x,addsr(2,x));
+  setsigne(p1,-signe(p1));
+  return gerepileuptoleaf(av, mpsqrt(p1));
 }
 
 /********************************************************************/
@@ -1325,9 +1323,8 @@ mpcos(GEN x)
       y=mpaut(p1); setsigne(y,-signe(y)); break;
     case 2: case 6:
       y=subsr(-1,p1); break;
-    case 3: case 5:
+    default: /* case 3: case 5: */
       y=mpaut(p1); break;
-    default:;
   }
   return gerepile(av,tetpil,y);
 }
@@ -1404,9 +1401,8 @@ mpsin(GEN x)
       y=addsr(1,p1); break;
     case 2: case 4:
       y=mpaut(p1); setsigne(y,-signe(y)); break;
-    case 3: case 7:
+    default: /* case 3: case 7: */
       y=subsr(-1,p1); break;
-    default:;
   }
   return gerepile(av,tetpil,y);
 }
