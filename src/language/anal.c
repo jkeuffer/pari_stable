@@ -2257,7 +2257,7 @@ number(int *pn, char **ps)
 }
 
 ulong
-pow10(int n)
+u_pow10(int n)
 {
   static ulong pw10[] = { 1UL, 10UL, 100UL, 1000UL, 10000UL, 100000UL,
                         1000000UL, 10000000UL, 100000000UL, 1000000000UL };
@@ -2273,7 +2273,7 @@ int_read_more(GEN y, char **ps)
   {
     ulong m = number(&nb, ps);
     if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
-    y = addumului(m, pow10(nb), y);
+    y = addumului(m, u_pow10(nb), y);
   }
   return y;
 }

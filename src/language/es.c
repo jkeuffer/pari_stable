@@ -738,18 +738,18 @@ Strexpand(GEN g) {
 #define sp(T) STMT_START { if ((T)->sp) pariputc(' '); } STMT_END
 
 /* convert integer --> base 10^9 [not memory clean] */
-static long *
+static ulong *
 convi(GEN x, long *l)
 {
   pari_sp av, lim;
   long lz = 3 + (long)((lgefint(x)-2) * (BITS_IN_LONG / (9*L2SL10)));
-  GEN z, zd;
+  ulong *z, *zd;
 
-  zd = z = new_chunk(lz);
+  zd = z = (ulong*)new_chunk(lz);
   av = avma; lim = stack_lim(av,1);
   for(;;)
   {
-    x = diviu_rem(x, 1000000000UL, (ulong*)zd); zd++;
+    x = diviu_rem(x, 1000000000UL, zd); zd++;
     if (!signe(x)) { if (l) *l = zd - z; return zd; }
     if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint(av, x);
   }
@@ -757,7 +757,7 @@ convi(GEN x, long *l)
 
 /* # of decimal digits, assume l > 0 */
 static long
-numdig(long l)
+numdig(ulong l)
 {
   if (l < 100000)
   {
@@ -777,25 +777,29 @@ static void
 zeros(long nb)  { while (nb-- > 0) pariputc('0'); }
 
 static void
-copart(char *s, long x, long start)
+copart(char *s, ulong x, long start)
 {
   char *p = s + start;
-  for ( ; p > s; x /= 10) *--p = x%10 + '0';
+  while (p > s)
+  {
+    ulong q = x/10;
+    *--p = (x - q*10) + '0';
+    x = q;
+  }
 }
-static void
-comid(char *s, long x) { copart(s,x,9); }
 
 /* convert abs(x) != 0 to str. Prepend '-' if (minus) */
 static char *
 itostr(GEN x, int minus)
 {
-  long l, d, *res = convi(x, &l);
+  long l, d;
+  ulong *res = convi(x, &l);
   char *s = (char*)new_chunk(l + minus + 1), *t = s;
 
   if (minus) *t++ = '-';
   d = numdig(*--res);
   copart(t, *res, d); t += d;
-  while (--l > 0) { comid(t, *--res); t += 9; }
+  while (--l > 0) { copart(t, *--res, 9); t += 9; }
   *t = 0; return s;
 }
 
@@ -838,7 +842,7 @@ wr_vecsmall(pariout_t *T, GEN g)
 /**                        WRITE A REAL NUMBER                     **/
 /**                                                                **/
 /********************************************************************/
-extern long pow10(int n);
+extern ulong u_pow10(int n);
 extern GEN rpowsi(ulong a, GEN n, long prec);
 
 /* e binary exponent, return exponent in base ten */
@@ -861,10 +865,10 @@ wr_exp(pariout_t *T, char *s, long n)
 }
 
 static void
-round_up(long *resd, long n, long *res)
+round_up(ulong *resd, ulong n, ulong *res)
 {
   *resd += n;
-  while (*resd >= 1000000000 && resd < res) { *resd++ = 0; *resd += 1; }
+  while (*resd >= 1000000000UL && resd < res) { *resd++ = 0; *resd += 1; }
 }
 
 /* assume x != 0 and print |x| in floating point format */
@@ -872,7 +876,8 @@ static void
 wr_float(pariout_t *T, GEN x, int f_format)
 {
   long beta, l, ldec, dec0, decdig, d, dif, lx = lg(x), dec = T->sigd;
-  GEN z, res, resd;
+  GEN z;
+  ulong *res, *resd;
   char *s, *t;
   
   dif =  bit_accuracy(lx) - expo(x);
@@ -904,7 +909,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
     dec = decdig;
   else if (dec < dec0) /* ==> 0 < dec < 9 */
   {
-    long p10 = pow10(dec0 - dec);
+    ulong p10 = u_pow10(dec0 - dec);
     if (*resd % p10 > (p10>>1)) *resd += p10; /* round up */
   }
   else if (dec < decdig)
@@ -914,7 +919,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
     resd -= l / 9;
     if (d)
     { /* cut resd[-1] to first d digits when printing */
-      long p10 = pow10(9 - d);
+      ulong p10 = u_pow10(9 - d);
       if (*--resd % p10 > (p10>>1)) round_up(resd, p10, res);
     }
     else if ((ulong)resd[-1] > 500000000) round_up(resd, 1, res);
@@ -924,7 +929,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
   l = ldec;
   d = numdig(*--res);
   copart(t, *res, d); t += d;
-  while (--l > 0) { comid(t, *--res); t += 9; }
+  while (--l > 0) { copart(t, *--res, 9); t += 9; }
   s[dec] = 0;
 
   decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
