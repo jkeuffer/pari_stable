@@ -21,7 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 subgroupcoset(long n, GEN v)
 {
-  ulong   ltop = avma, lbot;
+  ulong lbot;
+  gpmem_t ltop = avma;
   int     i, j, k = 1, l, m, o, p, flag;
   GEN     bit, cycle, cy;
   cycle = cgetg(n, t_VEC);
@@ -205,11 +206,11 @@ GEN subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   long base=1;
   long i,k;
   long lle=lg(le)*2+1;/*Assume dvmdii use lx+ly space*/
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   avma=ltop;
   for (i=1;i<=d;i++,base=mulssmod(base,z,n))
   {
-    ulong ltop=avma;
+    gpmem_t ltop=avma;
     long ex=base;
     GEN s=gzero;
     new_chunk(lle);
@@ -231,7 +232,7 @@ GEN subcyclo_orbits(GEN O, GEN powz, GEN le)
   for(i=1;i<=d;i++)
   {
     GEN s=gzero;
-    ulong av=avma;
+    gpmem_t av=avma;
     new_chunk(lle);
     for(j=1;j<=m;j++)
       s=addii(s,(GEN)powz[mael(O,i,j)]);
@@ -249,7 +250,7 @@ GEN subcyclo_orbits(GEN O, GEN powz, GEN le)
 GEN 
 subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
 {
-  ulong ltop=avma,av;
+  gpmem_t ltop=avma, av;
   GEN l,borne,le,powz,z,V;
   long lle;
   long i;
@@ -288,7 +289,7 @@ subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
   lle=lg(le)*3;/*Assume dvmdii use lx+ly space*/
   for (i=2; i<n; i++)
   {
-    ulong av=avma;
+    gpmem_t av=avma;
     GEN p1;
     new_chunk(lle);
     p1 = mulii(z,(GEN)powz[i-1]);
@@ -314,7 +315,7 @@ subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
 GEN 
 galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN V;
   long i;
   long d,o;
@@ -379,7 +380,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
 GEN
 subcyclo(long n, long d, long v)
 {
-  ulong av=avma;
+  gpmem_t av=avma;
   long q,p,al,r,g,gd;
   GEN fa,G;
   if (v<0) v = 0;

@@ -46,7 +46,7 @@ static GEN
 op_polmod(GEN f(GEN,GEN), GEN x, GEN y, long tx)
 {
   GEN mod,k,l, z=cgetg(3,t_POLMOD);
-  long av,tetpil;
+  gpmem_t av, tetpil;
 
   l=(GEN)y[1];
   if (tx==t_POLMOD)
@@ -165,7 +165,7 @@ gred_rfrac_i(GEN x)
 GEN 
 gred_rfrac2(GEN x1, GEN x2)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   return gerepileupto(av, gred_rfrac2_i(x1, x2));
 }
 
@@ -180,7 +180,7 @@ GEN
 gred_frac2(GEN x1, GEN x2)
 {
   GEN p1, y = dvmdii(x1,x2,&p1);
-  ulong av;
+  gpmem_t av;
 
   if (p1 == gzero) return y; /* gzero intended */
   av = avma;
@@ -221,7 +221,7 @@ gred(GEN x)
 GEN
 gsub(GEN x, GEN y)
 {
-  long tetpil, av = avma;
+  gpmem_t tetpil, av = avma;
   y=gneg_i(y); tetpil=avma;
   return gerepile(av,tetpil,gadd(x,y));
 }
@@ -235,7 +235,7 @@ gsub(GEN x, GEN y)
 static GEN
 addpadic(GEN x, GEN y)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long c,d,e,r,rx,ry;
   GEN u,z,p,mod;
 
@@ -277,7 +277,7 @@ addpadic(GEN x, GEN y)
 static GEN
 gaddpex(GEN x, GEN y)
 {
-  ulong av;
+  gpmem_t av;
   long tx,d,r,e;
   GEN z,q,p,p1,p2,mod,u;
 
@@ -336,7 +336,8 @@ gaddpex(GEN x, GEN y)
 static long
 kro_quad(GEN x, GEN y)
 {
-  long k, av=avma;
+  long k;
+  gpmem_t av=avma;
 
   x = subii(sqri((GEN)x[3]), shifti((GEN)x[2],2));
   k = kronecker(x,y); avma=av; return k;
@@ -390,7 +391,7 @@ addrfrac(GEN x, GEN y)
   GEN z = cgetg(3,t_RFRAC);
   GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
   GEN y1 = (GEN)y[1], y2 = (GEN)y[2], p1,p2,n,d,delta;
-  long tetpil;
+  gpmem_t tetpil;
 
   delta = ggcd(x2,y2);
   if (gcmp1(delta))
@@ -439,7 +440,7 @@ static GEN
 addscalrfrac(GEN x, GEN y)
 {
   GEN p1,num, z = cgetg(3,t_RFRAC);
-  long tetpil, av;
+  gpmem_t tetpil, av;
 
   p1 = gmul(x,(GEN)y[2]); tetpil = avma;
   num = gadd(p1,(GEN)y[1]);
@@ -478,7 +479,8 @@ to_polmod(GEN x, GEN mod)
 GEN
 gadd(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), vx,vy,lx,ly,i,j,k,l,av,tetpil;
+  long tx = typ(x), ty = typ(y), vx, vy, lx, ly, i, j, k, l;
+  gpmem_t av, tetpil;
   GEN z,p1,p2;
 
   if (is_const_t(tx) && is_const_t(ty))
@@ -913,7 +915,8 @@ GEN
 mulscalrfrac(GEN x, GEN y)
 {
   GEN p1,z,y1,y2,cx,cy1,cy2;
-  long tetpil,tx;
+  long tx;
+  gpmem_t tetpil;
 
   if (gcmp0(x)) return gcopy(x);
 
@@ -954,7 +957,7 @@ mulrfrac(GEN x, GEN y)
   GEN z = cgetg(3,t_RFRAC), p1;
   GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
   GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
-  long tetpil;
+  gpmem_t tetpil;
 
   p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdiv(x1,p1); y2 = gdiv(y2,p1); }
   p1 = ggcd(x2, y1); if (!gcmp1(p1)) { x2 = gdiv(x2,p1); y1 = gdiv(y1,p1); }
@@ -1074,7 +1077,8 @@ gmul_err(GEN x, GEN y, long tx, long ty)
 GEN
 gmul(GEN x, GEN y)
 {
-  long tx,ty,lx,ly,vx,vy,i,j,k,l,av,tetpil;
+  long tx, ty, lx, ly, vx, vy, i, j, k, l;
+  gpmem_t av, tetpil;
   GEN z,p1,p2,p3,p4;
 
   if (x == y) return gsqr(x);
@@ -1513,7 +1517,7 @@ gmul(GEN x, GEN y)
  */
           GEN a = x,b = y
           GEN p = NULL, pol = NULL;
-          long av = avma;
+          gpmem_t av = avma;
           if (ff_poltype(&x,&p,&pol) && ff_poltype(&y,&p,&pol))
           {
             /* fprintferr("HUM"); */
@@ -1594,7 +1598,8 @@ gmul(GEN x, GEN y)
 GEN
 gsqr(GEN x)
 {
-  long tx=typ(x),lx,i,j,k,l,av,tetpil;
+  long tx=typ(x), lx, i, j, k, l;
+  gpmem_t av, tetpil;
   GEN z,p1,p2,p3,p4;
 
   if (is_scalar_t(tx))
@@ -1765,7 +1770,8 @@ GEN divrfrac(GEN x, GEN y)
 GEN
 gdiv(GEN x, GEN y)
 {
-  long tx = typ(x), ty = typ(y), lx,ly,vx,vy,i,j,k,l,av,tetpil;
+  long tx = typ(x), ty = typ(y), lx, ly, vx, vy, i, j, k, l;
+  gpmem_t av, tetpil;
   GEN z,p1,p2,p3;
 
   if (y == gun) return gcopy(x);

@@ -50,7 +50,7 @@ void vecsmall_sort(GEN V)
 
 GEN vecsmall_uniq(GEN V)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN W;
   long i,j;
   if ( lg(V) == 1 ) return gcopy(V);
@@ -208,7 +208,7 @@ perm_inv(GEN x)
 GEN
 vecperm_orbits(GEN v, long n)
 {
-  ulong   ltop = avma;
+  gpmem_t ltop = avma;
   int     j, k, l, m, o, p, flag;
   GEN     bit, cycle, cy;
   cycle = cgetg(n+1, t_VEC);
@@ -253,7 +253,7 @@ vecperm_orbits(GEN v, long n)
 GEN
 perm_cycles(GEN v)
 {
-  ulong   ltop = avma;
+  gpmem_t ltop = avma;
   GEN  u = cgetg(2, t_VEC);
   u[1] = (long) v;
   return gerepileupto(ltop, vecperm_orbits(u, lg(v)-1));
@@ -319,7 +319,7 @@ GEN trivialsubgroups(long l)
 long
 perm_relorder(GEN p, GEN S)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   long n = 1;
   GEN  q = p;
   while (!vecvecsmall_search(S, q, 0))
@@ -443,7 +443,7 @@ GEN dicyclicgroup(GEN g1, GEN g2, long s1, long s2)
  */
 GEN group_quotient(GEN G, GEN H)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN p1,p2,p3;
   long i,j,k;
   long n=lg(mael(G,1,1))-1;
@@ -520,7 +520,7 @@ GEN quotient_subgroup_lift(GEN C, GEN H, GEN S)
 
 GEN quotient_group(GEN C, GEN G)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN Qgen,Qord,Qelt;
   GEN Q;
   long i,j;
@@ -550,7 +550,7 @@ GEN quotient_group(GEN C, GEN G)
 /* Test if g normalize N*/
 long group_perm_normalize(GEN N, GEN g)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   long l1 = gegal(vecvecsmall_sort(group_leftcoset(N, g)),
                   vecvecsmall_sort(group_rightcoset(N, g)));
   avma=ltop;
@@ -561,7 +561,7 @@ long group_perm_normalize(GEN N, GEN g)
 static
 GEN liftlistsubgroups(GEN L, GEN C, long r)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN p4;
   long i, k;
   long c=lg(C)-1;
@@ -595,7 +595,7 @@ GEN liftlistsubgroups(GEN L, GEN C, long r)
  */
 static GEN liftsubgroup(GEN C, GEN H, GEN S, long l)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN V = trivialsubgroups(l-1);
   long n = lg(S[1]);
   long i;
@@ -611,7 +611,7 @@ static GEN liftsubgroup(GEN C, GEN H, GEN S, long l)
  */
 GEN group_subgroups(GEN G) 
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN p1;
   GEN C,Q,M;
   long lM;
@@ -679,7 +679,7 @@ GEN group_subgroups(GEN G)
 long 
 group_isabelian(GEN G)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   long i,j;
   for(i=2;i<lg(G[1]);i++)
     for(j=1;j<i;j++)

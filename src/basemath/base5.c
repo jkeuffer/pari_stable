@@ -111,7 +111,7 @@ rnfmakematrices(GEN rnf)
 GEN
 rnfinitalg(GEN nf,GEN pol,long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long m,n,r1,r2,vnf,i,j,k,vpol,v1,r1j,r2j,lfac,degabs;
   GEN RES,sig,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
   GEN f,f2,fac,fac1,fac2,id,p4,p5;
@@ -237,7 +237,8 @@ rnfinitalg(GEN nf,GEN pol,long prec)
 GEN
 rnfbasistoalg(GEN rnf,GEN x)
 {
-  long tx=typ(x),lx=lg(x),av=avma,tetpil,i,n;
+  long tx=typ(x), lx=lg(x), i, n;
+  gpmem_t av=avma, tetpil;
   GEN p1,z,nf;
 
   checkrnf(rnf); nf=(GEN)rnf[10];
@@ -284,7 +285,8 @@ extern GEN mulmat_pol(GEN A, GEN x);
 GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
-  long av=avma,tx=typ(x), i,lx;
+  long tx=typ(x), i, lx;
+  gpmem_t av=avma;
   GEN z;
 
   checkrnf(rnf);
@@ -314,7 +316,8 @@ rnfalgtobasis(GEN rnf,GEN x)
 GEN
 rnfelementreltoabs(GEN rnf,GEN x)
 {
-  long av=avma,tx,i,lx,va,tp3;
+  long tx, i, lx, va, tp3;
+  gpmem_t av=avma;
   GEN z,p1,p2,p3,polabs,teta,alpha,s,k;
 
   checkrnf(rnf); tx=typ(x); lx=lg(x); va=varn((GEN)rnf[1]);
@@ -361,7 +364,8 @@ rnfelementreltoabs(GEN rnf,GEN x)
 GEN
 rnfelementabstorel(GEN rnf,GEN x)
 {
-  long av=avma,tx,i,lx;
+  long tx, i, lx;
+  gpmem_t av=avma;
   GEN z,p1,s,tetap,k,nf;
 
   checkrnf(rnf); tx=typ(x); lx=lg(x);
@@ -414,7 +418,7 @@ rnfelementup(GEN rnf,GEN x)
 GEN
 rnfelementdown(GEN rnf,GEN x)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i,lx,tx;
   GEN p1,z;
 
@@ -445,7 +449,7 @@ rnfelementdown(GEN rnf,GEN x)
 static GEN
 rnfprincipaltohermite(GEN rnf,GEN x)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN nf,bas,bas1,p1,z;
 
   x=rnfbasistoalg(rnf,x); nf=(GEN)rnf[10];
@@ -461,7 +465,8 @@ rnfprincipaltohermite(GEN rnf,GEN x)
 GEN
 rnfidealhermite(GEN rnf,GEN x)
 {
-  long tx=typ(x),lx=lg(x),av=avma,tetpil,i,j,n,m;
+  long tx=typ(x), lx=lg(x), i, j, n, m;
+  gpmem_t av=avma, tetpil;
   GEN z,p1,p2,x1,x2,x1j,nf,bas,unnf,zeronf;
 
   checkrnf(rnf);
@@ -538,7 +543,8 @@ rnfidealhermite(GEN rnf,GEN x)
 GEN
 rnfidealnormrel(GEN rnf,GEN id)
 {
-  long av=avma,i,n;
+  long i, n;
+  gpmem_t av=avma;
   GEN z,id2,nf;
 
   checkrnf(rnf);
@@ -552,7 +558,8 @@ rnfidealnormrel(GEN rnf,GEN id)
 GEN
 rnfidealnormabs(GEN rnf,GEN id)
 {
-  long av=avma,i,n;
+  long i, n;
+  gpmem_t av=avma;
   GEN z,id2;
 
   checkrnf(rnf);
@@ -565,7 +572,8 @@ rnfidealnormabs(GEN rnf,GEN id)
 GEN
 rnfidealreltoabs(GEN rnf,GEN x)
 {
-  long av=avma,i,j,k,n,m;
+  long i, j, k, n, m;
+  gpmem_t av=avma;
   GEN nf,basinv,om,id,p1,p2,p3,p4,p5,c;
 
   checkrnf(rnf);
@@ -597,7 +605,8 @@ rnfidealreltoabs(GEN rnf,GEN x)
 GEN
 rnfidealabstorel(GEN rnf,GEN x)
 {
-  long av=avma,tetpil,n,m,j,k;
+  long n, m, j, k;
+  gpmem_t av=avma, tetpil;
   GEN nf,basabs,ma,xj,p1,p2,id;
 
   checkrnf(rnf); n=degpol(rnf[1]); nf=(GEN)rnf[10]; m=degpol(nf[1]);
@@ -623,7 +632,7 @@ rnfidealabstorel(GEN rnf,GEN x)
 GEN
 rnfidealdown(GEN rnf,GEN x)
 {
-  long av=avma;
+  gpmem_t av=avma;
 
   checkrnf(rnf); x=rnfidealhermite(rnf,x);
   return gerepilecopy(av,gmael(x,2,1));
@@ -633,7 +642,8 @@ rnfidealdown(GEN rnf,GEN x)
 GEN
 rnfidealup(GEN rnf,GEN x)
 {
-  long av=avma,tetpil,i,n,m;
+  long i, n, m;
+  gpmem_t av=avma, tetpil;
   GEN nf,bas,bas2,p1,p2,zeronf,unnf;
 
   checkrnf(rnf);
@@ -651,7 +661,8 @@ rnfidealup(GEN rnf,GEN x)
 GEN
 rnfidealtwoelement(GEN rnf,GEN x)
 {
-  long av=avma,tetpil,j;
+  long j;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2,p3,res,polabs,nfabs,z;
 
   checkrnf(rnf);
@@ -670,7 +681,8 @@ rnfidealtwoelement(GEN rnf,GEN x)
 GEN
 rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
 {
-  long av=avma,tetpil,i,j,n;
+  long i, j, n;
+  gpmem_t av=avma, tetpil;
   GEN z,nf,x1,x2,p1,p2,p3,p4,p5,res;
 
   z=rnfidealtwoelement(rnf,y);
@@ -724,7 +736,7 @@ polnfmulscal(GEN nf,GEN s,GEN x)
 GEN
 polnfmul(GEN nf, GEN x, GEN y)
 {
-  ulong av;
+  gpmem_t av;
   long m,i,d,imin,imax,lx,ly,lz;
   GEN p1,z,zeronf;
 
@@ -748,7 +760,8 @@ polnfmul(GEN nf, GEN x, GEN y)
 GEN
 polnfdeuc(GEN nf, GEN x, GEN y, GEN *ptr)
 {
-  long av=avma,m,i,d,tx,lx,ly,lz,fl;
+  long m, i, d, tx, lx, ly, lz, fl;
+  gpmem_t av=avma;
   GEN z,unnf,lcy,r;
   GEN *gptr[2];
 
@@ -806,7 +819,8 @@ polnfdeuc(GEN nf, GEN x, GEN y, GEN *ptr)
 GEN
 polnfpow(GEN nf,GEN x,GEN k)
 {
-  long s,av=avma,m;
+  long s, m;
+  gpmem_t av=avma;
   GEN y,z;
 
   m=degpol(nf[1]);

@@ -103,7 +103,8 @@ desallocate(GEN **M)
 static GEN
 subFBgen(long N,long m,long minsFB,GEN vperm, long *ptss)
 {
-  long av = avma,i,j, lv=lg(vectbase),s=0,s1=0,n=0,ss=0,z=0;
+  long i, j, lv=lg(vectbase), s=0, s1=0, n=0, ss=0, z=0;
+  gpmem_t av = avma;
   GEN y1,y2,subFB,perm,perm1,P,Q;
   double prod;
 
@@ -174,7 +175,7 @@ subFBgen(long N,long m,long minsFB,GEN vperm, long *ptss)
 static GEN
 mulred(GEN nf,GEN x, GEN I, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN y = cgetg(3,t_VEC);
 
   y[1] = (long)idealmulh(nf,I,(GEN)x[1]);
@@ -239,7 +240,7 @@ FBgen(GEN nf,long n2,long n)
   prim = icopy(gun); p=*delta++; i=0; ip=0; KC=0;
   while (p<=n2)
   {
-    long av = avma, av1;
+    gpmem_t av = avma, av1;
     if (DEBUGLEVEL>=2) { fprintferr(" %ld",p); flusherr(); }
     prim[2] = p; p1 = primedec(nf,prim); lon=lg(p1);
     av1 = avma;
@@ -428,7 +429,8 @@ factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
 static GEN
 cleancol(GEN x,long N,long PRECREG)
 {
-  long i,j,av,tetpil,tx=typ(x),R1,RU;
+  long i, j, tx=typ(x), R1, RU;
+  gpmem_t av, tetpil;
   GEN s,s2,re,pi4,im,y;
 
   if (tx==t_MAT)
@@ -528,7 +530,8 @@ gauss_realimag(GEN x, GEN y)
 GEN
 getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
 {
-  long av = avma,e,i,j,R1,RU,N=degpol(nf[1]);
+  long e, i, j, R1, RU, N=degpol(nf[1]);
+  gpmem_t av = avma;
   GEN p1,p2,u,y,matep,s,xarch,vec;
   GEN *gptr[2];
 
@@ -594,7 +597,8 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
 GEN
 buchfu(GEN bnf)
 {
-  long av = avma, c;
+  long c;
+  gpmem_t av = avma;
   GEN nf,xarch,reg,res, y = cgetg(3,t_VEC);
 
   bnf = checkbnf(bnf); xarch = (GEN)bnf[3]; nf = (GEN)bnf[7];
@@ -664,7 +668,8 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
 static long
 factorgensimple(GEN nf,GEN ideal)
 {
-  long N,i,v,av1 = avma,lo, L = lg(vectbase);
+  long N, i, v, lo, L = lg(vectbase);
+  gpmem_t av1 = avma;
   GEN x;
   if (typ(ideal) != t_MAT) ideal = (GEN)ideal[1]; /* idele */
   x = dethnf_i(ideal);
@@ -995,7 +1000,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 static int
 fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i, c = lg(e);
   GEN z = C? C: gun;
   for (i=1; i<c; i++)
@@ -1104,7 +1109,8 @@ triv_gen(GEN nf, GEN x, long c, long flag)
 GEN
 isprincipalall(GEN bnf,GEN x,long flag)
 {
-  long av = avma,c,pr, tx = typ(x);
+  long c, pr, tx = typ(x);
+  gpmem_t av = avma;
   GEN nf;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1128,7 +1134,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
   c = getrand();
   for (;;)
   {
-    long av1 = avma;
+    gpmem_t av1 = avma;
     GEN y = isprincipalall0(bnf,x,&pr,flag);
     if (y) return gerepileupto(av,y);
 
@@ -1141,7 +1147,8 @@ isprincipalall(GEN bnf,GEN x,long flag)
 GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 {
-  long av = avma, l = lg(e), i,prec,c;
+  long l = lg(e), i, prec, c;
+  gpmem_t av = avma;
   GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
   int gen = flag & (nf_GEN | nf_GENMAT);
 
@@ -1168,7 +1175,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   c = getrand();
   for (;;)
   {
-    long av1 = avma;
+    gpmem_t av1 = avma;
     GEN y = isprincipalall0(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
@@ -1222,7 +1229,8 @@ isprincipalgenforce(GEN bnf,GEN x)
 GEN
 isunit(GEN bnf,GEN x)
 {
-  long av=avma,tetpil,tx = typ(x),i,R1,RU,n;
+  long tx = typ(x), i, R1, RU, n;
+  gpmem_t av=avma, tetpil;
   GEN p1,logunit,y,ex,nf,z,pi2_sur_w,gn,emb;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
@@ -1303,7 +1311,8 @@ isunit(GEN bnf,GEN x)
 GEN
 signunits(GEN bnf)
 {
-  long av,i,j,R1,RU,mun;
+  long i, j, R1, RU, mun;
+  gpmem_t av;
   GEN matunit,y,p1,p2,nf,pi;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1420,7 +1429,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 {
   const double eps = 0.000001;
   double *y,*z,**q,*v, MINKOVSKI_BOUND,BOUND;
-  ulong av = avma, av1,av2,limpile;
+  gpmem_t av = avma, av1, av2, limpile;
   long j,k,noideal, nbrel = lg(mat)-1;
   long alldep = 0, nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
   GEN x,xembed,M,T2,r,cbase,invcbase,T2vec,prvec;
@@ -1447,7 +1456,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   MINKOVSKI_BOUND = get_minkovski(N,R1,(GEN)nf[3],gborne);
   for (noideal=KC; noideal; noideal--)
   {
-    ulong av0 = avma;
+    gpmem_t av0 = avma;
     long nbrelideal=0, dependent = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)vectbase[noideal];
     GEN normideal = idealnorm(nf,ideal);
@@ -1478,7 +1487,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
     k = N; y[N]=z[N]=0; x[N]= (long) sqrt(BOUND/v[N]);
     for(;; x[1]--)
     {
-      ulong av3 = avma;
+      gpmem_t av3 = avma;
       double p;
       GEN col;
 
@@ -1506,7 +1515,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 	  if (ccontent(x)==1) /* primitive */
 	  {
             GEN Nx, gx = gmul_mati_smallvec(IDEAL,x);
-            long av4;
+            gpmem_t av4;
             if (!isnfscalar(gx))
             {
               xembed = gmul(M,gx); av4 = avma; nbsmallnorm++;
@@ -1611,7 +1620,7 @@ dbg_outrel(long phase,long cglob, GEN vperm,GEN *mat,GEN maarch)
 
   if (phase == 0)
   {
-    ulong av = avma; p2=cgetg(cglob+1,t_MAT);
+    gpmem_t av = avma; p2=cgetg(cglob+1, t_MAT);
     for (j=1; j<=cglob; j++)
     {
       p1=cgetg(KC+1,t_COL); p2[j]=(long)p1;
@@ -1679,7 +1688,8 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
                 GEN nf,GEN subFB,GEN vecT2,GEN *mat,GEN matarch,GEN list_jideal)
 {
   static long jideal, jdir;
-  long lim,i,av,av1,cptlist,cptzer,nbT2,lgsub,r1, jlist = 1;
+  long i, cptlist, cptzer, nbT2, lgsub, r1, jlist = 1;
+  gpmem_t lim, av, av1;
   GEN arch,col,colarch,ideal,m,P,ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
@@ -1786,7 +1796,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
 static long
 be_honest(GEN nf,GEN subFB,long PRECLLL)
 {
-  ulong av;
+  gpmem_t av;
   long ex,i,j,J,k,iz,nbtest,ru, lgsub = lg(subFB);
   GEN MCtw,MC,M,P,ideal,m,exu, D = (GEN)nf[3];
 
@@ -1812,7 +1822,7 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
     for (j=1; j<J; j++)
     {
       GEN ideal0 = prime_to_ideal(nf,(GEN)P[j]);
-      ulong av2 = avma;
+      gpmem_t av2 = avma;
       for(nbtest=0;;)
       {
 	ideal = ideal0;
@@ -1861,7 +1871,8 @@ static GEN
 compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptlambda)
 {
   GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda, *gptr[2];
-  long av = avma, i, zc = lg(xarch)-1, R1 = 2*RU - N;
+  long i, zc = lg(xarch)-1, R1 = 2*RU - N;
+  gpmem_t av = avma;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = greal(xarch); /* = (log |sigma_i(u_j)|) */
@@ -1919,7 +1930,7 @@ bestappr_noer(GEN x, GEN k)
 static int
 compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long r;
   GEN L,H,gc,den,R;
   double c;
@@ -2171,7 +2182,8 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
 static GEN
 relationrank(GEN *A, long r, GEN L)
 {
-  long i, n = lg(L)-1, av = avma, lim = stack_lim(av,1);
+  long i, n = lg(L)-1;
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   GEN invp = idmat(n);
 
   if (!r) return invp;
@@ -2192,7 +2204,8 @@ relationrank(GEN *A, long r, GEN L)
 static GEN
 codeprime(GEN bnf, GEN pr)
 {
-  long j,av=avma,tetpil;
+  long j;
+  gpmem_t av=avma, tetpil;
   GEN p,al,fa,p1;
 
   p=(GEN)pr[1]; al=(GEN)pr[2]; fa=primedec(bnf,p);
@@ -2209,7 +2222,8 @@ codeprime(GEN bnf, GEN pr)
 static GEN
 decodeprime(GEN nf, GEN co)
 {
-  long n,indi,av=avma;
+  long n, indi;
+  gpmem_t av=avma;
   GEN p,rem,p1;
 
   n=lg(nf[7])-1; p=dvmdis(co,n,&rem); indi=itos(rem)+1;
@@ -2347,7 +2361,7 @@ check_and_build_cycgen(GEN bnf)
   GEN cycgen = get_cycgen((GEN)bnf[10]);
   if (!cycgen)
   {
-    long av = avma;
+    gpmem_t av = avma;
     if (DEBUGLEVEL) err(warner,"completing bnf (building cycgen)");
     bnfinsert(bnf, makecycgen(bnf), 2); avma = av;
     cycgen = get_cycgen((GEN)bnf[10]);
@@ -2361,7 +2375,7 @@ check_and_build_matal(GEN bnf)
   GEN matal = get_matal((GEN)bnf[10]);
   if (!matal)
   {
-    long av = avma;
+    gpmem_t av = avma;
     if (DEBUGLEVEL) err(warner,"completing bnf (building matal)");
     bnfinsert(bnf, makematal(bnf), 1); avma = av;
     matal = get_matal((GEN)bnf[10]);
@@ -2372,7 +2386,8 @@ check_and_build_matal(GEN bnf)
 GEN
 smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsFB,long prec)
 {
-  long av=avma,av1,k;
+  long k;
+  gpmem_t av=avma, av1;
   GEN y,bnf,pFB,vp,nf,mas,res,uni,v1,v2,v3;
 
   if (typ(pol)==t_VEC) bnf = checkbnf(pol);
@@ -2406,7 +2421,7 @@ smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpi
 static GEN
 get_regulator(GEN mun,long prec)
 {
-  long av,tetpil;
+  gpmem_t av, tetpil;
   GEN p1;
 
   if (lg(mun)==1) return gun;
@@ -2465,14 +2480,14 @@ get_arch2_i(GEN nf, GEN a, long prec, int units)
 static GEN
 get_arch2(GEN nf, GEN a, long prec, int units)
 {
-  long av = avma;
+  gpmem_t av = avma;
   return gerepilecopy(av, get_arch2_i(nf,a,prec,units));
 }
 
 static void
 my_class_group_gen(GEN bnf, long prec, GEN nf0, GEN *ptcl, GEN *ptcl2)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN W=(GEN)bnf[1], C=(GEN)bnf[4], nf=(GEN)bnf[7], *gptr[2];
   GEN Vbase = get_Vbase(W, (GEN)bnf[5], (GEN)bnf[6]);
 
@@ -2538,7 +2553,8 @@ bnrnewprec(GEN bnr, long prec)
 GEN
 bnfmake(GEN sbnf, long prec)
 {
-  long av = avma, j,k,n,r1,r2,ru,lpf;
+  long j, k, n, r1, r2, ru, lpf;
+  gpmem_t av = avma;
   GEN p1,x,bas,ro,nf,mun,funits,index;
   GEN pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal,vectbase,Vbase;
 
@@ -2601,7 +2617,8 @@ static GEN
 classgroupall(GEN P, GEN data, long flag, long prec)
 {
   long court[3],doubl[4];
-  long av=avma,flun,lx, minsFB=3,nbrelpid=4;
+  long flun, lx, minsFB=3, nbrelpid=4;
+  gpmem_t av=avma;
   GEN bach=doubl,bach2=doubl,RELSUP=court,borne=gun;
 
   if (!data) lx=1;
@@ -2664,7 +2681,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
 GEN
 classgrouponly(GEN P, GEN data, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN z;
 
   if (typ(P)==t_INT)
@@ -2679,7 +2696,7 @@ classgrouponly(GEN P, GEN data, long prec)
 GEN
 regulator(GEN P, GEN data, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN z;
 
   if (typ(P)==t_INT)
@@ -2760,7 +2777,8 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
 static GEN
 buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
 {
-  long av = avma, k = EXP220;
+  long k = EXP220;
+  gpmem_t av = avma;
   GEN W,B,xarch,matarch,vectbase,vperm;
   GEN fu=cgetg(1,t_VEC), reg=gun, c_1=gun, zu=cgetg(3,t_VEC);
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
@@ -2793,7 +2811,7 @@ GEN
 buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
         long minsFB,long flun,long prec)
 {
-  ulong av = avma,av0,av1,limpile;
+  gpmem_t av = avma, av0, av1, limpile;
   long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob;
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;

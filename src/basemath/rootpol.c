@@ -63,7 +63,7 @@ quickmulcc(GEN x, GEN y)
     }
     if (ty==t_COMPLEX)
     {
-      long av,tetpil;
+      gpmem_t av, tetpil;
       GEN p1,p2;
 
       z=cgetg(3,t_COMPLEX); av=avma;
@@ -172,7 +172,7 @@ cook_square(GEN p)
 {
   GEN p0,p1,p2,p3,q,aux0,aux1,r,aux,plus,moins;
   long n=degpol(p),n0,n3,i,j,var;
-  ulong ltop = avma;
+  gpmem_t ltop = avma;
 
   if (n<=COOK_SQUARE_LIMIT) return karasquare(p);
 
@@ -572,7 +572,8 @@ at a distance eps */
 static double
 lower_bound(GEN p, long *k, double eps)
 {
-  long n=degpol(p),i,j,ltop=avma;
+  long n=degpol(p), i, j;
+  gpmem_t ltop=avma;
   GEN a,s,S,icd;
   double r,*rho;
 
@@ -608,7 +609,7 @@ static GEN
 max_modulus(GEN p, double tau)
 {
   GEN r,q,aux,gunr;
-  ulong av, ltop = avma;
+  gpmem_t av, ltop = avma;
   long i,k,n=degpol(p),nn,bitprec,M,e;
   double rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
 
@@ -658,7 +659,8 @@ static GEN
 modulus(GEN p, long k, double tau)
 {
   GEN q,gunr;
-  long i,kk=k,imax,n=degpol(p),nn,av,ltop=avma,bitprec,decprec,e;
+  long i, kk=k, imax, n=degpol(p), nn, bitprec, decprec, e;
+  gpmem_t av, ltop=avma;
   double tau2,r;
 
   tau2 = tau/6;
@@ -698,7 +700,8 @@ static GEN
 pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
 {
   GEN R, q, aux;
-  long n=degpol(p),i,imax,imax2,bitprec,ltop=avma, av;
+  long n=degpol(p), i, imax, imax2, bitprec;
+  gpmem_t ltop=avma, av;
   double tau2, aux2;
 
   tau2=tau/6.;
@@ -733,7 +736,7 @@ pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
 static GEN
 min_modulus(GEN p, double tau)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN r;
 
   if (isexactzero((GEN)p[2])) return realzero(3);
@@ -747,7 +750,8 @@ static long
 dual_modulus(GEN p, GEN R, double tau, long l)
 {
   GEN q;
-  long i,imax,k,delta_k=0,n=degpol(p),nn,nnn,valuat,ltop=avma,bitprec,ll=l;
+  long i, imax, k, delta_k=0, n=degpol(p), nn, nnn, valuat, bitprec, ll=l;
+  gpmem_t ltop=avma;
   double logmax,aux,tau2;
 
   tau2=7.*tau/8.;
@@ -938,7 +942,8 @@ parameters(GEN p, double *mu, double *gamma,
            long polreal, double param, double param2)
 {
   GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
-  long ltop=avma,limite=stack_lim(ltop,1),n=degpol(p),bitprec,NN,K,i,j,ltop2;
+  long n=degpol(p), bitprec, NN, K, i, j, ltop2;
+  gpmem_t ltop=avma, limite=stack_lim(ltop, 1);
   double lx;
 
   bitprec=gexpo(p)+(long)param2+8;
@@ -1102,7 +1107,7 @@ static GEN
 refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
 {
   GEN H=HH,D,aux;
-  ulong ltop=avma, limite=stack_lim(ltop,1);
+  gpmem_t ltop=avma, limite=stack_lim(ltop, 1);
   long error=0,i,bitprec1,bitprec2;
 
   D=gsub(gun,gres(gmul(HH,G),F)); error=gexpo(D);
@@ -1136,7 +1141,8 @@ static long
 refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
 {
   GEN pp,FF,GG,r,HH,f0;
-  long error,i,bitprec1=0,bitprec2,ltop=avma,shiftbitprec;
+  long error, i, bitprec1=0, bitprec2, shiftbitprec;
+  gpmem_t ltop=avma;
   long shiftbitprec2,n=degpol(p),enh,normF,normG,limite=stack_lim(ltop,1);
 
   FF=*F; HH=H;
@@ -1269,7 +1275,8 @@ extern GEN addshiftpol(GEN x, GEN y, long d);
 static GEN
 shiftpol(GEN p, GEN b)
 {
-  long av = avma,i, limit = stack_lim(av,1);
+  long i;
+  gpmem_t av = avma, limit = stack_lim(av, 1);
   GEN q = gzero;
 
   if (gcmp0(b)) return p;
@@ -1294,7 +1301,7 @@ conformal_pol(GEN p, GEN a, long bitprec)
 {
   GEN r,pui,num,aux, unr = myrealun(bitprec);
   long n=degpol(p), i;
-  ulong av, limit;
+  gpmem_t av, limit;
 
   aux = pui = cgetg(4,t_POL);
   pui[1] = evalsigne(1) | evalvarn(varn(p)) | evallgef(4);
@@ -1385,7 +1392,8 @@ static void
 conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
                   double aux, GEN *F,GEN *G)
 {
-  long bitprec2,n=degpol(p),decprec,i,ltop = avma, av;
+  long bitprec2, n=degpol(p), decprec, i;
+  gpmem_t ltop = avma, av;
   GEN q,FF,GG,a,R, *gptr[2];
   GEN rho,invrho;
   double delta,param,param2;
@@ -1400,7 +1408,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   for (i=1; i<=n; i++)
     if (signe(radii[i])) /* updating array radii */
     {
-      long a = avma;
+      gpmem_t a = avma;
       GEN p1 = gsqr(radii[i]);
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
       p1 = divrr(gmul2n((subrs(p1,1)),1),
@@ -1905,7 +1913,7 @@ all_roots(GEN p, long bitprec)
 {
   GEN lc,pd,q,roots_pol,m;
   long bitprec0, bitprec2,n=degpol(p),i,e,h;
-  ulong av;
+  gpmem_t av;
 
   pd = poldeflate(p, &h); lc = leading_term(pd);
   e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
@@ -2055,7 +2063,7 @@ isrealappr(GEN x, long e)
 static int
 isconj(GEN x, GEN y, long e)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i= (gexpo( gsub((GEN)x[1],(GEN)y[1]) ) < e
         && gexpo( gadd((GEN)x[2],(GEN)y[2]) ) < e);
   avma = av; return i;
@@ -2067,7 +2075,7 @@ isconj(GEN x, GEN y, long e)
 GEN
 roots(GEN p, long l)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long n,i,k,s,t,e;
   GEN c,L,p1,res,rea,com;
 

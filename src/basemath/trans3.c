@@ -58,7 +58,8 @@ GEN
 kbessel(GEN nu, GEN gx, long prec)
 {
   GEN x,y,p1,p2,zf,zz,s,t,q,r,u,v,e,f,c,d,ak,pitemp,nu2,w;
-  long l,lbin,av,av1,k,k2,l1,n2,n;
+  long l, lbin, k, k2, l1, n2, n;
+  gpmem_t av, av1;
 
   if (typ(nu)==t_COMPLEX) return kbessel2(nu,gx,prec);
   l = (typ(gx)==t_REAL)? lg(gx): prec;
@@ -149,7 +150,8 @@ GEN
 hyperu(GEN a, GEN b, GEN gx, long prec)
 {
   GEN x,y,p1,p2,p3,zf,zz,s,t,q,r,u,v,e,f,c,d,w,a1,gn;
-  long l,lbin,av,av1,av2,k,l1,n,ex;
+  long l, lbin, k, l1, n, ex;
+  gpmem_t av, av1, av2;
 
   if(gsigne(gx) <= 0) err(talker,"hyperu's third argument must be positive");
   ex = (iscomplex(a) || iscomplex(b));
@@ -225,7 +227,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
 GEN
 kbessel2(GEN nu, GEN x, long prec)
 {
-  long av = avma,tetpil;
+  gpmem_t av = avma, tetpil;
   GEN p1,p2,x2,a,pitemp;
 
   if (typ(x)==t_REAL) prec = lg(x);
@@ -242,7 +244,7 @@ GEN
 incgam(GEN s, GEN x, long prec)
 {
   GEN p1,z = cgetr(prec);
-  long av = avma;
+  gpmem_t av = avma;
 
   if (gcmp0(x)) return ggamma(s,prec);
   if (typ(x)!=t_REAL) { gaffect(x,z); x=z; }
@@ -273,7 +275,8 @@ GEN
 incgam1(GEN a, GEN x, long prec)
 {
   GEN p2,p3,y, z = cgetr(prec);
-  long av=avma, av1, l,n,i;
+  long l, n, i;
+  gpmem_t av=avma, av1;
   double m,mx;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
@@ -296,7 +299,8 @@ GEN
 incgam2(GEN a, GEN x, long prec)
 {
   GEN b,p1,p2,p3,y, z = cgetr(prec);
-  long av = avma,av1,l,n,i;
+  long l, n, i;
+  gpmem_t av = avma, av1;
   double m,mx;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
@@ -328,7 +332,8 @@ GEN
 incgam3(GEN s, GEN x, long prec)
 {
   GEN b,p1,p2,p3,y, z = cgetr(prec);
-  long av = avma, av1,l,n,i;
+  long l, n, i;
+  gpmem_t av = avma, av1;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
   l=lg(x); n = -bit_accuracy(l)-1;
@@ -364,7 +369,7 @@ GEN
 incgam4(GEN a, GEN x, GEN g, long prec)
 {
   GEN p1, z = cgetr(prec);
-  long av = avma;
+  gpmem_t av = avma;
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
   if (gcmp(subrs(x,1),a) > 0 || gsigne(greal(a)) <= 0)
@@ -384,7 +389,8 @@ incgam0(GEN a, GEN x, GEN z,long prec)
 GEN
 eint1(GEN x, long prec)
 {
-  long av = avma,tetpil,l,n,i;
+  long l, n, i;
+  gpmem_t av = avma, tetpil;
   GEN p1,p2,p3,p4,run,y;
 
   if (typ(x) != t_REAL) { gaffect(x,p1=cgetr(prec)); x = p1;}
@@ -454,7 +460,8 @@ eint1(GEN x, long prec)
 GEN
 veceint1(GEN C, GEN nmax, long prec)
 {
-  long av,av1,k,n,nstop,i,cd,nmin,G,a, chkpoint;
+  long k, n, nstop, i, cd, nmin, G, a, chkpoint;
+  gpmem_t av, av1;
   GEN y,e1,e2,F0,F,M2,f,den,minvn,mcn,p1,vdiff,ap,unr,zeror,deninit;
 
   if (!nmax) return eint1(C,prec);
@@ -527,7 +534,7 @@ veceint1(GEN C, GEN nmax, long prec)
 GEN
 gerfc(GEN x, long prec)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN p1,p2;
 
   if (typ(x)!=t_REAL) { p1=cgetr(prec); gaffect(x,p1); x=p1; }
@@ -548,7 +555,8 @@ gerfc(GEN x, long prec)
 static GEN
 czeta(GEN s, long prec)
 {
-  long av,n,p,n1,flag1,flag2,i,i2;
+  long n, p, n1, flag1, flag2, i, i2;
+  gpmem_t av;
   double st,sp,sn,ssig,ns,alpha,beta,maxbeta,xinf;
   GEN y,z,res,sig,ms,p1,p2,p3,p31,pitemp;
 
@@ -677,7 +685,8 @@ next_bin(GEN y, long n, long k)
 static GEN
 izeta(long k, long prec)
 {
-  long av=avma,av2,kk,n,li, limit;
+  long kk, n, li;
+  gpmem_t av=avma, av2, limit;
   GEN y,p1,pi2,qn,z,q,binom;
 
   /* treat trivial cases */
@@ -804,7 +813,7 @@ GEN czeta(GEN s0, long prec);
 static GEN
 izeta(long k, long prec)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN y,p1,pi2;
 
   /* treat trivial cases */
@@ -842,7 +851,7 @@ czeta(GEN s0, long prec)
   GEN s, u, a, y, res, tes, sig, invn2, p1, unr;
   GEN sim, ms, s1, s2, s3, s4, s5, *tab, tabn;
   long p, i, sqn, nn, lim, lim2, ct;
-  ulong av, av2 = avma, avlim;
+  gpmem_t av, av2 = avma, avlim;
   int funeq = 0;
   byteptr d;
 
@@ -927,7 +936,8 @@ czeta(GEN s0, long prec)
   sim = y = unr;
   for (i=ct; i > 1; i--)
   {
-    long j, av2 = avma;
+    long j;
+    gpmem_t av2 = avma;
     for (j=tabn[i]+1; j<=tabn[i-1]; j++)
       sim = gadd(sim, n_s(2*j+1, tab));
     sim = gerepileupto(av2, sim);
@@ -1022,7 +1032,8 @@ gzeta(GEN x, long prec)
 void
 gzetaz(GEN x, GEN y)
 {
-  long av=avma, prec = precision(y);
+  long prec = precision(y);
+  gpmem_t av=avma;
 
   if (!prec) err(infprecer,"gzetaz");
   gaffect(gzeta(x,prec),y); avma=av;
@@ -1040,7 +1051,8 @@ gzetaz(GEN x, GEN y)
 static GEN
 cxpolylog(long m, GEN x, long prec)
 {
-  long av=avma,li,i,n,bern_upto;
+  long li, i, n, bern_upto;
+  gpmem_t av=avma;
   GEN p1,z,h,q,s;
 
   if (gcmp1(x)) return izeta(m,prec);
@@ -1072,7 +1084,8 @@ cxpolylog(long m, GEN x, long prec)
 GEN
 polylog(long m, GEN x, long prec)
 {
-  long av,av1,limpile,l,e,i,G,sx;
+  long l, e, i, G, sx;
+  gpmem_t av, av1, limpile;
   GEN X,z,p1,p2,n,y,logx;
 
   if (m<0) err(talker,"negative index in polylog");
@@ -1144,7 +1157,8 @@ dilog(GEN x, long prec)
 GEN
 polylogd0(long m, GEN x, long flag, long prec)
 {
-  long k,l,av,fl,m2;
+  long k, l, fl, m2;
+  gpmem_t av;
   GEN p1,p2,p3,y;
 
   m2=m&1; av=avma;
@@ -1190,7 +1204,8 @@ polylogdold(long m, GEN x, long prec)
 GEN
 polylogp(long m, GEN x, long prec)
 {
-  long k,l,av,fl,m2;
+  long k, l, fl, m2;
+  gpmem_t av;
   GEN p1,y;
 
   m2=m&1; av=avma;
@@ -1236,7 +1251,8 @@ polylogp(long m, GEN x, long prec)
 GEN
 gpolylog(long m, GEN x, long prec)
 {
-  long i,lx,av=avma,v,n;
+  long i, lx, v, n;
+  gpmem_t av=avma;
   GEN y,p1,p2;
 
   if (m<=0)
@@ -1296,7 +1312,8 @@ gpolylog(long m, GEN x, long prec)
 void
 gpolylogz(long m, GEN x, GEN y)
 {
-  long av=avma, prec = precision(y);
+  long prec = precision(y);
+  gpmem_t av=avma;
 
   if (!prec) err(infprecer,"gpolylogz");
   gaffect(gpolylog(m,x,prec),y); avma=av;
@@ -1361,7 +1378,7 @@ inteta(GEN q)
   else
   {
     long l = 0, v = 0; /* gcc -Wall */
-    long av = avma, lim = stack_lim(av,3);
+    gpmem_t av = avma, lim = stack_lim(av, 3);
 
     if (is_scalar_t(tx)) l = -bit_accuracy(precision(q));
     else
@@ -1393,7 +1410,7 @@ inteta(GEN q)
 GEN
 eta(GEN x, long prec)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN q = qq(x,prec);
   return gerepileupto(av,inteta(q));
 }
@@ -1402,7 +1419,8 @@ eta(GEN x, long prec)
 GEN
 trueeta(GEN x, long prec)
 {
-  long tx=typ(x), av=avma, tetpil,l;
+  long tx=typ(x), l;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2,q,q24,n,z,m,unapprox;
 
   if (!is_scalar_t(tx)) err(typeer,"trueeta");
@@ -1436,7 +1454,8 @@ eta0(GEN x, long flag,long prec)
 GEN
 jell(GEN x, long prec)
 {
-  long av=avma,tetpil,tx = typ(x);
+  long tx = typ(x);
+  gpmem_t av=avma, tetpil;
   GEN p1;
 
   if (!is_scalar_t(tx) || tx == t_PADIC)
@@ -1458,7 +1477,7 @@ jell(GEN x, long prec)
 GEN
 wf2(GEN x, long prec)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2;
 
   p1=gsqrt(gdeux,prec);
@@ -1470,7 +1489,7 @@ wf2(GEN x, long prec)
 GEN
 wf1(GEN x, long prec)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2;
 
   p1=trueeta(gmul2n(x,-1),prec); p2=trueeta(x,prec);
@@ -1481,7 +1500,7 @@ wf1(GEN x, long prec)
 GEN
 wf(GEN x, long prec)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2;
 
   p1=gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
@@ -1508,7 +1527,7 @@ sagm(GEN x, long prec)
 {
   GEN p1,a,b,a1,b1,y;
   long l,ep;
-  ulong av;
+  gpmem_t av;
 
   if (gcmp0(x)) return gcopy(x);
   switch(typ(x))
@@ -1572,7 +1591,8 @@ sagm(GEN x, long prec)
 GEN
 agm(GEN x, GEN y, long prec)
 {
-  long av,tetpil, ty=typ(y);
+  long ty=typ(y);
+  gpmem_t av, tetpil;
   GEN z;
 
   if (is_matvec_t(ty))
@@ -1589,7 +1609,8 @@ agm(GEN x, GEN y, long prec)
 GEN
 logagm(GEN q)
 {
-  long av=avma,prec=lg(q),tetpil,s,n,lim;
+  long prec=lg(q), s, n;
+  gpmem_t av=avma, tetpil, lim;
   GEN y,q4,q1;
 
   if (typ(q)!=t_REAL) err(typeer,"logagm");
@@ -1608,7 +1629,7 @@ logagm(GEN q)
 GEN
 glogagm(GEN x, long prec)
 {
-  long av,tetpil;
+  gpmem_t av, tetpil;
   GEN y,p1,p2;
 
   switch(typ(x))
@@ -1646,7 +1667,8 @@ glogagm(GEN x, long prec)
 GEN
 theta(GEN q, GEN z, long prec)
 {
-  long av=avma,tetpil,l,n;
+  long l, n;
+  gpmem_t av=avma, tetpil;
   GEN ps,qn,qnold,y,zy,lq,ps2,p1,k,zold;
 
   l=precision(q); if (l) prec=l;
@@ -1683,7 +1705,8 @@ theta(GEN q, GEN z, long prec)
 GEN
 thetanullk(GEN q, long k, long prec)
 {
-  long av=avma,tetpil,l,n;
+  long l, n;
+  gpmem_t av=avma, tetpil;
   GEN p1,ps,qn,y,ps2;
 
   l=precision(q);
@@ -1708,7 +1731,8 @@ thetanullk(GEN q, long k, long prec)
 GEN
 jbesselh(GEN n, GEN z, long prec)
 {
-  long av,tetpil,k,l,i,lz;
+  long k, l, i, lz;
+  gpmem_t av, tetpil;
   GEN y,p1,p2,zinv,p0,s,c;
 
   if (typ(n)!=t_INT) err(talker,"not an integer index in jbesselh");

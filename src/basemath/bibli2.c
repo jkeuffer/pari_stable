@@ -30,7 +30,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 tayl(GEN x, long v, long precdl)
 {
-  long tetpil,i,vx = gvar9(x), av=avma;
+  long i, vx = gvar9(x);
+  gpmem_t tetpil, av=avma;
   GEN p1,y;
 
   if (v <= vx)
@@ -88,7 +89,8 @@ grando0(GEN x, long n, long do_clone)
 GEN
 tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 {
-  long av,k,l;
+  long k, l;
+  gpmem_t av;
   GEN q,a,r;
 
   if (v<0) v = 0;
@@ -129,7 +131,8 @@ GEN addshiftw(GEN x, GEN y, long d);
 GEN
 legendre(long n, long v)
 {
-  long av,tetpil,m,lim;
+  long m;
+  gpmem_t av, tetpil, lim;
   GEN p0,p1,p2;
 
   if (v<0) v = 0;
@@ -159,7 +162,8 @@ legendre(long n, long v)
 GEN
 cyclo(long n, long v)
 {
-  long av=avma,tetpil,d,q,m;
+  long d, q, m;
+  gpmem_t av=avma, tetpil;
   GEN yn,yd;
 
   if (n<=0) err(arither2);
@@ -278,7 +282,8 @@ mathilbert(long n) /* Hilbert matrix of order n */
 GEN
 matqpascal(long n, GEN q)
 {
-  long i,j,I, av = avma;
+  long i, j, I;
+  gpmem_t av = avma;
   GEN m, *qpow = NULL; /* gcc -Wall */
 
   if (n<0) n = -1;
@@ -318,7 +323,7 @@ matqpascal(long n, GEN q)
 GEN
 laplace(GEN x)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i,l,ec;
   GEN y,p1;
 
@@ -484,7 +489,8 @@ polrecip_i(GEN x)
 GEN
 binome(GEN n, long k)
 {
-  long av,i;
+  long i;
+  gpmem_t av;
   GEN y;
 
   if (k <= 1)
@@ -529,7 +535,8 @@ binome(GEN n, long k)
 GEN
 polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
 {
-  long av = avma,tetpil,i,m, ns=0, tx=typ(x);
+  long i, m, ns=0, tx=typ(x);
+  gpmem_t av = avma, tetpil;
   GEN den,ho,hp,w,y,c,d,dy;
 
   if (!xa)
@@ -612,7 +619,7 @@ gtostr(GEN x)
 GEN
 gtoset(GEN x)
 {
-  ulong av;
+  gpmem_t av;
   long i,c,tx,lx;
   GEN y;
 
@@ -675,7 +682,7 @@ gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN))
 long
 setsearch(GEN x, GEN y, long flag)
 {
-  long av = avma;
+  gpmem_t av = avma;
   long res;
   if (typ(y) != t_STR) y = gtostr(y);
   res=gen_search(x,y,flag,gcmp);
@@ -695,7 +702,7 @@ gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN))
 GEN
 setunion(GEN x, GEN y)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN z;
 
   if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
@@ -705,7 +712,8 @@ setunion(GEN x, GEN y)
 GEN
 setintersect(GEN x, GEN y)
 {
-  long av=avma,i,lx,c;
+  long i, lx, c;
+  gpmem_t av=avma;
   GEN z;
 
   if (!setisset(x) || !setisset(y)) err(talker,"not a set in setintersect");
@@ -718,7 +726,7 @@ setintersect(GEN x, GEN y)
 GEN
 gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN))
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   long find;
   long i,j,k;
   GEN  diff=cgetg(lg(set1),t_VEC);
@@ -765,7 +773,7 @@ dirval(GEN x)
 GEN
 dirmul(GEN x, GEN y)
 {
-  ulong av = avma, lim = stack_lim(av,1);
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   long lx,ly,lz,dx,dy,i,j,k;
   GEN z,p1;
 
@@ -801,7 +809,7 @@ dirmul(GEN x, GEN y)
 GEN
 dirdiv(GEN x, GEN y)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long lx,ly,lz,dx,dy,i,j;
   GEN z,p1;
 
@@ -886,7 +894,7 @@ genrand(GEN N)
     if (n == 0) r = 0;
     else
     {   
-      long av = avma;
+      gpmem_t av = avma;
       if (i < nz) n++; /* allow for equality if we can go down later */
       p1 = muluu(n, gp_rand()); /* < n * 2^32, so 0 <= first word < n */
       r = (lgefint(p1)<=3)? 0: p1[2]; avma = av;
@@ -923,7 +931,7 @@ gettime(void) { return timer(); }
 GEN
 numtoperm(long n, GEN x)
 {
-  ulong av;
+  gpmem_t av;
   long i,a,r;
   GEN v,w;
 
@@ -946,7 +954,8 @@ numtoperm(long n, GEN x)
 GEN
 permtonum(GEN x)
 {
-  long av=avma, lx=lg(x)-1, n=lx, last, ind, tx = typ(x);
+  long lx=lg(x)-1, n=lx, last, ind, tx = typ(x);
+  gpmem_t av=avma;
   GEN ary,res;
 
   if (!is_vec_t(tx)) err(talker,"not a vector in permtonum");
@@ -978,7 +987,8 @@ permtonum(GEN x)
 GEN
 polymodrecip(GEN x)
 {
-  long v,i,j,n,av,tetpil,lx;
+  long v, i, j, n, lx;
+  gpmem_t av, tetpil;
   GEN p1,p2,p3,p,phi,y,col;
 
   if (typ(x)!=t_POLMOD) err(talker,"not a polymod in polymodrecip");

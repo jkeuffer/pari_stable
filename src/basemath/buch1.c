@@ -209,7 +209,8 @@ gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
 static GEN
 quadhilbertimag(GEN D, GEN flag)
 {
-  long av=avma,h,i,e,prec;
+  long h, i, e, prec;
+  gpmem_t av=avma;
   GEN z,L,P,p,q,qfp,qfq,up,uq,u;
   int raw = ((typ(flag)==t_INT && signe(flag)));
 
@@ -236,7 +237,8 @@ quadhilbertimag(GEN D, GEN flag)
   prec = raw? DEFAULTPREC: 3;
   for(;;)
   {
-    long av0 = avma, ex, exmax = 0;
+    long ex, exmax = 0;
+    gpmem_t av0 = avma;
     GEN lead, sqd = gsqrt(negi(D),prec);
     P = cgetg(h+1,t_VEC); 
     for (i=1; i<=h; i++)
@@ -474,7 +476,8 @@ computeth2(GEN om, GEN la, long prec)
 static GEN
 computeP2(GEN bnr, GEN la, int raw, long prec)
 {
-  long av=avma, av2, clrayno,i, first = 1;
+  long clrayno, i, first = 1;
+  gpmem_t av=avma, av2;
   GEN listray,P0,P,f,lanum, nf = checknf(bnr);
   
   f = gmael3(bnr,2,1,1);
@@ -542,7 +545,8 @@ galoisapplypol(GEN nf, GEN s, GEN x)
 static GEN
 findquad(GEN a, GEN x, GEN p)
 {
-  long tu,tv, av = avma;
+  long tu, tv;
+  gpmem_t av = avma;
   GEN u,v;
   if (typ(x) == t_POLMOD) x = (GEN)x[2];
   if (typ(a) == t_POLMOD) a = (GEN)a[2];
@@ -730,7 +734,8 @@ GEN
 quadray(GEN D, GEN f, GEN flag, long prec)
 {
   GEN bnr,y,p1,pol,bnf,lambda;
-  long av = avma, raw;
+  long raw;
+  gpmem_t av = avma;
 
   if (!flag) flag = gzero;
   if (typ(flag)==t_INT) lambda = NULL;
@@ -794,7 +799,8 @@ extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 static GEN 
 rhoreal_pow(GEN x, long n)
 {
-  long i, av = avma, lim = stack_lim(av,1);
+  long i;
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   for (i=1; i<=n; i++)
   {
     x = rhorealform(x);
@@ -823,7 +829,7 @@ fix_signs(GEN x)
 static GEN
 redrealprimeform5(GEN Disc, long p)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN y = primeform(Disc,stoi(p),PRECREG);
   y = codeform5(y,PRECREG);
   return gerepileupto(av, redrealform(y));
@@ -832,7 +838,7 @@ redrealprimeform5(GEN Disc, long p)
 static GEN
 redrealprimeform(GEN Disc, long p)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN y = primeform(Disc,stoi(p),PRECREG);
   return gerepileupto(av, redrealform(y));
 }
@@ -840,7 +846,7 @@ redrealprimeform(GEN Disc, long p)
 static GEN
 comprealform3(GEN x, GEN y)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN z = cgetg(4,t_VEC); comp_gen(z,x,y);
   return gerepileupto(av, redrealform(z));
 }
@@ -886,7 +892,8 @@ check_bach(double cbach, double B)
 static long
 factorisequad(GEN f, long kcz, long limp)
 {
-  long i,p,k,av,lo;
+  long i, p, k, lo;
+  gpmem_t av;
   GEN q,r, x = (GEN)f[1];
 
   if (is_pm1(x)) { primfact[0]=0; return 1; }
@@ -959,7 +966,8 @@ badmod8(GEN x)
 static void
 factorbasequad(GEN Disc, long n2, long n)
 {
-  long i,p,bad, av = avma;
+  long i, p, bad;
+  gpmem_t av = avma;
   byteptr d=diffptr;
 
   numfactorbase = (long*) gpmalloc(sizeof(long)*(n2+1));
@@ -1100,7 +1108,8 @@ desalloc(long **mat)
 static GEN
 Lval1(GEN Disc)
 {
-  long av=avma, p;
+  long p;
+  gpmem_t av=avma;
   GEN y=realun(DEFAULTPREC);
   byteptr d=diffptr;
 
@@ -1138,7 +1147,8 @@ get_clgp(GEN Disc, GEN W, GEN *ptmet, long prec)
 static GEN
 extra_relations(long LIMC, long *ex, long nlze, GEN extramatc)
 {
-  long av,fpc,p,ep,i,j,k,nlze2, *col, *colg, s = 0, extrarel = nlze+2;
+  long fpc, p, ep, i, j, k, nlze2, *col, *colg, s = 0, extrarel = nlze+2;
+  gpmem_t av;
   long MAXRELSUP = min(50,4*KC);
   GEN p1,form, extramat = cgetg(extrarel+1,t_MAT);
 
@@ -1219,7 +1229,8 @@ extra_relations(long LIMC, long *ex, long nlze, GEN extramatc)
 static GEN
 imag_random_form(long current, long *ex)
 {
-  long av = avma,i;
+  long i;
+  gpmem_t av = avma;
   GEN form,pc;
 
   for(;;)
@@ -1240,7 +1251,8 @@ static void
 imag_relations(long lim, long s, long LIMC, long *ex, long **mat)
 {
   static long nbtest;
-  long av = avma, i,j,pp,fpc,b1,b2,ep,current, first = (s==0);
+  long i, j, pp, fpc, b1, b2, ep, current, first = (s==0);
+  gpmem_t av = avma;
   long *col,*fpd,*oldfact,*oldexp;
   GEN pc,form,form1;
 
@@ -1334,7 +1346,8 @@ imag_relations(long lim, long s, long LIMC, long *ex, long **mat)
 static int
 imag_be_honest(long *ex)
 {
-  long p,fpc, s = KC, nbtest = 0, av = avma;
+  long p, fpc, s = KC, nbtest = 0;
+  gpmem_t av = avma;
   GEN form;
 
   while (s<KC2)
@@ -1360,7 +1373,8 @@ imag_be_honest(long *ex)
 static GEN
 real_random_form(long *ex)
 {
-  long av = avma, i;
+  long i;
+  gpmem_t av = avma;
   GEN p1,form = NULL;
 
   for(;;)
@@ -1384,7 +1398,8 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
                GEN vecexpo)
 {
   static long nbtest;
-  long av = avma,av1,i,j,p,fpc,b1,b2,ep,current, first = (s==0);
+  long i, j, p, fpc, b1, b2, ep, current, first = (s==0);
+  gpmem_t av = avma, av1;
   long *col,*fpd,*oldfact,*oldexp,limstack;
   long findecycle,nbrhocumule,nbrho;
   GEN p1,p2,form,form0,form1,form2;
@@ -1559,7 +1574,8 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
 static int
 real_be_honest(long *ex)
 {
-  long p,fpc,s = KC,nbtest = 0,av = avma;
+  long p, fpc, s = KC, nbtest = 0;
+  gpmem_t av = avma;
   GEN p1,form,form0;
 
   while (s<KC2)
@@ -1644,7 +1660,7 @@ get_reg(GEN matc, long sreg)
 GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 {
-  ulong av0 = avma, av;
+  gpmem_t av0 = avma, av;
   long KCCO,KCCOPRO,i,j,s, *ex,**mat;
   long extrarel,nrelsup,nreldep,LIMC,LIMC2,cp,nbram,nlze;
   GEN p1,h,W,met,res,basecl,dr,pdep,C,B,extramat,extraC;

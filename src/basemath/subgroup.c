@@ -51,7 +51,8 @@ enum { b_NONE, b_MAX, b_EXACT, b_TYPE };
 typedef struct subgp_iter {
   long *M, *L; /* mu = p-subgroup type, lambda = p-group type */
   long *powlist; /* [i] = p^i, i = 0.. */
-  long *c, *maxc, *a, *maxa, **g, **maxg, *available;
+  long *c, *maxc, *a, *maxa, **g, **maxg;
+  gpmem_t *available;
   GEN **H; /* p-subgroup of type mu, in matrix form */
   GEN cyc; /* cyclic factors of G */
   GEN subq;/* subgrouplist(I) */
@@ -163,7 +164,7 @@ dogroup(subgp_iter *T)
   long  *a = T->a,  *maxa = T->maxa;
   long **g = T->g, **maxg = T->maxg;
   GEN **H = T->H;
-  ulong av = avma;
+  gpmem_t av = avma;
   long e,i,j,k,r,n,t2,ind, t = len(M), l = len(L);
 
   t2 = (l==t)? t-1: t;
@@ -233,7 +234,7 @@ loop(subgp_iter *T, long r)
 static void
 dopsubtyp(subgp_iter *T)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i,r, l = len(T->L), t = len(T->M);
 
   if (!t)
@@ -435,7 +436,7 @@ init_powlist(long k, long p)
 static void
 subgroup_engine(subgp_iter *T)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN B,L,fa,junk,primlist,p,listL,indexsubq = NULL;
   GEN cyc = T->cyc;
   long i,j,k,imax,nbprim, n = lg(cyc);
@@ -580,7 +581,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
 static GEN
 subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   subgp_iter T;
   sublist_t S;
   slist *list, *sublist;

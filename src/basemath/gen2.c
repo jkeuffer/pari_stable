@@ -32,31 +32,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 gop1z(GEN (*f)(GEN), GEN x, GEN y)
 {
-  long av=avma; gaffect(f(x),y); avma=av;
+  gpmem_t av=avma; gaffect(f(x), y); avma=av;
 }
 
 void
 gop2z(GEN (*f)(GEN, GEN), GEN x, GEN y, GEN z)
 {
-  long av=avma; gaffect(f(x,y),z); avma=av;
+  gpmem_t av=avma; gaffect(f(x, y), z); avma=av;
 }
 
 void
 gops2gsz(GEN (*f)(GEN, long), GEN x, long s, GEN z)
 {
-  long av=avma; gaffect(f(x,s),z); avma=av;
+  gpmem_t av=avma; gaffect(f(x, s), z); avma=av;
 }
 
 void
 gops2sgz(GEN (*f)(long, GEN), long s, GEN y, GEN z)
 {
-  long av=avma; gaffect(f(s,y),z); avma=av;
+  gpmem_t av=avma; gaffect(f(s, y), z); avma=av;
 }
 
 void
 gops2ssz(GEN (*f)(long, long), long s, long y, GEN z)
 {
-  long av=avma; gaffect(f(s,y),z); avma=av;
+  gpmem_t av=avma; gaffect(f(s, y), z); avma=av;
 }
 
 /*******************************************************************/
@@ -89,14 +89,14 @@ opgs2(int (*f)(GEN, GEN), GEN y, long s)
 void
 gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z)
 {
-  long av=avma;
+  gpmem_t av=avma;
   affsi(s,court_p); gaffect(f(court_p,y),z); avma=av;
 }
 
 void
 gopgs2z(GEN (*f)(GEN, GEN), GEN y, long s, GEN z)
 {
-  long av=avma;
+  gpmem_t av=avma;
   affsi(s,court_p); gaffect(f(y,court_p),z); avma=av;
 }
 
@@ -214,7 +214,8 @@ greffe(GEN x, long l, long use_stack)
 long
 gtolong(GEN x)
 {
-  long y,tx=typ(x),av=avma;
+  long y, tx=typ(x);
+  gpmem_t av=avma;
 
   switch(tx)
   {
@@ -384,7 +385,8 @@ gcmp_1(GEN x)
 int
 gcmp(GEN x, GEN y)
 {
-  long tx,ty,f,av;
+  long tx, ty, f;
+  gpmem_t av;
 
   tx=typ(x); ty=typ(y);
   if (is_intreal_t(tx))
@@ -499,7 +501,8 @@ vecegal(GEN x, GEN y)
 int
 gegal(GEN x, GEN y)
 {
-  ulong av,tx;
+  ulong tx;
+  gpmem_t av;
   long i;
   
   if (x == y) return 1;
@@ -611,7 +614,8 @@ polvaluation(GEN x, GEN *Z)
 long
 ggval(GEN x, GEN p)
 {
-  long tx=typ(x), tp=typ(p), av, limit,vx,v,i,val;
+  long tx=typ(x), tp=typ(p), vx, v, i, val;
+  gpmem_t av, limit;
   GEN p1,p2;
 
   if (isexactzero(x)) return VERYBIGINT;
@@ -703,7 +707,8 @@ svaluation(ulong x, ulong p, ulong *py)
 long
 pvaluation(GEN x, GEN p, GEN *py)
 {
-  long av,v;
+  long v;
+  gpmem_t av;
   GEN p1,p2;
 
   if (egalii(p,gdeux))
@@ -872,7 +877,8 @@ gneg_i(GEN x)
 GEN
 gabs(GEN x, long prec)
 {
-  long tx=typ(x),lx,i,l,tetpil;
+  long tx=typ(x), lx, i, l;
+  gpmem_t tetpil;
   GEN y,p1;
 
   switch(tx)
@@ -1098,7 +1104,8 @@ gaffsg(long s, GEN x)
 void
 gaffect(GEN x, GEN y)
 {
-  long i,j,k,l,v,vy,lx,ly,tx,ty,av;
+  long i, j, k, l, v, vy, lx, ly, tx, ty;
+  gpmem_t av;
   GEN p1,num,den;
 
 
@@ -1532,7 +1539,7 @@ gaffect(GEN x, GEN y)
 GEN
 co8(GEN x, long prec)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN p1, p = (GEN) x[1];
 
   p1 = subii(sqri((GEN)p[3]), shifti((GEN)p[2],2));
@@ -1555,7 +1562,8 @@ GEN
 cvtop(GEN x, GEN p, long l)
 {
   GEN p1,p2,p3;
-  long av,tetpil,n;
+  long n;
+  gpmem_t av, tetpil;
 
   if (typ(p)!=t_INT)
     err(talker,"not an integer modulus in cvtop or gcvtop");
@@ -1643,7 +1651,8 @@ gcvtop(GEN x, GEN p, long r)
 long
 gexpo(GEN x)
 {
-  long tx=typ(x),lx,e,i,y,av;
+  long tx=typ(x), lx, e, i, y;
+  gpmem_t av;
 
   switch(tx)
   {
@@ -1697,7 +1706,7 @@ normalize(GEN x)
   for (i=3; i<lx; i++)
     if (! isexactzero((GEN)x[i]))
     {
-      long tetpil = avma;
+      gpmem_t tetpil = avma;
       GEN p1 = cgetg(lx-i+2,t_SER);
       p1[1] = evalsigne(1) | evalvalp(valp(x)+i-2) | evalvarn(varn(x));
       j=i; i=2; while (j<lx) p1[i++] = lcopy((GEN)x[j++]);
@@ -1876,7 +1885,8 @@ listconcat(GEN list1, GEN list2)
 GEN
 listsort(GEN list, long flag)
 {
-  long i,av=avma, c=list[1], lx = lgef(list)-1;
+  long i, c=list[1], lx = lgef(list)-1;
+  gpmem_t av=avma;
   GEN perm,vec,l;
 
   if (typ(list) != t_LIST) err(typeer,"listsort");

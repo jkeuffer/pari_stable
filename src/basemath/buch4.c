@@ -44,7 +44,8 @@ psquare(GEN a,GEN p)
 static long
 lemma6(GEN pol,GEN p,long nu,GEN x)
 {
-  long i,lambda,mu,ltop=avma;
+  long i, lambda, mu;
+  gpmem_t ltop=avma;
   GEN gx,gpx;
 
   for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
@@ -96,7 +97,8 @@ lemma7(GEN pol,long nu,GEN x)
 static long
 zpsol(GEN pol,GEN p,long nu,GEN pnu,GEN x0)
 {
-  long i,result,ltop=avma;
+  long i, result;
+  gpmem_t ltop=avma;
   GEN x,pnup;
 
   result = (cmpis(p,2)) ? lemma6(pol,p,nu,x0) : lemma7(pol,nu,x0);
@@ -137,7 +139,7 @@ qpsoluble(GEN pol,GEN p)
 static long
 psquarenf(GEN nf,GEN a,GEN pr)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long v;
   GEN norm;
 
@@ -169,7 +171,8 @@ check2(GEN nf, GEN a, GEN zinit)
 static long
 psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 {
-  long v, ltop = avma;
+  long v;
+  gpmem_t ltop = avma;
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
@@ -182,7 +185,8 @@ psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 static long
 psquare2qnf(GEN nf,GEN a,GEN p,long q)
 {
-  long v, ltop=avma;
+  long v;
+  gpmem_t ltop=avma;
   GEN zinit = zidealstarinit(nf,idealpows(nf,p,q));
 
   v = check2(nf,a,zinit); avma = ltop; return v;
@@ -191,7 +195,8 @@ psquare2qnf(GEN nf,GEN a,GEN p,long q)
 static long
 lemma6nf(GEN nf,GEN pol,GEN p,long nu,GEN x)
 {
-  long i,lambda,mu,ltop=avma;
+  long i, lambda, mu;
+  gpmem_t ltop=avma;
   GEN gx,gpx;
 
   for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
@@ -212,7 +217,8 @@ lemma6nf(GEN nf,GEN pol,GEN p,long nu,GEN x)
 static long
 lemma7nf(GEN nf,GEN pol,GEN p,long nu,GEN x,GEN zinit)
 {
-  long res,i,lambda,mu,q,ltop=avma;
+  long res, i, lambda, mu, q;
+  gpmem_t ltop=avma;
   GEN gx,gpx,p1;
 
   for (i=lgef(pol)-2, gx=(GEN) pol[i+1]; i>1; i--)
@@ -245,7 +251,8 @@ lemma7nf(GEN nf,GEN pol,GEN p,long nu,GEN x,GEN zinit)
 static long
 zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 {
-  long i,result,ltop=avma;
+  long i, result;
+  gpmem_t ltop=avma;
   GEN pnup;
 
   nf=checknf(nf);
@@ -297,7 +304,7 @@ long
 qpsolublenf(GEN nf,GEN pol,GEN pr)
 {
   GEN repr,zinit,p1;
-  long ltop=avma;
+  gpmem_t ltop=avma;
 
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
@@ -333,7 +340,7 @@ long
 zpsolublenf(GEN nf,GEN pol,GEN p)
 {
   GEN repr,zinit;
-  long ltop=avma;
+  gpmem_t ltop=avma;
 
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"zpsolublenf");
@@ -359,7 +366,7 @@ zpsolublenf(GEN nf,GEN pol,GEN p)
 static long
 hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long rep;
   GEN pol;
 
@@ -379,7 +386,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 {
   GEN ord, ordp, p, prhall,t;
   long va, vb, rep;
-  ulong av = avma;
+  gpmem_t av = avma;
 
   if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbertp");
   checkprimeid(pr); nf = checknf(nf);
@@ -413,7 +420,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 long
 nfhilbert(GEN nf,GEN a,GEN b)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long r1, i;
   GEN S, al, bl, ro;
 
@@ -473,7 +480,7 @@ extern GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
 GEN
 bnfsunit(GEN bnf,GEN S,long prec)
 {
-  ulong ltop = avma;
+  gpmem_t ltop = avma;
   long i,j,ls;
   GEN p1,nf,classgp,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
@@ -584,7 +591,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
 GEN
 bnfissunit(GEN bnf,GEN suni,GEN x)
 {
-  long lB,cH,i,k,ls,tetpil, av = avma;
+  long lB, cH, i, k, ls;
+  gpmem_t tetpil, av = avma;
   GEN den,gen,S,v,p1,xp,xm,xb,N,HB,perm;
 
   bnf = checkbnf(bnf);
@@ -679,7 +687,7 @@ GEN
 rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 {
   long lgsunitrelnf,i;
-  ulong ltop = avma;
+  gpmem_t ltop = avma;
   GEN relnf,aux,vec,tors,xnf,H,Y,M,A,suni,sunitrelnf,sunitnormnf,prod;
   GEN res = cgetg(3,t_VEC), S1,S2;
 
@@ -795,7 +803,8 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
-  long ltop = avma, lbot;
+  long lbot;
+  gpmem_t ltop = avma;
   GEN ext = cgetg(4,t_VEC);
 
   bnf = checkbnf(bnf);

@@ -47,7 +47,8 @@ init_miller(GEN n)
 static int
 bad_for_base(GEN n, GEN a)
 {
-  long r, av=avma, lim=stack_lim(av,1);
+  long r;
+  gpmem_t av=avma, lim=stack_lim(av, 1);
   GEN c2, c = powmodulo(a,t1,n);
 
   if (!is_pm1(c) && !egalii(t,c)) /* go fishing for -1, not for 1 */
@@ -79,7 +80,8 @@ bad_for_base(GEN n, GEN a)
 long
 millerrabin(GEN n, long k)
 {
-  long r,i,av2, av = avma;
+  long r, i;
+  gpmem_t av2, av = avma;
 
   if (!signe(n)) return 0;
   /* If |n| <= 3, check if n = +- 1 */
@@ -135,7 +137,8 @@ millerrabin(GEN n, long k)
 int				/* no longer static -- needed in mpqs.c */
 miller(GEN n, long k)
 {
-  long r,i,av2, av = avma;
+  long r, i;
+  gpmem_t av2, av = avma;
   static long pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
   long *p;
@@ -170,7 +173,7 @@ miller(GEN n, long k)
 static GEN
 LucasMod(GEN n, long P, GEN N)
 {
-  ulong av = avma, lim = stack_lim(av,1);
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   GEN nd = n+2;
   long i, m = *nd, j = 1+bfffo((ulong)m);
   GEN v = stoi(P), v1 = stoi(P*P - 2);
@@ -236,7 +239,7 @@ IsLucasPsP0(GEN N)
 long
 IsLucasPsP(GEN N)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   int k;
   GEN T;
 
@@ -268,7 +271,7 @@ IsLucasPsP(GEN N)
 /*assume n>=2*/
 static long pl831(GEN N, GEN p)
 {
-  ulong ltop=avma,av;
+  gpmem_t ltop=avma, av;
   long a;
   GEN Nmun,Nmunp;
   Nmun=addis(N,-1);
@@ -302,7 +305,7 @@ extern GEN decomp_limit(GEN n, GEN limit);
 GEN
 plisprime(GEN N, long flag)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   long i;
   int eps;
   GEN C,F;
@@ -390,7 +393,8 @@ unsigned char prc210_d1[] =
 GEN
 nextprime(GEN n)
 {
-  long rc,rc0,rcd,rcn,av1,av2, av = avma;
+  long rc, rc0, rcd, rcn;
+  gpmem_t av1, av2, av = avma;
 
   if (typ(n) != t_INT) n=gceil(n); /* accept arguments in R --GN */
   if (typ(n) != t_INT) err(arither1);
@@ -431,7 +435,8 @@ nextprime(GEN n)
 GEN
 precprime(GEN n)
 {
-  long rc,rc0,rcd,rcn,av1,av2, av = avma;
+  long rc, rc0, rcd, rcn;
+  gpmem_t av1, av2, av = avma;
 
   if (typ(n) != t_INT) n=gfloor(n); /* accept arguments in R --GN */
   if (typ(n) != t_INT) err(arither1);
@@ -621,7 +626,8 @@ elladd0(long nbc, long nbc1,
 {
   GEN lambda;
   GEN W[2*nbcmax], *A=W+nbc;	/* W[0],A[0] never used */
-  long i, av=avma, tetpil;
+  long i;
+  gpmem_t av=avma, tetpil;
   ulong mask = ~0UL;
 
   /* actually, this is only ever called with nbc1==nbc or nbc1==4, so: */
@@ -692,7 +698,8 @@ elladd2(long nbc, GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
   GEN lambda, *Y1 = X1+nbc, *Y2 = X2+nbc, *Y3 = X3+nbc;
   GEN *Y4 = X4+nbc, *Y5 = X5+nbc, *Y6 = X6+nbc;
   GEN W[4*nbcmax], *A=W+2*nbc;	/* W[0],A[0] never used */
-  long i,j, av=avma, tetpil;
+  long i, j;
+  gpmem_t av=avma, tetpil;
   /* W[0] = gun; */
   W[1] = /* A[0] =*/ subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
@@ -764,7 +771,8 @@ elldouble(long nbc, GEN *X1, GEN *X2)
 {
   GEN lambda,v, *Y1 = X1+nbc, *Y2 = X2+nbc;
   GEN W[nbcmax+1];		/* W[0] never used */
-  long i, av=avma, tetpil;
+  long i;
+  gpmem_t av=avma, tetpil;
   /*W[0] = gun;*/ W[1] = Y1[0];
   for (i=1; i<nbc; i++)
     W[i+1] = modii(mulii(Y1[i], W[i]), N);
@@ -815,7 +823,8 @@ elldouble(long nbc, GEN *X1, GEN *X2)
 static int
 ellmult(long nbc, ulong k, GEN *X1, GEN *X2) /* k>2 prime, not checked */
 {
-  long i,d,e,e1,r,av=avma,tetpil;
+  long i, d, e, e1, r;
+  gpmem_t av=avma, tetpil;
   int res;
   GEN *A=X2, *B=XAUX, *S, *T=XAUX+2*nbc;
 
@@ -1118,7 +1127,8 @@ ellfacteur(GEN n, int insist)
       540400UL,606000UL,679500UL,761800UL,854100UL,957500UL,1073500UL,
     };
   long nbc,nbc2,dsn,dsnmax,rep,spc,gse,gss,rcn,rcn0,bstp,bstp0;
-  long a,i,j,k, av,av1,avtmp, size = expi(n) + 1, tf = lgefint(n);
+  long a, i, j, k, size = expi(n) + 1, tf = lgefint(n);
+  gpmem_t av, av1, avtmp;
   ulong B1,B2,B2_p,B2_rt,m,p,p0,p2,dp;
   GEN w,w0,x,*X,*XT,*XD,*XG,*YG,*XH,*XB,*XB2,*Xh,*Yh,*Xb, res = cgeti(tf);
   int rflag, use_clones = 0;
@@ -1653,7 +1663,8 @@ GEN
 pollardbrent(GEN n)
 {
   long tf = lgefint(n), size = 0, delta, retries = 0, msg_mask;
-  long c0, c, k, k1, l, avP, avx, GGG, av = avma;
+  long c0, c, k, k1, l, GGG;
+  gpmem_t avP, avx, av = avma;
   GEN x, x1, y, P, g, g1, res;
 
   if (DEBUGLEVEL >= 4) (void)timer2(); /* clear timer */
@@ -1916,7 +1927,7 @@ squfof(GEN n, long quiet)
   long tf = lgefint(n), nm4, cnt = 0, cntamb;
   long a1, b1, c1, d1, dd1, L1, a2, b2, c2, d2, dd2, L2, a, q, c, qc, qcb;
   GEN D1, D2, Q, res;
-  long av = avma;
+  gpmem_t av = avma;
   static long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
   long blp1 = 0, blp2 = 0;
   long mydebug = DEBUGLEVEL - quiet;
@@ -2367,7 +2378,8 @@ static
 long
 squfof_ambig(long a, long B, long dd, GEN D, long *cntamb)
 {
-  long b, c, q, qc, qcb, av = avma;
+  long b, c, q, qc, qcb;
+  gpmem_t av = avma;
   long a0, b0, b1, c0;
 
   q = (dd + (B>>1)) / a; qc = q*a; qcb = qc - B;
@@ -2569,7 +2581,8 @@ static ulong powersmod[106] = {
 long				/* no longer static -- used in mpqs.c */
 is_odd_power(GEN x, GEN *pt, long *mask)
 {
-  long av=avma, tetpil, lgx=lgefint(x), exponent=0, residue, resbyte;
+  long lgx=lgefint(x), exponent=0, residue, resbyte;
+  gpmem_t av=avma, tetpil;
   GEN y;
 
   *mask &= 7;			/* paranoia */
@@ -3519,7 +3532,8 @@ GEN mpqs(GEN N);		/* in src/modules/mpqs.c, maybe a dummy,
 static long
 ifac_crack(GEN *partial, GEN *where)
 {
-  long hint, cmp_res, exp1 = 1, exp2 = 1, av;
+  long hint, cmp_res, exp1 = 1, exp2 = 1;
+  gpmem_t av;
   GEN factor = NULL, exponent;
 
   if (DEBUGLEVEL >= 5)		/* none of these should ever happen */
@@ -4047,11 +4061,12 @@ long
 ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
 		  GEN state, long hint)
 {
-  long tf=lgefint(n), av=avma, lim=stack_lim(av,1);
+  long tf=lgefint(n);
+  gpmem_t av=avma, lim=stack_lim(av, 1);
   long nb=0;
   GEN part, here, workspc = new_chunk(tf + ifac_overshoot), pairs = (GEN)av;
   /* workspc will be doled out by us in pairs of smaller t_INTs */
-  long tetpil = avma;		/* remember head of workspc zone */
+  gpmem_t tetpil = avma;		/* remember head of workspc zone */;
 
   if (!n || typ(n) != t_INT) err(typeer, "ifac_decomp");
   if (!signe(n) || tf < 3) err(talker, "factoring 0 in ifac_decomp");
@@ -4119,7 +4134,8 @@ ifac_decomp(GEN n, long hint)
 long
 ifac_moebius(GEN n, long hint)
 {
-  long mu=1, av=avma, lim=stack_lim(av,1);
+  long mu=1;
+  gpmem_t av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 1, hint);
   GEN here = ifac_main(&part);
 
@@ -4144,7 +4160,7 @@ ifac_moebius(GEN n, long hint)
 long
 ifac_issquarefree(GEN n, long hint)
 {
-  long av=avma, lim=stack_lim(av,1);
+  gpmem_t av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 1, hint);
   GEN here = ifac_main(&part);
 
@@ -4168,7 +4184,8 @@ ifac_issquarefree(GEN n, long hint)
 long
 ifac_omega(GEN n, long hint)
 {
-  long omega=0, av=avma, lim=stack_lim(av,1);
+  long omega=0;
+  gpmem_t av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
@@ -4191,7 +4208,8 @@ ifac_omega(GEN n, long hint)
 long
 ifac_bigomega(GEN n, long hint)
 {
-  long Omega=0, av=avma, lim=stack_lim(av,1);
+  long Omega=0;
+  gpmem_t av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
@@ -4215,7 +4233,8 @@ GEN
 ifac_totient(GEN n, long hint)
 {
   GEN res = cgeti(lgefint(n));
-  long exponent, av=avma, tetpil, lim=stack_lim(av,1);
+  long exponent;
+  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
   GEN phi = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
@@ -4265,7 +4284,7 @@ ifac_numdiv(GEN n, long hint)
    * size here
    */
   GEN res;
-  long av=avma, tetpil, lim=stack_lim(av,1);
+  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
   GEN exponent, tau = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
@@ -4299,7 +4318,8 @@ ifac_sumdiv(GEN n, long hint)
 {
   /* don't preallocate */
   GEN res;
-  long exponent, av=avma, tetpil, lim=stack_lim(av,1);
+  long exponent;
+  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
   GEN contrib, sigma = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
@@ -4339,7 +4359,8 @@ ifac_sumdivk(GEN n, long k, long hint)
 {
   /* don't preallocate */
   GEN res;
-  long exponent, av=avma, tetpil, lim=stack_lim(av,1);
+  long exponent;
+  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
   GEN contrib, q, sigma = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);

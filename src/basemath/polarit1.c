@@ -89,14 +89,14 @@ incloop(GEN a)
 int
 gdivise(GEN x, GEN y)
 {
-  long av=avma;
+  gpmem_t av=avma;
   x=gmod(x,y); avma=av; return gcmp0(x);
 }
 
 int
 poldivis(GEN x, GEN y, GEN *z)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN p1 = poldivres(x,y,ONLY_DIVIDES);
   if (p1) { *z = p1; return 1; }
   avma=av; return 0;
@@ -116,7 +116,7 @@ poldivis(GEN x, GEN y, GEN *z)
 GEN
 poldivres(GEN x, GEN y, GEN *pr)
 {
-  ulong avy,av,av1;
+  gpmem_t avy, av, av1;
   long ty=typ(y),tx,vx,vy,dx,dy,dz,i,j,sx,lrem;
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
@@ -357,7 +357,8 @@ GEN
 rootmod2(GEN f, GEN pp)
 {
   GEN g,y,ss,q,r, x_minus_s;
-  long p,av = avma,av1,d,i,nbrac;
+  long p, d, i, nbrac;
+  gpmem_t av = avma, av1;
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return cgetg(1,t_COL); }
   if (!p) err(talker,"prime too big in rootmod2");
@@ -429,7 +430,8 @@ otherroot(GEN x, GEN r, GEN p)
 GEN
 rootmod(GEN f, GEN p)
 {
-  long av = avma,tetpil,n,i,j,la,lb;
+  long n, i, j, la, lb;
+  gpmem_t av = avma, tetpil;
   GEN y,pol,a,b,q,pol0;
 
   if (!factmod_init(&f, p, &i)) { avma=av; return cgetg(1,t_COL); }
@@ -541,7 +543,7 @@ Berlekamp_ker(GEN u, GEN p)
     p1[j] = laddis((GEN)p1[j], -1);
     if (j < N)
     {
-      ulong av = avma;
+      gpmem_t av = avma;
       w = gerepileupto(av, FpX_res(gmul(w,v), u, p));
     }
   }
@@ -555,7 +557,7 @@ Berlekamp_ker(GEN u, GEN p)
 long
 FpX_is_squarefree(GEN f, GEN p)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN z;
   z = FpX_gcd(f,derivpol(f),p);
   avma = av;
@@ -570,7 +572,8 @@ FpX_is_squarefree(GEN f, GEN p)
 long
 FpX_nbroots(GEN f, GEN p)
 {
-  long av = avma, n=lgef(f);
+  long n=lgef(f);
+  gpmem_t av = avma;
   GEN z;
   if (n <= 4) return n-3;
   f = FpX_red(f, p);
@@ -582,7 +585,8 @@ FpX_nbroots(GEN f, GEN p)
 long
 FpX_is_totally_split(GEN f, GEN p)
 {
-  long av = avma, n=lgef(f);
+  long n=lgef(f);
+  gpmem_t av = avma;
   GEN z;
   if (n <= 4) return 1;
   if (!is_bigint(p) && n-3 > p[2]) return 0;
@@ -596,7 +600,7 @@ FpX_is_totally_split(GEN f, GEN p)
 long
 FpX_nbfact(GEN u, GEN p)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN vker = Berlekamp_ker(u,p);
   avma = av; return lg(vker)-1;
 }
@@ -613,7 +617,7 @@ static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
 GEN
 FpV_roots_to_pol(GEN V, GEN p, long v)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   long i;
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
@@ -676,7 +680,8 @@ try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
 static void
 split(long m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
 {
-  long ps,l,v,dv,av0,av;
+  long ps, l, v, dv;
+  gpmem_t av0, av;
   GEN w,w0;
 
   dv=degpol(*t); if (dv==d) return;
@@ -709,7 +714,8 @@ split(long m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
 static void
 splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
 {
-  long l,v,dv,av;
+  long l, v, dv;
+  gpmem_t av;
   GEN w;
 
   dv=degpol(*t); if (dv==d) return;
@@ -756,7 +762,8 @@ init_pow_p_mod_pT(GEN p, GEN T)
 static GEN
 spec_FpXQ_pow(GEN x, GEN p, GEN S)
 {
-  long av = avma, lim = stack_lim(av,1), i,dx = degpol(x);
+  long i, dx = degpol(x);
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   GEN x0 = x+2, z;
   z = (GEN)x0[0];
   if (dx < 0) err(talker, "zero polynomial in FpXQ_pow. %Z not prime", p);
@@ -783,7 +790,8 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
 static GEN
 factcantor0(GEN f, GEN pp, long flag)
 {
-  long i,j,k,d,e,vf,p,nbfact,tetpil,av = avma;
+  long i, j, k, d, e, vf, p, nbfact;
+  gpmem_t tetpil, av = avma;
   GEN ex,y,f2,g,g1,u,v,pd,q;
   GEN *t;
 
@@ -1044,8 +1052,9 @@ long
 split_berlekamp(GEN *t, GEN p)
 {
   GEN u = *t, a,b,po2,vker,pol;
-  long av,N = degpol(u), d,i,ir,L,la,lb,ps, vu = varn(u);
-  ulong av0 = avma;
+  long N = degpol(u), d, i, ir, L, la, lb, ps, vu = varn(u);
+  gpmem_t av;
+  gpmem_t av0 = avma;
   
   vker = Berlekamp_ker(u,p);
   vker = mat_to_vecpol(vker,vu);
@@ -1116,7 +1125,8 @@ split_berlekamp(GEN *t, GEN p)
 GEN
 factmod0(GEN f, GEN pp)
 {
-  long i,j,k,e,p,N,nbfact,av = avma,tetpil,d;
+  long i, j, k, e, p, N, nbfact, d;
+  gpmem_t av = avma, tetpil;
   GEN pps2,ex,y,f2,p1,g1,u, *t;
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
@@ -1166,7 +1176,7 @@ factmod0(GEN f, GEN pp)
 GEN
 factmod(GEN f, GEN pp)
 {
-  long tetpil,av=avma;
+  gpmem_t tetpil, av=avma;
   long nbfact;
   long j;
   GEN y,u,v;
@@ -1220,7 +1230,8 @@ static GEN
 int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
 {
   GEN p1,y;
-  long v,sx, av = avma;
+  long v, sx;
+  gpmem_t av = avma;
 
   if (typ(x) == t_PADIC)
   {
@@ -1270,7 +1281,7 @@ pol_to_padic(GEN x, GEN pr, GEN p, long r)
   if (gcmp1(lead)) lead = NULL;
   else
   {
-    long av = avma;
+    gpmem_t av = avma;
     v = ggval(lead,p);
     if (v) lead = gdiv(lead, gpowgs(p,v));
     lead = int_to_padic(lead,p,pr,r,NULL);
@@ -1346,7 +1357,7 @@ apprgen_i(GEN f, GEN a)
 GEN
 apprgen(GEN f, GEN a)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   if (typ(f) != t_POL) err(notpoler,"apprgen");
   if (gcmp0(f)) err(zeropoler,"apprgen");
   if (typ(a) != t_PADIC) err(rootper1);
@@ -1416,7 +1427,7 @@ pnormalize(GEN f, GEN p, long prec, long n, GEN *plead, long *pprec, int *prev)
 GEN
 rootpadic(GEN f, GEN p, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN lead,y;
   long PREC,i,k;
   int reverse;
@@ -1476,7 +1487,7 @@ long hensel_lift_accel(long n, long *pmask)
 GEN
 rootpadiclift(GEN T, GEN S, GEN p, long e)
 {
-  ulong   ltop=avma;
+  gpmem_t ltop=avma;
   long    x;
   GEN     qold, q, qm1;
   GEN     W, Tr, Sr, Wr = gzero;
@@ -1525,7 +1536,7 @@ rootpadicliftroots(GEN f, GEN S, GEN q, long e)
     y[n-1]=(long) rootpadiclift(f, (GEN) S[n-1], q, e);
   else/* distinct-->totally split-->use trace trick */
   {
-    ulong av=avma;
+    gpmem_t av=avma;
     GEN z;
     z=(GEN)f[lgef(f)-2];/*-trace(roots)*/
     for(i=1; i<n-1;i++)
@@ -1547,7 +1558,7 @@ rootpadicliftroots(GEN f, GEN S, GEN q, long e)
 GEN
 rootpadicfast(GEN f, GEN p, long e)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN S,y;
   S=lift(rootmod(f,p));/*no multiplicity*/
   if (lg(S)==1)/*no roots*/
@@ -1568,7 +1579,7 @@ rootpadicfast(GEN f, GEN p, long e)
 GEN
 padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
 {
-  ulong   ltop=avma;
+  gpmem_t ltop=avma;
   GEN     qold, q, qm1;
   GEN     W, Sr, Wr = gzero;
   long    i, nb, mask;
@@ -1619,7 +1630,8 @@ GEN
 apprgen9(GEN f, GEN a)
 {
   GEN fp,p1,p,pro,x,x2,u,ip,T,vecg;
-  long av=avma,tetpil,v,ps_1,i,j,k,n,prec,d,va,fl2;
+  long v, ps_1, i, j, k, n, prec, d, va, fl2;
+  gpmem_t av=avma, tetpil;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen9");
   if (gcmp0(f)) err(zeropoler,"apprgen9");
@@ -1744,7 +1756,8 @@ static GEN
 padicff(GEN x,GEN p,long pr)
 {
   GEN q,basden,bas,invbas,mul,dx,nf,mat;
-  long n=degpol(x),av=avma;
+  long n=degpol(x);
+  gpmem_t av=avma;
 
   nf=cgetg(10,t_VEC); nf[1]=(long)x; dx=discsr(x);
   mat=cgetg(3,t_MAT); mat[1]=lgetg(3,t_COL); mat[2]=lgetg(3,t_COL);
@@ -1765,7 +1778,7 @@ padicff(GEN x,GEN p,long pr)
 GEN
 factorpadic2(GEN f, GEN p, long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN fa,ex,y;
   long n,i,l;
 
@@ -1811,7 +1824,7 @@ expo_is_squarefree(GEN e)
 GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN w,g,poly,y,p1,p2,ex,pols,exps,ppow,lead;
   long v=varn(f),n=degpol(f),mfx,i,k,j,r,pr;
   int reverse = 0;
@@ -1831,7 +1844,7 @@ factorpadic4(GEN f,GEN p,long prec)
   exps = cgetg(n+1,t_COL); n = lg(poly);
   for (j=i=1; i<n; i++)
   {
-    ulong av1 = avma;
+    gpmem_t av1 = avma;
     GEN fx = (GEN)poly[i], fa = factmod0(fx,p);
     w = (GEN)fa[1];
     if (expo_is_squarefree((GEN)fa[2]))
@@ -1946,7 +1959,7 @@ _sqr(void *data, GEN x) {
 static GEN
 Kronecker_powmod(GEN x, GEN mod, GEN n)
 {
-  ulong av0 = avma;
+  gpmem_t av0 = avma;
   long i,v = varn(x);
   GEN y, p1, p = NULL, pol = NULL;
   kronecker_muldata D;
@@ -2005,7 +2018,8 @@ FqX_rand(long d1, long v, GEN p, GEN a)
 static void
 split9(GEN *t, long d, GEN p, GEN q, GEN a, GEN S)
 {
-  long l,v,av,is2,cnt, dt = degpol(*t), da = degpol(a);
+  long l, v, is2, cnt, dt = degpol(*t), da = degpol(a);
+  gpmem_t av;
   GEN w,w0;
 
   if (dt == d) return;
@@ -2102,7 +2116,8 @@ init_pow_q_mod_pT(GEN Xmod, GEN q, GEN a, GEN T)
 static GEN
 spec_Fq_pow_mod_pol(GEN x, GEN p, GEN a, GEN S)
 {
-  long av = avma, lim = stack_lim(av,1), i,dx = degpol(x);
+  long i, dx = degpol(x);
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   GEN x0 = x+2, z,c;
 
   c = (GEN)x0[0];
@@ -2164,7 +2179,8 @@ static long isabsolutepol(GEN f, GEN pp, GEN a)
 GEN
 factmod9(GEN f, GEN pp, GEN a)
 {
-  long av = avma, tetpil,p,i,j,k,d,e,vf,va,nbfact,nbf,pk;
+  long p, i, j, k, d, e, vf, va, nbfact, nbf, pk;
+  gpmem_t av = avma, tetpil;
   GEN S,ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,qqd,qq,unfp,unfq, *t;
   GEN frobinv,X;
 
@@ -2307,7 +2323,8 @@ GEN zrhqr(GEN a,long PREC);
 GEN
 rootsold(GEN x, long l)
 {
-  long av1=avma,i,j,f,g,gg,fr,deg,l0,l1,l2,l3,l4,ln;
+  long i, j, f, g, gg, fr, deg, l0, l1, l2, l3, l4, ln;
+  gpmem_t av1=avma;
   long exc,expmin,m,deg0,k,ti,h,ii,e,e1,emax,v;
   GEN y,xc,xd0,xd,xdabs,p1,p2,p3,p4,p5,p6,p7,p8;
   GEN p9,p10,p11,p12,p14,p15,pa,pax,pb,pp,pq,ps;
@@ -2515,9 +2532,10 @@ rootsold(GEN x, long l)
 GEN
 roots2(GEN pol,long PREC)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long N,flagexactpol,flagrealpol,flagrealrac,ti,i,j;
-  long nbpol,k,av1,multiqol,deg,nbroot,fr,f;
+  long nbpol, k, multiqol, deg, nbroot, fr, f;
+  gpmem_t av1;
   GEN p1,p2,rr,EPS,qol,qolbis,x,b,c,*ad,v,tabqol;
 
   if (typ(pol)!=t_POL) err(typeer,"roots2");
@@ -2660,7 +2678,8 @@ roots2(GEN pol,long PREC)
 static GEN
 laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
 {
-  long av = avma, av1,MAXIT,iter,i,j;
+  long MAXIT, iter, i, j;
+  gpmem_t av = avma, av1;
   GEN rac,erre,I,x,abx,abp,abm,dx,x1,b,d,f,g,h,sq,gp,gm,g2,*ffrac;
 
   MAXIT=MR*MT; rac=cgetg(3,t_COMPLEX);
@@ -2723,7 +2742,7 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
 static GEN
 balanc(GEN x)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long last,i,j, sqrdx = (RADIX<<1), n = lg(x);
   GEN r,c,cofgen,a;
 
@@ -2903,7 +2922,7 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
 GEN
 zrhqr(GEN a,long prec)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long i,j,prec2, n = degpol(a), ex = -bit_accuracy(prec);
   GEN aa,b,p1,rt,rr,hess,x,dx,y,newval,oldval;
 

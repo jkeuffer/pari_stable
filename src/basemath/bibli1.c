@@ -28,7 +28,8 @@ extern GEN makebasis(GEN nf,GEN pol);
 GEN
 sqscal(GEN x)
 {
-  long i,av,lx;
+  long i, lx;
+  gpmem_t av;
   GEN z;
   lx = lg(x);
   if (lx == 1) return gzero;
@@ -43,7 +44,8 @@ sqscal(GEN x)
 GEN
 gscal(GEN x,GEN y)
 {
-  long i,av,lx;
+  long i, lx;
+  gpmem_t av;
   GEN z;
   if (x == y) return sqscal(x);
   lx = lg(x);
@@ -58,7 +60,8 @@ gscal(GEN x,GEN y)
 static GEN
 sqscali(GEN x)
 {
-  long i,av,lx;
+  long i, lx;
+  gpmem_t av;
   GEN z;
   lx = lg(x);
   if (lx == 1) return gzero;
@@ -72,7 +75,8 @@ sqscali(GEN x)
 static GEN
 gscali(GEN x,GEN y)
 {
-  long i,av,lx;
+  long i, lx;
+  gpmem_t av;
   GEN z;
   if (x == y) return sqscali(x);
   lx = lg(x);
@@ -152,7 +156,8 @@ lllgramall_finish(GEN h,GEN fl,long flag,long n)
 static GEN
 lllgramintwithcontent(GEN x, GEN veccon, long flag)
 {
-  long av0=avma,av,tetpil,lx=lg(x),i,j,k,l,n,lim,kmax;
+  long lx=lg(x), i, j, k, l, n, kmax;
+  gpmem_t av0=avma, av, tetpil, lim;
   GEN u,u2,B,lam,q,r,h,la,bb,p1,p2,p3,p4,fl,corr,corr2,newcon;
   GEN *gptr[8];
 
@@ -384,7 +389,8 @@ lllgramintwithcontent(GEN x, GEN veccon, long flag)
 static GEN
 lllintwithcontent(GEN x)
 {
-  long lx=lg(x),i,j,av,tetpil;
+  long lx=lg(x), i, j;
+  gpmem_t av, tetpil;
   GEN veccon,con,xred,g;
 
   if (typ(x) != t_MAT) err(typeer,"lllintwithcontent");
@@ -487,7 +493,8 @@ static int
 do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl)
 {
   GEN la,la2,p1,p2,Bk;
-  long av,i,j,lx;
+  long i, j, lx;
+  gpmem_t av;
 
   if (!fl[k-1]) return 0;
   lx = lg(x); av = avma;
@@ -552,7 +559,8 @@ static int
 do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR)
 {
   GEN la,la2, BK,BB,q;
-  long av,i,j,lx;
+  long i, j, lx;
+  gpmem_t av;
 
   lx = lg(x); av = avma;
   la = gcoeff(L,k,k-1); la2 = gsqr(la);
@@ -590,7 +598,8 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR)
 GEN
 lllgramall(GEN x, long alpha, long flag)
 {
-  long av0=avma,av,tetpil,lim,lx=lg(x),i,j,k,l,n,s,kmax;
+  long lx=lg(x), i, j, k, l, n, s, kmax;
+  gpmem_t av0=avma, av, tetpil, lim;
   GEN u,B,L,h,fl, *gptr[4];
 
   if (typ(x) != t_MAT) err(typeer,"lllgramall");
@@ -625,7 +634,7 @@ lllgramall(GEN x, long alpha, long flag)
       for (j=1; j<=k; j++)
 	if (j==k || fl[j])
 	{
-          long av1 = avma;
+          gpmem_t av1 = avma;
 	  u = gcoeff(x,k,j);
 	  for (i=1; i<j; i++) if (fl[i])
             u = divii(subii(mulii((GEN)B[i+1],u),
@@ -688,7 +697,8 @@ pslg(GEN x)
 static GEN
 lllgramallgen(GEN x, long flag)
 {
-  long av0=avma,av,tetpil,lx=lg(x),tu,i,j,k,l,n,lim;
+  long lx=lg(x), tu, i, j, k, l, n;
+  gpmem_t av0=avma, av, tetpil, lim;
   GEN u,B,lam,q,cq,h,la,bb,p1,p2,p3,p4,fl;
   int ps1,ps2,flc;
 
@@ -812,7 +822,8 @@ static int
 get_Gram_Schmidt(GEN x, GEN mu, GEN B, long k)
 {
   GEN s,A = cgetg(k+1, t_COL); /* scratch space */
-  long av,i,j;
+  long i, j;
+  gpmem_t av;
   A[1] = coeff(x,k,1);
   for(j=1;j<k;)
   {
@@ -833,7 +844,8 @@ GEN
 lllgramintern(GEN x, long alpha, long flag, long prec)
 {
   GEN xinit,L,h,B,L1,QR;
-  long retry = 2, av = avma,lim,l,i,j,k,k1,lx=lg(x),n,kmax,KMAX;
+  long retry = 2, l, i, j, k, k1, lx=lg(x), n, kmax, KMAX;
+  gpmem_t av = avma, lim;
   long last_prec;
 
   if (typ(x) != t_MAT) err(typeer,"lllgram");
@@ -993,7 +1005,8 @@ qflllgram0(GEN x, long flag, long prec)
 static GEN
 lll_proto(GEN x, GEN f(GEN, long), long prec)
 {
-  long lx=lg(x),i,j,av,av1;
+  long lx=lg(x), i, j;
+  gpmem_t av, av1;
   GEN g;
 
   if (typ(x) != t_MAT) err(typeer,"lll_proto");
@@ -1038,7 +1051,8 @@ lllgramkerimgen(GEN x) { return lllgramallgen(x,lll_ALL); }
 static GEN
 lllkerim_proto(GEN x, GEN f(GEN,long))
 {
-  long lx=lg(x), i,j,av,av1;
+  long lx=lg(x), i, j;
+  gpmem_t av, av1;
   GEN g;
 
   if (typ(x) != t_MAT) err(typeer,"lllkerim_proto");
@@ -1073,7 +1087,8 @@ GEN
 lllgram1(GEN x, long prec)
 {
   GEN mu,u,B,BB,BK,p,q,r,cst,unreel,sv,mu1,mu2;
-  long av,tetpil,lim,l,i,j,k,lx=lg(x),n,e;
+  long l, i, j, k, lx=lg(x), n, e;
+  gpmem_t av, tetpil, lim;
 
   if (typ(x) != t_MAT) err(typeer,"lllgram1");
   if (lg((GEN)x[1])!=lx) err(mattype1,"lllgram1"); n=lx-1;
@@ -1445,7 +1460,8 @@ real_indep(GEN re, GEN im, long bitprec)
 GEN
 lindep2(GEN x, long bit)
 {
-  long tx=typ(x),lx=lg(x),ly,i,j,e, av = avma;
+  long tx=typ(x), lx=lg(x), ly, i, j, e;
+  gpmem_t av = avma;
   GEN re,im,p1,p2;
 
   if (! is_vec_t(tx)) err(typeer,"lindep2");
@@ -1478,7 +1494,7 @@ lindep(GEN x, long prec)
   GEN *b,*be,*bn,**m,qzer;
   GEN c1,c2,c3,px,py,pxy,re,im,p1,p2,r,f,em;
   long i,j,fl,k, lx = lg(x), tx = typ(x), n = lx-1;
-  ulong av = avma, lim = stack_lim(av,1), av0,av1;
+  gpmem_t av = avma, lim = stack_lim(av,1), av0, av1;
   const long EXP = - bit_accuracy(prec) + 2*n;
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
@@ -1602,7 +1618,8 @@ lindep(GEN x, long prec)
 GEN
 plindep(GEN x)
 {
-  long av = avma,i,j, prec = VERYBIGINT, lx = lg(x)-1, ly,v;
+  long i, j, prec = VERYBIGINT, lx = lg(x)-1, ly, v;
+  gpmem_t av = avma;
   GEN p = NULL, pn,p1,m,a;
 
   if (lx < 2) return cgetg(1,t_VEC);
@@ -1642,7 +1659,8 @@ plindep(GEN x)
 GEN
 algdep0(GEN x, long n, long bit, long prec)
 {
-  long tx=typ(x),av,i,k;
+  long tx=typ(x), i, k;
+  gpmem_t av;
   GEN y,p1;
 
   if (! is_scalar_t(tx)) err(typeer,"algdep0");
@@ -1704,7 +1722,7 @@ matkerint0(GEN x, long flag)
 GEN
 kerint1(GEN x)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2;
 
   p1=matrixqz3(ker(x)); p2=lllint(p1); tetpil=avma;
@@ -1714,7 +1732,8 @@ kerint1(GEN x)
 GEN
 kerint2(GEN x)
 {
-  long lx=lg(x), i,j,av,av1;
+  long lx=lg(x), i, j;
+  gpmem_t av, av1;
   GEN g,p1;
 
   if (typ(x) != t_MAT) err(typeer,"kerint2");
@@ -1730,7 +1749,8 @@ kerint2(GEN x)
 static GEN
 lllall0(GEN x, long flag)
 {
-  long av0=avma,av,tetpil,lx=lg(x),i,j,k,l,n,lim,kmax;
+  long lx=lg(x), i, j, k, l, n, kmax;
+  gpmem_t av0=avma, av, tetpil, lim;
   GEN u,B,L,q,r,h,la,p1,p2,p4,fl;
 
   if (typ(x) != t_MAT) err(typeer,"lllall0");
@@ -1758,7 +1778,7 @@ lllall0(GEN x, long flag)
       {
 	if (j==k || fl[j])
 	{
-          long av1 = avma;
+          gpmem_t av1 = avma;
 	  u=gscali((GEN)x[k],(GEN)x[j]);
 	  for (i=1; i<j; i++)
 	    if (fl[i])
@@ -1845,7 +1865,7 @@ lllall0(GEN x, long flag)
 GEN
 kerint(GEN x)
 {
-  long av=avma,av1;
+  gpmem_t av=avma, av1;
   GEN g,p1;
 
   g=lllall0(x,lll_KER); if (lg(g)==1) return g;
@@ -1862,7 +1882,8 @@ kerint(GEN x)
 static long
 remove_duplicates(GEN y, GEN a)
 {
-  long k,i, nv = lg(y), av = avma;
+  long k, i, nv = lg(y);
+  gpmem_t av = avma;
   GEN z;
 
   if (nv < 2) return nv;
@@ -2032,7 +2053,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
 	   int (*check)(void *,GEN), void *arg)
 {
   GEN y,p1, base = NULL, polr = NULL;
-  long av = avma;
+  gpmem_t av = avma;
 
   if (typ(x) == t_POL)
   {
@@ -2097,7 +2118,8 @@ GEN
 ordred(GEN x, long prec)
 {
   GEN base,y;
-  long n=degpol(x),i,av=avma,v = varn(x);
+  long n=degpol(x), i, v = varn(x);
+  gpmem_t av=avma;
 
   if (typ(x) != t_POL) err(typeer,"ordred");
   if (!signe(x)) return gcopy(x);
@@ -2173,7 +2195,7 @@ get_polmin(CG_data *d, GEN x)
 static GEN
 chk_gen(void *data, GEN x)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN g = get_polchar((CG_data*)data,x);
   if (lgef(modulargcd(g,derivpol(g))) > 3) { avma=av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
@@ -2322,7 +2344,8 @@ storeallpols(GEN nf, GEN z, GEN a, GEN phimax, long flun)
 GEN
 polredabs0(GEN x, long flun, long prec)
 {
-  long i,nv, av = avma;
+  long i, nv;
+  gpmem_t av = avma;
   GEN nf,v,y,a,phimax;
   GEN (*storepols)(GEN, GEN, GEN, GEN, long);
   FP_chk_fun *chk;
@@ -2470,7 +2493,8 @@ GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 {
   GEN p1,bpol,rnf,elt,pol;
-  long va, av = avma;
+  long va;
+  gpmem_t av = avma;
 
   if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
   nf=checknf(nf); va = varn(relpol);
@@ -2510,7 +2534,8 @@ int addcolumntomatrix(GEN V,GEN INVP,GEN L);
 GEN
 gmul_mat_smallvec(GEN x, GEN y)
 {
-  long c = lg(x), l = lg(x[1]), av,i,j;
+  long c = lg(x), l = lg(x[1]), i, j;
+  gpmem_t av;
   GEN z=cgetg(l,t_COL), s;
 
   for (i=1; i<l; i++)
@@ -2527,7 +2552,8 @@ gmul_mat_smallvec(GEN x, GEN y)
 GEN
 gmul_mati_smallvec(GEN x, GEN y)
 {
-  long c = lg(x), l = lg(x[1]), av,i,j;
+  long c = lg(x), l = lg(x[1]), i, j;
+  gpmem_t av;
   GEN z=cgetg(l,t_COL), s;
 
   for (i=1; i<l; i++)
@@ -2575,7 +2601,8 @@ static GEN
 minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
   GEN x,res,p1,u,r,liste,gnorme,invp,V, *gptr[2];
-  long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank;
+  long n = lg(a), i, j, k, s, maxrank;
+  gpmem_t av0 = avma, av1, av, tetpil, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
@@ -2690,7 +2717,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     }
     else
     {
-      long av2 = avma;
+      gpmem_t av2 = avma;
       gnorme = ground(dbltor(p));
       if (gcmp(gnorme,BORNE) >= 0) avma = av2;
       else
@@ -2714,7 +2741,8 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
       case min_PERF:
       {
-        long av2=avma, I=1;
+        long I=1;
+        gpmem_t av2=avma;
 
         for (i=1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
@@ -2802,7 +2830,8 @@ perf(GEN a)
 static GEN
 smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
 {
-  long av,av1,lim,N,n,i,j,k,s,epsbit,prec, checkcnt = 1;
+  long N, n, i, j, k, s, epsbit, prec, checkcnt = 1;
+  gpmem_t av, av1, lim;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   GEN data = CHECK? CHECK->data: NULL;
@@ -2931,7 +2960,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
       S[s] = (long)dummycopy(x);
       if (s == stockmax && (flag&2) && check)
       {
-        long av1 = avma;
+        gpmem_t av1 = avma;
         GEN per = sindexsort(norms);
         if (DEBUGLEVEL) fprintferr("sorting...\n");
         for (i=1; i<=s; i++)
