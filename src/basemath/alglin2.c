@@ -2066,9 +2066,9 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
     if (!signe(q)) continue;
 
     q = negi(q);
-    A[j] = (long)ZV_lincomb(gun,q, (GEN)A[j], (GEN)A[j0]);
+    A[j]   = (long)ZV_lincomb(gun,q, (GEN)A[j], (GEN)A[j0]);
     if (U)
-      U[j] = (long)ZV_lincomb(gun,q,(GEN)U[j],(GEN)U[j0]);
+      U[j] = (long)ZV_lincomb(gun,q, (GEN)U[j], (GEN)U[j0]);
   }
 }
 
