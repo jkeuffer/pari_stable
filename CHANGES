@@ -53,6 +53,7 @@ XR 18- rnfinit(nf, T) -> bug in multiplication if nf = Q
    19- Pol(cotan(x)) -> SEGV
    20- factor(tough polynomial over Z[X]) --> possible SEGV when padic
        precision is increased [e.g factor(polzagier(60,0))]
+XR 21- bug in ideal bound computation in rnfnormgroup
 
   Changed
     1- DOS distribution archives (GPM removed)
