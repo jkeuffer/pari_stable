@@ -95,6 +95,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    53- contfrac(sin(Pi/4),,2) --> impossible assignment
    54- infinite recursion in gaffect(t_POL, scalar)
    55- content([-1]) was -1 (should be 1)
+   56- stack corruption in u_FpV_polint (used by modular bivariate resultant)
 
   Changed
 BA  1- improved Fp_isom
