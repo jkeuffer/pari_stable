@@ -208,15 +208,18 @@ Beware that
 
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
-\subsecidx{shift}$(x,n)$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$): shifts
+\subsecidx{shift}$(x,n,\{\fl=0\})$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$): shifts
 $x$ componentwise left by $n$ bits if $n\ge0$ and right by $|n|$ bits if
 $n<0$. A left shift by $n$ corresponds to multiplication by $2^n$. A right
 shift of an integer $x$ by $|n|$ corresponds to a Euclidean division of
-$x$ by $2^{|n|}$ with a
-remainder of the same sign as $x$, hence is not the same (in general) as
-$x \kbd{\bs} 2^n$.
+$x$ by $2^{|n|}$ with a remainder of the same sign as $x$, hence is not the
+same (when $x < 0$) as $x \kbd{\bs} 2^{|n|}$. If $\fl$ is non-zero, this
+behaviour is modified and rigt shift of a negative $x$ \var{is} the same
+as $x \kbd{\bs} 2^{|n|}$ (which is consistent with $2$-complement semantic
+of negative numbers).
 
-\syn{gshift}{x,n} where $n$ is a \kbd{long}.
+\syn{gshift3}{x,n,\fl} where $n$ is a \kbd{long}. Also available is
+$\teb{gshift}(x,n)$ for the case $\fl=0$.
 
 \subsecidx{shiftmul}$(x,n)$: multiplies $x$ by $2^n$. The difference with
 \kbd{shift} is that when $n<0$, ordinary division takes place, hence for
