@@ -215,11 +215,13 @@ caradj(GEN x, long v, GEN *py)
     t = gdivgs(mattrace(y), -k);
     for (i = 1; i < l; i++) coeff(y,i,i) = ladd(gcoeff(y,i,i), t);
     y = gclone(y); if (k > 2) gunclone(y0);
-    p[l-k+1] = lpileupto(av, t); av = avma;
+    /* beware: since y is a clone and t computed from it some components
+     * may be out of stack (eg. INTMOD/POLMOD) */
+    p[l-k+1] = lpileupto(av, forcecopy(t)); av = avma;
   }
   t = gzero;
   for (i=1; i<l; i++) t = gadd(t, gmul(gcoeff(x,1,i),gcoeff(y,i,1)));
-  p[2] = lpileupto(av, gneg(t));
+  p[2] = lpileupto(av, forcecopy(gneg(t)));
   i = gvar2(p);
   if (i == v) err(talker,"incorrect variable in caradj");
   if (i < v) p = gerepileupto(av0, poleval(p, polx[v]));
