@@ -1623,18 +1623,18 @@ lllintpartial(GEN mat)
 /**                                                                **/
 /********************************************************************/
 
-GEN pslq(GEN x, long prec);
-GEN pslqL2(GEN x, long prec);
+GEN pslq(GEN x);
+GEN pslqL2(GEN x);
 
 GEN
 lindep0(GEN x,long bit,long prec)
 {
   switch (bit)
   {
-    case 0: return pslq(x,prec);
+    case 0: return pslq(x);
     case -1: return lindep(x,prec);
     case -2: return deplin(x);
-    case -3: return pslqL2(x,prec);
+    case -3: return pslqL2(x);
     default: return lindep2(x,labs(bit));
   }
 }
@@ -1959,11 +1959,13 @@ init_timer(pslq_timer *T)
 }
 
 static int
-init_pslq(pslq_M *M, GEN x, long prec)
+init_pslq(pslq_M *M, GEN x, long *PREC)
 {
-  long lx = lg(x), n = lx-1, i, j, k;
+  long lx = lg(x), n = lx-1, i, j, k, prec;
   GEN s1, s, sinv;
 
+  prec = gprecision(x); if (!prec) prec = DEFAULTPREC;
+  *PREC = prec;
   M->EXP = - bit_accuracy(prec) + 2*n;
   M->flreal = (gexpo(gimag(x)) < M->EXP);
   if (!M->flreal)
@@ -2093,10 +2095,10 @@ get_tabga(int flreal, long n, long prec)
 }
 
 GEN
-pslq(GEN x, long prec)
+pslq(GEN x)
 {
   GEN tabga, p1;
-  long tx = typ(x);
+  long tx = typ(x), prec;
   pari_sp av0 = avma, lim = stack_lim(av0,1), av;
   pslq_M M;
   pslq_timer T;
@@ -2104,7 +2106,7 @@ pslq(GEN x, long prec)
   if (! is_vec_t(tx)) err(typeer,"pslq");
   if (lg(x) <= 2) return cgetg(1,t_VEC);
 
-  M.T = &T; init_pslq(&M, x, prec);
+  M.T = &T; init_pslq(&M, x, &prec);
   if (!M.flreal) return lindep(x, prec); /* FIXME */
 
   tabga = get_tabga(M.flreal, M.n, prec);
@@ -2319,10 +2321,10 @@ checkend(pslq_M *M, long prec)
 }
 
 GEN
-pslqL2(GEN x, long prec)
+pslqL2(GEN x)
 {
   GEN Abargen, Bbargen, tabga, p1;
-  long lx = lg(x), tx = typ(x), n = lx-1, i, m, ctpro, flreal, flit;
+  long lx = lg(x), tx = typ(x), n = lx-1, i, m, ctpro, flreal, flit, prec;
   pari_sp av0 = avma, lim = stack_lim(av0,1), av;
   double *tabgabar, gabar, tinvbar, t1bar, t2bar, t3bar, t4bar;
   double **Pbar, **Abar, **Bbar, **Hbar, *ybar;
@@ -2332,7 +2334,7 @@ pslqL2(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"pslq");
   if (n <= 1) return cgetg(1,t_COL);
-  M.T = &T; init_pslq(&M, x, prec);
+  M.T = &T; init_pslq(&M, x, &prec);
   if (!M.flreal) return lindep(x, prec);
 
   flreal = M.flreal;
