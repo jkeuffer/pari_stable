@@ -561,8 +561,15 @@ static void
 init_primedata(primedata *S)
 {
   long i, j, l, lff = lg(S->ff), v = fetch_var(), N = degpol(S->pol);
-  GEN T = init_Fq(S->p, S->lcm, v), p = S->p;
+  GEN T, p = S->p;
 
+  if (S->lcm == degpol(S->ff[lff-1]))
+  {
+    T = dummycopy((GEN)S->ff[lff-1]);
+    setvarn(T, v);
+  }
+  else
+    T = init_Fq(p, S->lcm, v);
   name_var(v,"y");
   S->T = T;
   S->firstroot = cgetg(lff, t_VECSMALL);
