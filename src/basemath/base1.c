@@ -1767,7 +1767,18 @@ chk_gen(void *data, GEN x)
   return g;
 }
 
-/* mat = base change matrix, r = Cholesky form of the quadratic form */
+static GEN
+norm_ei_from_Q(GEN Q, long k)
+{
+  GEN s = gcoeff(Q, k, k);
+  long i;
+  for (i = 1; i < k; i++)
+    s = gadd(s, gmul(gcoeff(Q,i,i), gsqr(gcoeff(Q,i,k))));
+  return s;
+}
+
+/* mat = base change matrix, r = Cholesky form of the quadratic form [matrix
+ * Q from algo 2.7.6] */
 static GEN
 chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
@@ -1777,14 +1788,15 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   int skipfirst = 0;
 
   d->u = mat;
-  d->ZKembed = gmul(d->M,   mat);
+  d->ZKembed = gmul(d->M, mat);
+  if (d->prec > DEFAULTPREC) r = gmul(r, realun(DEFAULTPREC));
 
   bound = d->bound;
   prev = NULL;
   x = zerocol(N);
   for (i=1; i<l; i++)
   {
-    B = QuickNormL2((GEN)r[i], DEFAULTPREC);
+    B = norm_ei_from_Q(r, i);
     if (gcmp(B,bound) >= 0) continue; /* don't assume increasing norms */
 
     /* use canon_pol to recognized trivial automorphism P --> P(-x) */
@@ -1820,7 +1832,7 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
     fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
   if (prec > d->prec) err(bugparier, "polredabs (precision problem)");
   if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
-  return bound;
+  return gmul(bound, dbltor(1.000001));
 }
 
 /* store phi(beta mod z). */
