@@ -582,8 +582,10 @@ element_val(GEN nf, GEN x, GEN vp)
   GEN cx,p;
 
   if (gcmp0(x)) return VERYBIGINT;
-  nf=checknf(nf); N=degpol(nf[1]);
-  checkprimeid(vp); p=(GEN)vp[1]; e=itos((GEN)vp[3]);
+  nf = checknf(nf); N = degpol(nf[1]);
+  checkprimeid(vp);
+  p = (GEN)vp[1];
+  e = itos((GEN)vp[3]);
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
@@ -600,7 +602,7 @@ element_val(GEN nf, GEN x, GEN vp)
   cx = content(x);
   if (gcmp1(cx)) vcx=0; else { x = gdiv(x,cx); vcx = ggval(cx,p); }
   w = int_elt_val(nf,x,p,(GEN)vp[5],NULL);
-  avma=av; return w + vcx*e;
+  avma = av; return w + vcx*e;
 }
 
 /* polegal without comparing variables */
@@ -853,19 +855,16 @@ zsigns(GEN nf, GEN x)
   return S;
 }
 
-GEN
-lllreducemodmatrix(GEN x,GEN y)
-{
-  pari_sp av = avma;
-  GEN z = lllint_ip(y,4);
-  return gerepileupto(av, reducemodinvertible(x, z));
-}
-
-/* for internal use...reduce x modulo (invertible) y */
+/* For internal use. Reduce x modulo (invertible) y */
 GEN
 reducemodinvertible(GEN x, GEN y)
 {
   return gadd(x, gneg(gmul(y, ground(gauss(y,x)))));
+}
+GEN
+lllreducemodmatrix(GEN x,GEN y)
+{
+  return reducemodinvertible(x, lllint_ip(y,4));
 }
 
 /* Reduce column x modulo y in HNF */
