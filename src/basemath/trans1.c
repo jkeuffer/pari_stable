@@ -21,11 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 #ifdef LONG_IS_64BIT
-# define C31 (9223372036854775808.0) /* VERYBIGINT * 1.0 */
 # define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(VERYBIGINT)) */
 # define CBRTVERYBIGINT 2097152      /* ceil(cbrt(VERYBIGINT)) */
 #else
-# define C31 (2147483648.0)
 # define SQRTVERYBIGINT 46341
 # define CBRTVERYBIGINT  1291
 #endif
@@ -763,42 +761,38 @@ GEN
 mpsqrt_sign(GEN x, long s)
 {
   pari_sp av, av0;
-  long l, l0, l1, l2, eps, n, i, ex;
+  long l, l1, i, ex;
   double beta;
-  GEN y, p1, p2, p3;
+  ulong u;
+  GEN y, a, t;
 
   if (!s) return realzero_bit(expo(x) >> 1);
   l = lg(x); y = cgetr(l); av0 = avma;
 
-  p1 = cgetr(l+1); affrr(x,p1);
-  ex = expo(x); eps = ex & 1; ex >>= 1;
-  p1[1] = evalsigne(1) | evalexpo(eps); /* |x| = 2^(2 ex) p1 */
+  a = cgetr(l+1); affrr(x,a);
+  beta = sqrt((double)(ulong)a[2]);
+  ex = expo(a);
+  if (ex & 1) {
+    a[1] = evalsigne(1) | evalexpo(1);
+    u = (ulong)(beta * (1 << BITS_IN_HALFULONG));
+  } else {
+    a[1] = evalsigne(1) | evalexpo(0);
+    u = (ulong)(beta * ((1 << BITS_IN_HALFULONG) * 0.707106781186547524));
+  }
+  /* |x| = 2^(ex/2) a */
+  t = cgetr(l+1);
+  t[1] = evalexpo(0) | evalsigne(1); t[2] = (long)u; /* ~ sqrt(a) */
+  for (i = 3; i <= l; i++) t[i] = 0;
 
-  n = (long)(2 + log((double) (l-2))/LOG2);
-  beta = sqrt((eps+1) * (2 + p1[2]/C31));
-  p2 = cgetr(l+1);
-  p2[1] = evalexpo(0) | evalsigne(1);
-  p2[2] = (long)((beta-2)*C31);
-  if (!p2[2]) { p2[2] = (long)HIGHBIT; setexpo(p2,1); }
-  for (i=3; i<=l; i++) p2[i] = 0;
-
-  p3 = cgetr(l+1); l -= 2; l1 = 1; l2 = 3;
-  av = avma;
-  for (i=1; i<=n; i++)
-  { /* execute p2 := (p2 + p1/p2)/2 */
-    l0 = l1<<1;
-    if (l0 <= l)
-      { l2 += l1; l1=l0; }
-    else
-      { l2 += l+1-l1; l1=l+1; }
-    setlg(p1, l1+2);
-    setlg(p3, l1+2);
-    setlg(p2, l2);
-    affrr(divrr(p1,p2), p3);
-    affrr(addrr(p2,p3), p2); setexpo(p2, expo(p2)-1);
+  l--; l1 = 1; av = avma;
+  while (l1 < l) { /* let t := (t + a/t)/2 */
+    l1 <<= 1; if (l1 > l) l1 = l;
+    setlg(a, l1 + 2);
+    setlg(t, l1 + 2);
+    affrr(addrr(t, divrr(a,t)), t); setexpo(t, expo(t)-1);
     avma = av;
   }
-  affrr(p2,y); setexpo(y, expo(y)+ex);
+  affrr(t,y); setexpo(y, expo(y) + (ex>>1));
   avma = av0; return y;
 }
 
@@ -1290,21 +1284,39 @@ mpexp1(GEN x)
 
   l2 = l+1; ex = expo(x);
   if (ex >= EXMAX) err(talker,"exponent too large in exp");
-  alpha = -1-log(2+x[2]/C31)-ex*LOG2;
+#if 0
+  alpha = -1 - log((double)(ulong)x[2]) + (31-ex)*LOG2; /* ~ -1 - log(x) */
   beta = 5. + bit_accuracy(l)*LOG2;
   a = sqrt(beta/(gama*LOG2));
-  b = (alpha + 0.5*log(beta*gama/LOG2))/LOG2;
-  if (a>=b)
+  b = (alpha + log(a*gama))/LOG2;
+  if (a >= b)
   {
-    n=(long)(1+sqrt(beta*gama/LOG2));
-    m=(long)(1+a-b);
+    n = (long)(1+a*gama);
+    m = (long)(1+a-b);
     l2 += m>>TWOPOTBITS_IN_LONG;
   }
   else
   {
-    n=(long)(1+beta/alpha);
-    m=0;
+    n = (long)(1+beta/alpha);
+    m = 0;
   }
+#else /* rewritten to save one log() */
+  beta = 5. + bit_accuracy(l)*LOG2;
+  a = sqrt(beta/(gama*LOG2));
+  b = 31 - ex + log2(a * (gama/2.718281828459045) / (double)(ulong)x[2]);
+  if (a >= b)
+  {
+    n = (long)(1+a*gama);
+    m = (long)(1+a-b);
+    l2 += m>>TWOPOTBITS_IN_LONG;
+  }
+  else
+  { /* rare ! */
+    alpha = -1 - log((double)(ulong)x[2]) + (31-ex)*LOG2; /* ~ -1 - log(x) */
+    n = (long)(1+beta/alpha);
+    m = 0;
+  }
+#endif
   unr=realun(l2);
   p2=rcopy(unr); setlg(p2,4);
   p4=cgetr(l2); affrr(x,p4); setsigne(p4,1);
@@ -1524,8 +1536,9 @@ mplog(GEN x)
 {
   pari_sp ltop, av;
   long EX,l,l1,l2,m,n,k,ex,s;
-  double alpha,a,b;
+  double a, b;
   GEN z,p1,y,y2,p4,p5,unr;
+  ulong u;
 
   if (typ(x)!=t_REAL) err(typeer,"mplog");
   if (signe(x)<=0) err(talker,"non positive argument in mplog");
@@ -1543,12 +1556,13 @@ mplog(GEN x)
   }
   /* 1 < p1 < 2 */
   av = avma; l -= 2;
-  alpha = 1. + p1[2] / C31; if (!alpha) alpha = 0.00000001;
-  a = -log(alpha)/LOG2;
-  b = sqrt(BITS_IN_HALFULONG*l/3.0);
+  u = ((ulong)p1[2]) & (~HIGHBIT); /* p1[2] - HIGHBIT, assuming HIGHBIT set */
+  if (u) a = (double)(BITS_IN_LONG-1) - log2((double)u); /* ~ -log2(p1 - 1) */
+  else   a = (double)(BITS_IN_LONG-1);
+  b = sqrt((BITS_IN_HALFULONG/3.0) * l);
   if (a <= b)
   {
-    n = 1 + (long)sqrt(BITS_IN_HALFULONG*3.0*l);
+    n = 1 + (long)3*b;
     m = 1 + (long)(b-a);
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
@@ -1566,7 +1580,7 @@ mplog(GEN x)
   y2 = cgetr(l2); av = avma;
 
   /* want to compute log(X), X ~ 1  (X = p4) */
-  /* y = (X-1)/(X+1).  log(X) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / * k */
+  /* y = (X-1)/(X+1). log(X) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / * k */
 
   /* affrr needed here instead of setlg since prec may DECREASE */
   p1 = cgetr(l2); affrr(subrr(p4,unr), p1);

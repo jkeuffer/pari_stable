@@ -196,6 +196,7 @@ BA 21- type() does not allow to change object types anymore.
    27- move BEGINEXTERN / ENDEXTERN pairs out of kernel headers into pari.h
    28- split the User's manual in two: PARI/GP and libpari.
    29- updated and completed the tutorial
+   30- faster basic transcendental functions on small inputs (sqrt, log, exp)
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
