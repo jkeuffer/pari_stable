@@ -2481,9 +2481,10 @@ static int
 chron(char *s)
 {
   if (*s)
-  {
-    if (*s == '#') { pariputs(do_time(ti_LAST)); s++; return 1; }
+  { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
+    if (*s == '#') s++;
     if (*s) return 0;
+    pariputs(do_time(ti_LAST));
   }
   else { chrono = 1-chrono; sd_timer("",d_ACKNOWLEDGE); }
   return 1;
