@@ -2430,16 +2430,17 @@ issimplefield(GEN x)
   return 0;
 }
 
+#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC)
 int
 isrational(GEN x)
 {
-  long i;
+  long i, t = typ(x);
+  if (t != t_POL) return is_rational_t(t);
   for (i=lgef(x)-1; i>1; i--)
-    switch(typ(x[i]))
-    {
-      case t_INT: case t_FRAC: break;
-      default: return 0;
-    }
+  {
+    t = typ(x[i]);
+    if (!is_rational_t(t)) return 0;
+  }
   return 1;
 }
 
