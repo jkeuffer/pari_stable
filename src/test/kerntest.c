@@ -3,7 +3,7 @@
 
 GEN   gzero, gun, gdeux;
 gpmem_t top, bot, avma;
-ulong memused = 0;
+size_t memused = 0;
 long  DEBUGLEVEL,DEBUGMEM = 0;
 
 void specinit()
@@ -19,9 +19,9 @@ void specinit()
 }
 
 void pari_err(long x, ...) { exit (0); }
-GEN gerepileuptoint(long av, GEN q){ return q; }
-void gerepilemanysp(long av, long tetpil, GEN* gptr[], long n){}
-void gerepilemany(long av, GEN* gptr[], long n){}
+GEN gerepileuptoint(gpmem_t av, GEN q){ return q; }
+void gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], long n){}
+void gerepilemany(gpmem_t av, GEN* gptr[], long n){}
 
 void sorstring(char* b, long x)
 {
