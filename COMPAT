@@ -1,4 +1,15 @@
-This file lists the incompatible changes between Version 1.39.15 and 2.0.x
+This file lists the incompatible changes between Version 2.x and older versions
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.2 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+* The calculator GP:
+====================
+
+* The library PARI:
+===================
+  - gsize() renamed to sizedigit()  [conflict with gtk]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 * The calculator GP:
 ====================

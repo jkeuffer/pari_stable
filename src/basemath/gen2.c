@@ -1835,7 +1835,7 @@ gexpo(GEN x)
 }
 
 long
-gsize(GEN x)
+sizedigit(GEN x)
 {
   return gcmp0(x)? 0: (long) ((gexpo(x)+1) * L2SL10) + 1;
 }

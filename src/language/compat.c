@@ -494,7 +494,7 @@ entree oldfonctions[]={
 {"simplify",1,(void *)simplify,2,"G"},
 {"sin",1,(void *)gsin,3,"Gp"},
 {"sinh",1,(void *)gsh,3,"Gp"},
-{"size",10,(void *)gsize,2,"lG"},
+{"size",10,(void *)sizedigit,2,"lG"},
 {"smallbasis",13,(void *)smallbase,6,"Gf"},
 {"smallbuchinit",93,(void *)smallbuchinit,6,"GD0.3,G,D0.3,G,D5,G,D1,G,D4,L,D3,L,p"},
 {"smalldiscf",1,(void *)smalldiscf,6,"G"},

@@ -60,6 +60,7 @@ XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
     7- bnfinit: "looking hard" part overdone in random relations. Tuned down.
 XR  8- added flag in rnfconductor to check extension is abelian (under GRH)
     9- made Vec("pari") return ["p","a","r","i"] instead of ["pari"]
+   10- renamed library function gsize() to sizedigit()  [conflict with gtk]
 
   Added
     1- file README.WIN

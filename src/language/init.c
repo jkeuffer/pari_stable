@@ -2106,7 +2106,7 @@ entree functions_basic[]={
 {"sin",1,(void*)gsin,3,"Gp"},
 {"sinh",1,(void*)gsh,3,"Gp"},
 {"sizebyte",10,(void*)taille2,2,"lG"},
-{"sizedigit",10,(void*)gsize,2,"lG"},
+{"sizedigit",10,(void*)sizedigit,2,"lG"},
 {"solve",37,(void*)zbrent,9,"V=GGEp"},
 {"sqr",18,(void*)gsqr,3,"G"},
 {"sqrt",1,(void*)gsqrt,3,"Gp"},
