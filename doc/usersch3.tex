@@ -1598,27 +1598,57 @@ Also available are
 $\teb{factor}(x)$ (= $\teb{factor0}(x,-1)$),
 $\teb{smallfact}(x)$ (= $\teb{factor0}(x,0)$).
 
-\subsecidx{factorback}$(f,\{nf\})$: $f$ being any factorization, gives back
-the factored object. If a second argument $\var{nf}$ is supplied, $f$ is
-assumed to be a prime ideal factorization in the number field $\var{nf}$.
-The resulting ideal is given in HNF\sidx{Hermite normal form} form.
+\subsecidx{factorback}$(f,\{e\},\{nf\})$: gives back the factored object
+corresponding to a factorization. If the last argument is of number field
+type (e.g.~created by \kbd{nfinit} or \kbd{bnfinit}), assume we are dealing
+with a prime ideal factorization in the number field. The resulting ideal is
+given in HNF\sidx{Hermite normal form} form.
 
-If $f$ is a vector (not mimicing a factorization, see below) instead of a
-factorization, return the product of all elements of $f$, i.e assume it is a
-factorization, all of whose exponents are equal to $1$.
+If $e$ is present, $e$ and $f$ must be vectors of the same length ($e$ being
+integral), and the corresponding factorization is the product of the
+$f[i]^e[i]$.
 
-Finally, if $f$ is a vector of $2$ vectors of the same length the second of
-which being integral (dummy factorization), say of the form $f = [x,e]$,
-return the product of the $x[i]^{e[i]}$. For example, in case separate
-\typ{VEC} $x$ and $e$ are originally available, it is more convenient (and
-legible) to use this trick than to build a legitimate factorization;
-compare
+If not, $f$ can either be a vector (as above with $e$ containing only $1$s)
+or a regular factorization, as produced with any \kbd{factor} command.
+Examples:
 \bprog
-factorback([x, e])
-factorback(concat(Mat(x~), e~))
-@eprog
+? factorback([2,2; 3,1])
+%1 = 12
+? factorback([2,2], [3,1])
+%2 = 12
+? factorback([5,2,3])
+%3 = 30
+? factorback([2,2], [3,1], nfinit(x^3+2))
+%4 =
+[16 0 0]
 
-\syn{factorback}{f,\var{nf}}, where an omitted
+[0 16 0]
+
+[0 0 16]
+? nf = nfinit(x^2+1); fa = idealfactor(nf, 10)
+%5 = 
+[[2, [1, 1]~, 2, 1, [1, 1]~] 2]
+
+[[5, [-2, 1]~, 1, 1, [2, 1]~] 1]
+
+[[5, [2, 1]~, 1, 1, [-2, 1]~] 1]
+? factorback(fa)
+  ***   forbidden multiplication t_VEC * t_VEC.
+? factorback(fa, nf)
+%6 =
+[10 0]
+
+[0 10]
+
+@eprog
+In the fourth example, $2$ and $3$ are interpreted as principal ideals in a
+cubic field. In the fifth one, \kbd{factorback(fa)} is meaningless since we
+forgot to indicate the number field, and the entries in the first column of
+\kbd{fa} can't be multiplied.
+
+\syn{factorback0}{f,e,\var{nf}}, where an omitted
+$\var{nf}$ or $e$ is entered as \kbd{NULL}. Also available is
+\tet{factorback}$(f,\var{nf})$ (case $e = \kbd{NULL}$) where an omitted
 $\var{nf}$ is entered as \kbd{NULL}.
 
 \subsecidx{factorcantor}$(x,p)$: factors the polynomial $x$ modulo the
