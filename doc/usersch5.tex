@@ -1802,7 +1802,7 @@ $\kbd{T}(0) \neq 0$.
 \fun{GEN}{Flx_rem_montgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
 \kbd{x} modulo \kbd{T}, where \kbd{mg} is the Montgomery inverse of \kbd{T}.
 
-\fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{FpX_renormalize}, where
+\fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{FpX\_renormalize}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{Flx_shift}{GEN T, long n}, returns \kbd{T} multiplied by $\kbd{x}^n$.
@@ -1986,6 +1986,9 @@ called on the vector's coefficients.
 
 \fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx},
 repeatedly called on the polynomial's coefficients.
+
+\fun{GEN}{ZXXV_to_FlxXV}{GEN V, ulong p, long v}, as \kbd{ZXX\_to\_FlxX},
+repeatedly called on the vector's coefficients.
 
 \fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flm}).
