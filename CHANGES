@@ -151,6 +151,7 @@ HC 12- gamma function for integral/rational arguments
        argument anymore
    31- unified nfinit, polred* [use dedicated structs internally]
    32- rnfconductor(..., 1) doesn't need GRH anymore
+   33- extracted FpXQ_gener from idealstar
 
   Added
     1- mplog2() function --> faster mplog()
