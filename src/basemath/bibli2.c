@@ -799,8 +799,8 @@ setminus(GEN x, GEN y)
 static long
 dirval(GEN x)
 {
-  long i=1,lx=lg(x);
-  while (i<lx && gcmp0((GEN)x[i])) i++;
+  long i = 1, lx = lg(x);
+  while (i < lx && gcmp0((GEN)x[i])) i++;
   return i;
 }
 
@@ -808,28 +808,27 @@ GEN
 dirmul(GEN x, GEN y)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
-  long lx,ly,lz,dx,dy,i,j,k;
-  GEN z,p1;
+  long lx, ly, lz, dx, dy, i, j, k;
+  GEN z;
 
-  if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(talker,"not a dirseries in dirmul");
-  dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
-  if (ly-dy<lx-dx) { z=y; y=x; x=z; lz=ly; ly=lx; lx=lz; lz=dy; dy=dx; dx=lz; }
-  lz=min(lx*dy,ly*dx);
-  z=cgetg(lz,t_VEC); for (i=1; i<lz; i++) z[i]= (long)gen_0;
+  if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(typeer,"dirmul");
+  dx = dirval(x); lx = lg(x);
+  dy = dirval(y); ly = lg(y);
+  if (ly-dy < lx-dx) { swap(x,y); lswap(lx,ly); lswap(dx,dy); }
+  lz = min(lx*dy,ly*dx);
+  z = zerovec(lz-1);
   for (j=dx; j<lx; j++)
   {
-    p1=(GEN)x[j];
-    if (!gcmp0(p1))
+    GEN c = (GEN)x[j];
+    if (gcmp0(c)) continue;
+    if (gcmp1(c))
+      for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],(GEN)y[k]);
+    else
     {
-      if (gcmp1(p1))
-	for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],(GEN)y[k]);
+      if (gcmp_1(c))
+        for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=lsub((GEN)z[i],(GEN)y[k]);
       else
-      {
-	if (gcmp_1(p1))
-	  for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=lsub((GEN)z[i],(GEN)y[k]);
-	else
-	  for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],gmul(p1,(GEN)y[k]));
-      }
+        for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],gmul(c,(GEN)y[k]));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -847,27 +846,25 @@ dirdiv(GEN x, GEN y)
   long lx,ly,lz,dx,dy,i,j;
   GEN z,p1;
 
-  if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(talker,"not a dirseries in dirmul");
-  dx=dirval(x); dy=dirval(y); lx=lg(x); ly=lg(y);
-  if (dy!=1) err(talker,"not an invertible dirseries in dirdiv");
-  lz=min(lx,ly*dx); p1=(GEN)y[1];
-  if (!gcmp1(p1)) { y=gdiv(y,p1); x=gdiv(x,p1); }
-  else x=gcopy(x);
-  z=cgetg(lz,t_VEC); for (i=1; i<dx; i++) z[i]= (long)gen_0;
+  if (typ(x)!=t_VEC || typ(y)!=t_VEC) err(typeer,"dirmul");
+  dx = dirval(x); lx = lg(x);
+  dy = dirval(y); ly = lg(y);
+  if (dy != 1 || ly == 1) err(talker,"not an invertible dirseries in dirdiv");
+  lz = min(lx,ly*dx); p1 = (GEN)y[1];
+  if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = dummycopy(x);
+  z = zerovec(lz-1);
   for (j=dx; j<lz; j++)
   {
     p1=(GEN)x[j]; z[j]=(long)p1;
-    if (!gcmp0(p1))
+    if (gcmp0(p1)) continue;
+    if (gcmp1(p1))
+      for (i=j+j; i<lz; i+=j) x[i]=lsub((GEN)x[i],(GEN)y[i/j]);
+    else
     {
-      if (gcmp1(p1))
-	for (i=j+j; i<lz; i+=j) x[i]=lsub((GEN)x[i],(GEN)y[i/j]);
+      if (gcmp_1(p1))
+        for (i=j+j; i<lz; i+=j) x[i]=ladd((GEN)x[i],(GEN)y[i/j]);
       else
-      {
-	if (gcmp_1(p1))
-	  for (i=j+j; i<lz; i+=j) x[i]=ladd((GEN)x[i],(GEN)y[i/j]);
-	else
-	  for (i=j+j; i<lz; i+=j) x[i]=lsub((GEN)x[i],gmul(p1,(GEN)y[i/j]));
-      }
+        for (i=j+j; i<lz; i+=j) x[i]=lsub((GEN)x[i],gmul(p1,(GEN)y[i/j]));
     }
   }
   return gerepilecopy(av,z);
