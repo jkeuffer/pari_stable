@@ -1873,7 +1873,7 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL:
-	  p1=greffe(y,lgef(x),0); p2=gdiv(x,p1);
+	  p1=greffe(y,lg(x),0); p2=gdiv(x,p1);
           free(p1); return p2;
 
 	case t_SER:
