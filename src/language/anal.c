@@ -415,6 +415,48 @@ readseq(char *c, int strict)
   return z;
 }
 
+static void
+check_proto(char *code)
+{
+  char *s = code, *old;
+  if (*s == 'l' || *s == 'v') s++;
+  while (*s && *s != '\n') switch (*s++)
+  {
+    case '&':
+    case '=':
+    case 'E':
+    case 'G':
+    case 'I':
+    case 'L':
+    case 'M':
+    case 'P':
+    case 'S':
+    case 'V':
+    case 'f':
+    case 'n':
+    case 'p':
+    case 'r':
+    case 'x': break;
+    case 's':
+      if (*s == '*') s++;
+      break;
+    case 'D':
+      if (*s == 'G' || *s == '&' || *s == 'n' || *s == 'I' || *s == 'V')
+      {
+        s++; break;
+      }
+      old = s; while (*s != ',') s++;
+      if (*s != ',') err(talker2, "missing comma", old, code);
+      break;
+    case ',': break;
+    case '\n': return; /* Before the mnemonic */
+      
+    case 'l':
+    case 'v': err(talker2, "this code has to come first", s-1, code);
+    default: err(talker2, "unknown parser code", s-1, code);
+  }
+}
+
 entree *
 install(void *f, char *name, char *code)
 {
@@ -428,6 +470,7 @@ install(void *f, char *name, char *code)
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
     if (*s) err(talker2,"not a valid identifier", s, name);
+    check_proto(code);
     ep = installep(f, name, strlen(name), EpINSTALL, 0, functions_hash + hash);
     ep->code = pari_strdup(code);
   }
@@ -2785,6 +2828,7 @@ skipidentifier(void)
     }
     analyseur++;
 
+    if (*s == 'v' || *s == 'l') s++;
     /* Optimized for G and p. */
     matchcomma = 0;
     while (*s == 'G') { match_comma(); skipexpr(); s++; }
@@ -2836,7 +2880,7 @@ skipidentifier(void)
       case '&': match_comma(); match('&'); check_matcell(); break;
       case 'V': match_comma(); check_var(); break;
 
-      case 'p': case 'P': case 'l': case 'v': case 'f': case 'x':
+      case 'p': case 'P': case 'f': case 'x':
         break;
 
       case 'D':
