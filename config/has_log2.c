@@ -1,2 +1,3 @@
 #include <math.h>
-main(){log2(2.);}
+char (*f)() = log2;
+int main(){ return f != log2; }
