@@ -931,12 +931,12 @@ sylpm(GEN f1,GEN f2,GEN pm)
   GEN a,h;
 
   n=degpol(f1); a=cgetg(n+1,t_MAT);
-  h = FpX_res(f2,f1,pm);
+  h = FpX_rem(f2,f1,pm);
   for (j=1;; j++)
   {
     a[j] = (long)pol_to_vec(h,n);
     if (j == n) break;
-    h = FpX_res(shiftpol(h,v),f1,pm);
+    h = FpX_rem(shiftpol(h,v),f1,pm);
   }
   return hnfmodid(a,pm);
 }
@@ -999,7 +999,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
       ha = gmul(ha,alpha);
       ha = Q_remove_denom(ha, &d);
       mod = d? mulii(pdp,d): pdp;
-      ha = FpX_res(ha, f, mod);
+      ha = FpX_rem(ha, f, mod);
       if (d) ha = gdivexact(ha,d);
     }
     b[i] = (long)pol_to_vec(ha,n);
@@ -1024,7 +1024,7 @@ FpX_val(GEN x0, GEN t, GEN p, GEN *py)
 
   for (k=0; ; k++)
   {
-    y = FpX_divres(x, t, p, &r);
+    y = FpX_divrem(x, t, p, &r);
     if (signe(r)) break;
     x = y;
   }
@@ -1038,7 +1038,7 @@ QpX_mod(GEN e, GEN f, GEN pk)
   GEN mod, d;
   e = Q_remove_denom(e, &d);
   mod = d? mulii(pk,d): pk;
-  e = FpX_res(e, centermod(f, mod), mod);
+  e = FpX_rem(e, centermod(f, mod), mod);
   e = FpX_center(e, mod);
   if (d) e = gdiv(e, d);
   return e;
@@ -2088,7 +2088,7 @@ _primedec(GEN nf, GEN p)
   N = degpol(T);
   L = cgetg(N+1,t_VEC); iL = 1;
   for (i=1; i<k; i++)
-    if (is_pm1(ex[i]) || signe(FpX_res(f,(GEN)F[i],p)))
+    if (is_pm1(ex[i]) || signe(FpX_rem(f,(GEN)F[i],p)))
       L[iL++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
     else /* F[i] | (f,g,h), happens at least once by Dedekind criterion */
       ex[i] = 0;
@@ -2266,7 +2266,7 @@ get_proj_modT(GEN basis, GEN T, GEN p)
     if (typ(w) != t_INT)
     {
       w = Q_primitive_part(w, &cx);
-      w = FpX_res(w, T, p);
+      w = FpX_rem(w, T, p);
       if (cx)
       {
         cx = gmod(cx, p);
@@ -2688,9 +2688,6 @@ mymod(GEN x, GEN p)
   return y;
 }
 #endif
-
-#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
-#define FqX_mul FpXQX_mul
 
 /* Relative Dedekind criterion over nf, applied to the order defined by a
  * root of irreducible polynomial P, modulo the prime ideal pr. Assume

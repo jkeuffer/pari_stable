@@ -564,7 +564,7 @@ findquad(GEN a, GEN x, GEN p)
   GEN u,v;
   if (typ(x) == t_POLMOD) x = (GEN)x[2];
   if (typ(a) == t_POLMOD) a = (GEN)a[2];
-  u = poldivres(x, a, &v);
+  u = poldivrem(x, a, &v);
   u = simplify(u); tu = typ(u);
   v = simplify(v); tv = typ(v);
   if (!is_scalar_t(tu) || !is_scalar_t(tv))

@@ -85,7 +85,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ldivir  (long)divir
 #define ldivis  (long)divis
 #define ldivmod (long)gdivmod
-#define ldivres (long)poldivres
 #define ldivri  (long)divri
 #define ldivrr  (long)divrr
 #define ldivrs  (long)divrs

@@ -767,10 +767,9 @@ nfmod(GEN nf, GEN a, GEN b)
 }
 
 /* Given a and b in nf, gives a two-component vector [y,r] in nf such
- * that r=a-b.y is "small".
- */
+ * that r=a-b.y is "small". */
 GEN
-nfdivres(GEN nf, GEN a, GEN b)
+nfdivrem(GEN nf, GEN a, GEN b)
 {
   pari_sp av=avma,tetpil;
   GEN p1,z, y = ground(element_div(nf,a,b));

@@ -45,7 +45,7 @@ int
 poldivis(GEN x, GEN y, GEN *z)
 {
   pari_sp av = avma;
-  GEN p1 = poldivres(x,y,ONLY_DIVIDES);
+  GEN p1 = poldivrem(x,y,ONLY_DIVIDES);
   if (p1) { *z = p1; return 1; }
   avma=av; return 0;
 }
@@ -61,7 +61,7 @@ poldivis(GEN x, GEN y, GEN *z)
  *   *z is the last object on stack (and thus can be disposed of with cgiv
  *   instead of gerepile) */
 GEN
-poldivres(GEN x, GEN y, GEN *pr)
+poldivrem(GEN x, GEN y, GEN *pr)
 {
   pari_sp avy, av, av1;
   long ty=typ(y),tx,vx,vy,dx,dy,dz,i,j,sx,lrem;
@@ -83,7 +83,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     if (pr) *pr=gcopy(x);
     return gzero;
   }
-  if (tx!=t_POL || ty!=t_POL) err(typeer,"euclidean division (poldivres)");
+  if (tx!=t_POL || ty!=t_POL) err(typeer,"euclidean division (poldivrem)");
 
   vx=varn(x);
   if (vx<vy)
@@ -326,7 +326,7 @@ rootmod2(GEN f, GEN pp)
   {
     mael(x_minus_s,2,2) = (long)s;
     /* one might do a FFT-type evaluation */
-    q = FpX_divres(f, x_minus_s, pp, &r);
+    q = FpX_divrem(f, x_minus_s, pp, &r);
     if (signe(r)) avma = av1;
     else
     {
@@ -473,10 +473,7 @@ rootmod0(GEN f, GEN p, long flag)
 /*                     FACTORISATION MODULO p                      */
 /*                                                                 */
 /*******************************************************************/
-#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
-#define FqX_rem(x,y,T,p) FpXQX_divres((x),(y),(T),(p),ONLY_REM)
 #define FqX_red FpXQX_red
-#define FqX_sqr FpXQX_sqr
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
 extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
@@ -522,7 +519,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
     if (j < N)
     {
       pari_sp av = avma;
-      w = gerepileupto(av, FpXQX_divres(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
+      w = gerepileupto(av, FpXQX_divrem(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
     }
   }
   return gerepileupto(ltop,FqM_ker(Q,T,p));
@@ -707,7 +704,7 @@ Flx_nbfact(GEN z, long p)
       fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
     if (!e) break;
     z = Flx_div(z, g, p);
-    w = Flx_res(w, z, p);
+    w = Flx_rem(w, z, p);
   }
   if (e)
   {
@@ -782,7 +779,7 @@ try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
   for (s=1; s<r; s++,w=w2)
   {
     w2 = gsqr(w);
-    w2 = FpX_res(w2, pol, p);
+    w2 = FpX_rem(w2, pol, p);
     if (gcmp1(w2)) break;
   }
   return gcmp_1(w)? NULL: w;
@@ -815,7 +812,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
     }
     else
     {
-      w = FpX_res(stopoly(m,ps,v),*t, p);
+      w = FpX_rem(stopoly(m,ps,v),*t, p);
       m++; w = try_pow(w,*t,p,q,r);
       if (!w) continue;
       w = ZX_s_add(w, -1);
@@ -842,7 +839,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   av=avma;
   for(;; avma=av, m=incpos(m))
   {
-    w = FpX_res(stopoly_gen(m,p,v),*t, p);
+    w = FpX_rem(stopoly_gen(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
     w = ZX_s_add(w,-1);
@@ -869,10 +866,10 @@ init_pow_p_mod_pT(GEN p, GEN T)
   for (i=2; i < n; i+=2)
   {
     p1 = gsqr((GEN)S[i>>1]);
-    S[i]   = (long)FpX_res(p1, T, p);
+    S[i]   = (long)FpX_rem(p1, T, p);
     if (i == n-1) break;
     p1 = gmul((GEN)S[i], (GEN)S[1]);
-    S[i+1] = (long)FpX_res(p1, T, p);
+    S[i+1] = (long)FpX_rem(p1, T, p);
   }
   return S;
 }
@@ -977,7 +974,7 @@ factcantor0(GEN f, GEN pp, long flag)
         }
         du -= dg;
         u = FpX_div(u,g,pp);
-        v = FpX_res(v,u,pp);
+        v = FpX_rem(v,u,pp);
       }
       if (du)
       {
@@ -1246,7 +1243,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
       else
       {
         pari_sp av = avma;
-        b = FpX_res(polt, a, p);
+        b = FpX_rem(polt, a, p);
         if (degpol(b) <= 0) { avma=av; continue; }
         b = ZX_s_add(FpXQ_pow(b,po2, a,p), -1);
         b = FpX_gcd(a,b, p); lb = degpol(b);
@@ -1301,7 +1298,6 @@ FqX_is_squarefree(GEN P, GEN T, GEN p)
   GEN z = FqX_gcd(P, derivpol(P), T, p);
   avma = av;
   return degpol(z)==0;
-
 }
 
 long

@@ -457,7 +457,7 @@ FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
   if (typ(x) == t_INT || typ(y) == t_INT)
     err(bugparier,"FpXQ_mul, t_INT are absolutely forbidden");
   z = quickmul(y+2, x+2, lg(y)-2, lg(x)-2); setvarn(z,varn(y));
-  z = FpX_red(z, p); return FpX_res(z,T, p);
+  z = FpX_red(z, p); return FpX_rem(z,T, p);
 }
 
 /* Square of y in Z/pZ[X]/(pol)
@@ -466,7 +466,7 @@ GEN
 FpXQ_sqr(GEN y,GEN pol,GEN p)
 {
   GEN z = quicksqr(y+2,lg(y)-2); setvarn(z,varn(y));
-  z = FpX_red(z, p); return FpX_res(z,pol, p);
+  z = FpX_red(z, p); return FpX_rem(z,pol, p);
 }
 /*Modify y[2].
  *No reduction if p is NULL
@@ -762,7 +762,7 @@ FpX_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p)
   p1=FpX_mul(ax, FpX_sub(y,x,p),p);
   p1 = FpX_add(x,p1,p);
   if (!Tz) Tz=FpX_mul(Tx,Ty,p);
-  p1 = FpX_res(p1,Tz,p);
+  p1 = FpX_rem(p1,Tz,p);
   return gerepileupto(av,p1);
 }
 
@@ -888,11 +888,11 @@ FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
   {
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    x[i] = (long)FpX_res(normalizepol_i(t,N), T,p);
+    x[i] = (long)FpX_rem(normalizepol_i(t,N), T,p);
   }
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  x[i] = (long)FpX_res(normalizepol_i(t,N), T,p);
+  x[i] = (long)FpX_rem(normalizepol_i(t,N), T,p);
   return normalizepol_i(x, i+1);
 }
 
@@ -906,19 +906,18 @@ FpXQX_red(GEN z, GEN T, GEN p)
     if (typ(z[i]) == t_INT)
       res[i] = lmodii((GEN)z[i],p);
     else if (T)
-      res[i] = (long)FpX_res((GEN)z[i],T,p);
+      res[i] = (long)FpX_rem((GEN)z[i],T,p);
     else
       res[i] = (long)FpX_red((GEN)z[i],p);
   return normalizepol_i(res,lg(res));
 }
-/* if T = NULL, call FpX_mul */
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
   long vx;
-  if (!T) err(bugparier,"T==NULL in FpXQX_mul");
+  if (!T) err(bugparier,"FpXQX_mul (T==NULL)");
   vx = min(varn(x),varn(y));
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
@@ -1070,7 +1069,7 @@ _FqXQ_red(void *data, GEN x)
   kronecker_muldata *D = (kronecker_muldata*)data;
   GEN t = FpXQX_from_Kronecker(x, D->T,D->p);
   setvarn(t, D->v);
-  t = FpXQX_divres(t, D->S,D->T,D->p, ONLY_REM);
+  t = FpXQX_divrem(t, D->S,D->T,D->p, ONLY_REM);
   return to_Kronecker(t,D->T);
 }
 static GEN
@@ -1176,13 +1175,13 @@ Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 }
 
 GEN
-Fq_res(GEN x, GEN T, GEN p)
+Fq_rem(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   switch(typ(x)==t_POL)
   {
     case 0: return modii(x,p);
-    case 1: return gerepileupto(ltop,FpX_res(FpX_red(x,p),T,p));
+    case 1: return gerepileupto(ltop,FpX_rem(FpX_red(x,p),T,p));
   }
   return NULL;
 }
@@ -1194,10 +1193,31 @@ Fq_res(GEN x, GEN T, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-/*Well nothing, for now. So we reuse FpXQX*/
-#define FqX_mul FpXQX_mul
-#define FqX_sqr FpXQX_sqr
-#define FqX_red FpXQX_red
+GEN
+FqX_mul(GEN x, GEN y, GEN T, GEN p)
+{
+  return T? FpXQX_mul(x, y, T, p): FpX_mul(x, y, p);
+}
+GEN
+FqX_sqr(GEN x, GEN T, GEN p)
+{
+  return T? FpXQX_sqr(x, T, p): FpX_sqr(x, p);
+}
+GEN
+FqX_div(GEN x, GEN y, GEN T, GEN p)
+{
+  return T? FpXQX_divrem(x,y,T,p,NULL): FpX_divrem(x,y,p,NULL);
+}
+GEN
+FqX_rem(GEN x, GEN y, GEN T, GEN p)
+{
+  return T? FpXQX_divrem(x,y,T,p,ONLY_REM): FpX_divrem(x,y,p,ONLY_REM);
+}
+GEN
+FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
+{
+  return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
+}
 
 static GEN modulo,Tmodulo;
 static GEN fgmul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
@@ -1228,7 +1248,7 @@ FqV_red(GEN z, GEN T, GEN p)
     if (typ(z[i]) == t_INT)
       res[i] = lmodii((GEN)z[i],p);
     else if (T)
-      res[i] = (long)FpX_res((GEN)z[i],T,p);
+      res[i] = (long)FpX_rem((GEN)z[i],T,p);
     else
       res[i] = (long)FpX_red((GEN)z[i],p);
   return res;
@@ -1930,13 +1950,13 @@ FqX_from_Kronecker(GEN z, GEN T, GEN p)
     a[1] = (long)T;
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    a[2] = (long)FpX_res(normalizepol_i(t,N), T,p);
+    a[2] = (long)FpX_rem(normalizepol_i(t,N), T,p);
   }
   a = cgetg(3,t_POLMOD); x[i] = (long)a;
   a[1] = (long)T;
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  a[2] = (long)FpX_res(normalizepol_i(t,N), T,p);
+  a[2] = (long)FpX_rem(normalizepol_i(t,N), T,p);
   return normalizepol_i(x, i+1);
 }
 
@@ -1953,7 +1973,7 @@ FqX_Kronecker_red(GEN z, GEN T, GEN p)
   for (i=2; i<lx+2; i++)
   {
     for (j=2; j<N; j++) t[j] = z[j];
-    a = FpX_res(normalizepol_i(t,N), T,p);
+    a = FpX_rem(normalizepol_i(t,N), T,p);
     for (j=2; j<lT; j++) y[j] = a[j];
     for (   ; j<N;  j++) y[j] = zero;
     z += (N-2);
@@ -1961,7 +1981,7 @@ FqX_Kronecker_red(GEN z, GEN T, GEN p)
   }
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  a = FpX_res(normalizepol_i(t,N), T,p);
+  a = FpX_rem(normalizepol_i(t,N), T,p);
   for (j=2; j<lT; j++) y[j] = a[j];
   for (   ; j<N;  j++) y[j] = zero;
   return normalizepol_i(x, l);
@@ -2019,14 +2039,14 @@ umodratu(GEN a, ulong p)
 
 /* x and y in Z[X]. Possibly x in Z */
 GEN
-FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
+FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
 {
   long vx, dx, dy, dz, i, j, sx, lrem;
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!p) return poldivres(x,y,pr);
-  if (!signe(y)) err(talker,"division by zero in FpX_divres");
+  if (!p) return poldivrem(x,y,pr);
+  if (!signe(y)) err(talker,"division by zero in FpX_divrem");
   vx = varn(x);
   dy = degpol(y);
   dx = (typ(x)==t_INT)? 0: degpol(x);
@@ -2059,7 +2079,7 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
     ulong pp = (ulong)p[2];
     GEN a = ZX_Flx(x, pp);
     GEN b = ZX_Flx(y, pp);
-    z = Flx_divres(a,b,pp, pr);
+    z = Flx_divrem(a,b,pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
     setlg(z, lg(z)); z = dummycopy(z);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
@@ -2123,15 +2143,15 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
 
 /* x and y in Z[Y][X]. Assume T irreducible mod p */
 GEN
-FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
+FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
 {
   long vx, dx, dy, dz, i, j, sx, lrem;
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!p) return poldivres(x,y,pr);
-  if (!T) return FpX_divres(x,y,p,pr);
-  if (!signe(y)) err(talker,"division by zero in FpX_divres");
+  if (!p) return poldivrem(x,y,pr);
+  if (!T) return FpX_divrem(x,y,p,pr);
+  if (!signe(y)) err(talker,"division by zero in FpX_divrem");
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -2168,14 +2188,14 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = (GEN)x[dx]; av = avma;
-  z[dz] = lead? lpileupto(av, FpX_res(gmul(p1,lead), T, p)): lcopy(p1);
+  z[dz] = lead? lpileupto(av, FpX_rem(gmul(p1,lead), T, p)): lcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=(GEN)x[i];
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    if (lead) p1 = gmul(FpX_res(p1, T, p), lead);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil,FpX_res(p1, T, p));
+    if (lead) p1 = gmul(FpX_rem(p1, T, p), lead);
+    tetpil=avma; z[i-dy] = lpile(av,tetpil,FpX_rem(p1, T, p));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
@@ -2185,7 +2205,7 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    tetpil=avma; p1 = FpX_res(p1, T, p); if (signe(p1)) { sx = 1; break; }
+    tetpil=avma; p1 = FpX_rem(p1, T, p); if (signe(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
   }
@@ -2205,7 +2225,7 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     av=avma; p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    tetpil=avma; rem[i]=lpile(av,tetpil, FpX_res(p1, T, p));
+    tetpil=avma; rem[i]=lpile(av,tetpil, FpX_rem(p1, T, p));
   }
   rem -= 2;
   if (lead) gunclone(lead);
@@ -2345,7 +2365,7 @@ FpX_gcd(GEN x, GEN y, GEN p)
   b = FpX_red(y, p);
   while (signe(b))
   {
-    av = avma; c = FpX_res(a,b,p); a=b; b=c;
+    av = avma; c = FpX_rem(a,b,p); a=b; b=c;
   }
   avma = av; return gerepileupto(av0, a);
 }
@@ -2366,7 +2386,7 @@ FpX_gcd_check(GEN x, GEN y, GEN p)
     GEN lead = leading_term(b);
     GEN g = mppgcd(lead,p);
     if (!is_pm1(g)) return gerepileupto(av,g);
-    c = FpX_res(a,b,p); a=b; b=c;
+    c = FpX_rem(a,b,p); a=b; b=c;
   }
   avma = av; return gun;
 }
@@ -2398,7 +2418,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     d = a; d1 = b; v = gzero; v1 = gun;
     while (signe(d1))
     {
-      q = FpX_divres(d,d1,p, &r);
+      q = FpX_divrem(d,d1,p, &r);
       v = gadd(v, gneg_i(gmul(q,v1)));
       v = FpX_red(v,p);
       u=v; v=v1; v1=u;
@@ -2435,7 +2455,7 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   d = a; d1 = b; v = gzero; v1 = gun;
   while (signe(d1))
   {
-    q = FpXQX_divres(d,d1,T,p, &r);
+    q = FpXQX_divrem(d,d1,T,p, &r);
     v = gadd(v, gneg_i(gmul(q,v1)));
     v = FpXQX_red(v,T,p);
     u=v; v=v1; v1=u;
@@ -2444,7 +2464,7 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   u = gadd(d, gneg_i(gmul(b,v)));
   u = FpXQX_red(u,T, p);
   lbot = avma;
-  u = FpXQX_divres(u,a,T,p,NULL);
+  u = FpXQX_divrem(u,a,T,p,NULL);
   d = gcopy(d);
   v = gcopy(v);
   {
@@ -2653,7 +2673,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
   while (db)
   {
     lb = (GEN)b[db+2];
-    c = FpX_res(a,b, p);
+    c = FpX_rem(a,b, p);
     a = b; b = c; dc = degpol(c);
     if (dc < 0) { avma = av; return 0; }
 
@@ -2696,7 +2716,7 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
   while (db)
   {
     lb = b[db+2];
-    c = Flx_res(a,b, p);
+    c = Flx_rem(a,b, p);
     a = b; b = c; dc = degpol(c);
     if (dc < 0) { avma = av; return 0; }
 

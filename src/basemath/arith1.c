@@ -1882,7 +1882,7 @@ sfcont(GEN x, long k)
       p2 = (GEN)x[2];
       for (i=1; i<l; i++)
       {
-	y[i] = ldivres(p1,p2,&p3);
+	y[i] = (long)poldivrem(p1,p2,&p3);
         if (gcmp0(p3)) { i++; break; }
 	p1 = p2; p2 = p3;
       }

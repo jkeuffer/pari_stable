@@ -499,7 +499,7 @@ chinese_retrieve_pol(GEN DATA, GEN listdelta)
     p1 = gmul(p1, (GEN)bezoutC[i]);
     S = S? gadd(S,p1): p1;
   }
-  return FpX_res(FpX_red(S, p), FpX_red((GEN)DATA[1],p), p);
+  return FpX_rem(FpX_red(S, p), FpX_red((GEN)DATA[1],p), p);
 }
 
 /* return P(X + c) using destructive Horner */
@@ -586,7 +586,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
       a = FpX_FpXQ_compo(g,w0, T,q); /* first time */
     /* now, a = 0 (p) */
     a = gmul(gneg(h0), gdivexact(a, p));
-    w1 = gadd(w0, gmul(p, FpX_res(a, T,p)));
+    w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
 
     w1_Q = centermod(gmul(w1, resii(ind,q)), q);
     if (gegal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
@@ -610,9 +610,9 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
     /* h0 := h0 * (2 - h0 g'(w1)) mod (T,q)
      *     = h0 + h0 * (1 - h0 g'(w1)) */
     a = gmul(gneg(h0), FpX_FpXQV_compo(gp, FpXV_red(wpow,q),T,q));
-    a = ZX_s_add(FpX_res(a, T,q), 1); /* 1 - h0 g'(w1) = 0 (p) */
+    a = ZX_s_add(FpX_rem(a, T,q), 1); /* 1 - h0 g'(w1) = 0 (p) */
     a = gmul(h0, gdivexact(a, p));
-    h0 = gadd(h0, gmul(p, FpX_res(a, T,p)));
+    h0 = gadd(h0, gmul(p, FpX_rem(a, T,p)));
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
   TR = (GEN)DATA[14];

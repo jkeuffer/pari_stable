@@ -49,6 +49,8 @@ Done for version 2.2.8 (released ??/??/2004):
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
        As a result maximal degree jumps to ~ 2^24 on 32bit machines
+    2- renamed *res(te) routines to *rem(ainder). Eg poldivres --> poldivrem,
+       nfdivres --> nfdivrem
 
   Added
 

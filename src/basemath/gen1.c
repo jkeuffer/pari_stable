@@ -137,7 +137,7 @@ gred_rfrac2_i(GEN x1, GEN x2)
   xx1=content(x1); if (!gcmp1(xx1)) x1=gdiv(x1,xx1);
   xx2=content(x2); if (!gcmp1(xx2)) x2=gdiv(x2,xx2);
   x3=gdiv(xx1,xx2);
-  y = poldivres(x1,x2,&p1);
+  y = poldivrem(x1,x2,&p1);
   if (!signe(p1)) return gmul(x3,y);
 
   p1 = ggcd(x2,p1);
@@ -410,7 +410,7 @@ addrfrac(GEN x, GEN y)
   n = gadd(gmul(x1,y2), gmul(y1,x2));
   if (gcmp0(n)) return gerepileupto((pari_sp)(z+3), n);
   tetpil = avma; d = gmul(x2, y2);
-  p1 = poldivres(n, delta, &p2); /* we want gcd(n,delta) */
+  p1 = poldivrem(n, delta, &p2); /* we want gcd(n,delta) */
   if (gcmp0(p2))
   {
     if (lg(d) == 3) /* "constant" denominator */

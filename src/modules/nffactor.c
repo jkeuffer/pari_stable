@@ -54,8 +54,6 @@ extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL
 extern void remake_GM(GEN nf, nffp_t *F, long prec);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
-#define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
-#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
 
 static GEN nfsqff(GEN nf,GEN pol,long fl);
 

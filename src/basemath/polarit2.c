@@ -87,7 +87,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
       s = gadd(s, gmul((GEN)y[k-i+1],(GEN)P[dP-i]));
     if (N)
     {
-      if (T) s = FpX_res(FpX_red(s,N), T, N);
+      if (T) s = FpX_rem(FpX_red(s,N), T, N);
       else   s = modii(s, N);
       if (P_lead) s = Fq_mul(s, P_lead, T, N);
     }
@@ -386,12 +386,12 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   if (T)
   {
     z = FpXQX_mul(v,g, T,pd);
-    t = FpXQX_divres(z,a, T,pd, &s);
+    t = FpXQX_divrem(z,a, T,pd, &s);
   }
   else
   {
     z = FpX_mul(v,g, pd);
-    t = FpX_divres(z,a, pd, &s);
+    t = FpX_divrem(z,a, pd, &s);
   }
   t = gadd(gmul(u,g), gmul(t,b)); t = FpXQX_red(t, T, pd);
   t = gmul(t,p0);
@@ -413,12 +413,12 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   if (T)
   {
     z = FpXQX_mul(v,g, T,pd);
-    t = FpXQX_divres(z,a, T,pd, &s);
+    t = FpXQX_divrem(z,a, T,pd, &s);
   }
   else
   {
     z = FpX_mul(v,g, pd);
-    t = FpX_divres(z,a, pd, &s);
+    t = FpX_divrem(z,a, pd, &s);
   }
   t = gadd(gmul(u,g), gmul(t,b)); t = FpXQX_red(t, T, pd);
   t = gmul(t,p0);
@@ -3227,7 +3227,7 @@ gdivexact(GEN x, GEN y)
         case t_INTMOD:
         case t_POLMOD: return gmul(x,ginv(y));
         case t_POL:
-          if (varn(x)==varn(y)) return poldivres(x,y, ONLY_DIVIDES);
+          if (varn(x)==varn(y)) return poldivrem(x,y, ONLY_DIVIDES);
       }
       lx = lg(x); z = new_chunk(lx);
       for (i=2; i<lx; i++) z[i] = (long)gdivexact((GEN)x[i],y);
@@ -3535,7 +3535,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   }
   if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
   p1 = gadd(z, gneg(gmul(uze,xprim)));
-  vze = poldivres(p1, yprim, &r);
+  vze = poldivrem(p1, yprim, &r);
   if (!gcmp0(r)) err(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
   p2 = gun;
@@ -3627,7 +3627,7 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
     }
   }
   p1 = gsub(v,gmul(uze,xprim));
-  vze = poldivres(p1, yprim, &r);
+  vze = poldivrem(p1, yprim, &r);
   if (!gcmp0(r)) err(warner,"inexact computation in bezoutpol");
   if (cu) uze = gdiv(uze,cu);
   if (cv) vze = gdiv(vze,cv);

@@ -963,7 +963,7 @@ gdiventres(GEN x, GEN y)
       }
       if (tx == t_POL)
       {
-        z[1] = ldivres(x,y,(GEN *)(z+2));
+        z[1] = (long)poldivrem(x,y,(GEN *)(z+2));
         return z;
       }
   }
@@ -982,7 +982,7 @@ divrem(GEN x, GEN y, long v)
   if (v < 0 || typ(y) != t_POL || typ(x) != t_POL) return gdiventres(x,y);
   vx = varn(x); if (vx != v) x = swap_vars(x,v);
   vy = varn(y); if (vy != v) y = swap_vars(y,v);
-  q = poldivres(x,y, &r);
+  q = poldivrem(x,y, &r);
   if (v && (vx != v || vy != v))
   {
     q = poleval(q, polx[v]);
@@ -1065,7 +1065,7 @@ gdivmod(GEN x, GEN y, GEN *pr)
     err(typeer,"gdivmod");
   }
   if (tx!=t_POL) err(typeer,"gdivmod");
-  return poldivres(x,y,pr);
+  return poldivrem(x,y,pr);
 }
 
 /*******************************************************************/

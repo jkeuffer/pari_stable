@@ -1221,7 +1221,7 @@ fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
   long l=lg(Tmod);
   GEN F=cgetg(l,t_VEC);
   for(i=1;i<l;i++)
-    F[i]=(long)FpXQ_minpoly(FpX_res(Sp,(GEN) Tmod[i],p), (GEN) Tmod[i],p);
+    F[i]=(long)FpXQ_minpoly(FpX_rem(Sp,(GEN) Tmod[i],p), (GEN) Tmod[i],p);
   return F;
 }
 

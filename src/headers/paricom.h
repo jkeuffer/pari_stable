@@ -93,6 +93,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lgef lg
 #define setlgef setlg
 #define leadingcoeff(x) (pollead((x),-1))
+#define poldivres poldivrem
+#define nfdivres nfdivrem
 
 #define rcopy mpcopy
 #define absr  mpabs
@@ -323,16 +325,16 @@ enum manage_var_t {
 
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
-#define gdeuc(x,y) (poldivres((x),(y),NULL))
-#define gres(x,y) (poldivres((x),(y),ONLY_REM))
-#define FpX_div(x,y,p) (FpX_divres((x),(y),(p), NULL))
-#define FpX_res(x,y,p) (FpX_divres((x),(y),(p), ONLY_REM))
+#define gdeuc(x,y) (poldivrem((x),(y),NULL))
+#define gres(x,y) (poldivrem((x),(y),ONLY_REM))
+#define FpX_div(x,y,p) (FpX_divrem((x),(y),(p), NULL))
+#define FpX_rem(x,y,p) (FpX_divrem((x),(y),(p), ONLY_REM))
 
 #define Flv_ZC(x)  (vecsmall_col((x)))
 #define Flv_ZV(x)  (vecsmall_vec((x)))
 #define Flm_ZM(x)  (matsmall_mat((x)))
 #define Flx_copy(x) (vecsmall_copy((x)))
-#define Flx_div(x,y,p) (Flx_divres((x),(y),(p), NULL))
+#define Flx_div(x,y,p) (Flx_divrem((x),(y),(p), NULL))
 
 #define matpascal(n) matqpascal((n),NULL)
 #define sturm(x) (sturmpart((x),NULL,NULL))

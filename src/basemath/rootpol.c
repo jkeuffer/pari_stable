@@ -1109,7 +1109,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
   pari_sp ltop=avma, limite=stack_lim(ltop, 1);
 
   FF=*F; HH=H;
-  GG=poldivres(p,*F,&r);
+  GG=poldivrem(p,*F,&r);
   normF=gexpo(FF);
   normG=gexpo(GG);
   enh=gexpo(H); if (enh<0) enh=0;
@@ -1147,7 +1147,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
     bitprec1=-3*error+shiftbitprec;
     if (bitprec1>bitprec2) bitprec1=bitprec2;
     pp=mygprec(p,bitprec1);
-    GG=poldivres(pp,mygprec(FF,bitprec1),&r);
+    GG=poldivrem(pp,mygprec(FF,bitprec1),&r);
     error=gexpo(r); if (error<-bitprec1) error=-bitprec1;
   }
   if (error>-bitprec) return 0; /* FAIL */

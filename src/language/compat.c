@@ -396,7 +396,7 @@ entree oldfonctions[]={
 {"nfdetint",2,(void *)nfdetint,6,"GG"},
 {"nfdiv",3,(void *)element_div,6,"GGG"},
 {"nfdiveuc",3,(void *)nfdiveuc,6,"GGG"},
-{"nfdivres",3,(void *)nfdivres,6,"GGG"},
+{"nfdivres",3,(void *)nfdivrem,6,"GGG"},
 {"nfhermite",2,(void *)nfhermite,6,"GG"},
 {"nfhermitemod",3,(void *)nfhermitemod,6,"GGG"},
 {"nfmod",3,(void *)nfmod,6,"GGG"},

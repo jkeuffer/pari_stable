@@ -1126,7 +1126,7 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
     m = (GEN)b[i];
     for (j=i+1; j<=li; j++)
       m = gsub(m, gmul(gcoeff(a,i,j), (GEN)u[j]));
-    m = FpX_res(m, T,p);
+    m = FpX_rem(m, T,p);
     u[i] = lpileupto(av, FpXQ_mul(m, FpXQ_inv(gcoeff(a,i,i), T,p), T,p));
   }
   return u;
@@ -1196,7 +1196,7 @@ _Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
 static void
 _Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
 {
-  b[i] = (long)FpX_res((GEN)b[i], T,p);
+  b[i] = (long)FpX_rem((GEN)b[i], T,p);
   b[k] = (long)ladd((GEN)b[k], gmul(m, (GEN)b[i]));
 }
 
@@ -1518,7 +1518,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     /* k is the line where we find the pivot */
     for (k = i; k <= li; k++)
     {
-      piv = FpX_res(gcoeff(a,k,i), T,p);
+      piv = FpX_rem(gcoeff(a,k,i), T,p);
       coeff(a,k,i) = (long)piv;
       if (signe(piv)) break;
     }
@@ -1536,7 +1536,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 
     for (k=i+1; k<=li; k++)
     {
-      coeff(a,k,i) = (long)FpX_res(gcoeff(a,k,i), T,p);
+      coeff(a,k,i) = (long)FpX_rem(gcoeff(a,k,i), T,p);
       m = gcoeff(a,k,i); coeff(a,k,i) = zero;
       if (signe(m))
       {
@@ -2764,7 +2764,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = (long)FpX_res(gcoeff(x,j,k), T,p);
+        coeff(x,j,k) = (long)FpX_rem(gcoeff(x,j,k), T,p);
         if (signe(coeff(x,j,k))) break;
       }
     if (j>m) { r++; d[k]=0; }
@@ -2879,10 +2879,10 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long k, long t, pari_sp av)
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
-    if (isonstack(coeff(x,u,k))) coeff(x,u,k) = (long) Fq_res(gcoeff(x,u,k),T,p);
+    if (isonstack(coeff(x,u,k))) coeff(x,u,k) = (long) Fq_rem(gcoeff(x,u,k),T,p);
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
-      if (isonstack(coeff(x,u,i))) coeff(x,u,i) = (long) Fq_res(gcoeff(x,u,i),T,p);
+      if (isonstack(coeff(x,u,i))) coeff(x,u,i) = (long) Fq_rem(gcoeff(x,u,i),T,p);
 
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
   for (u=t+1; u<=m; u++)
@@ -2920,14 +2920,14 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = (long) Fq_res(gcoeff(x,j,k), T, p);
+        coeff(x,j,k) = (long) Fq_rem(gcoeff(x,j,k), T, p);
         if (signe(coeff(x,j,k))) break;
       }
     if (j>m)
     {
       if (deplin) {
         c = cgetg(n+1, t_COL);
-        for (i=1; i<k; i++) c[i] = (long)Fq_res(gcoeff(x,d[i],k), T, p);
+        for (i=1; i<k; i++) c[i] = (long)Fq_rem(gcoeff(x,d[i],k), T, p);
         c[k] = un; for (i=k+1; i<=n; i++) c[i] = zero;
         return gerepileupto(av0, c); 
       }
@@ -2945,7 +2945,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
       {
         if (t==j) continue;
 
-        piv = Fq_res(gcoeff(x,t,k), T, p);
+        piv = Fq_rem(gcoeff(x,t,k), T, p);
         if (!signe(piv)) continue;
 
         coeff(x,t,k)=zero;
@@ -2968,7 +2968,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	C[i] = (long) Fq_res(p1, T, p); gunclone(p1);
+	C[i] = (long) Fq_rem(p1, T, p); gunclone(p1);
       }
       else
 	C[i] = zero;

@@ -557,9 +557,9 @@ Flx_pow(GEN x, long n, ulong p)
   }
 }
 
-/* separate from Flx_divres for maximal speed. */
+/* separate from Flx_divrem for maximal speed. */
 GEN
-Flx_res(GEN x, GEN y, ulong p)
+Flx_rem(GEN x, GEN y, ulong p)
 { 
   pari_sp av;
   GEN z, c;
@@ -625,17 +625,17 @@ Flx_res(GEN x, GEN y, ulong p)
   return Flx_renormalize(c-2, i+3);
 }
 
-/* as FpX_divres but working only on ulong types. ASSUME pr != ONLY_DIVIDES
+/* as FpX_divrem but working only on ulong types. ASSUME pr != ONLY_DIVIDES
  * if relevant, *pr is the last object on stack */
 GEN
-Flx_divres(GEN x, GEN y, ulong p, GEN *pr)
+Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
 {
   GEN z,q,c;
   long dx,dy,dz,i,j;
   ulong p1,inv;
   long sv=x[1];
 
-  if (pr == ONLY_REM) return Flx_res(x, y, p);
+  if (pr == ONLY_REM) return Flx_rem(x, y, p);
   dy = degpol(y);
   if (!dy)
   {
@@ -741,7 +741,7 @@ Flx_gcd_i(GEN a, GEN b, ulong p)
   if (lg(b) > lg(a)) swap(a, b);
   while (lg(b)-2)
   {
-    c = Flx_res(a,b,p);
+    c = Flx_rem(a,b,p);
     a = b; b = c;
   }
   return a;
@@ -773,7 +773,7 @@ Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
   v = Fl_Flx(1,a[1]); /* v = 1 */
   while (lg(y)-2)
   {
-    q = Flx_divres(x,y,p,&z);
+    q = Flx_divrem(x,y,p,&z);
     x = y; y = z; /* (x,y) = (y, x - q y) */
     z = Flx_sub(u, Flx_mul(q,v, p), p);
     u = v; v = z; /* (u,v) = (v, u - q v) */
@@ -805,7 +805,7 @@ Flx_resultant(GEN a, GEN b, ulong p)
   while (db)
   {
     lb = b[db+2];
-    c = Flx_res(a,b, p);
+    c = Flx_rem(a,b, p);
     a = b; b = c; dc = degpol(c);
     if (dc < 0) { avma = av; return 0; }
 
@@ -842,7 +842,7 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   while (dy)
   { /* b u = x (a), b v = y (a) */
     lb = y[dy+2];
-    q = Flx_divres(x,y, p, &z);
+    q = Flx_divrem(x,y, p, &z);
     x = y; y = z; /* (x,y) = (y, x - q y) */
     dz = degpol(z); if (dz < 0) { avma = av; return 0; }
     z = Flx_sub(u, Flx_mul(q,v, p), p);
@@ -1022,7 +1022,7 @@ GEN
 Flxq_mul(GEN y,GEN x,GEN pol,ulong p)
 {
   GEN z = Flx_mul(y,x,p);
-  return Flx_res(z,pol,p);
+  return Flx_rem(z,pol,p);
 }
 
 /* Square of y in Z/pZ[X]/(pol), as t_VECSMALL. */
@@ -1030,7 +1030,7 @@ GEN
 Flxq_sqr(GEN y,GEN pol,ulong p)
 {
   GEN z = Flx_sqr(y,p);
-  return Flx_res(z,pol,p);
+  return Flx_rem(z,pol,p);
 }
 
 typedef struct {
