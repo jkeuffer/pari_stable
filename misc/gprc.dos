@@ -1,4 +1,4 @@
-\\  _gprc   (c) K.B. version 2.15 (11 June 1999)
+\\ $Id$
 \\
 \\  SAMPLE GP INIT FILE (for DOS boxes)
 \\
@@ -23,8 +23,8 @@ prompt = "(%H:%M) \e[1mgp\e[m > "
 
 \\ #ifnot EMACS help = "/usr/local/bin/gphelp -detex -ch 4 -cb 0 -cu 2"
 
-\\ parisize = 10 000 000
-\\ primelimit = 1 000 000
+\\ parisize = 10M
+\\ primelimit = 1M
 \\ timer = 1
 
 \\ logfile  = "~/tmp/pari-%d.%m"

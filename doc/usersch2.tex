@@ -36,9 +36,9 @@ install \idx{Linux} or \idx{FreeBSD} on your machine.
 \misctitle{Note (added in version 2.0.12):} All the UNIX goodies are now
 available for DOS, OS/2 and Windows 3.1, thanks to the \tet{EMX} runtime
 package (\kbd{install} excluded under DOS, since DLLs are not supported by
-the OS). They've been reported to be available under Windows 95/98 and NT
-using the Cygwin package (untested by us, but supposedly supported by
-\kbd{Configure}).
+the OS). For Windows 95/98 and NT, you can use the \tet{EMX} binary in a
+DOS Window, or re-compile a native one using the Cygwin package. None of
+these versions has been tested extensively.
 
 \emacs If you have GNU Emacs, you can work in a special Emacs shell (see
 \secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as
@@ -126,8 +126,8 @@ is described in \secref{se:default}. The basic syntax is
 \kbd{default(\var{def}, \var{value})},
 
 \noindent
-which sets the default \var{def} to \var{value}. In interactive
-use, most of these can be abbreviated using historic GP metacommands (mostly,
+which sets the default \var{def} to \var{value}. In interactive use, most
+of these can be abbreviated using historic GP metacommands (mostly,
 starting with \b), which we shall describe in the next section.
 
 Here we will only describe the available defaults and how they are used. Just
@@ -136,10 +136,19 @@ as their current values (see \b{d}). Just after the default name, we give
 between parentheses the initial value when GP starts (assuming you did not
 tamper with it using command-line switches or a~\tet{gprc}).
 
-\misctitle{(somewhat technical) Note:} As we will see in \secref{se:strings},
-the second argument to default will be subject to string context expansion,
-which means you can use run-time values. In other words, something like
-\kbd{a = 3; default(logfile, "\var{some filename}" a ".log")} will work.
+\misctitle{Note:} the suffixes \kbd{k} or \kbd{M} can be appended to a
+\var{value} which is a numeric argument, with the effect of multiplying it
+by $10^3$ or $10^6$ respectively. Case is not taken into account there, so
+for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This is mostly
+useful to modify or set the defaults \kbd{primelimit} or \kbd{stacksize}
+which typically involve a lot of trailing zeroes.
+
+\misctitle{(somewhat technical) Note:} As we will see in
+\secref{se:strings}, the second argument to \kbd{default} will be subject
+to string context expansion, which means you can use run-time values. In
+other words, something like \kbd{a = 3; default(logfile, "\var{some
+filename}" a ".log")} will work (and log the output in
+\var{some filename}3.log).
 
 For the user's convenience, some defaults will be expanded further when
 the values are used (after the above expansion has been performed):
@@ -166,7 +175,7 @@ same meaning as in the C and bash shells~--- \kbd{\til} by itself stands
 for your home directory, and \kbd{\til{}user} is expanded to \kbd{user}'s
 home directory. This is applied to all filenames\sidx{filename}.
 
-\subsecidx{buffersize} (default \kbd{30000}): GP input is buffered, which means
+\subsecidx{buffersize} (default \kbd{30k}): GP input is buffered, which means
 only so many bytes of data can be read at a time before a command is
 executed. This used to be a very important variable, to allow for very
 large input files to be read into GP, for example large matrices, without it
@@ -279,9 +288,9 @@ greater than 2, it will indicate any important garbage collecting and the
 function it is taking place in (see~\b{gm}).
 
 \noindent {\bf Important Note:} As it noticeably slows down the performance
-(and triggers bugs in a popular compiler), the first functionality (memory
-usage) is disabled if you're not running a version compiled for debugging
-(see Appendix~A).
+(and triggers bugs in some versions of a popular compiler), the first
+functionality (memory usage) is disabled if you're not running a version
+compiled for debugging (see Appendix~A).
 
 \subsecidx{echo} (default \kbd{0}): this is a toggle, which can be either 1
 (on) or 0 (off). When \kbd{echo} mode is on, each command is reprinted before
@@ -358,16 +367,19 @@ Independently of the setting of this default, an object can be printed
 in any of the three formats at any time using the commands \b{a}, \b{m}
 and~\b{b} respectively (see below).
 
-\subsecidx{parisize} (default, 1000000 bytes on the Mac, 4000000 otherwise):
-GP, and in fact any program using the PARI library, needs a stack in which to
-do its computations. \kbd{parisize} is the stack size, in bytes. It is
+\subsecidx{parisize} (default, 1M bytes on the Mac, 4M otherwise): GP, and
+in fact any program using the PARI library, needs a stack in which to do
+its computations. \kbd{parisize} is the stack size, in bytes. It is
 strongly recommended you increase this default (using the \kbd{-s}
-command-line switch, or a \kbd{gprc}) if you can afford it. In case of
-emergency, you can use the \tet{allocatemem} function to increase
-\kbd{parisize}, once the session is started. GP will try to \var{double} the
-stack size by itself when memory runs low during a computation, but
-this very computation will then be lost, and you will have to type the
-command again.
+command-line switch, or a \kbd{gprc}) if you can afford it. Don't increase
+it beyond the actual amount of RAM installed on your computer or GP will
+spend most of its time paging.
+
+In case of emergency, you can use the \tet{allocatemem} function to
+increase \kbd{parisize}, once the session is started. GP will try to
+\var{double} the stack size by itself when memory runs low during a
+computation, but this very computation will then be lost, and you will have
+to type the command again.
 
 \subsecidx{path} (default \kbd{".:\til:\til/gp"} on UNIX systems,
 \kbd{".;C:\bs;C:\bs GP} on DOS, OS/2 and Windows, and \kbd{"."} otherwise):
@@ -378,10 +390,10 @@ GP will look for it in these directories, in the order they were written in
 \kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
 immediate parent. Tilde expansion is performed.
 
-\subsecidx{primelimit} (default \kbd{200000} on the Mac, and \kbd{500000}
-otherwise): GP precomputes a list of all primes less than \kbd{primelimit} at
-initialization time. These are used by many arithmetical functions.
-If you don't plan to invoke any of them, you can just set this to 1.
+\subsecidx{primelimit} (default \kbd{200k} on the Mac, and \kbd{500k}
+otherwise): GP precomputes a list of all primes less than \kbd{primelimit}
+at initialization time. These are used by many arithmetical functions. If
+you don't plan to invoke any of them, you can just set this to 1.
 
 \subsecidx{prompt} (default \kbd{"? "}): a string that will be printed as
 prompt. Note that most usual escape sequences are available there: \b{e} for

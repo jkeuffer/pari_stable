@@ -204,6 +204,11 @@ get_int(char *s, long dflt)
 
   if (*p == '-') p++;
   while(isdigit((int)*p)) { p++; dflt=n; }
+  switch(*p)
+  {
+    case 'k': case 'K': dflt *= 1000;    p++; break;
+    case 'm': case 'M': dflt *= 1000000; p++; break;
+  }
   if (*p) err(talker2,"I was expecting an integer here", s, s);
   return dflt;
 }
@@ -2149,7 +2154,7 @@ static void
 testint(char *s, long *d)
 {
   if (!s) return;
-  *d = atol(s);
+  *d = get_int(s, 0);
   if (*d <= 0) err(talker,"arguments must be positive integers");
 }
 

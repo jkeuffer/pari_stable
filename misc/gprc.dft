@@ -1,4 +1,4 @@
-/*  .gprc   (c) K.B. version 2.14 (11 June 1999)
+/* $Id$
  * 
  * SAMPLE GP INIT FILE.
  *
@@ -7,7 +7,7 @@
 
 \\ read "lib/gpalias"
 /* Read lib/gpalias BEFORE gp prompts you for commands.
- * The file contains some standard abbreviations (correct the path!!!) */
+ * The file contains some standard abbreviations (correct the path first !) */
 
 \\ secure = 1
 /* Disable commands system() and extern(). These commands are dangerous
@@ -47,7 +47,7 @@ prompt = "(%R) \e[1mgp\e[m > "
  *
  * #if EMACS prompt = "(%R) gp > "
  *
- * add the following two lines in your .emacs:
+ * add the following two lines in your .emacs (see emacs/pariemacs.txt)
  *
  * (setq gp-prompt-pattern
  *  (concat "^([0-9][0-9]:[0-9][0-9]) gp > [\C-j\t ]*\\|" gp-prompt-pattern))
@@ -59,7 +59,7 @@ prompt = "(%R) \e[1mgp\e[m > "
 \\   #ifnot EMACS colors = "9, 1, no, no, 6, 1, 2"
 /* If your terminal supports color. These are suggested values that don't
  * look too bad with the colormap provided with the distribution (under
- * emacs you have to customize colors using the Menu Bar). */
+ * emacs you can customize colors using the Menu Bar). */
 
 \\ Extended help options (don't interact well with emacs):
 \\ Don't use TeX + xdvi, but outputs formatted help in GP window:
@@ -67,11 +67,11 @@ prompt = "(%R) \e[1mgp\e[m > "
 \\ Same, using colors:
 \\   #ifnot EMACS help = "/usr/local/bin/gphelp -detex -ch 4 -cb 0 -cu 2"
 
-\\ Stack size : 10MB.
-\\ parisize = 10 000 000
+\\ Stack size : 10^7 Bytes.
+\\ parisize = 10M
 
-\\ Biggest precomputed prime
-\\ primelimit = 1 000 000
+\\ Biggest precomputed prime (= prevprime(10^6))
+\\ primelimit = 1M
 
 \\ Set timer on
 \\ timer = 1
@@ -84,12 +84,12 @@ prompt = "(%R) \e[1mgp\e[m > "
 \\ Output for postscript-producing gp commands.
 \\ psfile = "~/tmp/pari.ps"
 
-\\*****************************    FORMAT :     ***************************
+\\********************** FORMAT OF THIS FILE :    ***************************
 \\  Lines starting with '\\' and between '/*' '*/' pairs are comments
 \\  Blank lines are ignored
 \\  Line starting with #if KEYWORD is read iff KEYWORD is TRUE
 \\  Currently recognized keywords:
-\\    EMACS  are we running under emacs?
+\\    EMACS  are we running under Emacs?
 \\    READL  is readline available?
 \\
 \\  This file should be put in $HOME/.gprc or /etc/gprc and contain:
