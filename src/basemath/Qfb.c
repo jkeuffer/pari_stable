@@ -1029,7 +1029,7 @@ qfbimagsolvep(GEN Q, GEN p)
   if (kronecker(d,p) < 0) return gen_0;
   if (gcmp1(gel(Q,1)) && !signe(gel(Q,2)))
   { /* principal form. Use faster cornacchia */
-    if (!cornacchia(d, p, &M,&N)) { avma = av; return gen_0; }
+    if (!cornacchia(negi(d), p, &M,&N)) { avma = av; return gen_0; }
     goto END;
   }
   a = redimagsl2(Q, &N);
