@@ -267,6 +267,7 @@ GEN special_pivot(GEN x);
 GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 GEN vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod);
 GEN ZX_squff(GEN f, GEN *ex);
+GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 
 /* Number fields */
 GEN    arch_mul(GEN x, GEN y);

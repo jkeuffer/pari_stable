@@ -1054,10 +1054,8 @@ Decomp(decomp_t *S, long flag)
     fprintferr("  leaving Decomp: f1 = %Z\nf2 = %Z\ne = %Z\nde= %Z\n", f1,f2,e,de);
 
   if (flag)
-  {
-    b1 = factorpadic4(f1,p,flag);
-    b2 = factorpadic4(f2,p,flag); return concat_factor(b1,b2);
-  }
+    return concat_factor(ZX_monic_factorpadic(f1, p, flag),
+                         ZX_monic_factorpadic(f2, p, flag));
   else
   {
     GEN D = de, d1, d2, ib1, ib2;

@@ -1835,28 +1835,19 @@ expo_is_squarefree(GEN e)
   return 1;
 }
 
+/* assume f a ZX with leading_term 1, degree > 0 */
 GEN
-factorpadic4(GEN f,GEN p,long prec)
+ZX_monic_factorpadic(GEN f, GEN p, long prec)
 {
-  pari_sp av = avma;
-  GEN w,poly,y,p1,p2,ex,pols,exps,ppow,lead,lead_orig;
-  long n=degpol(f),i,k,j,pr,d;
-  int reverse = 0;
+  GEN w, poly, p1, p2, ex, P, E;
+  long n=degpol(f), i, k, j, pr;
 
-  if (typ(f)!=t_POL) err(notpoler,"factorpadic");
-  if (typ(p)!=t_INT) err(arither1);
-  if (gcmp0(f)) err(zeropoler,"factorpadic");
-  if (prec <= 0) err(talker,"non-positive precision in factorpadic");
-
-  if (n==0) return trivfact();
-  f = QpX_to_ZX(f);
-  if (n==1) return gerepilecopy(av, padic_trivfact(f,p,prec));
-  lead_orig = pollead(f, -1);
-  f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
+  if (n==1) return mkmat2(mkcol(f), mkcol(gen_1));
+  pr = prec;
 
   poly = ZX_squff(f,&ex);
-  pols = cgetg(n+1,t_COL);
-  exps = cgetg(n+1,t_COL); n = lg(poly);
+  P = cgetg(n+1,t_COL);
+  E = cgetg(n+1,t_COL); n = lg(poly);
   for (j=i=1; i<n; i++)
   {
     pari_sp av1 = avma;
@@ -1868,8 +1859,8 @@ factorpadic4(GEN f,GEN p,long prec)
       p2 = utoipos(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
-        pols[j] = p1[k];
-        exps[j] = (long)p2;
+        P[j] = p1[k];
+        E[j] = (long)p2;
       }
       continue;
     }
@@ -1882,34 +1873,51 @@ factorpadic4(GEN f,GEN p,long prec)
       p2 = (GEN)p2[2];
       for (k=1; k<lg(p1); k++,j++)
       {
-        pols[j] = p1[k];
-        exps[j] = lmulis((GEN)p2[k],ex[i]);
+        P[j] = p1[k];
+        E[j] = lmulis((GEN)p2[k],ex[i]);
       }
     }
     else
     {
       avma = av1;
-      pols[j] = (long)fx;
-      exps[j] = (long)utoipos(ex[i]); j++;
+      P[j] = (long)fx;
+      E[j] = (long)utoipos(ex[i]); j++;
     }
   }
+  setlg(P,j);
+  setlg(E,j); return mkmat2(P, E);
+}
+
+GEN
+factorpadic4(GEN f,GEN p,long prec)
+{
+  pari_sp av = avma;
+  GEN y, P, E, ppow, lead, lt;
+  long i, l, pr, n = degpol(f);
+  int reverse = 0;
+
+  if (typ(f)!=t_POL) err(notpoler,"factorpadic");
+  if (typ(p)!=t_INT) err(arither1);
+  if (gcmp0(f)) err(zeropoler,"factorpadic");
+  if (prec <= 0) err(talker,"non-positive precision in factorpadic");
+  if (n == 0) return trivfact();
+
+  f = QpX_to_ZX(f); (void)Z_pvalrem(leading_term(f), p, &lt);
+  f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
+  y = ZX_monic_factorpadic(f, p, pr);
+  P = gel(y,1);
+  E = gel(y,2); l = lg(P);
   if (lead)
-    for (i=1; i<j; i++)
-      pols[i] = (long)primpart( RgX_unscale((GEN)pols[i], lead) );
-  y = cgetg(3,t_MAT);
-  p1 = cgetg(j,t_COL); p = icopy(p); ppow = gpowgs(p,prec);
-  for (i=1; i<j; i++)
+    for (i=1; i<l; i++) gel(P,i) = primpart( RgX_unscale(gel(P,i), lead) );
+  ppow = gpowgs(p,prec);
+  for (i=1; i<l; i++)
   {
-    GEN t = gel(pols,i);
+    GEN t = gel(P,i);
     if (reverse) t = normalizepol(polrecip_i(t));
-    gel(p1,i) = ZX_to_ZpX_normalized(t,p,ppow,prec);
+    gel(P,i) = ZX_to_ZpX_normalized(t,p,ppow,prec);
   }
-  d = ggval(lead_orig, p);
-  lead_orig = gmul(lead_orig, gpowgs(p, -d));
-  p1[1] = lmul((GEN)p1[1], lead_orig);
-  y[1] = (long)p1; setlg(exps,j);
-  y[2] = lcopy(exps);
-  return gerepileupto(av, sort_factor(y, cmp_padic));
+  if (!gcmp1(lt)) gel(P,1) = gmul(gel(P,1), lt);
+  return gerepilecopy(av, sort_factor(y, cmp_padic));
 }
 
 GEN
