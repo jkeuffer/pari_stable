@@ -116,6 +116,7 @@ IZ 58- printtex(t_STR) [ protect special characters, eg ~ or \ ]
 IZ 59- [readline:] support old versions (1.0), try to recover from
        mismatched headers wrt. library, report version of loaded library in
        gp header [as opposed to library version at Configure time]
+BA 60- add "const" keyword to allow building with g++
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -181,6 +182,7 @@ IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
    43- [ix86 kernel:] macroified bfffo()
    44- made all GEN macros return signed types [ had inadvertently switched
        to ulong as a side effect of some other change, long ago ]
+BA 45- split kernel Makefiles in MakeLVL0 and MakeLVL1. 
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
@@ -192,6 +194,7 @@ IZ  5- File README.os2
     7- routines Strexpand(), Strtex()
 IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
 RS  9- routine numbpart()
+BA 10- GMP kernel
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)
