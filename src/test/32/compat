@@ -2850,7 +2850,7 @@ d(391, 3120), mod(2081, 3120)]]
 ? getstack()
 0
 ? getheap()
-[624, 125703]
+[623, 125696]
 ? print("Total time spent: ",gettime());
-Total time spent: 4810
+Total time spent: 14473
 ? \q

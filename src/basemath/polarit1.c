@@ -1146,7 +1146,7 @@ padic_pol_to_int(GEN f)
   return f;
 }
 
-/* return invlead * (x + O(pr)), x in Z or Z_p, pr = p^r */
+/* return invlead * (x + O(pr)), x in Z or Z_p, pr = p^r. May return gzero */
 static GEN
 int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
 {
@@ -1181,6 +1181,15 @@ int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
   return invlead? gerepileupto(av, gmul(invlead,y)): y;
 }
 
+/* as above. always return a t_PADIC */
+static GEN
+strict_int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
+{
+  GEN y = int_to_padic(x, p, pr, r, invlead);
+  if (y == gzero) y = ggrandocp(p,r);
+  return y;
+}
+
 /* return (x + O(p^r)) normalized (multiply by a unit such that leading coeff
  * is a power of p), x in Z[X] (or Z_p[X]) */
 static GEN
@@ -1213,126 +1222,142 @@ padic_trivfact(GEN x, GEN p, long r)
   p1[1]=un; return y;
 }
 
-/* a etant un p-adique, retourne le vecteur des racines p-adiques de f
- * congrues a a modulo p dans le cas ou on suppose f(a) congru a 0 modulo p
- * (ou a 4 si p=2).
- */
+/* a p-adic numbre, return vector of p-adic roots of f congruent to a mod p
+ * We assume 1) f(a) = 0 mod p (mod 4 if p=2).
+ *           2) leading coeff prime to p. */
 GEN
 apprgen(GEN f, GEN a)
 {
-  GEN fp,p1,p,P,pro,x,x2,u,ip;
-  long av=avma,tetpil,v,Ps,i,j,k,lu,n,fl2;
+  GEN fp,p1,p,P,res,x,u,a0,rac;
+  long av=avma,i,j,k,n;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen");
   if (gcmp0(f)) err(zeropoler,"apprgen");
   if (typ(a) != t_PADIC) err(rootper1);
   f = padic_pol_to_int(f);
-  fp=derivpol(f); p1=ggcd(f,fp);
-  if (lgef(p1)>3) { f=gdeuc(f,p1); fp=derivpol(f); }
-  p=(GEN)a[2]; p1=poleval(f,a);
-  v=ggval(p1,p); if (v <= 0) err(rootper2);
-  fl2=egalii(p,gdeux);
-  if (fl2 && v==1) err(rootper2);
-  v=ggval(poleval(fp,a),p);
-  if (!v) /* simple zero */
+  fp = derivpol(f); p1 = ggcd(f,fp);
+  if (lgef(p1)>3) { f = gdeuc(f,p1); fp = derivpol(f); }
+  p = (GEN)a[2]; 
+  P = egalii(p,gdeux)? stoi(4): p;
+  a0= gmod(a, P);
+  if (!gcmp0(FpX_eval(f,a0,P))) err(rootper2);
+  if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {
-    while (!gcmp0(p1))
-    {
-      a = gsub(a,gdiv(p1,poleval(fp,a)));
-      p1 = poleval(f,a);
-    }
-    tetpil=avma; pro=cgetg(2,t_VEC); pro[1]=lcopy(a);
-    return gerepile(av,tetpil,pro);
+    long prec = gcmp0(a)? valp(a): precp(a);
+    res = rootpadiclift(f, a0, p, prec);
+    res = strict_int_to_padic(res,p,gpowgs(p,prec),prec,NULL);
+    return gerepilecopy(av,_vec(res));
   }
-  n=degpol(f); pro=cgetg(n+1,t_VEC);
+  n = degpol(f); res = cgetg(n+1,t_VEC);
 
-  if (is_bigint(p)) err(impl,"apprgen for p>=2^31");
   x = ggrandocp(p, valp(a) | precp(a)); 
-  if (fl2)
+  f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
+  f = padic_pol_to_int(f);
+  if (!gcmp0(f)) f = gdiv(f, gpowgs(p,ggval(f, p)));
+
+  rac = lift_intern(rootmod(f, P));
+  for (j=0,i=1; i<lg(rac); i++)
   {
-    x2=ggrandocp(p,2); P = stoi(4);
+    u = apprgen(f, gadd(x,(GEN)rac[i]));
+    for (k=1; k<lg(u); k++) res[++j] = ladd(a, gmul(P,(GEN)u[k]));
   }
-  else
-  {
-    x2=ggrandocp(p,1); P = p;
-  }
-  f = poleval(f, gadd(a,gmul(P,polx[varn(f)])));
-  if (!gcmp0(f)) f = gdiv(f,gpuigs(p,ggval(f, p)));
-  Ps = itos(P);
-  for (j=0,i=0; i<Ps; i++)
-  {
-    ip=stoi(i);
-    if (gcmp0(poleval(f,gadd(ip,x2))))
-    {
-      u=apprgen(f,gadd(x,ip)); lu=lg(u);
-      for (k=1; k<lu; k++)
-      {
-        j++; pro[j]=ladd(a,gmul(P,(GEN)u[k]));
-      }
-    }
-  }
-  setlg(pro,j+1); return gerepilecopy(av,pro);
+  setlg(res,j+1); return gerepilecopy(av,res);
 }
 
-/* Retourne le vecteur des racines p-adiques de f en precision r */
-GEN
-rootpadic(GEN f, GEN p, long r)
+static GEN
+_rootpadic(GEN f, GEN p, long prec)
 {
-  GEN fp,y,z,p1,pr,rac;
-  long lx,i,j,k,n,av=avma,tetpil,fl2;
+  GEN fp,y,z,p1,q,rac;
+  long lx,i,j,k;
 
-  if (typ(f)!=t_POL) err(notpoler,"rootpadic");
-  if (gcmp0(f)) err(zeropoler,"rootpadic");
-  if (r<=0) err(rootper4);
-  f = padic_pol_to_int(f);
-  fp=derivpol(f); p1=ggcd(f,fp);
-  if (lgef(p1)>3) { f=gdeuc(f,p1); fp=derivpol(f); }
-  fl2=egalii(p,gdeux); rac=(fl2 && r>=2)? rootmod(f,stoi(4)): rootmod(f,p);
-  lx=lg(rac); p=gclone(p);
-  if (r==1)
+  fp = derivpol(f); p1 = ggcd(f,fp);
+  if (lgef(p1) > 3) { f = gdeuc(f,p1); fp = derivpol(f); }
+  rac = rootmod(f, (egalii(p,gdeux) && prec>=2)? stoi(4): p);
+  rac = lift_intern(rac); lx = lg(rac);
+  if (prec==1)
   {
-    tetpil=avma; y=cgetg(lx,t_COL);
+    y = cgetg(lx,t_COL);
     for (i=1; i<lx; i++)
     {
       z=cgetg(5,t_PADIC); y[i]=(long)z;
       z[1] = evalprecp(1)|evalvalp(0);
       z[2] = z[3] = (long)p;
-      z[4] = lcopy(gmael(rac,i,2));
+      z[4] = rac[i];
     }
-    return gerepile(av,tetpil,y);
+    return y;
   }
-  n=degpol(f); y=cgetg(n+1,t_COL);
-  j=0; pr = NULL;
-  z = cgetg(5,t_PADIC);
-  z[2] = (long)p;
-  for (i=1; i<lx; i++)
+  y = cgetg(degpol(f)+1,t_COL);
+  q = gpowgs(p,prec);
+  for (j=0,i=1; i<lx; i++)
   {
-    p1 = gmael(rac,i,2);
-    if (signe(p1))
-    {
-      if (!fl2 || mod2(p1))
-      {
-        z[1] = evalvalp(0)|evalprecp(r);
-        z[4] = (long)p1;
-      }
-      else
-      {
-        z[1] = evalvalp(1)|evalprecp(r);
-        z[4] = un;
-      }
-      if (!pr) pr=gpuigs(p,r);
-      z[3] = (long)pr;
-    }
-    else
-    {
-      z[1] = evalvalp(r);
-      z[3] = un;
-      z[4] = (long)p1;
-    }
+    z = strict_int_to_padic((GEN)rac[i], p, q, prec, NULL);
     p1 = apprgen(f,z);
-    for (k=1; k<lg(p1); k++) y[++j]=p1[k];
+    for (k=1; k<lg(p1); k++) y[++j] = p1[k];
   }
-  setlg(y,j+1); return gerepilecopy(av,y);
+  setlg(y,j+1); return y;
+}
+
+#define swap(x,y) { long _t=x; x=y; y=_t; }
+
+/* reverse x in place */
+static void
+polreverse(GEN x)
+{
+  long i, j;
+  if (typ(x) != t_POL) err(typeer,"polreverse");
+  for (i=2, j=lgef(x)-1; i<j; i++, j--) swap(x[i], x[j]);
+  (void)normalizepol(x);
+}
+
+static GEN
+pnormalize(GEN f, GEN p, long prec, long n, GEN *plead, long *pprec, int *prev)
+{
+  *plead = leading_term(f);
+  *pprec = prec;
+  *prev = 0;
+  if (!gcmp1(*plead))
+  {
+    long val = ggval(*plead,p), val1 = ggval(constant_term(f),p);
+    if (val1 < val)
+    {
+      *prev = 1; polreverse(f);
+     /* take care of loss of precision from leading coeff of factor
+      * (whose valuation is <= val) */
+      *pprec += val;
+      val = val1;
+    }
+    *pprec += val * n;
+  }
+  return pol_to_monic(f, plead);
+}
+
+
+/* return p-adic roots of f, precision prec */
+GEN
+rootpadic(GEN f, GEN p, long prec)
+{
+  ulong av = avma;
+  GEN lead,y;
+  long PREC,i,k;
+  int reverse;
+
+  if (typ(f)!=t_POL) err(notpoler,"rootpadic");
+  if (gcmp0(f)) err(zeropoler,"rootpadic");
+  if (prec <= 0) err(rootper4);
+  f = padic_pol_to_int(f);
+  f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
+
+  y = _rootpadic(f,p,PREC);
+  k = lg(y);
+  if (lead)
+  {
+    for (i=1; i<k; i++) y[i] = ldiv((GEN)y[i], lead);
+  }
+  if (reverse)
+  {
+    for (i=1; i<k; i++) y[i] = linv((GEN)y[i]);
+  }
+  return gerepilecopy(av, y);
 }
 /*************************************************************************/
 /*                             rootpadicfast                             */
@@ -1726,18 +1751,6 @@ squarefree(GEN f, GEN *ex)
   setlg(A,i); *ex=B; return A;
 }
 
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-
-/* reverse x in place */
-static void
-polreverse(GEN x)
-{
-  long i, j;
-  if (typ(x) != t_POL) err(typeer,"polreverse");
-  for (i=2, j=lgef(x)-1; i<j; i++, j--) swap(x[i], x[j]);
-  (void)normalizepol(x);
-}
-
 GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
@@ -1753,21 +1766,7 @@ factorpadic4(GEN f,GEN p,long prec)
   if (n==0) return trivfact();
   av=avma; f = padic_pol_to_int(f);
   if (n==1) return gerepileupto(av, padic_trivfact(f,p,prec));
-  lead = leading_term(f); pr = prec;
-  if (!gcmp1(lead))
-  {
-    long val = ggval(lead,p), val1 = ggval(constant_term(f),p);
-    if (val1 < val)
-    {
-      reverse = 1; polreverse(f);
-     /* take care of loss of precision from leading coeff of factor
-      * (whose valuation is <= val) */
-      pr += val;
-      val = val1;
-    }
-    pr += val * (n-1);
-  }
-  f = pol_to_monic(f, &lead);
+  f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
 
   poly=squarefree(f,&ex);
   pols=cgetg(n+1,t_COL);

@@ -159,7 +159,7 @@ x + x^2 - 1/6*x^3 - 1/2*x^4 - 59/120*x^5 - 1/8*x^6 + 419/5040*x^7 + 59/720*x
 ? variable(name^4-other)
 name
 ? getheap
-[61, 7109]
+[60, 7102]
 ? print("Total time spent: ",gettime);
-Total time spent: 90
+Total time spent: 249
 ? \q
