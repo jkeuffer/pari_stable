@@ -113,7 +113,7 @@ initprimes1(long size, long *lenp, long *lastp)
   return (byteptr) gprealloc(p,r-p,size + 2);
 }
 
-#define PRIME_ARENA (512 * 1024)
+#define PRIME_ARENA (200 * 1024) /* No slowdown even with 256K level-2 cache */
 
 /* Here's the workhorse.  This is recursive, although normally the first
    recursive call will bottom out and invoke initprimes1() at once.
@@ -121,7 +121,7 @@ initprimes1(long size, long *lenp, long *lastp)
 byteptr
 initprimes0(ulong maxnum, long *lenp, long *lastp)
 {
-  long k, size, alloced, asize, psize, rootnum, curlow, last, remains, need;
+  long k, size, alloced, asize, psize, rootnum, curlow, last, remains;
   byteptr q,r,s,fin, p, p1, fin1, plast, curdiff;
 
 #if 0
@@ -147,14 +147,20 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
   fin1 = p1 + psize - 1;
   remains = (maxnum - rootnum) >> 1; /* number of odd numbers to check */
 
-  need = 100 * rootnum;		/* Make % overhead negligeable. */
-  if (need < PRIME_ARENA) need = PRIME_ARENA;
-  if (avma - bot < (ulong)need>>1) {	/* need to do our own allocation */
-    alloced = 1; asize = need;
-  } else {			/* scratch area is free part of PARI stack */
-    alloced = 0; asize = avma - bot;
-  }
+  /* ARENA_IN_ROOTS below 12: some slowdown starts to be noticable
+   * when things fit into the cache.
+   * XXX The choice of 10 gives a slowdown of 1-2% on UltraSparcII,
+   * but makes calculations even for (the current) maximum of 436273009
+   * fit into 256K cache (still common for some architectures).
+   *
+   * One may change it when small caches become uncommon, but the gain
+   * is not going to be very noticable... */
+#define ARENA_IN_ROOTS	10
+
+  asize = ARENA_IN_ROOTS * rootnum;	/* Make % overhead negligeable. */
+  if (asize < PRIME_ARENA) asize = PRIME_ARENA;
   if (asize > remains) asize = remains + 1;/* + room for a sentinel byte */
+  alloced = (avma - bot < asize>>1); /* enough room on the stack ? */
   if (alloced)
     p = (byteptr) gpmalloc(asize);
   else
