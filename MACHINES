@@ -48,6 +48,7 @@ UltraSPARC60 360MHz  Solaris-2.6     gcc            5034    5209  2.0.16    IS
 UltraSPARC60 360MHz  Solaris-2.6      cc            6329    6453  2.0.16    IS
 UltraSPARC2i 360MHz  Solaris-7      egcs            5816    6286  2.0.16(17)HS
 UltraSPARC2i 333MHz  Solaris-7       gcc            5666    6818  2.0.20(18)
+UltraSparcII 300MHz  Linux-2.4.18    gcc-3.2.3      6102    6184  2.1.5     BA
 UltraSPARC10 300MHz  Solaris-2.6     gcc           (5932)  (6102) 2.0.12    GN
 UltraSPARC   300MHz  Solaris-2.5     gcc            7643    7566  2.0.9     IS
 UltraSPARC2  296MHz  Solaris-2.5.1   gcc            6098    6277  2.0.16    IS
