@@ -2064,7 +2064,6 @@ uniformizer_appr(GEN nf, GEN L, long i, GEN p)
   long j, l;
   GEN inter = NULL, P = (GEN)L[i], P2, Q, u, v, pi;
   int ramif;
-  gpmem_t av = avma;
 
   l = lg(L)-1;
   for (j=l; j; j--)
@@ -2103,7 +2102,7 @@ uniformizer_appr(GEN nf, GEN L, long i, GEN p)
   pi = gadd(pi, u);
   pi =  centermod(pi, p);
   if (!ramif && hnf_invimage(P2, pi)) pi[1] = laddii((GEN)pi[1], p);
-  return gerepilecopy(av, pi);
+  return pi;
 }
 
 /* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
@@ -2111,24 +2110,24 @@ uniformizer_appr(GEN nf, GEN L, long i, GEN p)
 static GEN
 uniformizer(GEN nf, GEN P, GEN p)
 {
-  GEN M, q, D, Dp, w, beta, a, T = (GEN)nf[1];
-  long prec, ex, i, f, N = degpol(T), m = lg(P)-1;
-  gpmem_t av;
+  GEN q, D, Dp, w, beta, a, T = (GEN)nf[1];
+  long i, f, N = degpol(T), m = lg(P)-1;
 
   if (!m) return gscalcol_i(p,N);
 
   /* we want v_p(Norm(beta)) = p^f, f = N-m */
-  av = avma; f = N-m;
+  f = N-m;
   P = centermod(P, p);
   q = mulii(gpowgs(p,f), p);
 
-  M = gmael(nf,5,1);
-  prec = gprecision(M);
-  ex = gexpo(M) + gexpo(mulsi(8 * N, p));
-  if (N * ex <= bit_accuracy(prec))
-  { /* enough prec to use norm_by_embed */
-    a = random_unif_loop_vec(nf, P, p, q);
-    return gerepilecopy(av,a);
+  if (typ(nf[5]) == t_VEC) /* dummy nf from padicff */
+  {
+    GEN M = gmael(nf,5,1);
+    long ex, prec = gprecision(M);
+    ex = gexpo(M) + gexpo(mulsi(8 * N, p));
+    /* enough prec to use norm_by_embed */
+    if (N * ex <= bit_accuracy(prec))
+      return random_unif_loop_vec(nf, P, p, q);
   }
 
   w = (GEN)nf[7];
@@ -2151,7 +2150,7 @@ uniformizer(GEN nf, GEN P, GEN p)
   if (D) a = gdivexact(a,D);
   a = centermod(a, p);
   if (!is_uniformizer(D,gmul(w,a), T,q)) a[1] = laddii((GEN)a[1],p);
-  return gerepilecopy(av,a);
+  return a;
 }
 
 /* Assuming P = (p,u) prime, return tau such that p Z + tau Z = p P^(-1)*/
@@ -2252,8 +2251,10 @@ get_pr(GEN nf, GEN L, long i, GEN p, int appr)
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
 
+  av = avma;
   if (appr) u = uniformizer_appr(nf, L, i, p);
   else      u = uniformizer(nf, P, p);
+  u = gerepilecopy(av, u);
   t = anti_uniformizer(nf,p,u);
   av = avma;
   e = 1 + int_elt_val(nf,t,p,t,NULL);
