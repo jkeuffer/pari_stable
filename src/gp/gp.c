@@ -92,7 +92,7 @@ usage(char *s)
   printf("\t[-s stacksize]\tStart with the PARI stack of given size (in bytes)\n");
   printf("\t[--emacs]\tRun as if in Emacs shell\n");
   printf("\t[--help]\tPrint this message\n");
-  printf("\t[--test]\t\tTest mode.  As -q, plus wrap long lines\n");
+  printf("\t[--test]\t\tTest mode. No history, wrap long lines (bench only)\n");
   printf("\t[--texmacs]\tRun as if using TeXmacs frontend\n");
   printf("\t[--version]\tOutput version info and exit\n");
   printf("\t[--version-short]\tOutput version number and exit\n\n");
