@@ -2298,9 +2298,11 @@ read_line(filtre_t *F, char *PROMPT)
   if (is_interactive())
   {
     if (!PROMPT) PROMPT = do_prompt(F->in_comment, prompt);
+#ifdef READLINE
     if (GP_DATA->flags & USE_READLINE)
       res = get_line_from_readline(PROMPT, F);
     else
+#endif
       res = get_line_from_user(PROMPT, F);
     if (!disable_color) term_color(c_NONE);
   }
