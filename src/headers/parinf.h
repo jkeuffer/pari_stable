@@ -42,9 +42,9 @@ GEN initalgall0(GEN x, long flag, long prec);
 #define min_PERF  2
 
 /* for fincke_pohst() */
-typedef struct {
+typedef struct FP_chk_fun {
   GEN (*f)(GEN,GEN);
-  GEN (*f_init)(GEN,GEN,GEN,GEN);
+  GEN (*f_init)(struct FP_chk_fun*,GEN,GEN,GEN,long*);
   GEN (*f_post)(GEN,GEN);
   GEN data;
   int skipfirst;
