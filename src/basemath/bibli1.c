@@ -2677,13 +2677,13 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
 	if (stockmax)
         { /* dummy values, needed to prevent a gerepilemany crash */
           GEN T = S;
-          for (i=s+1; i<=stockmax; i++) S[i]=dummy;
+          for (i=s+1; i<=stockmax; i++) S[i]=(long)dummy;
           S = gclone(S); if (isclone(T)) gunclone(T);
         }
         if (check)
         {
           gptr[cnt++]=&borne1; gptr[cnt++]=&borne2; gptr[cnt++]=&norms;
-          for (i=s+1; i<=stockmax; i++) norms[i]=dummy;
+          for (i=s+1; i<=stockmax; i++) norms[i]=(long)dummy;
         }
 	gerepilemany(av2,gptr,cnt);
       }
