@@ -1633,7 +1633,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
       if (er || !chib)
       {
 	p1   = mulii(pdr, ggcd(denom(content(gamm)), pdr));
-	chig = mycaract(redelt(chi, mulii(pdr, p1), pdr), gamm); 
+	chig = mycaract(redelt(chi, mulii(pdr, p1), pdr), gamm);
       }
       else
       {
@@ -1704,16 +1704,14 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	  if (typ(delt) == t_INT)
 	  {
 	    chie = poleval(chig, gadd(polx[v], delt));
-	    chie = polmodi(chie, pmr);
 	    nue  = (GEN)factmod(chie, p)[1];
 	    l    = lg(nue) - 1;
 	    nue  = lift((GEN)nue[l]);
 	  }
 	  else
-	  {
+	  { 
 	    p1   = factcp(p, chi, eta);
 	    chie = (GEN)p1[1]; 
-	    chie = polmodi(chie, pmr);
 	    nue  = (GEN)p1[2]; 
 	    l    = itos((GEN)p1[3]);
 	  }
@@ -1731,6 +1729,8 @@ nilord2(GEN p, GEN fx, long mf, GEN gx)
 	}
       delete_var();    
 
+      if (!signe(modii((GEN)chie[2], pmr))) chie = mycaract(chi, eta);
+	
       pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
       if (Ea%Ee)
       {
