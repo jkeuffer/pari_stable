@@ -133,6 +133,9 @@ sub options
     else
       { &help(); }
   }
+  $ch = "\e[m$ch";
+  $cu .= $cu ? "\e[1m": "\e[4m";
+  $cb .= "\e[1m";
   $detex = 1 if (!$detex && !$ENV{DISPLAY});
 }
 
@@ -763,7 +766,7 @@ sub basic_subst
   s/ *\\pmod(?![a-zA-Z]) *\{\s*((?:[^{}]|\{[^{}]*\})*)\}/ (mod $1)/g;
   s/ *\\cdot(?![a-zA-Z]) */./g;		# Maybe " . "?
   s/ *(\\|\@)[lc]?dots(?![a-zA-Z]) */.../g;
-  s/\\(log|sin|cos|lim(proj)?|tan|mod|sqrt|exp|ln|det|Re|Im|deg|wp|cap|oplus)(?![a-zA-Z])/$tr{startlword}$1$tr{endlword}/g;
+  s/\\(Cl|log|sin|cos|lim(proj)?|tan|mod|sqrt|exp|ln|det|Re|Im|deg|wp|cap|oplus)(?![a-zA-Z])/$tr{startlword}$1$tr{endlword}/g;
   s/\\pi(?![a-zA-Z])/$tr{startword}Pi$tr{endword}/g;
   s/\\(Alpha | Beta | Chi | Delta | Epsilon | Phi | Gamma
        | Eta | Iota | vartheta | Kappa | Lambda | Mu | Nu | Omicron
@@ -823,7 +826,7 @@ sub basic_subst
 
   s/\\p(?![a-zA-Z])/$tr{startbold}p$tr{endbold}$1/g;
   s/\\point\{([^\}]*)\}/$tr{startbold}* $1$tr{endbold}/g;
-  s/\\bullet/$tr{startbold}*$tr{endbold}/g;
+  s/(\\bullet|\\item)/$tr{startbold}*$tr{endbold}/g;
   s/\\misctitle\{([^\}]*)\}/$tr{startbold}$1$tr{endbold}/g;
   s/\\subsec\{([^\}]*)\}/$tr{startbold}$1$tr{endbold}/g unless $to_pod;
   s/\\teb\{([^\}]*)\}/\\sidx{$1}$tr{startbold}$1$tr{endbold}/g;
@@ -1119,9 +1122,9 @@ sub TeXprint
   s/\@\[agrave\]/`a/g;
   s/\@\[eacute\]/'e/g;
   s/\@\[ldollar\]/\$/g;
-  s/\@\[end(bold|code|bcode|bi|it)\]/\e[m$ch/g;
-  s/\@\[start(bold|code|bcode|bi)\]/$cb\e[1m/g;
-  s/\@\[startit\]/$cu\e[4m/g;
+  s/\@\[end(bold|code|bcode|bi|it)\]/$ch/g;
+  s/\@\[start(bold|code|bcode|bi)\]/$cb/g;
+  s/\@\[startit\]/$cu/g;
   s/\@\[(dollar|empty|endl?word|endpodcode|startl?word|startpodcode)\]//g;
   s/\@\[pm\]/±/g;
   s/\@\[lt\]/</g;
