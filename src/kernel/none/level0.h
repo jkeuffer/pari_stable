@@ -50,8 +50,8 @@ ENDEXTERN
 
 #else
 
-ulong overflow;
-ulong hiremainder;
+extern ulong overflow;
+extern ulong hiremainder;
 
 INLINE long
 addll(ulong x, ulong y)

@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* version (#ifdef __M68K__) since they are defined in mp.s   */
 #include "pari.h"
 
+ulong overflow;
+ulong hiremainder;
+
 /* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
  * GENs but pairs (long *a, long na) representing a list of digits (in basis
  * BITS_IN_LONG) : a[0], ..., a[na-1]. [ In ordre to facilitate splitting: no
