@@ -1264,7 +1264,11 @@ gmul(GEN x, GEN y)
 
   if (vx>vy || (vx==vy && is_scalar_t(tx)))
   {
-    if (isexactzero(x)) return zeropol(vy);
+    if (isexactzero(x)) 
+    {
+      if (vy == BIGINT) return gzero;/*What else? Bill.*/
+      else return zeropol(vy);
+    }
     if (tx == t_INT && is_pm1(x))
       return (signe(x)>0) ? gcopy(y): gneg(y);
     if (tx == t_POLMOD && vx == vy && ty != t_SER)
