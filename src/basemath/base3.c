@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 extern GEN to_famat(GEN g, GEN e);
 extern GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
@@ -691,7 +692,7 @@ GEN
 _algtobasis_cp(GEN nf, GEN x)
 { return typ(x) == t_COL? gcopy(x): algtobasis(nf, x); }
 
-/* gmul(A, RX_to_RV(x)), A t_MAT (or t_VEC) of compatible dimensions */
+/* gmul(A, RgX_to_RgV(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN
 mulmat_pol(GEN A, GEN x)
 {
@@ -1528,7 +1529,7 @@ archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen)
     while (increment(lambda, N, r))
     {
       pari_sp av1 = avma;
-      GEN a = RM_zc_mul(bas, lambda), c = (GEN)mat[lgmat];
+      GEN a = RgM_zc_mul(bas, lambda), c = (GEN)mat[lgmat];
       for (i = 1; i <= nba; i++)
       {
         GEN t = x? gadd((GEN)a[i], gun): (GEN)a[i];

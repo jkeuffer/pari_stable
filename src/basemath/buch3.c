@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 
 extern GEN idealcoprime_fact(GEN nf, GEN x, GEN fy);
@@ -811,7 +812,7 @@ static int
 is_unit(GEN M, long r1, GEN x)
 {
   pari_sp av = avma;
-  GEN Nx = ground( norm_by_embed(r1, RM_zc_mul(M,x)) );
+  GEN Nx = ground( norm_by_embed(r1, RgM_zc_mul(M,x)) );
   int ok = is_pm1(Nx);
   avma = av; return ok;
 }
@@ -1572,8 +1573,8 @@ rnf_is_abelian(GEN nf, GEN pol)
   for (i=1; i<l; i++)
     for (j=1; j<i; j++)
     {
-      GEN a = RX_RXQ_compo((GEN)rores[j], (GEN)ro[i], mod);
-      GEN b = RX_RXQ_compo((GEN)rores[i], (GEN)ro[j], mod);
+      GEN a = RgX_RgX_compo((GEN)rores[j], (GEN)ro[i], mod);
+      GEN b = RgX_RgX_compo((GEN)rores[i], (GEN)ro[j], mod);
       if (d) a = gmul(a, gpowgs(d, degpol(ro[i]) - degpol(ro[j])));
       if (!gegal(a, b)) return 0;
     }

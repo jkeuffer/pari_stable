@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 
 int pari_kernel_init(void)
 {
@@ -155,8 +156,6 @@ addsispec(long s, GEN x, long nx)
   *--zd = evaltyp(t_INT) | evallg(lz);
   avma=(pari_sp)zd; return zd;
 }
-
-#define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
 static GEN
 addiispec(GEN x, GEN y, long nx, long ny)

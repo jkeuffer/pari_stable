@@ -1,5 +1,5 @@
-#include <pari.h>
-#include <anal.h>
+#include "pari.h"
+#include "anal.h"
 
 GEN   gzero, gun, gdeux;
 pari_sp top, bot, avma;

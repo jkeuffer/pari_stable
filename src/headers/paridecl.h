@@ -650,10 +650,6 @@ GEN     rnfinitalg(GEN nf,GEN pol,long prec);
 
 /* bibli1.c */
 
-GEN     RM_zc_mul(GEN x, GEN y);
-GEN     RM_zm_mul(GEN x, GEN y);
-GEN     RV_zc_mul(GEN x, GEN y);
-GEN     RV_zm_mul(GEN x, GEN y);
 GEN     ZM_zc_mul(GEN x, GEN y);
 GEN     ZM_zm_mul(GEN x, GEN y);
 GEN     T2_from_embed(GEN x, long r1);
@@ -707,8 +703,6 @@ char    *stackmalloc(size_t N);
 
 /* bibli2.c */
 
-GEN     RXQ_powers(GEN a, GEN T, long l);
-GEN     RX_RXQ_compo(GEN f, GEN x, GEN T);
 GEN     binome(GEN x, long k);
 int     cmp_pol(GEN x, GEN y);
 int     cmp_prime_ideal(GEN x, GEN y);
@@ -1401,6 +1395,7 @@ long    FpX_is_totally_split(GEN f, GEN p);
 GEN     FpX_factor(GEN f, GEN p);
 long    FpX_nbfact(GEN f, GEN p);
 long    FpX_nbroots(GEN f, GEN p);
+GEN     FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p);
 GEN     FqX_factor(GEN x, GEN T, GEN p);
 GEN     FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 long    FqX_is_squarefree(GEN P, GEN T, GEN p);
@@ -1408,16 +1403,6 @@ long    FqX_nbfact(GEN u, GEN T, GEN p);
 long    FqX_nbroots(GEN f, GEN T, GEN p);
 GEN     FpX_rand(long d, long v, GEN p);
 GEN     FpX_roots(GEN f, GEN p);
-GEN     RM_to_RXV(GEN x, long v);
-GEN     RM_to_RXX(GEN x, long v,long w);
-GEN     RV_to_RX(GEN x, long v);
-GEN     RX_to_RV(GEN x, long N);
-GEN     RX_mul(GEN x,GEN y);
-GEN     RX_shift(GEN x, long n);
-GEN     RX_sqr(GEN x);
-GEN     RXV_to_RM(GEN v, long n);
-GEN     RXX_to_RM(GEN v, long n);
-GEN     RXY_swap(GEN x, long n, long w);
 GEN     apprgen(GEN f, GEN a);
 GEN     apprgen9(GEN f, GEN a);
 GEN     factcantor(GEN x, GEN p);
@@ -1602,6 +1587,33 @@ GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 int     u_pow(int p, int k);
 int     u_val(ulong n, ulong p);
+
+/* RgX.c */
+
+GEN     RgM_to_RgXV(GEN x, long v);
+GEN     RgM_to_RgXX(GEN x, long v,long w);
+GEN     RgM_zc_mul(GEN x, GEN y);
+GEN     RgM_zm_mul(GEN x, GEN y);
+GEN     RgV_to_RgX(GEN x, long v);
+GEN     RgV_zc_mul(GEN x, GEN y);
+GEN     RgV_zm_mul(GEN x, GEN y);
+GEN     RgX_divrem(GEN x,GEN y,GEN *r);
+GEN     RgX_mul(GEN x,GEN y);
+GEN     RgX_mulspec(GEN a, GEN b, long na, long nb);
+GEN     RgX_powers(GEN a, GEN T, long l);
+GEN     RgXQX_divrem(GEN x,GEN y,GEN T,GEN *r);
+GEN     RgXQX_mul(GEN x,GEN y,GEN T);
+GEN     RgXQX_red(GEN P, GEN T);
+GEN     RgXQX_RgXQ_mul(GEN x, GEN y, GEN T);
+GEN     RgX_Rg_mul(GEN y, GEN x);
+GEN     RgX_RgX_compo(GEN f, GEN x, GEN T);
+GEN     RgX_shift(GEN x, long n);
+GEN     RgX_sqr(GEN x);
+GEN     RgX_sqrspec(GEN a, long na);
+GEN     RgX_to_RgM(GEN v, long n);
+GEN     RgX_to_RgV(GEN x, long N);
+GEN     RgXX_to_RgM(GEN v, long n);
+GEN     RgXY_swap(GEN x, long n, long w);
 
 /* rootpol.c */
 

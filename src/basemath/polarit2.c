@@ -20,11 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 
-#define swap(a,b) { GEN _x = a; a = b; b = _x; }
-#define lswap(a,b) { long _x = a; a = b; b = _x; }
-#define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
-#define both_odd(a,b) ((a)&(b)&1)
 #define addshift(x,y) addshiftpol((x),(y),1)
 
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
@@ -4484,7 +4481,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (dR == 0) return scalarpol(gun, x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
-      R = RXX_to_RM(FlxX_to_ZXX(R), d);
+      R = RgXX_to_RgM(FlxX_to_ZXX(R), d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
       if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
@@ -4500,7 +4497,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       /* I suspect it must be better to take amax > bmax*/
       bo = racine(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
-      sol = RM_to_RXX(sol,x,y);
+      sol = RgM_to_RgXX(sol,x,y);
       dsol = primpart(sol);
       if (gcmp0(pseudorem_i(P, dsol, nf))
        && gcmp0(pseudorem_i(Q, dsol, nf))) break;

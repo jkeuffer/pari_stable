@@ -19,6 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                               **/
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
+
 #ifdef _WIN32
 #  include <windows.h>
 #  ifndef WINCE

@@ -20,12 +20,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
+
 extern GEN get_bas_den(GEN bas);
 extern GEN get_mul_table(GEN x,GEN bas,GEN invbas);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
-
-#define lswap(x,y) { long _t=x; x=y; y=_t; }
-#define swap(x,y) { GEN _t=x; x=y; y=_t; }
 
 /*******************************************************************/
 /*                                                                 */
@@ -62,7 +61,7 @@ poldvd(GEN x, GEN y, GEN *z)
  *   instead of gerepile) */
 /* assume, typ(x) = typ(y) = t_POL, same variable */
 GEN
-poldivrem_i(GEN x, GEN y, GEN *pr, long vx)
+RgX_divrem(GEN x, GEN y, GEN *pr)
 {
   pari_sp avy, av, av1;
   long dx,dy,dz,i,j,sx,lr;
@@ -86,8 +85,8 @@ poldivrem_i(GEN x, GEN y, GEN *pr, long vx)
   {
     if (pr && pr != ONLY_DIVIDES)
     {
-      if (pr == ONLY_REM) return zeropol(vx);
-      *pr = zeropol(vx);
+      if (pr == ONLY_REM) return zeropol(varn(x));
+      *pr = zeropol(varn(x));
     }
     return gdiv(x, constant_term(y));
   }
@@ -100,7 +99,7 @@ poldivrem_i(GEN x, GEN y, GEN *pr, long vx)
       if (pr == ONLY_REM) return gcopy(x);
       *pr = gcopy(x);
     }
-    return zeropol(vx);
+    return zeropol(varn(x));
   }
 
   /* x,y in R[X], y non constant */
@@ -229,7 +228,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
     }
     return gdiv(x,y);
   }
-  return poldivrem_i(x, y, pr, vx);
+  return RgX_divrem(x, y, pr);
 }
 
 /*******************************************************************/
@@ -500,7 +499,6 @@ rootmod0(GEN f, GEN p, long flag)
 /*******************************************************************/
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
 extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
-extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
 
 /* Functions giving information on the factorisation. */
 
@@ -515,7 +513,7 @@ FpX_Berlekamp_ker(GEN u, GEN p)
   w = v = FpXQ_pow(polx[varn(u)],p,u,p);
   for (j=2; j<=N; j++)
   {
-    p1 = RX_to_RV(w, N);
+    p1 = RgX_to_RgV(w, N);
     p1[j] = laddis((GEN)p1[j], -1);
     Q[j] = (long)p1;
     if (j < N)
@@ -537,7 +535,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
   {
-    p1 = RX_to_RV(w, N);
+    p1 = RgX_to_RgV(w, N);
     p1[j] = laddgs((GEN)p1[j], -1);
     Q[j] = (long)p1;
     if (j < N)
@@ -1083,120 +1081,6 @@ col_to_ff(GEN x, long v)
   return p;
 }
 
-GEN
-RV_to_RX(GEN x, long v)
-{
-  long i, k = lg(x);
-  GEN p;
-
-  while (--k && gcmp0((GEN)x[k]));
-  if (!k) return zeropol(v);
-  i = k+2; p = cgetg(i,t_POL);
-  p[1] = evalsigne(1) | evalvarn(v);
-  x--; for (k=2; k<i; k++) p[k] = x[k];
-  return p;
-}
-
-/* return the (N-dimensional) vector of coeffs of p */
-GEN
-RX_to_RV(GEN x, long N)
-{
-  long i, l;
-  GEN z = cgetg(N+1,t_COL);
-  if (typ(x) != t_POL)
-  {
-    z[1] = (long)x;
-    for (i=2; i<=N; i++) z[i]=zero;
-    return z;
-  }
-  l = lg(x)-1; x++;
-  for (i=1; i<l ; i++) z[i]=x[i];
-  for (   ; i<=N; i++) z[i]=zero;
-  return z;
-}
-
-/* vector of polynomials (in v) whose coeffs are given by the columns of x */
-GEN
-RM_to_RXV(GEN x, long v)
-{
-  long j, lx = lg(x);
-  GEN y = cgetg(lx, t_VEC);
-  for (j=1; j<lx; j++) y[j] = (long)RV_to_RX((GEN)x[j], v);
-  return y;
-}
-
-/* matrix whose entries are given by the coeffs of the polynomials in
- * vector v (considered as degree n-1 polynomials) */
-GEN
-RXV_to_RM(GEN v, long n)
-{
-  long j, N = lg(v);
-  GEN y = cgetg(N, t_MAT);
-  for (j=1; j<N; j++) y[j] = (long)RX_to_RV((GEN)v[j], n);
-  return y;
-}
-
-/* polynomial (in v) of polynomials (in w) whose coeffs are given by the columns of x */
-GEN
-RM_to_RXX(GEN x, long v,long w)
-{
-  long j, lx = lg(x);
-  GEN y = cgetg(lx+1, t_POL);
-  y[1]=evalsigne(1) | evalvarn(v);
-  y++;
-  for (j=1; j<lx; j++) y[j] = (long)RV_to_RX((GEN)x[j], w);
-  return normalizepol_i(--y, lx+1);
-}
-
-/* matrix whose entries are given by the coeffs of the polynomial v in
- * two variables (considered as degree n polynomials) */
-GEN
-RXX_to_RM(GEN v, long n)
-{
-  long j, N = lg(v)-1;
-  GEN y = cgetg(N, t_MAT);
-  v++;
-  for (j=1; j<N; j++) y[j] = (long)RX_to_RV((GEN)v[j], n);
-  return y;
-}
-
-/* P(X,Y) --> P(Y,X), n is an upper bound for deg_Y(P) */
-GEN
-RXY_swap(GEN x, long n, long w)
-{
-  long j, lx = lg(x), ly = n+3;
-  long v=varn(x);
-  GEN y = cgetg(ly, t_POL);
-  y[1]=evalsigne(1) | evalvarn(v);
-  for (j=2; j<ly; j++)
-  {
-    long k;
-    GEN p1=cgetg(lx,t_POL);
-    p1[1] = evalsigne(1) | evalvarn(w);
-    for (k=2; k<lx; k++)
-      if( j<lg(x[k]))
-        p1[k] = mael(x,k,j);
-      else
-        p1[k] = zero;
-    y[j] = (long)normalizepol_i(p1,lx);
-  }
-  return normalizepol_i(y,ly);
-}
-
-GEN
-RX_shift(GEN a, long n)
-{
-  long i, l = lg(a);
-  GEN  b;
-  if (!signe(a)) return a;
-  b = cgetg(l+n, t_POL);
-  b[1] = a[1];
-  for (i=0; i<n; i++) b[2+i] = zero;
-  for (i=2; i<l; i++) b[i+n] = a[i];
-  return b;
-}
-
-
 /* set x <-- x + c*y mod p */
 /* x is not required to be normalized.*/
 static void
@@ -1257,7 +1141,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   else
   {
     vker = FpX_Berlekamp_ker(u,p);
-    vker = RM_to_RXV(vker,vu);
+    vker = RgM_to_RgXV(vker,vu);
   }
   d = lg(vker)-1;
   po2 = shifti(p, -1); /* (p-1) / 2 */
@@ -1334,14 +1218,8 @@ GEN
 FpX_deriv(GEN f, GEN p) { return FpX_red(ZX_deriv(f), p); }
 GEN
 FqX_deriv(GEN f, GEN T, GEN p) { return FqX_red(derivpol(f), T, p); }
-
 GEN
-FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
-{
-  GEN g = T? FpXQX_safegcd(P,Q,T,p): FpX_gcd(P,Q,p);
-  if (!g) err(talker,"%Z not irreducible in FqX_gcd", T);
-  return g;
-}
+FqX_gcd(GEN P,GEN Q,GEN T,GEN p) {return T? FpXQX_gcd(P,Q,T,p): FpX_gcd(P,Q,p);}
 long
 FqX_is_squarefree(GEN P, GEN T, GEN p)
 {
@@ -1359,7 +1237,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
   long d, i, ir, L, la, lb;
 
   vker = FqX_Berlekamp_ker(u,T,q,p);
-  vker = RM_to_RXV(vker,vu);
+  vker = RgM_to_RgXV(vker,vu);
   d = lg(vker)-1;
   qo2 = shifti(q, -1); /* (q-1) / 2 */
   pol = cgetg(N+3,t_POL);
@@ -2065,7 +1943,7 @@ padicff(GEN x,GEN p,long pr)
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
   nf[4] = dvdii( diviiexact(dx, dK), p )? (long)p: un;
-  invbas = QM_inv(RXV_to_RM(bas,n), gun);
+  invbas = QM_inv(RgX_to_RgM(bas,n), gun);
   mul = get_mul_table(x,bas,invbas);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;

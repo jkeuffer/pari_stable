@@ -333,12 +333,15 @@ enum manage_var_t {
 
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
-#define gdeuc(x,y) (poldivrem((x),(y),NULL))
-#define grem(x,y) (poldivrem((x),(y),ONLY_REM))
-#define FpX_div(x,y,p) (FpX_divrem((x),(y),(p), NULL))
-#define FpX_rem(x,y,p) (FpX_divrem((x),(y),(p), ONLY_REM))
-
-#define Flx_div(x,y,p) (Flx_divrem((x),(y),(p), NULL))
+#define RgX_div(x,y)     (RgX_divrem((x),(y),NULL))
+#define RgX_rem(x,y)     (RgX_divrem((x),(y),ONLY_REM))
+#define RgXQX_div(x,y,T) (RgXQX_divrem((x),(y),(T),NULL))
+#define RgXQX_rem(x,y,T) (RgXQX_divrem((x),(y),(T),ONLY_REM))
+#define gdeuc(x,y)       (poldivrem((x),(y),NULL))
+#define grem(x,y)        (poldivrem((x),(y),ONLY_REM))
+#define FpX_div(x,y,p)   (FpX_divrem((x),(y),(p), NULL))
+#define FpX_rem(x,y,p)   (FpX_divrem((x),(y),(p), ONLY_REM))
+#define Flx_div(x,y,p)   (Flx_divrem((x),(y),(p), NULL))
 
 #define zv_to_ZV(x)    (vecsmall_to_vec((x)))
 #define zv_to_ZC(x)    (vecsmall_to_col((x)))

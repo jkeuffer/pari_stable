@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include <string.h>
 #include "pari.h"
+#include "pari-priv.h"
 #include "anal.h"
 #ifdef _WIN32
 #  ifndef WINCE
@@ -68,11 +69,11 @@ extern int   term_width(void);
 
 #ifdef BOTH_GNUPLOT_AND_X11
 /* Satisfy DLL dependencies: dummy only */
-#define EXTERM_DLL_DPES *PL_markstack_ptr, PL_stack_max, *PL_Sv, *PL_stack_sp, \
+#define EXTERN_DLL_DPES *PL_markstack_ptr, PL_stack_max, *PL_Sv, *PL_stack_sp, \
   *PL_tmps_floor, *PL_tmps_ix, *PL_markstack_max, *PL_stack_base, *PL_na, \
   *PL_sv_yes, *PL_sv_no, *PL_curpad, *PL_op
-extern int EXTERM_DLL_DPES;
-int EXTERM_DLL_DPES;
+extern int EXTERN_DLL_DPES;
+int EXTERN_DLL_DPES;
 #endif	/* defined BOTH_GNUPLOT_AND_X11 */
 
 typedef struct {

@@ -20,9 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 
-#define swap(x,y) {GEN _x = x; x = y; y = _x; }
-#define lswap(x,y) {long _x = x; x = y; y = _x; }
 #define fix_frac(z) if (signe(z[2])<0)\
 {\
   setsigne(z[1],-signe(z[1]));\
@@ -296,7 +295,7 @@ gred_rfrac2_i(GEN n, GEN d)
   }
   else
     c = ginv(cd);
-  y = poldivrem_i(n, d, &p1, varn(n));
+  y = RgX_divrem(n, d, &p1);
   if (!signe(p1)) return gmul(c,y);
   p1 = ggcd(d,p1);
   if (degpol(p1)) { n=gdeuc(n,p1); d=gdeuc(d,p1); }
@@ -1093,7 +1092,7 @@ mul_polmod_same(GEN X, GEN x, GEN y)
   t = gmul(x, y);
   /* gmod(t, (GEN)z[1])) optimised */
   if (typ(t) == t_POL  && (v = varn(X)) == varn(t) && lg(t) >= lg(X))
-    z[2] = lpileupto(av, poldivrem_i(t, X, ONLY_REM, v));
+    z[2] = lpileupto(av, RgX_divrem(t, X, ONLY_REM));
   else
     z[2] = (long)t;
   return z;
@@ -1119,17 +1118,6 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
 }
 
 static GEN
-mul_pol_scal(GEN y, GEN x) {
-  long i, ly;
-  GEN z;
-  if (isexactzero(x)) { long vy = varn(y); return zeropol(vy); }
-  ly = lg(y);
-  z = cgetg(ly,t_POL); z[1] = y[1];
-  if (ly == 2) return z;
-  for (i = 2; i < ly; i++) z[i] = lmul(x,(GEN)y[i]);
-  return normalizepol_i(z,ly);
-}
-static GEN
 mul_ser_scal(GEN y, GEN x) {
   long ly, i;
   GEN z;
@@ -1144,7 +1132,7 @@ mul_scal(GEN y, GEN x, long ty)
 {
   switch(ty)
   {
-    case t_POL: return mul_pol_scal(y, x);
+    case t_POL: return RgX_Rg_mul(y, x);
     case t_SER: return mul_ser_scal(y, x);
     case t_RFRAC: return mul_rfrac_scal((GEN)y[1],(GEN)y[2], x);
     case t_QFI: case t_QFR:
@@ -1298,10 +1286,10 @@ gmul(GEN x, GEN y)
       vx = varn(x);
       vy = varn(y);
       if (vx != vy) {
-        if (varncmp(vx, vy) < 0) return mul_pol_scal(x, y);
-        else                     return mul_pol_scal(y, x);
+        if (varncmp(vx, vy) < 0) return RgX_Rg_mul(x, y);
+        else                     return RgX_Rg_mul(y, x);
       }
-      return RX_mul(x, y);
+      return RgX_mul(x, y);
 
     case t_SER: {
       long mix, miy;
@@ -1718,7 +1706,7 @@ gsqr(GEN x)
         if (pol) z = from_Kronecker(z,pol);
         z = gerepileupto(av, z);
       }
-      else { avma = av; z = RX_sqr(a); }
+      else { avma = av; z = RgX_sqr(a); }
       setvarn(z, vx); return z;
     }
 

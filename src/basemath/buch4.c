@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 
 extern GEN to_polmod(GEN x, GEN mod);

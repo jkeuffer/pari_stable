@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                 **/
 /*********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 
 extern GEN ishiftr_spec(GEN x, long lx, long n);
 /*********************************************************************/
@@ -30,13 +31,12 @@ extern GEN ishiftr_spec(GEN x, long lx, long n);
 GEN
 garith_proto(GEN f(GEN), GEN x, int do_error)
 {
-  long tx=typ(x),lx,i;
+  long tx = typ(x), lx, i;
   GEN y;
-
   if (is_matvec_t(tx))
   {
-    lx=lg(x); y=cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i] = (long) garith_proto(f,(GEN) x[i], do_error);
+    lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) y[i] = (long)garith_proto(f, (GEN)x[i], do_error);
     return y;
   }
   if (tx != t_INT && do_error) err(arither1);
@@ -46,13 +46,12 @@ garith_proto(GEN f(GEN), GEN x, int do_error)
 GEN
 arith_proto(long f(GEN), GEN x, int do_error)
 {
-  long tx=typ(x),lx,i;
+  long tx = typ(x), lx, i;
   GEN y;
-
   if (is_matvec_t(tx))
   {
-    lx=lg(x); y=cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i] = (long) arith_proto(f,(GEN) x[i], do_error);
+    lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) y[i] = (long)arith_proto(f, (GEN)x[i], do_error);
     return y;
   }
   if (tx != t_INT && do_error) err(arither1);
@@ -64,19 +63,18 @@ arith_proto2(long f(GEN,GEN), GEN x, GEN n)
 {
   long l,i,tx = typ(x);
   GEN y;
-
   if (is_matvec_t(tx))
   {
     l=lg(x); y=cgetg(l,tx);
-    for (i=1; i<l; i++) y[i] = (long) arith_proto2(f,(GEN) x[i],n);
+    for (i=1; i<l; i++) y[i] = (long)arith_proto2(f,(GEN) x[i],n);
     return y;
   }
   if (tx != t_INT) err(arither1);
   tx=typ(n);
   if (is_matvec_t(tx))
   {
-    l=lg(n); y=cgetg(l,tx);
-    for (i=1; i<l; i++) y[i] = (long) arith_proto2(f,x,(GEN) n[i]);
+    l = lg(n); y = cgetg(l,tx);
+    for (i=1; i<l; i++) y[i] = (long)arith_proto2(f,x,(GEN) n[i]);
     return y;
   }
   if (tx != t_INT) err(arither1);
@@ -86,13 +84,13 @@ arith_proto2(long f(GEN,GEN), GEN x, GEN n)
 GEN
 arith_proto2gs(long f(GEN,long), GEN x, long y)
 {
-  long l,i,tx = typ(x);
+  long l, i, tx = typ(x);
   GEN t;
 
   if (is_matvec_t(tx))
   {
     l=lg(x); t=cgetg(l,tx);
-    for (i=1; i<l; i++) t[i]= (long) arith_proto2gs(f,(GEN) x[i],y);
+    for (i=1; i<l; i++) t[i]= (long)arith_proto2gs(f,(GEN) x[i],y);
     return t;
   }
   if (tx != t_INT) err(arither1);
@@ -102,13 +100,13 @@ arith_proto2gs(long f(GEN,long), GEN x, long y)
 GEN
 garith_proto2gs(GEN f(GEN,long), GEN x, long y)
 {
-  long l,i,tx = typ(x);
+  long l, i, tx = typ(x);
   GEN t;
 
   if (is_matvec_t(tx))
   {
-    l=lg(x); t=cgetg(l,tx);
-    for (i=1; i<l; i++) t[i]= (long) garith_proto2gs(f,(GEN) x[i],y);
+    l = lg(x); t = cgetg(l,tx);
+    for (i=1; i<l; i++) t[i] = (long)garith_proto2gs(f,(GEN) x[i],y);
     return t;
   }
   if (tx != t_INT) err(arither1);
@@ -116,39 +114,14 @@ garith_proto2gs(GEN f(GEN,long), GEN x, long y)
 }
 
 GEN
-garith_proto3ggs(GEN f(GEN,GEN,long), GEN x, GEN y, long z)
-{
-  long l,i,tx = typ(x);
-  GEN t;
-
-  if (is_matvec_t(tx))
-  {
-    l=lg(x); t=cgetg(l,tx);
-    for (i=1; i<l; i++) t[i]= (long) garith_proto3ggs(f,(GEN) x[i],y,z);
-    return t;
-  }
-  if (tx != t_INT) err(arither1);
-  tx = typ(y);
-  if (is_matvec_t(tx))
-  {
-    l=lg(y); t=cgetg(l,tx);
-    for (i=1; i<l; i++) t[i]= (long) garith_proto3ggs(f,x,(GEN) y[i],z);
-    return t;
-  }
-  if (tx != t_INT) err(arither1);
-  return f(x,y,z);
-}
-
-GEN
 gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 {
-  int tx=typ(x);
+  int tx = typ(x);
   if (!y)
   {
     pari_sp av = avma;
-    if (tx!=t_VEC && tx!=t_COL)
-      err(typeer,"association");
-    return gerepileupto(av,divide_conquer_prod(x,f));
+    if (tx != t_VEC && tx != t_COL) err(typeer,"association");
+    return gerepileupto(av, divide_conquer_prod(x,f));
   }
   return f(x,y);
 }

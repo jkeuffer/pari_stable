@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 
 void
 checkpt(GEN z)
@@ -914,8 +915,6 @@ set_gamma(SL2_red *T)
   T->a = a; T->b = b;
   T->c = c; T->d = d;
 }
-
-#define swap(x,y) { GEN _t=x; x=y; y=_t; }
 
 /* swap w1, w2 so that Im(t := w1/w2) > 0. Set tau = representative of t in
  * the standard fundamental domain, and g in Sl_2, such that tau = g.t */

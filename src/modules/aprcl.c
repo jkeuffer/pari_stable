@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN centermod_i(GEN x, GEN p, GEN ps2);
 
@@ -276,7 +277,7 @@ _powpolmodsimple(Cache *C, Red *R, GEN jac)
   for (j=1; j<ph; j++)
     w[j] = (long)_powpolmod(C, centermodii((GEN)w[j], R->N, R->N2), R, &sqrmod);
   w = centermod_i( gmul(C->matinvvite, w), R->N, R->N2 );
-  return RV_to_RX(w, 0);
+  return RgV_to_RgX(w, 0);
 }
 
 static GEN

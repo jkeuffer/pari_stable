@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                            */
 /**************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 extern GEN cauchy_bound(GEN p);
 extern GEN small_to_pol_i(GEN z, long l);
@@ -404,8 +405,6 @@ cmp_re(GEN x, GEN y)
   return gcmp((GEN)x[1], (GEN)y[1]);
 }
 
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-
 /* multiply the r o bb. Sort first to detect pairs of conjugate */
 static GEN
 monomial(GEN r, PERM bb, long nbv)
@@ -423,7 +422,7 @@ monomial(GEN r, PERM bb, long nbv)
     R = gen_sort(R, 0, &cmp_re);
   else if (nbv == 2)
   {
-    if (typ(R[2]) != t_COMPLEX) swap(R[1], R[2]);
+    if (typ(R[2]) != t_COMPLEX) lswap(R[1], R[2]);
   }
   t = NULL;
   for (i=1; i<=nbv; i++)

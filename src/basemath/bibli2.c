@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-
+#include "pari-priv.h"
 /********************************************************************/
 /**                                                                **/
 /**                 DEVELOPPEMENTS  LIMITES                        **/
@@ -932,47 +932,6 @@ permtonum(GEN x)
 /**                       MODREVERSE                               **/
 /**                                                                **/
 /********************************************************************/
-/* evaluate f(x) mod T */
-GEN
-RX_RXQ_compo(GEN f, GEN x, GEN T)
-{
-  pari_sp av = avma, limit;
-  long l;
-  GEN y;
-
-  if (typ(f) != t_POL) return gcopy(f);
-  l = lg(f)-1; y = (GEN)f[l];
-  limit = stack_lim(av, 1);
-  for (l--; l>=2; l--)
-  {
-    y = grem(gadd(gmul(y,x), (GEN)f[l]), T);
-    if (low_stack(limit,stack_lim(av,1)))
-    {
-      if (DEBUGMEM > 1) err(warnmem, "RX_RXQ_compo");
-      y = gerepileupto(av, y);
-    }
-  }
-  return gerepileupto(av, y);
-}
-
-/* return (1,...a^l) mod T. Not memory clean */
-GEN
-RXQ_powers(GEN a, GEN T, long l)
-{
-  long i;
-  GEN v;
-
-  if (typ(a) != t_POL) err(typeer,"RXQ_powers");
-  l += 2;
-  v = cgetg(l,t_VEC);
-  v[1] = un; if (l == 2) return v;
-
-  if (degpol(a) >= degpol(T)) a = grem(a, T);
-  v[2] = (long)a;
-  for (i=3; i<l; i++) v[i] = lres(gmul((GEN)v[i-1], a), T);
-  return v;
-}
-
 /* return y such that Mod(y, charpoly(Mod(a,T)) = Mod(a,T) */
 GEN
 modreverse_i(GEN a, GEN T)
@@ -986,9 +945,9 @@ modreverse_i(GEN a, GEN T)
     return gerepileupto(av, gneg(gdiv((GEN)T[2], (GEN)T[3])));
   if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
 
-  y = RXV_to_RM(RXQ_powers(a,T,n-1), n);
+  y = RgX_to_RgM(RgX_powers(a,T,n-1), n);
   y = gauss(y, vec_ei(n, 2));
-  return gerepilecopy(av, RV_to_RX(y, varn(T)));
+  return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 
 GEN

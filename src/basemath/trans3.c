@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 extern int OK_bern(long nb, long prec);
 extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrsns(GEN x, long i);
@@ -1979,7 +1980,6 @@ eta(GEN x, long prec)
 static GEN
 sqrt32(long prec) { GEN z = sqrtr(stor(3, prec)); setexpo(z, -1); return z; }
 
-#define swap(x,y) { long _t=x; x=y; y=_t; }
 /* exp(i x), x = k pi/12 */
 static GEN
 e12(long k, long prec)
@@ -2004,7 +2004,7 @@ e12(long k, long prec)
     case 3: z[1] = linv( gsqrt(gdeux, prec) );
             z[2] = (long)mpcopy((GEN)z[1]); break;
   }
-  if (sPiov2) swap(z[1], z[2]);
+  if (sPiov2) lswap(z[1], z[2]);
   if (sPi) setsigne(z[1], -signe(z[1]));
   if (s)   setsigne(z[2], -signe(z[2]));
   return z;

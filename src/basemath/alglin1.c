@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 
 /* for linear algebra mod p */
 #ifdef LONG_IS_64BIT
@@ -962,8 +963,6 @@ gaddmat_i(GEN x, GEN y)
 /*                       Solve A*X=B (Gauss pivot)                 */
 /*                                                                 */
 /*******************************************************************/
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-
 /* Assume x is a non-empty matrix. Return 0 if maximal pivot should not be
  * used, 1 otherwise */
 static int
@@ -1312,8 +1311,8 @@ gauss_intern(GEN a, GEN b)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
+      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
       p = gcoeff(a,i,i);
     }
     if (i == aco) break;
@@ -1380,8 +1379,8 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
+      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
     }
     if (i == aco) break;
 
@@ -1479,8 +1478,8 @@ FpM_gauss(GEN a, GEN b, GEN p)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
+      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
     }
     if (i == aco) break;
 
@@ -1540,8 +1539,8 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
+      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
       piv = gcoeff(a,i,i);
     }
     if (i == aco) break;
@@ -3244,7 +3243,7 @@ det_simple_gauss(GEN a, int inexact)
     }
     if (k != i)
     {
-      swap(a[i],a[k]); s = -s;
+      lswap(a[i],a[k]); s = -s;
       p = gcoeff(a,i,i);
     }
 
@@ -3310,7 +3309,7 @@ det(GEN a)
     {
       k=i+1; while (k<=nbco && gcmp0(gcoeff(a,i,k))) k++;
       if (k>nbco) return gerepilecopy(av, p);
-      swap(a[k], a[i]); s = -s;
+      lswap(a[k], a[i]); s = -s;
       p = gcoeff(a,i,i);
     }
     ci = (GEN*)a[i];

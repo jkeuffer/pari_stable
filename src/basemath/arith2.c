@@ -20,13 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                 **/
 /*********************************************************************/
 #include "pari.h"
-
-extern GEN arith_proto(long f(GEN), GEN x, int do_error);
-extern GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
-extern GEN arith_proto2gs(long f(GEN,long), GEN x, long y);
-extern GEN garith_proto(GEN f(GEN), GEN x, int do_error);
-extern GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
-extern GEN garith_proto3ggs(GEN f(GEN,GEN,long), GEN x, GEN y, long z);
+#include "pari-priv.h"
 
 #define sqru(i) (muluu((i),(i)))
 
@@ -1633,8 +1627,6 @@ ibitand(GEN x, GEN y)
   return out;
 }
 
-#define swaplen(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
-
 /* bitwise 'or' of absolute values of two integers */
 GEN
 ibitor(GEN x, GEN y)
@@ -1648,7 +1640,7 @@ ibitor(GEN x, GEN y)
 
   lx = lgefint(x); xp = int_LSW(x);
   ly = lgefint(y); yp = int_LSW(y);
-  if (lx < ly) swaplen(xp,yp,lx,ly);
+  if (lx < ly) swapspec(xp,yp,lx,ly);
   /* lx > 2 */
   out = cgeti(lx); out[1] = evalsigne(1) | evallgefint(lx);
   outp = int_LSW(out);
@@ -1683,7 +1675,7 @@ ibitxor(GEN x, GEN y)
 
   lx = lgefint(x); xp = int_LSW(x);
   ly = lgefint(y); yp = int_LSW(y);
-  if (lx < ly) swaplen(xp,yp,lx,ly);
+  if (lx < ly) swapspec(xp,yp,lx,ly);
   /* lx > 2 */
   out = cgeti(lx); out[1] = evalsigne(1) | evallgefint(lx);
   outp = int_LSW(out);

@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "anal.h"
 extern void changevalue_p(entree *ep, GEN x);
 extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
@@ -205,8 +206,8 @@ fordiv(GEN a, entree *ep, char *ch)
  *   fl = 2:        a1 <  ... <  an
  */
 typedef struct {
-  GEN *a, *m, *M;
-  long n,fl;
+  GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
+  long n, fl;
   char *ch;
 } fvdat;
 
@@ -972,7 +973,6 @@ _invf(GEN x, void *dat)
   return gmul(S->f(y, S->E), gsqr(y));
 }
 
-#define swap(a,b) { GEN _x = a; a = b; b = _x; }
 static GEN
 interp(GEN h, GEN s, long j, long lim, long KLOC)
 {
@@ -1196,7 +1196,7 @@ polzagreel(long n, long m, long prec)
       g[d-k+j] = lmpadd((GEN)g[d-k+j], mulri(b,(GEN)v[d-k+j]));
     g[d-k] = (long)b;
   }
-  g = gmul(RV_to_RX(g,0), gpowgs(Bx,r));
+  g = gmul(RgV_to_RgX(g,0), gpowgs(Bx,r));
   for (j=0; j<=r; j++)
   {
     if (j) g = derivpol(g);

@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 extern GEN extendedgcd(GEN A);
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
@@ -281,9 +282,6 @@ gram_schmidt(GEN e, GEN *ptB)
 /**                          LLL ALGORITHM                         **/
 /**                                                                **/
 /********************************************************************/
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-#define gswap(x,y) { GEN _t=x; x=y; y=_t; }
-
 static GEN
 lll_trivial(GEN x, long flag)
 {
@@ -534,7 +532,7 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
   if (fl[k])
   {
     GEN q;
-    if (!D) return 0; /* only swap non-kernel + kernel vector */
+    if (!D) return 0; /* only lswap non-kernel + kernel vector */
     q = addii(la2, mulii((GEN)B[k-1],(GEN)B[k+1]));
     if (cmpii(mulsi(D-1,sqri(Bk)), mulsi(D,q)) <= 0) {
       avma = av; return 0;
@@ -550,11 +548,11 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
     fprintferr(" (%ld)", expi(p1) - expi(mulsi(D, d)));
     avma = av1;
   }
-  if (h) swap(h[k-1], h[k]);
-  swap(x[k-1], x[k]); lx = lg(x);
+  if (h) lswap(h[k-1], h[k]);
+  lswap(x[k-1], x[k]); lx = lg(x);
   if (gram)
-    for (j=1; j < lx; j++) swap(coeff(x,k-1,j), coeff(x,k,j));
-  for (j=1; j<k-1; j++) swap(coeff(L,k-1,j), coeff(L,k,j))
+    for (j=1; j < lx; j++) lswap(coeff(x,k-1,j), coeff(x,k,j));
+  for (j=1; j<k-1; j++) lswap(coeff(L,k-1,j), coeff(L,k,j))
   if (fl[k])
   {
     av = avma;
@@ -619,11 +617,11 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN delta, int gram)
   B[k] = lmpmul((GEN)B[k-1], BK);
   B[k-1] = (long)BB;
 
-  if (h) swap(h[k-1],h[k]);
-  swap(x[k-1],x[k]); lx = lg(x);
+  if (h) lswap(h[k-1],h[k]);
+  lswap(x[k-1],x[k]); lx = lg(x);
   if (gram)
-    for (j=1; j < lx; j++) swap(coeff(x,k-1,j), coeff(x,k,j));
-  for (j=1; j<k-1; j++) swap(coeff(L,k-1,j), coeff(L,k,j))
+    for (j=1; j < lx; j++) lswap(coeff(x,k-1,j), coeff(x,k,j));
+  for (j=1; j<k-1; j++) lswap(coeff(L,k-1,j), coeff(L,k,j))
   for (i=k+1; i<=kmax; i++)
   {
     GEN t = gcoeff(L,i,k);
@@ -866,8 +864,8 @@ do_SWAPgen(GEN h, GEN L, GEN B, long k, GEN fl, int *flc)
     B[k] = ldiv(q, Bk);
   }
 
-  swap(h[k-1], h[k]); lx = lg(L);
-  for (j=1; j<k-1; j++) swap(coeff(L,k-1,j), coeff(L,k,j));
+  lswap(h[k-1], h[k]); lx = lg(L);
+  for (j=1; j<k-1; j++) lswap(coeff(L,k-1,j), coeff(L,k,j));
   if (fl[k])
   {
     for (i=k+1; i<lx; i++)
@@ -1117,8 +1115,8 @@ PRECPB:
                        gsqr(gcoeff(R,k-1,k)));
         fprintferr(" (%ld)", gexpo(q) - gexpo(gsqr(gcoeff(R, k,k))));
       }
-      swap(X[k], X[k-1]);
-      swap(h[k], h[k-1]);
+      lswap(X[k], X[k-1]);
+      lswap(h[k], h[k-1]);
       if      (MARKED == k)   MARKED = k-1;
       else if (MARKED == k-1) MARKED = k;
       avma = av1; k--;
@@ -1531,7 +1529,7 @@ lllintpartialall(GEN m, long flag)
       }
 
       /* Interchange the output vectors v1 and v2.  */
-      gswap(dot11,dot22); swap(tm[1],tm[2]);
+      swap(dot11,dot22); lswap(tm[1],tm[2]);
 
       /* Occasionally (including final pass) do garbage collection.  */
       if (npass2 % 8 == 0 || !progress)
@@ -1659,8 +1657,8 @@ lllintpartialall(GEN m, long flag)
       if (i != s)
       { /* Exchange with proper column */
         /* Only diagonal of dot is updated */
-        swap(tm2[i], tm2[s]);
-        swap(coeff(dot,i,i), coeff(dot,s,s));
+        lswap(tm2[i], tm2[s]);
+        lswap(coeff(dot,i,i), coeff(dot,s,s));
       }
     }
     i = 1;
@@ -2118,22 +2116,19 @@ static void
 SWAP(pslq_M *M, long m)
 {
   long j, n = M->n;
-  swap(M->y[m], M->y[m+1]);
-  swap(M->B[m], M->B[m+1]);
-  for (j=1; j<=n; j++) swap(coeff(M->A,m,j), coeff(M->A,m+1,j));
-  for (j=1; j<n;  j++) swap(coeff(M->H,m,j), coeff(M->H,m+1,j));
+  lswap(M->y[m], M->y[m+1]);
+  lswap(M->B[m], M->B[m+1]);
+  for (j=1; j<=n; j++) lswap(coeff(M->A,m,j), coeff(M->A,m+1,j));
+  for (j=1; j<n;  j++) lswap(coeff(M->H,m,j), coeff(M->H,m+1,j));
 }
-
-#define dswap(x,y) { double _t=x; x=y; y=_t; }
-#define ddswap(x,y) { double* _t=x; x=y; y=_t; }
 
 static void
 SWAPbar(pslqL2_M *M, long m)
 {
   long j, n = M->n;
   dswap(M->y[m], M->y[m+1]);
-  ddswap(M->A[m], M->A[m+1]);
-  ddswap(M->H[m], M->H[m+1]);
+  pdswap(M->A[m], M->A[m+1]);
+  pdswap(M->H[m], M->H[m+1]);
   for (j=1; j<=n; j++) dswap(M->B[j][m], M->B[j][m+1]);
 }
 
@@ -2671,26 +2666,6 @@ kerint(GEN x)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-/* x non-empty t_MAT, y a compatible zc (dimension > 0). */
-static GEN
-RM_zc_mul_i(GEN x, GEN y, long c, long l)
-{
-  long i, j;
-  pari_sp av;
-  GEN z = cgetg(l,t_COL), s;
-
-  for (i=1; i<l; i++)
-  {
-    av = avma; s = gmulgs(gcoeff(x,i,1),y[1]);
-    for (j=2; j<c; j++)
-       if (y[j]) s = gadd(s, gmulgs(gcoeff(x,i,j),y[j]));
-    z[i] = lpileupto(av,s);
-  }
-  return z;
-}
-GEN
-RM_zc_mul(GEN x, GEN y) { return RM_zc_mul_i(x,y, lg(x), lg(x[1])); }
-
 /* x non-empty ZM, y a compatible zc (dimension > 0). */
 static GEN
 ZM_zc_mul_i(GEN x, GEN y, long c, long l)
@@ -2715,17 +2690,6 @@ ZM_zc_mul(GEN x, GEN y) {
   return ZM_zc_mul_i(x,y, l, lg(x[1]));
 }
 
-/* x t_MAT, y a compatible zm (dimension > 0). */
-GEN 
-RM_zm_mul(GEN x, GEN y)
-{
-  long j, c, l = lg(x), ly = lg(y);
-  GEN z = cgetg(ly, t_MAT);
-  if (l == 1) return z;
-  c = lg(x[1]);
-  for (j = 1; j < ly; j++) z[j] = (long)RM_zc_mul_i(x, (GEN)y[j], l,c);
-  return z;
-}
 /* x ZM, y a compatible zm (dimension > 0). */
 GEN 
 ZM_zm_mul(GEN x, GEN y)
@@ -2735,27 +2699,6 @@ ZM_zm_mul(GEN x, GEN y)
   if (l == 1) return z;
   c = lg(x[1]);
   for (j = 1; j < ly; j++) z[j] = (long)ZM_zc_mul_i(x, (GEN)y[j], l,c);
-  return z;
-}
-
-static GEN
-RV_zc_mul_i(GEN x, GEN y, long l)
-{
-  long i;
-  GEN z = gzero;
-  pari_sp av = avma;
-  for (i = 1; i < l; i++) z = gadd(z, gmulgs((GEN)x[i], y[i]));
-  return gerepileupto(av, z);
-}
-GEN
-RV_zc_mul(GEN x, GEN y) { return RV_zc_mul_i(x, y, lg(x)); }
-
-GEN 
-RV_zm_mul(GEN x, GEN y)
-{
-  long j, l = lg(x), ly = lg(y);
-  GEN z = cgetg(ly, t_VEC);
-  for (j = 1; j < ly; j++) z[j] = (long)RV_zc_mul_i(x, (GEN)y[j], l);
   return z;
 }
 
@@ -2779,7 +2722,7 @@ minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
 static int
 addcolumntomatrix(GEN V, GEN invp, GEN L)
 {
-  GEN a = RM_zc_mul(invp,V);
+  GEN a = RgM_zc_mul(invp,V);
   long i,j,k, n = lg(invp);
 
   if (DEBUGLEVEL>6)

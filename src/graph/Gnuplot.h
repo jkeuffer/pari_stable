@@ -56,9 +56,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif /* CAT2 */
 
 
-#define TERM_CAN_MULTIPLOT    1  /* tested if stdout not redirected */
-#define TERM_CANNOT_MULTIPLOT 2  /* tested if stdout is redirected  */
-#define TERM_BINARY           4  /* open output file with "b"       */
+#define TERgM_CAN_MULTIPLOT    1  /* tested if stdout not redirected */
+#define TERgM_CANNOT_MULTIPLOT 2  /* tested if stdout is redirected  */
+#define TERgM_BINARY           4  /* open output file with "b"       */
 
 #ifndef NO_JUNK_SMALL
 
@@ -341,9 +341,9 @@ struct termentry *term;
 #define resume()	CALL_G_METH0(resume)
 #define fillbox(sx,sy,ex,ey,head)	CALL_G_METH5(fillbox,sx,sy,ex,ey,head)
 #define linewidth(size)	CALL_G_METH1D(linewidth,size)
-#define can_multiplot()	GET_G_FLAG(TERM_CAN_MULTIPLOT)
-#define cannot_multiplot()	GET_G_FLAG(TERM_CANNOT_MULTIPLOT)
-#define is_binary()	GET_G_FLAG(TERM_BINARY)
+#define can_multiplot()	GET_G_FLAG(TERgM_CAN_MULTIPLOT)
+#define cannot_multiplot()	GET_G_FLAG(TERgM_CANNOT_MULTIPLOT)
+#define is_binary()	GET_G_FLAG(TERgM_BINARY)
 
 #define termprop(prop) (term->prop)
 #define termset(term) my_change_term(term,strlen(term))

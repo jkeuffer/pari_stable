@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 
 extern GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
@@ -33,8 +34,6 @@ extern void init_dalloc();
 extern double *dalloc(size_t n);
 extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN GS_norms(GEN B, long prec);
-extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
-extern GEN RXQX_red(GEN P, GEN T);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN centermod_i(GEN x, GEN p, GEN ps2);
 extern GEN dim1proj(GEN prh);
@@ -51,8 +50,6 @@ extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern int isrational(GEN x);
 extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 extern void remake_GM(GEN nf, nffp_t *F, long prec);
-#define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
-#define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 
 static GEN nfsqff(GEN nf,GEN pol,long fl);
 
@@ -87,12 +84,6 @@ typedef struct /* for use in nfsqff */
   GEN dn;
   long hint;
 } nfcmbf_t;
-
-GEN
-RXQX_mul(GEN x, GEN y, GEN T)
-{
-  return RXQX_red(gmul(x,y), T);
-}
 
 static GEN
 unifpol0(GEN nf,GEN x,long flag)
@@ -162,7 +153,7 @@ QXQ_normalize(GEN P, GEN T)
     if (is_rational_t(typ(t)))
       P = gdiv(P, t);
     else
-      P = RXQX_mul(QX_invmod(t,T), P, T);
+      P = RgXQX_mul(QX_invmod(t,T), P, T);
   }
   return P;
 }
@@ -198,7 +189,7 @@ nfroots(GEN nf,GEN pol)
   if (degpol(g))
   { /* not squarefree */
     g = QXQ_normalize(g, T);
-    A = RXQX_div(A,g,T);
+    A = RgXQX_div(A,g,T);
   }
   A = QXQ_normalize(A, T);
   A = Q_primpart(A);
@@ -316,7 +307,7 @@ nffactor(GEN nf,GEN pol)
     pari_sp av1;
     GEN ex;
     g = QXQ_normalize(g, T);
-    A = RXQX_div(A,g, T);
+    A = RgXQX_div(A,g, T);
 
     y = nfsqff(nf,A,0); av1 = avma;
     l = lg(y);
@@ -327,7 +318,7 @@ nffactor(GEN nf,GEN pol)
       long e = 0;
       for(e = 1;; e++)
       {
-        q = RXQX_divrem(quo,fact,T, ONLY_DIVIDES);
+        q = RgXQX_divrem(quo,fact,T, ONLY_DIVIDES);
         if (!q) break;
         quo = q;
       }
@@ -856,7 +847,7 @@ nextK:
         avma = av; goto NEXT;
       }
       /* try out the new combination: y is the candidate factor */
-      q = RXQX_divrem(C2ltpol, y, nfpol, ONLY_DIVIDES);
+      q = RgXQX_divrem(C2ltpol, y, nfpol, ONLY_DIVIDES);
       if (!q)
       {
         if (DEBUGLEVEL>3) fprintferr("*");
@@ -970,7 +961,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 
     y = gerepilecopy(av, y);
     /* y is the candidate factor */
-    pol = RXQX_divrem(C2ltpol, y, nfT, ONLY_DIVIDES);
+    pol = RgXQX_divrem(C2ltpol, y, nfT, ONLY_DIVIDES);
     if (!pol) return NULL;
 
     y = Q_primpart(y);
@@ -994,7 +985,7 @@ nf_to_Zq(GEN x, GEN T, GEN pk, GEN pks2, GEN proj)
   if (typ(x) != t_COL) return centermodii(x, pk, pks2);
   y = gmul(proj, x);
   if (!T) return centermodii(y, pk, pks2);
-  y = RV_to_RX(y, varn(T));
+  y = RgV_to_RgX(y, varn(T));
   return centermod_i(FpX_rem(y, T, pk), pk, pks2);
 }
 
@@ -1364,7 +1355,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
 
     r = nf_bestlift_to_pol(lt? gmul(lt,r): r, NULL, L);
     Cltx_r[2] = lneg(r); /* check P(r) == 0 */
-    q = RXQX_divrem(C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
+    q = RgXQX_divrem(C2ltpol, Cltx_r, nfpol, ONLY_DIVIDES); /* integral */
     if (q) { 
       C2ltpol = C2lt? gmul(Clt,q): q;
       if (Clt) r = gdiv(r, Clt);

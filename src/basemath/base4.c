@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 
 extern GEN hnfmerge_get_1(GEN A, GEN B);
@@ -2672,9 +2673,6 @@ element_close(GEN nf, GEN x, GEN ideal)
  * given in HNF. A is an nxk matrix (same k and n the rank of the module)
  * such that if A_j is the j-th column of A then M=\a_1A_1+...\a_kA_k. We say
  * that [A,I] is a pseudo-basis if k=n */
-
-#define swap(x,y) { long _t=x; x=y; y=_t; }
-
 static GEN
 colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
 {
@@ -2804,7 +2802,7 @@ nfhermite(GEN nf, GEN x)
 
     def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
     if (!j) err(talker,"not a matrix of maximal rank in nfhermite");
-    if (j==def) j--; else { swap(A[j], A[def]); swap(I[j], I[def]); }
+    if (j==def) j--; else { lswap(A[j], A[def]); lswap(I[j], I[def]); }
 
     y = gcoeff(A,i,def);
     A[def] = (long)element_mulvec(nf, element_inv(nf,y), (GEN)A[def]);
@@ -3155,7 +3153,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   for (i=li-1; i>=ldef; i--)
   {
     def--; j=def; while (j>=1 && gcmp0(gcoeff(A,i,j))) j--;
-    if (j==def) j--; else { swap(A[j], A[def]); swap(I[j], I[def]); }
+    if (j==def) j--; else { lswap(A[j], A[def]); lswap(I[j], I[def]); }
     for (  ; j; j--)
     {
       GEN a, b, S, T, S0, T0 = (GEN)A[j];

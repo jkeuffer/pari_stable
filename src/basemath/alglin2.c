@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 extern GEN quicktrace(GEN x, GEN sym);
 extern GEN imagecomplspec(GEN x, long *nlze);
 extern void ZV_neg_ip(GEN M);
@@ -241,9 +242,6 @@ adj(GEN x)
 /*                       HESSENBERG FORM                           */
 /*                                                                 */
 /*******************************************************************/
-#define lswap(x,y) { long _t=x; x=y; y=_t; }
-#define swap(x,y) { GEN _t=x; x=y; y=_t; }
-
 GEN
 hess(GEN x)
 {
@@ -2107,7 +2105,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   { /* zero out bottom part, using the Id block */
     GEN A = vecextract_i(C, col+1, co);
     GEN c = rowextract_ip(extramat, perm, lig+1, li);
-    extraC   = gsub(extraC, typ(A)==t_MAT? RM_zm_mul(A, c): RV_zm_mul(A,c));
+    extraC   = gsub(extraC, typ(A)==t_MAT? RgM_zm_mul(A, c): RgV_zm_mul(A,c));
     extratop = gsub(extratop, ZM_zm_mul(B, c));
   }
 

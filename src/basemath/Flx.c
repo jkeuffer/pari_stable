@@ -14,6 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
+#include "pari-priv.h"
 GEN muliispec(GEN x, GEN y, long nx, long ny);
 GEN sqrispec(GEN x, long nx);
 
@@ -33,11 +34,6 @@ GEN sqrispec(GEN x, long nx);
    
    signe(x) is not valid. Use degpol(x)>=0 instead.
 */
-
-#define lswap(x,y) {long _z=x; x=y; y=_z;}
-#define pswap(x,y) {GEN *_z=x; x=y; y=_z;}
-#define swap(x,y)  {GEN  _z=x; x=y; y=_z;}
-#define swapspec(x,y, nx,ny) {swap(x,y); lswap(nx,ny);}
 
 long Flx_SQR_LIMIT = 200;
 long Flx_MUL_LIMIT = 100;
@@ -984,7 +980,6 @@ Flx_deriv(GEN z, ulong p)
 }
 
 /*Do not garbage collect*/
-
 GEN
 Flx_gcd_i(GEN a, GEN b, ulong p)
 {
@@ -1011,8 +1006,7 @@ Flx_is_squarefree(GEN z, ulong p)
   pari_sp av = avma;
   GEN d = Flx_gcd_i(z, Flx_deriv(z,p) , p);
   long res= (degpol(d) == 0);
-  avma = av;
-  return res;
+  avma = av; return res;
 }
 
 GEN
@@ -1801,7 +1795,7 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
     if (low_stack(st_lim, stack_lim(btop, 1)))
     {
       GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
-      if (DEBUGLEVEL>1) err(warnmem,"FpXQX_safegcd");
+      if (DEBUGLEVEL>1) err(warnmem,"FlxqX_safegcd");
       gerepilemany(btop, bptr, 2);
     }
     swap(P, Q); dg = -dg;

@@ -18,9 +18,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 
-#define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 extern GEN TR_pol(GEN P, GEN c);
 extern GEN addmulXn(GEN x, GEN y, long d);
 extern GEN norm_by_embed(long r1, GEN x);
@@ -29,8 +29,6 @@ extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN DDF2(GEN x, long hint);
 extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
-extern GEN RXQX_mul(GEN x, GEN y, GEN T);
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN col_to_ff(GEN x, long v);
 extern GEN element_mulidid(GEN nf, long i, long j);
@@ -726,7 +724,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     setlg(W1, lfa);
     setlg(W2, lfa); *ptw = w;
   }
-  return RM_to_RXV(a, varn(f));
+  return RgM_to_RgXV(a, varn(f));
 }
 
 static GEN
@@ -885,7 +883,7 @@ sylpm(GEN f1, GEN f2, GEN pm)
   h = FpX_rem(f2,f1,pm);
   for (j=1;; j++)
   {
-    a[j] = (long)RX_to_RV(h, n);
+    a[j] = (long)RgX_to_RgV(h, n);
     if (j == n) break;
     h = FpX_rem(shiftpol(h,v), f1, pm);
   }
@@ -903,7 +901,7 @@ gcdpm(GEN f1, GEN f2, GEN pm)
     if (!egalii(gcoeff(a,c,c), pm))
     {
       col = gdiv((GEN)a[c], gcoeff(a,c,c));
-      return gerepilecopy(av, RV_to_RX(col,v));
+      return gerepilecopy(av, RgV_to_RgX(col,v));
     }
   avma = av; return zeropol(v);
 }
@@ -976,7 +974,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
       ha = FpX_rem(ha, f, mod);
       if (d) ha = gdivexact(ha,d);
     }
-    b[i] = (long)RX_to_RV(ha,n);
+    b[i] = (long)RgX_to_RgV(ha,n);
   }
   b = hnfmodid(b,pd);
   if (DEBUGLEVEL>5) fprintferr("  new order: %Z\n",b);
@@ -987,7 +985,7 @@ static GEN
 get_partial_order_as_pols(GEN p, GEN f, GEN *d)
 {
   GEN b = maxord(p,f, ggval(ZX_disc(f),p));
-  GEN z = Q_remove_denom( RM_to_RXV(b, varn(f)), d );
+  GEN z = Q_remove_denom( RgM_to_RgXV(b, varn(f)), d );
   if (!*d) *d = gun;
   return z;
 }
@@ -1118,7 +1116,7 @@ Decomp(decomp_t *S, long flag)
     e = gsub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
       res[i] = (long)FpX_center(FpX_rem(gmul((GEN)ib2[i],e), fred, D), D);
-    res = RXV_to_RM(res, n);
+    res = RgX_to_RgM(res, n);
     return gdiv(hnfmodid(res,D), D); /* normalized integral basis */
   }
 }
@@ -1795,7 +1793,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       if (!update_phi(S, ns, &l, flag)) break;
     }
     if (!pia) break;
-    oE = Ea; opa = RX_RXQ_compo(pia, S->phi, S->f);
+    oE = Ea; opa = RgX_RgX_compo(pia, S->phi, S->f);
     if (La > 1)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);
@@ -2135,7 +2133,7 @@ pol_min(GEN mul, GEN p)
   GEN z, pow = get_powers(mul, p);
   z = FpM_deplin(pow, p);
   if (!z) errprime(p);
-  return gerepilecopy(av, RV_to_RX(z,0));
+  return gerepilecopy(av, RgV_to_RgX(z,0));
 }
 
 static GEN
@@ -2381,7 +2379,7 @@ get_proj_modT(GEN basis, GEN T, GEN p)
         w = FpX_Fp_mul(w, cx, p);
       }
     }
-    z[i] = (long)RX_to_RV(w, f); /* w_i mod (T,p) */
+    z[i] = (long)RgX_to_RgV(w, f); /* w_i mod (T,p) */
   }
   return z;
 }
@@ -2479,7 +2477,7 @@ modprinit(GEN nf, GEN pr, int zk)
   mul = FpM_mul(ffproj, mul, p);
 
   pow = get_powers(mul, p);
-  T = RV_to_RX(FpM_deplin(pow, p), varn(nf[1]));
+  T = RgV_to_RgX(FpM_deplin(pow, p), varn(nf[1]));
   nfproj = cgetg(f+1, t_MAT);
   for (i=1; i<=f; i++) nfproj[i] = (long)lift_to_zk((GEN)pow[i], c, N);
   nfproj = gmul((GEN)nf[7], nfproj);
@@ -2829,8 +2827,8 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   gzk = modprX_lift(g, modpr);
   hzk = modprX_lift(h, modpr);
 
-  k = gsub(P, RXQX_mul(gzk,hzk, nfT));
-  k = gdiv(RXQX_mul(tau,k,nfT), p);
+  k = gsub(P, RgXQX_mul(gzk,hzk, nfT));
+  k = gdiv(RgXQX_RgXQ_mul(k, tau, nfT), p);
   k = modprX(k, nf, modpr);
   k  = FqX_gcd(FqX_gcd(g,h,  T,p), k, T,p);
   d = degpol(k);  /* <= m */
@@ -2857,9 +2855,9 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   pal = modprX_lift(pal, modpr);
   for (   ; j<=m+d; j++)
   {
-    A[j] = (long)RX_to_RV(pal,m);
+    A[j] = (long)RgX_to_RgV(pal,m);
     I[j] = (long)prinvp;
-    pal = RXQX_rem(RXQX_mul(pal,X,nfT),P,nfT);
+    pal = RgXQX_rem(RgXQX_mul(pal,X,nfT),P,nfT);
   }
   /* the modulus is integral */
   base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),
@@ -2957,12 +2955,12 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     Wa = basistoalg(nf,W);
 
    /* compute MW: W_i*W_j = sum MW_k,(i,j) W_k */
-    Waa = lift_intern(RM_to_RXV(Wa,vpol));
+    Waa = lift_intern(RgM_to_RgXV(Wa,vpol));
     Wainv = lift_intern(ginv(Wa));
     for (i=1; i<=n; i++)
       for (j=i; j<=n; j++)
       {
-        GEN z = RXQX_rem(gmul((GEN)Waa[i],(GEN)Waa[j]), pol, nfT);
+        GEN z = RgXQX_rem(gmul((GEN)Waa[i],(GEN)Waa[j]), pol, nfT);
         long tz = typ(z);
           if (is_scalar_t(tz) || (tz == t_POL && varncmp(varn(z), vpol) > 0))
           z = gmul(z, (GEN)Wainv[1]);
@@ -3082,15 +3080,15 @@ static GEN
 get_d(GEN nf, GEN pol, GEN A)
 {
   long i, j, n = degpol(pol);
-  GEN W = RM_to_RXV(lift_intern(basistoalg(nf,A)), varn(pol));
+  GEN W = RgM_to_RgXV(lift_intern(basistoalg(nf,A)), varn(pol));
   GEN T, nfT = (GEN)nf[1], sym = polsym_gen(pol, NULL, n-1, nfT, NULL);
   T = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++) T[j] = lgetg(n+1,t_COL);
   for (j=1; j<=n; j++)
     for (i=j; i<=n; i++)
     {
-      GEN c = RXQX_mul((GEN)W[i],(GEN)W[j], nfT);
-      c = RXQX_rem(c, pol, nfT);
+      GEN c = RgXQX_mul((GEN)W[i],(GEN)W[j], nfT);
+      c = RgXQX_rem(c, pol, nfT);
       c = simplify_i(quicktrace(c,sym));
       coeff(T,j,i) = coeff(T,i,j) = (long)c;
     }
@@ -3688,7 +3686,6 @@ check_0(GEN B)
   return 0;
 }
 
-#define swap(x,y) { long _t=x; x=y; y=_t; }
 static int
 do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
         const int alpha, long r1)
@@ -3701,10 +3698,10 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   p2 = nftau(r1, (GEN)B[k-1]);
   if (gcmp(gmulsg(alpha,p1), gmulsg(alpha-1,p2)) > 0) return 0;
 
-  swap(MC[k-1],MC[k]);
-  swap(h[k-1],  h[k]);
-  swap(I[k-1],  I[k]);
-  for (j=1; j<=k-2; j++) swap(coeff(mu,k-1,j),coeff(mu,k,j));
+  lswap(MC[k-1],MC[k]);
+  lswap(h[k-1],  h[k]);
+  lswap(I[k-1],  I[k]);
+  for (j=1; j<=k-2; j++) lswap(coeff(mu,k-1,j),coeff(mu,k,j));
   muf = gcoeff(mu,k,k-1);
   mufc = gconj(muf);
   Bf = gadd((GEN)B[k], vecmul(real_i(vecmul(muf,mufc)), (GEN)B[k-1]));
@@ -3944,7 +3941,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 
   plg0= Q_remove_denom(plg, &den); /* plg = plg0/den */
   /* nf = K = Q(a), vbs[i+1] = a^i as an elt of L = Q[X] / polabs */
-  vbs = RXQ_powers(plg0, polabs, n-1);
+  vbs = RgX_powers(plg0, polabs, n-1);
   if (den)
   { /* restore denominators */
     vbs[2] = (long)plg; d = den;
@@ -3952,7 +3949,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   }
 
   /* bs = integer basis of K, as elements of L */
-  bs = gmul(vbs, RXV_to_RM((GEN)nf[7],n));
+  bs = gmul(vbs, RgX_to_RgM((GEN)nf[7],n));
 
   vpro = cgetg(N+1,t_VEC);
   for (i=1; i<=N; i++) vpro[i] = lpowgs(polx[v], i-1);
@@ -3964,7 +3961,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     for(j=1; j<=n; j++)
     {
       p1 = grem(gmul(bs, (GEN)w[j]), polabs);
-      B[k++] = (long)RX_to_RV(p1, m);
+      B[k++] = (long)RgX_to_RgV(p1, m);
     }
   }
   B = Q_remove_denom(B, &den);

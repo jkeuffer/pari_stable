@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *  */
 
 #include "pari.h"
+#include "pari-priv.h"
 #include <gmp.h>
 
 /*We need PARI invmod renamed to invmod_pari*/
@@ -227,8 +228,6 @@ addsispec(long s, GEN x, long nx)
   zd[1] = evalsigne(1) | evallgefint(lz);
   return zd;
 }
-
-#define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
 INLINE GEN
 addiispec(GEN x, GEN y, long nx, long ny)

@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                            */
 /**************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 
 int new_galois_format = 0;
@@ -1153,7 +1154,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   mat[1] = (long)F.M;
   mat[2] = (long)F.G;
 
-  invbas = QM_inv(RXV_to_RM(T->bas, lg(T->bas)-1), gun);
+  invbas = QM_inv(RgX_to_RgM(T->bas, lg(T->bas)-1), gun);
   nf[8] = (long)invbas;
   nf[9] = (long)get_mul_table(x, F.basden, invbas);
   if (DEBUGLEVEL) msgtimer("mult. table");
@@ -1182,7 +1183,7 @@ static GEN
 hnffromLLL(GEN nf)
 {
   GEN d, x;
-  x = RXV_to_RM((GEN)nf[7], degpol(nf[1]));
+  x = RgX_to_RgM((GEN)nf[7], degpol(nf[1]));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
   return gauss(hnfmodid(x, d), x);
@@ -1239,7 +1240,6 @@ nftohnfbasis(GEN nf, GEN x)
   return gerepilecopy(av, nfbasechange(u, x));
 }
 
-#define swap(x,y) { long _t=x; x=y; y=_t; }
 static GEN
 get_red_G(nfbasic_t *T, GEN *pro)
 {
@@ -1273,7 +1273,7 @@ get_red_G(nfbasic_t *T, GEN *pro)
   }
   *pro = F.ro; 
   if (u0) u = gmul(u0,u);
-  if (MARKED != 1) swap(u[1], u[MARKED]);
+  if (MARKED != 1) lswap(u[1], u[MARKED]);
   return u;
 }
 
@@ -1291,7 +1291,7 @@ get_LLL_basis(nfbasic_t *T, GEN *pro)
     u = lllfp_marked(&MARKED, make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC, 1);
     if (!u) u = idmat(1);
     else
-      if (MARKED != 1) swap(u[1], u[MARKED]);
+      if (MARKED != 1) lswap(u[1], u[MARKED]);
   }
   return u;
 }
@@ -1390,12 +1390,12 @@ nfpolred(int part, nfbasic_t *T)
   if (canon_pol(xbest) < 0) phi = gneg_i(phi);
   if (DEBUGLEVEL>1) fprintferr("xbest = %Z\n",xbest);
   rev = modreverse_i(phi, x);
-  for (i=1; i<=n; i++) a[i] = (long)RX_RXQ_compo((GEN)a[i], rev, xbest);
-  mat = RXV_to_RM(Q_remove_denom(a, &d), n);
+  for (i=1; i<=n; i++) a[i] = (long)RgX_RgX_compo((GEN)a[i], rev, xbest);
+  mat = RgX_to_RgM(Q_remove_denom(a, &d), n);
   if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
 
   (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
-  T->bas= RM_to_RXV(mat, v);
+  T->bas= RgM_to_RgXV(mat, v);
   T->dx = dxbest;
   T->x  = xbest; return rev;
 }
@@ -1405,7 +1405,7 @@ get_nfindex(GEN bas)
 {
   pari_sp av = avma;
   long n = lg(bas)-1;
-  GEN d, mat = RXV_to_RM(Q_remove_denom(bas, &d), n);
+  GEN d, mat = RgX_to_RgM(Q_remove_denom(bas, &d), n);
   if (!d) { avma = av; return gun; }
   return gerepileuptoint(av, diviiexact(gpowgs(d, n), det(mat)));
 }
@@ -1434,9 +1434,9 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     GEN mat;
     bas = (GEN)x[2]; x = (GEN)x[1];
     if (typ(bas) == t_MAT)
-      { mat = bas; bas = RM_to_RXV(mat,varn(x)); }
+      { mat = bas; bas = RgM_to_RgXV(mat,varn(x)); }
     else
-        mat = RXV_to_RM(bas, lg(bas)-1);
+        mat = RgX_to_RgM(bas, lg(bas)-1);
     index = get_nfindex(bas);
     dx = ZX_disc(x);
     dK = diviiexact(dx, sqri(index));
@@ -2050,11 +2050,11 @@ polredabs0(GEN x, long flag)
     y = storepol(x, y, a, T.lead, flag);
     if (flag & nf_ADDZK)
     {
-      GEN t, y0 = y, B = RXV_to_RM(T.bas, lg(T.bas)-1);
+      GEN t, y0 = y, B = RgX_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern((GEN)y[2]): modreverse_i(a, x);
       y = cgetg(3, t_VEC);
       y[1] = (long)y0;
-      y[2] = lmul(RXQ_powers(t, z, degpol(z)-1), B);
+      y[2] = lmul(RgX_powers(t, z, degpol(z)-1), B);
     }
   }
   return gerepilecopy(av, y);

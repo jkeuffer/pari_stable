@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "pari-priv.h"
 #include "parinf.h"
 extern GEN F2V_red_ip(GEN v);
 extern GEN check_and_build_cycgen(GEN bnf);
@@ -26,7 +27,6 @@ extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN T2_from_embed_norm(GEN x, long r1);
 extern GEN vconcat(GEN A, GEN B);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-extern GEN RXQX_red(GEN P, GEN T);
 extern GEN prodid(GEN nf, GEN I);
 
 extern GEN famat_inv(GEN f);
@@ -344,7 +344,7 @@ static GEN
 downtoK(toK_s *T, GEN x)
 {
   long degKz = lg(T->invexpoteta1) - 1;
-  GEN y = gmul(T->invexpoteta1, RX_to_RV(lift(x), degKz));
+  GEN y = gmul(T->invexpoteta1, RgX_to_RgV(lift(x), degKz));
   return gmodulcp(gtopolyrev(y,varn(T->polnf)), T->polnf);
 }
 
@@ -677,7 +677,7 @@ Stelt(GEN nf, GEN id, GEN polrel)
     I[i] = (long)matid;
   }
   x = cgetg(3,t_VEC);
-  x[1] = (long)RXV_to_RM(A, degpol(polrel));
+  x[1] = (long)RgX_to_RgM(A, degpol(polrel));
   x[2] = (long)I;
   return prodid(nf, (GEN)nfhermite(nf,x)[2]);
 }
@@ -840,7 +840,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     for (i = 2; i < lg(Rk); i++)
     {
       z = mod_Xell_a((GEN)Rk[i], vT, ell, num_t,den_t); /* mod T^ell - t */
-      Rk[i] = (long)RXQX_red(z, nfzpol); /* mod nfz.pol */
+      Rk[i] = (long)RgXQX_red(z, nfzpol); /* mod nfz.pol */
     }
     if (den_t) C_Rk = mul_content(C_Rk, ginv(den_t));
     prim_Rk = Q_primitive_part(Rk, &D);
@@ -872,7 +872,7 @@ lifttoKz(GEN nfz, GEN nf, GEN id, compo_s *C)
 {
   GEN I = ideal_two_elt(nf,id);
   GEN x = gmul((GEN)nf[7], (GEN)I[2]);
-  I[2] = (long)algtobasis(nfz, RX_RXQ_compo(x, C->p, C->R));
+  I[2] = (long)algtobasis(nfz, RgX_RgX_compo(x, C->p, C->R));
   return prime_to_ideal(nfz,I);
 }
   
@@ -1012,8 +1012,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   Q = FpM_ker(gsubgs(gtrans(Tc), g), gell);
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
-  p1 = RXQ_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
-  p1 = RXV_to_RM(p1, degKz);
+  p1 = RgX_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
+  p1 = RgX_to_RgM(p1, degKz);
   T.invexpoteta1 = invmat(p1); /* left inverse */
   T.polnf = polnf;
   T.tau = tau;
