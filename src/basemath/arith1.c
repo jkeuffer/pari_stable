@@ -114,6 +114,20 @@ garith_proto2gs(GEN f(GEN,long), GEN x, long y)
   return f(x,y);
 }
 
+GEN
+gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
+{
+  int tx=typ(x);
+  if (!y)
+  {
+    ulong av=avma;
+    if (tx!=t_VEC && tx!=t_COL)
+      err(typeer,"association");
+    return gerepileupto(av,divide_conquer_prod(x,f));
+  }
+  return f(x,y);
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**               ORDER of INTEGERMOD x  in  (Z/nZ)*                **/
@@ -1236,6 +1250,12 @@ mpppcm(GEN x, GEN y)
  *  Someone else may want to allow power series, complex numbers, and
  *  quadratic numbers.
  */
+
+GEN chinese(GEN x, GEN y)
+{
+  return gassoc_proto(chinois,x,y);
+}
+
 GEN
 chinois(GEN x, GEN y)
 {
@@ -1305,7 +1325,7 @@ mpinvmod(GEN a, GEN m)
 {
   GEN res;
   if (! invmod(a,m,&res))
-    err(talker,"impossible inverse modulo: %Z",gmodulcp(res,m));
+    err(invmoder,"%Z",gmodulcp(res,m));
   return res;
 }
 

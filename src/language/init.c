@@ -1062,7 +1062,7 @@ err(long numerr, ...)
     pariputsf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
-      case talker: case siginter:
+      case talker: case siginter: case invmoder:
         ch1=va_arg(ap, char*);
         vpariputs(ch1,ap); pariputc('.'); break;
 
@@ -1768,7 +1768,7 @@ entree functions_basic[]={
 {"centerlift",99,(void*)centerlift0,2,"GDn"},
 {"changevar",2,(void*)changevar,2,"GG"},
 {"charpoly",99,(void*)charpoly0,8,"GDnD0,L,"},
-{"chinese",2,(void*)chinois,4,"GG"},
+{"chinese",99,(void*)chinese,4,"GDG"},
 {"component",21,(void*)compo,2,"GL"},
 {"concat",99,(void*)concat,8,"GDG"},
 {"conj",18,(void*)gconj,2,"G"},
@@ -1850,7 +1850,7 @@ entree functions_basic[]={
 {"galoissubcyclo",99,(void*)galoissubcyclo,6,"LGDGDn"},
 {"gamma",1,(void*)ggamma,3,"Gp"},
 {"gammah",1,(void*)ggamd,3,"Gp"},
-{"gcd",25,(void*)gcd0,4,"GGD0,L,"},
+{"gcd",99,(void*)gcd0,4,"GDGD0,L,"},
 {"getheap",0,(void*)getheap,11,""},
 {"getrand",0,(void*)getrand,11,"l"},
 {"getstack",0,(void*)getstack,11,"l"},
@@ -1893,7 +1893,7 @@ entree functions_basic[]={
 {"issquare",99,(void*)gcarrecomplet,4,"GD&"},
 {"issquarefree",18,(void*)gissquarefree,4,"G"},
 {"kronecker",2,(void*)gkronecker,4,"GG"},
-{"lcm",2,(void*)glcm,4,"GG"},
+{"lcm",99,(void*)glcm0,4,"GDG"},
 {"length",10,(void*)glength,2,"lG"},
 {"lex",20,(void*)lexcmp,1,"lGG"},
 {"lift",99,(void*)lift0,2,"GDn"},

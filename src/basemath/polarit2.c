@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 
+GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
+
 GEN
 polsym(GEN x, long n)
 {
@@ -2045,9 +2047,9 @@ gcd0(GEN x, GEN y, long flag)
 {
   switch(flag)
   {
-    case 0: return ggcd(x,y);
-    case 1: return modulargcd(x,y);
-    case 2: return srgcd(x,y);
+    case 0: return gassoc_proto(ggcd,x,y);
+    case 1: return gassoc_proto(modulargcd,x,y);
+    case 2: return gassoc_proto(srgcd,x,y);
     default: err(flagerr,"gcd");
   }
   return NULL; /* not reached */
@@ -2325,6 +2327,11 @@ ggcd(GEN x, GEN y)
   }
   err(operf,"g",tx,ty);
   return NULL; /* not reached */
+}
+
+GEN glcm0(GEN x, GEN y)
+{
+  return gassoc_proto(glcm,x,y);
 }
 
 GEN
