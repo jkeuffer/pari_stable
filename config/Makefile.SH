@@ -600,7 +600,7 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   plotQt)
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
-    compile="\$(MOC) -o plotQt.moc.cpp $src/graph/plotQt.c; \$(CPLUSPLUS)"
+    compile="\$(MOC) -o plotQt.moc.cpp $src/graph/plotQt.c && \$(CPLUSPLUS)"
     ;;
   plot*)
     cflags="$cflags \$(PLOTCFLAGS)"
