@@ -117,6 +117,8 @@ IZ 17- allow changing the gnuplot DLL name for gnuplot-dynamic at Configure-time
    19- polredabs heuristic (try harder to detect subfields).
        Ex: try it on polcompositum(x^2 - d, polcyclo(11));
 MSo20- simplified polzagier()
+DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
+       before checking precision ]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

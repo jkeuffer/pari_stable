@@ -3081,21 +3081,23 @@ torsellnagelllutz(GEN e)
 static long
 torsbound(GEN e)
 {
-  long m, b, c, prime = 2;
+  long m, b, bold, prime = 2;
   pari_sp av = avma;
   byteptr p = diffptr;
   GEN D = (GEN)e[12];
   long n = bit_accuracy(lgefint(D)) >> 3;
   /* n = number of primes to try ~ 1 prime every 8 bits in D */
-  b = c = m = 0; p++;
-  while (m<n)
+  b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
+  m = 0; p++;
+  while (m < n)
   {
     NEXT_PRIME_VIADIFF_CHECK(prime,p);
     if (smodis(D, prime))
     {
       b = cgcd(b, prime+1 - itos(apell0(e,prime)));
-      if (b==c) m++; else {c = b; m = 0;}
       avma = av;
+      if (b == 1) break;
+      if (b == bold) m++; else { bold = b; m = 0; }
     }
   }
   return b;
@@ -3199,29 +3201,30 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
 GEN
 torselldoud(GEN e)
 {
-  long b, i, ord, prec, k = 1;
+  long B, i, ord, pr, prec, k = 1;
   pari_sp av=avma;
   GEN v,w,w1,w22,w1j,w12,p,tor1,tor2;
 
   checkbell(e);
   v = ellintegralmodel(e);
   if (v) e = coordch(e,v);
+ 
+  B = torsbound(e); /* #E_tor | B */
+  if (B == 1) { avma = av; return tors(e,1,NULL,NULL, v); }
 
-  b = DEFAULTPREC + ((lgefint((GEN)e[12])-2) >> 1); /* b >= size of sqrt(D) */
+  pr = DEFAULTPREC + ((lgefint((GEN)e[12])-2) >> 1); /* pr >= size of sqrt(D) */
   w1 = (GEN)e[15];
   prec = precision(w1);
-  if (prec < b) err(precer, "torselldoud");
-  if (b < prec) { prec = b; e = gprec_w(e, b); w1 = (GEN)e[15]; }
-  b = torsbound(e);
-  if (b==1) { avma=av; return tors(e,1,NULL,NULL, v); }
+  if (prec < pr) err(precer, "torselldoud");
+  if (pr < prec) { prec = pr; e = gprec_w(e, pr); w1 = (GEN)e[15]; }
   if (v) v[1] = linv((GEN)v[1]);
   w22 = gmul2n((GEN)e[16],-1);
-  if (b % 4)
+  if (B % 4)
   { /* cyclic of order 1, p, 2p, p <= 5 */
     p = NULL;
     for (i=10; i>1; i--)
     {
-      if (b%i != 0) continue;
+      if (B%i != 0) continue;
       w1j = gdivgs(w1,i);
       p = torspnt(e,w1j,i,prec);
       if (!p && i%2==0)
@@ -3259,7 +3262,7 @@ torselldoud(GEN e)
     case 0: /* no point of order 2 */
       for (i=9; i>1; i-=2)
       {
-        if (b%i!=0) continue;
+        if (B%i != 0) continue;
         w1j = gdivgs(w1,i);
         p = torspnt(e,w1j,i,prec);
         if (p) { k = i; break; }
@@ -3269,7 +3272,7 @@ torselldoud(GEN e)
     case 1: /* 1 point of order 2: w1 / 2 */
       for (i=12; i>2; i-=2)
       {
-        if (b%i!=0) continue;
+        if (B%i != 0) continue;
         w1j = gdivgs(w1,i);
         p = torspnt(e,w1j,i,prec);
         if (!p && i%4==0)
@@ -3282,7 +3285,7 @@ torselldoud(GEN e)
     case 2: /* 1 point of order 2: w = w2/2 or (w1+w2)/2 */
       for (i=5; i>1; i-=2)
       {
-        if (b%i!=0) continue;
+        if (B%i != 0) continue;
         w1j = gdivgs(w1,i);
         p = torspnt(e,gadd(w,w1j),2*i,prec);
         if (p) { k = 2*i; break; }
@@ -3293,7 +3296,7 @@ torselldoud(GEN e)
     case 3: /* 2 points of order 2: w1/2 and w2/2 */
       for (i=8; i>2; i-=2)
       {
-        if (b%(2*i)!=0) continue;
+        if (B%(2*i) != 0) continue;
         w1j = gdivgs(w1,i);
         p = torspnt(e,w1j,i,prec);
         if (p) { k = i; break; }
