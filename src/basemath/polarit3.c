@@ -682,7 +682,7 @@ FpXX_add(GEN x, GEN y, GEN p)
   long ly=lg(y);
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
-  for (i=2; i<ly; i++) z[i] = (long) FpX_add((GEN)x[i], (GEN)y[i], p);
+  for (i=2; i<ly; i++) z[i] = (long) Fq_add((GEN)x[i], (GEN)y[i], NULL, p);
   for (   ; i<lx; i++) z[i] = (long) gcopy((GEN)x[i]);
   return FpXX_renormalize(z, lz);
 }
@@ -1077,9 +1077,20 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 
 static GEN Tmodulo;
 static GEN _FpXQX_mul(GEN a,GEN b){return FpXQX_mul(a,b,Tmodulo,modulo);}
+static GEN _FlxqX_mul(GEN a,GEN b){return FlxqX_mul(a,b,Tmodulo,(ulong)modulo);}
 GEN 
 FpXQXV_prod(GEN V, GEN T, GEN p)
 {
+  if (lgefint(p) == 3)
+  {
+    pari_sp av = avma;
+    ulong pp = (long)p[2];
+    GEN Tl = ZX_to_Flx(T, pp);
+    GEN Vl = ZXXV_to_FlxXV(V, pp, varn(T));
+    modulo = (GEN)pp; Tmodulo = Tl;
+    Tl = divide_conquer_prod(Vl, &_FlxqX_mul);
+    return gerepileupto(av, FlxX_to_ZXX(Tl));
+  }
   modulo = p; Tmodulo = T;
   return divide_conquer_prod(V, &_FpXQX_mul);
 }

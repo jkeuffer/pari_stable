@@ -88,6 +88,7 @@ GEN     ZV_to_Flv(GEN x, ulong p);
 GEN     ZX_to_Flx(GEN x, ulong p);
 GEN     ZXV_to_FlxV(GEN v, ulong p);
 GEN     ZXX_to_FlxX(GEN B, ulong p, long v);
+GEN     ZXXV_to_FlxXV(GEN V, ulong p, long v);
 GEN     polx_Flx(long sv);
 GEN     zero_Flx(long sv);
 

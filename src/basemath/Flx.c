@@ -1563,6 +1563,15 @@ ZXX_to_FlxX(GEN B, ulong p, long v)
   return b;
 }
 
+GEN
+ZXXV_to_FlxXV(GEN V, ulong p, long v)
+{
+  long j, N = lg(V);
+  GEN y = cgetg(N, t_VEC);
+  for (j=1; j<N; j++) y[j] = (long)ZXX_to_FlxX((GEN)V[j], p, v);
+  return y;
+}
+
 /*Similar to normalizepol, in place*/
 /*FlxX_renormalize=zxX_renormalize */
 GEN
