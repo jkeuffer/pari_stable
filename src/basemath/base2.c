@@ -1796,284 +1796,151 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
 /*    2-ELT REPRESENTATION FOR PRIME IDEALS (dividing index)       */
 /*                                                                 */
 /*******************************************************************/
-/* beta = generators of prime ideal (vectors). Return "small" random elt in P */
-static GEN
-random_elt_in_P(GEN beta, long sm)
-{
-  long z, i, j, la, lbeta = lg(beta);
-  GEN a = NULL, B;
+/* to compute norm of elt in algtobasis form */
+typedef struct {
+  long r1;
+  GEN M;  /* via norm_by_embed */
 
-  /* compute sum random(-7..8) * beta[i] */
-  if (sm)
+  GEN D, w, T; /* via resultant if M = NULL */
+} norm_S;
+
+static GEN
+get_norm(norm_S *S, GEN a)
+{
+  if (S->M)
   {
-    la = lg(beta[1]);
-    if (sm > 7) sm = 0;
-    for (i=1; i<lbeta; i++)
-    { /* Warning: change definition of 'sm' if you change this */
-      z = random_bits(4); /* in [0,15] */
-      if (z >= 9) z -= 7;
-      if (sm) z %= sm;
-      if (!z) continue;
-      B = (GEN)beta[i];
-      if (a)
-        for (j = 1; j < la; j++) a[j] += z * B[j];
-      else {
-        a = cgetg(la, t_VECSMALL);
-        for (j = 1; j <la; j++) a[j] = z * B[j];
-      }
-    }
+    long e;
+    GEN N = grndtoi( norm_by_embed(S->r1, gmul(S->M, a)), &e );
+    if (e > -5) err(precer, "get_norm");
+    return N;
   }
-  else
-    for (i=1; i<lbeta; i++)
-    {
-      z = random_bits(4);
-      if (z >= 9) z -= 7;
-      if (!z) continue;
-      B = gmulsg(z, (GEN)beta[i]);
-      a = a? gadd(a, B): B;
-    }
-  return a;
+  if (S->w) a = gmul(S->w, a);
+  return ZX_resultant_all(S->T, a, S->D, 0);
 }
 
-/* routines to check uniformizer algebraically (as t_POL) */
-
-/* a t_POL, D t_INT (or NULL if 1), q = p^(f+1). a/D in pr | p, norm(pr) = pf.
+/* q = p^(f+1). a/D in pr | p, norm(pr) = pf.
  * Return 1 if (a/D,p) = pr, and 0 otherwise */
 static int
-is_uniformizer(GEN D, GEN a, GEN T, GEN q)
+is_uniformizer(GEN a, GEN q, norm_S *S)
 {
-  GEN N = ZX_resultant_all(T, a, D, 0); /* norm(a) */
-  return (resii(N, q) != gzero);
+  return (resii(get_norm(S,a), q) != gzero);
 }
 
-/* a/D or a/D + p uniformizer ? */
+/* return x * y, x, y are t_MAT (Fp-basis of in O_K/p), assume (x,y)=1.
+ * x or y may be NULL (= ok), not both */
 static GEN
-prime_check_elt(GEN D, GEN Dp, GEN a, GEN T, GEN q, int ramif)
+mul_intersect(GEN x, GEN y, GEN p)
 {
-  if (is_uniformizer(D,a,T,q)) return a;
-  /* can't succeed if e > 1 */
-  if (!ramif && is_uniformizer(D,gadd(a,Dp),T,q)) return a;
-  return NULL;
-}
-
-/* P given by an Fp basis */
-static GEN
-compute_pr2(GEN nf, GEN P, GEN p, int *ramif)
-{
-  long i, j, m = lg(P)-1;
-  GEN mul, P2 = gmul(p, P);
-  for (i=1; i<=m; i++)
-  {
-    mul = eltmul_get_table(nf, (GEN)P[i]);
-    for (j=1; j<=i; j++)
-      P2 = concatsp(P2, gmul(mul, (GEN)P[j]));
-  }
-  P2 = hnfmodid(P2, sqri(p)); /* HNF of pr^2 */
-  *ramif = egalii(gcoeff(P2,1,1), p); /* pr/p ramified ? */
-  return P2;
+  if (!x) return y;
+  if (!y) return x;
+  return FpM_intersect(x, y, p);
 }
 
 static GEN
-random_unif_loop_pol(GEN nf, GEN P, GEN D, GEN Dp, GEN beta, GEN pol,
-                     GEN p, GEN q)
+Fp_basis(GEN nf, GEN pr)
 {
-  long sm, i, c = 0, m = lg(P)-1, N = degpol(nf[1]), keep = getrand();
-  int ramif;
-  GEN a, P2;
-  pari_sp av;
-
-  for(i=1; i<=m; i++)
-    if ((a = prime_check_elt(D,Dp,(GEN)beta[i],pol,q,0))) return a;
-
-  (void)setrand(1);
-  if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
-  P2 = compute_pr2(nf, P, p, &ramif);
-
-  a = mulis(Dp, 8*degpol(nf[1]));
-  if (is_bigint(a)) sm = 0;
-  else
-  {
-    ulong mod = itou(Dp);
-    sm = itos(p);
-    for (i=1; i<=m; i++)
-      beta[i] = (long)u_Fp_FpV(pol_to_vec((GEN)beta[i], N), mod);
-  }
-
-  for(av = avma; ;avma = av)
-  {
-    if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
-    a = random_elt_in_P(beta, sm);
-    if (!a) continue;
-    if (sm) a = vec_to_pol(small_to_vec(a), varn(pol));
-    a = centermod(a, Dp);
-    if ((a = prime_check_elt(D,Dp,a,pol,q,ramif)))
-    {
-      if (DEBUGLEVEL) fprintferr("\n");
-      (void)setrand(keep); return a;
-    }
-  }
-}
-
-/* routines to check uniformizer numerically (as t_COL) */
-
-static int
-vec_is_uniformizer(GEN a, GEN q, long r1)
-{
-  long e;
-  GEN N = grndtoi( norm_by_embed(r1, a), &e );
-  if (e > -5) err(precer, "vec_is_uniformizer");
-  return (resii(N, q) != gzero);
+  long i, j, l;
+  GEN x, y;
+  if (typ(pr) == t_MAT) return pr;
+  x = prime_to_ideal(nf, pr);
+  l = lg(x);
+  y = cgetg(l, t_MAT);
+  for (i=j=1; i<l; i++)
+    if (gcmp1(gcoeff(x,i,i))) y[j++] = x[i];
+  setlg(y, j); return y;
 }
 
 static GEN
-prime_check_eltvec(GEN a, GEN M, GEN p, GEN q, long r1, long sm, int ramif)
+get_LV(GEN nf, GEN L, GEN p, long N)
 {
-  GEN ar;
-  long i,l;
-  a = centermod(a, p);
-  if (sm) ar = gmul_mat_smallvec(M, a);
-  else       ar = gmul(M, a);
+  long i, l = lg(L)-1;
+  GEN LV, LW, A, B;
 
-  if (vec_is_uniformizer(ar, q, r1)) return sm? small_to_col(a): a;
-  /* can't succeed if e > 1 */
-  if (ramif) return NULL;
-  l = lg(ar);
-  for (i=1; i<l; i++) ar[i] = ladd((GEN)ar[i], p);
-  if (!vec_is_uniformizer(ar, q, r1)) return NULL;
-  if (sm) a = small_to_col(a);
-  a[1] = laddii((GEN)a[1],p); return a;
+  LV = cgetg(l+1, t_VEC);
+  if (l == 1) { LV[1] = (long)idmat(N); return LV; }
+  LW = cgetg(l+1, t_VEC);
+  for (i=1; i<=l; i++) LW[i] = (long)Fp_basis(nf, (GEN)L[i]);
+
+  /* A[i] = L[1]...L[i-1], i = 2..l */
+  A = cgetg(l+1, t_VEC); A[1] = 0;
+  for (i=1; i < l; i++) A[i+1] = (long)mul_intersect((GEN)A[i], (GEN)LW[i], p);
+  /* B[i] = L[i+1]...L[l], i = 1..(l-1) */
+  B = cgetg(l+1, t_VEC); B[l] = 0;
+  for (i=l; i>=2; i--)  B[i-1] = (long)mul_intersect((GEN)B[i], (GEN)LW[i], p);
+
+  for (i=1; i<=l; i++)
+    LV[i] = (long)hnfmodid(mul_intersect((GEN)A[i], (GEN)B[i], p), p);
+  return LV;
 }
 
+/* P = Fp-basis (over O_K/p) for pr.
+ * V = Z-basis for I_p/pr.
+ * Return a p-uniformizer for pr */
 static GEN
-random_unif_loop_vec(GEN nf, GEN P, GEN p, GEN q)
+uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p)
 {
-  long sm, r1, i, c = 0, m = lg(P)-1, keep = getrand();
-  int ramif;
-  GEN a, P2, beta, M = gmael(nf,5,1);
-  pari_sp av;
-
-  r1 = nf_get_r1(nf);
-  a = mulis(p, 8*degpol(nf[1]));
-  if (is_bigint(a)) { sm = 0; beta = P; }
-  else
-  {
-    sm = itos(p); beta = cgetg(m+1, t_MAT);
-    for (i=1; i<=m; i++)
-      beta[i] = (long)u_Fp_FpV((GEN)P[i], itou(p));
-  }
-  for(i=1; i<=m; i++)
-    if ((a = prime_check_eltvec((GEN)beta[i],M,p,q,r1,sm,0))) return a;
-
-  (void)setrand(1);
-  if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
-  P2 = compute_pr2(nf, P, p, &ramif);
-
-  for(av = avma; ;avma = av)
-  {
-    if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
-    a = random_elt_in_P(beta, sm);
-    if (!a) continue;
-    if ((a = prime_check_eltvec(a,M,p,q,r1,sm,0)))
-    {
-      if (DEBUGLEVEL) fprintferr("\n");
-      (void)setrand(keep); return a;
-    }
-  }
-}
-
-/* L = Fp-bases for prime ideals of O_K/p. Return a p-uniformizer for
- * L[i] using the approximation theorem */
-static GEN
-uniformizer_appr(GEN nf, GEN L, long i, GEN p)
-{
-  long j, l;
-  GEN inter = NULL, P = (GEN)L[i], P2, Q, u, v, pi;
-  int ramif;
-
-  l = lg(L)-1;
-  for (j=l; j; j--)
-  {
-    if (j == i) continue;
-    Q = (GEN)L[j]; if (typ(Q) != t_MAT) break;
-    inter = inter? FpM_intersect(inter, Q, p): Q;
-  }
-  if (!inter)
-  {
-    setlg(L, l);
-    inter = idealprodprime(nf, L);
-  }
-  else
-  {
-    inter = hnfmodid(inter, p);
-    for (   ; j; j--)
-    {
-      Q = (GEN)L[j];
-      inter = idealmul(nf, inter, Q);
-    }
-  }
-
-  /* inter = prod L[j], j != i */
-  P2 = compute_pr2(nf, P, p, &ramif);
-  u = addone_aux2(P2, inter);
-  v = unnf_minus_x(u);
-  if (!ramif) pi = gmul(p, v);
-  else
-  {
-    l = lg(P)-1;
-    for (j=l; j; j--)
-      if (!hnf_invimage(P2, (GEN)P[j])) break;
-    pi = element_muli(nf,(GEN)P[j],v);
-  }
-  pi = gadd(pi, u);
-  pi =  centermod(pi, p);
-  if (!ramif && hnf_invimage(P2, pi)) pi[1] = laddii((GEN)pi[1], p);
-  return pi;
-}
-
-/* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
- * Output: x such that P = (p,x) */
-static GEN
-uniformizer(GEN nf, GEN P, GEN p)
-{
-  GEN q, D, Dp, w, beta, a, T = (GEN)nf[1];
-  long i, f, N = degpol(T), m = lg(P)-1;
+  long i, l, f, m = lg(P)-1, N = degpol(nf[1]);
+  GEN PM, u, Mv, w, x, q;
 
   if (!m) return gscalcol_i(p,N);
-
-  /* we want v_p(Norm(beta)) = p^f, f = N-m */
-  f = N-m;
-  P = centermod(P, p);
+  /* we want v_p(Norm(x)) = p^f, f = N-m */
+  f = N - m;
   q = mulii(gpowgs(p,f), p);
 
-  if (typ(nf[5]) == t_VEC) /* dummy nf from padicff */
+  PM= hnfmodid(P, p);
+  w = addone_aux2(PM, V);
+  u = centermod(element_sqr(nf, w), p);
+
+  x = dummycopy(u);
+  x[1] = laddii((GEN)x[1], p); /* try p + u */
+  if (is_uniformizer(x, q, S)) return x;
+
+  /* P/p ramified */
+  Mv = eltmul_get_table(nf, unnf_minus_x(w));
+  l = lg(P);
+  for (i=1; i<l; i++)
+  {
+    x = centermod(gadd(u, gmul(Mv, (GEN)P[i])), p);
+    if (is_uniformizer(x, q, S)) return x;
+  }
+  return NULL; /* not reached */
+}
+
+static void
+init_norm(norm_S *S, GEN nf, GEN p)
+{
+  GEN T = (GEN)nf[1];
+  long N = degpol(T);
+
+  S->M = NULL;
+  if (typ(nf[5]) == t_VEC) /* beware dummy nf from padicff */
   {
     GEN M = gmael(nf,5,1);
-    long ex, prec = gprecision(M);
-    ex = gexpo(M) + gexpo(mulsi(8 * N, p));
-    /* enough prec to use norm_by_embed */
-    if (N * ex <= bit_accuracy(prec))
-      return random_unif_loop_vec(nf, P, p, q);
+    long ex = gexpo(M) + gexpo(mulsi(8 * N, p));
+    if (N * ex <= bit_accuracy(gprecision(M)))
+    { /* enough prec to use norm_by_embed */
+      S->M = M;
+      S->r1 = nf_get_r1(nf);
+    }
   }
-
-  w = Q_remove_denom((GEN)nf[7], &D);
-  if (D)
+  if (!S->M)
   {
-    long v = pvaluation(D, p, &a);
-    D = gpowgs(p, v);
-    Dp = mulii(D, p);
-  } else {
-    w = dummycopy(w);
-    Dp = p;
+    GEN a, D, Dp, w = Q_remove_denom((GEN)nf[7], &D);
+    long i;
+    if (D)
+    {
+      long v = pvaluation(D, p, &a);
+      D = gpowgs(p, v);
+      Dp = mulii(D, p);
+    } else {
+      w = dummycopy(w);
+      Dp = p;
+    }
+    for (i=1; i<=N; i++) w[i] = (long)FpX_red((GEN)w[i], Dp);
+    S->D = D;
+    S->w = w;
+    S->T = T;
   }
-  for (i=1; i<=N; i++)
-    w[i] = (long)FpX_red((GEN)w[i], Dp); /* w[i] / D defined mod p */
-  beta = gmul(w, P);
-  a = random_unif_loop_pol(nf,P,D,Dp,beta,T,p,q);
-  a = algtobasis_i(nf,a);
-  if (D) a = gdivexact(a,D);
-  a = centermod(a, p);
-  if (!is_uniformizer(D,gmul(w,a), T,q)) a[1] = laddii((GEN)a[1],p);
-  return a;
 }
 
 /* Assuming P = (p,u) prime, return tau such that p Z + tau Z = p P^(-1)*/
@@ -2108,8 +1975,12 @@ apply_kummer(GEN nf,GEN u,GEN e,GEN p)
   }
   else
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
-    if (is_pm1(e) && !is_uniformizer(NULL,u, T, gpowgs(p,f+1)))
-      u[2] = laddii((GEN)u[2], p);
+    if (is_pm1(e))
+    {
+      norm_S S;
+      S.D = S.w = S.M = NULL; S.T = T;
+      if (!is_uniformizer(u, gpowgs(p,f+1), &S)) u[2] = laddii((GEN)u[2], p);  
+    }
     t = algtobasis_i(nf, FpX_div(T,u,p));
     pr[2] = (long)algtobasis_i(nf,u);
     pr[5] = (long)centermod(t, p);
@@ -2166,18 +2037,16 @@ pol_min(GEN mul, GEN p)
 }
 
 static GEN
-get_pr(GEN nf, GEN L, long i, GEN p, int appr)
+get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V)
 {
-  GEN pr, u, t, P = (GEN)L[i];
+  GEN pr, u, t;
   long e, f;
   pari_sp av;
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
 
   av = avma;
-  if (appr) u = uniformizer_appr(nf, L, i, p);
-  else      u = uniformizer(nf, P, p);
-  u = gerepilecopy(av, u);
+  u = gerepilecopy(av, uniformizer(nf, S, P, V, p));
   t = anti_uniformizer(nf,p,u);
   av = avma;
   e = 1 + int_elt_val(nf,t,p,t,NULL);
@@ -2191,32 +2060,12 @@ get_pr(GEN nf, GEN L, long i, GEN p, int appr)
   pr[5] = (long)t; return pr;
 }
 
-static int
-use_appr(GEN L, GEN pp, long N)
-{
-  long i, f, l = lg(L);
-  double prod = 1., NP;
-  GEN P;
-  pari_sp av = avma;
-
-  for (i=1; i<l; i++)
-  {
-    P = (GEN)L[i];
-    f = typ(P)==t_VEC? itos((GEN)P[4]): N - (lg(P)-1);
-    NP = gtodouble(gpowgs(pp, f));
-    prod *= (1 - 1./NP);
-  }
-  avma = av;
-  return (prod * N * 10 < 1);
-}
-
 /* prime ideal decomposition of p */
 static GEN
 _primedec(GEN nf, GEN p)
 {
-  long i,k,c,iL,N;
-  GEN ex,F,L,Lpr,Ip,H,phi,mat1,T,f,g,h,p1,UN;
-  int appr;
+  long i, k, c, iL, N;
+  GEN ex, F, L, Ip, H, phi, mat1, T, f, g, h, p1, UN;
 
   if (DEBUGLEVEL>2) (void)timer2();
   nf = checknf(nf); T = (GEN)nf[1];
@@ -2309,14 +2158,16 @@ _primedec(GEN nf, GEN p)
     else /* A2 field ==> H maximal, f = N-k = dim(A2) */
       L[iL++] = (long)H;
   }
-  setlg(L, iL);
-  Lpr = cgetg(iL, t_VEC);
   if (DEBUGLEVEL>2) msgtimer("splitting %ld factors",iL-1);
-  appr = use_appr(L,p,N);
-  if (DEBUGLEVEL>2 && appr) fprintferr("using the approximation theorem\n");
-  for (i=1; i<iL; i++) Lpr[i] = (long)get_pr(nf, L, i, p, appr);
+  setlg(L, iL);
+{
+  GEN Lpr = cgetg(iL, t_VEC);
+  GEN LV = get_LV(nf, L,p,N);
+  norm_S S; init_norm(&S, nf, p);
+  for (i=1; i<iL; i++) Lpr[i] = (long)get_pr(nf, &S, p, (GEN)L[i], (GEN)LV[i]);
   if (DEBUGLEVEL>2) msgtimer("finding uniformizers");
   return Lpr;
+}
 }
 
 GEN

@@ -96,6 +96,7 @@ BA  7- moved internals of genrand to mp.c/randomi
 BA  8- renamed mymyrand --> pari_rand31
     9- bnrstark: use partial factorization of discriminant when (pol)reducing
        the polynomial [could embark into hopeless factorizations]
+   10- primedec: improved search for uniformizers when p | index
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
