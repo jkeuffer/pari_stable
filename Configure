@@ -112,9 +112,9 @@ esac
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
-  gnuas AS ASFLAGS KERNELCPPFLAGS \
-  LD LDFLAGS LIBS runpathprefix\
-  runpath LDDYN DYNLIBS DYNFLAGS DYNRELOC\
+  gnuas AS ASFLAGS KERNELCPPFLAGS\
+  LD LDFLAGS LIBS\
+  runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
   X11 Xincroot extralib which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
