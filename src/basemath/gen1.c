@@ -325,10 +325,11 @@ gaddpex(GEN x, GEN y)
       e += c;
     }
   }
+  u = modii(u, mod);
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);
   z[3] = licopy(mod);
-  z[4] = lmodii(u,(GEN)z[3]);
+  z[4] = licopy(u);
   icopyifstack(p, z[2]); return z;
 }
 
