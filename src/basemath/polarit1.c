@@ -510,7 +510,7 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   long j,N = degpol(u);
   GEN v,w,Q,p1;
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
-  w = v = FqXQ_pow(polx[varn(u)], q, u, T, p);
+  w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
   {
     p1 = pol_to_vec(w, N);
@@ -583,7 +583,7 @@ FqX_split_part(GEN f, GEN T, GEN p)
   GEN z, X = polx[varn(f)];
   if (n <= 1) return f;
   f = FqX_red(f, T, p);
-  z = FqXQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
+  z = FpXQYQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
   z = gsub(z, X);
   return FqX_gcd(z, f, T, p);
 }
@@ -1315,7 +1315,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
         pari_sp av = avma;
         b = FqX_rem(polt, a, T,p);
         if (!degpol(b)) { avma=av; continue; }
-        b = FqXQ_pow(b,qo2, a,T,p);
+        b = FpXQYQ_pow(b,qo2, a,T,p);
         if (!degpol(b)) { avma=av; continue; }
         b[2] = ladd((GEN)b[2], gun);
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
@@ -2250,7 +2250,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     }
     else
     {
-      w = FqXQ_pow(w, shifti(q,-1), *t, T, p);
+      w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
       if (!degpol(w)) continue;
       w[2] = ladd((GEN)w[2], gun);
@@ -2301,7 +2301,7 @@ init_pow_q_mod_pT(GEN X, GEN q, GEN u, GEN T, GEN p)
   long i, n = degpol(u);
   GEN p1, S = cgetg(n, t_VEC);
 
-  S[1] = (long)FqXQ_pow(X, q, u, T, p);
+  S[1] = (long)FpXQYQ_pow(X, q, u, T, p);
 #if 1 /* use as many squarings as possible */
   for (i=2; i < n; i+=2)
   {
