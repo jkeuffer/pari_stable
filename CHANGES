@@ -86,6 +86,7 @@ IZ 37- [OS/2:] ^C would only work once
             b" }  \\ with an explicit \n
        produced "ab", whereas whitespace in strings is to be retained.
    40- inconsistencies in return type from lindep [t_VEC/t_COL].
+   41- possible oo loop in ellap [ typo in appell1 ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

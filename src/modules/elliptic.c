@@ -1418,7 +1418,7 @@ apell2_intern(GEN e, ulong p)
     else
       for (i=1; i<p; i++)
         s += kross(e8 + mulssmod(i, e72 + mulssmod(i, e6 + (i<<2), p), p), p);
-    avma=av; return stoi(-s);
+    avma = av; return stoi(-s);
   }
 }
 
@@ -1552,9 +1552,9 @@ powsell(GEN e, GEN z, GEN n, GEN p)
 
 /* assume H.f = 0, return exact order of f */
 static GEN
-exact_order(GEN H, GEN f, GEN cp4, GEN p)
+exact_order(GEN H, GEN f, GEN c4, GEN p)
 {
-  GEN P, e, g, h = H, fa = decomp(H);
+  GEN P, e, h = H, fa = decomp(H);
   long i, j, l;
 
   P = (GEN)fa[1]; l = lg(P);
@@ -1562,9 +1562,9 @@ exact_order(GEN H, GEN f, GEN cp4, GEN p)
   for (i=1; i<l; i++)
     for (j=itos((GEN)e[i]); j; j--)
     {
-      g = diviiexact(h,(GEN)P[i]);
-      if (powsell(cp4,f,g,p)) break;
-      h = g;
+      GEN n = diviiexact(h,(GEN)P[i]);
+      if (powsell(c4,f,n,p)) break;
+      h = n;
     }
   return h;
 }
@@ -1577,60 +1577,78 @@ _fix(GEN x, long k)
   if (lgefint(y) < k) { GEN p1 = cgeti(k); affii(y,p1); *x = (long)p1; }
 }
 
+/* Return the lift of a (mod b), which is closest to h */
+static GEN
+closest_lift(GEN a, GEN b, GEN h)
+{
+  return addii(a, mulii(b, diviiround(gsub(h,a), b)));
+}
+
 /* compute a_p using Shanks/Mestre + Montgomery's trick. Assume p > 457 */
 GEN
 apell1(GEN e, GEN p)
 {
-  long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, x, nb;
+  long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, nb;
+  ulong x;
   pari_sp av = avma, av2;
-  GEN p1,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
-  tx = ty = ti = NULL; /* gcc -Wall */
+  GEN p1, h, mfh, F, f, fh, fg, pordmin, u, v, p1p, p2p, A, B, c4, c6, cp4, pts;
+  tx = NULL;
+  ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
   c4 = gmod(gdivgs((GEN)e[10],  -48), p);
   c6 = gmod(gdivgs((GEN)e[11], -864), p);
+  /* once #E(Fp) is know mod B >= pordmin, it is completely determined */
   pordmin = gceil(gmul2n(gsqrt(p,DEFAULTPREC),2)); /* ceil( 4sqrt(p) ) */
   p1p = addsi(1, p);
   p2p = shifti(p1p, 1);
-  x = 0; u = c6; KRO = kronecker(c6, p); KROold = - KRO;
+  x = 0; u = c6; KRO = kronecker(u, p); KROold = - KRO;
   A = gzero; B = gun; h = p1p;
   for(;;)
   {
-    /* look for points alternatively on E and its quadratic twist E' */
     while (KRO != -KROold)
-    {
-      x++;
-      u = modii(addii(c6, mulsi(x, addii(c4, mulss(x,x)))), p);
+    { /* look for points alternatively on E and its quadratic twist E' */
+      x++; /* u = x^3 + c4 x + c6 */
+      u = modii(addii(c6, mului(x, addii(c4, muluu(x,x)))), p);
       KRO = kronecker(u, p);
     }
     KROold = KRO;
+    /* [ux, u^2] is on E_u: y^2 = x^3 + c4 u^2 x + c6 u^3
+     * E_u isomorphic to E (resp. E') iff KRO = 1 (resp. -1)
+     * #E(F_p) = p+1 - a_p, #E'(F_p) = p+1 + a_p
+     *
+     * #E_u(Fp) = A (mod B),  h is close to #E_u(Fp) */
 
     f = cgetg(3,t_VEC);
-    f[1] = lmodii(mulsi(x,u), p);
+    f[1] = lmodii(mului(x,u), p);
     f[2] = lmodii(sqri(u),    p);
-    cp4 = modii(mulii(c4, (GEN)f[2]), p);
+    cp4 = modii(mulii(c4, (GEN)f[2]), p); /* c4 for E_u */
     fh = powsell(cp4,f,h,p);
-    s = itos(gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC))) >> 1;
+    if (!fh) goto FOUND;
+
+    s = itos( gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC)) ) >> 1;
     /* look for h s.t f^h = 0 */
-    if (B == gun)
+    if (!tx)
     { /* first time: initialize */
       tx = newbloc(s+1);
       ty = newbloc(s+1);
       ti = newbloc(s+1);
+      F = f;
     }
-    else f = powsell(cp4,f,B,p); /* F = B.f */
+    else
+      F = powsell(cp4,f,B,p);
     *tx = evaltyp(t_VECSMALL) | evallg(s+1);
-    if (!fh) goto FOUND;
 
+    /* F = B.f */
     p1 = gcopy(fh);
     if (s < 3)
     { /* we're nearly done: naive search */
-      GEN q1 = p1, mf = negsell(f, p); /* -F */
+      GEN q1 = p1, mF = negsell(F, p); /* -F */
       for (i=1;; i++)
       {
-        p1 = addsell(cp4,p1, f,p); /* h.f + i.F */
+        p1 = addsell(cp4,p1, F,p); /* h.f + i.F */
         if (!p1) { h = addii(h, mulsi( i,B)); goto FOUND; }
-        q1 = addsell(cp4,q1,mf,p); /* h.f - i.F */
+        q1 = addsell(cp4,q1,mF,p); /* h.f - i.F */
         if (!q1) { h = addii(h, mulsi(-i,B)); goto FOUND; }
       }
     }
@@ -1643,7 +1661,7 @@ apell1(GEN e, GEN p)
       pts[i] = (long)p1; /* h.f + (i-1).F */
       _fix(p1+1, j); tx[i] = modBIL((GEN)p1[1]);
       _fix(p1+2, j); ty[i] = modBIL((GEN)p1[2]);
-      p1 = addsell(cp4,p1,f,p); /* h.f + i.F */
+      p1 = addsell(cp4,p1,F,p); /* h.f + i.F */
       if (!p1) { h = addii(h, mulsi(i,B)); goto FOUND; }
     }
     mfh = negsell(fh, p);
@@ -1681,7 +1699,7 @@ apell1(GEN e, GEN p)
     if (DEBUGLEVEL) msgtimer("[apell1] baby steps, s = %ld",s);
 
     /* giant steps: fg = s.F */
-    fg = addsell(cp4,p1,f,p);
+    fg = addsell(cp4,p1,F,p);
     if (!fg) { h = mulsi(s,B); goto FOUND; }
     pfinal = modBIL(p); av2 = avma;
 
@@ -1726,7 +1744,7 @@ apell1(GEN e, GEN p)
           { /* [h+j2] f == ± ftest (= [i.s] f)? */
             j2 = ti[r] - 1;
             if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
-            p1 = addsell(cp4, powsell(cp4,f,stoi(j2),p),fh,p);
+            p1 = addsell(cp4, powsell(cp4,F,stoi(j2),p),fh,p);
             if (egalii((GEN)p1[1], (GEN)ftest[1]))
             {
               if (egalii((GEN)p1[2], (GEN)ftest[2])) i = -i;
@@ -1755,10 +1773,9 @@ apell1(GEN e, GEN p)
         j = 1;
       }
     }
-
-FOUND: /* found a point of exponent h */
-    h = exact_order(h, f,cp4,p);
-    /* now h is the exact order, and divides E(Fp) = A (mod B) */
+FOUND: /* found a point of exponent h on E_u */
+    h = exact_order(h, f, cp4, p);
+    /* h | #E_u(Fp) = A (mod B) */
     if (B == gun) B = h;
     else
     {
@@ -1768,17 +1785,21 @@ FOUND: /* found a point of exponent h */
     }
 
     i = (cmpii(B, pordmin) < 0);
-    if (i) A = centermod(subii(p2p,A), B);
-    p1 = diviiround(gsub(p1p,A), B);
-    h = addii(A, mulii(p1,B));
+    /* If we are not done, update A mod B for the _next_ curve, isomorphic to
+     * the quadratic twist of this one */
+    if (i) A = resii(subii(p2p,A), B); /* #E(Fp)+#E'(Fp) = 2p+2 */
+    
     /* h = A mod B, closest lift to p+1 */
+    h = closest_lift(A, B, p1p);
     if (!i) break;
   }
-  gunclone(tx);
-  gunclone(ty);
-  gunclone(ti);
-  p1 = (KRO==1)? subii(p1p,h): subii(h,p1p);
-  return gerepileuptoint(av,p1);
+  if (tx)
+  {
+    gunclone(tx);
+    gunclone(ty);
+    gunclone(ti);
+  }
+  return gerepileuptoint(av, KRO==1? subii(p1p,h): subii(h,p1p));
 }
 
 typedef struct
@@ -1787,53 +1808,53 @@ typedef struct
   long x,y;
 } sellpt;
 
-/* set p1 <-- p1 + p2, safe with p1 = p2 */
+/* P <-- P + Q, safe with P = Q */
 static void
-addsell1(long e, long p, sellpt *p1, sellpt *p2)
+s_addell(sellpt *P, sellpt *Q, long c4, long p)
 {
   long num, den, lambda;
 
-  if (p1->isnull) { *p1 = *p2; return; }
-  if (p2->isnull) return;
-  if (p1->x == p2->x)
+  if (P->isnull) { *P = *Q; return; }
+  if (Q->isnull) return;
+  if (P->x == Q->x)
   {
-    if (! p1->y || p1->y != p2->y) { p1->isnull = 1; return; }
-    num = addssmod(e, mulssmod(3, mulssmod(p1->x, p1->x, p), p), p);
-    den = addssmod(p1->y, p1->y, p);
+    if (! P->y || P->y != Q->y) { P->isnull = 1; return; }
+    num = addssmod(c4, mulssmod(3, mulssmod(P->x, P->x, p), p), p);
+    den = addssmod(P->y, P->y, p);
   }
   else
   {
-    num = subssmod(p1->y, p2->y, p);
-    den = subssmod(p1->x, p2->x, p);
+    num = subssmod(P->y, Q->y, p);
+    den = subssmod(P->x, Q->x, p);
   }
   lambda = divssmod(num, den, p);
-  num = subssmod(mulssmod(lambda, lambda, p), addssmod(p1->x, p2->x, p), p);
-  p1->y = subssmod(mulssmod(lambda, subssmod(p2->x, num, p), p), p2->y, p);
-  p1->x = num; /* necessary in case p1 = p2: we need p2->x above */
+  num = subssmod(mulssmod(lambda, lambda, p), addssmod(P->x, Q->x, p), p);
+  P->y = subssmod(mulssmod(lambda, subssmod(Q->x, num, p), p), Q->y, p);
+  P->x = num; /* necessary in case P = Q: we need Q->x above */
 }
 
+/* Q <-- P^n */
 static void
-powssell1(long e, long p, long n, sellpt *p1, sellpt *p2)
+s_powell(sellpt *Q, sellpt *P, long n, long c4, long p)
 {
-  sellpt p3 = *p1;
+  sellpt R = *P;
 
-  if (n < 0) { n = -n; if (p3.y) p3.y = p - p3.y; }
-  p2->isnull = 1;
+  if (n < 0) { n = -n; if (R.y) R.y = p - R.y; }
+  Q->isnull = 1;
   for(;;)
   {
-    if (n&1) addsell1(e, p, p2, &p3);
-    n>>=1; if (!n) return;
-    addsell1(e, p, &p3, &p3);
+    if (n&1) s_addell(Q, &R, c4, p);
+    n >>= 1; if (!n) return;
+    s_addell(&R, &R, c4, p);
   }
 }
 
 /* assume H.f = 0, return exact order of f, cf. exact_order */
 static long
-sexact_order(long H, sellpt *f, long cp4, long p)
+sexact_order(long H, sellpt *f, long c4, long p)
 {
   GEN P, e, fa = decomp(stoi(H));
-  long h = H, g, pp;
-  long i, j, l;
+  long h = H, pp, i, j, l;
   sellpt fh;
 
   P = (GEN)fa[1]; l = lg(P);
@@ -1843,10 +1864,10 @@ sexact_order(long H, sellpt *f, long cp4, long p)
     pp = itos((GEN)P[i]);
     for (j=itos((GEN)e[i]); j; j--)
     {
-      g = h / pp;
-      powssell1(cp4, p, g, f, &fh);
+      long n = h / pp;
+      s_powell(&fh, f, n, c4, p);
       if (!fh.isnull) break;
-      h = g;
+      h = n;
     }
   }
   return h;
@@ -1863,18 +1884,19 @@ compare_multiples(multiple *a, multiple *b)
   return a->x - b->x;
 }
 
-/* assume e has good reduction at p. Should use Montgomery. */
+/* assume e has good reduction at p. Should use Montgomery.
+ * See apell1() */
 static GEN
 apell0(GEN e, long p)
 {
-  sellpt f,fh,fg,ftest,f2;
+  sellpt f, fh, fg, ftest, F;
   long pordmin,u,p1p,p2p,A,B,c4,c6,cp4;
-  long i, s, KRO, KROold, x, q, h, l, r, m;
+  long i, s, KRO, KROold, x, h, l, r, m;
   pari_sp av;
   multiple *table;
 
   if (p < 99) return apell2_intern(e,(ulong)p);
-  table = NULL; /* gcc -Wall */
+  table = NULL;
 
   av = avma;
   c4 = itos( gmodgs(gdivgs((GEN)e[10],  -48), p) );
@@ -1882,11 +1904,11 @@ apell0(GEN e, long p)
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
-  x = 0; u = c6; KROold = 0; KRO = kross(c6, p);
+  x = 0; u = c6; KRO = kross(u, p); KROold = -KRO;
   A = 0; B = 1; h = p1p;
   for(;;)
   {
-    while (KRO == KROold || !KRO)
+    while (KRO != -KROold)
     {
       x++;
       u = addssmod(c6, mulssmod(x, c4+mulssmod(x,x,p), p), p);
@@ -1897,25 +1919,26 @@ apell0(GEN e, long p)
     f.x = mulssmod(x, u, p);
     f.y = mulssmod(u, u, p);
     cp4 = mulssmod(c4, f.y, p);
-    powssell1(cp4, p, h, &f, &fh);
+    s_powell(&fh, &f, h, cp4, p);
     s = (long) (sqrt(((float)pordmin)/B) / 2);
-    if (!s) s=1;
-    if (B==1)
+    if (!s) s = 1;
+    if (!table)
     {
       table = (multiple *) gpmalloc((s+1)*sizeof(multiple));
-      f2 = f;
+      F = f;
     }
-    else powssell1(cp4, p, B, &f, &f2);
+    else
+      s_powell(&F, &f, B, cp4, p);
     for (i=0; i < s; i++)
     {
       if (fh.isnull) { h += B*i; goto FOUND; }
       table[i].x = fh.x;
       table[i].y = fh.y;
       table[i].i = i;
-      addsell1(cp4, p, &fh, &f2);
+      s_addell(&fh, &F, cp4, p);
     }
     qsort(table,s,sizeof(multiple),(QSCOMP)compare_multiples);
-    powssell1(cp4, p, s, &f2, &fg); ftest = fg;
+    s_powell(&fg, &F, s, cp4, p); ftest = fg;
     for (i=1; ; i++)
     {
       if (ftest.isnull) err(bugparier,"apell (f^(i*s) = 1)");
@@ -1926,7 +1949,7 @@ apell0(GEN e, long p)
 	if (table[m].x < ftest.x) l=m+1; else r=m;
       }
       if (r < s && table[r].x == ftest.x) break;
-      addsell1(cp4, p, &ftest, &fg);
+      s_addell(&ftest, &fg, cp4, p);
     }
     h += table[r].i * B;
     if (table[r].y == ftest.y) i = -i;
@@ -1949,11 +1972,12 @@ FOUND:
       A = (p2p - A) % B;
       if ((A << 1) > B) A -= B;
     }
-    q = ((ulong)(p2p + B - (A << 1))) / (B << 1);
-    h = A + q*B;
+    /* h = A mod B, closest lift to p+1 */
+    h = A + B * (((ulong)(p2p + B - (A << 1))) / (B << 1));
     avma = av; if (!i) break;
   }
-  free(table); return stoi(KRO==1? p1p-h: h-p1p);
+  if (table) free(table);
+  return stoi(KRO==1? p1p-h: h-p1p);
 }
 
 GEN
@@ -1961,7 +1985,7 @@ apell(GEN e, GEN p)
 {
   checkell(e);
   if (typ(p)!=t_INT || signe(p)<0) err(talker,"not a prime in apell");
-  if (gdivise((GEN)e[12],p)) /* e[12] may be an intmod */
+  if (gdivise((GEN)e[12],p)) /* D may be an intmod */
   {
     long s;
     pari_sp av = avma;
@@ -1987,103 +2011,111 @@ apell(GEN e, GEN p)
 GEN
 anell(GEN e, long n)
 {
-  long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] is not used */
+  long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
   long p, i, m;
-  pari_sp av, tetpil;
-  GEN p1,p2,an;
+  GEN p1, p2, *an;
 
   checkell(e);
   for (i=1; i<=5; i++)
     if (typ(e[i]) != t_INT) err(typeer,"anell");
   if (n <= 0) return cgetg(1,t_VEC);
-  if ((ulong)n>TEMPMAX)
-    err(impl,"anell for n>=2^24 (or 2^32 for 64 bit machines)");
-  an = cgetg(n+1,t_VEC); an[1] = un;
-  for (i=2; i <= n; i++) an[i] = 0;
-  for (p=2; p<=n; p++)
-    if (!an[p])
-    {
-      if (!smodis((GEN)e[12],p)) /* mauvaise reduction, p | e[12] */
-	switch (tab[p&3] * krogs((GEN)e[11],p)) /* renvoie (-c6/p) */
-	{
-	  case -1:  /* non deployee */
-	    for (m=p; m<=n; m+=p)
-	      if (an[m/p]) an[m]=lneg((GEN)an[m/p]);
-	    continue;
-	  case 0:   /* additive */
-	    for (m=p; m<=n; m+=p) an[m]=zero;
-	    continue;
-	  case 1:   /* deployee */
-	    for (m=p; m<=n; m+=p)
-	      if (an[m/p]) an[m]=lcopy((GEN)an[m/p]);
-	}
-      else /* bonne reduction */
-      {
-        GEN ap = apell0(e,p);
+  if ((ulong)n>TEMPMAX) err(impl,"anell for n > %lu", TEMPMAX);
 
-	if (p < TEMPC)
-	{
-	  ulong pk, oldpk = 1;
-	  for (pk=p; pk <= (ulong)n; oldpk=pk, pk *= p)
-	  {
-	    if (pk == (ulong)p) an[pk] = (long) ap;
-	    else
-	    {
-	      av = avma;
-	      p1 = mulii(ap, (GEN)an[oldpk]);
-	      p2 = mulsi(p, (GEN)an[oldpk/p]);
-	      tetpil = avma;
-	      an[pk] = lpile(av,tetpil,subii(p1,p2));
-	    }
-	    for (m = n/pk; m > 1; m--)
-	      if (an[m] && m%p) an[m*pk] = lmulii((GEN)an[m], (GEN)an[pk]);
-	  }
-	}
-	else
-	{
-	  an[p] = (long) ap;
-	  for (m = n/p; m > 1; m--)
-	    if (an[m] && m%p) an[m*p] = lmulii((GEN)an[m], (GEN)an[p]);
-	}
+  an = (GEN*)cgetg(n+1,t_VEC); an[1] = gun;
+  for (i=2; i <= n; i++) an[i] = NULL;
+  for (p=2; p<=n; p++)
+  {
+    if (an[p]) continue; /* p not prime */
+
+    if (!smodis((GEN)e[12],p)) /* bad reduction, p | D */
+      switch (tab[p&3] * krogs((GEN)e[11],p)) /* (-c6/p) */
+      {
+        case -1:  /* non deployee */
+          for (m=p; m<=n; m+=p)
+            if (an[m/p]) an[m] = negi(an[m/p]);
+          continue;
+        case 0:   /* additive */
+          for (m=p; m<=n; m+=p) an[m] = gzero;
+          continue;
+        case 1:   /* deployee */
+          for (m=p; m<=n; m+=p)
+            if (an[m/p]) an[m] = icopy(an[m/p]);
+          continue;
+      }
+    else /* good reduction */
+    {
+      GEN ap = apell0(e,p);
+
+      if (p < TEMPC)
+      {
+        ulong pk, oldpk = 1;
+        for (pk=p; pk <= (ulong)n; oldpk=pk, pk *= p)
+        {
+          if (pk == (ulong)p) an[pk] = ap;
+          else
+          {
+            pari_sp av = avma;
+            p1 = mulii(ap, an[oldpk]);
+            p2 = mulsi(p, an[oldpk/p]);
+            an[pk] = gerepileuptoint(av, subii(p1,p2));
+          }
+          for (m = n/pk; m > 1; m--)
+            if (an[m] && m%p) an[m*pk] = mulii(an[m], an[pk]);
+        }
+      }
+      else
+      {
+        an[p] = ap;
+        for (m = n/p; m > 1; m--)
+          if (an[m] && m%p) an[m*p] = mulii(an[m], an[p]);
       }
     }
-  return an;
+  }
+  return (GEN)an;
 }
 
 GEN
 akell(GEN e, GEN n)
 {
   long i, j, ex;
-  pari_sp av=avma;
-  GEN p1,p2,ap,u,v,w,y,pl;
+  pari_sp av = avma;
+  GEN fa, P, E, ap, u, v, w, y, p;
 
   checkell(e);
-  if (typ(n)!=t_INT) err(talker,"not an integer type in akell");
+  if (typ(n) != t_INT) err(talker,"not an integer type in akell");
   if (signe(n)<= 0) return gzero;
-  y=gun; if (gcmp1(n)) return y;
-  p2=auxdecomp(n,1); p1=(GEN)p2[1]; p2=(GEN)p2[2];
-  for (i=1; i<lg(p1); i++)
+  y = gun; if (gcmp1(n)) return y;
+  fa = auxdecomp(n,1);
+  P = (GEN)fa[1];
+  E = (GEN)fa[2];
+  for (i=1; i<lg(P); i++)
   {
-    pl=(GEN)p1[i];
-    if (divise((GEN)e[12], pl)) /* mauvaise reduction */
+    p = (GEN)P[i];
+    ex = itos((GEN)E[i]);
+    /* FIXME: should factor (n,D) first, then restrict to primes of good red. */
+    if (divise((GEN)e[12], p)) /* bad reduction */
     {
-      j = (((mod4(pl)+1)&2)-1)*kronecker((GEN)e[11],pl);
-      if (j<0 && mpodd((GEN)p2[i])) y = negi(y);
-      if (!j) { avma=av; return gzero; }
+      j = kronecker((GEN)e[11],p); /* (c6/p) */
+      if (!j) { avma = av; return gzero; }
+      if (odd(ex))
+      {
+        if (mod4(p) == 3) j = -j;
+        if (j < 0) y = negi(y);
+      }
     }
-    else /* bonne reduction */
+    else /* good reduction */
     {
-      ap=apell(e,pl); ex=itos((GEN)p2[i]);
-      u=ap; v=gun;
+      ap = apell(e,p);
+      u = ap; v = gun;
       for (j=2; j<=ex; j++)
       {
-	w = subii(mulii(ap,u), mulii(pl,v));
-	v=u; u=w;
+	w = subii(mulii(ap,u), mulii(p,v));
+	v = u; u = w;
       }
       y = mulii(u,y);
     }
   }
-  return gerepileupto(av,y);
+  return gerepileuptoint(av,y);
 }
 
 GEN
@@ -2184,7 +2216,7 @@ hell0(GEN e, GEN z, long prec)
   GEN a,b,s,x,u,v,u1,p1,p2,r;
   long n,i, ex = 5-bit_accuracy(prec);
 
-  /* cf. zell mais ne marche pas. Comment corriger? K.B. */
+  /* FIXME: cf. zell But doesn't work. How to fix?? K.B. */
   x = new_coords(e,(GEN)z[1],&a,&b,prec);
 
   u = gmul2n(gadd(a,b), -1);
