@@ -43,14 +43,14 @@ addCC(GEN x, GEN y)
     /* ty == t_COMPLEX */
     z = cgetg(3,t_COMPLEX);
     z[1] = laddii(x, (GEN)y[1]);
-    z[2] = y[2]; return z;
+    z[2] = licopy((GEN)y[2]); return z;
   }
   /* tx == t_COMPLEX */
   z = cgetg(3,t_COMPLEX);
   if (typ(y) == t_INT)
   {
     z[1] = laddii((GEN)x[1],y);
-    z[2] = x[2]; return z;
+    z[2] = licopy((GEN)x[2]); return z;
   }
   /* ty == t_COMPLEX */
   z[1] = laddii((GEN)x[1],(GEN)y[1]);
