@@ -806,6 +806,7 @@ zell(GEN e, GEN z, long prec)
     if (gsigne(greal(b)) != sw) b = gneg_i(b);
     a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
     r1 = gsub(a,b);
+    if (gcmp0(r1) || gexpo(r1) < gexpo(a) - bit_accuracy(prec)) break;
     p1 = gsqrt(gdiv(gadd(x0,r1),x0),prec);
     x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
     r1 = gsub(x1,x0);
