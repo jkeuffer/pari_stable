@@ -6,7 +6,7 @@
 /*                                                                 */
 /*******************************************************************/
 /* $Id$ */
-
+BEGINEXTERN
 /* alglin1.c */
 GEN     Fq_ker(GEN x, GEN T, GEN p);
 GEN     concat(GEN x, GEN y);
@@ -903,6 +903,9 @@ long       allocatemoremem(ulong newsize);
 GEN        changevar(GEN x, GEN y);
 void       checkmemory(GEN x);
 void       disable_dbg(long val);
+void       err(long numerr, ...);
+void       err_catch(long errnum, jmp_buf env, void *data);
+void      *err_leave(long errnum);
 void       freeall(void);
 void       genmsgtimer(long t, char *format, ...);
 long       gentimer(long i);
@@ -927,12 +930,6 @@ void       stackdummy(GEN x, long l);
 stackzone* switch_stack(stackzone *z, long n);
 long       timer(void);
 long       timer2(void);
-
-BEGINEXTERN
-VOLATILE void err(long numerr, ...);
-ENDEXTERN
-void       err_catch(long errnum, jmp_buf env, void *data);
-void      *err_leave(long errnum);
 
 /* mp.c ou mp.s */
 
@@ -1272,3 +1269,4 @@ GEN     veceint1(GEN nmax, GEN C, long prec);
 GEN     weber0(GEN x, long flag,long prec);
 GEN     wf(GEN x, long prec);
 GEN     wf2(GEN x, long prec);
+ENDEXTERN
