@@ -5,10 +5,10 @@ VersionMajor='2'
 VersionMinor='2'
 
 # Patch level
-patch='4'
+patch='5'
 
 # Status: alpha, beta, released, development
-status='alpha'
+status='development'
 
 if test -d CVS -a $status = development; then
   status="$status CHANGES-"`grep CHANGES CVS/Entries | awk -F/ '{print $3}'`
