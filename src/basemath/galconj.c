@@ -19,7 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**									**/
 /*************************************************************************/
 #include "pari.h"
-#define mylogint(x,y) logint((x),(y),NULL)
 GEN
 galoisconj(GEN nf)
 {
@@ -156,17 +155,6 @@ galoisconj2(GEN nf, long nbmax, long prec)
   7: memory
   9: complete detail
 */
-/* retourne la permutation identite */
-GEN
-permidentity(long l)
-{
-  GEN     perm;
-  int     i;
-  perm = cgetg(l + 1, t_VECSMALL);
-  for (i = 1; i <= l; i++)
-    perm[i] = i;
-  return perm;
-}
 
 GEN vandermondeinverseprepold(GEN T, GEN L)
 {
@@ -265,7 +253,7 @@ initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
   {
     GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
     disable_dbg(0);
-    dis = ZX_disc_all(T, 1+mylogint(res,gdeux));
+    dis = ZX_disc_all(T, 1+logint(res,gdeux,NULL));
     disable_dbg(-1);
     den = indexpartial(T,dis);
     if (ptdis) *ptdis = dis;
@@ -314,8 +302,8 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
-  gb->valsol = mylogint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l);
-  gb->valabs = mylogint(gmul2n(borneabs,2), gb->l);
+  gb->valsol = logint(gmul2n(borneroots,2+BITS_IN_LONG), gb->l,NULL);
+  gb->valabs = logint(gmul2n(borneabs,2), gb->l,NULL);
   gb->valabs = max(gb->valsol,gb->valabs);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:val1=%ld val2=%ld\n", gb->valsol, gb->valabs);
@@ -366,102 +354,14 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
   gl->L = L;
   gl->Lden = Lden;
   ltop = avma;
-  gl->e = mylogint(gmul2n(gb->bornesol, 2+BITS_IN_LONG),p);
+  gl->e = logint(gmul2n(gb->bornesol, 2+BITS_IN_LONG),p,NULL);
   gl->e = max(2,gl->e);
   lbot = avma;
   gl->Q = gpowgs(p, gl->e);
   gl->Q = gerepile(ltop, lbot, gl->Q);
   gl->TQ = FpX_red(T,gl->Q);
 }
-#if 0
-/*
- * T est le polynome \sum t_i*X^i S est un Polmod T 
- * Retourne un vecteur Spow
- * verifiant la condition: i>=1 et t_i!=0 ==> Spow[i]=S^(i-1)*t_i 
- * Essaie d'etre efficace sur les polynomes lacunaires
- */
-GEN
-compoTS(GEN T, GEN S, GEN Q, GEN mod)
-{
-  GEN     Spow;
-  int     i;
-  Spow = cgetg(lgef(T) - 2, t_VEC);
-  for (i = 3; i < lg(Spow); i++)
-    Spow[i] = 0;
-  Spow[1] = (long) polun[varn(S)];
-  Spow[2] = (long) S;
-  for (i = 2; i < lg(Spow) - 1; i++)
-  {
-    if (signe((GEN) T[i + 3]))
-      for (;;)
-      {
-	int     k, l;
-	for (k = 1; k <= (i >> 1); k++)
-	  if (Spow[k + 1] && Spow[i - k + 1])
-	    break;
-	if ((k << 1) < i)
-	{
-	  Spow[i + 1] = (long) FpXQ_mul((GEN) Spow[k + 1], (GEN) Spow[i - k + 1],Q,mod);
-	  break;
-	}
-	else if ((k << 1) == i)	
-	{
-	  Spow[i + 1] = (long) FpXQ_sqr((GEN) Spow[k + 1],Q,mod);
-	  break;
-	}
-	for (k = i - 1; k > 0; k--)
-	  if (Spow[k + 1])
-	    break;
-	if ((k << 1) < i)
-	{
-	  Spow[(k << 1) + 1] = (long) FpXQ_sqr((GEN) Spow[k + 1],Q,mod);
-	  continue;
-	}
-	for (l = i - k; l > 0; l--)
-	  if (Spow[l + 1])
-	    break;
-	if (Spow[i - l - k + 1])
-	  Spow[i - k + 1] = (long) FpXQ_mul((GEN) Spow[i - l - k + 1], (GEN) Spow[l + 1],Q,mod);
-	else
-	  Spow[l + k + 1] = (long) FpXQ_mul((GEN) Spow[k + 1], (GEN) Spow[l + 1],Q,mod);
-      }
-  }
-  for (i = 1; i < lg(Spow); i++)
-    if (signe((GEN) T[i + 2]))
-      Spow[i] = (long) FpX_Fp_mul((GEN) Spow[i], (GEN) T[i + 2],mod);
-  return Spow;
-}
 
-/*
- * Calcule T(S) a l'aide du vecteur Spow
- */
-static GEN
-calcTS(GEN Spow, GEN P, GEN S, GEN Q, GEN mod)
-{
-  GEN     res = gzero;
-  int     i;
-  for (i = 1; i < lg(Spow); i++)
-    if (signe((GEN) P[i + 2]))
-      res = FpX_add(res, (GEN) Spow[i],NULL);
-  res = FpXQ_mul(res,S,Q,mod);
-  res=FpX_Fp_add(res,(GEN)P[2],mod);
-  return res;
-}
-
-/*
- * Calcule T'(S) a l'aide du vecteur Spow
- */
-static GEN
-calcderivTS(GEN Spow, GEN P, GEN mod)
-{
-  GEN     res = gzero;
-  int     i;
-  for (i = 1; i < lg(Spow); i++)
-    if (signe((GEN) P[i + 2]))
-      res = FpX_add(res, FpX_Fp_mul((GEN) Spow[i], stoi(i),mod),NULL);
-  return FpX_red(res,mod);
-}
-#endif
 /*
  * Verifie que f est une solution presque surement et calcule sa permutation
  */
@@ -842,22 +742,6 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   *psi = NULL;
   return 0;
 }
-/*
- * applique une permutation t a un vecteur s sans duplication
- * Propre si s est un VECSMALL
- */
-GEN
-permapply(GEN s, GEN t)
-{
-  GEN     u;
-  int     i;
-  if (lg(s) < lg(t))
-    err(talker, "First permutation shorter than second in permapply");
-  u = cgetg(lg(s), typ(s));
-  for (i = 1; i < lg(s); i++)
-    u[i] = s[t[i]];
-  return u;
-}
 
 /*
  * alloue une ardoise pour n entiers de longueurs pour les test de
@@ -987,7 +871,7 @@ verifietest(GEN pf, struct galois_test *td)
   int     n = lg(td->L) - 1;
   if (DEBUGLEVEL >= 8)
     fprintferr("GaloisConj:Entree Verifie Test\n");
-  P = permapply(td->L, pf);
+  P = perm_mul(td->L, pf);
   for (i = 1; i < n; i++)
   {
     long    ord;
@@ -1095,7 +979,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   {
     avma=avm;
     err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
-    return permidentity(n);
+    return perm_identity(n);
   }
   N2=itos(NQ); R1=itos(NR);
   for (l2 = 0; l2 <= N2; l2++)
@@ -1243,39 +1127,7 @@ GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord)
   avma=ltop;
   return gen;
 }
-/*in place sort. Return V for convenience only*/
-GEN sortvecsmall(GEN V)
-{
-  long i,j,k,l,m;
-  for(l=1;l<lg(V);l<<=1)
-    for(j=1;(j>>1)<lg(V);j+=l<<1)
-      for(k=j+l,i=j; i<k && k<j+(l<<1) && k<lg(V);)
-	if (V[i]>V[k])
-	{
-	  long z=V[k];
-	  for (m=k;m>i;m--)
-	    V[m]=V[m-1];
-	  V[i]=z;
-	  k++;
-	}
-	else
-	  i++;
-  return V ;
-}
-GEN uniqvecsmall(GEN V)
-{
-  ulong ltop=avma;
-  GEN W;
-  long i,j;
-  if ( lg(V) == 1 ) return gcopy(V);
-  W=cgetg(lg(V),t_VECSMALL);
-  W[1]=V[1];
-  for(i=2,j=1;i<lg(V);i++)
-    if (V[i]!=W[j])
-      W[++j]=V[i];
-  setlg(W,j+1);
-  return gerepileupto(ltop,W);
-}
+
 int pari_compare_lg(GEN x, GEN y)
 {
   return lg(x)-lg(y);
@@ -1305,7 +1157,7 @@ hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
     for (k = 1; k <= c; k++)	/* I like it */
       sg[++l] = mulssmod(sg[k], gen[j], n);
   }
-  sortvecsmall(sg);
+  vecsmall_sort(sg);
   avma=ltop;
   return sg;
 }
@@ -1346,65 +1198,6 @@ listsousgroupes(long m, long p)
   setlg(res,k);
   res=gen_sort(res,0,&pari_compare_lg);
   return gerepileupto(ltop,res);
-}
-
-/* Compute the orbits decomposition of a permutation
- * or of a set of permutations given by a vector.
- * v must not be an empty vector, becaude there is no way then
- * to tell the length of the permutation.
- */
-
-GEN
-permorbite(GEN v)
-{
-  ulong   ltop = avma, lbot;
-  int     i, j, k, l, m, n, o, p, flag;
-  GEN     bit, cycle, cy, u;
-  if (typ(v) == t_VECSMALL)
-  {
-    u = cgetg(2, t_VEC);
-    u[1] = (long) v;
-    v = u;
-  }
-  n = lg(v[1]);
-  cycle = cgetg(n, t_VEC);
-  bit = cgetg(n, t_VECSMALL);
-  for (i = 1; i < n; i++)
-    bit[i] = 0;
-  for (k = 1, l = 1; k < n;)
-  {
-    for (j = 1; bit[j]; j++);
-    cy = cgetg(n, t_VECSMALL);
-    m = 1;
-    cy[m++] = j;
-    bit[j] = 1;
-    k++;
-    do
-    {
-      flag = 0;
-      for (o = 1; o < lg(v); o++)
-      {
-	for (p = 1; p < m; p++)	/* m varie! */
-	{
-	  j = ((long **) v)[o][cy[p]];
-	  if (!bit[j])
-	  {
-	    flag = 1;
-	    bit[j] = 1;
-	    k++;
-	    cy[m++] = j;
-	  }
-	}
-      }
-    }
-    while (flag);
-    setlg(cy, m);
-    cycle[l++] = (long) cy;
-  }
-  setlg(cycle, l);
-  lbot = avma;
-  cycle = gcopy(cycle);
-  return gerepile(ltop, lbot, cycle);
 }
 
 GEN
@@ -1830,24 +1623,6 @@ indexpartial(GEN P, GEN DP)
   return gerepileupto(av,res);
 }
 
-/* Calcule la puissance exp d'une permutation decompose en cycle */
-GEN
-permcyclepow(GEN O, long exp)
-{
-  int     j, k, n;
-  GEN     p;
-  for (n = 0, j = 1; j < lg(O); j++)
-    n += lg(O[j]) - 1;
-  p = cgetg(n + 1, t_VECSMALL);
-  for (j = 1; j < lg(O); j++)
-  {
-    n = lg(O[j]) - 1;
-    for (k = 1; k <= n; k++)
-      p[mael(O,j,k)] = mael(O,j,1 + (k + exp - 1) % n);
-  }
-  return p;
-}
-
 /*
  * Casse l'orbite O en sous-orbite d'ordre premier correspondant a des
  * puissance de l'element
@@ -1869,7 +1644,7 @@ splitorbite(GEN O)
   res[2] = lgetg(lg(fc), t_VECSMALL);
   for (i = 1; i < lg(fc); i++)
   {
-    ((GEN **) res)[1][lg(fc) - i] = permcyclepow(O, n / fc[i]);
+    ((GEN **) res)[1][lg(fc) - i] = cyc_powtoperm(O, n / fc[i]);
     ((GEN *) res)[2][lg(fc) - i] = fc[i];
   }
   if ( DEBUGLEVEL>=4 )
@@ -2378,7 +2153,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   orb[2] = (long) pfu;
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:orb=%Z \n", orb);
-  O = (long**)permorbite(orb);
+  O = (long**) vecperm_orbits(orb, 12);
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:O=%Z \n", O);
   av2 = avma;
@@ -2779,8 +2554,8 @@ galoisfindgroups(GEN lo, GEN sg, long f)
     W=cgetg(lg(lo[i]),t_VECSMALL);
     for(k=1;k<lg(lo[i]);k++)
       W[k]=mael(lo,i,k)%f;
-    sortvecsmall(W); 
-    U=uniqvecsmall(W);
+    vecsmall_sort(W); 
+    U=vecsmall_uniq(W);
     if (gegal(U, sg))
     {
       cgiv(U);
@@ -2802,16 +2577,6 @@ galoisfrobeniustest(GEN aut, struct galois_lift *gl, GEN frob)
   long res=poltopermtest(tlift, gl, frob);
   avma=ltop;
   return res;
-}
-
-static GEN
-galoismakepsiab(long g)
-{
-  GEN psi=cgetg(g+1,t_VECSMALL);
-  long i;
-  for (i = 1; i <= g; i++)
-    psi[i] = 1;
-  return psi;
 }
 
 static GEN
@@ -2840,7 +2605,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:p=%ld deg=%ld fp=%ld\n", gf->p, deg, gf->fp);
   res = cgetg(lg(L), t_VECSMALL);
-  gf->psi = galoismakepsiab(g);
+  gf->psi = vecsmall_const(g,1);
   av2=avma;
   initlift(T, den, ip, L, Lden, gb, &gl);
   aut = galoisdolift(&gl, res);
@@ -2870,7 +2635,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
     GEN psi=NULL,fres=NULL,sg;
     long el=gf->fp, dg=1, dgf=1;
     long e,pr;
-    sg=permidentity(1);
+    sg=perm_identity(1);
     for(e=1;e<=Fe[k];e++)
     {
       long l;
@@ -2882,7 +2647,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
       if (galoisfrobeniustest((GEN)gt.pauto[el+1],&gl,frob))
       {
 	dgf = dg; 
-	psi = galoismakepsiab(g);
+	psi = vecsmall_const(g,1);
 	fres= gcopy(frob);
 	continue;
       }
@@ -2915,7 +2680,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
     } 
     else
     {
-      GEN cp=permapply(res,fres);
+      GEN cp=perm_mul(res,fres);
       for(i=1;i<lg(res);i++) res[i]=cp[i];
       for(i=1;i<lg(psi);i++) gf->psi[i]=(dgf*gf->psi[i]+deg*psi[i])%pr;
     }
@@ -2937,7 +2702,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
   {
     /*We need to normalise result so that psi[g]=1*/
     long im=itos(mpinvmod(stoi(gf->psi[g]),stoi(gf->fp)));
-    GEN cp=permcyclepow(permorbite(res), im);
+    GEN cp=perm_pow(res, im);
     for(i=1;i<lg(res);i++) res[i]=cp[i];
     for(i=1;i<lg(gf->psi);i++) gf->psi[i]=mulssmod(im,gf->psi[i],gf->fp);
     avma=av2;
@@ -3153,7 +2918,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   ip=stoi(p);
   Tmod=gf.Tmod;
   fp=gf.fp;
-  O = permorbite(frob);
+  O = perm_cycles(frob);
   split = splitorbite(O);
   deg=lg(O[1])-1;
   sigma = permtopol(frob, L, M, den, gb->ladicabs, x);
@@ -3215,7 +2980,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj:G[%d]=%Z  d'ordre relatif %d\n", j,
 	  ((GEN **) PG)[1][j], ((long **) PG)[2][j]);
-    B = permorbite(((GEN **) PG)[1][j]);
+    B = perm_cycles(gmael(PG,1,j));
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj:B=%Z\n", B);
     w = gf.psi[Pg[j]];
@@ -3352,13 +3117,13 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
     grp[8] = (long) gcopy((GEN) G[2]);
   }
   res = cgetg(n + 1, t_VEC);
-  res[1] = (long) permidentity(n);
+  res[1] = (long) perm_identity(n);
   k = 1;
   for (i = 1; i < lg(G[1]); i++)
   {
     int     c = k * (((long **) G)[2][i] - 1);
     for (j = 1; j <= c; j++)	/* I like it */
-      res[++k] = (long) permapply((GEN) res[j], ((GEN **) G)[1][i]);
+      res[++k] = (long) perm_mul((GEN) res[j], ((GEN **) G)[1][i]);
   }
   if (flag)
   {
@@ -3635,16 +3400,15 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     err(flagerr, "galoisfixedfield");
   if (typ(perm) == t_VEC)
   {
-    if (lg(perm)==1)
-      perm=permidentity(n);
-    else
-      for (i = 1; i < lg(perm); i++)
-	if (typ(perm[i]) != t_VECSMALL || lg(perm[i])!=n+1)
-	  err(typeer, "galoisfixedfield");
+    for (i = 1; i < lg(perm); i++)
+      if (typ(perm[i]) != t_VECSMALL || lg(perm[i])!=n+1)
+        err(typeer, "galoisfixedfield");
+    O = vecperm_orbits(perm, n);
   }
   else if (typ(perm) != t_VECSMALL || lg(perm)!=n+1 )
     err(typeer, "galoisfixedfield");
-  O = permorbite(perm);
+  else
+    O = perm_cycles(perm);
   {
     GEN sym=cgetg(lg(L),t_VECSMALL);
     GEN dg=cgetg(lg(L),t_VECSMALL);
@@ -3675,12 +3439,12 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
       Pden = galoisborne(P, NULL, &Pgb, 1);
       if (Pgb.valabs > val)
       {
-	if (DEBUGLEVEL>=4)
-	  fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
-	      ,Pgb.valabs-val);
-	PL = rootpadicliftroots(P,PL,Pgb.l,Pgb.valabs);
-	L = rootpadicliftroots((GEN) gal[1],L,Pgb.l,Pgb.valabs);
-	mod = Pgb.ladicabs;
+        if (DEBUGLEVEL>=4)
+          fprintferr("GaloisConj:increase prec of p-adic roots of %ld.\n"
+              ,Pgb.valabs-val);
+        PL = rootpadicliftroots(P,PL,Pgb.l,Pgb.valabs);
+        L = rootpadicliftroots((GEN) gal[1],L,Pgb.l,Pgb.valabs);
+        mod = Pgb.ladicabs;
       }
     }
     PM = vandermondeinversemod(PL, P, Pden, mod);
@@ -3693,7 +3457,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     res[1] = (long) gcopy(P);
     res[2] = (long) gmodulcp(S, (GEN) gal[1]);
     res[3] = (long) fixedfieldfactor(L,O,(GEN)gal[6],
-	PM,Pden,mod,x,y);
+        PM,Pden,mod,x,y);
     return gerepile(ltop, lbot, res);
   }
 }
@@ -3703,17 +3467,15 @@ long
 galoistestabelian(GEN gal)
 {
   ulong ltop=avma;
-  long i,j;
+  GEN G;
+  long test;
   gal = checkgal(gal);
-  for(i=2;i<lg(gal[7]);i++)
-    for(j=1;j<i;j++)
-    {
-      long test=gegal(permapply(gmael(gal,7,i),gmael(gal,7,j)),
-	  permapply(gmael(gal,7,j),gmael(gal,7,i)));
-      avma=ltop;
-      if (!test) return 0;
-    }
-  return 1;  
+  G=cgetg(3,t_VEC);
+  G[1]=gal[7];
+  G[2]=gal[8];
+  test=group_isabelian(G);
+  avma=ltop;
+  return test;
 }
 
 GEN galoisisabelian(GEN gal, long flag)
@@ -3734,7 +3496,7 @@ GEN galoisisabelian(GEN gal, long flag)
     long k;
     M[i]=lgetg(n,t_COL);
     btop=avma;
-    P=permcyclepow(permorbite(gmael(gal,7,i)),mael(gal,8,i));
+    P=perm_pow(gmael(gal,7,i),mael(gal,8,i));
     for(j=1;j<lg(gal[6]);j++)
       if (gegal(P,gmael(gal,6,j)))
 	  break;
@@ -4014,7 +3776,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
   borne=mulii(binome(stoi(u),i),gpowgs(stoi(o),i));
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: borne=%Z\n",borne);
-  val=mylogint(shifti(borne,1),l);
+  val=logint(shifti(borne,1),l,NULL);
   avma=av;
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: val=%ld\n",val);
@@ -4044,3 +3806,27 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
   g=FpX_center(g,le);
   return gerepileupto(ltop,gscycloconductor(g,n,flag));
 }
+
+GEN galoissubgroups(GEN G)
+{
+  ulong ltop=avma;
+  GEN H;
+  G = checkgal(G);
+  H=cgetg(3,t_VEC);
+  H[1]=G[7];
+  H[2]=G[8];
+  return gerepileupto(ltop,group_subgroups(H));
+}
+
+GEN galoissubfields(GEN G, long flag, long v)
+{
+  ulong ltop=avma;
+  long i;
+  GEN L = galoissubgroups(G);
+  long l2 = lg(L);
+  GEN p3 = cgetg(l2, t_VEC);
+  for (i = 1; i < l2; ++i)
+    p3[i] = (long) galoisfixedfield(G, gmael(L,i,1), flag, v);
+  return gerepileupto(ltop,p3);
+}
+

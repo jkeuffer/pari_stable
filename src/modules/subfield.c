@@ -134,7 +134,7 @@ potential_block_systems(long N, long d, GEN n, ulong maxl)
 
 /* product of permutations. Put the result in perm1. */
 static void
-perm_mul(GEN perm1,GEN perm2)
+perm_mul_i(GEN perm1,GEN perm2)
 {
   long av = avma,i, N = lg(perm1);
   GEN perm=new_chunk(N);
@@ -160,7 +160,7 @@ cycle_power_to_perm(GEN perm,GEN cy,long l)
     perm[b] = cy[1];
     for (i=1; i<N; i++) p1[i] = perm[i];
 
-    for (j=2; j<=lp; j++) perm_mul(perm,p1);
+    for (j=2; j<=lp; j++) perm_mul_i(perm,p1);
     avma = av;
   }
   return perm;
@@ -312,7 +312,7 @@ print_block_system(long N,GEN Y,long d,GEN vbs,long maxl)
     for (u=1; u<=N; u++) perm[u]=u;
     for (u=1; u<=ns; u++)
       for (v=1; v<=t[u]; v++)
-	perm_mul(perm, cycle_power_to_perm(cyperm,gmael(Z,u,v),e[u][v]));
+	perm_mul_i(perm, cycle_power_to_perm(cyperm,gmael(Z,u,v),e[u][v]));
     vbs = append_vbs(vbs, im_block_by_perm(D,perm));
     if (lg(vbs) > maxl) return vbs;
     avma = av;

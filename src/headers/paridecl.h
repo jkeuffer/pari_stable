@@ -1073,7 +1073,25 @@ GEN     rnfcharpoly(GEN nf,GEN T,GEN alpha,int n);
 GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
+/* perm.c */
+
+GEN     cyc_powtoperm(GEN cyc, long exp);
+long    group_isabelian(GEN G);
+GEN     group_subgroups(GEN G);
+GEN     perm_cycles(GEN v);
+GEN     perm_identity(long l);
+GEN     perm_inv(GEN x);
+GEN     perm_mul(GEN s, GEN t);
+GEN     perm_pow(GEN perm, long exp);
+GEN     vecperm_orbits(GEN v, long n);
+GEN     vecsmall_const(long n, long c);
+int     vecsmall_lexcmp(GEN x, GEN y);
+int     vecsmall_prefixcmp(GEN x, GEN y);
+void    vecsmall_sort(GEN V);
+GEN     vecsmall_uniq(GEN V);
+
 /* polarit1.c */
+
 GEN     FpV_roots_to_pol(GEN V, GEN p, long v);
 long    FpX_is_irred(GEN f, GEN p);
 long    FpX_is_squarefree(GEN f, GEN p);
