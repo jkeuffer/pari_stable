@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
+#define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
 extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 extern GEN unnf_minus_x(GEN x);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
@@ -2289,6 +2290,25 @@ nfmodprinit(GEN nf, GEN pr)
   ffproj = rowextract_p(ffproj, c);
   if (! divise((GEN)nf[4], p))
   {
+    GEN basis, proj_modT;
+    if (N == f) T = (GEN)nf[1]; /* pr inert */
+    else
+      T = primpart(gmul((GEN)nf[7], (GEN)pr[2]));
+
+    basis = (GEN)nf[7];
+    proj_modT = cgetg(f+1, t_MAT);
+    for (i=1; i<=f; i++)
+    {
+      GEN cx, p1 = primitive_part((GEN)basis[c[i]], &cx);
+      if (cx)
+      {
+        cx = gmod(cx, p);
+        p1 = FpX_Fp_mul(FpX_rem(p1, T, p), cx, p);
+      }
+      proj_modT[i] = (long)pol_to_vec(p1, f);
+    }
+    ffproj = FpM_mul(proj_modT,ffproj,p);
+
     if (N == f) T = (GEN)nf[1]; /* pr inert */
     else
       T = primpart(gmul((GEN)nf[7], (GEN)pr[2]));
