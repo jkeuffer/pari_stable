@@ -1784,7 +1784,7 @@ plothraw0(long stringrect, long drawrect, GEN listx, GEN listy, long flags)
 GEN
 plothraw(GEN listx, GEN listy, long flags)
 {
-  flags=(flags)? 0: PLOT_POINTS;
+  flags = (flags > 1 ? flags : (flags ? 0: PLOT_POINTS));
   return plothraw0(STRINGRECT, DRAWRECT, listx, listy, flags);
 }
 
