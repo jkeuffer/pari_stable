@@ -1693,12 +1693,16 @@ red_montgomery(GEN T, GEN N, ulong inv)
   ulong av;
   GEN Te,Td,Ne,Nd, scratch;
   ulong m,t,d,k = lgefint(N)-2;
+  int carry;
   long i,j;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
   if (k == 0) return gzero;
   d = lgefint(T)-2; /* <= 2*k */
+#ifdef DEBUG
+  if (d > 2*k) err(bugparier,"red_montgomery");
+#endif
   if (k == 1)
   { /* as below, special cased for efficiency */
     ulong n = (ulong)N[2];
@@ -1725,6 +1729,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   Te = (GEN)av; /* 1 beyond end of T mantissa */
   Ne = N + k+2; /* 1 beyond end of N mantissa */
 
+  carry = 0;
   for (i=0; i<k; i++) /* set T := T/B nod N, k times */
   {
     Td = Te; /* one beyond end of (new) T mantissa */
@@ -1740,30 +1745,29 @@ red_montgomery(GEN T, GEN N, ulong inv)
       t = addll(addmul(m, *--Nd), *--Td); *Td = t;
     }
     overflow += hiremainder;
-    while (overflow)
+    if (overflow)
     {
-      if (Td > scratch) { t = addll(overflow, *--Td); *Td = t; }
-      else
-      { /* Td > N overflows (k+1 words), set Td := Td - N */
-        Td = Te;
-        Nd = Ne;
-        t = subll(*--Td, *--Nd); *Td = t;
-        while (Td > scratch) { t = subllx(*--Td, *--Nd); *Td = t; }
-#if DEBUG
-        assert(!overflow && i == k-1);
-#endif
-        goto END;
-      }
+      if (Td == scratch) { carry = 1; break; }
+      t = addll(overflow, *--Td); *Td = t + carry;
+      carry = (overflow || (carry && *Td == 0));
     }
   }
-END: /* copy result */
+  if (carry)
+  { /* Td > N overflows (k+1 words), set Td := Td - N */
+    Td = Te;
+    Nd = Ne;
+    t = subll(*--Td, *--Nd); *Td = t;
+    while (Td > scratch) { t = subllx(*--Td, *--Nd); *Td = t; }
+  }
+
+  /* copy result */
   Td = (GEN)av;
   while (! *scratch) scratch++; /* strip leading zeroes */
   while (Te > scratch) *--Td = *--Te;
   k = ((GEN)av - Td) + 2;
   *--Td = evalsigne(1) | evallgefint(k);
   *--Td = evaltyp(t_INT) | evallg(k);
-#if DEBUG
+#ifdef DEBUG
 {
   long l = lgefint(N)-2, s = BITS_IN_LONG*l;
   GEN R = shifti(gun, s);
