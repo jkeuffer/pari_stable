@@ -294,6 +294,7 @@ GEN     prime(long n);
 GEN     primeform(GEN x, GEN p, long prec);
 GEN     primes(long n);
 GEN     qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD);
+GEN     qfbsolve(GEN Q, GEN n);
 GEN     qfi(GEN x, GEN y, GEN z);
 GEN     qfr(GEN x, GEN y, GEN z, GEN d);
 GEN     redimag(GEN x);
