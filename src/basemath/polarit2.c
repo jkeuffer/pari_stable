@@ -661,7 +661,7 @@ cmbf(GEN target, GEN famod, GEN pe, long maxK, long klim,long hint)
   /* ind runs through strictly increasing sequences of length K,
    * 1 <= ind[i] <= lfamod */
 nextK:
-  if (K > maxK) goto END;
+  if (K > maxK || 2*K > lfamod) goto END;
   if (DEBUGLEVEL > 4)
     fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
@@ -718,7 +718,7 @@ nextK:
         }
       }
       lfamod -= K;
-      if (lfamod <= K) goto END; /* = K in fact */
+      if (lfamod < 2*K) goto END;
       i = 1; curdeg = deg[ind[1]];
       bound = all_factor_bound(target);
       lc = absi(leading_term(target));
@@ -801,7 +801,7 @@ refine_factors(GEN LL, GEN prime, long klim, long hint, long e, GEN res,
     else
     {
       GEN L2, pe, B = two_factor_bound(x);
-      long e2, klim2 = min(klim, dx>>1);
+      long e2, klim2 = min(klim, dx);
 
       e2 = get_e(B, prime, &pe);
       if (DEBUGLEVEL > 4)
@@ -1135,7 +1135,21 @@ rescale_pol_i(GEN P, GEN h)
   long i, l = lgef(P);
   for (i=3; i<l; i++)
   {
-    hi = mulii(hi,h); P[i] = lmulii((GEN)P[i], hi);
+    hi = mulii(hi,h);
+    P[i] = lmulii((GEN)P[i], hi);
+  }
+}
+
+/* P(hx) in Fp[X], in place. Assume P in Z[X], h in Z */
+void
+FpX_rescale_i(GEN P, GEN h, GEN p)
+{
+  GEN hi = gun;
+  long i, l = lgef(P);
+  for (i=3; i<l; i++)
+  {
+    hi = modii(mulii(hi,h), p);
+    P[i] = lmodii(mulii((GEN)P[i], hi), p);
   }
 }
 
@@ -1162,7 +1176,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod);
   famod = (GEN)listmod[l-1];
-  if (maxK >= 0 && lg(famod)-1 > maxK)
+  if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
     a = (GEN)res[l-1];
     lt = leading_term(a);
@@ -1172,10 +1186,19 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
       lt = NULL;
     else
     {
+      GEN invlt, invLT;
       if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
       a = primitive_pol_to_monic(a, &lt);
       B = uniform_Mignotte_bound(a);
       e = get_e(B, p, &pe);
+
+      invlt = mpinvmod(lt,p);
+      for (i = 1; i<lg(famod); i++)
+      { /* renormalize modular factors */
+        p1 = (GEN)famod[i]; FpX_rescale_i(p1, invlt, p);
+        invLT = powmodulo(lt, stoi(deg(p1)), p);
+        famod[i] = (long)FpX_Fp_mul(p1, invLT, p);
+      }
       famod = hensel_lift_fact(a,famod,p,pe,e);
     }
     setlg(res, l-1); /* remove last elt (possibly unfactored) */
@@ -1224,7 +1247,8 @@ combine_factors_old(GEN a, GEN famod, GEN p, long klim, long hint)
 
 extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
 
-/* assume degree(a) > 0, a(0) != 0, and a squarefree */
+/* assume degree(a) > 0, a(0) != 0, and a squarefree
+ * klim only used by decpol */
 static GEN
 squff(GEN a, long klim, long hint)
 {
@@ -1238,8 +1262,7 @@ squff(GEN a, long klim, long hint)
   if (hint < 0) return decpol(a,klim);
   if (!hint) hint = 1;
   if (DEBUGLEVEL > 2) timer2();
-  lbit=(da>>4)+1; nmax=da+1; i=da>>1;
-  if (!klim || klim>i) klim=i;
+  lbit=(da>>4)+1; nmax=da+1; klim=da>>1;
   chosenp = 0;
   tabd = NULL;
   tabdnew = (GEN*)new_chunk(nmax);
@@ -1320,9 +1343,9 @@ squff(GEN a, long klim, long hint)
   }
   if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
 #if 0
-  res = combine_factors_old(a, famod, prime, klim, hint);
+  res = combine_factors_old(a, famod, prime, da-1, hint);
 #else
-  res = combine_factors(a, famod, prime, klim, hint);
+  res = combine_factors(a, famod, prime, da-1, hint);
 #endif
   return gerepileupto(av, gcopy(res));
 }

@@ -1589,8 +1589,7 @@ FpX_normalize(GEN z, GEN p)
   long l = lgef(z)-1;
   GEN p1 = (GEN)z[l]; /* leading term */
   if (gcmp1(p1)) return z;
-  z = gmul(z, mpinvmod(p1,p));
-  return FpX_red(z, p);
+  return FpX_Fp_mul(z, mpinvmod(p1,p), p);
 }
 
 /* as above, p is guaranteed small, and coeffs of z are C longs in [0,p-1],
