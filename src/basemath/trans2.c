@@ -45,8 +45,8 @@ mpatan(GEN x)
   u = cmprs(x,1);
   if (!u)
   {
-    y=mppi(l+1); setexpo(y,-1);
-    if (sx<0)
+    y = Pi2n(-2, l+1);
+    if (sx < 0)
     {
       setsigne(x,-1);
       setsigne(y,-1);
@@ -112,11 +112,7 @@ mpatan(GEN x)
   }
   setlg(p4,l2); p4 = mulrr(p2,p4);
   setexpo(p4, expo(p4)+m);
-  if (u==1)
-  {
-    p5 = mppi(lp+1); setexpo(p5,0);
-    p4 = subrr(p5,p4);
-  }
+  if (u==1) p4 = subrr(Pi2n(-1, lp+1), p4);
   if (sx == -1) setsigne(p4,-signe(p4));
   affrr(p4,y); avma=av0; return y;
 }
@@ -174,24 +170,20 @@ gatanz(GEN x, GEN y)
 static GEN
 mpasin(GEN x)
 {
-  long l, u, v;
+  long l;
   pari_sp av;
   GEN y,p1;
 
-  u=cmprs(x,1); v=cmpsr(-1,x);
-  if (!u || !v)
+  if (!cmprs(x,1) || !cmpsr(-1,x))
+    y = Pi2n(-1, lg(x));
+  else
   {
-    y=mppi(lg(x)); setexpo(y,0);
-    if (signe(x)<0) setsigne(y,-1);
-    return y;
+    l = lg(x); y = cgetr(l); av = avma;
+    p1 = mpsqrt( subsr(1, mulrr(x,x)) );
+    affrr(mpatan(divrr(x,p1)), y); avma = av;
   }
-  l = lg(x); y=cgetr(l); av=avma;
-
-  p1 = cgetr(l+1); mulrrz(x,x,p1);
-  subsrz(1,p1,p1);
-  divrrz(x,mpsqrt(p1),p1);
-  affrr(mpatan(p1),y); if (signe(x)<0) setsigne(y,-1);
-  avma=av; return y;
+  if (signe(x) < 0) setsigne(y,-1);
+  return y;
 }
 
 GEN
@@ -203,19 +195,19 @@ gasin(GEN x, long prec)
 
   switch(typ(x))
   {
-    case t_REAL: sx=signe(x);
+    case t_REAL: sx = signe(x);
       if (!sx) return realzero_bit(expo(x));
-      if (sx<0) setsigne(x,1);
+      if (sx < 0) setsigne(x,1);
       if (cmpsr(1,x)>=0) { setsigne(x,sx); return mpasin(x); }
 
-      y=cgetg(3,t_COMPLEX);
-      y[1]=lmppi(lg(x)); setexpo(y[1],0);
-      y[2]=lmpach(x);
-      if (sx<0)
+      y = cgetg(3,t_COMPLEX);
+      y[1] = (long)Pi2n(-1, lg(x));
+      y[2] = lmpach(x);
+      if (sx < 0)
       {
         setsigne(y[1],-signe(y[1]));
         setsigne(y[2],-signe(y[2]));
-        setsigne(x,sx);
+        setsigne(x, sx);
       }
       return y;
 
@@ -262,42 +254,35 @@ gasinz(GEN x, GEN y)
 static GEN
 mpacos(GEN x)
 {
-  long l, u, v, sx;
+  long l, sx;
   pari_sp av;
-  GEN y,p1,p2;
+  GEN y, p1;
 
-  u=cmprs(x,1); v=cmpsr(-1,x); sx = signe(x);
+  sx = signe(x);
   if (!sx)
   {
-    l=expo(x)>>TWOPOTBITS_IN_LONG; if (l>=0) l = -1;
-    y=mppi(2-l); setexpo(y,0); return y;
+    l = expo(x)>>TWOPOTBITS_IN_LONG; if (l>=0) l = -1;
+    return Pi2n(-1, 2-l);
   }
-  l=lg(x);
-  if (!u) return realzero_bit( -(bit_accuracy(l)>>1) );
-  if (!v) return mppi(l);
-  y=cgetr(l); av=avma;
+  l = lg(x);
+  if (!cmprs(x,1)) return realzero_bit( -(bit_accuracy(l)>>1) );
+  if (!cmpsr(-1,x)) return mppi(l);
 
-  p1=cgetr(l+1);
-  if (expo(x)<0)
+  y = cgetr(l); av = avma;
+  if (expo(x) < 0)
   {
-    mulrrz(x,x,p1);
-    subsrz(1,p1,p1);
-    p1 = mpsqrt(p1); divrrz(x,p1,p1);
-    p1 = mpatan(p1);
-    p2 = mppi(l); setexpo(p2,0);
-    p1 = subrr(p2,p1);
+    p1 = mpsqrt( subsr(1, mulrr(x,x)) );
+    p1 = mpatan( divrr(x,p1) );
+    p1 = subrr(Pi2n(-1,l), p1);
   }
   else
   {
-    p2=cgetr(l+1);
-    if (sx>0) addsrz(1,x,p1); else subsrz(1,x,p1);
-    subsrz(2,p1,p2);
-    mulrrz(p1,p2,p1);
-    p1 = mpsqrt(p1); divrrz(p1,x,p1);
-    p1 = mpatan(p1);
-    if (sx<0) { setlg(p1,l); p1 = addrr(mppi(l),p1); }
+    p1 = sx>0? addsr(1,x): subsr(1,x);
+    p1 = mpsqrt( mulrr(p1,subsr(2,p1)) );
+    p1 = mpatan( divrr(p1,x) );
+    if (sx < 0) p1 = addrr(p1, mppi(l));
   }
-  affrr(p1,y); avma=av; return y;
+  affrr(p1,y); avma = av; return y;
 }
 
 GEN
@@ -375,7 +360,7 @@ mparg(GEN x, GEN y)
   prec = lg(y); if (prec<lg(x)) prec = lg(x);
   if (!sx)
   {
-    theta=mppi(prec); setexpo(theta,0);
+    theta = Pi2n(-1, prec);
     if (sy<0) setsigne(theta,-1);
     return theta;
   }
@@ -384,14 +369,13 @@ mparg(GEN x, GEN y)
   {
     theta = mpatan(divrr(y,x));
     if (sx>0) return theta;
-    pitemp=mppi(prec);
+    pitemp = mppi(prec);
     if (sy>0) return addrr(pitemp,theta);
     return subrr(theta,pitemp);
   }
   theta = mpatan(divrr(x,y));
-  pitemp=mppi(prec); setexpo(pitemp,0);
+  pitemp = Pi2n(-1, prec);
   if (sy>0) return subrr(pitemp,theta);
-
   theta = addrr(pitemp,theta);
   setsigne(theta,-signe(theta)); return theta;
 }
@@ -513,7 +497,7 @@ mpsh(GEN x)
   y = cgetr(lg(x)); av = avma;
   p1 = mpexp(x); p1 = addrr(p1, divsr(-1,p1));
   setexpo(p1, expo(p1)-1);
-  affrr(p1,y); avma = av; return y;
+  affrr(p1, y); avma = av; return y;
 }
 
 GEN
@@ -559,17 +543,12 @@ mpth(GEN x)
 {
   long l;
   pari_sp av;
-  GEN y,p1,p2;
+  GEN y, p1;
 
   if (!signe(x)) return realzero_bit(expo(x));
-  l=lg(x); y=cgetr(l); av=avma;
-
-  p1=cgetr(l+1); affrr(x,p1);
-  setexpo(p1,expo(p1)+1);
-  p1 = mpexp1(p1);
-  p2 = addsr(2,p1); setlg(p2,l+1);
-  p1 = divrr(p1,p2);
-  affrr(p1,y); avma=av; return y;
+  l = lg(x); y = cgetr(l); av = avma;
+  p1 = mpexp1(gmul2n(x,1));
+  affrr(divrr(p1,addsr(2,p1)), y); avma = av; return y;
 }
 
 GEN
@@ -778,10 +757,10 @@ mpath(GEN x)
   GEN y,p1;
 
   if (!signe(x)) return realzero_bit(expo(x));
-  y=cgetr(lg(x)); av=avma;
-  p1 = addrs(divsr(2,subsr(1,x)),-1);
+  y = cgetr(lg(x)); av = avma;
+  p1 = addrs(divsr(2,subsr(1,x)), -1);
   affrr(mplog(p1), y); avma=av;
-  setexpo(y,expo(y)-1); return y;
+  setexpo(y, expo(y)-1); return y;
 }
 
 GEN
@@ -799,7 +778,7 @@ gath(GEN x, long prec)
       tetpil=avma; y=cgetg(3,t_COMPLEX);
       p1=mplog(p1); setexpo(p1,expo(p1)-1);
       y[1]=(long)p1;
-      y[2]=lmppi(lg(x)); setexpo(y[2],0);
+      y[2]=(long)Pi2n(-1, lg(x));
       return gerepile(av,tetpil,y);
 
     case t_COMPLEX:
@@ -1018,7 +997,7 @@ mpgamma(GEN x)
   }
   mpbern(p,l2); p3=mplog(p2);
 
-  p4=realun(l2); setexpo(p4,-1);
+  p4 = real2n(-1, l2);
   p6 = subrr(p2,p4); p6 = mulrr(p6,p3);
   p6 = subrr(p6,p2);
   pitemp = mppi(l2); setexpo(pitemp,2);
@@ -1095,7 +1074,7 @@ cxgamma(GEN x, long prec)
   mpbern(p,l2); p3 = glog(p2,l2);
 
   p4=cgetg(3,t_COMPLEX);
-  p4[1] = (long)realun(l2); setexpo(p4[1],-1);
+  p4[1] = (long)real2n(-1, l2);
   p4[2] = (long)rcopy((GEN)p2[2]);
   subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
   gmulz(p4,p3,p4); gsubz(p4,p2,p4);
@@ -1428,7 +1407,7 @@ mplngamma(GEN x)
   }
   mpbern(p,l2); p3=mplog(p2);
 
-  p4=realun(l2); setexpo(p4,-1);
+  p4 = real2n(-1, l2);
   p6 = subrr(p2,p4); p6 = mulrr(p6,p3);
   p6 = subrr(p6,p2);
   pitemp = mppi(l2); setexpo(pitemp,2);
@@ -1533,7 +1512,7 @@ cxlngamma(GEN x, long prec)
   mpbern(p,l2); p3 = glog(p2,l2);
 
   p4=cgetg(3,t_COMPLEX);
-  p4[1] = (long)realun(l2); setexpo(p4[1],-1);
+  p4[1] = (long)real2n(-1, l2);
   subrrz((GEN)p2[1],(GEN)p4[1],(GEN)p4[1]);
   p4[2] = (long)rcopy((GEN)p2[2]);
   gmulz(p4,p3,p4); gsubz(p4,p2,p4);

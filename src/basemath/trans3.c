@@ -1359,10 +1359,10 @@ static GEN
 izeta(long k, long prec)
 {
   pari_sp av = avma;
-  GEN y,p1,pi2;
+  GEN y, p1;
 
   /* treat trivial cases */
-  if (!k) { y = realun(prec); setexpo(y,-1); setsigne(y,-1); return y; }
+  if (!k) { y = real2n(-1, prec); setsigne(y,-1); return y; }
   if (k < 0)
   {
     if ((k&1) == 0) return gzero;
@@ -1372,8 +1372,7 @@ izeta(long k, long prec)
   if (k > bit_accuracy(prec)+1) return realun(prec);
   if ((k&1) == 0)
   {
-    pi2 = mppi(prec); setexpo(pi2,2); /* 2Pi */
-    p1 = mulrr(gpowgs(pi2,k),absr(bernreal(k,prec)));
+    p1 = mulrr(gpowgs(Pi2n(1, prec), k),absr(bernreal(k,prec)));
     y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
     return gerepileuptoleaf(av, y);
   }

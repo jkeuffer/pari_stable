@@ -2283,7 +2283,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
 {
   long l, n, eps, flun;
   pari_sp av=avma, av1, tetpil, lim;
-  GEN z,p1,p2,cg,cg1,v,cga,cgb,s2,ns,gs,N;
+  GEN z,p1,p2,cg,v,cga,cgb,s2,ns,gs,N;
 
   if (!A) A = gun;
   else
@@ -2296,8 +2296,9 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   eps = ellrootno_all(e,gun,&N);
   if (flun && eps < 0) return realzero(prec);
 
-  cg1=mppi(prec); setexpo(cg1,2); cg=divrr(cg1,gsqrt(N,prec));
-  cga=gmul(cg,A); cgb=gdiv(cg,A);
+  cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
+  cga = gmul(cg,A);
+  cgb = gdiv(cg,A);
   l=(long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.)*log(rtodbl(cga)))
             / rtodbl(cgb)+1);
   v = anell(e, min((ulong)l,TEMPMAX));
