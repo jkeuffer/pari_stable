@@ -6601,8 +6601,9 @@ Overlapping regions will thus be drawn twice, and the windows are considered
 transparent. Then display the whole drawing in a special window on your
 screen.
 
-\subsecidx{plotfile}$(s)$: set the output file for plotting output. Special
-filename \kbd{-} redirects to the same place as PARI output.
+\subsecidx{plotfile}$(s)$: set the output file for plotting output. The
+special filename \kbd{"-"} redirects to the same place as PARI output. This
+is only taken into account by the \kbd{gnuplot} interface.
 
 \subsecidx{ploth}$(X=a,b,\var{expr},\{\fl=0\},\{n=0\})$: high precision
 plot of the function $y=f(x)$ represented by the expression \var{expr}, $x$
