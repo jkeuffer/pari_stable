@@ -991,6 +991,7 @@ GEN group_abelianHNF(GEN G, GEN S)
   long n=lg(G[1]);
   GEN M;
   if (!group_isabelian(G)) return NULL;
+  if (n==1) return cgetg(1,t_MAT);
   if (!S)
     S=group_elts(G,group_domain(G));
   M=cgetg(n,t_MAT);
