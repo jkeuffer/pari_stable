@@ -26,7 +26,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
   long *ptx,*pty;
   long i,j,x0,y0;
-  long good;
+  long good, seen_graph = 0;
   int point_type = -1, line_type = 0;
   PariRect *e;
   RectObj *p1;
@@ -34,6 +34,37 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   (void)do_free;
   PARI_get_plot(0);
 
+  /* Find the info about the *actual* x and y-coords of the
+     rectangles.  Use the first rectangle with has_graph attribute. */
+
+  for(i=0;i<lw;i++) {
+      e=rectgraph[w[i]];
+      if (RHasGraph(e)) {
+	  double t;
+
+	  xleft = x[i]; xright = xleft + RXsize(e) - 1;
+	  ytop = w_height - 1 - y[i]; ybot = ytop - (RYsize(e) - 1);
+	  t = (0 - RXshift(e))/RXscale(e);
+	  min_array[FIRST_X_AXIS] = min_array[SECOND_X_AXIS] = t;
+	  t = (RXsize(e) - 1 - RXshift(e))/RXscale(e);
+	  max_array[FIRST_X_AXIS] = max_array[SECOND_X_AXIS] = t;
+	  t = (RYsize(e) - 1 - RYshift(e))/RYscale(e);
+	  min_array[FIRST_Y_AXIS] = min_array[SECOND_Y_AXIS] = t;
+	  t = (0 - RYshift(e))/RYscale(e);
+	  max_array[FIRST_Y_AXIS] = max_array[SECOND_Y_AXIS] = t;
+	  seen_graph = 1;
+	  break;
+      }
+  }
+  if (!seen_graph) {			/* Put some reasonable values */
+      xleft = 0; xright = w_width - 1;
+      ybot  = 0; ytop   = w_height - 1;
+      min_array[FIRST_X_AXIS] = min_array[SECOND_X_AXIS] = 0;
+      max_array[FIRST_X_AXIS] = max_array[SECOND_X_AXIS] = 0;
+      min_array[FIRST_Y_AXIS] = min_array[SECOND_Y_AXIS] = 0;
+      max_array[FIRST_Y_AXIS] = max_array[SECOND_Y_AXIS] = 0;
+  }
+  
 #if 0
   graphics();				/* Switch on terminal. */
 #else
@@ -41,6 +72,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 #endif
   linetype(line_type);			/* X does not work otherwise. */
   setpointsize(pointsize);
+
   for(i=0;i<lw;i++)
   {
     e=rectgraph[w[i]]; p1=RHead(e); x0=x[i]; y0=y[i];

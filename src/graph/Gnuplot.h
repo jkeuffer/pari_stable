@@ -127,6 +127,69 @@ struct lexical_unit *token = tokens;
 long c_token = 0, num_tokens = 0;
 char term_options[200] = "";
 
+/* New with 3.7.1: */
+
+#define FIRST_Z_AXIS 0
+#define FIRST_Y_AXIS 1
+#define FIRST_X_AXIS 2
+#define SECOND_Z_AXIS 4 /* for future expansion ;-) */
+#define SECOND_Y_AXIS 5
+#define SECOND_X_AXIS 6
+/* extend list for datatype[] for t,u,v,r though IMHO
+ * they are not relevant to time data [being parametric dummies]
+ */
+#define T_AXIS 3  /* fill gap */
+#define R_AXIS 7  /* never used ? */
+#define U_AXIS 8
+#define V_AXIS 9
+
+#define AXIS_ARRAY_SIZE 10
+#define DATATYPE_ARRAY_SIZE 10
+
+extern double min_array[], max_array[], base_array[], log_base_array[];
+extern TBOOLEAN log_array[];
+/* graphics.c */
+extern int xleft, xright, ybot, ytop;
+extern TBOOLEAN is_3d_plot;
+
+double min_array[AXIS_ARRAY_SIZE], max_array[AXIS_ARRAY_SIZE], base_array[AXIS_ARRAY_SIZE], log_base_array[AXIS_ARRAY_SIZE];
+TBOOLEAN log_array[AXIS_ARRAY_SIZE];
+int xleft, xright, ybot, ytop;
+TBOOLEAN is_3d_plot;
+
+/* End of 3.7.1 additions */
+
+/* 3.7.0-devel additions */
+
+extern float surface_rot_z;
+extern TBOOLEAN polar;
+extern double			base_log_x, base_log_y, base_log_z;
+extern TBOOLEAN			is_log_x, is_log_y, is_log_z;
+extern double			log_base_log_x2, log_base_log_y2;
+extern double base_z;
+extern TBOOLEAN screen_ok;
+
+float surface_rot_z = 30.0;
+TBOOLEAN polar = 0;
+TBOOLEAN is_log_x = 0;
+TBOOLEAN is_log_y = 0;
+TBOOLEAN is_log_z = 0;
+double base_log_x = 0.0;
+double base_log_y = 0.0;
+double base_log_z = 0.0;
+double log_base_log_x = 0.0;
+double log_base_log_y = 0.0;
+double log_base_log_z = 0.0;
+double base_z = 0.0;
+TBOOLEAN screen_ok;
+
+void map3d_xy (double x, double y, double z, unsigned int *xt, unsigned int *yt)
+{
+    croak("Unsupported function map3d_xy called");
+}
+
+/* End of 3.7.0-devel additions */
+
 /* Here are the only missing functions: */
 
 struct value*

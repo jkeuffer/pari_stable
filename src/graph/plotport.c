@@ -229,6 +229,7 @@ initrect(long ne, long x, long y)
   RXcursor(e)=0; RYcursor(e)=0;
   RXscale(e)=1; RXshift(e)=0;
   RYscale(e)=1; RYshift(e)=0;
+  RHasGraph(e) = 0;
 }
 
 GEN
@@ -1427,6 +1428,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     initrect(stringrect, W.width-1, W.height-1);
     if (drawrect != stringrect) initrect(drawrect, is-1, js-1);
   }
+  RHasGraph(check_rect(drawrect)) = 1;
 
   if (!(flags & PLOT_NO_RESCALE))
     rectscale0(drawrect, xsml, xbig, ysml, ybig);
