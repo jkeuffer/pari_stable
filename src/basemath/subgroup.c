@@ -15,8 +15,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
-extern GEN hnf0(GEN x, long r);
-extern GEN hnf_gauss(GEN A, GEN B);
 
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);

@@ -24,7 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 extern GEN to_polmod(GEN x, GEN mod);
-extern GEN hnfall0(GEN A, long remove);
 extern GEN get_theta_abstorel(GEN T, GEN pol, GEN k);
 extern GEN _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
 
@@ -483,7 +482,6 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
 
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN vconcat(GEN Q1, GEN Q2);
-extern GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 extern GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
 extern GEN detcyc(GEN cyc);
 /* S a list of prime ideal in primedec format. Return res:
@@ -793,7 +791,7 @@ rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
   GEN bnf = (GEN)T[1], rel = (GEN)T[2], relpol = (GEN)T[3], theta = (GEN)T[4];
-  GEN nf, aux, H, Y, M, A, suni, sunitrel, futu, tu, w;
+  GEN nf, aux, H, U, Y, M, A, suni, sunitrel, futu, tu, w;
   GEN prod, S1, S2;
   GEN res = cgetg(3,t_VEC);
   long L, i, drel, itu;
@@ -860,8 +858,8 @@ rnfisnorm(GEN T, GEN x, long flag)
   }
   aux = zerocol(lg(A)-1); aux[itu] = (long)w;
   M[L] = (long)aux;
-  H = hnfall0(M, 0);
-  Y = gmul((GEN)H[2], inverseimage((GEN)H[1],A));
+  H = hnfall_i(M, &U, 0);
+  Y = gmul(U, inverseimage(H,A));
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
   aux = factorback(sunitrel, gfloor(Y));

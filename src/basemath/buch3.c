@@ -1349,7 +1349,6 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, char *s)
 extern GEN log_gen_pr(zlog_S *S, long index, GEN nf, long e);
 extern GEN log_gen_arch(zlog_S *S, long index);
 extern GEN factorbackprime(GEN nf, GEN L, GEN e);
-extern GEN hnf_gauss(GEN A, GEN B);
 
 /* return bnrisprincipal(bnr, (x)), assuming z = ideallog(x) */
 static GEN

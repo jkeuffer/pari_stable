@@ -25,8 +25,6 @@ extern GEN to_famat(GEN g, GEN e);
 extern GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN vconcat(GEN A, GEN B);
-extern GEN hnf_gauss(GEN A, GEN B);
-extern GEN idealhermite_aux(GEN nf, GEN x);
 
 /*******************************************************************/
 /*                                                                 */

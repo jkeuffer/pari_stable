@@ -33,12 +33,19 @@ GEN setloop(GEN a);
 
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN quicktrace(GEN x, GEN sym);
-GEN idealhermite_aux(GEN nf, GEN x);
-GEN hnfperm_i(GEN A, GEN *ptU, GEN *ptperm);
+
+GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 GEN hnfadd(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN hnfadd_i(GEN m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
-GEN hnfspec(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
+GEN hnfall_i(GEN A, GEN *ptB, long remove);
+GEN hnf_gauss(GEN A, GEN B);
+GEN hnf_invimage(GEN A, GEN b);
+GEN hnfmerge_get_1(GEN A, GEN B);
+GEN hnfperm_i(GEN A, GEN *ptU, GEN *ptperm);
 GEN hnfspec_i(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
+GEN hnfspec(long** m,GEN p,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
+GEN idealhermite_aux(GEN nf, GEN x);
+GEN mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC);
 
 GEN gmulXn(GEN x, long d);
 GEN addmulXn(GEN x, GEN y, long d);
