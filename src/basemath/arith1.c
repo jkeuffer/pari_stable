@@ -1397,13 +1397,12 @@ chinois(GEN x, GEN y)
     case t_POLMOD:
       if (gegal((GEN)x[1],(GEN)y[1]))  /* same modulus */
       {
-	z=cgetg(3,tx);
+	z = cgetg(3, t_INTMOD);
 	z[1]=lcopy((GEN)x[1]);
 	z[2]=(long)chinois((GEN)x[2],(GEN)y[2]);
         return z;
-      }  /* fall through */
-    case t_INTMOD:
-      z=cgetg(3,tx); av=avma;
+      }
+      z=cgetg(3,t_POLMOD); av=avma;
       d=gbezout((GEN)x[1],(GEN)y[1],&u,&v);
       if (!gegal(gmod((GEN)x[2],d), gmod((GEN)y[2],d))) break;
       p1 = gdiv((GEN)x[1],d);
@@ -1411,9 +1410,19 @@ chinois(GEN x, GEN y)
 
       tetpil=avma; z[1]=lmul(p1,(GEN)y[1]); z[2]=lmod(p2,(GEN)z[1]);
       gerepilecoeffssp(av,tetpil,z+1,2); return z;
+    case t_INTMOD:
+      z = cgetg(3,t_INTMOD); av = avma;
+      d = bezout((GEN)x[1],(GEN)y[1],&u,&v);
+      if (!egalii(resii((GEN)x[2],d), resii((GEN)y[2],d))) break;
+      p1 = diviiexact((GEN)x[1],d);
+      p2 = addii((GEN)x[2], mulii(mulii(u,p1), subii((GEN)y[2], (GEN)x[2])));
+      tetpil = avma;
+      z[1] = lmulii(p1, (GEN)y[1]);
+      z[2] = lmodii(p2, (GEN)z[1]);
+      gerepilecoeffssp(av,tetpil,z+1,2); return z;
 
     case t_POL:
-      lx=lg(x); z = cgetg(lx,tx); z[1] = x[1];
+      lx=lg(x); z = cgetg(lx,t_POL); z[1] = x[1];
       if (lx != lg(y) || varn(x) != varn(y)) break;
       for (i=2; i<lx; i++) z[i]=(long)chinois((GEN)x[i],(GEN)y[i]);
       return z;
@@ -1427,20 +1436,15 @@ chinois(GEN x, GEN y)
   return NULL; /* not reached */
 }
 
-/* return lift(chinois(x2 mod x1, y2 mod y1))
- * assume(x1,y1)=1, xi,yi integers and z1 = x1*y1
- */
+/* return lift(chinois(a mod A, b mod B))
+ * assume(A,B)=1, a,b,A,B integers and C = A*B */
 GEN
-chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1)
+Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C)
 {
   pari_sp av = avma;
-  GEN ax,p1;
-  (void)new_chunk((lgefint(z1)<<1)+lgefint(x1)+lgefint(y1)); /* HACK */
-  ax = mulii(Fp_inv(x1,y1), x1);
-  p1 = addii(x2, mulii(ax, subii(y2,x2)));
-  avma = av; return modii(p1,z1);
+  GEN c = addii(a, mulii(mulii(Fp_inv(A,B), A), subii(b,a)));
+  return gerepileuptoint(av, modii(c, C));
 }
-
 /*********************************************************************/
 /**                                                                 **/
 /**                      INVERSE MODULO b                           **/
