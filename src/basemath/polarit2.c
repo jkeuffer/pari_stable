@@ -974,45 +974,6 @@ special_pivot(GEN x)
   return H;
 }
 
-/* x matrix: compute a bound for | \sum e_i x_i | ^ 2, e_i = 0,1 */
-GEN
-norml2_spec(GEN x, long prec)
-{
-  long i,j, co = lg(x), li;
-  GEN S = gzero;
-  if (co == 1) return S;
-
-  x = gmul(x, realun(prec));
-  li = lg(x[1]);
-  for (i=1; i<li; i++)
-  {
-    GEN p = gzero;
-    GEN m = gzero;
-    for (j=1; j<co; j++)
-    {
-      GEN u = gcoeff(x,i,j);
-      long s = gsigne(u);
-      if      (s < 0) m = gadd(m,u);
-      else if (s > 0) p = gadd(p,u);
-    }
-    if (m != gzero) m = gneg(m);
-    if (gcmp(p,m) > 0) m = p;
-
-    S = gadd(S, gsqr(m));
-  }
-  return S;
-}
-
-/* bound for q(vS) := || vS ||_2^2 */
-static double
-bound_vS(GEN ML)
-{
-  gpmem_t av = avma;
-  GEN MLinv = gauss_intern(ML,NULL); /* left inverse */
-  double Nx = gtodouble(norml2_spec(MLinv, DEFAULTPREC));
-  avma = av; return Nx;
-}
-
 /* B from lllint_i: return [ |b_i^*|^2, i ] */
 GEN
 GS_norms(GEN B, long prec)
@@ -1026,12 +987,12 @@ GS_norms(GEN B, long prec)
 }
 
 static GEN
-check_factors(GEN P, GEN ML, GEN bound, GEN famod, GEN pa)
+check_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 {
   long i, j, r, n0;
   GEN pol = P, lcpol, lc, list, piv, y, pas2;
 
-  piv = special_pivot(ML);
+  piv = special_pivot(M_L);
   if (!piv) return NULL;
   if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
 
@@ -1072,11 +1033,11 @@ check_factors(GEN P, GEN ML, GEN bound, GEN famod, GEN pa)
 }
 
 long
-LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF,
+LLL_check_progress(GEN Bnorm, long n0, GEN m, GEN *CM_L, long *BPF,
                    pari_timer *T, long *ti_LLL)
 {
   GEN B, norm, u, up;
-  long i, R, r = lg(*ML)-1;
+  long i, R, r = lg(*CM_L)-1;
 
   if (DEBUGLEVEL>2) (void)TIMER(T);
   m = lllint_ip(m, 4);
@@ -1100,8 +1061,7 @@ LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF,
   if (R > r) return R; /* no progress */
 
   setlg(u, R+1);
-  for (i=1; i<=R; i++) setlg(u[i], r+1);
-  if (C != 1) u = gdivexact(u, stoi(C));
+  for (i=1; i<=R; i++) setlg(u[i], n0+1);
 
   up = FpM_image(u, stoi(27449)); /* inexpensive test */
   if (lg(up) != lg(u))
@@ -1109,8 +1069,7 @@ LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF,
     if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: rank decrease\n");
     u = ZM_HNFimage(u);
   }
-  *ML  = gmul(*ML, u);
-  *BvS = bound_vS(*ML); return lg(u)-1;
+  *CM_L  = u; return lg(u)-1;
 }
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
@@ -1125,10 +1084,10 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   const long N0 = 2; /* # of traces added at each step */
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
-  long i,j,tmax,n0,dP = degpol(P);
+  long i,j,tmax,n0,C, dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
-  double b0 = log((double)dP*2) / logp, logBr, BvS;
-  GEN lP, Br, Bnorm, T, T2, TT, ML, m, list;
+  double b0 = log((double)dP*2) / logp, logBr;
+  GEN lP, Br, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
   gpmem_t av, av2, lim;
   long ti_LLL = 0, ti_CF  = 0;
   pari_timer ti;
@@ -1142,29 +1101,31 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   logBr = gtodouble(glog(Br, DEFAULTPREC)) / logp;
 
   n0 = lg(famod) - 1;
-  list = cgetg(n0+1, t_COL);
+  C = (long)ceil( sqrt(N0 * n0 / 4.) );
+  Bnorm = dbltor(n0 * (C*C + N0*n0/4.) * 1.00001);
+  ZERO = zeromat(n0, N0);
 
   av = avma; lim = stack_lim(av, 1);
   TT = cgetg(n0+1, t_VEC);
-  T  = cgetg(n0+1, t_MAT);
+  Tra  = cgetg(n0+1, t_MAT);
   for (i=1; i<=n0; i++)
   {
-    TT[i] = 0;
-    T [i] = lgetg(N0+1, t_COL);
+    TT[i]  = 0;
+    Tra[i] = lgetg(N0+1, t_COL);
   }
-  ML = idmat(n0);
-  BvS = (double)n0;
+  CM_L = gscalsmat(C, n0);
   /* tmax = current number of traces used (and computed so far) */
   for (tmax = 0;; tmax += N0)
   {
-    long C, D, bmin, b, goodb, S = tmax + N0, r = lg(ML)-1;
-    double t;
+    long bmin, b, goodb, tnew = tmax + N0, r = lg(CM_L)-1;
+    GEN M_L, q;
     
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
 
+    bmin = (long)ceil(b0 + tnew*logBr);
+
     /* compute Newton sums (possibly relifting first) */
-    bmin = (long)ceil(b0 + S*logBr);
     if (a <= bmin)
     {
       a = (long)ceil(bmin + 3*N0*logBr) + 1; /* enough for 3 more rounds */
@@ -1174,8 +1135,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     }
     for (i=1; i<=n0; i++)
     {
-      GEN p1 = (GEN)T[i];
-      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], S, NULL, pa);
+      GEN p1 = (GEN)Tra[i];
+      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tnew, NULL, pa);
       TT[i] = (long)p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
       for (j=1; j<=N0; j++) p1[j] = p2[j];
@@ -1190,60 +1151,49 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       }
     }
 
-    /* compute bound */
+    /* compute truncation parameter */
     av2 = avma;
-    T2 = centermod( gmul(T, ML), pa );
+    M_L = (C == 1)? CM_L : gdivexact(CM_L, stoi(C));
+    T2 = centermod( gmul(Tra, M_L), pa );
     goodb = (long) ((gexpo(T2) - max(32, BitPerFactor*r)) * LOGp2);
     b = max(bmin, goodb);
     if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b);
 
-    t = sqrt(N0*n0*n0/4. / BvS);
-#if 0
-    if (t < 0.5) {
-      ML = lllint_ip(ML,1000);
-      BvS = bound_vS(ML);
-      t = sqrt(N0*n0*n0/4. / BvS);
-    }
-#endif
-    if (t < 0.5) {
-      C = 1; D = (long)ceil(1/t);
-      Bnorm = dbltor((BvS + D*D*N0*n0*n0/4.) * 1.00001);
-    } else {
-      C = (long)ceil(t); D = 1;
-      Bnorm = dbltor((BvS * C*C + N0*n0*n0/4.) * 1.00001);
-    }
-
-    /* build lattice */
-    if (D == 1)
-      m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
-                    vconcat( zeromat(r, N0),   gscalmat(gpowgs(p,a-b), N0) ) );
-    else
-      m = concatsp( vconcat( idmat(r), gmulsg(D,gdivround(T2, gpowgs(p,b))) ),
-                    vconcat( zeromat(r, N0),   gscalmat(gmulsg(D,gpowgs(p,a-b)), N0) ) );
-    /*     [  C        0      ]
-     * m = [                  ]   square matrix
-     *     [ T2   p^(a-b) I_s ]   T2 = T * ML  truncated
+    /* build and reduce lattice */
+    q = gpowgs(p, b);
+    m = concatsp( vconcat( CM_L, gdivround(T2, q) ),
+                  vconcat( ZERO, gscalmat(gpowgs(p,a-b), N0) ) );
+    /*     [ C M_L        0    ]
+     * m = [                   ]   square matrix
+     *     [  T2'  p^(a-b) I_s ]   T2' = Tra * M_L  truncated
      */
-    i = LLL_check_progress(Bnorm, m, C, &ML, &BvS, &BitPerFactor,
+    i = LLL_check_progress(Bnorm, n0, m, &CM_L, &BitPerFactor,
                            /*dbg:*/ &ti, &ti_LLL);
     if (i == 1) { list = _col(P); break; }
     if (i > r) { avma = av2; continue; } /* no progress */
 
-    ML = gerepileupto(av2, ML);
+    if (rec && i*rec >= n0)
+    {
+      CM_L = gerepilecopy(av2, CM_L);
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"LLL_cmbf");
+        gerepileall(av, 5, &CM_L, &TT, &Tra, &famod, &pa);
+      }
+      continue;
+    }
 
+    if (DEBUGLEVEL>2) (void)TIMER(&ti);
+    list = check_factors(P, M_L, bound, famod, pa);
+    if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
+    if (list) break;
+
+    CM_L = gerepilecopy(av2, CM_L);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"LLL_cmbf");
-      gerepileall(av, 4, &ML, &TT, &T, &famod);
+      gerepileall(av, 5, &CM_L, &TT, &Tra, &famod, &pa);
     }
-    if (rec && i*rec >= n0) continue;
-
-    av2 = avma;
-    if (DEBUGLEVEL>2) (void)TIMER(&ti);
-    list = check_factors(P, ML, bound, famod, pa);
-    if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
-    if (list) break;
-    avma = av2;
   }
   if (DEBUGLEVEL>2)
     fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
