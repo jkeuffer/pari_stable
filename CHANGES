@@ -56,6 +56,7 @@ Done for version 2.2.2 (released ??/??/2001):
 
   Added
 BA  1- New function 'vectorsmall'.
+    2- allow setting variable in divrem
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
