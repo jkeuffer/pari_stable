@@ -68,7 +68,7 @@ lllall_trivial(GEN x, long n, long flag)
   /* here n = 1 */
   if (gcmp0((GEN)x[1]))
   {
-    switch(flag)
+    switch(flag ^ lll_GRAM)
     {
       case lll_KER: return idmat(1);
       case lll_IM : return cgetg(1,t_MAT);
