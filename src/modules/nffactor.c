@@ -1146,7 +1146,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     av2 = avma;
     b = delta = 0; /* -Wall */
 AGAIN:
-    M_L = gdivexact(CM_L, stoi(C));
+    M_L = Q_div_to_int(CM_L, stoi(C));
     T2 = gmul(Tra, M_L);
     VV = gdivround(gmul(PRKinv, T2), pk);
     T2 = gsub(T2, gmul(PRK, VV));
@@ -1203,7 +1203,7 @@ AGAIN:
     if (i <= r && i*rec < n0)
     {
       if (DEBUGLEVEL>2) (void)TIMER(&ti);
-      list = nf_check_factors(T, P, M_L, famod, pk);
+      list = nf_check_factors(T, P, Q_div_to_int(CM_L,stoi(C)), famod, pk);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       CM_L = gerepilecopy(av2, CM_L);

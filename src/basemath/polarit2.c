@@ -1167,7 +1167,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     av2 = avma;
     delta = b = 0; /* -Wall */
 AGAIN:
-    M_L = gdivexact(CM_L, stoi(C));
+    M_L = Q_div_to_int(CM_L, stoi(C));
     T2 = centermod( gmul(Tra, M_L), pa );
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
@@ -1226,7 +1226,7 @@ AGAIN:
     if (i <= r && i*rec < n0)
     {
       if (DEBUGLEVEL>2) (void)TIMER(&ti);
-      list = check_factors(P, M_L, bound, famod, pa);
+      list = check_factors(P, Q_div_to_int(CM_L,stoi(C)), bound, famod, pa);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       CM_L = gerepilecopy(av2, CM_L);
