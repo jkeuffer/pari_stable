@@ -48,7 +48,7 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
        in characteristic 0
    11- [library:] typo in vpariputs: pariputsf("%Z%Z",x,y) did not work
        (prints x and address of y)
-IZ 12- [gnuplot + dynamic link]: allow building even when dlopen() not available
+IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -57,6 +57,8 @@ IZ 12- [gnuplot + dynamic link]: allow building even when dlopen() not available
     4- automatic concatenation for strings: use longest match for expression.
        print("a"[1]) is not valid since "a" is not a vector
        print("a", [1])  prints  'a[1]'
+IZ  5- [gphelp:] allow uninstalled operation from $TOPDIR or $TOPDIR/Oarch
+IZ  6- [gphelp:] better error messages in case TeX compilation fails
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h

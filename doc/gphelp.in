@@ -46,7 +46,23 @@ $version= "@version@";
 $miscdir= "@miscdir@";
 # no expanded material (@key@) below
 $wwwsite= "http://www.parigp-home.de/";
-$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR} || "$miscdir/doc";
+$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
+
+if (!defined $docdir) {
+  # work from TOPDIR/Oarch or TOPDIR too: may be uninstalled yet;
+  for ("$miscdir/doc", './doc', '../doc') {
+    if (-r "$_/usersch3.tex") {
+      $docdir = $_;
+      last;
+    }
+  }
+  $docdir ||= "$miscdir/doc";	# Last resort
+}
+
+if ($docdir =~ /^\./) {
+  require Cwd;
+  $docdir = Cwd::cwd() . "/$docdir";
+}
 
 $xdvi = $ENV{GPXDVI} || "xdvi";
 $xdviref = $ENV{GPXDVIREF} || "$xdvi -paper 29.7x21cm";
@@ -363,11 +379,13 @@ sub tex
 
 sub posttex
 {
-  print TEX "\\vfill\\eject\\bye"; close(TEX);
+  print TEX "\\vfill\\eject\\bye";
+  close(TEX) || die "Error closing '$texfile.tex': $!";
 
   chdir($tmpdir);
-  system("tex $texfile.tex 2>/dev/null > /dev/null < /dev/null") == 0
-    || die "could not process $texfile.dvi" if (! -f "$texfile.dvi");
+  $out = `tex $texfile.tex 2>&1 < /dev/null`;
+  $? == 0 && -f "$texfile.dvi"
+    || die "could not create '$texfile.dvi': status=$?, $out";
   setsid; # detach from terminal (^C will not kill xdvi)
   system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log)&");
 }
