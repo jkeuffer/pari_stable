@@ -693,7 +693,9 @@ below). Related but not equivalent to the function \kbd{read} (see
 input, there will be one history entry for each of them, whereas \kbd{read}
 would only record the last one. If \var{filename} is omitted, re-read the
 previously used input file (fails if no file has ever been successfully read
-in the current session).
+in the current session). If a GP \tet{binary file} (see \secref{se:writebin})
+is read using this command, it is silently loaded, without cluttering the
+history.
 
 \unix This command accepts compressed files in \idx{compress}ed (\kbd{.Z})
 or \idx{gzip}ped (\kbd{.gz} or \kbd{.z}) format. They will be uncompressed on

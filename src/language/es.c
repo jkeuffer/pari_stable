@@ -2510,6 +2510,177 @@ switchout(char *name)
 
 /*******************************************************************/
 /**                                                               **/
+/**                    I/O IN BINARY FORM                         **/
+/**                                                               **/
+/*******************************************************************/
+#define _fwrite(a,b,c,d) \
+  if (fwrite((a),(b),(c),(d)) < (c)) err(talker,"write failed")
+#define _fread(a,b,c,d) \
+  if (fread((a),(b),(c),(d)) < (c)) err(talker,"read failed")
+#define _lfread(a,b,c) _fread((a),sizeof(long),(b),(c))
+#define _cfread(a,b,c) _fread((a),sizeof(char),(b),(c))
+#define _lfwrite(a,b,c) _fwrite((a),sizeof(long),(b),(c))
+#define _cfwrite(a,b,c) _fwrite((a),sizeof(char),(b),(c))
+
+#define BIN_GEN 0
+#define NAM_GEN  1
+
+static long
+rd_long(FILE *f)
+{
+  long L;
+  _lfread(&L, 1, f); return L;
+}
+static void
+wr_long(long L, FILE *f)
+{
+  _lfwrite(&L, 1, f);
+}
+
+/* append x to file f */
+static void
+wrGEN(GEN x, FILE *f)
+{
+  GENbin *p = copy_bin(x);
+  long L = p->len;
+
+  wr_long(L,f);
+  wr_long((long)p->x,f);
+  wr_long((long)p->base,f);
+  _lfwrite(GENbase(p), L,f);
+  free((void*)p);
+}
+
+static void
+wrstr(char *s, FILE *f)
+{
+  long L = strlen(s)+1;
+  wr_long(L,f);
+  _cfwrite(s, L, f);
+}
+
+static char *
+rdstr(FILE *f)
+{
+  long L = rd_long(f);
+  char *s;
+  if (!L) return NULL;
+  s = gpmalloc(L);
+  _cfread(s, L, f); return s;
+}
+
+void
+writeGEN(GEN x, FILE *f)
+{
+  fputc(BIN_GEN,f);
+  wrGEN(x, f);
+}
+
+void
+writenamedGEN(GEN x, char *s, FILE *f)
+{
+  fputc(NAM_GEN,f);
+  wrstr(s, f);
+  wrGEN(x, f);
+}
+
+/* read a GEN from file f */
+static GEN
+rdGEN(FILE *f)
+{
+  long L = rd_long(f);
+  GENbin *p;
+
+  if (!L) return NULL;
+  p = (GENbin*)gpmalloc(sizeof(GENbin) + L*sizeof(long));
+  p->len  = L;
+  p->x    = (GEN)rd_long(f);
+  p->base = (GEN)rd_long(f);
+  _lfread(GENbase(p), L,f);
+  return bin_copy(p);
+}
+
+GEN
+readobj(FILE *f)
+{
+  int c = fgetc(f);
+  GEN x = NULL;
+  switch(c)
+  {
+    case BIN_GEN:
+      x = rdGEN(f);
+      if (!x) err(talker,"malformed binary file (no GEN)");
+      break;
+    case NAM_GEN:
+    {
+      char *s = rdstr(f);
+      if (!s) err(talker,"malformed binary file (no name)");
+      x = rdGEN(f);
+      if (!x) err(talker,"malformed binary file (no GEN)");
+      fprintferr("setting %s\n",s);
+      changevalue(fetch_named_var(s,0), x);
+      break;
+    }
+    case EOF: break;
+    default: err(talker,"unknown code in readobj");
+  }
+  return x;
+}
+
+#define MAGIC "\007\020" /* ^G^P */
+static void
+check_magic(char *name, FILE *f)
+{
+  char s[2];
+  if (fread(s,1,2, f) < 2) err(openfiler,"binary input",name);
+  if (strncmp(s,MAGIC,2)) err(talker,"%s is not a GP binary file",name);
+}
+
+int
+file_is_binary(FILE *f)
+{
+  char c = fgetc(f);
+  int r = isprint(c);
+  ungetc(c,f); return (r == 0);
+}
+
+void
+writebin(char *name, GEN x)
+{
+  FILE *f = fopen(name,"r");
+  int already = f? 1: 0;
+  
+  if (f) { check_magic(name,f); fclose(f); }
+  f = fopen(name,"a");
+  if (!f) err(openfiler,"binary output",name);
+  if (!already) fprintf(f, MAGIC);
+
+  if (x) writeGEN(x,f);
+  else
+  {
+    long v, maxv = manage_var(3,NULL);
+    for (v=0; v<maxv; v++)
+    {
+      entree *ep = varentries[v];
+      if (!ep) continue;
+      writenamedGEN(ep->value,ep->name,f);
+    }
+  }
+  fclose(f);
+}
+
+/* read all objects in file and return last one */
+GEN
+readbin(char *name, FILE *f)
+{
+  GEN y, x = NULL;
+  check_magic(name,f);
+  while ((y = readobj(f))) x = y;
+  return x;
+}
+
+/*******************************************************************/
+/**                                                               **/
 /**                       TEMPORARY FILES                         **/
 /**                                                               **/
 /*******************************************************************/

@@ -371,7 +371,7 @@ pop_val_if_newer(entree *ep, long loc)
   free((void*)v); return 1;
 }
 
-static void
+void
 changevalue(entree *ep, GEN val)
 {
   GEN x = gclone(val);

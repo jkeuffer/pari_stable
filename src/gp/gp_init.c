@@ -27,6 +27,7 @@ extern GEN   default0(char *a, char *b, long flag);
 extern void  error0(GEN *g);
 extern GEN   extern0(char *cmd);
 extern void  gp_quit(void);
+extern void  gpwritebin(char *s, GEN x);
 extern GEN   input0();
 extern void  kill0(entree *ep);
 extern void  print0(GEN *g,long flag);
@@ -59,6 +60,7 @@ entree functions_gp[]={
 {"whatnow",1,(void*)whatnow0,11,"vr"},
 {"write",99,(void*)write0,11,"vss*D0,L,"},
 {"write1",99,(void*)write0,11,"vss*D5,L,"},
+{"writebin",99,(void*)gpwritebin,11,"vsDG"},
 {"writetex",99,(void*)write0,11,"vss*D4,L,"},
 
 {NULL,0,NULL,0,NULL} /* sentinel */
@@ -83,6 +85,7 @@ char *helpmessages_gp[]={
   "whatnow(fun): if f was present in GP version 1.39.15 or lower, gives the new function name",
   "write(filename,a): write the string expression a (same output as print) to filename",
   "write1(filename,a): write the string expression a (same output as print1) to filename",
+  "writebin(filename,{x}): write x as a binary object to file filename. If x is omitted, write all session variables",
   "writetex(filename,a): write the string expression a (same format as print) to filename, in TeX format",
 };
 

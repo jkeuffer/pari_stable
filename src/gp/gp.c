@@ -337,6 +337,18 @@ write0(char *s, GEN *g, long flag)
   switchout(NULL);
 }
 
+void
+gpwritebin(char *s, GEN x)
+{
+  s = expand_tilde(s);
+  if (secure)
+  {
+    fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",s);
+    hit_return();
+  }
+  writebin(s,x); free(s);
+}
+
 Buffer *
 new_buffer()
 {
@@ -1755,6 +1767,13 @@ normal_output(GEN z, long n)
   term_color(c_NONE); pariputc('\n');
 }
 
+static GEN
+gpreadbin(char *s)
+{
+  GEN x = readbin(s,infile);
+  popinfile(); return x;
+}
+
 static void
 escape0(char *tch)
 {
@@ -1841,7 +1860,11 @@ escape0(char *tch)
       }
       break;
     case 'q': gp_quit(); break;
-    case 'r': switchin(get_sep_colon_ok(s)); break;
+    case 'r':
+      s = get_sep_colon_ok(s);
+      switchin(s);
+      if (file_is_binary(infile)) gpreadbin(s);
+      break;
     case 's': etatpile(0); break;
     case 't': gentypes(); break;
     case 'u':
@@ -2499,6 +2522,7 @@ GEN
 read0(char *s)
 {
   switchin(s);
+  if (file_is_binary(infile)) return gpreadbin(s);
   return gp_main_loop(0);
 }
 

@@ -6973,7 +6973,9 @@ dynamic file names if you wish).
 \subsubsecidx{read}$(\{\var{str}\})$: reads in the file whose name results
 from the expansion of the string \var{str}. If \var{str} is omitted,
 re-reads the last file that was fed into GP. The return value is the result of
-the last expression evaluated.\label{se:read}
+the last expression evaluated.\label{se:read} If a GP \tet{binary file} is
+read using this command (see \secref{se:writebin}), the file is loaded and
+the last object in the file is returned.
 
 \subsubsecidx{reorder}$(\{x=[\,]\})$: $x$ must be a vector. If $x$ is the
 empty vector, this gives the vector whose components are the existing
@@ -7105,6 +7107,33 @@ as \kbd{print}).\label{se:write}
 \subsubsecidx{write1}$(\var{filename},\{\var{str}*\})$: writes (appends) to
 \var{filename} the remaining arguments without a trailing newline
 (same output as \kbd{print1}).
+
+\subsubsecidx{writebin}$(\var{filename},\{x\})$: writes (appends) to
+\var{filename} the object $x$ in binary format. This format is not human
+readable, but contains the exact internal structure of $x$, and is much
+faster to save/load than a string expression, as would be produced by
+\tet{write}. The binary file format includes a magic number, so that such a
+file can be recognized and correctly input by the regular \tet{read} or \b{r}
+function. If saved objects refer to (polynomial) variables that are not
+defined in the new session, they will be displayed in a funny way (see
+\secref{se:kill}).
+
+If $x$ is omitted, saves all user variables from the session, together with
+their names. Reading such a ``named object'' back in a GP session will set
+the corresponding user variable to the saved value. E.g after
+\bprog
+x = 1; writebin("log")
+@eprog
+\noindent reading \kbd{log} into a clean session will set \kbd{x} to $1$.
+The relative variables priorities of new variables set in this way remain the
+same (preset variables retain their former priority, but are set to the new
+value). In particular, reading such a session log into a clean session will
+restore all variables exactly as they were in the original one.
+
+User functions, installed functions and history objects can not be saved via
+this function. Just as a regular input file, a binary file can be compressed
+using \tet{gzip}, provided the file name has the standard \kbd{.gz}
+extension. \label{se:writebin}\sidx{binary file}
 
 \subsubsecidx{writetex}$(\var{filename},\{\var{str}*\})$: as \kbd{write},
 in \TeX\ format.\label{se:writetex}

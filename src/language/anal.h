@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                 Declarations specific to the analyzer                 */
 /*                                                                       */
 /*************************************************************************/
-
+/* structs */
 typedef struct default_type {
   char *name;
   void *fun;
@@ -34,14 +34,29 @@ typedef struct module {
   char **help;
 } module;
 
+/* binary I/O */
+typedef struct GENbin {
+  long len; /* taille(x) */
+  GEN x; /* binary copy of x */
+  GEN base; /* base address of p->x */
+} GENbin;
+#define GENbase(p) ((GEN)p+3)
+
+void shiftaddress(GEN x, long dec);
+GENbin* copy_bin(GEN x);
+GEN bin_copy(GENbin *p);
+
+/* stacks */
 typedef struct stack {
   struct stack *prev;
   void *value;
 } stack;
 
-extern void push_stack(stack **pts, void *a);
-extern void *pop_stack(stack **pts);
+void push_stack(stack **pts, void *a);
+void *pop_stack(stack **pts);
 
+/* functions */
+void   changevalue(entree *ep, GEN val);
 entree *do_alias(entree *ep);
 int    is_identifier(char *s);
 entree *is_entry_intern(char *s, entree **table, long *hash);
@@ -49,14 +64,14 @@ long   is_keyword_char(char c);
 char   *readstring(char *src, char *s);
 long   loop_break();
 long   did_break();
-extern void   print_prefixed_text(char *s, char *prefix, char *str);
+void   print_prefixed_text(char *s, char *prefix, char *str);
 
-extern void term_color(int c);
-extern char *term_get_color(int c);
-extern void hit_return();
+void term_color(int c);
+char *term_get_color(int c);
+void hit_return();
 
-extern void push_val(entree *ep, GEN a);
-extern void pop_val(entree *ep);
+void push_val(entree *ep, GEN a);
+void pop_val(entree *ep);
 
 extern long prec, secure;
 extern GEN gnil;

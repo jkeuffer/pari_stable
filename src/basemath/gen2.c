@@ -133,129 +133,9 @@ pureimag(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                       CLONING & COPY                            */
-/*                  Replicate an existing GEN                      */
+/*                            SIZES                                */
 /*                                                                 */
 /*******************************************************************/
-/* lontyp = 0 means non recursive type
- * otherwise:
- *   lontyp = number of codewords
- *   if not in stack, we don't copy the words in [lontyp,lontyp2[
- */
-const  long  lontyp[] = { 0,0,0,1,1,1,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
-static long lontyp2[] = { 0,0,0,2,1,1,1,3,2,2, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
-
-/* can't do a memcpy there: avma and x may overlap. memmove is slower */
-GEN
-gcopy(GEN x)
-{
-  long tx=typ(x),lx,i;
-  GEN y;
-
-  if (tx == t_SMALL) return x;
-  if (! is_recursive_t(tx))
-  {
-    if (tx == t_INT && !signe(x)) return gzero; /* very common case */
-    lx = lg(x); y = new_chunk(lx);
-    for (i=lx-1; i>=0; i--) y[i]=x[i];
-  }
-  else
-  {
-    lx = lg(x); y = new_chunk(lx);
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
-    for (i=0; i<lontyp[tx];  i++) y[i]=x[i];
-    for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
-    for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
-  }
-  /* unsetisclone(y); useless because gunclone checks isonstack */
-  return y;
-}
-
-GEN
-gcopy_i(GEN x, long lx)
-{
-  long tx=typ(x),i;
-  GEN y;
-
-  if (tx == t_SMALL) return x;
-  y=cgetg(lx,tx);
-  if (! is_recursive_t(tx))
-    for (i=lx-1; i>0; i--) y[i]=x[i];
-  else
-  {
-    for (i=1; i<lontyp[tx];  i++) y[i]=x[i];
-    for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
-    for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
-  }
-  return y;
-}
-
-GEN
-forcecopy(GEN x)
-{
-  long tx=typ(x),lx,i;
-  GEN y;
-
-  if (tx == t_SMALL) return x;
-  if (! is_recursive_t(tx))
-  {
-    if (tx == t_INT && !signe(x)) return gzero; /* very common case */
-    lx = lg(x); y = new_chunk(lx);
-    for (i=lx-1; i>=0; i--) y[i]=x[i];
-  }
-  else
-  {
-    lx = lg(x); y = new_chunk(lx);
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
-    for (i=0; i<lontyp[tx]; i++) y[i]=x[i];
-    for (   ; i<lx;         i++) y[i]=(long)forcecopy((GEN)x[i]);
-  }
-  unsetisclone(y); return y;
-}
-
-GEN
-dummycopy(GEN x)
-{
-  long tx=typ(x), lx=lg(x),i;
-  GEN y=new_chunk(lx);
-
-  switch(tx)
-  {
-    case t_POLMOD:
-      y[1]=x[1]; y[2]=(long) dummycopy((GEN)x[2]);
-      break;
-    case t_MAT:
-      for (i=lx-1;i;i--) y[i]=(long)dummycopy((GEN)x[i]);
-      break;
-    default:
-      for (i=lx-1;i;i--) y[i]=x[i];
-  }
-  y[0]=x[0]; return y;
-}
-
-/* assume x is a t_POL. FOR INTERNAL USE! */
-GEN
-dummyclone(GEN x)
-{
-  long lx = lgef(x);
-  GEN z = (GEN)gpmalloc(lx*sizeof(long));
-  while (--lx >= 0) z[lx] = x[lx];
-  return z;
-}
-
-long
-taille(GEN x)
-{
-  long i,n,lx=lg(x),tx=typ(x);
-
-  n = lx;
-  if (is_recursive_t(tx))
-  {
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
-    for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
-  }
-  return n;
-}
 
 long
 glength(GEN x)
@@ -290,39 +170,21 @@ matsize(GEN x)
 }
 
 long
-taille2(GEN x) { return taille(x)<<TWOPOTBYTES_IN_LONG; }
-
-GEN
-brutcopy(GEN x, GEN y)
+taille(GEN x)
 {
-  long i,lx,tx=typ(x);
-  GEN z;
-
+  long i,n,lx, tx = typ(x);
   if (! is_recursive_t(tx))
-  {
-    lx = (tx==t_INT)? lgefint(x): lg(x);
-    for (i=0; i<lx; i++) y[i] = x[i];
-  }
+    n = (tx==t_INT)? lgefint(x): lg(x);
   else
   {
-    lx=lg(x); z = y + lx;
-    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
-    for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
-    for (   ; i<lx; i++)
-    {
-      y[i] = (long)brutcopy((GEN)x[i], z);
-      z += taille((GEN)x[i]);
-    }
+    n = lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
   }
-  unsetisclone(y); return y;
+  return n;
 }
 
-GEN
-gclone(GEN x)
-{
-  x = brutcopy(x, newbloc(taille(x)));
-  setisclone(x); return x;
-}
+long
+taille2(GEN x) { return taille(x)<<TWOPOTBYTES_IN_LONG; }
 
 /*******************************************************************/
 /*                                                                 */
@@ -387,11 +249,11 @@ gtolong(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                      COMPARE TO ZERO                            */
-/*        returns 1 whenever the GEN x is 0, and 0 otherwise       */
+/*                         COMPARISONS                             */
 /*                                                                 */
 /*******************************************************************/
 
+/* returns 1 whenever x = 0, and 0 otherwise */
 int
 gcmp0(GEN x)
 {
@@ -443,13 +305,7 @@ gcmp0(GEN x)
   return 0;
 }
 
-/*******************************************************************/
-/*                                                                 */
-/*                      COMPARE TO 1 and -1                        */
-/*     returns 1 whenever the GEN x is 1 (resp. -1), 0 otherwise   */
-/*                                                                 */
-/*******************************************************************/
-
+/* returns 1 whenever x = 1, 0 otherwise */
 int
 gcmp1(GEN x)
 {
@@ -492,6 +348,7 @@ gcmp1(GEN x)
   return 0;
 }
 
+/* returns 1 whenever the x = -1, 0 otherwise */
 int
 gcmp_1(GEN x)
 {
@@ -539,13 +396,7 @@ gcmp_1(GEN x)
   return 0;
 }
 
-/*******************************************************************/
-/*                                                                 */
-/*                       SIGNED COMPARISON                         */
-/*     returns the sign of x - y when it makes sense. 0 otherwise  */
-/*                                                                 */
-/*******************************************************************/
-
+/* returns the sign of x - y when it makes sense. 0 otherwise */
 int
 gcmp(GEN x, GEN y)
 {
@@ -568,6 +419,7 @@ gcmp(GEN x, GEN y)
   av=avma; y=gneg_i(y); f=gsigne(gadd(x,y)); avma=av; return f;
 }
 
+/* as gcmp for vector/matrices, using lexicographic ordering on components */
 int
 lexcmp(GEN x, GEN y)
 {
@@ -629,6 +481,7 @@ lexcmp(GEN x, GEN y)
 /*                                                               */
 /*****************************************************************/
 
+/* x,y t_POL */
 static int
 polegal(GEN x, GEN y)
 {
@@ -641,16 +494,16 @@ polegal(GEN x, GEN y)
 }
 
 #define MASK(x) (((ulong)(x)) & (TYPBITS | LGBITS))
+/* typ(x) = typ(y) = t_VEC/COL/MAT */
 static int
 vecegal(GEN x, GEN y)
 {
-  long i, tx = typ(x);
+  long i;
 
-  if (!is_matvec_t(tx)) return gegal(x,y);
   if (MASK(x[0]) != MASK(y[0])) return 0;
 
   i = lg(x)-1;
-  if (tx != t_MAT)
+  if (typ(x) != t_MAT)
   {
     for ( ; i; i--)
       if (! gegal((GEN)x[i],(GEN)y[i]) ) return 0;

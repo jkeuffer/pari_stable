@@ -354,7 +354,7 @@ pari_addfunctions(module **modlist_p, entree *func, char **help)
   modlist->help = NULL;
 }
 
-static long 
+static long
 fix_size(long a)
 {
   /* BYTES_IN_LONG*ceil(a/BYTES_IN_LONG) */
@@ -580,7 +580,7 @@ killbloc0(GEN x, int inspect)
 
   if (!x || isonstack(x)) return;
   if (bl_next(x)) bl_prev(bl_next(x)) = bl_prev(x);
-  else 
+  else
   {
     cur_bloc = (GEN)bl_prev(x);
     next_bloc = bl_num(x);
@@ -701,7 +701,7 @@ reorder(GEN x)
 {
   long tx,lx,i,n, nvar = manage_var(3,NULL);
   int *var,*varsort,*t1;
-  
+
   if (!x) return polvar;
   tx=typ(x); lx=lg(x)-1;
   if (! is_vec_t(tx)) err(typeer,"reorder");
@@ -761,7 +761,7 @@ recover(int flag)
 
  /* disable recover() and SIGINT. Better: sigint_[block|release] as in
   * readline/rltty.c ? */
-  try_to_recover=0; 
+  try_to_recover=0;
   sigfun = os_signal(SIGINT, SIG_IGN);
 
   for (n = 0; n < functions_tblsz; n++)
@@ -809,7 +809,7 @@ recover(int flag)
     }
   }
 #endif
-  try_to_recover=1; 
+  try_to_recover=1;
   os_signal(SIGINT, sigfun);
 }
 
@@ -852,7 +852,7 @@ errcontext(char *msg, char *s, char *entry)
     t += strlen(t);
     strncpy(t, s - past, past); t[past] = 0;
   }
-  
+
   t = str; if (!past) *t++ = ' ';
   strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
   pre = gpmalloc(2 * 16 + 1);
@@ -910,7 +910,7 @@ err_seek(long n)
 }
 
 /* kill last handler for error n */
-void 
+void
 err_leave_default(long n)
 {
   stack *s = err_catch_stack, *lasts = NULL;
@@ -1110,7 +1110,7 @@ err(long numerr, ...)
     }
   }
   term_color(c_NONE); va_end(ap);
-  if (numerr==errpile) 
+  if (numerr==errpile)
   {
     fprintferr("\n  current stack size: %ld (%.3f Mbytes)\n",
       top-bot, (top-bot)/1048576.);
@@ -1120,6 +1120,193 @@ err(long numerr, ...)
   if (ret || (trapped && default_exception_handler &&
               default_exception_handler(numerr))) { flusherr(); return; }
   err_recover(numerr);
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                       CLONING & COPY                            */
+/*                  Replicate an existing GEN                      */
+/*                                                                 */
+/*******************************************************************/
+/* lontyp = 0 means non recursive type
+ * otherwise:
+ *   lontyp = number of codewords
+ *   if not in stack, we don't copy the words in [lontyp,lontyp2[
+ */
+const  long  lontyp[] = { 0,0,0,1,1,1,1,2,1,1, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
+static long lontyp2[] = { 0,0,0,2,1,1,1,3,2,2, 2,2,0,1,1,1,1,1,1,1, 2,0,0 };
+
+/* can't do a memcpy there: avma and x may overlap. memmove is slower */
+GEN
+gcopy(GEN x)
+{
+  long tx=typ(x),lx,i;
+  GEN y;
+
+  if (tx == t_SMALL) return x;
+  if (! is_recursive_t(tx))
+  {
+    if (tx == t_INT && !signe(x)) return gzero; /* very common case */
+    lx = lg(x); y = new_chunk(lx);
+    for (i=lx-1; i>=0; i--) y[i]=x[i];
+  }
+  else
+  {
+    lx = lg(x); y = new_chunk(lx);
+    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    for (i=0; i<lontyp[tx];  i++) y[i]=x[i];
+    for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
+    for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
+  }
+  /* unsetisclone(y); useless because gunclone checks isonstack */
+  return y;
+}
+
+GEN
+gcopy_i(GEN x, long lx)
+{
+  long tx=typ(x),i;
+  GEN y;
+
+  if (tx == t_SMALL) return x;
+  y=cgetg(lx,tx);
+  if (! is_recursive_t(tx))
+    for (i=lx-1; i>0; i--) y[i]=x[i];
+  else
+  {
+    for (i=1; i<lontyp[tx];  i++) y[i]=x[i];
+    for (   ; i<lontyp2[tx]; i++) copyifstack(x[i],y[i]);
+    for (   ; i<lx;          i++) y[i]=lcopy((GEN)x[i]);
+  }
+  return y;
+}
+
+GEN
+forcecopy(GEN x)
+{
+  long tx=typ(x),lx,i;
+  GEN y;
+
+  if (tx == t_SMALL) return x;
+  if (! is_recursive_t(tx))
+  {
+    if (tx == t_INT && !signe(x)) return gzero; /* very common case */
+    lx = lg(x); y = new_chunk(lx);
+    for (i=lx-1; i>=0; i--) y[i]=x[i];
+  }
+  else
+  {
+    lx = lg(x); y = new_chunk(lx);
+    if (tx==t_POL || tx==t_LIST) lx = lgef(x);
+    for (i=0; i<lontyp[tx]; i++) y[i]=x[i];
+    for (   ; i<lx;         i++) y[i]=(long)forcecopy((GEN)x[i]);
+  }
+  unsetisclone(y); return y;
+}
+
+/* copy x as if avma = *AVMA, update *AVMA */
+GEN
+gcopy_av(GEN x, GEN *AVMA)
+{
+  long i,lx,tx=typ(x);
+  GEN y;
+
+  if (! is_recursive_t(tx))
+  {
+    lx = (tx==t_INT)? lgefint(x): lg(x);
+    *AVMA = y = *AVMA - lx;
+    for (i=0; i<lx; i++) y[i] = x[i];
+  }
+  else
+  {
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    *AVMA = y = *AVMA - lx;
+    for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
+    for (   ; i<lx; i++)         y[i] = (long)gcopy_av((GEN)x[i], AVMA);
+  }
+  unsetisclone(y); return y;
+}
+
+GEN
+dummycopy(GEN x)
+{
+  long tx=typ(x), lx=lg(x),i;
+  GEN y=new_chunk(lx);
+
+  switch(tx)
+  {
+    case t_POLMOD:
+      y[1]=x[1]; y[2]=(long)dummycopy((GEN)x[2]);
+      break;
+    case t_MAT:
+      for (i=lx-1;i;i--) y[i]=(long)dummycopy((GEN)x[i]);
+      break;
+    default:
+      for (i=lx-1;i;i--) y[i]=x[i];
+  }
+  y[0]=x[0]; return y;
+}
+
+GEN
+gclone(GEN x)
+{
+  long i,lx,tx = typ(x), t = taille(x);
+  GEN y = newbloc(t);
+  if (!is_recursive_t(tx))
+  {
+    lx = (tx==t_INT)? lgefint(x): lg(x);
+    for (i=0; i<lx; i++) y[i] = x[i];
+  }
+  else
+  {
+    GEN AVMA = y+t;
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    for (i=0; i<lontyp[tx]; i++) y[i] = x[i];
+    for (   ; i<lx; i++)         y[i] = (long)gcopy_av((GEN)x[i], &AVMA);
+  }
+  setisclone(y); return y;
+}
+
+void
+shiftaddress(GEN x, long dec)
+{
+  long i,lx, tx = typ(x);
+  if (is_recursive_t(tx))
+  {
+    lx = (tx==t_POL || tx==t_LIST)? lgef(x): lg(x);
+    for (i=lontyp[tx]; i<lx; i++) {
+      x[i] += dec;
+      shiftaddress((GEN)x[i], dec);
+    }
+  }
+}
+
+/* return a clone of x structured as a gcopy. To free it, free(*base).
+ * Can be copied via memcpy(, *base, ((x - *base)+lg(x)) * sizeof(long)) */
+GENbin*
+copy_bin(GEN x)
+{
+  long t = taille(x);
+  GENbin *p = (GENbin*)gpmalloc(sizeof(GENbin) + t*sizeof(long));
+  GEN AVMA = GENbase(p) + t;
+  p->len = t;
+  p->x   = gcopy_av(x, &AVMA);
+  p->base= AVMA; return p;
+}
+
+/* p from copy_bin. Copy p->x back to stack, then destroy p */
+GEN
+bin_copy(GENbin *p)
+{
+  GEN x,y,base;
+  long dx,len;
+
+  len = p->len;
+  x   = p->x;
+  base= p->base; dx = x - base;
+  y = (GEN)memcpy((void*)new_chunk(len), (void*)GENbase(p), len*sizeof(long));
+  if (dx) { y += dx; shiftaddress(y, (y-x)*sizeof(long)); }
+  free(p); return y;
 }
 
 /*******************************************************************/
@@ -1144,6 +1331,8 @@ stackdummy(GEN z, long l)
  * objects to contiguous locations and cleans up the stack between
  * av and avma.
  */
+
+#if 0
 void
 gerepilemany(long av, GEN* gptr[], long n)
 {
@@ -1159,6 +1348,19 @@ gerepilemany(long av, GEN* gptr[], long n)
     *(gptr[i]) = forcecopy(l[i]);
     gunclone(l[i]);
   }
+  free(l);
+}
+#endif
+
+void
+gerepilemany(long av, GEN* gptr[], long n)
+{
+  GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
+  long i;
+
+  for (i=0; i<n; i++) l[i] = copy_bin(*(gptr[i]));
+  avma = av;
+  for (i=0; i<n; i++) *(gptr[i]) = bin_copy(l[i]);
   free(l);
 }
 
@@ -1386,11 +1588,6 @@ switch_stack(stackzone *z, long n)
   return NULL;
 }
 
-#if 0 /* for a specific broken machine (readline not correctly installed) */
-char *xmalloc(long x) { return malloc(x); }
-char *xrealloc(char *c,long x) { return realloc(c,x); }
-#endif
-
 char*
 gpmalloc(size_t bytes)
 {
@@ -1402,8 +1599,7 @@ gpmalloc(size_t bytes)
     if (!tmp) err(memer);
     return tmp;
   }
-  if (DEBUGMEM)
-    err(warner,"mallocing NULL object");
+  if (DEBUGMEM) err(warner,"mallocing NULL object");
   return NULL;
 }
 
@@ -1430,7 +1626,8 @@ gprealloc(void *pointer, size_t newsize, size_t oldsize)
 #else
   else tmp = (char *) realloc(pointer,newsize);
 #endif
-  if (!tmp) err(memer,oldsize);
+  (void)oldsize;
+  if (!tmp) err(memer);
   return tmp;
 }
 
@@ -1450,6 +1647,13 @@ checkmemory(GEN z)
   }
 }
 #endif
+
+void
+init_stack()
+{
+  GEN x = ((GEN)bot);
+  while (x < (GEN)avma) *x++ = 0xfefefefe;
+}
 
 /*******************************************************************/
 /*                                                                 */
