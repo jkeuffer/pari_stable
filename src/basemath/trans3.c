@@ -1528,7 +1528,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   {
     GEN p1 = gzero;
     if (DEBUGLEVEL > 2 && !(j%50))
-      fprintferr("  twistpartialzeta: %ld\%\n", 100*j/lva);      
+      fprintferr("  twistpartialzeta: %ld%%\n", 100*j/lva);      
     for (k = 1; k <= N; k++)
     {
       pari_sp av2 = avma;
