@@ -4442,18 +4442,20 @@ $\var{nf}$, i.e.~$\var{nf}[X]/(T)$. Returns a polynomial in variable $v$
 
 \syn{rnfcharpoly}{\var{nf},T,a,v}, where $v$ is a variable number.
 
-\subsecidx{rnfconductor}$(\var{bnf},\var{pol})$: $\var{bnf}$ being a big number
-field as output by \kbd{bnfinit}, and \var{pol} a relative polynomial defining
-an \idx{Abelian extension}, computes the class field theory conductor of this
-Abelian extension. The result is a 3-component vector
-$[\var{conductor},\var{rayclgp},\var{subgroup}]$, where \var{conductor} is
-the conductor of the extension given as a 2-component row vector
-$[f_0,f_\infty]$, \var{rayclgp} is the full ray class group corresponding to
-the conductor given as a 3-component vector [h,cyc,gen] as usual for a group,
-and \var{subgroup} is a matrix in HNF defining the subgroup of the ray class
-group on the given generators gen.
+\subsecidx{rnfconductor}$(\var{bnf},\var{pol},\{\fl=0\})$: $\var{bnf}$
+being a big number field as output by \kbd{bnfinit}, and \var{pol} a
+relative polynomial defining an \idx{Abelian extension}, computes the
+class field theory conductor of this Abelian extension. The result is
+a 3-component vector $[\var{conductor},\var{rayclgp},\var{subgroup}]$,
+where \var{conductor} is the conductor of the extension given as a
+2-component row vector $[f_0,f_\infty]$, \var{rayclgp} is the full ray
+class group corresponding to the conductor given as a 3-component
+vector [h,cyc,gen] as usual for a group, and \var{subgroup} is a
+matrix in HNF defining the subgroup of the ray class group on the
+given generators gen. If $\fl$ is non-zero, check under GRH that
+\var{pol} indeed defines an Abelian extension.
 
-\syn{rnfconductor}{\var{rnf},\var{pol},\var{prec}}.
+\syn{rnfconductor}{\var{rnf},\var{pol},\fl,\var{prec}}.
 
 \subsecidx{rnfdedekind}$(\var{nf},\var{pol},\var{pr})$: given a number field
 $\var{nf}$ as output by \kbd{nfinit} and a polynomial \var{pol} with

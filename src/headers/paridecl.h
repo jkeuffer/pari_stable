@@ -640,7 +640,7 @@ GEN     isprincipalrayall(GEN bignf, GEN x,long flall);
 GEN     isprincipalraygen(GEN bignf, GEN x);
 GEN     rayclassno(GEN bignf,GEN ideal);
 GEN     rayclassnolist(GEN bnf,GEN listes);
-GEN     rnfconductor(GEN bnf, GEN polrel, long prec);
+GEN     rnfconductor(GEN bnf, GEN polrel, long flag, long prec);
 GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 GEN     rnfnormgroup(GEN bnr, GEN polrel);
 GEN     subgrouplist0(GEN bnr, long indexbound, long all, long prec);

@@ -917,7 +917,7 @@ testx(GEN subgroup, GEN X, long prec)
   polrelbe=gsubst(polrelbe,v,gdiv(polx[v],p1));
   polrelbe=gmul(polrelbe,gpuigs(p1,degree(polrelbe)));
   if (DEBUGLEVEL>=2) { fprintferr("polrelbe = "); outerr(polrelbe); }
-  p1=rnfconductor(bnf,polrelbe,prec);
+  p1=rnfconductor(bnf,polrelbe,0,prec);
   if (!gegal((GEN)p1[1],module)) return gzero;
   if (!gegal((GEN)p1[3],subgroup)) return gzero;
   return polrelbe;

@@ -1414,13 +1414,14 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
 
 /* etant donne un bnr et un polynome relatif, trouve le groupe des normes
    correspondant a l'extension relative en supposant qu'elle est abelienne
-   et que le module donnant bnr est multiple du conducteur (tout ceci n'etant
-   bien sur pas verifie). */
-GEN
-rnfnormgroup(GEN bnr, GEN polrel)
+   et que le module donnant bnr est multiple du conducteur. Verifie que
+   l'extension est bien abelienne (sous GRH) si rnf != NULL, dans ce cas
+   rnf est le rnf de l'extension relative. */
+static GEN
+rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 {
   long av=avma,i,j,reldeg,sizemat,prime,nfac,k;
-  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,pr,famo,ep,fac,col,p1;
+  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,pr,famo,ep,fac,col,p1,bd,upnf;
   byteptr d = diffptr;
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
@@ -1431,27 +1432,52 @@ rnfnormgroup(GEN bnr, GEN polrel)
   group = diagonal((GEN)raycl[2]);
   k = cmpis(detgroup,reldeg);
   if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
-  if (!k) return group;
+  if (!rnf && !k) return group;
+  
+  if (rnf)
+  {
+    polreldisc=gmael(rnf,3,1);  
+    k=degree(gmael3(bnr,1,7,1));
+    bd=gmulsg(k,glog(gmael3(bnr,1,7,3),DEFAULTPREC));
+    bd=gadd(bd,glog(mpabs(det(polreldisc)),DEFAULTPREC));
+    k=reldeg*k;p1=gaddgs(gmulsg(k,dbltor(2.5)),5);
+    bd=gfloor(gsqr(gadd(gmulsg(4,bd),p1)));
+    if (DEBUGLEVEL) fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
+    upnf=nfinit0(gmael(rnf,11,1),1,DEFAULTPREC);
+  }
+  else
+  {
+    polreldisc=idealhermite(nf,discsr(polrel));
+    bd = upnf = NULL;
+  }
 
-  polreldisc=discsr(polrel);
-  sizemat=lg(group)-1; prime = *d++;
-  /* tant que nffactormod est bugge pour p=2 on commence a prime = 3 */
+  sizemat=lg(group)-1; prime = 0;
   for(;;)
   {
     prime += *d++; if (!*d) err(primer1);
+    if (rnf && cmpis(bd,prime) <= 0) break;
     fa=primedec(nf,stoi(prime));
     for (i=1; i<lg(fa); i++)
     {
       pr = (GEN)fa[i];
-      if (element_val(nf,polreldisc,pr)==0)
+      if (idealval(nf,polreldisc,pr)==0 && 
+	  (!rnf || (cmpis((GEN)pr[4], 1) == 0)))
       {
-	famo=nffactormod(nf,polrel,pr);
+	if (rnf)
+	  famo=idealfactor(upnf,rnfidealup(rnf,pr));
+	else
+	  famo=nffactormod(nf,polrel,pr);
 	ep=(GEN)famo[2]; fac=(GEN)famo[1];
-        nfac=lg(ep)-1; k=lgef((GEN)fac[1])-3;
+        nfac=lg(ep)-1; 
+	if (rnf)
+	  k=itos(gmael(fac,1,4));
+	else 
+	  k=lgef((GEN)fac[1])-3;
 	for (j=1; j<=nfac; j++)
 	{
 	  if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-	  if (lgef(fac[j])-3 != k)
+	  if ((rnf && cmpis(gmael(fac,j,4),k)) ||
+	      (!rnf && lgef(fac[j])-3 != k))
 	    err(talker,"non Galois extension in rnfnormgroup");
 	}
 	col=gmulsg(k,isprincipalrayall(bnr,pr,nf_REGULAR));
@@ -1459,24 +1485,33 @@ rnfnormgroup(GEN bnr, GEN polrel)
 	for (j=1; j<=sizemat; j++) p1[j]=group[j];
 	p1[sizemat+1]=(long)col;
 	group=hnf(p1); detgroup=dethnf(group);
-        k = cmpis(detgroup,reldeg);
-        if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
-	if (!k) { cgiv(detgroup); return gerepileupto(av,group); }
+        k=cmpis(detgroup,reldeg);
+	if (k>0) err(bugparier,"rnfnormgroup");
+        if (k<0) err(talker,"not an Abelian extension in rnfnormgroup");
+	if (!rnf && !k) { cgiv(detgroup); return gerepileupto(av,group); }
       }
     }
   }
+  cgiv(detgroup); return gerepileupto(av,group);
+}
+
+GEN
+rnfnormgroup(GEN bnr, GEN polrel)
+{
+  return rnfnormgroup0(bnr,polrel,NULL);
 }
 
 /* Etant donne un bnf et un polynome relatif polrel definissant une extension
-   abelienne (ce qui n'est pas verifie), calcule le conducteur et le groupe de
-   congruence correspondant a l'extension definie par polrel sous la forme
-   [[ideal,arch],[hm,cyc,gen],group] ou [ideal,arch] est le conducteur, et
-   [hm,cyc,gen] est le groupe de classes de rayon correspondant. */
+   abelienne, calcule le conducteur et le groupe de congruence correspondant 
+   a l'extension definie par polrel sous la forme 
+   [[ideal,arch],[hm,cyc,gen],group] ou [ideal,arch] est le conducteur, et 
+   [hm,cyc,gen] est le groupe de classes de rayon correspondant. Verifie 
+   (sous GRH) que polrel definit bien une extension abelienne si flag != 0 */
 GEN
-rnfconductor(GEN bnf, GEN polrel, long prec)
+rnfconductor(GEN bnf, GEN polrel, long flag, long prec)
 {
   long av=avma,tetpil,R1,i,v;
-  GEN nf,module,arch,bnr,group,p1,pol2;
+  GEN nf,module,rnf,arch,bnr,group,p1,pol2;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
   if (typ(polrel)!=t_POL) err(typeer,"rnfconductor");
@@ -1486,10 +1521,21 @@ rnfconductor(GEN bnf, GEN polrel, long prec)
   p1=denom(gtovec(p1));
   pol2=gsubst(polrel,v,gdiv(polx[v],p1));
   pol2=gmul(pol2,gpuigs(p1,degree(pol2)));
-  module[1]=rnfdiscf(nf,pol2)[1]; arch=cgetg(R1+1,t_VEC);
+  if (flag) 
+  {
+    rnf=rnfinitalg(bnf,pol2,DEFAULTPREC);
+    module[1]=mael(rnf,3,1);
+  }
+  else
+  {
+    rnf=NULL;
+    module[1]=rnfdiscf(nf,pol2)[1]; 
+  }
+  arch=cgetg(R1+1,t_VEC);
   module[2]=(long)arch; for (i=1; i<=R1; i++) arch[i]=un;
   bnr=buchrayall(bnf,module,nf_INIT | nf_GEN,prec);
-  group=rnfnormgroup(bnr,pol2); tetpil=avma;
+  group=rnfnormgroup0(bnr,pol2,rnf); 
+  tetpil=avma;
   return gerepile(av,tetpil,conductor(bnr,group,1,prec));
 }
 

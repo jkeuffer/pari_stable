@@ -2059,7 +2059,7 @@ entree functions_basic[]={
 {"rnfbasis",2,(void*)rnfbasis,6,"GG"},
 {"rnfbasistoalg",2,(void*)rnfbasistoalg,6,"GG"},
 {"rnfcharpoly",99,(void*)rnfcharpoly,6,"GGGDn"},
-{"rnfconductor",29,(void*)rnfconductor,6,"GGp"},
+{"rnfconductor",29,(void*)rnfconductor,6,"GGD0,L,p"},
 {"rnfdedekind",99,(void*)rnfdedekind,6,"GGG"},
 {"rnfdet",99,(void*)rnfdet0,6,"GGDG"},
 {"rnfdisc",2,(void*)rnfdiscf,6,"GG"},
