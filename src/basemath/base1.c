@@ -1195,12 +1195,12 @@ typedef struct {
 } basicnf_t;
 
 static long 
-get_LLLprec(basicnf_t *T)
+get_LLLprec(basicnf_t *T, GEN basden)
 {
   long n = degpol(T->x);
   /* size of entries of G */
-  long e = n * expo(cauchy_bound(T->x)) + expi(mulsi(n, T->index));
-  return DEFAULTPREC + ((e+BITS_IN_LONG) >> TWOPOTBITS_IN_LONG);
+  long e = n * expo(cauchy_bound(T->x)) + gexpo((GEN)basden[1]) + (long)log2(n);
+  return MEDDEFAULTPREC + (e >> TWOPOTBITS_IN_LONG);
 }
 
 static GEN
@@ -1208,9 +1208,10 @@ get_red_T2(basicnf_t *T, GEN *polr)
 {
   GEN ro, M, basden, G2, u, u0 = NULL;
   gpmem_t av;
-  long i, prec = get_LLLprec(T);
+  long i, prec;
 
   basden = get_bas_den(T->bas);
+  prec = get_LLLprec(T, basden);
   av = avma;
 
   for (i=1; ; i++)
@@ -1245,6 +1246,7 @@ LLL_nfbasis(basicnf_t *T, GEN *ro)
   if (T->r1 != degpol(T->x)) return get_red_T2(T, ro);
   u = lllint_marked(1, make_T(T->x, T->bas), 100, 1, &u,NULL,NULL);
   if (ro) *ro = NULL;
+  if (!u) return idmat(1);
   return u;
 }
 
@@ -1354,7 +1356,6 @@ nfinit_basic(GEN x, long flag, GEN fa, basicnf_t *T)
   T->dK    = dK;
   T->bas   = bas;
   T->index = index;
-  if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
 /* Initialize the number field defined by the polynomial x (in variable v)
@@ -1388,7 +1389,7 @@ _initalg(GEN x, long flag, long prec)
   }
   if (flag & nf_REDUCE)
   {
-    GEN pow, dpow, dmat, mat, phi, d;
+    GEN mat, phi, d;
     long i;
 
     T.bas = bas = gmul(bas, LLL_nfbasis(&T, NULL));
@@ -1402,6 +1403,8 @@ _initalg(GEN x, long flag, long prec)
       rev = modreverse(phi, x); x = T.x; /* in this order */
 
 #if 0
+{
+  GEN dmat, dpow, pow;
       pow = RX_powers(rev, x, n-1);
       pow = Q_remove_denom(pow, &dpow);
       d = denom(content(bas)); bas = gmul(bas, d);
@@ -1410,6 +1413,7 @@ _initalg(GEN x, long flag, long prec)
       for (i=1; i<=n; i++) mat[i] = (long)mulmat_pol(pow, (GEN)bas[i]);
       mat = Q_primitive_part(mat, &dmat);
       if (dmat) d = diviiexact(d, dmat);
+}
 #else
       for (i=1; i<=n; i++) bas[i] = (long)eleval(x, (GEN)bas[i], rev);
       d = denom(content(bas)); mat = vecpol_to_mat(gmul(d, bas), n);
