@@ -1388,12 +1388,27 @@ mpinvmod(GEN a, GEN m)
 
 /*********************************************************************/
 /**                                                                 **/
-/**                   POWERING MODULO (A^N mod M)                   **/
+/**                    MODULAR EXPONENTIATION                       **/
 /**                                                                 **/
 /*********************************************************************/
 GEN resiimul(GEN x, GEN y);
-GEN resmod2n(GEN x, long y);
 static GEN _resii(GEN x, GEN y) { return resii(x,y); }
+
+/* Montgomery reduction */
+
+typedef struct {
+  GEN N;
+  ulong inv; /* inv = -N^(-1) mod B, */
+} montdata;
+
+extern ulong invrev(ulong b);
+
+void
+init_montdata(GEN N, montdata *s)
+{
+  s->N = N;
+  s->inv = (ulong) -invrev(modBIL(N));
+}
 
 GEN
 init_remainder(GEN M)
@@ -1407,82 +1422,205 @@ init_remainder(GEN M)
 }
 
 /* optimal on UltraSPARC */
-static long RESIIMUL_LIMIT = 150;
+static long RESIIMUL_LIMIT   = 150;
+static long MONTGOMERY_LIMIT = 32;
 
 void
 setresiilimit(long n) { RESIIMUL_LIMIT = n; }
+void
+setmontgomerylimit(long n) { MONTGOMERY_LIMIT = n; }
 
-struct muldata {
-  GEN M;
+typedef struct {
+  GEN N;
   GEN (*res)(GEN,GEN);
-  GEN (*mul)(GEN,GEN);
-};
+  GEN (*mulred)(GEN,GEN,GEN);
+} muldata;
+
+/* reduction for multiplication by 2 */
+static GEN
+_redsub(GEN x, GEN N)
+{
+  return (cmpii(x,N) >= 0)? subii(x,N): x;
+}
+/* Montgomery reduction */
+extern GEN red_montgomery(GEN T, GEN N, ulong inv);
+static GEN
+montred(GEN x, GEN N)
+{
+  return red_montgomery(x, ((montdata*)N)->N, ((montdata*)N)->inv);
+}
+/* 2x mod N */
+static GEN
+_muli2red(GEN x, GEN y/* ignored */, GEN N) {
+  (void)y; return _redsub(shifti(x,1), N);
+}
+static GEN
+_muli2montred(GEN x, GEN y/* ignored */, GEN N) {
+  return _muli2red(x,y, ((montdata*)N)->N);
+}
+static GEN
+_muli2invred(GEN x, GEN y/* ignored */, GEN N) {
+  return _muli2red(x,y, (GEN)N[1]);
+}
+/* xy mod N */
+static GEN
+_muliired(GEN x, GEN y, GEN N) { return resii(mulii(x,y), N); }
+static GEN
+_muliimontred(GEN x, GEN y, GEN N) { return montred(mulii(x,y), N); }
+static GEN
+_muliiinvred(GEN x, GEN y, GEN N) { return resiimul(mulii(x,y), N); }
 
 static GEN
-_muli2(GEN x, GEN y/* ignored */)
+_mul(void *data, GEN x, GEN y)
+{
+  muldata *D = (muldata *)data;
+  return D->mulred(x,y,D->N);
+}
+static GEN
+_sqr(void *data, GEN x)
+{
+  muldata *D = (muldata *)data;
+  return D->res(sqri(x), D->N);
+}
+
+/* A^k mod N */
+GEN
+powmodulo(GEN A, GEN k, GEN N)
+{
+  ulong av = avma;
+  long t,s, lN;
+  int base_is_2, use_montgomery;
+  GEN y;
+  muldata  D;
+  montdata S;
+
+  if (typ(A) != t_INT || typ(k) != t_INT || typ(N) != t_INT) err(arither1);
+  s = signe(k);
+  if (!s)
+  {
+    t = signe(resii(A,N)); avma = av;
+    return t? gun: gzero;
+  }
+  if (s < 0) y = mpinvmod(A,N);
+  else
+  {
+    y = modii(A,N);
+    if (!signe(y)) { avma = av; return gzero; }
+  }
+
+  base_is_2 = 0;
+  if (lgefint(y) == 3) switch(y[2])
+  {
+    case 1: avma = av; return gun;
+    case 2: base_is_2 = 1; break;
+  }
+
+  /* TODO: Move this out of here and use for general modular computations */
+  lN = lgefint(N);
+  use_montgomery = mod2(N) && lN < MONTGOMERY_LIMIT;
+  if (use_montgomery)
+  {
+    init_montdata(N, &S);
+    y = resii(shifti(y, bit_accuracy(lN)), N);
+    D.mulred = base_is_2? &_muli2montred: &_muliimontred;
+    D.res = &montred;
+    D.N = (GEN)&S;
+  }
+  else if (lN > RESIIMUL_LIMIT
+       && (lgefint(k) > 3 || (((double)k[2])*expi(A)) > 2 + expi(N)))
+  {
+    D.mulred = base_is_2? &_muli2invred: &_muliiinvred;
+    D.res = &resiimul;
+    D.N = init_remainder(N);
+  }
+  else
+  {
+    D.mulred = base_is_2? &_muli2red: &_muliired;
+    D.res = &_resii;
+    D.N = N;
+  }
+  y = leftright_pow(y, k, (void*)&D, &_sqr, &_mul);
+  if (use_montgomery)
+  {
+    y = montred(y, (GEN)&S);
+    if (cmpii(y,N) >= 0) y = subii(y,N);
+  }
+  return gerepileuptoint(av,y);
+}
+
+/* TO BE DELETED */
+
+typedef struct {
+  GEN N;
+  GEN (*res)(GEN,GEN);
+  GEN (*mul)(GEN,GEN);
+} _muldata;
+
+static GEN
+__muli2(GEN x, GEN y/* ignored */)
 {
   (void)y; return shifti(x,1);
 }
 
 static GEN
-_mul(void *data, GEN x, GEN y)
+__mul(void *data, GEN x, GEN y)
 {
-  struct muldata *D = (struct muldata *)data;
-  return D->res(D->mul(x,y), D->M);
+  _muldata *D = (_muldata *)data;
+  return D->res(D->mul(x,y), D->N);
 }
 static GEN
-_sqr(void *data, GEN x)
+__sqr(void *data, GEN x)
 {
-  struct muldata *D = (struct muldata *)data;
-  return D->res(sqri(x), D->M);
+  _muldata *D = (_muldata *)data;
+  return D->res(sqri(x), D->N);
 }
 GEN
-powmodulo(GEN A, GEN N, GEN M)
+powmodulO(GEN A, GEN k, GEN N)
 {
   ulong av = avma;
-  long k,s;
+  long t,s;
   GEN y;
-  struct muldata D;
+  _muldata D;
 
-  if (typ(A) != t_INT || typ(N) != t_INT || typ(M) != t_INT) err(arither1);
-  s = signe(N);
+  if (typ(A) != t_INT || typ(k) != t_INT || typ(N) != t_INT) err(arither1);
+  s = signe(k);
   if (!s)
   {
-    k = signe(resii(A,M)); avma=av;
-    return k? gun: gzero;
+    t = signe(resii(A,N)); avma=av;
+    return t? gun: gzero;
   }
-  if (s < 0) { A = mpinvmod(A,M); N = absi(N); }
+  if (s < 0) { A = mpinvmod(A,N); k = absi(k); }
   else
   {
-    A = modii(A,M);
+    A = modii(A,N);
     if (!signe(A)) { avma=av; return gzero; }
   }
   y = A;
   if (lgefint(y)==3) switch(y[2])
   {
     case 1: avma = av; return gun; /* y = 1 */
-    case 2: D.mul = &_muli2; break;/* y = 2 */
+    case 2: D.mul = &__muli2; break;/* y = 2 */
     default: D.mul = &mulii;
   }
   else
     D.mul = &mulii;
 
   /* TODO: Move this out of here and use for general modular computations */
-  if ((k = vali(M)) && k == expi(M))
-  { /* M is a power of 2 */
-    M = (GEN)k;
+  if ((t = vali(N)) && t == expi(N))
+  { /* N is a power of 2 */
+    N = (GEN)t;
     D.res = (GEN(*)(GEN,GEN))&resmod2n;
   }
-  else if (lgefint(M) > RESIIMUL_LIMIT
-       && (lgefint(N) > 3 || (((double)N[2])*expi(A)) > 2 + expi(M)))
-  { /* compute x % M using multiplication by 1./M */
-    M = init_remainder(M);
+  else if (lgefint(N) > RESIIMUL_LIMIT
+       && (lgefint(k) > 3 || (((double)k[2])*expi(A)) > 2 + expi(N)))
+  { /* compute x % N using multiplication by 1./N */
+    N = init_remainder(N);
     D.res = &resiimul;
   }
   else
     D.res = &_resii;
-  D.M   = M;
-  y = leftright_pow(y, N, (void*)&D, &_sqr, &_mul);
+  D.N   = N;
+  y = leftright_pow(y, k, (void*)&D, &__sqr, &__mul);
   return gerepileupto(av,y);
 }
 

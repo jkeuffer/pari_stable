@@ -1419,27 +1419,26 @@ mplog(GEN x)
 GEN
 teich(GEN x)
 {
-  GEN aux,y,z,p1;
+  GEN p,q,y,z,aux,p1;
   long av,n,k;
 
   if (typ(x)!=t_PADIC) err(talker,"not a p-adic argument in teichmuller");
   if (!signe(x[4])) return gcopy(x);
-  y=cgetp(x); z=(GEN)x[4];
-  if (!cmpis((GEN)x[2],2))
+  p = (GEN)x[2];
+  q = (GEN)x[3];
+  z = (GEN)x[4];
+  y = cgetp(x); av = avma;
+  if (egalii(p, gdeux))
+    z = (mod4(z) & 2)? addsi(-1,q): gun;
+  else
   {
-    n = mod4(z);
-    if (n & 2)
-      addsiz(-1,(GEN)x[3],(GEN)y[4]);
-    else
-      affsi(1,(GEN)y[4]);
-    return y;
+    p1 = addsi(-1, p);
+    z = resii(z, p);
+    aux = divii(addsi(-1,q),p1); n = precp(x);
+    for (k=1; k<n; k<<=1)
+      z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,powmodulo(z,p1,q))))), q);
   }
-  av = avma; p1 = addsi(-1,(GEN)x[2]);
-  aux = divii(addsi(-1,(GEN)x[3]),p1); n = precp(x);
-  for (k=1; k<n; k<<=1)
-    z=modii(mulii(z,addsi(1,mulii(aux,addsi(-1,powmodulo(z,p1,(GEN)x[3]))))),
-            (GEN)x[3]);
-  affii(z,(GEN)y[4]); avma=av; return y;
+  affii(z, (GEN)y[4]); avma = av; return y;
 }
 
 /* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
