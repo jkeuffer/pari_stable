@@ -64,7 +64,7 @@ if test -n "$gmp"; then
     /$kernlvl1)
       pretty=`echo $pretty | sed "s/$kernlvl1/GMP-$gmp/"` ;;
     *)
-      pretty=`echo $pretty | sed "s, *kernel,/GMP-$gmp kernel,"` ;;
+      pretty=`echo $pretty | sed "s/ *kernel/\/GMP-$gmp kernel/"` ;;
   esac
   kernlvl1=gmp
 fi
