@@ -83,6 +83,8 @@ MSo27- ?0 with _many_ user functions defined --> SEGV [ typo in commands() ]
        had degree 1, introduced in 2.2.2 ]
    30- Set(matid(2)) --> [ "[1, 0;\n0, 1]" ]. Ensure "raw" format is used,
        not "prettymat".
+   31- typo in rnfpolred(bnf, *). E.g rnfpolred(nfinit(polcyclo(3,a)),x^3-19)
+       --> oo loop  [ non-positive T_2 form ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

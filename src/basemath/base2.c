@@ -3518,7 +3518,7 @@ rnfscal(GEN m, GEN x, GEN y)
 {
   long i, l = lg(m);
   GEN z = cgetg(l, t_COL);
-  for (i = 1; i < l; i++) z[i] = lmul(gtrans_i((GEN)x[i]), gmul((GEN)m[i], (GEN)y[i]));
+  for (i = 1; i < l; i++) z[i] = lmul(gconj(gtrans_i((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
   return z;
 }
 
