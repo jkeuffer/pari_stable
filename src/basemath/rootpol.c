@@ -492,40 +492,24 @@ mygprec(GEN x, long bitprec)
   return y;
 }
 
-/* the round fonction has a bug in pari. Thus I create mygfloor, using gfloor
-which has no bug (destroy z)*/
+/* normalize a polynomial p, that is change it with coefficients in Z[i],
+after making product by 2^shift */
 static GEN
-mygfloor(GEN z)
+pol_to_gaussint(GEN p, long shift)
 {
-  if (typ(z)!=t_COMPLEX) return gfloor(z);
-  z[1] = lfloor((GEN)z[1]);
-  z[2] = lfloor((GEN)z[2]); return z;
+  long i, l = lgef(p);
+  GEN q = cgetg(l, t_POL); q[1] = p[1];
+  for (i=2; i<l; i++) q[i] = (long)floor_mpshift((GEN)p[i], shift);
+  return q;
 }
 
 /* returns a polynomial q in (Z[i])[x] keeping bitprec bits of p */
 static GEN
 eval_rel_pol(GEN p,long bitprec)
 {
-  long e = gexpo(p), n = lgef(p), i, shift;
-  GEN q = gprec_w(p, DEFAULTPREC + (bitprec >> TWOPOTBITS_IN_LONG));
-
-  shift = bitprec-e+1;
-  for (i=2; i<n; i++) q[i] = (long) mygfloor(myshiftic((GEN)q[i],shift));
-  return q;
+  return pol_to_gaussint(p, bitprec-gexpo(p)+1);
 }
 
-/* normalize a polynomial p, that is change it with coefficients in Z[i],
-after making product by 2^bitprec */
-static void
-pol_to_gaussint(GEN p, long bitprec)
-{
-  long i,n=lgef(p);
-  for (i=2; i<n; i++)
-  {
-    myshiftrc((GEN) p[i],bitprec);
-    p[i]=(long) mygfloor((GEN) p[i]);
-  }
-}
 
 /* returns p(R*x)/R^n (in R or R[i]), n=deg(p), bitprec bits of precision */
 static GEN
@@ -626,8 +610,7 @@ max_modulus(GEN p, double tau)
   e = findpower(q);
   homothetie2n(q,e);
   affsi(e, r);
-  q = mygprec(q,bitprec+(n<<1));
-  pol_to_gaussint(q,bitprec);
+  q = pol_to_gaussint(q, bitprec);
   M = (long) (log2( log(4.*n) / (2*tau2) )) + 2;
   nn = n;
   for (i=0,e=0;;)

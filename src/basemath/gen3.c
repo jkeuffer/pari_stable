@@ -1966,32 +1966,56 @@ grndtoi(GEN x, long *e)
   return NULL; /* not reached */
 }
 
+extern GEN mpshift_special(GEN x, long lx, long n);
+
+/* floor(x * 2^s) */
+GEN
+floor_mpshift(GEN x, long s)
+{
+  long ex, lx;
+  GEN z;
+  switch(typ(x))
+  {
+    case t_INT:
+      return shifti(x, s);
+    case t_REAL:
+      if (!signe(x)) return gzero;
+      ex = expo(x) + s; if (ex < 0) return gzero;
+      lx = lg(x);
+      return mpshift_special(x, lx, ex - bit_accuracy(lx) + 1);
+    case t_COMPLEX:
+      z = cgetg(3, t_COMPLEX);
+      z[1] = (long)floor_mpshift((GEN)x[1], s);
+      z[2] = (long)floor_mpshift((GEN)x[2], s);
+      return z;
+    default: err(typeer,"floor_mpshift");
+      return NULL; /* not reached */
+  }
+}
+
 /* e = number of error bits on integral part */
 GEN
 gcvtoi(GEN x, long *e)
 {
-  long tx=typ(x), lx, i, ex, e1;
-  gpmem_t av;
+  long tx = typ(x), lx, i, ex, e1;
   GEN y;
 
-  *e = -HIGHEXPOBIT;
   if (tx == t_REAL)
   {
-    long x0,x1;
-    ex=expo(x); if (ex<0) { *e=ex; return gzero; }
-    lx=lg(x); e1 = ex - bit_accuracy(lx) + 1;
-    x0=x[0]; x1=x[1]; settyp(x,t_INT); setlgefint(x,lx);
-    y=shifti(x,e1); x[0]=x0; x[1]=x1;
-    if (e1<=0) { av=avma; e1=expo(subri(x,y)); avma=av; }
-    *e=e1; return y;
+    ex = expo(x); if (ex < 0) { *e = ex; return gzero; }
+    lx = lg(x); e1 = ex - bit_accuracy(lx) + 1;
+    y = mpshift_special(x, lx, e1);
+    if (e1 <= 0) { gpmem_t av = avma; e1 = expo(subri(x,y)); avma = av; }
+    *e = e1; return y;
   }
+  *e = -HIGHEXPOBIT;
   if (is_matvec_t(tx))
   {
-    lx=lg(x); y=cgetg(lx,tx);
+    lx = lg(x); y = cgetg(lx,tx);
     for (i=1; i<lx; i++)
     {
-      y[i]=lcvtoi((GEN)x[i],&e1);
-      if (e1>*e) *e=e1;
+      y[i] = lcvtoi((GEN)x[i],&e1);
+      if (e1 > *e) *e = e1;
     }
     return y;
   }

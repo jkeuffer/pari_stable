@@ -260,21 +260,18 @@ affrr(GEN x, GEN y)
 }
 
 GEN
-shifti(GEN x, long n)
+mpshift_special(GEN x, long lx, long n)
 {
-  return shifti3(x, n, 0);
-}
-
-GEN
-shifti3(GEN x, long n, long flag)
-{
-  const long s=signe(x);
-  long lx,ly,i,m;
+  long ly, i, m, s = signe(x);
   GEN y;
-
   if (!s) return gzero;
-  if (!n) return icopy(x);
-  lx = lgefint(x);
+  if (!n) 
+  {
+    y = cgeti(lx); /* cf icopy. But also applies to a t_REAL! */
+    y[1] = evalsigne(s) | evallgefint(lx);
+    while (--lx > 1) y[lx]=x[lx];
+    return y;
+  }
   if (n > 0)
   {
     GEN z = (GEN)avma;
@@ -289,51 +286,63 @@ shifti3(GEN x, long n, long flag)
       register const ulong sh = BITS_IN_LONG - m;
       shift_left2(y,x, 2,lx-1, 0,m,sh);
       i = ((ulong)x[2]) >> sh;
+      /* Extend y on the left? */
       if (i) { ly++; y = new_chunk(1); y[2] = i; }
     }
   }
   else
   {
-    long lyorig;
-
-    if (s > 0)
-        flag = 0;
     n = -n;
-    ly = lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
-    if (ly<3)
-	return flag ? stoi(-1) : gzero;
+    ly = lx - (n>>TWOPOTBITS_IN_LONG);
+    if (ly<3) return gzero;
     y = new_chunk(ly);
     m = n & (BITS_IN_LONG-1);
     if (m) {
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-        if (ly==3) { avma = (gpmem_t)(y+3); return flag ? stoi(-1) : gzero; }
+        if (ly==3) { avma = (gpmem_t)(y+3); return gzero; }
         ly--; avma = (gpmem_t)(++y);
       }
     } else {
       for (i=2; i<ly; i++) y[i]=x[i];
     }
-    /* With FLAG: round up instead of rounding down */
-    if (flag) {				/* Check low bits of x */
-      i = lx; flag = 0;
-      while (--i >= lyorig)
-	if (x[i]) { flag = 1; break; }  /* Need to increment y by 1 */
-      if (!flag && m)
-	flag = x[lyorig - 1] & ((1<<m) - 1);
-    }
-    if (flag) {				/* Increment y */
-      for (i = ly;;)
-      {
-	if (--i < 2)
-        { /* Extend y on the left */
-	  if (avma <= bot) err(errpile);
-	  avma = (gpmem_t)(--y); ly++;
-	  y[2] = 1; break;
-	}
-	if (++y[i]) break;
-	/* Now propagate the bit into the next longword */
-      }
+  }
+  y[1] = evalsigne(s)|evallgefint(ly);
+  y[0] = evaltyp(t_INT)|evallg(ly); return y;
+}
+
+GEN
+shifti(GEN x, long n)
+{
+  return mpshift_special(x, lgefint(x), n);
+}
+
+GEN
+shifti3(GEN x, long n, long flag)
+{
+  long s, lyorig, ly, i, m, lx = lgefint(x);
+  GEN y = mpshift_special(x, lx, n);
+
+  if (!flag || n >= 0 || (s = signe(x)) >= 0) return y;
+  if (y == gzero) return stoi(-1);
+  n = -n;
+  /* With FLAG: round up instead of rounding down */
+  ly = lgefint(y);
+  lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
+  m = n & (BITS_IN_LONG-1);
+  /* Check low bits of x */
+  i = lx; flag = 0;
+  while (--i >= lyorig)
+    if (x[i]) { flag = 1; break; }  /* Need to increment y by 1 */
+  if (!flag && m)
+    flag = x[lyorig - 1] & ((1<<m) - 1);
+  if (flag) { /* Increment y */
+    for (i = ly;;)
+    { /* Extend y on the left? */
+      if (--i < 2) { ly++; y = new_chunk(1); y[2] = 1; break; }
+      if (++y[i]) break;
+      /* Now propagate the bit into the next longword */
     }
   }
   y[1] = evalsigne(s)|evallgefint(ly);
