@@ -311,8 +311,6 @@ rectscale(long ne, GEN x1, GEN x2, GEN y1, GEN y2)
  * }
  */
 
-#define DTOL(t) ((long)(t + 0.5))
-
 static void
 rectmove0(long ne, double x, double y, long relative)
 {
@@ -324,8 +322,8 @@ rectmove0(long ne, double x, double y, long relative)
   else
    { RXcursor(e) = x; RYcursor(e) = y; }
   RoNext(z) = 0; RoType(z) = ROt_MV;
-  RoMVx(z) = DTOL(RXcursor(e) * RXscale(e) + RXshift(e));
-  RoMVy(z) = DTOL(RYcursor(e) * RYscale(e) + RYshift(e));
+  RoMVx(z) = RXcursor(e) * RXscale(e) + RXshift(e);
+  RoMVy(z) = RYcursor(e) * RYscale(e) + RYshift(e);
   if (!RHead(e)) RHead(e)=RTail(e)=z;
   else { RoNext(RTail(e))=z; RTail(e)=z; }
 }
@@ -353,10 +351,11 @@ rectpoint0(long ne, double x, double y,long relative) /* code = ROt_MV/ROt_PT */
   else
    { RXcursor(e) = x; RYcursor(e) = y; }
   RoNext(z)=0;
-  RoPTx(z) = DTOL(RXcursor(e)*RXscale(e) + RXshift(e));
-  RoPTy(z) = DTOL(RYcursor(e)*RYscale(e) + RYshift(e));
-  RoType(z) = ((RoPTx(z)<0)||(RoPTy(z)<0)||(RoPTx(z)>RXsize(e))
-	       ||(RoPTy(z)>RYsize(e))) ? ROt_MV : ROt_PT;
+  RoPTx(z) = RXcursor(e)*RXscale(e) + RXshift(e);
+  RoPTy(z) = RYcursor(e)*RYscale(e) + RYshift(e);
+  RoType(z) = ( DTOL(RoPTx(z)) < 0
+		|| DTOL(RoPTy(z)) < 0 || DTOL(RoPTx(z)) > RXsize(e)
+		|| DTOL(RoPTy(z)) > RYsize(e) ) ? ROt_MV : ROt_PT;
   if (!RHead(e)) RHead(e)=RTail(e)=z;
   else { RoNext(RTail(e))=z; RTail(e)=z; }
   RoCol(z)=current_color[ne];
@@ -385,18 +384,18 @@ rectcolor(long ne, long color)
 void
 rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_LN */
 {
-  long dx,dy,dxy,xmin,xmax,ymin,ymax,x1,y1,x2,y2;
+  double dx,dy,dxy,xmin,xmax,ymin,ymax,x1,y1,x2,y2;
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
 
-  x1 = DTOL(RXcursor(e)*RXscale(e) + RXshift(e));
-  y1 = DTOL(RYcursor(e)*RYscale(e) + RYshift(e));
+  x1 = RXcursor(e)*RXscale(e) + RXshift(e);
+  y1 = RYcursor(e)*RYscale(e) + RYshift(e);
   if (relative)
     { RXcursor(e)+=gx2; RYcursor(e)+=gy2; }
   else
     { RXcursor(e)=gx2; RYcursor(e)=gy2; }
-  x2 = DTOL(RXcursor(e)*RXscale(e) + RXshift(e));
-  y2 = DTOL(RYcursor(e)*RYscale(e) + RYshift(e));
+  x2 = RXcursor(e)*RXscale(e) + RXshift(e);
+  y2 = RYcursor(e)*RYscale(e) + RYshift(e);
   xmin = max(min(x1,x2),0); xmax = min(max(x1,x2),RXsize(e));
   ymin = max(min(y1,y2),0); ymax = min(max(y1,y2),RYsize(e));
   dxy = x1*y2 - y1*x2; dx = x2-x1; dy = y2-y1;
@@ -439,19 +438,19 @@ rectrline(long ne, GEN gx2, GEN gy2)
 void
 rectbox0(long ne, double gx2, double gy2, long relative)
 {
-  long x1,y1,x2,y2,xmin,ymin,xmax,ymax;
+  double x1,y1,x2,y2,xmin,ymin,xmax,ymax;
   double xx,yy;
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
 
-  x1 = DTOL(RXcursor(e)*RXscale(e) + RXshift(e));
-  y1 = DTOL(RYcursor(e)*RYscale(e) + RYshift(e));
+  x1 = RXcursor(e)*RXscale(e) + RXshift(e);
+  y1 = RYcursor(e)*RYscale(e) + RYshift(e);
   if (relative)
   { xx = RXcursor(e)+gx2; yy = RYcursor(e)+gy2; }
   else
   {  xx = gx2; yy = gy2; }
-  x2=DTOL(xx*RXscale(e) + RXshift(e));
-  y2=DTOL(yy*RYscale(e) + RYshift(e));
+  x2 = xx*RXscale(e) + RXshift(e);
+  y2 = yy*RYscale(e) + RYshift(e);
   xmin = max(min(x1,x2),0); xmax = min(max(x1,x2),RXsize(e));
   ymin = max(min(y1,y2),0); ymax = min(max(y1,y2),RYsize(e));
 
@@ -502,16 +501,17 @@ killrect(long ne)
 void
 rectpoints0(long ne, double *listx, double *listy, long lx) /* code = ROt_MP */
 {
-  long *ptx,*pty,x,y,i,cp=0;
+  double *ptx, *pty, x, y;
+  long i, cp=0;
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjMP));
 
-  ptx=(long*) gpmalloc(lx*sizeof(long));
-  pty=(long*) gpmalloc(lx*sizeof(long));
+  ptx=(double*) gpmalloc(lx*sizeof(double));
+  pty=(double*) gpmalloc(lx*sizeof(double));
   for (i=0; i<lx; i++)
   {
-    x=DTOL(RXscale(e)*listx[i] + RXshift(e));
-    y=DTOL(RYscale(e)*listy[i] + RYshift(e));
+    x = RXscale(e)*listx[i] + RXshift(e);
+    y = RYscale(e)*listy[i] + RYshift(e);
     if ((x>=0)&&(y>=0)&&(x<=RXsize(e))&&(y<=RYsize(e)))
     {
       ptx[cp]=x; pty[cp]=y; cp++;
@@ -551,22 +551,23 @@ rectpoints(long ne, GEN listx, GEN listy)
 void
 rectlines0(long ne, double *x, double *y, long lx, long flag) /* code = ROt_ML */
 {
-  long i,I,*ptx,*pty;
+  long i,I;
+  double *ptx,*pty;
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
 
   I = flag ? lx+1 : lx;
-  ptx = (long*) gpmalloc(I*sizeof(long));
-  pty = (long*) gpmalloc(I*sizeof(long));
+  ptx = (double*) gpmalloc(I*sizeof(double));
+  pty = (double*) gpmalloc(I*sizeof(double));
   for (i=0; i<lx; i++)
   {
-    ptx[i]=DTOL(RXscale(e)*x[i] + RXshift(e));
-    pty[i]=DTOL(RYscale(e)*y[i] + RYshift(e));
+    ptx[i] = RXscale(e)*x[i] + RXshift(e);
+    pty[i] = RYscale(e)*y[i] + RYshift(e);
   }
   if (flag)
   {
-    ptx[i]=DTOL(RXscale(e)*x[0] + RXshift(e));
-    pty[i]=DTOL(RYscale(e)*y[0] + RYshift(e));
+    ptx[i] = RXscale(e)*x[0] + RXshift(e);
+    pty[i] = RYscale(e)*y[0] + RYshift(e);
   }
   RoNext(z)=0; RoType(z)=ROt_ML;
   RoMLcnt(z)=lx; RoMLxs(z)=ptx; RoMLys(z)=pty;
@@ -623,8 +624,8 @@ rectstring3(long ne, char *str, long dir) /* code = ROt_ST */
   strcpy(s,str);
   RoNext(z)=0; RoType(z) = ROt_ST;
   RoSTl(z) = l; RoSTs(z) = s;
-  RoSTx(z) = DTOL(RXscale(e)*RXcursor(e)+RXshift(e));
-  RoSTy(z) = DTOL(RYscale(e)*RYcursor(e)+RYshift(e));
+  RoSTx(z) = RXscale(e)*RXcursor(e)+RXshift(e);
+  RoSTy(z) = RYscale(e)*RYcursor(e)+RYshift(e);
   RoSTdir(z) = dir;
   if (!RHead(e)) RHead(e)=RTail(e)=z;
   else { RoNext(RTail(e))=z; RTail(e)=z; }
@@ -742,10 +743,10 @@ rectcopy(long source, long dest, long xoff, long yoff)
       case ROt_MP: case ROt_ML:
 	next = (RectObj*) gpmalloc(sizeof(RectObjMP));
 	memcpy(next,p1,sizeof(RectObjMP));
-	RoMPxs(next) = (long*) gpmalloc(sizeof(long)*RoMPcnt(next));
-	RoMPys(next) = (long*) gpmalloc(sizeof(long)*RoMPcnt(next));
-	memcpy(RoMPxs(next),RoMPxs(p1),sizeof(long)*RoMPcnt(next));
-	memcpy(RoMPys(next),RoMPys(p1),sizeof(long)*RoMPcnt(next));
+	RoMPxs(next) = (double*) gpmalloc(sizeof(double)*RoMPcnt(next));
+	RoMPys(next) = (double*) gpmalloc(sizeof(double)*RoMPcnt(next));
+	memcpy(RoMPxs(next),RoMPxs(p1),sizeof(double)*RoMPcnt(next));
+	memcpy(RoMPys(next),RoMPys(p1),sizeof(double)*RoMPcnt(next));
 	for (i=0; i<RoMPcnt(next); i++)
 	{
 	  RoMPxs(next)[i] += xoff; RoMPys(next)[i] += yoff;
@@ -777,7 +778,7 @@ rectcopy(long source, long dest, long xoff, long yoff)
 
 /* A simpler way is to clip by 4 half-planes */
 static int
-clipline(long xmin, long xmax, long ymin, long ymax, long *x1p, long *y1p, long *x2p, long *y2p)
+clipline(long xmin, long xmax, long ymin, long ymax, double *x1p, double *y1p, double *x2p, double *y2p)
 {
     int xy_exch = 0, rc = CLIPLINE_NONEMPTY;
     double t;
@@ -882,8 +883,8 @@ rectclip(long rect)
       next = RoNext(p1);
       switch(RoType(p1)) {
       case ROt_PT:
-	  if ( RoPTx(p1) < xmin || RoPTx(p1) > xmax
-	       || RoPTy(p1) < ymin || RoPTy(p1) > ymax) {
+	  if ( DTOL(RoPTx(p1)) < xmin || DTOL(RoPTx(p1)) > xmax
+	       || DTOL(RoPTy(p1)) < ymin || DTOL(RoPTy(p1)) > ymax) {
 		 remove:
 	      *prevp = next;
 	      free(p1);
@@ -923,8 +924,9 @@ rectclip(long rect)
 	  int f = 0, t = 0;
 
 	  while (f < c) {
-	      if ( RoMPxs(p1)[f] >= xmin && RoMPxs(p1)[f] <= xmax
-		   && RoMPys(p1)[f] >= ymin && RoMPys(p1)[f] <= ymax) {
+	      if ( DTOL(RoMPxs(p1)[f]) >= xmin && DTOL(RoMPxs(p1)[f]) <= xmax
+		   && DTOL(RoMPys(p1)[f]) >= ymin
+		   && DTOL(RoMPys(p1)[f]) <= ymax) {
 		  if (t != f) {
 		      RoMPxs(p1)[t] = RoMPxs(p1)[f];
 		      RoMPys(p1)[t] = RoMPys(p1)[f];
@@ -944,7 +946,7 @@ rectclip(long rect)
 	     several pieces if some part is clipped. */
 	  int c = RoMPcnt(p1) - 1;
 	  int f = 0, t = 0, had_lines = 0, had_hole = 0, rc;
-	  long ox = RoMLxs(p1)[0], oy = RoMLys(p1)[0], oxn, oyn;
+	  double ox = RoMLxs(p1)[0], oy = RoMLys(p1)[0], oxn, oyn;
 
 	  while (f < c) {
 	      /* Endpoint of this segment is the startpoint of the
@@ -1001,10 +1003,10 @@ rectclip(long rect)
 		  RoType(n) = ROt_ML;
 		  RoCol(n) = RoCol(p1);
 		  RoMLcnt(n) = c - f;
-		  RoMLxs(n) = (long*) gpmalloc(sizeof(long)*(c - f));
-		  RoMLys(n) = (long*) gpmalloc(sizeof(long)*(c - f));
-		  memcpy(RoMPxs(n),RoMPxs(p1) + f, sizeof(long)*(c - f));
-		  memcpy(RoMPys(n),RoMPys(p1) + f, sizeof(long)*(c - f));
+		  RoMLxs(n) = (double*) gpmalloc(sizeof(double)*(c - f));
+		  RoMLys(n) = (double*) gpmalloc(sizeof(double)*(c - f));
+		  memcpy(RoMPxs(n),RoMPxs(p1) + f, sizeof(double)*(c - f));
+		  memcpy(RoMPys(n),RoMPys(p1) + f, sizeof(double)*(c - f));
 		  RoMPxs(n)[0] = oxn; RoMPys(n)[0] = oyn; 
 		  RoNext(n) = next;
 		  RoNext(p1) = n;
@@ -1827,7 +1829,8 @@ postdraw0(long *w, long *x, long *y, long lw)
 void
 postdraw00(long *w, long *x, long *y, long lw, long scale)
 {
-  long *ptx,*pty,*numpoints,*numtexts,*xtexts,*ytexts,*dirtexts;
+  double *ptx,*pty;
+  long *numpoints,*numtexts,*xtexts,*ytexts,*dirtexts;
   RectObj *p1;
   PariRect *e;
   long i,j,x0,y0;
@@ -1889,27 +1892,27 @@ postdraw00(long *w, long *x, long *y, long lw, long scale)
       switch(RoType(p1))
       {
 	case ROt_PT:
-	  points[nd[ROt_PT]].x=RoPTx(p1)+x0;
-	  points[nd[ROt_PT]].y=RoPTy(p1)+y0;
+	  points[nd[ROt_PT]].x = DTOL(RoPTx(p1)+x0);
+	  points[nd[ROt_PT]].y = DTOL(RoPTy(p1)+y0);
 	  nd[ROt_PT]++; break;
 	case ROt_LN:
-	  seg[nd[ROt_LN]].x1=RoLNx1(p1)+x0;
-	  seg[nd[ROt_LN]].y1=RoLNy1(p1)+y0;
-	  seg[nd[ROt_LN]].x2=RoLNx2(p1)+x0;
-	  seg[nd[ROt_LN]].y2=RoLNy2(p1)+y0;
+	  seg[nd[ROt_LN]].x1 = DTOL(RoLNx1(p1)+x0);
+	  seg[nd[ROt_LN]].y1 = DTOL(RoLNy1(p1)+y0);
+	  seg[nd[ROt_LN]].x2 = DTOL(RoLNx2(p1)+x0);
+	  seg[nd[ROt_LN]].y2 = DTOL(RoLNy2(p1)+y0);
 	  nd[ROt_LN]++; break;
 	case ROt_BX:
-	  a=rect[nd[ROt_BX]].x=RoBXx1(p1)+x0;
-	  b=rect[nd[ROt_BX]].y=RoBXy1(p1)+y0;
-	  rect[nd[ROt_BX]].width =RoBXx2(p1)+x0-a;
-	  rect[nd[ROt_BX]].height=RoBXy2(p1)+y0-b;
+	  a=rect[nd[ROt_BX]].x = DTOL(RoBXx1(p1)+x0);
+	  b=rect[nd[ROt_BX]].y = DTOL(RoBXy1(p1)+y0);
+	  rect[nd[ROt_BX]].width = DTOL(RoBXx2(p1)+x0-a);
+	  rect[nd[ROt_BX]].height = DTOL(RoBXy2(p1)+y0-b);
 	  nd[ROt_BX]++; break;
 	case ROt_MP:
-	  ptx=RoMPxs(p1); pty=RoMPys(p1);
+	  ptx = RoMPxs(p1); pty = RoMPys(p1);
 	  for (j=0; j<RoMPcnt(p1); j++)
 	  {
-	    points[nd[ROt_PT]+j].x=ptx[j]+x0;
-	    points[nd[ROt_PT]+j].y=pty[j]+y0;
+	    points[nd[ROt_PT]+j].x = DTOL(ptx[j]+x0);
+	    points[nd[ROt_PT]+j].y = DTOL(pty[j]+y0);
 	  }
 	  nd[ROt_PT]+=RoMPcnt(p1); break;
 	case ROt_ML:
@@ -1918,16 +1921,16 @@ postdraw00(long *w, long *x, long *y, long lw, long scale)
 	  lines[nd[ROt_ML]]=(SPoint*)gpmalloc(RoMLcnt(p1)*sizeof(SPoint));
 	  for (j=0; j<RoMLcnt(p1); j++)
 	  {
-	    lines[nd[ROt_ML]][j].x=ptx[j]+x0;
-	    lines[nd[ROt_ML]][j].y=pty[j]+y0;
+	    lines[nd[ROt_ML]][j].x = DTOL(ptx[j]+x0);
+	    lines[nd[ROt_ML]][j].y = DTOL(pty[j]+y0);
 	  }
 	  nd[ROt_ML]++; break;
 	case ROt_ST:
-	  texts[nd[ROt_ST]]=RoSTs(p1);
-	  numtexts[nd[ROt_ST]]=RoSTl(p1);
-	  xtexts[nd[ROt_ST]]=RoSTx(p1)+x0;
-	  ytexts[nd[ROt_ST]]=RoSTy(p1)+y0;
-	  dirtexts[nd[ROt_ST]]=RoSTdir(p1);
+	  texts[nd[ROt_ST]] = RoSTs(p1);
+	  numtexts[nd[ROt_ST]] = RoSTl(p1);
+	  xtexts[nd[ROt_ST]] = DTOL(RoSTx(p1)+x0);
+	  ytexts[nd[ROt_ST]] = DTOL(RoSTy(p1)+y0);
+	  dirtexts[nd[ROt_ST]] = RoSTdir(p1);
 	  nd[ROt_ST]++; break;
 	default: break;
       }

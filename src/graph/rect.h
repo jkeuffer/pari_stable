@@ -3,6 +3,8 @@
 #define PLOT_NAME_LEN 20
 #define NUMRECT 18
 
+#define DTOL(t) ((long)(t + 0.5))
+
 typedef struct PARI_plot {
   long width;
   long height;
@@ -53,21 +55,21 @@ typedef struct PariRect {
 typedef struct RectObj1P {
   struct RectObj *next;
   long code,color;
-  long x,y;
+  double x,y;
 } RectObj1P;
 
 typedef struct RectObj2P {
   struct RectObj *next;
   long code,color;
-  long x1,y1;
-  long x2,y2;
+  double x1,y1;
+  double x2,y2;
 } RectObj2P;
 
 typedef struct RectObjMP {
   struct RectObj *next;
   long code,color;
   long count;
-  long *xs,*ys;
+  double *xs,*ys;
 } RectObjMP;
 
 typedef struct RectObjST {
@@ -75,7 +77,8 @@ typedef struct RectObjST {
   long code,color;
   long length;
   char *s;
-  long x,y,dir;
+  double x,y;
+  long dir;
 } RectObjST;
 
 typedef struct RectObjPN {

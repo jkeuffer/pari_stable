@@ -24,7 +24,7 @@
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
-  long *ptx,*pty;
+  double *ptx,*pty;
   long i,j,x0,y0, hjust, vjust, hgap, vgap, hgapsize, vgapsize;
   long good, seen_graph = 0;
   int point_type = -1, line_type = 0;
@@ -85,52 +85,54 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
       switch(RoType(p1))
       {
 	case ROt_PT:
-	  point(RoPTx(p1)+x0, w_height - 1 - RoPTy(p1) - y0, point_type);
+	  point(DTOL(RoPTx(p1)+x0), w_height - 1 - DTOL(RoPTy(p1) + y0),
+		point_type);
 	  break;
 	case ROt_LN:
-	  move(RoLNx1(p1)+x0, w_height - 1 - RoLNy1(p1) - y0);
-	  vector(RoLNx2(p1)+x0, w_height - 1 - RoLNy2(p1) - y0);
+	  move(DTOL(RoLNx1(p1)+x0), w_height - 1 - DTOL(RoLNy1(p1) + y0));
+	  vector(DTOL(RoLNx2(p1)+x0), w_height - 1 - DTOL(RoLNy2(p1) + y0));
 	  break;
 	case ROt_BX:
-	  move(RoBXx1(p1)+x0, w_height - 1 - RoBXy1(p1) - y0);
-	  vector(RoBXx2(p1)+x0, w_height - 1 - RoBXy1(p1) - y0);
-	  vector(RoBXx2(p1)+x0, w_height - 1 - RoBXy2(p1) - y0);
-	  vector(RoBXx1(p1)+x0, w_height - 1 - RoBXy2(p1) - y0);
-	  vector(RoBXx1(p1)+x0, w_height - 1 - RoBXy1(p1) - y0);
+	  move(DTOL(RoBXx1(p1)+x0), w_height - 1 - DTOL(RoBXy1(p1) + y0));
+	  vector(DTOL(RoBXx2(p1)+x0), w_height - 1 - DTOL(RoBXy1(p1) + y0));
+	  vector(DTOL(RoBXx2(p1)+x0), w_height - 1 - DTOL(RoBXy2(p1) + y0));
+	  vector(DTOL(RoBXx1(p1)+x0), w_height - 1 - DTOL(RoBXy2(p1) + y0));
+	  vector(DTOL(RoBXx1(p1)+x0), w_height - 1 - DTOL(RoBXy1(p1) + y0));
 	  break;
 	case ROt_MP:
 	  ptx=RoMPxs(p1);
 	  pty=RoMPys(p1);
 	  for(j=0;j<RoMPcnt(p1);j++)
 	  {
-	    point(ptx[j]+x0,  w_height - 1 - pty[j] - y0, point_type);
+	    point(DTOL(ptx[j] + x0),  w_height - 1 - DTOL(pty[j] + y0),
+		  point_type);
 	  }
 	  break;
 	case ROt_ML:
 	  ptx=RoMLxs(p1);
 	  pty=RoMLys(p1);
 	  j = 0;
-	  if (ptx[j]+x0 < 0 || ptx[j]+x0 >= w_width
-	      || pty[j] + y0 < 0 || pty[j] + y0 >= w_height) {
+	  if (DTOL(ptx[j]+x0) < 0 || DTOL(ptx[j]+x0) >= w_width
+	      || DTOL(pty[j] + y0) < 0 || DTOL(pty[j] + y0) >= w_height) {
 	    good = 0;
 	  } else {
-	    move(ptx[j]+x0, w_height - 1 - pty[j] - y0);
+	    move(DTOL(ptx[j]+x0), w_height - 1 - DTOL(pty[j] + y0));
 	    good = 1;
 	  }
 	  for(j=1;j<RoMLcnt(p1);j++)
 	  {
 	    if (good) {
-	      if (ptx[j]+x0 < 0 || ptx[j]+x0 >= w_width
-		  || pty[j] + y0 < 0 || pty[j] + y0 >= w_height) {
+	      if (DTOL(ptx[j] + x0) < 0 || DTOL(ptx[j]+x0) >= w_width
+		  || DTOL(pty[j] + y0) < 0 || DTOL(pty[j] + y0) >= w_height) {
 		good = 0;
 	      } else {
-		vector(ptx[j]+x0, w_height - 1 - pty[j] - y0);
+		vector(DTOL(ptx[j] + x0), w_height - 1 - DTOL(pty[j] + y0));
 	      }
 	    } else {
-	      if (ptx[j]+x0 < 0 || ptx[j]+x0 >= w_width
-		  || pty[j] + y0 < 0 || pty[j] + y0 >= w_height) {
+	      if (DTOL(ptx[j] + x0) < 0 || DTOL(ptx[j] + x0) >= w_width
+		  || DTOL(pty[j] + y0) < 0 || DTOL(pty[j] + y0) >= w_height) {
 	      } else {
-		move(ptx[j]+x0, w_height - 1 - pty[j] - y0);
+		move(DTOL(ptx[j]+x0), w_height - 1 - DTOL(pty[j] + y0));
 		good = 1;
 	      }
 	    }
@@ -153,15 +155,16 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 	      can_justify = justify_text(shift); /* 1 for LEFT */
 	      strdir = RoSTdir(p1);
 	  }
-	  xstart = RoSTx(p1) + x0 + hgap
+	  xstart = DTOL(RoSTx(p1) + x0) + hgap
 	      - (can_justify ? 0 
 		 : ((RoSTl(p1) * pari_plot.fwidth - 1) * shift / 2));
 	  xend = xstart + (can_justify ? 0 : RoSTl(p1) * pari_plot.fwidth - 1);
 	  if (xstart < 0 || xend >= w_width
-	      || RoSTy(p1) + y0 < 0 || RoSTy(p1) + y0 >= w_height) {
+	      || DTOL(RoSTy(p1) + y0) < 0 
+	      || DTOL(RoSTy(p1) + y0) >= w_height) {
 	  } else {
 	      put_text(xstart,
-		       w_height - 1 - RoSTy(p1) - y0 + vgap,
+		       w_height - 1 - DTOL(RoSTy(p1) + y0) + vgap,
 		       RoSTs(p1));
 	  }
 	  break;

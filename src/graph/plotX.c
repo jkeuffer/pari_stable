@@ -116,7 +116,8 @@ zmalloc(size_t x)
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
-  long *ptx,*pty,*c, shift;
+  double *ptx,*pty;
+  long *c, shift;
   long *numpoints[MAX_COLORS],*numtexts[MAX_COLORS];
   long *xtexts[MAX_COLORS],*ytexts[MAX_COLORS];
   long rcolcnt[MAX_COLORS][ROt_MAX];
@@ -269,7 +270,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
         oldheight = height; force = 1;
 
         /* recompute scale */
-	xs=((double)width)/w_width; ys=((double)height)/w_height;
+	xs = ((double)width)/w_width; ys=((double)height)/w_height;
       }
       case Expose: if (!force) break;
         force = 0;
@@ -282,27 +283,27 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 	    switch(RoType(p1))
 	    {
 	      case ROt_PT:
-		points[col][c[ROt_PT]].x=(long)((RoPTx(p1)+x0)*xs);
-		points[col][c[ROt_PT]].y=(long)((RoPTy(p1)+y0)*ys);
+		points[col][c[ROt_PT]].x = DTOL((RoPTx(p1)+x0)*xs);
+		points[col][c[ROt_PT]].y = DTOL((RoPTy(p1)+y0)*ys);
 		c[ROt_PT]++;break;
 	      case ROt_LN:
-		seg[col][c[ROt_LN]].x1= (long)((RoLNx1(p1)+x0)*xs);
-		seg[col][c[ROt_LN]].y1= (long)((RoLNy1(p1)+y0)*ys);
-		seg[col][c[ROt_LN]].x2= (long)((RoLNx2(p1)+x0)*xs);
-		seg[col][c[ROt_LN]].y2= (long)((RoLNy2(p1)+y0)*ys);
+		seg[col][c[ROt_LN]].x1 = DTOL((RoLNx1(p1)+x0)*xs);
+		seg[col][c[ROt_LN]].y1 = DTOL((RoLNy1(p1)+y0)*ys);
+		seg[col][c[ROt_LN]].x2 = DTOL((RoLNx2(p1)+x0)*xs);
+		seg[col][c[ROt_LN]].y2 = DTOL((RoLNy2(p1)+y0)*ys);
 		c[ROt_LN]++;break;
 	      case ROt_BX:
-		a=rec[col][c[ROt_BX]].x = (long)((RoBXx1(p1)+x0)*xs);
-		b=rec[col][c[ROt_BX]].y = (long)((RoBXy1(p1)+y0)*ys);
-		rec[col][c[ROt_BX]].width = (long)((RoBXx2(p1)+x0-a)*xs);
-		rec[col][c[ROt_BX]].height = (long)((RoBXy2(p1)+y0-b)*ys);
+		a=rec[col][c[ROt_BX]].x = DTOL((RoBXx1(p1)+x0)*xs);
+		b=rec[col][c[ROt_BX]].y = DTOL((RoBXy1(p1)+y0)*ys);
+		rec[col][c[ROt_BX]].width = DTOL((RoBXx2(p1)+x0-a)*xs);
+		rec[col][c[ROt_BX]].height = DTOL((RoBXy2(p1)+y0-b)*ys);
 		c[ROt_BX]++;break;
 	      case ROt_MP:
-		ptx=RoMPxs(p1); pty=RoMPys(p1);
+		ptx = RoMPxs(p1); pty = RoMPys(p1);
 		for(j=0;j<RoMPcnt(p1);j++)
 		{
-		  points[col][c[ROt_PT]+j].x= (long)((ptx[j]+x0)*xs);
-		  points[col][c[ROt_PT]+j].y= (long)((pty[j]+y0)*ys);
+		  points[col][c[ROt_PT]+j].x = DTOL((ptx[j]+x0)*xs);
+		  points[col][c[ROt_PT]+j].y = DTOL((pty[j]+y0)*ys);
 		}
 		c[ROt_PT]+=RoMPcnt(p1);break;
 	      case ROt_ML:
@@ -312,8 +313,8 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 		  (XPoint*)zmalloc(RoMLcnt(p1)*sizeof(XPoint));
 		for(j=0;j<RoMLcnt(p1);j++)
 		{
-		  lines[col][c[ROt_ML]][j].x= (long)((ptx[j]+x0)*xs);
-		  lines[col][c[ROt_ML]][j].y= (long)((pty[j]+y0)*ys);
+		  lines[col][c[ROt_ML]][j].x = DTOL((ptx[j]+x0)*xs);
+		  lines[col][c[ROt_ML]][j].y = DTOL((pty[j]+y0)*ys);
 		}
 		c[ROt_ML]++;break;
 	      case ROt_ST:
@@ -332,10 +333,10 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 		shift = (hjust == RoSTdirLEFT ? 0 :
 			 (hjust == RoSTdirRIGHT ? 2 : 1));
 		xtexts[col][c[ROt_ST]] 
-		    = (long)(( RoSTx(p1) + x0 + hgap
+		    = DTOL(( RoSTx(p1) + x0 + hgap
 			       - (strlen(RoSTs(p1)) * pari_plot.fwidth
 				  * shift)/2)*xs);
-		ytexts[col][c[ROt_ST]]= (long)((RoSTy(p1)+y0-vgap/2)*ys);
+		ytexts[col][c[ROt_ST]] = DTOL((RoSTy(p1)+y0-vgap/2)*ys);
 		c[ROt_ST]++;break;
 	      default: break;
 	    }
