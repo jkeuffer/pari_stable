@@ -670,6 +670,8 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
   *pd = d; return N;
 }
 
+extern GEN idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n);
+
 /* try to split ideal / (some integer) on FB */
 static long
 factorgensimple(GEN nf,GEN ideal)
@@ -708,7 +710,7 @@ factorgensimple(GEN nf,GEN ideal)
       long k,l,n;
       k = N - sum_ef;
       if (vx % k) break;
-      k = vx / k; /* x / p^k factors on FB */
+      k = vx / k; /* ideal / p^k may factor on FB */
       for (l = lo0+1; l <= lo; l++)
       {
         P = (GEN)vectbase[primfact[l]];
@@ -720,6 +722,18 @@ factorgensimple(GEN nf,GEN ideal)
         if (n <= lo && primfact[n] == l) { n++; continue; }
         lo++; primfact[lo] = l; P = (GEN)vectbase[l];
         expoprimfact[lo] = - k * itos((GEN)P[3]);
+      }
+      /* check that ideal / p^k / (tentative factorisation) is integral */
+      {
+        GEN z = ideal;
+        for (l = lo0+1; l <= lo; l++)
+        {
+          GEN n = stoi(- expoprimfact[l]);
+          z = idealmulpowprime(nf, z, (GEN)vectbase[primfact[l]], n);
+        }
+        z = gdiv(z, gpowgs(p, k));
+        if (!gcmp1(denom(z))) { avma=av1; return 0; }
+        ideal = z;
       }
     }
     if (gcmp1(y)) { avma=av1; primfact[0]=lo; return 1; }

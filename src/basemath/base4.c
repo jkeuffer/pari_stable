@@ -1048,16 +1048,37 @@ idealmulspec(GEN nf, GEN x, GEN a, GEN alpha)
 
 /* x ideal (matrix form,maximal rank), vp prime ideal (primedec). Output the
  * product. Can be used for arbitrary vp of the form [p,a,e,f,b], IF vp
- * =pZ_K+aZ_K, p is an integer, and norm(vp) = p^f; e and b are not used. For
- * internal use.
+ * =pZ_K+aZ_K, p is an integer, and norm(vp) = p^f; e and b are not used.
+ * For internal use.
  */
 GEN
 idealmulprime(GEN nf, GEN x, GEN vp)
 {
   GEN denx = denom(x);
 
-  if (gcmp1(denx)) denx = NULL; else x=gmul(denx,x);
+  if (gcmp1(denx)) denx = NULL; else x = gmul(denx,x);
   x = idealmulspec(nf,x, (GEN)vp[1], (GEN)vp[2]);
+  return denx? gdiv(x,denx): x;
+}
+
+static GEN idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d);
+
+/* x * vp^n */
+GEN
+idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
+{
+  GEN denx,y,d;
+
+  if (!signe(n)) return x;
+  nf = checknf(nf);
+  y = idealpowprime_spec(nf, vp, n, &d);
+  denx = denom(x);
+  if (gcmp1(denx)) denx = d; else
+  {
+    x = gmul(denx,x);
+    if (d) denx = mulii(d,denx);
+  }
+  x = idealmulspec(nf,x, (GEN)y[1], (GEN)y[2]);
   return denx? gdiv(x,denx): x;
 }
 
@@ -1281,24 +1302,44 @@ idealinv(GEN nf, GEN x)
   res[1]=(long)x; res[2]=lneg(ax); return res;
 }
 
+/* return x such that vp^n = x/d */
+static GEN
+idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
+{
+  GEN n1, x, r;
+  long s = signe(n);
+
+  if (s == 0) err(talker, "0th power in idealpowprime_spec");
+  if (s < 0) n = negi(n);
+  /* now n > 0 */
+  x = dummycopy(vp);
+  n1 = dvmdii(n, (GEN)x[3], &r);
+  if (signe(r)) n1 = addis(n1,1); /* n1 = ceil(n/e) */
+  x[1] = (long)powgi((GEN)x[1],n1);
+  if (s < 0)
+  {
+    x[2] = ldiv(element_pow(nf,(GEN)x[5],n), powgi((GEN)vp[1],subii(n,n1)));
+    *d = (GEN)x[1];
+  }
+  else
+  {
+    x[2] = (long)element_pow(nf,(GEN)x[2],n);
+    *d = NULL;
+  }
+  return x;
+}
+
 static GEN
 idealpowprime(GEN nf, GEN vp, GEN n)
 {
-  GEN n1, x;
+  GEN x, d;
   long s = signe(n);
 
   nf = checknf(nf);
   if (s == 0) return idmat(lgef(nf[1])-3);
-  if (s < 0) n = negi(n);
-  x = dummycopy(vp);
-  n1 = gceil(gdiv(n,(GEN)x[3]));
-  x[1]=(long)powgi((GEN)x[1],n1);
-  if (s < 0)
-    x[2]=ldiv(element_pow(nf,(GEN)x[5],n), powgi((GEN)vp[1],subii(n,n1)));
-  else
-    x[2]=(long)element_pow(nf,(GEN)x[2],n);
+  x = idealpowprime_spec(nf, vp, n, &d);
   x = prime_to_ideal_aux(nf,x);
-  if (s<0) x = gdiv(x, powgi((GEN)vp[1],n1));
+  if (d) x = gdiv(x, d);
   return x;
 }
 
