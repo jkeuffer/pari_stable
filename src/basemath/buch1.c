@@ -388,6 +388,7 @@ form_to_ideal(GEN x)
   return y;
 }
 
+#if 0
 /* P as output by quadhilbertimag, convert forms to ideals */
 static void
 convert_to_id(GEN P)
@@ -399,6 +400,7 @@ convert_to_id(GEN P)
     p1[1] = (long)form_to_ideal((GEN)p1[1]);
   }
 }
+#endif
 
 /* P approximation computed at initial precision prec. Compute needed prec
  * to know P with 1 word worth of trailing decimals */
