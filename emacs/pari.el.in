@@ -6,7 +6,7 @@
 
 ;; All functions of gp are preserved.
 
-;; Version 2.34 (2-November-1999)
+;; Version 2.35 (2-November-1999)
 ;; The original pari.el was written by Annette Hoffman.
 ;; Modified by David Carlisle (JANET: carlisle@uk.ac.man.cs).
 ;; Modified by Karim Belabas (belabas@math.u-bordeaux.fr) for gp 2.xxx.
@@ -72,8 +72,15 @@
 
 ;; To customize variables:
 (eval-and-compile
-(defvar old-emacs-versionp
-  (not (string-lessp "20.3" (emacs-version)))))
+(defvar old-emacs-versionp t)
+(save-excursion
+  (set-buffer "*Messages*")
+  (let ((pt (point)))
+       (emacs-version t)
+       (goto-char pt)
+       (if (re-search-forward "\\(GNU Emacs\\|\\) \\([^ ]*\\) " nil t)
+           (setq old-emacs-versionp (not (string-lessp "20.3" (match-string 2))))
+           (setq old-emacs-versionp t)))))
   ;; This variable is required since some functions are not
   ;; supported by earlier versions.
 
@@ -2528,9 +2535,18 @@ nil means don't do that if the file wasn't existing already."
 ;; GP HELP MODE
 ;;--------------
 
-(defsubst gp-has-spacep (word)
-  "T if WORD contains a space and NIL otherwise"
-  (not (eq (memq ?\  (string-to-list word)) nil)))
+(defun gp-has-spacep (astring)
+  "T if ASTRING contains a space and NIL otherwise"
+  (let ((ans nil) (where 0) (ll (length astring)))
+   (while (and (not ans) (< where ll))
+      (setq ans (or ans (string= (substring astring where (1+ where)) " "))
+            where (1+ where)))
+   ans))
+
+; Une programmation plus efficace avec emacs 20.3:
+;(defsubst gp-has-spacep (word)
+;  "T if WORD contains a space and NIL otherwise"
+;  (not (eq (memq ?\  (string-to-list word)) nil)))
 
 (defun gp-display-raw-menu (lst start end)
   (beginning-of-line)
