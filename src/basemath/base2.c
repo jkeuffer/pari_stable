@@ -1525,8 +1525,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (!chig || !gcmp1(denom(content(chig))))
       {
 	/* Valuation of beta was wrong. This means that
-	   either gamma fails the v*-test */
-	if (!chib) chib = mycaract(chi, beta, p, NULL, ns);
+	   gamma fails the v*-test */
+	chib = mycaract(chi, beta, p, NULL, ns);
 	vstar(p, chib, &L, &E);
 	eq = (long)(-L / E);
 	er = (long)(-L*Ea / E - eq*Ea);
@@ -1539,8 +1539,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  gamm = gmod(gamm, chi);
 	  gamm = redelt(gamm, p, pmr);
 	}
-	if (eq || er) chig = mycaract(chi, gamm, p, pmf, ns);
-	else chig = chib;
+	chig = mycaract(chi, gamm, p, pmf, ns);
       }
 
       nug  = (GEN)factmod(chig, p)[1];
