@@ -620,7 +620,7 @@ nextK:
         t = nf_bestlift(t, NULL, T->L);
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
         {
-          if (DEBUGLEVEL>3) fprintferr(".");
+          if (DEBUGLEVEL>6) fprintferr(".");
           avma = av; goto NEXT;
         }
       }
