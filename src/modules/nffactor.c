@@ -846,7 +846,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   const int y = 4;
   const double alpha = ((double)y-1) / y; /* LLL parameter */
   gpmem_t av = avma;
-  GEN prk, prk2, PRK, u, B, GSmin, pa;
+  GEN prk, PRK, B, GSmin, pa;
 
   if (!a)  a = (long) bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
 
@@ -855,14 +855,12 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     prk = idealpows(nf, pr, a);
     pa = gcoeff(prk,1,1);
-    prk2= hnfmodid(prk, pa);
-    PRK = gmul(prk2, lllintpartial(prk2));
+    PRK = hnfmodid(prk, pa);
 
-    u = lllint_i(PRK, y, 0, NULL, &B);
+    PRK = lllint_i(PRK, y, 0, NULL, NULL, &B);
     GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
-  PRK = gmul(PRK, u);
   T->a = a;
   T->pa = T->den = pa;
   T->prk = PRK;
@@ -971,7 +969,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
      * m = [           ]   square matrix
      *     [ T2r    PRK]   T2r = Tra * BL  truncated
      */
-    u = lllint_i(m, 4, 0, NULL, &B);
+    u = lllint_i(m, 4, 0, NULL, NULL, &B);
     norm = GS_norms(B, DEFAULTPREC);
     for (i=r+dnf; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
@@ -993,6 +991,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
 
     setlg(u, r+1);
     for (i=1; i<=r; i++) setlg(u[i], n+1);
+    u = gdivexact(u, stoi(C));
     BL = gerepileupto(av2, gmul(BL, u));
     if (low_stack(lim, stack_lim(av,1)))
     {
