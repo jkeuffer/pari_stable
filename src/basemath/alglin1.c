@@ -1667,7 +1667,9 @@ detint(GEN x)
 
   if (typ(x)!=t_MAT) err(typeer,"detint");
   n=lg(x)-1; if (!n) return gun;
-  m1=lg(x[1]); m=m1-1; lim=stack_lim(av,1);
+  m1=lg(x[1]); m=m1-1;
+  if (n < m) return gzero;
+  lim=stack_lim(av,1);
   c=new_chunk(m1); for (k=1; k<=m; k++) c[k]=0;
   av1=avma; pass=cgetg(m1,t_MAT);
   for (j=1; j<=m; j++)
