@@ -527,20 +527,23 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   long Sbound;
   GEN pol = T->pol, nf = T->nf, famod = T->fact;
   GEN dn = T->dn, bound = T->bound;
-  long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
+  GEN den = T->L->den, deno2 = shifti(den, -1);
   GEN nfpol = (GEN)nf[1];
-  GEN lc, lcpol;
+  long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
+  GEN lc, lcpol, h1 = NULL; /* gcc -Wall */
   GEN pa = gpowgs(p,a), pas2 = shifti(pa,-1);
 
-  GEN trace1   = cgetg(lfamod+1, t_VEC);
-  GEN trace2   = cgetg(lfamod+1, t_VEC);
+  GEN hS1    = cgetg(lfamod+1, t_VEC);
+  GEN hS2    = cgetg(lfamod+1, t_VEC);
+  GEN trace1   = cgetg(lfamod+1, t_MAT);
+  GEN trace2   = cgetg(lfamod+1, t_MAT);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
-  const double Blow = get_Blow((double)lfamod, (double)degpol(nfpol));
+  const double Blow = get_Blow((double)lfamod, (double)dnf);
 
   if (maxK < 0) maxK = lfamod-1;
   (void)dn;
@@ -550,13 +553,13 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   lcpol = lc? gmul(lc,pol): pol;
 
   {
-    GEN q, goodq, lc2 = lc? sqri(lc): NULL;
+    GEN T1,T2, q, goodq, lc2 = lc? sqri(lc): NULL;
     long e, e1, e2;
 
     q = ceil_safe(mpsqrt(T->BS_2));
     for (i=1; i <= lfamod; i++)
     {
-      GEN T1,T2, P = (GEN)famod[i];
+      GEN P = (GEN)famod[i];
       long d = degpol(P);
 
       degpol[i] = d; P += 2;
@@ -580,8 +583,13 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
     {
       goodq = shifti(gun, e2 - 32); /* single precision check */
       if (cmpii(goodq, q) > 0) q = goodq;
-      trace1 = gdivround(trace1, q); if (gcmp0(trace1)) trace1 = NULL;
-      trace2 = gdivround(trace2, q); if (gcmp0(trace2)) trace2 = NULL;
+      T1 = trace1;
+      T2 = trace2;
+      trace1 = gdivround(T1, q); if (gcmp0(trace1)) trace1 = NULL;
+      trace2 = gdivround(T2, q); if (gcmp0(trace2)) trace2 = NULL;
+      if (trace1) hS1 = gsub(T1, gmul(T->L->prk, trace1));
+      if (trace2) hS2 = gsub(T2, gmul(T->L->prk, trace2)); /* <= q/2 */
+      h1 = gdivround(T->L->prk, q);
     }
   }
   degsofar[0] = 0; /* sentinel */
@@ -604,16 +612,26 @@ nextK:
     }
     if (curdeg <= klim && curdeg % T->hint == 0) /* trial divide */
     {
-      GEN t, y, q, list;
+      GEN s, t, y, q, list;
       gpmem_t av;
 
       av = avma;
       /* d - 1 test */
       if (trace1)
       {
+        s = (GEN)hS1[ind[1]];
         t = (GEN)trace1[ind[1]];
-        for (i=2; i<=K; i++) t = gadd(t, (GEN)trace1[ind[i]]);
-        t = nf_bestlift(t, NULL, T->L);
+        for (i=2; i<=K; i++)
+        {
+          t = gadd(t, (GEN)trace1[ind[i]]);
+          s = gadd(s, (GEN)hS1[ind[i]]);
+          for (j=1; j<=dnf; j++)
+            if (absi_cmp((GEN)s[i], deno2) > 0)
+            {
+              t = gsub(t, (GEN)h1[i]);
+              s[i] = lsubii((GEN)s[i], den);
+            }
+        }
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
         {
           if (DEBUGLEVEL>6) fprintferr(".");
@@ -623,39 +641,25 @@ nextK:
       /* d - 2 test */
       if (trace2)
       {
+        s = (GEN)hS2[ind[1]];
         t = (GEN)trace2[ind[1]];
-        for (i=2; i<=K; i++) t = gadd(t, (GEN)trace2[ind[i]]);
-        t = nf_bestlift(t, NULL, T->L);
+        for (i=2; i<=K; i++)
+        {
+          t = gadd(t, (GEN)trace2[ind[i]]);
+          s = gadd(s, (GEN)hS2[ind[i]]);
+          for (j=1; j<=dnf; j++)
+            if (absi_cmp((GEN)s[i], deno2) > 0)
+            {
+              t = gsub(t, (GEN)h1[i]);
+              s[i] = lsubii((GEN)s[i], den);
+            }
+        }
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
         {
           if (DEBUGLEVEL>3) fprintferr("|");
           avma = av; goto NEXT;
         }
       }
-      av = avma;
-#if 0
-      /* check trailing coeff */
-      y = lc;
-      for (i=1; i<=K; i++)
-      {
-        GEN q = constant_term((GEN)famod[ind[i]]);
-        if (y) q = mulii(y, q);
-        y = centermod_i(q, pa, pas2);
-      }
-      y = nf_bestlift(y, T->L);
-      if (gcmp0(y))
-      {
-        if (DEBUGLEVEL>3) fprintferr("T0");
-        avma = av; goto NEXT;
-      }
-      y = gres(gmul(constant_term(lcpol), QX_invmod(y, nfpol)), nfpol);
-      if (denom(content(y)) != gun)
-      {
-        if (DEBUGLEVEL>3) fprintferr("T");
-        avma = av; goto NEXT;
-      }
-#endif
-
       avma = av;
       y = lc; /* full computation */
       for (i=1; i<=K; i++)
@@ -687,15 +691,15 @@ nextK:
       fa[cnt++] = (long)QXQ_normalize(y, nfpol);
       /* fix up pol */
       pol = q;
-      if (lc) pol = gdivexact(pol, leading_term(y));
+      if (lc) pol = primpart(pol);
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
         if (j <= K && i == ind[j]) j++;
         else
         {
           famod[k] = famod[i];
-          if (trace1) trace1[k] = trace1[i];
-          if (trace2) trace2[k] = trace2[i];
+          if (trace1) { trace1[k] = trace1[i]; hS1[k] = hS2[i]; }
+          if (trace2) { trace2[k] = trace2[i]; hS2[k] = hS2[i]; }
           degpol[k] = degpol[i]; k++;
         }
       }
@@ -836,7 +840,7 @@ bestlift_bound(GEN C, long n, double alpha, GEN Npr)
 }
 
 static void
-bestlift_init_pr(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
+bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
 {
   const int y = 4;
   const double alpha = ((double)y-1) / y; /* LLL parameter */
@@ -859,7 +863,7 @@ bestlift_init_pr(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   }
   PRK = gmul(PRK, u);
   T->a = a;
-  T->pa= pa;
+  T->pa = T->den = pa;
   T->prk = PRK;
   T->iprk = ZM_inv(PRK, pa);
   T->GSmin= GSmin;
@@ -923,7 +927,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
       nflift_t L1;
       GEN polred;
 
-      bestlift_init_pr(a<<1, nf, T->pr, Btra, &L1);
+      bestlift_init(a<<1, nf, T->pr, Btra, &L1);
       a      = L1.a;
       pa     = L1.pa;
       PRK    = L1.prk;
@@ -1125,7 +1129,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     }
   }
 
-  bestlift_init_pr(0, nf, pr, C, &L);
+  bestlift_init(0, nf, pr, C, &L);
   T.pr = pr;
   T.L  = &L;
 
