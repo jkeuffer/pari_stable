@@ -1015,7 +1015,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
 static GEN
 nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 {
-  GEN z, res, L, listmod, famod = T->fact, pol = T->pol, nf = T->nf;
+  GEN z, res, L, listmod, famod = T->fact, nf = T->nf;
   long i, m, l, maxK = 3, nft = lg(famod)-1;
 
   T->fact = hensel_lift_fact(polred,famod,NULL,p,T->pa,a);
