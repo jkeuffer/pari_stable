@@ -485,8 +485,7 @@ for dir in basemath modules language gp graph gpdyn graphdyn; do
   gp-dyn|gp_rl-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
     cflags="\$(DYNFLAGS) -I$src/language \$(RLINCLUDE)"
-    depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h libpari_dll.h
-libpari_globals.h \$(LIBPARI).dll"
+    depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   gp_init-dyn|plotport-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
