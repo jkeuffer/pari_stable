@@ -20,18 +20,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 
+#define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
+extern GEN DDF2(GEN x, long klim, long hint);
+extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
+extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
+extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
+extern GEN det_mod_P_n(GEN a, GEN N, GEN P);
 extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN element_mulid(GEN nf, GEN x, long i);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN ideal_better_basis(GEN nf, GEN x, GEN M);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 extern GEN mat_to_vecpol(GEN x, long v);
+extern GEN merge_factor_i(GEN f, GEN g);
+extern GEN mulmat_pol(GEN A, GEN x);
+extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN nfidealdet1(GEN nf, GEN a, GEN b);
 extern GEN nfsuppl(GEN nf, GEN x, long n, GEN prhall);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
 extern GEN respm(GEN f1,GEN f2,GEN pm);
+extern GEN to_polmod(GEN x, GEN mod);
+extern GEN vecpol_to_mat(GEN v, long n);
+extern int isrational(GEN x);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 
 static void
 allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
@@ -716,8 +728,6 @@ allbase4(GEN f,long code, GEN *y, GEN *ptw)
   return bas;
 }
 
-extern GEN merge_factor_i(GEN f, GEN g);
-
 static GEN
 update_fact(GEN x, GEN f)
 {
@@ -957,7 +967,7 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     }
     fprintferr("\n");
   }
-  ha = pd = gpuigs(p,mf/2); pdp = mulii(pd,p);
+  ha = pd = gpowgs(p,mf/2); pdp = mulii(pd,p);
   dU = typ(U)==t_POL? degpol(U): 0;
   b = cgetg(n,t_MAT); /* Z[a] + U/p Z[a] is maximal */
   /* skip first column = gscalcol(pd,n) */
@@ -1043,7 +1053,7 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
       a1 = gmul(a1,p1);
     }
   }
-  pdr = respm(f,derivpol(f),gpuigs(p,mf+1));
+  pdr = respm(f,derivpol(f),gpowgs(p,mf+1));
   e = eleval(f,FpX_red(gmul(a1,b2), p),theta);
   e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
 
@@ -1335,8 +1345,8 @@ getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
   }
 
   pip = eleval(chi, nup, phi);
-  pip = lift_intern(gpuigs(gmodulcp(pip, chi), r));
-  pp  = gpuigs(p, s); 
+  pip = lift_intern(gpowgs(gmodulcp(pip, chi), r));
+  pp  = gpowgs(p, s); 
 
   *Lp = L; 
   *Ep = E;
@@ -1401,8 +1411,6 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 
   return rep;
 }
-
-extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 
 /* flag != 0 iff we're looking for the p-adic factorization, 
    in which case it is the p-adic precision we want */
@@ -1746,9 +1754,9 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
   while (r < 0) { r = r + Et; t++; }
   while (s < 0) { s = s + Ea; t++; }
 
-  c1 = lift_intern(gpuigs(gmodulcp(alph2, fa), s));
-  c2 = lift_intern(gpuigs(gmodulcp(thet2, fa), r));
-  c3 = gdiv(gmod(gmul(c1, c2), fa), gpuigs(p, t));
+  c1 = lift_intern(gpowgs(gmodulcp(alph2, fa), s));
+  c2 = lift_intern(gpowgs(gmodulcp(thet2, fa), r));
+  c3 = gdiv(gmod(gmul(c1, c2), fa), gpowgs(p, t));
 
   psi = redelt(c3, pmr, pmr);
   phi = gadd(polx[v], psi);
@@ -1897,85 +1905,57 @@ pol_min(GEN mula, GEN Mi2, GEN p)
 static GEN
 kerlens2(GEN x, GEN p)
 {
-  gpmem_t av1, av = avma;
-  long i,j,k,t,nbc,nbl;
-  GEN a,c,l,d,y,q;
-
-  a=gmul(x,gmodulsg(1,p));
-  nbl=nbc=lg(x)-1;
-  c=new_chunk(nbl+1); for (i=1; i<=nbl; i++) c[i]=0;
-  l=new_chunk(nbc+1);
-  d=new_chunk(nbc+1);
-  k = t = 1;
-  while (t<=nbl && k<=nbc)
-  {
-    for (j=1; j<k; j++)
-      for (i=1; i<=nbl; i++)
-	if (i!=l[j])
-	  coeff(a,i,k) = lsub(gmul((GEN)d[j],gcoeff(a,i,k)),
-	                      gmul(gcoeff(a,l[j],k),gcoeff(a,i,j)));
-    t=1; while (t<=nbl && (c[t] || gcmp0(gcoeff(a,t,k)))) t++;
-    if (t<=nbl) { d[k]=coeff(a,t,k); c[t]=k; l[k]=t; k++; }
-  }
-  if (k>nbc) err(bugparier,"kerlens2");
-  y=cgetg(nbc+1,t_COL);
-  y[1]=(k>1)?coeff(a,l[1],k):un;
-  for (q=gun,j=2; j<k; j++)
-  {
-    q=gmul(q,(GEN)d[j-1]);
-    y[j]=lmul(gcoeff(a,l[j],k),q);
-  }
-  if (k>1) y[k]=lneg(gmul(q,(GEN)d[k-1]));
-  for (j=k+1; j<=nbc; j++) y[j]=zero;
-  av1=avma; return gerepile(av,av1,lift(y));
+  gpmem_t av = avma;
+  GEN y = deplin(gmul(x,gmodulsg(1,p)));
+  return gerepileupto(av, lift(y));
 }
 
 static GEN
 kerlens(GEN x, GEN pgen)
 {
   gpmem_t av = avma;
-  long i,j,k,t,nbc,nbl,p,q,*c,*l,*d,**a;
+  long i,j,k,t,nc,nl,p,q,*c,*l,*d,**a;
   GEN y;
 
   if (cmpis(pgen, MAXHALFULONG>>1) > 0)
     return kerlens2(x,pgen);
   /* ici p <= (MAXHALFULONG>>1) ==> long du C */
-  p=itos(pgen); nbl=nbc=lg(x)-1;
-  a=(long**)new_chunk(nbc+1);
-  for (j=1; j<=nbc; j++)
+  p=itos(pgen); nl=nc=lg(x)-1;
+  a=(long**)new_chunk(nc+1);
+  for (j=1; j<=nc; j++)
   {
-    c=a[j]=new_chunk(nbl+1);
-    for (i=1; i<=nbl; i++) c[i]=smodis(gcoeff(x,i,j),p);
+    c=a[j]=new_chunk(nl+1);
+    for (i=1; i<=nl; i++) c[i]=smodis(gcoeff(x,i,j),p);
   }
-  c=new_chunk(nbl+1); for (i=1; i<=nbl; i++) c[i]=0;
-  l=new_chunk(nbc+1);
-  d=new_chunk(nbc+1);
+  c=new_chunk(nl+1); for (i=1; i<=nl; i++) c[i]=0;
+  l=new_chunk(nc+1);
+  d=new_chunk(nc+1);
   k = t = 1;
-  while (t<=nbl && k<=nbc)
+  while (t<=nl && k<=nc)
   {
     for (j=1; j<k; j++)
-      for (i=1; i<=nbl; i++)
+      for (i=1; i<=nl; i++)
 	if (i!=l[j])
           a[k][i] = (d[j]*a[k][i] - a[j][i]*a[k][l[j]]) % p;
-    t=1; while (t<=nbl && (c[t] || !a[k][t])) t++;
-    if (t<=nbl) { d[k]=a[k][t]; c[t]=k; l[k++]=t; }
+    t=1; while (t<=nl && (c[t] || !a[k][t])) t++;
+    if (t<=nl) { d[k]=a[k][t]; c[t]=k; l[k++]=t; }
   }
-  if (k>nbc) err(bugparier,"kerlens");
-  avma=av; y=cgetg(nbc+1,t_COL);
+  if (k>nc) err(bugparier,"kerlens");
+  avma=av; y=cgetg(nc+1,t_COL);
   t=(k>1) ? a[k][l[1]]:1;
-  y[1]=(t>0)? lstoi(t):lstoi(t+p);
+  y[1]=(t>=0)? lstoi(t):lstoi(t+p);
   for (q=1,j=2; j<k; j++)
   {
     q = (q*d[j-1]) % p;
     t = (a[k][l[j]]*q) % p;
-    y[j] = (t>0) ? lstoi(t) : lstoi(t+p);
+    y[j] = (t>=0) ? lstoi(t) : lstoi(t+p);
   }
   if (k>1)
   {
     t = (q*d[k-1]) % p;
     y[k] = (t>0) ? lstoi(p-t) : lstoi(-t);
   }
-  for (j=k+1; j<=nbc; j++) y[j]=zero;
+  for (j=k+1; j<=nc; j++) y[j]=zero;
   return y;
 }
 
@@ -1988,9 +1968,6 @@ lens(GEN nf, GEN p, GEN a)
   GEN mat = eltmul_get_table(nf, a);
   return gerepileupto(av, kerlens(mat,p));
 }
-
-extern GEN det_mod_P_n(GEN a, GEN N, GEN P);
-GEN sylvestermatrix_i(GEN x, GEN y);
 
 /* a in pr | p, norm(pr) = pf. Return 1 if (a,p) = pr, and 0 otherwise */
 static int
@@ -2052,7 +2029,7 @@ prime_two_elt(GEN nf, GEN p, GEN ideal)
   if (!m) return gscalcol_i(p,N);
 
   /* we want v_p(Norm(beta)) = p^f, f = N-m */
-  av = avma; f = N-m; pf = gpuigs(p,f);
+  av = avma; f = N-m; pf = gpowgs(p,f);
   ideal = centermod(ideal, p);
   ideal = concatsp(gscalcol(p,N), ideal);
   ideal = ideal_better_basis(nf, ideal, p);
@@ -2272,8 +2249,7 @@ nfreducemodpr2(GEN nf, GEN x, GEN prhall)
  */
 
 /* given MODULES x and y by their pseudo-bases in HNF, gives a
- * pseudo-basis of the module generated by x and y. For internal use.
- */
+ * pseudo-basis of the module generated by x and y. */
 static GEN
 rnfjoinmodules(GEN nf, GEN x, GEN y)
 {
@@ -2281,25 +2257,25 @@ rnfjoinmodules(GEN nf, GEN x, GEN y)
   GEN p1,p2,z,Hx,Hy,Ix,Iy;
 
   if (x == NULL) return y;
-  Hx=(GEN)x[1]; lx=lg(Hx); Ix=(GEN)x[2];
-  Hy=(GEN)y[1]; ly=lg(Hy); Iy=(GEN)y[2];
+  Hx = (GEN)x[1]; lx = lg(Hx); Ix = (GEN)x[2];
+  Hy = (GEN)y[1]; ly = lg(Hy); Iy = (GEN)y[2];
   i = lx+ly-1;
   z = (GEN)gpmalloc(sizeof(long*)*(3+2*i));
   *z = evaltyp(t_VEC)|evallg(3);
   p1 =  z+3; z[1]=(long)p1; *p1 = evaltyp(t_MAT)|evallg(i);
   p2 = p1+i; z[2]=(long)p2; *p2 = evaltyp(t_VEC)|evallg(i);
 
-  for (i=1; i<lx; i++) { p1[i]=Hx[i]; p2[i]=Ix[i]; }
-  for (   ; i<lx+ly-1; i++) { p1[i]=Hy[i-lx+1]; p2[i]=Iy[i-lx+1]; }
+  for (i=1; i<lx; i++) { p1[i] = Hx[i]; p2[i] = Ix[i]; }
+  p1 += lx-1;
+  p2 += lx-1;
+  for (i=1; i<ly; i++) { p1[i] = Hy[i]; p2[i] = Iy[i]; }
   x = nfhermite(nf,z); free(z); return x;
 }
 
-/* a usage interne, pas de gestion de pile : x et y sont des vecteurs dont
- * les coefficients sont les composantes sur nf[7]; avec reduction mod pr sauf
- * si prhall=NULL
- */
+/* pas de gestion de pile : x et y sont des vecteurs dont les coefficients
+ * sont les composantes sur nf[7]; avec reduction mod pr sauf si prhall=NULL */
 static GEN
-rnfelement_mulidmod(GEN nf, GEN multab, GEN unnf, GEN x, long h, GEN prhall)
+rnfelement_mulidmod(GEN nf, GEN multab, GEN x, long h, GEN prhall)
 {
   long j,k,N;
   GEN p1,c,v,s,znf;
@@ -2307,14 +2283,14 @@ rnfelement_mulidmod(GEN nf, GEN multab, GEN unnf, GEN x, long h, GEN prhall)
   if (h==1) return gcopy(x);
   N = lg(x)-1; multab += (h-1)*N;
   x = lift(x); v = cgetg(N+1,t_COL);
-  znf = gscalcol_i(gzero,lg(unnf)-1);
+  znf = gscalcol_i(gzero,degpol(nf[1]));
   for (k=1; k<=N; k++)
   {
     s = gzero;
     for (j=1; j<=N; j++)
       if (!gcmp0(p1 = (GEN)x[j]) && !gcmp0(c = gcoeff(multab,k,j)))
       {
-        if (!gegal(c,unnf)) p1 = element_mul(nf,p1,c);
+        if (!gcmp1(c)) p1 = element_mul(nf,p1,c);
         s = gadd(s,p1);
       }
     if (s == gzero) s = znf;
@@ -2325,11 +2301,10 @@ rnfelement_mulidmod(GEN nf, GEN multab, GEN unnf, GEN x, long h, GEN prhall)
   return v;
 }
 
-/* a usage interne, pas de gestion de pile : x est un vecteur dont
- * les coefficients sont les composantes sur nf[7]
- */
+/* pas de gestion de pile : x est un vecteur dont les coefficients sont les
+ * composantes sur nf[7] */
 static GEN
-rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
+rnfelement_sqrmod(GEN nf, GEN multab, GEN x, GEN prhall)
 {
   long i,j,k,n;
   GEN p1,c,z,s;
@@ -2347,7 +2322,7 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
       if (!gcmp0(c))
       {
 	p1=element_sqr(nf,(GEN)x[i]);
-	if (!gegal(c,unnf)) p1 = element_mul(nf,p1,c);
+	if (!gcmp1(c)) p1 = element_mul(nf,p1,c);
         s = gadd(s,p1);
       }
       for (j=i+1; j<=n; j++)
@@ -2356,7 +2331,7 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
 	if (!gcmp0(c))
 	{
 	  p1=gmul2n(element_mul(nf,(GEN)x[i],(GEN)x[j]),1);
-	  if (!gegal(c,unnf)) p1 = element_mul(nf,p1,c);
+	  if (!gcmp1(c)) p1 = element_mul(nf,p1,c);
           s = gadd(s,p1);
 	}
       }
@@ -2368,7 +2343,7 @@ rnfelement_sqrmod(GEN nf, GEN multab, GEN unnf, GEN x, GEN prhall)
 }
 
 typedef struct {
-  GEN nf, multab, unnf, prhall;
+  GEN nf, multab, prhall;
   long h;
 } rnfeltmod_muldata;
 
@@ -2377,31 +2352,30 @@ _mul(void *data, GEN x, GEN y/* base; ignored */)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
   (void)y;
-  return rnfelement_mulidmod(D->nf,D->multab,D->unnf,x,D->h,D->prhall);
+  return rnfelement_mulidmod(D->nf,D->multab,x,D->h,D->prhall);
 }
 static GEN
 _sqr(void *data, GEN x)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  return rnfelement_sqrmod(D->nf,D->multab,D->unnf,x,D->prhall);
+  return rnfelement_sqrmod(D->nf,D->multab,x,D->prhall);
 }
 
-/* Compute x^n mod pr in the extension, assume n >= 0 [cf puissii()]*/
+/* Compute x^n mod pr in the extension, assume n >= 0 */
 static GEN
 rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
 {
   gpmem_t av = avma;
-  GEN y, unrnf = (GEN)matId[1];
+  GEN y;
   rnfeltmod_muldata D;
 
-  if (!signe(n)) return unrnf;
+  if (!signe(n)) return gun;
   y = (GEN)matId[h];
  
   D.h = h;
   D.nf    = nf;
   D.multab= multab;
   D.prhall= prhall;
-  D.unnf  = (GEN)unrnf[1];
   y = leftright_pow(y, n, (void*)&D, &_sqr, &_mul);
   return gerepilecopy(av, y);
 }
@@ -2427,13 +2401,13 @@ mymod(GEN x, GEN p)
 }
 
 static GEN
-rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
+rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
 {
-  gpmem_t av=avma,tetpil,av1,lim;
+  gpmem_t av=avma,av1,lim;
   long i,j,k,n,v1,v2,vpol,m,cmpt,sep;
   GEN p,q,q1,prhall,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
   GEN pip,baseIp,baseOp,alpha,matprod,alphainv,matC,matG,vecpro,matH;
-  GEN neworder,H,Hid,alphalistinv,alphalist,prhinv;
+  GEN neworder,H,Hid,alphalistinv,alphalist,prhinv,T;
 
   if (DEBUGLEVEL>1) fprintferr(" treating %Z\n",pr);
   prhall=nfmodprinit(nf,pr);
@@ -2445,13 +2419,14 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
   A=gmael(p1,2,1);
   I=gmael(p1,2,2);
 
-  n=degpol(pol); vpol=varn(pol);
+  T = (GEN)nf[1]; pol = lift(pol);
+  n = degpol(pol); vpol = varn(pol);
   p=(GEN)pr[1]; q=powgi(p,(GEN)pr[4]); pip=(GEN)pr[2];
   q1=q; while (cmpis(q1,n)<0) q1=mulii(q1,q);
 
   multab=cgetg(n*n+1,t_MAT);
   for (j=1; j<=n*n; j++) multab[j]=lgetg(n+1,t_COL);
-  prhinv = idealinv(nf,(GEN)prhall[1]);
+  prhinv = idealinv(nf, pr);
   alphalistinv=cgetg(n+1,t_VEC);
   alphalist=cgetg(n+1,t_VEC);
   A1=cgetg(n+1,t_MAT);
@@ -2465,43 +2440,53 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
     }
     for (i=1; i<=n; i++)
     {
-      if (gegal((GEN)I[i],id)) alphalist[i]=alphalistinv[i]=(long)unnf;
+      if (gegal((GEN)I[i],id)) alphalist[i] = alphalistinv[i] = un;
       else
       {
-	p1=ideal_two_elt(nf,(GEN)I[i]);
-	v1=gcmp0((GEN)p1[1])? EXP220
-                            : element_val(nf,(GEN)p1[1],pr);
-	v2=element_val(nf,(GEN)p1[2],pr);
-	if (v1>v2) p2=(GEN)p1[2]; else p2=(GEN)p1[1];
-	alphalist[i]=(long)p2;
-        alphalistinv[i]=(long)element_inv(nf,p2);
+	p1 = ideal_two_elt(nf,(GEN)I[i]);
+        if (gcmp0((GEN)p1[1]))
+          p2 = (GEN)p1[2];
+        else
+        {
+          v1 = element_val(nf,(GEN)p1[1],pr);
+          v2 = element_val(nf,(GEN)p1[2],pr);
+          p2 = (v1>v2)? (GEN)p1[2]: (GEN)p1[1];
+        }
+	alphalist[i] = (long)p2;
+        alphalistinv[i] = (long)element_inv(nf,p2);
       }
     }
     for (j=1; j<=n; j++)
     {
-      p1=cgetg(n+1,t_COL); A1[j]=(long)p1;
-      for (i=1; i<=n; i++)
-	p1[i] = (long)element_mul(nf,gcoeff(A,i,j),(GEN)alphalist[j]);
-    }
-    Aa=basistoalg(nf,A1); Aainv=lift_intern(ginv(Aa));
-    Aaa=mat_to_vecpol(Aa,vpol);
-    for (i=1; i<=n; i++) for (j=i; j<=n; j++)
-    {
-      long tp;
-      p1 = lift_intern(gres(gmul((GEN)Aaa[i],(GEN)Aaa[j]), pol));
-      tp = typ(p1);
-      if (is_scalar_t(tp) || (tp==t_POL && varn(p1)>vpol))
-	p2 = gmul(p1, (GEN)Aainv[1]);
-      else
-        p2 = gmul(Aainv, pol_to_vec(p1, n));
+      alpha = (GEN)alphalist[j];
+      if (alpha == gun) { A1[j] = A[j]; continue; }
 
-      p3 = algtobasis(nf,p2);
-      for (k=1; k<=n; k++)
-      {
-	coeff(multab,k,(i-1)*n+j) = p3[k];
-	coeff(multab,k,(j-1)*n+i) = p3[k];
-      }
+      p1 = cgetg(n+1,t_COL); A1[j] = (long)p1;
+      for (i=1; i<=n; i++)
+	p1[i] = (long)element_mul(nf,gcoeff(A,i,j),alpha);
     }
+    Aa = basistoalg(nf,A1);
+    Aainv = lift_intern(ginv(Aa));
+    Aaa = lift_intern(mat_to_vecpol(Aa,vpol));
+    for (i=1; i<=n; i++)
+      for (j=i; j<=n; j++)
+      {
+        long tp;
+        p1 = RXQX_rem(gmul((GEN)Aaa[i],(GEN)Aaa[j]), pol, T);
+        tp = typ(p1);
+        if (is_scalar_t(tp) || (tp==t_POL && varn(p1)>vpol))
+          p2 = gmul(p1, (GEN)Aainv[1]);
+        else
+          p2 = mulmat_pol(Aainv, p1);
+
+        for (k=1; k<=n; k++)
+        {
+          GEN c = algtobasis(nf, (GEN)p2[k]);
+          if (isnfscalar(c)) c = (GEN)c[1];
+          coeff(multab,k,(i-1)*n+j) = (long)c;
+          coeff(multab,k,(j-1)*n+i) = (long)c;
+        }
+      }
     R=cgetg(n+1,t_MAT); multabmod = mymod(multab,p);
     R[1] = matId[1];
     for (j=2; j<=n; j++)
@@ -2522,7 +2507,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
       p1=cgetg(n+1,t_COL); matprod[j]=(long)p1;
       for (i=1; i<=n; i++)
       {
-        p2 = rnfelement_mulidmod(nf,multab,unnf, (GEN)alpha[i],j, NULL);
+        p2 = rnfelement_mulidmod(nf,multab, (GEN)alpha[i],j, NULL);
         for (k=1; k<=n; k++)
           p2[k] = lmul((GEN)nf[7], (GEN)p2[k]);
         p1[i] = (long)p2;
@@ -2556,25 +2541,29 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN unnf, GEN id, GEN matId)
       p1[j] = matId[j];
       p2[j] = (long)idealmul(nf,(GEN)I[j],(GEN)alphalistinv[j]);
     }
-    matH=nfhermite(nf,vecpro);
-    p1=algtobasis(nf,gmul(Aa,basistoalg(nf,(GEN)matH[1])));
-    p2=(GEN)matH[2];
+    matH = nfhermite(nf,vecpro);
+    p1 = algtobasis(nf, gmul(Aa, basistoalg(nf,(GEN)matH[1])));
+    p2 = (GEN)matH[2];
 
-    tetpil=avma; neworder=cgetg(3,t_VEC);
-    H=cgetg(n+1,t_MAT); Hid=cgetg(n+1,t_VEC);
+    neworder = cgetg(3,t_VEC);
+    H   = cgetg(n+1,t_MAT);
+    Hid = cgetg(n+1,t_VEC);
     for (j=1; j<=n; j++)
     {
+      alphainv = (GEN)alphalistinv[j];
+      if (alphainv == gun) { H[j] = p1[j]; Hid[j] = p2[j]; continue; }
+
       p3=cgetg(n+1,t_COL); H[j]=(long)p3;
       for (i=1; i<=n; i++)
-	p3[i]=(long)element_mul(nf,gcoeff(p1,i,j),(GEN)alphalistinv[j]);
-      Hid[j]=(long)idealmul(nf,(GEN)p2[j],(GEN)alphalist[j]);
+	p3[i] = (long)element_mul(nf,gcoeff(p1,i,j),alphainv);
+      Hid[j] = (long)idealmul(nf,(GEN)p2[j],(GEN)alphalist[j]);
     }
-    if (DEBUGLEVEL>3)
-      { fprintferr(" new order:\n"); outerr(H); outerr(Hid); }
+    if (DEBUGLEVEL>3) { fprintferr(" new order:\n"); outerr(H); outerr(Hid); }
     if (sep == 2 || gegal(I,Hid))
     {
-      neworder[1]=(long)H; neworder[2]=(long)Hid;
-      return gerepile(av,tetpil,neworder);
+      neworder[1]=(long)H;
+      neworder[2]=(long)Hid;
+      return gerepilecopy(av, neworder);
     }
 
     A=H; I=Hid;
@@ -2650,7 +2639,7 @@ rnfround2all(GEN nf, GEN pol, long all)
   for (i=1; i<=nbidp; i++)
     if (ep[i] > 1)
     {
-      y=rnfordmax(nf,pol,(GEN)list[i],unnf,id,matId);
+      y=rnfordmax(nf,pol,(GEN)list[i],id,matId);
       pseudo = rnfjoinmodules(nf,pseudo,y);
     }
   if (!pseudo)
@@ -2681,7 +2670,7 @@ rnfround2all(GEN nf, GEN pol, long all)
   }
   p4=gun; p3=auxdecomp(content(d),0);
   for (i=1; i<lg(p3[1]); i++)
-    p4 = gmul(p4, gpuigs(gcoeff(p3,i,1), itos(gcoeff(p3,i,2))>>1));
+    p4 = gmul(p4, gpowgs(gcoeff(p3,i,1), itos(gcoeff(p3,i,2))>>1));
   p4 = gsqr(p4); tetpil=avma;
   i = all? 2: 0;
   p1=cgetg(3 + i,t_VEC);
@@ -2940,10 +2929,6 @@ rnfisfree(GEN bnf, GEN order)
 /**		      COMPOSITUM OF TWO NUMBER FIELDS                **/
 /**								     **/
 /**********************************************************************/
-extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-extern GEN DDF2(GEN x, long klim, long hint);
-extern GEN to_polmod(GEN x, GEN mod);
-
 /* modular version */
 GEN
 polcompositum0(GEN A, GEN B, long flall)
@@ -2995,9 +2980,6 @@ compositum2(GEN pol1,GEN pol2)
 {
   return polcompositum0(pol1,pol2,1);
 }
-
-extern int isrational(GEN x);
-extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 
 int
 nfissquarefree(GEN nf, GEN x)
@@ -3420,8 +3402,6 @@ rnfpolred(GEN nf, GEN pol, long prec)
   }
   return gerepilecopy(av,w);
 }
-
-extern GEN vecpol_to_mat(GEN v, long n);
 
 /* given a relative polynomial pol over nf, compute a pseudo-basis for the
  * extension, then an absolute basis */
