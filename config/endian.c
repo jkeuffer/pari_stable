@@ -2,20 +2,20 @@ main()
 {
   if (sizeof(long) == 4)
   {
-    union {double f; unsigned long i[2];} fi;
-    fi.f = 2.;
-    if (fi.i[0]==0 && fi.i[1]==(1UL<<30)) printf("1234\n");
-    else if (fi.i[1]==0 && fi.i[0]==(1UL<<30)) printf("4321\n");
+    union {double d; unsigned long l[2];} x;
+    x.d = 2.;
+    if      (x.l[0]==0 && x.l[1]==(1UL<<30)) printf("1\n");
+    else if (x.l[1]==0 && x.l[0]==(1UL<<30)) printf("0\n");
     else
-      printf("UNKNOWN\n");
+      printf("NOT IEEE (32 bit)\n");
   }
   else
   {
-    union {double f; unsigned long i;} fi;
-    fi.f = 2.;
-    if (fi.i==(1UL<<62)) printf("12345678\n");
+    union {double d; unsigned long l;} x;
+    x.d = 2.;
+    if (x.l==(1UL<<62)) printf("-\n");
     else
-      printf("UNKNOWN\n");
+      printf("NOT IEEE (64 bit)\n");
   }
   exit(0);
 }

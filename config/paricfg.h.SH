@@ -41,7 +41,7 @@ cat >> $file << EOT
 # define PARIINFO "${pretty}${debuginfo}"
 #endif
 
-#define PARI_BYTE_ORDER    ${endian}
+#define PARI_DOUBLE_FORMAT ${doubleformat}
 EOT
 
 case $asmarch in

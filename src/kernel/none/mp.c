@@ -2332,12 +2332,6 @@ karamulir(GEN x, GEN y, long flag)
 #endif
 
 #ifdef LONG_IS_64BIT
-
-#if PARI_BYTE_ORDER == LITTLE_ENDIAN_64 || PARI_BYTE_ORDER == BIG_ENDIAN_64
-#else
-  error... unknown machine
-#endif
-
 GEN
 dbltor(double x)
 {
@@ -2381,16 +2375,14 @@ rtodbl(GEN x)
   return fi.f;
 }
 
-#else
+#else /* LONG_IS_64BIT */
 
-#if   PARI_BYTE_ORDER == LITTLE_ENDIAN
+#if   PARI_DOUBLE_FORMAT == 1
 #  define INDEX0 1
 #  define INDEX1 0
-#elif PARI_BYTE_ORDER == BIG_ENDIAN
+#elif PARI_DOUBLE_FORMAT == 0
 #  define INDEX0 0
 #  define INDEX1 1
-#else
-   error... unknown machine
 #endif
 
 GEN
@@ -2448,7 +2440,7 @@ rtodbl(GEN x)
   fi.i[INDEX1] = (a << (BITS_IN_LONG-expo_len)) | (b >> expo_len);
   return fi.f;
 }
-#endif
+#endif /* LONG_IS_64BIT */
 
 /* Old cgiv without reference count (which was not used anyway)
  * Should be a macro.

@@ -800,12 +800,12 @@ fi
 if test "$fastread" != yes; then
   cat << EOT
 ==========================================================================
-Only ANSI C and C++ compilers are supported. Choosing the GNU compiler
+Only ANSI C and C++ compilers are supported.  Choosing the GNU compiler
 gcc/g++ enables the inlining of kernel routines (about 20% speedup; if you
-use a recent g++, it is a good idea to include the -fpermissive flag).
-If you choose not to use gcc, the C++ version of Pari will be a little
-faster because of general inlining, but can be used in library mode only
-with C++ programs (we **really** recommand using gcc all the way through).
+use g++, it is a good idea to include the -fpermissive flag).  If you choose
+not to use gcc, the C++ version of Pari will be a little faster because of
+general inlining, but can be used in library mode only with C++ programs (we
+**really** recommand using gcc all the way through).
 EOT
   echo $n ..."Which C compiler shall I use ? $c"
   dflt=$CC; rep=; . ./myread
@@ -1092,44 +1092,58 @@ fi
 
 ####################### CONFIGURE - LIBC ####################################
 #
-#  Long integer ?
+#  sizeof(long), double format
 #
-endian=4321;
+doubleformat=4321;
 exe=$osname-$arch-endian$$
-if ($CC $extraflag endian.c -o $exe 2>/dev/null); then
-  endian=`$exe`;
+if ($CC $cflags $extraflag endian.c -o $exe 2>/dev/null); then
+  doubleformat=`$exe`;
 fi
 rm -f $exe $exe$exe_suff
+case "$doubleformat" in
+  *IEEE*)
+    echo "***************************************************************"
+    echo "Your 'double' type does not follow the IEEE754 format. Aborting"
+    echo "PLEASE REPORT! (dbltor/rtodbl need to be fixed)"; exit 1;;
+  -) sizeof_long=8; pretty="$pretty 64-bit version";;
+  *) sizeof_long=4; pretty="$pretty 32-bit version";;
+esac
+echo "Given the previous choices, sizeof(long) is $sizeof_long chars."
 
 if test "$fastread" != yes; then
 cat << EOT
-Determining sizeof(long) and 'double endianness'. PARI assumes doubles are
-stored in IEEE754 format [ sign, exponent, mantissa high, mantissa ]; 'double
-endianness' only matters on 32-bit architecture: assuming a union { double f;
-ulong i[2]; }, are the double exponent and sign stored on the first ulong
-component (4321, Big Endian) or the second one (1234, Little Endian) ? Beware
-that on some processors (e.g ARM) double and long endianness are different.
+If your hardware supports different size of longs (e.g SGI/MIPS), and you
+want to use a different word size than the above. You should probably have
+specified some exotic compilation flag CFLAG (e.g -o32,-n32).
 
-If your hardware supports different size of longs (e.g SGI/MIPS), you can
-decide to use a particular word size by specifying endianness (e.g answer 4321
-instead of the proposed 12345678). You will probably have to specify some
-exotic compilation flag (e.g -o32,-n32).
-============================================================================
 EOT
-  echo $n "What is the internal byte representation of a double ? $c"
-  dflt=$endian; rep='12345678 1234 4321'; . ./myread
-  endian=$ans
+
+  if test $doubleformat != "-"; then
+cat << EOT
+For 32-bit architecture, PARI needs to know the format of your 'double' type.
+PARI assumes doubles are stored in IEEE754 format [ (sign, exponent, mantissa
+high) on one word, (mantissa low) on another ]; assuming a
+  union { double d; ulong l[2]; } x;
+are the double exponent and sign stored on x.i[0] (0) or on x.i[1] (1) ?
+
+Using \$CC \$CFLAGS with
+  CC    =$CC
+  CFLAGS=$cflags
+the answer is: $doubleformat.
+EOT
+  fi
 fi
-echo "The internal byte representation of a double is $endian."
-
-case $endian in
-  *8) sizeof_long=8; pretty="$pretty 64-bit version";;
-  *)  sizeof_long=4; pretty="$pretty 32-bit version";;
+case $doubleformat in
+  0) _format='l[0], l[1]';;
+  1) _format='l[1], l[0]';;
+  -) _format='not needed (64bit)';;
 esac
-
-
+cat <<EOT
+The internal word representation of a double is $_format.
+==========================================================================
+EOT
 #
-# Looking in C lib for some functions.
+# Looking in libc for some functions.
 #
 exe=$osname-$arch-tmp$$
 _has_list=
@@ -1303,7 +1317,7 @@ for variable in\
   rl_appendchar rl_genericbind rl_save_prompt _rl_save_prompt rl_message\
   rl_completion_matches rl_completion_func_t\
   RLINCLUDE RLLIBS\
-  sizeof_long endian\
+  sizeof_long doubleformat\
   gnuplot extralib X11 Xincroot which_graphic_lib gnuplot_libs\
   $_has_list; do
   eval "echo $variable=\'"'$'"$variable\'" \>\> $dflt_conf_file
