@@ -94,6 +94,9 @@ BA  8- renamed mymyrand --> pari_rand31
 BA  2- routines ishiftr, gfloor2n
     3- routine random_bits
 
+  Removed
+    1- macro definition BITS_IN_RANDOM (useless)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.4 (released 12/09/2002):
   Fixed
