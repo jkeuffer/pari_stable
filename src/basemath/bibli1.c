@@ -1696,6 +1696,14 @@ check_condition(double beta, double tau, double rho, int d, int delta, int t)
 {
   int dim = d*delta + t;
 
+  if (DEBUGLEVEL >= 4) 
+    {
+      fprintferr("delta = %d t = %d cond = %lf\n", delta, t, 
+		 d*delta*(delta+1)/2 - beta*delta*dim + 
+		 rho*delta*(delta - 1) / 2
+		 + rho * t * delta + tau*dim*(dim - 1)/2); 
+    }
+
   return (d*delta*(delta+1)/2 - beta*delta*dim + rho*delta*(delta - 1) / 2
 	  + rho * t * delta + tau*dim*(dim - 1)/2 <= 0);
 }
@@ -1733,13 +1741,13 @@ choose_params(GEN P, GEN N, GEN X, GEN B, int *pdelta, int *pt)
 GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 {
-  GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst;
-  int delta, ltop = avma, i, j, row, d, l, dim, t, bnd = 5;
+  GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst, Z;
+  int delta, ltop = avma, i, j, row, d, l, dim, t, bnd = 10;
 
   if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "Coppersmith");
   if (typ(X) != t_INT) X = gfloor(X);
-  if (!B) B = N;
   if (typ(B) != t_INT) B = gfloor(B);
+  if (gcmp0(B)) B = N; else bnd = 1; /* bnd-hack is only for the case B = N */
 
   P = dummycopy(P0); d = degpol(P);
   if (!gcmp1((GEN)P[d+2]))
@@ -1796,10 +1804,14 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
           coeff(M, l, row) = lmulii(gmael(M, row, l), N0);
       if (row >= 1) N0 = mulii(N0, N);
     }
+    /* Z is the upper bound for the L^1 norm of the polynomial, 
+       ie. N^delta if B = N, B^delta otherwise */ 
+    if (B != N) Z = gpowgs(B, delta); else Z = N0; 
+
     if (DEBUGLEVEL >= 2)
     {
       if (DEBUGLEVEL >= 6) fprintferr("Matrix to be reduced:\n%Z\n", M);
-      fprintferr("Entering LLL\nbitsize bound: %ld\n", expi(N0));
+      fprintferr("Entering LLL\nbitsize bound: %ld\n", expi(Z));
       fprintferr("expected shvector bitsize: %ld\n", expi(dethnf_i(M))/dim);
     }
 
@@ -1812,17 +1824,16 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     {
       fprintferr("Candidate: %Z\n", short_pol);
       fprintferr("bitsize Norm: %ld\n", expi(nsp));
-      fprintferr("bitsize bound: %ld\n", expi(mulsi(bnd, N0)));
+      fprintferr("bitsize bound: %ld\n", expi(mulsi(bnd, Z)));
     }
-
-    if (cmpii(nsp, mulsi(bnd, N0)) < 0) break; /* SUCCESS */
+    if (cmpii(nsp, mulsi(bnd, Z)) < 0) break; /* SUCCESS */
 
     /* Failed with the precomputed or supplied value */
     t++; if (t == d) { delta++; t = 1; }
     if (DEBUGLEVEL >= 2)
       fprintferr("Increasing dim, delta = %d t = %d\n", delta, t);
   }
-  bnd = itos(divii(nsp, N0)) + 1;
+  bnd = itos(divii(nsp, Z)) + 1;
 
   while (!signe(short_pol[dim])) dim--;
 
@@ -1848,7 +1859,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
         if (l == lg(sol)) sol = concatsp(sol, z);
       }
     }
-    if (i < bnd) R[2] = (long)addii((GEN)R[2], N0);
+    if (i < bnd) R[2] = (long)addii((GEN)R[2], Z);
   }
   return gerepilecopy(ltop, sol);
 }
