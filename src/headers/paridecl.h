@@ -1570,7 +1570,7 @@ GEN     FpXQ_div(GEN x,GEN y,GEN T,GEN p);
 GEN     FpXQ_ffisom_inv(GEN S,GEN Tp, GEN p);
 GEN     FpXQ_inv(GEN x,GEN T,GEN p);
 GEN     FpXQ_invsafe(GEN x, GEN T, GEN p);
-GEN     FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l);
+GEN     FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l);
 GEN     FpXQ_minpoly(GEN x, GEN T, GEN p);
 GEN     FpXQ_mul(GEN y,GEN x,GEN T,GEN p);
 GEN     FpXQ_pow(GEN x, GEN n, GEN T, GEN p);

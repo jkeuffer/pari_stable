@@ -1297,7 +1297,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 /*                                                                 */
 /*******************************************************************/
 GEN
-FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l)
+FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
 {
   return RgXV_to_RgM(FpXQ_powers(y,m-1,P,l),n);
 }
@@ -1314,7 +1314,7 @@ FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
 {
   pari_sp ltop = avma;
   int n = degpol(T);
-  GEN V, M = FpXQ_matrix_pow(n,n,S,T,p);
+  GEN V, M = FpXQ_matrix_pow(S,n,n,T,p);
   V = FpM_invimage(M, vec_ei(n, 2), p);
   return gerepileupto(ltop, gtopolyrev(V, varn(T)));
 }
@@ -1436,13 +1436,24 @@ FlxqV_Flx_Frobenius(GEN V, GEN P, GEN T, ulong p)
  * TODO: use left-right binary (tricky!)
  */
 GEN
+Flm_Frobenius_pow(GEN M, long d, GEN T, ulong p)
+{
+  pari_sp ltop=avma;
+  long i,l=degpol(T);
+  GEN R, W = (GEN) M[2];
+  for (i = 2; i <= d; ++i) W = Flm_Flv_mul(M,W,p);
+  R=Flxq_matrix_pow(Flv_to_Flx(W,T[2]),l,l,T,p);
+  return gerepileupto(ltop,R);
+}
+
+GEN
 FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   long i,l=degpol(T);
   GEN R, W = (GEN) M[2];
   for (i = 2; i <= d; ++i) W = FpM_FpV_mul(M,W,p);
-  R=FpXQ_matrix_pow(l,l,RgV_to_RgX(W,varn(T)),T,p);
+  R=FpXQ_matrix_pow(RgV_to_RgX(W,varn(T)),l,l,T,p);
   return gerepilecopy(ltop,R);
 }
 
@@ -1523,8 +1534,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,degpol(P),degpol(Q));
   e = u_pvalrem(n, l, &pg);
   avma=ltop;
-  if(!MA) MA=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
-  if(!MB) MB=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
+  if(!MA) MA=FpXQ_matrix_pow(FpXQ_pow(polx[vp],l,P,l),np,np,P,l);
+  if(!MB) MB=FpXQ_matrix_pow(FpXQ_pow(polx[vq],l,Q,l),nq,nq,Q,l);
   A=Ap=zeropol(vp);
   B=Bp=zeropol(vq);
   if (pg > 1)
@@ -1661,7 +1672,13 @@ FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
   n=degpol(P);
   m=n/d;
   if (DEBUGLEVEL>=4) (void)timer2();
-  M=FpM_Frobenius_pow(MP,d,P,l);
+  if (lgefint(l)==3)
+  {
+    ulong p=l[2];
+    M=Flm_to_ZM(Flm_Frobenius_pow(ZM_to_Flm(MP,p),d,ZX_to_Flx(P,p),p));
+  }
+  else
+    M=FpM_Frobenius_pow(MP,d,P,l);
   if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: Frobenius power");
   Tl=gcopy(P); setvarn(Tl,w);
   V=cgetg(m+1,t_VEC);
@@ -1691,8 +1708,8 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
 
   if (d==1) return mkcolcopy(P);
   if (DEBUGLEVEL>=4) (void)timer2();
-  FP=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
-  FQ=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
+  FP=FpXQ_matrix_pow(FpXQ_pow(polx[vp],l,P,l),np,np,P,l);
+  FQ=FpXQ_matrix_pow(FpXQ_pow(polx[vq],l,Q,l),nq,nq,Q,l);
   if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
   FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
   av=avma;
@@ -1723,12 +1740,12 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   else
   {
     E = RgXX_to_RgM(E,np);
-    MP= FpXQ_matrix_pow(np,d,SP,P,l);
+    MP= FpXQ_matrix_pow(SP,np,d,P,l);
     IR= (GEN)FpM_indexrank(MP,l)[1];
     E = rowextract_p(E, IR);
     M = rowextract_p(MP,IR);
     M = FpM_inv(M,l);
-    MQ= FpXQ_matrix_pow(nq,d,SQ,Q,l);
+    MQ= FpXQ_matrix_pow(SQ,nq,d,Q,l);
     M = FpM_mul(MQ,M,l);
     M = FpM_mul(M,E,l);
     M = gerepileupto(av,M);
