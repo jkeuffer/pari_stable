@@ -1016,75 +1016,78 @@ divisors(GEN n)
   tetpil=avma; return gerepile(av,tetpil,sort((GEN)t));
 }
 
-GEN
-core(GEN n)
+static GEN
+_core(GEN n, int all)
 {
-  gpmem_t av=avma,tetpil;
+  gpmem_t av = avma;
   long i;
-  GEN fa,p1,p2,res=gun;
+  GEN fa,p1,p2,c = gun;
 
-  fa=auxdecomp(n,1); p1=(GEN)fa[1]; p2=(GEN)fa[2];
+  fa = auxdecomp(n,all);
+  p1 = (GEN)fa[1];
+  p2 = (GEN)fa[2];
   for (i=1; i<lg(p1); i++)
-    if (mod2((GEN)p2[i])) res = mulii(res,(GEN)p1[i]);
-  tetpil=avma; return gerepile(av,tetpil,icopy(res));
+    if (mod2((GEN)p2[i])) c = mulii(c,(GEN)p1[i]);
+  return gerepileuptoint(av, c);
 }
 
-GEN
-core2(GEN n)
+static GEN
+_core2(GEN n, int all)
 {
-  gpmem_t av=avma,tetpil;
+  gpmem_t av = avma;
   long i;
-  GEN fa,p1,p2,p3,res=gun,res2=gun,y;
+  GEN fa,p1,p2,e,c=gun,f=gun,y;
 
-  fa=auxdecomp(n,1); p1=(GEN)fa[1]; p2=(GEN)fa[2];
+  fa = auxdecomp(n,all);
+  p1 = (GEN)fa[1];
+  p2 = (GEN)fa[2];
   for (i=1; i<lg(p1); i++)
   {
-    p3=(GEN)p2[i];
-    if (mod2(p3)) res=mulii(res,(GEN)p1[i]);
-    if (!gcmp1(p3)) res2=mulii(res2,gpui((GEN)p1[i],shifti(p3,-1),0));
+    e = (GEN)p2[i];
+    if (mod2(e))   c = mulii(c, (GEN)p1[i]);
+    if (!gcmp1(e)) f = mulii(f, powgi((GEN)p1[i], shifti(e,-1)));
   }
-  tetpil=avma; y=cgetg(3,t_VEC);
-  y[1]=(long)icopy(res); y[2]=(long)icopy(res2);
-  return gerepile(av,tetpil,y);
+  y = cgetg(3,t_VEC);
+  y[1] = (long)c;
+  y[2] = (long)f; return gerepilecopy(av, y);
 }
 
+GEN core(GEN n)        { return _core(n,1); }
+GEN corepartial(GEN n) { return _core(n,0); }
+GEN core2(GEN n)       { return _core2(n,1); }
+GEN core2partial(GEN n){ return _core2(n,0); }
+
 GEN
-core0(GEN n,long flag)
-{
-  return flag? core2(n): core(n);
-}
+core0(GEN n,long flag) { return flag? core2(n): core(n); }
+
+static long
+_mod4(GEN c) { long r = mod4(c); if (signe(c) < 0) r = 4-r; return r; }
 
 GEN
 coredisc(GEN n)
 {
-  gpmem_t av=avma,tetpil;
-  long r;
-  GEN p1=core(n);
-
-  r=mod4(p1); if (signe(p1)<0) r = 4-r;
-  if (r==1 || r==4) return p1;
-  tetpil=avma; return gerepile(av,tetpil,shifti(p1,2));
+  gpmem_t av = avma;
+  GEN c = core(n);
+  long r = _mod4(c);
+  if (r==1 || r==4) return c;
+  return gerepileuptoint(av, shifti(c,2));
 }
 
 GEN
 coredisc2(GEN n)
 {
-  gpmem_t av=avma,tetpil;
-  long r;
-  GEN y,p1,p2=core2(n);
-
-  p1=(GEN)p2[1]; r=mod4(p1); if (signe(p1)<0) r=4-r;
-  if (r==1 || r==4) return p2;
-  tetpil=avma; y=cgetg(3,t_VEC);
-  y[1]=lshifti(p1,2); y[2]=lmul2n((GEN)p2[2],-1);
-  return gerepile(av,tetpil,y);
+  gpmem_t av = avma;
+  GEN y = core2(n);
+  GEN c = (GEN)y[1], f = (GEN)y[2];
+  long r = _mod4(c);
+  if (r==1 || r==4) return y;
+  y = cgetg(3,t_VEC);
+  y[1] = lshifti(c,2);
+  y[2] = lmul2n(f,-1); return gerepileupto(av, y);
 }
 
 GEN
-coredisc0(GEN n,long flag)
-{
-  return flag? coredisc2(n): coredisc(n);
-}
+coredisc0(GEN n,long flag) { return flag? coredisc2(n): coredisc(n); }
 
 /***********************************************************************/
 /**                                                                   **/
