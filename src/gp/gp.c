@@ -2357,7 +2357,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
       check_filtre(F);
       return 0;
     }
-    /* received ^C in fgets and comming back from break_loop(),
+    /* received ^C in fgets and coming back from break_loop(),
      * retry (as if "\n" were input) */
     handle_C_C = 0;
   }
@@ -2375,17 +2375,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
   return 1;
 }
 
-/* request one line interactively.
- * Return 0: EOF
- *        1: got one line from readline or infile */
-#ifndef READLINE
-static int
-get_line_from_user(char *prompt, filtre_t *F)
-{
-  pariputs(prompt);
-  return get_line_from_file(prompt,F,infile);
-}
-#else	/* READLINE */
+#ifdef READLINE
 static int
 history_is_new(char *s)
 {
@@ -2399,52 +2389,55 @@ gp_add_history(char *s)
   if (history_is_new(s)) add_history(s);
 }
 
+/* request one line interactively.
+ * Return 0: EOF
+ *        1: got one line from readline or infile */
+static int
+get_line_from_readline(char *prompt, filtre_t *F)
+{
+  Buffer *b = (Buffer*)F->data;
+  char *buf, *s = b->buf;
+  int index, added;
+
+  if (! (buf = gprl_input(b, &s, prompt)) )
+  { /* EOF */
+    pariputs("\n");
+    check_filtre(F);
+    return 0;
+  }
+  /* Put the original read line into history */
+  index = history_length;
+  gp_add_history(buf);	/* Copies the entry */
+
+  added = input_loop(F,buf,NULL,prompt); /* free()s buf */
+  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+
+  s = b->buf;
+  if (*s)
+  {
+    if (added)
+    { /* Remove incomplete lines */
+      int i = history_length;
+      while (i > index) {
+        HIST_ENTRY *e = remove_history(--i);
+        free(e->line); free(e);
+      }
+      gp_add_history(s);
+    }
+  
+    /* update logfile */
+    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+  }
+  return 1;
+}
+#endif
+
 static int
 get_line_from_user(char *prompt, filtre_t *F)
 {
-  if (use_readline)
-  {
-    Buffer *b = (Buffer*)F->data;
-    char *buf, *s = b->buf;
-    int index, added;
-
-    if (! (buf = gprl_input(b, &s, prompt)) )
-    { /* EOF */
-      pariputs("\n");
-      check_filtre(F);
-      return 0;
-    }
-    /* Put the original read line into history */
-    index = history_length;
-    gp_add_history(buf);	/* Copies the entry */
-
-    added = input_loop(F,buf,NULL,prompt); /* free()s buf */
-    unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
-
-    if (*s)
-    {				/* XXXX Better use b->buf ?! */
-      if (added)
-      { /* Remove incomplete lines */
-        int i = history_length;
-        while (i > index) {
-          HIST_ENTRY *e = remove_history(--i);
-          free(e->line); free(e);
-        }
-        gp_add_history(s);
-      }
-    
-      /* update logfile */
-      if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
-    }
-    return 1;
-  }
-  else
-  {
-    pariputs(prompt);
-    return get_line_from_file(prompt,F,infile);
-  }
+  pariputs(prompt);
+  return get_line_from_file(prompt,F,infile);
 }
-#endif
 
 static int
 is_interactive(void)
@@ -2462,7 +2455,14 @@ static int
 read_line(char *promptbuf, filtre_t *F)
 {
   if (is_interactive())
+  {
+#ifdef READLINE
+    if (use_readline)
+      return get_line_from_readline(promptbuf, F);
+    else
+#endif
     return get_line_from_user(promptbuf, F);
+  }
   else
     return get_line_from_file(DFT_PROMPT,F,infile);
 }
