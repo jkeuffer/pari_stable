@@ -1317,7 +1317,14 @@ static GEN
 padic_pol_to_int(GEN f)
 {
   long i, l = lgef(f);
-  f = gdiv(f,content(f));
+  GEN c = content(f);
+  if (gcmp0(c)) /*  O(p^n) can occur */
+  {
+    if (typ(c) != t_PADIC) err(typeer,"padic_pol_to_int");
+    f = gdiv(f, gpowgs((GEN)c[2], valp(c)));
+  }
+  else
+    f = gdiv(f,c);
   for (i=2; i<l; i++)
     switch(typ(f[i]))
     {
@@ -1429,12 +1436,13 @@ apprgen_i(GEN f, GEN a)
   GEN fp,u,p,q,P,res,a0,rac;
   long prec,i,j,k;
 
+  prec = gcmp0(a)? valp(a): precp(a);
+  if (prec <= 1) return _vec(a);
   fp = derivpol(f); u = ggcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
   P = egalii(p,gdeux)? stoi(4): p;
   a0= gmod(a, P);
-  prec = gcmp0(a)? valp(a): precp(a);
 #if 0 /* assumption */
   if (!gcmp0(FpX_eval(f,a0,P))) err(rootper2);
 #endif
@@ -1972,7 +1980,7 @@ factorpadic4(GEN f,GEN p,long prec)
       continue;
     }
     /* use Round 4 */
-    mfx = ggval(discsr(fx),p);
+    mfx = ggval(ZX_disc(fx),p);
     r = lg(w)-1;
     g = (GEN)w[r];
     p2 = (r == 1)? nilord(p,fx,mfx,g,pr)
