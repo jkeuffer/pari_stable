@@ -63,6 +63,7 @@ long   expi(GEN x);
 double gtodouble(GEN x);
 GEN    icopy(GEN x);
 GEN    icopy_av(GEN x, GEN y);
+GEN    itor(GEN x, long prec);
 long   itos(GEN x);
 ulong  itou(GEN x);
 GEN    modis(GEN x, long y);
@@ -89,6 +90,7 @@ GEN    resis(GEN x, long y);
 GEN    ressi(long x, GEN y);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
+GEN    stor(long x, long prec);
 GEN    stoi(long x);
 GEN    subii(GEN x, GEN y);
 GEN    subir(GEN x, GEN y);
@@ -721,25 +723,19 @@ gtodouble(GEN x)
 }
 
 INLINE GEN
-realzero_bit(long bitprec)
-{
-  GEN x=cgetr(2);
-  x[1]=evalexpo(bitprec);
-  return x;
-}
+realzero_bit(long bitprec) { GEN x=cgetr(2); x[1]=evalexpo(bitprec); return x; }
 
 INLINE GEN
-realzero(long prec)
-{
-  return realzero_bit(-bit_accuracy(prec));
-}
+realzero(long prec) { return realzero_bit(-bit_accuracy(prec)); }
 
 INLINE GEN
-realun(long prec)
-{
-  GEN x=cgetr(prec); affsr(1,x);
-  return x;
-}
+realun(long prec) { GEN x=cgetr(prec); affsr(1,x); return x; }
+
+INLINE GEN
+stor(long s, long prec) { GEN z = cgetr(prec); affsr(s,z); return z; }
+
+INLINE GEN
+itor(GEN x, long prec) { GEN z = cgetr(prec); affir(x,z); return z; }
 
 INLINE long
 addssmod(long a, long b, long p)
