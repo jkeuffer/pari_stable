@@ -948,8 +948,8 @@ get_periods(GEN e, SL2_red *T)
   if (is_vec_t(tx))
     switch(lg(e))
     {
-      case  3: T->w1=(GEN)e[1];  T->w2=(GEN)e[2]; red_modSL2(T); return 1;
-      case 20: T->w1=(GEN)e[16]; T->w2=(GEN)e[15];red_modSL2(T); return 1;
+      case  3: T->w1 = (GEN)e[1];  T->w2 = (GEN)e[2]; red_modSL2(T); return 1;
+      case 20: T->w1 = (GEN)e[15]; T->w2 = (GEN)e[16];red_modSL2(T); return 1;
     }
   return 0;
 }
