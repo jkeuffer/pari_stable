@@ -1345,6 +1345,8 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     if (!chi) return NULL;
   }
   if (d) chi = rescale_pol(chi, d);
+  /* can happen only if gamma is incorrect (not an integer) */
+  if (!gcmp1(Q_denom(chi))) return NULL;
   if (pp) chi = centermod(chi, pp);
   return chi;
 }
