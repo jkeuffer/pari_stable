@@ -1315,7 +1315,7 @@ mpinvmod(GEN a, GEN m)
 /**                                                                 **/
 /*********************************************************************/
 GEN resiimul(GEN x, GEN y);
-GEN resmod2n(GEN x, GEN y);
+GEN resmod2n(GEN x, long y);
 GEN _resii(GEN x, GEN y) { return resii(x,y); }
 
 GEN
