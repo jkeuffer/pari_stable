@@ -1965,17 +1965,20 @@ idealintersect(GEN nf, GEN x, GEN y)
   long lz,i,N;
   GEN z,dx,dy;
 
-  nf=checknf(nf); N=degpol(nf[1]);
-  if (idealtyp(&x,&z)!=t_MAT || lg(x)!=N+1) x=idealhermite_aux(nf,x);
-  if (idealtyp(&y,&z)!=t_MAT || lg(y)!=N+1) y=idealhermite_aux(nf,y);
+  nf = checknf(nf); N = degpol(nf[1]);
+  if (idealtyp(&x,&z) != t_MAT || lg(x) != N+1) x = idealhermite_aux(nf,x);
+  if (idealtyp(&y,&z) != t_MAT || lg(y) != N+1) y = idealhermite_aux(nf,y);
   if (lg(x) == 1 || lg(y) == 1) { avma = av; return cgetg(1, t_MAT); }
-  dx=denom(x); if (!gcmp1(dx))   y = gmul(y,dx);
-  dy=denom(y); if (!gcmp1(dy)) { x = gmul(x,dy); dx = mulii(dx,dy); }
-  z = kerint(concatsp(x,y)); lz=lg(z);
+  x = Q_remove_denom(x, &dx);
+  y = Q_remove_denom(y, &dy);
+  if (dx) y = gmul(y, dx);
+  if (dy) x = gmul(x, dy);
+  dx = mul_content(dx,dy);
+  z = kerint(concatsp(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = gmul(x,z);
-  z = hnfmodid(z, glcm(gcoeff(x,1,1), gcoeff(y,1,1)));
-  if (!gcmp1(dx)) z = gdiv(z,dx);
+  z = hnfmodid(z, mpppcm(gcoeff(x,1,1), gcoeff(y,1,1)));
+  if (dx) z = gdiv(z,dx);
   return gerepileupto(av,z);
 }
 
