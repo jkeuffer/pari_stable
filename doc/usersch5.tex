@@ -1827,6 +1827,12 @@ repeatedly called on the polynomial's coefficients.
 
 \fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
 
+\fun{GEN}{FqV_to_FlxC}{GEN x, GEN T, GEN p}, converts coefficients in Fq to
+coefficient in Flx, result being a column vector.
+
+\fun{GEN}{FqM_to_FlxM}{GEN x, GEN T, GEN p}, converts coefficients in Fq to
+coefficient in Flx.
+
 \subsubsec{From single precision}
 
 \fun{GEN}{Flx_to_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of non-negative

@@ -989,6 +989,30 @@ FqV_red(GEN z, GEN T, GEN p)
   return res;
 }
 
+GEN
+FqV_to_FlxC(GEN v, GEN T, GEN pp)
+{
+  long j, N = lg(v);
+  long vT = varn(T);
+  ulong p = pp[2];
+  GEN y = cgetg(N, t_COL);
+  for (j=1; j<N; j++) 
+    y[j] = (long)(typ(v[j])==t_INT?  Z_to_Flx((GEN)v[j], p, vT)
+                                  : ZX_to_Flx((GEN)v[j], p));
+  return y;
+}
+
+GEN
+FqM_to_FlxM(GEN x, GEN T, GEN pp)
+{
+  long j, n = lg(x);
+  GEN y = cgetg(n,t_MAT);
+  if (n == 1) return y;
+  for (j=1; j<n; j++) 
+    y[j] = (long)FqV_to_FlxC((GEN)x[j], T, pp);
+  return y;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       n-th ROOT in Fq                           */
