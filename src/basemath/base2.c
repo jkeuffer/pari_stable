@@ -2781,7 +2781,7 @@ rnfisfree(GEN bnf, GEN order)
 GEN
 polcompositum0(GEN pol1, GEN pol2, long flall)
 {
-  long av=avma,tetpil,i,v,a,l;
+  long av=avma,i,v,a,l;
   GEN pro1,p1,p2,fa,rk,y;
 
   if (typ(pol1)!=t_POL || typ(pol2)!=t_POL) err(typeer,"polcompositum0");
@@ -2814,14 +2814,14 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
     l=lg(fa); y=cgetg(l,t_VEC);
     for (i=1; i<l; i++)
     {
-      GEN v = cgetg(5,t_VEC); y[i] = (long)v;
-      v[1] = fa[i]; 
-      p1=gmodulcp(polx[v],(GEN)fa[i]);
+      GEN w = cgetg(5,t_VEC); y[i] = (long)w;
+      w[1] = fa[i]; 
+      p1=gmodulcp(polx[w],(GEN)fa[i]);
       p2=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p1),
                      gsubst((GEN)rk[3],MAXVARN,p1)));
-      v[2] = (long)p2;
-      v[3] = ladd(p1,gmulsg(a,p2));
-      v[4] = lstoi(-a);
+      w[2] = (long)p2;
+      w[3] = ladd(p1,gmulsg(a,p2));
+      w[4] = lstoi(-a);
     }
   }
   return gerepileupto(av, gcopy(y));
