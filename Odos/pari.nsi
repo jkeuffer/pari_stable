@@ -30,9 +30,10 @@ Section "pari (required)" SecCopy
   File "..\misc\tex2mail"
   File "..\Ocygwin-i686\libpari-2.2.dll"
   File "\cygwin\bin\cygwin1.dll"
-  File "\cygwin\bin\cygncurses7.dll"
-  File "\cygwin\bin\cygreadline5.dll"
-  File "\cygwin\bin\cygperl5_8_0.dll"
+  File "\cygwin\bin\cygncurses-8.dll"
+  File "\cygwin\bin\cygreadline6.dll"
+  File "\cygwin\bin\cygperl5_8_5.dll"
+  File "\cygwin\bin\cygcrypt-0.dll"
   File "\cygwin\bin\perl.exe"
 
   WriteRegStr HKCU "Software\PARI" "" $INSTDIR
@@ -69,7 +70,7 @@ Section "examples" SecEX
   File "..\examples\Inputrc"
   File "..\examples\*.gp"
   File "..\examples\*.c"
-  File "..\examples\Makefile"
+  File "..\examples\Makefile.cygwin-i686"
 SectionEnd
 
 Function .onInstSuccess
@@ -120,10 +121,11 @@ Section "Uninstall"
 
   Delete "$INSTDIR\perl.exe"
   Delete "$INSTDIR\cygwin1.dll"
-  Delete "$INSTDIR\cygncurses7.dll"
-  Delete "$INSTDIR\cygreadline5.dll"
+  Delete "$INSTDIR\cygncurses-8.dll"
+  Delete "$INSTDIR\cygreadline6.dll"
   Delete "$INSTDIR\Uninstall.exe"
-  Delete "$INSTDIR\cygperl5_8_0.dll"
+  Delete "$INSTDIR\cygperl5_8_5.dll"
+  Delete "$INSTDIR\cygcrypt-0.dll"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\data"
 
