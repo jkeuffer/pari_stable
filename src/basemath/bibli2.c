@@ -1055,6 +1055,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   long i,j,indxt,ir,l,tx=typ(x),lx=lg(x);
   GEN q,y,indx;
 
+  if (tx == t_LIST) { lx = lgeflist(x)-1; tx = t_VEC; x++; }
   if (!is_matvec_t(tx) && tx != t_VECSMALL) err(typeer,"gen_sort");
   if (flag & cmp_C) tx = t_VECSMALL;
   else if (flag & cmp_IND) tx = t_VEC;
@@ -1076,7 +1077,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
 
   ir = lx-1; l = (ir>>1)+1;
   for(;;)
-  {
+  { /* HeapSort */
     if (l > 1) indxt = indx[--l];
     else
     {

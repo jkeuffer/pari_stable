@@ -1870,15 +1870,13 @@ listconcat(GEN L1, GEN L2)
 GEN
 listsort(GEN L, long flag)
 {
-  long i, c = L[1], lx = lgeflist(L)-1;
+  long i, c, lx = lgeflist(L)-1;
   pari_sp av = avma;
   GEN perm, vec, l;
 
   if (typ(L) != t_LIST) err(typeer,"listsort");
-  vec = L+1;
-  vec[0] = evaltyp(t_VEC) | evallg(lx);
-  perm = sindexsort(vec);
-  L[1] = c; l = cgetg(lx,t_VEC);
+  perm = sindexsort(L);
+  l = cgetg(lx,t_VEC); vec = L+1;
   for (i=1; i<lx; i++) l[i] = vec[perm[i]];
   if (flag)
   {
