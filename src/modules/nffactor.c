@@ -1167,7 +1167,8 @@ rnfdedekind(GEN nf,GEN T,GEN pr)
       nf_pol_divres(nf,nf_pol_mul(nf,pal,nfx),T,&pal);
     }
     base[2] = lmul((GEN)base[2], p);
-    base = nfhermitemod(nf,base, nfdetint(nf,base));
+    base = nfhermitemod(nf,base, idealmul(nf, gpowgs(p, m), 
+					  idealpow(nf, prinv, stoi(d)))); 
     base[2] = ldiv((GEN)base[2], p);
   }
   res[2]=(long)base; return gerepileupto(av, gcopy(res));
