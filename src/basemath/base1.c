@@ -37,8 +37,7 @@ extern ulong smulss(ulong x, ulong y, ulong *rem);
 void
 checkrnf(GEN rnf)
 {
-  if (typ(rnf)!=t_VEC) err(idealer1);
-  if (lg(rnf)!=12) err(idealer1);
+  if (typ(rnf)!=t_VEC || lg(rnf)!=12) err(idealer1);
 }
 
 GEN
