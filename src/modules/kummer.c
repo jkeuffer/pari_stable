@@ -994,7 +994,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   for (j=1; j<lW; j++) vecW[j] = (long)famat_factorback(vselmer, (GEN)P[j]);
   /* step 6 */
   if (DEBUGLEVEL>2) fprintferr("Step 6\n");
-  Q = FpM_ker(gsubgs(gtrans(Tc), g), gell);
+  Q = FpM_ker(gsubgs(gtrans_i(Tc), g), gell);
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
   p1 = RgX_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
