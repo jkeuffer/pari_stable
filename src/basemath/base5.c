@@ -327,15 +327,7 @@ rnfelementreltoabs(GEN rnf,GEN x)
     case t_POLMOD:
       x=lift_to_pol(x); /* fall through */
     case t_POL:
-      if (gvar(x) > va)
-      {
-	if (gcmp0(x)) {x=cgetg(2,t_POL); x[1]=evalvarn(va) | evallgef(2);}
-	else
-	{
-	  p1=cgetg(3,t_POL); p1[1]=evalvarn(va) | evallgef(3) | evalsigne(1);
-	  p1[2]=(long)x; x=p1;
-	}
-      }
+      if (gvar(x) > va) x = scalarpol(x,va);
       p1=(GEN)rnf[11]; polabs=(GEN)p1[1]; alpha=(GEN)p1[2]; k=(GEN)p1[3];
       if (typ(alpha) == t_INT)
 	teta=gmodulcp(gsub(polx[va],gmul(k,alpha)),polabs);
