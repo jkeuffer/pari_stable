@@ -959,15 +959,6 @@ subfields_poldata(GEN T, struct poldata *PD)
   }
 }
 
-static long
-grouporder(GEN G)
-{
-  GEN Go = (GEN)G[2];
-  long i, l = lg(Go), o = 1;
-  for (i=1; i<l; i++) o *= Go[i];
-  return o;
-}
-
 GEN
 subfields(GEN nf,GEN d)
 {
@@ -993,7 +984,7 @@ subfields(GEN nf,GEN d)
     for (i=1; i<l; i++)
     {
       GEN H = (GEN)L[i];
-      if (grouporder(H) == o)
+      if (group_order(H) == o)
         F[k++] = (long) galoisfixedfield(G, (GEN)H[1], 0, v0);
     }
     setlg(F, k);
