@@ -4265,14 +4265,14 @@ mpsqrtl(GEN a)
 void
 shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh)
 {
-    if (sh) {				/* shift_words_r() works */
-	register ulong sh_complement = BITS_IN_LONG - sh;
+  if (sh) {				/* shift_words_r() works */
+    register ulong sh_complement = BITS_IN_LONG - sh;
 
-	shift_words_r(target, source, source_end, prepend, sh, sh_complement);
-    } else {
-	int i;
+    shift_words_r(target, source, source_end, prepend, sh, sh_complement);
+  } else {
+    int i;
 
-	for (i=0; i < source_end - source; i++)
-	    target[i] = source[i];
-    }
+    for (i=0; i < source_end - source; i++)
+      target[i] = source[i];
+  }
 }
