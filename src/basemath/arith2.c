@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN arith_proto(long f(GEN), GEN x, int do_error);
 extern GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
+extern GEN arith_proto2gs(long f(GEN,long), GEN x, long y);
 extern GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 extern GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 extern GEN garith_proto3ggs(GEN f(GEN,GEN,long), GEN x, GEN y, long z);
@@ -2468,16 +2469,10 @@ bittest(GEN x, long n)
   return u? 1: 0;
 }
 
-static long
-bittestg(GEN x, GEN n)
-{
-  return bittest(x,itos(n));
-}
-
 GEN
 gbittest(GEN x, GEN n)
 {
-  return arith_proto2(bittestg,x,n);
+  return arith_proto2gs(bittest,x,itos(n));
 }
 
 /***********************************************************************/
@@ -2488,19 +2483,25 @@ gbittest(GEN x, GEN n)
 /***********************************************************************/
 extern GEN int_normalize(GEN x, long known_zero_words);
 
+INLINE GEN
+inegate(GEN z)
+{
+  return subsi(-1,z);
+}
+
 /* Truncate a non-negative integer to a number of bits.  */
 static GEN
-ibittrunc(GEN x, long bits, long normalized)
+ibittrunc(GEN x, long bits)
 {
     int xl = lgefint(x) - 2;
     int len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG);
     int known_zero_words;
 
-    if (xl < len_out && normalized)
+    if (xl < len_out)
         return x;
         /* Check whether mask is trivial */
     if (!(bits & (BITS_IN_LONG - 1))) {
-	if (xl == len_out && normalized)
+	if (xl == len_out)
 	    return x;
     } else if (len_out <= xl)
     {
@@ -2519,45 +2520,6 @@ ibittrunc(GEN x, long bits, long normalized)
     return int_normalize(x, known_zero_words);
 }
 
-/* Increment/decrement absolute value of non-zero integer in place.
-   It is assumed that the increment will not increase the length.
-   Decrement may result in a non-normalized value.
-   Returns 1 if the increment overflows (thus the result is 0). */
-static int
-incdec(GEN x, long incdec)
-{
-  long i, *xl;
-  long len = lgefint(x)-2;
-  const ulong uzero = 0;
-
-  xl = int_LSW(x);
-  if (incdec == 1)
-  {
-    for (i=1;i<len;i++)
-    {
-      xl=int_nextW(xl);
-      if ((ulong)*xl != ~uzero) {
-        (*xl)++;
-        return 0;
-      }
-      *xl = 0;
-    }
-    return 1;
-  } else
-  {
-    for (i=1;i<len;i++)
-    {
-      xl=int_nextW(xl);
-      if (*xl != 0) {
-        (*xl)--;
-        return 0;
-      }
-      *xl = (long)~uzero;
-    }
-    return 0;
-  }
-}
-
 GEN
 gbitneg(GEN x, long bits)
 {
@@ -2569,15 +2531,14 @@ gbitneg(GEN x, long bits)
     if (bits < -1)
         err(talker, "negative exponent in bitwise negation");
     if (bits == -1)
-        return gsub(gneg(gun),x);
+        return inegate(x);
     if (bits == 0)
 	return gzero;
     if (signe(x) == -1) {		/* Consider as if mod big power of 2 */
-	x = icopy(x);
-	setsigne(x, 1);
-	incdec(x, -1);
-	/* Now truncate this! */
-	return ibittrunc(x, bits, *int_MSW(x));
+        pari_sp ltop=avma;
+        x = inegate(x);
+	x = ibittrunc(x, bits);
+        return gerepileuptoint(ltop, x);
     }
     xl = lgefint(x);
     len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
@@ -2591,12 +2552,12 @@ gbitneg(GEN x, long bits)
 	  *outp = ~uzero;
 	else
 	  *outp = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
-	for (i = 1; i < len_out - xl; i++)
+	for (i = 3; i < len_out - xl + 2; i++)
         {
           outp=int_precW(outp);
           *outp = ~uzero;
         }
-	while (i < len_out)
+	for (     ; i < len_out; i++)
         {
           outp=int_precW(outp);
 	  *outp = ~*xp;
@@ -2608,12 +2569,12 @@ gbitneg(GEN x, long bits)
     x = icopy(x);
     for (i = 2; i < xl; i++)
 	x[i] = ~x[i];
-    return ibittrunc(x, bits, *int_MSW(x));
+    return ibittrunc(x, bits);
 }
 
 /* bitwise 'and' of two positive integers (any integers, but we ignore sign).
  * Inputs are not necessary normalized. */
-static GEN
+GEN
 ibitand(GEN x, GEN y)
 {
   long lx, ly, lout;
@@ -2621,6 +2582,7 @@ ibitand(GEN x, GEN y)
   GEN out;
   long i;
 
+  if (!signe(x) || !signe(y)) return gzero;
   lx=lgefint(x); ly=lgefint(y);
   lout = min(lx,ly);
   xp = int_LSW(x);
@@ -2644,15 +2606,16 @@ ibitand(GEN x, GEN y)
 
 #define swaplen(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
-/* bitwise 'or' of two positive integers (any integers, but we ignore sign).
- * Inputs are not necessary normalized. */
-static GEN
+/* bitwise 'or' of absolute values of two integers */
+GEN
 ibitor(GEN x, GEN y)
 {
   long lx, ly;
   long *xp, *yp, *outp;
   GEN  out;
   long i;
+  if (!signe(x)) return absi(y);
+  if (!signe(y)) return absi(x);
 
   lx=lgefint(x); ly=lgefint(y);
   if (lx < ly)
@@ -2683,15 +2646,16 @@ ibitor(GEN x, GEN y)
   return out;
 }
 
-/* bitwise 'xor' of two positive integers (any integers, but we ignore sign).
- * Inputs are not necessary normalized. */
-static GEN
+/* bitwise 'xor' of absolute values of two integers */
+GEN
 ibitxor(GEN x, GEN y)
 {
   long lx, ly;
   long *xp, *yp, *outp;
   GEN  out;
   long i;
+  if (!signe(x)) return absi(y);
+  if (!signe(y)) return absi(x);
 
   lx=lgefint(x); ly=lgefint(y);
   if (lx < ly)
@@ -2721,16 +2685,17 @@ ibitxor(GEN x, GEN y)
   return out;
 }
 
-/* bitwise negated 'implies' of two positive integers (any integers, but we
- * ignore sign).  "Neg-Implies" is x & ~y unless "negated".
- * Inputs are not necessary normalized. */
-static GEN
+/* bitwise 'negimply' of absolute values of two integers */
+/* "negimply(x,y)" is ~(x => y) == ~(~x | y) == x & ~y   */
+GEN
 ibitnegimply(GEN x, GEN y)
 {
   long lx, ly, lout, lin;
   long *xp, *yp, *outp;
   GEN out;
   long i;
+  if (!signe(x)) return gzero;
+  if (!signe(y)) return absi(x);
 
   lx=lgefint(x); ly=lgefint(y);
   lin = min(lx,ly);
@@ -2766,154 +2731,118 @@ ibitnegimply(GEN x, GEN y)
   return out;
 }
 
-static GEN
-inegate_inplace(GEN z, pari_sp ltop)
-{
-  long o;
-
-  /* Negate z */
-  o = incdec(z, 1);                     /* Can overflow z... */
-  setsigne(z, -1);
-  if (!o)
-      return z;
-  else if (lgefint(z) == 2)
-      setsigne(z, 0);
-  incdec(z,-1);                 /* Restore a normalized value */
-  return gerepileupto(ltop, subis(z,1));
-}
-
 GEN
 gbitor(GEN x, GEN y)
 {
-  pari_sp ltop;
+  pari_sp ltop=avma;
   long sx,sy;
   GEN z;
 
   if (typ(x) != t_INT || typ(y) != t_INT)
       err(typeer, "bitwise or");
-  sx=signe(x); if (!sx) return icopy(y);
-  sy=signe(y); if (!sy) return icopy(x);
-  if (sx == 1) {
-      if (sy == 1)
-	  return ibitor(x,y);
-      goto posneg;
-  } else if (sy == -1) {
-      ltop = avma;
-      incdec(x, -1); incdec(y, -1);
-      z = ibitand(x,y);
-      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
-  } else {
-      z = x; x = y; y = z;
-      /* x is positive, y is negative.  The result will be negative. */
-    posneg:
-      ltop = avma;
-      incdec(y, -1);
-      z = ibitnegimply(y,x);            /* ~x & y */
-      incdec(y, 1);
+  sx=signe(x); sy=signe(y);
+  switch (((sx>=0)<<1) | (sy>=0))
+  {
+  case 3: /*1,1*/
+    return ibitor(x,y);
+  case 2: /*1,-1*/
+      z = ibitnegimply(inegate(y),x);
+      break;
+  case 1: /*-1,1*/
+      z = ibitnegimply(inegate(x),y);
+      break;
+  case 0: /*-1,-1*/
+      z = ibitand(inegate(x),inegate(y));
+      break;
+  default:
+      return NULL;
   }
-  return inegate_inplace(z, ltop);
+  return gerepileupto(ltop,inegate(z));
 }
 
 GEN
 gbitand(GEN x, GEN y)
 {
-  pari_sp ltop;
+  pari_sp ltop=avma;
   long sx,sy;
   GEN z;
 
   if (typ(x) != t_INT || typ(y) != t_INT)
       err(typeer, "bitwise and");
-  sx=signe(x); if (!sx) return gzero;
-  sy=signe(y); if (!sy) return gzero;
-  if (sx == 1) {
-      if (sy == 1)
-          return ibitand(x,y);
-      goto posneg;
-  } else if (sy == -1) {
-      ltop = avma;
-      incdec(x, -1); incdec(y, -1);
-      z = ibitor(x,y);
-      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
-      return inegate_inplace(z, ltop);
-  } else {
-      z = x; x = y; y = z;
-      /* x is positive, y is negative.  The result will be positive. */
-    posneg:
-      ltop = avma;
-      incdec(y, -1);
-      /* x & ~y */
-      z = ibitnegimply(x,y);            /* x & ~y */
-      incdec(y, 1);
-      return z;
+  sx=signe(x); sy=signe(y); 
+  switch (((sx>=0)<<1) | (sy>=0))
+  {
+  case 3: /*1,1*/
+    return ibitand(x,y);
+  case 2: /*1,-1*/
+      z = ibitnegimply(x,inegate(y));
+      break;
+  case 1: /*-1,1*/
+      z = ibitnegimply(y,inegate(x));
+      break;
+  case 0: /*-1,-1*/
+      z = inegate(ibitor(inegate(x),inegate(y)));
+      break;
+  default:
+      return NULL;
   }
+  return gerepileupto(ltop,z);
 }
 
 GEN
 gbitxor(GEN x, GEN y)
 {
-  pari_sp ltop;
+  pari_sp ltop=avma;
   long sx,sy;
   GEN z;
 
   if (typ(x) != t_INT || typ(y) != t_INT)
       err(typeer, "bitwise xor");
-  sx=signe(x); if (!sx) return icopy(y);
-  sy=signe(y); if (!sy) return icopy(x);
-  if (sx == 1) {
-      if (sy == 1)
-	  return ibitxor(x,y);
-      goto posneg;
-  } else if (sy == -1) {
-      incdec(x, -1); incdec(y, -1);
-      z = ibitxor(x,y);
-      incdec(x, 1); incdec(y, 1);	/* Restore x and y... */
-      return z;
-  } else {
-      z = x; x = y; y = z;
-      /* x is positive, y is negative.  The result will be negative. */
-    posneg:
-      ltop = avma;
-      incdec(y, -1);
-      /* ~(x ^ ~y) == x ^ y */
-      z = ibitxor(x,y);
-      incdec(y, 1);
+  sx=signe(x); sy=signe(y); 
+  switch (((sx>=0)<<1) | (sy>=0))
+  {
+  case 3: /*1,1*/
+    return ibitxor(x,y);
+  case 2: /*1,-1*/
+      z = inegate(ibitxor(x,inegate(y)));
+      break;
+  case 1: /*-1,1*/
+      z = inegate(ibitxor(inegate(x),y));
+      break;
+  case 0: /*-1,-1*/
+      z = ibitxor(inegate(x),inegate(y));
+      break;
+  default:
+      return NULL;
   }
-  return inegate_inplace(z, ltop);
+  return gerepileupto(ltop,z);
 }
 
 GEN
 gbitnegimply(GEN x, GEN y)              /* x & ~y */
 {
-  pari_sp ltop;
+  pari_sp ltop=avma;
   long sx,sy;
   GEN z;
 
   if (typ(x) != t_INT || typ(y) != t_INT)
       err(typeer, "bitwise negated imply");
-  sx=signe(x); if (!sx) return gzero;
-  sy=signe(y); if (!sy) return icopy(x);
-  if (sx == 1) {
-      if (sy == 1)
-          return ibitnegimply(x,y);
-      /* x is positive, y is negative.  The result will be positive. */
-      incdec(y, -1);
-      z = ibitand(x,y);
-      incdec(y, 1);
-      return z;
-  } else if (sy == -1) {
-      /* both negative.  The result will be positive. */
-      incdec(x, -1); incdec(y, -1);
-      /* ((~x) & ~(~y)) == ~x & y */
-      z = ibitnegimply(y,x);
-      incdec(x, 1); incdec(y, 1);       /* Restore x and y... */
-      return z;
-  } else {
-      /* x is negative, y is positive.  The result will be negative. */
-      ltop = avma;
-      incdec(x, -1);
-      /* ~((~x) & ~y) == x | y */
-      z = ibitor(x,y);
-      incdec(x, 1);
+  sx=signe(x); sy=signe(y); 
+  switch (((sx>=0)<<1) | (sy>=0))
+  {
+  case 3: /*1,1*/
+    return ibitnegimply(x,y);
+  case 2: /*1,-1*/
+      z = ibitand(x,inegate(y));
+      break;
+  case 1: /*-1,1*/
+      z = inegate(ibitor(y,inegate(x)));
+      break;
+  case 0: /*-1,-1*/
+      z = ibitnegimply(inegate(y),inegate(x));
+      break;
+  default:
+      return NULL;
   }
-  return inegate_inplace(z, ltop);
+  return gerepileupto(ltop,z);
 }
