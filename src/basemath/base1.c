@@ -1426,7 +1426,8 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     if (DEBUGLEVEL) msgtimer("round4");
     r1 = sturm(x);
   }
-  else if (typ(x) == t_VEC && lg(x)==3 && typ(x[1])==t_POL)
+  else if (typ(x) == t_VEC && lg(x)==3 
+           && typ(x[1])==t_POL && lg(x[2])-1 == degpol(x[1]))
   { /* monic integral polynomial + integer basis */
     GEN mat;
     bas = (GEN)x[2]; x = (GEN)x[1];
