@@ -183,6 +183,7 @@ BA 21- type() does not allow to change object types anymore.
    23- more informative error messages in concat()
    24- in affsi / affui (s, z) : do not check that lg(z) >= 3
    25- replace gexpo(t_QUAD) by a rough aproximation (as t_COMPLEXE): faster
+   26- for P a polynomial with t_INTMOD coefficients, define content(P) = 1
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

@@ -3127,7 +3127,7 @@ content(GEN x)
     {
       lx--; p1=ggcd(p1,(GEN)x[lx]);
     }
-    if (isinexactreal(p1)) { avma=av; return gun; }
+    if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gun; }
   }
   return av==avma? gcopy(p1): gerepileupto(av,p1);
 }
