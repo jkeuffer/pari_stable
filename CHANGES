@@ -109,6 +109,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    66- gcd(O(2^1), O(2^10)) --> O(2^10)
    67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"  [ [] in
        stable version, which is also wrong: 2 + O(2^2) ]
+   68- one could write() an object to a binary file, corrupting it
 
   Changed
 BA  1- improved Fp_isom
@@ -152,6 +153,7 @@ HC 12- gamma function for integral/rational arguments
    31- unified nfinit, polred* [use dedicated structs internally]
    32- rnfconductor(..., 1) doesn't need GRH anymore
    33- extracted FpXQ_gener from idealstar
+   34- allow more types in gdivround
 
   Added
     1- mplog2() function --> faster mplog()
