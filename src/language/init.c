@@ -938,7 +938,7 @@ err_clean()
     else
     { /* preserve */
       if (lasts) lasts->prev = s; else err_catch_stack = s;
-      lasts = s;
+      lasts = s; s = s->prev;
     }
   }
   if (!lasts)
