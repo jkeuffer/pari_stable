@@ -2023,7 +2023,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
 
 /* remark: F->KCZ changes if be_honest() fails */
 static int
-be_honest(FB_t *F, GEN nf, long PRECLLL)
+be_honest(FB_t *F, GEN nf)
 {
   long ex, i, j, J, k, iz, nbtest, ru, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   GEN P, ideal, m, vdir;
@@ -3172,7 +3172,7 @@ PRECPB:
   }
   /* DONE */
 
-  if (!be_honest(&F, nf, PRECLLL)) goto START;
+  if (!be_honest(&F, nf)) goto START;
   F.KCZ2 = 0; /* be honest only once ! */
 
   /* fundamental units */
