@@ -834,14 +834,15 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   for (k = 2; k <= ell; k++)
   {
     GEN z, g = gzero, b = vecsmall_const(k-1, 0);
+    pari_sp av = avma;
     do
     {
       if (! b_suitable(b, r, k, ell)) continue;
       z = factorbackelt(powtaubet, compute_t(b, r, m, ell), nfz);
-      z = _basistoalg(nfz, z);
-      g = gadd(g, gmul(get_multinomial(b), z));
+      z = _algtobasis(nfz, z);
+      g = gerepileupto(av, gadd(g, gmul(get_multinomial(b), z)));
     } while (increment_inc(b, k, m));
-    S[k] = lmul(gmulsg(ell, e), tracetoK(T,g));
+    S[k] = lmul(gmulsg(ell, e), tracetoK(T, basistoalg(nfz,g)));
   }
   return pol_from_Newton(S);
 }
