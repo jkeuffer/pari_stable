@@ -252,7 +252,7 @@ GEN
 mathilbert(long n) /* Hilbert matrix of order n */
 {
   long i,j;
-  GEN a,p;
+  GEN p;
 
   if (n < 0) n = 0;
   p = cgetg(n+1,t_MAT);
