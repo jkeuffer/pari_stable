@@ -676,14 +676,14 @@ mului(ulong x, GEN y)
   setsigne(z,s); return z;
 }
 
-/* a + b*Y, assume y >= 0, 0 <= a,b <= VERYBIGINT */
+/* a + b*|y| */
 GEN
-addsmulsi(long a, long b, GEN y)
+addumului(ulong a, ulong b, GEN y)
 {
   GEN z;
   long i, lz;
   ulong hi;
-  if (!signe(y)) return stoi(a);
+  if (!signe(y)) return utoi(a);
   lz = lgefint(y)+1;
   z = cgeti(lz);
   z[2]=a;
