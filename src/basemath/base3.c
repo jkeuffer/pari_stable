@@ -291,7 +291,7 @@ element_sqr(GEN nf, GEN x)
     for (i=2; i<=N; i++) s[i]=lcopy((GEN)x[i]);
     return s;
   }
-  v=cgetg(N+1,t_COL);
+  v=cgetg(N+1,t_COL); av = avma;
   for (k=1; k<=N; k++)
   {
     if (k == 1)
