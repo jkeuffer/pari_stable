@@ -1096,9 +1096,9 @@ desalloc(long **mat)
   }
 }
 
-/* L-function */
+/* ~ L(kro_D, 1) */
 static GEN
-lfunc(GEN Disc)
+Lval1(GEN Disc)
 {
   long av=avma, p;
   GEN y=realun(DEFAULTPREC);
@@ -1601,8 +1601,8 @@ gcdreal(GEN a,GEN b,long *pte)
   long e;
   GEN k1,r;
 
-  if (!signe(a)) return mpcopy(b);
-  if (!signe(b)) return mpcopy(a);
+  if (!signe(a)) return mpabs(b);
+  if (!signe(b)) return mpabs(a);
 
   if (typ(a)==t_INT)
   {
@@ -1651,9 +1651,9 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 {
   long av0 = avma,av,tetpil,KCCO,KCCOPRO,i,j,s, *ex,**mat;
   long extrarel,nrelsup,nreldep,LIMC,LIMC2,cp,nbram,nlze;
-  GEN p1,h,W,met,res,basecl,dr,c_1,pdep,C,B,extramat,extraC;
-  GEN reg,vecexpo,glog2,cst;
-  double drc,lim,LOGD;
+  GEN p1,h,W,met,res,basecl,dr,pdep,C,B,extramat,extraC;
+  GEN R,vecexpo,glog2,resc,Res,z;
+  double c_1,drc,lim,LOGD;
 
   Disc = D; if (typ(Disc)!=t_INT) err(typeer,"buchquad");
   s=mod4(Disc);
@@ -1682,8 +1682,18 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
     err(warner,"not a fundamental discriminant in quadclassunit");
   buch_init(); RELSUP = RELSUP0;
   dr=cgetr(3); affir(Disc,dr); drc=fabs(rtodbl(dr)); LOGD=log(drc);
-  lim=sqrt(drc); cst = mulrr(lfunc(Disc), dbltor(lim));
+
+  lim = sqrt(drc);
+  resc = dbltor(lim); Res = Lval1(Disc);
+  /* resc = sqrt(D) w / 2^r1 (2pi)^r2 ~ hR / L(chi,1) */
+  if (PRECREG)
+    resc = gmul2n(resc,-1);
+  else
+    resc = divrr(resc, mppi(DEFAULTPREC));
+  z = mulrr(Res, resc); /* ~ hR */
+  R = gun;
   if (!PRECREG) lim /= sqrt(3.);
+
   cp = (long)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 13) cp = 13;
   av = avma; cbach /= 2;
@@ -1781,41 +1791,34 @@ EXTRAREL:
     }
   }
   /* tentative class number */
-  h=gun; for (i=1; i<lg(W); i++) h=mulii(h,gcoeff(W,i,i));
+  h = dethnf_i(W);
   if (PRECREG)
   {
     /* tentative regulator */
-    reg = get_reg(C, KCCOPRO - (lg(B)-1) - (lg(W)-1));
-    if (!reg)
+    R = get_reg(C, KCCOPRO - (lg(B)-1) - (lg(W)-1));
+    if (!R)
     {
-      desalloc(mat);
-      prec = (PRECREG<<1)-2; goto INCREASE;
+      prec = (PRECREG<<1)-2;
+      desalloc(mat); goto INCREASE;
     }
-    if (gexpo(reg)<=-3)
+    if (gexpo(R) <= -3)
     {
       if (++nrelsup <= 7)
       {
-        if (DEBUGLEVEL) { fprintferr("regulateur nul\n"); flusherr(); }
+        if (DEBUGLEVEL) fprintferr("regulator is zero\n");
         nlze=min(KC,nrelsup); goto EXTRAREL;
       }
       desalloc(mat); goto INCREASE;
     }
-    c_1 = divrr(gmul2n(gmul(h,reg),1), cst);
-  }
-  else
-  {
-    reg = gun;
-    c_1 = divrr(gmul(h,mppi(DEFAULTPREC)), cst);
   }
 
-  if (gcmpgs(gmul2n(c_1,2),3)<0) { c_1=stoi(10); nrelsup=7; }
-  if (gcmpgs(gmul2n(c_1,1),3)>0)
+  c_1 = gtodouble(gdiv(gmul(h,R), z));
+  if (c_1 < 0.75) { c_1 = 10.; nrelsup = 7; }
+  if (c_1 > 1.5)
   {
-    nrelsup++;
-    if (nrelsup<=7)
+    if (++nrelsup <= 7)
     {
-      if (DEBUGLEVEL)
-        { fprintferr("***** check = %f\n\n",gtodouble(c_1)); flusherr(); }
+      if (DEBUGLEVEL) fprintferr("***** check = %f\n\n",c_1);
       nlze=min(KC,nrelsup); goto EXTRAREL;
     }
     if (cbach < 5.99) { desalloc(mat); goto INCREASE; }
@@ -1829,8 +1832,8 @@ EXTRAREL:
   for (i=1; i<s; i++) p1[i] = (long)icopy(gcoeff(met,i,i));
   res[2]=(long)p1;
   res[3]=lcopy(basecl);
-  res[4]=lcopy(reg);
-  res[5]=lcopy(c_1); return gerepile(av0,tetpil,res);
+  res[4]=lcopy(R);
+  res[5]=(long)dbltor(c_1); return gerepile(av0,tetpil,res);
 }
 
 GEN
