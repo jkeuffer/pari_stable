@@ -1110,23 +1110,23 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   }
 }
 
-/* minimum extension valuation: res[0]/res[1] (both are longs) */
+/* minimum extension valuation: L/E */
 static void
 vstar(GEN p,GEN h, long *L, long *E)
 {
-  long m,first,j,k,v,w;
+  long first, j, k, v, w, m = degpol(h);
 
-  m=degpol(h); first=1; k=1; v=0;
+  first = 1; k = 1; v = 0;
   for (j=1; j<=m; j++)
     if (! gcmp0((GEN)h[m-j+2]))
     {
       w = ggval((GEN)h[m-j+2],p);
-      if (first || w*k < v*j) { v=w; k=j; }
-      first=0;
+      if (first || w*k < v*j) { v = w; k = j; }
+      first = 0;
     }
-  m = cgcd(v,k);
-  *L = v/m;
-  *E = k/m;
+  w = cgcd(v,k);
+  *L = v/w;
+  *E = k/w;
 }
 
 /* reduce the element elt modulo rd, taking first care of the denominators */
@@ -1305,25 +1305,23 @@ val_fact(ulong n, ulong p)
 static GEN
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
-  GEN p1, chi, npp;
+  GEN d, chi, npp;
   long v = varn(f), n = degpol(f);
 
   if (gcmp0(beta)) return zeropol(v);
 
-  beta = Q_primitive_part(beta,&p1);
+  beta = Q_primitive_part(beta,&d);
   if (!pp)
     chi = ZX_caract(f, beta, v);
   else
   {
     npp = pp;
     if (lgefint(p) == 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
-    if (p1) npp = mulii(npp, gpowgs(denom(p1), n));
+    if (d) npp = mulii(npp, gpowgs(denom(d), n));
 
     chi = newtoncharpoly(beta, f, npp, ns);
   }
-
-  if (p1) chi = rescale_pol(chi,p1);
-
+  if (d) chi = rescale_pol(chi, d);
   if (!pp) return chi;
 
   /* this can happen only if gamma is incorrect (not an integer) */
