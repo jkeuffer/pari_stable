@@ -175,6 +175,23 @@ If the exponent is not of type integer, this is treated as a transcendental
 function (see \secref{se:trans}), and in particular has the effect of
 componentwise powering on vector or matrices.
 
+As an exception, if the exponent is a rational number $p/q$ and $x$ an
+integer modulo a prime, return a solution $y$ of $y^q=x^p$ if it
+exists. Currently, $q$ must not have large prime factors.
+
+Beware that
+
+\bprog
+? Mod(7,19)^(1/2)
+%1 = Mod(11, 19)/*is any square root*/
+? sqrt(Mod(7,19))
+%2 = Mod(8, 19)/*is the smallest square root*/
+? Mod(7,19)^(3/5)
+%3 = Mod(1, 19)
+? %3^(5/3)
+%4 = Mod(1, 19)/*Mod(7,19) is just another cubic root*/
+@eprog\noindent
+
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
 \subsecidx{shift}$(x,n)$ or $x$ \kbd{<<} $n$ (= $x$ \kbd{>>} $(-n)$): shifts
