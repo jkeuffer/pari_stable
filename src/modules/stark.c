@@ -2613,7 +2613,7 @@ QuadGetST(GEN data, long prec)
   nmax = 0;
   for (j = 1; j <= ncond; j++)
   {
-    C[j]  = mael(dtcr, j, 2);
+    C[j]  = mael(dtcr, mael(vChar,j,1), 2);
     nn[j] = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
     nmax  = max(nmax, nn[j]);
   }
