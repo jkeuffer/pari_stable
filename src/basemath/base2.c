@@ -59,7 +59,7 @@ allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
   GEN w;
   if (typ(f)!=t_POL) err(notpoler,"allbase");
   if (degpol(f) <= 0) err(constpoler,"allbase");
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   switch(code)
   {
     case 0: case 1:
@@ -2007,7 +2007,7 @@ primedec(GEN nf, GEN p)
   long i,k,c,iL,N;
   GEN ex,F,L,Ip,H,phi,mat1,T,f,g,h,p1,UN;
 
-  if (DEBUGLEVEL>2) timer2();
+  if (DEBUGLEVEL>2) (void)timer2();
   nf = checknf(nf); T = (GEN)nf[1];
   F = factmod(T,p);
   ex = (GEN)F[2];
@@ -3622,7 +3622,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 
   if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
   nf = checknf(nf); v = varn(relpol);
-  if (DEBUGLEVEL>1) timer2();
+  if (DEBUGLEVEL>1) (void)timer2();
   relpol = unifpol(nf,relpol,1);
   eq = rnfequation2(nf,relpol);
   a = (GEN)eq[3];

@@ -45,7 +45,7 @@ static GEN  **powsubfactorbase,vperm,subfactorbase,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
-extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
+extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -214,7 +214,7 @@ quadhilbertimag(GEN D, GEN flag)
   GEN z,L,P,p,q,qfp,qfq,up,uq,u;
   int raw = ((typ(flag)==t_INT && signe(flag)));
 
-  if (DEBUGLEVEL>=2) timer2();
+  if (DEBUGLEVEL>=2) (void)timer2();
   if (gcmpgs(D,-11) >= 0) return polx[0];
   L = getallforms(D,&h,&z);
   if (DEBUGLEVEL>=2) msgtimer("class number = %ld",h);
@@ -705,7 +705,7 @@ quadrayimagsigma(GEN bnr, int raw, long prec)
   f2 = 2 * itos(gcoeff(f,1,1));
   u = getallrootsof1(bnf); lu = lg(u);
   for (i=1; i<lu; i++)
-    u[i] = (long)colreducemodmat((GEN)u[i], f, NULL); /* roots of 1, mod f */
+    u[i] = (long)colreducemodHNF((GEN)u[i], f, NULL); /* roots of 1, mod f */
   if (DEBUGLEVEL>1)
     fprintferr("quadray: looking for [a,b] != unit mod 2f\n[a,b] = ");
   for (a=0; a<f2; a++)
@@ -716,7 +716,7 @@ quadrayimagsigma(GEN bnr, int raw, long prec)
       if (DEBUGLEVEL>1) fprintferr("[%ld,%ld] ",a,b);
 
       labas = algtobasis(nf, la);
-      lamodf = colreducemodmat(labas, f, NULL);
+      lamodf = colreducemodHNF(labas, f, NULL);
       for (i=1; i<lu; i++)
         if (gegal(lamodf, (GEN)u[i])) break;
       if (i < lu) continue; /* la = unit mod f */
@@ -871,7 +871,7 @@ initrealform5(long *ex)
 static void
 buch_init(void)
 {
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   primfact  = new_chunk(100);
   primfact1 = new_chunk(100);
   exprimfact  = new_chunk(100);

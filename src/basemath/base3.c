@@ -837,7 +837,7 @@ reducemodinvertible(GEN x, GEN y)
 
 /* Reduce column x modulo y in HNF */
 GEN
-colreducemodmat(GEN x, GEN y, GEN *Q)
+colreducemodHNF(GEN x, GEN y, GEN *Q)
 {
   long i, l = lg(x);
   GEN q;
@@ -869,13 +869,13 @@ reducemodHNF(GEN x, GEN y, GEN *Q)
   if (Q)
   {
     GEN q = cgetg(lx, t_MAT); *Q = q;
-    for (i=1; i<lx; i++) R[i] = (long)colreducemodmat((GEN)x[i],y,(GEN*)(q+i));
+    for (i=1; i<lx; i++) R[i] = (long)colreducemodHNF((GEN)x[i],y,(GEN*)(q+i));
   }
   else
     for (i=1; i<lx; i++)
     {
       gpmem_t av = avma;
-      R[i] = lpileupto(av, colreducemodmat((GEN)x[i],y,NULL));
+      R[i] = lpileupto(av, colreducemodHNF((GEN)x[i],y,NULL));
     }
   return R;
 }
@@ -885,7 +885,7 @@ GEN
 nfreducemodideal(GEN nf,GEN x0,GEN ideal)
 {
   GEN y = idealhermite(nf,ideal);
-  GEN x = colreducemodmat(x0, y, NULL);
+  GEN x = colreducemodHNF(x0, y, NULL);
   if (gcmp0(x)) return (GEN)y[1];
   return x == x0? gcopy(x) : x;
 }
@@ -1290,7 +1290,7 @@ detcyc(GEN cyc)
 }
 
 /* (U,V) = 1. Return y = x mod U, = 1 mod V (uv: u + v = 1, u in U, v in V) */
-static GEN
+GEN
 makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x)
 {
   GEN y = gadd((GEN)uv[1], element_mul(nf,x,(GEN)uv[2]));
@@ -1361,7 +1361,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   uv = NULL; /* gcc -Wall */
   if (x)
   {
-    uv = idealaddtoone(nf,prk, idealdivexact(nf,x,prk));
+    uv = idealaddtoone(nf,prk, idealdivpowprime(nf,x,pr,ep));
     g0 = makeprimetoideal(nf,x,uv,v);
     if(DEBUGLEVEL>3) fprintferr("g0 computed\n");
   }

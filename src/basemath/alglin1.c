@@ -3113,7 +3113,7 @@ det(GEN a)
   if (!nbco) return gun;
   if (nbco != lg(a[1])-1) err(mattype1,"det");
   if (use_maximal_pivot(a)) return det_simple_gauss(a,1);
-  if (DEBUGLEVEL > 7) timer2();
+  if (DEBUGLEVEL > 7) (void)timer2();
 
   av = avma; lim = stack_lim(av,2);
   a = dummycopy(a); s = 1;

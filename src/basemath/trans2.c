@@ -888,7 +888,7 @@ mpbern(long nb, long prec)
   {
     fprintferr("caching Bernoulli numbers 2*%ld to 2*%ld, prec = %ld\n",
                i,nb,prec);
-    timer2();
+    (void)timer2();
   }
 
   p2 = p1; av2=avma;
@@ -1240,7 +1240,7 @@ gammanew(GEN s0, long la, long prec)
   gpmem_t av, av2, avlim;
   int funeq = 0;
 
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
   if (signe(sig) <= 0 || expo(sig) < -1)
@@ -1767,7 +1767,7 @@ psinew(GEN s0, long prec)
   const long la = 3;
  
 
-  if (DEBUGLEVEL>2) timer2();
+  if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (signe(sig) <= 0)
   {

@@ -1155,7 +1155,7 @@ initalgall0(GEN x, long flag, long prec)
   GEN lead = NULL,nf,ro,bas,mat,rev,dK,dx,index,res;
   long n,i,r1,r2,ru,PRECREG;
 
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   if (typ(x)==t_POL)
   {
     n=degpol(x); if (n<=0) err(constpoler,"initalgall0");
@@ -1514,7 +1514,7 @@ initzeta(GEN pol, long prec)
   if (is_bigint(p1) || N0 > 10000000)
     err(talker,"discriminant too large for initzeta, sorry");
   if (DEBUGLEVEL>=2)
-    { fprintferr("\ninitzeta:\nN0 = %ld\n",N0); flusherr(); timer2(); }
+    { fprintferr("\ninitzeta:\nN0 = %ld\n",N0); flusherr(); (void)timer2(); }
 
   /* Calcul de imax */
 

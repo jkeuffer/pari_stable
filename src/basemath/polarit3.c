@@ -1671,7 +1671,7 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     {
       l=gcoeff(m,i,1); j=itos(gcoeff(m,i,2));
       e=pvaluation(q,l,&r);
-      if(DEBUGLEVEL>=6) timer2();
+      if(DEBUGLEVEL>=6) (void)timer2();
       y=fflgen(l,e,r,T,p,&zeta);
       if(DEBUGLEVEL>=6) msgtimer("fflgen");
       if (zetan) z=FpXQ_mul(z,FpXQ_pow(y,gpowgs(l,e-j),T,p),T,p);
@@ -1815,7 +1815,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   long vu=varn(U), r=degpol(U);
   long i;
   GEN A, R, M, ib0, V;
-  if (DEBUGLEVEL>=4) timer2();
+  if (DEBUGLEVEL>=4) (void)timer2();
   V=polfrobenius(MA,l,r,vu);
   if (DEBUGLEVEL>=4) msgtimer("pol[frobenius]");
   M=matpolfrobenius(V,U,P,l);
@@ -1870,7 +1870,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   e=pvaluation(stoi(n),l,&q);
   pg=itos(q);
   avma=ltop;
-  if (DEBUGLEVEL>=4) timer2();
+  if (DEBUGLEVEL>=4) (void)timer2();
   if(!MA) MA=matrixpow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   if(!MB) MB=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
   if (DEBUGLEVEL>=4) msgtimer("matrixpow");
@@ -1888,7 +1888,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (lg(z)<2) err(talker,"%Z is not a prime in Fp_intersect",l);
       z=negi(lift((GEN)z[1]));
       ipg=stoi(pg);
-      if (DEBUGLEVEL>=4) timer2();
+      if (DEBUGLEVEL>=4) (void)timer2();
       A=FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in Fp_intersect"
@@ -1918,7 +1918,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       ipg=stoi(pg);
       A=intersect_ker(P, MA, U, l); 
       B=intersect_ker(Q, MB, U, l);
-      if (DEBUGLEVEL>=4) timer2();
+      if (DEBUGLEVEL>=4) (void)timer2();
       An=(GEN) _FpXQYQ_pow(A,stoi(pg),U,P,l)[2];
       Bn=(GEN) _FpXQYQ_pow(B,stoi(pg),U,Q,l)[2];
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");

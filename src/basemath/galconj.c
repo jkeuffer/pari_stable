@@ -458,8 +458,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   GEN     W, Pr, Qr, Sr, Wr = gzero, Prold, Qrold, Spow;
   long    i,nb,mask;
   GEN    *gptr[2];
-  if (DEBUGLEVEL == 1)
-    timer2();
+  if (DEBUGLEVEL == 1) (void)timer2();
   x = varn(P);
   rt = brent_kung_optpow(degpol(Q),1);
   q = p; qm1 = gun; /*during the run, we have p*qm1=q*/
@@ -478,7 +477,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     if (DEBUGLEVEL>=2)
     {
       level=(level<<1)-((mask>>i)&1);
-      timer2();
+      (void)timer2();
     }
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
     q   =  mulii(qm1, p);
@@ -572,7 +571,7 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
     int i;
     long nautpow=brent_kung_optpow(gt->n-1,gt->f-2);
     GEN autpow;
-    if (DEBUGLEVEL >= 1) timer2();
+    if (DEBUGLEVEL >= 1) (void)timer2();
     autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
     for (i = 3; i <= gt->f; i++)
       gt->pauto[i] = (long) FpX_FpXQV_compo((GEN)gt->pauto[i-1],autpow,gl->TQ,gl->Q);
@@ -653,7 +652,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   if (DEBUGLEVEL>=4)
   {
     stop=N1/20;
-    timer2();
+    (void)timer2();
   }
   avma = ltop2;
   C=gt->C;
@@ -730,7 +729,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       if (DEBUGLEVEL>=4)
       {
 	stop=N1/20;
-	timer2();
+	(void)timer2();
       }
     }
     for (j = 2; j < m && pf[j - 1] >= pf[j]; j++);
@@ -954,8 +953,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   long    i, j, cx, hop = 0, start = 0;
   GEN     W, NN, NQ, NR;
   long    V;
-  if (DEBUGLEVEL >= 1)
-    timer2();
+  if (DEBUGLEVEL >= 1) (void)timer2();
   a = lg(F) - 1;
   b = lg(F[1]) - 1;
   c = lg(B) - 1;
@@ -1698,8 +1696,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   long order,phi_order;
   long plift,nbmax,nbtest,deg;
   byteptr primepointer,pp;
-  if (DEBUGLEVEL >= 1)
-    timer2();
+
+  if (DEBUGLEVEL >= 1) (void)timer2();
   n = degpol(T);
   if (!karma_type) karma_type=n;
   else err(warner,"entering black magic computation");
@@ -2249,8 +2247,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   gpmem_t ltop=avma;
   GEN     res;
   int     bl,i,d = lgef(u)-2;
-  if (DEBUGLEVEL >= 6)
-    timer2();
+  if (DEBUGLEVEL >= 6) (void)timer2();
   if ( !d ) return 0;
   res=(GEN)u[2];
   for (i = 1; i < d; i++)
@@ -3085,8 +3082,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
     den = absi(den);
   }
   gb.l = stoi(ga.l);
-  if (DEBUGLEVEL >= 1)
-    timer2();
+  if (DEBUGLEVEL >= 1) (void)timer2();
   den = galoisborne(T, den, &gb, ga.ppp);
   if (DEBUGLEVEL >= 1)
     msgtimer("galoisborne()");
@@ -3111,8 +3107,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
     avma = ltop;
     return gzero;
   }
-  if (DEBUGLEVEL >= 1)
-    timer2();
+  if (DEBUGLEVEL >= 1) (void)timer2();
   if (flag)
   {
     grp = cgetg(9, t_VEC);

@@ -542,7 +542,7 @@ FpM_Berlekamp_ker(GEN u, GEN p)
 {
   long j,N = degpol(u);
   GEN vker,v,w,Q,p1;
-  if (DEBUGLEVEL > 7) timer2();
+  if (DEBUGLEVEL > 7) (void)timer2();
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FpXQ_pow(polx[varn(u)],p,u,p);
   for (j=2; j<=N; j++)
@@ -567,7 +567,7 @@ FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
 {
   long j,N = degpol(u);
   GEN vker,v,w,Q,p1;
-  if (DEBUGLEVEL > 7) timer2();
+  if (DEBUGLEVEL > 7) (void)timer2();
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
@@ -2111,7 +2111,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
 
   if (dt == d) return;
   v = varn(*t);
-  if (DEBUGLEVEL > 6) timer2();
+  if (DEBUGLEVEL > 6) (void)timer2();
   av = avma; is2 = egalii(p, gdeux);
   for(cnt = 1;;cnt++)
   { /* splits *t with probability ~ 1 - 2^(1-r) */

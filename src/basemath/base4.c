@@ -27,9 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
 extern GEN element_muli(GEN nf, GEN x, GEN y);
-extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
+extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
-extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
 extern GEN special_anti_uniformizer(GEN nf, GEN pr);
 extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
@@ -1258,7 +1257,7 @@ nf_to_Fp_simple(GEN x, GEN prh)
   {
     x = gmul(gmul(x,ch), mpinvmod(ch,p));
   }
-  ch = colreducemodmat(gmod(x, p), prh, NULL);
+  ch = colreducemodHNF(gmod(x, p), prh, NULL);
   return (GEN)ch[1]; /* in Fp^* */
 }
 
@@ -1292,7 +1291,7 @@ to_Fp_simple(GEN nf, GEN x, GEN prh)
   return NULL;
 }
 
-/* Compute t = prod g[i]^e[i] mod pr^n, assuming (t, pr) = 1.
+/* Compute t = prod g[i]^e[i] mod pr^k, assuming (t, pr) = 1.
  * Method: modify each g[i] so that it becomes coprime to pr :
  *  x / (p^k u) --> x * (b/p)^v_pr(x) / z^k u, where z = b^e/p^(e-1)
  * b/p = vp^(-1) times something prime to p; both numerator and denominator
@@ -1301,35 +1300,35 @@ to_Fp_simple(GEN nf, GEN x, GEN prh)
  * EX = exponent of (O_K / pr^k)^* used to reduce the product in case the
  * e[i] are large */
 static GEN
-famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prn, GEN EX)
+famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i,k, l = lg(g);
-  GEN prnZ,cx,x,u, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
+  GEN prkZ,cx,x,u, zpow = gzero, p = (GEN)pr[1], b = (GEN)pr[5];
   GEN mul = eltmul_get_table(nf, b);
   GEN newg = cgetg(l+1, t_VEC); /* room for z */
 
-  prnZ = gcoeff(prn, 1,1);
+  prkZ = gcoeff(prk, 1,1);
   for (i=1; i < l; i++)
   {
     x = (GEN)g[i];
     if (typ(x) != t_COL) x = algtobasis(nf, x);
     cx = denom(x); x = gmul(x,cx);
     k = pvaluation(cx, p, &u);
-    if (!gcmp1(u)) /* could avoid the inversion, but prnZ is small--> cheap */
-      x = gmul(x, mpinvmod(u, prnZ));
+    if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
+      x = gmul(x, mpinvmod(u, prkZ));
     if (k)
       zpow = addii(zpow, mulsi(k, (GEN)e[i]));
     (void)int_elt_val(nf, x, p, mul, &x);
-    newg[i] = (long)colreducemodmat(x, prn, NULL);
+    newg[i] = (long)colreducemodHNF(x, prk, NULL);
   }
   if (zpow == gzero) setlg(newg, l);
   else
   {
-    newg[i] = (long)FpV_red(special_anti_uniformizer(nf, pr), prnZ);
+    newg[i] = (long)FpV_red(special_anti_uniformizer(nf, pr), prkZ);
     e = concatsp(e, negi(zpow));
   }
   e = gmod(e, EX);
-  return famat_to_nf_modideal_coprime(nf, newg, e, prn);
+  return famat_to_nf_modideal_coprime(nf, newg, e, prk);
 }
 
 GEN

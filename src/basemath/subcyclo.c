@@ -245,8 +245,7 @@ subcyclo_start(long n, long d, long o, long *ptr_val,long *ptr_l)
   GEN l,borne,le,z;
   long i;
   long e,val;
-  if (DEBUGLEVEL >= 1)
-    timer2();
+  if (DEBUGLEVEL >= 1) (void)timer2();
   l=stoi(n+1);e=1;
   while(!isprime(l)) 
   { 
@@ -462,8 +461,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       return NULL;/*Not reached*/
   }
   V = cgetg(n, t_VECSMALL);
-  if (DEBUGLEVEL >= 1)
-    timer2();
+  if (DEBUGLEVEL >= 1) (void)timer2();
   if (DEBUGLEVEL >= 6)
     fprintferr("Subcyclo: complex=%ld\n",complex);
   if (!complex) /*Add complex conjugation*/

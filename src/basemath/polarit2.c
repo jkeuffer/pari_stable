@@ -28,29 +28,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 
-GEN
-polsym(GEN x, long n)
-{
-  long dx=degpol(x), i, k;
-  gpmem_t av1, av2;
-  GEN s,y,x_lead;
-
-  if (n<0) err(impl,"polsym of a negative n");
-  if (typ(x) != t_POL) err(typeer,"polsym");
-  if (!signe(x)) err(zeropoler,"polsym");
-  y=cgetg(n+2,t_COL); y[1]=lstoi(dx);
-  x_lead=(GEN)x[dx+2]; if (gcmp1(x_lead)) x_lead=NULL;
-  for (k=1; k<=n; k++)
-  {
-    av1=avma; s = (dx>=k)? gmulsg(k,(GEN)x[dx+2-k]): gzero;
-    for (i=1; i<k && i<=dx; i++)
-      s = gadd(s,gmul((GEN)y[k-i+1],(GEN)x[dx+2-i]));
-    if (x_lead) s = gdiv(s,x_lead);
-    av2=avma; y[k+1]=lpile(av1,av2,gneg(s));
-  }
-  return y;
-}
-
 extern GEN Fq_mul(GEN x, GEN y, GEN T, GEN p);
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
@@ -80,26 +57,30 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   }
   P += 2; /* strip codewords */
 
-  P_lead=(GEN)P[dP]; if (gcmp1(P_lead)) P_lead=NULL;
+  P_lead = (GEN)P[dP]; if (gcmp1(P_lead)) P_lead = NULL;
   if (N && P_lead) P_lead = FpXQ_inv(P_lead,T,N);
   for (k=m; k<=n; k++)
   {
-    av1=avma; s = (dP>=k)? gmulsg(k,(GEN)P[dP-k]): gzero;
+    av1 = avma; s = (dP>=k)? gmulsg(k,(GEN)P[dP-k]): gzero;
     for (i=1; i<k && i<=dP; i++)
       s = gadd(s, gmul((GEN)y[k-i+1],(GEN)P[dP-i]));
     if (N)
     {
-      if (T)
-        s = FpX_res(FpX_red(s,N), T, N);
-      else
-        s = modii(s, N);
+      if (T) s = FpX_res(FpX_red(s,N), T, N);
+      else   s = modii(s, N);
       if (P_lead) s = Fq_mul(s, P_lead, T, N);
     }
     else
       if (P_lead) s = gdiv(s,P_lead);
-    av2=avma; y[k+1]=lpile(av1,av2,gneg(s));
+    av2 = avma; y[k+1] = lpile(av1,av2, gneg(s));
   }
   return y;
+}
+
+GEN
+polsym(GEN x, long n)
+{
+  return polsym_gen(x, NULL, n, NULL,NULL);
 }
 
 static int (*polcmp_coeff_cmp)(GEN,GEN);
@@ -440,7 +421,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   l = 0; E[++l] = e;
   while (e > 1) { e = (e+1)/2; E[++l] = e; }
 
-  if (DEBUGLEVEL > 3) timer2();
+  if (DEBUGLEVEL > 3) (void)timer2();
 
   if (flag != 2)
   {
@@ -1333,7 +1314,7 @@ DDF(GEN a, long hint)
   const int MAXNP = max(5, (long)sqrt(da));
 
   if (hint <= 0) hint = 1;
-  if (DEBUGLEVEL > 2) timer2();
+  if (DEBUGLEVEL > 2) (void)timer2();
   lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
   chosenp = 0;
   tabd = NULL;

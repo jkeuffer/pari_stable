@@ -1993,7 +1993,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   long i,j,s,lo,lo0;
 
   if (DEBUGLEVEL)
-    { fprintferr("\n#### Computing class group generators\n"); timer2(); }
+    { fprintferr("\n#### Computing class group generators\n"); (void)timer2(); }
   D = smithall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
   Ui = ginv(U);
   lo0 = lo = lg(D);
@@ -2797,7 +2797,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
 
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
 
   P = get_nfpol(P, &nf);
   if (typ(gRELSUP) != t_INT) gRELSUP = gtrunc(gRELSUP);

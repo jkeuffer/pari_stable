@@ -1401,7 +1401,7 @@ czeta(GEN s0, long prec)
   int funeq = 0;
   byteptr d;
 
-  if (DEBUGLEVEL>2) timer2();
+  if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
   if (signe(sig) <= 0 || expo(sig) < -1)
