@@ -367,7 +367,7 @@ install-examples:
 
 install-data:
 	-mkdir -p \$(DATADIR)
-	@-for f in $data/*; do \$(INSTALL_DATA)  \$\$f \$(DATADIR); done 2>/dev/null
+	-for f in $data/*; do \$(INSTALL_DATA)  \$\$f \$(DATADIR); done 2>/dev/null
 
 install-lib-sta: \$(LIBPARI_STA)
 	-mkdir -p \$(LIBDIR)

@@ -1158,9 +1158,9 @@ echo $n ..."documentation, examples, and emacs macros ? $c"
 dflt=$dfltall; . ./myread; miscdir=$ans
 
 if test -z "$share_prefix"; then
-  dfltdat=$miscdir/data
+  dfltdat=$miscdir/galdata
 else
-  dfltdat=$share_prefix/pari/data
+  dfltdat=$share_prefix/pari/galdata
 fi
 
 echo $n ..."miscellaneous data (galois resolvents) ? $c"
