@@ -2124,10 +2124,7 @@ $\teb{rhorealnod}(x,sq)$ (= $\teb{qfbred}(x,3,,isqrtD)$).
 
 \subsecidx{quadclassunit}$(D,\{\fl=0\},\{\var{tech}=[]\})$:
 \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the class
-group of a quadratic field of discriminant $D$. If $D$ is not fundamental,
-the function may or may not be defined, but usually is, and often gives the
-right answer (a warning is issued). The more general function \tet{bnrinit}
-should be used to compute the class group of an order.
+group of a quadratic order of discriminant $D$.
 
 This function should be used instead of \kbd{qfbclassno} or \kbd{quadregula}
 when $D<-10^{25}$, $D>10^{10}$, or when the \emph{structure} is wanted.
