@@ -694,7 +694,7 @@ nfiso0(GEN a, GEN b, long fliso)
     {
       p1=gdiv(da,db);
       if (typ(p1)==t_FRAC) p1=mulii((GEN)p1[1],(GEN)p1[2]);
-      if (!carreparfait(p1)) { avma=av; return gzero; }
+      if (!gcarreparfait(p1)) { avma=av; return gzero; }
     }
     else
     {
