@@ -2017,7 +2017,7 @@ static GEN
 rayclassnointernarch(GEN blist, GEN h, GEN matU)
 {
   long lx,nc,k,kk,j,r1,jj,nba,nbarch;
-  GEN _2,bid,qm,Lray,cyc,m,z,H,mm,rowsel;
+  GEN _2,bid,qm,Lray,cyc,m,H,mm,rowsel;
 
   if (!matU) return rayclassnointern(blist,h);
   lx = lg(blist); if (lx == 1) return blist;
@@ -2108,7 +2108,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   GEN arch2,dlk,disclist,p4,faussefa,fauxpr,gprime, U, sgnU;
 
   if (bound <= 0) err(talker,"non-positive bound in discrayabslist");
-  clhray = nz = 0; /* gcc -Wall */
+  clhray = nz = 0; p1 = NULL; /* gcc -Wall */
   mod = Id = dlk = ideal = clhrayall = discall = faall = NULL;
 
   /* ce qui suit recopie d'assez pres ideallistzstarall */

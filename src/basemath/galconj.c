@@ -1273,7 +1273,6 @@ fixedfieldsurmer(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v, GE
       P=FpX_center(P,mod);
       if (p==gun || FpX_is_squarefree(P,p))
       {
-	GEN V;
 	if (DEBUGLEVEL>=4) 
 	  debug_surmer("FixedField: Sym: %Z\n",S,n);
 	return _vec2copy(s, P);/*do not swap*/
