@@ -110,8 +110,7 @@ change_state(char *msg, int *opt, int count)
   rl_stuff_char(c); return 1;
 }
 
-/* Wrapper around rl_complete to allow insertion of () with a point in
-   between. */
+/* Wrapper around rl_complete to allow toggling insertion of arguments */
 static int
 pari_rl_complete(int count, int key)
 {
@@ -454,10 +453,30 @@ default_generator(char *text,int state)
   return generator(gp_default_list,text,&n,len,DFLT);
 }
 
-char **
-pari_completion(char *text, int start, int end)
+static void
+rl_print_aide(char *s, int flag)
 {
-  int i, first=0;
+  int p = rl_point, e = rl_end;
+  FILE *save = pari_outfile;
+
+  rl_point = 0; rl_end = 0; pari_outfile = rl_outstream;
+  SAVE_PROMPT();
+  rl_message("",0,0);
+  aide(s, flag);
+  RESTORE_PROMPT();
+  rl_point = p; rl_end = e; pari_outfile = save;
+  rl_clear_message();
+#ifdef RL_REFRESH_LINE_OLDPROTO
+  rl_refresh_line();
+#else
+  rl_refresh_line(0,0);
+#endif
+}
+
+char **
+pari_completion(char *text, int START, int END)
+{
+  int i, first=0, start=START;
 
 /* If the line does not begin by a backslash, then it is:
  * . an old command ( if preceded by "whatnow(" ).
@@ -470,7 +489,7 @@ pari_completion(char *text, int start, int end)
   while (start && is_keyword_char(rl_line_buffer[start])) start--;
   if (rl_line_buffer[start] == '~')
   {
-    for(i=start+1;i<=end;i++)
+    for(i=start+1;i<=END;i++)
       if (rl_line_buffer[i] == '/')
 	return get_matches(-1,text,FILE_COMPLETION);
     return get_matches(-1,text,USER_COMPLETION);
@@ -492,7 +511,7 @@ pari_completion(char *text, int start, int end)
   if (rl_line_buffer[start] == '(' && start)
   {
 #define MAX_KEYWORD 200
-    int iend, j;
+    int iend, j,k;
     entree *ep;
     char buf[MAX_KEYWORD];
 
@@ -516,15 +535,18 @@ pari_completion(char *text, int start, int end)
     }
 
     j = start + 1;
-    while (j && isspace((int)rl_line_buffer[j])) j++;
+    while (j <= END && isspace((int)rl_line_buffer[j])) j++;
+    k = END;
+    while (k > j && isspace((int)rl_line_buffer[k])) k--;
     /* If we are in empty parens, insert arguments for the function: */
-    if ( (rl_line_buffer[j] == ')' || !rl_line_buffer[j] )
-	 && do_args_complete
+    if (do_args_complete && k == j
+         && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
 	 && (iend - i < MAX_KEYWORD)
 	 && ( strncpy(buf, rl_line_buffer + i, iend - i),
 	      buf[iend - i] = 0, 1)
 	 && (ep = is_entry(buf)) && ep->help)
      {
+#if 0
       char *s = ep->help;
 
       while (is_keyword_char(*s)) s++;
@@ -542,9 +564,13 @@ pari_completion(char *text, int start, int end)
           return ret;
         }
       }
+#endif
+      rl_print_aide(buf,h_RL);
+      rl_attempted_completion_over = 1;
+      return NULL;
     }
   }
-  for(i=end-1;i>=start;i--)
+  for(i=END-1;i>=start;i--)
     if (!is_keyword_char(rl_line_buffer[i]))
     {
       if (rl_line_buffer[i] == '.')
@@ -552,15 +578,19 @@ pari_completion(char *text, int start, int end)
       break;
     }
   add_help_keywords = 0;
-  return get_matches(end,text,command_generator);
+  return get_matches(END,text,command_generator);
 }
 
+/* long help if count < 0 */
 static int
 rl_short_help(int count, int key)
 {
-  int p=rl_point, off=p, e = rl_end;
-  FILE *save = pari_outfile;
-  long flag = h_RL;
+  const int flag = (count < 0)? h_RL | h_LONG: h_RL;
+  int off = rl_point;
+
+  /* func() with cursor on ')' following completion */
+  if (off && rl_line_buffer[off-1] == '('
+          && !is_keyword_char(rl_line_buffer[off])) off--;
 
   while (off && is_keyword_char(rl_line_buffer[off-1])) off--;
 
@@ -569,30 +599,17 @@ rl_short_help(int count, int key)
   if (off >= 8) {		/* Check for default(whatever) */
     int t = off - 1;
 
-    while (t >= 7 && (rl_line_buffer[t] == ' ' || rl_line_buffer[t] == '\t'))
-      t--;
+    while (t >= 7 && isspace(rl_line_buffer[t])) t--;
     if (rl_line_buffer[t--] == '(') {
-      while (t >= 6 && (rl_line_buffer[t] == ' ' || rl_line_buffer[t] == '\t'))
-	t--;
-      if (t >= 6 && rl_line_buffer[t] == 't'
-	  && strncmp(rl_line_buffer + t - 6, "default", 7) == 0
-	  && (t == 6 || !is_keyword_char(rl_line_buffer[t-7])))
-	off = t - 6;		/* All this for that assignment */
+      while (t >= 6 && isspace(rl_line_buffer[t])) t--;
+      t -= 6;
+      if (t >= 0
+	  && strncmp(rl_line_buffer + t, "default", 7) == 0
+	  && (t == 0 || !is_keyword_char(rl_line_buffer[t-1])))
+	off = t;
     }
   }
-  rl_point = 0; rl_end = 0; pari_outfile = rl_outstream;
-  if (count < 0) flag |= h_LONG; /* long help */
-  SAVE_PROMPT();
-  rl_message("",0,0);
-  aide(rl_line_buffer + off, flag);
-  RESTORE_PROMPT();
-  rl_point = p; rl_end = e; pari_outfile = save;
-  rl_clear_message();
-#ifdef RL_REFRESH_LINE_OLDPROTO
-  rl_refresh_line();
-#else
-  rl_refresh_line(count,key);
-#endif
+  rl_print_aide(rl_line_buffer + off, flag);
   return 0;
 }
 

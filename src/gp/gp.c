@@ -104,6 +104,9 @@ static stack *bufstack = NULL;
 #define LBRACE '{'
 #define RBRACE '}'
 #define pariputs_opt(s) if (!quiet_mode) pariputs(s)
+#define skip_space(s) while (isspace((int)*s)) s++
+#define skip_alpha(s) while (isalpha((int)*s)) s++
+#define ask_filtre(t) filtre("",NULL,t)
 
 static void
 usage(char *s)
@@ -1381,7 +1384,7 @@ ok_external_help(char *s)
 
 /* don't mess readline display */
 static void
-aide_err(char *s1, char *s2, int flag)
+aide_print(char *s1, char *s2, int flag)
 {
   if ((flag & h_RL) == 0) err(talker, "%s: %s", s1, s2);
   pariputsf("%s: %s\n", s1, s2);
@@ -1404,12 +1407,9 @@ aide0(char *s, int flag)
     if (long_help) external_help(s,3); else commands(n);
     return;
   }
-  if (*s == '\\') {
-    s1 = s+1;
-    while (isalpha((int)*s1))
-      s1++;
-    *s1 = '\0';			/* Get meaningful entry on \ps 5 */
-  }
+  /* Get meaningful entry on \ps 5 */ 
+  if (*s == '\\') { s1 = s+1; skip_alpha(s1); *s1 = '\0';}
+
   if (flag & h_APROPOS) { external_help(s,-1); return; }
   if (long_help && (n = ok_external_help(s))) { external_help(s,n); return; }
   switch (*s)
@@ -1425,21 +1425,11 @@ aide0(char *s, int flag)
     if (!strcmp(ep->name, "default"))
     {
       char *t = s+7, *e;
-
-      while (*t == ' ' || *t == '\t')
-	t++;
-      if (*t == '/' || *t == '(') {
-	t++;
-	while (*t == ' ' || *t == '\t')
-	  t++;
-	e = t;
-	while (isalpha((int)*e))
-	  e++;
-	*e = '\0';			/* get_sep() made it a copy... */
-	if (is_default(t)) {
-	  external_help(t, 2);
-          return;
-	}
+      skip_space(t);
+      if (*t == '(') {
+	t++; skip_space(t);
+        e = t; skip_alpha(e); *e = '\0'; /* safe: get_sep() made it a copy */
+	if (is_default(t)) { external_help(t, 2); return; }
       }
     }
   }
@@ -1450,10 +1440,10 @@ aide0(char *s, int flag)
       external_help(s,n);
     else
     {
-      if (n == 2) { aide_err(s,"default",flag); return; }
+      if (n == 2) { aide_print(s,"default",h_RL); return; }
       n = whatnow(s,1);
       if (n) err(obsoler,s,s, s,n);
-      aide_err(s,"unknown identifier",flag);
+      aide_print(s,"unknown identifier",flag);
     }
     return;
   }
@@ -1469,11 +1459,11 @@ aide0(char *s, int flag)
 
     case EpGVAR:
     case EpVAR:
-      if (!ep->help) { aide_err(s, "user defined variable",flag); return; }
+      if (!ep->help) { aide_print(s, "user defined variable",h_RL); return; }
       long_help=0; break;
 
     case EpINSTALL:
-      if (!ep->help) { aide_err(s, "installed function",flag); return; }
+      if (!ep->help) { aide_print(s, "installed function",h_RL); return; }
       long_help=0; break;
   }
   if (long_help) { external_help(ep->name,3); return; }
@@ -2219,9 +2209,6 @@ gprl_input(Buffer *b, char **s0, char *prompt)
   return s;
 }
 #endif
-
-#define skip_space(s) while (isspace((int)*s)) s++
-#define ask_filtre(t) filtre("",NULL,t)
 
 static void
 input_loop(Buffer *b, char *buf0, FILE *file, char *prompt)
