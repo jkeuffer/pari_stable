@@ -3059,11 +3059,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   gptr[3]=&H; gerepilemany(av,gptr,4);
   if (DEBUGLEVEL)
   {
-    if (DEBUGLEVEL>7)
-    {
-      fprintferr("mit = %Z\n",H);
-      fprintferr("C = %Z\n",p1);
-    }
+    if (DEBUGLEVEL>7) fprintferr("mit = %Z\nC = %Z\n",H,*ptC);
     msgtimer("hnfadd (%ld)",lextra);
   }
   return H;
