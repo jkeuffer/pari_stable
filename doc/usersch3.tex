@@ -5118,15 +5118,18 @@ as output by \kbd{rnfinit}, and $x$ an element of $L$ in absolute form, i.e.
 expressed as a polynomial or polmod with polmod coefficients, \emph{not} on
 the relative integral basis.
 
-
 \syn{rnfalgtobasis}{\var{rnf},x}.
 
-\subsecidx{rnfbasis}$(\var{bnf},L)$: gives either a true $\var{bnf}$-basis of
-$\Z_L$ if it exists, or an $n+1$-element generating set of $L$ if not, where
-$n$ is the rank of $L$ over $\var{bnf}$. Here, $\var{bnf}$ is as output by
-\kbd{bnfinit}; $L$ is either a polynomial with coefficients in $\var{bnf}$
-defining a relative extension of $\var{bnf}$, or a pseudo-basis of such an
-extension, as ouput by \tet{rnfpseudobasis}.
+\subsecidx{rnfbasis}$(\var{bnf}, M)$: let $K$ the field represented by
+\var{bnf}, as output by \kbd{bnfinit}. $M$ is a projective $\Z_K$-module
+given by a pseudo-basis, as output by \kbd{rnfhnf}. The routine returns
+either a true $\Z_K$-basis of $M$ if it exists, or an $n+1$-element
+generating set of $M$ if not, where $n$ is the rank of $M$ over $\var{K}$.
+(Note that $n$ is the size of the pseudo-basis.)
+
+It is allowed to use a polynomial $P$ with coefficients in $K$ instead of $M$,
+in which case, $M$ is defined as the ring of integers of $K[X]/(P)$
+($P$ is assumed irreducible over $K$), viewed as a $\Z_K$-module.
 
 \syn{rnfbasis}{\var{bnf},x}.
 
