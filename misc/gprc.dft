@@ -19,11 +19,11 @@
  * use "\:" to insert a real ":"). The ~ notation may not be available on
  * your system */
 
-prompt = "(%R) \e[1mgp\e[m > "
-#if READL prompt = "(%R) \e[1mgp\e[m > "
+prompt = "(%H:%M) \e[1mgp\e[m > "
+#if READL prompt = "(%H:%M) \e[1mgp\e[m > "
 #if EMACS prompt = "? "
 /* Set gp prompt. % is used for macros related to the time of day [back to
- * the shell prompt, try "man strftime"]. Example: %R = time of day in the
+ * the shell prompt, try "man strftime"]. Example: %H:%M = time of day in the
  * form HH:MM. Characters can be escaped UNIX-style using '\', e.g \e = <ESC>
  *
  * Above, the first escape sequence sets a bold font, the second restores
@@ -34,14 +34,14 @@ prompt = "(%R) \e[1mgp\e[m > "
  * can work around those by bracing non-visible characters between ^A/^B
  * pairs (see manual), like this:
  * 
- * #if READL prompt = "(%R) \e[1mgp\e[m > "
- *                          ^^_____^^ brace the "set bold" sequence \e[1m
+ * #if READL prompt = "(%H:%M) \e[1mgp\e[m > "
+ *                             ^^_____^^ brace the "set bold" sequence \e[1m
  *
  * CAUTION2: If you plan to use gp under emacs, do not tamper with the prompt
  * variable UNLESS you also set correctly the gp-prompt-pattern regexp in
  * your .emacs. For instance, if to use:
  *
- * #if EMACS prompt = "(%R) gp > "
+ * #if EMACS prompt = "(%H:%M) gp > "
  *
  * add the following two lines in your .emacs (see emacs/pariemacs.txt)
  *

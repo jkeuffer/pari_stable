@@ -170,7 +170,7 @@ system, you can try \kbd{man strftime} at your shell prompt to get a complete
 list). This is applied to \kbd{prompt}, \kbd{psfile}, and \kbd{logfile}. For
 instance,
 
-\kbd{default(prompt,"(\%R) ? ")}
+\kbd{default(prompt,"(\%H:\%M) ? ")}
 
 \noindent
 will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
@@ -2291,20 +2291,20 @@ macros.
 \noindent For instance you could set your prompt in the following portable way:
 \bprog
 \\ self modifying prompt looking like @com\hbox{\rm(18:03) \key{gp}\kbd{ >}}
-prompt   = "(\%R) \e[1mgp\e[m > "
+prompt   = "(%H:%M) \e[1mgp\e[m > "
 
 \\ readline wants non-printing characters to be braced between ^A/^B pairs
-#if READL prompt = "(%R) ^A\e[1m^Bgp^A\e[m^B > "
+#if READL prompt = "(%H:%M) ^A\e[1m^Bgp^A\e[m^B > "
 
 \\ escape sequences not supported under emacs
-#if EMACS prompt = "(%R) gp > "
+#if EMACS prompt = "(%H:%M) gp > "
 @eprog
 
 \noindent Note that any of the last two lines could be broken in the
 following way
 \bprog
 #if EMACS
-  prompt = "(%R) gp > "
+  prompt = "(%H:%M) gp > "
 @eprog
 \noindent since the preprocessor directive applies to the next line if the
 current one is empty.
