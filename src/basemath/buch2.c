@@ -2154,7 +2154,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   if (DEBUGLEVEL)
   {
     msgtimer("bestappr/regulator");
-    fprintferr("\n#### Tentative regulator : %Z\n", R);
+    fprintferr("\n#### Tentative regulator : %Z\n", gprec_w(R,3));
     fprintferr("\n ***** check = %f\n",c);
   }
   if (c < 0.8 || c > 1.3) { avma = av; return fupb_RELAT; }
