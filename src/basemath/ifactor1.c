@@ -1810,7 +1810,7 @@ fin:
 /**                 (Cf. Algorithm 8.7.2 in ACiCNT)                   **/
 /**                                                                   **/
 /***********************************************************************/
-extern long scarrecomplet(ulong A);
+extern ulong ucarrecomplet(ulong A);
 static long squfof_ambig(long a, long B, long C, long dd, GEN D, long *cntamb);
 
 #define SQUFOF_BLACKLIST_SZ 64
@@ -2026,7 +2026,7 @@ squfof(GEN n, long quiet)
     }
     if (act1)
     {
-      if ((a = scarrecomplet(a1)) != 0) /* square form? */
+      if ((a = ucarrecomplet(a1)) != 0) /* square form? */
       {
 	if (mydebug >= 4)
 	{
@@ -2132,7 +2132,7 @@ squfof(GEN n, long quiet)
     }
     if (act2)
     {
-      if ((a = scarrecomplet(a2)) != 0) /* square form? */
+      if ((a = ucarrecomplet(a2)) != 0) /* square form? */
       {
 	if (mydebug >= 4)
 	{

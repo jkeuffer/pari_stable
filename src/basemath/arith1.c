@@ -359,8 +359,8 @@ static int carresmod65[]={
 static int carresmod11[]={1,1,0,1,1,1,0,0,0,1,0};
 
 /* emulate carrecomplet on single-word positive integers */
-long
-scarrecomplet(ulong A)
+ulong
+ucarrecomplet(ulong A)
 {
   long a;
 
@@ -385,7 +385,7 @@ carrecomplet(GEN x, GEN *pt)
   }
   if (lgefint(x) == 3)
   {
-    long a = scarrecomplet((ulong)x[2]);
+    long a = ucarrecomplet((ulong)x[2]);
     if (!a) return 0;
     if (pt) *pt = stoi(a);
     return 1;
