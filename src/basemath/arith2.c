@@ -88,7 +88,7 @@ primes(long n)
  * when maxnum (size) is moderate.
  */
 static byteptr
-initprimes1(long size, long *lenp, long *lastp)
+initprimes1(ulong size, long *lenp, long *lastp)
 {
   long k;
   byteptr q,r,s,fin, p = (byteptr) gpmalloc(size+2);
