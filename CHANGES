@@ -81,6 +81,7 @@ IZ 39- TeX quasi-parsing in gphelp
    44- round4 [dbasis]: make sure polmodi gets a polynomial, not an int (SEGV)
    45- various typos in rnfkummer (SEGV or 'non-maximal rank in nfhermite')
    46- Configure -l (no argument) didn't work anymore
+BA 47- incorrect quoting in src/make_vi_tags (make ctags)
 
   Changed
     1- DOS distribution archives (GPM removed)
