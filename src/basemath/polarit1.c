@@ -655,7 +655,7 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   long i;
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
-    g[i]=(long)deg1pol(gun,negi((GEN)V[i]),v);
+    g[i]=(long)deg1pol(gun,modii(negi((GEN)V[i]),p),v);
   modulo=p;
   g=divide_conquer_prod(g,&gsmul);
   return gerepileupto(ltop,g);
