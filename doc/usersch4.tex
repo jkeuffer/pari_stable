@@ -374,7 +374,7 @@ required code words. This is the low-level constructor underlying
 word. It works by simply returning the address \kbd{((GEN)avma) - n}, after
 checking that it is larger than \kbd{(GEN)bot}.
 
-\fun{void *}{stackmalloc}{size\_t n}
+\fun{char*}{stackmalloc}{size\_t n}
 
 allocates memory on the stack for $n$ chars (\emph{not} $n$ \kbd{GEN}s). This
 is faster than using \kbd{malloc}, and easier to use in most situations when

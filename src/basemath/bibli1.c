@@ -1906,7 +1906,7 @@ dalloc(size_t n)
   avma -= n; return (double*)avma;
 }
 
-void *
+char *
 stackmalloc(size_t N)
 {
   size_t n = nchar2nlong(N);
