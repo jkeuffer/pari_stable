@@ -31,12 +31,12 @@ static GEN    constante();
 static GEN    expr();
 static GEN    facteur();
 static GEN    identifier();
-static GEN    matrix_block(GEN p, entree *ep);
 static GEN    read_member(GEN x);
 static GEN    seq();
 static GEN    truc();
 static long   number(long *nb);
 static void   doskipseq(char *s, int strict);
+static void   skip_matrix_block();
 static void   skipconstante();
 static void   skipexpr();
 static void   skipfacteur();
@@ -671,6 +671,71 @@ do_switch(int noparen, int matchcomma)
 /**                          READ FUNCTIONS                        **/
 /**                                                                **/
 /********************************************************************/
+typedef struct matcomp
+{
+  GEN *ptcell;
+  GEN parent;
+  long full_col, full_row;
+} matcomp;
+
+/* Return the content of the matrix cell and sets members of corresponding
+ * matrix component 'c'.  Assume *analyseur = '[' */
+static GEN
+matcell(GEN p, matcomp *C)
+{
+  GEN *pt = &p;
+  long c,r, tx, full_col, full_row;
+  tx = full_col = full_row = 0; 
+  do {
+    analyseur++; p = *pt; tx = typ(p);
+    switch(tx)
+    {
+      case t_LIST:
+        c = check_array_index(lgef(p)-1) + 1;
+        pt = (GEN*)(p + c); match(']'); break;
+
+      case t_VEC: case t_COL: case t_VECSMALL:
+        c = check_array_index(lg(p));
+        pt = (GEN*)(p + c); match(']'); break;
+
+      case t_MAT:
+        if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
+                                  analyseur,mark.start);
+        full_col = full_row = 0;
+        if (*analyseur==',') /* whole column */
+        {
+          analyseur++; full_col = 1;
+          c = check_array_index(lg(p));
+          pt = (GEN*)(p + c); match(']'); break;
+        }
+
+        r = check_array_index(lg(p[1]));
+        match(',');
+        if (*analyseur == ']') /* whole row */
+        {
+          GEN p2 = cgetg(lg(p),t_VEC);
+          analyseur++;
+          if (*analyseur != '[') full_row = r;
+          for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
+          pt = &p2;
+        }
+        else
+        {
+          c = check_array_index(lg(p));
+          pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+          match(']');
+        }
+        break;
+
+      default:
+        err(caracer1,analyseur-1,mark.start);
+    }
+  } while (*analyseur == '[');
+  C->full_row = full_row;
+  C->full_col = full_col;
+  C->parent = p; C->ptcell = pt;
+  return (tx == t_VECSMALL)? stoi((long)*pt): *pt;
+}
 
 static GEN
 facteur(void)
@@ -704,7 +769,10 @@ facteur(void)
       case '~':
 	analyseur++; x = gtrans(x); break;
       case '[':
-        x = matrix_block(x,NULL); break;
+      {
+        matcomp c;
+        x = matcell(x, &c); break;
+      }
       case '!':
 	if (analyseur[1] != '=')
 	{
@@ -816,14 +884,19 @@ truc(void)
 }
 
 /* valid x opop, e.g x++ */
-#ifdef INLINE
-INLINE
-#endif
-int
-repeated_op()
+static GEN
+double_op()
 {
+  static long mun[] = { evaltyp(t_INT) | m_evallg(3), 
+                        evalsigne(-1)|evallgefint(3), 1 };
   char c = *analyseur;
-  return c == analyseur[1] && (c == '+' || c == '-');
+  if (c == analyseur[1])
+    switch(c)
+    {
+      case '+': analyseur+=2; return gun; /* ++ */
+      case '-': analyseur+=2; return mun; /* -- */
+    }
+  return NULL;
 }
 
 /* return op if op= detected */
@@ -864,127 +937,79 @@ get_op_fun()
 }
 
 static GEN
-matrix_block(GEN p, entree *ep)
+expr_ass()
 {
-  long tx,full_col,full_row,c,r;
-  char *old;
-  GEN res, *pt, cpt;
+  GEN res = expr();
+  if (br_status) err(breaker,"assignment");
+  return res;
+}
 
-  tx = full_col = full_row = 0; pt = &p;
-  while (*analyseur == '[')
+F2GEN
+affect_block(GEN *res)
+{
+  F2GEN f;
+  GEN r;
+  if (*analyseur == '=')
   {
-    analyseur++; p = *pt; tx = typ(p);
-    switch(tx)
-    {
-      case t_LIST:
-        c = check_array_index(lgef(p)-1) + 1;
-        pt = (GEN*)(p + c); match(']'); break;
-
-      case t_VEC: case t_COL: case t_VECSMALL:
-        c = check_array_index(lg(p));
-        pt = (GEN*)(p + c); match(']'); break;
-
-      case t_MAT:
-        if (lg(p)==1) err(talker2,"a 0x0 matrix has no elements",
-                                  analyseur,mark.start);
-        full_col = full_row = 0;
-        if (*analyseur==',') /* whole column */
-        {
-          analyseur++; full_col = 1;
-          c = check_array_index(lg(p));
-          pt = (GEN*)(p + c); match(']'); break;
-        }
-
-        r = check_array_index(lg(p[1]));
-        match(',');
-        if (*analyseur == ']') /* whole row */
-        {
-          GEN p2 = cgetg(lg(p),t_VEC);
-          analyseur++;
-          if (*analyseur != '[') full_row = r;
-          for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
-          pt = &p2;
-        }
-        else
-        {
-          c = check_array_index(lg(p));
-          pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
-          match(']');
-        }
-        break;
-
-      default:
-        err(caracer1,analyseur-1,mark.start);
-    }
+    r = NULL; f = NULL;
+    if (analyseur[1] != '=') { analyseur++; r = expr_ass(); }
   }
-  old = analyseur;
-  cpt = *pt;
-  if (tx == t_VECSMALL) cpt = stoi((long)cpt);
+  else if ((r = double_op()))  f = &gadd;
+  else if ((f = get_op_fun())) r = expr_ass();
+  *res = r; return f;
+}
 
-  if (*analyseur == '=') /* assignment or equality test */
-  {
-    if (analyseur[1] == '=') return cpt; /* == */
-    analyseur++; old = analyseur; res = expr();
-    if (br_status) err(breaker,"assignment");
-  }
-  else if (repeated_op())
-  { /* a++, a-- */
-    res = gadd(cpt, (*analyseur == '+')? gun: negi(gun));
-    analyseur += 2;
-  }
-  else
-  {
-    F2GEN f = get_op_fun();
-    if (!f) return (ep && !full_row)? cpt: gcopy(cpt);
+/* assign res at *pt in "simple array object" p */
+static GEN
+change_compo(matcomp c, GEN res)
+{
+  GEN p = c.parent, *pt = c.ptcell;
+  long i, full_row = c.full_row, full_col = c.full_col;
+  char *old = analyseur;
 
-    old = analyseur; res = expr();
-    if (br_status) err(breaker,"assignment");
-    res = f(cpt, res);
-  }
-
-  /* assignment */
-  if (!ep) err(caracer1,analyseur,mark.start);
-
-  if (!tx) /* simple variable */
-  {
-    changevalue(ep,res);
-    return (GEN) ep->value;
-  }
-
-  if (full_row) /* whole row (index r) */
-  {
-    if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
-    for (c=1; c<lg(p); c++)
-    {
-      GEN p2 = gcoeff(p,full_row,c); if (isclone(p2)) killbloc(p2);
-      coeff(p,full_row,c) = lclone((GEN)res[c]);
-    }
-    return res;
-  }
-
-  if (tx == t_VECSMALL)
+  if (typ(p) == t_VECSMALL)
   {
     if (typ(res) != t_INT || is_bigint(res))
       err(talker2,"not a suitable VECSMALL component",old,mark.start);
     *pt = (GEN)itos(res); return res;
   }
-
-  /* sanity check in case v[i] = f(), where f destroys v */
-  if (cpt != *pt)
-    err(talker2,"variable on the left-hand side was affected during this function call. Check whether it is modified as a side effect there", old, mark.start);
+  if (full_row)
+  {
+    if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
+    for (i=1; i<lg(p); i++)
+    {
+      GEN p1 = gcoeff(p,full_row,i); if (isclone(p1)) killbloc(p1);
+      coeff(p,full_row,i) = lclone((GEN)res[i]);
+    }
+    return res;
+  }
+  if (full_col)
+    if (typ(res) != t_COL || lg(res) != lg(*pt)) err(caseer2,old,mark.start);
 
   res = gclone(res);
-  if (full_col) /* whole col */
-  {
-    if (typ(res) != t_COL || lg(res) != lg(cpt))
-      err(caseer2,old,mark.start);
-
-    for (r=1; r<lg(cpt); r++)
-      if (isclone(cpt[r])) killbloc((GEN)cpt[r]);
-  }
-  /* no need to inspect if full_col (done above) */
-  if (isclone(cpt)) killbloc0(cpt, !full_col);
+  if (isclone(*pt)) killbloc(*pt);
   return *pt = res;
+}
+
+/* extract from p the needed component */
+static GEN
+matrix_block(GEN p)
+{
+  char *end, *ini = analyseur;
+  GEN res, cpt;
+  matcomp c;
+  F2GEN fun;
+
+  skip_matrix_block();
+  fun = affect_block(&res);
+  end = analyseur;
+  analyseur = ini;
+  cpt = matcell(p, &c);
+  if (!res) return cpt; /* no assignment */
+
+  if (fun) res = fun(cpt, res);
+  res = change_compo(c,res);
+  analyseur = end; return res;
 }
 
 static char*
@@ -1211,16 +1236,22 @@ global0()
 }
 
 static void
-check_pointer(unsigned int ptrs, entree *pointer[])
+check_pointers(unsigned int ptrs, matcomp *init[])
 {
   unsigned int i;
   for (i=0; ptrs; i++,ptrs>>=1)
     if (ptrs & 1)
     {
-      entree *e = pointer[i];
-      GEN x = (GEN)e->value;
-      pop_val(e);
-      changevalue(e, x);
+      matcomp *c = init[i];
+      GEN *pt = c->ptcell, x = gclone(*pt);
+      if (c->parent == NULL)
+      {
+        if (isclone(*pt)) killbloc(*pt);
+        *pt = x;
+      }
+      else
+        change_compo(*c, x);
+      free((void*)c);
     }
 }
 
@@ -1398,7 +1429,17 @@ identifier(void)
         ep->value = (void *)ptr; return gnil;
       }
     }
-    return matrix_block((GEN) ep->value,ep);
+    if (*analyseur != '[')
+    { /* whole variable, no component */
+      F2GEN fun = affect_block(&res);
+      if (res)
+      {
+        if (fun) res = fun((GEN)ep->value, res);
+        changevalue(ep,res);
+      }
+      return (GEN)ep->value;
+    }
+    return matrix_block((GEN)ep->value);
   }
   ep = do_alias(ep); matchcomma = 0;
 #ifdef STACK_CHECK
@@ -1413,7 +1454,7 @@ identifier(void)
     long fake;
     void *call = ep->value;
     GEN argvec[9];
-    entree *pointers[9];
+    matcomp *init[9];
 
     deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
     if (*analyseur == '(')
@@ -1473,11 +1514,19 @@ identifier(void)
         case '&': /* *GEN */
 	  match_comma(); match('&'); mark.symbol=analyseur;
         {
-          entree *e = entry();
-          push_val(e, (GEN)e->value);
+          matcomp *c = (matcomp*)malloc(sizeof(matcomp));
+          entree *ep = entry();
+
+          if (*analyseur == '[')
+            (void)matcell((GEN)ep->value, c);
+          else
+          {
+            c->parent = NULL;
+            c->ptcell = (GEN*)&ep->value;
+          }
           has_pointer |= (1 << i);
-          pointers[i] = e;
-	  argvec[i++] = (GEN) &(e->value); break;
+          init[i] = c;
+	  argvec[i++] = (GEN)c->ptcell; break;
         }
         /* Input position */
         case 'E': /* expr */
@@ -1598,7 +1647,7 @@ identifier(void)
 	((void (*)(ANYARG))call)(_ARGS_);
 	res = gnil; break;
     }
-    if (has_pointer) check_pointer(has_pointer,pointers);
+    if (has_pointer) check_pointers(has_pointer,init);
     if (!noparen) match(')');
     return res;
   }
@@ -2198,7 +2247,7 @@ skipstring()
 }
 
 static void
-skip_lock(int no_affect)
+skip_matrix_block()
 {
   while (*analyseur == '[')
   {
@@ -2212,40 +2261,20 @@ skip_lock(int no_affect)
     }
     match(']');
   }
+}
 
-  if (*analyseur == '=' && analyseur[1] != '=')
+/* return 1 if we would be assigning some value after expansion. 0 otherwise.
+ * Skip all chars corresponding to the assignment (and assigned value) */
+static int
+skip_affect_block()
+{
+  if (*analyseur == '=')
   {
-    if (no_affect) err(caracer1,analyseur,mark.start);
-    analyseur++; skipexpr(); return;
+    if (analyseur[1] != '=') { analyseur++; skipexpr(); return 1; }
   }
-  if (repeated_op())
-  {
-    if (no_affect) err(caracer1,analyseur,mark.start);
-    analyseur+=2; return;
-  }
-  if (!*analyseur) return;
-  if (analyseur[1] != '=')
-  {
-    switch(*analyseur)
-    {
-      case '>': case '<':
-	if (analyseur[1] != *analyseur || analyseur[2] != '=') return;
-	if (no_affect) err(caracer1,analyseur,mark.start);
-	analyseur+=3; skipexpr(); return;
-      case '\\':
-	if (analyseur[1] != '/' || analyseur[2] != '=') return;
-	if (no_affect) err(caracer1,analyseur,mark.start);
-	analyseur+=3; skipexpr(); return;
-    }
-    return;
-  }
-
-  switch(*analyseur)
-  {
-    case '+': case '-': case '*': case '/': case '\\': case '%':
-      if (no_affect) err(caracer1,analyseur,mark.start);
-      analyseur+=2; skipexpr(); return;
-  }
+  else if (double_op()) return 1;
+  else if (get_op_fun()) { skipexpr(); return 1; }
+  return 0;
 }
 
 static void
@@ -2339,7 +2368,12 @@ skipfacteur(void)
       case '~': case '\'':
 	analyseur++; break;
       case '[':
-	skip_lock(1); break;
+      {
+        char *old;
+	skip_matrix_block(); old = analyseur;
+        if (skip_affect_block()) err(caracer1,old,mark.start);
+        break;
+      }
       case '!':
 	if (analyseur[1] != '=') { analyseur++; break; }
       default: return;
@@ -2414,6 +2448,20 @@ check_var()
 }
 
 static void
+check_matcell()
+{
+  char *old = analyseur;
+  check_var_name();
+  switch(EpVALENCE(skipentry()))
+  {
+    case EpVAR:
+    case EpGVAR: break;
+    default: err(varer1,old,mark.start);
+  }
+  skip_matrix_block();
+}
+
+static void
 skipidentifier(void)
 {
   int matchcomma=0;
@@ -2480,7 +2528,7 @@ skipidentifier(void)
 
       case 'S': match_comma();
         check_var_name(); skipentry(); break;
-      case '&': match_comma(); match('&'); check_var(); break;
+      case '&': match_comma(); match('&'); check_matcell(); break;
       case 'V': match_comma(); check_var(); break;
 
       case 'p': case 'P': case 'l': case 'v': case 'f': case 'x':
@@ -2534,7 +2582,7 @@ skipidentifier(void)
   {
     case EpGVAR:
     case EpVAR: /* variables */
-      skip_lock(0); return;
+      skip_matrix_block(); (void)skip_affect_block(); return;
 
     case EpUSER: /* fonctions utilisateur */
     {
