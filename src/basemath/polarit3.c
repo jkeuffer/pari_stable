@@ -2270,7 +2270,8 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!p) return poldivrem(x,y,pr);
+  if (!p) err(bugparier," FpXQX_divrem(x, y, T, p, pr), p is NULL");
+             
   if (!T) return FpX_divrem(x,y,p,pr);
   if (!signe(y)) err(gdiver);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
