@@ -40,6 +40,8 @@ cat >> $file << EOT
 #else
 # define PARIINFO "${pretty}${debuginfo}"
 #endif
+#define PARI_VERSION_CODE `expr $VersionMajor \\* 65536 + $VersionMinor \\* 256 + $patch`
+#define PARI_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 
 #define PARI_DOUBLE_FORMAT ${doubleformat}
 EOT
@@ -143,7 +145,7 @@ esac
 case $has_dlopen in
 yes|builtin) cat >> $file << EOT
 #define HAS_DLOPEN
-#define DL_DFLT_NAME "libpari.$sodest"
+#define DL_DFLT_NAME "lib$libpari_base.$DLSUFFIX.$sodest"
 EOT
 ;;
 esac
