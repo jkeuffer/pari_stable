@@ -2478,7 +2478,7 @@ denom(GEN x)
       return gen_1;
 
     case t_FRAC:
-      return absi((GEN)x[2]);
+      return icopy((GEN)x[2]);
 
     case t_COMPLEX:
       av=avma; t=denom((GEN)x[1]); s=denom((GEN)x[2]); tetpil=avma;
@@ -2525,7 +2525,7 @@ numer(GEN x)
       return gcopy(x);
 
     case t_FRAC:
-      return (signe(x[2])>0)? gcopy((GEN)x[1]): gneg((GEN)x[1]);
+      return (signe(x[2])>0)? icopy((GEN)x[1]): negi((GEN)x[1]);
 
     case t_POLMOD:
       av=avma; s=numer((GEN)x[2]); tetpil=avma;
