@@ -66,6 +66,7 @@ BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
    30- wrong precision used in numerical derivation
 BA 31- isprime(n < 2, 2 or 3) gave wrong result
 IZ 32- \r C:\a.gp wouldn't work     [ : and \ forbidden... ]
+BA 33- bad PARI prototypes in init.c [were confusing GP2C]
 
   Changed
     1- DOS distribution archives (GPM removed)
