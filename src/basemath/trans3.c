@@ -2336,7 +2336,7 @@ agm1r(GEN x)
   {
     GEN a = a1; a1 = addrr(a,b1);
     setexpo(a1, expo(a1)-1);
-    b1 = sqrtr(mulrr(a,b1));
+    b1 = sqrtr_abs(mulrr(a,b1));
   }
   while (expo(subrr(b1,a1)) - expo(b1) >= l);
   affrr(a1,y); avma = av; return y;
