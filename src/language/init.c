@@ -1765,7 +1765,6 @@ switch_stack(stackzone *z, long n)
   return NULL;
 }
 
-#ifdef MEMSTEP
 void
 checkmemory(GEN z)
 {
@@ -1780,7 +1779,6 @@ checkmemory(GEN z)
 #endif
   }
 }
-#endif
 
 void
 fill_stack(void)
