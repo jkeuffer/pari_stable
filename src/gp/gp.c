@@ -242,25 +242,36 @@ get_sep_colon_ok(const char *t)
   return get_sep0(t,0);
 }
 
-/* "atoul" + optional [km] suffix */
+static ulong
+safe_mul(ulong x, ulong y)
+{
+  LOCAL_HIREMAINDER;
+  ulong z = mulll(x, y);
+  return hiremainder? 0: z;
+}
+
+/* "atoul" + optional [kmg] suffix */
 static ulong
 my_int(char *s)
 {
-  ulong m, n = 0;
+  ulong n = 0;
   char *p = s;
 
   while (isdigit((int)*p)) { 
-    m = n;
+    ulong m = n;
     n = 10*n + (*p++ - '0');
     if (n < m) err(talker2,"integer too large",s,s);
   }
-  m = n;
-  switch(*p)
+  if (n)
   {
-    case 'k': case 'K': n *= 1000;    p++; break;
-    case 'm': case 'M': n *= 1000000; p++; break;
+    switch(*p)
+    {
+      case 'k': case 'K': n = safe_mul(n,1000UL);       p++; break;
+      case 'm': case 'M': n = safe_mul(n,1000000UL);    p++; break;
+      case 'g': case 'G': n = safe_mul(n,1000000000UL); p++; break;
+    }
+    if (!n) err(talker2,"integer too large",s,s);
   }
-  if (n < m) err(talker2,"integer too large",s,s);
   if (*p) err(talker2,"I was expecting an integer here", s, s);
   return n;
 }

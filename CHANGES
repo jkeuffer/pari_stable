@@ -153,6 +153,7 @@ GH  5- PowerPC level0 inline assembly kernel
     6- support for install() on Mac OS X
 BA  7- GP function galoisexport
 IZ  8- logstyle and TeXstyle defaults
+    9- [GP defaults:] support 'G' suffix (for Giga) (already supported k and M)
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]

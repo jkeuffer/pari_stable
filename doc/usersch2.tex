@@ -145,12 +145,12 @@ as their current values (see \b{d}). Just after the default name, we give
 between parentheses the initial value when GP starts (assuming you did not
 tamper with it using command-line switches or a~\tet{gprc}).
 
-\misctitle{Note:} the suffixes \kbd{k} or \kbd{M} can be appended to a
-\var{value} which is a numeric argument, with the effect of multiplying it
-by $10^3$ or $10^6$ respectively. Case is not taken into account there, so
-for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This is mostly
-useful to modify or set the defaults \kbd{primelimit} or \kbd{stacksize}
-which typically involve a lot of trailing zeroes.
+\misctitle{Note:} the suffixes \kbd{k}, \kbd{M} or \kbd{G} can be appended to
+a \var{value} which is a numeric argument, with the effect of multiplying it
+by $10^3$, $10^6$ and $10^9$ respectively. Case is not taken into account
+there, so for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This
+is mostly useful to modify or set the defaults \kbd{primelimit} or
+\kbd{stacksize} which typically involve a lot of trailing zeroes.
 
 \misctitle{(somewhat technical) Note:} As we will see in
 \secref{se:strings}, the second argument to \kbd{default} will be subject
