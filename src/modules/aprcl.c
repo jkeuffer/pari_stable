@@ -320,7 +320,8 @@ e(ulong t)
       m /= ex[j];
     }
     /* d runs through the divisors of t */
-    if (BSW_psp(stoi(++d))) s = muliu(s, u_pow(d, 1 + u_val(t,d)));
+    if (BSW_psp(stoi(++d)))
+      s = muliu(s, (ulong)u_pow(d, 1 + u_val(t,d)));
   }
   return s;
 }
