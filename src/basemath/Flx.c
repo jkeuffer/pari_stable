@@ -185,10 +185,10 @@ Z_to_Flx(GEN x, ulong p, long v)
 {
   GEN z;
   long sv=evalvarn(v);
-  if (!signe(x)) return zero_Flx(sv);
   z = cgetg(3, t_VECSMALL);
   z[1] = sv;
   z[2] = (long) umodiu(x,p); 
+  if (!z[2]) {avma = (pari_sp)(z + lg(z)); z = zero_Flx(sv);}
   return z;
 }
 
