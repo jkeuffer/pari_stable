@@ -116,9 +116,10 @@ x^6 + Mod(6, 7)*x^5 + Mod(1, 7)*x^4 + Mod(6, 7)*x^3 + Mod(1, 7)*x^2 + Mod(6,
 [10 1]
 
 ? ffinit(2,11)
-Mod(1, 2)*x^11 + Mod(1, 2)*x^2 + Mod(1, 2)
+Mod(1, 2)*x^11 + Mod(1, 2)*x^9 + Mod(1, 2)*x^8 + Mod(1, 2)*x^6 + Mod(1, 2)*x
+^4 + Mod(1, 2)*x^3 + Mod(1, 2)*x^2 + Mod(1, 2)*x + Mod(1, 2)
 ? ffinit(7,4)
-Mod(1, 7)*x^4 + Mod(1, 7)*x + Mod(1, 7)
+Mod(1, 7)*x^4 + Mod(2, 7)*x + Mod(3, 7)
 ? fibonacci(100)
 354224848179261915075
 ? gcd(12345678,87654321)
@@ -253,7 +254,7 @@ x^2 - x + 3
 [768, [12, 4, 4, 2, 2], [Mod(67, 3120), Mod(2341, 3120), Mod(1847, 3120), Mo
 d(391, 3120), Mod(2081, 3120)]]
 ? getheap
-[85, 2613]
+[85, 2619]
 ? print("Total time spent: ",gettime);
-Total time spent: 579
+Total time spent: 577
 ? \q
