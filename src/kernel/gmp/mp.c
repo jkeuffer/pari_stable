@@ -150,15 +150,6 @@ icopy_ef(GEN x, long l)
   shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
 
-#define MASK(x) (((ulong)(x)) & (LGEFINTBITS | SIGNBITS))
-int
-egalii(GEN x, GEN y)
-{
-  if (MASK(x[1]) != MASK(y[1])) return 0;
-  return !mpn_cmp(LIMBS(x),LIMBS(y),NLIMBS(x)); /* Note that NLIMBS(x)==NLIMBS(y)*/
-}
-#undef MASK
-
 /***********************************************************************/
 /**								      **/
 /**		         ADDITION / SUBTRACTION          	      **/
@@ -546,6 +537,12 @@ INLINE int
 absi_cmp_lg(GEN x, GEN y, long l)
 {
   return mpn_cmp(LIMBS(x),LIMBS(y),l-2);
+}
+
+INLINE int
+absi_equal_lg(GEN x, GEN y, long l)
+{
+  return !mpn_cmp(LIMBS(x),LIMBS(y),l-2);
 }
 
 /***********************************************************************/

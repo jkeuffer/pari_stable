@@ -21,7 +21,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 
-/*They depend on absi_cmp_lg in mp.c*/
+/*They depend on absi_cmp_lg and absi_equal_lg in mp.c*/
+
+#define MASK(x) (((ulong)(x)) & (LGEFINTBITS | SIGNBITS))
+int
+egalii(GEN x, GEN y)
+{
+  if (MASK(x[1]) != MASK(y[1])) return 0;
+  return absi_equal_lg(x, y, lgefint(x));
+}
+#undef MASK
 
 int
 cmpsi(long x, GEN y)
@@ -99,7 +108,7 @@ absi_equal(GEN x, GEN y)
   if (!signe(y)) return 0;
 
   lx=lgefint(x); if (lx != lgefint(y)) return 0;
-  return !absi_cmp_lg(x, y, lx);
+  return absi_equal_lg(x, y, lx);
 }
 
 /* x and y are integers. Return sign(|x| - |y|) */

@@ -69,17 +69,6 @@ int pari_kernel_init(void)
   shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
 
-#define MASK(x) (((ulong)(x)) & (LGEFINTBITS | SIGNBITS))
-int
-egalii(GEN x, GEN y)
-{
-  long i;
-  if (MASK(x[1]) != MASK(y[1])) return 0;
-  i = lgefint(x)-1; while (i>1 && x[i]==y[i]) i--;
-  return i==1;
-}
-#undef MASK
-
 /***********************************************************************/
 /**								      **/
 /**		         ADDITION / SUBTRACTION          	      **/
@@ -466,6 +455,13 @@ absi_cmp_lg(GEN x, GEN y, long l)
   while (i<l && x[i]==y[i]) i++;
   if (i==l) return 0;
   return ((ulong)x[i] > (ulong)y[i])? 1: -1;
+}
+
+INLINE int
+absi_equal_lg(GEN x, GEN y, long l)
+{
+  long i = l-1; while (i>1 && x[i]==y[i]) i--;
+  return i==1;
 }
 
 /***********************************************************************/
