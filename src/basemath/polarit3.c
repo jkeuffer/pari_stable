@@ -150,10 +150,7 @@ u_FpX_addspec(GEN x, GEN y, long p, long lx, long ly)
   z -= 2; z[1]=0; return u_normalizepol(z, lz);
 }
 
-#ifdef INLINE
-INLINE
-#endif
-ulong
+INLINE ulong
 u_FpX_mullimb(GEN x, GEN y, ulong p, long a, long b)
 {
   ulong p1 = 0;
@@ -459,10 +456,7 @@ addpolcopy(GEN x, GEN y, long lx, long ly)
   z -= 2; z[1]=0; return normalizepol_i(z, lz);
 }
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 mulpol_limb(GEN x, GEN y, char *ynonzero, long a, long b)
 {
   GEN p1 = NULL;

@@ -92,10 +92,7 @@ egalii(GEN x, GEN y)
 /**                                                                   **/
 /***********************************************************************/
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 addsispec(long s, GEN x, long nx)
 {
   GEN xd, zd = (GEN)avma;
@@ -121,10 +118,7 @@ addsispec(long s, GEN x, long nx)
 
 #define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;
@@ -154,10 +148,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
 }
 
 /* assume x >= y */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 subisspec(GEN x, long s, long nx)
 {
   GEN xd, zd = (GEN)avma;
@@ -183,10 +174,7 @@ subisspec(GEN x, long s, long nx)
 }
 
 /* assume x > y */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 subiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;
@@ -863,10 +851,7 @@ muluu(ulong x, ulong y)
 }
 
 /* assume ny > 0 */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 mulsispec(long x, GEN y, long ny)
 {
   GEN yd, z = (GEN)avma;
@@ -989,10 +974,7 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
 
 /* set z <-- x*y, floating point multiplication.
  * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z) */
-#ifdef INLINE
-INLINE
-#endif
-void
+INLINE void
 mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
 {
   const int flag = (lz != ly);
@@ -2148,10 +2130,7 @@ absr_cmp(GEN x, GEN y)
 /**                                                                **/
 /********************************************************************/
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 muliispec(GEN x, GEN y, long nx, long ny)
 {
   GEN z2e,z2d,yd,xd,ye,zd;
@@ -2189,10 +2168,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
   avma=(pari_sp)zd; return zd;
 }
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 sqrispec(GEN x, long nx)
 {
   GEN z2e,z2d,yd,xd,zd,x0,z0;

@@ -1447,10 +1447,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
  **
  **/
 
-#ifdef INLINE
- INLINE
-#endif
-void
+INLINE void
 mpqs_sieve_p(unsigned char *begin, unsigned char *end,
              long p_times_4, long p, unsigned char log_p)
 {
@@ -1575,12 +1572,7 @@ mpqs_add_0(char **last) {
  ** the remainder on the stack as GENs;  the caller should clean up.
  **/
 
-#ifdef INLINE
- INLINE
-#else
- static
-#endif
-ulong
+INLINE ulong
 mpqs_div_rem(GEN x, long y, GEN *q)
 {
   GEN r;

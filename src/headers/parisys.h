@@ -38,8 +38,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define INLINE inline
 #  ifdef __GNUC__
 #    define VOLATILE volatile
-#  else
-#    define VOLATILE
 #  endif
 #else
 #  define ANYARG
@@ -50,9 +48,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #    ifdef GCC_INLINE
 #      define INLINE __inline__ static
 #    endif
-#  else
-#    define VOLATILE
 #  endif
+#endif
+#ifndef VOLATILE
+#  define VOLATILE
+#endif
+#ifndef INLINE
+#  define INLINE static
 #endif
 
 #ifdef _WIN32

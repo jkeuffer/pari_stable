@@ -64,19 +64,13 @@ int pari_kernel_init(void)
 #define LIMBS(x)  ((mp_limb_t *)((x)+2))
 #define NLIMBS(x) (lgefint(x)-2)
 
-#ifdef INLINE
-INLINE
-#endif
-void
+INLINE void
 xmpn_copy(mp_limb_t *x, mp_limb_t *y, long n)
 {
   while (--n >= 0) x[n]=y[n];
 }
 
-#ifdef INLINE
-INLINE
-#endif
-void
+INLINE void
 xmpn_mirror(mp_limb_t *x, long n)
 {
   long i;
@@ -88,10 +82,7 @@ xmpn_mirror(mp_limb_t *x, long n)
   }
 }
 
-#ifdef INLINE
-INLINE
-#endif
-void
+INLINE void
 xmpn_mirrorcopy(mp_limb_t *z, mp_limb_t *x, long n)
 {
   long i;
@@ -99,10 +90,7 @@ xmpn_mirrorcopy(mp_limb_t *z, mp_limb_t *x, long n)
     z[i]=x[n-1-i];
 }
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 icopy_ef(GEN x, long l)
 {
   register long lx = lgefint(x);
@@ -169,10 +157,7 @@ egalii(GEN x, GEN y)
 /**                                                                   **/
 /***********************************************************************/
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 addsispec(long s, GEN x, long nx)
 {
   GEN  zd;
@@ -189,10 +174,7 @@ addsispec(long s, GEN x, long nx)
 
 #define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN zd;
@@ -212,10 +194,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
 }
 
 /* assume x >= y */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 subisspec(GEN x, long s, long nx)
 {
   GEN zd;
@@ -230,10 +209,7 @@ subisspec(GEN x, long s, long nx)
 }
 
 /* assume x > y */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 subiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN zd;
@@ -942,10 +918,7 @@ muluu(ulong x, ulong y)
 }
 
 /* assume ny > 0 */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 mulsispec(long x, GEN y, long ny)
 {
   long lz = ny+3;
@@ -1025,22 +998,15 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 muliispec(GEN x, GEN y, long nx, long ny);
-
 
 /* We must have nx>=ny. This lets garbage on the stack.
    This handle squares correctly (mpn_mul is optimized
    for squares).
 */
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 quickmulii(GEN x, GEN y, long nx, long ny)
 {
   GEN cx=new_chunk(nx),cy;
@@ -1085,10 +1051,7 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
 
 /* set z <-- x*y, floating point multiplication.
  * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z) */
-#ifdef INLINE
-INLINE
-#endif
-void
+INLINE void
 mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
 {
   const int flag = (lz != ly);
@@ -2025,10 +1988,7 @@ absr_cmp(GEN x, GEN y)
 /********************************************************************/
 
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 muliispec(GEN x, GEN y, long nx, long ny)
 {
   GEN zd;
@@ -2050,10 +2010,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
   return zd;
 }
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 sqrispec(GEN x, long nx)
 {
   GEN zd;

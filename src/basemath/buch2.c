@@ -2771,10 +2771,7 @@ regulator(GEN P, GEN data, long prec)
   return gerepilecopy(av,(GEN)z[6]);
 }
 
-#ifdef INLINE
-INLINE
-#endif
-GEN
+INLINE GEN
 col_0(long n)
 {
    GEN c = (GEN) gpmalloc(sizeof(long)*(n+1));
