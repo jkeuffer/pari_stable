@@ -135,6 +135,7 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    11- library function gerepileall
    12- library functions corepartial, core2partial
    13- library functions affui, itou
+   14- library function lllint_ip (in place)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
