@@ -2189,7 +2189,7 @@ init_units(GEN BNF)
 {
   GEN bnf = checkbnf(BNF), x = (GEN)bnf[8], v, funits;
   long i, l;
-  if (lg(x) == 5) funits = (GEN)buchfu(bnf)[1];
+  if (lg(x) == 5) funits = buchfu(bnf);
   else
   {
     if (lg(x) != 6) err(talker,"incorrect big number field");
