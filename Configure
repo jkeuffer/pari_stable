@@ -51,7 +51,7 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 ####################### CONFIGURE - ARCHITECTURE ############################
 . ./get_archos # arch, osname, asmarch, pretty
 ####################### CONFIGURE - COMPILATION #############################
-. ./get_cc   # $_cc_list, extraflag
+. ./get_cc   # $_cc_list (includes 'optimization'), extraflag
 . ./get_as   # AS, ASFLAGS, KERNELCPPFLAGS, gnuas
 . ./get_ld   # LD, LDFLAGS, LIBS, runpathprefix
 . ./get_dlld # $_dlld_list, fix libpari_base
@@ -61,11 +61,11 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 ####################### CONFIGURE - LIBRARIES ###############################
 # Looking for libraries: X11, gnuplot, readline
 if test "$optimization" != profiling; then
-  . ./get_libpth
+  . ./get_libpth # initialize
   echo Checking for optional libraries and headers...
   . ./get_X11  # X11, Xincroot, extralib
   . ./get_gnuplot_libs # gnuplot, gnuplot_libs
-  . ./get_readline # $_readline_list
+  . ./get_readline # $_readline_list (includes 'readline')
   . ./get_graphic_lib # which_graphic_lib, graphic_lib_dll
   if test -z "$X11$gnuplot$readline" \
           -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
