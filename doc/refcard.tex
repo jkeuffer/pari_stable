@@ -17,7 +17,13 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari-GP reference card}
+% ignore parimacro.tex's \magnification setting
+\let\oldmagnification\magnification
+\catcode`@=11
+\def\magnification{\count@}%
+\catcode`@=12
 \input parimacro.tex
+\let\magnification\oldmagnification
 \ifPDF
   \input pdfmacs.tex
   \pdfpagewidth=11.69in
