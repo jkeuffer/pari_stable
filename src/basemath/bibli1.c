@@ -252,15 +252,30 @@ ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
   x[k] = (long)ZV_lincomb(gun, q, (GEN)x[k], (GEN)x[l]);
 }
 
+static GEN
+round_safe(GEN q)
+{ 
+  long e;
+  if (typ(q) == t_REAL && expo(q) > 30)
+  {
+    q = grndtoi(q, &e);
+    if (e > 0) return NULL;
+  } else
+    q = ground(q);
+  return q;
+}
+
 /* b[k] <-- b[k] - round(L[k,l]) b[l], only b[1] ... b[K] modified so far
  * assume l < k and update x = Gram(b), L = Gram Schmidt coeffs. */
-static void
+static int
 RED_gram(long k, long l, GEN x, GEN h, GEN L, long K)
 {
-  long e,i,lx;
-  GEN q = grndtoi(gcoeff(L,k,l), &e);
+  long i,lx;
+  GEN q = round_safe(gcoeff(L,k,l));
   GEN xk, xl;
-  if (!signe(q)) return;
+
+  if (!q) return 0;
+  if (!signe(q)) return 1;
   q = negi(q); lx = lg(x);
   xk = (GEN)x[k]; xl = (GEN)x[l];
   if (is_pm1(q))
@@ -278,16 +293,18 @@ RED_gram(long k, long l, GEN x, GEN h, GEN L, long K)
     for (i=1;i<lx;i++) coeff(x,k,i)=xk[i]=ladd((GEN)xk[i], gmul(q,(GEN)xl[i]));
   }
   update_L(k,l,q,L);
-  update_h(k,l,q,K,h);
+  update_h(k,l,q,K,h); return 1;
 }
 
-static void
+static int
 RED(long k, long l, GEN x, GEN h, GEN L, long K)
 {
   long i,lx;
-  GEN q = ground(gcoeff(L,k,l));
+  GEN q = round_safe(gcoeff(L,k,l));
   GEN xk, xl;
-  if (!signe(q)) return;
+
+  if (!q) return 0;
+  if (!signe(q)) return 1;
   q = negi(q);
   xk = (GEN)x[k]; xl = (GEN)x[l];
   lx = lg(xk);
@@ -303,7 +320,7 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
     for (i=1;i<lx;i++) xk[i] = ladd((GEN)xk[i], gmul(q,(GEN)xl[i]));
   }
   update_L(k,l,q,L);
-  update_h(k,l,q,K,h);
+  update_h(k,l,q,K,h); return 1;
 }
 
 static int
@@ -868,6 +885,7 @@ PRECPB:
   {
     case 2: h = idmat(n); break; /* entry */
     case 1:
+      if (flag == 2) return _vec(h);
       if (gram && kmax > 2)
       { /* some progress but precision loss, try again */
         prec = (prec<<1)-2; kmax = 1;
@@ -890,8 +908,8 @@ PRECPB:
   L=cgetg(lx,t_MAT);
   B=cgetg(lx,t_COL);
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); B[j] = zero; }
-  if (gram) j = incrementalGS(x, L, B, 1);
-  if (!j) {
+  if (gram && !incrementalGS(x, L, B, 1))
+  {
     if (!flag) return NULL; 
     err(lllger3);
   }
@@ -918,15 +936,13 @@ PRECPB:
           if (!incrementalGS(x, L, B, k1)) goto PRECPB;
       }
       else
-      {
-        if (flag == 2) return _vec(h);
         goto PRECPB;
-      }
     }
     if (k != MARKED)
     {
-      if (!gram) RED(k,k-1, x,h,L,KMAX);
-      else  RED_gram(k,k-1, x,h,L,KMAX);
+      if (!gram) j = RED(k,k-1, x,h,L,KMAX);
+      else j = RED_gram(k,k-1, x,h,L,KMAX);
+      if (!j) goto PRECPB;
     }
     if (do_SWAP(x,h,L,B,kmax,k,delta,1))
     {
@@ -940,8 +956,9 @@ PRECPB:
       if (k != MARKED)
         for (l=k-2; l; l--)
         {
-          if (!gram) RED(k,l, x,h,L,KMAX);
-          else  RED_gram(k,l, x,h,L,KMAX);
+          if (!gram) j = RED(k,l, x,h,L,KMAX);
+          else  j = RED_gram(k,l, x,h,L,KMAX);
+          if (!j) goto PRECPB;
           if (low_stack(lim, stack_lim(av,1)))
           {
             if(DEBUGMEM>1) err(warnmem,"lllfp[1]");
