@@ -2561,22 +2561,28 @@ polgcdnun(GEN x, GEN y)
   }
 }
 
+static int issimplefield(GEN x);
+static int
+issimplepol(GEN x)
+{
+  long i, lx = lgef(x);
+  for (i=2; i<lx; i++)
+    if (issimplefield((GEN)x[i])) return 1;
+  return 0;
+}
+
 /* return 1 if coeff explosion is not possible */
 static int
 issimplefield(GEN x)
 {
-  long lx,i;
   switch(typ(x))
   {
     case t_REAL: case t_INTMOD: case t_PADIC: case t_SER:
       return 1;
-    case t_POL:
-      lx=lgef(x);
-      for (i=2; i<lx; i++)
-	if (issimplefield((GEN)x[i])) return 1;
-      return 0;
-    case t_COMPLEX: case t_POLMOD:
+    case t_COMPLEX:
       return issimplefield((GEN)x[1]) || issimplefield((GEN)x[2]);
+    case t_POLMOD: 
+      return issimplepol((GEN)x[1]) || issimplepol((GEN)x[2]);
   }
   return 0;
 }
