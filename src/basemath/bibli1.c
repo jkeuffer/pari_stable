@@ -834,7 +834,7 @@ LABLLLGRAM:
         fprintferr("%ld: %Z\n",i,qfeval(x,(GEN)h[i]));
       flusherr();
     }
-    if (L1 != gzero &&
+    if (typ(L1) == t_REAL &&
         (2*gexpo(L1) > bit_accuracy(lg(L1)) || 2*lg(L1) < last_prec))
     {
       last_prec = lg(L1);
