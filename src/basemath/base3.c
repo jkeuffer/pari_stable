@@ -663,7 +663,7 @@ GEN
 zsigne(GEN nf,GEN x,GEN arch)
 {
   GEN _0,_1, vecsign, rac = (GEN)nf[6];
-  long av, i,j,l;
+  long av, i,j,l,e,B;
 
   if (!arch) return cgetg(1,t_COL);
   switch(typ(x))
@@ -676,10 +676,17 @@ zsigne(GEN nf,GEN x,GEN arch)
   l = lg(arch); vecsign = cgetg(l,t_COL);
   _0 = gmodulss(0,2);
   _1 = gmodulss(1,2); av = avma;
+  B = bit_accuracy(precision((GEN)rac[1]));
+  e = gexpo(x);
   for (j=1,i=1; i<l; i++)
     if (signe(arch[i]))
-      vecsign[j++] = (gsigne(poleval(x,(GEN)rac[i])) > 0)? (long)_0
-                                                         : (long)_1;
+    {
+      GEN y = poleval(x,(GEN)rac[i]);
+      if (e + gexpo((GEN)rac[i]) - gexpo(y) > B)
+        err(talker, "precision too low in zsigne");
+      vecsign[j++] = (gsigne(y) > 0)? (long)_0
+                                                           : (long)_1;
+    }
   avma = av; setlg(vecsign,j); return vecsign;
 }
 
