@@ -42,7 +42,8 @@ if test -z "$CC"; then
       *) echo ..."I could not find gcc."; gcc=;;
   esac
   if test -n "$gcc"; then
-    __gnuc__=`$gcc -v 2>&1 | sed -n 's/.*version //p'`
+    # avoid internationalization trouble by setting LANG=C
+    __gnuc__=`env LANG=C $gcc -v 2>&1 | sed -n 's/.*version //p'`
     if test -z "$__gnuc__"; then __gnuc__=unknown; fi
     echo GNU compiler version $__gnuc__
   fi
