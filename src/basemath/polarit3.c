@@ -1715,7 +1715,6 @@ static GEN
 u_Fp_FpX(GEN x, int malloc, ulong p)
 {
   long i, lx;
-  ulong m;
   GEN a;
 
   switch (typ(x))
@@ -1724,17 +1723,9 @@ u_Fp_FpX(GEN x, int malloc, ulong p)
     case t_INT: a = u_allocpol(0, malloc);
       a[2] = umodiu(x, p); return a;
   }
-  lx = lgef(x); m = 0;
-  for (i=lx-1; i>1; i--)
-  {
-    m = umodiu((GEN)x[i],p);
-    if (m) break;
-  }
-  if (i == 1) return u_zeropol(malloc);
-  a = u_allocpol(i-2, malloc);
-  a[i] = (long)m;
-  for (i--; i>1; i--) a[i] = (long)umodiu((GEN)x[i],p);
-  return a;
+  lx = lgef(x); a = u_allocpol(lx-3, malloc);
+  for (i=2; i<lx; i++) a[i] = (long)umodiu((GEN)x[i], p);
+  return u_normalizepol(a,lx);
 }
 
 #if 0
@@ -2182,6 +2173,28 @@ init_CRT(GEN Hp, GEN *ptq, ulong p)
   return H;
 }
 
+GEN 
+init_CRT_i(ulong Hp, GEN *ptq, ulong p)
+{
+  *ptq = utoi(p);
+  return stoi((long) (Hp > (p>>1))? Hp - p: Hp);
+}
+
+int
+incremental_CRT_i(GEN *H, ulong Hp, GEN *ptq, ulong p)
+{
+  GEN h, q = *ptq, qp = muliu(q,p), lim = shifti(qp,-1);
+  int stable = 1;
+  h = u_chrem_coprime(*H,Hp,q,p,qp);
+  if (h)
+  {
+    if (cmpii(h,lim) > 0) h = subii(h,qp);
+    *H = h; stable = 0;
+  }
+  *ptq = qp; return stable;
+
+}
+
 int
 incremental_CRT(GEN H, GEN Hp, GEN *ptq, ulong p)
 {
@@ -2426,45 +2439,6 @@ polint_triv(GEN xa, GEN ya)
   long i, n = lg(xa), av = avma, lim = stack_lim(av,2);
   for (i=1; i<n; i++)
   {
-    GEN T,dP,u;
-    long e, prec;
-    if (gcmp0((GEN)ya[i])) continue;
-
-    T = gdeuc(Q, gsub(polx[0], (GEN)xa[i]));
-    e = gexpo((GEN)ya[i]) + gexpo(T);
-    prec = DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG);
-    u = cgetr(prec);
-    gaffect(poleval(T,(GEN)xa[i]), u);
-    u = ginv(u);
-
-    if (i < n-1 && absi_equal((GEN)xa[i], (GEN)xa[i+1]))
-    { /* x_i = -x_{i+1} */
-      T = gmul(T, u);
-      dP = pol_comp(T, (GEN)ya[i], (GEN)ya[i+1]);
-      i++;
-    }
-    else
-    {
-      dP = gmul((GEN)ya[i], T);
-      dP = gmul(dP, u);
-    }
-    P = P? gadd(P, dP): dP;
-    if (low_stack(lim,stack_lim(av,2)))
-    {
-      if (DEBUGMEM>1) err(warnmem,"polint_triv (i = %ld)",i);
-      P = gerepileupto(av, P);
-    }
-  }
-  return P? ground(P): zeropol(0);
-}
-
-GEN
-polint_triv2(GEN xa, GEN ya)
-{
-  GEN P = NULL, Q = roots_to_pol(xa,0);
-  long i, n = lg(xa), av = avma, lim = stack_lim(av,2);
-  for (i=1; i<n; i++)
-  {
     GEN T,dP;
     if (gcmp0((GEN)ya[i])) continue;
     T = gdeuc(Q, gsub(polx[0], (GEN)xa[i]));
@@ -2486,7 +2460,7 @@ polint_triv2(GEN xa, GEN ya)
       P = gerepileupto(av, P);
     }
   }
-  return P? ground(P): zeropol(0);
+  return P? P: zeropol(0);
 }
 
 ulong
@@ -2571,7 +2545,12 @@ ZY_ZXY_ResBound(GEN A, GEN B)
   GEN a = gzero, b = gzero;
   long i , lA = lgef(A), lB = lgef(B);
   for (i=2; i<lA; i++) a = addii(a, sqri((GEN)A[i]));
-  for (i=2; i<lB; i++) b = addii(b, sqri((GEN)gnorml1((GEN)B[i], 0)));
+  for (i=2; i<lB; i++)
+  {
+    GEN t = (GEN)B[i];
+    if (typ(t) != t_INT) t = gnorml1(t, 0);
+    b = addii(b, sqri(t));
+  }
   b = mulii(gpowgs(a, deg(B)), gpowgs(b, deg(A)));
   return gerepileupto(av, addis(racine(b), 1));
 }
@@ -2620,9 +2599,11 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
     a = u_Fp_FpX(A, 0, p);
     for (i=2; i<lb; i++)
       b[i] = (long)u_Fp_FpX((GEN)B[i], 0, p);
+   /* Evaluate at 0 (possibly) and +/- n, so that P_n(X) = P_{-n}(-X),
+    * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
     n = dres & 1;
     for (i = 0; i<=dres; n++)
-    { /* evaluate at +/- n */
+    {
       if (!vec_u_FpX_eval(b, n, p, &evalp, &evalm)) continue; /* degree drop */
       x[++i] = n;
       y[i] = u_FpX_resultant(a, evalp, p);
@@ -2670,12 +2651,73 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
   return gerepileupto(av, gcopy(H));
 }
 
+/* caract(Mod(B, A)), A,B in Z[X] */
 GEN
-mycaract(GEN A, GEN B)
+ZX_caract(GEN A, GEN B, long v)
 {
-  long i;
-  B = dummycopy(B); setvarn(B,0);
-  return ZY_ZXY_resultant(A, B, &i);
+  ulong av = avma;
+  GEN B0, R, a;
+  long dB;
+  int delete;
+
+  if (v < 0) v = 0;
+  switch (typ(B))
+  {
+    case t_POL: dB = deg(B); if (dB > 0) break;
+      B = dB? (GEN)B[2]: gzero; /* fall through */
+    default:
+      return gerepileupto(av, gpowgs(gsub(polx[v], B), deg(A)));
+  }
+  delete = 0;
+  if (varn(A) == 0)
+  {
+    long v0 = fetch_var(); delete = 1;
+    A = dummycopy(A); setvarn(A,v0);
+    B = dummycopy(B); setvarn(B,v0);
+  }
+  B0 = cgetg(4, t_POL); B0[1] = evalsigne(1)|evalvarn(0)|evallgef(4);
+  B0[2] = (long)gneg_i(B);
+  B0[3] = un;
+  R = ZY_ZXY_resultant(A, B0, NULL);
+  if (delete) delete_var();
+  setvarn(R, v); a = leading_term(A);
+  if (!gcmp1(a)) R = gdiv(R, gpowgs(a, dB));
+  return gerepileupto(av, R);
+}
+
+GEN
+ZX_resultant(GEN A, GEN B)
+{
+  ulong av = avma, av2, lim, Hp;
+  GEN q, a, b, H, bound;
+  byteptr d = diffptr + 3000;
+  ulong p = 27449; /* p = prime(3000) */
+
+  q = H = NULL;
+  av2 = avma; lim = stack_lim(av,2);
+  bound = ZY_ZXY_ResBound(A,B);
+  if (DEBUGLEVEL>4) fprintferr("bound for resultant: %Z\n",bound);
+
+  for(;;)
+  {
+    p += *d++; if (!*d) err(primer1);
+    a = u_Fp_FpX(A, 0, p);
+    b = u_Fp_FpX(B, 0, p);
+    Hp= u_FpX_resultant(a, b, p);
+    if (!H) 
+      H = init_CRT_i(Hp, &q, p);
+    else /* could make it probabilistic ??? [e.g if stable twice, etc] */
+      (void)incremental_CRT_i(&H, Hp, &q, p);
+    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld", p);
+    if (cmpii(q, bound) >= 0) break; /* DONE */
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
+      if (DEBUGMEM>1) err(warnmem,"ZX_resultant");
+      gerepilemany(av2,gptr, 2);
+    }
+  }
+  return gerepileuptoint(av, icopy(H));
 }
 
 #if 0
