@@ -2646,7 +2646,7 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
     if (i == l)
       err(bugparier, "makescind (no polynomial found)");
   }
-  pol = polredabs(pol, prec);
+  pol = polredabs0(pol, nf_PARTIALFACT, prec);
   return gerepileupto(av, pol);
 }
 
@@ -2683,7 +2683,7 @@ GenusField(GEN bnf, long prec)
     }
   }
 
-  return gerepileupto(av, polredabs(pol, prec));
+  return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT, prec));
 }
 
 /* if flag = 0 returns the reduced polynomial,  flag = 1 returns the

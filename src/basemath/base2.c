@@ -3927,7 +3927,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
     msgtimer("absolute basis");
     fprintferr("original absolute generator: %Z\n", POL);
   }
-  red = polredabs0(bas, (flag==6)? nf_ORIG: nf_RAW, prec);
+  red = polredabs0(bas, (flag==6)? nf_ORIG|nf_PARTIALFACT: nf_RAW, prec);
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag == 2) return gerepileupto(av,pol);

@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "parinf.h"
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN vecmul(GEN x, GEN y);
@@ -920,7 +921,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     GEN A3,A3rev;
 
     if (DEBUGLEVEL>2) fprintferr("Step reduction\n");
-    p1 = polredabs2(R,prec);
+    p1 = polredabs0(R, nf_ORIG|nf_PARTIALFACT, prec);
     R = (GEN)p1[1]; if (DEBUGLEVEL>2) fprintferr("polredabs = %Z",R);
     A3= (GEN)p1[2];
     A1 = poleval(lift(A1), A3);
