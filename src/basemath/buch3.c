@@ -8,7 +8,6 @@
 #include "parinf.h"
 
 extern GEN check_and_build_cycgen(GEN bnf);
-extern GEN compute_class_number(GEN mit,GEN *met,GEN *u1,GEN *u2);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
 extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
@@ -51,6 +50,19 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN vecsign, GEN gen,
       }
     }
   }
+}
+
+/* U W V = D, Ui = U^(-1) */
+GEN
+compute_class_number(GEN W, GEN *D,GEN *Ui,GEN *V)
+{
+  GEN S = smith2(W);
+
+  *Ui= ginv((GEN)S[1]);
+  *V = (GEN)S[2];
+  *D = (GEN)S[3];
+  if (DEBUGLEVEL>=4) msgtimer("smith/class group");
+  return dethnf_i(*D);
 }
 
 GEN

@@ -1379,8 +1379,7 @@ init_idele(GEN nf)
 {
   GEN x = cgetg(3,t_VEC);
   long RU;
-  nf = checknf(nf);
-  RU = itos(gmael(nf,2,1)) + itos(gmael(nf,2,2));
+  nf = checknf(nf); RU = lg(nf[6])-1;
   x[2] = (long)zerovec(RU); return x;
 }
 

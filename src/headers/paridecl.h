@@ -369,6 +369,7 @@ GEN     nfmod(GEN nf, GEN a, GEN b);
 GEN     nfreducemodidele(GEN nf,GEN g,GEN idele,GEN structarch);
 GEN     nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall);
 GEN     reducemodmatrix(GEN x, GEN y);
+GEN     reducemodHNF(GEN x, GEN y, GEN *Q);
 GEN     zarchstar(GEN nf,GEN x,GEN arch,long nba);
 GEN     zideallog(GEN nf,GEN x,GEN bigideal);
 GEN     zidealstar(GEN nf, GEN x);

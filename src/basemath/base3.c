@@ -727,39 +727,48 @@ lllreducemodmatrix(GEN x,GEN y)
 
 /* Reduce column x modulo y in HNF */
 static GEN
-colreducemodmat(GEN x,GEN y)
+colreducemodmat(GEN x, GEN y, GEN *Q)
 {
-  long av = avma, i;
+  long i, l = lg(x), av = avma;
   GEN q;
 
-  for (i=lg(x)-1; i>=1; i--)
+  if (Q) *Q = cgetg(l,t_COL);
+  if (l == 1) return cgetg(1,t_COL);
+  for (i = l-1; i>0; i--)
   {
-    q = gdivround((GEN)x[i], gcoeff(y,i,i));
-    if (signe(q)) { q = gneg(q); x = gadd(x, gmul(q,(GEN)y[i])); }
+    q = negi(gdivround((GEN)x[i], gcoeff(y,i,i)));
+    if (Q) (*Q)[i] = (long)q;
+    if (signe(q)) x = gadd(x, gmul(q, (GEN)y[i]));
   }
-  return avma==av? gcopy(x): gerepileupto(av,x);
+  return Q? x: gerepileupto(av,x);
 }
 
 /* for internal use...Reduce matrix x modulo matrix y */
 GEN
 reducemodmatrix(GEN x, GEN y)
 {
-  long i, lx = lg(x);
-  GEN z = cgetg(lx,t_MAT);
-
   if (DEBUGLEVEL>=8)
   {
     fprintferr("entering reducemodmatrix; avma-bot = %ld\n",avma-bot);
     flusherr();
   }
-  y = hnfmod(y,detint(y));
-  for (i=1; i<lx; i++)
+  return reducemodHNF(x, hnfmod(y,detint(y)), NULL);
+}
+
+/* x = y Q + R */
+GEN
+reducemodHNF(GEN x, GEN y, GEN *Q)
+{
+  long lx = lg(x), i;
+  GEN R = cgetg(lx, t_MAT);
+  if (Q)
   {
-    if(DEBUGLEVEL>=8) { fprintferr("%ld ",i); flusherr(); }
-    z[i]=(long)colreducemodmat((GEN)x[i],y);
+    GEN q = cgetg(lx, t_MAT); *Q = q;
+    for (i=1; i<lx; i++) R[i] = (long)colreducemodmat((GEN)x[i],y,(GEN*)(q+i));
   }
-  if(DEBUGLEVEL>=8) { fprintferr("\n"); flusherr(); }
-  return z;
+  else
+    for (i=1; i<lx; i++) R[i] = (long)colreducemodmat((GEN)x[i],y,NULL);
+  return R;
 }
 
 /* compute elt = x mod idele, with sign(elt) = sign(x) at arch */
@@ -1344,7 +1353,7 @@ compute_gen(GEN nf, GEN u1, GEN met, GEN gen, GEN module, long nbp, GEN sarch)
   long i,j,s,nba, c = lg(met), lgen = lg(gen);
   GEN basecl=cgetg(c,t_VEC), unnf = gscalcol_i(gun, lgef(nf[1])-3);
   GEN arch,x,p1,p2,p3,p4,p5,generator;
-  
+
   if (sarch)
   {
     arch = (GEN)module[2];
@@ -1469,7 +1478,7 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
     p1[3] = (long)compute_gen(nf,u1,met,gen,ideal, nbp,sarch);
   }
   else p1 = cgetg(3,t_VEC);
-  y = cgetg(6,t_VEC); 
+  y = cgetg(6,t_VEC);
   y[1]=(long)ideal;
   y[2]=(long)p1;
     p1[1]=(long)dethnf(met);

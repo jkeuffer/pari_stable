@@ -2788,7 +2788,7 @@ $\var{bnf}[3]$ contains the complex logarithmic embeddings of the system of
 fundamental units which has been found. It is an $(r_1+r_2)\times(r_1+r_2-1)$
 matrix.
 
-$\var{bnf}[4]$ contains the matrix $WB_C$ of Archimedean components of the
+$\var{bnf}[4]$ contains the matrix $M''_C$ of Archimedean components of the
 relations of the matrix $(W|B)$.
 
 $\var{bnf}[5]$ contains the prime factor base, i.e.~the list of prime
@@ -2800,17 +2800,23 @@ necessary to reduce the relation matrix to the form explained in subsection
 right). Note that in the above mentioned book, the need to permute the rows
 of the relation matrices which occur was not emphasized.
 
-$\var{bnf}[9]$ is a 3-element row vector obtained as follows.  Let
-$b=u_1^{-1}\var{bnf}[1]u_2$ obtained by applying the \idx{Smith normal form}
-algorithm to the matrix $W$ (= $\var{bnf}[1]$). Then
-$\var{bnf}[9]=[u_1,u_2,b]$. Note that the final class group generators
-may be elements of $b$ or their inverse (possibly \idx{LLL}-reduced),
-whichever has smallest norm.
+$\var{bnf}[9]$ is a 3-element row vector used in \tet{bnfisprincipal} only
+and obtained as follows.  Let $D = U W V$ obtained by applying the
+\idx{Smith normal form} algorithm to the matrix $W$ (= $\var{bnf}[1]$) and
+let $U_r$ be the reduction of $U$ modulo $D$. The first elements of the
+factorbase are given (in terms of \kbd{bnf.gen}) by the columns of $U_r$,
+with archimedian component $g_a$; let also $GD_a$ be the archimedian
+components of the generators of the (principal) ideals defined by the
+\kbd{bnf.gen[i] \pow bnf.cyc[i]}. Then $\var{bnf}[9]=[U_r, g_a, GD_a]$.
 
-Finally, $\var{bnf}[10]$ is unused and set equal to 0, but it is essential
-that this component be present, because PARI distinguishes a number field
-\var{nf} from a big number field \var{bnf} by the number of its
-components.\smallskip
+Finally, $\var{bnf}[10]$ is by default unused and set equal to 0. This
+field is used to store further information about the field as it becomes
+available (which is rarely needed, hence would be too expensive to compute
+during the initial \kbd{bnfinit} call). For instance, the generators of the
+principal ideals \kbd{bnf.gen[i]\pow bnf.cyc[i]} (during a call to
+\tet{bnrisprincipal}}), or those corresponding to the relations in $W$ and
+$B$ (when the \kbd{bnf} internal precision needs to be increased).
+\smallskip
 
 \noindent$\bullet$ The less technical components are as follows:
 
