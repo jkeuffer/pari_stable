@@ -348,7 +348,7 @@ extern GEN galoisbig(GEN x, long prec);
 extern GEN cauchy_bound(GEN p);
 
 static GEN
-roots_to_ZX(GEN z, long v, long *e)
+roots_to_ZX(GEN z, long *e)
 {
   GEN a = roots_to_pol(z,0);
   GEN b = grndtoi(greal(a),e);
@@ -410,7 +410,7 @@ galois(GEN x, long prec)
           z[4] = (long)get_F4(transroot(p1,1,4));
           z[5] = (long)get_F4(transroot(p1,2,3));
           z[6] = (long)get_F4(transroot(p1,3,4));
-          p5 = roots_to_ZX(z,0, &e);
+          p5 = roots_to_ZX(z, &e);
           if (e <= -10) break;
 	  prec = (prec<<1)-2;
 	}
@@ -457,7 +457,7 @@ galois(GEN x, long prec)
               e1 = gexpo(gimag(p3)); if (e1>e) e=e1;
               ee[l]=e; z[l] = (long)p3;
 	    }
-            p5 = roots_to_ZX(z,0, &e);
+            p5 = roots_to_ZX(z, &e);
             if (e <= -10) break;
 	    prec = (prec<<1)-2;
 	  }
@@ -519,7 +519,7 @@ galois(GEN x, long prec)
 	      }
 	      z[l] = (long)p3;
 	    }
-            p5 = roots_to_ZX(z,0, &e);
+            p5 = roots_to_ZX(z, &e);
             if (e <= -10) break;
 	    prec=(prec<<1)-2;
 	  }
@@ -540,7 +540,7 @@ galois(GEN x, long prec)
 		          gmul(gmul((GEN)p2[4],(GEN)p2[5]),(GEN)p2[6]));
 		  z[++ind] = (long)p3;
 		}
-              p5 = roots_to_ZX(z,0, &e);
+              p5 = roots_to_ZX(z, &e);
 	      if (e <= -10)
 	      {
                 if (!ZX_is_squarefree(p5)) goto tchi;
@@ -622,7 +622,7 @@ galois(GEN x, long prec)
               GEN t = gadd((GEN)p1[i],(GEN)p1[j]);
 	      for (k=j+1; k<=7; k++) z[++ind] = ladd(t, (GEN)p1[k]);
             }
-          p5 = roots_to_ZX(z,0, &e);
+          p5 = roots_to_ZX(z, &e);
 	  if (e <= -10) break;
           prec = (prec<<1)-2;
 	}

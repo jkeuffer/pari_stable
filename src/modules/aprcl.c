@@ -253,7 +253,7 @@ _powpolmod(int pk, GEN jac, red_t *R, GEN (*_sqr)(GEN, red_t *))
 }
 
 static GEN
-_powpolmodsimple(red_t *R, int k, int pk, GEN jac)
+_powpolmodsimple(red_t *R, int pk, GEN jac)
 {
   GEN vres,w,wpow,wnew,ma;
   long lvres;
@@ -277,7 +277,7 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
 {
   GEN (*_sqr)(GEN, red_t *);
 
-  if (!gcmp0(tabmatvite[pkfalse])) return _powpolmodsimple(R, k, pk, jac);
+  if (!gcmp0(tabmatvite[pkfalse])) return _powpolmodsimple(R, pk, jac);
   if (pk == 3) {
     R->red = &_red; _sqr = &sqrmod3;
   } else if (pk == 4) {
@@ -454,7 +454,7 @@ compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
 
 /* p odd prime */
 static GEN
-get_jac(GEN N, ulong q, ulong p, int k, GEN tabf, GEN tabg)
+get_jac(ulong q, ulong p, int k, GEN tabf, GEN tabg)
 {
   GEN ze, vpk;
   long i, qm3s2;
@@ -535,7 +535,7 @@ calcjac(GEN N, GEN et)
     {
       p = itos((GEN)faqpr[j]);
       k = itos((GEN)faqex[j]);
-      J[j] = (long)get_jac(N,q,p,k,tabf,tabg);
+      J[j] = (long)get_jac(q,p,k,tabf,tabg);
     }
   }
 }
@@ -797,7 +797,7 @@ step4a(GEN N, ulong q, int p, int k, GEN jpq)
     GEN tabf, tabg;
 
     compute_fg(q,1, &tabf,&tabg);
-    jpq = get_jac(N,q,p,k,tabf,tabg);
+    jpq = get_jac(q,p,k,tabf,tabg);
     if (dotime) sgtjac+=timer();
   }
   R.N = N;

@@ -316,7 +316,7 @@ typedef struct {
 } sr_muldata;
 
 static GEN
-_rpowsi_mul(void *data, GEN x, GEN y/* base; ignored */)
+_rpowsi_mul(void *data, GEN x, GEN y/*unused*/)
 {
   sr_muldata *D = (sr_muldata *)data;
   return D->mulsg(D->a, x);

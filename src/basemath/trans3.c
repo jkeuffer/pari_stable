@@ -142,7 +142,7 @@ norml1(GEN n, long prec)
 /* computes sum_{k=0}^m n!*((-1)^flag*z^2/4)^k/(k!*(k+n)!) */
 
 static GEN
-_jbessel(GEN n, GEN z, long flag, long m, long prec)
+_jbessel(GEN n, GEN z, long flag, long m)
 {
   long k, limit;
   gpmem_t av, tetpil;
@@ -196,12 +196,12 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 	precnew  = prec;
 	if (x >= 1.0) precnew += 1 + (long)(x/(LOG2*BITS_IN_LONG));
 	znew = setlgcx(z,precnew);
-	if (k >= 0) p1 = setlgcx(_jbessel(stoi(k),znew,flag,lim,precnew),prec);
+	if (k >= 0) p1 = setlgcx(_jbessel(stoi(k),znew,flag,lim),prec);
 	else
 	{
 	  i = precision(n);
 	  nnew = (i && (i < precnew)) ? setlgcx(n,precnew) : n;
-	  p1 = setlgcx(_jbessel(nnew,znew,flag,lim,precnew),prec);
+	  p1 = setlgcx(_jbessel(nnew,znew,flag,lim),prec);
 	}
 	tetpil = avma; return gerepile(av,tetpil,gmul(p2,p1));
       }
@@ -210,9 +210,9 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (isint(setlgcx2(n,prec),&ki))
       {
 	k = labs(ki);
-	p1 = _jbessel(stoi(k),z,flag,lg(z)-2,prec);
+	p1 = _jbessel(stoi(k),z,flag,lg(z)-2);
       }
-      else p1 = _jbessel(n,z,flag,lg(z)-2,prec);
+      else p1 = _jbessel(n,z,flag,lg(z)-2);
       tetpil = avma; return gerepile(av,tetpil,gcopy(p1));
       
     case t_VEC: case t_COL: case t_MAT:

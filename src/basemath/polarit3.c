@@ -1436,7 +1436,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 #define FqX_sqr FpXQX_sqr
 #define FqX_red FpXQX_red
 static GEN
-Fq_neg(GEN x, GEN T, GEN p)/*T is not used but it is for consistency*/
+Fq_neg(GEN x, GEN T/*unused*/, GEN p)
 {
   switch(typ(x)==t_POL)
   {

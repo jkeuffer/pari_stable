@@ -2122,6 +2122,7 @@ static GEN
 chk_reccoeff_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
 {
   RC_data *d = (RC_data*)chk->data;
+  (void)nf; (void)gram; (void)ptprec;
   d->U = mat; return d->nB;
 }
 
@@ -2144,9 +2145,9 @@ chk_reccoeff(void *data, GEN x)
 }
 
 static GEN
-chk_reccoeff_post(void *data /*unused*/, GEN res)
+chk_reccoeff_post(void *data/*unused*/, GEN res)
 {
-  return res;
+  (void)data; return res;
 }
 
 /* Using Cohen's method */
