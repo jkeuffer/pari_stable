@@ -102,7 +102,7 @@ GEN
 getallforms(GEN D, long *pth, GEN *ptz)
 {
   long d = itos(D), dabs = labs(d),  dover3 = dabs/3, t, b2, a, b, c, h;
-  GEN z, L = cgetg((long)sqrt(dabs) * log2(dabs), t_VEC);
+  GEN z, L = cgetg((long)(sqrt(dabs) * log2(dabs)), t_VEC);
   b2 = b = (d&1); h = 0; z=gun;
   while (b2 <= dover3)
   {
