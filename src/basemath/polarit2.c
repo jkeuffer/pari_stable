@@ -343,8 +343,8 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 GEN 
 polhensellift(GEN pol, GEN fct, GEN p, long exp)
 {
-  GEN p1, p2, p3;
-  long av = avma, j, k, l;
+  GEN p1, p2;
+  long av = avma, j, l;
 
   /* we check the arguments */
   if (typ(pol) != t_POL) 
@@ -366,16 +366,8 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
     err(talker, "not a correct factorization in polhensellift");
 
   /* finally we check that the elements of fct are coprime mod p */
-  for (j = 1; j < l; j++)
-  {
-    p2 = (GEN)p1[j];
-    for (k = j+1; k <= l; k++) 
-    {
-      p3 = (GEN)p1[k];
-      if (degree(Fp_pol_gcd(p2, p3, p)) > 0)
-	err(talker, "factors are not coprime in polhensellift");
-    }
-  }
+  if (gcmp0(discsr(Fp_pol(pol, p))))
+    err(talker, "factors are not coprime in polhensellift");
 
   return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, p, 
 						 gpowgs(p, exp), exp)));
