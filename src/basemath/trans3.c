@@ -2343,6 +2343,24 @@ agm1r(GEN x)
 }
 
 static GEN
+agm1cx(GEN x, long prec)
+{
+  GEN a, a1, b1;
+  pari_sp av = avma;
+  long l = precision(x); if (!l) l = prec;
+
+  a1 = x; b1 = gun; l = 5-bit_accuracy(l);
+  do
+  {
+    a = a1;
+    a1 = gmul2n(gadd(a,b1),-1);
+    b1 = gsqrt(gmul(a,b1), prec);
+  }
+  while (gexpo(gsub(b1,a1)) - gexpo(b1) >= l);
+  return gerepilecopy(av,a1);
+}
+
+static GEN
 sagm(GEN x, long prec)
 {
   GEN p1, a, a1, b1, y;
@@ -2352,20 +2370,12 @@ sagm(GEN x, long prec)
   if (gcmp0(x)) return gcopy(x);
   switch(typ(x))
   {
-    case t_REAL: return agm1r(x);
+    case t_REAL: return signe(x) > 0? agm1r(x): agm1cx(x, prec);
 
     case t_COMPLEX:
-      if (gcmp0((GEN)x[2])) return transc(sagm, (GEN)x[1], prec);
-      av = avma; l = precision(x); if (l) prec = l;
-      a1 = x; b1 = gun; l = 5-bit_accuracy(prec);
-      do
-      {
-	a = a1;
-	a1 = gmul2n(gadd(a,b1),-1);
-	b1 = gsqrt(gmul(a,b1), prec);
-      }
-      while (gexpo(gsub(b1,a1)) - gexpo(b1) >= l);
-      return gerepilecopy(av,a1);
+      if (gcmp0((GEN)x[2]) && gsigne((GEN)x[1]) > 0)
+        return transc(sagm, (GEN)x[1], prec);
+      return agm1cx(x, prec);
 
     case t_PADIC:
       av = avma;

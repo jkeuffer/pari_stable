@@ -191,6 +191,7 @@ JD 74- [Configure:] detection of times()
        "unsafe" gerepile right afterwards ]
    92- component(Ser(x),2^31-1) --> SEGV
    93- typos in krosi(), kronecker() [ e.g krosi(-4,1), kronecker(0,2^32+1) ]
+   94- agm(-1,2) --> oo loop
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
