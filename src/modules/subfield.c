@@ -601,7 +601,8 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
                   d,oldlistpotbl);
     flusherr();
   }
-  *ptlistpotbl=oldlistpotbl; *ptff=lift(oldff); *ptnn=oldnn; return stoi(pp);
+  if (oldff) oldff = lift_intern(oldff);
+  *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptnn=oldnn; return stoi(pp);
 }
 
 static GEN
