@@ -30,6 +30,7 @@ typedef struct slist {
 
 typedef struct {
   GEN hnfgroup;
+  GEN listKer;
   slist *list;
 } sublist_t;
 
@@ -58,7 +59,7 @@ typedef struct subgp_iter {
   int boundtype;
   long countsub; /* number of subgroups of type M (so far) */
   long count; /* number of p-subgroups so far [updated when M completed] */
-  long expoI; /* exponent of I */
+  GEN expoI; /* exponent of I */
   void(*fun)(struct subgp_iter *, GEN); /* applied to each subgroup */
   void *fundata; /* for fun */
 } subgp_iter;
@@ -112,11 +113,26 @@ addcell(sublist_t *S, GEN H)
   S->list = cell;
 }
 
+/* 0 if hinv*list[i] has a denominator for all i, 1 otherwise */
+static int
+hnflistdivise(GEN list,GEN h)
+{
+  ulong av = avma;
+  long i, I = lg(list);
+  GEN hinv = ginv(h);
+
+  for (i=1; i<I; i++)
+    if (gcmp1(denom(gmul(hinv,(GEN)list[i])))) break;
+  avma = av; return i < I;
+}
+
 static void
 list_fun(subgp_iter *T, GEN x)
 {
   sublist_t *S = (sublist_t*)T->fundata;
-  addcell(S, hnf(concatsp(S->hnfgroup,x))); T->countsub++;
+  GEN H = hnf(concatsp(S->hnfgroup,x));
+  if (S->listKer && hnflistdivise(S->listKer, H)) return; /* test conductor */
+  addcell(S, H); T->countsub++;
 }
 /* -------------------------------------------------------------- */
 
@@ -128,7 +144,7 @@ treatsub(subgp_iter *T, GEN H)
   if (!T->subq) T->fun(T, H);
   else
   { /* not a p group, add the trivial part */
-    GEN Hp = gmulsg(T->expoI, H); /* lift H to G */
+    GEN Hp = gmul(T->expoI, H); /* lift H to G */
     long l = lg(T->subqpart);
     for (i=1; i<l; i++)
       T->fun(T, concatsp(Hp, (GEN)T->subqpart[i]));
@@ -400,7 +416,7 @@ expand_sub(GEN x, long n)
 }
 
 extern GEN matqpascal(long n, GEN q);
-static GEN subgrouplist_i(GEN cyc, GEN bound, long expoI);
+static GEN subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer);
 
 static GEN
 init_powlist(long k, long p)
@@ -473,15 +489,15 @@ subgroup_engine(subgp_iter *T)
       if (gcmp1((GEN)cycI[i])) break;
     }
     setlg(cycI, i); /* cyclic factors of I */
-    if (is_bigint(cyc[1]))
-      err(impl,"subgrouplist for large cyclic factors");
     if (T->boundtype == b_EXACT)
     {
       (void)pvaluation(T->bound,p,&B);
       B = _vec(B);
     }
-    T->expoI = itos((GEN)cycI[1]);
-    T->subq = subgrouplist_i(cycI, B, T->expoI);
+    if (is_bigint(cyc[1]))
+      err(impl,"subgrouplist for large cyclic factors");
+    T->expoI = (GEN)cycI[1];
+    T->subq = subgrouplist_i(cycI, B, T->expoI, NULL);
 
     lsubq = lg(T->subq);
     for (i=1; i<lsubq; i++)
@@ -558,7 +574,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
 }
 
 static GEN
-subgrouplist_i(GEN cyc, GEN bound, long expoI)
+subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
 {
   ulong av = avma;
   subgp_iter T;
@@ -574,6 +590,7 @@ subgrouplist_i(GEN cyc, GEN bound, long expoI)
   sublist = list = (slist*) gpmalloc(sizeof(slist));
   S.list = sublist;
   S.hnfgroup = diagonal(cyc);
+  S.listKer = listKer;
   T.fun = &list_fun;
   T.fundata = (void*)&S;
 
@@ -607,5 +624,11 @@ subgrouplist_i(GEN cyc, GEN bound, long expoI)
 GEN
 subgrouplist(GEN cyc, GEN bound)
 {
-  return subgrouplist_i(cyc,bound,-1);
+  return subgrouplist_i(cyc,bound,NULL,NULL);
+}
+
+GEN
+subgroupcondlist(GEN cyc, GEN bound, GEN listKer)
+{
+  return subgrouplist_i(cyc,bound,NULL,listKer);
 }

@@ -34,6 +34,7 @@ extern GEN arch_mul(GEN x, GEN y);
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN ideallllred_elt(GEN nf, GEN I);
+extern GEN subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
 
 /* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
 static GEN
@@ -2483,7 +2484,7 @@ discrayabslistarchsquare(GEN bnf, GEN arch, long bound)
 /* Let bnr1, bnr2 be such that mod(bnr2) | mod(bnr1), compute the
    matrix of the surjective map Cl(bnr1) ->> Cl(bnr2) */
 GEN
-bnrGetSurjMat(GEN bnr1, GEN bnr2)
+bnrGetSurj(GEN bnr1, GEN bnr2)
 {
   long nbg, i;
   GEN gen, M;
@@ -2498,16 +2499,14 @@ bnrGetSurjMat(GEN bnr1, GEN bnr2)
   return M;
 }
 
+/* Kernel of the above map */
 static GEN
-computehuv(GEN bnr,GEN id, GEN arch)
+bnrGetKer(GEN bnr, GEN mod2)
 {
   long i,n, av = avma;
-  GEN bnr2,P,U, newmod = cgetg(3,t_VEC);
-  newmod[1] = (long)id;
-  newmod[2] = (long)arch;
+  GEN P,U, bnr2 = buchrayall(bnr,mod2,nf_INIT);
 
-  bnr2 = buchrayall(bnr,newmod,nf_INIT);
-  P = bnrGetSurjMat(bnr, bnr2); n = lg(P);
+  P = bnrGetSurj(bnr, bnr2); n = lg(P);
   P = concatsp(P, diagonal(gmael(bnr2,5,2)));
   U = (GEN)hnfall(P)[2]; setlg(U,n);
   for (i=1; i<n; i++) setlg(U[i], n);
@@ -2515,51 +2514,42 @@ computehuv(GEN bnr,GEN id, GEN arch)
   return gerepileupto(av, hnf(U));
 }
 
-/* 0 if hinv*list[i] has a denominator for all i, 1 otherwise */
-static int
-hnflistdivise(GEN list,GEN h)
-{
-  long av = avma, i, I = lg(list);
-  GEN hinv = ginv(h);
-
-  for (i=1; i<I; i++)
-    if (gcmp1(denom(gmul(hinv,(GEN)list[i])))) break;
-  avma = av; return i < I;
-}
-
 static GEN
 subgroupcond(GEN bnr, GEN indexbound)
 {
   ulong av = avma;
   long i,j,lgi,lp;
-  GEN li,p1,lidet,perm,nf,bid,ideal,arch,primelist,listkernels;
+  GEN li,p1,lidet,perm,nf,bid,ideal,arch,arch2,primelist,listKer;
+  GEN mod = cgetg(3, t_VEC);
 
   checkbnrgen(bnr); bid=(GEN)bnr[2];
   ideal=gmael(bid,1,1);
   arch =gmael(bid,1,2); nf=gmael(bnr,1,7);
   primelist=gmael(bid,3,1); lp=lg(primelist)-1;
-  listkernels=cgetg(lp+lg(arch),t_VEC);
+  mod[2] = (long)arch;
+  listKer=cgetg(lp+lg(arch),t_VEC);
   for (i=1; i<=lp; )
   {
-    p1=idealdiv(nf,ideal,(GEN)primelist[i]);
-    listkernels[i++]=(long)computehuv(bnr,p1,arch);
+    mod[1] = (long)idealdiv(nf,ideal,(GEN)primelist[i]);
+    listKer[i++] = (long)bnrGetKer(bnr,mod);
   }
+  mod[1] = (long)ideal; arch2 = dummycopy(arch);
+  mod[2] = (long)arch2;
   for (j=1; j<lg(arch); j++)
     if (signe((GEN)arch[j]))
     {
-      p1=dummycopy(arch); p1[j]=zero;
-      listkernels[i++]=(long)computehuv(bnr,ideal,p1);
+      arch2[j] = zero; 
+      listKer[i++] = (long)bnrGetKer(bnr,mod);
+      arch2[j] = un;
     }
-  setlg(listkernels,i);
+  setlg(listKer,i);
 
-  li=subgrouplist(gmael(bnr,5,2),indexbound);
-  lgi=lg(li);
-  for (i=1,j=1; j<lgi; j++)
-    if (!hnflistdivise(listkernels, (GEN)li[j])) li[i++] = li[j];
+  li = subgroupcondlist(gmael(bnr,5,2),indexbound,listKer);
+  lgi = lg(li);
   /* sort by increasing index */
-  lgi = i; setlg(li,i); lidet=cgetg(lgi,t_VEC);
-  for (i=1; i<lgi; i++) lidet[i]=(long)dethnf_i((GEN)li[i]);
-  perm = sindexsort(lidet); p1=li; li=cgetg(lgi,t_VEC);
+  lidet = cgetg(lgi,t_VEC);
+  for (i=1; i<lgi; i++) lidet[i] = (long)dethnf_i((GEN)li[i]);
+  perm = sindexsort(lidet); p1 = li; li = cgetg(lgi,t_VEC);
   for (i=1; i<lgi; i++) li[i] = p1[perm[lgi-i]];
   return gerepilecopy(av,li);
 }
