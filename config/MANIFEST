@@ -21,6 +21,7 @@ Odos/paricfg.h
 Odos/pariinl.h
 README
 README.DOS
+README.WIN
 TODO
 config/DOC_Make.SH
 config/GEN_Make.SH
