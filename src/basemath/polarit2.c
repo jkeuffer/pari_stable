@@ -3575,7 +3575,6 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     GEN M, dsol, dens;
     GEN R, ax, bo;
     byteptr primepointer;
-    GEN *bptr[] = { &M, &mod };
     for (p = 27449, primepointer = diffptr + 3000; ; p += *(primepointer++))
     {
       if (!*primepointer) err(primer1);
@@ -3613,7 +3612,13 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (gdivise(P, dsol) && gdivise(Q, dsol))
         break;
       if (low_stack(st_lim, stack_lim(btop, 1)))
-        gerepilemany(btop, bptr, 2);
+      {
+	GEN *bptr[2];
+	bptr[0]=&M; bptr[1]=&mod;
+	if (DEBUGMEM>1)
+	  err(warnmem,"nfgcd");
+	gerepilemany(btop, bptr, 2);
+      }
     }
   }
   return gerepileupto(ltop, gcopy(sol));

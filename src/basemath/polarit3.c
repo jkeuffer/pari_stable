@@ -972,12 +972,12 @@ FpXX_red(GEN z, GEN p)
     for(i=2;i<lgef(res);i++)
       if (typ(z[i])!=t_INT)
       {
-	int av=avma;
+	ulong av=avma;
         res[i]=(long)FpX_red((GEN)z[i],p);
 	if (lgef(res[i])<=3)
 	{
 	  if (lgef(res[i])==2) {avma=av;res[i]=zero;}
-	  else res[i]=lpileupto(avma,gcopy(gmael(res,i,2)));
+	  else res[i]=lpileupto(av,gcopy(gmael(res,i,2)));
 	}
       }
       else
@@ -1090,7 +1090,6 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
   {
     ulong btop = avma;
     ulong st_lim = stack_lim(btop, 1);
-    GEN *bptr[] = {&P, &Q};
     do
     {
       dg = lgef(P)-lgef(Q);
@@ -1117,8 +1116,14 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 	dg = lgef(P)-lgef(Q);
       }while(dg>=0);
       if (low_stack(st_lim, stack_lim(btop, 1)))
+      {
+    	GEN *bptr[2];
+	bptr[0]=&P; bptr[1]=&Q;
+	if (DEBUGLEVEL>1)
+	  err(warnmem,"FpXQX_safegcd");
 	gerepilemany(btop, bptr, 2);
-    }while(signe(P));
+      }
+    } while(signe(P));
   }
   return gerepileupto(ltop, Q);
 }
