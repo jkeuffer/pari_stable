@@ -474,89 +474,69 @@ remainder, i.e.~non-negative and less than the absolute value of~\kbd{y}.
 
 \subsec{Division with remainder}: the following functions return two objects,
 unless specifically asked for only one of them~--- a quotient and a remainder.
-The remainder will be created on the stack, and a \kbd{GEN} pointer to this
-object will be returned through the variable whose address is passed as the
-\kbd{r} argument.
+The quotient is returned and a the remainder is returned through the variable
+whose address is passed as the \kbd{r} argument. All \kbd{GEN}s, whether
+returned directly or through a pointer, are created on the stack.
 
-\fun{GEN}{dvmdss}{long s, long t, GEN *r} creates the Euclidean
-quotient and remainder of the longs \kbd{s} and~\kbd{t}. If \kbd{r} is not
-\kbd{NULL} or \kbd{ONLY\_REM}, this puts the remainder into \kbd{*r},
-and returns the quotient. If \kbd{r} is equal to \kbd{NULL}, only the
-quotient is returned. If \kbd{r} is equal to \kbd{ONLY\_REM}, the remainder
-is returned instead of the quotient. In the generic case, the remainder is
-created after the quotient and can be disposed of individually with a
-\kbd{cgiv(r)}. The remainder is always of the sign of the dividend~\kbd{s}.
-
-\fun{GEN}{dvmdsi}{long s, GEN x, GEN *r} creates the Euclidean
-quotient and remainder of the long \kbd{s} by the integer~\kbd{x}.
-Obeys the same conventions with respect to~\kbd{r}.
-
-\fun{GEN}{dvmdis}{GEN x, long s, GEN *r} create the Euclidean
-quotient and remainder of the integer x by the long~s.
-
-\fun{GEN}{dvmdii}{GEN x, GEN y, GEN *r} returns the Euclidean quotient
-of the integer \kbd{x} by the integer \kbd{y} and puts the remainder
-into~\kbd{*r}. If \kbd{r} is equal to \kbd{NULL}, the remainder is not
-created, and if \kbd{r} is equal to  \kbd{ONLY\_REM}, only the remainder
-is created and returned. In the generic case, the remainder is created
-after the quotient and can be disposed of individually with a \kbd{cgiv(r)}.
-The remainder is always of the sign of the dividend~\kbd{x}.
+\fun{GEN}{dvmdii}{GEN x, GEN y, GEN *r} returns the Euclidean quotient of the
+integer \kbd{x} by the integer \kbd{y} and puts the remainder into~\kbd{*r}.
+If \kbd{r} is equal to \kbd{NULL}, the remainder is not created, and if
+\kbd{r} is equal to  \kbd{ONLY\_REM}, only the remainder is created and
+returned. In the generic case, the remainder is created after the quotient
+and can be disposed of individually with a \kbd{cgiv(r)}. The remainder is
+always of the sign of the dividend~\kbd{x}.
 
 \fun{GEN}{truedvmdii}{GEN x, GEN y, GEN *r}, as \kbd{dvmdii} but with a
 non-negative remainder.
 
-\fun{void}{mpdvmdz}{GEN x, GEN y, GEN z, GEN *r} assigns the Euclidean
-quotient of the integers \kbd{x} and \kbd{y} into the integer or real~\kbd{z},
-putting the remainder into~\kbd{*r} (unless \kbd{r} is equal to \kbd{NULL} or
-\kbd{ONLY\_REM} as above).
-
-\fun{void}{dvmdssz}{long s, long t, GEN z, GEN *r} assigns the Euclidean
-quotient of the longs \kbd{s} and \kbd{t} into the integer or real~\kbd{z},
-putting the remainder into~\kbd{*r} (unless \kbd{r} is equal to \kbd{NULL} or
-\kbd{ONLY\_REM} as above).
-
-\fun{void}{dvmdsiz}{long s, GEN x, GEN z, GEN *r} assigns the Euclidean
-quotient of the long \kbd{s} and the integer \kbd{x} into the integer or
-real~\kbd{z}, putting the remainder into \kbd{*r} (unless \kbd{r} is equal
-to \kbd{NULL} or \kbd{ONLY\_REM} as above).
-
-\fun{void}{dvmdisz}{GEN x, long s, GEN z, GEN *r} assigns the Euclidean
-quotient of the integer \kbd{x} and the long \kbd{s} into the integer or
-real~\kbd{z}, putting the remainder into~\kbd{*r} (unless \kbd{r} is equal
-to \kbd{NULL} or \kbd{ONLY\_REM} as above).
-
 \fun{void}{dvmdiiz}{GEN x, GEN y, GEN z, GEN *r} assigns the Euclidean
-quotient of the integers \kbd{x} and \kbd{y} into the integer or real~\kbd{z},
-putting the address of the remainder into~\kbd{*r} (unless \kbd{r} is equal
-to \kbd{NULL} or \kbd{ONLY\_REM} as above).
+quotient of the integers \kbd{x} and \kbd{y} into the integer or
+real~\kbd{z}, putting the address of the remainder into~\kbd{*r} (unless
+\kbd{r} is equal to \kbd{NULL} or \kbd{ONLY\_REM} as above).
 
 \fun{void}{diviiexact}{GEN x, GEN y} returns the Euclidean quotient $\kbd{x}
 / \kbd{y}$, assuming $\kbd{y}$ divides $\kbd{x}$. Uses Jebelean algorithm
 (Jebelean-Krandick bidirectional exact division is not implemented).
 
-\fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient $\kbd{x}
-/ \kbd{y}$, assuming $\kbd{y}$ divides $\kbd{x}$ and $\kbd{y}$ is \emph{odd}.
+\fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
+$|\kbd{x}| / \kbd{y}$ (note the absolue value!), assuming $\kbd{y}$ divides
+$\kbd{x}$ and $\kbd{y}$ is \emph{odd}.
+
+\fun{long}{sdivss_rem}{long s, long t, long *r} computes the Euclidean
+quotient and remainder of the longs \kbd{s} and~\kbd{t}. Puts the remainder
+into \kbd{*r}, and returns the quotient. The remainder is of the sign of the
+dividend~\kbd{s}, and has strictly smaller absolute value than~\kbd{t}.
+
+\fun{long}{sdivsi_rem}{long s, GEN x, long *r} computes the Euclidean
+quotient and remainder of the long \kbd{s} by the integer~\kbd{x}. As
+\kbd{sdivss\_rem} otherwise.
+
+\fun{GEN}{divis_rem}{GEN x, long s, long *r} computes the Euclidean quotient
+and remainder of the integer \kbd{x} by the long~\kbd{s}. As
+\kbd{sdivss\_rem} otherwise.
+
+\fun{long}{smodis}{GEN x, long y} computes the true Euclidean
+remainder of the integer~\kbd{x} by the long~\kbd{y}. This is the
+non-negative remainder, not the one whose sign is the sign of \kbd{x}
+as in the \kbd{div} functions.
+
+\fun{long}{smodsi}{long x, GEN y} computes the Euclidean
+remainder of the long~\kbd{x} by the integer~\kbd{|y|}.
+
+\fun{ulong}{umodiu}{GEN x, ulong y} computes the Euclidean
+remainder of the integer~\kbd{|x|} by the unsigned long~\kbd{y}.
+
+\fun{ulong}{umodui}{ulong x, GEN y} computes the Euclidean
+remainder of the unsigned long~\kbd{x} by the integer~\kbd{|y|}.
 
 \subsec{Miscellaneous functions}
-
-\fun{void}{addsii}{long s, GEN x, GEN z} assigns the sum of the long \kbd{s}
-and the integer \kbd{x} into the integer~\kbd{z} (essentially identical to
-\kbd{addsiz} except that \kbd{z} is specifically an integer).
 
 \fun{long}{divise}{GEN x, GEN y} if the integer \kbd{y} divides the
 integer~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
 
-\fun{long}{divisii}{GEN x, long s, GEN z} assigns the Euclidean quotient of
-the integer \kbd{x} and the long \kbd{s} into the integer \kbd{z}, and returns
-the remainder as a long.
-
 \fun{long}{mpdivis}{GEN x, GEN y, GEN z} if the integer \kbd{y} divides the
-integer~\kbd{x}, assigns the quotient to the integer~\kbd{z} and returns
-1 (true), otherwise returns 0 (false).
-
-\fun{void}{mulsii}{long s, GEN x, GEN z} assigns the product of the long
-\kbd{s} and the integer \kbd{x} into the integer~\kbd{z} (essentially
-identical to \kbd{mulsiz} except that \kbd{z} is specifically an integer).
+integer~\kbd{x}, assigns the quotient to the integer~\kbd{z} and returns 1
+(true), otherwise returns 0 (false).
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
@@ -571,24 +551,24 @@ component (i.e.\ not counting the codewords) of the object~\kbd{x}.
 degree~\kbd{n} of~\kbd{x} if \kbd{x} is a scalar, polynomial or power series,
 and otherwise of the \kbd{n}-th component of~\kbd{x}.
 
-\noindent % borderline case -- looks better like this [GN]
-The remaining two are macros, NOT functions (see \secref{se:typecast} for a
-detailed explanation):
+\noindent % borderline case -- looks better like this [GN] The remaining two
+are macros, NOT functions (see \secref{se:typecast} for a detailed
+explanation):
 
 \fun{long}{coeff}{GEN x, long i, long j} applied to a matrix \kbd{x} (type
 \typ{MAT}), this gives the address of the coefficient at row \kbd{i} and
 column~\kbd{j} of~\kbd{x}.
 
 \fun{long}{mael$n$}{GEN x, long $a_1$, ..., long $a_n$} stands for
-\kbd{x[$a_1$][$a_2$]...[$a_n$]}, where $2\le n \le 5$, with all the
-necessary typecasts.
+\kbd{x[$a_1$][$a_2$]...[$a_n$]}, where $2\le n \le 5$, with all the necessary
+typecasts.
 
 \subsec{Copying and conversion}
 
-\fun{GEN}{cgetp}{GEN x} creates space sufficient to hold the $p$-adic~\kbd{x},
-and sets the prime $p$ and the $p$-adic precision to those of~\kbd{x}, but
-does not copy (the $p$-adic unit or zero representative and the modulus
-of)~\kbd{x}.
+\fun{GEN}{cgetp}{GEN x} creates space sufficient to hold the
+$p$-adic~\kbd{x}, and sets the prime $p$ and the $p$-adic precision to those
+of~\kbd{x}, but does not copy (the $p$-adic unit or zero representative and
+the modulus of)~\kbd{x}.
 
 \fun{GEN}{gcopy}{GEN x} creates a new copy of the object~\kbd{x} on the PARI
 stack. For permanent subobjects, only the pointer is copied.
@@ -614,69 +594,69 @@ converts \kbd{x} into a C double if possible.
 \fun{GEN}{dbltor}{double x} converts the C double \kbd{x} into a PARI real.
 
 \fun{double}{gtodouble}{GEN x} if \kbd{x} is a real number (but not
-necessarily of type \typ{REAL}), converts \kbd{x} into a C double if possible.
+necessarily of type \typ{REAL}), converts \kbd{x} into a C double if
+possible.
 
-\fun{long}{gtolong}{GEN x} if \kbd{x} is an integer (not a C long,
-but not necessarily of type \typ{INT}), converts \kbd{x} into a C long
-if possible.
+\fun{long}{gtolong}{GEN x} if \kbd{x} is an integer (not a C long, but not
+necessarily of type \typ{INT}), converts \kbd{x} into a C long if possible.
 
 \fun{GEN}{gtopoly}{GEN x, long v} converts or truncates the object~\kbd{x}
 into a polynomial with main variable number~\kbd{v}. A common application
 would be the conversion of coefficient vectors.
 
 \fun{GEN}{gtopolyrev}{GEN x, long v} converts or truncates the object~\kbd{x}
-into a polynomial with main variable number~\kbd{v}, but vectors are converted
-in reverse order.
+into a polynomial with main variable number~\kbd{v}, but vectors are
+converted in reverse order.
 
 \fun{GEN}{gtoser}{GEN x, long v} converts the object~\kbd{x} into a power
 series with main variable number~\kbd{v}.
 
 \fun{GEN}{gtovec}{GEN x} converts the object~\kbd{x} into a (row) vector.
 
-\fun{GEN}{co8}{GEN x, long l} applied to a quadratic number~\kbd{x}
-(type \typ{QUAD}), converts \kbd{x} into a real or complex number
-depending on the sign of the discriminant of~\kbd{x}, to precision
-\hbox{\kbd{l} \B-bit} words.% absolutely forbid line brk at hyphen here [GN]
+\fun{GEN}{co8}{GEN x, long l} applied to a quadratic number~\kbd{x} (type
+\typ{QUAD}), converts \kbd{x} into a real or complex number depending on the
+sign of the discriminant of~\kbd{x}, to precision \hbox{\kbd{l} \B-bit}
+words.% absolutely forbid line brk at hyphen here [GN]
 
 \fun{GEN}{gcvtop}{GEN x, GEN p, long l} converts \kbd{x} into a \kbd{p}-adic
 number of precision~\kbd{l}.
 
-\fun{GEN}{gmodulcp}{GEN x, GEN y} creates the object \kbd{\key{Mod}(x,y)}
-on the PARI stack, where \kbd{x} and \kbd{y} are either both integers, and
-the result is an integermod (type \typ{INTMOD}), or \kbd{x} is a scalar or
-a polynomial and \kbd{y} a polynomial, and the result is a polymod
-(type \typ{POLMOD}).
+\fun{GEN}{gmodulcp}{GEN x, GEN y} creates the object \kbd{\key{Mod}(x,y)} on
+the PARI stack, where \kbd{x} and \kbd{y} are either both integers, and the
+result is an integermod (type \typ{INTMOD}), or \kbd{x} is a scalar or a
+polynomial and \kbd{y} a polynomial, and the result is a polymod (type
+\typ{POLMOD}).
 
 \fun{GEN}{gmodulgs}{GEN x, long y} same as \key{gmodulcp} except \kbd{y} is a
 \kbd{long}.
 
-\fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulcp} except both \kbd{x}
-and \kbd{y} are \kbd{long}s.
+\fun{GEN}{gmodulss}{long x, long y} same as \key{gmodulcp} except both
+\kbd{x} and \kbd{y} are \kbd{long}s.
 
 \fun{GEN}{gmodulo}{GEN x, GEN y} same as \key{gmodulcp} except that the
 modulus \kbd{y} is copied onto the heap and not onto the PARI stack.
 
-\fun{long}{gexpo}{GEN x} returns the binary exponent of \kbd{x} or the maximal
-binary exponent of the coefficients of~\kbd{x}. Returns
+\fun{long}{gexpo}{GEN x} returns the binary exponent of \kbd{x} or the
+maximal binary exponent of the coefficients of~\kbd{x}. Returns
 \hbox{\kbd{-HIGHEXPOBIT}} if \kbd{x} has no components or is an exact zero.
 
 \fun{long}{gsigne}{GEN x} returns the sign of~\kbd{x} ($-1$, 0 or 1) when
-\kbd{x} is an integer, real or (irreducible or reducible) fraction. Raises
-an error for all other types.
+\kbd{x} is an integer, real or (irreducible or reducible) fraction. Raises an
+error for all other types.
 
 \fun{long}{gvar}{GEN x} returns the main variable of~\kbd{x}. If no component
 of~\kbd{x} is a polynomial or power series, this returns \kbd{BIGINT}.
 
 \fun{int}{precision}{GEN x} If \kbd{x} is of type \typ{REAL}, returns the
-precision of~\kbd{x} (the length of \kbd{x} in \B-bit words if \kbd{x} is
-not zero, and a reasonable quantity obtained from the exponent of \kbd{x}
-if \kbd{x} is numerically equal to zero). If \kbd{x} is of type \typ{COMPLEX},
+precision of~\kbd{x} (the length of \kbd{x} in \B-bit words if \kbd{x} is not
+zero, and a reasonable quantity obtained from the exponent of \kbd{x} if
+\kbd{x} is numerically equal to zero). If \kbd{x} is of type \typ{COMPLEX},
 returns the minimum of the precisions of the real and imaginary part.
 Otherwise, returns~0 (which stands in fact for infinite precision).
 
 \fun{long}{sizedigit}{GEN x} returns 0 if \kbd{x} is exactly~0. Otherwise,
-returns \kbd{\key{gexpo}(x)} multiplied by $\log_{10}(2)$. This gives a
-crude estimate for the maximal number of decimal digits of the components
+returns \kbd{\key{gexpo}(x)} multiplied by $\log_{10}(2)$. This gives a crude
+estimate for the maximal number of decimal digits of the components
 of~\kbd{x}.
 
 \subsec{Comparison operators and valuations}
@@ -686,10 +666,9 @@ otherwise.
 
 \fun{int}{isexactzero}{GEN x} returns 1 (true) if \kbd{x} is exactly equal
 to~0, 0~(false) otherwise. Note that many PARI functions will return a
-pointer to \key{gzero} when they are aware that the result they return is
-an exact zero, so it is almost always faster to test for pointer equality
-first, and call \key{isexactzero} (or \key{gcmp0}) only when the first
-test fails.
+pointer to \key{gzero} when they are aware that the result they return is an
+exact zero, so it is almost always faster to test for pointer equality first,
+and call \key{isexactzero} (or \key{gcmp0}) only when the first test fails.
 
 \fun{int}{gcmp1}{GEN x} returns 1 (true) if \kbd{x} is equal to~1, 0~(false)
 otherwise.
@@ -700,9 +679,11 @@ otherwise.
 \fun{long}{gcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} (returns
 the sign of $\kbd{x}-\kbd{y}$).
 
-\fun{long}{gcmpsg}{long s, GEN x} comparison of the long \kbd{s} with~\kbd{x}.
+\fun{long}{gcmpsg}{long s, GEN x} comparison of the long \kbd{s}
+with~\kbd{x}.
 
-\fun{long}{gcmpgs}{GEN x, long s} comparison of \kbd{x} with the long~\kbd{s}.
+\fun{long}{gcmpgs}{GEN x, long s} comparison of \kbd{x} with the
+long~\kbd{s}.
 
 \fun{long}{lexcmp}{GEN x, GEN y} comparison of \kbd{x} with \kbd{y} for the
 lexicographic ordering.
@@ -718,11 +699,11 @@ the long~\kbd{s}, 0~otherwise.
 
 \fun{long}{iscomplex}{GEN x} returns 1 (true) if \kbd{x} is a complex number
 (of component types embeddable into the reals) but is not itself real, 0~if
-\kbd{x} is a real (not necessarily of type \typ{REAL}), or raises an error
-if \kbd{x} is not embeddable into the complex numbers.
+\kbd{x} is a real (not necessarily of type \typ{REAL}), or raises an error if
+\kbd{x} is not embeddable into the complex numbers.
 
-\fun{long}{ismonome}{GEN x} returns 1 (true) if \kbd{x} is a non-zero monomial
-in its main variable, 0~otherwise.
+\fun{long}{ismonome}{GEN x} returns 1 (true) if \kbd{x} is a non-zero
+monomial in its main variable, 0~otherwise.
 
 \fun{long}{ggval}{GEN x, GEN p} returns the greatest exponent~$e$ such that
 $\kbd{p}^e$ divides~\kbd{x}, when this makes sense.

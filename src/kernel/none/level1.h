@@ -50,6 +50,8 @@ long   divisii(GEN x, long y, GEN z);
 void   divisz(GEN x, long y, GEN z);
 void   divrrz(GEN x, GEN y, GEN z);
 void   divsiz(long x, GEN y, GEN z);
+GEN    divsi_rem(long x, GEN y, long *rem);
+GEN    divss_rem(long x, long y, long *rem);
 GEN    divss(long x, long y);
 ulong  divuumod(ulong a, ulong b, ulong p);
 void   divssz(long x, long y, GEN z);
@@ -72,6 +74,7 @@ long   itos(GEN x);
 long   itos_or_0(GEN x);
 ulong  itou(GEN x);
 GEN    modis(GEN x, long y);
+GEN    modsi(long x, GEN y);
 GEN    modss(long x, long y);
 GEN    mpabs(GEN x);
 GEN    mpadd(GEN x, GEN y);
@@ -97,6 +100,8 @@ GEN    resis(GEN x, long y);
 GEN    ressi(long x, GEN y);
 GEN    resss(long x, long y);
 GEN    rtor(GEN x, long prec);
+long   sdivsi_rem(long x, GEN y, long *rem);
+long   sdivss_rem(long x, long y, long *rem);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
 long   smodss(long x, long y);
@@ -291,26 +296,10 @@ itos_or_0(GEN x) {
 }
 
 INLINE GEN
-modss(long x, long y)
-{
-  LOCAL_HIREMAINDER;
-
-  if (!y) err(moder1);
-  if (y<0) y=-y;
-  hiremainder=0; (void)divll(labs(x),y);
-  if (!hiremainder) return gzero;
-  return (x < 0) ? stoi(y-hiremainder) : stoi(hiremainder);
-}
+modss(long x, long y) { return stoi(smodss(x, y)); }
 
 INLINE GEN
-resss(long x, long y)
-{
-  LOCAL_HIREMAINDER;
-
-  if (!y) err(reser1);
-  hiremainder=0; (void)divll(labs(x),labs(y));
-  return (x < 0) ? stoi(-((long)hiremainder)) : stoi(hiremainder);
-}
+resss(long x, long y) { return stoi(x % y); }
 
 INLINE void
 affii(GEN x, GEN y)
@@ -538,18 +527,20 @@ vali(GEN x)
 INLINE GEN
 divss(long x, long y) { return stoi(x / y); }
 
-INLINE GEN
-divss_rem(long x, long y, long *rem)
+INLINE long
+sdivss_rem(long x, long y, long *rem)
 {
-  long p1;
+  long q;
   LOCAL_HIREMAINDER;
-
   if (!y) err(diver1);
-  hiremainder=0; p1 = divll((ulong)labs(x),(ulong)labs(y));
-  if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
-  if (y<0) p1 = -p1;
-  *rem = (long)hiremainder; return stoi(p1);
+  hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
+  if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
+  if (y < 0) q = -q;
+  return q;
 }
+
+INLINE GEN
+divss_rem(long x, long y, long *rem) { return stoi(sdivss_rem(x,y,rem)); }
 
 INLINE GEN
 dvmdss(long x, long y, GEN *z)
@@ -558,6 +549,30 @@ dvmdss(long x, long y, GEN *z)
   const GEN q = divss_rem(x,y, &rem);
   *z = stoi(rem); return q;
 }
+
+INLINE long
+sdivsi_rem(long x, GEN y, long *rem)
+{
+  long q, s = signe(y);
+  LOCAL_HIREMAINDER;
+
+  if (!s) err(diver2);
+  if (!x || lgefint(y)>3 || ((long)y[2])<0) { *rem = x; return 0; }
+  hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
+  if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
+  if (s < 0) q = -q;
+  *rem = hiremainder; return q;
+}
+
+INLINE GEN
+modsi(long x, GEN y) {
+  long r;
+  (void)sdivsi_rem(x, y, &r);
+  return (r >= 0)? stoi(r): addsi_sign(x, y, 1);
+}
+
+INLINE GEN
+divsi_rem(long s, GEN y, long *rem) { return stoi(sdivsi_rem(s,y,rem)); }
 
 INLINE GEN
 dvmdsi(long x, GEN y, GEN *z)
@@ -619,7 +634,7 @@ umodui(ulong x, GEN y)
 {
   LOCAL_HIREMAINDER;
   if (!signe(y)) err(diver2);
-  if (!x || lgefint(y) > 3 || ((long)y[2]) < 0) return x;
+  if (!x || lgefint(y) > 3) return x;
   hiremainder = 0; (void)divll(x, y[2]); return hiremainder;
 }
 

@@ -33,20 +33,19 @@ enum {
 /* mp.s ou mp.c */
 
   affer1, affer2, affer3, affer4, affer5,
-  shier1, shier2, truer1, adder1,
+  shier2,
   
-  adder2, adder3, adder4, adder5, muler1,
-  muler2, muler3, muler4, muler5, muler6,
+  muler4,
   diver1, diver2, diver3, diver4, diver5,
-  diver6, diver7, diver8, diver9, diver10,
-  diver11, diver12, divzer1, dvmer1, moder1,
+  diver6, diver8, diver9,
+  divzer1, dvmer1,
   
-  reser1, arier1, arier2, errpile, errlg,
+  errpile, errlg,
   errexpo, errvalp, rtodber,
 
 /* alglin.c */
 
-  concater, matinv1, mattype1, suppler2,
+  concater, matinv1, mattype1,
 
 /* anal.c   */
 

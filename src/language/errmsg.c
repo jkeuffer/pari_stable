@@ -90,36 +90,12 @@ char *errmessage[]=
   "impossible assignment R-->S",
 /* affer5 */
   "impossible assignment R-->I",
-/* shier1 */
-  "overflow in integer shift",
 /* shier2 */
   "overflow in real shift",
-/* truer1 */
-  "overflow in truncation",
 
-/* adder1 */
-  "overflow in S+I",
-/* adder2 */
-  "overflow in I+I",
-/* adder3 */
-  "overflow in I+R",
-/* adder4 */
-  "overflow in R+R",
-/* adder5 */
-  "underflow in R+R",
-/* muler1 */
-  "overflow in I*I",
-/* muler2 */
-  "overflow in S*R",
-/* muler3 */
-  "overflow in S*I",
 /* muler4 */
   "overflow in R*R",
 
-/* muler5 */
-  "underflow in R*R",
-/* muler6 */
-  "overflow in I*R (R=0)",
 /* diver1 */
   "division by zero in S/S",
 /* diver2 */
@@ -132,31 +108,15 @@ char *errmessage[]=
   "division by zero in I/R",
 /* diver6 */
   "division by zero in R/S",
-/* diver7 */
-  "underflow in R/S",
 /* diver8 */
   "division by zero in R/I",
 
 /* diver9 */
   "division by zero in R/R",
-/* diver10 */
-  "underflow in R/R",
-/* diver11 */
-  "overflow in R/R",
-/* diver12 */
-  "underflow in R/I (R=0)",
 /* divzer1 */
   "forbidden division R/R-->I or I/R-->I or R/I-->I",
 /* dvmer1 */
   "division by zero in dvmdii",
-/* moder1 */
-  "zero modulus in modss",
-/* reser1 */
-  "division by zero in resss",
-/* arier1 */
-  "forbidden type in an arithmetic function",
-/* arier2 */
-  "third operand of type real",
 
 /* errpile */
   "the PARI stack overflows !",
@@ -177,8 +137,6 @@ char *errmessage[]=
   "non invertible matrix in gauss",
 /* mattype1 */
   "not a square matrix",
-/* suppler2 */
-  "not linearly independent columns in suppl",
 
   /*  ANAL.C  */
 

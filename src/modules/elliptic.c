@@ -2556,10 +2556,11 @@ numroots2(int a, int b, int c, int p, int *mult)
 static GEN
 localred_carac_23(GEN e, long p)
 {
-  long c, nu, nudelta;
+  long c, nu, nudelta, r, s, t;
   int a21, a42, a63, a32, a64, theroot, al, be, ga, p2, p3, p4;
   GEN pk, p2k, pk1;
-  GEN r, s, t, v;
+  GEN v;
+
 
   nudelta = ggval((GEN)e[12], stoi(p));
   v = init_ch();
@@ -2580,20 +2581,20 @@ localred_carac_23(GEN e, long p)
         /* Inu  */
     if (p == 2)
     {
-      r = modis((GEN)e[4], 2);
-      s = modis(addii(r, (GEN)e[2]), 2);
-      if (signe(r))
-        t = modis(addii(addii((GEN)e[4], (GEN)e[5]), s), 2);
-      else
-        t = modis((GEN)e[5], 2);
+      r = smodis((GEN)e[4], 2);
+      s = smodis((GEN)e[2], 2);
+      t = smodis((GEN)e[5], 2);
+      if (r) { t = (s + t) & 1; s = (s + 1) & 1; }
     }
     else /* p == 3 */
     {
-      r = negi(modis((GEN)e[8], 3));
-      s = modis((GEN)e[1], 3);
-      t = modis(ellLHS0_i(e,r), 3);
+      r = - smodis((GEN)e[8], 3);
+      s = smodis((GEN)e[1], 3);
+      t = smodis((GEN)e[3], 3);
+      if (s) { t  = (t + r*s) % 3; if (t < 0) t += 3; }
     }
-    cumule(&v, &e, gun, r, s, t); /* p | (a1, a2, a3, a4, a6) */
+    /* p | (a1, a2, a3, a4, a6) */
+    cumule(&v, &e, gun, stoi(r), stoi(s), stoi(t));
     p2 = p * p;
     if (smodis((GEN)e[5], p2))
       return localred_result(nudelta, 2, 1, v);
@@ -3503,7 +3504,7 @@ ellrootno_2(GEN e)
       {
 	case 1: return -kross(2,u*v);
 	case 2: return -kross(2,v);
-	case 3: y1=itos(modis(gsubsg(u,gmul2n(c6,-5)),16)); avma=av;
+	case 3: y1 = smodis(gsubsg(u,gmul2n(c6,-5)),16); avma=av;
 	  return (y1==7 || y1==11) ? 1 : -1;
 	case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
 	case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
@@ -3541,9 +3542,9 @@ ellrootno_2(GEN e)
       if (n2==1) return 1;
       else
       {
-	y1=itos(modis(gaddsg(u,gmul2n(c6,-8)),16)); avma=av;
-	if (v6==10) return (y1==9) || (y1==13) ? 1 : -1;
-	else return (y1==9) || (y1==5) ? 1 : -1;
+	y1 = smodis(addsi(u, gmul2n(c6,-8)), 16); avma=av;
+	if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
+	else return (y1==9 || y1==5) ? 1 : -1;
       }
     case -8: return n2==2 ? kross(-1,v*d1) : -1;
     case -9: return n2==2 ? -kross(-1,d1) : -1;

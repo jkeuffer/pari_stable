@@ -918,20 +918,6 @@ vals(ulong z)
 }
 
 GEN
-divsi_rem(long x, GEN y, long *rem)
-{
-  long p1, s = signe(y);
-  LOCAL_HIREMAINDER;
-
-  if (!s) err(diver2);
-  if (!x || lgefint(y)>3 || ((long)y[2])<0) { *rem = x; return gzero; }
-  hiremainder=0; p1=divll(labs(x),y[2]);
-  if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
-  if (s<0) p1 = -p1;
-  *rem = (long)hiremainder; return stoi(p1);
-}
-
-GEN
 divsi(long x, GEN y)
 {
   long p1, s = signe(y);
@@ -945,20 +931,6 @@ divsi(long x, GEN y)
   return stoi(p1);
 }
 
-GEN
-modui(ulong x, GEN y)
-{
-  LOCAL_HIREMAINDER;
-
-  if (!signe(y)) err(diver2);
-  if (!x || lgefint(y)>3) hiremainder=x;
-  else
-  {
-    hiremainder=0; (void)divll(x,y[2]);
-  }
-  return utoi(hiremainder);
-}
-
 ulong
 umodiu(GEN y, ulong x)
 {
@@ -970,9 +942,6 @@ umodiu(GEN y, ulong x)
   if (!hi) return 0;
   return (sy > 0)? hi: x - hi;
 }
-
-GEN
-modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 
 /* return |y| \/ x */
 GEN
@@ -992,29 +961,6 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   if (z [ly - 1] == 0) ly--;
   z[1] = evallgefint(ly) | evalsigne(1);
   return z;
-}
-
-GEN
-modsi(long x, GEN y)
-{
-  long s = signe(y);
-  GEN p1;
-  LOCAL_HIREMAINDER;
-
-  if (!s) err(diver2);
-  if (!x || lgefint(y)>3 || ((long)y[2])<0) hiremainder=x;
-  else
-  {
-    hiremainder=0; (void)divll(labs(x),y[2]);
-    if (x<0) hiremainder = -((long)hiremainder);
-  }
-  if (!hiremainder) return gzero;
-  if (x>0) return stoi(hiremainder);
-  if (s<0)
-    { setsigne(y,1); p1=addsi(hiremainder,y); setsigne(y,-1); }
-  else
-    p1=addsi(hiremainder,y);
-  return p1;
 }
 
 GEN
