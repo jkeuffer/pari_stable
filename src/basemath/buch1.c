@@ -1080,7 +1080,7 @@ subFBquad(GEN D, double PROD, long KC)
     {
       vperm[i] = j; i++;
       prod *= p;
-      if (prod > PROD) break;
+      if (i > 2 && prod > PROD) break;
     }
   }
   if (j == lv) return NULL;
