@@ -1795,13 +1795,11 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   chk->skipfirst = skipfirst;
   if (DEBUGLEVEL>2) fprintferr("chk_gen_init: skipfirst = %ld\n",skipfirst);
 
-  /* should be gexpo( max_k C^n_k (bound/k)^(k/2) ) */
-  prec2 = (1 + (((gexpo(bound)*N)/2) >> TWOPOTBITS_IN_LONG));
-  if (prec2 < 0) prec2 = 0;
-  prec = 3 + prec2;
+  /* should be DEF + gexpo( max_k C^n_k (bound/k)^(k/2) ) */
+  prec = DEFAULTPREC + (((gexpo(bound)*N)/2) >> TWOPOTBITS_IN_LONG);
   if (DEBUGLEVEL)
     fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
-  if (prec > d->prec) err(bugparier, "precision problem in polredabs");
+  if (prec > d->prec) err(bugparier, "polredabs (precision problem)");
   if (prec < d->prec) d->ZKembed = gprec_w(d->ZKembed, prec);
   return bound;
 }
