@@ -1,0 +1,18 @@
+if test -n "$__gnuc__"; then
+  # Some architectures need -fPIC for building dynamic lib
+  # *-i?86|*-sparc*|*-powerpc|*-s390|*-mips) DLCFLAGS=
+  case "$osname-$arch" in
+    *-hppa|*-ia64|*-alpha|*-arm) DLCFLAGS=-fPIC ;;
+    x86_64-*) case "$sizeof_long" in 
+              8) DLCFLAGS=-fPIC;;
+              esac;;
+    darwin-*) DLCFLAGS=-fno-common;;
+  esac
+else
+  case "$osname-$arch" in
+    hpux-*) DLCFLAGS=+z;;
+  esac
+fi
+CFLAGS="$DLCFLAGS $CFLAGS"
+
+echo "C compiler is          $CC  $CFLAGS"

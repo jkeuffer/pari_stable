@@ -11,8 +11,8 @@ case "$doubleformat" in
     echo "***************************************************************"
     echo "Your 'double' type does not follow the IEEE754 format. Aborting"
     echo "PLEASE REPORT! (dbltor/rtodbl need to be fixed)"; exit 1;;
-  -) sizeof_long=8; pretty="$pretty 64-bit version";;
-  *) sizeof_long=4; pretty="$pretty 32-bit version";;
+  -) sizeof_long=8;;
+  *) sizeof_long=4;;
 esac
 echo "Given the previous choices, sizeof(long) is $sizeof_long chars."
 

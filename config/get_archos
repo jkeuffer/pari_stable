@@ -12,7 +12,7 @@ if test "$fastread" != yes; then
 Currently supported architectures:
 EOM
   rep='none sparcv7 sparcv8_super sparcv8_micro sparcv9
-       ix86 i386 i486 i586 i686 alpha arm fx2800 hppa ia64 mips 
+       ix86 i386 i486 i586 i686 alpha amd64 arm fx2800 hppa ia64 mips m68k
        ppc s390'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
@@ -34,85 +34,3 @@ EOM
   osname=$ans
 fi
 
-#
-#   A pretty name for the architecture
-#   The asm file used (if any)
-#
-case "$arch" in
-  sparc)         asmarch=sparcv8_micro; pretty=Sparc ;;
-  sparcv7)       asmarch=$arch;         pretty=SparcV7 ;;
-  sparcv8_micro) asmarch=$arch;         pretty=MicroSparc ;;
-  sparcv8_super) asmarch=$arch;         pretty=SuperSparc ;;
-  sparcv9)       asmarch=sparcv8_micro; pretty=UltraSparc ;;
-  i?86)          asmarch=ix86 ;         pretty=$arch ;;
-  ia64)          asmarch=ia64 ;         pretty=Itanium ;;
-  hppa)          asmarch=none ;         pretty='HP Precision'
-        case "$osname-`uname -r`" in
-        hpux-?.10.*)  asmarch=$arch ;;
-        esac ;;
-  alpha)         asmarch=$arch;         pretty=Alpha ;;
-  ppc)           asmarch=$arch;         pretty='Power PC' ;;
-  arm*)          asmarch=none;          pretty=$arch ;;
-  mips)          asmarch=none;          pretty=MIPS ;;
-  sh3)           asmarch=none;          pretty=SH-3 ;;
-  sh5)           asmarch=none;          pretty=SH-5 ;;
-  vax)           asmarch=none;          pretty=VAX ;;
-  fx2800)        asmarch=none;          pretty='Alliant FX/2800' ;;
-  s390)          asmarch=none;          pretty='S/390' ;;
-  none)          asmarch=none;          pretty=unknown ;;
-  *)             asmarch=none;          pretty=$arch
-                 echo "        Warning ! architecture $arch not tested";;
-esac
-
-#
-#   Modifications for pretty name and asm file
-#
-pretty="$pretty running $osname"
-
-tmp_kern=auto-none
-if test  -n "$kernel"; then
-  tmp_kern=$kernel
-else
-  if test "$fastread" != yes; then
-  cat << EOM
-==========================================================================
-An optimized Pari kernel is available for these architectures
-("none" means that we will use the portable C version of GP/PARI)
-("-gmp" means we will use the GMP library (that needs to be installed))
-EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa ppc
-  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp ppc-gmp'
-  . ./display
-  echo $n ..."Which of these apply, if any ? $c"
-  dflt=$asmarch; . ./myread; 
-  tmp_kern=$ans
-  cat << EOM
-==========================================================================
-EOM
-  fi
-fi
-tmp_kern=`./kernel-name $tmp_kern $asmarch none`
-kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
-kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
-
-case "$kernlvl0" in
-  none)          prettyk="portable C";;
-  sparcv7)       prettyk=SparcV7;;
-  sparcv8_super) prettyk=SuperSparc;;
-  sparcv8_micro) prettyk=MicroSparc;;
-  ix86)          prettyk=ix86;;
-  ia64)          prettyk=ia64;;
-  hppa)          prettyk=HPPA;;
-  alpha)         prettyk=Alpha;;
-  ppc)           prettyk=PPC;;
-  *)             prettyk="$kernlvl0";;
-esac
-
-case "$kernlvl1" in
-  gmp) prettyk="$prettyk/GMP";;
-  none) ;;
-  *) prettyk="$prettyk/$kernlvl1";;
-esac
-
-pretty="$pretty ($prettyk kernel)"
-echo "Building for architecture: $pretty"
