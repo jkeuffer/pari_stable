@@ -3002,7 +3002,7 @@ GEN
 fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
 {
   VOLATILE long pr,av=avma,i,j,n;
-  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,res,z,vnorm,sperm,perm,uperm,gram;
+  VOLATILE GEN B,nf,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram;
   VOLATILE GEN bound = B0;
   void *catcherr = NULL;
   long prec = PREC;
@@ -3015,19 +3015,19 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   if (nf && !signe(gmael(nf,2,2))) /* totally real */
   {
     GEN T = nf_get_T((GEN)nf[1], (GEN)nf[7]);
-    v1 = lllgramint(T);
-    prec += 2 * ((gexpo(v1) + gexpo((GEN)nf[1])) >> TWOPOTBITS_IN_LONG);
+    u = lllgramint(T);
+    prec += 2 * ((gexpo(u) + gexpo((GEN)nf[1])) >> TWOPOTBITS_IN_LONG);
     nf = nfnewprec(nf, prec);
-    r = qf_base_change(T,v1,1);
+    r = qf_base_change(T,u,1);
     i = PREC + (gexpo(r) >> TWOPOTBITS_IN_LONG);
     if (i < prec) prec = i;
     r = gmul(r, realun(prec));
   }
   else
   {
-    v1 = lllgramintern(a,4,flag&1, (prec<<1)-2);
-    if (!v1) goto PRECPB;
-    r = qf_base_change(a,v1,1);
+    u = lllgramintern(a,4,flag&1, (prec<<1)-2);
+    if (!u) goto PRECPB;
+    r = qf_base_change(a,u,1);
   }
   r = sqred1intern(r,flag&1);
   if (!r) goto PRECPB;
@@ -3065,9 +3065,12 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   }
   if (i == 6) goto PRECPB; /* diverges... */
 
-  u = invmat(gtrans(v));
-  r = gmul(r, u); /* r = LLL basis now */
-  u = gmul(v1,u);
+  if (v)
+  {
+    GEN u2 = invmat(gtrans(v));
+    r = gmul(r,u2); /* r = LLL basis now */
+    u = gmul(u,u2);
+  }
 
   vnorm = cgetg(n,t_VEC);
   for (j=1; j<n; j++) vnorm[j] = lnorml2((GEN)rinvtrans[j]);
