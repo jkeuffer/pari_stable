@@ -160,6 +160,11 @@ EOT
 echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
 dflt=n; rep='y n'; . $config_dir/myread
 
+cdobjdir=
+if test "$objdir" != "$mkobjdir"; then
+  cdobjdir="cd $objdir; "
+fi
+
 case $ans in
 y) if (cd $objdir; make gp); then
      echo $n "Shall we install the files where they belong (y/n)? $c"
