@@ -135,7 +135,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
 
 /* return (x * X^d) + y. Assume d > 0, x > 0 and y >= 0 */
 GEN
-addshiftw(GEN x, GEN y, long d)
+addmulXn(GEN x, GEN y, long d)
 {
   GEN xd,yd,zd = (GEN)avma;
   long a,lz,ny = lgpol(y), nx = lgpol(x);
@@ -166,13 +166,13 @@ addshiftpol(GEN x, GEN y, long d)
 {
   long v = varn(x);
   if (!signe(x)) return y;
-  x = addshiftw(x,y,d);
+  x = addmulXn(x,y,d);
   setvarn(x,v); return x;
 }
 
 /* as above, producing a clean malloc */
 static GEN
-addshiftwcopy(GEN x, GEN y, long d)
+addmulXncopy(GEN x, GEN y, long d)
 {
   GEN xd,yd,zd = (GEN)avma;
   long a,lz,ny = lgpol(y), nx = lgpol(x);
@@ -252,14 +252,14 @@ quickmul(GEN a, GEN b, long na, long nb)
 
     c1 = quickmul(c1+2,c2+2, lgpol(c1),lgpol(c2));
     c2 = gneg_i(gadd(c0,c));
-    c0 = addshiftw(c0, gadd(c1,c2), n0);
+    c0 = addmulXn(c0, gadd(c1,c2), n0);
   }
   else
   {
     c = quickmul(a,b,n0a,nb);
     c0 = quickmul(a0,b,na,nb);
   }
-  c0 = addshiftwcopy(c0,c,n0);
+  c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
@@ -318,8 +318,8 @@ quicksqr(GEN a, long na)
   c = quicksqr(a,n0a);
   c0 = quicksqr(a0,na);
   c1 = gmul2n(quickmul(a0,a, na,n0a), 1);
-  c0 = addshiftw(c0,c1, n0);
-  c0 = addshiftwcopy(c0,c,n0);
+  c0 = addmulXn(c0,c1, n0);
+  c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
 /*****************************************

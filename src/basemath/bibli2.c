@@ -126,7 +126,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
   return q;
 }
 
-GEN addshiftw(GEN x, GEN y, long d);
+GEN addmulXn(GEN x, GEN y, long d);
 /* Legendre polynomial */
 /* L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1) */
 GEN
@@ -145,7 +145,7 @@ legendre(long n, long v)
   p1=gmul2n(polx[v],1);
   for (m=1; m<n; m++)
   {
-    p2 = addshiftw(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
+    p2 = addmulXn(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
     setvarn(p2,v);
     p0 = p1; tetpil=avma; p1 = gdivgs(p2,m+1);
     if (low_stack(lim, stack_lim(av,2)))
@@ -177,15 +177,15 @@ cyclo(long n, long v)
     m = mu(stoi(q));
     if (m)
     { /* y *= (x^d - 1) */
-      if (m>0) yn = addshiftw(yn, gneg(yn), d);
-      else     yd = addshiftw(yd, gneg(yd), d);
+      if (m>0) yn = addmulXn(yn, gneg(yn), d);
+      else     yd = addmulXn(yd, gneg(yd), d);
     }
     if (q==d) break;
     m = mu(stoi(d));
     if (m)
     { /* y *= (x^q - 1) */
-      if (m>0) yn = addshiftw(yn, gneg(yn), q);
-      else     yd = addshiftw(yd, gneg(yd), q);
+      if (m>0) yn = addmulXn(yn, gneg(yn), q);
+      else     yd = addmulXn(yd, gneg(yd), q);
     }
   }
   tetpil=avma; yn = gerepile(av,tetpil,gdeuc(yn,yd));

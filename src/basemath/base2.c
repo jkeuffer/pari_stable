@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
-extern GEN addshiftw(GEN x, GEN y, long d);
+extern GEN addmulXn(GEN x, GEN y, long d);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
@@ -919,7 +919,7 @@ polmodi_keep(GEN x, GEN y)
 static GEN
 shiftpol(GEN x, long v)
 {
-  x = addshiftw(x, zeropol(v), 1);
+  x = addmulXn(x, zeropol(v), 1);
   setvarn(x,v); return x;
 }
 
