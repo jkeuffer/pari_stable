@@ -2974,11 +2974,11 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   ulong av = avma, av2, lim, bound;
   long i,n, lb, dres = deg(A)*deg(B0), nmax = (dres+1)>>1;
   long vX = varn(B0), vY = varn(A); /* assume vX < vY */
-  GEN dglist,cB,B,q,a,b,ev,H,H0,H1,Hp,H0p,H1p,C0,C1;
+  GEN x,y,dglist,cB,B,q,a,b,ev,H,H0,H1,Hp,H0p,H1p,C0,C1;
   byteptr d = diffptr + 3000;
   ulong p = 27449; /* p = prime(3000) */
 
-  dglist = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
+  dglist = Hp = H0p = H1p = C0 = C1 = NULL; /* gcc -Wall */
   if (LERS)
   {
     if (!lambda) err(talker,"ZY_ZXY_resultant_all: LERS needs lambda");
