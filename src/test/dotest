@@ -1,5 +1,11 @@
 #!/bin/sh
 
+case "$1" in
+  8) bitlen=64 ;;
+  4) bitlen=32 ;;
+esac
+testlist="$2"
+
 wrln () { echo "$1"; echo "$1" >> $file_bench; }
 
 wr () { echo $n "$1$c"; echo $n "$1$c" >> $file_bench; }
@@ -27,17 +33,7 @@ if test -f /bin/rm ; then RM=/bin/rm; else RM=rm ; fi
 if sh -c 'test -x /bin/sh' 2>&-; then x=-x; else x=-r; fi
 (echo "hi there\c" ; echo " ") > echotmp
 if grep c echotmp >/dev/null 2>&1 ; then n=-n; c=; else n=; c='\c'; fi
-$RM echotmp
-
-case "$1" in
-  8) bitlen=64 ;;
-  *) bitlen=32 ;;
-esac
-case "$2" in
-  -c) testlist=compat;;
-  -g) testlist=ploth;;
-  -a) testlist=all;;
-esac
+$RM -f echotmp
 
 . $confdir/version
 file_bench=Bench-$VersionMajor.$VersionMinor.$patch
@@ -69,6 +65,7 @@ for testdata in $testlist; do
   O=$IFS;IFS=_;set $testdata;IFS=$O;testname=$1;testmul=$2
   file_in=$testdir/in/$testname
   file_out=$testdir/$bitlen/$testname
+  if test ! -r $file_out; then file_out=$testdir/32/$testname; fi
   if test ! -r $file_in -o ! -r $file_out; then
     wrln "Error! Missing file, can't test $testname"
   else
@@ -105,7 +102,7 @@ for testdata in $testlist; do
     wrln
   fi
 done
-$RM $file_test
+$RM -f $file_test
 BUG=
 for suf in $SUF; do
   B=`eval echo '$'BUG$suf`; BUG="$BUG$B"

@@ -338,23 +338,24 @@ tune-sta: tune.o lib-sta
 gp-sta: $src/funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
-EOT
-
-cat >> $file << EOT
 
 bench: $exec
 	@$doexec
-test-compat: $exec
-	@$doexec -c
-test-graphic: $exec
-	@$doexec -g
 dobench::
 	@$doexec
-dotest-compat::
-	@$doexec -c
-dotest-graphic::
-	@$doexec -g
 
+EOT
+testlist='compat graphic galois'
+for i in $testlist; do
+  cat >> $file << EOT
+test-$i: $exec
+	@$doexec $i
+dotest-$i::
+	@$doexec $i
+EOT
+done
+
+cat >> $file << EOT
 cleanemacs:
 	\$(RM) $emx/*.elc
 cleantest:
