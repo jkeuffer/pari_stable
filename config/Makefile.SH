@@ -260,7 +260,7 @@ EMACSDIR  = \$(DESTDIR)$emacsdir
 DATADIR   = \$(DESTDIR)$datadir
 SYSDATADIR= \$(DESTDIR)$sysdatadir
 
-READMEDIR = \$(DATADIR)
+READMEDIR = \$(DATADIR)/etc
 EXDIR     = \$(DATADIR)/examples
 MISCDIR   = \$(DATADIR)/misc
 DOCDIR    = \$(DATADIR)/doc
@@ -404,7 +404,7 @@ install-man::
 	-\$(RM) \$(MANDIR)/pari.1
 	-\$(LN) gp.1 \$(MANDIR)/pari.1
 
-install-misc: $install_emacs_files install-top
+install-misc: $install_emacs_files
 	-mkdir -p \$(MISCDIR) \$(BINDIR)
 	\$(INSTALL_PROGRAM) $misc/tex2mail \$(BINDIR)
 	\$(INSTALL_DATA) $doc/tex2mail.1 \$(MANDIR)
@@ -416,19 +416,6 @@ install-misc: $install_emacs_files install-top
 	\$(INSTALL_DATA) $misc/new.dic   \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/pari.xpm  \$(MISCDIR)
 	\$(INSTALL_PROGRAM) $misc/xgp    \$(MISCDIR)
-
-install-top::
-	-mkdir -p \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/AUTHORS      \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/Announce.2.1 \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/CHANGES      \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/COMPAT       \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/COPYING      \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/CVS.txt      \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/MACHINES     \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/NEW          \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/README       \$(READMEDIR)
-	\$(INSTALL_DATA) $TOP/TODO         \$(READMEDIR)
 
 install-cfg::
 	-mkdir -p \$(SYSDATADIR) \$(DATADIR)/PARI
