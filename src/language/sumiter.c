@@ -1014,7 +1014,7 @@ qromo(entree *ep, GEN a, GEN b, char *ch, long prec)
 GEN
 qromi(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  GEN ss,dss,s,h,q1,p1,p,qlint,del,ddel,x,sum;
+  GEN ss,dss,s,h,q1,p1,qlint,del,ddel,x,sum;
   long av = avma, av1,tetpil,j,j1,j2,lim,it,sig;
 
   a = fix(ginv(a), prec);
