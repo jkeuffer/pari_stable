@@ -1971,7 +1971,11 @@ squfof(GEN n, long quiet)
 	  /* blacklist overflows: shouldn't happen */
 	  act1 = 0;		/* silently */
 	else
+	{
+	  if (mydebug >= 6)
+	    fprintferr("SQUFOF: blacklisting a = %ld on first cycle\n", a1);
 	  blacklist1[blp1++] = a1;
+	}
       }
     }
 
@@ -1999,7 +2003,11 @@ squfof(GEN n, long quiet)
 	  /* blacklist overflows: shouldn't happen */
 	  act2 = 0;		/* silently */
 	else
+	{
+	  if (mydebug >= 6)
+	    fprintferr("SQUFOF: blacklisting a = %ld on second cycle\n", a2);
 	  blacklist2[blp2++] = a2;
+	}
       }
     }
 
@@ -2082,6 +2090,8 @@ squfof(GEN n, long quiet)
 
 	  /* chase the inverse root form back along the ambiguous cycle */
 	  q = squfof_ambig(a, b1, c1, dd1, D1, &cntamb);
+	  if (mydebug >= 6)
+	    fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
 	  if (nm4 == 3) q /= cgcd(q, 3);
 
 	  /* return if successful */
@@ -2189,6 +2199,8 @@ squfof(GEN n, long quiet)
 
 	  /* chase the inverse root form along the ambiguous cycle */
 	  q = squfof_ambig(a, b2, c2, dd2, D2, &cntamb);
+	  if (mydebug >= 6)
+	    fprintferr("SQUFOF: squfof_ambig returned %ld\n", q);
 	  if (nm4 == 1) q /= cgcd(q, 5);
 
 	  /* return if successful */
