@@ -1941,7 +1941,7 @@ padicff(GEN x,GEN p,long pr)
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
   nf[4] = dvdii( diviiexact(dx, dK), p )? (long)p: un;
-  invbas = QM_inv(RgX_to_RgM(bas,n), gun);
+  invbas = QM_inv(RgXV_to_RgM(bas,n), gun);
   mul = get_mul_table(x,bas,invbas);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;

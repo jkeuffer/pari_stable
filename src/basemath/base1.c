@@ -1131,7 +1131,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   mat[1] = (long)F.M;
   mat[2] = (long)F.G;
 
-  invbas = QM_inv(RgX_to_RgM(T->bas, lg(T->bas)-1), gun);
+  invbas = QM_inv(RgXV_to_RgM(T->bas, lg(T->bas)-1), gun);
   nf[8] = (long)invbas;
   nf[9] = (long)get_mul_table(x, F.basden, invbas);
   if (DEBUGLEVEL) msgtimer("mult. table");
@@ -1160,7 +1160,7 @@ static GEN
 hnffromLLL(GEN nf)
 {
   GEN d, x;
-  x = RgX_to_RgM((GEN)nf[7], degpol(nf[1]));
+  x = RgXV_to_RgM((GEN)nf[7], degpol(nf[1]));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
   return gauss(hnfmodid(x, d), x);
@@ -1367,7 +1367,7 @@ nfpolred(int part, nfbasic_t *T)
   if (DEBUGLEVEL>1) fprintferr("xbest = %Z\n",xbest);
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) a[i] = (long)RgX_RgX_compo((GEN)a[i], rev, xbest);
-  mat = RgX_to_RgM(Q_remove_denom(a, &d), n);
+  mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
   if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
 
   (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
@@ -1381,7 +1381,7 @@ get_nfindex(GEN bas)
 {
   pari_sp av = avma;
   long n = lg(bas)-1;
-  GEN d, mat = RgX_to_RgM(Q_remove_denom(bas, &d), n);
+  GEN d, mat = RgXV_to_RgM(Q_remove_denom(bas, &d), n);
   if (!d) { avma = av; return gun; }
   return gerepileuptoint(av, diviiexact(gpowgs(d, n), det(mat)));
 }
@@ -1412,7 +1412,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
     if (typ(bas) == t_MAT)
       { mat = bas; bas = RgM_to_RgXV(mat,varn(x)); }
     else
-        mat = RgX_to_RgM(bas, lg(bas)-1);
+        mat = RgXV_to_RgM(bas, lg(bas)-1);
     index = get_nfindex(bas);
     dx = ZX_disc(x);
     dK = diviiexact(dx, sqri(index));
@@ -2011,7 +2011,7 @@ polredabs0(GEN x, long flag)
     y = storepol(x, y, a, T.lead, flag);
     if (flag & nf_ADDZK)
     {
-      GEN t, y0 = y, B = RgX_to_RgM(T.bas, lg(T.bas)-1);
+      GEN t, y0 = y, B = RgXV_to_RgM(T.bas, lg(T.bas)-1);
       t = (flag & nf_ORIG)? lift_intern((GEN)y[2]): modreverse_i(a, x);
       t = gmul(RgX_powers(t, z, degpol(z)-1), B);
       y = mkvec2(y0, t);

@@ -251,7 +251,7 @@ makenfabs(GEN rnf)
 
   M = modulereltoabs(rnf, (GEN)rnf[7]);
   n = lg(M)-1;
-  M = RgX_to_RgM(Q_remove_denom(M, &d), n);
+  M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
   if (d) M = gdiv(hnfcenter_ip(hnfmodid(M, d)), d);
   else   M = idmat(n);
 

@@ -1637,7 +1637,7 @@ GEN     RgX_RgX_compo(GEN f, GEN x, GEN T);
 GEN     RgX_shift(GEN x, long n);
 GEN     RgX_sqr(GEN x);
 GEN     RgX_sqrspec(GEN a, long na);
-GEN     RgX_to_RgM(GEN v, long n);
+GEN     RgXV_to_RgM(GEN v, long n);
 GEN     RgX_to_RgV(GEN x, long N);
 GEN     RgXX_to_RgM(GEN v, long n);
 GEN     RgXY_swap(GEN x, long n, long w);

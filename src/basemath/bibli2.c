@@ -934,7 +934,7 @@ modreverse_i(GEN a, GEN T)
     return gerepileupto(av, gneg(gdiv((GEN)T[2], (GEN)T[3])));
   if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
 
-  y = RgX_to_RgM(RgX_powers(a,T,n-1), n);
+  y = RgXV_to_RgM(RgX_powers(a,T,n-1), n);
   y = gauss(y, vec_ei(n, 2));
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }

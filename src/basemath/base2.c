@@ -1097,7 +1097,7 @@ Decomp(decomp_t *S, long flag)
     e = gsub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
       res[i] = (long)FpX_center(FpX_rem(gmul((GEN)ib2[i],e), fred, D), D);
-    res = RgX_to_RgM(res, n);
+    res = RgXV_to_RgM(res, n);
     return gdiv(hnfmodid(res,D), D); /* normalized integral basis */
   }
 }
@@ -3908,7 +3908,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   }
 
   /* bs = integer basis of K, as elements of L */
-  bs = gmul(vbs, RgX_to_RgM((GEN)nf[7],n));
+  bs = gmul(vbs, RgXV_to_RgM((GEN)nf[7],n));
 
   vpro = cgetg(N+1,t_VEC);
   for (i=1; i<=N; i++) vpro[i] = lpowgs(polx[v], i-1);

@@ -662,7 +662,7 @@ Stelt(GEN nf, GEN id, GEN polrel)
     I[i] = (long)matid;
   }
   x = cgetg(3,t_VEC);
-  x[1] = (long)RgX_to_RgM(A, degpol(polrel));
+  x[1] = (long)RgXV_to_RgM(A, degpol(polrel));
   x[2] = (long)I;
   return prodid(nf, (GEN)nfhermite(nf,x)[2]);
 }
@@ -998,7 +998,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
   p1 = RgX_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
-  p1 = RgX_to_RgM(p1, degKz);
+  p1 = RgXV_to_RgM(p1, degKz);
   T.invexpoteta1 = invmat(p1); /* left inverse */
   T.polnf = polnf;
   T.tau = tau;

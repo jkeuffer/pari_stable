@@ -1115,7 +1115,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 GEN
 FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l)
 {
-  return RgX_to_RgM(FpXQ_powers(y,m-1,P,l),n);
+  return RgXV_to_RgM(FpXQ_powers(y,m-1,P,l),n);
 }
 
 GEN
@@ -1209,7 +1209,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
     btop=(pari_sp)W;
     M[i]=(long)Mi;
   }
-  return RgX_to_RgM(M,l);
+  return RgXV_to_RgM(M,l);
 }
 
 static GEN
