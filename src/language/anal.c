@@ -1508,6 +1508,7 @@ identifier(void)
         while (*analyseur != ')')
         {
           match_comma(); ch1=analyseur;
+          check_var_name();
           ep = skipentry();
           switch(EpVALENCE(ep))
           {
@@ -3079,3 +3080,56 @@ alias0(char *s, char *old)
   x[1] = (long)ep;
   installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
 }
+
+/* Try f (trapping error e), recover using r (break_loop, if NULL) */
+GEN
+trap0(char *e, char *r, char *f)
+{
+  long av = avma, numerr = -1;
+  GEN x = gnil;
+       if (!strcmp(e,"errpile")) numerr = errpile;
+  else if (!strcmp(e,"typeer")) numerr = typeer;
+  else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
+  else if (!strcmp(e,"accurer")) numerr = accurer;
+  else if (!strcmp(e,"archer")) numerr = archer;
+  else if (*e) err(impl,"this trap keyword");
+  /* TO BE CONTINUED */
+
+  if (!f) { f = r; r = NULL; } /* define a default handler */
+  if (r)
+  { /* explicit recovery text */
+    jmp_buf env;
+    if (setjmp(env)) 
+    {
+      avma = av;
+      (void)err_leave(numerr);
+      x = lisseq(r);
+      skipseq();
+    }
+    else
+    {
+      err_catch(numerr, env, NULL);
+      x = lisseq(f);
+      (void)err_leave(numerr);
+    }
+    return x;
+  }
+
+ /* default will execute f (or start a break loop), then jump to
+  * environnement */
+  if (f)
+  {
+    if (!*f) /* unset previous handler */
+    {/* TODO: find a better interface
+      * TODO: no leaked handler from the library should have survived
+      */
+      void *a = err_leave(numerr);
+      if (a) free(a);
+      return x;
+    }
+    f = pari_strdup(f);
+  }
+  err_catch(numerr, NULL, f);
+  return x;
+}
+
