@@ -62,6 +62,9 @@ extern int  whatnow(char *s, int flag);
 
 static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
+#define SIZE  128
+#define SIZE2 256
+
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
 #define BREAK_LOOP_PROMPT "break> "
@@ -403,8 +406,8 @@ sd_toggle(const char *v, int flag, char *s, int *ptn)
     if (n == state) return gnil;
     if (n != !state)
     {
-      char s[128];
-      sprintf(s, "default: incorrect value for %s [0:off / 1:on]", s);
+      char s[SIZE];
+      (void)snprintf(s, SIZE, "default: incorrect value for %s [0:off / 1:on]", s);
       err(talker2, s, v,v);
     }
     state = *ptn = n;
@@ -445,8 +448,9 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
-      char buf[128];
-      sprintf(buf, "default: incorrect value for %s [%lu-%lu]", s, Min, Max);
+      char buf[SIZE];
+      (void)snprintf(buf, SIZE, "default: incorrect value for %s [%lu-%lu]",
+               s, Min, Max);
       err(talker2, buf, v,v);
     }
     *ptn = n;
@@ -523,8 +527,8 @@ sd_format(const char *v, int flag)
   }
   if (flag == d_RETURN)
   {
-    char s[128];
-    sprintf(s, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
+    char s[SIZE];
+    (void)snprintf(s, SIZE, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
     return STRtoGENstr(s);
   }
   if (flag == d_ACKNOWLEDGE)
@@ -586,7 +590,7 @@ sd_colors(char *v, int flag)
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
-    char s[128], *t = s;
+    char s[SIZE], *t = s;
     int col[3], n;
     for (*t=0,c=c_ERR; c < c_LAST; c++)
     {
@@ -1278,9 +1282,9 @@ community(void)
   long len = strlen(GPMISCDIR) + 1024;
   char *s = (char*)gpmalloc(len);
 
-  sprintf(s, "The standard distribution of GP/PARI includes a reference \
-manual, a tutorial, a reference card and quite a few examples. They should \
-have been installed in the directory '%s'. If not you should ask the person \
+  (void)snprintf(s, len, "The standard distribution of GP/PARI includes a \
+reference manual, a tutorial, a reference card and quite a few examples. They \
+should have been installed in the directory '%s'. If not, ask the person \
 who installed PARI on your system where they can be found. You can also \
 download them from the PARI WWW site 'http://www.parigp-home.de/'",
 GPMISCDIR);
@@ -1719,7 +1723,7 @@ what_readline(char *buf)
   if (strcmp(READLINE, rl_library_version))
   {
     ver = (char*)rl_library_version;
-    sprintf(extra, " [was v%s in Configure]", READLINE);
+    (void)snprintf(extra, SIZE, " [was v%s in Configure]", READLINE);
   }
   else
 #  endif
@@ -1727,11 +1731,11 @@ what_readline(char *buf)
     ver = READLINE;
     extra[0] = 0;
   }
-  sprintf(buf, "v%s %s%s", ver,
+  (void)snprintf(buf, SIZE, "v%s %s%s", ver,
             (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
             extra);
 #else
-  sprintf(buf, "not compiled in");
+  (void)snprintf(buf, SIZE, "not compiled in");
 #endif
 }
 
@@ -1752,13 +1756,13 @@ what_cc(char *buf)
 {
 #ifdef GCC_VERSION
 #  ifdef __cplusplus
-  sprintf(buf, "g++-%s", GCC_VERSION); return;
+  (void)snprintf(buf, SIZE, "g++-%s", GCC_VERSION); return;
 #  else
-  sprintf(buf, "gcc-%s", GCC_VERSION); return;
+  (void)snprintf(buf, SIZE, "gcc-%s", GCC_VERSION); return;
 #  endif
 #endif
 #ifdef _MSC_VER
-  sprintf(buf,"MSVC-%s", _MSC_VER); return;
+  (void)snprintf(buf, SIZE, "MSVC-%i", _MSC_VER); return;
 #endif
   *buf = 0;
 }
@@ -1766,18 +1770,20 @@ what_cc(char *buf)
 static void
 print_version(void)
 {
-  char buf[256], ver[128];
+  char buf[SIZE2], ver[SIZE];
 
   center(PARIVERSION); center(PARIINFO);
   what_cc(ver);
-  if (*ver) sprintf(buf,"compiled: %s, %s", __DATE__, ver);
-  else      sprintf(buf,"compiled: %s", __DATE__);
+  if (*ver) (void)snprintf(buf, SIZE2, "compiled: %s, %s", __DATE__, ver);
+  else      (void)snprintf(buf, SIZE2, "compiled: %s", __DATE__);
   center(buf);
   what_readline(ver);
-  sprintf(buf,"(readline %s, extended help%s available)", ver,
+  (void)snprintf(buf, SIZE2, "(readline %s, extended help%s available)", ver,
           has_ext_help()? "": " not");
   center(buf);
 }
+#undef SIZE
+#undef SIZE2
 
 static void
 gp_head(void)
