@@ -18,12 +18,6 @@ create new ones.
 
 \noindent The other objects are not initialized by default:
 
-\tet{geuler}. This is Euler's constant. To initialize it, call
-{\tt\idx{consteuler}(prec)} (see \secref{se:euler}).
-
-\tet{gpi}. This is the number $\pi$. To initialize it, call
-{\tt\idx{constpi}(prec)} (see \secref{se:pi}).
-
 \tet{bern}(i). This is the $2i$-th Bernoulli number ($B_0=1$, $B_2=1/6$,
 $B_4=-1/30$, etc\dots). To initialize them, use the function:
 
@@ -34,6 +28,20 @@ real numbers\/} of precision \kbd{prec}. They can then be used with the macro
 \kbd{bern(i)}. Note that this is not a function but simply an abbreviation,
 hence care must be taken that \kbd{i} is inside the right bounds (i.e. $0\le
 \kbd{i}\le n-1$) before using it, since no checking is done by PARI itself.
+
+\tet{geuler}. This is Euler's constant. It is initialized by the first call
+to \tet{mpeuler} (see \secref{se:euler}).
+
+\tet{gpi}. This is the number $\pi$.  It is initialized by the first call to
+\tet{mppi} (see \secref{se:pi}).
+
+The use of both \tet{geuler} and \tet{gpi} is deprecated since it's always
+possible that some library function increases the precision of the constant
+{\it after} you've computed it, hence modifying the computation accuracy
+without your asking for it and increasing your running times for no good
+reason. You should always use \tet{mpeuler} and \tet{mppi} (note that only
+the first call will actually compute the constant, unless a higher precision
+is required).
 
 Finally, one has access to a table of (differences of) primes through the
 pointer \tet{diffptr}. This is used as follows: when

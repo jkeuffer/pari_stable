@@ -837,11 +837,9 @@ is one of the few special reserved names which cannot be used for variables
 (the others are \kbd{I} and \kbd{Pi}, as well as all function names).
 \label{se:euler}
 
-\syn{mpeuler}{\var{prec}} where $\var{prec}$ \var{must} be
-given. Note that this creates $\gamma$ on the PARI stack. If one does not
-want to create it on the stack but stash it for later use under the global
-name \teb{geuler} (with no parentheses), use instead
-$\teb{consteuler}(\var{prec})$.
+\syn{mpeuler}{\var{prec}} where $\var{prec}$ \var{must} be given. Note that
+this creates $\gamma$ on the PARI stack, but a copy is also created on the
+heap for quicker computations next time the function is called.
 
 \subsecidx{I}: the complex number $\sqrt{-1}$.
 
@@ -849,16 +847,24 @@ The library syntax is the global variable \kbd{gi} (of type \kbd{GEN}).
 
 \subsecidx{Pi}: the constant $\pi$ ($3.14159\cdots$).\label{se:pi}
 
-\syn{mppi}{\var{prec}} where $\var{prec}$ \var{must} be given.
-Note that this creates $\pi$ on the PARI stack. If one does not want to
-create it on the stack but stash it for later use under the global
-name \teb{gpi} (with no parentheses), use instead $\teb{constpi}(\var{prec})$.
+\syn{mppi}{\var{prec}} where $\var{prec}$ \var{must} be given. Note that this
+creates $\pi$ on the PARI stack, but a copy is also created on the heap for
+quicker computations next time the function is called.
 
 \subsecidx{abs}$(x)$: absolute value of $x$ (modulus if $x$ is complex).
 Power series and rational functions are not allowed. Contrary to most
-transcendental functions, an integer is \var{not} converted to a real
-number before applying \kbd{abs}. If $x$ is a polynomial, returns $-x$ if
-the leading coefficient is real and negative else returns $x$.
+transcendental functions, an exact argument is \var{not} converted to a real
+number before applying \kbd{abs} and an exact result is returned if possible.
+\bprog
+? abs(-1)
+%1 = 1
+? abs(3/7 + 4/7*I)
+%2 = 5/7
+? abs(1 + I)
+%3 = 1.414213562373095048801688724
+@eprog
+\noindent If $x$ is a polynomial, returns $-x$ if the leading coefficient is
+real and negative else returns $x$.
 
 \syn{gabs}{x,\var{prec}}.
 
@@ -3175,11 +3181,12 @@ class field corresponding to the modulus in \var{bnr} and the given
 congruence subgroup using \idx{Stark units} (set $\var{subgroup}=0$ if you
 want the whole ray class group). The main variable of \var{bnr} must not be
 $x$, and the ground field and the class field must be totally real and not
-isomorphic to $\Q$. \fl\ is optional and may be set to 0 to obtain a
+isomorphic to $\Q$ (over the rationnals, use \tet{polsubcyclo} or
+\tet{galoissubcyclo}). \fl\ is optional and may be set to 0 to obtain a
 reduced relative polynomial, 1 to be satisfied with any relative
 polynomial, 2 to obtain an absolute polynomial and 3 to obtain the
-irreducible relative polynomial of the Stark unit, 0 being
-default. Example: 
+irreducible relative polynomial of the Stark unit, 0 being default.
+Example: 
 
 \bprog
 bnf = bnfinit(y^2 - 3);
@@ -3359,29 +3366,29 @@ absolutely equivalent to \kbd{ nfgaloisconj(pol)}, if degree of
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
-\subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\})$: Compute a polynomial
+\subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\})$: compute a polynomial
 defining the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H}
 of $\Z/n\Z$. The subgroup \var{H} can be given by a generator, a set
-of generator given by a vector or a HNF matrix. If present \kbd{Z}
+of generators given by a vector or a HNF matrix. If present \kbd{Z}
 must be \kbd{znstar(n)}, currently it is used only when \var{H} is a
 HNF matrix. If \var{v} is given, the polynomial is given in the
 variable \var{v}.
 
 The following function can be used to compute all subfields of
-$\Q(\zeta_n)$, of order less than \kbd{d}, if \kbd{d} is set:
+$\Q(\zeta_n)$ (of order less than \kbd{d}, if \kbd{d} is set):
 
 \bprog
-subcyclo(n,d=-1)=
+subcyclo(n, d = -1)=
 {
-	local(Z,G,S);
-	Z=znstar(n);
-	if(d==-1,d=n);
-	G=matdiagonal(Z[2]);
-	S=[];
-	forsubgroup(H=G,d,
-		S=concat(S,galoissubcyclo(n,mathnf(concat(G,H)),Z));
-	);
-	S
+  local(Z,G,S);
+  if (d < 0, d = n);
+  Z = znstar(n);
+  G = matdiagonal(Z[2]);
+  S = [];
+  forsubgroup(H = G, d,
+    S = concat(S, galoissubcyclo(n, mathnf(concat(G,H)),Z));
+  );
+  S
 }
 @eprog
 
@@ -5016,7 +5023,8 @@ polynomial \var{pol} in the interval $]a,b]$, using Sturm's algorithm. $a$
 \subsecidx{polsubcyclo}$(n,d,\{v=x\})$: gives a polynomial (in variable
 $v$) defining the sub-Abelian extension of degree $d$ of the cyclotomic
 field $\Q(\zeta_n)$, where $d\mid \phi(n)$. $(\Z/n\Z)^*$ has to be cyclic
-(i.e.~$n=2$, $4$, $p^k$ or $2p^k$ for an odd prime $p$).
+(i.e.~$n=2$, $4$, $p^k$ or $2p^k$ for an odd prime $p$). The function 
+\tet{galoissubcyclo} covers the general case.
 
 \syn{subcyclo}{n,d,v}, where $v$ is a variable number.
 
@@ -5105,16 +5113,24 @@ $\kbd{thueinit}(P)$. \var{sol}, if present, contains the solutions of
 $\text{Norm}(x)=a$ modulo units of positive norm in the number field
 defined by $P$ (as computed by \kbd{bnfisintnorm}). If \var{tnf} was
 computed without assuming \idx{GRH} ($\fl=1$ in \kbd{thueinit}), the
-result is unconditional.
+result is unconditional. For instance, here's how to solve the Thue
+equation $x^13 - 5y^13 = - 4$:
+
+\bprog
+? tnf = thueinit(x^13 - 5);
+? thue(tnf, -4)
+%1 = [[1, 1]]
+\@eprog
+Hence, assuming GRH, the only solution is $x = 1$, $y = 1$.
 
 \syn{thue}{\var{tnf},a,\var{sol}}, where an omitted \var{sol} is coded
 as \kbd{NULL}.
 
-\subsecidx{thueinit}$(P,\{\fl=0\})$: initializes the \var{tnf} corresponding to
-$P$. It is meant to be used in conjunction with \tet{thue} to solve Thue
-equations $P(x,y) = a$, where $a$ is an integer. If $\fl$ is non-zero,
-certify the result unconditionnaly, Otherwise, assume \idx{GRH}, this being
-much faster of course.
+\subsecidx{thueinit}$(P,\{\fl=0\})$: initializes the \var{tnf}
+corresponding to $P$. It is meant to be used in conjunction with \tet{thue}
+to solve Thue equations $P(x,y) = a$, where $a$ is an integer. If $\fl$ is
+non-zero, certify the result unconditionnaly, Otherwise, assume \idx{GRH},
+this being much faster of course.
 
 \syn{thueinit}{P,\fl,\var{prec}}.
 
