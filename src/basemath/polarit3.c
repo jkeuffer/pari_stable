@@ -3021,6 +3021,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   cB = content(B0);
   if (typ(cB) == t_POL) cB = content(cB);
   if (gcmp1(cB)) cB = NULL; else B0 = gdiv(B0, cB);
+
   if (lambda)
     B = poleval(B0, gadd(polx[MAXVARN], gmulsg(*lambda, polx[vY])));
   else
@@ -3036,6 +3037,24 @@ INIT:
     B = poleval(B0, gadd(polx[MAXVARN], gmulsg(*lambda, polx[vY])));
     av2 = avma;
   }
+
+  if (deg(A) <= 3)
+  { /* sub-resultant faster for small degrees */
+    if (LERS)
+    {
+      H = subresall(A,B,&q);
+      if (typ(q) != t_POL || deg(q)!=1 || !ZX_issquarefree(H)) goto INIT;
+      H0 = (GEN)q[2]; if (typ(H0) == t_POL) setvarn(H0,vX);
+      H1 = (GEN)q[3]; if (typ(H1) == t_POL) setvarn(H1,vX);
+    }
+    else
+    {
+      H = subres(A,B);
+      if (checksqfree && !ZX_issquarefree(H)) goto INIT;
+    }
+    goto END;
+  }
+
   H = H0 = H1 = NULL;
   lb = lgef(B); b = u_allocpol(deg(B), 0);
   bound = ZY_ZXY_ResBound(A,B);
@@ -3147,6 +3166,7 @@ INIT:
       gerepilemany(av2,gptr,LERS? 4: 2); b = u_allocpol(deg(B), 0);
     }
   }
+END:
   setvarn(H, vX); if (delete) delete_var();
   if (cB) H = gmul(H, gpowgs(cB, deg(A)));
   if (LERS)
@@ -3354,7 +3374,12 @@ ZX_invmod(GEN A0, GEN B0)
   ulong p, av2, av = avma, avlim = stack_lim(av,1);
   byteptr d = diffptr;
 
-  if ((typ(A0) | typ(B0)) !=t_POL) err(notpoler,"ZX_invmod");
+  if (typ(B0) != t_POL) err(notpoler,"ZX_invmod");
+  if (typ(A0) != t_POL)
+  {
+    if (is_scalar_t(typ(A0))) return ginv(A0);
+    err(notpoler,"ZX_invmod");
+  }
   A = content(A0); D = A;
   B = content(B0);
   A = gcmp1(A)? A0: gdiv(A0,A);

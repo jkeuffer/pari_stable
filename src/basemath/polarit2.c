@@ -2247,7 +2247,7 @@ issimplefield(GEN x)
   return 0;
 }
 
-static int
+int
 isrational(GEN x)
 {
   long i;
