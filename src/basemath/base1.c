@@ -2229,7 +2229,7 @@ zeta_get_N0(GEN C,  GEN limx)
   GEN z = gfloor(gdiv(C, limx));
   if (is_bigint(z))
     err(talker, "need %Z coefficients in initzeta: computation impossible", z);
-  if (DEBUGLEVEL>1) fprintferr("\ninitzeta: N0 = %ld\n", z);
+  if (DEBUGLEVEL>1) fprintferr("\ninitzeta: N0 = %Z\n", z);
   avma = av; return itos(z);
 }
 
