@@ -2359,7 +2359,7 @@ rank(GEN x)
 
 /* if p != NULL, assume x integral and compute rank over Fp */
 static GEN
-indexrank0(GEN x, GEN p, int small)
+indexrank0(GEN x, GEN p, int vecsmall)
 {
   gpmem_t av = avma;
   long i,j,n,r;
@@ -2372,8 +2372,8 @@ indexrank0(GEN x, GEN p, int small)
   n = lg(x)-1; r = n - r;
 
   avma=av; res=cgetg(3,t_VEC);
-  p1=cgetg(r+1,small? t_VECSMALL: t_VEC); res[1]=(long)p1;
-  p2=cgetg(r+1,small? t_VECSMALL: t_VEC); res[2]=(long)p2;
+  p1=cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[1]=(long)p1;
+  p2=cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[2]=(long)p2;
   if (d)
   {
     for (i=0,j=1; j<=n; j++)
@@ -2381,7 +2381,7 @@ indexrank0(GEN x, GEN p, int small)
     free(d);
     qsort(p1+1,r,sizeof(long),(QSCOMP)pari_compare_long);
   }
-  if (!small)
+  if (!vecsmall)
     for (i=1;i<=r;i++) { p1[i]=lstoi(p1[i]); p2[i]=lstoi(p2[i]); }
   return res;
 }

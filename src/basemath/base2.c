@@ -1798,21 +1798,21 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
 /*******************************************************************/
 /* beta = generators of prime ideal (vectors). Return "small" random elt in P */
 static GEN
-random_elt_in_P(GEN beta, long small)
+random_elt_in_P(GEN beta, long sm)
 {
   long z, i, j, la, lbeta = lg(beta);
   GEN a = NULL, B;
 
   /* compute sum random(-7..8) * beta[i] */
-  if (small)
+  if (sm)
   {
     la = lg(beta[1]);
-    if (small > 7) small = 0;
+    if (sm > 7) sm = 0;
     for (i=1; i<lbeta; i++)
-    { /* Warning: change definition of 'small' if you change this */
+    { /* Warning: change definition of 'sm' if you change this */
       z = mymyrand() >> (BITS_IN_RANDOM-5); /* in [0,15] */
       if (z >= 9) z -= 7;
-      if (small) z %= small;
+      if (sm) z %= sm;
       if (!z) continue;
       B = (GEN)beta[i];
       if (a)
@@ -1877,7 +1877,7 @@ static GEN
 random_unif_loop_pol(GEN nf, GEN P, GEN D, GEN Dp, GEN beta, GEN pol,
                      GEN p, GEN q)
 {
-  long small, i, c = 0, m = lg(P)-1, N = degpol(nf[1]), keep = getrand();
+  long sm, i, c = 0, m = lg(P)-1, N = degpol(nf[1]), keep = getrand();
   int ramif;
   GEN a, P2;
   gpmem_t av;
@@ -1890,11 +1890,11 @@ random_unif_loop_pol(GEN nf, GEN P, GEN D, GEN Dp, GEN beta, GEN pol,
   P2 = compute_pr2(nf, P, p, &ramif);
 
   a = mulis(Dp, 8*degpol(nf[1]));
-  if (is_bigint(a)) small = 0;
+  if (is_bigint(a)) sm = 0;
   else
   {
     ulong mod = itou(Dp);
-    small = itos(p);
+    sm = itos(p);
     for (i=1; i<=m; i++)
       beta[i] = (long)u_Fp_FpV(pol_to_vec((GEN)beta[i], N), mod);
   }
@@ -1902,9 +1902,9 @@ random_unif_loop_pol(GEN nf, GEN P, GEN D, GEN Dp, GEN beta, GEN pol,
   for(av = avma; ;avma = av)
   {
     if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
-    a = random_elt_in_P(beta, small);
+    a = random_elt_in_P(beta, sm);
     if (!a) continue;
-    if (small) a = vec_to_pol(small_to_vec(a), varn(pol));
+    if (sm) a = vec_to_pol(small_to_vec(a), varn(pol));
     a = centermod(a, Dp);
     if ((a = prime_check_elt(D,Dp,a,pol,q,ramif)))
     {
@@ -1926,43 +1926,43 @@ vec_is_uniformizer(GEN a, GEN q, long r1)
 }
 
 static GEN
-prime_check_eltvec(GEN a, GEN M, GEN p, GEN q, long r1, long small, int ramif)
+prime_check_eltvec(GEN a, GEN M, GEN p, GEN q, long r1, long sm, int ramif)
 {
   GEN ar;
   long i,l;
   a = centermod(a, p);
-  if (small) ar = gmul_mat_smallvec(M, a);
+  if (sm) ar = gmul_mat_smallvec(M, a);
   else       ar = gmul(M, a);
 
-  if (vec_is_uniformizer(ar, q, r1)) return small? small_to_col(a): a;
+  if (vec_is_uniformizer(ar, q, r1)) return sm? small_to_col(a): a;
   /* can't succeed if e > 1 */
   if (ramif) return NULL;
   l = lg(ar);
   for (i=1; i<l; i++) ar[i] = ladd((GEN)ar[i], p);
   if (!vec_is_uniformizer(ar, q, r1)) return NULL;
-  if (small) a = small_to_col(a);
+  if (sm) a = small_to_col(a);
   a[1] = laddii((GEN)a[1],p); return a;
 }
 
 static GEN
 random_unif_loop_vec(GEN nf, GEN P, GEN p, GEN q)
 {
-  long small, r1, i, c = 0, m = lg(P)-1, keep = getrand();
+  long sm, r1, i, c = 0, m = lg(P)-1, keep = getrand();
   int ramif;
   GEN a, P2, beta, M = gmael(nf,5,1);
   gpmem_t av;
 
   r1 = nf_get_r1(nf);
   a = mulis(p, 8*degpol(nf[1]));
-  if (is_bigint(a)) { small = 0; beta = P; }
+  if (is_bigint(a)) { sm = 0; beta = P; }
   else
   {
-    small = itos(p); beta = cgetg(m+1, t_MAT);
+    sm = itos(p); beta = cgetg(m+1, t_MAT);
     for (i=1; i<=m; i++)
       beta[i] = (long)u_Fp_FpV((GEN)P[i], itou(p));
   }
   for(i=1; i<=m; i++)
-    if ((a = prime_check_eltvec((GEN)beta[i],M,p,q,r1,small,0))) return a;
+    if ((a = prime_check_eltvec((GEN)beta[i],M,p,q,r1,sm,0))) return a;
 
   (void)setrand(1);
   if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
@@ -1971,9 +1971,9 @@ random_unif_loop_vec(GEN nf, GEN P, GEN p, GEN q)
   for(av = avma; ;avma = av)
   {
     if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
-    a = random_elt_in_P(beta, small);
+    a = random_elt_in_P(beta, sm);
     if (!a) continue;
-    if ((a = prime_check_eltvec(a,M,p,q,r1,small,0)))
+    if ((a = prime_check_eltvec(a,M,p,q,r1,sm,0)))
     {
       if (DEBUGLEVEL) fprintferr("\n");
       (void)setrand(keep); return a;

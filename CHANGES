@@ -124,6 +124,7 @@ XR 63- smarter precision increase in update_alpha() (ROUND 4) [stick to
    64- E=ellinit([0,0,0,-10301051460877581926458079712219,-12725370882271967125361344545020920373899020890]); ellap(E,1167254453) --> wrong result
    65- factor(x^2 + I*1.) --> SEGV
    66- when printing x < 0 t_REAL, was rounded in the wrong direction
+   67- [WINCE port:] small and SID are already defined in windows.h
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

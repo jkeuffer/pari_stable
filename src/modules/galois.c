@@ -31,7 +31,7 @@ typedef POBJ RESOLVANTE;
 static long isin_G_H(GEN po, GEN *r, long n1, long n2);
 
 static long N,EVEN,PREC,PRMAX,TSCHMAX,coeff[9][10];
-static char SID[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+static char ID[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
 static char* str_base = GPDATADIR;
 
 static long *par_vec;
@@ -905,7 +905,7 @@ check_isin(GEN po,GEN *r,long nbm,long nbv, POBJ a, POBJ tau, POBJ ss, PERM s0)
           if (multi[i]==1)
           {
             uu = ss[numi[i]];
-            ro = DEBUGLEVEL? get_pol_perm(SID,uu,rr,a,nbm,nbv): (GEN)NULL;
+            ro = DEBUGLEVEL? get_pol_perm(ID,uu,rr,a,nbm,nbv): (GEN)NULL;
             return isin_end(tau[nogr], uu, s0, ro, av1);
           }
       }
@@ -946,7 +946,7 @@ check_isin(GEN po,GEN *r,long nbm,long nbv, POBJ a, POBJ tau, POBJ ss, PERM s0)
             if (multi[i]==1)
             {
               uu = ss[numi[i]];
-              ro = DEBUGLEVEL? get_pol_perm(SID,uu,rr,a,nbm,nbv): (GEN)NULL;
+              ro = DEBUGLEVEL? get_pol_perm(ID,uu,rr,a,nbm,nbv): (GEN)NULL;
               return isin_end(tau[nogr], uu, s0, ro, av1);
             }
           avma = av1; nri=nbracint; nrm=nbrac;
@@ -1320,7 +1320,7 @@ static GROUP
 initgroup(long n, long nbgr)
 {
   GROUP t = allocgroup(n,nbgr);
-  t[1] = SID; return t;
+  t[1] = ID; return t;
 }
 
 static PERM
@@ -1331,15 +1331,15 @@ data8(long n1, long n2, GROUP *t)
     case 7: if (n2!=1) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
-      return SID;
+      return ID;
     case 9: if (n2!=4) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 4, 3, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 10: if (n2!=2) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
-      return SID;
+      return ID;
     case 11:
       switch(n2)
       {
@@ -1357,22 +1357,22 @@ data8(long n1, long n2, GROUP *t)
     case 15: if (n2!=6 && n2!=8) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 6, 5, 8, 7);
-      return SID;
+      return ID;
     case 16: if (n2!=7) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 18:
       switch(n2)
       {
         case 9: *t=initgroup(N,3);
           _aff((*t)[2], 1, 5, 3, 7, 2, 6, 4, 8);
           _aff((*t)[3], 1, 2, 3, 4, 6, 5, 8, 7);
-          return SID;
+          return ID;
         case 10: *t=initgroup(N,3);
           _aff((*t)[2], 1, 6, 3, 8, 2, 5, 4, 7);
           _aff((*t)[3], 1, 5, 3, 7, 2, 6, 4, 8);
-          return SID;
+          return ID;
       }break;
     case 19: if (n2!=9) break;
       *t=initgroup(N,1);
@@ -1380,7 +1380,7 @@ data8(long n1, long n2, GROUP *t)
     case 20: if (n2!=10) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 22:
       switch(n2)
       {
@@ -1397,7 +1397,7 @@ data8(long n1, long n2, GROUP *t)
           _aff((*t)[4], 1, 2, 3, 4, 7, 8, 6, 5);
           _aff((*t)[5], 1, 2, 3, 4, 7, 8, 5, 6);
           _aff((*t)[6], 1, 2, 3, 4, 5, 6, 8, 7);
-          return SID;
+          return ID;
       }break;
     case 23: if (n2!=8) break;
       *t=initgroup(N,1);
@@ -1405,14 +1405,14 @@ data8(long n1, long n2, GROUP *t)
     case 26: if (n2!=15 && n2!=17) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 28: if (n2!=21) break;
       *t=initgroup(N,1);
       return _cr(1, 2, 3, 4, 7, 8, 5, 6);
     case 29: if (n2!=18 && n2!=19) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 30: if (n2!=21) break;
       *t=initgroup(N,1);
       return _cr(1, 2, 3, 4, 7, 8, 5, 6);
@@ -1420,11 +1420,11 @@ data8(long n1, long n2, GROUP *t)
       *t=initgroup(N,3);
       _aff((*t)[2], 1, 2, 3, 4, 7, 8, 5, 6);
       _aff((*t)[3], 1, 2, 5, 6, 7, 8, 3, 4);
-      return SID;
+      return ID;
     case 32: if (n2!=12 && n2!=13) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 33:
       switch(n2)
       {
@@ -1446,11 +1446,11 @@ data8(long n1, long n2, GROUP *t)
     case 39: if (n2!=24) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 40: if (n2!=23) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 41:
       switch(n2)
       {
@@ -1465,7 +1465,7 @@ data8(long n1, long n2, GROUP *t)
     case 45: if (n2!=41 && n2!=42) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
     case 46: if (n2!=28) break;
       *t=initgroup(N,1);
       return _cr(1, 2, 5, 6, 3, 4, 7, 8);
@@ -1475,9 +1475,9 @@ data8(long n1, long n2, GROUP *t)
     case 49: if (n2!=48) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 7);
-      return SID;
+      return ID;
   }
-  *t=initgroup(N,1); return SID;
+  *t=initgroup(N,1); return ID;
 }
 
 static long
@@ -1729,21 +1729,21 @@ data9(long n1, long n2, GROUP *t)
       *t=initgroup(N,3);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
       _aff((*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
-      return SID;
+      return ID;
     case 7: if (n2!=2) break;
       *t=initgroup(N,3);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
       _aff((*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
-      return SID;
+      return ID;
     case 8: if (n2!=4) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 4, 7, 2, 5, 8, 3, 6, 9);
-      return SID;
+      return ID;
     case 12: if (n2!=4) break;
       *t=initgroup(N,3);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 9, 7);
       _aff((*t)[3], 1, 2, 3, 4, 5, 6, 9, 7, 8);
-      return SID;
+      return ID;
     case 13: if (n2!=4) break;
       *t=initgroup(N,1);
       return _cr(1, 4, 7, 2, 5, 8, 3, 6, 9);
@@ -1751,21 +1751,21 @@ data9(long n1, long n2, GROUP *t)
       *t=initgroup(N,3);
       _aff((*t)[2], 1, 2, 3, 5, 6, 4, 9, 7, 8);
       _aff((*t)[3], 1, 2, 3, 6, 4, 5, 8, 9, 7);
-      return SID;
+      return ID;
     case 17: if (n2!=6) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 7, 8, 9, 4, 5, 6);
-      return SID;
+      return ID;
     case 21: if (n2!=10) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 7, 8, 9, 4, 5, 6);
-      return SID;
+      return ID;
     case 33: if (n2!=32) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 7, 9, 8);
-      return SID;
+      return ID;
   }
-  *t=initgroup(N,1); return SID;
+  *t=initgroup(N,1); return ID;
 }
 
 static long
@@ -2163,19 +2163,19 @@ data10(long n1,long n2,GROUP *t)
     case 9: if (n2!=3 && n2!=6) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
-      return SID;
+      return ID;
     case 10: *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
-      return SID;
+      return ID;
     case 14: case 16:*t=initgroup(N,1);
       return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
     case 17: if (n2!=5) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 10, 9, 8, 7);
-      return SID;
+      return ID;
     case 19: case 20: *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
-      return SID;
+      return ID;
     case 21: if (n2!=10) break;
       *t=initgroup(N,1);
       return _cr(1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
@@ -2190,10 +2190,10 @@ data10(long n1,long n2,GROUP *t)
     case 27: if (n2!=17 && n2!=21) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
-      return SID;
+      return ID;
     case 28: *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 8, 10, 7, 9);
-      return SID;
+      return ID;
     case 29: if (n2!=5) break;
       *t=initgroup(N,1);
       return _cr(1, 3, 5, 7, 9, 2, 4, 6, 8, 10);
@@ -2215,9 +2215,9 @@ data10(long n1,long n2,GROUP *t)
     case 41: if (n2!=22 && n2!=40) break;
       *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 7, 8, 10, 9);
-      return SID;
+      return ID;
   }
-  *t=initgroup(N,1); return SID;
+  *t=initgroup(N,1); return ID;
 }
 
 static long
@@ -2324,9 +2324,9 @@ data11(long n1, GROUP *t)
       return _cr(1, 2, 3, 4, 6, 10, 11, 9, 7, 5, 8);
     case 7: *t=initgroup(N,2);
       _aff((*t)[2], 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10);
-      return SID;
+      return ID;
   }
-  *t=initgroup(N,1); return SID;
+  *t=initgroup(N,1); return ID;
 }
 
 static long
@@ -2481,7 +2481,7 @@ galoisbig(GEN pol, long prec)
     fprintferr("discriminant = %Z\n", dpol);
     fprintferr("%s group\n", EVEN? "EVEN": "ODD"); flusherr();
   }
-  PRMAX = prec+5; TSCHMAX = 1; SID[0] = N;
+  PRMAX = prec+5; TSCHMAX = 1; ID[0] = N;
   switch(N)
   {
     case 8: t = galoismodulo8(pol,dpol);
