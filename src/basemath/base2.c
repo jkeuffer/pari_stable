@@ -3612,7 +3612,7 @@ findmin(GEN nf, GEN ideal, GEN muf,long prec)
 {
   gpmem_t av = avma;
   long i, l;
-  GEN m,y, G = gmael(nf,5,3);
+  GEN m,y, G = gmael(nf,5,2);
 
   m = gmul(G, ideal);
   m = lllintern(m,4,1,prec);
