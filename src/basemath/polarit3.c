@@ -1182,11 +1182,14 @@ u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p)
 GEN
 FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 {
-  pari_sp av = avma;
+  pari_sp av;
   FpX_muldata D;
-  long vx = varn(x);
+  long vx;
   GEN y;
+  if (!pol) return powmodulo(x, n, p);
+  vx = varn(x);
   if (!signe(n)) return polun[vx];
+  av = avma;
   if (signe(n) < 0)
   {
     x=FpXQ_inv(x,pol,p);
