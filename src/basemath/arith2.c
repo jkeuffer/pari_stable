@@ -49,6 +49,22 @@ prime(long n)
 }
 
 GEN
+pith(long n)
+{
+  byteptr p = diffptr;
+  long c, prime = 0, res = 0;
+
+  if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
+  while (prime<=n)
+  {
+    c = *p++; if (!c) err(primer1);
+    prime += c;
+    res++;
+  }
+  return stoi(res-1);
+}
+
+GEN
 primes(long n)
 {
   byteptr p = diffptr;
