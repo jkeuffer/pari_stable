@@ -348,16 +348,13 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   if (ptlead) *ptlead = lead; return POL;
 }
 
-/* compute x1*x2^2 + x2*x3^2 + x3*x4^2 + x4*x1^2 */
+/* x1*x2^2 + x2*x3^2 + x3*x4^2 + x4*x1^2 */
 static GEN
-get_F4(GEN x)
+F4(GEN x)
 {
-  GEN p1=gzero;
-  long i;
-
-  for (i=1; i<=4; i++)
-    p1 = gadd(p1, gmul((GEN)x[i], gsqr((GEN)x[(i&3)+1])));
-  return p1;
+  return gadd(
+    gmul((GEN)x[1], gadd(gsqr((GEN)x[2]), gmul((GEN)x[4],(GEN)x[1]))),
+    gmul((GEN)x[3], gadd(gsqr((GEN)x[4]), gmul((GEN)x[2],(GEN)x[3]))));
 }
 
 static GEN
@@ -384,7 +381,7 @@ GEN
 galois(GEN x, long prec)
 {
   pari_sp av = avma, av1;
-  long i,j,k,n,f,l,l2,e,e1,pr,ind;
+  long i,j,k,n,f,l,l2,e,e1,pr,ind, prec;
   GEN x1,p1,p2,p3,p4,p5,w,z,ee;
   static int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
   static int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
@@ -408,7 +405,7 @@ galois(GEN x, long prec)
     return f? _res(3,1,1): _res(6,-1,2);
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
-  if (n > 7) return galoisbig(x,prec);
+  if (n > 7) return galoisbig(x, prec);
   for(;;)
   {
     GEN cb = cauchy_bound(x);
@@ -418,15 +415,14 @@ galois(GEN x, long prec)
         prec = DEFAULTPREC + (long)((gexpo(cb)*18. / BITS_IN_LONG));
         for(;;)
 	{
-	  p1=roots(x,prec);
-          z[1] = (long)get_F4(p1);
-          z[2] = (long)get_F4(transroot(p1,1,2));
-          z[3] = (long)get_F4(transroot(p1,1,3));
-          z[4] = (long)get_F4(transroot(p1,1,4));
-          z[5] = (long)get_F4(transroot(p1,2,3));
-          z[6] = (long)get_F4(transroot(p1,3,4));
-          p5 = roots_to_ZX(z, &e);
-          if (e <= -10) break;
+	  p1=cleanroots(x,prec);
+          z[1] = (long)F4(p1);
+          z[2] = (long)F4(transroot(p1,1,2));
+          z[3] = (long)F4(transroot(p1,1,3));
+          z[4] = (long)F4(transroot(p1,1,4));
+          z[5] = (long)F4(transroot(p1,2,3));
+          z[6] = (long)F4(transroot(p1,3,4));
+          p5 = roots_to_ZX(z, &e); if (e <= -10) break;
 	  prec = (prec<<1)-2;
 	}
         if (!ZX_is_squarefree(p5)) goto tchi;
@@ -452,7 +448,7 @@ galois(GEN x, long prec)
 	{
           for(;;)
 	  {
-	    p1=roots(x,prec);
+	    p1=cleanroots(x,prec);
 	    for (l=1; l<=6; l++)
 	    {
 	      p2=(l==1)?p1: ((l<6)?transroot(p1,1,l): transroot(p1,2,5));
@@ -467,8 +463,7 @@ galois(GEN x, long prec)
               e1 = gexpo(gimag(p3)); if (e1>e) e=e1;
               ee[l]=e; z[l] = (long)p3;
 	    }
-            p5 = roots_to_ZX(z, &e);
-            if (e <= -10) break;
+            p5 = roots_to_ZX(z, &e); if (e <= -10) break;
 	    prec = (prec<<1)-2;
 	  }
           if (!ZX_is_squarefree(p5)) goto tchi;
@@ -510,7 +505,7 @@ galois(GEN x, long prec)
 	{
           for(;;)
 	  {
-	    p1=roots(x,prec);
+	    p1=cleanroots(x,prec);
 	    for (l=1; l<=6; l++)
 	    {
 	      p2=(l==1)?p1:transroot(p1,1,l);
@@ -524,8 +519,7 @@ galois(GEN x, long prec)
 	      }
 	      z[l] = (long)p3;
 	    }
-            p5 = roots_to_ZX(z, &e);
-            if (e <= -10) break;
+            p5 = roots_to_ZX(z, &e); if (e <= -10) break;
 	    prec=(prec<<1)-2;
 	  }
 	  if (!ZX_is_squarefree(p5)) goto tchi;
@@ -598,15 +592,14 @@ galois(GEN x, long prec)
         prec = DEFAULTPREC + (long)((gexpo(cb)*7. / BITS_IN_LONG));
         for(;;)
 	{
-	  ind = 0; p1=roots(x,prec);
+	  ind = 0; p1=cleanroots(x,prec);
 	  for (i=1; i<=5; i++)
 	    for (j=i+1; j<=6; j++)
             {
               GEN t = gadd((GEN)p1[i],(GEN)p1[j]);
 	      for (k=j+1; k<=7; k++) z[++ind] = ladd(t, (GEN)p1[k]);
             }
-          p5 = roots_to_ZX(z, &e);
-	  if (e <= -10) break;
+          p5 = roots_to_ZX(z, &e); if (e <= -10) break;
           prec = (prec<<1)-2;
 	}
         if (!ZX_is_squarefree(p5)) goto tchi;
@@ -620,7 +613,7 @@ galois(GEN x, long prec)
 	  case 3: avma = av; return _res(21,1,3);
 	  case 4: avma = av; return _res(14,-1,2);
 	  case 5: avma = av; return _res(7,1,1);
-          default: err(talker,"galois (bug2)");
+          default: err(bugparier,"galois (bug2)");
 	}
     }
     tchi: avma = av1; x = tschirnhaus(x1);

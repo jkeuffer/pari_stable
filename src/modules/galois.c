@@ -2427,7 +2427,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
 }
 
 GEN
-galoisbig(GEN pol)
+galoisbig(GEN pol, long prec)
 {
   GEN dpol, res = cgetg(4,t_VEC);
   long *tab, t = 0;
