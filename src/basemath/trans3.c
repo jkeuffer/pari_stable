@@ -1737,7 +1737,7 @@ zetap(GEN s)
     err(talker, "argument must be a gp-adic integer");
 
   gp = (GEN)s[2]; p = itou(gp);
-  xp = log2(p); /* the extra precision; FIXME: quite arbitrary */
+  xp = (long) log2(p); /* the extra precision; FIXME: quite arbitrary */
   if (DEBUGLEVEL > 2) fprintferr("zetap: extra prec = %ld\n", xp);
   is = gtrunc(s);  /* make s an integer */
   N  = itos(muluu(p,prec)) + xp; /* FIXME: crude estimation */
