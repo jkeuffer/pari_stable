@@ -1298,7 +1298,7 @@ static long
 gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
 {
   long i,e, k = i0, ex = -HIGHEXPOBIT, lx = lg(x);
-  GEN p;
+  GEN p,r;
   if (c)
     for (i=i0; i<lx; i++)
     {
@@ -1313,7 +1313,8 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
       if (e > ex) { ex=e; k=i; }
     }
   p = (GEN)x[k];
-  return approx_0(p, (GEN)x0[k])? i: k;
+  r = (GEN)x0[k]; if (isexactzero(r)) r = x0;
+  return approx_0(p, r)? i: k;
 }
 
 /* return the transform of x under a standard Gauss pivot. r = dim ker(x).
