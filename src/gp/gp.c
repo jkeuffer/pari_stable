@@ -2120,7 +2120,7 @@ next_expr(char *t)
       case '\0':
         return "";
       default:
-        if (outer && separe(c)) { s[-1] = 0; return s; }
+        if (outer && c == ';') { s[-1] = 0; return s; }
     }
   }
 }
