@@ -2010,8 +2010,8 @@ FlxqX_safegcd(GEN P, GEN Q, GEN T, ulong p)
   pari_sp btop, ltop = avma, st_lim;
   long dg;
   GEN U, q;
-  if (!lgpol(P)) return gcopy(Q);
-  if (!lgpol(Q)) return gcopy(P);
+  if (!signe(P)) return gcopy(Q);
+  if (!signe(Q)) return gcopy(P);
   btop = avma; st_lim = stack_lim(btop, 1);
   dg = lg(P)-lg(Q);
   if (dg < 0) { swap(P, Q); dg = -dg; }
