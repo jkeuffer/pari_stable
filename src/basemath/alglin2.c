@@ -1754,6 +1754,15 @@ hnflll(GEN A)
   if (typ(A) != t_MAT) err(typeer,"hnflll");
   n = lg(A); B = idmat(n-1); A = gcopy(fix_rows(A));
   D = (GEN*) cgetg(n+1, t_VEC); D++; /* hack: need a "sentinel" D[0] */
+  if (n == 2) /* handle trivial case: return negative diag coeff otherwise */
+  {
+    i = findi((GEN)A[1]);
+    if (i && signe(gcoeff(A,i,1)) < 0)
+    {
+      neg_col((GEN)A[1]);
+      neg_col((GEN)B[1]);
+    }
+  }
   lambda = (GEN**) cgetg(n,t_MAT);
   for (i=1; i<n; i++) { D[i] = gun; lambda[i] = (GEN*)zerocol(n-1); }
   D[0] = gun; k = 2;
