@@ -2045,7 +2045,7 @@ gdiv(GEN x, GEN y)
      || (vx==vy && is_scalar_t(ty)) || (is_matvec_t(tx) && !is_matvec_t(ty)))
   {
     if (tx == t_RFRAC) return divrfracscal(x,y);
-    z = cgetg(lx, tx);
+    z = cgetg_copy(lx, x);
     switch(tx)
     {
       case t_POL: case t_SER:
