@@ -527,6 +527,23 @@ binome(GEN n, long k)
   return gerepileupto(av, y);
 }
 
+/* Assume n >= 1, return bin, bin[k+1] = binomial(n, k) */
+GEN
+vecbinome(long n)
+{
+  long d = (n + 1)/2, k;
+  GEN bin = cgetg(n+2, t_VEC), *C;
+  C = (GEN*)(bin + 1); /* C[k] = binomial(n, k) */
+  C[0] = gun;
+  for (k=1; k <= d; k++)
+  {
+    gpmem_t av = avma;
+    C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), stoi(k)));
+  }
+  for (   ; k <= n; k++) C[k] = C[n - k];
+  return bin;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                  POLYNOMIAL INTERPOLATION                      **/

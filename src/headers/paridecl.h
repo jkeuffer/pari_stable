@@ -635,6 +635,7 @@ GEN     sort(GEN x);
 long    tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN));
 GEN     tayl(GEN x, long v, long precdl);
 GEN     tchebi(long n, long v);
+GEN     vecbinome(long n);
 GEN     vecsort(GEN x, GEN k);
 GEN     vecsort0(GEN x, GEN k, long flag);
 

@@ -361,23 +361,6 @@ nffactor(GEN nf,GEN pol)
   rep[2] = (long)p1; return sort_factor(rep, cmp_pol);
 }
 
-/* Assume n >= 1, return bin, bin[k+1] = binomial(n, k) */
-GEN
-vecbinome(long n)
-{
-  long d = (n + 1)/2, k;
-  GEN bin = cgetg(n+2, t_VEC), *C;
-  C = (GEN*)(bin + 1); /* C[k] = binomial(n, k) */
-  C[0] = gun;
-  for (k=1; k <= d; k++)
-  {
-    gpmem_t av = avma;
-    C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), stoi(k)));
-  }
-  for (   ; k <= n; k++) C[k] = C[n - k];
-  return bin;
-}
-
 /* return a bound for T_2(P), P | polbase in C[X]
  * NB: Mignotte bound: A | S ==>
  *  |a_i| <= binom(d-1, i-1) || S ||_2 + binom(d-1, i) lc(S)
@@ -386,9 +369,8 @@ vecbinome(long n)
  * sigma, then take the sup over i.
  **/
 static GEN
-nf_factor_bound(GEN nf, GEN polbase)
+nf_Mignotte_bound(GEN nf, GEN polbase)
 {
-  gpmem_t av = avma;
   GEN G = gmael(nf,5,2), lS = leading_term(polbase); /* t_INT */
   GEN p1, C, N2, matGS, binlS, bin;
   long prec, i, j, d = degpol(polbase), n = degpol(nf[1]), r1 = nf_get_r1(nf);
@@ -397,15 +379,14 @@ nf_factor_bound(GEN nf, GEN polbase)
   binlS = bin = vecbinome(d-1);
   if (!gcmp1(lS)) binlS = gmul(lS, bin);
 
-  matGS = cgetg(d+2, t_MAT);
   N2 = cgetg(n+1, t_VEC);
   prec = gprecision(G);
   for (;;)
   {
     nffp_t F;
 
-    for (j=0; j<=d; j++)
-      matGS[j+1] = lmul(G, (GEN)polbase[j+2]);
+    matGS = cgetg(d+2, t_MAT);
+    for (j=0; j<=d; j++) matGS[j+1] = lmul(G, (GEN)polbase[j+2]);
     matGS = gtrans_i(matGS);
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
@@ -425,7 +406,6 @@ PRECPB:
     prec = (prec<<1)-2;
     remake_GM(nf, &F, prec); G = F.G;
     if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
-    matGS = gtrans_i(matGS);
   }
 
   /* Take sup over 0 <= i <= d of
@@ -435,7 +415,7 @@ PRECPB:
   C = mulsi(n, sqri(lS));
   /* i = d: sum_sigma ||sigma(S)||_2^2 */
   p1 = gnorml2(N2); if (gcmp(C, p1) < 0) C = p1;
-  for (i = 1; i <= d-1; i++ )
+  for (i = 1; i < d; i++)
   {
     GEN s = gzero;
     for (j = 1; j <= n; j++)
@@ -445,7 +425,64 @@ PRECPB:
     }
     if (gcmp(C, s) < 0) C = s;
   }
-  return gerepileupto(av, C);
+  return C;
+}
+
+/* return a bound for T_2(P), P | polbase
+ * max |b_i|^2 <= 3^{3/2 + d} / (4 \pi d) [P]_2,
+ * where [P]_2 is Bombieri's 2-norm
+ * Sum over conjugates
+*/
+static GEN
+nf_Beauzamy_bound(GEN nf, GEN polbase)
+{
+  GEN lt,C,run,s, G = gmael(nf,5,2), POL, bin;
+  long i,prec,precnf, d = degpol(polbase), n = degpol(nf[1]);
+
+  precnf = gprecision(G);
+  prec   = MEDDEFAULTPREC;
+  bin = vecbinome(d);
+  POL = polbase + 2;
+  /* compute [POL]_2 */
+  for (;;)
+  {
+    run= realun(prec);
+    s = realzero(prec);
+    for (i=0; i<=d; i++)
+    {
+      GEN p1 = gnorml2(gmul(G, gmul(run, (GEN)POL[i]))); /* T2(POL[i]) */
+      if (!signe(p1)) continue;
+      if (lg(p1) == 3) break;
+      /* s += T2(POL[i]) / binomial(d,i) */
+      s = addrr(s, gdiv(p1, (GEN)bin[i+1]));
+    }
+    if (i > d) break;
+
+    prec = (prec<<1)-2;
+    if (prec > precnf)
+    {
+      nffp_t F; remake_GM(nf, &F, prec); G = F.G;
+      if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
+    }
+  }
+  lt = (GEN)leading_term(polbase)[1];
+  s = gmul(s, mulis(sqri(lt), n));
+  C = gpow(stoi(3), dbltor(1.5 + d), DEFAULTPREC); /* 3^{3/2 + d} */
+  return gdiv(gmul(C, s), gmulsg(d, mppi(DEFAULTPREC)));
+}
+
+static GEN
+nf_factor_bound(GEN nf, GEN polbase)
+{
+  gpmem_t av = avma;
+  GEN a = nf_Mignotte_bound(nf, polbase);
+  GEN b = nf_Beauzamy_bound(nf, polbase);
+  if (DEBUGLEVEL>2)
+  {
+    fprintferr("Mignotte bound: %Z\n",a);
+    fprintferr("Beauzamy bound: %Z\n",b);
+  }
+  return gerepileupto(av, gmin(a, b));
 }
 
 static long

@@ -646,13 +646,69 @@ two_factor_bound(GEN x)
 }
 #endif
 
+/* A | S ==> |a_i| <= binom(d-1, i-1) || S ||_2 + binom(d-1, i) lc(S) */
 static GEN
-uniform_Mignotte_bound(GEN x, GEN N2)
+Mignotte_bound(GEN S)
 {
-  if (!N2) N2 = mpsqrt(QuickNormL2(x,DEFAULTPREC));
-  return ceil_safe(gmul2n(N2, degpol(x)));
+  long i, d = degpol(S);
+  GEN lS, C, binlS, bin, N2, p1;
+  
+  N2 = mpsqrt(QuickNormL2(S,DEFAULTPREC));
+  binlS = bin = vecbinome(d-1);
+  lS = leading_term(S);
+  if (!is_pm1(lS)) binlS = gmul(lS, bin);
+
+  /* i = 0 */
+  C = (GEN)binlS[1];
+  /* i = d */
+  p1 = N2; if (gcmp(C, p1) < 0) C = p1;
+  for (i = 1; i < d; i++)
+  {
+    p1 = gadd(gmul((GEN)bin[i], N2), (GEN)binlS[i+1]);
+    if (gcmp(C, p1) < 0) C = p1;
+  }
+  return C;
+}
+/* A | S ==> |a_i|^2 <= 3^{3/2 + d} / (4 \pi d) [P]_2^2,
+ * where [P]_2 is Bombieri's 2-norm */
+static GEN
+Beauzamy_bound(GEN S)
+{
+  const long prec = DEFAULTPREC;
+  long i, d = degpol(S);
+  GEN bin, lS, s, C;
+  bin = vecbinome(d);
+
+  s = realzero(prec);
+  for (i=0; i<=d; i++)
+  {
+    GEN c = (GEN)S[i+2];
+    if (gcmp0(c)) continue;
+    /* s += P_i^2 / binomial(d,i) */
+    s = addrr(s, gdiv(itor(sqri(c), prec), (GEN)bin[i+1]));
+  }
+  /* s = [S]_2^2 */
+  C = gpow(stoi(3), dbltor(1.5 + d), prec); /* 3^{3/2 + d} */
+  C = gdiv(gmul(C, s), gmulsg(4*d, mppi(prec)));
+  lS = absi(leading_term(S));
+  return mulir(lS, mpsqrt(C));
 }
 
+static GEN
+factor_bound(GEN S)
+{
+  gpmem_t av = avma;
+  GEN a = Mignotte_bound(S);
+  GEN b = Beauzamy_bound(S);
+  if (DEBUGLEVEL>2)
+  {
+    fprintferr("Mignotte bound: %Z\n",a);
+    fprintferr("Beauzamy bound: %Z\n",b);
+  }
+  return gerepileupto(av, ceil_safe(gmin(a, b)));
+}
+
+#if 0
 /* all factors have coeffs less than the bound */
 static GEN
 all_factor_bound(GEN x)
@@ -665,6 +721,7 @@ all_factor_bound(GEN x)
   z = mulii(z, binome(stoi(n-1), n>>1));
   return shifti(mulii(t,z),1);
 }
+#endif
 
 /* Naive recombination of modular factors: combine up to maxK modular
  * factors, degree <= klim and divisible by hint
@@ -674,7 +731,7 @@ all_factor_bound(GEN x)
  * target/lc(target) modulo p^a
  * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
 static GEN
-cmbf(GEN pol, GEN famod, GEN p, long a, long b,
+cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
      long maxK, long klim,long hint)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
@@ -688,7 +745,6 @@ cmbf(GEN pol, GEN famod, GEN p, long a, long b,
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
-  GEN bound = all_factor_bound(pol);
 
   if (maxK < 0) maxK = lfamod-1;
 
@@ -818,7 +874,7 @@ nextK:
       lfamod -= K;
       if (lfamod < 2*K) goto END;
       i = 1; curdeg = degpol[ind[1]];
-      bound = all_factor_bound(pol);
+      bound = factor_bound(pol);
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? gmul(lc,pol): pol;
       if (DEBUGLEVEL > 2)
@@ -1281,12 +1337,11 @@ cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 static GEN
 combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
-  GEN la, B, A, res, L, pa, pb, listmod, N2;
+  GEN la, B, A, res, L, pa, pb, listmod;
   long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
   pari_timer T;
 
-  N2 = mpsqrt(QuickNormL2(target,DEFAULTPREC));
-  A = uniform_Mignotte_bound(target, N2);
+  A = factor_bound(target);
 
   la = absi(leading_term(target));
   B = mulsi(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
@@ -1297,7 +1352,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Z^%ld)", p,a);
-  L = cmbf(target, famod, p, a, b, maxK, klim, hint);
+  L = cmbf(target, famod, A, p, a, b, maxK, klim, hint);
   if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
 
   res     = (GEN)L[1];
@@ -1305,7 +1360,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   famod = (GEN)listmod[l];
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
-    if (l!=1) A = uniform_Mignotte_bound((GEN)res[l], NULL);
+    if (l!=1) A = factor_bound((GEN)res[l]);
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
     L = LLL_cmbf((GEN)res[l], famod, p, pa, A, a, maxK);
     if (DEBUGLEVEL>2) msgTIMER(&T,"Knapsack");
