@@ -2843,6 +2843,28 @@ Q_primitive_part(GEN x, GEN *ptc)
 }
 
 GEN
+QX_denom(GEN x)
+{
+  long i, l = lgef(x);
+  GEN r, d = gun;
+  for (i=2; i<l; i++)
+  {
+    r = (GEN)x[i];
+    if (typ(r) == t_FRAC) d = mpppcm(d, (GEN)r[2]);
+  }
+  return d;
+}
+
+GEN
+Q_remove_denom(GEN x, GEN *ptd)
+{
+  GEN d = typ(x) == t_POL? QX_denom(x): denom(x);
+  if (gcmp1(d)) d = NULL; else x = Q_muli_to_int(x,d);
+  if (ptd) *ptd = d;
+  return x;
+}
+
+GEN
 primpart(GEN x) { return primitive_part(x, NULL); }
 
 GEN
@@ -2885,14 +2907,14 @@ _rc(GEN a, GEN n, GEN d)
   return a;
 }
 
-/* return y = x * d, assuming x rationnal, and d,y integral */
+/* return y = x * d, assuming x rational, and d,y integral */
 GEN
-Q_remove_denom(GEN x, GEN d)
+Q_muli_to_int(GEN x, GEN d)
 {
   long i, j, h, l;
   GEN y;
 
-  if (typ(d) != t_INT) err(typeer,"Q_remove_denom");
+  if (typ(d) != t_INT) err(typeer,"Q_muli_to_int");
 
   switch (typ(x))
   {
@@ -2942,7 +2964,7 @@ Q_div_to_int(GEN x, GEN c)
   {
     if (t != t_FRAC) err(typeer,"Q_div_to_int");
     n = (GEN)c[1];
-    d = (GEN)c[2]; if (gcmp1(n)) return Q_remove_denom(x,d);
+    d = (GEN)c[2]; if (gcmp1(n)) return Q_muli_to_int(x,d);
   }
 
   switch(typ(x))

@@ -998,19 +998,6 @@ respm(GEN x,GEN y,GEN pm)
   return gerepileuptoint(av, icopy(p1));
 }
 
-GEN
-QX_denom(GEN x)
-{
-  long i, l = lgef(x);
-  GEN r, d = gun;
-  for (i=2; i<l; i++)
-  {
-    r = (GEN)x[i];
-    if (typ(r) == t_FRAC) d = mpppcm(d, (GEN)r[2]);
-  }
-  return d;
-}
-
 static GEN
 dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 {
@@ -1043,13 +1030,8 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     {
       GEN d, mod;
       ha = gmul(ha,alpha);
-      d = QX_denom(ha); if (gcmp1(d)) d = NULL;
-      if (!d) mod = pdp;
-      else
-      {
-        ha = Q_remove_denom(ha, d);
-        mod = mulii(pdp, d);
-      }
+      ha = Q_remove_denom(ha, &d);
+      mod = d? mulii(pdp,d): pdp;
       ha = FpX_res(ha, f, mod);
     }
     b[i] = (long)pol_to_vec(ha,n);
@@ -1085,17 +1067,12 @@ FpX_val(GEN x0, GEN t, GEN p, GEN *py)
 static GEN
 QpX_mod(GEN e, GEN f, GEN pk)
 {
-  GEN mod, den = QX_denom(e);
-  if (gcmp1(den)) {
-    den = NULL;
-    mod = pk;
-  } else {
-    e = Q_remove_denom(e, den);
-    mod = mulii(pk,den);
-  }
+  GEN mod, d;
+  e = Q_remove_denom(e, &d);
+  mod = d? mulii(pk,d): pk;
   e = FpX_res(e, centermod(f, mod), mod);
   e = FpX_center(e, mod);
-  if (den) e = gdiv(e, den);
+  if (d) e = gdiv(e, d);
   return e;
 }
 
@@ -4032,16 +4009,17 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   N = degpol(pol);
   n = degpol(nf[1]); m = n*N;
 
-  den = QX_denom(plg);
-  plg0= Q_remove_denom(plg, den); /* plg = plg0/den */
+  plg0= Q_remove_denom(plg, &den); /* plg = plg0/den */
   vbs = cgetg(n+1,t_VEC);
   /* nf = K = Q(a), vbs[i+1] = a^i as an elt of L = Q[X] / polabs */
   vbs[1] = un;
   vbs[2] = (long)plg0;
   for (i=3; i<=n; i++) vbs[i] = lres(gmul((GEN)vbs[i-1], plg0), polabs);
-  /* restore denominators */
-  vbs[2] = (long)plg; d = den;
-  for (i=3; i<=n; i++) { d = mulii(d,den); vbs[i] = ldiv((GEN)vbs[i], d); }
+  if (den)
+  { /* restore denominators */
+    vbs[2] = (long)plg; d = den;
+    for (i=3; i<=n; i++) { d = mulii(d,den); vbs[i] = ldiv((GEN)vbs[i], d); }
+  }
 
   /* bs = integer basis of K, as elements of L */
   bs = gmul(vbs, vecpol_to_mat((GEN)nf[7],n));
@@ -4059,8 +4037,8 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
       B[k++] = (long)pol_to_vec(p1, m);
     }
   }
-  den = denom(B); B = Q_remove_denom(B, den);
-  B = hnfmodid(B, den); B = gdiv(B, den);
+  B = Q_remove_denom(B, &den);
+  if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = idmat(m);
   p1 = cgetg(3,t_VEC);
   p1[1] = (long)polabs;
   p1[2] = (long)B; return gerepilecopy(av, p1);

@@ -709,11 +709,11 @@ idealadd(GEN nf, GEN x, GEN y)
   if (ty != id_MAT || lg(y)!=N+1) y = idealhermite_aux(nf,y);
   if (lg(x) == 1) return gerepileupto(av,y);
   if (lg(y) == 1) return gerepileupto(av,x); /* check for 0 ideal */
-  dx=denom(x);
-  dy=denom(y); dz=mulii(dx,dy);
+  dx = denom(x);
+  dy = denom(y); dz = mulii(dx,dy);
   if (gcmp1(dz)) dz = NULL; else {
-    x = Q_remove_denom(x, dz);
-    y = Q_remove_denom(y, dz);
+    x = Q_muli_to_int(x, dz);
+    y = Q_muli_to_int(y, dz);
   }
   if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
   {
@@ -1547,9 +1547,9 @@ idealnorm(GEN nf, GEN x)
 static GEN
 hnfideal_inv(GEN nf, GEN I)
 {
-  GEN J, dI = denom(I), IZ,dual;
+  GEN J, dI, IZ,dual;
 
-  if (gcmp1(dI)) dI = NULL; else I = Q_remove_denom(I, dI);
+  I = Q_remove_denom(I, &dI);
   if (lg(I)==1) err(talker, "cannot invert zero ideal");
   IZ = gcoeff(I,1,1); /* I \cap Z */
   if (!signe(IZ)) err(talker, "cannot invert zero ideal");
@@ -2222,8 +2222,7 @@ appr_reduce(GEN s, GEN y)
   for (i=1; i<=N; i++) z[i] = y[i];
   z[N+1] = (long)s;
   u = (GEN)ker(z)[1];
-  d = denom(u);
-  if (!gcmp1(d)) u = Q_remove_denom(u, d);
+  u = Q_remove_denom(u, NULL);
   d = (GEN)u[N+1]; setlg(u,N+1);
   for (i=1; i<=N; i++) u[i] = (long)diviiround((GEN)u[i],d);
   return gadd(s, gmul(y,u));
@@ -2239,13 +2238,13 @@ appr_reduce(GEN s, GEN y)
 GEN
 make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1)
 {
-  GEN fZ, t, L, D2, d1, d2, d = denom(L0);
+  GEN fZ, t, L, D2, d1, d2, d;
 
   if (ptd1) *ptd1 = NULL;
-
-  if (is_pm1(d)) return L0;
+  L = Q_remove_denom(L0, &d);
+  if (!d) return L0;
   
-  L = Q_remove_denom(L0, d); /* L0 = L / d, L integral */
+  /* L0 = L / d, L integral */
   fZ = gcoeff(f,1,1);
   /* Kill denom part coprime to fZ */
   d2 = coprime_part(d, fZ);
@@ -2316,9 +2315,8 @@ idealapprfact_i(GEN nf, GEN x)
   x = factorbackprime(nf, list,e2);
   if (flag) /* denominator */
   {
-    d = denom(z);
-    z = Q_remove_denom(z, d);
-    x = Q_remove_denom(x, d);
+    z = Q_remove_denom(z, &d);
+    x = Q_muli_to_int(x, d);
   }
   else d = NULL;
   z = appr_reduce(z, x);

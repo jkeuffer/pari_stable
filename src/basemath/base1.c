@@ -1025,17 +1025,16 @@ GEN
 get_bas_den(GEN bas)
 {
   GEN z,b,d,den, dbas = dummycopy(bas);
-  long i, c = 0, l = lg(bas);
+  long i, l = lg(bas);
+  int power = 1;
   den = cgetg(l,t_VEC);
   for (i=1; i<l; i++)
   {
-    b = (GEN)bas[i];
-    d = denom(content(b));
-    if (is_pm1(d)) d = NULL; else { b = Q_remove_denom(b,d); c++; }
+    b = Q_remove_denom((GEN)bas[i], &d);
     dbas[i]= (long)b;
-    den[i] = (long)d;
+    den[i] = (long)d; if (d) power = 0;
   }
-  if (!c) den = NULL; /* power basis */
+  if (power) den = NULL; /* power basis */
   z = cgetg(3,t_VEC);
   z[1] = (long)dbas;
   z[2] = (long)den; return z;
@@ -1117,8 +1116,8 @@ hnffromLLL(GEN nf)
 {
   GEN d, x;
   x = vecpol_to_mat((GEN)nf[7], degpol(nf[1]));
-  d = denom(x); x = Q_remove_denom(x, d);
-  
+  x = Q_remove_denom(x, &d);
+  if (!d) return x; /* power basis */
   return gauss(hnfmodid(x, d), x);
 }
 
