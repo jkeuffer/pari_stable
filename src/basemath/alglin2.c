@@ -1062,22 +1062,25 @@ QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
   A[j] = (long)QV_lincomb(aj,ak, p1,(GEN)A[j]);
 }
 
+extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
+
 static GEN
-matrixqz_aux(GEN A, long m, long n)
+matrixqz_aux(GEN A)
 {
   ulong av = avma, lim = stack_lim(av,1);
-  long i,j;
+  long i,j,k,n,m;
   GEN a;
 
-  for (i=1; i<=m; i++)
+  n = lg(A); if (n == 1) return cgetg(1,t_MAT);
+  m = lg(A[1]);
+  for (i=1; i<m; i++)
   {
-    long k = 1;
-    for (j=1; j<=n; j++)
+    for (j=k=1; j<n; j++)
     {
       GEN a = gcoeff(A,i,j);
       if (gcmp0(a)) continue;
 
-      k = (j==n)? 1: j+1;
+      k = j+1; if (k == n) k = 1;
       /* zero a = Aij  using  b = Aik */
       QV_elem(a, gcoeff(A,i,k), A, j,k);
     }
@@ -1090,54 +1093,53 @@ matrixqz_aux(GEN A, long m, long n)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"matrixqz_aux");
-      A=gerepilecopy(av,A);
+      A = gerepilecopy(av,A);
     }
   }
-  return hnf(A);
+  return m > 100? hnfall_i(A,NULL,1): hnf(A);
 }
 
 GEN
 matrixqz2(GEN x)
 {
-  long av = avma,m,n;
-
+  ulong av = avma;
   if (typ(x)!=t_MAT) err(typeer,"matrixqz2");
-  n=lg(x)-1; if (!n) return gcopy(x);
-  m=lg(x[1])-1; x=dummycopy(x);
-  return gerepileupto(av, matrixqz_aux(x,m,n));
+  x = dummycopy(x);
+  return gerepileupto(av, matrixqz_aux(x));
 }
 
 GEN
 matrixqz3(GEN x)
 {
-  long av=avma,av1,j,j1,k,m,n,lim;
+  ulong av = avma, av1, lim;
+  long j,j1,k,m,n;
   GEN c;
 
   if (typ(x)!=t_MAT) err(typeer,"matrixqz3");
-  n=lg(x)-1; if (!n) return gcopy(x);
-  m=lg(x[1])-1; x=dummycopy(x); c=new_chunk(n+1);
-  for (j=1; j<=n; j++) c[j]=0;
-  av1=avma; lim=stack_lim(av1,1);
-  for (k=1; k<=m; k++)
+  n = lg(x); if (n==1) return gcopy(x);
+  m = lg(x[1]); x = dummycopy(x);
+  c = cgetg(n,t_VECSMALL);
+  for (j=1; j<n; j++) c[j] = 0;
+  av1 = avma; lim = stack_lim(av1,1);
+  for (k=1; k<m; k++)
   {
-    j=1; while (j<=n && (c[j] || gcmp0(gcoeff(x,k,j)))) j++;
-    if (j<=n)
-    {
-      c[j]=k; x[j]=ldiv((GEN)x[j],gcoeff(x,k,j));
-      for (j1=1; j1<=n; j1++)
-	if (j1!=j)
-        {
-          GEN t = gcoeff(x,k,j1);
-          if (!gcmp0(t)) x[j1] = lsub((GEN)x[j1],gmul(t,(GEN)x[j]));
-        }
-      if (low_stack(lim, stack_lim(av1,1)))
+    j=1; while (j<n && (c[j] || gcmp0(gcoeff(x,k,j)))) j++;
+    if (j==n) continue;
+   
+    c[j]=k; x[j]=ldiv((GEN)x[j],gcoeff(x,k,j));
+    for (j1=1; j1<n; j1++)
+      if (j1!=j)
       {
-	if(DEBUGMEM>1) err(warnmem,"matrixqz3");
-	x=gerepilecopy(av1,x);
+        GEN t = gcoeff(x,k,j1);
+        if (!gcmp0(t)) x[j1] = lsub((GEN)x[j1],gmul(t,(GEN)x[j]));
       }
+    if (low_stack(lim, stack_lim(av1,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"matrixqz3");
+      x = gerepilecopy(av1,x);
     }
   }
-  return gerepileupto(av, matrixqz_aux(x,m,n));
+  return gerepileupto(av, matrixqz_aux(x));
 }
 
 GEN
