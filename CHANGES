@@ -115,6 +115,7 @@ MW 69- ellap(ellinit([0,0,1,-7077,235516]), 1075060289) --> "zero argument in
        an arithmetic function"
 MW 70- ellap(ellinit([0,0,1,-7077,235516]),1135392007) --> SEGV
 BA 71- user's manual index truncated if LANG=fr_FR
+   72- lex(string1, string2) could return something not in {-1,0,1}
 
   Changed
 BA  1- improved Fp_isom
