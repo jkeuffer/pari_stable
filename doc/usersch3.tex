@@ -6932,13 +6932,14 @@ initalize tables for use with integral transforms such as \kbd{intmellininv},
 etc., where $a$ and $b$ are coded as in \kbd{intnum}, $\var{expr}$ is the
 function $s(X)$ to which the integral transform is to be applied (which will
 multiply the weights of integration) and $m$ is as in \kbd{intnuminit}. If
-\fl is nonzero, assumes that $s(-X)=\overline{s(X)}$, which makes the
+$\fl$ is nonzero, assumes that $s(-X)=\overline{s(X)}$, which makes the
 computation twice as fast. See \kbd{intmellininvshort} for examples of the
 use of this function, which is particularly useful when the function $s(X)$
 is lengthy to compute, such as a gamma product.
 
 \synt{intfuncinit}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,long m, long flag, long prec}.
-Note that the order of $m$ and \fl are reversed compared to the \kbd{GP} syntax.
+Note that the order of $m$ and $\fl$ are reversed compared to the \kbd{GP}
+syntax.
 
 \subsecidx{intlaplaceinv}$(X=sig,z,\var{expr},\{\var{tab}\})$: 
 numerical integration of $\var{expr}(X)e^{Xz}$ with respect to $X$ on the line 
@@ -7523,7 +7524,7 @@ function is slower than \kbd{sumpos} or \kbd{suminf}. Uses the \tet{intnum}
 routines, and \var{tab} is as in intnum, but if used must be initialized with
 \kbd{sumnuminit}. At low precision, if \var{tab} is not initialized, can
 be slower than \kbd{sumpos}, when the latter is applicable. However in
-general faster for slowly decreasing functions. If \fl is nonzero, assumes
+general faster for slowly decreasing functions. If $\fl$ is nonzero, assumes
 that the function $f$ to be summed is of real type, i.e. satisfies
 $\overline{f(z)}=f(\overline{z})$, and then up to twice faster when \var{tab}
 is precomputed:
@@ -7628,7 +7629,7 @@ even for divergent series. On the other hand the exponential decrease must be
 indicated. 
 
 \var{tab} is as in \kbd{intnum}, but if used must be initialized with
-\kbd{sumnuminit}. If \fl is nonzero, assumes that the function $f$ to be
+\kbd{sumnuminit}. If $\fl$ is nonzero, assumes that the function $f$ to be
 summed is of real type, i.e. satisfies $\overline{f(z)}=f(\overline{z})$, and
 then twice faster when \var{tab} is precomputed.
 
