@@ -429,42 +429,10 @@ _mulidmod(void *data, GEN x, GEN y)
   return FpV_red(element_mulid(D->nf, x, D->I), D->p);
 }
 static GEN
-_mulmod(void *data, GEN x, GEN y)
-{
-  eltmod_muldata *D = (eltmod_muldata*)data;
-  return FpV_red(element_muli(D->nf, x, y), D->p);
-}
-static GEN
 _sqrmod(void *data, GEN x)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
   return FpV_red(element_sqri(D->nf, x), D->p);
-}
-
-/* x in Z^n, compute lift(x^n mod p) */
-GEN
-element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
-{
-  gpmem_t av = avma;
-  eltmod_muldata D;
-  long s,N;
-  GEN y;
-
-  if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
-  nf=checknf(nf); N=degpol(nf[1]);
-  s=signe(n); if (!s) return gscalcol_i(gun,N);
-  if (typ(x)!=t_COL) x=algtobasis(nf,x);
-
-  if (isnfscalar(x))
-  {
-    y = gscalcol_i(gun,N);
-    y[1] = (long)powmodulo((GEN)x[1],n,p); return y;
-  }
-  D.nf = nf;
-  D.p = p;
-  y = leftright_pow(x,n, (void*)&D, &_sqrmod, &_mulmod);
-  if (s < 0)  y = FpV_red(element_inv(nf,y), p);
-  return av==avma? gcopy(y): gerepileupto(av,y);
 }
 
 /* x = I-th vector of the Z-basis of Z_K, in Z^n, compute lift(x^n mod p) */

@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
-extern GEN makebasis(GEN nf,GEN pol);
 
 /* scalar product x.x */
 GEN
@@ -3133,7 +3132,7 @@ polredabs0(GEN x, long flun, long prec)
   prec = nfgetprec(nf);
   x = (GEN)nf[1];
 
-  if (lgef(x) == 4)
+  if (degpol(x) == 1)
   {
     y = _vec(polx[varn(x)]);
     a = _vec(gsub((GEN)y[1], (GEN)x[2]));
@@ -3249,44 +3248,6 @@ factoredpolred2(GEN x, GEN p, long prec)
 
   y[2]= (long) allpolred(x,(GEN*)(y+1),(long)p,prec);
   return y;
-}
-
-/* relative polredabs. Returns
- * flag = 0: relative polynomial
- * flag = 1: relative polynomial + element
- * flag = 2: absolute polynomial */
-GEN
-rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
-{
-  GEN p1,bpol,rnf,elt,pol;
-  long va;
-  gpmem_t av = avma;
-
-  if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
-  nf=checknf(nf); va = varn(relpol);
-  if (DEBUGLEVEL>1) timer2();
-  p1 = makebasis(nf, unifpol(nf,relpol,1));
-  rnf = (GEN)p1[3];
-  if (DEBUGLEVEL>1) 
-  {
-    msgtimer("absolute basis");
-    fprintferr("original absolute generator: %Z\n",p1[1]);
-  }
-  p1 = polredabs0(p1, nf_RAW | nf_NORED, prec);
-  bpol = (GEN)p1[1];
-  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",bpol);
-  if (flag==2) return gerepileupto(av,bpol);
-
-  elt = rnfelementabstorel(rnf,(GEN)p1[2]);
-  p1=cgetg(3,t_VEC);
-  pol = rnfcharpoly(nf,relpol,elt,va);
-  if (!flag) p1 = pol;
-  else
-  {
-    p1[1]=(long)pol;
-    p1[2]=(long)polymodrecip(elt);
-  }
-  return gerepileupto(av,p1);
 }
 
 /********************************************************************/

@@ -1216,7 +1216,7 @@ initalgall0(GEN x, long flag, long prec)
   else
   {
     i = lg(x);
-    if (typ(x) == t_VEC && i<=4 && i>=3 && typ(x[1])==t_POL)
+    if (typ(x) == t_VEC && i==3 && typ(x[1])==t_POL)
     { /* polynomial + integer basis */
       bas=(GEN)x[2]; x=(GEN)x[1]; n=degpol(x);
       if (typ(bas) == t_MAT) { mat = bas; bas = mat_to_vecpol(mat,varn(x)); }

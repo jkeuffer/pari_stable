@@ -19,9 +19,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
+#include "parinf.h"
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
+extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 extern GEN DDF2(GEN x, long klim, long hint);
 extern GEN FpVQX_red(GEN z, GEN T, GEN p);
@@ -412,7 +414,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
 	    {
 	      const GEN r=modii(gcoeff(w[i],k,h),p);
 	      const GEN s=modii(gcoeff(w[j],h,k),p);
-              const GEN p2 = mulii(r,s); 
+              const GEN p2 = mulii(r,s);
 	      if (p2!=gzero) p1 = addii(p1,p2);
 	    }
 	  coeff(T,i,j) = lpileupto(av1,p1);
@@ -429,7 +431,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
           coeff(T2,j,i)=(i==j)? ps: 0;
           coeff(T2,j,n+i)=smodis(gcoeff(t,i,j),ps);
         }
-      rowred_long(T2,pps); 
+      rowred_long(T2,pps);
     }
     else
     {
@@ -574,7 +576,7 @@ allbase(GEN f, long code, GEN *y)
       }
     tetpil=avma; a=gtrans(at);
     {
-      GEN *gptr[2]; 
+      GEN *gptr[2];
       da = icopy(da); gptr[0]=&a; gptr[1]=&da;
       gerepilemanysp(av1,tetpil,gptr,2);
     }
@@ -747,7 +749,7 @@ update_fact(GEN x, GEN f)
   for (i=1; i<l; i++)
   {
     k = pvaluation(d, (GEN)p[i], &d);
-    if (k) { q[iq] = p[i]; e[iq] = lstoi(k); iq++; } 
+    if (k) { q[iq] = p[i]; e[iq] = lstoi(k); iq++; }
   }
   setlg(q,iq); setlg(e,iq);
   return merge_factor_i(decomp(d), g);
@@ -930,7 +932,7 @@ polmodiaux(GEN x, GEN y, GEN ys2)
 {
   if (typ(x)!=t_INT)
     x = mulii((GEN)x[1], mpinvmod((GEN)x[2],y));
-  x = modii(x,y); 
+  x = modii(x,y);
   if (cmpii(x,ys2) > 0) x = subii(x,y);
   return x;
 }
@@ -1152,15 +1154,15 @@ polsymmodpp(GEN g, GEN pp)
   long d = degpol(g), i, k;
   GEN s , y;
 
-  y = cgetg(d + 1, t_COL); 
+  y = cgetg(d + 1, t_COL);
   y[1] = lstoi(d);
   for (k = 1; k < d; k++)
   {
-    av1 = avma; 
+    av1 = avma;
     s = centermod(gmulsg(k, polcoeff0(g,d-k,-1)), pp);
     for (i = 1; i < k; i++)
       s = gadd(s, gmul((GEN)y[k-i+1], polcoeff0(g,d-i,-1)));
-    av2 = avma; 
+    av2 = avma;
     y[k + 1] = lpile(av1, av2, centermod(gneg(s), pp));
   }
 
@@ -1178,20 +1180,20 @@ manage_cache(GEN chi, GEN pp, GEN ns)
   {
     if (DEBUGLEVEL > 4)
       fprintferr("newtonsums: result too large to fit in cache\n");
-    return polsymmodpp(chi, pp); 
+    return polsymmodpp(chi, pp);
   }
 
   if (!signe((GEN)ns[1]))
   {
-    ns2 = polsymmodpp(chi, pp); 
-    for (j = 1; j <= n; j++) 
+    ns2 = polsymmodpp(chi, pp);
+    for (j = 1; j <= n; j++)
       affii((GEN)ns2[j], (GEN)ns[j]);
   }
-  
+
   return ns;
 }
 
-/* compute the Newton sums modulo pp of the characteristic 
+/* compute the Newton sums modulo pp of the characteristic
    polynomial of a(x) mod g(x) */
 static GEN
 newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
@@ -1219,9 +1221,9 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
 
     for (k = 0; k <= n-1; k++)
       s = addii(s, mulii(polcoeff0(pa, k, -1), (GEN)ns2[k+1]));
-    
+
     if (pp) va[j] = (long)centermod(s, pp);
-    
+
     if (low_stack(lim, stack_lim(av2, 1)))
     {
       GEN *gptr[2];
@@ -1268,15 +1270,15 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
       c = gerepilecopy(av2, c);
     }
   }
- 
+
   k = (n%2)? 1: 2;
-  for (  ; k <= n+1; k += 2) 
+  for (  ; k <= n+1; k += 2)
     c[k] = lneg((GEN)c[k]);
 
   return gerepileupto(av, gtopoly(c, vn));
 }
 
-static GEN 
+static GEN
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
   GEN p1, chi, npp;
@@ -1299,12 +1301,12 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   }
 
   if (p1) chi = rescale_pol(chi,p1);
-  
+
   if (!pp) return chi;
 
   /* this can happen only if gamma is incorrect (not an integer) */
   if (divise(denom(content(chi)), p)) return NULL;
-  
+
   return redelt(chi, pp, pp);
 }
 
@@ -1328,39 +1330,39 @@ factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
 static GEN
 getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
 {
-  long v = varn(chi), L, E, r, s; 
+  long v = varn(chi), L, E, r, s;
   GEN chin, pip, pp, vn;
 
   if (gegal(nup, polx[v]))
     chin = chip;
   else
     chin = mycaract(chip, nup, p, NULL, NULL);
-  
+
   vn = vstar(p, chin);
-  L  = vn[0]; 
+  L  = vn[0];
   E  = vn[1];
-  
+
   cbezout(L, -E, &r, &s);
 
-  if (r <= 0) 
-  { 
-    long q = (-r) / E; 
-    q++; 
-    r += q*E; 
-    s += q*L; 
+  if (r <= 0)
+  {
+    long q = (-r) / E;
+    q++;
+    r += q*E;
+    s += q*L;
   }
 
   pip = eleval(chi, nup, phi);
   pip = lift_intern(gpowgs(gmodulcp(pip, chi), r));
-  pp  = gpowgs(p, s); 
+  pp  = gpowgs(p, s);
 
-  *Lp = L; 
+  *Lp = L;
   *Ep = E;
   return gdiv(pip, pp);
 }
 
 static GEN
-update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf, 
+update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 	     GEN ns)
 {
   long l, v = varn(fx);
@@ -1380,18 +1382,18 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
   for (;;)
   {
     if (signe(pdr)) break;
-    if (!nalph) nalph = gadd(alph, gmul(p, polx[v])); 
+    if (!nalph) nalph = gadd(alph, gmul(p, polx[v]));
     /* nchi was too reduced at this point */
-    nchi = mycaract(fx, nalph, NULL, NULL, ns); 
+    nchi = mycaract(fx, nalph, NULL, NULL, ns);
     pdr = respm(nchi, derivpol(nchi), pmf);
     if (signe(pdr)) break;
     if (DEBUGLEVEL >= 6)
       fprintferr("  non separable polynomial in update_alpha!\n");
-    /* at this point, we assume that chi is not square-free */ 
+    /* at this point, we assume that chi is not square-free */
     nalph = gadd(nalph, gmul(p, polx[v]));
     w = factcp(p, fx, nalph, NULL, ns);
-    nchi = (GEN)w[1]; 
-    nnu  = (GEN)w[2]; 
+    nchi = (GEN)w[1];
+    nnu  = (GEN)w[2];
     l    = itos((GEN)w[3]);
     if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
     pdr = respm(nchi, derivpol(nchi), pmr);
@@ -1418,7 +1420,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
   return rep;
 }
 
-/* flag != 0 iff we're looking for the p-adic factorization, 
+/* flag != 0 iff we're looking for the p-adic factorization,
    in which case it is the p-adic precision we want */
 GEN
 nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
@@ -1440,7 +1442,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     }
     fprintferr("\n");
   }
-  
+
   pmf = gpowgs(p, mf + 1);
   pdr = respm(fx, derivpol(fx), pmf);
   pmr = mulii(sqri(pdr), p);
@@ -1448,7 +1450,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
   chi = polmodi_keep(fx, pmr);
 
   alph = polx[v];
-  nu = gx; 
+  nu = gx;
   N  = degpol(fx);
   oE = 0;
   opa = NULL;
@@ -1483,12 +1485,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
       pia  = redelt(pia, pmr, pmf);
     }
-    
+
     oE = Ea; opa = eleval(fx, pia, alph);
 
     if (DEBUGLEVEL >= 5)
       fprintferr("  Fa = %ld and Ea = %ld \n", Fa, Ea);
-   
+
     /* we change alpha such that nu = pia */
     if (La > 1)
     {
@@ -1502,7 +1504,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     }
 
     /* if Ea*Fa == N then O = Zp[alpha] */
-    if (Ea*Fa == N) 
+    if (Ea*Fa == N)
     {
       if (flag) return NULL;
 
@@ -1527,15 +1529,15 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	eq = (long)(vn / N);
 	er = (long)(vn*Ea/N - eq*Ea);
       }
-      else  
+      else
       {
 	chib = mycaract(chi, beta, NULL, NULL, ns);
 	vb = vstar(p, chib);
 	eq = (long)(vb[0] / vb[1]);
 	er = (long)(vb[0]*Ea / vb[1] - eq*Ea);
       }
-      
-      /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */ 
+
+      /* eq and er are such that gamma = beta.p^-eq.nu^-er is a unit */
       if (eq) gamm = gdiv(beta, gpowgs(p, eq));
       else gamm = beta;
 
@@ -1556,7 +1558,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	fprintferr("  gamma = %Z\n", gamm);
 
       if (er || !chib)
-	chig = mycaract(chi, gamm, p, pmf, ns); 
+	chig = mycaract(chi, gamm, p, pmf, ns);
       else
       {
 	chig = poleval(chib, gmul(polx[v], gpowgs(p, eq)));
@@ -1566,7 +1568,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (!chig || !gcmp1(denom(content(chig))))
       {
-	/* the valuation of beta was wrong... This also means 
+	/* the valuation of beta was wrong... This also means
 	   that chi_gamma has more than one factor modulo p   */
 	if (!chig) chig = mycaract(chi, gamm, p, NULL, NULL);
 
@@ -1574,13 +1576,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	eq = (long)(-vb[0] / vb[1]);
 	er = (long)(-vb[0]*Ea / vb[1] - eq*Ea);
 	if (eq) gamm = gmul(gamm, gpowgs(p, eq));
-	if (er) 
+	if (er)
 	{
 	  gamm = gmul(gamm, gpowgs(nu, er));
 	  gamm = gmod(gamm, chi);
 	  gamm = redelt(gamm, p, pmr);
 	}
-	if (eq || er) chig = mycaract(chi, gamm, p, pmf, ns); 
+	if (eq || er) chig = mycaract(chi, gamm, p, pmf, ns);
       }
 
       nug  = (GEN)factmod(chig, p)[1];
@@ -1625,10 +1627,10 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       for (i = 1;; i++)
       {
 	if (i >= lg(w))
-          err(talker, "bug in nilord (no suitable root), is p = %Z a prime?", 
+          err(talker, "bug in nilord (no suitable root), is p = %Z a prime?",
 	      (long)p);
         delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
-        eta  = gsub(gamm, delt);	  
+        eta  = gsub(gamm, delt);	
         if (typ(delt) == t_INT)
         {
           chie = poleval(chig, gadd(polx[v], delt));
@@ -1637,28 +1639,28 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
           nue  = lift((GEN)nue[l]);
         }
         else
-        { 
+        {
           p1   = factcp(p, chi, eta, pmf, ns);
           chie = (GEN)p1[1];
-          nue  = (GEN)p1[2]; 
+          nue  = (GEN)p1[2];
           l    = itos((GEN)p1[3]);
         }
         if (l > 1)
         {
           /* there are at least 2 factors mod. p => chi can be split */
-          delete_var();      
+          delete_var();
           phi = eleval(fx, eta, alph);
           phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, chie, nue, flag);
         }
-        
+
         /* if vp(eta) = vp(gamma - delta) > 0 */
         if (gegal(nue, polx[v])) break;
       }
-      delete_var();    
+      delete_var();
 
-      if (!signe(modii((GEN)chie[2], pmr))) 
+      if (!signe(modii((GEN)chie[2], pmr)))
 	chie = mycaract(chi, eta, p, pmf, ns);
 	
       pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
@@ -1679,7 +1681,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	}
 	break;
       }
-      
+
       if (eq) delt = gmul(delt, gpowgs(p, eq));
       if (er) delt = gmul(delt, gpowgs(nu, er));
       beta = gsub(beta, delt);
@@ -1714,8 +1716,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 }
 
 /* Returns [1,phi,chi,nu] if phi non-primary
- *         [2,phi,chi,nu] with F_phi = lcm (F_alpha, F_theta) 
- *                         and E_phi = E_alpha 
+ *         [2,phi,chi,nu] with F_phi = lcm (F_alpha, F_theta)
+ *                         and E_phi = E_alpha
  */
 static GEN
 testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
@@ -1723,9 +1725,9 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
   long m, Dat, t, v = varn(fa);
   GEN b, w, phi, h;
 
-  Dat = clcm(Fa, Ft) + 3; 
+  Dat = clcm(Fa, Ft) + 3;
   b = cgetg(5, t_VEC);
-  m = p[2]; 
+  m = p[2];
   if (degpol(p) > 0 || m < 0) m = 0;
 
   for (t = 1;; t++)
@@ -1737,10 +1739,10 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
     if (h[2] > 1) { b[1] = un; break; }
     if (lgef(w[2]) == Dat) { b[1] = deux; break; }
   }
-  
-  b[2] = (long)phi; 
-  b[3] = w[1]; 
-  b[4] = w[2]; 
+
+  b[2] = (long)phi;
+  b[3] = w[1];
+  b[4] = w[2];
   return b;
 }
 
@@ -1748,7 +1750,7 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
  *         [2, phi, chi, nu] if E_phi = lcm (E_alpha, E_theta)
  */
 static GEN
-testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2, 
+testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
        long Et, GEN ns)
 {
   GEN b, c1, c2, c3, psi, phi, w, h;
@@ -1770,9 +1772,9 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
   w = factcp(p, fa, phi, pmf, ns);
   h = (GEN)w[3];
   b[1] = (h[2] > 1)? un: deux;
-  b[2] = (long)phi; 
-  b[3] = w[1]; 
-  b[4] = w[2]; 
+  b[2] = (long)phi;
+  b[3] = w[1];
+  b[4] = w[2];
   return b;
 }
 
@@ -2108,7 +2110,7 @@ primedec(GEN nf, GEN p)
     long dim;
 
     H = (GEN)h[c]; k = lg(H)-1;
-    M   = FpM_suppl(concatsp(H,UN), p); 
+    M   = FpM_suppl(concatsp(H,UN), p);
     Mi  = FpM_inv(M, p);
     M2  = vecextract_i(M, k+1,N); /* M = (H|M2) invertible */
     Mi2 = rowextract_i(Mi,k+1,N);
@@ -2535,7 +2537,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   rnfeltmod_muldata D;
 
   if (!signe(n)) return gun;
- 
+
   D.multab = multab;
   D.h = h;
   D.T = T;
@@ -2775,7 +2777,7 @@ rnfround2all(GEN nf, GEN pol, long all)
   nf=checknf(nf); nfT=(GEN)nf[1]; vpol=varn(pol);
   pol = fix_relative_pol(nf,pol,1);
   N = degpol(nfT);
-  n = degpol(pol); 
+  n = degpol(pol);
   list = idealfactor(nf, discsr(pol));
   ep  = (long*)list[2];
   list= (GEN)  list[1];
@@ -3136,7 +3138,7 @@ polcompositum0(GEN A, GEN B, long flall)
       a = gneg_i(gmod(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
-      w[1] = C[i]; 
+      w[1] = C[i];
       w[2] = (long)to_polmod(a, (GEN)w[1]);
       w[3] = (long)to_polmod(b, (GEN)w[1]);
       w[4] = lstoi(-k); C[i] = (long)w;
@@ -3201,7 +3203,7 @@ rnfequation0(GEN nf, GEN B, long flall)
     a = gneg_i(gmod(a, C));
     b = gadd(polx[v], gmulsg(k,a));
     w = cgetg(4,t_VEC); /* [C, a, n ] */
-    w[1] = (long)C; 
+    w[1] = (long)C;
     w[2] = (long)to_polmod(a, (GEN)w[1]);
     w[3] = lstoi(-k); C = w;
   }
@@ -3535,7 +3537,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
     default: err(idealer1);
       return NULL; /* not reached */
   }
-  if (degpol(pol) <= 1) 
+  if (degpol(pol) <= 1)
   {
     w=cgetg(2,t_VEC);
     w[1]=lpolx[vpol]; return w;
@@ -3581,33 +3583,24 @@ rnfpolred(GEN nf, GEN pol, long prec)
 
 /* given a relative polynomial pol over nf, compute a pseudo-basis for the
  * extension, then an absolute basis */
-GEN
-makebasis(GEN nf,GEN pol)
+static GEN
+makebasis(GEN nf, GEN pol, GEN rnfeq)
 {
-  GEN elts,ids,polabs,plg,B,bs,p1,p2,a,den,vbs,vbspro,vpro,rnf;
-  gpmem_t av=avma;
+  GEN elts,ids,polabs,plg,B,bs,p1,den,vbs,vbspro,vpro;
+  gpmem_t av = avma;
   long n,N,m,i,j, v = varn(pol);
 
-  p1 = rnfequation2(nf,pol);
-  polabs= (GEN)p1[1];
-  plg   = (GEN)p1[2];
-  a     = (GEN)p1[3];
-  rnf = cgetg(12,t_VEC);
-  for (i=2;i<=9;i++) rnf[i]=zero;
-  rnf[1] =(long)pol;
-  rnf[10]=(long)nf; p2=cgetg(4,t_VEC);
-  rnf[11]=(long)p2; p2[1]=p2[2]=zero; p2[3]=(long)a;
-  if (signe(a))
-    pol = gsubst(pol,v,gsub(polx[v],
-                            gmul(a,gmodulcp(polx[varn(nf[1])],(GEN)nf[1]))));
-  p1=rnfpseudobasis(nf,pol);
+  polabs= (GEN)rnfeq[1];
+  plg   = (GEN)rnfeq[2];
+  p1 = rnfpseudobasis(nf,pol);
   elts= (GEN)p1[1];
   ids = (GEN)p1[2];
-  if (DEBUGLEVEL>1) { fprintferr("relative basis computed\n"); flusherr(); }
-  N=degpol(pol); n=degpol((GEN)nf[1]); m=n*N;
+  if (DEBUGLEVEL>1) fprintferr("relative basis computed\n");
+  N = degpol(pol);
+  n = degpol(nf[1]); m = n*N;
   den = denom(content(lift(plg)));
   vbs = cgetg(n+1,t_VEC);
-  vbs[1] = un; 
+  vbs[1] = un;
   vbs[2] = (long)plg; vbspro = gmul(den,plg);
   for(i=3;i<=n;i++)
     vbs[i] = ldiv(gmul((GEN)vbs[i-1],vbspro),den);
@@ -3620,7 +3613,7 @@ makebasis(GEN nf,GEN pol)
     p1[1]=(long)polabs;
     p1[2]=lpuigs(polx[v],i-1); vpro[i]=(long)p1;
   }
-  vpro=gmul(vpro,elts); B = cgetg(m+1, t_MAT);
+  vpro = gmul(vpro,elts); B = cgetg(m+1, t_MAT);
   for(i=1;i<=N;i++)
     for(j=1;j<=n;j++)
     {
@@ -3629,8 +3622,52 @@ makebasis(GEN nf,GEN pol)
     }
   p1 = denom(B); B = gmul(B,p1);
   B = hnfmodid(B, p1); B = gdiv(B,p1);
-  p1=cgetg(4,t_VEC);
-  p1[1]=(long)polabs;
-  p1[2]=(long)B;
-  p1[3]=(long)rnf; return gerepilecopy(av, p1);
+  p1 = cgetg(3,t_VEC);
+  p1[1] = (long)polabs;
+  p1[2] = (long)B; return gerepilecopy(av, p1);
+}
+
+/* relative polredabs. Returns
+ * flag = 0: relative polynomial
+ * flag = 1: relative polynomial + element
+ * flag = 2: absolute polynomial */
+GEN
+rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
+{
+  GEN eq,p1,bpol,elt,pol,T,a;
+  long v;
+  gpmem_t av = avma;
+
+  if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
+  nf = checknf(nf); v = varn(relpol);
+  if (DEBUGLEVEL>1) timer2();
+  relpol = unifpol(nf,relpol,1);
+  eq = rnfequation2(nf,relpol);
+  a = (GEN)eq[3];
+  T = (GEN)nf[1];
+  if (signe(a))
+    relpol = poleval(relpol, gsub(polx[v],
+                             gmul(a, gmodulcp(polx[varn(T)],T))));
+  p1 = makebasis(nf, eq, relpol);
+  if (DEBUGLEVEL>1)
+  {
+    msgtimer("absolute basis");
+    fprintferr("original absolute generator: %Z\n",p1[1]);
+  }
+  p1 = polredabs0(p1, nf_RAW | nf_NORED, prec);
+  bpol = (GEN)p1[1];
+  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",bpol);
+  if (flag==2) return gerepileupto(av,bpol);
+
+  elt = eltabstorel((GEN)p1[2], T, relpol, a);
+
+  p1 = cgetg(3,t_VEC);
+  pol = rnfcharpoly(nf,relpol,elt,v);
+  if (!flag) p1 = pol;
+  else
+  {
+    p1[1] = (long)pol;
+    p1[2] = (long)polymodrecip(elt);
+  }
+  return gerepileupto(av,p1);
 }

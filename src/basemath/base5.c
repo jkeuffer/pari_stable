@@ -366,12 +366,22 @@ rnfelementreltoabs(GEN rnf,GEN x)
   }
 }
 
+/* assume x,T,pol t_POL. T defines base field, pol defines rnf over T.
+ * x an absolute element of the extension */
+GEN 
+eltabstorel(GEN x, GEN T, GEN pol, GEN k)
+{
+  GEN theta = gmodulcp(gadd(polx[varn(pol)],
+                            gmul(k, gmodulcp(polx[varn(T)],T))), pol);
+  return poleval(x, theta);
+}
+
 GEN
 rnfelementabstorel(GEN rnf,GEN x)
 {
   long tx, i, lx;
   gpmem_t av=avma;
-  GEN z,p1,s,tetap,k,nf;
+  GEN z,k,nf,T;
 
   checkrnf(rnf); tx=typ(x); lx=lg(x);
   switch(tx)
@@ -382,14 +392,11 @@ rnfelementabstorel(GEN rnf,GEN x)
       return z;
 
     case t_POLMOD:
-      x=lift_to_pol(x); /* fall through */
+      x = lift_to_pol(x); /* fall through */
     case t_POL:
-      p1=(GEN)rnf[11]; k=(GEN)p1[3]; nf=(GEN)rnf[10];
-      tetap=gmodulcp(gadd(polx[varn(rnf[1])],
-	    gmul(k,gmodulcp(polx[varn(nf[1])],(GEN)nf[1]))),(GEN)rnf[1]);
-      s=gzero;
-      for (i=lgef(x)-1; i>1; i--) s=gadd((GEN)x[i],gmul(tetap,s));
-      return gerepileupto(av,s);
+      k  = (GEN)rnf[11]; k = (GEN)k[3];
+      nf = (GEN)rnf[10]; T = (GEN)nf[1];
+      return gerepileupto(av, eltabstorel(x,T,(GEN)rnf[1],k));
 
     default: return gcopy(x);
   }
