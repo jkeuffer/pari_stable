@@ -596,7 +596,7 @@ long intheadlong(GEN x, GEN mod)
 GEN matheadlong(GEN W, GEN mod)
 {
   long i,j;
-  GEN V=cgetg(lg(W),t_VEC);
+  GEN V=cgetg(lg(W),t_MAT);
   for(i=1;i<lg(W);i++)
   {
     V[i]=lgetg(lg(W[i]),t_VECSMALL);
@@ -814,7 +814,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   td->ladic = ladic;
   td->L = L;
   td->M = M;
-  td->PV = cgetg(n + 1, t_VECSMALL);	/* peut-etre t_VEC est correct ici */
+  td->PV = cgetg(n + 1, t_VECSMALL);
   for (i = 1; i <= n; i++)
     td->PV[i] = 0;
   ltop = avma;
@@ -1083,7 +1083,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
       fprintferr("GaloisConj:%d hop sur %Z iterations\n", hop, NN);
   }
   avma = avm;
-  return gzero;
+  return NULL;
 }
 
 int pari_compare_lg(GEN x, GEN y)
@@ -1460,32 +1460,6 @@ galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
     aut[i] = (long) permtopol((GEN) res[i], L, M, den, mod, v);
   }
   return aut;
-}
-
-/*
- * Casse l'orbite O en sous-orbite d'ordre premier correspondant a des
- * puissance de l'element
- */
-GEN
-splitorbite(GEN O)
-{
-  pari_sp lbot, ltop = avma;
-  int     i, n;
-  GEN     fc, res;
-  n = lg(O[1]) - 1;
-  fc = decomp_primary_small(n);
-  lbot = avma;
-  res = cgetg(3, t_VEC);
-  res[1] = lgetg(lg(fc), t_VEC);
-  res[2] = lgetg(lg(fc), t_VECSMALL);
-  for (i = 1; i < lg(fc); i++)
-  {
-    mael(res,1,lg(fc) - i) = (long)cyc_powtoperm(O, n / fc[i]);
-    mael(res,2,lg(fc) - i) = fc[i];
-  }
-  if ( DEBUGLEVEL>=4 )
-    fprintferr("GaloisConj:splitorbite: %Z\n",res);
-  return gerepile(ltop, lbot, res);
 }
 
 /*
@@ -2690,6 +2664,24 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
   return gerepilecopy(ltop,PG);
 }
 
+/* Let 
+ * sigma^m=1
+ * tau*sigma*tau^-1=sigma^s.
+ * Compute n so that 
+ * (sigma*tau)^e=sigma^n*tau^e
+ * We have n=sum_{k=0}^{e-1} s^k mod m.
+ */
+
+static long 
+stpow(long s, long e, long m)
+{
+  long i;
+  long n = 1;
+  for (i = 1; i < e; i++)
+    n = (1 + n * s) % m;
+  return n;
+}
+
 GEN
 galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 	  const struct galois_analysis *ga)
@@ -2700,7 +2692,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   long    n, p, deg, x;
   int     i, j;
   GEN     Lden, sigma;
-  GEN     Tmod, res, pf = gzero, split, ip;
+  GEN     Tmod, res, pf = gzero, ip;
   GEN     frob;
   GEN     O;
   GEN     PG, Pg;
@@ -2747,7 +2739,6 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   ip=stoi(p);
   Tmod=gf.Tmod;
   O = perm_cycles(frob);
-  split = splitorbite(O);
   deg=lg(O[1])-1;
   sigma = permtopol(frob, L, M, den, gb->ladicabs, x);
   if (DEBUGLEVEL >= 9)
@@ -2756,13 +2747,10 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   {
     lbot = avma;
     res = cgetg(3, t_VEC);
-    res[1] = lgetg(lg(split[1]), t_VEC);
-    res[2] = lgetg(lg(split[2]), t_VECSMALL);
-    for (i = 1; i < lg(split[1]); i++)
-    {
-      mael(res,1,i) = lcopy(gmael(split,1,i));
-      mael(res,2,i) = mael(split,2,i);
-    }
+    res[1] = lgetg(2, t_VEC);
+    res[2] = lgetg(2, t_VECSMALL);
+    mael(res,1,1) = (long) cyc_powtoperm(O,1);
+    mael(res,2,1) = deg;
     return gerepile(ltop, lbot, res);
   }
   if (DEBUGLEVEL >= 9)
@@ -2790,54 +2778,64 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   inittest(L, M, gb->bornesol, gb->ladicsol, &td);
   lbot = avma;
   res = cgetg(3, t_VEC);
-  res[1] = lgetg(lg(PG[1]) + lg(split[1]) - 1, t_VEC);
-  res[2] = lgetg(lg(PG[1]) + lg(split[1]) - 1, t_VECSMALL);
-  for (i = 1; i < lg(split[1]); i++)
-  {
-    mael(res,1,i) = lcopy(gmael(split,1,i));
-    mael(res,2,i) = mael(split,2,i);
-  }
-  for (i = lg(split[1]); i < lg(res[1]); i++)
+  res[1] = lgetg(lg(PG[1]) + 1, t_VEC);
+  res[2] = lgetg(lg(PG[1]) + 1, t_VECSMALL);
+  mael(res,1,1) = (long) cyc_powtoperm(O,1);
+  mael(res,2,1) = deg;
+  for (i = 2; i < lg(res[1]); i++)
     mael(res,1,i) = lgetg(n + 1, t_VECSMALL);
   ltop2 = avma;
   for (j = 1; j < lg(PG[1]); j++)
   {
-    GEN     B;
-    long    t;
-    long    w, sr, dss;
+    long sr;
+    long k;
+    GEN  gj = gmael(PG,1,j);
+    long s  = gf.psi[Pg[j]];
+    GEN  B  = perm_cycles(gj);
+    long oj = lg(B[1]) - 1;
+    GEN  F  = decomp_small(oj);
+    GEN  Fp = (GEN) F[1];
+    GEN  Fe = (GEN) F[2];
     if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisConj: G[%d]=%Z of relative order %d\n", j,
-	  gmael(PG,1,j), mael(PG,2,j));
+      fprintferr("GaloisConj: G[%d]=%Z of relative order %d\n", j, gj, oj);
     B = perm_cycles(gmael(PG,1,j));
-    if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisConj: B=%Z\n", B);
-    w = gf.psi[Pg[j]];
-    dss = deg / cgcd(deg, w - 1);
-    sr = 1;
-    for (i = 1; i < lg(B[1]) - 1; i++)
-      sr = (1 + sr * w) % deg;
-    sr = cgcd(sr, deg);
-    if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisConj:w=%ld [%ld] sr=%ld dss=%ld\n", w, deg, sr, dss);
-    for (t = 0; t < sr; t += dss)
+    pf = perm_identity(n);
+    for (k=lg(Fp)-1; k>=1; k--)
     {
-      pf = testpermutation(O, B, w, t, sr, &td);
-      if (pf != gzero)
-	break;
+      long e;
+      long dg = 1, el = oj;
+      long ot = 0;
+      long od = 1;
+      long t;
+      long p = Fp[k];
+      GEN  pf1 = NULL;
+      
+      for(e=1;e<=Fe[k];e++)
+      { 
+        long sel;
+        GEN Bel;
+        dg *= p; el /= p;
+        Bel = perm_cycles(cyc_powtoperm(B, el));
+        sel = powuumod(s, el, deg); 
+        sr  = cgcd(stpow(sel,dg,deg),deg);
+        if (DEBUGLEVEL >= 6)
+          fprintferr("GaloisConj: exp %d: s=%ld [%ld] ot=%ld sr=%ld od=%ld nb=%ld \n",
+              dg, sel, deg, ot, sr, od, sr/od);
+        for (t = ot; t < sr; t += od)
+          if ( t*(sel-1)%deg==0 )
+          {
+            pf1 = testpermutation(O, Bel, sel, t, sr, &td);
+            if (pf1)
+              break;
+          }
+        if (!pf1) { freetest(&td); avma = ltop; return gzero; }
+        ot = t; od = sr; 
+      }
+      pf = perm_mul(pf, perm_pow(pf1, el));
     }
-    if (pf == gzero)
-    {
-      freetest(&td);
-      avma = ltop;
-      return gzero;
-    }
-    else
-    {
-      int     i;
-      for (i = 1; i <= n; i++)
-	mael3(res,1,lg(split[1]) + j - 1,i) = pf[i];
-      mael(res,2,lg(split[1]) + j - 1) = mael(PG,2,j);
-    }
+    for (k = 1; k <= n; k++)
+      mael3(res,1,j + 1,k) = (long) pf[k];
+    mael(res,2,j+1) = mael(PG,2,j);
     avma = ltop2;
   }
   if (DEBUGLEVEL >= 4)
