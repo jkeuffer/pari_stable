@@ -30,6 +30,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  */
 
 /* z2 := z1[imin..imax].f shifted left sh bits (feeding f from the right) */
+/* These macros work only for sh != 0 !!! */
 #define shift_left2(z2,z1,imin,imax,f, sh,m) {\
   register ulong _l,_k = ((ulong)f)>>m;\
   GEN t1 = z1 + imax, t2 = z2 + imax, T = z1 + imin;\
@@ -45,18 +46,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   shift_left2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
 
-/* z2 := f.z1[imin..imax-1] shifted right sh bits (feeding f from the left) */
-#define shift_right2(z2,z1,imin,imax,f, sh,m) {\
-  register GEN t1 = z1 + imin, t2 = z2 + imin, T = z1 + imax;\
-  register ulong _k,_l = *t1++;\
-  *t2++ = (_l>>(ulong)sh) | ((ulong)f<<(ulong)m);\
-  while (t1 < T) {\
-    _k = _l<<(ulong)m; _l = *t1++;\
-    *t2++ = (_l>>(ulong)sh) | _k;\
+#define shift_words_r(target,source,source_end,prepend, sh, sh_complement) {\
+  register ulong _k,_l = *source++;\
+  *target++ = (_l>>(ulong)sh) | ((ulong)prepend<<(ulong)sh_complement);\
+  while (source < source_end) {\
+    _k = _l<<(ulong)sh_complement; _l = *source++;\
+    *target++ = (_l>>(ulong)sh) | _k;\
   }\
 }
+#define shift_right2(z2,z1,imin,imax,f, sh,m) {\
+  register GEN s = (z1) + (imin), ta = (z2) + (imin), se = (z1) + (imax);\
+  shift_words_r(ta,s,se,(f),(sh),(m));				\
+}
+/* z2 := f.z1[imin..imax-1] shifted right sh bits (feeding f from the left) */
 #define shift_right(z2,z1,imin,imax,f, sh) {\
-  register const ulong _m = BITS_IN_LONG - sh;\
+  register const ulong _m = BITS_IN_LONG - (sh);\
   shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
 
@@ -321,13 +325,13 @@ shifti3(GEN x, long n, long flag)
       for (i = ly;;)
       {
 	if (--i < 2)
-        {			/* Need to extend y on the left */
+        { /* Extend y on the left */
 	  if (avma <= bot) err(errpile);
 	  avma = (ulong)(--y); ly++;
 	  y[2] = 1; break;
 	}
 	if (++y[i]) break;
-	/* Now we need to propagate the bit into the next longword... */
+	/* Now propagate the bit into the next longword */
       }
     }
   }
@@ -4254,4 +4258,29 @@ mpsqrtl(GEN a)
   }
   while (x < y);
   return y;
+}
+
+/* target should point to a buffer of source_end - source + 1 ulongs.
+
+   fills this buffer by bits of ulongs in source..source_end-1 shifted
+   right sh units; the "most significant" sh bits of the result are
+   set to be the least significant sh bits of prepend.
+
+   The ordering of bits in this bitmap is the same as for t_INT.
+
+   sh should not exceed BITS_IN_LONG.
+ */
+void
+shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh)
+{
+    if (sh) {				/* shift_words_r() works */
+	register ulong sh_complement = BITS_IN_LONG - sh;
+
+	shift_words_r(target, source, source_end, prepend, sh, sh_complement);
+    } else {
+	int i;
+
+	for (i=0; i < source_end - source; i++)
+	    target[i] = source[i];
+    }
 }

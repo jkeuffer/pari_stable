@@ -56,7 +56,7 @@ char *helpmessages_basic[]={
   "bitneg(x,{n=-1}): bitwise negation of an integers x truncated to n bits.  n=-1 means represent infinite sequences of bit 1 as negative numbers.  Negative numbers behave as if modulo big power of 2",
   "bitnegimpy(x,y): bitwise \"negated imply\" of two integers x and y, in other words, x BITAND BITNEG(y).  Negative numbers behave as if modulo big power of 2",
   "bitor(x,y): bitwise \"or\" of two integers x and y.  Negative numbers behave as if modulo big power of 2",
-  "bittest(x,n): gives bit number n (coefficient of 2^n) of the integer x",
+  "bittest(x,n,{c=1}): extracts |c| bits starting from  number n (coefficient of 2^n) of the integer x, returning the bits as an integer bitmap; negative c means: treat negative values of x as if modulo big power of 2; bits at negative offsets are zeros",
   "bitxor(x,y): bitwise \"exclusive or\" of two integers x and y.  Negative numbers behave as if modulo big power of 2",
   "bnfcertify(bnf): certify the correctness (i.e. remove the GRH) of the bnf data output by bnfclassunit or bnfinit",
   "bnfclassunit(P,{flag=0},{tech=[]}): compute the class group, regulator of the number field defined by the polynomial P, and also the fundamental units if they are not too large. flag and tech are both optional. flag can be any of 0: default, 1: insist on having fundamental units, 2: do not compute units. See manual for details about tech. P may also be a non-zero integer, and is then considered as the discriminant of a quadratic order",

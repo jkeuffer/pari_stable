@@ -25,6 +25,7 @@ extern GEN arith_proto(long f(GEN), GEN x, int do_error);
 extern GEN arith_proto2(long f(GEN,GEN), GEN x, GEN n);
 extern GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 extern GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
+extern GEN garith_proto3ggs(GEN f(GEN,GEN,long), GEN x, GEN y, long z);
 
 #define sqru(i) (muluu((i),(i)))
 
@@ -1958,6 +1959,100 @@ bittest(GEN x, long n)
   return n? 1: 0;
 }
 
+GEN
+bittest_many(GEN x, GEN gn, long c)
+{
+  long lx = lgefint(x), l1, l2, b1, b2, two_adic = 0, l_res, skip;
+  ulong *p, *pnew;
+  long n = itos(gn), extra_words = 0, partial_bits;
+  GEN res;
+
+  if (c == 1)				/* Shortcut */
+      return bittest(x,n) ? gun : gzero;
+  /* Negative n with n+c>0 are too hairy to implement... */
+  if (!signe(x) || c == 0)
+      return gzero;
+  if (c < 0) {				/* Negative x means 2s complemenent */
+      c = -c;
+      if (signe(x) < 0)
+	  two_adic = 1;			/* treat x 2-adically... */
+  }
+  if (n < 0) {
+      long oa, na;
+
+      if (n + c <= 0)
+	  return gzero;
+      oa = avma;
+      res = bittest_many(x, gzero, two_adic? -(n+c) : n+c);
+      na = avma;
+      res = shifti3(res,-n,0);
+      return gerepile(oa,na,res);
+  }
+  partial_bits = (c & (BITS_IN_LONG-1));
+  l2 = lx-1 - (n>>TWOPOTBITS_IN_LONG); /* Last=least-significant word */
+  l1 = lx-1 - ((n + c - 1)>>TWOPOTBITS_IN_LONG); /* First word */
+  b2 = (n & (BITS_IN_LONG-1));		/* Last bit, skip less-signifant */
+  b1 = ((n + c - 1) & (BITS_IN_LONG-1)); /* First bit, skip more-significant */
+  if (l2 < 2) {				/* always: l1 <= l2 */
+      if (!two_adic)
+	  return gzero;
+      /* x is non-zero, so it behaves as -1.  */
+      return gbitneg(gzero,c);
+  }
+  if (l1 < 2) {
+      if (two_adic)	/* If b1 < b2, bits are set by prepend in shift_r */
+	  extra_words = 2 - l1 - (b1 < b2);
+      else	  
+	  partial_bits = b2 ? BITS_IN_LONG - b2 : 0;
+      l1 = 2;
+      b1 = (BITS_IN_LONG-1);		/* Include all bits in this word */
+  }
+  skip = (b1 < b2);			/* Skip the first word of the shift */
+  l_res = l2 - l1 + 1 + 2 - skip + extra_words;	/* A coarse estimate */
+  p = new_chunk(l_res) + 2 + extra_words;
+  shift_r(p - skip, x + l1, x + l2 + 1, 0, b2);
+  if (two_adic) {			/* Check the low bits of x */
+	int i = lx, nonzero = 0;
+
+	/* Flip the bits */
+	pnew = p + l_res - 2 - extra_words;
+	while (--pnew >= p)
+	    *pnew = MAXULONG - *pnew;
+	/* Fill the extra words */
+	while (extra_words--)
+	    *--p = MAXULONG;
+	/* The result is one less than 2s-complement if the lower-bits
+	   of x were all 0. */
+	while (--i > l2) {
+	    if (x[i]) {
+		nonzero = 1;
+		break;
+	    }
+	}
+	if (!nonzero && b2)		/* Check the partial word too */
+	    nonzero = x[l2] & ((1<<b2) - 1);
+	if (!nonzero) { /* Increment res.  Do not underflow to before p */
+	    pnew = p + l_res - 2;
+	    while (--pnew >= p)
+		if (++*pnew)
+		    break;
+	}
+  }
+  if (partial_bits)
+      *p &= (1<<partial_bits) - 1;
+  pnew = p;
+  while ((pnew < p + l_res - 2) && !*pnew) /* Skip 0 words */
+      pnew++;
+  avma = (long)(pnew - 2);
+  if (pnew >= p - 2 + l_res)
+      return gzero;
+  l_res -= (pnew - p);
+  res = pnew - 2;
+  res[1] = evalsigne(1)|evallgefint(l_res);
+  res[0] = evaltyp(t_INT)|evallg(l_res);
+  return res;
+}
+
 static long
 bittestg(GEN x, GEN n)
 {
@@ -1968,6 +2063,12 @@ GEN
 gbittest(GEN x, GEN n)
 {
   return arith_proto2(bittestg,x,n);
+}
+
+GEN
+gbittest3(GEN x, GEN n, long c)
+{
+  return garith_proto3ggs(bittest_many,x,n,c);
 }
 
 /***********************************************************************/

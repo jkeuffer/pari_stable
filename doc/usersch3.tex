@@ -490,12 +490,20 @@ Negative numbers behave as if modulo a huge power of $2$.
 
 \syn{gbitor}{x,y}.
 
-\subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $|x|$ starting
-from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
-The result is 0 or 1. To extract several bits at once as a vector, pass a
-vector for $n$.
+\subsecidx{bittest}$(x,n,\{c=1\})$: extracts $|c|$ bits starting from
+number $n$ from the right in the development of $|x|$ (i.e.~the coefficient
+of $2^n$ in the binary expansion of $x$), returning the bits as an integer
+bitmap. That is, if $x = \sum x_i 2^i$ with the $x_i$ in $\{0,1\}$, this
+routine returns the integer
+$$ \sum_{0\leq i < |c|} x_{n + i} 2^i $$
+Bits at negative offsets are 0. A negative value of $c$ means that negative
+values of $x$ are treated in the spirit of $2$-complement arithmetic (i.e
+modulo a big power of $2$). To extract several bits (or groups of bits if
+$|c|>1$) separately at once as a vector, pass a vector for $n$.
 
-\syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
+\syn{gbittest3}{x,n,c}. Also available are $\teb{gbittest}(x,n)$
+(default case $c=1$) and for simple cases $\teb{bittest}(x,n)$, where $n$
+and the result are \kbd{long}s.
 
 \subsecidx{bitxor}$(x,y)$: bitwise (exclusive) \tet{or}\sidx{bitwise
 exclusive or} of two integers $x$ and $y$, that is the integer

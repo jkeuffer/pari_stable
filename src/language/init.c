@@ -1928,7 +1928,7 @@ entree functions_basic[]={
 {"bitneg",99,(void*)gbitneg,2,"GD-1,L,"},
 {"bitnegimply",2,(void*)gbitnegimply,2,"GG"},
 {"bitor",2,(void*)gbitor,2,"GG"},
-{"bittest",2,(void*)gbittest,2,"GG"},
+{"bittest",99,(void*)gbittest3,2,"GGD1,L,"},
 {"bitxor",2,(void*)gbitxor,2,"GG"},
 {"bnfcertify",10,(void*)certifybuchall,6,"lG"},
 {"bnfclassunit",99,(void*)bnfclassunit0,6,"GD0,L,DGp"},

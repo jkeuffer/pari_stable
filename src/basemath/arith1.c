@@ -115,6 +115,30 @@ garith_proto2gs(GEN f(GEN,long), GEN x, long y)
 }
 
 GEN
+garith_proto3ggs(GEN f(GEN,GEN,long), GEN x, GEN y, long z)
+{
+  long l,i,tx = typ(x);
+  GEN t;
+
+  if (is_matvec_t(tx))
+  {
+    l=lg(x); t=cgetg(l,tx);
+    for (i=1; i<l; i++) t[i]= (long) garith_proto3ggs(f,(GEN) x[i],y,z);
+    return t;
+  }
+  if (tx != t_INT) err(arither1);
+  tx = typ(y);
+  if (is_matvec_t(tx))
+  {
+    l=lg(y); t=cgetg(l,tx);
+    for (i=1; i<l; i++) t[i]= (long) garith_proto3ggs(f,x,(GEN) y[i],z);
+    return t;
+  }
+  if (tx != t_INT) err(arither1);
+  return f(x,y,z);
+}
+
+GEN
 gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 {
   int tx=typ(x);
