@@ -2659,9 +2659,8 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an;
   LISTray LIST;
 
+  nf_get_sign(nf, &r1,&r2);
   N     = degpol(nf[1]);
-  r1    = nf_get_r1(nf);
-  r2    = (N - r1)>>1;
   cond1 = gmael4(data, 1, 2, 1, 2);
   dataCR = (GEN)data[5];
 
@@ -2908,23 +2907,18 @@ get_subgroup(GEN subgp, GEN cyc)
 GEN
 bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
 {
-  long cl, N, newprec, bnd = 0;
+  long N, newprec, bnd = 0;
   pari_sp av = avma;
   GEN bnf, dataS, p1, Mcyc, nf, data;
 
-  if (flag >= 4)
-  {
-    bnd = -10;
-    flag -= 4;
-  }
-
+  if (flag >= 4) { bnd = -10; flag -= 4; }
   if (flag < 0 || flag > 3) err(flagerr,"bnrstark");
 
   /* check the bnr */
   checkbnrgen(bnr);
-  bnf  = checkbnf(bnr);
-  nf   = checknf(bnf);
-  N    = degpol(nf[1]);
+  bnf = checkbnf(bnr);
+  nf  = checknf(bnf);
+  N   = degpol(nf[1]);
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
  
   Mcyc = diagonal(gmael(bnr, 5, 2));
@@ -2941,16 +2935,14 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
     err(talker, "incorrect subgrp in bnrstark");
 
   /* compute bnr(conductor) */
-  p1       = conductor(bnr, subgrp, 2);
-  bnr      = (GEN)p1[2];
+  p1     = conductor(bnr, subgrp, 2);
+  bnr    = (GEN)p1[2];
   subgrp = (GEN)p1[3];
+  if (gcmp1( det(subgrp) )) { avma = av; return polx[0]; }
 
   /* check the class field */
   if (!gcmp0(gmael3(bnr, 2, 1, 2)))
     err(talker, "not a totally real class field in bnrstark");
-
-  cl = itos(det(subgrp));
-  if (cl == 1) return polx[0];
 
   if (DEBUGLEVEL) (void)timer2();
 
