@@ -39,18 +39,6 @@ case "$osname" in
   *)   systems=;;
 esac
 
-#FIXME:
-#This is a kludge to work around the fact that there is two kernels
-#in the sparcv8 directory...
-case "$kernlvl0" in
-  sparcv8*) dirlvl0=sparcv8;;
-  *) dirlvl0="$kernlvl0";;
-esac
-
-if test -s $src_dir/kernel/$dirlvl0/MakeVar.SH; then
-  . $src_dir/kernel/$dirlvl0/MakeVar.SH
-fi
-
 hlist='pari paritype paricast paricom parierr parigen paristio parisys pariport'
 HEADERS=''
 for f in $khlist; do
@@ -605,18 +593,9 @@ pariinl.h: parilvl0.h parilvl1.h
 
 EOT
 
-#FIXME:
-#This is a kludge to work around the fact that there is two kernels
-#in the sparcv8 directory...
-case "$kernlvl0" in
-  sparcv8*) dirlvl0=sparcv8;;
-  *) dirlvl0=$kernlvl0;;
-esac
-
-if test -s $src_dir/kernel/$dirlvl0/MakeLVL0.SH; then
-  . $src_dir/kernel/$dirlvl0/MakeLVL0.SH
+if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
+  . $src_dir/kernel/$kernlvl0/MakeLVL0.SH
 fi
-
 if test -s $src_dir/kernel/$kernlvl1/MakeLVL1.SH; then
   . $src_dir/kernel/$kernlvl1/MakeLVL1.SH
 fi

@@ -1059,7 +1059,7 @@ long    taille2(GEN x);
 long    timer(void);
 long    timer2(void);
 
-/* mp.c ou mp.s */
+/* mp.c */
 
 int     absi_cmp(GEN x, GEN y);
 int     absi_equal(GEN x, GEN y);

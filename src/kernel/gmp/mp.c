@@ -42,11 +42,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include <gmp.h>
 
-#ifndef REGISTER_MP_OPERANDS
-ulong overflow;
-ulong hiremainder;
-#endif
-
 void setmontgomerylimit(long n); 
 int pari_kernel_init(void)
 {

@@ -92,27 +92,12 @@ C(bfffo): sethi	%hi(0xffff0000),%o1
 	retl
 	add	%o2,%o1,%o0
 
-#ifdef __GNUC__
-C(divll):	 wr	 %g5,%g0,%y
-#else /* ! __GNUC__ */
 C(divll): sethi	%hi(C(hiremainder)),%o4
 	ld	[%o4+%lo(C(hiremainder))],%o2
 	wr	%o2,%g0,%y
-#endif
 	mov	%o0,%o3
-	nop
-	nop
 	udivcc	%o0,%o1,%o0
-	bvc	1f
 	umul	%o0,%o1,%o5
-	mov	0x2f,%o0
-	call	C(pari_err),1
-	nop
-#ifdef __GNUC__
-1:	retl
-	sub   %o3,%o5,%g5
-#else /* ! __GNUC__ */
 1:	subcc	%o3,%o5,%o2
 	retl
 	st	%o2,[%o4+%lo(C(hiremainder))]
-#endif

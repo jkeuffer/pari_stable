@@ -17,10 +17,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* These are optimised for SuperSparc                             */
 /* The following symbols are defined in this file :               */
 /* divll bfffo (& tabshi)                                         */
-/*   But divll have to use hiremainder, so it is different when   */
-/*   hiremainder is inline or not                                 */
-/*   If libpari.so is compiled with gcc, you should compile all   */
-/*   files with gcc                                               */
 
 #if defined(sun) || defined(NeXT)
 #  ifdef __STDC__
@@ -92,18 +88,10 @@ C(bfffo): sethi	%hi(65535),%o2
 	retl
 	add	%o1,%o0,%o0
 
-#ifdef __GNUC__
-#define SAVE_HI(X)	mov	X,%g5
-#define LOAD_HI(X)	mov	%g5,X
-#define LOAD_Hi(X)
-#else
 #define SAVE_HI(X)	st	X,[%o4+%lo(C(hiremainder))]
-#define LOAD_HI(X)	sethi   %hi(C(hiremainder)),%o4
-#define LOAD_Hi(X)	ld      [%o4+%lo(C(hiremainder))],X
-#endif
 
-C(divll): LOAD_HI(%o2)
-	LOAD_Hi(%o2)
+C(divll): sethi   %hi(C(hiremainder)),%o4
+	ld      [%o4+%lo(C(hiremainder))],%o2
 	sethi	%hi(0xfff00000),%o5
 	andcc	%o5,%o2,%g0
 	bnz,a	C(divlllong)
@@ -133,7 +121,6 @@ C(divll): LOAD_HI(%o2)
 	subcc	%o3,%o1,%o2;\
 	bcc	label;\
 	addxcc	%o0,%o0,%o0
-
 
 C(divlllong):
 	blu	1f

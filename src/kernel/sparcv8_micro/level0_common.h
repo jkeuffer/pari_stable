@@ -25,22 +25,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* These functions are always in level0.s                         */
 /* The following symbols are always defined in this file :        */
 /* divll bfffo (& tabshi)                                         */
-/*   But divll have to use hiremainder, so it is different when   */
-/*   hiremainder is inline or not                                 */
-/*   If libpari.so is compiled with gcc, you should compile all   */
-/*   files with gcc                                               */
-
-#define LOCAL_OVERFLOW
-#define LOCAL_HIREMAINDER
 
 BEGINEXTERN
-extern long divll(ulong x, ulong y);
+extern ulong hiremainder, overflow;
 extern int  bfffo(ulong x);
 ENDEXTERN
 
 #ifndef ASMINLINE
+#define LOCAL_OVERFLOW
+#define LOCAL_HIREMAINDER
 BEGINEXTERN
-  extern ulong hiremainder, overflow;
   extern long addll(ulong a, ulong b);
   extern long addllx(ulong a, ulong b);
   extern long subll(ulong a, ulong b);
@@ -49,13 +43,13 @@ BEGINEXTERN
   extern long shiftlr(ulong x, ulong y);
   extern long mulll(ulong x, ulong y);
   extern long addmul(ulong x, ulong y);
+  extern long divll(ulong x, ulong y);
 ENDEXTERN
 
 #else /* ASMINLINE */
 
-#define REGISTER_MP_OPERANDS
-register ulong hiremainder __asm__("%g5");
-register ulong overflow __asm__("%g6");
+#define LOCAL_HIREMAINDER  ulong hiremainder
+#define LOCAL_OVERFLOW     ulong overflow
 
 #define addll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
@@ -63,17 +57,17 @@ register ulong overflow __asm__("%g6");
           addx  %%g0,%%g0,%1" \
 	 : "=r" (__value), "=r" (overflow) \
 	 : "r" (__arg1), "r" (__arg2) \
-         : "%g6","cc"); \
+         : "cc"); \
 __value; })								
 
 #define addllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
-   __asm__ ( "subcc %%g0,%%g6,%%g0; \
+   __asm__ ( "subcc %%g0,%1,%%g0; \
           addxcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
 	 : "=r" (__value), "=r" (overflow) \
-	 : "r" (__arg1), "r" (__arg2) \
-         : "%g6","cc"); \
+	 : "r" (__arg1), "r" (__arg2), "1" (overflow) \
+         : "cc"); \
 __value; })								
 
 #define subll(a,b) \
@@ -82,17 +76,17 @@ __value; })
           addx  %%g0,%%g0,%1" \
 	 : "=r" (__value), "=r" (overflow) \
 	 : "r" (__arg1), "r" (__arg2) \
-         : "%g6","cc"); \
+         : "cc"); \
 __value; })								
 
 #define subllx(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
-   __asm__ ( "subcc %%g0,%%g6,%%g0; \
+   __asm__ ( "subcc %%g0,%1,%%g0; \
           subxcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
 	 : "=r" (__value), "=r" (overflow) \
-	 : "r" (__arg1), "r" (__arg2) \
-         : "%g6","cc"); \
+	 : "r" (__arg1), "r" (__arg2), "1" (overflow) \
+         : "cc"); \
 __value; })								
 
 #define shiftl(a,b) \
@@ -102,7 +96,7 @@ __value; })
           sll %2,%3,%0" \
 	 : "=r" (__value), "=r" (hiremainder) \
 	 : "r" (__arg1), "r" (__arg2) \
-         : "%o4","%g5"); \
+         : "%o4"); \
 __value; })								
 
 #define shiftlr(a,b) \
@@ -112,7 +106,7 @@ __value; })
           srl %2,%3,%0" \
 	 : "=r" (__value), "=r" (hiremainder) \
 	 : "r" (__arg1), "r" (__arg2) \
-         : "%o4","%g5"); \
+         : "%o4"); \
 __value; }) 			
 
 #define mulll(a,b) \
@@ -120,35 +114,17 @@ __value; })
    __asm__ ( "umul %2,%3,%0; \
           rd  %%y,%1" \
 	 : "=r" (__value), "=r" (hiremainder) \
-	 : "r" (__arg1), "r" (__arg2) \
-         : "%g5");	\
+	 : "r" (__arg1), "r" (__arg2));	\
 __value;})								
 
 #define addmul(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "umul %2,%3,%0; \
           rd  %%y,%%o4; \
-          addcc %0,%%g5,%0; \
+          addcc %0,%1,%0; \
           addx %%g0,%%o4,%1" \
 	 : "=r" (__value), "=r" (hiremainder) \
-	 : "r" (__arg1), "r" (__arg2) \
-         : "%o4","%g5","cc");	\
+	 : "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
+         : "%o4","cc");	\
 __value;})								
-
-#define divllasm(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
-   __asm__( "wr      %%g5,%%g0,%%y;\
-         mov     %2,%%o4;\
-	 udivcc  %2,%3,%0;\
-         bvc     1f;\
-         umul    %0,%3,%%o5;\
-         mov     47,%%o0;\
-         call    err,1;\
-         nop         ;\
-1:	 sub     %%o4,%%o5,%1"\
-	: "=r" (__value), "=r" (hiremainder) \
-	: "r" (__arg1), "r" (__arg2) \
-        : "%o4","%o5","%g5","cc");	\
-__value;})								
-
 #endif /* ASMINLINE */
