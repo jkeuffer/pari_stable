@@ -178,6 +178,15 @@ desallocate(RELCACHE_t *M)
   M->last = M->base = NULL;
 }
 
+INLINE GEN
+col_0(long n)
+{
+   GEN c = (GEN)calloc(n + 1, sizeof(long));
+   if (!c) err(memer);
+   c[0] = evaltyp(t_VECSMALL) | evallg(n + 1);
+   return c;
+}
+
 GEN
 cgetalloc(GEN x, size_t l, long t)
 {
@@ -303,7 +312,7 @@ mulred(GEN nf, GEN x, GEN I, GEN *pm)
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
 static void
-powFBgen(FB_t *F, GEN nf, long a)
+powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
 {
   pari_sp av = avma;
   long i, j, n = lg(F->subFB);
@@ -315,6 +324,11 @@ powFBgen(FB_t *F, GEN nf, long a)
   Alg = cgetg(n, t_VEC);
   Ord = cgetg(n, t_VECSMALL);
   F->pow->arc = NULL;
+  if (cache)
+  { /* make sure enough room to store relations we may stumble upon */
+    size_t slim = (cache->last - cache->base) + a;
+    if (slim > cache->len) reallocate(cache, slim << 1);
+  }
   for (i=1; i<n; i++)
   {
     GEN m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
@@ -325,10 +339,22 @@ powFBgen(FB_t *F, GEN nf, long a)
     for (j=2; j<=a; j++)
     {
       GEN J = mulred(nf, (GEN)id2[j-1], vp, &m);
-      if (!J) break; /* id2[j] = 1. Use it to reduce exponents later */
+      if (!J) break;
+      if (gegal(J, (GEN)id2[j-1])) { j = 1; break; }
       id2[j] = (long)J;
       alg[j] = (long)m;
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
+    }
+
+    if (cache && j <= a)
+    { /* vp^j principal */
+      long k;
+      REL_t *rel = cache->last + 1;
+      rel->R = col_0(F->KC); rel->nz = F->subFB[i];
+      rel->R[ rel->nz ] = j;
+      for (k = 2; k < j; j++) m = element_mul(nf, m, (GEN)alg[k]);
+      rel->m = gclone(m);
+      rel->ex= NULL; cache->last = rel;
     }
     setlg(id2, j);
     setlg(alg, j); Ord[i] = j;
@@ -1670,7 +1696,8 @@ powFB_fill(RELCACHE_t *cache, GEN M)
       GEN z, t = (GEN)Alg[i]; 
       long lt = lg(t);
       z = cgetg(lt, t_VEC);
-      Arc[i] = (long)z; z[1] = M[1];  /* leave t[1] = 1 alone ! */
+      Arc[i] = (long)z; if (lt == 1) continue;
+      z[1] = M[1];  /* leave t[1] = 1 alone ! */
       for (j = 2; j < lt; j++)
         z[j] = lmul(typ(t[j]) == t_COL? M: (GEN)M[1], (GEN)t[j]);
       for (j = 3; j < lt; j++)
@@ -1679,15 +1706,6 @@ powFB_fill(RELCACHE_t *cache, GEN M)
     pow->arc = gclone(Arc);
   }
   avma = av;
-}
-
-INLINE GEN
-col_0(long n)
-{
-   GEN c = (GEN)calloc(n + 1, sizeof(long));
-   if (!c) err(memer);
-   c[0] = evaltyp(t_VECSMALL) | evallg(n + 1);
-   return c;
 }
 
 static void
@@ -1940,7 +1958,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
   GEN ideal, IDEAL, m, P, ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase < 0) return 0; }
-  if (!F->pow) powFBgen(F, nf, CBUCHG+1);
+  if (!F->pow) powFBgen(F, cache, nf, CBUCHG+1);
   nbG = lg(vecG)-1;
   lgsub = lg(F->subFB); ex = cgetg(lgsub, t_VECSMALL);
   cptzer = cptlist = 0;
@@ -1969,6 +1987,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
     }
     while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
+    if (gcmp1(gcoeff(ideal,1,1))) continue;
     IDEAL = lllint_ip(ideal, 4);
 
     if (phase != 1) jdir = 1; else phase = 2;
@@ -2036,7 +2055,7 @@ be_honest(FB_t *F, GEN nf)
                F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
     flusherr();
   }
-  if (!F->pow) powFBgen(F, nf, CBUCHG+1);
+  if (!F->pow) powFBgen(F, NULL, nf, CBUCHG+1);
   ru = lg(nf[6]);
   vdir = cgetg(ru, t_VECSMALL);
   av = avma;
@@ -3115,7 +3134,7 @@ PRECPB:
   if (!phase)
   { /* never reduced before */
     long lgex = cache.last - oldrel, j;
-    GEN mat = cgetg(lgex+1, t_MAT);
+    GEN mat = cgetg(lgex+1, t_VEC);
     C = cgetg(lgex+1, t_MAT);
     for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
     {
