@@ -116,7 +116,7 @@ for variable in\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1\
   gnuas AS ASFLAGS KERNELCPPFLAGS\
-  LD LDFLAGS LIBS\
+  LD LIBS\
   dir_sep runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
