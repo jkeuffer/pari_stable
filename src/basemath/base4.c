@@ -1998,12 +1998,29 @@ idealintersect(GEN nf, GEN x, GEN y)
 /*                                                                 */
 /*******************************************************************/
 
-GEN
+static GEN
+chk_vdir(GEN nf, GEN vdir)
+{
+  long l, i, t;
+  GEN v;
+  if (!vdir || gcmp0(vdir)) return NULL;
+  l = lg(vdir);
+  if (l != lg(nf[6])) err(talker, "incorrect vector length in idealred");
+  t = typ(vdir);
+  if (t == t_VECSMALL) return vdir;
+  if (t != t_VEC) err(talker, "not a vector in idealred");
+  v = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) v[i] = itos(gceil((GEN)vdir[i]));
+  return v;
+}
+
+static GEN
 computeGtwist(GEN nf, GEN vdir)
 {
   long i, j, k, l, lG, v, r1, r2;
   GEN p1, G = gmael(nf,5,2);
 
+  vdir = chk_vdir(nf, vdir);
   if (!vdir) return G;
   l = lg(vdir); lG = lg(G);
   p1 = dummycopy(G);
@@ -2025,69 +2042,39 @@ computeGtwist(GEN nf, GEN vdir)
   return p1;
 }
 
-static GEN
-chk_vdir(GEN nf, GEN vdir)
-{
-  long l, i, t;
-  GEN v;
-  if (!vdir || gcmp0(vdir)) return NULL;
-  l = lg(vdir);
-  if (l != lg(nf[6])) err(talker, "incorrect vector length in idealred");
-  t = typ(vdir);
-  if (t == t_VECSMALL) return vdir;
-  if (t != t_VEC) err(talker, "not a vector in idealred");
-  v = cgetg(l, t_VECSMALL);
-  for (i=1; i<l; i++) v[i] = itos(gceil((GEN)vdir[i]));
-  return v;
-}
-
 /* assume I in NxN matrix form (not necessarily HNF) */
-static GEN
-idealred_elt_i(GEN *ptnf, GEN I, GEN vdir, long *ptprec)
+GEN
+ideallllred_elt(GEN nf, GEN I, GEN vdir)
 {
-  GEN G, u, y, nf = *ptnf;
-  long i, e, prec = *ptprec;
+  GEN u, G0;
 
-  e = gexpo(I)>>TWOPOTBITS_IN_LONG;
-  if (e < 0) e = 0;
-  for (i=1; ; i++)
+  if (vdir && typ(vdir) == t_MAT) G0 = vdir;
+  else
   {
-    G = computeGtwist(nf,vdir);
-    y = gmul(G, I);
-    u = lllintern(y, 100, 1, prec);
-    if (u) break;
-
-    if (i == MAXITERPOL) err(accurer,"idealred");
-    prec = (prec<<1)-2;
-    if (DEBUGLEVEL) err(warnprec,"idealred",prec);
-    nf = nfnewprec(nf, e + prec);
+    GEN G = computeGtwist(nf, vdir);
+    long e, r = lg(G)-1;
+    for (e = 4; ; e <<= 1)
+    {
+      G0 = ground(G);
+      if (rank(G0) == r) break; /* maximal rank ? */
+      G = gmul2n(G, e);
+    }
   }
-  *ptprec = prec;
-  *ptnf = nf;
+  u = lll(gmul(G0, I), DEFAULTPREC);
   return gmul(I, (GEN)u[1]); /* small elt in I */
 }
 
 GEN
-ideallllred_elt(GEN nf, GEN I, GEN vdir)
-{
-  long prec = DEFAULTPREC;
-  return idealred_elt_i(&nf, I, vdir, &prec);
-}
-GEN
-idealred_elt(GEN nf, GEN I)
-{
-  return ideallllred_elt(nf, I, NULL);
-}
+idealred_elt(GEN nf, GEN I) { return ideallllred_elt(nf, I, NULL); }
 
 GEN
 ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
   pari_sp av = avma;
-  long N, i, nfprec;
-  GEN J, Ired, res, aI, y, x, T, b, c1, c, pol;
+  long N, i;
+  GEN J, res, aI, y, x, T, b, c1, c, pol;
 
-  nf = checknf(nf); nfprec = nfgetprec(nf);
-  if (prec <= 0) prec = nfprec;
+  nf = checknf(nf); 
   pol = (GEN)nf[1]; N = degpol(pol);
   T = x = c = c1 = NULL;
   if (idealtyp(&I,&aI) == id_PRINCIPAL)
@@ -2098,11 +2085,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   }
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
   I = primitive_part(I, &c1);
-  if (2 * expi(gcoeff(I,1,1)) >= bit_accuracy(nfprec))
-    Ired = lllint_ip(I,4);
-  else
-    Ired = I;
-  y = idealred_elt_i(&nf, Ired, chk_vdir(nf,vdir), &prec);
+  y = ideallllred_elt(nf, I, vdir);
 
   if (isnfscalar(y))
   { /* already reduced */
@@ -2127,7 +2110,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 
   J = cgetg(N+1,t_MAT); /* = I T/ x integral */
   for (i=1; i<=N; i++)
-    J[i] = (long)element_muli(nf,b,(GEN)Ired[i]);
+    J[i] = (long)element_muli(nf,b,(GEN)I[i]);
   J = Q_primitive_part(J, &c);
  /* c = content (I T / x) = T / den(I/x) --> d = den(I/x) = T / c
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
@@ -2156,7 +2139,10 @@ END:
       break;
 
     default:
-      if (y) y = gneg_i(get_arch(nf,y,prec));
+      if (y) {
+        if (prec <= 0) prec = nfgetprec(nf);
+        y = gneg_i(get_arch(nf,y,prec));
+      }
       break;
   }
   if (y) aI = arch_mul(aI,y);

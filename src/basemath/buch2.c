@@ -74,7 +74,6 @@ extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
 extern GEN sqred1_from_QR(GEN x, long prec);
-extern GEN computeGtwist(GEN nf, GEN vdir);
 extern GEN famat_mul(GEN f, GEN g);
 extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
 extern GEN to_famat_all(GEN x, GEN y);
@@ -129,7 +128,7 @@ typedef struct FB_t {
   powFB_t *pow;/* array of [P^0,...,P^{k_P}], P in LP o subFB */
   GEN perm; /* permutation of LP used to represent relations [updated by
                hnfspec/hnfadd: dense rows come first] */
-  GEN vecG;
+  GEN vecG, G0;
 } FB_t;
 
 enum { sfb_UNSUITABLE = -1, sfb_CHANGE = 1, sfb_INCREASE = 2 };
@@ -337,12 +336,12 @@ subFB_change(FB_t *F, GEN nf, GEN L_jid)
 }
 
 static GEN
-red(GEN nf, GEN I, GEN *pm)
+red(GEN nf, GEN I, GEN G0, GEN *pm)
 {
   GEN m, y = cgetg(3,t_VEC);
   y[1] = (long)I;
   y[2] = lgetg(1, t_MAT);
-  y = ideallllred(nf, y, NULL, 0);
+  y = ideallllred(nf, y, G0, 0);
   m = (GEN)y[2];
   y = (GEN)y[1]; *pm = lg(m)==1? gun: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
@@ -382,11 +381,11 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
     {
-      GEN J = red(nf, idealmulh(nf,vp,(GEN)id2[j-1]), &m);
+      GEN J = red(nf, idealmulh(nf,vp,(GEN)id2[j-1]), F->G0, &m);
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
       if (!J)
       {
-        if (j == 2 && !red(nf, vp, &M)) { j = 1; m = M; }
+        if (j == 2 && !red(nf, vp, F->G0, &M)) { j = 1; m = M; }
         break;
       }
       if (gegal(J, (GEN)id2[j-1])) { j = 1; break; }
@@ -1818,7 +1817,7 @@ relationrank(RELCACHE_t *cache, GEN L, ulong p)
 }
 
 static void
-small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
+small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
            long nbrelpid, double LIMC2)
 {
   const ulong mod_p = 27449;
@@ -1857,7 +1856,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
     IDEAL = prime_to_ideal(nf,ideal);
-    r = red_ideal(&IDEAL, G0, G, prec);
+    r = red_ideal(&IDEAL, F->G0, G, prec);
     if (!r) err(bugparier, "small_norm (precision too low)");
 
     for (k=1; k<=N; k++)
@@ -2960,12 +2959,12 @@ shift_G(GEN G, GEN Gtw, long a, long b, long r1)
   shift_embed(g,Gtw,b,r1); return g;
 }
 
-static GEN
-compute_vecG(GEN nf, GEN *pG0, long n)
+static void
+compute_vecG(GEN nf, FB_t *F, long n)
 {
   GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
   long e, i, j, ind, r1 = nf_get_r1(nf), r = lg(G)-1;
-  if (n == 1) { *pG0 = G0 = ground(G); return _vec( G0 ); }
+  if (n == 1) { F->G0 = G0 = ground(G); F->vecG = _vec( G0 ); return; }
   for (e = 4; ; e <<= 1)
   {
     G0 = ground(G); Gtw0 = ground(gmul2n(G, 10));
@@ -2976,7 +2975,7 @@ compute_vecG(GEN nf, GEN *pG0, long n)
   for (ind=j=1; j<=n; j++)
     for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G0,Gtw0,i,j,r1);
   if (DEBUGLEVEL) msgtimer("weighted G matrices");
-  *pG0 = G0; return vecG;
+  F->G0 = G0; F->vecG = vecG;
 }
 
 static GEN
@@ -3002,7 +3001,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
-  F.vecG = compute_vecG(nf, &G0, min(RU, 9));
+  compute_vecG(nf, &F, min(RU, 9));
   D = (GEN)nf[3]; drc = fabs(gtodouble(D));
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
@@ -3034,7 +3033,7 @@ START:
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
   if (nbrelpid > 0) {
-    small_norm(&cache,&F,G0,LOGD,nf,nbrelpid,LIMC2); avma = av2;
+    small_norm(&cache,&F,LOGD,nf,nbrelpid,LIMC2); avma = av2;
   }
 
   /* Random relations */
