@@ -2067,9 +2067,9 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
 
   if (! is_vec_t(tx)) err(typeer,"pslq");
   /* check trivial cases */
-  if (n <= 1) return cgetg(1, t_COL);
   for (k = 1; k <= n; k++)
     if (gcmp0((GEN)x[k])) return vec_ei(n, k);
+  if (n <= 1) return cgetg(1, t_COL);
   prec = gprecision(x)-1;
   if (prec < 0)
   { /* exact components */
@@ -2082,6 +2082,8 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
       U = (GEN)extendedgcd(im)[2];
       setlg(U, lg(U)-1); /* remove last column */
       x = gmul(greal(x), U);
+      if (n == 2) /* x has a single component */
+        return gcmp0((GEN)x[1])? (GEN)U[1]: cgetg(1, t_COL);
     }
     x = (GEN)extendedgcd(x)[2];
     x = (GEN)x[1];
