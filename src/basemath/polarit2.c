@@ -2622,10 +2622,11 @@ content(GEN x)
 }
 
 GEN
-primitive_part(GEN x, GEN *c)
+primitive_part(GEN x, GEN *ptc)
 {
-  *c = content(x);
-  if (gcmp1(*c)) *c = NULL; else x = gdiv(x,*c);
+  GEN c = content(x);
+  if (gcmp1(c)) c = NULL; else x = gdiv(x,c);
+  if (ptc) *ptc = c;
   return x;
 }
 
