@@ -92,6 +92,7 @@ XR 46- forgotten case in Round4 [ nfdisc(x^12-10*x^11-57*x^10+740*x^9+353*x^8-16
 BA 50- compilation problem on OSF (RTLD_GLOBAL undefined)
 BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    52- problems with tex2mail output (wrong alignment, wrong colors)
+   53- contfrac(sin(Pi/4),,2) --> impossible assignment
 
   Changed
 BA  1- improved Fp_isom
