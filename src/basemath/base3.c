@@ -1820,8 +1820,8 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
     archp = cgetg(1, t_VECSMALL);
   }
   x = idealhermite(nf, ideal);
-  if (!gcmp1(denom(gcoeff(x,1,1))))
-    err(talker,"zidealstarinit needs an integral ideal: %Z",x);
+  if (lg(x) == 1 || !gcmp1(denom(gcoeff(x,1,1))))
+    err(talker,"zidealstarinit needs an integral non-zero ideal: %Z",x);
   ideal = cgetg(3,t_VEC);
   ideal[1] = (long)x;
   ideal[2] = (long)arch;

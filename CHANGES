@@ -61,6 +61,7 @@ IS 13- gp-dyn build on AIX
 IS 17- [AIX:] various compilation problems + select better CFLAGS
        (-qtune=auto -qmaxmem=8192)
 IS 18- [HPUX:] remove -E from DLCFLAGS
+   19- bnrconductor(bnfinit(x)) --> SEGV [ missing check ]
 
   Changed
     1- rnf structure (removed useless components)
