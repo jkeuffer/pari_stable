@@ -1,26 +1,36 @@
 # Which Executable Linker ?
 #
+_ld_list='LD LDFLAGS LIBS runpathprexix LDused GNULDused'
 case "$osname" in
   darwin) LIBS= ;;
+  osf1)   LIBS='-lm -lots -lc';; # FIXME: why add -lc here ?
   *)      LIBS=-lm;;
 esac
-case "$osname-$arch" in
-  linux-*|cygwin*|freebsd-*)
-      LD=$CC; LDFLAGS="$cflags -Xlinker -export-dynamic"
-      runpathprefix='-Xlinker -rpath -Xlinker ';;
-  osf1-alpha)
-      LD=$ld; LIBS="$LIBS -lots -lc"; runpathprefix='-rpath '
-      LDFLAGS='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
-      case "$optimization" in
-	full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
-      esac;;
-  solaris-*) LD=$CC; LDFLAGS=$cflags; runpathprefix=-R ;;
-  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe"
-             case "$optimization" in
-               full) LDFLAGS="$LDFLAGS -s";;
-             esac;;
-  *)         LD=$CC; LDFLAGS=$cflags ;;
-esac
+
+if test -z "$LD"; then
+  case "$osname" in
+    osf1)LD=$ld ;; # FIXME: Why not $CC ?
+    *)   LD=$CC ;;
+  esac
+fi
+
+# FIXME: user had better know what she's doing, when setting LD/LDFLAGS !
+if test -z "$LDFLAGS"; then
+  case "$osname-$arch" in
+    osf1-*) # only case where $LD != $CC
+        LDFLAGS='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
+        case "$optimization" in
+          full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
+        esac ;;
+    linux-*|cygwin*|freebsd-*) LDFLAGS="$cflags -Wl,-export-dynamic" ;;
+    solaris-*) LDFLAGS=$cflags ;;
+    os2-*)     LDFLAGS="$cflags -Zexe"
+               case "$optimization" in
+                 full) LDFLAGS="$LDFLAGS -s";;
+               esac;;
+    *)         LDFLAGS=$cflags ;;
+  esac
+fi
 
 if test "$fastread" != yes; then
   echo $n ..."Which linker for building executables ? $c"
@@ -37,3 +47,16 @@ if test "$fastread" != yes; then
 fi
 
 echo "Executable linker is   $LD  $LDFLAGS"
+
+LDused=$LD
+GNULDused=
+if test $LD=$CC -a -n "$__gnuc__"; then
+  LDused=`$CC -print-prog-name=ld`
+fi
+if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
+
+case "$osname" in
+  osf1) runpathprefix='-rpath ';;
+  linux|cygwin*|freebsd) runpathprefix='-Wl,-rpath,';;
+  solaris) runpathprefix='-R ';;
+esac

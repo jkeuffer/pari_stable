@@ -53,7 +53,7 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 ####################### CONFIGURE - COMPILATION #############################
 . ./get_cc   # $_cc_list (includes 'optimization'), extraflag
 . ./get_as   # AS, ASFLAGS, KERNELCPPFLAGS, gnuas
-. ./get_ld   # LD, LDFLAGS, LIBS, runpathprefix
+. ./get_ld   # $_ld_list
 . ./get_dlld # $_dlld_list, fix libpari_base
 ####################### CONFIGURE - LIBC ####################################
 . ./get_double_format # doubleformat, sizeof_long, update pretty
@@ -126,6 +126,7 @@ for variable in\
   X11 Xincroot extralib which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
   $_install_list\
   $_cc_list\
+  $_ld_list\
   $_dlld_list\
   $_readline_list\
   $_has_list; do

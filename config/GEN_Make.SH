@@ -6,11 +6,6 @@ lnfile=Makefile
 echo Extracting $file
 rm -f $file $dir/$lnfile
 
-case "$runpathprefix" in
-  -R)       RUNPTH="-R$runpath";;
-  *-rpath*) RUNPTH="$runpathprefix $runpath";;
-esac
-
 if test -z "$DLLD"; then static=y; fi
 case "$static" in
   n) dft=dyn ;;
@@ -61,10 +56,10 @@ LD         = $LD
 LDFLAGS    = $LDFLAGS
 DLLD       = $DLLD
 DLLDFLAGS  = $MYDLLDFLAGS
-EXTRADLLDFLAGS  = $EXTRADLLDFLAGS
+EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 EXTRALIBS  =
 
-RUNPTH     = $RUNPTH
+RUNPTH     = $runpathprefix$runpath
 LIBDIR     = -L$libdir
 DLCFLAGS   = $DLCFLAGS
 LIBS       = $LIBS -lpari

@@ -1,5 +1,5 @@
 # Exported variables
-_dlld_list="DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest"
+_dlld_list='DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest'
 
 # Which suffix for Dynamic Lib?
 # Some linkers (SunOS 4) need minor and major lib version numbers.
@@ -27,18 +27,15 @@ case "$osname-$arch" in
 esac
 
 # if DLLD is defined at this point, respect it, even if do_dll=no
-if test $do_dll=yes; then
+if test $do_dll=yes -a -z "$DLLD"; then
   case "$osname" in
-    os2) DLLD="${DLLD-$LD}";;
-    *)   DLLD="${DLLD-ld}";;
+    os2) DLLD="$LD";;
+    *)   if test -n "$ld"; then DLLD=$ld; fi;;
   esac
 fi
 
 if test -n "$DLLD"; then
 # Which Dynamic Lib Linker?
-  if test "$DLLD" = ld -a -n "$ld"; then
-    DLLD=$ld;
-  fi
   if test "$fastread" != yes; then
     echo $n ..."Which linker for building dynamic libs? $c"
     dflt="$DLLD"; rep=; . ./myread
@@ -47,11 +44,7 @@ if test -n "$DLLD"; then
 
   GNUld=no
   case "$DLLD" in
-    *ld)
-      if ($DLLD -v 2>&1 | grep GNU > /dev/null); then
-        echo "...Hum, this looks like GNU ld"
-        GNUld=yes
-      fi;;
+    *ld) if ($DLLD -v 2>&1 | grep GNU > /dev/null); then GNUld=yes; fi;;
   esac
 
 # Which Flags for Dynamic Lib Linker ?
@@ -93,4 +86,7 @@ if test -z "$DLLD"; then
   echo "No Dynamic Lib"
 else
   echo "Dynamic Lib linker is  $DLLD  $DLLDFLAGS"
+  if test "$GNUld" = yes; then
+    echo "...Hum, this looks like GNU ld"
+  fi
 fi

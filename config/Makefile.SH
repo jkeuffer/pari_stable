@@ -154,17 +154,12 @@ for f in $inline; do
   OBJS="$OBJS $f\$(_O)"
 done
 
-case "$runpathprefix" in
-  -R) RUNPTH_FINAL="-R$runpath"
-      if test -n "$plotrunpath"; then
-        RUNPTH_FINAL="$RUNPTH_FINAL -R$plotrunpath"
-      fi
-      RUNPTH="-R$TOP/$objdir $RUNPTH_FINAL";;
-  *-rpath*)
-      tmp="$runpath$dir_sep$plotrunpath"
-      RUNPTH_FINAL="$runpathprefix $tmp"
-      RUNPTH="$runpathprefix $TOP/$objdir$dir_sep$tmp";;
-esac
+tmp=$runpath
+if test -n "$plotrunpath"; then
+  tmp="$tmp$dir_sep$plotrunpath"
+fi
+RUNPTH_FINAL="$runpathprefix$tmp"
+RUNPTH="$runpathprefix$TOP/$objdir$dir_sep$tmp"
 
 if test -z "$DLLD"; then
   exec="gp-sta"; static=y
@@ -357,9 +352,9 @@ tune: tune-sta
 	-\$(LN) $ln_objdir/tune ../tune
 
 tune-dyn: tune.o lib-dyn
-	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
+	\$(LD) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
 tune-sta: tune.o lib-sta
-	\$(CC) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
+	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
 
 gp-sta: \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
