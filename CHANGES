@@ -130,6 +130,7 @@ IZ  7- readline: allow switching readline editing on/off [for commandtools]
 IZ  8- readline: F1 has same effect as M-h, and F1F1 as M-H (short/long help)
     9- function writebin
 XR 10- new error message "precer" (precision too low in...)
+   11- allow minimal handling of t_VECSMALL under GP
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
