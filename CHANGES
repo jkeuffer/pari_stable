@@ -27,6 +27,7 @@ TH = Teluhiko Hilano
 TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
+
 ===========================================================================
 Done for version ??? (released ??/??/2000):
   Fixed
@@ -51,17 +52,16 @@ IS 13- function prototypes (missing 'extern')
        polred([x,x]), bezout(Mod(x,x^2+1),0), numtoperm(-1,0), polred(nf),
        idealhnf(nf,y+z): SEGV
    16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
-   17- often printed more digits than were significant [ precision(Pi,20) ]
-   18- factorcantor(x^4 - x^3 - 2*x - 1, 3) --> SEGV [typo!]
-   19- matsupplement(non-exact entries): fixed zero test (--> |x| < eps)
-   20- precision(I*1.) --> +oo (should be realprecision)
-   21- global() could check uninitialized memory
-   22- default(prettyprinter,"non-existent-file") ---> SIGPIPE and GP crash
-   24- gamma(1+O(3^2)+x) --> SIGFPE
-   25- typo in cxgamma (gamma(-4.1+Pi*I/2) --> exponent overflow)
-   26- Odos/paricfg.h defined PARIINFO incorrectly
-   27- inconsistenty t_POLMOD specification: Mod(x,y)+16 --> invalid object
-   28- bnfsunit error (impossible I-->S) when large class group
+   17- factorcantor(x^4 - x^3 - 2*x - 1, 3) --> SEGV [typo!]
+   18- matsupplement(non-exact entries): fixed zero test (--> |x| < eps)
+   19- precision(I*1.) --> +oo (should be realprecision)
+   20- global() could check uninitialized memory
+   21- default(prettyprinter,"non-existent-file") ---> SIGPIPE and GP crash
+   22- gamma(1+O(3^2)+x) --> SIGFPE
+   23- typo in cxgamma (gamma(-4.1+Pi*I/2) --> exponent overflow)
+   24- Odos/paricfg.h defined PARIINFO incorrectly
+   25- inconsistenty t_POLMOD specification: Mod(x,y)+16 --> invalid object
+   26- bnfsunit error (impossible I-->S) when large class group
 
   Changed
 BA  1- more efficient quadratic Hensel lift
