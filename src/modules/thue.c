@@ -81,9 +81,9 @@ inithue(GEN poly, long flag)
 
   if (!uftot)
   {
-    if (deg<=2) err(talker,"invalid polynomial in thue (need deg>2)");
     uftot=bnfinit0(poly,1,NULL,Prec);
-    uftot=checkbnf_discard(uftot);
+    if (uftot != checkbnf_discard(uftot))
+      err(talker,"non-monic polynomial in thue");
     if (flag) certifybuchall(uftot);
     s=itos(gmael3(uftot,7,2,1));
     t=itos(gmael3(uftot,7,2,2));
@@ -612,6 +612,7 @@ thueinit(GEN poly, long flag, long prec)
   if (checktnf(poly)) { uftot=(GEN)poly[2]; poly=(GEN)poly[1]; }
   else
     if (typ(poly)!=t_POL) err(notpoler,"thueinit");
+  if (degree(poly)<=2) err(talker,"invalid polynomial in thue (need deg>2)");
 
   if (!gisirreducible(poly)) err(redpoler,"thueinit");
   st=sturm(poly);
