@@ -65,6 +65,7 @@ IS 13- function prototypes (missing 'extern')
    27- qfminim([;],...) / qfperfection([;]) --> SEGV
    28- idealpow(,,,1) only reduced at the end, not after each multiplication
    29- typo in zbrent (always used bisection)
+BA 30- cotan(x) wasn't accepted
 
   Changed
 BA  1- more efficient quadratic Hensel lift
