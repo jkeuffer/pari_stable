@@ -1171,7 +1171,7 @@ check_pointer(unsigned int ptrs, entree *pointer[])
     if (ptrs & 1)
     {
       entree *e = pointer[i];
-      GEN x = e->value;
+      GEN x = (GEN)e->value;
       pop_val(e);
       changevalue(e, x);
     }
@@ -1326,7 +1326,7 @@ identifier(void)
 	  match_comma(); match('&'); mark.symbol=analyseur;
         {
           entree *e = entry();
-          push_val(e, e->value);
+          push_val(e, (GEN)e->value);
           has_pointer |= (1 << i);
           pointers[i] = e;
 	  argvec[i++] = (GEN) &(e->value); break;
