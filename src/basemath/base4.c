@@ -1261,6 +1261,7 @@ idealinv(GEN nf, GEN x)
   {
     case id_MAT:
       if (lg(x) != lg(x[1])) x = idealmat_to_hnf(nf,x);
+      if (lg(x)-1 != lgef(nf[1])-3) err(consister,"idealinv");
       x = hnfideal_inv(nf,x); break;
     case id_PRINCIPAL: tx = typ(x);
       if (is_const_t(tx)) x = ginv(x);
