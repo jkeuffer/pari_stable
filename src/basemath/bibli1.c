@@ -1583,8 +1583,10 @@ algdep0(GEN x, long n, long bit, long prec)
   if (gcmp0(x)) return gzero;
   if (!n) return gun;
 
-  av=avma; p1=cgetg(n+2,t_COL); p1[1]=un;
-  for (i=2; i<=n+1; i++) p1[i]=lmul((GEN)p1[i-1],x);
+  av=avma; p1=cgetg(n+2,t_COL);
+  p1[1] = un;
+  p1[2] = (long)x; /* n >= 1 */
+  for (i=3; i<=n+1; i++) p1[i]=lmul((GEN)p1[i-1],x);
 
   p1 = bit? lindep2(p1,bit): lindep(p1,prec);
   if (lg(p1) < 2)
@@ -2497,10 +2499,20 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_PERF: break;
     default: err(talker, "incorrect flag in minim00");
   }
-  av=avma;
+  if (n == 1)
+  {
+    switch(flag)
+    {
+      case min_FIRST: avma=av0; return cgetg(1,t_VEC);
+      case min_PERF:  avma=av0; return gzero;
+    }
+    res[1]=res[2]=zero;
+    res[3]=lgetg(1,t_MAT); return res;
+  }
 
+  av = avma;
   minim_alloc(n, &q, &x, &y, &z, &v);
-  av1=avma;
+  av1 = avma;
 
   u = lllgramint(a);
   if (lg(u) != n)
@@ -2577,14 +2589,11 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     p = x[1]+z[1]; gnorme = ground( dbltor(y[1] + p*p*v[1]) );
     if (gnorme_max)
       { if (gcmp(gnorme,gnorme_max) > 0) gnorme_max=gnorme; }
-    else
+    else if (gcmp(gnorme,BORNE) < 0)
     {
-      if (gcmp(gnorme,BORNE) < 0)
-      {
-	BOUND=gtodouble(gnorme)+eps; s=0;
-        affii(gnorme,BORNE); avma=av1;
-	if (flag == min_PERF) invp = idmat(maxrank);
-      }
+      BOUND=gtodouble(gnorme)+eps; s=0;
+      affii(gnorme,BORNE); avma=av1;
+      if (flag == min_PERF) invp = idmat(maxrank);
     }
 
     switch(flag)
@@ -2618,25 +2627,25 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
           avma=av2; continue;
         }
 
-          if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
+        if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
         if (++s == maxrank)
-          {
-            if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
-            avma=av0; return stoi(s);
-          }
+        {
+          if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
+          avma=av0; return stoi(s);
+        }
 
-          if (low_stack(lim, stack_lim(av1,1)))
-          {
-            if(DEBUGMEM>1) err(warnmem,"minim00");
-            if (DEBUGLEVEL>1)
-            { 	
-              fprintferr("\ngerepile in qfperfection. rank>=%ld\n",s);
-              flusherr();
-            }
-            tetpil=avma; invp = gerepile(av1,tetpil,gcopy(invp));
+        if (low_stack(lim, stack_lim(av1,1)))
+        {
+          if(DEBUGMEM>1) err(warnmem,"minim00");
+          if (DEBUGLEVEL>1)
+          { 	
+            fprintferr("\ngerepile in qfperfection. rank>=%ld\n",s);
+            flusherr();
           }
+          tetpil=avma; invp = gerepile(av1,tetpil,gcopy(invp));
         }
       }
+    }
   }
   switch(flag)
   {
@@ -2928,6 +2937,13 @@ fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
   if (!r) goto PRECPB;
 
   n = lg(a);
+  if (n == 1)
+  {
+    if (CHECK) err(talker, "dimension 0 in fincke_pohst");
+    avma = av; z=cgetg(4,t_VEC);
+    z[1]=z[2]=zero;
+    z[3]=lgetg(1,t_MAT); return z;
+  }
   for (i=1; i<n; i++)
   {
     GEN p1 = gsqrt(gcoeff(r,i,i), prec);

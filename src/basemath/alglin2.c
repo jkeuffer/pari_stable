@@ -569,6 +569,7 @@ sqred1intern(GEN a,long flag)
   long av = avma,tetpil,i,j,k, lim=stack_lim(av,1), n=lg(a);
 
   if (typ(a)!=t_MAT) err(typeer,"sqred1");
+  if (n == 1) return cgetg(1, t_MAT);
   if (lg(a[1])!=n) err(mattype1,"sqred1");
   b=cgetg(n,t_MAT);
   for (j=1; j<n; j++)
