@@ -506,6 +506,9 @@ pol_to_gaussint(GEN p, long shift)
 static GEN
 eval_rel_pol(GEN p,long bitprec)
 {
+  long i;
+  for (i = 2; i < lg(p); i++) 
+    if (gcmp0((GEN)p[i])) p[i] = zero; /* bad behaviour of gexpo */
   return pol_to_gaussint(p, bitprec-gexpo(p)+1);
 }
 
