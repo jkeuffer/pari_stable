@@ -980,7 +980,7 @@ u_FpM_FpV_mul(GEN x, GEN y, ulong p)
     for (k=1; k<lx; k++)
     {
       p1 += coeff(x,i,k) * y[k];
-      if (p1 & HIGHBIT) p1 %= p; 
+      if (p1 & HIGHBIT) p1 %= p;
     }
     z[i] = p1 % p;
   }
@@ -1007,13 +1007,13 @@ u_FpM_FpX_mul(GEN x, GEN y, ulong p)
       for (i=1; i<l; i++)
       {
         z[i] += c[i];
-        if (z[i] & HIGHBIT) z[i] %= p; 
+        if (z[i] & HIGHBIT) z[i] %= p;
       }
     else
       for (i=1; i<l; i++)
       {
         z[i] += c[i] * y[k];
-        if (z[i] & HIGHBIT) z[i] %= p; 
+        if (z[i] & HIGHBIT) z[i] %= p;
       }
   }
   for (i=1; i<l; i++) z[i] %= p;
@@ -1891,7 +1891,7 @@ apprgen9(GEN f, GEN a)
     x2 = ggrandocp(p,1);
     P = p;
   }
-  ps_1 = itos(p)-1; 
+  ps_1 = itos(p)-1;
   f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
   f = gdiv(f, gpowgs(p, ggval(f,p)));
 
@@ -2483,12 +2483,12 @@ rootsold(GEN x, long l)
 {
   long i, j, f, g, gg, fr, deg, ln;
   gpmem_t av=avma, av0, av1, av2, av3;
-  long exc,expmin,m,deg0,k,ti,h,ii,e,e1,emax,v;
+  long exc,expmin,m,deg0,k,ti,h,ii,e, v = varn(x);
   GEN y,xc,xd0,xd,xdabs,p1,p2,p3,p4,p5,p6,p7,p8;
   GEN p9,p10,p11,p12,p14,p15,pa,pax,pb,pp,pq,ps;
 
   if (typ(x)!=t_POL) err(typeer,"rootsold");
-  v=varn(x); deg0=degpol(x); expmin=12 - bit_accuracy(l);
+  deg0=degpol(x); expmin=12 - bit_accuracy(l);
   if (!signe(x)) err(zeropoler,"rootsold");
   y=cgetg(deg0+1,t_COL); if (!deg0) return y;
   for (i=1; i<=deg0; i++)
@@ -2503,173 +2503,162 @@ rootsold(GEN x, long l)
     if (ti==t_REAL) gg=0;
     else if (ti==t_QUAD)
     {
-      p2=gmael3(x,i,1,2);
-      if (gsigne(p2)>0) g=0;
+      p2 = gmael3(x,i,1,2);
+      if (gsigne(p2) > 0) g = 0;
     } else if (ti != t_INT && ti != t_INTMOD && !is_frac_t(ti)) g=0;
   }
-  av1=avma; p2=cgetg(3,t_COMPLEX);
-  p2[1]=lmppi(DEFAULTPREC); p2[2]=ldivrs((GEN)p2[1],10);
-  p11=cgetg(4,t_POL); p11[1]=evalsigne(1)+evallgef(4);
-  setvarn(p11,v); p11[3]=un;
-
-  p12=cgetg(5,t_POL); p12[1]=evalsigne(1)+evallgef(5);
-  setvarn(p12,v); p12[4]=un;
+  av1 = avma;
   for (i=2; i<=deg0+2 && gcmp0((GEN)x[i]); i++) gaffsg(0,(GEN)y[i-1]);
-  k=i-2;
-  if (k!=deg0)
+  k = i-2;
+  if (k==deg0) return y;
+
+  p2=cgetg(3,t_COMPLEX);
+  p2[1] = lmppi(DEFAULTPREC);
+  p2[2] = ldivrs((GEN)p2[1],10); /* Pi * (1+I/10) */
+  p11=cgetg(4,t_POL); p11[1]=evalsigne(1)|evalvarn(v)|evallgef(4);
+  p11[3]=un;
+
+  p12=cgetg(5,t_POL); p12[1]=evalsigne(1)|evalvarn(v)|evallgef(5);
+  p12[4]=un;
+  if (k)
   {
-    if (k)
+    j=deg0+3-k; pax=cgetg(j,t_POL);
+    pax[1] = evalsigne(1) | evalvarn(v) | evallgef(j);
+    for (i=2; i<j; i++) pax[i]=x[i+k];
+  }
+  else pax=x;
+  xd0=deriv(pax,v); pa=pax;
+  pq = NULL; /* for lint */
+  if (gg) { pp=ggcd(pax,xd0); h=isnonscalar(pp); if (h) pq=gdeuc(pax,pp); }
+  else{ pp=gun; h=0; }
+  m = 0;
+  while (k != deg0)
+  {
+    m++;
+    if (h)
     {
-      j=deg0+3-k; pax=cgetg(j,t_POL);
-      pax[1] = evalsigne(1) | evalvarn(v) | evallgef(j);
-      for (i=2; i<j; i++) pax[i]=x[i+k];
+      pa=pp; pb=pq; pp=ggcd(pa,deriv(pa,v)); h=isnonscalar(pp);
+      if (h) pq=gdeuc(pa,pp); else pq=pa; ps=gdeuc(pb,pq);
     }
-    else pax=x;
-    xd0=deriv(pax,v); m=1; pa=pax;
-    pq = NULL; /* for lint */
-    if (gg) { pp=ggcd(pax,xd0); h=isnonscalar(pp); if (h) pq=gdeuc(pax,pp); }
-    else{ pp=gun; h=0; }
-    do
+    else ps = pa;
+    deg = degpol(ps); if (!deg) continue;
+
+    /* roots of exact order m */
+    av3 = avma;
+    e = gexpo(ps) - gexpo(leading_term(ps));
+    if (e < 0) e = 0; if (ps!=pax) xd0=deriv(ps,v);
+    xdabs=cgetg(deg+2,t_POL); xdabs[1]=xd0[1];
+    for (i=2; i<deg+2; i++)
     {
-      if (h)
+      av3=avma; p3=(GEN)xd0[i];
+      p4=gabs(greal(p3),l);
+      p5=gabs(gimag(p3),l);
+      xdabs[i]=lpileupto(av3, gadd(p4,p5));
+    }
+    av0=avma; xc=gcopy(ps); xd=gcopy(xd0); av2=avma;
+    for (i=1; i<=deg; i++)
+    {
+      if (i==deg)
       {
-        pa=pp; pb=pq; pp=ggcd(pa,deriv(pa,v)); h=isnonscalar(pp);
-        if (h) pq=gdeuc(pa,pp); else pq=pa; ps=gdeuc(pb,pq);
+        p1=(GEN)y[k+m*i]; gdivz(gneg_i((GEN)xc[2]),(GEN)xc[3],p1);
+        p14=(GEN)p1[1]; p15=(GEN)p1[2];
       }
-      else ps=pa;
-          /* calcul des racines d'ordre exactement m */
-      deg=degpol(ps);
-      if (deg)
+      else
       {
-        av3=avma; e=gexpo((GEN)ps[deg+2]); emax=e;
-        for (i=2; i<deg+2; i++)
+        p3=gshift(p2,e); p4=poleval(xc,p3); p5=gnorm(p4); exc=0;
+        while (exc >= -20)
         {
-          p3=(GEN)(ps[i]);
-          e1=gexpo(p3); if (e1>emax) emax=e1;
-        }
-        e=emax-e; if (e<0) e=0; avma=av3; if (ps!=pax) xd0=deriv(ps,v);
-        xdabs=cgetg(deg+2,t_POL); xdabs[1]=xd0[1];
-        for (i=2; i<deg+2; i++)
-        {
-          av3=avma; p3=(GEN)xd0[i];
-          p4=gabs(greal(p3),l);
-          p5=gabs(gimag(p3),l);
-          xdabs[i]=lpileupto(av3, gadd(p4,p5));
-        }
-        av0=avma; xc=gcopy(ps); xd=gcopy(xd0); av2=avma;
-        for (i=1; i<=deg; i++)
-        {
-          if (i==deg)
+          p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
+          av3 = avma;
+          if (gcmp0(p5)) exc = -32;
+          else exc = expo(gnorm(p7))-expo(gnorm(p3));
+          avma = av3;
+          for (j=1; j<=10; j++)
           {
-            p1=(GEN)y[k+m*i]; gdivz(gneg_i((GEN)xc[2]),(GEN)xc[3],p1);
-            p14=(GEN)p1[1]; p15=(GEN)p1[2];
-          }
-          else
-          {
-            p3=gshift(p2,e); p4=poleval(xc,p3); p5=gnorm(p4); exc=0;
-            while (exc >= -20)
+            p8=gadd(p3,p7); p9=poleval(xc,p8); p10=gnorm(p9);
+            if (exc < -20 || cmprr(p10,p5) < 0)
             {
-              p7 = gneg_i(gdiv(p4, poleval(xd,p3)));
-              av3 = avma;
-              if (gcmp0(p5)) exc = -32;
-              else exc = expo(gnorm(p7))-expo(gnorm(p3));
-              avma = av3;
-              for (j=1; j<=10; j++)
-              {
-                p8=gadd(p3,p7); p9=poleval(xc,p8); p10=gnorm(p9);
-                if (exc < -20 || cmprr(p10,p5) < 0)
-                {
-                  GEN *gptr[3];
-                  p3=p8; p4=p9; p5=p10;
-                  gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
-                  gerepilemanysp(av2,av3,gptr,3);
-                  break;
-                }
-                gshiftz(p7,-2,p7); avma=av3;
-              }
-              if (j > 10)
-              {
-                avma=av;
-                if (DEBUGLEVEL)
-                {
-                  fprintferr("too many iterations in rootsold(): ");
-                  fprintferr("using roots2()\n"); flusherr();
-                }
-                return roots2(x,l);
-              }
+              GEN *gptr[3];
+              p3=p8; p4=p9; p5=p10;
+              gptr[0]=&p3; gptr[1]=&p4; gptr[2]=&p5;
+              gerepilemanysp(av2,av3,gptr,3);
+              break;
             }
-            p1=(GEN)y[k+m*i]; setlg(p1[1],3); setlg(p1[2],3); gaffect(p3,p1);
-            avma=av2; p14=(GEN)p1[1]; p15=(GEN)p1[2];
-            for (ln=4; ln<=l; ln=(ln<<1)-2)
-            {
-              setlg(p14,ln); setlg(p15,ln);
-              if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
-              if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
-              p4=poleval(xc,p1);
-              p5=poleval(xd,p1); p6=gneg_i(gdiv(p4,p5));
-              settyp(p14,t_REAL); settyp(p15,t_REAL);
-              gaffect(gadd(p1,p6),p1); avma=av2;
-            }
+            gshiftz(p7,-2,p7); avma=av3;
           }
-          setlg(p14,l); setlg(p15,l);
-          p7=gcopy(p1); p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
-          setlg(p14,l+1); setlg(p15,l+1);
-          if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
-          if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
-          for (ii=1; ii<=5; ii++)
+          if (j > 10)
           {
-            p4=poleval(ps,p7); p5=poleval(xd0,p7);
-            p6=gneg_i(gdiv(p4,p5)); p7=gadd(p7,p6);
-            p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
-            if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
-            if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
-          }
-          gaffect(p7,p1); p4=poleval(ps,p7);
-          p6=gdiv(p4,poleval(xdabs,gabs(p7,l)));
-          if (gexpo(p6)>=expmin)
-          {
-            avma=av;
+            avma = av;
             if (DEBUGLEVEL)
-            {
-              fprintferr("internal error in rootsold(): using roots2()\n");
-              flusherr();
-            }
+              err(warner,"too many iterations in rootsold(): using roots2()");
             return roots2(x,l);
           }
-          avma=av2;
-          if (expo(p1[2])<expmin && g)
-          {
-            gaffect(gzero,(GEN)p1[2]);
-            for (j=1; j<m; j++) gaffect(p1,(GEN)y[k+(i-1)*m+j]);
-            p11[2]=lneg((GEN)p1[1]);
-            xc=gerepileupto(av0, gdeuc(xc,p11));
-          }
-          else
-          {
-            for (j=1; j<m; j++) gaffect(p1,(GEN)y[k+(i-1)*m+j]);
-            if (g)
-            {
-              p1=gconj(p1);
-              for (j=1; j<=m; j++) gaffect(p1,(GEN)y[k+i*m+j]);
-              i++;
-              p12[2]=lnorm(p1); p12[3]=lmulsg(-2,(GEN)p1[1]);
-              xc=gerepileupto(av0, gdeuc(xc,p12));
-            }
-            else
-            {
-              p11[2]=lneg(p1);
-              xc=gerepileupto(av0, gdeuc(xc,p11));
-            }
-          }
-          xd=deriv(xc,v); av2=avma;
         }
-        k += deg*m;
+        p1=(GEN)y[k+m*i]; setlg(p1[1],3); setlg(p1[2],3); gaffect(p3,p1);
+        avma=av2; p14=(GEN)p1[1]; p15=(GEN)p1[2];
+        for (ln=4; ln<=l; ln=(ln<<1)-2)
+        {
+          setlg(p14,ln); setlg(p15,ln);
+          if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
+          if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+          p4=poleval(xc,p1);
+          p5=poleval(xd,p1); p6=gneg_i(gdiv(p4,p5));
+          settyp(p14,t_REAL); settyp(p15,t_REAL);
+          gaffect(gadd(p1,p6),p1); avma=av2;
+        }
       }
-      m++;
+      setlg(p14,l); setlg(p15,l);
+      p7=gcopy(p1); p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
+      setlg(p14,l+1); setlg(p15,l+1);
+      if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
+      if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+      for (ii=1; ii<=5; ii++)
+      {
+        p4=poleval(ps,p7); p5=poleval(xd0,p7);
+        p6=gneg_i(gdiv(p4,p5)); p7=gadd(p7,p6);
+        p14=(GEN)(p7[1]); p15=(GEN)(p7[2]);
+        if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
+        if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+      }
+      gaffect(p7,p1); p4=poleval(ps,p7);
+      p6=gdiv(p4,poleval(xdabs,gabs(p7,l)));
+      if (gexpo(p6)>=expmin)
+      {
+        avma=av;
+        if (DEBUGLEVEL)
+          err(warner,"internal error in rootsold(): using roots2()");
+        return roots2(x,l);
+      }
+      avma=av2;
+      if (expo(p1[2])<expmin && g)
+      {
+        gaffect(gzero,(GEN)p1[2]);
+        for (j=1; j<m; j++) gaffect(p1,(GEN)y[k+(i-1)*m+j]);
+        p11[2]=lneg((GEN)p1[1]);
+        xc=gerepileupto(av0, gdeuc(xc,p11));
+      }
+      else
+      {
+        for (j=1; j<m; j++) gaffect(p1,(GEN)y[k+(i-1)*m+j]);
+        if (g)
+        {
+          p1=gconj(p1);
+          for (j=1; j<=m; j++) gaffect(p1,(GEN)y[k+i*m+j]);
+          i++;
+          p12[2]=lnorm(p1); p12[3]=lmulsg(-2,(GEN)p1[1]);
+          xc=gerepileupto(av0, gdeuc(xc,p12));
+        }
+        else
+        {
+          p11[2]=lneg(p1);
+          xc=gerepileupto(av0, gdeuc(xc,p11));
+        }
+      }
+      xd=deriv(xc,v); av2=avma;
     }
-    while (k!=deg0);
+    k += deg*m;
   }
-  avma=av1;
+  avma = av1;
   for (j=2; j<=deg0; j++)
   {
     p1 = (GEN)y[j];
@@ -2680,9 +2669,9 @@ rootsold(GEN x, long l)
       if (gcmp0((GEN)p2[2])) f=0; else f=1;
       if (f<fr) break;
       if (f==fr && gcmp((GEN)p2[1],(GEN)p1[1]) <= 0) break;
-      y[k+1]=y[k];
+      y[k+1] = y[k];
     }
-    y[k+1]=(long)p1;
+    y[k+1] = (long)p1;
   }
   return y;
 }
@@ -2702,8 +2691,8 @@ roots2(GEN pol,long PREC)
   if (!N) return cgetg(1,t_COL);
   if (N==1)
   {
-    p1=gmul(realun(PREC),(GEN)pol[3]);
-    p2=gneg_i(gdiv((GEN)pol[2],p1));
+    p1 = gmul(realun(PREC),(GEN)pol[3]);
+    p2 = gneg_i(gdiv((GEN)pol[2],p1));
     return gerepilecopy(av,p2);
   }
   EPS = real2n(12 - bit_accuracy(PREC), 3);
@@ -2728,12 +2717,12 @@ roots2(GEN pol,long PREC)
     p1 = cgetc(PREC); rr[i] = (long)p1;
     for (j=3; j<PREC; j++) mael(p1,2,j)=mael(p1,1,j)=0;
   }
-  if (flagexactpol) tabqol=square_free_factorization(pol);
+  if (flagexactpol) tabqol = square_free_factorization(pol);
   else
   {
-    tabqol=cgetg(3,t_MAT);
-    tabqol[1]=lgetg(2,t_COL); mael(tabqol,1,1)=un;
-    tabqol[2]=lgetg(2,t_COL); mael(tabqol,2,1)=lcopy(pol);
+    tabqol = cgetg(3,t_MAT);
+    tabqol[1] = (long)_col(gun);
+    tabqol[2] = (long)_col(gcopy(pol));
   }
   nbpol=lg(tabqol[1])-1; nbroot=0;
   for (k=1; k<=nbpol; k++)
@@ -2742,55 +2731,57 @@ roots2(GEN pol,long PREC)
     multiqol=itos(gmael(tabqol,1,k)); deg=degpol(qol);
     for (j=deg; j>=1; j--)
     {
-      x=gzero; flagrealrac=0;
-      if (j==1) x=gneg_i(gdiv((GEN)qolbis[2],(GEN)qolbis[3]));
+      x = gzero; flagrealrac = 0;
+      if (j==1) x = gneg_i(gdiv((GEN)qolbis[2],(GEN)qolbis[3]));
       else
       {
-        x=laguer(qolbis,j,x,EPS,PREC);
+        x = laguer(qolbis,j,x,EPS,PREC);
         if (x == NULL) goto RLAB;
       }
       if (flagexactpol)
       {
-        x=gprec(x,(long)((PREC-1)*pariK));
-        x=laguer(qol,deg,x,gmul2n(EPS,-32),PREC+1);
+        x = gprec_w(x, PREC+2);
+        x = laguer(qol,deg,x,gmul2n(EPS,-32),PREC+1);
       }
-      else x=laguer(qol,deg,x,EPS,PREC);
+      else x = laguer(qol,deg,x,EPS,PREC);
       if (x == NULL) goto RLAB;
 
       if (typ(x)==t_COMPLEX &&
-          gcmp(gabs(gimag(x),PREC),gmul2n(gmul(EPS,gabs(greal(x),PREC)),1))<=0)
-        { x[2]=zero; flagrealrac=1; }
+          gcmp(gabs(gimag(x),PREC), gmul2n(gmul(EPS,gabs(greal(x),PREC)),1))<=0)
+        { x[2]=zero; flagrealrac = 1; }
       else if (j==1 && flagrealpol)
-        { x[2]=zero; flagrealrac=1; }
-      else if (typ(x)!=t_COMPLEX) flagrealrac=1;
+        { x[2]=zero; flagrealrac = 1; }
+      else if (typ(x)!=t_COMPLEX) flagrealrac = 1;
 
-      for (i=1; i<=multiqol; i++) gaffect(x,(GEN)rr[nbroot+i]);
-      nbroot+=multiqol;
+      for (i=1; i<=multiqol; i++) gaffect(x, (GEN)rr[nbroot+i]);
+      nbroot += multiqol;
       if (!flagrealpol || flagrealrac)
       {
-        ad = (GEN*) new_chunk(j+1);
-        for (i=0; i<=j; i++) ad[i]=(GEN)qolbis[i+2];
-        b=(GEN)ad[j];
+        ad = (GEN*)new_chunk(j+1);
+        for (i=0; i<=j; i++) ad[i] = (GEN)qolbis[i+2];
+        b = ad[j];
         for (i=j-1; i>=0; i--)
         {
-          c=(GEN)ad[i]; ad[i]=b;
-          b=gadd(gmul((GEN)rr[nbroot],b),c);
+          c = ad[i]; ad[i] = b;
+          b = gadd(gmul((GEN)rr[nbroot],b),c);
         }
-        v=cgetg(j+1,t_VEC); for (i=1; i<=j; i++) v[i]=(long)ad[j-i];
-        qolbis=gtopoly(v,varn(qolbis));
+        v = cgetg(j+1,t_VEC); for (i=1; i<=j; i++) v[i] = (long)ad[j-i];
+        qolbis = gtopoly(v,varn(qolbis));
         if (flagrealpol)
           for (i=2; i<=j+1; i++)
             if (typ(qolbis[i])==t_COMPLEX) mael(qolbis,i,2)=zero;
       }
       else
       {
-        ad = (GEN*) new_chunk(j-1); ad[j-2]=(GEN)qolbis[j+2];
-        p1=gmulsg(2,greal((GEN)rr[nbroot])); p2=gnorm((GEN)rr[nbroot]);
-        ad[j-3]=gadd((GEN)qolbis[j+1],gmul(p1,ad[j-2]));
+        ad = (GEN*)new_chunk(j-1);
+        ad[j-2] = (GEN)qolbis[j+2];
+        p1 = gmulsg(2,greal((GEN)rr[nbroot]));
+        p2 = gnorm((GEN)rr[nbroot]);
+        ad[j-3] = gadd((GEN)qolbis[j+1],gmul(p1,ad[j-2]));
         for (i=j-2; i>=2; i--)
-          ad[i-2] = gadd((GEN)qolbis[i+2],gsub(gmul(p1,ad[i-1]),gmul(p2,ad[i])));
-        v=cgetg(j,t_VEC); for (i=1; i<=j-1; i++) v[i]=(long)ad[j-1-i];
-        qolbis=gtopoly(v,varn(qolbis));
+          ad[i-2] = gadd((GEN)qolbis[i+2], gsub(gmul(p1,ad[i-1]), gmul(p2,ad[i])));
+        v = cgetg(j,t_VEC); for (i=1; i<=j-1; i++) v[i] = (long)ad[j-1-i];
+        qolbis = gtopoly(v,varn(qolbis));
         for (i=2; i<=j; i++)
           if (typ(qolbis[i])==t_COMPLEX) mael(qolbis,i,2)=zero;
         for (i=1; i<=multiqol; i++)
@@ -2823,9 +2814,8 @@ roots2(GEN pol,long PREC)
   }
   if (DEBUGLEVEL)
   {
-    fprintferr("too many iterations in roots2() ( laguer() ): \n");
+    fprintferr("too many iterations in roots2() ( laguer() ):\n");
     fprintferr("     real coefficients polynomial, using zrhqr()\n");
-    flusherr();
   }
   return zrhqr(pol,PREC);
 }
