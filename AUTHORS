@@ -1,6 +1,6 @@
 PARI/GP was originally written (1987) in the Laboratoire A2X, Universite
 Bordeaux I (France) by Christian Batut, Dominique Bernardi, Henri Cohen
-and Michel Olivier. Karim Belabas maintains PARI/GP since 1995.
+and Michel Olivier. It is maintained by Karim Belabas since 1995.
 
 A great number of people have contributed code through the successive
 stages which eventually resulted in the present version of PARI/GP.
