@@ -1098,6 +1098,8 @@ GEN     perm_inv(GEN x);
 GEN     perm_mul(GEN s, GEN t);
 GEN     perm_pow(GEN perm, long exp);
 GEN     vecperm_orbits(GEN v, long n);
+GEN     vecsmall_append(GEN V, long s);
+GEN     vecsmall_prepend(GEN V, long s);
 GEN     vecsmall_const(long n, long c);
 int     vecsmall_lexcmp(GEN x, GEN y);
 int     vecsmall_prefixcmp(GEN x, GEN y);
@@ -1293,6 +1295,7 @@ GEN     roots0(GEN x,long flag,long l);
 
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     subcyclo(long n, long d, long v);
+GEN     polsubcyclo(long n, long d, long v);
 
 /* subfields.c */
 

@@ -344,7 +344,7 @@ char *helpmessages_basic[]={
   "polrootsmod(x,p,{flag=0}): roots mod p of the polynomial x. flag is optional, and can be 0: default, or 1: use a naive search, useful for small p",
   "polrootspadic(x,p,r): p-adic roots of the polynomial x to precision r",
   "polsturm(x,{a},{b}): number of real roots of the polynomial x in the interval]a,b] (which are respectively taken to be -oo or +oo when omitted)",
-  "polsubcyclo(n,d,{v=x}): finds an equation (in variable v) for the d-th degree subfield of Q(zeta_n), where (Z/nZ)^* must be cyclic",
+  "polsubcyclo(n,d,{v=x}): finds an equation (in variable v) for the d-th degree subfields of Q(zeta_n). Output is a polynomial or a vector of polynomials is there are several such fields, or none.",
   "polsylvestermatrix(x,y): forms the sylvester matrix associated to the two polynomials x and y. Warning: the polynomial coefficients are in columns, not in rows",
   "polsym(x,n): vector of symmetric powers of the roots of x up to n",
   "poltchebi(n,{v=x}): Tchebitcheff polynomial of degree n (n C-integer), in variable v",

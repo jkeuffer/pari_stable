@@ -447,7 +447,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
         if (lg(sg) == 1 || lg(sg) != lg(sg[1]))
           err(talker,"not a HNF matrix in galoissubcyclo");
         if (!Z)
-          Z=znstar(stoi(n));
+          err(talker,"N must be a bnrinit or a znstar if H is a matrix in galoissubcyclo");
         zn2 = gtovecsmall((GEN)Z[2]);
         zn3 = lift((GEN)Z[3]);
         if ( lg(zn2) != lg(sg) || lg(zn3) != lg(sg))
@@ -557,3 +557,25 @@ subcyclo(long n, long d, long v)
   return gerepileupto(ltop,T);
 }
 
+GEN polsubcyclo(long n, long d, long v)
+{
+  ulong ltop=avma;
+  GEN L, Z=znstar(stoi(n));
+  /*subcyclo is twice faster but Z must be cyclic*/
+  if (lg(Z[2]) == 2 && divise(Z[1],stoi(d)))
+  {
+    avma=ltop; 
+    return subcyclo(n, d, v);
+  }
+  L=subgrouplist((GEN) Z[2], _vec(stoi(d)));
+  if (lg(L) == 2)
+    return gerepileupto(ltop, galoissubcyclo(Z, (GEN) L[1], 0, v));
+  else
+  {
+    GEN V=cgetg(lg(L),t_VEC);
+    long i;
+    for (i=1; i< lg(V); i++)
+      V[i] = (long) galoissubcyclo(Z, (GEN) L[i], 0, v);
+    return gerepileupto(ltop,V);
+  }
+}
