@@ -92,7 +92,7 @@ constpi(long prec)
     n--; n1-=6;
   }
   p1 = divsr(53360,p1);
-  mulrrz(p1,sqrtr_sign(stor(k3,prec), 1), tmppi);
+  mulrrz(p1,sqrtr_abs(stor(k3,prec), 1), tmppi);
   if (gpi) gunclone(gpi);
   avma = av1;  gpi = tmppi;
 }
@@ -758,7 +758,7 @@ gpow(GEN x, GEN n, long prec)
 /********************************************************************/
 /* sqrt(|x|), assume x t_REAL */
 GEN
-sqrtr_sign(GEN x, long s)
+sqrtr_abs(GEN x, long s)
 {
   pari_sp av, av0;
   long l, l1, i, ex;
@@ -804,7 +804,7 @@ sqrtr(GEN x) {
   long s = signe(x);
   if (typ(x) != t_REAL) err(typeer,"sqrtr");
   if (s < 0) err(talker,"negative argument in sqrtr");
-  return sqrtr_sign(x, s);
+  return sqrtr_abs(x, s);
 }
 
 /* assume x unit, precp(x) = pp > 3 */
@@ -932,9 +932,9 @@ gsqrt(GEN x, long prec)
   {
     case t_REAL: {
       long s = signe(x);
-      if (s >= 0) return sqrtr_sign(x, s);
+      if (s >= 0) return sqrtr_abs(x, s);
       y = cgetg(3,t_COMPLEX);
-      y[2] = (long)sqrtr_sign(x, s);
+      y[2] = (long)sqrtr_abs(x, s);
       y[1] = zero; return y;
     }
 
@@ -1482,7 +1482,7 @@ mplog(GEN x)
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
     p1 = p4; av = avma;
-    for (k=1; k<=m; k++) p1 = sqrtr_sign(p1, 1);
+    for (k=1; k<=m; k++) p1 = sqrtr_abs(p1, 1);
     affrr(p1,p4); avma = av;
   }
   else
@@ -1765,7 +1765,7 @@ mpaut(GEN x)
 {
   pari_sp av = avma;
   GEN p1 = mulrr(x, addsr(2,x));
-  return gerepileuptoleaf(av, sqrtr_sign(p1, signe(p1)));
+  return gerepileuptoleaf(av, sqrtr_abs(p1, signe(p1)));
 }
 
 /********************************************************************/

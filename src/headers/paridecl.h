@@ -1694,7 +1694,7 @@ GEN     mplog2(long prec);
 GEN     mppi(long prec);
 GEN     mpsin(GEN x);
 GEN     sqrtr(GEN x);
-GEN     sqrtr_sign(GEN x, long s);
+GEN     sqrtr_abs(GEN x, long s);
 GEN     sqrtnr(GEN x, long n);
 GEN     palog(GEN x);
 GEN     powgi(GEN x, GEN n);

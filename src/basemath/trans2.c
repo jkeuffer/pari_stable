@@ -88,7 +88,7 @@ mpatan(GEN x)
   for (i=1; i<=m; i++)
   {
     p5 = addsr(1, mulrr(p2,p2)); setlg(p5,l2);
-    p5 = addsr(1, sqrtr_sign(p5, 1)); setlg(p5,l2);
+    p5 = addsr(1, sqrtr_abs(p5, 1)); setlg(p5,l2);
     affrr(divrr(p2,p5), p2); avma = av;
   }
   p3 = mulrr(p2,p2); l1 = 4;
