@@ -1,12 +1,12 @@
 # For SunOS
 #   If __GNUC__, most level0 functions are "asm inline"
 #   If not, they are "asm extern"
-# For NextStep or Linux
+# For NextStep
 #   We don't accept "asm inline" since it does not work (Ptitboul)
 kercom=$src/kernel/sparcv8_micro
 ker=$src/kernel/$kernlvl0
 
-if test "$osname" = "nextstep" -o "$osname" = "linux"
+if test "$osname" = "nextstep" 
 then
   level0=$src/kernel/none/asm0.h
 else
