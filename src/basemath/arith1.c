@@ -656,10 +656,10 @@ long
 isperfectpower(GEN x, GEN *pty)
 {
   pari_sp av = avma;
-  long e2, ex, k = 1, mask = 7;
+  long ex, k = 1, mask = 7;
   GEN logx, y;
   byteptr d;
-  ulong p;
+  ulong p, e2;
 
   if (typ(x) != t_INT || gcmp(x, gdeux) < 0)
     err(talker, "isperfectpower: argument must be > 1");
