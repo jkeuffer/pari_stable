@@ -513,7 +513,6 @@ vecegal(GEN x, GEN y)
     if (! vecegal((GEN)x[i],(GEN)y[i]) ) return 0;
   return 1;
 }
-#undef MASK
 
 int
 gegal(GEN x, GEN y)
@@ -559,6 +558,11 @@ gegal(GEN x, GEN y)
 
       case t_VEC: case t_COL: case t_MAT:
         return vecegal(x,y);
+      case t_VECSMALL:
+        if (MASK(x[0]) != MASK(y[0])) return 0;
+        for (i = lg(x)-1; i; i--)
+          if (x[i] != y[i]) return 0;
+        return 1;
     }
   {
     jmp_buf env;
@@ -575,6 +579,7 @@ gegal(GEN x, GEN y)
   }
   return i;
 }
+#undef MASK
 
 /*******************************************************************/
 /*                                                                 */

@@ -566,50 +566,48 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
 }
 
 static GEN
-choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
+choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
 {
-  long j,k,oldllist,llist,r,nn,oldnn,*n,N,pp;
-  GEN p,listpotbl,oldlistpotbl,ff,oldff;
+  ulong av;
+  long j,k,oldllist,llist,r,lcm,oldlcm,N,pp;
+  GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
   byteptr di=diffptr;
 
   if (DEBUGLEVEL) timer2();
   di++; p = stoi(2); N = deg(pol);
   while (p[2]<=N) p[2] += *di++;
-  oldllist = oldnn = BIGINT;
-  oldlistpotbl = oldff = NULL; pp = 0; /* gcc -Wall */
-  for(k=1; k<11 || oldnn == BIGINT; k++,p[2]+= *di++)
+  oldllist = 100000;
+  oldlcm = 0;
+  oldlistpotbl = oldff = oldn = NULL; pp = 0; /* gcc -Wall */
+  av = avma;
+  for(k=1; k<11 || !oldn; k++,p[2]+= *di++,avma = av)
   {
-    ulong av = avma, maxl;
     while (!smodis(dpol,p[2])) p[2] += *di++;
     if (k > 50) err(talker,"sorry, too many block systems in nfsubfields");
     ff=(GEN)factmod(pol,p)[1]; r=lg(ff)-1;
-    if (r == 1 || r == N) { avma = av; continue; }
+    if (r == 1 || r == N) continue;
 
     n = cgetg(r+1, t_VECSMALL);
-    nn = n[1] = deg(ff[1]);
-    for (j=2; j<=r; j++) { n[j] = deg(ff[j]); nn = clcm(nn,n[j]); }
-    maxl = (oldnn == BIGINT)? 100000: oldnn * oldllist;
-    listpotbl = potential_block_systems(N,d,n, maxl);
+    lcm = n[1] = deg(ff[1]);
+    for (j=2; j<=r; j++) { n[j] = deg(ff[j]); lcm = clcm(lcm,n[j]); }
+    if (lcm < oldlcm) continue; /* false when oldlcm = 0 */
+    if (r >= BIL) { err(warner,"subfields: overflow in calc_block"); continue; }
+    if (DEBUGLEVEL) fprintferr("p = %ld,\tlcm = %ld,\torbits: %Z\n",p[2],lcm,n);
+    if (oldn && gegal(n,oldn)) continue;
+
+    listpotbl = potential_block_systems(N,d,n, oldllist);
     if (!listpotbl) { oldlistpotbl = NULL; pp = p[2]; break; }
     llist = lg(listpotbl)-1;
-    if (DEBUGLEVEL)
+    if (llist >= oldllist)
     {
-      if (llist >= maxl)
-        msgtimer("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs > %ld [aborted]",
-                  p[2],r,nn,maxl);
-      else
-        msgtimer("p = %ld,\tr = %ld,\tnn = %ld,\t#pbs = %ld",
-                  p[2],r,nn,llist);
-      flusherr();
+      if (DEBUGLEVEL) msgtimer("#pbs >= %ld [aborted]",oldllist);
+      for (j=1; j<llist; j++) free((void*)listpotbl[j]);
+      free((void*)(listpotbl-1)); continue;
     }
-    if (llist < maxl && nn * llist < maxl)
-    {
-      oldllist = llist; oldlistpotbl = listpotbl;
-      pp = p[2]; oldff = ff; oldnn = nn; continue;
-    }
-    for (j=1; j<llist; j++) free((void*)listpotbl[j]);
-    free((void*)(listpotbl-1));
-    avma = av;
+    oldllist = llist; oldlistpotbl = listpotbl;
+    pp = p[2]; oldff = ff; oldlcm = lcm; oldn = n;
+    if (DEBUGLEVEL) msgtimer("#pbs = %ld",llist);
+    av = avma;
   }
   if (DEBUGLEVEL)
   {
@@ -619,7 +617,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptnn)
     flusherr();
   }
   if (oldff) oldff = lift_intern(oldff);
-  *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptnn=oldnn; return stoi(pp);
+  *ptlistpotbl=oldlistpotbl; *ptff=oldff; *ptlcm=oldlcm; return stoi(pp);
 }
 
 static GEN
