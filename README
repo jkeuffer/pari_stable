@@ -1,30 +1,25 @@
-This is PARI/GP, version 2.0.x.beta (*).
+This is PARI/GP, version 2.1.x (*).
 
-The `beta' status means that a substantial amount of testing has been done,
-but bugs might still be lurking in the code and the documentation might not
-be absolutely accurate. Apart from this word of caution, we believe this
-version is stable enough to be released for public use and for site-wide
-installations.
+PARI/GP is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation. It is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY WHATSOEVER.
 
-It is important for you and for us that you try this new version and send us
-feedback, so than we can incorporate fixes and improvements into the
-forthcoming `release' version. As usual for bug reports, try to make them
-easily reproducible (using e.g. setrand(1)). Always include the GP header
-and, if relevant, the Configure log.
+Check the License for details. You should have received a copy of it, along
+with the package; see the file 'COPYING'. If not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-Some binaries can be found at the address
-
-  ftp://megrez.math.u-bordeaux.fr/pub/pari
 
 (*) Version numbers have the shape: MAJOR.MINOR.patchlevel.status. The status
 increases through {alpha, beta, release}. New features are introduced during
 the `alpha' phase, tested during `beta', and declared stable when `release'
-is reached. The MAJOR version number (currently 2) won't change for a while,
-the MINOR version number (0) increases when a new status cycle starts (as
-soon as a `release' version is out), and the patchlevel goes up each time we
-feel an upgrade is necessary (improvement, bugfix, ...). `Release' versions
-may be updated with further patchlevels if sufficiently important bugs need
-to be fixed before the next cycle reaches completion.
+is reached. The MAJOR version number (currently 2) won't change for a while.
+The MINOR version number (1) increases by 2 when a new status cycle starts (as
+soon as a `release' version is out) [odd numbers are reserved for `released'
+versions, even ones for alpha/beta phase]. The patchlevel goes up each time
+we feel an upgrade is necessary (improvement, bugfix, ...). `Release'
+versions may be updated with further patchlevels if sufficiently important
+bugs need to be fixed before the next cycle reaches completion.
 ==========================================================================
 
 To get started, run TeX on the file INSTALL.tex and have a look at the dvi

@@ -1,34 +1,24 @@
-/* COPYRIGHT (c) 1998     Thomas Papanikolaou and Xavier Roblot
- * All rights reserved.    (papanik,roblot@math.u-bordeaux.fr)
+/* $Id$
+
+Copyright (C) 2000  The PARI group.
+
+This file is part of the PARI/GP package.
+
+PARI/GP is free software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License as published by the Free Software
+Foundation. It is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY WHATSOEVER.
+
+Check the License for details. You should have received a copy of it, along
+with the package; see the file 'COPYING'. If not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+
+/* Written by Thomas Papanikolaou and Xavier Roblot
  *
- * FILE: pari-x.y.z/src/modules/mpqs.c (thereafter called Software)
- *       (NOTE: the exact position of the file within PARI may vary).
- *
- * DESCRIPTION: Implementation of the Self-Initializing Multi-Polynomial
- * Quadratic Sieve based on code developed as part of the LiDIA project
+ * Implementation of the Self-Initializing Multi-Polynomial Quadratic Sieve
+ * based on code developed as part of the LiDIA project
  * (http://www.informatik.tu-darmstadt.de/TI/LiDIA/Welcome.html)
- *
- * LEGALESE: This Software is intended as a service to the PARI user
- * community, but the authors cannot be held responsible for any
- * consequences, either direct or indirect, which the use of this
- * package may have. It can be freely copied and spread for non
- * commercial purposes, as long as it is not modified and this
- * copyright notice stays attached. A free, exclusive license to
- * distribute the Software is herewith granted to the authors of PARI,
- * as stated in the PARI copyright file. However, modified versions and
- * derivatives of this Software do not become eligible for commercial
- * use, i.e. all commercial rights remain with the original authors.
- * Especially, including PARI into commercial code (either as text or
- * by linking the PARI library) does not allow the use of the Software.
- * If you want to use this Software, modified versions or derivatives of
- * this Software for commercial purposes, you have to contact the original
- * authors for a commercial license.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
- * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-/* $Id$ */
 #include "pari.h"
 
 #ifndef SEEK_SET

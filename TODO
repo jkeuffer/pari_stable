@@ -49,10 +49,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
--  default(prettyprinter,"non-existent-file") + \o2 ---> eventual SEGV
-   (on Linux at least, return value of popen unreliable: a FILE * is
-    returned, that will be valid for a few puts/flush, then cause a crash)
-
 4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is

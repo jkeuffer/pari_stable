@@ -1,6 +1,8 @@
 This file lists some of the novelties in PARI/GP 2.0. Incompatible changes are
 described in COMPAT. See TODO for possible future improvements.
 
+PARI/GP is now released under the GNU General Public License.
+
 ==========================================================================
 The GP/PARI structure has been cleaned up.
 
