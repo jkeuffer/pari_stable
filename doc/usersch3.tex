@@ -5907,6 +5907,20 @@ Otherwise, \tet{lindep}$([1,x,\ldots,x^{k-1}], \fl)$ is used. If
 the sup norm of the smallest relation, \tet{algdep} returns that bound
 instead.
 
+\bprog
+? \p200
+? algdep(2^(1/6)+3^(1/5), 30, 100); \\ wrong result in 2.6s (PIII 1GHz)
+? algdep(2^(1/6)+3^(1/5), 30, 170); \\ right result in 8s (PIII 1GHz)
+? algdep(2^(1/6)+3^(1/5), 30, 200); \\ wrong result in 8s
+? \p250
+? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right result in 8.5s
+? algdep(2^(1/6)+3^(1/5), 30, 200); \\ right result in 8.5s
+? \p200
+? algdep(2^(1/6)+3^(1/5), 30); \\ wrong result in 34s
+? \p250
+? algdep(2^(1/6)+3^(1/5), 30); \\ right result in 42s
+@eprog
+
 \syn{algdep0}{x,k,\fl,\var{prec}}, where $k$ and $\fl$ are \kbd{long}s.
 Also available is $\teb{algdep}(x,k,\var{prec})$ ($\fl=0$).
 
@@ -6006,8 +6020,9 @@ kernel. The element is defined over the field of coefficients of $x$, and is
 in general not integral.
 
 If $\fl>0$, uses the LLL algorithm. $|\fl|$ is a parameter which should be
-between one half the number of decimal digits of precision and that number
-This is in general faster than the other variants.
+between 0.6 and 0.9 times the number of correct decimal digits in the input.
+This is in general faster than the other variants. See the example in
+\tet{lindep} section.
 
 \syn{lindep0}{x,\fl,\var{prec}}. Also available is
 $\teb{lindep}(x,\var{prec})$ ($\fl=0$).
