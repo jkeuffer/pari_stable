@@ -129,6 +129,7 @@ typedef struct FB_t {
   powFB_t *pow;/* array of [P^0,...,P^{k_P}], P in LP o subFB */
   GEN perm; /* permutation of LP used to represent relations [updated by
                hnfspec/hnfadd: dense rows come first] */
+  GEN vecG;
 } FB_t;
 
 enum { sfb_UNSUITABLE = -1, sfb_CHANGE = 1, sfb_INCREASE = 2 };
@@ -1691,25 +1692,11 @@ signunits(GEN bnf)
 
 /* LLL-reduce ideal and return Cholesky for T2 | ideal */
 static GEN
-red_ideal(GEN *ideal,GEN Gvec,GEN prvec)
+red_ideal(GEN *ideal, GEN G0, GEN G, long prec)
 {
-  long i;
-  for (i=1; i<lg(Gvec); i++)
-  {
-    GEN p1,u, G = (GEN)Gvec[i];
-    long prec = prvec[i];
-
-    p1 = gmul(G, *ideal);
-    u = lllintern(p1,100,1,prec);
-    if (u)
-    {
-      p1 = gmul(p1, u);
-      p1 = sqred1_from_QR(p1, prec);
-      if (p1) { *ideal = gmul(*ideal,u); return p1; }
-    }
-    if (DEBUGLEVEL) err(warner, "prec too low in red_ideal[%ld]: %ld",i,prec);
-  }
-  return NULL;
+  GEN u = lll(gmul(G0, *ideal), DEFAULTPREC);
+  *ideal = gmul(*ideal,u); /* approximate LLL reduction */
+  return sqred1_from_QR(gmul(G, *ideal), prec);
 }
 
 static GEN
@@ -1841,8 +1828,8 @@ relationrank(RELCACHE_t *cache, GEN L)
 }
 
 static void
-small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
-           double LIMC2)
+small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
+           long nbrelpid, double LIMC2)
 {
   const int BMULT = 8;
   const int maxtry_DEP  = 20;
@@ -1852,7 +1839,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
   pari_sp av, av2, limpile;
   long nbsmallnorm, nbfact, j, k, noideal, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
-  GEN x, gx, Mlow, M, G, r, Gvec, prvec;
+  GEN x, gx, Mlow, M, G, r;
   GEN L = vecsmall_const(F->KC, 0), invp = relationrank(cache, L);
   REL_t *rel = cache->last;
 
@@ -1874,10 +1861,6 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
     Mlow = gprec_w(M, precbound);
   else
     Mlow = M;
-
-  prvec = cgetg(3,t_VECSMALL); Gvec = cgetg(3,t_VEC);
-  prvec[1] = MEDDEFAULTPREC;   Gvec[1] = (long)gprec_w(G,prvec[1]);
-  prvec[2] = prec;             Gvec[2] = (long)G;
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   av = avma;
   for (noideal=F->KC; noideal; noideal--)
@@ -1888,9 +1871,8 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
     REL_t *oldrel = rel;
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
-    ideal = prime_to_ideal(nf,ideal);
-    IDEAL = lllint_ip(ideal,4); /* should be almost T2-reduced */
-    r = red_ideal(&IDEAL,Gvec,prvec);
+    IDEAL = prime_to_ideal(nf,ideal);
+    r = red_ideal(&IDEAL, G0, G, prec);
     if (!r) err(bugparier, "small_norm (precision too low)");
 
     for (k=1; k<=N; k++)
@@ -2064,9 +2046,9 @@ remove_content(GEN I)
 }
 
 static int
-rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN vecG, GEN L_jid, long *pjid)
+rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
 {
-  long nbG = lg(vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
+  long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
   GEN ideal, m, ex = cgetg(lgsub, t_VECSMALL);
@@ -2103,7 +2085,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN vecG, GEN L_jid, long *pjid)
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
-      m = pseudomin(ideal, (GEN)vecG[j]);
+      m = pseudomin(ideal, (GEN)(F->vecG)[j]);
       if (!factorgen(F,nf,ideal,m))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
@@ -2137,11 +2119,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN vecG, GEN L_jid, long *pjid)
 
 /* remark: F->KCZ changes if be_honest() fails */
 static int
-be_honest(FB_t *F, GEN nf, GEN vecG)
+be_honest(FB_t *F, GEN nf)
 {
-  long ex, i, j, J, k, iz, nbtest, ru;
-  long nbG = lg(vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   GEN P, ideal, m, vdir;
+  long ex, i, j, J, k, iz, nbtest, ru;
+  long nbG = lg(F->vecG)-1, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   pari_sp av;
 
   if (DEBUGLEVEL) {
@@ -2173,7 +2155,7 @@ be_honest(FB_t *F, GEN nf, GEN vecG)
         ideal = remove_content(ideal);
         for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
-          m = pseudomin(ideal, (GEN)vecG[j]);
+          m = pseudomin(ideal, (GEN)(F->vecG)[j]);
           if (factorgen(F,nf,ideal,m)) break;
 	}
 	avma = av2; if (k < ru) break;
@@ -2415,52 +2397,6 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
   z[2]=(long)ga;
   z[3]=(long)GD;
   if (DEBUGLEVEL) msgtimer("classgroup generators");
-}
-
-static void
-shift_embed(GEN G, GEN Gtw, long a, long r1)
-{
-  long j, k, l = lg(G);
-  if (a <= r1)
-    for (j=1; j<l; j++) coeff(G,a,j) = coeff(Gtw,a,j);
-  else
-  {
-    k = (a<<1) - r1;
-    for (j=1; j<l; j++)
-    {
-      coeff(G,k-1,j) = coeff(Gtw,k-1,j);
-      coeff(G,k  ,j) = coeff(Gtw,k,  j);
-    }
-  }
-}
-
-/* G where embeddings a and b are multiplied by 2^10 */
-static GEN
-shift_G(GEN G, GEN Gtw, long a, long b, long r1)
-{
-  GEN g = dummycopy(G);
-  if (a != b) shift_embed(g,Gtw,a,r1);
-  shift_embed(g,Gtw,b,r1); return g;
-}
-
-static GEN
-compute_vecG(GEN nf, long n)
-{
-  GEN vecG, G0, Gtw, G = gmael(nf,5,2);
-  long e, i, j, ind, r1 = nf_get_r1(nf), l = lg(G);
-
-  for (e = 4; ; e <<= 1)
-  {
-    G0 = ground(G); Gtw = ground(gmul2n(G, 10));
-    if (lg(hnf(G0)) == l && lg(hnf(Gtw)) == l) break;
-    G = gmul2n(G, e);
-  }
-  vecG = cgetg(1 + n*(n+1)/2,t_VEC);
-  if (n == 1) { vecG[1] = (long)G0; return vecG; }
-  for (ind=j=1; j<=n; j++)
-    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G0,Gtw,i,j,r1);
-  if (DEBUGLEVEL) msgtimer("weighted G matrices");
-  return vecG;
 }
 
 /* SMALLBUCHINIT */
@@ -3016,6 +2952,51 @@ init_rel(RELCACHE_t *cache, FB_t *F, long RU)
                cache->last - cache->base);
 }
 
+static void
+shift_embed(GEN G, GEN Gtw, long a, long r1)
+{
+  long j, k, l = lg(G);
+  if (a <= r1)
+    for (j=1; j<l; j++) coeff(G,a,j) = coeff(Gtw,a,j);
+  else
+  {
+    k = (a<<1) - r1;
+    for (j=1; j<l; j++)
+    {
+      coeff(G,k-1,j) = coeff(Gtw,k-1,j);
+      coeff(G,k  ,j) = coeff(Gtw,k,  j);
+    }
+  }
+}
+
+/* G where embeddings a and b are multiplied by 2^10 */
+static GEN
+shift_G(GEN G, GEN Gtw, long a, long b, long r1)
+{
+  GEN g = dummycopy(G);
+  if (a != b) shift_embed(g,Gtw,a,r1);
+  shift_embed(g,Gtw,b,r1); return g;
+}
+
+static GEN
+compute_vecG(GEN nf, GEN *pG0, long n)
+{
+  GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
+  long e, i, j, ind, r1 = nf_get_r1(nf), l = lg(G);
+  if (n == 1) return _vec( ground(G) );
+  for (e = 4; ; e <<= 1)
+  {
+    G0 = ground(G); Gtw0 = ground(gmul2n(G, 10));
+    if (lg(hnf(G0)) == l && lg(hnf(Gtw0)) == l) break; /* maximal rank ? */
+    G = gmul2n(G, e);
+  }
+  vecG = cgetg(1 + n*(n+1)/2,t_VEC);
+  for (ind=j=1; j<=n; j++)
+    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G0,Gtw0,i,j,r1);
+  if (DEBUGLEVEL) msgtimer("weighted G matrices");
+  *pG0 = G0; return vecG;
+}
+
 static GEN
 buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun, 
      long PRECREG)
@@ -3024,7 +3005,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   long N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
   long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
-  GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
+  GEN G0, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int minsFB = 3;
@@ -3039,6 +3020,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
 
   nf_get_sign(nf, &R1, &R2); RU = R1+R2;
+  F.vecG = compute_vecG(nf, &G0, min(RU, 9));
   D = (GEN)nf[3]; drc = fabs(gtodouble(D));
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
@@ -3069,17 +3051,18 @@ START:
   PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
-  if (nbrelpid > 0) {small_norm(&cache,&F,LOGD,nf,nbrelpid,LIMC2); avma = av2;}
+  if (nbrelpid > 0) {
+    small_norm(&cache,&F,G0,LOGD,nf,nbrelpid,LIMC2); avma = av2;
+  }
 
   /* Random relations */
-  W = vecG = L_jid = NULL;
+  W = L_jid = NULL;
   jid = sfb_trials = nreldep = 0;
   need = cache.end - cache.last;
   if (need > 0)
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
-    if (!vecG) { vecG = compute_vecG(nf, min(RU, 9)); av2 = avma; }
     pre_allocate(&cache, need); cache.end = cache.last + need;
     if (++nreldep > MAXRELSUP) {
       F.sfb_chg = sfb_INCREASE;
@@ -3090,7 +3073,7 @@ MORE:
       jid = nreldep = 0;
     }
     if (F.newpow) powFBgen(&F, &cache, nf);
-    if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, vecG, L_jid, &jid)) goto START;
+    if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, L_jid, &jid)) goto START;
     L_jid = NULL;
   }
   if (precpb)
@@ -3167,13 +3150,12 @@ PRECPB:
 
   if (F.KCZ2 > F.KCZ)
   {
-    if (!vecG) vecG = compute_vecG(nf, min(RU, 9));
     if (F.newpow) powFBgen(&F, NULL, nf);
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
       powFBgen(&F, NULL, nf);
     }
-    if (!be_honest(&F, nf, vecG)) goto START;
+    if (!be_honest(&F, nf)) goto START;
   }
   F.KCZ2 = 0; /* be honest only once */
 
