@@ -145,6 +145,9 @@ BA  7- support for real forms for qfbsolve.
 BA  9- new algorithm for exp(t_REAL) [ Newton ]
    10- new macro ndec2prec()
    11- use Trager's trick in factorff()
+   12- member function .bid (from a bnr). Extend mod, clgp, no, cyc, gen to
+       bid and bnr structure.
+   13- new keywords for ?? : bid, CFT, ideal, idele, modulus, rnf. 
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
@@ -189,6 +192,11 @@ MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
    20- bnfinit(non-monic t_POL) --> now discard variable change
    21- rename apprgen9 -> padicappr, factmod9 -> factorff
    22- rewrite padicappr()
+   23- [COMPAT] bnrdisclist has lost its 4th argument 'flag', and omitting the
+       archimedean component now means that all 2^r1 possible values are
+       substituted (formerly: indicate no ramification at infinity).
+       The prototype of bnrdisclist0 has likewise changed.
+   24- renamed isprincipalrayall -> bnrisprincipal
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private

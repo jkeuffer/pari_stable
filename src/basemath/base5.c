@@ -352,7 +352,7 @@ GEN
 lift_to_pol(GEN x)
 {
   GEN y = (GEN)x[2];
-  return (typ(y) != t_POL)? gtopoly(y,varn(x[1])): y;
+  return (typ(y) != t_POL)? scalarpol(y,varn(x[1])): y;
 }
 
 GEN

@@ -187,6 +187,9 @@ get_bnf(GEN x, int *t)
           if (typ(x[2]) != t_POLMOD) break;
           return get_bnf((GEN)x[1],t);
         case 5 : *t = typ_QUA; return NULL;
+        case 6 :
+          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+          *t = typ_BID; return NULL;
         case 10: *t = typ_NF; return NULL;
         case 11: *t = typ_BNF; return x;
         case 7 : *t = typ_BNR;
@@ -225,6 +228,9 @@ get_nf(GEN x, int *t)
           x = (GEN)x[1]; if (typ(x)!=t_VEC || lg(x)!=11) break;
           x = (GEN)x[7]; if (typ(x)!=t_VEC || lg(x)!=10) break;
           return x;
+        case 6 :
+          if (typ(x[1]) != t_VEC || typ(x[3]) != t_MAT) break;
+          *t = typ_BID; return NULL;
         case 9 :
           x = (GEN)x[2];
           if (typ(x) == t_VEC && lg(x) == 4) *t = typ_GAL;
@@ -2121,7 +2127,7 @@ dirzetak0(GEN nf, long N0)
 {
   GEN vect, c, c2, pol = (GEN)nf[1], index = (GEN)nf[4];
   pari_sp av = avma;
-  long i, j, k, limk, lx;
+  long i, k, limk, lx;
   ulong q, p;
   byteptr d = diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
@@ -2139,12 +2145,12 @@ dirzetak0(GEN nf, long N0)
       { vect = (GEN) FpX_degfact(pol,court)[1]; lx = lg(vect); }
     else
     {
-      GEN p1 = primedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_COL);
+      GEN p1 = primedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_VECSMALL);
       for (i=1; i<lx; i++) vect[i] = itou( gmael(p1,i,4) );
     }
-    for (j=1; j<lx; j++)
+    for (i=1; i<lx; i++)
     {
-      GEN N = gpowgs(court, vect[j]); /* N = court^f */
+      GEN N = gpowgs(court, vect[i]); /* N = court^f */
       if (cmpiu(N, N0) > 0) break;
 
       q = p = (ulong)N[2]; limk = N0/q;

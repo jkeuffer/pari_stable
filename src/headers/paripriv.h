@@ -126,6 +126,7 @@ GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 GEN extendedgcd(GEN A);
 
 /* miscellaneous linear algebra */
+GEN  diagonal_i(GEN x);
 GEN  F2V_red_ip(GEN v);
 GEN  gauss_realimag(GEN x, GEN y);
 GEN  imagecomplspec(GEN x, long *nlze);
@@ -137,7 +138,9 @@ GEN  sqred1_from_QR(GEN x, long prec);
 GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
 GEN  ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
-GEN  vecconst(GEN v, GEN x);
+GEN  vec_setconst(GEN v, GEN x);
+GEN  vec_const(long n, GEN x);
+GEN  col_const(long n, GEN x);
   
 GEN  GS_norms(GEN B, long prec);
 GEN  dim1proj(GEN prh);
@@ -302,7 +305,6 @@ GEN    init_unif_mod_fZ(GEN L);
 GEN    init_units(GEN BNF);
 long   int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 GEN    isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
-GEN    logunitmatrix(GEN nf, GEN U, GEN sgnU, GEN bid);
 GEN    make_integral(GEN nf, GEN L0, GEN f, GEN *listpr);
 GEN    maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 GEN    modprM(GEN z, GEN nf,GEN modpr);
@@ -329,6 +331,8 @@ GEN    unif_mod_fZ(GEN pr, GEN F);
 GEN    unnf_minus_x(GEN x);
 void   wr_rel(GEN col);
 GEN    zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
+GEN    zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid);
+GEN    zlog_units_noarch(GEN nf, GEN U, GEN bid);
 GEN    zsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
 
 /* Dedekind zeta */

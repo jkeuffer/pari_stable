@@ -591,7 +591,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   n = lg(cyc)-1; /* not necessarily = N */
 
   S.list = sublist = (slist*) gpmalloc(sizeof(slist));
-  S.hnfgroup = diagonal(cyc);
+  S.hnfgroup = diagonal_i(cyc);
   S.gen = gen;
   S.count = 0;
   T.fun = &list_fun;

@@ -458,18 +458,10 @@ static int
 vecegal(GEN x, GEN y)
 {
   long i;
-
   if (MASK(x[0]) != MASK(y[0])) return 0;
 
-  i = lg(x)-1;
-  if (typ(x) != t_MAT)
-  {
-    for ( ; i; i--)
-      if (! gequal((GEN)x[i],(GEN)y[i]) ) return 0;
-    return 1;
-  }
-  for ( ; i; i--)
-    if (! vecegal((GEN)x[i],(GEN)y[i]) ) return 0;
+  for (i = lg(x)-1; i; i--)
+    if (! gequal((GEN)x[i],(GEN)y[i]) ) return 0;
   return 1;
 }
 

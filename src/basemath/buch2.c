@@ -778,6 +778,23 @@ buchfu(GEN bnf)
   return gerepilecopy(av, getfu(nf, &A, nf_UNITS, &c, 0));
 }
 
+GEN
+init_units(GEN BNF)
+{
+  GEN bnf = checkbnf(BNF), x = gel(bnf,8), v, funits;
+  long i, l;
+  if (lg(x) == 5) funits = buchfu(bnf);
+  else
+  {
+    if (lg(x) != 6) err(talker,"incorrect big number field");
+    funits = gel(x,5);
+  }
+  l = lg(funits) + 1;
+  v = cgetg(l, t_VEC); v[1] = mael(x, 4, 2);
+  for (i = 2; i < l; i++) v[i] = funits[i-1];
+  return v;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*           PRINCIPAL IDEAL ALGORITHM (DISCRETE LOG)              */
@@ -1616,9 +1633,8 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
   y = cgetg(RU,t_MAT);
   if (add_zu)
   {
-    GEN w = gmael3(bnf,8,4,1), v = cgetg(l, t_COL);
-    if (equaliu(w,2)) (void)vecconst(v, gen_1);
-    y[j++] = (long)v;
+    GEN w = gmael3(bnf,8,4,1);
+    gel(y, j++) = equaliu(w,2)? col_const(l - 1, gen_1): cgetg(1, t_COL);
   }
   for ( ; j < RU; j++) y[j] = (long)zsign_from_logarch((GEN)A[j], invpi, archp);
   return y;
@@ -2383,7 +2399,7 @@ makecycgen(GEN bnf)
 
   if (DEBUGLEVEL) err(warner,"completing bnf (building cycgen)");
   nf = checknf(bnf);
-  cyc = gmael3(bnf,8,1,2); D = diagonal(cyc);
+  cyc = gmael3(bnf,8,1,2); D = diagonal_i(cyc);
   gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
   l = lg(gen); h = cgetg(l, t_VEC);
   for (i=1; i<l; i++)

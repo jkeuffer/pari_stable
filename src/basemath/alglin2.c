@@ -2470,11 +2470,10 @@ allhnfmod(GEN x, GEN dm, int flag)
   x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns / discard accumulator */
   if (flag & hnf_PART) return x;
 
-  b = cgetg(li, t_VEC);
-  if (modid) (void)vecconst(b, dm);
+  if (modid) b = vec_const(li-1, dm);
   else
   { /* compute optimal value for dm */
-    b[1] = coeff(x,1,1);
+    b = cgetg(li, t_VEC); b[1] = coeff(x,1,1);
     for (i = 2; i < li; i++) b[i] = lmulii((GEN)b[i-1], gcoeff(x,i,i));
   }
   dm = b;

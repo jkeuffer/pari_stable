@@ -830,6 +830,20 @@ diagonal(GEN x)
   }
   return y;
 }
+/* same, assuming x is a t_VEC/t_COL. Not memory clean. */
+GEN
+diagonal_i(GEN x)
+{
+  long j, lx = lg(x);
+  GEN y = cgetg(lx,t_MAT);
+
+  for (j=1; j<lx; j++)
+  {
+    gel(y,j) = zerocol(lx-1);
+    gcoeff(y,j,j) = gel(x,j);
+  }
+  return y;
+}
 
 /* compute m*diagonal(d) */
 GEN
@@ -3449,7 +3463,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   switch(typ(D))
   {
     case t_VEC:
-    case t_COL: delta = diagonal(D); break;
+    case t_COL: delta = diagonal_i(D); break;
     case t_INT: delta =gscalmat(D,n); break;
     default: err(typeer,"gaussmodulo");
       return NULL; /* not reached */

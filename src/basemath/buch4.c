@@ -482,7 +482,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     M[i] = (long)isprincipal(bnf,p1);
   }
   /* 2) relations from bnf class group */		
-  M = concatsp(M, diagonal((GEN) classgp[2]));
+  M = concatsp(M, diagonal_i((GEN) classgp[2]));
 
   /* S class group */
   H = hnfall_i(M, &U, 1);

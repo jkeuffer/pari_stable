@@ -51,6 +51,18 @@ member_p(GEN x)
 }
 
 GEN
+member_bid(GEN x)
+{
+  int t; (void)get_nf(x,&t);
+  switch(t) {
+    case typ_BNR: return gel(x,2);
+    case typ_BID: return x;
+  }
+  member_err("bid");
+  return NULL;
+}
+
+GEN
 member_bnf(GEN x)
 {
   int t; x = get_bnf(x,&t);
@@ -127,8 +139,11 @@ GEN
 member_mod(GEN x) /* modulus */
 {
   int t; (void)get_nf(x,&t);
-  if (t == typ_GAL)
-    return gmael(x,2,3);
+  switch(t) {
+    case typ_GAL: return gmael(x,2,3);
+    case typ_BNR: x = gel(x,2); /* fall through */
+    case typ_BID: return gel(x,1);
+  }
   switch(typ(x))
   {
     case t_INTMOD: case t_POLMOD: case t_QUAD: break;
@@ -225,6 +240,7 @@ member_clgp(GEN x) /* class group (3-component row vector) */
     {
       case typ_QUA: return mkvec3((GEN)x[1], (GEN)x[2], (GEN)x[3]);
       case typ_CLA: return gmael(x,1,5);
+      case typ_BID: return x = gel(x,2);
     }
     if (typ(x)==t_VEC)
       switch(lg(x))

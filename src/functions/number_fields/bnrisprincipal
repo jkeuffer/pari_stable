@@ -1,6 +1,6 @@
 Function: bnrisprincipal
 Section: number_fields
-C-Name: isprincipalrayall
+C-Name: bnrisprincipal
 Prototype: GGD1,L,
 Help: bnrisprincipal(bnr,x,{flag=1}): bnr being output by bnrinit, gives
  [v,alpha], where v is the vector of exponents on the class group

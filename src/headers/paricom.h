@@ -307,6 +307,7 @@ enum manage_var_t {
 #define typ_ELL  7 /* elliptic curve */
 #define typ_QUA  8 /* quadclassunit  */
 #define typ_GAL  9 /* galoisinit     */
+#define typ_BID 10
 /* for gen_sort */
 #define cmp_IND 1
 #define cmp_LEX 2

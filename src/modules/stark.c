@@ -226,7 +226,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   condc = gmael(bnrc, 2, 1); if (gequal(cond, condc)) return NULL;
 
   cyc   = gmael(bnr, 5, 2); nbg = lg(cyc)-1;
-  Mrc   = diagonal(gmael(bnrc, 5, 2));
+  Mrc   = diagonal_i(gmael(bnrc, 5, 2));
   nf    = gmael(bnr, 1, 7);
 
   M = bnrGetSurj(bnr, bnrc);
@@ -315,8 +315,8 @@ ComputeKernel(GEN bnrm, GEN bnrn, GEN dtQ)
   pari_sp av = avma;
   GEN Mrm, genm, Mrq, mgq, P;
 
-  Mrm  = diagonal(gmael(bnrm, 5, 2));
-  Mrq  = diagonal((GEN)dtQ[2]);
+  Mrm  = diagonal_i(gmael(bnrm, 5, 2));
+  Mrq  = diagonal_i((GEN)dtQ[2]);
   genm = gmael(bnrm, 5, 3);
   nbm  = lg(genm) - 1;
   mgq  = (GEN)dtQ[3];
@@ -339,7 +339,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
 
   disable_dbg(0);
 
-  Mr = diagonal(gmael(bnr, 5, 2));
+  Mr = diagonal_i(gmael(bnr, 5, 2));
   D = smithall(hnf_gauss(C, Mr), &U, NULL);
   T = gmul(C,ginv(U));
   subgrp  = subgrouplist(D, mkvec(gen_2));
@@ -397,7 +397,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
     M = gmul(bnrGetSurj(bnr, bnrpr), subgroup);
-    subpr = hnf(concatsp(M, diagonal(cycpr)));
+    subpr = hnf(concatsp(M, diagonal_i(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(dethnf_i(subgroup), dethnf_i(subpr)) );
   }
@@ -2662,7 +2662,7 @@ START:
   } TRY {
     /* find the modulus defining N */
     bnr  = buchrayinitgen(bnf, gen_1);
-    M = diagonal(gmael(bnr,5,2));
+    M = diagonal_i(gmael(bnr,5,2));
     dtQ  = InitQuotient(M);
     bnrh = FindModulus(bnr, dtQ, &newprec, prec);
     if (DEBUGLEVEL) msgtimer("FindModulus");
@@ -2720,13 +2720,13 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   if (nf_get_r2(nf)) err(talker, "base field not totally real in bnrstark");
 
   /* check the subgrp */
-  Mcyc = diagonal(gmael(bnr, 5, 2));
+  Mcyc = diagonal_i(gmael(bnr, 5, 2));
   if (! (subgrp = get_subgroup(subgrp,Mcyc)) )
     err(talker, "incorrect subgrp in bnrstark");
 
   /* compute bnr(conductor) */
   p1     = conductor(bnr, subgrp, 2);
-  bnr    = (GEN)p1[2]; Mcyc = diagonal(gmael(bnr, 5, 2));
+  bnr    = (GEN)p1[2]; Mcyc = diagonal_i(gmael(bnr, 5, 2));
   subgrp = (GEN)p1[3];
   if (gcmp1( dethnf_i(subgrp) )) { avma = av; return polx[0]; }
 
@@ -2797,7 +2797,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   if (!(flag & 2)) bnr = (GEN)conductor(bnr, NULL, 2)[2];
   cyc  = gmael(bnr, 5, 2);
   ncc  = lg(cyc) - 1;
-  Mcyc = diagonal(cyc);
+  Mcyc = diagonal_i(cyc);
 
   /* check the subgroup */
   if (! (subgp = get_subgroup(subgp,Mcyc)) )

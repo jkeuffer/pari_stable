@@ -333,8 +333,7 @@ jump_to_given_buffer(Buffer *buf)
     if (b == buf) break;
     pop_buffer();
   }
-  if (!b->env) { b = NULL; err(warner,"no env tied to buffer"); }
-  if (!b) longjmp(GP_DATA->env, 0);
+  if (!b || !b->env) longjmp(GP_DATA->env, 0);
   longjmp(b->env, 0);
 }
 
@@ -1353,20 +1352,21 @@ member_commands(void)
   pariputs("Member functions, followed by relevant objects\n\n\
 a1-a6, b2-b8, c4-c6 : coeff. of the curve.            ell\n\
 area : area                                           ell\n\
+bid  : big ideal                                                    bnr\n\
 bnf  : big number field                                        bnf, bnr\n\
-clgp : class group                                             bnf, bnr\n\
-cyc  : cyclic decomposition (SNF)               clgp           bnf, bnr\n\
+clgp : class group                   bid,                      bnf, bnr\n\
+cyc  : cyclic decomposition (SNF)    bid,       clgp,          bnf, bnr\n\
 diff, codiff: different and codifferent                    nf, bnf, bnr\n\
 disc : discriminant                                   ell, nf, bnf, bnr\n\
-e, f : inertia/residues degree            prid\n\
+e, f : inertia/residue  degree            prid\n\
 fu   : fundamental units                                       bnf, bnr\n\
 futu : [u,w] where u=unit group, w=torsion                     bnf, bnr\n\
-gen  : generators                         prid, clgp           bnf, bnr\n\
+gen  : generators                    bid, prid, clgp,          bnf, bnr\n\
 index: index                                                   bnf, bnr\n\
 j    : j-invariant                                    ell\n\
-mod  : modulus\n\
+mod  : modulus                       bid,                           bnr\n\
 nf   : number field                                            bnf, bnr\n\
-no   : number of elements                       clgp           bnf, bnr\n\
+no   : number of elements            bid,       clgp,          bnf, bnr\n\
 omega, eta: [omega1,omega2] and [eta1, eta2]          ell\n\
 p    : rational prime contained in prid   prid\n\
 pol  : defining polynomial                                 nf, bnf, bnr\n\
@@ -1470,6 +1470,9 @@ char *keyword_list[]={
   "bnf",
   "bnr",
   "ell",
+  "rnf",
+  "bid",
+  "modulus",
   NULL
 };
 
@@ -1755,7 +1758,7 @@ gp_head(void)
            DATA_BEGIN, DATA_END);
 #endif
   print_version(); pariputs("\n");
-  center("Copyright (C) 2003 The PARI Group");
+  center("Copyright (C) 2000-2005 The PARI Group");
   print_text("\nPARI/GP is free software, covered by the GNU General Public \
 License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
   pariputs("\n\
@@ -2603,7 +2606,6 @@ gp_main_loop(int ismain)
   push_stack(&bufstack, (void*)b);
   for(;;)
   {
-    (void)setjmp(b->env);
     if (ismain)
     {
       static long tloc, outtyp;
@@ -2721,8 +2723,8 @@ break_loop(long numerr)
   filtre_t F;
 
   if (b) jump_to_given_buffer(b);
-  push_stack(&bufstack, (void*)new_buffer());
-  b = current_buffer; /* buffer created above */
+  b = new_buffer();
+  push_stack(&bufstack, (void*)b);
 
   (void)&s; /* emulate volatile */
   old = s = get_analyseur();
@@ -2950,7 +2952,8 @@ main(int argc, char **argv)
         fprintferr("... skipping file '%s'\n", A.v[i]);
         i++; if (i == A.n) break;
       }
-      (void)read0((char*)A.v[i]); free(A.v[i]); }
+      (void)read0((char*)A.v[i]); free(A.v[i]);
+    }
     GP_DATA->flags = f; logfile = l;
   }
   free(A.v);

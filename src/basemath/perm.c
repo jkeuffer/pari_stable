@@ -173,6 +173,17 @@ vecsmall_coincidence(GEN u, GEN v)
   return s;
 }
 
+/* returns the first index i<=n such that x=v[i] if it exits, 0 otherwise */
+long
+vecsmall_isin(GEN v, long x)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++)
+    if (v[i] == x) return i;
+  return 0;
+}
+
+
 long
 vecsmall_pack(GEN V, long base, long mod)
 {

@@ -343,7 +343,7 @@ get_gell(GEN bnr, GEN subgp, long all)
   GEN gell;
   if (all)        gell = stoi(all);
   else if (subgp) gell = det(subgp);
-  else            gell = det(diagonal(gmael(bnr,5,2)));
+  else            gell = det(diagonal_i(gmael(bnr,5,2)));
   if (typ(gell) != t_INT) err(arither1);
   return gell;
 }
@@ -693,7 +693,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   }
   (void)hnfall_i(concatsp(P, subgroup), &U, 1);
   setlg(U, l); for (j=1; j<l; j++) setlg(U[j], l);
-  return hnfmodid(concatsp(U, diagonal(raycycz)), (GEN)raycycz[1]);
+  return hnfmodid(concatsp(U, diagonal_i(raycycz)), (GEN)raycycz[1]);
 }
 
 static GEN
