@@ -2979,9 +2979,11 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 
 /* assume dres := deg(Res_Y(a,b), X) <= deg(a,Y) * deg(b,X) < p */
 static GEN
-u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, ulong dres, GEN x, GEN y)
+Fly_Flxy_resultant_polint(GEN a, GEN b, ulong p, ulong dres)
 {
   ulong i, n, la = (ulong)leading_term(a);
+  GEN  x = cgetg(dres+2, t_VECSMALL);
+  GEN  y = cgetg(dres+2, t_VECSMALL);
  /* Evaluate at dres+ 1 points: 0 (if dres even) and +/- n, so that P_n(X) =
   * P_{-n}(-X), where P_i is Lagrange polynomial: P_i(j) = delta_{i,j} */
   for (i=0,n = 1; i < dres; n++)
@@ -2993,7 +2995,7 @@ u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, ulong dres, GEN x, GEN y)
   {
     x[++i] = 0;   y[i] = u_FpX_eval_resultant(a,b, x[i], p,la);
   }
-  return Flv_polint(x,y, p, b[1]);
+  return Flv_polint(x,y, p, evalvarn(varn(b)));
 }
 
 /* x^n mod p */
@@ -3069,7 +3071,7 @@ u_FpX_divexact(GEN x, GEN y, ulong p)
 }
 
 static GEN
-u_FpYX_subres(GEN u, GEN v, ulong p)
+Flyx_subres(GEN u, GEN v, ulong p)
 {
   pari_sp av = avma, av2, lim;
   long degq,dx,dy,du,dv,dr,signh;
@@ -3115,7 +3117,7 @@ u_FpYX_subres(GEN u, GEN v, ulong p)
   return gerepileupto(av, z);
 }
 
-/* return a t_POL (in dummy variable 0) whose coeffs are the coeffs of b,
+/* return a t_POL (in variable v) whose coeffs are the coeffs of b,
  * in variable v. This is an incorrect PARI object if initially varn(b) < v.
  * We could return a vector of coeffs, but it is convenient to have degpol()
  * and friends available. Even in that case, it will behave nicely with all
@@ -3142,25 +3144,16 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    long l = lg(b);
-
-    a = ZX_Flx(a, pp);
-    for (i=2; i<l; i++)
-      b[i] = (long)ZX_Flx((GEN)b[i], pp);
+    b = ZXX_Flxy(b, pp, evalvarn(vX));
     if ((ulong)dres >= pp)
     {
-      l = lg(a);
-      a[0] = evaltyp(t_POL) | evallg(l);
-      a[1] = evalsigne(1) | evalvarn(vY);
-      for (i=2; i<l; i++)
-        a[i] = (long)Fl_Flx(a[i],evalvarn(vX));
-      x = u_FpYX_subres(a, b, pp);
+      a = ZXX_Flxy(a, pp, evalvarn(vX));
+      x = Flyx_subres(a, b, pp);
     }
     else
     {
-      x = cgetg(dres+2, t_VECSMALL);
-      y = cgetg(dres+2, t_VECSMALL);
-      x = u_FpY_FpXY_resultant(a, b, pp, (ulong)dres, x, y);
+      a = ZX_Flx(a, pp);
+      x = Fly_Flxy_resultant_polint(a, b, pp, (ulong)dres);
       setvarn(x, vX);
     }
     return Flx_ZX(x);
@@ -3318,7 +3311,7 @@ INIT:
       H1p= (GEN)C1[1];
     }
     else
-      Hp = u_FpY_FpXY_resultant(a, b, p, (ulong)dres, x, y);
+      Hp = Fly_Flxy_resultant_polint(a, b, p, (ulong)dres);
     if (!H && degpol(Hp) != dres) continue;
     if (dp != 1) Hp = Flx_Fl_mul(Hp, powusmod(dp,-degA,p), p);
     if (checksqfree) {
