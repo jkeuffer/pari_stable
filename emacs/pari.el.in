@@ -6,13 +6,13 @@
 
 ;; All functions of gp are preserved.
 
-;; Version 2.30 (14-June-1999)
+;; Version 2.32 (4-September-1999)
 ;; The original pari.el was written by Annette Hoffman.
 ;; Modified by David Carlisle (JANET: carlisle@uk.ac.man.cs).
 ;; Modified by Karim Belabas (belabas@math.u-bordeaux.fr) for gp 2.xxx.
 ;; Modified by Olivier Ramare (ramare@gat.univ-lille1.fr).
 
-;; Maintainer (22-November-1998): Olivier Ramare (ramare@gat.univ-lille1.fr).
+;; Maintainer (22-November-1998): Olivier Ramare (ramare@agat.univ-lille1.fr).
 
 ;; See pariemacs.txt  for more details.
 
@@ -23,11 +23,13 @@
 ;;     DON'T have it followed by a newline.
 
 ;; This file is split in six parts :
-;;   PART I : MAIN CONSTANTS
+;;   PART I : MAIN CONSTANTS (contains a macro).
 ;;            Some of them may have to be modified by the user.
+;;            The macro 'gp-defcustom is defined there.
 ;; PART  II : KEYMAPS AND OTHER VARIABLES
 ;;            including the two macros 'gp-hilit-init and
-;;            'gp-tell-hilit-about-patterns
+;;            'gp-tell-hilit-about-patterns. Also the substitution
+;;            'gp-setup is being defined there.
 ;; PART III : gp-mode AND gp-script-mode
 ;; PART  IV : GENERAL FUNCTIONS
 ;;            Contains: HANDLING THE WINDOWS ...
@@ -46,9 +48,10 @@
 ;;
 ;; Note that this order is not random! In order for the compilation
 ;; to work properly with macros, they *should* be defined before
-;; they are called.
+;; they are called (if emacs-version is below 20.3).
 
 (provide 'pari)
+(eval-and-compile (require 'backquote)) ;; This file is used in macros.
 
 ;;--------------------------
 ;; PART I : MAIN CONSTANTS
@@ -66,14 +69,45 @@
 (defconst gp-file-name "@bindir@/gp"
  "The file name of the gp executable file")
 
+;; To customize variables:
+(eval-and-compile
+(defvar old-emacs-versionp
+  (< (string-to-number emacs-version) 20)))
+  ;; This variable is required since some functions are not
+  ;; supported by earlier versions.
+
+(defmacro gp-defcustom (symbol value doc &rest args)
+ "If emacs-version is larger than 20, then customization of the
+variables is allowed, else no."
+   (` (if old-emacs-versionp
+      (, (list 'defvar symbol value
+               ;; The "doc" string of a customizable variable starts
+               ;; with a "*". Remove it here.
+               (list 'substring doc 1)))
+      ;; definition of 'defcustom taken from custom.el:
+      (, (nconc (list 'custom-declare-variable
+	       (list 'quote symbol)
+	       (list 'quote value)
+	       doc)
+	 args)))))
+
+(eval-and-compile
+(or old-emacs-versionp
+(defgroup gp nil
+"Major mode for editing GP source in Emacs"
+:group 'languages)))
+
 ;; CONFIGURE:
 (defvar gp-readline-enabledp @readline-enabledp@
 "t is readline is enabled. Emacs will try to set it properly
 whenever a gp-session is started.")
 
-(defvar pari-colors
-  (expand-file-name (concat gp-gphelp-dir "pari-colors.el" ))
-  "Where the choice of colors is stored")
+(gp-defcustom pari-colors 
+  (eval (expand-file-name (concat gp-gphelp-dir "pari-colors.el" )))
+"*Where the choice of colors is stored"
+:type 'file
+:group 'gp)
+
 ;; Should be set in a hook if pari.el is installed on a network,
 ;; since these colors are user dependent. It is reset in
 ;; 'gp-hilit-translate called by 'gp-hilit-init after reading the hooks.
@@ -81,12 +115,16 @@ whenever a gp-session is started.")
 ;; the chosen file is not writable. This should take care of the case
 ;; of a casual user accessing to gp through a network.
 
-(defvar gp-additional-completion-file ""
+(gp-defcustom gp-additional-completion-file ""
 "*A name (string) of a completion file used in supplement for completion.
-This file should have the format of 'gp-menu files.")
+This file should have the format of 'gp-menu files."
+:type 'file
+:group 'gp)
 
-(defvar gp-tutorial-requiredp t
-  "*T if comments should be given for some functions.")
+(gp-defcustom gp-tutorial-requiredp t
+"*T if comments should be given for some functions."
+:type 'boolean
+:group 'gp)
 ;; The functions concerned are : 'gp-cmd2-to-paint, 'gp-make-completion-file
 
 ;; CONFIGURE:
@@ -94,14 +132,29 @@ This file should have the format of 'gp-menu files.")
 ;; (defconst gp-dvi-preview "texsun"
  "dvi previewer (and options)")
 
-(defvar gp-no-color-item nil
-  "*T means remove the menu-bar item [GP/Colors]")
+(gp-defcustom gp-no-menu-bar nil
+"*A non nil value means that we do not want any menu-bar"
+:type 'boolean
+:group 'gp)
 
-(defvar gp-no-hilit nil
-  "*If this variable is non-nil don't highlight GP scripts and *PARI* buffer")
+(gp-defcustom gp-no-color-item nil
+"*T means remove the menu-bar item [GP/Colors]"
+:type 'boolean
+:group 'gp)
 
-(defvar gp-no-menu-bar nil
-  "*A non nil value means that we do not want any menu-bar")
+(gp-defcustom gp-no-hilit nil
+"*If this variable is non-nil don't highlight GP scripts and *PARI* buffer.
+Note however that any change of value will become effective only during
+next session."
+;; Simply because the really relevant variable is 'gp-can-hilit.
+:type 'boolean
+:group 'gp)
+
+(gp-defcustom gp-no-separate-window-for-mistakes nil
+"*T means errors under the gp calculator will not be
+displayed on a separate window."
+:type 'boolean
+:group 'gp)
 
 (defconst gp-temp-directory "/tmp/"
   "*Directory in which to create temporary files.")
@@ -115,20 +168,33 @@ This file should have the format of 'gp-menu files.")
   "Temporary file name used for text being sent as input to emacs.")
 
 (defconst gp-max-saved-wind-conf 20
-"Maximal number of saved window configurations")
+  "Maximal number of saved window configurations")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Individual users may want to re-set some of the variables in this section
 ;; in a gp-mode-hook in their .emacs file (see pariemacs.txt for examples).
 
-(defvar gp-stack-size "10000000" "*Default stack size: passed to gp.")
-(defvar gp-prime-limit "500000" "*Default prime limit: passed to gp.")
-(defvar gp-prompt-for-args nil
+(gp-defcustom gp-stack-size 10000000
+"*Default stack size passed to gp."
+:type 'integer
+:group 'gp)
+
+(gp-defcustom gp-prime-limit 500000
+"*Default prime limit passed to gp."
+:type 'integer
+:group 'gp)
+
+(gp-defcustom gp-prompt-for-args nil
   "*A non-nil value makes M-x gp act like C-u M-x gp, 
-   ie prompt for the command line arguments.")
-(defvar gp-keep-PARI-buffer-when-quitting nil
-"T means what it says...")
+   ie prompt for the command line arguments."
+:type 'boolean
+:group 'gp)
+
+(gp-defcustom gp-keep-PARI-buffer-when-quitting nil
+"*T means what it says..."
+:type 'boolean
+:group 'gp)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -153,7 +219,6 @@ This file should have the format of 'gp-menu files.")
       (insert messg "\n"))))
 
 (defsubst gp-setup nil
-  (require 'backquote)
   (defconst gp-places-alist
     (list
     ''gp-error ''gp-history ''gp-prompt  ''gp-output ''gp-input
@@ -248,6 +313,10 @@ This file should have the format of 'gp-menu files.")
 "t if expression to be send to GP starts with a {.")
 (defvar gp-reads-this-buffer nil
 "name of the buffer gp is interpreting.")
+(defvar gp-latest-error nil
+"Regexp matching latest execution error. It contains a grouping
+whose closing parenthesis corresponds to the point where gp
+has detected a mistake.")
 (defvar gp-registers-list nil
 "List of registers from 0 to (1- gp-max-saved-wind-conf)
 where window-configurations are stored.
@@ -364,6 +433,9 @@ nil
 (define-key gp-map "\C-n"    (function next-line))
 (define-key gp-map "\M-p"    (function gp-previous-command))
 (define-key gp-map "\M-n"    (function gp-next-command))
+(define-key gp-map "\M-s"    (function gp-skip-to-error))
+(define-key gp-map [C-kp-subtract] (function gp-remove-last-output))
+(define-key gp-map [M-kp-subtract] (function gp-remove-last-action))
 )
 
 (defvar gp-script-map nil
@@ -382,6 +454,7 @@ nil
 (define-key gp-script-map "\M-\\t"  (function gp-meta-t))
 (define-key gp-script-map "\M-\\v"  (function gp-meta-v))
 (define-key gp-script-map "\M-\\z"  (function gp-run-in-region))
+(define-key gp-script-map "\M-s"    (function gp-skip-to-error))
 )
 
 (defvar gp-menu-map nil
@@ -521,8 +594,9 @@ nil
         "Fonctions ou Sections dans la description desquelles \"%s\" apparait :"  ;;  no 31
         "Sujet"
         "Nom du fichier de completion : "                ;; no 33
-        "Could not locate the error."                                 ;;  no 34
-        "Probable mistake."                                 ;;  no 35
+        "Erreur introuvable."                                 ;;  no 34
+        "Probable typo."                                 ;;  no 35
+        (concat "Aucune erreur a localiser ou buffer (" gp-reads-this-buffer ") absent") ;; no 36
         ))
      (english .
        ("Using default choice for completion"            ;; no 1
@@ -559,7 +633,8 @@ nil
         "Subject"                                                     ;;  no 32
         "Name of the completion file: "                               ;;  no 33
         "Could not locate the error."                                 ;;  no 34
-        "Probable mistake."                                 ;;  no 35
+        "Probable mistake."                                           ;;  no 35
+        (concat "No error to be found or missing buffer (" gp-reads-this-buffer ")") ;; no 36
         ))
      (german  .
        ("Using default choice for completion"         ;; no 1
@@ -596,7 +671,8 @@ nil
         "Subject"
         "Name of the completion file: "
         "Could not locate the error."                                 ;;  no 34
-        "Probable mistake."                                           ;;  no 35
+        "Probable mistake."                                 ;;  no 35
+        (concat "No error to be found or missing buffer (" gp-reads-this-buffer ")") ;; no 36
         ))))
 
 ;;---------------------------------------
@@ -604,7 +680,7 @@ nil
 ;;---------------------------------------
 
 (defun gp-messager (msg-number)
-  (nth msg-number (assq gp-language gp-messages-list)))
+  (eval (nth msg-number (assq gp-language gp-messages-list))))
 
 (defsubst file-really-exists-p (file)
   (and (not (string= file "")) (file-exists-p file)))
@@ -1061,8 +1137,10 @@ The answer is t if success, and nil otherwise."
           (gp-command
            (concat
              (gp-read-input "Gp executable ?" gp-file-name "" flag)
-             (gp-read-input "Stack size ?" gp-stack-size " -s " flag)
-	     (gp-read-input "Prime limit ?" gp-prime-limit " -p " flag)
+             (gp-read-input "Stack size ?" (number-to-string gp-stack-size)
+                            " -s " flag)
+	     (gp-read-input "Prime limit ?" (number-to-string gp-prime-limit)
+                            " -p " flag)
 	     " -emacs"  ;; -emacs requested by gp2.
              )))
  
@@ -1118,9 +1196,10 @@ The answer is t if success, and nil otherwise."
 (defun gp-run-in-region (beg end)
   "Run GP on the current region.  A temporary file (gp-temp-file) is
 written in gp-temp-directory, but GP is run in the current directory."
-;; Set gp-input-start and gp-input-end.
+;; Set gp-input-start, gp-input-end and gp-reads-this-buffer.
    (interactive "r")
    (setq gp-input-start beg gp-input-end end)
+   (setq gp-reads-this-buffer (buffer-name))
    (gp-input-filter)
    (write-region beg end gp-temp-file nil nil)
    (gp nil)     ;; In case a GP-process was not already running, starts one.
@@ -1191,50 +1270,83 @@ written in gp-temp-directory, but GP is run in the current directory."
             (gp-info-wind-conf)
 	    (select-window wind))))))
 
+(defsubst gp-frame-parameter (frame parameter)
+  (if old-emacs-versionp
+    (cond ((eq parameter 'cursor-color) "black")
+          ((eq parameter 'background-color) "blue")
+          (t nil))
+    (frame-parameter frame parameter)))
+
 (defun gp-special-output-filter nil
-  (let ((wind (selected-window))
-        (errp (save-excursion
+  (let ((errp (save-excursion
                 (goto-char (1+ gp-input-end))
                 (or (looking-at "^  \\*\\*\\*   unexpected character: \\.\\.\\.")
                     (looking-at "^  \\*\\*\\*   expected character: [^\n]*\n  \\*\\*\\*   instead of: ")
+                    (looking-at "^  \\*\\*\\*   expected character: [^\n]*\n  \\*\\*\\*   instead of:\n  \\*\\*\\*   \\.\\.\\.")
+                    (looking-at "^  \\*\\*\\*   unknown function or error in formal parameters:\n  \\*\\*\\*   \\.\\.\\.") 
                     (looking-at "^  \\*\\*\\*   unexpected character: "))
                 )))
       (if errp  ;; T if an error has been detected.
        	(progn
           (goto-char (match-end 0))
-	  (let* ((astring (buffer-substring (point)
+	  (let* (;; the line containing the mistake:
+                 (astring (buffer-substring (point)
                                             (progn (end-of-line) (point))))
-                 (aregexp (substring astring 0 1))
+                 ;; how many characters of astring have been sent to
+                 ;; gp-latest-error:
                  (place 1)
-                 (which-char (- (search-forward "^") (progn (end-of-line) (point))))
-                 (special-char (substring astring (1- (+ (length astring) which-char))
-                                                  (+ (length astring) which-char))))
+                 ;; "location" of the mistake:
+                 (which-char (+ (length astring) (- (search-forward "^")
+                                                    (progn (end-of-line) (point))))))
+            ;; We create gp-latest-error:
+           (setq gp-latest-error (concat "\\(" (regexp-quote (substring astring 0 1))))
             (while (< place (length astring))
-              (setq aregexp
-                    (concat aregexp "[ \t\n]*\\(\\(/\\*[^\\*]*\\*/\\|\\\\\\.*$\\)[ \t\n]*\\)*"
-                            (regexp-quote (substring astring place (setq place (1+ place)))))))
+              (setq gp-latest-error
+                    (concat gp-latest-error "[ \t\n]*\\(\\(/\\*[^\\*]*\\*/\\|\\\\\\.*$\\)[ \t\n]*\\)*"
+                            (regexp-quote (substring astring place (setq place (1+ place))))))
+              (if (= place which-char)
+                  (setq gp-latest-error (concat gp-latest-error "\\)"))))
             (select-window (get-buffer-window gp-reads-this-buffer))
             (goto-char (point-min))
-            (if (re-search-forward aregexp nil t)
-                (progn (forward-char which-char)
-                       (search-backward special-char)
-                       (message (gp-messager 35))
-                       ;; Make the cursor blink:
-                       (let ((old-color "black")
-                             (other-color "blue")  ;;  a fix...
-                             (how-many 6) (how-long-dark 50) (how-long-light 70) aux)
-                            (while (> how-many 0)
-                              (set-cursor-color other-color)
-                              (sit-for 0 how-long-light)
-                              (set-cursor-color old-color)
-                              (sit-for 0 how-long-dark)
-                              (setq how-many (1- how-many)))
-                            (set-cursor-color other-color)
-                            (sit-for 0 how-long-light)
-                            (set-cursor-color old-color)
-                            ))
-                (message (gp-messager 34)))
-	    )))))
+            (gp-skip-to-error))))))
+
+(defun gp-skip-to-error nil
+  (interactive)
+
+  (if (and gp-reads-this-buffer gp-latest-error
+           (buffer-live-p (get-buffer gp-reads-this-buffer)))
+    (progn
+      (if (string= (buffer-name) gp-reads-this-buffer) nil
+          (switch-to-buffer gp-reads-this-buffer)
+          (goto-char (point-min)))
+      (if (re-search-forward gp-latest-error (point-max) t)
+          (progn (goto-char (1- (match-end 1)))
+                 ;; Warn the user this place is maybe not the good one !:
+                 (message (gp-messager 35))
+                 ;; Make the cursor blink:
+                 (let ((old-color (gp-frame-parameter nil 'cursor-color))
+                       ;; Does not work... Why ? :
+                       (other-color (gp-frame-parameter nil 'background-color))
+                       (how-many 6) (how-long-dark 50) (how-long-light 70) aux)
+                       ;; The lighter color should stay longer. In case of a dark background
+                       ;; exchange the times:
+                       (if (eq hilit-background-mode 'dark)
+                           (progn (setq aux how-long-light)
+                                  (setq how-long-light how-long-dark)
+                                  (setq how-long-dark aux)))
+                       (setq other-color "blue")
+                       (while (> how-many 0)
+                         (set-cursor-color other-color)
+                         (sit-for 0 how-long-light)
+                         (set-cursor-color old-color)
+                         (sit-for 0 how-long-dark)
+                         (setq how-many (1- how-many)))
+                       (set-cursor-color other-color)
+                       (sit-for 0 how-long-light)
+                       (set-cursor-color old-color)))
+          ;; Could not locate the error:
+          (message (gp-messager 34))))
+    (message (gp-messager 36))))
 
 (defun gp-usual-start ()
   "Start a GP session."
@@ -1273,8 +1385,7 @@ written in gp-temp-directory, but GP is run in the current directory."
          (gp-beginning-of-last-line)
          (insert (concat "\\r " gp-pgrm))
          (set-marker (process-mark gp-process) (point))
-         (gp-send-input)
-         (setq gp-reads-this-buffer nil)))
+         (gp-send-input)))
 
 (defun gp-C-j nil
   (interactive)
@@ -1321,14 +1432,15 @@ expression is complete or not."
   (goto-char (setq gp-input-start (match-end 0)))  ;; end of prompt
   (setq gp-input-start-bracketp (looking-at "[ \t]*{"))
 
-  (let ((lastp t))
+  (let ((lastp t))  ;; t if this input is ths last one
+                    ;; (i.e. is not followed by a prompt).
     (if gp-input-start-bracketp
       (progn
         (save-excursion
-          (if (re-search-forward "}" nil t)
+          (if (re-search-forward "}" (point-max) t)
               (setq gp-input-end (point))
               (setq gp-input-end nil)))
-        (setq lastp (not (re-search-forward gp-prompt-pattern nil t)))
+        (setq lastp (not (re-search-forward gp-prompt-pattern (point-max) t)))
         (if (or (and (not lastp) gp-input-end
                      (< (match-beginning 0) gp-input-end))
                 (not gp-input-end))
@@ -1338,13 +1450,13 @@ expression is complete or not."
                 ;; Repair the \n:
                 (progn
                   (goto-char gp-input-start)
-                  (while (search-forward "\n" nil t)
+                  (while (search-forward "\n" (point-max) t)
                     (put-text-property (1- (point)) (point)
                                        'gp-virtual-newline t)))
                 (setq gp-input-end (match-beginning 0)))
               (setq gp-input-start-bracketp nil)))))
 
-    (if gp-input-start-bracketp ;; properly encloed expression.
+    (if gp-input-start-bracketp ;; properly enclosed expression.
       (setq gp-complete-expression t)
 
       (setq gp-input-end (gp-find-end-of-input (point-max)))
@@ -1474,16 +1586,25 @@ of the gp program."
            t)
           (t nil))))
 
-(defun gp-send-input (&optional local)
-  "Sends input to gp. Does not send incomplete expressions
+(defun gp-send-input (&optional localp)
+  "   Sends input to gp. Does not send incomplete expressions
    ie those starting with {, without a matching }, or those
    ending with \\ .
    Uses a temporary file (and \\r ) for large expressions.
-   If LOCAL is non nil, sends the output to 'gp-output-filter."
+   If LOCALP is non nil, then it is assumed the input comes
+   from the *PARI* buffer, in which case if this input was a
+   `\r '-command, sends the output to 'gp-output-filter.
+   If LOCALP is nil, then if a file is being read which is
+   currently being displayed, sends the output to 'gp-special-output-filter.
+
+   Sub-functions are 'gp-treat-special-inputp and 'gp-copy-input
+   with whom it shares the variables:
+   'gp-input-start 'gp-input-end 'gp-complete-expression
+   'gp-input-start-backetp 'gp-reads-this-buffer."
 
   (if (gp-treat-special-inputp)
       nil ;; already treated.
-    (gp-copy-input)) ;; does all the work!
+      (gp-copy-input)) ;; does all the work!
   (if gp-complete-expression
 ;; If it is a complete expression do this:
       (progn
@@ -1504,14 +1625,15 @@ of the gp program."
         (set-marker (process-mark gp-process) (point))
         (if gp-should-wait-for-outputp (gp-update-hilit)
             (setq gp-should-wait-for-outputp t))
-        (if local
+        (if localp
             ;; Sometimes the output should not be sent to the output filter:
            (progn
              (save-excursion
                (goto-char gp-input-start)
-               (setq local
-                     (re-search-forward "\\\\r +" gp-input-end t)))
-             (if local (gp-output-filter)))
+               (setq localp
+                     (not (re-search-forward "\\\\r +" gp-input-end t))))
+             (if (and localp (not gp-no-separate-window-for-mistakes))
+                 (gp-output-filter)))
            (if (and (stringp gp-reads-this-buffer)
                     (buffer-visiblep gp-reads-this-buffer))
                ;; If an error is detected, and a buffer is visible
@@ -1523,7 +1645,9 @@ of the gp program."
       (gp-C-j)
       (message (gp-messager 9))))
 
-(defun gp-send-local-input nil (interactive) (gp-send-input t))
+(defun gp-send-local-input nil
+  "An input is declared to be `local' if it comes from the *PARI* buffer."
+  (interactive) (gp-send-input t))
 
 (defun gp-interrupt ()
   "Interrupts gp.
@@ -1784,7 +1908,7 @@ With nil, it is 'gp-quiet-meta-command."
   (interactive)
   (save-excursion
     (goto-char (point-max))
-    (re-search-backward gp-prompt-pattern nil t 2)
+    (re-search-backward gp-prompt-pattern (point-min) t 2)
     (goto-char (match-end 0))
     (gp-copy-input)))
 
@@ -1826,6 +1950,23 @@ gp-previous-command and gp-next-command and reciprocally"
   (interactive)
   (gp-toggle-previous-next-behavior)
   (message (gp-messager 14)))
+
+(defun gp-remove-last-output nil
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (if (re-search-backward gp-prompt-pattern (point-min) t)
+        (delete-region gp-input-end (1- (point))))))
+
+(defun gp-remove-last-action nil
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (if (re-search-backward gp-prompt-pattern (point-min) t)
+        (let ((where (1- (point))))
+             (goto-char gp-input-start)
+             (if (re-search-backward gp-prompt-pattern (point-min) t)
+                 (delete-region (1- (point)) where))))))
 
 ;;-------------------------
 ;; GP COMPLETION FUNCTIONS
@@ -2068,7 +2209,7 @@ ie a list of list whose cars are strings used for completion."
 	      (message (gp-messager 15)) (goto-char p)))))
 
       ;; Get end of completed-part:
-      (search-backward "@" nil t)
+      (search-backward "@" (point-min) t)
       (setq to-insert (buffer-substring temp (point)))
       (forward-char 1) ;; In order to skip the "@".
       ;; Possible further completions:
@@ -2142,7 +2283,7 @@ is a list of list of possible matching words."
     (cond ((and gp-readline-enabledp gp-process
                 (equal (process-buffer gp-process) (current-buffer)))
            (save-excursion
-              (if (re-search-backward gp-prompt-pattern nil t)
+              (if (re-search-backward gp-prompt-pattern (point-min) t)
                   (setq gp-input-start (match-end 0))  ;; end of prompt
                   (setq gp-input-start (point-min))))
            (gp-merge-completions
@@ -2216,7 +2357,7 @@ is a list of list of possible matching words."
        (find-file-noselect my-completion-file))
     (goto-char (point-min))
     (if (eobp) (gp-completion-stamp my-completion-file)
-               (re-search-forward "#.*$" nil t)
+               (re-search-forward "#.*$" (point-max) t)
                (goto-char (match-end 0))
                (if (eobp) (insert "\n") (forward-char 1)))
     (message (gp-messager 16)))
@@ -2259,8 +2400,8 @@ is a list of list of possible matching words."
 
 (defmacro gp-cpl-file-has (astring)
   "t if the edited completion file has the string ASTRING
-at a beginning of line followed by \n or a  space or a #,
-and t when ASTRING is the empty string."
+at a beginning of line followed by \n or a  space or a #.
+Also t when ASTRING is the empty string."
  (`
   (if (string= (, astring) "") t
     (save-excursion
@@ -2271,7 +2412,7 @@ and t when ASTRING is the empty string."
          nil  ;; Return value is nil.
         (forward-line 1)
         (re-search-forward
-         (concat "^" (regexp-quote (, astring)) "[\n| |#]") nil t nil))))))
+         (concat "^" (regexp-quote (, astring)) "[\n| |#]") (point-max) t))))))
 
 (defun gp-prepare-completion-file (option)
 "  Write in the file `buffername.cpl' which has the format of a completion
@@ -2280,7 +2421,7 @@ variables of the visited file. OPTION is t means save the buffer on file,
 nil means don't do that if the file wasn't existing already."
   (let* ((file (buffer-name)) (my-cpl-file (concat file ".cpl")))
    (or option (gp-make-cpl-help file))
-   ;; We prepare the buffer:
+   ;; Prepare buffer:
    (save-excursion
     (if (or option
             (file-exists-p (expand-file-name my-cpl-file)))
@@ -2289,28 +2430,28 @@ nil means don't do that if the file wasn't existing already."
     (if (file-exists-p (expand-file-name my-cpl-file))
         (progn
            ;; Assume it has the format of a completion-file:
-           (re-search-forward "#" nil t)
+           (re-search-forward "#" (point-max) t)
            (end-of-line)
            (if (eobp) (insert "\n")
                (next-line 1) (beginning-of-line)
                (kill-region (point) (point-max))))
         (if option (gp-completion-stamp my-cpl-file)
             (insert "\n### Function Names : (one per line)\n")))
-    ;; Add the function names:
+    ;; Add function names:
     (set-buffer file)
     (goto-char (point-min))
     (let ((thelist nil))
-    (while (re-search-forward gp-function-proto-pstart nil t nil)
+    (while (re-search-forward gp-function-proto-pstart (point-max) t)
            (add-to-list 'thelist
              (buffer-substring (match-beginning 2) (match-end 2))))
     (setq thelist (sort thelist (function string-lessp))) ;; We order things.
     (set-buffer my-cpl-file)
     (mapcar (lambda (fn) (insert fn "\n")) (gp-clear-list2 thelist)))
 
-    ;; Prepare the buffer for the names of global variables:
+    ;; Prepare buffer for names of global variables:
     (insert (gp-messager 25) "\n")
 
-    ;; Add the global-variable-names:
+    ;; Add global-variable-names:
     (set-buffer file)
     (goto-char (point-min))
     (let (theplace (thelist nil))
@@ -2451,7 +2592,7 @@ The available commands are
   (if (eobp)
     (progn (ding)
            (goto-char (point-min))
-           (re-search-forward "###\n" nil t))))
+           (re-search-forward "###\n" (point-max) t))))
 
 (defun gp-menu-previous ()
   "Move up one line of the gp help menu. (Go to bottom if at the top.)"
@@ -2471,7 +2612,7 @@ The available commands are
            (< (point) gp-menu-end-simple))
       ;; multiple columns display:
       (progn
-        (re-search-forward "[\n\t ][a-zA-Z]" nil t)
+        (re-search-forward "[\n\t ][a-zA-Z]" (point-max) t)
         (forward-char -1))
       ;; single column display:
       (forward-char 1)))
@@ -2482,7 +2623,7 @@ The available commands are
            (< (point) gp-menu-end-simple))
       ;; multiple columns display:
       (progn
-        (re-search-backward "[\n\t ][a-zA-Z]" nil t)
+        (re-search-backward "[\n\t ][a-zA-Z]" (point-min) t)
         (forward-char 1))
       ;; single column display:
       (forward-char -1)))
@@ -2498,12 +2639,12 @@ The available commands are
 
 (defsubst gp-menu-get-beg nil
   (save-excursion
-    (re-search-backward "\\`\\|[ \n]" nil t)
+    (re-search-backward "\\`\\|[ \n]" (point-min) t)
     (match-end 0)))
 
 (defsubst gp-menu-get-end nil
   (save-excursion
-    (re-search-forward "\\'\\|[ \n]" nil t)
+    (re-search-forward "\\'\\|[ \n]" (point-max) t)
     (match-beginning 0)))
 
 (defun gp-menu-select ()
@@ -2999,13 +3140,13 @@ the list 'gp-colors-alist"
 
 (defsubst gp-build-color-menu nil
   "Build the Colors menu"
-  (if (not gp-no-color-item)
+  (if (and (not gp-no-color-item)
+           (eq window-system 'x) (x-display-color-p))
   (if (not (eq gp-color-menu-list nil))
   gp-color-menu-list
   (setq gp-color-menu-list
   (list
-      (if (and (eq window-system 'x) (x-display-color-p))
-      (append
+     (append
         (list "Colors")
         ;; There is an entry for each pattern to be colored.
         ;; A list of these items can be found in gp-places-alist.
@@ -3026,7 +3167,7 @@ the list 'gp-colors-alist"
         ;; In order to save the changes made in the file pari-colors.
         ["Save" gp-save-colors pari-colors-modifiedp]
         ["Hilit Switch" gp-hilit-switch t]
-        ["Rehilit All" gp-update-hilit-buffers t]))))))))
+        ["Rehilit All" gp-update-hilit-buffers t])))))))
 
 (defconst gp-metakeys-gp-mode-menu
   (list
@@ -3100,6 +3241,7 @@ the list 'gp-colors-alist"
     (if (equal major-mode 'gp-script-mode)
         (list ["Add Comment" gp-add-comment t]) nil)
     (list ["Complete" gp-complete t])
+    (list ["Skip to error" gp-skip-to-error t])
     (if (equal major-mode 'gp-mode)
         (list ["Copy Last Input" gp-copy-last-input (processp gp-process)])
         nil)
@@ -3152,4 +3294,4 @@ the list 'gp-colors-alist"
         (list ["Previous Setting" gp-restore-wind-conf
                                   gp-registers-list])))))
 
-;;; pari.el ends here   ----------3051 lines
+;;; pari.el ends here   ----------3240 lines

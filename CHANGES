@@ -103,6 +103,8 @@ XR  1- modulus choice in bnrstark
 GN 16- minor tuning in pollardbrent() for huge integers (call ECM sooner)
    17- renamed directories dos -> Odos, o.xxx.xxx --> Oxxx.
        Moved win32/* --> Odos
+OR 18- new version of pari.el
+XR 19- new modular round 4 implementation 
 
   Added
     1- an optional argument to next()

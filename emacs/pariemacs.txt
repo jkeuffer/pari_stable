@@ -1,10 +1,13 @@
-This file refers to pari.el version 2.30
+This file refers to pari.el version 2.32
 
 Users that are used to previous versions should read the part concerning hooks.
 Also, one key-binging has been changed: M-RET (meta-return) is not linked
 anymore to 'gp-copy-input which copies the input at the end of the buffer
 but to 'gp-C-j which splits the line. The same effect can be obtained via
 C-j. The command 'gp-copy-input is available via M-c (meta-c).
+If your version of emacs is at least 20, then customization of most of the
+varaibles is now possible through the menu-bar.
+!! The variables 'gp-stack-size and 'gp-prime-limit are now *integers*.
 
                Some Notes on pari-mode
                =======================
@@ -103,6 +106,8 @@ C-u C-l                        Rehilight the whole buffer, however long.
          gp-set-date-prompt    Set a prompt that gives the date.
          gp-set-separator-prompt
                                Set a prompt with a separator
+M-s      gp-skip-to-error      Strives to locate the latest error detected
+                               while executing a program.
 
 
 Functions that are not linked with a key can be accessed through the menu-bar
@@ -140,6 +145,11 @@ M-n      gp-previous-command   Step to the previous command.
 C-n      next-line             Step to the next line.
 C-p      previous-line         Step to the previous line.
          gp-toggle             Exchange behaviour of C-p/M-p and C-n/M-n.
+C-kp-subtract
+         gp-remove-last-output Erases last output.
+M-kp-subtract
+         gp-remove-last-action Erases last input and its output.
+
 
 Within a gp-script set in gp-script-mode, the following extra commands
 are available:
@@ -246,9 +256,15 @@ current line.
 
 M-\ 
 ===
-The other comands on the M-\ prefix send the appropriate meta command to
+The other commands on the M-\ prefix send the appropriate meta command to
 gp. However they use the mini-buffer to read arguments (eg so that you can
 use filename completion) and display any output in the *gp-help* buffer.
+
+C-kp-subtract/M-kp-subtract
+===========================
+These commands are available only if you have a separate numerical keypad.
+You should then press the Control key (respectively the Alt key) and the -
+from this keypad.
 
 ===========================================================================
 
@@ -271,6 +287,10 @@ It is possible to override these default by setting the variable
 'pari-colors which can be set in 'pari-mode-hook (see below). Colors
 will then be read from and written to this file.
 
+Troubles may occur with "}". A "}" followed by a newline indicates the
+end of a function definition (starting with a "}"). Spaces ot tab-characters
+are *not* allowed there. So if you use "}" in a string, simply don't
+have it followed by a newline --- and pari.el won't get confused.
 
 NOTE: in order to set the colours, emacs has to be in charge from the
 moment you send a command until GP outputs an answer. Thus it will appear
@@ -373,6 +393,51 @@ starting as an additional completion file. It can be set in a hook. Default
 value is the empty string.
 ===========================================================================
 
+CUSTOMIZATION:
+==============
+
+From version 2.31 onwards, some environment variables can be set via
+the menu-bar provided you use a version of emacs which is at least 20.
+Otherwise, you can use the classical way through a hook as explained
+in the note number 3 below. Assuming you do have custom.el,
+the item to be used is [Help Customize Specific-Group],
+and the group to choose is gp. You can then modify the shown variables,
+and save them for future sessions: they will be stored in your .emacs
+file under the shape:
+
+  (custom-set-variables
+    ; To select where the colors are stored:
+    '(pari-colors "~/pari-colors.el")
+    ; To select a file containing possible completions:
+    '(gp-additional-completion-file "")
+    ; To set parameters of gp:
+    '(gp-stack-size 10000000)
+    '(gp-prime-limit 500000)
+    ; To ask gp to not/always ask for arguments:
+    '(gp-prompt-for-args nil)
+    ; To ask/remove tutorial help:
+    '(gp-tutorial-requiredp t)
+    ; To set/remove hilighting:
+    '(gp-no-hilit nil)
+    ; To set/remove the menu-bar item [GP/Colors]:
+    '(gp-no-color-item nil)
+    ; To set/remove both menu-bars:
+    '(gp-no-menu-bar nil)
+    ; To keep the PARI buffer when quitting:
+    '(gp-keep-PARI-buffer-when-quitting t)
+    ; To have mistakes displayed on a separate window:
+    '(gp-no-separate-window-for-mistakes nil))
+  (custom-set-faces)
+
+Within  the customization-window, you should save these values for them
+to become valid. Note that the variables having something to do with the
+menu-bar will affect only the next session since this menu-bar is
+computed at the beginning of each session. The same applies to 'gp-no-hilit
+since it is only used at the beginning of the session to set 'gp-can-hilit
+which is in fact the relevant variable.
+
+===========================================================================
+
 LISP EXPRESSIONS IN GP-SCRIPTS:
 ===============================
 
@@ -415,6 +480,30 @@ complicated and a project is to write a file translating simple MuPAD-syntax
 into gp-syntax.
 
 ===========================================================================
+
+HANDLING OF MISTAKES:
+=====================
+
+If you edit a program, execute it (or part of it) via the menu-bar,
+and an error is found, then emacs will try to locate the typo in your
+script. Note that this script should be in a visible window. Sometimes,
+the place shown will not be the proper one and you can ask for the next
+matching occurence by selecting the menu-item "Skip-to-error". Incidentally,
+this function will also start the search even if the buffer is not visible,
+in which case the search will start from the begining of the buffer and not
+from point-location.
+
+In the *PARI* buffer, mistake will be displayed on a separate window,
+so as not to crowd your session. However you can disable this behaviour
+by setting the variable 'gp-no-separate-window-for-mistakes to t.
+Exception to this is a \r command whose output will never go to a
+separate window.
+
+Alternatively, you can delete last output through the key C-kp-subtract
+(Control and the - from the numerical keypad), and all of last input and
+out via M-kp-subtract.
+
+===========================================================================
 Notes
 =====
 
@@ -434,7 +523,9 @@ Notes
 
 3) pari-mode-hook/gp-mode-hook/gp-script-mode-hook:
    Individual users can customise gp-mode without having to make copies of
-   the file pari.el. There are *three* hooks, namely gp-mode-hook,
+   the file pari.el and most of this customization is automatically done
+   (see the CUSTOMIZATION section above).
+   For more specific purposes there are *three* hooks, namely gp-mode-hook,
    gp-script-mode-hook and an additional hook 'pari-mode-hook common to both
    modes. You should mostly use pari-mode-hook but can use also the two more
    specialised gp-mode-hook which will be run by the gp command and
@@ -455,8 +546,8 @@ Notes
          (function (lambda ()
            (define-key gp-map "\M-\\p" 'gp-meta-p)
            (define-key gp-map "\M-p" 'gp-set-prompt)
-           (setq gp-stack-size "1000000")
-           (setq gp-prime-limit "2000")
+           (setq gp-stack-size 1000000)
+           (setq gp-prime-limit 2000)
            (gp-completion-file my-file)
        )))
 
@@ -469,7 +560,8 @@ Notes
         Let the completion system use all the commands listed in the
         file my-file.
 
-   Here is a generic way to set pari-mode-hook:
+   In case, customization is not possible through the menu-bar, (see
+   section CUSTOMIZATION), here is a generic way to set pari-mode-hook:
       (setq pari-mode-hook
        (function (lambda ()
               ; To select where the colors are stored:
@@ -485,15 +577,16 @@ Notes
               ; To set/remove both menu-bars:
               (setq gp-no-menu-bar nil)
               ; To set parameters of gp:
-              (setq gp-stack-size "10000000")
-              (setq gp-buffer-size "200000")
-              (setq gp-prime-limit "500000")
+              (setq gp-stack-size 10000000)
+              (setq gp-prime-limit 500000)
               ; To ask gp to not/always ask for arguments:
               (setq gp-prompt-for-args nil)
               ; To ensure a proper default for completion:
               (setq gp-complete-choice 'gp-complete)
               ; To keep the PARI buffer when quitting:
               (setq gp-keep-PARI-buffer-when-quitting t)
+              ; To have mistakes displayed on a separate window:
+              (setq gp-no-separate-window-for-mistakes nil)
               )))
 
    A change in prompt, which has not gone to the .gprc (see below), *has to*
@@ -522,15 +615,18 @@ Notes
       "-s", "-b" or "-p" are *not* sent to gp. 
    If RET is typed in response to any of the prompts produced by C-u M-x gp
       then the default value, ie., the value of gp-file-name, gp-stack-size,
-       gp-buffer-size or gp-prime-limit, is assumed. 
+      or gp-prime-limit, is assumed. 
    If a space is sent to the prompt (ie SPC RET) then the appropriate argument
        is not  sent to gp, even if the default is non-empty.
 
-   People who often use different settings for these arguments, may like to
-   add the line
+   People who often use different settings for these arguments, may like
+   either to add the line
 
    (setq gp-prompt-for-args t)
-   to their gp-mode-hook. This makes M-x gp act like C-u M-x gp.
+   to their gp-mode-hook, or to use the command (outside the gp-mode-hook)
+   (custom-set-variables
+      '(gp-prompt-for-args t))
+   This makes M-x gp act like C-u M-x gp.
 
 5) Prompt.
    Emacs needs to know at all time what your prompt looks like: it's stored
@@ -569,10 +665,11 @@ Notes
    colors are concerned, nothing that I know of.
 ===========================================================================
 
-  Modified: Olivier Ramare 14-June-1999 version 2.30.
+  Modified: Olivier Ramare 4-September-1999 version 2.32.
+  Modified: Olivier Ramare 23-June-1999 version 2.31.
   Modified: Olivier Ramare 15-Marsh-1999 version 2.28.
   Modified: Olivier Ramare 28-January-1999 version 2.24.
   Modified: Karim Belabas 13-January-1998 version 2.19.
   Modified from the original file pari.txt written by David Carlisle
 
-        15-Marsh-1999  (This file refers to pari.el version 2.28)
+  4-September-1999 version 2.32 (This file refers to pari.el version 2.32)
