@@ -109,7 +109,7 @@ mpatan(GEN x)
   p4 = mulrr(p2,p4); setexpo(p4, expo(p4)+m);
   if (inv) p4 = subrr(Pi2n(-1, lp), p4);
   if (sx < 0) setsigne(p4,-signe(p4));
-  affrr(p4,y); avma = av0; return y;
+  affr_fixlg(p4,y); avma = av0; return y;
 }
 
 GEN
@@ -171,10 +171,7 @@ gasin(GEN x, long prec)
         if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
         y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
       }
-      if (expo(x) < 0) {
-        y = cgetr(lg(x)); av = avma;
-        affrr(mpasin(x), y); avma = av; return y;
-      }
+      if (expo(x) < 0) { av = avma; return gerepileuptoleaf(av, mpasin(x)); }
       y = cgetg(3,t_COMPLEX);
       y[1] = (long)Pi2n(-1, lg(x));
       y[2] = (long)mpach(x, 1);
@@ -221,11 +218,8 @@ acos0(long e) {
 static GEN
 mpacos(GEN x)
 {
-  long l = lg(x);
-  GEN y = cgetr(l);
   pari_sp av = avma;
-  affrr( subrr(Pi2n(-1,l), mpasin(x)), y );
-  avma = av; return y;
+  return gerepileuptoleaf(av, subrr(Pi2n(-1,lg(x)), mpasin(x)));
 }
 
 GEN
@@ -317,7 +311,7 @@ rfix(GEN x,long prec)
 }
 
 static GEN
-sarg(GEN x, GEN y, long prec)
+cxarg(GEN x, GEN y, long prec)
 {
   pari_sp av = avma;
   x = rfix(x,prec);
@@ -342,7 +336,7 @@ garg(GEN x, long prec)
       return gerepileuptoleaf(av, garg(quadtoc(x, prec), prec));
 
     case t_COMPLEX:
-      return sarg((GEN)x[1],(GEN)x[2],prec);
+      return cxarg((GEN)x[1],(GEN)x[2],prec);
 
     case t_VEC: case t_COL: case t_MAT:
       return transc(garg,x,prec);
@@ -361,17 +355,16 @@ static GEN
 mpch(GEN x)
 {
   pari_sp av;
-  GEN y, z;
+  GEN z;
 
   if (gcmp0(x)) { /* 1 + x */
     long e = expo(x);
     if (e > 0) return realzero_bit(e);
     return realun(3 + ((-e)>>TWOPOTBITS_IN_LONG));
   }
-  y = cgetr(lg(x)); av = avma;
-  z = mpexp(x); z = addrr(z, ginv(z));
-  setexpo(z, expo(z)-1);
-  affrr(z, y); avma = av; return y;
+  av = avma;
+  z = mpexp(x); z = addrr(z, ginv(z)); setexpo(z, expo(z)-1);
+  return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -405,13 +398,12 @@ static GEN
 mpsh(GEN x)
 {
   pari_sp av;
-  GEN y,p1;
+  GEN z;
 
   if (!signe(x)) return realzero_bit(expo(x));
-  y = cgetr(lg(x)); av = avma;
-  p1 = mpexp(x); p1 = addrr(p1, divsr(-1,p1));
-  setexpo(p1, expo(p1)-1);
-  affrr(p1, y); avma = av; return y;
+  av = avma;
+  z = mpexp(x); z = addrr(z, divsr(-1,z)); setexpo(z, expo(z)-1);
+  return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -453,10 +445,8 @@ mpth(GEN x)
   if (cmprs(x, bit_accuracy(l)) >= 0) {
     y = realun(l);
   } else {
-    y = cgetr(l); av = avma;
-    t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
-    affrr(divrr(t, addsr(2,t)), y);
-    avma = av;
+    av = avma; t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
+    return gerepileuptoleaf(av, divrr(t, addsr(2,t)));
   }
   if (s < 0) setsigne(y, -signe(y)); /* tanh is odd */
   return y;
@@ -496,14 +486,12 @@ gth(GEN x, long prec)
 static GEN
 mpash(GEN x)
 {
-  long s = signe(x);
-  GEN z, y = cgetr(lg(x));
   pari_sp av = avma;
-
-  z = (s<0)? negr(x): x;
-  z = mplog( addrr(z, sqrtr( addrs(mulrr(z,z), 1) )) );
+  long s = signe(x);
+  GEN z = (s<0)? negr(x): x;
+  z = logr_abs( addrr(z, sqrtr( addrs(mulrr(z,z), 1) )) );
   if (s<0) setsigne(z, -signe(z));
-  affrr(z,y); avma = av; return y;
+  return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -552,13 +540,9 @@ gash(GEN x, long prec)
 static GEN
 mpach(GEN x, long s)
 {
-  long l = lg(x);
-  GEN z, y = cgetr(l);
   pari_sp av = avma;
-
-  if (s != signe(x)) { x = rcopy(x); setsigne(x, s); }
-  z = mplog( addrr(x, sqrtr( subrs(mulrr(x,x), 1) )) );
-  affrr(z,y); avma = av; return y;
+  GEN z = logr_abs( addrr_sign(x, s, sqrtr( subrs(mulrr(x,x), 1) ), 1) );
+  return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -623,11 +607,9 @@ gach(GEN x, long prec)
 static GEN
 mpath(GEN x)
 {
-  GEN z, y = cgetr(lg(x));
   pari_sp av = avma;
-
-  z = mplog( addrs(divsr(2,subsr(1,x)), -1) ); setexpo(z, expo(z)-1);
-  affrr(z, y); avma = av; return y;
+  GEN z = logr_abs( addrs(divsr(2,subsr(1,x)), -1) );
+  setexpo(z, expo(z)-1); return gerepileuptoleaf(av, z);
 }
 
 GEN
@@ -644,7 +626,7 @@ gath(GEN x, long prec)
 
       y = cgetg(3,t_COMPLEX);
       av = avma; 
-      p1 = mplog( addrs(divsr(2,addsr(-1,x)),1) );
+      p1 = logr_abs( addrs(divsr(2,addsr(-1,x)),1) );
       setexpo(p1, expo(p1)-1);
       y[1]=(long)gerepileuptoleaf(av, p1);
       y[2]=(long)Pi2n(-1, lg(x)); return y;
@@ -938,13 +920,15 @@ red_mod_2z(GEN x, GEN z)
 
 /* update lg(z) before affrr(y, z)  [ to cater for precision loss ]*/
 void
-rfixlg(GEN z, GEN y) {
+affr_fixlg(GEN y, GEN z) {
   long ly = lg(y), lz = lg(z);
   if (ly < lz)
   {
     setlg(z, ly);
     stackdummy(z + ly, lz - ly);
   }
+  /* lz <= ly */
+  affrr(y, z);
 }
 
 static GEN
@@ -958,12 +942,11 @@ cxgamma(GEN s0, int dolog, long prec)
   if (DEBUGLEVEL>5) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
-  if (signe(sig) <= 0 || expo(sig) < -1)
-  {
-    if (typ(s) == t_REAL || gexpo((GEN)s[2]) <= 16) funeq = 1;
+  if ((signe(sig) <= 0 || expo(sig) < -1)
+    && (typ(s) == t_REAL || gexpo((GEN)s[2]) <= 16))
+  { /* s <--> 1-s */
+    funeq = 1; s = gsub(gun, s); sig = real_i(s);
   }
-  /* s <--> 1-s */
-  if (funeq) { s = gsub(gun, s); sig = real_i(s); }
 
   { /* find "optimal" parameters [lim, nn] */
     double ssig = rtodbl(sig);
@@ -1041,64 +1024,48 @@ cxgamma(GEN s0, int dolog, long prec)
   y = s;
   if (typ(s0) == t_INT)
   {
-    if (is_bigint(s0))
+    long ss = itos(s0);
+    if (ss < 0) err(talker,"non-positive integer argument in cxgamma");
+    for (i=1; i < nn; i++)
     {
-      for (i=1; i < nn; i++)
+      y = mulrs(y, ss + i);
+      if (low_stack(avlim,stack_lim(av2,3)))
       {
-        y = mulri(y, addis(s0, i));
-        if (low_stack(avlim,stack_lim(av2,3)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"gamma");
-          y = gerepileuptoleaf(av2, y);
-        }
+        if(DEBUGMEM>1) err(warnmem,"gamma");
+        y = gerepileuptoleaf(av2, y);
       }
     }
-    else
+    if (dolog) y = logr_abs(y);
+  }
+  else if (!dolog || typ(s) == t_REAL)
+  { /* Compute lngamma mod 2 I Pi */
+    for (i=1; i < nn; i++)
     {
-      long ss = itos(s0);
-      for (i=1; i < nn; i++)
+      y = gmul(y, gaddgs(s,i));
+      if (low_stack(avlim,stack_lim(av2,3)))
       {
-        y = mulrs(y, ss + i);
-        if (low_stack(avlim,stack_lim(av2,3)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"gamma");
-          y = gerepileuptoleaf(av2, y);
-        }
+        if(DEBUGMEM>1) err(warnmem,"gamma");
+        y = gerepileupto(av2, y);
       }
     }
-    if (dolog) y = mplog(y);
+    if (dolog) y = logr_abs(y);
   }
   else
-    if (!dolog || typ(s) == t_REAL)
-    { /* Compute lngamma mod 2 I Pi */
-      for (i=1; i < nn; i++)
-      {
-        y = gmul(y, gaddgs(s,i));
-        if (low_stack(avlim,stack_lim(av2,3)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"gamma");
-          y = gerepileupto(av2, y);
-        }
-      }
-      if (dolog) y = mplog(y);
-    }
-    else /* Be careful with the imaginary part */
+  { /* dolog && complex s: be careful with imaginary part */
+    y = glog(y, prec);
+    for (i=1; i < nn; i++)
     {
-      y = glog(y, prec);
-      for (i=1; i < nn; i++)
+      y = gadd(y, glog(gaddgs(s,i), prec));
+      if (low_stack(avlim,stack_lim(av2,3)))
       {
-        y = gadd(y, glog(gaddgs(s,i), prec));
-        if (low_stack(avlim,stack_lim(av2,3)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"gamma");
-          y = gerepileupto(av2, y);
-        }
+        if(DEBUGMEM>1) err(warnmem,"gamma");
+        y = gerepileupto(av2, y);
       }
     }
-
-  nnx = gaddgs(s, nn);
+  }
   if (DEBUGLEVEL>5) msgtimer("product from 0 to N-1");
 
+  nnx = gaddgs(s, nn);
   a = ginv(nnx); invn2 = gsqr(a);
   tes = divrsns(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
   if (DEBUGLEVEL>5) msgtimer("Bernoullis");
@@ -1112,60 +1079,48 @@ cxgamma(GEN s0, int dolog, long prec)
   p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
   p1 = gadd(p1, gmul(tes, a));
 
-  pi = mppi(prec); pi2 = gmul2n(pi, 1); sqrtpi2 = sqrtr(pi2);
+  pi = mppi(prec); pi2 = shiftr(pi, 1); sqrtpi2 = sqrtr(pi2);
 
-  if (!dolog)
-  {
-    if (funeq)
-    { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) */
-      y = gmul2n(gdiv(gmul(sqrtpi2,y), gsin(gmul(s,pi), prec)), -1);
-      p1 = gneg(p1);
-    }
-    else /* y --> sqrt(2Pi) / y */
-      y = gdiv(sqrtpi2, y);
-  }
-  else
+  if (dolog)
   {
     if (funeq)
     { /* 2 Pi ceil( (2Re(s) - 3)/4 ) */
-      GEN p2 = mulri(pi2, gceil(gmul2n(subrs(gmul2n(sig,1), 3), -2)));
-      /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s) */
-      y = gsub(gadd(y, gmul2n(mplog(Pi2n(-1,prec)), -1)),
-               glog(gsin(gmul(s,pi), prec), prec));
-      if (signe(p2)) {
-        if (gsigne(imag_i(s)) < 0) setsigne(p2, -signe(p2));
+      GEN z = mulri(pi2, ceilr(shiftr(subrs(shiftr(sig,1), 3), -2)));
+      /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s)
+       *     = y - log( sin(Pi s) / (sqrt(2Pi)/2) ) */
+      y = gsub(y, glog(gdiv(gsin(gmul(pi, s),prec), shiftr(sqrtpi2,-1)), prec));
+      if (signe(z)) {
+        if (gsigne(imag_i(s)) < 0) setsigne(z, -signe(z));
         if (typ(y) == t_COMPLEX)
-          y[2] = (long)addrr((GEN)y[2], p2);
+          y[2] = ladd((GEN)y[2], z);
         else
-          y = gadd(y, pureimag(p2));
+          y = gadd(y, pureimag(z));
       }
       p1 = gneg(p1);
     }
     else /* y --> sqrt(2Pi) / y */
-      y = gsub(glog(sqrtpi2, prec), y);
-  }
-
-  if (dolog)
-  {
+      y = gsub(logr_abs(sqrtpi2), y);
     y = gadd(p1, y);
-    if (typ(y) == t_COMPLEX)
-    {
-      if (typ(res) == t_REAL) return gerepileupto(av, y);
-      rfixlg((GEN)res[2], (GEN)y[2]);
-    }
-    else rfixlg(res, y);
   }
   else
   {
-    y = gmul(gexp(p1, prec), y);
-    if (typ(y) == t_COMPLEX)
-    {
-      rfixlg((GEN)res[1], (GEN)y[1]);
-      rfixlg((GEN)res[2], (GEN)y[2]);
+    if (funeq)
+    { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) = y sqrt(Pi/2)/sin(Pi s) */
+      y = gdiv(gmul(shiftr(sqrtpi2,-1),y), gsin(gmul(pi, s), prec));
+      p1 = gneg(p1);
     }
-    else rfixlg(res, y);
+    else /* y --> sqrt(2Pi) / y */
+      y = gdiv(sqrtpi2, y);
+    y = gmul(gexp(p1, prec), y);
   }
-  gaffect(y, res); avma = av; return res;
+  if (typ(y) == t_REAL) affr_fixlg(y, res);
+  else
+  {
+    if (typ(res) == t_REAL) return gerepileupto(av, y);
+    affr_fixlg((GEN)y[1], (GEN)res[1]);
+    affr_fixlg((GEN)y[2], (GEN)res[2]);
+  }
+  avma = av; return res;
 }
 
 /* Gamma((m+1) / 2) */
@@ -1176,7 +1131,6 @@ gammahs(long m, long prec)
   pari_sp av = avma;
   long ma = labs(m);
 
-  if (ma > 962353) err(talker, "argument too large in ggamma");
   if (ma > 200 + 50*(prec-2)) /* heuristic */
   {
     z = stor(m + 1, prec); setexpo(z, expo(z)-1);
@@ -1198,6 +1152,28 @@ gammahs(long m, long prec)
     setexpo(z, expo(z) + v);
   }
   affrr(z, y); avma = av; return y;
+}
+GEN
+ggamd(GEN x, long prec)
+{
+  pari_sp av, tetpil;
+
+  switch(typ(x))
+  {
+    case t_INT:
+    {
+      long k = itos(x);
+      if (labs(k) > 962353) err(talker, "argument too large in ggamd");
+      return gammahs(k<<1, prec);
+    }
+    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
+      av=avma; x = gadd(x,ghalf); tetpil=avma;
+      return gerepile(av,tetpil,ggamma(x,prec));
+
+    case t_INTMOD: case t_PADIC: err(typeer,"ggamd");
+    case t_SER: err(impl,"gamd of a power series");
+  }
+  return transc(ggamd,x,prec);
 }
 
 GEN
@@ -1262,9 +1238,8 @@ glngamma(GEN x, long prec)
       if (signe(x) <= 0) err(talker,"non-positive integer in glngamma");
       if (cmpis(x,200 + 50*(prec-2)) > 0) /* heuristic */
 	return cxgamma(x, 1, prec);
-      y = cgetr(prec); av = avma;
-      p1 = mplog( itor(mpfact(itos(x) - 1), prec) );
-      affrr(p1, y); avma = av; return y;
+      av = avma;
+      return gerepileuptoleaf(av, logr_abs( itor(mpfact(itos(x) - 1), prec) ));
 
     case t_REAL: case t_COMPLEX:
       return cxgamma(x, 1, prec);
@@ -1287,39 +1262,7 @@ glngamma(GEN x, long prec)
 }
 /********************************************************************/
 /**                                                                **/
-/**                       GAMMA AT HALF INTEGERS                   **/
-/**                                                                **/
-/********************************************************************/
-
-static GEN
-mpgamd(long x, long prec)
-{
-  if (labs(x) > 962353) x = 962353; /* too large. Raise error in gammahs */
-  return gammahs(x<<1, prec);
-}
-
-GEN
-ggamd(GEN x, long prec)
-{
-  pari_sp av, tetpil;
-
-  switch(typ(x))
-  {
-    case t_INT:
-      return mpgamd(itos(x),prec);
-
-    case t_REAL: case t_FRAC: case t_COMPLEX: case t_QUAD:
-      av=avma; x = gadd(x,ghalf); tetpil=avma;
-      return gerepile(av,tetpil,ggamma(x,prec));
-
-    case t_INTMOD: case t_PADIC: err(typeer,"ggamd");
-    case t_SER: err(impl,"gamd of a power series");
-  }
-  return transc(ggamd,x,prec);
-}
-/********************************************************************/
-/**                                                                **/
-/**                               PSI                              **/
+/**                  PSI(x) = GAMMA'(x)/GAMMA(x)                   **/
 /**                                                                **/
 /********************************************************************/
 
@@ -1330,15 +1273,13 @@ cxpsi(GEN s0, long prec)
   GEN sum,z,a,res,tes,in2,sig,s,unr;
   long lim,nn,k;
   const long la = 3;
+  int funeq = 0;
 
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
-  if (signe(sig) <= 0)
-  {
-    GEN pi = mppi(prec);
-    z = gsub(cxpsi(gsub(gun,s), prec), gmul(pi, gcotan(gmul(pi,s), prec)));
-    gaffect(z, res); avma = av; return res;
-  }
+  if (signe(sig) <= 0) { funeq = 1; s = gsub(gun, s); sig = real_i(s); }
+  if (typ(s0) == t_INT && signe(s0) <= 0)
+    err(talker,"non-positive integer argument in cxpsi");
 
   {
     double ssig = rtodbl(sig);
@@ -1382,7 +1323,18 @@ cxpsi(GEN s0, long prec)
   }
   if (DEBUGLEVEL>2) msgtimer("Bernoulli sum");
   z = gsub(z, gmul(in2,tes));
-  gaffect(z, res); avma = av; return res;
+  if (funeq)
+  {
+    GEN pi = mppi(prec);
+    z = gadd(z, gmul(pi, gcotan(gmul(pi,s), prec)));
+  }
+  if (typ(z) == t_REAL) affr_fixlg(z, res);
+  else
+  {
+    affr_fixlg((GEN)z[1], (GEN)res[1]);
+    affr_fixlg((GEN)z[2], (GEN)res[2]);
+  }
+  avma = av; return res;
 }
 
 GEN

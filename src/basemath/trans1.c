@@ -901,7 +901,7 @@ padic_sqrt(GEN x)
 GEN
 gsqrt(GEN x, long prec)
 {
-  pari_sp av, tetpil;
+  pari_sp av;
   GEN y, p1, p2;
 
   switch(typ(x))
@@ -915,27 +915,12 @@ gsqrt(GEN x, long prec)
       y[2] = (long)p1; return y;
 
     case t_COMPLEX:
+      if (isexactzero((GEN)x[2])) return gsqrt(x, prec);
       y = cgetg(3,t_COMPLEX); av = avma;
-      if (isexactzero((GEN)x[2]))
-      {
-        long tx;
-        x = (GEN)x[1]; tx = typ(x);
-	if ((is_intreal_t(tx) || tx == t_FRAC) && gsigne(x) < 0)
-	{
-	  y[1] = zero; tetpil = avma;
-	  y[2] = lpileupto(av, gsqrt(gneg_i(x), prec));
-	  return y;
-	}
-        avma = (pari_sp)(y+3); return gsqrt(x, prec);
-      }
 
       p1 = gsqr((GEN)x[1]);
       p2 = gsqr((GEN)x[2]); p1 = gsqrt(gadd(p1,p2), prec);
-      if (gcmp0(p1))
-      {
-	y[1] = (long)sqrtr(p1);
-	y[2] = lcopy((GEN)y[1]); return y;
-      }
+      if (gcmp0(p1)) { y[1] = y[2] = (long)sqrtr(p1); return y; }
       if (gsigne((GEN)x[1]) < 0)
       {
         p1 = sqrtr( gmul2n(gsub(p1,(GEN)x[1]), -1) );
@@ -1223,7 +1208,7 @@ exp1r_abs(GEN x)
     setlg(p2,l2);
     p2 = mulrr(p2, addsr(2,p2));
   }
-  affrr(p2,y); avma = av; return y;
+  affr_fixlg(p2,y); avma = av; return y;
 }
 
 GEN
@@ -1386,25 +1371,28 @@ agm1r_abs(GEN x)
     a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
     b1 = sqrtr_abs(mulrr(a,b1));
   }
-  affrr(a1,y); avma = av; return y;
+  affr_fixlg(a1,y); avma = av; return y;
 }
 
 static GEN
 agm1cx(GEN x, long prec)
 {
   GEN a1, b1;
-  pari_sp av = avma;
-  long l = precision(x); if (!l) l = prec;
+  pari_sp av = avma, av2;
+  long L, l = precision(x); if (!l) l = prec;
 
-  a1 = x; b1 = gun; l = 5-bit_accuracy(l);
-  do
+  L = 5-bit_accuracy(l);
+  a1 = gmul2n(gadd(realun(l), x), -1);
+  av2 = avma;
+  b1 = gsqrt(x, prec);
+  while (gexpo(gsub(b1,a1)) - gexpo(b1) >= L)
   {
     GEN a = a1;
     a1 = gmul2n(gadd(a,b1),-1);
+    av2 = avma;
     b1 = gsqrt(gmul(a,b1), prec);
   }
-  while (gexpo(gsub(b1,a1)) - gexpo(b1) >= l);
-  return gerepilecopy(av,a1);
+  avma = av2; return gerepileupto(av,a1);
 }
 
 /* agm(1,x) */
@@ -1596,7 +1584,7 @@ logr_abs(GEN X)
   setlg(S, l2); y = mulrr(y,S); /* = log(X)/2 */
   setexpo(y, expo(y)+m+1);
   if (EX) y = addrr(y, mulsr(EX, mplog2(l2)));
-  affrr(y, z); avma = ltop; return z;
+  affr_fixlg(y, z); avma = ltop; return z;
 }
 
 GEN
@@ -1615,7 +1603,52 @@ logagmr_abs(GEN q)
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
   y = divrr(Pi2n(-1, prec), agm1r_abs( divsr(4, Q) ));
   y = addrr(y, mulsr(e - lim, mplog2(prec)));
-  affrr(y, z); return z;
+  affr_fixlg(y, z); return z;
+}
+
+/* assume imaginary part is non-zero */
+GEN
+logagmcx(GEN q, long prec)
+{
+  GEN z, y, Q, a, b;
+  long lim, e, ea, eb;
+  pari_sp av;
+  int neg = 0;
+  
+  z = cgetc(prec); av = avma; prec++;
+  if (gsigne((GEN)q[1]) < 0) { q = gneg(q); neg = 1; }
+  lim = bit_accuracy(prec) >> 1;
+  Q = gtofp(q, prec);
+  a = (GEN)Q[1];
+  b = (GEN)Q[2];
+  if (gcmp0(a)) {
+    affr_fixlg(logr_abs(b), (GEN)z[1]);
+    y = Pi2n(-1, prec);
+    if (signe(b) < 0) setsigne(y, -1);
+    affr_fixlg(y, (GEN)z[2]); avma = av; return z;
+  }
+  ea = expo(a);
+  eb = expo(b);
+  if (ea <= eb)
+  {
+    setexpo(Q[1], lim - eb + ea);
+    setexpo(Q[2], lim);
+    e = lim - eb;
+  } else {
+    setexpo(Q[1], lim);
+    setexpo(Q[2], lim - ea + eb);
+    e = lim - ea;
+  }
+
+  /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^e */
+  y = gdiv(Pi2n(-1, prec), agm1cx( gdivsg(4, Q), prec ));
+  a = (GEN)y[1];
+  b = (GEN)y[2];
+  a = addrr(a, mulsr(-e, mplog2(prec)));
+  if (neg) b = gsigne(b) <= 0? gadd(b, mppi(prec))
+                             : gsub(b, mppi(prec));
+  affr_fixlg(a, (GEN)z[1]);
+  affr_fixlg(b, (GEN)z[2]); avma = av; return z;
 }
 
 GEN
@@ -1718,6 +1751,8 @@ log0(GEN x, long flag,long prec)
   return NULL; /* not reached */
 }
 
+#define LOGAGMCX_LIMIT 90
+
 GEN
 glog(GEN x, long prec)
 {
@@ -1737,10 +1772,12 @@ glog(GEN x, long prec)
       y[2] = lmppi(lg(x)); return y;
 
     case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX); y[2]=larg(x,prec);
-      av=avma; p1=glog(gnorm(x),prec); tetpil=avma;
-      y[1]=lpile(av,tetpil,gmul2n(p1,-1));
-      return y;
+      if (gcmp0((GEN)x[2])) return glog((GEN)x[1], prec);
+      if (prec > LOGAGMCX_LIMIT) return logagmcx(x, prec);
+      y = cgetg(3,t_COMPLEX);
+      y[2] = larg(x,prec);
+      av = avma; p1 = glog(cxnorm(x),prec); tetpil = avma;
+      y[1] = lpile(av,tetpil,gmul2n(p1,-1)); return y;
 
     case t_PADIC:
       return palog(x);
@@ -1833,7 +1870,7 @@ mpsc1(GEN x, long *ptmod8)
     p2 = mulrr(p2, addsr(2,p2));
     setexpo(p2, expo(p2)+1);
   }
-  affrr(p2,y); return y;
+  affr_fixlg(p2,y); return y;
 }
 
 /* sqrt (|1 - (1+x)^2|) = sqrt(|x*(x+2)|). Sends cos(x)-1 to |sin(x)| */
@@ -1889,14 +1926,14 @@ gcos(GEN x, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(v1, r); /* = - I*sin(I*Im(x)) */
       gsincos((GEN)x[1],&u,&v,prec);
-      affrr(gmul(v1,v), (GEN)y[1]);
-      affrr(gmul(u1,u), (GEN)y[2]); return y;
+      affr_fixlg(gmul(v1,v), (GEN)y[1]);
+      affr_fixlg(gmul(u1,u), (GEN)y[2]); return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
-      affrr(mpcos(x), y); avma = av; return y;
+      affr_fixlg(mpcos(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcos");
 
@@ -1952,14 +1989,14 @@ gsin(GEN x, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos((GEN)x[1],&u,&v,prec);
-      affrr(gmul(v1,u), (GEN)y[1]);
-      affrr(gmul(u1,v), (GEN)y[2]); return y;
+      affr_fixlg(gmul(v1,u), (GEN)y[1]);
+      affr_fixlg(gmul(u1,v), (GEN)y[2]); return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
-      affrr(mpsin(x), y); avma = av; return y;
+      affr_fixlg(mpsin(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gsin");
 
@@ -2032,8 +2069,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       *s = gtofp(x, prec);
       *c = cgetr(prec); av = avma;
       mpsincos(*s, &ps, &pc);
-      affrr(ps,*s);
-      affrr(pc,*c); avma = av; return;
+      affr_fixlg(ps,*s);
+      affr_fixlg(pc,*c); avma = av; return;
 
     case t_REAL:
       mpsincos(x,s,c); return;
@@ -2046,10 +2083,10 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos((GEN)x[1], &u,&v, prec);
-      affrr(mulrr(v1,u),         (GEN)ps[1]);
-      affrr(mulrr(u1,v),         (GEN)ps[2]);
-      affrr(mulrr(v1,v),         (GEN)pc[1]);
-      affrr(mulrr(mpneg(u1),u),  (GEN)pc[2]); return;
+      affr_fixlg(mulrr(v1,u),       (GEN)ps[1]);
+      affr_fixlg(mulrr(u1,v),       (GEN)ps[2]);
+      affr_fixlg(mulrr(v1,v),       (GEN)pc[1]);
+      affr_fixlg(mulrr(mpneg(u1),u),(GEN)pc[2]); return;
 
     case t_QUAD:
       av = avma; gsincos(quadtoc(x, prec), s, c, prec);
@@ -2146,7 +2183,7 @@ gtan(GEN x, long prec)
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
-      affrr(mptan(x), y); avma = av; return y;
+      affr_fixlg(mptan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gtan");
 
@@ -2189,7 +2226,7 @@ gcotan(GEN x, long prec)
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
-      affrr(mpcotan(x), y); avma = av; return y;
+      affr_fixlg(mpcotan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcotan");
 

@@ -42,6 +42,11 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.9 (released ??/??/2004):
   Fixed
     1- ploth(,256). splines had stopped working
+    2- gamma(-1.), psi(-1.) [ non-positive integers masquerading as t_REALs ]:
+       wrong results (oo) or 'division by 0' error messages
+    3- log(1. + 1e-20) --> print more decimals than are significant
+    4- [Mac OS X + Fltk]: remove the BROKEN_FORK assertion --> graphic
+       window becomes independant of gp as under other OSes.
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
@@ -51,6 +56,7 @@ Done for version 2.2.9 (released ??/??/2004):
     3- new algorithm for log(2) [ AGM ]
     4- use more readable colors for hi-res plots [ replace "sienna" by
        "violetred" and "cornsilk" by "green" ]
+    5- new algorithm for log( t_COMPLEX ) [ AGM ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.8 (released 25/11/2004):
