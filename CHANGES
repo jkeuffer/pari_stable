@@ -121,14 +121,21 @@ IZ 16- readline: hit_return() would not work after Esc-H
    22- let A^-1 and 1/A return a left inverse of A if it exists [A had to be
        square]
    23- retuned factorization over Z[X] (+ "d-1 test" in naive recombination)
+   24- sort factorpadic() output
 
   Added
     1- files README.WIN, config/[arch-osname|locatesymbol], doc/tex2mail.1
 GN  2- Jebelean extended gcd + rational number reconstruction
 XR  3- new flag to rnfconductor (check extension is abelian)
 IZ  4- set of default colors (boldfg)
-    5- modular univariate and bivariate resultant.
+    5- modular polynomial arithmetic ([uni|bi]variate resultant over Z,
+       characteristic polynomial of algebraic numbers, nfgcd).
+       [undocumented, experminental]
     6- Pohlig-Hellman discrete log over Fp and nf.zk / pr
+
+  Changed
+    1- start using the new modular functions [polcompositum]
+    2- mpsqrtnmod (modular n-th root of 1) uses Fp_shanks now
 
   Removed
     1- obsolete undocumented functions oldidealinv, idealinv0
