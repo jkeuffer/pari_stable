@@ -147,10 +147,10 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   sa = signe(a); sb = signe(b);
   if (!sb)
   {
-    if (pv != NULL) *pv = gen_0;
+    if (pv) *pv = gen_0;
     switch(sa)
     {
-    case  0: if (pu) *pu = gen_1; return gen_0;
+    case  0: if (pu) *pu = gen_0; return gen_0;
     case  1: if (pu) *pu = gen_1; return icopy(a);
     case -1: if (pu) *pu = gen_m1; return(negi(a));
     }
