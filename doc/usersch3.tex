@@ -3255,6 +3255,8 @@ $\text{Norm}(a)=x$,
 where $a$ is an integer in $\var{bnf}$. If $\var{bnf}$ has not been certified,
 the correctness of the result depends on the validity of \idx{GRH}.
 
+See also \tet{bnfisnorm}.
+
 \syn{bnfisintnorm}{\var{bnf},x}.
 
 \subsecidx{bnfisnorm}$(\var{bnf},x,\{\fl=1\})$: tries to tell whether the
@@ -3262,15 +3264,15 @@ rational number $x$ is the norm of some element y in $\var{bnf}$. Returns a
 vector $[a,b]$ where $x=Norm(a)*b$. Looks for a solution which is an $S$-unit,
 with $S$ a certain set of prime ideals containing (among others) all primes
 dividing $x$. If $\var{bnf}$ is known to be \idx{Galois}, set $\fl=0$ (in
-this case,
-$x$ is a norm iff $b=1$). If $\fl$ is non zero the program adds to $S$ the
-following prime ideals, depending on the sign of $\fl$. If $\fl>0$, the
-ideals of norm less than $\fl$. And if $\fl<0$ the ideals dividing $\fl$.
+this case, $x$ is a norm iff $b=1$). If $\fl$ is non zero the program adds to
+$S$ the following prime ideals, depending on the sign of $\fl$. If $\fl>0$,
+the ideals of norm less than $\fl$. And if $\fl<0$ the ideals dividing $\fl$.
 
- If you are willing to assume \idx{GRH}, the answer is guaranteed
-(i.e.~$x$ is a norm iff $b=1$), if $S$ contains all primes less than
-$12\log(\var{disc}(\var{Bnf}))^2$,
-where $\var{Bnf}$ is the Galois closure of $\var{bnf}$.
+Assuming \idx{GRH}, the answer is guaranteed (i.e.~$x$ is a norm iff $b=1$),
+if $S$ contains all primes less than $12\log(\var{disc}(\var{Bnf}))^2$, where
+$\var{Bnf}$ is the Galois closure of $\var{bnf}$.
+
+See also \tet{bnfisintnorm}.
 
 \syn{bnfisnorm}{\var{bnf},x,\fl,\var{prec}}, where $\fl$ and
 $\var{prec}$ are \kbd{long}s.
