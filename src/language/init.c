@@ -46,7 +46,7 @@ GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
 void (*output_fun)(GEN);
 
-void  initout(void);
+void  initout(int initerr);
 int   term_width(void);
 
 typedef struct cell {
@@ -223,7 +223,7 @@ init_defaults(int force)
   current_psfile = pari_strdup("pari.ps");
   current_logfile= pari_strdup("pari.log");
   logfile = NULL;
-  initout(); next_bloc=0;
+  initout(1); next_bloc=0;
 }
 
 /* does elt belong to list, after position start (excluded) ? */
@@ -786,7 +786,7 @@ disable_dbg(long val)
 void
 err_recover(long numerr)
 {
-  initout();
+  initout(0);
   disable_dbg(-1);
   get_timer(-1);
   killallfiles(0);
