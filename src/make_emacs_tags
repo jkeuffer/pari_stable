@@ -7,6 +7,12 @@
 # If you are reading this, you may enjoy imenu-go.el from
 #    ftp://ftp.math.ohio-state.edu/pub/users/ilya/emacs/
 
+if test -n "$ETAGS"; then
+  etags=$ETAGS
+else
+  etags=etags
+fi
+
 # Skip language/init.c, gp/gp_init.c and language/helpmessages.c:
 
 errors='language/errmsg.c'
@@ -26,10 +32,10 @@ excluded=`perl -e 'print join "\n",
 
 errre='\/\*[ \t]*\([a-zA-Z_0-9]+\)[ \t]*\*\/'
 
-etags -r "/$errre/\\1/"  $errors
+$etags -r "/$errre/\\1/"  $errors
 
 # All files which do not require a special processing
-etags -a $excluded
+$etags -a $excluded
 
 # Process declarations like
 
@@ -40,17 +46,17 @@ etags -a $excluded
 
 re='[ \t]*{[ \t]*"\([a-zA-Z_0-9]+\)"[ \t]*,[ \t]*[0-9]+[ \t]*,[ \t]*([ \t]*void[ \t]*\*[ \t]*)[ \t]*\([a-zA-Z0-9+]+\)[ \t]*,'
 
-etags -a -l c -o TAGS.tmp     -r "/$re/\\1/" -r "/$re/\\2/" $init_c
+$etags -a -l c -o TAGS.tmp     -r "/$re/\\1/" -r "/$re/\\2/" $init_c
 
 # Process helpmessages too:
 #  "printtex(a): outputs a in TeX format",
 
 helpre='[ \t]*"\([a-zA-Z_0-9]+\)[=(]'
 
-etags -a -l c -o TAGS.tmp     -r "/$re/\\1/" -r "/$re/\\2/" \
+$etags -a -l c -o TAGS.tmp     -r "/$re/\\1/" -r "/$re/\\2/" \
     -r "/$helpre/\\1/"    $gp_init
 
-etags -a -l c -o TAGS.tmp     -r "/$helpre/\\1/"  $messages
+$etags -a -l c -o TAGS.tmp     -r "/$helpre/\\1/"  $messages
 
 # This would produces a wrong entry size - though AFAIK, nobody uses it
 # uniq TAGS.tm >> TAGS
