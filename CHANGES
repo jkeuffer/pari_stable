@@ -55,6 +55,9 @@ IZ 19- tex2mail had difficulties with rational functions
 IZ  3- meaning of flags > 1 in plothraw
 IZ  4- output of \x (a bit more verbose)
 
+  Added
+BA  1- Pocklington-Lehmer primality prover
+
 ===========================================================================
 Done for version 2.0.19.beta (released 17/03/2000):
   Fixed
