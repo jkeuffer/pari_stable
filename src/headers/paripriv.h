@@ -34,6 +34,7 @@ GEN setloop(GEN a);
 
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN quicktrace(GEN x, GEN sym);
+GEN idealhermite_aux(GEN nf, GEN x);
 
 GEN _checkbnf(GEN bnf);
 GEN _checknf(GEN nf);

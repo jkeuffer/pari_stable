@@ -605,6 +605,7 @@ GEN     idealpow(GEN nf, GEN ix, GEN n);
 GEN     idealpow0(GEN nf, GEN ix, GEN n, long flag, long prec);
 GEN     idealpowred(GEN nf, GEN ix, GEN n,long prec);
 GEN     idealpows(GEN nf, GEN ideal, long iexp);
+long    idealtyp(GEN *ideal, GEN *arch);
 GEN     ideleaddone(GEN nf, GEN x, GEN idele);
 int     ishnfall(GEN x);
 int     isidentity(GEN x);

@@ -55,7 +55,7 @@ static GEN mat_ideal_two_elt2(GEN nf, GEN x, GEN a);
 
 /* types and conversions */
 
-static long
+long
 idealtyp(GEN *ideal, GEN *arch)
 {
   GEN x = *ideal;

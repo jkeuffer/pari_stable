@@ -1405,23 +1405,17 @@ triv_gen(GEN nf, GEN x, long c, long flag)
 GEN
 isprincipalall(GEN bnf,GEN x,long flag)
 {
-  long c, pr, tx = typ(x);
+  GEN nf, arch;
+  long c, pr, tx = idealtyp(&x, &arch);
   pari_sp av = avma;
-  GEN nf;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
-  if (tx == t_POLMOD)
-  {
-    if (!gegal((GEN)x[1],(GEN)nf[1]))
-      err(talker,"not the same number field in isprincipal");
-    x = (GEN)x[2]; tx = t_POL;
-  }
-  if (tx == t_POL || tx == t_COL || tx == t_INT || tx == t_FRAC)
+  if (tx == id_PRINCIPAL)
   {
     if (gcmp0(x)) err(talker,"zero ideal in isprincipal");
     return triv_gen(nf, x, lg(mael3(bnf,8,1,2))-1, flag);
   }
-  x = idealhermite(nf,x);
+  x = idealhermite_aux(nf, x);
   if (lg(x)==1) err(talker,"zero ideal in isprincipal");
   if (degpol(nf[1]) == 1)
     return gerepileupto(av, triv_gen(nf, gcoeff(x,1,1), 0, flag));
