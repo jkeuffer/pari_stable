@@ -825,7 +825,7 @@ errcontext(char *msg, char *s, char *entry)
   char str[STR_LEN + 2];
   char *buf, *t, *pre;
 
-  if (!s || !entry) { print_text(msg); return; }
+  if (!s || !entry) { print_prefixed_text(msg,"  ***   ",NULL); return; }
 
   t = buf = gpmalloc(strlen(msg) + MAX_PAST + 5 + 2 * 16);
   sprintf(t,"%s: ", msg);
