@@ -557,7 +557,6 @@ $install_emacs_files: elc
 	-cd $emx; for f in *.elc *.el pariemacs.txt; do \
 	  \$(INSTALL_DATA) \$\$f \$(EMACSDIR); \
 	done
-	
 EOT
 fi
 
@@ -573,7 +572,7 @@ $src/desc/Def: $src/funclist
 	cd $src/desc; make Def
 
 $src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/desc/Def
-	cd $src/desc; make 
+	cd $src/desc; make
 EOT
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
@@ -626,7 +625,7 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     depend="$src/language/anal.h"
     ;;
   init)
-    depend="$src/language/anal.h $src/language/init.h" 
+    depend="$src/language/anal.h $src/language/init.h"
     ;;
   anal)
     depend="$src/language/anal.h $src/headers/parinf.h"
