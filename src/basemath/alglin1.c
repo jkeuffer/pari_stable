@@ -2961,7 +2961,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   {
     p1 = cgetg(lig+1,t_COL); extramat[j] = (long)p1;
     p2 = (GEN)dep[j-lextra]; for (i=1; i<=nlze; i++) p1[i] = p2[i];
-    p2 = (GEN)   H[j-lextra]; for (   ; i<=lig ; i++) p1[i] = p2[i-nlze];
+    p2 = (GEN)  H[j-lextra]; for (   ; i<=lig ; i++) p1[i] = p2[i-nlze];
   }
   for (j=lextra+1; j<lB+colnew; j++)
     Cnew[j] = C[j-lextra+col-lH];
