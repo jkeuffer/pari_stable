@@ -770,6 +770,7 @@ incgam0(GEN s, GEN x, GEN g, long prec)
       if (!l) l = prec;
       prec = l + nbits2nlong(-es) + 1;
       s = gtofp(s, prec);
+      x = gtofp(x, prec);
     }
     z = gadd(g? g: ggamma(s,prec), gneg(incgamc(s,x,prec)));
   }
