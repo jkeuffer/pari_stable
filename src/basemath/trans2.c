@@ -942,7 +942,7 @@ rfixlg(GEN z, GEN y) {
   if (ly < lz)
   {
     setlg(z, ly);
-    stackdummy(z + ly, lz - ly - 1);
+    stackdummy(z + ly, lz - ly);
   }
 }
 
@@ -1242,11 +1242,11 @@ glngamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x) <= 0) err(talker,"non-positive integer argument in glngamma");
+      if (signe(x) <= 0) err(talker,"non-positive integer in glngamma");
       if (cmpis(x,200 + 50*(prec-2)) > 0) /* heuristic */
 	return cxgamma(x, 1, prec);
       y = cgetr(prec); av = avma;
-      p1 = mplog(itor(mpfact(itos(x) - 1), prec) );
+      p1 = mplog( itor(mpfact(itos(x) - 1), prec) );
       affrr(p1, y); avma = av; return y;
 
     case t_REAL: case t_COMPLEX:
