@@ -1032,7 +1032,7 @@ primeform(GEN x, GEN p, long prec)
   av = avma;
   y[3] = lpileuptoint(av, diviiexact(shifti(subii(sqri(b), x), -2), p));
   y[2] = (long)b;
-  y[1] = (long)p;
+  y[1] = lcopy(p);
   return y;
 }
 
