@@ -187,30 +187,6 @@ ZX_Flx(GEN x, ulong p)
   return Flx_renormalize(a,lx);
 }
 
-/* Note: vs is used _only_ for the t_INT. It must match
- * the shifted variable of any t_POL coefficients.
- */
-
-GEN 
-ZXX_Flxy(GEN B, ulong p, long vs)
-{
-  long lb=lg(B);
-  long i;
-  GEN b=cgetg(lb,t_POL);
-  b[1]=B[1];
-  for (i=2; i<lb; i++) 
-    switch (typ(B[i]))
-    {
-    case t_INT:  
-      b[i] = (long)Fl_Flx(umodiu((GEN)B[i], p), vs);
-      break;           
-    case t_POL:
-      b[i] = (long)ZX_Flx((GEN)B[i], p);
-      break;
-    }
-  return b;
-}
-
 GEN
 ZV_Flv(GEN x, ulong p)
 {
