@@ -26,7 +26,7 @@ static GEN    constante();
 static GEN    expr();
 static GEN    facteur();
 static GEN    identifier();
-static GEN    lock(GEN p, entree *ep);
+static GEN    matrix_block(GEN p, entree *ep);
 static GEN    read_member(GEN x);
 static GEN    seq();
 static GEN    truc();
@@ -704,7 +704,7 @@ facteur(void)
       case '~':
 	analyseur++; x = gtrans(x); break;
       case '[':
-        x = lock(x,NULL); break;
+        x = matrix_block(x,NULL); break;
       case '!':
 	if (analyseur[1] != '=')
 	{
@@ -829,7 +829,7 @@ repeated_op()
 }
 
 static GEN
-lock(GEN p, entree *ep)
+matrix_block(GEN p, entree *ep)
 {
   long tx,full_col,full_row,c,r;
   char *old;
@@ -1367,7 +1367,7 @@ identifier(void)
         ep->value = (void *)ptr; return gnil;
       }
     }
-    return lock((GEN) ep->value,ep);
+    return matrix_block((GEN) ep->value,ep);
   }
   ep = do_alias(ep); matchcomma = 0;
 #ifdef STACK_CHECK
