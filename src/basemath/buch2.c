@@ -1431,9 +1431,10 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 
 /* I assumed to be integral HNF */
 static GEN
-ideallllredpart1(GEN nf, GEN I, GEN matt2, long N, long PRECREGINT)
+ideallllredpart1(GEN I, GEN matt2, long PRECREGINT)
 {
   GEN y,m,idealpro;
+  long N = lg(I)-1;
 
   if (!gcmp1(gcoeff(I,N,N))) { y=content(I); if (!gcmp1(y)) I=gdiv(I,y); }
   y = lllgramintern(qf_base_change(matt2,I,1),100,1,PRECREGINT+1);
@@ -1599,8 +1600,7 @@ random_relation(long phase,long cmptglob,long lim,long LIMC,long N,
       if (DEBUGLEVEL>2)
         fprintferr("phase=%ld,jideal=%ld,jdir=%ld,rand=%ld\n",
                    phase,jideal,jdir,getrand());
-      idealpro = ideallllredpart1(nf,(GEN)ideal[1], (GEN)lmatt2[jdir],
-                                  N, PRECREGINT);
+      idealpro = ideallllredpart1((GEN)ideal[1],(GEN)lmatt2[jdir],PRECREGINT);
       if (!idealpro) return -2;
       if (!factorisegen(nf,idealpro,KCZ,LIMC))
       {
@@ -1654,9 +1654,9 @@ random_relation(long phase,long cmptglob,long lim,long LIMC,long N,
 static long
 be_honest(GEN nf,GEN subfb,long RU,long PRECREGINT)
 {
-  long av,ex,i,j,k,iz,nbtest, N = lgef(nf[1])-3, lgsub = lg(subfb);
   GEN exu=new_chunk(RU+1), MCtw = cgetg(RU+1,t_MAT);
-  GEN p1,p2,ideal,idealpro, MC = gmael(nf,5,2), M = gmael(nf,5,1);
+  GEN P,ideal,idealpro, MC = gmael(nf,5,2), M = gmael(nf,5,1);
+  long av = avma,ex,i,j,J,k,iz,nbtest, lgsub = lg(subfb);
 
   if (DEBUGLEVEL)
   {
@@ -1664,15 +1664,19 @@ be_honest(GEN nf,GEN subfb,long RU,long PRECREGINT)
 		factorbase[KCZ+1],factorbase[KCZ2]);
     flusherr();
   }
-  av=avma;
   for (iz=KCZ+1; iz<=KCZ2; iz++)
   {
-    p1=idealbase[numfactorbase[factorbase[iz]]];
     if (DEBUGLEVEL>1) fprintferr("%ld ", factorbase[iz]);
-    for (j=1; j<lg(p1); j++)
+    P = idealbase[numfactorbase[factorbase[iz]]];
+    J = lg(P);
+    /* if unramified, check all but 1 */
+    if (!divise((GEN)nf[3], gmael(P,1,1))) J--;
+    for (j=1; j<J; j++)
+    {
+      GEN ideal0 = prime_to_ideal(nf,(GEN)P[j]);
       for(nbtest=0;;)
       {
-	ideal = prime_to_ideal(nf,(GEN)p1[j]);
+	ideal = ideal0;
 	for (i=1; i<lgsub; i++)
 	{
 	  ex = mymyrand()>>randshift;
@@ -1689,14 +1693,14 @@ be_honest(GEN nf,GEN subfb,long RU,long PRECREGINT)
 	  }
           for (i=1; i<=RU; i++)
             MCtw[i] = exu[i]? lmul2n((GEN)MC[i],exu[i]<<1): MC[i];
-          p2 = mulmat_real(MCtw,M);
-          idealpro = ideallllredpart1(nf,ideal,p2,N,PRECREGINT);
+          idealpro = ideallllredpart1(ideal, mulmat_real(MCtw,M), PRECREGINT);
           if (idealpro &&
 	      factorisegen(nf,idealpro,iz-1,factorbase[iz-1])) break;
 	  nbtest++; if (nbtest==200) return 0;
 	}
 	avma=av; if (k <= RU) break;
       }
+    }
   }
   if (DEBUGLEVEL)
   {
