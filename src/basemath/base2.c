@@ -2208,35 +2208,35 @@ primedec(GEN nf, GEN p)
 {
   gpmem_t av=avma,tetpil;
   long i,j,k,kbar,np,c,indice,N,lp;
-  GEN ex,f,list,ip,elth,h;
+  GEN ex,F,list,ip,elth,h;
   GEN modfrob,algebre,algebre1,b,mat1,T;
-  GEN alpha,beta,p1,p2,unmodp,zmodp,idmodp;
+  GEN alpha,beta,f,g,h,p1,p2,unmodp,zmodp,idmodp;
 
   if (DEBUGLEVEL>=3) timer2();
   nf=checknf(nf); T=(GEN)nf[1]; N=degpol(T);
-  f=factmod(T,p); ex=(GEN)f[2];
-  f=centerlift((GEN)f[1]); np=lg(f);
+  F=factmod(T,p); ex=(GEN)F[2];
+  F=centerlift((GEN)F[1]); np=lg(F);
   if (DEBUGLEVEL>=6) msgtimer("factmod");
 
   if (signe(modii((GEN)nf[4],p))) /* p doesn't divide index */
   {
     list=cgetg(np,t_VEC);
     for (i=1; i<np; i++)
-      list[i]=(long)apply_kummer(nf,(GEN)f[i],(GEN)ex[i],p, NULL);
+      list[i]=(long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p, NULL);
     if (DEBUGLEVEL>=6) msgtimer("simple primedec");
     p1=stoi(4); tetpil=avma;
     return gerepile(av,tetpil,vecsort(list,p1));
   }
 
-  p1 = (GEN)f[1];
-  for (i=2; i<np; i++)
-    p1 = FpX_red(gmul(p1, (GEN)f[i]), p);
-  p1 = FpX_red(gdivexact(gsub(gmul(p1, FpX_div(T,p1,p)), T), p), p);
+  g = (GEN)F[1];
+  for (i=2; i<np; i++) g = FpX_red(gmul(g,(GEN)F[i]), p);
+  h = FpX_div(T,g,p);
+  f = FpX_red(gdivexact(gsub(gmul(g,h), T), p), p);
   list = cgetg(N+1,t_VEC);
   indice=1; beta=NULL;
-  for (i=1; i<np; i++) /* e = 1 or f[i] does not divide p1 (mod p) */
-    if (is_pm1(ex[i]) || signe(FpX_res(p1,(GEN)f[i],p)))
-      list[indice++] = (long)apply_kummer(nf,(GEN)f[i],(GEN)ex[i],p,&beta);
+  for (i=1; i<np; i++) /* F[i] does not divide (f,g,h) */
+    if (is_pm1(ex[i]) || signe(FpX_res(f,(GEN)F[i],p)))
+      list[indice++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p,&beta);
   if (DEBUGLEVEL>=3) msgtimer("unramified factors");
 
   /* modfrob = modified Frobenius: x -> x^p - x mod p */
