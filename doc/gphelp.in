@@ -51,7 +51,7 @@ $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
 if (!defined $docdir) {
   # work from TOPDIR/Oarch or TOPDIR too: may be uninstalled yet;
   for ("$miscdir/doc", './doc', '../doc') {
-    if (-r "$_/usersch3.tex") {
+    if (-r "$_/translations") {
       $docdir = $_;
       last;
     }
