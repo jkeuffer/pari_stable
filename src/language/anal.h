@@ -140,6 +140,10 @@ enum { NONE, WARN, OLDFUN, OLDALL };
 /* return type for GP functions */
 enum { RET_GEN, RET_INT, RET_VOID };
 
+#ifdef __EMX__
+#  define STACK_CHECK
+#endif
+
 #ifdef STACK_CHECK
 extern void *PARI_stack_limit;
 #endif

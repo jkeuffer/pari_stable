@@ -111,8 +111,14 @@ pop_stack(stack **pts)
 /*********************************************************************/
 
 /* adapted from Perl code written by Dominic Dunlop */
-#include <sys/resource.h>
 void *PARI_stack_limit = NULL;
+
+#  ifdef __EMX__				/* Emulate */
+extern void* get_stack(double,int);
+#    define STACK_CHECK_INIT(b)		\
+	((void)b, PARI_stack_limit = get_stack(1./16, 32*1024))
+#  else /* !__EMX__ */
+#include <sys/resource.h>
 
 /* Set PARI_stack_limit to (a little above) the lowest safe address that can
  * be used on the stack. Leave PARI_stack_limit at its initial value (NULL)
@@ -128,6 +134,11 @@ pari_init_stackcheck(void *stack_base)
  * PARI_stack_limit = stack_base - ((rip.rlim_cur/16)*15); */
   PARI_stack_limit = (void*)((long)stack_base - (rip.rlim_cur/16)*15);
 }
+#    define STACK_CHECK_INIT(b) pari_init_stackcheck(b)
+#  endif /* !__EMX__ */
+
+#else
+#    define STACK_CHECK_INIT(b)		((void)b)
 #endif /* STACK_CHECK */
 
 /*********************************************************************/
@@ -496,9 +507,7 @@ pari_init(size_t parisize, ulong maxprime)
 {
   long i;
 
-#ifdef STACK_CHECK
-  pari_init_stackcheck(&i);
-#endif
+  STACK_CHECK_INIT(&i);
   init_defaults(0);
   if (INIT_JMP && setjmp(environnement))
   {

@@ -182,6 +182,7 @@ BA  4- [Configure:] --builddir flag
 IZ  5- File README.os2
     6- Allow nfroots(, P) [ roots in Q ]
     7- routines Strexpand(), Strtex()
+IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

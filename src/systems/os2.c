@@ -3,6 +3,7 @@
 #define INCL_BASE
 #include <os2.h>
 #include <float.h>
+#include <stdlib.h>
 
 static ULONG retcode;
 static char fail[300];
@@ -189,4 +190,26 @@ dlclose(void *handle)
 
 	retcode = rc;
 	return 2;
+}
+
+void*
+get_stack(double fraction, int min)
+{
+  int rc;
+  TIB *tib;
+  PIB *pib;
+  char *s, *e;
+  unsigned long d;
+    
+  if (!(_emx_env & 0x200)) return 0;	/* not OS/2. */
+  rc = DosGetInfoBlocks(&tib, &pib);
+  if (rc) return 0;			/* ignore error */
+  s = (char*)tib->tib_pstack;
+  e = (char*)tib->tib_pstacklimit;
+  d = fraction * (e-s);
+  if (min >= 3*(e-s)/4)
+    min = 3*(e-s)/4;
+  if (d < min)
+    d = min;
+  return (void*)(s + d);
 }
