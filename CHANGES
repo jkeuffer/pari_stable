@@ -94,8 +94,6 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
     9- upgrade pariemacs, see pariemacs.txt
    10- faster divll for portable kernel [ inspired by GMP ]
    11- allow system() under Windows (95 and higher)
-   12- in logfile, make a difference between user input ('? ') and input
-       from file ('From file: ').
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
