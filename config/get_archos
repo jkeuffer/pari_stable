@@ -64,7 +64,7 @@ esac
 #
 #   Modifications for pretty name and asm file
 #
-pretty="$pretty running $osname";;
+pretty="$pretty running $osname"
 
 tmp_kern=auto-none
 if test  -n "$kernel"; then
