@@ -1549,7 +1549,7 @@ lindep(GEN x, long prec)
     }
     i=j; i1=i+1;
     avma = av1; r = grndtoi(m[i1][i], &e);
-    if (e >= 0) err(talker,"precision too low in lindep");
+    if (e >= 0) err(precer,"lindep");
     r  = negi(r);
     p1 = ZV_lincomb(gun,r, b[i1],b[i]);
     av1 = avma;

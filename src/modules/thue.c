@@ -185,7 +185,7 @@ T_A_Matrices(void)
   /* Check for the precision in matrix inversion. See paper, Lemma 2.4.2. */
   if (gcmp(gmul(gadd(gmul(stoi(r),gmul(nia,eps1)),eps2),
            gmul(gdeux,stoi(r))),gun) == -1)
-    err(talker,"not enough precision in thue");
+    err(precer,"thue");
 
   eps3=gmul(gdeux,gmul(gmul(gsqr(stoi(r)),nia),
 		       gadd(gmul(stoi(r),gdiv(nia,eps1)),eps2)));

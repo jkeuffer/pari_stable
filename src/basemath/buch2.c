@@ -1275,7 +1275,7 @@ isunit(GEN bnf,GEN x)
         if (gcmp0((GEN)ex[RU]) && e < -4) break;
       }
 
-      if (++i > 4) err(talker,"insufficient precision in isunit");
+      if (++i > 4) err(precer,"isunit");
       prec = (prec-1)<<1;
       if (DEBUGLEVEL) err(warnprec,"isunit",prec);
       nf = nfnewprec(nf, prec);

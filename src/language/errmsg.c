@@ -58,6 +58,8 @@ char *errmessage[]=
   "sorry, not yet available on this system",
 /* warnmem */
   "collecting garbage in",
+/* precer */
+  "precision too low",
 
 /* siginter */
   "",

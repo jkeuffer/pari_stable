@@ -186,7 +186,7 @@ do_agm(GEN *ptx1, GEN a1, GEN b1, long prec, long sw)
 
   x1 = gmul2n(gsub(a1,b1),-2);
   if (gcmp0(x1))
-    err(talker,"precision too low in initell");
+    err(precer,"initell");
   G = 6 - bit_accuracy(prec);
   for(;;)
   {
@@ -199,7 +199,7 @@ do_agm(GEN *ptx1, GEN a1, GEN b1, long prec, long sw)
     if (gcmp0(r1) || gexpo(r1) <= G + gexpo(b1)) break;
   }
   if (gprecision(x1)*2 <= (prec+2))
-    err(talker,"precision too low in initell");
+    err(precer,"initell");
   *ptx1 = x1; return ginv(gmul2n(a1,2));
 }
 
@@ -266,7 +266,7 @@ padic_initell(GEN y, GEN p, long prec)
 
   w = gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
   w = gadd(w,gsqrt(gaddgs(gsqr(w),-1),0));
-  if (gcmp0(w)) err(talker,"precision too low in initell");
+  if (gcmp0(w)) err(precer,"initell");
   q=ginv(w);
   if (valp(q)<0) q=ginv(q);
 
@@ -349,7 +349,7 @@ initell0(GEN x, long prec)
   y[16] = (long)w2;
   p1 = gdiv(gsqr(pi),gmulsg(6,w1));
   p2 = thetanullk(q,1,prec);
-  if (gcmp0(p2)) err(talker,"precision too low in initell");
+  if (gcmp0(p2)) err(precer,"initell");
   y[17] = lmul(p1,gdiv(thetanullk(q,3,prec),p2));
   y[18] = ldiv(gsub(gmul((GEN)y[17],w2),gmul(gi,pi)), w1);
   return y;
@@ -2987,7 +2987,7 @@ torselldoud(GEN e)
 
   b = lgefint((GEN)e[12]) >> 1; /* b = size of sqrt(D) */
   prec = precision((GEN)e[15]);
-  if (prec < b) err(talker, "precision too low in torselldoud");
+  if (prec < b) err(precer, "torselldoud");
   b = max(b, DEFAULTPREC);
   if (b < prec) { prec = b; e = gprec_w(e, b); }
   b = torsbound(e,3);

@@ -1896,7 +1896,7 @@ binaire(GEN x)
       }
 
       lx=lg(x); y=cgetg(3,t_VEC);
-      if (ex > bit_accuracy(lx)) err(talker,"loss of precision in binary");
+      if (ex > bit_accuracy(lx)) err(precer,"binary");
       p1 = cgetg(max(ex,0)+2,t_VEC);
       p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
       y[1] = (long) p1; y[2] = (long) p2;

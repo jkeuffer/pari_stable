@@ -231,7 +231,7 @@ static GEN
 mylog(GEN x, long prec)
 {
   if (gcmp0(x))
-    err(talker,"precision too low in get_arch");
+    err(precer,"get_arch");
   return glog(x,prec);
 }
 

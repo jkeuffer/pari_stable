@@ -758,7 +758,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
   {
     aux=buchfu(relnf);
     if(gcmp0((GEN)aux[2]))
-      err(talker,"please increase precision to have units in bnfisnorm");
+      err(precer,"bnfisnorm, please increase precision and try again");
     aux=(GEN)aux[1];
   }
   if (lg(aux)>1)

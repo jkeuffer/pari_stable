@@ -3240,7 +3240,7 @@ findmin(GEN nf, GEN ideal, GEN muf,long prec)
     m = lllint(ideal);
     m = qf_base_change(gmael(nf,5,3), gmul(ideal,m), 0);
     m = lllgramintern(m,4,1,prec);
-    if (!m) err(talker,"precision too low in rnflllgram");
+    if (!m) err(precer,"rnflllgram");
   }
   ideal=gmul(ideal,m);
   N=lg(ideal)-1; y=cgetg(N+1,t_MAT);
