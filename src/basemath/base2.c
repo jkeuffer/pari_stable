@@ -3613,7 +3613,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
   if (signe(a))
     relpol = poleval(relpol, gsub(polx[v],
                              gmul(a, gmodulcp(polx[varn(T)],T))));
-  p1 = makebasis(nf, eq, relpol);
+  p1 = makebasis(nf, relpol, eq);
   if (DEBUGLEVEL>1)
   {
     msgtimer("absolute basis");
