@@ -1193,8 +1193,9 @@ gtodblList(GEN data, long flags)
 
   if (! is_vec_t(tx)) err(talker,"not a vector in gtodblList");
   if (!nl) return NULL;
-  lx1=lg(data[1]);
+  lx1 = lg(data[1]);
 
+  if (nl == 1) err(talker,"single vector in gtodblList");
   /* Allocate memory, then convert coord. to double */
   l=(dblPointList*) gpmalloc(nl*sizeof(dblPointList));
   for (i=0; i<nl-1; i+=2)
