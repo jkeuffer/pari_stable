@@ -61,7 +61,7 @@ static struct
 static char *redefine_fun = NULL;
 
 /* points to the part of the string that remains to be parsed */
-static char *analyseur;
+static char *analyseur = NULL;
 
 /* when non-0, we are checking the syntax of a new function body */
 static long skipping_fun_def;
