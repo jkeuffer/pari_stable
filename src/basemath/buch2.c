@@ -30,7 +30,7 @@ extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN get_roots(GEN x,long r1,long ru,long prec);
 extern void get_nf_matrices(GEN nf, long small);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t, long v);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t);
 extern GEN init_idele(GEN nf);
 extern GEN norm_by_embed(long r1, GEN x);
 extern void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
@@ -397,7 +397,7 @@ factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
       for (j=1; j<n1; j++)
       {
         P = (GEN)p1[j];
-	v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], NULL, k);
+	v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], NULL);
 	if (v)
 	{
 	  primfact[++lo]=ip+j; expoprimfact[lo]=v;
@@ -415,7 +415,7 @@ factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
   for (k=1,j=1; j<n1; j++)
   {
     P = (GEN)p1[j];
-    v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], NULL, k);
+    v = int_elt_val(nf,x,(GEN)P[1],(GEN)P[5], NULL);
     if (v)
     {
       primfact[++lo]=ip+j; expoprimfact[lo]=v;

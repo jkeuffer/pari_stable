@@ -27,7 +27,7 @@ extern GEN T2_from_embed_norm(GEN x, long r1);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN famat_to_nf(GEN nf, GEN f);
 extern GEN vconcat(GEN A, GEN B);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx, long v);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
     
 
 static long rc,ell,degK,degKz,m,d,vnf,dv;
@@ -387,9 +387,9 @@ isprimeidealconj(GEN pr1, GEN pr2, GEN U)
   if (gegal(x,(GEN)pr2[2])) return 1;
   for(;;)
   {
-    if (int_elt_val(nfz,x,p,b2,NULL,0)) return 1;
+    if (int_elt_val(nfz,x,p,b2,NULL)) return 1;
     x = FpV_red(tauofelt(nfz,x,U), p);
-    if (int_elt_val(nfz,x,p,b1,NULL,0)) return 0;
+    if (int_elt_val(nfz,x,p,b1,NULL)) return 0;
   }
 }
 

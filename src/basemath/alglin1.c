@@ -852,18 +852,38 @@ mattodiagonal(GEN m)
 GEN
 gaddmat(GEN x, GEN y)
 {
-  long ly,dy,i,j;
-  GEN z;
+  long l,d,i,j;
+  GEN z, cz,cy;
 
-  ly=lg(y); if (ly==1) return cgetg(1,t_MAT);
-  dy=lg(y[1]);
-  if (typ(y)!=t_MAT || ly!=dy) err(mattype1,"gaddmat");
-  z=cgetg(ly,t_MAT);
-  for (i=1; i<ly; i++)
+  l = lg(y); if (l==1) return cgetg(1,t_MAT);
+  d = lg(y[1]);
+  if (typ(y)!=t_MAT || l!=d) err(mattype1,"gaddmat");
+  z=cgetg(l,t_MAT);
+  for (i=1; i<l; i++)
   {
-    z[i]=lgetg(dy,t_COL);
-    for (j=1; j<dy; j++)
-      coeff(z,j,i) = i==j? ladd(x,gcoeff(y,j,i)): lcopy(gcoeff(y,j,i));
+    cz = cgetg(d,t_COL); z[i] = (long)cz; cy = (GEN)y[i];
+    for (j=1; j<d; j++)
+      cz[j] = i==j? ladd(x,(GEN)cy[j]): lcopy((GEN)cy[j]);
+  }
+  return z;
+}
+
+/* same, no copy */
+GEN
+gaddmat_i(GEN x, GEN y)
+{
+  long l,d,i,j;
+  GEN z, cz,cy;
+
+  l = lg(y); if (l==1) return cgetg(1,t_MAT);
+  d = lg(y[1]);
+  if (typ(y)!=t_MAT || l!=d) err(mattype1,"gaddmat");
+  z = cgetg(l,t_MAT);
+  for (i=1; i<l; i++)
+  {
+    cz = cgetg(d,t_COL); z[i] = (long)cz; cy = (GEN)y[i];
+    for (j=1; j<d; j++)
+      cz[j] = i==j? ladd(x,(GEN)cy[j]): cy[j];
   }
   return z;
 }
@@ -956,7 +976,8 @@ hnfdivide(GEN A, GEN B)
   u = cgetg(n+1, t_COL);
   for (k=1; k<=n; k++)
   {
-    b = (GEN)B[k]; m = (GEN)b[k];
+    b = (GEN)B[k];
+    m = (GEN)b[k];
     u[k] = ldvmdii(m, gcoeff(A,k,k), &r);
     if (r != gzero) { avma = av; return 0; }
     for (i=k-1; i>0; i--)
@@ -964,11 +985,39 @@ hnfdivide(GEN A, GEN B)
       m = negi((GEN)b[i]);
       for (j=i+1; j<=k; j++)
         m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
-      u[i] = ldvmdii(negi(m), gcoeff(A,i,i), &r);
+      m = dvmdii(m, gcoeff(A,i,i), &r);
       if (r != gzero) { avma = av; return 0; }
+      u[i] = lnegi(m);
     }
   }
   avma = av; return 1;
+}
+
+/* A upper HNF, b integral vector. Return A^(-1) b if integral,
+ * NULL otherwise. */
+GEN
+hnf_invimage(GEN A, GEN b)
+{
+  gpmem_t av = avma, av2;
+  long n = lg(A)-1, i,j;
+  GEN u, m, r;
+
+  if (!n) return NULL;
+  u = cgetg(n+1, t_COL);
+  m = (GEN)b[n];
+  u[n] = ldvmdii(m, gcoeff(A,n,n), &r);
+  if (r != gzero) { avma = av; return NULL; }
+  for (i=n-1; i>0; i--)
+  {
+    av2 = avma;
+    m = negi((GEN)b[i]);
+    for (j=i+1; j<=n; j++)
+      m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
+    m = dvmdii(m, gcoeff(A,i,i), &r);
+    if (r != gzero) { avma = av; return NULL; }
+    u[i] = (long)gerepileuptoint(av2, negi(m));
+  }
+  return u;
 }
 
 GEN

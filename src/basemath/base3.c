@@ -151,7 +151,7 @@ element_inv(GEN nf, GEN x)
       x = lift(x); break;
     }
   p1 = QX_invmod(gmul((GEN)nf[7],x), (GEN)nf[1]);
-  p1 = algtobasis_intern(nf,p1);
+  p1 = algtobasis_i(nf,p1);
 
   if (p) p1 = FpV(p1, p);
   return gerepileupto(av,p1);
@@ -214,7 +214,7 @@ element_div(GEN nf, GEN x, GEN y)
     }
 
   p1 = gmul(gmul((GEN)nf[7],x), QX_invmod(gmul((GEN)nf[7],y), (GEN)nf[1]));
-  p1 = algtobasis_intern(nf, gres(p1, (GEN)nf[1]));
+  p1 = algtobasis_i(nf, gres(p1, (GEN)nf[1]));
   if (p) p1 = FpV(p1,p);
   return gerepileupto(av,p1);
 }
@@ -490,25 +490,30 @@ element_mulid(GEN nf, GEN x, long i)
   return v;
 }
 
+GEN
+eltmul_get_table(GEN nf, GEN x)
+{
+  long i, N = degpol(nf[1]);
+  GEN mul = cgetg(N+1,t_MAT);
+  mul[1] = (long)x; /* assume w_1 = 1 */
+  for (i=2; i<=N; i++) mul[i] = (long)element_mulid(nf,x,i);
+  return mul;
+}
+
 /* valuation of integer x, with resp. to prime ideal P above p.
  * p.P^(-1) = b Z_K, v >= val_p(norm(x)), and N = deg(nf)
  * [b may be given as the 'multiplication by b' matrix]
  */
 long
-int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx, long v)
+int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 {
   long i,k,w, N = degpol(nf[1]);
   GEN r,a,y,mul;
   
-  if (typ(b) == t_MAT) mul = b;
-  else
-  {
-    mul = cgetg(N+1,t_MAT);
-    for (i=1; i<=N; i++) mul[i] = (long)element_mulid(nf,b,i);
-  }
+  mul = (typ(b) == t_MAT)? b: eltmul_get_table(nf, b);
   y = cgetg(N+1, t_COL); /* will hold the new x */
   x = dummycopy(x);
-  for(w=0; w<=v; w++)
+  for(w=0;; w++)
   {
     for (i=1; i<=N; i++)
     { /* compute (x.b)_i */
@@ -516,13 +521,14 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx, long v)
       for (k=2; k<=N; k++) a = addii(a, mulii((GEN)x[k], gcoeff(mul,i,k)));
       /* is it divisible by p ? */
       y[i] = ldvmdii(a,p,&r);
-      if (signe(r)) goto END;
+      if (signe(r))
+      {
+        if (newx) *newx = x;
+        return w;
+      }
     }
     r=x; x=y; y=r;
   }
-END:
-  if (newx) *newx = x;
-  return w;
 }
 
 long
@@ -541,7 +547,7 @@ element_val(GEN nf, GEN x, GEN vp)
       return ggval(x,p)*e;
     case t_POLMOD: x = (GEN)x[2]; /* fall through */
     case t_POL:
-      x = algtobasis_intern(nf,x); break;
+      x = algtobasis_i(nf,x); break;
     case t_COL:
       if (lg(x)==N+1) break;
     default: err(typeer,"element_val");
@@ -550,7 +556,7 @@ element_val(GEN nf, GEN x, GEN vp)
 
   cx = content(x);
   if (gcmp1(cx)) vcx=0; else { x = gdiv(x,cx); vcx = ggval(cx,p); }
-  w = int_elt_val(nf,x,p,(GEN)vp[5],NULL,VERYBIGINT);
+  w = int_elt_val(nf,x,p,(GEN)vp[5],NULL);
   avma=av; return w + vcx*e;
 }
 
@@ -564,7 +570,7 @@ element_val2(GEN nf, GEN x, GEN d, GEN vp)
 
   if (!v) return 0;
   av=avma;
-  v = int_elt_val(nf,x,p,(GEN)vp[5],NULL,v);
+  v = int_elt_val(nf,x,p,(GEN)vp[5],NULL);
   avma=av; return v;
 }
 
@@ -650,10 +656,9 @@ mulmat_pol(GEN A, GEN x)
 }
 
 /* valid for scalars and polynomial, degree less than N.
- * No garbage collecting. No check (SEGV for vectors).
- */
+ * No garbage collecting. No check.  */
 GEN
-algtobasis_intern(GEN nf, GEN x)
+algtobasis_i(GEN nf, GEN x)
 {
   GEN P = (GEN)nf[1];
   long tx = typ(x), N = degpol(P);
@@ -688,7 +693,7 @@ algtobasis(GEN nf, GEN x)
 	err(talker,"not the same number field in algtobasis");
       x = (GEN)x[2]; /* fall through */
     case t_POL:
-      return gerepileupto(av,algtobasis_intern(nf,x));
+      return gerepileupto(av,algtobasis_i(nf,x));
 
     default: N=degpol(nf[1]); return gscalcol(x,N);
   }
@@ -964,16 +969,6 @@ zidealij(GEN x, GEN y)
   z[3] = lmul(U,xi); return z;
 }
 
-static GEN
-get_multab(GEN nf, GEN x)
-{
-  long lx = lg(x), i;
-  GEN multab = cgetg(lx, t_MAT);
-  for (i=1; i<lx; i++)
-    multab[i]=(long)element_mulid(nf,x,i);
-  return multab;
-}
-
 /* return mat * y mod prh */
 static GEN
 mul_matvec_mod_pr(GEN mat, GEN y, GEN prh)
@@ -1126,7 +1121,7 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall,GEN q)
   g0inv = lift_intern(element_invmodpr(nf,g0,prhall));
   p1 = x;
 
-  multab = get_multab(nf, g0inv);
+  multab = eltmul_get_table(nf, g0inv);
   for (i=lg(multab)-1; i; i--)
     multab[i]=(long)FpV_red((GEN)multab[i], p);
 
@@ -1143,7 +1138,7 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall,GEN q)
   for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
   smalltable=p1; p1=giant;
 
-  multab = get_multab(nf, giant);
+  multab = eltmul_get_table(nf, giant);
   for (i=lg(multab)-1; i; i--)
     multab[i]=(long)FpV_red((GEN)multab[i], p);
 

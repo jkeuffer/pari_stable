@@ -24,7 +24,7 @@ extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN element_mulid(GEN nf, GEN x, long i);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN ideal_better_basis(GEN nf, GEN x, GEN M);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t, long v);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
 extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN nfidealdet1(GEN nf, GEN a, GEN b);
 extern GEN nfsuppl(GEN nf, GEN x, long n, GEN prhall);
@@ -1855,77 +1855,43 @@ nbasis(GEN ibas,GEN pd)
 static GEN lens(GEN nf,GEN p,GEN a);
 GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 
-/* return a Z basis of Z_K's p-radical, modfrob = x--> x^p-x */
+/* return a Z basis of Z_K's p-radical, phi = x--> x^p-x */
 static GEN
-pradical(GEN nf, GEN p, GEN *modfrob)
+pradical(GEN nf, GEN p, GEN *phi)
 {
   long i,N = degpol(nf[1]);
-  GEN p1,m,frob,rad;
+  GEN q,m,frob,rad;
 
+  /* matrix of Frob: x->x^p over Z_K/p */
   frob = cgetg(N+1,t_MAT);
   for (i=1; i<=N; i++)
-    frob[i] = (long) element_powid_mod_p(nf,i,p, p);
+    frob[i] = (long)element_powid_mod_p(nf,i,p, p);
 
-  /* p1 = smallest power of p st p^k >= N */
-  p1=p; while (cmpis(p1,N)<0) p1=mulii(p1,p);
-  if (p1==p) m = frob;
-  else
-  {
-    m=cgetg(N+1,t_MAT); p1 = divii(p1,p);
-    for (i=1; i<=N; i++)
-      m[i]=(long)element_pow_mod_p(nf,(GEN)frob[i],p1, p);
-  }
-  rad = FpM_ker(m, p);
+  m = frob; q = p;
+  while (cmpis(q,N) < 0) { q = mulii(q,p); m = FpM_mul(m, frob, p); }
+  rad = FpM_ker(m, p); /* m = Frob^k, s.t p^k >= N */
   for (i=1; i<=N; i++)
     coeff(frob,i,i) = lsubis(gcoeff(frob,i,i), 1);
-  *modfrob = frob; return rad;
+  *phi = frob; return rad;
 }
 
+/* minimal polynomial of a in A2 (dim A2 = d2). mula = multiplication
+ * table by a in ZK/p */
 static GEN
-project(GEN algebre, GEN x, long k, long kbar, GEN p)
+pol_min(GEN mula, GEN Mi2, GEN p)
 {
-  x = FpM_invimage(algebre,x,p);
-  x += k; x[0] = evaltyp(t_COL) | evallg(kbar+1);
-  return x;
-}
+  gpmem_t av = avma;
+  long i, d2 = lg(Mi2[1]);
+  GEN z, pow = cgetg(d2+2,t_MAT), P = pow+1;
 
-/* Calcule le polynome minimal de alpha dans algebre (coeffs dans Z) */
-static GEN
-pol_min(GEN alpha,GEN nf,GEN algebre,long kbar,GEN p)
-{
-  gpmem_t av=avma,tetpil;
-  long i,N,k;
-  GEN p1,puiss;
-
-  N = lg(nf[1])-3; puiss=cgetg(N+2,t_MAT);
-  k = N-kbar; p1=alpha;
-  puiss[1] = (long)gscalcol_i(gun,kbar);
-  for (i=2; i<=N+1; i++)
+  P[0] = Mi2[1]; z = (GEN)mula[1];
+  for (i=1; i<=d2; i++)
   {
-    if (i>2) p1 = FpV_red(element_mul(nf,p1,alpha), p);
-    puiss[i] = (long) project(algebre,p1,k,kbar,p);
+    P[i] = (long)FpM_FpV_mul(Mi2, z, p); /* a^i */
+    if (i!=d2) z = FpM_FpV_mul(mula, z, p);
   }
-  p1 = (GEN)FpM_ker(puiss, p)[1]; tetpil=avma;
-  return gerepile(av,tetpil,gtopolyrev(p1,0));
-}
-
-/* Evalue le polynome pol en alpha,element de nf */
-static GEN
-eval_pol(GEN nf,GEN pol,GEN alpha,GEN algebre,GEN algebre1, GEN p)
-{
-  gpmem_t av=avma;
-  long i,kbar,k, lx = lgef(pol)-1, N = degpol(nf[1]);
-  GEN res;
-
-  kbar = lg(algebre1)-1; k = N-kbar;
-  res = gscalcol_i((GEN)pol[lx], N);
-  for (i=2; i<lx; i++)
-  {
-    res = element_mul(nf,alpha,res);
-    res[1] = ladd((GEN)res[1],(GEN)pol[i]);
-  }
-  res = project(algebre,res,k,kbar,p);
-  return gerepileupto(av, FpV_red(gmul(algebre1,res), p));
+  z = (GEN)FpM_ker(pow, p)[1];
+  return gerepileupto(av, gtopolyrev(z,0));
 }
 
 static GEN
@@ -2018,72 +1984,30 @@ vecteur sur la base d'entiers */
 static GEN
 lens(GEN nf, GEN p, GEN a)
 {
-  gpmem_t av=avma,tetpil;
-  long N=degpol(nf[1]),j;
-  GEN mat=cgetg(N+1,t_MAT);
-  for (j=1; j<=N; j++) mat[j]=(long)element_mulid(nf,a,j);
-  tetpil=avma; return gerepile(av,tetpil,kerlens(mat,p));
+  gpmem_t av = avma;
+  GEN mat = eltmul_get_table(nf, a);
+  return gerepileupto(av, kerlens(mat,p));
 }
 
 extern GEN det_mod_P_n(GEN a, GEN N, GEN P);
 GEN sylvestermatrix_i(GEN x, GEN y);
 
-/* check if p^va doesnt divide norm x (or norm(x+p)) */
-/* use subres to compute norm */
-static GEN
-prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
+/* a in pr | p, norm(pr) = pf. Return 1 if (a,p) = pr, and 0 otherwise */
+static int
+is_uniformizer(GEN a, GEN T, GEN pf, GEN p)
 {
-  GEN norme=subres(pol,a);
-  if (resii(divii(norme,pf),p) != gzero) return a;
-  /* Note: a+p can't succeed if e > 1, can we know this at this point ? */
-  a=gadd(a,p); norme=subres(pol,a);
-  if (resii(divii(norme,pf),p) != gzero) return a;
+  GEN N = subres(a,T); /* norm(a) */
+  return (resii(diviiexact(N,pf), p) != gzero);
+}
+
+static GEN
+prime_check_elt(GEN a, GEN T, GEN p, GEN pf)
+{
+  if (is_uniformizer(a,T,pf,p)) return a;
+  /* FIXME: can't succeed if e > 1, can we know this at this point ? */
+  if (is_uniformizer(gadd(a,p),T,pf,p)) return a;
   return NULL;
 }
-
-#if 0
-static GEN
-prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
-{
-  long m = lg(beta)-1;
-  gpmem_t av;
-  int i,j,K, *x = (int*)new_chunk(m+1);
-  GEN a;
-
-  K = 1; av = avma;
-  for(;;)
-  { /* x runs through strictly increasing sequences of length K,
-     * 1 <= x[i] <= m */
-nextK:
-    if (DEBUGLEVEL) fprintferr("K = %d\n", K);
-    for (i=1; i<=K; i++) x[i] = i;
-    for(;;)
-    {
-      if (DEBUGLEVEL > 1)
-      {
-        for (i=1; i<=K; i++) fprintferr("%d ",x[i]);
-        fprintferr("\n"); flusherr();
-      }
-      a = (GEN)beta[x[1]];
-      for (i=2; i<=K; i++) a = gadd(a, (GEN)beta[x[i]]);
-      if ((a = prime_check_elt(a,pol,p,pf))) return a;
-      avma = av;
-
-      /* start: i = K+1; */
-      do
-      {
-        if (--i == 0)
-        {
-          if (++K > m) return NULL; /* fail */
-          goto nextK;
-        }
-        x[i]++;
-      } while (x[i] > m - K + i);
-      for (j=i; j<K; j++) x[j+1] = x[j]+1;
-    }
-  }
-}
-#endif
 
 static GEN
 random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
@@ -2121,8 +2045,8 @@ random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
 static GEN
 prime_two_elt(GEN nf, GEN p, GEN ideal)
 {
-  GEN beta,a,pf, pol = (GEN)nf[1];
-  long f, N=degpol(pol), m=lg(ideal)-1;
+  GEN beta,a,pf, T = (GEN)nf[1];
+  long f, N=degpol(T), m=lg(ideal)-1;
   gpmem_t av;
 
   if (!m) return gscalcol_i(p,N);
@@ -2134,150 +2058,154 @@ prime_two_elt(GEN nf, GEN p, GEN ideal)
   ideal = ideal_better_basis(nf, ideal, p);
   beta = gmul((GEN)nf[7], ideal);
 
-#if 0
-  a = prime_two_elt_loop(beta,pol,p,pf);
-  if (!a) err(bugparier, "prime_two_elt (failed)");
-#else
-  a = random_prime_two_elt_loop(beta,pol,p,pf);
-#endif
+  a = random_prime_two_elt_loop(beta,T,p,pf);
+  a = centermod(algtobasis_i(nf,a), p);
+  if (!is_uniformizer(gmul((GEN)nf[7],a), T,pf,p)) a[1] = laddii((GEN)a[1],p);
 
-  a = centermod(algtobasis_intern(nf,a), p);
-  if (resii(divii(subres(gmul((GEN)nf[7],a),pol),pf),p) == gzero)
-    a[1] = laddii((GEN)a[1],p);
   return gerepilecopy(av,a);
 }
 
+/* pr = (p,u) of ramification index e */
 GEN
-apply_kummer(GEN nf,GEN pol,GEN e,GEN p,GEN *beta)
+apply_kummer(GEN nf,GEN u,GEN e,GEN p)
 {
-  GEN T = (GEN)nf[1], p1, res = cgetg(6,t_VEC);
-  long f = degpol(pol), N = degpol(T);
+  GEN T = (GEN)nf[1], pr = cgetg(6,t_VEC);
+  long f = degpol(u), N = degpol(T);
 
-  res[1]=(long)p;
-  res[3]=(long)e;
-  res[4]=lstoi(f);
+  pr[1] = (long)p;
+  pr[3] = (long)e;
+  pr[4] = lstoi(f);
   if (f == N) /* inert */
   {
-    res[2]=(long)gscalcol_i(p,N);
-    res[5]=(long)gscalcol_i(gun,N);
+    pr[2] = (long)gscalcol_i(p,N);
+    pr[5] = (long)gscalcol_i(gun,N);
   }
   else
   {
-    if (ggval(subres(pol,T),p) > f)
-      pol[2] = laddii((GEN)pol[2],p);
-    res[2] = (long) algtobasis_intern(nf,pol);
-
-    p1 = FpX_div(T,pol,p);
-    res[5] = (long) centermod(algtobasis_intern(nf,p1), p);
-
-    if (beta)
-      *beta = *beta? FpX_div(*beta,pol,p): p1;
+    GEN t, pf = f==1? p: gpowgs(p,f);
+    /* make sure v_pr(u) = 1 (automatic if e>1) */
+    if (is_pm1(e) && !is_uniformizer(u, T,pf,p))
+      u[2] = laddii((GEN)u[2], p);
+    t = algtobasis_i(nf, FpX_div(T,u,p));
+    pr[2] = (long)algtobasis_i(nf,u);
+    pr[5] = (long)centermod(t, p);
   }
-  return res;
+  return pr;
+}
+
+static GEN
+get_pr(GEN nf, GEN p, GEN H, long f)
+{
+  GEN pr, u = prime_two_elt(nf,p,H), t = lens(nf,p,u);
+  gpmem_t av = avma;
+  long e = 1 + int_elt_val(nf,t,p,t,NULL);
+  avma = av;
+  pr = cgetg(6,t_VEC);
+  pr[1] = (long)p;
+  pr[2] = (long)u;
+  pr[3] = lstoi(e);
+  pr[4] = lstoi(f);
+  pr[5] = (long)t; return pr;
 }
 
 /* prime ideal decomposition of p sorted by increasing residual degree */
 GEN
 primedec(GEN nf, GEN p)
 {
-  gpmem_t av=avma,tetpil;
-  long i,j,k,kbar,np,c,indice,N;
-  GEN ex,F,list,ip,elth;
-  GEN modfrob,algebre,algebre1,b,mat1,T;
-  GEN alpha,beta,f,g,h,p1,UN;
+  gpmem_t av = avma;
+  long i,k,c,iL,N;
+  GEN ex,F,L,Ip,H,phi,mat1,T,beta,f,g,h,p1,UN;
 
-  if (DEBUGLEVEL>=3) timer2();
-  nf=checknf(nf); T=(GEN)nf[1]; N=degpol(T);
-  F=factmod(T,p); ex=(GEN)F[2];
-  F=centerlift((GEN)F[1]); np=lg(F);
-  if (DEBUGLEVEL>=6) msgtimer("factmod");
+  if (DEBUGLEVEL>2) timer2();
+  nf = checknf(nf); T = (GEN)nf[1];
+  F = factmod(T,p);
+  ex = (GEN)F[2];
+  F  = (GEN)F[1]; F = centerlift(F);
+  if (DEBUGLEVEL>5) msgtimer("factmod");
 
+  k = lg(F);
   if (signe(modii((GEN)nf[4],p))) /* p doesn't divide index */
   {
-    list=cgetg(np,t_VEC);
-    for (i=1; i<np; i++)
-      list[i]=(long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p, NULL);
-    if (DEBUGLEVEL>=6) msgtimer("simple primedec");
-    p1=stoi(4); tetpil=avma;
-    return gerepile(av,tetpil,vecsort(list,p1));
+    L = cgetg(k,t_VEC);
+    for (i=1; i<k; i++)
+      L[i] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
+    if (DEBUGLEVEL>5) msgtimer("simple primedec");
+    return gerepileupto(av, vecsort(L, stoi(4)));
   }
 
   g = (GEN)F[1];
-  for (i=2; i<np; i++) g = FpX_mul(g,(GEN)F[i], p);
+  for (i=2; i<k; i++) g = FpX_mul(g,(GEN)F[i], p);
   h = FpX_div(T,g,p);
   f = FpX_red(gdivexact(gsub(gmul(g,h), T), p), p);
-  list = cgetg(N+1,t_VEC);
-  indice=1; beta=NULL;
-  for (i=1; i<np; i++) /* F[i] does not divide (f,g,h) */
+
+  N = degpol(T); beta = h;
+  L = cgetg(N+1,t_VEC); iL = 1;
+  for (i=1; i<k; i++)
     if (is_pm1(ex[i]) || signe(FpX_res(f,(GEN)F[i],p)))
-      list[indice++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p,&beta);
-  if (DEBUGLEVEL>=3) msgtimer("unramified factors");
+      L[iL++] = (long)apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
+    else /* F[i] | (f,g,h), happens at least once by Dedekind criterion */
+      beta = FpX_mul(beta, (GEN)F[i], p);
+  if (DEBUGLEVEL>2) msgtimer("Kummer factors");
 
-  /* modfrob = modified Frobenius: x -> x^p - x mod p */
-  ip = pradical(nf,p,&modfrob);
-  if (DEBUGLEVEL>=3) msgtimer("pradical");
+  /* phi matrix of x -> x^p - x in algebra Z_K/p */
+  Ip = pradical(nf,p,&phi);
+  if (DEBUGLEVEL>2) msgtimer("pradical");
 
-  if (beta)
-  {
-    long l = lg(ip)-1;
-    beta = FpV_red(algtobasis_intern(nf,beta), p);
-    p1=cgetg(2*l+N+1,t_MAT);
+  /* split etale algebra Z_K / (p,Ip) */
+  h = cgetg(N+1,t_VEC);
+  if (iL > 1)
+  { /* split off Kummer factors */
+    beta = FpV_red(algtobasis_i(nf,beta), p);
+    k = lg(Ip)-1; p1 = cgetg(2*k+N+1,t_MAT);
     for (i=1; i<=N;   i++) p1[i] = (long)element_mulid(nf,beta,i);
-    for (   ; i<=N+l; i++)
+    for (   ; i<=N+k; i++)
     {
-      GEN p2 = (GEN)ip[i-N];
-      p1[i+l] = (long)p2;
-      p1[i] = (long)gdivexact(element_mul(nf,p2,beta),p);
+      GEN p2 = (GEN)Ip[i-N];
+      p1[i+k] = (long)p2;
+      p1[i] = (long)gdivexact(element_muli(nf,p2,beta),p);
     }
-    ip = FpM_image(FpM_red(p1,p), p);
-    if (lg(ip)>N) err(bugparier,"primedec (bad pradical)");
+    h[1] = (long)FpM_image(FpM_red(p1,p), p);
   }
-  UN = gscalcol(gun, N);
+  else
+    h[1] = (long)Ip;
 
-  h = cgetg(N+1,t_VEC); h[1] = (long)ip;
+  UN = gscalcol(gun, N);
   for (c=1; c; c--)
-  {
-    elth=(GEN)h[c]; k=lg(elth)-1; kbar=N-k;
-    p1 = concatsp(elth, UN);
-    algebre = FpM_suppl(p1, p);
-    algebre1 = cgetg(kbar+1,t_MAT);
-    for (i=1; i<=kbar; i++) algebre1[i]=algebre[i+k];
-    b = FpM_mul(modfrob,algebre1,p);
-    for (i=1;i<=kbar;i++)
-      b[i] = (long) project(algebre,(GEN)b[i],k,kbar, p);
-    mat1 = FpM_ker(b, p);
+  { /* Let A:= (Z_K/p) / Ip; try to split A2 := A / Im H ~ Im M2
+       H * ? + M2 * Mi2 = Id_N ==> M2 * Mi2 projector A --> A2 */
+    GEN M, Mi, M2, Mi2, phi2;
+    H = (GEN)h[c]; k = lg(H)-1;
+    M   = FpM_suppl(concatsp(H,UN), p); 
+    Mi  = FpM_inv(M, p);
+    M2  = vecextract_i(M, k+1,N); /* M = (H|M2) invertible */
+    Mi2 = rowextract_i(Mi,k+1,N);
+    phi2 = FpM_mul(Mi2, FpM_mul(phi,M2, p), p);
+    mat1 = FpM_ker(phi2, p);
     if (lg(mat1) > 2)
-    {
-      GEN mat2 = cgetg(k+N+1,t_MAT);
-      for (i=1; i<=k; i++) mat2[i]=elth[i];
-      alpha = FpM_FpV_mul(algebre1,(GEN)mat1[2], p);
-      p1 = pol_min(alpha,nf,algebre,kbar,p);
-      p1 = (GEN)factmod0(p1,p)[1];
-      for (i=1; i<lg(p1); i++)
+    { /* phi2 v = 0 <==> a = M2 v in Ker phi */
+      GEN I,R,r,a,mula, v = (GEN)mat1[2];
+      long n;
+
+      a = FpM_FpV_mul(M2,v, p);
+      mula = FpM_red(eltmul_get_table(nf, a), p);
+      R = rootmod(pol_min(mula,Mi2,p), p); /* totally split mod p */
+
+      n = lg(R)-1;
+      for (i=1; i<=n; i++)
       {
-	beta = eval_pol(nf,(GEN)p1[i],alpha,algebre,algebre1,p);
-	for (j=1; j<=N; j++)
-	  mat2[k+j] = (long)FpV_red(element_mulid(nf,beta,j), p);
-	h[c] = (long)FpM_image(mat2, p); c++;
+        r = lift_intern((GEN)R[i]);
+        I = gaddmat_i(negi(r), mula);
+	h[c++] = (long)FpM_image(concatsp(H, I), p);
       }
+      if (n == N-k)
+        for (i=1; i<=n; i++) L[iL++] = (long)get_pr(nf,p,(GEN)h[--c], 1);
     }
-    else
-    {
-      GEN z, u = prime_two_elt(nf,p,elth), v = lens(nf,p,u);
-      gpmem_t av1 = avma;
-      i = int_elt_val(nf,v,p,v,NULL,N-1);
-      avma = av1;
-      z = cgetg(6,t_VEC); list[indice++] = (long)z;
-      z[1] = (long)p;
-      z[2] = (long)u;
-      z[3] = lstoi(i+1);
-      z[4] = lstoi(kbar);
-      z[5] = (long)v;
-    }
-    if (DEBUGLEVEL>=3) msgtimer("h[%ld]",c);
+    else /* A2 field ==> H maximal, f = N-k = dim(A2) */
+      L[iL++] = (long)get_pr(nf,p,H, N-k);
+    if (DEBUGLEVEL>2) msgtimer("h[%ld]",c);
   }
-  setlg(list, indice); tetpil=avma;
-  return gerepile(av,tetpil,gen_sort(list,0,cmp_prime_over_p));
+  setlg(L, iL);
+  return gerepileupto(av, gen_sort(L,0,cmp_prime_over_p));
 }
 
 /* REDUCTION Modulo a prime ideal */
@@ -2739,7 +2667,7 @@ rnfround2all(GEN nf, GEN pol, long all)
       p1 = lift_intern(gmul((GEN)W[i],(GEN)W[j]));
       coeff(p2,j,i)=coeff(p2,i,j)=(long)quicktrace(p1,sym);
     }
-  d = algtobasis_intern(nf,det(p2));
+  d = algtobasis_i(nf,det(p2));
 
   I=(GEN)pseudo[2];
   i=1; while (i<=n && gegal((GEN)I[i],id)) i++;

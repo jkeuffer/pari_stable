@@ -25,7 +25,7 @@ extern long init_padic_prec(long e, int BitPerFactor, long r, double LOGp2);
 extern double bound_vS(long tmax, GEN *BL);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
-extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p,GEN *beta);
+extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN gauss_intern(GEN a, GEN b);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
@@ -530,7 +530,7 @@ choose_prime(GEN nf, GEN bad, GEN lim)
     if (lg(r) > 1) break;
   }
   r = gsub(polx[varn(x)], lift_intern((GEN)r[1]));
-  return apply_kummer(nf,r,gun,p,NULL);
+  return apply_kummer(nf,r,gun,p);
 }
 
 static GEN
@@ -589,7 +589,7 @@ nf_bestlift(GEN elt, nfcmbf_t *T)
   long i,l = lg(T->h), t = typ(elt);
   if (t != t_INT)
   {
-    if (t == t_POL) elt = algtobasis_intern(T->nf,elt);
+    if (t == t_POL) elt = algtobasis_i(T->nf,elt);
     u = gmul(T->hinv,elt);
     for (i=1; i<l; i++) u[i] = (long)gdivround((GEN)u[i], T->den);
   }

@@ -302,7 +302,7 @@ rnfalgtobasis(GEN rnf,GEN x)
 	err(talker,"not the same number field in rnfalgtobasis");
       x = lift_to_pol(x); /* fall through */
     case t_POL:
-    { /* cf algtobasis_intern */
+    { /* cf algtobasis_i */
       GEN P = (GEN)rnf[1];
       long N = degpol(P);
       if (degpol(x) >= N) x = gres(x,P);

@@ -47,6 +47,7 @@ GEN     eigen(GEN x, long prec);
 GEN     extract(GEN x, GEN l);
 GEN     extract0(GEN x, GEN l1, GEN l2);
 GEN     gaddmat(GEN x, GEN y);
+GEN     gaddmat_i(GEN x, GEN y);
 GEN     gauss(GEN a, GEN b);
 GEN     gaussmodulo(GEN M, GEN D, GEN Y);
 GEN     gaussmodulo2(GEN M, GEN D, GEN Y);
@@ -376,7 +377,7 @@ GEN     smalldiscf(GEN x);
 /* base3.c */
 
 GEN     algtobasis(GEN nf, GEN x);
-GEN     algtobasis_intern(GEN nf,GEN x);
+GEN     algtobasis_i(GEN nf,GEN x);
 GEN     basistoalg(GEN nf, GEN x);
 GEN     element_div(GEN nf, GEN x, GEN y);
 GEN     element_inv(GEN nf, GEN x);
@@ -391,6 +392,7 @@ GEN     element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN structarch);
 GEN     element_sqr(GEN nf,GEN x);
 long    element_val(GEN nf, GEN x, GEN vp);
 long    element_val2(GEN nf, GEN x, GEN d, GEN vp);
+GEN     eltmul_get_table(GEN nf, GEN x);
 GEN     ideallist(GEN nf,long bound);
 GEN     ideallist0(GEN nf,long bound, long flag);
 GEN     ideallistarch(GEN nf, GEN list, GEN arch);
