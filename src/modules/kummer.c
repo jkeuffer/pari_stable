@@ -27,7 +27,7 @@ extern GEN T2_from_embed_norm(GEN x, long r1);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN famat_to_nf(GEN nf, GEN f);
 
-static long rc,ell,degK,degKz,m,d,vnf,dv,nbcol;
+static long rc,ell,degK,degKz,m,d,vnf,dv;
 static GEN matexpoteta1,nf,raycyc,polnf;
 static GEN bnfz,nfz,U,uu,gell,cyc,gencyc,vecalpha,R,g;
 static GEN listmod,listprSp,listbid,listunif,listellrank;
@@ -181,7 +181,7 @@ static GEN
 rnfkummersimple(GEN bnr, GEN subgroup, long all)
 {
   long r1,degnf,ell,j,i,l;
-  long nbgenclK,lSml2,lSl,lSp,lastindex,nbvunit,nbvunit0;
+  long nbgenclK,lSml2,lSl,lSp,lastindex,nbvunit;
   long kmax,lastbid,nbcol,nblig,k,llistx,e,vp,vd;
 
   GEN bnf,nf,classgroup,cyclic,bid,ideal,arch,cycgen,gell,p1,p2,p3;
@@ -293,7 +293,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all)
     vecbeta0[j]=(long)p3;
   }
   vunit=gmodulcp(concatsp(gmael(bnf,8,5),gmael3(bnf,8,4,2)),polnf);
-  nbvunit0=lg(vunit)-1;
+  listg = vunit;
   for (i=1; i<=lastindex; i++) vunit = concatsp(vunit,(GEN)listalpha[i]);
   nbvunit=lg(vunit)-1;
   id=idmat(degnf);
@@ -346,7 +346,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all)
   listx = get_listx(arch,msign,munit,vecmunit2,ell,lSp,lSml2,nbvunit,r1);
   llistx= lg(listx);
   listal= cgetg(llistx,t_VEC);
-  listg = concatsp(vunit, concatsp(vecalpha0,vecbeta0));
+  listg = concatsp(listg, concatsp(vecalpha0,vecbeta0));
   l = lg(listg);
   for (i=1; i<llistx; i++)
   {
@@ -915,22 +915,23 @@ reducebeta(GEN be)
   return reducebetanaive(fix_be(be, u), NULL);
 }
 
+/* cf. algo 5.3.18 */
 static GEN
 testx(GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup)
 {
-  long i,v,l;
+  long i,v,l,lX;
   GEN be,polrelbe,p1;
 
-/* in alg. 5.3.18., C=nbcol */
   X = FpV_red(X, gell);
   if (gcmp0(X)) return NULL;
-  for (i=dv+1; i<=nbcol; i++)
+  lX = lg(X);
+  for (i=dv+1; i<lX; i++)
     if (gcmp0((GEN)X[i])) return NULL;
   l = lg(vecMsup);
   for (i=1; i<l; i++)
-    if (!smodis(gmul((GEN)vecMsup[i],X), ell)) return NULL;
+    if (gcmp0(FpV_red(gmul((GEN)vecMsup[i],X), gell))) return NULL;
   be = gun;
-  for (i=1; i<=nbcol; i++)
+  for (i=1; i<lX; i++)
     be = gmul(be, powgi((GEN)vecw[i], (GEN)X[i]));
   if (DEBUGLEVEL>1) fprintferr("reducing beta = %Z\n",be);
   be = reducebeta(be);
@@ -950,9 +951,9 @@ testx(GEN bnf, GEN X, GEN module, GEN subgroup, GEN vecMsup)
 GEN
 rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
-  long i,j,l,av=avma,e,vp,vd,dK,lSl,lSp,lSl2,lSml2,dc,ru,rv;
+  long i,j,l,av=avma,e,vp,vd,dK,lSl,lSp,lSl2,lSml2,dc,ru,rv,nbcol;
   GEN p1,p2,p3,p4,wk,pr;
-  GEN rayclgp,bid,ideal,cycgen,vselmer;
+  GEN bnf,rayclgp,bid,ideal,cycgen,vselmer;
   GEN kk,clgp,fununits,torsunit,vecB,vecC,Tc,Tv,P;
   GEN Q,Qt,idealz,gothf,factgothf,listpr,listex,factell,p,vecnul;
   GEN M,al,K,Msup,X,finalresult,y,module,A1,A2,vecMsup;
@@ -1142,8 +1143,8 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 	if (vp==1) { avma = av; return gzero; }
         if (!isconjinprimelist(Sml2,pr))
         {
-          _append(Sml2,pr);
-          _append(ESml2, (GEN)listex[i]);
+          _append(Sml2, pr);
+          _append(ESml2,(GEN)vp);
         }
       }
     }
