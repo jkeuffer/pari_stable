@@ -29,6 +29,15 @@ GEN vecsmall_const(long n, long c)
   return V;
 }
 
+GEN vecsmall_shorten(GEN v, long n)
+{
+  long i;
+  GEN V=cgetg(n+1,t_VECSMALL);
+  for(i=1;i<=n;i++) V[i]=v[i];
+  return V;
+ 
+}
+
 /*in place sort.*/
 void vecsmall_sort(GEN V)
 {
@@ -128,6 +137,52 @@ GEN vecsmall_concat(GEN u, GEN v)
   return res;
 }
 
+
+/*************************************************************************/
+/**                                                                     **/
+/**               Routine for handling bit vector                       **/
+/**                                                                     **/
+/*************************************************************************/
+
+GEN
+bitvec_alloc(long n)
+{
+  long l=1+(n>>TWOPOTBITS_IN_LONG);
+  return vecsmall_const(l,0);
+}
+
+
+GEN
+bitvec_shorten(GEN bitvec, long n)
+{
+  long l=1+(n>>TWOPOTBITS_IN_LONG);
+  return vecsmall_shorten(bitvec,l);
+}
+
+long
+bitvec_test(GEN bitvec, long b)
+{
+  long q=b>>TWOPOTBITS_IN_LONG;
+  long r=b&(BITS_IN_LONG-1);
+  return (bitvec[1+q]>>r)&1;
+}
+
+void
+bitvec_set(GEN bitvec, long b)
+{
+  long q=b>>TWOPOTBITS_IN_LONG;
+  long r=b&(BITS_IN_LONG-1);
+  bitvec[1+q]|=1<<r;
+}
+
+void
+bitvec_clear(GEN bitvec, long b)
+{
+  long q=b>>TWOPOTBITS_IN_LONG;
+  long r=b&(BITS_IN_LONG-1);
+  bitvec[1+q]&=~(1<<r);
+}
+
 /*************************************************************************/
 /**                                                                     **/
 /**               Routine for handling vector of VECSMALL               **/
@@ -225,15 +280,16 @@ vecperm_orbits(GEN v, long n)
   gpmem_t ltop = avma;
   int     j, k, l, m, o, p, flag;
   GEN     bit, cycle, cy;
+  long    mj=1;
   cycle = cgetg(n+1, t_VEC);
-  bit = vecsmall_const(n,0);
+  bit = bitvec_alloc(n);
   for (k = 1, l = 1; k <= n;)
   {
-    for (j = 1; bit[j]; j++);
+    for (  ; bitvec_test(bit,mj); mj++);
     cy = cgetg(n+1, t_VECSMALL);
     m = 1;
-    cy[m++] = j;
-    bit[j] = 1;
+    cy[m++] = mj;
+    bitvec_set(bit,mj++);
     k++;
     do
     {
@@ -243,10 +299,10 @@ vecperm_orbits(GEN v, long n)
 	for (p = 1; p < m; p++)	/* m varie! */
 	{
 	  j = mael(v,o,cy[p]);
-	  if (!bit[j])
+	  if (!bitvec_test(bit,j))
 	  {
 	    flag = 1;
-	    bit[j] = 1;
+	    bitvec_set(bit,j);
 	    k++;
 	    cy[m++] = j;
 	  }
@@ -463,17 +519,21 @@ GEN group_quotient(GEN G, GEN H)
   long n=lg(mael(G,1,1))-1;
   long o=group_order(H);
   GEN elt = vecvecsmall_sort(group_elts(G,n));
-  GEN used = vecsmall_const(lg(elt),0);
+  GEN used = bitvec_alloc(lg(elt));
   long l = (lg(elt)-1)/o;
   p2 = cgetg(l+1, t_VEC);
   p3 = cgetg(lg(elt), t_VEC);
   for (i = 1, k = 1; i <= l; ++i)
   {
     GEN V;
-    while(used[a]) a++;
+    while(bitvec_test(used,a)) a++;
     V = group_leftcoset(H,(GEN)elt[a]);
     p2[i] = V[1];
-    for(j=1;j<lg(V);j++) used[vecvecsmall_search(elt,(GEN)V[j],0)] = 1;
+    for(j=1;j<lg(V);j++) 
+    {
+      long b=vecvecsmall_search(elt,(GEN)V[j],0);
+      bitvec_set(used,b);
+    }
     for (j = 1; j <= o; j++)
       p3[k++] = (long) vecsmall_append((GEN) V[j],i);
   }
@@ -743,6 +803,37 @@ GEN group_abelianHNF(GEN G)
   }
   return M;
 }
+
+#if 0
+/* Compute generators for the subgroup of (Z/nZ)* given in HNF. 
+ * I apologize for the following spec:
+ * If zns=znstar(n) then
+ * zn2=gtovecsmall((GEN)zns[2]);
+ * zn3=lift((GEN)zns[3]);
+ * gen and ord : VECSMALL of length lg(zn3).
+ * the result is in gen. 
+ * ord contains the relatives orders of the generators.
+ */
+
+GEN
+znstar_group(long n, GEN ZN, GEN H)
+{
+  gpmem_t ltop=avma;
+  int j,h;
+  GEN m=stoi(n);
+  GEN gen;
+  for (j = 1; j < lg(gen); j++)
+  {
+    gen[j] = 1;
+    for (h = 1; h < lg(lss); h++)
+      gen[j] = mulssmod(gen[j], itos(powmodulo((GEN)zn3[h],gmael(lss,j,h),m)),n);
+    ord[j] = zn2[j] / itos(gmael(lss,j,j));
+  }
+  avma=ltop;
+  return gen;
+}
+#endif
+
 
 GEN
 abelian_group(GEN v)
