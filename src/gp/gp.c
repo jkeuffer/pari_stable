@@ -2155,7 +2155,7 @@ gp_sighandler(int sig)
         pari_outfile = stdout; pari_fclose(f);
       }
       err(talker, "Broken Pipe, resetting file stack...");
-      /* fall through [actually not, but pacifies compiler] */
+      return; /* not reached */
     }
 #endif
     default: msg = "signal handling"; break;
