@@ -5141,11 +5141,12 @@ exactly equal to $B$ are computed. For instance
 %2 = [[2, 1; 0, 1], [1, 0; 0, 2], [2, 0; 0, 1], [3, 0; 0, 1], [1, 0; 0, 1]]
 ? subgrouplist([6,2],[3])  \\@com index 3
 %3 = [[3, 0; 0, 1]]
-? bnr = bnrinit(bnfinit(x),120,1);
+? bnr = bnrinit(bnfinit(x), [120,[1]], 1);
 ? L = subgrouplist(bnr, [8]);
 @eprog
-\noindent In the last example, $L$ corresponds to the 5 subfields of
-$\Q(\zeta_{120})$, of degree $8$ and conductor $120$.
+\noindent In the last example, $L$ corresponds to the 24 subfields of
+$\Q(\zeta_{120})$, of degree $8$ and conductor $120\infty$ (by setting \fl,
+we see there are a total of $43$ subgroups of degree $8$).
 \bprog
 ? vector(#L, i, galoissubcyclo(bnr, L[i]))
 @eprog
