@@ -141,7 +141,7 @@ Intel/ARM
 *StrongARM   110MHz  Linux-2.4.5     gcc-2.95.2    17162!      -  2.1.1     BA
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Intel/ia64
-*Itanium II 1000MHz  Linux-2.4.19    gcc-3.0.4      1318    1478  2.1.5     BA
+*Itanium II 1000MHz  Linux-2.4.19    gcc-3.0.4      1318    1478  2.1.5 (40)BA
 *Itanium     800MHz  Linux-2.4.9     gcc-3.0.1      2557    2474  2.1.2 (28)BA
 ------------------------------------------------------------------------------
 Motorola
@@ -164,6 +164,7 @@ PPC G4       400MHz  MacOS X 10.2    gcc-3.1        5174!         2.1.4     MB
 *POWER2       66MHz  AIX-4.2         cc            37592!      -  2.0.4 (3) GN
 ------------------------------------------------------------------------------
 IBM/S390
+*S390         773BM  Linux-2.4.19    gcc-3.2.3      5272    5646  2.1.5 (39)BA
 *S390         630BM  Linux-2.4.17    gcc-2.95.4     6764    6574  2.1.3 (33)BA
 ------------------------------------------------------------------------------
 SGI/MIPS
@@ -309,6 +310,10 @@ CFLAGS= -fbranch-probabilities  -O3 -DGCC_INLINE -Wall -Wno-implicit
 (37) http://db.debian.org/machines.cgi?host=crest
 
 (38) Cygwin 1.3.20-1
+
+(39) http://db.debian.org/machines.cgi?host=raptor
+
+(40) http://db.debian.org/machines.cgi?host=merkel
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
