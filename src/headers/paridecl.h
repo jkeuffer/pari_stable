@@ -1167,7 +1167,7 @@ GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
 GEN     quicksqr(GEN a, long na);
-GEN     small_to_pol(GEN z);
+GEN     small_to_pol(GEN z, long v);
 GEN     pol_to_small(GEN x);
 GEN     stopoly(long m, long p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);

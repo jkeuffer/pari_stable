@@ -979,7 +979,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
     pol = u_Fp_FpX(pol,0, pp);
     x = u_Fp_FpX(x,0, pp);
     y = u_FpXQ_pow(x, n, pol, pp);
-    y = small_to_pol(y); setvarn(y, vx);
+    y = small_to_pol(y,vx);
   }
   else
   {
@@ -1811,9 +1811,10 @@ small_to_pol_i(GEN z, long l)
 
 /* assume z[i] % p has been done */
 GEN
-small_to_pol(GEN z)
+small_to_pol(GEN z, long v)
 {
-  return small_to_pol_i(z, lgef(z));
+  GEN x = small_to_pol_i(z, lgef(z));
+  setvarn(x,v); return x;
 }
 
 GEN
@@ -2080,10 +2081,10 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
     GEN zz= u_FpX_divrem(a,b,pp,1, pr);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
-      rem = small_to_pol(*pr);
-      free(*pr); setvarn(rem, vx); *pr = rem;
+      rem = small_to_pol(*pr,vx);
+      free(*pr); *pr = rem;
     }
-    z = small_to_pol(zz); setvarn(z, vx);
+    z = small_to_pol(zz,vx);
     free(zz); free(a); free(b); return z;
   }
   lead = gcmp1(lead)? NULL: gclone(mpinvmod(lead,p));
@@ -2143,15 +2144,14 @@ static GEN
 FpX_gcd_long(GEN x, GEN y, GEN p)
 {
   ulong pp = (ulong)p[2], av = avma;
-  GEN a,b,z;
+  GEN a,b;
 
   (void)new_chunk((lgef(x) + lgef(y)) << 2); /* scratch space */
   a = u_Fp_FpX(x,0, pp);
   if (!signe(a)) { avma = av; return FpX_red(y,p); }
   b = u_Fp_FpX(y,0, pp);
   a = u_FpX_gcd_i(a,b, pp);
-  avma = av; z = small_to_pol(a);
-  setvarn(z, varn(x)); return z;
+  avma = av; return small_to_pol(a, varn(x));
 }
 
 /* x and y in Z[X], return lift(gcd(x mod p, y mod p)) */
@@ -2195,7 +2195,7 @@ u_FpX_sub(GEN x, GEN y, ulong p)
 
 /* list of u_FpX in gptr, return then as GEN */
 static void
-u_gerepilemany(long av, GEN* gptr[], long n)
+u_gerepilemany(long av, GEN* gptr[], long n, long v)
 {
   GEN *l = (GEN*)gpmalloc(n*sizeof(GEN));
   long i;
@@ -2206,7 +2206,7 @@ u_gerepilemany(long av, GEN* gptr[], long n)
   /* copy them back, kill clones */
   for (--i; i>=0; i--)
   {
-    *(gptr[i]) = small_to_pol(l[i]);
+    *(gptr[i]) = small_to_pol(l[i],v);
     gunclone(l[i]);
   }
   free(l);
@@ -2236,7 +2236,7 @@ static GEN
 FpX_extgcd_long(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 {
   ulong pp = (ulong)p[2];
-  long av = avma, vx;
+  long av = avma;
   GEN a, b, d;
 
   a = u_Fp_FpX(x,0, pp);
@@ -2244,12 +2244,9 @@ FpX_extgcd_long(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   d = u_FpX_extgcd(a,b, pp, ptu,ptv);
   {
     GEN *gptr[3]; gptr[0] = &d; gptr[1] = ptu; gptr[2] = ptv;
-    u_gerepilemany(av, gptr, 3);
+    u_gerepilemany(av, gptr, 3, varn(x));
   }
-  vx = varn(x);
-  setvarn(*ptu,vx);
-  setvarn(*ptv,vx);
-  setvarn(d,vx); return d;
+  return d;
 }
 
 /* x and y in Z[X], return lift(gcd(x mod p, y mod p)). Set u and v st

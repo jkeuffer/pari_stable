@@ -1229,7 +1229,8 @@ static GEN
 squff(GEN a, long hint)
 {
   GEN PolX,lead,res,Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
-  long da = deg(a), klim,chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,nf,nft;
+  long da = deg(a), va = varn(a);
+  long klim,chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,nf,nft;
   ulong *tabbit, *tabkbit, *tmp, av = avma;
   byteptr pt=diffptr;
   const int MAXNP = max(5, (long)sqrt(da));
@@ -1311,7 +1312,7 @@ squff(GEN a, long hint)
     if (g)
     {
       long n = deg(g)/d;
-      famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp));
+      famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
       if (n > 1) (void)split_berlekamp(Q, (GEN*)(famod+nft),prime,primes2);
       nft += n;
     }

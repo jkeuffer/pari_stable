@@ -1120,8 +1120,7 @@ split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
         for (i=2; i<=d; i++)
           FpX_addmul(pol, (GEN)vker[i], mymyrand()%p, p);
       }
-      polt = small_to_pol(pol);
-      setvarn(polt,vu);
+      polt = small_to_pol(pol,vu);
     }
     else
     {
