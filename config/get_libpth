@@ -20,7 +20,7 @@ case "$osname" in
           /usr/local/lib\
           /lib\
       "
-      cygtop=/
+      cygtop=
     else
 # cygnus for version 0.*
       libpth="
