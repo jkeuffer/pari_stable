@@ -4281,17 +4281,17 @@ example involving the field $\Q(\zeta_5, 5^{1/5})$:
 \bprog
 ? z = polcompositum(x^5 - 5, polcyclo(5), 1)[1];
 ? pol = z[1]                 \\@com \kbd{pol} defines the compositum
-\%2 = x^20 + 5*x^19 + 15*x^18 + 35*x^17 + 70*x^16 + 141*x^15 + 260*x^14 \
+%2 = x^20 + 5*x^19 + 15*x^18 + 35*x^17 + 70*x^16 + 141*x^15 + 260*x^14 \
   + 355*x^13 + 95*x^12 - 1460*x^11 - 3279*x^10 - 3660*x^9 - 2005*x^8    \
   + 705*x^7 + 9210*x^6 + 13506*x^5 + 7145*x^4 - 2740*x^3 + 1040*x^2     \
   - 320*x + 256
 ? a = z[2]; a^5 - 5          \\@com \kbd{a} is a fifth root of $5$
-\%3 = 0
+%3 = 0
 ? z = polredabs(pol, 1);     \\@com look for a simpler polynomial
 ? pol = z[1]
-\%5 = x^20 + 25*x^10 + 5
+%5 = x^20 + 25*x^10 + 5
 ? a = subst(a.pol, x, z[2])  \\@com \kbd{a} in the new coordinates
-\%6 = Mod(-5/22*x^19 + 1/22*x^14 - 123/22*x^9 + 9/11*x^4, x^20 + 25*x^10 + 5)
+%6 = Mod(-5/22*x^19 + 1/22*x^14 - 123/22*x^9 + 9/11*x^4, x^20 + 25*x^10 + 5)
 @eprog
 
 \syn{polcompositum0}{x,y,\fl}.
