@@ -2744,7 +2744,7 @@ roots2(GEN pol,long PREC)
 static GEN
 laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
 {
-  long MAXIT, iter, i, j;
+  long MAXIT, iter, j;
   gpmem_t av = avma, av1;
   GEN rac,erre,I,x,abx,abp,abm,dx,x1,b,d,f,g,h,sq,gp,gm,g2,*ffrac;
 
