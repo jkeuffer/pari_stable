@@ -1,5 +1,5 @@
 # Exported variables
-_dlld_list='DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest'
+_dlld_list='DL_DFLT_NAME DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest'
 
 # Which suffix for Dynamic Lib?
 # Some linkers (SunOS 4) need minor and major lib version numbers.
@@ -24,6 +24,13 @@ case "$osname" in
   cygwin)soname= ; sodest= ; DLSUFFIX=dll ;;
   darwin)soname= ; sodest= ; DLSUFFIX=dylib;;
   *) do_dll=no ;;
+esac
+
+# dlopen(NULL) should return a handle to the running process. 
+# On FreeBSD 2.2.5 (Y. Uchikawa) and Cygwin, this does not work.
+case "$osname" in 
+  freebsd|cygwin) DL_DFLT_NAME="\"lib$libpari_base.$DLSUFFIX$sodest\"" ;;
+  *) DL_DFLT_NAME=NULL ;;
 esac
 
 # if DLLD is defined at this point, respect it, even if do_dll=no

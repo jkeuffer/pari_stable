@@ -37,23 +37,14 @@ install0(char *name, char *code, char *gpname, char *lib)
 {
   void *f, *handle;
 
- /* dlopen(NULL) returns a handle to the running process. 
-  * Bug report Y. Uchikawa: does not work for gp-dyn on FreeBSD 2.2.5
-  */
-#if defined(__FreeBSD__) || defined(__CYGWIN__)
   if (! *lib) lib = DL_DFLT_NAME;
-#else
-  if (! *lib) lib = NULL;
-#endif
-  if (! *gpname) gpname=name;
+  if (! *gpname) gpname = name;
   if (lib) lib = expand_tilde(lib);
 
-/* OSF1 has dlopen but not RTLD_GLOBAL*/
-#ifndef RTLD_GLOBAL
-#define RTLD_GLOBAL 0
+#ifndef RTLD_GLOBAL /* OSF1 has dlopen but not RTLD_GLOBAL*/
+#  define RTLD_GLOBAL 0
 #endif
-
-  handle = dlopen(lib,RTLD_LAZY|RTLD_GLOBAL);
+  handle = dlopen(lib, RTLD_LAZY|RTLD_GLOBAL);
 
   if (!handle)
   {
@@ -61,14 +52,14 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) err(talker,"couldn't open dynamic library '%s'",lib);
     err(talker,"couldn't open dynamic symbol table of process");
   }
-  f = dlsym(handle,name);
+  f = dlsym(handle, name);
   if (!f)
   {
     if (lib) err(talker,"can't find symbol '%s' in library '%s'",name,lib);
     err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
   if (lib) free(lib);
-  install(f,gpname,code);
+  install(f, gpname, code);
 }
 #else
 #  ifdef _WIN32
