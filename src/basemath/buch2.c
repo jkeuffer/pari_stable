@@ -91,8 +91,7 @@ extern void dbg_rel(long s, GEN col);
 
 #define SFB_MAX 4
 
-#define RANDOM_BITS 4
-static const int CBUCHG = (1<<RANDOM_BITS) - 1;
+static const int RANDOM_BITS = 4;
 static const int MAXRELSUP = 50;
 
 /* used by factor[elt|gen|gensimple] to return factorizations of smooth elts
@@ -122,10 +121,13 @@ typedef struct {
   GEN iLP; /* iLP[p] = i such that LV[p] = [LP[i],...] */
   long KC, KCZ, KCZ2;
   GEN subFB; /* LP o subFB =  part of FB used to build random relations */
-  powFB_t *pow;/* array of [P^0,...,P^CBUCHG], P in LP o subFB */
+  int sfb_chg; /* need to change subFB ? */
+  powFB_t *pow;/* array of [P^0,...,P^{k_P}], P in LP o subFB */
   GEN perm; /* permutation of LP used to represent relations [updated by
                hnfspec/hnfadd: dense rows come first] */
 } FB_t;
+
+enum { sfb_UNSUITABLE = -1, sfb_CHANGE = 1, sfb_INCREASE = 2 };
 
 typedef struct {
   GEN R; /* relation vector as t_VECSMALL */
@@ -198,11 +200,11 @@ cgetalloc(GEN x, size_t l, long t)
 static void
 reallocate(RELCACHE_t *M, long len)
 {
-  size_t last = M->last-M->base, chk = M->chk-M->base, end = M->end-M->base;
+  size_t last = M->last-M->base, chk = M->chk-M->base, end = M->end - M->base;
   M->base = (REL_t*)gprealloc((void*)M->base, (len+1) * sizeof(REL_t));
   M->last = M->base + last;
   M->chk  = M->base + chk;
-  M->end  = M->base + end; M->len  = len;
+  M->end  = M->base + end; M->len = len;
 }
 
 /* don't take P|p if P ramified, or all other Q|p already there */
@@ -264,27 +266,23 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   F->subFB = gclone(yes);
   F->pow = NULL; 
   if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL>3)
-    {
-      fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
-      for (i=1; i<=F->KC; i++) fprintferr("no %ld = %Z\n",i,F->LP[i]);
-      fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
-      outerr(vecextract_p(F->LP,F->subFB));
-      fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
-      fprintferr("perm = %Z\n\n",F->perm);
-    }
     msgtimer("sub factorbase (%ld elements)",lg(F->subFB)-1);
-  }
   avma = av; return 1;
 }
 static int
-subFB_change(FB_t *F, GEN nf, long step, GEN L_jid)
+subFB_change(FB_t *F, GEN nf, GEN L_jid)
 {
   GEN yes, D = (GEN)nf[3];
-  long i, iyes, lv = F->KC + 1, l = lg(F->subFB)-1, minsFB = l + step;
+  long i, iyes, minsFB, chg = F->sfb_chg, lv = F->KC + 1, l = lg(F->subFB)-1;
   pari_sp av = avma;
 
+  switch (chg)
+  {
+    case sfb_INCREASE: minsFB = l + 1; break;
+    default: minsFB = l; break;
+  }
+
+  if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
   yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
   if (L_jid)
   {
@@ -310,8 +308,16 @@ subFB_change(FB_t *F, GEN nf, long step, GEN L_jid)
     }
     if (i == lv) return 0;
   }
-  gunclone(F->subFB);
-  F->subFB = gclone(yes);
+  if (gegal(F->subFB, yes))
+  {
+    if (chg != sfb_UNSUITABLE) F->sfb_chg = 0;
+  }
+  else
+  {
+    gunclone(F->subFB);
+    F->subFB = gclone(yes);
+    F->sfb_chg = 0;
+  }
   F->pow = NULL; avma = av; return 1;
 }
 
@@ -336,9 +342,10 @@ pre_allocate(RELCACHE_t *cache, size_t n)
 }
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1) */
-static int
-powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
+static void
+powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 {
+  const int a = 1<<RANDOM_BITS;
   pari_sp av = avma;
   long i, j, c = 1, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
@@ -379,6 +386,8 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       for (k = 2; k < j; k++) m = element_mul(nf, m, (GEN)alg[k]);
       rel->m = gclone(m);
       rel->ex= NULL; cache->last = rel;
+      /* trouble with subFB: include ideal even though it's principal */
+      if (j == 1 && F->sfb_chg == sfb_UNSUITABLE) j = 2;
     }
     setlg(id2, j);
     setlg(alg, j); Ord[i] = j; if (c < 64) c *= j;
@@ -388,7 +397,8 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
   F->pow->ord = gclone(Ord);
   F->pow->alg = gclone(Alg); avma = av;
   if (DEBUGLEVEL) msgtimer("powFBgen");
-  return (c >= 6); /* if c too small we'd better change the subFB soon */
+  /* if c too small we'd better change the subFB soon */
+  F->sfb_chg = (c < 6)? sfb_UNSUITABLE: 0;
 }
 
 /* Compute FB, LV, iLP + KC*. Reset perm
@@ -405,6 +415,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
   GEN prim, Res;
 
   maxprime_check((ulong)n2);
+  F->sfb_chg = 0;
   F->FB  = cgetg(n2+1, t_VECSMALL);
   F->iLP = cgetg(n2+1, t_VECSMALL);
   F->LV = (GEN*)new_chunk(n2+1);
@@ -2036,7 +2047,10 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN vecG, GEN L_jid, long *pjid)
   pari_sp av, av1;
   GEN ideal, m, ex = cgetg(lgsub, t_VECSMALL);
  
-  if (DEBUGLEVEL && L_jid) fprintferr("looking hard for %Z\n",L_jid);
+  if (DEBUGLEVEL) {
+    fprintferr("\n(more relations needed: %ld)\n", cache->end - cache->last);
+    if (L_jid) fprintferr("looking hard for %Z\n",L_jid);
+  }
   for (av = avma;;)
   {
     REL_t *rel = cache->last;
@@ -2112,7 +2126,7 @@ be_honest(FB_t *F, GEN nf)
                F->FB[ F->KCZ+1 ], F->FB[ F->KCZ2 ]);
     flusherr();
   }
-  if (!F->pow) (void)powFBgen(F, NULL, nf, CBUCHG+1);
+  if (!F->pow) powFBgen(F, NULL, nf);
   ru = lg(nf[6]);
   vdir = cgetg(ru, t_VECSMALL);
   av = avma;
@@ -2992,7 +3006,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
 {
   pari_sp av, av2;
   long N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
-  long nreldep, sfb_change, sfb_trials, nlze, precdouble = 0, precadd = 0;
+  long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN M, res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
@@ -3042,37 +3056,29 @@ START:
 
   /* Random relations */
   W = vecG = L_jid = NULL;
-  jid = sfb_trials = sfb_change = nreldep = 0;
-  nlze = cache.end - cache.last;
-  if (nlze > 0)
+  jid = sfb_trials = nreldep = 0;
+  need = cache.end - cache.last;
+  if (need > 0)
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
+    if (!vecG) { vecG = compute_vecG(nf, min(RU, 9)); av2 = avma; }
+    pre_allocate(&cache, need); cache.end = cache.last + need;
     if (++nreldep > MAXRELSUP) {
-      sfb_change = 2;
+      F.sfb_chg = sfb_INCREASE;
       if (++sfb_trials > SFB_MAX) goto START;
     }
-    if (sfb_change) {
-      if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-      if (!subFB_change(&F, nf, sfb_change-1, L_jid)) goto START;
-      jid = sfb_change = nreldep = 0;
+    if (F.sfb_chg) {
+      if (!subFB_change(&F, nf, L_jid)) goto START;
+      jid = nreldep = 0;
     }
-    if (!vecG) { vecG = compute_vecG(nf, min(RU, 9)); av2 = avma; }
-    pre_allocate(&cache, nlze);
-    if (!F.pow && !powFBgen(&F, &cache, nf, CBUCHG+1)) sfb_change = 1;
-    if (DEBUGLEVEL)
-	fprintferr("\n(need %ld more relation%s)\n", nlze, (nlze==1)?"":"s");
-    if (!sfb_change)
-    {
-      if (!rnd_rel(&cache,&F, nf, vecG, L_jid, &jid)) goto START;
-      if (W) { if (jid == F.KC) jid = 1; else jid++; }
-    }
+    if (!F.pow) powFBgen(&F, &cache, nf);
+    if (!F.sfb_chg && !rnd_rel(&cache,&F, nf, vecG, L_jid, &jid)) goto START;
     L_jid = NULL;
   }
-
-PRECPB:
   if (precpb)
   {
+PRECPB:
     precdouble++;
     if (precadd) { PRECREG += precadd; precadd = 0; }
     else           PRECREG = (PRECREG<<1)-2;
@@ -3081,11 +3087,11 @@ PRECPB:
       char str[64]; sprintf(str,"buchall (%s)",precpb);
       err(warnprec,str,PRECREG);
     }
+    precpb = NULL;
     nf = nf_cloneprec(nf, PRECREG, pnf);
     if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
     for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
-    cache.chk = cache.base; /* recompute all arch component */
-    precpb = NULL; W = NULL;
+    cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
   }
   /* Reduce relation matrices */
   M = gmael(nf, 5, 1); 
@@ -3108,14 +3114,14 @@ PRECPB:
   }
   gerepileall(av2, 4, &W,&C,&B,&dep);
   cache.chk = cache.last;
-  nlze = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
-  if (nlze)
+  need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
+  if (need)
   { /* dependent rows */
-    if (nlze > 5)
+    if (need > 5)
     {
-      L_jid = vecextract_i(F.perm, 1, nlze);
+      if (need > 20) F.sfb_chg = sfb_CHANGE;
+      L_jid = vecextract_i(F.perm, 1, need);
       vecsmall_sort(L_jid); jid = 0; 
-      if (nlze > 20) sfb_change = 1;
     }
     goto MORE;
   }
