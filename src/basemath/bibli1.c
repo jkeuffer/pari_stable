@@ -2058,13 +2058,13 @@ init_timer(pslq_timer *T)
 }
 
 static int
-is_zero(GEN x, long e)
+is_zero(GEN x, long e, long prec)
 {
   if (gcmp0(x)) return 1;
   if (typ(x) == t_REAL)
   {
     long ex = expo(x);
-    return (ex < e || (lg(x) == 3 && ex < (e>>1)));
+    return (ex < e || (prec != 3 && lg(x) == 3 && ex < (e>>1)));
   }
   return gexpo(x) < e;
 }
@@ -2083,7 +2083,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   prec = gprecision(x)-1; if (prec < DEFAULTPREC) prec = DEFAULTPREC;
   *PREC = prec;
   M->EXP = - bit_accuracy(prec) + max(2*n, 32);
-  M->flreal = is_zero(gimag(x), M->EXP);
+  M->flreal = is_zero(gimag(x), M->EXP, prec);
   if (!M->flreal)
     return lindep(x,prec); /* FIXME */
   else
@@ -2172,7 +2172,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
     if (DEBUGLEVEL>3) M->T->t1234 += timer();
   }
   for (i=1; i<n; i++)
-    if (is_zero(gcoeff(H,i,i), M->EXP)) {
+    if (is_zero(gcoeff(H,i,i), M->EXP, prec)) {
       m = vecabsminind(M->y); return (GEN)M->B[m];
     }
   for (i=m+1; i<=n; i++) redall(M, i, min(i-1,m+1));
@@ -2180,7 +2180,7 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
   if (DEBUGLEVEL>3) M->T->reda += timer();
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
   m = vecabsminind(M->y);
-  if (is_zero((GEN)M->y[m], M->EXP)) return (GEN)M->B[m];
+  if (is_zero((GEN)M->y[m], M->EXP, prec)) return (GEN)M->B[m];
 
   if (DEBUGLEVEL>2)
   {
@@ -2415,12 +2415,12 @@ applybar(pslq_M *M, pslqL2_M *Mbar, GEN Abargen, GEN Bbargen)
 }
 
 static GEN
-checkend(pslq_M *M)
+checkend(pslq_M *M, long prec)
 {
   long i, m, n = M->n;
 
   for (i=1; i<=n-1; i++)
-    if (is_zero(gcoeff(M->H,i,i), M->EXP))
+    if (is_zero(gcoeff(M->H,i,i), M->EXP, prec))
     {
       m = vecabsminind(M->y);
       return (GEN)M->B[m];
@@ -2428,7 +2428,7 @@ checkend(pslq_M *M)
   if (gexpo(M->A) >= -M->EXP)
     return ginv( maxnorml2(M) );
   m = vecabsminind(M->y);
-  if (is_zero((GEN)M->y[m], M->EXP)) return (GEN)M->B[m];
+  if (is_zero((GEN)M->y[m], M->EXP, prec)) return (GEN)M->B[m];
   return NULL;
 }
 
@@ -2526,7 +2526,7 @@ RESTART:
       {
 	if (applybar(&M, &Mbar, Abargen,Bbargen))
 	{
-	  if ( (p1 = checkend(&M)) ) return gerepilecopy(av0, p1);
+	  if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
 	  goto RESTART;
 	}
 	else
@@ -2534,7 +2534,7 @@ RESTART:
           if (ctpro == 1) goto DOGEN;
           storeprecdoubles(&Mbar, &Mbarst); /* restore */
           if (! applybar(&M, &Mbar, Abargen,Bbargen)) err(bugparier,"pslqL2");
-	  if ( (p1 = checkend(&M)) ) return gerepilecopy(av0, p1);
+	  if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
           goto RESTART;
         }
       }
