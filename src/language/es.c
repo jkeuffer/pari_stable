@@ -276,7 +276,7 @@ vpariputs(const char* format, va_list args)
     if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
     free(buf); bufsize++;
   }
-  buf[bufsize] = 0; /* just in case */
+  buf[bufsize-1] = 0; /* just in case */
 #else
   buf = gpmalloc(bufsize);
   (void)vsprintf(buf,str,args); /* pray it does fit */
