@@ -665,10 +665,11 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
   GEN B,L,h,fl;
 
   if (typ(x) != t_MAT) err(typeer,"lllint");
+  fl = cgetg(lx,t_VECSMALL);
+  if (ptfl) *ptfl = fl;
   n = lx-1; if (n <= 1) return NULL;
   hx = lg(x[1]);
   if (gram && hx != lx) err(mattype1,"lllint");
-  fl = cgetg(lx,t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1); x = dummycopy(x);
   B = gscalcol(gun, lx);
