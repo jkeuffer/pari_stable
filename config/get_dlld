@@ -77,8 +77,8 @@ if test -n "$DLLD"; then
   # assume DLLD = djgpp
   case "$osname" in
     os2) case "$optimization" in
-           full) DLLDFLAGS="$cflags -Zdll -s" ;;
-           *)    DLLDFLAGS="$cflags -Zdll" ;;
+           full) DLLDFLAGS="$CFLAGS -Zdll -s" ;;
+           *)    DLLDFLAGS="$CFLAGS -Zdll" ;;
          esac;;
   esac
 

@@ -1,5 +1,5 @@
 exe=$osname-$arch-endian$$
-if ($CC $cflags $extraflag endian.c -o $exe 2>/dev/null); then
+if ($CC $CFLAGS $extraflag endian.c -o $exe 2>/dev/null); then
   doubleformat=`$exe`;
 else
   echo "***************************************************************"
@@ -34,7 +34,7 @@ are the double exponent and sign stored on x.i[0] (0) or on x.i[1] (1) ?
 
 Using \$CC \$CFLAGS with
   CC    =$CC
-  CFLAGS=$cflags
+  CFLAGS=$CFLAGS
 the answer is: $doubleformat.
 EOT
   fi

@@ -1,5 +1,5 @@
 # Exported variables
-_cc_list="__gnuc__ CC cflags optimization DBGFLAGS OPTFLAGS CPP exe_suff suffix ASMINLINE DLCFLAGS"
+_cc_list="__gnuc__ CC CFLAGS optimization DBGFLAGS OPTFLAGS CPP exe_suff suffix ASMINLINE DLCFLAGS"
 
 # Which optimization ?
 if test "$fastread" != yes; then
@@ -149,11 +149,11 @@ CFLAGS="$CFLAGS $cflags"
 if test "$fastread" != yes; then
   echo $n ..."With which flags ? $c"
   dflt=$CFLAGS; rep=; . ./myread
-  cflags=$ans
+  CFLAGS=$ans
 fi
 
 # Here we should check it is an ANSI compiler...
-echo "C compiler is          $CC  $cflags"
+echo "C compiler is          $CC  $CFLAGS"
 
 # Which C PreProcessor ?
 case "$osname" in

@@ -100,7 +100,7 @@ gnuplot-dynamic)
   graph="$graph plotgnuplot"
   ;;
 builtin.X11-gnuplot)
-  cflags="$cflags -DBOTH_GNUPLOT_AND_X11"
+  CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
   PLOTCFLAGS=-I$Xincroot
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
   if test "$osname" = concentrix; then
@@ -116,7 +116,7 @@ builtin.X11-gnuplot)
   graph="$graph plotgnuplot plotX"
   ;;
 builtin.X11-gnuplot-dynamic)
-  cflags="$cflags -DBOTH_GNUPLOT_AND_X11"
+  CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
   PLOTCFLAGS="-I$Xincroot -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
   if test "$osname" = concentrix; then
     PLOTLIBS="-lX11"
@@ -209,7 +209,7 @@ SIZEOF_LONG= $sizeof_long
 CC_FLAVOR  =
 CC         = $CC \$(CC_FLAVOR)
 CPPFLAGS   = $CPPFLAGS
-CFLAGS     = $cflags
+CFLAGS     = $CFLAGS
 LD_FLAVOR  = \$(CC_FLAVOR)
 LD         = $LD \$(LD_FLAVOR)
 LDFLAGS    = $LDFLAGS
