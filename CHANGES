@@ -93,6 +93,7 @@ BA  8- renamed mymyrand --> pari_rand31
     1- [TeXmacs:] contextual completion (<TAB>)
 BA  2- routines ishiftr, gfloor2n
     3- routine random_bits
+BA  4- [Configure:] --builddir flag
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

@@ -126,7 +126,7 @@ Build Options:
   --host=<arch-osname>  target achitecture
   --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot 
 	gnuplot-dynamic builtin.X11-gnuplot builtin.X11-gnuplot-dynamic)
-  --builddir=<dir>      directory where the object files will be 
+  --builddir=<dir>      directory where the object files will be created
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)
   -pg             creates profiling version (in Oxxx.prf)
