@@ -316,7 +316,6 @@ isinexactreal(GEN x)
 int
 isexactzeroscalar(GEN g)
 {
-  long i;
   switch (typ(g))
   {
     case t_INT:
