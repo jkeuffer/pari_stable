@@ -1358,7 +1358,8 @@ factmod0(GEN f, GEN pp)
       }
     }
     if (!p) break;
-    j=(degpol(f2))/p+3; if (j==3) break;
+    j = degpol(f2); if (j % p) err(talker, "factmod: %Z is not prime", pp);
+    j = j/p + 3; if (j==3) break;
 
     e*=p; setlg(f,j); setlgef(f,j);
     for (i=2; i<j; i++) f[i] = f2[p*(i-2)+2];
