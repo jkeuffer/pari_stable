@@ -1224,10 +1224,8 @@ GEN sqrtr_abs(GEN a, long s)
   if ( ((ulong)c[0]) >= HIGHBIT-1 )
     if (mpn_add_1(c+1,c+1,pr,1))
     {
-      /* This cannot happen unless c[0]==HIGHBIT-1,
-       * but we are not supposed to round up for that
-       * value anyway... but the protable kernel do it
-       * that way.*/
+      /* This cannot happen unless c[0]==HIGHBIT-1, and we are not supposed
+       * to round up for that value. But native kernel does it that way... */
       avma=(pari_sp)res;
       affsr(1,res);
       setexpo(res,er+1);
