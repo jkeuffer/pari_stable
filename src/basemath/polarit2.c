@@ -635,11 +635,11 @@ all_factor_bound(GEN x)
 
 /* x defined mod p^a, return mods ( (x - mods(x, p^b)) / p^b , p^(b-a) )  */
 static GEN
-TruncTrace(GEN x, GEN pb, GEN pa_b, GEN pb_as2, GEN pbs2)
+TruncTrace(GEN x, GEN pb, GEN pa_b, GEN pa_bs2, GEN pbs2)
 {
   GEN r, q = dvmdii(x, pb, &r);
   if (cmpii(r,  pbs2) > 0) q = addis(q,1);
-  if (cmpii(q,pb_as2) > 0) q = subii(q,pa_b);
+  if (cmpii(q,pa_bs2) > 0) q = subii(q,pa_b);
   return q;
 }
 
@@ -655,6 +655,7 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
      long maxK, long klim,long hint)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
+  long spa_b, spa_bs2;
   GEN lc, lctarget, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
   GEN trace    = cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
@@ -671,7 +672,7 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
   lctarget = gmul(lc,target);
 
   {
-    GEN pa_b = gpowgs(p, a-b), pb_as2 = shifti(pa_b,-1);
+    GEN pa_b = gpowgs(p, a-b), pa_bs2 = shifti(pa_b,-1);
     GEN pb   = gpowgs(p, b),   pbs2   = shifti(pb,-1);
     for (i=1; i <= lfamod; i++)
     {
@@ -681,8 +682,10 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
         T = modii(mulii(lc, (GEN)p1[deg[i]+1]), pa);
       else
         T = (GEN)p1[deg[i]+1]; /* d-1 term */
-      trace[i] = itos( TruncTrace(T, pb,pa_b,pb_as2,pbs2) );
+      trace[i] = itos( TruncTrace(T, pb,pa_b,pa_bs2,pbs2) );
     }
+    spa_b   =   pa_b[2]; /* < 2^(BIL-1) */
+    spa_bs2 = pa_bs2[2]; /* < 2^(BIL-1) */
   }
   degsofar[0] = 0; /* sentinel */
 
@@ -708,7 +711,9 @@ nextK:
       long t;
 
       /* d - 1 test,  overflow is not a problem (correct mod 2^BIL) */
-      for (t=0,i=1; i<=K; i++) t += trace[ind[i]];
+      for (t=trace[ind[1]],i=2; i<=K; i++)
+        t = addssmod(t, trace[ind[i]], spa_b);
+      if (t > spa_bs2) t -= spa_bs2;
       if (labs(t) > ((K+1)>>1))
       {
         if (DEBUGLEVEL>6) fprintferr(".");
@@ -1084,13 +1089,13 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     pa_b = gpowgs(p, a-b);
     {
       GEN pb = gpowgs(p, b);
-      GEN pb_as2 = shifti(pa_b,-1);
+      GEN pa_bs2 = shifti(pa_b,-1);
       GEN pbs2   = shifti(pb,-1);
       for (i=1; i<=r; i++)
       {
         GEN p1 = (GEN)T2[i];
         for (j=1; j<=s; j++)
-          p1[j] = (long)TruncTrace((GEN)p1[j],pb,pa_b,pb_as2,pbs2);
+          p1[j] = (long)TruncTrace((GEN)p1[j],pb,pa_b,pa_bs2,pbs2);
       }
     }
     if (gcmp0(T2)) { avma = av2; continue; }
@@ -3432,7 +3437,7 @@ polfnf(GEN a, GEN t)
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
   /* n guaranteed to be squarefree */
-  fa = (GEN)squff2(n,0,0)[1]; lx=lg(fa);
+  fa = squff2(n,0,0); lx=lg(fa);
   y=cgetg(3,t_MAT);
   p1=cgetg(lx,t_COL); y[1]=(long)p1;
   p2=cgetg(lx,t_COL); y[2]=(long)p2;
