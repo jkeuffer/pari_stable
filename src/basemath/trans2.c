@@ -1176,12 +1176,12 @@ ggammaz(GEN x, GEN y)
 static GEN
 mplngamma(GEN x)
 {
-  GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
+  GEN z,y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
   long l,l1,l2,u,i,k,e,f,s,sx,n,p,av,av1;
   double alpha,beta,dk;
 
   sx=signe(x); if (!sx) err(talker,"zero argument in mplngamma");
-  cgetg(3, t_COMPLEX); l=lg(x); y=cgetr(l); av=avma;
+  z = cgetg(3, t_COMPLEX); l=lg(x); y=cgetr(l); av=avma;
 
   l2=l+1; p1=cgetr(l2);
   u = (expo(x)<-1 || sx<0);
@@ -1264,9 +1264,8 @@ mplngamma(GEN x)
   }
   if (f<0) /* t_COMPLEX result */
   {
-    p2 = y - 3;
-    p2[1] = (long)y; affrr(p4,y); avma = av;
-    p2[2] = (long)mppi(l); return p2;
+    z[1] = (long)y; affrr(p4,y); avma = av;
+    z[2] = (long)mppi(l); return z;
   }
   /* t_REAL result */
   y[3] = y[0]; y += 3;
