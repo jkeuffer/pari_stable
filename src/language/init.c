@@ -2120,7 +2120,7 @@ geni(void) { return gi; }
  *  F  Fake *GEN (function requires a *GEN, but we don't use the resulting GEN)
  *  f  Fake *long
  *  p  real precision (prec for the C library)
- *  P  series precision (precdl dor the C library)
+ *  P  series precision (precdl for the C library)
  *  r  raw input (treated as a string without quotes).
  *     Quoted args are copied as strings. Stops at first unquoted ')' or ','.
  *     Special chars can be quoted using '\'.  Ex : aa"b\n)"c => "aab\n)c".
