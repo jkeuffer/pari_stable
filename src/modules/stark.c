@@ -1413,16 +1413,20 @@ an_AddMul(int **an,int **an2, long np, long n, long deg, GEN chi, int **reduc)
 
 /* correct the coefficients an(chi) according with diff(chi) in place */
 static void
-CorrectCoeff(GEN dtcr, CHI_t *C, int** an, int** reduc, long n, long deg)
+CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
 {
-  long lg, av1, j, np, av = avma;
+  ulong av = avma;
+  long lg, av1, j, np;
   int **an2;
-  GEN bnrc, diff, ray, chi, pr;
+  GEN bnrc, diff, ray, chi, CHI, pr;
+  CHI_t chi_t, *C = &chi_t;
 
-  bnrc =  (GEN)dtcr[3];
   diff =  (GEN)dtcr[6];
   lg   =  lg(diff) - 1;
   if (!lg) return;
+
+  bnrc =  (GEN)dtcr[3];
+  CHI  =  (GEN)dtcr[8]; init_CHI(C, CHI, deg);
 
   if (DEBUGLEVEL > 2) fprintferr("diff(CHI) = %Z", diff);
 
@@ -1482,7 +1486,7 @@ ComputeCoeff(GEN dtcr, long n, long deg)
   }
   FreeMat(an2, n);
 
-  CorrectCoeff(dtcr, C, an, reduc, n, deg);
+  CorrectCoeff(dtcr, an, reduc, n, deg);
   FreeMat(reduc, deg-1);
   avma = av; return an;
 }
@@ -2340,7 +2344,7 @@ computean(GEN dtcr, LIST_t *R, long n, long deg)
     }
   }
 
-  CorrectCoeff(dtcr, C, an, reduc, n, deg);
+  CorrectCoeff(dtcr, an, reduc, n, deg);
   FreeMat(reduc, deg-1);
   avma = av; return an;
 }
