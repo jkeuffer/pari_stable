@@ -641,39 +641,11 @@ all_factor_bound(GEN x)
 {
   long i, n = lgef(x) - 3;
   GEN t, z = gzero;
-  for (i=2; i<=n+2; i++) z = addii(z,sqri((GEN)x[i]));
+  for (i=2; i<=n+2; i++) z = addii(z, sqri((GEN)x[i]));
   t = absi((GEN)x[n+2]);
   z = addii(t, addsi(1, racine(z)));
   z = mulii(z, binome(stoi(n-1), n>>1));
   return shifti(mulii(t,z),1);
-}
-
-/* x defined mod p^a, return mods ( (x - mods(x, p^b)) / p^b , p^(b-a) )  */
-static GEN
-Truncate_p(GEN x, GEN pb, GEN pa_b, GEN pa_bs2, GEN pbs2)
-{
-  GEN r, q = dvmdii(x, pb, &r);
-  if (cmpii(r,  pbs2) > 0) q = addis(q,1);
-  if (pa_bs2 && cmpii(q,pa_bs2) > 0) q = subii(q,pa_b);
-  return q;
-}
-
-/* in place */
-GEN
-MatTruncate_p(GEN T, GEN p, long a, long b)
-{
-  GEN pb = gpowgs(p, b);
-  GEN pa_b = gpowgs(p, a-b);
-  GEN pa_bs2 = shifti(pa_b,-1);
-  GEN pbs2   = shifti(pb,-1);
-  long i,j, r = lg(T)-1, s = lg(T[1])-1;
-  for (i=1; i<=r; i++)
-  {
-    GEN c = (GEN)T[i];
-    for (j=1; j<=s; j++)
-      c[j] = (long)Truncate_p((GEN)c[j],pb,pa_b,pa_bs2,pbs2);
-  }
-  return T;
 }
 
 /* Naive recombination of modular factors: combine up to maxK modular
@@ -707,18 +679,16 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
   {
     GEN pa_b,pa_bs2,pb,pbs2;
     pa_b = gpowgs(p, a-b); /* make sure p^(a-b) < 2^(BIL-1) */
-    while (is_bigint(pa_b)) { b++; pa_b = divii(pa_b, p); }
+    while (is_bigint(pa_b)) { b++; pa_b = diviiexact(pa_b, p); }
     pa_bs2 = shifti(pa_b,-1);
     pb= gpowgs(p, b); pbs2 = shifti(pb,-1);
     for (i=1; i <= lfamod; i++)
     {
       GEN T, p1 = (GEN)famod[i];
       degpol[i] = degpol(p1);
-      if (!gcmp1(lc))
-        T = modii(mulii(lc, (GEN)p1[degpol[i]+1]), pa);
-      else
-        T = (GEN)p1[degpol[i]+1]; /* d-1 term */
-      trace[i] = itos( Truncate_p(T, pb,pa_b,NULL,pbs2) );
+      T = (GEN)p1[degpol[i]+1]; /* d-1 term */
+      if (!gcmp1(lc)) T = modii(mulii(lc, T), pa);
+      trace[i] = itos(diviiround(T, pb));
     }
     spa_b   =   pa_b[2]; /* < 2^(BIL-1) */
     spa_bs2 = pa_bs2[2]; /* < 2^(BIL-1) */
@@ -1103,7 +1073,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
    * S = number of traces used at the round's end = tmax + s */
   for(tmax = 0;; tmax = S)
   {
-    GEN pas2, pa_b, BE;
+    GEN pas2;
     long b, goodb;
     double Nx;
 
@@ -1142,19 +1112,10 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
     if (goodb > b) b = goodb;
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: (a, b) = (%ld, %ld), expo(T) = %ld\n",
-                 a,b,gexpo(T2));
-    T2 = MatTruncate_p(T2,p, a,b);
-    if (gcmp0(T2)) { avma = av2; continue; }
+      fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b,gexpo(T2));
 
-    BE = cgetg(s+1, t_MAT);
-    pa_b = gpowgs(p, a-b);
-    for (i=1; i<=s; i++)
-    {
-      BE[i] = (long)zerocol(r+s);
-      coeff(BE, i+r, i) = (long)pa_b;
-    }
-    m = concatsp( vconcat( gscalmat(stoi(C), r), T2 ), BE );
+    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
+                  vconcat( zeromat(r, s),   gscalmat(gpowgs(p,a-b), s) ) );
     /*     [  C        0      ]
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
@@ -1196,6 +1157,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
 
     pas2 = shifti(pa,-1); target = P;
+    r = lg(piv)-1; /* BL need not have maximal rank */
     for (i=1; i<=r; i++)
     {
       GEN p1 = (GEN)piv[i];
@@ -1213,7 +1175,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (i > r)
     {
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: %ld factors\n", r);
-      setlg(list,r+1); return list;
+      setlg(list,i); return list;
     }
   }
 }

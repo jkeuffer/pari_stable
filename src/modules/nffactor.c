@@ -1079,7 +1079,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     if (cmpii(goodq, q) > 0) q = goodq;
 
     m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2r, q) ),
-                  vconcat(zeromat(r, dnf),  gdivround(PRK,q)));
+                  vconcat( zeromat(r, dnf), gdivround(PRK, q) ) );
     /*     [  C     0  ]
      * m = [           ]   square matrix
      *     [ T2r    PRK]   T2r = Tra * BL  truncated
@@ -1121,9 +1121,9 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     if (!piv) { avma = av2; continue; }
     if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
 
-    r = lg(piv); /* BL need not have maximal rank */
     target = T->pol;
-    for (i=1; i<r; i++)
+    r = lg(piv)-1; /* BL need not have maximal rank */
+    for (i=1; i<=r; i++)
     {
       GEN p1 = (GEN)piv[i], rem;
       if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
@@ -1138,10 +1138,10 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       if (!gcmp0(rem)) break;
       list[i] = (long)y;
     }
-    if (i == r)
+    if (i > r)
     {
       if (DEBUGLEVEL>2) fprintferr("nf_LLL_cmbf: %ld factors\n", r);
-      setlg(list,r); return list;
+      setlg(list,i); return list;
     }
     avma = av2;
   }
