@@ -2053,7 +2053,7 @@ sfcont(GEN x, GEN x1, long k)
             avma = av1; break;
           }
 	}
-	if (i >= 2 && gcmp1((GEN)y[i]))
+	if (i > 2 && gcmp1((GEN)y[i]))
 	{
 	  cgiv((GEN)y[i]); --i; cgiv((GEN)y[i]);
 	  y[i] = laddsi(1,(GEN)y[i]);
