@@ -17,6 +17,11 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari-GP reference card}
+\def\versionnumber{2.13}% Version of this reference card
+\def\PARIversion{2.2.5}% Version of PARI described on this reference card
+\def\year{2002}
+\def\month{August}
+
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
 \catcode`@=11
@@ -29,7 +34,6 @@
   \pdfpagewidth=11.69in
   \pdfpageheight=8.26in
 \fi
-
 %**start of header
 \newcount\columnsperpage
 % The final reference card has six columns, three on each side.
@@ -57,7 +61,7 @@
 %  Universite Paris Sud
 %  Departement de Mathematiques (bat. 425)
 %  F-91405 Orsay
-%  Internet: Karim.Belabas@math.u-psud.fr
+%  email: Karim.Belabas@math.u-psud.fr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (original reference card by Joseph H. Silverman)
 % (original reference card macros due to Stephen Gildea)
@@ -93,10 +97,6 @@
 %% Thanks to Bill Allombert, Henri Cohen, Gerhard Niklasch, and Joe
 %% Silverman for many comments and corrections.
 
-\def\versionnumber{2.12}% Version of this reference card
-\def\PARIversion{2.1.0}% Version of PARI described on this reference card
-\def\year{2002}
-\def\month{April}
 \def\version{\month\ \year\ v\versionnumber}
 
 \def\shortcopyrightnotice{\vskip .5ex plus 2 fill
@@ -1013,7 +1013,8 @@ Extension $L/K$ is defined by $g\in K[x]$. We have $order\subset L$.
 \li{relative norm of ideal $x$}{rnfidealnormrel$(\var{rnf},x)$}
 \li{solutions of $N_{K/\QQ}(y)=x\in \ZZ$}{bnfisintnorm$(\var{bnf},x)$}
 \li{is $x\in\QQ$ a norm from $K$?}{bnfisnorm$(\var{bnf},x,\fl)$}
-\li{is $x\in K$ a norm from $L$?}{rnfisnorm$(\var{bnf},ext,x,\fl)$}
+\li{initialize $T$ for norm eq.~solver}{rnfisnorminit$(K,pol,\fl)$}
+\li{is $a\in K$ a norm from $L$?}{rnfisnorm$(T,a,\fl)$}
 \vfill
 \copyrightnotice
 \bye
