@@ -145,6 +145,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
     2- src/kernel/sparcv[89]
+    3- config/MANIFEST [ now built dynamically ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.5 (released 11/02/2003):
