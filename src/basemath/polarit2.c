@@ -1271,16 +1271,16 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
   return res;
 }
 
-extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
+extern long split_berlekamp(GEN *t, GEN pp, GEN pps2);
 #define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
 
 /* assume degree(a) > 0, a(0) != 0, and a squarefree */
 static GEN
 squff(GEN a, long hint)
 {
-  GEN PolX,lead,res,Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
+  GEN PolX,lead,res,prime,primes2,famod,y,g,z,w,*tabd,*tabdnew;
   long da = deg(a), va = varn(a);
-  long klim,chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,nf,nft;
+  long klim,chosenp,p,nfacp,lbit,j,d,e,np,nmax,nf,nft;
   ulong *tabbit, *tabkbit, *tmp, av = avma;
   byteptr pt=diffptr;
   const int MAXNP = max(5, (long)sqrt(da));
@@ -1353,9 +1353,6 @@ squff(GEN a, long hint)
   prime[2] = chosenp; primes2 = shifti(prime, -1);
   nf = nmax; nft = 1;
   y = cgetg(nf+1,t_COL); famod = cgetg(nf+1,t_COL);
-  Q = cgetg(da+1,t_MAT);
-  for (i=1; i<=da; i++) Q[i] = lgetg(da+1, t_COL);
-  p1 = (GEN)Q[1]; for (i=1; i<=da; i++) p1[i] = zero;
   for (d = 1; nft <= nf; d++)
   {
     g = tabd[d]; 
@@ -1363,7 +1360,7 @@ squff(GEN a, long hint)
     {
       long n = deg(g)/d;
       famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
-      if (n > 1 && n != split_berlekamp(Q, (GEN*)(famod+nft),prime,primes2))
+      if (n > 1 && n != split_berlekamp((GEN*)(famod+nft),prime,primes2))
         err(bugparier,"squff: wrong numbers of factors");
       nft += n;
     }

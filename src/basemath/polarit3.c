@@ -1469,7 +1469,7 @@ GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 /*  Isomorphisms between finite fields                             */
 /*                                                                 */
 /*******************************************************************/
-static GEN
+GEN
 matrixpow(long n, long m, GEN y, GEN P,GEN l)
 {
   ulong av=avma;
@@ -3214,14 +3214,14 @@ INIT:
     if (LERS)
     {
       H = subresall(A,B,&q);
-      if (typ(q) != t_POL || deg(q)!=1 || !ZX_issquarefree(H)) goto INIT;
+      if (typ(q) != t_POL || deg(q)!=1 || !ZX_is_squarefree(H)) goto INIT;
       H0 = (GEN)q[2]; if (typ(H0) == t_POL) setvarn(H0,vX);
       H1 = (GEN)q[3]; if (typ(H1) == t_POL) setvarn(H1,vX);
     }
     else
     {
       H = subres(A,B);
-      if (checksqfree && !ZX_issquarefree(H)) goto INIT;
+      if (checksqfree && !ZX_is_squarefree(H)) goto INIT;
     }
     goto END;
   }
@@ -3472,7 +3472,7 @@ ZX_disc_all(GEN x, ulong bound)
 GEN ZX_disc(GEN x) { return ZX_disc_all(x,0); }
 
 int
-ZX_issquarefree(GEN x)
+ZX_is_squarefree(GEN x)
 {
   ulong av = avma;
   int d = (lgef(modulargcd(x,derivpol(x))) == 3);

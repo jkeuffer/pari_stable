@@ -3033,8 +3033,8 @@ polcompositum0(GEN A, GEN B, long flall)
   C = content(B); if (!gcmp1(C)) B = gdiv(B, C);
   check_pol_int(A,"compositum");
   check_pol_int(B,"compositum");
-  if (!ZX_issquarefree(A)) err(talker,"compositum: %Z not separable", A);
-  if (!ZX_issquarefree(B)) err(talker,"compositum: %Z not separable", B);
+  if (!ZX_is_squarefree(A)) err(talker,"compositum: %Z not separable", A);
+  if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z not separable", B);
 
   k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   C = squff2(C,0,0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */

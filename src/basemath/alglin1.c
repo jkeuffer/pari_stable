@@ -623,7 +623,6 @@ zeromat(long m, long n)
   return y;
 }
 
-
 GEN
 gscalcol(GEN x, long n) 
 { 

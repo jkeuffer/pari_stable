@@ -491,12 +491,37 @@ rootmod0(GEN f, GEN p, long flag)
 /*                                                                 */
 /*******************************************************************/
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
-/*
- *Functions giving information on the factorisation.
- */
-/*
- * f in ZZ[X] and p a prime number.
- */
+/* Functions giving information on the factorisation. */
+
+/* u in Z[X], return kernel of (Frob - Id) over Fp[X] / u */
+static GEN
+Berlekamp_ker(GEN u, GEN p)
+{
+  long i,j,d,N = lgef(u)-3;
+  GEN vker,v,w,Q,p1,p2;
+  if (DEBUGLEVEL > 7) timer2();
+  Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
+  w = v = FpXQ_pow(polx[varn(u)],p,u,p);
+  for (j=2; j<=N; j++)
+  {
+    Q[j] = lgetg(N+1,t_COL); p1 = (GEN)Q[j];
+    d = lgef(w)-1; p2 = w+1;
+    for (i=1; i<d ; i++) p1[i] = p2[i];
+    for (   ; i<=N; i++) p1[i] = zero;
+    p1[j] = laddis((GEN)p1[j], -1);
+    if (j < N)
+    {
+      ulong av = avma;
+      w = gerepileupto(av, FpX_res(gmul(w,v), u, p));
+    }
+  }
+  if (DEBUGLEVEL > 7) msgtimer("frobenius");
+  vker = FpM_ker(Q,p);
+  if (DEBUGLEVEL > 7) msgtimer("kernel");
+  return vker;
+}
+
+/* f in ZZ[X] and p a prime number. */
 long
 FpX_is_squarefree(GEN f, GEN p)
 {
@@ -535,45 +560,15 @@ FpX_is_totally_split(GEN f, GEN p)
   z = FpXQ_pow(polx[varn(f)], p, f, p);
   avma = av; return lgef(z)==4 && gcmp1((GEN)z[3]) && !signe(z[2]);
 }
-/*
- * u in ZZ[X] and pp a prime number.
- * u must be squarefree mod pp.
- * leading term of u must be prime to pp.
- *
- * OK it is a copy paste of splitberlekamp
- * Consider merging.
- */
+/* u in ZZ[X] and p a prime number.
+ * u must be squarefree mod p.
+ * leading term of u must be prime to p. */
 long
-FpX_nbfact(GEN u, GEN pp)
+FpX_nbfact(GEN u, GEN p)
 {
-  ulong av,ltop=avma;
-  GEN p1, p2, vker,v,w;
-  long N = lgef(u)-3, d,i,j, vu = varn(u);
-  GEN Q;
-  if (DEBUGLEVEL > 7) timer2();
-  Q=cgetg(N+1,t_MAT); Q[1]=lgetg(N+1,t_COL);
-  p1 = (GEN)Q[1];
-  for (i=1; i<=N; i++) p1[i] = zero;
-  w = v = FpXQ_pow(polx[vu],pp,u,pp);
-  for (j=2; j<=N; j++)
-  {
-    Q[j]=lgetg(N+1,t_COL);
-    p1 = (GEN)Q[j];
-    d=lgef(w)-1; p2 = w+1;
-    for (i=1; i<d ; i++) p1[i] = p2[i];
-    for (   ; i<=N; i++) p1[i] = zero;
-    p1[j] = laddis((GEN)p1[j], -1);
-    if (j < N)
-    {
-      av = avma;
-      w = gerepileupto(av, FpX_res(gmul(w,v), u, pp));
-    }
-  }
-  if (DEBUGLEVEL > 7) msgtimer("frobenius");
-  vker = FpM_ker(Q,pp);
-  if (DEBUGLEVEL > 7) msgtimer("kernel");
-  avma=ltop;
-  return lg(vker)-1;
+  ulong av = avma;
+  GEN vker = Berlekamp_ker(u,p);
+  avma = av; return lg(vker)-1;
 }
 static GEN modulo;
 static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
@@ -982,33 +977,16 @@ FpX_addmul(GEN x, GEN y, long c, long p)
 }
 
 long
-split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2)
+split_berlekamp(GEN *t, GEN pp, GEN pps2)
 {
-  GEN u = *t, p1, p2, vker,v,w,pol;
-  long av,N = lgef(u)-3, d,i,j,kk,l1,l2,p, vu = varn(u);
+  GEN u = *t, p1, p2, vker,pol;
+  long av,N = lgef(u)-3, d,i,kk,l1,l2,p, vu = varn(u);
   ulong av0 = avma;
   
-  if (DEBUGLEVEL > 7) timer2();
-  p = is_bigint(pp)? 0: pp[2];
-  setlg(Q, N+1); setlg(Q[1], N+1);
-  w = v = FpXQ_pow(polx[vu],pp,u,pp);
-  for (j=2; j<=N; j++)
-  {
-    p1 = (GEN)Q[j]; setlg(p1, N+1);
-    d=lgef(w)-1; p2 = w+1;
-    for (i=1; i<d ; i++) p1[i] = p2[i];
-    for (   ; i<=N; i++) p1[i] = zero;
-    p1[j] = laddis((GEN)p1[j], -1);
-    if (j < N)
-    {
-      av = avma;
-      w = gerepileupto(av, FpX_res(gmul(w,v), u, pp));
-    }
-  }
-  if (DEBUGLEVEL > 7) msgtimer("frobenius");
-  vker = mat_to_vecpol(FpM_ker(Q,pp), vu);
-  if (DEBUGLEVEL > 7) msgtimer("kernel");
+  vker = Berlekamp_ker(u,pp);
+  vker = mat_to_vecpol(vker,vu);
   d = lg(vker)-1;
+  p = is_bigint(pp)? 0: pp[2];
   if (p)
   {
     avma = av0; p1 = cgetg(d+1, t_VEC); /* hack: hidden gerepile */
@@ -1077,7 +1055,7 @@ GEN
 factmod0(GEN f, GEN pp)
 {
   long i,j,k,e,p,N,nbfact,av = avma,tetpil,d;
-  GEN pps2,ex,y,f2,p1,g1,Q,u, *t;
+  GEN pps2,ex,y,f2,p1,g1,u, *t;
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
   /* to hold factors and exponents */
@@ -1085,10 +1063,6 @@ factmod0(GEN f, GEN pp)
   e = nbfact = 1;
   pps2 = shifti(pp,-1);
 
-  Q = cgetg(d+1,t_MAT);
-  for (i=1; i<=d; i++) Q[i] = lgetg(d+1, t_COL);
-  p1 = (GEN)Q[1];
-  for (i=1; i<=d; i++) p1[i] = zero;
   for(;;)
   {
     f2 = FpX_gcd(f,derivpol(f), pp);
@@ -1108,7 +1082,7 @@ factmod0(GEN f, GEN pp)
       {
         /* here u is square-free (product of irred. of multiplicity e * k) */
         t[nbfact] = FpX_normalize(u,pp);
-        d = (N==1)? 1: split_berlekamp(Q, t+nbfact, pp, pps2);
+        d = (N==1)? 1: split_berlekamp(t+nbfact, pp, pps2);
         for (j=0; j<d; j++) ex[nbfact+j] = e*k;
         nbfact += d;
       }
