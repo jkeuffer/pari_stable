@@ -85,7 +85,7 @@ gpman: gp.1
 clean:	
 	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc users.std $pdf\\
 	../INSTALL.log ../INSTALL.dvi ../INSTALL.idx ../INSTALL.pdf\\
-	../INSTALL.aux ../INSTALL.toc ../INSTALL.ps ../$pdf
+	../INSTALL.aux ../INSTALL.toc ../INSTALL.ps ../$pdf *.dumbpod *.3
 
 cleandoc: clean
 
