@@ -2963,7 +2963,7 @@ GEN
 buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av = avma, av0, av2;
-  long PRECREG = prec, PRECLLL, N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
+  long PRECREG, PRECLLL, N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
   long nlze, zc, nreldep, phase, i, j, k, MAXRELSUP;
   long sfb_change, sfb_trials, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
@@ -2979,9 +2979,8 @@ buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 
   if (DEBUGLEVEL) (void)timer2();
 
+  PRECREG = max(prec, MEDDEFAULTPREC);
   P = get_nfpol(P, &nf);
-
-  /* Initializations */
   fu = NULL; /* gcc -Wall */
   N = degpol(P);
   if (!nf)
