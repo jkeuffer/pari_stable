@@ -117,6 +117,7 @@ IZ 51- [tex2mail:] line couldn't start with {...\over...} (required indent)
 IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    53- ZX_QX_resultant (modular resultant with integer result): possible
        infinite loop when the result is 0, and non trivial denominator.
+   54- elleta(E.omega) gave incorrect results [ conflicting normalizations ]
 
   Changed
     1- rnf structure (removed useless components)
