@@ -1474,7 +1474,7 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
   long n=degpol(p),i,j,k,bitprec2;
   GEN q,FF,GG,R;
   GEN *radii = (GEN*) cgetg(n+1, t_VEC);
-  for (i=2; i<n; i++) radii[i]=myrealzero(3);
+  for (i=2; i<n; i++) radii[i] = myrealzero();
   aux = thickness/(double) n/4.;
   radii[1] = rmin = min_modulus(p, aux);
   radii[n] = rmax = max_modulus(p, aux);
