@@ -1,7 +1,7 @@
 Function: lex
 Section: operators
 C-Name: lexcmp
-Prototype: lGG
+Prototype: iGG
 Help: lex(x,y): compare x and y lexicographically (1 if x>y, 0 if x=y, -1 if
  x<y)
 
