@@ -61,6 +61,7 @@ BA 22- nfgaloisconj now use `p-1'-test + better strategy
 BA 23- fix accuracy problems in vandermondeinverse
    24- missed some simplifications when handling multivariate t_RFRAC
    25- [Cygwin:] incorrect default 'path' (used : instead of ;)
+   26- element_sqr didn't check its arguments (SEGV if bad input)
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -71,6 +72,7 @@ BA  4- Fp_PHlog (Pohlig-Hellman) can use a factorization of the subgroup order
     6- [libpari:] rename permute/permuteInv to GP names numtoperm/permtonum
     7- scalar + [;] --> error  [made it [;]]
 BA  8- factorback, chinese, lcm and gcd now accept a single vector
+    9- Use I \cap Z instead of NI in hnfideal_inv
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
