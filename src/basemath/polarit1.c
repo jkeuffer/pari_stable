@@ -459,7 +459,9 @@ ZX_deriv(GEN x)
 GEN
 FpX_deriv(GEN f, GEN p) { return FpX_red(ZX_deriv(f), p); }
 GEN
-FqX_deriv(GEN f, GEN T, GEN p) { return FqX_red(derivpol(f), T, p); }
+FqX_deriv(GEN f, /*unused*/GEN T, GEN p) {
+  (void)T; return FpXX_red(derivpol(f), p);
+}
 
 /* f in ZZ[X] and p a prime number. */
 long

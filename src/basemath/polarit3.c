@@ -778,26 +778,29 @@ monomial(GEN a, int degpol, int v)
 GEN
 FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
 {
-  pari_sp btop, ltop = avma, st_lim;
+  pari_sp av2, av = avma, st_lim;
   long dg;
   GEN U, q;
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    GEN Pl = ZXX_to_FlxX(P, pp, varn(T));
-    GEN Ql = ZXX_to_FlxX(Q, pp, varn(T));
-    GEN Tl = ZX_to_Flx(T, pp);
+    GEN Pl, Ql, Tl;
+    Pl = ZXX_to_FlxX(P, pp, varn(T));
+    if (!signe(Pl)) { avma = av; return gcopy(Q); }
+    Ql = ZXX_to_FlxX(Q, pp, varn(T));
+    if (!signe(Ql)) { avma = av; return gcopy(P); }
+    Tl = ZX_to_Flx(T, pp);
     U = FlxqX_safegcd(Pl, Ql, Tl, pp);
     if (!U) err(talker, "non-invertible polynomial in FpXQX_gcd");
-    return gerepileupto(ltop, FlxX_to_ZXX(U));
+    return gerepileupto(av, FlxX_to_ZXX(U));
   }
-  P = FpXX_red(P, p); btop = avma;
+  P = FpXX_red(P, p); av2 = avma;
   Q = FpXX_red(Q, p);
-  if (!signe(P)) return gerepileupto(ltop, Q);
-  if (!signe(Q)) { avma = btop; return P; }
+  if (!signe(P)) return gerepileupto(av, Q);
+  if (!signe(Q)) { avma = av2; return P; }
   T = FpX_red(T, p);
 
-  btop = avma; st_lim = stack_lim(btop, 1);
+  av2 = avma; st_lim = stack_lim(av2, 1);
   dg = lg(P)-lg(Q);
   if (dg < 0) { swap(P, Q); dg = -dg; }
   for(;;)
@@ -811,15 +814,15 @@ FpXQX_gcd(GEN P, GEN Q, GEN T, GEN p)
     } while (dg >= 0);
     if (!signe(P)) break;
 
-    if (low_stack(st_lim, stack_lim(btop, 1)))
+    if (low_stack(st_lim, stack_lim(av2, 1)))
     {
       if (DEBUGMEM>1) err(warnmem,"FpXQX_gcd");
-      gerepileall(btop, 2, &P,&Q);
+      gerepileall(av2, 2, &P,&Q);
     }
     swap(P, Q); dg = -dg;
   }
   Q = FqX_Fq_mul(Q, U, T, p); /* normalize GCD */
-  return gerepileupto(ltop, Q);
+  return gerepileupto(av, Q);
 }
 
 /*******************************************************************/

@@ -1524,7 +1524,6 @@ FlxV_to_Flm(GEN v, long n)
 
 /* FlxX are t_POL with Flx coefficients.
  * Normally the variable ordering should be respected.*/
-
 GEN 
 FlxX_to_ZXX(GEN B)
 {
@@ -1540,9 +1539,7 @@ FlxX_to_ZXX(GEN B)
 }
 
 /* Note: v is used _only_ for the t_INT. It must match
- * the variable of any t_POL coefficients.
- */
-
+ * the variable of any t_POL coefficients. */
 GEN 
 ZXX_to_FlxX(GEN B, ulong p, long v)
 {
@@ -1560,7 +1557,7 @@ ZXX_to_FlxX(GEN B, ulong p, long v)
       b[i] = (long)ZX_to_Flx((GEN)B[i], p);
       break;
     }
-  return b;
+  return normalizepol_i(b, lb);
 }
 
 GEN
@@ -1569,7 +1566,7 @@ ZXXV_to_FlxXV(GEN V, ulong p, long v)
   long j, N = lg(V);
   GEN y = cgetg(N, t_VEC);
   for (j=1; j<N; j++) y[j] = (long)ZXX_to_FlxX((GEN)V[j], p, v);
-  return y;
+  return normalizepol_i(y, N);
 }
 
 /*Similar to normalizepol, in place*/
