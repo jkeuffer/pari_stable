@@ -787,6 +787,7 @@ GEN     normalizepol(GEN x);
 GEN     normalizepol_i(GEN x, long lx);
 long    pvaluation(GEN x, GEN p, GEN *py);
 long    svaluation(ulong x, ulong p, long *py);
+GEN     realun(long prec);
 GEN     realzero(long prec);
 long    taille(GEN x);
 long    taille2(GEN x);
