@@ -1254,9 +1254,21 @@ isunit(GEN bnf,GEN x)
   for (   ; i<=RU; i++) p1[i] = deux;
   logunit = concatsp(logunit,p1);
   /* ex = fundamental units exponents */
-  ex = ground(gauss(greal(logunit), get_arch_real(nf,x,&emb, MEDDEFAULTPREC)));
-  if (!gcmp0((GEN)ex[RU]))
-    err(talker,"insufficient precision in isunit");
+  {
+    GEN rx, rlog = greal(logunit);
+    long e, prec = nfgetprec(nf);
+    for (i=1; i<=5; i++)
+    {
+      rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
+      ex = grndtoi(gauss(rlog, rx), &e);
+      if (gcmp0((GEN)ex[RU]) && e < -4) break;
+
+      prec = (prec-1)<<1;
+      if (DEBUGLEVEL) err(warnprec,"isunit",prec);
+      nf = nfnewprec(nf, prec);
+    }
+    if (i > 5) err(talker,"insufficient precision in isunit");
+  }
 
   setlg(ex, RU);
   setlg(p1, RU); settyp(p1, t_VEC);
