@@ -12,6 +12,7 @@ DS = Denis Simon
 GH = Guillaume Hanrot
 GN = Gerhard Niklasch
 GT = Glenn Thobe
+GTo= Gonzalo Tornaria
 HC = Henri Cohen
 IS = Igor Schein
 IK = Iwao Kimura
@@ -109,7 +110,8 @@ BA  6- New functions galoissubgroups, galoisubfields.
 HC  7- Implemented all Bessel functions J, I, N, K, H1, H2, and Bessel functions
        for power series and polynomials.
 HC  8- Implemented PSLQ [preliminary]
-    9- library functions FpM_ker, FpM_deplin
+GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
+   10- library functions FpM_ker, FpM_deplin
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
