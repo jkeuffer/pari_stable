@@ -211,6 +211,8 @@ lisseq0(char *t, GEN (*f)(void))
     return gerepilecopy(av, br_res);
   }
   if (res == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
+  /* ep->value, beware: it may be killed anytime.  */
+  if (isclone(res)) { avma = av; return forcecopy(res); }
   return gerepileupto(av, res);
 }
 
