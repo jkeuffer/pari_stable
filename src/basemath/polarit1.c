@@ -1473,6 +1473,7 @@ rootpadic(GEN f, GEN p, long prec)
   long PREC,i,k;
   int reverse;
 
+  if (typ(p)!=t_INT) err(typeer,"rootpadic");
   if (typ(f)!=t_POL) err(notpoler,"rootpadic");
   if (gcmp0(f)) err(zeropoler,"rootpadic");
   if (prec <= 0) err(talker,"non-positive precision in rootpadic");
