@@ -845,7 +845,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
  * applique une permutation t a un vecteur s sans duplication
  * Propre si s est un VECSMALL
  */
-static GEN
+GEN
 permapply(GEN s, GEN t)
 {
   GEN     u;
@@ -3072,6 +3072,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     }
     PM = vandermondeinversemod(PL, P, Pden, Pgb.ladicabs);
     PG = galoisgen(P, PL, PM, Pden, &Pgb, &Pga);
+    if (PG == gzero) return NULL;
     for (j = 1; j < lg(PG[1]); j++)
     {
       ulong btop=avma;
