@@ -1911,7 +1911,7 @@ sfcont(GEN x, GEN x1, long k)
     case t_RFRAC:
     case t_RFRACN:
       av = avma;
-      l = typ(x[1] == t_POL)? lgef(x[1]): 3;
+      l = typ(x[1]) == t_POL? lgef(x[1]): 3;
       if (lgef(x[2]) > l) l = lgef(x[2]);
       if (k > 0 && l > k+1) l = k+1;
       y = cgetg(l,t_VEC);
