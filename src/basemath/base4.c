@@ -1708,7 +1708,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   nf = checknf(nf);
   
   /* inert, special cased for efficiency */
-  if (absi_equal(n, stoi(degpol(nf[1]))))
+  if (itos((GEN)vp[4]) == degpol(nf[1]))
     return gmul(x, powgi((GEN)vp[1], n));
 
   y = idealpowprime_spec(nf, vp, n, &d);
