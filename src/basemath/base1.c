@@ -999,6 +999,7 @@ get_roots_for_M(nffp_t *F)
     n = degpol(F->x);
     eBD = 1 + gexpo((GEN)F->basden[1]);
     er  = 1 + gexpo(F->ro? F->ro: cauchy_bound(F->x));
+    if (er < 0) er = 0;
     F->extraprec = ((n*er + eBD + (long)log2(n)) >> TWOPOTBITS_IN_LONG);
   }
 
@@ -1125,7 +1126,8 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   GEN nf = cgetg(10,t_VEC);
   GEN x = T->x;
   GEN invbas,Tr,D,TI,A,dA, mat = cgetg(8,t_VEC);
-  nffp_t F; get_nf_fp_compo(T, &F, ro, prec);
+  nffp_t F;
+  get_nf_fp_compo(T, &F, ro, prec);
 
   nf[1] = (long)T->x;
   nf[2] = (long)get_sign(T->r1, degpol(T->x));
