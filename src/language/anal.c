@@ -819,7 +819,7 @@ truc(void)
 
   if (*analyseur == '!') /* NOT */
   {
-    analyseur++; p1 = truc();
+    analyseur++; p1 = facteur();
     if (br_status) err(breaker,"here (after !)");
     return gcmp0(p1)? gun: gzero;
   }
@@ -838,7 +838,7 @@ truc(void)
   }
   if (*analyseur == '#') /* CARD */
   {
-    analyseur++; p1 = truc();
+    analyseur++; p1 = facteur();
     if (br_status) err(breaker,"here (after #)");
     return stoi(glength(p1));
   }
@@ -2429,7 +2429,7 @@ skiptruc(void)
   switch(*analyseur)
   {
     case '"': skipstring(); return;
-    case '!': case '#': analyseur++; skiptruc(); return;
+    case '!': case '#': analyseur++; skipfacteur(); return;
     case '&': case '\'':
       analyseur++; check_var_name();
       skipentry(); return;
