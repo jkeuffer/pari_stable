@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*x being a t_INT, return a pointer to the most significant word of x.*/
 
 #define int_LSW(x) (x+2)
-/*x being a t_int, return a pointer to the least significant word of x.*/
+/*x being a t_INT, return a pointer to the least significant word of x.*/
 
 #define int_precW(x) ((x)-1)
 /*x pointing to a mantissa word, return the previous (less significant)
