@@ -1314,8 +1314,9 @@ gconvsp(GEN x, long e)
 
   if (gcmp0(x)) return zeropol(v);
   y = dummycopy(x);
-  i=lg(x)-1; while (i>1 && gcmp0((GEN)y[i])) i--;
+  i = lg(x)-1; while (i > 1 && gcmp0((GEN)y[i])) i--;
   y[0] = evaltyp(t_POL) | evallg(i+1);
+  y[1] &= ~VALPBITS;
   return e? gmul(y,  gpowgs(polx[v], e)): y;
 }
 
