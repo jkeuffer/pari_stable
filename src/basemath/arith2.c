@@ -1704,6 +1704,15 @@ imag_unit_form(GEN x)
   return y;
 }
 
+static GEN
+invraw(GEN x)
+{
+  GEN y = gcopy(x);
+  setsigne(y[2], -signe(y[2]));
+  if (typ(y) == t_QFR) setsigne(y[4], -signe(y[4]));
+  return y;
+}
+
 GEN
 powrealraw(GEN x, long n)
 {
@@ -1715,7 +1724,7 @@ powrealraw(GEN x, long n)
     err(talker,"not a real quadratic form in powrealraw");
   if (!n) return real_unit_form(x);
   if (n== 1) return gcopy(x);
-  if (n==-1) return ginv(x);
+  if (n==-1) return invraw(x);
 
   y = NULL; m=labs(n);
   for (; m>1; m>>=1)
@@ -1724,7 +1733,7 @@ powrealraw(GEN x, long n)
     x=sqcomprealraw(x);
   }
   y = y? comprealraw(y,x): x;
-  if (n<0) y = ginv(y);
+  if (n<0) y = invraw(y);
   return gerepileupto(av,y);
 }
 
@@ -1739,7 +1748,7 @@ powimagraw(GEN x, long n)
     err(talker,"not an imaginary quadratic form in powimag");
   if (!n) return imag_unit_form(x);
   if (n== 1) return gcopy(x);
-  if (n==-1) return ginv(x);
+  if (n==-1) return invraw(x);
 
   y = NULL; m=labs(n);
   for (; m>1; m>>=1)
@@ -1748,7 +1757,7 @@ powimagraw(GEN x, long n)
     x=sqcompimagraw(x);
   }
   y = y? compimagraw(y,x): x;
-  if (n<0) y = ginv(y);
+  if (n<0) y = invraw(y);
   return gerepileupto(av,y);
 }
 
