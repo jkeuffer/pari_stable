@@ -1299,6 +1299,7 @@ set_LLL_basis(nfbasic_t *T, GEN *pro)
 {
   T->bas = gmul(T->bas, get_LLL_basis(T, pro));
   T->basden = NULL; /* recompute */
+  if (DEBUGLEVEL) msgtimer("LLL basis");
 }
 
 typedef struct {
@@ -1470,6 +1471,7 @@ _initalg(GEN x, long flag, long prec)
   nfbasic_t T;
 
   nfbasic_init(x, flag, NULL, &T);
+  set_LLL_basis(&T, &ro);
 
   if (T.lead && !(flag & (nf_RED|nf_PARTRED)))
   {
@@ -1478,20 +1480,16 @@ _initalg(GEN x, long flag, long prec)
   }
   if (flag & (nf_RED|nf_PARTRED))
   {
-    set_LLL_basis(&T, &ro);
     rev = nfpolred(flag & nf_PARTRED, &T);
-    if (rev) ro = NULL; /* changed T.x */
+    if (DEBUGLEVEL) msgtimer("polred");
+    if (rev) { ro = NULL; set_LLL_basis(&T, &ro); } /* changed T.x */
     if (flag & nf_ORIG)
     {
       if (!rev) rev = polx[varn(T.x)]; /* no improvement */
       if (T.lead) rev = gdiv(rev, T.lead);
       rev = to_polmod(rev, T.x);
     }
-    if (DEBUGLEVEL) msgtimer("polred");
   }
-
-  set_LLL_basis(&T, &ro);
-  if (DEBUGLEVEL) msgtimer("LLL basis");
 
   nf = nfbasic_to_nf(&T, ro, prec);
   if (flag & nf_ORIG)
@@ -1639,9 +1637,10 @@ static GEN
 allpolred(GEN x, long flag, GEN fa, GEN *pta, FP_chk_fun *CHECK)
 {
   GEN ro = NULL;
-  nfbasic_t T; nfbasic_init(x, flag, fa, &T);
-  if (T.lead) err(impl,"polred for non-monic polynomial");
+  nfbasic_t T;
+  nfbasic_init(x, flag, fa, &T);
   set_LLL_basis(&T, &ro);
+  if (T.lead) err(impl,"polred for non-monic polynomial");
   return _polred(T.x, T.bas, pta, CHECK);
 }
 
@@ -1965,7 +1964,7 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
   return y;
 }
 
-GEN
+static GEN
 _polredabs(nfbasic_t *T, GEN *u)
 {
   long i, prec, e, n = degpol(T->x);
@@ -1975,7 +1974,6 @@ _polredabs(nfbasic_t *T, GEN *u)
   CG_data d; chk.data = (void*)&d;
 
   set_LLL_basis(T, &ro);
-  if (DEBUGLEVEL) msgtimer("LLL basis");
 
   /* || polchar ||_oo < 2^e */
   e = n * (gexpo(gmulsg(n, cauchy_bound(T->x))) + 1);
