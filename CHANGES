@@ -61,6 +61,10 @@ XR  2- factorpadic so that factorback gives back the original polynomial, up
        to a power of p
     3- type of avma, bot, top to 'pari_sp' (pari stack pointer) [does not
        break existing code]
+    4- [library:] make floating point assignments round the inputs (used to
+       truncate)
+    5- ensure proper rounding in divrr() [ important for numbers input in
+       scientific format, e.g. 1e20 ]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
