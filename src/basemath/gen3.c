@@ -1896,8 +1896,7 @@ ground(GEN x)
       return gerepileuptoint(av, mpent(p1));
     }
     case t_FRAC: case t_FRACN:
-      av=avma; p1 = addii(shifti((GEN)x[2], -1), (GEN)x[1]);
-      return gerepileuptoint(av, truedvmdii(p1, (GEN)x[2], NULL));
+      return diviiround((GEN)x[1], (GEN)x[2]);
 
     case t_POLMOD: y=cgetg(3,t_POLMOD);
       copyifstack(x[1],y[1]);
