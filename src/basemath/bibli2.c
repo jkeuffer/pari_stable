@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-extern GEN _ei(long n, long i);
 
 /********************************************************************/
 /**                                                                **/
@@ -986,7 +985,7 @@ modreverse_i(GEN a, GEN T)
   if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
 
   y = vecpol_to_mat(RXQ_powers(a,T,n-1), n);
-  y = gauss(y, _ei(n, 2));
+  y = gauss(y, vec_ei(n, 2));
   return gerepilecopy(av, vec_to_pol(y, varn(T)));
 }
 

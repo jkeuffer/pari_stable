@@ -37,7 +37,6 @@ extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 extern GEN RXQX_mul(GEN x, GEN y, GEN T);
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-extern GEN _ei(long n, long i);
 extern GEN col_to_ff(GEN x, long v);
 extern GEN element_mulidid(GEN nf, long i, long j);
 extern GEN eltmulid_get_table(GEN nf, long i);
@@ -1881,7 +1880,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   f = N - m;
   q = mulii(gpowgs(p,f), p);
 
-  u = FpM_invimage(concatsp(P, V), _ei(N,1), p);
+  u = FpM_invimage(concatsp(P, V), vec_ei(N,1), p);
   setlg(u, lg(P));
   u = centermod(gmul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
@@ -2281,7 +2280,7 @@ modprinit(GEN nf, GEN pr, int zk)
   for (k=i=1; i<=N; i++)
   {
     x = gcoeff(prh, i,i);
-    if (!is_pm1(x)) { c[k] = i; ffproj[i] = (long)_ei(N, i); k++; }
+    if (!is_pm1(x)) { c[k] = i; ffproj[i] = (long)vec_ei(N, i); k++; }
     else
       ffproj[i] = lneg((GEN)prh[i]);
   }
@@ -2332,11 +2331,11 @@ modprinit(GEN nf, GEN pr, int zk)
       x = element_powid_mod_p(nf,c[i],p, p);
       frob[i] = (long)FpM_FpV_mul(ffproj, x, p);
     }
-    u = _ei(f,2); k = 2;
+    u = vec_ei(f,2); k = 2;
     deg1 = ffdegree(u, frob, p);
     while (deg1 < f)
     {
-      k++; u2 = _ei(f, k);
+      k++; u2 = vec_ei(f, k);
       deg2 = ffdegree(u2, frob, p);
       deg = clcm(deg1,deg2);
       if (deg == deg1) continue;
@@ -2723,7 +2722,7 @@ rnfdedekind_i(GEN nf,GEN P,GEN pr, GEN disc)
   matid = gscalmat(d? p: gun, n);
   for (j=1; j<=m; j++)
   {
-    p1[j] = (long)_ei(m, j);
+    p1[j] = (long)vec_ei(m, j);
     p2[j] = (long)matid;
   }
   if (d)

@@ -2089,7 +2089,7 @@ hnfmerge_get_1(GEN A, GEN B)
   for (j = 1; j < l; j++)
   {
     c = j+1;
-    U[j] = (long)_ei(l-1, j);
+    U[j] = (long)vec_ei(l-1, j);
     U[c] = (long)zerocol(l-1); /* dummy */
     C[j] = (long)vecextract_i((GEN)A[j], 1,j);
     C[c] = (long)vecextract_i((GEN)B[j], 1,j);

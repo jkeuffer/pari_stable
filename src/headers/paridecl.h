@@ -98,6 +98,7 @@ GEN     sindexrank(GEN x);
 GEN     sum(GEN v, long a, long b);
 GEN     suppl(GEN x);
 GEN     vconcat(GEN A, GEN B);
+GEN     vec_ei(long n, long i);
 GEN     vecextract_i(GEN A, long y1, long y2);
 GEN     vecextract_p(GEN A, GEN p);
 GEN     zerocol(long n);

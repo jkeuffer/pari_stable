@@ -27,7 +27,6 @@ extern GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN vconcat(GEN A, GEN B);
 extern GEN hnf_gauss(GEN A, GEN B);
-extern GEN _ei(long n, long i);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1775,7 +1774,7 @@ GEN
 log_gen_arch(zlog_S *S, long index)
 {
   GEN y = zerocol(S->n);
-  zlog_add_sign(y, _ei(lg(S->archp)-1, index), S->lists);
+  zlog_add_sign(y, vec_ei(lg(S->archp)-1, index), S->lists);
   return gmul(S->U, y);
 }
 

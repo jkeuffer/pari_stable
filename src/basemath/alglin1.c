@@ -2260,7 +2260,7 @@ inverseimage(GEN m,GEN v)
 
 /* i-th vector in the standard basis */
 GEN
-_ei(long n, long i)
+vec_ei(long n, long i)
 {
   GEN e = zerocol(n); e[i] = un; return e;
 }
@@ -2297,7 +2297,7 @@ get_suppl(GEN x, GEN d, long r)
   for (j=1; j<=rx; j++)
     y[j] = lcopy((GEN)y[j]);
   for (   ; j<=n; j++)
-    y[j] = (long)_ei(n, y[j]);
+    y[j] = (long)vec_ei(n, y[j]);
   free(d); return y;
 }
 
