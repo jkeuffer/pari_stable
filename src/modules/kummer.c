@@ -864,6 +864,7 @@ static void
 compositum_red(compo_s *C, GEN P, GEN Q)
 {
   GEN p, q, a, z = (GEN)compositum2(P, Q)[1];
+  long v;
   a = (GEN)z[1];
   p = (GEN)z[2];
   q = (GEN)z[3];
@@ -871,11 +872,13 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   /* reduce R */
   z = polredabs0(a, nf_ORIG|nf_PARTIALFACT);
   C->R = (GEN)z[1];
-  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z\n",C->R);
-  a    = (GEN)z[2];
-  C->p = poleval(lift_intern(C->p), a);
-  C->q = poleval(lift_intern(C->q), a);
+  a    = (GEN)z[2]; v = varn(a[1]);
+  p = poleval(lift_intern(p), a); if (typ(p) != t_POL) p = scalarpol(p,v);
+  q = poleval(lift_intern(q), a); if (typ(q) != t_POL) q = scalarpol(q,v);
+  C->p = p;
+  C->q = q;
   C->rev = modreverse_i((GEN)a[2], (GEN)a[1]);
+  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z\n",C->R);
 }
 
 static GEN
