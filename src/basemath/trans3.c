@@ -1216,7 +1216,7 @@ next_bin(GEN y, long n, long k)
 }
 
 static GEN
-izeta(long k, long prec)
+szeta(long k, long prec)
 {
   long kk, n, li;
   pari_sp av=avma, av2, limit;
@@ -1266,7 +1266,7 @@ izeta(long k, long prec)
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"izeta");
+        if (DEBUGMEM>1) err(warnmem,"szeta");
         gerepileall(av2,2, &z, &qn);
       }
     }
@@ -1298,7 +1298,7 @@ izeta(long k, long prec)
       qn=mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"izeta");
+        if (DEBUGMEM>1) err(warnmem,"szeta");
         gerepileall(av2,2, &z, &qn);
       }
     }
@@ -1343,7 +1343,7 @@ GEN czeta(GEN s0, long prec);
 
 /* assume k != 1 */
 static GEN
-izeta(long k, long prec)
+szeta(long k, long prec)
 {
   pari_sp av = avma;
   GEN y, p1;
@@ -1352,9 +1352,14 @@ izeta(long k, long prec)
   if (!k) { y = real2n(-1, prec); setsigne(y,-1); return y; }
   if (k < 0)
   {
+    GEN s;
     if ((k&1) == 0) return gzero;
-    y = bernreal(1-k,prec);
-    return gerepileuptoleaf(av, divrs(y,k-1));
+    if (-k <= bit_accuracy(prec)+1)
+      return gerepileuptoleaf(av, divrs(bernreal(1-k,prec), k-1));
+    s = stoi(1 - k);
+    y = gdiv(ggamma(s, prec), powgi(Pi2n(1, prec), s));
+    if ((k&3) == 3) setsigne(y, -1);
+    return gerepileuptoleaf(av, gmul2n(y, 1));
   }
   if (k > bit_accuracy(prec)+1) return realun(prec);
   if ((k&1) == 0)
@@ -1388,7 +1393,7 @@ czeta(GEN s0, long prec)
     if (typ(s0) == t_INT)
     {
       p = itos(s0); avma = av2;
-      return izeta(p,prec);
+      return szeta(p,prec);
     }
     funeq = 1; s = gsub(gun, s); sig = greal(s);
   }
@@ -1524,11 +1529,9 @@ czeta(GEN s0, long prec)
 END:
   if (funeq)
   {
-    GEN pitemp = mppi(prec); setexpo(pitemp,2); /* 2Pi */
-    y = gmul(gmul(y, ggamma(gprec_w(s,prec-1),prec)),
-             gpow(pitemp,gneg(s),prec));
-    setexpo(pitemp,0); /* Pi/2 */
-    y = gmul2n(gmul(y, gcos(gmul(pitemp,s),prec)), 1);
+    y = gmul(gmul(y, ggamma(gprec_w(s,prec),prec)),
+             gpow(Pi2n(1,prec), gneg(s), prec));
+    y = gmul2n(gmul(y, gcos(gmul(Pi2n(-1,prec),s), prec)), 1);
   }
   gaffect(y,res); avma = av; return res;
 }
@@ -1546,7 +1549,7 @@ gzeta(GEN x, long prec)
         if (signe(x) > 0) return realun(prec);
         if (signe(x) < 0 && mod2(x) == 0) return realzero(prec);
       }
-      return izeta(itos(x),prec);
+      return szeta(itos(x),prec);
 
     case t_REAL: case t_COMPLEX:
       return czeta(x,prec);
@@ -1583,16 +1586,16 @@ cxpolylog(long m, GEN x, long prec)
   pari_sp av=avma;
   GEN p1,z,h,q,s;
 
-  if (gcmp1(x)) return izeta(m,prec);
+  if (gcmp1(x)) return szeta(m,prec);
   z=glog(x,prec); h=gneg_i(glog(gneg_i(z),prec));
   for (i=1; i<m; i++) h = gadd(h,ginv(stoi(i)));
 
   bern_upto=m+50; mpbern(bern_upto,prec);
-  q=gun; s=izeta(m,prec);
+  q=gun; s=szeta(m,prec);
   for (n=1; n<=m+1; n++)
   {
     q=gdivgs(gmul(q,z),n);
-    s=gadd(s,gmul((n==(m-1))? h: izeta(m-n,prec),q));
+    s=gadd(s,gmul((n==(m-1))? h: szeta(m-n,prec),q));
   }
 
   n = m+3; z=gsqr(z); li = -(bit_accuracy(prec)+1);
@@ -1600,7 +1603,7 @@ cxpolylog(long m, GEN x, long prec)
   for(;;)
   {
     q = gdivgs(gmul(q,z),(n-1)*n);
-    p1 = gmul(izeta(m-n,prec),q);
+    p1 = gmul(szeta(m-n,prec),q);
     s = gadd(s,p1);
     if (gexpo(p1) < li) break;
     n+=2;
@@ -1668,7 +1671,7 @@ polylog(long m, GEN x, long prec)
   {
     GEN logx2 = gsqr(logx); p1 = gneg_i(ghalf);
     for (i=m-2; i>=0; i-=2)
-      p1 = gadd(izeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
+      p1 = gadd(szeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
     if (m&1) p1 = gmul(logx,p1); else y = gneg_i(y);
     p1 = gadd(gmul2n(p1,1), gmul(z,gpowgs(logx,m-1)));
   }
@@ -1691,7 +1694,7 @@ polylogd0(long m, GEN x, long flag, long prec)
 
   m2=m&1; av=avma;
   if (gcmp0(x)) return gcopy(x);
-  if (gcmp1(x) && m>=2) return m2?izeta(m,prec):gzero;
+  if (gcmp1(x) && m>=2) return m2?szeta(m,prec):gzero;
   l=precision(x);
   if (!l) { l=prec; x=gmul(x,realun(l)); }
   p1=gabs(x,prec); fl=0;
@@ -1738,7 +1741,7 @@ polylogp(long m, GEN x, long prec)
 
   m2=m&1; av=avma;
   if (gcmp0(x)) return gcopy(x);
-  if (gcmp1(x) && m>=2) return m2?izeta(m,prec):gzero;
+  if (gcmp1(x) && m>=2) return m2?szeta(m,prec):gzero;
   l=precision(x);
   if (!l) { l=prec; x=gmul(x,realun(l)); }
   p1=gabs(x,prec); fl=0;
