@@ -562,7 +562,7 @@ static GEN
 FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
 {
   long j,N = degpol(u);
-  GEN vker,v,w,Q,p1;
+  GEN v,w,Q,p1;
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FqXQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
@@ -636,9 +636,119 @@ FpX_is_totally_split(GEN f, GEN p)
   avma = av;
   return degpol(z) == 1 && gcmp1((GEN)z[3]) && !signe(z[2]); /* x^p = x ? */
 }
+
+/* u_vec_to_pol(u_FpM_FpV_mul(x, u_pol_to_vec(y), p)) */
+static GEN
+u_FpM_FpX_mul(GEN x, GEN y, ulong p)
+{
+  long i,k,l, ly=lgef(y)-1;
+  GEN z;
+  if (ly==1) return u_zeropol();
+  l = lg(x[1]);
+  y++;
+  z = vecsmall_const(l,0) + 1;
+  for (k=1; k<ly; k++)
+  {
+    GEN c;
+    if (!y[k]) continue;
+    c = (GEN)x[k];
+    if (y[k] == 1)
+      for (i=1; i<l; i++)
+      {
+        z[i] += c[i];
+        if (z[i] & HIGHBIT) z[i] %= p;
+      }
+    else
+      for (i=1; i<l; i++)
+      {
+        z[i] += c[i] * y[k];
+        if (z[i] & HIGHBIT) z[i] %= p;
+      }
+  }
+  for (i=1; i<l; i++) z[i] %= p;
+  while (--l && !z[l]);
+  if (!l) return u_zeropol();
+  *z-- = evalsigne(1) | evallgef(l+2) | evalvarn(0);
+  return z;
+}
+
+extern GEN u_FpX_Kmul(GEN a, GEN b, ulong p, long na, long nb);
+#define u_FpX_mul(x,y, p) u_FpX_Kmul(x+2,y+2,p, lgef(x)-2,lgef(y)-2)
+#define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),NULL)
+
+static GEN
+u_FpM_Frobenius(GEN u, ulong p)
+{
+  long j,N = degpol(u);
+  GEN v,w,Q;
+  pari_timer T;
+
+  if (DEBUGLEVEL > 7) TIMERstart(&T);
+  Q = cgetg(N+1,t_MAT); 
+  Q[1] = (long)vecsmall_const(N, 0);
+  coeff(Q,1,1) = 1;
+  w = v = u_FpXQ_pow(pol_to_small(polx[varn(u)]), utoi(p), u, p);
+  for (j=2; j<=N; j++)
+  {
+    Q[j] = (long)u_pol_to_vec(w, N);
+    if (j < N)
+    {
+      pari_sp av = avma;
+      w = gerepileupto(av, u_FpX_rem(u_FpX_mul(w, v, p), u, p));
+    }
+  }
+  if (DEBUGLEVEL > 7) msgTIMER(&T, "frobenius");
+  return Q;
+}
+
 /* u in ZZ[X] and p a prime number.
  * u must be squarefree mod p.
  * leading term of u must be prime to p. */
+long
+u_FpX_nbfact(GEN z, long p)
+{
+  long lgg, nfacp = 0, d = 0, e = degpol(z);
+  GEN g, w, MP = u_FpM_Frobenius(z, p), PolX = pol_to_small(polx[0]);
+
+  w = PolX;
+  while (d < (e>>1))
+  { /* here e = degpol(z) */
+    d++;
+    w = u_FpM_FpX_mul(MP, w, p); /* w^p mod (z,p) */
+    g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
+    lgg = degpol(g);
+    if (!lgg) continue;
+
+    e -= lgg;
+    nfacp += lgg/d;
+    if (DEBUGLEVEL>5)
+      fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
+    if (!e) break;
+    z = u_FpX_div(z, g, p);
+    w = u_FpX_rem(w, z, p);
+  }
+  if (e)
+  {
+    if (DEBUGLEVEL>5) fprintferr("   %3ld factor of degree %3ld\n",1,e);
+    nfacp++;
+  }
+  return nfacp;
+}
+
+long
+u_FpX_nbroots(GEN f, long p)
+{
+  long n = degpol(f);
+  pari_sp av = avma;
+  GEN z, X;
+  if (n <= 1) return n;
+  X = pol_to_small(polx[varn(f)]);
+  z = u_FpXQ_pow(X, utoi(p), f, p);
+  z = u_FpX_sub(z, X, p);
+  z = u_FpX_gcd(z, f, p);
+  avma = av; return degpol(z);
+}
+
 long
 FpX_nbfact(GEN u, GEN p)
 {
@@ -646,6 +756,7 @@ FpX_nbfact(GEN u, GEN p)
   GEN vker = FpM_Berlekamp_ker(u, p);
   avma = av; return lg(vker)-1;
 }
+
 long
 FqX_nbfact(GEN u, GEN T, GEN p)
 {
@@ -655,13 +766,6 @@ FqX_nbfact(GEN u, GEN T, GEN p)
   vker = FqM_Berlekamp_ker(u, T, gpowgs(p, degpol(T)), p);
   avma = av; return lg(vker)-1;
 }
-
-/* Please use only use this function when you it is false, or that there is a
- * lot of factors. If you believe f is irreducible or that it has few factors,
- * then use `FpX_nbfact(f,p)==1' instead (faster).
- */
-static GEN factcantor0(GEN f, GEN pp, long flag);
-long FpX_is_irred(GEN f, GEN p) { return !!factcantor0(f,p,2); }
 
 static GEN modulo;
 static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
@@ -708,8 +812,7 @@ try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
  *  t[0] polynomial of degree k*d product of k irreducible factors of degree d
  *  t[0] is expected to be normalized (leading coeff = 1)
  * OUTPUT:
- *  t[0],t[1]...t[k-1] the k factors, normalized
- */
+ *  t[0],t[1]...t[k-1] the k factors, normalized */
 static void
 split(long m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
 {
@@ -927,17 +1030,17 @@ factcantor0(GEN f, GEN pp, long flag)
   return gerepile(av,tetpil,y);
 }
 
-GEN
-factcantor(GEN f, GEN p)
-{
-  return factcantor0(f,p,0);
-}
+/* Use only use this function when you think f is reducible, and that there
+ * are a lot of factors. If you believe f is irreducible or that it has few
+ * factors, then use `FpX_nbfact(f,p)==1' instead. */
+long
+FpX_is_irred(GEN f, GEN p) { return !!factcantor0(f,p,2); }
 
 GEN
-simplefactmod(GEN f, GEN p)
-{
-  return factcantor0(f,p,1);
-}
+factcantor(GEN f, GEN p) { return factcantor0(f,p,0); }
+
+GEN
+simplefactmod(GEN f, GEN p) { return factcantor0(f,p,1); }
 
 GEN
 col_to_ff(GEN x, long v)
@@ -1004,41 +1107,6 @@ u_FpM_FpV_mul(GEN x, GEN y, ulong p)
   return z;
 }
 #endif
-
-/* u_vec_to_pol(u_FpM_FpV_mul(x, u_pol_to_vec(y), p)) */
-GEN
-u_FpM_FpX_mul(GEN x, GEN y, ulong p)
-{
-  long i,k,l, ly=lgef(y)-1;
-  GEN z;
-  if (ly==1) return u_zeropol();
-  l = lg(x[1]);
-  y++;
-  z = vecsmall_const(l,0) + 1;
-  for (k=1; k<ly; k++)
-  {
-    GEN c;
-    if (!y[k]) continue;
-    c = (GEN)x[k];
-    if (y[k] == 1)
-      for (i=1; i<l; i++)
-      {
-        z[i] += c[i];
-        if (z[i] & HIGHBIT) z[i] %= p;
-      }
-    else
-      for (i=1; i<l; i++)
-      {
-        z[i] += c[i] * y[k];
-        if (z[i] & HIGHBIT) z[i] %= p;
-      }
-  }
-  for (i=1; i<l; i++) z[i] %= p;
-  while (--l && !z[l]);
-  if (!l) return u_zeropol();
-  *z-- = evalsigne(1) | evallgef(l+2) | evalvarn(0);
-  return z;
-}
 
 /* return the (N-dimensional) vector of coeffs of p */
 GEN
