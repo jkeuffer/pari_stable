@@ -352,7 +352,7 @@ static void
 HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
 {
   pari_sp av = avma;
-  long space = lgef(f) * (lgefint(pd) + lgefint(p0) - 2);
+  long space = lgef(f) * (lgefint(pd) + lgefint(p0));
   GEN a2,b2,g,z,s,t;
   GEN a = (GEN)V[j], b = (GEN)V[j+1];
   GEN u = (GEN)W[j], v = (GEN)W[j+1];
