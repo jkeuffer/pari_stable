@@ -1,7 +1,6 @@
 # Target directory for object files
 pre=O
-cst_objdir=$pre$osname-$arch;
-objdir=$cst_objdir
+objdir=$pre$osname-$arch;
 if test -n "$dfltobjdir"; then
   if test "$dfltobjdir" = auto; then
     case "$kernlvl0" in
@@ -32,9 +31,4 @@ EOT
   echo $n ..."Enter dir name : $c"
   dflt=$objdir; rep=; . ./myread
   objdir=$ans
-fi
-
-cdobjdir=
-if test "$objdir" != "$cst_objdir"; then 
-  cdobjdir="cd $objdir; "
 fi
