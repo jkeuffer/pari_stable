@@ -1774,10 +1774,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  }
 	  else
 	  {
-	    GEN p2 = ggcd(Q_denom(eta), pdr);
-	    p1 = gmodulcp(gmul(p2, eta),
-			  redelt(chi, mulii(p, gpowgs(p2, N)), pmf));
-	    p1 = gmod(divii(gnorm(p1), gpowgs(p2, N)), p);
+            p1 = modii(ZX_QX_resultant(chi, eta), p);
 	    if (signe(p1)) continue;
 	    if (fm) break;
 	
