@@ -304,17 +304,6 @@ allocgroup(long n, long card)
   return gr;
 }
 
-static char *
-name(char *pre, long n, long n1, long n2, long no)
-{
-  static char chn[256];
-  char ch[6];
-
-  snprintf(chn, 250, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
-  if (no) { sprintf(ch,"_%ld",no); strcat(chn, ch); }
-  return chn;
-}
-
 #ifdef UNIX
 #  include <fcntl.h>
 #endif
@@ -323,13 +312,17 @@ name(char *pre, long n, long n1, long n2, long no)
 #endif
 
 static long
-galopen(char *s)
+galopen(char *pre, long n, long n1, long n2, long no)
 {
-  long fd = os_open(s,O_RDONLY);
-  if (fd == -1)
-    err(talker,"galois files not available, sorry\n[missing %s]",s);
+  char *s = gpmalloc(strlen(pari_datadir) + 3 + 4 * 20 + 1);
+  long fd;
+
+  sprintf(s, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
+  if (no) sprintf(s + strlen(s), "_%ld", no);
+  fd = os_open(s, O_RDONLY);
+  if (fd == -1) err(talker,"galois files not available\n[missing %s]",s);
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
-  return fd;
+  free(s); return fd;
 }
 
 static char
@@ -371,7 +364,7 @@ lirecoset(long n1, long n2, long n)
 
   if (n<11 || n2<8)
   {
-    fd = galopen(name("COS", n, n1, n2, 0));
+    fd = galopen("COS", n, n1, n2, 0);
     os_read(fd,&c,1); m=bin(c);
     os_read(fd,&c,1);
     os_read(fd,ch,6); cardgr=atol(ch); gr=allocgroup(m,cardgr);
@@ -381,7 +374,7 @@ lirecoset(long n1, long n2, long n)
   gr = grptr = allocgroup(n, 8 * cardgr);
   for (no=1; no<=8; no++)
   {
-    fd = galopen(name("COS", n, n1, n2, no)); os_read(fd,ch,8);
+    fd = galopen("COS", n, n1, n2, no); os_read(fd,ch,8);
     read_obj(grptr, fd,cardgr,m); grptr += cardgr;
   }
   return gr;
@@ -393,7 +386,7 @@ lireresolv(long n1, long n2, long n, resolv *R)
   char ch[5];
   long fd, nm, nv;
 
-  fd = galopen(name("RES", n, n1, n2, 0));
+  fd = galopen("RES", n, n1, n2, 0);
   os_read(fd,ch,5); nm = atol(ch);
   os_read(fd,ch,3); nv = atol(ch);
   R->a = alloc_pobj(nv,nm);
