@@ -119,11 +119,13 @@ BA  5- Library .so link changed to libpari.so for all versions.
     it used to return. The values returned by ellbil() and ellheightmatrix are
     unaffected. In particular, ellheightmatrix() is the polar form of 
     elleight(), and ellbil now satisfies the proper identity for B(P, Q) =
-    (h(P+Q)-h(P)-h(Q)) / 2, and
+    (h(P+Q)-h(P)-h(Q)) / 2
     7- renamed and declared gmul_mat_smallvec --> RM_zc_mul
                             gmul_mati_smallvec--> ZM_zc_mul
     8- moved highlvl.o and plot*.o from the gp binary to libpari
     9- bnfinit: use approximate integral LLL reduction (much faster than fp)
+   10- bnfinit: cache multiplication table by prime ideal anti-uniformizers
+       (faster valuations)
 
   Added
     1- make test-all [ all test suite (SLOW !)]
