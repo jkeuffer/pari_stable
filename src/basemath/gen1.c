@@ -1071,7 +1071,7 @@ VC_mul(GEN x, GEN y, long l)
   for (i=1; i<l; i++)   
   {
     GEN c = (GEN)y[i];
-    if (!isexactzero(c)) z = gadd(z, gmul((GEN)x[i], c));
+    if (!isexactzeroscalar(c)) z = gadd(z, gmul((GEN)x[i], c));
   }
   return gerepileupto(av,z);
 }
@@ -1088,7 +1088,7 @@ MC_mul(GEN x, GEN y, long l, long lz)
     for (j=1; j<l; j++)
     {
       GEN c = (GEN)y[j];
-      if (!isexactzero(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
+      if (!isexactzeroscalar(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
     }
     z[i] = lpileupto(av,t);
   }

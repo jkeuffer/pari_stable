@@ -41,6 +41,7 @@ Done for version 2.2.7 (released ??/07/2003):
     1- bench input files: should all start by a 'gettime()' instruction
     2- bnfisnorm(bnfinit(x^2-11),1) --> [Mod(1, #), 1]   [ return a result
        involving MAXVARN on trivial input ]
+    3- [Mat(5)] * [[0]~]~ --> 0. Should be [0]~   [introduced in 2.2.6-C.25]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

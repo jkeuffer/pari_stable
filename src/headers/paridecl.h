@@ -1001,6 +1001,7 @@ GEN     hqfeval(GEN q, GEN x);
 GEN     integ(GEN x, long v);
 int     iscomplex(GEN x);
 int     isexactzero(GEN g);
+int     isexactzeroscalar(GEN g);
 int     isinexactreal(GEN x);
 int     ismonome(GEN x);
 GEN     lift(GEN x);

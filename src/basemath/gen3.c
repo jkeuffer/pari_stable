@@ -314,6 +314,29 @@ isinexactreal(GEN x)
 }
 
 int
+isexactzeroscalar(GEN g)
+{
+  long i;
+  switch (typ(g))
+  {
+    case t_INT:
+      return !signe(g);
+    case t_REAL: case t_PADIC: case t_SER:
+      return 0;
+    case t_INTMOD: case t_POLMOD:
+      return isexactzeroscalar((GEN)g[2]);
+    case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
+      return isexactzeroscalar((GEN)g[1]);
+    case t_COMPLEX:
+      return isexactzeroscalar((GEN)g[1]) && isexactzeroscalar((GEN)g[2]);
+    case t_QUAD:
+      return isexactzeroscalar((GEN)g[2]) && isexactzeroscalar((GEN)g[3]);
+    case t_POL: return lgef(g) == 2;
+  }
+  return 0;
+}
+
+int
 isexactzero(GEN g)
 {
   long i;
@@ -332,10 +355,7 @@ isexactzero(GEN g)
     case t_QUAD:
       return isexactzero((GEN)g[2]) && isexactzero((GEN)g[3]);
 
-    case t_POL:
-      for (i=lgef(g)-1; i>1; i--)
-        if (!isexactzero((GEN)g[i])) return 0;
-      return 1;
+    case t_POL: return lgef(g) == 2;
     case t_VEC: case t_COL: case t_MAT:
       for (i=lg(g)-1; i; i--)
 	if (!isexactzero((GEN)g[i])) return 0;
