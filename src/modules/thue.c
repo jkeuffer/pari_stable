@@ -297,7 +297,7 @@ Baker(baker_s *BS)
   }
 
   /* Compute a bound for the h_0 */
-  hb0 = gadd(gmul2n(BS->hal,2), gmul(gen_2, gadd(BS->Hmu,mplog2(prec))));
+  hb0 = gadd(gmul2n(BS->hal,2), gmul2n(gadd(BS->Hmu,mplog2(prec)), 1));
   tmp = gdiv(gmul(gsub(ro0, (GEN)ro[i2]), (GEN)BS->NE[i1]),
              gmul(gsub(ro0, (GEN)ro[i1]), (GEN)BS->NE[i2]));
   tmp = gmax(gen_1, abslog(tmp, prec));

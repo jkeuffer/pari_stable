@@ -270,7 +270,7 @@ padic_initell(GEN y, GEN p, long prec)
   for (i=1; i<=13; i++) y[i] = lmul(q,(GEN)y[i]);
   if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
-  if (equalii(p,gen_2))
+  if (equaliu(p,2))
   {
     pv = utoipos(4); 
     err(impl,"initell for 2-adic numbers");
@@ -624,7 +624,7 @@ ordell(GEN e, GEN x, long prec)
   {
     b = gneg_i(b);
     y = cgetg(2,t_VEC);
-    if (td == t_INTMOD && equalii((GEN)D[1], gen_2))
+    if (td == t_INTMOD && equaliu((GEN)D[1], 2))
       y[1] = (long)mkintmodu(gcmp0(a)?0:1, 2);
     else
       y[1] = lmul2n(b,-1);
@@ -642,7 +642,7 @@ ordell(GEN e, GEN x, long prec)
   {
     if (td==t_INTMOD)
     {
-      if (equalii((GEN)D[1],gen_2))
+      if (equaliu((GEN)D[1],2))
       {
         avma=av;
         if (!gcmp0(a)) return cgetg(1,t_VEC);
@@ -864,10 +864,8 @@ zell(GEN e, GEN z, long prec)
     z2 = invell(e, z1);
     bad = (gexpo(gsub(z,z1)) > gexpo(gsub(z,z2)));
     if (bad) t = gneg(t);
-    if (DEBUGLEVEL)
-    {
-      if (DEBUGLEVEL>4)
-      {
+    if (DEBUGLEVEL) {
+      if (DEBUGLEVEL>4) {
         fprintferr("  z  = %Z\n",z);
         fprintferr("  z1 = %Z\n",z1);
         fprintferr("  z2 = %Z\n",z2);
@@ -877,8 +875,8 @@ zell(GEN e, GEN z, long prec)
     }
   }
   /* send t to the fundamental domain if necessary */
-  p2 = gdiv(imag_i(t),gmael(e,16,2));
-  p1 = gsub(p2, gmul2n(gen_1,-2));
+  p2 = gdiv(imag_i(t), gmael(e,16,2));
+  p1 = gsub(p2, mkfrac(gen_1, utoipos(4)));
   if (gcmp(gabs(p1,prec),ghalf) >= 0)
     t = gsub(t, gmul((GEN)e[16],gfloor(gadd(p2,dbltor(0.1)))));
   if (gsigne(real_i(t)) < 0) t = gadd(t,(GEN)e[15]);
@@ -1156,7 +1154,7 @@ ellzeta(GEN om, GEN z, long prec)
   
   y = gdiv(gmul(gsqr(T.W2),_elleisnum(&T,2,prec)), pii2);
   y = gadd(ghalf, gdivgs(gmul(Z,y),-12));
-  y = gadd(y, ginv(gsub(u,gen_1)));
+  y = gadd(y, ginv(gsubgs(u, 1)));
   toadd = (long)ceil(9.065*gtodouble(imag_i(Z)));
   av1 = avma; lim = stack_lim(av1,1);
   
@@ -1993,7 +1991,7 @@ apell(GEN e, GEN p)
 {
   checkell(e);
   if (typ(p)!=t_INT || signe(p) <= 0) err(talker,"not a prime in apell");
-  if (equalii(p, gen_2)) return _a_2(e);
+  if (equaliu(p,2)) return _a_2(e);
   if (gdvd((GEN)e[12],p)) /* D may be an intmod */
   {
     pari_sp av = avma;

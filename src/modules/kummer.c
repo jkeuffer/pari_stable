@@ -331,7 +331,7 @@ static GEN
 downtoK(toK_s *T, GEN x)
 {
   long degKz = lg(T->invexpoteta1) - 1;
-  GEN y = gmul(T->invexpoteta1, RgX_to_RgV(lift(x), degKz));
+  GEN y = gmul(T->invexpoteta1, RgX_to_RgV(lift_intern(x), degKz));
   return gmodulcp(gtopolyrev(y,varn(T->polnf)), T->polnf);
 }
 
@@ -656,10 +656,9 @@ Stelt(GEN nf, GEN id, GEN polrel)
   I = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
   {
-    GEN v = (GEN)id[i];
-    if (typ(v) == t_POL) { v = dummycopy(v); setvarn(v, 0); }
-    A[i] = (long)gmod(v, polrel);
-    I[i] = (long)matid;
+    GEN v = gel(id,i);
+    gel(A,i) = (typ(v) != t_POL)? v: RgX_rem(v, polrel);
+    gel(I,i) = matid;
   }
   x = cgetg(3,t_VEC);
   x[1] = (long)RgXV_to_RgM(A, degpol(polrel));
@@ -697,7 +696,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
     g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     P[j] = (long)isprincipalray(bnr, g);
   }
-  U = (GEN)hnfall(concatsp(P, subgroup))[2];
+  (void)hnfall_i(concatsp(P, subgroup), &U, 1);
   setlg(U, l); for (j=1; j<l; j++) setlg(U[j], l);
   return hnfmodid(concatsp(U, diagonal(raycycz)), (GEN)raycycz[1]);
 }
