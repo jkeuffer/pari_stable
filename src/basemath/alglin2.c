@@ -3362,24 +3362,27 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
     *pb = gen_1; *pv = gen_1; return b;
   }
   d = RgX_extgcd(a,b, pu,pv);
-  if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
-  else if (typ(d[2]) == t_REAL && lg(d[2]) == 3)
-#if 1
-  { /* possible accuracy problem */
-    GEN D = RgX_gcd_simple(a,b);
-    if (degpol(D)) { 
-      D = gdiv(D, leading_term(D));
-      a = RgX_div(a, D); b = RgX_div(b, D);
-      d = RgX_extgcd(a,b, pu,pv); /* retry now */
-      d = gmul(d, D);
-    }
-  }
-#else
-  { /* less stable */
-    d = RgX_extgcd_simple(a,b, pu,pv);
+  if (typ(d) == t_POL)
+  {
     if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+    else if (typ(d[2]) == t_REAL && lg(d[2]) == 3)
+  #if 1
+    { /* possible accuracy problem */
+      GEN D = RgX_gcd_simple(a,b);
+      if (degpol(D)) { 
+        D = gdiv(D, leading_term(D));
+        a = RgX_div(a, D); b = RgX_div(b, D);
+        d = RgX_extgcd(a,b, pu,pv); /* retry now */
+        d = gmul(d, D);
+      }
+    }
+  #else
+    { /* less stable */
+      d = RgX_extgcd_simple(a,b, pu,pv);
+      if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
+    }
+  #endif
   }
-#endif
   *pa = a;
   *pb = b; return d;
 }
