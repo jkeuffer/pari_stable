@@ -95,10 +95,11 @@ IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
 IZ 15- flags for OS/2 build + use generic [pre|suf]fix for object files
 IZ 16- readline: hit_return() would not work after Esc-H
                  extend online help recognition capabilities (Esc h/H, F1)
+   17- install the whole distribution (see ?12) + Configure flag --share-prefix
 
   Added
     1- files README.WIN, config/arch-osname, doc/tex2mail.1
-GN  2- Jebelean extended gcd
+GN  2- Jebelean extended gcd + rational number reconstruction
 XR  3- new flag to rnfconductor (check extension is abelian)
 IZ  4- set of default colors (boldfg)
 
