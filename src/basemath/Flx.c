@@ -412,7 +412,7 @@ Flx_shiftip(pari_sp av, GEN x, long v)
 {
   long i, lx = lg(x), ly;
   GEN y;
-  if (v <= 0 || lx==2) return gerepileuptoleaf(av, x);
+  if (!v || lx==2) return gerepileuptoleaf(av, x);
   avma = av; ly = lx + v;
   x += lx; y = new_chunk(ly) + ly; /*cgetg could overwrite x!*/
   for (i = 2; i<lx; i++) *--y = *--x;
