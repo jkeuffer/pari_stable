@@ -78,6 +78,16 @@ static int did_init_matched = 0;
 #  endif
 #endif
 
+#ifdef HAS_RL_COMPLETION_MATCHES
+#  define COMPLETION_MATCHES ((CF)rl_completion_matches)
+#  define FILE_COMPLETION ((GF)rl_filename_completion_function)
+#  define USER_COMPLETION ((GF)rl_username_completion_function)
+#else
+#  define COMPLETION_MATCHES ((CF)completion_matches)
+#  define FILE_COMPLETION ((GF)filename_completion_function)
+#  define USER_COMPLETION ((GF)username_completion_function)
+#endif
+
 #define ELECTRIC_PAREN 1
 #define ARGS_COMPLETE  2
 static int
@@ -294,7 +304,7 @@ get_matches(int end, char *text, char* f(char*,int))
   rl_completion_append_character = ' ';
 #endif
   current_ep = NULL;
-  matches = ((CF) completion_matches)(text, (char *(*)())f);
+  matches = COMPLETION_MATCHES(text, (char *(*)())f);
   if (matches && !matches[1]) /* a single match */
   {
     if (add_paren(end))
@@ -462,8 +472,8 @@ pari_completion(char *text, int start, int end)
   {
     for(i=start+1;i<=end;i++)
       if (rl_line_buffer[i] == '/')
-	return get_matches(-1,text,(GF)filename_completion_function);
-    return get_matches(-1,text,(GF)username_completion_function);
+	return get_matches(-1,text,FILE_COMPLETION);
+    return get_matches(-1,text,USER_COMPLETION);
   }
 
   while (rl_line_buffer[first] && isspace((int)rl_line_buffer[first])) first++;
@@ -471,7 +481,7 @@ pari_completion(char *text, int start, int end)
   {
     case '\\':
       if (first == start) text = rl_line_buffer+start+1;
-      return get_matches(-1,text,(GF)filename_completion_function);
+      return get_matches(-1,text,FILE_COMPLETION);
     case '?':
       if (rl_line_buffer[first+1] == '?') add_help_keywords = 1;
       return get_matches(-1,text,command_generator);
@@ -502,7 +512,7 @@ pari_completion(char *text, int start, int end)
     if (iend - i >= 4)
     {
       if (strncmp(rl_line_buffer + i,"read",4) == 0)
-	return get_matches(-1,text,(GF)filename_completion_function);
+	return get_matches(-1,text,FILE_COMPLETION);
     }
 
     j = start + 1;
@@ -604,38 +614,43 @@ init_readline()
   rl_special_prefixes = "~";
 
   /* custom completer */
-#ifndef CPPFunction_defined
-#  define CPPFunction Function
+#ifndef HAS_RL_COMPLETION_FUNC_T
+# ifndef CPPFunction_defined
+#   define CPPFunction Function
+# endif
+# define rl_completion_func_t CPPFunction
 #endif
-  rl_attempted_completion_function = (CPPFunction *) pari_completion;
+  rl_attempted_completion_function = (rl_completion_func_t*) pari_completion;
 
   /* we always want the whole list of completions under emacs */
   if (under_emacs) rl_completion_query_items = 0x8fff;
 
-#define Bind ((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)
-#define Defun ((void(*)(const char*,Function*,int)) rl_add_defun)
+#define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
+  ((a), (Function*)(b), (c)))
+#define Defun(a,b,c) (((void(*)(const char*,Function*,int)) rl_add_defun)\
+  ((a), (Function*)(b), (c)))
 
-  Defun("short-help", (Function*) rl_short_help, -1);
-  Defun("long-help", (Function*) rl_long_help, -1);
-  Defun("pari-complete", (Function*) pari_rl_complete, '\t');
-  Defun("pari-matched-insert", (Function*) pari_rl_default_matched_insert, -1);
-  Defun("pari-forward-sexp", (Function*) pari_rl_forward_sexp, -1);
-  Defun("pari-backward-sexp", (Function*) pari_rl_backward_sexp, -1);
+  Defun("short-help", rl_short_help, -1);
+  Defun("long-help", rl_long_help, -1);
+  Defun("pari-complete", pari_rl_complete, '\t');
+  Defun("pari-matched-insert", pari_rl_default_matched_insert, -1);
+  Defun("pari-forward-sexp", pari_rl_forward_sexp, -1);
+  Defun("pari-backward-sexp", pari_rl_backward_sexp, -1);
 
-  Bind('h', (Function*) rl_short_help, emacs_meta_keymap);
-  Bind('H', (Function*) rl_long_help,  emacs_meta_keymap);
-  Bind('h', (Function*) rl_short_help, vi_movement_keymap);
-  Bind('H', (Function*) rl_long_help,  vi_movement_keymap);
-  Bind('(', (Function*) pari_rl_matched_insert, emacs_standard_keymap);
-  Bind('[', (Function*) pari_rl_matched_insert, emacs_standard_keymap);
-  Bind(6, (Function*) pari_rl_forward_sexp,  emacs_meta_keymap); /* M-C-f */
-  Bind(2, (Function*) pari_rl_backward_sexp, emacs_meta_keymap); /* M-C-b */
+  Bind('h', rl_short_help, emacs_meta_keymap);
+  Bind('H', rl_long_help,  emacs_meta_keymap);
+  Bind('h', rl_short_help, vi_movement_keymap);
+  Bind('H', rl_long_help,  vi_movement_keymap);
+  Bind('(', pari_rl_matched_insert, emacs_standard_keymap);
+  Bind('[', pari_rl_matched_insert, emacs_standard_keymap);
+  Bind(6, pari_rl_forward_sexp,  emacs_meta_keymap); /* M-C-f */
+  Bind(2, pari_rl_backward_sexp, emacs_meta_keymap); /* M-C-b */
 
 #ifdef EMACS_DOS_KEYMAP
-  Bind(';', (Function*) rl_short_help, emacs_dos_keymap); /* F1 */
-  Bind('T', (Function*) rl_long_help,  emacs_dos_keymap); /* Shift-F1 */
-  Bind(155, (Function*) pari_rl_backward_sexp, emacs_dos_keymap); /* Alt-Left */
-  Bind(157, (Function*) pari_rl_forward_sexp,  emacs_dos_keymap); /* Alt-Right*/
+  Bind(';', rl_short_help, emacs_dos_keymap); /* F1 */
+  Bind('T', rl_long_help,  emacs_dos_keymap); /* Shift-F1 */
+  Bind(155, pari_rl_backward_sexp, emacs_dos_keymap); /* Alt-Left */
+  Bind(157, pari_rl_forward_sexp,  emacs_dos_keymap); /* Alt-Right*/
 #endif
 }
 #endif

@@ -91,6 +91,12 @@ EOT
   if test -n "$rl_message"; then
     echo '#define HAS_RL_MESSAGE' >> $file
   fi
+  if test -n "$rl_completion_matches"; then
+    echo '#define HAS_RL_COMPLETION_MATCHES' >> $file
+  fi
+  if test -n "$rl_completion_func_t"; then
+    echo '#define HAS_RL_COMPLETION_FUNC_T' >> $file
+  fi
   echo >> $file
 fi
 

@@ -548,6 +548,12 @@ if test "$optimization" != profiling; then
      ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
          if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
          if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
+         if (grep rl_completion_matches $x > /dev/null 2>&1); then
+           rl_completion_matches=yes;
+         fi
+         if (grep rl_completion_func_t $x > /dev/null 2>&1); then
+           rl_completion_func_t=yes;
+         fi
          if (grep "rl_refresh_line *()" $x > /dev/null 2>&1); then
            rl_refresh_line_oldproto=yes
          fi
@@ -1251,6 +1257,7 @@ for variable in\
   ranlib gzip zcat emacs perl ln_s make_sh exe_suff\
   readline readline_enabledp CPPF_defined rl_refresh_line_oldproto\
   rl_appendchar rl_save_prompt _rl_save_prompt rl_message\
+  rl_completion_matches rl_completion_func_t\
   RLINCLUDE RLLIBS\
   sizeof_long endian has_exp2\
   has_getrusage has_times has_ulong has_ftime has_strftime\
