@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 extern GEN u_FpM_deplin(GEN x, ulong p);
 extern GEN u_FpM_inv(GEN a, ulong p);
-extern long ideal_is_zk(GEN ideal,long N);
 extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
@@ -1393,7 +1392,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   }
 }
 
-/* x ideal, compute elements in 1+x whose sign matrix is invertible */
+/* x integral ideal, compute elements in 1+x whose sign matrix is invertible */
 GEN
 zarchstar(GEN nf,GEN x,GEN arch,long nba)
 {
@@ -1423,7 +1422,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
     y[2] = (long)_vec(_col(p1));
     y[3] = (long)gscalmat(gun,1); return y;
   }
-  zk = ideal_is_zk(x,N);
+  zk = gcmp1(gcoeff(x,1,1));
   genarch = cgetg(nba+1,t_VEC);
   mat = cgetg(nba+1,t_MAT); setlg(mat,2);
   for (i=1; i<=nba; i++) mat[i] = lgetg(nba+1, t_VECSMALL);

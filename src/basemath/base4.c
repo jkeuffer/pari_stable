@@ -91,23 +91,6 @@ idealtyp(GEN *ideal, GEN *arch)
   *ideal = x; return t;
 }
 
-/* Assume ideal in HNF form */
-long
-ideal_is_zk(GEN ideal,long N)
-{
-  long i,j, lx = lg(ideal);
-
-  if (typ(ideal) != t_MAT || lx==1) return 0;
-  N++; if (lx != N || lg(ideal[1]) != N) return 0;
-  for (i=1; i<N; i++)
-  {
-    if (!gcmp1(gcoeff(ideal,i,i))) return 0;
-    for (j=i+1; j<N; j++)
-      if (!gcmp0(gcoeff(ideal,i,j))) return 0;
-  }
-  return 1;
-}
-
 static GEN
 prime_to_ideal_aux(GEN nf, GEN vp)
 {
@@ -983,7 +966,7 @@ element_invmodideal(GEN nf, GEN x, GEN y)
   GEN v,p1,xh,yh;
 
   nf=checknf(nf); N=degpol(nf[1]);
-  if (ideal_is_zk(y,N)) return zerocol(N);
+  if (gcmp1(gcoeff(y,1,1))) return zerocol(N);
   i = lg(y);
   if (typ(y)!=t_MAT || i==1 || i != lg(y[1])) yh=idealhermite_aux(nf,y);
   else
