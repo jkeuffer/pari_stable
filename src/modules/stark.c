@@ -812,9 +812,8 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      GEN *gptr[2]; gptr[0] = (GEN*)&s; gptr[1] = (GEN*)&vB;
       if (DEBUGMEM > 1) err(warnmem,"ComputeArtinNumber");
-      gerepilemany(av2, gptr, 2);
+      gerepileall(av2, 2, &s, &vB);
     }
   }
 
