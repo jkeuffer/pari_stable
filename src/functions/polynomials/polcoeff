@@ -7,7 +7,6 @@ Help: polcoeff(x,s,{v}): coefficient of degree s of x, or the s-th component
  to the main variable if v is omitted, with respect to the variable v
  otherwise
 Description: 
- (pol, small):gen:parens:copy	(GEN)$(1)[$(2)+2]
- (gen, small):gen	polcoeff0($1, $2, -1)
- (gen, small, var):gen	polcoeff0($1, $2, -1)
+ (pol, 0):gen:copy      constant_term($1)
+ (gen, small, ?var):gen polcoeff0($1, $2, $3)
 
