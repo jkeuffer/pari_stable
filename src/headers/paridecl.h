@@ -239,6 +239,7 @@ GEN     coredisc(GEN n);
 GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
 GEN     decomp(GEN n);
+GEN     decomp_primary_small(long n);
 GEN     divisors(GEN n);
 GEN     factorint(GEN n, long flag);
 GEN     gbigomega(GEN n);
@@ -371,7 +372,6 @@ GEN     rnfsimplifybasis(GEN bnf, GEN order);
 GEN     rnfsteinitz(GEN nf, GEN order);
 GEN     smallbase(GEN x, GEN *y);
 GEN     smalldiscf(GEN x);
-GEN     subcyclo(GEN p, GEN d, int n);
 
 /* base3.c */
 
@@ -792,7 +792,6 @@ GEN     galoisfixedfield(GEN gal, GEN v, long flag, long y);
 GEN     galoisinit(GEN nf, GEN den, long karma);
 GEN     galoisisabelian(GEN gal, long flag);
 GEN     galoispermtopol(GEN gal, GEN perm);
-GEN     galoissubcyclo(long n, GEN H, GEN Z, long v, long flag);
 GEN     galoissubgroups(GEN G);
 GEN     galoissubfields(GEN G, long flag, long v);
 long    numberofconjugates(GEN T, long pdepart);
@@ -1276,6 +1275,11 @@ ulong   u_invmod(ulong x, ulong p);
 int     isrealappr(GEN x, long l);
 GEN     roots(GEN x,long l);
 GEN     roots0(GEN x,long flag,long l);
+
+/*subcyclo.c */
+
+GEN     galoissubcyclo(long n, GEN H, GEN Z, long v, long flag);
+GEN     subcyclo(long n, long d, long v);
 
 /* subfields.c */
 
