@@ -439,7 +439,8 @@ GEN
 readseq(char *c, int strict)
 {
   GEN z;
-  check_new_fun=NULL; skipping_fun_def=0;
+  check_new_fun = NULL;
+  skipping_fun_def = 0;
   added_newline = 1;
   doskipseq(c, strict);
   z = lisseq0(c, seq);
@@ -523,6 +524,7 @@ free_args(gp_args *f)
   GEN *y = f->arg;
   for (i = f->narg + f->nloc - 1; i>=0; i--)
     if (isclone(y[i])) gunclone(y[i]);
+  free((void*)f);
 }
 
 void
@@ -538,10 +540,9 @@ freeep(entree *ep)
   {
     switch(EpVALENCE(ep))
     {
-      case EpVAR: case EpGVAR: break;
+      case EpVAR: case EpGVAR: free((void*)ep->args); break;
       default: free_args((gp_args*)ep->args);
     }
-    free((void*)ep->args);
   }
   free(ep);
 }
@@ -2249,8 +2250,7 @@ identifier(void)
       analyseur = ch1-1; /* points to '(' */
 
       free_args((gp_args*)ep->args);
-      free(ep->args); ep->args = NULL;
-      ep->valence = EpNEW;
+      ep->args = NULL;
     /* Fall through */
 
     case EpNEW: /* new function */
