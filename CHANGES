@@ -61,6 +61,7 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
    14- typos in qfsign/qfgaussred() [ aka sqred2 ]: wrong results: e.g
        qfsign([0, -1, 1, 1; -1, 0, 0, 1; 1, 0, 0, -1; 1, 1, -1, 0]) --> [2,2]
        ( should be [2,1] )
+   15- numbpart(0) --> 0 [ should be 1 ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
