@@ -1270,6 +1270,7 @@ real_relations(long need, long *pc, long lim, ulong LIMC, GEN mat, GEN C)
   pari_sp av, av1, limstack;
   GEN d, col, form, form0, form1, ex = cgetg(lgsub, t_VECSMALL);
 
+  if (lim > need) lim = need;
   av = avma; limstack = stack_lim(av,1);
   for(;;)
   {
