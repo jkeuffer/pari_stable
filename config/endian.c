@@ -1,3 +1,4 @@
+#include <stdio.h>
 main()
 {
   if (sizeof(long) == 4)
