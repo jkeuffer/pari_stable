@@ -2081,7 +2081,8 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
     {
       U = (GEN)extendedgcd(im)[2];
       setlg(U, lg(U)-1); /* remove last column */
-      x = gmul(greal(x), U);
+      x = greal(x); settyp(x, t_VEC);
+      x = gmul(x, U);
       if (n == 2) /* x has a single component */
         return gcmp0((GEN)x[1])? (GEN)U[1]: cgetg(1, t_COL);
     }
