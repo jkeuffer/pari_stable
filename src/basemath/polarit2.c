@@ -3482,20 +3482,28 @@ GEN FpM(GEN z, GEN p);
 GEN polpol_to_mat(GEN v, long n);
 GEN mat_to_polpol(GEN x, long v, long w);
 
+static 
+GEN to_frac(GEN a, GEN b)
+{
+  GEN f = cgetg(3, t_FRAC);
+  f[1] = (long)a;
+  f[2] = (long)b; return f;
+}
+
 /* compute rational lifting for all the components of M modulo mod.
  * If one components fails, return NULL.
  * See ratlift.
  * If denom is not NULL, check that the denominators divide denom
  * 
  * FIXME: NOT stack clean ! a & b stay on the stack.
- * If we suppose mod and denome coprime, then a and b are coprime
+ * If we suppose mod and denom coprime, then a and b are coprime
  * so we can do a cgetg(t_FRAC).
  */
-GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
+GEN
+matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
 {
   ulong ltop = avma;
-  GEN N;
-  GEN a, b;
+  GEN N, a, b;
   long l2, l3;
   long i, j;
   if (typ(M)!=t_MAT) err(typeer,"matratlift");
@@ -3506,39 +3514,32 @@ GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
     N[j] = lgetg(l3 + 1, t_COL);
     for (i = 1; i <= l3; ++i)
     {
-      if (ratlift(gcoeff(M,i,j), mod, &a, &b, amax, bmax)
-	  && (!denom || gcmp0(modii(denom,b))))
-	coeff(N, i, j) = ldiv(a, b);
-      else
-      {
-	avma=ltop;
-	return NULL;
-      }
+      if (!ratlift(gcoeff(M,i,j), mod, &a, &b, amax, bmax)
+	 || (denom && !divise(denom,b))
+         || !gcmp1(mppgcd(a,b))) { avma = ltop; return NULL; }
+      coeff(N, i, j) = (long)to_frac(a, b);
     }
   }
   return N;
 }
-GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
+
+GEN
+polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
 {
   ulong ltop = avma;
-  GEN Q;
-  GEN a, b;
-  long l2;
-  long j;
+  GEN Q,a,b,t;
+  long l2, j;
   if (typ(P)!=t_POL) err(typeer,"polratlift");
   l2 = lg(P);
-  Q = cgetg(l2, t_POL);
-  Q[1]=P[1];
+  Q = cgetg(l2, t_POL); Q[1] = P[1];
   for (j = 2; j < l2; ++j)
   {
-      if (ratlift((GEN) P[j], mod, &a, &b, amax, bmax)
-          && (!denom || gcmp0(modii(denom,b))))
-        Q[j] = ldiv(a, b);
-      else
-      {
-        avma=ltop;
-        return NULL;
-      }
+    t = (GEN)P[j];
+    if (signe(t) < 0) t = addii(t, mod);
+    if (!ratlift(t, mod, &a, &b, amax, bmax)
+        || (denom && !divise(denom,b))
+        || !gcmp1(mppgcd(a,b))) { avma=ltop; return NULL; }
+    Q[j] = (long)to_frac(a,b);
   }
   return Q;
 }
