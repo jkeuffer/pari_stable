@@ -709,7 +709,7 @@ ggval(GEN x, GEN p)
 	  }
 	  avma = av; return val;
 	}
-	if (vx > v) return 0;
+	if (varncmp(vx, v) > 0) return 0;
       }
       else if (tp!=t_INT) break;
       i=2; while (isexactzero((GEN)x[i])) i++;
@@ -719,7 +719,7 @@ ggval(GEN x, GEN p)
       if (tp!=t_POL && tp!=t_SER && tp!=t_INT) break;
       v=gvar(p); vx=varn(x);
       if (vx==v) return (long)(valp(x)/ggval(p,polx[v]));
-      if (vx>v) return 0;
+      if (varncmp(vx, v) > 0) return 0;
       return minval(x,p,2,lg(x));
 
     case t_FRAC: case t_FRACN: case t_RFRAC: case t_RFRACN:
@@ -1464,7 +1464,7 @@ gaffect(GEN x, GEN y)
       switch(ty)
       {
 	case t_POL:
-	  vy=varn(y); if (vy>v) err(operf,"",x,y);
+	  vy=varn(y); if (varncmp(vy, v) > 0) err(operf,"",x,y);
 	  if (vy==v)
 	  {
 	    if (lx>ly) err(operi,"",x,y);
@@ -1480,7 +1480,7 @@ gaffect(GEN x, GEN y)
 	  break;
 	
 	case t_SER:
-	  vy=varn(y); if (vy>v) err(operf,"",x,y);
+	  vy=varn(y); if (varncmp(vy, v) > 0) err(operf,"",x,y);
 	  if (!signe(x)) { gaffsg(0,y); return; }
 	  if (vy==v)
 	  {
@@ -1512,7 +1512,7 @@ gaffect(GEN x, GEN y)
 
     case t_SER:
       if (ty!=t_SER) err(operf,"",x,y);
-      v=varn(x); vy=varn(y); if (vy>v) err(operf,"",x,y);
+      v=varn(x); vy=varn(y); if (varncmp(vy, v) > 0) err(operf,"",x,y);
       if (vy==v)
       {
 	y[1]=x[1]; k=lx; if (k>ly) k=ly;

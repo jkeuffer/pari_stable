@@ -86,7 +86,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
   if (tx!=t_POL || ty!=t_POL) err(typeer,"euclidean division (poldivrem)");
 
   vx=varn(x);
-  if (vx<vy)
+  if (varncmp(vx, vy) < 0)
   {
     if (pr && pr != ONLY_DIVIDES)
     {
@@ -118,7 +118,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
     return f(x, constant_term(y));
   }
   dx = degpol(x);
-  if (vx>vy || dx<dy)
+  if (varncmp(vx, vy) > 0 || dx<dy)
   {
     if (pr)
     {
@@ -1964,8 +1964,8 @@ cmp_padic(GEN x, GEN y)
   if (y == gzero) return  1;
   vx = valp(x);
   vy = valp(y);
-  if (vx < vy) return  1;
-  if (vx > vy) return -1;
+  if (varncmp(vx, vy) < 0) return  1;
+  if (varncmp(vx, vy) > 0) return -1;
   return cmpii((GEN)x[4], (GEN)y[4]);
 }
 
@@ -2495,7 +2495,7 @@ factmod9(GEN f, GEN p, GEN T)
 
   if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
   va = varn(T);
-  if (va <= varn(f))
+  if (varncmp(va, varn(f)) <= 0)
     err(talker,"polynomial variable must have higher priority in factorff");
   unfp = gmodulsg(1,p); T = gmul(unfp,T);
   unfq = gmodulo(gmul(unfp,polun[va]), T);

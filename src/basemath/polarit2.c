@@ -1598,13 +1598,13 @@ gdeflate(GEN x, long v, long d)
   {
     long vx = varn(x);
     pari_sp av;
-    if (vx < v)
+    if (varncmp(vx, v) < 0)
     {
       lx = lg(x); z = cgetg(lx, tx); z[1] = x[1];
       for (i=2; i<lx; i++) z[i] = (long)gdeflate((GEN)x[i],v,d);
       return z;
     }
-    if (vx > v) return gcopy(x);
+    if (varncmp(vx, v) > 0) return gcopy(x);
     av = avma;
     if (tx == t_SER)
     {
@@ -2758,8 +2758,8 @@ ggcd(GEN x, GEN y)
   }
 
   vx = gvar9(x); vy = gvar9(y);
-  if (vy<vx) return cont_gcd(y,x);
-  if (vx<vy) return cont_gcd(x,y);
+  if (varncmp(vy, vx) < 0) return cont_gcd(y,x);
+  if (varncmp(vx, vy) < 0) return cont_gcd(x,y);
   switch(tx)
   {
     case t_POLMOD:
@@ -3045,7 +3045,7 @@ polinvmod(GEN x, GEN y)
 
   while (vx!=vy)
   {
-    if (vx > vy)
+    if (varncmp(vx,vy) > 0)
     {
       d=cgetg(3,t_RFRAC);
       d[1]=(long)polun[vx];
@@ -3131,8 +3131,8 @@ content(GEN x)
     {
       GEN n = (GEN)x[1], d = (GEN)x[2];
       long vn = gvar9(n), vd = gvar9(d);
-      if (vn < vd) return ginv(d);
-      if (vn > vd) return gcopy(n);
+      if (varncmp(vn, vd) < 0) return ginv(d);
+      if (varncmp(vn, vd) > 0) return gcopy(n);
       return gerepileupto(av, gdiv(content(n), content(d)));
     }
 

@@ -62,7 +62,7 @@ op_polmod(GEN f(GEN,GEN), GEN x, GEN y, long tx)
       long vx=varn(k), vy=varn(l);
       if (vx==vy) { mod=srgcd(k,l); x=(GEN)x[2]; y=(GEN)y[2]; }
       else
-        if (vx<vy) { mod=cpifstack(k); x=(GEN)x[2]; }
+        if (varncmp(vx, vy) < 0) { mod=cpifstack(k); x=(GEN)x[2]; }
         else       { mod=cpifstack(l); y=(GEN)y[2]; }
     }
   }
@@ -124,16 +124,16 @@ gred_rfrac2_i(GEN n, GEN d)
   if (ty!=t_POL)
   {
     if (tx!=t_POL) return gred_rfrac_copy(n,d);
-    if (gvar2(d) > varn(n)) return gdiv(n,d);
+    if (varncmp(gvar2(d), varn(n)) > 0) return gdiv(n,d);
     err(talker,"incompatible variables in gred");
   }
   if (tx!=t_POL)
   {
-    if (varn(d) < gvar2(n)) return gred_rfrac_simple(n,d);
+    if (varncmp(varn(d), gvar2(n)) < 0) return gred_rfrac_simple(n,d);
     err(talker,"incompatible variables in gred");
   }
-  if (varn(d) < varn(n)) return gred_rfrac_simple(n,d);
-  if (varn(d) > varn(n)) return gdiv(n,d);
+  if (varncmp(varn(d), varn(n)) < 0) return gred_rfrac_simple(n,d);
+  if (varncmp(varn(d), varn(n)) > 0) return gdiv(n,d);
 
   /* now n and d are polynomials with the same variable */
   cd = content(d); if (!gcmp1(cd)) d = gdiv(d,cd);
@@ -712,11 +712,11 @@ gadd(GEN x, GEN y)
   }
 
   vx=gvar(x); vy=gvar(y);
-  if (vx<vy || (vx==vy && tx>ty)) { swap(x,y); lswap(tx,ty); lswap(vx,vy); }
+  if (varncmp(vx, vy) < 0 || (vx==vy && tx>ty)) { swap(x,y); lswap(tx,ty); lswap(vx,vy); }
   if (ty==t_POLMOD) return op_polmod(gadd,x,y,tx);
 
-  /* here !isscalar(y) and vx >= vy */
-  if ( (vx>vy && (!is_matvec_t(tx) || !is_matvec_t(ty)))
+  /* here !isscalar(y) and vx >>= vy */
+  if ( (varncmp(vx, vy) > 0 && (!is_matvec_t(tx) || !is_matvec_t(ty)))
     || (vx==vy && is_scalar_t(tx)) )
   {
     if (tx == t_POLMOD && vx == vy && ty != t_SER)
@@ -907,10 +907,10 @@ fix_rfrac_if_pol(GEN x, GEN y)
   if (gcmp1(y)) { avma = av; return x; }
   if (typ(y) != t_POL)
   {
-    if (typ(x) != t_POL || gvar2(y) > varn(x))
+    if (typ(x) != t_POL || varncmp(gvar2(y), varn(x)) > 0)
       return gdiv(x,y);
   }
-  else if (varn(y) > varn(x)) return gdiv(x,y);
+  else if (varncmp(varn(y), varn(x)) > 0) return gdiv(x,y);
   avma = av; return NULL;
 }
 
@@ -940,7 +940,7 @@ mulscalrfrac(GEN x, GEN y)
   vn = gvar(n);
   vd = gvar(d);
   z = cgetg(3, t_RFRAC);
-  if (vx > min(vd,vn)) { cx = x; x = gun; }
+  if (varncmp(vx, vd) > 0 || varncmp(vx, vn) > 0) { cx = x; x = gun; }
   else
   {
     long td;
@@ -1391,7 +1391,7 @@ gmul(GEN x, GEN y)
 
   vx=gvar(x); vy=gvar(y);
   if (!is_matvec_t(ty))
-    if (is_matvec_t(tx) || vx<vy || (vx==vy && tx>ty)) {
+    if (is_matvec_t(tx) || varncmp(vx, vy) < 0 || (vx==vy && tx>ty)) {
       swap(x,y);
       lswap(tx,ty);
       lswap(vx,vy);
@@ -1476,7 +1476,7 @@ gmul(GEN x, GEN y)
   }
   /* now !ismatvec(x and y) */
 
-  if (vx>vy || (vx==vy && is_scalar_t(tx)))
+  if (varncmp(vx, vy) > 0 || (vx==vy && is_scalar_t(tx)))
   {
     if (isexactzero(x))
     {
@@ -2115,7 +2115,7 @@ gdiv(GEN x, GEN y)
     av = avma;
     return gerepileupto(av, gmul(x, ginv(y)));
   }
-  if (tx == t_POLMOD && vx<=vy)
+  if (tx == t_POLMOD && varncmp(vx, vy) <= 0)
   {
     av = avma;
     if (vx == vy)
@@ -2132,7 +2132,7 @@ gdiv(GEN x, GEN y)
   /* now x and y are not both is_scalar_t */
 
   lx = lg(x);
-  if ((vx<vy && (!is_matvec_t(tx) || !is_matvec_t(ty)))
+  if ((varncmp(vx, vy) < 0 && (!is_matvec_t(tx) || !is_matvec_t(ty)))
      || (vx==vy && is_scalar_t(ty)) || (is_matvec_t(tx) && !is_matvec_t(ty)))
   {
     if (tx == t_RFRAC) return divrfracscal(x,y);
@@ -2153,7 +2153,7 @@ gdiv(GEN x, GEN y)
   }
 
   ly = lg(y);
-  if (vy<vx || (vy==vx && is_scalar_t(tx)))
+  if (varncmp(vy, vx) < 0 || (vy==vx && is_scalar_t(tx)))
   {
     switch(ty)
     {

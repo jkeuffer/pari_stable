@@ -122,7 +122,7 @@ unifpol0(GEN nf,GEN x,long flag)
 GEN
 unifpol(GEN nf, GEN x, long flag)
 {
-  if (typ(x)==t_POL && varn(x) < varn(nf[1]))
+  if (typ(x)==t_POL && varncmp(varn(x), varn(nf[1])) < 0)
   {
     long i, d = lg(x);
     GEN y = cgetg(d,t_POL); y[1] = x[1];
@@ -161,7 +161,7 @@ nffactormod(GEN nf, GEN x, GEN pr)
   nf = checknf(nf);
   vn = varn((GEN)nf[1]);
   if (typ(x)!=t_POL) err(typeer,"nffactormod");
-  if (vx >= vn)
+  if (varncmp(vx,vn) >= 0)
     err(talker,"polynomial variable must have highest priority in nffactormod");
 
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
@@ -200,7 +200,7 @@ nfroots(GEN nf,GEN pol)
 
   nf = checknf(nf); T = (GEN)nf[1];
   if (typ(pol) != t_POL) err(notpoler,"nfroots");
-  if (varn(pol) >= varn(T))
+  if (varncmp(varn(pol), varn(T)) >= 0)
     err(talker,"polynomial variable must have highest priority in nfroots");
   d = degpol(pol);
   if (d == 0) return cgetg(1,t_VEC);
@@ -307,7 +307,7 @@ nffactor(GEN nf,GEN pol)
   if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   nf = checknf(nf); T = (GEN)nf[1];
   if (typ(pol) != t_POL) err(notpoler,"nffactor");
-  if (varn(pol) >= varn(T))
+  if (varncmp(varn(pol), varn(T)) >= 0)
     err(talker,"polynomial variable must have highest priority in nffactor");
 
   if (d == 0) return trivfact();
@@ -1601,7 +1601,7 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
   if (typ(alpha) != t_POL || varn(alpha) == vnf)
     return gerepileupto(av, gpowgs(gsub(polx[v], alpha), lT - 3));
   vT = varn(T);
-  if (varn(alpha) != vT || v >= vnf)
+  if (varn(alpha) != vT || varncmp(v, vnf)>=0)
     err(talker,"incorrect variables in rnfcharpoly");
   if (lg(alpha) >= lT) alpha = gmod(alpha,T);
   if (lT <= 4)

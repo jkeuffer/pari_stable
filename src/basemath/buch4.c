@@ -722,7 +722,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 
   relpol = get_bnfpol(relpol, &rel, &nfrel);
   drel = degpol(relpol);
-  if (varn(relpol) >= varn(T))
+  if (varncmp(varn(relpol), varn(T)) >= 0)
     err(talker,"main variable must be of higher priority in rnfisnorminit");
 
   rnfeq = NULL; /* no reltoabs needed */

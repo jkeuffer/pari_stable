@@ -3065,7 +3065,7 @@ Flyx_subres(GEN u, GEN v, ulong p)
 }
 
 /* return a t_POL (in variable v) whose coeffs are the coeffs of b,
- * in variable v. This is an incorrect PARI object if initially varn(b) < v.
+ * in variable v. This is an incorrect PARI object if initially varn(b) << v.
  * We could return a vector of coeffs, but it is convenient to have degpol()
  * and friends available. Even in that case, it will behave nicely with all
  * functions treating a polynomial as a vector of coeffs (eg poleval). 
@@ -3080,7 +3080,7 @@ swap_vars(GEN b0, long v)
   return b;
 }
 
-/* assume varn(b) < varn(a) */
+/* assume varn(b) << varn(a) */
 GEN
 FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
 {
@@ -3153,7 +3153,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   ulong bound, p, dp;
   pari_sp av = avma, av2 = 0, lim;
   long i,n, lb, degA = degpol(A), dres = degA*degpol(B0);
-  long vX = varn(B0), vY = varn(A); /* assume vX < vY */
+  long vX = varn(B0), vY = varn(A); /* assume vX << vY */
   GEN x, y, dglist, dB, B, q, a, b, ev, H, H0, H1, Hp, H0p, H1p, C0, C1, L;
   byteptr d = init_modular(&p);
 

@@ -139,3 +139,6 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define varn(x)       ((long)((((ulong*)(x))[1]&VARNBITS) >> VARNSHIFT))
 #define setvarn(x,s)  (((ulong*)(x))[1]=\
 		       (((ulong*)(x))[1]&(~VARNBITS)) | (ulong)evalvarn(s))
+
+#define varncmp(x,y)  ((x)-(y))
+

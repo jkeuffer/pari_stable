@@ -2968,7 +2968,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
       {
         GEN z = RXQX_rem(gmul((GEN)Waa[i],(GEN)Waa[j]), pol, nfT);
         long tz = typ(z);
-        if (is_scalar_t(tz) || (tz == t_POL && varn(z) > vpol))
+          if (is_scalar_t(tz) || (tz == t_POL && varncmp(varn(z), vpol) > 0))
           z = gmul(z, (GEN)Wainv[1]);
         else
           z = mulmat_pol(Wainv, z);
@@ -3060,7 +3060,7 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
 {
   GEN xnf = (typ(nf) == t_POL)? nf: (GEN)nf[1];
   long i, vnf = varn(xnf), lx = lg(x);
-  if (typ(x) != t_POL || varn(x) >= vnf)
+  if (typ(x) != t_POL || varncmp(varn(x), vnf) >= 0)
     err(talker,"incorrect polynomial in rnf function");
   x = dummycopy(x);
   for (i=2; i<lx; i++)
@@ -3103,7 +3103,7 @@ get_d(GEN nf, GEN pol, GEN A)
 
 /* nf = base field K
  * pol= monic polynomial, coefficients in Z_K, defining a relative
- *   extension L = K[X]/(pol). One MUST have varn(pol) < varn(nf[1]).
+ *   extension L = K[X]/(pol). One MUST have varn(pol) << varn(nf[1]).
  * Returns a pseudo-basis [A,I] of Z_L, set (D,d) to the relative
  * discriminant, and f to the index-ideal */
 GEN

@@ -707,7 +707,7 @@ gmod(GEN x, GEN y)
     case t_POL:
       if (is_scalar_t(tx))
       {
-        if (tx!=t_POLMOD || varn(x[1]) > varn(y))
+        if (tx!=t_POLMOD || varncmp(varn(x[1]), varn(y)) > 0)
           return degpol(y)? gcopy(x): gzero;
 	if (varn(x[1])!=varn(y)) return gzero;
         z=cgetg(3,t_POLMOD);
@@ -769,7 +769,7 @@ static GEN
 specialmod(GEN x, GEN y)
 {
   GEN z = gmod(x,y);
-  if (gvar(z) < varn(y)) z = gzero;
+  if (varncmp(gvar(z), varn(y)) < 0) z = gzero;
   return z;
 }
 
@@ -1402,7 +1402,7 @@ gsubst(GEN x, long v, GEN y)
     p2=gsubst((GEN)x[2],v,y); vy=gvar(p2);
     if (typ(p1)!=t_POL)
       err(talker,"forbidden substitution in a scalar type");
-    if (vy>=vx)
+    if (varncmp(vy, vx) >= 0)
     {
       tetpil=avma;
       return gerepile(av,tetpil,gmodulcp(p2,p1));
@@ -1419,9 +1419,9 @@ gsubst(GEN x, long v, GEN y)
         return (ty==t_MAT)? gscalmat(gzero,ly-1): gzero;
 
       vx = varn(x);
-      if (vx < v)
+      if (varncmp(vx, v) < 0)
       {
-        if (gvar(y) > vx)
+        if (varncmp(gvar(y), vx) > 0)
         { /* easy special case */
           z = cgetg(lx, t_POL); z[1] = x[1];
           for (i=2; i<lx; i++) z[i] = lsubst((GEN)x[i],v,y);
@@ -1434,9 +1434,9 @@ gsubst(GEN x, long v, GEN y)
       }
       /* v <= vx */
       if (ty!=t_MAT)
-        return (vx > v)? gcopy(x): poleval(x,y);
+        return varncmp(vx,v) > 0 ? gcopy(x): poleval(x,y);
 
-      if (vx > v) return gscalmat(x,ly-1);
+      if (varncmp(vx, v) > 0) return gscalmat(x,ly-1);
       if (lx==3) return gscalmat((GEN)x[2],ly-1);
       av=avma; z=(GEN)x[lx-1];
       for (i=lx-1; i>2; i--) z=gaddmat((GEN)x[i-1],gmul(z,y));
@@ -1444,9 +1444,9 @@ gsubst(GEN x, long v, GEN y)
 
     case t_SER:
       vx = varn(x);
-      if (vx > v) return (ty==t_MAT)? gscalmat(x,ly-1): gcopy(x);
+      if (varncmp(vx, v) > 0) return (ty==t_MAT)? gscalmat(x,ly-1): gcopy(x);
       ex = valp(x);
-      if (vx < v)
+      if (varncmp(vx, v) < 0)
       {
         if (!signe(x)) return gcopy(x);
         /* FIXME: improve this */
@@ -1653,8 +1653,8 @@ deriv(GEN x, long v)
       y[2]=lderiv((GEN)x[2],v); return y;
 
     case t_POL:
-      vx=varn(x); if (vx>v) return gzero;
-      if (vx<v)
+      vx=varn(x); if (varncmp(vx, v) > 0) return gzero;
+      if (varncmp(vx, v) < 0)
       {
         lx = lg(x); y = cgetg(lx,t_POL);
         for (i=2; i<lx; i++) y[i] = lderiv((GEN)x[i],v);
@@ -1664,8 +1664,8 @@ deriv(GEN x, long v)
       return derivpol(x);
 
     case t_SER:
-      vx=varn(x); if (vx>v) return gzero;
-      if (vx<v)
+      vx=varn(x); if (varncmp(vx, v) > 0) return gzero;
+      if (varncmp(vx, v) < 0)
       {
         if (!signe(x)) return gcopy(x);
         lx=lg(x); e=valp(x);
@@ -1745,14 +1745,14 @@ integ(GEN x, long v)
     case t_POL:
       vx=varn(x); lx=lg(x);
       if (lx==2) return zeropol(min(v,vx));
-      if (vx>v)
+      if (varncmp(vx, v) > 0)
       {
         y=cgetg(4,t_POL);
 	y[1] = x[1];
         y[2] = zero;
         y[3] = lcopy(x); return y;
       }
-      if (vx<v) return triv_integ(x,v,tx,lx);
+      if (varncmp(vx, v) < 0) return triv_integ(x,v,tx,lx);
       y = cgetg(lx+1,tx); y[1] = x[1]; y[2] = zero;
       for (i=3; i<=lx; i++) y[i] = ldivgs((GEN)x[i-1],i-2);
       return y;
@@ -1761,16 +1761,16 @@ integ(GEN x, long v)
       lx=lg(x); e=valp(x); vx=varn(x);
       if (!signe(x))
       {
-        if (vx == v) e++; else if (vx < v) v = vx;
+        if (vx == v) e++; else if (varncmp(vx, v) < 0) v = vx;
         return zeroser(v,e);
       }
-      if (vx>v)
+      if (varncmp(vx, v) > 0)
       {
         y = cgetg(4,t_POL);
         y[1] = evalvarn(v) | evalsigne(1);
         y[2]=zero; y[3]=lcopy(x); return y;
       }
-      if (vx<v) return triv_integ(x,v,tx,lx);
+      if (varncmp(vx, v) < 0) return triv_integ(x,v,tx,lx);
       y=cgetg(lx,tx);
       for (i=2; i<lx; i++)
       {
@@ -1786,14 +1786,14 @@ integ(GEN x, long v)
 
     case t_RFRAC: case t_RFRACN:
       vx = gvar(x);
-      if (vx>v)
+      if (varncmp(vx, v) > 0)
       {
 	y=cgetg(4,t_POL);
 	y[1] = signe(x[1])? evalvarn(v) | evalsigne(1)
 	                  : evalvarn(v);
         y[2]=zero; y[3]=lcopy(x); return y;
       }
-      if (vx<v)
+      if (varncmp(vx, v) < 0)
       {
 	p1=cgetg(v+2,t_VEC);
 	for (i=0; i<vx; i++)   p1[i+1] = lpolx[i];
@@ -2380,8 +2380,8 @@ poltoser(GEN x, long v, long prec)
   GEN y;
 
   if (gcmp0(x)) return zeroser(v, prec);
-  if (is_scalar_t(tx) || vx > v) return scalarser(x, v, prec);
-  if (vx < v) return coefstoser(x, v, prec);
+  if (is_scalar_t(tx) || varncmp(vx, v) > 0) return scalarser(x, v, prec);
+  if (varncmp(vx, v) < 0) return coefstoser(x, v, prec);
 
   lx = lg(x); i = 2; while (i<lx && gcmp0((GEN)x[i])) i++;
   l = lx-i; if (precdl > (ulong)l) l = (long)precdl;
@@ -2424,8 +2424,8 @@ _gtoser(GEN x, long v, long prec)
   if (tx == t_SER)
   {
     long vx = varn(x);
-    if      (vx < v) y = coefstoser(x, v, prec);
-    else if (vx > v) y = scalarser(x, v, prec);
+    if      (varncmp(vx, v) < 0) y = coefstoser(x, v, prec);
+    else if (varncmp(vx, v) > 0) y = scalarser(x, v, prec);
     else y = gcopy(x);
     return y;
   }
