@@ -454,6 +454,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
   push_val(ep, v);
   while (v) {
     pari_sp av2 = avma; lisseq_void(c); avma = av2;
+    if (loop_break()) break;
     v = next(D, v);
   }
   pop_val(ep); avma = av;
