@@ -256,6 +256,7 @@ sub apropos_check
   return if (! /$help/);
 
   $_ = $current;
+  s/\\b{(.)}/\\$1/;
   s/\{\}//g; s/\}.*//;
   s/\\pow/^/; s/\\%/%/; s/\\bs/\\/; s/\\\#/\#/g;
   s,\+\$/\$-,+/-,;

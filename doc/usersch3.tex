@@ -53,7 +53,7 @@ of the others were (that is, they were set to 0). This will usually be
 announced as ``The binary digits of $\fl$ mean 1: $p_0$, 2: $p_1$, 4:
 $p_2$'', and so on, using the available consecutive powers of~$2$.
 
-To finish with our generic simple-minded example, the {\it library\/} function
+To finish with our generic simple-minded example, the \var{library} function
 \kbd{foo}, as defined above, is seen to have two mandatory arguments,
 $x$ and \fl (no PARI mathematical function has been implemented so
 as to accept a variable number of arguments). When not mentioned otherwise,
@@ -110,7 +110,7 @@ and $y$. In addition to the impossibilities for multiplication, note that if
 the divisor is a matrix, it must be an invertible square matrix, and in that
 case the result is $x*y^{-1}$. Furthermore note that the result is as exact
 as possible: in particular, division of two integers always gives a rational
-number (which may be an integer if the quotient is exact) and {\it not\/} the
+number (which may be an integer if the quotient is exact) and \var{not} the
 Euclidean quotient (see $x$ \kbd{\bs} $y$ for that), and similarly the
 quotient of two polynomials is a rational function in general. To obtain the
 approximate real value of the quotient of two integers, add \kbd{0.} to the
@@ -192,7 +192,7 @@ integer the result is still an integer.
 The six standard \idx{comparison operators} \kbd{<=}, \kbd{<}, \kbd{>=},
 \kbd{>}, \kbd{==}, \kbd{!=} are available in GP, and in library mode under
 the names \teb{gle}, \teb{glt}, \teb{gge}, \teb{ggt}, \teb{geq}, \teb{gne}
-respectively. The library syntax is ${\it co}(x,y)$, where {\it co} is the
+respectively. The library syntax is $\var{co}(x,y)$, where \var{co} is the
 comparison operator. The result is 1 (as a \kbd{GEN}) if the comparison is
 true, 0 (as a \kbd{GEN}) if it is false.
 
@@ -215,14 +215,14 @@ not an exact object. To test whether $x$ is an exact object which is equal to
 zero, one must use $\teb{isexactzero}$.
 
 Also note that the \kbd{gcmp} and \kbd{gegal} functions return a C-integer,
-and {\it not\/} a \kbd{GEN} like \kbd{gle} etc.
+and \var{not} a \kbd{GEN} like \kbd{gle} etc.
 
 \smallskip
 GP accepts the following synonyms for some of the above functions: since
 there is no bitwise \kbd{and} or bitwise \kbd{or}, \kbd{|} and \kbd{\&} are
 accepted as\sidx{bitwise and}\sidx{bitwise or} synonyms of \kbd{||} and
 \kbd{\&\&} respectively. Also, \kbd{<>} is accepted as a synonym for
-\kbd{!=}. On the other hand, \kbd{=} is definitely {\it not\/} a synonym for
+\kbd{!=}. On the other hand, \kbd{=} is definitely \var{not} a synonym for
 \kbd{==} since it is the assignment statement.
 
 \subsecidx{lex}$(x,y)$: gives the result of a lexicographic comparison
@@ -310,7 +310,7 @@ i.e.~it chops off the $O(X^k)$. If $x$ is a vector, this function creates
 the polynomial whose coefficients are given in $x$, with $x[1]$ being the
 leading coefficient (which can be zero).
 
-Warning: this is {\it not\/} a substitution function. It is intended to be
+Warning: this is \var{not} a substitution function. It is intended to be
 quick and dirty. So if you try \kbd{Pol(a,y)} on the polynomial \kbd{a = x+y},
 you will get \kbd{y+y}, which is not a valid PARI object.
 
@@ -465,8 +465,8 @@ The third method is specific to vectors or matrices under GP. If $x$ is a
 component of $x$, i.e.~\kbd{compo(x,n)}. It is more natural and shorter to
 write. If $x$ is a matrix, \tet{x[m,n]} represents the coefficient of
 row \kbd{m} and column \kbd{n} of the matrix, \tet{x[m,]} represents
-the $m^{\text{th}}$ {\it row\/} of $x$, and \tet{x[,n]} represents
-the $n^{\text{th}}$ {\it column\/} of $x$.
+the $m^{\text{th}}$ \var{row} of $x$, and \tet{x[,n]} represents
+the $n^{\text{th}}$ \var{column} of $x$.
 
 Finally note that in library mode, the macros \teb{coeff} and \teb{mael}
 are available to deal with the non-recursivity of the \kbd{GEN} type from the
@@ -581,7 +581,7 @@ with a new precision $n$. This is to be understood as follows:
 For exact types, no change. For $x$ a vector or a matrix, the operation
 is done componentwise.
 
-For real $x$, $n$ is the number of desired significant {\it decimal} digits.
+For real $x$, $n$ is the number of desired significant \var{decimal} digits.
 If $n$ is smaller than the precision of $x$, $x$ is truncated, otherwise $x$
 is extended with zeros.
 
@@ -647,7 +647,7 @@ not for example a complex number of 0 imaginary part and integer real part
 tree representing the PARI object $x$.
 
 \syn{taille2}{x} which returns a \kbd{long}. The
-function \teb{taille} returns the number of {\it words} instead.
+function \teb{taille} returns the number of \var{words} instead.
 
 \subsecidx{sizedigit}$(x)$: outputs a quick bound for the number of decimal
 digits of (the components of) $x$, off by at most $1$. If you want the
@@ -698,7 +698,7 @@ library mode the function \kbd{gvar} is more appropriate.
 \syn{gpolvar}{x}. However, in library mode, this function should not be used.
 Instead, test whether $x$ is a $p$-adic (type \typ{PADIC}), in which case $p$
 is in $x[2]$, or call the function $\key{gvar}(x)$ which returns the variable
-{\it number\/} of $x$ if it exists, \kbd{BIGINT} otherwise.
+\var{number/} of $x$ if it exists, \kbd{BIGINT} otherwise.
 
 \section{Transcendental functions}\label{se:trans}
 
@@ -774,7 +774,7 @@ is one of the few special reserved names which cannot be used for variables
 (the others are \kbd{I} and \kbd{Pi}, as well as all function names).
 \label{se:euler}
 
-\syn{mpeuler}{\var{prec}} where $\var{prec}$ {\it must\/} be
+\syn{mpeuler}{\var{prec}} where $\var{prec}$ \var{must} be
 given. Note that this creates $\gamma$ on the PARI stack. If one does not
 want to create it on the stack but stash it for later use under the global
 name \teb{geuler} (with no parentheses), use instead
@@ -786,14 +786,14 @@ The library syntax is the global variable \kbd{gi} (of type \kbd{GEN}).
 
 \subsecidx{Pi}: the constant $\pi$ ($3.14159\cdots$).\label{se:pi}
 
-\syn{mppi}{\var{prec}} where $\var{prec}$ {\it must\/} be given.
+\syn{mppi}{\var{prec}} where $\var{prec}$ \var{must} be given.
 Note that this creates $\pi$ on the PARI stack. If one does not want to
 create it on the stack but stash it for later use under the global
 name \teb{gpi} (with no parentheses), use instead $\teb{constpi}(\var{prec})$.
 
 \subsecidx{abs}$(x)$: absolute value of $x$ (modulus if $x$ is complex).
 Polynomials, power series and rational functions are not allowed.
-Contrary to most transcendental functions, an integer is {\it not\/}
+Contrary to most transcendental functions, an integer is \var{not}
 converted to a real number before applying \kbd{abs}.
 
 \syn{gabs}{x,\var{prec}}.
@@ -1159,9 +1159,9 @@ The entries in $x$ are not checked for primality. They need only be positive
 integers not divisible by any of the pre-computed primes. It's in fact a nice
 trick to add composite numbers, which for example the function
 $\kbd{factor}(x,0)$ was not able to factor. In case the message ``impossible
-inverse modulo $\langle${\it some integermod}$\rangle$'' shows up afterwards,
+inverse modulo $\langle$\var{some integermod}$\rangle$'' shows up afterwards,
 you have just stumbled over a non-trivial factor. Note that the arithmetic
-functions in the narrow sense, like \teb{eulerphi}, do {\it not\/} use this
+functions in the narrow sense, like \teb{eulerphi}, do \var{not} use this
 extra table.
 
 The present PARI version \vers{} allows up to 100 user-specified
@@ -1325,7 +1325,7 @@ part is not necessarily prime. See \teb{factorint} for more information about
 the algorithms used.
 
    The polynomials or rational functions to be factored must have scalar
-coefficients. In particular PARI does {\it not\/} know how to factor
+coefficients. In particular PARI does \var{not} know how to factor
 multivariate polynomials.
 
    Note that PARI tries to guess in a sensible way over which ring you want to
@@ -1358,7 +1358,7 @@ the factored object. If a second argument $\var{nf}$ is supplied, $f$ is
 assumed to be a prime ideal factorization in the number field $\var{nf}$.
 The resulting ideal is given in HNF\sidx{Hermite normal form} form.
 
-\syn{factorback}{f,\var{nf\/}}, where an omitted
+\syn{factorback}{f,\var{nf}}, where an omitted
 $\var{nf}$ is entered as \kbd{NULL}.
 
 \subsecidx{factorcantor}$(x,p)$: factors the polynomial $x$ modulo the
@@ -1366,7 +1366,7 @@ prime $p$, using distinct degree plus
 \idx{Cantor-Zassenhaus}\sidx{Zassenhaus}. The coefficients of $x$ must be
 operation-compatible with $\Z/p\Z$. The result is a two-column matrix, the
 first column being the irreducible polynomials dividing $x$, and the second
-the exponents.  If you want only the {\it degrees\/} of the irreducible
+the exponents.  If you want only the \var{degrees} of the irreducible
 polynomials (for example for computing an $L$-function), use
 $\kbd{factormod}(x,p,1)$. Note that the \kbd{factormod} algorithm is
 usually faster than \kbd{factorcantor}.
@@ -1422,7 +1422,7 @@ us know.
 the prime integer $p$, using \idx{Berlekamp}. The coefficients of $x$ must be
 operation-compatible with $\Z/p\Z$. The result is a two-column matrix, the
 first column being the irreducible polynomials dividing $x$, and the second
-the exponents. If $\fl$ is non-zero, outputs only the {\it degrees} of the
+the exponents. If $\fl$ is non-zero, outputs only the \var{degrees} of the
 irreducible polynomials (for example, for computing an $L$-function). A
 different algorithm for computing the mod $p$ factorization is
 \kbd{factorcantor} which is sometimes faster.
@@ -1484,7 +1484,7 @@ should be used if $x$ is known to be of type integer.
 \subsecidx{issquare}$(x,\{\&n\})$: true (1) if $x$ is square, false (0) if
 not. $x$ can be of any type. If $n$ is given and an exact square root had to
 be computed in the checking process, puts that square root in $n$. This is in
-particular the case when $x$ is an integer or a polynomial. This is {\it not}
+particular the case when $x$ is an integer or a polynomial. This is \var{not}
 the case for intmods (use quadratic reciprocity) or series (only check the
 leading coefficient).
 
@@ -1625,7 +1625,7 @@ discriminant, $\lfloor \sqrt{D}\rfloor$, and $\sqrt{D}$ respectively
 (no checking is done of these facts). If $D<0$ these values are useless,
 and all references to Shanks's distance are irrelevant.
 
-\syn{qfbred0}{x,\fl,D,\var{isqrtD},\var{sqrtD\/}}. Use \kbd{NULL}
+\syn{qfbred0}{x,\fl,D,\var{isqrtD},\var{sqrtD}}. Use \kbd{NULL}
 to omit any of $D$, \var{isqrtD}, \var{sqrtD}.
 
 \noindent Also available are
@@ -1653,9 +1653,9 @@ right answer (a warning is issued). The more general function \tet{bnrinit}
 should be used to compute the class group of an order.
 
 This function should be used instead of \kbd{qfbclassno} or \kbd{quadregula}
-when $D<-10^{25}$, $D>10^{10}$, or when the {\it structure\/} is wanted.
+when $D<-10^{25}$, $D>10^{10}$, or when the \var{structure} is wanted.
 
-If $\fl$ is non-zero {\it and\/} $D>0$, computes the narrow class group and
+If $\fl$ is non-zero \var{and} $D>0$, computes the narrow class group and
 regulator, instead of the ordinary (or wide) ones. In the current version
 \vers, this doesn't work at all~: use the general function \tet{bnfnarrow}.
 
@@ -2133,7 +2133,7 @@ root number of the L-series of the elliptic curve $E$. Note that the global
 root number is the sign of the functional equation and conjecturally is the
 parity of the rank of the \idx{Mordell-Weil group}.
 The equation for $E$ must have
-coefficients in $\Q$ but need {\it not\/} be minimal.
+coefficients in $\Q$ but need \var{not} be minimal.
 
 \syn{ellrootno}{E,p} and the result (equal to $\pm1$) is a \kbd{long}.
 
@@ -2160,7 +2160,7 @@ satisfies the equation of the elliptic curve. Second, the differential
 $du/(2v+a_1u+a_3)$ is equal to $f(z)dz$, a differential form on
 $H/\Gamma_0(N)$ where $N$ is the conductor of the curve. The variable used in
 the power series for $u$ and $v$ is $x$, which is implicitly understood to be
-equal to $\exp(2i\pi z)$. It is assumed that the curve is a {\it strong\/}
+equal to $\exp(2i\pi z)$. It is assumed that the curve is a \var{strong}
 \idx{Weil curve}, and the Manin constant is equal to 1. The equation of
 the curve $E$ must be minimal (use \kbd{ellglobalred} to get a minimal
 equation).
@@ -2187,7 +2187,7 @@ If $\fl = 0$, use Doud's algorithm~: bound torsion by computing $\#E(\F_p)$
 for small primes of good reduction, then look for torsion points using
 Weierstrass parametrization (and Mazur's classification).
 
-If $\fl = 1$, use Lutz--Nagell ({\it much} slower), $E$ is allowed to be a
+If $\fl = 1$, use Lutz--Nagell (\var{much} slower), $E$ is allowed to be a
 medium vector.
 
 \syn{elltors0}{E,flag}.
@@ -2198,10 +2198,10 @@ Computes the value at $z$ of the Weierstrass $\wp$ function attached to the
 elliptic curve $E$ as given by \kbd{ellinit} (alternatively, $E$ can be
 given as a lattice $[\omega_1,\omega_2]$).
 
-If $z$ is omitted or is a simple variable, computes the {\it power
-series\/} expansion in $z$ (starting $z^{-2}+O(z^2)$). The number of terms
-to an {\it even\/} power in the expansion is the default serieslength in
-GP, and the second argument (C long integer) in library mode.
+If $z$ is omitted or is a simple variable, computes the \var{power series}
+expansion in $z$ (starting $z^{-2}+O(z^2)$). The number of terms to an
+\var{even} power in the expansion is the default serieslength in GP, and the
+second argument (C long integer) in library mode.
 
 Optional \fl\ is (for now) only taken into account when $z$ is numeric, and
 means 0: compute only $\wp(z)$, 1: compute $[\wp(z),\wp'(z)]$.
@@ -2253,18 +2253,18 @@ modulus.
 $\bullet$ $\var{\idx{rnf}}$ denotes a relative number field (see below).
 \smallskip
 
-$\bullet$ ${\it \idx{ideal}}$ can mean any of the following:
+$\bullet$ $\var{\idx{ideal}}$ can mean any of the following:
 
 \quad -- a $\Z$-basis, in \idx{Hermite normal form}
 (HNF) or not. In this case $x$ is a square matrix.
 
-\quad -- an {\it \idx{idele}}, i.e.~a 2-component vector, the first
+\quad -- an \var{\idx{idele}}, i.e.~a 2-component vector, the first
 being an ideal given as a $\Z$--basis, the second being a $r_1+r_2$-component
 row vector giving the complex logarithmic Archimedean information.
 
 \quad -- a $\Z_K$-generating system for an ideal.
 
-\quad -- a {\it column} vector $x$ expressing an element of the number field
+\quad -- a \var{column} vector $x$ expressing an element of the number field
 on the integral basis, in which case the ideal is treated as being the
 principal idele (or ideal) generated by $x$.
 
@@ -2276,7 +2276,7 @@ is treated as being the principal idele generated by $x$.
 
 \quad -- an integer or a rational number, also treated as a principal idele.
 
-$\bullet$ a {\it\idx{character}} on the Abelian group
+$\bullet$ a \var{{character}} on the Abelian group
 $\bigoplus (\Z/N_i\Z) g_i$
 is given by a row vector $\chi = [a_1,\ldots,a_n]$ such that
 $\chi(\prod g_i^{n_i}) = exp(2i\pi\sum a_i n_i / N_i)$.
@@ -2286,7 +2286,7 @@ $\chi(\prod g_i^{n_i}) = exp(2i\pi\sum a_i n_i / N_i)$.
 
 1) An element in $\var{nf}$ can be expressed either as a polmod or as a
 vector of components on the integral basis \kbd{\var{nf}.zk}. It is absolutely
-essential that all such vectors be {\it column\/} vectors.
+essential that all such vectors be \var{column} vectors.
 
 2) When giving an ideal by a $\Z_K$ generating system to a function expecting
 an ideal, it must be ensured that the function understands that it is a
@@ -2295,35 +2295,35 @@ generators is strictly less than the degree of the field, there is no
 ambiguity and the program assumes that one is giving a $\Z_K$-generating set.
 When the number of generators is greater than or equal to the degree of the
 field, however, the program assumes on the contrary that you are giving a
-$\Z$-generating set. If this is not the case, you {\it must\/} absolutely
+$\Z$-generating set. If this is not the case, you \var{must} absolutely
 change it into a $\Z$-generating set, the simplest manner being to use
 \kbd{idealhnf(\var{nf},$x$)}.
 
 Concerning relative extensions, some additional definitions are necessary.
 
-$\bullet$ A {\it\idx{relative matrix}\/} will be a matrix whose entries are
+$\bullet$ A \var{{relative matrix}} will be a matrix whose entries are
 elements of a (given) number field $\var{nf}$, always expressed as column
 vectors on the integral basis \kbd{\var{nf}.zk}. Hence it is a matrix of
 vectors.
 
-$\bullet$ An {\it\idx{ideal list}\/} will be a row vector of (fractional)
+$\bullet$ An \var{\idx{ideal list}} will be a row vector of (fractional)
 ideals of the number field $\var{nf}$.
 
-$\bullet$ A {\it\idx{pseudo-matrix}\/} will be a pair $(A,I)$ where $A$ is a
+$\bullet$ A \var{\idx{pseudo-matrix}} will be a pair $(A,I)$ where $A$ is a
 relative matrix and $I$ an ideal list whose length is the same as the number
 of columns of $A$. This pair will be represented by a 2-component row vector.
 
-$\bullet$ The {\it\idx{module}\/} generated by a pseudo-matrix $(A,I)$ is
+$\bullet$ The \var{\idx{module}} generated by a pseudo-matrix $(A,I)$ is
 the sum $\sum_i{\Bbb a}_jA_j$ where the ${\Bbb a}_j$ are the ideals of $I$
 and $A_j$ is the $j$-th column of $A$.
 
-$\bullet$ A pseudo-matrix $(A,I)$ is a {\it\idx{pseudo-basis}} of the module it
-generates if $A$ is a square matrix with non-zero determinant and all the
+$\bullet$ A pseudo-matrix $(A,I)$ is a \var{\idx{pseudo-basis}} of the module
+it generates if $A$ is a square matrix with non-zero determinant and all the
 ideals of $I$ are non-zero. We say that it is in Hermite Normal
-Form\sidx{Hermite normal form} (HNF) if
-it is upper triangular and all the elements of the diagonal are equal to 1.
+Form\sidx{Hermite normal form} (HNF) if it is upper triangular and all the
+elements of the diagonal are equal to 1.
 
-$\bullet$ The {\it determinant\/} of a pseudo-basis $(A,I)$ is the ideal
+$\bullet$ The \var{determinant} of a pseudo-basis $(A,I)$ is the ideal
 equal to the product of the determinant of $A$ by all the ideals of $I$. The
 determinant of a pseudo-matrix is the determinant of any pseudo-basis of the
 module it generates.
@@ -2368,7 +2368,7 @@ However, and even though it may not be specified in the descriptions of the
 functions below, it is permissible, if the function expects a $\var{nf}$, to
 use a $\var{bnf}$ instead (which contains much more information). The program
 will make the effort of converting to what it needs. On the other hand, if
-the program requires a big number field, the program will {\it not\/} launch
+the program requires a big number field, the program will \var{not} launch
 \kbd{bnfinit} for you, which can be a costly operation. Instead, it will give
 you a specific error message.
 
@@ -2457,10 +2457,9 @@ where the parameters are to be understood as follows:
 $P$ is the defining polynomial for the number field, which must be in
 $\Z[X]$, irreducible and, preferably, monic. In fact, if you supply a
 non-monic polynomial at this point, GP will issue a warning, then
-{\it transform your polynomial\/} so that it becomes monic. Instead of
-the normal
-result, say \kbd{res}, you then get a vector \kbd{[res,Mod(a,Q)]}, where
-\kbd{Mod(a,Q)=Mod(X,P)} gives the change of variables.
+\var{transform your polynomial} so that it becomes monic. Instead of the
+normal result, say \kbd{res}, you then get a vector \kbd{[res,Mod(a,Q)]},
+where \kbd{Mod(a,Q)=Mod(X,P)} gives the change of variables.
 
 The numbers $c$ and $c2$ are positive real numbers which control the
 execution time and the stack size. To get maximum speed, set $c2=c$. To get a
@@ -2469,21 +2468,21 @@ quadratic case, but then you should use the much faster function
 \kbd{quadclassunit}). Reasonable values for $c$ are between $0.1$ and
 $2$. (The defaults are $c=c2=0.3$).
 
-$\var{nrel\/}$ is the number of initial extra relations requested in
+$\var{nrel}$ is the number of initial extra relations requested in
 computing the
 relation matrix. Reasonable values are between 5 and 20. (The default is 5).
 
-$\var{borne\/}$ is a multiplicative coefficient of the Minkowski bound which
+$\var{borne}$ is a multiplicative coefficient of the Minkowski bound which
 controls
 the search for small norm relations. If this parameter is set equal to 0, the
 program does not search for small norm relations. Otherwise reasonable values
 are between $0.5$ and $2.0$. (The default is $1.0$).
 
-$\var{nrpid\/}$ is the maximal number of small norm relations associated to each
+$\var{nrpid}$ is the maximal number of small norm relations associated to each
 ideal in the factor base. Irrelevant when $\var{borne}=0$. Otherwise,
 reasonable values are between 4 and 20. (The default is 4).
 
-$\var{minsfb\/}$ is the minimal number of elements in the ``sub-factorbase''.
+$\var{minsfb}$ is the minimal number of elements in the ``sub-factorbase''.
 If the
 program does not seem to succeed in finding a full rank matrix (which you can
 see in GP by typing \kbd{\bs g 2}), increase this number. Reasonable values
@@ -2494,7 +2493,7 @@ are between 2 and 5. (The default is 3).
 Apart from the polynomial $P$, you don't need to supply any of the technical
 parameters (under the library you still need to send at least an empty
 vector, \kbd{cgetg(1,t\_VEC)}). However, should you choose to set some of
-them, they {\it must\/} be given in the requested order. For example, if you
+them, they \var{must} be given in the requested order. For example, if you
 want to specify a given value of $nrel$, you must give some values as well
 for $c$ and $c2$, and provide a vector $[c,c2,nrel]$.
 
@@ -2502,23 +2501,23 @@ Note also that you can use an $\var{nf}$ instead of $P$, which avoids
 recomputing the integral basis and analogous quantities.
 
 \smallskip
-\subsecidx{bnfcertify}$(\var{bnf\/})$: $\var{bnf}$ being a big number field
+\subsecidx{bnfcertify}$(\var{bnf})$: $\var{bnf}$ being a big number field
 as output by \kbd{bnfinit} or \kbd{bnfclassunit}, checks whether the result
 is correct, i.e.~whether it is possible to remove the assumption of the
 Generalized Riemann Hypothesis\sidx{GRH}. If it is correct, the answer is 1.
 If not, the program may output some error message, but more probably will loop
-indefinitely. In {\it no\/} occasion can the program give a wrong answer
+indefinitely. In \var{no} occasion can the program give a wrong answer
 (barring bugs of course): if the program answers 1, the answer is certified.
 
-\syn{certifybuchall}{\var{bnf\/}}, and the result is a C long.
+\syn{certifybuchall}{\var{bnf}}, and the result is a C long.
 
 \subsecidx{bnfclassunit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: \idx{Buchmann}'s
 sub-exponential algorithm for computing the class group, the regulator and a
 system of \idx{fundamental units} of the general algebraic number field $K$
 defined by the irreducible polynomial $P$ with integer coefficients.
 
-The result of this function is a vector $v$ with 10 components (it is {\it
-not\/} a $\var{bnf}$, you need \kbd{bnfinit} for that), which for ease of
+The result of this function is a vector $v$ with 10 components (it is
+\var{not} a $\var{bnf}$, you need \kbd{bnfinit} for that), which for ease of
 presentation is in fact output as a one column matrix. First we describe the
 default behaviour ($\fl=0$):
 
@@ -2577,7 +2576,7 @@ methods for representing algebraic numbers which are not implemented in PARI.
 If $\fl=2$, the fundamental units and roots of unity are not computed.
 Hence the result has only 7 components, the first seven ones.
 
-$\var{tech\/}$ is a technical vector (empty by default) containing $c$, $c2$,
+$\var{tech}$ is a technical vector (empty by default) containing $c$, $c2$,
 \var{nrel}, \var{borne}, \var{nbpid}, \var{minsfb}, in this order (see
 the beginning of the section or the keyword \kbd{bnf}).
 You can supply any number of these {\it provided you give an actual value to
@@ -2609,29 +2608,29 @@ $\var{bnf}$.
 principle are not used by the casual user. However, for the sake of
 completeness, their description is as follows. We use the notations explained
 in the book by H. Cohen, {\it A Course in Computational Algebraic Number
-Theory\/}, Graduate Texts in Maths \key{138}, Springer-Verlag, 1993, Section
+Theory}, Graduate Texts in Maths \key{138}, Springer-Verlag, 1993, Section
 6.5, and subsection 6.5.5 in particular.
 
-$\var{bnf\/}[1]$ contains the matrix $W$, i.e.~the matrix in Hermite normal
+$\var{bnf}[1]$ contains the matrix $W$, i.e.~the matrix in Hermite normal
 form giving relations for the class group on prime ideal generators
 $(\p_i)_{1\le i\le r}$.
 
-$\var{bnf\/}[2]$ contains the matrix $B$, i.e.~the matrix containing the
+$\var{bnf}[2]$ contains the matrix $B$, i.e.~the matrix containing the
 expressions of the prime ideal factorbase in terms of the $\p_i$. It is an
 $r\times c$ matrix.
 
- $\var{bnf\/}[3]$ contains the complex logarithmic embeddings of the system of
+ $\var{bnf}[3]$ contains the complex logarithmic embeddings of the system of
 fundamental units which has been found. It is an $(r_1+r_2)\times(r_1+r_2-1)$
 matrix.
 
- $\var{bnf\/}[4]$ contains the matrix $M''_C$ of Archimedean components of the
+ $\var{bnf}[4]$ contains the matrix $M''_C$ of Archimedean components of the
 relations of the matrix $M''$, except that the first $r_1+r_2-1$ columns are
-suppressed since they are already in $\var{bnf\/}[3]$.
+suppressed since they are already in $\var{bnf}[3]$.
 
- $\var{bnf\/}[5]$ contains the prime factor base, i.e.~the list of $k$ prime
+ $\var{bnf}[5]$ contains the prime factor base, i.e.~the list of $k$ prime
 ideals used in finding the relations.
 
- $\var{bnf\/}[6]$ contains the permutation of the prime factor base which was
+ $\var{bnf}[6]$ contains the permutation of the prime factor base which was
 necessary
 to reduce the relation matrix to the form explained in subsection 6.5.5
 of GTM~138 (i.e.~with a
@@ -2639,24 +2638,24 @@ big $c\times c$ identity matrix on the lower right). Note that in the above
 mentioned book, the need to permute the rows of the relation matrices which
 occur was not emphasized.
 
- $\var{bnf\/}[9]$ is a 3-element row vector obtained as follows.  Let
-$b=u_1^{-1}\var{bnf\/}[1]u_2$ obtained by applying the \idx{Smith normal form}
+ $\var{bnf}[9]$ is a 3-element row vector obtained as follows.  Let
+$b=u_1^{-1}\var{bnf}[1]u_2$ obtained by applying the \idx{Smith normal form}
 algorithm to the matrix $W$ (= $\var{bnf}[1]$). Then
-$\var{bnf\/}[9]=[u_1,u_2,b]$. Note that the final class group generators
+$\var{bnf}[9]=[u_1,u_2,b]$. Note that the final class group generators
 given by \kbd{bnfinit} or \kbd{bnfclassunit} are obtained by
 \idx{LLL}-reducing the generators whose list is $b$.
 
- Finally, $\var{bnf\/}[10]$ is unused and set equal to 0, but it is essential
+ Finally, $\var{bnf}[10]$ is unused and set equal to 0, but it is essential
 that this component be present, because PARI distinguishes a number field
 \var{nf} from a big number field \var{bnf} by the number of its
 components. \smallskip
 
 \noindent$\bullet$ The less technical components are as follows:
 
- $\var{bnf\/}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
+ $\var{bnf}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
 $\var{nf}$ as would be given by \kbd{nfinit}.
 
- $\var{bnf\/}[8]$ is a vector containing the last 6 components of
+ $\var{bnf}[8]$ is a vector containing the last 6 components of
 \kbd{bnfclassunit[,1]}, i.e.~the classgroup \kbd{\var{bnf}.clgp}, the
 regulator \kbd{\var{bnf}.reg}, the general ``check'' number which should be
 close to 1, the number of roots of unity and a generator \kbd{\var{bnf}.tu},
@@ -2684,10 +2683,10 @@ units. Then $v[1]$ is the polynomial $P$, $v[2]$ is the number of real
 embeddings $r_1$, $v[3]$ is the field discriminant, $v[4]$ is the integral
 basis, $v[5]$ is the list of roots as in the sixth component of \kbd{nfinit},
 $v[6]$ is the matrix $MD$ of \kbd{nfinit} giving a $\Z$-basis of the
-different, $v[7]$ is the matrix $\kbd{W} = \var{bnf\/}[1]$, $v[8]$ is the
-matrix $\kbd{matalpha}=\var{bnf\/}[2]$, $v[9]$ is the prime ideal factor base
-$\var{bnf\/}[5]$ coded in a compact way, and ordered according to the
-permutation $\var{bnf\/}[6]$, $v[10]$ is the 2-component vector giving the
+different, $v[7]$ is the matrix $\kbd{W} = \var{bnf}[1]$, $v[8]$ is the
+matrix $\kbd{matalpha}=\var{bnf}[2]$, $v[9]$ is the prime ideal factor base
+$\var{bnf}[5]$ coded in a compact way, and ordered according to the
+permutation $\var{bnf}[6]$, $v[10]$ is the 2-component vector giving the
 number of roots of unity and a generator, expressed on the integral basis,
 $v[11]$ is the list of fundamental units, expressed on the integral basis,
 $v[12]$ is a vector containing the algebraic numbers alpha corresponding to
@@ -2696,7 +2695,7 @@ the columns of the matrix \kbd{matalpha}, expressed on the integral basis.
    Note that all the components are exact (integral or rational), except for
 the roots in $v[5]$. In practice, this is the only component which a user
 is allowed to modify, by recomputing the roots to a higher accuracy if
-desired. Note also that the member functions will {\it not\/} work on
+desired. Note also that the member functions will \var{not} work on
 \var{sbnf}, you have to use \kbd{bnfmake} explicitly first.
 
 \syn{bnf{}init0}{P,\fl,\var{tech},\var{prec}}.
@@ -2744,9 +2743,9 @@ simple true/false answer: it gives a row vector $[v_1,v_2,check]$, where
  $v_1$ is the vector of components $c_i$ of the class of the ideal $x$ in the
 class group, expressed on the generators $g_i$ given by \kbd{bnfinit}
 (specifically \kbd{\var{bnf}.clgp.gen} which is the same as
-\kbd{\var{bnf\/}[8][1][3]}). The $c_i$ are chosen so that $0\le c_i<n_i$
+\kbd{\var{bnf}[8][1][3]}). The $c_i$ are chosen so that $0\le c_i<n_i$
 where $n_i$ is the order of $g_i$ (the vector of $n_i$ being
-\kbd{\var{bnf}.clgp.cyc}, that is \kbd{\var{bnf\/}[8][1][2]}).
+\kbd{\var{bnf}.clgp.cyc}, that is \kbd{\var{bnf}[8][1][2]}).
 
  $v_2$ gives on the integral basis the components of $\alpha$ such that
 $x=\alpha\prod_ig_i^{c_i}$. In particular, $x$ is principal if and only if
@@ -2762,13 +2761,13 @@ result is checked for correctness.
 
 If $\fl=0$, outputs only $v_1$, which is much easier to compute.
 
-If $\fl=2$, does as if $\fl$ were $0$, but doubles the precision until a result is
-obtained.
+If $\fl=2$, does as if $\fl$ were $0$, but doubles the precision until a
+result is obtained.
 
 If $\fl=3$, as in the default behaviour ($\fl=1$), but doubles the precision
 until a result is obtained.
 
-The user is warned that these two last setting may induce {\it very\/} lengthy
+The user is warned that these two last setting may induce \var{very} lengthy
 computations.
 
 \syn{isprincipalall}{\var{bnf},x,\fl}.
@@ -2789,23 +2788,23 @@ $i\le r$ and is an integer modulo the order of $\zeta$ for $i=r+1$.
 \subsecidx{bnfmake}$(\var{sbnf})$: \var{sbnf} being a ``small $\var{bnf}$''
 as output
 by \kbd{bnfinit}$(x,3)$, computes the complete \kbd{bnfinit} information. The
-result is {\it not\/} identical to what \kbd{bnfinit} would yield, but is
+result is \var{not} identical to what \kbd{bnfinit} would yield, but is
 functionally identical. The execution time is very small compared to a
 complete \kbd{bnfinit}. Note that if the default precision in GP (or
 $\var{prec}$ in library mode) is greater than the precision of the roots
 $\var{sbnf}[5]$, these are recomputed so as to get a result with greater
 accuracy.
 
-Note that the member functions are {\it not\/} available for \var{sbnf}, you
+Note that the member functions are \var{not} available for \var{sbnf}, you
 have to use \kbd{bnfmake} explicitly first.
 
 \syn{makebigbnf}{\var{sbnf},\var{prec}}, where $\var{prec}$ is a
 C long integer.
 
-\subsecidx{bnfnarrow}$(\var{bnf\/})$: $\var{bnf}$ being a big number field as
+\subsecidx{bnfnarrow}$(\var{bnf})$: $\var{bnf}$ being a big number field as
 output by \kbd{bnfinit}, computes the narrow class group of $\var{bnf}$. The
 output is a 3-component row vector $v$ analogous to the corresponding
-class group component \kbd{\var{bnf}.clgp} (\kbd{\var{bnf\/}[8][1]}): the
+class group component \kbd{\var{bnf}.clgp} (\kbd{\var{bnf}[8][1]}): the
 first component is the narrow class number \kbd{$v$.no}, the second component
 is a vector containing the SNF\sidx{Smith normal form} cyclic components
 \kbd{$v$.cyc} of the narrow
@@ -2813,16 +2812,16 @@ class group, and the third is a vector giving the generators of the
 corresponding \kbd{$v$.gen} cyclic groups. Note that this function is a
 special case of \kbd{bnrclass}.
 
-\syn{buchnarrow}{\var{bnf\/}}.
+\syn{buchnarrow}{\var{bnf}}.
 
-\subsecidx{bnfsignunit}$(\var{bnf\/})$: $\var{bnf}$ being a big number field
+\subsecidx{bnfsignunit}$(\var{bnf})$: $\var{bnf}$ being a big number field
 output by \kbd{bnfinit}, this computes an $r_1\times(r_1+r_2-1)$ matrix
 having $\pm1$ components, giving the signs of the real embeddings of the
 fundamental units.
 
-\syn{signunits}{\var{bnf\/}}.
+\syn{signunits}{\var{bnf}}.
 
-\subsecidx{bnfreg}$(\var{bnf\/})$: $\var{bnf}$ being a big number field
+\subsecidx{bnfreg}$(\var{bnf})$: $\var{bnf}$ being a big number field
 output by \kbd{bnfinit}, computes its regulator.
 
 \syn{regulator}{\var{bnf},\var{tech},\var{prec}}, where \var{tech} is as in
@@ -2853,7 +2852,7 @@ $v[6]$ is a copy of $S$.
 
 \syn{bnfsunit}{\var{bnf},S,\var{prec}}.
 
-\subsecidx{bnfunit}$(\var{bnf\/})$: $\var{bnf}$ being a big number field as
+\subsecidx{bnfunit}$(\var{bnf})$: $\var{bnf}$ being a big number field as
 output by
 \kbd{bnfinit}, outputs a two-component row vector giving in the first
 component the vector of fundamental units of the number field, and in the
@@ -2862,7 +2861,7 @@ computation (which is always correct, otherwise an error message is printed).
 This function is mainly for people who used the wrong flag in \kbd{bnfinit}
 and would like to skip part of a lengthy \kbd{bnfinit} computation.
 
-\syn{buchfu}{\var{bnf\/}}.
+\syn{buchfu}{\var{bnf}}.
 
 \subsecidx{bnrL1}$(\var{bnr},\{\fl=0\})$:
 \var{bnr} being the number field data which is output by
@@ -2989,7 +2988,7 @@ conductor corresponding to the $L$, no data is computed and the result is $0$
 $\var{bnf}$ being a big
 number field as output by \kbd{bnfinit} (the units are mandatory), computes a
 list of discriminants of Abelian extensions of the number field by increasing
-modulus norm up to bound {\it bound}, where the ramified Archimedean places are
+modulus norm up to bound \var{bound}, where the ramified Archimedean places are
 given by \var{arch} (unramified at infinity if \var{arch} is void or
 omitted). If
 \fl\ is non-zero, give \var{arch} all the possible values. (See \kbd{bnr}
@@ -3121,10 +3120,10 @@ considered as a \idx{Dirichlet series}.
 \subsecidx{factornf}$(x,t)$: factorization of the univariate polynomial $x$
 over the number field defined by the (univariate) polynomial $t$. $x$ may
 have coefficients in $\Q$ or in the number field. The main variable of
-$t$ must be of {\it lower\/} priority than that of $x$ (in other words the
-variable number of $t$ must be {\it greater\/} than that of $x$). However if
+$t$ must be of \var{lower} priority than that of $x$ (in other words the
+variable number of $t$ must be \var{greater} than that of $x$). However if
 the coefficients of the number field occur explicitly (as polmods) as
-coefficients of $x$, the variable of these polmods {\it must\/} be the same as
+coefficients of $x$, the variable of these polmods \var{must} be the same as
 the main variable of $t$. For example
 \kbd{factornf(x\pow 2 + Mod(y,y\pow 2+1), y\pow 2+1)} and
 \kbd{factornf(x\pow 2+1, y\pow 2+1)} are legal but
@@ -3189,7 +3188,7 @@ for all other $\p$.
 
 \subsecidx{idealcoprime}$(\var{nf},x,y)$: given two integral ideals $x$ and $y$
 in the number field $\var{nf}$, finds a $\beta$ in the field, expressed on the
-integral basis $\var{nf\/}[7]$, such that $\beta\cdot y$ is an integral ideal
+integral basis $\var{nf}[7]$, such that $\beta\cdot y$ is an integral ideal
 coprime to $x$.
 
 \syn{idealcoprime}{\var{nf},x}.
@@ -3221,7 +3220,7 @@ $\Z$-basis).
 
 If $b$ is not omitted, assume the ideal given was $a\Z_K+b\Z_K$, where $a$
 and $b$ are elements of $K$ given either as vectors on the integral basis
-$\var{nf\/}[7]$ or as algebraic numbers.
+$\var{nf}[7]$ or as algebraic numbers.
 
 \syn{idealhnf0}{\var{nf},a,b} where an omitted $b$ is coded as \kbd{NULL}.
 Also available is $\teb{idealhermite}(\var{nf},a)$ ($b$ omitted).
@@ -3360,7 +3359,7 @@ Here \var{vdir} must be either an $r1+r2$-component vector ($r1$ and $r2$
 number of real and complex places of \var{nf} as usual), or the PARI zero,
 in which case \var{vdir} is assumed to be equal to the vector having only
 components equal to 1. The notion of reduction along a direction is
-technical and cannot be explained here. Note that this is {\it not\/} the
+technical and cannot be explained here. Note that this is \var{not} the
 same as the LLL reduction of the lattice $x$ since ideal operations are
 involved. The result is the \idx{Hermite normal form} of the LLL-reduced
 ideal, which is usually, but not always, a reduced ideal. $x$ may also be a
@@ -3390,7 +3389,7 @@ cyclic components and
 $v[3]$ the corresponding generators. When the row vector is explicitly
 included, the
 non-zero elements of this vector are considered as real embeddings of
-\var{nf} in the order given by \kbd{polroots}, i.e.~in \var{nf\/}[6]
+\var{nf} in the order given by \kbd{polroots}, i.e.~in \var{nf}[6]
 (\kbd{\var{nf}.roots}), and then $I$ is a module with components at infinity.
 
 To solve discrete logarithms (using \kbd{ideallog}), you have to choose
@@ -3496,14 +3495,14 @@ an order which will be maximal at all the small primes.
 
 If $p$ is present, we assume (without checking!) that it is the two-column
 matrix of the factorization of the discriminant of the polynomial $x$. Note
-that it does {\it not\/} have to be a complete factorization. This is
+that it does \var{not} have to be a complete factorization. This is
 especially useful if only a local integral basis for some small set of places
 is desired: only factors with exponents greater or equal to 2 will be
 considered.
 
 \syn{nfbasis0}{x,\fl,p}. An extended version
 is $\teb{nfbasis}(x,\&d,\fl,p)$, where $d$ will receive the discriminant of
-the number field ({\it not\/} of the polynomial $x$), and an omitted $p$ should
+the number field (\var{not} of the polynomial $x$), and an omitted $p$ should
 be input as \kbd{gzero}. Also available are $\teb{base}(x,\&d)$ ($\fl=0$),
 $\teb{base2}(x,\&d)$ ($\fl=2$) and $\teb{factoredbase}(x,p,\&d)$.
 
@@ -3621,11 +3620,11 @@ and the result is a \kbd{long}.
 \subsecidx{nf{}factor}$(\var{nf},x)$: factorization of the univariate
 polynomial $x$ over the number field $\var{nf}$ given by \kbd{nfinit}. $x$
 has coefficients in $\var{nf}$ (i.e.~either scalar, polmod, polynomial or
-column vector). The main variable of $\var{nf}$ must be of {\it lower\/}
+column vector). The main variable of $\var{nf}$ must be of \var{lower}
 priority than that of $x$ (in other words, the variable number of $\var{nf}$
-must be {\it greater\/} than that of $x$). However if the polynomial defining
+must be \var{greater} than that of $x$). However if the polynomial defining
 the number field occurs explicitly  in the coefficients of $x$ (as modulus of
-a \typ{POLMOD}), its main variable must be {\it the same\/} as the main
+a \typ{POLMOD}), its main variable must be \var{the same} as the main
 variable of $x$. For example, if $\var{nf}=\hbox{\kbd{nfinit(y\pow 2+1)}}$
 then
 \hbox{\kbd{nffactor(\var{nf},x\pow 2+Mod(y,y\pow 2+1))}} and
@@ -3640,11 +3639,11 @@ field $\var{nf}$. $x$ can have coefficients in the number field (scalar,
 polmod, polynomial, column vector) or modulo the prime ideal (integermod
 modulo the rational prime under \var{pr}, polmod or polynomial with
 integermod coefficients, column vector of integermod). The prime ideal
-\var{pr} {\it must\/} be in the format output by \kbd{idealprimedec}. The
+\var{pr} \var{must} be in the format output by \kbd{idealprimedec}. The
 main variable of $\var{nf}$ must be of lower priority than that of $x$ (in
 other words the variable number of $\var{nf}$ must be greater than that of
 $x$). However if the coefficients of the number field occur explicitly (as
-polmods) as coefficients of $x$, the variable of these polmods {\it must\/}
+polmods) as coefficients of $x$, the variable of these polmods \var{must}
 be the same as the main variable of $t$ (see \kbd{nffactor}).
 
 \syn{nf{}factormod}{\var{nf},x,\var{pr}}.
@@ -3665,7 +3664,7 @@ arguments are forbidden.
 
 \subsecidx{nfgaloisconj}$(\var{nf},\{\fl=0\},\{d\})$: $\var{nf}$ being a
 number field as output by \kbd{nfinit}, computes the conjugates of a root
-$r$ of the non-constant polynomial $x=\var{nf\/}[1]$ expressed as
+$r$ of the non-constant polynomial $x=\var{nf}[1]$ expressed as
 polynomials in $r$. This can be used even if the number field $\var{nf}$ is
 not \idx{Galois} since some conjugates may lie in the field. As a note to
 old-timers of PARI, starting with version 2.0.17 this function works much
@@ -3737,18 +3736,18 @@ preferably monic, irreducible polynomial in $\Z[X]$, computes a 9-component
 vector \var{nf} useful in working in the number field $K$ defined by
 \var{pol}.
 
- $\var{nf\/}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
+ $\var{nf}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
 
- $\var{nf\/}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}), the number of real
+ $\var{nf}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}), the number of real
 and complex places of $K$.
 
- $\var{nf\/}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of
+ $\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of
 the number field $K$.
 
- $\var{nf\/}[4]$ contains the index of $\var{nf\/}[1]$,
-i.e.~$[\Z_K:\Z[\theta]]$, where $\theta$ is any root of $\var{nf\/}[1]$.
+ $\var{nf}[4]$ contains the index of $\var{nf}[1]$,
+i.e.~$[\Z_K:\Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
 
- $\var{nf\/}[5]$ is a vector containing 7 matrices $M$, $MC$, $T2$, $T$,
+ $\var{nf}[5]$ is a vector containing 7 matrices $M$, $MC$, $T2$, $T$,
 $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
 
 \quad$\bullet$ $M$ is the $(r1+r2)\times n$ matrix whose columns represent
@@ -3780,18 +3779,18 @@ a $\Z_K$-basis of $d(K)$ times the codifferent ideal
 (\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal) and $n$
 is its norm (this ideal is used in \tet{idealinv}).
 
- $\var{nf\/}[6]$ is the vector containing the $r1+r2$ roots
-(\kbd{\var{nf}.roots}) of $\var{nf\/}[1]$ corresponding to the $r1+r2$
+ $\var{nf}[6]$ is the vector containing the $r1+r2$ roots
+(\kbd{\var{nf}.roots}) of $\var{nf}[1]$ corresponding to the $r1+r2$
 embeddings of the number field into $\C$ (the first $r1$ components are real,
 the next $r2$ have positive imaginary part).
 
- $\var{nf\/}[7]$ is an integral basis in Hermite normal form for $\Z_K$
+ $\var{nf}[7]$ is an integral basis in Hermite normal form for $\Z_K$
 (\kbd{\var{nf}.zk}) expressed on the powers of~$\theta$.
 
- $\var{nf\/}[8]$ is the $n\times n$ integral matrix expressing the power
+ $\var{nf}[8]$ is the $n\times n$ integral matrix expressing the power
 basis in terms of the integral basis, and finally
 
- $\var{nf\/}[9]$ is the $n\times n^2$ matrix giving the multiplication table
+ $\var{nf}[9]$ is the $n\times n^2$ matrix giving the multiplication table
 of the integral basis.
 
 If a non monic polynomial is input, \kbd{nfinit} will transform it into a
@@ -3851,7 +3850,7 @@ algorithm will be used.
 
 \syn{nf{}isisom}{x,y,\fl}.
 
-\subsecidx{nfnewprec}$(\var{nf\/})$: transforms the number field $\var{nf}$
+\subsecidx{nfnewprec}$(\var{nf})$: transforms the number field $\var{nf}$
 into the corresponding data using current (usually larger) precision. This
 function works as expected if $\var{nf}$ is in fact a $\var{bnf}$ (update
 $\var{bnf}$ to current precision) but may be quite slow (many generators of
@@ -3891,18 +3890,18 @@ vector). The main variable of $\var{nf}$ must be of lower priority than that
 of $x$ (in other words the variable number of $\var{nf}$ must be greater than
 that of $x$). However if the coefficients of the number field occur
 explicitly (as polmods) as coefficients of $x$, the variable of these
-polmods {\it must\/} be the same as the main variable of $t$ (see
+polmods \var{must} be the same as the main variable of $t$ (see
 \kbd{nffactor}).
 
 \syn{nfroots}{\var{nf},x}.
 
-\subsecidx{nfrootsof1}$(\var{nf\/})$: computes the number of roots of unity
+\subsecidx{nfrootsof1}$(\var{nf})$: computes the number of roots of unity
 $w$ and a primitive $w$-th root of unity (expressed on the integral basis)
 belonging to the number field $\var{nf}$. The result is a two-component
 vector $[w,z]$ where $z$ is a column vector expressing a primitive $w$-th
 root of unity on the integral basis \kbd{\var{nf}.zk}.
 
-\syn{rootsof1}{\var{nf\/}}.
+\syn{rootsof1}{\var{nf}}.
 
 \subsecidx{nfsnf}$(\var{nf},x)$: given a torsion module $x$ as a 3-component
 row
@@ -3927,16 +3926,20 @@ in $\Z_K/\var{pr}$, where $a$ is a matrix and $b$ a column vector, and where
 
 \syn{nfsolvemodpr}{\var{nf},a,b,\var{pr}}.
 
-\subsecidx{polcompositum}$(x,y,\{\fl=0\})$: $x$ and $y$ being polynomials in
-$\Z[x]$ in the same variable, outputs a vector giving the list of all
+\subsecidx{polcompositum}$(x,y,\{\fl=0\})$: $x$ and $y$ being polynomials
+in $\Z[x]$ in the same variable, outputs a vector giving the list of all
 possible composita of the number fields defined by $x$ and $y$, if $x$ and
 $y$ are irreducible, or of the corresponding \'etale algebras, if they are
-only squarefree. Returns an error if one of the polynomials is not squarefree.
+only squarefree. Returns an error if one of the polynomials is not
+squarefree. When one of the polynomials is irreducible (say \kbd{x}), it is
+often \var{much} faster to use \kbd{nffactor(nfinit(x), y)} then
+\tet{rnfequation}.
 
 If $\fl=1$, outputs a vector of 4-component vectors $[z,a,b,k]$, where $z$
-ranges through the list of all possible compositums as above, and $a$ (resp.
-$b$) expresses the root of $x$ (resp. $y$) as a polmod in a root of $z$,
-and $k$ is a small integer k such that $a+kb$ is the chosen root of $z$.
+ranges through the list of all possible compositums as above, and $a$
+(resp. $b$) expresses the root of $x$ (resp. $y$) as a polmod in a root of
+$z$, and $k$ is a small integer k such that $a+kb$ is the chosen root of
+$z$.
 
 \syn{polcompositum0}{x,y,\fl}.
 
@@ -4018,7 +4021,7 @@ The binary digits of $\fl$ mean
 output and $a$ is an element expressed on a root of the polynomial $P$,
 whose minimal polynomial is equal to $x$.
 
-4: gives {\it all} polynomials of minimal $T_2$ norm (of the two polynomials 
+4: gives \var{all} polynomials of minimal $T_2$ norm (of the two polynomials 
 $P(x)$ and $P(-x)$, only one is given).
 
 \syn{polredabs0}{x,\fl,\var{prec}}.
@@ -4064,7 +4067,7 @@ $x$ as a polmod with polmods coefficients.
 
 \subsecidx{rnfcharpoly}$(\var{nf},T,a,\{v=x\})$: characteristic polynomial of
 $a$ over $\var{nf}$, where $a$ belongs to the algebra defined by $T$ over
-$\var{nf}$, i.e.~$\var{nf\/}[X]/(T)$. Returns a polynomial in variable $v$
+$\var{nf}$, i.e.~$\var{nf}[X]/(T)$. Returns a polynomial in variable $v$
 ($x$ by default).
 
 \syn{rnfcharpoly}{\var{nf},T,a,v}, where $v$ is a variable number.
@@ -4106,7 +4109,7 @@ the relative
 discriminant of $L$. This is a two-element row vector $[D,d]$, where $D$ is
 the relative ideal discriminant and $d$ is the relative discriminant
 considered as an element of $\var{nf}^*/{\var{nf}^*}^2$. The main variable of
-$\var{nf}$ {\it must\/} be of lower priority than that of \var{pol}.
+$\var{nf}$ \var{must} be of lower priority than that of \var{pol}.
 
 Note: As usual, $\var{nf}$ can be a $\var{bnf}$ as output by \kbd{nfinit}.
 
@@ -4115,7 +4118,7 @@ Note: As usual, $\var{nf}$ can be a $\var{bnf}$ as output by \kbd{nfinit}.
 \subsecidx{rnfeltabstorel}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field
 extension $L/K$ as output by \kbd{rnfinit} and $x$ being an element of $L$
-expressed as a polynomial modulo the absolute equation $\var{rnf\/}[11][1]$,
+expressed as a polynomial modulo the absolute equation $\var{rnf}[11][1]$,
 computes $x$ as an element of the relative extension $L/K$ as a polmod with
 polmod coefficients.
 
@@ -4135,7 +4138,7 @@ vector.
 number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an
 element of $L$ expressed as a polynomial or polmod with polmod
 coefficients, computes $x$ as an element of the absolute extension $L/\Q$ as
-a polynomial modulo the absolute equation $\var{rnf\/}[11][1]$. If $x$ is
+a polynomial modulo the absolute equation $\var{rnf}[11][1]$. If $x$ is
 given on the relative integral basis, apply \kbd{rnfbasistoalg} first,
 otherwise PARI will believe you are dealing with a vector.
 
@@ -4145,7 +4148,7 @@ otherwise PARI will believe you are dealing with a vector.
 field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an element of
 $K$ expressed as a polynomial or polmod, computes $x$ as an element of the
 absolute extension $L/\Q$ as a polynomial modulo the absolute equation
-$\var{rnf\/}[11][1]$. Note that it is unnecessary to compute $x$ as an
+$\var{rnf}[11][1]$. Note that it is unnecessary to compute $x$ as an
 element of the relative extension $L/K$ (its expression would be identical to
 itself). If $x$ is given on the integral basis of $K$, apply
 \kbd{nfbasistoalg} first, otherwise PARI will believe you are dealing with a
@@ -4165,7 +4168,7 @@ $a$ expresses as a polmod a root $\beta$ of $pol$ in terms of a root $\theta$
 of $z$, and $k$ is a small integer such that $\theta=\beta+k\alpha$ where
 $\alpha$ is a root of the polynomial defining the base field $\var{nf}$.
 
-  The main variable of $\var{nf}$ {\it must\/} be of lower priority than that
+  The main variable of $\var{nf}$ \var{must} be of lower priority than that
 of \var{pol}. Note that for efficiency, this does not check whether the
 relative equation is irreducible over $\var{nf}$, but only if it is
 squarefree. If it is reducible but squarefree, the result will be the
@@ -4280,28 +4283,28 @@ $m$ the degree of the base field, $n$ the relative degree, $L$ the large
 field (of relative degree $n$ or absolute degree $nm$), $r_1$ and $r_2$ the
 number of real and complex places of $K$.
 
-$\var{rnf\/}[1]$ contains the relative polynomial \var{pol}.
+$\var{rnf}[1]$ contains the relative polynomial \var{pol}.
 
-$\var{rnf\/}[2]$ is a row vector with $r_1+r_2$ entries, entry $j$ being
+$\var{rnf}[2]$ is a row vector with $r_1+r_2$ entries, entry $j$ being
 a 2-component row vector $[r_{j,1},r_{j,2}]$ where $r_{j,1}$ and $r_{j,2}$
 are the number of real and complex places of $L$ above the $j$-th place of
 $K$ so that $r_{j,1}=0$ and $r_{j,2}=n$ if $j$ is a complex place, while if
 $j$ is a real place we have $r_{j,1}+2r_{j,2}=n$.
 
-$\var{rnf\/}[3]$ is a two-component row vector $[\d(L/K),s]$ where $\d(L/K)$
+$\var{rnf}[3]$ is a two-component row vector $[\d(L/K),s]$ where $\d(L/K)$
 is the relative ideal discriminant of $L/K$ and $s$ is the discriminant of
 $L/K$ viewed as an element of $K^*/(K^*)^2$, in other words it is the output
 of \kbd{rnfdisc}.
 
-$\var{rnf\/}[4]$ is the ideal index $\f$, i.e.~such that
+$\var{rnf}[4]$ is the ideal index $\f$, i.e.~such that
 $d(pol)\Z_K=\f^2\d(L/K)$.
 
-$\var{rnf\/}[5]$ is a vector \var{vm} with 7 entries useful for certain
+$\var{rnf}[5]$ is a vector \var{vm} with 7 entries useful for certain
 computations in the relative extension $L/K$. $\var{vm}[1]$ is a vector of
 $r_1+r_2$ matrices, the $j$-th matrix being an $(r_{1,j}+r_{2,j})\times n$
 matrix $M_j$ representing the numerical values of the conjugates of the
 $j$-th embedding of the elements of the integral basis, where $r_{i,j}$ is as
-in $\var{rnf\/}[2]$. $\var{vm}[2]$ is a vector of $r_1+r_2$ matrices, the
+in $\var{rnf}[2]$. $\var{vm}[2]$ is a vector of $r_1+r_2$ matrices, the
 $j$-th matrix $MC_j$ being essentially the conjugate of the matrix $M_j$
 except that the last $r_{2,j}$ columns are also multiplied by 2.
 $\var{vm}[3]$ is a vector of $r_1+r_2$ matrices $T2_j$, where $T2_j$ is
@@ -4313,30 +4316,30 @@ of the relative integral basis. Note that the $j$-th embedding of $T$ is
 equal to $\overline{MC_j}\cdot M_j$, and in particular will be equal to
 $T2_j$ if $r_{2,j}=0$. Note also that the relative ideal discriminant of
 $L/K$ is equal to $\det(T)$ times the square of the product of the ideals
-in the relative pseudo-basis (in $\var{rnf\/}[7][2]$). The last 3 entries
+in the relative pseudo-basis (in $\var{rnf}[7][2]$). The last 3 entries
 $\var{vm}[5]$, $\var{vm}[6]$ and $\var{vm}[7]$ are linked to the different
 as in \kbd{nfinit}, but have not yet been implemented.
 
-$\var{rnf\/}[6]$ is a row vector with $r_1+r_2$ entries, the $j$-th entry
+$\var{rnf}[6]$ is a row vector with $r_1+r_2$ entries, the $j$-th entry
 being the
 row vector with $r_{1,j}+r_{2,j}$ entries of the roots of the $j$-th embedding
 of the relative polynomial \var{pol}.
 
-$\var{rnf\/}[7]$ is a two-component row vector, where the first component is
+$\var{rnf}[7]$ is a two-component row vector, where the first component is
 the relative integral pseudo basis expressed as polynomials (in the variable of
 $pol$) with polmod coefficients in $\var{nf}$, and the second component is the
 ideal list of the pseudobasis in HNF.
 
-$\var{rnf\/}[8]$ is the inverse matrix of the integral basis matrix, with
+$\var{rnf}[8]$ is the inverse matrix of the integral basis matrix, with
 coefficients polmods in $\var{nf}$.
 
-$\var{rnf\/}[9]$ may be the multiplication table of the integral basis, but
+$\var{rnf}[9]$ may be the multiplication table of the integral basis, but
 is not implemented at present.
 
-$\var{rnf\/}[10]$ is $\var{nf}$.
+$\var{rnf}[10]$ is $\var{nf}$.
 
-$\var{rnf\/}[11]$ is a vector \var{vabs} with 5 entries describing the {\it
-absolute\/} extension $L/\Q$. $\var{vabs}[1]$ is an absolute equation.
+$\var{rnf}[11]$ is a vector \var{vabs} with 5 entries describing the
+\var{absolute} extension $L/\Q$. $\var{vabs}[1]$ is an absolute equation.
 $\var{vabs}[2]$ expresses the generator $\alpha$ of the number field
 $\var{nf}$ as a polynomial modulo the absolute equation $\var{vabs}[1]$.
 $\var{vabs}[3]$ is a small integer $k$ such that, if $\beta$ is an abstract
@@ -4371,7 +4374,7 @@ free, false (0) if not.
 element \var{el} in \var{bnf} is the norm of some $y$ in \var{ext}.
 $\var{bnf}$ is as output by \kbd{bnfinit}.
 
-$\var{ext\/}$ is a relative extension which has to be a row vector whose
+$\var{ext}$ is a relative extension which has to be a row vector whose
 components are:
 
 $\var{ext}[1]$: a relative equation of the number field \var{ext} over
@@ -4480,7 +4483,7 @@ the ideals of $I$ except perhaps the last one are equal to the ring of
 integers of $\var{nf}$, and outputs the four-component row vector $[A,I,D,d]$
 as in \kbd{rnfpseudobasis}. The name of this function comes from the fact
 that the ideal class of the last ideal of $I$ (which is well defined) is
-called the {\it Steinitz class\/} of the module $\Z_L$.
+called the \var{\idx{Steinitz class}} of the module $\Z_L$.
 
 Note: $\var{nf}$ can be a $\var{bnf}$ as output by \kbd{bnfinit}.
 
@@ -4499,7 +4502,7 @@ SNF\sidx{Smith normal form} matrix corresponding to $G$. If $\fl=0$
 \var{bound}, $\fl$ and $\var{prec}$ are long integers.
 
 \subsecidx{zetak}$(\var{znf},x,\{\fl=0\})$: \var{znf} being a number
-field initialized by \kbd{zetakinit} ({\it not\/} by \kbd{nfinit}),
+field initialized by \kbd{zetakinit} (\var{not} by \kbd{nfinit}),
 computes the value of the \idx{Dedekind} zeta function of the number
 field at the complex number $x$. If $\fl=1$ computes Dedekind $\Lambda$
 function instead (i.e.~the product of the
@@ -4699,7 +4702,7 @@ The algorithm used is a modification of A.~\idx{Sch\"onhage}'s remarkable
 root-finding algorithm, due to and implemented by X.~Gourdon. Barring bugs,
 it is guaranteed to converge and to give the roots to the required accuracy.
 
-If $\fl=1$, use a variant of the Newton-Raphson method, which is {\it not}
+If $\fl=1$, use a variant of the Newton-Raphson method, which is \var{not}
 guaranteed to converge, but is rather fast. If you get the messages ``too
 many iterations in roots'' or ``INTERNAL ERROR: incorrect result in roots'',
 use the default function (i.e.~no flag or $\fl=0$). This used to be the
@@ -4709,18 +4712,18 @@ default root-finding function in PARI until version 1.39.06.
 
 \subsecidx{polrootsmod}$(\var{pol},p,\{\fl=0\})$: row vector of roots modulo
 $p$ of the polynomial \var{pol}. The particular non-prime value $p=4$ is
-accepted, mainly for $2$-adic computations. Multiple roots are {\it not\/}
+accepted, mainly for $2$-adic computations. Multiple roots are \var{not}
 repeated.
 
 If $p<100$, you may try setting $\fl=1$, which uses a naive search. In this
-case, multiple roots {\it are\/} repeated with their order of multiplicity.
+case, multiple roots \var{are} repeated with their order of multiplicity.
 
 \syn{rootmod}{\var{pol},p} ($\fl=0$) or
 $\teb{rootmod2}(\var{pol},p)$ ($\fl=1$).
 
 \subsecidx{polrootspadic}$(\var{pol},p,r)$: row vector of $p$-adic roots of the
 polynomial \var{pol} with $p$-adic precision equal to $r$. Multiple roots are
-{\it not\/} repeated. $p$ is assumed to be a prime.
+\var{not} repeated. $p$ is assumed to be a prime.
 
 \syn{rootpadic}{\var{pol},p,r}, where $r$ is a \kbd{long}.
 
@@ -4844,7 +4847,7 @@ much faster of course.
 Note that most linear algebra functions operating on subspaces defined by
 generating sets (such as \tet{mathnf}, \tet{qflll}, etc.) take matrices as
 arguments. As usual, the generating vectors are taken to be the
-{\it columns\/} of the given matrix.
+\var{columns} of the given matrix.
 
 \subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic dependence} $x$ being
 real or complex, finds a polynomial of degree at most $k$ having $x$ as
@@ -4900,7 +4903,7 @@ is $x$, i.e.~comes first, and bottom row otherwise).
 
 The empty matrix \kbd{[;]} is considered to have a number of rows compatible
 with any operation, in particular concatenation. (Note that this is
-definitely {\it not\/} the case for empty vectors \kbd{[~]} or \kbd{[~]\til}.)
+definitely \var{not} the case for empty vectors \kbd{[~]} or \kbd{[~]\til}.)
 
 If $y$ is omitted, $x$ has to be a row vector or a list, in which case its
 elements are concatenated, from left to right, using the above rules.
@@ -5036,10 +5039,9 @@ matrix} of order $x$, i.e.~the matrix whose coefficient ($i$,$j$) is $1/
 \syn{mathilbert}{x}.
 
 \subsecidx{mathnf}$(x,\{\fl=0\})$: if $x$ is a (not necessarily square)
-matrix of maximal rank, finds the {\it upper triangular\/}
-\idx{Hermite normal form}
-of $x$. If the rank of $x$ is equal to its number of rows, the result is a
-square matrix. In general, the columns of the result form a basis of the
+matrix of maximal rank, finds the \var{upper triangular} \idx{Hermite normal
+form} of $x$. If the rank of $x$ is equal to its number of rows, the result
+is a square matrix. In general, the columns of the result form a basis of the
 lattice spanned by the columns of $x$.
 
 If $\fl=0$, uses the naive algorithm. If the $\Z$-module generated by the
@@ -5047,7 +5049,7 @@ columns is a lattice, it is recommanded to use \kbd{mathnfmod(x,
 matdetint(x))} instead (much faster).
 
 If $\fl=1$, uses Batut's algorithm. Outputs a two-component row vector
-$[H,U]$, where $H$ is the {\it upper triangular\/} Hermite normal form
+$[H,U]$, where $H$ is the \var{upper triangular} Hermite normal form
 of $x$ (i.e.~the default result) and $U$ is the unimodular transformation
 matrix such that $xU=[0|H]$. If the rank of $x$ is equal to its number of
 rows, $H$ is a square matrix. In general, the columns of $H$ form a basis
@@ -5064,7 +5066,7 @@ case.
 If $\fl=4$, as in case 1 above, but uses \idx{LLL} reduction along the way.
 
 \syn{mathnf0}{x,\fl}. Also available are $\teb{hnf}(x)$ ($\fl=0$) and
-$\teb{hnfall}(x)$ ($\fl=1$). To reduce {\it huge} (say $400 \times 400$ and
+$\teb{hnfall}(x)$ ($\fl=1$). To reduce \var{huge} (say $400 \times 400$ and
 more) relation matrices (sparse with small entries), you can use the pair
 \kbd{hnfspec} / \kbd{hnfadd}. Since this is rather technical and the
 calling interface may change, they are not documented yet. Look at the code
@@ -5073,7 +5075,7 @@ in \kbd{basemath/alglin1.c}.
 \subsecidx{mathnfmod}$(x,d)$: if $x$ is a (not necessarily square) matrix of
 maximal rank with integer entries, and $d$ is a multiple of the (non-zero)
 determinant of the lattice spanned by the columns of $x$, finds the
-{\it upper triangular\/} \idx{Hermite normal form} of $x$.
+\var{upper triangular} \idx{Hermite normal form} of $x$.
 
 If the rank of $x$ is equal to its number of rows, the result is a square
 matrix. In general, the columns of the result form a basis of the lattice
@@ -5296,11 +5298,10 @@ $x$. The method used is Jacobi's method for symmetric matrices.
 \syn{jacobi}{x}.
 
 \subsecidx{qf{}lll}$(x,\{\fl=0\})$: \idx{LLL} algorithm applied to the
-{\it columns}
-of the (not necessarily square) matrix $x$. The columns of $x$ must however
-be of maximal rank (unless specified otherwise below). The result is a square
-transformation matrix $T$ such that $x\cdot T$ is an LLL-reduced basis of the
-lattice generated by the column vectors of $x$.
+\var{columns} of the (not necessarily square) matrix $x$. The columns of $x$
+must however be of maximal rank (unless specified otherwise below). The
+result is a square transformation matrix $T$ such that $x\cdot T$ is an
+LLL-reduced basis of the lattice generated by the column vectors of $x$.
 
 If $\fl=0$ (default), the computations are done with real numbers (i.e.~not
 with rational numbers) hence are fast but as presently programmed (version
@@ -5313,7 +5314,7 @@ accurate and quite fast. In this case, $x$ needs not be of maximal rank.
 If $\fl=2$, similar to case 1, except $x$ should be an integer matrix whose
 columns are linearly independent. The lattice generated by the columns of
 $x$ is first partially reduced before applying the LLL algorithm. [A basis
-is said to be {\it partially reduced} if $|v_i \pm v_j| \geq |v_i|$ for any
+is said to be \var{partially reduced} if $|v_i \pm v_j| \geq |v_i|$ for any
 two distinct basis vectors $v_i, \, v_j$.]
 
 This can be significantly faster than $\fl=1$ when one row is huge compared
@@ -5425,7 +5426,7 @@ $x[j]=y$, otherwise returns 0. If $\fl$ is non-zero returns the index $j$
 where $y$ should be inserted, and $0$ if it already belongs to $x$ (this is
 meant to be used in conjunction with \kbd{listinsert}).
 
-This function works also if $x$ is a {\it sorted\/} list (see \kbd{listsort}).
+This function works also if $x$ is a \var{sorted} list (see \kbd{listsort}).
 
 \syn{setsearch}{x,y,\fl} which returns a \kbd{long}
 integer.
@@ -5445,7 +5446,7 @@ non-square matrix (but not a vector), an error occurs.
 
 \subsecidx{vecextract}$(x,y,\{z\})$: extraction of components of the
 vector or matrix $x$ according to $y$. In case $x$ is a matrix, its
-components are as usual the {\it columns} of $x$. The parameter $y$ is a
+components are as usual the \var{columns} of $x$. The parameter $y$ is a
 component specifier, which is either an integer, a string describing a
 range, or a vector.
 
@@ -5471,8 +5472,8 @@ reverse order if $b < a$.
 In addition, if the first character in the string is \kbd{\pow}, the
 complement of the given set of indices is taken.
 
-If $z$ is not omitted, $x$ must be a matrix. $y$ is then the {\it line}
-specifier, and $z$ the {\it column} specifier, where the component specifier
+If $z$ is not omitted, $x$ must be a matrix. $y$ is then the \var{line}
+specifier, and $z$ the \var{column} specifier, where the component specifier
 is as explained above.
 
 \bprog%
@@ -5530,7 +5531,7 @@ $\teb{lexsort}(x)$ (= $\kbd{vecsort0}(x,\text{NULL},2)$).
 
 Also available are \teb{sindexsort} and \teb{sindexlexsort} which return a
 vector (type \typ{VEC}) of C-long integers $v$, where $v[1]\dots v[n]$
-contain the indices. Note that the resulting $v$ is {\it not\/} a valid PARI
+contain the indices. Note that the resulting $v$ is \var{not} a valid PARI
 object, but is in general easier to use in C programs!
 
 \section{Sums, products, integrals and similar functions}
@@ -5586,7 +5587,7 @@ If $\fl=1$, uses a general driver routine for doing numerical integration,
 making no particular assumption (slow).
 
 $\fl=2$ is tailored for being used when $a$ or $b$ are infinite. One
-{\it must\/} have $ab>0$, and in fact if for example $b=+\infty$, then it is
+\var{must} have $ab>0$, and in fact if for example $b=+\infty$, then it is
 preferable to have $a$ as large as possible, at least $a\ge1$.
 
 If $\fl=3$, the function is allowed to be undefined (but continuous) at $a$
@@ -5631,7 +5632,7 @@ time = 43 ms.
 \synt{produit}{entree *ep, GEN a, GEN b, char *expr, GEN x}.
 
 \subsecidx{prodeuler}$(X=a,b,\var{expr})$: product of expression \var{expr},
-initialized at 1. (i.e.~to a {\it real\/} number equal to 1 to the current
+initialized at 1. (i.e.~to a \var{real} number equal to 1 to the current
 \kbd{realprecision}), the formal parameter $X$ ranging over the prime numbers
 between $a$ and $b$.\sidx{Euler product}
 
@@ -5771,17 +5772,17 @@ section (with somewhat more complicated flags).
 
 $\bullet$ low-level plotting functions, where every drawing primitive (point,
 line, box, etc.) must be specified by the user. These low-level functions
-(called {\it rectplot} functions, sharing the prefix \kbd{plot}) work as
+(called \var{rectplot} functions, sharing the prefix \kbd{plot}) work as
 follows. You have at your disposal 16 virtual windows which are filled
 independently, and can then be physically ORed on a single window at
 user-defined positions. These windows are numbered from 0 to 15, and must be
 initialized before being used by the function \kbd{plotinit}, which specifies
-the height and width of the virtual window (called a {\it rectwindow} in the
+the height and width of the virtual window (called a \var{rectwindow} in the
 sequel). At all times, a virtual cursor (initialized at $[0,0]$) is
 associated to the window, and its current value can be obtained using the
 function \kbd{plotcursor}.
 
-  A number of primitive graphic objects (called {\it rect} objects) can then
+  A number of primitive graphic objects (called \var{rect} objects) can then
 be drawn in these windows, using a default color associated to that window
 (which can be changed under X11, using the \kbd{plotcolor} function, black
 otherwise) and only the part of the object which is inside the window will be
@@ -5811,7 +5812,7 @@ $y$-coordinates going downwards.
 also for GUI's based on X11 such as Openwindows and Motif), and for
 Sunview/Suntools only, though very little code remains which is actually
 platform-dependent. A Macintosh, and an Atari/Gem port were provided for
-previous versions. These {\it may} be adapted in future releases.
+previous versions. These \var{may} be adapted in future releases.
 
    Under X11/Suntools, the physical window (opened by \kbd{plotdraw} or any
 of the \kbd{ploth*} functions) is completely separated from GP (technically,
@@ -5849,7 +5850,7 @@ represented by expression \var{expr} from $a$ to $b$.
 virtual cursor. Draw in the rectwindow $w$ the outline of the rectangle which
 is such that the points $(x1,y1)$ and $(x2,y2)$ are opposite corners. Only
 the part of the rectangle which is in $w$ is drawn. The virtual cursor does
-{\it not\/} move.
+\var{not} move.
 
 \subsecidx{plotclip}$(w)$: `clips' the content of rectwindow $w$, i.e
 remove all parts of the drawing that would not be visible on the screen.
@@ -5865,7 +5866,7 @@ and you only have the following palette to choose from:
 
 Note that it should be fairly easy for you to hardwire some more colors by
 tweaking the files \kbd{rect.h} and \kbd{plotX.c}. User-defined
-colormaps would be nice, and {\it may\/} be available in future versions.
+colormaps would be nice, and \var{may} be available in future versions.
 
 \subsecidx{plotcopy}$(w1,w2,dx,dy)$: copy the contents of rectwindow
 $w1$ to rectwindow $w2$, with offset $(dx,dy)$.
@@ -5907,7 +5908,7 @@ the same window.
 
 \noindent The binary digits of $\fl$ mean:
 
-$\bullet$ 1: {\it \idx{parametric plot}}. Here \var{expr} must be a vector with
+$\bullet$ 1: \var{\idx{parametric plot}}. Here \var{expr} must be a vector with
 an even number of components. Successive pairs are then understood as the
 parametric coordinates of a plane curve. Each of these are then drawn.
 
@@ -5922,19 +5923,19 @@ curves.
 $y=x$.
 
 
-$\bullet$ 2: {\it \idx{recursive plot}}. If this flag is set, only {\it
-one\/} curve can be drawn at time, i.e.~\var{expr} must be either a
-two-component vector (for a single parametric curve, and the parametric flag
-{\it has\/} to be set), or a scalar function. The idea is to choose pairs of
-successive reference points, and if their middle point is not too far away
-from the segment joining them, draw this as a local approximation to the
-curve. Otherwise, add the middle point to the reference points. This is very
-fast, and usually more precise than usual plot. Compare the results of
+$\bullet$ 2: \var{\idx{recursive plot}}. If this flag is set, only \var{one}
+curve can be drawn at time, i.e.~\var{expr} must be either a two-component
+vector (for a single parametric curve, and the parametric flag \var{has} to
+be set), or a scalar function. The idea is to choose pairs of successive
+reference points, and if their middle point is not too far away from the
+segment joining them, draw this as a local approximation to the curve.
+Otherwise, add the middle point to the reference points. This is very fast,
+and usually more precise than usual plot. Compare the results of
 $$\kbd{ploth(X=-1,1,sin(1/X),2)}\quad
  \text{and}\quad\kbd{ploth(X=-1,1,sin(1/X))}$$
 for instance. But beware that if you are extremely unlucky, or choose too few
 reference points, you may draw some nice polygon bearing little resemblance
-to the original curve. For instance you should {\it never\/} plot recursively 
+to the original curve. For instance you should \var{never} plot recursively 
 an odd function in a symmetric interval around 0. Try
 \bprog%
   ploth(x = -20, 20, sin(x), 2)
@@ -5993,7 +5994,7 @@ virtual cursor does not move.
 $X$ and $Y$ are allowed to be scalars (in this case, both have to).
 There, a single segment will be drawn, between the virtual cursor current
 position and the point $(X,Y)$. And only the part thereof which
-actually lies within the boundary of $w$. Then {\it move} the virtual cursor
+actually lies within the boundary of $w$. Then \var{move} the virtual cursor
 to $(X,Y)$, even if it is outside the window. If you want to draw a
 line from $(x1,y1)$ to $(x2,y2)$ where $(x1,y1)$ is not necessarily the
 position of the virtual cursor, use \kbd{plotmove(w,x1,y1)} before using this
@@ -6007,14 +6008,14 @@ to position $(x,y)$.
 
 \subsecidx{plotpoints}$(w,X,Y)$: draw on the rectwindow $w$ the
 points whose $(x,y)$-coordinates are in the vectors of equal length $X$ and
-$Y$ and which are inside $w$. The virtual cursor does {\it not\/} move. This
+$Y$ and which are inside $w$. The virtual cursor does \var{not} move. This
 is basically the same function as \kbd{plothraw}, but either with no scaling
 factor or with a scale chosen using the function \kbd{plotscale}.
 
 As was the case with the \kbd{plotlines} function, $X$ and $Y$ are allowed to
 be (simultaneously) scalar. In this case, draw the single point $(X,Y)$ on
 the rectwindow $w$ (if it is actually inside $w$), and in any case
-{\it move\/} the virtual cursor to position $(x,y)$.
+\var{move} the virtual cursor to position $(x,y)$.
 
 \subsecidx{plotpointsize}$(w,size)$: changes the ``size'' of following
 points in rectwindow $w$. If $w = -1$, change it in all rectwindows.
@@ -6027,7 +6028,7 @@ This only works in the \kbd{gnuplot} interface.
 the rectangle which is such that the points $(x1,y1)$ and $(x1+dx,y1+dy)$ are
 opposite corners, where $(x1,y1)$ is the current position of the cursor.
 Only the part of the rectangle which is in $w$ is drawn. The virtual cursor
-does {\it not\/} move.
+does \var{not} move.
 
 \subsecidx{plotrecth}$(w,X=a,b,\var{expr},\{\fl=0\},\{n=0\})$: writes to
 rectwindow $w$ the curve output of \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$.
@@ -6127,7 +6128,7 @@ successive steps are used in the order they appear in $s$.
 \eprog
 
 \subsubsecidx{forsubgroup}$(H=G,\{B\},\var{seq})$: executes \var{seq} for
-each subgroup $H$ of the {\it abelian} group $G$ (given in 
+each subgroup $H$ of the \var{abelian} group $G$ (given in 
 SNF\sidx{Smith normal form} form or as a vector of elementary divisors),
 whose index is bounded by bound. The subgroups are not ordered in any
 obvious way, unless $G$ is a $p$-group in which case Birkhoff's algorithm
@@ -6187,8 +6188,8 @@ if (reallydoit \&\& longcomplicatedfunction(), $\dots$)%
 \noindent is a perfectly safe statement.
 
   Recall that functions such as \kbd{break} and \kbd{next} operate on
-{\it loops\/} (such as \kbd{for$xxx$}, \kbd{while}, \kbd{until}). The \kbd{if}
-statement is {\it not\/} a loop (obviously!).
+\var{loops} (such as \kbd{for$xxx$}, \kbd{while}, \kbd{until}). The \kbd{if}
+statement is \var{not} a loop (obviously!).
 
 \subsubsecidx{next}$(\{n=1\})$: interrupts execution of current $seq$,
 resume the next iteration of the innermost enclosing loop, within the
@@ -6202,11 +6203,11 @@ result $x$.
 \subsubsecidx{until}$(a,\var{seq})$: evaluates expression sequence \var{seq}
 until $a$ is not equal to 0 (i.e.~until $a$ is true). If $a$ is initially
 not equal to 0, \var{seq} is evaluated once (more generally, the condition
-on $a$ is tested {\it after\/} execution of the \var{seq}, not before as in
+on $a$ is tested \var{after} execution of the \var{seq}, not before as in
 \kbd{while}).
 
 \subsubsecidx{while}$(a,\var{seq})$: while $a$ is non-zero evaluate the
-expression sequence \var{seq}. The test is made {\it before\/} evaluating
+expression sequence \var{seq}. The test is made \var{before} evaluating
 the $seq$, hence in particular if $a$ is initially equal to zero the
 \var{seq} will not be evaluated at all.\smallskip
 
@@ -6216,7 +6217,7 @@ the $seq$, hence in particular if $a$ is initially equal to zero the
   In addition to the general PARI functions, it is necessary to have some
 functions which will be of use specifically for GP, though a few of these can
 be accessed under library mode. Before we start describing these, we recall
-the difference between {\it strings\/} and {\it keywords\/} (see
+the difference between \var{strings} and \var{keywords} (see
 \secref{se:strings}): the latter don't get expanded at all, and you can type
 them without any enclosing quotes. The former are dynamic objects, where
 everything outside quotes gets immediately expanded.
@@ -6227,7 +6228,7 @@ arguments (possibly none) can be given.
 
 \subsubsecidx{addhelp}$(S,\var{str})$:\label{se:addhelp} changes the help
 message for the symbol $S$. The string \var{str} is expanded on the spot
-and stored as the online help for $S$. If $S$ is a function {\it you\/} have
+and stored as the online help for $S$. If $S$ is a function \var{you} have
 defined, its definition will still be printed before the message \var{str}.
 It is recommended that you document global variables and user functions in
 this way. Of course GP won't protest if you don't do it.
@@ -6237,22 +6238,22 @@ functions (but if you do, we'd like to hear why you needed to do it!).
 
 \subsubsecidx{alias}$(\var{newkey},\var{key})$: defines the keyword
 \var{newkey} as an alias for keyword \var{key}. \var{key} must correspond
-to an existing {\it function\/} name.
-This is different from the general user macros in that alias expansion takes
-place immediately upon execution, without having to look up any function
-code, and is thus much faster. A sample alias file \kbd{misc/gpalias} is
-provided with the standard distribution. Alias commands are meant to be read
-upon startup from the \kbd{.gprc} file, to cope with function names you are
-dissatisfied with, and should be useless in interactive usage.
+to an existing \var{function} name. This is different from the general user
+macros in that alias expansion takes place immediately upon execution,
+without having to look up any function code, and is thus much faster. A
+sample alias file \kbd{misc/gpalias} is provided with the standard
+distribution. Alias commands are meant to be read upon startup from the
+\kbd{.gprc} file, to cope with function names you are dissatisfied with, and
+should be useless in interactive usage.
 
 \subsubsecidx{allocatemem}$(\{x=0\})$: this is a very special operation which
-allows the user to change the stack size {\it after\/} initialization. $x$
+allows the user to change the stack size \var{after} initialization. $x$
 must be a non-negative integer. If $x!=0$, a new stack of size $16*\lceil
 x/16\rceil$ bytes will be allocated, all the PARI data on the old stack will
 be moved to the new one, and the old stack will be discarded. If $x=0$, the
 size of the new stack will be twice the size of the old one.
 
-Although it is a function, this must be the {\it last\/} instruction in any GP
+Although it is a function, this must be the \var{last} instruction in any GP
 sequence. The technical reason is that this routine usually moves the stack,
 so objects from the current sequence might not be correct anymore. Hence, to
 prevent such problems, this routine terminates by a \kbd{longjmp} (just as an
@@ -6270,11 +6271,13 @@ defaults, and \secref{se:meta} for some shortcut alternatives.
 
 If \var{val} is omitted, prints the current value of default \var{key}.
 If \var{key} is omitted, prints the current values of all the defaults.
+In short, typing \kbd{default()} has the same effect as \b{d}.
+
 If $\fl$ is set, returns the result instead of printing it.
 
-\subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of them
-interpreted as a string), then interrupts the running GP program, returning to
-the input prompt.
+\subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of
+them interpreted as a string), then interrupts the running GP program,
+returning to the input prompt.
 
 Example: \kbd{error("n = ", n, " is not squarefree !")}.
 
@@ -6337,7 +6340,7 @@ sequence of expressions is given, the result is the result of the last
 expression of the sequence. When using this instruction, it is useful to
 prompt for the string by using the \kbd{print1} function. Note that in the
 present version 2.19 of \kbd{pari.el}, when using GP under GNU Emacs (see
-\secref{se:emacs}) one {\it must\/} prompt for the string, with a string
+\secref{se:emacs}) one \var{must} prompt for the string, with a string
 which ends with the same prompt as any of the previous ones (a \kbd{"? "}
 will do for instance).
 
@@ -6364,7 +6367,7 @@ called by the \kbd{+} operator of course):
 when GP has been compiled statically. In that case, the first use of an
 installed function will provoke a Segmentation Fault, i.e.~a major internal
 blunder (this should never happen with a dynamically linked executable). This
-{\it used\/} to be the fate of statically linked gp on \kbd{Linux} and
+\var{used} to be the fate of statically linked gp on \kbd{Linux} and
 \kbd{OSF1} up to and including version 2.0.3.
 
 Hence, if you intend to use this function, please check first on some
@@ -6481,7 +6484,7 @@ created object, as well as the objects created from it, will not be reduced
 automatically, making some operations a bit faster.
 
 There is no equivalent library syntax, since the internal functions \kbd{typ}
-and \kbd{settyp} are available. Note that \kbd{settyp} does {\it not\/}
+and \kbd{settyp} are available. Note that \kbd{settyp} does \var{not}
 create a copy of \kbd{x}, contrary to most PARI functions. It also doesn't
 check for consistency. \kbd{settyp} just changes the type in place and
 returns nothing. \kbd{typ} returns a C long integer. Note also the different
