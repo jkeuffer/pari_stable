@@ -42,6 +42,12 @@ Done for version 2.2.7 (released ??/07/2003):
     2- bnfisnorm(bnfinit(x^2-11),1) --> [Mod(1, #), 1]   [ return a result
        involving MAXVARN on trivial input ]
     3- [Mat(5)] * [[0]~]~ --> 0. Should be [0]~   [introduced in 2.2.6-C.25]
+    4- \p 1000
+E=ellinit([1,0,1,-120039822036992245303534619191166796374,5042249924849106700108
+01799168082726759443756222911415116]);
+x1=1e100; y1=ellordinate(E,x1)[1];
+ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
+       [ precision error ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

@@ -1059,7 +1059,7 @@ elleta(GEN om, long prec)
 }
 
 static GEN
-reduce_z(GEN z, long prec, SL2_red *T)
+reduce_z(GEN z, SL2_red *T)
 {
   GEN Z = gdiv(z, T->W2);
   long t = typ(z);
@@ -1070,7 +1070,8 @@ reduce_z(GEN z, long prec, SL2_red *T)
   Z = gsub(Z, gmul(T->x,T->Tau));
   T->y = ground(greal(Z));
   Z = gsub(Z, T->y);
-  if (gcmp0(Z) || gexpo(Z) < 5 - bit_accuracy(prec)) Z = NULL; /* z in L */
+  if (gcmp0(Z) || gexpo(Z) < 5 - bit_accuracy(gprecision(Z)))
+    Z = NULL; /* z in L */
   return Z;
 }
 
@@ -1083,7 +1084,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
   pari_sp av=avma, lim, av1;
   GEN p1,pii2,q,u,y,yp,u1,u2,qn,v;
 
-  z = reduce_z(z,prec, T);
+  z = reduce_z(z, T);
   if (!z) return NULL;
 
   /* Now L,z normalized to <1,tau>. z in fund. domain of <1, tau> */
@@ -1148,7 +1149,7 @@ ellzeta(GEN om, GEN z, long prec)
   SL2_red T;
 
   if (!get_periods(om, &T)) err(typeer,"ellzeta");
-  Z = reduce_z(z, prec, &T);
+  Z = reduce_z(z, &T);
   if (!Z) err(talker,"can't evaluate ellzeta at a pole");
   if (!gcmp0(T.x) || !gcmp0(T.y))
   {
@@ -1196,7 +1197,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
   SL2_red T;
 
   if (!get_periods(w, &T)) err(typeer,"ellsigma");
-  Z = reduce_z(z, prec, &T);
+  Z = reduce_z(z, &T);
   if (!Z)
   {
     if (!dolog) return gzero;
