@@ -984,7 +984,7 @@ hil(GEN x, GEN y, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-/* Tonelli-Shanks. Assume p is prime and (a,p) = -1. */
+/* Tonelli-Shanks. Assume p is prime and (a,p) != -1. */
 ulong
 Fl_sqrt(ulong a, ulong p)
 {
@@ -1007,7 +1007,7 @@ Fl_sqrt(ulong a, ulong p)
       if (i >= 0)
       {
         if (i) continue;
-        err(talker,"composite modulus in Fp_sqrt: %lu",p);
+        err(talker,"composite modulus in Fl_sqrt: %lu",p);
       }
       y = m = Fl_pow(k, q, p);
       for (i=1; i<e; i++)
@@ -1024,7 +1024,7 @@ Fl_sqrt(ulong a, ulong p)
        a square --> w even power of y, hence w^(2^(e-1)) = 1 */
     p1 = Fl_sqr(w,p);
     for (k=1; p1 != 1 && k < e; k++) p1 = Fl_sqr(p1,p);
-    if (k == e) err(talker,"composite modulus in Fl_sqrt: %lu?", p);
+    if (k == e) err(talker,"non quadratic residue Mod(%lu,%lu) in Fl_sqrt",a,p);
     /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
     p1 = y;
     for (i=1; i < e-k; i++) p1 = Fl_sqr(p1,p);
