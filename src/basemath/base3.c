@@ -2167,11 +2167,11 @@ init_units(GEN bnf, GEN *funits, GEN *racunit)
 static GEN
 ideallistzstarall(GEN bnf,long bound,long flag)
 {
-  byteptr ptdif=diffptr;
-  pari_sp lim,av0=avma,av;
-  long i,j,k,l,q2,lp1,q;
+  byteptr ptdif = diffptr;
+  pari_sp lim, av, av0 = avma;
+  long i, j, k, l, q2, lp1, q;
   long do_gen = flag & 1, do_units = flag & 2, big_id = !(flag & 4);
-  GEN y,nf,p,z,z2,p1,p2,p3,fa,pr,ideal,lu,lu2,funits,racunit,embunit;
+  GEN y,nf,p,z,z2,p1,p2,fa,pr,ideal,lu,lu2,funits,racunit,embunit;
 
   nf = checknf(bnf);
   if (bound <= 0) return cgetg(1,t_VEC);
@@ -2185,15 +2185,15 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   {
     init_units(bnf,&funits,&racunit);
     lu = cgetg(bound+1,t_VEC);
-    for (i=2; i<=bound; i++) lu[i]=lgetg(1,t_VEC);
+    for (i=2; i<=bound; i++) lu[i] = lgetg(1,t_VEC);
     lu[1] = (long)_vec(logunitmatrix(nf,funits,racunit,ideal));
   }
 
-  p=cgeti(3); p[1]=evalsigne(1) | evallgefint(3);
-  av=avma; lim=stack_lim(av,1);
+  p = cgeti(3); p[1] = evalsigne(1) | evallgefint(3);
+  av = avma; lim = stack_lim(av,1);
   lu2 = embunit = NULL; /* gcc -Wall */
   maxprime_check((ulong)bound);
-  for (p[2]=0; p[2]<=bound; )
+  for (p[2] = 0; p[2] <= bound; )
   {
     NEXT_PRIME_VIADIFF(p[2], ptdif);
     if (DEBUGLEVEL>1) { fprintferr("%ld ",p[2]); flusherr(); }
@@ -2203,19 +2203,19 @@ ideallistzstarall(GEN bnf,long bound,long flag)
       pr = (GEN)fa[j]; p1 = powgi(p,(GEN)pr[4]);
       if (is_bigint(p1) || (q = itos(p1)) > bound) continue;
 
-      q2=q; ideal=pr; z2=dummycopy(z);
-      if (do_units) lu2=dummycopy(lu);
+      q2 = q; ideal = pr; z2 = dummycopy(z);
+      if (do_units) lu2 = dummycopy(lu);
       for (l=2; ;l++)
       {
         if (big_id) ideal = zidealstarinitall(nf,ideal,do_gen);
         if (do_units) embunit = logunitmatrix(nf,funits,racunit,ideal);
-        for (i=q; i<=bound; i+=q)
+        for (i = q; i <= bound; i += q)
         {
           p1 = (GEN)z[i/q]; lp1 = lg(p1);
           if (lp1 == 1) continue;
 
           p2 = cgetg(lp1,t_VEC);
-          for (k=1; k<lp1; k++)
+          for (k = 1; k < lp1; k++)
             if (big_id)
               p2[k] = (long)zidealstarinitjoin(nf,(GEN)p1[k],ideal,do_gen);
             else
@@ -2225,8 +2225,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
           {
             p1 = (GEN)lu[i/q];
             p2 = cgetg(lp1,t_VEC);
-            for (k=1; k<lp1; k++)
-              p2[k] = (long)vconcat((GEN)p1[k],embunit);
+            for (k = 1; k < lp1; k++) p2[k] = (long)vconcat((GEN)p1[k],embunit);
             lu2[i] = (long)concatsp((GEN)lu2[i],p2);
           }
         }
@@ -2237,22 +2236,20 @@ ideallistzstarall(GEN bnf,long bound,long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&z; gptr[1]=&lu;
       if(DEBUGMEM>1) err(warnmem,"ideallistzstarall");
-      gerepilemany(av,gptr,do_units?2:1);
+      gerepileall(av, do_units?2:1, &z, &lu);
     }
   }
   if (!do_units) return gerepilecopy(av0, z);
   y = cgetg(3,t_VEC);
-  y[1] = lcopy(z);
-  lu2 = cgetg(lg(z),t_VEC);
-  for (i=1; i<lg(z); i++)
+  y[1] = (long)z;
+  for (i = 1; i < lg(z); i++)
   {
-    p1=(GEN)z[i]; p2=(GEN)lu[i]; lp1=lg(p1);
-    p3=cgetg(lp1,t_VEC); lu2[i]=(long)p3;
-    for (j=1; j<lp1; j++) p3[j] = lmul(gmael(p1,j,5),(GEN)p2[j]);
+    GEN p1 = (GEN)z[i], p2 = (GEN)lu[i];
+    long l = lg(p2);
+    for (j = 1; j < l; j++) p2[j] = lmul(gmael(p1,j,5), (GEN)p2[j]);
   }
-  y[2]=(long)lu2; return gerepileupto(av0, y);
+  y[2] = (long)lu; return gerepilecopy(av0, y);
 }
 
 GEN
