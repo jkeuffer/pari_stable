@@ -1587,16 +1587,11 @@ END:
 
 extern GEN addmulXn(GEN x, GEN y, long d);
 
-/* return 0 if p divides x, w(x) otherwise */
+/* return w(x), x _should not_ be divisible by p */
 static GEN
 quickteich(GEN vz, GEN p, GEN x)
 {
-  GEN y;
-
-  if (!vz) return teich(x);
-  y  = (typ(x) == t_PADIC)? gtrunc(x): x;
-  if (divise(y, p)) return gzero;
-  return (GEN)vz[itos(modii(y, p))];
+  return (GEN)vz[itos(modii(lift(x), p))];
 }
 
 /* compute phi^(m)_s(x); s must be an integer */ 
@@ -1605,17 +1600,16 @@ phi_ms(GEN vz, GEN p, long m, GEN s, GEN x)
 {
   GEN p1, p2; 
 
-  if (valp(x) > 0) return gzero;
+  if (divise(lift(x), p)) return gzero;
   p1 = powgi(quickteich(vz, p, x), addis(s, m));
   p2 = powgi(x, negi(s));
-  return gmul(p1, p2);
+  return lift(gmul(p1, p2));
 }
 
-/* compute the coefficients of the power series corresponding 
-   to the twisted partial zeta function Z_f(a, c, s) for a 
-   in va; skip the constant coefficient which is zero */
+/* compute the values of the twisted partial 
+   zeta function Z_f(a, c, s) for a in va */
 static GEN 
-twistpartialpowser(GEN p, GEN q, long N, long f, long c, GEN va)
+twistpartialzeta(GEN p, GEN q, long N, long f, long c, GEN va, GEN cff)
 {
   long j, k, lva = lg(va)-1, a;
   pari_sp av, lim;
@@ -1638,16 +1632,19 @@ twistpartialpowser(GEN p, GEN q, long N, long f, long c, GEN va)
   /* ser is a unit, convert to POL */
   ser[0] = evaltyp(t_POL)| evallg(lg(ser));
   ser[1] = evalsigne(1)| evalvarn(0);
-  a   = 1;
+  a = 1;
   for (j = 1; j <= lva; j++)
   {
-    GEN p2 = cgetg(N+1, t_VEC);
+    GEN p1 = gzero;
+    if (DEBUGLEVEL > 2 && !(j%50))
+      fprintferr("  twistpartialpowser: %ld\%\n", 100*j/lva);      
     for (k = 1; k <= N; k++)
     {
       pari_sp av2 = avma;
-      p2[k] = lpileupto(av2, quicktrace(polcoeff_i(ser,k,0), psm));
+      GEN p2 = quicktrace(polcoeff_i(ser,k,0), psm);
+      p1 = gerepileupto(av2, addii(p1, mulii((GEN)cff[k], p2)));
     }
-    rep[j] = (long)p2;    
+    rep[j] = lmodii(p1, q);
     if (j < lva) 
     {
       long e = va[j+1] - a, i;
@@ -1668,8 +1665,7 @@ twistpartialpowser(GEN p, GEN q, long N, long f, long c, GEN va)
         for (i=2; i<lg(ser); i++)
           ser[i] = (long)FpX_rem((GEN)ser[i], cyc, q);
       }
-
-      a   = va[j+1];
+      a = va[j+1];
     }
     if (low_stack(lim, stack_lim(av, 1)))
     {
@@ -1695,10 +1691,11 @@ gzetap(GEN s)
   pp = precp(s);
   is = gtrunc(s);  /* make s an integer */
   N  = itos(mulis(p, pp))+2*xp; /* FIXME: crude estimation */
-  q  = gpowgs(p, pp+xp);
+  q  = gpowgs(p, pp+2*xp);
 
   /* initialize the roots of unity for the computation 
      of the Teichmuller character (also the values of f and c) */
+  if (DEBUGLEVEL > 1) fprintferr("gzetap: computing roots of 1\n");
   if (cmpis(p, 2) == 0)
   {  
     vz = NULL;
@@ -1712,15 +1709,15 @@ gzetap(GEN s)
     for (j = 1; cmpsi(j, p) < 0; j++)
       vz[j] = (long)gsubgs(x, j);
     p1 = hensel_lift_fact(p1, vz, NULL, p, q, pp+xp);
-    /* p1 = polhensellift(p1, vz, p, pp+xp); */
     for (j = 1; cmpsi(j, p) < 0; j++)
-      vz[j] = (long)gadd(gneg(polcoeff0((GEN) p1[j], 0, 0)), 
-			 zeropadic(p, pp+xp));
+      vz[j] = (long)gmodulcp(gneg(polcoeff0((GEN) p1[j], 0, 0)), q);
     f = itos(p); c = 2;      
   }
 
   /* compute the first N coefficients of the Malher expansion 
      of phi^(-1)_s skipping the first one (which is zero) */
+  if (DEBUGLEVEL > 1) 
+    fprintferr("gzetap: computing Mahler expansion of phi^(-1)_s\n");
   cff = cgetg(N+1, t_VEC);
   bn = new_chunk(N+2); /* bn[i] = binom(k, i), i <= k */
   l = lg(q);
@@ -1728,9 +1725,7 @@ gzetap(GEN s)
   for (k = 1; k <= N; k++)
   {
     pari_sp av2 = avma;
-    GEN p1, A = phi_ms(vz, p, -1, is, gaddsg(k, zeropadic(p, pp+xp)));
-    A  = gtrunc(A);
-    p1 = gzero;
+    GEN p1 = gzero, A = phi_ms(vz, p, -1, is, gmodulsg(k, q));
     for (j = k - 1; j > 0; j--)
     {
       GEN b = addii((GEN)bn[j], (GEN)bn[j-1]);
@@ -1748,22 +1743,21 @@ gzetap(GEN s)
   /* The line below looks a bit stupid but it is to keep the 
      possibility of later adding p-adic Dirichlet L-functions */
   va = perm_identity(f - 1);
-  vtz = twistpartialpowser(p, q, N, f, c, va);
+  if (DEBUGLEVEL > 1) 
+    fprintferr("gzetap: computing twisted partial zeta functions\n");
+  vtz = twistpartialzeta(p, q, N, f, c, va, cff);
   
   /* sum over all a's the coefficients of the twisted 
      partial zeta functions and integrate */
+  if (DEBUGLEVEL > 1) 
+    fprintferr("gzetap: summing up and multiplying by correcting factor\n");
   val = gzero;
-  for (k = 1; k <= N; k++)
-  {
-    GEN p1 = gzero;
-    for (j = 1; j < f; j++)
-      p1 = gadd(p1, gcoeff(vtz, k, j));
-    val = gadd(val, gmul(p1, (GEN)cff[k]));
-  }
+  for (j = 1; j < f; j++)
+    val = gadd(val, (GEN)vtz[j]);
+  val = lift(val);
 
   /* finally we multiply by the corrective factor */
-  cft = gsubgs(gmulsg(c, phi_ms(vz, p, -1, is,
-				gaddsg(c, zeropadic(p, pp+xp)))), 1);
+  cft = gsubgs(gmulsg(c, phi_ms(vz, p, -1, is, gmodulsg(c, q))), 1);
   val = gdiv(val, cft);
 
   /* adjust the precision and return */
