@@ -108,7 +108,7 @@ initprimes1(ulong size, long *lenp, long *lastp)
 /*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks
     like there is 64K of quickier cache too).
 
-      arena|    30m     100m    300m    1000m    2000m	<-- primelimit
+      arena|    30m     100m    300m    1000m    2000m  <-- primelimit
       =================================================
       16K       1.1053  1.1407  1.2589  1.4368   1.6086 
       24K       1.0000  1.0625  1.1320  1.2443   1.3095 
@@ -152,7 +152,7 @@ initprimes1(ulong size, long *lenp, long *lastp)
 
      [SLOW2_IN_ROOTS = 0.36, ALPHA = 0.38]
 
-      arena|    30m     100m    300m    1000m    2000m	<-- primelimit
+      arena|    30m     100m    300m    1000m    2000m  <-- primelimit
       =================================================
         16K    1.014    0.9835  0.9942  0.9889  1.004
         24K    0.9526   0.9758  0.9861  0.9942  0.981
@@ -215,8 +215,8 @@ initprimes1(ulong size, long *lenp, long *lastp)
 #  endif
 #endif
 
-#define CACHE_ALPHA	(0.38)		/* Cache performance model parameter */
-#define CACHE_CUTOFF	(0.018)		/* Cache performance not smooth here */
+#define CACHE_ALPHA     (0.38)          /* Cache performance model parameter */
+#define CACHE_CUTOFF    (0.018)         /* Cache performance not smooth here */
 
 static double slow2_in_roots = SLOW2_IN_ROOTS;
 
@@ -248,7 +248,7 @@ static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
  */
 ulong
 good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
-		cache_model_t *cache_model, long model_type)
+                cache_model_t *cache_model, long model_type)
 {
   ulong asize, cache_arena = cache_model->arena;
   double Xmin, Xmax, A, B, C1, C2, D, V;
@@ -296,7 +296,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
   /* The simple case: fitting into cache doesn't slow us down more than 10% */
   if (cache_arena - fixed_to_cache > 10 * slow2_size) {
       asize = cache_arena - fixed_to_cache;
-      if (asize > total) asize = total;	/* Automatically false... */
+      if (asize > total) asize = total; /* Automatically false... */
       return asize;
   }
   /* Slowdown of not fitting into cache is significant.  Try to optimize.
@@ -312,36 +312,36 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
   if (D > 0)
       V = cut_off*cut_off + 2*C1*cut_off + C2; /* Value at CUT_OFF */
   else
-      V = 0;				/* Peacify the warning */
+      V = 0;                            /* Peacify the warning */
   Xmin = cut_off;
   Xmax = ((double)total - fixed_to_cache)/cache_arena; /* Two candidates */
 
   if ( D <= 0 || (V >= 0 && C1 + cut_off >= 0) ) /* slowdown increasing */
-      Xmax = cut_off;			/* Only one candidate */
-  else if (V >= 0 &&			/* slowdown concave down */
-	   ((Xmax + C1) <= 0 || (Xmax*Xmax + 2*C1*Xmax + C2) <= 0))
-      /* DO NOTHING */;			/* Keep both candidates */
+      Xmax = cut_off;                   /* Only one candidate */
+  else if (V >= 0 &&                    /* slowdown concave down */
+           ((Xmax + C1) <= 0 || (Xmax*Xmax + 2*C1*Xmax + C2) <= 0))
+      /* DO NOTHING */;                 /* Keep both candidates */
   else if (V <= 0 && (Xmax*Xmax + 2*C1*Xmax + C2) <= 0) /* slowdown decreasing */
-      Xmin = cut_off;			/* Only one candidate */
+      Xmin = cut_off;                   /* Only one candidate */
   else /* Now we know: two root, the largest is in CUT_OFF..Xmax */
       Xmax = sqrt(D) - C1;
-  if (Xmax != Xmin) {	/* Xmin == CUT_OFF; Check which one is better */
+  if (Xmax != Xmin) {   /* Xmin == CUT_OFF; Check which one is better */
       double v1 = (cut_off + A)/(cut_off + B);
       double v2 = 2.33 * (Xmax + A)/(Xmax + B) * pow(Xmax, alpha);
 
       if (1.1 * v2 >= v1) /* Prefer fitting into the cache if slowdown < 10% */
-	  V = v1;
+          V = v1;
       else {
-	  Xmin = Xmax;
-	  V = v2;
+          Xmin = Xmax;
+          V = v2;
       }
-  } else if (B > 0)			/* We need V */
+  } else if (B > 0)                     /* We need V */
       V = 2.33 * (Xmin + A)/(Xmin + B) * pow(Xmin, alpha);
   if (B > 0 && 1.1 * V > A/B)  /* Now Xmin is the minumum.  Compare with 0 */
       Xmin = 0;
 
   asize = (ulong)((1 + Xmin)*cache_arena - fixed_to_cache);
-  if (asize > total) asize = total;	/* May happen due to approximations */
+  if (asize > total) asize = total;     /* May happen due to approximations */
   return asize;
 }
 
@@ -406,29 +406,29 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
        corresponding odd number is prime or not */
     ulong p;
     byteptr q;
-    register byteptr write_to = data;	/* Better code with gcc 2.8.1 */
-    register ulong   cnt      = count;	/* Better code with gcc 2.8.1 */
-    register ulong   start    = s;	/* Better code with gcc 2.8.1 */
-    register ulong   delta    = 1;	/* Better code with gcc 2.8.1 */
+    register byteptr write_to = data;   /* Better code with gcc 2.8.1 */
+    register ulong   cnt      = count;  /* Better code with gcc 2.8.1 */
+    register ulong   start    = s;      /* Better code with gcc 2.8.1 */
+    register ulong   delta    = 1;      /* Better code with gcc 2.8.1 */
 
     memset(data, 0, cnt);
-    start >>= 1;			/* (start - 1)/2 */
-    start += cnt;			/* Corresponds to the end */
+    start >>= 1;                        /* (start - 1)/2 */
+    start += cnt;                       /* Corresponds to the end */
     cnt -= 1;
     /* data corresponds to start.  q runs over primediffs.  */
     /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
     for (q = known_primes + 1, p = 3; delta; delta = *++q, p += delta) {
-	/* first odd number which is >= start > p and divisible by p
-	   = last odd number which is <= start + 2p - 1 and 0 (mod p)
-	   = p + the last even number which is <= start + p - 1 and 0 (mod p)
-	   = p + the last even number which is <= start + p - 2 and 0 (mod p)
-	   = p + start + p - 2 - (start + p - 2) % 2p
-	   = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
+        /* first odd number which is >= start > p and divisible by p
+           = last odd number which is <= start + 2p - 1 and 0 (mod p)
+           = p + the last even number which is <= start + p - 1 and 0 (mod p)
+           = p + the last even number which is <= start + p - 2 and 0 (mod p)
+           = p + start + p - 2 - (start + p - 2) % 2p
+           = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
       long off = cnt - ((start+(p>>1)) % p);
 
       while (off >= 0) {
-	  write_to[off] = 1;
-	  off -= p;
+          write_to[off] = 1;
+          off -= p;
       }
     }
 }
@@ -474,7 +474,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   /* Actually, we access primes array of psize too; but we access it
      consequently, thus we do not include it in fixed_to_cache */
   asize = good_arena_size((ulong)(rootnum * slow2_in_roots), remains + 1, 0,
-			  &cache_model, 0) - 1;
+                          &cache_model, 0) - 1;
   /* enough room on the stack ? */
   alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
   if (alloced)
@@ -490,7 +490,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
      it may point before p..fin-1. */
   plast = p - ((rootnum - last) >> 1) - 1;
   p_prime_above = p1 + 2;
-  while (remains)	/* Cycle over arenas.  Performance is not crucial */
+  while (remains)       /* Cycle over arenas.  Performance is not crucial */
   {
     unsigned char was_delta;
 
@@ -500,20 +500,20 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     }
     /* Fake the upper limit appropriate for the given arena */
     while (prime_above*prime_above <= curlow + (asize << 1) && *p_prime_above)
-	prime_above += *p_prime_above++;
+        prime_above += *p_prime_above++;
     was_delta = *p_prime_above;
-    *p_prime_above = 0;			/* Put a 0 sentinel for sieve_chunk */
+    *p_prime_above = 0;                 /* Put a 0 sentinel for sieve_chunk */
 
     (*sieve_chunk_p)(p1, curlow, p, asize);
 
-    *p_prime_above = was_delta;		/* Restore */
-    p[asize] = 0;			/* Put a 0 sentinel for ZZZ */
+    *p_prime_above = was_delta;         /* Restore */
+    p[asize] = 0;                       /* Put a 0 sentinel for ZZZ */
     /* now q runs over addresses corresponding to primes */
     for (q = p; ; plast = q++)
     {
       long d;
 
-      while (*q) q++;			/* use ZZZ 0-sentinel at end */
+      while (*q) q++;                   /* use ZZZ 0-sentinel at end */
       if (q >= fin) break;
       d = (q - plast) << 1;
       while (d >= DIFFPTR_SKIP)
@@ -737,7 +737,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (i<0) { (void)stoi(-1); (void)stoi(1); nb++; }
   if (is_pm1(n)) return aux_end(NULL,nb);
 
-  n = gclone(n);  setsigne(n,1);
+  n = gclone(n); setsigne(n,1);
   i = vali(n);
   if (i)
   {
@@ -1510,7 +1510,8 @@ sq_gen(GEN z, GEN x)
     v1 = divii((GEN)x[1],d1);
     v2 = mulii(v1,mppgcd(d1,(GEN)x[3]));
   }
-  m = mulii((GEN)x[3],x2); setsigne(m,-signe(m));
+  m = mulii((GEN)x[3],x2);
+  setsigne(m,-signe(m));
   r = modii(m,v2); p1 = mulii(v1,r);
   c3 = addii(mulii((GEN)x[3],d1), mulii(r,addii((GEN)x[2],p1)));
   z[1] = lmulii(v1,v2);
@@ -2400,8 +2401,8 @@ binaire(GEN x)
       do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
-	m=HIGHBIT; xp=int_precW(xp); u=*xp;
-	do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
+        m=HIGHBIT; xp=int_precW(xp); u=*xp;
+        do { y[ly] = m & u ? un : zero; ly++; } while (m>>=1);
       }
       break;
     }
@@ -2485,92 +2486,75 @@ gbittest(GEN x, GEN n)
 extern GEN int_normalize(GEN x, long known_zero_words);
 
 INLINE GEN
-inegate(GEN z)
-{
-  return subsi(-1,z);
-}
+inegate(GEN z) { return subsi(-1,z); }
 
 /* Truncate a non-negative integer to a number of bits.  */
 static GEN
 ibittrunc(GEN x, long bits)
 {
-    int xl = lgefint(x) - 2;
-    int len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG);
-    int known_zero_words;
+  int xl = lgefint(x) - 2;
+  int len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG);
+  int known_zero_words;
 
-    if (xl < len_out)
-        return x;
-        /* Check whether mask is trivial */
-    if (!(bits & (BITS_IN_LONG - 1))) {
-	if (xl == len_out)
-	    return x;
-    } else if (len_out <= xl)
-    {
-      GEN xi=int_W(x, len_out-1);
-      /* Non-trival mask is given by a formula, if x is not
-         normalized, this works even in the exceptional case */
-      *xi = *xi & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
-      if (*xi && xl == len_out)
-        return x;
-    }
-    /* Normalize */
-    if (xl <= len_out)			/* Not normalized */
-      known_zero_words = 0;
-    else
-      known_zero_words = xl - len_out;
-    return int_normalize(x, known_zero_words);
+  if (xl < len_out)
+      return x;
+      /* Check whether mask is trivial */
+  if (!(bits & (BITS_IN_LONG - 1))) {
+      if (xl == len_out)
+          return x;
+  } else if (len_out <= xl) {
+    GEN xi = int_W(x, len_out-1);
+    /* Non-trival mask is given by a formula, if x is not
+       normalized, this works even in the exceptional case */
+    *xi = *xi & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
+    if (*xi && xl == len_out) return x;
+  }
+  /* Normalize */
+  known_zero_words = xl - len_out;
+  if (known_zero_words < 0) known_zero_words = 0;
+  return int_normalize(x, known_zero_words);
 }
 
 GEN
 gbitneg(GEN x, long bits)
 {
-    long xl, len_out, i;
-    const ulong uzero = 0;
+  const ulong uzero = 0;
+  long xl, len_out, i;
 
-    if (typ(x) != t_INT)
-        err(typeer, "bitwise negation");
-    if (bits < -1)
-        err(talker, "negative exponent in bitwise negation");
-    if (bits == -1)
-        return inegate(x);
-    if (bits == 0)
-	return gzero;
-    if (signe(x) == -1) {		/* Consider as if mod big power of 2 */
-        pari_sp ltop=avma;
-        x = inegate(x);
-	x = ibittrunc(x, bits);
-        return gerepileuptoint(ltop, x);
+  if (typ(x) != t_INT)
+      err(typeer, "bitwise negation");
+  if (bits < -1)
+      err(talker, "negative exponent in bitwise negation");
+  if (bits == -1) return inegate(x);
+  if (bits == 0) return gzero;
+  if (signe(x) < 0) { /* Consider as if mod big power of 2 */
+    pari_sp ltop = avma;
+    return gerepileuptoint(ltop, ibittrunc(inegate(x), bits));
+  }
+  xl = lgefint(x);
+  len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
+  if (len_out > xl) { /* Need to grow */
+    GEN out, outp, xp = int_MSW(x);
+    out = cgeti(len_out); out[1] = evalsigne(1) | evallgefint(len_out);
+    outp = int_MSW(out);
+    if (!(bits & (BITS_IN_LONG - 1)))
+      *outp = ~uzero;
+    else
+      *outp = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
+    for (i = 3; i < len_out - xl + 2; i++)
+    {
+      outp = int_precW(outp); *outp = ~uzero;
     }
-    xl = lgefint(x);
-    len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG) + 2;
-    if (len_out > xl) {			/* Need to grow */
-	GEN out = cgeti(len_out);
-        GEN outp, xp=int_MSW(x);
-	setlgefint(out, len_out);
-        outp = int_MSW(out);
-
-	if (!(bits & (BITS_IN_LONG - 1)))
-	  *outp = ~uzero;
-	else
-	  *outp = (1 << (bits & (BITS_IN_LONG - 1))) - 1;
-	for (i = 3; i < len_out - xl + 2; i++)
-        {
-          outp=int_precW(outp);
-          *outp = ~uzero;
-        }
-	for (     ; i < len_out; i++)
-        {
-          outp=int_precW(outp);
-	  *outp = ~*xp;
-          xp=int_precW(xp);
-        }
-	setsigne(out,1);
-	return out;
+    for (     ; i < len_out; i++)
+    {
+      outp = int_precW(outp); *outp = ~*xp;
+      xp   = int_precW(xp);
     }
-    x = icopy(x);
-    for (i = 2; i < xl; i++)
-	x[i] = ~x[i];
-    return ibittrunc(x, bits);
+    return out;
+  }
+  x = icopy(x);
+  for (i = 2; i < xl; i++) x[i] = ~x[i];
+  return ibittrunc(x, bits);
 }
 
 /* bitwise 'and' of two positive integers (any integers, but we ignore sign).
@@ -2585,23 +2569,19 @@ ibitand(GEN x, GEN y)
 
   if (!signe(x) || !signe(y)) return gzero;
   lx=lgefint(x); ly=lgefint(y);
-  lout = min(lx,ly);
+  lout = min(lx,ly); /* > 2 */
   xp = int_LSW(x);
   yp = int_LSW(y);
-  out = cgeti(lout);
-  out[1] = evalsigne(1) | evallgefint(lout);
+  out = cgeti(lout); out[1] = evalsigne(1) | evallgefint(lout);
   outp = int_LSW(out);
   for (i=2; i<lout; i++)
   {
-      *outp = (*xp) & (*yp);
-      outp  = int_nextW(outp);
-      xp    = int_nextW(xp);
-      yp    = int_nextW(yp);
+    *outp = (*xp) & (*yp);
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
+    yp    = int_nextW(yp);
   }
-  if (lout == 2)
-      setsigne(out,0);
-  else if ( !*int_MSW(out) )
-      out = int_normalize(out, 1);
+  if ( !*int_MSW(out) ) out = int_normalize(out, 1);
   return out;
 }
 
@@ -2618,32 +2598,27 @@ ibitor(GEN x, GEN y)
   if (!signe(x)) return absi(y);
   if (!signe(y)) return absi(x);
 
-  lx=lgefint(x); ly=lgefint(y);
-  if (lx < ly)
-      swaplen(x,y,lx,ly);
-  xp = int_LSW(x);
-  yp = int_LSW(y);
-  out = cgeti(lx);
-  out[1] = evalsigne(1) | evallgefint(lx);
+  lx = lgefint(x); xp = int_LSW(x);
+  ly = lgefint(y); yp = int_LSW(y);
+  if (lx < ly) swaplen(xp,yp,lx,ly);
+  /* lx > 2 */
+  out = cgeti(lx); out[1] = evalsigne(1) | evallgefint(lx);
   outp = int_LSW(out);
   for (i=2;i<ly;i++)
   {
-      *outp = (*xp) | (*yp);
-      outp  = int_nextW(outp);
-      xp    = int_nextW(xp);
-      yp    = int_nextW(yp);
+    *outp = (*xp) | (*yp);
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
+    yp    = int_nextW(yp);
   }
   for (   ;i<lx;i++)
   {
-     *outp = *xp;
-     outp=int_nextW(outp);
-     xp    = int_nextW(xp);
+    *outp = *xp;
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
   }
-  if (lx == 2)
-    setsigne(out,0);
-    /* If input is normalized, this is not needed*/
-  else if ( !*int_MSW(out) )
-    out = int_normalize(out, 1);
+  /* If input is normalized, this is not needed */
+  if ( !*int_MSW(out) ) out = int_normalize(out, 1);
   return out;
 }
 
@@ -2658,31 +2633,26 @@ ibitxor(GEN x, GEN y)
   if (!signe(x)) return absi(y);
   if (!signe(y)) return absi(x);
 
-  lx=lgefint(x); ly=lgefint(y);
-  if (lx < ly)
-      swaplen(x,y,lx,ly);
-  xp = int_LSW(x);
-  yp = int_LSW(y);
-  out = cgeti(lx);
-  out[1] = evalsigne(1) | evallgefint(lx);
+  lx = lgefint(x); xp = int_LSW(x);
+  ly = lgefint(y); yp = int_LSW(y);
+  if (lx < ly) swaplen(xp,yp,lx,ly);
+  /* lx > 2 */
+  out = cgeti(lx); out[1] = evalsigne(1) | evallgefint(lx);
   outp = int_LSW(out);
   for (i=2;i<ly;i++)
   {
-      *outp = (*xp) ^ (*yp);
-      outp  = int_nextW(outp);
-      xp    = int_nextW(xp);
-      yp    = int_nextW(yp);
+    *outp = (*xp) ^ (*yp);
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
+    yp    = int_nextW(yp);
   }
   for (   ;i<lx;i++)
   {
-     *outp = *xp;
-     outp  = int_nextW(outp);
-     xp    = int_nextW(xp);
+    *outp = *xp;
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
   }
-  if (lx == 2)
-      setsigne(out,0);
-  else if ( !*int_MSW(out) )
-      out = int_normalize(out, 1);
+  if ( !*int_MSW(out) ) out = int_normalize(out, 1);
   return out;
 }
 
@@ -2698,152 +2668,134 @@ ibitnegimply(GEN x, GEN y)
   if (!signe(x)) return gzero;
   if (!signe(y)) return absi(x);
 
-  lx=lgefint(x); ly=lgefint(y);
-  lin = min(lx,ly);
-  lout = max(lx,ly);
-  xp = int_LSW(x);
-  yp = int_LSW(y);
-  out = cgeti(lout);
-  out[1] = evalsigne(1) | evallgefint(lout);
+  lx = lgefint(x); xp = int_LSW(x);
+  ly = lgefint(y); yp = int_LSW(y);
+  if (lx < ly) { lin = lx; lout = ly; } else { lin = ly; lout = lx; }
+  /* lout > 2 */
+  out = cgeti(lout); out[1] = evalsigne(1) | evallgefint(lout);
   outp = int_LSW(out);
   for (i=2; i<lin; i++)
   {
-      *outp = (*xp) & ~(*yp);
-      outp  = int_nextW(outp);
-      xp    = int_nextW(xp);
-      yp    = int_nextW(yp);
+    *outp = (*xp) & ~(*yp);
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
+    yp    = int_nextW(yp);
   }
   for (   ;i<lx;i++)
   {
-     *outp = *xp;
-     outp  = int_nextW(outp);
-     xp    = int_nextW(xp);
+    *outp = *xp;
+    outp  = int_nextW(outp);
+    xp    = int_nextW(xp);
   }
   for (   ;i<ly;i++)
   {
-     *outp = ~(*yp);
-     outp  = int_nextW(outp);
-     yp    = int_nextW(yp);
+    *outp = ~(*yp);
+    outp  = int_nextW(outp);
+    yp    = int_nextW(yp);
   }
-  if (lout == 2)
-      setsigne(out,0);
-  else if ( !*int_MSW(out) )
-      out = int_normalize(out, 1);
+  if ( !*int_MSW(out) ) out = int_normalize(out, 1);
   return out;
 }
+
+#define signs(x,y) (((signe(x) >= 0) << 1) | (signe(y) >= 0))
 
 GEN
 gbitor(GEN x, GEN y)
 {
-  pari_sp ltop=avma;
-  long sx,sy;
+  pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT)
-      err(typeer, "bitwise or");
-  sx=signe(x); sy=signe(y);
-  switch (((sx>=0)<<1) | (sy>=0))
+  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise or");
+  switch (signs(x, y))
   {
-  case 3: /*1,1*/
-    return ibitor(x,y);
-  case 2: /*1,-1*/
+    case 3: /*1,1*/
+      return ibitor(x,y);
+    case 2: /*1,-1*/
       z = ibitnegimply(inegate(y),x);
       break;
-  case 1: /*-1,1*/
+    case 1: /*-1,1*/
       z = ibitnegimply(inegate(x),y);
       break;
-  case 0: /*-1,-1*/
+    case 0: /*-1,-1*/
       z = ibitand(inegate(x),inegate(y));
       break;
-  default:
-      return NULL;
+    default: return NULL;
   }
-  return gerepileupto(ltop,inegate(z));
+  return gerepileupto(ltop, inegate(z));
 }
 
 GEN
 gbitand(GEN x, GEN y)
 {
-  pari_sp ltop=avma;
-  long sx,sy;
+  pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT)
-      err(typeer, "bitwise and");
-  sx=signe(x); sy=signe(y); 
-  switch (((sx>=0)<<1) | (sy>=0))
+  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise and");
+  switch (signs(x, y))
   {
-  case 3: /*1,1*/
-    return ibitand(x,y);
-  case 2: /*1,-1*/
+    case 3: /*1,1*/
+      return ibitand(x,y);
+    case 2: /*1,-1*/
       z = ibitnegimply(x,inegate(y));
       break;
-  case 1: /*-1,1*/
+    case 1: /*-1,1*/
       z = ibitnegimply(y,inegate(x));
       break;
-  case 0: /*-1,-1*/
+    case 0: /*-1,-1*/
       z = inegate(ibitor(inegate(x),inegate(y)));
       break;
-  default:
-      return NULL;
+    default: return NULL;
   }
-  return gerepileupto(ltop,z);
+  return gerepileupto(ltop, z);
 }
 
 GEN
 gbitxor(GEN x, GEN y)
 {
-  pari_sp ltop=avma;
-  long sx,sy;
+  pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT)
-      err(typeer, "bitwise xor");
-  sx=signe(x); sy=signe(y); 
-  switch (((sx>=0)<<1) | (sy>=0))
+  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise xor");
+  switch (signs(x, y))
   {
-  case 3: /*1,1*/
-    return ibitxor(x,y);
-  case 2: /*1,-1*/
+    case 3: /*1,1*/
+      return ibitxor(x,y);
+    case 2: /*1,-1*/
       z = inegate(ibitxor(x,inegate(y)));
       break;
-  case 1: /*-1,1*/
+    case 1: /*-1,1*/
       z = inegate(ibitxor(inegate(x),y));
       break;
-  case 0: /*-1,-1*/
+    case 0: /*-1,-1*/
       z = ibitxor(inegate(x),inegate(y));
       break;
-  default:
-      return NULL;
+    default: return NULL;
   }
   return gerepileupto(ltop,z);
 }
 
+/* x & ~y */
 GEN
-gbitnegimply(GEN x, GEN y)              /* x & ~y */
+gbitnegimply(GEN x, GEN y)
 {
-  pari_sp ltop=avma;
-  long sx,sy;
+  pari_sp ltop = avma;
   GEN z;
 
-  if (typ(x) != t_INT || typ(y) != t_INT)
-      err(typeer, "bitwise negated imply");
-  sx=signe(x); sy=signe(y); 
-  switch (((sx>=0)<<1) | (sy>=0))
+  if (typ(x) != t_INT || typ(y) != t_INT) err(typeer, "bitwise negated imply");
+  switch (signs(x, y))
   {
-  case 3: /*1,1*/
-    return ibitnegimply(x,y);
-  case 2: /*1,-1*/
+    case 3: /*1,1*/
+      return ibitnegimply(x,y);
+    case 2: /*1,-1*/
       z = ibitand(x,inegate(y));
       break;
-  case 1: /*-1,1*/
+    case 1: /*-1,1*/
       z = inegate(ibitor(y,inegate(x)));
       break;
-  case 0: /*-1,-1*/
+    case 0: /*-1,-1*/
       z = ibitnegimply(inegate(y),inegate(x));
       break;
-  default:
-      return NULL;
+    default: return NULL;
   }
   return gerepileupto(ltop,z);
 }
