@@ -478,9 +478,12 @@ divrs(GEN x, long y)
 GEN
 truedvmdii(GEN x, GEN y, GEN *z)
 {
-  pari_sp av = avma;
-  GEN r, q = dvmdii(x,y,&r); /* assume that r is last on stack */
-  GEN *gptr[2];
+  pari_sp av;
+  GEN r, q, *gptr[2];
+  if (!is_bigint(y)) return truedvmdis(x, itos(y), z);
+
+  av = avma;
+  q = dvmdii(x,y,&r); /* assume that r is last on stack */
 
   if (signe(r)>=0)
   {
@@ -494,11 +497,29 @@ truedvmdii(GEN x, GEN y, GEN *z)
     r = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
     return gerepileuptoint(av, r);
   }
-  q = addsi(-signe(y),q);
+  q = addis(q, -signe(y));
   if (!z) return gerepileuptoint(av, q);
 
   *z = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
   gptr[0]=&q; gptr[1]=z; gerepilemanysp(av,(pari_sp)r,gptr,2);
+  return q;
+}
+GEN
+truedvmdis(GEN x, long y, GEN *z)
+{
+  pari_sp av = avma;
+  long r;
+  GEN q = divis_rem(x,y,&r);
+
+  if (r >= 0)
+  {
+    if (z == ONLY_REM) { avma = av; return utoi(r); }
+    if (z) *z = utoi(r);
+    return q;
+  }
+  if (z == ONLY_REM) { avma = av; return utoi(r + labs(y)); }
+  q = gerepileuptoint(av, addis(q, (y < 0)? 1: -1));
+  if (z) *z = utoi(r + labs(y));
   return q;
 }
 

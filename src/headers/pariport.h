@@ -67,6 +67,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define subis(x,y)     (addsi(-(y),(x)))
 #define subrs(x,y)     (addsr(-(y),(x)))
 
+#define truedivii(a,b) (truedvmdii((a),(b),NULL))
+#define truedivis(a,b) (truedvmdis((a),(b),NULL))
 #define divii(a,b)     (dvmdii((a),(b),NULL))
 #define remii(a,b)     (dvmdii((a),(b),ONLY_REM))
 

@@ -2206,7 +2206,7 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
   }
   for (j=j0+1; j<lA; j++)
   {
-    GEN q = truedvmdii(gcoeff(A,i,j), d, NULL);
+    GEN q = truedivii(gcoeff(A,i,j), d);
     if (!signe(q)) continue;
 
     q = negi(q);
@@ -2485,7 +2485,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     ldm = lgefint(dm[i]);
     for (j = i+1; j < li; j++)
     {
-      b = negi(truedvmdii(gcoeff(x,i,j), diag, NULL));
+      b = negi(truedivii(gcoeff(x,i,j), diag));
       p1 = ZV_lincomb(gen_1,b, (GEN)x[j], (GEN)x[i]);
       x[j] = (long)p1;
       for (k=1; k<i; k++)
@@ -2553,7 +2553,7 @@ reduce2(GEN A, GEN B, long k, long j, long *row0, long *row1, GEN **lambda, GEN 
   *row0 = findi_normalize((GEN)A[j], B,j,lambda);
   *row1 = findi_normalize((GEN)A[k], B,k,lambda);
   if (*row0)
-    q = truedvmdii(gcoeff(A,*row0,k), gcoeff(A,*row0,j), NULL);
+    q = truedivii(gcoeff(A,*row0,k), gcoeff(A,*row0,j));
   else if (absi_cmp(shifti(lambda[k][j], 1), D[j]) > 0)
     q = diviiround(lambda[k][j], D[j]);
   else
@@ -2833,7 +2833,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       for (j1=1; j1<j; j1++)
       {
         if (!l[j1]) continue;
-        q = truedvmdii(gcoeff(A,t,j1),d,NULL);
+        q = truedivii(gcoeff(A,t,j1),d);
         if (!signe(q)) continue;
 
         q = negi(q);
@@ -2861,7 +2861,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       for (j=1; j<k; j++)
       {
         if (!l[j]) continue;
-	q = truedvmdii(gcoeff(A,t,j),p,NULL);
+	q = truedivii(gcoeff(A,t,j),p);
 	if (!signe(q)) continue;
 
         q = negi(q);
