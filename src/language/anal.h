@@ -275,11 +275,11 @@ GEN Strtex(GEN g);
 typedef struct {
   char format; /* e,f,g */
   long fieldw; /* 0 (ignored) or field width */
-  long sigd; /* -1 (all) or number of sign. digits printed */
-  int sp;
-  int initial;
-  int prettyp;
+  long sigd;   /* -1 (all) or number of significant digits printed */
+  int sp;      /* 0 = suppress whitespace from output */
+  int prettyp; /* output style: raw, prettyprint, etc */
   int TeXstyle;
+  int initial; /* private */
 } pariout_t;
 
 extern void gen_output(GEN x, pariout_t *T);
