@@ -725,8 +725,7 @@ addrr(GEN x, GEN y)
       { /* round up */
         i = lz-1;
         while (++z[i] == 0 && i > 1) i--;
-        /* extend z to the left? */
-        if (i == 1) { avma = (gpmem_t)z; z = new_chunk(1); z[2] = 1; }
+        if (i == 1) { ez++; z[2] = HIGHBIT; }
       }
     }
     else if (j) shift_left(z,z,2,lz-1, 0,j);
