@@ -2764,7 +2764,7 @@ lgcdii(ulong* d, ulong* d1,
     dd = *d; ddlo = d[1];
   }
 #ifdef DEBUG_LEHMER
-  fprintf(stderr, "  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
+  fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
 #endif
 
   /* First subtraction/division stage.  (If a subtraction initially suffices,
@@ -2827,7 +2827,7 @@ lgcdii(ulong* d, ulong* d1,
   }
   xu = 0; xv = xu1 = 1UL; res = 1;
 #ifdef DEBUG_LEHMER
-  fprintf(stderr, "  q = %ld, %lx, %lx\n", xv1, dd1, dd);
+  fprintferr("  q = %ld, %lx, %lx\n", xv1, dd1, dd);
 #endif
 
   /* Some invariants from here across the first loop:
@@ -2892,8 +2892,8 @@ lgcdii(ulong* d, ulong* d1,
 	res++;
 	dd1 = tmpd; xu = tmpu; xv = tmpv;
 #ifdef DEBUG_LEHMER
-	fprintf(stderr, "  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
-		q, dd, dd1, xu1, xu, xv1, xv);
+	fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
+		   q, dd, dd1, xu1, xu, xv1, xv);
 #endif
       }
 
@@ -2926,7 +2926,7 @@ lgcdii(ulong* d, ulong* d1,
 	res++;
 	dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
-	fprintf(stderr, "  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
+	fprintferr("  q = %ld, %lx, %lx [%lu,%lu;%lu,%lu]\n",
 		q, dd1, dd, xu, xu1, xv, xv1);
 #endif
       }
@@ -2968,7 +2968,7 @@ lgcdii(ulong* d, ulong* d1,
       ddlo = tmp1;
     }
 #ifdef DEBUG_LEHMER
-    fprintf(stderr, "  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
+    fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
 #endif
   } /* end of skip-pable section:  get here also, with res==1, when there
      * was a problem immediately after the very first division. */
@@ -3006,7 +3006,7 @@ lgcdii(ulong* d, ulong* d1,
    * to return.)
    */
 #ifdef DEBUG_LEHMER
-  fprintf(stderr, "(sh)");
+  fprintferr("(sh)");
 #endif
 
   if (res&1)
@@ -3062,7 +3062,7 @@ lgcdii(ulong* d, ulong* d1,
   } /* end reshift */
 
 #ifdef DEBUG_LEHMER
-  fprintf(stderr, "  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
+  fprintferr("  %lx:%lx, %lx:%lx\n", dd, ddlo, dd1, dd1lo);
 #endif
 
   /* The Second Loop.  Rip-off of the first, but we now check for overflow
@@ -3108,7 +3108,7 @@ lgcdii(ulong* d, ulong* d1,
       res++;
       dd1 = tmpd; xu = tmpu; xv = tmpv;
 #ifdef DEBUG_LEHMER
-      fprintf(stderr, "  q = %ld, %lx, %lx\n", q, dd, dd1);
+      fprintferr("  q = %ld, %lx, %lx\n", q, dd, dd1);
 #endif
     }
 
@@ -3148,7 +3148,7 @@ lgcdii(ulong* d, ulong* d1,
       res++;
       dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
-      fprintf(stderr, "  q = %ld, %lx, %lx\n", q, dd1, dd);
+      fprintferr("  q = %ld, %lx, %lx\n", q, dd1, dd);
 #endif
     }
 
