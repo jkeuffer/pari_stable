@@ -2172,6 +2172,24 @@ modpr_TAU(GEN modpr)
   return tau;
 }
 
+/* prh = HNF matrix, which is identity but for the first line. Return a
+ * projector to ZK / prh ~ Z/prh[1,1] */
+GEN
+dim1proj(GEN prh)
+{
+  long i, N = lg(prh)-1;
+  GEN ffproj = cgetg(N+1, t_VEC);
+  GEN x, q = gcoeff(prh,1,1);
+  ffproj[1] = un;
+  for (i=2; i<=N; i++)
+  {
+    x = gcoeff(prh,1,i);
+    if (signe(x)) x = subii(q,x);
+    ffproj[i] = (long)x;
+  }
+  return ffproj;
+}
+
 static GEN
 modprinit(GEN nf, GEN pr, int zk)
 {
@@ -2189,17 +2207,9 @@ modprinit(GEN nf, GEN pr, int zk)
 
   if (f == 1)
   {
-    ffproj = cgetg(N+1, t_VEC);
-    ffproj[1] = un;
-    for (i=2; i<=N; i++)
-    {
-      x = gcoeff(prh,1,i);
-      if (signe(x)) x = subii(p,x);
-      ffproj[i] = (long)x;
-    }
     res = cgetg(SMALLMODPR, t_COL);
     res[mpr_TAU] = (long)tau;
-    res[mpr_FFP] = (long)ffproj;
+    res[mpr_FFP] = (long)dim1proj(prh);
     res[mpr_PR ] = (long)pr; return gerepilecopy(av, res);
   }
 
