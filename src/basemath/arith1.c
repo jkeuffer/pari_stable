@@ -480,7 +480,7 @@ polcarrecomplet(GEN x, GEN *pt)
     y = scalarpol(b, varn(x)); goto END;
   }
   x = gdiv(x,a);
-  y = gtrunc(gsqrt(greffe(x,l,1),0));
+  y = gtrunc(gsqrt(greffe(x,2+l,1),0));
   if (!gequal(gsqr(y), x)) { avma = av; return 0; }
   if (!pt) { avma = av; return 1; }
 
@@ -498,43 +498,43 @@ GEN
 gcarrecomplet(GEN x, GEN *pt)
 {
   long l, tx = typ(x);
-  GEN y;
+  GEN *F;
   pari_sp av;
 
   if (!pt) return gcarreparfait(x);
-  if (is_matvec_t(tx))
+  if (is_vec_t(tx))
   {
     long i, l = lg(x);
-    GEN z, p, t;
-    y = cgetg(l,tx);
-    z = cgetg(l,tx);
+    GEN p, t, y = cgetg(l,tx), z = cgetg(l,tx);
     for (i=1; i<l; i++)
     {
       t = gcarrecomplet((GEN)x[i],&p);
-      y[i] = (long)t;
-      z[i] = gcmp0(t)? (long)gen_0: (long)p;
+      gel(y,i) = t;
+      gel(z,i) = t == gen_0? gen_0: p;
     }
     *pt = z; return y;
   }
   switch(tx)
   {
-    case t_INT: l = carrecomplet(x, pt); goto END;
-    case t_FRAC:
-      av = avma;
-      l = carrecomplet(mulii((GEN)x[1],(GEN)x[2]), pt);
-      break;
+    case t_INT: l = carrecomplet(x, pt); break;
+    case t_FRAC: av = avma;
+      F = (GEN*)cgetg(3, t_FRAC);
+      l = carrecomplet((GEN)x[1], &F[1]);
+      if (l) l = carrecomplet((GEN)x[2], &F[2]);
+      if (!l) { avma = av; break; }
+      *pt = (GEN)F; break;
 
-    case t_POL: l = polcarrecomplet(x,pt); goto END;
-    case t_RFRAC:
-      av = avma;
-      l = polcarrecomplet(gmul((GEN)x[1],(GEN)x[2]), pt);
-      break;
+    case t_POL: l = polcarrecomplet(x,pt); break;
+    case t_RFRAC: av = avma;
+      F = (GEN*)cgetg(3, t_RFRAC);
+      l = (gcarrecomplet((GEN)x[1], &F[1]) != gen_0);
+      if (l) l = polcarrecomplet((GEN)x[2], &F[2]);
+      if (!l) { avma = av; break; }
+      *pt = (GEN)F; break;
 
     default: err(arither1);
       return NULL; /* not reached */
   }
-  if (l) *pt = gerepileupto(av, gdiv(*pt, (GEN)x[2])); else avma = av;
-END:
   return l? gen_1: gen_0;
 }
 

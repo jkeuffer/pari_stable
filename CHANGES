@@ -74,6 +74,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        before release-2-2-8 ]
    25- ellchangecurve(e over Qp) --> e.w not updated
    26- ellheight(e over Fp, pt) -->  SEGV
+   27- issquare(Mat(2), &z); z --> SEGV  [ don't allow matrices as input ]
+       issquare(1/x^2) --> SEGV [ typo in polcarrecomplet ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -115,6 +117,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    13- allow non-real arguments in incgamc
 MW 14- ellap: if E has CM by a principal order, use Cornacchia instead
        of Shanks/Mestre
+   15- more efficient algorithm for issquare(t_FRAC | t_RFRAC)
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private
