@@ -1021,7 +1021,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   }
   /* treat the ramified part using logarithms */
   e = Z_pvalrem(n, p, &q);
-  if (e) x = padic_sqrtn_ram(x,e);
+  if (e) { x = padic_sqrtn_ram(x,e); if (!x) return NULL; }
   if (is_pm1(q))
   { /* finished */
     if (signe(q) < 0) x = ginv(x);
@@ -1034,7 +1034,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   tetpil = avma;
   /* use hensel lift for unramified case */
   x = padic_sqrtn_unram(x, q, zetan);
-  if (!x) { *zetan = gzero; return gzero; }
+  if (!x) return NULL;
   if (zetan)
   {
     GEN *gptr[2];
@@ -1093,7 +1093,13 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (zetan) { z[2] = (long)*zetan; *zetan = z; }
     return y;
 
-  case t_PADIC: return padic_sqrtn(x,n,zetan);
+  case t_PADIC:
+    y = padic_sqrtn(x,n,zetan);
+    if (!y) {
+      if (zetan) return gzero;
+      err(talker,"nth-root does not exist in gsqrtn");
+    }
+    return y;
 
   case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
     i = precision(x); if (i) prec = i;
