@@ -658,13 +658,9 @@ static GEN
 sd_rl(char *v, int flag)
 {
 #ifdef READLINE
-#  if 0			/* Works - even when init_readline() was called */
-    if (readline_init && *v == '0')
-	err(talker, "Too late to switch off readline mode");
-#  endif
     if (!readline_init && *v && *v != '0') {
-	init_readline();
-	readline_init = 1;
+      init_readline();
+      readline_init = 1;
     }
     return sd_numeric(v,flag,"readline",&use_readline, 0,20,NULL);
 #else	/* !( defined READLINE ) */
@@ -1955,11 +1951,11 @@ get_preproc_value(char *s)
   if (!strncmp(s,"READL",5))
   {
 #ifdef READLINE
-  if (use_readline)
-    return 1;
-  else
+    if (use_readline)
+      return 1;
+    else
 #endif
-  return 0;
+    return 0;
   }
   return -1;
 }
@@ -2298,15 +2294,13 @@ gprl_input(Buffer *b, char **endp, char *prompt)
   long left = b->len - used, l;
   char *s;
   
-  if (! (s = readline(prompt)) )
-      return NULL;			/* EOF */
+  if (! (s = readline(prompt)) ) return NULL; /* EOF */
   l = strlen(s);
   if ((ulong)left < l)
   {
     long incr = b->len;
 
-    if (incr < l)
-	incr = l;
+    if (incr < l) incr = l;
     fix_buffer(b, b->len + incr);
     *endp = b->buf + used;
   }
@@ -2361,10 +2355,10 @@ input_loop(Buffer *b, char *already_read, FILE *file, char *prompt)
     /* read continuation line */
 #ifdef READLINE
     if (!file) {
-	free(already_read);
-	already_read = gprl_input(b, &s, do_prompt(prompt_cont));
-	if (!history_is_dup(already_read))
-	    add_history(already_read);	/* Makes a copy */
+      free(already_read);
+      already_read = gprl_input(b, &s, do_prompt(prompt_cont));
+      if (!history_is_dup(already_read))
+        add_history(already_read);	/* Makes a copy */
     } else
 #endif
       already_read = file_input(b,&s,file,TeXmacs);
@@ -2420,41 +2414,44 @@ get_line_from_user(char *prompt, Buffer *b)
 static int
 history_is_dup(char *s)
 {
-    if (!history_length)
-	return 0;
-    return !strcmp(s, history_get(history_length)->line);
+  if (!history_length) return 0;
+  return !strcmp(s, history_get(history_length)->line);
 }
 
 static int
 get_line_from_user(char *prompt, Buffer *b)
 {
-  char *buf, *s = b->buf;
-  int index, added;
+  if (use_readline)
+  {
+    char *buf, *s = b->buf;
+    int index, added;
 
-  if (! (buf = gprl_input(b,&s, prompt)) )
-  { /* EOF */
-    pariputs("\n"); return 0;
-  }
-  /* Put the original read line into history */
-  index = history_length;
-  if (!history_is_dup(buf))
-      add_history(buf);			/* Copies the entry */
-
-  added = input_loop(b,buf,NULL,prompt); /* free()s buf */
-  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
-
-  if (*s) {				/* XXXX Better use b->buf ?! */
-    if (added) {			/* Remove incomplete lines */
-      int i = history_length;
-      while (i > index) {
-        HIST_ENTRY *e = remove_history(--i);
-        free(e->line); free(e);
-      }
-      if (!history_is_dup(s)) add_history(s);
+    if (! (buf = gprl_input(b,&s, prompt)) )
+    { /* EOF */
+      pariputs("\n"); return 0;
     }
-  
-    /* update logfile */
-    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+    /* Put the original read line into history */
+    index = history_length;
+    if (!history_is_dup(buf)) add_history(buf);	/* Copies the entry */
+
+    added = input_loop(b,buf,NULL,prompt); /* free()s buf */
+    unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
+
+    if (*s)
+    {				/* XXXX Better use b->buf ?! */
+      if (added)
+      { /* Remove incomplete lines */
+        int i = history_length;
+        while (i > index) {
+          HIST_ENTRY *e = remove_history(--i);
+          free(e->line); free(e);
+        }
+        if (!history_is_dup(s)) add_history(s);
+      }
+    
+      /* update logfile */
+      if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+    }
     return 1;
   }
   else
@@ -2851,8 +2848,8 @@ main(int argc, char **argv)
   pari_sig_init(gp_sighandler);
 #ifdef READLINE
   if (use_readline) {
-      init_readline();
-      readline_init = 1;
+    init_readline();
+    readline_init = 1;
   }
 #endif
   gp_history_fun = gp_history;
