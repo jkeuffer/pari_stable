@@ -7,19 +7,19 @@ DEF=pari.desc
 all: $(HEADERS)
 
 $(DEF): ../funclist merge_822 PARI/822.pm
-	$(PERL) merge_822 ../functions/*/* > $(DEF)
+	$(PERL) merge_822 ../functions/*/* > $(DEF).new && mv $(DEF).new $(DEF)
 
 ../language/members.h: $(DEF) gen_member
-	$(PERL) gen_member $(DEF) > $@ 
+	$(PERL) gen_member $(DEF) > $@.new && mv $@.new $@
 
 ../language/init.h: $(DEF) $(HE_DEPS)
-	$(PERL) gen_proto basic $(DEF) > $@ && $(PERL) gen_help  basic $(DEF) >> $@
+	$(PERL) gen_proto basic $(DEF) > $@.new && $(PERL) gen_help basic $(DEF) >> $@.new && mv $@.new $@
 
 ../gp/gp_init.h: $(DEF) $(HE_DEPS)
-	$(PERL) gen_proto gp $(DEF) > $@ && $(PERL) gen_help  gp $(DEF) >> $@
+	$(PERL) gen_proto gp $(DEF) > $@.new && $(PERL) gen_help gp $(DEF) >> $@.new && mv $@.new $@
 
 ../gp/highlvl.h: $(DEF) $(HE_DEPS)
-	$(PERL) gen_proto highlevel $(DEF) > $@ && $(PERL) gen_help  highlevel $(DEF) >> $@
+	$(PERL) gen_proto highlevel $(DEF) > $@.new && $(PERL) gen_help  highlevel $(DEF) >> $@.new && mv $@.new $@
 
 veryclean:
 	rm -f $(DEF) $(HEADERS)
