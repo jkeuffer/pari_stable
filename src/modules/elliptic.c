@@ -3053,6 +3053,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   }
   if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gen_0; }
   flun = gcmp1(A) && gcmp1(s);
+  checkell(e);
   e = ell_to_small(e); gr = globalreduction(e);
   e = _coordch(e,(GEN)gr[2]);
   N = (GEN)gr[1];
