@@ -1681,28 +1681,22 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   double drc, lim, LOGD, LOGD2;
   const long MAXRELSUP = 7;
 
-  Disc = D; if (typ(Disc)!=t_INT) err(typeer,"buchquad");
-  s = mod4(Disc);
-  switch(signe(Disc))
+  check_quaddisc(D, &s, /*junk*/&i, "buchquad");
+  Disc = D;
+  if (s < 0)
   {
-    case -1:
-      if (cmpis(Disc,-4) >= 0)
-      {
-        GEN p1=cgetg(6,t_VEC); p1[1]=p1[4]=p1[5]=un;
-        p1[2]=p1[3]=lgetg(1,t_VEC); return p1;
-      }
-      if (s==2 || s==1) err(funder2,"buchquad");
-      PRECREG=0; break;
-
-    case 1:
-      if (s==2 || s==3) err(funder2,"buchquad");
-      if (flag)
-        err(talker,"sorry, narrow class group not implemented. Use bnfnarrow");
-      PRECREG=1; break;
-
-    default: err(talker,"zero discriminant in quadclassunit");
+    if (cmpis(Disc,-4) >= 0)
+    {
+      GEN z = cgetg(6,t_VEC);
+      z[1] = z[4] = z[5] = un;
+      z[2] = z[3]= lgetg(1,t_VEC); return z;
+    }
+    PRECREG = 0;
+  } else {
+    if (flag)
+      err(talker,"sorry, narrow class group not implemented. Use bnfnarrow");
+    PRECREG = 1;
   }
-  if (carreparfait(Disc)) err(talker,"square argument in quadclassunit");
   buch_init(); RELSUP = RELSUP0;
   drc = fabs(gtodouble(Disc));
   LOGD = log(drc);
