@@ -34,11 +34,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
    supplied polynomial to compute roots in Qp, then return them at precision
    p^r [ better, polroots() and factorpadic() behave this way ] ?
 
-5  intnum(x=0, Pi, sin(2^11 * x)^2) --> 3e-46
-   we evaluate at regularly spaced control points, interpolating the results
-   obtained when increasing the number of points. When result looks stable,
-   we stop. For some periodic function, this gives a ridiculous result.
-
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
 4  ellinit over Q_2 doesn't work (AGM loses too much precision)
