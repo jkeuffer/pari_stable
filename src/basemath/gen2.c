@@ -239,10 +239,10 @@ gcmp0(GEN x)
   return 0;
 }
 
-/* assume x != 0, is |x| == 1 ? */
+/* assume x != 0, is |x| == 2^n ? */
 int
-absrnz_egal1(GEN x) {
-  if (expo(x)==0 && (ulong)x[2]==HIGHBIT)
+absrnz_egal2n(GEN x) {
+  if ((ulong)x[2]==HIGHBIT)
   {
     long i, lx = lg(x);
     for (i = 3; i < lx; i++)
@@ -251,6 +251,9 @@ absrnz_egal1(GEN x) {
   }
   return 0;
 }
+/* assume x != 0, is |x| == 1 ? */
+int
+absrnz_egal1(GEN x) { return !expo(x) && absrnz_egal2n(x); }
 
 /* returns 1 whenever x = 1, 0 otherwise */
 int
