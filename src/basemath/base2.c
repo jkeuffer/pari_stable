@@ -954,31 +954,30 @@ compmod(GEN f, GEN g, GEN T, GEN p)
 }
 
 static GEN
-dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
+dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
 {
-  long n=degpol(f),dU,i;
-  GEN b,ha,pd,pdp;
+  long n = degpol(f), dU, i;
+  GEN b, ha, pd, pdp;
 
   if (n == 1) return gscalmat(gun, 1);
   if (DEBUGLEVEL>5)
   {
     fprintferr("  entering Dedekind Basis with parameters p=%Z\n",p);
-    fprintferr("  f = %Z,\n  alpha = %Z\n",f,alpha);
+    fprintferr("  f = %Z,\n  a = %Z\n",f,a);
   }
   ha = pd = gpowgs(p,mf/2); pdp = mulii(pd,p);
   dU = U ? degpol(U): 0;
-  b = cgetg(n,t_MAT); /* Z[a] + U/p Z[a] is maximal */
+  b = cgetg(n, t_MAT); /* Z[a] + U/p Z[a] is maximal */
   /* skip first column = gscalcol(pd,n) */
   for (i=1; i<n; i++)
   {
     if (i == dU)
-      ha = gmul(diviiexact(pd, p), compmod(U, alpha, f, pdp));
+      ha = gmul(diviiexact(pd, p), compmod(U, a, f, pdp));
     else
     {
       GEN d, mod;
-      ha = gmul(ha,alpha);
-      ha = Q_remove_denom(ha, &d);
-      mod = d? mulii(pdp,d): pdp;
+      ha = Q_remove_denom(gmul(ha,a), &d);
+      mod = d? mulii(pdp, d): pdp;
       ha = FpX_rem(ha, f, mod);
       if (d) ha = gdivexact(ha,d);
     }
@@ -1203,7 +1202,7 @@ polsymmodp(GEN g, GEN p)
 static GEN
 manage_cache(GEN chi, GEN pp, GEN ns)
 {
-  if (lgefint(pp) > lgefint(ns[1]))
+  if (lgefint(pp) > lg(ns[1]))
   {
     if (DEBUGLEVEL > 4) fprintferr("newtonsums: result doesn't fit in cache\n");
     return polsymmodp(chi, pp);
