@@ -1429,7 +1429,11 @@ ideallog_to_bnr(GEN bnr, GEN z)
   col = (typ(z) == t_COL); /* else t_MAT */
   lz = col? lg(z): lg(z[1]);
   lU = lg(U);
-  if (lz != lU) U = vecextract_i(U, lU-lz+1, lU-1); /* remove Cl(K) part */
+  if (lz != lU)
+  {
+    if (lz == 1) return zerocol(lg(U[1]) - 1); /* lU != 1 */
+    U = vecextract_i(U, lU-lz+1, lU-1); /* remove Cl(K) part */
+  }
   z = gmul(U, z);
   if (col)
     z = vecmodii(z, divray);
