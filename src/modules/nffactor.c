@@ -732,6 +732,7 @@ END:
   { /* leftover factor */
     if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
 
+    if (lc && lfamod < 2*K) pol = QXQ_normalize(primpart(pol), nfpol);
     setlg(famod, lfamod+1);
     listmod[cnt] = (long)dummycopy(famod);
     fa[cnt++] = (long)pol;
@@ -784,7 +785,7 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN BL, GEN famod, GEN pa)
     y = primpart(y);
     if (lc)
     {
-      pol = gdivexact(pol, leading_term(y));
+      pol = primpart(pol);
       lc = absi(leading_term(pol));
     }
     lcpol = lc? gmul(lc, pol): pol;
