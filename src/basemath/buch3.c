@@ -37,7 +37,7 @@ buchnarrow(GEN bnf)
 
   cyc = (GEN)clgp[2];
   gen = (GEN)clgp[3];
-  v = FpM_image(zsignunits(bnf, NULL, 1), gdeux);
+  v = FpM_image(zsignunits(bnf, NULL, 1), gtwo);
   t = lg(v)-1;
   if (t == r1) { avma = av; return gcopy(clgp); }
 
@@ -60,7 +60,7 @@ buchnarrow(GEN bnf)
    * [ logs 2 ] = relation matrix for Cl_f */
   R = concatsp(
     vconcat(diagonal(cyc), logs),
-    vconcat(zeromat(ngen, r1-t), gscalmat(gdeux,r1-t))
+    vconcat(zeromat(ngen, r1-t), gscalmat(gtwo,r1-t))
   );
  
   met = smithrel(R,NULL,&u1);
@@ -146,7 +146,7 @@ too_big(GEN nf, GEN bet)
   GEN x = gnorm(basistoalg(nf,bet));
   switch (typ(x))
   {
-    case t_INT: return absi_cmp(x, gun);
+    case t_INT: return absi_cmp(x, gone);
     case t_FRAC: return absi_cmp((GEN)x[1], (GEN)x[2]);
   }
   err(bugparier, "wrong type in too_big");
@@ -672,9 +672,9 @@ hermiteconstant(long n)
 
   switch(n)
   {
-    case 1: return gun;
+    case 1: return gone;
     case 2: return mkfrac(utoipos(4), utoipos(3));
-    case 3: return gdeux;
+    case 3: return gtwo;
     case 4: return utoipos(4);
     case 5: return utoipos(8);
     case 6: return mkfrac(utoipos(64), utoipos(3));
@@ -885,7 +885,7 @@ compute_M0(GEN M_star,long N)
 	p1 = divrs(M_star, m1);
 	p4 = sqrtr_abs( mulrr(addsr(1,p1),subrs(p1,3)) );
         p5 = subrs(p1,1);
-	u = gun;
+	u = gone;
         v = gmul2n(addrr(p5,p4),-1);
         w = gmul2n(subrr(p5,p4),-1);
 	M0_pro=gmul2n(mulsr(m1,addrr(gsqr(logr_abs(v)),gsqr(logr_abs(w)))), -2);
@@ -938,7 +938,7 @@ compute_M0(GEN M_star,long N)
 	f2 = gadd(f2,gmulsg(n2,gmul(X,Z)));
 	f2 = gadd(f2,gmulsg(n3,gmul(X,Y)));
 	f2 = gsub(f2,gmul(M,gmul(X,gmul(Y,Z))));
-	f3 = gsub(gmul(gpowgs(X,n1),gmul(gpowgs(Y,n2),gpowgs(Z,n3))), gun);
+	f3 = gsub(gmul(gpowgs(X,n1),gmul(gpowgs(Y,n2),gpowgs(Z,n3))), gone);
         /* f1 = n1 X + n2 Y + n3 Z - M */
         /* f2 = n1 YZ + n2 XZ + n3 XY */
         /* f3 = X^n1 Y^n2 Z^n3 - 1*/
@@ -1008,7 +1008,7 @@ lowerboundforregulator_i(GEN bnf)
 
   nf = (GEN)bnf[7]; N = degpol(nf[1]);
   nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
-  if (!RU) return gun;
+  if (!RU) return gone;
 
   G = gmael(nf,5,2);
   units = algtobasis(bnf,units);
@@ -1159,7 +1159,7 @@ certifybuchall(GEN bnf)
     fprintferr("  Testing primes <= B (= %lu)\n\n",bound); flusherr();
   }
   cycgen = check_and_build_cycgen(bnf);
-  for (bad=gun,i=1; i<=nbgen; i++)
+  for (bad=gone,i=1; i<=nbgen; i++)
     bad = lcmii(bad, gcoeff(gen[i],1,1));
   for (i=1; i<=nbgen; i++)
   {
@@ -1386,7 +1386,7 @@ conductor(GEN bnr, GEN H0, long all)
     if (all < 0) { avma = av; return gzero; }
     archp[k] = 0;
   }
-  if (all < 0) { avma = av; return gun; }
+  if (all < 0) { avma = av; return gone; }
   ideal = gegal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   for (j = k = 1; k < l; k++)
     if (archp[k]) archp[j++] = archp[k];
@@ -1547,7 +1547,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
 
   pol2 = fix_relative_pol(nf, pol2, 1);
   R1 = nf_get_r1(nf); arch = cgetg(R1+1,t_VEC);
-  for (i=1; i<=R1; i++) arch[i]=un;
+  for (i=1; i<=R1; i++) arch[i]=one;
   module = mkvec2((GEN)rnfdiscf(nf,pol2)[1], arch);
   bnr   = buchrayall(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,pol2);
@@ -1880,7 +1880,7 @@ discrayabslist(GEN bnf, GEN lists)
 	{
 	  arch2[k] = zero;
 	  clhss = itos(rayclassno(bnf,mod));
-	  arch2[k] = un;
+	  arch2[k] = one;
 	  if (clhss == clhray) { clhray = 0; break; }
 	}
 	else nz++;
@@ -1892,7 +1892,7 @@ LLDISCRAY:
       n = clhray * degk;
       R1= clhray * nz;
       if (((n-R1)&3) == 2) /* r2 odd, set dlk = -dlk */
-        dlk = factormul(to_famat_all(utoineg(1),gun), dlk);
+        dlk = factormul(to_famat_all(gminusone,gone), dlk);
       d[jj] = (long)mkvec3(utoipos(n), stoi(R1), factormul(dlk,p3));
     }
   }
@@ -2007,7 +2007,7 @@ rayclassnointernarch(GEN blist, GEN h, GEN matU)
   if (!matU) return rayclassnointern(blist,h);
   lx = lg(blist); if (lx == 1) return blist;
 
-  r1 = lg(matU[1])-1; _2 = gscalmat(gdeux,r1);
+  r1 = lg(matU[1])-1; _2 = gscalmat(gtwo,r1);
   Lray = cgetg(lx,t_VEC); nbarch = 1<<r1;
   for (j=1; j<lx; j++)
   {
@@ -2114,7 +2114,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   }
   nba = 0; allarch = (arch==NULL);
   if (allarch)
-    { arch=cgetg(r1+1,t_VEC); for (i=1; i<=r1; i++) arch[i]=un; nba=r1; }
+    { arch=cgetg(r1+1,t_VEC); for (i=1; i<=r1; i++) arch[i]=one; nba=r1; }
   else if (gcmp0(arch))
     { arch=cgetg(r1+1,t_VEC); for (i=1; i<=r1; i++) arch[i]=zero; }
   else
@@ -2124,7 +2124,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     for (i=1; i<=r1; i++) if (signe(arch[i])) nba++;
     if (nba) mod = cgetg(3,t_VEC);
   }
-  bidp = zidealstarinitall(nf, mkvec2(gun, arch), 0);
+  bidp = zidealstarinitall(nf, mkvec2(gone, arch), 0);
   if (allarch)
   {
     matarchunit = logunitmatrix(nf, U, sgnU, bidp);
@@ -2346,7 +2346,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
             {
               arch2[k] = zero;
               clhss = itos(rayclassno(bnf,mod));
-              arch2[k] = un;
+              arch2[k] = one;
               if (clhss==clhray) { clhray=0; goto LDISCRAY; }
             }
             else nz++;
@@ -2360,7 +2360,7 @@ LDISCRAY:
 	  p3 = factorpow(fadkabs,clhray);
           n = clhray * degk;
           R1= clhray * nz;
-	  if (((n-R1)&3)==2) dlk = factormul(to_famat_all(utoineg(1),gun), dlk);
+	  if (((n-R1)&3)==2) dlk = factormul(to_famat_all(gminusone,gone), dlk);
           p1 = mkvec3(utoipos(n), stoi(R1), factormul(dlk,p3));
 	}
         discall[karch+1]=(long)p1;

@@ -153,7 +153,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   if (ysmlu) ysml=ysmlu;
   if (ybigu) ybig=ybigu;
   avma=av2; diff=gsub(ybig,ysml);
-  if (gcmp0(diff)) { ybig=gaddsg(1,ybig); diff=gun; }
+  if (gcmp0(diff)) { ybig=gaddsg(1,ybig); diff=gone; }
   dyj = gdivsg((JSCR-1)*3+2,diff);
   jz = 3-gtolong(gmul(ysml,dyj));
   av2=avma; z = PICTZERO(jz); jz = jz/3;

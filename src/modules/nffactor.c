@@ -258,7 +258,7 @@ nffactor(GEN nf,GEN pol)
   if (d == 1)
   {
     rep[1] = (long)mkcol( gcopy(pol) );
-    rep[2] = (long)mkcol( gun );
+    rep[2] = (long)mkcol( gone );
     return rep;
   }
 
@@ -303,7 +303,7 @@ nffactor(GEN nf,GEN pol)
   {
     y = gerepileupto(av, nfsqff(nf,A,0));
     l = lg(y);
-    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = un;
+    p1 = cgetg(l, t_COL); for (j=l-1; j>=1; j--) p1[j] = one;
   }
   if (DEBUGLEVEL>3)
     fprintferr("number of factor(s) found: %ld\n", lg(y)-1);
@@ -536,7 +536,7 @@ L2_bound(GEN T, GEN tozk, GEN *ptden)
 
   T = get_nfpol(T, &nf);
   prec = ZX_get_prec(T) + ZM_get_prec(tozk);
-  den = nf? gun: NULL;
+  den = nf? gone: NULL;
   den = initgaloisborne(T, den, prec, &L, &prep, NULL);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (nf) M = gmul(tozk, M);
@@ -625,7 +625,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
 
   if (e < 0) return NULL; /* S = 0 */
 
-  qgood = shifti(gun, e - 32); /* single precision check */
+  qgood = shifti(gone, e - 32); /* single precision check */
   if (cmpii(qgood, q) > 0) q = qgood;
 
   S1 = gdivround(S, q);
@@ -1004,7 +1004,7 @@ get_R(GEN M)
     prec = (prec-1)<<1;
   }
   l = lg(R);
-  for (i=1; i<l; i++) coeff(R,i,i) = un;
+  for (i=1; i<l; i++) coeff(R,i,i) = one;
   return R;
 }
 
@@ -1154,7 +1154,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
     Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2*tnew, dnf)));
-    bmin = logint(ceil_safe(sqrtr(Btra)), gdeux, NULL);
+    bmin = logint(ceil_safe(sqrtr(Btra)), gtwo, NULL);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
@@ -1210,7 +1210,7 @@ AGAIN:
     }
 
     /* restart with truncated entries */
-    q = shifti(gun, b);
+    q = shifti(gone, b);
     P1 = gdivround(PRK, q);
     S1 = gdivround(Tra, q);
     T2 = gsub(gmul(S1, M_L), gmul(P1, VV));
@@ -1317,7 +1317,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
   else
     z = rootpadicfast(polred, L->p, L->k);
   Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol));
-  Cltx_r[3] = Clt? (long)Clt: un;
+  Cltx_r[3] = Clt? (long)Clt: one;
   C2ltpol  = C2lt? gmul(C2lt, pol): pol;
   for (m=1,i=1; i<lg(z); i++)
   {
@@ -1434,7 +1434,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       }
       avma = av2;
     }
-    apr = primedec_apply_kummer(nf,r,gun,ap);
+    apr = primedec_apply_kummer(nf,r,gone,ap);
 
     modpr = zk_to_ff_init(nf,&apr,&aT,&ap);
     red = modprX(polbase, nf, modpr);

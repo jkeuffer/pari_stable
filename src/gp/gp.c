@@ -1051,7 +1051,7 @@ setdefault(char *s,char *v, int flag)
   for (dft=gp_default_list; dft->fun; dft++)
     if (!strcmp(s,dft->name))
     {
-      if (flag == d_EXISTS) return gun;
+      if (flag == d_EXISTS) return gone;
       return ((GEN (*)(char*,int)) dft->fun)(v,flag);
     }
   if (flag == d_EXISTS) return gzero;

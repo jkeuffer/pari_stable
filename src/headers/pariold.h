@@ -1,4 +1,6 @@
 /* For compatibility with 1.x.x */
+#define gun   gone
+#define gdeux gtwo
 #define err pari_err /* move to e.g paritr.h ? */
 #define init pari_init
 #define gen2str GENtostr

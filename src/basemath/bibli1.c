@@ -184,7 +184,7 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
     if (! incrementalQ(x, L, B, Q, j, prec)) return 0;
   for (j=1; j<k; j++)
   {
-    m = (GEN)L[j]; Nx = (GEN)m[j]; /* should set m[j] = un; but need it later */
+    m = (GEN)L[j]; Nx = (GEN)m[j]; /* should set m[j] = one; but need it later */
     invNx = ginv(Nx);
     for (i=max(j0, j+1); i<=k; i++) m[i] = lmpmul(invNx, (GEN)m[i]);
   }
@@ -429,7 +429,7 @@ ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
   q = negi(q);
   Zupdate_row(k,l,q,L,B);
   Zupdate_col(k,l,q,K,h);
-  x[k] = (long)ZV_lincomb(gun, q, (GEN)x[k], (GEN)x[l]);
+  x[k] = (long)ZV_lincomb(gone, q, (GEN)x[k], (GEN)x[l]);
 }
 
 static GEN
@@ -645,7 +645,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   else
   {
     if (s < 0) err(lllger3);
-    B[k+1] = coeff(L,k,k); coeff(L,k,k) = un; fl[k] = 1;
+    B[k+1] = coeff(L,k,k); coeff(L,k,k) = one; fl[k] = 1;
   }
 }
 
@@ -667,7 +667,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   if (gram && hx != lx) err(mattype1,"lllint");
 
   av = avma; lim = stack_lim(av,1); x = dummycopy(x);
-  B = gscalcol(gun, lx);
+  B = gscalcol(gone, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
@@ -906,7 +906,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
   if (gcmp0(u)) B[k+1] = B[k];
   else
   {
-    B[k+1] = coeff(L,k,k); coeff(L,k,k) = un; fl[k] = 1;
+    B[k+1] = coeff(L,k,k); coeff(L,k,k) = one; fl[k] = 1;
   }
 }
 
@@ -925,7 +925,7 @@ lllgramallgen(GEN x, long flag)
   fl = cgetg(lx, t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1);
-  B = gscalcol(gun, lx);
+  B = gscalcol(gone, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); fl[j] = 0; }
 
@@ -1509,7 +1509,7 @@ lllintpartialall(GEN m, long flag)
         dot12new = addii(dot12, mulii(q, dot22));
         dot11 = addii(dot11, mulii(q, addii(dot12, dot12new)));
         dot12 = dot12new;
-        tm[1] = (long)ZV_lincomb(gun,q, (GEN)tm[1],(GEN)tm[2]);
+        tm[1] = (long)ZV_lincomb(gone,q, (GEN)tm[1],(GEN)tm[2]);
       }
 
       /* Interchange the output vectors v1 and v2.  */
@@ -1606,8 +1606,8 @@ lllintpartialall(GEN m, long flag)
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
           reductions++; q = negi(q);
-          tm2[k1] = (long)ZV_lincomb(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
-          dot[k1] = (long)ZV_lincomb(gun,q, (GEN)dot[k1], (GEN)dot[k2]);
+          tm2[k1] = (long)ZV_lincomb(gone,q, (GEN)tm2[k1], (GEN)tm2[k2]);
+          dot[k1] = (long)ZV_lincomb(gone,q, (GEN)dot[k1], (GEN)dot[k2]);
           coeff(dot, k1, k1) = laddii(gcoeff(dot,k1,k1),
                                       mulii(q, gcoeff(dot,k2,k1)));
           for (d = 1; d <= ncol; d++) coeff(dot,k1,d) = coeff(dot,d,k1);
@@ -1775,7 +1775,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 
     /* TODO: In case of failure do not recompute the full vector */
     Xpowers = (GEN*)new_chunk(dim + 1);
-    Xpowers[0] = gun;
+    Xpowers[0] = gone;
     for (j = 1; j <= dim; j++) Xpowers[j] = gmul(Xpowers[j-1], X);
 
     /* TODO: in case of failure, use the part of the matrix
@@ -1925,7 +1925,7 @@ lindep2(GEN x, long bit)
   for (i=1; i<lx; i++)
   {
     p1 = cgetg(ly,t_COL); p2[i] = (long)p1;
-    for (j=1; j<lx; j++) p1[j] = (i==j)? un: zero;
+    for (j=1; j<lx; j++) p1[j] = (i==j)? one: zero;
     p1[lx]           = lcvtoi(gshift((GEN)re[i],bit),&e);
     if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
@@ -2015,7 +2015,7 @@ lindep(GEN x, long prec)
     avma = av1; r = grndtoi(m[k][i], &e);
     if (e >= 0) err(precer,"lindep");
     r  = negi(r);
-    p1 = ZV_lincomb(gun,r, b[k],b[i]);
+    p1 = ZV_lincomb(gone,r, b[k],b[i]);
     b[k] = b[i];
     b[i]  = p1;
     av1 = avma;
@@ -2054,7 +2054,7 @@ lindep(GEN x, long prec)
       av1 = avma;
     }
   }
-  p1 = cgetg(lx,t_COL); p1[n] = un; for (i=1; i<n; i++) p1[i] = zero;
+  p1 = cgetg(lx,t_COL); p1[n] = one; for (i=1; i<n; i++) p1[i] = zero;
   return gerepileupto(av, gauss(gtrans_i((GEN)b),p1));
 }
 
@@ -2753,7 +2753,7 @@ plindep(GEN x)
   if (!p) err(talker,"not a p-adic vector in plindep");
   v = ggval(x,p); pn = gpowgs(p,prec);
   if (v != 0) x = gmul(x, gpowgs(p, -v));
-  x = lift_intern(gmul(x, gmodulcp(gun, pn)));
+  x = lift_intern(gmul(x, gmodulcp(gone, pn)));
 
   ly = 2*lx - 1;
   m = cgetg(ly+1,t_MAT);
@@ -2781,12 +2781,12 @@ algdep0(GEN x, long n, long bit, long prec)
   if (gcmp0(x)) return polx[0];
   if (n <= 0)
   {
-    if (!n) return gun;
+    if (!n) return gone;
     err(talker,"negative polynomial degree in algdep");
   }
 
   av = avma; p1 = cgetg(n+2,t_COL);
-  p1[1] = un;
+  p1[1] = one;
   p1[2] = (long)x; /* n >= 1 */
   for (i=3; i<=n+1; i++) p1[i] = lmul((GEN)p1[i-1],x);
   if (typ(x) == t_PADIC)
@@ -3482,7 +3482,7 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   if (!v) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
-  v = ZM_inv(gtrans_i(v),gun);
+  v = ZM_inv(gtrans_i(v),gone);
   r = gmul(r,v);
   u = u? gmul(u,v): v;
 

@@ -266,11 +266,11 @@ padic_initell(GEN y, GEN p, long prec)
  GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
-  q = gadd(gun, zeropadic(p,prec));
+  q = gadd(gone, zeropadic(p,prec));
   for (i=1; i<=13; i++) y[i] = lmul(q,(GEN)y[i]);
   if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
-  if (egalii(p,gdeux))
+  if (egalii(p,gtwo))
   {
     pv = utoipos(4); 
     err(impl,"initell for 2-adic numbers");
@@ -624,7 +624,7 @@ ordell(GEN e, GEN x, long prec)
   {
     b = gneg_i(b);
     y = cgetg(2,t_VEC);
-    if (td == t_INTMOD && egalii((GEN)D[1], gdeux))
+    if (td == t_INTMOD && egalii((GEN)D[1], gtwo))
       y[1] = (long)gmodulss(gcmp0(a)?0:1, 2);
     else
       y[1] = lmul2n(b,-1);
@@ -642,7 +642,7 @@ ordell(GEN e, GEN x, long prec)
   {
     if (td==t_INTMOD)
     {
-      if (egalii((GEN)D[1],gdeux))
+      if (egalii((GEN)D[1],gtwo))
       {
         avma=av;
         if (!gcmp0(a)) return cgetg(1,t_VEC);
@@ -682,8 +682,8 @@ CM_powell(GEN e, GEN z, GEN n)
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, gmul(n,polx[0]));
   grdx = gadd((GEN)z[1], gdivgs((GEN)e[6],12));
-  p0 = gzero; p1 = gun;
-  q0 = gun;   q1 = gzero;
+  p0 = gzero; p1 = gone;
+  q0 = gone;   q1 = gzero;
   do
   {
     GEN p2,q2, ss = gzero;
@@ -810,7 +810,7 @@ zell(GEN e, GEN z, long prec)
   checkbell(e);
   ty = typ(D);
   if (ty==t_INTMOD) err(typeer,"zell");
-  if (lg(z)<3) return (ty==t_PADIC)? gun: gzero;
+  if (lg(z)<3) return (ty==t_PADIC)? gone: gzero;
 
   x1 = new_coords(e,(GEN)z[1],&a,&b,1, prec);
   if (ty==t_PADIC)
@@ -847,7 +847,7 @@ zell(GEN e, GEN z, long prec)
   }
   u = gdiv(x1,a); t = gaddsg(1,u);
   if (gcmp0(t) || gexpo(t) <  5 - bit_accuracy(prec))
-    t = negi(gun);
+    t = negi(gone);
   else
     t = gdiv(u,gsqr(gaddsg(1,gsqrt(t,prec))));
   u = gsqrt(ginv(gmul2n(a,2)),prec);
@@ -878,7 +878,7 @@ zell(GEN e, GEN z, long prec)
   }
   /* send t to the fundamental domain if necessary */
   p2 = gdiv(imag_i(t),gmael(e,16,2));
-  p1 = gsub(p2, gmul2n(gun,-2));
+  p1 = gsub(p2, gmul2n(gone,-2));
   if (gcmp(gabs(p1,prec),ghalf) >= 0)
     t = gsub(t, gmul((GEN)e[16],gfloor(gadd(p2,dbltor(0.1)))));
   if (gsigne(real_i(t)) < 0) t = gadd(t,(GEN)e[15]);
@@ -900,7 +900,7 @@ set_gamma(SL2_red *T)
 {
   GEN t = T->tau, a, b, c, d, run = dbltor(1. - 1e-8);
 
-  a = d = gun;
+  a = d = gone;
   b = c = gzero;
   for(;;)
   {
@@ -967,11 +967,11 @@ trueE(GEN tau, long k, long prec)
   q = gexp(gmul(pii2, tau), prec);
   q = check_real(q);
   y = gzero; n = utoi(1);
-  av = avma; lim = stack_lim(av,2); qn = gun; n[2] = 0;
+  av = avma; lim = stack_lim(av,2); qn = gone; n[2] = 0;
   for(;;)
   { /* compute y := sum_{n>0} n^(k-1) q^n / (1-q^n) */
     n[2]++; qn = gmul(q,qn);
-    p1 = gdiv(gmul(gpowgs(n,k-1),qn), gsub(gun,qn));
+    p1 = gdiv(gmul(gpowgs(n,k-1),qn), gsub(gone,qn));
     if (gcmp0(p1) || gexpo(p1) <= - bit_accuracy(prec) - 5) break;
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
@@ -980,7 +980,7 @@ trueE(GEN tau, long k, long prec)
       gerepileall(av, 2, &y,&qn);
     }
   }
-  return gadd(gun, gmul(y, gdiv(gdeux, szeta(1-k, prec))));
+  return gadd(gone, gmul(y, gdiv(gtwo, szeta(1-k, prec))));
 }
 
 /* (2iPi/W2)^k E_k(W1/W2) */
@@ -1086,9 +1086,9 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
   pii2 = PiI2(prec);
   q = gexp(gmul(pii2,T->Tau),prec);
   u = gexp(gmul(pii2,z),prec);
-  u1= gsub(gun,u); u2=gsqr(u1);
+  u1= gsub(gone,u); u2=gsqr(u1);
   y = gadd(ginv(utoi(12)), gdiv(u,u2));
-  if (flall) yp = gdiv(gadd(gun,u), gmul(u1,u2));
+  if (flall) yp = gdiv(gadd(gone,u), gmul(u1,u2));
   toadd = (long)ceil(9.065*gtodouble(imag_i(z)));
 
   av1 = avma; lim = stack_lim(av1,1); qn = q;
@@ -1097,16 +1097,16 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     GEN qnu,qnu1,qnu2,qnu3,qnu4;
 
     qnu = gmul(qn,u);     /* q^n u */
-    qnu1 = gsub(gun,qnu); /* 1 - q^n u */
+    qnu1 = gsub(gone,qnu); /* 1 - q^n u */
     qnu2 = gsqr(qnu1);    /* (1 - q^n u)^2 */
     qnu3 = gsub(qn,u);    /* q^n - u */
     qnu4 = gsqr(qnu3);    /* (q^n - u)^2 */
     p1 = gsub(gmul(u, gadd(ginv(qnu2),ginv(qnu4))),
-              gmul2n(ginv(gsqr(gsub(gun,qn))), 1));
+              gmul2n(ginv(gsqr(gsub(gone,qn))), 1));
     y = gadd(y, gmul(qn,p1));
     if (flall)
     {
-      p1 = gadd(gdiv(gadd(gun,qnu),gmul(qnu1,qnu2)),
+      p1 = gadd(gdiv(gadd(gone,qnu),gmul(qnu1,qnu2)),
                 gdiv(gadd(qn,u),gmul(qnu3,qnu4)));
       
       yp = gadd(yp, gmul(qn,p1));
@@ -1156,14 +1156,14 @@ ellzeta(GEN om, GEN z, long prec)
   
   y = gdiv(gmul(gsqr(T.W2),_elleisnum(&T,2,prec)), pii2);
   y = gadd(ghalf, gdivgs(gmul(Z,y),-12));
-  y = gadd(y, ginv(gsub(u,gun)));
+  y = gadd(y, ginv(gsub(u,gone)));
   toadd = (long)ceil(9.065*gtodouble(imag_i(Z)));
   av1 = avma; lim = stack_lim(av1,1);
   
   /* y += sum q^n ( u/(u*q^n - 1) + 1/(u - q^n) ) */
   for (qn = q;;)
   {
-    GEN p1 = gadd(gdiv(u,gsub(gmul(qn,u),gun)), ginv(gsub(u,qn)));
+    GEN p1 = gadd(gdiv(u,gsub(gmul(qn,u),gone)), ginv(gsub(u,qn)));
     y = gadd(y, gmul(qn,p1));
     qn = gmul(q,qn);
     if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
@@ -1184,7 +1184,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
 {
   long toadd;
   pari_sp av = avma, lim, av1;
-  GEN Z,zinit,p1,pii2,q,u,y,y1,u1,qn,negu,uinv,et,etnew,uhalf;
+  GEN Z,zinit,p1,pii2,q,u,y,y1,u1,qn,uinv,et,etnew,uhalf;
   int doprod = (flag >= 2);
   int dolog = (flag & 1);
   SL2_red T;
@@ -1218,11 +1218,10 @@ ellsigma(GEN w, GEN z, long flag, long prec)
     u1 = gsub(uhalf,ginv(uhalf));
     y = gdiv(gmul(T.W2,u1),pii2);
     av1 = avma; lim = stack_lim(av1,1); qn=q;
-    negu = utoineg(1);
     for(;;)
     {
-      p1 = gmul(gadd(gmul(qn,u),negu),gadd(gmul(qn,uinv),negu));
-      p1 = gdiv(p1,gsqr(gadd(qn,negu)));
+      p1 = gmul(gadd(gmul(qn,u),gminusone),gadd(gmul(qn,uinv),gminusone));
+      p1 = gdiv(p1,gsqr(gadd(qn,gminusone)));
       y = gmul(y,p1);
       qn = gmul(q,qn);
       if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
@@ -1242,7 +1241,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
     u = gneg_i(u); uinv = ginv(u);
     y = gzero;
     av1 = avma; lim = stack_lim(av1,1);
-    qn = q; qn2 = gun;
+    qn = q; qn2 = gone;
     urn = uhalf; urninv = ginv(uhalf);
     for(n=0;;n++)
     {
@@ -1299,7 +1298,7 @@ _weipell(GEN c4, GEN c6, long PREC)
     default:P[6] = ldivgs(c6,6048);
     case 3: P[4] = ldivgs(c4, 240);
     case 2: P[2] = zero;
-    case 1: P[0] = un;
+    case 1: P[0] = one;
     case 0: break;
   }
   for (k=4; k<PREC; k++)
@@ -1611,7 +1610,7 @@ apell1(GEN e, GEN p)
   p1p = addsi(1, p);
   p2p = shifti(p1p, 1);
   x = 0; u = c6; KRO = kronecker(u, p); KROold = - KRO;
-  A = gzero; B = gun; h = p1p;
+  A = gzero; B = gone; h = p1p;
   for(;;)
   {
     while (!KRO || KRO == KROold)
@@ -1782,7 +1781,7 @@ apell1(GEN e, GEN p)
 FOUND: /* found a point of exponent h on E_u */
     h = exact_order(h, f, cp4, p);
     /* h | #E_u(Fp) = A (mod B) */
-    if (B == gun) B = h;
+    if (B == gone) B = h;
     else
     {
       p1 = chinois(gmodulcp(A,B), gmodulsg(0,h));
@@ -1997,7 +1996,7 @@ apell(GEN e, GEN p)
 {
   checkell(e);
   if (typ(p)!=t_INT || signe(p)<0) err(talker,"not a prime in apell");
-  if (egalii(p, gdeux)) return _a_2(e);
+  if (egalii(p, gtwo)) return _a_2(e);
   if (gdvd((GEN)e[12],p)) /* D may be an intmod */
   {
     pari_sp av = avma;
@@ -2030,7 +2029,7 @@ anell(GEN e, long n)
   if (n <= 0) return cgetg(1,t_VEC);
   if ((ulong)n >= LGBITS) err(impl,"anell for n >= %lu", LGBITS);
 
-  an = (GEN*)cgetg(n+1,t_VEC); an[1] = gun;
+  an = (GEN*)cgetg(n+1,t_VEC); an[1] = gone;
   for (i=2; i <= n; i++) an[i] = NULL;
   for (p=2; p<=n; p++)
   {
@@ -2093,7 +2092,7 @@ akell(GEN e, GEN n)
   checkell(e);
   if (typ(n) != t_INT) err(talker,"not an integer type in akell");
   if (signe(n)<= 0) return gzero;
-  y = gun; if (gcmp1(n)) return y;
+  y = gone; if (gcmp1(n)) return y;
   fa = auxdecomp(n,1);
   P = (GEN)fa[1];
   E = (GEN)fa[2];
@@ -2117,7 +2116,7 @@ akell(GEN e, GEN n)
     else /* good reduction */
     {
       ap = apell(e,p);
-      u = ap; v = gun;
+      u = ap; v = gone;
       for (j=2; j<=ex; j++)
       {
 	w = subii(mulii(ap,u), mulii(p,v));
@@ -2141,7 +2140,7 @@ hell(GEN e, GEN a, long prec)
   pi2surw = gdiv(Pi2n(1, prec), (GEN)e[15]);
   z = gmul(real_i(zell(e,a,prec)), pi2surw);
   q = real_i( gexp(gmul((GEN)e[16], pureimag(pi2surw)),prec) );
-  y = gsin(z,prec); qn = gun; ps = gneg_i(q);
+  y = gsin(z,prec); qn = gone; ps = gneg_i(q);
   for (n = 3; ; n += 2)
   {
     qn = gmul(qn, ps);
@@ -2172,7 +2171,7 @@ hells(GEN e, GEN x, long prec)
   for (n = 3; n < lim; n += 2)
   {
     w = gmul(t, gaddsg(4, gmul(t, gadd(b2, gmul(t, gadd(b42, gmul(t, b6)))))));
-    z = gsub(gun, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t,b8))))));
+    z = gsub(gone, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t,b8))))));
     mu = gadd(mu, gmul2n(glog(z,prec), -n));
     t = gdiv(w, z);
   }
@@ -2183,7 +2182,7 @@ hells(GEN e, GEN x, long prec)
 static GEN
 init_ch() {
   GEN v = cgetg(5,t_VEC);
-  v[1] = un; v[2] = v[3] = v[4] = zero; return v;
+  v[1] = one; v[2] = v[3] = v[4] = zero; return v;
 }
 
 GEN
@@ -2342,7 +2341,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   long l, n, eps, flun;
   GEN z, cg, v, cga, cgb, s2, ns, gs, N;
 
-  if (!A) A = gun;
+  if (!A) A = gone;
   else
   {
     if (gsigne(A)<=0)
@@ -2351,7 +2350,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   }
   if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gzero; }
   flun = gcmp1(A) && gcmp1(s);
-  eps = ellrootno_all(e, gun, &N);
+  eps = ellrootno_all(e, gone, &N);
   if (flun && eps < 0) { avma = av; return realzero(prec); }
 
   gs = ggamma(s, prec);
@@ -2506,7 +2505,7 @@ localred_carac_p(GEN e, GEN p, int minim)
     case  6: f = 2; kod = -1; /* I0*  */
       p2 = sqri(p);
       /* x^3 - 3c4/p^2 x - 2c6/p^3 */
-      tri = coefs_to_pol(4, gun, gzero,
+      tri = coefs_to_pol(4, gone, gzero,
                             negi(diviiexact(gmulsg(3, c4), p2)),
                             negi(diviiexact(gmul2n(c6,1),  mulii(p2,p))));
       c = 1 + FpX_nbroots(tri, p);
@@ -2540,7 +2539,7 @@ aux2(GEN ak, int p, GEN pl)
 }
 
 /* number of distinct roots of X^3 + aX^2 + bX + c modulo p
- * if there's a multiple root, put it un *mult */
+ * if there's a multiple root, put it one *mult */
 static int
 numroots3(int a, int b, int c, int p, int *mult)
 {
@@ -2605,7 +2604,7 @@ localred_carac_23(GEN e, long p)
       if (s) { t  = (t + r*s) % 3; if (t < 0) t += 3; }
     }
     /* p | (a1, a2, a3, a4, a6) */
-    cumule(&v, &e, gun, stoi(r), stoi(s), stoi(t));
+    cumule(&v, &e, gone, stoi(r), stoi(s), stoi(t));
     p2 = p * p;
     if (smodis((GEN)e[5], p2))
       return localred_result(nudelta, 2, 1, v);
@@ -2625,7 +2624,7 @@ localred_carac_23(GEN e, long p)
         /* IV   */
 
     if (smodis((GEN)e[5], p3))
-      cumule(&v, &e, gun, gzero, gzero, p == 2? gdeux: modis((GEN)e[3], 9));
+      cumule(&v, &e, gone, gzero, gzero, p == 2? gtwo: modis((GEN)e[3], 9));
         /* p | a1, a2; p^2  | a3, a4; p^3 | a6 */
     a21 = aux((GEN)e[2], p, 1);
     a42 = aux((GEN)e[4], p, 2);
@@ -2641,7 +2640,7 @@ localred_carac_23(GEN e, long p)
         return localred_result(nudelta - 4, -1, c, v);
             /* I0*  */
       case 2: /* compute nu */
-        if (theroot) cumule(&v, &e, gun, stoi(theroot * p), gzero, gzero);
+        if (theroot) cumule(&v, &e, gone, stoi(theroot * p), gzero, gzero);
             /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
         nu = 1;
         pk  = utoipos(p2);
@@ -2652,7 +2651,7 @@ localred_carac_23(GEN e, long p)
           ga = -aux2((GEN)e[5], p, p2k);
           al = 1;
           if (numroots2(al, be, ga, p, &theroot) == 2) break;
-          if (theroot) cumule(&v, &e, gun, gzero, gzero, mulsi(theroot,pk));
+          if (theroot) cumule(&v, &e, gone, gzero, gzero, mulsi(theroot,pk));
           pk1 = pk;
           pk  = mulsi(p, pk);
           p2k = mulsi(p, p2k); nu++;
@@ -2661,7 +2660,7 @@ localred_carac_23(GEN e, long p)
           be = aux2((GEN)e[4], p, pk);
           ga = aux2((GEN)e[5], p, p2k);
           if (numroots2(al, be, ga, p, &theroot) == 2) break;
-          if (theroot) cumule(&v, &e, gun, mulsi(theroot, pk1), gzero, gzero);
+          if (theroot) cumule(&v, &e, gone, mulsi(theroot, pk1), gzero, gzero);
           p2k = mulsi(p, p2k); nu++;
         }
         if (p == 2)
@@ -2671,7 +2670,7 @@ localred_carac_23(GEN e, long p)
         return localred_result(nudelta - 4 - nu, -4 - nu, c, v);
             /* Inu* */
       case 1:
-        if (theroot) cumule(&v, &e, gun, stoi(theroot * p), gzero, gzero);
+        if (theroot) cumule(&v, &e, gone, stoi(theroot * p), gzero, gzero);
             /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
         a32 = aux((GEN)e[3], p, 2);
         a64 = aux((GEN)e[5], p, 4);
@@ -2684,7 +2683,7 @@ localred_carac_23(GEN e, long p)
           return localred_result(nudelta - 6, -4, c, v);
         }
             /* IV*  */
-        if (theroot) cumule(&v, &e, gun, gzero, gzero, stoi(theroot*p*p));
+        if (theroot) cumule(&v, &e, gone, gzero, gzero, stoi(theroot*p*p));
             /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
         p4 = p2 * p2;
         if (smodis((GEN)e[4], p4))
@@ -2761,7 +2760,7 @@ ellintegralmodel(GEN e)
   for (k = i = 2; i < l; i++)
     if (!egalii((GEN)L[i], (GEN)L[i-1])) L[k++] = L[i];
 
-  l = k; u = gun;
+  l = k; u = gone;
   for (k = 1; k < l; k++)
   {
     GEN p = (GEN)L[k];
@@ -2785,7 +2784,7 @@ standard_model(GEN e, GEN *pv)
   s = gdiventgs((GEN)e[1], -2);
   r = gdiventgs(gaddgs(gsub(gsub((GEN)e[2], gmul(s,(GEN)e[1])), gsqr(s)), 1), -3);
   t = gdiventgs(ellLHS0(e,r), -2);
-  cumulev(pv, gun, r, s, t);
+  cumulev(pv, gone, r, s, t);
 }
 
 GEN
@@ -2841,7 +2840,7 @@ globalreduction(GEN E)
   l = lg(P);
   for (k = 1; k < l; k++) (long)Z_pvalrem(D, (GEN)P[k], &D);
   if (!is_pm1(D)) P = concatsp(P, (GEN)decomp(absi(D))[1]);
-  l = lg(P); c = N = gun;
+  l = lg(P); c = N = gone;
   for (k = 1; k < l; k++)
   {
     GEN p = (GEN)P[k];
@@ -2919,7 +2918,7 @@ taniyama(GEN e)
 
   checkell(e); v = cgetg(precdl+3,t_SER);
   v[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
-  v[2] = un;
+  v[2] = one;
   c=gtoser(anell(e,precdl+1),0); setvalp(c,1);
   d=ginv(c); c=gsqr(d);
   for (n=-3; n<=(long)precdl-4; n++)
@@ -3082,7 +3081,7 @@ torsellnagelllutz(GEN e)
   if (t==1)
   {
     avma=av; w=cgetg(4,t_VEC);
-    w[1] = un;
+    w[1] = one;
     w[2] = lgetg(1,t_VEC);
     w[3] = lgetg(1,t_VEC);
     return w;
@@ -3101,7 +3100,7 @@ torsellnagelllutz(GEN e)
   {
     if (t&3) err(bugparier,"torsell (bug2)");
     t2 = t>>1;
-    w2 = mkvec2(utoipos(t2), gdeux);
+    w2 = mkvec2(utoipos(t2), gtwo);
     for (k=2; k<=t; k++)
       if (_orderell(e,(GEN)r[k]) == t2) break;
     if (k>t) err(bugparier,"torsell (bug3)");
@@ -3215,7 +3214,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     }
     r = cgetg(4,t_VEC);
     r[1] = (long)utoipos(2*k);
-    r[2] = (long)mkvec2(utoipos(k), gdeux);
+    r[2] = (long)mkvec2(utoipos(k), gtwo);
     r[3] = (long)mkvec2copy(p, q);
   }
   else
@@ -3232,7 +3231,7 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     else
     {
       r = cgetg(4,t_VEC);
-      r[1] = un;
+      r[1] = one;
       r[2] = lgetg(1,t_VEC);
       r[3] = lgetg(1,t_VEC);
     }
@@ -3611,7 +3610,7 @@ ellrootno_p(GEN e, GEN p, GEN ex)
 
   if (gcmp1(ex)) return -kronecker(negi((GEN)e[11]),p);
   j=(GEN)e[13];
-  if (!gcmp0(j) && ggval(j,p) < 0) return kronecker(negi(gun),p);
+  if (!gcmp0(j) && ggval(j,p) < 0) return kronecker(negi(gone),p);
   ep = 12/cgcd(12,ggval((GEN)e[12],p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);
@@ -3667,7 +3666,7 @@ ellrootno(GEN e, GEN p)
 {
   pari_sp av = avma;
   long s;
-  if (!p) p = gun;
+  if (!p) p = gone;
   s = ellrootno_all(e, p, NULL);
   avma = av; return s;
 }

@@ -269,7 +269,7 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
 {
   GEN V=cgetg(l+2,t_VEC);
   long i;
-  V[1] = (long) scalarpol(gun,varn(T));
+  V[1] = (long) scalarpol(gone,varn(T));
   if (l==0) return V;
   V[2] = lcopy(x);
   if (l==1) return V;
@@ -498,7 +498,7 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   long i;
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
-    g[i] = (long)deg1pol_i(gun,modii(negi((GEN)V[i]),p),v);
+    g[i] = (long)deg1pol_i(gone,modii(negi((GEN)V[i]),p),v);
   return gerepileupto(ltop,FpXV_prod(g,p));
 }
 
@@ -925,7 +925,7 @@ FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
   long k;
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    W[k] = (long)deg1pol_i(gun,Fq_neg((GEN)V[k],T,p),v);
+    W[k] = (long)deg1pol_i(gone,Fq_neg((GEN)V[k],T,p),v);
   return gerepileupto(ltop, FpXQXV_prod(W, T, p));
 }
 
@@ -1055,7 +1055,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
  * If zetan != NULL, it is set to a primitive mth root of unity so that the set
  * of solutions is {x*zetan^k;k=0 to m-1}
  *
- * If a = 0, return 0 and (if zetan != NULL) set zetan = gun */
+ * If a = 0, return 0 and (if zetan != NULL) set zetan = gone */
 GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 {
   pari_sp ltop=avma, av1, lim;
@@ -1067,8 +1067,8 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
     err(typeer,"FpXQ_sqrtn");
   if (!degpol(T)) err(constpoler,"FpXQ_sqrtn");
   if (!signe(n)) err(talker,"1/0 exponent in FpXQ_sqrtn");
-  if (gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
-  if (gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
+  if (gcmp1(n)) {if (zetan) *zetan=gone;return gcopy(a);}
+  if (gcmp0(a)) {if (zetan) *zetan=gone;return gzero;}
 
   q = addsi(-1, gpowgs(p,degpol(T)));
   m = bezout(n,q,&u1,&u2);
@@ -1189,7 +1189,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
   long lV=lg(V);
   GEN  PV=RgX_to_RgV(P, lgpol(P));
   M=cgetg(l+1,t_VEC);
-  M[1]=(long)scalarpol(poleval(P,gun),v);
+  M[1]=(long)scalarpol(poleval(P,gone),v);
   M[2]=(long)FpXV_FpV_innerprod(V,PV,p);
   btop=avma;
   gptr[0]=&Mi;
@@ -1399,22 +1399,21 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   }
   if (e!=0)
   {
-    GEN VP,VQ,moinsun,Ay,By,lmun;
+    GEN VP,VQ,Ay,By,lmun;
     int i,j;
-    moinsun=utoineg(1);
     lmun=addis(l,-1);
-    MA=gaddmat(moinsun,MA);
-    MB=gaddmat(moinsun,MB);
+    MA=gaddmat(gminusone,MA);
+    MB=gaddmat(gminusone,MB);
     Ay=polun[vp];
     By=polun[vq];
     VP=cgetg(np+1,t_COL);
-    VP[1]=un;
+    VP[1]=one;
     for(i=2;i<=np;i++) VP[i]=zero;
     if (np==nq) VQ=VP;/*save memory*/
     else
     {
       VQ=cgetg(nq+1,t_COL);
-      VQ[1]=un;
+      VQ[1]=one;
       for(i=2;i<=nq;i++) VQ[i]=zero;
     }
     for(j=0;j<e;j++)
@@ -2005,7 +2004,7 @@ FpX_gcd_check(GEN x, GEN y, GEN p)
     if (!is_pm1(g)) return gerepileupto(av,g);
     c = FpX_rem(a,b,p); a=b; b=c;
   }
-  avma = av; return gun;
+  avma = av; return gone;
 }
 
 /* x and y in Z[X], return lift(gcd(x mod p, y mod p)). Set u and v st
@@ -2032,7 +2031,7 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   {
     a = FpX_red(x, p);
     b = FpX_red(y, p);
-    d = a; d1 = b; v = gzero; v1 = gun;
+    d = a; d1 = b; v = gzero; v1 = gone;
     while (signe(d1))
     {
       q = FpX_divrem(d,d1,p, &r);
@@ -2063,7 +2062,7 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 
   a = FpXQX_red(x, T, p);
   b = FpXQX_red(y, T, p);
-  d = a; d1 = b; v = gzero; v1 = gun;
+  d = a; d1 = b; v = gzero; v1 = gone;
   while (signe(d1))
   {
     q = FpXQX_divrem(d,d1,T,p, &r);
@@ -2094,7 +2093,7 @@ FpXQ_charpoly(GEN x, GEN T, GEN p)
   GEN R;
   T = gcopy(T); setvarn(T, MAXVARN);
   x = gcopy(x); setvarn(x, MAXVARN);
-  R = FpY_FpXY_resultant(T, deg1pol_i(gun,FpX_neg(x,p),v),p);
+  R = FpY_FpXY_resultant(T, deg1pol_i(gone,FpX_neg(x,p),v),p);
   return gerepileupto(ltop,R);
 }
 
@@ -2254,7 +2253,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
 {
   long da,db,dc;
   pari_sp av, lim;
-  GEN c,lb, res = gun;
+  GEN c,lb, res = gone;
 
   if (!signe(a) || !signe(b)) return gzero;
   da = degpol(a);
@@ -2264,7 +2263,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     swapspec(a,b, da,db);
     if (both_odd(da,db)) res = subii(p, res);
   }
-  if (!da) return gun; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
+  if (!da) return gone; /* = res * a[2] ^ db, since 0 <= db <= da = 0 */
   av = avma; lim = stack_lim(av,2);
   while (db)
   {
@@ -2980,7 +2979,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   B0 = cgetg(4, t_POL);
   B0[1] = evalsigne(1);
   B0[2] = (long)gneg_i(B);
-  B0[3] = un;
+  B0[3] = one;
   R = ZY_ZXY_resultant(A, B0, lambda);
   if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(A);
@@ -3116,8 +3115,8 @@ ZX_is_squarefree(GEN x)
 static GEN
 _gcd(GEN a, GEN b)
 {
-  if (!a) a = gun;
-  if (!b) b = gun;
+  if (!a) a = gone;
+  if (!b) b = gone;
   return ggcd(a,b);
 }
 
@@ -3330,18 +3329,18 @@ f2init(long l)
 
   if (l == 1) return cyclo(3, MAXVARN);
 
-  S = coefs_to_pol(4, gun,gun,gzero,gzero); /* #(#^2 + #) */
+  S = coefs_to_pol(4, gone,gone,gzero,gzero); /* #(#^2 + #) */
   setvarn(S, MAXVARN);
-  q = coefs_to_pol(3, gun,gun, S); /* X^2 + X + #(#^2+#) */
+  q = coefs_to_pol(3, gone,gone, S); /* X^2 + X + #(#^2+#) */
 
   /* x^4+x+1, irred over F_2, minimal polynomial of a root of q */
-  T = coefs_to_pol(5, gun,gzero,gzero,gun,gun);
+  T = coefs_to_pol(5, gone,gzero,gzero,gone,gone);
   for (i=2; i<l; i++)
   { /* q = X^2 + X + a(#) irred. over K = F2[#] / (T(#))
      * ==> X^2 + X + a(#) b irred. over K for any root b of q
      * ==> X^2 + X + (b^2+b)b */
     setvarn(T, MAXVARN);
-    T = FpY_FpXY_resultant(T, q, gdeux);
+    T = FpY_FpXY_resultant(T, q, gtwo);
     /* T = minimal polynomial of b over F2 */
   }
   return T;
@@ -3357,12 +3356,12 @@ ffinit_Artin_Shreier(GEN ip, long l)
   long p=itos(ip);
   GEN x,xp,yp,y2pm1;
   GEN P, Q;
-  xp=monomial(gun,p,0);
-  P = FpX_sub(xp, deg1pol_i(gun,gun,0), NULL);
+  xp=monomial(gone,p,0);
+  P = FpX_sub(xp, deg1pol_i(gone,gone,0), NULL);
   if (l == 1) return P;
   x=polx[0];
-  yp=monomial(gun,p,MAXVARN);
-  y2pm1=monomial(gun,2*p-1,MAXVARN);
+  yp=monomial(gone,p,MAXVARN);
+  y2pm1=monomial(gone,2*p-1,MAXVARN);
   Q = gsub(FpX_sub(xp, x, NULL), FpX_sub(y2pm1, yp, NULL));
   for (i = 2; i <= l; ++i)
   {
@@ -3411,7 +3410,7 @@ ffinit_fact(GEN p, long n)
   GEN P; /* pol */
   long i;
   /* If n is even, then F[1] is 2^bfffo(n)*/
-  if (!odd(n) && egalii(p, gdeux))
+  if (!odd(n) && egalii(p, gtwo))
     P = f2init(vals(n));
   else
     P = fpinit(p, F[1]);

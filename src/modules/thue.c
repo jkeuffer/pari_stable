@@ -48,7 +48,7 @@ static GEN
 distoZ(GEN z)
 {
   GEN p1 = gfrac(z);
-  return gmin(p1, gsub(gun,p1));
+  return gmin(p1, gsub(gone,p1));
 }
 
 /* Compensates rounding errors for computation/display of the constants.
@@ -57,7 +57,7 @@ static GEN
 myround(GEN x, long dir)
 {
   GEN eps = gpowgs(stoi(dir > 0? 10: -10), -10);
-  return gmul(x, gadd(gun, eps));
+  return gmul(x, gadd(gone, eps));
 }
 
 /* Returns the index of the largest element in a vector */
@@ -99,8 +99,8 @@ static GEN
 LogHeight(GEN x, long prec)
 {
   int i, n = lg(x)-1;
-  GEN LH = gun;
-  for (i=1; i<=n; i++) LH = gmul(LH, gmax(gun, gabs((GEN)x[i], prec)));
+  GEN LH = gone;
+  for (i=1; i<=n; i++) LH = gmul(LH, gmax(gone, gabs((GEN)x[i], prec)));
   return gdivgs(glog(LH,prec), n);
 }
 
@@ -189,7 +189,7 @@ T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
 static GEN
 inithue(GEN P, GEN bnf, long flag, long prec)
 {
-  GEN MatFU, x0, tnf, tmp, gpmin, dP, csts, ALH, eps5, ro, c1, c2, Ind = gun;
+  GEN MatFU, x0, tnf, tmp, gpmin, dP, csts, ALH, eps5, ro, c1, c2, Ind = gone;
   int k,j, n = degpol(P);
   long s,t, prec_roots;
 
@@ -223,7 +223,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     tmp = gabs(poleval(dP,(GEN)ro[k]),prec);
     if (!c1 || gcmp(tmp,c1) < 0) c1 = tmp;
   }
-  c1 = gdiv(shifti(gun,n-1), c1);
+  c1 = gdiv(shifti(gone,n-1), c1);
   c1 = gprec_w(myround(c1, 1), DEFAULTPREC);
 
   c2 = NULL; /* max |r_i - r_j|, i!=j */
@@ -235,7 +235,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     }
   c2 = gprec_w(myround(c2, -1), DEFAULTPREC);
 
-  if (t==0) x0 = gun;
+  if (t==0) x0 = gone;
   else
   {
     gpmin = NULL; /* min |P'(r_i)|, i > s */
@@ -248,7 +248,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 
     /* Compute x0. See paper, Prop. 2.2.1 */
     x0 = gmul(gpmin, Vecmax(gabs(imag_i(ro), prec)));
-    x0 = sqrtnr(gdiv(shifti(gun,n-1), x0), n);
+    x0 = sqrtnr(gdiv(shifti(gone,n-1), x0), n);
   }
   if (DEBUGLEVEL>1) 
     fprintferr("c1 = %Z\nc2 = %Z\nIndice <= %Z\n", c1, c2, Ind);
@@ -279,7 +279,7 @@ static GEN
 Baker(baker_s *BS)
 {
   const long prec = DEFAULTPREC;
-  GEN tmp, B0, hb0, c9 = gun, ro = BS->ro, ro0 = (GEN)ro[BS->iroot];
+  GEN tmp, B0, hb0, c9 = gone, ro = BS->ro, ro0 = (GEN)ro[BS->iroot];
   int k, i1, i2, r = BS->r;
 
   switch (BS->iroot) {
@@ -292,15 +292,15 @@ Baker(baker_s *BS)
   for (k=1; k<=r; k++)
   {
     tmp = gdiv(gcoeff(BS->MatFU,i1,k), gcoeff(BS->MatFU,i2,k));
-    tmp = gmax(gun, abslog(tmp,prec));
+    tmp = gmax(gone, abslog(tmp,prec));
     c9 = gmul(c9, gmax((GEN)BS->ALH[k], gdiv(tmp, BS->bak)));
   }
 
   /* Compute a bound for the h_0 */
-  hb0 = gadd(gmul2n(BS->hal,2), gmul(gdeux, gadd(BS->Hmu,mplog2(prec))));
+  hb0 = gadd(gmul2n(BS->hal,2), gmul(gtwo, gadd(BS->Hmu,mplog2(prec))));
   tmp = gdiv(gmul(gsub(ro0, (GEN)ro[i2]), (GEN)BS->NE[i1]),
              gmul(gsub(ro0, (GEN)ro[i1]), (GEN)BS->NE[i2]));
-  tmp = gmax(gun, abslog(tmp, prec));
+  tmp = gmax(gone, abslog(tmp, prec));
   hb0 = gmax(hb0, gdiv(tmp, BS->bak));
   c9 = gmul(c9,hb0);
   /* Multiply c9 by the "constant" factor */
@@ -493,8 +493,8 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, int s, GEN c1)
     GEN t = contfrac0(rr, 0, 100); 
     GEN p, q, pm1, qm1, p0, q0, z; 
 
-    pm1 = gzero; p0 = gun; 
-    qm1 = gun; q0 = gzero; 
+    pm1 = gzero; p0 = gone; 
+    qm1 = gone; q0 = gzero; 
 
     for (j = 1; j < lg(t); j++) 
     {
@@ -626,7 +626,7 @@ thueinit(GEN pol, long flag, long prec)
   }
   else
   {
-    GEN c0 = gun, ro = roots(pol, DEFAULTPREC);
+    GEN c0 = gone, ro = roots(pol, DEFAULTPREC);
     if (!gisirreducible(pol)) err(redpoler,"thueinit");
     for (k=1; k<lg(ro); k++) c0 = gmul(c0, imag_i((GEN)ro[k]));
     c0 = ginv( mpabs(c0) );
@@ -666,7 +666,7 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
                 gdiv((GEN)BS->NE[3], (GEN)BS->NE[2]));
       lambda = divrr(garg(p1,prec), Pi2);
 
-      errdelta = gdiv(gmul2n(gun, 1 - bit_accuracy(prec)),
+      errdelta = gdiv(gmul2n(gone, 1 - bit_accuracy(prec)),
                       gabs((GEN)fu[2],prec));
     }
     BS->delta = delta;
@@ -743,7 +743,7 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
                 gdiv((GEN)BS->NE[3], (GEN)BS->NE[2]));
       lambda = divrr(garg(p1,prec), Pi2);
 
-      errdelta = gdiv(gmul2n(gun, 1 - bit_accuracy(prec)),
+      errdelta = gdiv(gmul2n(gone, 1 - bit_accuracy(prec)),
                       gabs((GEN)fu[2],prec));
     }
     
@@ -843,7 +843,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
   c4 = mulsr(n-1, c3);
   x1 = gmax(x0, sqrtnr(mulsr(2,tmp),n));
 
-  Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) Vect[i]=un;
+  Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) Vect[i]=one;
   Vect = gmul(gabs(A,DEFAULTPREC), Vect);
   c14 = mulrr(c4, Vecmax(Vect));
   x2 = gmax(x1, sqrtnr(mulsr(10,c14), n));
@@ -865,7 +865,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
   {
     GEN Delta, MatNE, Hmu, c5, c7;
 
-    Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) Vect[i] = un;
+    Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) Vect[i] = one;
     if (iroot <= r) Vect[iroot] = lstoi(1-n);
     Delta = gmul(A,Vect);
 
@@ -955,7 +955,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
         }
         if (i <= r) continue;
 
-        z1 = z2 = gun;
+        z1 = z2 = gone;
         for(i=1; i<=r; i++)
         {
           GEN c = ground((GEN)b[i]);
@@ -1227,7 +1227,7 @@ get_unit_1(GEN bnf, GEN *unit)
   long i, n = degpol(nf[7]);
 
   if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
-  if (odd(n)) { *unit = utoineg(1); return 1; }
+  if (odd(n)) { *unit = gminusone; return 1; }
   v = signunits(bnf);
   for (i = 1; i < lg(v); i++)
   {
@@ -1250,7 +1250,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   if (typ(a)!=t_INT)
     err(talker,"expected an integer in bnfisintnorm");
   if (!signe(a))  return mkvec(gzero);
-  if (gcmp1(a)) return mkvec(gun);
+  if (gcmp1(a)) return mkvec(gone);
 
   get_sol_abs(bnf, absi(a), &Primes);
 
@@ -1258,7 +1258,7 @@ bnfisintnormabs(GEN bnf, GEN a)
   for (i=1; i<=sindex; i++)
   {
     x = normsol[i];
-    if (!Nprimes) x = gun;
+    if (!Nprimes) x = gone;
     else
     {
       x = isprincipalfact(bnf, Primes, vecsmall_to_col(x), NULL,

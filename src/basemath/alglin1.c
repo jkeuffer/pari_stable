@@ -682,7 +682,7 @@ GEN
 gscalsmat(long x, long n) { return gscalmat_proto((GEN)x,gzero,n,1); }
 
 GEN
-idmat(long n) { return gscalmat_proto(gun,gzero,n,0); }
+idmat(long n) { return gscalmat_proto(gone,gzero,n,0); }
 
 GEN
 idmat_intern(long n,GEN myun,GEN z) { return gscalmat_proto(myun,z,n,0); }
@@ -1636,7 +1636,7 @@ detint(GEN x)
   long i,j,k,rg,n,m,m1;
 
   if (typ(x)!=t_MAT) err(typeer,"detint");
-  n=lg(x)-1; if (!n) return gun;
+  n=lg(x)-1; if (!n) return gone;
   m1=lg(x[1]); m=m1-1;
   if (n < m) return gzero;
   lim=stack_lim(av,1);
@@ -1652,7 +1652,7 @@ detint(GEN x)
       if (typ(gcoeff(x,j,k)) != t_INT)
         err(talker,"not an integer matrix in detint");
   v=cgetg(m1,t_COL);
-  det1=gzero; piv=pivprec=gun;
+  det1=gzero; piv=pivprec=gone;
   for (rg=0,k=1; k<=n; k++)
   {
     long t = 0;
@@ -1855,7 +1855,7 @@ keri(GEN x)
 
   av0=avma; m=lg(x[1])-1; r=0;
   pp=cgetg(n+1,t_COL);
-  x=dummycopy(x); p=gun;
+  x=dummycopy(x); p=gone;
   c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   l=cgetg(n+1, t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
@@ -1937,7 +1937,7 @@ deplin(GEN x0)
   d = (GEN*)cgetg(nl+1,t_VEC); /* pivot list */
   c = cgetg(nl+1, t_VECSMALL);
   l = cgetg(nc+1, t_VECSMALL); /* not initialized */
-  for (i=1; i<=nl; i++) { d[i] = gun; c[i] = 0; }
+  for (i=1; i<=nl; i++) { d[i] = gone; c[i] = 0; }
   ck = NULL; /* gcc -Wall */
   for (k=1; k<=nc; k++)
   {
@@ -1956,7 +1956,7 @@ deplin(GEN x0)
     c[i] = k; l[k] = i; /* pivot d[k] in x[i,k] */
   }
   if (k > nc) { avma = av; return zerocol(nc); }
-  if (k == 1) { avma = av; return gscalcol_i(gun,nc); }
+  if (k == 1) { avma = av; return gscalcol_i(gone,nc); }
   y = cgetg(nc+1,t_COL);
   y[1] = (long)ck[ l[1] ];
   for (q=d[1],j=2; j<k; j++)
@@ -1982,16 +1982,16 @@ deplin(GEN x0)
 static GEN
 gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
 {
-  GEN x,c,d,p,mun;
+  GEN x, c, d, p;
   pari_sp av, lim;
-  long i,j,k,r,t,n,m;
+  long i, j, k, r, t, n, m;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
   if (typ(x0)!=t_MAT) err(typeer,"gauss_pivot");
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
   m=lg(x0[1])-1; r=0;
 
-  x = dummycopy(x0); mun = negi(gun);
+  x = dummycopy(x0);
   if (a)
   {
     if (n != m) err(consister,"gauss_pivot_ker");
@@ -2012,8 +2012,8 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
     }
     else
     { /* pivot for column k on row j */
-      c[j]=k; d[k]=j; p = gdiv(mun,gcoeff(x,j,k));
-      coeff(x,j,k) = (long)mun;
+      c[j]=k; d[k]=j; p = gdiv(gminusone,gcoeff(x,j,k));
+      coeff(x,j,k) = (long)gminusone;
       /* x[j,] /= - x[j,k] */
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmul(p,gcoeff(x,j,i));
@@ -2037,7 +2037,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
 static void
 gauss_pivot(GEN x0, GEN *dd, long *rr)
 {
-  GEN x,c,d,d0,mun,p;
+  GEN x, c, d, d0, p;
   long i, j, k, r, t, n, m;
   pari_sp av, lim;
   long (*get_pivot)(GEN,GEN,GEN,long);
@@ -2059,7 +2059,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
     get_pivot = gauss_get_pivot_NZ;
     for (k=1; k<=n; k++) d0[k] = k;
   }
-  x = dummycopy(x0); mun = negi(gun);
+  x = dummycopy(x0);
   m=lg(x[1])-1; r=0;
   c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
@@ -2069,7 +2069,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
     if (j>m) { r++; d[d0[k]]=0; }
     else
     {
-      c[j]=k; d[d0[k]]=j; p = gdiv(mun,gcoeff(x,j,k));
+      c[j]=k; d[d0[k]]=j; p = gdiv(gminusone, gcoeff(x,j,k));
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmul(p,gcoeff(x,j,i));
 
@@ -2112,7 +2112,7 @@ ker0(GEN x, GEN a)
       }
       else
 	p[i] = zero;
-    p[k]=un; for (i=k+1; i<=n; i++) p[i]=zero;
+    p[k]=one; for (i=k+1; i<=n; i++) p[i]=zero;
   }
   return gerepile(av,tetpil,y);
 }
@@ -2231,7 +2231,7 @@ inverseimage(GEN m,GEN v)
 
 /* i-th vector in the standard basis */
 GEN
-vec_ei(long n, long i) { GEN e = zerocol(n); e[i] = un; return e; }
+vec_ei(long n, long i) { GEN e = zerocol(n); e[i] = one; return e; }
 GEN
 vec_Cei(long n, long i, GEN c) { GEN e = zerocol(n); e[i] = (long)c; return e; }
 
@@ -2669,7 +2669,7 @@ static GEN
 FpM_ker_i(GEN x, GEN p, long deplin)
 {
   pari_sp av0 = avma, av, lim, tetpil;
-  GEN y, c, d, piv, mun;
+  GEN y, c, d, piv;
   long i, j, k, r, t, n, m;
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
@@ -2685,7 +2685,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   }
 
   m=lg(x[1])-1; r=0;
-  x=dummycopy(x); mun=negi(gun);
+  x=dummycopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -2702,7 +2702,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
       if (deplin) {
         c = cgetg(n+1, t_COL);
         for (i=1; i<k; i++) c[i] = lmodii(gcoeff(x,d[i],k), p);
-        c[k] = un; for (i=k+1; i<=n; i++) c[i] = zero;
+        c[k] = one; for (i=k+1; i<=n; i++) c[i] = zero;
         return gerepileupto(av0, c);
       }
       r++; d[k]=0;
@@ -2712,7 +2712,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     else
     {
       c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
-      coeff(x,j,k) = (long)mun;
+      coeff(x,j,k) = (long)gminusone;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmodii(mulii(piv,gcoeff(x,j,i)), p);
       for (t=1; t<=m; t++)
@@ -2746,7 +2746,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
       }
       else
 	C[i] = zero;
-    C[k]=un; for (i=k+1; i<=n; i++) C[i]=zero;
+    C[k]=one; for (i=k+1; i<=n; i++) C[i]=zero;
   }
   return gerepile(av0,tetpil,y);
 }
@@ -3070,9 +3070,9 @@ Flxq_gerepile_gauss_ker(GEN x, GEN T, ulong p, long k, long t, pari_sp av)
 static GEN
 FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
 {
-  pari_sp av0,av,lim,tetpil;
-  GEN y,c,d,piv,mun;
-  long i,j,k,r,t,n,m;
+  pari_sp av0, av, lim, tetpil;
+  GEN y, c, d, piv;
+  long i, j, k, r, t, n, m;
 
   if (!T) return FpM_ker_i(x,p,deplin);
 
@@ -3089,7 +3089,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     return gerepileupto(ltop,p1);
   }
   m=lg(x[1])-1; r=0; av0 = avma;
-  x=dummycopy(x); mun=negi(gun);
+  x=dummycopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -3106,7 +3106,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
       if (deplin) {
         c = cgetg(n+1, t_COL);
         for (i=1; i<k; i++) c[i] = (long)Fq_red(gcoeff(x,d[i],k), T, p);
-        c[k] = un; for (i=k+1; i<=n; i++) c[i] = zero;
+        c[k] = one; for (i=k+1; i<=n; i++) c[i] = zero;
         return gerepileupto(av0, c); 
       }
       r++; d[k]=0;
@@ -3116,7 +3116,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     else
     {
       c[j]=k; d[k]=j; piv = Fq_neg_inv(gcoeff(x,j,k), T, p);
-      coeff(x,j,k) = (long)mun;
+      coeff(x,j,k) = (long)gminusone;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (long) Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
@@ -3151,7 +3151,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
       }
       else
 	C[i] = zero;
-    C[k]=un; for (i=k+1; i<=n; i++) C[i]=zero;
+    C[k]=one; for (i=k+1; i<=n; i++) C[i]=zero;
   }
   return gerepile(av0,tetpil,y);
 }
@@ -3166,8 +3166,8 @@ static GEN
 FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
 {
   pari_sp av0,av,lim,tetpil;
-  GEN y,c,d,piv,mun;
-  long i,j,k,r,t,n,m;
+  GEN y, c, d, piv, mun;
+  long i, j, k, r, t, n, m;
   long vs;
 
   if (typ(x)!=t_MAT) err(typeer,"FlxqM_ker");
@@ -3203,7 +3203,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
     else
     {
       c[j]=k; d[k]=j; piv = Flx_neg(Flxq_inv(gcoeff(x,j,k), T, p), p);
-      coeff(x,j,k) = (long)Fl_to_Flx(p-1,vs);
+      coeff(x,j,k) = (long)mun;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (long) Flxq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
@@ -3326,7 +3326,7 @@ det_simple_gauss(GEN a, int inexact)
   long i,j,k,s, nbco = lg(a)-1;
   GEN x,p;
 
-  av=avma; s=1; x=gun; a=dummycopy(a);
+  av=avma; s=1; x=gone; a=dummycopy(a);
   for (i=1; i<nbco; i++)
   {
     p=gcoeff(a,i,i); k=i;
@@ -3375,7 +3375,7 @@ det2(GEN a)
 {
   long nbco = lg(a)-1;
   if (typ(a)!=t_MAT) err(mattype1,"det2");
-  if (!nbco) return gun;
+  if (!nbco) return gone;
   if (nbco != lg(a[1])-1) err(mattype1,"det2");
   return det_simple_gauss(a, use_maximal_pivot(a));
 }
@@ -3399,14 +3399,14 @@ det(GEN a)
   GEN p,pprec;
 
   if (typ(a)!=t_MAT) err(mattype1,"det");
-  if (!nbco) return gun;
+  if (!nbco) return gone;
   if (nbco != lg(a[1])-1) err(mattype1,"det");
   if (use_maximal_pivot(a)) return det_simple_gauss(a,1);
   if (DEBUGLEVEL > 7) (void)timer2();
 
   av = avma; lim = stack_lim(av,2);
   a = dummycopy(a); s = 1;
-  for (pprec=gun,i=1; i<nbco; i++,pprec=p)
+  for (pprec=gone,i=1; i<nbco; i++,pprec=p)
   {
     GEN *ci, *ck, m, p1;
     int diveuc = (gcmp1(pprec)==0);

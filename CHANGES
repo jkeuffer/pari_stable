@@ -68,6 +68,7 @@ BA 11- [hi-res plot: fltk] line plotting was broken
        sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
        (*eval)(GEN,void*) everywhere instead of entree * ]
 BA  5- allow Configure -l <directory>  [ in addition to <directory>/pari.cfg ]
+    6- renamed gun --> gone, gdeux --> gtwo.
 
   Added
     1- new algorithm for log( t_COMPLEX ), log(2) [ AGM ]
@@ -78,7 +79,7 @@ HC  4- "double exponential method" for numerical integration and sumation.
        intfouriersin, intfuncinit, intlaplaceinv, intmellininv,
        intmellininvshort, intnuminit, intnuminitgen, intnumromb, intnumstep,
        sumnum, sumnumalt, sumnuminit
-
+    5- new universal constant gminusone
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.8 (released 25/11/2004):
   Fixed

@@ -76,7 +76,7 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_CLA: return gmael(x,1,4);
-      case typ_Q: return mkvec2(gun, polx[varn(x[1])]);
+      case typ_Q: return mkvec2(gone, polx[varn(x[1])]);
     }
     member_err("zk");
   }
@@ -292,7 +292,7 @@ member_tu(GEN x)
         if (signe(y)<0 && cmpis(y,-4)>=0)
           y = stoi((itos(y) == -4)? 4: 6);
         else
-        { y = gdeux; x=negi(gun); }
+        { y = gtwo; x=negi(gone); }
         res[1] = (long)y;
         res[2] = (long)x; return res;
       case typ_CLA:

@@ -90,7 +90,7 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
   if (n==1) return polx[v];
 
   q = cgetg(n+3, t_POL); r = q + n+2;
-  a = shifti(gun, n-1);
+  a = shifti(gone, n-1);
   *r-- = (long)a;
   *r-- = zero;
   if (n < SQRTVERYBIGINT)
@@ -212,7 +212,7 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
 GEN
 roots_to_pol(GEN a, long v)
 {
-  return roots_to_pol_intern(gun,a,v,0);
+  return roots_to_pol_intern(gone,a,v,0);
 }
 
 /* prod_{i=1..r1} (x - a[i]) prod_{i=1..r2} (x - a[i])(x - conj(a[i]))*/
@@ -229,7 +229,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
     GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
     p2[2] = lmul((GEN)a[i],(GEN)a[i+1]);
     p2[3] = lneg(gadd((GEN)a[i],(GEN)a[i+1]));
-    p2[4] = un; p2[1] = code;
+    p2[4] = one; p2[1] = code;
   }
   if (i < r1+1)
     p1[k++] = ladd(polx[v], gneg((GEN)a[i]));
@@ -238,7 +238,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
     GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
     p2[2] = lnorm((GEN)a[i]);
     p2[3] = lneg(gtrace((GEN)a[i]));
-    p2[4] = un; p2[1] = code;
+    p2[4] = one; p2[1] = code;
   }
   setlg(p1, k); return divide_conquer_prod(p1, gmul);
 }
@@ -260,9 +260,9 @@ mathilbert(long n) /* Hilbert matrix of order n */
   {
     p[j] = lgetg(n+1,t_COL);
     for (i=1+(j==1); i<=n; i++)
-      coeff(p,i,j) = (long)mkfrac(gun, utoipos(i+j-1));
+      coeff(p,i,j) = (long)mkfrac(gone, utoipos(i+j-1));
   }
-  if (n) coeff(p,1,1) = un;
+  if (n) coeff(p,1,1) = one;
   return p;
 }
 
@@ -285,7 +285,7 @@ matqpascal(long n, GEN q)
   }
   for (i=1; i<=n; i++)
   {
-    I = (i+1)/2; coeff(m,i,1)=un;
+    I = (i+1)/2; coeff(m,i,1)=one;
     if (q)
     {
       for (j=2; j<=I; j++)
@@ -470,7 +470,7 @@ binome(GEN n, long k)
   {
     if (is_noncalc_t(typ(n))) err(typeer,"binomial");
     if (k < 0) return gzero;
-    if (k == 0) return gun;
+    if (k == 0) return gone;
     return gcopy(n);
   }
   av = avma;
@@ -485,7 +485,7 @@ binome(GEN n, long k)
         if (k <= 1)
         {
           if (k < 0) return gzero;
-          if (k == 0) return gun;
+          if (k == 0) return gone;
           return icopy(n);
         }
       }
@@ -521,7 +521,7 @@ vecbinome(long n)
   long d = (n + 1)/2, k;
   GEN bin = cgetg(n+2, t_VEC), *C;
   C = (GEN*)(bin + 1); /* C[k] = binomial(n, k) */
-  C[0] = gun;
+  C[0] = gone;
   for (k=1; k <= d; k++)
   {
     pari_sp av = avma;
@@ -1011,7 +1011,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   if (lx==2)
   {
     if      (flag & cmp_C)   y[1] = 1;
-    else if (flag & cmp_IND) y[1] = un;
+    else if (flag & cmp_IND) y[1] = one;
     else if (tx == t_VECSMALL) y[1] = x[1];
     else y[1] = lcopy((GEN)x[1]); 
     return y;

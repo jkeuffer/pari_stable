@@ -316,7 +316,7 @@ gcmp_1(GEN x)
       av=avma; y=gegal(addsi(1,(GEN)x[4]), (GEN)x[3]); avma=av; return y;
 
     case t_POLMOD:
-      av=avma; p1=gadd(gun,(GEN)x[2]);
+      av=avma; p1=gadd(gone,(GEN)x[2]);
       y = signe(p1) && !gegal(p1,(GEN)x[1]); avma=av; return !y;
 
     case t_POL:
@@ -1185,10 +1185,11 @@ gaffect(GEN x, GEN y)
   if (tx == ty) switch(tx) {
     case t_INT:
       if (!is_universal_constant(y)) { affii(x,y); return; }
-      /* y = gzero, gnil, gun or gdeux */
+      /* y = gzero, gnil, gone or gtwo */
       if (y==gzero) err(overwriter,"gaffect (gzero)");
-      if (y==gun)   err(overwriter,"gaffect (gun)");
-      if (y==gdeux) err(overwriter,"gaffect (gdeux)");
+      if (y==gone)  err(overwriter,"gaffect (gone)");
+      if (y==gminusone) err(overwriter,"gaffect (gminusone)");
+      if (y==gtwo)  err(overwriter,"gaffect (gtwo)");
       err(overwriter,"gaffect (gnil)");
     case t_REAL: affrr(x,y); return;
     case t_INTMOD:
@@ -1512,7 +1513,7 @@ qtop(GEN x, GEN p, long d)
   P = (GEN)x[1];
   b = (GEN)P[3];
   c = (GEN)P[2]; av = avma;
-  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, egalii(p,gdeux)? d+2: d), 0);
+  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, egalii(p,gtwo)? d+2: d), 0);
   z = gmul2n(gsub(z, b), -1);
   return gerepileupto(av, gadd(u, gmul(v, z)));
 }
@@ -1522,7 +1523,7 @@ ctop(GEN x, GEN p, long d)
   pari_sp av = avma;
   GEN z, u = (GEN)x[1], v = (GEN)x[2];
   if (isexactzero(v)) return cvtop(u, p, d);
-  z = gsqrt(cvtop(negi(gun), p, d - ggval(v, p)), 0); /* = I */
+  z = gsqrt(cvtop(negi(gone), p, d - ggval(v, p)), 0); /* = I */
   return gerepileupto(av, gadd(u, gmul(v, z)) );
 }
 

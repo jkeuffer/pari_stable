@@ -43,14 +43,14 @@ _jbessel(GEN n, GEN z, long flag, long m)
     k = lg(p1)-2 - v;
     if (v < 0) err(negexper,"jbessel");
     if (v == 0) err(impl,"jbessel around a!=0");
-    if (k <= 0) return gadd(gun, zeroser(varn(z), 2*v));
+    if (k <= 0) return gadd(gone, zeroser(varn(z), 2*v));
     p1 = gprec(p1, k);
   }
-  s = gun;
+  s = gone;
   av = avma; lim = stack_lim(av,1);
   for (k=m; k>=1; k--)
   {
-    s = gadd(gun,gdiv(gdivgs(gmul(p1,s),k),gaddsg(k,n)));
+    s = gadd(gone,gdiv(gdivgs(gmul(p1,s),k),gaddsg(k,n)));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"jbessel");
@@ -257,7 +257,7 @@ kbessel(GEN nu, GEN gx, long prec)
   {
     zf = gsqrt(gdivgs(pitemp,n2),prec);
     zz = ginv(stor(n2<<2, prec));
-    s=gun; t=gzero;
+    s=gone; t=gzero;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
       if (k2 & ~(MAXHALFULONG>>1))
@@ -265,7 +265,7 @@ kbessel(GEN nu, GEN gx, long prec)
       else
         p1 = gaddsg(k2*k2,nu2);
       ak=gdivgs(gmul(p1,zz),-k);
-      s=gadd(gun,gmul(ak,s));
+      s=gadd(gone,gmul(ak,s));
       t=gaddsg(k2,gmul(ak,t));
     }
     gmulz(s,zf,u); t=gmul2n(t,-1);
@@ -301,7 +301,7 @@ kbessel(GEN nu, GEN gx, long prec)
   {
     p2=gmul2n(x,1);
     zf=gsqrt(gdiv(pitemp,p2),prec);
-    zz=ginv(gmul2n(p2,2)); s=gun;
+    zz=ginv(gmul2n(p2,2)); s=gone;
     for (k=n2,k2=2*n2-1; k > 0; k--,k2-=2)
     {
       if (k2 & ~(MAXHALFULONG>>1))
@@ -309,7 +309,7 @@ kbessel(GEN nu, GEN gx, long prec)
       else
         p1=gaddsg(k2*k2,nu2);
       ak=gdivgs(gmul(p1,zz),k);
-      s=gsub(gun,gmul(ak,s));
+      s=gsub(gone,gmul(ak,s));
     }
     gmulz(s,zf,y);
   }
@@ -319,7 +319,7 @@ kbessel(GEN nu, GEN gx, long prec)
 
 /* computes sum_{k=0}^m ((-1)^flag*z^2/4)^k / (k!*(k+n)!) * (H(k)+H(k+n))
  + sum_{k=0}^{n-1} ((-1)^(flag+1)*z^2/4)^(k-n) * (n-k-1)!/k!. Ici n
- doit etre un long. Attention, contrairement a _jbessel, pas de n! devant.
+ doit etre one long. Attention, contrairement a _jbessel, pas de n! devant.
  Quand flag > 1, calculer exactement les H(k) et factorielles */
 static GEN
 _kbessel(long n, GEN z, long flag, long m, long prec)
@@ -335,7 +335,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
     k = lg(p1)-2 - v;
     if (v < 0) err(negexper,"kbessel");
     if (v == 0) err(impl,"kbessel around a!=0");
-    if (k <= 0) return gadd(gun, zeroser(varn(z), 2*v));
+    if (k <= 0) return gadd(gone, zeroser(varn(z), 2*v));
     p1 = gprec(p1, k);
   }
   tabh = (GEN*)cgetg(m+n+2,t_VEC); tabh[1] = gzero;
@@ -349,7 +349,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
   }
   else
   {
-    s = gun; tabh[2] = s;
+    s = gone; tabh[2] = s;
     for (k=2; k<=m+n; k++)
     {
       s = gdivgs(gaddsg(1,gmulsg(k,s)),k); tabh[k+1] = s;
@@ -586,7 +586,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   if (cmprs(x,n)<0)
   {
     gn=stoi(n); zf=gpow(gn,gneg_i(a),l1);
-    zz=gdivsg(-1,gn); s=gun; t=gzero;
+    zz=gdivsg(-1,gn); s=gone; t=gzero;
     for (k=n-1; k>=0; k--)
     {
       p1=gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
@@ -616,7 +616,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
       }
       p1=u; u=e; e=p1;
       p1=v; v=f; f=p1;
-      gmulz(q,gadd(gun,c),q);
+      gmulz(q,gadd(gone,c),q);
       p1=subrr(q,r); ex=expo(p1); avma=av1;
     }
     while (ex>lbin);
@@ -624,11 +624,11 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
   else
   {
     zf=gpow(x,gneg_i(a),l1);
-    zz=divsr(-1,x); s=gun;
+    zz=divsr(-1,x); s=gone;
     for (k=n-1; k>=0; k--)
     {
       p1=gdivgs(gmul(gmul(gaddgs(a,k),gaddgs(a1,k)),zz),k+1);
-      s=gadd(gun,gmul(p1,s));
+      s=gadd(gone,gmul(p1,s));
     }
     u = gmul(s,zf);
   }
@@ -644,7 +644,7 @@ kbessel2(GEN nu, GEN x, long prec)
   if (typ(x)==t_REAL) prec = lg(x);
   x2 = gshift(x,1);
   a = gcmp0(imag_i(nu))? cgetr(prec): cgetc(prec);
-  gaddz(gun,gshift(nu,1), a);
+  gaddz(gone,gshift(nu,1), a);
   p1 = hyperu(gshift(a,-1),a,x2,prec);
   p1 = gmul(gmul(p1,gpow(x2,nu,prec)), sqrtr(mppi(prec)));
   return gerepileupto(av, gdiv(p1,gexp(x,prec)));
@@ -677,7 +677,7 @@ incgam1(GEN a, GEN x, long prec)
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
   l=lg(x); mx=rtodbl(x);
   m=(long) bit_accuracy_mul(l,LOG2); n=(long)(m/(log(m)-(1+log(mx))));
-  p2 = cgetr(l); affrr(addir(gun,gsub(x,a)), p2);
+  p2 = cgetr(l); affrr(addir(gone,gsub(x,a)), p2);
   p3 = subrs(p2, n+1); av1 = avma;
   for (i=n; i>=1; i--)
   {
@@ -1081,12 +1081,12 @@ czeta(GEN s0, long prec)
       gaffect(szeta(itos(s0), prec), res);
       avma = av; return res;
     }
-    funeq = 1; s = gsub(gun,s);
+    funeq = 1; s = gsub(gone,s);
   }
   optim_zeta(s, prec, &p, &n);
 
   n1 = (n < 46340)? n*n: 0;
-  y=gun; ms=gneg_i(s); p1=cgetr(prec+1); p2=gun;
+  y=gone; ms=gneg_i(s); p1=cgetr(prec+1); p2=gone;
   for (i=2; i<=n; i++)
   {
     affsr(i,p1); p2 = gexp(gmul(ms,mplog(p1)), prec+1);
@@ -1134,7 +1134,7 @@ inv_szeta_euler(long n, double lba, long prec)
   maxprime_check((ulong)lim);
 
   prec++;
-  z = gsub(gun, real2n(-n, prec));
+  z = gsub(gone, real2n(-n, prec));
   for (p = 3; p <= lim;)
   {
     long l = prec + 1 - (long)floor(A * log(p));
@@ -1370,7 +1370,7 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
-  if (gexpo(gsub(s, gun)) < -5 ||
+  if (gexpo(gsub(s, gone)) < -5 ||
       (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
   { /* s <--> 1-s */
     if (typ(s0) == t_INT)
@@ -1378,9 +1378,9 @@ czeta(GEN s0, long prec)
       i = itos(s0); avma = av2;
       return szeta(i, prec);
     }
-    funeq = 1; s = gsub(gun, s); sig = real_i(s);
+    funeq = 1; s = gsub(gone, s); sig = real_i(s);
   }
-  if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { y = gun; goto END; }
+  if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { y = gone; goto END; }
   optim_zeta(s, prec, &lim, &nn);
   maxprime_check((ulong)nn);
   prec++; unr = realun(prec); /* one extra word of precision */
@@ -1499,7 +1499,7 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
   if (vz)
     p1 =(GEN)vz[xp]; /* vz[x] = Teichmuller(x) */
   else 
-    p1 = (x & 2)? negi(gun): gun;
+    p1 = (x & 2)? negi(gone): gone;
   p1 = Fp_pow(p1, addis(s, m), q);
   p2 = Fp_pow(stoi(x), negi(s), q);
   return modii(mulii(p1,p2), q);
@@ -1512,15 +1512,15 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
   long j, k, lva = lg(va)-1, a, N = lg(cff)-1;
   pari_sp av, lim;
-  GEN x = polx[0], y = polx[fetch_user_var("y")], eta, one, mon, den;
+  GEN x = polx[0], y = polx[fetch_user_var("y")], eta, _1, mon, den;
   GEN cyc, psm, invden, rep, ser;
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
   psm = polsym(cyc, degpol(cyc) - 1);
   eta = gmodulcp(y, cyc);
-  one = gmodulsg(1, q); /* Mod(1, q); */
+  _1 = gmodulsg(1, q); /* Mod(1, q); */
   mon = gaddsg(1, x);
-  den = gsubsg(1, gmul(gpowgs(gmul(one,eta), f), gpowgs(gmul(one,mon), f)));
+  den = gsubsg(1, gmul(gpowgs(gmul(_1,eta), f), gpowgs(gmul(_1,mon), f)));
   den = gadd(den, zeroser(0, N+1));
   av = avma; lim = stack_lim(av, 1);
   invden = ginv(den);
@@ -1587,7 +1587,7 @@ init_teich(ulong p, GEN q, long prec)
     return NULL;
   else
   { /* primitive (p-1)-th root of 1 */
-    GEN z, z0 = padicsqrtnlift(gun, utoipos(p-1), Fp_gener(gp), gp, prec);
+    GEN z, z0 = padicsqrtnlift(gone, utoipos(p-1), Fp_gener(gp), gp, prec);
     z = z0;
     vz = cgetg(p, t_VEC);
     for (j = 1; j < (long)p-2; j++)
@@ -1596,7 +1596,7 @@ init_teich(ulong p, GEN q, long prec)
       z = modii(mulii(z, z0), q);
     }
     vz[ umodiu(z, p) ] = (long)z; /* z = z0^(p-2) */
-    vz[1] = un; /* z0^(p-1) */
+    vz[1] = one; /* z0^(p-1) */
   }
   return gerepileupto(av, gcopy(vz));
 }
@@ -1736,7 +1736,7 @@ cxpolylog(long m, GEN x, long prec)
   for (i=1; i<m; i++) h = gadd(h, ginv(utoipos(i)));
 
   bern_upto=m+50; mpbern(bern_upto,prec);
-  q=gun; s=szeta(m,prec);
+  q=gone; s=szeta(m,prec);
   for (n=1; n<=m+1; n++)
   {
     q=gdivgs(gmul(q,z),n);
@@ -1769,14 +1769,14 @@ polylog(long m, GEN x, long prec)
   if (gcmp0(x)) return gcopy(x);
   av = avma;
   if (m==1)
-    return gerepileupto(av, gneg(glog(gsub(gun,x), prec)));
+    return gerepileupto(av, gneg(glog(gsub(gone,x), prec)));
 
   l = precision(x);
   if (!l) { l=prec; x=gmul(x, realun(l)); }
   e = gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
   X = (e > 0)? ginv(x): x;
   G = -bit_accuracy(l);
-  n = icopy(gun);
+  n = icopy(gone);
   av1=avma; limpile=stack_lim(av1,1);
   y = Xn = X;
   for (i=2; ; i++)
@@ -1796,7 +1796,7 @@ polylog(long m, GEN x, long prec)
   sx = gsigne(imag_i(x));
   if (!sx)
   {
-    if (m&1) sx = gsigne(gsub(gun, real_i(x)));
+    if (m&1) sx = gsigne(gsub(gone, real_i(x)));
     else     sx = - gsigne(real_i(x));
   }
   z = pureimag( divri(mppi(l), mpfact(m-1)) );
@@ -1847,7 +1847,7 @@ polylogd0(long m, GEN x, long flag, long prec)
   p1 = gabs(x,prec); fl=0;
   if (expo(p1) >= 0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
-  p1=gneg_i(glog(p1,prec)); p2=gun;
+  p1=gneg_i(glog(p1,prec)); p2=gone;
   y=polylog(m,x,prec); y = m2? real_i(y): imag_i(y);
   for (k=1; k<m; k++)
   {
@@ -1860,7 +1860,7 @@ polylogd0(long m, GEN x, long flag, long prec)
     if (flag)
       p2 = gdivgs(gmul(p2,p1),-2*m);
     else
-      p2 = gdivgs(gmul(glog(gnorm(gsub(gun,x)),prec),p2),2*m);
+      p2 = gdivgs(gmul(glog(gnorm(gsub(gone,x)),prec),p2),2*m);
     y=gadd(y,p2);
   }
   if (fl) y = gneg(y);
@@ -1903,7 +1903,7 @@ polylogp(long m, GEN x, long prec)
   }
   else
   {
-    GEN p2=gun, p3, p4, p5, p51=cgetr(prec);
+    GEN p2=gone, p3, p4, p5, p51=cgetr(prec);
 
     for (k=1; k<m; k++)
     {
@@ -1935,7 +1935,7 @@ gpolylog(long m, GEN x, long prec)
 
   if (m <= 0)
   {
-    GEN t = coefs_to_pol(2, negi(gun), gun); /* 1 - X */
+    GEN t = coefs_to_pol(2, negi(gone), gone); /* 1 - X */
     p1 = polx[0];
     for (i=2; i <= -m; i++)
       p1 = gmul(polx[0], gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));
@@ -1959,7 +1959,7 @@ gpolylog(long m, GEN x, long prec)
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (!m) { avma = av; return gneg(ghalf); }
-      if (m==1) return gerepileupto(av, gneg( glog(gsub(gun,y),prec) ));
+      if (m==1) return gerepileupto(av, gneg( glog(gsub(gone,y),prec) ));
       if (gcmp0(y)) return gcopy(y);
       v = valp(y);
       if (v <= 0) err(impl,"polylog around a!=0");
@@ -2035,7 +2035,7 @@ inteta(GEN q)
   long tx=typ(q);
   GEN p1,ps,qn,y;
 
-  y=gun; qn=gun; ps=gun;
+  y=gone; qn=gone; ps=gone;
   if (tx==t_PADIC)
   {
     if (valp(q) <= 0) err(talker,"non-positive valuation in eta");
@@ -2103,7 +2103,7 @@ e12(long k, long prec)
   z = cgetg(3, t_COMPLEX);
   switch(k)
   {
-    case 0: z[1] = licopy(gun); z[2] = zero; break;
+    case 0: z[1] = licopy(gone); z[2] = zero; break;
     case 1: t = gmul2n(addrs(sqrt32(prec), 1), -1);
       z[1] = (long)sqrtr(t);
       z[2] = lmul2n(ginv((GEN)z[1]), -2); break;
@@ -2111,7 +2111,7 @@ e12(long k, long prec)
     case 2: z[1] = (long)sqrt32(prec);
             z[2] = (long)real2n(-1, prec); break;
 
-    case 3: z[1] = linv( gsqrt(gdeux, prec) );
+    case 3: z[1] = linv( gsqrt(gtwo, prec) );
             z[2] = (long)mpcopy((GEN)z[1]); break;
   }
   if (sPiov2) lswap(z[1], z[2]);
@@ -2132,7 +2132,7 @@ trueeta(GEN x, long prec)
   if (!is_scalar_t(tx)) err(typeer,"trueeta");
   x = upper_half(x, &prec);
   run = dbltor(1 - 1e-8);
-  m = gun;
+  m = gone;
   N = gzero;
   for(;;)
   {
@@ -2185,7 +2185,7 @@ wf2(GEN x, long prec)
   pari_sp av=avma, tetpil;
   GEN p1,p2;
 
-  p1=gsqrt(gdeux,prec);
+  p1=gsqrt(gtwo,prec);
   p2=gdiv(trueeta(gmul2n(x,1),prec),trueeta(x,prec));
   tetpil=avma;
   return gerepile(av,tetpil,gmul(p1,p2));
@@ -2247,7 +2247,7 @@ theta(GEN q, GEN z, long prec)
     GEN lq = glog(q,prec); k = roundr(divrr(zy, real_i(lq)));
     if (signe(k)) { zold = z; z = gadd(z, mulcxmI(gmul(lq,k))); }
   }
-  qn = gun;
+  qn = gone;
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
   y = gsin(z,prec);
@@ -2280,10 +2280,10 @@ thetanullk(GEN q, long k, long prec)
   q = gtofp(q, prec); if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
 
   if (!(k&1)) { avma = av; return gzero; }
-  qn = gun;
+  qn = gone;
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
-  y = gun;
+  y = gone;
   for (n = 1;; n++)
   {
     GEN t;
@@ -2309,10 +2309,10 @@ vecthetanullk(GEN q, long k, long prec)
   if (!l) prec = l;
   q = gtofp(q, prec); if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
 
-  qn = gun;
+  qn = gone;
   ps2 = gsqr(q);
   ps = gneg_i(ps2);
-  y = cgetg(k+1, t_VEC); for (i = 1; i <= k; i++) y[i] = un;
+  y = cgetg(k+1, t_VEC); for (i = 1; i <= k; i++) y[i] = one;
   for (n = 1;; n++)
   {
     ulong N = 2*n + 1;

@@ -174,9 +174,9 @@ static GEN
 rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 {
   if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
-  if (b == gun || gcmpgs(b, -1) >= 0)
+  if (b == gone || gcmpgs(b, -1) >= 0)
   { /* a < -100, b >= -1 */
-    GEN _1 = negi(gun); /* split at -1 */
+    GEN _1 = negi(gone); /* split at -1 */
     return gadd(qromi(E,eval,a,_1,prec),
                 qrom2(E,eval,_1,b,prec));
   }
@@ -197,7 +197,7 @@ rombint(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
     if (gcmpgs(a,1) >= 0)
       z = qromi(E,eval,a,b,prec);
     else /* split at 1 */
-      z = gadd(rom_bsmall(E,eval,a,gun,prec), qromi(E,eval,gun,b,prec));
+      z = gadd(rom_bsmall(E,eval,a,gone,prec), qromi(E,eval,gone,b,prec));
   }
   else
     z = rom_bsmall(E,eval,a,b,prec);
@@ -557,7 +557,7 @@ suminit_start(GEN sig)
   else sig2 = gzero;
   if (!isinR(sig) || !isinR(sig2)) err(talker, "incorrect abcissa in sumnum");
   if (gsigne(sig2) > 0) sig2 = mulcxmI(sig2);
-  return mkvec2(mkvec(gun), sig2);
+  return mkvec2(mkvec(gone), sig2);
 }
 
 /* phi(t) depending on sig[2] as in intnum, with weights phi'(t)tanh(Pi*phi(t))
@@ -574,7 +574,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
   b = suminit_start(sig);
   flii = gcmp0((GEN)b[2]);
   if (flii)
-    tab = intnuminit(mkvec(negi(gun)), mkvec(gun), m, prec);
+    tab = intnuminit(mkvec(negi(gone)), mkvec(gone), m, prec);
   else
     tab = intnuminit(gzero, b, m, prec);
   eps = bit_accuracy(prec);
@@ -678,7 +678,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
   tra = (GEN)a[1];
   ea = ginv(gaddsg(1, (GEN)a[2]));
-  ba = gdiv(gsub(b, tra), gpow(gdeux, ea, prec));
+  ba = gdiv(gsub(b, tra), gpow(gtwo, ea, prec));
   av = avma;
   S = gmul(gmul(tabw0, ba), eval(gadd(gmul(ba, gaddsg(1, tabx0)), tra), E));
   for (k = 1; k <= m; k++)
@@ -818,7 +818,7 @@ f_getycplx(GEN a, long prec)
   long s;
   GEN tmp, a2R, a2I;
 
-  if (lg(a) == 2 || gcmp0((GEN)a[2])) return gun;
+  if (lg(a) == 2 || gcmp0((GEN)a[2])) return gone;
   a2R = real_i((GEN)a[2]);
   a2I = imag_i((GEN)a[2]);
   s = gsigne(a2I); if (s < 0) a2I = gneg(a2I);
@@ -873,7 +873,7 @@ static GEN
 homtab(GEN tab, GEN k)
 {
   GEN z;
-  if (gcmp0(k) || gegal(k, gun)) return tab;
+  if (gcmp0(k) || gegal(k, gone)) return tab;
   if (gsigne(k) < 0) k = gneg(k);
   z = cgetg(8, t_VEC);
   TABm(z)  = icopy(TABm(tab));
@@ -1405,7 +1405,7 @@ intcirc(void *E, GEN (*eval)(GEN, void*), GEN a, GEN R, GEN tab, long prec)
 }
 
 static GEN
-gettmpP(GEN x) { return mkvec2(mkvec(gun), x); }
+gettmpP(GEN x) { return mkvec2(mkvec(gone), x); }
 
 static GEN
 gettmpN(GEN tmpP) { return mkvec2(gneg((GEN)tmpP[1]), (GEN)tmpP[2]); }
@@ -1502,7 +1502,7 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
   auxmel_t D;
   GEN z, tmpP, LX = gneg(glog(x, prec));
 
-  if (typ(sig) != t_VEC) sig = mkvec2(sig, gun);
+  if (typ(sig) != t_VEC) sig = mkvec2(sig, gone);
   if (lg(sig) != 3 || !isinR((GEN)sig[1]) || !isinR((GEN)sig[2]))
     err(typeer,"intmellininvshort");
   if (gsigne((GEN)sig[2]) <= 0)
@@ -1529,7 +1529,7 @@ mytra(GEN a, GEN x, long flag)
       if (!s) err(talker,"x = 0 in Fourier");
       if (s < 0) xa = gneg(xa);
       b = cgetg(3, t_VEC);
-      b[1] = (long)mkvec( codea > 0 ? gun : negi(gun) );
+      b[1] = (long)mkvec( codea > 0 ? gone : negi(gone) );
       b[2] = (long)(flag? mulcxI(xa): mulcxmI(xa));
       return b;
     case f_YOSCS: case f_YOSCC:
@@ -1698,7 +1698,7 @@ intnumdoub(void *Ef, GEN (*evalf)(GEN, GEN, void*), void *Ec, GEN (*evalc)(GEN, 
   if (typ(tabint) == t_INT)
   {
     GEN C = evalc(a, Ec), D = evald(a, Ed);
-    if (typ(C) != t_VEC && typ(D) != t_VEC) { C = gzero; D = gun; }
+    if (typ(C) != t_VEC && typ(D) != t_VEC) { C = gzero; D = gone; }
     E.tabintern = intnuminit0(C, D, tabint, prec);
   }
   else E.tabintern = tabint;

@@ -289,11 +289,11 @@ puiss0(GEN x)
   {
     case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX:
     case t_PADIC: case t_QUAD:
-      return gun;
+      return gone;
 
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1], y[1]);
-      y[2] = un; return y;
+      y[2] = one; return y;
 
     case t_POLMOD:
       y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
@@ -330,7 +330,7 @@ _muli(void *data /* ignored */, GEN x, GEN y) { (void)data; return mulii(x,y); }
  * Use left shift binary algorithm (RS is wasteful: multiplies big numbers,
  * with LS one of them is the base, hence small). Sign of result is set
  * to s (= +-1) regardless of what it would have been. Makes life easier for
- * caller, which otherwise might do a setsigne(gun,-1) */
+ * caller, which otherwise might do a setsigne(gone,-1) */
 static GEN
 powiu(GEN a, ulong N, long s)
 {
@@ -339,7 +339,7 @@ powiu(GEN a, ulong N, long s)
 
   if (lgefint(a) == 3)
   { /* easy if |a| < 3 */
-    if (a[2] == 1) return (s>0)? gun: negi(gun);
+    if (a[2] == 1) return (s>0)? gone: negi(gone);
     if (a[2] == 2) { a = int2n(N); setsigne(a,s); return a; }
   }
   if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
@@ -440,7 +440,7 @@ pow_monome(GEN x, long n)
   if (!y) y = A;
   else {
     GEN c = denom(b);
-    y[1] = (long)c; if (c != gun) b = gmul(b,c);
+    y[1] = (long)c; if (c != gone) b = gmul(b,c);
     y[2] = (long)A;
   }
   A[d] = (long)b; return y;
@@ -530,7 +530,7 @@ gpowgs(GEN x, long n)
       }
       s = (sx < 0 && odd(n))? -1: 1;
       if (n > 0) return powiu(x, n, s);
-      t = (s > 0)? gun: negi(gun);
+      t = (s > 0)? gone: negi(gone);
       if (is_pm1(x)) return t;
       /* n < 0, |x| > 1 */
       y = cgetg(3,t_FRAC);
@@ -599,7 +599,7 @@ powgi(GEN x, GEN n)
 
     case t_INT:
       if (lgefint(x)==3 && x[2] == 1)
-        return (!signe(n) || signe(x) > 0)? gun: negi(gun);
+        return (!signe(n) || signe(x) > 0)? gone: negi(gone);
       if (signe(x)) err(errlg);
       if (signe(n) < 0) err(gdiver);
       return gzero;
@@ -632,7 +632,7 @@ ser_pow(GEN x, GEN n, long prec)
   lead = (GEN)x[2];
   if (gcmp1(lead))
   {
-    GEN X, Y, alp = gadd(n,gun); /* will be left on the stack */
+    GEN X, Y, alp = gadd(n,gone); /* will be left on the stack */
     long lx, mi, i, j, d;
 
     lx = lg(x);
@@ -642,7 +642,7 @@ ser_pow(GEN x, GEN n, long prec)
     Y = y+2;
 
     d = mi = lx-3; while (mi>=1 && gcmp0((GEN)X[mi])) mi--;
-    Y[0] = un;
+    Y[0] = one;
     for (i=1; i<=d; i++)
     {
       av = avma; p1 = gzero;
@@ -655,7 +655,7 @@ ser_pow(GEN x, GEN n, long prec)
     }
     return y;
   }
-  p1 = gdiv(x,lead); p1[2] = un; /* in case it's inexact */
+  p1 = gdiv(x,lead); p1[2] = one; /* in case it's inexact */
   p1 = gpow(p1,  n, prec);
   p2 = gpow(lead,n, prec); return gmul(p1, p2);
 }
@@ -747,7 +747,7 @@ gpow(GEN x, GEN n, long prec)
     }
     else if (tx == t_PADIC)
     {
-      if (egalii(d, gdeux))
+      if (egalii(d, gtwo))
         z = padic_sqrt(x);
       else
         z = padic_sqrtn(x, d, NULL);
@@ -781,7 +781,7 @@ sqrtr(GEN x) {
 static GEN
 sqrt_2adic(GEN x, long pp)
 {
-  GEN z = mod16(x)==1? gun: utoipos(3);
+  GEN z = mod16(x)==1? gone: utoipos(3);
   long zp;
   pari_sp av, lim;
 
@@ -794,7 +794,7 @@ sqrt_2adic(GEN x, long pp)
     GEN mod;
     zp = (zp<<1) - 1;
     if (zp > pp) zp = pp;
-    mod = shifti(gun, zp);
+    mod = shifti(gone, zp);
     z = addii(z, resmod2n(mulii(x, Fp_inv(z,mod)), zp));
     z = shifti(z, -1); /* (z + x/z) / 2 */
     if (pp == zp) return z;
@@ -857,7 +857,7 @@ padic_sqrt(GEN x)
   mod = (GEN)x[3];
   x   = (GEN)x[4]; /* lift to int */
   e >>= 1; av = avma;
-  if (egalii(gdeux, p))
+  if (egalii(gtwo, p))
   {
     long r = mod8(x);
     if (pp <= 3)
@@ -868,7 +868,7 @@ padic_sqrt(GEN x)
         case 3: if (r == 1) break;
         default: err(sqrter5);
       }
-      z = gun;
+      z = gone;
       pp = 1;
     }
     else
@@ -878,7 +878,7 @@ padic_sqrt(GEN x)
       z = gerepileuptoint(av, z);
       pp--;
     }
-    mod = shifti(gun, pp);
+    mod = shifti(gone, pp);
   }
   else /* p != 2 */
   {
@@ -959,9 +959,9 @@ rootsof1padic(GEN n, GEN y)
   pari_sp av0 = avma, av;
   GEN z, r = cgetp(y);
 
-  av = avma; (void)Fp_sqrtn(gun,n,(GEN)y[2],&z);
+  av = avma; (void)Fp_sqrtn(gone,n,(GEN)y[2],&z);
   if (z==gzero) { avma = av0; return gzero; }/*should not happen*/
-  z = padicsqrtnlift(gun, n, z, (GEN)y[2], precp(y));
+  z = padicsqrtnlift(gone, n, z, (GEN)y[2], precp(y));
   affii(z, (GEN)r[4]); avma = av; return r;
 }
 
@@ -1012,7 +1012,7 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   affii(padicsqrtnlift((GEN)x[4], n, a, p, precp(x)), (GEN)r[4]);
   if (zetan)
   {
-    affii(padicsqrtnlift(gun, n, *zetan, p, precp(x)), (GEN)Z[4]);
+    affii(padicsqrtnlift(gone, n, *zetan, p, precp(x)), (GEN)Z[4]);
     *zetan = Z;
   }
   avma = av; return r;
@@ -1027,7 +1027,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   if (!signe(x[4]))
   {
     long m = itos(n);
-    if (zetan) *zetan = gun;
+    if (zetan) *zetan = gone;
     return zeropadic(p, (valp(x)+m-1)/m);
   }
   /* treat the ramified part using logarithms */
@@ -1038,8 +1038,8 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
     if (signe(q) < 0) x = ginv(x);
     x = gerepileupto(av, x);
     if (zetan)
-      *zetan = (e && lgefint(p)==3 && p[2]==2)? negi(gun) /*-1 in Q_2*/
-                                              : gun;
+      *zetan = (e && lgefint(p)==3 && p[2]==2)? negi(gone) /*-1 in Q_2*/
+                                              : gone;
     return x;
   }
   tetpil = avma;
@@ -1078,7 +1078,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
   if (is_pm1(n))
   {
-    if (zetan) *zetan = gun;
+    if (zetan) *zetan = gone;
     return (signe(n) > 0)? gcopy(x): ginv(x);
   }
   if (zetan) *zetan = gzero;
@@ -1250,7 +1250,7 @@ paexp(GEN x)
   long k, e = valp(x), pp = precp(x), n = e + pp;
   pari_sp av;
   GEN y, r, p = (GEN)x[2];
-  int is2 = egalii(gdeux, p);
+  int is2 = egalii(gtwo, p);
 
   if (gcmp0(x)) return gaddgs(x,1);
   if (e <= 0 || (e == 1 && is2)) return NULL;
@@ -1266,7 +1266,7 @@ paexp(GEN x)
     k = itos(dvmdii(subis(mulis(t,n), 1), subis(mulis(t,e), 1), &r));
     if (!signe(r)) k--;
   }
-  for (y=gun; k; k--) y = gaddsg(1, gdivgs(gmul(y,x), k));
+  for (y=gone; k; k--) y = gaddsg(1, gdivgs(gmul(y,x), k));
   return gerepileupto(av, y);
 }
 
@@ -1303,7 +1303,7 @@ serexp(GEN x, long prec)
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coeff of X^i in z */
     xd = x+2-ex; yd = y+2; ly -= 2;
-    yd[0] = un;
+    yd[0] = one;
     for (i=1; i<ex; i++) yd[i]=zero;
     for (   ; i<ly; i++)
     {
@@ -1409,7 +1409,7 @@ agm1(GEN x, long prec)
 
     case t_PADIC:
       av = avma;
-      a1 = x; b1 = gun; l = precp(x);
+      a1 = x; b1 = gone; l = precp(x);
       do
       {
 	a = a1;
@@ -1423,7 +1423,7 @@ agm1(GEN x, long prec)
 
     default:
       av = avma; if (!(y = _toser(x))) break;
-      a1 = y; b1 = gun; l = lg(y)-2;
+      a1 = y; b1 = gone; l = lg(y)-2;
       l2 = 5-bit_accuracy(prec);
       do
       {
@@ -1664,8 +1664,8 @@ teich(GEN x)
   p = (GEN)x[2];
   q = (GEN)x[3];
   z = (GEN)x[4]; y = cgetp(x); av = avma;
-  if (egalii(p, gdeux))
-    z = (mod4(z) & 2)? addsi(-1,q): gun;
+  if (egalii(p, gtwo))
+    z = (mod4(z) & 2)? addsi(-1,q): gone;
   else
   {
     p1 = addsi(-1, p);
@@ -1686,16 +1686,16 @@ palogaux(GEN x)
   long k,e,pp;
   GEN y,s,y2, p = (GEN)x[2];
 
-  if (egalii(gun, (GEN)x[4]))
+  if (egalii(gone, (GEN)x[4]))
   {
     long v = valp(x)+precp(x);
-    if (egalii(gdeux,p)) v--;
+    if (egalii(gtwo,p)) v--;
     return zeropadic(p, v);
   }
   y = gdiv(gaddgs(x,-1), gaddgs(x,1));
   e = valp(y); /* > 0 */
   pp = e+precp(y);
-  if (egalii(gdeux,p)) pp--;
+  if (egalii(gtwo,p)) pp--;
   else
   {
     GEN p1;
@@ -1703,10 +1703,10 @@ palogaux(GEN x)
     pp -= 2;
   }
   k = pp/e; if (!odd(k)) k--;
-  y2 = gsqr(y); s = gdivgs(gun,k);
+  y2 = gsqr(y); s = gdivgs(gone,k);
   while (k > 2)
   {
-    k -= 2; s = gadd(gmul(y2,s), gdivgs(gun,k));
+    k -= 2; s = gadd(gmul(y2,s), gdivgs(gone,k));
   }
   return gmul(s,y);
 }
@@ -1718,7 +1718,7 @@ palog(GEN x)
   GEN y, p = (GEN)x[2];
 
   if (!signe(x[4])) err(talker,"zero argument in palog");
-  if (egalii(p, gdeux))
+  if (egalii(p, gtwo))
   {
     y = gsqr(x); setvalp(y,0);
     y = palogaux(y);
@@ -2119,7 +2119,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       pc = cgetg(ly,t_SER); *c = pc;
       ps = cgetg(lx,t_SER); *s = ps;
       pc[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
-      pc[2] = un; ps[1] = y[1];
+      pc[2] = one; ps[1] = y[1];
       for (i=2; i<ex+2; i++) ps[i] = lcopy((GEN)y[i]);
       for (i=3; i< ex2; i++) pc[i] = zero;
       for (i=ex2; i<ly; i++)

@@ -1,7 +1,7 @@
 #include "pari.h"
 #include "anal.h"
 
-GEN   gzero, gun, gdeux;
+GEN   gzero, gone, gtwo;
 pari_sp top, bot, avma;
 size_t memused = 0;
 ulong  DEBUGLEVEL,DEBUGMEM = 0;
@@ -14,8 +14,8 @@ void specinit()
   gzero = malloc(2);
   gzero[0] = evaltyp(t_INT)|evallg(2);
   gzero[1] = evallgefint(2);
-  gun   = utoipos(1);
-  gdeux = utoipos(2);
+  gone   = utoipos(1);
+  gtwo = utoipos(2);
 }
 
 void gerepileall(pari_sp av, int n, ...){}

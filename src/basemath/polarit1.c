@@ -112,7 +112,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
   {
     case t_INTMOD:
     case t_POLMOD: y_lead = ginv(y_lead);
-      f = gmul; mod = gmodulcp(gun, (GEN)y_lead[1]);
+      f = gmul; mod = gmodulcp(gone, (GEN)y_lead[1]);
       break;
     default: if (gcmp1(y_lead)) y_lead = NULL;
       f = gdiv; mod = NULL;
@@ -259,7 +259,7 @@ factmod_init(GEN *F, GEN pp)
   long i, d;
 
   if (typ(f)!=t_POL || typ(pp)!=t_INT) err(typeer,"factmod");
-  f = lift_intern( gmul(f, mod(gun,pp)) );
+  f = lift_intern( gmul(f, mod(gone,pp)) );
   d = lg(f); if (d <= 2) err(zeropoler,"factmod");
   for (i=2; i<d; i++)
     if (typ(f[i])!=t_INT) err(impl,"factormod for general polynomials");
@@ -278,7 +278,7 @@ root_mod_2(GEN f)
   z1 = n & 1;
   y = cgetg(z0+z1+1, t_COL); i = 1;
   if (z0) y[i++] = zero;
-  if (z1) y[i]   = un;
+  if (z1) y[i]   = one;
   return y;
 }
 
@@ -301,8 +301,8 @@ root_mod_4(GEN f)
   z1 = (no == ((4-ne)&3));
   y=cgetg(1+z0+z1+z2+z3,t_COL); i = 1; p = utoipos(4);
   if (z0) y[i++] = zero;
-  if (z1) y[i++] = un;
-  if (z2) y[i++] = deux;
+  if (z1) y[i++] = one;
+  if (z2) y[i++] = two;
   if (z3) y[i]   = (long)utoipos(3);
   return y;
 }
@@ -372,10 +372,10 @@ quadsolvemod(GEN x, GEN p, int unknown)
   GEN b = (GEN)x[3], c = (GEN)x[2];
   GEN s,u,D;
 
-  if (egalii(p, gdeux))
+  if (egalii(p, gtwo))
   {
     if (signe(c)) return NULL;
-    return gun;
+    return gone;
   }
   D = subii(sqri(b), shifti(c,2));
   D = remii(D,p);
@@ -422,7 +422,7 @@ FpX_roots_i(GEN f, GEN p)
   lb = degpol(b); n += la + lb; setlg(y, n+1);
   if (lb) y[j]    = (long)FpX_normalize(b,p);
   if (la) y[j+lb] = (long)FpX_normalize(a,p);
-  pol = gadd(polx[varn(f)], gun); pol0 = constant_term(pol);
+  pol = gadd(polx[varn(f)], gone); pol0 = constant_term(pol);
   while (j <= n)
   { /* cf FpX_split_Berlekamp */
     a = (GEN)y[j]; la = degpol(a);
@@ -831,7 +831,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
   {
     if (ps==2)
     {
-      w0 = w = FpXQ_pow(polx[v], utoi(m-1), *t, gdeux); m += 2;
+      w0 = w = FpXQ_pow(polx[v], utoi(m-1), *t, gtwo); m += 2;
       for (l=1; l<d; l++)
         w = gadd(w0, spec_FpXQ_pow(w, p, S));
     }
@@ -964,7 +964,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
 
       /* here u is square-free (product of irred. of multiplicity e * k) */
       S = init_pow_p_mod_pT(pp, u);
-      pd=gun; v=polx[vf];
+      pd=gone; v=polx[vf];
       for (d=1; d <= du>>1; d++)
       {
         if (!flag) pd = mulii(pd,pp);
@@ -987,8 +987,8 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
           g = FpX_normalize(g, pp);
           t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
           r = vali(q); q = shifti(q,-r);
-         /* le premier parametre est un entier variable m qui sera
-          * converti en un polynome w dont les coeff sont ses digits en
+         /* le premier parametre est one entier variable m qui sera
+          * converti en one polynome w dont les coeff sont ses digits en
           * base p (initialement m = p --> X) pour faire pgcd de g avec
           * w^(p^d-1)/2 jusqu'a casser. p = 2 is treated separately.
           */
@@ -1011,7 +1011,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
     j = lg(f2); if (j==3) break;
     e *= p; f = poldeflate_i(f2, p);
   }
-  if (flag > 1) return gun; /* irreducible */
+  if (flag > 1) return gone; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2((GEN)t, E);
   if (!flag) (void)sort_factor(y,cmpii);
@@ -1177,8 +1177,8 @@ FpX_split_Berlekamp(GEN *t, GEN p)
         GEN r = quadsolvemod(a,p,1);
         if (r)
         {
-          t[i] = deg1pol_i(gun, subii(p,r), vu); r = otherroot(a,r,p);
-          t[L] = deg1pol_i(gun, subii(p,r), vu); L++;
+          t[i] = deg1pol_i(gone, subii(p,r), vu); r = otherroot(a,r,p);
+          t[L] = deg1pol_i(gone, subii(p,r), vu); L++;
         }
         set_irred(i);
       }
@@ -1263,7 +1263,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
         if (!degpol(b)) { avma=av; continue; }
         b = FpXQYQ_pow(b,qo2, a,T,p);
         if (!degpol(b)) { avma=av; continue; }
-        b[2] = ladd((GEN)b[2], gun);
+        b[2] = ladd((GEN)b[2], gone);
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
         if (lb && lb < la)
         {
@@ -1468,7 +1468,7 @@ padic_trivfact(GEN x, GEN p, long r)
   GEN y = cgetg(3,t_MAT);
   p = icopy(p);
   y[1]=(long)mkcol(pol_to_padic(x,gpowgs(p,r),p,r));
-  y[2]=(long)mkcol(gun); return y;
+  y[2]=(long)mkcol(gone); return y;
 }
 
 /* Assume x reduced mod p. q = p^e (simplified version of int_to_padic).
@@ -1479,7 +1479,7 @@ Fp_to_Zp(GEN x, GEN p, GEN q, long e)
   GEN y = cgetg(5, t_PADIC);
   if (egalii(p, x)) /* implies p = x = 2 */
   {
-    x = gun; q = shifti(q, -1);
+    x = gone; q = shifti(q, -1);
     y[1] = evalprecp(e-1) | evalvalp(1);
   }
   else if (!signe(x)) y[1] = evalprecp(0) | evalvalp(e);
@@ -1500,7 +1500,7 @@ apprgen_i(GEN f, GEN a)
   fp = derivpol(f); u = modulargcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
-  P = egalii(p,gdeux)? utoipos(4): p;
+  P = egalii(p,gtwo)? utoipos(4): p;
   a0= gmod(a, P);
   if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {
@@ -1545,7 +1545,7 @@ rootpadic_i(GEN f, GEN p, long prec)
 
   z = modulargcd(f, derivpol(f));
   if (degpol(z) > 0) f = gdeuc(f,z);
-  q = (egalii(p,gdeux) && prec>=2)? utoipos(4): p;
+  q = (egalii(p,gtwo) && prec>=2)? utoipos(4): p;
   rac = FpX_roots(FpX_red(f,q), q);
   lx = lg(rac); if (lx == 1) return rac;
   if (prec==1)
@@ -1667,7 +1667,7 @@ rootpadiclift(GEN T, GEN S, GEN p, long e)
   GEN     W, Tr, Sr, Wr = gzero;
   long     i, nb, mask;
   x = varn(T);
-  qold = p ;  q = p; qm1 = gun;
+  qold = p ;  q = p; qm1 = gone;
   nb=hensel_lift_accel(e, &mask);
   Tr = FpX_red(T,q);
   S = modii(S,q);
@@ -1682,7 +1682,7 @@ rootpadiclift(GEN T, GEN S, GEN p, long e)
     if (i)
     {
       W = modii(mulii(Wr,FpX_eval(deriv(Tr,x),Sr,qold)),qold);
-      W = subii(gdeux,W);
+      W = subii(gtwo,W);
       W = modii(mulii(Wr, W),qold);
     }
     Wr = W;
@@ -1751,9 +1751,9 @@ padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
   GEN     qold, q, qm1;
   GEN     W, Sr, Wr = gzero;
   long    i, nb, mask;
-  qold = p ; q = p; qm1 = gun;
+  qold = p ; q = p; qm1 = gone;
   nb   = hensel_lift_accel(e, &mask);
-  W    = modii(mulii(n,Fp_pow(S,subii(n,gun),q)),q);
+  W    = modii(mulii(n,Fp_pow(S,subii(n,gone),q)),q);
   W    = Fp_inv(W,q);
   for(i=0;i<nb;i++)
   {
@@ -1762,8 +1762,8 @@ padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
     Sr = S;
     if (i)
     {
-      W = modii(mulii(Wr,mulii(n,Fp_pow(Sr,subii(n,gun),qold))),qold);
-      W = subii(gdeux,W);
+      W = modii(mulii(Wr,mulii(n,Fp_pow(Sr,subii(n,gone),qold))),qold);
+      W = subii(gtwo,W);
       W = modii(mulii(Wr, W),qold);
     }
     Wr = W;
@@ -1820,7 +1820,7 @@ apprgen9(GEN f, GEN a)
   if (!p) err(typeer,"apprgen9");
 
   p1 = poleval(f,a); v = ggval(lift_intern(p1),p);
-  fl2 = egalii(p,gdeux);
+  fl2 = egalii(p,gtwo);
   if (v <= 0 || (fl2 && v==1)) err(talker,"root does not exist in apprgen9");
   v = ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
@@ -1932,10 +1932,10 @@ padicff(GEN x,GEN p,long pr)
 
   nf = cgetg(10,t_VEC); nf[1] = (long)x;
   if (is_pm1(q)) {
-    e = mkcol(gun);
+    e = mkcol(gone);
     g = mkcol(p);
   } else {
-    e = mkcol2(stoi(Z_pvalrem(dx,p,&q)), gun);
+    e = mkcol2(stoi(Z_pvalrem(dx,p,&q)), gone);
     g = mkcol2(p, q);
   }
   fa = cgetg(3,t_MAT);
@@ -1944,8 +1944,8 @@ padicff(GEN x,GEN p,long pr)
 
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
-  nf[4] = dvdii( diviiexact(dx, dK), p )? (long)p: un;
-  invbas = QM_inv(RgXV_to_RgM(bas,n), gun);
+  nf[4] = dvdii( diviiexact(dx, dK), p )? (long)p: one;
+  invbas = QM_inv(RgXV_to_RgM(bas,n), gone);
   mul = get_mul_table(x,bas,invbas);
   nf[7]=(long)bas;
   nf[8]=(long)invbas;
@@ -2161,7 +2161,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   if (dt == d) return;
   v = varn(*t);
   if (DEBUGLEVEL > 6) (void)timer2();
-  av = avma; is2 = egalii(p, gdeux);
+  av = avma; is2 = egalii(p, gtwo);
   for(cnt = 1;;cnt++, avma = av)
   { /* splits *t with probability ~ 1 - 2^(1-r) */
     w = w0 = FqX_rand(dt,v, T,p);
@@ -2183,7 +2183,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
       w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
       if (!degpol(w)) continue;
-      w[2] = ladd((GEN)w[2], gun);
+      w[2] = ladd((GEN)w[2], gone);
     }
     w = FqX_gcd(*t,w, T,p); l = degpol(w);
     if (l && l != dt) break;
@@ -2577,10 +2577,10 @@ rootsold(GEN x, long prec)
   pi = mppi(DEFAULTPREC);
   p2 = mkcomplex(pi, divrs(pi,10)); /* Pi * (1+I/10) */
   p11=cgetg(4,t_POL); p11[1]=x[1];
-  p11[3]=un;
+  p11[3]=one;
 
   p12=cgetg(5,t_POL); p12[1]=x[1];
-  p12[4]=un;
+  p12[4]=one;
   if (k)
   {
     j=deg0+3-k; pax=cgetg(j,t_POL);
@@ -2591,7 +2591,7 @@ rootsold(GEN x, long prec)
   xd0 = derivpol(pax); pa = pax;
   pq = NULL; /* for lint */
   if (gg) { pp = ggcd(pax,xd0); h = degpol(pp); if (h) pq=gdeuc(pax,pp); }
-  else{ pp=gun; h=0; }
+  else{ pp=gone; h=0; }
   m = 0;
   while (k != deg0)
   {
@@ -2895,7 +2895,7 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
 
   MAXIT = MR*MT; rac = cgetc(PREC);
   av1 = avma;
-  I = mkcomplex(gun,gun);
+  I = mkcomplex(gone,gone);
   ffrac = (GEN*)new_chunk(MR+1);
   ffrac[0] = dbltor(0.0);
   ffrac[1] = dbltor(0.5);
@@ -2933,7 +2933,7 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
     if (gsigne(gmax(abp,abm)) > 0)
       dx = gdivsg(N,gp);
     else
-      dx = gmul(gadd(gun,abx), gexp(gmulgs(I,iter),PREC));
+      dx = gmul(gadd(gone,abx), gexp(gmulgs(I,iter),PREC));
     x1 = gsub(x,dx);
     if (gexpo(QuickNormL1(gsub(x,x1),PREC)) < EPS)
     {
@@ -3139,7 +3139,7 @@ zrhqr(GEN a,long prec)
   {
     p1 = cgetg(n+1,t_COL); hess[j] = (long)p1;
     p1[1] = lneg(gdiv((GEN)a[n-j+2],(GEN)a[n+2]));
-    for (i=2; i<=n; i++) p1[i] = (i==(j+1))? un: zero;
+    for (i=2; i<=n; i++) p1[i] = (i==(j+1))? one: zero;
   }
   rt = hqr(balanc(hess));
   prec2 = 2*prec; /* polishing the roots */

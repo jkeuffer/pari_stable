@@ -52,9 +52,9 @@ static GEN
 to_primitive(GEN x, GEN *cx)
 {
   if (typ(x) != t_POL)
-    { *cx = x; x = gun; }
+    { *cx = x; x = gone; }
   else if (lg(x) == 3)
-    { *cx = (GEN)x[2]; x = gun; }
+    { *cx = (GEN)x[2]; x = gone; }
   else
     { *cx = content(x); if (!gcmp1(*cx)) x = gdiv(x,*cx); }
   return x;
@@ -1017,7 +1017,7 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
   vn = gvar(n);
   vd = gvar(d);
   z = cgetg(3, t_RFRAC);
-  if (varncmp(vx, vd) > 0 || varncmp(vx, vn) > 0) { cx = x; x = gun; }
+  if (varncmp(vx, vd) > 0 || varncmp(vx, vn) > 0) { cx = x; x = gone; }
   else
   {
     long td;
@@ -1030,7 +1030,7 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
       return gerepileupto(av, gdiv(gmul(x,n), d));
     x = to_primitive(x, &cx);
   }
-  n = to_primitive(n, &cn); if (x != gun) n = gmul(n,x);
+  n = to_primitive(n, &cn); if (x != gone) n = gmul(n,x);
   d = to_primitive(d, &cd);
   cx = gdiv(gmul(cx,cn), cd);
   if (typ(cx) == t_POL)
@@ -1697,7 +1697,7 @@ gsqr(GEN x)
 	
       case t_PADIC:
 	z = cgetg(5,t_PADIC);
-	i = (egalii((GEN)x[2], gdeux) && signe(x[4]))? 1: 0;
+	i = (egalii((GEN)x[2], gtwo) && signe(x[4]))? 1: 0;
         if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
         z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
 	icopyifstack(x[2], z[2]);
@@ -1808,7 +1808,7 @@ gsqr(GEN x)
 /********************************************************************/
 static GEN
 div_rfrac_scal(GEN x, GEN y)
-{ return mul_rfrac((GEN)x[1],(GEN)x[2], gun,y); }
+{ return mul_rfrac((GEN)x[1],(GEN)x[2], gone,y); }
 static GEN
 div_scal_rfrac(GEN x, GEN y)
 { return mul_rfrac_scal((GEN)y[2], (GEN)y[1], x); }
@@ -1951,7 +1951,7 @@ gdiv(GEN x, GEN y)
         if (!s) err(gdiver);
         if (signe(x) < 0) s = -s;
         z = cgetg(3, t_FRAC);
-        z[1] = s<0? lnegi(gun): un;
+        z[1] = s<0? lnegi(gone): one;
         z[2] = labsi(y); return z;
       }
       return gred_frac2(x,y);
@@ -2517,7 +2517,7 @@ gmul2n(GEN x, long n)
       if (n<=l) return shifti(x,-n);
       z = cgetg(3,t_FRAC);
       z[1] = lshifti(x,-l);
-      z[2] = lshifti(gun,n-l); return z;
+      z[2] = lshifti(gone,n-l); return z;
 	
     case t_REAL:
       return shiftr(x,n);
@@ -2531,7 +2531,7 @@ gmul2n(GEN x, long n)
         icopyifstack(p2,z[1]); return z;
       }
       return div_intmod_same(z, (GEN)x[1], (GEN)x[2],
-                                           modii(shifti(gun,-n), (GEN)x[1]));
+                                           modii(shifti(gone,-n), (GEN)x[1]));
     case t_FRAC:
       l = vali((GEN)x[1]);
       k = vali((GEN)x[2]);
@@ -2564,11 +2564,11 @@ gmul2n(GEN x, long n)
       for (; i<lx; i++) z[i] = lmul2n((GEN)x[i],n);
       return z;
 
-    case t_RFRAC: av=avma; p1 = gmul2n(gun,n); tetpil = avma;
+    case t_RFRAC: av=avma; p1 = gmul2n(gone,n); tetpil = avma;
       return gerepile(av,tetpil, mul_rfrac_scal((GEN)x[1],(GEN)x[2], p1));
 
     case t_PADIC:
-      av=avma; z=gmul2n(gun,n); tetpil=avma;
+      av=avma; z=gmul2n(gone,n); tetpil=avma;
       return gerepile(av,tetpil,gmul(z,x));
   }
   err(typeer,"gmul2n");

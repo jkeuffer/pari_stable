@@ -124,7 +124,7 @@ RgX_powers(GEN a, GEN T, long l)
   if (typ(a) != t_POL) err(typeer,"RgX_powers");
   l += 2;
   v = cgetg(l,t_VEC);
-  v[1] = un; if (l == 2) return v;
+  v[1] = one; if (l == 2) return v;
 
   if (degpol(a) >= degpol(T)) a = grem(a, T);
   v[2] = (long)a;

@@ -66,7 +66,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   nbauto = 1;
   prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);
   w = cgetg(n + 2, t_VEC);
-  w[1] = un;
+  w[1] = one;
   for (i = 2; i <= n; i++)
     w[i] = lmul(p1, (GEN) w[i - 1]);
   v = varn(x);
@@ -173,7 +173,7 @@ vandermondeinverseprep(GEN L)
     GEN W=cgetg(n,t_VEC);
     for (j = 1; j < n; j++)
       if (i==j)
-	W[j]=un;
+	W[j]=one;
       else
 	W[j]=lsub((GEN)L[i],(GEN)L[j]);
     V[i]=lpileupto(ltop,divide_conquer_prod(W,&gmul));
@@ -235,7 +235,7 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
   {
     GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
     disable_dbg(0);
-    dis = ZX_disc_all(T, 1+logint(res,gdeux,NULL));
+    dis = ZX_disc_all(T, 1+logint(res,gtwo,NULL));
     disable_dbg(-1);
     den = indexpartial(T,dis);
     if (ptdis) *ptdis = dis;
@@ -413,7 +413,7 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
 }
 
 /*
- * Soit P un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(Q) tel
+ * Soit P one polynome de \ZZ[X] , p one nombre premier , S\in\FF_p[X]/(Q) tel
  * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
  * Unclean stack.
  */
@@ -456,13 +456,13 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   if (DEBUGLEVEL == 1) (void)timer2();
   x = varn(P);
   rt = brent_kung_optpow(degpol(Q),1);
-  q = p; qm1 = gun; /*during the run, we have p*qm1=q*/
+  q = p; qm1 = gone; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);
   Pr = FpX_red(P,q);
   Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
   W=FpX_FpXQ_compo(deriv(Pr, x),S,Qr,q);
   W=FpXQ_inv(W,Qr,q);
-  qold = p; qm1old=gun;
+  qold = p; qm1old=gone;
   Qrold = Qr;
   gptr[0] = &S;
   gptr[1] = &Wr;
@@ -485,7 +485,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     {
       W = FpXQ_mul(Wr, FpX_FpXQV_compo(deriv(Pr,-1),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
       W = FpX_neg(W, qold);
-      W = FpX_Fp_add(W, gdeux, qold);
+      W = FpX_Fp_add(W, gtwo, qold);
       W = FpXQ_mul(Wr, W, Qrold, qold);
     }
     Wr = W;
@@ -506,7 +506,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   return S;
 }
 /*
- * Soit T un polynome de \ZZ[X] , p un nombre premier , S\in\FF_p[X]/(T) tel
+ * Soit T one polynome de \ZZ[X] , p one nombre premier , S\in\FF_p[X]/(T) tel
  * que T(S)=0 [p,T] Relever S en S_0 tel que T(S_0)=0 [T,p^e]
  * Unclean stack.
  */
@@ -836,7 +836,7 @@ freetest(struct galois_test *td)
 }
 
 /*
- * Test si le nombre padique P est proche d'un entier inferieur a td->borne
+ * Test si le nombre padique P est proche d'one entier inferieur a td->borne
  * en valeur absolue.
  */
 static long
@@ -853,7 +853,7 @@ padicisint(GEN P, struct galois_test *td)
 }
 
 /*
- * Verifie si pf est une vrai solution et non pas un "hop"
+ * Verifie si pf est une vrai solution et non pas one "hop"
  */
 static long
 verifietest(GEN pf, struct galois_test *td)
@@ -1268,7 +1268,7 @@ fixedfieldsurmer(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v, GE
       GEN s=fixedfieldpol(O,L,mod,S,deg);
       GEN P=FpV_roots_to_pol(s,mod,v);
       P=FpX_center(P,mod);
-      if (p==gun || FpX_is_squarefree(P,p))
+      if (p==gone || FpX_is_squarefree(P,p))
       {
 	if (DEBUGLEVEL>=4) 
 	  debug_surmer("FixedField: Sym: %Z\n",S,n);
@@ -1367,7 +1367,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
     av = avma;
     z = Fp_inv(FpX_eval(Tp, (GEN) L[i],mod),mod);
     z = modii(mulii(den,z),mod);
-    P = FpX_Fp_mul(FpX_div(T, deg1pol_i(gun,negi((GEN) L[i]),x),mod), z, mod); 
+    P = FpX_Fp_mul(FpX_div(T, deg1pol_i(gone,negi((GEN) L[i]),x),mod), z, mod); 
     M[i] = lgetg(n, t_COL);
     for (j = 1; j < n; j++)
       mael(M,i,j) = lcopy((GEN) P[1 + j]);
@@ -1376,7 +1376,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
   gunclone(Tp); /*unclone*/
   return M;
 }
-/* Calcule le polynome associe a un vecteur conjugue v*/
+/* Calcule le polynome associe a one vecteur conjugue v*/
 static GEN
 vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
 {
@@ -2583,8 +2583,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     mael(PG,2,1)=2;
     mael3(PG,1,1,1)=2;
     mael3(PG,1,1,2)=1;
-    tau = deg1pol_i(utoineg(1),negi((GEN)P[3]),x);
-    tau = lift(gmul(tau,gmodulcp(gun,ip)));
+    tau = deg1pol_i(gminusone, negi((GEN)P[3]), x);
+    tau = lift(gmul(tau,gmodulcp(gone,ip)));
     tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
     tau = FpX_normalize(tau, ip);
@@ -2890,7 +2890,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
     ga.l = 3;
     ga.deg = 1;
     ga.ppp = 1;
-    den = gun;
+    den = gone;
   }
   else
     galoisanalysis(T, &ga, 1, karma);
@@ -3164,7 +3164,7 @@ fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
   GEN     F,G,V,res,cosets;
   int     i, j, k;
   F=cgetg(lg(O[1])+1,t_COL);
-  F[lg(O[1])]=un;
+  F[lg(O[1])]=one;
   G=cgetg(lg(O),t_VEC);
   for (i = 1; i < lg(O); i++)
   {
@@ -3233,7 +3233,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     GEN sym=cgetg(lg(L),t_VECSMALL);
     GEN dg=cgetg(lg(L),t_VECSMALL);
     GEN V;
-    V = fixedfieldsympol(O, L, mod, gmael(gal,2,1), gun, sym, dg, x);
+    V = fixedfieldsympol(O, L, mod, gmael(gal,2,1), gone, sym, dg, x);
     P=(GEN)V[2];
     PL=(GEN)V[1];
   }
@@ -3306,7 +3306,7 @@ galoisisabelian(GEN gal, long flag)
   pari_sp ltop = avma;
   GEN S, G = checkgroup(gal,&S);
   if (!group_isabelian(G)) {avma=ltop;return gzero;}
-  if (flag==1) {avma=ltop;return gun;}
+  if (flag==1) {avma=ltop;return gone;}
   if (flag==2) return gerepileupto(ltop,group_abelianSNF(G,S));
   if (flag) err(flagerr,"galoisisabelian");
   return gerepileupto(ltop, group_abelianHNF(G,S));

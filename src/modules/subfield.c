@@ -523,7 +523,7 @@ init_traces(GEN ff, GEN T, GEN p)
     pow1[i] = (long)p1; p2 = (GEN)pow[i];
     for (j=1; j<=N; j++) p1[j] = coeff(p2,1,j);
   }
-  p1 = cgetg(N+1,t_VEC); p1[1] = un;
+  p1 = cgetg(N+1,t_VEC); p1[1] = one;
   for (i=2; i<=N; i++) p1[i] = zero;
   /* Trk[i] = line 1 of x -> x + x^p + ... + x^{p^(i-1)} */
   Trk = pow; /* re-use (destroy) pow */
@@ -543,7 +543,7 @@ interpol(GEN H, GEN T, GEN p)
   long i, m = lg(H);
   GEN X = polx[0],d,p1,p2,a;
 
-  p1=polun[0]; p2=gun; a = gneg(constant_term((GEN)H[1])); /* = D[1] */
+  p1=polun[0]; p2=gone; a = gneg(constant_term((GEN)H[1])); /* = D[1] */
   for (i=2; i<m; i++)
   {
     d = constant_term((GEN)H[i]); /* -D[i] */
@@ -642,9 +642,9 @@ bound_for_coeff(long m, GEN rr, GEN *maxroot)
 
   rr = gabs(rr,0); *maxroot = vecmax(rr);
   for (i=1; i<lrr; i++)
-    if (gcmp((GEN)rr[i], gun) < 0) rr[i] = un;
-  for (b1=gun,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
-  for (b2=gun    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
+    if (gcmp((GEN)rr[i], gone) < 0) rr[i] = one;
+  for (b1=gone,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
+  for (b2=gone    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
   B = gmul(b1, gsqr(b2)); /* Mahler measure */
   M = cgetg(m+2, t_VEC); M[1]=M[2]=zero; /* unused */
   for (i=1; i<m; i++)
@@ -681,9 +681,9 @@ compute_data(blockdata *B)
   roo = B->PD->roo;
   if (DATA) /* update (translate) an existing DATA */
   {
-    GEN Xm1 = gsub(polx[varn(pol)], gun);
+    GEN Xm1 = gsub(polx[varn(pol)], gone);
     GEN TR = addis((GEN)DATA[5], 1);
-    GEN mTR = negi(TR), mun = negi(gun), interp, bezoutC;
+    GEN mTR = negi(TR), mun = negi(gone), interp, bezoutC;
 
     DATA[5] = (long)TR;
     pol = TR_pol((GEN)DATA[1], mun);
@@ -698,7 +698,7 @@ compute_data(blockdata *B)
     interp  = (GEN)DATA[9];
     for (i=1; i<l; i++)
     {
-      if (degpol(interp[i]) > 0) /* do not turn polun[0] into gun */
+      if (degpol(interp[i]) > 0) /* do not turn polun[0] into gone */
       {
         p1 = TR_pol((GEN)interp[i], mun);
         interp[i] = (long)FpXX_red(p1, p);

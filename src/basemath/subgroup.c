@@ -314,7 +314,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     setlen(M, j-1); w = weight(M);
     if (w >= wmin && w <= wmax)
     {
-      GEN p1 = gun;
+      GEN p1 = gone;
 
       if (T->subq && T->bound) /* G not a p-group */
       {
@@ -612,7 +612,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
     for (   ; j<=N; j++)
     {
       H[j] = lgetg(N+1, t_COL);
-      for (i=1; i<=N; i++) coeff(H,i,j) = (i==j)? un: zero;
+      for (i=1; i<=N; i++) coeff(H,i,j) = (i==j)? one: zero;
     }
   }
   free(sublist); return z;

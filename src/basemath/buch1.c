@@ -97,7 +97,7 @@ getallforms(GEN D, long *pth, GEN *ptz)
 {
   long d = itos(D), dabs = labs(d),  dover3 = dabs/3, t, b2, a, b, c, h;
   GEN z, L = cgetg((long)(sqrt(dabs) * log2(dabs)), t_VEC);
-  b2 = b = (d&1); h = 0; z=gun;
+  b2 = b = (d&1); h = 0; z=gone;
   while (b2 <= dover3)
   {
     t = (b2-d)/4;
@@ -122,7 +122,7 @@ getallforms(GEN D, long *pth, GEN *ptz)
 static void
 get_pq(GEN D, GEN z, GEN pq, GEN *ptp, GEN *ptq)
 {
-  GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC), court = icopy(gun);
+  GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC), court = icopy(gone);
   GEN form;
   long i, ell, p, l = 1, d = itos(D);
   byteptr diffell = diffptr + 2;
@@ -255,7 +255,7 @@ quadhilbertimag(GEN D, GEN pq)
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
     /* to avoid integer overflow (1 + 0.) */
-    lead = (exmax < bit_accuracy(prec))? gun: realun(prec);
+    lead = (exmax < bit_accuracy(prec))? gone: realun(prec);
 
     P = real_i( roots_to_pol_intern(lead,P,0,0) );
     P = grndtoi(P,&exmax);
@@ -315,7 +315,7 @@ getallelts(GEN bnr)
   list = (GEN*) cgetg(no+1,t_VEC);
   if (!lc)
   {
-    list[1] = idealhermite(nf,gun);
+    list[1] = idealhermite(nf,gone);
     return (GEN)list;
   }
   pows = (GEN**)cgetg(lc+1,t_VEC);
@@ -345,7 +345,7 @@ getallelts(GEN bnr)
     if (p1) p2 = idealmodidele(bnr, idealmul(nf,p2,p1));
     list[j + 1] = p2;
   }
-  list[1] = idealhermite(nf,gun);
+  list[1] = idealhermite(nf,gone);
   return (GEN)list;
 }
 
@@ -384,7 +384,7 @@ form_to_ideal(GEN x)
        && tx != t_QFR && tx != t_QFI) err(typeer,"form_to_ideal");
   b = negi((GEN)x[2]); if (mpodd(b)) b = addis(b,1);
   y[1] = (long)mkcol2((GEN)x[1], gzero);
-  y[2] = (long)mkcol2((GEN)shifti(b,-1), gun);
+  y[2] = (long)mkcol2((GEN)shifti(b,-1), gone);
   return y;
 }
 
@@ -446,7 +446,7 @@ computeth2(GEN om, GEN la, long prec)
 {
   GEN p1,p2,res = ellphistinit(om,prec);
 
-  p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gun,prec));
+  p1 = gsub(ellphist(om,res,la,prec), ellphist(om,res,gone,prec));
   p2 = imag_i(p1);
   if (gexpo(real_i(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
     return NULL;
@@ -624,7 +624,7 @@ treatspecialsigma(GEN nf, GEN gf)
   p2 = gcoeff(gf,2,2);
   if (gcmp1(p2)) { fl = 0; tryf = p1; }
   else {
-    if (Ds % 16 != 8 || !egalii(content(gf),gdeux)) return NULL;
+    if (Ds % 16 != 8 || !egalii(content(gf),gtwo)) return NULL;
     fl = 1; tryf = shifti(p1,-1);
   }
   /* tryf integer > 0 */
@@ -1556,7 +1556,7 @@ gcdreal(GEN a,GEN b)
 static int
 get_R(GEN C, long sreg, GEN z, GEN *ptR)
 {
-  GEN R = gun;
+  GEN R = gone;
   double c;
   long i;
 
@@ -1621,7 +1621,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
     if (cmpis(Disc,-4) >= 0)
     {
       GEN z = cgetg(6,t_VEC);
-      z[1] = z[4] = z[5] = un;
+      z[1] = z[4] = z[5] = one;
       z[2] = z[3]= lgetg(1,t_VEC); return z;
     }
     PRECREG = 0;
@@ -1640,7 +1640,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   if (PRECREG) resc = dbltor(lim / 2.);
   else         resc = dbltor(lim / PI);
   if (!PRECREG) lim /= sqrt(3.);
-  R = gun;
+  R = gone;
   cp = (long)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 20) cp = 20;
   av = avma; cbach /= 2;

@@ -379,7 +379,7 @@ rnfalgtobasis(GEN rnf,GEN x)
   return gscalcol(x, degpol(rnf[1]));
 }
 
-/* x doit etre un polymod ou un polynome ou un vecteur de tels objets... */
+/* x doit etre one polymod ou one polynome ou one vecteur de tels objets... */
 GEN
 rnfelementreltoabs(GEN rnf,GEN x)
 {
@@ -507,7 +507,7 @@ rnfelementdown(GEN rnf,GEN x)
 static GEN
 rnfid(long n, long m)
 {
-  return idmat_intern(n, gscalcol_i(gun,m), zerocol(m));
+  return idmat_intern(n, gscalcol_i(gone,m), zerocol(m));
 }
 
 /* x est exprime sur la base relative */
@@ -563,7 +563,7 @@ prodidnorm(GEN I)
 {
   long i, l = lg(I);
   GEN z;
-  if (l == 1) return gun;
+  if (l == 1) return gone;
   z = dethnf((GEN)I[1]);
   for (i=2; i<l; i++) z = gmul(z, dethnf((GEN)I[i]));
   return z;
@@ -573,7 +573,7 @@ static GEN
 makenorms(GEN rnf)
 {
   GEN f = (GEN)rnf[4];
-  return typ(f) == t_INT? gun: dethnf(f);
+  return typ(f) == t_INT? gone: dethnf(f);
 }
 
 GEN
@@ -596,7 +596,7 @@ rnfidealnormabs(GEN rnf, GEN id)
   GEN z;
 
   checkrnf(rnf);
-  if (degpol(rnf[1]) == 1) return gun;
+  if (degpol(rnf[1]) == 1) return gone;
 
   z = prodidnorm( (GEN)rnfidealhermite(rnf,id)[2] );
   return gerepileupto(av, gmul(z, check_and_build_norms(rnf)));

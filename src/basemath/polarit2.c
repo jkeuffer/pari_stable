@@ -385,7 +385,7 @@ HenselLift(GEN V, GEN W, long j, GEN f, GEN T, GEN pd, GEN p0, int noinv)
   av = avma;
   (void)new_chunk(space); /* HACK */
   g = gadd(gmul(u,a2), gmul(v,b2));
-  g = gadd(gneg_i(g), gun);
+  g = gadd(gneg_i(g), gone);
 
   if (T) g = FpXQX_red(g, T, mulii(p0,pd));
   g = gdivexact(g, p0);
@@ -524,7 +524,7 @@ BezoutPropagate(GEN link, GEN v, GEN w, GEN pe, GEN U, GEN f, long j)
     R = FpX_sub(U, Q, pe);
   }
   else
-    R = FpX_Fp_add(FpX_neg(Q, pe), gun, pe);
+    R = FpX_Fp_add(FpX_neg(Q, pe), gone, pe);
   w[j+1] = (long)Q; /*  0 mod U v[j],  1 mod (1-U) v[j+1] */
   w[j  ] = (long)R; /*  1 mod U v[j],  0 mod (1-U) v[j+1] */
   BezoutPropagate(link, v, w, pe, R, f, link[j  ]);
@@ -998,8 +998,8 @@ root_bound(GEN P0)
     avma = av;
   }
   if (k < 0) k = 0;
-  x = shifti(gun, k);
-  y = shifti(gun, k+1);
+  x = shifti(gone, k);
+  y = shifti(gone, k+1);
   for(k=0; ; k++)
   {
     z = shifti(addii(x,y), -1);
@@ -1300,7 +1300,7 @@ GEN
 unscale_pol(GEN P, GEN h)
 {
   long i, l = lg(P);
-  GEN hi = gun, Q = cgetg(l, t_POL);
+  GEN hi = gone, Q = cgetg(l, t_POL);
   Q[1] = P[1];
   Q[2] = lcopy((GEN)P[2]);
   for (i=3; i<l; i++)
@@ -1315,8 +1315,8 @@ GEN
 rescale_pol_to_monic(GEN P)
 {
   long i, l = lg(P);
-  GEN h, Q = cgetg(l,t_POL), hi = gun;
-  h = (GEN)P[l-1]; Q[l-1] = un;
+  GEN h, Q = cgetg(l,t_POL), hi = gone;
+  h = (GEN)P[l-1]; Q[l-1] = one;
   for (i=l-2; i>=2; i--)
   {
     Q[i] = lmul((GEN)P[i], hi);
@@ -1331,7 +1331,7 @@ GEN
 rescale_pol(GEN P, GEN h)
 {
   long i, l = lg(P);
-  GEN Q = cgetg(l,t_POL), hi = gun;
+  GEN Q = cgetg(l,t_POL), hi = gone;
   Q[l-1] = P[l-1];
   for (i=l-2; i>=2; i--)
   {
@@ -1346,7 +1346,7 @@ GEN
 FpX_rescale(GEN P, GEN h, GEN p)
 {
   long i, l = lg(P);
-  GEN Q = cgetg(l,t_POL), hi = gun;
+  GEN Q = cgetg(l,t_POL), hi = gone;
   Q[l-1] = P[l-1];
   for (i=l-2; i>=2; i--)
   {
@@ -1814,7 +1814,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	assign_or_fail((GEN)p1[1],p);
         t[3]=1; break;
       case t_COMPLEX:
-        if (!pcx) pcx = coefs_to_pol(3, gun,gzero,gun); /* x^2 + 1 */
+        if (!pcx) pcx = coefs_to_pol(3, gone,gzero,gone); /* x^2 + 1 */
 	for (j=1; j<=2; j++)
 	{
 	  p2 = (GEN)p1[j];
@@ -1962,7 +1962,7 @@ deg1_from_roots(GEN L, long v)
   long i, l = lg(L);
   GEN z = cgetg(l,t_COL);
   for (i=1; i<l; i++)
-    z[i] = (long)deg1pol_i(gun, gneg((GEN)L[i]), v);
+    z[i] = (long)deg1pol_i(gone, gneg((GEN)L[i]), v);
   return z;
 }
 GEN
@@ -1981,7 +1981,7 @@ static GEN
 gauss_primpart(GEN x, GEN *c)
 {
   GEN y, a = (GEN)x[1], b = (GEN)x[2], n = gcdii(a, b);
-  *c = n; if (n == gun) return x;
+  *c = n; if (n == gone) return x;
   y = cgetg(3, t_COMPLEX);
   y[1] = (long)diviiexact(a, n);
   y[2] = (long)diviiexact(b, n); return y;
@@ -2029,23 +2029,23 @@ Ipow(long e) {
   switch(e & 3)
   {
     case 1: return gi;
-    case 2: return negi(gun);
+    case 2: return negi(gone);
     case 3: return gneg(gi);
   }
-  return gun;
+  return gone;
 }
 
 static GEN
 gauss_factor(GEN x)
 {
   pari_sp av = avma;
-  GEN a = (GEN)x[1], b = (GEN)x[2], d = gun;
+  GEN a = (GEN)x[1], b = (GEN)x[2], d = gone;
   GEN n, y, fa, P, E, P2, E2;
   long t1 = typ(a);
   long t2 = typ(b), i, j, l, exp = 0;
   if (t1 == t_FRAC) d = (GEN)a[2];
   if (t2 == t_FRAC) d = lcmii(d, (GEN)b[2]);
-  if (d == gun) y = x;
+  if (d == gone) y = x;
   else
   {
     y = gmul(x, d);
@@ -2062,11 +2062,11 @@ gauss_factor(GEN x)
   {
     GEN p = (GEN)P[i], w, w2, t, we, pe;
     long v, e = itos((GEN)E[i]);
-    int is2 = egalii(p, gdeux);
+    int is2 = egalii(p, gtwo);
     if (is2)
-      w = mkcomplex(gun, gun);
+      w = mkcomplex(gone, gone);
     else
-      w = vec_to_gauss(qfbimagsolvep(qfi(gun,gzero,gun),p));
+      w = vec_to_gauss(qfbimagsolvep(qfi(gone,gzero,gone),p));
     w2 = gauss_normal( gconj(w) );
     /* w * w2 * I^3 = p, w2 = gconj(w) * I */
     pe = gpowgs(p, e);
@@ -2118,12 +2118,12 @@ gauss_factor(GEN x)
       long e;
       int is2;
       if (mod4(p) == 3) continue;
-      is2 = egalii(p, gdeux);
+      is2 = egalii(p, gtwo);
       e = itos((GEN)E[i]);
       if (is2)
-        w = mkcomplex(gun,gun);
+        w = mkcomplex(gone,gone);
       else
-        w = vec_to_gauss(qfbimagsolvep(qfi(gun,gzero,gun),p));
+        w = vec_to_gauss(qfbimagsolvep(qfi(gone,gzero,gone),p));
       P[i] = (long)w;
       if (is2)
         E[i] = lstoi(e << 1);
@@ -2144,7 +2144,7 @@ gauss_factor(GEN x)
   y = gmul(y, Ipow(exp));
   if (!gcmp1(y)) {
     fa[1] = (long)concatsp(mkcol(y), (GEN)fa[1]);
-    fa[2] = (long)concatsp(gun,     (GEN)fa[2]);
+    fa[2] = (long)concatsp(gone,     (GEN)fa[2]);
   }
   return gerepilecopy(av, fa);
 }
@@ -2166,7 +2166,7 @@ factor(GEN x)
   {
     y = cgetg(3,t_MAT);
     y[1] = (long)mkcolcopy(x);
-    y[2] = (long)mkcol(gun); return y;
+    y[2] = (long)mkcol(gone); return y;
   }
   av = avma;
   switch(tx)
@@ -2190,7 +2190,7 @@ factor(GEN x)
 	  av = avma; p1 = roots(x,pa); tetpil = avma;
           p2 = deg1_from_roots(p1, v);
 	  y[1]=lpile(av,tetpil,p2);
-	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) p3[i] = un;
+	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) p3[i] = one;
           y[2]=(long)p3; return y;
 
 	case t_REAL: y=cgetg(3,t_MAT); lx=lg(x)-2; v=varn(x);
@@ -2199,7 +2199,7 @@ factor(GEN x)
             if (typ(p1[r1]) == t_COMPLEX) break;
 	  lx=(r1+lx)>>1; p2=cgetg(lx,t_COL);
 	  for(i=1; i<r1; i++)
-            p2[i] = (long)deg1pol_i(gun, negr((GEN)p1[i]), v);
+            p2[i] = (long)deg1pol_i(gone, negr((GEN)p1[i]), v);
 	  for(   ; i<lx; i++)
 	  {
 	    GEN a = (GEN) p1[2*i-r1];
@@ -2207,10 +2207,10 @@ factor(GEN x)
 	    p[1] = x[1];
 	    p[2] = lnorm(a);
 	    p[3] = lmul2n((GEN)a[1],1); setsigne(p[3],-signe(p[3]));
-	    p[4] = un;
+	    p[4] = one;
 	  }
 	  y[1]=lpile(av,tetpil,p2);
-	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) p3[i] = un;
+	  p3=cgetg(lx,t_COL); for (i=1; i<lx; i++) p3[i] = one;
           y[2]=(long)p3; return y;
 
 	case t_PADIC: return factorpadic4(x,p,pa);
@@ -2249,7 +2249,7 @@ factor(GEN x)
               return gerepileupto(av,p1);
             case t_COMPLEX: p5 = gi; break;
             case t_QUAD: p5=cgetg(4,t_QUAD);
-              p5[1]=(long)pol; p5[2]=zero; p5[3]=un;
+              p5[1]=(long)pol; p5[2]=zero; p5[3]=one;
               break;
 	    default: err(impl,"factor of general polynomial");
               return NULL; /* not reached */
@@ -2352,7 +2352,7 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
   pari_sp ltop, lim;
   long i,k,lx = lg(x);
 
-  if (lx == 1) return gun;
+  if (lx == 1) return gone;
   if (lx == 2) return gcopy((GEN)x[1]);
   x = dummycopy(x); k = lx;
   ltop=avma; lim = stack_lim(ltop,1);
@@ -2405,7 +2405,7 @@ _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
   {
     if (t == t_MAT) {
       switch( lg(fa) ) {
-        case 1: return gun;
+        case 1: return gone;
         case 3: break;
         default: err(talker,"not a factorisation in factorback");
       }
@@ -2426,7 +2426,7 @@ _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
     if (k == lx) t = t_MAT;
   }
   if (t != t_MAT) err(talker,"not a factorisation in factorback");
-  if (lx == 1) return gun;
+  if (lx == 1) return gone;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
     if (signe(e[k]))
@@ -2489,7 +2489,7 @@ gisirreducible(GEN x)
   if (tx!=t_POL) err(notpoler,"gisirreducible");
   l=lg(x); if (l<=3) return gzero;
   y=factor(x); avma=av;
-  return (lg(gcoeff(y,1,1))==l)?gun:gzero;
+  return (lg(gcoeff(y,1,1))==l)?gone:gzero;
 }
 
 /*******************************************************************/
@@ -2582,8 +2582,8 @@ zero_gcd(GEN x, GEN y, long tx, long ty)
   {
     case t_INT: return absi(x);
     case t_FRAC: return gabs(x,0);
-    case t_COMPLEX: return c_is_rational(x)? gauss_gcd(x, gzero): gun;
-    case t_REAL: return gun;
+    case t_COMPLEX: return c_is_rational(x)? gauss_gcd(x, gzero): gone;
+    case t_REAL: return gone;
     default: return gcopy(x);
   }
 }
@@ -2637,7 +2637,7 @@ ggcd(GEN x, GEN y)
         return triv_cont_gcd(y,x);
 
       case t_PADIC:
-        if (!egalii((GEN)x[2],(GEN)y[2])) return gun;
+        if (!egalii((GEN)x[2],(GEN)y[2])) return gone;
         vx = valp(x);
         vy = valp(y); return gpowgs((GEN)y[2], min(vy,vx));
 
@@ -2654,7 +2654,7 @@ ggcd(GEN x, GEN y)
         if (typ(p1[2])==t_INT && typ(p1[3])==t_INT) return gcopy(x);
         return triv_cont_gcd(y,x);
 
-      default: return gun; /* t_REAL */
+      default: return gone; /* t_REAL */
     }
     if (is_const_t(ty)) switch(tx)
     {
@@ -2679,7 +2679,7 @@ ggcd(GEN x, GEN y)
           case t_PADIC:
             return padic_gcd(x,y);
 
-          default: return gun; /* t_REAL */
+          default: return gone; /* t_REAL */
         }
 
       case t_INTMOD:
@@ -2715,7 +2715,7 @@ ggcd(GEN x, GEN y)
       case t_PADIC: /* ty = QUAD */
         return triv_cont_gcd(y,x);
 
-      default: return gun; /* tx = t_REAL */
+      default: return gone; /* tx = t_REAL */
     }
     return cont_gcd(y,x);
   }
@@ -2867,7 +2867,7 @@ polgcdnun(GEN x, GEN y)
     if (pol_approx0(r, x, exact))
     {
       avma = av1;
-      if (lg(y) == 3 && !exact) { avma = av; return gun; }
+      if (lg(y) == 3 && !exact) { avma = av; return gone; }
       return (y==yorig)? gcopy(y): gerepileupto(av,y);
     }
     x = y; y = r;
@@ -2986,7 +2986,7 @@ content(GEN x)
     }
 
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); if (lx==1) return gun;
+      lx = lg(x); if (lx==1) return gone;
       p1=content((GEN)x[1]);
       for (i=2; i<lx; i++) p1 = ggcd(p1,content((GEN)x[i]));
       return gerepileupto(av,p1);
@@ -3009,7 +3009,7 @@ content(GEN x)
     while (lx>lontyp[tx])
     {
       lx--; p1=gcdii(p1,(GEN)x[lx]);
-      if (is_pm1(p1)) { avma=av; return gun; }
+      if (is_pm1(p1)) { avma=av; return gone; }
     }
   }
   else
@@ -3018,7 +3018,7 @@ content(GEN x)
     {
       lx--; p1=ggcd(p1,(GEN)x[lx]);
     }
-    if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gun; }
+    if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gone; }
   }
   i = typ(p1); if (is_matvec_t(i)) err(typeer, "content");
   return av==avma? gcopy(p1): gerepileupto(av,p1);
@@ -3051,7 +3051,7 @@ Q_content(GEN x)
     case t_FRAC: return gabs(x,0);
 
     case t_VEC: case t_COL: case t_MAT:
-      l = lg(x); if (l == 1) return gun;
+      l = lg(x); if (l == 1) return gone;
       av = avma; d = Q_content((GEN)x[1]);
       for (i=2; i<l; i++)
       {
@@ -3102,27 +3102,27 @@ Q_denom(GEN x)
 
   switch(typ(x))
   {
-    case t_INT: return gun;
+    case t_INT: return gone;
     case t_FRAC: return (GEN)x[2];
 
     case t_VEC: case t_COL: case t_MAT:
-      l = lg(x); if (l == 1) return gun;
+      l = lg(x); if (l == 1) return gone;
       av = avma; d = Q_denom((GEN)x[1]);
       for (i=2; i<l; i++)
       {
         D = Q_denom((GEN)x[i]);
-        if (D != gun) d = lcmii(d, D);
+        if (D != gone) d = lcmii(d, D);
         if ((i & 255) == 0) d = gerepileuptoint(av, d);
       }
       return gerepileuptoint(av, d);
 
     case t_POL:
-      l = lg(x); if (l == 2) return gun;
+      l = lg(x); if (l == 2) return gone;
       av = avma; d = Q_denom((GEN)x[2]);
       for (i=3; i<l; i++)
       {
         D = Q_denom((GEN)x[i]);
-        if (D != gun) d = lcmii(d, D);
+        if (D != gone) d = lcmii(d, D);
       }
       return gerepileuptoint(av, d);
   }
@@ -3289,7 +3289,7 @@ init_resultant(GEN x, GEN y)
   {
     if (tx==t_POL) return gpowgs(y,degpol(x));
     if (ty==t_POL) return gpowgs(x,degpol(y));
-    return gun;
+    return gone;
   }
   if (tx!=t_POL || ty!=t_POL) err(typeer,"subresall");
   if (varn(x)==varn(y)) return NULL;
@@ -3386,7 +3386,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
   dy=degpol(y); y = revpol(y); dz=dx-dy; p = dz+1;
   lz = dz+3; z = cgetg(lz, t_POL) + 2;
   ypow = new_chunk(dz+1);
-  ypow[0] = un;
+  ypow[0] = one;
   for (i=1; i<=dz; i++) ypow[i] = lmul((GEN)ypow[i-1], (GEN)y[0]);
   av2 = avma; lim = stack_lim(av2,1);
   for (iz=0;;)
@@ -3450,7 +3450,7 @@ subresall(GEN u, GEN v, GEN *sol)
   av = avma;
   u = primitive_part(u, &cu);
   v = primitive_part(v, &cv);
-  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
+  g = h = gone; av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
     r = pseudorem(u,v); dr = lg(r);
@@ -3482,7 +3482,7 @@ subresall(GEN u, GEN v, GEN *sol)
   z = (GEN)v[2];
   if (dv > 1) z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1));
   if (signh < 0) z = gneg(z); /* z = resultant(ppart(x), ppart(y)) */
-  p2 = gun;
+  p2 = gone;
   if (cu) p2 = gmul(p2, gpowgs(cu,dy));
   if (cv) p2 = gmul(p2, gpowgs(cv,dx));
   z = gmul(z, p2);
@@ -3513,7 +3513,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   {
     if (tx==t_POL) return scalar_res(x,y,U,V);
     if (ty==t_POL) return scalar_res(y,x,V,U);
-    *U = ginv(x); *V = gzero; return gun;
+    *U = ginv(x); *V = gzero; return gone;
   }
   if (tx!=t_POL || ty!=t_POL) err(typeer,"subresext");
   if (varn(x) != varn(y))
@@ -3533,8 +3533,8 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   av = avma;
   u = primitive_part(x, &cu); xprim = u;
   v = primitive_part(y, &cv); yprim = v;
-  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
-  um1 = gun; uze = gzero;
+  g = h = gone; av2 = avma; lim = stack_lim(av2,1);
+  um1 = gone; uze = gzero;
   for(;;)
   {
     q = pseudodiv(u,v, &r); dr = lg(r);
@@ -3575,7 +3575,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   vze = poldivrem(p1, yprim, &r);
   if (!gcmp0(r)) err(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
-  p2 = gun;
+  p2 = gone;
   if (cu) p2 = gmul(p2, gpowgs(cu,dy));
   if (cv) p2 = gmul(p2, gpowgs(cv,dx));
   cu = cu? gdiv(p2,cu): p2;
@@ -3634,8 +3634,8 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 
   u = primitive_part(x, &cu); xprim = u;
   v = primitive_part(y, &cv); yprim = v;
-  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
-  um1 = gun; uze = gzero;
+  g = h = gone; av2 = avma; lim = stack_lim(av2,1);
+  um1 = gone; uze = gzero;
   for(;;)
   {
     q = pseudodiv(u,v, &r); dr = lg(r);
@@ -3771,7 +3771,7 @@ resultantducos(GEN P, GEN Q)
     Z = (dP & dQ & 1)? gneg(Q): Q;
     Q = P; P = Z; delta = -delta;
   }
-  s = gun;
+  s = gone;
   if (degpol(Q) > 0)
   {
     av2 = avma; lim = stack_lim(av2,1);
@@ -3794,7 +3794,7 @@ resultantducos(GEN P, GEN Q)
     }
   }
   if (!signe(Q)) { avma = av; return gzero; }
-  if (!degpol(P)){ avma = av; return gun; }
+  if (!degpol(P)){ avma = av; return gone; }
   s = Lazard(leading_term(Q), s, degpol(P));
   if (cP) s = gmul(s, gpowgs(cP,dQ));
   if (cQ) s = gmul(s, gpowgs(cQ,dP)); else if (!cP) s = gcopy(s);
@@ -3924,9 +3924,9 @@ srgcd(GEN x, GEN y)
 
   if (!signe(y)) return gcopy(x);
   if (!signe(x)) return gcopy(y);
-  if (is_scalar_t(tx) || is_scalar_t(ty)) return gun;
+  if (is_scalar_t(tx) || is_scalar_t(ty)) return gone;
   if (tx!=t_POL || ty!=t_POL) err(typeer,"srgcd");
-  vx=varn(x); if (vx!=varn(y)) return gun;
+  vx=varn(x); if (vx!=varn(y)) return gone;
   if (ismonome(x)) return gcdmonome(x,y);
   if (ismonome(y)) return gcdmonome(y,x);
   av = avma;
@@ -3944,7 +3944,7 @@ srgcd(GEN x, GEN y)
     if (dy==3) return gerepile(av,tetpil,d);
 
     av1=avma; lim=stack_lim(av1,1);
-    u=gdiv(x,p1); v=gdiv(y,p2); g=h=gun;
+    u=gdiv(x,p1); v=gdiv(y,p2); g=h=gone;
     for(;;)
     {
       GEN r = pseudorem(u,v);
@@ -4089,7 +4089,7 @@ sturmpart(GEN x, GEN a, GEN b)
   }
   u=gdiv(x,content(x)); v=derivpol(x);
   v=gdiv(v,content(v));
-  g=gun; h=gun;
+  g=gone; h=gone;
   s = b? gsigne(poleval(u,b)): sl;
   t = a? gsigne(poleval(u,a)): ((lg(u)&1)? sl: -sl);
   r1=0;
@@ -4163,7 +4163,7 @@ polinvinexact(GEN x, GEN y)
   z = cgetg(dy+2,t_POL); z[1] = y[1];
   v = cgetg(lz+1,t_COL);
   for (i=1; i<lz; i++) v[i] = zero;
-  v[lz] = un; v = gauss(sylvestermatrix(y,x),v);
+  v[lz] = one; v = gauss(sylvestermatrix(y,x),v);
   for (i=2; i<dy+2; i++) z[i] = v[lz-i+2];
   return gerepilecopy(av, normalizepol_i(z, dy+2));
 }
@@ -4471,7 +4471,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
                              ZXX_to_FlxX(Q,p,y),
                              ZX_to_Flx(nf,p), p)) == NULL) continue;
       dR = degpol(R);
-      if (dR == 0) return scalarpol(gun, x);
+      if (dR == 0) return scalarpol(gone, x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
 
       R = RgXX_to_RgM(FlxX_to_ZXX(R), d);

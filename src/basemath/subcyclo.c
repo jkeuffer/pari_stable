@@ -228,8 +228,8 @@ long znstar_conductor(long n, GEN H)
   return cnd;
 }
 
-/* Calcule les orbites d'un sous-groupe de Z/nZ donne par un
- * generateur ou d'un ensemble de generateur donne par un vecteur. 
+/* Calcule les orbites d'one sous-groupe de Z/nZ donne par one
+ * generateur ou d'one ensemble de generateur donne par one vecteur. 
  */
 GEN
 znstar_cosets(long n, long phi_n, GEN H)
@@ -443,7 +443,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
     fprintferr("Subcyclo: val=%ld\n",val);
   le=gpowgs(l,val);
   z=lift(gpowgs(gener(l),e));
-  z=padicsqrtnlift(gun,utoipos(n),z,l,val);
+  z=padicsqrtnlift(gone,utoipos(n),z,l,val);
   if (DEBUGLEVEL >= 1)
     msgtimer("padicsqrtnlift.");
   *ptr_val=val;
@@ -525,8 +525,8 @@ galoiscyclo(long n, long v)
   mael(grp,2,2) = lstoi(val);
   mael(grp,2,3) = licopy(le);
   grp[3] = lcopy(L);
-  grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gun, le);
-  grp[5] = un;
+  grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gone, le);
+  grp[5] = one;
   grp[6] = lcopy(elts);
   grp[7] = lcopy((GEN)G[1]);
   grp[8] = lcopy((GEN)G[2]);
@@ -578,7 +578,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long card, phi_n;
   if (flag<0 || flag>2) err(flagerr,"galoissubcyclo");
   if ( v==-1 ) v=0;
-  if (!sg) sg=gun;
+  if (!sg) sg=gone;
   switch(typ(N))
   {
     case t_INT:
@@ -729,7 +729,7 @@ subcyclo(long n, long d, long v)
   o /= d;
   if (p==2)
   {
-    GEN pol = powgi(polx[v],gdeux); pol[2]=un; /* replace gzero */
+    GEN pol = powgi(polx[v],gtwo); pol[2]=one; /* replace gzero */
     return pol; /* = x^2 + 1 */
   }
   G=gener(utoipos(n));

@@ -57,7 +57,7 @@ companion(GEN x) /* cf assmat */
   {
     y[j] = lgetg(l,t_COL);
     for (i=1; i<l-1; i++)
-      coeff(y,i,j)=(i+1==j)? un: zero;
+      coeff(y,i,j)=(i+1==j)? one: zero;
     coeff(y,i,j) = lneg((GEN)x[j+1]);
   }
   return y;
@@ -275,7 +275,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   w = (GEN*)new_chunk(n+1);
 
   av2 = avma; limit = stack_lim(av2,1);
-  delta=gun; m=idmat(n);
+  delta=gone; m=idmat(n);
 
   for(;;)
   {
@@ -398,7 +398,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
       }
       rowred(Tn,pp);
     }
-    for (index=gun,i=1; i<=n; i++)
+    for (index=gone,i=1; i<=n; i++)
       index = mulii(index,gcoeff(Tn,i,i));
     if (gcmp1(index)) break;
 
@@ -452,7 +452,7 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
   cf[2]=companion(f);
   for (i=3; i<=n; i++) cf[i]=mulmati(cf[2],cf[i-1]);
 
-  a=idmat(n); da=gun;
+  a=idmat(n); da=gone;
   for (i=1; i<=h; i++)
   {
     pari_sp av1 = avma;
@@ -564,7 +564,7 @@ get_coprimes(GEN a, GEN b)
     {
       if (is_pm1(u[i])) continue;
       d = gcdii(c, (GEN)u[i]);
-      if (d == gun) continue;
+      if (d == gone) continue;
       c = diviiexact(c, d);
       u[i] = (long)diviiexact((GEN)u[i], d);
       u = concatsp(u, d);
@@ -605,7 +605,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   /* "complete" factorization first */
   for (i=1; i<lw; i++)
   {
-    if (w2[i] == 1) { ordmax = concatsp(ordmax, gun); continue; }
+    if (w2[i] == 1) { ordmax = concatsp(ordmax, gone); continue; }
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
@@ -636,14 +636,14 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   for (i=1; i<lw; i++)
   {
     GEN db, b = (GEN)ordmax[i];
-    if (b == gun) continue;
-    db = gun;
+    if (b == gone) continue;
+    db = gone;
     for (j=1; j<=n; j++)
     {
       p1 = denom(gcoeff(b,j,j));
       if (cmpii(p1,db) > 0) db = p1;
     }
-    if (db == gun) continue;
+    if (db == gone) continue;
 
     /* db = denom(diag(b)), (da,db) = 1 */
     b = Q_muli_to_int(b,db);
@@ -684,7 +684,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   }
   else
   {
-    *index = gun;
+    *index = gone;
     a = idmat(n);
   }
 
@@ -901,7 +901,7 @@ static void
 update_den(GEN *e, GEN *de, GEN *pp)
 {
   GEN ce = Q_content(*e);
-  if (ce != gun) {
+  if (ce != gone) {
     ce = gcdii(*de, ce);
     *de = diviiexact(*de, ce);
     *e  = gdivexact(*e, ce);
@@ -932,7 +932,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   long n = degpol(f), dU, i;
   GEN b, ha, pd, pdp;
 
-  if (n == 1) return gscalmat(gun, 1);
+  if (n == 1) return gscalmat(gone, 1);
   if (DEBUGLEVEL>5)
   {
     fprintferr("  entering Dedekind Basis with parameters p=%Z\n",p);
@@ -966,7 +966,7 @@ get_partial_order_as_pols(GEN p, GEN f, GEN *d)
 {
   GEN b = maxord(p,f, Z_pval(ZX_disc(f),p));
   GEN z = Q_remove_denom( RgM_to_RgXV(b, varn(f)), d );
-  if (!*d) *d = gun;
+  if (!*d) *d = gone;
   return z;
 }
 
@@ -1035,7 +1035,7 @@ Decomp(decomp_t *S, long flag)
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   /* E = e / de, e in Z[X], de in Z,  E = a(phi) mod (f, p) */
   th = Q_remove_denom(S->phi, &dt);
-  if (!dt) dt = gun;
+  if (!dt) dt = gone;
   de = gpowgs(dt, degpol(a));
   pr = mulii(p, de);
   e = FpX_FpXQ_compo(FpX_rescale(a, dt, pr), th, S->f, pr);
@@ -1191,7 +1191,7 @@ manage_cache(GEN chi, GEN pp, GEN ns)
 }
 
 /* compute the c first Newton sums modulo pp of the
-   characteristic polynomial of a/d mod chi, d > 0 power of p (NULL = gun),
+   characteristic polynomial of a/d mod chi, d > 0 power of p (NULL = gone),
    a, chi in Zp[X]
    ns = Newton sums of chi */
 static GEN
@@ -1202,7 +1202,7 @@ newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
   pari_sp av, lim;
 
   a = centermod(a, pp); av = avma; lim = stack_lim(av, 1);
-  pa = polun[varn(a)]; dpa = gun;
+  pa = polun[varn(a)]; dpa = gone;
   va = zerovec(c);
   for (j = 1; j <= c; j++)
   { /* pa/dpa = (a/d)^(j-1) mod (chi, pp) */
@@ -1237,7 +1237,7 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
   GEN c = cgetg(n + 2, t_VEC);
 
   if (!NS) return NULL;
-  c[1] = (long)(n & 1 ? utoineg(1): gun);
+  c[1] = (long)(n & 1 ? gminusone: gone);
   for (k = 2; k <= n+1; k++) c[k] = zero;
   for (k = 2; k <= n+1; k++)
   {
@@ -1270,7 +1270,7 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   GEN v, d, pp;
   long m, n = degpol(chi), j, c;
 
-  c = egalii(p, gdeux)? 2*n/3 : min(2*E, n);
+  c = egalii(p, gtwo)? 2*n/3 : min(2*E, n);
   if (c < 2) c = 2;
   a = Q_remove_denom(a, &d);
   m = d? Z_pval(d, p): 0; /* >= 0 */
@@ -1354,7 +1354,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   for (k = 1; k <= n; k++)
   {
     V = zerocol(N); G[N-k] = (long)V;
-    V[n+1-k] = un;
+    V[n+1-k] = one;
     for (j = n+1; j <= N; j++)
     {
       p2 = polcoeff0(B, N-j, -1);
@@ -1385,7 +1385,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   d   = diviiexact(d, c);
 
   V = zerocol(N); G[N] = (long)V;
-  V[N] = (long)pdr; V[n+1] = un;
+  V[N] = (long)pdr; V[n+1] = one;
 
   p1 = mulii(pdr, p);
   for (k = 1; k <= n; k++)
@@ -1564,7 +1564,7 @@ ch_var(GEN x, long v)
 static GEN
 get_gamma(decomp_t *S, GEN x, long eq, long er)
 {
-  GEN q, g = x, Dg = eq ? gpowgs(S->p, eq): gun;
+  GEN q, g = x, Dg = eq ? gpowgs(S->p, eq): gone;
   if (er)
   {
     if (!S->invnu)
@@ -1840,7 +1840,7 @@ indexpartial(GEN P, GEN DP)
 {
   pari_sp av = avma;
   long i, nb;
-  GEN fa, res = gun, dP = derivpol(P);
+  GEN fa, res = gone, dP = derivpol(P);
   pari_timer T;
 
   if(DEBUGLEVEL>=5) (void)TIMER(&T);
@@ -2051,7 +2051,7 @@ primedec_apply_kummer(GEN nf,GEN u,GEN e,GEN p)
   if (f == N) /* inert */
   {
     pr[2] = (long)gscalcol_i(p,N);
-    pr[5] = (long)gscalcol_i(gun,N);
+    pr[5] = (long)gscalcol_i(gone,N);
   }
   else
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
@@ -2095,7 +2095,7 @@ get_powers(GEN mul, GEN p)
   long i, d = lg(mul[1]);
   GEN z, pow = cgetg(d+2,t_MAT), P = pow+1;
 
-  P[0] = (long)gscalcol_i(gun, d-1);
+  P[0] = (long)gscalcol_i(gone, d-1);
   z = (GEN)mul[1];
   for (i=1; i<=d; i++)
   {
@@ -2203,7 +2203,7 @@ _primedec(GEN nf, GEN p)
   else
     h[1] = (long)Ip;
 
-  UN = gscalcol(gun, N);
+  UN = gscalcol(gone, N);
   for (c=1; c; c--)
   { /* Let A:= (Z_K/p) / Ip; try to split A2 := A / Im H ~ Im M2
        H * ? + M2 * Mi2 = Id_N ==> M2 * Mi2 projector A --> A2 */
@@ -2331,7 +2331,7 @@ dim1proj(GEN prh)
   long i, N = lg(prh)-1;
   GEN ffproj = cgetg(N+1, t_VEC);
   GEN x, q = gcoeff(prh,1,1);
-  ffproj[1] = un;
+  ffproj[1] = one;
   for (i=2; i<=N; i++)
   {
     x = gcoeff(prh,1,i);
@@ -2744,7 +2744,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   GEN y;
   rnfeltmod_muldata D;
 
-  if (!signe(n)) return gun;
+  if (!signe(n)) return gone;
 
   D.multab = multab;
   D.h = h;
@@ -2839,7 +2839,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
                                     idealpows(nf, prinvp, d)));
   base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
   vt = vdisc - 2*d;
-  return gerepilecopy(av, mkvec3(vt < 2? gun: gzero, base, stoi(vt)));
+  return gerepilecopy(av, mkvec3(vt < 2? gone: gzero, base, stoi(vt)));
 }
 
 /* [L:K] = n, [K:Q] = m */
@@ -2863,7 +2863,7 @@ rnfdedekind(GEN nf, GEN P, GEN pr)
   avma = av; z = rnfdedekind_i(nf, P, pr, v);
   if (!z) {
     z = cgetg(4, t_VEC);
-    z[1] = un;
+    z[1] = one;
     z[2] = (long)triv_order(degpol(P), degpol(nf[1]));
     z[3] = lstoi(v);
   }
@@ -2915,7 +2915,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     {
       GEN tau, tauinv;
       long v1, v2;
-      if (gegal((GEN)I[j],id)) { Tau[j] = Tauinv[j] = un; continue; }
+      if (gegal((GEN)I[j],id)) { Tau[j] = Tauinv[j] = one; continue; }
 
       p1 = ideal_two_elt(nf,(GEN)I[j]);
       v1 = element_val(nf,(GEN)p1[1],pr);
@@ -2990,7 +2990,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     /* restore the HNF property W[i,i] = 1. NB: Wa upper triangular, with
      * Wa[i,i] = Tau[i] */
     for (j=1; j<=n; j++)
-      if (Tau[j] != un)
+      if (Tau[j] != one)
       {
         W[j] = (long)element_mulvec(nf, (GEN)Tauinv[j], (GEN)W[j]);
         I[j] = (long)idealmul(nf,       (GEN)Tau[j],    (GEN)I[j] );
@@ -3107,13 +3107,13 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
   d = get_d(nf, pol, A);
 
   i=1; while (i<=n && gegal((GEN)I[i], id)) i++;
-  if (i > n) { D = gun; if (pf) *pf = gun; }
+  if (i > n) { D = gone; if (pf) *pf = gone; }
   else
   {
     D = (GEN)I[i];
     for (i++; i<=n; i++) D = idealmul(nf,D,(GEN)I[i]);
     if (pf) *pf = idealinv(nf, D);
-    D = idealpow(nf,D,gdeux);
+    D = idealpow(nf,D,gtwo);
   }
   p1 = core2partial(Q_content(d), 0);
   *pd = gdiv(d, sqri((GEN)p1[2]));
@@ -3698,7 +3698,7 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
   roorder = nf_all_roots(nf, pol, prec);
   if (!roorder) return NULL;
   ru = lg(roorder);
-  unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = un;
+  unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = one;
   powreorder = cgetg(lx,t_MAT); powreorder[1] = (long)unro;
   T2 = cgetg(ru, t_VEC);
   for (i = 1; i < ru; i++)

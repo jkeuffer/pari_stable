@@ -877,7 +877,7 @@ L1:
 
 /* L0: */
   if (e1 == UNDEF) goto L1;
-  e = F0? (gcmp0(e1)? gzero: gun): e1;
+  e = F0? (gcmp0(e1)? gzero: gone): e1;
   e1 = UNDEF;
   switch(*analyseur)
   {
@@ -888,7 +888,7 @@ L1:
 
     case '|':
       if (*++analyseur == '|') analyseur++;
-      if (!gcmp0(e)) { skipexpr(); return gun; }
+      if (!gcmp0(e)) { skipexpr(); return gone; }
       F0=1; goto L1;
   }
   return e;
@@ -1336,7 +1336,7 @@ truc(void)
     case '!': /* NOT */
       analyseur++; old = analyseur;
       z = facteur(); NO_BREAK("after !", old);
-      return gcmp0(z)? gun: gzero;
+      return gcmp0(z)? gone: gzero;
 
     case ('\''): { /* QUOTE */
       entree *ep;
@@ -1431,7 +1431,7 @@ double_op()
   if (c && c == analyseur[1])
     switch(c)
     {
-      case '+': analyseur+=2; return gun; /* ++ */
+      case '+': analyseur+=2; return gone; /* ++ */
       case '-': analyseur+=2; return mun; /* -- */
     }
   return NULL;
@@ -2521,14 +2521,14 @@ manage_var(long n, entree *ep)
   p[0] = evaltyp(t_POL) | evallg(4);
   p[1] = evalsigne(1) | evalvarn(var);
   p[2] = zero;
-  p[3] = un;
+  p[3] = one;
   polx[var] = p;
 
   /* create polun[nvar] */
   p += 4;
   p[0] = evaltyp(t_POL) | evallg(3);
   p[1] = evalsigne(1) | evalvarn(var);
-  p[2] = un;
+  p[2] = one;
   polun[var] = p;
 
   varentries[var] = ep;

@@ -71,7 +71,7 @@ static GEN
 rand_INT(long n)
 {
   pari_sp av = avma;
-  GEN x, N = shifti(gun, n*BITS_IN_LONG);
+  GEN x, N = shifti(gone, n*BITS_IN_LONG);
   do x = genrand(N); while (lgefint(x) != n+2);
   return gerepileuptoint(av, x);
 }
@@ -144,11 +144,11 @@ static double speed_logagm(speed_param *s)
 { enable(s);  TIME_FUN(mplog(s->x)); }
 
 static double speed_logcx(speed_param *s)
-{ GEN z; setexpo(s->x,0); z = gadd(gun, gmul(gi, s->x));
+{ GEN z; setexpo(s->x,0); z = gadd(gone, gmul(gi, s->x));
   glog(z,s->size);
   disable(s); TIME_FUN(glog(z,s->size)); }
 static double speed_logcxagm(speed_param *s)
-{ GEN z; setexpo(s->x,0); z = gadd(gun, gmul(gi, s->x));
+{ GEN z; setexpo(s->x,0); z = gadd(gone, gmul(gi, s->x));
   glog(z,s->size);
   enable(s); TIME_FUN(glog(z,s->size)); }
 

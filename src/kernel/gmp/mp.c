@@ -431,7 +431,7 @@ floorr(GEN x)
   long e, d, m, i, lx;
   GEN y;
   if (signe(x) >= 0) return truncr(x);
-  if ((e=expo(x)) < 0) return stoi(-1);
+  if ((e=expo(x)) < 0) return gminusone;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
   lx=lg(x); if (d>lx) err(precer, "floorr (precision loss in truncation)");
@@ -987,7 +987,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 #ifdef DEBUG
   {
     long l = lgefint(N)-2, s = BITS_IN_LONG*l;
-    GEN R = shifti(gun, s);
+    GEN R = shifti(gone, s);
     GEN res = remii(mulii(T, Fp_inv(R, N)), N);
     if (k > lgefint(N)
         || !egalii(remii(Td,N),res)

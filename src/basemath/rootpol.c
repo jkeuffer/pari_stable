@@ -797,7 +797,7 @@ RUgen(long N, long bitprec)
 static GEN
 initRU(long N, long bitprec)
 {
-  GEN prim,aux,*RU;
+  GEN prim, *RU;
   long i,N2=(N>>1),N4=(N>>2),N8=(N>>3);
 
   RU = (GEN*)cgetg(N+1,t_VEC); RU++;
@@ -817,7 +817,7 @@ initRUgen(long N, long bitprec)
 {
   GEN *RU = (GEN*)cgetg(N+1,t_VEC), z = RUgen(N,bitprec);
   long i, k = (N+3)>>1;
-  RU[0] = gun;
+  RU[0] = gone;
   RU[1] = z;
   for (i=2; i<k; i++) RU[i] = gmul(z, RU[i-1]);
   for (   ; i<N; i++) RU[i] = gconj(RU[N-i]);
@@ -881,7 +881,7 @@ parameters(GEN p, double *mu, double *gamma,
       lx = gtodouble(mplog(gx));
       if (lx < *mu) *mu = lx;
       if (polreal && (i>0 && i<K-1))
-	ggamma = gadd(ggamma, gdiv(gdeux,gx));
+	ggamma = gadd(ggamma, gdiv(gtwo,gx));
       else
 	ggamma = gadd(ggamma, ginv(gx));
     }
@@ -933,7 +933,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 
   for (i=0; i<K; i++)
   {
-    RU[0]=(long) gun;
+    RU[0]=(long) gone;
     for (j=1; j<=n; j++) RU[j]=lmul((GEN)RU[j-1],prim2);
     /* RU[j]=prim^{ ij }=prim2^j */
 
@@ -1002,7 +1002,7 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
   pari_sp ltop=avma, limite=stack_lim(ltop, 1);
   long error=0,i,bitprec1,bitprec2;
 
-  D=gsub(gun,grem(gmul(HH,G),F)); error=gexpo(D);
+  D=gsub(gone,grem(gmul(HH,G),F)); error=gexpo(D);
   bitprec2=bitprec+shiftbitprec;
 
   for (i=0; (error>-bitprec && i<NEWTON_MAX) && error<=0; i++)
@@ -1020,7 +1020,7 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
     bitprec1=-error*2+shiftbitprec;
     if (bitprec1>bitprec2) bitprec1=bitprec2;
     H=gadd(mygprec(H,bitprec1),aux);
-    D=gsub(gun,grem(gmul(H,G),F));
+    D=gsub(gone,grem(gmul(H,G),F));
     error=gexpo(D); if (error<-bitprec1) error=-bitprec1;
   }
   if (error>-bitprec/2) return NULL; /* FAIL */
@@ -1100,7 +1100,7 @@ split_fromU(GEN p, long k, double delta, long bitprec,
 
   H =cgetg(k+2,t_POL); H[1] = p[1];
   FF=cgetg(k+3,t_POL); FF[1]= p[1];
-  FF[k+2]=un;
+  FF[k+2]=one;
 
   NN=(long) (0.5/delta); NN+=(NN%2); if (NN<2) NN=2;
   NN=NN*Lmax; ltop=avma;
@@ -1298,7 +1298,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   FF = conformal_pol(FF,a,bitprec2);
   GG = conformal_pol(GG,a,bitprec2);
 
-  a = mplog( ginv(gsub(gun, gnorm(a))) );
+  a = mplog( ginv(gsub(gone, gnorm(a))) );
   FF = gmul(FF, mpexp(mulrs(a,k)));
   GG = gmul(GG, mpexp(mulrs(a,n-k)));
 
@@ -1559,13 +1559,13 @@ root_error(long n, long k, GEN roots_pol, GEN sigma, GEN shatzle)
     }
   }
   rho=gabs(mygprec((GEN)roots_pol[k],31),DEFAULTPREC);
-  if (gcmp(rho,dbltor(1.))==-1) rho=gun;
+  if (gcmp(rho,dbltor(1.))==-1) rho=gone;
   eps=gmul(rho,shatzle);
   aux=gmul(gpowgs(rho,n),sigma);
 
   for (j=1; j<=2 || (j<=5 && gcmp(rap,dbltor(1.2))==1); j++)
   {
-    m=n; prod=gun;
+    m=n; prod=gone;
     epsbis=gdivgs(gmulgs(eps,5),4);
     for (i=1; i<=n; i++)
     {

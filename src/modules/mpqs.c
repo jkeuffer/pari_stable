@@ -1200,7 +1200,7 @@ static GEN
 mpqs_factorback(long *FB, char *relations, GEN kN)
 {
   char *s, *t = pari_strdup(relations);
-  GEN p_e, prod = gun;
+  GEN p_e, prod = gone;
   long e;
 
   s = strtok(t, " \n");
@@ -1570,7 +1570,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       s = strchr(ejk, ':') + 2;
       s = strtok(s, " \n");
 
-      prod_pi_ei = gun;
+      prod_pi_ei = gone;
       while (s != NULL)
       {
 	exi = atol(s); if (!exi) break;
@@ -1861,11 +1861,11 @@ split(GEN N, long *e, long *res)
   ulong mask;
   long flag;
   GEN base;
-  if (isprobableprime(N)) { *e = un; return 1; }
+  if (isprobableprime(N)) { *e = one; return 1; }
   if (carrecomplet(N, &base))
   { /* squares could cost us a lot of time */
     if (res) *res = (long)base; else affii(base, N); 
-    *e = deux;
+    *e = two;
     if (DEBUGLEVEL >= 5) fprintferr("MPQS: decomposed a square\n");
     return 1;
   }
@@ -1948,7 +1948,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
    * down at the end to what we actually found, or up if we are very lucky and
    * find more factors.  In the upper half of our vector, we store information
    * about which factors we know to be composite (zero) or believe to be
-   * composite ((long)NULL) or suspect to be prime (un), or an exponent (deux
+   * composite ((long)NULL) or suspect to be prime (one), or an exponent (two
    * or some t_INT) if it is a proper power */
   av2 = avma; lim = stack_lim(av2,1);
   if (rank > (long)BITS_IN_LONG - 2)
@@ -1964,7 +1964,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 
   for (i = 0; i < H_cols; i++)
   { /* loop over kernel basis */
-    X = Y_prod = gun;
+    X = Y_prod = gone;
     memset(ei, 0, (size_of_FB + 2) * sizeof(long));
 
     av3 = avma; lim3 = stack_lim(av3,1);
@@ -2131,11 +2131,11 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
     icopyifstack(res[i], new_res[j++]); /* factor */
     flag = res[res_size+i];
     new_res[j++] =		/* exponent */
-      flag ?			/* flag was zero or un or ... */
-	(flag == zero ? un :
+      flag ?			/* flag was zero or one or ... */
+	(flag == zero ? one :
 	 (isonstack((GEN)flag) ? licopy((GEN)flag) : flag)
 	 ) :
-	   un;			/* flag was (long)NULL */
+	   one;			/* flag was (long)NULL */
     new_res[j++] =		/* class */
       flag == zero ? zero :	/* known composite */		
 	(long)NULL;		/* base of power or suspected prime --

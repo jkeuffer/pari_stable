@@ -179,7 +179,7 @@ idealsqrtn(GEN nf, GEN x, GEN gn, int strict)
     if (q) q = idealmulpowprime(nf, q, (GEN)Pr[i], e);
     else   q = idealpow(nf, (GEN)Pr[i], e);
   }
-  return q? q: gun;
+  return q? q: gone;
 }
 
 static GEN
@@ -707,7 +707,7 @@ pol_from_Newton(GEN S)
 {
   long i, k, l = lg(S);
   GEN C = cgetg(l+1, t_VEC), c = C + 1;
-  c[0] = un;
+  c[0] = one;
   c[1] = S[1];
   for (k = 2; k < l; k++)
   {

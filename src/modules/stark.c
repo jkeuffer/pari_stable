@@ -53,7 +53,7 @@ GEN
 InitRU(GEN den, long prec)
 {
   GEN c, s;
-  if (egalii(den, gdeux)) return utoineg(1);
+  if (egalii(den, gtwo)) return gminusone;
   gsincos(divri(Pi2n(1, prec), den), &s, &c, prec);
   return mkcomplex(c, s);
 }
@@ -213,7 +213,7 @@ get_Char(GEN chic, long prec)
 {
   GEN d, C;
   C = cgetg(4, t_VEC);
-  C[1] = (long)Q_remove_denom(chic, &d); if (!d) d = gun;
+  C[1] = (long)Q_remove_denom(chic, &d); if (!d) d = gone;
   C[2] = (long)InitRU(d, prec);
   C[3] = (long)d; return C;
 }
@@ -384,7 +384,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   Mr = diagonal(gmael(bnr, 5, 2));
   D = smithall(gauss(C, Mr), &U, NULL);
   T = gmul(C,ginv(U));
-  subgrp  = subgrouplist(D, mkvec(gdeux));
+  subgrp  = subgrouplist(D, mkvec(gtwo));
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
     subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
@@ -398,7 +398,7 @@ Order(GEN cyc, GEN x)
 {
   pari_sp av = avma;
   long i, l = lg(cyc);
-  GEN c,o,f = gun;
+  GEN c,o,f = gone;
   for (i = 1; i < l; i++)
   {
     o = (GEN)cyc[i];
@@ -537,7 +537,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 
   /* Initialization of the possible infinite part */
   arch = cgetg(N+1, t_VEC);
-  for (i = 1; i <= N; i++) arch[i] = un;
+  for (i = 1; i <= N; i++) arch[i] = one;
 
   /* narch = (N == 2)? 1: N; -- if N=2, only one case is necessary */
   narch = N;
@@ -583,7 +583,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 	  bnrm = buchrayinitgen(bnf, m);
 	  p1   = conductor(bnrm, NULL, -1);
 	  disable_dbg(-1);
-          arch[N+1-s] = un;
+          arch[N+1-s] = one;
 	  if (!signe(p1)) continue;
 
           /* compute Im(C) in Clk(m)... */
@@ -672,7 +672,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   for (ic = 0, i = 1; i <= nChar; i++)
   {
     CHI = (GEN)LCHI[i];
-    if (cmpsi(2, (GEN)CHI[3]) >= 0) { W[i] = un; continue; } /* trivial case */
+    if (cmpsi(2, (GEN)CHI[3]) >= 0) { W[i] = one; continue; } /* trivial case */
     ic++; indW[ic] = i;
     lC[ic] = (CHI_t*)new_chunk(sizeof(CHI_t));
     init_CHI_C(lC[ic], CHI);
@@ -719,7 +719,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   }
   else
   {
-    mu  = gun;
+    mu  = gone;
     idh = idg;
   }
 
@@ -759,7 +759,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   av2 = avma; lim = stack_lim(av2, 1);
   vB = (GEN*)cgetg(nz+1, t_VEC);
-  for (i=1; i<=nz; i++) vB[i] = gun;
+  for (i=1; i<=nz; i++) vB[i] = gone;
 
   tr = gmod(gmul(vt, muslambda), den); /* for beta = 1 */
   s0 = powgi(z, tr);
@@ -919,7 +919,7 @@ ComputeAChi(GEN dtcr, long flag, long prec)
   chi  = (GEN)dtcr[8];
   l    = lg(diff) - 1;
 
-  A = gun;
+  A = gone;
   r = 0;
 
   for (i = 1; i <= l; i++)
@@ -929,14 +929,14 @@ ComputeAChi(GEN dtcr, long flag, long prec)
     p1  = ComputeImagebyChar(chi, ray);
 
     if (flag)
-      B = gsub(gun, gdiv(p1, idealnorm(nf, (GEN)diff[i])));
+      B = gsub(gone, gdiv(p1, idealnorm(nf, (GEN)diff[i])));
     else if (gcmp1(p1))
     {
       B = glog(idealnorm(nf, (GEN)diff[i]), prec);
       r++;
     }
     else
-      B = gsub(gun, p1);
+      B = gsub(gone, p1);
     A = gmul(A, B);
   }
   return flag? A: mkvec2(stoi(r), A);
@@ -1098,7 +1098,7 @@ get_listCR(GEN dataD)
 
     /* if chi is not real, add its conjugate character to allCR */
     d = Order(Mr, lchi);
-    if (!egalii(d, gdeux))
+    if (!egalii(d, gtwo))
       allCR[tnc++] = (long)ConjChar(lchi, Mr);
   }
   disable_dbg(-1);
@@ -1629,7 +1629,7 @@ ppgamma(ST_t *T, long prec)
   gamdm[2] = zero;
   gamdm[3] = lneg(gadd(gmul2n(mplog2(prec), 1), eul));
   for (i = 2; i <= r; i++)
-    gamdm[i+2] = lmul((GEN)gamun[i+2], subis(shifti(gun,i), 1));
+    gamdm[i+2] = lmul((GEN)gamun[i+2], subis(shifti(gone,i), 1));
   gamdm = gmul(sqpi, gexp(gamdm, prec)); /* Gamma(1/2 + x) */
 
  /* We simplify to get one of the following two expressions
@@ -1648,7 +1648,7 @@ ppgamma(ST_t *T, long prec)
     p2 = gsubst(gam,0,x2);
   }
   cf = gpowgs(sqpi, t);
-  an = gpowgs(gpow(gdeux, gsubsg(1,x), prec), t); /* 2^{t-tx} */
+  an = gpowgs(gpow(gtwo, gsubsg(1,x), prec), t); /* 2^{t-tx} */
   bn = gpowgs(gam, t+c); /* Gamma(x)^{t+c} */
   cn_evn = gpowgs(p1, s-t); /* Gamma(X)^{s-t} */
   cn_odd = gpowgs(p2, s-t); /* Gamma(Y)^{s-t} */
@@ -1742,7 +1742,7 @@ get_cS_cT(ST_t *T, long n)
   aij = T->aij; i0= T->i0;
   bij = T->bij; r = T->r;
   Z = cgetg(r+1, t_VEC);
-  Z[1] = un;
+  Z[1] = one;
 
   csurn = gdivgs(T->c1, n);
   nsurc = ginv(csurn);
@@ -1857,7 +1857,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   racpi = sqrtr(mppi(prec2));
   powracpi = (GEN*)cgetg(r1+2,t_VEC);
-  powracpi++; powracpi[0] = gun; powracpi[1] = racpi;
+  powracpi++; powracpi[0] = gone; powracpi[1] = racpi;
   for (j=2; j<=r1; j++) powracpi[j] = mulrr(powracpi[j-1], racpi);
   cScT.powracpi = powracpi;
 
@@ -2044,7 +2044,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
   eps = gpowgs(utoipos(10), min(-8, (d->G >> 1)));
-  tB  = gpow(gmul2n(eps, N), gdivgs(gun, 1-N), DEFAULTPREC);
+  tB  = gpow(gmul2n(eps, N), gdivgs(gone, 1-N), DEFAULTPREC);
 
   Bd    = gceil(gmin(B, tB));
   prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
@@ -2177,7 +2177,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     if (! (p1 = RecCoeff2(nf, &d, prec)) ) return NULL;
     pol[cf+2] = (long)p1;
   }
-  pol[cl+2] = un;
+  pol[cl+2] = one;
   return gerepilecopy(av, pol);
 }
 
@@ -2475,7 +2475,7 @@ GenusField(GEN bnf)
   l = 0;
   pol = NULL;
 
-  for (c = 2; l < hk; c++) /* skip c = 1 : div[1] = gun */
+  for (c = 2; l < hk; c++) /* skip c = 1 : div[1] = gone */
   {
     d = (GEN)div[c];
     if (mod4(d) == 1)
@@ -2709,14 +2709,14 @@ START:
 
   /* if the exponent of the class group is 2, use rather Genus Field Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
-  if (gegal(exp, gdeux)) { (void)delete_var(); return GenusField(bnf); }
+  if (gegal(exp, gtwo)) { (void)delete_var(); return GenusField(bnf); }
 
   CATCH(precer) {
     prec += EXTRA_PREC; pol = NULL;
     err (warnprec, "quadhilbertreal", prec);
   } TRY {
     /* find the modulus defining N */
-    bnr   = buchrayinitgen(bnf, gun);
+    bnr   = buchrayinitgen(bnf, gone);
     dataC = InitQuotient(bnr, gzero);
     bnrh  = FindModulus(dataC, 1, &newprec, prec, flag? -1: 0);
 

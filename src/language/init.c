@@ -33,7 +33,7 @@ const int     functions_tblsz = 135; /* size of functions_hash          */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
 ulong   logstyle = logstyle_none;
 GEN     *polun, *polx;
-GEN     gnil, gzero, gun, gdeux, ghalf, polvar, gi;
+GEN     gnil, gzero, gone, gminusone, gtwo, ghalf, polvar, gi;
 GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
@@ -543,24 +543,30 @@ reset_traps()
 static void
 init_universal_constants(void)
 {
-  /* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
-  GEN p = universal_constants = (long*) gpmalloc(16*sizeof(long));
+  /* 2 (gnil) + 2 (gzero) + 3 (gone) + 3 (gminusone) + 3 (gtwo) + 3 (half) + 3 (gi) */
+  GEN p = universal_constants = (long*) gpmalloc(19*sizeof(long));
   gzero = p; p+=2; gnil = p; p+=2;
   gzero[0] = gnil[0] = evaltyp(t_INT) | evallg(2);
   gzero[1] = gnil[1] = evallgefint(2);
 
-  gun = p; p+=3; gdeux = p; p+=3;
-  gun[0] = gdeux[0] = evaltyp(t_INT) | evallg(3);
-  gun[1] = gdeux[1] = evalsigne(1) | evallgefint(3);
-  gun[2] = 1; gdeux[2]= 2;
+  gone = p; p+=3;
+  gtwo = p; p+=3;
+  gone[0] = gtwo[0] = evaltyp(t_INT) | evallg(3);
+  gone[1] = gtwo[1] = evalsigne(1) | evallgefint(3);
+  gone[2] = 1; gtwo[2]= 2;
+
+  gminusone = p; p+=3;
+  gminusone[0] = evaltyp(t_INT) | evallg(3);
+  gminusone[1] = evalsigne(-1) | evallgefint(3);
+  gminusone[2] = 1;
 
   ghalf = p; p+=3; gi = p; p+=3;
   ghalf[0] = evaltyp(t_FRAC) | evallg(3);
-  ghalf[1] = un;
-  ghalf[2] = deux;
+  ghalf[1] = one;
+  ghalf[2] = two;
   gi[0] = evaltyp(t_COMPLEX) | evallg(3);
   gi[1] = zero;
-  gi[2] = un;
+  gi[2] = one;
 }
 
 static size_t

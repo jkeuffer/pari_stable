@@ -167,7 +167,7 @@ numbpart(GEN n)
 
   if (typ(n) != t_INT) err(typeer, "partition function");
   if (signe(n) < 0) return gzero;
-  if (cmpii(n, gdeux) < 0) return gun;
+  if (cmpii(n, gtwo) < 0) return gone;
   if (cmpii(n, u2toi(0x38d7e, 0xa4c68000)) >= 0)
     err(talker, "arg to partition function must be < 10^15");
   est = estim(n);

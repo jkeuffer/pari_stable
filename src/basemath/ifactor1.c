@@ -297,14 +297,14 @@ IsLucasPsP0(GEN N)
 
   m = addis(N,1); v = vali(m); m = shifti(m,-v);
   z = LucasMod(m, b, N);
-  if (egalii(z, gdeux)) return 1;
+  if (egalii(z, gtwo)) return 1;
   N_2 = subis(N,2);
   if (egalii(z, N_2)) return 1;
   for (i=1; i<v; i++)
   {
     if (!signe(z)) return 1;
     z = modii(subis(sqri(z), 2), N);
-    if (egalii(z, gdeux)) return 0;
+    if (egalii(z, gtwo)) return 0;
   }
   return 0;
 }
@@ -378,7 +378,7 @@ BSW_psp(GEN N)
 
   /* no prime divisor < 103 */
   if (n && n < 10427) return 1;
-  init_miller(&S, N); k = bad_for_base(&S, gdeux);
+  init_miller(&S, N); k = bad_for_base(&S, gtwo);
   avma = av; if (k) return 0;
   if (n && n < 1016801)
     switch(n) {
@@ -441,8 +441,8 @@ pl831(GEN N, GEN p)
 }
 /* Assume N is a strong BSW pseudoprime
  *
- * flag 0: return gun (prime), gzero (composite)
- * flag 1: return gzero (composite), gun (small prime), matrix (large prime)
+ * flag 0: return gone (prime), gzero (composite)
+ * flag 1: return gzero (composite), gone (small prime), matrix (large prime)
  *
  * The matrix has 3 columns, [a,b,c] with
  * a[i] prime factor of N-1,
@@ -464,8 +464,8 @@ plisprime(GEN N, long flag)
   if (t != t_INT) err(arither1);
   if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
 
-  eps = absi_cmp(N,gdeux);
-  if (eps<=0) return eps? gzero: gun;
+  eps = absi_cmp(N,gtwo);
+  if (eps<=0) return eps? gzero: gone;
 
   N = absi(N);
   if (!F)
@@ -486,17 +486,17 @@ plisprime(GEN N, long flag)
     if (!witness) { avma = ltop; return gzero; }
     mael(C,1,i) = licopy(p);
     mael(C,2,i) = lutoi(witness);
-    if (!flag) r = BSW_isprime(p)? gun: gzero;
+    if (!flag) r = BSW_isprime(p)? gone: gzero;
     else
     {
-      if (BSW_isprime_small(p)) r = gun;
-      else if (expi(p) > 250)   r = isprimeAPRCL(p)? gdeux: gzero;
+      if (BSW_isprime_small(p)) r = gone;
+      else if (expi(p) > 250)   r = isprimeAPRCL(p)? gtwo: gzero;
       else                      r = plisprime(p,flag);
     }
     mael(C,3,i) = (long)r;
     if (r == gzero) err(talker,"False prime number %Z in plisprime", p);
   }
-  if (!flag) { avma = ltop; return gun; }
+  if (!flag) { avma = ltop; return gone; }
   return gerepileupto(ltop,C);
 }
 
@@ -550,11 +550,11 @@ nextprime(GEN n)
 
   if (typ(n) != t_INT) n = gceil(n);
   if (typ(n) != t_INT) err(arither1);
-  if (signe(n) <= 0) { avma = av; return gdeux; }
+  if (signe(n) <= 0) { avma = av; return gtwo; }
   if (lgefint(n) <= 3)
   { /* check if n <= 7 */
     ulong k = n[2];
-    if (k <= 2) { avma = av; return gdeux; }
+    if (k <= 2) { avma = av; return gtwo; }
     if (k == 3) { avma = av; return utoipos(3); }
     if (k <= 5) { avma = av; return utoipos(5); }
     if (k <= 7) { avma = av; return utoipos(7); }
@@ -595,7 +595,7 @@ precprime(GEN n)
   { /* check if n <= 10 */
     ulong k = n[2];
     if (k <= 1)  { avma = av; return gzero; }
-    if (k == 2)  { avma = av; return gdeux; }
+    if (k == 2)  { avma = av; return gtwo; }
     if (k <= 4)  { avma = av; return utoipos(3); }
     if (k <= 6)  { avma = av; return utoipos(5); }
     if (k <= 10) { avma = av; return utoipos(7); }
@@ -898,7 +898,7 @@ elldouble(long nbc, GEN *X1, GEN *X2)
   GEN W[nbcmax+1]; /* W[0] unused */
   long i;
   pari_sp av = avma, tetpil;
-  /*W[0] = gun;*/ W[1] = Y1[0];
+  /*W[0] = gone;*/ W[1] = Y1[0];
   for (i=1; i<nbc; i++) W[i+1] = modii(mulii(Y1[i], W[i]), N);
   tetpil = avma;
 
@@ -1513,7 +1513,7 @@ ellfacteur(GEN n, int insist)
       /* initialize a few other things */
       bstp = bstp0;
       p = p0; d = d0; rcn = rcn0;
-      gl = gun; av1 = avma;
+      gl = gone; av1 = avma;
       /* scratchspace for prod (x_i-x_j) */
       avtmp = (pari_sp)new_chunk(8 * lgefint(n));
       /* the correct entry in XB to use depends on bstp and on where we are
@@ -1544,7 +1544,7 @@ ellfacteur(GEN n, int insist)
 	{ /* take gcd */
 	  gl = gcdii(gl, n);
 	  if (!is_pm1(gl) && !egalii(gl, n)) { p = p2; goto fin; }
-	  gl = gun; avma = av1;
+	  gl = gone; avma = av1;
 	  while (k > gss) /* hm, just how large are those prime gaps? */
 	  { /* giant step */
 	    if (DEBUGLEVEL >= 7) fprintferr("\t(giant step at p = %lu)\n", p);
@@ -1638,7 +1638,7 @@ rho_dbg(long c, long msg_mask)
 
 /* Return NULL when we run out of time, or a single t_INT containing a
  * nontrivial factor of n, or a vector of t_INTs, each triple of successive
- * entries containing a factor, an exponent (equal to un),  and a factor
+ * entries containing a factor, an exponent (equal to one),  and a factor
  * class (NULL for unknown or zero for known composite),  matching the
  * internal representation used by the ifac_*() routines below.  Repeated
  * factors may arise;  the caller will sort the factors anyway. */
@@ -1706,7 +1706,7 @@ PB_RETRY:
                delta, c >> 5);
     flusherr();
   }
-  x = gdeux; P = gun; g1 = NULL; k = 1; l = 1;
+  x = gtwo; P = gone; g1 = NULL; k = 1; l = 1;
   (void)new_chunk(10 + 6 * tf); /* enough for cgetg(10) + 3 modii */
   y = cgeti(tf); affsi(2, y);
   x1= cgeti(tf); affsi(2, x1);
@@ -1738,7 +1738,7 @@ PB_RETRY:
         }
         avma = av; return NULL;
       }
-      P = gun;			/* not necessary, but saves 1 mulii/round */
+      P = gone;			/* not necessary, but saves 1 mulii/round */
       if (DEBUGLEVEL >= 4) rho_dbg(c0-(c>>5), msg_mask);
       affii(x,y);
     }
@@ -1748,7 +1748,7 @@ PB_RETRY:
     if (c & 0x1f) /* otherwise, we already checked */
     {
       g = gcdii(n, P); if (!is_pm1(g)) goto fin;
-      P = gun;
+      P = gone;
     }
 
    /* Fast forward phase, doing l inner iterations without computing gcds.
@@ -1847,20 +1847,20 @@ fin:
     }
     res = cgetg(7, t_VEC);
     res[1] = licopy(g);         /* factor */
-    res[2] = un;		/* exponent 1 */
+    res[2] = one;		/* exponent 1 */
     res[3] = (g1!=n? zero: LNULL); /* known composite when g1!=n */
 
     res[4] = (long)diviiexact(n,g);       /* cofactor */
-    res[5] = un;		/* exponent 1 */
+    res[5] = one;		/* exponent 1 */
     res[6] = LNULL;	/* unknown */
     return res;
   }
   /* g < g1 < n : our lucky day -- we've split g1, too */
   res = cgetg(10, t_VEC);
   /* unknown status for all three factors */
-  res[1] = licopy(g);              res[2] = un; res[3] = LNULL;
-  res[4] = (long)diviiexact(g1,g); res[5] = un; res[6] = LNULL;
-  res[7] = (long)diviiexact(n,g1); res[8] = un; res[9] = LNULL;
+  res[1] = licopy(g);              res[2] = one; res[3] = LNULL;
+  res[4] = (long)diviiexact(g1,g); res[5] = one; res[6] = LNULL;
+  res[7] = (long)diviiexact(n,g1); res[8] = one; res[9] = LNULL;
   if (DEBUGLEVEL >= 4)
   {
     rho_dbg(c0-(c>>5), 0);
@@ -2125,7 +2125,7 @@ squfof(GEN n)
 	  { /* q^2 divides D1 hence n [ assuming n % 3 != 0 ] */
 	    avma = av;
 	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    return mkvec3(utoipos(q), gdeux, NULL);/* exponent 2, unknown status */
+	    return mkvec3(utoipos(q), gtwo, NULL);/* exponent 2, unknown status */
 	  }
 	  /* chase the inverse root form back along the ambiguous cycle */
 	  q = squfof_ambig(a, b1, dd1, D1);
@@ -2168,7 +2168,7 @@ squfof(GEN n)
 	  { /* q^2 divides D2 hence n [ assuming n % 5 != 0 ] */
 	    avma = av;
 	    if (DEBUGLEVEL >= 4) fprintferr("SQUFOF: found factor %ld^2\n", q);
-	    return mkvec3(utoipos(q), gdeux, NULL);/* exponent 2, unknown status */
+	    return mkvec3(utoipos(q), gtwo, NULL);/* exponent 2, unknown status */
 	  }
 	  /* chase the inverse root form along the ambiguous cycle */
 	  q = squfof_ambig(a, b2, dd2, D2);
@@ -2574,7 +2574,7 @@ is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * one of the arithmetic user interface routines) needs a primary factor, and
  * the smallest thing in our list is P_1, we return that and its exponent, and
  * remove it from our list. (When nothing is left, we return a sentinel value
- * -- gun.  And in Moebius mode, when we see something with exponent > 1,
+ * -- gone.  And in Moebius mode, when we see something with exponent > 1,
  * whether prime or composite,  we return gzero or 0, depending on the
  * function). In all other cases, ifac_main() iterates the following steps
  * until we have a P_1 in the smallest position.
@@ -2621,16 +2621,16 @@ is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
  * cending order, we cannot stop when we find one larger than sqrt(N0).)
  */
 /* Data structure:  We keep everything in a single t_VEC of t_INTs.  The
- * first component records whether we're doing full (NULL) or Moebius (un)
+ * first component records whether we're doing full (NULL) or Moebius (one)
  * factorization;  in the latter case many subroutines return a sentinel
  * value as soon as they spot an exponent > 1.  The second component records
  * the hint from factorint()'s optional flag, for use by ifac_crack().
  * The remaining components  (initially 15)  are used in groups of three:
  * a GEN pointer at the t_INT value of the factor, a pointer at the t_INT
- * exponent (usually gun or gdeux so we don't clutter up the stack too
+ * exponent (usually gone or gtwo so we don't clutter up the stack too
  * much),  and another t_INT GEN pointer to record the class of the factor:
- * NULL for unknown, zero for known composite C_k, un for known prime Q_j
- * awaiting trial division, and deux for finished prime P_i.
+ * NULL for unknown, zero for known composite C_k, one for known prime Q_j
+ * awaiting trial division, and two for finished prime P_i.
  */
 /* When during the division stage we re-sort a C_k-turned-U_l to a lower
  * position, we rotate any intervening material upward towards its old
@@ -2729,7 +2729,7 @@ static void ifac_whoiswho(GEN *partial, GEN *where, long after_crack);
 
 static GEN ifac_main(GEN *partial);
 /* main loop:  iterate until smallest entry is a finished prime;  returns
- * a `where' pointer, or gun if nothing left, or gzero in Moebius mode if
+ * a `where' pointer, or gone if nothing left, or gzero in Moebius mode if
  * we aren't squarefree */
 
 /* In the most common cases, control flows from the user interface to
@@ -2741,7 +2741,7 @@ static GEN ifac_main(GEN *partial);
 GEN ifac_start(GEN n, long moebius, long hint);
 
 /* run main loop until primary factor is found, return the prime and assign the
- * exponent. If nothing left, return gun and set exponent to 0; if in Moebius
+ * exponent. If nothing left, return gone and set exponent to 0; if in Moebius
  * mode and a square factor is discovered, return gzero and set exponent to 0 */
 GEN ifac_primary_factor(GEN *partial, long *exponent);
 
@@ -2779,7 +2779,7 @@ ifac_start(GEN n, long moebius, long hint)
 
   part = cgetg(ifac_initial_length, t_VEC);
   here = part + ifac_initial_length;
-  part[1] = moebius? un : LNULL;
+  part[1] = moebius? one : LNULL;
   part[2] = lstoi(hint);
   if (isonstack(n)) n = absi(n);
   /* make copy, because we'll later want to dvdiiz() into it in place.
@@ -2787,7 +2787,7 @@ ifac_start(GEN n, long moebius, long hint)
    * auxdecomp0(), and we assume the sign has already been set positive */
   /* fill first slot at the top end */
   *--here = zero;/* initially composite */
-  *--here = un;	 /* initial exponent 1 */
+  *--here = one;	 /* initial exponent 1 */
   *--here = (long) n;
   /* and NULL out the remaining slots */
   while (here > part + 3) *--here = LNULL;
@@ -2923,7 +2923,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   }
   value = (GEN)(*washere);
   exponent = (GEN)(washere[1]);
-  if (exponent != gun && moebius_mode && cmpsi(1,exponent) < 0)
+  if (exponent != gone && moebius_mode && cmpsi(1,exponent) < 0)
     return 1;			/* should have been detected by caller */
   class0 = (GEN)(washere[2]);
 
@@ -2977,7 +2977,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
 	err(talker, "composite equals prime in ifac_sort_one");
       else if (class0 != gzero && class1 == gzero)
 	err(talker, "prime equals composite in ifac_sort_one");
-      else if (class0 == gdeux)	/* should happen even less */
+      else if (class0 == gtwo)	/* should happen even less */
 	scan[2] = (long)class0;	/* use it */
     }
     else			/* shouldn't happen either */
@@ -2986,8 +2986,8 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   /* else stay with the existing known class0 */
   scan[2] = (long)class1;
   /* in any case, add exponents */
-  if (scan[-2] == un && exponent == gun)
-    scan[1] = deux;
+  if (scan[-2] == one && exponent == gone)
+    scan[1] = two;
   else
     scan[1] = laddii((GEN)(scan[-2]), exponent);
   /* move the value over and null out the vacated slot below */
@@ -3048,7 +3048,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
     if (scan[2])
     { /* known class of factor */
       if (scan[2] == zero) larger_compos = 1;
-      else if (!larger_compos && scan[2] == un)
+      else if (!larger_compos && scan[2] == one)
       {
 	if (DEBUGLEVEL >= 3)
 	{
@@ -3057,12 +3057,12 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 	  fprintferr("IFAC: prime %Z\n\tappears with exponent = %ld\n",
 		     **where, itos((GEN)(*where)[1]));
 	}
-	scan[2] = deux;
+	scan[2] = two;
       }
       continue;
     }
     scan[2] = BSW_psp((GEN)(*scan)) ?
-       (larger_compos ? un : deux) : /* un- or finished prime */
+       (larger_compos ? one : two) : /* one- or finished prime */
        zero;			     /* composite */
 
     if (scan[2] == zero) larger_compos = 1;
@@ -3088,7 +3088,7 @@ ifac_divide(GEN *partial, GEN *where)
     err(talker, "partial impossibly short in ifac_divide");
   if (!(*where) || *where > *partial + lgp - 3 || *where < *partial + 3)
     err(talker, "`*where\' out of bounds in ifac_divide");
-  if ((*where)[2] != un)
+  if ((*where)[2] != one)
     err(talker, "division by composite or finished prime in ifac_divide");
   if (!(**where))		/* always test just this one */
     err(talker, "division by nothing in ifac_divide");
@@ -3110,7 +3110,7 @@ ifac_divide(GEN *partial, GEN *where)
     }
     if (newexp > exponent)	/* did anything happen? */
     {
-      (*where)[1] = (newexp == 2 ? deux : (long)utoipos(newexp));
+      (*where)[1] = (newexp == 2 ? two : (long)utoipos(newexp));
       exponent = newexp;
       if (is_pm1(*scan)) /* factor dissolved completely */
       {
@@ -3128,7 +3128,7 @@ ifac_divide(GEN *partial, GEN *where)
 		   **where, newexp);
     }
   } /* for */
-  (*where)[2] = deux; /* make it a finished prime */
+  (*where)[2] = two; /* make it a finished prime */
   if (DEBUGLEVEL >= 3)
     fprintferr("IFAC: prime %Z\n\tappears with exponent = %ld\n",
 	       **where, newexp);
@@ -3180,9 +3180,9 @@ ifac_crack(GEN *partial, GEN *where)
     if (DEBUGLEVEL >= 4)
       fprintferr("IFAC: found %Z =\n\t%Z ^2\n", **where, factor);
     affii(factor, (GEN)(**where)); avma = av; factor = NULL;
-    if (exponent == gun)
-      (*where)[1] = deux;
-    else if (exponent == gdeux)
+    if (exponent == gone)
+      (*where)[1] = two;
+    else if (exponent == gtwo)
     { (*where)[1] = (long)utoipos(4); av = avma; }
     else
       affsi(itos(exponent) << 1, (GEN)((*where)[1]));
@@ -3194,7 +3194,7 @@ ifac_crack(GEN *partial, GEN *where)
   /* check whether our composite hasn't become prime */
   if (exp1 > 1 && hint != 15 && BSW_psp((GEN)(**where)))
   {
-    (*where)[2] = un;
+    (*where)[2] = one;
     if (DEBUGLEVEL >= 4) fprintferr("IFAC: factor %Z\n\tis prime\n",**where);
     return 0; /* bypass subsequent ifac_whoiswho() call */
   }
@@ -3213,9 +3213,9 @@ ifac_crack(GEN *partial, GEN *where)
       if (DEBUGLEVEL >= 4)
 	fprintferr("IFAC: found %Z =\n\t%Z ^%ld\n", **where, factor, exp1);
       affii(factor, (GEN)(**where)); avma = av; factor = NULL;
-      if (exponent == gun)
+      if (exponent == gone)
       { (*where)[1] = (long)utoipos(exp1); av = avma; }
-      else if (exponent == gdeux)
+      else if (exponent == gtwo)
       { (*where)[1] = (long)utoipos(exp1<<1); av = avma; }
       else
         affsi(exp1 * itos(exponent), (GEN)((*where)[1]));
@@ -3230,9 +3230,9 @@ ifac_crack(GEN *partial, GEN *where)
       if (DEBUGLEVEL >= 4)
 	fprintferr("IFAC: found %Z =\n\t%Z ^%ld\n", **where, factor, exp1);
       affii(factor, (GEN)(**where)); avma = av; factor = NULL;
-      if (exponent == gun)
+      if (exponent == gone)
       { (*where)[1] = (long)utoipos(exp1); av = avma; }
-      else if (exponent == gdeux)
+      else if (exponent == gtwo)
       { (*where)[1] = (long)utoipos(exp1<<1); av = avma; }
       else
         affsi(exp1 * itos(exponent), (GEN)((*where)[1]));
@@ -3242,7 +3242,7 @@ ifac_crack(GEN *partial, GEN *where)
 
     if (exp2 > 1 && hint != 15 && BSW_psp((GEN)(**where)))
     { /* Something nice has happened and our composite has become prime */
-      (*where)[2] = un;
+      (*where)[2] = one;
       if (DEBUGLEVEL >= 4)
         fprintferr("IFAC: factor %Z\n\tis prime\n", **where);
       return 0;	/* bypass subsequent ifac_whoiswho() call */
@@ -3292,7 +3292,7 @@ ifac_crack(GEN *partial, GEN *where)
 	 * several times before and after this message already */
 	if (DEBUGLEVEL == 2) fprintferr("\t%Z\n",**where);
       }
-      (*where)[2] = un;	/* might as well trial-divide by it... */
+      (*where)[2] = one;	/* might as well trial-divide by it... */
       return 1;
     }
   }
@@ -3365,7 +3365,7 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
 
   /* store factors, beginning at *where, and catching any duplicates */
   **where = facvec[sorted[nf]];
-  if ((newexp = (GEN)(facvec[sorted[nf]+1])) != gun) /* new exponent > 1 */
+  if ((newexp = (GEN)(facvec[sorted[nf]+1])) != gone) /* new exponent > 1 */
   {
     if (exponent == 1)
       (*where)[1] = isonstack(newexp) ? licopy(newexp) : (long)newexp;
@@ -3384,27 +3384,27 @@ ifac_insert_multiplet(GEN *partial, GEN *where, GEN facvec)
 	fprintferr("\tfactor no. %ld is a duplicate%s\n", j, (j>1? "...": ""));
       /* update exponent, ignore class which would already have been set,
        * then forget current factor */
-      if ((newexp = (GEN)(facvec[sorted[j]+1])) != gun) /* new exp > 1 */
+      if ((newexp = (GEN)(facvec[sorted[j]+1])) != gone) /* new exp > 1 */
 	(*where)[1] = laddis((GEN)((*where)[1]), exponent * itos(newexp));
-      else if ((*where)[1] == un && exponent == 1)
-        (*where)[1] = deux;
+      else if ((*where)[1] == one && exponent == 1)
+        (*where)[1] = two;
       else
         (*where)[1] = laddis((GEN)((*where)[1]), exponent);
       if (moebius_mode) return 0; /* stop now, but with exponent updated */
       continue;
     }
     (*where)[-1] = facvec[sorted[j]+2];	/* class as given */
-    if ((newexp = (GEN)(facvec[sorted[j]+1])) != gun) /* new exp > 1 */
+    if ((newexp = (GEN)(facvec[sorted[j]+1])) != gone) /* new exp > 1 */
     {
-      if (exponent == 1 && newexp == gdeux)
-	(*where)[-2] = deux;
+      if (exponent == 1 && newexp == gtwo)
+	(*where)[-2] = two;
       else /* exponent*newexp > 2 */
 	(*where)[-2] = lmulsi(exponent, newexp);
     }
     else
     {
-      (*where)[-2] = (exponent == 1 ? un :
-		      (exponent == 2 ? deux :
+      (*where)[-2] = (exponent == 1 ? one :
+		      (exponent == 2 ? two :
 		       (long)utoipos(exponent)));/* inherit parent's exponent */
     }
     (*where)[-3] = isonstack(factor) ? licopy(factor) : (long)factor;
@@ -3427,12 +3427,12 @@ ifac_main(GEN *partial)
   GEN here = ifac_find(partial, partial);
   long nf, hint = itos((GEN)((*partial)[2])) & 15;
 
-  /* if nothing left, return gun */
-  if (!here) return gun;
+  /* if nothing left, return gone */
+  if (!here) return gone;
 
   /* if we are in Moebius mode and have already detected a repeated factor,
    * stop right here.  Shouldn't happen */
-  if (moebius_mode && here[1] != un)
+  if (moebius_mode && here[1] != one)
   {
     if (DEBUGLEVEL >= 3)
       fprintferr("IFAC: main loop: repeated old factor\n\t%Z\n", *here);
@@ -3441,7 +3441,7 @@ ifac_main(GEN *partial)
 
   /* loop until first entry is a finished prime.  May involve reallocations,
    * thus updates of *partial */
-  while (here[2] != deux)
+  while (here[2] != two)
   {
 #if IFAC_DEBUG
     if (!(here[2]))
@@ -3467,7 +3467,7 @@ ifac_main(GEN *partial)
            * in the stack the old components were.*/
       }
       nf = ifac_crack(partial, &here);
-      if (moebius_mode && here[1] != un) /* that was a power */
+      if (moebius_mode && here[1] != one) /* that was a power */
       {
 	if (DEBUGLEVEL >= 3)
 	  fprintferr("IFAC: main loop: repeated new factor\n\t%Z\n", *here);
@@ -3477,7 +3477,7 @@ ifac_main(GEN *partial)
       ifac_whoiswho(partial, &here, nf);
       continue;
     }
-    if (here[2] == un)
+    if (here[2] == one)
     { /* prime but not yet finished: finish it */
       if (ifac_divide(partial, &here))
       {
@@ -3499,7 +3499,7 @@ ifac_main(GEN *partial)
     }
     err(talker, "non-existent factor class in ifac_main");
   } /* while */
-  if (moebius_mode && here[1] != un)
+  if (moebius_mode && here[1] != one)
   {
     if (DEBUGLEVEL >= 3)
       fprintferr("IFAC: after main loop: repeated old factor\n\t%Z\n", *here);
@@ -3528,7 +3528,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
 {
   GEN res, here = ifac_main(partial);
 
-  if (here == gun) { *exponent = 0; return gun; }
+  if (here == gone) { *exponent = 0; return gone; }
   else if (here == gzero) { *exponent = 0; return gzero; }
 
   res = icopy((GEN)(*here));
@@ -3590,7 +3590,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
   part = ifac_start(n, 0, hint);
   here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     long lf = lgefint(*here);
     nb++;
@@ -3635,7 +3635,7 @@ ifac_moebius(GEN n, long hint)
   GEN part = ifac_start(n, 1, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun && here != gzero)
+  while (here != gone && here != gzero)
   {
     if (itos((GEN)(here[1])) > 1) { here = gzero; break; } /* won't happen */
     mu = -mu;
@@ -3648,7 +3648,7 @@ ifac_moebius(GEN n, long hint)
       part = gerepileupto(av, part);
     }
   }
-  avma = av; return here == gun? mu: 0;
+  avma = av; return here == gone? mu: 0;
 }
 
 long
@@ -3658,7 +3658,7 @@ ifac_issquarefree(GEN n, long hint)
   GEN part = ifac_start(n, 1, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun && here != gzero)
+  while (here != gone && here != gzero)
   {
     if (itos((GEN)(here[1])) > 1) { here = gzero; break; } /* won't happen */
     here[2] = here[1] = *here = LNULL;
@@ -3670,7 +3670,7 @@ ifac_issquarefree(GEN n, long hint)
       part = gerepileupto(av, part);
     }
   }
-  avma = av; return here == gun? 1: 0;
+  avma = av; return here == gone? 1: 0;
 }
 
 long
@@ -3681,7 +3681,7 @@ ifac_omega(GEN n, long hint)
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     omega++;
     here[2] = here[1] = *here = LNULL;
@@ -3704,7 +3704,7 @@ ifac_bigomega(GEN n, long hint)
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     Omega += itos((GEN)(here[1]));
     here[2] = here[1] = *here = LNULL;
@@ -3724,16 +3724,16 @@ ifac_totient(GEN n, long hint)
 {
   GEN res = cgeti(lgefint(n));
   pari_sp av=avma, tetpil, lim=stack_lim(av, 1);
-  GEN phi = gun;
+  GEN phi = gone;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     phi = mulii(phi, addsi(-1, (GEN)(*here)));
-    if (here[1] != un)
+    if (here[1] != one)
     {
-      if (here[1] == deux)
+      if (here[1] == two)
 	phi = mulii(phi, (GEN)(*here));
       else
 	phi = mulii(phi, gpowgs((GEN)(*here), itos((GEN)(here[1])) - 1));
@@ -3760,11 +3760,11 @@ GEN
 ifac_numdiv(GEN n, long hint)
 {
   pari_sp av=avma, lim=stack_lim(av, 1);
-  GEN tau = gun;
+  GEN tau = gone;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     tau = mulis(tau, 1 + itos((GEN)(here[1])));
     here[2] = here[1] = *here = LNULL;
@@ -3791,11 +3791,11 @@ ifac_sumdiv(GEN n, long hint)
 {
   long exponent;
   pari_sp av=avma, lim=stack_lim(av, 1);
-  GEN contrib, sigma = gun;
+  GEN contrib, sigma = gone;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     exponent = itos((GEN)(here[1]));
     contrib = addsi(1, (GEN)(*here));
@@ -3826,11 +3826,11 @@ ifac_sumdivk(GEN n, long k, long hint)
 {
   long exponent;
   pari_sp av=avma, lim=stack_lim(av, 1);
-  GEN contrib, q, sigma = gun;
+  GEN contrib, q, sigma = gone;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
-  while (here != gun)
+  while (here != gone)
   {
     exponent = itos((GEN)(here[1]));
     q = gpowgs((GEN)(*here), k);

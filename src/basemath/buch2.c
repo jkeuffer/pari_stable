@@ -313,7 +313,7 @@ red(GEN nf, GEN I, GEN G0, GEN *pm)
   GEN m, y;
   y = ideallllred(nf, mkvec2(I, cgetg(1,t_MAT)), G0, 0);
   m = (GEN)y[2];
-  y = (GEN)y[1]; *pm = lg(m)==1? gun: gmael(m, 1, 1);
+  y = (GEN)y[1]; *pm = lg(m)==1? gone: gmael(m, 1, 1);
   return is_pm1(gcoeff(y,1,1))? NULL: ideal_two_elt(nf,y);
 }
 
@@ -347,7 +347,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
     GEN M, m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
     id2 = cgetg(a+1,t_VEC); Id2[i] = (long)id2;
     id2[1] = (long)mkvec2((GEN)vp[1], (GEN)vp[2]);
-    alg = cgetg(a+1,t_VEC); Alg[i] = (long)alg; alg[1] = un;
+    alg = cgetg(a+1,t_VEC); Alg[i] = (long)alg; alg[1] = one;
     vp = prime_to_ideal(nf,vp);
     for (j=2; j<=a; j++)
     {
@@ -410,7 +410,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
   F->LV = (GEN*)new_chunk(n2+1);
 
   Res = realun(DEFAULTPREC);
-  prim = icopy(gun);
+  prim = icopy(gone);
   i = ip = 0;
   F->KC = F->KCZ = 0;
   for (p = 0;;) /* p <= n2 */
@@ -790,7 +790,7 @@ get_norm_fact_primes(GEN gen, GEN ex, GEN C, GEN *pd)
 {
   GEN N,d,P,p,e;
   long i,s,c = lg(ex);
-  d = N = gun;
+  d = N = gone;
   for (i=1; i<c; i++)
     if ((s = signe(ex[i])))
     {
@@ -816,7 +816,7 @@ get_norm_fact(GEN gen, GEN ex, GEN *pd)
 {
   long i, c = lg(ex);
   GEN d,N,I,e,n,ne,de;
-  d = N = gun;
+  d = N = gone;
   for (i=1; i<c; i++)
     if (signe(ex[i]))
     {
@@ -1245,7 +1245,7 @@ fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
 {
   pari_sp av = avma;
   long i, c = lg(e);
-  GEN z = C? C: gun;
+  GEN z = C? C: gone;
   for (i=1; i<c; i++)
     if (signe(e[i])) z = idealmul(nf, z, idealpow(nf, (GEN)g[i], (GEN)e[i]));
   if (typ(z) != t_MAT) z = idealhermite(nf,z);
@@ -1328,7 +1328,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* find coords on Zk; Q = N (x / \prod gj^ej) = N(alpha), denom(alpha) | d */
   Q = gdiv(dethnf_i(x), get_norm_fact(gen, ex, &d));
-  col = isprincipalarch(bnf, col, Q, gun, d, &e);
+  col = isprincipalarch(bnf, col, Q, gone, d, &e);
   if (col && !fact_ok(nf,x, col,gen,ex)) col = NULL;
   if (!col && !gcmp0(ex))
   {
@@ -1415,7 +1415,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   if (gen)
   {
     z = cgetg(3,t_VEC);
-    z[2] = (flag & nf_GENMAT)? lgetg(1, t_MAT): lmodulcp(gun,(GEN)nf[1]);
+    z[2] = (flag & nf_GENMAT)? lgetg(1, t_MAT): lmodulcp(gone,(GEN)nf[1]);
   }
   id = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */
@@ -1427,7 +1427,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     }
   if (id == C) /* e = 0 */
   {
-    if (!C) return isprincipalall(bnf, gun, flag);
+    if (!C) return isprincipalall(bnf, gone, flag);
     C = idealhermite(nf,C); id = z;
     if (gen) id[1] = (long)C; else id = C;
   }
@@ -1533,8 +1533,8 @@ isunit(GEN bnf,GEN x)
   if (isnfscalar(x)) return gerepileupto(av, rational_unit((GEN)x[1],n,RU));
 
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
-  for (i=1; i<=R1; i++) v[i] = un;
-  for (   ; i<=RU; i++) v[i] = deux;
+  for (i=1; i<=R1; i++) v[i] = one;
+  for (   ; i<=RU; i++) v[i] = two;
   logunit = concatsp(logunit, v);
   /* ex = fundamental units exponents */
   rlog = real_i(logunit);
@@ -1600,7 +1600,7 @@ zsign_from_logarch(GEN LA, GEN invpi, GEN archp)
   for (i=1; i<l; i++)
   {
     GEN p1 = ground( gmul(imag_i((GEN)LA[archp[i]]), invpi) );
-    y[i] = mpodd(p1)? un: zero;
+    y[i] = mpodd(p1)? one: zero;
   }
   avma = av; return y;
 }
@@ -1618,7 +1618,7 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
   if (add_zu)
   {
     GEN w = gmael3(bnf,8,4,1), v = cgetg(l, t_COL);
-    if (egalii(w,gdeux)) (void)vecconst(v, gun);
+    if (egalii(w,gtwo)) (void)vecconst(v, gone);
     y[j++] = (long)v;
   }
   for ( ; j < RU; j++) y[j] = (long)zsign_from_logarch((GEN)A[j], invpi, archp);
@@ -1630,7 +1630,7 @@ GEN
 signunits(GEN bnf)
 {
   pari_sp av = avma;
-  GEN y, mun = negi(gun);
+  GEN y;
   long i, j;
 
   bnf = checkbnf(bnf);
@@ -1638,7 +1638,7 @@ signunits(GEN bnf)
   for (j = 1; j < lg(y); j++)
   {
     GEN *c = (GEN*)y[j];
-    for (i = 1; i < lg(c); i++) c[i] = (c[i] == gzero)? gun: mun;
+    for (i = 1; i < lg(c); i++) c[i] = (c[i] == gzero)? gone: gminusone;
   }
   return gerepilecopy(av, y);
 }
@@ -2130,8 +2130,8 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = real_i(A); /* = (log |sigma_i(u_j)|) */
   T = cgetg(RU+1,t_COL);
-  for (i=1; i<=R1; i++) T[i] = un;
-  for (   ; i<=RU; i++) T[i] = deux;
+  for (i=1; i<=R1; i++) T[i] = one;
+  for (   ; i<=RU; i++) T[i] = two;
   mdet = concatsp(xreal,T); /* det(Span(mdet)) = N * R */
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
@@ -2392,9 +2392,9 @@ makecycgen(GEN bnf)
     if (cmpis((GEN)cyc[i], 5) < 0)
     {
       GEN N = dethnf_i((GEN)gen[i]);
-      y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gun, &e);
+      y = isprincipalarch(bnf,(GEN)GD[i], N, (GEN)cyc[i], gone, &e);
       if (y && !fact_ok(nf,y,NULL,gen,(GEN)D[i])) y = NULL;
-      if (y) { h[i] = (long)to_famat_all(y,gun); continue; }
+      if (y) { h[i] = (long)to_famat_all(y,gone); continue; }
     }
     y = isprincipalfact(bnf, gen, (GEN)D[i], NULL, nf_GENMAT|nf_FORCE);
     h[i] = y[2];
@@ -2425,7 +2425,7 @@ makematal(GEN bnf)
     GEN ex = (j<=lW)? (GEN)W[j]: (GEN)B[j-lW];
     GEN C = (j<=lW)? NULL: (GEN)pFB[j];
     GEN dx, Nx = get_norm_fact_primes(pFB, ex, C, &dx);
-    GEN y = isprincipalarch(bnf,(GEN)WB_C[j], Nx,gun, dx, &e);
+    GEN y = isprincipalarch(bnf,(GEN)WB_C[j], Nx,gone, dx, &e);
     if (y && !fact_ok(nf,y,C,pFB,ex)) y = NULL;
     if (y)
     {
@@ -2498,7 +2498,7 @@ get_regulator(GEN mun)
   pari_sp av = avma;
   GEN A;
 
-  if (lg(mun)==1) return gun;
+  if (lg(mun)==1) return gone;
   A = gtrans( real_i(mun) );
   setlg(A, lg(A)-1);
   return gerepileupto(av, gabs(det(A), 0));
@@ -2595,7 +2595,7 @@ get_clfu(GEN clgp, GEN reg, GEN zu, GEN fu, long fl)
   GEN z = cgetg(6, t_VEC);
   z[1] = (long)clgp;
   z[2] = (long)reg;
-  z[3] = un; /* DUMMY */
+  z[3] = one; /* DUMMY */
   z[4] = (long)zu;
   z[5] = (long)fu; setlg(z, l); return z;
 }
@@ -2755,7 +2755,7 @@ regulator(GEN P, GEN data, long prec)
       z=quadclassunit0(P,0,data,prec);
       return gerepilecopy(av,(GEN)z[4]);
     }
-    return gun;
+    return gone;
   }
   z=(GEN)classgroupall(P,data,6,prec)[1];
   return gerepilecopy(av,(GEN)z[6]);
@@ -2775,8 +2775,8 @@ buchall_for_degree_one_pol(GEN nf, long flun)
 {
   GEN v = cgetg(1,t_VEC), m = cgetg(1,t_MAT);
   GEN W, B, A, C, Vbase, res;
-  GEN fu = v, R = gun, zu = mkvec2(gdeux, utoineg(1));
-  GEN clg1 = mkvec3(gun,v,v), clg2 = mkvec3(m,v,v);
+  GEN fu = v, R = gone, zu = mkvec2(gtwo, gminusone);
+  GEN clg1 = mkvec3(gone,v,v), clg2 = mkvec3(m,v,v);
 
   W = B = A = C= m;
   Vbase = cgetg(1,t_COL);

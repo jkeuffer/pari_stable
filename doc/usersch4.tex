@@ -82,10 +82,10 @@ been written to do this; we will see later how (and when) you should use
 them.
 
 $\bullet$ the following \emph{universal objects} (by definition, objects
-which do not belong on the stack): the integers 0, 1 and 2 (respectively
-called \teb{gzero}, \teb{gun}, and \teb{gdeux}), the
-fraction $\dfrac{1}{2}$ (\teb{ghalf}), the complex number $i$
-(\teb{gi}). All of these are of type \kbd{GEN}.
+which do not belong on the stack): the integers 0, 1, -1 and 2 (respectively
+called \teb{gzero}, \teb{gone}, \teb{gminusone} and \teb{gtwo}), the fraction
+$\dfrac{1}{2}$ (\teb{ghalf}), the complex number $i$ (\teb{gi}). All of these
+are of type \kbd{GEN}.
 
 In addition, space is reserved for the polynomials $x_v$
 \sidx{variable}
@@ -152,12 +152,12 @@ abbreviate:
 %
 \bprog
 (long) gzero     ----->  zero
-(long) gun       ----->  un
+(long) gone      ----->  one
 (long) polx[v]   ----->  lpolx[v]
 (long) gadd(x,y) ----->  ladd(x,y)
 @eprog\noindent%
 \kbdsidx{zero}%
-\kbdsidx{un}%
+\kbdsidx{one}%
 \kbdsidx{lpolx}
 In general, replacing a leading \kbd{g} by an \kbd{l} in the name of a PARI
 function typecasts the result to \kbd{long}. Note that \kbd{ldiv} is an ANSI C
@@ -854,7 +854,7 @@ irrelevant, the behaviour is also as above on $64$-bit machines).
 Returns the \typ{POL} whose $n$ coefficients (\kbd{GEN}) follow, in order of
 decreasing degree.
 \bprog
-  coefs_to_pol(3, gun, gdeux, gzero);
+  coefs_to_pol(3, gone, gtwo, gzero);
 @eprog
 \noindent returns the polynomial $X^2 + 2X$ (in variable $0$, use
 \tet{setvarn} if you want other variable numbers). Beware that $n$ is the
@@ -871,14 +871,14 @@ latter three functions do \emph{not} copy their arguments, nor do they produce
 an object a priori suitable for \tet{gerepileupto}. For instance
 \bprog
   /*@Ccom gerepile-safe: components are universal objects */
-  z = coefs_to_vec(3, gun, gzero, gdeux);
+  z = coefs_to_vec(3, gone, gzero, gtwo);
 
   /*@Ccom not OK for gerepileupto: stoi(3) creates component before root */
-  z = coefs_to_vec(3, stoi(3), gzero, gdeux);
+  z = coefs_to_vec(3, stoi(3), gzero, gtwo);
 
   /*@Ccom NO! First vector component \kbd{x} is destroyed */
-  x = gclone(gun);
-  z = coefs_to_vec(3, x, gzero, gdeux);
+  x = gclone(gone);
+  z = coefs_to_vec(3, x, gzero, gtwo);
   gunclone(x);
 @eprog
 
@@ -1500,7 +1500,7 @@ used under \kbd{gp}. It would read the value of \kbd{y}, as currently known
 by the \kbd{gp} interpreter (possibly creating it in the process). But if
 \kbd{y} has been modified by previous \kbd{gp} commands (e.g \kbd {y = 1}),
 then the value of \kbd{gy} is not what you expected it to be and corresponds
-instead to the current value of the \kbd{gp} variable (e.g \kbd{gun}).
+instead to the current value of the \kbd{gp} variable (e.g \kbd{gone}).
 
 \subsubsec{Temporary variables}\sidx{variable (temporary)}:
 \kbd{MAXVARN} is available, but is better left to pari internal functions

@@ -321,7 +321,7 @@ e(ulong t)
     P[i] = itos((GEN)P[i]);
     nbd *= E[i];
   }
-  s = gdeux; /* nbd = number of divisors */
+  s = gtwo; /* nbd = number of divisors */
   for (k=0; k<nbd; k++)
   {
     m = k; d = 1;
@@ -629,7 +629,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
     if (!gcmp1( centermodii( mulii(a, (GEN)vpa[ph]), R->N, R->N2) )) return 0;
     p1 = cgetg(ph+1,t_MAT);
     p2 = cgetg(ph+1,t_COL); p1[1] = (long)p2;
-    for (i=1; i<=ph; i++) p2[i] = un;
+    for (i=1; i<=ph; i++) p2[i] = one;
     j = 2; p1[j] = (long)vpa; p3 = vpa;
     for (j++; j <= ph; j++)
     {
@@ -730,7 +730,7 @@ static GEN
 autvec(int pk, GEN z, GEN v, GEN C)
 {
   int i, lv = lg(v);
-  GEN s = gun;
+  GEN s = gone;
   for (i=1; i<lv; i++)
   {
     long y = mael(v,i,2);
@@ -744,7 +744,7 @@ static GEN
 autvec_TH(int pk, GEN z, GEN v, GEN C)
 {
   int i, lv = lg(v);
-  GEN s = gun;
+  GEN s = gone;
   for (i=1; i<lv; i++)
   {
     long y = v[i];
@@ -757,7 +757,7 @@ static GEN
 autvec_AL(int pk, GEN z, GEN v, Red *R)
 {
   const int r = smodis(R->N, pk);
-  GEN s = gun;
+  GEN s = gone;
   int i, lv = lg(v);
   for (i=1; i<lv; i++)
   {
@@ -923,7 +923,7 @@ step6(GEN N, ulong t, GEN et)
   ulong i;
   pari_sp av = avma;
 
-  r = gun;
+  r = gone;
   for (i=1; i<t; i++)
   {
     r = remii(mulii(r,N1), et);
@@ -931,7 +931,7 @@ step6(GEN N, ulong t, GEN et)
     if (!signe(remii(N,r)) && !egalii(r,N)) return mkvec2(r, gzero);
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
-  return gun;
+  return gone;
 }
 
 static GEN
@@ -950,7 +950,7 @@ aprcl(GEN N)
   if (cmpis(N,12) <= 0)
     switch(itos(N))
     {
-      case 2: case 3: case 5: case 7: case 11: return gun;
+      case 2: case 3: case 5: case 7: case 11: return gone;
       default: return _res(0,0);
     }
   t = compt(N);

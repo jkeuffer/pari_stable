@@ -50,7 +50,7 @@ gcdii(GEN a, GEN b)
     case  0: avma=av; a=shifti(a,v); return a;
     case -1: p1=b; b=a; a=p1;
   }
-  if (is_pm1(b)) { avma=av; return shifti(gun,v); }
+  if (is_pm1(b)) { avma=av; return shifti(gone,v); }
  {
   /* general case */
   /*This serve two purposes: 1) mpn_gcd destroy its input and need an extra
@@ -151,11 +151,11 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     switch(sa)
     {
     case  0:
-      if (pu != NULL) *pu = gun; return gzero;
+      if (pu != NULL) *pu = gone; return gzero;
     case  1:
-      if (pu != NULL) *pu = gun; return icopy(a);
+      if (pu != NULL) *pu = gone; return icopy(a);
     case -1:
-      if (pu != NULL) *pu = negi(gun); return(negi(a));
+      if (pu != NULL) *pu = negi(gone); return(negi(a));
     }
   }
   if (s == 0)			/* |a| == |b| != 0 */
@@ -163,11 +163,11 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pu != NULL) *pu = gzero;
     if (sb > 0)
     {
-      if (pv != NULL) *pv = gun; return icopy(b);
+      if (pv != NULL) *pv = gone; return icopy(b);
     }
     else
     {
-      if (pv != NULL) *pv = negi(gun); return(negi(b));
+      if (pv != NULL) *pv = negi(gone); return(negi(b));
     }
   }
   /* now |a| > |b| > 0 */
@@ -180,8 +180,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pu != NULL)
     {
       if (xu == 0) *pu = gzero; /* can happen when b divides a */
-      else if (xu == 1) *pu = sa < 0 ? negi(gun) : gun;
-      else if (xu == 2) *pu = sa < 0 ? negi(gdeux) : gdeux;
+      else if (xu == 1) *pu = sa < 0 ? negi(gone) : gone;
+      else if (xu == 2) *pu = sa < 0 ? negi(gtwo) : gtwo;
       else
       {
 	*pu = cgeti(3);
@@ -191,8 +191,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     }
     if (pv != NULL)
     {
-      if (xv == 1) *pv = sb < 0 ? negi(gun) : gun;
-      else if (xv == 2) *pv = sb < 0 ? negi(gdeux) : gdeux;
+      if (xv == 1) *pv = sb < 0 ? negi(gone) : gone;
+      else if (xv == 2) *pv = sb < 0 ? negi(gtwo) : gtwo;
       else
       {
 	*pv = cgeti(3);
@@ -200,8 +200,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	(*pv)[2] = xv;
       }
     }
-    if (g == 1) return gun;
-    else if (g == 2) return gdeux;
+    if (g == 1) return gone;
+    else if (g == 2) return gtwo;
     else
     {
       r = cgeti(3);

@@ -32,7 +32,7 @@ psquare(GEN a,GEN p)
   if (!signe(a) || gcmp1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
-  return egalii(p, gdeux)? umodiu(ap, 8) == 1
+  return egalii(p, gtwo)? umodiu(ap, 8) == 1
                          : kronecker(ap,p) == 1;
 }
 
@@ -68,7 +68,7 @@ lemma7(GEN pol,long nu,GEN x)
 
   for (i=lgpol(pol), gx=(GEN)pol[i+1]; i>1; i--)
     gx = addii(mulii(gx,x), (GEN)pol[i]);
-  if (psquare(gx,gdeux)) return 1;
+  if (psquare(gx,gtwo)) return 1;
 
   for (i=lgpol(pol),gpx=mulis((GEN)pol[i+1],i-1); i>2; i--)
     gpx = gadd(gmul(gpx,x), mulis((GEN)pol[i],i-2));
@@ -118,7 +118,7 @@ zpsoluble(GEN pol,GEN p)
 {
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
     err(typeer,"zpsoluble");
-  return zpsol(pol,p,0,gun,gzero);
+  return zpsol(pol,p,0,gone,gzero);
 }
 
 /* vaut 1 si l'equation y^2=Pol(x) a une solution p-adique rationnelle
@@ -129,7 +129,7 @@ qpsoluble(GEN pol,GEN p)
 {
   if ((typ(pol)!=t_POL && typ(pol)!=t_INT) || typ(p)!=t_INT )
     err(typeer,"qpsoluble");
-  if (zpsol(pol,p,0,gun,gzero)) return 1;
+  if (zpsol(pol,p,0,gone,gzero)) return 1;
   return (zpsol(polrecip(pol),p,1,p,gzero));
 }
 
@@ -268,7 +268,7 @@ zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   avma=ltop; return 0;
 }
 
-/* calcule un systeme de representants Zk/p */
+/* calcule one systeme de representants Zk/p */
 static GEN
 repres(GEN nf,GEN p)
 {
@@ -296,7 +296,7 @@ repres(GEN nf,GEN p)
  *    p-adique (eventuellement (1,y,0) = oo)
  * =0 sinon.
  * Les coefficients de pol doivent etre des entiers de nf.
- * p est un ideal premier sous forme primedec.
+ * p est one ideal premier sous forme primedec.
  */
 long
 qpsolublenf(GEN nf,GEN pol,GEN pr)
@@ -308,9 +308,9 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
   checkprimeid(pr);
 
-  if (egalii((GEN) pr[1], gdeux))
+  if (egalii((GEN) pr[1], gtwo))
   { /* tough case */
-    zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gdeux,pr)));
+    zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gtwo,pr)));
     if (psquare2nf(nf,(GEN) pol[2],pr,zinit)) return 1;
     if (psquare2nf(nf, leading_term(pol),pr,zinit)) return 1;
   }
@@ -321,7 +321,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
     zinit = gzero;
   }
   repr = repres(nf,pr);
-  if (zpsolnf(nf,pol,pr,0,gun,gzero,repr,zinit)) { avma=ltop; return 1; }
+  if (zpsolnf(nf,pol,pr,0,gone,gzero,repr,zinit)) { avma=ltop; return 1; }
   p1 = gmodulcp(gmul((GEN) nf[7],(GEN) pr[2]),(GEN) nf[1]);
   if (zpsolnf(nf,polrecip(pol),pr,1,p1,gzero,repr,zinit))
     { avma=ltop; return 1; }
@@ -332,7 +332,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
 /* =1 si l'equation y^2 = pol(x) a une solution entiere p-adique
  * =0 sinon.
  * Les coefficients de pol doivent etre des entiers de nf.
- * p est un ideal premier sous forme primedec.
+ * p est one ideal premier sous forme primedec.
  */
 long
 zpsolublenf(GEN nf,GEN pol,GEN p)
@@ -353,11 +353,11 @@ zpsolublenf(GEN nf,GEN pol,GEN p)
   }
   else
   {
-    zinit=zidealstarinit(nf,idealpows(nf,p,1+2*idealval(nf,gdeux,p)));
+    zinit=zidealstarinit(nf,idealpows(nf,p,1+2*idealval(nf,gtwo,p)));
     if (psquare2nf(nf,(GEN) pol[2],p,zinit)) return 1;
   }
   repr=repres(nf,p);
-  if (zpsolnf(nf,pol,p,0,gun,gzero,repr,zinit)) { avma=ltop; return 1; }
+  if (zpsolnf(nf,pol,p,0,gone,gzero,repr,zinit)) { avma=ltop; return 1; }
   avma=ltop; return 0;
 }
 
@@ -390,7 +390,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   checkprimeid(pr); nf = checknf(nf);
   p = (GEN)pr[1];
 
-  if (egalii(p,gdeux)) return hilb2nf(nf,a,b,pr);
+  if (egalii(p,gtwo)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
   va = idealval(nf,a,pr);
@@ -513,7 +513,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
 
   /* S class group */
   H = hnfall(M); U = (GEN)H[2]; H= (GEN)H[1];
-  card = gun;
+  card = gone;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
     GEN U, D = smithall(H, &U, NULL);
@@ -521,7 +521,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
       if (gcmp1((GEN)D[i])) break;
     setlg(D,i); D = mattodiagonal_i(D); /* cf smithrel */
     card = detcyc(D);
-    p1=cgetg(i,t_VEC); pow=ZM_inv(U,gun);
+    p1=cgetg(i,t_VEC); pow=ZM_inv(U,gone);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
     res[5] = (long)mkvec3(card,D,p1);
@@ -614,7 +614,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   p1[0] = evaltyp(t_COL) | evallg(lB);
   v = concatsp(v, p1); /* append bottom of p1 (= [0 Id] part) */
 
-  xp = gun; xm = gun; gen = (GEN)suni[1];
+  xp = gone; xm = gone; gen = (GEN)suni[1];
   for (i=1; i<ls; i++)
   {
     k = -itos((GEN)v[i]); if (!k) continue;
@@ -622,8 +622,8 @@ make_unit(GEN bnf, GEN suni, GEN *px)
     if (k > 0) xp = gmul(xp, gpowgs(p1, k));
     else       xm = gmul(xm, gpowgs(p1,-k));
   }
-  if (xp != gun) *px = gmul(*px,xp);
-  if (xm != gun) *px = gdiv(*px,xm);
+  if (xp != gone) *px = gmul(*px,xp);
+  if (xm != gone) *px = gdiv(*px,xm);
   return v;
 }
 
@@ -732,7 +732,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     galois = nfisgalois(gsubst(nfrel, varn(P), polx[varn(T)]), P);
   }
 
-  prod = gun; S1 = S2 = cgetg(1, t_VEC);
+  prod = gone; S1 = S2 = cgetg(1, t_VEC);
   res = gmael(rel,8,1);
   cyc = (GEN)res[2];
   gen = (GEN)res[3]; l = lg(cyc);
@@ -784,7 +784,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   {
     GEN res = cgetg(3, t_VEC);
     res[1] = (long)simplify((GEN)x[2]);
-    res[2] = un; return res;
+    res[2] = one; return res;
   }
 
   /* build set T of ideals involved in the solutions */

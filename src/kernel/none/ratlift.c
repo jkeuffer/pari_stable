@@ -78,7 +78,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   if (s == 0)
   {
     if (a != NULL) *a = gzero;
-    if (b != NULL) *b = gun;
+    if (b != NULL) *b = gone;
     return 1;
   }
   else if (signe(amax)==0)
@@ -89,7 +89,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   if (cmpii(x,amax) <= 0)
   {
     if (a != NULL) *a = icopy(x);
-    if (b != NULL) *b = gun;
+    if (b != NULL) *b = gone;
     return 1;
   }
 
@@ -98,7 +98,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
    */
   (void)new_chunk(lgefint(bmax) + lgefint(amax)); /* room for a,b */
   d = m; d1 = x;
-  v = gzero; v1 = gun;
+  v = gzero; v1 = gone;
   /* assert d1 > amax, v1 <= bmax here */
   lb = lgefint(bmax);
   lbb = bfffo(*int_MSW(bmax));

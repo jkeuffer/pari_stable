@@ -240,7 +240,7 @@ famat_get_arch(GEN nf, GEN x, long prec)
   long i, l = lg(e);
 
   if (l <= 1)
-    return get_arch(nf, gun, prec);
+    return get_arch(nf, gone, prec);
   A = NULL; /* -Wall */
   for (i=1; i<l; i++)
   {
@@ -302,7 +302,7 @@ famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
   long i, l = lg(e);
 
   if (l <= 1)
-    return get_arch_real(nf, gun, emb, prec);
+    return get_arch_real(nf, gone, emb, prec);
   A = T = NULL; /* -Wall */
   for (i=1; i<l; i++)
   {
@@ -501,7 +501,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
     y[2] = lcopy((GEN)x[2]); return y;
   }
 
-  x = Q_primitive_part(x, &cx); if (!cx) cx = gun;
+  x = Q_primitive_part(x, &cx); if (!cx) cx = gone;
   if (lg(x) != N+1) x = idealhermite_aux(nf,x);
 
   xZ = gcoeff(x,1,1);
@@ -641,7 +641,7 @@ idealfactor(GEN nf, GEN x)
   {
     y = cgetg(3,t_MAT);
     y[1] = (long)mkcol(gcopy(x));
-    y[2] = (long)mkcol(gun); return y;
+    y[2] = (long)mkcol(gone); return y;
   }
   av = avma;
   nf = checknf(nf);
@@ -943,7 +943,7 @@ unnf_minus_x(GEN x)
   long i, N = lg(x);
   GEN y = cgetg(N,t_COL);
 
-  y[1] = lsub(gun,(GEN)x[1]);
+  y[1] = lsub(gone,(GEN)x[1]);
   for (i=2;i<N; i++) y[i] = lneg((GEN)x[i]);
   return y;
 }
@@ -1156,12 +1156,12 @@ famat_add(GEN f, GEN x)
   if (lg(f) == 1)
   {
     h[1] = (long)mkcolcopy(x);
-    h[2] = (long)mkcol(gun);
+    h[2] = (long)mkcol(gone);
   }
   else
   {
     h[1] = (long)append((GEN)f[1], x); /* x may be a t_COL */
-    h[2] = (long)concat((GEN)f[2], gun);
+    h[2] = (long)concat((GEN)f[2], gone);
   }
   return h;
 }
@@ -1217,7 +1217,7 @@ famat_to_nf(GEN nf, GEN f)
 {
   GEN t, *x, *e;
   long i;
-  if (lg(f) == 1) return gun;
+  if (lg(f) == 1) return gone;
 
   x = (GEN*)f[1];
   e = (GEN*)f[2];
@@ -1292,7 +1292,7 @@ nf_to_Fp_simple(GEN x, GEN modpr, GEN p)
 static GEN
 famat_to_Fp_simple(GEN nf, GEN x, GEN modpr, GEN p)
 {
-  GEN h, n, t = gun, g = (GEN)x[1], e = (GEN)x[2], q = subis(p,1);
+  GEN h, n, t = gone, g = (GEN)x[1], e = (GEN)x[2], q = subis(p,1);
   long i, l = lg(g);
 
   for (i=1; i<l; i++)
@@ -1373,7 +1373,7 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
 {
   GEN t,sarch,module,cyc,fa2;
   long lc;
-  if (lg(g) == 1) return gscalcol_i(gun, degpol(nf[1])); /* 1 */
+  if (lg(g) == 1) return gscalcol_i(gone, degpol(nf[1])); /* 1 */
   module = (GEN)bid[1];
   fa2 = (GEN)bid[4]; sarch = (GEN)fa2[lg(fa2)-1];
   cyc = gmael(bid,2,2); lc = lg(cyc);
@@ -1384,7 +1384,7 @@ famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid)
     GEN id = (GEN)module[1];
     t = famat_to_nf_modideal_coprime(nf, g, e, id, EX);
   }
-  if (!t) t = gun;
+  if (!t) t = gone;
   return set_sign_mod_idele(nf, to_famat(g,e), t, module, sarch);
 }
 
@@ -2047,7 +2047,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   T = x = c = c1 = NULL;
   if (idealtyp(&I,&aI) == id_PRINCIPAL)
   {
-    if (gcmp0(I)) { y=gun; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
+    if (gcmp0(I)) { y=gone; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
     if (!aI) return I;
     goto END;
   }
@@ -2267,7 +2267,7 @@ GEN
 init_unif_mod_fZ(GEN L)
 {
   long i, r = lg(L);
-  GEN pr, p, F = gun;
+  GEN pr, p, F = gone;
   for (i = 1; i < r; i++)
   {
     pr = (GEN)L[i]; p = (GEN)pr[1];
@@ -2324,7 +2324,7 @@ idealapprfact_i(GEN nf, GEN x, int nored)
     q = element_pow(nf, pi, (GEN)e[i]);
     z = z? element_mul(nf, z, q): q;
   }
-  if (!z) return gscalcol_i(gun, degpol(nf[1]));
+  if (!z) return gscalcol_i(gone, degpol(nf[1]));
   if (nored)
   {
     if (flagden) err(impl,"nored + denominator in idealapprfact");
@@ -2413,7 +2413,7 @@ idealchinese(GEN nf, GEN x, GEN w)
   e = (GEN)x[2];
   if (!is_vec_t(ty) || lg(w) != r)
     err(talker,"not a suitable vector of elements in idealchinese");
-  if (r == 1) return gscalcol_i(gun,N);
+  if (r == 1) return gscalcol_i(gone,N);
 
   w = Q_remove_denom(w, &den);
   if (den)
@@ -2604,7 +2604,7 @@ colcomb(GEN nf, GEN u, GEN v, GEN A, GEN B)
     z = element_mulvec(nf,v,B);
   else
   {
-    z = u==gun? A: element_mulvec(nf,u,A);
+    z = u==gone? A: element_mulvec(nf,u,A);
     if (!gcmp0(v)) z = gadd(z, element_mulvec(nf,v,B));
   }
   return z;
@@ -2649,13 +2649,13 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   if (gcmp0(a)) return zero_nfbezout(nf,b,A,B,pu,pv,pw,pdi);
   if (gcmp0(b)) return zero_nfbezout(nf,a,B,A,pv,pu,pw,pdi);
 
-  if (a != gun) /* frequently called with a = gun */
+  if (a != gone) /* frequently called with a = gone */
   {
     if (isnfscalar(a)) a = (GEN)a[1];
-    if (gcmp1(a)) a = gun;
+    if (gcmp1(a)) a = gone;
   }
 
-  aA = (a == gun)? A: idealmulelt(nf,a,A);
+  aA = (a == gone)? A: idealmulelt(nf,a,A);
   bB = idealmulelt(nf,b,B);
   d = idealadd(nf,aA,bB);
   di = hnfideal_inv(nf,d);
@@ -2663,7 +2663,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
   { /* aA | bB  (frequent) */
     w = B;
     v = gzero;
-    if (a == gun)
+    if (a == gone)
       u = vec_ei(lg(B)-1, 1);
     else
     {
@@ -2686,7 +2686,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
     w = idealmul(nf,w,B);
     u = (GEN)uv[1];
     v = element_div(nf,(GEN)uv[2],b);
-    if (a != gun)
+    if (a != gone)
     {
       GEN inva = element_inv(nf, a);
       u =  element_mul(nf,u,inva);
@@ -2736,9 +2736,9 @@ nfhermite(GEN nf, GEN x)
       b = (GEN)T0[i]; if (gcmp0(b)) continue;
 
       S0 = (GEN)A[def];
-      d = nfbezout(nf, gun,b, (GEN)I[def],(GEN)I[j], &u,&v,&w,&di);
+      d = nfbezout(nf, gone,b, (GEN)I[def],(GEN)I[j], &u,&v,&w,&di);
       S = colcomb(nf, u,v, S0,T0);
-      T = colcomb(nf, gun,gneg(b), T0,S0);
+      T = colcomb(nf, gone,gneg(b), T0,S0);
       A[def] = (long)S; A[j] = (long)T;
       I[def] = (long)d; I[j] = (long)w;
     }
@@ -2748,7 +2748,7 @@ nfhermite(GEN nf, GEN x)
     for (j=def+1; j<=k; j++)
     {
       GEN c = element_close(nf,gcoeff(A,i,j), idealmul(nf,d,(GEN)J[j]));
-      A[j] = (long)colcomb(nf, gun,gneg(c), (GEN)A[j],(GEN)A[def]);
+      A[j] = (long)colcomb(nf, gone,gneg(c), (GEN)A[j],(GEN)A[def]);
     }
     if (low_stack(lim, stack_lim(av1,2)))
     {
@@ -2969,12 +2969,12 @@ nfdetint(GEN nf, GEN x)
   check_ZKmodule(x, "nfdetint");
   A = (GEN)x[1];
   I = (GEN)x[2];
-  n = lg(A)-1; if (!n) return gun;
+  n = lg(A)-1; if (!n) return gone;
 
   m1 = lg(A[1]); m = m1-1;
   id = idmat(N);
   c = new_chunk(m1); for (k=1; k<=m; k++) c[k] = 0;
-  piv = pivprec = gscalcol_i(gun,N);
+  piv = pivprec = gscalcol_i(gone,N);
 
   av1 = avma; lim = stack_lim(av1,1);
   det1 = idprod = gzero; /* dummy for gerepilemany */
@@ -3065,7 +3065,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
   li = lg(A[1]);
-  unnf = gscalcol(gun,N);
+  unnf = gscalcol(gone,N);
   detmat = lllint_ip(Q_remove_denom(detmat, NULL), 100);
 
   av = avma; lim = stack_lim(av,2);
@@ -3102,7 +3102,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   I += def; I[0] = evaltyp(t_VEC)|evallg(li);
   for (i=li-1; i>=1; i--)
   {
-    d = nfbezout(nf, gun,gcoeff(A,i,i), d0,(GEN)I[i], &u,&v,&w,&di);
+    d = nfbezout(nf, gone,gcoeff(A,i,i), d0,(GEN)I[i], &u,&v,&w,&di);
     p1 = element_mulvec(nf,v,(GEN)A[i]);
     if (i > 1)
     {
@@ -3120,7 +3120,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
     for (j=i+1; j<li; j++)
     {
       GEN c = element_close(nf, gcoeff(A,i,j), idealmul(nf,d,(GEN)J[j]));
-      A[j] = (long)colcomb(nf, gun,gneg(c), (GEN)A[j],(GEN)A[i]);
+      A[j] = (long)colcomb(nf, gone,gneg(c), (GEN)A[j],(GEN)A[i]);
     }
     if (low_stack(lim, stack_lim(av,2)))
     {
