@@ -98,3 +98,14 @@ typedef struct FP_chk_fun {
 extern GEN _initalg(GEN x, long flag, long prec);
 extern GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC, FP_chk_fun *CHECK);
 extern GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
+
+/* for ideallog / zlog */
+typedef struct {
+  GEN lists; /* lists[i] = */
+  GEN ind;  /* ind[i] = start of vector */
+  GEN P, e; /* finit part of conductor = prod P^e */
+  GEN archp; /* archimedean part of conductor, in permutation form */
+  long n;  /* total number of generators for all (O_K/P^e)^* and (O_K/f_oo) */
+  GEN U; /* base change matrix from generators to bid.gen */
+} zlog_S;
+extern void init_zlog_bid(zlog_S *S, GEN bid);

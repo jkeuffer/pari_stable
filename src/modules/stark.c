@@ -690,7 +690,7 @@ END:
 static GEN
 ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 {
-  long ic, i, j, nz, q, N, nChar = lg(LCHI)-1;
+  long ic, i, j, nz, N, nChar = lg(LCHI)-1;
   pari_sp av = avma, av2, lim;
   GEN sqrtnc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
   GEN cyc, *vN, *vB, diff, vt, idg, mu, idh, zid, *gen, z, *nchi;
@@ -717,7 +717,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   T     = gmael(nf,5,4);
   cond  =  gmael(bnr, 2, 1);
   cond0 = (GEN)cond[1]; condZ = gcoeff(cond0,1,1);
-  cond1 = (GEN)cond[2];
+  cond1 = arch_to_perm((GEN)cond[2]);
   N     = degpol(nf[1]);
 
   sqrtnc  = gsqrt(idealnorm(nf, cond0), prec);
@@ -725,13 +725,9 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   den = idealnorm(nf, dc);
   z   = InitRU(den, prec);
 
-  q = 0;
-  for (i = 1; i < lg(cond1); i++)
-    if (gcmp1((GEN)cond1[i])) q++;
-
   /* compute a system of elements congru to 1 mod cond0 and giving all
      possible signatures for cond1 */
-  sarch = zarchstar(nf, cond0, cond1, q);
+  sarch = zarchstar(nf, cond0, cond1);
 
   /* find lambda in diff.cond such that gcd(lambda.(diff.cond)^-1,cond0) = 1
      and lambda >> 0 at cond1 */
@@ -835,7 +831,8 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   }
 
   classe = isprincipalray(bnr, idh);
-  z = gpowgs(gneg_i(gi),q);
+  z = gpowgs(gneg_i(gi), lg(cond1)-1);
+  
   for (ic = 1; ic <= nChar; ic++)
   {
     s0 = gmul(s[ic], EvalChar(lC[ic], classe));

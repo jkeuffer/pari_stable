@@ -141,6 +141,7 @@ DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
    26- improved idealval()
    27- simplified element_reduce, idealmodidele (redideal), compute_raygen
        (create bnr.gen): faster, smaller elements
+   28- new algorithm for conductor() [much faster, does not need bnr.gen]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

@@ -28,7 +28,6 @@ extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
 extern int hnfdivide(GEN A, GEN B);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
-extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
 extern GEN special_anti_uniformizer(GEN nf, GEN pr);
 extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
@@ -878,8 +877,8 @@ idealaddtoone_i(GEN nf, GEN x, GEN y)
 static GEN
 ideleaddone_i(GEN nf, GEN x, GEN y)
 {
+  GEN p1, p2, u, arch, archp;
   long i, nba;
-  GEN p1, p2, u, arch;
 
   (void)idealtyp(&y, &arch);
   u = idealaddtoone_i(nf, x, y); /* u in x, 1-u in y */
@@ -887,13 +886,12 @@ ideleaddone_i(GEN nf, GEN x, GEN y)
   
   if (typ(arch) != t_VEC && lg(arch)-1 != nf_get_r1(nf))
     err(talker,"incorrect idele in idealaddtoone");
-  for (nba=0, i=1; i < lg(arch); i++)
-    if (signe(arch[i])) nba++;
-  if (!nba) return u;
+  archp = arch_to_perm(arch);
+  if (lg(archp) == 1) return u;
 
   if (gcmp0(u)) u = (GEN)idealhermite_aux(nf,x)[1];
-  p2 = zarchstar(nf, idealmul(nf,x,y), arch, nba);
-  p1 = lift_intern(gmul((GEN)p2[3], zsigne(nf,u,arch)));
+  p2 = zarchstar(nf, idealmul(nf,x,y), archp);
+  p1 = lift_intern(gmul((GEN)p2[3], zsigne(nf,u,archp)));
   p2 = (GEN)p2[2]; nba = 0;
   for (i = 1; i < lg(p1); i++)
     if (signe(p1[i])) { nba = 1; u = element_mul(nf,u,(GEN)p2[i]); }
@@ -942,7 +940,7 @@ element_invmodideal(GEN nf, GEN x, GEN y)
 {
   pari_sp av = avma;
   long N;
-  GEN v, a, xh, yh;
+  GEN a, xh, yh;
 
   nf = checknf(nf); N = degpol(nf[1]);
   if (gcmp1(gcoeff(y,1,1))) return zerocol(N);
@@ -955,10 +953,8 @@ element_invmodideal(GEN nf, GEN x, GEN y)
     default: err(typeer,"element_invmodideal");
       return NULL; /* not reached */
   }
-  a = hnfmerge_get_1(xh, yh);
-  a = element_div(nf,a,x);
-  v = gerepileupto(av, nfreducemodideal(nf, a, y));
-  return v;
+  a = element_div(nf, hnfmerge_get_1(xh, yh), x);
+  return gerepileupto(av, nfreducemodideal(nf, a, y));
 }
 
 GEN
@@ -1343,7 +1339,7 @@ to_Fp_simple(GEN nf, GEN x, GEN pr)
  *
  * EX = exponent of (O_K / pr^k)^* used to reduce the product in case the
  * e[i] are large */
-static GEN
+GEN
 famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 {
   long i, l = lg(g);
@@ -1375,35 +1371,6 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   }
   e = gmod(e, EX);
   return famat_to_nf_modideal_coprime(nf, newg, e, prk);
-}
-
-GEN
-famat_ideallog(GEN nf, GEN g, GEN e, GEN bid)
-{
-  pari_sp av = avma;
-  GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
-  GEN cyc = gmael(bid,2,2), list_set = (GEN)bid[4], U = (GEN)bid[5];
-  GEN p1,y0,x,y, psigne;
-  long i, l;
-  if (lg(cyc) == 1) return cgetg(1,t_COL);
-  y0 = y = cgetg(lg(U), t_COL);
-  psigne = zsigne(nf, to_famat(g,e), arch);
-  l = lg(vp);
-  for (i=1; i < l; i++)
-  {
-    GEN pr = (GEN)vp[i], prk;
-    prk = (l==2)? gmael(bid,1,1): idealpow(nf, pr, (GEN)ep[i]);
-    /* TODO: FIX group exponent (should be mod prk, not f !) */
-    x = famat_makecoprime(nf, g, e, pr, prk, (GEN)cyc[1]);
-    y = zinternallog_pk(nf, x, y, pr, prk, (GEN)list_set[i], &psigne);
-  }
-  p1 = lift_intern(gmul(gmael(list_set,i,3), psigne));
-  for (i=1; i<lg(p1); i++) *++y = p1[i];
-  y = gmul(U,y0);
-  avma = av; x = cgetg(lg(y), t_COL);
-  for (i=1; i<lg(y); i++)
-    x[i] = lmodii((GEN)y[i], (GEN)cyc[i]);
-  return x;
 }
 
 /* prod g[i]^e[i] mod bid, assume (g[i], id) = 1 */

@@ -642,8 +642,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     if (typ(vecel[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = arch_mul(to_famat_all((GEN)vecel[i], negi((GEN)ep[i])), beta);
   p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
-  for (i=1; i<=c; i++)
-    ex[i] = lmodii((GEN)p1[i],(GEN)divray[i]);
+  ex = vecmodii(p1, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
   /* compute generator */
@@ -1405,6 +1404,22 @@ getgen(GEN bnf, GEN gen)
   return g;
 }
 
+static GEN
+check_subgroup(GEN bnr, GEN H, GEN *clhray, char *s)
+{
+  GEN h;
+  if (H && gcmp0(H)) H = NULL;
+  if (H)
+  {
+    H = hnf(H);
+    if (!hnfdivide(H, diagonal(gmael(bnr,5,2))))
+      err(talker,"incorrect subgroup in %s", s);
+    h = dethnf_i(H);
+    if (egalii(h, *clhray)) H = NULL; else *clhray = h;
+  }
+  return H;
+}
+
 /* Given a number field bnf=bnr[1], a ray class group structure bnr (from
  * buchrayinit), and a subgroup H (HNF form) of the ray class group, compute
  * the conductor of H (copy of discrayrelall) if all=0. If all > 0, compute
@@ -1413,7 +1428,7 @@ getgen(GEN bnf, GEN gen)
  * if all = 2: [[ideal,arch],newbnr,H']
  * if all < 0, answer only 1 is module is the conductor, 0 otherwise. */
 GEN
-conductor(GEN bnr, GEN H, long all)
+conductorold(GEN bnr, GEN H, long all)
 {
   pari_sp av = avma;
   long r1,j,k,ep;
@@ -1426,14 +1441,7 @@ conductor(GEN bnr, GEN H, long all)
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
   ideal= gmael(bid,1,1);
   arch = gmael(bid,1,2);
-  if (H && gcmp0(H)) H = NULL;
-  if (H)
-  {
-    p1 = gauss(H, diagonal(gmael(bnr,5,2)));
-    if (!gcmp1(denom(p1))) err(talker,"incorrect subgroup in conductor");
-    p1 = absi(det(H));
-    if (egalii(p1, clhray)) H = NULL; else clhray = p1;
-  }
+  H = check_subgroup(bnr, H, &clhray, "conductor");
   /* H = NULL --> trivial subgroup, else precompute isprincipal(gen) */
   if (H || all > 0) gen = getgen(bnf, gen);
 
@@ -1473,6 +1481,105 @@ conductor(GEN bnr, GEN H, long all)
   if (all==1) bnr2 = (GEN)bnr2[5];
   p1[2] = lcopy(bnr2);
   p1[1] = lcopy(mod); return gerepileupto(av, p1);
+}
+
+extern GEN log_gen_pr(zlog_S *S, long index, GEN nf, long e);
+extern GEN log_gen_arch(zlog_S *S, long index);
+extern GEN factorbackprime(GEN nf, GEN L, GEN e);
+extern GEN hnf_gauss(GEN A, GEN B);
+
+/* return bnrisprincipal(bnr, (x)), assuming z = ideallog(x) */
+static GEN
+ideallog_to_bnr(GEN bnr, GEN z)
+{
+  GEN rayclass = (GEN)bnr[5], U = (GEN)bnr[4], divray = (GEN)rayclass[2];
+  long j, l, lU, lz;
+  int col;
+
+  if (lg(z) == 1) return z;
+  col = (typ(z) == t_COL); /* else t_MAT */
+  lz = col? lg(z): lg(z[1]);
+  lU = lg(U);
+  if (lz != lU) U = vecextract_i(U, lU-lz+1, lU-1); /* remove Cl(K) part */
+  z = gmul(U, z);
+  if (col)
+    z = vecmodii(z, divray);
+  else
+  {
+    l = lg(z);
+    for (j = 1; j < l; j++) z[j] = (long)vecmodii((GEN)z[j], divray);
+  }
+  return z;
+}
+static GEN
+bnr_log_gen_pr(GEN bnr, zlog_S *S, GEN nf, long e, long index)
+{
+  return ideallog_to_bnr(bnr, log_gen_pr(S, index, nf, e));
+}
+static GEN
+bnr_log_gen_arch(GEN bnr, zlog_S *S, long index)
+{
+  return ideallog_to_bnr(bnr, log_gen_arch(S, index));
+}
+
+/* A \subset H ? Allow H = NULL = trivial subgroup */
+static int
+contains(GEN H, GEN A)
+{
+  return H? (hnf_gauss(H, A) != NULL): gcmp0(A);
+}
+
+GEN
+conductor(GEN bnr, GEN H0, long all)
+{
+  pari_sp av = avma;
+  long j, k, l;
+  GEN bnf, nf, gen, bid, ideal, archp, p1, clhray, bnr2;
+  GEN e2, e, mod, H;
+  zlog_S S;
+
+  if (all > 0) checkbnrgen(bnr);
+  bnf = (GEN)bnr[1];
+  bid = (GEN)bnr[2]; init_zlog_bid(&S, bid);
+  clhray = gmael(bnr,5,1);
+  gen    = gmael(bnr,5,3);
+  nf = (GEN)bnf[7];
+  ideal= gmael(bid,1,1);
+  archp = arch_to_perm( gmael(bid,1,2) );
+  H = check_subgroup(bnr, H0, &clhray, "conductor");
+
+  e = S.e; l = lg(e);
+  e2 = cgetg(l, t_COL);
+  for (k = 1; k < l; k++)
+  {
+    for (j = itos((GEN)e[k]); j > 0; j--)
+    {
+      if (!contains(H, bnr_log_gen_pr(bnr, &S, nf, j, k))) break;
+      if (all < 0) { avma = av; return gzero; }
+    }
+    e2[k] = lstoi(j);
+  }
+  l = lg(archp);
+  for (k = 1; k < l; k++)
+  {
+    if (contains(H, bnr_log_gen_arch(bnr, &S, k))) archp[k] = 0;
+    if (all < 0) { avma = av; return gzero; }
+  }
+  if (all < 0) { avma = av; return gun; }
+  if (!gegal(e2, e)) ideal = factorbackprime(nf, S.P, e2);
+  for (j = k = 1; k < l; k++)
+    if (archp[k]) archp[j++] = archp[k];
+  setlg(archp, j);
+  mod = cgetg(3,t_VEC);
+  mod[1] = (long)ideal;
+  mod[2] = (long)perm_to_arch(nf, archp);
+  if (!all) return gerepilecopy(av, mod);
+
+  bnr2 = buchrayall(bnf, mod, nf_INIT | nf_GEN);
+  p1 = cgetg(4,t_VEC);
+  p1[3] = (long)imageofgroup0(gen, bnr2, H);
+  p1[2] = (all == 1)? bnr2[5]: (long)bnr2;
+  p1[1] = (long)mod; return gerepilecopy(av, p1);
 }
 
 /* return the norm group corresponding to the relative extension given by
@@ -1640,14 +1747,7 @@ discrayrelall(GEN bnr, GEN H, long flag)
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
   ideal= gmael(bid,1,1);
   arch = gmael(bid,1,2);
-  if (gcmp0(H)) H = NULL;
-  else
-  {
-    p1 = gauss(H, diagonal(gmael(bnr,5,2)));
-    if (!gcmp1(denom(p1))) err(talker,"incorrect subgroup in discray");
-    p1 = absi(det(H));
-    if (egalii(p1, clhray)) H = NULL; else clhray = p1;
-  }
+  H = check_subgroup(bnr, H, &clhray, "bnrdiscray");
   /* H = NULL --> trivial subgroup, else precompute isprincipal(gen) */
   if (H) gen = getgen(bnf,gen);
 
@@ -1751,6 +1851,28 @@ discrayabscond(GEN bnr, GEN H)
   return discrayabsall(bnr,H,nf_COND);
 }
 
+/* chi character of abelian G: chi[i] = chi(z_i), where G = \oplus Z/cyc[i] z_i.
+ * Return Ker chi [ NULL = trivial subgroup of G ] */
+static GEN
+KerChar(GEN chi, GEN cyc)
+{
+  long i, l = lg(cyc);
+  GEN m, U, d1;
+
+  if (lg(chi) != l) err(talker,"incorrect character length in KerChar");
+  if (l == 1) return NULL; /* trivial subgroup */
+  d1 = (GEN)cyc[1]; m = cgetg(l+1,t_MAT);
+  for (i=1; i<l; i++)
+  {
+    if (typ(chi[i]) != t_INT) err(typeer,"conductorofchar");
+    m[i] = (long)_col(mulii((GEN)chi[i], diviiexact(d1, (GEN)cyc[i])));
+  }
+  m[i] = (long)_col(d1);
+  U = (GEN)hnfall(m)[2];
+  for (i = 1; i < l; i++) setlg(U[i], l);
+  setlg(U,l); return U;
+}
+
 /* Given a number field bnf=bnr[1], a ray class group structure bnr and a
  * vector chi representing a character on the generators bnr[2][3], compute
  * the conductor of chi. */
@@ -1758,26 +1880,7 @@ GEN
 bnrconductorofchar(GEN bnr, GEN chi)
 {
   pari_sp av = avma;
-  long nbgen,i;
-  GEN m,U,d1,cyc;
-
-  checkbnrgen(bnr);
-  cyc = gmael(bnr,5,2); nbgen = lg(cyc)-1;
-  if (lg(chi)-1 != nbgen)
-    err(talker,"incorrect character length in conductorofchar");
-  if (!nbgen) return conductor(bnr,gzero,0);
-
-  d1 = (GEN)cyc[1]; m = cgetg(nbgen+2,t_MAT);
-  for (i=1; i<=nbgen; i++)
-  {
-    if (typ(chi[i]) != t_INT) err(typeer,"conductorofchar");
-    m[i] = (long)_col(mulii((GEN)chi[i], divii(d1, (GEN)cyc[i])));
-  }
-  m[i] = (long)_col(d1);
-  U = (GEN)hnfall(m)[2];
-  setlg(U,nbgen+1);
-  for (i=1; i<=nbgen; i++) setlg(U[i],nbgen+1); /* U = Ker chi */
-  return gerepileupto(av, conductor(bnr,U,0));
+  return gerepileupto(av, conductor(bnr, KerChar(chi, gmael(bnr,5,2)), 0));
 }
 
 /* Given lists of [zidealstarinit, unit ideallogs], return lists of ray class

@@ -3126,12 +3126,26 @@ qfbeval0_i(GEN q, GEN x, GEN y, long n)
 
   for (i=2;i<n;i++)
   {
-    for (j=1;j<i;j++)
+    if (!signe(x[i]))
     {
-      GEN p1 = addii(mulii((GEN)x[i],(GEN)y[j]), mulii((GEN)x[j],(GEN)y[i]));
-      res = gadd(res, gmul(gcoeff(q,i,j),p1));
+      if (!signe(y[i])) continue;
+      for (j=1;j<i;j++)
+        res = gadd(res, gmul(gcoeff(q,i,j), mulii((GEN)x[j],(GEN)y[i])));
     }
-    res = gadd(res, gmul(gcoeff(q,i,i), mulii((GEN)x[i],(GEN)y[i])));
+    else if (!signe(y[i]))
+    {
+      for (j=1;j<i;j++)
+        res = gadd(res, gmul(gcoeff(q,i,j), mulii((GEN)x[i],(GEN)y[j])));
+    }
+    else
+    {
+      for (j=1;j<i;j++)
+      {
+        GEN p1 = addii(mulii((GEN)x[i],(GEN)y[j]), mulii((GEN)x[j],(GEN)y[i]));
+        res = gadd(res, gmul(gcoeff(q,i,j),p1));
+      }
+      res = gadd(res, gmul(gcoeff(q,i,i), mulii((GEN)x[i],(GEN)y[i])));
+    }
   }
   return gerepileupto(av,res);
 }
