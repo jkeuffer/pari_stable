@@ -2401,15 +2401,13 @@ void errcontext(char *msg, char *s, char *entry);
 int
 break_loop(long numerr)
 {
-  static Buffer *b = NULL;
+  static FILE *oldinfile = NULL;
   static char *old = NULL;
+  static Buffer *b = NULL;
   VOLATILE int go_on = 0;
   char *s, *t, *msg;
-  static FILE *oldinfile = NULL;
 
   if (b) jump_to_given_buffer(b);
-  
-  b = new_buffer();
   if (setjmp(b->env))
   {
     msg = "back to break loop";
@@ -2417,18 +2415,19 @@ break_loop(long numerr)
   }
   else
   {
-    oldinfile = infile;
     msg = "Starting break loop (type 'break' to go back to GP)";
     old = s = _analyseur();
     t = current_buffer->buf;
     /* something fishy, probably a ^C, or we overran analyseur */
     if (!s || !s[-1] || s < t || s >= t + current_buffer->len) s = NULL;
-    b->flenv = 1;
-    push_stack(&bufstack, (void*)b);
+
+    push_stack(&bufstack, (void*)new_buffer());
+    b = current_buffer; /* buffer created above */
+    b->flenv = 1; oldinfile = infile;
   }
 
-  term_color(c_ERR);
-  fprintferr("\n"); errcontext(msg, s, t);
+  term_color(c_ERR); fprintferr("\n");
+  errcontext(msg, s, t);
   term_color(c_NONE);
   if (numerr == siginter) pariputs("['' or 'next' will continue]\n");
   infile = stdin;
@@ -2458,8 +2457,8 @@ break_loop(long numerr)
     if (numerr == siginter && flag == 2) { go_on = 1; break; }
   }
   if (old && !s) _set_analyseur(old);
-  pop_buffer(); infile = oldinfile;
-  b = NULL; return go_on;
+  b = NULL; infile = oldinfile;
+  pop_buffer(); return go_on;
 }
 
 int
