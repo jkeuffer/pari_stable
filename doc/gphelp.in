@@ -50,6 +50,7 @@ if ($#ARGV < 0) { &treat($_); cleanexit(); }
 &pretex() if (!$detex);
 for (@ARGV) { &treat($_); }
 
+
 if ($apropos) { &apropos_final_print(); cleanexit(); }
 if (!$found) { &clean if (!$detex); cleanexit(); }
 
@@ -208,7 +209,11 @@ sub treat
     if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){$help}/)
       { $first = $_; last; }
   }
-  return not_found($help) if (eof(DOC) && !$searchall);
+  if (eof(DOC))
+  {
+    &not_found($help) if (!$searchall);
+    return;
+  }
   $found = 1;
 
   if (!$detex) { &tex(); return; }
@@ -476,7 +481,7 @@ sub get_match
   $parity = ($open eq $close);
   /$open/; $_ = $'; # remove everything before (and including) first $open
 
-  while (1) {
+  while ($_) {
     @tmp = split(/($open|$close)/);
     while ($_ = shift(@tmp)) {
       $obr++ if (/^$open$/);
