@@ -2743,8 +2743,11 @@ rootsold(GEN x, long l)
       p15 = (GEN)p7[2]; setlg(p15,l+1);
       for (ii=1; ii<=5; ii++)
       {
-        p14 = (GEN)p7[1]; if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
-        p15 = (GEN)p7[2]; if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+        if (typ(p7) == t_COMPLEX)
+        {
+          p14 = (GEN)p7[1]; if (gcmp0(p14)) { settyp(p14,t_INT); p14[1]=2; }
+          p15 = (GEN)p7[2]; if (gcmp0(p15)) { settyp(p15,t_INT); p15[1]=2; }
+        }
         p7 = gadd(p7, gneg_i(gdiv(poleval(ps,p7), poleval(xd0,p7))));
       }
       gaffect(p7, p1); 
