@@ -2030,7 +2030,7 @@ zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2)
   pari_sp av = avma;
   long i, nbp, nbgen, lx1, lx2, l1, l2, lx;
   GEN f, f1, f2, clgp1, clgp2, fa1, fa2, lists1, lists2;
-  GEN lists, fa, U, U1, U2, cyc, cyc1, cyc2, y, u1 = NULL, x, P1, P2, gen;
+  GEN lists, fa, U, U1, U2, cyc, cyc1, cyc2, y, u1 = NULL, x, gen;
 
   nf = checknf(nf); checkbid(bid1); checkbid(bid2);
   f1 = (GEN)bid1[1]; clgp1 = (GEN)bid1[2]; fa1 = (GEN)bid1[3];
@@ -2038,17 +2038,7 @@ zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2)
   gen = (lg(clgp1)>3 && lg(clgp2)>3)? gen_1: NULL;
   x = idealmul(nf, (GEN)f1[1],(GEN)f2[1]);
   f = mkvec2(x, (GEN)f1[2]);
-
-  P1 = (GEN)fa1[1]; lx1 = lg(P1);
-  P2 = (GEN)fa2[1]; lx2 = lg(P2);
-  fa = cgetg(3,t_MAT);
-  fa[1] = (long)concatsp(P1, P2);
-  fa[2] = (long)concatsp((GEN)fa1[2], (GEN)fa2[2]);
-#ifdef DEBUG
-  for (i=1; i<lx1; i++)
-    if (isinvector(P2, (GEN)P1[i], lx2-1))
-      err(talker,"noncoprime ideals in zidealstarinitjoin");
-#endif
+  fa = concat_factor(fa1, fa2);
 
   lists1 = (GEN)bid1[4]; lx1 = lg(lists1);
   lists2 = (GEN)bid2[4]; lx2 = lg(lists2);
