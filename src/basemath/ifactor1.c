@@ -2337,7 +2337,7 @@ static ulong powersmod[106] = {
  * bit 2: 7th pwr;  set a bit to have the corresponding power examined --
  * and is updated appropriately for a possible follow-up call */
 long
-is_357_power(GEN x, GEN *pt, long *mask)
+is_357_power(GEN x, GEN *pt, ulong *mask)
 {
   long lx = lgefint(x), exponent = 0, residue, resbyte;
   pari_sp av = avma;
@@ -2474,7 +2474,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
  * under consideration, these word-sized computations take negligible time.
  * Experimentally making the cutoff point caller-configurable... */
 long
-is_odd_power(GEN x, GEN *pt, ulong *curexp, long cutoffbits)
+is_odd_power(GEN x, GEN *pt, ulong *curexp, ulong cutoffbits)
 {
   long size = expi(x) /* not +1 */;
   ulong p = 0;
@@ -2482,9 +2482,9 @@ is_odd_power(GEN x, GEN *pt, ulong *curexp, long cutoffbits)
   byteptr d = diffptr;
 
   /* cutting off at 1 is safe, but direct root extraction attempts will be
-   * faster when trial division hasn't been used to discover very small
+   * faster when trial division has been used to discover very small
    * bases.  We become competitive at about cutoffbits = 4 */
-  if (cutoffbits < 1) cutoffbits = 1;
+  if (!cutoffbits) cutoffbits = 1;
   /* prepare for iterating curexp over primes */
   if (*curexp < 11) *curexp = 11;
   while (p < *curexp) { NEXT_PRIME_VIADIFF(p,d); if (!*d) break; }
@@ -3211,8 +3211,7 @@ ifac_crack(GEN *partial, GEN *where)
   /* MPQS cannot factor prime powers; check for cubes/5th/7th powers. Do this
    * even if MPQS is blocked by hint: it is useful in bounded factorization */
   {
-    long exp0 = 0;
-    long mask = 7;
+    ulong exp0 = 0, mask = 7;
     if (DEBUGLEVEL == 4) fprintferr("IFAC: checking for odd power\n");
     /* At debug levels > 4, is_357_power() prints something more informative */
     av = avma;
