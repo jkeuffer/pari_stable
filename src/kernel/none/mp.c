@@ -1635,40 +1635,42 @@ invrev(ulong b)
 GEN 
 diviuexact(GEN x, ulong y)
 {
-  long i,ii, lz,lx = lgefint(x);
+  long i,lz,lx;
   ulong q, yinv;
-  GEN z;
+  GEN z, z0, x0, x0min;
 
   if (y == 1) return icopy(x);
+  lx = lgefint(x);
+  if (lx == 3) return stoi((ulong)x[2] / y);
   yinv = invrev(y);
-  lz = (y < x[2]) ? lx : lx-1;
+  lz = (y <= x[2]) ? lx : lx-1;
   z = new_chunk(lz);
+  z0 = z + lz;
+  x0 = x + lx; x0min = x + lx-lz+2;
 
-  for (ii=lx-1,i=lz-1; i>=2; i--,ii--)
+  while (x0 > x0min)
   {
-    LOCAL_HIREMAINDER;
-
-    z[i] = q = yinv*((ulong)x[ii]); /* i-th quotient */
+    *--z0 = q = yinv*((ulong)*--x0); /* i-th quotient */
     if (!q) continue;
-
     /* x := x - q * y */
-    (void)mulll(q,y);
     { /* update neither lowest word (could set it to 0) nor highest ones */
-      register GEN x0 = x + (ii - 1);
+      LOCAL_HIREMAINDER;
+      register GEN x1 = x0 - 1;
+      (void)mulll(q,y);
       if (hiremainder)
       {
-        if ((ulong)*x0 < hiremainder)
+        if ((ulong)*x1 < hiremainder)
         {
-          *x0 -= hiremainder;
-          do (*--x0)--; while ((ulong)*x0 == MAXULONG);
+          *x1 -= hiremainder;
+          do (*--x1)--; while ((ulong)*x1 == MAXULONG);
         }
         else
-          *x0 -= hiremainder;
+          *x1 -= hiremainder;
       }
     }
   }
   i=2; while(!z[i]) i++;
-  z += i-2; lz -= (i-2);
+  z += i-2; lz -= i-2;
   z[0] = evaltyp(t_INT)|evallg(lz);
   z[1] = evalsigne(1)|evallg(lz);
   avma = (ulong)z; return z;
@@ -1703,7 +1705,8 @@ diviiexact(GEN x, GEN y)
   if (ly == 3) 
   {
     x = diviuexact(x,(ulong)y[2]);
-    setsigne(x,sx*sy); return x;
+    if (signe(x)) setsigne(x,sx*sy); /* should have x != 0 at this point */
+    return x;
   }
   lx = lgefint(x); if (ly>lx) err(talker,"impossible division in diviiexact");
   y0inv = invrev(y[ly-1]);
