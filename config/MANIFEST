@@ -122,6 +122,7 @@ src/basemath/gen1.c
 src/basemath/gen2.c
 src/basemath/gen3.c
 src/basemath/ifactor1.c
+src/basemath/perm.c
 src/basemath/polarit1.c
 src/basemath/polarit2.c
 src/basemath/polarit3.c
@@ -197,6 +198,7 @@ src/language/init.c
 src/language/sumiter.c
 src/make_emacs_tags
 src/make_vi_tags
+src/modules/aprcl.c
 src/modules/elliptic.c
 src/modules/galois.c
 src/modules/kummer.c
