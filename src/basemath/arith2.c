@@ -2313,11 +2313,11 @@ ibittrunc(GEN x, long bits, long normalized)
     int known_zero_words;
 
     if (xl < len_out && normalized)
-        return;
+        return x;
         /* Check whether mask is trivial */
     if (!(bits & (BITS_IN_LONG - 1))) {
 	if (xl == len_out && normalized)
-	    return;
+	    return x;
     } else if (len_out <= xl)
     {
       GEN xi=int_W(x, len_out-1);
@@ -2325,7 +2325,7 @@ ibittrunc(GEN x, long bits, long normalized)
          normalized, this works even in the exceptional case */
       *xi = *xi & ((1 << (bits & (BITS_IN_LONG - 1))) - 1);
       if (*xi && xl == len_out)
-        return;
+        return x;
     }
     /* Normalize */
     if (xl <= len_out)			/* Not normalized */
