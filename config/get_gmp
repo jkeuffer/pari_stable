@@ -8,7 +8,6 @@ if test -z "$disable_gmp"; then
   gmp_add="$TOP/gmp-$osname-$arch $TOP/gmp"
   pth="$with_gmp_lib $gmp_add $libpth"
   lib=gmp; . ./locatelib
-  gmp=$try
 fi
 
 if test -n "$gmp"; then
