@@ -355,7 +355,6 @@ install-doc::
 	-\$(INSTALL_DATA) $doc/appa.tex     \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/appb.tex     \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/appc.tex     \$(DOCDIR)
-	-\$(INSTALL_DATA) $doc/paricfg.tex.in \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/parimacro.tex \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/pdfmacs.tex  \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/refcard.tex  \$(DOCDIR)
