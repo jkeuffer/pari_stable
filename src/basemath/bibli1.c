@@ -162,7 +162,7 @@ lllgramintwithcontent(GEN x, GEN veccon, long flag)
   if (typ(x) != t_MAT) err(typeer,"lllgramintwithcontent");
   n=lx-1; if (n<=1) return lllall_trivial(x,flag);
   if (lg((GEN)x[1])!=lx) err(mattype1,"lllgramintwithcontent");
-  fl = new_chunk(lx);
+  fl = cgetg(lx, t_VECSMALL);
 
   av=avma; lim=stack_lim(av,1);
   x=dummycopy(x); veccon=dummycopy(veccon);
@@ -710,7 +710,7 @@ lllgramallgen(GEN x, long flag)
   n=lx-1; if (n<=1) return lllall_trivial(x,flag);
   if (lg((GEN)x[1])!=lx) err(mattype1,"lllgramallgen");
 
-  fl = new_chunk(lx);
+  fl = cgetg(lx, t_VECSMALL);
 
   av=avma; lim=stack_lim(av,1);
   B=cgetg(lx+1,t_COL);
@@ -2518,7 +2518,7 @@ lllall0(GEN x, long flag)
 
   if (typ(x) != t_MAT) err(typeer,"lllall0");
   n=lx-1; if (n<=1) return lllall_trivial(x, flag | lll_GRAM);
-  fl = new_chunk(lx);
+  fl = cgetg(lx, t_VECSMALL);
 
   av=avma; lim=stack_lim(av,1); x=dummycopy(x);
   B=gscalcol(gun, lx);
