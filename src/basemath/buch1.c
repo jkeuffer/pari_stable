@@ -1182,16 +1182,17 @@ imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
   pari_sp av;
   GEN col, form, ex = cgetg(lgsub, t_VECSMALL);
 
+  if (!current) current = lgsub;
   av = avma;
   for(;;)
   {
     if (s >= need) break;
     if (first && s >= lim) {
-      first = 0;
+      first = 0; current = lgsub;
       if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av;
-    if (++current > KC) current = 1;
+    if (++current > KC) current = lgsub;
     form = qfi_pf(Disc, FB[current]);
     form = compimag(form, qfi_random(ex));
     nbtest++; fpc = factorquad(form,KC,LIMC);
@@ -1286,12 +1287,12 @@ real_relations(long need, long *pc, long lim, ulong LIMC, GEN mat, GEN C)
 NEW:
     if (s >= need) break;
     if (first && s >= lim) {
-      first = 0;
+      first = 0; current = lgsub;
       if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av; form = qfr3_random(ex);
     if (!first) {
-      if (++current > KC) current = 1;
+      if (++current > KC) current = lgsub;
       form = QFR3_comp(form, qfr3_pf(Disc, FB[current]));
     }
     av1 = avma;
