@@ -799,7 +799,7 @@ eval_sign(GEN M, GEN x, long k)
   return signe(z);
 }
 
-static GEN
+GEN
 vecconst(GEN v, GEN x)
 {
   long i, l = lg(v);
@@ -833,8 +833,7 @@ perm_to_arch(GEN nf, GEN archp)
   GEN v;
   if (typ(archp) == t_VEC) return archp;
 
-  l = lg(archp);
-  nf = checknf(nf);
+  l = lg(archp); nf = checknf(nf);
   v = zerovec( nf_get_r1(nf) );
   for (i = 1; i < l; i++) v[ archp[i] ] = un;
   return v;
@@ -1676,13 +1675,13 @@ get_index(GEN lists)
 }
 
 static void
-init_zlog(zlog_S *S, long n, GEN P, GEN e, GEN archp, GEN lists, GEN U)
+init_zlog(zlog_S *S, long n, GEN P, GEN e, GEN arch, GEN lists, GEN U)
 {
   S->n = n;
   S->U = U;
   S->P = P;
   S->e = e;
-  S->archp = arch_to_perm(archp);
+  S->archp = arch_to_perm(arch);
   S->lists = lists;
   S->ind = get_index(lists);
 }
@@ -1698,13 +1697,13 @@ init_zlog_bid(zlog_S *S, GEN bid)
  * S->lists. If index !=0, do the computation for the corresponding prime
  * ideal and set to 0 the other components. */
 static GEN
-zlog_ind(GEN nf, GEN a, zlog_S *S, long index)
+zlog_ind(GEN nf, GEN a, zlog_S *S, GEN sgn, long index)
 {
-  GEN y0 = zerocol(S->n), y, list, pr, prk, psigne;
+  GEN y0 = zerocol(S->n), y, list, pr, prk;
   pari_sp av = avma;
   long i, k, kmin, kmax;
 
-  a = _algtobasis(nf,a);
+  if (typ(a) != t_INT) a = _algtobasis(nf,a);
   if (DEBUGLEVEL>3)
   {
     fprintferr("entering zlog, "); flusherr();
@@ -1720,22 +1719,23 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, long index)
     kmin = 1; kmax = lg(S->P)-1;
     y = y0;
   }
-  psigne = zsigne(nf, a, S->archp);
+  if (!sgn) sgn = zsigne(nf, a, S->archp);
   for (k = kmin; k <= kmax; k++)
   {
     list= (GEN)S->lists[k];
     pr  = (GEN)S->P[k];
     prk = idealpow(nf, pr, (GEN)S->e[k]);
-    y = zlog_pk(nf, a, y, pr, prk, list, &psigne);
+    y = zlog_pk(nf, a, y, pr, prk, list, &sgn);
   }
-  zlog_add_sign(y0, psigne, S->lists);
+  zlog_add_sign(y0, sgn, S->lists);
   if (DEBUGLEVEL>3) { fprintferr("leaving\n"); flusherr(); }
   avma = av;
   for (i=1; i <= S->n; i++) y0[i] = licopy((GEN)y0[i]);
   return y0;
 }
+/* sgn = sign(a, S->arch) or NULL if unknown */
 GEN
-zlog(GEN nf, GEN a, zlog_S *S) { return zlog_ind(nf, a, S, 0); }
+zlog(GEN nf, GEN a, GEN sgn, zlog_S *S) { return zlog_ind(nf, a, S, sgn, 0); }
 
 /* Log on bid.gen of generators of P_{1,I pr^{e-1}} / P_{1,I pr^e} (I,pr) = 1,
  * defined implicitly via CRT. 'index' is the index of pr in modulus
@@ -1858,7 +1858,7 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
       for (k=1; k<lg(g); k++)
       {
 	a = element_powmodidele(nf, (GEN)g[k], (GEN)f[k], ideal, sarch);
-	h[++cp] = lneg(zlog_ind(nf, a, &S, i));
+	h[++cp] = lneg(zlog_ind(nf, a, &S, NULL, i));
 	coeff(h,cp,cp) = f[k];
       }
     }
@@ -1995,7 +1995,7 @@ zideallog(GEN nf, GEN x, GEN bid)
   else
   {
     zlog_S S; init_zlog_bid(&S, bid);
-    y = zlog(nf, x, &S);
+    y = zlog(nf, x, NULL, &S);
   }
 END:
   y = gmul((GEN)bid[5], y);
@@ -2133,42 +2133,41 @@ zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long add_gen)
 
 /* compute matrix of zlogs of units */
 GEN
-logunitmatrix(GEN nf, GEN funits, GEN racunit, GEN bid)
+logunitmatrix(GEN nf, GEN U, GEN sgnU, GEN bid)
 {
-  long j, R = lg(funits)-1;
-  GEN m = cgetg(R+2, t_MAT);
+  long j, l = lg(U);
+  GEN m = cgetg(l, t_MAT);
   zlog_S S; init_zlog_bid(&S, bid);
-
-  m[1] = (long)zlog(nf, racunit, &S);
-  for (j=2; j<=R+1; j++) m[j] = (long)zlog(nf, (GEN)funits[j-1], &S);
+  for (j = 1; j < l; j++)
+    m[j] = (long)zlog(nf, (GEN)U[j], vecextract_p((GEN)sgnU[j], S.archp), &S);
   return m;
 }
 
 /* calcule la matrice des zlog des unites */
 static GEN
-logunitmatrixarch(GEN nf, GEN funits, GEN racunit, GEN bid)
+logunitmatrixarch(GEN sgnU, GEN bid)
 {
-  long j, R = lg(funits)-1;
-  GEN liste,structarch,arch, m = cgetg(R+2,t_MAT);
-
-  arch = gmael(bid,1,2);
-  liste = (GEN)bid[4]; structarch = (GEN)liste[lg(liste)-1];
-  m[1] = (long)zsigne(nf, racunit, arch);
-  for (j=2; j<=R+1; j++) m[j] = (long)zsigne(nf, (GEN)funits[j-1], arch);
-  return F2V_red_ip(gmul((GEN)structarch[3], m));
+  GEN liste = (GEN)bid[4], structarch, arch = gmael(bid,1,2);
+  structarch = (GEN)liste[lg(liste)-1];
+  return F2V_red_ip(gmul((GEN)structarch[3],
+                    rowextract_p(sgnU, arch_to_perm(arch))));
 }
 
-static void
-init_units(GEN BNF, GEN *funits, GEN *racunit)
+GEN
+init_units(GEN BNF)
 {
-  GEN bnf = checkbnf(BNF), x = (GEN)bnf[8];
-  if (lg(x) == 5) *funits = (GEN)buchfu(bnf)[1];
+  GEN bnf = checkbnf(BNF), x = (GEN)bnf[8], v, funits;
+  long i, l;
+  if (lg(x) == 5) funits = (GEN)buchfu(bnf)[1];
   else
   {
     if (lg(x) != 6) err(talker,"incorrect big number field");
-    *funits = (GEN)x[5];
+    funits = (GEN)x[5];
   }
-  *racunit = gmael(x, 4, 2);
+  l = lg(funits) + 1;
+  v = cgetg(l, t_VEC); v[1] = mael(x, 4, 2);
+  for (i = 2; i < l; i++) v[i] = funits[i - 1];
+  return v;
 }
 
 /*  flag &1 : generateurs, sinon non
@@ -2182,7 +2181,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   pari_sp lim, av, av0 = avma;
   long i, j, k, l, q2, lp1, q;
   long do_gen = flag & 1, do_units = flag & 2, big_id = !(flag & 4);
-  GEN y,nf,p,z,z2,p1,p2,fa,pr,ideal,lu,lu2,funits,racunit,embunit;
+  GEN y,nf,p,z,z2,p1,p2,fa,pr,ideal,lu,lu2, U, sgnU, embunit;
 
   nf = checknf(bnf);
   if (bound <= 0) return cgetg(1,t_VEC);
@@ -2192,12 +2191,14 @@ ideallistzstarall(GEN bnf,long bound,long flag)
   ideal = idmat(degpol(nf[1]));
   if (big_id) ideal = zidealstarinitall(nf,ideal,do_gen);
   z[1] = (long)_vec(ideal);
+  lu = U = sgnU = NULL; /* -Wall */
   if (do_units)
   {
-    init_units(bnf,&funits,&racunit);
+    U = init_units(bnf);
+    sgnU = zsignunits(bnf, NULL, 1);
     lu = cgetg(bound+1,t_VEC);
+    lu[1] = (long)_vec(logunitmatrix(nf, U, sgnU, ideal));
     for (i=2; i<=bound; i++) lu[i] = lgetg(1,t_VEC);
-    lu[1] = (long)_vec(logunitmatrix(nf,funits,racunit,ideal));
   }
 
   p = cgeti(3); p[1] = evalsigne(1) | evallgefint(3);
@@ -2219,7 +2220,7 @@ ideallistzstarall(GEN bnf,long bound,long flag)
       for (l=2; ;l++)
       {
         if (big_id) ideal = zidealstarinitall(nf,ideal,do_gen);
-        if (do_units) embunit = logunitmatrix(nf,funits,racunit,ideal);
+        if (do_units) embunit = logunitmatrix(nf, U, sgnU, ideal);
         for (i = q; i <= bound; i += q)
         {
           p1 = (GEN)z[i/q]; lp1 = lg(p1);
@@ -2323,7 +2324,7 @@ ideallistarchall(GEN bnf,GEN list,GEN arch,long flag)
 {
   pari_sp av;
   long i,j,lp1, do_units = flag & 2;
-  GEN nf = checknf(bnf), p1,p2,p3,racunit,funits,lu2,lu,embunit,z,y;
+  GEN nf = checknf(bnf), p1, p2, p3, lu2, lu, z, y, sgnU;
 
   if (typ(list) != t_VEC || (do_units && lg(list) != 3))
     err(typeer, "ideallistarch");
@@ -2343,20 +2344,20 @@ ideallistarchall(GEN bnf,GEN list,GEN arch,long flag)
   z = ideallist_arch(nf,z,arch, flag & 1);
   if (!do_units) return z;
 
-  y[1]=(long)z; av=avma;
-  init_units(bnf,&funits,&racunit);
-  lu2=cgetg(lg(z),t_VEC);
-  for (i=1; i<lg(z); i++)
+  y[1] = (long)z; av = avma;
+  sgnU = zsignunits(bnf, NULL, 1);
+  lu2 = cgetg(lg(z), t_VEC);
+  for (i = 1; i < lg(z); i++)
   {
-    p1=(GEN)z[i]; p2=(GEN)lu[i]; lp1=lg(p1);
-    p3=cgetg(lp1,t_VEC); lu2[i]=(long)p3;
-    for (j=1; j<lp1; j++)
+    p1 = (GEN)z[i]; p2 = (GEN)lu[i]; lp1 = lg(p1);
+    p3 = cgetg(lp1,t_VEC); lu2[i] = (long)p3;
+    for (j = 1; j<lp1; j++)
     {
-      embunit = logunitmatrixarch(nf,funits,racunit,(GEN)p1[j]);
-      p3[j] = lmul(gmael(p1,j,5), vconcat((GEN)p2[j],embunit));
+      GEN bid = (GEN)p1[j], emb = logunitmatrixarch(sgnU, bid);
+      p3[j] = lmul((GEN)bid[5], vconcat((GEN)p2[j], emb));
     }
   }
-  y[2]=lpilecopy(av,lu2); return y;
+  y[2] = lpilecopy(av,lu2); return y;
 }
 
 GEN

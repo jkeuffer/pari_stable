@@ -694,6 +694,7 @@ GEN     quick_isprincipalgen(GEN bnf, GEN x);
 GEN     regulator(GEN P,GEN data,long prec);
 GEN     signunits(GEN bignf);
 GEN     smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsfb,long prec);
+GEN     zsignunits(GEN bnf, GEN archp, int add_zu);
 
 /* buch3.c */
 

@@ -21,7 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-extern GEN zlog(GEN nf, GEN a, zlog_S *S);
+extern GEN init_units(GEN BNF);
+extern GEN F2V_red_ip(GEN v);
+extern GEN zlog(GEN nf, GEN a, GEN sgn, zlog_S *S);
 extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr);
 extern GEN unif_mod_fZ(GEN pr, GEN F);
 extern GEN init_unif_mod_fZ(GEN L);
@@ -38,7 +40,7 @@ extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
-extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
+extern GEN logunitmatrix(GEN nf, GEN U, GEN sgnU, GEN bid);
 extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
 extern GEN to_Fp_simple(GEN nf, GEN x, GEN ffproj);
@@ -128,8 +130,8 @@ buchnarrow(GEN bnf)
   logs = cgetg(ngen+1,t_MAT);
   for (j=1; j<=ngen; j++)
   {
-    GEN u = lift_intern(gmul(v, zsigne(nf,(GEN)cycgen[j],arch)));
-    logs[j] = (long)vecextract_i(u, t+1, r1);
+    GEN u = gmul(v, zsigne(nf,(GEN)cycgen[j],arch));
+    logs[j] = (long)F2V_red_ip( vecextract_i(u, t+1, r1) );
   }
   /* [ cyc  0 ]
    * [ logs 2 ] = relation matrix for Cl_f */
@@ -426,22 +428,22 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
 /**                                                                **/
 /********************************************************************/
 static GEN
-get_dataunit(GEN nf, GEN zu, GEN fu, GEN bid)
+get_dataunit(GEN bnf, GEN bid)
 {
-  long i, l = lg(fu) + 1;
-  GEN D = cgetg(l, t_MAT), cyc = gmael(bid,2,2);
+  GEN D, cyc = gmael(bid,2,2), U = init_units(bnf), nf = (GEN)bnf[7];
+  long i, l;
   zlog_S S; init_zlog_bid(&S, bid);
-  D[1] = (long)vecmodii( gmul(S.U, zlog(nf, zu, &S)), cyc );
-  for (i = 2; i < l; i++)
-    D[i] = (long)vecmodii( gmul(S.U, zlog(nf, (GEN)fu[i-1], &S)), cyc );
+  D = zsignunits(bnf, S.archp, 1); l = lg(D);
+  for (i = 1; i < l; i++)
+    D[i] = (long)vecmodii(gmul(S.U, zlog(nf, (GEN)U[i],(GEN)D[i], &S)), cyc);
   return concatsp(D, diagonal(cyc));
 }
 
 static GEN
 buchrayall(GEN bnf,GEN module,long flag)
 {
-  GEN nf, cyc, gen, genplus, hmatu, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
-  GEN bigres, bid, cycbid, genbid, x, y, funits, hmat, vecel;
+  GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
+  GEN bigres, bid, cycbid, genbid, x, y, funits, hmat, El;
   long RU, Ri, j, ngen, lh;
   const int add_gen = flag & nf_GEN;
   const int do_init = flag & nf_INIT;
@@ -449,7 +451,7 @@ buchrayall(GEN bnf,GEN module,long flag)
 
   bnf = checkbnf(bnf); nf = checknf(bnf);
   funits = check_units(bnf, "buchrayall"); RU = lg(funits);
-  vecel = genplus = NULL; /* gcc -Wall */
+  El = Gen = NULL; /* gcc -Wall */
   bigres = (GEN)bnf[8];
   cyc = gmael(bigres,1,2);
   gen = gmael(bigres,1,3); ngen = lg(cyc)-1;
@@ -462,33 +464,31 @@ buchrayall(GEN bnf,GEN module,long flag)
   x = idealhermite(nf,module);
   if (Ri || add_gen || do_init)
   {
-    vecel = cgetg(ngen+1,t_VEC);
+    El = cgetg(ngen+1,t_VEC);
     for (j=1; j<=ngen; j++)
     {
       p1 = idealcoprime(nf,(GEN)gen[j],x);
       if (isnfscalar(p1)) p1 = (GEN)p1[1];
-      vecel[j]=(long)p1;
+      El[j] = (long)p1;
     }
   }
   if (add_gen)
   {
-    genplus = cgetg(lh+1,t_VEC);
-    for (j=1; j<=ngen; j++)
-      genplus[j] = (long)idealmul(nf,(GEN)vecel[j],(GEN)gen[j]);
-    for (  ; j<=lh; j++)
-      genplus[j] = genbid[j-ngen];
+    Gen = cgetg(lh+1,t_VEC);
+    for (j=1; j<=ngen; j++) Gen[j] = (long)idealmul(nf,(GEN)El[j],(GEN)gen[j]);
+    for (   ; j<=lh; j++)   Gen[j] = genbid[j - ngen];
   }
   if (!Ri)
   {
     clg = cgetg(add_gen? 4: 3,t_VEC);
-    if (add_gen) clg[3] = (long)genplus;
+    if (add_gen) clg[3] = (long)Gen;
     clg[1] = mael(bigres,1,1);
     clg[2] = (long)cyc;
     if (!do_init) return gerepilecopy(av,clg);
     y = cgetg(7,t_VEC);
     y[1] = (long)bnf;
     y[2] = (long)bid;
-    y[3] = (long)vecel;
+    y[3] = (long)El;
     y[4] = (long)idmat(ngen);
     y[5] = (long)clg; u = cgetg(3,t_VEC);
     y[6] = (long)u;
@@ -498,20 +498,18 @@ buchrayall(GEN bnf,GEN module,long flag)
   }
 
   cycgen = check_and_build_cycgen(bnf);
-  hmatu = hnfall( get_dataunit(nf, gmael(bigres,4,2), funits, bid) );
-  hmat = (GEN)hmatu[1];
-
+  hmat = hnfall_i( get_dataunit(bnf, bid), do_init? &u: NULL, 1);
   logs = cgetg(ngen+1, t_MAT);
   /* FIXME: cycgen[j] is not necessarily coprime to bid, but it is made coprime
    * in famat_zlog using canonical uniformizers [from bid data]: no need to
    * correct it here. The same ones will be used in isprincipalrayall. Hence
-   * modification by vecel is useless. */
+   * modification by El is useless. */
   for (j=1; j<=ngen; j++)
   {
     p1 = (GEN)cycgen[j];
-    if (typ(vecel[j]) != t_INT) /* <==> != 1 */
-      p1 = arch_mul(to_famat_all((GEN)vecel[j], (GEN)cyc[j]), p1);
-    logs[j] = (long)zideallog(nf, p1, bid); /* = log(genplus[j]) */
+    if (typ(El[j]) != t_INT) /* <==> != 1 */
+      p1 = arch_mul(to_famat_all((GEN)El[j], (GEN)cyc[j]), p1);
+    logs[j] = (long)zideallog(nf, p1, bid); /* = log(Gen[j]) */
   }
   /* [ cyc  0   ]
    * [-logs hmat] = relation matrix for Cl_f */
@@ -523,11 +521,11 @@ buchrayall(GEN bnf,GEN module,long flag)
   clg = cgetg(add_gen? 4: 3, t_VEC);
   clg[1] = (long)detcyc(met);
   clg[2] = (long)met;
-  if (add_gen) clg[3] = (long)compute_raygen(nf,u1,genplus,bid);
+  if (add_gen) clg[3] = (long)compute_raygen(nf,u1,Gen,bid);
   if (!do_init) return gerepilecopy(av, clg);
 
   u2 = cgetg(Ri+1,t_MAT);
-  u1 = cgetg(RU+1,t_MAT); u = (GEN)hmatu[2];
+  u1 = cgetg(RU+1,t_MAT);
   for (j=1; j<=RU; j++) { u1[j]=u[j]; setlg(u[j],RU+1); }
   u += RU;
   for (j=1; j<=Ri; j++) { u2[j]=u[j]; setlg(u[j],RU+1); }
@@ -535,7 +533,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   y = cgetg(7,t_VEC);
   y[1] = (long)bnf;
   y[2] = (long)bid;
-  y[3] = (long)vecel;
+  y[3] = (long)El;
   y[4] = (long)U;
   y[5] = (long)clg; u = cgetg(3,t_VEC);
   y[6] = (long)u;
@@ -600,7 +598,7 @@ rayclassno(GEN bnf,GEN ideal)
   if (lg(cycbid) == 1) return gerepileuptoint(av, icopy(h));
 
   funits = check_units(bnf,"rayclassno");
-  D = get_dataunit(nf, gmael(bigres,4,2), funits, bid);
+  D = get_dataunit(bnf, bid);
   H = hnfmodid(D, (GEN)cycbid[1]); /* (Z_K/f)^* / units ~ Z^n / H */
   return gerepileuptoint(av, mulii(h, dethnf_i(H)));
 }
@@ -621,14 +619,14 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
   pari_sp av=avma;
-  GEN bnf,nf,bid,matu,vecel,ep,p1,beta,idep,ex,rayclass;
+  GEN bnf,nf,bid,matu,El,ep,p1,beta,idep,ex,rayclass;
   GEN divray,genray,alpha,alphaall,racunit,res,funit;
 
   checkbnr(bnr);
   bnf = (GEN)bnr[1]; nf = (GEN)bnf[7];
   bid = (GEN)bnr[2];
-  vecel=(GEN)bnr[3];
-  matu =(GEN)bnr[4];
+  El  = (GEN)bnr[3];
+  matu= (GEN)bnr[4];
   rayclass=(GEN)bnr[5];
   divray = (GEN)rayclass[2]; c = lg(divray)-1;
   ex = cgetg(c+1,t_COL);
@@ -641,9 +639,9 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   ep  = (GEN)idep[1];
   beta= (GEN)idep[2];
   j = lg(ep);
-  for (i=1; i<j; i++) /* modify beta as if gen -> vecel.gen (coprime to bid) */
-    if (typ(vecel[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
-      beta = arch_mul(to_famat_all((GEN)vecel[i], negi((GEN)ep[i])), beta);
+  for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
+    if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
+      beta = arch_mul(to_famat_all((GEN)El[i], negi((GEN)ep[i])), beta);
   p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
   ex = vecmodii(p1, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
@@ -2053,20 +2051,18 @@ static GEN
 getcompobig(GEN vext,long i)
 {
   long cext;
-
   if (i<=LGVINT) return gmael(vext,1,i);
   cext = ((i-1)>>SHLGVINT)+1;
-  return gmael(vext, cext, i-((cext-1)<<SHLGVINT));
+  return gmael(vext, cext, i - ((cext-1)<<SHLGVINT));
 }
 
 static void
 putcompobig(GEN vext,long i,GEN x)
 {
   long cext;
-
-  if (i<=LGVINT) { mael(vext,1,i)=(long)x; return; }
-  cext=((i-1)>>SHLGVINT)+1;
-  mael(vext, cext, i-((cext-1)<<SHLGVINT)) = (long)x;
+  if (i<=LGVINT) { mael(vext, 1, i) = (long)x; return; }
+  cext = ((i-1)>>SHLGVINT) + 1;
+  mael(vext, cext, i - ((cext-1)<<SHLGVINT)) = (long)x;
 }
 
 static GEN
@@ -2226,10 +2222,10 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   ulong q, p2s;
   pari_sp av0 = avma, av, av1, lim;
   GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
-  GEN funits,racunit,embunit,sous,clh,sousray,raylist;
+  GEN embunit,sous,clh,sousray,raylist;
   GEN clhrayall,discall,faall,Id,idealrel,idealrelinit;
   GEN sousdisc,mod,P,ex,fac,fadkabs,pz;
-  GEN arch2,dlk,disclist,p4,faussefa,fauxpr,gprime;
+  GEN arch2,dlk,disclist,p4,faussefa,fauxpr,gprime, U, sgnU;
 
   if (bound <= 0) err(talker,"non-positive bound in discrayabslist");
   clhray = nz = 0; /* gcc -Wall */
@@ -2242,8 +2238,8 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   degk = degpol(nf[1]);
   fadkabs = factor(absi((GEN)nf[3]));
   clh = gmael3(bnf,8,1,1);
-  racunit = gmael3(bnf,8,4,2);
-  funits = check_units(bnf,"discrayabslistarchintern");
+  U = init_units(bnf);
+  sgnU = zsignunits(bnf, NULL, 1);
 
   if (ramip >= 0) square = 0;
   else
@@ -2268,7 +2264,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   p1[2] = (long)arch; bidp = zidealstarinitall(nf,p1,0);
   if (allarch)
   {
-    matarchunit = logunitmatrix(nf,funits,racunit,bidp);
+    matarchunit = logunitmatrix(nf, U, sgnU, bidp);
     if (r1>15) err(talker,"r1>15 in discrayabslistarchintern");
   }
   else
@@ -2279,7 +2275,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   av = avma; lim = stack_lim(av,1);
   z = bigcgetvec(bound); for (i=2;i<=bound;i++) putcompobig(z,i,cgetg(1,t_VEC));
   if (allarch) bidp = zidealstarinitall(nf,idmat(degk),0);
-  embunit = logunitmatrix(nf,funits,racunit,bidp);
+  embunit = logunitmatrix(nf, U, sgnU, bidp);
   putcompobig(z,1, _vec(zsimp(bidp,embunit))); 
   if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
   maxprime_check((ulong)bound);
@@ -2300,8 +2296,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       }
       raylist = gerepilecopy(av1,raylist);
       z2 = bigcgetvec(sqbou);
-      for (i=1; i<=sqbou; i++)
-        putcompobig(z2,i, gcopy(getcompobig(z,i)));
+      for (i=1; i<=sqbou; i++) putcompobig(z2,i, gcopy(getcompobig(z,i)));
       z = z2;
     }
     fa = primedec(nf,p); lfa = lg(fa)-1;
@@ -2317,7 +2312,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       {
         cex++; bidp = zidealstarinitall(nf,ideal,0);
         faussefa = to_famat_all(fauxpr, stoi(cex));
-        embunit = logunitmatrix(nf,funits,racunit,bidp);
+        embunit = logunitmatrix(nf, U, sgnU, bidp);
         for (i=q; i<=bound; i+=q)
         {
           p1 = getcompobig(z,i/q); lp1 = lg(p1);

@@ -66,6 +66,7 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
+extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
 extern GEN sqred1_from_QR(GEN x, long prec);
@@ -636,7 +637,7 @@ gauss_realimag(GEN x, GEN y)
   y = split_realimag(y,r1,r2); return gauss(M, y);
 }
 
-GEN
+static GEN
 getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
 {
   long e, i, j, R1, RU, N=degpol(nf[1]);
@@ -694,26 +695,20 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
     y[j] = (long)p1;
   }
   if (DEBUGLEVEL) msgtimer("getfu");
-  gerepileall(av,2, &A, &y);
   *ptA = A; return y;
 }
 
 GEN
 buchfu(GEN bnf)
 {
-  long c;
   pari_sp av = avma;
-  GEN nf,A,res, y = cgetg(3,t_VEC);
+  GEN nf, A, res;
+  long c;
 
   bnf = checkbnf(bnf); A = (GEN)bnf[3]; nf = (GEN)bnf[7];
   res = (GEN)bnf[8];
-  if (lg(res)==7 && lg(res[5])==lg(nf[6])-1)
-  {
-    y[1] = lcopy((GEN)res[5]);
-    y[2] = lcopy((GEN)res[6]); return y;
-  }
-  y[1] = (long)getfu(nf, &A, nf_UNITS, &c, 0);
-  y[2] = lstoi(c); return gerepilecopy(av, y);
+  if (lg(res)==6 && lg(res[5])==lg(nf[6])-1) return gcopy((GEN)res[5]);
+  return gerepilecopy(av, getfu(nf, &A, nf_UNITS, &c, 0));
 }
 
 /*******************************************************************/
@@ -1542,30 +1537,52 @@ isunit(GEN bnf,GEN x)
 }
 
 GEN
-signunits(GEN bnf)
+zsignunits(GEN bnf, GEN archp, int add_zu)
 {
-  long i, j, R1, RU;
-  GEN matunit, y, nf, mun, pi = mppi(MEDDEFAULTPREC);
+  GEN y, A = (GEN)bnf[3], pi = mppi(DEFAULTPREC);
+  long l, i, j = 1, RU = lg(A);
 
-  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
-  matunit = (GEN)bnf[3];
-  RU = lg(matunit);
-  R1 = nf_get_r1(nf);
+  if (!archp) archp = perm_identity( nf_get_r1((GEN)bnf[7]) );
+  l = lg(archp);
+  if (add_zu) { RU++; A--; }
   y = cgetg(RU,t_MAT);
-  mun = negi(gun);
-  for (j=1; j<RU; j++)
+  if (add_zu)
   {
-    GEN c = cgetg(R1+1,t_COL);
+    GEN w = gmael3(bnf,8,4,1), v = cgetg(l, t_COL);
+    if (egalii(w,gdeux)) (void)vecconst(v, stoi(-1));
+    y[j++] = (long)v;
+  }
+  for ( ; j < RU; j++)
+  {
+    GEN c = cgetg(l,t_COL), d = (GEN)A[j];
     pari_sp av = avma;
     y[j] = (long)c;
-    for (i=1; i<=R1; i++)
+    for (i=1; i<l; i++)
     {
-      GEN p1 = ground( gdiv(gimag(gcoeff(matunit,i,j)), pi) );
-      c[i] = mpodd(p1)? (long)mun: un;
+      GEN p1 = ground( gdiv(gimag((GEN)d[ archp[i] ]), pi) );
+      c[i] = mpodd(p1)? (long)un: zero;
     }
     avma = av;
   }
   return y;
+}
+
+/* obsolete */
+GEN
+signunits(GEN bnf)
+{
+  pari_sp av = avma;
+  GEN y, mun = negi(gun);
+  long i, j;
+
+  bnf = checkbnf(bnf);
+  y = zsignunits(bnf, NULL, 0);
+  for (j = 1; j < lg(y); j++)
+  {
+    GEN *c = (GEN*)y[j];
+    for (i = 1; i < lg(c); i++) c[i] = (c[i] == gzero)? gun: mun;
+  }
+  return gerepilecopy(av, y);
 }
 
 /* LLL-reduce ideal and return Cholesky for T2 | ideal */

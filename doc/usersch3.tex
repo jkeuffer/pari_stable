@@ -3216,12 +3216,14 @@ long time when the coefficients of the fundamental units on the integral
 basis are very large.
 
    When $\fl=2$, on the contrary, it is initially agreed that GP
-will not compute units.
+will not compute units. Note that the resulting \var{bnf} will not be
+suitable for \kbd{bnrinit}, and that this flag provides negligible time
+savings. In short, do not use it without a very good reason.
 
-   When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small big
-number field'' (or \var{sbnf} for short) which contains enough information
-to recover the full $\var{bnf}$ vector very rapidly, but which is much
-smaller and hence easy to store and print. It is supposed to be used in
+   When $\fl=3$, computes a very small version of \kbd{bnfinit}, a ``small
+big number field'' (or \var{sbnf} for short) which contains enough
+information to recover the full $\var{bnf}$ vector very rapidly, but which is
+much smaller and hence easy to store and print. It is supposed to be used in
 conjunction with \kbd{bnfmake}. The output is a 12 component vector $v$, as
 follows. Let $\var{bnf}$ be the result of a full \kbd{bnfinit}, complete with
 units. Then $v[1]$ is the polynomial $P$, $v[2]$ is the number of real
@@ -3414,38 +3416,38 @@ $v[6]$ is a copy of $S$.
 \syn{bnfsunit}{\var{bnf},S,\var{prec}}.
 
 \subsecidx{bnfunit}$(\var{bnf})$: $\var{bnf}$ being a big number field as
-output by \kbd{bnfinit}, outputs a two-component row vector giving in the
-first component the vector of fundamental units of the number field, and in
-the second component the number of bit of accuracy which remained in the
-computation (which is always correct, otherwise an error message is printed).
-This function is mainly for people who used the wrong flag in \kbd{bnfinit}
-and would like to skip part of a lengthy \kbd{bnfinit} computation.
+output by \kbd{bnfinit}, outputs the vector of fundamental units of the
+number field.
+
+This function is mostly useless, since it will only succeed if
+\var{bnf} contains the units, in which case \kbd{bnf.fu} is recommanded
+instead, or \var{bnf} was produced with \kbd{bnfinit(,,2)}, which is itself 
+deprecated.
 
 \syn{buchfu}{\var{bnf}}.
 
-\subsecidx{bnrL1}$(\var{bnr},\{\var{subgroup}\},\{\fl=0\})$:
-\var{bnr} being the number field data which is output by
-\kbd{bnrinit(,,1)} and \var{subgroup} being a square matrix defining a
-congruence subgroup of the ray class group corresponding to \var{bnr}
-(the trivial congruence subgroup if omitted), returns for each
-\idx{character} $\chi$ of the ray class group which is trivial on this
-subgroup, the value at $s = 1$ (or $s = 0$) of the abelian
-$L$-function associated to $\chi$. For the value at $s = 0$, the
+\subsecidx{bnrL1}$(\var{bnr},\{\var{subgroup}\},\{\fl=0\})$: \var{bnr} being
+the number field data which is output by \kbd{bnrinit(,,1)} and
+\var{subgroup} being a square matrix defining a congruence subgroup of the
+ray class group corresponding to \var{bnr} (the trivial congruence subgroup
+if omitted), returns for each \idx{character} $\chi$ of the ray class group
+which is trivial on this subgroup, the value at $s = 1$ (or $s = 0$) of the
+abelian $L$-function associated to $\chi$. For the value at $s = 0$, the
 function returns in fact for each character $\chi$ a vector $[r_\chi ,
-c_\chi]$ where $r_\chi$ is the order of $L(s, \chi)$ at $s = 0$ and
-$c_\chi$ the first non-zero term in the expansion of $L(s,
-\chi)$ at $s = 0$; in other words
+c_\chi]$ where $r_\chi$ is the order of $L(s, \chi)$ at $s = 0$ and $c_\chi$
+the first non-zero term in the expansion of $L(s, \chi)$ at $s = 0$; in other
+words
 %
 $$L(s, \chi) = c_\chi \cdot s^{r_\chi} + O(s^{r_\chi + 1})$$
 %
 \noindent near $0$. \fl\ is optional, default value is 0; its binary digits
-mean 1: compute at $s = 1$ if set to 1 or $s = 0$ if set to 0, 2: compute
-the primitive $L$-functions associated to $\chi$ if set to 0 or the
-$L$-function with Euler factors at prime ideals dividing the modulus of
-\var{bnr} removed if set to 1 (this is the so-called $L_S(s, \chi)$
-function where $S$ is the set of infinite places of the number field
-together with the finite prime ideals dividing the modulus of \var{bnr},
-see the example below), 3: returns also the character.
+mean 1: compute at $s = 1$ if set to 1 or $s = 0$ if set to 0, 2: compute the
+primitive $L$-functions associated to $\chi$ if set to 0 or the $L$-function
+with Euler factors at prime ideals dividing the modulus of \var{bnr} removed
+if set to 1 (this is the so-called $L_S(s, \chi)$ function where $S$ is the
+set of infinite places of the number field together with the finite prime
+ideals dividing the modulus of \var{bnr}, see the example below), 3: returns
+also the character.
 
 Example:
 \bprog

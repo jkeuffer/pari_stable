@@ -170,7 +170,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
    18- ellglobalred(): use gcd(e.c4, e.c6) to help factor e.disc
    19- removed obsolete components ("checks", "bits of accuracy left in
        computation") from quadclassunit / bnfinit / bnfisprincipal /
-       bnrisprincipal outputs.
+       bnrisprincipal / bnfunit outputs.
    20- 'make test-graphic' is gone. Use 'make test-ploth'
 HC 21- new implementation of gamma()
    22- renamed Oxxx/dft.Config.in --> pari.cfg
