@@ -22,7 +22,7 @@
 \centerline{\mine PARI / GP}
 \vskip1.truecm
 \authors
-\centerline{last updated November 5, 2000}
+\centerline{last updated September 17, 2002}
 \centerline{(this document distributed with version \vers)}
 \endtitle
 
@@ -80,7 +80,7 @@ for pure mathematicians, and not for physicists (although they are welcome to
 use it). And mathematically, $1/7$ is an element of the field $\Q$ of
 rational numbers, so how else but $1/7$ can the computer give the answer to
 you? (well maybe $2/14$, but why complicate matters?). Seriously, the basic
-point here is that PARI (hence GP) will almost always try to give you a
+point here is that PARI, hence GP, will almost always try to give you a
 result which is as precise as possible (we will see why ``almost'' later),
 hence since here you gave an operation whose result can be represented
 exactly, that's what it gives you.
@@ -309,7 +309,8 @@ try
 cos(x)           cos(x)^2 + sin(x)^2           exp(cos(x))
 gamma(1 + x)     exp(exp(x) - 1)               1 / tan(x)
 @eprog
-for different values of \kbd{serieslength}.
+\noindent for different values of \kbd{serieslength} (change it using \b{ps}
+\var{newvalue}).
 
 Let's try something else: type \kbd{(1 + x)\pow 3}. No \kbd{O(x)} here, since
 the result is a polynomial.  Haha, but I have learnt that if you do not take
@@ -545,14 +546,12 @@ number theory can skip ahead).
 The first is the type ``integer--modulo''. Let us see an example. Type
 \kbd{n = 10\pow 15 + 3}. We want to know whether this number is prime or not. Of
 course we could make use of the built-in facilities of PARI, but let us do
-otherwise. (Note that PARI does not actually prove that a number is prime: any
-strong pseudoprime for a number of bases is declared to be prime.) We first
-trial divide by the built-in table of primes. We slightly cheat here and use a
-variant of the function \kbd{factor} which does exactly this. So type
-\kbd{factor(n, 200000)} (the last argument tells \kbd{factor} to trial divide
-up to the given bound and stop at this point. You can set it to 0 to trial
-divide by the full set of built-in primes, which goes up to $500000$ by
-default).
+otherwise. We first trial divide by the built-in table of primes. We slightly
+cheat here and use a variant of the function \kbd{factor} which does exactly
+this. So type \kbd{factor(n, 200000)} (the last argument tells \kbd{factor}
+to trial divide up to the given bound and stop at this point. You can set it
+to 0 to trial divide by the full set of built-in primes, which goes up to
+$500000$ by default).
 
 The result is a 2 column matrix (as for all factoring functions), the first
 column giving the primes and the second their exponents. Here we get a single
@@ -580,9 +579,17 @@ obtained \kbd{Mod(1,n)} on the other hand, it would have given us a hint that
 
 To find the factors is another story. One must use less naive techniques than
 trial division (or be very patient). To finish this example, type
-\kbd{factor(n)} to see the factors. Since the smallest factor is 14902357,
-you would have had to be very patient with trial division! Note that none of
-the factors in the decomposition are {\it proven} primes.
+\kbd{fa = factor(n)} to see the factors. Since the smallest factor is 14902357,
+you would have had to be very patient with trial division!
+
+Note that, as is the case with most ``prime''-producing functions, the
+``prime'' factors given by \kbd{factor} are only strong pseudoprimes, and not
+\emph{proven} primes. Use \kbd{isprime( fa[,1] )} to rigorously prove
+primality of the factors. The latter command applies \kbd{isprime} to all
+entries in the first column of \kbd{fa}, i.e to all pseudoprimes, and returns
+the column vector of results (all equal to 1, so the pseudoprimes are indeed
+primes). All arithmetic functions can be applied in this way to the entries
+of a vector or matrix.
 \smallskip
 
 The second specifically number-theoretic type is the $p$-adic numbers. I have
@@ -599,7 +606,7 @@ exp(l)}. If you know about $p$-adic logarithms, you will not be surprised that
 equal to \kbd{n} times a $(p-1)$-st root of unity.
 
 Incidentally, if you want to get back the integer 569 from the $p$-adic
-number \kbd{n}, type \kbd{truncate(n)}.
+number \kbd{n}, type \kbd{lift(n)} or \kbd{truncate(n)}.
 \smallskip
 
 The third number-theoretic type is the type ``quadratic number''. This type
@@ -691,7 +698,9 @@ on.
 In addition to the factoring facilities, you have a few functions related to
 primality testing such as \kbd{isprime}, \kbd{ispseudoprime},
 \kbd{precprime}, and \kbd{nextprime}. As previously mentioned, only strong
-pseudoprimes are produced; there is no sophisticated primality test.
+pseudoprimes are produced by the latter two (they pass the
+\kbd{ispseudoprime} test); the more sophisticated primality tests in
+\kbd{isprime} are not applied by default.
 
 We also have the usual multiplicative arithmetic functions: the M\"obius $\mu$
 function (\kbd{moebius}), the Euler $\phi$ function (\kbd{eulerphi}), the
@@ -1072,7 +1081,7 @@ a plunge into these problems. Type
 
 \centerline{\tt gcd(x\pow 2 - 1., x\pow2 - 3.*x + 2.)}
 
- You are lucky, the result is almost correct except for a bizarre factor of
+You are lucky, the result is almost correct except for a bizarre factor of
 3 which comes from the way PARI does the computation. In any case, it is still
 essentially a reasonable result. But now type
 \kbd{gcd(x - Pi, x\pow 2 - 6*zeta(2))}.
@@ -1304,7 +1313,7 @@ function and type (for instance in \kbd{points.gp} which you can read in with
   v=[];
   for (x = -3, 1000,
     s = ellordinate(e,x);
-    if (length(s),            \\ @com we could use \kbd{if (!s,)} instead
+    if (#s,            \\ @com if cardinality of \kbd{s} is non-zero
       v = concat(v, [[x,s[1]]])
     )
   ); v
@@ -1337,10 +1346,12 @@ points should also be considered).
 
 Type \kbd{hv = ellheight(e, v)}. This gives the vector of canonical heights.
 Let us order the points according to their height. For this, type
-
-\kbd{iv = vecindexsort(hv)}, then \kbd{hv = vecextract(hv,iv)} and
-\kbd{v = vecextract(v,iv)}.
-
+\bprog
+  iv = vecsort(hv, 1);    \\@com indirect sorting
+  hv = vecextract(hv, iv);
+  v  = vecextract( v, iv);
+@eprog
+\noindent
 It seems reasonable to take the numbers with smallest height as generators of
 the Mordell-Weil group. Let's try the first 4: type
 
