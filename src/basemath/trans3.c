@@ -1000,7 +1000,7 @@ gzeta(GEN x, long prec)
       if (is_bigint(x))
       {
         if (signe(x) > 0) return realun(prec);
-        if (signe(x) < 0 && mod2(x) == 1) return realzero(prec);
+        if (signe(x) < 0 && mod2(x) == 0) return realzero(prec);
       }
       return izeta(itos(x),prec);
 
