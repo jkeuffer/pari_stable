@@ -80,7 +80,7 @@ _mulii(GEN x, GEN y) {
 }
 
 /* compute xy as ( sum_i x_i sum_j y_j m^{i,j}_k )_k. 
- * Assume tab in M_{N x N^2}(Z), with x, y in Z^N */
+ * Assume tab in M_{N x N^2}(Z), with x, y R^N (R arbitrary) */
 static GEN
 mul_by_tabi(GEN tab, GEN x, GEN y)
 {
