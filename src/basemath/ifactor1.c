@@ -201,6 +201,8 @@ a[i] prime factor of N-1,
 b[i] witness for a[i] as in pl831
 c[i] plisprime(a[i])
 */
+GEN
+decomp_limit(GEN n, GEN limit);
 GEN  plisprime(GEN N, long flag)
 {
   ulong ltop=avma;
@@ -215,7 +217,8 @@ GEN  plisprime(GEN N, long flag)
     if (gcmp(N,mulss(10670053,32010157))<0) { avma=ltop; return gun; }
   }
   else { avma=ltop; return gzero; }
-  F=(GEN)factor(addis(N,-1))[1];
+  F=(GEN)decomp_limit(addis(N,-1),racine(N))[1];
+  if (DEBUGLEVEL>=3) fprintferr("P.L.:factor O.K.\n");
   C=cgetg(4,t_MAT);
   C[1]=lgetg(lg(F),t_COL); 
   C[2]=lgetg(lg(F),t_COL);
@@ -3282,9 +3285,23 @@ ifac_primary_factor(GEN *partial, long *exponent)
    compact little routine. */
 
 #define ifac_overshoot 64	/* lgefint(n)+64 words reserved */
+/* ifac_decomp_break: 
+ *
+ * Find primary factors of n until ifac_break return true, or n is
+ * factored if ifac_break is NULL.
+ */
+/* ifac_break:
+ *
+ * state is for state management of the function, and depend of the
+ * function.  ifac_break is called initially in decomp_break with
+ * here=NULL.  This allows the function to see the new value of n.
+ * return 1: stop factoring, 0 continue.  If ifac_break is NULL,
+ * assumed to always return 0. ifac_break must not let anything on the
+ * stack. However data can be stored in state*/
 
 long
-ifac_decomp(GEN n, long hint)
+ifac_decomp_break(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+		  GEN state, long hint)
 {
   long tf=lgefint(n), av=avma, lim=stack_lim(av,1);
   long nb=0;
@@ -3323,6 +3340,12 @@ ifac_decomp(GEN n, long hint)
     pairs -= 3;
     *pairs = evaltyp(t_INT) | evallg(3);
     affii((GEN)(here[1]), pairs);
+    if (ifac_break && (*ifac_break)(n,pairs,here,state))
+    {
+      if (DEBUGLEVEL >= 3)
+	fprintferr("IFAC: (Partial fact.)Stop requested.\n");
+      break;
+    }
     here[2] = here[1] = *here = (long)NULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
@@ -3340,6 +3363,12 @@ ifac_decomp(GEN n, long hint)
     flusherr();
   }
   return nb;
+}
+
+long
+ifac_decomp(GEN n, long hint)
+{
+  return ifac_decomp_break(n, NULL, gzero, hint);
 }
 
 long

@@ -387,6 +387,9 @@ find_fact(GEN N, long *flag)
 /* function imported from ifactor1.c */
 long
 ifac_decomp(GEN n, long hint);
+long
+ifac_decomp_break(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+		  GEN state, long hint);
 
 static GEN
 aux_end(GEN n, long nb)
@@ -419,8 +422,9 @@ aux_end(GEN n, long nb)
   return z;
 }
 
-static GEN
-auxdecomp0(GEN n, long all, long hint)
+GEN 
+auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
+		  GEN state, long all, long hint)
 {
   long pp[] = { evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),2,0 };
   long nb = 0,i,k,lim1,av,lp;
@@ -481,9 +485,55 @@ auxdecomp0(GEN n, long all, long hint)
 
   /* now we have a large composite.  Use hint as is if all==1 */
   if (all!=1) hint = 15; /* turn off everything except pure powers */
-  nb += ifac_decomp(n, hint);
+  if (ifac_break && (*ifac_break)(n,NULL,NULL,state))
+    /*Initialize ifac_break*/
+  {
+    if (DEBUGLEVEL >= 3)
+      fprintferr("IFAC: (Partial fact.) Initial stop requested.\n");
+  }
+  else
+    nb += ifac_decomp_break(n, ifac_break, state, hint);
 
   return aux_end(n, nb);
+}
+/* state is an array with 2 elements:
+ * state[1]: current unfactored part.
+ * state[2]: limit.
+ */
+static long ifac_break_limit(GEN n, GEN pairs, GEN here, GEN state)
+{
+  ulong ltop=avma;
+  int res;
+  if (!here)
+    /* Initial call.
+     * Small prime have been removed since start, 
+     * and n is the new unfactored part.
+     * Note: the result is affect()ed to state[1] to preserve stack.
+     */
+    affii(n,(GEN)state[1]);
+  else
+  {
+    /*Compute the primary factor found.*/
+    GEN p=powgi((GEN)here[0],(GEN)here[1]); 
+    if (DEBUGLEVEL>=3)
+      fprintferr("IFAC: Stop: Primary factor: %Z\n",p);
+    /*divide the unfactored part by the primary factor and assign the
+      result to state[1]*/
+    diviiz((GEN)state[1],p,(GEN)state[1]);
+  }
+  if (DEBUGLEVEL>=3)
+    fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
+  /*check the stopping criterion*/ 
+  res=cmpii((GEN)state[1],(GEN)state[2])<=0;
+  /*restore the stack.*/
+  avma=ltop;
+  return res;
+}
+
+static GEN
+auxdecomp0(GEN n, long all, long hint)
+{
+  return auxdecomp1(n, NULL, gzero, all, hint);
 }
 
 GEN
@@ -504,6 +554,23 @@ GEN
 decomp(GEN n)
 {
   return auxdecomp0(n,1,decomp_default_hint);
+}
+
+/* Factor until the unfactored part is smaller than limit.
+ */
+GEN
+decomp_limit(GEN n, GEN limit)
+{
+  GEN state;
+  /*Initialise state.*/
+  state=cgetg(3,t_VEC);
+  /* In fact this is mainly done to allocate memory for
+   * affect(). Currently state[1] value is discarded in the initial call
+   * of ifac_break_limit 
+   */
+  state[1]=licopy(n);
+  state[2]=lcopy(limit);
+  return auxdecomp1(n, &ifac_break_limit, state, 1, decomp_default_hint);
 }
 
 GEN
