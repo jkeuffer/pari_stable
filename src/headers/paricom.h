@@ -123,21 +123,19 @@ extern int new_galois_format;
 #  define BIGINT (32767)          /* 2^15-1 */
 #endif
 
-#ifdef NOEXP2
+#ifndef HAS_EXP2
 #  ifdef __cplusplus
      inline double exp2(double x) {return exp(x*LOG2);}
-     inline double log2(double x) {return log(x)/LOG2;}
 #  else
 #    define exp2(x) (exp((double)(x)*LOG2))
-#    ifndef __CYGWIN32__
-#      define log2(x) (log((double)(x))/LOG2)
-#    endif
 #  endif
-#else
-  BEGINEXTERN
-    double exp2(double);
-    double log2(double);
-  ENDEXTERN
+#endif
+#ifndef HAS_LOG2
+#  ifdef __cplusplus
+     inline double log2(double x) {return log(x)/LOG2;}
+#  else
+#    define log2(x) (log((double)(x))/LOG2)
+#  endif
 #endif
 
 #ifndef LONG_IS_64BIT

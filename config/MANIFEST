@@ -56,6 +56,7 @@ config/gnu.c
 config/has_TIOCGWINSZ.c
 config/has_dlopen.c
 config/has_exp2.c
+config/has_log2.c
 config/has_getrlimit.c
 config/has_getrusage.c
 config/has_opendir.c

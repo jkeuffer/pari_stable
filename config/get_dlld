@@ -11,10 +11,9 @@ if test "$optimization" = profiling; then DLLD=; else
 # Some linkers (SunOS 4) need minor and major lib version numbers.
 # Some others (SunOS 5) need a link from a .so
 # Some others (HPUX 09) do not want version numbers.
-#
   soname=.$soname_num
   case "$osname-$arch" in
-#    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
+#   aix-*)  DLSUFFIX=a  ;; FIXME: dynamic linking does not work
     sunos-*) sodest=.$VersionMajor$VersionMinor.$patch
              soname=$sodest;;
     *-alpha|solaris-*|linux-*|freebsd-*)
@@ -22,8 +21,7 @@ if test "$optimization" = profiling; then DLLD=; else
         pari) sodest=.$version.$patch;; # released versions
         *) sodest=.$patch.0.0;; # unstable versions
       esac ;;
-# FIXME: gp-dyn.exe crashes on startup
-#   cygwin*)soname= ; sodest= ; DLSUFFIX=dll;;
+#   cygwin*)soname= ; sodest= ; DLSUFFIX=dll;; FIXME: gp-dyn.exe crashes
     hpux-*) soname= ; sodest= ; DLSUFFIX=sl;;
     irix-*) soname= ; sodest= ;;
     os2-*)  soname= ; sodest= ; DLSUFFIX=dll

@@ -138,7 +138,10 @@ case "$sizeof_long" in
 esac
 
 case "$has_exp2" in
-no) echo '#define NOEXP2' >> $file;;
+yes) echo '#define HAS_EXP2' >> $file;;
+esac
+case "$has_log2" in
+yes) echo '#define HAS_LOG2' >> $file;;
 esac
 
 case "$has_ulong" in
