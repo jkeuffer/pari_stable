@@ -177,7 +177,7 @@ update_h(long k, long l, GEN q, long K, GEN h)
 
 /* L[k,] += q * L[l,], l < k */
 static void
-update_LI(long k, long l, GEN q, GEN L, GEN B)
+Zupdate_L(long k, long l, GEN q, GEN L, GEN B)
 {
   long i;
   if (is_pm1(q))
@@ -197,7 +197,7 @@ update_LI(long k, long l, GEN q, GEN L, GEN B)
 }
 
 static void
-REDI_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
+ZRED_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
   long i,lx;
   GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
@@ -220,17 +220,17 @@ REDI_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
     xk[k] = laddii((GEN)xk[k], mulii(q,(GEN)xl[k]));
     for(i=1;i<lx;i++) coeff(x,k,i)=xk[i]=laddii((GEN)xk[i],mulii(q,(GEN)xl[i]));
   }
-  update_LI(k,l,q,L,B);
+  Zupdate_L(k,l,q,L,B);
   update_h (k,l,q,K,h);
 }
 
 static void
-REDI(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
+ZRED(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
   GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
   if (!signe(q)) return;
   q = negi(q);
-  update_LI(k,l,q,L,B);
+  Zupdate_L(k,l,q,L,B);
   update_h (k,l,q,K,h);
   x[k] = (long)ZV_lincomb(gun, q, (GEN)x[k], (GEN)x[l]);
 }
@@ -270,7 +270,7 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
 }
 
 static int
-do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
+do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
          int gram)
 {
   GEN la,la2,p1,Bk;
@@ -291,7 +291,7 @@ do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
     }
     B[k] = (long)diviiexact(q, Bk);
   }
-  /* SWAPI(k-1,k) */
+  /* ZSWAP(k-1,k) */
   if (DEBUGLEVEL>3 && k==kmax)
   { /* output diagnostics associated to re-normalized rational quantities */
     gpmem_t av1 = avma;
@@ -384,7 +384,7 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR)
   return 1;
 }
 static void
-incrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
+ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
 {
   GEN u = NULL; /* gcc -Wall */
   long i, j, s;
@@ -409,8 +409,8 @@ incrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   }
 }
 
-/* x integer matrix */
-GEN
+/* x integer matrix. Beware: this function can return NULL */
+static GEN
 lllint_marked(long MARKED, GEN x, long alpha, int gram,
               GEN *pth, GEN *ptfl, GEN *ptB)
 {
@@ -434,7 +434,7 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
     fl[j] = 0; L[j] = (long)zerocol(n);
   }
   h = pth? idmat(n): NULL;
-  incrementalGS(x, L, B, 1, fl, gram);
+  ZincrementalGS(x, L, B, 1, fl, gram);
   kmax = 1;
   if (DEBUGLEVEL>5) fprintferr("k = ");
   for (k=2;;)
@@ -442,15 +442,15 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
     if (k > kmax)
     {
       if (DEBUGLEVEL>3) fprintferr("K%ld ",k);
-      incrementalGS(x, L, B, k, fl, gram);
+      ZincrementalGS(x, L, B, k, fl, gram);
       kmax = k;
     }
     if (k != MARKED)
     {
-      if (!gram) REDI(k,k-1, x,h,L,(GEN)B[k],kmax);
-      else  REDI_gram(k,k-1, x,h,L,(GEN)B[k],kmax);
+      if (!gram) ZRED(k,k-1, x,h,L,(GEN)B[k],kmax);
+      else  ZRED_gram(k,k-1, x,h,L,(GEN)B[k],kmax);
     }
-    if (do_SWAPI(x,h,L,B,kmax,k,alpha,fl,gram))
+    if (do_ZSWAP(x,h,L,B,kmax,k,alpha,fl,gram))
     {
       if      (MARKED == k)   MARKED = k-1;
       else if (MARKED == k-1) MARKED = k;
@@ -461,8 +461,8 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
       if (k != MARKED)
         for (l=k-2; l; l--)
         {
-          if (!gram) REDI(k,l, x,h,L,(GEN)B[l+1],kmax);
-          else  REDI_gram(k,l, x,h,L,(GEN)B[l+1],kmax);
+          if (!gram) ZRED(k,l, x,h,L,(GEN)B[l+1],kmax);
+          else  ZRED_gram(k,l, x,h,L,(GEN)B[l+1],kmax);
           if (low_stack(lim, stack_lim(av,1)))
           {
             if(DEBUGMEM>1) err(warnmem,"lllint[1]");
@@ -488,17 +488,20 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
   return h? h: x;
 }
 
+/* Beware: this function can return NULL (dim x <= 1) */
 GEN
 lllint_i(GEN x, long alpha, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 {
   return lllint_marked(0, x,alpha,gram,pth,ptfl,ptB);
 }
 
-/* return x * lllint(x) */
+/* return x * lllint(x). No garbage collection */
 GEN
 lllint_ip(GEN x, long alpha)
 {
-  return lllint_i(x, alpha, 0, NULL, NULL, NULL);
+  GEN h = lllint_i(x, alpha, 0, NULL, NULL, NULL); 
+  if (!h) h = x;
+  return h;
 }
 
 GEN
@@ -652,7 +655,7 @@ lllgramallgen(GEN x, long flag)
 
 /* compute B[k], update mu(k,1..k-1) */
 static int
-get_Gram_Schmidt(GEN x, GEN mu, GEN B, long k)
+incrementalGS(GEN x, GEN mu, GEN B, long k)
 {
   GEN s,A = cgetg(k+1, t_COL); /* scratch space */
   long i, j;
@@ -750,7 +753,7 @@ PRECPB:
     {
       kmax = k; if (KMAX < kmax) KMAX = kmax;
       if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
-      if (!get_Gram_Schmidt(x,L,B,k)) goto PRECPB;
+      if (!incrementalGS(x,L,B,k)) goto PRECPB;
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
     L1 = gcoeff(L,k,k-1);
@@ -762,7 +765,7 @@ PRECPB:
 	fprintferr("\nRecomputing Gram-Schmidt, kmax = %ld, prec was %ld\n",
                    kmax,last_prec);
       for (k1=1; k1<=kmax; k1++)
-        if (!get_Gram_Schmidt(x,L,B,k1)) goto PRECPB;
+        if (!incrementalGS(x,L,B,k1)) goto PRECPB;
     }
     if (k != MARKED) RED(k,k-1, x,h,L,KMAX);
     if (do_SWAP(x,h,L,B,kmax,k,QR))
