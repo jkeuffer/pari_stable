@@ -15,6 +15,17 @@ Priority classification (first column): [subjective and debatable!]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
+-  mathnfmod([1,2;2,0]/3,2) --> SEGV: easy to fix locally. But the
+   documentations specifies that the input must be integral and almost all
+   routines can be broken (SEGV) by forging clever enough invalid inputs.
+
+   PARI is not strongly typed, and thorough type checking is expensive if
+   repeated over and over again on the same objects. Adding more quick
+   specialized checks in each routine is not the solution: it will simply be a
+   little harder to break, at the expense of unmaintainable code. A solution
+   would be to allow dynamic GEN typing that would store type information once
+   it's computed. How useful would this be ?
+
 -  ? O(y^5)/(1+x) + O(x^3)
    %1 = O(x^3)
 
