@@ -42,6 +42,7 @@ GEN sqrispec(GEN x, long nx);
 long Flx_SQR_LIMIT = 200;
 long Flx_MUL_LIMIT = 100;
 long Flx_INVMONTGOMERY_LIMIT = 6000;
+long Flx_POW_MONTGOMERY_LIMIT = 1000;
 
 #define both_odd(x,y) ((x)&(y)&1)
 
@@ -1336,34 +1337,6 @@ _Flxq_mul(void *data, GEN x, GEN y)
 
 /* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
 GEN
-Flxq_pow_montgo(GEN x, GEN n, GEN pol, ulong p)
-{
-  pari_sp av = avma;
-  Flxq_muldata D;
-  GEN y;
-  if (!signe(n)) return Fl_Flx(1,varn(pol));
-  if (signe(n) < 0)
-    x=Flxq_inv(x,pol,p);
-  else
-    x=Flx_rem(x, pol, p);
-  if (is_pm1(n)) return x;
-  D.pol = pol;
-  D.p   = p;
-  /* not tuned*/
-  if (pol[2])
-  {
-    /*We do not handle polynomials multiple of x yet*/
-    D.mg  = Flx_invmontgomery(pol,p);
-    y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
-  }
-  else
-    y = leftright_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
-  return gerepileupto(av, y);
-}
-
-
-/* n-Power of x in Z/pZ[X]/(pol), as t_VECSMALL. */
-GEN
 Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
 {
   pari_sp av = avma;
@@ -1378,9 +1351,9 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   D.pol = pol;
   D.p   = p;
   /* not tuned*/
-  if (0 && pol[2])
+  if (pol[2] && degpol(pol) >= Flx_POW_MONTGOMERY_LIMIT)
   {
-    /*We do not handle polynomials multiple of x yet*/
+    /* We do not handle polynomials multiple of x yet */
     D.mg  = Flx_invmontgomery(pol,p);
     y = leftright_pow(x, n, (void*)&D, &_sqr_montgomery, &_mul_montgomery);
   }
