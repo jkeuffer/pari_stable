@@ -1337,10 +1337,6 @@ Mod(1,p))}, normalized.
 \kbd{FpX\_red} componentwise and returns the result (and we obtain a vector
 of \kbd{FpX}s).
 
-\fun{GEN}{FpXX_red}{GEN z, GEN p}, \kbd{z} a \typ{POL} whose coefficients are
-either \kbd{ZX}s or \typ{INT}s. Returns the \typ{POL} equal to \kbd{z} with
-all components reduced modulo \kbd{p}.
-
 \noindent Now, except for \kbd{p}, the operands and outputs are all \kbd{FpX}
 objects. Results are undefined on other inputs.
 
@@ -1548,6 +1544,17 @@ $\kbd{f}(\kbd{x})$.
 \fun{GEN}{FpX_FpXQV_compo}{GEN f,GEN V,GEN T,GEN p} returns
 $\kbd{f}(\kbd{x})$, assuming that \kbd{V} was computed by
 $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$.
+
+\subsec{\kbd{FpXX}}.
+Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
+coefficients are either \typ{INT}s or \typ{FpX}s. This reduce memory
+overhead at the expense of consistency.
+
+\fun{GEN}{FpXX_add}{GEN x, GEN y, GEN p} adds \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{FpXX_red}{GEN z, GEN p}, \kbd{z} a \typ{POL} whose coefficients are
+either \kbd{ZX}s or \typ{INT}s. Returns the \typ{POL} equal to \kbd{z} with
+all components reduced modulo \kbd{p}.
 
 \subsec{\kbd{FpXQX}, \kbd{FqX}}.
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
@@ -1838,6 +1845,15 @@ returning an \kbd{Flx} in variable $v$.
 
 \fun{GEN}{FlxqV_roots_to_pol}{GEN V, GEN T, ulong p, long v} as 
 \kbd{FqV\_roots\_to\_pol} returning an \kbd{FlxqX} in variable $v$.
+
+\subsec{\kbd{FlxX}}. See \kbd{FpXX} operations.
+
+\fun{GEN}{FlxX_add}{GEN P, GEN Q, ulong p}
+
+\fun{GEN}{FlxX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
+
+\fun{GEN}{FlxX_shift}{GEN a, long n}
 
 \subsec{\kbd{FlxqX}}. See \kbd{FpXQX} operations.
 
