@@ -362,6 +362,7 @@ convol(GEN x, GEN y)
   /* inputs shifted: x[i] and y[i] now correspond to monomials of same degree */
   if (ly < lx) lx = ly; /* min length */
   if (ex < ey) ex = ey; /* max valuation */
+  if (lx - ex < 3) return zeroser(vx, lx-2);
 
   z = cgetg(lx - ex, t_SER);
   z[1] = evalsigne(1) | evalvalp(ex) | evalvarn(vx);
