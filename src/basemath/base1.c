@@ -284,7 +284,8 @@ gpolcomp(GEN p1, GEN p2)
   return 0;
 }
 
-/* assume pol in Z[X] */
+/* assume pol in Z[X]. Find C, L in Z such that POL = C pol(x / L) monic in Z[X].
+ * Return POL and set *ptlead = L */
 GEN
 primitive_pol_to_monic(GEN pol, GEN *ptlead)
 {
@@ -342,8 +343,7 @@ get_F4(GEN x)
   return p1;
 }
 
-GEN galoisbig(GEN x, long prec);
-GEN roots_to_pol(GEN a, long v);
+extern GEN galoisbig(GEN x, long prec);
 
 GEN
 galois(GEN x, long prec)
