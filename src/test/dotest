@@ -136,14 +136,14 @@ done
 
 case "x$buge" in
   x)  file_diff=;;
-  x*) end=""
-      file_diff=elliptic-sta.dif;;
   xsta|xdyn)
       end=" (gp-$buge only)"
       file_diff=elliptic-$buge.dif;;
   xexe)
       end=" (gp-$buge)"
       file_diff=elliptic.dif;;
+  x*) end=""
+      file_diff=elliptic-sta.dif;;
 esac
 if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
@@ -159,18 +159,19 @@ fi
 
 case "x$bugp" in
   x)  file_diff=;;
-  x*) end=""
-      file_diff=program-sta.dif;;
   xsta|xdyn)
       end=" (gp-$bugp only)"
       file_diff=program-$bugp.dif;;
   xexe)
       end=" (gp-$bugp)"
       file_diff=program.dif;;
+  x*) end=""
+      file_diff=program-sta.dif;;
 esac
 if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
 pat=`head -4 $file_diff|tail -1|grep "108,118"`
+
 if test $len -eq 29  -a  -n "$pat"; then
 cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
