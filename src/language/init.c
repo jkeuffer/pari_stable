@@ -146,6 +146,17 @@ pari_sighandler(int sig)
       msg="bus error: bug in PARI or calling program";
       break;
 #endif
+#ifdef SIGFPE
+    case SIGFPE:
+      msg="floating point exception: bug in PARI or calling program";
+      break;
+#endif
+#ifdef SIGPIPE
+    case SIGPIPE:
+      msg="broken pipe: bug in PARI or calling program";
+      break;
+#endif
+
     default:
       msg="unknown signal";
   }
@@ -335,18 +346,22 @@ fix_size(long a)
 void
 pari_sig_init(void (*f)(int))
 {
-#ifdef WINCE
-#else
 #ifdef SIGBUS
   signal(SIGBUS,f);
 #endif
+#ifdef SIGFPE
+  signal(SIGFPE,f);
+#endif
+#ifdef SIGINT
   signal(SIGINT,f);
+#endif
 #ifdef SIGBREAK
   signal(SIGBREAK,f);
 #endif
 #ifdef SIGPIPE
   signal(SIGPIPE,f);
 #endif
+#ifdef SIGSEGV
   signal(SIGSEGV,f);
 #endif
 }

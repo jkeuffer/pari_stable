@@ -1536,20 +1536,27 @@ gp_quit()
 {
   free_graph(); freeall();
   kill_all_buffers(NULL);
-#ifdef WINCE
-#else
   if (INIT_SIG)
   {
 #ifdef SIGBUS
     signal(SIGBUS,SIG_DFL);
 #endif
+#ifdef SIGFPE
+    signal(SIGFPE,SIG_DFL);
+#endif
+#ifdef SIGPIPE
+    signal(SIGPIPE,SIG_DFL);
+#endif
+#ifdef SIGSEGV
     signal(SIGSEGV,SIG_DFL);
+#endif
+#ifdef SIGINT
     signal(SIGINT,SIG_DFL);
+#endif
 #ifdef SIGBREAK
     signal(SIGBREAK,SIG_DFL);
 #endif
   }
-#endif
   term_color(c_NONE);
   pariputs_opt("Good bye!\n"); exit(0);
 }
@@ -1982,6 +1989,16 @@ do_time(long flag)
   return thestring;
 }
 
+static void
+handle_SIGINT()
+{
+#ifdef _WIN32
+  if (++win32ctrlc >= 5) _exit(3);
+#else
+  err(siginter, do_time(ti_INTERRUPT));
+#endif
+}
+
 #ifndef WINCE
 static void
 gp_sighandler(int sig)
@@ -1990,25 +2007,28 @@ gp_sighandler(int sig)
   signal(sig,gp_sighandler);
   switch(sig)
   {
-    case SIGINT:
-#ifdef _WIN32
-# ifdef SIGBREAK
-    case SIGBREAK:
-# endif
-      if (++win32ctrlc >= 5) _exit(3);
-      return;
+#ifdef SIGBREAK
+    case SIGBREAK: handle_SIGINT(); return;
 #endif
-      msg = do_time(ti_INTERRUPT);
-      err(siginter,msg);
-      return;
+#ifdef SIGINT
+    case SIGINT: handle_SIGINT(); return;
+#endif
 
+#ifdef SIGSEGV
     case SIGSEGV:
       msg="GP (Segmentation Fault)";
       break;
+#endif
 
 #ifdef SIGBUS
     case SIGBUS:
       msg="GP (Bus Error)";
+      break;
+#endif
+
+#ifdef SIGFPE
+    case SIGFPE:
+      msg="GP (Floating Point Exception)";
       break;
 #endif
 
@@ -2017,6 +2037,7 @@ gp_sighandler(int sig)
       msg="GP (Broken Pipe)";
       break;
 #endif
+
     default:
       msg="signal handling";
   }
