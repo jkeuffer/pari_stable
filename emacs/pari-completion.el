@@ -13,6 +13,8 @@
 ;; Of pari.el, it uses:
 ;; variables:
 ;;     gp-process, gp-prompt-pattern, gp-tutorial-requiredp
+(defvar gp-tutorial-requiredp)
+(defvar gp-prompt-pattern)
 ;; functions: 
 ;;     gp-restore-wind-conf, gp-background,
 ;;     gp-store-wind-conf, gp-backward-wind-conf,

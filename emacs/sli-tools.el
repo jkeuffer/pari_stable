@@ -41,6 +41,8 @@
 ;; Variables that defines how indentation should occur.
 ;; See mupad.el for an example.
 ;;------------------------------------------------------
+(defvar block-comment-start)
+(defvar block-comment-end)
 
 ;; We use "" and  \" for strings.
 

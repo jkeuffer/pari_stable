@@ -50,10 +50,12 @@
   (defun gp-add-symbol (s) (print "Feature pari-completion is absent." "*Messages*"))))
 
 (defvar gp-c-array nil "Defined in pari-completion.el")
-;; The next two variables are here to pacify the compiler !
+;; The next variables are here to pacify the compiler !
 ;; Do *not* assign any value to them or they may override ....
 (defvar gp-file-name)
 (defvar gp-version)
+(defvar gp-gphelp-dir)
+(defvar gp-pariemacs)
 ;;; help menu part:
 
 ;; Topology of a menu-buffer : three parts delimited
