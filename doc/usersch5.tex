@@ -278,8 +278,11 @@ so an error message is issued.
 \fun{GEN}{itor}{GEN x, long prec} assigns the \typ{INT} \kbd{x} into a
 \typ{REAL} of length \kbd{prec} and return the latter.
 
-\fun{long}{itos}{GEN x} converts the PARI integer \kbd{x} to a C long (if
-possible, otherwise an error message is issued).
+\fun{long}{itos}{GEN x} converts the PARI integer \kbd{x} to a C long if
+possible, otherwise raise an exception.
+
+\fun{long}{itos_or_0}{GEN x} converts the PARI integer \kbd{x} to a C long if
+possible, otherwise return $0$.
 
 \fun{GEN}{stoi}{long s} creates the PARI integer corresponding to the
 long~\kbd{s}.
