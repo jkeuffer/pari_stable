@@ -1129,13 +1129,22 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
       }
     }
     q = (GEN)x[indxt]; i=l;
-    for (j=i<<1; j<=ir; j<<=1)
-    {
-      if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) < 0) j++;
-      if (cmp(q,(GEN)x[indx[j]]) >= 0) break;
+    if (flag & cmp_REV)
+      for (j=i<<1; j<=ir; j<<=1)
+      {
+        if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) > 0) j++;
+        if (cmp(q,(GEN)x[indx[j]]) <= 0) break;
 
-      indx[i]=indx[j]; i=j;
-    }
+        indx[i]=indx[j]; i=j;
+      }
+    else
+      for (j=i<<1; j<=ir; j<<=1)
+      {
+        if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) < 0) j++;
+        if (cmp(q,(GEN)x[indx[j]]) >= 0) break;
+
+        indx[i]=indx[j]; i=j;
+      }
     indx[i]=indxt;
   }
 }

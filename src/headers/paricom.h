@@ -318,4 +318,5 @@ extern void* global_err_data;
 /* for gen_sort */
 #define cmp_IND 1
 #define cmp_LEX 2
-#define cmp_C   4
+#define cmp_REV 4
+#define cmp_C   8
