@@ -1231,7 +1231,7 @@ manage_cache(GEN chi, GEN pp, GEN ns)
    a, chi in Zp[X]
    ns = Newton sums of chi */
 static GEN
-newtonsums(GEN a, GEN da, GEN chi, GEN pp, GEN ns, long c)
+newtonsums(GEN a, GEN da, GEN chi, long c, GEN pp, GEN ns)
 {
   GEN va, pa, dpa, s;
   long j, k, n = degpol(chi);
@@ -1310,7 +1310,7 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   m = d? ggval(d, p): 0; /* >= 0 */
   pp = gpowgs(p, (m+1)*c+1);
   ns = manage_cache(chi, pp, ns);
-  v = newtonsums(a, d, chi, pp, ns, c);
+  v = newtonsums(a, d, chi, c, pp, ns);
   if (!v) return 0;
   for (j = 1; j <= c; j++)
     if (signe((GEN)v[j]) && E*ggval((GEN)v[j], p) - j*(E*m+1) < 0) return 0;
@@ -1346,8 +1346,9 @@ mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
     NPP = mulii(NPP, gpowgs(d, n));
     nspp = (dr < 0)? NPP: mulii(nspp, gpowgs(p, dr));
   }
-  ns = manage_cache(f, nspp, ns);
-  chi = newtoncharpoly(npp, p, newtonsums(a, d, f, NPP, ns, n));
+  ns = newtonsums(a, d, f, n, NPP, manage_cache(f, nspp, ns));
+  if (!ns) return NULL;
+  chi = newtoncharpoly(npp, p, ns);
   if (!chi) return NULL;
   setvarn(chi, varn(f));
   return gerepileupto(av, centermod(chi, pp));
