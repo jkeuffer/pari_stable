@@ -118,6 +118,8 @@ Kernel:
 
 4  inline level0 routines should operate on _limbs_, not on words.
 
+4  use divide & conquer approach in string / integer conversions
+
 3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
 
 2  add support for different multiprecision kernels (a la LiDIA)
@@ -181,9 +183,16 @@ Misc:
 
 ***************************   GP DESIGN       ****************************
 
-5  remove limitation to 8 arguments for static functions (argvec[9])
+-  rework the semantics of "trap". 
 
-4  use divide & conquer approach in string / integer conversions
+-  Allow GP to trap an OS signal. A good example. Suppose that gp runs, say
+   in nohup mode, and it takes several days or even weeks to complete the
+   program. In meantime several things can happen resulting in shutdown of
+   the machine. On shutdown all programs receive SIGTERM signal. I would like
+   gp to be able to trap this signal and when it receives one, to execute
+   some gp command, e.g saving all settings with full accuracy (e.g writebin).
+
+5  remove limitation to 8 arguments for static functions (argvec[9])
 
 4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
    in large intervals, sieve out multiple of small primes there, then use
