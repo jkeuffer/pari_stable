@@ -373,7 +373,8 @@ _res(long n, long s, long k)
   GEN y = cgetg(4, t_VEC);
   y[1] = lstoi(n);
   y[2] = lstoi(s);
-  if (!new_galois_format) k = (n == 24 && (k == 6 || k == 2))? 2: 1;
+  if (!new_galois_format)
+    k = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
   y[3] = lstoi(k); return y;
 }
 
