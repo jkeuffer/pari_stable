@@ -2768,19 +2768,18 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
   N   = degpol(nf[1]);
   if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
 
-  Mcyc = diagonal(gmael(bnr, 5, 2));
-
   /* check the bnf */
   if (!varn(nf[1])) err(talker, "main variable in bnrstark must not be x");
   if (nf_get_r2(nf)) err(talker, "base field not totally real in bnrstark");
 
   /* check the subgrp */
+  Mcyc = diagonal(gmael(bnr, 5, 2));
   if (! (subgrp = get_subgroup(subgrp,Mcyc)) )
     err(talker, "incorrect subgrp in bnrstark");
 
   /* compute bnr(conductor) */
   p1     = conductor(bnr, subgrp, 2);
-  bnr    = (GEN)p1[2];
+  bnr    = (GEN)p1[2]; Mcyc = diagonal(gmael(bnr, 5, 2));
   subgrp = (GEN)p1[3];
   if (gcmp1( dethnf_i(subgrp) )) { avma = av; return polx[0]; }
 
