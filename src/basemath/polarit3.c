@@ -4018,6 +4018,7 @@ u_FpYX_subres(GEN u, GEN v, ulong p)
     swap(u,v); lswap(dx,dy);
     if (both_odd(dx, dy)) signh = -signh;
   }
+  if (dy < 0) return gzero;
   if (dy==0) return gerepileupto(av, u_FpX_pow((GEN)v[2],dx,p));
 
   g = h = u_scalarpol(1, 0); av2 = avma; lim = stack_lim(av2,1);
