@@ -2375,10 +2375,12 @@ eltmul(GEN x, GEN y) { return element_mul(static_OBJ, x, y); }
 static GEN
 eltpow(GEN x, GEN n) { return element_pow(static_OBJ, x, n); }
 
+#if 0
 static GEN
 ellmul(GEN x, GEN y) { return powell(static_OBJ, x, y); }
 static GEN
 ellpow(GEN x, GEN n) { return idealpow(static_OBJ, x, n); }
+#endif
 
 GEN
 _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
