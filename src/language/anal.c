@@ -1253,8 +1253,13 @@ static GEN
 num_deriv(void *call, GEN argvec[])
 {
   GEN eps,a,b, x = argvec[0];
-  long pr = precision(x), pr2,l;
-  long av = avma, e, ex = gexpo(x);
+  long pr,pr2,l,e,ex, av = avma;
+  if (!is_const_t(typ(x))) 
+  {
+    a = do_call(call, x, argvec);
+    return gerepileupto(av, deriv(a,gvar9(a)));
+  }
+  pr = precision(x); ex = gexpo(x);
   if (!pr) pr = prec;
   pr2 = (long)ceil(pr * 3.)/2;
   l = 2+pr2;
@@ -1272,8 +1277,14 @@ static GEN
 num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
 {
   GEN eps,a,b, x = *arg;
-  long pr = precision(x), pr2,l;
-  long av = avma, e, ex = gexpo(x);
+  long pr,pr2,l,e,ex, av = avma;
+
+  if (!is_const_t(typ(x))) 
+  {
+    a = call_fun(p,arg,loc,narg,nloc);
+    return gerepileupto(av, deriv(a,gvar9(a)));
+  }
+  pr = precision(x); ex = gexpo(x);
   if (!pr) pr = prec;
   pr2 = (long)ceil(pr * 3.)/2;
   l = 2+pr2;
