@@ -1193,7 +1193,7 @@ ellfacteur(GEN n, int insist)
     nbc = dsn + (dsn >> 2) + 9;	/* 8 or more curves in parallel */
     nbc &= ~3; /* nbc is always a multiple of 4 */
     if (nbc > nbcmax) nbc = nbcmax;
-    a = 1 + (nbcmax<<7); /* seed for choice of curves */
+    a = 1 + (nbcmax<<7)*(size&0xffff); /* seed for choice of curves */
     rep = 0; /* gcc -Wall */
   }
   else
@@ -1228,8 +1228,8 @@ ellfacteur(GEN n, int insist)
     }
 
     /* it may be convenient to use disjoint sets of curves for the non-insist
-     * and insist phases;  moreover, repeated non-insistent calls acting on
-     * factors of the same original number should try to use fresh curves.
+     * and insist phases;  moreover, repeated calls acting on factors of the
+     * same original number should try to use fresh curves.
      * The following achieves this */
     a = 1 + (nbcmax<<3)*(size & 0xf);
   }
