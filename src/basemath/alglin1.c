@@ -1105,13 +1105,13 @@ gauss_get_col(GEN a, GEN b, GEN p, long li)
   return u;
 }
 
-GEN
-Fp_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN p)
+static GEN
+Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
 {
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = lresii(mulii((GEN)b[li], mpinvmod(piv,p)), p);
+  u[li] = lresii(mulii((GEN)b[li], invpiv), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
@@ -1123,13 +1123,13 @@ Fp_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN p)
   }
   return u;
 }
-GEN
-Fq_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN T, GEN p)
+static GEN
+Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
 {
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = (long)FpXQ_mul((GEN)b[li], FpXQ_inv(piv,T,p), T,p);
+  u[li] = (long)FpXQ_mul((GEN)b[li], invpiv, T,p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
@@ -1142,6 +1142,7 @@ Fq_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN T, GEN p)
   return u;
 }
 
+#if 0
 /* assume -p < a < p, return 1/a mod p */
 static long
 u_Fp_inv(long a, long p)
@@ -1149,43 +1150,46 @@ u_Fp_inv(long a, long p)
   if (a < 0) a = p + a; /* pb with ulongs < 0 */
   return (long)u_invmod((ulong)a,(ulong)p);
 }
+#endif
 
-/* assume 0 <= a[i,i] < p */
-GEN
-u_Fp_gauss_get_col(GEN a, GEN b, ulong piv, long li, ulong p)
+/* assume 0 <= a[i,j], invpiv < p */
+static GEN
+u_Fp_gauss_get_col_OK(GEN a, GEN b, ulong invpiv, long li, ulong p)
 {
-  GEN u = cgetg(li+1,t_VECSMALL);
-  ulong m;
+  ulong *u = (ulong*)cgetg(li+1,t_VECSMALL);
+  ulong m = b[li] % p;
   long i,j;
 
-  m = b[li] % p;
-  if (u_OK_ULONG(p))
+  u[li] = (m * invpiv) % p;
+  for (i = li-1; i > 0; i--)
   {
-    u[li] = (m * u_Fp_inv(piv,p)) % p;
-    for (i=li-1; i>0; i--)
-    {
-      m = p - b[i]%p;
-      for (j=i+1; j<=li; j++) {
-        if (m & HIGHBIT) m %= p;
-        m += coeff(a,i,j) * u[j];
-      }
-      m %= p;
-      if (m) m = ((p-m) * u_invmod((ulong)coeff(a,i,i), p)) % p; 
-      u[i] = m;
+    m = p - b[i]%p;
+    for (j = i+1; j <= li; j++) {
+      if (m & HIGHBIT) m %= p;
+      m += coeff(a,i,j) * u[j]; /* 0 <= u[j] < p */
     }
+    m %= p;
+    if (m) m = ((p-m) * u_invmod((ulong)coeff(a,i,i), p)) % p; 
+    u[i] = m;
   }
-  else
+  return u;
+}
+static GEN
+u_Fp_gauss_get_col(GEN a, GEN b, ulong invpiv, long li, ulong p)
+{
+  ulong *u = (ulong*)cgetg(li+1,t_VECSMALL);
+  ulong m = b[li] % p;
+  long i,j;
+
+  u[li] = mulssmod(m, invpiv, p);
+  for (i=li-1; i>0; i--)
   {
-    u[li] = mulssmod(m, u_Fp_inv(piv,p), p);
-    for (i=li-1; i>0; i--)
-    {
-      m = p - b[i]%p;
-      for (j=i+1; j<=li; j++)
-        m += mulssmod(coeff(a,i,j), u[j], p);
-      m %= p;
-      if (m) m = mulssmod(p-m, u_invmod((ulong)coeff(a,i,i), p), p);
-      u[i] = m;
-    }
+    m = p - b[i]%p;
+    for (j = i+1; j <= li; j++)
+      m += mulssmod(coeff(a,i,j), u[j], p);
+    m %= p;
+    if (m) m = mulssmod(p-m, u_invmod((ulong)coeff(a,i,i), p), p);
+    u[i] = m;
   }
   return u;
 }
@@ -1213,16 +1217,16 @@ _Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
   b[k] = (long)ladd((GEN)b[k], gmul(m, (GEN)b[i]));
 }
 
-/* assume m < p && u_OK_ULONG(p) && (! (b[i] & MASK)) */
+/* assume m < p && u_OK_ULONG(p) && (! (b[i] & b[k] & MASK)) */
 static void
-_u_Fp_addmul_OK(GEN b, long k, long i, ulong m, ulong p)
+_u_Fp_addmul_OK(ulong *b, long k, long i, ulong m, ulong p)
 {
   b[k] += m * b[i];
   if (b[k] & MASK) b[k] %= p;
 }
 /* assume m < p */
 static void
-_u_Fp_addmul(GEN b, long k, long i, ulong m, ulong p)
+_u_Fp_addmul(ulong *b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
   b[k] += mulssmod(m, b[i], p);
@@ -1334,8 +1338,9 @@ gauss(GEN a, GEN b)
 static GEN
 u_FpM_gauss_sp(GEN a, GEN b, ulong p)
 {
-  long iscol,i,j,k,li,bco, aco = lg(a)-1;
-  ulong piv, m;
+  long iscol, i, j, k, li, bco, aco = lg(a)-1;
+  ulong piv, invpiv, m;
+  const int OK_ulong = u_OK_ULONG(p);
   GEN u;
 
   if (!aco) return cgetg(1,t_MAT);
@@ -1343,53 +1348,58 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
   bco = lg(b)-1;
   iscol = (typ(b)!=t_MAT);
   if (iscol) b = col_to_mat(b);
-  piv = 0; /* gcc -Wall */
+  piv = invpiv = 0; /* -Wall */
   for (i=1; i<=aco; i++)
   {
     /* k is the line where we find the pivot */
-    piv = coeff(a,i,i) % p;
-    coeff(a,i,i) = piv; k = i;
-    if (!piv)
+    if (OK_ulong) /* u_Fp_gauss_get_col wants 0 <= a[i,j] < p for all i,j */
+      for (k = 1; k < i; k++) coeff(a,k,i) %= p;
+    for (k = i; k <= li; k++)
     {
-      for (k++; k <= li; k++)
-      {
-        coeff(a,k,i) %= p;
-        if (coeff(a,k,i)) break;
-      }
-      if (k>li) return NULL;
+      piv = ( coeff(a,k,i) %= p );
+      if (piv) break;
     }
+    if (!piv) return NULL;
+    invpiv = u_invmod(piv, p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
       for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
       for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
-      piv = coeff(a,i,i);
     }
     if (i == aco) break;
 
     for (k=i+1; k<=li; k++)
     {
-      m = coeff(a,k,i) % p; coeff(a,k,i) = 0;
-      if (m)
+      m = ( coeff(a,k,i) %= p );
+      if (!m) continue;
+
+      m = p - mulssmod(m, invpiv, p); /* - 1/piv mod p */
+      if (m == 1)
       {
-	m = mulssmod(m, u_invmod(piv,p), p);
-        m = p - m;
-        if (u_OK_ULONG(p))
-        {
-          for (j=i+1; j<=aco; j++) _u_Fp_addmul_OK((GEN)a[j],k,i,m, p);
-          for (j=1;   j<=bco; j++) _u_Fp_addmul_OK((GEN)b[j],k,i,m, p);
-        }
-        else
-        {
-          for (j=i+1; j<=aco; j++) _u_Fp_addmul((GEN)a[j],k,i,m, p);
-          for (j=1;   j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p);
-        }
+        for (j=i+1; j<=aco; j++) _u_Fp_add((ulong*)a[j],k,i, p);
+        for (j=1;   j<=bco; j++) _u_Fp_add((ulong*)b[j],k,i, p);
+      }
+      else if (OK_ulong)
+      {
+        for (j=i+1; j<=aco; j++) _u_Fp_addmul_OK((ulong*)a[j],k,i,m, p);
+        for (j=1;   j<=bco; j++) _u_Fp_addmul_OK((ulong*)b[j],k,i,m, p);
+      }
+      else
+      {
+        for (j=i+1; j<=aco; j++) _u_Fp_addmul((ulong*)a[j],k,i,m, p);
+        for (j=1;   j<=bco; j++) _u_Fp_addmul((ulong*)b[j],k,i,m, p);
       }
     }
   }
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++) u[j] = (long)u_Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
+  if (OK_ulong)
+    for (j=1; j<=bco; j++)
+      u[j] = (long)u_Fp_gauss_get_col_OK(a,(GEN)b[j], invpiv, aco, p);
+  else
+    for (j=1; j<=bco; j++)
+      u[j] = (long)u_Fp_gauss_get_col(a,(GEN)b[j], invpiv, aco, p);
   return iscol? (GEN)u[1]: u;
 }
 
@@ -1422,7 +1432,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   pari_sp av,lim;
   long i,j,k,li,bco, aco = lg(a)-1;
   int iscol;
-  GEN piv,m,u;
+  GEN piv, invpiv, m, u;
 
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
   if (b && typ(b)!=t_COL && typ(b)!=t_MAT) err(typeer,"gauss");
@@ -1447,54 +1457,52 @@ FpM_gauss(GEN a, GEN b, GEN p)
   lim = stack_lim(av,1);
   a = dummycopy(a);
   bco = lg(b)-1;
-  piv = NULL; /* gcc -Wall */
+  piv = invpiv = NULL; /* -Wall */
   for (i=1; i<=aco; i++)
   {
+    GEN minvpiv;
     /* k is the line where we find the pivot */
-    coeff(a,i,i) = lresii(gcoeff(a,i,i), p);
-    piv = gcoeff(a,i,i); k = i;
-    if (!signe(piv))
+    for (k = i; k <= li; k++)
     {
-      for (k++; k <= li; k++)
-      {
-        coeff(a,k,i) = lresii(gcoeff(a,k,i), p);
-        if (signe(coeff(a,k,i))) break;
-      }
-      if (k>li) return NULL;
+      piv = resii(gcoeff(a,k,i), p);
+      coeff(a,k,i) = (long)piv;
+      if (signe(piv)) break;
     }
+    if (k > li) return NULL;
+    invpiv  = mpinvmod(piv, p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
       for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
       for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
-      piv = gcoeff(a,i,i);
     }
     if (i == aco) break;
 
+    minvpiv = negi(invpiv);
     for (k=i+1; k<=li; k++)
     {
       coeff(a,k,i) = lresii(gcoeff(a,k,i), p);
       m = gcoeff(a,k,i); coeff(a,k,i) = zero;
       if (signe(m))
       {
-	m = mulii(m, mpinvmod(piv,p));
-        m = resii(negi(m), p);
+	
+        m = resii(mulii(m, minvpiv), p); /* -1/piv mod p */
 	for (j=i+1; j<=aco; j++) _Fp_addmul((GEN)a[j],k,i,m, p);
         for (j=1  ; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&a; gptr[1]=&b;
       if(DEBUGMEM>1) err(warnmem,"FpM_gauss. i=%ld",i);
-      gerepilemany(av,gptr,2);
+      gerepileall(av,2, &a,&b);
     }
   }
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++) u[j] = (long)Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
+  for (j=1; j<=bco; j++)
+    u[j] = (long)Fp_gauss_get_col(a, (GEN)b[j], invpiv, aco, p);
   return gerepilecopy(av, iscol? (GEN)u[1]: u);
 }
 GEN
@@ -1503,7 +1511,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   pari_sp av,lim;
   long i,j,k,li,bco, aco = lg(a)-1;
   int iscol;
-  GEN piv,m,u;
+  GEN piv, invpiv, m, u;
 
   if (!T) return FpM_gauss(a,b,p);
 
@@ -1521,21 +1529,18 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   lim = stack_lim(av,1);
   a = dummycopy(a);
   bco = lg(b)-1;
-  piv = NULL; /* gcc -Wall */
+  piv = invpiv = NULL; /* -Wall */
   for (i=1; i<=aco; i++)
   {
     /* k is the line where we find the pivot */
-    coeff(a,i,i) = (long)FpX_res(gcoeff(a,i,i), T,p);
-    piv = gcoeff(a,i,i); k = i;
-    if (!signe(piv))
+    for (k = i; k <= li; k++)
     {
-      for (k++; k <= li; k++)
-      {
-        coeff(a,k,i) = (long)FpX_res(gcoeff(a,k,i), T,p);
-        if (signe(coeff(a,k,i))) break;
-      }
-      if (k>li) return NULL;
+      piv = FpX_res(gcoeff(a,k,i), T,p);
+      coeff(a,k,i) = (long)piv;
+      if (signe(piv)) break;
     }
+    if (k > li) return NULL;
+    invpiv = FpXQ_inv(piv,T,p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
@@ -1552,23 +1557,22 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
       m = gcoeff(a,k,i); coeff(a,k,i) = zero;
       if (signe(m))
       {
-	m = FpXQ_mul(m, FpXQ_inv(piv,T,p),T,p);
-        m = resii(negi(m), p);
+	m = gneg( FpXQ_mul(m, invpiv, T,p) );
 	for (j=i+1; j<=aco; j++) _Fq_addmul((GEN)a[j],k,i,m, T,p);
         for (j=1;   j<=bco; j++) _Fq_addmul((GEN)b[j],k,i,m, T,p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&a; gptr[1]=&b;
       if(DEBUGMEM>1) err(warnmem,"FpM_gauss. i=%ld",i);
-      gerepilemany(av,gptr,2);
+      gerepileall(av, 2, &a,&b);
     }
   }
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++) u[j] = (long)Fq_gauss_get_col(a,(GEN)b[j],piv,aco,T,p);
+  for (j=1; j<=bco; j++)
+    u[j] = (long)Fq_gauss_get_col(a, (GEN)b[j], invpiv, aco, T, p);
   return gerepilecopy(av, iscol? (GEN)u[1]: u);
 }
 
@@ -1579,7 +1583,7 @@ FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
 /* set y = x * y */
 #define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
 static GEN
-u_FpM_Fp_mul_ip(GEN y, long x, long p)
+u_FpM_Fp_mul_ip(GEN y, ulong x, ulong p)
 {
   int i,j, m = lg(y[1]), l = lg(y);
   if (HIGHWORD(x | p))
@@ -2483,9 +2487,10 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
 static GEN
 u_FpM_ker_sp(GEN x, ulong p, long deplin)
 {
-  GEN y,c,d;
-  long i,j,k,r,t,n;
+  GEN y, c, d;
+  long i, j, k, r, t, n;
   ulong a, piv, m;
+  const int OK_ulong = u_OK_ULONG(p);
 
   n = lg(x)-1;
   m=lg(x[1])-1; r=0;
@@ -2520,21 +2525,17 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
 	coeff(x,j,i) = (piv * coeff(x,j,i)) % p;
       for (t=1; t<=m; t++)
       {
-	if (t==j) continue;
+	if (t == j) continue;
 
-        piv = coeff(x,t,k) % p;
+        piv = ( coeff(x,t,k) %= p );
         if (!piv) continue;
 
-        coeff(x,t,k) = 0;
         if (piv == 1)
           for (i=k+1; i<=n; i++) _u_Fp_add((GEN)x[i],t,j,p);
+        else if (OK_ulong)
+          for (i=k+1; i<=n; i++) _u_Fp_addmul_OK((ulong*)x[i],t,j,piv,p);
         else
-        {
-          if (u_OK_ULONG(p))
-            for (i=k+1; i<=n; i++) _u_Fp_addmul_OK((GEN)x[i],t,j,piv,p);
-          else
-            for (i=k+1; i<=n; i++) _u_Fp_addmul((GEN)x[i],t,j,piv,p);
-        }
+          for (i=k+1; i<=n; i++) _u_Fp_addmul((ulong*)x[i],t,j,piv,p);
       }
     }
   }
