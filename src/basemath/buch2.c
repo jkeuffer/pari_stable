@@ -278,10 +278,10 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   avma = av; return 1;
 }
 static int
-subFB_increase(FB_t *F, GEN nf, long step, GEN L_jid)
+subFB_change(FB_t *F, GEN nf, long step, GEN L_jid)
 {
   GEN yes, D = (GEN)nf[3];
-  long i, iyes, lv = F->KC + 1, minsFB = lg(F->subFB)-1 + step;
+  long i, iyes, lv = F->KC + 1, l = lg(F->subFB)-1, minsFB = l + step;
   pari_sp av = avma;
 
   yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
@@ -359,6 +359,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
     for (j=2; j<=a; j++)
     {
       GEN J = red(nf, idealmulh(nf,vp,(GEN)id2[j-1]), &m);
+      if (DEBUGLEVEL>1) fprintferr(" %ld",j);
       if (!J)
       {
         if (j == 2 && !red(nf, vp, &m)) j = 1;
@@ -367,7 +368,6 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       if (gegal(J, (GEN)id2[j-1])) { j = 1; break; }
       id2[j] = (long)J;
       alg[j] = (long)m;
-      if (DEBUGLEVEL>1) fprintferr(" %ld",j);
     }
     if (cache && j <= a)
     { /* vp^j principal */
@@ -2414,12 +2414,11 @@ shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 }
 
 static GEN
-compute_vecG(GEN nf)
+compute_vecG(GEN nf, long n)
 {
-  GEN vecG, G0, Gtw, M = gmael(nf,5,1), G = gmael(nf,5,2);
-  long e, r1, i, j, ind, n = min(lg(M[1])-1, 9);
+  GEN vecG, G0, Gtw, G = gmael(nf,5,2);
+  long e, i, j, ind, r1 = nf_get_r1(nf);
 
-  r1 = nf_get_r1(nf);
   for (e = 4; ; e <<= 1)
   {
     G0 = ground(G);
@@ -3053,10 +3052,10 @@ MORE:
     }
     if (sfb_change) {
       if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-      if (!subFB_increase(&F, nf, sfb_change-1, L_jid)) goto START;
+      if (!subFB_change(&F, nf, sfb_change-1, L_jid)) goto START;
       jid = sfb_change = nreldep = 0;
     }
-    if (!vecG) { vecG = compute_vecG(nf); av2 = avma; }
+    if (!vecG) { vecG = compute_vecG(nf, min(RU, 9)); av2 = avma; }
     pre_allocate(&cache, nlze);
     if (!F.pow && !powFBgen(&F, &cache, nf, CBUCHG+1)) sfb_change = 1;
     if (DEBUGLEVEL)
