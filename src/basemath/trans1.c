@@ -802,9 +802,12 @@ sqrtr_abs(GEN x, long s)
 GEN
 sqrtr(GEN x) {
   long s = signe(x);
+  GEN y;
   if (typ(x) != t_REAL) err(typeer,"sqrtr");
-  if (s < 0) err(talker,"negative argument in sqrtr");
-  return sqrtr_abs(x, s);
+  if (s >= 0) return sqrtr_abs(x, s);
+  y = cgetg(3,t_COMPLEX);
+  y[2] = (long)sqrtr_abs(x, s);
+  y[1] = zero; return y;
 }
 
 /* assume x unit, precp(x) = pp > 3 */
@@ -930,13 +933,7 @@ gsqrt(GEN x, long prec)
 
   switch(typ(x))
   {
-    case t_REAL: {
-      long s = signe(x);
-      if (s >= 0) return sqrtr_abs(x, s);
-      y = cgetg(3,t_COMPLEX);
-      y[2] = (long)sqrtr_abs(x, s);
-      y[1] = zero; return y;
-    }
+    case t_REAL: return sqrtr(x);
 
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
