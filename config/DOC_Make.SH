@@ -38,11 +38,11 @@ users.dvi: users.tex appa.tex appb.tex appc.tex\\
  usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
  paricfg.tex parimacro.tex
 	rm -f users.std; tex users;
-	sed -e 's/!\([1-9]\)!/!00\1!/'\\
-	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
-	    -e 's/[{][}]//'\\
+	sed -e 's/!\([1-9]\)\$\$/!00\1/'\\
+	    -e 's/!\([1-9][0-9]\)\$\$/!0\1/'\\
+	    -e 's/\\\\EFF {}/f/g'\\
 	  users.idx | sort -f |\\
-	sed -e 's/!0*\([0-9]*\)!/!\1!/' > users.std;
+	sed -e 's/!00*\([0-9]*\)\$\$/!\1/' > users.std;
 	tex users; rm -f users.idx
 
 gpman: gp.1
@@ -58,11 +58,16 @@ veryclean: clean
 	rm -f paricfg.tex gp.man
 
 .tex.pod:
-	perl $doc_dir/gphelp -to_pod \$*.tex > tmp_pod && mv tmp_pod \$*.pod
+	perl gphelp -to_pod \$*.tex > tmp_pod && mv tmp_pod \$*.pod
 
 .ipf.inf:
 	ipfc /INF \$*.ipf
 
-pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod usersch3.pod usersch4.pod usersch5.pod appa.pod appb.pod appc.pod appd.pod
-	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --file=usersch4.pod --file=usersch5.pod --section-name=Appendices --file=appa.pod --file=appb.pod --file=appc.pod --file=appd.pod > tmp_ipf && mv tmp_ipf pari.ipf
+# This is for testing:
+
+.pod.ipf:
+	pod2ipf \$*.pod > tmp_ipf && mv tmp_ipf \$*.ipf
+
+pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod usersch3.pod usersch4.pod usersch5.pod appa.pod appb.pod appc.pod
+	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --file=usersch4.pod --file=usersch5.pod --section-name=Appendices --file=appa.pod --file=appb.pod --file=appc.pod > tmp_ipf && mv tmp_ipf pari.ipf
 EOT
