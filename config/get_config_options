@@ -152,7 +152,8 @@ Optional libraries:
   --with-gmp-include=DIR      specify location of gmp headers
   --with-gmp-lib=DIR          specify location of gmp libs
 
-  --with-qt[=DIR]             use the Qt graphical library [prefix for Qt dir.]
+  --with-qt[=DIR]        use the Qt graphical library [prefix for Qt dir.]
+  --with-fltk[=DIR]      use the FLTK graphical library [prefix for FLTK dir.]
 
 EOT
 exit 1
