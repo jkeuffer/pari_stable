@@ -362,7 +362,11 @@ removeprimes(GEN prime)
 /* Some overkill removed from this  (15 spsp for an integer < 2^32 ?!).
    Should really revert to isprime() once the new primality tester is ready
    --GN */
+#if 0
 #define pseudoprime(p) millerrabin(p,3*lgefint(p))
+#else /* remove further overkill :-)  --KB */
+#define pseudoprime(p) IsLucasPsP(p)
+#endif
 
 /* where to stop trial dividing in factorization */
 

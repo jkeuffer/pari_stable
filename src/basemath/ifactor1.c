@@ -292,7 +292,8 @@ static long pl831(GEN N, GEN p)
     avma=av;
   }
 }
-/*
+/* Assume N is a strong BSW pseudoprime
+ *
  * flag 0: return gun (prime), gzero (composite)
  * flag 1: return gzero (composite), gun (small prime), matrix (large prime)
  *
@@ -313,12 +314,14 @@ plisprime(GEN N, long flag)
   eps = absi_cmp(N,gdeux);
   if (eps<=0) return eps? gzero: gun;
   N = absi(N);
+#if 0 /* assume N a BSW pseudoprime */
   /* Use Jaeschke results. See above */
   if (miller(N,7))
   { /* compare to 341550071728321 */
     if (cmpii(N, u2toi(0x136a3, 0x52b2c8c1)) < 0) { avma=ltop; return gun; }
   }
   else { avma=ltop; return gzero; }
+#endif
   F=(GEN)decomp_limit(addis(N,-1),racine(N))[1];
   if (DEBUGLEVEL>=3) fprintferr("P.L.:factor O.K.\n");
   C=cgetg(4,t_MAT);
@@ -422,7 +425,7 @@ nextprime(GEN n)
   av2 = av1 = avma;
   for(;;)
   {
-    if (miller(n,10)) break;
+    if (IsLucasPsP(n)) break;
     av1 = avma;
     rcd = prc210_d1[rcn];
     if (++rcn > 47) rcn = 0;
@@ -465,7 +468,7 @@ precprime(GEN n)
   av2 = av1 = avma;
   for(;;)
   {
-    if (miller(n,10)) break;
+    if (IsLucasPsP(n)) break;
     av1 = avma;
     if (rcn == 0)
     { rcd = 2; rcn = 47; }

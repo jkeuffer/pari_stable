@@ -1609,11 +1609,16 @@ isprimeSelfridge(GEN x) { return (plisprime(x,0)==gun); }
 long
 isprime(GEN x)
 {
-  long ex;
   if (!IsLucasPsP(x)) return 0;
-  ex = expi(x);
-  if (ex < 44)  return 1; /* FIXME: find up to date bounds */
-  if (ex < 110) return isprimeSelfridge(x);
+  if (lgefint(x) <= 4)
+  {
+    gpmem_t av = avma;
+    long t;
+    t = cmpii(x, u2toi(0x918UL, 0x4e72a000UL)); /* 10^13. FIXME: better bound?*/
+    avma = av;
+    if (t < 0) return 1;
+  }
+  if (expi(x) < 110) return isprimeSelfridge(x);
   return isprimeAPRCL(x);
 }
 
