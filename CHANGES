@@ -71,6 +71,7 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
                         --> x^10 + O(x^21) at \ps 21 [missing x^20 term]
    27- nffactor/nfroots: SEGV over Q
    28- missing sanity checks in install() [ did not check the parser code ]
+   29- typo in nilord() [lg-->lgefint]: nfdisc() didn't work on 64bit HP
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
