@@ -137,7 +137,7 @@ for variable in\
   dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
-  X11 X11_INC X11_LIB which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
+  X11 X11_INC X11_LIBS which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
   $_install_list\
   $_cc_list\
   $_ld_list\
