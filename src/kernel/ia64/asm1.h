@@ -1,5 +1,7 @@
 /* Extracted from gmp-4.1.2 */
+BEGINEXTERN
 extern ulong invert_word(ulong);
+ENDEXTERN
 
 #define sub_ddmmss(sh, sl, ah, al, bh, bl) \
 ({                                         \
