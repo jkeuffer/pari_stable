@@ -1566,74 +1566,63 @@ FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
 /*NO clean malloc*/
 static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
 {
-  gpmem_t av1;
-  GEN z,m,m1;
-  long x=varn(T),k,u,v,pp,i;
-  if (is_bigint(p))
-    pp=VERYBIGINT;
-  else
-    pp=itos(p);
-  av1 = avma;
+  gpmem_t av1 = avma;
+  GEN z, m, m1;
+  const long pp = is_bigint(p)? VERYBIGINT: itos(p);
+  long x=varn(T),k,u,v,i;
+
   for (k=0; ; k++)
   {
-    z=(lgef(T)==4)?polun[x]:polx[x];
-    u=k/pp;v=2;/*FpX_Fp_add modify y[2]*/
-    z=gaddgs(z, k%pp);
+    z = (degpol(T)==1)? polun[x]: polx[x];
+    u = k/pp; v=2; /* FpX_Fp_add modify y */
+    z = gaddgs(z, k%pp);
     while(u)
     {
-      z=FpX_add(z, monomial(stoi(u%pp),v,x), NULL);
-      u/=pp; v++;
+      z = FpX_add(z, monomial(stoi(u%pp),v,x), NULL);
+      u /= pp; v++;
     }
-    if ( DEBUGLEVEL>=6 )
-      fprintferr("FF l-Gen:next %Z\n",z);
+    if ( DEBUGLEVEL>=6 ) fprintferr("FF l-Gen:next %Z\n",z);
     m1 = m = FpXQ_pow(z,r,T,p);
-    if (gcmp1(m)) {avma = av1; continue;}
+    if (gcmp1(m)) { avma = av1; continue; }
+
     for (i=1; i<e; i++)
-      if (gcmp1(m=FpXQ_pow(m,l,T,p))) break;
+      if (gcmp1(m = FpXQ_pow(m,l,T,p))) break;
     if (i==e) break;
     avma = av1;
   }
-  *zeta=m;
-  return m1;
+  *zeta = m; return m1;
 }
-/* resoud x^l=a mod (p,T)
- * l doit etre premier
- * q=p^degpol(T)-1
- * q=(l^e)*r
- * e>=1
- * pgcd(r,l)=1
- * m=y^(q/l)
- * y n'est pas une puissance l-ieme
- * m!=1
- * ouf!
- */
+/* Solve x^l = a mod (p,T)
+ * l must be prime
+ * q = p^degpol(T)-1 = (l^e)*r, with e>=1 and pgcd(r,l)=1
+ * m = y^(q/l)
+ * y not an l-th power [ m != 1 ] */
 GEN
 ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
 {
   gpmem_t av = avma, lim;
   long i,k;
   GEN p1,p2,u1,u2,v,w,z;
-  if(gcmp1(a)) return gcopy(a);
-  (void)bezout(r,l,&u1,&u2);
-  v=FpXQ_pow(a,u2,T,p);
-  w=FpXQ_pow(a,modii(mulii(negi(u1),r),q),T,p);
+
+  if (gcmp1(a)) return gcopy(a);
+
+  (void)bezout(r,l,&u1,&u2); /* result is 1 */
+  v = FpXQ_pow(a,u2,T,p);
+  w = FpXQ_pow(a, modii(mulii(negi(u1),r),q), T,p);
   lim = stack_lim(av,1);
   while (!gcmp1(w))
   {
-    /* if p is not prime, next loop will not end */
-    k=0;
-    p1=w;
-    do
-    {
-      z=p1;
-      p1=FpXQ_pow(p1,l,T,p);
+    k = 0;
+    p1 = w;
+    do { /* if p is not prime, loop will not end */
+      z = p1;
+      p1 = FpXQ_pow(p1,l,T,p);
       k++;
-    }while(!gcmp1(p1));
+    } while (!gcmp1(p1));
     if (k==e) { avma=av; return NULL; }
     p2 = FpXQ_mul(z,m,T,p);
-    for(i=1; !gcmp1(p2); i++) p2 = FpXQ_mul(p2,m,T,p);/*should be a baby step
-							      giant step instead*/
-    p1= FpXQ_pow(y,modii(mulsi(i,gpowgs(l,e-k-1)),q),T,p);
+    for (i=1; !gcmp1(p2); i++) p2 = FpXQ_mul(p2,m,T,p);/*TODO: BS/GS instead*/
+    p1= FpXQ_pow(y, modii(mulsi(i,gpowgs(l,e-k-1)), q), T,p);
     m = FpXQ_pow(m,stoi(i),T,p);
     e = k;
     v = FpXQ_mul(p1,v,T,p);
@@ -1641,97 +1630,71 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     w = FpXQ_mul(y,w,T,p);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[4];
       if(DEBUGMEM>1) err(warnmem,"ffsqrtlmod");
-      gptr[0]=&y; gptr[1]=&v; gptr[2]=&w; gptr[3]=&m;
-      gerepilemany(av,gptr,4);
+      gerepileall(av,4, &y,&v,&w,&m);
     }
   }
-  return gerepilecopy(av,v);
+  return gerepilecopy(av, v);
 }
-/*  n is an integer, a is in Fp[X]/(T), p is prime, T is irreducible mod p
-
-return a solution of
-
-x^n=a mod p
-
-1)If there is no solution return NULL and if zetan is not NULL set zetan to gzero.
-
-2) If there is solution there are exactly  m=gcd(p-1,n) of them.
-
-If zetan is not NULL, zetan is set to a primitive mth root of unity so that
-the set of solutions is {x*zetan^k;k=0 to m-1}
-
-If a=0 ,return 0 and if zetan is not NULL zetan is set to gun
-*/
+/* Solve x^n = a mod p: n integer, a in Fp[X]/(T) [ p prime, T irred. mod p ]
+ *
+ * 1) if no solution, return NULL and (if zetan != NULL) set zetan to gzero.
+ *
+ * 2) If there is a solution, there are exactly  m=gcd(p-1,n) of them.
+ * If zetan != NULL, it is set to a primitive mth root of unity so that the set
+ * of solutions is {x*zetan^k;k=0 to m-1}
+ *
+ * If a = 0, return 0 and (if zetan != NULL) set zetan = gun */
 GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 {
-  gpmem_t lbot=0, ltop=avma, av1, lim;
+  gpmem_t ltop=avma, av1, lim;
   long i,j,e;
   GEN m,u1,u2;
   GEN q,r,zeta,y,l,z;
-  GEN *gptr[2];
+
   if (typ(a) != t_POL || typ(n) != t_INT || typ(T) != t_POL || typ(p)!=t_INT)
     err(typeer,"ffsqrtnmod");
-  if (lgef(T)==3)
-    err(constpoler,"ffsqrtnmod");
-  if(!signe(n))
-    err(talker,"1/0 exponent in ffsqrtnmod");
-  if(gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
-  if(gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
-  q=addsi(-1,gpowgs(p,degpol(T)));
-  m=bezout(n,q,&u1,&u2);
-  if (gcmp(m,n))
-  {
-    GEN b=modii(u1,q);
-    lbot=avma;
-    a=FpXQ_pow(a,b,T,p);
-  }
-  if (zetan) z=polun[varn(T)];
-  lim=stack_lim(ltop,1);
+  if (!degpol(T)) err(constpoler,"ffsqrtnmod");
+  if (!signe(n)) err(talker,"1/0 exponent in ffsqrtnmod");
+  if (gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
+  if (gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
+
+  q = addsi(-1, gpowgs(p,degpol(T)));
+  m = bezout(n,q,&u1,&u2);
+  if (!egalii(m,n)) a = FpXQ_pow(a, modii(u1,q), T,p);
+  if (zetan) z = polun[varn(T)];
+  lim = stack_lim(ltop,1);
   if (!gcmp1(m))
   {
-    m=decomp(m);
-    av1=avma;
+    m = decomp(m); av1 = avma;
     for (i = lg(m[1])-1; i; i--)
     {
-      l=gcoeff(m,i,1); j=itos(gcoeff(m,i,2));
-      e=pvaluation(q,l,&r);
+      l = gcoeff(m,i,1);
+      j = itos(gcoeff(m,i,2));
+      e = pvaluation(q,l,&r);
       if(DEBUGLEVEL>=6) (void)timer2();
-      y=fflgen(l,e,r,T,p,&zeta);
+      y = fflgen(l,e,r,T,p,&zeta);
       if(DEBUGLEVEL>=6) msgtimer("fflgen");
-      if (zetan) z=FpXQ_mul(z,FpXQ_pow(y,gpowgs(l,e-j),T,p),T,p);
-      do
+      if (zetan) z = FpXQ_mul(z, FpXQ_pow(y,gpowgs(l,e-j),T,p), T,p);
+      for (; j; j--)
       {
-	lbot=avma;
-	a=ffsqrtlmod(a,l,T,p,q,e,r,y,zeta);
-	if (!a){avma=ltop;return NULL;}
-	j--;
-      }while (j);
+	a = ffsqrtlmod(a,l,T,p,q,e,r,y,zeta);
+	if (!a) {avma=ltop; return NULL;}
+      }
       if (low_stack(lim, stack_lim(ltop,1)))
-	  /* n can have lots of prime factors*/
-      {
+      { /* n can have lots of prime factors */
 	if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
-	if (zetan)
-	{
-	  z=gcopy(z);
-	  gptr[0]=&a;gptr[1]=&z;
-	  gerepilemanysp(av1,lbot,gptr,2);
-	}
-	else
-	  a=gerepileupto(av1,a);
-	lbot=av1;
+        gerepileall(av1,zetan? 2: 1, &a,&z);
       }
     }
   }
   if (zetan)
   {
-    *zetan=gcopy(z);
-    gptr[0]=&a;gptr[1]=zetan;
-    gerepilemanysp(ltop,lbot,gptr,2);
+    *zetan = z;
+    gerepileall(ltop,2,&a,zetan);
   }
   else
-    a=gerepileupto(ltop,a);
+    a = gerepileupto(ltop, a);
   return a;
 }
 /*******************************************************************/
