@@ -30,25 +30,25 @@ typedef POBJ RESOLVANTE;
 
 static long isin_G_H(GEN po, GEN *r, long n1, long n2);
 
-static long N,CAR,PREC,PRMAX,TSCHMAX,coeff[9][10];
+static long N,EVEN,PREC,PRMAX,TSCHMAX,coeff[9][10];
 static char SID[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
 static char* str_base = GPDATADIR;
 
-static long par_N, *par_vec;
+static long *par_vec;
 
+/* k-1 entries filled so far
+ * m = maximal allowed value, n = sum to reach with remaining elements */
 static void
 do_par(long k, long n, long m)
 {
   long i;
-
-  if (n<=0)
+  if (n <= 0)
   {
-    GEN p1 = new_chunk(par_N+1);
-    for (i=1; i<k     ; i++) p1[i] = par_vec[i];
-    for (   ; i<=par_N; i++) p1[i] = 0;
+    GEN p1 = cgetg(k, t_VECSMALL);
+    for (i=1; i<k; i++) p1[i] = par_vec[i];
     return;
   }
-  if (n<m) m=n;
+  if (n < m) m = n;
   for (i=1; i<=m; i++)
   {
     par_vec[k] = i;
@@ -56,33 +56,27 @@ do_par(long k, long n, long m)
   }
 }
 
-/* compute the partitions of m. T[0][0] = p(m) */
-static long **
+/* compute the partitions of n, as decreasing t_VECSMALLs */
+static GEN
 partitions(long n)
 {
-  long i, j = 1, l = n+1;
   gpmem_t av, av1;
-  GEN T;
+  long i, j, lT;
+  GEN T, P;
 
-  par_vec = new_chunk(l); par_N = n;
-  l = l*sizeof(long);
-  av = avma; do_par(1,n,n); av1 = avma;
-  T = new_chunk((av-av1)/l + 1);
-  for (i=av-l; i>=av1; i-=l) T[j++]=i;
+  par_vec = new_chunk(n+1);
+  av = avma; do_par(1,n,n);
+  av1= avma;
+  for (lT=1, P = (GEN)av1; P < (GEN)av; P += lg(P)) lT++;
+  T = cgetg(lT, t_VEC);
+  for (j=lT, P = (GEN)av1; P < (GEN)av; P += lg(P)) T[--j] = (long)P;
 
   if (DEBUGLEVEL > 7)
   {
-    fprintferr("Partitions of %ld: p(%ld) = %ld\n",n,n,j-1);
-    for (i=1; i<j; i++)
-    {
-      fprintferr("i = %ld: ",i);
-      for (l=1; l<=n; l++)
-        fprintferr("%ld ",((long**)T)[i][l]);
-      fprintferr("\n"); flusherr();
-    }
+    fprintferr("Partitions of %ld: p(%ld) = %ld\n",n,n,lT-1);
+    for (i=1; i<lT; i++) fprintferr("i = %ld: %Z\n",i,(GEN)T[i]);
   }
-  T[0] = lgeti(1); ((long**)T)[0][0] = j-1;
-  return (long**)T;
+  return T;
 }
 
 /* affect to the permutation x the N arguments that follow */
@@ -103,6 +97,19 @@ _gr(long len,...)
   GEN x = new_chunk(l+1);
 
   va_start(args,len); x[0] = len;
+  for (i=1; i<=l; i++) x[i] = va_arg(args,int);
+  va_end(args); return x;
+}
+
+/* return a VECSMALL of length l from the arguments (for galoismodulo11) */
+static GEN
+_typ(long l,...)
+{
+  va_list args;
+  long i;
+  GEN x = cgetg(l+1, t_VECSMALL);
+
+  va_start(args,l);
   for (i=1; i<=l; i++) x[i] = va_arg(args,int);
   va_end(args); return x;
 }
@@ -138,49 +145,13 @@ printperm(PERM perm)
   fprintferr(" )\n");
 }
 
-/* ranger dans l'ordre decroissant (quicksort) */
-static void
-ranger(long *t, long n)
-{
-  long tpro,l,r,i,j;
-
-  l=1+n/2; r=n; tpro=t[1];
-  for(;;)
-  {
-    if (l>1) { l--; tpro=t[l]; }
-    else
-    {
-      tpro=t[r]; t[r]=t[1]; r--;
-      if (r==1) { t[1]=tpro; return; }
-    }
-    i=l;
-    for (j=i<<1; j<=r; j<<=1)
-    {
-      if (j < r && t[j] > t[j+1]) j++;
-      if (t[j] >= tpro) break;
-      t[i] = t[j]; i=j;
-    }
-    t[i]=tpro;
-  }
-}
-
-/* 0 if t1=t2, -1 if t1<t2, 1 if t1>t2 */
-static long
-compareupletlong(long *t1,long *t2)
-{
-  long i;
-  for (i=1; i<=N; i++)
-    if (t1[i]!=t2[i]) return (t1[i] < t2[i])? -1: 1;
-  return 0;
-}
-
 /* return i if typ = TYP[i], 0 otherwise */
 static long
-numerotyp(long **TYP, long *galtyp)
+numerotyp(GEN TYP, GEN galtyp)
 {
-  long i, nb = TYP[0][0];
-  for (i=1; i<=nb; i++)
-    if (!compareupletlong(galtyp,TYP[i])) return i;
+  long i, nb = lg(TYP);
+  for (i=1; i<nb; i++)
+    if (gegal(galtyp,(GEN)TYP[i])) return i;
   return 0;
 }
 
@@ -199,7 +170,7 @@ rayergroup11(long num, long *gr)
 {
   long r = 0;
 
-  if (CAR)
+  if (EVEN)
     switch(num)
     {
       case 2: case 5:
@@ -225,7 +196,7 @@ rayergroup(long **GR, long num, long *gr)
 
   if (!GR) return rayergroup11(num,gr);
   nbgr = lg(GR); r = 0 ;
-  if (CAR)
+  if (EVEN)
   {
     for (i=1; i<nbgr; i++)
       if (gr[i] && GR[i][0] < 0 && raye(GR[i],num)) { gr[i]=0; r++; }
@@ -239,35 +210,35 @@ rayergroup(long **GR, long num, long *gr)
 }
 
 static long
-galmodp(GEN pol, GEN dpol, long **TYP, long *gr, long **GR)
+galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
 {
-  long p = 0, i,k,l,n,nbremain,dtyp[NMAX+1];
+  long p = 0, i,k,l,n,nbremain;
   byteptr d = diffptr;
-  GEN p1;
+  GEN p1, dtyp;
 
   switch(N)
   {
-    case  8: nbremain = CAR? 28: 22; break;
-    case  9: nbremain = CAR? 18: 16; break;
-    case 10: nbremain = CAR? 12: 33; break;
-    default: nbremain = CAR?  5:  3; break; /* case 11 */
+    case  8: nbremain = EVEN? 28: 22; break;
+    case  9: nbremain = EVEN? 18: 16; break;
+    case 10: nbremain = EVEN? 12: 33; break;
+    default: nbremain = EVEN?  5:  3; break; /* case 11 */
   }
 
+  dtyp = new_chunk(NMAX+1);
   k = gr[0]; for (i=1; i<k; i++) gr[i]=1;
   for (k=1; k<15; k++, d++)
   {
     p += *d; if (!*d) err(primer1);
-    if (smodis(dpol,p)) /* p does not divide dpol */
-    {
-      p1 = simplefactmod(pol,stoi(p));
-      p1 = (GEN)p1[1]; l = lg(p1);
-      for (i=1; i<l ; i++) dtyp[i] = itos((GEN)(p1[l-i]));
-      for (   ; i<=N; i++) dtyp[i] = 0;
-      ranger(dtyp,N); n = numerotyp(TYP,dtyp);
-      if (!n) return 1; /* only for N=11 */
-      nbremain -= rayergroup(GR,n,gr);
-      if (nbremain==1) return 1;
-    }
+    if (!smodis(dpol,p)) continue; /* p divides dpol */
+
+    p1 = simplefactmod(pol,stoi(p));
+    p1 = (GEN)p1[1]; l = lg(p1);
+    for (i=1; i<l ; i++) dtyp[i] = itos((GEN)(p1[l-i]));
+    dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
+    n = numerotyp(TYP,dtyp);
+    if (!n) return 1; /* only for N=11 */
+    nbremain -= rayergroup(GR,n,gr);
+    if (nbremain==1) return 1;
   }
   return 0;
 }
@@ -1000,9 +971,9 @@ galoisprim8(GEN po, GEN *r)
 
 /* PRIM_8_1: */
   rep=isin_G_H(po,r,50,43);
-  if (rep) return CAR? 37: 43;
+  if (rep) return EVEN? 37: 43;
 /* PRIM_8_2: */
-  if (!CAR) return 50;
+  if (!EVEN) return 50;
 /* PRIM_8_3: */
   rep=isin_G_H(po,r,49,48);
   if (!rep) return 49;
@@ -1323,7 +1294,7 @@ closure8(GEN po)
   GEN r[NMAX];
 
   r[0] = myroots(po,PRMAX); preci(r,PREC);
-  if (!CAR)
+  if (!EVEN)
   {
   /* CLOS_8_1: */
     rep=isin_G_H(po,r,50,47);
@@ -1513,7 +1484,8 @@ galoismodulo8(GEN pol, GEN dpol)
 {
   long res, gr[51];
   gpmem_t av = avma;
-  long **TYP = partitions(8), **GR = (long**)cgeti(49);
+  long **GR = (long**)cgeti(49);
+  GEN TYP = partitions(8);
 
 /* List of possible types in group j: GR[j][0] = #GR[j] if
  * the group is odd, - #GR[j] if even */
@@ -1568,7 +1540,7 @@ galoismodulo8(GEN pol, GEN dpol)
 
   gr[0]=51; res = galmodp(pol,dpol,TYP,gr,GR);
   avma=av; if (!res) return 0;
-  return CAR? 49: 50;
+  return EVEN? 49: 50;
 }
 
 /* BIBLIOTHEQUE POUR LE DEGRE 9 */
@@ -1577,7 +1549,7 @@ galoisprim9(GEN po, GEN *r)
 {
   long rep;
 
-  if (!CAR)
+  if (!EVEN)
   {
   /* PRIM_9_1: */
     rep=isin_G_H(po,r,34,26);
@@ -1732,7 +1704,7 @@ closure9(GEN po)
   GEN r[NMAX];
 
   r[0] = myroots(po,PRMAX); preci(r,PREC);
-  if (!CAR)
+  if (!EVEN)
   {
   /* CLOS_9_1: */
     rep=isin_G_H(po,r,34,31);
@@ -1800,7 +1772,8 @@ galoismodulo9(GEN pol, GEN dpol)
 {
   long res, gr[35];
   gpmem_t av = avma;
-  long **TYP = partitions(9), **GR = (long**) cgeti(33);
+  long **GR = (long**) cgeti(33);
+  GEN TYP = partitions(9);
 
   /* 42 TYPES ORDONNES CROISSANT (T[1],...,T[30])*/
 
@@ -1839,7 +1812,7 @@ galoismodulo9(GEN pol, GEN dpol)
 
   gr[0]=35; res = galmodp(pol,dpol,TYP,gr,GR);
   avma=av; if (!res) return 0;
-  return CAR? 33: 34;
+  return EVEN? 33: 34;
 }
 
 /* BIBLIOTHEQUE POUR LE DEGRE 10 */
@@ -1847,7 +1820,7 @@ static long
 galoisprim10(GEN po, GEN *r)
 {
   long rep;
-  if (CAR)
+  if (EVEN)
   {
   /* PRIM_10_1: */
     rep=isin_G_H(po,r,44,31);
@@ -2157,7 +2130,7 @@ closure10(GEN po)
   GEN r[NMAX];
 
   r[0] = myroots(po,PRMAX); preci(r,PREC);
-  if (CAR)
+  if (EVEN)
   {
   /* CLOS_10_1: */
     rep=isin_G_H(po,r,44,42);
@@ -2251,7 +2224,8 @@ galoismodulo10(GEN pol, GEN dpol)
 {
   long res, gr[46];
   gpmem_t av = avma;
-  long **TYP = partitions(10), **GR = (long**) cgeti(45);
+  long **GR = (long**) cgeti(45);
+  GEN TYP = partitions(10);
 
   GR[ 1]= _gr(  4, 1,6,30,42);
   GR[ 2]= _gr(  3, 1,6,30);
@@ -2300,7 +2274,7 @@ galoismodulo10(GEN pol, GEN dpol)
 
   gr[0]=46; res = galmodp(pol,dpol,TYP,gr,GR);
   avma=av; if (!res) return 0;
-  return CAR? 44: 45;
+  return EVEN? 44: 45;
 }
 
 /* BIBLIOTHEQUE POUR LE DEGRE 11 */
@@ -2312,7 +2286,7 @@ closure11(GEN po)
   GEN r[NMAX];
 
   r[0] = myroots(po,PRMAX); preci(r,PREC);
-  if (CAR)
+  if (EVEN)
   {
   /* EVEN_11_1: */
     rep=isin_G_H(po,r,7,6);
@@ -2359,32 +2333,29 @@ galoismodulo11(GEN pol, GEN dpol)
 {
   long res, gr[6] = {0, 1, 1, 1, 1, 1};
   gpmem_t av = avma;
-  long **TYP = (long**) cgeti(9);
+  GEN *TYP = (GEN*)cgetg(EVEN? 9: 6, t_VEC);
 
-  TYP[0] = new_chunk(1);
-  TYP[1] = _gr(11, 11,0,0,0,0,0,0,0,0,0,0);
-  if (CAR)
+  TYP[1] = _typ(1, 11);
+  if (EVEN)
   {
-    TYP[2] = _gr(11, 8,2,1,0,0,0,0,0,0,0,0);
-    TYP[3] = _gr(11, 6,3,2,0,0,0,0,0,0,0,0);
-    TYP[4] = _gr(11, 5,5,1,0,0,0,0,0,0,0,0);
-    TYP[5] = _gr(11, 4,4,1,1,1,0,0,0,0,0,0);
-    TYP[6] = _gr(11, 3,3,3,1,1,0,0,0,0,0,0);
-    TYP[7] = _gr(11, 2,2,2,2,1,1,1,0,0,0,0);
-    TYP[8] = _gr(11, 1,1,1,1,1,1,1,1,1,1,1);
-    TYP[0][0] = 8;
+    TYP[2] = _typ(3, 8,2,1);
+    TYP[3] = _typ(3, 6,3,2);
+    TYP[4] = _typ(3, 5,5,1);
+    TYP[5] = _typ(5, 4,4,1,1,1);
+    TYP[6] = _typ(5, 3,3,3,1,1);
+    TYP[7] = _typ(7, 2,2,2,2,1,1,1);
+    TYP[8] = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
   }
   else
   {
-    TYP[2] = _gr(11,10,1,0,0,0,0,0,0,0,0,0);
-    TYP[3] = _gr(11, 5,5,1,0,0,0,0,0,0,0,0);
-    TYP[4] = _gr(11, 2,2,2,2,2,1,0,0,0,0,0);
-    TYP[5] = _gr(11, 1,1,1,1,1,1,1,1,1,1,1);
-    TYP[0][0] = 5;
+    TYP[2] = _typ(2, 10,1);
+    TYP[3] = _typ(3, 5,5,1);
+    TYP[4] = _typ(6, 2,2,2,2,2,1);
+    TYP[5] = _typ(11, 1,1,1,1,1,1,1,1,1,1,1);
   }
-  res = galmodp(pol,dpol,TYP,gr,NULL);
+  res = galmodp(pol,dpol,(GEN)TYP,gr,NULL);
   avma=av; if (!res) return 0;
-  return CAR? 7: 8;
+  return EVEN? 7: 8;
 }
 
 /* return 1 iff we need to read a resolvent */
@@ -2500,14 +2471,14 @@ galoisbig(GEN pol, long prec)
     1920,1920,1920,3840,7200,14400,14400,28800,1814400,3628800};
   long tab11[]={0, 11,22,55,110,660,7920,19958400,39916800};
 
-  N = degpol(pol); dpol = discsr(pol); CAR = carreparfait(dpol);
+  N = degpol(pol); dpol = discsr(pol); EVEN = carreparfait(dpol);
   prec += 2 * (MEDDEFAULTPREC-2);
   PREC = prec;
   if (DEBUGLEVEL)
   {
     fprintferr("Galoisbig (prec=%ld): reduced polynomial #1 = %Z\n",prec,pol);
     fprintferr("discriminant = %Z\n", dpol);
-    fprintferr("%s group\n", CAR? "EVEN": "ODD"); flusherr();
+    fprintferr("%s group\n", EVEN? "EVEN": "ODD"); flusherr();
   }
   PRMAX = prec+5; TSCHMAX = 1; SID[0] = N;
   switch(N)
@@ -2533,6 +2504,6 @@ galoisbig(GEN pol, long prec)
   }
   avma = av;
   res[1]=lstoi(tab[t]);
-  res[2]=lstoi(CAR? 1 : -1);
+  res[2]=lstoi(EVEN? 1 : -1);
   res[3]=lstoi(t); return res;
 }
