@@ -1517,8 +1517,8 @@ GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 {
   pari_sp av0 = avma, av, av2;
-  long KCCO, i, s, current, nbram, nrelsup, nreldep, cp, need;
-  ulong LIMC, LIMC2;
+  long KCCO, i, s, current, nbram, nrelsup, nreldep, need;
+  ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
   double drc, lim, LOGD, LOGD2;
   const long MAXRELSUP = 7;
@@ -1551,7 +1551,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   if (PRECREG) resc = dbltor(lim / 2.);
   else         resc = dbltor(lim / PI);
   if (!PRECREG) lim /= sqrt(3.);
-  cp = (long)exp(sqrt(LOGD*log(LOGD)/8.0));
+  cp = (ulong)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 20) cp = 20;
   av = avma; cbach /= 2;
 

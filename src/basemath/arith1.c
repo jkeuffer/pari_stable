@@ -3916,8 +3916,7 @@ primeform_u(GEN x, ulong p)
 {
   GEN c, y = cgetg(4, t_QFI);
   pari_sp av = avma;
-  long s;
-  ulong b;
+  ulong b, s;
 
   s = mod8(x); if (signe(x) < 0 && s) s = 8-s;
   /* 2 or 3 mod 4 */
