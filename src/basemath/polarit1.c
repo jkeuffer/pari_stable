@@ -2427,18 +2427,45 @@ isabsolutepol(GEN f)
   return 1;
 }
 
+long
+FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p, int roots)
+{
+  GEN *t = t0, u = *t, v, S, g, X = polx[varn(u)];
+  long d, dg, N = degpol(u);
+
+  if (N == 1) return 1;
+  v = X; S = init_pow_q_mod_pT(X, q, u, T, p);
+  for (d=1; d <= N>>1; d++)
+  {
+    v = spec_Fq_pow_mod_pol(v, S, T, p);
+    g = FqX_gcd(gsub(v,X),u, T,p);
+    dg = degpol(g); if (dg <= 0) continue;
+
+    /* all factors of g have degree d */
+    *t = g;
+    FqX_split(t, d, q, S, T, p);
+    t += dg / d;
+    N -= dg;
+    if (roots) break;
+
+    u = FqX_div(u,g, T,p);
+    v = FqX_rem(v,u, T,p);
+  }
+  if (N && !roots) *t++ = u;
+  return t - t0;
+}
+
 GEN
 factmod9(GEN f, GEN p, GEN T)
 {
   pari_sp av = avma;
-  long pg, i, j, k, d, e, N, vf, va, nbfact, nbf, pk;
-  GEN S,ex,f2,f3,df1,df2,g1,u,v,q,unfp,unfq, *t;
-  GEN frobinv,X;
+  long pg, i, j, k, d, e, N, va, nbfact, nbf, pk;
+  GEN S, ex, f2, f3, df1, df2, g1, u, q, unfp, unfq,  *t;
+  GEN frobinv;
 
   if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
-  vf = varn(f);
   va = varn(T);
-  if (va <= vf)
+  if (va <= varn(f))
     err(talker,"polynomial variable must have higher priority in factorff");
   unfp = gmodulsg(1,p); T = gmul(unfp,T);
   unfq = gmodulo(gmul(unfp,polun[va]), T);
@@ -2460,7 +2487,6 @@ factmod9(GEN f, GEN p, GEN T)
 
   frobinv = gpowgs(p, degpol(T)-1);
 
-  X = polx[vf];
   q = gpowgs(p, degpol(T));
   e = nbfact = 1;
   pk = 1;
@@ -2468,6 +2494,7 @@ factmod9(GEN f, GEN p, GEN T)
   df1 = FqX_deriv(f, T, p);
   for(;;)
   {
+    long nb0;
     while (gcmp0(df1))
     { /* needs d >= p: pg = 0 can't happen  */
       pk *= pg; e = pk;
@@ -2491,45 +2518,20 @@ factmod9(GEN f, GEN p, GEN T)
       }
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
-
-#if 0
-    N = degpol(u);
+    nb0 = nbfact; N = degpol(u);
     if (N)
     {
+#if 0
       t[nbfact] = FpXQX_normalize(u, T,p);
-      d = (N==1)? 1: FqX_split_berlekamp(t+nbfact, q, T, p);
-      for (j=0; j<d; j++) ex[nbfact+j] = e;
-      nbfact += d;
-    }
+      nbfact += (N==1)? 1: FqX_split_berlekamp(t+nbfact, q, T, p);
 #else
-{
-    GEN g;
-    long dg;
-
-    N = degpol(u); v = X;
-    if (N > 1) S = init_pow_q_mod_pT(X, q, u, T, p);
-    for (d=1; d <= N>>1; d++)
-    {
-      v = spec_Fq_pow_mod_pol(v, S, T, p);
-      g = FqX_gcd(gsub(v,X),u, T,p);
-      dg = degpol(g);
-      if (dg <= 0) continue;
-
-      /* all factors of g have degree d */
-      j = nbfact+dg/d;
-
-      t[nbfact] = g;
-      FqX_split(t+nbfact,d,q,S,T,p);
-      for (; nbfact<j; nbfact++) ex[nbfact] = e;
-      N -= dg;
-      u = FqX_div(u,g, T,p);
-      v = FqX_rem(v,u, T,p);
-    }
-    if (N) { t[nbfact] = u; ex[nbfact++] = e; }
-}
+      t[nbfact] = u;
+      nbfact += (N==1)? 1: FqX_sqf_split(t+nbfact, q, T, p, 0);
 #endif
-    if (!degpol(f2)) break;
+    }
+    for (j = nb0; j < nbfact; j++) ex[j] = e;
 
+    if (!degpol(f2)) break;
     f = f2; df1 = df2; e += pk;
   }
 
