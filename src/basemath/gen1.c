@@ -1811,6 +1811,8 @@ gdiv(GEN x, GEN y)
     if (ty == t_POLMOD)
       return gerepileupto(av, gdiv(to_polmod(x,(GEN)y[1]), y));
   }
+  if (is_noncalc_t(tx) || is_noncalc_t(ty))
+    err(typeer,"division");
   /* now x and y are not both is_scalar_t */
 
   lx = lg(x);

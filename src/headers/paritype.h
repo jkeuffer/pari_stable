@@ -53,3 +53,5 @@
 #define needsnewline(tx) (is_matvec(tx))
 #define isscalar(x) (is_scalar_t(typ(x)) || (typ(x)==t_POL && lgef(x)<=3))
 #define isnonscalar(x) (typ(x) == t_POL && lgef(x) > 3)
+
+#define is_noncalc_t(tx) ((tx) >= t_LIST)

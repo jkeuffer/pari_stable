@@ -150,7 +150,7 @@ gred_rfrac(GEN x)
   p1[1]=lmul(x1,xx1);
   p1[2]=lmul(x2,xx2); return p1;
 }
-
+/*must NEVER returns a FRACN or a RFRACN*/
 GEN
 gred(GEN x)
 {
@@ -164,7 +164,7 @@ gred(GEN x)
     if (p1 == gzero) return y; /* gzero volontaire */
     (void)new_chunk((lgefint(x1)+lgefint(x2))<<1);
     p1=mppgcd(x2,p1);
-    if (is_pm1(p1)) { avma=av; return gcopy(x); }
+    if (is_pm1(p1)) { avma=av; y=gcopy(x); settyp(y,t_FRAC); return y; }
     avma=av; y=cgetg(3,t_FRAC);
     y[1]=ldivii(x1,p1);
     y[2]=ldivii(x2,p1); return y;
