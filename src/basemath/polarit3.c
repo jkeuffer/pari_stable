@@ -3269,8 +3269,8 @@ modulargcd(GEN A0, GEN B0)
   if ((typ(A0) | typ(B0)) !=t_POL) err(notpoler,"modulargcd");
   if (!signe(A0)) return gcopy(B0);
   if (!signe(B0)) return gcopy(A0);
-  A = primitive_part(A0, &a); check_pol_int(A, "modulargcd");
-  B = primitive_part(B0, &b); check_pol_int(B, "modulargcd");
+  A = primitive_part(A0, &a); check_ZX(A, "modulargcd");
+  B = primitive_part(B0, &b); check_ZX(B, "modulargcd");
   D = _gcd(a,b);
   if (varn(A) != varn(B)) err(talker,"different variables in modulargcd");
  

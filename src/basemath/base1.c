@@ -139,12 +139,33 @@ checkprimeid(GEN id)
     err(talker,"incorrect prime ideal");
 }
 
-void
-check_pol_int(GEN x, char *s)
+static int
+_check_ZX(GEN x)
 {
   long k = lg(x)-1;
   for ( ; k>1; k--)
-    if (typ(x[k])!=t_INT) err(talker,"polynomial not in Z[X] in %s",s);
+    if (typ(x[k])!=t_INT) return 0;
+  return 1;
+}
+
+void
+check_ZX(GEN x, char *s)
+{
+  if (! _check_ZX(x)) err(talker,"polynomial not in Z[X] in %s",s);
+}
+void
+check_ZXY(GEN x, char *s)
+{
+  long k = lg(x)-1;
+  for ( ; k>1; k--) {
+    GEN t = gel(x,k);
+    switch(typ(t)) {
+      case t_INT: break;
+      case t_POL: if (_check_ZX(x)) break;
+      /* fall through */
+      default: err(talker,"polynomial not in Z[X,Y] in %s",s);
+    }
+  }
 }
 
 GEN
@@ -377,7 +398,7 @@ galois(GEN x, long prec)
   n=degpol(x); if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
   x = primpart(x);
-  check_pol_int(x, "galois");
+  check_ZX(x, "galois");
   if (gisirreducible(x) != gen_1)
     err(impl,"galois of reducible polynomial");
 
@@ -702,8 +723,8 @@ nfiso0(GEN a, GEN b, long fliso)
   long n,m,i,vb,lx;
   GEN nfa, nfb, p1, y, la, lb;
 
-  a = primpart(get_nfpol(a, &nfa)); check_pol_int(a, "nsiso0");
-  b = primpart(get_nfpol(b, &nfb)); check_pol_int(b, "nsiso0");
+  a = primpart(get_nfpol(a, &nfa)); check_ZX(a, "nsiso0");
+  b = primpart(get_nfpol(b, &nfb)); check_ZX(b, "nsiso0");
   if (fliso && nfa && !nfb) { p1=a; a=b; b=p1; p1=nfa; nfa=nfb; nfb=p1; }
   m=degpol(a);
   n=degpol(b); if (m<=0 || n<=0) err(constpoler,"nfiso or nfincl");
@@ -1399,7 +1420,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
   if (DEBUGLEVEL) (void)timer2();
   if (typ(x) == t_POL)
   {
-    check_pol_int(x, "nfinit");
+    check_ZX(x, "nfinit");
     if (gisirreducible(x) == gen_0) err(redpoler, "nfinit");
     x = pol_to_monic(x, &(T->lead));
     bas = allbase(x, flag, &dx, &dK, &index, &fa);

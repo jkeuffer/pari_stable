@@ -89,6 +89,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    34- znlog(x,g): first check whether x == g [ quite frequent ]
    35- rnfisnorminit(nfinit(y^2+y+1), x^3-y,2) --> "incompatible variables"
    36- nffactormod() returned a factorization which was not a proper t_MAT 
+   37- rnfequation(y^2+1, x + Mod(z*y - 1, y^2+1)) --> SEGV [ BIB ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

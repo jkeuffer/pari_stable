@@ -732,7 +732,7 @@ _nfbasis(GEN x0, long flag, GEN fa, GEN *pbas, GEN *pdK)
 
   if (typ(x0)!=t_POL) err(typeer,"nfbasis");
   if (!degpol(x0)) err(zeropoler,"nfbasis");
-  check_pol_int(x0, "nfbasis");
+  check_ZX(x0, "nfbasis");
 
   x = pol_to_monic(x0, &lead);
   if (fa && gcmp0(fa)) fa = NULL; /* compatibility. NULL is the proper arg */
@@ -3354,10 +3354,10 @@ polcompositum0(GEN A, GEN B, long flall)
   if (degpol(A)<=0 || degpol(B)<=0) err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) err(talker,"not the same variable in compositum");
-  A = Q_primpart(A); check_pol_int(A,"compositum");
+  A = Q_primpart(A); check_ZX(A,"compositum");
   if (!ZX_is_squarefree(A)) err(talker,"compositum: %Z inseparable", A);
   if (!same) {
-    B = Q_primpart(B); check_pol_int(B,"compositum");
+    B = Q_primpart(B); check_ZX(B,"compositum");
     if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z inseparable", B);
   }
 
@@ -3426,8 +3426,9 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
   B = fix_relative_pol(A,B,1); lB = lg(B);
   if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
 
-  check_pol_int(A,"rnfequation");
+  check_ZX(A,"rnfequation");
   B = primpart(lift_intern(B));
+  check_ZXY(B,"rnfequation");
   for (k=2; k<lB; k++)
     if (lg(B[k]) >= lA) B[k] = lres((GEN)B[k],A);
 

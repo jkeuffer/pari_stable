@@ -415,7 +415,8 @@ GEN     sumdivk(GEN n,long k);
 
 GEN     bnfnewprec(GEN nf, long prec);
 GEN     bnrnewprec(GEN bnr, long prec);
-void    check_pol_int(GEN x, char *s);
+void    check_ZX(GEN x, char *s);
+void    check_ZXY(GEN x, char *s);
 GEN     check_units(GEN x, char *f);
 void    checkbid(GEN bid);
 GEN     checkbnf(GEN bnf);
