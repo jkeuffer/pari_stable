@@ -557,7 +557,7 @@ Flx_Berlekamp_ker(GEN u, ulong p)
   pari_timer T;
   TIMER(&T);
   Q = cgetg(N+1,t_VEC); Q[1] = (long) vecsmall_const(N,0);
-  w = v = Flxq_pow(polx_Flx(u[1]),stoi(p),u,p);
+  w = v = Flxq_pow(polx_Flx(u[1]),utoi(p),u,p);
   for (j=2; j<=N; j++)
   {
     p1 = Flx_to_Flv(w, N);
@@ -1101,7 +1101,7 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
 }
 
 static long
-small_rand(long p)
+small_rand(ulong p)
 {
   return (p==2)? ((pari_rand31() & 0x1000) == 0): pari_rand31() % p;
 }
@@ -1133,7 +1133,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   GEN u = *t, a,b,po2,vker;
   long d, i, ir, L, la, lb, vu = varn(u);
   long l = lg(u);
-  ulong ps = itos_or_0(p);
+  ulong ps = itou_or_0(p);
   if (ps)
   {
     vker = Flx_Berlekamp_ker(ZX_to_Flx(u,ps),ps);
