@@ -877,7 +877,7 @@ group_subgroups(GEN G)
   }
   else
   {
-    long osig = itos(gcoeff(decomp(stoi(ord[1])), 1, 1));
+    long osig = mael(decomp_small(ord[1]), 1, 1);
     GEN sig = perm_pow((GEN)gen[1], ord[1]/osig);
     H = cyclicgroup(sig,osig);
     sg3 = NULL;
