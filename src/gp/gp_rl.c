@@ -798,7 +798,7 @@ unblock_SIGINT(void)
  * Return 0: EOF
  *        1: got one line from readline or infile */
 int
-get_line_from_readline(char *prompt, filtre_t *F)
+get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
 {
   const int index = history_length;
   char *s;
@@ -823,7 +823,7 @@ get_line_from_readline(char *prompt, filtre_t *F)
     }
   
     /* update logfile */
-    if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
+    if (logfile) fprintf(logfile, "%s%s\n",bare_prompt,s);
   }
   unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
   return 1;

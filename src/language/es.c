@@ -318,7 +318,11 @@ pariputsf(char *format, ...)
 void
 term_color(int c)
 {
+  FILE *o_logfile = logfile;
+
+  logfile = 0;				/* Ugly hack... */
   pariputs(term_get_color(c));
+  logfile = o_logfile;
 }
 
 void
@@ -1978,6 +1982,7 @@ tex2mail_output(GEN z, long n)
 {
   pariout_t T = *(GP_DATA->fmt); /* copy */
   FILE *o_out;
+  FILE *o_logfile = logfile;
   
   if (!prettyp_init()) return 0;
   o_out = pari_outfile; /* save state */
@@ -1987,11 +1992,13 @@ tex2mail_output(GEN z, long n)
   pariflush();
   pari_outfile = GP_DATA->pp->file->file;
   T.prettyp = f_TEX;
+  logfile = NULL;
 
   /* history number */
   if (n)
   {
     char s[128];
+
     if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
     {
       char col1[80];
@@ -2002,12 +2009,21 @@ tex2mail_output(GEN z, long n)
     else
       sprintf(s, "\\%%%ld = ", n);
     pariputs_opt(s);
+    if (o_logfile)
+	fprintf(o_logfile, "%%%ld = ", n);
   }
   /* output */
   gen_output(z, &T);
+  
 
   /* flush and restore */
   prettyp_wait();
+  if (o_logfile) {
+    pari_outfile = o_logfile;
+    /* XXXX Maybe it is better to output in another format? */
+    outbrute(z); pariputc('\n'); pariflush();
+  }
+  logfile = o_logfile;
   pari_outfile = o_out;
   if (n) term_color(c_NONE);
   return 1;

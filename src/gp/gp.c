@@ -2219,9 +2219,10 @@ brace_color(char *s, int c, int force)
 }
 
 static char *
-do_prompt(int in_comment, char *p)
+do_prompt(int in_comment, char *p, char **bare)
 {
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
+  static char buf1[MAX_PROMPT_LEN];
   char *s;
 
   if (GP_DATA->flags & TEST) return prompt;
@@ -2231,8 +2232,12 @@ do_prompt(int in_comment, char *p)
   s += strlen(s);
   if (in_comment)
     strcpy(s, COMMENTPROMPT);
-  else
-    do_strftime(p,s, MAX_PROMPT_LEN-1);
+  else {
+    do_strftime(p,buf1, MAX_PROMPT_LEN-1);
+    strcpy(s, buf1);
+  }
+  if (bare)
+    *bare = buf1;
   s += strlen(s);
   brace_color(s, c_INPUT, 1); return buf;
 }
@@ -2308,7 +2313,7 @@ input_loop(filtre_t *F, input_method *IM)
 
     /* read continuation line */
     s = F->end;
-    if (IM->prompt) IM->prompt = do_prompt(F->in_comment, prompt_cont);
+    if (IM->prompt) IM->prompt = do_prompt(F->in_comment, prompt_cont, NULL);
     to_read = IM->getline(b,&s, IM);
     if (!to_read) break;
   }
@@ -2443,7 +2448,7 @@ is_interactive(void)
 #endif
 }
 
-extern int get_line_from_readline(char *prompt, filtre_t *F);
+extern int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 
 /* return 0 if no line could be read (EOF) */
 static int
@@ -2453,10 +2458,15 @@ read_line(filtre_t *F, char *PROMPT)
   if (compatible == OLDALL) F->downcase = 1;
   if (is_interactive())
   {
-    if (!PROMPT) PROMPT = do_prompt(F->in_comment, prompt);
+    char *bare_prompt;
+
+    if (PROMPT)
+      bare_prompt = PROMPT;
+    else
+      PROMPT = do_prompt(F->in_comment, prompt, &bare_prompt);
 #ifdef READLINE
     if (GP_DATA->flags & USE_READLINE)
-      res = get_line_from_readline(PROMPT, F);
+      res = get_line_from_readline(PROMPT, bare_prompt, F);
     else
 #endif
       res = get_line_from_user(PROMPT, F);

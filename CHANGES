@@ -101,6 +101,9 @@ BA  8- renamed mymyrand --> pari_rand31
 IZ 11- [OS/2:] improve dlopen(NULL,...)
 IZ 12- [OS/2:] enable dynamic-linking build
 IZ 13- [OS/2:] use same CFLAGS as under Linux
+IZ 14- when using external prettyprinter, write in raw format to logfile 
+       [not in TeX format sent to prettyprinter]
+IZ 15- don't output color escape sequences to logfile
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
