@@ -33,6 +33,7 @@ else
   dfltdata=$share_prefix/pari
 fi
 
+echo "Installation directories for:"
 echo $n ..."executables (gp, gphelp) ? $c"
 dflt=${dfltbindir:-$prefix/bin}; . ./myread; bindir=$ans
 
