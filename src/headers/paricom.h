@@ -239,9 +239,9 @@ extern void* global_err_data;
 
 #define mpodd(x) (signe(x) && mod2(x))
 
-#define ONLY_REM ((GEN*)0x1)
-#define ONLY_DIVIDES ((GEN*)0x2)
-#define ONLY_DIVIDES_EXACT ((GEN*)0x3)
+#define ONLY_REM ((GEN*)0x1L)
+#define ONLY_DIVIDES ((GEN*)0x2L)
+#define ONLY_DIVIDES_EXACT ((GEN*)0x3L)
 #define gdeuc(x,y) (poldivres((x),(y),NULL))
 #define gres(x,y) (poldivres((x),(y),ONLY_REM))
 #define Fp_deuc(x,y,p) (Fp_poldivres((x),(y),(p), NULL))
