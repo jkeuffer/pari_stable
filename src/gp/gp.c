@@ -2160,12 +2160,15 @@ gp_initrc(growarray *A, char *path)
   FILE *file = gprc_get(path);
   Buffer *b;
   filtre_t F;
+  int c = 0;
 
   if (!file) return;
   b = new_buffer();
   init_filtre(&F, (void*)b);
   for(;;)
   {
+    if (setjmp(GP_DATA->env)) fprintferr("...skipping line %ld.\n", c);
+    c++;
     if (!get_line_from_file(NULL,&F,file)) break;
     s = b->buf;
     if (*s == '#')
@@ -2921,7 +2924,15 @@ read_opt(growarray *A, long argc, char **argv)
     }
   }
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  if (initrc) gp_initrc(A, argv[0]);
+  if (initrc)
+  {
+    gp_initrc(A, argv[0]);
+    if (setjmp(GP_DATA->env))
+    {
+      pariputs("### Errors on startup, exiting...\n\n");
+      exit(1);
+    }
+  }
   for ( ; i < argc; i++) grow_append(A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
@@ -2979,11 +2990,17 @@ main(int argc, char **argv)
   if (!(GP_DATA->flags & QUIET)) gp_head();
   if (A.n)
   {
-    ulong f = GP_DATA->flags;
+    VOLATILE ulong f = GP_DATA->flags;
     FILE *l = logfile;
-    long i;
+    VOLATILE long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); logfile = NULL;
-    for (i = 0; i < A.n; i++) { (void)read0((char*)A.v[i]); free(A.v[i]); }
+    for (i = 0; i < A.n; i++) {
+      if (setjmp(GP_DATA->env))
+      {
+        fprintferr("... skipping file '%s'\n", A.v[i]);
+        i++; if (i == A.n) break;
+      }
+      (void)read0((char*)A.v[i]); free(A.v[i]); }
     GP_DATA->flags = f; logfile = l;
   }
   free(A.v);
