@@ -85,3 +85,149 @@ randomi(GEN N)
   if (!n) x = int_normalize(x, 1);
   return x;
 }
+
+/********************************************************************/
+/**                                                                **/
+/**              EXPONENT / CONVERSION t_REAL --> double           **/
+/**                                                                **/
+/********************************************************************/
+
+#ifdef LONG_IS_64BIT
+long
+expodb(double x)
+{
+  union { double f; ulong i; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+
+  if (x==0.) return -exp_mid;
+  fi.f = x;
+  return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
+}
+
+GEN
+dbltor(double x)
+{
+  GEN z;
+  long e;
+  union { double f; ulong i; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int expo_len = 11; /* number of bits of exponent */
+  LOCAL_HIREMAINDER;
+
+  if (x==0.) return realzero_bit(-exp_mid);
+  fi.f = x; z = cgetr(DEFAULTPREC);
+  e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
+  z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
+  z[2] = (fi.i << expo_len) | HIGHBIT;
+  return z;
+}
+
+double
+rtodbl(GEN x)
+{
+  long ex,s=signe(x);
+  ulong a;
+  union { double f; ulong i; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int expo_len = 11; /* number of bits of exponent */
+  LOCAL_HIREMAINDER;
+
+  if (typ(x)==t_INT && !s) return 0.0;
+  if (typ(x)!=t_REAL) err(typeer,"rtodbl");
+  if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
+
+  /* start by rounding to closest */
+  a = (x[2] & (HIGHBIT-1)) + 0x400;
+  if (a & HIGHBIT) { ex++; a=0; }
+  if (ex >= exp_mid) err(rtodber);
+  fi.i = ((ex + exp_mid) << mant_len) | (a >> expo_len);
+  if (s<0) fi.i |= HIGHBIT;
+  return fi.f;
+}
+
+#else /* LONG_IS_64BIT */
+
+#if   PARI_DOUBLE_FORMAT == 1
+#  define INDEX0 1
+#  define INDEX1 0
+#elif PARI_DOUBLE_FORMAT == 0
+#  define INDEX0 0
+#  define INDEX1 1
+#endif
+
+long
+expodb(double x)
+{
+  union { double f; ulong i[2]; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int shift = mant_len-32;
+
+  if (x==0.) return -exp_mid;
+  fi.f = x;
+  {
+    const ulong a = fi.i[INDEX0];
+    return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+  }
+}
+
+GEN
+dbltor(double x)
+{
+  GEN z;
+  long e;
+  union { double f; ulong i[2]; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int expo_len = 11; /* number of bits of exponent */
+  const int shift = mant_len-32;
+
+  if (x==0.) return realzero_bit(-exp_mid);
+  fi.f = x; z=cgetr(DEFAULTPREC);
+  {
+    const ulong a = fi.i[INDEX0];
+    const ulong b = fi.i[INDEX1];
+    e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+    z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
+    z[3] = b << expo_len;
+    z[2] = HIGHBIT | b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
+  }
+  return z;
+}
+
+double
+rtodbl(GEN x)
+{
+  long ex,s=signe(x),lx=lg(x);
+  ulong a,b,k;
+  union { double f; ulong i[2]; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int expo_len = 11; /* number of bits of exponent */
+  const int shift = mant_len-32;
+
+  if (typ(x)==t_INT && !s) return 0.0;
+  if (typ(x)!=t_REAL) err(typeer,"rtodbl");
+  if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
+
+  /* start by rounding to closest */
+  a = x[2] & (HIGHBIT-1);
+  if (lx > 3)
+  {
+    b = x[3] + 0x400UL; if (b < 0x400UL) a++;
+    if (a & HIGHBIT) { ex++; a=0; }
+  }
+  else b = 0;
+  if (ex > exp_mid) err(rtodber);
+  ex += exp_mid;
+  k = (a >> expo_len) | (ex << shift);
+  if (s<0) k |= HIGHBIT;
+  fi.i[INDEX0] = k;
+  fi.i[INDEX1] = (a << (BITS_IN_LONG-expo_len)) | (b >> expo_len);
+  return fi.f;
+}
+#endif /* LONG_IS_64BIT */
+

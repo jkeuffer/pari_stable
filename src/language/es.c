@@ -20,9 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "anal.h"
-extern GEN confrac(GEN x); /* should be static here, but use hiremainder */
-extern GEN convi(GEN x);
-char * type_name(long t);
+extern char *type_name(long t);
 
 void
 hit_return(void)
@@ -731,8 +729,41 @@ Strexpand(GEN g) {
 #define putsigne_nosp(x) pariputc((x>0)? '+' : '-')
 #define putsigne(x) pariputs((x>0)? " + " : " - ")
 #define sp_sign_sp(T,x) ((T)->sp? putsigne(x): putsigne_nosp(x))
-#define sp(T) do { if ((T)->sp) pariputc(' '); } while(0);
 #define comma_sp(T)     ((T)->sp? pariputs(", "): pariputc(','))
+#define sp(T) STMT_START { if ((T)->sp) pariputc(' '); } STMT_END
+
+/* convert integer --> base 10^9 [not memory clean] */
+static long *
+convi(GEN x, long *l)
+{
+  pari_sp av, lim;
+  long lz = 3 + (long)((lgefint(x)-2) * (BITS_IN_LONG / (9*L2SL10)));
+  GEN z, zd;
+
+  zd = z = new_chunk(lz);
+  av = avma; lim = stack_lim(av,1);
+  for(;;)
+  {
+    x = dvmdiu(x, 1000000000, zd); zd++;
+    if (!signe(x)) { if (l) *l = zd - z; return zd; }
+    if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint(av, x);
+  }
+}
+
+/* # of decimal digits, assume l > 0 */
+static long
+numdig(long l)
+{
+  if (l < 100000)
+  {
+    if (l < 100)    return (l < 10)? 1: 2;
+    if (l < 10000)  return (l < 1000)? 3: 4;
+    return 5;
+  }
+  if (l < 10000000)   return (l < 1000000)? 6: 7;
+  if (l < 1000000000) return (l < 100000000)? 8: 9;
+  return 10;
+}
 
 static void
 blancs(long nb) { while (nb-- > 0) pariputc(' '); }
@@ -740,91 +771,49 @@ blancs(long nb) { while (nb-- > 0) pariputc(' '); }
 static void
 zeros(long nb)  { while (nb-- > 0) pariputc('0'); }
 
-static long
-coinit(long x)
-{
-  char cha[10], *p = cha + 9;
-
-  *p = 0;
-  do { *--p = x%10 + '0'; x /= 10; } while (x);
-  pariputs(p); return 9 - (p - cha);
-}
-
-/* as above, printing leading 0s, return # significant digits printed
- * print at most dec significant digits */
-static long
-coinit2(long x, long dec)
-{
-  char cha[10], *p = cha + 9;
-  int i = 0;
-
-  for (*p = 0; p > cha; x /= 10) *--p = x%10 + '0';
-  while (cha[i] == '0') i++;
-  i = 9-i; /* # significant digits to print */
-  if (i > dec) { i = dec; cha[dec] = 0; }
-  pariputs(cha); return i;
-}
-
 static void
-comilieu(long x)
+copart(char *s, long x, long start)
 {
-  char cha[10], *p = cha + 9;
-
-  for (*p = 0; p > cha; x /= 10) *--p = x%10 + '0';
-  pariputs(cha);
+  char *p = s + start;
+  for ( ; p > s; x /= 10) *--p = x%10 + '0';
 }
-
 static void
-cofin(long x, long decim)
-{
-  char cha[10], *p = cha + 9;
+comid(char *s, long x) { copart(s,x,9); }
 
-  for (; p > cha; x /= 10) *--p = x%10 + '0';
-  cha[decim] = 0; pariputs(cha);
+/* convert abs(x) != 0 to str. Prepend '-' if (minus) */
+static char *
+itostr(GEN x, int minus)
+{
+  long l, d, *res = convi(x, &l);
+  char *s = (char*)new_chunk(l + minus + 1), *t = s;
+
+  if (minus) *t++ = '-';
+  d = numdig(*--res);
+  copart(t, *res, d); t += d;
+  while (--l > 0) { comid(t, *--res); t += 9; }
+  *t = 0; return s;
 }
 
-static long
-nbdch(long l)
-{
-  if (l<100000)
-  {
-    if (l<10) return 1;
-    if (l<100) return 2;
-    if (l<1000) return 3;
-    if (l<10000) return 4;
-    return 5;
-  }
-  if (l<1000000) return 6;
-  if (l<10000000) return 7;
-  if (l<100000000) return 8;
-  if (l<1000000000) return 9;
-  return 10; /* not reached */
-}
-
-/* write int x > 0 */
+/* x != 0 integer, write abs(x). Prepend '-' if (minus) */
 static void
-wr_intpos(GEN x)
+wr_intsgn(GEN x, int minus)
 {
-  long *res = convi(x);
-  (void)coinit(*--res); while (*--res >= 0) comilieu(*res);
+  pari_sp av = avma;
+  pariputs( itostr(x, minus) ); avma = av;
 }
 
 /* write int. T->fieldw: field width (pad with ' ') */
 static void
 wr_int(pariout_t *T, GEN x, int nosign)
 {
-  long *res,*re,i, sx = signe(x);
-  int minus;
+  long sx = signe(x);
+  pari_sp av = avma;
+  char *s;
 
   if (!sx) { blancs(T->fieldw - 1); pariputc('0'); return; }
-  re = res = convi(x);
-  i = nbdch(*--re); while (*--re >= 0) i+=9;
-  minus = (sx < 0 && !nosign);
-  if (minus) i++;
-
-  blancs(T->fieldw - i);
-  if (minus) pariputc('-');
-  (void)coinit(*--res); while (*--res >= 0) comilieu(*res);
+  s = itostr(x, sx < 0 && !nosign);
+  blancs( T->fieldw - strlen(s) );
+  pariputs(s); avma = av;
 }
 
 static void
@@ -844,70 +833,100 @@ wr_vecsmall(pariout_t *T, GEN g)
 /**                        WRITE A REAL NUMBER                     **/
 /**                                                                **/
 /********************************************************************/
-static void wr_exp(pariout_t *T, GEN x);
+extern long pow10(int n);
+extern GEN rpowsi(ulong a, GEN n, long prec);
+
+/* e binary exponent, return exponent in base ten */
+static long
+ex10(long e) { return (long) ((e >= 0)? e*L2SL10: -(-e*L2SL10)-1); }
+
+/* sss.ttt, assume 'point' < strlen(s) */
+static void
+wr_dec(char *s, long point)
+{
+  char *t = s + point, save = *t;
+  *t = 0;    pariputs(s); pariputc('.'); /* integer part */
+  *t = save; pariputs(t);
+}
+/* a.bbb En*/
+static void
+wr_exp(pariout_t *T, char *s, long n)
+{
+  wr_dec(s, 1); sp(T); pariputsf("E%ld", n);
+}
+
+static void
+round_up(long *resd, long n, long *res)
+{
+  *resd += n;
+  while (*resd >= 1000000000 && resd < res) { *resd++ = 0; *resd += 1; }
+}
 
 /* assume x != 0 and print |x| in floating point format */
 static void
-wr_float(pariout_t *T, GEN x)
+wr_float(pariout_t *T, GEN x, int f_format)
 {
-  long *res, ex,s,d,e,decmax, dec = T->sigd;
-  GEN p1;
-
-  if (dec>0) /* round if needed */
-  {
-    GEN arrondi = cgetr(3);
-    ex = expo(x) - (long)((((double)BITS_IN_LONG)/pariK)*dec+2);
-    arrondi[1] = (x[1] & ~EXPOBITS) | evalexpo(ex);
-    arrondi[2] = x[2]; x = addrr(x,arrondi);
+  long beta, l, ldec, dec0, decdig, d, dif, lx = lg(x), dec = T->sigd;
+  GEN z, res, resd;
+  char *s, *t;
+  
+  dif =  bit_accuracy(lx) - expo(x);
+  if (dif <= 0) f_format = 0; /* write in E format */
+  if (dec > 0)
+  { /* reduce precision if possible */
+    l = 3 + (dec * pariK1);
+    if (lx > l) { x = rtor(x, l); lx = l; }
   }
-  ex = expo(x); e = bit_accuracy(lg(x)); /* significant bits */
-  if (ex >= e) { wr_exp(T,x); return; }
-  decmax = (long) (e * L2SL10); /* significant digits */
-  if ((ulong)decmax < (ulong)dec) dec = decmax; /* Hack: includes dec < 0 */
-
-/* integer part */
-  p1 = gcvtoi(x,&e); s = signe(p1);
-  if (e > 0) err(bugparier,"wr_float");
-  if (!s) { pariputc('0'); d=0; }
-  else
+  
+  beta = ex10(dif);
+  if (beta)
   {
-    x = subri(x,p1); setsigne(p1,1);
-    res = convi(p1); d = coinit(*--res);
-    while (*(--res) >= 0) { d += 9; comilieu(*res); }
+    z = rpowsi(10UL, stoi(labs(beta)), lx+1);
+    z = (beta > 0)? mulrr(x, z): divrr(x, z);
+    setsigne(z, 1);
   }
-  pariputc('.');
+  else z = mpabs(x);
 
-/* fractional part: 0 < x < 1 */
-  if (!signe(x))
+  /* x ~ z / 10^beta, z in N */
+  z = grndtoi(z, &l); /* l is junk */
+  res = convi(z, &ldec);
+  resd = res - 1; /* leading word */
+  dec0 = numdig(*resd);
+  decdig = 9 * (ldec-1) + dec0; /* number of significant decimal digits in z */
+
+  /* Round properly; leading word may overflow to 10^9 after rounding */
+  if (dec < 0 || decdig < dec)
+    dec = decdig;
+  else if (dec < dec0) /* ==> 0 < dec < 9 */
   {
-    dec -= d; if (dec>0) zeros(dec);
-    return;
+    long p10 = pow10(dec0 - dec);
+    if (*resd % p10 > (p10>>1)) *resd += p10; /* round up */
   }
-
-  res = confrac(x);
-  if (!s)
+  else if (dec < decdig)
   {
-    while (!*res) { res++; pariputs("000000000"); }
-    d = coinit2(*res++, dec);
+    l = dec - dec0; /* skip leading word */
+    d = l % 9;
+    resd -= l / 9;
+    if (d)
+    { /* cut resd[-1] to first d digits when printing */
+      long p10 = pow10(9 - d);
+      if (*--resd % p10 > (p10>>1)) round_up(resd, p10, res);
+    }
+    else if ((ulong)resd[-1] > 500000000) round_up(resd, 1, res);
   }
 
-  /* d = # significant digits already printed */
-  dec -= d;
-  while (dec>8) { comilieu(*res++); dec -= 9; }
-  if (dec>0) cofin(*res,dec);
-}
+  s = t = (char*)new_chunk(decdig + 1);
+  l = ldec;
+  d = numdig(*--res);
+  copart(t, *res, d); t += d;
+  while (--l > 0) { comid(t, *--res); t += 9; }
+  s[dec] = 0;
 
-/* as above in exponential format */
-static void
-wr_exp(pariout_t *T, GEN x)
-{
-  GEN dix = stor(10, lg(x)+1);
-  long e = expo(x);
-
-  e = (e>=0)? (long)(e*L2SL10): (long)(-(-e*L2SL10)-1);
-  if (e) x = mulrr(x, gpowgs(dix,-e));
-  if (absr_cmp(x, dix) >= 0) { x = divrr(x,dix); e++; }
-  wr_float(T,x); sp(T); pariputsf("E%ld",e);
+  decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
+  dif = decdig - beta; /* # of decimal digits in integer part */
+  if (!f_format || dif > dec) wr_exp(T,s, dif-1);
+  else if (dif > 0) wr_dec(s, dif);
+  else { pariputs("0."); zeros(-dif); pariputs(s); }
 }
 
 /* Write real number x.
@@ -918,34 +937,29 @@ wr_exp(pariout_t *T, GEN x)
 static void
 wr_real(pariout_t *T, GEN x, int nosign)
 {
-  pari_sp ltop;
+  pari_sp av;
   long sx = signe(x), ex = expo(x);
 
   if (!sx) /* real 0 */
   {
     if (T->format == 'f')
     {
-      long d, dec = T->sigd;
+      long dec = T->sigd;
       if (dec < 0)
       {
-        d = 1+((-ex)>>TWOPOTBITS_IN_LONG);
-        if (d < 0) d = 0;
-        dec = (long)(pariK*d);
+        long d = 1 + ((-ex)>>TWOPOTBITS_IN_LONG);
+        dec = (d <= 0)? 0: (long)(pariK*d);
       }
       pariputs("0."); zeros(dec);
     }
     else
-    {
-      ex = (ex>=0)? (long)(ex*L2SL10): (long)(-(-ex*L2SL10)-1);
-      pariputsf("0.E%ld", ex+1);
-    }
+      pariputsf("0.E%ld", ex10(ex) + 1);
     return;
   }
   if (!nosign && sx < 0) pariputc('-'); /* print sign if needed */
-  ltop = avma;
-  if ((T->format == 'g' && ex>=-32)
-    || T->format == 'f') wr_float(T,x); else wr_exp(T,x);
-  avma = ltop;
+  av = avma;
+  wr_float(T,x, (T->format == 'g' && ex >= -32) || T->format == 'f');
+  avma = av;
 }
 
 /********************************************************************/
@@ -1518,9 +1532,7 @@ bruti(GEN g, pariout_t *T, int nosign)
   switch(tg)
   {
     case t_SMALL: pariputsf("%ld",smalltos(g)); break;
-    case t_INT:
-      if (!nosign && signe(g) < 0) pariputc('-');
-      wr_intpos(g); break;
+    case t_INT: wr_intsgn(g, !nosign && signe(g) < 0); break;
     case t_REAL: wr_real(T,g,nosign); break;
 
     case t_INTMOD: case t_POLMOD:
@@ -1589,7 +1601,7 @@ bruti(GEN g, pariout_t *T, int nosign)
 	{
 	  if (!i || !is_pm1(a))
 	  {
-	    wr_intpos(a); if (i) pariputc('*');
+	    wr_intsgn(a, 0); if (i) pariputc('*');
 	  }
 	  if (i) padic_nome(ev,i);
           sp_sign_sp(T,1);
@@ -1914,9 +1926,7 @@ texi(GEN g, pariout_t *T, int nosign)
   switch(tg)
   {
     case t_SMALL: pariputsf("%ld",smalltos(g)); break;
-    case t_INT: 
-      if (!nosign && signe(g) < 0) pariputc('-');
-      wr_intpos(g); break;
+    case t_INT: wr_intsgn(g, !nosign && signe(g) < 0); break;
     case t_REAL: wr_real(T,g,nosign); break;
 
     case t_INTMOD: case t_POLMOD:
@@ -1977,7 +1987,7 @@ texi(GEN g, pariout_t *T, int nosign)
 	{
 	  if (!i || !is_pm1(a))
 	  {
-	    wr_intpos(a); if (i) pariputs("\\cdot");
+	    wr_intsgn(a, 0); if (i) pariputs("\\cdot");
 	  }
 	  if (i) padic_texnome(ev,i);
 	  pariputc('+');

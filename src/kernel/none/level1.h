@@ -90,6 +90,7 @@ GEN    realzero_bit(long bitprec);
 void   resiiz(GEN x, GEN y, GEN z);
 GEN    resis(GEN x, long y);
 GEN    ressi(long x, GEN y);
+GEN    rtor(GEN x, long prec);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
 GEN    stor(long x, long prec);
@@ -762,6 +763,9 @@ stor(long s, long prec) { GEN z = cgetr(prec); affsr(s,z); return z; }
 
 INLINE GEN
 itor(GEN x, long prec) { GEN z = cgetr(prec); affir(x,z); return z; }
+
+INLINE GEN
+rtor(GEN x, long prec) { GEN z = cgetr(prec); affrr(x,z); return z; }
 
 INLINE long
 addssmod(long a, long b, long p)

@@ -1218,25 +1218,25 @@ modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 
 /* return |y| \/ x */
 GEN
-diviu(GEN y, ulong x)
+dvmdiu(GEN y, ulong x, ulong *rem)
 {
   long sy=signe(y),ly,i;
   GEN z;
   LOCAL_HIREMAINDER;
 
   if (!x) err(diver4);
-  if (!sy) { hiremainder=0; SAVE_HIREMAINDER; return gzero; }
+  if (!sy) { *rem = 0; return gzero; }
 
   ly = lgefint(y);
   if (x <= (ulong)y[2]) hiremainder=0;
   else
   {
-    if (ly==3) { hiremainder=itou(y); SAVE_HIREMAINDER; return gzero; }
+    if (ly==3) { *rem = (ulong)y[2]; return gzero; }
     hiremainder=y[2]; ly--; y++;
   }
   z = cgeti(ly); z[1] = evallgefint(ly) | evalsigne(1);
   for (i=2; i<ly; i++) z[i]=divll(y[i],x);
-  SAVE_HIREMAINDER; return z;
+  *rem = hiremainder; return z;
 }
 
 #ifndef __M68K__
@@ -1726,71 +1726,6 @@ DIVIDE: /* quotient is non-zero */
     *z = (GEN)qd;
   }
   avma = (pari_sp)qd; return q;
-}
-
-#ifdef LONG_IS_64BIT
-#  define DIVCONVI 7
-#else
-#  define DIVCONVI 14
-#endif
-
-/* convert integer --> base 10^9 */
-GEN
-convi(GEN x)
-{
-  pari_sp av = avma, lim;
-  long lz;
-  GEN z,p1;
-
-  lz = 3 + ((lgefint(x)-2)*15)/DIVCONVI;
-  z = new_chunk(lz); z[1] = -1; p1 = z+2;
-  lim = stack_lim(av,1);
-  for(;;)
-  {
-    x = diviu(x,1000000000); *p1++ = hiremainder;
-    if (!signe(x)) { avma = av; return p1; }
-    if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint((pari_sp)z,x);
-  }
-}
-#undef DIVCONVI
-
-/* convert fractional part --> base 10^9 [assume expo(x) < 0] */
-GEN
-confrac(GEN x)
-{
-  long lx=lg(x), ex = -expo(x)-1, d,m,ly,ey,lr,i,j;
-  GEN y,y1;
-
-  ey = ex + bit_accuracy(lx);
-  ly = 1 + ((ey-1) >> TWOPOTBITS_IN_LONG);
-  d = ex >> TWOPOTBITS_IN_LONG;
-  m = ex & (BITS_IN_LONG-1);
-  y = new_chunk(ly); y1 = y + (d-2);
-  while (d--) y[d]=0;
-  if (!m)
-    for (i=2; i<lx; i++) y1[i] = x[i];
-  else
-  { /* shift x left sh bits */
-    const ulong sh=BITS_IN_LONG-m;
-    ulong k=0, l;
-    for (i=2; i<lx; i++)
-    {
-      l = x[i];
-      y1[i] = (l>>m)|k;
-      k = l<<sh;
-    }
-    y1[i] = k;
-  }
-  lr = 1 + ((long) (ey*L2SL10))/9;
-  y1 = new_chunk(lr);
-  for (j=0; j<lr; j++)
-  {
-    LOCAL_HIREMAINDER;
-    hiremainder=0;
-    for (i=ly-1; i>=0; i--) y[i]=addmul(y[i],1000000000);
-    y1[j]=hiremainder;
-  }
-  return y1;
 }
 
 GEN
@@ -2420,151 +2355,6 @@ quicksqri(GEN a, long na)
 
 GEN
 sqri(GEN a) { return quicksqri(a+2, lgefint(a)-2); }
-
-/********************************************************************/
-/**                                                                **/
-/**              EXPONENT / CONVERSION t_REAL --> double           **/
-/**                                                                **/
-/********************************************************************/
-
-#ifdef LONG_IS_64BIT
-long
-expodb(double x)
-{
-  union { double f; ulong i; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-
-  if (x==0.) return -exp_mid;
-  fi.f = x;
-  return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
-}
-
-GEN
-dbltor(double x)
-{
-  GEN z;
-  long e;
-  union { double f; ulong i; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-  const int expo_len = 11; /* number of bits of exponent */
-  LOCAL_HIREMAINDER;
-
-  if (x==0.) return realzero_bit(-exp_mid);
-  fi.f = x; z = cgetr(DEFAULTPREC);
-  e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
-  z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
-  z[2] = (fi.i << expo_len) | HIGHBIT;
-  return z;
-}
-
-double
-rtodbl(GEN x)
-{
-  long ex,s=signe(x);
-  ulong a;
-  union { double f; ulong i; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-  const int expo_len = 11; /* number of bits of exponent */
-  LOCAL_HIREMAINDER;
-
-  if (typ(x)==t_INT && !s) return 0.0;
-  if (typ(x)!=t_REAL) err(typeer,"rtodbl");
-  if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
-
-  /* start by rounding to closest */
-  a = (x[2] & (HIGHBIT-1)) + 0x400;
-  if (a & HIGHBIT) { ex++; a=0; }
-  if (ex >= exp_mid) err(rtodber);
-  fi.i = ((ex + exp_mid) << mant_len) | (a >> expo_len);
-  if (s<0) fi.i |= HIGHBIT;
-  return fi.f;
-}
-
-#else /* LONG_IS_64BIT */
-
-#if   PARI_DOUBLE_FORMAT == 1
-#  define INDEX0 1
-#  define INDEX1 0
-#elif PARI_DOUBLE_FORMAT == 0
-#  define INDEX0 0
-#  define INDEX1 1
-#endif
-
-long
-expodb(double x)
-{
-  union { double f; ulong i[2]; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-  const int shift = mant_len-32;
-
-  if (x==0.) return -exp_mid;
-  fi.f = x;
-  {
-    const ulong a = fi.i[INDEX0];
-    return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
-  }
-}
-
-GEN
-dbltor(double x)
-{
-  GEN z;
-  long e;
-  union { double f; ulong i[2]; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-  const int expo_len = 11; /* number of bits of exponent */
-  const int shift = mant_len-32;
-
-  if (x==0.) return realzero_bit(-exp_mid);
-  fi.f = x; z=cgetr(DEFAULTPREC);
-  {
-    const ulong a = fi.i[INDEX0];
-    const ulong b = fi.i[INDEX1];
-    e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
-    z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
-    z[3] = b << expo_len;
-    z[2] = HIGHBIT | b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
-  }
-  return z;
-}
-
-double
-rtodbl(GEN x)
-{
-  long ex,s=signe(x),lx=lg(x);
-  ulong a,b,k;
-  union { double f; ulong i[2]; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-  const int expo_len = 11; /* number of bits of exponent */
-  const int shift = mant_len-32;
-
-  if (typ(x)==t_INT && !s) return 0.0;
-  if (typ(x)!=t_REAL) err(typeer,"rtodbl");
-  if (!s || (ex=expo(x)) < - exp_mid) return 0.0;
-
-  /* start by rounding to closest */
-  a = x[2] & (HIGHBIT-1);
-  if (lx > 3)
-  {
-    b = x[3] + 0x400UL; if (b < 0x400UL) a++;
-    if (a & HIGHBIT) { ex++; a=0; }
-  }
-  else b = 0;
-  if (ex > exp_mid) err(rtodber);
-  ex += exp_mid;
-  k = (a >> expo_len) | (ex << shift);
-  if (s<0) k |= HIGHBIT;
-  fi.i[INDEX0] = k;
-  fi.i[INDEX1] = (a << (BITS_IN_LONG-expo_len)) | (b >> expo_len);
-  return fi.f;
-}
-#endif /* LONG_IS_64BIT */
 
 /* Old cgiv without reference count (which was not used anyway)
  * Should be a macro.

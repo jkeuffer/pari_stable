@@ -2237,11 +2237,17 @@ number(long *nb)
   return m;
 }
 
-static GEN
-constante()
+long
+pow10(int n)
 {
   static long pw10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
                         10000000, 100000000, 1000000000 };
+  return pw10[n];
+}
+
+static GEN
+constante()
+{
   long i, l, m, n = 0, nb;
   pari_sp av = avma;
   GEN z,y;
@@ -2251,7 +2257,7 @@ constante()
   {
     if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
     m = number(&nb);
-    y = addsmulsi(m, pw10[nb], y);
+    y = addsmulsi(m, pow10(nb), y);
   }
   switch(*analyseur)
   {
@@ -2265,7 +2271,7 @@ constante()
       {
         if (++i == 4) { avma = av; i = 0; } /* HACK gerepile */
         m = number(&nb); n -= nb;
-        y = addsmulsi(m, pw10[nb], y);
+        y = addsmulsi(m, pow10(nb), y);
       }
       if (*analyseur != 'E' && *analyseur != 'e')
       {
@@ -2295,7 +2301,7 @@ constante()
   z = itor(y, l);
   if (n)
   {
-    y = rpowsi(10UL, stoi(labs(n)), l); /* 10^|n| */
+    y = rpowsi(10UL, stoi(labs(n)), l+1); /* 10^|n| */
     z = (n > 0)? mulrr(z,y): divrr(z,y);
     z = gerepileuptoleaf(av, z);
   }
