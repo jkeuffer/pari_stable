@@ -1318,8 +1318,11 @@ gconvsp(GEN x, int flpile)
    subst_poly(pol, from, to) =
    { local(t='subst_poly_t, M);
 
+     \\ if fraction
+     M = numerator(from) - t * denominator(from);
+     \\ else
      M = from - t;
-     subst(lift(Mod(pol,M), variable(M)),t,to)
+     subst(pol % M, t, to)
    }
  */
 GEN
@@ -1327,10 +1330,17 @@ gsubst_expr(GEN pol, GEN from, GEN to)
 {
   pari_sp av = avma;
   long v = fetch_var();		/* XXX Need fetch_var_low_priority() */
-  GEN tmp = gsub(from, polx[v]);	/* M */
+  GEN tmp;
 
-  if (v <= gvar(from))
-      err(talker, "subst: unexpected variable precedence");
+  switch (typ(from)) {
+  case t_RFRAC: case t_RFRACN: /* M= numerator(from) - t * denominator(from) */
+    tmp = gsub((GEN)from[1], gmul(polx[v], (GEN)from[2]));
+    break;
+  default:
+    tmp = gsub(from, polx[v]);	/* M = from - t */
+  }
+
+  if (v <= gvar(from)) err(talker, "subst: unexpected variable precedence");
   tmp = gmul(pol, gmodulcp(gun, tmp));
   if (typ(tmp) == t_POLMOD)
     tmp = (GEN)tmp[2];			/* optimize lift */
