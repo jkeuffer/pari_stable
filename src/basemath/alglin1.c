@@ -684,7 +684,7 @@ gscalmat_proto(GEN z, GEN myzero, long n, int flag)
 {
   long i,j;
   GEN y = cgetg(n+1,t_MAT);
-  if (n < 0) err(talker,"negative size in scalmat");
+  if (n < 0) err(talker,"negative size in gscalmat_proto");
   if (flag) z = (flag==1)? stoi((long)z): gcopy(z);
   for (i=1; i<=n; i++)
   {
@@ -712,7 +712,7 @@ gscalcol_proto(GEN z, GEN myzero, long n)
 {
   GEN y = cgetg(n+1,t_COL);
   long i;
-
+  if (n < 0) err(talker,"negative size in gscalcol_proto");
   if (n)
   {
     y[1]=(long)z;
