@@ -2246,7 +2246,9 @@ is a list of list of possible matching words."
               (gp-restore-wind-conf)
               (forward-word 1)
               ;; In case of a completion via readline:
-              (if (char-equal (char-after (point)) ?() (forward-char 1))
+              (if (and (char-after (point))
+                       (char-equal (char-after (point)) ?())
+                (forward-char 1))
               (if (char-equal (preceding-char) ?)) (forward-char -1))))
     ;; more than two matches:
     (if (string= (car ans) "")
