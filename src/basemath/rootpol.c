@@ -1951,7 +1951,7 @@ roots_com(GEN q, long bitprec)
     GEN M, z, t = (GEN)q[2];
     long i, x, y, l, n;
 
-    if (isexactzero(t)) x = bitprec;
+    if (isexactzero(t)) x = -bitprec;
     else
     {
       n = gexpo(t);
