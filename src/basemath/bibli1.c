@@ -1287,7 +1287,7 @@ PRECPB:
     {
       kmax = k;
       if (KMAX < kmax) { KMAX = kmax; count_max = 8; }
-      if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
+      if (DEBUGLEVEL>3) {fprintferr("K%ld ",k);flusherr();}
       if (gram) j = incrementalGS(x, L, B, k);
       else      j = Householder_get_mu(x, L, B, k, Q, prec);
       if (!j) goto PRECPB;
