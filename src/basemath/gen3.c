@@ -1332,6 +1332,7 @@ gsubst_expr(GEN pol, GEN from, GEN to)
   long v = fetch_var();		/* XXX Need fetch_var_low_priority() */
   GEN tmp;
 
+  from = simplify_i(from);
   switch (typ(from)) {
   case t_RFRAC: case t_RFRACN: /* M= numerator(from) - t * denominator(from) */
     tmp = gsub((GEN)from[1], gmul(polx[v], (GEN)from[2]));

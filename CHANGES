@@ -121,6 +121,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
        infinite loop when the result is 0, and non trivial denominator.
    54- elleta(E.omega) gave incorrect results [ conflicting normalizations ]
    55- typo in charpoly(t_MAT) [ stack overflow after garbage collection ]
+   56- subst(y,x+y-x,y) --> 0  [ missing simplification ]
 
   Changed
     1- rnf structure (removed useless components)
