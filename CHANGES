@@ -75,6 +75,7 @@ MSo20- bittest(1,32) --> 1  [ off-by-1 error ]
    24- too little GC in serreverse()
    25- bnfinit(huge field) --> "precision loss in truncation" [ missing
        term sqrt(disc(K)) in norm bound ]
+   26- allow conj(t_POLMOD) provided the modulus degree is <= 2.
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

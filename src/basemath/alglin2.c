@@ -471,7 +471,7 @@ QuickNormL1(GEN x,long prec)
 GEN
 gconj(GEN x)
 {
-  long lx,i,tx=typ(x);
+  long lx, i, tx = typ(x);
   GEN z;
 
   switch(tx)
@@ -481,34 +481,43 @@ gconj(GEN x)
       return gcopy(x);
 
     case t_COMPLEX:
-      z=cgetg(3,t_COMPLEX);
-      z[1]=lcopy((GEN) x[1]);
-      z[2]=lneg((GEN) x[2]);
+      z = cgetg(3,t_COMPLEX);
+      z[1] = lcopy((GEN)x[1]);
+      z[2] = lneg((GEN)x[2]);
       break;
 
     case t_QUAD:
-      z=cgetg(4,t_QUAD);
-      copyifstack(x[1],z[1]);
-      z[2]=gcmp0(gmael(x,1,3))? lcopy((GEN) x[2])
-                              : ladd((GEN) x[2],(GEN) x[3]);
-      z[3]=lneg((GEN) x[3]);
+      z = cgetg(4,t_QUAD); copyifstack(x[1],z[1]);
+      z[2] = gcmp0(gmael(x,1,3))? lcopy((GEN)x[2])
+                                : ladd((GEN)x[2], (GEN)x[3]);
+      z[3] = lneg((GEN) x[3]);
       break;
 
     case t_POL:
-      lx=lgef(x); z=cgetg(lx,tx); z[1]=x[1];
-      for (i=2; i<lx; i++) z[i]=lconj((GEN) x[i]);
+      lx = lgef(x); z = cgetg(lx,tx); z[1] = x[1];
+      for (i=2; i<lx; i++) z[i] = lconj((GEN)x[i]);
       break;
 
     case t_SER:
-      lx=lg(x); z=cgetg(lx,tx); z[1]=x[1];
-      for (i=2; i<lx; i++) z[i]=lconj((GEN) x[i]);
+      lx = lg(x); z = cgetg(lx,tx); z[1] = x[1];
+      for (i=2; i<lx; i++) z[i] = lconj((GEN)x[i]);
       break;
 
     case t_RFRAC: case t_RFRACN: case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); z=cgetg(lx,tx);
-      for (i=1; i<lx; i++) z[i]=lconj((GEN) x[i]);
+      lx = lg(x); z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) z[i] = lconj((GEN)x[i]);
       break;
 
+    case t_POLMOD:
+    {
+      long d = degpol(x[1]);
+      if (d < 2) return gcopy(x);
+      if (d == 2)
+      {
+        pari_sp av = avma;
+        return gerepileupto(av, gadd(gtrace(x), gneg(x)));
+      }
+    }
     default:
       err(typeer,"gconj");
       return NULL; /* not reached */
