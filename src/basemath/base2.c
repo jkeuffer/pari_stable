@@ -1156,7 +1156,7 @@ redelt_i(GEN a, GEN N, GEN p, GEN *pda)
     }
     else
       *pda = NULL;
-    if (!is_pm1(z)) a = gmul(a, mpinvmod(z, N));
+    if (!is_pm1(z)) a = gmul(a, Fp_inv(z, N));
   }
   return centermod(a, N);
 }
@@ -1276,7 +1276,7 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
       s = gdiv(s, gpowgs(p, v));
       if (typ(s) != t_INT) return NULL;
     }
-    s = mulii(s, mpinvmod(z, pp));
+    s = mulii(s, Fp_inv(z, pp));
     c[k] = (long)gerepileuptoint(av2, centermod(s, pp));
   }
   for (k = odd(n)? 1: 2; k <= n+1; k += 2) c[k] = lnegi((GEN)c[k]);

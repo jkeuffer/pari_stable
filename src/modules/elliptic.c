@@ -1420,7 +1420,7 @@ apell2_intern(GEN e, ulong p)
         s += kross(e8 + i*(e72 + i*(e6 + (i<<2))), p);
     else
       for (i=1; i<p; i++)
-        s += kross(e8 + muluumod(i, e72 + muluumod(i, e6 + (i<<2), p), p), p);
+        s += kross(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
     avma = av; return stoi(-s);
   }
 }
@@ -1451,7 +1451,7 @@ multi_invmod(GEN x, GEN p)
   for (i=2; i<lx; i++)
     y[i] = lremii(mulii((GEN)y[i-1], (GEN)x[i]), p);
 
-  u = mpinvmod((GEN)y[--i], p);
+  u = Fp_inv((GEN)y[--i], p);
   for ( ; i > 1; i--)
   {
     y[i] = lremii(mulii(u, (GEN)y[i-1]), p);
@@ -1480,7 +1480,7 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
     p1 = remii(p1, p);
   }
   else { p1 = subii(y2,y1); p2 = subii(x2, x1); }
-  p1 = mulii(p1, mpinvmod(p2, p));
+  p1 = mulii(p1, Fp_inv(p2, p));
   p1 = remii(p1, p);
   x = subii(sqri(p1), addii(x1,x2));
   y = negi(addii(y1, mulii(p1,subii(x,x1))));
@@ -1820,17 +1820,17 @@ s_addell(sellpt *P, sellpt *Q, long c4, long p)
   if (P->x == Q->x)
   {
     if (! P->y || P->y != Q->y) { P->isnull = 1; return; }
-    num = adduumod(c4, muluumod(3, muluumod(P->x, P->x, p), p), p);
-    den = adduumod(P->y, P->y, p);
+    num = Fl_add(c4, Fl_mul(3, Fl_mul(P->x, P->x, p), p), p);
+    den = Fl_add(P->y, P->y, p);
   }
   else
   {
-    num = subuumod(P->y, Q->y, p);
-    den = subuumod(P->x, Q->x, p);
+    num = Fl_sub(P->y, Q->y, p);
+    den = Fl_sub(P->x, Q->x, p);
   }
-  lambda = divuumod(num, den, p);
-  num = subuumod(muluumod(lambda, lambda, p), adduumod(P->x, Q->x, p), p);
-  P->y = subuumod(muluumod(lambda, subuumod(Q->x, num, p), p), Q->y, p);
+  lambda = Fl_div(num, den, p);
+  num = Fl_sub(Fl_mul(lambda, lambda, p), Fl_add(P->x, Q->x, p), p);
+  P->y = Fl_sub(Fl_mul(lambda, Fl_sub(Q->x, num, p), p), Q->y, p);
   P->x = num; /* necessary in case P = Q: we need Q->x above */
 }
 
@@ -1914,15 +1914,15 @@ apell0(GEN e, ulong p)
     {
       ulong t;
       if (++x >= p) err(talker, "%lu is not prime", p);
-      t = adduumod(c4, muluumod(x,x,p), p);
-      u = adduumod(c6, muluumod(x, t, p), p);
+      t = Fl_add(c4, Fl_mul(x,x,p), p);
+      u = Fl_add(c6, Fl_mul(x, t, p), p);
       KRO = kross(u,p);
     }
     KROold = KRO;
     f.isnull = 0;
-    f.x = muluumod(x, u, p);
-    f.y = muluumod(u, u, p);
-    cp4 = muluumod(c4, f.y, p);
+    f.x = Fl_mul(x, u, p);
+    f.y = Fl_mul(u, u, p);
+    cp4 = Fl_mul(c4, f.y, p);
     s_powell(&fh, &f, h, cp4, p);
     s = (long) (sqrt(((float)pordmin)/B) / 2);
     if (!s) s = 1;

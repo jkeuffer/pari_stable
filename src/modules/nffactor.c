@@ -1008,7 +1008,7 @@ ZqX(GEN P, GEN pk, GEN T, GEN proj)
 static GEN
 ZqX_normalize(GEN P, GEN lt, nflift_t *L)
 {
-  GEN R = lt? gmul(mpinvmod(lt, L->pk), P): P;
+  GEN R = lt? gmul(Fp_inv(lt, L->pk), P): P;
   return ZqX(R, L->pk, L->Tpk, L->ZqProj);
 }
 
@@ -1053,7 +1053,7 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
     L->Tpk = (GEN)z[1];
     proj = get_proj_modT(L->topow, L->Tpk, L->pk);
     if (L->topowden)
-      proj = FpM_red(gmul(mpinvmod(L->topowden, L->pk), proj), L->pk);
+      proj = FpM_red(gmul(Fp_inv(L->topowden, L->pk), proj), L->pk);
     L->ZqProj = proj;
   }
   else

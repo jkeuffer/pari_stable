@@ -181,7 +181,7 @@ divpT(GEN x, GEN y) { pari_sp av = avma;
 static GEN
 add_intmod_same(GEN z, GEN X, GEN x, GEN y) {
   if (lgefint(X) == 3) {
-    ulong u = adduumod(itou(x),itou(y), X[2]);
+    ulong u = Fl_add(itou(x),itou(y), X[2]);
     avma = (pari_sp)z; z[2] = lutoi(u);
   }
   else {
@@ -194,7 +194,7 @@ add_intmod_same(GEN z, GEN X, GEN x, GEN y) {
 static GEN
 mul_intmod_same(GEN z, GEN X, GEN x, GEN y) {
   if (lgefint(X) == 3) {
-    ulong u = muluumod(itou(x),itou(y), X[2]);
+    ulong u = Fl_mul(itou(x),itou(y), X[2]);
     avma = (pari_sp)z; z[2] = lutoi(u);
   }
   else
@@ -206,13 +206,13 @@ static GEN
 div_intmod_same(GEN z, GEN X, GEN x, GEN y)
 {
   if (lgefint(X) == 3) {
-    ulong m = (ulong)X[2], u = invumod(itou(y), m);
+    ulong m = (ulong)X[2], u = Fl_inv(itou(y), m);
     if (!u) err(invmoder,"%Z", gmodulcp(y, X));
-    u = muluumod(itou(x), u, m);
+    u = Fl_mul(itou(x), u, m);
     avma = (pari_sp)z; z[2] = lutoi(u);
   }
   else
-    z[2] = lpileuptoint((pari_sp)z, remii(mulii(x, mpinvmod(y,X)), X) );
+    z[2] = lpileuptoint((pari_sp)z, remii(mulii(x, Fp_inv(y,X)), X) );
   icopyifstack(X, z[1]); return z;
 }
 
@@ -437,13 +437,13 @@ addQp(GEN x, GEN y)
     q = gpowgs(p,d);
     mod = mulii(mod, q);
     u   = mulii(u, q);
-    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
+    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, Fp_inv(p2,mod));
     u = addii(u, p1);
   }
   else if (d < 0)
   {
     q = gpowgs(p,-d);
-    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
+    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, Fp_inv(p2,mod));
     p1 = mulii(p1, q);
     u = addii(u, p1);
     r = py; e = vy;
@@ -451,7 +451,7 @@ addQp(GEN x, GEN y)
   else
   {
     long c;
-    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
+    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, Fp_inv(p2,mod));
     u = addii(u, p1);
     if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
     {
@@ -868,7 +868,7 @@ gadd(GEN x, GEN y)
       {
         case t_FRAC: { GEN X = (GEN)x[1];
           z = cgetg(3, t_INTMOD);
-          p1 = modii(mulii((GEN)y[1], mpinvmod((GEN)y[2],X)), X);
+          p1 = modii(mulii((GEN)y[1], Fp_inv((GEN)y[2],X)), X);
           return add_intmod_same(z, X, p1, (GEN)x[2]);
         }
         case t_COMPLEX: return addRc(x, y);
@@ -1894,7 +1894,7 @@ divpp(GEN x, GEN y) {
   z[1] = evalprecp(b) | evalvalp(valp(x) - valp(y));
   icopyifstack(x[2], z[2]);
   z[3] = licopy(M); av = avma;
-  z[4] = lpileuptoint(av, remii(mulii((GEN)x[4], mpinvmod((GEN)y[4], M)), M) );
+  z[4] = lpileuptoint(av, remii(mulii((GEN)x[4], Fp_inv((GEN)y[4], M)), M) );
   return z;
 }
 
@@ -1925,7 +1925,7 @@ gdiv(GEN x, GEN y)
       if (X==Y || egalii(X,Y))
         return div_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y); av = avma;
-      p1 = mulii((GEN)x[2], mpinvmod((GEN)y[2], (GEN)z[1]));
+      p1 = mulii((GEN)x[2], Fp_inv((GEN)y[2], (GEN)z[1]));
       z[2] = lpileuptoint(av, remii(p1, (GEN)z[1])); return z;
     }
     case t_FRAC: {

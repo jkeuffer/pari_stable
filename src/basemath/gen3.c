@@ -437,7 +437,7 @@ gmod(GEN x, GEN y)
 
 	case t_FRAC:
 	  av=avma;
-	  p1=mulii((GEN)x[1],mpinvmod((GEN)x[2],y));
+	  p1=mulii((GEN)x[1],Fp_inv((GEN)x[2],y));
 	  tetpil=avma; return gerepile(av,tetpil,modii(p1,y));
 
 	case t_QUAD: z=cgetg(4,tx);
@@ -915,7 +915,7 @@ ginv(GEN x)
 
     case t_INTMOD: z=cgetg(3,t_INTMOD);
       icopyifstack(x[1],z[1]);
-      z[2]=lmpinvmod((GEN)x[2],(GEN)x[1]); return z;
+      z[2]=(long)Fp_inv((GEN)x[2],(GEN)x[1]); return z;
 
     case t_FRAC:
       s = signe(x[1]); if (!s) err(gdiver);
@@ -940,7 +940,7 @@ ginv(GEN x)
       z[1] = evalprecp(precp(x)) | evalvalp(-valp(x));
       icopyifstack(x[2], z[2]);
       z[3] = licopy((GEN)x[3]);
-      z[4] = lmpinvmod((GEN)x[4],(GEN)z[3]); return z;
+      z[4] = (long)Fp_inv((GEN)x[4],(GEN)z[3]); return z;
 
     case t_POLMOD: z = cgetg(3,t_POLMOD);
       X = (GEN)x[1];

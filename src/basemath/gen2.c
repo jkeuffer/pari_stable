@@ -1241,7 +1241,7 @@ gaffect(GEN x, GEN y)
               affrr(rdivii((GEN)x[1],(GEN)x[2], lg(y)), y);
               avma = av; break;
 	    case t_INTMOD: av = avma;
-              p1 = mpinvmod((GEN)x[2],(GEN)y[1]);
+              p1 = Fp_inv((GEN)x[2],(GEN)y[1]);
 	      modiiz(mulii((GEN)x[1],p1),(GEN)y[1],(GEN)y[2]);
 	      avma = av; break;
 	    case t_COMPLEX: gaffect(x,(GEN)y[1]); gaffsg(0,(GEN)y[2]); break;
@@ -1252,7 +1252,7 @@ gaffect(GEN x, GEN y)
 	      av = avma; vx = pvaluation(num, (GEN) y[2], &num);
 	      if (!vx) vx = -pvaluation(den,(GEN)y[2],&den);
 	      setvalp(y,vx);
-	      p1 = mulii(num,mpinvmod(den,(GEN)y[3]));
+	      p1 = mulii(num,Fp_inv(den,(GEN)y[3]));
 	      modiiz(p1,(GEN)y[3],(GEN)y[4]); avma = av; break;
 	    case t_QUAD: gaffect(x,(GEN)y[2]); gaffsg(0,(GEN)y[3]); break;
 	    case t_POLMOD: gaffect(x,(GEN)y[2]); break;
@@ -1488,7 +1488,7 @@ cvtop2(GEN x, GEN y)
       z[1] = evalprecp(d) | evalvalp(v);
       z[2] = (long)p;
       z[3] = y[3];
-      if (!gcmp1(den)) num = mulii(num, mpinvmod(den, (GEN)z[3]));
+      if (!gcmp1(den)) num = mulii(num, Fp_inv(den, (GEN)z[3]));
       z[4] = lremii(num, (GEN)z[3]); return z;
     }
     case t_COMPLEX: return ctop(x, p, d);
@@ -1532,7 +1532,7 @@ cvtop(GEN x, GEN p, long d)
       z[1] = evalprecp(d) | evalvalp(v);
       icopyifstack(p, z[2]);
       z[3] = lpowgs(p, d);
-      if (!gcmp1(den)) num = mulii(num, mpinvmod(den, (GEN)z[3]));
+      if (!gcmp1(den)) num = mulii(num, Fp_inv(den, (GEN)z[3]));
       z[4] = lremii(num, (GEN)z[3]); return z; /* not memory-clean */
     }
     case t_COMPLEX: return ctop(x, p, d);

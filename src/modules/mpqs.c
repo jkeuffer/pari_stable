@@ -978,7 +978,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       {
         p = (ulong)FB[start_index_FB + 1 + j];
         p1 = divis(A, (long)p);
-        p1 = muliu(p1, invumod(umodiu(p1, p), p));
+        p1 = muliu(p1, Fl_inv(umodiu(p1, p), p));
         p1 = muliu(p1, sqrt_mod_p_kN[start_index_FB + 1 + j]);
         affii(remii(p1, A), H[i++]); avma = av;
       }
@@ -1004,20 +1004,20 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     {
       ulong mb, tmp1, tmp2, m;
       p = (ulong)FB[j]; m = M % p;
-      inv_A2[j] = invumod(umodiu(p1, p), p); /* = 1/(2*A) mod p_i */
+      inv_A2[j] = Fl_inv(umodiu(p1, p), p); /* = 1/(2*A) mod p_i */
       mb = umodiu(B, p); if (mb) mb = p - mb;
       /* mb = -B mod p */
-      tmp1 = subuumod(mb, sqrt_mod_p_kN[j], p);
-      tmp1 = muluumod(tmp1, inv_A2[j], p);
-      start_1[j] = (long)adduumod(tmp1, m, p);
+      tmp1 = Fl_sub(mb, sqrt_mod_p_kN[j], p);
+      tmp1 = Fl_mul(tmp1, inv_A2[j], p);
+      start_1[j] = (long)Fl_add(tmp1, m, p);
 
-      tmp2 = adduumod(mb, sqrt_mod_p_kN[j], p);
-      tmp2 = muluumod(tmp2, inv_A2[j], p);
-      start_2[j] = (long)adduumod(tmp2, m, p);
+      tmp2 = Fl_add(mb, sqrt_mod_p_kN[j], p);
+      tmp2 = Fl_mul(tmp2, inv_A2[j], p);
+      start_2[j] = (long)Fl_add(tmp2, m, p);
       for (i = 0; (ulong)i < no_of_primes_in_A; i++)
       {
         ulong h = umodiu(H[i], p) << 1; if (h > p) h -= p;
-	inv_A_H[i][j] = muluumod(h, inv_A2[j], p); /* 1/A * H[i] mod p_j */
+	inv_A_H[i][j] = Fl_mul(h, inv_A2[j], p); /* 1/A * H[i] mod p_j */
       }
     }
     if (!invmod(shifti(A,2), kN, &p1))
@@ -1038,8 +1038,8 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       for (j = 2; (ulong)j <= size_of_FB; j++)
       {
 	p = (ulong)FB[j];
-	start_1[j] = subuumod(start_1[j], inv_A_H[v2][j], p);
-	start_2[j] = subuumod(start_2[j], inv_A_H[v2][j], p);
+	start_1[j] = Fl_sub(start_1[j], inv_A_H[v2][j], p);
+	start_2[j] = Fl_sub(start_2[j], inv_A_H[v2][j], p);
       }
       p1 = addii(B, p1);
     }
@@ -1048,8 +1048,8 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       for (j = 2; (ulong)j <= size_of_FB; j++)
       {
 	p = (ulong)FB[j];
-	start_1[j] = adduumod(start_1[j], inv_A_H[v2][j], p);
-	start_2[j] = adduumod(start_2[j], inv_A_H[v2][j], p);
+	start_1[j] = Fl_add(start_1[j], inv_A_H[v2][j], p);
+	start_2[j] = Fl_add(start_2[j], inv_A_H[v2][j], p);
       }
       p1 = subii(B, p1);
     }
@@ -1070,7 +1070,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     {
       ulong tmp, s;
       p = (ulong)FB[start_index_FB + 1 + j];
-      tmp = divuumod(umodiu(p1, p), umodiu(B, p), p); s = (tmp + M) % p;
+      tmp = Fl_div(umodiu(p1, p), umodiu(B, p), p); s = (tmp + M) % p;
       start_1[start_index_FB + 1 + j] = (long)s;
       start_2[start_index_FB + 1 + j] = (long)s;
     }
@@ -1208,7 +1208,7 @@ mpqs_factorback(long *FB, char *relations, GEN kN)
   {
     e = atol(s); if (!e) break;
     s = strtok(NULL, " \n");
-    p_e = powiumod(stoi(FB[atol(s)]), (ulong)e, kN);
+    p_e = Fp_powu(stoi(FB[atol(s)]), (ulong)e, kN);
     prod = remii(mulii(prod, p_e), kN);
     s = strtok(NULL, " \n");
   }
@@ -1576,7 +1576,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
 	exi = atol(s); if (!exi) break;
 	s = strtok(NULL, " \n");
 	pi = atol(s);
-	pi_ei = powmodulo(stoi(FB[pi]), stoi(exi), kN);
+	pi_ei = Fp_pow(stoi(FB[pi]), stoi(exi), kN);
 	prod_pi_ei = modii(mulii(prod_pi_ei, pi_ei), kN);
 	s = strtok(NULL, " \n");
       }
@@ -1989,7 +1989,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
       if (ei[j])
       {
         if (ei[j] & 1) err(bugparier, "MPQS (relation is a nonsquare)");
-	X = remii(mulii(X, powiumod(stoi(FB[j]), (ulong)ei[j]>>1, N_or_kN)),
+	X = remii(mulii(X, Fp_powu(stoi(FB[j]), (ulong)ei[j]>>1, N_or_kN)),
 		  N_or_kN);
 	if (low_stack(lim3, stack_lim(av3,1)))
 	{
@@ -2327,7 +2327,7 @@ mpqs(GEN N)
     /* compute the approximations of the logarithms of p_i */
     log_FB[i] = (unsigned char) (log_multiplier * log2((double)p) * 2);
     /* compute the x_i such that x_i^2 = (kN % p_i) mod p_i */
-    sqrt_mod_p_kN[i] = sqrtumod(umodiu(kN, p), p);
+    sqrt_mod_p_kN[i] = Fl_sqrt(umodiu(kN, p), p);
   }
 
   if (DEBUGLEVEL >= 5)

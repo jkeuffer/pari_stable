@@ -223,6 +223,9 @@ BA 21- type() does not allow to change object types anymore.
        resii --> remii, gres --> grem
    42- rename krogs --> krois, krosg --> krosi
    43- rename FpXQX_FpXQ_mul -> FqX_Fq_mul, FpXQX_normalize -> FqX_normalize
+   44- rename adduumod, subuumod, muluumod, divuumod --> Fl_[add,sub,mul,div]
+       invumod --> Fl_inv, invsmod --> Fl_inv_signed, powuumod --> Fl_pow
+       powiumod -> Fp_powu, mpsqrtmod --> Fp_sqrt, mpsqrtnmod --> Fp_sqrtn
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -245,7 +248,7 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
        truncr
 BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now 
        also accept subgroups returned by galoissubgroups.
-   16- new routine sqrtumod
+   16- new routine Fl_sqrt
    17- new routines FpX_factor, FqX_factor, FpX_degfact, FqX_red
 
   Removed

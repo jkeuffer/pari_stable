@@ -1052,7 +1052,7 @@ lgcdii(ulong* d, ulong* d1,
 
 /* 1 / Mod(x,p) , or 0 if inverse doesn't exist. Assume x < p */
 ulong
-invumod(ulong x, ulong p)
+Fl_inv(ulong x, ulong p)
 {
   long s;
   ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
@@ -1063,7 +1063,7 @@ invumod(ulong x, ulong p)
 
 /* assume m > 0 */
 long
-invsmod(long a, long m)
+Fl_inv_signed(long a, long m)
 {
   if (a >= 0)
   {
@@ -1074,5 +1074,5 @@ invsmod(long a, long m)
     if (-a > m) a %= m;
     a += m;
   }
-  return (long)invumod((ulong)a, (ulong)m);
+  return (long)Fl_inv((ulong)a, (ulong)m);
 }

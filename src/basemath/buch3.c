@@ -237,7 +237,7 @@ static GEN
 make_integral_Z(GEN x, GEN fZ)
 {
   GEN d, y = Q_remove_denom(x, &d);
-  if (d) y = FpV_red(gmul(y, mpinvmod(d, fZ)), fZ);
+  if (d) y = FpV_red(gmul(y, Fp_inv(d, fZ)), fZ);
   return y;
 }
 

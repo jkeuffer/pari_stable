@@ -1628,7 +1628,7 @@ isunit(GEN bnf,GEN x)
   {
     GEN ro = gmul(row(gmael(nf,5,1), 1), z);
     GEN p2 = ground(gdiv(garg(ro, prec), pi2_sur_w));
-    p1 = mulii(p1,  mpinvmod(p2, gn));
+    p1 = mulii(p1,  Fp_inv(p2, gn));
   }
 
   ex[RU] = lmodulcp(p1, gn);
@@ -1782,7 +1782,7 @@ addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
   }
   k = 1; while (k<n && (L[k] || !a[k])) k++;
   if (k == n) { avma = av; return 0; }
-  invak = invumod((ulong)a[k], p);
+  invak = Fl_inv((ulong)a[k], p);
   L[k] = 1;
   for (i=k+1; i<n; i++) 
     if (a[i]) a[i] = p - ((a[i] * invak) % p);

@@ -82,7 +82,7 @@ static int
 bad_for_base(miller_t *S, GEN a)
 {
   long r, lim, av = avma;
-  GEN c2, c = powmodulo(a, S->t1, S->n);
+  GEN c2, c = Fp_pow(a, S->t1, S->n);
 
   if (is_pm1(c) || egalii(S->t, c)) return 0;
 
@@ -249,13 +249,13 @@ u_LucasMod(ulong n, ulong P, ulong N)
   { /* v = v_k, v1 = v_{k+1} */
     if (((long)m) < 0)
     { /* set v = v_{2k+1}, v1 = v_{2k+2} */
-      v = adduumod(muluumod(v,v1,N), mP, N);
-      v1= adduumod(muluumod(v1,v1,N),m2, N);
+      v = Fl_add(Fl_mul(v,v1,N), mP, N);
+      v1= Fl_add(Fl_mul(v1,v1,N),m2, N);
     }
     else
     {/* set v = v_{2k}, v1 = v_{2k+1} */
-      v1= adduumod(muluumod(v,v1,N),mP, N);
-      v = adduumod(muluumod(v,v,N), m2, N);
+      v1= Fl_add(Fl_mul(v,v1,N),mP, N);
+      v = Fl_add(Fl_mul(v,v,N), m2, N);
     }
   }
   return v;
@@ -276,7 +276,7 @@ u_IsLucasPsP(ulong n, ulong P)
   for (i=1; i<v; i++)
   {
     if (!z) return 1;
-    z = adduumod(muluumod(z,z, n), m2, n);
+    z = Fl_add(Fl_mul(z,z, n), m2, n);
     if (z == 2) return 0;
   }
   return 0;
@@ -435,8 +435,8 @@ pl831(GEN N, GEN p)
   av = avma;
   for(a = 2;; a++, avma = av)
   {
-    GEN b = powmodulo(utoi(a), Nmunp, N);
-    GEN c = powmodulo(b,p,N), g = gcdii(addis(b,-1), N);
+    GEN b = Fp_pow(utoi(a), Nmunp, N);
+    GEN c = Fp_pow(b,p,N), g = gcdii(addis(b,-1), N);
     if (!is_pm1(c)) return 0;
     if (is_pm1(g)) { avma=ltop; return a; }
     if (!egalii(g,N)) return 0;

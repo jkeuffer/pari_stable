@@ -417,7 +417,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   if (T)
     t = FpXQ_pow(t, diviiexact(ord, ordp), T,p); /* in F_p^* */
   else
-    t = powmodulo(t, diviiexact(ord, ordp), p);
+    t = Fp_pow(t, diviiexact(ord, ordp), p);
   if (typ(t) == t_POL)
   {
     if (degpol(t)) err(bugparier,"nfhilbertp");

@@ -418,7 +418,7 @@ gpowgs(GEN x, long n)
  /* If gpowgs were only ever called from gpow, the switch wouldn't be needed.
   * In fact, under current word and bit field sizes, an integer power with
   * multiword exponent will always overflow.  But it seems easier to call
-  * puissii|powmodulo() with a mock-up GEN as 2nd argument than to write
+  * puissii|Fp_pow() with a mock-up GEN as 2nd argument than to write
   * separate versions for a long exponent.  Note that n = HIGHBIT is an
   * invalid argument. --GN
   */
@@ -438,7 +438,7 @@ gpowgs(GEN x, long n)
     }
     case t_INTMOD:
       y=cgetg(3,tx); copyifstack(x[1],y[1]);
-      y[2]=(long)powmodulo((GEN)(x[2]),(GEN)gn,(GEN)(x[1]));
+      y[2]=(long)Fp_pow((GEN)(x[2]),(GEN)gn,(GEN)(x[1]));
       return y;
     case t_FRAC:
     {
@@ -536,7 +536,7 @@ powgi(GEN x, GEN n)
 
   switch(tx=typ(x))
   {/* catch some types here, instead of trying gpowgs() first, because of
-    * the simpler call interface to puissii() and powmodulo() -- even though
+    * the simpler call interface to puissii() and Fp_pow() -- even though
     * for integer/rational bases other than 0,+-1 and non-wordsized
     * exponents the result will be certain to overflow. --GN
     */
@@ -554,7 +554,7 @@ powgi(GEN x, GEN n)
     }
     case t_INTMOD:
       y=cgetg(3,tx); copyifstack(x[1],y[1]);
-      y[2]=(long)powmodulo((GEN)x[2],n,(GEN)x[1]);
+      y[2]=(long)Fp_pow((GEN)x[2],n,(GEN)x[1]);
       return y;
     case t_FRAC:
     {
@@ -595,7 +595,7 @@ powgi(GEN x, GEN n)
       y[1] = evalprecp(precp(x)+v) | evalvalp(e);
       icopyifstack(p, y[2]);
       y[3] = (long)mod;
-      y[4] = (long)powmodulo((GEN)x[4], n, mod);
+      y[4] = (long)Fp_pow((GEN)x[4], n, mod);
       return y;
     }
     case t_QFR:
@@ -732,9 +732,9 @@ gpow(GEN x, GEN n, long prec)
       if (!BSW_psp((GEN)x[1])) err(talker,"gpow: modulus %Z is not prime",x[1]);
       y = cgetg(3,tx); copyifstack(x[1],y[1]);
       av = avma;
-      z = mpsqrtnmod((GEN)x[2], d, (GEN)x[1], NULL);
+      z = Fp_sqrtn((GEN)x[2], d, (GEN)x[1], NULL);
       if (!z) err(talker,"gpow: nth-root does not exist");
-      y[2] = lpileuptoint(av, powmodulo(z, a, (GEN)x[1]));
+      y[2] = lpileuptoint(av, Fp_pow(z, a, (GEN)x[1]));
       return y;
     }
     else if (tx == t_PADIC)
@@ -822,7 +822,7 @@ sqrt_2adic(GEN x, long pp)
     zp = (zp<<1) - 1;
     if (zp > pp) zp = pp;
     mod = shifti(gun, zp);
-    z = addii(z, resmod2n(mulii(x, mpinvmod(z,mod)), zp));
+    z = addii(z, resmod2n(mulii(x, Fp_inv(z,mod)), zp));
     z = shifti(z, -1); /* (z + x/z) / 2 */
     if (pp == zp) return z;
 
@@ -840,7 +840,7 @@ sqrt_2adic(GEN x, long pp)
 static GEN
 sqrt_padic(GEN x, GEN modx, long pp, GEN p)
 {
-  GEN mod, z = mpsqrtmod(x, p);
+  GEN mod, z = Fp_sqrt(x, p);
   long zp = 1;
   pari_sp av, lim;
 
@@ -855,7 +855,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
     zp <<= 1;
     if (zp < pp) mod = sqri(mod); else { zp = pp; mod = modx; }
     inv2 = shifti(mod, -1); /* = (mod + 1)/2 = 1/2 */
-    z = addii(z, remii(mulii(x, mpinvmod(z,mod)), mod));
+    z = addii(z, remii(mulii(x, Fp_inv(z,mod)), mod));
     z = mulii(z, inv2);
     z = modii(z, mod); /* (z + x/z) / 2 */
     if (pp <= zp) return z;
@@ -937,7 +937,7 @@ gsqrt(GEN x, long prec)
 
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      p1 = mpsqrtmod((GEN)x[2],(GEN)y[1]);
+      p1 = Fp_sqrt((GEN)x[2],(GEN)y[1]);
       if (!p1) err(sqrter5);
       y[2] = (long)p1; return y;
 
@@ -1007,7 +1007,7 @@ rootsof1padic(GEN n, GEN y)
   pari_sp av0 = avma, av;
   GEN z, r = cgetp(y);
 
-  av = avma; (void)mpsqrtnmod(gun,n,(GEN)y[2],&z);
+  av = avma; (void)Fp_sqrtn(gun,n,(GEN)y[2],&z);
   if (z==gzero) { avma = av0; return gzero; }/*should not happen*/
   z = padicsqrtnlift(gun, n, z, (GEN)y[2], precp(y));
   affii(z, (GEN)r[4]); avma = av; return r;
@@ -1055,7 +1055,7 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   r = cgetp(x); setvalp(r,v);
   Z = NULL; /* -Wall */
   if (zetan) Z = cgetp(x);
-  av = avma; a = mpsqrtnmod((GEN)x[4], n, p, zetan);
+  av = avma; a = Fp_sqrtn((GEN)x[4], n, p, zetan);
   if (!a) err(talker,"nth-root does not exist in gsqrtn");
   affii(padicsqrtnlift((GEN)x[4], n, a, p, precp(x)), (GEN)r[4]);
   if (zetan)
@@ -1145,7 +1145,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) { z = cgetg(3,t_INTMOD); copyifstack(x[1],z[1]); }
     y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-    y[2] = (long)mpsqrtnmod((GEN)x[2],n,(GEN)x[1],zetan);
+    y[2] = (long)Fp_sqrtn((GEN)x[2],n,(GEN)x[1],zetan);
     if (!y[2]) err(talker,"nth-root does not exist in gsqrtn");
     if (zetan) { z[2] = (long)*zetan; *zetan = z; }
     return y;
@@ -1543,7 +1543,7 @@ teich(GEN x)
     z = remii(z, p);
     aux = diviiexact(addsi(-1,q),p1); n = precp(x);
     for (k=1; k<n; k<<=1)
-      z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,powmodulo(z,p1,q))))), q);
+      z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q))))), q);
   }
   affii(z, (GEN)y[4]); avma = av; return y;
 }
@@ -1597,7 +1597,7 @@ palog(GEN x)
   { /* compute log(x^(p-1)) / (p-1) */
     GEN mod = (GEN)x[3], p1 = subis(p,1);
     y = cgetp(x);
-    y[4] = (long)powmodulo((GEN)x[4], p1, mod);
+    y[4] = (long)Fp_pow((GEN)x[4], p1, mod);
     p1 = diviiexact(subis(mod,1), p1); /* 1/(1-p) */
     y = gmul(palogaux(y), mulis(p1, -2));
   }

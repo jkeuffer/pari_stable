@@ -47,7 +47,7 @@ znstar_partial_coset_func(long n, GEN H, void (*func)(void *data,long c)
   {
     long k, m = i;
     for(j=1; j<d && m%ord[j]==0 ;j++) m /= ord[j];
-    cache[j] = muluumod(cache[j],gen[j],n);
+    cache[j] = Fl_mul(cache[j],gen[j],n);
     for (k=1; k<j; k++) cache[k] = cache[j];
     (*func)(data, cache[j]);
   }
@@ -134,7 +134,7 @@ znstar_generate(long n, GEN V)
     long o = 0;
     while (!bitvec_test(bits, (long)g))
     {
-      g = muluumod(g, v, (ulong)n);
+      g = Fl_mul(g, v, (ulong)n);
       o++;
     }
     if (o)
@@ -168,7 +168,7 @@ znstar_elts(long n, GEN H)
   {
     int c = l * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      sg[++l] = (long)muluumod((ulong)sg[k], (ulong)gen[j], (ulong)n);
+      sg[++l] = (long)Fl_mul((ulong)sg[k], (ulong)gen[j], (ulong)n);
   }
   vecsmall_sort(sg);
   return sg;
@@ -289,8 +289,8 @@ znstar_hnf_generators(GEN Z, GEN M)
   {
     gen[j] = 1;
     for (h = 1; h < l; h++)
-      gen[j] = (long)muluumod((ulong)gen[j], 
-                  powuumod(itou((GEN)zgen[h]), itou(gmael(M,j,h)), n), n);
+      gen[j] = (long)Fl_mul((ulong)gen[j], 
+                  Fl_pow(itou((GEN)zgen[h]), itou(gmael(M,j,h)), n), n);
   }
   avma = ltop; return gen;
 }
@@ -365,12 +365,12 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   GEN V=cgetg(d+1,t_VEC);
   ulong base=1;
   long i,k;
-  for (i=1; i<=d; i++,base = muluumod(base,z,n))
+  for (i=1; i<=d; i++,base = Fl_mul(base,z,n))
   {
     pari_sp av = avma;
     long ex = base;
     GEN s = gzero;
-    for (k=0; k<m; k++, ex = muluumod(ex,g,n)) s = gadd(s,(GEN)powz[ex]);
+    for (k=0; k<m; k++, ex = Fl_mul(ex,g,n)) s = gadd(s,(GEN)powz[ex]);
     if (le) s = modii(s, le);
     V[i] = lpileupto(av, s);
   }
@@ -522,7 +522,7 @@ galoiscyclo(long n, long v)
   {
     int     c = i * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      L[++i] = (long) powmodulo((GEN)L[k],(GEN)gen[j],le);
+      L[++i] = (long) Fp_pow((GEN)L[k],(GEN)gen[j],le);
   }
   G=abelian_group(ord);
   elts = group_elts(G, card); /*not stack clean*/

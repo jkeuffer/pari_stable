@@ -349,7 +349,7 @@ Flx_roots_naive(GEN f, ulong p)
   }
   while (n < d-1 && p > s);
   if (n == d-1 && p != s) /* -f[2]/f[3] */
-    y[++n] = muluumod(p - invumod((ulong)f[3], p), (ulong)f[2], p);
+    y[++n] = Fl_mul(p - Fl_inv((ulong)f[3], p), (ulong)f[2], p);
   setlg(y, n+1); return y;
 }
 
@@ -386,7 +386,7 @@ quadsolvemod(GEN x, GEN p, int unknown)
   D = remii(D,p);
   if (unknown && kronecker(D,p) == -1) return NULL;
 
-  s = mpsqrtmod(D,p);
+  s = Fp_sqrt(D,p);
   if (!s) err(talker,"not a prime in quadsolvemod");
   u = addis(shifti(p,-1), 1); /* = 1/2 */
   return modii(mulii(u, subii(s,b)), p);
@@ -562,7 +562,7 @@ Flx_Berlekamp_ker(GEN u, ulong p)
   for (j=2; j<=N; j++)
   {
     p1 = Flx_Flv_lg(w, N);
-    p1[j] = subuumod((ulong)p1[j], 1, p);
+    p1[j] = Fl_sub((ulong)p1[j], 1, p);
     Q[j] = (long)p1;
     if (j < N)
     {
@@ -686,10 +686,10 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
       c = (GEN)x[k];
       if (y[k] == 1)
         for (i=1; i<l; i++)
-          z[i] = adduumod(z[i], c[i], p);
+          z[i] = Fl_add(z[i], c[i], p);
       else
         for (i=1; i<l; i++)
-          z[i] = adduumod(z[i], muluumod(c[i],y[k],p), p);
+          z[i] = Fl_add(z[i], Fl_mul(c[i],y[k],p), p);
     }
   }
   while (--l && !z[l]);
@@ -1200,7 +1200,7 @@ Flx_addmul_inplace(GEN gx, GEN gy, ulong c, ulong p)
   if (u_OK_ULONG(p))
     for (i=2; i<ly;  i++) x[i] = (x[i] + c*y[i]) % p;
   else
-    for (i=2; i<ly;  i++) x[i] = adduumod(x[i], muluumod(c,y[i],p),p);
+    for (i=2; i<ly;  i++) x[i] = Fl_add(x[i], Fl_mul(c,y[i],p),p);
 }
 
 static long
@@ -1782,7 +1782,7 @@ rootpadiclift(GEN T, GEN S, GEN p, long e)
   nb=hensel_lift_accel(e, &mask);
   Tr = FpX_red(T,q);
   W=FpX_eval(deriv(Tr, x),S,q);
-  W=mpinvmod(W,q);
+  W=Fp_inv(W,q);
   for(i=0;i<nb;i++)
   {
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
@@ -1863,8 +1863,8 @@ padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
   long    i, nb, mask;
   qold = p ; q = p; qm1 = gun;
   nb   = hensel_lift_accel(e, &mask);
-  W    = modii(mulii(n,powmodulo(S,subii(n,gun),q)),q);
-  W    = mpinvmod(W,q);
+  W    = modii(mulii(n,Fp_pow(S,subii(n,gun),q)),q);
+  W    = Fp_inv(W,q);
   for(i=0;i<nb;i++)
   {
     qm1 = (mask&(1<<i))?sqri(qm1):mulii(qm1, q);
@@ -1872,12 +1872,12 @@ padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
     Sr = S;
     if (i)
     {
-      W = modii(mulii(Wr,mulii(n,powmodulo(Sr,subii(n,gun),qold))),qold);
+      W = modii(mulii(Wr,mulii(n,Fp_pow(Sr,subii(n,gun),qold))),qold);
       W = subii(gdeux,W);
       W = modii(mulii(Wr, W),qold);
     }
     Wr = W;
-    S = subii(Sr, mulii(Wr, subii(powmodulo(Sr,n,q),a)));
+    S = subii(Sr, mulii(Wr, subii(Fp_pow(Sr,n,q),a)));
     S = modii(S,q);
     qold = q;
   }

@@ -1200,7 +1200,7 @@ fixedfieldnewtonsum(GEN O, GEN L, GEN mod, GEN e)
     pari_sp ltop=avma;
     GEN s=gzero;
     for(j=1; j<=g; j++)
-      s=addii(s,powmodulo((GEN)L[mael(O,i,j)],e,mod));
+      s=addii(s,Fp_pow((GEN)L[mael(O,i,j)],e,mod));
     PL[i]=lpileupto(ltop,modii(s,mod));
   }
   return PL;
@@ -1380,7 +1380,7 @@ vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod)
   {
     GEN z;
     av = avma;
-    z = mpinvmod(FpX_eval(Tp, (GEN) L[i],mod),mod);
+    z = Fp_inv(FpX_eval(Tp, (GEN) L[i],mod),mod);
     z = modii(mulii(den,z),mod);
     P = FpX_Fp_mul(FpX_div(T, deg1pol(gun,negi((GEN) L[i]),x),mod), z, mod); 
     M[i] = lgetg(n, t_COL);
@@ -2494,10 +2494,10 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   else
   {
     /*We need to normalise result so that psi[g]=1*/
-    long im=invsmod(gf->psi[g],deg);
+    long im=Fl_inv_signed(gf->psi[g],deg);
     GEN cp=perm_pow(res, im);
     for(i=1;i<lg(res);i++) res[i]=cp[i];
-    for(i=1;i<lg(gf->psi);i++) gf->psi[i] = (long)muluumod(im,gf->psi[i],deg);
+    for(i=1;i<lg(gf->psi);i++) gf->psi[i] = (long)Fl_mul(im,gf->psi[i],deg);
     avma=av2;
     gf->deg=deg;
     return res;
@@ -2682,8 +2682,8 @@ wpow(long s, long m, long e, long n)
     w[i] = w[i-1]*e;
   for(i=n; i>=1; i--)
   {
-    si = powuumod(si,e,m);
-    w[i] = muluumod(s-1, stpow(si, w[i], m), m);
+    si = Fl_pow(si,e,m);
+    w[i] = Fl_mul(s-1, stpow(si, w[i], m), m);
   }
   return w;
 }
@@ -2823,7 +2823,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       Be[e] = (long) cyc_pow(B, op);
       for(i=e-1; i>=1; i--)
         Be[i] = (long) cyc_pow((GEN)Be[i+1], p);
-      w = wpow(powuumod(s,op,deg),deg,p,e);
+      w = wpow(Fl_pow(s,op,deg),deg,p,e);
       wg = cgetg(e+2,t_VECSMALL);
       wg[e+1] = deg;
       for (i=e; i>=1; i--)
@@ -2835,7 +2835,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
         GEN Bel = (GEN) Be[f];
         long t;
         dg *= p; el /= p;
-        sel = powuumod(s,el,deg); 
+        sel = Fl_pow(s,el,deg); 
         if (DEBUGLEVEL >= 6)
           fprintferr("GaloisConj: B=%Z\n", Bel);
         sr  = cgcd(stpow(sel,p,deg),deg);

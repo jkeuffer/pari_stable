@@ -1060,7 +1060,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
   {
     long l = lgefint(N)-2, s = BITS_IN_LONG*l;
     GEN R = shifti(gun, s);
-    GEN res = remii(mulii(T, mpinvmod(R, N)), N);
+    GEN res = remii(mulii(T, Fp_inv(R, N)), N);
     if (k > lgefint(N)
         || !egalii(remii(Td,N),res)
         || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");

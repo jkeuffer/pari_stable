@@ -1333,7 +1333,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
 
     h = Q_remove_denom((GEN)g[i], &dh);
     if (dh)
-      h = FpV_red(gmul(h,mpinvmod(dh,idZ)), idZ);
+      h = FpV_red(gmul(h,Fp_inv(dh,idZ)), idZ);
     if (sn > 0)
     {
       z = element_powmodideal(nf, h, n, id);
@@ -1380,7 +1380,7 @@ famat_to_Fp_simple(GEN nf, GEN x, GEN modpr, GEN p)
       case t_COL: h = nf_to_Fp_simple(h, modpr, p); break;
       default: h = gmod(h, p);
     }
-    t = mulii(t, powmodulo(h, n, p)); /* not worth reducing */
+    t = mulii(t, Fp_pow(h, n, p)); /* not worth reducing */
   }
   return modii(t, p);
 }
@@ -1424,7 +1424,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
     {
       long k = pvaluation(cx, p, &u);
       if (!gcmp1(u)) /* could avoid the inversion, but prkZ is small--> cheap */
-        x = gmul(x, mpinvmod(u, prkZ));
+        x = gmul(x, Fp_inv(u, prkZ));
       if (k)
         zpow = addii(zpow, mulsi(k, (GEN)e[i]));
     }
@@ -2279,7 +2279,7 @@ make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
   fZ = gcoeff(f,1,1);
   /* Kill denom part coprime to fZ */
   d2 = coprime_part(d, fZ);
-  t = mpinvmod(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
+  t = Fp_inv(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
   if (egalii(d, d2)) return L;
 
   d1 = diviiexact(d, d2);

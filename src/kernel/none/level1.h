@@ -35,7 +35,6 @@ GEN    addii(GEN x, GEN y);
 GEN    addir(GEN x, GEN y);
 GEN    addrr(GEN x, GEN y);
 GEN    addsi(long x, GEN y);
-ulong  adduumod(ulong a, ulong b, ulong p);
 void   affii(GEN x, GEN y);
 void   affsi(long s, GEN x);
 void   affsr(long s, GEN x);
@@ -54,7 +53,11 @@ void   divsiz(long x, GEN y, GEN z);
 GEN    divss(long x, long y);
 GEN    divss_rem(long x, long y, long *rem);
 void   divssz(long x, long y, GEN z);
-ulong  divuumod(ulong a, ulong b, ulong p);
+ulong  Fl_add(ulong a, ulong b, ulong p);
+ulong  Fl_div(ulong a, ulong b, ulong p);
+ulong  Fl_mul(ulong a, ulong b, ulong p);
+ulong  Fl_sqr(ulong a, ulong p);
+ulong  Fl_sub(ulong a, ulong b, ulong p);
 int    dvdii(GEN x, GEN y);
 int    dvdiiz(GEN x, GEN y, GEN z);
 int    dvdisz(GEN x, long y, GEN z);
@@ -97,7 +100,6 @@ GEN    mpneg(GEN x);
 GEN    mpround(GEN x);
 GEN    mpsub(GEN x, GEN y);
 GEN    mptrunc(GEN x);
-ulong  muluumod(ulong a, ulong b, ulong c);
 GEN    new_chunk(size_t x);
 long   random_bits(long k);
 GEN    rdivii(GEN x, GEN y, long prec);
@@ -124,7 +126,6 @@ GEN    subir(GEN x, GEN y);
 GEN    subri(GEN x, GEN y);
 GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
-ulong  subuumod(ulong a, ulong b, ulong p);
 ulong  umodui(ulong x, GEN y);
 GEN    utoi(ulong x);
 GEN    utor(ulong s, long prec);
@@ -797,42 +798,51 @@ gtodouble(GEN x)
   gaffect(x,(GEN)reel4); return rtodbl((GEN)reel4);
 }
 
-/* same as adduumod, assume p <= 2^(BIL - 1), so that overflow can't occur */
+/* same as Fl_add, assume p <= 2^(BIL - 1), so that overflow can't occur */
 INLINE ulong
-adduumod_noofl(ulong a, ulong b, ulong p)
+Fl_add_noofl(ulong a, ulong b, ulong p)
 {
   ulong res = a + b;
   return (res >= p) ? res - p : res;
 }
 INLINE ulong
-adduumod(ulong a, ulong b, ulong p)
+Fl_add(ulong a, ulong b, ulong p)
 {
   ulong res = a + b;
   return (res >= p || res < a) ? res - p : res;
 }
 
 INLINE ulong
-subuumod(ulong a, ulong b, ulong p)
+Fl_sub(ulong a, ulong b, ulong p)
 {
   ulong res = a - b;
   return (res > a) ? res + p: res;
 }
 
 INLINE ulong
-muluumod(ulong a, ulong b, ulong c)
+Fl_mul(ulong a, ulong b, ulong p)
 {
   LOCAL_HIREMAINDER;
   {
     register ulong x = mulll(a,b);
-    (void)divll(x,c);
+    (void)divll(x,p);
   }
   return hiremainder;
 }
-
 INLINE ulong
-divuumod(ulong a, ulong b, ulong p)
+Fl_sqr(ulong a, ulong p)
 {
-  return muluumod(a, invumod(b, p), p);
+  LOCAL_HIREMAINDER;
+  {
+    register ulong x = mulll(a,a);
+    (void)divll(x,p);
+  }
+  return hiremainder;
+}
+INLINE ulong
+Fl_div(ulong a, ulong b, ulong p)
+{
+  return Fl_mul(a, invumod(b, p), p);
 }
 
 INLINE long

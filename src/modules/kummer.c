@@ -447,7 +447,7 @@ get_u(GEN cyc, long rc, GEN gell)
   long i, l = lg(cyc);
   GEN u = cgetg(l,t_VEC);
   for (i=1; i<=rc; i++) u[i] = zero;
-  for (   ; i<  l; i++) u[i] = lmpinvmod((GEN)cyc[i], gell);
+  for (   ; i<  l; i++) u[i] = (long)Fp_inv((GEN)cyc[i], gell);
   return u;
 }
 
@@ -940,8 +940,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   degKz = degpol(COMPO.R);
   m = degKz / degK;
   d = (ell-1) / m;
-  g = (long)powuumod(Fl_gener(ell), d, ell);
-  if (powuumod((ulong)g, m, ell*ell) == 1) g += ell;
+  g = (long)Fl_pow(Fl_gener(ell), d, ell);
+  if (Fl_pow((ulong)g, m, ell*ell) == 1) g += ell;
   /* ord(g) = m in all (Z/ell^k)^* */
   /* step 3 */
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");
@@ -1052,7 +1052,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     ap = cgetg(1, t_MAT);
     for (i=0; i<m; i++)
     {
-      ap = famat_mul(ap, famat_pow(p2, utoi(powuumod(g,m-1-i,ell))));
+      ap = famat_mul(ap, famat_pow(p2, utoi(Fl_pow(g,m-1-i,ell))));
       if (i < m-1) p2 = tauofelt(p2, tau);
     }
     vecAp[j] = (long)ap;
@@ -1064,7 +1064,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 
   /* step 14, 15, and 17 */
   if (DEBUGLEVEL>2) fprintferr("Step 14, 15 and 17\n");
-  mginv = (m * invumod(g,ell)) % ell;
+  mginv = (m * Fl_inv(g,ell)) % ell;
   vecMsup = cgetg(lSml2+1,t_VEC);
   M = NULL;
   for (i=1; i<=lSl2; i++)

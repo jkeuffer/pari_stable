@@ -518,49 +518,45 @@ representing classes modulo $m$ are assumed to belong to $[0,m-1[$. The
 result may be wrong for a number of reasons otherwise: it may not be reduced,
 overflow can occur, etc.
 
-\fun{ulong}{adduumod}{ulong x, ulong y, ulong m} returns the smallest
+\fun{ulong}{Fl_add}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
 
-\fun{ulong}{subuumod}{ulong x, ulong y, ulong m} returns the smallest
+\fun{ulong}{Fl_sub}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x - y$ modulo $m$.
 
-\fun{ulong}{muluumod}{ulong x, ulong y, ulong m} returns the smallest positive
+\fun{ulong}{Fl_mul}{ulong x, ulong y, ulong m} returns the smallest positive
 representative of $x y$ modulo $m$.
 
-\fun{ulong}{invumod}{ulong x, ulong m} returns the smallest
+\fun{ulong}{Fl_inv}{ulong x, ulong m} returns the smallest
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
 mod~$m$, return $0$.
 
-\fun{long}{invsmod}{long x, ulong m} returns the smallest
+\fun{long}{Fl_inv_signed}{long x, ulong m} returns the smallest
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
 mod $m$, return $0$. In this routine no specific assumptions are made about
 the size or sign of $x$ ($m$ is still assumed to be positive). Consequently,
-it is a little slower than \kbd{invumod}.
+it is a little slower than \kbd{Fl\_inv}.
 
-\fun{ulong}{divuumod}{ulong x, ulong y, ulong m} returns the smallest
+\fun{ulong}{Fl_div}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x y^{-1}$ modulo $m$. If $y$ is not invertible
 mod $m$, return $0$.
 
-\fun{ulong}{powuumod}{ulong x, ulong n, ulong m} returns the smallest
+\fun{ulong}{Fl_pow}{ulong x, ulong n, ulong m} returns the smallest
 positive representative of $x^n$ modulo $m$.
 
-\fun{ulong}{powusmod}{ulong x, long n, ulong m} as \kbd{powuumod}, but $n$
-is allowed to be negative, in which case it is assumed that $x$ is invertible
-modulo $m$ (otherwise, $0$ is returned).
-
-\fun{ulong}{sqrtumod}{ulong x, ulong p} returns the square root of \kbd{x}
+\fun{ulong}{Fl_sqrt}{ulong x, ulong p} returns the square root of \kbd{x}
 modulo \kbd{p} (smallest positive representative). Assumes \kbd{p} to be
 prime, and \kbd{x} to be a square modulo \kbd{p}.
-
-\fun{long}{krouu}{ulong x, ulong y} returns the Kronecker symbol $(x|y)$,
-i.e.$-1$, $0$ or $1$. Assumes \kbd{y} is non-zero. If \kbd{y} is prime, this
-is the Legendre symbol.
 
 \fun{ulong}{Fl_gener}{ulong p} returns a primitive root modulo \kbd{p},
 assuming \kbd{p} is prime.
 
 \fun{ulong}{Fl_gener_fact}{ulong p, GEN fa} as \kbd{Fl\_gener}, assuming
-\kbd{fa} is the factorization of $\kbd{p} - 1$.
+\kbd{fa} is the factorization of $\kbd{p} - 1$. (As output by \kbd{factor}.)
+
+\fun{long}{krouu}{ulong x, ulong y} returns the Kronecker symbol $(x|y)$,
+i.e.$-1$, $0$ or $1$. Assumes \kbd{y} is non-zero. If \kbd{y} is prime, this
+is the Legendre symbol.
 
 \section{Level 1 kernel (operations on longs, integers and reals)}
 
@@ -1033,28 +1029,28 @@ that $0 \leq k < 31$.
 
 \subsec{Modular operations}. In this subsection, all \kbd{GEN}s are \typ{INT}.
 
-\fun{ulong}{powiumod}{GEN x, ulong n, GEN m} raises \kbd{x} to the \kbd{n}-th
+\fun{ulong}{Fp_powu}{GEN x, ulong n, GEN m} raises \kbd{x} to the \kbd{n}-th
 power modulo \kbd{p} (smallest non-negative residue).
 
-\fun{GEN}{powmodulo}{GEN x, GEN n, GEN m} returns $\kbd{x}^\kbd{n}$
+\fun{GEN}{Fp_pow}{GEN x, GEN n, GEN m} returns $\kbd{x}^\kbd{n}$
 modulo \kbd{p} (smallest non-negative residue).
 
-\fun{GEN}{mpinvmod}{GEN a, GEN m} returns an inverse of \kbd{a} modulo \kbd{m}
+\fun{GEN}{Fp_inv}{GEN a, GEN m} returns an inverse of \kbd{a} modulo \kbd{m}
 (smallest non-negative residue). Raise an error if \kbd{a} is not invertible.
 
-\fun{GEN}{mpinvmodsafe}{GEN a, GEN m} as \kbd{mpinvmod}, but return
+\fun{GEN}{Fp_invsafe}{GEN a, GEN m} as \kbd{Fp\_inv}, but return
 \kbd{NULL} if \kbd{a} is not invertible.
 
 \fun{int}{invmod}{GEN a, GEN m, GEN *g},  return $1$ if \kbd{a}
 modulo \kbd{m} is invertible, else return $0$ and set
 $\kbd{g} = \gcd(\kbd{a},\kbd{m})$.
 
-\fun{GEN}{mpsqrtmod}{GEN x, GEN p} returns a square root of \kbd{x} modulo
+\fun{GEN}{Fp_sqrt}{GEN x, GEN p} returns a square root of \kbd{x} modulo
 \kbd{p} (the smallest non-negative residue), where \kbd{x}, \kbd{p} are
 \typ{INT}s, and \kbd{p} is assumed to be prime. Return \kbd{NULL}
 if \kbd{x} is not a quadratic residue modulo \kbd{p}.
 
-\fun{GEN}{mpsqrtnmod}{GEN x, GEN n, GEN p, GEN *zn} returns an \kbd{n}-th
+\fun{GEN}{Fp_sqrtn}{GEN x, GEN n, GEN p, GEN *zn} returns an \kbd{n}-th
 root of $\kbd{x}$ modulo \kbd{p} (smallest non-negative residue), where
 \kbd{x}, \kbd{n}, \kbd{p} are \typ{INT}s, and \kbd{p} is assumed to be prime.
 Return \kbd{NULL} if \kbd{x} is not an \kbd{n}-th power residue. Otherwise,

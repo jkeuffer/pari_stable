@@ -431,7 +431,7 @@ computetabdl(ulong q)
   w[q-1] = qm1s2; a = 1;
   for (i=1; i<=qm3s2; i++)
   {
-    a = muluumod(g,a,q);
+    a = Fl_mul(g,a,q);
     w[a]   = i;
     w[q-a] = i+qm1s2;
   }
@@ -556,16 +556,16 @@ finda(Cache *Cp, GEN N, int pk, int p)
     {
       for (;;u++)
       {
-	a = powmodulo(utoi(u), N1, N);
-	b = powmodulo(a, ph, N);
+	a = Fp_pow(utoi(u), N1, N);
+	b = Fp_pow(a, ph, N);
 	if (!gcmp1(b)) break;
       }
     }
     else
     {
       while (krosi(u,N) >= 0) u++;
-      a = powmodulo(utoi(u), N1, N);
-      b = powmodulo(a, ph, N);
+      a = Fp_pow(utoi(u), N1, N);
+      b = Fp_pow(a, ph, N);
     }
     /* checking b^p = 1 mod N done economically in caller */
     b = gcdii(addis(b,-1), N);
@@ -576,7 +576,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
       Cp->pkvite = pv;
     }
   }
-  return powmodulo(a, divis(pv, pk), N);
+  return Fp_pow(a, divis(pv, pk), N);
 }
 
 /* return 0: N not a prime, 1: no problem so far */
@@ -844,7 +844,7 @@ step4b(Cache *C, Red *R, ulong q, int k)
   if (ind < 0) return -1;
   if ((ind&1)==0) return 0;
   if (DEBUGLEVEL>2) C->ctsgt++;
-  s3 = powmodulo(utoi(q), R->N2, R->N);
+  s3 = Fp_pow(utoi(q), R->N2, R->N);
   return is_m1(s3, R->N);
 }
 
@@ -864,7 +864,7 @@ step4c(Cache *C, Red *R, ulong q)
   if (ind < 0) return -1;
   if ((ind&1)==0) return 0;
   if (DEBUGLEVEL>2) C->ctsgt++;
-  s3 = powmodulo(utoi(q), R->N2, R->N);
+  s3 = Fp_pow(utoi(q), R->N2, R->N);
   return is_m1(s3, R->N);
 }
 
@@ -872,7 +872,7 @@ step4c(Cache *C, Red *R, ulong q)
 static int
 step4d(Cache *C, Red *R, ulong q)
 {
-  GEN s1 = powmodulo(negi(utoi(q)), R->N2, R->N);
+  GEN s1 = Fp_pow(negi(utoi(q)), R->N2, R->N);
   if (DEBUGLEVEL>2) C->ctsgt++;
   if (gcmp1(s1)) return 0;
   if (is_m1(s1, R->N)) return (mod4(R->N) == 1);
@@ -981,7 +981,7 @@ aprcl(GEN N)
   for (i=2; i<lfat; i++)
   {
     p = fat[i]; q = p*p;
-    flaglp[p] = (powuumod(smodis(N,q),p-1,q) != 1);
+    flaglp[p] = (Fl_pow(smodis(N,q),p-1,q) != 1);
   }
   globfa = (GEN)decomp(shifti(et, -vali(et)))[1];
   calcjac(pC, globfa, &tabfaq, &tabj);

@@ -462,7 +462,7 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
 
   z = FpX_extgcd(x, T, p, &U, &V);
   if (degpol(z)) return NULL;
-  z = mpinvmodsafe((GEN)z[2], p);
+  z = Fp_invsafe((GEN)z[2], p);
   if (!z) return NULL;
   return FpX_Fp_mul(U, z, p);
 }
@@ -537,26 +537,26 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
 
 /* modular power */
 ulong
-powuumod(ulong x, ulong n0, ulong p)
+Fl_pow(ulong x, ulong n0, ulong p)
 {
   ulong y, z, n;
   if (n0 <= 2)
   { /* frequent special cases */
-    if (n0 == 2) return muluumod(x,x,p);
+    if (n0 == 2) return Fl_mul(x,x,p);
     if (n0 == 1) return x;
     if (n0 == 0) return 1;
   }
   y = 1; z = x; n = n0;
   for(;;)
   {
-    if (n&1) y = muluumod(y,z,p);
+    if (n&1) y = Fl_mul(y,z,p);
     n>>=1; if (!n) return y;
-    z = muluumod(z,z,p);
+    z = Fl_mul(z,z,p);
   }
 }
 
 GEN
-powiumod(GEN x, ulong n0, GEN p)
+Fp_powu(GEN x, ulong n0, GEN p)
 {
   GEN y, z;
   ulong n;
@@ -750,11 +750,11 @@ FpX_eval(GEN x,GEN y,GEN p)
     for (j=i; !signe((GEN)x[j]); j--)
       if (j==2)
       {
-	if (i!=j) y = powiumod(y,i-j+1,p);
+	if (i!=j) y = Fp_powu(y,i-j+1,p);
 	p1=mulii(p1,y);
 	goto fppoleval;/*sorry break(2) no implemented*/
       }
-    r = (i==j)? y: powiumod(y,i-j+1,p);
+    r = (i==j)? y: Fp_powu(y,i-j+1,p);
     p1 = modii(addii(mulii(p1,r), (GEN)x[j]),p);
   }
  fppoleval:
@@ -1188,28 +1188,28 @@ Fq_mul(GEN x, GEN y, GEN T, GEN p)
 GEN
 Fq_neg_inv(GEN x, GEN T, GEN p)
 {
-  if (typ(x) == t_INT) return mpinvmod(negi(x),p);
+  if (typ(x) == t_INT) return Fp_inv(negi(x),p);
   return FpXQ_inv(FpX_neg(x,p),T,p);
 }
 
 GEN
 Fq_invsafe(GEN x, GEN pol, GEN p)
 {
-  if (typ(x) == t_INT) return mpinvmodsafe(x,p);
+  if (typ(x) == t_INT) return Fp_invsafe(x,p);
   return FpXQ_invsafe(x,pol,p);
 }
 
 GEN
 Fq_inv(GEN x, GEN pol, GEN p)
 {
-  if (typ(x) == t_INT) return mpinvmod(x,p);
+  if (typ(x) == t_INT) return Fp_inv(x,p);
   return FpXQ_inv(x,pol,p);
 }
 
 GEN
 Fq_pow(GEN x, GEN n, GEN pol, GEN p)
 {
-  if (typ(x) == t_INT) return powmodulo(x,n,p);
+  if (typ(x) == t_INT) return Fp_pow(x,n,p);
   return FpXQ_pow(x,n,pol,p);
 }
 
@@ -1625,7 +1625,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
    * a_{i-1}=\phi(a_i)+b_ia_{r-1}  i=r-1 to 1
    * Where a_0=A[1] and b_i=U[i+2]
    */
-  ib0=negi(mpinvmod((GEN)U[2],l));
+  ib0=negi(Fp_inv((GEN)U[2],l));
   R=cgetg(r+1,t_MAT);
   R[1]=A[1];
   R[r]=(long)FpM_FpV_mul(MA,gmul((GEN)A[1],ib0),l);
@@ -1697,10 +1697,10 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (!invmod(Bn,l,&z))
         err(talker,"Polynomials not irreducible in Fp_intersect");
       z=modii(mulii(An,z),l);
-      L=mpsqrtnmod(z,ipg,l,NULL);
+      L=Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
-      if (DEBUGLEVEL>=4) msgtimer("mpsqrtnmod");
+      if (DEBUGLEVEL>=4) msgtimer("Fp_sqrtn");
       B=FpX_Fp_mul(B,L,l);
     }
     else
@@ -1979,7 +1979,7 @@ FpX_normalize(GEN z, GEN p)
 {
   GEN p1 = leading_term(z);
   if (lg(z) == 2 || gcmp1(p1)) return z;
-  return FpX_Fp_mul(z, mpinvmod(p1,p), p);
+  return FpX_Fp_mul(z, Fp_inv(p1,p), p);
 }
 
 GEN
@@ -2073,7 +2073,7 @@ umodratu(GEN a, ulong p)
   else { /* assume a a t_FRAC */
     ulong num = umodiu((GEN)a[1],p);
     ulong den = umodiu((GEN)a[2],p);
-    return (ulong)muluumod(num, invumod(den,p), p);
+    return (ulong)Fl_mul(num, Fl_inv(den,p), p);
   }
 }
 #endif
@@ -2132,7 +2132,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     }
     return Flx_ZX_inplace(z);
   }
-  lead = gcmp1(lead)? NULL: gclone(mpinvmod(lead,p));
+  lead = gcmp1(lead)? NULL: gclone(Fp_inv(lead,p));
   avma = av0;
   z=cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
@@ -2559,7 +2559,7 @@ u_chinese_coprime(GEN a, ulong b, GEN q, ulong p, ulong qinv, GEN pq)
   if (b == amod) return NULL;
   d = (b > amod)? b - amod: p - (amod - b); /* (b - a) mod p */
   (void)new_chunk(lgefint(pq)<<1); /* HACK */
-  ax = mului(muluumod(d,qinv,p), q); /* d mod p, 0 mod q */
+  ax = mului(Fl_mul(d,qinv,p), q); /* d mod p, 0 mod q */
   avma = av; return addii(a, ax); /* in ]-q, pq[ assuming a in -]-q,q[ */
 }
 
@@ -2601,7 +2601,7 @@ int
 Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
-  ulong qinv = invumod(umodiu(q,p), p);
+  ulong qinv = Fl_inv(umodiu(q,p), p);
   int stable = 1;
   h = u_chinese_coprime(*H,Hp,q,p,qinv,qp);
   if (h)
@@ -2616,7 +2616,7 @@ int
 ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN H = *ptH, h, lim = shifti(qp,-1);
-  ulong qinv = invumod(umodiu(q,p), p);
+  ulong qinv = Fl_inv(umodiu(q,p), p);
   long i, l = lg(H), lp = lg(Hp);
   int stable = 1;
 
@@ -2658,7 +2658,7 @@ int
 ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p)
 {
   GEN h, lim = shifti(qp,-1);
-  ulong qinv = invumod(umodiu(q,p), p);
+  ulong qinv = Fl_inv(umodiu(q,p), p);
   long i,j, l = lg(H), m = lg(H[1]);
   int stable = 1;
   for (j=1; j<l; j++)
@@ -2728,7 +2728,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (dc < 0) { avma = av; return 0; }
 
     if (both_odd(da,db)) res = subii(p, res);
-    if (!gcmp1(lb)) res = muliimod(res, powiumod(lb, da - dc, p), p);
+    if (!gcmp1(lb)) res = muliimod(res, Fp_powu(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
       if (DEBUGMEM>1) err(warnmem,"FpX_resultant (da = %ld)",da);
@@ -2737,7 +2737,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
-  res = muliimod(res, powiumod((GEN)b[2], da, p), p);
+  res = muliimod(res, Fp_powu((GEN)b[2], da, p), p);
   return gerepileuptoint(av, res);
 }
 
@@ -2778,9 +2778,9 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
       if (both_odd(da,db)) res = p-res;
       if (lb != 1)
       {
-        ulong t = powuumod(lb, da - dc, p);
-        res = muluumod(res, t, p);
-        if (dc) cx = muluumod(cx, t, p);
+        ulong t = Fl_pow(lb, da - dc, p);
+        res = Fl_mul(res, t, p);
+        if (dc) cx = Fl_mul(cx, t, p);
       }
     }
     else
@@ -2799,11 +2799,11 @@ u_FpX_resultant_all(GEN a, GEN b, long *C0, long *C1, GEN dglist, ulong p)
 
   if (da == 1) /* last non-constant polynomial has degree 1 */
   {
-    *C0 = muluumod(cx, a[2], p);
-    *C1 = muluumod(cx, a[3], p);
+    *C0 = Fl_mul(cx, a[2], p);
+    *C1 = Fl_mul(cx, a[3], p);
     lb = b[2];
-  } else lb = powuumod(b[2], da, p);
-  avma = av; return muluumod(res, lb, p);
+  } else lb = Fl_pow(b[2], da, p);
+  avma = av; return Fl_mul(res, lb, p);
 }
 
 /* u P(X) + v P(-X) */
@@ -2881,7 +2881,7 @@ FpV_polint(GEN xa, GEN ya, GEN p)
   {
     if (!signe(ya[i])) continue;
     T = FpX_div_by_X_x(Q, (GEN)xa[i], p);
-    inv = mpinvmod(FpX_eval(T,(GEN)xa[i], p), p);
+    inv = Fp_inv(FpX_eval(T,(GEN)xa[i], p), p);
     if (i < n-1 && egalii(addii((GEN)xa[i], (GEN)xa[i+1]), p))
     {
       dP = pol_comp(T, muliimod((GEN)ya[i],  inv,p),
@@ -2912,21 +2912,21 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
   for (i=1; i<n; i++)
   {
     T = Flx_div_by_X_x(Q, xa[i], p, NULL);
-    inv = invumod(Flx_eval(T,xa[i], p), p);
+    inv = Fl_inv(Flx_eval(T,xa[i], p), p);
 
     if (ya[i])
     {
-      dP = Flx_Fl_mul(T, muluumod(ya[i],inv,p), p);
+      dP = Flx_Fl_mul(T, Fl_mul(ya[i],inv,p), p);
       P = P ? Flx_add(P , dP , p): dP;
     }
     if (C0[i])
     {
-      dP0= Flx_Fl_mul(T, muluumod(C0[i],inv,p), p);
+      dP0= Flx_Fl_mul(T, Fl_mul(C0[i],inv,p), p);
       P0= P0? Flx_add(P0, dP0, p): dP0;
     }
     if (C1[i])
     {
-      dP1= Flx_Fl_mul(T, muluumod(C1[i],inv,p), p);
+      dP1= Flx_Fl_mul(T, Fl_mul(C1[i],inv,p), p);
       P1= P1? Flx_add(P1, dP1, p): dP1;
     }
   }
@@ -3010,7 +3010,7 @@ u_FpX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
   int drop;
   GEN ev = u_vec_FpX_eval_gen(b, n, p, &drop);
   ulong r = Flx_resultant(a, ev, p);
-  if (drop && la != 1) r = muluumod(r, powuumod(la, drop,p),p);
+  if (drop && la != 1) r = Fl_mul(r, Fl_pow(la, drop,p),p);
   return r;
 }
 static GEN
@@ -3019,7 +3019,7 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
   int drop;
   GEN ev = vec_FpX_eval_gen(b, n, p, &drop);
   GEN r = FpX_resultant(a, ev, p);
-  if (drop && !gcmp1(la)) r = muliimod(r, powiumod(la, drop,p),p);
+  if (drop && !gcmp1(la)) r = muliimod(r, Fp_powu(la, drop,p),p);
   return r;
 }
 
@@ -3042,16 +3042,6 @@ Fly_Flxy_resultant_polint(GEN a, GEN b, ulong p, ulong dres)
     x[++i] = 0;   y[i] = u_FpX_eval_resultant(a,b, x[i], p,la);
   }
   return Flv_polint(x,y, p, evalvarn(varn(b)));
-}
-
-/* x^n mod p */
-ulong
-powusmod(ulong x, long n, ulong p)
-{
-  if (n < 0)
-    return powuumod(invumod(x, p), (ulong)(-n), p);
-  else
-    return powuumod(x, (ulong)n, p);
 }
 
 static GEN
@@ -3104,7 +3094,7 @@ u_FpX_divexact(GEN x, GEN y, ulong p)
   {
     ulong t = (ulong)y[2];
     if (t == 1) return x;
-    t = invumod(t, p);
+    t = Fl_inv(t, p);
     l = lg(x); z = cgetg(l, t_POL); z[1] = x[1];
     for (i=2; i<l; i++) z[i] = (long)Flx_Fl_mul((GEN)x[i],t,p);
   }
@@ -3359,7 +3349,7 @@ INIT:
     else
       Hp = Fly_Flxy_resultant_polint(a, b, p, (ulong)dres);
     if (!H && degpol(Hp) != dres) continue;
-    if (dp != 1) Hp = Flx_Fl_mul(Hp, powusmod(dp,-degA,p), p);
+    if (dp != 1) Hp = Flx_Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
     if (checksqfree) {
       if (!Flx_is_squarefree(Hp, p)) goto INIT;
       if (DEBUGLEVEL>4) fprintferr("Final lambda = %ld\n",*lambda);
@@ -3517,7 +3507,7 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     a = ZX_Flx(A, p);
     b = ZX_Flx(B, p);
     Hp= Flx_resultant(a, b, p);
-    if (dp != 1) Hp = muluumod(Hp, powusmod(dp, -degA, p), p);
+    if (dp != 1) Hp = Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
     if (!H)
     {
       stable = 0; q = utoi(p);
@@ -3627,7 +3617,7 @@ modulargcd(GEN A0, GEN B0)
       Hp = Flx_normalize(Hp, p);
     else
     {
-      ulong t = muluumod(umodiu(g, p), invumod(Hp[m+2],p), p);
+      ulong t = Fl_mul(umodiu(g, p), Fl_inv(Hp[m+2],p), p);
       Hp = Flx_Fl_mul(Hp, t, p);
     }
     if (m < n)

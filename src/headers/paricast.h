@@ -134,7 +134,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lmpexp1 (long)mpexp1
 #define lmpexp  (long)mpexp
 #define lmpfact (long)mpfact
-#define lmpinvmod (long)mpinvmod
 #define lmplog  (long)mplog
 #define lmpmul  (long)mpmul
 #define lmpneg  (long)mpneg

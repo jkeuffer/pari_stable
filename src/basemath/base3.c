@@ -1100,7 +1100,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   p1 = racine(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
   lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
-  g0inv = mpinvmod(g0, p); p1 = x;
+  g0inv = Fp_inv(g0, p); p1 = x;
 
   c = 3 * lgefint(p);
   for (i=1;;i++)
@@ -1111,7 +1111,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
     (void)new_chunk(c); p1 = mulii(p1,g0inv); /* HACK */
     avma = av1; p1 = remii(p1, p);
   }
-  giant = remii(mulii(x, mpinvmod(p1,p)), p);
+  giant = remii(mulii(x, Fp_inv(p1,p)), p);
   p1=cgetg(lbaby+1,t_VEC);
   perm = gen_sort(smalltable, cmp_IND | cmp_C, cmpii);
   for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
@@ -1157,7 +1157,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
   ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
-  ginv = mpinvmod(g,p);
+  ginv = Fp_inv(g,p);
   v = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
@@ -1168,14 +1168,14 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
     t0 = diviiexact(ord, (GEN)qj[e]);
-    a0 = powmodulo(a, t0, p); 
-    ginv0 = powmodulo(ginv, t0, p); /* order q^e */
-    g_q = powmodulo(g, diviiexact(ord,q), p); /* order q */
+    a0 = Fp_pow(a, t0, p); 
+    ginv0 = Fp_pow(ginv, t0, p); /* order q^e */
+    g_q = Fp_pow(g, diviiexact(ord,q), p); /* order q */
     n_q = gzero;
     for (j=0; j<e; j++)
     {
-      b = modii(mulii(a0, powmodulo(ginv0, n_q, p)), p);
-      b = powmodulo(b, (GEN)qj[e-1-j], p);
+      b = modii(mulii(a0, Fp_pow(ginv0, n_q, p)), p);
+      b = Fp_pow(b, (GEN)qj[e-1-j], p);
       b = Fp_shanks(b, g_q, p, q);
       n_q = addii(n_q, mulii(b, (GEN)qj[j]));
     }

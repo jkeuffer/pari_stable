@@ -354,7 +354,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN T, GEN p)
       }
       else
       {
-        d = mpinvmod(d, p);
+        d = Fp_inv(d, p);
         u = FpX_Fp_mul(u, d, p);
         v = FpX_Fp_mul(v, d, p);
       }
@@ -818,7 +818,7 @@ nextK:
 
       /* d - 1 test */
       for (t=trace1[ind[1]],i=2; i<=K; i++)
-        t = adduumod(t, trace1[ind[i]], spa_b);
+        t = Fl_add(t, trace1[ind[i]], spa_b);
       if (t > spa_bs2) t = spa_b - t;
       if (t > Sbound)
       {
@@ -827,7 +827,7 @@ nextK:
       }
       /* d - 2 test */
       for (t=trace2[ind[1]],i=2; i<=K; i++)
-        t = adduumod(t, trace2[ind[i]], spa_b);
+        t = Fl_add(t, trace2[ind[i]], spa_b);
       if (t > spa_bs2) t = spa_b - t;
       if (t > Sbound)
       {
@@ -4243,7 +4243,7 @@ ginvmod(GEN x, GEN y)
       if (is_scalar_t(tx)) return ginv(x);
       break;
     case t_INT:
-      if (tx==t_INT) return mpinvmod(x,y);
+      if (tx==t_INT) return Fp_inv(x,y);
       if (tx==t_POL) return gzero;
   }
   err(typeer,"ginvmod");
@@ -4481,7 +4481,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 	gerepileall(btop, 2, &M, &mod);
       }
 
-      ax = gmulgs(mpinvmod(stoi(p), mod), p);
+      ax = gmulgs(Fp_inv(stoi(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
       mod = mulis(mod, p);
       M = lift(FpM(M, mod));

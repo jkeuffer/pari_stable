@@ -213,7 +213,7 @@ Fl_gener_fact(ulong p, GEN fa)
     if (x % p)
     {
       for (i=k; i; i--)
-	if (powuumod(x, (ulong)L[i], p) == 1) break;
+	if (Fl_pow(x, (ulong)L[i], p) == 1) break;
       if (!i) break;
     }
   avma = av; return x;
@@ -242,7 +242,7 @@ Fp_gener_fact(GEN p, GEN fa)
     GEN d = gcdii(p,x);
     if (!is_pm1(d)) continue;
     for (i = k; i; i--) {
-      GEN e = powmodulo(x, (GEN)V[i], p);
+      GEN e = Fp_pow(x, (GEN)V[i], p);
       if (is_pm1(e)) break;
     }
     if (!i) { avma = av0; return utoi((ulong)x[2]); }
@@ -286,7 +286,7 @@ gener(GEN m)
   if (e >= 2)
   {
     GEN M = (e == 2)? m: sqri(p); 
-    if (gcmp1(powmodulo(x, subis(p,1), M))) x = addii(x,p);
+    if (gcmp1(Fp_pow(x, subis(p,1), M))) x = addii(x,p);
   }
   return gerepileupto(av, gmodulcp(x,m));
 }
@@ -352,7 +352,7 @@ znstar(GEN n)
     for (i=1; i<=sizeh; i++)
     {
       q = (GEN)moduli[i]; a = (GEN)gen[i];
-      u = mpinvmod(q, diviiexact(n,q));
+      u = Fp_inv(q, diviiexact(n,q));
       gen[i] = lmodulcp(addii(a,mulii(mulii(subsi(1,a),u),q)), n);
     }
   
@@ -951,10 +951,9 @@ hil(GEN x, GEN y, GEN p)
 /*                                                                 */
 /*******************************************************************/
 
-#define sqrumod(m, p) (muluumod(m,m,p))
 /* Tonelli-Shanks. Assume p is prime and (a,p) = -1. */
 ulong
-sqrtumod(ulong a, ulong p)
+Fl_sqrt(ulong a, ulong p)
 {
   long i, e;
   ulong k, p1, q, v, y, w, m;
@@ -963,7 +962,7 @@ sqrtumod(ulong a, ulong p)
   p1 = p - 1; e = vals(p1);
   if (e == 0) /* p = 2 */
   {
-    if (p != 2) err(talker,"composite modulus in sqrtumod: %lu",p);
+    if (p != 2) err(talker,"composite modulus in Fl_sqrt: %lu",p);
     return ((a & 1) == 0)? 0: 1;
   }
   q = p1 >> e; /* q = (p-1)/2^oo is odd */
@@ -975,116 +974,33 @@ sqrtumod(ulong a, ulong p)
       if (i >= 0)
       {
         if (i) continue;
-        err(talker,"composite modulus in mpsqrtmod: %lu",p);
+        err(talker,"composite modulus in Fp_sqrt: %lu",p);
       }
-      y = m = powuumod(k, q, p);
+      y = m = Fl_pow(k, q, p);
       for (i=1; i<e; i++)
-	if ((m = sqrumod(m,p)) == 1) break;
+	if ((m = Fl_sqr(m,p)) == 1) break;
       if (i == e) break; /* success */
     }
 
-  p1 = powuumod(a, q >> 1, p); /* a ^ [(q-1)/2] */
+  p1 = Fl_pow(a, q >> 1, p); /* a ^ [(q-1)/2] */
   if (!p1) return 0;
-  v = muluumod(a, p1, p);
-  w = muluumod(v, p1, p);
+  v = Fl_mul(a, p1, p);
+  w = Fl_mul(v, p1, p);
   while (w != 1)
   { /* a*w = v^2, y primitive 2^e-th root of 1
        a square --> w even power of y, hence w^(2^(e-1)) = 1 */
-    p1 = sqrumod(w,p);
-    for (k=1; p1 != 1 && k < e; k++) p1 = sqrumod(p1,p);
-    if (k == e) err(talker,"composite modulus in sqrtumod: %lu?", p);
+    p1 = Fl_sqr(w,p);
+    for (k=1; p1 != 1 && k < e; k++) p1 = Fl_sqr(p1,p);
+    if (k == e) err(talker,"composite modulus in Fl_sqrt: %lu?", p);
     /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
     p1 = y;
-    for (i=1; i < e-k; i++) p1 = sqrumod(p1,p);
-    y = sqrumod(p1, p); e = k;
-    w = muluumod(y, w, p);
-    v = muluumod(v, p1, p);
+    for (i=1; i < e-k; i++) p1 = Fl_sqr(p1,p);
+    y = Fl_sqr(p1, p); e = k;
+    w = Fl_mul(y, w, p);
+    v = Fl_mul(v, p1, p);
   }
   p1 = p - v; if (v > p1) v = p1;
   return v;
-}
-
-#define sqrmod(x,p) (remii(sqri(x),p))
-static GEN ffsqrtmod(GEN a, GEN p);
-
-/* Tonelli-Shanks. Assume p is prime and return NULL if (a,p) = -1. */
-GEN
-mpsqrtmod(GEN a, GEN p)
-{
-  pari_sp av = avma, av1,lim;
-  long i, k, e;
-  GEN p1, q, v, y, w, m;
-
-  if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
-  if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in mpsqrtmod");
-  if (lgefint(p) == 3) 
-    return utoi( sqrtumod(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
-
-  p1 = addsi(-1,p); e = vali(p1);
-  
-  /* If `e' is "too big", use Cipolla algorithm ! [GTL] */
-  if (e*(e-1) > 20 + 8 * bit_accuracy(lgefint(p)))
-  {
-    v = ffsqrtmod(a,p);
-    if (!v) { avma = av; return NULL; }
-    return gerepileuptoint(av,v);
-  }
-
-  if (e == 0) /* p = 2 */
-  {
-    avma = av;
-    if (!egalii(p, gdeux))
-      err(talker,"composite modulus in mpsqrtmod: %Z",p);
-    if (!signe(a) || !mod2(a)) return gzero;
-    return gun;
-  }
-  q = shifti(p1,-e); /* q = (p-1)/2^oo is odd */
-  if (e == 1) y = p1;
-  else /* look for an odd power of a primitive root */
-    for (k=2; ; k++)
-    { /* loop terminates for k < p (even if p composite) */
-  
-      i = krosi(k,p);
-      if (i >= 0)
-      {
-        if (i) continue;
-        err(talker,"composite modulus in mpsqrtmod: %Z",p);
-      }
-      av1 = avma;
-      y = m = powmodulo(stoi(k),q,p);
-      for (i=1; i<e; i++)
-	if (gcmp1(m = sqrmod(m,p))) break;
-      if (i == e) break; /* success */
-      avma = av1;
-    }
-
-  p1 = powmodulo(a, shifti(q,-1), p); /* a ^ [(q-1)/2] */
-  if (!signe(p1)) { avma=av; return gzero; }
-  v = modii(mulii(a, p1), p);
-  w = modii(mulii(v, p1), p);
-  lim = stack_lim(av,1);
-  while (!gcmp1(w))
-  { /* a*w = v^2, y primitive 2^e-th root of 1
-       a square --> w even power of y, hence w^(2^(e-1)) = 1 */
-    p1 = sqrmod(w,p);
-    for (k=1; !gcmp1(p1) && k < e; k++) p1 = sqrmod(p1,p);
-    if (k == e) { avma=av; return NULL; } /* p composite or (a/p) != 1 */
-    /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
-    p1 = y;
-    for (i=1; i < e-k; i++) p1 = sqrmod(p1,p);
-    y = sqrmod(p1, p); e = k;
-    w = modii(mulii(y, w), p);
-    v = modii(mulii(v, p1), p);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      GEN *gptr[3]; gptr[0]=&y; gptr[1]=&w; gptr[2]=&v;
-      if(DEBUGMEM>1) err(warnmem,"mpsqrtmod");
-      gerepilemany(av,gptr,3);
-    }
-  }
-  av1 = avma;
-  p1 = subii(p,v); if (cmpii(v,p1) > 0) v = p1; else avma = av1;
-  return gerepileuptoint(av, v);
 }
 
 /* Cipolla's algorithm is better when e = v_2(p-1) is "too big".
@@ -1107,7 +1023,7 @@ mpsqrtmod(GEN a, GEN p)
  *
  * cf: LNCS 2286, pp 430-434 (2002)  [Gonzalo Tornaria] */
 static GEN  
-ffsqrtmod(GEN a, GEN p)
+sqrt_Cipolla(GEN a, GEN p)
 {
   pari_sp av = avma, av1, lim;
   long e, t, man, k, nb;
@@ -1155,7 +1071,7 @@ ffsqrtmod(GEN a, GEN p)
     if (low_stack(lim, stack_lim(av1, 1)))
     {
        GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
-       if (DEBUGMEM>1) err(warnmem, "ffsqrtmod");
+       if (DEBUGMEM>1) err(warnmem, "sqrt_Cipolla");
        gerepilemany(av1,gptr,2);
     }
     
@@ -1172,7 +1088,7 @@ ffsqrtmod(GEN a, GEN p)
     if (low_stack(lim, stack_lim(av1, 1)))
     {
        GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
-       if (DEBUGMEM>1) err(warnmem, "ffsqrtmod");
+       if (DEBUGMEM>1) err(warnmem, "sqrt_Cipolla");
        gerepilemany(av1,gptr,2);
     }
   }
@@ -1193,7 +1109,89 @@ ffsqrtmod(GEN a, GEN p)
   u = subii(p,v); if (cmpii(v,u) > 0) v = u;
   return gerepileuptoint(av,v);
 }
- 
+
+#define sqrmod(x,p) (remii(sqri(x),p))
+
+/* Tonelli-Shanks. Assume p is prime and return NULL if (a,p) = -1. */
+GEN
+Fp_sqrt(GEN a, GEN p)
+{
+  pari_sp av = avma, av1,lim;
+  long i, k, e;
+  GEN p1, q, v, y, w, m;
+
+  if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
+  if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in Fp_sqrt");
+  if (lgefint(p) == 3) 
+    return utoi( Fl_sqrt(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
+
+  p1 = addsi(-1,p); e = vali(p1);
+  
+  /* If `e' is "too big", use Cipolla algorithm ! [GTL] */
+  if (e*(e-1) > 20 + 8 * bit_accuracy(lgefint(p)))
+  {
+    v = sqrt_Cipolla(a,p);
+    if (!v) { avma = av; return NULL; }
+    return gerepileuptoint(av,v);
+  }
+
+  if (e == 0) /* p = 2 */
+  {
+    avma = av;
+    if (!egalii(p, gdeux))
+      err(talker,"composite modulus in Fp_sqrt: %Z",p);
+    if (!signe(a) || !mod2(a)) return gzero;
+    return gun;
+  }
+  q = shifti(p1,-e); /* q = (p-1)/2^oo is odd */
+  if (e == 1) y = p1;
+  else /* look for an odd power of a primitive root */
+    for (k=2; ; k++)
+    { /* loop terminates for k < p (even if p composite) */
+  
+      i = krosi(k,p);
+      if (i >= 0)
+      {
+        if (i) continue;
+        err(talker,"composite modulus in Fp_sqrt: %Z",p);
+      }
+      av1 = avma;
+      y = m = Fp_pow(stoi(k),q,p);
+      for (i=1; i<e; i++)
+	if (gcmp1(m = sqrmod(m,p))) break;
+      if (i == e) break; /* success */
+      avma = av1;
+    }
+
+  p1 = Fp_pow(a, shifti(q,-1), p); /* a ^ [(q-1)/2] */
+  if (!signe(p1)) { avma=av; return gzero; }
+  v = modii(mulii(a, p1), p);
+  w = modii(mulii(v, p1), p);
+  lim = stack_lim(av,1);
+  while (!gcmp1(w))
+  { /* a*w = v^2, y primitive 2^e-th root of 1
+       a square --> w even power of y, hence w^(2^(e-1)) = 1 */
+    p1 = sqrmod(w,p);
+    for (k=1; !gcmp1(p1) && k < e; k++) p1 = sqrmod(p1,p);
+    if (k == e) { avma=av; return NULL; } /* p composite or (a/p) != 1 */
+    /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
+    p1 = y;
+    for (i=1; i < e-k; i++) p1 = sqrmod(p1,p);
+    y = sqrmod(p1, p); e = k;
+    w = modii(mulii(y, w), p);
+    v = modii(mulii(v, p1), p);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      GEN *gptr[3]; gptr[0]=&y; gptr[1]=&w; gptr[2]=&v;
+      if(DEBUGMEM>1) err(warnmem,"Fp_sqrt");
+      gerepilemany(av,gptr,3);
+    }
+  }
+  av1 = avma;
+  p1 = subii(p,v); if (cmpii(v,p1) > 0) v = p1; else avma = av1;
+  return gerepileuptoint(av, v);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                       n-th ROOT MODULO p                        */
@@ -1214,10 +1212,10 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
   long k, i; 
   for (k=1; ; k++)
   {
-    m1 = m = powmodulo(stoi(k+1), r, p);
+    m1 = m = Fp_pow(stoi(k+1), r, p);
     if (gcmp1(m)) { avma = av1; continue; }
     for (i=1; i<e; i++)
-      if (gcmp1(m = powmodulo(m,l,p))) break;
+      if (gcmp1(m = Fp_pow(m,l,p))) break;
     if (i==e) break;
     avma = av1;
   }
@@ -1237,8 +1235,8 @@ mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
   GEN p1, u1, u2, v, w, z, dl;
 
   (void)bezout(r,l,&u1,&u2);
-  v = powmodulo(a,u2,p);
-  w = powmodulo(a,modii(mulii(negi(u1),r),q),p);
+  v = Fp_pow(a,u2,p);
+  w = Fp_pow(a,modii(mulii(negi(u1),r),q),p);
   lim = stack_lim(av,1);
   while (!gcmp1(w))
   {
@@ -1246,16 +1244,16 @@ mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
     p1 = w;
     do
     { /* if p is not prime, this loop will not end */
-      z = p1; p1 = powmodulo(p1,l,p);
+      z = p1; p1 = Fp_pow(p1,l,p);
       k++;
     } while(!gcmp1(p1));
     if (k==e) { avma = av; return NULL; }
-    dl = Fp_shanks(mpinvmod(z,p),m,p,l);
-    p1 = powmodulo(y, modii(mulii(dl,gpowgs(l,e-k-1)),q), p);
-    m = powmodulo(m,dl,p);
+    dl = Fp_shanks(Fp_inv(z,p),m,p,l);
+    p1 = Fp_pow(y, modii(mulii(dl,gpowgs(l,e-k-1)),q), p);
+    m = Fp_pow(m,dl,p);
     e = k;
     v = modii(mulii(p1,v),p);
-    y = powmodulo(p1,l,p);
+    y = Fp_pow(p1,l,p);
     w = modii(mulii(y,w),p);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1274,14 +1272,14 @@ mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
 * If zetan!=NULL, *zetan is set to a primitive mth root of unity so that
 * the set of solutions is { x*zetan^k; k=0..m-1 } */
 GEN 
-mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
+Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
 {
   pari_sp ltop = avma, lbot = 0, lim;
   GEN m, u1, u2, q, z;
 
   if (typ(a) != t_INT || typ(n) != t_INT || typ(p)!=t_INT)
-    err(typeer,"mpsqrtnmod");
-  if (!signe(n)) err(talker,"1/0 exponent in mpsqrtnmod");
+    err(typeer,"Fp_sqrtn");
+  if (!signe(n)) err(talker,"1/0 exponent in Fp_sqrtn");
   if (gcmp1(n)) { if (zetan) *zetan = gun; return icopy(a);}
   a = modii(a,p);
   if (gcmp0(a)) { if (zetan) *zetan = gun; avma = ltop; return gzero;}
@@ -1301,7 +1299,7 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
       j = itos(gcoeff(F,i,2));
       e = pvaluation(q,l,&r);
       y = mplgenmod(l,e,r,p,&zeta);
-      if (zetan) z = modii(mulii(z, powmodulo(y,gpowgs(l,e-j),p)), p);
+      if (zetan) z = modii(mulii(z, Fp_pow(y,gpowgs(l,e-j),p)), p);
       do
       {
 	lbot = avma;
@@ -1315,7 +1313,7 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
       } while (--j);
       if (low_stack(lim, stack_lim(ltop,1)))
       { /* n can have lots of prime factors*/
-	if(DEBUGMEM>1) err(warnmem,"mpsqrtnmod");
+	if(DEBUGMEM>1) err(warnmem,"Fp_sqrtn");
         gerepileall(av1, zetan? 2: 1, &a, &z);
 	lbot = av1;
       }
@@ -1324,7 +1322,7 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
   if (!egalii(m, n))
   {
     GEN b = modii(u1,q);
-    lbot = avma; a = powmodulo(a,b,p);
+    lbot = avma; a = Fp_pow(a,b,p);
   }
   if (zetan)
   {
@@ -1440,7 +1438,7 @@ chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1)
   pari_sp av = avma;
   GEN ax,p1;
   (void)new_chunk((lgefint(z1)<<1)+lgefint(x1)+lgefint(y1)); /* HACK */
-  ax = mulii(mpinvmod(x1,y1), x1);
+  ax = mulii(Fp_inv(x1,y1), x1);
   p1 = addii(x2, mulii(ax, subii(y2,x2)));
   avma = av; return modii(p1,z1);
 }
@@ -1452,7 +1450,7 @@ chinois_int_coprime(GEN x2, GEN y2, GEN x1, GEN y1, GEN z1)
 /*********************************************************************/
 
 GEN
-mpinvmod(GEN a, GEN m)
+Fp_inv(GEN a, GEN m)
 {
   GEN res;
   if (! invmod(a,m,&res))
@@ -1461,7 +1459,7 @@ mpinvmod(GEN a, GEN m)
 }
 
 GEN
-mpinvmodsafe(GEN a, GEN m)
+Fp_invsafe(GEN a, GEN m)
 {
   GEN res;
   if (! invmod(a,m,&res))
@@ -1570,7 +1568,7 @@ _sqr(void *data, GEN x)
 
 /* A^k mod N */
 GEN
-powmodulo(GEN A, GEN k, GEN N)
+Fp_pow(GEN A, GEN k, GEN N)
 {
   pari_sp av = avma;
   long t,s, lN;
@@ -1586,7 +1584,7 @@ powmodulo(GEN A, GEN k, GEN N)
     t = signe(remii(A,N)); avma = av;
     return t? gun: gzero;
   }
-  if (s < 0) y = mpinvmod(A,N);
+  if (s < 0) y = Fp_inv(A,N);
   else
   {
     y = modii(A,N);
@@ -1594,7 +1592,7 @@ powmodulo(GEN A, GEN k, GEN N)
   }
   if (lgefint(N) == 3 && lgefint(k) == 3)
   {
-    ulong a = powuumod(itou(y), itou(k), itou(N));
+    ulong a = Fl_pow(itou(y), itou(k), itou(N));
     avma = av; return utoi(a);
   }
 
@@ -3619,7 +3617,7 @@ primeform(GEN x, GEN p, long prec)
   }
   else
   {
-    b = mpsqrtmod(x,p); if (!b) err(sqrter5);
+    b = Fp_sqrt(x,p); if (!b) err(sqrter5);
     s &= 1; /* s = x mod 2 */
     /* mod(b) != mod2(x) ? [Warning: we may have b == 0] */
     if ((!signe(b) && s) || mod2(b) != s) b = gerepileuptoint(av, subii(p,b));

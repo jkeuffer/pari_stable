@@ -1117,7 +1117,7 @@ Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
     for (j=i+1; j<=li; j++)
       m = subii(m, mulii(gcoeff(a,i,j), (GEN)u[j]));
     m = remii(m, p);
-    u[i] = lpileuptoint(av, remii(mulii(m, mpinvmod(gcoeff(a,i,i), p)), p));
+    u[i] = lpileuptoint(av, remii(mulii(m, Fp_inv(gcoeff(a,i,i), p)), p));
   }
   return u;
 }
@@ -1160,7 +1160,7 @@ u_Fp_gauss_get_col_OK(GEN a, uGEN b, ulong invpiv, long li, ulong p)
       m += ucoeff(a,i,j) * u[j]; /* 0 <= u[j] < p */
     }
     m %= p;
-    if (m) m = ((p-m) * invumod(ucoeff(a,i,i), p)) % p; 
+    if (m) m = ((p-m) * Fl_inv(ucoeff(a,i,i), p)) % p; 
     u[i] = m;
   }
   return u;
@@ -1172,14 +1172,14 @@ u_Fp_gauss_get_col(GEN a, uGEN b, ulong invpiv, long li, ulong p)
   ulong m = b[li] % p;
   long i,j;
 
-  u[li] = muluumod(m, invpiv, p);
+  u[li] = Fl_mul(m, invpiv, p);
   for (i=li-1; i>0; i--)
   {
     m = p - b[i]%p;
     for (j = i+1; j <= li; j++)
-      m += muluumod(ucoeff(a,i,j), u[j], p);
+      m += Fl_mul(ucoeff(a,i,j), u[j], p);
     m %= p;
-    if (m) m = muluumod(p-m, invumod(ucoeff(a,i,i), p), p);
+    if (m) m = Fl_mul(p-m, Fl_inv(ucoeff(a,i,i), p), p);
     u[i] = m;
   }
   return u;
@@ -1220,7 +1220,7 @@ static void
 _u_Fp_addmul(uGEN b, long k, long i, ulong m, ulong p)
 {
   b[i] %= p;
-  b[k] += muluumod(m, b[i], p);
+  b[k] += Fl_mul(m, b[i], p);
   if (b[k] & MASK) b[k] %= p;
 }
 /* same m = 1 */
@@ -1375,7 +1375,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
       if (piv) break;
     }
     if (!piv) return NULL;
-    invpiv = invumod(piv, p);
+    invpiv = Fl_inv(piv, p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
@@ -1390,7 +1390,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
       m = ( ucoeff(a,k,i) %= p );
       if (!m) continue;
 
-      m = p - muluumod(m, invpiv, p); /* - 1/piv mod p */
+      m = p - Fl_mul(m, invpiv, p); /* - 1/piv mod p */
       if (m == 1)
       {
         for (j=i+1; j<=aco; j++) _u_Fp_add((uGEN)a[j],k,i, p);
@@ -1474,7 +1474,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
       if (signe(piv)) break;
     }
     if (k > li) return NULL;
-    invpiv  = mpinvmod(piv, p);
+    invpiv  = Fp_inv(piv, p);
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
@@ -1583,7 +1583,7 @@ Flm_Fl_mul_inplace(GEN y, ulong x, ulong p)
   if (HIGHWORD(x | p))
     for(j=1; j<l; j++)
       for(i=1; i<m; i++)
-        ucoeff(y,i,j) = muluumod(ucoeff(y,i,j), x, p);
+        ucoeff(y,i,j) = Fl_mul(ucoeff(y,i,j), x, p);
   else
     for(j=1; j<l; j++)
       for(i=1; i<m; i++)
@@ -2561,7 +2561,7 @@ Flm_mul(GEN x, GEN y, ulong p)
       {
         ulong p1 = 0;
         for (k=1; k<lx; k++)
-          p1 = adduumod(p1,muluumod(coeff(x,i,k),coeff(y,k,j),p),p);
+          p1 = Fl_add(p1,Fl_mul(coeff(x,i,k),coeff(y,k,j),p),p);
         coeff(z,i,j) = p1;
       }
     }
@@ -2598,8 +2598,8 @@ Flm_Flv_mul(GEN x, GEN y, ulong p)
       ulong p1 = 0;
       for (k=1; k<lx; k++)
       {
-        ulong t = muluumod(coeff(x,i,k), y[k], p);
-        p1 = adduumod(p1, t, p);
+        ulong t = Fl_mul(coeff(x,i,k), y[k], p);
+        p1 = Fl_add(p1, t, p);
       }
       z[i] = p1;
     }
@@ -2643,7 +2643,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
     else
     {
       c[j] = k; d[k] = j;
-      piv = p - invumod(a, p); /* -1/a */
+      piv = p - Fl_inv(a, p); /* -1/a */
       ucoeff(x,j,k) = p-1;
       if (piv == 1) { /* nothing */ }
       else if (OK_ulong)
@@ -2651,7 +2651,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
           ucoeff(x,j,i) = (piv * ucoeff(x,j,i)) % p;
       else
         for (i=k+1; i<=n; i++)
-          ucoeff(x,j,i) = muluumod(piv, ucoeff(x,j,i), p);
+          ucoeff(x,j,i) = Fl_mul(piv, ucoeff(x,j,i), p);
       for (t=1; t<=m; t++)
       {
 	if (t == j) continue;
@@ -2733,7 +2733,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     }
     else
     {
-      c[j]=k; d[k]=j; piv = negi(mpinvmod(gcoeff(x,j,k), p));
+      c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
       coeff(x,j,k) = (long)mun;
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmodii(mulii(piv,gcoeff(x,j,i)), p);
@@ -2822,9 +2822,9 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
     if (j>m) { r++; d[k]=0; }
     else
     {
-      c[j]=k; d[k]=j; piv = p - invumod(coeff(x,j,k), p);
+      c[j]=k; d[k]=j; piv = p - Fl_inv(coeff(x,j,k), p);
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = muluumod(piv,coeff(x,j,i), p);
+	coeff(x,j,i) = Fl_mul(piv,coeff(x,j,i), p);
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
@@ -2833,7 +2833,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
           {
             coeff(x,t,k)=0;
             for (i=k+1; i<=n; i++)
-              coeff(x,t,i) = adduumod(coeff(x,t,i), muluumod(piv,coeff(x,j,i),p),p);
+              coeff(x,t,i) = Fl_add(coeff(x,t,i), Fl_mul(piv,coeff(x,j,i),p),p);
           }
         }
       for (i=k; i<=n; i++) coeff(x,j,i) = 0; /* dummy */
@@ -2869,7 +2869,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
     if (j>m) { r++; d[k]=0; }
     else
     {
-      c[j]=k; d[k]=j; piv = negi(mpinvmod(gcoeff(x,j,k), p));
+      c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmodii(mulii(piv,gcoeff(x,j,i)), p);
       for (t=1; t<=m; t++)
@@ -2989,7 +2989,7 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
   col = (GEN)p1[i]; p1 = (GEN) col[nbcol];
   if (gcmp0(p1)) return NULL;
 
-  p1 = mpinvmod(negi(p1),p);
+  p1 = Fp_inv(negi(p1),p);
   setlg(col,nbcol);
   for(i=1;i<nbcol;i++)
     col[i]=lmulii((GEN)col[i],p1);

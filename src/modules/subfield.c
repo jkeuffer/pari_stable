@@ -437,7 +437,7 @@ get_bezout(GEN pol, GEN fk, GEN p)
     d = constant_term(d);
     if (!gcmp1(d))
     {
-      d = mpinvmod(d, p);
+      d = Fp_inv(d, p);
       v = FpX_Fp_mul(v,d, p);
     }
     bezout_coeff[i] = (long)FpX_mul(B,v, p);
