@@ -1581,7 +1581,7 @@ _fix(GEN x, long k)
 GEN
 apell1(GEN e, GEN p)
 {
-  long *tx, *ty, *ti, pfinal, i, j, s, k, k1, x, nb;
+  long *tx, *ty, *ti, pfinal, i, j, s, KRO, KROold, x, nb;
   pari_sp av = avma, av2;
   GEN p1,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
   tx = ty = ti = NULL; /* gcc -Wall */
@@ -1589,20 +1589,21 @@ apell1(GEN e, GEN p)
   if (DEBUGLEVEL) (void)timer2();
   c4 = gmod(gdivgs((GEN)e[10],  -48), p);
   c6 = gmod(gdivgs((GEN)e[11], -864), p);
-  pordmin = gceil(gmul2n(gsqrt(p,DEFAULTPREC),2)); /* ceil( sqrt(4p) ) */
-  p1p = addsi(1,p);
-  p2p = shifti(p1p,1);
-  x = 0; u = c6; k1 = 0; k = kronecker(c6, p);
+  pordmin = gceil(gmul2n(gsqrt(p,DEFAULTPREC),2)); /* ceil( 4sqrt(p) ) */
+  p1p = addsi(1, p);
+  p2p = shifti(p1p, 1);
+  x = 0; u = c6; KRO = kronecker(c6, p); KROold = - KRO;
   A = gzero; B = gun; h = p1p;
   for(;;)
   {
-    while (k == k1 || !k)
+    /* look for points alternatively on E and its quadratic twist E' */
+    while (KRO != -KROold)
     {
       x++;
       u = modii(addii(c6, mulsi(x, addii(c4, mulss(x,x)))), p);
-      k = kronecker(u, p);
+      KRO = kronecker(u, p);
     }
-    k1 = k;
+    KROold = KRO;
 
     f = cgetg(3,t_VEC);
     f[1] = lmodii(mulsi(x,u), p);
@@ -1776,7 +1777,7 @@ FOUND: /* found a point of exponent h */
   gunclone(tx);
   gunclone(ty);
   gunclone(ti);
-  p1 = (k==1)? subii(p1p,h): subii(h,p1p);
+  p1 = (KRO==1)? subii(p1p,h): subii(h,p1p);
   return gerepileuptoint(av,p1);
 }
 
@@ -1868,7 +1869,7 @@ apell0(GEN e, long p)
 {
   sellpt f,fh,fg,ftest,f2;
   long pordmin,u,p1p,p2p,A,B,c4,c6,cp4;
-  long i, s, k, k1, x, q, h, l, r, m;
+  long i, s, KRO, KROold, x, q, h, l, r, m;
   pari_sp av;
   multiple *table;
 
@@ -1881,17 +1882,17 @@ apell0(GEN e, long p)
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
-  x = 0; u = c6; k1 = 0; k = kross(c6, p);
+  x = 0; u = c6; KROold = 0; KRO = kross(c6, p);
   A = 0; B = 1; h = p1p;
   for(;;)
   {
-    while (k == k1 || !k)
+    while (KRO == KROold || !KRO)
     {
       x++;
       u = addssmod(c6, mulssmod(x, c4+mulssmod(x,x,p), p), p);
-      k = kross(u,p);
+      KRO = kross(u,p);
     }
-    k1 = k;
+    KROold = KRO;
     f.isnull = 0;
     f.x = mulssmod(x, u, p);
     f.y = mulssmod(u, u, p);
@@ -1952,7 +1953,7 @@ FOUND:
     h = A + q*B;
     avma = av; if (!i) break;
   }
-  free(table); return stoi(k==1? p1p-h: h-p1p);
+  free(table); return stoi(KRO==1? p1p-h: h-p1p);
 }
 
 GEN
