@@ -1940,17 +1940,17 @@ that $x$ is a prime number. Use \tet{isprime} (which is of course much
 slower) to prove that $x$ is indeed prime.
 
 If $\fl = 0$, checks whether $x$ is a Baillie-Pomerance-Selfridge-Wagstaff
-pseudo prime (strong Rabin-Miller pseudo prime for base $2$, with
-end-matching to catch square roots of $-1$, followed by strong Lucas test for
-the sequence $(P,-1)$, $P$ smallest positive integer such that $P^2 - 4$ is
-not a square mod $x$).
+pseudo prime (strong Rabin-Miller pseudo prime for base $2$, followed by
+strong Lucas test for the sequence $(P,-1)$, $P$ smallest positive integer
+such that $P^2 - 4$ is not a square mod $x$).
 
 There are no known composite numbers passing this test (in particular, all
 composites $\leq 10^{13}$ are correctly detected), although it is expected
 that infinitely many such numbers exist.
 
-If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime (with
-end-matching) for $\fl$ randomly chosen bases.
+If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime  for
+$\fl$ randomly chosen bases (with end-matching to catch square roots of
+$-1$).
 
 \syn{gispseudoprime}{x,\fl}, but the simpler function $\teb{ispseudoprime}(x)$
 which returns a \kbd{long} should be used if $x$ is known to be of type
@@ -1975,9 +1975,17 @@ integer. This \teb{issquarefree} is just the square of the
 arithmetic function much like the latter.
 
 \subsecidx{kronecker}$(x,y)$:
-Kronecker\sidx{Kronecker symbol}\sidx{Legendre symbol}
-(i.e.~generalized Legendre) symbol $\left(\dfrac{x}{y}\right)$. $x$ and $y$
-must be of type integer.
+\idx{Kronecker symbol} $(x|y)$, where $x$ and $y$ must be of type integer. By
+definition, this is the extension of \idx{Legendre symbol} to $\Z \times \Z$
+by total multiplicativity in both arguments with the following special rules
+for $y = 0, -1$ or $2$:
+
+$\bullet$ $(x|0) = 1$ if $|x| = 1$ and $0$ otherwise.
+
+$\bullet$ $(x|-1) = 1$ if $x \geq 0$ and $-1$ otherwise.
+
+$\bullet$ $(x|2) = 0$ if $x$ is even and $1$ if $x = 1,-1 \mod 8$ and $-1$
+if $x=3,-3 \mod 8$.
 
 \syn{kronecker}{x,y}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 
