@@ -1112,7 +1112,8 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
  * the result is in gen. 
  * ord contains the relatives orders of the generators.
  */
-GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord)
+GEN
+hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord)
 {
   gpmem_t ltop=avma;
   int j,h;

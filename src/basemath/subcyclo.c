@@ -310,6 +310,7 @@ subcyclo_main(long n, long d, long o, long g, long gd, GEN O, long v)
   return gerepileupto(ltop,R);
 }
 
+extern GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord);
 
 GEN 
 galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
