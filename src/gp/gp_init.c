@@ -19,7 +19,7 @@ void  print0(GEN *g,long flag);
 GEN   read0(char *s);
 long  setprecr(long n);
 void  system0(char *cmd);
-void  trap0(char *s, char *f);
+GEN   trap0(char *e, char *f, char *r);
 int   whatnow(char *s, int silent);
 void  write0(char *s, GEN *g, long flag);
 
@@ -41,7 +41,7 @@ entree functions_gp[]={
 {"quit",0,(void*)gp_quit,11,"v"},
 {"read",0,(void*)read0,11,"D\"\",s,"},
 {"system",70,(void*)system0,11,"vs"},
-{"trap",0,(void*)trap0,11,"vD\"\",r,DI"},
+{"trap",0,(void*)trap0,11,"D\"\",r,DI,DI"},
 {"whatnow",1,(void*)whatnow0,11,"vr"},
 {"write",0,(void*)write0,11,"vss*D0,L,"},
 {"write1",0,(void*)write0,11,"vss*D4,L,"},
@@ -65,7 +65,7 @@ char *helpmessages_gp[]={
   "quit(): quits GP and return to the system",
   "read({filename}): read from the input file filename. If filename is omitted, reread last input file (be it from readfile or \\r)",
   "system(a): a being a string, execute the system command a (not valid on every machine)",
-  "trap(err, seq): execute seq when err is trapped",
+  "trap({err}, {seq}, {rec}): If called with 3 arguments, try to execute seq, trapping error err (all of them if err ommitted); sequence rec is executed if the error occurs. When called with less than 2 arguments, define seq as a default handler for error err (a break loop will be started if seq omitted). If seq is the empty string \"\" delete the last default handler and replace it by the previous one",
   "whatnow(fun): if f was present in GP version 1.39.15 or lower, gives the new function name",
   "write(filename,a): write the string expression a (same output as print) to filename",
   "write1(filename,a): write the string expression a (same output as print1) to filename",

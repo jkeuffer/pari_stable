@@ -66,6 +66,7 @@ typedef struct Buffer {
   char *buf;
   long len;
   jmp_buf env;
+  int flenv;
 } Buffer;
 
 #define current_buffer ((Buffer*)(bufstack->value))
@@ -273,6 +274,47 @@ write0(char *s, GEN *g, long flag)
   switchout(s); free(s);
   print0(g,flag); added_newline = i;
   switchout(NULL);
+}
+
+Buffer *
+new_buffer()
+{
+  Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
+  b->len = paribufsize;
+  b->buf = gpmalloc(b->len);
+  b->flenv = 0; return b;
+}
+
+void
+del_buffer(Buffer *b)
+{
+  free(b->buf); free((void*)b);
+}
+
+
+static void
+pop_buffer()
+{
+  Buffer *b = (Buffer*) pop_stack(&bufstack);
+  del_buffer(b);
+}
+
+/* if (but_one != 0),  leave a single buffer standing */
+static void
+kill_all_buffers(int but_one)
+{
+  while (bufstack->prev) pop_buffer();
+  if (! but_one) pop_buffer();
+}
+
+static void
+jump_to_buffer()
+{
+  Buffer *b;
+  while ( (b = current_buffer) )
+    if (!b->flenv) pop_buffer();
+  if (!b) longjmp(environnement, 0);
+  longjmp(b->env, 0);
 }
 
 /********************************************************************/
@@ -596,6 +638,13 @@ sd_output(char *v, int flag)
   return sd_numeric(v,flag,"output",&prettyp, 0,2,msg);
 }
 
+void
+allocatemem0(unsigned long newsize)
+{
+  parisize = allocatemoremem(newsize);
+  jump_to_buffer();
+}
+
 static GEN
 sd_parisize(char *v, int flag)
 {
@@ -603,11 +652,7 @@ sd_parisize(char *v, int flag)
   GEN r = sd_numeric(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
   if (n != parisize)
   {
-    if (flag != d_INITRC)
-    {
-      parisize = allocatemoremem(n);
-      longjmp(current_buffer->env, 0);
-    }
+    if (flag != d_INITRC) allocatemem0(n);
     parisize = n;
   }
   return r;
@@ -1372,23 +1417,8 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
 static void
 fix_buffer(Buffer *b, long newlbuf)
 {
-  b->buf = gprealloc(b->buf,newlbuf, b->len);
+  b->buf = gprealloc(b->buf, newlbuf, b->len);
   b->len = paribufsize = newlbuf;
-}
-
-static void
-kill_buffer()
-{
-  Buffer *b = (Buffer*) pop_stack(&bufstack);
-  if (b) free(b->buf);
-}
-
-/* if (but_one != 0),  leave a single buffer standing */
-static void
-kill_all_buffers(int but_one)
-{
-  while (bufstack->prev) kill_buffer();
-  if (! but_one) kill_buffer();
 }
 
 void
@@ -1725,17 +1755,16 @@ gp_initrc()
   char **flist, *s,*s1,*s2;
   FILE *file = gprc_get();
   long fnum = 4, find = 0;
-  Buffer BUF, *b = &BUF;
+  Buffer *b;
 
   if (!file) return NULL;
   flist = (char **) gpmalloc(fnum * sizeof(char*));
-  b->len = paribufsize;
-  b->buf = gpmalloc(b->len);
+  b = new_buffer();
   for(;;)
   {
     if (! get_line_from_file(file, b, NULL))
     {
-      free(b->buf);
+      del_buffer(b);
       if (!quiet_mode) fprintferr("Done.\n\n");
       fclose(file); flist[find] = NULL;
       return flist;
@@ -2019,11 +2048,9 @@ gp_main_loop()
   char *promptbuf = prompt;
   long av, i,j, first = (!bufstack);
   GEN z = gnil;
-  Buffer BUF, *b = &BUF;
+  Buffer *b = new_buffer();
 
   push_stack(&bufstack, (void*)b);
-  b->len = paribufsize;
-  b->buf = gpmalloc(b->len);
   for(;;)
   {
     if (first)
@@ -2058,7 +2085,7 @@ gp_main_loop()
 	Sleep(10); if (win32ctrlc) dowin32ctrlc();
 #endif
 	if (popinfile()) gp_quit();
-	if (!first) { kill_buffer(); return z; }
+	if (!first) { pop_buffer(); return z; }
       }
       else if (!check_meta(b->buf)) break;
     }
@@ -2096,7 +2123,7 @@ gp_main_loop()
     }
     pariputc('\n'); pariflush();
   }
-  kill_buffer();
+  pop_buffer();
 }
 
 GEN
@@ -2137,26 +2164,16 @@ default0(char *a, char *b, long flag)
   return setdefault(a,b,flag);
 }
 
-void
-allocatemem0(unsigned long newsize)
-{
-  parisize = allocatemoremem(newsize);
-  longjmp(current_buffer->env, 0);
-}
-
 GEN
 input0()
 {
-  Buffer BUF, *b = &BUF;
+  Buffer *b = new_buffer();
   GEN x;
-
-  b->len = paribufsize;
-  b->buf = gpmalloc(b->len);
 
   while (! get_line_from_file(infile, b, DFT_INPROMPT))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
   x = lisseq(b->buf);
-  free(b->buf); return x;
+  del_buffer(b); return x;
 }
 
 void
@@ -2180,28 +2197,54 @@ error0(GEN *g)
   err_recover(talker);
 }
 
-void
-trap0(char *s, char *f)
+/* Try f (trapping error e), recover using r (break_loop, if NULL) */
+GEN
+trap0(char *e, char *r, char *f)
 {
-  long numerr = -1;
-       if (!strcmp(s,"errpile")) numerr = errpile;
-  else if (!strcmp(s,"typeer")) numerr = typeer;
-  else if (!strcmp(s,"gdiver2")) numerr = gdiver2;
-  else if (!strcmp(s,"accurer")) numerr = accurer;
-  else if (*s) err(impl,"this trap keyword");
+  long av = avma, numerr = -1;
+  GEN x = gnil;
+       if (!strcmp(e,"errpile")) numerr = errpile;
+  else if (!strcmp(e,"typeer")) numerr = typeer;
+  else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
+  else if (!strcmp(e,"accurer")) numerr = accurer;
+  else if (*e) err(impl,"this trap keyword");
   /* TO BE CONTINUED */
-  if (f)
-  {
-    if (!*f)
+
+  if (!f) { f = r; r = NULL; } /* define a default handler */
+  if (r)
+  { /* explicit recovery text */
+    jmp_buf env;
+    if (setjmp(env)) 
     {
-      void *a = err_leave(numerr);
-      if (a) free(a);
+      avma = av;
+      (void)err_leave(numerr);
+      x = lisseq(r);
     }
     else
-    err_catch(numerr, environnement, (void*)pari_strdup(f));
+    {
+      err_catch(numerr, env, NULL);
+      x = lisseq(f);
+      (void)err_leave(numerr);
+    }
+    return x;
   }
-  else
-    err_catch(numerr, NULL, NULL); /* will start a break loop */
+
+ /* default will execute f (or start a break loop), then jump to
+  * environnement */
+  if (f)
+  {
+    if (!*f) /* unset previous handler */
+    {/* TODO: find a better interface
+      * TODO: no leaked handler from the library should have survived
+      */
+      void *a = err_leave(numerr);
+      if (a) free(a);
+      return x;
+    }
+    f = pari_strdup(f);
+  }
+  err_catch(numerr, NULL, f);
+  return x;
 }
 
 void errcontext(char *msg, char *s, char *entry);
@@ -2209,10 +2252,8 @@ void errcontext(char *msg, char *s, char *entry);
 void
 break_loop()
 {
-  Buffer BUF, *b = &BUF;
+  Buffer *b = new_buffer();
 
-  b->len = paribufsize;
-  b->buf = gpmalloc(b->len);
   term_color(c_ERR);
   fprintferr("\n");
   errcontext("Starting break loop (^D to exit)",
@@ -2233,7 +2274,7 @@ break_loop()
       pariputc('\n');
     }
   }
-  free(b->buf);
+  del_buffer(b);
 }
 
 int
