@@ -1052,6 +1052,7 @@ gerfc(GEN x, long prec)
 /**		        FONCTION ZETA DE RIEMANN                      **/
 /**								      **/
 /***********************************************************************/
+const double log2PI = 1.83787706641;
 
 static double
 get_xinf(double beta)
@@ -1093,7 +1094,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
       l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
     }
-    l = (pariC2*(prec-2) - l2 + s*2*pariC1) / (2. * (1.+ log((double)la)));
+    l = (pariC2*(prec-2) - l2 + s*log2PI) / (2. * (1.+ log((double)la)));
     l2 = dabs(s, t)/2;
     if (l < l2) l = l2;
     p = (long) ceil(l); if (p < 2) p = 2;
@@ -1103,7 +1104,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   else if (t)
   {
     sn = dabs(s, t);
-    alpha = pariC2*(prec-2) - 0.39 + log(sn/s) + s*(2*pariC1 - log(sn));
+    alpha = pariC2*(prec-2) - 0.39 + log(sn/s) + s*(log2PI - log(sn));
     beta = (alpha+s)/t - atan(s/t);
     if (beta <= 0)
     {
@@ -1136,7 +1137,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   else
   {
     sn = fabs(s);
-    beta = pariC2*(prec-2) + 0.61 + s*(2*pariC1 - log(s));
+    beta = pariC2*(prec-2) + 0.61 + s*(log2PI - log(s));
     if (beta > 0)
     {
       p = (long)ceil(beta / 2.0);
@@ -1851,7 +1852,7 @@ polylog(long m, GEN x, long prec)
 {
   long l, e, i, G, sx;
   pari_sp av, av1, limpile;
-  GEN X,z,p1,p2,n,y,logx;
+  GEN X, Xn, z, p1, p2, n, y, logx;
 
   if (m<0) err(talker,"negative index in polylog");
   if (!m) return gneg(ghalf);
@@ -1867,17 +1868,17 @@ polylog(long m, GEN x, long prec)
   G = -bit_accuracy(l);
   n = icopy(gun);
   av1=avma; limpile=stack_lim(av1,1);
-  y = p1 = X;
+  y = Xn = X;
   for (i=2; ; i++)
   {
-    n[2] = i; p1 = gmul(X,p1); p2 = gdiv(p1,gpowgs(n,m));
+    n[2] = i; Xn = gmul(X,Xn); p2 = gdiv(Xn,gpowgs(n,m));
     y = gadd(y,p2);
     if (gexpo(p2) <= G) break;
 
     if (low_stack(limpile, stack_lim(av1,1)))
-    { GEN *gptr[2]; gptr[0]=&y; gptr[1]=&p1;
+    {
       if(DEBUGMEM>1) err(warnmem,"polylog");
-      gerepilemany(av1,gptr,2);
+      gerepileall(av1,2, &y, &Xn);
     }
   }
   if (e < 0) return gerepileupto(av, y);
@@ -1898,7 +1899,8 @@ polylog(long m, GEN x, long prec)
   { /* same formula as below, written more efficiently */
     y = gneg_i(y);
     p1 = gmul2n(gsqr(gsub(logx, z)), -1); /* = (log(-x))^2 / 2 */
-    p1 = gadd(divrs(gsqr(mppi(l)), 6), p1);
+    if (typ(x) == t_REAL) p1 = real_i(p1);
+    p1 = gadd(p1, divrs(gsqr(mppi(l)), 6));
     p1 = gneg_i(p1);
   }
   else
@@ -1908,8 +1910,8 @@ polylog(long m, GEN x, long prec)
       p1 = gadd(szeta(m-i,l), gmul(p1,gdivgs(logx2,(i+1)*(i+2))));
     if (m&1) p1 = gmul(logx,p1); else y = gneg_i(y);
     p1 = gadd(gmul2n(p1,1), gmul(z,gpowgs(logx,m-1)));
+    if (typ(x) == t_REAL) p1 = real_i(p1);
   }
-
   return gerepileupto(av, gadd(y,p1));
 }
 

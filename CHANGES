@@ -199,6 +199,7 @@ JD 74- [Configure:] detection of times()
        again completes properly --> \r foo.
 BA 98- Reduce stack consumption in ffinit and polsubcyclo.
    99- (p/q)' wasn't simplified if q wasn't squarefree
+  100- polylog(n, x < 0) had a (small) non-zero imaginary part
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
