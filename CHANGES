@@ -34,7 +34,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.5 (released ??/11/2002): [hopefully]
+Done for version 2.2.5 (released 11/02/2003):
   Fixed
     1- [bnfinit:] typo in be_honest() --> SEGV when cbach2 > cbach [from 2.2.4]
     2- apprpadic() when p = 2 (could not work) + typos
@@ -143,7 +143,7 @@ BA 60- add "const" keyword to allow building with g++
    82- Precision loss in inputs of large exponent: 1e100000 -->9.99999824 E99999
    83- quadgen / quadpoly accepted square inputs --> weird bugs later.
    84- poldegree(x^2 / y^4, y) --> -1
-   85- [introduced 2.2.4:] setrand(178);quadclassunit(82421) --> 2 instead of 1
+   85- setrand(178);quadclassunit(82421) --> 2 instead of 1 [from 2.2.4:]
    86- polroots( Pol(subst([1,0,4*x,0,2*x^2+24,0,16*x,0,16],x,10^2589) )
        --> division by zero [ double overflow ]
    87- LLL-reduction over polynomial rings (almost always failed)
