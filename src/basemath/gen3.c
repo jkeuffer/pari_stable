@@ -2481,7 +2481,7 @@ gtovec(GEN x)
     char t[2] = {0,0};
     y = str_to_vecsmall(x);
     lx = lg(y);
-    for (i=1; i<=lx; i++)
+    for (i=1; i<lx; i++)
     {
       t[0] = y[i];
       y[i] = (long)STRtoGENstr(t);
