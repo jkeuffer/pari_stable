@@ -1588,8 +1588,8 @@ END:
 extern GEN addmulXn(GEN x, GEN y, long d);
 
 /* compute phi^(m)_s(x); s must be an integer */ 
-static GEN 
-phi_ms(GEN vz, ulong p, GEN q, long m, GEN s, long x)
+GEN 
+phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
 {
   long xp = x % p;
   GEN p1, p2; 
@@ -1602,10 +1602,10 @@ phi_ms(GEN vz, ulong p, GEN q, long m, GEN s, long x)
 
 /* compute the values of the twisted partial 
    zeta function Z_f(a, c, s) for a in va */
-static GEN 
-twistpartialzeta(GEN p, GEN q, long N, long f, long c, GEN va, GEN cff)
+GEN 
+twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
-  long j, k, lva = lg(va)-1, a;
+  long j, k, lva = lg(va)-1, a, N = lg(cff)-1, N0 = N;
   pari_sp av, lim;
   GEN x = polx[0], y = polx[fetch_user_var("y")], eta, one, mon, den;
   GEN cyc, psm, invden, rep, ser;
@@ -1616,7 +1616,10 @@ twistpartialzeta(GEN p, GEN q, long N, long f, long c, GEN va, GEN cff)
   one = gmodulsg(1, q); /* Mod(1, q); */
   mon = gaddsg(1, x);
   den = gsubsg(1, gmul(gpowgs(gmul(one,eta), f), gpowgs(gmul(one,mon), f)));
-  den = gadd(den, zeroser(0, N + 5));
+  /* FIXME: get rid of unnecessary coeffs; 
+     should be done in coeff_of_phi_ms? */
+  while (gcmp0((GEN)cff[N0])) N0--;
+  den = gadd(den, zeroser(0, N0+5));
   av = avma; lim = stack_lim(av, 1);
   invden = ginv(den);
   rep = zerovec(lva);
@@ -1670,35 +1673,19 @@ twistpartialzeta(GEN p, GEN q, long N, long f, long c, GEN va, GEN cff)
   return rep;
 }
 
-static GEN
-zetap(GEN s)
+/* initialize the roots of unity for the computation 
+   of the Teichmuller character (also the values of f and c) */
+GEN
+init_teich(ulong p, GEN q, long prec)
 {
-  const long xp = 3; /* the extra precision; FIXME: quite arbitrary */
-  ulong p;
-  long j, k, N, f, c, l, prec = precp(s);
-  pari_sp av = avma;
-  GEN gp, q, vz, is, cff, vtz, val, va, cft, bn;
+  GEN vz, gp = stoi(p);
+  long av = avma, j;
 
-  if (valp(s) < 0)
-    err(talker, "argument must be a gp-adic integer");
-
-  gp  = (GEN)s[2]; p = itou(gp);
-  is = gtrunc(s);  /* make s an integer */
-  N  = itos(muluu(p,prec)) + 2*xp; /* FIXME: crude estimation */
-  q  = gpowgs(gp, prec + 2*xp);
-
-  /* initialize the roots of unity for the computation 
-     of the Teichmuller character (also the values of f and c) */
-  if (DEBUGLEVEL > 1) fprintferr("zetap: computing roots of 1\n");
   if (p == 2UL)
-  {  
     vz = NULL;
-    f = 4;
-    c = 3;
-  }
   else
   { /* primitive (p-1)-th root of 1 */
-    GEN z, z0 = padicsqrtnlift(gun, utoi(p-1), Fp_gener(gp), gp, prec + 2*xp);
+    GEN z, z0 = padicsqrtnlift(gun, utoi(p-1), Fp_gener(gp), gp, prec);
     z = z0;
     vz = cgetg(p, t_VEC);
     for (j = 1; j < (long)p-2; j++)
@@ -1708,22 +1695,25 @@ zetap(GEN s)
     }
     vz[ umodiu(z, p) ] = (long)z; /* z = z0^(p-2) */
     vz[1] = un; /* z0^(p-1) */
-    f = (long)p;
-    c = 2;      
   }
+  return gerepileupto(av, gcopy(vz));
+}
 
   /* compute the first N coefficients of the Mahler expansion 
-     of phi^(-1)_s skipping the first one (which is zero) */
-  if (DEBUGLEVEL > 1) 
-    fprintferr("zetap: computing Mahler expansion of phi^(-1)_s\n");
-  cff = cgetg(N+1, t_VEC);
+     of phi^m_s skipping the first one (which is zero) */
+GEN
+coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
+{
+  GEN bn, cff = cgetg(N+1, t_VEC);
+  long k, j, l;
+
   bn = new_chunk(N+2); /* bn[i] = binom(k, i), i <= k */
   l = lg(q);
   for (k = 0; k <= N; k++) { GEN t = cgeti(l); affsi(1, t); bn[k] = (long)t; }
   for (k = 1; k <= N; k++)
   {
     pari_sp av2 = avma;
-    GEN p1 = gzero, A = phi_ms(vz, p, q, -1, is, k);
+    GEN p1 = gzero, A = phi_ms(p, q, m, s, k, vz);
     for (j = k - 1; j > 0; j--)
     {
       GEN b = addii((GEN)bn[j], (GEN)bn[j-1]);
@@ -1735,15 +1725,56 @@ zetap(GEN s)
     cff[k] = (long)gerepileuptoint(av2, modii(subii(A, p1), q));
   }
 
+  return cff;
+}
+
+static GEN
+zetap(GEN s)
+{
+  ulong p;
+  long xp, N, f, c, prec = precp(s);
+  pari_sp av = avma;
+  GEN gp, q, vz, is, cff, vtz, val, va, cft;
+
+  if (valp(s) < 0)
+    err(talker, "argument must be a gp-adic integer");
+
+  gp = (GEN)s[2]; p = itou(gp);
+  xp = log2(p); /* the extra precision; FIXME: quite arbitrary */
+  if (DEBUGLEVEL > 2) fprintferr("zetap: extra prec = %ld\n", xp);
+  is = gtrunc(s);  /* make s an integer */
+  N  = itos(muluu(p,prec)) + xp; /* FIXME: crude estimation */
+  q  = gpowgs(gp, prec + xp);
+
+  /* initialize the roots of unity for the computation 
+     of the Teichmuller character (also the values of f and c) */
+  if (DEBUGLEVEL > 1) fprintferr("zetap: computing (p-1)th roots of 1\n");
+  vz = init_teich(p, q, prec + xp);
+  if (p == 2UL)
+  {  
+    f = 4;
+    c = 3;
+  }
+  else
+  { 
+    f = (long)p;
+    c = 2;      
+  }
+
+  /* compute the first N coefficients of the Mahler expansion 
+     of phi^(-1)_s skipping the first one (which is zero) */
+  if (DEBUGLEVEL > 1) 
+    fprintferr("zetap: computing Mahler expansion of phi^(-1)_s\n");
+  cff = coeff_of_phi_ms(p, q, -1, is, N, vz);
+
   /* compute the coefficients of the power series corresponding 
      to the twisted partial zeta function Z_f(a, c, s) for a in va */
-
   /* The line below looks a bit stupid but it is to keep the 
      possibility of later adding gp-adic Dirichlet L-functions */
   va = perm_identity(f - 1);
   if (DEBUGLEVEL > 1) 
     fprintferr("zetap: computing twisted partial zeta functions\n");
-  vtz = twistpartialzeta(gp, q, N, f, c, va, cff);
+  vtz = twistpartialzeta(gp, q, f, c, va, cff);
   
   /* sum over all a's the coefficients of the twisted 
      partial zeta functions and integrate */
@@ -1751,7 +1782,7 @@ zetap(GEN s)
     fprintferr("zetap: summing up and multiplying by correcting factor\n");
   
   /* sum and multiply by the corrective factor */
-  cft = gsubgs(gmulsg(c, phi_ms(vz, p, q, -1, is, c)), 1);
+  cft = gsubgs(gmulsg(c, phi_ms(p, q, -1, is, c, vz)), 1);
   val = gdiv(sum(vtz, 1, f-1), cft);
 
   /* adjust the precision and return */
