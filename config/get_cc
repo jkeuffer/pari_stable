@@ -128,6 +128,7 @@ if test -n "$__gnuc__"; then
   case "$osname" in
     os2)      cflags="$cflags -Zmt -Zsysv-signals";;
     nextstep) cflags="$cflags -traditional-cpp";;
+    darwin)   cflags="$cflags -no-cpp-precomp";;
   esac
 
   # omit-frame-pointer incompatible with -pg
