@@ -212,11 +212,12 @@ element_div(GEN nf, GEN x, GEN y)
 GEN
 element_muli(GEN nf, GEN x, GEN y)
 {
-  long i, j, k, N;
+  long i, j, k, N, tx = typ(x), ty = typ(y);
   GEN s, v, tab = get_tab(nf, &N);
 
-  if (typ(x) != t_COL || lg(x) != N+1
-   || typ(y) != t_COL || lg(y) != N+1) err(typeer,"element_muli");
+  if (tx == t_INT) { return ty == t_INT? gscalcol(mulii(x,y), N): gmul(x, y); }
+  if (tx != t_COL || lg(x) != N+1
+   || ty != t_COL || lg(y) != N+1) err(typeer,"element_muli");
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
@@ -1104,7 +1105,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   GEN p1,smalltable,giant,perm,v,g0inv;
 
   x = modii(x,p);
-  if (is_pm1(x) || equalii(p,gen_2)) { avma = av; return gen_0; }
+  if (is_pm1(x) || equaliu(p,2)) { avma = av; return gen_0; }
   p1 = addsi(-1, p); if (!q) q = p1;
   if (equalii(p1,x)) { avma = av; return shifti(q,-1); }
   p1 = sqrti(q);
@@ -1200,7 +1201,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
   GEN q,n_q,ord,ordp;
 
   if (gcmp1(a)) { avma = av; return gen_0; }
-  if (equalii(p, gen_2)) {
+  if (equaliu(p,2)) {
     if (!signe(a)) err(talker,"a not invertible in ff_PHlog_Fp");
     avma = av; return gen_0;
   }
