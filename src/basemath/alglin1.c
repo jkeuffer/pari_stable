@@ -1502,7 +1502,8 @@ static void
 gerepile_gauss_ker(GEN x, long m, long n, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma, A;
-  long dec,u,i;
+  long u,i;
+  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++) copyifstack(coeff(x,u,k), coeff(x,u,k));
@@ -1512,13 +1513,13 @@ gerepile_gauss_ker(GEN x, long m, long n, long k, long t, gpmem_t av)
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
   for (u=t+1; u<=m; u++)
   {
-    A=coeff(x,u,k);
+    A=(gpmem_t)coeff(x,u,k);
     if (A<av && A>=bot) coeff(x,u,k)+=dec;
   }
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
     {
-      A=coeff(x,u,i);
+      A=(gpmem_t)coeff(x,u,i);
       if (A<av && A>=bot) coeff(x,u,i)+=dec;
     }
 }
@@ -1527,7 +1528,8 @@ static void
 gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, gpmem_t av)
 {
   gpmem_t tetpil = avma, A;
-  long dec,u,i;
+  long u,i;
+  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
@@ -1539,13 +1541,13 @@ gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, gpmem_t av)
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
   for (u=t+1; u<=m; u++)
   {
-    A=coeff(x,u,k);
+    A=(gpmem_t)coeff(x,u,k);
     if (A<av && A>=bot) coeff(x,u,k)+=dec;
   }
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
     {
-      A=coeff(x,u,i);
+      A=(gpmem_t)coeff(x,u,i);
       if (A<av && A>=bot) coeff(x,u,i)+=dec;
     }
 }
@@ -1556,7 +1558,8 @@ static void
 gerepile_gauss(GEN x,long m,long n,long k,long t,gpmem_t av, long j, GEN c)
 {
   gpmem_t tetpil = avma, A;
-  long dec,u,i;
+  long u,i;
+  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
@@ -1569,14 +1572,14 @@ gerepile_gauss(GEN x,long m,long n,long k,long t,gpmem_t av, long j, GEN c)
   for (u=t+1; u<=m; u++)
     if (u==j || !c[u])
     {
-      A=coeff(x,u,k);
+      A=(gpmem_t)coeff(x,u,k);
       if (A<av && A>=bot) coeff(x,u,k)+=dec;
     }
   for (u=1; u<=m; u++)
     if (u==j || !c[u])
       for (i=k+1; i<=n; i++)
       {
-        A=coeff(x,u,i);
+        A=(gpmem_t)coeff(x,u,i);
         if (A<av && A>=bot) coeff(x,u,i)+=dec;
       }
 }
@@ -2583,7 +2586,8 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
                       gpmem_t av)
 {
   gpmem_t tetpil = avma,A;
-  long dec,u,i;
+  long u,i;
+  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
@@ -2595,13 +2599,13 @@ Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
   for (u=t+1; u<=m; u++)
   {
-    A=coeff(x,u,k);
+    A=(gpmem_t)coeff(x,u,k);
     if (A<av && A>=bot) coeff(x,u,k)+=dec;
   }
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
     {
-      A=coeff(x,u,i);
+      A=(gpmem_t)coeff(x,u,i);
       if (A<av && A>=bot) coeff(x,u,i)+=dec;
     }
 }

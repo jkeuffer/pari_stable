@@ -64,9 +64,9 @@ extern char    *errmessage[], *current_psfile;
 #define is_universal_constant(x) ((GEN)(x) >= gzero && (GEN)(x) <= gi)
 
 #define copyifstack(x,y) {gpmem_t _t=(gpmem_t)(x); \
-			  (y)=(_t>=bot &&_t<top)? lcopy((GEN)_t): _t;}
+			  (y)=(_t>=bot &&_t<top)? lcopy((GEN)_t): (long)_t;}
 #define icopyifstack(x,y) {gpmem_t _t=(gpmem_t)(x); \
-			  (y)=(_t>=bot &&_t<top)? licopy((GEN)_t): _t;}
+			  (y)=(_t>=bot &&_t<top)? licopy((GEN)_t): (long)_t;}
 #define isonstack(x) ((gpmem_t)(x)>=bot && (gpmem_t)(x)<top)
 
 /* Define this to (1) locally (in a given file, NOT here) to check

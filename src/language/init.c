@@ -1490,7 +1490,7 @@ void
 gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], long n)
 {
   const gpmem_t av2 = avma;
-  const long dec = av-tetpil;
+  const size_t dec = av-tetpil;
   long i;
 
   (void)gerepile(av,tetpil,NULL);
@@ -1511,7 +1511,7 @@ void
 gerepilemanyvec(gpmem_t av, gpmem_t tetpil, long *g, long n)
 {
   const gpmem_t av2 = avma;
-  const long dec = av-tetpil;
+  const size_t dec = av-tetpil;
   long i;
 
   (void)gerepile(av,tetpil,NULL);
@@ -1592,11 +1592,11 @@ GEN
 gerepile(gpmem_t av, gpmem_t tetpil, GEN q)
 {
   gpmem_t avmb;
-  long dec = av - tetpil;
+  size_t dec = av - tetpil;
   GEN ll,a,b;
 
   if (dec==0) return q;
-  if (dec<0) err(talker,"lbot>ltop in gerepile");
+  if ((long)dec<0) err(talker,"lbot>ltop in gerepile");
 
   if ((gpmem_t)q >= avma && (gpmem_t)q < tetpil)
     q = (GEN) (((gpmem_t)q) + dec);
