@@ -729,13 +729,14 @@ gisanypower(GEN x, GEN *pty)
   ulong k, h;
   if (tx == t_FRAC)
   {
-    GEN fa, P, E, a = (GEN)x[1], b = (GEN)x[2], z = cgetg(3, t_FRAC);
+    pari_sp av = avma;
+    GEN fa, P, E, a = (GEN)x[1], b = (GEN)x[2];
     long i, j, p, e;
     int sw = (cmpii(a, b) > 0);
 
     if (sw) swap(a, b);
     k = isanypower(a, pty? &a: NULL);
-    if (!k) { avma = (pari_sp)(z + 3); return 0; }
+    if (!k) { avma = av; return 0; }
     fa = decomp(utoipos(k));
     P = (GEN)fa[1];
     E = (GEN)fa[2]; h = k;
@@ -747,11 +748,10 @@ gisanypower(GEN x, GEN *pty)
         if (!is_kth_power(b, p, &b, NULL)) break;
       if (j < e) k /= u_pow(p, e - j);
     }
-    if (k == 1) { avma = (pari_sp)(z + 3); return 0; }
-    if (!pty) { avma = (pari_sp)(z + 3); return k; }
+    if (k == 1) { avma = av; return 0; }
+    if (!pty) { avma = av; return k; }
     if (k != h) a = gpowgs(a, h/k);
-    z[1] = (long)a;
-    z[2] = (long)b; *pty = gerepilecopy((pari_sp)(z + 3), z);
+    *pty = gerepilecopy(av, mkfrac(a, b));
     return k;
   }
   if (tx == t_INT) return isanypower(x, pty);
@@ -2186,14 +2186,9 @@ sfcont(GEN x, long k)
         e = bit_accuracy(lx)-1-expo(x);
         if (e < 0) err(talker,"integral part not significant in sfcont");
         c = ishiftr_lg(x,lx,0);
-        a = cgetg(3, t_FRAC);
-	a[1] = (long)c;
-	a[2] = lshifti(gun, e);
-
-        b = cgetg(3, t_FRAC);
-	b[1] = laddsi(signe(x), c);
-	b[2] = a[2];
-	a = Qsfcont(a,NULL,k);
+        y = int2n(e);
+	a = Qsfcont(mkfrac(c, y), NULL, k);
+        b = mkfrac(addsi(signe(x), c), y);
 	return gerepilecopy(av, Qsfcont(b,a,k));
 
       case t_FRAC:

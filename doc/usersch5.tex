@@ -2206,6 +2206,9 @@ then the above warning does not apply.
 
 \fun{GEN}{mkcomplex}{GEN x, GEN y} creates the \typ{COMPLEX} $x + iy$.
 
+\fun{GEN}{mkfrac}{GEN x, GEN y} creates the \typ{FRAC} $x/y$. Assumes that
+$y > 1$ and $(x,y) = 1$.
+
 \fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n}
 components set to \kbd{gzero}, but the \kbd{i}-th one which us set to
 \kbd{C}.
