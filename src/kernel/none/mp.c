@@ -3815,46 +3815,26 @@ int
 ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 {
   GEN d,d1,v,v1,q,r;
-  long av=avma,av1,lim;
+  ulong av = avma, av1, lim;
   long lb,lr,lbb,lbr,s,s0;
   ulong vmax;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
   int lhmres;			/* Lehmer stage return value */
 
-  if (typ(x) != t_INT || typ(m) != t_INT ||
-      typ(amax) != t_INT || typ(bmax) != t_INT) err(arither1);
+  if ((typ(x) | typ(m) | typ(amax) | typ(bmax)) != t_INT) err(arither1);
   if (signe(bmax) <= 0)
-  {
-    err(talker,
-	"bound bmax in ratlift must be positive, found\n\tbmax=%Z\n",
-	bmax);
-  }
+    err(talker, "ratlift: bmax must be > 0, found\n\tbmax=%Z\n", bmax);
   if (signe(amax) < 0)
-  {
-    err(talker,
-	"bound amax in ratlift must be nonnegative, found\n\tamax=%Z\n",
-	amax);
-  }
+    err(talker, "ratilft: amax must be >= 0, found\n\tamax=%Z\n", amax);
   /* check 2*amax*bmax < m */
   if (cmpii(shifti(mulii(amax, bmax), 1), m) >= 0)
-  {
-    avma=av;
-    err(talker,
-	"must have 2*amax*bmax < m in ratlift, found\n"
-	"\tamax=%Z\n\tbmax=%Z\n\tm=%Z\n",
-	amax, bmax, m);
-  }
-  avma = av;
+    err(talker, "ratlift: must have 2*amax*bmax < m, found\n\tamax=%Z\n\tbmax=%Z\n\tm=%Z\n", amax,bmax,m);
   /* we _could_ silently replace x with modii(x,m) instead of the following,
    * but let's leave this up to the caller
    */
-  s = signe(x);
+  avma = av; s = signe(x);
   if (s < 0 || cmpii(x,m) >= 0)
-  {
-    err(talker,
-	"must have 0 <= x < m in ratlift, found\n\tx=%Z\n\tm=%Z\n",
-	x, m);
-  }
+    err(talker, "ratlift: must have 0 <= x < m, found\n\tx=%Z\n\tm=%Z\n", x,m);
 
   /* special cases x=0 and/or amax=0 */
   if (s == 0)
@@ -4116,8 +4096,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
     fprintferr("rl-fs: vmax=%lu\n", vmax);
 #endif
     /* single-word "Lehmer", discarding the gcd or whatever it returns */
-    (void)rgcduu((ulong)(d[2]), (ulong)(d1[2]),
-		 vmax, &xu, &xu1, &xv, &xv1, &s0);
+    (void)rgcduu((ulong)d[2], (ulong)d1[2], vmax, &xu, &xu1, &xv, &xv1, &s0);
 #ifdef DEBUG_RATLIFT
     fprintferr("rl-fs: [%lu,%lu; %lu,%lu] %s\n",
 	       xu, xu1, xv, xv1,
@@ -4193,7 +4172,6 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
   /* get here when we have run into d1 == 0 before returning... in fact,
    * this cannot happen.
    */
-  avma = av;
   err(talker, "ratlift failed to catch d1 == 0\n");
   /* NOTREACHED */
   return 0;
