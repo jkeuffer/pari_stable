@@ -1674,7 +1674,7 @@ KerChar(GEN chi, GEN cyc)
     m[i] = (long)mkcol(mulii((GEN)chi[i], diviiexact(d1, (GEN)cyc[i])));
   }
   m[i] = (long)mkcol(d1);
-  U = (GEN)hnfall(m)[2];
+  (void)hnfall_i(m, &U, 1);
   for (i = 1; i < l; i++) setlg(U[i], l);
   setlg(U,l); return U;
 }

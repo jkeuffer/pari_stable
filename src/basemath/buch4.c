@@ -32,8 +32,8 @@ psquare(GEN a,GEN p)
   if (!signe(a) || gcmp1(a)) return 1;
   v = Z_pvalrem(a, p, &ap);
   if (v&1) return 0;
-  return equalii(p, gen_2)? umodiu(ap, 8) == 1
-                         : kronecker(ap,p) == 1;
+  return equaliu(p, 2)? umodiu(ap, 8) == 1
+                      : kronecker(ap,p) == 1;
 }
 
 static long
@@ -366,7 +366,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   checkprimeid(pr); nf = checknf(nf);
   p = (GEN)pr[1];
 
-  if (equalii(p,gen_2)) return hilb2nf(nf,a,b,pr);
+  if (equaliu(p,2)) return hilb2nf(nf,a,b,pr);
 
   /* pr not above 2, compute t = tame symbol */
   va = idealval(nf,a,pr);
@@ -485,7 +485,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
   M = concatsp(M, diagonal((GEN) classgp[2]));
 
   /* S class group */
-  H = hnfall(M); U = (GEN)H[2]; H= (GEN)H[1];
+  H = hnfall_i(M, &U, 1);
   card = gen_1;
   if (lg(H) > 1)
   { /* non trivial (rare!) */

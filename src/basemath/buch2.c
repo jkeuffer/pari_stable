@@ -1617,7 +1617,7 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
   if (add_zu)
   {
     GEN w = gmael3(bnf,8,4,1), v = cgetg(l, t_COL);
-    if (equalii(w,gen_2)) (void)vecconst(v, gen_1);
+    if (equaliu(w,2)) (void)vecconst(v, gen_1);
     y[j++] = (long)v;
   }
   for ( ; j < RU; j++) y[j] = (long)zsign_from_logarch((GEN)A[j], invpi, archp);
