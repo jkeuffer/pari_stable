@@ -5405,7 +5405,9 @@ the same extension of $\Q_p$ as $a$.
 
 \subsecidx{polcoeff}$(x,s,\{v\})$: coefficient of degree $s$ of the
 polynomial $x$, with respect to the main variable if $v$ is omitted, with
-respect to $v$ otherwise.
+respect to $v$ otherwise. This routine also applies to power series, scalars
+(polynomial of degree $0$), and to rational functions provided that the
+denominator is monomial.
 
 \syn{polcoeff0}{x,s,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded
 as $-1$. Also available is \teb{truecoeff}$(x,v)$.
