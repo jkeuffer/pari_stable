@@ -85,6 +85,9 @@ MSo27- ?0 with _many_ user functions defined --> SEGV [ typo in commands() ]
        not "prettymat".
    31- typo in rnfpolred(bnf, *). E.g rnfpolred(nfinit(polcyclo(3,a)),x^3-19)
        --> oo loop  [ non-positive T_2 form ]
+   32- typo in ellap: rare wrong result. E.g
+       E=ellinit([0,0,1,-5115523309,-140826120488927]);
+       ellap(E, 1315717181)
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

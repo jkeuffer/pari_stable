@@ -1641,10 +1641,8 @@ apell1(GEN e, GEN p)
       tx = newbloc(s+1);
       ty = newbloc(s+1);
       ti = newbloc(s+1);
-      F = f;
     }
-    else
-      F = powsell(cp4,f,B,p);
+    F = powsell(cp4,f,B,p);
     *tx = evaltyp(t_VECSMALL) | evallg(s+1);
 
     /* F = B.f */
