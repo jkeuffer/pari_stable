@@ -1748,11 +1748,11 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	  eq = (long)(-L / E);
 	  er = (long)(-L*Ea / E - eq*Ea);
 	
-	  if (eq) gamm = gmul(beta, gpowgs(p, eq)); else gamm = beta;
+          gamm = beta;
+	  if (eq) gamm = gmul(gamm, gpowgs(p, eq));
 	  if (er)
 	  {
-	    gamm = gmul(gamm, gpowgs(nu, er));
-	    gamm = gmod(gamm, chi);
+	    gamm = fmod(gmul(gamm, gpowgs(nu, er)), chi);
 	    gamm = redelt(gamm, p, p);
 	  }
 	  chig = mycaract(chi, gamm, p, pmf, ns);
@@ -1767,7 +1767,6 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	{ /* at least 2 factors mod p ==> chi can be split */
 	  phi  = RX_RXQ_compo(gamm, alph, fx);
 	  phi  = redelt(phi, p, p);
-	  if (flag) mf += 3;
 	  return Decomp(p, fx, dred, phi, chig, nug, flag);
 	}
 	
@@ -1780,7 +1779,6 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	  { /* at least 2 factors mod p ==> chi can be split */
 	    phi = RX_RXQ_compo((GEN)w[1], alph, fx);
 	    phi = redelt(phi, p, p);
-	    if (flag) mf += 3;
 	    return Decomp(p, fx, dred, phi, (GEN)w[2], (GEN)w[3], flag);
 	  }
 	  break;
@@ -1810,7 +1808,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	  if (fm) { fm = -1; break; }
           err(talker, "bug in nilord (no root). Is p = %Z a prime?", p);
 	}
-        delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
+        delt = gneg_i(gsubst(gmael(w, i, 2), nv, polx[v]));
         eta  = gsub(gamm, delt);	
 	if (fm)
 	{
@@ -1827,8 +1825,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	}
 	else
 	{
-	  p1 = modii(ZX_QX_resultant(chi, eta), p);
-	  if (signe(p1)) continue;
+	  if (!divise(ZX_QX_resultant(chi, eta), p)) continue;
 	
 	  p1   = factcp(p, chi, eta, pmr, ns, &l);
 	  chie = (GEN)p1[1];
@@ -1836,12 +1833,10 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	}
 	
         if (l > 1)
-        {
-          /* there are at least 2 factors mod. p => chi can be split */
+        { /* there are at least 2 factors mod. p => chi can be split */
           (void)delete_var();
           phi = RX_RXQ_compo(eta, alph, fx);
           phi = redelt(phi, p, p);
-          if (flag) mf += 3;
           return Decomp(p, fx, dred, phi, chie, nue, flag);
         }
 
@@ -1855,7 +1850,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
       if (!fm)
       {
         long Le, Ee;
-	if (!signe(modii(constant_term(chie), pmr)))
+	if (divise(constant_term(chie), pmr))
 	  chie = mycaract(chi, eta, p, pmf, ns);
 	
 	pie = getprime(p, chi, eta, chie, nue, &Le, &Ee);
@@ -1868,7 +1863,6 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	  { /* there are at least 2 factors mod. p => chi can be split */
 	    phi = RX_RXQ_compo((GEN)w[1], alph, fx);
 	    phi = redelt(phi, p, p);
-	    if (flag) mf += 3;
 	    return Decomp(p, fx, dred, phi, (GEN)w[2], (GEN)w[3], flag);
 	  }
 	  break;
