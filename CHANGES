@@ -194,6 +194,7 @@ MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-4) !]
        result (generators not required) or infinite loop.
    57- compatibility problems with readline-4.2 (build would fail)
 BA 58- pari format %Z (pariputsf) treated incorrectly on 64bit machines
+XR 59- typo in smallvectors (polredabs): possible oo loop
 
   Changed
     1- DOS distribution archives (GPM removed)
