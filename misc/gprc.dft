@@ -90,12 +90,13 @@ prettyprinter = "/usr/local/bin/tex2mail -TeX -noindent -ragged -by_par"
 \\********************** FORMAT OF THIS FILE :    ***************************
 \\  Lines starting with '\\' and between '/*' '*/' pairs are comments
 \\  Blank lines are ignored
-\\  Line starting with #if KEYWORD is read iff KEYWORD is TRUE
-\\  Currently recognized keywords:
+\\  Line starting with #if BOOLEAN is read iff BOOLEAN is TRUE
+\\  Currently recognized booleans:
 \\    EMACS  are we running under Emacs?
 \\    READL  is readline available?
+\\    VERSION {<,>,<=,>=} a.b.c  does version number satisfy the inequality?
 \\
-\\  This file should be put in $HOME/.gprc or /etc/gprc and contain:
+\\  This file should be put in $HOME/.gprc or /etc/gprc and contains:
 \\  * references to gp scripts that are to be run BEFORE the first gp prompt.
 \\
 \\    Syntax: read "filename"  (quotes are mandatory. ~ syntax allowed)
