@@ -1045,7 +1045,8 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
-/* assume xy>0 and the division is exact */
+/* assume xy>0 and the division is exact. Not stack-clean if y is even
+ * and not a power of 2 */
 GEN
 diviuexact(GEN x, ulong y)
 {
@@ -1053,9 +1054,9 @@ diviuexact(GEN x, ulong y)
   ulong q, yinv;
   GEN z, z0, x0, x0min;
 
-  if (y == 1) return icopy(x);
   vy = vals(y);
   if (vy) { y >>= vy; x = shifti(x, -vy); }
+  if (y == 1) return vy? x: icopy(x);
   lx = lgefint(x);
   if (lx == 3) return utoi((ulong)x[2] / y);
   yinv = invrev(y);
