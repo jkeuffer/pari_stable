@@ -24,11 +24,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define principalideal_aux(nf,x) (principalideal0((nf),(x),0))
 
+extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
 extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
-
-static GEN nfbezout(GEN nf, GEN a, GEN b, GEN ida, GEN idb, GEN *u, GEN *v, GEN *w, GEN *di);
+extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
+extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
+extern GEN special_anti_uniformizer(GEN nf, GEN pr);
+extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1288,12 +1292,6 @@ to_Fp_simple(GEN nf, GEN x, GEN prh)
   return NULL;
 }
 
-extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psigne);
-extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
-extern GEN special_anti_uniformizer(GEN nf, GEN pr);
-extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-
 /* Compute t = prod g[i]^e[i] mod pr^n, assuming (t, pr) = 1.
  * Method: modify each g[i] so that it becomes coprime to pr :
  *  x / (p^k u) --> x * (b/p)^v_pr(x) / z^k u, where z = b^e/p^(e-1)
@@ -1390,7 +1388,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   long i,l;
 
   if (lg(fa) == 1) return zerovec(lg(nf[6])-1);
-  g = (GEN)fa[1]; 
+  g = (GEN)fa[1];
   e = (GEN)fa[2]; l = lg(e);
   for (i=1; i<l; i++)
   {
@@ -1549,7 +1547,6 @@ idealnorm(GEN nf, GEN x)
 }
 
 /* inverse */
-extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 
 /* rewritten from original code by P.M & M.H.
  *
@@ -1682,7 +1679,7 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
 
   if (!signe(n)) return x;
   nf = checknf(nf);
-  
+
   /* inert, special cased for efficiency */
   if (itos((GEN)vp[4]) == degpol(nf[1]))
     return gmul(x, powgi((GEN)vp[1], n));
@@ -1804,7 +1801,7 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
   D.nf  = nf;
   D.prec= prec;
   y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
- 
+
   if (s < 0) y = idealinv(nf,y);
   else if (is_pm1(n)) y = ideallllred(nf,x,NULL,prec);
   return gerepileupto(av,y);
@@ -2299,7 +2296,7 @@ idealapprfact(GEN nf, GEN x) { return idealappr0(nf,x,1); }
  */
 GEN
 ideal_two_elt2(GEN nf, GEN x, GEN a)
-{ 
+{
   gpmem_t av=avma,tetpil;
   long ta=typ(a),i,r;
   GEN con,ep,b,list,fact;
@@ -2399,21 +2396,17 @@ GEN
 element_reduce(GEN nf, GEN x, GEN ideal)
 {
   long tx = typ(x), N, i;
-  gpmem_t av=avma, tetpil;
-  GEN p1,u;
+  gpmem_t av=avma;
+  GEN u,d;
 
   if (is_extscalar_t(tx))
     x = algtobasis_i(checknf(nf), x);
   N = lg(x);
   if (typ(ideal) != t_MAT || lg(ideal) != N) err(typeer,"element_reduce");
-  p1 = cgetg(N+1,t_MAT);
-  for (i=1; i<N; i++) p1[i] = ideal[i];
-  p1[N] = (long)x;
-  u = (GEN)ker(p1)[1];
-  p1 = (GEN)u[N]; setlg(u,N);
-  for (i=1; i<N; i++) u[i] = lround(gdiv((GEN)u[i],p1));
-  u = gmul(ideal,u); tetpil = avma;
-  return gerepile(av,tetpil, gadd(u,x));
+  u = deplin( concatsp(ideal,x) );
+  d = (GEN)u[N]; setlg(u,N);
+  for (i=1; i<N; i++) u[i] = (long)gdivround((GEN)u[i],d);
+  return gerepileupto(av, gadd(x, gmul(ideal,u)));
 }
 
 /* A torsion-free module M over Z_K will be given by a row vector [A,I] with
@@ -2445,16 +2438,9 @@ nfhermite(GEN nf, GEN x)
   if (k < m) err(talker,"not a matrix of maximal rank in nfhermite");
 
   av = avma; lim = stack_lim(av, 1);
-  p1 = cgetg(k+1,t_MAT); for (j=1; j<=k; j++) p1[j]=A[j];
-  A = p1; I = dummycopy(I);
-  J = cgetg(k+1,t_VEC);
-  for (j=1; j<=k; j++)
-  {
-    if (typ(I[j])!=t_MAT) I[j] = (long)idealhermite_aux(nf,(GEN)I[j]);
-    J[j] = zero;
-  }
-
-  def = k+1;
+  A = matalgtobasis(nf,A);
+  I = dummycopy(I);
+  J = zerovec(k); def = k+1;
   for (i=m; i>=1; i--)
   {
     GEN den,p4,p5,p6,u,v,newid, invnewid = NULL;
@@ -2463,7 +2449,7 @@ nfhermite(GEN nf, GEN x)
     if (!j) err(talker,"not a matrix of maximal rank in nfhermite");
     if (j==def) j--; else { swap(A[j], A[def]); swap(I[j], I[def]); }
     p1 = gcoeff(A,i,def);
-    p2 = element_inv(nf,p1);
+    p2 = element_inv(nf, p1);
     A[def] = (long)element_mulvec(nf,p2,(GEN)A[def]);
     I[def] = (long)idealmul(nf,p1,(GEN)I[def]);
     for (  ; j; j--)
@@ -2478,11 +2464,11 @@ nfhermite(GEN nf, GEN x)
       p4 = idealmul(nf, p2,        invnewid);
       p5 = idealmul(nf,(GEN)I[def],invnewid);
       y = idealaddtoone(nf,p4,p5);
-      u = element_div(nf,(GEN)y[1],p1);
+      u = (GEN)y[1]; u = element_div(nf, u, p1);
       v = (GEN)y[2];
-      p6 = gsub((GEN)A[j], element_mulvec(nf,p1,(GEN)A[def]));
-      A[def] = ladd(element_mulvec(nf,u,(GEN)A[j]),
-                    element_mulvec(nf,v,(GEN)A[def]));
+      p6 = gsub((GEN)A[j], element_mulvec(nf, p1,(GEN)A[def]));
+      A[def] = ladd(element_mulvec(nf, u, (GEN)A[j]),
+                    element_mulvec(nf, v, (GEN)A[def]));
       A[j] = (long)p6;
       I[j] = (long)idealmul(nf,idealmul(nf,(GEN)I[j],(GEN)I[def]),invnewid);
       I[def] = (long)newid; den = denom((GEN)I[j]);
@@ -2497,9 +2483,9 @@ nfhermite(GEN nf, GEN x)
     p1 = (GEN)I[def];
     for (j=def+1; j<=k; j++)
     {
-      p2 = gsub(element_reduce(nf,gcoeff(A,i,j), idealmul(nf,p1,(GEN)J[j])),
-                gcoeff(A,i,j));
-      A[j] = ladd((GEN)A[j], element_mulvec(nf,p2,(GEN)A[def]));
+      GEN c = gcoeff(A,i,j);
+      p2 = gsub(element_reduce(nf,c, idealmul(nf,p1,(GEN)J[j])), c);
+      A[j] = ladd((GEN)A[j], element_mulvec(nf, p2,(GEN)A[def]));
     }
     if (low_stack(lim, stack_lim(av1,1)))
     {
@@ -2509,11 +2495,72 @@ nfhermite(GEN nf, GEN x)
     }
   }
   y = cgetg(3,t_VEC);
-  p1 = cgetg(m+1,t_MAT); y[1] = (long)p1;
-  p2 = cgetg(m+1,t_VEC); y[2] = (long)p2;
-  for (j=1; j<=m; j++) p1[j] = lcopy((GEN)A[j+k-m]);
-  for (j=1; j<=m; j++) p2[j] = lcopy((GEN)I[j+k-m]);
-  return gerepileupto(av0, y);
+  A += k-m; A[0] = evaltyp(t_MAT)|evallg(m+1); y[1] = (long)A;
+  I += k-m; I[0] = evaltyp(t_VEC)|evallg(m+1); y[2] = (long)I;
+  return gerepilecopy(av0, y);
+}
+
+static GEN
+idealmulelt(GEN nf, GEN elt, GEN x)
+{
+  long t = typ(elt);
+  GEN z;
+  if (t == t_POL || t == t_POLMOD) elt = algtobasis(nf,elt);
+  if (isnfscalar(elt)) elt = (GEN)elt[1];
+  z = element_mulvec(nf, elt, x);
+  settyp(z, t_MAT); return z;
+}
+
+static GEN
+zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
+{
+  gpmem_t av, tetpil;
+  GEN pab,d;
+
+  d=idealmulelt(nf,b,B); *di=idealinv(nf,idealmat_to_hnf(nf,d));
+  av=avma; pab=idealmul(nf,A,B); tetpil=avma;
+  *w=gerepile(av,tetpil, idealmul(nf,pab,*di));
+  *v=element_inv(nf,b);
+  *u=gzero; return d;
+}
+
+/* Given elements a,b and ideals A, B, outputs d = a.A+b.B and gives
+ * di=d^-1, w=A.B.di, u, v such that au+bv=1 and u in A.di, v in
+ * B.di. Assume A, B non-zero, but a or b can be zero (not both)
+ */
+static GEN
+nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *u,GEN *v,GEN *w,GEN *di)
+{
+  GEN pab,pu,pv,pw,uv,d,dinv,pa,pb,pa1,pb1, *gptr[5];
+  gpmem_t av, tetpil;
+
+  if (gcmp0(a))
+  {
+    if (gcmp0(b)) err(talker,"both elements zero in nfbezout");
+    return zero_nfbezout(nf,b,A,B,u,v,w,di);
+  }
+  if (gcmp0(b))
+    return zero_nfbezout(nf,a,B,A,v,u,w,di);
+
+  av = avma;
+  pa = idealmulelt(nf,a,A);
+  pb = idealmulelt(nf,b,B);
+
+  d=idealadd(nf,pa,pb); dinv=idealinv(nf,d);
+  pa1=idealmullll(nf,pa,dinv);
+  pb1=idealmullll(nf,pb,dinv);
+  uv=idealaddtoone(nf,pa1,pb1);
+  pab=idealmul(nf,A,B); tetpil=avma;
+
+  pu=element_div(nf,(GEN)uv[1],a);
+  pv=element_div(nf,(GEN)uv[2],b);
+  d=gcopy(d); dinv=gcopy(dinv);
+  pw=idealmul(nf,pab,dinv);
+
+  *u=pu; *v=pv; *w=pw; *di=dinv;
+  gptr[0]=u; gptr[1]=v; gptr[2]=w; gptr[3]=di;
+  gptr[4]=&d; gerepilemanysp(av,tetpil,gptr,5);
+  return d;
 }
 
 /* A torsion module M over Z_K will be given by a row vector [A,I,J] with
@@ -2557,82 +2604,76 @@ nfsmith(GEN nf, GEN x)
   {
     do
     {
-      c=0;
+      c = 0;
       for (j=i-1; j>=1; j--)
       {
-	p1=gcoeff(A,i,j);
-	if (!gcmp0(p1))
-	{
-	  p2=gcoeff(A,i,i);
-	  d=nfbezout(nf,p2,p1,(GEN)J[i],(GEN)J[j],&u,&v,&w,&dinv);
-	  if (!gcmp0(u))
-	  {
-	    if (!gcmp0(v))
-	      b=gadd(element_mulvec(nf,u,(GEN)A[i]),
-	             element_mulvec(nf,v,(GEN)A[j]));
-	    else b=element_mulvec(nf,u,(GEN)A[i]);
-	  }
-	  else b=element_mulvec(nf,v,(GEN)A[j]);
-	  A[j]=lsub(element_mulvec(nf,p2,(GEN)A[j]),
-	            element_mulvec(nf,p1,(GEN)A[i]));
-	  A[i]=(long)b; J[j]=(long)w; J[i]=(long)d;
-	}
-      }
-      for (j=i-1; j>=1; j--)
-      {
-	p1=gcoeff(A,j,i);
-	if (!gcmp0(p1))
-	{
-	  p2=gcoeff(A,i,i);
-	  d=nfbezout(nf,p2,p1,(GEN)I[i],(GEN)I[j],&u,&v,&w,&dinv);
-	  if (gcmp0(u))
-	    b=element_mulvecrow(nf,v,A,j,i);
-	  else
-	  {
-	    if (gcmp0(v))
-	      b=element_mulvecrow(nf,u,A,i,i);
-	    else
-	      b=gadd(element_mulvecrow(nf,u,A,i,i),
-	             element_mulvecrow(nf,v,A,j,i));
-	  }
-	  p3=gsub(element_mulvecrow(nf,p2,A,j,i),
-	          element_mulvecrow(nf,p1,A,i,i));
-	  for (k=1; k<=i; k++) { coeff(A,j,k)=p3[k]; coeff(A,i,k)=b[k]; }
-	  I[j]=(long)w; I[i]=(long)d; c++;
-	}
-      }
-      if (!c)
-      {
-	b=gcoeff(A,i,i); if (gcmp0(b)) break;
+	p1=gcoeff(A,i,j); if (gcmp0(p1)) continue;
 
-	b=idealmul(nf,b,idealmul(nf,(GEN)J[i],(GEN)I[i]));
-	for (k=1; k<i; k++)
-	  for (l=1; l<i; l++)
-	  {
-	    p3 = gcoeff(A,k,l);
-	    if (!gcmp0(p3))
+        p2 = gcoeff(A,i,i);
+        d = nfbezout(nf,p2,p1,(GEN)J[i],(GEN)J[j],&u,&v,&w,&dinv);
+        if (gcmp0(u)) b = element_mulvec(nf,v,(GEN)A[j]);
+        else
+        {
+          if (gcmp0(v)) b = element_mulvec(nf,u,(GEN)A[i]);
+          else
+            b = gadd(element_mulvec(nf,u,(GEN)A[i]),
+                     element_mulvec(nf,v,(GEN)A[j]));
+        }
+        A[j] = lsub(element_mulvec(nf,p2,(GEN)A[j]),
+                    element_mulvec(nf,p1,(GEN)A[i]));
+        A[i] = (long)b; J[j] = (long)w; J[i] = (long)d;
+      }
+      for (j=i-1; j>=1; j--)
+      {
+	p1 = gcoeff(A,j,i); if (gcmp0(p1)) continue;
+
+        p2 = gcoeff(A,i,i);
+        d = nfbezout(nf,p2,p1,(GEN)I[i],(GEN)I[j],&u,&v,&w,&dinv);
+        if (gcmp0(u)) b = element_mulvecrow(nf,v,A,j,i);
+        else
+        {
+          if (gcmp0(v))
+            b = element_mulvecrow(nf,u,A,i,i);
+          else
+            b = gadd(element_mulvecrow(nf,u,A,i,i),
+                     element_mulvecrow(nf,v,A,j,i));
+        }
+        p3 = gsub(element_mulvecrow(nf,p2,A,j,i),
+                  element_mulvecrow(nf,p1,A,i,i));
+        for (k=1; k<=i; k++) { coeff(A,j,k) = p3[k]; coeff(A,i,k) = b[k]; }
+        I[j] = (long)w; I[i] = (long)d; c = 1;
+      }
+      if (c) continue;
+
+      b=gcoeff(A,i,i); if (gcmp0(b)) break;
+
+      b=idealmul(nf,b,idealmul(nf,(GEN)J[i],(GEN)I[i]));
+      for (k=1; k<i; k++)
+        for (l=1; l<i; l++)
+        {
+          p3 = gcoeff(A,k,l);
+          if (!gcmp0(p3))
+          {
+            p4 = idealmul(nf,p3,idealmul(nf,(GEN)J[l],(GEN)I[k]));
+            if (!gegal(idealadd(nf,b,p4), b))
             {
-              p4 = idealmul(nf,p3,idealmul(nf,(GEN)J[l],(GEN)I[k]));
-	      if (!gegal(idealadd(nf,b,p4), b))
-              {
-                b=idealdiv(nf,(GEN)I[k],(GEN)I[i]);
-                p4=gauss(idealdiv(nf,(GEN)J[i],idealmul(nf,p3,(GEN)J[l])),b);
-                l=1; while (l<=N && gcmp1(denom((GEN)p4[l]))) l++;
-                if (l>N) err(talker,"bug2 in nfsmith");
-                p3=element_mulvecrow(nf,(GEN)b[l],A,k,i);
-                for (l=1; l<=i; l++)
-                  coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p3[l]);
+              b=idealdiv(nf,(GEN)I[k],(GEN)I[i]);
+              p4=gauss(idealdiv(nf,(GEN)J[i],idealmul(nf,p3,(GEN)J[l])),b);
+              l=1; while (l<=N && gcmp1(denom((GEN)p4[l]))) l++;
+              if (l>N) err(talker,"bug2 in nfsmith");
+              p3=element_mulvecrow(nf,(GEN)b[l],A,k,i);
+              for (l=1; l<=i; l++)
+                coeff(A,i,l) = ladd(gcoeff(A,i,l),(GEN)p3[l]);
 
-                k = l = i; c = 1;
-              }
+              k = l = i; c = 1;
             }
-	  }
-      }
+          }
+        }
       if (low_stack(lim, stack_lim(av,1)))
       {
-        GEN *gptr[3];
+        GEN *gptr[3]; gptr[0]=&A; gptr[1]=&I; gptr[2]=&J;
 	if(DEBUGMEM>1) err(warnmem,"nfsmith");
-        gptr[0]=&A; gptr[1]=&I; gptr[2]=&J; gerepilemany(av,gptr,3);
+        gerepilemany(av,gptr,3);
       }
     }
     while (c);
@@ -2718,67 +2759,17 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN modpr)
   }
 }
 
-/* x est une matrice dont les coefficients sont des vecteurs dans la base
- * d'entiers modulo un ideal premier modpr, sous forme reduite modulo modpr.
- */
 GEN
-nfkermodpr(GEN nf, GEN x, GEN modpr)
+nfkermodpr(GEN nf, GEN x, GEN pr)
 {
-  gpmem_t av0, av, av1, lim;
-  long i,j,k,r,t,n,m,N;
-  GEN c,d,y,unnf,munnf,zeromodp,zeronf,p,pp,prh;
+  gpmem_t av = avma;
+  GEN T,p,modpr;
 
-  nf=checknf(nf); checkprhall(modpr);
+  nf = checknf(nf);
   if (typ(x)!=t_MAT) err(typeer,"nfkermodpr");
-  n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  prh=(GEN)modpr[1]; av0=avma;
-  N=degpol(nf[1]); pp=gcoeff(prh,1,1);
-
-  zeromodp=gmodulsg(0,pp);
-  unnf=cgetg(N+1,t_COL); unnf[1]=(long)gmodulsg(1,pp);
-  zeronf=cgetg(N+1,t_COL); zeronf[1]=(long)zeromodp;
-
-  av=avma; munnf=cgetg(N+1,t_COL); munnf[1]=(long)gmodulsg(-1,pp);
-  for (i=2; i<=N; i++)
-    zeronf[i] = munnf[i] = unnf[i] = (long)zeromodp;
-
-  m=lg(x[1])-1; x=dummycopy(x); r=0;
-  c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
-  d=new_chunk(n+1); av1=avma; lim=stack_lim(av1,1);
-  for (k=1; k<=n; k++)
-  {
-    j=1;
-    while (j<=m && (c[j] || gcmp0(gcoeff(x,j,k)))) j++;
-    if (j > m) { r++; d[k]=0; continue; }
-
-      p=element_divmodpr(nf,munnf,gcoeff(x,j,k),modpr);
-      c[j]=k; d[k]=j; coeff(x,j,k)=(long)munnf;
-      for (i=k+1; i<=n; i++)
-	coeff(x,j,i)=(long)element_mulmodpr(nf,p,gcoeff(x,j,i),modpr);
-      for (t=1; t<=m; t++)
-	if (t!=j)
-	{
-        p = gcoeff(x,t,k); if (gcmp0(p)) continue;
-        coeff(x,t,k) = (long)zeronf;
-	  for (i=k+1; i<=n; i++)
-            coeff(x,t,i)=ladd(gcoeff(x,t,i),
-	                      element_mulmodpr(nf,p,gcoeff(x,j,i),modpr));
-          if (low_stack(lim, stack_lim(av1,1)))
-          {
-            if (DEBUGMEM>1) err(warnmem,"nfkermodpr, k = %ld / %ld",k,n);
-            x=gerepilecopy(av1,x);
-          }
-	}
-  }
-  if (!r) { avma=av0; return cgetg(1,t_MAT); }
-  av1=avma; y=cgetg(r+1,t_MAT);
-  for (j=k=1; j<=r; j++,k++)
-  {
-    p=cgetg(n+1,t_COL); y[j]=(long)p; while (d[k]) k++;
-    for (i=1; i<k; i++) p[i]=d[i]? lcopy(gcoeff(x,d[i],k)): (long)zeronf;
-    p[k]=(long)unnf; for (i=k+1; i<=n; i++) p[i]=(long)zeronf;
-  }
-  return gerepile(av,av1,y);
+  modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  x = modprM(lift(x), nf, modpr);
+  return gerepileupto(av, FqM_ker(x,T,p));
 }
 
 /* a.x=b ou b est un vecteur */
@@ -2845,52 +2836,16 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN modpr)
 }
 
 GEN
-nfsuppl(GEN nf, GEN x, long n, GEN modpr)
+nfsuppl(GEN nf, GEN x, long n, GEN pr)
 {
-  long k, s, t, N, lx=lg(x);
-  gpmem_t av=avma, av2;
-  GEN y,p1,p2,p,unmodp,zeromodp,unnf,zeronf,prh;
+  gpmem_t av = avma;
+  GEN T,p,modpr;
 
-  k=lx-1; if (k>n) err(suppler2);
-  if (k && lg(x[1])!=n+1) err(talker,"incorrect dimension in nfsupl");
-  N=degpol(nf[1]); prh=(GEN)modpr[1]; p=gcoeff(prh,1,1);
-
-  unmodp=gmodulsg(1,p); zeromodp=gmodulsg(0,p);
-  unnf=gscalcol_proto(unmodp,zeromodp,N);
-  zeronf=gscalcol_proto(zeromodp,zeromodp,N);
-  y = idmat_intern(n,unnf,zeronf);
-  av2=avma;
-
-  for (s=1; s<=k; s++)
-  {
-    p1=nfsolvemodpr(nf,y,(GEN)x[s],modpr);
-    t=s; while (t<=n && gcmp0((GEN)p1[t])) t++;
-    avma=av2; if (t>n) err(suppler2);
-    p2=(GEN)y[s]; y[s]=x[s]; if (s!=t) y[t]=(long)p2;
-  }
-  return gerepilecopy(av, lift_intern(y));
-}
-
-/* Given two fractional ideals a and b, gives x in a, y in b, z in b^-1,
-   t in a^-1 such that xt-yz=1. In the present version, z is in Z. */
-GEN
-nfidealdet1(GEN nf, GEN a, GEN b)
-{
-  gpmem_t av=avma;
-  GEN x,p1,res,da,db;
-
-  a = idealinv(nf,a);
-  da = denom(a); if (!gcmp1(da)) a = gmul(da,a);
-  db = denom(b); if (!gcmp1(db)) b = gmul(db,b);
-  x = idealcoprime(nf,a,b);
-  p1 = idealaddtoone(nf, idealmul(nf,x,a), b);
-
-  res = cgetg(5,t_VEC);
-  res[1] = lmul(x,da);
-  res[2] = ldiv((GEN)p1[2],db);
-  res[3] = lnegi(db);
-  res[4] = (long) element_div(nf,(GEN)p1[1],(GEN)res[1]);
-  return gerepileupto(av,res);
+  nf = checknf(nf);
+  if (typ(x)!=t_MAT) err(typeer,"nfkermodpr");
+  modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  x = modprM(lift(x), nf, modpr);
+  return gerepileupto(av, FqM_suppl(x,T,p));
 }
 
 /* Given a pseudo-basis pseudo, outputs a multiple of its ideal determinant */
@@ -2993,58 +2948,6 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN detmat)
     x[i]=(long)element_reduce(nf,(GEN)x[i],detmat);
 }
 
-static GEN
-zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
-{
-  gpmem_t av, tetpil;
-  GEN pab,d;
-
-  d=idealmulelt(nf,b,B); *di=idealinv(nf,idealmat_to_hnf(nf,d));
-  av=avma; pab=idealmul(nf,A,B); tetpil=avma;
-  *w=gerepile(av,tetpil, idealmul(nf,pab,*di));
-  *v=element_inv(nf,b);
-  *u=gzero; return d;
-}
-
-/* Given elements a,b and ideals A, B, outputs d = a.A+b.B and gives
- * di=d^-1, w=A.B.di, u, v such that au+bv=1 and u in A.di, v in
- * B.di. Assume A, B non-zero, but a or b can be zero (not both)
- */
-static GEN
-nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *u,GEN *v,GEN *w,GEN *di)
-{
-  GEN pab,pu,pv,pw,uv,d,dinv,pa,pb,pa1,pb1, *gptr[5];
-  gpmem_t av, tetpil;
-
-  if (gcmp0(a))
-  {
-    if (gcmp0(b)) err(talker,"both elements zero in nfbezout");
-    return zero_nfbezout(nf,b,A,B,u,v,w,di);
-  }
-  if (gcmp0(b))
-    return zero_nfbezout(nf,a,B,A,v,u,w,di);
-
-  av = avma;
-  pa=idealmulelt(nf,a,A);
-  pb=idealmulelt(nf,b,B);
-
-  d=idealadd(nf,pa,pb); dinv=idealinv(nf,d);
-  pa1=idealmullll(nf,pa,dinv);
-  pb1=idealmullll(nf,pb,dinv);
-  uv=idealaddtoone(nf,pa1,pb1);
-  pab=idealmul(nf,A,B); tetpil=avma;
-
-  pu=element_div(nf,(GEN)uv[1],a);
-  pv=element_div(nf,(GEN)uv[2],b);
-  d=gcopy(d); dinv=gcopy(dinv);
-  pw=idealmul(nf,pab,dinv);
-
-  *u=pu; *v=pv; *w=pw; *di=dinv;
-  gptr[0]=u; gptr[1]=v; gptr[2]=w; gptr[3]=di;
-  gptr[4]=&d; gerepilemanysp(av,tetpil,gptr,5);
-  return d;
-}
-
 /* A usage interne. Pas de verifs ni gestion de pile */
 GEN
 idealoplll(GEN op(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
@@ -3056,45 +2959,34 @@ idealoplll(GEN op(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
   return den? gdiv(z,den): z;
 }
 
-/* A usage interne. Pas de verifs ni gestion de pile */
-GEN
-idealmulelt(GEN nf, GEN elt, GEN x)
-{
-  long t = typ(elt);
-  GEN z;
-  if (t == t_POL || t == t_POLMOD) elt = algtobasis(nf,elt);
-  if (isnfscalar(elt)) elt = (GEN)elt[1];
-  z = element_mulvec(nf, elt, x);
-  settyp(z, t_MAT); return z;
-}
-
 GEN
 nfhermitemod(GEN nf, GEN pseudo, GEN detmat)
 {
   long li, co, i, j, jm1, def, ldef, N;
-  gpmem_t av0=avma, av, tetpil, lim;
-  GEN b,q,w,p1,p2,d,u,v,den,x,I,J,dinv,unnf,wh;
+  gpmem_t av0=avma, av, lim;
+  GEN b,q,w,p1,d,u,v,den,x,I,J,dinv,wh,unnf;
 
   nf=checknf(nf); N=degpol(nf[1]);
   if (typ(pseudo)!=t_VEC || lg(pseudo)!=3)
     err(talker,"not a module in nfhermitemod");
-  x=(GEN)pseudo[1]; I=(GEN)pseudo[2];
-  if (typ(x)!=t_MAT) err(talker,"not a matrix in nfhermitemod");
-  co=lg(x);
-  if (typ(I)!=t_VEC || lg(I)!=co)
+  x = (GEN)pseudo[1];
+  I = (GEN)pseudo[2];
+  if (typ(x) != t_MAT) err(talker,"not a matrix in nfhermitemod");
+  co = lg(x);
+  if (typ(I) != t_VEC || lg(I) != co)
     err(talker,"not a correct ideal list in nfhermitemod");
   if (co==1) return cgetg(1,t_MAT);
 
-  li=lg(x[1]); x=dummycopy(x); I=dummycopy(I);
-  unnf=gscalcol_i(gun,N);
-  for (j=1; j<co; j++)
-    if (typ(I[j])!=t_MAT) I[j]=(long)idealhermite_aux(nf,(GEN)I[j]);
+  li= lg(x[1]);
+  x = matalgtobasis(nf, x);
+  I = dummycopy(I);
+  unnf = gscalcol(gun,N);
 
-  den=denom(detmat); if (!gcmp1(den)) detmat=gmul(den,detmat);
-  detmat=gmul(detmat,lllintpartial(detmat));
+  den = denom(detmat); if (!gcmp1(den)) detmat = gmul(den,detmat);
+  detmat = gmul(detmat,lllintpartial(detmat));
 
-  av=avma; lim=stack_lim(av,1);
-  def=co; ldef=(li>co)?li-co+1:1;
+  av = avma; lim = stack_lim(av,1);
+  def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
   {
     def--; j=def-1; while (j && gcmp0(gcoeff(x,i,j))) j--;
@@ -3119,39 +3011,40 @@ nfhermitemod(GEN nf, GEN pseudo, GEN detmat)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2];
+      GEN *gptr[2]; gptr[0]=&x; gptr[1]=&I;
       if(DEBUGMEM>1) err(warnmem,"[1]: nfhermitemod");
-      gptr[0]=&x; gptr[1]=&I; gerepilemany(av,gptr,2);
+      gerepilemany(av,gptr,2);
     }
   }
-  b=detmat; wh=cgetg(li,t_MAT); def--;
+  b = detmat; wh = cgetg(li,t_MAT); def--;
   for (i=li-1; i>=1; i--)
   {
     d = nfbezout(nf,gcoeff(x,i,i+def),unnf,(GEN)I[i+def],b,&u,&v,&w,&dinv);
     p1 = element_mulvec(nf,u,(GEN)x[i+def]);
     nfcleanmod(nf,p1,i,idealmullll(nf,b,dinv));
-    wh[i]=(long)p1; coeff(wh,i,i)=(long)unnf; I[i+def]=(long)d;
-    if (i>1) b=idealmul(nf,b,dinv);
+    wh[i] = (long)p1; coeff(wh,i,i) = (long)unnf;
+    I[i+def] = (long)d;
+    if (i>1) b = idealmul(nf,b,dinv);
   }
   J=cgetg(li,t_VEC); J[1]=zero;
-  for (j=2; j<li; j++) J[j]=(long)idealinv(nf,(GEN)I[j+def]);
+  for (j=2; j<li; j++) J[j] = (long)idealinv(nf,(GEN)I[j+def]);
   for (i=li-2; i>=1; i--)
   {
     for (j=i+1; j<li; j++)
     {
-      q=idealmul(nf,(GEN)I[i+def],(GEN)J[j]);
-      p1=gsub(element_reduce(nf,gcoeff(wh,i,j),q),gcoeff(wh,i,j));
-      wh[j]=(long)gadd((GEN)wh[j],element_mulvec(nf,p1,(GEN)wh[i]));
+      q = idealmul(nf,(GEN)I[i+def],(GEN)J[j]);
+      p1 = gsub(element_reduce(nf,gcoeff(wh,i,j),q), gcoeff(wh,i,j));
+      wh[j] = ladd((GEN)wh[j],element_mulvec(nf,p1,(GEN)wh[i]));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[3];
+      GEN *gptr[3]; gptr[0]=&wh; gptr[1]=&I; gptr[2]=&J;
       if(DEBUGMEM>1) err(warnmem,"[2]: nfhermitemod");
-      gptr[0]=&wh; gptr[1]=&I; gptr[2]=&J; gerepilemany(av,gptr,3);
+      gerepilemany(av,gptr,3);
     }
   }
-  tetpil=avma; p1=cgetg(3,t_VEC); p1[1]=lcopy(wh);
-  p2=cgetg(li,t_VEC); p1[2]=(long)p2;
-  for (j=1; j<li; j++) p2[j]=lcopy((GEN)I[j+def]);
-  return gerepile(av0,tetpil,p1);
+  I += def; I[0] = evaltyp(t_VEC)|evallg(li);
+  p1=cgetg(3,t_VEC);
+  p1[1] = (long)wh;
+  p1[2] = (long)I; return gerepilecopy(av0, p1);
 }

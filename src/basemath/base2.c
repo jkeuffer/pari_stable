@@ -22,31 +22,34 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
-extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
-extern GEN unnf_minus_x(GEN x);
-extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
-extern GEN eltmulid_get_table(GEN nf, long i);
-extern GEN _ei(long n, long i);
 extern GEN DDF2(GEN x, long klim, long hint);
+extern GEN FpVQX_red(GEN z, GEN T, GEN p);
+extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
+extern GEN RXQX_mul(GEN x, GEN y, GEN T);
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
-extern GEN det_mod_P_n(GEN a, GEN N, GEN P);
+extern GEN _ei(long n, long i);
+extern GEN col_to_ff(GEN x, long v);
 extern GEN element_muli(GEN nf, GEN x, GEN y);
 extern GEN element_mulid(GEN nf, GEN x, long i);
+extern GEN element_mulidid(GEN nf, long i, long j);
 extern GEN eleval(GEN f,GEN h,GEN a);
+extern GEN eltmulid_get_table(GEN nf, long i);
 extern GEN ideal_better_basis(GEN nf, GEN x, GEN M);
+extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN merge_factor_i(GEN f, GEN g);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-extern GEN nfidealdet1(GEN nf, GEN a, GEN b);
 extern GEN nfsuppl(GEN nf, GEN x, long n, GEN modpr);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
 extern GEN respm(GEN f1,GEN f2,GEN pm);
+extern GEN sqr_by_tab(GEN tab, GEN x);
 extern GEN to_polmod(GEN x, GEN mod);
+extern GEN unnf_minus_x(GEN x);
 extern GEN vecpol_to_mat(GEN v, long n);
 extern int isrational(GEN x);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
@@ -2383,7 +2386,6 @@ nfmodprinit(GEN nf, GEN pr)
   res[6] = (long)nfproj; return gerepilecopy(av, res);
 }
 
-/* assume x in 'basis' form (t_COL) */
 GEN
 nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p)
 {
@@ -2393,6 +2395,7 @@ nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p)
   *pr = (GEN)modpr[4]; return modpr;
 }
 
+/* assume x in 'basis' form (t_COL) */
 GEN
 zk_to_ff(GEN x, GEN modpr)
 {
@@ -2400,15 +2403,24 @@ zk_to_ff(GEN x, GEN modpr)
   GEN y = gmul((GEN)modpr[3], x);
   if (lg(modpr) == 5) return modii(y,p);
   y = FpV_red(y, p);
-  return col_to_pol(y, varn(modpr[5]));
+  return col_to_ff(y, varn(modpr[5]));
 }
 
 GEN
 nf_to_ff(GEN nf, GEN x, GEN modpr)
 {
+  gpmem_t av = avma;
   GEN prh,p,den;
-  long v;
+  long v, t = typ(x);
+
   prh = (GEN)modpr[1]; p = gcoeff(prh,1,1);
+  if (t == t_POLMOD) { x = (GEN)x[2]; t = typ(x); }
+  switch(t)
+  {
+    case t_INT: return modii(x, p);
+    case t_FRAC: return gmod(x, p);
+    case t_POL: x = algtobasis(nf, x);
+  }
   den = denom(x);
   if (!gcmp1(den))
   {
@@ -2419,7 +2431,36 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
     x = FpV_red(x, p);
     if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
   }
-  return zk_to_ff(x, modpr);
+  return gerepilecopy(av, zk_to_ff(x, modpr));
+}
+
+/* reduce the coefficients of pol modulo modpr */
+GEN
+modprX(GEN x, GEN nf,GEN modpr)
+{
+  long i, l;
+  GEN z;
+
+  if (typ(x)!=t_POL) return nf_to_ff(nf,x,modpr);
+  l = lgef(x);
+  z = cgetg(l,t_POL); z[1] = x[1];
+  for (i=2; i<l; i++) z[i] = (long)nf_to_ff(nf,(GEN)x[i],modpr);
+  return normalizepol(z);
+}
+GEN
+modprM(GEN z, GEN nf,GEN modpr)
+{
+  long i,j,l = lg(z), m = lg((GEN)z[1]);
+  GEN x,y,zi;
+  x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++)
+  {
+    x[i] = lgetg(m,t_COL);
+    y = (GEN)x[i];
+    zi= (GEN)z[i];
+    for (j=1; j<m; j++) y[j] = (long)nf_to_ff(nf,(GEN)zi[j], modpr);
+  }
+  return x;
 }
 
 GEN
@@ -2463,78 +2504,8 @@ rnfjoinmodules(GEN nf, GEN x, GEN y)
   x = nfhermite(nf,z); free(z); return x;
 }
 
-/* pas de gestion de pile : x et y sont des vecteurs dont les coefficients
- * sont les composantes sur nf[7]; avec reduction mod pr sauf si modpr=NULL */
-static GEN
-rnfelement_mulidmod(GEN nf, GEN multab, GEN x, long h, GEN modpr)
-{
-  long j,k,N;
-  GEN p1,c,v,s,znf;
-
-  if (h==1) return gcopy(x);
-  N = lg(x)-1; multab += (h-1)*N;
-  x = lift(x); v = cgetg(N+1,t_COL);
-  znf = gscalcol_i(gzero,degpol(nf[1]));
-  for (k=1; k<=N; k++)
-  {
-    s = gzero;
-    for (j=1; j<=N; j++)
-      if (!gcmp0(p1 = (GEN)x[j]) && !gcmp0(c = gcoeff(multab,k,j)))
-      {
-        if (!gcmp1(c)) p1 = element_mul(nf,p1,c);
-        s = gadd(s,p1);
-      }
-    if (s == gzero) s = znf;
-    else
-      if (modpr) s = nfreducemodpr(nf,s,modpr);
-    v[k] = (long)s;
-  }
-  return v;
-}
-
-/* pas de gestion de pile : x est un vecteur dont les coefficients sont les
- * composantes sur nf[7] */
-static GEN
-rnfelement_sqrmod(GEN nf, GEN multab, GEN x, GEN modpr)
-{
-  long i,j,k,n;
-  GEN p1,c,z,s;
-
-  n=lg(x)-1; x=lift(x); z=cgetg(n+1,t_COL);
-  for (k=1; k<=n; k++)
-  {
-    if (k == 1)
-      s = element_sqr(nf,(GEN)x[1]);
-    else
-      s = gmul2n(element_mul(nf,(GEN)x[1],(GEN)x[k]), 1);
-    for (i=2; i<=n; i++)
-    {
-      c = gcoeff(multab,k,(i-1)*n+i);
-      if (!gcmp0(c))
-      {
-	p1=element_sqr(nf,(GEN)x[i]);
-	if (!gcmp1(c)) p1 = element_mul(nf,p1,c);
-        s = gadd(s,p1);
-      }
-      for (j=i+1; j<=n; j++)
-      {
-	c = gcoeff(multab,k,(i-1)*n+j);
-	if (!gcmp0(c))
-	{
-	  p1=gmul2n(element_mul(nf,(GEN)x[i],(GEN)x[j]),1);
-	  if (!gcmp1(c)) p1 = element_mul(nf,p1,c);
-          s = gadd(s,p1);
-	}
-      }
-    }
-    if (modpr) s = nfreducemodpr(nf,s,modpr);
-    z[k]=(long)s;
-  }
-  return z;
-}
-
 typedef struct {
-  GEN nf, multab, modpr;
+  GEN nf, multab, modpr,T,p;
   long h;
 } rnfeltmod_muldata;
 
@@ -2542,32 +2513,35 @@ static GEN
 _mul(void *data, GEN x, GEN y/* base; ignored */)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
+  GEN z = x? element_mulid(D->multab,x,D->h)
+           : element_mulidid(D->multab,D->h,D->h);
   (void)y;
-  return rnfelement_mulidmod(D->nf,D->multab,x,D->h,D->modpr);
+  return FpVQX_red(z,D->T,D->p);
 }
 static GEN
 _sqr(void *data, GEN x)
 {
   rnfeltmod_muldata *D = (rnfeltmod_muldata *) data;
-  return rnfelement_sqrmod(D->nf,D->multab,x,D->modpr);
+  GEN z = x? sqr_by_tab(D->multab,x)
+           : element_mulidid(D->multab,D->h,D->h);
+  return FpVQX_red(z,D->T,D->p);
 }
 
 /* Compute x^n mod pr in the extension, assume n >= 0 */
 static GEN
-rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN modpr)
+rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
 {
   gpmem_t av = avma;
   GEN y;
   rnfeltmod_muldata D;
 
   if (!signe(n)) return gun;
-  y = (GEN)matId[h];
  
+  D.multab = multab;
   D.h = h;
-  D.nf    = nf;
-  D.multab= multab;
-  D.modpr= modpr;
-  y = leftright_pow(y, n, (void*)&D, &_sqr, &_mul);
+  D.T = T;
+  D.p = p;
+  y = leftright_pow(NULL, n, (void*)&D, &_sqr, &_mul);
   return gerepilecopy(av, y);
 }
 
@@ -2592,68 +2566,64 @@ mymod(GEN x, GEN p)
 }
 
 static GEN
-rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
+rnfordmax(GEN nf, GEN pol, GEN pr)
 {
   gpmem_t av=avma,av1,lim;
   long i,j,k,n,v1,v2,vpol,m,cmpt,sep;
-  GEN p,q,q1,modpr,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
+  GEN p,T,q,q1,modpr,A,Aa,Aaa,A1,I,R,p1,p2,p3,multab,multabmod,Aainv;
   GEN pip,baseIp,baseOp,alpha,matprod,alphainv,matC,matG,vecpro,matH;
-  GEN neworder,H,Hid,alphalistinv,alphalist,prhinv,T;
+  GEN neworder,H,Hid,alphalistinv,alphalist,prhinv,nfT,id,rnfId;
 
   if (DEBUGLEVEL>1) fprintferr(" treating %Z\n",pr);
-  modpr=nfmodprinit(nf,pr);
-  p1=rnfdedekind(nf,pol,modpr);
+  modpr = nf_to_ff_init(nf,&pr,&T,&p);
+  p1 = rnfdedekind(nf,pol,modpr);
   if (gcmp1((GEN)p1[1])) return gerepilecopy(av,(GEN)p1[2]);
 
-  sep=itos((GEN)p1[3]);
-  A=gmael(p1,2,1);
-  I=gmael(p1,2,2);
+  sep = itos((GEN)p1[3]);
+  A = gmael(p1,2,1);
+  I = gmael(p1,2,2);
 
-  T = (GEN)nf[1]; pol = lift(pol);
+  pip = basistoalg(nf, (GEN)pr[2]);
+  nfT = (GEN)nf[1]; pol = lift(pol);
   n = degpol(pol); vpol = varn(pol);
-  p=(GEN)pr[1]; q=powgi(p,(GEN)pr[4]); pip=(GEN)pr[2];
-  q1=q; while (cmpis(q1,n)<0) q1=mulii(q1,q);
+  q = T? gpowgs(p,degpol(T)): p;
+  q1 = q; while (cmpis(q1,n) < 0) q1 = mulii(q1,q);
+  rnfId = idmat(degpol(pol));
+  id    = idmat(degpol(nfT));
 
-  multab=cgetg(n*n+1,t_MAT);
-  for (j=1; j<=n*n; j++) multab[j]=lgetg(n+1,t_COL);
+  multab = cgetg(n*n+1,t_MAT);
+  for (j=1; j<=n*n; j++) multab[j] = lgetg(n+1,t_COL);
   prhinv = idealinv(nf, pr);
-  alphalistinv=cgetg(n+1,t_VEC);
-  alphalist=cgetg(n+1,t_VEC);
-  A1=cgetg(n+1,t_MAT);
-  av1=avma; lim=stack_lim(av1,1);
+  alphalistinv = cgetg(n+1,t_VEC);
+  alphalist    = cgetg(n+1,t_VEC);
+  A1 = cgetg(n+1,t_MAT);
+  av1 = avma; lim = stack_lim(av1,1);
   for(cmpt=1; ; cmpt++)
   {
-    if (DEBUGLEVEL>1)
-    {
-      fprintferr("    %ld%s pass\n",cmpt,eng_ord(cmpt));
-      flusherr();
-    }
-    for (i=1; i<=n; i++)
-    {
-      if (gegal((GEN)I[i],id)) alphalist[i] = alphalistinv[i] = un;
-      else
-      {
-	p1 = ideal_two_elt(nf,(GEN)I[i]);
-        if (gcmp0((GEN)p1[1]))
-          p2 = (GEN)p1[2];
-        else
-        {
-          v1 = element_val(nf,(GEN)p1[1],pr);
-          v2 = element_val(nf,(GEN)p1[2],pr);
-          p2 = (v1>v2)? (GEN)p1[2]: (GEN)p1[1];
-        }
-	alphalist[i] = (long)p2;
-        alphalistinv[i] = (long)element_inv(nf,p2);
-      }
-    }
+    if (DEBUGLEVEL>1) fprintferr("    %ld%s pass\n",cmpt,eng_ord(cmpt));
     for (j=1; j<=n; j++)
     {
-      alpha = (GEN)alphalist[j];
-      if (alpha == gun) { A1[j] = A[j]; continue; }
+      if (gegal((GEN)I[j],id))
+      {
+        alphalist[j] = alphalistinv[j] = un;
+        A1[j] = A[j]; continue;
+      }
+
+      p1 = ideal_two_elt(nf,(GEN)I[j]);
+      if (gcmp0((GEN)p1[1]))
+        alpha = (GEN)p1[2];
+      else
+      {
+        v1 = element_val(nf,(GEN)p1[1],pr);
+        v2 = element_val(nf,(GEN)p1[2],pr);
+        alpha = (v1>v2)? (GEN)p1[2]: (GEN)p1[1];
+      }
+      alphalist[j]    = (long)alpha;
+      alphalistinv[j] = (long)element_inv(nf,alpha);
 
       p1 = cgetg(n+1,t_COL); A1[j] = (long)p1;
       for (i=1; i<=n; i++)
-	p1[i] = (long)element_mul(nf,gcoeff(A,i,j),alpha);
+        p1[i] = (long)element_mul(nf,gcoeff(A,i,j),alpha);
     }
     Aa = basistoalg(nf,A1);
     Aainv = lift_intern(ginv(Aa));
@@ -2662,75 +2632,67 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
       for (j=i; j<=n; j++)
       {
         long tp;
-        p1 = RXQX_rem(gmul((GEN)Aaa[i],(GEN)Aaa[j]), pol, T);
+        p1 = RXQX_rem(gmul((GEN)Aaa[i],(GEN)Aaa[j]), pol, nfT);
         tp = typ(p1);
         if (is_scalar_t(tp) || (tp==t_POL && varn(p1)>vpol))
           p2 = gmul(p1, (GEN)Aainv[1]);
         else
           p2 = mulmat_pol(Aainv, p1);
-
         for (k=1; k<=n; k++)
         {
-          GEN c = algtobasis(nf, (GEN)p2[k]);
-          if (isnfscalar(c)) c = (GEN)c[1];
-          coeff(multab,k,(i-1)*n+j) = (long)c;
-          coeff(multab,k,(j-1)*n+i) = (long)c;
+          coeff(multab,k,(i-1)*n+j) = p2[k];
+          coeff(multab,k,(j-1)*n+i) = p2[k];
         }
       }
-    R=cgetg(n+1,t_MAT); multabmod = mymod(multab,p);
-    R[1] = matId[1];
+    multabmod = modprM(multab,nf,modpr);
+    R = cgetg(n+1,t_MAT);
+    R[1] = rnfId[1];
     for (j=2; j<=n; j++)
-      R[j] = (long) rnfelementid_powmod(nf,multabmod,matId, j,q1,modpr);
-    baseIp = nfkermodpr(nf,R,modpr);
-    baseOp = nfsuppl(nf,baseIp,n,modpr);
-    alpha=cgetg(n+1,t_MAT);
-    for (j=1; j<lg(baseIp); j++) alpha[j]=baseOp[j];
+      R[j] = (long) rnfelementid_powmod(multabmod,j,q1,T,p);
+    R = modprM(lift(R), nf, modpr);
+    baseIp = FqM_ker(R,T,p);
+    baseOp = FqM_suppl(baseIp,T,p);
+    alpha = cgetg(n+1,t_MAT);
+    for (j=1; j<lg(baseIp); j++) alpha[j] = baseOp[j];
     for (   ; j<=n; j++)
     {
-      p1=cgetg(n+1,t_COL); alpha[j]=(long)p1;
+      p1 = cgetg(n+1,t_COL); alpha[j] = (long)p1;
       for (i=1; i<=n; i++)
-	p1[i]=(long)element_mul(nf,pip,gcoeff(baseOp,i,j));
+        p1[i] = lmul(pip, ff_to_nf(gcoeff(baseOp,i,j), modpr));
     }
-    matprod=cgetg(n+1,t_MAT);
+    alphainv = lift_intern(ginv(alpha));
+
+    matprod = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
-      p1=cgetg(n+1,t_COL); matprod[j]=(long)p1;
+      p1 = cgetg(n+1,t_COL); matprod[j] = (long)p1;
       for (i=1; i<=n; i++)
       {
-        p2 = rnfelement_mulidmod(nf,multab, (GEN)alpha[i],j, NULL);
-        for (k=1; k<=n; k++)
-          p2[k] = lmul((GEN)nf[7], (GEN)p2[k]);
+        p2 = element_mulid(multab, (GEN)alpha[i],j);
         p1[i] = (long)p2;
       }
     }
-    alphainv = lift_intern(ginv(basistoalg(nf,alpha)));
     matC = cgetg(n+1,t_MAT);
     for (j=1; j<=n; j++)
     {
-      p1=cgetg(n*n+1,t_COL); matC[j]=(long)p1;
+      p1 = cgetg(n*n+1,t_COL); matC[j] = (long)p1;
       for (i=1; i<=n; i++)
       {
 	p2 = gmul(alphainv, gcoeff(matprod,i,j));
-	for (k=1; k<=n; k++)
-	  p1[(i-1)*n+k]=(long)nfreducemodpr(nf,algtobasis(nf,(GEN)p2[k]),modpr);
+	for (k=1; k<=n; k++) p1[(i-1)*n+k]=(long)nf_to_ff(nf,(GEN)p2[k],modpr);
       }
     }
-    matG=nfkermodpr(nf,matC,modpr); m=lg(matG)-1;
-    vecpro=cgetg(3,t_VEC);
-    p1=cgetg(n+m+1,t_MAT); vecpro[1]=(long)p1;
-    p2=cgetg(n+m+1,t_VEC); vecpro[2]=(long)p2;
+    matG = FqM_ker(matC,T,p); m = lg(matG)-1;
+    vecpro = cgetg(3,t_VEC);
+    vecpro[1] = (long)concatsp(matG,rnfId);
+    p2 = cgetg(n+m+1,t_VEC);
     for (j=1; j<=m; j++)
-    {
-      p1[j] = llift((GEN)matG[j]);
       p2[j] = (long)prhinv;
-    }
-    p1 += m;
+    vecpro[2] = (long)p2;
     p2 += m;
     for (j=1; j<=n; j++)
-    {
-      p1[j] = matId[j];
       p2[j] = (long)idealmul(nf,(GEN)I[j],(GEN)alphalistinv[j]);
-    }
+
     matH = nfhermite(nf,vecpro);
     p1 = algtobasis(nf, gmul(Aa, basistoalg(nf,(GEN)matH[1])));
     p2 = (GEN)matH[2];
@@ -2751,12 +2713,12 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
     if (DEBUGLEVEL>3) { fprintferr(" new order:\n"); outerr(H); outerr(Hid); }
     if (sep == 2 || gegal(I,Hid))
     {
-      neworder[1]=(long)H;
-      neworder[2]=(long)Hid;
+      neworder[1] = (long)H;
+      neworder[2] = (long)Hid;
       return gerepilecopy(av, neworder);
     }
 
-    A=H; I=Hid;
+    A = H; I = Hid;
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
       GEN *gptr[2]; gptr[0]=&A; gptr[1]=&I;
@@ -2807,15 +2769,18 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
 static GEN
 rnfround2all(GEN nf, GEN pol, long all)
 {
-  gpmem_t av=avma,tetpil;
+  gpmem_t av = avma;
   long i,j,n,N,nbidp,vpol,*ep;
-  GEN p1,p2,p3,p4,polnf,list,unnf,id,matId,I,W,pseudo,y,discpol,d,D,sym;
+  GEN A,p1,p2,p3,p4,nfT,list,id,I,W,pseudo,y,d,D,sym,unnf;
 
-  nf=checknf(nf); polnf=(GEN)nf[1]; vpol=varn(pol);
+  nf=checknf(nf); nfT=(GEN)nf[1]; vpol=varn(pol);
   pol = fix_relative_pol(nf,pol,1);
-  N=degpol(polnf); n=degpol(pol); discpol=discsr(pol);
-  list=idealfactor(nf,discpol); ep=(long*)list[2]; list=(GEN)list[1];
-  nbidp=lg(list)-1; for(i=1;i<=nbidp;i++) ep[i]=itos((GEN)ep[i]);
+  N = degpol(nfT);
+  n = degpol(pol); 
+  list = idealfactor(nf, discsr(pol));
+  ep  = (long*)list[2];
+  list= (GEN)  list[1];
+  nbidp=lg(list)-1; for(i=1;i<=nbidp;i++) ep[i] = itos((GEN)ep[i]);
   if (DEBUGLEVEL>1)
   {
     fprintferr("Ideals to consider:\n");
@@ -2823,32 +2788,37 @@ rnfround2all(GEN nf, GEN pol, long all)
       if (ep[i]>1) fprintferr("%Z^%ld\n",list[i],ep[i]);
     flusherr();
   }
-  id=idmat(N); unnf=gscalcol_i(gun,N);
-  matId=idmat_intern(n,unnf, gscalcol_i(gzero,N));
+  id = idmat(N); unnf = (GEN)id[1];
   pseudo = NULL;
   for (i=1; i<=nbidp; i++)
     if (ep[i] > 1)
     {
-      y=rnfordmax(nf,pol,(GEN)list[i],id,matId);
+      y = rnfordmax(nf,pol,(GEN)list[i]);
       pseudo = rnfjoinmodules(nf,pseudo,y);
     }
-  if (!pseudo)
+  if (pseudo)
   {
-    I=cgetg(n+1,t_VEC); for (i=1; i<=n; i++) I[i]=(long)id;
-    pseudo=cgetg(3,t_VEC); pseudo[1]=(long)matId; pseudo[2]=(long)I;
+    A = (GEN)pseudo[1];
+    I = (GEN)pseudo[2];
   }
-  W=gmodulcp(mat_to_vecpol(basistoalg(nf,(GEN)pseudo[1]),vpol),pol);
+  else
+  {
+    I = cgetg(n+1,t_VEC); for (i=1; i<=n; i++) I[i]=(long)id;
+    A = idmat_intern(n, unnf, gzero);
+  }
+  W = mat_to_vecpol(lift_intern(basistoalg(nf,A)), vpol);
   p2=cgetg(n+1,t_MAT); for (j=1; j<=n; j++) p2[j]=lgetg(n+1,t_COL);
-  sym=polsym(pol,n-1);
+  sym = polsym(pol,n-1);
+  pol = lift(pol);
   for (j=1; j<=n; j++)
     for (i=j; i<=n; i++)
     {
-      p1 = lift_intern(gmul((GEN)W[i],(GEN)W[j]));
+      p1 = RXQX_mul((GEN)W[i],(GEN)W[j], nfT);
+      p1 = RXQX_rem(p1, pol, nfT);
       coeff(p2,j,i)=coeff(p2,i,j)=(long)quicktrace(p1,sym);
     }
-  d = algtobasis_i(nf,det(p2));
+  d = algtobasis_i(nf, det(p2));
 
-  I=(GEN)pseudo[2];
   i=1; while (i<=n && gegal((GEN)I[i],id)) i++;
   if (i>n) D=id;
   else
@@ -2858,16 +2828,16 @@ rnfround2all(GEN nf, GEN pol, long all)
       if (!gegal((GEN)I[i],id)) D = idealmul(nf,D,(GEN)I[i]);
     D = idealpow(nf,D,gdeux);
   }
-  p4=gun; p3=auxdecomp(content(d),0);
+  p4 = gun; p3 = auxdecomp(content(d),0);
   for (i=1; i<lg(p3[1]); i++)
     p4 = gmul(p4, gpowgs(gcoeff(p3,i,1), itos(gcoeff(p3,i,2))>>1));
-  p4 = gsqr(p4); tetpil=avma;
+  p4 = gsqr(p4);
   i = all? 2: 0;
   p1=cgetg(3 + i,t_VEC);
-  if (i) { p1[1]=lcopy((GEN)pseudo[1]); p1[2]=lcopy(I); }
+  if (i) { p1[1] = lcopy(A); p1[2] = lcopy(I); }
   p1[1+i] = (long)idealmul(nf,D,d);
   p1[2+i] = ldiv(d,p4);
-  return gerepile(av,tetpil,p1);
+  return gerepileupto(av,p1);
 }
 
 GEN
@@ -2954,63 +2924,82 @@ rnfdet0(GEN nf, GEN x, GEN y)
   return y? rnfdet2(nf,x,y): rnfdet(nf,x);
 }
 
-/* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d] it does
- * not matter), gives an nxn matrix (not in HNF) of a pseudo-basis and
- * an ideal vector [id,id,...,id,I] such that order=nf[7]^(n-1)xI.
- * Since it uses the approximation theorem, can be long.
- */
+/* Given two fractional ideals a and b, gives x in a, y in b, z in b^-1,
+   t in a^-1 such that xt-yz=1. In the present version, z is in Z. */
+static GEN
+nfidealdet1(GEN nf, GEN a, GEN b)
+{
+  gpmem_t av = avma;
+  GEN x,p1,res,u,v,da,db;
+
+  a = idealinv(nf,a);
+  da = denom(a); if (!gcmp1(da)) a = gmul(da,a);
+  db = denom(b); if (!gcmp1(db)) b = gmul(db,b);
+  x = idealcoprime(nf,a,b);
+  p1 = idealaddtoone(nf, idealmul(nf,x,a), b);
+  u = (GEN)p1[1];
+  v = (GEN)p1[2];
+
+  res = cgetg(5,t_VEC);
+  res[1] = (long)gmul(x,da);
+  res[2] = (long)gdiv(v,db);
+  res[3] = lnegi(db);
+  res[4] = (long)element_div(nf, u, (GEN)res[1]);
+  return gerepilecopy(av,res);
+}
+
+/* given a pseudo-basis of an order in HNF [A,I] (or [A,I,D,d]), gives an
+ * n x n matrix (not in HNF) of a pseudo-basis and an ideal vector
+ * [id,id,...,id,I] such that order = nf[7]^(n-1) x I.
+ * Uses the approximation theorem ==> slow. */
 GEN
 rnfsteinitz(GEN nf, GEN order)
 {
-  gpmem_t av=avma,tetpil;
-  long i,n;
+  gpmem_t av = avma;
+  long i,n,l;
   GEN Id,A,I,p1,a,b;
 
   nf = checknf(nf);
   Id = idmat(degpol(nf[1]));
-  if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
-  if (typ(order)!=t_VEC || lg(order)<3)
+  if (typ(order) == t_POL) order = rnfpseudobasis(nf,order);
+  l = lg(order);
+  if (typ(order)!=t_VEC || l < 3)
     err(talker,"not a pseudo-matrix in rnfsteinitz");
-  A=dummycopy((GEN)order[1]);
-  I=dummycopy((GEN)order[2]); n=lg(A)-1;
+  A = matalgtobasis(nf, (GEN)order[1]);
+  I = dummycopy((GEN)order[2]); n=lg(A)-1;
   if (typ(A) != t_MAT || typ(I) != t_VEC || lg(I) != n+1)
     err(typeer,"rnfsteinitz");
   for (i=1; i<n; i++)
   {
-    a = (GEN)I[i];
-    if (!gegal(a,Id))
+    GEN c1,c2;
+    a = (GEN)I[i]; if (gegal(a,Id)) continue;
+
+    c1 = (GEN)A[i];
+    c2 = (GEN)A[i+1];
+    b = (GEN)I[i+1];
+    if (gegal(b,Id))
     {
-      GEN c1 = (GEN)A[i];
-      GEN c2 = (GEN)A[i+1];
-      b = (GEN)I[i+1];
-      if (gegal(b,Id))
-      {
-        A[i]  = (long)c2;
-        A[i+1]= lneg(c1);
-	I[i]  = (long)b;
-        I[i+1]= (long)a;
-      }
-      else
-      {
-	p1 = nfidealdet1(nf,a,b);
-	A[i]  = ladd(element_mulvec(nf,(GEN)p1[1], c1),
-		     element_mulvec(nf,(GEN)p1[2], c2));
-	A[i+1]= ladd(element_mulvec(nf,(GEN)p1[3], c1),
-	             element_mulvec(nf,(GEN)p1[4], c2));
-	I[i]  =(long)Id;
-        I[i+1]=(long)idealmul(nf,a,b); p1 = content((GEN)I[i+1]);
-	if (!gcmp1(p1))
-	{
-	  I[i+1] = ldiv((GEN)I[i+1],p1);
-	  A[i+1] = lmul(p1,(GEN)A[i+1]);
-	}
-      }
+      A[i]  = (long)c2;
+      A[i+1]= lneg(c1);
+      I[i]  = (long)b;
+      I[i+1]= (long)a;
+    }
+    else
+    {
+      p1 = nfidealdet1(nf,a,b);
+      A[i]  = ladd(element_mulvec(nf, (GEN)p1[1], c1),
+                   element_mulvec(nf, (GEN)p1[2], c2));
+      A[i+1]= ladd(element_mulvec(nf, (GEN)p1[3], c1),
+                   element_mulvec(nf, (GEN)p1[4], c2));
+      I[i]  = (long)Id;
+      I[i+1]= (long)primitive_part(idealmul(nf,a,b), &p1);
+      if (p1) A[i+1] = (long)element_mulvec(nf, p1,(GEN)A[i+1]);
     }
   }
-  tetpil=avma; p1=cgetg(lg(order),t_VEC);
-  p1[1]=lcopy(A); p1[2]=lcopy(I);
-  for (i=3; i<lg(order); i++) p1[i]=lcopy((GEN)order[i]);
-  return gerepile(av,tetpil,p1);
+  p1 = cgetg(n,t_VEC);
+  p1[1]=(long)A;
+  p1[2]=(long)I; for (i=3; i<l; i++) p1[i]=order[i];
+  return gerepilecopy(av, p1);
 }
 
 /* Given bnf as output by buchinit and either an order as output by
@@ -3058,32 +3047,30 @@ GEN
 rnfhermitebasis(GEN bnf, GEN order)
 {
   gpmem_t av = avma;
-  long j,N,n;
+  long j,n;
   GEN nf,A,I,p1,id;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
-  N=degpol(nf[1]); id=idmat(N);
+  id = idmat(degpol(nf[1]));
   if (typ(order)==t_POL)
   {
-    order=rnfpseudobasis(nf,order);
-    A=(GEN)order[1];
+    order = rnfpseudobasis(nf,order);
+    A = (GEN)order[1];
   }
   else
   {
     if (typ(order)!=t_VEC || lg(order)<3)
       err(talker,"not a pseudo-matrix in rnfbasis");
-    A=gcopy((GEN)order[1]);
+    A = dummycopy((GEN)order[1]);
   }
   I=(GEN)order[2]; n=lg(A)-1;
   for (j=1; j<=n; j++)
   {
-    if (!gegal((GEN)I[j],id))
-    {
-      p1=isprincipalgen(bnf,(GEN)I[j]);
-      if (gcmp0((GEN)p1[1]))
-	A[j]=(long)element_mulvec(nf,(GEN)p1[2],(GEN)A[j]);
-      else { avma=av; return gzero; }
-    }
+    if (gegal((GEN)I[j],id)) continue;
+
+    p1 = isprincipalgen(bnf,(GEN)I[j]);
+    if (!gcmp0((GEN)p1[1])) { avma = av; return gzero; }
+    A[j] = (long)element_mulvec(nf,(GEN)p1[2],(GEN)A[j]);
   }
   return gerepilecopy(av,A);
 }

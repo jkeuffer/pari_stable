@@ -69,26 +69,14 @@ get_tab(GEN nf, long *N)
   *N = lg(tab[1])-1; return tab;
 }
 
-/* product of x and y in nf */
 GEN
-element_mul(GEN nf, GEN x, GEN y)
+mul_by_tab(GEN tab, GEN x, GEN y)
 {
   gpmem_t av;
-  long i,j,k,N,tx,ty;
-  GEN s,v,c,p1,tab;
+  long i,j,k,N;
+  GEN s,v,c,p1;
 
-  if (x == y) return element_sqr(nf,x);
-
-  tx=typ(x); ty=typ(y);
-  nf=checknf(nf); tab = get_tab(nf, &N);
-  if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_mul");
-  if (ty==t_POLMOD) y=checknfelt_mod(nf,y,"element_mul");
-  if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
-  if (is_extscalar_t(ty)) return scal_mul(nf,y,x,tx);
-  if (tx != t_COL || ty != t_COL) err(typeer,"element_mul");
-  if (isnfscalar(x)) return gmul((GEN)x[1],y);
-  if (isnfscalar(y)) return gmul((GEN)y[1],x);
-
+  N = lg(x)-1;
   v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
   {
@@ -121,6 +109,29 @@ element_mul(GEN nf, GEN x, GEN y)
     v[k]=(long)gerepileupto(av,s); av=avma;
   }
   return v;
+}
+
+/* product of x and y in nf */
+GEN
+element_mul(GEN nf, GEN x, GEN y)
+{
+  long N,tx,ty;
+  GEN tab;
+
+  if (x == y) return element_sqr(nf,x);
+
+  tx=typ(x); ty=typ(y);
+  nf=checknf(nf);
+  if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_mul");
+  if (ty==t_POLMOD) y=checknfelt_mod(nf,y,"element_mul");
+  if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
+  if (is_extscalar_t(ty)) return scal_mul(nf,y,x,tx);
+  if (tx != t_COL || ty != t_COL) err(typeer,"element_mul");
+  if (isnfscalar(x)) return gmul((GEN)x[1],y);
+  if (isnfscalar(y)) return gmul((GEN)y[1],x);
+
+  tab = get_tab(nf, &N);
+  return mul_by_tab(tab,x,y);
 }
 
 /* inverse of x in nf */
@@ -306,20 +317,14 @@ element_sqri(GEN nf, GEN x)
   return v;
 }
 
-/* square of x in nf */
 GEN
-element_sqr(GEN nf, GEN x)
+sqr_by_tab(GEN tab, GEN x)
 {
   gpmem_t av = avma;
-  long i,j,k,N, tx = typ(x);
-  GEN p1,s,v,c,tab;
+  long i,j,k,N;
+  GEN p1,s,v,c;
 
-  nf = checknf(nf);
-  tab = get_tab(nf, &N);
-  if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
-  if (is_extscalar_t(tx))
-    return gerepileupto(av, algtobasis(nf, gsqr(x)));
-  if (tx != t_COL) err(typeer,"element_sqr");
+  N = lg(x)-1;
   if (isnfscalar(x))
   {
     s=cgetg(N+1,t_COL); s[1]=lsqr((GEN)x[1]);
@@ -356,6 +361,26 @@ element_sqr(GEN nf, GEN x)
     v[k]=(long)gerepileupto(av,s); av=avma;
   }
   return v;
+}
+
+/* square of x in nf */
+GEN
+element_sqr(GEN nf, GEN x)
+{
+  long N, tx = typ(x);
+  GEN tab;
+
+  nf = checknf(nf);
+  if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
+  if (is_extscalar_t(tx))
+  {
+    gpmem_t av = avma;
+    return gerepileupto(av, algtobasis(nf, gsqr(x)));
+  }
+  if (tx != t_COL) err(typeer,"element_sqr");
+
+  tab = get_tab(nf, &N);
+  return sqr_by_tab(tab,x);
 }
 
 static GEN
@@ -463,6 +488,14 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   y = leftright_pow(y,n, (void*)&D, &_sqrmod, &_mulidmod);
   if (s < 0) y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);
+}
+
+GEN
+element_mulidid(GEN nf, long i, long j)
+{
+  long N;
+  GEN tab = get_tab(nf, &N);
+  tab += (i-1)*N; return (GEN)tab[j];
 }
 
 /* Outputs x.w_i, where w_i is the i-th elt of the integral basis */
@@ -606,7 +639,7 @@ polegal_spec(GEN x, GEN y)
 GEN
 basistoalg(GEN nf, GEN x)
 {
-  long tx=typ(x),lx=lg(x),i;
+  long tx=typ(x),lx=lg(x),i,j,l;
   GEN z;
 
   nf=checknf(nf);
@@ -626,8 +659,17 @@ basistoalg(GEN nf, GEN x)
       }
       /* fall through */
 
-    case t_VEC: case t_MAT: z=cgetg(lx,tx);
+    case t_VEC: z=cgetg(lx,tx);
       for (i=1; i<lx; i++) z[i]=(long)basistoalg(nf,(GEN)x[i]);
+      return z;
+    case t_MAT: z=cgetg(lx,t_MAT);
+      if (!lx) return z;
+      l = lg(x[1]);
+      for (j=1; j<lx; j++)
+      {
+        z[j] = lgetg(l,t_COL);
+        for (i=1; i<l; i++) coeff(z,i,j) = (long)basistoalg(nf,gcoeff(x,i,j));
+      }
       return z;
 
     case t_POLMOD:
@@ -986,39 +1028,6 @@ zidealij(GEN x, GEN y)
   z[3] = lmul(U,xi); return z;
 }
 
-/* return mat * y mod prh */
-static GEN
-mul_matvec_mod_pr(GEN mat, GEN y, GEN prh)
-{
-  gpmem_t av;
-  long i,j, lx = lg(mat);
-  GEN v, res = cgetg(lx,t_COL), p = gcoeff(prh,1,1);
-
-  av = avma; (void)new_chunk((lx-1) * lgefint(p));
-  v = zerocol(lx-1);
-  for (i=lx-1; i; i--)
-  {
-    GEN p1 = (GEN)v[i], t = (GEN)prh[i];
-    for (j=1; j<lx; j++)
-      p1 = addii(p1, mulii(gcoeff(mat,i,j), (GEN)y[j]));
-    p1 = modii(p1, p);
-    if (p1 != gzero && is_pm1(t[i]))
-    {
-      for (j=1; j<i; j++)
-        v[j] = lsubii((GEN)v[j], mulii(p1, (GEN)t[j]));
-      p1 = gzero;
-    }
-    if (p1 == gzero) /* intended */
-      res[i] = zero;
-    else
-    {
-      res[i] = (long)icopy_av(p1, (GEN)av);
-      av = (gpmem_t)res[i];
-    }
-  }
-  avma = av; return res;
-}
-
 /* smallest integer n such that g0^n=x modulo p prime. Assume g0 has order q
  * (p-1 if q = NULL) */
 GEN
@@ -1119,102 +1128,99 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
   return gerepileuptoint(av, lift(chinese(v,NULL)));
 }
 
-/* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
- * q = order of g0  (Npr - 1 if q = NULL)
- * TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
+/* discrete log in Fq for a in Fp^* */
 static GEN
-nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN modpr,GEN q)
+ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 {
-  gpmem_t av=avma,av1,lim;
-  long lbaby,i,k, f = itos((GEN)pr[4]);
-  GEN p1,smalltable,giant,perm,v,g0inv,prh = (GEN)modpr[1];
-  GEN multab, p = (GEN)pr[1];
+  gpmem_t av = avma;
+  GEN q,n_q,ord,ordp;
 
-  x = lift_intern(nfreducemodpr(nf,x,modpr));
-  p1 = q? q: addsi(-1, gpowgs(p,f));
+  if (gcmp1(a) || egalii(p, gdeux)) { avma = av; return gzero; }
+
+  ordp = subis(p, 1);
+  ord = T? subis(gpowgs(p,degpol(T)), 1): p;
+  if (egalii(a, ordp)) /* -1 */
+    return gerepileuptoint(av, shifti(ord,-1));
+
+  if (!T) q = NULL;
+  else 
+  { /* we want < g > = Fp^* */
+    q = divii(ord,ordp);
+    g = FpXQ_pow(g,q,T,p);
+    if (typ(g) == t_POL) g = constant_term(g);
+  }
+  n_q = Fp_PHlog(a,g,p,NULL);
+  if (q) n_q = mulii(q, n_q);
+  return gerepileuptoint(av, n_q);
+}
+
+/* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
+ * q = order of g0  (Npr - 1 if q = NULL) */
+static GEN
+ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
+{
+  gpmem_t av = avma, av1, lim;
+  long lbaby,i,k;
+  GEN p1,smalltable,giant,perm,v,g0inv;
+
+  if (typ(x) == t_INT) return ff_PHlog_Fp(x,g0,T,p);
+
+  /* here f > 1 ==> T != NULL */
+  p1 = q? q: addsi(-1, gpowgs(p,degpol(T)));
   p1 = racine(p1);
-  if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in nfshanks");
-  lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
-  g0inv = lift_intern(element_invmodpr(nf,g0,modpr));
+  if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
+  lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
+  g0inv = FpXQ_inv(g0,T,p);
   p1 = x;
-
-  multab = eltmul_get_table(nf, g0inv);
-  for (i=lg(multab)-1; i; i--)
-    multab[i]=(long)FpV_red((GEN)multab[i], p);
 
   for (i=1;;i++)
   {
-    if (isnfscalar(p1) && gcmp1((GEN)p1[1])) { avma=av; return stoi(i-1); }
+    if (gcmp1(p1)) { avma = av; return stoi(i-1); }
 
     smalltable[i]=(long)p1; if (i==lbaby) break;
-    p1 = mul_matvec_mod_pr(multab,p1,prh);
+    p1 = FpXQ_mul(p1,g0inv, T,p);
   }
-  giant=lift_intern(element_divmodpr(nf,x,p1,modpr));
-  p1=cgetg(lbaby+1,t_VEC);
-  perm = gen_sort(smalltable, cmp_IND | cmp_C, cmp_vecint);
-  for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
-  smalltable=p1; p1=giant;
-
-  multab = eltmul_get_table(nf, giant);
-  for (i=lg(multab)-1; i; i--)
-    multab[i]=(long)FpV_red((GEN)multab[i], p);
+  giant = FpXQ_div(x,p1,T,p);
+  perm = gen_sort(smalltable, cmp_IND | cmp_C, cmp_pol);
+  smalltable = vecextract_p(smalltable, perm);
+  p1 = giant;
 
   av1 = avma; lim=stack_lim(av1,2);
   for (k=1;;k++)
   {
-    i=tablesearch(smalltable,p1,cmp_vecint);
+    i = tablesearch(smalltable,p1,cmp_pol);
     if (i)
     {
-      v=addis(mulss(lbaby-1,k),perm[i]);
-      return gerepileuptoint(av,addsi(-1,v));
+      v = addis(mulss(lbaby-1,k), perm[i]);
+      return gerepileuptoint(av, addsi(-1,v));
     }
-    p1 = mul_matvec_mod_pr(multab,p1,prh);
+    p1 = FpXQ_mul(p1, giant, T,p);
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
-      if(DEBUGMEM>1) err(warnmem,"nfshanks");
+      if(DEBUGMEM>1) err(warnmem,"ffshanks");
       p1 = gerepileupto(av1, p1);
     }
   }
 }
 
-/* same in nf.zk / pr
- * TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
+/* same in Fp[X]/T */
 GEN
-nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN modpr)
+ff_PHlog(GEN a, GEN g, GEN T, GEN p)
 {
   gpmem_t av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,ord,fa,ex;
   long e,i,j,l;
 
-  a = lift_intern(nfreducemodpr(nf,a,modpr));
-  if (isnfscalar(a))
-  { /* can be done in Fp^* */
-    GEN p = (GEN)pr[1], ordp = subis(p, 1);
-    a = (GEN)a[1];
-    if (gcmp1(a) || egalii(p, gdeux)) { avma = av; return gzero; }
-    ord = subis(idealnorm(nf,pr), 1);
-    if (egalii(a, ordp)) /* -1 */
-      return gerepileuptoint(av, shifti(ord,-1));
-
-    if (egalii(ord, ordp))
-      q = NULL;
-    else /* we want < g > = Fp^* */
-    {
-      q = divii(ord,ordp);
-      g = element_powmodpr(nf,g,q,modpr);
-    }
-    g = lift_intern((GEN)g[1]);
-    n_q = Fp_PHlog(a,g,p,NULL);
-    if (q) n_q = mulii(q, n_q);
-    return gerepileuptoint(av, n_q);
-  }
-  ord = subis(idealnorm(nf,pr),1);
+  if (typ(a) == t_INT)
+    return gerepileuptoint(av, ff_PHlog_Fp(a,g,T,p));
+  /* f > 1 ==> T != NULL */
+  ord = subis(gpowgs(p, degpol(T)), 1);
   fa = factor(ord);
   ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
-  ginv = lift_intern(element_invmodpr(nf, g, modpr));
+  ginv = FpXQ_inv(g,T,p);
   v = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
@@ -1224,21 +1230,32 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN modpr)
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
     t0 = divii(ord, (GEN)qj[e]);
-    a0 = element_powmodpr(nf, a, t0, modpr); 
-    ginv0 = element_powmodpr(nf, ginv, t0, modpr); /* order q^e */
-    g_q = element_powmodpr(nf, g, divii(ord,q), modpr); /* order q */
+    a0 = FpXQ_pow(a, t0, T,p); 
+    ginv0 = FpXQ_pow(ginv, t0, T,p); /* order q^e */
+    g_q = FpXQ_pow(g, divii(ord,q), T,p); /* order q */
+
     n_q = gzero;
     for (j=0; j<e; j++)
     {
-      b = element_mulmodpr(nf,a0,
-                              element_powmodpr(nf, ginv0, n_q, modpr), modpr);
-      b = element_powmodpr(nf, b, (GEN)qj[e-1-j], modpr);
-      b = nfshanks(nf,b, g_q, pr,modpr, q);
+      b = FpXQ_mul(a0, FpXQ_pow(ginv0, n_q, T,p), T,p);
+      b = FpXQ_pow(b, (GEN)qj[e-1-j], T,p);
+      b = ffshanks(b, g_q, q, T,p);
       n_q = addii(n_q, mulii(b, (GEN)qj[j]));
     }
     v[i] = lmodulcp(n_q, (GEN)qj[e]);
   }
   return gerepileuptoint(av, lift(chinese(v,NULL)));
+}
+
+/* same in nf.zk / pr */
+GEN
+nf_PHlog(GEN nf, GEN a, GEN g, GEN pr)
+{
+  gpmem_t av = avma;
+  GEN T,p, modpr = nf_to_ff_init(nf, &pr, &T, &p);
+  GEN A = nf_to_ff(nf,a,modpr);
+  GEN G = nf_to_ff(nf,g,modpr);
+  return gerepileuptoint(av, ff_PHlog(A,G,T,p));
 }
 
 GEN
@@ -1526,7 +1543,7 @@ zinternallog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
   {
     L = (GEN)list[j]; cyc=(GEN)L[1]; gen=(GEN)L[2];
     if (j==1)
-      p1 = nf_PHlog(nf,a,(GEN)gen[1],pr, nfmodprinit(nf,pr));
+      p1 = nf_PHlog(nf,a,(GEN)gen[1],pr);
     else
     {
       p1 = (GEN)a[1]; a[1] = laddsi(-1,(GEN)a[1]);

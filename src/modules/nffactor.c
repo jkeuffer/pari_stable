@@ -51,7 +51,6 @@ extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 #define FqX_mul FpXQX_mul
 #define FqX_red FpXQX_red
 
-static GEN nfmod_pol_reduce(GEN nf,GEN modpr,GEN pol);
 static GEN nfsqff(GEN nf,GEN pol,long fl);
 
 typedef struct /* for use in nfsqff */
@@ -120,28 +119,16 @@ unifpol(GEN nf,GEN pol,long flag)
   return unifpol0(nf,(GEN) pol, flag);
 }
 
-/* reduce the coefficients of pol modulo modpr */
+/* lift coeffs of pol to Zk (in algtobasis form) */
 static GEN
-nfmod_pol_reduce(GEN nf,GEN modpr,GEN pol)
+zkX(GEN x, GEN modpr)
 {
-  gpmem_t av = avma;
-  long i;
-  GEN p1;
+  long i, l;
+  GEN z;
 
-  if (typ(pol)!=t_POL) return nf_to_ff(nf,pol,modpr);
-  pol = unifpol(nf,pol,0);
-  i = lgef(pol);
-  p1=cgetg(i,t_POL); p1[1]=pol[1];
-  for (i--; i>=2; i--)
-    p1[i] = (long) nf_to_ff(nf,(GEN)pol[i],modpr);
-  return gerepilecopy(av, normalizepol(p1));
-}
-
-static GEN
-pol_ff_to_nf(GEN x, GEN modpr)
-{
-  long i, l = lgef(x);
-  GEN z = cgetg(l, t_POL); z[1] = x[1];
+  if (typ(x)!=t_POL) return gcopy(x);
+  l = lgef(x);
+  z = cgetg(l, t_POL); z[1] = x[1];
   for (i=2; i<l; i++) z[i] = (long)ff_to_nf((GEN)x[i], modpr); 
   return z;
 }
@@ -180,10 +167,10 @@ nffactormod(GEN nf, GEN x, GEN pr)
     err(talker,"polynomial variable must have highest priority in nffactormod");
 
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
-  xrd = nfmod_pol_reduce(nf, modpr, x);
+  xrd = modprX(x, nf, modpr);
   rep = nffactormod_i(nf,xrd,modpr);
   z = (GEN)rep[1]; l = lg(z);
-  for (j = 1; j < l; j++) z[j] = (long)pol_ff_to_nf((GEN)z[j], modpr);
+  for (j = 1; j < l; j++) z[j] = (long)zkX((GEN)z[j], modpr);
   return gerepilecopy(av, rep);
 }
 
@@ -693,17 +680,6 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
   return gerepileupto(av, unifpol(nf,p1,1));
 }
 
-/* cf pol_to_vec */
-static GEN
-RXQX_to_nf(GEN nf, GEN x, long N, GEN veczero)
-{
-  GEN c = cgetg(N+1,t_COL), y = x+1;
-  long i,l = lgef(x)-1; 
-  for (i=1; i<l ; i++) c[i] = (long)algtobasis(nf, (GEN)y[i]);
-  for (   ; i<=N; i++) c[i] = (long)veczero;
-  return c;
-}
-
 /* relative Dedekind criterion over nf, applied to the order defined by a
  * root of irreducible polynomial P, modulo the prime ideal pr. Returns
  * [flag,basis,val], where basis is a pseudo-basis of the enlarged order,
@@ -714,7 +690,7 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
 {
   long vt, r, d, n, m, i, j;
   gpmem_t av = avma;
-  GEN Prd,P,p1,p2,p,tau,g,vecun,veczero,matid;
+  GEN Prd,P,p1,p2,p,tau,g,matid;
   GEN modpr,res,h,k,base,nfT,T,gzk,hzk;
 
   nf = checknf(nf); nfT = (GEN)nf[1]; P = lift(P0);
@@ -724,21 +700,18 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
   n = degpol(nfT);
   m = degpol(P);
 
-  vecun = gscalcol_i(gun,n);
-  veczero = zerocol(n);
-
-  Prd = nfmod_pol_reduce(nf, modpr, P);
+  Prd = modprX(P, nf, modpr);
   p1 = (GEN)nffactormod_i(nf,Prd,modpr)[1];
   r = lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
   g = (GEN)p1[1];
   for (i=2; i<r; i++) g = FqX_mul(g, (GEN)p1[i], T, p);
   h = FqX_div(Prd,g, T, p);
-  gzk = pol_ff_to_nf(g, modpr);
-  hzk = pol_ff_to_nf(h, modpr);
+  gzk = zkX(g, modpr);
+  hzk = zkX(h, modpr);
 
   k = gsub(P, RXQX_mul(gzk,hzk, nfT));
   k = gdiv(RXQX_mul(tau,k,nfT), p);
-  k = nfmod_pol_reduce(nf, modpr, unifpol(nf,k,0));
+  k = modprX(k, nf, modpr);
 
   p2 = FqX_gcd(g,h,  T,p);
   k  = FqX_gcd(p2,k, T,p); d = degpol(k);  /* <= m */
@@ -747,9 +720,9 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
   res[3] = lstoi(vt);
   res[1] = (!d || vt<=1)? un: zero;
 
-  base=cgetg(3,t_VEC);
-  p1=cgetg(m+d+1,t_MAT); base[1]=(long)p1;
-  p2=cgetg(m+d+1,t_VEC); base[2]=(long)p2;
+  base = cgetg(3,t_VEC);
+  p1 = cgetg(m+d+1,t_MAT); base[1] = (long)p1;
+  p2 = cgetg(m+d+1,t_VEC); base[2] = (long)p2;
  /* if d > 0, base[2] temporarily multiplied by p, for the final nfhermitemod
   * [ which requires integral ideals ] */
   matid = gscalmat(d? p: gun, n);
@@ -757,8 +730,7 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
   {
     p2[j]=(long)matid;
     p1[j]=lgetg(m+1,t_COL);
-    for (i=1; i<=m; i++)
-      coeff(p1,i,j) = (i==j)?(long)vecun:(long)veczero;
+    for (i=1; i<=m; i++) coeff(p1,i,j) = (i==j)?un:zero;
   }
   if (d)
   {
@@ -766,10 +738,10 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
     GEN X = polx[varn(P)], pal;
 
     pal = FqX_div(Prd,k, T,p);
-    pal = pol_ff_to_nf(pal, modpr);
+    pal = zkX(pal, modpr);
     for (   ; j<=m+d; j++)
     {
-      p1[j] = (long)RXQX_to_nf(nf,pal,m,veczero);
+      p1[j] = (long)pol_to_vec(pal,m);
       p2[j] = (long)prinvp;
       pal = RXQX_rem(RXQX_mul(pal,X,nfT),P,nfT);
     }

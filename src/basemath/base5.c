@@ -45,7 +45,7 @@ GEN
 matalgtobasis(GEN nf,GEN x)
 {
   long i,j,lx,li;
-  GEN p1,z;
+  GEN p1,z,c;
 
   if (typ(x)!=t_MAT)
     err(talker,"argument must be a matrix in matalgtobasis");
@@ -55,7 +55,12 @@ matalgtobasis(GEN nf,GEN x)
   for (j=1; j<lx; j++)
   {
     p1=cgetg(li,t_COL); z[j]=(long)p1;
-    for (i=1; i<li; i++) p1[i]=(long)algtobasis(nf,gcoeff(x,i,j));
+    for (i=1; i<li; i++)
+    {
+      c = gcoeff(x,i,j);
+      c = typ(c)==t_COL? gcopy(c): algtobasis(nf,c);
+      p1[i]=(long)c;
+    }
   }
   return z;
 }
@@ -456,7 +461,7 @@ rnfprincipaltohermite(GEN rnf,GEN x)
   bas=(GEN)rnf[7]; bas1=(GEN)bas[1];
   p1=rnfalgtobasis(rnf,gmul(x,gmodulcp(bas1,(GEN)rnf[1])));
   z=cgetg(3,t_VEC); z[2]=bas[2];
-  settyp(p1,t_MAT); z[1]=(long)matalgtobasis(nf,p1);
+  settyp(p1,t_MAT); z[1]=(long)p1;
 
   tetpil=avma;
   return gerepile(av,tetpil,nfhermite(nf,z));
@@ -622,7 +627,6 @@ rnfidealabstorel(GEN rnf,GEN x)
       p2[k+1]=(long)truecoeff(xj,k);
   }
   ma=gmul((GEN)rnf[8],ma);
-  ma=matalgtobasis(nf,ma);
   p1=cgetg(n*m+1,t_VEC); id=idmat(m);
   for (j=1; j<=n*m; j++) p1[j]=(long)id;
   p2=cgetg(3,t_VEC); p2[1]=(long)ma; p2[2]=(long)p1;
