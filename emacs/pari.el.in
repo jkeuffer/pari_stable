@@ -123,7 +123,6 @@ whenever a gp-session is started."
 (gp-defcustom pari-colors 
 ;; CONFIGURE ??
  (eval (expand-file-name (concat gp-gphelp-dir "pari-colors.el" )))
-    "/home/ramare/lisp/first-look/pari-colors.el"
 "*Where the choice of colors is stored"
 :type 'file
 :group 'gp)
@@ -231,7 +230,7 @@ it at the bottom of your file."
 ;; This can't be done automagically in a satisfactory way
 
 (defvar gp-prompt-pattern
-  "^---- (type return to continue) ----\\|^\\?[\n\t ]*"
+  "^[?>][\n\t ]*"
   "*Regexp used to match gp prompts.
    can be set with gp-set-prompt (bound to M-\\ p)")
 
