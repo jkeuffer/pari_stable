@@ -869,7 +869,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   C->R = (GEN)z[1];
   a    = (GEN)z[2];
   C->p = poleval(p, a);
-  if (C->p == gen_0) C->p = to_polmod(zeropol(v),(GEN)a[1]);
+  if (C->p == gen_0) C->p = mkpolmod(zeropol(v),(GEN)a[1]);
   C->q = poleval(q, a); 
   C->rev = modreverse_i((GEN)a[2], (GEN)a[1]);
   if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z\n",C->R);

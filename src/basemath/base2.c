@@ -2911,7 +2911,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     for (j=1; j<lg(Ip); j++)
     {
       p1 = (GEN)A[j];
-      for (i=1; i<=n; i++) p1[i] = (long)to_polmod((GEN)p1[i], nfT);
+      for (i=1; i<=n; i++) p1[i] = (long)mkpolmod((GEN)p1[i], nfT);
     }
     for (   ; j<=n; j++)
     {
@@ -3383,8 +3383,8 @@ polcompositum0(GEN A, GEN B, long flall)
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = C[i];
-      w[2] = (long)to_polmod(a, (GEN)w[1]);
-      w[3] = (long)to_polmod(b, (GEN)w[1]);
+      w[2] = (long)mkpolmod(a, (GEN)w[1]);
+      w[3] = (long)mkpolmod(b, (GEN)w[1]);
       w[4] = lstoi(-k); C[i] = (long)w;
     }
   }
@@ -3453,7 +3453,7 @@ rnfequation0(GEN A, GEN B, long flall)
     GEN a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], C));/* inv is costly !*/
     a = gneg_i(RgX_rem(a, C));
     /* b = gadd(polx[varn(A)], gmulsg(k,a)); */
-    C = mkvec3(C, to_polmod(a, C), stoi(k));
+    C = mkvec3(C, mkpolmod(a, C), stoi(k));
   }
   return gerepilecopy(av, C);
 }
@@ -3930,6 +3930,6 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   elt = eltabstorel((GEN)red[2], T, relpol, a);
   pol = rnfcharpoly(nf,relpol,elt,v);
   if (!(flag & nf_ORIG)) return gerepileupto(av, pol);
-  elt = to_polmod(modreverse_i((GEN)elt[2],(GEN)elt[1]), pol);
+  elt = mkpolmod(modreverse_i((GEN)elt[2],(GEN)elt[1]), pol);
   return gerepilecopy(av, mkvec2(pol, elt));
 }

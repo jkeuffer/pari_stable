@@ -805,7 +805,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   for (i=1; i<L; i++)
   {
     GEN u = poleval((GEN)sunitrel[i], theta); /* abstorel */
-    if (typ(u) != t_POLMOD) u = to_polmod(u, (GEN)theta[1]);
+    if (typ(u) != t_POLMOD) u = mkpolmod(u, (GEN)theta[1]);
     sunitrel[i] = (long)u;
     u = bnfissunit(bnf,suni, gnorm(u));
     if (lg(u) == 1) err(bugparier,"rnfisnorm");
