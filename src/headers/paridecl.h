@@ -925,6 +925,7 @@ GEN     mulmat_real(GEN x, GEN y);
 GEN     numer(GEN x);
 long    padicprec(GEN x, GEN p);
 GEN     polcoeff0(GEN x,long n,long v);
+GEN     polcoeff_i(GEN x, long n, long v);
 long    poldegree(GEN x,long v);
 GEN     poleval(GEN x, GEN y);
 GEN     pollead(GEN x,long v);

@@ -2190,74 +2190,99 @@ compo(GEN x, long n)
   return gcopy((GEN)x[l]);
 }
 
+/* assume x a t_RFRAC(n) */
+static GEN
+_rfraccoeff(GEN x, long n, long v)
+{
+  long ex, w = precdl;
+  if (v<0) v = gvar(x);
+  ex = ggval((GEN)x[2], polx[v]);
+  precdl = n + ex + 1; x = gtoser(x, v);
+  precdl = w;
+  return _sercoeff(x,n,v);
+}
+
+/* assume x a t_POL */
+static GEN
+_polcoeff(GEN x, long n, long v)
+{
+  long i, w, dx;
+  GEN z;
+  dx = degpol(x);
+  if (dx < 0) return gzero;
+  if (v < 0 || v == (w=varn(x)))
+    return (n < 0 || n > dx)? gzero: (GEN)x[n+2];
+  if (w > v) return n? gzero: x;
+  /* w < v */
+  if (dx == 0) return polcoeff_i((GEN)x[2], n, v);
+  z = cgetg(dx+3, t_POL);
+  z[1] = x[1];
+  for (i=2; i<dx+3; i++) z[i] = (long)polcoeff_i((GEN)x[i], n, v);
+  return normalizepol(z);
+}
+
+/* assume x a t_SER */
+static GEN
+_sercoeff(GEN x, long n, long v)
+{
+  long i, w, dx, ex;
+  GEN z;
+ 
+  if (!signe(x)) return gzero;
+  dx = lg(x)-3; ex = valp(x); n -= ex;
+  if (v < 0 || v == (w=varn(x)))
+  {
+    if (n > dx) err(talker,"non existent component in truecoeff");
+    return (n < 0)? gzero: (GEN)x[n+2];
+  }
+  if (w > v) return n? gzero: x;
+  /* w < v */
+  if (dx == 0) return polcoeff_i((GEN)x[2], n, v);
+  z = cgetg(dx+3, t_POL);
+  z[1] = x[1];
+  for (i=2; i<dx+3; i++) z[i] = (long)polcoeff_i((GEN)x[i], n, v);
+  return normalizepol(z);
+}
+
+GEN
+polcoeff_i(GEN x, long n, long v)
+{
+  switch(typ(x))
+  {
+    case t_POL: return _polcoeff(x,n,v);
+    case t_SER: return _sercoeff(x,n,v);
+    case t_RFRAC:
+    case t_RFRACN: return _rfraccoeff(x,n,v);
+    default: return n? gzero: x;
+  }
+}
+
 /* with respect to the main variable if v<0, with respect to the variable v
    otherwise. v ignored if x is not a polynomial/series. */
-
 GEN
 polcoeff0(GEN x, long n, long v)
 {
-  long tx=typ(x),lx,ex,w,av,tetpil;
-  GEN xinit;
+  long tx=typ(x),av;
 
   if (is_scalar_t(tx)) return n? gzero: gcopy(x);
 
+  av = avma;
   switch(tx)
   {
+    case t_POL: x = _polcoeff(x,n,v); break;
+    case t_SER: x = _sercoeff(x,n,v); break;
+    case t_RFRAC:
+    case t_RFRACN: x = _rfraccoeff(x,n,v); break;
+   
     case t_QFR: case t_QFI: case t_VEC: case t_COL: case t_MAT:
-      if (n<1 || n>=lg(x)) break;
-      return gcopy((GEN)x[n]);
+      if (n>=1 && n<lg(x)) return gcopy((GEN)x[n]);
+    /* fall through */
 
-    case t_POL:
-      if (n<0) return gzero;
-      w=varn(x);
-      if (v < 0 || v == w)
-	return (n>=lgef(x)-2)? gzero: gcopy((GEN)x[n+2]);
-      if (v < w) return n? gzero: gcopy(x);
-      av=avma; xinit=x;
-      x=gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
-      if (gvar(x)) { avma=av; return n? gzero: gcopy(xinit); }
-      if (typ(x) == t_POL)
-      {
-        if (n>=lgef(x)-2) { avma=av; return gzero; }
-        x = (GEN)x[n+2];
-      }
-      else
-        x = polcoeff0(x, n, 0);
-      tetpil=avma; return gerepile(av,tetpil,gsubst(x,MAXVARN,polx[w]));
-
-    case t_SER:
-      w=varn(x);
-      if (v < 0 || v == w)
-      {
-	if (!signe(x)) return gzero;
-	lx=lg(x); ex=valp(x); if (n<ex) return gzero;
-	if (n>=ex+lx-2) break;
-	return gcopy((GEN)x[n-ex+2]);
-      }
-      if (v < w) return n?  gzero: gcopy(x);
-      av=avma; xinit=x;
-      x=gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
-      if (gvar(x)) { avma=av; return n? gzero: gcopy(xinit); }
-      if (gcmp0(x)) { avma=av; return gzero; }
-      if (typ(x) == t_SER)
-      {
-        lx=lg(x); ex=valp(x); if (n<ex) return gzero;
-        if (n>=ex+lx-2) break;
-        x = (GEN)x[n-ex+2];
-      }
-      else
-        x = polcoeff0(x, n, 0);
-      tetpil=avma; return gerepile(av,tetpil,gsubst(x,MAXVARN,polx[w]));
-
-    case t_RFRAC: case t_RFRACN:
-      w = precdl; av = avma;
-      if (v<0) v = gvar(x);
-      ex = ggval((GEN)x[2], polx[v]);
-      precdl = n + ex + 1; x = gtoser(x, v); precdl = w;
-      return gerepileupto(av, polcoeff0(x, n, v));
+    default: err(talker,"nonexistent component in truecoeff");
   }
-  err(talker,"nonexistent component in truecoeff");
-  return NULL; /* not reached */
+  if (x == gzero) return x;
+  if (avma == av) return gcopy(x);
+  return gerepilecopy(av, x);
 }
 
 GEN
