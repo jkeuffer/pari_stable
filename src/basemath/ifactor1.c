@@ -310,7 +310,7 @@ plisprime(GEN N, long flag)
   long i, l, t = typ(N);
   int eps;
   GEN C, F = NULL;
- 
+
   if (t == t_VEC)
   { /* [ N, [p1,...,pk] ], pi list of pseudoprime divisors of N */
     F = (GEN)N[2];
@@ -318,17 +318,17 @@ plisprime(GEN N, long flag)
   }
   if (t != t_INT) err(arither1);
   if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
- 
+
   eps = absi_cmp(N,gdeux);
   if (eps<=0) return eps? gzero: gun;
- 
+
   N = absi(N);
   if (!F)
   {
     F = (GEN)decomp_limit(addis(N,-1), racine(N))[1];
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }
- 
+
   C = cgetg(4,t_MAT); l = lg(F);
   C[1] = lgetg(l,t_COL);
   C[2] = lgetg(l,t_COL);
@@ -3520,10 +3520,8 @@ ifac_divide(GEN *partial, GEN *where)
 }
 
 
-GEN mpqs(GEN N);		/* in src/modules/mpqs.c, maybe a dummy,
-				 * returns a factor, or a vector of factors,
-				 * or NULL
-				 */
+extern GEN mpqs(GEN N);/* in src/modules/mpqs.c, maybe a dummy,
+		        * returns a factor, a vector of factors, or NULL */
 
 /* The following takes the place of 2.0.9.alpha's find_factor(). */
 

@@ -92,7 +92,7 @@ static ulong test_mode, quiet_mode, gpsilent, simplifyflag;
 static ulong chrono, pariecho, primelimit, strictmatch;
 static ulong tglobal, histsize, paribufsize, lim_lines;
 static int tm_is_waiting = 0, handle_C_C = 0;
-static pariout_t fmt;
+static pariout_t *fmt;
 
 #define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
@@ -151,14 +151,12 @@ gp_preinit(void)
   secure = test_mode = under_emacs = under_texmacs = chrono = pariecho = 0;
   prettyprinter = prettyprinter_dft;
   prettyprinter_file = NULL;
-  fmt.prettyp= f_PRETTYMAT;
-  fmt.format = 'g';
-  fmt.fieldw = 0;
-  fmt.sp     = 1;
+  fmt = &DFLT_OUTPUT;
+  fmt->prettyp= f_PRETTYMAT;
 #ifdef LONG_IS_64BIT
-  fmt.sigd     = 38;
+  fmt->sigd     = 38;
 #else
-  fmt.sigd     = 28;
+  fmt->sigd     = 28;
 #endif
   lim_lines = 0;
   histsize = 5000; paribufsize = 1024;
@@ -271,7 +269,7 @@ tm_end_output(void)
 void
 print0(GEN *g, long flag)
 {
-  pariout_t T = fmt;
+  pariout_t T = *fmt;
 
   added_newline = (flag & f_NOEOL) == 0;
   T.prettyp = flag & ~f_NOEOL;
@@ -438,19 +436,19 @@ sd_realprecision(char *v, int flag)
 {
   if (*v)
   {
-    long newnb = get_int(v, fmt.sigd);
+    long newnb = get_int(v, fmt->sigd);
     long newprec = (long) (newnb*pariK1 + 3);
 
-    if (fmt.sigd == newnb && prec == newprec) return gnil;
+    if (fmt->sigd == newnb && prec == newprec) return gnil;
     if (newnb < 0) err(talker,"default: negative real precision");
-    fmt.sigd = newnb; prec = newprec;
+    fmt->sigd = newnb; prec = newprec;
   }
-  if (flag == d_RETURN) return stoi(fmt.sigd);
+  if (flag == d_RETURN) return stoi(fmt->sigd);
   if (flag == d_ACKNOWLEDGE)
   {
     long n = PRECDIGIT;
     pariputsf("   realprecision = %ld significant digits", n);
-    if (n != fmt.sigd) pariputsf(" (%ld digits displayed)", fmt.sigd);
+    if (n != fmt->sigd) pariputsf(" (%ld digits displayed)", fmt->sigd);
     pariputc('\n');
   }
   return gnil;
@@ -472,24 +470,24 @@ sd_format(char *v, int flag)
     char c = *v;
     if (c!='e' && c!='f' && c!='g')
       err(talker2,"default: inexistent format",v,v);
-    fmt.format = c; v++;
+    fmt->format = c; v++;
 
     if (isdigit((int)*v))
-      { fmt.fieldw=atol(v); while (isdigit((int)*v)) v++; }
+      { fmt->fieldw=atol(v); while (isdigit((int)*v)) v++; }
     if (*v++ == '.')
     {
-      if (*v == '-') fmt.sigd = -1;
+      if (*v == '-') fmt->sigd = -1;
       else
-	if (isdigit((int)*v)) fmt.sigd=atol(v);
+	if (isdigit((int)*v)) fmt->sigd=atol(v);
     }
   }
   if (flag == d_RETURN)
   {
-    sprintf(thestring, "%c%ld.%ld", fmt.format, fmt.fieldw, fmt.sigd);
+    sprintf(thestring, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
     return strtoGENstr(thestring,0);
   }
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   format = %c%ld.%ld\n", fmt.format, fmt.fieldw, fmt.sigd);
+    pariputsf("   format = %c%ld.%ld\n", fmt->format, fmt->fieldw, fmt->sigd);
   return gnil;
 }
 
@@ -713,7 +711,7 @@ static GEN
 sd_output(char *v, int flag)
 {
   char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)", "(external prettyprint)", NULL};
-  return sd_ulong(v,flag,"output",(ulong*) &(fmt.prettyp), 0,3,msg);
+  return sd_ulong(v,flag,"output",(ulong*) &(fmt->prettyp), 0,3,msg);
 }
 
 extern void err_clean(void);
@@ -1661,7 +1659,7 @@ gp_history(long p, long flag, char *old, char *entrypoint)
 static void
 texmacs_output(GEN z, long n)
 {
-  pariout_t T = fmt;
+  pariout_t T = *fmt;
   char *sz;
 
   T.prettyp = f_TEX;
@@ -1705,7 +1703,7 @@ static int
 tex2mail_output(GEN z, long n)
 {
   FILE *o_out;
-  pariout_t T = fmt;
+  pariout_t T = *fmt;
   
   if (!(prettyprinter && prettyp_init())) return 0;
   o_out = pari_outfile; /* save state */
@@ -1750,7 +1748,7 @@ normal_output(GEN z, long n)
   /* output */
   term_color(c_OUTPUT);
   init_lim_lines(thestring,lim_lines);
-  gen_output(z, &fmt);
+  gen_output(z, fmt);
   init_lim_lines(NULL,lim_lines);
   term_color(c_NONE); pariputc('\n');
 }
@@ -1809,10 +1807,10 @@ escape0(char *tch)
       x = gp_history(d, 0, tch+1,tch-1);
       switch (c)
       {
-	case 'a': brute   (x, fmt.format, -1); break;
-	case 'm': matbrute(x, fmt.format, -1); break;
+	case 'a': brute   (x, fmt->format, -1); break;
+	case 'm': matbrute(x, fmt->format, -1); break;
 	case 'B': if (tex2mail_output(x,0)) return;  /* fall through */
-	case 'b': sor     (x, fmt.format, -1, fmt.fieldw); break;
+	case 'b': sor     (x, fmt->format, -1, fmt->fieldw); break;
 	case 'x': voir(x, get_int(s, -1)); 
         case 'w':
 	{
@@ -2416,7 +2414,7 @@ gp_main_loop(int ismain)
     if (ismain)
     {
       static long tloc, outtyp;
-      tloc = tglobal; outtyp = fmt.prettyp; recover(0);
+      tloc = tglobal; outtyp = fmt->prettyp; recover(0);
       if (setjmp(environnement))
       {
         char *s = (char*)global_err_data;
@@ -2429,7 +2427,7 @@ gp_main_loop(int ismain)
 	  if (!i) i = histsize;
 	  i--; j--;
 	}
-        tglobal = tloc; fmt.prettyp = outtyp;
+        tglobal = tloc; fmt->prettyp = outtyp;
         kill_all_buffers(b);
       }
     }
@@ -2466,12 +2464,12 @@ gp_main_loop(int ismain)
     avma = av;
     if (gpsilent) continue;
 
-    if (test_mode) { init80(0); gen_output(z, &fmt); pariputc('\n'); }
+    if (test_mode) { init80(0); gen_output(z, fmt); pariputc('\n'); }
     else
     {
       if (under_texmacs)
         texmacs_output(z,tglobal);
-      else if (fmt.prettyp != f_PRETTY || !tex2mail_output(z,tglobal))
+      else if (fmt->prettyp != f_PRETTY || !tex2mail_output(z,tglobal))
         normal_output(z,tglobal);
     }
     pariflush();
@@ -2607,7 +2605,7 @@ break_loop(long numerr)
       }
       if (x == gnil) continue;
 
-      term_color(c_OUTPUT); gen_output(x, &fmt);
+      term_color(c_OUTPUT); gen_output(x, fmt);
       term_color(c_NONE); pariputc('\n');
     }
     /* break loop initiated by ^C. Empty input --> continue computation */
@@ -2634,9 +2632,9 @@ gp_exception_handler(long numerr)
 long
 setprecr(long n)
 {
-  long m = fmt.sigd;
+  long m = fmt->sigd;
 
-  if (n>0) {fmt.sigd = n; prec = (long)(n*pariK1 + 3);}
+  if (n>0) {fmt->sigd = n; prec = (long)(n*pariK1 + 3);}
   return m;
 }
 

@@ -46,6 +46,12 @@ static GEN  **powsubfactorbase,vperm,subfactorbase,Disc,sqrtD,isqrtD;
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
+extern GEN quadhilbertreal(GEN D, GEN flag, long prec);
+extern void comp_gen(GEN z,GEN x,GEN y);
+extern GEN codeform5(GEN x, long prec);
+extern GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
+extern GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
+extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -271,8 +277,6 @@ quadhilbertimag(GEN D, GEN flag)
   }
   return gerepileupto(av,P);
 }
-
-GEN quadhilbertreal(GEN D, GEN flag, long prec);
 
 GEN
 quadhilbert(GEN D, GEN flag, long prec)
@@ -786,12 +790,6 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 /*  Routines related to binary quadratic forms (for internal use)  */
 /*                                                                 */
 /*******************************************************************/
-extern void comp_gen(GEN z,GEN x,GEN y);
-extern GEN codeform5(GEN x, long prec);
-extern GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
-extern GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-
 #define rhorealform(x) rhoreal_aux(x,Disc,sqrtD,isqrtD)
 #define redrealform(x) gcopy(fix_signs(redrealform5(x,Disc,sqrtD,isqrtD)))
 #define comprealform(x,y) fix_signs(comprealform5(x,y,Disc,sqrtD,isqrtD))

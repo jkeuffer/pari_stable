@@ -60,7 +60,7 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 int  (*default_exception_handler)(long);
 GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
-pariout_t DFLT_OUTPUT = { 'g', -1, 1, 0, 0, f_RAW };
+pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, 0, f_RAW };
 
 extern void  initout(int initerr);
 extern int   term_width(void);
