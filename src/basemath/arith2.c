@@ -2368,7 +2368,6 @@ GEN qfbimagsolvep(GEN Q,GEN p)
 
 GEN qfbsolve(GEN Q,GEN n)
 {
-  pari_sp ltop=avma;
   if (typ(Q)!=t_QFI || typ(n)!=t_INT)
     err(typeer,"qfbsolve");
   return qfbimagsolvep(Q,n);
