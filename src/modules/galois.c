@@ -770,37 +770,34 @@ gpoly(GEN rr, long n1, long n2)
   return NULL; /* not reached */
 }
 
+extern GEN small_to_pol_i(GEN z, long l);
+extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
+
 static void
 tschirn(GEN po, GEN *r, long pr)
 {
-  long av0 = avma, a[NMAX],v,i,d;
+  long a[NMAX],i,k, v = varn(po), d = TSCHMAX + 1;
   GEN h,u;
 
-  d = TSCHMAX+1;
-  if (d>=N)
-    err(talker,"too large degree for Tschirnhaus transformation in tschirn");
+  if (d >= N) err(talker,"degree too large in tschirn");
   if (DEBUGLEVEL)
-  {
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",d);
-    flusherr();
-  }
-  v=varn(po); h=polun[v];
-  do
-  {
-    avma = av0;
-    for (i=0; i<d; i++)
-    {
-      a[i] = ((mymyrand()>>4) & 7) + 1;
-      h = gaddsg(a[i],gmul(polx[v],h));
-    }
-    u=caract(gmodulcp(h,po),v);
-  }
-  while (lgef(srgcd(u,deriv(u,v))) > 3);
-  if (DEBUGLEVEL>2) { bruterr(u,'g',-1); fprintferr("\n"); flusherr(); }
 
-  avma = av0; d = TSCHMAX;
+  do 
+  {
+    for (i=0; i<d; i++) a[i] = ((mymyrand()>>4) & 7) + 1;
+    h = small_to_pol_i(a-2, d+2);
+    (void)normalizepol_i(h, d+2);
+
+  } while (lgef(h) <= 3);
+  setvarn(h, v);
+  k = 0; u = ZX_caract_sqf(h, po, &k, v);
+  a[1] += k; /* a may have been modified */
+  if (DEBUGLEVEL>2) outerr(u); 
+
+  d = TSCHMAX;
   for (i=0; i<=d; i++) coeff[d][i] = a[i];
-  preci(r,PRMAX); r[d]=cgetg(N+1,t_VEC);
+  preci(r,PRMAX); r[d] = cgetg(N+1,t_VEC);
   new_pol(r,a,d); preci(r,pr); TSCHMAX++;
 }
 
