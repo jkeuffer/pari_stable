@@ -1121,7 +1121,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
   }
   x = idealhermite(nf,x);
   if (lg(x)==1) err(talker,"zero ideal in isprincipal");
-  if (lgef(nf[1])==4)
+  if (degpol(nf[1]) == 1)
     return gerepileupto(av, triv_gen(nf, gcoeff(x,1,1), 0, flag));
 
   pr = prec_arch(bnf); /* precision of unit matrix */
