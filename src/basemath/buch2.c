@@ -2826,6 +2826,9 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
   if (lim < 3) lim = 3;
   cbach = min(12., gtodouble(gcbach)); cbach /= 2;
+  if (cbach == 0.) err(talker,"Bach constant = 0 in bnfxxx");
+  if (nbrelpid < 0) err(talker,"negative #relation / ideal in bnfxxx");
+   
   cbach2 = gtodouble(gcbach2);
   /* resc = sqrt(D) w / 2^r1 (2pi)^r2 ~ hR / Res(zeta_K,1) */
   resc = gmul(gmul2n(gpuigs(shiftr(mppi(DEFAULTPREC),1),-R2),-R1),
