@@ -1869,7 +1869,7 @@ entree functions_basic[]={
 {"idealinv",25,(void*)idealinv0,6,"GGD0,L,"},
 {"ideallist",99,(void*)ideallist0,6,"GLD4,L,"},
 {"ideallistarch",99,(void*)ideallistarch0,6,"GGDGD0,L,"},
-{"ideallog",99,(void*)zideallog,6,"GGGp"},
+{"ideallog",99,(void*)zideallog,6,"GGG"},
 {"idealmin",99,(void*)minideal,6,"GGDGp"},
 {"idealmul",99,(void*)idealmul0,6,"GGGD0,L,p"},
 {"idealnorm",2,(void*)idealnorm,6,"GG"},
