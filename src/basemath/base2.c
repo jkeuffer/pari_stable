@@ -2815,7 +2815,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   av1 = avma; lim = stack_lim(av1,1);
   for(cmpt=1; ; cmpt++)
   {
-    GEN I0 = dummycopy(I), Wa;
+    GEN I0 = dummycopy(I), W0 = dummycopy(W), Wa;
     GEN Wainv, Waa;
     GEN Ip, A, Ainv, MWmod, F;
     GEN pseudo, G;
@@ -2864,10 +2864,10 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     F = cgetg(n+1, t_MAT); F[1] = rnfId[1];
     for (j=2; j<=n; j++) F[j] = (long)rnfelementid_powmod(MWmod, j, q1, T,p);
     Ip = FqM_ker(F,T,p);
+    if (lg(Ip) == 1) { W = W0; I = I0; break; }
 
     /* Fill C: W_k A_j = sum_i C_(i,j),k A_i */
-    if (lg(Ip) == 1) A = rnfId;
-    else             A = modprM_lift(FqM_suppl(Ip,T,p), modpr);
+    A = modprM_lift(FqM_suppl(Ip,T,p), modpr);
     for (j=1; j<lg(Ip); j++)
     {
       p1 = (GEN)A[j];
@@ -2890,8 +2890,8 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
           coeff(C, (j-1)*n+i, k) = (long)nf_to_ff(nf,c,modpr);
         }
       }
-
     G = modprM_lift(FqM_ker(C,T,p), modpr);
+
     pseudo = rnfjoinmodules_i(nf, G,prhinv, rnfId,I);
     /* express W in terms of the power basis */
     W = algtobasis(nf, gmul(Wa, basistoalg(nf,(GEN)pseudo[1])));
@@ -2905,18 +2905,18 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
         I[j] = (long)idealmul(nf,       (GEN)Tau[j],    (GEN)I[j] );
       }
     if (DEBUGLEVEL>3) fprintferr(" new order:\n%Z\n%Z\n", W, I);
-    if (sep <= 3 || gegal(I,I0))
-    {
-      GEN res = cgetg(3,t_VEC);
-      res[1] = (long)W;
-      res[2] = (long)I; return gerepilecopy(av, res);
-    }
+    if (sep <= 3 || gegal(I,I0)) break;
 
     if (low_stack(lim, stack_lim(av1,1)) || (cmpt & 3) == 0)
     {
       if(DEBUGMEM>1) err(warnmem,"rnfordmax");
       gerepileall(av1,2, &W,&I);
     }
+  }
+  {
+    GEN res = cgetg(3,t_VEC);
+    res[1] = (long)W;
+    res[2] = (long)I; return gerepilecopy(av, res);
   }
 }
 
