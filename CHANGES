@@ -151,6 +151,8 @@ IZ 19- try to output usable TeX (avoid braces, let TeX split lines)
 MS 21- allow poltchebi(n < 0) [ := poltchebi(-n), still satisfies the 3-term
        recursion ]
 IZ 22- prime sieve optimization [ primelimit ]
+   23- try to reduce the likelihood of an artefact relation in PSLQ [ use
+       "confidence level" 2^(-20) ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

@@ -2023,7 +2023,7 @@ maxnorml2(pslq_M *M)
     for (j=1; j<n; j++) s = gadd(s, gnorm(gcoeff(M->H,i,j)));
     ma = gmax(ma, s);
   }
-  return gsqrt(ma, DEFAULTPREC);
+  return mpsqrt(gmul(ma, realun(DEFAULTPREC)));
 }
 
 static void
@@ -2055,7 +2055,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   for (k = 1; k <= n; k++)
     if (gcmp0((GEN)x[k])) return vec_ei(n, k);
   if (n <= 1) return cgetg(1, t_COL);
-  prec = gprecision(x)-1;
+  prec = gprecision(x);
   if (prec < 0)
   { /* exact components */
     pari_sp av = avma;
@@ -2176,7 +2176,9 @@ one_step_gen(pslq_M *M, GEN tabga, long prec)
   if (DEBUGLEVEL>3) M->T->reda += timer();
   if (gexpo(M->A) >= -M->EXP) return ginv(maxnorml2(M));
   m = vecabsminind(M->y);
-  if (is_zero((GEN)M->y[m], M->EXP, prec)) return (GEN)M->B[m];
+  if (is_zero((GEN)M->y[m], M->EXP, prec)
+   && gexpo(M->y) - gexpo((GEN)M->y[m]) > 20)
+    return (GEN)M->B[m];
 
   if (DEBUGLEVEL>2)
   {
