@@ -2785,6 +2785,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob;
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
+  long seed;
   double cbach,cbach2,drc,LOGD2;
   GEN p1,vecG,fu,zu,nf,D,xarch,W,R,Res,z,h,vperm,subFB;
   GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase, *mat;
@@ -2836,6 +2837,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   av0 = avma; mat = NULL; FB = NULL;
 
 START:
+  seed = getrand();
   avma = av0; desallocate(&mat);
   if (precpb)
   {
@@ -3082,6 +3084,7 @@ MORE:
     if (k <= 0 && labs(flun) > 2)
     {
       if (k < 0) precadd = (DEFAULTPREC-2) + ((-k) >> TWOPOTBITS_IN_LONG);
+      (void)setrand(seed);
       precpb = "getfu"; goto START;
     }
   }
