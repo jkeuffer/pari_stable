@@ -1436,6 +1436,7 @@ GEN
 nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
   long L, E, Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
+  pari_sp av = avma, av2, limit;
   GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib, ns;
   GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, opa;
 
@@ -1510,14 +1511,16 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     /* if Ea*Fa == N then O = Zp[alpha] */
     if (Ea*Fa == N)
     {
-      if (flag) return NULL;
+      if (flag) { avma = av; return NULL; }
 
       alph = redelt(alph, sqri(p), pmf);
-      return dbasis(p, fx, mf, alph, p);
+      return gerepileupto(av, dbasis(p, fx, mf, alph, p));
     }
 
     /* during the process beta tends to a factor of chi */
     beta  = lift_intern(gpowgs(gmodulcp(nu, chi), Ea));
+
+    av2 = avma; limit = stack_lim(av2, 1);
 
     for (;;)
     {
@@ -1597,7 +1600,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	phi  = RX_RXQ_compo(gamm, alph, fx);
 	phi  = redelt(phi, p, pmf);
 	if (flag) mf += 3;
-        return Decomp(p, fx, mf, phi, chig, nug, flag);
+        return gerepileupto(av, Decomp(p, fx, mf, phi, chig, nug, flag));
       }
 
       Fg = degpol(nug);
@@ -1613,7 +1616,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  phi = RX_RXQ_compo((GEN)w[2], alph, fx);
 	  phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
-          return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+          return gerepileupto(av, Decomp(p, fx, mf, phi, (GEN)w[3], 
+					 (GEN)w[4], flag));
 	}
 	break;
       }
@@ -1653,7 +1657,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
           phi = RX_RXQ_compo(eta, alph, fx);
           phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
-          return Decomp(p, fx, mf, phi, chie, nue, flag);
+          return gerepileupto(av, Decomp(p, fx, mf, phi, chie, nue, flag));
         }
 
         /* if vp(eta) = vp(gamma - delta) > 0 */
@@ -1678,7 +1682,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  phi = RX_RXQ_compo((GEN)w[2], alph, fx);
 	  phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
-          return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
+          return gerepileupto(av, Decomp(p, fx, mf, phi, (GEN)w[3], 
+					 (GEN)w[4], flag));
 	}
 	break;
       }
@@ -1686,6 +1691,15 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (eq) delt = gmul(delt, gpowgs(p, eq));
       if (er) delt = gmul(delt, gpowgs(nu, er));
       beta = gsub(beta, delt);
+
+      if (low_stack(limit,stack_lim(av2,1)))
+      {
+	GEN *gptr[2];
+	long c = 2; 
+	gptr[0]=&beta; if (kapp) { gptr[1]=&kapp; } else { c = 1; }
+	if (DEBUGMEM > 1) err(warnmem, "nilord");
+	gerepilemany(av2, gptr, c);
+      }
     }
 
     /* we replace alpha by a new alpha with a larger F or E */
@@ -1706,12 +1720,13 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       {
 	p1 = (GEN)factmod0(chi, p)[1];
 	l  = lg(p1) - 1;
-	if (l == 1) return NULL;
+	if (l == 1) { avma = av; return NULL; }
 	phi = redelt(alph, p, pmf);
-	return Decomp(p, fx, ggval(pmf, p), phi, chi, (GEN)p1[l], flag);
+	return gerepileupto(av, Decomp(p, fx, ggval(pmf, p), phi, chi, 
+				       (GEN)p1[l], flag));
       }
       else
-	return dbasis(p, fx, mf, alph, chi);
+	return gerepileupto(av, dbasis(p, fx, mf, alph, chi));
     }
   }
 }
