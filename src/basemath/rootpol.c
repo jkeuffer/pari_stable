@@ -1922,9 +1922,9 @@ static GEN
 all_roots(GEN p, long bitprec)
 {
   GEN pd,q,roots_pol,m;
-  long bitprec0, bitprec2,n=lgef(p)-3,i,e,h,av;
+  long bitprec0, bitprec2,n=lgef(p)-3,i,e,h;
+  ulong av;
 
-  roots_pol=cgetg(n+1,t_VEC); av=avma;
 #if 0
   pd = poldeflate(p, &h);
 #else
@@ -1932,9 +1932,9 @@ all_roots(GEN p, long bitprec)
 #endif
   e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
   bitprec0=bitprec + gexpo(pd) - gexpo(leading_term(pd)) + (long)log2(n/h)+1+e;
-  for (i=1;; i++)
+  for (av=avma,i=1;; i++,avma=av)
   {
-    setlg(roots_pol,1); 
+    roots_pol = cgetg(n+1,t_VEC); setlg(roots_pol,1); 
     bitprec2 = bitprec0 + (1<<i)*n;
     q = gmul(myrealun(bitprec2), mygprec(pd,bitprec2));
     m = split_complete(q,bitprec2,roots_pol);
@@ -1950,7 +1950,6 @@ all_roots(GEN p, long bitprec)
     }
     if (DEBUGLEVEL > 7)
       fprintferr("all_roots: restarting, i = %ld, e = %ld\n", i,e);
-    avma = av;
   }
 }
 
