@@ -3417,7 +3417,6 @@ newtonpoly(GEN x, GEN p)
 
 extern int cmp_pol(GEN x, GEN y);
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
-GEN squff2(GEN x, long klim, long hint);
 GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 
@@ -3425,16 +3424,16 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN
 polfnf(GEN a, GEN t)
 {
-  GEN x0, y,p1,p2,u,fa,n,unt,dent,alift;
+  GEN x0,y,p1,p2,u,fa,n,unt,dent,alift;
   long av=avma,tetpil,lx,v,i,k,vt;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
   vt=varn(t); v=varn(a);
   a = fix_relative_pol(t,a,0);
-  a = gdiv(a, content(a));
+  alift = lift(a); p1 = content(alift);
+  if (!gcmp1(p1)) { a = gdiv(a, p1); alift = lift(a); }
   dent=discsr(t); unt = gmodulsg(1,t);
-  alift=lift(a);
   u = lift(gdiv(a, gmul(unt,nfgcd(alift,derivpol(alift), t, dent))));
   n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
