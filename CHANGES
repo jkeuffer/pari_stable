@@ -98,6 +98,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    56- stack corruption in u_FpV_polint (used by modular bivariate resultant)
    57- polroots() used too high a precision when checking errors a posteriori
        (--> slow)
+   58- contfrac(1/x) --> SEGV
 
   Changed
 BA  1- improved Fp_isom
