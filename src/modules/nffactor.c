@@ -680,7 +680,7 @@ get_trace(GEN ind, trace_data *T)
 static trace_data *
 init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
 {
-  long e = gexpo((GEN)S), i,j, l,h;
+  long e = gexpo(S), i,j, l,h;
   GEN qgood, S1, invd;
 
   if (e < 0) return NULL; /* S = 0 */
@@ -759,14 +759,11 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   pari_sp av0 = avma;
   GEN pk = gpowgs(p,a), pks2 = shifti(pk,-1);
 
-  GEN trace1   = cgetg(lfamod+1, t_MAT);
-  GEN trace2   = cgetg(lfamod+1, t_MAT);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
-  GEN q = ceil_safe(mpsqrt(T->BS_2));
   GEN lc = absi(leading_term(pol)), lt = is_pm1(lc)? NULL: lc;
   GEN C2ltpol, C = T->L->topowden, Tpk = T->L->Tpk;
   GEN Clt  = mul_content(C, lt);
@@ -781,7 +778,11 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 
   C2ltpol = C2lt? gmul(C2lt,pol): pol;
   {
+    GEN q = ceil_safe(mpsqrt(T->BS_2));
+    pari_sp av = avma;
     GEN t1,t2, ltdn, lt2dn;
+    GEN trace1   = cgetg(lfamod+1, t_MAT);
+    GEN trace2   = cgetg(lfamod+1, t_MAT);
 
     ltdn = mul_content(lt, dn);
     lt2dn= mul_content(ltdn, lt);
@@ -804,9 +805,10 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       trace1[i] = (long)nf_bestlift(t1, NULL, T->L);
       trace2[i] = (long)nf_bestlift(t2, NULL, T->L);
     }
-
-    T1 = init_trace(&_T1, trace1, T->L, q);
-    T2 = init_trace(&_T2, trace2, T->L, q);
+    trace1 = gclone(trace1);
+    trace2 = gclone(trace2); avma = av;
+    T1 = init_trace(&_T1, trace1, T->L, q); gunclone(trace1);
+    T2 = init_trace(&_T2, trace2, T->L, q); gunclone(trace2);
   }
   degsofar[0] = 0; /* sentinel */
 
