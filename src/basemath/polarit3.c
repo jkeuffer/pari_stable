@@ -2924,6 +2924,17 @@ ZX_resultant(GEN A, GEN B)
   return gerepileuptoint(av, icopy(H));
 }
 
+/* assume x has integral coefficients */
+GEN
+ZX_disc(GEN x)
+{
+  ulong av = avma;
+  GEN l, d = ZX_resultant(x, derivpol(x));
+  l = leading_term(x); if (!gcmp1(l)) d = divii(d,l);
+  if (deg(x) & 2) d = negi(d);
+  return gerepileuptoint(av,d);
+}
+
 int
 ZX_issquarefree(GEN x)
 {
