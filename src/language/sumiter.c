@@ -45,7 +45,7 @@ static int negcmp(GEN x, GEN y) { return gcmp(y,x); }
 void
 forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
 {
-  long ss, av,av0 = avma, lim, i, lgv;
+  long ss, av,av0 = avma, lim, i;
   GEN v = NULL;
   int (*cmp)(GEN,GEN);
 
@@ -53,8 +53,8 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   push_val(ep, a);
   if (is_vec_t(typ(s)))
   {
-    v=s; lgv=lg(v)-1; s=gzero;
-    for (i=1; i<=lgv; i++) s = gadd(s,(GEN)v[i]);
+    v = s; s = gzero;
+    for (i=lg(v)-1; i; i--) s = gadd(s,(GEN)v[i]);
   }
   ss = gsigne(s);
   if (!ss) err(talker, "step equal to zero in forstep");
@@ -64,7 +64,11 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   {
     long av1=avma; (void)lisseq(ch); avma=av1;
     if (loop_break()) break;
-    if (v) { if (++i > lgv) i=1; s = (GEN)v[i]; }
+    if (v)
+    {
+      if (++i >= lg(v)) i = 1;
+      s = (GEN)v[i];
+    }
     a = (GEN) ep->value; a = gadd(a,s);
 
     if (low_stack(lim, stack_lim(av,1)))
@@ -77,25 +81,83 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   pop_val(ep); avma = av0;
 }
 
+/* assume ptr is the address of a diffptr containing the succesive
+ * differences between primes, and c = current prime (up to *p excluded)
+ * return smallest prime >= a, update ptr */
+static long
+sinitp(long a, long c, byteptr *ptr)
+{
+  byteptr p = *ptr;
+  if (a <= 0) a = 2;
+  if (maxprime() < a) err(primer1);
+  while (a > c) c += *p++;
+  *ptr = p; return c;
+}
+
+/* value changed during the loop, replace by the first prime whose
+   value is strictly larger than new value */
+static void
+update_p(entree *ep, byteptr *ptr, long prime[])
+{
+  GEN z = ep->value;
+  long a, c;
+
+  if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
+  if (is_bigint(z)) { prime[2] = -1; /* = infinity */ return; }
+  a += itos(z); c = prime[2];
+  if (c < a)
+    prime[2] = sinitp(a, c, ptr); /* increased */
+  else if (c > a)
+  { /* lowered, reset p */
+    *ptr = diffptr;
+    prime[2] = sinitp(a, 0, ptr);
+  }
+  changevalue_p(ep, prime); 
+}
+
+static byteptr
+prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
+{
+  byteptr p = diffptr;
+  ulong P;
+
+  ga = gceil(ga); gb = gfloor(gb);
+  if (is_bigint(ga) || is_bigint(gb))
+  {
+    if (cmpii(ga, gb) > 0) return NULL;
+    err(primer1);
+  }
+  P = maxprime();
+  *a = itos(ga); if (*a <= 0) *a = 1;
+  *b = itos(gb); if (*a > *b) return NULL;
+  if (*a <= P) prime[2] = sinitp(*a, 0, &p);
+  if (*b > P) err(primer1);
+  return p;
+}
+
 void
 forprime(entree *ep, GEN ga, GEN gb, char *ch)
 {
-  long av = avma, a,b;
   long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  byteptr p=diffptr;
+  long av = avma, a,b;
+  byteptr p;
 
-  ga = gceil(ga); gb = gfloor(gb);
-  if (is_bigint(ga) || is_bigint(gb)) err(primer1);
-  a = itos(ga); if (a<=0) a = 1;
-  b = 0; while (*p && a > b) b += *p++;
-  prime[2] = b; b = itos(gb);
+  p = prime_loop_init(ga,gb, &a,&b, prime);
+  if (!p) { avma = av; return; }
+
   avma = av; push_val(ep, prime);
-  while (prime[2] <= b)
+  while ((ulong)prime[2] < (ulong)b)
   {
-    if (!*p) err(primer1);
     (void)lisseq(ch); if (loop_break()) break;
-    avma = av; prime[2] += *p++;
+    if (ep->value == prime)
+      prime[2] += *p++;
+    else
+      update_p(ep, &p, prime);
+    avma = av;
   }
+  /* if b = P --> *p = 0 now and the loop wouldn't end if it read 'while
+   * (prime[2] <= b)' */
+  if (prime[2] == b) { (void)lisseq(ch); (void)loop_break(); avma = av; }
   pop_val(ep);
 }
 
@@ -440,36 +502,39 @@ prodinf1(entree *ep, GEN a, char *ch, long prec)
 }
 
 GEN
-prodeuler(entree *ep, GEN a, GEN b, char *ch, long prec)
+prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
-  long prime,tetpil, av,av0 = avma, lim;
+  long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long a,b,tetpil, av,av0 = avma, lim;
   GEN p1,x = realun(prec);
-  byteptr p=diffptr;
+  byteptr p;
+  
+  av = avma;
+  p = prime_loop_init(ga,gb, &a,&b, prime);
+  if (!p) { avma = av; return x; }
 
-  prime = 0;
-  b = gfloor(b); a = gceil(a);
-  while (*p && cmpis(a,prime)>0) prime += *p++;
-  if (cmpsi(prime,b) > 0)
+  av = avma; push_val(ep, prime);
+  lim = stack_lim(avma,1);
+  while ((ulong)prime[2] < (ulong)b)
   {
-    av=avma; if (gcmp1(subii(a,b))) { avma=av; return x; }
-    err(talker,"incorrect indices in prodeuler");
-  }
-  av=avma; lim = stack_lim(avma,1);
-  a = stoi(prime); push_val(ep, a);
-  do
-  {
-    if (!*p) err(primer1);
     p1 = lisexpr(ch); if (did_break()) err(breaker,"prodeuler");
-    x=gmul(x,p1); a = addsi(*p++,a);
+    x = gmul(x,p1);
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&x; gptr[1]=&a;
       if (DEBUGMEM>1) err(warnmem,"prodeuler");
-      gerepilemany(av,gptr,2);
+      x = gerepileupto(av, gcopy(x));
     }
-    ep->value = (void*)a;
+    if (ep->value == prime)
+      prime[2] += *p++;
+    else
+      update_p(ep, &p, prime);
   }
-  while (gcmp(a,b)<=0);
+  /* cf forprime */
+  if (prime[2] == b)
+  {
+    p1 = lisexpr(ch); if (did_break()) err(breaker,"prodeuler");
+    x = gmul(x,p1);
+  }
   pop_val(ep); tetpil=avma;
   return gerepile(av0,tetpil,gcopy(x));
 }
