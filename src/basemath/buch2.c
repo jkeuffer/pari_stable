@@ -51,26 +51,28 @@ static const int CBUCHG = (1<<RANDOM_BITS) - 1;
 static const int randshift = BITS_IN_RANDOM-1 - RANDOM_BITS;
 #undef RANDOM_BITS
 
-static long KC,KCZ,KCZ2,MAXRELSUP;
-static long primfact[500],expoprimfact[500];
-static GEN *idealbase, vectbase, FB, numFB, powsubFB, numideal;
+static long KC, KCZ, KCZ2, MAXRELSUP;
+static long primfact[500], expoprimfact[500];
+static GEN *idealbase, vectbase, FB, powsubFB, numideal;
 
 /* FB[i]     i-th rational prime used in factor base
- * numFB[i]  index k such that FB[k]=i (0 if i is not prime)
  *
  * vectbase          vector of all ideals in FB
  * vecbase o subFB   part of FB used to build random relations
  * powsubFB  array lg(subFB) x (CBUCHG+1)   all powers up to CBUCHG
  *
- * idealbase[i]      prime ideals above i in FB
+ * idealbase[p]      list of P|p, NP <= n2
+ * HACK: isclone() is set for idealbase[p] iff all P|p are in FB
+ * (idealbase[i], i not prime or i > n2, is undefined!)
+ *
  * numideal[i]       index k such that idealbase[k] = i.
  *
  * mat            all relations found (as long integers, not reduced)
  * cglob          lg(mat) = total number of relations found so far
  *
  * Use only non-inert primes, coprime to discriminant index F:
- *   KC = number of prime ideals in factor base (norm < Bach cst)
- *   KC2= number of prime ideals assumed to generate class group (>= KC)
+ *   KC = number of P in factor base (p <= n, NP <= n2)
+ *   KC2= number of P assumed to generate class group (NP <= n2)
  *
  *   KCZ = number of rational primes under ideals counted by KC
  *   KCZ2= same for KC2
@@ -113,81 +115,71 @@ reallocate(long max, GEN *M, GEN *first_nz)
   *first_nz = cgetalloc(*first_nz, l, t_VECSMALL);
 }
 
-/* Return the list of indexes or the primes chosen for the subFB.
- * Fill vperm (if !=0): primes ideals sorted by increasing norm (except the
- * ones in subFB come first [dense rows come first for hnfspec])
- * ss = number of rational primes whose divisors are all in FB
- */
-static GEN
-subFBgen(long N,long m,long minsFB,GEN vperm, long *ptss)
+/* don't take P|p if P ramified, or all other Q|p already there */
+static int
+ok_subFB(long t, GEN D)
 {
-  long i, j, lv=lg(vectbase), s=0, s1=0, n=0, ss=0, z=0;
-  gpmem_t av = avma;
-  GEN y1,y2,subFB,perm,perm1,P,Q;
+  GEN LP, P = (GEN)vectbase[t];
+  long p = itos((GEN)P[1]);
+  LP = idealbase[p];
+  return smodis(D,p) && (!isclone(LP) || t != numideal[p] + lg(LP)-1);
+}
+
+/* Return the list of indexes of the primes chosen for the subFB.
+ * Fill *ptvperm (if !=0): primes ideals sorted by increasing norm (except the
+ * ones in subFB come first [dense rows for hnfspec]) */
+static GEN
+subFBgen(GEN nf, long PROD, long minsFB, GEN *ptvperm)
+{
+  GEN y, perm, yes, no, D = (GEN)nf[3];
+  long i, j, k, iyes, ino, lv = KC + 1;
   double prod;
+  gpmem_t av;
 
-  (void)new_chunk(lv); /* room for subFB */
-  y1 = cgetg(lv,t_COL);
-  y2 = cgetg(lv,t_COL);
-  for (i=1,P=(GEN)vectbase[i];;P=Q)
-  { /* we'll sort ideals by norm (excluded ideals = "zero") */
-    long e = itos((GEN)P[3]);
-    long ef= e*itos((GEN)P[4]);
-
-    s1 += ef;
-    y2[i] = (long)powgi((GEN)P[1],(GEN)P[4]);
-    /* take only unramified ideals */
-    if (e>1) { y1[i]=zero; s=0; z++; } else { y1[i]=y2[i]; s += ef; }
-
-    i++; Q = (GEN)vectbase[i];
-    if (i == lv || !egalii((GEN)P[1], (GEN)Q[1]))
-    { /* don't take all P above a given p (delete the last one) */
-      if (s == N) { y1[i-1]=zero; z++; }
-      if (s1== N) ss++;
-      if (i == lv) break;
-      s = s1 = 0;
-    }
-  }
-  if (z+minsFB >= lv) return NULL;
-
-  prod = 1.0;
-  perm = sindexsort(y1) + z; /* skip "zeroes" (excluded ideals) */
-  for(;;)
+  if (ptvperm) 
   {
-    if (++n > minsFB && (z+n >= lv || prod > m + 0.5)) break;
-    prod *= gtodouble((GEN)y1[perm[n]]);
-  }
-  if (prod < m) return NULL;
-  n--;
-
-  /* take the first (non excluded) n ideals (wrt norm), put them first, and
-   * sort the rest by increasing norm */
-  for (j=1; j<=n; j++) y2[perm[j]] = zero;
-  perm1 = sindexsort(y2); avma = av;
-
-  subFB = cgetg(n+1, t_VECSMALL);
-  if (vperm)
+    vectbase = cgetg(lv, t_COL);
+    *ptvperm = cgetg(lv, t_VECSMALL);
+  } 
+  av = avma;
+  y = cgetg(lv,t_COL); /* Norm P */
+  for (k=0, i=1; i <= KCZ; i++)
   {
-    for (j=1; j<=n; j++) vperm[j] = perm[j];
-    for (   ; j<lv; j++) vperm[j] = perm1[j];
-  }
-  for (j=1; j<=n; j++) subFB[j] = perm[j];
-
-  if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL>3)
+    GEN LP = idealbase[FB[i]];
+    long l = lg(LP);
+    for (j = 1; j < l; j++)
     {
-      fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
-      for (i=1; i<=KC; i++) fprintferr("no %ld = %Z\n",i,vectbase[i]);
-      fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
-      outerr(vecextract_p(vectbase,subFB));
-      fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
-      fprintferr("vperm = %Z\n\n",vperm);
+      GEN P = (GEN)LP[j];
+      k++;
+      y[k]        = (long)powgi((GEN)P[1], (GEN)P[4]);
+      vectbase[k] = (long)P; /* noop if ptvperm = NULL */
     }
-    msgtimer("sub factorbase (%ld elements)",n);
+  }
+  /* perm sorts vectbase by increasing norm */
+  perm = sindexsort(y);
+  yes = cgetg(lv, t_VECSMALL); iyes = 1;
+  no  = cgetg(lv, t_VECSMALL); ino  = 1;
+  prod = 1.0;
+  for (i = 1; i < lv; i++)
+  {
+    long t = perm[i];
+    if (!ok_subFB(t, D)) { no[ino++] = t; continue; }
+
+    yes[iyes++] = t;
+    prod *= (double)itos((GEN)y[t]);
+    if (iyes > minsFB && prod > PROD+0.5) break;
+  }
+  if (i == lv) return NULL;
+  avma = av; /* safe, also if ptvperm = NULL */
+  if (ptvperm)
+  {
+    GEN p = *ptvperm;
+    for (j=1; j<iyes; j++)     p[j] = yes[j];
+    for (i=1; i<ino; i++, j++) p[j] =  no[i];
+    for (   ; j<lv; j++)       p[j] =  perm[j];
   }
   powsubFB = NULL;
-  *ptss = ss; return subFB;
+  setlg(yes, iyes); return gcopy(yes);
 }
 
 static GEN
@@ -205,8 +197,7 @@ mulred(GEN nf,GEN x, GEN I, long prec)
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subFB (a > 1)
  * powsubFB[j][i] contains P_i^j in LLL form + archimedean part in
- * MULTIPLICATIVE form (logs are expensive)
- */
+ * MULTIPLICATIVE form (logs are expensive) */
 static void
 powsubFBgen(GEN nf,GEN subFB,long a,long prec)
 {
@@ -235,87 +226,77 @@ powsubFBgen(GEN nf,GEN subFB,long a,long prec)
   if (DEBUGLEVEL) msgtimer("powsubFBgen");
 }
 
-/* Compute FB, numFB, idealbase, vectbase, numideal.
+/* Compute FB, idealbase, numideal.
  * n2: bound for norm of tested prime ideals (includes be_honest())
- * n : bound for prime ideals used to build relations (Bach cst) ( <= n2 )
+ * n : bound for p, such that P|p (NP <= n2) used to build relations
 
  * Return prod_{p<=n2} (1-1/p) / prod_{Norm(P)<=n2} (1-1/Norm(P)),
- * close to residue of zeta_K at 1 = 2^r1 (2pi)^r2 h R / (w D)
- */
+ * close to residue of zeta_K at 1 = 2^r1 (2pi)^r2 h R / (w D) */
 static GEN
 FBgen(GEN nf,long n2,long n)
 {
-  byteptr delta=diffptr;
-  long KC2,i,j,k,p,lon,ip,nor, N = degpol(nf[1]);
-  GEN prim,p2,p1,NormP,Res;
+  byteptr delta = diffptr;
+  long KC2, i, p, ip;
+  GEN prim, Res;
 
-  numFB    = cgetg(n2+1,t_VECSMALL);
-  FB       = cgetg(n2+1,t_VECSMALL);
-  numideal = cgetg(n2+1,t_VECSMALL);
-  idealbase= (GEN*)cgetg(n2+1,t_VEC);
+  if (maxprime() < n2) err(primer1);
+  FB       = cgetg(n2+1, t_VECSMALL);
+  numideal = cgetg(n2+1, t_VECSMALL);
+  idealbase= (GEN*)new_chunk(n2+1);
 
-  Res=realun(DEFAULTPREC);
-  prim = icopy(gun); p=*delta++; i=0; ip=0; KC=0;
-  while (p<=n2)
+  Res = realun(DEFAULTPREC);
+  prim = icopy(gun); i = 0; ip = 0; KC = 0;
+  for (p = 0;;) /* p <= n2 */
   {
     gpmem_t av = avma, av1;
-    if (DEBUGLEVEL>=2) { fprintferr(" %ld",p); flusherr(); }
-    prim[2] = p; p1 = primedec(nf,prim); lon=lg(p1);
-    av1 = avma;
-    divrsz(mulsr(p-1,Res),p,Res);
-    if (itos(gmael(p1,1,4)) == N) /* p inert */
-    {
-      NormP = gpowgs(prim,N);
-      if (!is_bigint(NormP) && (nor=NormP[2]) <= n2)
-	divrsz(mulsr(nor,Res),nor-1, Res);
-      avma = av1;
-    }
-    else
-    {
-      numideal[p]=ip;
-      i++; numFB[p]=i; FB[i]=p;
-      for (k=1; k<lon; k++,ip++)
-      {
-	NormP = powgi(prim,gmael(p1,k,4));
-	if (is_bigint(NormP) || (nor=NormP[2]) > n2) break;
+    long k, l;
+    GEN P, a, b;
 
-        divrsz(mulsr(nor,Res),nor-1, Res);
-      }
-      /* keep all ideals with Norm <= n2 */
-      avma = av1;
-      if (k == lon)
-        setisclone(p1); /* flag it: all prime divisors in FB */
-      else
-        { setlg(p1,k); p1 = gerepilecopy(av,p1); }
-      idealbase[i] = p1;
+    NEXT_PRIME_VIADIFF(p, delta);
+    if (!KC && p > n) { KCZ = i; KC = ip; }
+    if (p > n2) break;
+
+    if (DEBUGLEVEL>1) { fprintferr(" %ld",p); flusherr(); }
+    prim[2] = p; P = primedec(nf,prim); l = lg(P);
+
+    /* a/b := (p-1)/p * prod_{P|p, NP <= n2} NP / (NP-1) */
+    av1 = avma; a = b = NULL;
+    for (k=1; k<l; k++)
+    {
+      GEN NormP = powgi(prim, gmael(P,k,4));
+      long nor;
+      if (is_bigint(NormP) || (nor=NormP[2]) > n2) break;
+
+      if (a) { a = mului(nor, a); b = mului(nor-1, b); }
+      else   { a = utoi(nor / p); b = utoi((nor-1) / (p-1)); }
     }
-    NEXT_PRIME_VIADIFF_CHECK(p, delta);
-    if (KC == 0 && p>n) { KCZ=i; KC=ip; }
+    if (a) affrr(divri(mulir(a,Res),b),   Res);
+    else   affrr(divrs(mulsr(p-1,Res),p), Res);
+    avma = av1;
+    if (l == 2 && itos(gmael(P,1,3)) == 1) continue; /* p inert */
+
+    /* keep non-inert ideals with Norm <= n2 */
+    if (k == l)
+      setisclone(P); /* flag it: all prime divisors in FB */
+    else
+      { setlg(P,k); P = gerepilecopy(av,P); }
+    numideal[p] = ip; ip += k-1;
+    FB[++i] = p;
+    idealbase[p] = P;
   }
   if (!KC) return NULL;
-  KCZ2=i; KC2=ip; MAXRELSUP = min(50,4*KC);
+  KCZ2 = i; KC2 = ip;
 
   setlg(FB,KCZ2);
-  setlg(numFB,KCZ2);
-  setlg(numideal,KCZ2);
-  setlg(idealbase,KCZ2);
-  vectbase=cgetg(KC+1,t_COL);
-  for (i=1; i<=KCZ; i++)
-  {
-    p1 = idealbase[i]; k=lg(p1);
-    p2 = vectbase + numideal[FB[i]];
-    for (j=1; j<k; j++) p2[j]=p1[j];
-  }
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>1) fprintferr("\n");
     if (DEBUGLEVEL>6)
     {
       fprintferr("########## FACTORBASE ##########\n\n");
-      fprintferr("KC2=%ld, KC=%ld, KCZ=%ld, KCZ2=%ld, MAXRELSUP=%ld\n",
-                  KC2, KC, KCZ, KCZ2, MAXRELSUP);
+      fprintferr("KC2=%ld, KC=%ld, KCZ=%ld, KCZ2=%ld\n", KC2, KC, KCZ, KCZ2);
       for (i=1; i<=KCZ; i++)
-	fprintferr("++ idealbase[%ld] = %Z",i,idealbase[i]);
+	fprintferr("++ idealbase[%ld] = %Z",i,idealbase[FB[i]]);
     }
     msgtimer("factor base");
   }
@@ -328,9 +309,9 @@ factorgen(GEN nf,GEN I,GEN m,long kcz,long limp)
 {
   long i,j,n1,ip,v,p,k,lo,ifinal;
   GEN x,q,r,P,p1,listexpo;
-  GEN Nm= absi( subres(gmul((GEN)nf[7],m), (GEN)nf[1]) ); /* |Nm| */
+  GEN Nm = absi( subres(gmul((GEN)nf[7],m), (GEN)nf[1]) ); /* |Nm| */
 
-  x = divii(Nm, dethnf_i(I)); /* m in I, so NI | Nm */
+  x = diviiexact(Nm, dethnf_i(I)); /* m in I, so NI | Nm */
   if (is_pm1(x)) { primfact[0]=0; return 1; }
   listexpo = new_chunk(kcz+1);
   for (i=1; ; i++)
@@ -349,8 +330,9 @@ factorgen(GEN nf,GEN I,GEN m,long kcz,long limp)
     k = listexpo[i];
     if (k)
     {
-      p = FB[i]; p1 = idealbase[numFB[p]];
-      n1 = lg(p1); ip = numideal[p];
+      p = FB[i];
+      p1 = idealbase[p]; n1 = lg(p1);
+      ip = numideal[p];
       for (j=1; j<n1; j++)
       {
         P = (GEN)p1[j];
@@ -367,8 +349,9 @@ factorgen(GEN nf,GEN I,GEN m,long kcz,long limp)
   }
   if (is_pm1(x)) { primfact[0]=lo; return 1; }
 
-  p = itos(x); p1 = idealbase[numFB[p]];
-  n1 = lg(p1); ip = numideal[p];
+  p = itos(x);
+  p1 = idealbase[p]; n1 = lg(p1);
+  ip = numideal[p];
   for (k=1,j=1; j<n1; j++)
   {
     P = (GEN)p1[j];
@@ -408,8 +391,9 @@ factorelt(GEN nf,GEN x,GEN Nx,long kcz,long limp)
     k = listexpo[i];
     if (k)
     {
-      p = FB[i]; p1 = idealbase[numFB[p]];
-      n1 = lg(p1); ip = numideal[p];
+      p = FB[i];
+      p1 = idealbase[p]; n1 = lg(p1);
+      ip = numideal[p];
       for (j=1; j<n1; j++)
       {
         P = (GEN)p1[j];
@@ -426,8 +410,9 @@ factorelt(GEN nf,GEN x,GEN Nx,long kcz,long limp)
   }
   if (is_pm1(Nx)) { primfact[0]=lo; return 1; }
 
-  p = itos(Nx); p1 = idealbase[numFB[p]];
-  n1 = lg(p1); ip = numideal[p];
+  p = itos(Nx);
+  p1 = idealbase[p]; n1 = lg(p1);
+  ip = numideal[p];
   for (k=1,j=1; j<n1; j++)
   {
     P = (GEN)p1[j];
@@ -1228,7 +1213,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       {
         GEN u = lift_intern(basistoalg(nf, (GEN)y[2]));
         if (flag & nf_GENMAT)
-          y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]: 
+          y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]:
                                           (long)arch_mul((GEN)id[2], (GEN)y[2]);
         else
           y[2] = (long)algtobasis(nf, gmul((GEN)id[2], u));
@@ -1827,8 +1812,8 @@ static long
 be_honest(GEN nf,GEN subFB,long PRECLLL)
 {
   gpmem_t av;
-  long ex,i,j,J,k,iz,nbtest,ru, lgsub = lg(subFB);
-  GEN G,M,P,ideal,m,exu, D = (GEN)nf[3];
+  long ex, i, j, J, k, iz, nbtest, ru, lgsub = lg(subFB);
+  GEN G, M, P, ideal, m, exu;
 
   if (KCZ2 <= KCZ) return 1;
   if (DEBUGLEVEL)
@@ -1844,10 +1829,12 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
   av = avma;
   for (iz=KCZ+1; iz<=KCZ2; iz++, avma = av)
   {
-    if (DEBUGLEVEL>1) fprintferr("%ld ", FB[iz]);
-    P = idealbase[numFB[FB[iz]]]; J = lg(P);
-    /* if unramified, check all but 1 */
-    if (J > 1 && !divise(D, gmael(P,1,1))) J--;
+    long p = FB[iz];
+    if (DEBUGLEVEL>1) fprintferr("%ld ", p);
+    P = idealbase[p]; J = lg(P);
+    /* all P|p in FB + last is unramified --> check all but last */
+    if (isclone(P) && itou(gmael(P,J-1,3)) == 1UL /* e = 1 */) J--;
+
     for (j=1; j<J; j++)
     {
       GEN ideal0 = prime_to_ideal(nf,(GEN)P[j]);
@@ -1924,7 +1911,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   kR = mpabs(kR);
   lambda = gauss(Im_mdet,xreal); /* approximate rational entries */
   for (i=1; i<=zc; i++) setlg(lambda[i], RU);
-  gerepileall(av,2, &lambda, &kR); 
+  gerepileall(av,2, &lambda, &kR);
   *ptlambda = lambda; return kR;
 }
 
@@ -2073,7 +2060,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
     z[1]=Vbase[1]; I = idealpowred(nf0,z,p1,prec);
     for (i=2; i<lo0; i++)
     {
-      p1 = gcoeff(Uir,i,j); 
+      p1 = gcoeff(Uir,i,j);
       if (signe(p1))
       {
 	z[1]=Vbase[i]; J = idealpowred(nf0,z,p1,prec);
@@ -2412,7 +2399,7 @@ get_pr_lists(GEN FB)
 {
   GEN pr, L;
   long i, l = lg(FB), p, pmax;
-  
+
   pmax = 0;
   for (i=1; i<l; i++)
   {
@@ -2425,7 +2412,7 @@ get_pr_lists(GEN FB)
   {
     pr = (GEN)FB[i]; p = itos((GEN)pr[1]);
     L[p] = (long) (L[p]? concatsp((GEN)L[p], _vec(pr)): _vec(pr));
-  } 
+  }
   for (p=1; p<=pmax; p++)
     if (L[p]) L[p] = (long)gen_sort((GEN)L[p],0,cmp_prime_over_p);
   return L;
@@ -2449,7 +2436,7 @@ decode_pr_lists(GEN nf, GEN pfc)
   {
     t = (GEN)pfc[i]; p = itos(t) / n;
     if (!L[p]) L[p] = (long)primedec(nf, stoi(p));
-  } 
+  }
   return L;
 }
 			
@@ -2507,7 +2494,7 @@ get_regulator(GEN mun)
 
   if (lg(mun)==1) return gun;
   A = gtrans( greal(mun) );
-  setlg(A, lg(A)-1); 
+  setlg(A, lg(A)-1);
   return gerepileupto(av, gabs(det(A), 0));
 }
 
@@ -2883,7 +2870,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 {
   gpmem_t av = avma, av0, av1, limpile;
   long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
-  long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob,seed;
+  long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,cglob,seed;
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
   GEN vecG,fu,zu,nf,D,A,W,R,Res,z,h,vperm,subFB;
@@ -2922,12 +2909,11 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   cbach = min(12., gtodouble(gcbach)); cbach /= 2;
   if (cbach == 0.) err(talker,"Bach constant = 0 in bnfxxx");
   if (nbrelpid < 0) err(talker,"negative #relation / ideal in bnfxxx");
-   
+
   cbach2 = gtodouble(gcbach2);
-  /* resc = sqrt(D) w / 2^r1 (2pi)^r2 ~ hR / Res(zeta_K,1) */
-  resc = gmul(gmul2n(gpuigs(shiftr(mppi(DEFAULTPREC),1),-R2),-R1),
-              gsqrt(absi(D),DEFAULTPREC));
-  resc = mulri(resc,(GEN)zu[1]);
+  /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
+  resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), (GEN)zu[1]),
+              gmul2n(gpowgs(Pi2n(1,DEFAULTPREC), R2), R1));
   if (DEBUGLEVEL)
     fprintferr("N = %ld, R1 = %ld, R2 = %ld\nD = %Z\n",N,R1,R2,D);
   av0 = avma; mat = NULL; FB = NULL; first_nz = NULL;
@@ -2951,25 +2937,36 @@ START:
     nf = nfnewprec(nf,PRECREG); av0 = avma;
   }
   else
-  {
     cbach = check_bach(cbach,12.);
-    if (N == 2 && cbach > 6.) cbach = 6.;
-  }
   precadd = 0;
 
-  /* T2-LLL-reduce nf.zk */
-  LIMC = (long)(cbach*LOGD2); if (LIMC < 20) LIMC = 20;
+  LIMC = (long)(cbach*LOGD2);
+  if (LIMC < 20) { LIMC = 20; cbach = LIMC / LOGD2; }
   LIMC2= max(3 * N, (long)(cbach2*LOGD2));
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
   /* initialize FB, [sub]vperm */
-  Res = FBgen(nf,LIMC2,LIMC);
+  Res = FBgen(nf, LIMC2, LIMC);
   if (!Res) goto START;
-  vperm = cgetg(lg(vectbase), t_VECSMALL);
-  sfb_trials = sfb_increase = 0;
-  subFB = subFBgen(N,min(lim,LIMC2), minsFB, vperm, &ss);
+
+  subFB = subFBgen(nf, min(lim,LIMC2), minsFB, &vperm);
   if (!subFB) goto START;
+
+  if (DEBUGLEVEL)
+  {
+    if (DEBUGLEVEL>3)
+    {
+      fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
+      for (i=1; i<=KC; i++) fprintferr("no %ld = %Z\n",i,vectbase[i]);
+      fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
+      outerr(vecextract_p(vectbase,subFB));
+      fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
+      fprintferr("vperm = %Z\n\n",vperm);
+    }
+    msgtimer("sub factorbase (%ld elements)",lg(subFB)-1);
+  }
+  sfb_trials = sfb_increase = 0;
   nreldep = nrelsup = 0;
 
   /* PRECLLL = prec for LLL-reductions (idealred)
@@ -2982,10 +2979,11 @@ START:
     PRECREG = PRECLLL;
     nf = nfnewprec(nf,PRECREG); av0 = avma;
   }
-  KCCO = KC+RU-1 + max(ss,RELSUP); /* expected number of needed relations */
+  KCCO = KC+RU-1 + RELSUP; /* expected number of needed relations */
   if (DEBUGLEVEL)
-    fprintferr("relsup = %ld, ss = %ld, KCZ = %ld, KC = %ld, KCCO = %ld\n",
-               RELSUP,ss,KCZ,KC,KCCO);
+    fprintferr("relsup = %ld, KCZ = %ld, KC = %ld, KCCO = %ld\n",
+               RELSUP, KCZ, KC, KCCO);
+  MAXRELSUP = min(50, 4*KC);
   matmax = 10*KCCO + MAXRELSUP; /* make room for lots of relations */
   reallocate(matmax, (GEN*)&mat, &first_nz);
   setlg(mat, KCCO+1);
@@ -2994,17 +2992,18 @@ START:
   cglob = 0; z = zerocol(RU);
   for (i=1; i<=KCZ; i++)
   {
-    GEN c, P = idealbase[i];
-    if (isclone(P))
-    { /* all prime divisors in FB */
-      unsetisclone(P); cglob++;
-      C[cglob] = (long)z; /* 0 */
-      mat[cglob] = c = col_0(KC);
-      k = numideal[FB[i]];
-      first_nz[cglob] = k+1;
-      c += k;
-      for (j=lg(P)-1; j; j--) c[j] = itos(gmael(P,j,3));
-    }
+    long p = FB[i];
+    GEN c, P = idealbase[p];
+    if (!isclone(P)) continue;
+
+    /* all prime divisors in FB */
+    cglob++;
+    C[cglob] = (long)z; /* 0 */
+    mat[cglob] = c = col_0(KC);
+    k = numideal[p];
+    first_nz[cglob] = k+1;
+    c += k;
+    for (j=lg(P)-1; j; j--) c[j] = itos(gmael(P,j,3));
   }
   if (DEBUGLEVEL) fprintferr("After trivial relations, cglob = %ld\n",cglob);
   /* initialize for other relations */
@@ -3013,8 +3012,7 @@ START:
     mat[i] = col_0(KC);
     C[i] = (long)cgetc_col(RU,PRECREG);
   }
-  av1 = avma; liste = cgetg(KC+1,t_VECSMALL);
-  for (i=1; i<=KC; i++) liste[i] = 0;
+  av1 = avma; liste = vecsmall_const(KC, 0);
   invp = relationrank(mat,cglob,liste);
 
   /* relations through elements of small norm */
@@ -3034,6 +3032,7 @@ START:
   else
   {
     GEN matarch;
+    long ss;
 
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
@@ -3042,7 +3041,7 @@ MORE:
       if (DEBUGLEVEL) fprintferr("*** Increasing sub factor base\n");
       sfb_increase = 0;
       if (++sfb_trials > SFB_MAX) goto START;
-      subFB = subFBgen(N,min(lim,LIMC2), lg(subFB)-1+SFB_STEP,NULL,&ss);
+      subFB = subFBgen(nf,min(lim,LIMC2), lg(subFB)-1+SFB_STEP,NULL);
       if (!subFB) goto START;
       nreldep = nrelsup = 0;
     }
@@ -3104,11 +3103,7 @@ MORE:
     W = hnfspec(mat,vperm,&pdep,&B,&C, lg(subFB)-1);
     phase = 1;
     nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
-    if (nlze)
-    {
-      list_jideal = cgetg(nlze+1, t_VECSMALL);
-      for (i=1; i<=nlze; i++) list_jideal[i] = vperm[i];
-    }
+    if (nlze) list_jideal = vecextract_i(vperm, 1, nlze);
     lgex = max(nlze, MIN_EXTRA); /* set lgex > 0, in case regulator is 0 */
     /* allocate now, reduce dimension later (setlg) when lgex goes down */
     extramat= cgetg(lgex+1,t_MAT);
@@ -3135,8 +3130,7 @@ MORE:
 
   /* first attempt at regulator for the check */
   zc = (lg(mat)-1) - (lg(B)-1) - (lg(W)-1);
-  A = cgetg(zc+1,t_MAT); /* cols corresponding to units */
-  for (j=1; j<=zc; j++) A[j] = C[j];
+  A = vecextract_i(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A,RU,N,&lambda);
   if (!R)
   { /* not full rank for units */
