@@ -85,6 +85,7 @@ MW 33- (recent) typo in localred (char 2)
    36- sqrtn(0,...) ---> error
    37- galoisinit(x^4 + 5264*x^3 + 8034856*x^2 + 4205424384*x + 504485485632)
        --> weird error
+   38- qfsign([;]) --> SEGV
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -100,7 +101,7 @@ IZ  6- [gphelp:] better error messages in case TeX compilation fails
 IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     9- buchall: re-use the same random seed when doubling prec (for units)
    10- major cleanup in thue / thueinit
-   11- major cleanup in rnfkummer (use elements in factored form)
+   11- major improvements in rnfkummer (use elements in factored form)
    12- improved quadray(D < 0) when relative degree is huge
    13- improved bnfisprincipal when class group large: use factorisation
        (+idealred) instead of arch. components (require much less precision)

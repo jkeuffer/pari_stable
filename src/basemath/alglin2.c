@@ -763,12 +763,13 @@ sqred2(GEN a, long no_signature)
   long n,i,j,k,l,sp,sn,t;
 
   if (typ(a)!=t_MAT) err(typeer,"sqred2");
-  n=lg(a); if (lg(a[1]) != n) err(mattype1,"sqred2");
+  n = lg(a); if (n > 1 && lg(a[1]) != n) err(mattype1,"sqred2");
 
-  av=avma; mun=negi(gun); r=new_chunk(n);
-  for (i=1; i<n; i++) r[i]=1;
-  av1=avma; lim=stack_lim(av1,1); a=dummycopy(a);
-  n--; t=n; sp=sn=0;
+  av = avma; mun = negi(gun);
+  r = vecsmall_const(n-1, 1);
+  av1= avma; lim = stack_lim(av1,1);
+  a = dummycopy(a);
+  n--; t = n; sp = sn = 0;
   while (t)
   {
     k=1; while (k<=n && (gcmp0(gcoeff(a,k,k)) || !r[k])) k++;
@@ -819,9 +820,10 @@ sqred2(GEN a, long no_signature)
       if (k>n) break;
     }
   }
-  if (no_signature) return gerepilecopy(av,a);
-  avma=av;
-  a=cgetg(3,t_VEC); a[1]=lstoi(sp); a[2]=lstoi(sn); return a;
+  if (no_signature) return gerepilecopy(av, a);
+  avma = av; a = cgetg(3,t_VEC);
+  a[1] = lstoi(sp);
+  a[2] = lstoi(sn); return a;
 }
 
 GEN
