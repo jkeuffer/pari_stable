@@ -25,10 +25,10 @@ LicenseData "..\COPYING"
 
 Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
-  File /oname=gp.exe "..\Ocygwin-i386\gp-dyn.exe"
+  File /oname=gp.exe "..\Ocygwin-i686\gp-dyn.exe"
   File "makegprc"
   File "..\misc\tex2mail"
-  File "..\Ocygwin-i386\libpari-2.2.dll"
+  File "..\Ocygwin-i686\libpari-2.2.dll"
   File "\cygwin\bin\cygwin1.dll"
   File "\cygwin\bin\cygncurses7.dll"
   File "\cygwin\bin\cygreadline5.dll"
