@@ -2610,52 +2610,46 @@ following information in the first 13 components:
 %
 $$ a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,\Delta,j.$$
 %
-In particular, the discriminant is $E[12]$ (or \kbd{$E$.disc}), and the
-$j$-invariant is $E[13]$ (or \kbd{$E$.j}).
+In particular, the discriminant is \kbd{$E$.disc}, and the
+$j$-invariant is \kbd{$E$.j}.
 
 The other six components are only present if $\fl$ is $0$ (or omitted!).
 Their content depends on whether the curve is defined over $\R$ or not:
 \smallskip
-$\bullet$ When $E$ is defined over $\R$, $E[14]$ (\kbd{$E$.roots}) is a
-vector whose three components contain the roots of the right hand side of the
-associated Weierstrass equation.
+$\bullet$ When $E$ is defined over $\R$, \kbd{$E$.roots} is a vector whose
+three components contain the roots of the right hand side of the associated
+Weierstrass equation.
 $$ (y + a_1x/2 + a_3/2)^2 = g(x) $$
 If the roots are all real, then they are ordered by decreasing value. If only
 one is real, it is the first component.
 
-$E[15]$ (\kbd{$E$.omega[1]}) is the real period of $E$ (integral of
+Then $\omega_1 = $\kbd{$E$.omega[1]} is the real period of $E$ (integral of
 $dx/(2y+a_1x+a_3)$ over the connected component of the identity element of
-the real points of the curve), and $E[16]$ (\kbd{$E$.omega[2]}) is a complex
-period. In other words, $\omega_1=E[15]$ and $\omega_2=E[16]$ form a basis of
-the complex lattice defining $E$ (\kbd{$E$.omega}), with
+the real points of the curve), and $\omega_2 = $\kbd{$E$.omega[2]} is a
+complex period. In other words, \kbd{$E$.omega} forms a basis of the
+complex lattice defining $E$, with
 $\tau=\dfrac{\omega_2}{\omega_1}$ having positive imaginary part.
 
-$E[17]$ and $E[18]$ are the corresponding values $\eta_1$ and $\eta_2$ such
-that $\eta_1\omega_2-\eta_2\omega_1=i\pi$, and both can be retrieved by
-typing \kbd{$E$.eta} (as a row vector whose components are the $\eta_i$).
+\kbd{$E$.eta} is a row vector containing the corresponding values $\eta_1$
+and $\eta_2$ such that $\eta_1\omega_2-\eta_2\omega_1=i\pi$.
 
-Finally, $E[19]$ (\kbd{$E$.area}) is the volume of the complex lattice defining
+Finally, \kbd{$E$.area} is the volume of the complex lattice defining
 $E$.\smallskip
 
 $\bullet$ When $E$ is defined over $\Q_p$, the $p$-adic valuation of $j$
-must be negative. Then $E[14]$ (\kbd{$E$.roots}) is the vector with a single
-component equal to the $p$-adic root of the associated Weierstrass equation
+must be negative. Then \kbd{$E$.roots} is the vector with a single component
+equal to the $p$-adic root of the associated Weierstrass equation
 corresponding to $-1$ under the Tate parametrization.
 
-$E[15]$ is equal to the square of the $u$-value, in the notation of Tate.
+\kbd{$E$.tate} yields the three-component vector $[u^2,u,q]$, in the
+notations of Tate. If the $u$-component does not belong to $\Q_p$, it is set
+to zero.
 
-$E[16]$ is the $u$-value itself, if it belongs to $\Q_p$, otherwise zero.
+\kbd{$E$.w} is Mestre's $w$ (this is technical).
 
-$E[17]$ is the value of Tate's $q$ for the curve $E$.
-
-\kbd{$E$.tate} will yield the three-component vector $[u^2,u,q]$.
-
-$E[18]$ (\kbd{$E$.w}) is the value of Mestre's $w$ (this is technical), and
-$E[19]$ is arbitrarily set equal to zero.
-\smallskip
-For all other base fields or rings, the last six components are arbitrarily
-set equal to zero. See also the description of member functions related to
-elliptic curves at the beginning of this section.
+\smallskip For all other base fields or rings, the last six components are
+arbitrarily set equal to zero. See also the description of member functions
+related to elliptic curves at the beginning of this section.
 
 \syn{ellinit0}{E,\fl,\var{prec}}. Also available are
 $\teb{initell}(E,\var{prec})$ ($\fl=0$) and
