@@ -51,6 +51,8 @@ Done for version 2.2.2 (released ??/??/2001):
     7- more efficient polcoeff [also: made it independent of MAXVARN]
     8- retuned bnfinit (let subfactorbase increase further):
        setrand(1);bnfinit(x^4 + 1159*x^2 + 335241) would never finish.
+    9- specified precisely lex() [see manual]. Now:
+       lex([0,0],[0]) = 1 (was -1), lex(0,[0]) = -1 (was 0)
 
   Added
 BA  1- New function 'vectorsmall'.
