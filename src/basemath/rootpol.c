@@ -779,7 +779,7 @@ dual_modulus(GEN p, double lrho, double tau, long l)
     tau2 *= 7./4.;
     bit = 6*nn - 5*ll + (long)(nn*(log2(1/tau2) + tau2 * 8./7.));
   }
-  avma = av; return delta_k + ind_maxlog2(q);
+  avma = av; return delta_k + (long)ind_maxlog2(q);
 }
 
 /********************************************************************/
@@ -1811,7 +1811,7 @@ all_roots(GEN p, long bit)
   pari_sp av;
 
   pd = poldeflate(p, &h); lc = leading_term(pd);
-  e = (2/LOG2) * cauchy_bound(pd); if (e < 0) e = 0;
+  e = (long)((2/LOG2) * cauchy_bound(pd)); if (e < 0) e = 0;
   bit0 = bit + gexpo(pd) - gexpo(lc) + (long)log2(n/h)+1+e;
   bit2 = bit0; e = 0;
   for (av=avma,i=1;; i++,avma=av)
