@@ -2216,7 +2216,7 @@ only available for curves defined over $\Q_p$.\smallskip
 
 Some functions, in particular those relative to height computations (see
 \kbd{ellheight}) require also that the curve be in minimal Weierstrass
-form. This is achieved by the function \kbd{ellglobalred}.
+form. This is achieved by the function \kbd{ellminimalmodel}.
 
 All functions related to elliptic curves share the prefix \kbd{ell}, and the
 precise curve we are interested in is always the first argument, in either
@@ -2238,7 +2238,7 @@ known to hold in full generality thanks to the work of \idx{Breuil},
 medium or long vector of the type given by \kbd{ellinit}. For this function
 to work for every $n$ and not just those prime to the conductor, $E$ must
 be a minimal Weierstrass equation. If this is not the case, use the
-function \kbd{ellglobalred} first before using \kbd{ellak}.
+function \kbd{ellminimalmodel} first before using \kbd{ellak}.
 
 \syn{akell}{E,n}.
 
@@ -2453,6 +2453,12 @@ $O(N^{1/2})$ algorithm.
 \syn{lseriesell}{E,s,A,\var{prec}} where $\var{prec}$ is a \kbd{long} and an
 omitted $A$ is coded as \kbd{NULL}.
 
+\subsecidx{ellminimalmodel}$(E,\{\&v\})$:  return the standard minimal
+integral model of the rational elliptic curve $E$. If present, sets $v$ to the
+corresponding change of variables.
+
+\syn{ellminimalmodel}{E,\&v}, where an omitted $v$ is coded as \kbd{NULL}.
+
 \subsecidx{ellorder}$(E,z)$: gives the order of the point $z$ on the elliptic
 curve $E$ if it is a torsion point, zero otherwise. In the present version
 \vers, this is implemented only for elliptic curves defined over $\Q$.
@@ -2520,7 +2526,7 @@ $H/\Gamma_0(N)$ where $N$ is the conductor of the curve. The variable used in
 the power series for $u$ and $v$ is $x$, which is implicitly understood to be
 equal to $\exp(2i\pi z)$. It is assumed that the curve is a \var{strong}
 \idx{Weil curve}, and the Manin constant is equal to 1. The equation of
-the curve $E$ must be minimal (use \kbd{ellglobalred} to get a minimal
+the curve $E$ must be minimal (use \kbd{ellminimalmodel} to get a minimal
 equation).
 
 \syn{taniyama}{E}, and the precision of the result is determined by the
