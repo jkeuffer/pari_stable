@@ -915,7 +915,7 @@ compute_M0(GEN M_star,long N)
           p5 = subrr(gsqr(S), gmul2n(P,2));
           if (gsigne(p5) < 0) continue;
 
-          p6 = sqrtr_abs(p5);
+          p6 = sqrtr(p5);
           v = gmul2n(subrr(S,p6),-1);
           if (gsigne(v) <= 0) continue;
 
