@@ -1347,7 +1347,7 @@ points should also be considered).
 Type \kbd{hv = ellheight(e, v)}. This gives the vector of canonical heights.
 Let us order the points according to their height. For this, type
 \bprog
-  iv = vecsort(hv, 1);    \\@com indirect sorting
+  iv = vecsort(hv,, 1);    \\@com indirect sorting
   hv = vecextract(hv, iv);
   v  = vecextract( v, iv);
 @eprog
