@@ -774,10 +774,10 @@ mpsqrt_sign(GEN x, long s)
   ex = expo(a);
   if (ex & 1) {
     a[1] = evalsigne(1) | evalexpo(1);
-    u = (ulong)(beta * (1 << BITS_IN_HALFULONG));
+    u = (ulong)(beta * (1UL << BITS_IN_HALFULONG));
   } else {
     a[1] = evalsigne(1) | evalexpo(0);
-    u = (ulong)(beta * ((1 << BITS_IN_HALFULONG) * 0.707106781186547524));
+    u = (ulong)(beta * ((1UL << BITS_IN_HALFULONG) * 0.707106781186547524));
   }
   /* |x| = 2^(ex/2) a */
   t = cgetr(l+1);
