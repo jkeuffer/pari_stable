@@ -431,11 +431,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   long e,val;
   if (DEBUGLEVEL >= 1) (void)timer2();
   l=stoi(n+1);e=1;
-  while(!isprime(l)) 
-  { 
-    l=addis(l,n);
-    e++;
-  }
+  while(!isprime(l)) { l=addis(l,n); e++; }
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: prime l=%Z\n",l);
   av=avma;
