@@ -198,6 +198,7 @@ JD 74- [Configure:] detection of times()
        [\r f<TAB> was OK]. Solution: just expand to '\r f'; hitting <TAB>
        again completes properly --> \r foo.
 BA 98- Reduce stack consumption in ffinit and polsubcyclo.
+   99- (p/q)' wasn't simplified if q wasn't squarefree
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

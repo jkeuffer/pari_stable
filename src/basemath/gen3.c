@@ -1382,8 +1382,8 @@ GEN
 deriv(GEN x, long v)
 {
   long lx, vx, tx, e, i, j;
-  pari_sp av, tetpil;
-  GEN y,p1,p2;
+  pari_sp av;
+  GEN y;
 
   tx=typ(x); if (is_const_t(tx)) return gzero;
   if (v < 0) v = gvar(x);
@@ -1425,11 +1425,26 @@ deriv(GEN x, long v)
       }
       return derivser(x);
 
-    case t_RFRAC: av=avma; y=cgetg(3,t_RFRAC);
-      y[2]=lsqr((GEN)x[2]); av=avma;
-      p1=gmul((GEN)x[2],deriv((GEN)x[1],v));
-      p2=gmul(gneg_i((GEN)x[1]),deriv((GEN)x[2],v));
-      tetpil=avma; y[1]=lpile(av,tetpil, gadd(p1,p2)); return y;
+    case t_RFRAC: {
+      GEN a = (GEN)x[1], b = (GEN)x[2], bp, b0, d, t;
+      y = cgetg(3,t_RFRAC); av = avma;
+
+      bp = deriv(b, v);
+      d = ggcd(bp, b);
+      if (gcmp1(d)) {
+        d = gadd(gmul(b, deriv(a,v)), gmul(gneg_i(a), bp));
+        y[1] = lpileupto(av, d);
+        y[2] = lsqr(b); return y;
+      }
+      b0 = gdivexact(b, d);
+      bp = gdivexact(bp,d);
+      a = gadd(gmul(b0, deriv(a,v)), gmul(gneg_i(a), bp));
+      t = ggcd(a, d);
+      if (!gcmp1(t)) { a = gdivexact(a, t); d = gdivexact(d, t); }
+      y[1] = (long)a;
+      y[2] = lmul(d, gsqr(b0));
+      return gerepilecopy((pari_sp)(y+3), y);
+    }
 
     case t_VEC: case t_COL: case t_MAT: lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++) y[i]=lderiv((GEN)x[i],v);
