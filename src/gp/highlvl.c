@@ -18,6 +18,8 @@ long secure;
 
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>
+char *expand_tilde(char *s);
+
 void 
 install0(char *name, char *code, char *gpname, char *lib)
 {
@@ -32,6 +34,7 @@ install0(char *name, char *code, char *gpname, char *lib)
   if (! *lib) lib = NULL;
 #endif
   if (! *gpname) gpname=name;
+  if (lib) lib = expand_tilde(lib);
   
   handle = dlopen(lib,RTLD_LAZY);
   if (!handle)
@@ -46,6 +49,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) err(talker,"can't find symbol '%s' in library '%s'",name,lib);
     err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
+  if (lib) free(lib);
   install(f,gpname,code);
 }
 #else
@@ -69,6 +73,7 @@ install0(char *name, char *code, char *gpname, char *lib)
   if (! *lib) lib = DL_DFLT_NAME;
 #endif
   if (! *gpname) gpname=name;
+  if (lib) lib = expand_tilde(lib);
   
   handle = LoadLibrary(lib);
   if (!handle)
@@ -82,6 +87,7 @@ install0(char *name, char *code, char *gpname, char *lib)
     if (lib) err(talker,"can't find symbol '%s' in library '%s'",name,lib);
     err(talker,"can't find symbol '%s' in dynamic symbol table of process",name);
   }
+  if (lib) free(lib);
   install((void*)f,gpname,code);
 }
 #  else
