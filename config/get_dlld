@@ -1,5 +1,5 @@
 # Exported variables
-_dlld_list='DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest DLLDisGCC'
+_dlld_list='DLLD DLLDFLAGS EXTRADLLDFLAGS DLSUFFIX soname sodest'
 
 # Which suffix for Dynamic Lib?
 # Some linkers (SunOS 4) need minor and major lib version numbers.
@@ -36,7 +36,7 @@ if test $do_dll=yes -a -z "$DLLD"; then
 fi
 
 GNUdlld=
-DLLDisGCC=
+DLLDneedsWl=
 if test -n "$DLLD"; then
 # Which Dynamic Lib Linker?
   if test "$fastread" != yes; then
@@ -45,9 +45,11 @@ if test -n "$DLLD"; then
     DLLD=$ans
   fi
 
-  if test "$DLLD"="$CC" -a -n "$__gnuc__"; then
-    DLLDisGCC=yes;
-    GNUdlld=$GNULDused
+  if test "$DLLD"="$CC"; then
+    if test -n "$__gnuc__"; then
+      DLLDneedsWl=yes;
+      GNUdlld=$GNULDused
+    fi 
   fi
 
   case "$DLLD" in
@@ -77,7 +79,7 @@ if test -n "$DLLD"; then
   case "$osname" in
     osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
   esac
-  DLLDFLAGS=`./ldflags "$DLLDisGCC" "$DLLDFLAGS"`
+  DLLDFLAGS=`./ldflags "$DLLDneedsWl" "$DLLDFLAGS"`
   # assume DLLD = djgpp
   case "$osname" in
     os2) case "$optimization" in

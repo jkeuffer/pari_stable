@@ -1,6 +1,6 @@
 # Which Executable Linker ?
 #
-_ld_list='LD LDFLAGS LIBS runpathprexix LDisGCC LDused GNULDused'
+_ld_list='LD LDFLAGS LIBS runpathprexix LDneedWl LDused GNULDused'
 case "$osname" in
   darwin) LIBS= ;;
   osf1)   LIBS='-lm -lots';;
@@ -14,30 +14,33 @@ if test "$fastread" != yes; then
   dflt=$LD; rep=; . ./myread
   LD=$ans
 fi
-
-LDisGCC=
-GNULDused=
 LDused=$LD
-if test "$LD"="$CC" -a -n "$__gnuc__"; then
-  LDused=`$CC -print-prog-name=ld`
-  LDisGCC=yes
-fi
-if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
 # Which Flags for Executable Linker?
 ldflags=
-if test "$LD"="$CC"; then ldflags=$CFLAGS; fi
+if test "$LD"="$CC"; then
+  ldflags=$CFLAGS
+  GNULDused=
+  if test -n "$__gnuc__"; then
+    LDused=`$CC -print-prog-name=ld`
+    LDneedsWl=yes
+  else
+    if test "$osname"=hpux; then LDneedsWl=yes; fi
+  fi
+fi
+if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
+
 case "$osname-$arch" in
   osf1-*) case "$optimization" in
             full|profiling) ldflags="$ldflags -g0 -O4";;
           esac ;;
   linux-*|cygwin*|freebsd-*)
-    tmp=`./ldflags "$LDisGCC" "-export-dynamic"`
+    tmp=`./ldflags "$LDneedsWl" "-export-dynamic"`
     ldflags="$ldflags $tmp" ;;
-  os2-*)     ldflags="$ldflags -Zexe"
-             case "$optimization" in
-               full) ldflags="$ldflags -s";;
-             esac;;
+  os2-*)  ldflags="$ldflags -Zexe"
+          case "$optimization" in
+            full) ldflags="$ldflags -s";;
+          esac;;
 esac
 LDFLAGS="$ldflags $LDFLAGS"
 
