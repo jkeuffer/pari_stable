@@ -399,7 +399,7 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
   {
     GEN Ai = (GEN)A[i], p1 = gun;
     for (j=1; j<=d; j++)
-      p1 = FpXQ_mul(p1, (GEN)fhk[Ai[j]], T,pe);
+      p1 = Fq_mul(p1, (GEN)fhk[Ai[j]], T,pe);
     delta[i] = (long)p1;
     if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
     /* g = prod (X - delta[i])
@@ -719,7 +719,7 @@ interpol(GEN H, GEN T, GEN p)
   {
     d = constant_term(H[i]); /* -D[i] */
     p1 = FpXQX_mul(p1,gadd(X,d), T,p);
-    p2 = FpXQ_mul(p2, gadd(a,d), T,p);
+    p2 = Fq_mul(p2, gadd(a,d), T,p);
   }
   p2 = FpXQ_inv(p2, T,p);
   return FpXQX_FpXQ_mul(p1,p2, T,p);
