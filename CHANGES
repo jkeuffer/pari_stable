@@ -171,6 +171,7 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    15- library functions Q_primitive_part, Q_primpart, Q_remove_denom, Q_denom
    16- allow polredabs to use a partial factorisation of disc(nf) [as polred,
        but inconsistent values. Backward compatibility problem here...]
+   17- routine ellminimalmodel()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
