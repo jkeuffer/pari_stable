@@ -1,5 +1,4 @@
 Function: kill
-Class: highlevel
 Section: programming
 C-Name: kill0
 Prototype: vS

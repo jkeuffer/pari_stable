@@ -220,18 +220,20 @@ GEN     zv_ZV(GEN z);
 
 /* anal.c */
 
-entree  *fetch_named_var(char *s, int doerr);
-entree  *gp_variable(char *s);
-entree  *is_entry(char *s);
+void    addhelp(entree *ep, char *s);
 void    delete_named_var(entree *ep);
 long    delete_var(void);
+entree  *fetch_named_var(char *s, int doerr);
 long    fetch_user_var(char *s);
 long    fetch_var(void);
 GEN     flisexpr(char *t);
 GEN     flisseq(char *t);
 void    freeep(entree *ep);
+entree  *gp_variable(char *s);
 long    hashvalue(char *s);
 entree* install(void *f, char *name, char *code);
+entree  *is_entry(char *s);
+void    kill0(entree *ep);
 GEN     lisexpr(char *t);
 GEN     lisseq(char *t);
 long    manage_var(long n, entree *ep);
@@ -239,6 +241,7 @@ void    name_var(long n, char *s);
 GEN     readseq(char *c, int strict);
 GEN     STRtoGENstr(const char *s);
 GEN     strtoGENstr(char *s, long flag); /* FIXME: obsolete */
+GEN     type0(GEN x, char *st);
 
 /* arith1.c */
 

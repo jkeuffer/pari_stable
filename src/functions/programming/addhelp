@@ -1,5 +1,4 @@
 Function: addhelp
-Class: highlevel
 Section: programming
 C-Name: addhelp
 Prototype: vSs
