@@ -31,17 +31,18 @@ if test ! -f $Xincroot/X11/Xos.h; then
    /*) Xincroot=`echo $x | sed 's,/X11/Xos.h,,'`;;
    *)  Xincroot=;;
   esac
-  if test -n "$Xincroot"; then
-    echo ..."Found X11 header files in $Xincroot/X11"
-  fi
 fi
 # X11 -- Lib
 pth=$x11pth
 lib=X11; . ./locatelib
-if test -f $Xincroot/X11/Xos.h -a -z "$graph_cmd"; then
-  which_graphic_lib=builtin.X11-gnuplot-dynamic
-  test -n "$extralib" && echo ..."Extra Libraries are $extralib"
+if test -f $Xincroot/X11/Xos.h -a -n "$X11"; then
+  if test -z "$graph_cmd"; then
+    which_graphic_lib=builtin.X11-gnuplot-dynamic
+  fi
   echo ..."Found X11 header files in $Xincroot/X11"
+  test -n "$extralib" && echo ..."Extra Libraries are $extralib"
   X11_LIBS="-L$X11 -lX11 $extralib"
   X11_INC="-I$Xincroot"
+else
+  echo "### X11 not found"
 fi

@@ -89,13 +89,6 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color[GAINSBORO] = rgb_color( 220, 220, 220);
 }
 
-static char*
-zmalloc(size_t x)
-{
-  return x? gpmalloc(x): NULL;
-}
-
-
 Plotter::~Plotter() {
 
     for( int col = 1; col < MAX_COLORS; col++) {
