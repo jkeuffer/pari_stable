@@ -75,7 +75,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
         GLOBL(C(hiremainder))
 
 #ifdef _MSC_VER
-ulong overflow, hiremainder;
+unsigned long overflow, hiremainder;
 #else
 #ifdef BSD_SYNTAX
 #  if defined(__EMX__) && defined(__NO_AOUT) /* Otherwise IBM linker will
