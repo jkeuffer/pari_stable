@@ -2427,7 +2427,7 @@ karamulir(GEN x, GEN y, long flag)
 GEN
 dbltor(double x)
 {
-  GEN z = cgetr(3);
+  GEN z;
   long e;
   union { double f; ulong i; } fi;
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
@@ -2436,7 +2436,7 @@ dbltor(double x)
   LOCAL_HIREMAINDER;
 
   if (x==0) return realzero_bit(-308);
-  fi.f = x;
+  fi.f = x; z = cgetr(DEFAULTPREC);
   e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
   z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
   z[2] = (fi.i << expo_len) | HIGHBIT;
@@ -2485,11 +2485,11 @@ dbltor(double x)
   union { double f; ulong i[2]; } fi;
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
-  const int shift = mant_len-32;
   const int expo_len = 11; /* number of bits of exponent */
+  const int shift = mant_len-32;
 
   if (x==0) return realzero_bit(-308);
-  fi.f = x; z=cgetr(4);
+  fi.f = x; z=cgetr(DEFAULTPREC);
   {
     const ulong a = fi.i[INDEX0];
     const ulong b = fi.i[INDEX1];
@@ -2509,8 +2509,8 @@ rtodbl(GEN x)
   union { double f; ulong i[2]; } fi;
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
-  const int shift = mant_len-32;
   const int expo_len = 11; /* number of bits of exponent */
+  const int shift = mant_len-32;
 
   if (typ(x)==t_INT && !s) return 0.0;
   if (typ(x)!=t_REAL) err(typeer,"rtodbl");
