@@ -3030,7 +3030,7 @@ PRECPB:
       goto MORE;
     }
   }
-
+  need = 1;
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
   A = vecextract_i(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A, RU, N, &lambda);
