@@ -36,6 +36,9 @@ BA  1- gpflog could print some lines twice
     3- polhensellift didn't accept factors which were not squarefree
     4- Configure missed some shared libraries (when only .so.version was there)
     5- non-standard major/minor version number combo in libpari.so (Linux)
+    6- possible symlink attacks against mpqs()
+    7- internal requests for precision of bnfinit(x) [ = Q ] could yield SEGV
+    8- compatible = 3 not taken into account when reading a file
 
   Changed
     1- DOS distribution archives (GPM removed)
