@@ -1722,7 +1722,7 @@ INCREASE: avma = av; cbach = check_bach(cbach,6.);
     for (j=1; j<=KC; j++) mat[i][j]=0;
   }
   ex = new_chunk(lgsub+1);
-  limhash = (LIMC<(MAXHALFULONG>>1))? LIMC*LIMC: HIGHBIT>>1;
+  limhash = ((ulong)LIMC < (MAXHALFULONG>>1))? LIMC*LIMC: HIGHBIT>>1;
   for (i=0; i<HASHT; i++) hashtab[i]=NULL;
 
   s = lgsub+nbram+RELSUP;

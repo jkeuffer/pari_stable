@@ -1372,7 +1372,7 @@ ellfacteur(GEN n, int insist)
 	Xb[10] = XT[j+2];   Xb[11] = XT[j+3];
 	Xb += 4;		/* this points at [420]Q */
 	/* ... entries at powers of 2 times 210 .... */
-	for (m = 2; m < gse+k; m++) /* omit Y coords of [2^gse*210]Q */
+	for (m = 2; m < (ulong)gse+k; m++) /* omit Y coords of [2^gse*210]Q */
 	{
 	  long m2 = m*nbc2 + j;
 	  Xb += (2UL<<m);	/* points now at [2^m*210]Q */
@@ -1394,24 +1394,24 @@ ellfacteur(GEN n, int insist)
 		  XB + 32, XB2 + 32)
 	  > 1) goto fin;	/* 8 + {1,...,7} = {9,...,15} */
       /* ... and the remainder of the lot */
-      for (m = 5; m <= gse; m++)
+      for (m = 5; m <= (ulong)gse; m++)
       {
 	/* fill in from 2^(m-1)+1 to 2^m-1 in chunks of 64 and 60 points */
 	ulong m2 = 2UL << m;	/* will point at 2^(m-1)+1 */
-	for (j = 0; j < m2-64; j+=64) /* executed 0 times when m == 5 */
+	for (j = 0; (ulong)j < m2-64; j+=64) /* executed 0 times when m == 5 */
 	{
 	  if (elladd0(64, 4,
 		      XB + m2 - 4, XB2 + m2 - 4,
 		      XB + j,      XB2 + j,
 		      XB + m2 + j,
-		      (m<gse ? XB2 + m2 + j : NULL))
+		      (m<(ulong)gse ? XB2 + m2 + j : NULL))
 	      > 1) goto fin;
 	} /* j == m2-64 here, 60 points left */
 	if (elladd0(60, 4,
 		    XB + m2 - 4, XB2 + m2 - 4,
 		    XB + j,      XB2 + j,
 		    XB + m2 + j,
-		    (m<gse ? XB2 + m2 + j : NULL))
+		    (m<(ulong)gse ? XB2 + m2 + j : NULL))
 	    > 1) goto fin;
 	/* (when m==gse, drop Y coords of result, and when both equal 1024,
 	 * overwrite Y coords of second argument with X coords of result)

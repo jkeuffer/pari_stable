@@ -1286,14 +1286,14 @@ apell2_intern(GEN e, ulong p)
   if (p == 2) return _a_2(e);
   else
   {
-    long av=avma,i;
+    ulong av = avma, i;
     GEN unmodp = gmodulss(1,p);
     ulong e6 = itos((GEN)gmul(unmodp,(GEN)e[6])[2]);
     ulong e8 = itos((GEN)gmul(unmodp,(GEN)e[8])[2]);
     ulong e72= itos((GEN)gmul(unmodp,(GEN)e[7])[2]) << 1;
     long s = kross(e8, p);
 
-    if (p < 757)
+    if (p < 757UL)
       for (i=1; i<p; i++)
         s += kross(e8 + i*(e72 + i*(e6 + (i<<2))), p);
     else
@@ -1554,11 +1554,11 @@ apell1(GEN e, GEN p)
         m = (l+r) >> 1;
         if (tx[m] < k) l = m+1; else r = m;
       }
-      if (r <= s && tx[r] == k)
+      if (r <= (ulong)s && tx[r] == k)
       {
         while (tx[r] == k && r) r--;
         k2 = _low((GEN)ftest[2]);
-        for (r++; tx[r] == k && r <= s; r++)
+        for (r++; tx[r] == k && r <= (ulong)s; r++)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == ± ftest (= [i.s] f)? */
             if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
@@ -1819,7 +1819,8 @@ anell(GEN e, long n)
   for (i=1; i<=5; i++)
     if (typ(e[i]) != t_INT) err(typeer,"anell");
   if (n <= 0) return cgetg(1,t_VEC);
-  if (n>TEMPMAX) err(impl,"anell for n>=2^24 (or 2^32 for 64 bit machines)");
+  if ((ulong)n>TEMPMAX)
+    err(impl,"anell for n>=2^24 (or 2^32 for 64 bit machines)");
   an = cgetg(n+1,t_VEC); an[1] = un;
   for (i=2; i <= n; i++) an[i] = 0;
   for (p=2; p<=n; p++)
@@ -1846,9 +1847,9 @@ anell(GEN e, long n)
 	if (p < TEMPC)
 	{
 	  ulong pk, oldpk = 1;
-	  for (pk=p; pk <= n; oldpk=pk, pk *= p)
+	  for (pk=p; pk <= (ulong)n; oldpk=pk, pk *= p)
 	  {
-	    if (pk == p) an[pk] = (long) ap;
+	    if (pk == (ulong)p) an[pk] = (long) ap;
 	    else
 	    {
 	      av = avma;
@@ -2125,7 +2126,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   cga=gmul(cg,A); cgb=gdiv(cg,A);
   l=(long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.)*log(rtodbl(cga)))
             / rtodbl(cgb)+1);
-  v = anell(e, min(l,TEMPMAX));
+  v = anell(e, min((ulong)l,TEMPMAX));
   s2 = ns = NULL; /* gcc -Wall */
   if (!flun) { s2=gsubsg(2,s); ns=gpui(cg,gsubgs(gmul2n(s,1),2),prec); }
   z=gzero;
@@ -2142,7 +2143,8 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
     p2=flun? p1: gdiv(gmul(ns,incgam(s2,gmulsg(n,cgb),prec)),
                       gpui(stoi(n),s2,prec));
     if (eps<0) p2=gneg_i(p2);
-    z = gadd(z,gmul(gadd(p1,p2),(n<=TEMPMAX)? (GEN)v[n]: akell(e,stoi(n))));
+    z = gadd(z, gmul(gadd(p1,p2),
+                     ((ulong)n<=TEMPMAX)? (GEN)v[n]: akell(e,stoi(n))));
     if (low_stack(lim, stack_lim(av1,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lseriesell");

@@ -1960,7 +1960,7 @@ GetST(GEN dataCR, long prec)
     if (nmax < N0[i]) nmax  = N0[i];
   }
 
-  if (nmax > maxprime())
+  if ((ulong)nmax > maxprime())
     err(talker, "Not enough precomputed primes (need all primes up to %ld)", nmax);
 
   i0 = GetBoundi0(r1, r2, prec);

@@ -259,7 +259,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
     {
       case ClientMessage:
         if (event.xclient.message_type != wm_protocols ||
-            event.xclient.data.l[0] != wm_delete_window) break;
+            (Atom)event.xclient.data.l[0] != wm_delete_window) break;
       case ButtonPress:
       case DestroyNotify:
 	XUnloadFont(display,font_info->fid); XFreeGC(display,gc);

@@ -648,7 +648,7 @@ testprime(GEN bnf, long minkowski)
   fb=(GEN)bnf[5];
   p1 = gmael(fb, lg(fb)-1, 1); /* largest p in factorbase */
   pp = 0; pmax = is_bigint(p1)? VERYBIGINT: itos(p1);
-  if (minkowski > maxprime()) err(primer1);
+  if ((ulong)minkowski > maxprime()) err(primer1);
   while (pp < minkowski)
   {
     pp += *delta++;
@@ -1202,7 +1202,7 @@ certifybuchall(GEN bnf)
   if (is_bigint(gbound))
     err(talker,"sorry, too many primes to check");
 
-  bound = itos(gbound); if (bound > maxprime()) err(primer1);
+  bound = itos(gbound); if ((ulong)bound > maxprime()) err(primer1);
   if (DEBUGLEVEL>1)
   {
     fprintferr("\nPHASE 2: are all primes good ?\n\n");
@@ -2201,7 +2201,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
 {
   byteptr ptdif=diffptr;
   long degk,lim,av0,av,av1,tetpil,i,j,k,p2s,lfa,lp1,sqbou,cex, allarch;
-  long ffs,fs,resp,flbou,tdi,nba, k2,karch,kka,nbarch,jjj,jj,square;
+  long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lfa2,ep,som,clhss,normps,normi,nbdezero,r1,R1,n,c;
   ulong q;
   GEN nf,p,z,pol,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
@@ -2304,7 +2304,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
 	      for (k=1; k<lp1; k++)
 	      {
 		p3=(GEN)p1[k];
-		if (i==q ||
+		if (q == (ulong)i ||
                     ((p4=gmael(p3,1,1)) && !isinvector(p4,fauxpr,lg(p4)-1)))
 		{
 		  c++;
@@ -2529,15 +2529,7 @@ LDISCRAY:
     }
   }
   if (DEBUGLEVEL>2) msgtimer("discrayabs");
-  tdi=taille2(disclist);
-  if (DEBUGLEVEL>2)
-  { fprintferr("avma = %ld, t(d) = %ld ",avma-bot,tdi); flusherr(); }
-  if (tdi<avma-bot)
-  {
-    tetpil=avma; disclist=gerepile(av0,tetpil,gcopy(disclist));
-    if (DEBUGLEVEL>2) { fprintferr("avma = %ld ",avma-bot); flusherr(); }
-  }
-  return disclist;
+  tetpil=avma; return gerepile(av0,tetpil,gcopy(disclist));
 }
 
 GEN

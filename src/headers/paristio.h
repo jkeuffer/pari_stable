@@ -70,9 +70,9 @@ extern char    *errmessage[], *current_psfile;
  * "random" garbage collecting
  */
 #ifdef DYNAMIC_STACK
-#  define low_stack(x,l) (avma < (l))
+#  define low_stack(x,l) (avma < (ulong)(l))
 #else
-#  define low_stack(x,l) (avma < (x))
+#  define low_stack(x,l) (avma < (ulong)(x))
 #endif
 
 #define stack_lim(av,n) (bot + (((av)-bot)>>(n)))

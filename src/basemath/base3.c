@@ -342,7 +342,8 @@ element_sqr(GEN nf, GEN x)
 GEN
 element_pow(GEN nf, GEN x, GEN n)
 {
-  long s,av=avma,N,i,j,m;
+  ulong av = avma;
+  long s,N,i,j,m;
   GEN y,p1;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
@@ -375,7 +376,8 @@ element_pow(GEN nf, GEN x, GEN n)
 GEN
 element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
 {
-  long s,av=avma,N,i,j,m;
+  ulong av = avma;
+  long s,N,i,j,m;
   GEN y,p1;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
@@ -409,7 +411,8 @@ element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
 GEN
 element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
 {
-  long s,av=avma,N,i,j,m;
+  ulong av = avma;
+  long s,N,i,j,m;
   GEN y,p1;
 
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
@@ -1070,7 +1073,8 @@ znlog(GEN x, GEN g0)
 GEN
 dethnf(GEN mat)
 {
-  long av,i,l = lg(mat);
+  long i,l = lg(mat);
+  ulong av;
   GEN s;
 
   if (l<3) return l<2? gun: icopy(gcoeff(mat,1,1));

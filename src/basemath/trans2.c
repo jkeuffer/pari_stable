@@ -969,7 +969,7 @@ static GEN
 bernvec2(long k)
 {
   GEN B = cgetg(k+2,t_VEC);
-  ulong i;
+  long i;
 
   for (i=1; i<=k; i++)
     B[i+1]=(long)bernfracspec(i<<1);
@@ -1279,7 +1279,7 @@ gammanew(GEN s0, long la, long prec)
       nn = 1;
 
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
-    if (nn >= maxprime()) err(primer1);
+    if ((ulong)nn >= maxprime()) err(primer1);
   }
   prec++; unr = realun(prec);
 
@@ -1639,7 +1639,7 @@ mpgamd(long x, long prec)
 
   a = labs(x);
   l = prec+1+(a>>TWOPOTBITS_IN_LONG);
-  if (l > LGBITS>>1) err(talker,"argument too large in ggamd");
+  if ((ulong)l > LGBITS>>1) err(talker,"argument too large in ggamd");
   y=cgetr(prec); av=avma;
 
   p1 = mpsqrt(mppi(l));

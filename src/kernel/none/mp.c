@@ -1281,7 +1281,7 @@ divrr(GEN x, GEN y)
       x1[j] = subll(x1[j], addmul(qp,y[j]));
       hiremainder += overflow;
     }
-    if (x1[1] != hiremainder)
+    if ((ulong)x1[1] != hiremainder)
     {
       if ((ulong)x1[1] < hiremainder)
       {
@@ -1689,7 +1689,7 @@ diviuexact(GEN x, ulong y)
   lx = lgefint(x);
   if (lx == 3) return stoi((ulong)x[2] / y);
   yinv = invrev(y);
-  lz = (y <= x[2]) ? lx : lx-1;
+  lz = (y <= (ulong)x[2]) ? lx : lx-1;
   z = new_chunk(lz);
   z0 = z + lz;
   x0 = x + lx; x0min = x + lx-lz+2;

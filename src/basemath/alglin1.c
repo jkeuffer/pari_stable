@@ -997,9 +997,10 @@ detint(GEN x)
 }
 
 static void
-gerepile_gauss_ker(GEN x, long m, long n, long k, long t, long av)
+gerepile_gauss_ker(GEN x, long m, long n, long k, long t, ulong av)
 {
-  long tetpil = avma,dec,u,A,i;
+  ulong tetpil = avma,A;
+  long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++) copyifstack(coeff(x,u,k), coeff(x,u,k));
@@ -1021,9 +1022,10 @@ gerepile_gauss_ker(GEN x, long m, long n, long k, long t, long av)
 }
 
 static void
-gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, long av)
+gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, ulong av)
 {
-  long tetpil = avma,dec,u,A,i;
+  ulong tetpil = avma,A;
+  long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
@@ -1049,9 +1051,10 @@ gerepile_gauss_FpM_ker(GEN x, GEN p, long m, long n, long k, long t, long av)
 /* special gerepile for huge matrices */
 
 static void
-gerepile_gauss(GEN x,long m,long n,long k,long t,long av, long j, GEN c)
+gerepile_gauss(GEN x,long m,long n,long k,long t,ulong av, long j, GEN c)
 {
-  long tetpil = avma,dec,u,A,i;
+  ulong tetpil = avma,A;
+  long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
@@ -1773,7 +1776,7 @@ FpM_ker_i(GEN x, GEN p, long nontriv)
 
   if (typ(x)!=t_MAT) err(typeer,"FpM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
-  if (lgefint(p) == 3 && p[2] < (MAXHALFULONG>>1))
+  if (lgefint(p) == 3 && (ulong)p[2] < (MAXHALFULONG>>1))
     return u_FpM_ker(x, p, nontriv);
 
   m=lg(x[1])-1; r=0; av0 = avma;
@@ -2019,9 +2022,11 @@ Fq_res(GEN x, GEN T, GEN p)
 }
 
 static void
-Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t, long av)
+Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
+                      ulong av)
 {
-  long tetpil = avma,dec,u,A,i;
+  ulong tetpil = avma,A;
+  long dec,u,i;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
@@ -2711,7 +2716,8 @@ hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     {
       matj = mat[j];
       if (! (t = matj[perm[lig]]) ) continue;
-      if (vmax[col] && labs(t) >= (HIGHBIT-vmax[j]) / vmax[col]) goto END2;
+      if (vmax[col] && (ulong)labs(t) >= (HIGHBIT-vmax[j]) / vmax[col])
+        goto END2;
 
       for (s=0, i=lk0+1; i<=lig; i++)
         absmax(s, matj[perm[i]] -= t*p[perm[i]]);

@@ -459,7 +459,7 @@ gcmp1(GEN x)
       return is_pm1(x) && signe(x)==1;
 
     case t_REAL:
-      if (signe(x) > 0 && expo(x)==0 && x[2]==HIGHBIT)
+      if (signe(x) > 0 && expo(x)==0 && (ulong)x[2]==HIGHBIT)
       {
         long i,lx = lg(x);
         for (i=3; i<lx; i++)
@@ -504,7 +504,7 @@ gcmp_1(GEN x)
       return is_pm1(x) && signe(x)== -1;
 
     case t_REAL:
-      if (signe(x) < 0 && expo(x)==0 && x[2]==HIGHBIT)
+      if (signe(x) < 0 && expo(x)==0 && (ulong)x[2]==HIGHBIT)
       {
         long i,lx = lg(x);
         for (i=3; i<lx; i++)
@@ -676,7 +676,8 @@ egalii(GEN x, GEN y)
 int
 gegal(GEN x, GEN y)
 {
-  long av,i,tx;
+  ulong av,tx;
+  long i;
   
   if (x == y) return 1;
   tx = typ(x);

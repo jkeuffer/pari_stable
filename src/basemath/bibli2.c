@@ -944,7 +944,7 @@ genrand(GEN N)
   nz = lx-1; while (!N[nz]) nz--; /* nz = index of last non-zero word */
   for (i=2; i<lx; i++)
   {
-    long n = N[i], r;
+    ulong n = N[i], r;
     if (n == 0) r = 0;
     else
     {   

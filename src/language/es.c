@@ -752,7 +752,7 @@ wr_float(GEN x)
   ex = expo(x); e = bit_accuracy(lg(x)); /* significant bits */
   if (ex >= e) { wr_exp(x); return; }
   decmax = (long) (e * L2SL10); /* significant digits */
-  if (decmax < (ulong)dec) dec = decmax; /* Hack: includes dec < 0 */
+  if ((ulong)decmax < (ulong)dec) dec = decmax; /* Hack: includes dec < 0 */
 
 /* integer part */
   p1 = gcvtoi(x,&e); s = signe(p1);
@@ -1120,7 +1120,8 @@ etatpile(unsigned int n)
   pariputsf(" %ld variable names used out of %d\n\n",manage_var(3,NULL),MAXVARN);
   if (!n) return;
 
-  if (n>nu) n=nu; adr=(GEN)avma; adr1=adr+n;
+  if (n > (ulong)nu) n = nu;
+  adr = (GEN)avma; adr1 = adr+n;
   while (adr<adr1)
   {
     sorstring(VOIR_STRING3,(ulong)adr);

@@ -457,7 +457,8 @@ extern GEN powrealform(GEN x, GEN n);
 GEN
 powgi(GEN x, GEN n)
 {
-  long lim,av,i,j,m,tx, sn=signe(n);
+  long i,j,m,tx, sn=signe(n);
+  ulong lim,av;
   GEN y, p1;
 
   if (typ(n) != t_INT) err(talker,"not an integral exponent in powgi");

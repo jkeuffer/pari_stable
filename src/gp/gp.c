@@ -2200,7 +2200,7 @@ gprl_input(Buffer *b, char **s0, char *prompt)
   char *s;
   
   if (! (s = readline(prompt)) ) return NULL; /* EOF */
-  if (left < strlen(s))
+  if ((ulong)left < strlen(s))
   {
     fix_buffer(b, b->len << 1);
     *s0 = b->buf + used;

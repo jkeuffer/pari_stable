@@ -888,7 +888,7 @@ czeta(GEN s0, long prec)
     l2 = (lim+ssig/2.-.25);
     nn = (long) 1 + ceil( sqrt(l2*l2 + st*st/4) * la / PI );
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
-    if (nn >= maxprime()) err(primer1);
+    if ((ulong)nn >= maxprime()) err(primer1);
   }
   prec++; unr = realun(prec); /* one extra word of precision */
   
@@ -916,7 +916,7 @@ czeta(GEN s0, long prec)
   for (p=3; p <= sqn; p += *d++)
   {
     ulong oldq = p, q = p*p;
-    while (q<nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
+    while (q<(ulong)nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
   }
   if (DEBUGLEVEL) msgtimer("tab[q^-s] from 1 to N-1"); 
 

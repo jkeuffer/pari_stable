@@ -1158,7 +1158,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     }
 
     /* determine primes used for A in this iteration */
-    for (i = 0, j = 0; j < total_no_of_primes_for_A; j++)
+    for (i = 0, j = 0; (ulong)j < total_no_of_primes_for_A; j++)
     {
       if (*bin_index & (1 << j))
       {
@@ -1174,7 +1174,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
 
     av = avma;
     p1 = stoi(Q_prime[0]);
-    for (i = 1; i < no_of_primes_in_A; i++)
+    for (i = 1; (ulong)i < no_of_primes_in_A; i++)
       p1 = mulis(p1, Q_prime[i]);
     affii(p1, A);
     avma = av;
@@ -1183,7 +1183,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
      * let bound := no_of_primes_in_A. Compute H_i, 0 <= i < bound.
      */
 
-    for (i = 0; i < no_of_primes_in_A; i++)
+    for (i = 0; (ulong)i < no_of_primes_in_A; i++)
     {
       av = avma;
       p = Q_prime[i];
@@ -1206,7 +1206,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     /* compute actual B coefficient, by taking all v_i == 1 */
     av = avma;
     p1 = H_i[0];
-    for (i = 1; i < no_of_primes_in_A; i++)
+    for (i = 1; (ulong)i < no_of_primes_in_A; i++)
       p1 = addii(p1, H_i[i]);
     affii(p1, B);
     avma = av;
@@ -1225,14 +1225,14 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     av = avma;
     p1 = shifti(A, 1);
     size_of_FB = FB[0] + 1;
-    for (i = 2; i <= size_of_FB; i++)
+    for (i = 2; (ulong)i <= size_of_FB; i++)
       inv_A2[i] = mpqs_invsmod(smodis(p1, FB[i]), FB[i]);
     avma = av;
 
     /* compute inv_A_H_i[i][j] = 1/A * H_i[i] mod p_j */
-    for (i = 0; i < no_of_primes_in_A; i++)
+    for (i = 0; (ulong)i < no_of_primes_in_A; i++)
     {
-      for (j = 2; j <= size_of_FB; j++)
+      for (j = 2; (ulong)j <= size_of_FB; j++)
       {
 	av = avma;
 	p1 = mulis(H_i[i], inv_A2[j] << 1);
@@ -1245,7 +1245,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
      * initialize start_1[i] with the first value p_i | Q(z1 + i p_j)
      * initialize start_2[i] with the first value p_i | Q(z2 + i p_j)
      */
-    for (j = 2; j <= size_of_FB; j++)
+    for (j = 2; (ulong)j <= size_of_FB; j++)
     {
       p = FB[j];
       M_mod_p = M % p;
@@ -1316,7 +1316,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
 
     if (i == -1)
     {
-      for (j = 2; j <= size_of_FB; j++)
+      for (j = 2; (ulong)j <= size_of_FB; j++)
       {
 	p = FB[j];
 	start_1[j] += inv_A_H_i[nu_2][j];
@@ -1329,7 +1329,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
     }
     else
     {
-      for (j = 2; j <= size_of_FB; j++)
+      for (j = 2; (ulong)j <= size_of_FB; j++)
       {
 	p = FB[j];
 	start_1[j] -= inv_A_H_i[nu_2][j];
@@ -1357,7 +1357,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
   p1 = subii(kN, sqri(B));
   p2 = divii(p1, shifti(A, 2));
 
-  for (j = 1; j <= total_no_of_primes_for_A; j++)
+  for (j = 1; (ulong)j <= total_no_of_primes_for_A; j++)
     if (*bin_index & (1 << (j-1)))
     {
       p = FB[start_index_FB_for_A + j];
@@ -1639,7 +1639,7 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 #endif
 
   i = 0;
-  while (i < number_of_candidates)
+  while (i < (ulong)number_of_candidates)
   {
 #ifdef MPQS_DEBUG_VERYVERBOSE	/* this one really fills the screen... */
     fprintferr("%c", (char)('0' + i%10));
@@ -1742,7 +1742,7 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
       tmp_p = x % p;
 
       ei = 0;
-      if (bi && pi > start_index_FB_for_A)
+      if (bi && pi > (ulong)start_index_FB_for_A)
       {
 	ei = bi & 1;	/* either 0 or 1 */
 	bi >>= 1;
@@ -3091,7 +3091,7 @@ mpqs(GEN N)
   sqrt_mod_p_kN =
     (long *) gpmalloc((size_of_FB + 2) * sizeof(long));
 
-  for (i = 2; i < size_of_FB + 2; i++)
+  for (i = 2; (ulong)i < size_of_FB + 2; i++)
   {
     long av1 = avma;
     p = FB[i];
@@ -3166,12 +3166,12 @@ mpqs(GEN N)
   /* will be used to compute the consecutive B during
      self-initialization */
   H_i = (GEN *) gpmalloc(no_of_primes_in_A * sizeof(GEN));
-  for (i = 0; i < no_of_primes_in_A; i++)
+  for (i = 0; (ulong)i < no_of_primes_in_A; i++)
     H_i[i] = cgeti(2 * total_no_of_primes_for_A);
 
   inv_A_H_i =
     (long **) gpmalloc(total_no_of_primes_for_A * sizeof(long *));
-  for (i = 0; i < total_no_of_primes_for_A; i++)
+  for (i = 0; (ulong)i < total_no_of_primes_for_A; i++)
     inv_A_H_i[i] = (long *) gpmalloc((size_of_FB + 2) * sizeof(long));
 
   start_1 = (long *) gpmalloc((size_of_FB + 2) * sizeof(long));
@@ -3201,7 +3201,7 @@ mpqs(GEN N)
   free(Q_prime); \
 /*  free(Q_prime_glob); */ \
   free(H_i); \
-  for (i = 0; i < total_no_of_primes_for_A; i++) \
+  for (i = 0; (ulong)i < total_no_of_primes_for_A; i++) \
     free(inv_A_H_i[i]); \
   free(inv_A_H_i); \
   free(start_1); \
@@ -3348,7 +3348,7 @@ mpqs(GEN N)
       (long)((1000.0 * (total_candidates_number - total_full_relations))
 	     / (total_candidates_number ? total_candidates_number : 1));
 
-    if (percentage < sort_interval)
+    if ((ulong)percentage < sort_interval)
       continue;			/* most main loops end here... */
 
     /* Extra processing when we have completed a sort interval: */

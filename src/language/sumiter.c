@@ -102,7 +102,7 @@ sinitp(long a, long c, byteptr *ptr)
 {
   byteptr p = *ptr;
   if (a <= 0) a = 2;
-  if (maxprime() < a) err(primer1);
+  if (maxprime() < (ulong)a) err(primer1);
   while (a > c) c += *p++;
   *ptr = p; return c;
 }
@@ -145,8 +145,8 @@ prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
   P = maxprime();
   *a = itos(ga); if (*a <= 0) *a = 1;
   *b = itos(gb); if (*a > *b) return NULL;
-  if (*a <= P) prime[2] = sinitp(*a, 0, &p);
-  if (*b > P) err(primer1);
+  if ((ulong)*a <= P) prime[2] = sinitp(*a, 0, &p);
+  if ((ulong)*b > P) err(primer1);
   return p;
 }
 
@@ -601,11 +601,11 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
       for (i=1; i<=n; i++) y[i]=x[i];
       lx=lgef(polnum)-3;
       q=p; qlim = n/p; j=1;
-      while (q<=n && j<=lx)
+      while (q<=(ulong)n && j<=lx)
       {
 	c=(GEN)polnum[j+2];
 	if (!gcmp0(c))
-	  for (k=1,k1=q; k1<=n; k1+=q,k++)
+	  for (k=1,k1=q; k1<=(ulong)n; k1+=q,k++)
 	    x[k1] = ladd((GEN)x[k1], gmul(c,(GEN)y[k]));
         if (q > qlim) break;
 	q*=p; j++;

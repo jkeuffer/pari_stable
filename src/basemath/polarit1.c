@@ -205,7 +205,8 @@ GEN gdivexact(GEN x, GEN y);
 GEN
 poldivres(GEN x, GEN y, GEN *pr)
 {
-  long ty=typ(y),tx,vx,vy,dx,dy,dz,i,j,avy,av,av1,sx,lrem;
+  ulong avy,av,av1;
+  long ty=typ(y),tx,vx,vy,dx,dy,dz,i,j,sx,lrem;
   int remainder;
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);

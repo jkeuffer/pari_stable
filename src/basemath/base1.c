@@ -1415,8 +1415,8 @@ static GEN
 dirzetak0(GEN nf, long N0)
 {
   GEN vect,p1,pol,disc,c,c2;
-  long av=avma,i,j,k,lx;
-  ulong limk,q,p,rem;
+  long av=avma,i,j,k,limk,lx;
+  ulong q,p,rem;
   byteptr d=diffptr;
   long court[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3),0};
 
@@ -1444,7 +1444,7 @@ dirzetak0(GEN nf, long N0)
       {
         q=p=p1[2]; limk=N0/q;
         for (k=2; k<=N0; k++) c2[k]=c[k];
-        while (q<=N0)
+        while (q<=(ulong)N0)
         {
           for (k=1; k<=limk; k++) c2[k*q] += c[k];
           q = smulss(q,p,&rem);

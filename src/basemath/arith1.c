@@ -1239,7 +1239,8 @@ mpppcm(GEN x, GEN y)
 GEN
 chinois(GEN x, GEN y)
 {
-  long i,lx,vx,av,tetpil, tx = typ(x);
+  ulong av,tetpil, tx = typ(x);
+  long i,lx,vx;
   GEN z,p1,p2,d,u,v;
 
   if (gegal(x,y)) return gcopy(x);
@@ -1516,8 +1517,7 @@ GEN muluu(ulong x, ulong y);
 GEN
 mpfact(long n)
 {
-  long lx, av = avma;
-  ulong k,l;
+  long lx,k,l, av = avma;
   GEN x;
 
   if (n<2)
@@ -1689,7 +1689,7 @@ sfcont(GEN x, GEN x1, long k)
         l=avma; lx1=lgefint(x[2]);
 	l1 = (long) ((double) BYTES_IN_LONG/4.0*46.093443*(lx1-2)+3);
         if (k>0 && ++k > 0 && l1 > k) l1 = k; /* beware overflow */
-	if (l1>LGBITS) l1=LGBITS;
+	if ((ulong)l1>LGBITS) l1=LGBITS;
 	if (lgefint(x[1]) >= lx1) p1=icopy((GEN)x[1]);
 	else affii((GEN)x[1],p1=cgeti(lx1));
 	p2=icopy((GEN)x[2]); lx1=lg(x1);
@@ -1837,7 +1837,8 @@ pnqn(GEN x)
 GEN
 bestappr(GEN x, GEN k)
 {
-  long av=avma,tetpil,tx,tk=typ(k),lx,i,e;
+  ulong av = avma, tetpil;
+  long tx,tk=typ(k),lx,i,e;
   GEN p0,p1,p,q0,q1,q,a,y;
 
   if (tk != t_INT)

@@ -136,7 +136,7 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
 
   need = 100 * rootnum;		/* Make % overhead negligeable. */
   if (need < PRIME_ARENA) need = PRIME_ARENA;
-  if (avma - bot < need>>1) {	/* need to do our own allocation */
+  if (avma - bot < (ulong)need>>1) {	/* need to do our own allocation */
     alloced = 1; asize = need;
   } else {			/* scratch area is free part of PARI stack */
     alloced = 0; asize = avma - bot;
@@ -1185,7 +1185,7 @@ comp_gen(GEN z,GEN x,GEN y)
 static GEN
 compimag0(GEN x, GEN y, int raw)
 {
-  long tx = typ(x), av = avma, tetpil;
+  ulong tx = typ(x), av = avma, tetpil;
   GEN z;
 
   if (typ(y) != tx || tx!=t_QFI) err(typeer,"composition");
@@ -1197,7 +1197,7 @@ compimag0(GEN x, GEN y, int raw)
 static GEN
 compreal0(GEN x, GEN y, int raw)
 {
-  long tx = typ(x), av = avma, tetpil;
+  ulong tx = typ(x), av = avma, tetpil;
   GEN z;
 
   if (typ(y) != tx || tx!=t_QFR) err(typeer,"composition");
@@ -2065,7 +2065,7 @@ incdec(GEN x, long incdec)
     xl = x + len;
     if (incdec == 1) {
 	while (--xl >= xf) {
-	    if (*xl != ~uzero) {
+	    if ((ulong)*xl != ~uzero) {
 		(*xl)++;
 		return 0;
 	    }

@@ -1868,7 +1868,7 @@ factor(GEN x)
                 p2[2] = (long)deg1pol_i((GEN)p1[2], (GEN)p1[1], v);
             }
           }
-          killv = (avma != (long)pol);
+          killv = (avma != (ulong)pol);
           if (killv) setvarn(pol, fetch_var());
           switch (typ2(tx))
           {
@@ -2536,7 +2536,8 @@ vecbezoutres(GEN x, GEN y)
 GEN
 content(GEN x)
 {
-  long av,tetpil,lx,i,tx=typ(x);
+  long lx,i,tx=typ(x);
+  ulong av,tetpil;
   GEN p1,p2;
 
   if (is_scalar_t(tx))
