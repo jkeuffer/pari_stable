@@ -117,40 +117,48 @@ static long next_bloc;
 static GEN cur_bloc=NULL; /* current bloc in bloc list */
 static long *universal_constants;
 
-#ifdef WINCE
+static void
+pari_handle_SIGINT()
+{
+#ifdef _WIN32
+  if (++win32ctrlc >= 5) _exit(3);
 #else
+  err(talker, "user interrupt");
+#endif
+}
+
 static void
 pari_sighandler(int sig)
 {
   char *msg;
+  os_signal(sig,pari_sighandler);
   switch(sig)
   {
-    case SIGINT:
-#ifdef _WIN32
-# ifdef SIGBREAK
-    case SIGBREAK:
-# endif
-      if (++win32ctrlc >= 5) _exit(3);
-      signal(sig,pari_sighandler);
-      return;
+#ifdef SIGBREAK
+    case SIGBREAK: pari_handle_SIGINT(); return;
 #endif
-      msg="user interrupt";
-      break;
+#ifdef SIGINT
+    case SIGINT:   pari_handle_SIGINT(); return;
+#endif
 
+#ifdef SIGSEGV
     case SIGSEGV:
       msg="segmentation fault: bug in PARI or calling program";
       break;
+#endif
 
 #ifdef SIGBUS
     case SIGBUS:
       msg="bus error: bug in PARI or calling program";
       break;
 #endif
+
 #ifdef SIGFPE
     case SIGFPE:
       msg="floating point exception: bug in PARI or calling program";
       break;
 #endif
+
 #ifdef SIGPIPE
     case SIGPIPE:
       msg="broken pipe: bug in PARI or calling program";
@@ -160,10 +168,8 @@ pari_sighandler(int sig)
     default:
       msg="unknown signal";
   }
-  signal(sig,pari_sighandler);
   err(talker,msg);
 }
-#endif
 
 #ifdef _WIN32
 int win32ctrlc = 0;
@@ -347,22 +353,22 @@ void
 pari_sig_init(void (*f)(int))
 {
 #ifdef SIGBUS
-  signal(SIGBUS,f);
+  (void)os_signal(SIGBUS,f);
 #endif
 #ifdef SIGFPE
-  signal(SIGFPE,f);
+  (void)os_signal(SIGFPE,f);
 #endif
 #ifdef SIGINT
-  signal(SIGINT,f);
+  (void)os_signal(SIGINT,f);
 #endif
 #ifdef SIGBREAK
-  signal(SIGBREAK,f);
+  (void)os_signal(SIGBREAK,f);
 #endif
 #ifdef SIGPIPE
-  signal(SIGPIPE,f);
+  (void)os_signal(SIGPIPE,f);
 #endif
 #ifdef SIGSEGV
-  signal(SIGSEGV,f);
+  (void)os_signal(SIGSEGV,f);
 #endif
 }
 
@@ -392,9 +398,7 @@ pari_init(long parisize, long maxprime)
     fprintferr("  ***   Error in the PARI system. End of program.\n");
     exit(1);
   }
-#ifndef WINCE
   if (INIT_SIG) pari_sig_init(pari_sighandler);
-#endif
   size = fix_size(parisize);
 #if __MWERKS__
   {
@@ -737,18 +741,14 @@ recover(int flag)
   static long listloc;
   long n;
   entree *ep, *epnext;
-#ifndef WINCE
   void (*sigfun)(int);
-#endif
 
   if (!flag) { listloc = next_bloc; return; }
 
  /* disable recover() and SIGINT. Better: sigint_[block|release] as in
   * readline/rltty.c ? */
   try_to_recover=0; 
-#ifndef WINCE
-  sigfun = signal(SIGINT, SIG_IGN);
-#endif
+  sigfun = os_signal(SIGINT, SIG_IGN);
 
   for (n = 0; n < functions_tblsz; n++)
     for (ep = functions_hash[n]; ep; ep = epnext)
@@ -796,9 +796,7 @@ recover(int flag)
   }
 #endif
   try_to_recover=1; 
-#ifndef WINCE
-  signal(SIGINT, sigfun);
-#endif
+  os_signal(SIGINT, sigfun);
 }
 
 void

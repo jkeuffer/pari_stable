@@ -1536,27 +1536,7 @@ gp_quit()
 {
   free_graph(); freeall();
   kill_all_buffers(NULL);
-  if (INIT_SIG)
-  {
-#ifdef SIGBUS
-    signal(SIGBUS,SIG_DFL);
-#endif
-#ifdef SIGFPE
-    signal(SIGFPE,SIG_DFL);
-#endif
-#ifdef SIGPIPE
-    signal(SIGPIPE,SIG_DFL);
-#endif
-#ifdef SIGSEGV
-    signal(SIGSEGV,SIG_DFL);
-#endif
-#ifdef SIGINT
-    signal(SIGINT,SIG_DFL);
-#endif
-#ifdef SIGBREAK
-    signal(SIGBREAK,SIG_DFL);
-#endif
-  }
+  if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
   pariputs_opt("Good bye!\n"); exit(0);
 }
@@ -1990,7 +1970,7 @@ do_time(long flag)
 }
 
 static void
-handle_SIGINT()
+gp_handle_SIGINT()
 {
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
@@ -1999,19 +1979,18 @@ handle_SIGINT()
 #endif
 }
 
-#ifndef WINCE
 static void
 gp_sighandler(int sig)
 {
   char *msg;
-  signal(sig,gp_sighandler);
+  os_signal(sig,gp_sighandler);
   switch(sig)
   {
 #ifdef SIGBREAK
-    case SIGBREAK: handle_SIGINT(); return;
+    case SIGBREAK: gp_handle_SIGINT(); return;
 #endif
 #ifdef SIGINT
-    case SIGINT: handle_SIGINT(); return;
+    case SIGINT: gp_handle_SIGINT(); return;
 #endif
 
 #ifdef SIGSEGV
@@ -2043,7 +2022,6 @@ gp_sighandler(int sig)
   }
   err(bugparier,msg);
 }
-#endif
 
 static void
 brace_color(char *s, int c)
@@ -2546,9 +2524,7 @@ main(int argc, char **argv)
 
   init_graph(); INIT_SIG_off;
   pari_init(parisize, primelimit);
-#ifndef WINCE
   pari_sig_init(gp_sighandler);
-#endif
 #ifdef READLINE
   init_readline();
 #endif

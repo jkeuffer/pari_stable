@@ -63,3 +63,13 @@ extern char    *errmessage[], *current_psfile;
 #endif
 
 #define stack_lim(av,n) (bot + (((av)-bot)>>(n)))
+
+#ifndef O_RDONLY
+#  define O_RDONLY 0
+#endif
+#ifndef SIG_IGN
+#  define SIG_IGN (void(*)())1
+#endif
+#ifndef SIGINT
+#  define SIGINT 2
+#endif

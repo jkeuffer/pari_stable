@@ -5,9 +5,6 @@
 /**************************************************************/
 /* $Id$ */
 #include "pari.h"
-#ifndef WINCE
-#  include <fcntl.h>
-#endif
 
 #define NMAX 11 /* maximum degree */
 
@@ -411,24 +408,11 @@ name(char *pre, long n, long n1, long n2, long no)
 static long
 galopen(char *s)
 {
-#ifdef WINCE
-	HANDLE h;
-	short ws[256];
-	MultiByteToWideChar(CP_ACP, 0, s, strlen(s)+1, ws, 256);
-	h = CreateFile(ws,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
-	if (h == INVALID_HANDLE_VALUE)
-		err(talker, "galois files not available in this version, sorry");
-	if (DEBUGLEVEL > 3) msgtimer("opening %s", s);
-	return (long)h;
-#else
-  long fd = open(s,O_RDONLY);
-
+  long fd = os_open(s,O_RDONLY);
   if (fd == -1)
     err(talker,"galois files not available in this version, sorry");
-
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
   return fd;
-#endif
 }
 
 static char
@@ -452,19 +436,11 @@ read_obj(POBJ g, long fd, long n, long m)
   i = j = 1;
   for(;;)
   {
-#ifdef WINCE
-	  if (k==BUFFS) { DWORD chRead; ReadFile((HANDLE)fd, ch, BUFFS, &chRead, NULL); k=0; }
-#else
-    if (k==BUFFS) { read(fd,ch,BUFFS); k=0; }
-#endif
+    if (k==BUFFS) { os_read(fd,ch,BUFFS); k=0; }
     g[i][j++] = bin(ch[k++]);
     if (j>m) { j=1; i++; if (i>n) break; }
   }
-#ifdef WINCE
-  CloseHandle((HANDLE)fd); if (DEBUGLEVEL > 3) msgtimer("read_object");
-#else
-  close(fd); if (DEBUGLEVEL > 3) msgtimer("read_object");
-#endif
+  os_close(fd); if (DEBUGLEVEL > 3) msgtimer("read_object");
 }
 #undef BUFFS
 
@@ -476,40 +452,21 @@ lirecoset(long n1, long n2, long n)
   char c, ch[8];
   long no,m,cardgr,fd;
 
-#ifdef WINCE
-  long chRead;
   if (n<11 || n1<8)
   {
     fd = galopen(name(str_coset, n, n1, n2, 0));
-    ReadFile((HANDLE)fd,&c,1, &chRead, NULL); m=bin(c); ReadFile((HANDLE)fd,&c,1, &chRead, NULL);
-    ReadFile((HANDLE)fd,ch,6, &chRead, NULL); cardgr=atol(ch); gr=allocgroup(m,cardgr);
+    os_read(fd,&c,1); m=bin(c); os_read(fd,&c,1);
+    os_read(fd,ch,6); cardgr=atol(ch); gr=allocgroup(m,cardgr);
     read_obj(gr, fd,cardgr,m); return gr;
   }
   m = 11; cardgr = 45360;
   gr = grptr = allocgroup(n, 8 * cardgr);
   for (no=1; no<=8; no++)
   {
-    fd = galopen(name(str_coset, n, n1, n2, no)); ReadFile((HANDLE)fd,ch,8, &chRead, NULL);
+    fd = galopen(name(str_coset, n, n1, n2, no)); os_read(fd,ch,8);
     read_obj(grptr, fd,cardgr,m); grptr += cardgr;
   }
   return gr;
-#else
-  if (n<11 || n1<8)
-  {
-    fd = galopen(name(str_coset, n, n1, n2, 0));
-    read(fd,&c,1); m=bin(c); read(fd,&c,1);
-    read(fd,ch,6); cardgr=atol(ch); gr=allocgroup(m,cardgr);
-    read_obj(gr, fd,cardgr,m); return gr;
-  }
-  m = 11; cardgr = 45360;
-  gr = grptr = allocgroup(n, 8 * cardgr);
-  for (no=1; no<=8; no++)
-  {
-    fd = galopen(name(str_coset, n, n1, n2, no)); read(fd,ch,8);
-    read_obj(grptr, fd,cardgr,m); grptr += cardgr;
-  }
-  return gr;
-#endif
 }
 
 static RESOLVANTE
@@ -519,20 +476,11 @@ lireresolv(long n1, long n2, long n, long *nv, long *nm)
   char ch[5];
   long fd;
 
-#ifdef WINCE
-  long chRead;
   fd = galopen(name(str_resolv, n, n1, n2, 0));
-  ReadFile((HANDLE)fd,ch,5, &chRead, NULL); *nm=atol(ch);
-  ReadFile((HANDLE)fd,ch,3, &chRead, NULL); *nv=atol(ch);
+  os_read(fd,ch,5); *nm=atol(ch);
+  os_read(fd,ch,3); *nv=atol(ch);
   b = allocresolv(*nm,*nv);
   read_obj(b, fd,*nm,*nv); return b;
-#else
-  fd = galopen(name(str_resolv, n, n1, n2, 0));
-  read(fd,ch,5); *nm=atol(ch);
-  read(fd,ch,3); *nv=atol(ch);
-  b = allocresolv(*nm,*nv);
-  read_obj(b, fd,*nm,*nv); return b;
-#endif
 }
 
 static GEN

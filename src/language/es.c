@@ -301,9 +301,6 @@ void init_lim_lines(char *s, long max);
 static int
 term_width_intern()
 {
-#ifdef WINCE
-	return 0;
-#endif
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
@@ -2177,6 +2174,55 @@ try_pipe(char *cmd, int flag)
   return newfile(file, f, mf_PIPE|flag);
 #endif
 }
+
+void
+os_close(long fd)
+{
+#ifdef WINCE
+  CloseHandle((HANDLE)fd);
+#else
+  close(fd);
+#endif
+}
+
+void
+(*os_signal(int sig, void (*f)(int)))(int)
+{
+#ifdef WINCE
+  return SIG_IGN;
+#else
+  return signal(sig,f);
+#endif
+}
+
+void
+os_read(long fd, char ch[], long s)
+{
+#ifdef WINCE
+  DWORD chRead;
+  ReadFile((HANDLE)fd, ch, s, &chRead, NULL);
+#else
+  read(fd,ch,s);
+#endif
+}
+
+long
+os_open(char *s, int mode)
+{
+  long fd;
+#ifdef WINCE
+  HANDLE h;
+  short ws[256];
+  if (mode != O_RDONLY) err(impl,"generic open for Windows");
+  MultiByteToWideChar(CP_ACP, 0, s, strlen(s)+1, ws, 256);
+  h = CreateFile(ws,GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+  fd = (h == INVALID_HANDLE_VALUE)? (long)-1: (long)h;
+#else
+  fd = open(s,O_RDONLY);
+#endif
+  return fd;
+}
+
 /*******************************************************************/
 /**                                                               **/
 /**                   GP STANDARD INPUT AND OUTPUT                **/
@@ -2464,12 +2510,11 @@ pari_file_exists(char *s)
 #endif
 }
 
-#ifndef macintosh
 char *
 env_ok(char *s)
 {
-#ifdef WINCE
-	return NULL;
+#if defined(WINCE) || defined(macintosh)
+  return NULL;
 #else
   char *t = getenv(s);
   if (t && pari_is_rwx(t) == 0)
@@ -2480,33 +2525,26 @@ env_ok(char *s)
   return t;
 #endif
 }
-#endif
 
 static char*
 pari_tmp_dir()
 {
-#ifdef WINCE
-	char *s;
-
-	s = env_ok("TEMP"); if (s) return s;
-	return "\\temp";
-#else
-#ifndef macintosh
   char *s;
-
+#ifdef WINCE
+  s = env_ok("TEMP"); if (s) return s;
+  return "\\temp";
+#endif
   s = env_ok("GPTMPDIR"); if (s) return s;
   s = env_ok("TMPDIR"); if (s) return s;
 #ifdef __EMX__
   s = env_ok("TMP"); if (s) return s;
   s = env_ok("TEMP"); if (s) return s;
 #endif
-#endif
 #if defined(UNIX) || defined(__EMX__)
   if (pari_is_rwx("/var/tmp")) return "/var/tmp";
   if (pari_is_rwx("/tmp")) return "/tmp";
 #endif
   return ".";
-#endif
 }
 
 /* Return a "unique filename" built from the string s, possibly the user id
@@ -2542,12 +2580,10 @@ pari_unique_filename(char *s)
     if (buf[lpre-1] != '/') { (void)strcat(buf, "/"); lpre++; }
 #ifdef __EMX__
     if (!unix_shell())
+#endif
+#if defined(__EMX__) || defined(WINCE)
       for (pre=buf; *pre; pre++)
 	if (*pre == '/') *pre = '\\';
-#endif
-#ifdef WINCE
-	for (pre=buf; *pre; pre++) 
-		if (*pre == '/') *pre = '\\';
 #endif
     pre = buf + lpre; if (!s) return s;
   }
