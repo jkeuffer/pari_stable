@@ -284,10 +284,8 @@ OBJSGP = $OBJSGP
 OBJSDGP = $OBJSDGP
 
 dft: gp $pari_elc
-	-
 
 gp: gp-$dft ../gp$suffix$exe_suff $libdft
-	-
 
 ../gp$suffix$exe_suff: gp-$dft
 	-\$(RM) \$@
@@ -613,3 +611,5 @@ if test -n "$DYNFLAGS"; then
   echo "include Makefile.DLLs" >> $file
   cp $config_dir/Makefile.DLLs $objdir
 fi
+
+echo ".PHONY: gp dft"  >> $file

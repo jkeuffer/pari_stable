@@ -106,6 +106,7 @@ MSo44- [gp: \x] missing 'break' statement in escape()
          low to decide 
 BA 50- [FreeBSD:] PORTOBJFORMAT undefined by the system --> Configure fails
    51- rnfisnorm() [errors, SEGV]. Had to change the prototype.
+BA 52- Oxxx/Makefile was not compatible with BSD make.
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -225,8 +226,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    64- besselj(0,O(1)) [or besseli] --> precision<=0 in gprec.
    65- O(1)' --> O(x^-1)
    66- gcd(O(2^1), O(2^10)) --> O(2^10)
-   67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"  [ [] in
-       stable version, which is also wrong: 2 + O(2^2) ]
+   67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"  
    68- one could write() an object to a binary file, corrupting it
 MW 69- ellap(ellinit([0,0,1,-7077,235516]), 1075060289) --> "zero argument in
        an arithmetic function"
