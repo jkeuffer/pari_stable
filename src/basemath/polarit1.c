@@ -1166,15 +1166,28 @@ padic_pol_to_int(GEN f)
   return f;
 }
 
-/* return x + O(pr), x in Z, pr = p^r */
+/* return invlead * (x + O(pr)), x in Z or Z_p, pr = p^r */
 static GEN
-int_to_padic(GEN x, GEN p, GEN pr, long r)
+int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
 {
   GEN p1,y;
-  long v;
-  if (typ(x) == t_PADIC) return gcopy(x);
+  long v,sx, av = avma;
+
+  if (typ(x) == t_PADIC)
+  {
+    v = valp(x);
+    if (r >= precp(x) + v) return invlead? gmul(x, invlead): gcopy(x);
+    sx = !gcmp0(x);
+    p1 = (GEN)x[4];
+  }
+  else
+  {
+    sx = signe(x);
+    if (!sx) return gzero;
+    v = pvaluation(x,p,&p1);
+  }
   y = cgetg(5,t_PADIC);
-  if (signe(x) && (v = pvaluation(x,p,&p1)) < r)
+  if (sx && v < r)
   {
     y[4] = lmodii(p1,pr); r -= v;
   }
@@ -1184,17 +1197,29 @@ int_to_padic(GEN x, GEN p, GEN pr, long r)
   }
   y[3] = (long)pr; 
   y[2] = (long)p;
-  y[1] = evalprecp(r)|evalvalp(v); return y;
+  y[1] = evalprecp(r)|evalvalp(v);
+  return invlead? gerepileupto(av, gmul(invlead,y)): y;
 }
 
-/* return x + O(p^r), x in Z[X] */
+/* return (x + O(p^r)) normalized (multiply by a unit such that leading coeff
+ * is a power of p), x in Z[X] (or Z_p[X]) */
 static GEN
 pol_to_padic(GEN x, GEN pr, GEN p, long r)
 {
-  long i,lx = lgef(x);
-  GEN z = cgetg(lx,t_POL);
-  for (i=2; i<lx; i++)
-    z[i] = (long)int_to_padic((GEN)x[i],p,pr,r);
+  long v = 0,i,lx = lgef(x);
+  GEN z = cgetg(lx,t_POL), lead = leading_term(x);
+
+  if (gcmp1(lead)) lead = NULL;
+  else
+  {
+    long av = avma;
+    v = ggval(lead,p);
+    if (v) lead = gdiv(lead, gpowgs(p,v));
+    lead = int_to_padic(lead,p,pr,r,NULL);
+    lead = gerepileupto(av, ginv(lead));
+  }
+  for (i=lx-1; i>1; i--)
+    z[i] = (long)int_to_padic((GEN)x[i],p,pr,r,lead);
   z[1] = x[1]; return z;
 }
 
@@ -1650,6 +1675,8 @@ factorpadic2(GEN x, GEN p, long r)
   if (r<=0) err(rootper4);
 
   if (lgef(x)==3) return trivfact();
+ if (!gcmp1(leading_term(x)))
+    err(impl,"factorpadic2 for non-monic polynomial");
   if (lgef(x)==4) return padic_trivfact(x,p,r);
   y=cgetg(3,t_MAT);
   fa = (GEN*)new_chunk(lgef(x)-2);
@@ -1706,11 +1733,24 @@ squarefree(GEN f, GEN *ex)
   setlg(A,i); *ex=B; return A;
 }
 
+#define swap(x,y) { long _t=x; x=y; y=_t; }
+
+/* reverse x in place */
+static void
+polreverse(GEN x)
+{
+  long i, j;
+  if (typ(x) != t_POL) err(typeer,"polreverse");
+  for (i=2, j=lgef(x)-1; i<j; i++, j--) swap(x[i], x[j]);
+  (void)normalizepol(x);
+}
+
 GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
   GEN w,g,poly,fx,y,p1,p2,ex,pols,exps,ppow,lead;
   long v=varn(f),n=lgef(f)-3,av,tetpil,mfx,i,k,j,r,pr;
+  int reverse = 0;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
   if (gcmp0(f)) err(zeropoler,"factorpadic");
@@ -1719,8 +1759,22 @@ factorpadic4(GEN f,GEN p,long prec)
   if (n==0) return trivfact();
   av=avma; f = padic_pol_to_int(f);
   if (n==1) return gerepileupto(av, padic_trivfact(f,p,prec));
+  lead = leading_term(f); pr = prec;
+  if (!gcmp1(lead))
+  {
+    long val = ggval(lead,p), val1 = ggval((GEN)f[2],p);
+    if (val1 < val)
+    {
+      reverse = 1; polreverse(f);
+     /* take care of loss of precision from leading coeff of factor
+      * (whose valuation is <= val) */
+      pr += val;
+      val = val1;
+    }
+    pr += val * (n-1);
+  }
   f = pol_to_monic(f, &lead);
-  pr = lead? prec + (n-1) * ggval(lead,p): prec;
+
   poly=squarefree(f,&ex);
   pols=cgetg(n+1,t_COL);
   exps=cgetg(n+1,t_COL); n = lg(poly);
@@ -1776,7 +1830,10 @@ factorpadic4(GEN f,GEN p,long prec)
   tetpil=avma; y=cgetg(3,t_MAT);
   p1 = cgetg(j,t_COL); ppow = gpowgs(p,prec); p = icopy(p);
   for (i=1; i<j; i++)
+  {
+    if (reverse) polreverse((GEN)pols[i]);
     p1[i] = (long)pol_to_padic((GEN)pols[i],ppow,p,prec);
+  }
   y[1]=(long)p1; setlg(exps,j);
   y[2]=lcopy(exps); return gerepile(av,tetpil,y);
 }
