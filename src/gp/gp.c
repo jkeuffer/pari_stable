@@ -1695,7 +1695,7 @@ gp_head(void)
            DATA_BEGIN, DATA_END);
 #endif
   print_version(); pariputs("\n");
-  center("Copyright (C) 2002 The PARI Group");
+  center("Copyright (C) 2003 The PARI Group");
   print_text("\nPARI/GP is free software, covered by the GNU General Public \
 License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
   pariputs("\n\
