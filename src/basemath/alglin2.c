@@ -2326,9 +2326,19 @@ gsmithall(GEN x,long all)
 	p1=gcoeff(x,i,j);
 	if (signe(p1))
 	{
-	  p2=gcoeff(x,i,i); v=gdiventres(p1,p2);
-	  if (gcmp0((GEN)v[2])) { d=p2; p4=(GEN)v[1]; v=gzero; p3=gun; u=gun; }
-	  else { d=gbezout(p2,p1,&u,&v); p3=gdiv(p2,d); p4=gdiv(p1,d); }
+	  p2=gcoeff(x,i,i);
+          if (!signe(p2))
+          {
+            p3 = gzero; p4 = gun; u = gzero; v = gun;
+          }
+          else
+          {
+            v = gdiventres(p1,p2);
+            if (gcmp0((GEN)v[2]))
+              { d=p2; p4=(GEN)v[1]; v=gzero; p3=gun; u=gun; }
+            else
+              { d=gbezout(p2,p1,&u,&v); p3=gdiv(p2,d); p4=gdiv(p1,d); }
+          }
 	  for (k=1; k<=i; k++)
 	  {
 	    b=gadd(gmul(u,gcoeff(x,k,i)),gmul(v,gcoeff(x,k,j)));
@@ -2343,9 +2353,19 @@ gsmithall(GEN x,long all)
 	p1=gcoeff(x,j,i);
 	if (signe(p1))
 	{
-	  p2=gcoeff(x,i,i); v=gdiventres(p1,p2);
-	  if (gcmp0((GEN)v[2])) { d=p2; p4=(GEN)v[1]; v=gzero; p3=gun; u=gun; }
-	  else { d=gbezout(p2,p1,&u,&v); p3=gdiv(p2,d); p4=gdiv(p1,d); }
+	  p2 = gcoeff(x,i,i);
+          if (!signe(p2))
+          {
+            p3 = gzero; p4 = gun; u = gzero; v = gun;
+          }
+          else
+          {
+            v = gdiventres(p1,p2);
+            if (gcmp0((GEN)v[2]))
+              { d=p2; p4=(GEN)v[1]; v=gzero; p3=gun; u=gun; }
+            else
+              { d=gbezout(p2,p1,&u,&v); p3=gdiv(p2,d); p4=gdiv(p1,d); }
+          }
 	  for (k=1; k<=i; k++)
 	  {
 	    b=gadd(gmul(u,gcoeff(x,i,k)),gmul(v,gcoeff(x,j,k)));
@@ -2361,15 +2381,15 @@ gsmithall(GEN x,long all)
 	b=gcoeff(x,i,i); fl=1;
 	if (signe(b))
 	{
-	  for (k=1; (k<i)&&fl; k++)
-	    for (l=1; (l<i)&&fl; l++)
-	      fl= !signe(gmod(gcoeff(x,k,l),b));
+	  for (k=1; k<i && fl; k++)
+	    for (l=1; l<i && fl; l++)
+	      fl = !signe(gmod(gcoeff(x,k,l),b));
 	  if (!fl)
 	  {
 	    k--;
 	    for (l=1; l<=i; l++)
-	      coeff(x,i,l)=ladd(gcoeff(x,i,l),gcoeff(x,k,l));
-	    if (all) ml[i]=ladd((GEN)ml[i],(GEN)ml[k]);
+	      coeff(x,i,l) = ladd(gcoeff(x,i,l),gcoeff(x,k,l));
+	    if (all) ml[i] = ladd((GEN)ml[i],(GEN)ml[k]);
 	  }
 	}
       }
@@ -2390,7 +2410,7 @@ gsmithall(GEN x,long all)
   if (all)
   {
     for (k=1; k<=n; k++)
-      if (signe(gcoeff(x,k,k))<0)
+      if (signe(gcoeff(x,k,k)) < 0)
       { mr[k]=lneg((GEN)mr[k]); coeff(x,k,k)=lneg(gcoeff(x,k,k)); }
     tetpil=avma; z=cgetg(4,t_VEC);
     z[1]=ltrans(ml); z[2]=lcopy(mr); z[3]=lcopy(x);
