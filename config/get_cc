@@ -95,7 +95,7 @@ if test -n "$__gnuc__"; then
   case "$asmarch" in
     alpha)
       case "$__gnuc__" in
-        2.95.3*|3.*) OPTFLAGS=-O;; # avoid optimizer bugs
+        2.95.3*|3.*) ;;
         *) ASMINLINE=;; # doesn't work with 2.95.2.
       esac
     ;;
