@@ -2718,14 +2718,14 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
       b[i] = (long)u_Fp_FpX((GEN)B[i], 0, p);
    /* Evaluate at 0 (possibly) and +/- n, so that P_n(X) = P_{-n}(-X),
     * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
-    for (n = 1; n<=(dres>>1); n++)
+    for (i=0,n = 1; n <= (dres+1)>>1; n++)
     {
       ev = vec_u_FpX_eval(b, n, p);
       i++; x[i] = n;   y[i] = u_FpX_resultant(a, ev, p);
       ev = vec_u_FpX_eval(b, p-n, p);
       i++; x[i] = p-n; y[i] = u_FpX_resultant(a, ev, p);
     }
-    if (i != dres+1);
+    if (i != dres+1)
     {
       ev = vec_u_FpX_eval(b, 0, p);
       i++; x[i] = 0;   y[i] = u_FpX_resultant(a, ev, p);
