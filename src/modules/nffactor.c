@@ -936,7 +936,7 @@ END:
   if (cnt == 2) { 
     avma = av0; 
     res[1] = (long)_vec(T->pol);
-    res[2] = (long)T->fact;
+    res[2] = (long)_vec(T->fact);
   }
   else
   {
