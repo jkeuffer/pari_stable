@@ -278,7 +278,7 @@ entree oldfonctions[]={
 {"isisom",2,(void *)nfisisom,6,"GG"},
 {"isisomfast",2,(void *)nfisisom,6,"GG"},
 {"isoncurve",20,(void *)oncurve,5,"GGl"},
-{"isprime",1,(void *)gisprime,4,"G"},
+{"isprime",1,(void *)gisprime,4,"GD0,L,"},
 {"isprincipal",2,(void *)isprincipal,6,"GG"},
 {"isprincipalforce",2,(void *)isprincipalforce,6,"GG"},
 {"isprincipalgen",2,(void *)isprincipalgen,6,"GG"},

@@ -1564,10 +1564,20 @@ discriminant of a quadratic field, false (0) otherwise.
 simpler function $\teb{isfundamental}(x)$ which returns a \kbd{long}
 should be used if $x$ is known to be of type integer.
 
-\subsecidx{isprime}$(x)$: true (1) if $x$ is a strong pseudo-prime
+\subsecidx{isprime}$(x,\{\fl=0\})$: if $\fl=0$ (default), true (1) if $x$ is a strong pseudo-prime
 for 10 randomly chosen bases, false (0) otherwise.
 
-\syn{gisprime}{x}, but the
+If $\fl=1$, use Pocklington-Lehmer ``P-1'' test. true (1) if $x$ is
+prime, false (0) otherwise.
+
+If $\fl=2$, use Pocklington-Lehmer ``P-1'' test. return 0 if $x$ is
+composite, 1 if $x$ is a small prime (currently less than $10^12$),
+and a matrix if $x$ is a large prime.  The matrix has three
+columns. The first contains the prime factors $p$, the second a
+witness of primality relatively to $p$ as in Proposition~8.3.1 in
+GTM~138, and the third is isprime(p,2).
+
+\syn{gisprime}{x,\fl}, but the
 simpler function $\teb{isprime}(x)$ which returns a \kbd{long}
 should be used if $x$ is known to be of type integer.
 

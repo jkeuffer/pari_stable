@@ -149,7 +149,100 @@ miller(GEN n, long k)
   }
   avma=av; return 1;
 }
+/***********************************************************************/
+/**                                                                   **/
+/**                       Pocklington-Lehmer                          **/
+/**                        P-1 primality test                         **/
+/** Crude implementation  BA 2000Apr21                                **/
+/***********************************************************************/
 
+/*assume n>=2*/
+static long pl831(GEN N, GEN p)
+{
+  ulong ltop=avma,av;
+  long a;
+  GEN Nmun,Nmunp;
+  Nmun=addis(N,-1);
+  Nmunp=divii(Nmun,p);
+  av=avma;
+  for(a=2;;a++)
+  {
+    GEN b;
+    b=powmodulo(stoi(a),Nmunp,N);
+    if (gcmp1(powmodulo(b,p,N)))
+    {
+      GEN g;
+      g=mppgcd(addis(b,-1),N);
+      if (gcmp1(g))
+      {
+	avma=ltop;
+	return a;
+      }
+      if (!gegal(g,N))
+      {
+	avma=ltop;
+	return 0;
+      }
+    }
+    else
+    {
+      avma=ltop;
+      return 0;
+    }
+    avma=av;
+  }
+}
+/*
+ flag 0: return gun (prime), gzero (composite)
+ flag 1: return gzero (composite), gun (small prime), matrix (large prime)
+
+The matrix has 3 columns, [a,b,c] with 
+a[i] prime factor of N-1,
+b[i] witness for a[i] as in pl831
+c[i] plisprime(a[i])
+*/
+GEN  plisprime(GEN N, long flag)
+{
+  ulong ltop=avma;
+  long i;
+  GEN C,F;
+  if (gcmp(N,gpowgs(stoi(10),12))<=0)
+  {
+    avma=ltop;
+    if (gegal(N,gdeux) || miller(N,16))
+      return gun;
+    else
+      return gzero;
+  }
+  F=(GEN)factor(addis(N,-1))[1];
+  C=cgetg(4,t_MAT);
+  C[1]=lgetg(lg(F),t_COL); 
+  C[2]=lgetg(lg(F),t_COL);
+  C[3]=lgetg(lg(F),t_COL);
+  for(i=1;i<lg(F);i++)
+  {
+    long witness;
+    GEN p;
+    p=(GEN)F[i];
+    witness=pl831(N,p);
+    if (!witness)
+    {
+      avma=ltop;
+      return gzero;
+    }
+    mael(C,1,i)=lcopy(p);
+    mael(C,2,i)=lstoi(witness);
+    mael(C,3,i)=(long)plisprime(p,flag);
+    if (gmael(C,3,i)==gzero)
+      err(talker,"Sorry false prime number %Z in plisprime",p);
+  }
+  if (!flag)
+  {
+    avma=ltop;
+    return gun;
+  }
+  return gerepileupto(ltop,C);
+}
 /***********************************************************************/
 /**                                                                   **/
 /**                       PRIMES IN SUCCESSION                        **/

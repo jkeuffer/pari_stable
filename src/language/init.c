@@ -1851,7 +1851,7 @@ entree functions_basic[]={
 {"intformal",14,(void*)integ,7,"GDn"},
 {"intnum",99,(void*)intnum0,9,"V=GGED0,L,p"},
 {"isfundamental",18,(void*)gisfundamental,4,"G"},
-{"isprime",18,(void*)gisprime,4,"G"},
+{"isprime",99,(void*)gisprime,4,"GD0,L,"},
 {"ispseudoprime",18,(void*)gispsp,4,"G"},
 {"issquare",99,(void*)gcarrecomplet,4,"GD&"},
 {"issquarefree",18,(void*)gissquarefree,4,"G"},
