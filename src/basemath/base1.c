@@ -1108,6 +1108,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
   for (i=1; i<=n; i++)
     for (j=i; j<=n; j++)
     {
+      ulong av = avma;
       z = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
@@ -1115,7 +1116,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
         d = _mulii((GEN)den[i], (GEN)den[j]);
         if (d) z = gdivexact(z, d);
       }
-      mul[j+(i-1)*n] = mul[i+(j-1)*n] = (long)z;
+      mul[j+(i-1)*n] = mul[i+(j-1)*n] = lpileupto(av,z);
     }
   if (T) *T = get_T(mul,x,bas,den);
   return mul;
