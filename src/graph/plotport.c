@@ -250,10 +250,8 @@ initrect_gen(long ne, GEN x, GEN y, long flag)
 
     PARI_get_plot(0);
     xi = w_width - 1;  yi = w_height - 1;
-    if (xd)
-      xi = (long)(xd*xi + 0.5);
-    if (yd)
-      yi = (long)(yd*yi + 0.5);
+    if (xd) xi = DTOL(xd*xi);
+    if (yd) yi = DTOL(yd*yi);
   } else {
     xi = itos(x);  yi = itos(y);
     if (!xi || !yi)
@@ -721,7 +719,8 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   y = (double*) gpmalloc(lx*sizeof(double));
   for (i=0; i<lx; i++)
   {
-    x[i] = gtodouble((GEN)listx[i+1]); y[i] = gtodouble((GEN)listy[i+1]);
+    x[i] = gtodouble((GEN)listx[i+1]);
+    y[i] = gtodouble((GEN)listy[i+1]);
   }
   rectlines0(ne,x,y,lx,flag);
   free(x); free(y);
@@ -816,8 +815,8 @@ rectcopy_gen(long source, long dest, GEN xoff, GEN yoff, long flag)
 
     PARI_get_plot(0);
     xi = w_width - 1;  yi = w_height - 1;
-    xi = (long)(xd*xi + 0.5);
-    yi = (long)(yd*yi + 0.5);
+    xi = DTOL(xd*xi);
+    yi = DTOL(yd*yi);
   } else {
     xi = itos(xoff);  yi = itos(yoff);
   }
@@ -1927,9 +1926,9 @@ gendraw(GEN list, long ps, long flag)
   GEN x0,y0,win;
 
   if (typ(list) != t_VEC) err(talker,"not a vector in rectdraw");
-  n = lg(list)-1;
+  n = lg(list)-1; if (!n) return;
   if (n%3) err(talker,"incorrect number of components in rectdraw");
-  n = n/3; if (!n) return;
+  n = n/3;
   w = (long*)gpmalloc(n*sizeof(long));
   x = (long*)gpmalloc(n*sizeof(long));
   y = (long*)gpmalloc(n*sizeof(long));
@@ -1945,8 +1944,8 @@ gendraw(GEN list, long ps, long flag)
       long xi, yi;
 
       xi = w_width - 1;  yi = w_height - 1;
-      xi = (long)(xd*xi + 0.5);
-      yi = (long)(yd*yi + 0.5);
+      xi = DTOL(xd*xi);
+      yi = DTOL(yd*yi);
       x[i] = xi; y[i] = yi;
     } else {
       x[i]=itos(x0); y[i]=itos(y0);
