@@ -14,6 +14,9 @@ Priority classification (first column): [subjective and debatable!]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
+5  polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5);
+  ***   degree too large in tschirn.
+
 4  precision problems in polgalois:
    setrand(7);
    polgalois(x^8+162644002617632464507038884216211529274267271168000002)
