@@ -2095,8 +2095,8 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   tB  = gpow(gmul2n(eps, N), gdivgs(gun, 1-N), DEFAULTPREC);
 
   Bd    = gceil(gmin(B, tB));
-  p1    = gceil(gdiv(glog(Bd, DEFAULTPREC), dbltor(2.3026)));
-  prec2 = max((prec << 1) - 2, (long)(itos(p1) * pariK1 + BIGDEFAULTPREC));
+  prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
+  prec2 = max((prec << 1) - 2, prec2);
   nf2   = nfnewprec(nf, prec2);
   beta2 = gprec_w(beta, prec2);
 
