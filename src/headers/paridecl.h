@@ -19,7 +19,60 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 BEGINEXTERN
-/* alglin1.c */
+/* Flx.c */
+
+GEN     Fl_Flx(ulong x, long sv);
+GEN     Flm_FlxV(GEN x, long sv);
+GEN     Flm_ZM(GEN z);
+GEN     Flv_Flx(GEN x, long vs);
+GEN     Flv_ZC(GEN z);
+GEN     Flv_ZV(GEN z);
+GEN     Flv_polint(GEN xa, GEN ya, ulong p, long vs);
+GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);
+GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
+GEN     Flx_Flv_lg(GEN x, long N);
+GEN     Flx_ZX_inplace(GEN z);
+GEN     Flx_add(GEN x, GEN y, ulong p);
+GEN     Flx_deriv(GEN z, ulong p);
+GEN     Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem);
+GEN     Flx_divrem(GEN x, GEN y, ulong p, GEN *pr);
+ulong   Flx_eval(GEN x, ulong y, ulong p);
+GEN     Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv);
+ulong   Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV);
+GEN     Flx_gcd(GEN a, GEN b, ulong p);
+GEN     Flx_gcd_i(GEN a, GEN b, ulong p);
+GEN     Flx_invmontgomery(GEN T, ulong p);
+int     Flx_is_squarefree(GEN z, ulong p);
+GEN     Flx_mul(GEN x, GEN y, ulong p);
+GEN     Flx_neg(GEN x, ulong p);
+GEN     Flx_neg_inplace(GEN x, ulong p);
+GEN     Flx_normalize(GEN z, ulong p);
+GEN     Flx_polx(long sv);
+GEN     Flx_pow(GEN x, long n, ulong p);
+GEN     Flx_recip(GEN x);
+GEN     Flx_red(GEN z, ulong p);
+GEN     Flx_redmontgomery(GEN x, GEN mg, GEN T, ulong p);
+GEN     Flx_rem(GEN x, GEN y, ulong p);
+GEN     Flx_renormalize(GEN x, long l);
+ulong   Flx_resultant(GEN a, GEN b, ulong p);
+GEN     Flx_sqr(GEN x, ulong p);
+GEN     Flx_sub(GEN x, GEN y, ulong p);
+long    Flx_valuation(GEN x);
+GEN     Flx_zero(long v);
+GEN     Flx_ZX(GEN z);
+GEN     Flx_ZX_inplace(GEN z);
+GEN     Flxq_inv(GEN x,GEN T,ulong p);
+GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
+GEN     Flxq_mul(GEN y,GEN x,GEN pol,ulong p);
+GEN     Flxq_pow(GEN x, GEN n, GEN pol, ulong p);
+GEN     Flxq_sqr(GEN y,GEN pol,ulong p);
+GEN     ZM_Flm(GEN x, ulong p);
+GEN     ZV_Flv(GEN x, ulong p);
+GEN     ZX_Flx(GEN x, ulong p);
+GEN     ZXX_Flxy(GEN B, ulong p, long vs);
+
+ /* alglin1.c */
+
 GEN     Flm_deplin(GEN x, ulong p);
 GEN     Flm_inv(GEN x, ulong p);
 GEN     Flm_ker(GEN x, ulong p);
@@ -1570,55 +1623,6 @@ GEN     bnfisintnorm(GEN x, GEN y);
 GEN     thue(GEN thueres, GEN rhs, GEN ne);
 GEN     thueinit(GEN poly, long flag, long prec);
 
-/* smalpol1.c */
-
-GEN     FpX_Flx(GEN x);
-GEN     Fl_Flx(ulong x, long sv);
-GEN     Flm_FlxV(GEN x, long sv);
-GEN     Flm_ZM(GEN z);
-GEN     Flv_ZC(GEN z);
-GEN     Flv_ZV(GEN z);
-GEN     Flv_polint(GEN xa, GEN ya, ulong p, long vs);
-GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);
-GEN     Flx_Fl_mul(GEN y, ulong x, ulong p);
-GEN     Flx_Flv_lg(GEN x, long N);
-GEN     Flx_FpX_inplace(GEN z);
-GEN     Flx_add(GEN x, GEN y, ulong p);
-GEN     Flx_addshift(GEN x, GEN y, ulong p, long d);
-GEN     Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly);
-GEN     Flx_deriv(GEN z, ulong p);
-GEN     Flx_div_by_X_x(GEN a, ulong x, ulong p, ulong *rem);
-GEN     Flx_divrem(GEN x, GEN y, ulong p, GEN *pr);
-ulong   Flx_eval(GEN x, ulong y, ulong p);
-GEN     Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv);
-ulong   Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV);
-GEN     Flx_gcd(GEN a, GEN b, ulong p);
-GEN     Flx_gcd_i(GEN a, GEN b, ulong p);
-GEN     Flx_get(long d);
-int     Flx_is_squarefree(GEN z, ulong p);
-GEN     Flx_mul(GEN x, GEN y, ulong p);
-GEN     Flx_neg(GEN x, ulong p);
-GEN     Flx_normalize(GEN z, ulong p);
-GEN     Flx_polx(long sv);
-GEN     Flx_pow(GEN x, long n, ulong p);
-GEN     Flx_renormalize(GEN x, long l);
-GEN     Flx_rem(GEN x, GEN y, ulong p);
-ulong   Flx_resultant(GEN a, GEN b, ulong p);
-GEN     Flx_sqr(GEN x, ulong p);
-GEN     Flx_sub(GEN x, GEN y, ulong p);
-GEN     Flx_zero(long v);
-GEN     Flx_ZX(GEN z);
-GEN     Flx_ZX_inplace(GEN z);
-GEN     Flxq_inv(GEN x,GEN T,ulong p);
-GEN     Flxq_invsafe(GEN x, GEN T, ulong p);
-GEN     Flxq_mul(GEN y,GEN x,GEN pol,ulong p);
-GEN     Flxq_pow(GEN x, GEN n, GEN pol, ulong p);
-GEN     Flxq_sqr(GEN y,GEN pol,ulong p);
-GEN     Z_Flx(GEN x, ulong p, long vs);
-GEN     ZM_Flm(GEN x, ulong p);
-GEN     ZV_Flv(GEN x, ulong p);
-GEN     ZX_Flx(GEN x, ulong p);
- 
 /* trans1.c */
 
 GEN     Pi2n(long n, long prec);
