@@ -1630,6 +1630,29 @@ sors(GEN g, pariout_t *T)
   pariputsf("%ld", (long)g);
 }
 
+static void 
+quote_string(char *s)
+{
+  pariputc('"'); 
+  while (*s)
+  {
+    char c=*s++;
+    if (c=='\\' || c=='"' || c=='\033' || c=='\n' || c=='\t')
+    {
+      pariputc('\\');
+      switch(c)
+      {
+      case '\\': case '"': break;
+      case '\n':   c='n'; break;
+      case '\033': c='e'; break;
+      case '\t':   c='t'; break;
+      }
+    }
+    pariputc(c);
+  }
+  pariputc('"');
+}
+
 void
 bruti(GEN g, pariout_t *T, int addsign)
 {
@@ -1759,8 +1782,7 @@ bruti(GEN g, pariout_t *T, int addsign)
       pariputs("])"); break;
 
     case t_STR:
-      pariputc('"'); pariputs(GSTR(g)); pariputc('"');
-      return;
+      quote_string(GSTR(g)); break;
 
     case t_MAT:
     {
@@ -1862,7 +1884,7 @@ sori(GEN g, pariout_t *T)
   {
     case t_REAL: wr_real(T,g,1); return;
     case t_STR:
-      pariputc('"'); pariputs(GSTR(g)); pariputc('"'); return;
+      quote_string(GSTR(g)); return;
     case t_LIST:
       pariputs("List("); l = lgeflist(g);
       for (i=2; i<l; i++)
