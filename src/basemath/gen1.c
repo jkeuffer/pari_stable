@@ -1244,9 +1244,9 @@ mulqq(GEN x, GEN y) {
 GEN
 gmul(GEN x, GEN y)
 {
-  long tx, ty, lx, ly, vx, vy, i, j, k, l;
+  long tx, ty, lx, ly, vx, vy, i, j, l;
   pari_sp av, tetpil;
-  GEN z, p1, p2, p3;
+  GEN z, p1, p2;
 
   if (x == y) return gsqr(x);
   tx = typ(x); ty = typ(y);
@@ -1300,26 +1300,36 @@ gmul(GEN x, GEN y)
         else                     return mul_ser_scal(y, x);
       }
       if (gcmp0(x) || gcmp0(y)) return zeroser(vx, valp(x)+valp(y));
-      lx=lg(x); ly=lg(y);
-      if (lx>ly) { k=ly; ly=lx; lx=k; p1=y; y=x; x=p1; }
+      lx = lg(x); if (lx > lg(y)) { lx = lg(y); swap(x, y); }
       z = cgetg(lx,t_SER);
       z[1] = evalvalp(valp(x)+valp(y)) | evalvarn(vx) | evalsigne(1);
+      if (lx > 200) /* threshold for 32bit coeffs: 400, 512 bits: 100 */
+      {
+        long ly;
+        y = RgX_mul(ser_to_pol_i(x, lx), ser_to_pol_i(y, lx));
+        ly = lg(y);
+        if (ly >= lx) {
+          for (i = 2; i < lx; i++) z[i] = y[i];
+        } else {
+          for (i = 2; i < ly; i++) z[i] = y[i];
+          for (     ; i < lx; i++) z[i] = zero;
+        }
+        return gerepilecopy((pari_sp)(z + lx), z);
+      }
       x += 2; y += 2; z += 2; lx -= 3;
       p2 = (GEN)gpmalloc((lx+1)*sizeof(long));
-      p3 = (GEN)gpmalloc((ly+1)*sizeof(long));
       mix = miy = 0;
       for (i=0; i<=lx; i++)
       {
         p2[i] = !isexactzero((GEN)y[i]); if (p2[i]) miy = i;
-        p3[i] = !isexactzero((GEN)x[i]); if (p3[i]) mix = i;
+        if (!isexactzero((GEN)x[i])) mix = i;
         p1 = gzero; av = avma;
         for (j=i-mix; j<=min(i,miy); j++)
           if (p2[j]) p1 = gadd(p1, gmul((GEN)y[j],(GEN)x[i-j]));
         z[i] = lpileupto(av,p1);
       }
       z -= 2; /* back to normalcy */
-      free(p2);
-      free(p3); return normalize(z);
+      free(p2); return normalize(z);
     }
     case t_QFI: return compimag(x,y);
     case t_QFR: return compreal(x,y);

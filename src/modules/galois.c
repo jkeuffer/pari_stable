@@ -407,7 +407,7 @@ cmp_re(GEN x, GEN y)
 
 /* multiply the r o bb. Sort first to detect pairs of conjugate */
 static GEN
-monomial(GEN r, PERM bb, long nbv)
+Monomial(GEN r, PERM bb, long nbv)
 {
   GEN t, R = cgetg(nbv + 1, t_VEC);
   long i, s = 1;
@@ -448,10 +448,10 @@ static GEN
 gpolynomial(GEN r, resolv *R)
 {
   long i;
-  GEN p1 = monomial(r,R->a[1], R->nv);
+  GEN p1 = Monomial(r,R->a[1], R->nv);
 
   for (i=2; i<=R->nm; i++)
-    p1 = gadd(p1, monomial(r,R->a[i], R->nv));
+    p1 = gadd(p1, Monomial(r,R->a[i], R->nv));
   return p1;
 }
 

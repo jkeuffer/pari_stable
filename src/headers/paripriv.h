@@ -36,6 +36,11 @@ GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN quicktrace(GEN x, GEN sym);
 GEN idealhermite_aux(GEN nf, GEN x);
 
+GEN gmulXn(GEN x, long d);
+GEN addmulXn(GEN x, GEN y, long d);
+GEN monomial(GEN a, int degpol, int v);
+GEN ser_to_pol_i(GEN x, long lx);
+
 GEN _checkbnf(GEN bnf);
 GEN _checknf(GEN nf);
 

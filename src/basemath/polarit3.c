@@ -651,7 +651,7 @@ FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
 }
 
 /* a X^degpol, assume degpol >= 0 */
-static GEN
+GEN
 monomial(GEN a, int degpol, int v)
 {
   long i, lP = degpol+3;

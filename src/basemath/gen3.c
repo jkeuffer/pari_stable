@@ -1036,19 +1036,18 @@ ginv(GEN x)
 /*                                                                 */
 /*******************************************************************/
 
-/* Convert t_SER --> t_POL / t_RFRAC */
-static GEN
-gconvsp(GEN x, long e)
+/* Convert t_SER --> t_POL [ ignore valp ]. INTERNAL ! */
+GEN
+ser_to_pol_i(GEN x, long lx)
 {
   long v = varn(x), i;
   GEN y;
 
-  if (gcmp0(x)) return zeropol(v);
-  y = dummycopy(x);
-  i = lg(x)-1; while (i > 1 && gcmp0((GEN)y[i])) i--;
-  y[0] = evaltyp(t_POL) | evallg(i+1);
-  y[1] &= ~VALPBITS;
-  return e? gmul(y,  gpowgs(polx[v], e)): y;
+  if (!signe(x)) return zeropol(v);
+  i = lx-1; while (i > 1 && gcmp0((GEN)x[i])) i--;
+  y = cgetg(i+1, t_POL); y[1] = x[1] & ~VALPBITS;
+  for ( ; i > 1; i--) y[i] = x[i];
+  return y;
 }
 
 /*
@@ -1186,7 +1185,7 @@ gsubst(GEN x, long v, GEN y)
       {
         if (!signe(x)) return gcopy(x);
         /* FIXME: improve this */
-        av = avma; p1 = gconvsp(x, 0);
+        av = avma; p1 = ser_to_pol_i(x, lx);
         z = tayl(gsubst(p1,v,y), vx, lx-2);
         if (ex) z = gmul(z, gpowgs(polx[vx],ex));
         return gerepileupto(av, z);
@@ -1242,11 +1241,11 @@ gsubst(GEN x, long v, GEN y)
 
         case t_POL: case t_RFRAC:
           if (isexactzero(y)) return scalarser((GEN)x[2],v,lx-2);
-          vy=gvar(y); e=gval(y,vy);
-          if (e<=0)
+          vy = gvar(y); e = gval(y,vy);
+          if (e <= 0)
             err(talker,"non positive valuation in a series substitution");
-	  av = avma; p1 = gconvsp(x, ex); 
-          z = tayl(gsubst(p1,v,y), vy, e*(lx-2+ex));
+	  av = avma; p1 = gsubst(ser_to_pol_i(x, lg(x)), v, y);
+          z = gmul(gpowgs(y, ex), tayl(p1, vy, e*(lx-2)));
 	  return gerepileupto(av, z);
 
         default:
@@ -1818,7 +1817,16 @@ static GEN
 ser2rfrac(GEN x)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, gconvsp(x, valp(x)));
+  long e = valp(x);
+  GEN a = ser_to_pol_i(x, lg(x));
+  if (e) {
+    GEN z;
+    if (e > 0) return gerepilecopy(av, gmulXn(a, e));
+    z = cgetg(3, t_RFRAC);
+    z[2] = (long)monomial(gun, labs(e), varn(a));
+    z[1] = (long)a; return gerepilecopy(av, z);
+  }
+  return gerepilecopy(av, a);
 }
 
 GEN

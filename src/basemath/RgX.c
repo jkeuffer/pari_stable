@@ -362,7 +362,7 @@ mulpol(GEN x, GEN y, long nx, long ny)
   free(p1); z -= 2; z[1]=0; return normalizepol_i(z, lz);
 }
 
-/* return (x * X^d) + y. Assume d > 0, x,y != 0 */
+/* return (x * X^d) + y. Assume d > 0, y != 0 */
 GEN
 addmulXn(GEN x, GEN y, long d)
 {
@@ -392,6 +392,21 @@ addmulXn(GEN x, GEN y, long d)
   while (yd > y) *--zd = *--yd;
   *--zd = evalsigne(1);
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
+}
+/* return (x * X^d). Assume d >= 0 */
+GEN
+gmulXn(GEN x, long d)
+{
+  long i, l;
+  GEN z;
+  
+  if (!signe(x)) return x;
+  l = lg(x);
+  z = cgetg(l + d, t_POL);
+  z[1] = x[1];
+  for (i = 2; i < l; i++) z[d + i] = x[i];
+  for (i = 2; i < 2+d; i++) z[i] = zero;
+  return z;
 }
 
 GEN
