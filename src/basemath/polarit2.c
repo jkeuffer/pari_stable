@@ -1991,6 +1991,66 @@ roots_from_deg1(GEN x)
   return r;
 }
 
+static GEN
+quad_to_gauss(GEN x)
+{
+  GEN y = cgetg(3, t_COMPLEX);
+  y[1] = x[2];
+  y[2] = x[3]; return y;
+}
+
+static GEN
+gauss_primpart(GEN x, GEN *c)
+{
+  GEN y, a = (GEN)x[1], b = (GEN)x[2], n = mppgcd(a, b);
+  if (n == gun) { *c = NULL; return x; }
+  *c = n; y = cgetg(3, t_COMPLEX);
+  y[1] = (long)diviiexact(a, n);
+  y[2] = (long)diviiexact(b, n); return y;
+}
+
+static GEN
+gauss_primpart_try(GEN x, GEN c)
+{
+  GEN r, y;
+  if (typ(x) == t_INT)
+  {
+    y = dvmdii(x, c, &r); if (r != gzero) return NULL;
+  }
+  else
+  {
+    GEN a = (GEN)x[1], b = (GEN)x[2]; y = cgetg(3, t_COMPLEX);
+    y[1] = (long)dvmdii(a, c, &r); if (r != gzero) return NULL;
+    y[2] = (long)dvmdii(b, c, &r); if (r != gzero) return NULL;
+  }
+  return y;
+}
+
+static int
+gauss_cmp(GEN x, GEN y)
+{
+  int v;
+  if (typ(x) != t_COMPLEX)
+    return (typ(y) == t_COMPLEX)? -1: gcmp(x, y);
+  if (typ(y) != t_COMPLEX) return 1;
+  v = absi_cmp((GEN)x[2], (GEN)y[2]);
+  if (v) return v;
+  if (signe(x[1]) != signe(x[2])) return (signe(x[1]) == 1)? 1: -1;
+  return gcmp((GEN)x[1], (GEN)y[1]);
+}
+
+static GEN
+Ipow(long e) {
+  switch(e & 3)
+  {
+    case 1: return gi;
+    case 2: return negi(gun);
+    case 3: return gneg(gi);
+  }
+  return gun;
+}
+
+
 GEN
 factor(GEN x)
 {
@@ -2116,6 +2176,98 @@ factor(GEN x)
         }
       }
 
+    case t_COMPLEX:
+    {
+      pari_sp av = avma;
+      GEN a = (GEN)x[1], b = (GEN)x[2], d = gun;
+      GEN n, y, fa, P, E, P2, E2;
+      long t1 = typ(a);
+      long t2 = typ(b), i, j, l;
+      if (is_frac_t(t1)) d = (GEN)a[2];
+      if (is_frac_t(t2)) d = mpppcm(d, (GEN)b[2]);
+      if (d == gun) y = x;
+      else
+      {
+        y = gmul(x, d);
+        a = (GEN)x[1]; t1 = typ(a);
+        b = (GEN)x[2]; t2 = typ(b);
+      }
+      if (t1 != t_INT || t2 != t_INT) break;
+      y = gauss_primpart(y, &n);
+      fa = factor(gnorm(y)); P = (GEN)fa[1]; E = (GEN)fa[2];
+      l = lg(P);
+      P2 = cgetg(l, t_COL);
+      E2 = cgetg(l, t_COL);
+      for (i = j = 1; i < l; i++)
+      {
+        GEN p = (GEN)P[i], w, w2, t;
+        long v;
+        int is2 = egalii(p, gdeux);
+        if (is2)
+        { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
+        else
+          w = quad_to_gauss(cornacchia(gun, p));
+        w2 = gconj(w);
+        t = gauss_primpart_try( gmul(y, w2), p );
+        if (t) y = t;
+        else { y = gauss_primpart_try( gmul(y, w), p ); swap(w, w2); }
+        P[i] = (long)w;
+        v = pvaluation(n, p, &n);
+        if (v) {
+          if (is2) { 
+            y = gmul(y, Ipow(3*v));
+            v <<= 1;
+          }
+          else {
+            P2[j] = (long)w2;
+            E2[j] = lstoi(v); j++;
+          }
+          E[i] = laddis((GEN)E[i], v);
+        }
+        v = pvaluation(d, p, &d);
+        if (v) {
+          E[i] = lsubis((GEN)E[i], v);
+          if (is2) {
+            y = gmul(y, Ipow(3*v));
+            v <<= 1;
+          }
+          else {
+            P2[j] = (long)w2;
+            E2[j] = lstoi(-v); j++;
+          }
+        }
+      }
+      if (j > 1) {
+        GEN Fa = cgetg(3, t_MAT);
+        setlg(P2, j); Fa[1] = (long)P2;
+        setlg(E2, j); Fa[2] = (long)E2;
+        fa = concat_factor(fa, Fa);
+      }
+      if (!is_pm1(n) || !is_pm1(d))
+      {
+        GEN Fa = factor(gdiv(n, d));
+        P = (GEN)Fa[1]; l = lg(P);
+        E = (GEN)Fa[2];
+        for (i = j = 1; i < l; i++)
+        {
+          GEN p = (GEN)P[i];
+          if (mod4(p) == 1)
+          {
+            GEN w = quad_to_gauss( cornacchia(gun, p) );
+            P[i] = (long)w;
+            P = concatsp(P, gconj(w));
+            E = concatsp(E, (GEN)E[i]);
+          }
+        }
+        fa = concat_factor(fa, Fa);
+      }
+      fa = sort_factor_gen(fa, &gauss_cmp);
+      if (!gcmp1(y)) {
+        fa[1] = (long)concatsp(_col(y), (GEN)fa[1]);
+        fa[2] = (long)concatsp(gun,     (GEN)fa[2]);
+      }
+      return gerepilecopy(av, fa);
+    }
     case t_RFRACN:
       return gerepileupto(av, factor(gred_rfrac(x)));
     case t_RFRAC:

@@ -120,6 +120,7 @@ BA  2- Add support for GNU/Hurd.
     4- output support for zm / Flm matrices (t_MAT with t_VECSMALLs instead
        of t_COLs)
     5- FpM_rank
+    6- declare cornacchia, cornacchia2 + allow factor( an elt in Z[i] )
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
