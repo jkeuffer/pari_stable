@@ -361,7 +361,7 @@ FpX_quad_root(GEN x, GEN p, int unknown)
   GEN b = (GEN)x[3], c = (GEN)x[2];
   GEN s,u,D;
 
-  if (equalii(p, gen_2))
+  if (equaliu(p, 2))
   {
     if (signe(c)) return NULL;
     return gen_1;
@@ -1489,7 +1489,7 @@ apprgen_i(GEN f, GEN a)
   fp = derivpol(f); u = modulargcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   p = (GEN)a[2];
-  P = equalii(p,gen_2)? utoipos(4): p;
+  P = equaliu(p,2)? utoipos(4): p;
   a0= padic_to_Fp(a, P);
   if (!gcmp0(FpX_eval(fp,a0,p))) /* simple zero */
   {
@@ -1534,7 +1534,7 @@ rootpadic_i(GEN f, GEN p, long prec)
 
   z = modulargcd(f, derivpol(f));
   if (degpol(z) > 0) f = gdeuc(f,z);
-  q = (equalii(p,gen_2) && prec>=2)? utoipos(4): p;
+  q = (equaliu(p,2) && prec>=2)? utoipos(4): p;
   rac = FpX_roots(FpX_red(f,q), q);
   lx = lg(rac); if (lx == 1) return rac;
   if (prec==1)
@@ -1809,7 +1809,7 @@ apprgen9(GEN f, GEN a)
   if (!p) err(typeer,"apprgen9");
 
   p1 = poleval(f,a); v = ggval(lift_intern(p1),p);
-  fl2 = equalii(p,gen_2);
+  fl2 = equaliu(p,2);
   if (v <= 0 || (fl2 && v==1)) err(talker,"root does not exist in apprgen9");
   v = ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
@@ -2147,7 +2147,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
   if (dt == d) return;
   v = varn(*t);
   if (DEBUGLEVEL > 6) (void)timer2();
-  av = avma; is2 = equalii(p, gen_2);
+  av = avma; is2 = equaliu(p, 2);
   for(cnt = 1;;cnt++, avma = av)
   { /* splits *t with probability ~ 1 - 2^(1-r) */
     w = w0 = FqX_rand(dt,v, T,p);

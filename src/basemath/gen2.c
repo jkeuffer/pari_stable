@@ -1590,7 +1590,7 @@ qtop(GEN x, GEN p, long d)
   P = (GEN)x[1];
   b = (GEN)P[3];
   c = (GEN)P[2]; av = avma;
-  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, equalii(p,gen_2)? d+2: d), 0);
+  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, equaliu(p,2)? d+2: d), 0);
   z = gmul2n(gsub(z, b), -1);
   return gerepileupto(av, gadd(u, gmul(v, z)));
 }

@@ -3517,7 +3517,7 @@ ffinit_fact(GEN p, long n)
   GEN P; /* pol */
   long i;
   /* If n is even, then F[1] is 2^bfffo(n)*/
-  if (!odd(n) && equalii(p, gen_2))
+  if (!odd(n) && equaliu(p, 2))
     P = f2init(vals(n));
   else
     P = fpinit(p, F[1]);
