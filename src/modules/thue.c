@@ -81,7 +81,9 @@ inithue(GEN poly, long flag)
 
   if (!uftot)
   {
+    if (deg<=2) err(talker,"invalid polynomial in thue (need deg>2)");
     uftot=bnfinit0(poly,1,NULL,Prec);
+    uftot=checkbnf_discard(uftot);
     if (flag) certifybuchall(uftot);
     s=itos(gmael3(uftot,7,2,1));
     t=itos(gmael3(uftot,7,2,2));

@@ -2019,11 +2019,7 @@ smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpi
   else
   {
     bnf=buchall(pol,gcbach,gcbach2,gRELSUP,gborne,nbrelpid,minsfb,-3,prec);
-    if (checkbnf(bnf) != bnf)
-    {
-      err(warner,"non-monic polynomial. Change of variables discarded");
-      bnf = (GEN)bnf[1];
-    }
+    bnf = checkbnf_discard(bnf);
   }
   pfb=(GEN)bnf[5]; vp=(GEN)bnf[6]; nf=(GEN)bnf[7];
   mas=(GEN)nf[5]; res=(GEN)bnf[8]; uni=(GEN)res[5];

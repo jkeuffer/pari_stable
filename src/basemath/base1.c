@@ -38,6 +38,15 @@ checkbnf(GEN bnf)
 }
 
 GEN
+checkbnf_discard(GEN bnf)
+{
+  GEN x = checkbnf(bnf);
+  if (x != bnf && lg(bnf) == 3)
+    err(warner,"non-monic polynomial. Change of variables discarded");
+  return x;
+}
+
+GEN
 checknf(GEN nf)
 {
   if (typ(nf)==t_POL) err(talker,"please apply nfinit first");
@@ -1012,7 +1021,7 @@ initalgall0(GEN x, long flag, long prec)
       if (!(flag & nf_SMALL))
       {
         if (!(flag & nf_REDUCE))
-          err(warner,"non-monic polynomial. Result of the form [nf,c].");
+          err(warner,"non-monic polynomial. Result of the form [nf,c]");
         flag = flag | nf_REDUCE | nf_ORIG;
       }
     }
@@ -1170,6 +1179,7 @@ nfnewprec(GEN nf, long prec)
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
   if (lg(nf) == 11) return bnfnewprec(nf,prec);
+  (void)checknf(nf);
   if (prec <= 0) 
   {
     ro = (GEN)nf[6];
@@ -1372,6 +1382,7 @@ initzeta(GEN pol, long prec)
   eps=gmul2n(gun,-bit_accuracy(prec)-6); p1=dbltor(0.5);
   nfz=cgetg(10,t_VEC);
   bnf=buchinit(pol,p1,p1,prec+1); prec=(prec<<1)-1;
+  bnf = checkbnf_discard(bnf);
   Pi = mppi(prec); racpi=gsqrt(Pi,prec);
 
   /* Nb de classes et regulateur */

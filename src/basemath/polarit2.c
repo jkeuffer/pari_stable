@@ -1489,7 +1489,9 @@ glcm(GEN x, GEN y)
   {
     case t_INT: if (signe(p2)<0) setsigne(p2,1);
       break;
-    case t_POL: p1=leading_term(p2);
+    case t_POL:
+      if (lgef(p2) <= 2) break;
+      p1=leading_term(p2);
       if (typ(p1)==t_INT && signe(p1)<0) p2=gneg(p2);
   }
   return gerepileupto(av,p2);

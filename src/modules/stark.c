@@ -3205,6 +3205,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   GEN S, T, rep, indCR, invCR, Qt;
   long N, cl, i, j, k, nc, lq, a, av = avma, ncc;
 
+  checkbnr(bnr);
   bnf  = (GEN)bnr[1];
   nf   = (GEN)bnf[7];
   cyc  = gmael(bnr, 5, 2);

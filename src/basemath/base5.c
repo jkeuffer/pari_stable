@@ -648,6 +648,7 @@ rnfidealtwoelement(GEN rnf,GEN x)
   long av=avma,tetpil,j;
   GEN p1,p2,p3,res,polabs,nfabs,z;
 
+  checkrnf(rnf);
   res=(GEN)rnf[11]; polabs=(GEN)res[1];
   nfabs=cgetg(10,t_VEC); nfabs[1]=(long)polabs;
   for (j=2; j<=9; j++) nfabs[j]=zero;

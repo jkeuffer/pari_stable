@@ -1279,9 +1279,10 @@ real_unit_form_by_disc(GEN D, long prec)
 GEN
 real_unit_form(GEN x)
 {
-  long av = avma, prec = precision((GEN)x[4]);
+  long av = avma, prec;
   GEN D;
-
+  if (typ(x) != t_QFI) err(typeer,"real_unit_form");
+  prec = precision((GEN)x[4]);
   if (!prec) err(talker,"not a t_REAL in 4th component of a t_QFR");
   D = qf_disc(x,NULL,NULL);
   return gerepileupto(av, real_unit_form_by_disc(D,prec));
@@ -1316,6 +1317,7 @@ imag_unit_form(GEN x)
 {
   GEN p1,p2, y = cgetg(4,t_QFI);
   long av;
+  if (typ(x) != t_QFI) err(typeer,"imag_unit_form");
   y[1] = un;
   y[2] = mpodd((GEN)x[2])? un: zero;
   av = avma; p1 = mulii((GEN)x[1],(GEN)x[3]);

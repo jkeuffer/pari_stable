@@ -3072,8 +3072,8 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
   GEN     P, S, PL, O, res;
   long    x;
   int     i;
-  x = varn((GEN) gal[1]);
   gal = checkgal(gal);
+  x = varn((GEN) gal[1]);
   if (flag<0 || flag>2)
     err(flagerr, "galoisfixedfield");
   if (typ(perm) == t_VEC)
