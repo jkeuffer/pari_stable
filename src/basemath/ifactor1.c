@@ -224,13 +224,13 @@ plisprime(GEN N, long flag)
   int eps;
   GEN C,F;
   if ( typ(N) != t_INT ) err(arither1);
-  N=absi(N);
-  eps=cmpis(N,2);
-  if (eps<=0) { avma=ltop; return eps?gzero:gun; }
+  eps = absi_cmp(N,gdeux);
+  if (eps<=0) return eps? gzero: gun;
+  N = absi(N);
   /* Use Jaeschke results. See above */
-  if (miller(N,7)) /* miller returns 0 for 2 ! */
+  if (miller(N,7))
   {
-    if (gcmp(N,mulss(10670053,32010157))<0) { avma=ltop; return gun; }
+    if (cmpii(N,mulss(10670053,32010157)) < 0) { avma=ltop; return gun; }
   }
   else { avma=ltop; return gzero; }
   F=(GEN)decomp_limit(addis(N,-1),racine(N))[1];
