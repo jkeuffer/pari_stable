@@ -2781,7 +2781,15 @@ ellintegralmodel(GEN e)
   GEN a = cgetg(6,t_VEC), v;
   long i;
 
-  for (i=1; i<6; i++) a[i]=e[i];
+  for (i=1; i<6; i++)
+  {
+    a[i]=e[i];
+    switch(typ(a[i]))
+    {
+      case t_INT: case t_FRAC: case t_FRACN: break;
+      default: err(talker, "not a rational curve in ellintegralmodel");
+    }
+  }
   a = denom(a); if (gcmp1(a)) return NULL;
   v = cgetg(5,t_VEC);
   v[1]=linv(a); v[2]=v[3]=v[4]=zero; return v;
