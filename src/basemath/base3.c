@@ -26,7 +26,6 @@ extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 extern GEN vconcat(GEN A, GEN B);
-extern GEN ff_to_nf(GEN x, GEN modpr);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1429,7 +1428,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
     pra = gcopy(prb);
     gptr[0]=&pra; gptr[1]=&list;
     gerepilemanysp(av1,tetpil,gptr,2);
-    prb = (b==(a<<1))? idealpow(nf,pra,gdeux): prk;
+    prb = (b==(a<<1))? idealpows(nf,pr,b): prk;
   }
 }
 

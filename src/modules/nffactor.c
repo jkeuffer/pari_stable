@@ -22,16 +22,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 
 extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
-extern GEN ff_to_nf(GEN x, GEN modpr);
-extern GEN nf_to_ff(GEN nf, GEN x, GEN modpr);
-extern long init_padic_prec(long e, int BitPerFactor, long r, double LOGp2);
 extern double bound_vS(long tmax, GEN *BL);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
-extern GEN gauss_intern(GEN a, GEN b);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
-extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
 extern GEN nf_get_T2(GEN base, GEN polr);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
@@ -133,13 +128,11 @@ zkX(GEN x, GEN modpr)
   return z;
 }
 
-/* factorization of x modulo pr. Assume x already reduced, and pr is a modpr */
-GEN
-nffactormod_i(GEN nf, GEN x, GEN pr)
+/* factorization of x modulo pr. Assume x already reduced */
+static GEN
+nffactormod_i(GEN x, GEN T, GEN p)
 {
-  GEN rep, modpr, T, p;
-
-  modpr = nf_to_ff_init(nf, &pr, &T, &p);
+  GEN rep;
   if (!T)
   {
     rep = factmod0(x, p);
@@ -168,7 +161,7 @@ nffactormod(GEN nf, GEN x, GEN pr)
 
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
   xrd = modprX(x, nf, modpr);
-  rep = nffactormod_i(nf,xrd,modpr);
+  rep = nffactormod_i(xrd,T,p);
   z = (GEN)rep[1]; l = lg(z);
   for (j = 1; j < l; j++) z[j] = (long)zkX((GEN)z[j], modpr);
   return gerepilecopy(av, rep);
@@ -701,7 +694,7 @@ rnfdedekind(GEN nf,GEN P0,GEN pr)
   m = degpol(P);
 
   Prd = modprX(P, nf, modpr);
-  p1 = (GEN)nffactormod_i(nf,Prd,modpr)[1];
+  p1 = (GEN)nffactormod_i(Prd,T,p)[1];
   r = lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
   g = (GEN)p1[1];
   for (i=2; i<r; i++) g = FqX_mul(g, (GEN)p1[i], T, p);
@@ -1005,6 +998,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
   GEN y, Tra, T2, T2r, TT, BL, m, u, norm, target, M, piv, list;
   gpmem_t av, av2, lim;
 
+  P = unifpol(T->nf,P,0);
   n0 = n = r = lg(famod) - 1;
   list = cgetg(n0+1, t_COL);
 
@@ -1061,7 +1055,7 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
       PRK = gmul(PRK, u);
       PRKinv = ZM_inv(PRK, pa);
 
-      polred = nf_pol_red(unifpol(T->nf,P,0), prk);
+      polred = nf_pol_red(P, prk);
       famod = hensel_lift_fact(polred,famod,NULL,p,pa,a);
       /* recompute old Newton sums to new precision */
       if (tmax)

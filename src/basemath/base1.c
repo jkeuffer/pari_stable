@@ -126,13 +126,6 @@ checkprimeid(GEN id)
 }
 
 void
-checkprhall(GEN prhall)
-{
-  if (typ(prhall) != t_COL || lg(prhall) < 5 || typ(prhall[1]) != t_MAT)
-    err(talker,"incorrect prhall format");
-}
-
-void
 check_pol_int(GEN x, char *s)
 {
   long k = lgef(x)-1;

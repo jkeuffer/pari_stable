@@ -1201,7 +1201,7 @@ FqX_split_berlekamp(GEN *t, GEN q, GEN T, GEN p)
   vker = FqM_Berlekamp_ker(u,T,q,p);
   vker = mat_to_vecpol(vker,vu);
   d = lg(vker)-1;
-  qo2 = shifti(q, -1); /* (p-1) / 2 */
+  qo2 = shifti(q, -1); /* (q-1) / 2 */
   pol = cgetg(N+3,t_POL);
   ir = 0;
   /* t[i] irreducible for i < ir, still to be treated for i < L */

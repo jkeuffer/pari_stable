@@ -2702,22 +2702,18 @@ element_mulmodpr2(GEN nf, GEN x, GEN y, GEN modpr)
   gpmem_t av=avma;
   GEN p1;
 
-  nf=checknf(nf); checkprhall(modpr);
+  nf=checknf(nf); checkmodpr(modpr);
   p1 = element_mul(nf,x,y);
   return gerepileupto(av,nfreducemodpr(nf,p1,modpr));
 }
 
-/* On ne peut PAS definir ca comme les autres par
- * #define element_divmodpr() nfreducemodpr(element_div())
- * car le element_div ne marche pas en general
- */
 GEN
 element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   gpmem_t av=avma;
   GEN p1;
 
-  nf=checknf(nf); checkprhall(modpr);
+  nf=checknf(nf); checkmodpr(modpr);
   p1=lift_intern(gdiv(gmodulcp(gmul((GEN)nf[7],trivlift(x)), (GEN)nf[1]),
                       gmodulcp(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1])));
   p1=algtobasis_i(nf,p1);
@@ -2736,27 +2732,16 @@ element_invmodpr(GEN nf, GEN y, GEN modpr)
 }
 
 GEN
-element_powmodpr(GEN nf,GEN x,GEN k,GEN modpr)
+element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
 {
-  long N, s;
   gpmem_t av=avma;
-  GEN y,z;
+  GEN z,T,p,modpr;
 
-  nf=checknf(nf); checkprhall(modpr);
-  N=degpol(nf[1]);
-  s=signe(k); k=(s>=0)?k:negi(k);
-  z=x; y = gscalcol_i(gun,N);
-  for(;;)
-  {
-    if (mpodd(k)) y=element_mulmodpr(nf,z,y,modpr);
-    k=shifti(k,-1);
-    if (signe(k)) z=element_sqrmodpr(nf,z,modpr);
-    else
-    {
-      cgiv(k); if (s<0) y = element_invmodpr(nf,y,modpr);
-      return gerepileupto(av,y);
-    }
-  }
+  nf = checknf(nf);
+  modpr = nf_to_ff_init(nf,&pr,&T,&p);
+  z = nf_to_ff(nf,x,modpr);
+  z = FpXQ_pow(z,k,T,p);
+  return gerepileupto(av, algtobasis(nf, ff_to_nf(z,modpr)));
 }
 
 GEN
@@ -2774,65 +2759,17 @@ nfkermodpr(GEN nf, GEN x, GEN pr)
 
 /* a.x=b ou b est un vecteur */
 GEN
-nfsolvemodpr(GEN nf, GEN a, GEN b, GEN modpr)
+nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 {
   gpmem_t av = avma;
-  long nbli,nbco,i,j,k;
-  GEN aa,x,p,m,u;
+  GEN T,p,modpr;
 
-  nf=checknf(nf); checkprhall(modpr);
+  nf = checknf(nf);
   if (typ(a)!=t_MAT) err(typeer,"nfsolvemodpr");
-  nbco=lg(a)-1; nbli=lg(a[1])-1;
-  if (typ(b)!=t_COL) err(typeer,"nfsolvemodpr");
-  if (lg(b)!=nbco+1) err(mattype1,"nfsolvemodpr");
-  x=cgetg(nbli+1,t_COL);
-  for (j=1; j<=nbco; j++) x[j]=b[j];
-  aa=cgetg(nbco+1,t_MAT);
-  for (j=1; j<=nbco; j++)
-  {
-    aa[j]=lgetg(nbli+1,t_COL);
-    for (i=1; i<=nbli; i++) coeff(aa,i,j)=coeff(a,i,j);
-  }
-  for (i=1; i<nbli; i++)
-  {
-    p=gcoeff(aa,i,i); k=i;
-    if (gcmp0(p))
-    {
-      k=i+1; while (k<=nbli && gcmp0(gcoeff(aa,k,i))) k++;
-      if (k>nbco) err(matinv1);
-      for (j=i; j<=nbco; j++)
-      {
-	u=gcoeff(aa,i,j); coeff(aa,i,j)=coeff(aa,k,j);
-	coeff(aa,k,j)=(long)u;
-      }
-      u=(GEN)x[i]; x[i]=x[k]; x[k]=(long)u;
-      p=gcoeff(aa,i,i);
-    }
-    for (k=i+1; k<=nbli; k++)
-    {
-      m=gcoeff(aa,k,i);
-      if (!gcmp0(m))
-      {
-	m=element_divmodpr(nf,m,p,modpr);
-	for (j=i+1; j<=nbco; j++)
-	  coeff(aa,k,j)=lsub(gcoeff(aa,k,j),
-	                     element_mulmodpr(nf,m,gcoeff(aa,i,j),modpr));
-	x[k]=lsub((GEN)x[k],element_mulmodpr(nf,m,(GEN)x[i],modpr));
-      }
-    }
-  }
-  /* Resolution systeme triangularise */
-  p=gcoeff(aa,nbli,nbco); if (gcmp0(p)) err(matinv1);
-
-  x[nbli]=(long)element_divmodpr(nf,(GEN)x[nbli],p,modpr);
-  for (i=nbli-1; i>0; i--)
-  {
-    m=(GEN)x[i];
-    for (j=i+1; j<=nbco; j++)
-      m=gsub(m,element_mulmodpr(nf,gcoeff(aa,i,j),(GEN)x[j],modpr));
-    x[i]=(long)element_divmodpr(nf,m,gcoeff(aa,i,i),modpr);
-  }
-  return gerepilecopy(av,x);
+  modpr = nf_to_ff_init(nf, &pr,&T,&p);
+  a = modprM(lift(a), nf, modpr);
+  b = modprM(lift(b), nf, modpr);
+  return gerepileupto(av, FqM_gauss(a,b,T,p));
 }
 
 GEN

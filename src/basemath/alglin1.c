@@ -1038,6 +1038,23 @@ Fp_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN p)
   }
   return u;
 }
+GEN
+Fq_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN T, GEN p)
+{
+  GEN m, u=cgetg(li+1,t_COL);
+  long i,j;
+
+  u[li] = (long)FpXQ_mul((GEN)b[li], FpXQ_inv(piv,T,p), T,p);
+  for (i=li-1; i>0; i--)
+  {
+    m = (GEN)b[i];
+    for (j=i+1; j<=li; j++)
+      m = gsub(m, gmul(gcoeff(a,i,j), (GEN)u[j]));
+    m = FpX_res(m, T,p);
+    u[i] = (long)FpXQ_mul(m, FpXQ_inv(gcoeff(a,i,i), T,p), T,p);
+  }
+  return u;
+}
 
 /* assume -p < a < p, return 1/a mod p */
 static long
@@ -1100,6 +1117,14 @@ _Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
 {
   if (lgefint(b[i]) > lgefint(p)) b[i] = lresii((GEN)b[i], p);
   b[k] = laddii((GEN)b[k], mulii(m, (GEN)b[i]));
+}
+
+/* same, reduce mod (T,p) */
+static void
+_Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
+{
+  b[i] = (long)FpX_res((GEN)b[i], T,p);
+  b[k] = (long)ladd((GEN)b[k], gmul(m, (GEN)b[i]));
 }
 
 /* assume m < p */
@@ -1408,6 +1433,99 @@ FpM_gauss(GEN a, GEN b, GEN p)
   }
   return gerepilecopy(av, u);
 }
+GEN
+FqM_gauss(GEN a, GEN b, GEN T, GEN p)
+{
+  gpmem_t av,lim;
+  long iscol,i,j,k,li,bco, aco = lg(a)-1;
+  GEN piv,m,u;
+
+  if (!T) return FpM_gauss(a,b,p);
+
+  if (typ(a)!=t_MAT) err(mattype1,"gauss");
+  if (b && typ(b)!=t_COL && typ(b)!=t_MAT) err(typeer,"gauss");
+  if (!aco)
+  {
+    if (b && lg(b)!=1) err(consister,"gauss");
+    if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
+    return cgetg(1,t_MAT);
+  }
+  li = lg(a[1])-1;
+  if (li != aco && (li < aco || b)) err(mattype1,"gauss");
+  b = check_b(b,li); av = avma;
+  iscol = (typ(b)==t_COL);
+  lim = stack_lim(av,1);
+  a = dummycopy(a);
+  bco = lg(b)-1;
+  piv = NULL; /* gcc -Wall */
+  for (i=1; i<=aco; i++)
+  {
+    /* k is the line where we find the pivot */
+    coeff(a,i,i) = (long)FpX_res(gcoeff(a,i,i), T,p);
+    piv = gcoeff(a,i,i); k = i;
+    if (!signe(piv))
+    {
+      for (k++; k <= li; k++)
+      {
+        coeff(a,k,i) = (long)FpX_res(gcoeff(a,k,i), T,p);
+        if (signe(coeff(a,k,i))) break;
+      }
+      if (k>li) return NULL;
+    }
+
+    /* if (k!=i), exchange the lines s.t. k = i */
+    if (k != i)
+    {
+      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
+      if (iscol) { swap(b[i],b[k]); }
+      else
+        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      piv = gcoeff(a,i,i);
+    }
+    if (i == aco) break;
+
+    for (k=i+1; k<=li; k++)
+    {
+      coeff(a,k,i) = (long)FpX_res(gcoeff(a,k,i), T,p);
+      m = gcoeff(a,k,i); coeff(a,k,i) = zero;
+      if (signe(m))
+      {
+	m = FpXQ_mul(m, FpXQ_inv(piv,T,p),T,p);
+        m = resii(negi(m), p);
+	for (j=i+1; j<=aco; j++) _Fq_addmul((GEN)a[j],k,i,m, T,p);
+	if (iscol) _Fq_addmul(b,k,i,m, T,p);
+        else
+          for (j=1; j<=bco; j++) _Fq_addmul((GEN)b[j],k,i,m, T,p);
+      }
+    }
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      GEN *gptr[2]; gptr[0]=&a; gptr[1]=&b;
+      if(DEBUGMEM>1) err(warnmem,"FpM_gauss. i=%ld",i);
+      gerepilemany(av,gptr,2);
+    }
+  }
+
+  if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
+  if (iscol) u = Fq_gauss_get_col(a,b,piv,aco,T,p);
+  else
+  {
+    gpmem_t av1 = avma;
+    lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
+    for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
+    for (j=1; j<=bco; j++)
+    {
+      u[j] = (long)Fq_gauss_get_col(a,(GEN)b[j],piv,aco,T,p);
+      if (low_stack(lim, stack_lim(av1,1)))
+      {
+        if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
+        u = gerepilecopy(av1, u);
+      }
+    }
+  }
+  return gerepilecopy(av, u);
+}
+
 
 GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }

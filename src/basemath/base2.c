@@ -22,17 +22,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
+extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 extern GEN DDF2(GEN x, long klim, long hint);
 extern GEN FpVQX_red(GEN z, GEN T, GEN p);
-extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 extern GEN RXQX_mul(GEN x, GEN y, GEN T);
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN _ei(long n, long i);
 extern GEN col_to_ff(GEN x, long v);
-extern GEN element_muli(GEN nf, GEN x, GEN y);
-extern GEN element_mulid(GEN nf, GEN x, long i);
 extern GEN element_mulidid(GEN nf, long i, long j);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN eltmulid_get_table(GEN nf, long i);
@@ -42,7 +40,6 @@ extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN merge_factor_i(GEN f, GEN g);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-extern GEN nfsuppl(GEN nf, GEN x, long n, GEN modpr);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
@@ -1869,64 +1866,6 @@ nbasis(GEN ibas,GEN pd)
 /*                   BUCHMANN-LENSTRA ALGORITHM                    */
 /*                                                                 */
 /*******************************************************************/
-/* REDUCTION Modulo a prime ideal */
-
-/* x integral, reduce mod prh in HNF */
-GEN
-nfreducemodpr_i(GEN x, GEN prh)
-{
-  GEN p = gcoeff(prh,1,1);
-  long i,j;
-
-  x = dummycopy(x);
-  for (i=lg(x)-1; i>=2; i--)
-  {
-    GEN t = (GEN)prh[i], p1 = resii((GEN)x[i], p);
-    x[i] = (long)p1;
-    if (signe(p1) && is_pm1(t[i]))
-    {
-      for (j=1; j<i; j++)
-        x[j] = lsubii((GEN)x[j], mulii(p1, (GEN)t[j]));
-      x[i] = zero;
-    }
-  }
-  x[1] = lresii((GEN)x[1], p); return x;
-}
-
-/* for internal use */
-GEN
-nfreducemodpr(GEN nf, GEN x, GEN modpr)
-{
-  long i, v;
-  GEN p, prh, den;
-
-  for (i=lg(x)-1; i>0; i--)
-    if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
-  prh = (GEN)modpr[1]; p = gcoeff(prh,1,1);
-  den = denom(x);
-  if (!gcmp1(den))
-  {
-    GEN cx;
-    v = ggval(den,p);
-    if (v) x = element_mul(nf,x, element_pow(nf,(GEN)modpr[2],stoi(v)));
-    x = primitive_part(x, &cx);
-    x = FpV_red(x, p);
-    if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
-  }
-  return FpV(nfreducemodpr_i(x, prh), p);
-}
-
-/* public function */
-GEN
-nfreducemodpr2(GEN nf, GEN x, GEN modpr)
-{
-  gpmem_t av = avma; checkprhall(modpr);
-  if (typ(x) != t_COL) x = algtobasis(nf,x);
-  return gerepileupto(av, nfreducemodpr(nf,x,modpr));
-}
-
-GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-
 /* return a Z basis of Z_K's p-radical, phi = x--> x^p-x */
 static GEN
 pradical(GEN nf, GEN p, GEN *phi)
@@ -2386,34 +2325,105 @@ nfmodprinit(GEN nf, GEN pr)
   res[6] = (long)nfproj; return gerepilecopy(av, res);
 }
 
+void
+checkmodpr(GEN modpr)
+{
+  if (typ(modpr) != t_COL || lg(modpr) < 5)
+    err(talker,"incorrect modpr format");
+  checkprimeid((GEN)modpr[4]);
+}
+
 GEN
 nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p)
 {
   GEN modpr = (typ(*pr) == t_COL)? *pr: nfmodprinit(nf, *pr);
   *T = lg(modpr)==5? NULL: (GEN)modpr[5];
-  *p = gcoeff(modpr[1],1,1);
-  *pr = (GEN)modpr[4]; return modpr;
+  *pr = (GEN)modpr[4];
+  *p = (GEN)(*pr)[1]; return modpr;
 }
 
 /* assume x in 'basis' form (t_COL) */
 GEN
 zk_to_ff(GEN x, GEN modpr)
 {
-  GEN p = gcoeff(modpr[1],1,1);
+  GEN pr = (GEN)modpr[4];
+  GEN p = (GEN)pr[1];
   GEN y = gmul((GEN)modpr[3], x);
   if (lg(modpr) == 5) return modii(y,p);
   y = FpV_red(y, p);
   return col_to_ff(y, varn(modpr[5]));
 }
 
+/* REDUCTION Modulo a prime ideal */
+static GEN
+kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
+{
+  GEN cx, den = denom(x);
+  long v;
+  if (gcmp1(den)) return x;
+
+  v = ggval(den,p);
+  if (v) x = element_mul(nf,x, element_pow(nf,(GEN)modpr[2],stoi(v)));
+  x = primitive_part(x, &cx);
+  x = FpV_red(x, p);
+  if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
+  return x;
+}
+
+/* x integral, reduce mod prh in HNF */
+GEN
+nfreducemodpr_i(GEN x, GEN prh)
+{
+  GEN p = gcoeff(prh,1,1);
+  long i,j;
+
+  x = dummycopy(x);
+  for (i=lg(x)-1; i>=2; i--)
+  {
+    GEN t = (GEN)prh[i], p1 = resii((GEN)x[i], p);
+    x[i] = (long)p1;
+    if (signe(p1) && is_pm1(t[i]))
+    {
+      for (j=1; j<i; j++)
+        x[j] = lsubii((GEN)x[j], mulii(p1, (GEN)t[j]));
+      x[i] = zero;
+    }
+  }
+  x[1] = lresii((GEN)x[1], p); return x;
+}
+
+/* for internal use */
+GEN
+nfreducemodpr(GEN nf, GEN x, GEN modpr)
+{
+  long i;
+  GEN p, prh;
+
+  for (i=lg(x)-1; i>0; i--)
+    if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
+  prh = (GEN)modpr[1]; p = gcoeff(prh,1,1);
+  x = kill_denom(x, nf, p, modpr);
+  return FpV(nfreducemodpr_i(x, prh), p);
+}
+
+/* public function */
+GEN
+nfreducemodpr2(GEN nf, GEN x, GEN modpr)
+{
+  gpmem_t av = avma; checkmodpr(modpr);
+  if (typ(x) != t_COL) x = algtobasis(nf,x);
+  return gerepileupto(av, nfreducemodpr(nf,x,modpr));
+}
+
+
 GEN
 nf_to_ff(GEN nf, GEN x, GEN modpr)
 {
   gpmem_t av = avma;
-  GEN prh,p,den;
-  long v, t = typ(x);
+  GEN pr = (GEN)modpr[4];
+  GEN p = (GEN)pr[1];
+  long t = typ(x);
 
-  prh = (GEN)modpr[1]; p = gcoeff(prh,1,1);
   if (t == t_POLMOD) { x = (GEN)x[2]; t = typ(x); }
   switch(t)
   {
@@ -2421,17 +2431,15 @@ nf_to_ff(GEN nf, GEN x, GEN modpr)
     case t_FRAC: return gmod(x, p);
     case t_POL: x = algtobasis(nf, x);
   }
-  den = denom(x);
-  if (!gcmp1(den))
-  {
-    GEN cx;
-    v = ggval(den,p);
-    if (v) x = element_mul(nf,x, element_pow(nf,(GEN)modpr[2],stoi(v)));
-    x = primitive_part(x, &cx);
-    x = FpV_red(x, p);
-    if (cx) x = FpV_red(gmul(gmod(cx, p), x), p);
-  }
+  x = kill_denom(x, nf, p, modpr);
   return gerepilecopy(av, zk_to_ff(x, modpr));
+}
+
+GEN
+ff_to_nf(GEN x, GEN modpr)
+{
+  if (lg(modpr) < 7) return x;
+  return mulmat_pol((GEN)modpr[6], x);
 }
 
 /* reduce the coefficients of pol modulo modpr */
@@ -2448,26 +2456,25 @@ modprX(GEN x, GEN nf,GEN modpr)
   return normalizepol(z);
 }
 GEN
-modprM(GEN z, GEN nf,GEN modpr)
+modprV(GEN z, GEN nf,GEN modpr)
 {
-  long i,j,l = lg(z), m = lg((GEN)z[1]);
-  GEN x,y,zi;
-  x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++)
-  {
-    x[i] = lgetg(m,t_COL);
-    y = (GEN)x[i];
-    zi= (GEN)z[i];
-    for (j=1; j<m; j++) y[j] = (long)nf_to_ff(nf,(GEN)zi[j], modpr);
-  }
+  long i,l = lg(z);
+  GEN x;
+  x = cgetg(l,typ(z));
+  for (i=1; i<l; i++) x[i] = (long)nf_to_ff(nf,(GEN)z[i], modpr);
   return x;
 }
-
 GEN
-ff_to_nf(GEN x, GEN modpr)
+modprM(GEN z, GEN nf,GEN modpr)
 {
-  if (lg(modpr) < 7) return x;
-  return mulmat_pol((GEN)modpr[6], x);
+  long i,l = lg(z), m;
+  GEN x;
+
+  if (typ(z) != t_MAT) return modprV(z,nf,modpr);
+  x = cgetg(l,t_MAT); if (l==1) return x;
+  m = lg((GEN)z[1]);
+  for (i=1; i<l; i++) x[i] = (long)modprV((GEN)z[i],nf,modpr);
+  return x;
 }
 
 /*                        relative ROUND 2
