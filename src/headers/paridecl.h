@@ -1175,6 +1175,7 @@ GEN     polresultant0(GEN x, GEN y,long v,long flag);
 GEN     polsym(GEN x, long n);
 GEN     primitive_part(GEN x, GEN *c);
 GEN     primpart(GEN x);
+GEN     pseudorem(GEN x, GEN y);
 GEN     quadgen(GEN x);
 GEN     quadpoly(GEN x);
 GEN     quadpoly0(GEN x, long v);

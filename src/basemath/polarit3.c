@@ -4014,7 +4014,7 @@ ZX_is_squarefree(GEN x)
 GEN
 modulargcd(GEN A0, GEN B0)
 {
-  GEN a,b,Hp,D,A,B,q,qp,H,g,p1;
+  GEN a,b,Hp,D,A,B,q,qp,H,g;
   long m,n;
   ulong p;
   gpmem_t av2, av = avma, avlim = stack_lim(av, 1);
@@ -4061,8 +4061,8 @@ modulargcd(GEN A0, GEN B0)
     qp = muliu(q,p);
     if (ZX_incremental_CRT(&H, Hp, q, qp, p))
     { /* H stable: check divisibility */
-      if (!is_pm1(g)) { p1 = content(H); if (!is_pm1(p1)) H = gdiv(H,p1); }
-      if (!signe(gres(A,H)) && !signe(gres(B,H))) break; /* DONE */
+      if (!is_pm1(g)) H = primpart(H);
+      if (gcmp0(pseudorem(A,H)) && gcmp0(pseudorem(B,H))) break; /* DONE */
 
       if (DEBUGLEVEL) fprintferr("modulargcd: trial division failed");
     }

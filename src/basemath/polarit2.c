@@ -1044,8 +1044,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       {
         avma = av2;
         BL = hnfall_i(BL,NULL,1);
-        r = lg(BL)-1; z = invmat(BL);
         av2 = avma;
+        r = lg(BL)-1; z = invmat(BL);
       }
       Nx = gtodouble(my_norml2(gmul(run, z)));
       avma = av2;
@@ -2797,8 +2797,8 @@ revpol(GEN x)
 }
 
 /* assume dx >= dy, y non constant */
-GEN
-pseudorem(GEN x, GEN y)
+static GEN
+pseudorem_i(GEN x, GEN y, GEN mod)
 {
   long vx = varn(x), dx, dy, dz, i, lx, p;
   gpmem_t av = avma, av2, lim;
@@ -2812,9 +2812,15 @@ pseudorem(GEN x, GEN y)
   {
     x[0] = lneg((GEN)x[0]); p--;
     for (i=1; i<=dy; i++)
+    {
       x[i] = ladd(gmul((GEN)y[0], (GEN)x[i]), gmul((GEN)x[0],(GEN)y[i]));
+      if (mod) x[i] = lmod((GEN)x[i], mod);
+    }
     for (   ; i<=dx; i++)
+    {
       x[i] = lmul((GEN)y[0], (GEN)x[i]);
+      if (mod) x[i] = lmod((GEN)x[i], mod);
+    }
     do { x++; dx--; } while (dx >= 0 && gcmp0((GEN)x[0]));
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
@@ -2828,14 +2834,20 @@ pseudorem(GEN x, GEN y)
   x[0]=evaltyp(t_POL) | evallg(lx);
   x[1]=evalsigne(1) | evalvarn(vx) | evallgef(lx);
   x = revpol(x) - 2;
+  if (mod) x = gmul(x, gmodulcp(gun, mod));
   if (p)
   { /* multiply by y[0]^p   [beware dummy vars from FpY_FpXY_resultant] */  
-    GEN t = gpowgs((GEN)y[0], p);
+    GEN t = (GEN)y[0];
+    if (mod) t = gmodulcp(t, mod);
+    t = gpowgs(t, p);
     for (i=2; i<lx; i++) x[i] = lmul((GEN)x[i], t);
     return gerepileupto(av, x);
   }
   return gerepilecopy(av, x);
 }
+
+GEN
+pseudorem(GEN x, GEN y) { return pseudorem_i(x,y, NULL); }
 
 extern void gerepilemanycoeffs2(gpmem_t av, GEN x, long n, GEN y, long o);
 
@@ -2848,7 +2860,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
   gpmem_t av = avma, av2, lim;
   GEN z, r, ypow;
 
-  if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
+  if (!signe(y)) err(talker,"euclidean division by zero (pseudodiv)");
   (void)new_chunk(2);
   dx=degpol(x); x = revpol(x);
   dy=degpol(y); y = revpol(y); dz=dx-dy; p = dz+1;
@@ -3758,6 +3770,7 @@ newtonpoly(GEN x, GEN p)
 
 extern int cmp_pol(GEN x, GEN y);
 extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
+extern GEN indexpartial(GEN P, GEN DP);
 GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
 GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 
@@ -3766,7 +3779,7 @@ GEN
 polfnf(GEN a, GEN t)
 {
   gpmem_t av = avma;
-  GEN x0,y,p1,p2,u,fa,n,unt,dent,alift;
+  GEN x0,y,p1,p2,u,G,fa,n,unt,dent,alift;
   long lx,i,k,e;
   int sqfree, tmonic;
 
@@ -3775,15 +3788,20 @@ polfnf(GEN a, GEN t)
   a = fix_relative_pol(t,a,0);
   alift = lift(a);
   p1 = content(alift); if (!gcmp1(p1)) { a = gdiv(a, p1); alift = lift(a); }
-  p1 = content(t); if (!gcmp1(t)) t = gdiv(t, p1);
+  t = primpart(t);
   tmonic = is_pm1(leading_term(t));
 
-  dent = ZX_disc(t); unt = gmodulsg(1,t);
-  u = nfgcd(alift,derivpol(alift), t, dent);
-  sqfree = gcmp1(u);
-  u = sqfree? alift: lift_intern(gdiv(a, gmul(unt,u)));
+  dent = indexpartial(t, NULL); unt = gmodulsg(1,t);
+  G = nfgcd(alift,derivpol(alift), t, dent);
+  sqfree = gcmp1(G);
+  u = sqfree? alift: lift_intern(gdiv(a, gmul(unt,G)));
   k = 0; n = ZY_ZXY_resultant(t, u, &k);
-  if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
+  if (DEBUGLEVEL>4) fprintferr("polfnf: choosing k = %ld\n",k);
+  if (!sqfree)
+  {
+    G = poleval(G, gadd(polx[varn(a)], gmulsg(k, polx[varn(t)])));
+    G = ZY_ZXY_resultant(t, G, NULL);
+  }
 
   /* n guaranteed to be squarefree */
   fa = DDF2(n,0); lx = lg(fa);
@@ -3791,31 +3809,22 @@ polfnf(GEN a, GEN t)
   p1 = cgetg(lx,t_COL); y[1] = (long)p1;
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;
   x0 = gadd(polx[varn(a)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
-  for (i=lx-1; i>1; i--)
+  for (i=lx-1; i>0; i--)
   {
-    GEN b, F = lift_intern(poleval((GEN)fa[i], x0));
-    if (!tmonic) F = gdiv(F, content(F));
+    GEN f = (GEN)fa[i], F = lift_intern(poleval(f, x0));
+    if (!tmonic) F = primpart(F);
     F = nfgcd(u, F, t, dent);
     if (typ(F) != t_POL || degpol(F) == 0)
       err(talker,"reducible modulus in factornf");
-    F = gmul(unt, F);
-    F = gdiv(F, leading_term(F));
-    u = lift_intern(gdeuc(u, F));
-    u = gdiv(u, content(u));
-    if (sqfree) e = 1;
-    else
+    e = 1;
+    if (!sqfree)
     {
-      e = 0; while (poldivis(a,F, &b)) { a = b; e++; }
-      if (degpol(a) == degpol(u)) sqfree = 1;
+      while (poldivis(G,f, &G)) e++;
+      if (degpol(G) == 0) sqfree = 1;
     }
-    p1[i] = (long)F;
+    p1[i] = ldiv(gmul(unt,F), leading_term(F));
     p2[i] = lstoi(e);
   }
-  u = gmul(unt, u);
-  u = gdiv(u, leading_term(u));
-  p1[1] = (long)u;
-  e = sqfree? 1: degpol(a)/degpol(u);
-  p2[1] = lstoi(e);
   return gerepilecopy(av, sort_factor(y, cmp_pol));
 }
 
@@ -3913,9 +3922,7 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
  * If not NULL, den must a a multiple of the denominator of the gcd,
  * for example the discriminant of nf.
  *
- * NOTE: if nf is not irreducible, nfgcd may loop forever, especially if the
- * gcd divides nf !
- */
+ * NOTE: if nf is not irreducible, nfgcd may loop forever, esp. if gcd | nf */
 GEN
 nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 {
@@ -3928,7 +3935,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   if (!signe(P) || !signe(Q))
     return zeropol(x);
   /*Compute denominators*/
-  if (!den) den = ZX_disc(nf);
+  if (!den) den = indexpartial(nf, NULL);
   lP = leading_term(P);
   lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
@@ -3938,15 +3945,15 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     gpmem_t btop = avma, st_lim = stack_lim(btop, 1);
     long p;
     long dM=0, dR;
-    GEN M, dsol, dens;
+    GEN M, dsol;
     GEN R, ax, bo;
     byteptr primepointer;
     for (p = 27449, primepointer = diffptr + 3000; ; p += *(primepointer++))
     {
       if (!*primepointer) err(primer1);
       if (!smodis(den, p))
-        continue;/*Discard primes dividing the disc(T) or leadingcoeff(PQ) */
-      if (DEBUGLEVEL>=5) fprintferr("nfgcd: p=%d\n",p);
+        continue;/*Discard primes dividing disc(T) or leadingcoeff(PQ) */
+      if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
       if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
         continue;/*Discard primes when modular gcd does not exist*/
       dR = degpol(R);
@@ -3971,11 +3978,9 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       bo = racine(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL)
         continue;
-      dens = denom(sol);
       sol = mat_to_polpol(sol,x,y);
-      dsol = gmul(sol, gmodulcp(dens, nf));
-      if (gdivise(P, dsol) && gdivise(Q, dsol))
-        break;
+      dsol = primpart(sol);
+      if (gcmp0(pseudorem_i(P, dsol, nf)) && gcmp0(pseudorem_i(Q, dsol, nf))) break;
     }
   }
   return gerepilecopy(ltop, sol);
