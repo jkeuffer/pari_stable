@@ -387,7 +387,7 @@ do_strftime(const char *s, char *buf, long max)
 {
 #ifdef HAS_STRFTIME
   time_t t = time(NULL);
-  strftime(buf,max,s,localtime(&t));
+  (void)strftime(buf,max,s,localtime(&t));
 #else
   strcpy(buf,s);
 #endif
@@ -674,7 +674,7 @@ sd_rl(const char *v, int flag)
     readline_init = 1;
   }
   if (o_readline_state != readline_state)
-    sd_gptoggle(readline_state ? "1" : "0", d_SILENT, "readline", USE_READLINE);
+    (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", USE_READLINE);
 #endif
   return res;
 }
@@ -1774,9 +1774,9 @@ License, and comes WITHOUT ANY WARRANTY WHATSOEVER");
   pariputs("\n\
 Type ? for help, \\q to quit.\n\
 Type ?12 for how to get moral (and possibly technical) support.\n\n");
-  sd_realprecision  ("",d_ACKNOWLEDGE);
-  sd_seriesprecision("",d_ACKNOWLEDGE);
-  sd_format         ("",d_ACKNOWLEDGE);
+  (void)sd_realprecision  ("",d_ACKNOWLEDGE);
+  (void)sd_seriesprecision("",d_ACKNOWLEDGE);
+  (void)sd_format         ("",d_ACKNOWLEDGE);
   pariputsf("\nparisize = %lu, primelimit = %lu\n", top-bot, primelimit);
 }
 
@@ -1824,7 +1824,7 @@ escape0(char *tch)
 	else if (!strncmp(tch,"serieslength",len)) f = sd_seriesprecision;
 	else if (!strncmp(tch,"format",len))       f = sd_format;
 	else if (!strncmp(tch,"prompt",len))       f = sd_prompt;
-	if (f) { f(get_sep(s), d_ACKNOWLEDGE); return; }
+	if (f) { (void)f(get_sep(s), d_ACKNOWLEDGE); return; }
 	break;
       }
   }
@@ -1872,13 +1872,13 @@ escape0(char *tch)
     case 'e':
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & ECHO)? "0": "1";
-      sd_echo(s,d_ACKNOWLEDGE); break;
+      (void)sd_echo(s,d_ACKNOWLEDGE); break;
     case 'g':
       switch (*s)
       {
-        case 'm': sd_debugmem(++s,d_ACKNOWLEDGE); break;
-        case 'f': sd_debugfiles(++s,d_ACKNOWLEDGE); break;
-        default : sd_debug(s,d_ACKNOWLEDGE); break;
+        case 'm': (void)sd_debugmem(++s,d_ACKNOWLEDGE); break;
+        case 'f': (void)sd_debugfiles(++s,d_ACKNOWLEDGE); break;
+        default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
       }
       break;
     case 'h': print_hash_list(s); break;
@@ -1886,17 +1886,17 @@ escape0(char *tch)
       s = get_sep_colon_ok(s);
       if (*s)
       {
-        sd_logfile(s,d_ACKNOWLEDGE);
+        (void)sd_logfile(s,d_ACKNOWLEDGE);
         if (logfile) break;
       }
-      sd_log(logfile?"0":"1",d_ACKNOWLEDGE);
+      (void)sd_log(logfile?"0":"1",d_ACKNOWLEDGE);
       break;
-    case 'o': sd_output(s,d_ACKNOWLEDGE); break;
+    case 'o': (void)sd_output(s,d_ACKNOWLEDGE); break;
     case 'p':
       switch (*s)
       {
-        case 's': sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
-        default : sd_realprecision(s,d_ACKNOWLEDGE); break;
+        case 's': (void)sd_seriesprecision(++s,d_ACKNOWLEDGE); break;
+        default : (void)sd_realprecision(s,d_ACKNOWLEDGE); break;
       }
       break;
     case 'q': gp_quit(); break;
@@ -1927,7 +1927,7 @@ escape0(char *tch)
     case 'y':
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & SIMPLIFY)? "0": "1";
-      sd_simplify(s,d_ACKNOWLEDGE); break;
+      (void)sd_simplify(s,d_ACKNOWLEDGE); break;
     default: err(caracer1,tch,tch-1);
   }
 }
@@ -2204,7 +2204,7 @@ gp_initrc(growarray *A, char *path)
 	if (*t != '=') err_gprc("missing '='",t,b->buf);
 	*t++ = 0;
 	if (*t == '"') (void)readstring(t, t);
-	setdefault(s,t,d_INITRC);
+	(void)setdefault(s,t,d_INITRC);
       }
     }
   }
@@ -2283,7 +2283,7 @@ static void
 gp_sighandler(int sig)
 {
   char *msg;
-  os_signal(sig,gp_sighandler);
+  (void)os_signal(sig,gp_sighandler);
   switch(sig)
   {
 #ifdef SIGBREAK
@@ -2614,7 +2614,7 @@ chron(char *s)
     if (*s) return 0;
     pariputs(do_time(ti_LAST));
   }
-  else { GP_DATA->flags ^= CHRONO; sd_timer("",d_ACKNOWLEDGE); }
+  else { GP_DATA->flags ^= CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
   return 1;
 }
 
@@ -2714,7 +2714,7 @@ gp_main_loop(int ismain)
     if (GP_DATA->flags & CHRONO)
       pariputs(do_time(ti_REGULAR));
     else
-      do_time(ti_NOPRINT);
+      (void)do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
     if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
@@ -2983,7 +2983,7 @@ main(int argc, char **argv)
     FILE *l = logfile;
     long i;
     GP_DATA->flags &= ~(CHRONO|ECHO); logfile = NULL;
-    for (i = 0; i < A.n; i++) { read0((char*)A.v[i]); free(A.v[i]); }
+    for (i = 0; i < A.n; i++) { (void)read0((char*)A.v[i]); free(A.v[i]); }
     GP_DATA->flags = f; logfile = l;
   }
   free(A.v);
