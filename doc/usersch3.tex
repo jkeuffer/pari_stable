@@ -2225,11 +2225,11 @@ in the real case.
 
 \syn{quadhilbert}{D,\fl,\var{prec}}.
 
-\subsecidx{quadgen}$(D)$: creates the quadratic number\sidx{omega}
-$\omega=(a+\sqrt{D})/2$ where $a=0$ if $x\equiv0\mod4$,
-$a=1$ if $D\equiv1\mod4$, so that $(1,\omega)$ is an integral basis for
-the quadratic order of discriminant $D$. $D$ must be an integer congruent to
-0 or 1 modulo 4, which is not a square.
+\subsecidx{quadgen}$(D)$: \label{se:quadgen}creates the quadratic
+number\sidx{omega} $\omega=(a+\sqrt{D})/2$ where $a=0$ if $x\equiv0\mod4$,
+$a=1$ if $D\equiv1\mod4$, so that $(1,\omega)$ is an integral basis for the
+quadratic order of discriminant $D$. $D$ must be an integer congruent to 0 or
+1 modulo 4, which is not a square.
 
 \syn{quadgen}{x}.
 
@@ -2267,11 +2267,12 @@ $x$ is large.
 
 \syn{regula}{x,\var{prec}}.
 
-\subsecidx{quadunit}$(x)$: fundamental unit\sidx{fundamental units} of the
-real quadratic field $\Q(\sqrt x)$ where  $x$ is the positive discriminant
-of the field. If $x$ is not a fundamental discriminant, this probably gives
-the fundamental unit of the corresponding order. $x$ must be of type
-integer, and the result is a quadratic number.
+\subsecidx{quadunit}$(D)$: fundamental unit\sidx{fundamental units} of the
+real quadratic field $\Q(\sqrt D)$ where  $D$ is the positive discriminant
+of the field. If $D$ is not a fundamental discriminant, this probably gives
+the fundamental unit of the corresponding order. $D$ must be an integer
+congruent to 0 or 1 modulo 4, which is not a square; the result is a
+quadratic number (see \secref{se:quadgen}).
 
 \syn{fundunit}{x}.
 
