@@ -1448,15 +1448,17 @@ suppl_intern(GEN x, GEN myid)
   if (typ(x) != t_MAT) err(typeer,"suppl");
   if (lx==1) err(talker,"empty matrix in suppl");
   n=lg(x[1]); if (lx>n) err(suppler2);
+  if (lx == n) return gcopy(x);
 
   zone  = switch_stack(NULL, n*n);
   switch_stack(zone,1);
   y = myid? dummycopy(myid): idmat(n-1);
   switch_stack(zone,0);
+  gauss_get_prec(x,0);
   for (i=1; i<lx; i++)
   {
-    p1=gauss(y,(GEN)x[i]); j=i;
-    while (j<n && gcmp0((GEN)p1[j])) j++;
+    p1 = gauss(y,(GEN)x[i]); j=i;
+    while (j<n && gauss_is_zero((GEN)p1[j])) j++;
     if (j>=n) err(suppler2);
     p1=(GEN)y[i]; y[i]=x[i]; if (i!=j) y[j]=(long)p1;
   }
