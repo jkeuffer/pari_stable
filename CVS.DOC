@@ -1,15 +1,15 @@
 This file documents access to the CVS server, which is intended for PARI
 developers or [alpha|beta]-testers who want the very latest bleeding edge
 release. The CVS sources are guaranteed to compile cleanly and to pass the
-bench suite on (one of) the administrator(s)'s machine(s), that's all. They
-may otherwise contain severe bugs. Stable releases will be made available
-on a regular basis using the customary method (a message to pari-announce).
+bench suite on (one of) the administrator(s)'s machine(s), they may otherwise
+contain severe bugs. Stable releases will be made available on a regular
+basis using the customary method (a message to pari-announce).
 
 
 First connection to the anonymous CVS server:
 
   cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot login
-  Hit return when asked for a password
+  Hit return when asked for a password (there's no password)
 
   cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot checkout pari
 
@@ -39,9 +39,9 @@ commit' directly.
 
 
 NOTES:
-1) you can speed up file transfers by using cvs -z9 (transfer files in
-compressed format), e.g 'cvs -z9 update' if you've missed a lot of patches,
-or 'cvs -z9 checkout' for the initial checkout. This requires that GNU gzip
+1) you can speed up file transfers by using cvs -z3 (transfer files in
+compressed format), e.g 'cvs -z3 update' if you've missed a lot of patches,
+or 'cvs -z3 checkout' for the initial checkout. This requires that GNU gzip
 be in your path.
 
 2) once you've run Configure, some files/directory will be created in the
