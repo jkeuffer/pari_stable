@@ -62,6 +62,9 @@ int pari_kernel_init(void)
 
 #define LIMBS(x)  ((mp_limb_t *)((x)+2))
 #define NLIMBS(x) (lgefint(x)-2)
+/*This one is for t_REAL to emphasize there are not t_INT*/
+#define RLIMBS(x)  ((mp_limb_t *)((x)+2))
+#define RNLIMBS(x) (lg(x)-2)
 
 INLINE void
 xmpn_copy(mp_limb_t *x, mp_limb_t *y, long n)
@@ -1521,23 +1524,23 @@ divrs(GEN x, long y)
 GEN
 divrr_with_gmp(GEN x, GEN y)
 {
-  long lx=lg(x)-2,ly=lg(y)-2;
+  long lx=RNLIMBS(x),ly=RNLIMBS(y);
   long lw=min(lx,ly);
   long lly=min(lw+1,ly);
   GEN  w=cgetr(lw+2);
   pari_sp av=avma;
   long lu=lw+lly;
   long llx=min(lu,lx);
-  GEN u=new_chunk(lu);
-  GEN z=new_chunk(lly);
-  GEN q,r;
+  mp_limb_t *u=(mp_limb_t *)new_chunk(lu);
+  mp_limb_t *z=(mp_limb_t *)new_chunk(lly);
+  mp_limb_t *q,*r;
   long e=expo(x)-expo(y);
   long sx=signe(x),sy=signe(y);
-  xmpn_mirrorcopy(z,y+2,lly);
-  xmpn_mirrorcopy(u+lu-llx,x+2,llx);
+  xmpn_mirrorcopy(z,RLIMBS(y),lly);
+  xmpn_mirrorcopy(u+lu-llx,RLIMBS(x),llx);
   xmpn_zero(u,lu-llx);
-  q = new_chunk(lw+1);
-  r = new_chunk(lly);
+  q = (mp_limb_t *)new_chunk(lw+1);
+  r = (mp_limb_t *)new_chunk(lly);
 
   mpn_tdiv_qr(q,r,0,u,lu,z,lly);
   
@@ -1545,7 +1548,7 @@ divrr_with_gmp(GEN x, GEN y)
   if ((ulong)r[lly-1] > ((ulong)z[lly-1]>>1))
     mpn_add_1(q,q,lw+1,1);
   
-  xmpn_mirrorcopy(w+2,q,lw);
+  xmpn_mirrorcopy(RLIMBS(w),q,lw);
   /*If q[lw] then q[lw]=1. We just need to right shift to 
    * renormalize, but then we do not need e-- */
   if (q[lw]) 
