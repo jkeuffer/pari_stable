@@ -844,8 +844,6 @@ GEN     pureimag(GEN x);
 long    pvaluation(GEN x, GEN p, GEN *py);
 long    sizedigit(GEN x);
 long    svaluation(ulong x, ulong p, long *py);
-long    taille(GEN x);
-long    taille2(GEN x);
 GEN     vecmax(GEN x);
 GEN     vecmin(GEN x);
 
@@ -988,6 +986,8 @@ void    pari_init(long parisize, long maxprime);
 GEN     reorder(GEN x);
 void    stackdummy(GEN x, long l);
 stackzone* switch_stack(stackzone *z, long n);
+long    taille(GEN x);
+long    taille2(GEN x);
 long    timer(void);
 long    timer2(void);
 
