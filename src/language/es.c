@@ -11,6 +11,7 @@ GEN convi(GEN x);
 static void bruti(GEN g, long n);
 static void texi(GEN g, long nosign);
 static void sori(GEN g);
+char * type_name(long t);
 static char format;
 static long decimals, chmp, initial;
 
@@ -913,6 +914,10 @@ voir2(GEN x, long nb, long bl)
   long tx=typ(x),i,j,e,dx,lx=lg(x);
 
   sorstring(VOIR_STRING1,(ulong)x);
+  if (tx!=t_POL && tx!=t_SER)
+    pariputsf("%s%c", type_name(tx)+2, isclone(x)?'!':'|');
+  else
+    pariputsf("%s %d%c", type_name(tx)+2, varn(x), isclone(x)?'!':'|');
   if (! is_recursive_t(tx)) /* t_SMALL, t_INT, t_REAL, t_STR, t_VECSMALL */
   {
     if (nb<0) nb = (tx==t_INT)? lgefint(x): lx;
@@ -945,6 +950,7 @@ voir2(GEN x, long nb, long bl)
       break;
 
     case t_PADIC:
+      blancs(bl-2); pariputsf("precp : %d   valp : %d\n", precp(x), valp(x));
       if (isonstack(x[2])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
       pariputs("  p : "); voir2((GEN)x[2],nb,bl);
       blancs(bl); pariputs("p^l : "); voir2((GEN)x[3],nb,bl);
@@ -958,6 +964,10 @@ voir2(GEN x, long nb, long bl)
       break;
 
     case t_POL: case t_SER:
+      if (tx == t_SER)
+      {
+	blancs(bl); pariputsf("prec : %d   valp : %d\n", lg(x)-2, valp(x));
+      }
       e = (tx==t_SER)? valp(x): 0;
       for (i=2; i<lx; i++)
       {
