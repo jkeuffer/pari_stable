@@ -1911,7 +1911,7 @@ stackmalloc(size_t N)
 {
   size_t n = nchar2nlong(N);
   if (avma - bot < n) err(errpile);
-  avma -= n; return (double*)avma;
+  avma -= n; return (char*)avma;
 }
 
 static double
