@@ -1326,8 +1326,8 @@ divisors(GEN n)
   tetpil = avma; return gerepile(av,tetpil,sort((GEN)t));
 }
 
-static GEN
-do_core(GEN n, int all)
+GEN
+corepartial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
@@ -1341,8 +1341,8 @@ do_core(GEN n, int all)
   return gerepileuptoint(av, c);
 }
 
-static GEN
-do_core2(GEN n, int all)
+GEN
+core2partial(GEN n, long all)
 {
   pari_sp av = avma;
   long i;
@@ -1362,10 +1362,8 @@ do_core2(GEN n, int all)
   y[2] = (long)f; return gerepilecopy(av, y);
 }
 
-GEN core(GEN n)        { return do_core(n,1); }
-GEN corepartial(GEN n) { return do_core(n,0); }
-GEN core2(GEN n)       { return do_core2(n,1); }
-GEN core2partial(GEN n){ return do_core2(n,0); }
+GEN core(GEN n)  { return corepartial(n,1); }
+GEN core2(GEN n) { return core2partial(n,1); }
 
 GEN
 core0(GEN n,long flag) { return flag? core2(n): core(n); }
