@@ -32,7 +32,7 @@ alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3169    3434  2.0.16(20)JC
 alpha21164a  600MHz  Linux-2.2.12   gcc  X11 dl2    4440    ????  2.0.17(22)IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
-alpha21164   500Mhz  Linux-2.0.35    gcc X11 dl2    5327    5493  2.0.17(13)
+alpha21164   500Mhz  Linux-2.0.35    gcc X11 dl2    5809    5466  2.0.18(13)
 alpha21064   172Mhz  OSF1-3.0        cc  X11 dl2   38598   39823  2.0.13
 ------------------------------------------------------------------------------
 Sun/SPARC
@@ -52,7 +52,7 @@ UltraSPARC   200MHz  Solaris-2.5.1   gcc X11 dl2    9226    9268  2.0.16    IS
 UltraSPARC   200MHz  Solaris-2.5.1    cc X11 dl2   11226   11755  2.0.16    IS
 UltraSPARC   167MHz  Solaris-2.6     gcc X11 dl2   10767   11218  2.0.16    IS
 UltraSPARC   167MHz  Solaris-2.6      cc X11 dl2   13677   13967  2.0.16    IS
-UltraSPARC   167MHz  Solaris-2.5     gcc X11 dl2   11100   11370  2.0.17
+UltraSPARC   167MHz  Solaris-2.5     gcc X11 dl2   11052   11160  2.0.18
 UltraSPARC   167MHz  Solaris-2.5     g++ X11 dl2   13474   13418  2.0.9 (7) LG
 UltraSPARC   167MHz  Solaris-2.5     CC  X11 -     15778   16400  2.0.9     LG
 UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl2   16241   17048  2.0.9     LG

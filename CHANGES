@@ -133,6 +133,7 @@ BA 98- incorrect object for gerepileupto in gscalcol
    99- try to detect bad input (e.g quad. form not > 0) in (integral) LLL
 XR100- typo in nffactor ("keep the value of i")
 IS101- work around an obscure gcc bug (gcc-2.96, alpha-linux) in stark.c
+  102- rnfcharpoly(nfinit(y^2+1),1,1) --> SEGV
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
