@@ -180,12 +180,12 @@ GEN vectosmall(GEN H)
 GEN
 permidentity(long l)
 {
-    GEN     perm;
-      int     i;
-        perm = cgetg(l + 1, t_VECSMALL);
-	  for (i = 1; i <= l; i++)
-	        perm[i] = i;
-	    return perm;
+  GEN     perm;
+  int     i;
+  perm = cgetg(l + 1, t_VECSMALL);
+  for (i = 1; i <= l; i++)
+    perm[i] = i;
+  return perm;
 }
 
 GEN vandermondeinverseprepold(GEN T, GEN L)
@@ -1352,9 +1352,12 @@ listsousgroupes(long m, long p)
   return gerepileupto(ltop,res);
 }
 
-/* Calcule les orbites d'une permutation 
- * ou d'un ensemble de permutations donne par un vecteur.
+/* Compute the orbits decomposition of a permutation
+ * or of a set of permutations given by a vector.
+ * v must not be an empty vector, becaude there is no way then
+ * to tell the length of the permutation.
  */
+
 GEN
 permorbite(GEN v)
 {
@@ -1435,7 +1438,6 @@ fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
   }
   return gerepileupto(ltop, s);
 }
-GEN caractducos(GEN p, GEN x, int v);
 
 GEN
 fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
@@ -1528,10 +1530,73 @@ fixedfieldtest(GEN V)
   return 1;
 }
 
+void
+debug_surmer(char *s,GEN S, long n)
+{
+  long l=lg(S);
+  setlg(S,n+1);
+  fprintferr(s,S);
+  setlg(S,l);
+}
+
+/*We try hard to find a polynomial R squarefree mod p.
+Unfortunately, it may be too much asked.
+A less bugprone way would be to only ask it to be squarefree mod p^e
+with e not too big. Most of the code is here, but I lack the theoretical
+knowledge to make it to work smoothly.B.A.
+*/ 
+static GEN
+fixedfieldsurmer(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v, GEN LN,long n)
+{
+  long i;
+  GEN V;
+  V=(GEN)LN[n];
+  for (i=1;i<lg(S);i++)
+    S[i]=0;
+  S[n]=1;
+  for (i=0;i<2*n-1;i++)
+  {
+    long k;
+    if (fixedfieldtest(V))
+    {
+      ulong av=avma;
+      GEN s=fixedfieldpol(O,L,mod,S,deg);
+      GEN P=FpV_roots_to_pol(s,mod,v);
+      P=FpX_center(P,mod);
+      if (p==gun || FpX_is_squarefree(P,p))
+      {
+	GEN V;
+	if (DEBUGLEVEL>=4) 
+	  debug_surmer("FixedField: Sym: %Z\n",S,n);
+	V=cgetg(3,t_VEC);
+	V[1]=lcopy(s);/*do not swap*/
+	V[2]=lcopy(P);
+	return V;
+      }
+      else
+      {
+	if (DEBUGLEVEL>=6)
+	  debug_surmer("FixedField: bad mod: %Z\n",S,n);
+	avma=av;
+      }
+    }
+    else 
+    {
+      if (DEBUGLEVEL>=6)
+        debug_surmer("FixedField: Tested: %Z\n",S,n);
+    }
+    k=1+(i%n);
+    S[k]++;
+    V=FpV_red(gadd(V,(GEN)LN[k]),l);
+  }
+  return NULL;
+}
+
 GEN
 fixedfieldsympol(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v)
 {
   ulong ltop=avma;
+  GEN V=NULL;
   GEN LN=cgetg(lg(L),t_VEC);
   GEN Ll=FpV_red(L,l);
   long n,i;
@@ -1541,15 +1606,20 @@ fixedfieldsympol(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v)
   {
     long j;
     LN[n]=(long)fixedfieldnewtonsum(O,Ll,l,stoi(i));
-    if (DEBUGLEVEL>=6) fprintferr("FixedField: LN[%d]=%Z\n",n,LN[n]);
     for(j=2;j<lg(LN[n]);j++)
       if(cmpii(gmael(LN,n,j),gmael(LN,n,1)))
 	break;
     if(j==lg(LN[n]) && j>2)
       continue;
-    deg[n++]=i;
-    if (n>=3 && fixedfieldtests(LN,n-1))
-      break;
+    if (DEBUGLEVEL>=6) fprintferr("FixedField: LN[%d]=%Z\n",n,LN[n]);
+    deg[n]=i;
+    if (fixedfieldtests(LN,n))
+    {
+      V=fixedfieldsurmer(O,L,mod,l,p,S,deg,v,LN,n);
+      if (V)
+	break;
+    }
+    n++;
   }
   if (DEBUGLEVEL>=4) 
   {
@@ -1558,58 +1628,9 @@ fixedfieldsympol(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN S, GEN deg, long v)
     fprintferr("FixedField: Computed degrees: %Z\n",deg);
     setlg(deg,l);
   }
-  if (i==lg(L) && n == 1)
+  if (!V)
     err(talker, "prime too small in fixedfield");
-  n--;
-  S[1]=1;
-  for(i=2;i<lg(S);i++)
-    S[i]=0;
-  {
-    GEN V;
-    V=(GEN)LN[1];
-    i=0;
-    while(1)/*fork*/
-    {
-      if(fixedfieldtest(V))
-      {
-	ulong av=avma;
-	GEN s=fixedfieldpol(O,L,mod,S,deg);
-	GEN P=FpV_roots_to_pol(s,mod,v);
-	P=FpX_center(P,mod);
-	if ( p==gun || FpX_is_squarefree(P,p))
-	{
-	  GEN V;
-	  if (DEBUGLEVEL>=4) 
-	  {
-	    long l=lg(S);
-	    setlg(S,n+1);
-	    fprintferr("FixedField: Sym: %Z\n",S);
-	    setlg(S,l);
-	  }
-	  V=cgetg(3,t_VEC);
-	  V[1]=lcopy(s);/*do not swap*/
-	  V[2]=lcopy(P);
-	  return gerepileupto(ltop,V);
-	}
-	else
-	{
-	  if (DEBUGLEVEL>=6)
-	  {
-	    long l=lg(S);
-	    setlg(S,n+1);
-	    fprintferr("FixedField: bad mod: %Z\n",S);
-	    setlg(S,l);
-	  }
-	  avma=av;
-	}
-      }
-      if (n==1)
-	err(talker, "primes too small in fixedfield");
-      S[2+i]++;
-      V=FpV_red(gadd(V,(GEN)LN[2+i]),l);
-      i=(i+1)%(n-1);
-    }
-  }
+  return gerepileupto(ltop,V);
 }
 /*
  * Calcule l'inclusion de R dans T i.e. S telque T|R\compo S
@@ -3597,21 +3618,24 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
 {
   ulong   ltop = avma, lbot;
   GEN     L, P, S, PL, O, res, mod;
-  long    x;
+  long    x, n;
   int     i;
   gal = checkgal(gal);
   x = varn((GEN) gal[1]);
-  L = (GEN) gal[3];
+  L = (GEN) gal[3]; n=lg(L)-1;
   mod = gmael(gal,2,3);
   if (flag<0 || flag>2)
     err(flagerr, "galoisfixedfield");
   if (typ(perm) == t_VEC)
   {
-    for (i = 1; i < lg(perm); i++)
-      if (typ(perm[i]) != t_VECSMALL)
-	err(typeer, "galoisfixedfield");
+    if (lg(perm)==1)
+      perm=permidentity(n);
+    else
+      for (i = 1; i < lg(perm); i++)
+	if (typ(perm[i]) != t_VECSMALL || lg(perm[i])!=n+1)
+	  err(typeer, "galoisfixedfield");
   }
-  else if (typ(perm) != t_VECSMALL)
+  else if (typ(perm) != t_VECSMALL || lg(perm)!=n+1 )
     err(typeer, "galoisfixedfield");
   O = permorbite(perm);
   {
