@@ -963,6 +963,7 @@ root_bound(GEN P0)
     if (cmpii(shifteval(Q,k), shifti(lP, d*k)) >= 0) break;
     avma = av;
   }
+  if (k < 0) k = 0;
   x = shifti(gun, k);
   y = shifti(gun, k+1);
   for(k=0; ; k++)
@@ -1242,6 +1243,7 @@ AGAIN:
       list = check_factors(P, Q_div_to_int(CM_L,stoi(C)), bound, famod, pa);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
+      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: check_factors failed");
       CM_L = gerepilecopy(av2, CM_L);
     }
     if (low_stack(lim, stack_lim(av,1)))
