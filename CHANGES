@@ -1206,6 +1206,8 @@ HC  4- optional argument to direuler (length of result)
 IZ  9- string justification in high-res plot
 IZ 10- bit operations ( bit[ and | or | neg | negimply | xor ] )
 XR 11- add new flag value in bnrstark/quadray: try to find a better modulus
+   12- Configure flags to indicate where gmp/readline library/headers are to
+       be found
 
   Changed
     1- default binary produced by Configure -g is now static
@@ -1218,6 +1220,7 @@ HC  3- extend the range of direuler (maxp was 2^16)
 XR  8- nfsqff: choose a prime ideal with few factors + better heuristic bound
 IS  9- default CFLAGS on linux-alpha
    10- improved factorcantor / factorff
+   11- default multiprecision kernel is GMP if the library is installed
 
   Removed
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)
