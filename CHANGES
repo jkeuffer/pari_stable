@@ -191,6 +191,7 @@ HC 21- new implementation of gamma()
    27- remove special handling of t_STR by printtex / writetex [ 2-2-6-C19:
        a \ would be inserted in front of $, %,  etc. ]. This broke things like
        printtex("$", x, "$"), and is better done by the user herself.
+   28- bnfinit(): remove useless components from the "technical parameter".
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
