@@ -1325,11 +1325,11 @@ GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(long m, long p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
 GEN     u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p);
-GEN     u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr);
+GEN     u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr);
 GEN     u_FpX_rem(GEN x, GEN y, ulong p);
 GEN     u_Fp_FpM(GEN x, ulong p);
 GEN     u_Fp_FpV(GEN x, ulong p);
-GEN     u_Fp_FpX(GEN x,int malloc, ulong p);
+GEN     u_Fp_FpX(GEN x, ulong p);
 int     u_FpX_is_squarefree(GEN z, ulong p);
 GEN     u_FpX_normalize(GEN z, ulong p);
 GEN     u_FpX_sub(GEN x, GEN y, ulong p);
@@ -1337,6 +1337,7 @@ GEN     u_FpX_gcd(GEN a, GEN b, ulong p);
 ulong   u_invmod(ulong x, ulong p);
 int     u_pow(int p, int k);
 int     u_val(ulong n, ulong p);
+GEN     u_zeropol(void);
 
 /* rootpol.c */
 

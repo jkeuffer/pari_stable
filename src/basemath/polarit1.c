@@ -950,6 +950,79 @@ vec_to_pol(GEN x, long v)
   return p;
 }
 
+GEN
+u_vec_to_pol(GEN x)
+{
+  long i, k = lg(x);
+  GEN p;
+
+  while (--k && !x[k]);
+  if (!k) return u_zeropol();
+  i = k+2; p = cgetg(i,t_POL);
+  p[1] = evalsigne(1) | evallgef(i) | evalvarn(0);
+  x--; for (k=2; k<i; k++) p[k] = x[k];
+  return p;
+}
+
+#if 0
+static GEN
+u_FpM_FpV_mul(GEN x, GEN y, ulong p)
+{
+  long i,k,l,lx=lg(x), ly=lg(y);
+  GEN z;
+  if (lx != ly) err(operi,"* [mod p]",x,y);
+  if (lx==1) return cgetg(1,t_VECSMALL);
+  l = lg(x[1]);
+  z = cgetg(l,t_VECSMALL);
+  for (i=1; i<l; i++)
+  {
+    ulong p1 = 0;
+    for (k=1; k<lx; k++)
+    {
+      p1 += coeff(x,i,k) * y[k];
+      if (p1 & HIGHBIT) p1 %= p; 
+    }
+    z[i] = p1 % p;
+  }
+  return z;
+}
+#endif
+
+/* u_vec_to_pol(u_FpM_FpV_mul(x, u_pol_to_vec(y), p)) */
+GEN
+u_FpM_FpX_mul(GEN x, GEN y, ulong p)
+{
+  long i,k,l, ly=lgef(y)-1;
+  GEN z;
+  if (ly==1) return u_zeropol();
+  l = lg(x[1]);
+  y++;
+  z = vecsmall_const(l,0) + 1;
+  for (k=1; k<ly; k++)
+  {
+    GEN c;
+    if (!y[k]) continue;
+    c = (GEN)x[k];
+    if (y[k] == 1)
+      for (i=1; i<l; i++)
+      {
+        z[i] += c[i];
+        if (z[i] & HIGHBIT) z[i] %= p; 
+      }
+    else
+      for (i=1; i<l; i++)
+      {
+        z[i] += c[i] * y[k];
+        if (z[i] & HIGHBIT) z[i] %= p; 
+      }
+  }
+  for (i=1; i<l; i++) z[i] %= p;
+  while (--l && !z[l]);
+  if (!l) return u_zeropol();
+  *z-- = evalsigne(1) | evallgef(l+2) | evalvarn(0);
+  return z;
+}
+
 /* return the (N-dimensional) vector of coeffs of p */
 GEN
 pol_to_vec(GEN x, long N)
@@ -965,6 +1038,19 @@ pol_to_vec(GEN x, long N)
   l = lgef(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
   for (   ; i<=N; i++) z[i]=zero;
+  return z;
+}
+
+/* return the (N-dimensional) vector of coeffs of p */
+GEN
+u_pol_to_vec(GEN x, long N)
+{
+  long i, l;
+  GEN z = cgetg(N+1,t_VECSMALL);
+  if (typ(x) != t_VECSMALL) err(typeer,"u_pol_to_vec");
+  l = lgef(x)-1; x++;
+  for (i=1; i<l ; i++) z[i]=x[i];
+  for (   ; i<=N; i++) z[i]=0;
   return z;
 }
 
@@ -1110,7 +1196,7 @@ FpX_split_berlekamp(GEN *t, GEN p)
   po2 = shifti(p, -1); /* (p-1) / 2 */
   pol = cgetg(N+3,t_POL);
   ir = 0;
-  /* t[i] irreducible for i < ir, still to be treated for i < L */
+  /* t[i] irreducible for i <= ir, still to be treated for i < L */
   for (L=1; L<d; )
   {
     GEN polt;

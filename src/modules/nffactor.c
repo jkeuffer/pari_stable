@@ -1064,7 +1064,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   for(tmax = 0;; tmax++)
   {
     long a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
-    GEN M_L, q, S1, P1, VV;
+    GEN oldCM_L, M_L, q, S1, P1, VV;
     int first = 1;
 
     /* bound for f . S_k(genuine factor) = ZC * bound for T_2(S_tnew) */
@@ -1110,6 +1110,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 
     /* compute truncation parameter */
     if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
+    oldCM_L = CM_L;
     av2 = avma;
     b = delta = 0; /* -Wall */
 AGAIN:
@@ -1123,7 +1124,6 @@ AGAIN:
       a = gexpo(T2);
       bgood = (long)(a - max(32, BitPerFactor * r));
       b = max(bmin, bgood);
-      q = shifti(gun, b);
       delta = a - b;
     }
     else
@@ -1134,37 +1134,39 @@ AGAIN:
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
     }
 
-    q = shifti(gun, b);
     /* restart with truncated entries */
+    q = shifti(gun, b);
     P1 = gdivround(PRK, q);
     S1 = gdivround(Tra, q);
-    T2 = gmul(S1, M_L);
-    T2 = gsub(T2, gmul(P1, VV));
-
+    T2 = gsub(gmul(S1, M_L), gmul(P1, VV));
+    m = vconcat( CM_L, T2 );
     if (first)
     {
       first = 0;
-      m = concatsp( vconcat( CM_L, T2 ),
-                    vconcat( ZERO, P1 ) );
+      m = concatsp( m, vconcat(ZERO, P1) );
       /*     [ C M_L   0  ]
        * m = [            ]   square matrix
        *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
        */
     }
-    else
-      m = vconcat( CM_L, T2 );
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: b =%4ld; r =%3ld -->%3ld, time = %ld\n",
                  b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = _col(QXQ_normalize(P,nfT)); break; }
-    i = lg(CM_L) - 1;
     if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
     if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
+
+    i = lg(CM_L) - 1;
+    if (i == r && gegal(CM_L, oldCM_L))
+    {
+      CM_L = oldCM_L;
+      avma = av2; continue;
+    }
 
     if (i <= r && i*rec < n0)
     {

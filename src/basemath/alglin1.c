@@ -1145,23 +1145,27 @@ _Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
   b[k] = (long)ladd((GEN)b[k], gmul(m, (GEN)b[i]));
 }
 
+/* assume m < p && u_OK_ULONG(p) && (! (b[i] & MASK)) */
+static void
+_u_Fp_addmul_OK(GEN b, long k, long i, ulong m, ulong p)
+{
+  b[k] += m * b[i];
+  if (b[k] & MASK) b[k] %= p;
+}
 /* assume m < p */
 static void
 _u_Fp_addmul(GEN b, long k, long i, ulong m, ulong p)
 {
-  ulong a;
-  if (u_OK_ULONG(p))
-  {
-    if (b[i] & MASK) b[i] %= p;
-    a = b[k] + m * b[i];
-  }
-  else
-  {
-    b[i] %= p;
-    a = b[k] + mulssmod(m, b[i], p);
-  }
-  if (a & MASK) a %= p;
-  b[k] = (long)a;
+  b[i] %= p;
+  b[k] += mulssmod(m, b[i], p);
+  if (b[k] & MASK) b[k] %= p;
+}
+/* same m = 1 */
+static void
+_u_Fp_add(GEN b, long k, long i, ulong p)
+{
+  b[k] += b[i];
+  if (b[k] & MASK) b[k] %= p;
 }
 
 /* Gaussan Elimination. Compute a^(-1)*b
@@ -1303,8 +1307,16 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
       {
 	m = mulssmod(m, u_invmod(piv,p), p);
         m = p - m;
-	for (j=i+1; j<=aco; j++) _u_Fp_addmul((GEN)a[j],k,i,m, p);
-        for (j=1;   j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p);
+        if (u_OK_ULONG(p))
+        {
+          for (j=i+1; j<=aco; j++) _u_Fp_addmul_OK((GEN)a[j],k,i,m, p);
+          for (j=1;   j<=bco; j++) _u_Fp_addmul_OK((GEN)b[j],k,i,m, p);
+        }
+        else
+        {
+          for (j=i+1; j<=aco; j++) _u_Fp_addmul((GEN)a[j],k,i,m, p);
+          for (j=1;   j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p);
+        }
       }
     }
   }
@@ -2439,15 +2451,23 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (piv * coeff(x,j,i)) % p;
       for (t=1; t<=m; t++)
-	if (t!=j)
-	{
-	  piv = coeff(x,t,k) % p;
-          if (piv)
-          {
-            coeff(x,t,k) = 0;
+      {
+	if (t==j) continue;
+
+        piv = coeff(x,t,k) % p;
+        if (!piv) continue;
+
+        coeff(x,t,k) = 0;
+        if (piv == 1)
+          for (i=k+1; i<=n; i++) _u_Fp_add((GEN)x[i],t,j,p);
+        else
+        {
+          if (u_OK_ULONG(p))
+            for (i=k+1; i<=n; i++) _u_Fp_addmul_OK((GEN)x[i],t,j,piv,p);
+          else
             for (i=k+1; i<=n; i++) _u_Fp_addmul((GEN)x[i],t,j,piv,p);
-          }
-	}
+        }
+      }
     }
   }
   if (deplin) return NULL;
@@ -2520,18 +2540,18 @@ FpM_ker_i(GEN x, GEN p, long deplin)
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmodii(mulii(piv,gcoeff(x,j,i)), p);
       for (t=1; t<=m; t++)
-	if (t!=j)
-	{
-	  piv = modii(gcoeff(x,t,k), p);
-          if (signe(piv))
-          {
-            coeff(x,t,k)=zero;
-            for (i=k+1; i<=n; i++)
-              coeff(x,t,i) = laddii(gcoeff(x,t,i),mulii(piv,gcoeff(x,j,i)));
-            if (low_stack(lim, stack_lim(av,1)))
-              gerepile_gauss_FpM_ker(x,p,k,t,av);
-          }
-	}
+      {
+	if (t==j) continue;
+
+        piv = modii(gcoeff(x,t,k), p);
+        if (!signe(piv)) continue;
+
+        coeff(x,t,k)=zero;
+        for (i=k+1; i<=n; i++)
+          coeff(x,t,i) = laddii(gcoeff(x,t,i),mulii(piv,gcoeff(x,j,i)));
+        if (low_stack(lim, stack_lim(av,1)))
+          gerepile_gauss_FpM_ker(x,p,k,t,av);
+      }
     }
   }
   if (deplin) { avma = av0; return NULL; }
@@ -2886,18 +2906,18 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = (long) Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
-	if (t!=j)
-	{
-	  piv = Fq_res(gcoeff(x,t,k), T, p);
-          if (signe(piv))
-          {
-            coeff(x,t,k)=zero;
-            for (i=k+1; i<=n; i++)
-              coeff(x,t,i) = (long)Fq_add(gcoeff(x,t,i),Fq_mul(piv,gcoeff(x,j,i), T, p), T, p);
-            if (low_stack(lim, stack_lim(av,1)))
-              Fq_gerepile_gauss_ker(x,T,p,k,t,av);
-          }
-	}
+      {
+        if (t==j) continue;
+
+        piv = Fq_res(gcoeff(x,t,k), T, p);
+        if (!signe(piv)) continue;
+
+        coeff(x,t,k)=zero;
+        for (i=k+1; i<=n; i++)
+          coeff(x,t,i) = (long)Fq_add(gcoeff(x,t,i),Fq_mul(piv,gcoeff(x,j,i), T, p), T, p);
+        if (low_stack(lim, stack_lim(av,1)))
+          Fq_gerepile_gauss_ker(x,T,p,k,t,av);
+      }
     }
   }
   if (deplin) { avma = av0; return NULL; }

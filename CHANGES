@@ -22,6 +22,7 @@ KO = Kiyoshi Ohgishi
 LG = Louis Granboulan
 MD = Mark Dickinson
 MS = Michael Stoll
+MSo= Michael Somos
 MW = Mark Watkins
 OR = Olivier Ramare
 OV = Oliver Voigt
@@ -92,7 +93,7 @@ MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
        [when computing fundamental units]
    42- bnrL1(bnr with conductor 1) --> SEGV
    43- "impossible inverse modulo ..." when using addprimes() + ROUND 2
-   44- [gp: \x] missing 'break' statement in escape()
+MSo44- [gp: \x] missing 'break' statement in escape()
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -115,6 +116,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
        (+idealred) instead of arch. components (require much less precision)
    14- allow arbitrary prime degree in rnfkummer
    15- [library:] allow trapping invmoder and recovering the offending INTMOD
+   16- improved factor over Z[X] for _huge_ degrees (factorizations mod p)
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
@@ -1974,7 +1976,7 @@ HC  4- functions where it makes sense now admit an optional argument for
     6- remove {} and \ from readline history
     7- improve treatment of sample programs in gphelp -d
     8- uniformized debugmem messages
-    9- simplify the coinit function (Michael Somos)
+MSo 9- simplify the coinit function
    10- changing the function set through default(compatible,) no longer
        resets installed functions
    11- renamed nfker-->nfkermodpr, nfgauss-->nfsolvemodpr

@@ -270,46 +270,6 @@ polidivis(GEN x, GEN y, GEN bound)
   return z;
 }
 
-static long
-min_deg(long jmax,ulong tabbit[])
-{
-  long j, k = 1, j1 = 2;
-
-  for (j=jmax; j>=0; j--)
-  {
-    for (  ; k<=15; k++)
-    {
-      if (tabbit[j]&j1) return ((jmax-j)<<4)+k;
-      j1<<=1;
-    }
-    k = 0; j1 = 1;
-  }
-  return (jmax<<4)+15;
-}
-
-/* tabkbit is a bit vector (only lowest 32 bits of each word are used
- * on 64bit architecture): reading from right to left, bit i+1 is set iff
- * degree i is attainable from the factorisation mod p.
- *
- * record N modular factors of degree d. */
-static void
-record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
-{
-  long n,j, a = d>>4, b = d&15; /* d = 16 a + b */
-  ulong *tmp2 = tmp - a;
-
-  for (n = 1; n <= N; n++)
-  {
-    ulong pro, rem = 0;
-    for (j=jmax; j>=a; j--)
-    {
-      pro = tabkbit[j] << b;
-      tmp2[j] = (pro&0xffff) + rem; rem = pro >> 16;
-    }
-    for (j=jmax-a; j>=0; j--) tabkbit[j] |= tmp[j];
-  }
-}
-
 /***********************************************************************/
 /**                                                                   **/
 /**       QUADRATIC HENSEL LIFT (adapted from V. Shoup's NTL)         **/
@@ -1110,6 +1070,14 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final,
   setlg(u, R+1); return u;
 }
 
+static ulong
+next2pow(ulong a)
+{
+  ulong b = 1;
+  while (b < a) b <<= 1;
+  return b;
+}
+
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
  * van Hoeij's knapsack
  *
@@ -1156,18 +1124,20 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   for (tmax = 0;; tmax += N0)
   {
     long b, bmin, bgood, delta, tnew = tmax + N0, r = lg(CM_L)-1;
-    GEN M_L, q, q2, CM_Lp;
+    GEN M_L, q, CM_Lp, oldCM_L;
+    int first = 1;
     
     bmin = (long)ceil(b0 + tnew*logBr);
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld, bmin = %ld)\n",
                  r, tmax, bmin);
 
-
     /* compute Newton sums (possibly relifting first) */
     if (a <= bmin)
     {
       a = (long)ceil(bmin + 3*N0*logBr) + 1; /* enough for 3 more rounds */
+      a = next2pow(a);
+
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
       for (i=1; i<=n0; i++) TT[i] = 0;
@@ -1192,25 +1162,18 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     /* compute truncation parameter */
     if (DEBUGLEVEL>2) { TIMERstart(&ti2); TIMERstart(&TI); }
+    oldCM_L = CM_L;
     av2 = avma;
-    delta = 0;
-    b = 0; /* -Wall */
+    delta = b = 0; /* -Wall */
 AGAIN:
     M_L = gdivexact(CM_L, stoi(C));
     T2 = centermod( gmul(Tra, M_L), pa );
-    if (!delta)
+    if (first)
     { /* initialize lattice, using few p-adic digits for traces */
       double t = gexpo(T2) - max(32, BitPerFactor*r);
       bgood = (long) (t * LOGp2);
       b = max(bmin, bgood);
       delta = a - b;
-      q = gpowgs(p, b); q2 = gpowgs(p, a-b);
-      m = concatsp( vconcat( CM_L, gdivround(T2, q) ),
-                    vconcat( ZERO, gscalmat(q2, N0) ) );
-      /*     [ C M_L        0    ]
-       * m = [                   ]   square matrix
-       *     [  T2'  p^(a-b) I_s ]   T2' = Tra * M_L  truncated
-       */
     }
     else
     { /* add more p-adic digits and continue reduction */
@@ -1218,21 +1181,39 @@ AGAIN:
       if (b0 < b) b = b0;
       b = max(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
-      q = gpowgs(p, b); q2 = gpowgs(p, a-b);
-      m = vconcat( CM_L, centermod(gdivround(T2, q), q2) );
     }
+
+    q = gpowgs(p, b);
+    m = vconcat( CM_L, gdivround(T2, q) );
+    if (first)
+    {
+      GEN P1 = gscalmat(gpowgs(p, a-b), N0);
+      first = 0;
+      m = concatsp( m, vconcat(ZERO, P1) );
+      /*     [ C M_L        0    ]
+       * m = [                   ]   square matrix
+       *     [  T2'  p^(a-b) I_s ]   T2' = Tra * M_L  truncated
+       */
+    }
+
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+                 a,b, lg(oldCM_L)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = _col(P); break; }
-    i = lg(CM_L) - 1;
     if (b > bmin) 
     {
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
     if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this block of traces");
+
+    i = lg(CM_L) - 1;
+    if (i == r && gegal(CM_L, oldCM_L))
+    {
+      CM_L = oldCM_L;
+      avma = av2; continue;
+    }
 
     CM_Lp = FpM_image(CM_L, stoi(27449)); /* inexpensive test */
     if (lg(CM_Lp) != lg(CM_L))
@@ -1370,18 +1351,45 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
   return res;
 }
 
-#define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
+#define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),NULL)
+
+extern GEN u_FpX_Kmul(GEN a, GEN b, ulong p, long na, long nb);
+extern GEN u_pol_to_vec(GEN x, long N);
+extern GEN u_FpM_FpX_mul(GEN x, GEN y, ulong p);
+#define u_FpX_mul(x,y, p) u_FpX_Kmul(x+2,y+2,p, lgef(x)-2,lgef(y)-2)
+
+static GEN
+u_FpM_Frobenius(GEN u, ulong p)
+{
+  long j,N = degpol(u);
+  GEN v,w,Q;
+  if (DEBUGLEVEL > 7) (void)timer2();
+  Q = cgetg(N+1,t_MAT); 
+  Q[1] = (long)vecsmall_const(N, 0);
+  coeff(Q,1,1) = 1;
+  w = v = u_FpXQ_pow(u_Fp_FpX(polx[varn(u)], p), utoi(p), u, p);
+  for (j=2; j<=N; j++)
+  {
+    Q[j] = (long)u_pol_to_vec(w, N);
+    if (j < N)
+    {
+      gpmem_t av = avma;
+      w = gerepileupto(av, u_FpX_rem(u_FpX_mul(w, v, p), u, p));
+    }
+  }
+  if (DEBUGLEVEL > 7) msgtimer("frobenius");
+  return Q;
+}
 
 /* Assume a squarefree, degree(a) > 0, a(0) != 0 */
 static GEN
 DDF(GEN a, long hint)
 {
-  GEN PolX,lead,res,prime,famod,y,g,z,w,*tabd,*tabdnew;
-  long da = degpol(a), va = varn(a);
-  long klim,chosenp,p,nfacp,lbit,j,d,e,np,nmax,nf,nft;
-  ulong *tabbit, *tabkbit, *tmp;
-  gpmem_t av = avma;
-  byteptr pt=diffptr;
+  GEN MP, PolX, lead, prime, famod, z, w;
+  const long da = degpol(a);
+  long chosenp, p, nfacp, d, e, np, nmax;
+  gpmem_t av = avma, av1;
+  byteptr pt = diffptr;
   const int MAXNP = max(5, (long)sqrt((double)da));
   long ti = 0;
   pari_timer T;
@@ -1389,97 +1397,73 @@ DDF(GEN a, long hint)
   if (DEBUGLEVEL>2) (void)TIMER(&T);
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) (void)timer2();
-  lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
+  nmax = da+1;
   chosenp = 0;
-  tabd = NULL;
-  tabdnew = (GEN*)new_chunk(nmax);
-  tabbit  = (ulong*)new_chunk(lbit);
-  tabkbit = (ulong*)new_chunk(lbit);
-  tmp     = (ulong*)new_chunk(lbit);
   prime = icopy(gun);
   lead = (GEN)a[da+2]; if (gcmp1(lead)) lead = NULL;
-  PolX = u_Fp_FpX(polx[0],0, 2);
-  for (p = np = 0; np < MAXNP; )
+  PolX = u_Fp_FpX(polx[0], 2);
+  av1 = avma;
+  for (p = np = 0; np < MAXNP; avma = av1)
   {
-    gpmem_t av0 = avma;
-
     NEXT_PRIME_VIADIFF_CHECK(p,pt);
     if (lead && !smodis(lead,p)) continue;
-    z = u_Fp_FpX(a,0, p);
-    if (!u_FpX_is_squarefree(z, p)) { avma = av0; continue ; }
+    z = u_Fp_FpX(a, p);
+    if (!u_FpX_is_squarefree(z, p)) continue;
 
-    for (j=0; j<lbit-1; j++) tabkbit[j] = 0;
-    tabkbit[j] = 1;
+    MP = u_FpM_Frobenius(z, p);
+
     d = 0; e = da; nfacp = 0;
     w = PolX; prime[2] = p;
     while (d < (e>>1))
     {
       long lgg;
-      d++; w = u_FpXQ_pow(w, prime, z, p);
+      GEN g;
+      /* here e = degpol(z) */
+      d++;
+      w = u_FpM_FpX_mul(MP, w, p); /* w^p mod (z,p) */
       g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
       lgg = degpol(g);
-      if (!lgg) g = NULL;
-      else
-      {
-	z = u_FpX_div(z, g, p); e = degpol(z);
-        w = u_FpX_rem(w, z, p);
-        lgg /= d; nfacp += lgg;
-        if (DEBUGLEVEL>5)
-          fprintferr("   %3ld factor%s of degree %3ld\n", lgg, lgg==1?"":"s",d);
-	record_factors(lgg, d, lbit-1, tabkbit, tmp);
-      }
-      tabdnew[d] = g;
+      if (!lgg) continue;
+
+      e -= lgg;
+      nfacp += lgg/d;
+      if (DEBUGLEVEL>5)
+        fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
+      if (!e) break;
+      z = u_FpX_div(z, g, p);
+      w = u_FpX_rem(w, z, p);
     }
-    if (e > 0)
+    if (e)
     {
       if (DEBUGLEVEL>5) fprintferr("   %3ld factor of degree %3ld\n",1,e);
-      tabdnew[e] = z; nfacp++;
-      record_factors(1, e, lbit-1, tabkbit, tmp);
+      nfacp++;
     }
-
-    if (np) for (j=0; j<lbit; j++) tabbit[j] &= tabkbit[j];
-    else    for (j=0; j<lbit; j++) tabbit[j] = tabkbit[j];
-    if (DEBUGLEVEL > 4)
+    if (DEBUGLEVEL>4)
       fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
                   p, nfacp, nfacp==1?"": "s", timer2());
-    if (min_deg(lbit-1,tabbit) > klim) { 
-      avma = av; return _col(a);
-    }
     if (nfacp < nmax)
     {
-      nmax = nfacp; tabd = tabdnew; chosenp = p;
-      for (j=d+1; j<e; j++) tabd[j] = NULL;
+      if (nfacp == 1) { avma = av; return _col(a); }
+      nmax = nfacp; chosenp = p;
       if (nmax < 5) break; /* very few factors. Enough */
-      tabdnew = (GEN*)new_chunk(da);
     }
-    else avma = av0;
     np++;
   }
   prime[2] = chosenp;
-  nf = nmax; nft = 1;
-  y = cgetg(nf+1,t_COL); famod = cgetg(nf+1,t_COL);
-  for (d = 1; nft <= nf; d++)
-  {
-    g = tabd[d];
-    if (g)
-    {
-      long n = degpol(g)/d;
-      famod[nft] = (long)small_to_pol(u_FpX_normalize(g, chosenp),va);
-      if (n > 1 && n != FpX_split_berlekamp((GEN*)(famod+nft),prime))
-        err(bugparier,"DDF: wrong numbers of factors");
-      nft += n;
-    }
-  }
-  if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
+  famod = cgetg(nmax+1,t_COL);
+  famod[1] = (long)(lead? FpX_normalize(a, prime): FpX_red(a, prime));
+  if (nmax != FpX_split_berlekamp((GEN*)(famod+1),prime))
+    err(bugparier,"DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
   {
+    if (DEBUGLEVEL>4) msgtimer("splitting mod p = %ld",chosenp);
     ti = TIMER(&T);
     fprintferr("Time setup: %ld\n", ti);
   }
-  res = combine_factors(a, famod, prime, da-1, hint);
+  z = combine_factors(a, famod, prime, da-1, hint);
   if (DEBUGLEVEL>2)
     fprintferr("Total Time: %ld\n===========\n", ti + TIMER(&T));
-  return gerepilecopy(av, res);
+  return gerepilecopy(av, z);
 }
 
 /* A(X^d) --> A(X) */
