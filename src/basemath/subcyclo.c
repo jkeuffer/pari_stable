@@ -546,7 +546,7 @@ galoiscyclo(long n, long v)
  * complex is set to 0 if the bnr is real and to 1 if it is complex.
  * Not stack clean 
  */
-GEN bnrtozn(GEN bnr, long *complex)
+GEN bnr_to_znstar(GEN bnr, long *complex)
 {
   GEN zk;
   GEN gen;
@@ -556,6 +556,8 @@ GEN bnrtozn(GEN bnr, long *complex)
   GEN p3;         /* vec */
   GEN res;
   checkbnrgen(bnr);
+  if (degpol(gmael3(bnr,1,7,1))!=1)
+    err(talker,"bnr must be over Q in bnr_to_znstar");
   zk = (GEN) bnr[5];
   gen = (GEN) zk[3];
   /*cond is the finite part of the conductor
@@ -603,7 +605,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       break;
     case t_VEC:
       if (lg(N)==7)
-        N=bnrtozn(N,&complex);
+        N=bnr_to_znstar(N,&complex);
       if (lg(N)==4)
       {
         Z = N;
