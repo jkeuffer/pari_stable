@@ -322,9 +322,30 @@ quicksqr(GEN a, long na)
   c0 = addmulXncopy(c0,c,n0);
   return shiftpol_ip(gerepileupto(av,c0), v);
 }
-/*****************************************
- * Arithmetic in Z/pZ[X]                 *
- *****************************************/
+
+/*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
+
+GEN
+ZX_renormalize(GEN x, long lx)
+{
+  long i;
+  for (i = lx-1; i>1; i--)
+    if (signe((GEN)x[i])) break;
+  stackdummy(x + (i+1), lg(x) - (i+1));
+  setlg(x, i+1); setsigne(x, i!=1); return x;
+}
+
+#define FpX_renormalize ZX_renormalize
+#define FpXX_renormalize ZX_renormalize
+#define FpXQX_renormalize ZX_renormalize
+
+/************************************************************************
+ **                                                                    ** 
+ **                      Arithmetic in Z/pZ[X]                         **
+ **                                                                    **
+ ************************************************************************/
+
+/* In practice, p is not assumed to be prime. */
 
 /*********************************************************************
 These functions suppose polynomials to be already reduced.
@@ -382,11 +403,12 @@ FpX_add(GEN x,GEN y,GEN p)
   z = cgetg(lx,t_POL); z[1] = x[1];
   for (i=2; i<ly; i++) z[i]=laddii((GEN)x[i],(GEN)y[i]);
   for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
-  (void)normalizepol_i(z, lx);
-  if (lg(z) == 2) { avma = (pari_sp)(z + lx); z = zeropol(varn(x)); }
-  if (p) z= FpX_red(z, p);
+  z = FpX_renormalize(z, lx);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  if (p) z = FpX_red(z, p);
   return z;
 }
+
 GEN
 FpX_sub(GEN x,GEN y,GEN p)
 {
@@ -400,17 +422,18 @@ FpX_sub(GEN x,GEN y,GEN p)
     z[1] = x[1];
     for (i=2; i<ly; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
     for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
-    (void)normalizepol_i(z, lz);
+    if (p) z = FpX_red(z, p);
+    else   z = FpX_renormalize(z, lz);
   }
   else
   {
     z[1] = y[1];
     for (i=2; i<lx; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
     for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
+    if (p) z = FpX_red(z, p);
     /*polynomial is always normalized*/
   }
-  if (lg(z) == 2) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
-  if (p) z= FpX_red(z, p);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
   return z;
 }
 GEN
@@ -857,7 +880,7 @@ FpXX_red(GEN z, GEN p)
         else res[i]=lpilecopy(av,gmael(res,i,2));
       }
     }
-  return normalizepol_i(res,lg(res));
+  return FpXX_renormalize(res,lg(res));
 }
 
 /*******************************************************************/
@@ -880,12 +903,12 @@ FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
   {
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    x[i] = (long)FpX_rem(normalizepol_i(t,N), T,p);
+    x[i] = (long)FpX_rem(FpX_renormalize(t,N), T,p);
   }
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  x[i] = (long)FpX_rem(normalizepol_i(t,N), T,p);
-  return normalizepol_i(x, i+1);
+  x[i] = (long)FpX_rem(FpX_renormalize(t,N), T,p);
+  return FpXQX_renormalize(x, i+1);
 }
 
 GEN
@@ -901,7 +924,7 @@ FpXQX_red(GEN z, GEN T, GEN p)
       res[i] = (long)FpX_rem((GEN)z[i],T,p);
     else
       res[i] = (long)FpX_red((GEN)z[i],p);
-  return normalizepol_i(res,lg(res));
+  return FpXQX_renormalize(res,lg(res));
 }
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
@@ -939,7 +962,7 @@ FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
   res[1] = P[1];
   for(i=2; i<lP; i++)
     res[i] = (long)Fq_mul(U,(GEN)P[i], T,p);
-  return normalizepol_i(res,lg(res));
+  return FpXQX_renormalize(res,lg(res));
 }
 
 /* a X^degpol, assume degpol >= 0 */
@@ -1901,7 +1924,7 @@ FpX_red(GEN z, GEN p)
   if (typ(z) == t_INT) return modii(z,p);
   l = lg(z); x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lmodii((GEN)z[i],p);
-  x[1] = z[1]; return normalizepol_i(x,l);
+  x[1] = z[1]; return FpX_renormalize(x,l);
 }
 
 GEN
@@ -2118,7 +2141,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) (void)normalizepol_i(rem, lrem);
+  if (!sx) (void)FpX_renormalize(rem, lrem);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2211,7 +2234,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) (void)normalizepol_i(rem, lrem);
+  if (!sx) (void)FpXQX_renormalize(rem, lrem);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2900,7 +2923,7 @@ vec_FpX_eval_gen(GEN b, GEN x, GEN p, int *drop)
   z[1] = b[1];
   for (i=2; i<lb; i++)
     z[i] = (long)FpX_eval((GEN)b[i], x, p);
-  z = normalizepol_i(z, lb);
+  z = FpX_renormalize(z, lb);
   *drop = lb - lg(z);
   return z;
 }
