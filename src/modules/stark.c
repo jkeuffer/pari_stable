@@ -24,6 +24,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define EXTRA_PREC (DEFAULTPREC-1)
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
+extern GEN zeta_get_limx(long r1, long r2, long bit);
+extern long zeta_get_i0(long r1, long r2, long bit, GEN limx);
+extern long zeta_get_N0(GEN C,  GEN limx);
 extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 extern GEN bnrGetSurj(GEN bnr1, GEN bnr2);
 
@@ -1604,66 +1607,6 @@ powrfrac(GEN x, long n, long d)
   return mpsqrtn(x, d);
 }
 
-/* N_0 = floor( C_K / limx ) */
-static GEN
-get_limx(long r1, long r2, long bit)
-{
-  pari_sp av = avma;
-  GEN p1, p2, c0, c1, A0;
-  long r = r1 + r2, N = r + r2;
-
-  /* c1 = N 2^(-2r2 / N) */
-  c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
-
-  c0 = gpowgs(Pi2n(1, DEFAULTPREC), r-1);
-  c0 = gmul(c0, powrfrac(real2n(1, DEFAULTPREC), r1 * (r2-1), N));
-  c0 = mpsqrt( divrs( gmul2n(c0, 3), N*N) );
- 
-  A0 = mplog( gmul2n(c0, bit) );
-  p2 = gdiv(A0, c1);
-  p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
-  return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
-}
-
-static long
-GetBoundN0(GEN C,  long r1, long r2,  long prec)
-{
-  pari_sp av = avma;
-  GEN limx = get_limx(r1, r2, bit_accuracy(prec));
-
-  limx = gfloor(gdiv(C, limx));
-  if (is_bigint(limx))
-    err(talker, "need %Z coefficients in GetST: computation impossible", limx);
-  avma = av; return itos(limx);
-}
-
-long
-zeta_get_imax(long r1, long r2, GEN B, GEN limx)
-{
-  long imin = 1, imax   = 1400;
-  while(imax - imin >= 4)
-  {
-    long i = (imax + imin) >> 1;
-    GEN t = gpowgs(limx, i);
-    t = gmul(t, gpowgs(mpfactr(i/2, DEFAULTPREC), r1));
-    t = gmul(t, gpowgs(mpfactr(i  , DEFAULTPREC), r2));
-    if (gcmp(t, B) >= 0) imax = i; else imin = i;
-  }
-  return imax & ~1; /* make it even */
-}
-
-static long
-GetBoundi0(long r1, long r2,  long bit)
-{
-  pari_sp av = avma;
-  GEN B, limx = get_limx(r1, r2, bit);
-  long imax;
-  B = mpsqrt( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) );
-  B = gmul(B, gmul2n(gpowgs(stoi(5), r1), bit + r2));
-  imax = zeta_get_imax(r1, r2, B, limx);
-  avma = av; return imax;
-}
-
 static GEN /* cf polcoeff */
 _sercoeff(GEN x, long n)
 {
@@ -1927,7 +1870,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
   pari_sp av, av1, av2;
   long ncond, n, j, k, jc, nmax, prec2, i0, r1, r2;
   GEN bnr, nf, racpi, *powracpi;
-  GEN rep, N0, C, T, S, an, degs;
+  GEN rep, N0, C, T, S, an, degs, limx;
   LISTray LIST;
   ST_t cScT;
 
@@ -1954,15 +1897,16 @@ GetST(GEN dataCR, GEN vChar, long prec)
   C  = cgetg(ncond+1, t_VEC);
   N0 = cgetg(ncond+1, t_VECSMALL);
   nmax = 0;
+  limx = zeta_get_limx(r1, r2, bit_accuracy(prec));
   for (j = 1; j <= ncond; j++)
   {
     C[j]  = mael(dataCR, mael(vChar,j,1), 2);
-    N0[j] = GetBoundN0((GEN)C[j], r1, r2, prec);
+    N0[j] = zeta_get_N0((GEN)C[j], limx);
     if (nmax < N0[j]) nmax  = N0[j];
   }
   if ((ulong)nmax > maxprime())
     err(talker, "Not enough precomputed primes (need all p <= %ld)", nmax);
-  i0 = GetBoundi0(r1, r2, bit_accuracy(prec));
+  i0 = zeta_get_i0(r1, r2, bit_accuracy(prec), limx);
 
   if (DEBUGLEVEL>1) fprintferr("nmax = %ld, i0 = %ld\n", nmax, i0);
   InitPrimes(gmael(dataCR,1,4), nmax, &LIST);
@@ -2701,7 +2645,7 @@ LABDOUB:
     for (i = 1; i <= cl; i++) C[i] = mael(dataCR, i, 2);
     Cmax = vecmax(C);
 
-    n = GetBoundN0(Cmax, r1, r2, newprec);
+    n = zeta_get_N0(Cmax, zeta_get_limx(r1, r2, bit_accuracy(newprec)));
     if (n > bnd) n = bnd;
     if (DEBUGLEVEL) fprintferr("nmax in QuickPol: %ld \n", n);
     InitPrimes(gmael(dataCR,1,4), n, &LIST);
