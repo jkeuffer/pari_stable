@@ -559,7 +559,7 @@ divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
 static int
 smooth_int(FB_t *F, GEN *N, GEN *ex)
 {
-  GEN q, r, FB = F->FB;
+  GEN q, FB = F->FB;
   const long KCZ = F->KCZ;
   const long limp = FB[KCZ]; /* last p in FB */
   long i, p, k;
@@ -567,8 +567,9 @@ smooth_int(FB_t *F, GEN *N, GEN *ex)
   *ex = new_chunk(KCZ+1);
   for (i=1; ; i++)
   {
-    p = FB[i]; q = dvmdis(*N,p,&r);
-    for (k=0; !signe(r); k++) { *N = q; q = dvmdis(*N, p, &r); }
+    long r;
+    p = FB[i]; q = divis_rem(*N, p, &r);
+    for (k=0; !r; k++) { *N = q; q = divis_rem(*N, p, &r); }
     (*ex)[i] = k;
     if (cmpis(q,p) <= 0) break;
     if (i == KCZ) return 0;

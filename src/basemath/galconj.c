@@ -623,7 +623,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   GEN     C, Cd, SG, cache;
   long    Z, c_idx=gt->g-1;
   long    stop=0,hop=0;
-  GEN     NN,NQ,NR;
+  GEN     NN,NQ;
   long    N1,N2,R1,Ni;
   m = gt->g;
   ord = gt->f;
@@ -637,16 +637,14 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=10000000;
-  NQ=dvmdis(NN,N1,&NR);
+  NQ=divis_rem(NN,N1,&R1);
   if (cmpis(NQ,1000000000)>0)
   {
     err(warner,"Combinatorics too hard : would need %Z tests!\n"
-	"I will skip it,but it may induce galoisinit to loop",NN);
-    avma = ltop;
-    *psi = NULL;
-    return 0;
+	"I will skip it, but it may induce an infinite loop",NN);
+    avma = ltop; *psi = NULL; return 0;
   }
-  N2=itos(NQ); R1=itos(NR); if(!N2) N1=R1;
+  N2=itos(NQ); if(!N2) N1=R1;
   if (DEBUGLEVEL>=4)
   {
     stop=N1/20;
@@ -940,7 +938,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   int     p1, p2, p3, p4, p5, p6;
   long 	  l1, l2, N1, N2, R1;
   long    i, j, cx, hop = 0, start = 0;
-  GEN     W, NN, NQ, NR;
+  GEN     W, NN, NQ;
   long    V;
   if (DEBUGLEVEL >= 1) (void)timer2();
   a = lg(F) - 1;
@@ -971,14 +969,14 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=100000;
-  NQ=dvmdis(NN,N1,&NR);
+  NQ=divis_rem(NN,N1,&R1);
   if (cmpis(NQ,1000000000)>0)
   {
     avma=avm;
     err(warner,"Combinatorics too hard : would need %Z tests!\n I'll skip it but you will get a partial result...",NN);
     return perm_identity(n);
   }
-  N2=itos(NQ); R1=itos(NR);
+  N2=itos(NQ);
   for (l2 = 0; l2 <= N2; l2++)
   {
     long nbiter = (l2<N2) ? N1: R1;

@@ -1520,20 +1520,6 @@ mpqs_add_0(char **last) {
   *s++ = 0; *last = s;
 }
 
-/**
- ** divide and return the remainder.  Leaves both the quotient and
- ** the remainder on the stack as GENs;  the caller should clean up.
- **/
-
-INLINE ulong
-mpqs_div_rem(GEN x, long y, GEN *q)
-{
-  GEN r;
-  *q = dvmdis(x, y, &r);
-  if (signe(r)) return (ulong)(r[2]);
-  return 0;
-}
-
 #ifdef DEBUG
 static GEN
 mpqs_factorback(long *FB, char *relations, GEN kN)
@@ -1688,7 +1674,6 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
     {
       long tmp_p = x % p;
       ulong ei = 0;
-      GEN Qx_div_p;
 
       if (bi && pi > (ulong)start_index_FB_for_A)
       {
@@ -1698,13 +1683,14 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 
       if (tmp_p == start_1[pi] || tmp_p == start_2[pi])
       { /* p divides Q(x) and possibly A */
-        long remd_p = mpqs_div_rem(Qx, p, &Qx_div_p);
+        long remd_p;
+        GEN Qx_div_p = divis_rem(Qx, p, &remd_p);
 	if (remd_p) break; /* useless candidate: abort */
 
         do
         {
 	  ei++; Qx = Qx_div_p;
-	  remd_p = mpqs_div_rem(Qx, p, &Qx_div_p);
+          Qx_div_p = divis_rem(Qx, p, &remd_p);
         } while (remd_p == 0);
       }
       if (ei)			/* p might divide A but not Q(x) */

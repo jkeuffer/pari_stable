@@ -1056,10 +1056,9 @@ padic_sqrtn_ram(GEN x, long e)
   n=gpowgs((GEN) x[2],e);
   if (valp(x))
   {
-    GEN p1,z;
-    p1=dvmdsi(valp(x),n,&z);
-    if (signe(z))
-      err(talker,"n-root does not exists in gsqrtn");
+    long z;
+    GEN p1 = divsi_rem(valp(x), n, &z);
+    if (z) err(talker,"n-root does not exists in gsqrtn");
     v=itos(p1);
     x=gcopy(x);setvalp(x,0);
   }
@@ -1086,10 +1085,9 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   /*check valuation*/
   if (valp(x))
   {
-    GEN p1,z;
-    p1=dvmdsi(valp(x),n,&z);
-    if (signe(z))
-      err(talker,"n-root does not exists in gsqrtn");
+    long z;
+    GEN p1 = divsi_rem(valp(x),n,&z);
+    if (z) err(talker,"n-root does not exists in gsqrtn");
     v=itos(p1);
   }
   a=mpsqrtnmod((GEN)x[4],n,p,zetan);

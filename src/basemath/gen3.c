@@ -509,20 +509,20 @@ gdivgs(GEN x, long s)
   switch(tx)
   {
     case t_INT:
-      av=avma; z=dvmdis(x,s,&p1);
-      if (p1==gzero) return z;
+      av = avma; z = divis_rem(x,s,&i);
+      if (!i) return z;
 
-      i = cgcd(s, smodis(x,s));
+      i = cgcd(s, i);
       avma=av; z=cgetg(3,t_FRAC);
       if (i == 1)
         x = icopy(x);
       else
       {
         s /= i;
-        x = divis(x, i);
+        x = divis(x, i); /* not diviuexact, we may have x < 0 */
       }
-      z[1]=(long)x; z[2]=lstoi(s);
-      fix_frac(z); return z;
+      z[1] = (long)x;
+      z[2] = lstoi(s); fix_frac(z); return z;
 
     case t_REAL:
       return divrs(x,s);

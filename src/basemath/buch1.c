@@ -929,22 +929,24 @@ check_bach(double cbach, double B)
   return cbach;
 }
 
+/* FIXME: use buch2.c:smooth_int() */
 static long
 factorquad(GEN f, long kcz, long limp)
 {
   long i, p, k, lo;
   pari_sp av;
-  GEN q,r, x = (GEN)f[1];
+  GEN q, x = (GEN)f[1];
 
   if (is_pm1(x)) { primfact[0]=0; return 1; }
   av=avma; lo=0;
   if (signe(x) < 0) x = absi(x);
   for (i=1; ; i++)
   {
-    p=FB[i]; q=dvmdis(x,p,&r);
-    if (!signe(r))
+    long r;
+    p = FB[i]; q = divis_rem(x,p,&r);
+    if (!r)
     {
-      for (k=0; !signe(r); k++) { x=q; q=dvmdis(x,p,&r); }
+      for (k=0; !r; k++) { x=q; q = divis_rem(x,p,&r); }
       primfact[++lo]=p; exprimfact[lo]=k;
     }
     if (cmpis(q,p)<=0) break;

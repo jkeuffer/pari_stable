@@ -890,8 +890,8 @@ GEN
 numtoperm(long n, GEN x)
 {
   pari_sp av;
-  long i,a,r;
-  GEN v,w;
+  long i, r;
+  GEN v;
 
   if (n < 0) err(talker,"n too small (%ld) in numtoperm",n);
   if (typ(x) != t_INT) err(arither1);
@@ -900,7 +900,8 @@ numtoperm(long n, GEN x)
   if (signe(x) <= 0) x = modii(x, mpfact(n));
   for (r=2; r<=n; r++)
   {
-    x = dvmdis(x,r,&w); a = itos(w);
+    long a;
+    x = divis_rem(x, r,&a);
     for (i=r; i>=a+2; i--) v[i] = v[i-1];
     v[i] = r;
   }
