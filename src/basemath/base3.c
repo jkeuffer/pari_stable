@@ -1096,7 +1096,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
   return gerepileuptoint(av, lift(chinese(v,NULL)));
 }
 
-/* discrete log in Fq for a in Fp^* */
+/* discrete log in Fq for a in Fp^*, g primitive root in Fq^* */
 static GEN
 ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 {
@@ -1123,7 +1123,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 }
 
 /* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
- * q = order of g0. Assume T != NULL */
+ * q = order of g0 is prime (and != p) */
 static GEN
 ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
 {
@@ -1131,8 +1131,14 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   long lbaby,i,k;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
-  if (typ(x) == t_INT) return ff_PHlog_Fp(x,g0,T,p); /* should not occur */
-  if (!degpol(x)) return ff_PHlog_Fp(constant_term(x),g0,T,p);
+  if (!degpol(x)) x = constant_term(x);
+  if (typ(x) == t_INT)
+  {
+    if (!gcmp1(modii(p,q))) return gzero;
+    /* g0 in Fp^*, order q | (p-1) */
+    if (typ(g0) == t_POL) g0 = constant_term(g0);
+    return Fp_PHlog(x,g0,p,q);
+  }
 
   p1 = racine(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
