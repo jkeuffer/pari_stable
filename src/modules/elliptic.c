@@ -1539,7 +1539,7 @@ apell1(GEN e, GEN p)
   GEN p1,p2,p3,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,acon,bcon,c4,c6,cp4,pts;
   GEN __x;
 
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   p1 = gmodulsg(1,p);
   c4 = gdivgs(gmul(p1,(GEN)e[10]), -48);
   c6 = gdivgs(gmul(p1,(GEN)e[11]), -864);

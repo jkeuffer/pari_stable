@@ -272,7 +272,7 @@ nffactor(GEN nf,GEN pol)
   GEN A,g,y,p1,rep,T;
   long l, j, d = degpol(pol);
   gpmem_t av;
-  if (DEBUGLEVEL>3) timer2();
+  if (DEBUGLEVEL>3) (void)timer2();
 
   nf = checknf(nf); T = (GEN)nf[1];
   if (typ(pol) != t_POL) err(notpoler,"nffactor");

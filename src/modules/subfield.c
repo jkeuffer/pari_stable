@@ -604,7 +604,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
   GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
  
   minp = N*(m-1)/2;
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   di++; p = stoi(2);
   while (p[2]<=minp) p[2] += *di++;
   oldllist = 100000;
@@ -918,7 +918,7 @@ CHANGE:
       LSB = gerepileupto(av2, concat(LSB, _subfield(CSF,ESF)));
     }
   }
-  delete_var();
+  (void)delete_var();
   for (i=1; i<llist; i++) free((void*)listpotbl[i]);
   free((void*)(listpotbl-1));
   if (DEBUGLEVEL) fprintferr("\nSubfields of degree %ld: %Z\n",d, LSB);

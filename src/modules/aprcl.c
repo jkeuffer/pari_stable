@@ -803,27 +803,27 @@ step4a(GEN N, ulong q, int p, int k, GEN jpq)
   red_t R;
 
   pk = u_pow(p,k); pk2=pkfalse;
-  if (dotime) timer();
+  if (dotime) (void)timer2();
   if (!jpq)
   {
     GEN tabf, tabg;
 
     compute_fg(q,1, &tabf,&tabg);
     jpq = get_jac(q,p,k,tabf,tabg);
-    if (dotime) sgtjac+=timer();
+    if (dotime) sgtjac+=timer2();
   }
   R.N = N;
   R.C = tabcyc[pk2];
   AL = get_AL(N, pk);
 
   s1 = autvec(pk,jpq,(GEN)tabTH[pk2]);
-  if (dotime) sgtaut+=timer();
+  if (dotime) sgtaut+=timer2();
   s2 = powpolmod(&R,k,pk,s1);
-  if (dotime) {sgt[pk2]+=timer();ctsgt[pk2]++;};
+  if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;};
   s3 = autvec(pk,jpq,AL);
-  if (dotime) sgtaut+=timer();
+  if (dotime) sgtaut+=timer2();
   s3 = _red(gmul(lift(s3),s2), &R);
-  if (dotime) sgt[pk2]+=timer();
+  if (dotime) sgt[pk2]+=timer2();
 
   ind = look_eta(pk, s3);
   if (ind == pk) return -1;
@@ -846,9 +846,9 @@ step4b(GEN N, ulong q, int k)
   GEN AL,s1,s2,s3, j2q,j3q;
   red_t R;
 
-  if (dotime) timer();
+  if (dotime) (void)timer2();
   (void)get_jac2(N,q,k, &j2q,&j3q);
-  if (dotime) sgtjac+=timer();
+  if (dotime) sgtjac+=timer2();
 
   pk2 = pkfalse;
   R.N = N;
@@ -856,14 +856,14 @@ step4b(GEN N, ulong q, int k)
   AL = get_AL(N, pk);
 
   s1 = autvec(pk,j3q,(GEN)tabTH[pk2]);
-  if (dotime) sgtaut+=timer();
+  if (dotime) sgtaut+=timer2();
   s2 = powpolmod(&R, k,pk,s1);
-  if (dotime) {sgt[pk2]+=timer();ctsgt[pk2]++;}
+  if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;}
   s3 = autvec(pk,j3q,AL);
-  if (dotime) sgtaut+=timer();
+  if (dotime) sgtaut+=timer2();
   s3 = _red(gmul(lift(s3),s2), &R);
   if (mod8(N) >= 5) s3 = _red(gmul(j2q, s3), &R);
-  if (dotime) sgt[pk2]+=timer();
+  if (dotime) sgt[pk2]+=timer2();
 
   ind = look_eta(pk, s3);
   if (ind == pk) return -1;
@@ -871,7 +871,7 @@ step4b(GEN N, ulong q, int k)
   else
   {
     s3 = powmodulo(stoi(q), shifti(N,-1), N);
-    if (dotime) {sgt[pk2]+=timer();ctsgt[pk2]++;}
+    if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;}
     return is_m1(s3, N);
   }
 }
@@ -889,12 +889,12 @@ step4c(GEN N, ulong q)
   R.N = N;
   R.C = tabcyc[pk2];
 
-  if (dotime) timer();
+  if (dotime) (void)timer2();
   s0 = sqrmod4(jpq, &R);
   s1 = gmulsg(q,s0);
   s3 = powpolmod(&R, 2,pk,s1);
   if (mod4(N) == 3) s3 = _red(gmul(s0,s3), &R);
-  if (dotime) {sgt[pk2]+=timer();ctsgt[pk2]++;}
+  if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;}
 
   ind = look_eta(pk, s3);
   if (ind == pk) return -1;
@@ -902,7 +902,7 @@ step4c(GEN N, ulong q)
   else
   {
     s3 = powmodulo(stoi(q), shifti(N,-1), N);
-    if (dotime) sgt[pk2]+=timer();
+    if (dotime) sgt[pk2]+=timer2();
     return is_m1(s3,N);
   }
 }
@@ -913,9 +913,9 @@ step4d(GEN N, ulong q)
 {
   GEN s1;
 
-  if (dotime) timer();
+  if (dotime) (void)timer2();
   s1 = powmodulo(negi(stoi(q)), shifti(N,-1), N);
-  if (dotime) {sgt[2]+=timer();ctsgt[2]++;}
+  if (dotime) {sgt[2]+=timer2();ctsgt[2]++;}
   if (gcmp1(s1)) return 0;
   if (is_m1(s1,N)) return (mod4(N) == 1);
   return -1;
@@ -960,7 +960,7 @@ step6(GEN N, ulong t, GEN et)
   ulong i;
   gpmem_t av;
 
-  if (dotime) timer();
+  if (dotime) (void)timer2();
   N1 = resii(N, et);
   r = gun; av = avma;
   for (i=1; i<t; i++)
@@ -974,7 +974,7 @@ step6(GEN N, ulong t, GEN et)
     }
     if ((i & 0x1f) == 0) r = gerepileuptoint(av, r);
   }
-  if (dotime) sgt6 = timer();
+  if (dotime) sgt6 = timer2();
   return gun;
 }
 
@@ -1018,7 +1018,7 @@ aprcl(GEN N)
       default: return _res(0,0);
     }
   ctglob = 0;
-  if (dotime) timer();
+  if (dotime) (void)timer2();
   t = compt(N);
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
   et = e(t);
@@ -1047,7 +1047,7 @@ aprcl(GEN N)
   calcjac(N, et);
   if (dotime)
   {
-    sgtjac = timer();
+    sgtjac = (void)timer2();
     fprintferr("Jacobi sums and tables computed\nq-values: ");
   }
   sgtaut = 0;

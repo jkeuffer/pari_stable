@@ -1954,7 +1954,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
   /* compute S,T differently if nf is quadratic */
   if (degpol(nf[1]) == 2) return QuadGetST(dataCR, vChar, prec);
 
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   /* allocate memory for answer */
   rep = cgetg(3, t_VEC);
   S = cgetg(cl+1, t_VEC); rep[1] = (long)S;
@@ -2848,7 +2848,7 @@ LABDOUB:
     polrel = gmul(polrel, gpowgs(polx[n], h));
     polrel = gsubst(polrel, n, polx[0]);
     polrel = gmul(polrel, leading_term(polrel));
-    delete_var();
+    (void)delete_var();
   }
 
   if (DEBUGLEVEL >= 2) fprintferr("polrel = %Z\n", polrel);
@@ -2880,7 +2880,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   void *catcherr = NULL;
 
   (void)&prec; /* prevent longjmp clobbering it */
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
 
   disable_dbg(0);
   /* quick computation of the class number */
@@ -2906,7 +2906,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
 
   /* if the exponent of the class group is 2, use rather Genus Field Theory */
   exp = gmael4(bnf, 8, 1, 2, 1);
-  if (gegal(exp, gdeux)) { delete_var(); return GenusField(bnf, prec); }
+  if (gegal(exp, gdeux)) { (void)delete_var(); return GenusField(bnf, prec); }
 
   { /* catch precision problems (precision too small) */
     jmp_buf env;
@@ -2934,7 +2934,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
 
   /* use the generic function AllStark */
   pol = AllStark(bnrh, nf, 2, newprec);
-  delete_var();
+  (void)delete_var();
   err_leave(&catcherr);
   return gerepileupto(av, makescind(bnf, pol, cl, prec));
 }
@@ -2993,7 +2993,7 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
   cl = itos(det(subgrp));
   if (cl == 1) return polx[0];
 
-  timer2();
+  if (DEBUGLEVEL) (void)timer2();
 
   /* find a suitable extension N */
   dataS = InitQuotient(bnr, subgrp);

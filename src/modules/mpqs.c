@@ -184,7 +184,7 @@ mpqs_sort_lp_file(char *filename)
     /* sort_table is allocated on the stack, 0x100 cells at a time. Hence the
      * stack must be left alone in the rest of the loop to keep the array
      * connected. In particular, buffers can't be new_chunk'ed --KB */
-    if ((i & 0xff) == 0) new_chunk(0x100);
+    if ((i & 0xff) == 0) (void)new_chunk(0x100);
     *sort_table = cur_line;
     cur_line += length;
 
@@ -3371,7 +3371,7 @@ mpqs(GEN N)
     }
     /* sort LPNEW and merge it into LPREL, diverting combinables into COMB */
     pari_fclose(pLPNEW);
-    mpqs_sort_lp_file(LPNEW_str);
+    (void)mpqs_sort_lp_file(LPNEW_str);
     tp = mpqs_mergesort_lp_file(LPREL_str, LPNEW_str, 0);
     pLPNEW = pari_fopen(LPNEW_str, WRITE); /* NOT safefopen */
     LPNEW = pLPNEW->file;
@@ -3413,7 +3413,7 @@ mpqs(GEN N)
 
     /* sort FNEW and merge it into FREL */
     pari_fclose(pFNEW);
-    mpqs_sort_lp_file(FNEW_str);
+    (void)mpqs_sort_lp_file(FNEW_str);
     total_full_relations = mpqs_mergesort_lp_file(FREL_str, FNEW_str, 1);
     /* this being the definitive count (combinables combined, and
        duplicates removed) */

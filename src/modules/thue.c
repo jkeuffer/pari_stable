@@ -98,7 +98,7 @@ inithue(GEN poly, long flag)
     uftot=bnfinit0(poly,1,NULL,Prec);
     if (uftot != checkbnf_discard(uftot))
       err(talker,"non-monic polynomial in thue");
-    if (flag) certifybuchall(uftot);
+    if (flag) (void)certifybuchall(uftot);
     s=itos(gmael3(uftot,7,2,1));
     t=itos(gmael3(uftot,7,2,2));
   }
