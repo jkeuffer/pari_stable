@@ -1507,7 +1507,7 @@ static void
 gp_head()
 {
   print_version(); pariputs("\n");
-  center("Copyright (C) 1989-1999 by");
+  center("Copyright (C) 1989-2000 by");
   center("C. Batut, K. Belabas, D. Bernardi, H. Cohen and M. Olivier.");
   pariputs("\n\
 Type ? for help, \\q to quit.\n\
