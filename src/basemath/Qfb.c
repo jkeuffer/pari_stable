@@ -1024,14 +1024,18 @@ primeform(GEN x, GEN p, long prec)
 GEN
 qfbimagsolvep(GEN Q, GEN p)
 {
+  GEN M, N, x,y, a,b,c, d;
   pari_sp av = avma;
-  GEN M, N, x,y, a,b,c, d = qf_disc(Q);
-  if (kronecker(d,p) < 0) return gen_0;
   if (gcmp1(gel(Q,1)) && !signe(gel(Q,2)))
   { /* principal form. Use faster cornacchia */
-    if (!cornacchia(negi(d), p, &M,&N)) { avma = av; return gen_0; }
+    c = gel(Q,3);
+    if (kronecker(negi(c), p) < 0) { avma = av; return gen_0; }
+    avma = av;
+    if (!cornacchia(c, p, &M,&N)) return gen_0;
     goto END;
   }
+  d = qf_disc(Q);
+  if (kronecker(d,p) < 0) return gen_0;
   a = redimagsl2(Q, &N);
   b = redimagsl2(primeform(d, p, 0), &M);
   if (!gequal(a, b)) return gen_0;
