@@ -454,7 +454,7 @@ GEN     zsigne(GEN nf,GEN alpha,GEN arch);
 
 GEN     element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     element_invmodpr(GEN nf, GEN y, GEN modpr);
-GEN     element_mulmodpr2(GEN nf, GEN x, GEN y, GEN modpr);
+GEN     element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     element_powmodpr(GEN nf, GEN x, GEN k, GEN modpr);
 GEN     element_reduce(GEN nf, GEN x, GEN ideal);
 GEN     ideal_two_elt(GEN nf, GEN ix);

@@ -2837,7 +2837,7 @@ nfsmith(GEN nf, GEN x)
 #define trivlift(x) ((typ(x)==t_POLMOD)? (GEN)x[2]: lift_intern(x))
 
 GEN
-element_mulmodpr2(GEN nf, GEN x, GEN y, GEN modpr)
+element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
   gpmem_t av=avma;
   GEN p1;
@@ -2881,7 +2881,9 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
   modpr = nf_to_ff_init(nf,&pr,&T,&p);
   z = nf_to_ff(nf,x,modpr);
   z = FpXQ_pow(z,k,T,p);
-  return gerepileupto(av, algtobasis(nf, ff_to_nf(z,modpr)));
+  z = ff_to_nf(z,modpr);
+  if (typ(z) != t_COL) z = algtobasis(nf, z);
+  return gerepilecopy(av, z);
 }
 
 GEN

@@ -2221,7 +2221,7 @@ entree functions_basic[]={
 {"nfeltdivrem",3,(void*)nfdivres,6,"GGG"},
 {"nfeltmod",3,(void*)nfmod,6,"GGG"},
 {"nfeltmul",3,(void*)element_mul,6,"GGG"},
-{"nfeltmulmodpr",4,(void*)element_mulmodpr2,6,"GGGG"},
+{"nfeltmulmodpr",4,(void*)element_mulmodpr,6,"GGGG"},
 {"nfeltpow",3,(void*)element_pow,6,"GGG"},
 {"nfeltpowmodpr",4,(void*)element_powmodpr,6,"GGGG"},
 {"nfeltreduce",3,(void*)element_reduce,6,"GGG"},

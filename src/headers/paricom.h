@@ -279,14 +279,8 @@ extern int new_galois_format;
 #define element_mulmodideal(nf,x,y,ideal) (\
   nfreducemodideal((nf),element_mul((nf),(x),(y)),(ideal))\
 )
-#define element_mulmodpr(nf,x,y,prhall) (\
-  nfreducemodpr((nf),element_mul((nf),(x),(y)),(prhall))\
-)
 #define element_sqrmodideal(nf,x,ideal) (\
   nfreducemodideal((nf),element_sqr((nf),(x)),(ideal))\
-)
-#define element_sqrmodpr(nf,x,prhall) (\
-  nfreducemodpr((nf),element_sqr((nf),(x)),(prhall))\
 )
 #define buchgen(P,gcbach,gcbach2,prec) (\
   buchall((P),(gcbach),(gcbach2),stoi(5),gzero,4,3,0,(prec))\
