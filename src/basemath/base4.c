@@ -1498,10 +1498,13 @@ idealmul(GEN nf, GEN x, GEN y)
           p1 = idealhermite_aux(nf, element_mul(nf,x,y));
           break;
         case id_PRIME:
-          p1 = eltmul_get_table(nf, x);
-          p1 = concatsp(gmul(p1,(GEN)y[1]), gmul(p1,(GEN)y[2]));
+        {
+          GEN mx = eltmul_get_table(nf, x);
+          GEN mpi= eltmul_get_table(nf, (GEN)y[2]);
+          p1 = concatsp(gmul(mx,(GEN)y[1]), gmul(mx,mpi));
           p1 = idealmat_to_hnf(nf, p1);
           break;
+        }
         default: /* id_MAT */
           p1 = idealmat_to_hnf(nf, gmul(eltmul_get_table(nf,x), y));
       }break;
