@@ -85,7 +85,9 @@ initially.
 The following routines are not part of the level 0 kernel per se, but
 implement modular operations on words in terms of the above. They are written
 so that no overflow may occur. Let $m \geq 1$ be the modulus; all operands
-representing classes modulo $m$ are assumed to belong to $[0,m-1[$.
+representing classes modulo $m$ are assumed to belong to $[0,m-1[$ (the
+result may be wrong for a number of reasons otherwise: it may not be reduced,
+overflow can occur, etc.).
 
 \fun{ulong}{adduumod}{ulong x, ulong y, ulong m} returns the smallest
 positive representative of $x + y$ modulo $m$.
@@ -96,11 +98,12 @@ positive representative of $x - y$ modulo $m$.
 \fun{ulong}{muluumod}{ulong x, ulong y, ulong m} returns the smallest positive
 representative of $x y$ modulo $m$.
 
-\fun{ulong}{divuumod}{ulong x, ulong y, ulong m} returns the smallest
-positive representative of $x y^{-1}$ modulo $m$.
-
 \fun{ulong}{invumod}{ulong x, ulong m} returns the smallest
 positive representative of $x^{-1}$ modulo $m$. If $x$ is not invertible
+mod $m$, return $0$.
+
+\fun{ulong}{divuumod}{ulong x, ulong y, ulong m} returns the smallest
+positive representative of $x y^{-1}$ modulo $m$. Ix $y$ is not invertible 
 mod $m$, return $0$.
 
 \fun{ulong}{powuumod}{ulong x, ulong n, ulong m} returns the smallest
