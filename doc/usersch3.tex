@@ -1284,12 +1284,12 @@ of the word~--- Euler's totient\sidx{Euler totient function} function, the
 \idx{Moebius} function, the sums over divisors or powers of divisors
 etc.--- call, after trial division by small primes, the same versatile
 factoring machinery described under \kbd{factorint}. It includes
-\idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and has an early exit
-option for the functions \teb{moebius} and (the integer function
-underlying) \teb{issquarefree}. Note that it relies on a (fairly strong)
-probabilistic primality test: numbers found to be strong pseudo-primes
-after 10 successful trials of the \idx{Rabin-Miller} test are declared
-primes.
+\idx{Shanks SQUFOF}, \idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and
+has an early exit option for the functions \teb{moebius} and (the integer
+function underlying) \teb{issquarefree}. Note that it relies on a (fairly
+strong) probabilistic primality test: numbers found to be strong
+pseudo-primes after 10 successful trials of the \idx{Rabin-Miller} test are
+declared primes.
 
 \bigskip
 \subsecidx{addprimes}$(\{x=[\,]\})$: adds the primes contained in the vector
@@ -1542,19 +1542,19 @@ $\teb{mpfactr}(x,\var{prec})$ for $\kbd{factorial}(x)$. $x$ must be a \kbd{long}
 integer and not a PARI integer.
 
 \subsecidx{factorint}$(n,\{\fl=0\})$: factors the integer n using a
-combination of the \idx{Pollard Rho} method (with modifications due to
-Brent), \idx{Lenstra}'s \idx{ECM} (with modifications by Montgomery),
-and \idx{MPQS} (the latter adapted from the \idx{LiDIA} code with the kind
-permission of the LiDIA
-maintainers), as well as a search for pure powers with exponents$\le 10$.
-The output is a two-column matrix as for \kbd{factor}.
+combination of the \idx{Shanks SQUFOF} and \idx{Pollard Rho} method (with
+modifications due to Brent), \idx{Lenstra}'s \idx{ECM} (with modifications by
+Montgomery), and \idx{MPQS} (the latter adapted from the \idx{LiDIA} code
+with the kind permission of the LiDIA maintainers), as well as a search for
+pure powers with exponents$\le 10$. The output is a two-column matrix as for
+\kbd{factor}.
 
 This gives direct access to the integer factoring engine called by most
 arithmetical functions. \fl\ is optional; its binary digits mean 1: avoid
 MPQS, 2: skip first stage ECM (we may still fall back to it later), 4: avoid
-Rho, 8: don't run final ECM (as a result, a huge composite may be declared
-to be prime). Note that a (strong) probabilistic primality test is used;
-thus composites might (very rarely) not be detected.
+Rho and SQUFOF, 8: don't run final ECM (as a result, a huge composite may be
+declared to be prime). Note that a (strong) probabilistic primality test is
+used; thus composites might (very rarely) not be detected.
 
 The machinery underlying this function is still in a somewhat experimental
 state, but should be much faster on average than pure ECM as used by all
