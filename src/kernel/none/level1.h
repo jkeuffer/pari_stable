@@ -44,6 +44,7 @@ void   dvmdssz(long x, long y, GEN z, GEN t);
 ulong  evallg(ulong x);
 ulong  evallgef(ulong x);
 ulong  evalvalp(ulong x);
+ulong  evalexpo(ulong x);
 #ifndef __M68K__
 long   expi(GEN x);
 #endif
@@ -102,6 +103,14 @@ evalvalp(ulong x)
 {
   const long v = m_evalvalp(x);
   if (v & ~VALPBITS) err(errvalp);
+  return v;
+}
+
+INLINE ulong
+evalexpo(ulong x)
+{
+  const long v = m_evalexpo(x);
+  if (v & ~EXPOBITS) err(errexpo);
   return v;
 }
 

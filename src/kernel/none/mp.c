@@ -8,6 +8,13 @@
 /* version (#ifdef __M68K__) since they are defined in mp.s   */
 #include "pari.h"
 
+/* NOTE: arguments of "spec" routines (muliispec, addiispec, etc.) aren't
+ * GENs but pairs (long *a, long na) representing a list of digits (in basis
+ * BITS_IN_LONG) : a[0], ..., a[na-1]. [ In ordre to facilitate splitting: no
+ * need to reintroduce codewords ]
+ * Use speci(a,na) to visualize the coresponding GEN.
+ */
+
 /* z2 := z1[imin..imax].f shifted left sh bits (feeding f from the right) */
 #define shift_left2(z2,z1,imin,imax,f, sh,m) {\
   register ulong _i,_l,_k = ((ulong)f)>>m;\
@@ -36,6 +43,7 @@
   register const ulong _m = BITS_IN_LONG - sh;\
   shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
 }
+
 
 #ifdef INLINE
 INLINE
@@ -574,7 +582,7 @@ addrr(GEN x, GEN y)
         if (i==1)
         {
           shift_right(z,z, 2,lz, 1,1);
-          ey=evalexpo(ey+1); if (ey & ~EXPOBITS) err(adder4);
+          ey=evalexpo(ey+1);
           z[1] = evalsigne(sx) | ey; return z;
         }
         z[i] = y[i]+1; if (z[i--]) break;
@@ -592,7 +600,6 @@ addrr(GEN x, GEN y)
     {
       avma = (long)(z+lz);
       e = evalexpo(ey - bit_accuracy(lx));
-      if (e & ~EXPOBITS) err(adder4);
       z=cgetr(3); z[1]=e; z[2]=0; return z;
     }
     f2 = ((ulong)y[i] > (ulong)x[i]);
@@ -619,7 +626,6 @@ addrr(GEN x, GEN y)
   x = z+2; i=0; while (!x[i]) i++;
   lz -= i; z += i; m = bfffo(z[2]);
   e = evalexpo(ey - (m | (i<<TWOPOTBITS_IN_LONG)));
-  if (e & ~EXPOBITS) err(adder5);
   if (m) shift_left(z,z,2,lz-1, 0,m);
   z[1] = evalsigne(sx) | e;
   z[0] = evaltyp(t_REAL) | evallg(lz);
@@ -736,7 +742,7 @@ mulsr(long x, GEN y)
 
   sh = bfffo(hiremainder); m = BITS_IN_LONG-sh;
   if (sh) shift_left2(z,z, 2,lx-1, garde,sh,m);
-  e = evalexpo(m+e); if (e & ~EXPOBITS) err(muler2);
+  e = evalexpo(m+e);
   z[1] = evalsigne(s) | e; return z;
 }
 
@@ -750,7 +756,7 @@ mulrr(GEN x, GEN y)
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  e = evalexpo(expo(x)+expo(y)); if (e & ~EXPOBITS) err(muler4);
+  e = evalexpo(expo(x)+expo(y));
   if (!sx || !sy) { z=cgetr(3); z[1]=e; z[2]=0; return z; }
   if (sy<0) sx = -sx;
   lz=lg(x); ly=lg(y);
@@ -824,7 +830,6 @@ mulir(GEN x, GEN y)
   if (!sy)
   {
     e = evalexpo(expi(x)+ey);
-    if (e & ~EXPOBITS) err(muler6);
     z=cgetr(3); z[1]=e; z[2]=0; return z;
   }
 
@@ -833,7 +838,6 @@ mulir(GEN x, GEN y)
   y1=cgetr(lz+1);
   affir(x,y1); x=y; y=y1;
   e = evalexpo(expo(y)+ey);
-  if (e & ~EXPOBITS) err(muler4);
   z[1] = evalsigne(sx) | e;
   if (lz==3)
   {
@@ -1156,7 +1160,6 @@ divrs(GEN x, long y)
 
   /* we may have hiremainder != 0 ==> garde */
   garde=divll(0,y); sh=bfffo(z[2]); ex=evalexpo(expo(x)-sh);
-  if (ex & ~EXPOBITS) err(diver7);
   if (sh) shift_left(z,z, 2,lx-1, garde,sh);
   z[1] = evalsigne(s) | ex;
   return z;
@@ -1171,7 +1174,6 @@ divrr(GEN x, GEN y)
 
   if (!sy) err(diver9);
   e = evalexpo(expo(x) - expo(y));
-  if (e & ~EXPOBITS) err(diver11);
   if (!sx) { z=cgetr(3); z[1]=e; z[2]=0; return z; }
   if (sy<0) sx = -sx;
   e = evalsigne(sx) | e;
@@ -1853,15 +1855,15 @@ absr_cmp(GEN x, GEN y)
 /**               INTEGER MULTIPLICATION (KARATSUBA)               **/
 /**                                                                **/
 /********************************************************************/
+#define _sqri_l 47
+#define _muli_l 25 /* optimal on PII 350MHz + gcc 2.7.2.1 (gp-dyn) */
 
 #if 0 /* for tunings */
-long SQRI_LIMIT = 12;
-long MULII_LIMIT = 16;
+long KARATSUBA_SQRI_LIMIT = _sqri_l;
+long KARATSUBA_MULI_LIMIT = _muli_l;
 
-void
-setsqi(long a) { SQRI_LIMIT=a; }
-void
-setmuli(long a) { MULII_LIMIT=a; }
+void setsqri(long a) { KARATSUBA_SQRI_LIMIT = a; }
+void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
 
 GEN
 speci(GEN x, long nx)
@@ -1869,12 +1871,12 @@ speci(GEN x, long nx)
   GEN z = cgeti(nx+2);
   long i;
   for (i=0; i<nx; i++) z[i+2] = x[i];
-  z[1]=evalsigne(1)|evallgefint(nx+2);
+  z[1] = evalsigne(1)|evallgefint(nx+2);
   return z;
 }
 #else
-#  define SQRI_LIMIT 12
-#  define MULII_LIMIT 16
+#  define KARATSUBA_SQRI_LIMIT _sqri_l
+#  define KARATSUBA_MULI_LIMIT _muli_l
 #endif
 
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
@@ -1919,6 +1921,70 @@ muliispec(GEN x, GEN y, long nx, long ny)
   avma=(long)zd; return zd;
 }
 
+#ifdef INLINE
+INLINE
+#endif
+GEN
+sqrispec(GEN x, long nx)
+{
+  GEN z2e,z2d,yd,xd,zd,x0,z0;
+  long p1,lz;
+  LOCAL_HIREMAINDER;
+
+  if (!nx) return gzero;
+  zd = (GEN)avma; lz = (nx+1) << 1;
+  z0 = new_chunk(lz);
+  if (nx == 1)
+  {
+    *--zd = mulll(*x, *x);
+    *--zd = hiremainder; goto END;
+  }
+  xd = x + nx;
+  
+  /* compute double products --> zd */
+  p1 = *--xd; yd = xd; --zd;
+  *--zd = mulll(p1, *--yd); z2e = zd;
+  while (yd > x) *--zd = addmul(p1, *--yd);
+  *--zd = hiremainder;
+
+  x0 = x+1;
+  while (xd > x0)
+  {
+    LOCAL_OVERFLOW;
+    p1 = *--xd; yd = xd;
+
+    z2e -= 2; z2d = z2e;
+    *z2d = addll(mulll(p1, *--yd), *z2d); z2d--;
+    while (yd > x)
+    {
+      hiremainder += overflow;
+      *z2d = addll(addmul(p1, *--yd), *z2d); z2d--;
+    }
+    *--zd = hiremainder + overflow;
+  }
+  /* multiply zd by 2 (put result in zd - 1) */
+  zd[-1] = ((*zd & HIGHBIT) != 0);
+  shift_left(zd, zd, 0, (nx<<1)-3, 0, 1);
+
+  /* add the squares */
+  xd = x + nx; zd = z0 + lz;
+  p1 = *--xd;
+  *--zd = mulll(p1,p1);
+  *--zd = addll(hiremainder, *zd);
+  while (xd > x)
+  {
+    p1 = *--xd;
+    *--zd = addll(mulll(p1,p1)+ overflow, *zd);
+    *--zd = addll(hiremainder + overflow, *zd);
+  }
+
+END:
+  if (*zd == 0) { zd++; lz--; } /* normalize */
+  *--zd = evalsigne(1) | evallgefint(lz);
+  *--zd = evaltyp(t_INT) | evallg(lz);
+  avma=(long)zd; return zd;
+}
+
 /* return (x shifted left d words) + y. Assume d > 0, x > 0 and y >= 0 */
 static GEN
 addshiftw(GEN x, GEN y, long d)
@@ -1948,8 +2014,7 @@ addshiftw(GEN x, GEN y, long d)
   z[0] = evaltyp(t_INT) | evallg(lz); return z;
 }
 
-/* Fast product (Karatsuba) of integers a,b. These are not real GENs, a+2
- * and b+2 were sent instead. na, nb = number of digits of a, b.
+/* Fast product (Karatsuba) of integers. a and b are "special" GENs
  * c,c0,c1,c2 are genuine GENs.
  */
 static GEN
@@ -1961,7 +2026,7 @@ quickmulii(GEN a, GEN b, long na, long nb)
   if (na < nb) swapspec(a,b, na,nb);
   if (nb == 1) return mulsispec(*b, a, na);
   if (nb == 0) return gzero;
-  if (nb < MULII_LIMIT) return muliispec(a,b,na,nb);
+  if (nb < KARATSUBA_MULI_LIMIT) return muliispec(a,b,na,nb);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (!*a0 && n0a) { a0++; n0a--; }
@@ -2021,7 +2086,7 @@ quicksqri(GEN a, long na)
   GEN a0,c,c0,c1;
   long av,n0,n0a,i;
 
-  if (na<SQRI_LIMIT) return muliispec(a,a,na,na);
+  if (na < KARATSUBA_SQRI_LIMIT) return sqrispec(a,na);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+na; n0a=n0;
   while (!*a0 && n0a) { a0++; n0a--; }
@@ -2029,7 +2094,14 @@ quicksqri(GEN a, long na)
   if (n0a)
   {
     c0 = quicksqri(a0,n0a);
+#if 0
     c1 = shifti(quickmulii(a0,a, n0a,na),1);
+#else /* slower !!! */
+    a = addiispec(a0,a,n0a,na);
+    a = quicksqri(a+2,lgefint(a)-2);
+    c1= addiispec(c0+2,c+2, lgefint(c0)-2, lgefint(c)-2);
+    c1= subiispec(a+2, c1+2, lgefint(a)-2, lgefint(c1)-2);
+#endif
     c = addshiftw(c,c1, n0);
     c = addshiftw(c,c0, n0);
   }
@@ -2057,7 +2129,7 @@ karamulrr1(GEN x, GEN y)
   if (lx>ly) { lx=ly; z=x; x=y; y=z; flag=1; } else flag = (lx!=ly);
   if (lx < MULRR_LIMIT) return mulrr(x,y);
   sx=signe(x); sy=signe(y);
-  e = evalexpo(expo(x)+expo(y)); if (e & ~EXPOBITS) err(muler4);
+  e = evalexpo(expo(x)+expo(y));
   if (!sx || !sy) { z=cgetr(3); z[2]=0; z[1]=e; return z; }
   if (sy<0) sx = -sx;
   ly=lx+flag; z=cgetr(lx);
@@ -2104,7 +2176,7 @@ karamulrr2(GEN x, GEN y)
   if (lx>ly) { lx=ly; z=x; x=y; y=z; flag=1; } else flag = (lx!=ly);
   if (lx < MULRR2_LIMIT) return mulrr(x,y);
   ly=lx+flag; sx=signe(x); sy=signe(y);
-  e = evalexpo(expo(x)+expo(y)); if (e & ~EXPOBITS) err(muler4);
+  e = evalexpo(expo(x)+expo(y));
   if (!sx || !sy) { z=cgetr(3); z[2]=0; z[1]=e; return z; }
   if (sy<0) sx = -sx;
   z=cgetr(lx);
