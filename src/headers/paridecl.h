@@ -1251,6 +1251,7 @@ GEN     small_to_mat(GEN z);
 GEN     small_to_pol(GEN z, long v);
 GEN     small_to_vec(GEN z);
 GEN     pol_to_small(GEN x);
+ulong   powuumod(ulong x, ulong n0, ulong p);
 GEN     rescale_pol(GEN P, GEN h);
 GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(long m, long p, long v);
@@ -1264,6 +1265,7 @@ int     u_FpX_is_squarefree(GEN z, ulong p);
 GEN     u_FpX_normalize(GEN z, ulong p);
 GEN     u_FpX_sub(GEN x, GEN y, ulong p);
 GEN     u_FpX_gcd(GEN a, GEN b, ulong p);
+ulong   u_invmod(ulong x, ulong p);
 
 /* rootpol.c */
 

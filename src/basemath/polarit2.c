@@ -2144,6 +2144,20 @@ gaussian_gcd(GEN x, GEN y)
   setsigne(z[2],1);\
 }
 
+#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC)
+int
+isrational(GEN x)
+{
+  long i, t = typ(x);
+  if (t != t_POL) return is_rational_t(t);
+  for (i=lgef(x)-1; i>1; i--)
+  {
+    t = typ(x[i]);
+    if (!is_rational_t(t)) return 0;
+  }
+  return 1;
+}
+
 static int
 cx_isrational(GEN x)
 { 
@@ -2473,20 +2487,6 @@ issimplefield(GEN x)
       return issimplefield((GEN)x[1]) || issimplefield((GEN)x[2]);
   }
   return 0;
-}
-
-#define is_rational_t(t) ((t)==t_INT || (t)==t_FRAC)
-int
-isrational(GEN x)
-{
-  long i, t = typ(x);
-  if (t != t_POL) return is_rational_t(t);
-  for (i=lgef(x)-1; i>1; i--)
-  {
-    t = typ(x[i]);
-    if (!is_rational_t(t)) return 0;
-  }
-  return 1;
 }
 
 static int

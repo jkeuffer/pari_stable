@@ -2233,7 +2233,7 @@ from_Kronecker(GEN z, GEN pol)
 /*                          MODULAR GCD                            */
 /*                                                                 */
 /*******************************************************************/
-ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
+extern ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 /* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
 ulong
 u_invmod(ulong x, ulong p)
