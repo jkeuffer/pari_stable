@@ -67,10 +67,10 @@ setdir::
 	mkdir \$\$dir; mv $tarfile \$\$dir; \\
 	cd \$\$dir; tar xf $tarfile; \$(RM) $tarfile; cd ..; \\
 	tar cf $tarfile \$\$dir; \\
-	rm -r \$\$dir
+	\$(RM) -r \$\$dir
 
 tar:
-	rm -f $ztarfile
+	\$(RM) $ztarfile
 	$tar cf $tarfile $tarinc
 
 distrib: tar setdir
