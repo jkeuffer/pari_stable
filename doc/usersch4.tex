@@ -2217,6 +2217,7 @@ do not use the resulting \kbd{long}\cr
 \noindent $\bullet$ Return type: \kbd{GEN} by default, otherwise the
 following can appear at the start of the code string:
 %
+\+& \kbd{i} & return \kbd{int}\cr
 \+& \kbd{l} & return \kbd{long}\cr
 \+& \kbd{v} & return \kbd{void}\cr
 
@@ -2241,6 +2242,7 @@ GEN name(GEN x, GEN y, long prec)   ----> "GGp"
 void name(GEN x, GEN y, long prec)  ----> "vGGp"
 void name(GEN x, long y, long prec) ----> "vGLp"
 long name(GEN x)                    ----> "lG"
+int name(long x)                    ----> "iL"
 @eprog
 
 If you want more examples, GP gives you easy access to the parser codes
