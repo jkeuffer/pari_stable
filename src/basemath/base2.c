@@ -1660,14 +1660,15 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       eq = (long)(L / E);
       er = (long)(L*Ea / E - eq*Ea);
       if (DEBUGLEVEL>4) fprintferr("  (eq,er) = (%ld,%ld)\n", eq,er);
-      gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
       if (er || !chib)
-        /* reducing modulo pdr is too much in some cases.
-           gamm might not be an integer ==> chig = NULL */
+      { /* gamm might not be an integer ==> chig = NULL */
+        gamm = get_gamma(S, beta, eq, er); /* = beta p^-eq  nu^-er (a unit) */
         chig = mycaract(S->chi, gamm, S->p, S->pmr, -1, ns);
+      }
       else
-      {
+      { /* gamm = beta/p^eq, special case of the above */
         GEN h = gpowgs(S->p, eq);
+        gamm = gdiv(beta, h);
         chig = gdiv(unscale_pol(chib, h), gpowgs(h, N));
         chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
       }
