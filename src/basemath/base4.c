@@ -1653,7 +1653,8 @@ idealmul(GEN nf, GEN x, GEN y)
 GEN
 idealnorm(GEN nf, GEN x)
 {
-  pari_sp av = avma,tetpil;
+  pari_sp av = avma;
+  long tx;
   GEN y;
 
   nf = checknf(nf);
@@ -1667,7 +1668,10 @@ idealnorm(GEN nf, GEN x)
       if (lg(x) != lgef(nf[1])-2) x = idealhermite_aux(nf,x);
       x = dethnf(x);
   }
-  tetpil=avma; return gerepile(av,tetpil,gabs(x,0));
+  tx = typ(x);
+  if (tx == t_INT) return gerepileuptoint(av, absi(x));
+  if (tx != t_FRAC) err(typeer, "idealnorm");
+  return gerepileupto(av, gabs(x,0));
 }
 
 /* inverse */
