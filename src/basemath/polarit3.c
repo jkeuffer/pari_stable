@@ -3356,7 +3356,7 @@ muliimod(GEN x, GEN y, GEN p)
 
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
 
-/* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab+a+r), with R=A%B, a=deg(A) ...*/
+/* Res(A,B) = Res(B,R) * lc(B)^(a-r) * (-1)^(ab), with R=A%B, a=deg(A) ...*/
 GEN
 FpX_resultant(GEN a, GEN b, GEN p)
 {
