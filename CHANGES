@@ -42,6 +42,7 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
     5- (a.x = [a]); "a".x ---> [a]  \\ should be ["a"]
     6- (a.x = [a]); print("a".x) ---> a0.E-28x  \\ should be ["a"]
     7- (a.x = [a]); 1.x ---> error \\ should be [1]
+    8- wrong rnfidealnorm[rel | abs] (wrong result if O_L not free O_K-module)
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
