@@ -1458,7 +1458,6 @@ nfnewprec(GEN nf, long prec)
   basden = get_bas_den((GEN)nf[7]);
   mat[1]=(long)make_M(basden,ro);
   mat[2]=(long)make_Cholevsky_T2((GEN)mat[1], r1, prec);
-  mat[3]=zero; /* FIXME: useless */
   return gerepilecopy(av, y);
 }
 
