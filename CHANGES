@@ -51,6 +51,8 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
     5- erfc(non scalar) --> type error
     6- raising to t_FRAC power didn't work with p-adics: (-1+O(5))^(1/2) --> 1
     7- [ isprime / APRCL: ] integer overflow, e.g isprime(2^32 + 1, 2)
+    8- sum(i=2^32-10,2^32+10,1) --> 11  [ kind of overflow ] + didn't use the 
+       t_INT interface ==> broken with GMP kernel
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

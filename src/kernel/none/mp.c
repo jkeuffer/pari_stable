@@ -86,6 +86,63 @@ egalii(GEN x, GEN y)
 /**                                                                   **/
 /***********************************************************************/
 
+GEN
+setloop(GEN a)
+{
+  a = icopy(a); (void)new_chunk(2); /* dummy to get two cells of extra space */
+  return a;
+}
+
+/* assume a > 0, initialized by setloop. Do a++ */
+GEN
+incpos(GEN a)
+{
+  long i, l = lgefint(a);
+  for (i=l-1; i>1; i--)
+    if (++a[i]) return a;
+  l++; a--; /* use extra cell */
+  a[0]=evaltyp(t_INT) | _evallg(l);
+  a[1]=evalsigne(1) | evallgefint(l);
+  a[2]=1; return a;
+}
+
+/* assume a < 0, initialized by setloop. Do a++ */
+GEN
+incneg(GEN a)
+{
+  long l = lgefint(a)-1;
+  if (a[l]--)
+  {
+    if (l == 2 && !a[2])
+    {
+      a[0] = evaltyp(t_INT) | _evallg(2);
+      a[1] = evalsigne(0) | evallgefint(2);
+    }
+    return a;
+  }
+  for (l--; l>1; l--)
+    if (a[l]--) break;
+  l++; a++; /* save one cell */
+  a[0] = evaltyp(t_INT) | _evallg(l);
+  a[1] = evalsigne(-1) | evallgefint(l);
+  return a;
+}
+
+/* assume a initialized by setloop. Do a++ */
+GEN
+incloop(GEN a)
+{
+  switch(signe(a))
+  {
+    case 0: a--; /* use extra cell */
+      a[0]=evaltyp(t_INT) | _evallg(3);
+      a[1]=evalsigne(1) | evallgefint(3);
+      a[2]=1; return a;
+    case -1: return incneg(a);
+    default: return incpos(a);
+  }
+}
+
 INLINE GEN
 addsispec(long s, GEN x, long nx)
 {

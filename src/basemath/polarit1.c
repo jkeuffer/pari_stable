@@ -27,58 +27,6 @@ extern GEN pol_to_monic(GEN pol, GEN *lead);
 #define lswap(x,y) { long _t=x; x=y; y=_t; }
 #define swap(x,y) { GEN _t=x; x=y; y=_t; }
 
-/* see splitgen() for how to use these two */
-GEN
-setloop(GEN a)
-{
-  a=icopy(a); (void)new_chunk(2); /* dummy to get two cells of extra space */
-  return a;
-}
-
-/* assume a > 0 */
-GEN
-incpos(GEN a)
-{
-  long i,l=lgefint(a);
-
-  for (i=l-1; i>1; i--)
-    if (++a[i]) return a;
-  i=l+1; a--; /* use extra cell */
-  a[0]=evaltyp(1) | evallg(i);
-  a[1]=evalsigne(1) | evallgefint(i);
-  return a;
-}
-
-GEN
-incloop(GEN a)
-{
-  long i,l;
-
-  switch(signe(a))
-  {
-    case 0:
-      a--; /* use extra cell */
-      a[0]=evaltyp(t_INT) | evallg(3);
-      a[1]=evalsigne(1) | evallgefint(3);
-      a[2]=1; return a;
-
-    case -1:
-      l=lgefint(a);
-      for (i=l-1; i>1; i--)
-        if (a[i]--) break;
-      if (a[2] == 0)
-      {
-        a++; /* save one cell */
-        a[0] = evaltyp(t_INT) | evallg(2);
-        a[1] = evalsigne(0) | evallgefint(2);
-      }
-      return a;
-
-    default:
-      return incpos(a);
-  }
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                           DIVISIBILITE                          */
