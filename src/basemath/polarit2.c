@@ -153,16 +153,25 @@ sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
 }
 
 GEN
-sort_vecpol(GEN a)
+sort_vecpol_gen(GEN a)
 {
   long n, i;
   pari_sp av = avma;
   GEN A,w;
   n = lg(a); A = new_chunk(n);
-  w = gen_sort(a, cmp_IND | cmp_C, cmp_pol);
+  w = gen_sort(a, cmp_IND | cmp_C, &polcmp);
   for (i=1; i<n; i++) A[i] = a[w[i]];
   for (i=1; i<n; i++) a[i] = A[i];
   avma = av; return a;
+}
+
+GEN
+sort_vecpol(GEN y, int (*cmp)(GEN,GEN))
+{
+  int (*old)(GEN,GEN) = polcmp_coeff_cmp;
+  polcmp_coeff_cmp = cmp;
+  (void)sort_vecpol_gen(y);
+  polcmp_coeff_cmp = old; return y;
 }
 
 /* centered residue x mod p. po2 = shifti(p, -1) or NULL (euclidean residue) */

@@ -1289,7 +1289,7 @@ GEN     resultantducos(GEN x, GEN y);
 GEN     roots_from_deg1(GEN x);
 GEN     sort_factor(GEN y, int (*cmp)(GEN,GEN));
 GEN     sort_factor_gen(GEN y, int (*cmp)(GEN,GEN));
-GEN     sort_vecpol(GEN a);
+GEN     sort_vecpol(GEN a, int (*cmp)(GEN,GEN));
 GEN     srgcd(GEN x, GEN y);
 long    sturmpart(GEN x, GEN a, GEN b);
 GEN     subresall(GEN u, GEN v, GEN *sol);

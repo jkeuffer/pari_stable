@@ -1556,7 +1556,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       d = FpX_split_berlekamp((GEN*)(rep + 1), L.p);
       setlg(rep, d + 1);
     }
-    T.fact  = gerepilecopy(av2, sort_vecpol(rep));
+    T.fact  = gerepilecopy(av2, sort_vecpol(rep, &cmp_pol));
   }
   if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Z", pr);
   T.pr = pr;

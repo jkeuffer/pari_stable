@@ -3352,7 +3352,7 @@ polcompositum0(GEN A, GEN B, long flall)
   if (same) { D = rescale_pol(A, stoi(1 - k)); C = gdivexact(C, D); }
   C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
   if (same) C = concatsp(C, D);
-  C = sort_vecpol(C);
+  C = sort_vecpol(C, &cmpii);
   if (flall)
   {
     long i,l = lg(C);
