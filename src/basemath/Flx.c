@@ -14,6 +14,8 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
+GEN muliispec(GEN x, GEN y, long nx, long ny);
+GEN sqrispec(GEN x, long nx);
 
 /* Not so fast arithmetic with polynomials with small coefficients. */
 
@@ -210,15 +212,25 @@ Flx_renormalize(GEN /*in place*/ x, long lx)
   return x;
 }
 
+/*Do not renormalize. Must not use z[0],z[1]*/
+static GEN
+Flx_red_lg_i(GEN z, long l, ulong p)
+{
+  long i;
+  ulong *y=(ulong *)z;
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=2; i<l; i++)
+    x[i] = (long) y[i]%p;
+  return x; 
+}
+
 GEN
 Flx_red(GEN z, ulong p)
 {
-  long i,l;
-  GEN x;
-  l = lg(z); x = cgetg(l, t_VECSMALL);
-  for (i=2; i<l; i++)
-    x[i] = z[i]%p;
-  x[1] = z[1]; return Flx_renormalize(x,l);
+  long l = lg(z);
+  GEN x = Flx_red_lg_i(z,l,p); 
+  x[1] = z[1]; 
+  return Flx_renormalize(x,l);
 }
 
 GEN
@@ -356,6 +368,18 @@ Flx_shiftip(pari_sp av, GEN x, long v)
   return y;
 }
 
+INLINE long
+maxlenghtcoeffpol (ulong p, long n)
+{
+  pari_sp ltop=avma;
+  long l;
+  GEN z=muluu(p-1,p-1);
+  z=mulis(z,n);
+  l=lgefint(z)-2;
+  avma=ltop;
+  return l;
+}
+
 INLINE ulong
 Flx_mullimb_ok(GEN x, GEN y, ulong p, long a, long b)
 { /* Assume OK_ULONG*/
@@ -382,7 +406,7 @@ Flx_mullimb(GEN x, GEN y, ulong p, long a, long b)
 }
 
 /* assume nx >= ny > 0 */
-GEN
+static GEN
 Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
 {
   long i,lz,nz;
@@ -405,6 +429,13 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
   z -= 2; return Flx_renormalize(z, lz);
 }
 
+INLINE GEN
+Flx_mulspec_mulii(GEN a, GEN b, ulong p, long na, long nb)
+{
+  GEN z=muliispec(a,b,na,nb);
+  return Flx_red_lg_i(z,lgefint(z),p);
+}
+
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
@@ -422,6 +453,8 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
   if (!nb) return Flx_zero(0);
 
   av = avma;
+  if (na>30 && maxlenghtcoeffpol(p,nb)==1)
+    return Flx_shiftip(av,Flx_mulspec_mulii(a,b,p,na,nb), v);
   if (nb < Flx_MUL_LIMIT)
     return Flx_shiftip(av,Flx_mulspec_basecase(a,b,p,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
@@ -464,7 +497,7 @@ Flx_mul(GEN x, GEN y, ulong p)
  z[1] = x[1]; return z;
 }
 
-GEN
+static GEN
 Flx_sqrspec_basecase(GEN x, ulong p, long nx)
 {
   long i, lz, nz;
@@ -479,14 +512,14 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
     for (i=0; i<nx; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,0, (i+1)>>1);
-      p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
+      p1 <<= 1; 
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
       z[i] = (long) (p1 % p);
     }
     for (  ; i<nz; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,i-nx+1, (i+1)>>1);
-      p1 <<= 1; if (p1 & HIGHBIT) p1 %= p;
+      p1 <<= 1; 
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
       z[i] = (long) (p1 % p);
     }
@@ -520,6 +553,13 @@ Flx_2_mul(GEN x, ulong p)
   z[1] = x[1]; return z;
 }
 
+static GEN
+Flx_sqrspec_sqri(GEN a, ulong p, long na)
+{
+  GEN z=sqrispec(a,na);
+  return Flx_red_lg_i(z,lgefint(z),p);
+}
+
 GEN
 Flx_sqrspec(GEN a, ulong p, long na)
 {
@@ -529,6 +569,8 @@ Flx_sqrspec(GEN a, ulong p, long na)
 
   while (na && !a[0]) { a++; na--; v += 2; }
   av = avma;
+  if (na > 30 && maxlenghtcoeffpol(p,na)==1)
+    return Flx_shiftip(av, Flx_sqrspec_sqri(a,p,na), v);
   if (na < Flx_SQR_LIMIT) 
     return Flx_shiftip(av, Flx_sqrspec_basecase(a,p,na), v);
   i=(na>>1); n0=na-i; na=i;
