@@ -386,8 +386,8 @@ parse_bound(subgp_iter *T)
     T->bound = b;
     break;
   case t_COL: /* exact type */
-    if (lg(B) > len(T->L)+1) err(typeer,"subgroup");
     err(impl,"exact type in subgrouplist");
+    if (lg(B) > len(T->L)+1) err(typeer,"subgroup");
     T->boundtype = b_TYPE;
     break;
   default: err(typeer,"subgroup");
@@ -442,9 +442,16 @@ subgroup_engine(subgp_iter *T)
   for (i=1; i<n-1; i++)
     if (!dvdii((GEN)cyc[i], (GEN)cyc[i+1]))
       err(talker,"not a group in forsubgroup");
-  if (n == 1) { T->fun(T, cyc); return; }
-  if (!signe(cyc[1]))
-    err(talker,"infinite group in forsubgroup");
+  if (n == 1) {
+    parse_bound(T);
+    switch(T->boundtype)
+    {
+      case b_EXACT: break;
+      default: T->fun(T, cyc);
+    }
+    return;
+  }
+  if (!signe(cyc[1])) err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) (void)timer2();
   fa = factor((GEN)cyc[1]); primlist = (GEN)fa[1];
   nbprim = lg(primlist);
