@@ -12,7 +12,6 @@ GEN initalgall0(GEN x, long flag, long prec);
 #define nf_ORIG         1
 
 /* for initalgall0 */
-#define nf_DIFFERENT   16
 #define nf_REGULAR      0 /* for both */
 
 /* for isprincipal */

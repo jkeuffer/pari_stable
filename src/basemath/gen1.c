@@ -1300,7 +1300,16 @@ gmul(GEN x, GEN y)
       {
 	case t_POL:
         {
-          GEN a = x,b = y, p = NULL, pol = NULL;
+#if 0
+/* Too dangerous / cumbersome to correct here. Don't use t_POLMODS of 
+ * t_INTMODs to represent elements of finite fields. Implement a finite
+ * field type instead and compute with polynomials with integer coeffs in
+ * Kronecker form...
+ * For gsqr, it's still idiotic to let ff_poltype correct bad implementations,
+ * but less dangerous.
+ */
+          GEN a = x,b = y
+          GEN p = NULL, pol = NULL;
           long av = avma;
           if (ff_poltype(&x,&p,&pol) && ff_poltype(&y,&p,&pol))
           {
@@ -1317,6 +1326,9 @@ gmul(GEN x, GEN y)
             avma = av;
             z = quickmul(a+2, b+2, lgef(a)-2, lgef(b)-2);
           }
+#else
+          z = quickmul(x+2, y+2, lgef(x)-2, lgef(y)-2);
+#endif
           setvarn(z,vx); return z;
         }
 	case t_SER:
@@ -1952,7 +1964,8 @@ gdiv(GEN x, GEN y)
               if (p2[l])
                 p1 = gadd(p1, gmul((GEN)z[j], (GEN)p2[l]));
             }
-	    tetpil=avma; z[i]=lpile(av,tetpil, gdiv(p1,y_lead));
+            p1 = gdiv(p1, y_lead);
+	    tetpil=avma; z[i]=lpile(av,tetpil, forcecopy(p1));
 	  }
           for (i=3; i<lx; i++)
             if (p2[i]) gunclone((GEN)p2[i]);

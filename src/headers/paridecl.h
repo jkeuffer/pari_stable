@@ -251,7 +251,6 @@ GEN     checknf(GEN nf);
 void    checkprhall(GEN prhall);
 void    checkprimeid(GEN bid);
 void    checkrnf(GEN rnf);
-GEN     differente(GEN nf, GEN premiers);
 GEN     galois(GEN x, long prec);
 GEN     galoisapply(GEN nf, GEN aut, GEN x);
 GEN     get_bnf(GEN x,int *t);

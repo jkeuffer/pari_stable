@@ -98,6 +98,22 @@ IZ 61- updated gnuplot support
    65- lngamma(-0.106) --> SEGV
    66- quadray(-11,3) --> x^2
 XR 67- typo in nilord2 (wrong value for modular reduction)
+   68- unsafe division t_SER / t_SER with clonable components
+   69- polroots(1E-28*I*x^2+1) --> bug in roots (conjugates)
+   70- typo in cxlngamma [ lngamma(-7.4927-0.418564*I) --> SEGV ]
+   71- polroots(polynomial of very small Norm wrt prec) behaved badly (SEGV)
+   72- polylog(1, Mod(1,2)) --> SEGV
+   73- zeta(22!/23) --> SEGV
+   74- not enough GC in rnformax
+   75- over-reactive 'secure' default (+ moved it later in default .gprc)
+   76- sqrt(Mod(15,y^2+1) + O(x^5)) --> SEGV
+BA 77- typo in isinexactfield
+   78- sum(x=1,10, expr1; seq) : seq silently ignored
+   79- ellan and elltaniyama didn't check their arguments
+   80- simplify(t_POLMOD) could create invalid objects (mod not a t_POL)
+   81- primes(-1) --> SEGV
+   82- addprimes(0) wasn't rejected
+   83- various inconsistant error bessages (e.g. factor("a"))
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -108,6 +124,7 @@ HC  4- optional argument to direuler (length of result)
     5- low-level kernel function for integer squarings (twice faster)
     6- error trapping in library mode and under GP
     7- break loop to investigate errors under GP
+    8- "sprintf-rounding" under GP
 
   Changed
     1- default binary produced by Configure -g is now static
@@ -115,6 +132,7 @@ HC  4- optional argument to direuler (length of result)
 HC  3- extend the range of direuler (maxp was 2^16)
     4- trial divide by the "private primes" before the primality tests
     5- don't double stack automatically
+    6- disable ff_poltype correction (for lack of decent finite fields) in gmul
 
   Removed
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)

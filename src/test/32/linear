@@ -11,7 +11,7 @@ z^3 + 7*z^2 + 16*z - 19
 ? charpoly([1,2;3,4],z,1)
 z^2 - 5*z - 2
 ? charpoly(Mod(1,8191)*[1,2;3,4],z,2)
-Mod(1, 8191)*z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
+z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
 ? lindep(Mod(1,7)*[2,-1;1,3],-1)
 [Mod(6, 7), Mod(5, 7)]~
 ? lindep([(1-3*sqrt(2))/(3-2*sqrt(3)),1,sqrt(2),sqrt(3),sqrt(6)])
@@ -777,7 +777,7 @@ Mod(1, 8191)*z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
 [[4, 13, 3, 17, 14]~ [14, 16, 11, 5, 4]~ [9, 11, 13, 7, 15]~]
 
 ? getheap
-[111, 12382]
+[111, 12376]
 ? print("Total time spent: ",gettime);
-Total time spent: 304
+Total time spent: 120
 ? \q
