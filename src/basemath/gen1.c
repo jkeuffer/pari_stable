@@ -903,13 +903,19 @@ mulscalrfrac(GEN x, GEN y)
   d = (GEN)y[2];
   vx = gvar(x);
   vn = gvar(n);
-  vd = gvar(d); /* vd <= vn */
+  vd = gvar(d);
   z = cgetg(3, t_RFRAC);
-  if (vx > vd) { cx = x; x = gun; }
+  if (vx > min(vd,vn)) { cx = x; x = gun; }
   else
   {
+    long td;
     p1 = ggcd(x,d); if (isnonscalar(p1)) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
-    if (lgef(d) == 3) return gerepileupto(av, gdiv(gmul(x,n), (GEN)d[2]));
+    td = typ(d);
+    if (is_scalar_t(td) || (td == t_POL && lgef(d) == 3))
+    {
+      if (td == t_POL)d = constant_term(d);
+      return gerepileupto(av, gdiv(gmul(x,n), d));
+    }
     x = to_primitive(x, &cx);
   }
   n = to_primitive(n, &cn); if (x != gun) n = gmul(n,x);
