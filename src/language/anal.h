@@ -36,8 +36,21 @@ typedef struct module {
   entree *func;
   char **help;
 } module;
-
 int  gp_init_entrees(module *modlist, entree **hash, int force);
+
+typedef struct {
+  entree *ep;
+  char *ch;
+} exprdat;
+GEN _gp_eval(GEN x, void *dat);
+#define EXPR_START(ep, ch) exprdat __E; __E.ch=ch; __E.ep=ep; push_val(ep,NULL);
+#define EXPR_END(ep) pop_val(ep);
+#define EXPR_WRAP(ep, ch, call) \
+{ GEN z; EXPR_START(ep, ch); z = call; EXPR_END(ep); return z; }
+#define EXPR_ARG &__E, &_gp_eval
+
+void push_val(entree *ep, GEN a);
+void pop_val(entree *ep);
 
 /* binary I/O */
 typedef struct GENbin {
@@ -106,9 +119,6 @@ void   set_analyseur(char *s);
 void term_color(int c);
 char *term_get_color(int c);
 void hit_return(void);
-
-void push_val(entree *ep, GEN a);
-void pop_val(entree *ep);
 
 extern ulong prec;
 extern GEN gnil;

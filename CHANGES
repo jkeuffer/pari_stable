@@ -58,13 +58,23 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
        on 64 bit machines. Bumped BINARY_VERSION for writebin --> objects
        saved in writebin format between 2.2.1 and 2.2.8 are incompatible.
-    4- use more readable colors for hi-res plots [ replace "sienna" by
+    2- use more readable colors for hi-res plots [ replace "sienna" by
        "violetred" and "cornsilk" by "green" ]
+    3- GP interface of function intnum [ old flags not recognized, much more
+       elaborate interface ]
+    4- library interface of functions intnum, prodeuler, suminf, sumalt,
+       sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
+       (*eval)(GEN,void*) everywhere instead of entree * ]
 
   Added
     1- new algorithm for log( t_COMPLEX ), log(2) [ AGM ]
     2- new algorithm for Pi [ AGM ]
     3- new algorithm for atan, acos, asin [ AGM ]
+HC  4- "double exponential method" for numerical integration and sumation.
+       See ??intnum. New functions intcirc, intfouriercos, intfourierexp,
+       intfouriersin, intfuncinit, intlaplaceinv, intmellininv,
+       intmellininvshort, intnuminit, intnuminitgen, intnumromb, intnumstep,
+       sumnum, sumnumalt, sumnuminit
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.8 (released 25/11/2004):

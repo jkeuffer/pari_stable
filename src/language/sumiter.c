@@ -13,15 +13,9 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/********************************************************************/
-/**                                                                **/
-/**                   SUMS, PRODUCTS, ITERATIONS                   **/
-/**                                                                **/
-/********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
-
 /********************************************************************/
 /**                                                                **/
 /**                        ITERATIONS                              **/
@@ -104,8 +98,7 @@ sinitp(ulong a, ulong c, byteptr *ptr)
   byteptr p = *ptr;
   if (a <= 0) a = 2;
   maxprime_check((ulong)a);
-  while (a > c)
-     NEXT_PRIME_VIADIFF(c,p);
+  while (a > c) NEXT_PRIME_VIADIFF(c,p);
   *ptr = p; return c;
 }
 
@@ -495,21 +488,19 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
 }
 
 GEN
-suminf(entree *ep, GEN a, char *ch, long prec)
+suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long fl, G;
-  pari_sp tetpil, av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   GEN p1,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in suminf");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  push_val(ep, a);
   fl=0; G = bit_accuracy(prec) + 5;
   for(;;)
   {
-    p1 = lisexpr_nobreak(ch);
-    x = gadd(x,p1); a = incloop(a);
+    p1 = eval(a, E); x = gadd(x,p1); a = incloop(a);
     if (gcmp0(p1) || gexpo(p1) <= gexpo(x)-G)
       { if (++fl==3) break; }
     else
@@ -519,25 +510,25 @@ suminf(entree *ep, GEN a, char *ch, long prec)
       if (DEBUGMEM>1) err(warnmem,"suminf");
       x = gerepileupto(av,x);
     }
-    ep->value = (void*)a;
   }
-  pop_val(ep); tetpil=avma;
-  return gerepile(av0,tetpil,gsub(x,gun));
+  return gerepileupto(av0, gaddgs(x,-1));
 }
+GEN
+suminf0(entree *ep, GEN a, char *ch, long prec)
+{ EXPR_WRAP(ep,ch, suminf(EXPR_ARG, a, prec)); }
 
 GEN
 divsum(GEN num, entree *ep, char *ch)
 {
   pari_sp av = avma;
-  GEN z, y = gzero, t = divisors(num);
+  GEN y = gzero, t = divisors(num);
   long i, l = lg(t);
 
   push_val(ep, NULL);
   for (i=1; i<l; i++)
   {
-    ep->value = (void*) t[i];
-    z = lisseq_nobreak(ch);
-    y = gadd(y, z);
+    ep->value = (void*)t[i];
+    y = gadd(y, lisseq_nobreak(ch));
   }
   pop_val(ep); return gerepileupto(av,y);
 }
@@ -578,19 +569,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
 }
 
 GEN
-prodinf0(entree *ep, GEN a, char *ch, long flag, long prec)
-{
-  switch(flag)
-  {
-    case 0: return prodinf(ep,a,ch,prec);
-    case 1: return prodinf1(ep,a,ch,prec);
-  }
-  err(flagerr);
-  return NULL; /* not reached */
-}
-
-GEN
-prodinf(entree *ep, GEN a, char *ch, long prec)
+prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   pari_sp av0 = avma, av, lim;
   long fl,G;
@@ -599,25 +578,21 @@ prodinf(entree *ep, GEN a, char *ch, long prec)
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  push_val(ep, a);
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p1 = lisexpr_nobreak(ch);
-    x=gmul(x,p1); a = incloop(a);
+    p1 = eval(a, E); x = gmul(x,p1); a = incloop(a);
     if (gexpo(gsubgs(p1,1)) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"prodinf");
       x = gerepileupto(av,x);
     }
-    ep->value = (void*)a;
   }
-  pop_val(ep); return gerepilecopy(av0,x);
+  return gerepilecopy(av0,x);
 }
-
 GEN
-prodinf1(entree *ep, GEN a, char *ch, long prec)
+prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   pari_sp av0 = avma, av, lim;
   long fl,G;
@@ -626,63 +601,65 @@ prodinf1(entree *ep, GEN a, char *ch, long prec)
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf1");
   a = setloop(a);
   av = avma; lim = stack_lim(av,1);
-  push_val(ep, a);
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p2 = lisexpr_nobreak(ch);
-    p1 = gadd(p2,gun); x=gmul(x,p1); a = incloop(a);
+    p2 = eval(a, E); p1 = gaddgs(p2,1); x = gmul(x,p1); a = incloop(a);
     if (gcmp0(p1) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"prodinf1");
       x = gerepileupto(av,x);
     }
-    ep->value = (void*)a;
   }
-  pop_val(ep); return gerepilecopy(av0,x);
+  return gerepilecopy(av0,x);
+}
+GEN
+prodinf0(entree *ep, GEN a, char *ch, long flag, long prec)
+{
+  switch(flag)
+  {
+    case 0: EXPR_WRAP(ep,ch, prodinf (EXPR_ARG, a, prec));
+    case 1: EXPR_WRAP(ep,ch, prodinf1(EXPR_ARG, a, prec));
+  }
+  err(flagerr);
+  return NULL; /* not reached */
 }
 
 GEN
-prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
+prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
 {
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong a,b, *prime = (ulong*)p;
   pari_sp av, av0 = avma, lim;
-  GEN p1,x = realun(prec);
+  GEN x = realun(prec);
   byteptr d;
 
   av = avma;
   d = prime_loop_init(ga,gb, &a,&b, prime);
   if (!d) { avma = av; return x; }
 
-  av = avma; push_val(ep, (GEN)prime);
+  av = avma;
   lim = stack_lim(avma,1);
   while (prime[2] < b)
   {
-    p1 = lisexpr_nobreak(ch);
-    x = gmul(x,p1);
+    x = gmul(x, eval(prime, E));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"prodeuler");
       x = gerepilecopy(av, x);
     }
-    if (ep->value == prime)
-      NEXT_PRIME_VIADIFF(prime[2], d);
-    else
-      update_p(ep, &d, prime);
+    NEXT_PRIME_VIADIFF(prime[2], d);
   }
-  /* cf forprime */
-  if (prime[2] == b)
-  {
-    p1 = lisexpr_nobreak(ch);
-    x = gmul(x,p1);
-  }
-  pop_val(ep); return gerepilecopy(av0,x);
+  if (prime[2] == b) x = gmul(x, eval(prime, E));
+  return gerepilecopy(av0,x);
 }
+GEN
+prodeuler0(entree *ep, GEN a, GEN b, char *ch, long prec)
+{ EXPR_WRAP(ep,ch, prodeuler(EXPR_ARG, a, b, prec)); }
 
 GEN
-direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
+direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
 {
   long pp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong a, b, i, k, n, p, *prime = (ulong*)pp;
@@ -695,14 +672,12 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
   n = c? itou(c): b;
   if (!d || b < 2 || (c && signe(c) < 0)) return mkvec(gun);
   if (n < b) b = n;
-  push_val(ep, (GEN)prime);
 
   y = cgetg(n+1,t_VEC); av = avma;
-  x = cgetg(n+1,t_VEC); x[1]=un; for (i=2; i<=n; i++) x[i]=zero;
-  p = prime[2];
+  x = zerovec(n); x[1] = un; p = prime[2];
   while (p <= b)
   {
-    s = lisexpr_nobreak(ch);
+    s = eval(prime, E);
     polnum = numer(s);
     polden = denom(s);
     tx = typ(polnum);
@@ -771,14 +746,11 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
     NEXT_PRIME_VIADIFF(p, d);
     prime[2] = p;
   }
-  pop_val(ep); return gerepilecopy(av0,x);
+  return gerepilecopy(av0,x);
 }
-
 GEN
-direuler(entree *ep, GEN a, GEN b, char *ch)
-{
-  return direulerall(ep,a,b,ch,NULL);
-}
+direuler0(entree *ep, GEN a, GEN b, char *ch, GEN c)
+{ EXPR_WRAP(ep,ch, direuler(EXPR_ARG, a, b, c)); }
 
 /********************************************************************/
 /**                                                                **/
@@ -795,16 +767,12 @@ vecteur(GEN nmax, entree *ep, char *ch)
 
   if (typ(nmax)!=t_INT || signe(nmax) < 0)
     err(talker,"bad number of components in vector");
-  m=itos(nmax); y=cgetg(m+1,t_VEC);
-  if (!ep || !ch)
-  {
-    for (i=1; i<=m; i++) y[i] = zero;
-    return y;
-  }
-  push_val(ep, c);
+  m = itos(nmax);
+  if (!ep || !ch) return zerovec(m);
+  y = cgetg(m+1,t_VEC); push_val(ep, c);
   for (i=1; i<=m; i++)
   {
-    c[2]=i; p1 = lisseq_nobreak(ch);
+    c[2] = i; p1 = lisseq_nobreak(ch);
     y[i] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
   }
   pop_val(ep); return y;
@@ -819,17 +787,13 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
 
   if (typ(nmax)!=t_INT || signe(nmax) < 0)
     err(talker,"bad number of components in vector");
-  m=itos(nmax); y=cgetg(m+1,t_VECSMALL);
-  if (!ep || !ch)
-  {
-    for (i=1; i<=m; i++) y[i] = 0;
-    return y;
-  }
+  m = itos(nmax);
+  if (!ep || !ch) return vecsmall_const(m, 0);
+  y = cgetg(m+1,t_VECSMALL);
   push_val(ep, c);
   for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(lisseq_nobreak(ch)); }
   pop_val(ep); return y;
 }
-
 
 GEN
 vvecteur(GEN nmax, entree *ep, char *ch)
@@ -841,8 +805,8 @@ vvecteur(GEN nmax, entree *ep, char *ch)
 GEN
 matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
 {
-  GEN y,z,p1;
-  long i,j,m,n,s;
+  GEN y, z, p1;
+  long i, j, m, n, s;
   long c1[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
   long c2[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 1};
 
@@ -853,27 +817,15 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
 
   s=signe(nlig);
   if (typ(nlig)!=t_INT || s<0) err(talker,"bad number of rows in matrix");
-  m=itos(ncol)+1;
-  n=itos(nlig)+1; y=cgetg(m,t_MAT);
-  if (!s)
-  {
-    for (i=1; i<m; i++) y[i]=lgetg(1,t_COL);
-    return y;
-  }
-  if (!ep1 || !ep2 || !ch)
-  {
-    for (i=1; i<m; i++)
-    {
-      z=cgetg(n,t_COL); y[i]=(long)z;
-      for (j=1; j<n; j++) z[j] = zero;
-    }
-    return y;
-  }
+  m = itos(ncol)+1;
+  n = itos(nlig)+1;
+  if (!s) return zeromat(1, m-1);
+  if (!ep1 || !ep2 || !ch) return zeromat(n-1, m-1);
   push_val(ep1, c1);
-  push_val(ep2, c2);
+  push_val(ep2, c2); y = cgetg(m,t_MAT);
   for (i=1; i<m; i++)
   {
-    c2[2]=i; z=cgetg(n,t_COL); y[i]=(long)z;
+    c2[2] = i; z = cgetg(n,t_COL); y[i] = (long)z;
     for (j=1; j<n; j++)
     {
       c1[2] = j; p1 = lisseq_nobreak(ch);
@@ -889,42 +841,29 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
 /**                         SUMMING SERIES                         **/
 /**                                                                **/
 /********************************************************************/
-
 GEN
-sumalt0(entree *ep, GEN a, char *ch, long flag, long prec)
+RgX_div_by_X_x(GEN a, GEN x, GEN *r)
 {
-  switch(flag)
-  {
-    case 0: return sumalt(ep,a,ch,prec);
-    case 1: return sumalt2(ep,a,ch,prec);
-    default: err(flagerr);
-  }
-  return NULL; /* not reached */
+  long l = lg(a), i;
+  GEN *a0, *z0, z = cgetg(l-1, t_POL);
+  z[1] = a[1];
+  a0 = (GEN*)a + l-1;
+  z0 = (GEN*)z + l-2; *z0 = *a0--;
+  for (i=l-3; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
+    *z0 = gadd(*a0--, gmul(x, *z0--));
+  if (r) *r = gadd(*a0, gmul(x, *z0));
+  return z;
 }
 
 GEN
-sumpos0(entree *ep, GEN a, char *ch, long flag, long prec)
-{
-  switch(flag)
-  {
-    case 0: return sumpos(ep,a,ch,prec);
-    case 1: return sumpos2(ep,a,ch,prec);
-    default: err(flagerr);
-  }
-  return NULL; /* not reached */
-}
-
-GEN
-sumalt(entree *ep, GEN a, char *ch, long prec)
+sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long k, N;
-  pari_sp av = avma, tetpil;
-  GEN s,az,c,x,e1,d;
+  pari_sp av = avma;
+  GEN s, az, c, e1, d;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
-
-  push_val(ep, a);
-  e1 = addsr(3,gsqrt(stoi(8),prec));
+  e1 = addsr(3, sqrtr(stor(8,prec)));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = gpowgs(e1,N);
   d = shiftr(addrr(d, ginv(d)),-1);
@@ -932,54 +871,57 @@ sumalt(entree *ep, GEN a, char *ch, long prec)
   s = gzero;
   for (k=0; ; k++)
   {
-    x = lisexpr_nobreak(ch);
-    c = gadd(az,c); s = gadd(s,gmul(x,c));
+    c = gadd(az,c); s = gadd(s, gmul(c, eval(a, E)));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
     if (k==N-1) break;
-    a = addsi(1,a); ep->value = (void*) a;
+    a = addsi(1,a);
   }
-  tetpil = avma; pop_val(ep);
-  return gerepile(av,tetpil,gdiv(s,d));
+  return gerepileupto(av, gdiv(s,d));
 }
 
 GEN
-sumalt2(entree *ep, GEN a, char *ch, long prec)
+sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long k, N;
-  pari_sp av = avma, tetpil;
-  GEN x,s,dn,pol;
+  pari_sp av = avma;
+  GEN s, dn, pol;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
-
-  push_val(ep, a);
   N = (long)(0.31*(bit_accuracy(prec) + 5));
   pol = polzagreel(N,N>>1,prec+1);
-  dn = poleval(pol,gun);
-  pol[2] = lsub((GEN)pol[2],dn);
-  pol = gdiv(pol, gsub(polx[0],gun));
+  pol = RgX_div_by_X_x(pol, gun, &dn);
   N = degpol(pol);
   s = gzero;
   for (k=0; k<=N; k++)
   {
-    x = lisexpr_nobreak(ch);
-    s = gadd(s, gmul(x,(GEN)pol[k+2]));
+    s = gadd(s, gmul((GEN)pol[k+2], eval(a, E)));
     if (k == N) break;
-    a = addsi(1,a); ep->value = (void*) a;
+    a = addsi(1,a);
   }
-  tetpil = avma; pop_val(ep);
-  return gerepile(av,tetpil, gdiv(s,dn));
+  return gerepileupto(av, gdiv(s,dn));
 }
 
 GEN
-sumpos(entree *ep, GEN a, char *ch, long prec)
+sumalt0(entree *ep, GEN a, char *ch, long flag, long prec)
+{
+  switch(flag)
+  {
+    case 0: EXPR_WRAP(ep,ch, sumalt (EXPR_ARG,a,prec));
+    case 1: EXPR_WRAP(ep,ch, sumalt2(EXPR_ARG,a,prec));
+    default: err(flagerr);
+  }
+  return NULL; /* not reached */
+}
+
+GEN
+sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long k, kk, N, G;
-  pari_sp av = avma, tetpil;
+  pari_sp av = avma;
   GEN r, reel, s, az, c, x, e1, d, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos");
 
-  push_val(ep, NULL);
   a = subis(a,1); reel = cgetr(prec);
   e1 = addsr(3,gsqrt(stoi(8),prec));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
@@ -993,41 +935,38 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
     if (odd(k) && stock[k]) x = stock[k];
     else
     {
+      pari_sp av2 = avma;
       x = gzero; r = stoi(2*k+2);
       for(kk=0;;kk++)
       {
+        
         long ex;
-	ep->value = (void*)addii(r,a);
-
-        gaffect(lisexpr_nobreak(ch), reel);
-        ex = expo(reel)+kk; setexpo(reel,ex);
+        gaffect(eval(addii(r,a), E), reel);
+        ex = expo(reel) + kk; setexpo(reel,ex);
 	x = gadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
+      x = gerepileupto(av2, x);
       if (2*k < N) stock[2*k+1] = x;
-      ep->value = (void*)addsi(k+1,a);
-
-      gaffect(lisexpr_nobreak(ch), reel);
+      gaffect(eval(addsi(k+1,a), E), reel);
       x = gadd(reel, gmul2n(x,1));
     }
     c = gadd(az,c);
     s = gadd(s, gmul(x, k&1? gneg_i(c): c));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
   }
-  tetpil=avma; pop_val(ep);
-  return gerepile(av,tetpil,gdiv(s,d));
+  return gerepileupto(av, gdiv(s,d));
 }
 
 GEN
-sumpos2(entree *ep, GEN a, char *ch, long prec)
+sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long k, kk, N, G;
-  pari_sp av = avma, tetpil;
+  pari_sp av = avma;
   GEN r, reel, s, pol, dn, x, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos2");
 
-  push_val(ep, a);
   a = subis(a,1); reel = cgetr(prec);
   N = (long)(0.31*(bit_accuracy(prec) + 5));
 
@@ -1036,245 +975,44 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
   for (k=1; k<=N; k++)
     if (odd(k) || !stock[k])
     {
+      pari_sp av2 = avma;
       x = gzero; r = stoi(2*k);
       for(kk=0;;kk++)
       {
         long ex;
-	ep->value = (void*)addii(r,a);
-
-        gaffect(lisexpr_nobreak(ch), reel);
-        ex = expo(reel)+kk; setexpo(reel,ex);
+        gaffect(eval(addii(r,a), E), reel);
+        ex = expo(reel) + kk; setexpo(reel,ex);
 	x = gadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
+      x = gerepileupto(av2, x);
       if (2*k-1 < N) stock[2*k] = x;
-      ep->value = (void*)addsi(k,a);
-      gaffect(lisexpr_nobreak(ch), reel);
+      gaffect(eval(addsi(k,a), E), reel);
       stock[k] = gadd(reel, gmul2n(x,1));
     }
-  pop_val(ep); s = gzero;
+  s = gzero;
   pol = polzagreel(N,N>>1,prec+1);
-  dn = poleval(pol,gun);
-  pol[2] = lsub((GEN)pol[2],dn);
-  pol = gdiv(pol, gsub(gun,polx[0]));
+  pol = RgX_div_by_X_x(pol, gun, &dn);
   for (k=1; k<=lg(pol)-2; k++)
   {
     GEN p1 = gmul((GEN)pol[k+1],stock[k]);
     if (odd(k)) p1 = gneg_i(p1);
     s = gadd(s,p1);
   }
-  tetpil=avma; return gerepile(av,tetpil,gdiv(s,dn));
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                NUMERICAL INTEGRATION (Romberg)                 **/
-/**                                                                **/
-/********************************************************************/
-typedef struct {
-  entree *ep;
-  char *ch;
-} exprdat;
-
-typedef struct {
-  GEN (*f)(GEN,void *);
-  void *E;
-} invfun;
-
-/* f(x) */
-static GEN
-_gp_eval(GEN x, void *dat)
-{
-  exprdat *E = (exprdat*)dat;
-  E->ep->value = x;
-  return lisexpr_nobreak(E->ch);
-}
-/* 1/x^2 f(1/x) */
-static GEN
-_invf(GEN x, void *dat)
-{
-  invfun *S = (invfun*)dat;
-  GEN y = ginv(x);
-  return gmul(S->f(y, S->E), gsqr(y));
-}
-
-static GEN
-interp(GEN h, GEN s, long j, long lim, long KLOC)
-{
-  pari_sp av = avma;
-  long e1,e2;
-  GEN dss, ss = polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
-
-  e1 = gexpo(ss);
-  e2 = gexpo(dss);
-  if (e1-e2 <= lim && (j <= 10 || e1 >= -lim)) { avma = av; return NULL; }
-  if (gcmp0(imag_i(ss))) ss = real_i(ss);
-  return ss;
-}
-
-static GEN
-qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
-{
-  const long JMAX = 25, KLOC = 4;
-  GEN ss,s,h,p1,p2,qlint,del,x,sum;
-  long j, j1, it, sig;
-
-  a = gtofp(a,prec);
-  b = gtofp(b,prec);
-  qlint = subrr(b,a); sig = signe(qlint);
-  if (!sig)  return gzero;
-  if (sig < 0) { setsigne(qlint,1); swap(a,b); }
-
-  s = new_chunk(JMAX+KLOC-1);
-  h = new_chunk(JMAX+KLOC-1);
-  h[0] = (long)realun(prec);
-
-  p1 = eval(a, dat); if (p1 == a) p1 = rcopy(p1);
-  p2 = eval(b, dat);
-  s[0] = lmul2n(gmul(qlint,gadd(p1,p2)),-1);
-  for (it=1,j=1; j<JMAX; j++, it<<=1)
-  {
-    pari_sp av, av2;
-    h[j] = lshiftr((GEN)h[j-1],-2);
-    av = avma; del = divrs(qlint,it);
-    x = addrr(a, shiftr(del,-1));
-    av2 = avma;
-    for (sum = gzero, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
-    {
-      sum = gadd(sum, eval(x, dat));
-      if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
-    }
-    sum = gmul(sum,del); p1 = gadd((GEN)s[j-1], sum);
-    s[j] = lpileupto(av, gmul2n(p1,-1));
-    if (DEBUGLEVEL>3) fprintferr("qrom3: iteration %ld: %Z\n", j,s[j]);
-
-    if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-j-6, KLOC)))
-      return gmulsg(sig,ss);
-  }
-  return NULL;
-}
-
-static GEN
-qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
-{
-  const long JMAX = 16, KLOC = 4;
-  GEN ss,s,h,p1,qlint,del,ddel,x,sum;
-  long j, j1, it, sig;
-
-  a = gtofp(a, prec);
-  b = gtofp(b, prec);
-  qlint = subrr(b,a); sig = signe(qlint);
-  if (!sig)  return gzero;
-  if (sig < 0) { setsigne(qlint,1); swap(a,b); }
-
-  s = new_chunk(JMAX+KLOC-1);
-  h = new_chunk(JMAX+KLOC-1);
-  h[0] = (long)realun(prec);
-
-  p1 = shiftr(addrr(a,b),-1);
-  s[0] = lmul(qlint, eval(p1, dat));
-  for (it=1, j=1; j<JMAX; j++, it*=3)
-  {
-    pari_sp av, av2;
-    h[j] = ldivrs((GEN)h[j-1],9);
-    av = avma; del = divrs(qlint,3*it); ddel = shiftr(del,1);
-    x = addrr(a, shiftr(del,-1));
-    av2 = avma;
-    for (sum = gzero, j1 = 1; j1 <= it; j1++)
-    {
-      sum = gadd(sum, eval(x, dat)); x = addrr(x,ddel);
-      sum = gadd(sum, eval(x, dat)); x = addrr(x,del);
-      if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
-    }
-    sum = gmul(sum,del); p1 = gdivgs((GEN)s[j-1],3);
-    s[j] = lpileupto(av, gadd(p1,sum));
-    if (DEBUGLEVEL>3) fprintferr("qrom2: iteration %ld: %Z\n", j,s[j]);
-
-    if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-(3*j/2)-6, KLOC)))
-      return gmulsg(sig, ss);
-  }
-  return NULL;
-}
-
-/* integrate after change of variables x --> 1/x */
-static GEN
-qromi(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
-{
-  GEN A = ginv(b), B = ginv(a);
-  invfun S;
-  S.f = eval;
-  S.E = E; return qrom2(&S, &_invf, A, B, prec);
-}
-
-/* a < b, assume b "small" (< 100 say) */
-static GEN
-rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
-{
-  if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
-  if (b == gun || gcmpgs(b, -1) >= 0)
-  { /* a < -100, b >= -1 */
-    GEN _1 = negi(gun); /* split at -1 */
-    return gadd(qromi(E,eval,a,_1,prec),
-                qrom2(E,eval,_1,b,prec));
-  }
-  /* a < -100, b < -1 */
-  return qromi(E,eval,a,b,prec);
-}
-
-static GEN
-rombint(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
-{
-  long l = gcmp(b,a);
-  GEN z;
-
-  if (!l) return gzero;
-  if (l < 0) swap(a,b);
-  if (gcmpgs(b,100) >= 0)
-  {
-    if (gcmpgs(a,1) >= 0)
-      z = qromi(E,eval,a,b,prec);
-    else /* split at 1 */
-      z = gadd(rom_bsmall(E,eval,a,gun,prec), qromi(E,eval,gun,b,prec));
-  }
-  else
-    z = rom_bsmall(E,eval,a,b,prec);
-  if (l < 0) z = gneg(z);
-  return z;
+  return gerepileupto(av, gdiv(s,dn));
 }
 
 GEN
-intnum(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec)
+sumpos0(entree *ep, GEN a, char *ch, long flag, long prec)
 {
-  pari_sp av = avma;
-  GEN z;
   switch(flag)
   {
-    case 0: z = qrom3  (E,eval,a,b,prec); break;
-    case 1: z = rombint(E,eval,a,b,prec); break;
-    case 2: z = qromi  (E,eval,a,b,prec); break;
-    case 3: z = qrom2  (E,eval,a,b,prec); break;
-    default: err(flagerr); z = NULL;
+    case 0: EXPR_WRAP(ep,ch, sumpos (EXPR_ARG,a,prec));
+    case 1: EXPR_WRAP(ep,ch, sumpos2(EXPR_ARG,a,prec));
+    default: err(flagerr);
   }
-  if (!z) err(intger2);
-  return gerepileupto(av, z);
+  return NULL; /* not reached */
 }
-
-GEN
-intnum0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec)
-{
-  exprdat E;
-  GEN z;
-
-  E.ch = ch;
-  E.ep = ep; push_val(ep, NULL);
-  z = intnum(&E, &_gp_eval, a,b, flag, prec);
-  pop_val(ep); return z;
-}
-/********************************************************************/
-/**                                                                **/
-/**                  ZAGIER POLYNOMIALS (for sumalt)               **/
-/**                                                                **/
-/********************************************************************/
 
 GEN
 polzag(long n, long m)
@@ -1418,15 +1156,8 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
 
 GEN
 zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec)
-{
-  exprdat E;
-  GEN z;
+{ EXPR_WRAP(ep,ch, zbrent(EXPR_ARG, a,b, prec)); }
 
-  E.ch = ch;
-  E.ep = ep; push_val(ep, NULL);
-  z = zbrent(&E, &_gp_eval, a,b, prec);
-  pop_val(ep); return z;
-}
 /* x = solve_start(&D, a, b, prec)
  * while (x) {
  *   y = ...(x);

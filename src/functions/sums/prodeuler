@@ -1,6 +1,6 @@
 Function: prodeuler
 Section: sums
-C-Name: prodeuler
+C-Name: prodeuler0
 Prototype: V=GGEp
 Help: prodeuler(X=a,b,expr): Euler product (X runs over the primes between a
  and b) of real or complex expression

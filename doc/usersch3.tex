@@ -90,9 +90,9 @@ corresponding to the numeric identifier is given after it as in
 fun(x, {flag = 0} ):
 
   If flag is equal to 1 = AGM, use an agm formula\dots
-@eprog
-\noindent which means that one can use indifferently \kbd{fun($x$, 1)} or
-\kbd{fun($x$, AGM)}.
+@eprog\noindent
+which means that one can use indifferently \kbd{fun($x$, 1)} or \kbd{fun($x$,
+AGM)}.
 
 For a binary flag, mnemonics corresponding to the various toggles are given
 after each of them. They can be negated by prepending \kbd{no\_} to the
@@ -564,9 +564,8 @@ arguments of \kbd{Str} are evaluated in string context, see \secref{se:strings}.
 %1 = "x2"
 ? eval(%)
 %2 = 0
-@eprog
-
-\noindent This function is mostly useless in library mode. Use the pair
+@eprog\noindent
+This function is mostly useless in library mode. Use the pair
 \tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{GEN} and \kbd{char*}.
 The latter returns a malloced string, which should be freed after usage.
 
@@ -1169,8 +1168,8 @@ applying \kbd{abs} and an exact result is returned if possible.
 %2 = 5/7
 ? abs(1 + I)
 %3 = 1.414213562373095048801688724
-@eprog
-\noindent If $x$ is a polynomial, returns $-x$ if the leading coefficient is
+@eprog\noindent
+If $x$ is a polynomial, returns $-x$ if the leading coefficient is
 real and negative else returns $x$. For a power series, the constant
 coefficient is considered instead.
 
@@ -1458,8 +1457,8 @@ variable, or we are computing a power.
 %3 = 1 + O(2^5)
 ? (1 + O(2^4))^4
 %4 = 1 + O(2^6)
-@eprog
-\noindent(note the difference between \kbd{\%2} and \kbd{\%3} above).
+@eprog\noindent
+(note the difference between \kbd{\%2} and \kbd{\%3} above).
 
 \syn{gsqr}{x}.
 
@@ -1797,9 +1796,9 @@ fact, any factor which is $\leq 10^{13}$ is a genuine prime number. Use
 \bprog
 fa = factor(2^2^7 +1)
 isprime( fa[,1] )
-@eprog
-\noindent An argument \var{lim} can be added, meaning that we look only for
-prime factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest
+@eprog\noindent
+An argument \var{lim} can be added, meaning that we look only for prime
+factors $p < \var{lim}$, or up to \kbd{primelimit}, whichever is lowest
 (except when $\var{lim}=0$ where the effect is identical to setting
 $\var{lim}=\kbd{primelimit}$). In this case, the remaining part may actually
 be a proven composite! See \tet{factorint} for more information about the
@@ -1828,9 +1827,8 @@ needed, you can always ask for the content explicitly:
 
 ? content(t^2 + 5/2*t + 1)
 %2 = 1/2
-@eprog
-
-\noindent See also \tet{factornf} and \tet{nffactor}.
+@eprog\noindent
+See also \tet{factornf} and \tet{nffactor}.
 
 \syn{factor0}{x,\var{lim}}, where \var{lim} is a C integer.
 Also available are
@@ -2198,8 +2196,8 @@ in the number of classes of forms:
 \bprog
 QFBclassno(D) =
   qfbclassno(D) * if (D < 0 || norm(quadunit(D)) < 0, 1, 2)
-@eprog
-\noindent Here are a few examples:
+@eprog\noindent
+Here are a few examples:
 \bprog
 ? qfbclassno(400000028)
 time = 3,140 ms.
@@ -2386,7 +2384,7 @@ For $D>0$, uses Stark's conjecture. If $\fl$ is non-zero, try hard to
 get the best modulus. The function may fail with the following message
 \bprog
 "Cannot find a suitable modulus in FindModulus"
-@eprog
+@eprog\noindent
 See \tet{bnrstark} for more details about the real case.
 
 \syn{quadray}{D,f,\fl}.
@@ -3857,7 +3855,7 @@ must be less than the priority of the variable of $\var{gal}.pol$ (see
 G = galoisinit(x^4+1);
 galoisfixedfield(G,G.group[2],2)
   [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
-@eprog
+@eprog\noindent
 computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
 
 \syn{galoisfixedfield}{\var{gal},\var{perm},\fl,$v$}, where $v$ is a variable number, an omitted $v$ being coded by $-1$.
@@ -3977,9 +3975,9 @@ applied to all components recursively.
 \bprog
 G = galoisinit(pol);
 galoispermtopol(G, G[6])~
-@eprog
-\noindent is equivalent to \kbd{nfgaloisconj(pol)}, if degree of \var{pol}
-is greater or equal to $2$.
+@eprog\noindent
+is equivalent to \kbd{nfgaloisconj(pol)}, if degree of \var{pol} is greater
+or equal to $2$.
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
@@ -4923,7 +4921,7 @@ is in general \emph{much} faster to proceed as follows
 \bprog
    nf = nfinit(P); L = nffactor(nf, Q)[,1];
    vector(#L, i, rnfequation(nf, L[i]))
-@eprog
+@eprog\noindent
 to obtain the same result. If you are only interested in the degrees of the
 simple factors, the \kbd{rnfequation} instruction can be replaced by a
 trivial \kbd{poldegree(P) * poldegree(L[i])}.
@@ -5435,8 +5433,8 @@ bnf = bnfinit(y^3 + y^2 - 2*y - 1);
 p = x^2 + Mod(y^2 + 2*y + 1, bnf.pol);
 T = rnfisnorminit(bnf, p);
 rnfisnorm(T, 17)
-@eprog
-\noindent checks whether $17$ is a norm in the Galois extension $\Q(\beta) /
+@eprog\noindent
+checks whether $17$ is a norm in the Galois extension $\Q(\beta) /
 \Q(\alpha)$, where $\alpha^3 + \alpha^2 - 2\alpha - 1 = 0$ and $\beta^2 +
 \alpha^2 + 2\alpha + 1 = 0$ (it is).
 
@@ -5958,15 +5956,15 @@ particular, beware that:
 
 ? subst(1, x, Mat([0,1]))
   ***   forbidden substitution by a non square matrix
-@eprog
-\noindent If $x$ is a power series, $z$ must be either a polynomial, a power
+@eprog\noindent
+If $x$ is a power series, $z$ must be either a polynomial, a power
 series, or a rational function.
 
 \syn{gsubst}{x,y,z}, where $y$ is the variable number.
 
 \subsecidx{substpol}$(x,y,z)$:
 replace the ``variable'' $y$ by the argument $z$ in the ``polynomial''
-expression $x$. Every type is allowed for $x$, but the same behavior
+expression $x$. Every type is allowed for $x$, but the same behaviour
 as \kbd{subst} above apply.
 
 The difference with \kbd{subst} is that $y$ is allowed to be any polynomial
@@ -5977,8 +5975,8 @@ here. The substitution is done as per the following script:
 
      subst(lift(Mod(pol,M), variable(M)), t, to)
    }
-@eprog
-\noindent For instance
+@eprog\noindent
+For instance
 \bprog
 ? substpol(x^4 + x^2 + 1, x^2, y)
 %1 = y^2 + y + 1
@@ -6095,8 +6093,8 @@ minpoly(A)=
 
   y / gcd(y,y')
 }
-@eprog
-\noindent The value of $\fl$ is only significant for matrices.
+@eprog\noindent
+The value of $\fl$ is only significant for matrices.
 
 If $\fl=0$, the method used is essentially the same as for computing the
 adjoint matrix, i.e.~computing the traces of the powers of $A$.
@@ -6833,46 +6831,500 @@ number of recursions. Also, a number of functions from numerical analysis
 like numerical integration and summation of series will be described here.
 
 One of the parameters in these loops must be the control variable, hence a
-simple variable name. The last parameter can be any legal PARI expression,
-including of course expressions using loops. Since it is much easier to
-program directly the loops in library mode, these functions are mainly
-useful for GP programming. The use of these functions in library mode is a
-little tricky and its explanation will be mostly omitted, although the
-reader can try and figure it out by himself by checking the example given
-for the \tet{sum} function. In this section we only give the library
-syntax, with no semantic explanation.
+simple variable name. In the descriptions, the letter $X$ will always denote
+any simple variable name, and represents the formal parameter used in the
+function. The expression to be summed, integrated, etc. is any legal PARI
+expression, including of course expressions using loops.
 
-The letter $X$ will always denote any simple variable name, and represents
-the formal parameter used in the function.
+\misctitle{Library mode.}
+Since it is easier to program directly the loops in library mode, these
+functions are mainly useful for GP programming. Their use library mode is
+tricky and its explanation will be mostly omitted, although the reader can
+try and figure it out by himself by checking the example given for \tet{sum}.
 
-\misctitle{(numerical) integration}:\sidx{numerical integration} A number
-of Romberg-like integration methods are implemented (see \kbd{intnum} as
-opposed to \kbd{intformal} which we already described). The user should not
-require too much accuracy: 18 or 28 decimal digits is OK, but not much more.
-In addition, analytical cleanup of the integral must have been done: there
-must be no singularities in the interval or at the boundaries. In practice
-this can be accomplished with a simple change of variable. Furthermore, for
-improper integrals, where one or both of the limits of integration are plus
-or minus infinity, the function must decrease sufficiently rapidly at
-infinity. This can often be accomplished through integration by parts.
-Finally, the function to be integrated should not be very small
-(compared to the current precision) on the entire interval. This can
-of course be accomplished by just multiplying by an appropriate
-constant.
+On the other hand, numerical functions code a function (to be integrated,
+summed, etc.) with two parameters named
+\bprog
+  GEN (*eval)(GEN,void*)
+  void *E;
+@eprog\noindent
+The second is meant to contain all auxilliary data needed by your function.
+The first is a pointer to a function whose first parameter is a \kbd{GEN} and
+the second a \kbd{void*}, and it is assumed that \kbd{eval(x, E)} returns
+the value of your function evaluated at \kbd{x}. For instance, one might code
+the translation by (a fixed) \kbd{t} via
+\bprog
+GEN translate(GEN x, void *E) { return gadd(x, (GEN)E); }
+@eprog
+One would then use \kbd{\&translate} as evaluation function \kbd{eval},
+and \kbd{(void*)t} as data \kbd{E}. Of course, you can set \kbd{E} to a
+pointer to any \kbd{struct} (typecast to \kbd{void*}), so the above mechanism
+handles arbitrary functions. For simple functions without extra parameters,
+you may set \kbd{E = NULL} and ignore that argument in your function
+definition.
 
-Note that \idx{infinity} can be represented with essentially no loss of
-accuracy by 1e4000. However beware of real underflow when dealing with
-rapidly decreasing functions. For example, if one wants to compute the
-$\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one should set
-infinity equal to 10 for example, and certainly not to 1e4000.
-
-The integrand may have values belonging to a vector space over the real
-numbers; in particular, it can be complex-valued or vector-valued.
+\misctitle{Numerical integration.}\sidx{numerical integration} 
+Starting with version 2.2.9 the powerful ``double exponential'' univariate
+integration method has been implemented in the routine \tet{intnum} and its
+variants. Romberg integration is still available under the name
+\kbd{intnumromb}, but superseded. It is possible to compute numerically
+integrals to thousands of decimal places in reasonable time, as long as the
+integrand is regular, as is usually the case. It is also reasonable to
+compute numerically integrals in several variables, although more than two
+becomes lengthy. The integration domain may be non-compact, and the integrand
+may have reasonable singularities at endpoints. To use \kbd{intnum}, the user
+must split the integral into a sum of subintegrals where the function has
+(possible) singularities only at the endpoints. Polynomials in logarithms are
+not considered singular, and neglecting these logs, singularities are assumed
+to be algebraic (in other words asymptotic to $C(x-a)^{-\alpha}$ for some
+$\alpha$ such that $\alpha>-1$ when $x$ is close to $a$), or to correspond to
+simple discontinuities of some (higher) derivative of the function. For
+instance, the point $0$ is a singularity of $\text{abs}(x)$.
 
 See also the discrete summation methods below (sharing the prefix \kbd{sum}).
 
-\subsecidx{intnum}$(X=a,b,\var{expr},\{\fl=0\})$: numerical integration of
-\var{expr} (smooth in $]a,b[$), with respect to $X$.
+\subsecidx{intcirc}$(X=a,R,\var{expr}, \{\var{tab}\})$: numerical
+integration of \var{expr} with respect to $X$ on the circle $|X-a|=R$,
+divided by $2i\pi$. In other words, when \var{expr} is a meromorphic
+function, sum of the residues in the corresponding disk. \var{tab} is as in
+\kbd{intnum}, except that if computed with \kbd{intnuminit} it should be with
+the endpoints \kbd{[-1, 1]}.
+
+\bprog
+? \p105
+? intcirc(s=1, 0.5, zeta(s)) - 1
+time = 3,460 ms.
+%1 = -2.40... E-104 - 2.7... E-106*I
+@eprog
+
+\synt{intcirc}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN R,GEN tab, 
+long prec}.
+
+\subsecidx{intfouriercos}$(X=a,b,z,\var{expr},\{\var{tab}\})$: numerical
+integration of $\var{expr}(X)\cos(2\pi zX)$ from $a$ to $b$, in other words
+Fourier cosine transform (from $a$ to $b$) of the function represented by
+\var{expr}. $a$ and $b$ are coded as in \kbd{intnum}, and are not necessarily
+at infinity, but if they are, oscillations (i.e. $[[\pm1],\alpha I]$) are
+forbidden.
+
+\synt{intfouriercos}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, 
+GEN tab, long prec}.
+
+\subsecidx{intfourierexp}$(X=a,b,z,\var{expr},\{\var{tab}\})$: numerical
+integration of $\var{expr}(X)\exp(-2\pi zX)$ from $a$ to $b$, in other words
+Fourier transform (from $a$ to $b$) of the function represented by
+\var{expr}. Note the minus sign. $a$ and $b$ are coded as in \kbd{intnum},
+and are not necessarily at infinity but if they are, oscillations (i.e.
+$[[\pm1],\alpha I]$) are forbidden.
+
+\synt{intfourierexp}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, 
+GEN tab, long prec}.
+
+\subsecidx{intfouriersin}$(X=a,b,z,\var{expr},\{\var{tab}\})$: numerical
+integration of $\var{expr}(X)\sin(2\pi zX)$ from $a$ to $b$, in other words
+Fourier sine transform (from $a$ to $b$) of the function represented by
+\var{expr}. $a$ and $b$ are coded as in \kbd{intnum}, and are not necessarily
+at infinity but if they are, oscillations (i.e. $[[\pm1],\alpha I]$) are
+forbidden.
+
+\synt{intfouriersin}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, GEN z, 
+GEN tab, long prec}.
+
+\subsecidx{intfuncinit}$(X=a,b,\var{expr},\{\fl=0\},\{m=0\})$:
+initalize tables for use with integral transforms such as \kbd{intmellininv},
+etc., where $a$ and $b$ are coded as in \kbd{intnum}, $\var{expr}$ is the
+function $s(X)$ to which the integral transform is to be applied (which will
+multiply the weights of integration) and $m$ is as in \kbd{intnuminit}. If
+\fl is nonzero, assumes that $s(-X)=\overline{s(X)}$, which makes the
+computation twice as fast. See \kbd{intmellininvshort} for examples of the
+use of this function, which is particularly useful when the function $s(X)$
+is lengthy to compute, such as a gamma product.
+
+\synt{intfuncinit}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,long m, 
+long flag, long prec}. Note that the order of $m$ and \fl are reversed
+compared to the \kbd{GP} syntax.
+
+\subsecidx{intlaplaceinv}$(X=sig,z,\var{expr},\{\var{tab}\})$: 
+numerical integration of $\var{expr}(X)e^{Xz}$ with respect to $X$ on the line 
+$\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Laplace transform
+of the function corresponding to \var{expr} at the value $z$.
+
+$sig$ is coded as follows. Either it is a real number $\sigma$, equal to the
+abcissa of integration, and then the function to be integrated is assumed to
+be slowly decreasing when the imaginary part of the variable tends to
+$\pm\infty$. Or it is a two component vector $[\sigma,\alpha]$, where
+$\sigma$ is as before, and either $\alpha=0$ for slowly decreasing functions,
+or $\alpha>0$ for functions decreasing like $\exp(-\alpha t)$. Note that it
+is not necessary to choose the exact value of $\alpha$. \var{tab} is as in
+\kbd{intnum}.
+
+It is often a good idea to use this function with a value of $m$ one or two
+higher than the one chosen by default (which can be viewed thanks to the
+function \kbd{intnumstep}), or to increase the abcissa of integration
+$\sigma$. For example:
+
+\bprog
+? \p 105
+? intlaplaceinv(x=2, 1, 1/x) - 1
+time = 350 ms.
+%1 = 7.37... E-55 + 1.72... E-54*I \\@com not so good
+? m = intnumstep()
+%2 = 7
+? intlaplaceinv(x=2, 1, 1/x, m+1) - 1
+time = 700 ms.
+%3 = 3.94... E-97 + 4.76... E-98*I \\@com better
+? intlaplaceinv(x=2, 1, 1/x, m+2) - 1
+time = 1400 ms.
+%4 = 0.E-105 + 0.E-106*I \\@com perfect but slow.
+? intlaplaceinv(x=5, 1, 1/x) - 1
+time = 340 ms.
+%5 = -5.98... E-85 + 8.08... E-85*I \\@com better than \%1
+? intlaplaceinv(x=5, 1, 1/x, m+1) - 1
+time = 680 ms.
+%6 = -1.09... E-106 + 0.E-104*I \\@com perfect, fast.
+? intlaplaceinv(x=10, 1, 1/x) - 1
+time = 340 ms.
+%7 = -4.36... E-106 + 0.E-102*I \\@com perfect, fastest, but why $sig=10$?
+? intlaplaceinv(x=100, 1, 1/x) - 1
+time = 330 ms.
+%7 = 1.07... E-72 + 3.20... E-72*I \\@com too far now...
+@eprog
+
+\synt{intlaplaceinv}{void *E, GEN (*eval)(GEN,void*), GEN sig,GEN z, GEN tab, 
+long prec}.
+
+\subsecidx{intmellininv}$(X=sig,z,\var{expr},\{\var{tab}\})$: numerical 
+integration of $\var{expr}(X)z^{-X}$ with respect to $X$ on the line 
+$\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Mellin transform of
+the function corresponding to \var{expr} at the value $z$.
+
+$sig$ is coded as follows. Either it is a real number $\sigma$, equal to the
+abcissa of integration, and then the function to be integrated is assumed to
+decrease exponentially fast, of the order of $\exp(-t)$ when the imaginary
+part of the variable tends to $\pm\infty$. Or it is a two component vector
+$[\sigma,\alpha]$, where $\sigma$ is as before, and either $\alpha=0$ for
+slowly decreasing functions, or $\alpha>0$ for functions decreasing like
+$\exp(-\alpha t)$, such as gamma products. Note that it is not necessary to
+choose the exact value of $\alpha$, and that $\alpha=1$ (equivalent to $sig$
+alone) is usually sufficient. \var{tab} is as in \kbd{intnum}.
+
+As all similar functions, this function is provided for the convenience of
+the user, who could use \kbd{intnum} directly. However it is in general
+better to use \kbd{intmellininvshort}.
+
+\bprog
+? \p 105
+? intmellininv(s=2,4, gamma(s)^3);
+time = 1,190 ms. \\@com reasonable.
+? \p 308
+? intmellininv(s=2,4, gamma(s)^3);
+time = 51,300 ms. \\@com slow because of $\Gamma(s)^3$.
+@eprog\noindent
+
+\synt{intmellininv}{void *E, GEN (*eval)(GEN,void*), GEN sig, GEN z, GEN tab, 
+long prec}.
+
+\subsecidx{intmellininvshort}$(sig,z,tab)$: numerical integration 
+of $s(X)z^{-X}$ with respect to $X$ on the line $\Re(X)=sig$, divided by
+$2i\pi$, in other words, inverse Mellin transform of $s(X)$ at the value $z$.
+Here $s(X)$ is implicitly contained in \var{tab} in \kbd{intfuncinit} format,
+typically
+\bprog
+  tab = intfuncinit(T = [-1], [1], s(sig + I*T))
+@eprog\noindent
+or similar commands. Take the example of the inverse Mellin transform of
+$\Gamma(s)^3$ given in \kbd{intmellininv}:
+
+\bprog
+? \p308
+? A = intmellininv(s=2,4, gamma(s)^3);
+time = 51,300 ms. \\@com slow because of $\Gamma(s)^3$.
+? tab = intfuncinit(t=[[-1], 3*Pi/2],[[1], 3*Pi/2], gamma(2+I*t)^3, 1);
+time = 25,370 ms.
+? M(z) = intmellininvshort(2,z,tab)
+? M(4) - A
+time = 1,040 ms. 
+%4 = 0.E-310 + 4.22... E-312*I \\@com 50 times faster than \kbd{intmellininv} and perfect.
+? \p 105
+? tab = intfuncinit(t=[-1], [1], gamma(2+I*t)^3, 1);
+time = 580 ms.
+? A = intmellininv(s=2,4,gamma(s)^3);
+time = 1190 ms. \\@com at 105D, slow but reasonable.
+? M(4) - A
+time = 30 ms.
+%8 = 3.4... E-108 + 1.20... E-109*I \\@com 40 times faster and perfect.
+@eprog\noindent
+In the computation of \var{tab} we did not include the exact exponential
+decrease of $\Gamma(2+it)^3$, namely $\alpha = 3\pi/2$, although the result
+would have been essentially the same.
+
+\synt{intmellininvshort}{GEN sig, GEN z, GEN tab, long prec}.
+
+\subsecidx{intnum}$(X=a,b,\var{expr},\{\var{tab}\})$: numerical integration
+of \var{expr} on $[a,b]$ (possibly infinite interval) with respect to $X$,
+where $a$ and $b$ are coded as explained below. The integrand may have values
+belonging to a vector space over the real numbers; in particular, it can be
+complex-valued or vector-valued.
+
+If \var{tab} is omitted, necessary integration tables are computed using
+\kbd{intnuminit} according to the current precision. It may be a positive
+integer $m$, and tables are computed assuming the integration step is
+$1/2^m$. Finally \var{tab} can be a table output by \kbd{intnuminit}, in
+which case it is used directly. This is important if several integrations of
+the same type are performed (on the same kind of interval and functions, and
+the same accuracy), since it saves expensive precomputations.
+
+If \var{tab} is omitted the algorithm guesses a reasonable value for $m$
+depending on the current precision. That value may be obtained as
+\bprog
+  intnumstep()
+@eprog\noindent
+However this value may be off from the optimal one, and this is important
+since the integration time is roughly proportional to $2^m$. One may try
+consecutive values of $m$ until they give the same value up to an accepted
+error.
+
+The endpoints $a$ and $b$ are coded as follows. If $a$ is not at $\pm\infty$,
+it is either coded as a scalar (real or complex), or as a two component vector 
+$[a,\alpha]$, where the function is assumed to have a singularity of the
+form $(x-a)^{\alpha+\epsilon}$ at $a$, where $\epsilon$ indicates that powers
+of logarithms are neglected. In particular, $[a,\alpha]$ with $\alpha\ge 0$
+is equivalent to $a$. If a wrong singularity exponent is used, the result
+will lose a catastrophic number of decimals, for instance approximately half
+the number of digits will be correct if $\alpha=-1/2$ is omitted.
+
+The endpoints of integration can be $\pm\infty$, which is coded as 
+$[\pm 1]$ or as $[[\pm1],\alpha]$. Here $\alpha$ codes the behaviour of the
+function at $\pm\infty$ as follows.
+
+\item $\alpha=0$ (or no $\alpha$ at all, i.e. simply $[\pm1]$) assumes that the
+function to be integrated tends to zero, but not exponentially fast, and not
+oscillating such as $\sin(x)/x$.
+
+\item $\alpha>0$ assumes that the function tends to zero exponentially fast
+approximately as $\exp(-\alpha x)$, including reasonably oscillating
+functions such as $\exp(-x)\sin(x)$. The precise choice of $\alpha$, while
+useful in extreme cases, is not critical, and may be off by a \emph{factor}
+of $10$ or more from the correct value.
+
+\item $\alpha<-1$ assumes that the function tends to $0$ slowly, like
+$x^{\alpha}$. Here it is essential to give the correct $\alpha$, if possible,
+but on the other hand $\alpha\le -2$ is equivalent to $\alpha=0$, in other
+words to no $\alpha$ at all.
+
+\smallskip The last two codes are reserved for oscillating functions.
+Let $k > 0$ real, and $g(x)$ a nonoscillating function tending to $0$, then
+
+\item $\alpha=k I$ assumes that the function behaves like $\cos(kx)g(x)$.
+
+\item $\alpha=-kI$ assumes that the function behaves like $\sin(kx)g(x)$.
+
+\noindent Here it is critical to give the exact value of $k$. If the
+oscillating part is not a pure sine or cosine, one must expand it into a
+Fourier series, use the above codings, and sum the resulting contributions.
+Otherwise you will get nonsense. Note that $\cos(kx)$ (and similarly
+$\sin(kx)$) means that very function, and not a translated version such as
+$\cos(kx+a)$.
+
+If for instance $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero exponentially 
+fast as $\exp(-\alpha x)$, it is up to the user to choose between 
+$[[\pm1],\alpha]$ and $[[\pm1],kI]$, but a good rule of thumb is that if the
+oscillations are much weaker than the exponential decrease, choose 
+$[[\pm1],\alpha]$, otherwise choose $[[\pm1],kI]$, although the latter can
+reasonably be used in all cases, while the former cannot. To take a specific
+example, in the inverse Mellin transform, the function to be integrated is
+almost always exponentially decreasing times oscillating. If we choose the
+oscillating type of integral we perhaps obtain the best results, at the
+expense of having to recompute our functions for a different value of the
+variable $z$ giving the transform, preventing us to use a function such as
+\kbd{intmellininvshort}. On the other hand using the exponential type of
+integral, we obtain less accurate results, but we skip expensive
+recomputations. See \kbd{intmellininvshort} and \kbd{intfuncinit} for more
+explanations.
+
+\smallskip
+\misctitle{Note.} If you do not like the code $[\pm1]$ for $\pm\infty$, you
+are welcome to set, e.g \kbd{oo = [1]} or \kbd{INFINITY = [1]}, then
+using \kbd{+oo}, \kbd{-oo}, \kbd{-INFINITY}, etc. will have the expected
+behaviour.
+
+We shall now see many examples to get a feeling for what the various
+parameters achieve. All examples below assume precision is set to $105$
+decimal digits. We first type
+\bprog
+? \p 105
+? oo = [1]  \\@com for clarity
+@eprog
+
+\misctitle{Apparent singularities.} Even if the function $f(x)$ represented
+by \var{expr} has no singularities, it may be important to define the
+function differently near special points. For instance, if $f(x) = 1
+/(\exp(x)-1) - \exp(-x)/x$, then $\int_0^\infty f(x)\,dx=\gamma$, Euler's
+constant \kbd{Euler}. But
+
+\bprog
+? f(x) = 1/(exp(x)-1) - exp(-x)/x
+? intnum(x = 0, [oo,1],  f(x)) - Euler
+%1 = 6.00... E-67
+@eprog\noindent
+thus only correct to $76$ decimal digits. This is because close to $0$ the 
+function $f$ is computed with an enormous loss of accuracy.
+ A better solution is
+
+\bprog
+? f(x) = 1/(exp(x)-1)-exp(-x)/x
+? F = truncate( f(t + O(t^7)) ); \\@com expansion around t = 0
+? g(x) = if (x > 1e-18, f(x), subst(F,t,x))  \\@com note that $6 \cdot 18 > 105$
+? intnum(x = 0, [oo,1],  g(x)) - Euler
+%2 = 0.E-106 \\@com perfect
+@eprog\noindent
+It is up to the user to determine constants such as the $10^{-18}$ and $7$
+used above.
+
+\misctitle{True singularities.} With true singularities the result is much
+worse. For instance
+
+\bprog
+? intnum(x = 0, 1,  1/sqrt(x)) - 2
+%1 = -1.92... E-59 \\@com only $59$ correct decimals
+
+? intnum(x = [0,-1/2], 1,  1/sqrt(x)) - 2
+%2 = 0.E-105 \\@com better
+@eprog
+
+\misctitle{Oscillating functions.}
+
+\bprog
+? intnum(x = 0, oo, sin(x) / x) - Pi/2
+%1 = 20.78.. \\@com nonsense
+? intnum(x = 0, [oo,1], sin(x)/x) - Pi/2
+%2 = 0.004.. \\@com bad
+? intnum(x = 0, [oo,-I], sin(x)/x) - Pi/2
+%3 = 0.E-105 \\@com perfect
+? intnum(x = 0, [oo,-I], sin(2*x)/x) - Pi/2  \\@com oops, wrong $k$
+%4 = 0.07...
+? intnum(x = 0, [oo,-2*I], sin(2*x)/x) - Pi/2
+%5 = 0.E-105 \\@com perfect
+
+? intnum(x = 0, [oo,-I], sin(x)^3/x) - Pi/4
+%6 = 0.0092... \\@com bad
+? sin(x)^3 - (3*sin(x)-sin(3*x))/4
+%7 = O(x^17)
+@eprog\noindent
+We may use the above linearization and compute two oscillating integrals with
+``infinite endpoints'' \kbd{[oo, -I]} and \kbd{[oo, -3*I]} respectively, or
+notice the obvious change of variable, and reduce to the single integral
+${1\over 2}\int_0^\infty \sin(x)/x\,dx$. We finish with some more complicated
+examples:
+
+\bprog
+? intnum(x = 0, [oo,-I], (1-cos(x))/x^2) - Pi/2
+%1 = -0.0004... \\@com bad
+? intnum(x = 0, 1, (1-cos(x))/x^2) \
++ intnum(x = 1, oo, 1/x^2) - intnum(x = 1, [oo,I], cos(x)/x^2) - Pi/2
+%2 = -2.18... E-106 \\@com OK
+
+? intnum(x = 0, [oo, 1], sin(x)^3*exp(-x)) - 0.3
+%3 = 5.45... E-107 \\@com OK
+? intnum(x = 0, [oo,-I], sin(x)^3*exp(-x)) - 0.3
+%4 = -1.33... E-89 \\@com lost 16 decimals. Try higher $m$:
+? m = intnumstep()
+%5 = 7 \\@com the value of $m$ actually used above.
+? tab = intnuminit(0,[oo,-I], m+1); \\@com try $m$ one higher.
+? intnum(x = 0, oo, sin(x)^3*exp(-x), tab) - 0.3
+%6 = 5.45... E-107 \\@com OK this time.
+@eprog
+
+\misctitle{Warning.} Like \tet{sumalt}, \kbd{intnum} often assigns a
+reasonable value to diverging integrals. Use these values at your own risk!
+For example:
+
+\bprog
+? intnum(x = 0, [oo, -I], x^2*sin(x))
+%1 = -2.0000000000...
+@eprog\noindent
+Note the formula
+$$ \int_0^\infty \sin(x)/x^s\,dx = \cos(\pi s/2) \Gamma(1-s)\;, $$
+a priori valid only for $0 < \Re(s) < 2$, but the right hand side provides an
+analytic continuation which may be evaluated at $s = -2$\dots
+
+\misctitle{Multivariate integration.}
+Using successive univariate integration with respect to different formal
+parameters, it is immediate to do naive multivariate integration. But it is
+important to use a suitable \kbd{intnuminit} to precompute data for the
+\emph{internal} integrations at least!
+
+For example, to compute the double integral on the unit disc $x^2+y^2\le1$
+of the function $x^2+y^2$, we can write
+\bprog
+? tab = intnuminit(-1,1);
+? intnum(x=-1,1, intnum(y=-sqrt(1-x^2),sqrt(1-x^2), x^2+y^2, tab), tab)
+@eprog\noindent
+The first \var{tab} is essential, the second optional. Compare:
+
+\bprog
+? tab = intnuminit(-1,1);
+time = 30 ms.
+? intnum(x=-1,1, intnum(y=-sqrt(1-x^2),sqrt(1-x^2), x^2+y^2));
+time = 54,410 ms. \\@com slow
+? intnum(x=-1,1, intnum(y=-sqrt(1-x^2),sqrt(1-x^2), x^2+y^2, tab), tab);
+time = 7,210 ms.  \\@com faster
+@eprog\noindent
+However, the \kbd{intnuminit} program is usually pessimistic when it comes to
+choosing the integration step $2^{-m}$. It is often possible to improve the
+speed by trial and error. Continuing the above example:
+\bprog
+? test(M) =
+{
+  tab = intnuminit(-1,1, M);
+  intnum(x=-1,1, intnum(y=-sqrt(1-x^2),sqrt(1-x^2), x^2+y^2,tab), tab) - Pi/2
+}
+? m = intnumstep() \\@com what value of $m$ did it take ?
+%1 = 7
+? test(m - 1)
+time = 1,790 ms.
+%2 = -2.05... E-104 \\@com $4 = 2^2$ times faster and still OK.
+? test(m - 2)
+time = 430 ms.
+%3 = -1.11... E-104 \\@com $16 = 2^4$ times faster and still OK.
+? test(m - 3)
+time = 120 ms.
+%3 = -7.23... E-60 \\@com $64 = 2^6$ times faster, only $60$ correct decimals.
+@eprog
+
+\synt{intnall}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,GEN tab, 
+long prec}, where $\kbd{eval}(x, E)$ returns the value of the function at $x$
+and an omitted \var{tab} is coded as \kbd{NULL}.
+
+\subsecidx{intnuminit}$(a,b,\{m=0\})$: initialize tables for integration from
+$a$ to $b$, where $a$ and $b$ are coded as in \kbd{intnum}. Only the
+compactness, the possible existence of singularities, the speed of decrease
+or the oscillations at infinity are taken into account, and not the values.
+For instance {\tt intnuminit(-1,1)} is equivalent to {\tt intnuminit(0,Pi)},
+and {\tt intnuminit([0,-1/2],[1])} is equivalent to {\tt
+intnuminit([-1],[-1,-1/2])}. If $m$ is not given, it is computed according to
+the current precision. Otherwise the integration step is $1/2^m$. Reasonable
+values of $m$ are $m=6$ or $m=7$ for $100$ decimal digits, and $m=9$ for
+$1000$ decimal digits.
+
+The result is technical, but in some cases it is useful to know the output.
+Let $x=\phi(t)$ be the change of variable which is used. \var{tab}[1] contains 
+the integer $m$ as above, either given by the user or computed from the default
+precision, and can be recomputed directly using the function \kbd{intnumstep}.
+\var{tab}[2] and \var{tab}[3] contain respectively the abcissa and weight
+corresponding to $t=0$ ($\phi(0)$ and $\phi'(0)$). \var{tab}[4] and
+\var{tab}[5] contain the abcissas and weights corresponding to positive
+$t=nh$ for $1\le n\le N$ and $h=1/2^m$ ($\phi(nh)$ and $\phi'(nh)$). Finally
+\var{tab}[6] and \var{tab}[7] contain either the abcissas and weights
+corresponding to negative $t=nh$ for $-N\le n\le -1$, or may be empty (but
+not always) if $\phi(t)$ is an odd function (implicitly we would have
+$\var{tab}[6]=-\var{tab}[4]$ and $\var{tab}[7]=\var{tab}[5]$).
+
+\synt{intnuminit}{GEN a, GEN b, long m, long prec}.
+
+\subsecidx{intnumromb}$(X=a,b,\var{expr},\{\fl=0\})$: numerical integration of
+\var{expr} (smooth in $]a,b[$), with respect to $X$. This function is
+deprecated, use \tet{intnum} instead. 
 
 Set $\fl=0$ (or omit it altogether) when $a$ and $b$ are not too large, the
 function is smooth, and can be evaluated exactly everywhere on the interval
@@ -6888,10 +7340,33 @@ preferable to have $a$ as large as possible, at least $a\ge1$.
 If $\fl=3$, the function is allowed to be undefined (but continuous) at $a$
 or $b$, for example the function $\sin(x)/x$ at $x=0$.
 
-\synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long
-prec}. Where $\kbd{eval}(x, E)$ returns the value of the function at $x$. You
-may store any additional information required by \kbd{eval} in $E$, or set it
-to \kbd{NULL}.
+The user should not require too much accuracy: 18 or 28 decimal digits is OK,
+but not much more. In addition, analytical cleanup of the integral must have
+been done: there must be no singularities in the interval or at the
+boundaries. In practice this can be accomplished with a simple change of
+variable. Furthermore, for improper integrals, where one or both of the
+limits of integration are plus or minus infinity, the function must decrease
+sufficiently rapidly at infinity. This can often be accomplished through
+integration by parts. Finally, the function to be integrated should not be
+very small (compared to the current precision) on the entire interval. This
+can of course be accomplished by just multiplying by an appropriate constant.
+
+Note that \idx{infinity} can be represented with essentially no loss of
+accuracy by 1e1000. However beware of real underflow when dealing with
+rapidly decreasing functions. For example, if one wants to compute the
+$\int_0^\infty e^{-x^2}\,dx$ to 28 decimal digits, then one should set
+infinity equal to 10 for example, and certainly not to 1e1000.
+
+\synt{intnumromb}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, 
+long prec}, where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
+You may store any additional information required by \kbd{eval} in $E$, or set 
+it to \kbd{NULL}.
+
+\subsecidx{intnumstep}$()$: give the value of $m$ used in all the
+\kbd{intnum} and \kbd{sumnum} programs, hence such that the integration
+step is equal to $1/2^m$.
+
+\synt{intnumstep}{long prec}.
 
 \subsecidx{prod}$(X=a,b,\var{expr},\{x=1\})$: product of expression
 \var{expr}, initialized at $x$, the formal parameter $X$ going from $a$ to
@@ -6921,7 +7396,7 @@ initialized at 1. (i.e.~to a \emph{real} number equal to 1 to the current
 \kbd{realprecision}), the formal parameter $X$ ranging over the prime numbers
 between $a$ and $b$.\sidx{Euler product}
 
-\synt{prodeuler}{entree *ep, GEN a, GEN b, char *expr, long prec}.
+\synt{prodeuler}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec}.
 
 \subsecidx{prodinf}$(X=a,\var{expr},\{\fl=0\})$: \idx{infinite product} of
 expression \var{expr}, the formal parameter $X$ starting at $a$. The evaluation
@@ -6931,7 +7406,7 @@ $\C$.
 
 If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
 
-\synt{prodinf}{entree *ep, GEN a, char *expr, long prec} ($\fl=0$), or
+\synt{prodinf}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec} ($\fl=0$), or
 \teb{prodinf1} with the same arguments ($\fl=1$).
 
 \subsecidx{solve}$(X=a,b,\var{expr})$: find a real root of expression
@@ -6940,10 +7415,7 @@ $\var{expr}(X=a) * \var{expr}(X=b) \le 0$.
 This routine uses Brent's method and can fail miserably if \var{expr} is
 not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
 
-\synt{zbrent}{void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec}.
-Where $\kbd{eval}(x, E)$ returns the value of the function at $x$. You
-may store any additional information required by \kbd{eval} in $E$, or set it
-to \kbd{NULL}.
+\synt{zbrent}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec}.
 
 \subsecidx{sum}$(X=a,b,\var{expr},\{x=0\})$: sum of expression \var{expr},
 initialized at $x$, the formal parameter going from $a$ to $b$. As for
@@ -7039,11 +7511,161 @@ time = 0 ms.
 
 \synt{suminf}{entree *ep, GEN a, char *expr, long prec}.
 
+\subsecidx{sumnum}$(X=a,sig,\var{expr},\{\var{tab}\}),\{\fl=0\}$: numerical 
+summation of \var{expr}, the variable $X$ taking integer values from ceiling 
+of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic function 
+$f(X)$ for $\Re(X)\ge sig$.
+
+$sig$ is coded as follows: either it is a real number $\sigma$, and then the
+function $f$ is assumed to decrease at least as $1/X^2$ at infinity, but not
+exponentially. Or it is a two-component vector $[\sigma,\alpha]$, where
+$\sigma$ is as before, $\alpha<-1$, and the function $f$ is then assumed to
+decrease like $X^{\alpha}$ (so $\alpha\le-2$ is equivalent to no $\alpha$ at
+all). Or it is a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
+before, $\alpha>0$, and the function $f$ is then assumed to decrease like
+$\exp(-\alpha X)$. In the latter case it is essential that $\alpha$ be
+exactly the rate of exponential decrease, and it is usually a good idea to
+increase by $1$ the default value of $m$ used for the integration step.
+
+In practice, if the function is exponentially decreasing the \kbd{sumnum}
+function is slower than \kbd{sumpos} or \kbd{suminf}. Uses the \tet{intnum}
+routines, and \var{tab} is as in intnum, but if used must be initialized with
+\kbd{sumnuminit}. At low precision, if \var{tab} is not initialized, can
+be slower than \kbd{sumpos}, when the latter is applicable. However in
+general faster for slowly decreasing functions. If \fl is nonzero, assumes
+that the function $f$ to be summed is of real type, i.e. satisfies
+$\overline{f(z)}=f(\overline{z})$, and then up to twice faster when \var{tab}
+is precomputed:
+
+\bprog
+? \p 308
+? a = sumpos(n=1, 1/(n^3+n+1));
+time = 1,410 ms.
+? tab = sumnuminit(2);
+time = 1,620 ms. \\@com slightly slower, but done once and for all.
+? b = sumnum(n=1, 2, 1/(n^3+n+1), tab);
+time = 460 ms. \\@com 3 times as fast as @kbd{sumpos}
+? a - b
+%4 = -1.004... E-306 + 0.E-320*I \\@com perfect.
+? sumnum(n=1, 2, 1/(n^3+n+1), tab, 1) - a; \\@com function of real type
+time = 240 ms. 
+%2 = -1.004... E-306 \\@com twice as fast, still perfect and no imaginary part.
+? c = sumnum(n=1, 2, 1/(n^2+1),tab,1);
+time = 170 ms. \\@com fast
+? d = sumpos(n=1, 1 / (n^2+1));
+time = 2,700 ms. \\@com slow.
+? d - c
+time = 0 ms.
+%5 = 1.97... E-306 \\@com perfect.
+@eprog
+
+For slowly decreasing function, we must indicate singularities:
+\bprog
+? \p 308
+? a = sumnum(n=1, 2, n^(-4/3));
+time = 9,930 ms. \\@com slow because of the computation of $n^{-4/3}$.
+? a - zeta(4/3)
+time = 110 ms.
+%1 = -2.42... E-107 \\@com lost 200 decimals because of singularity at $\infty$
+? b = sumnum(n=1, [2,-4/3], n^(-4/3), /*omitted*/, 1); \\@com of real type
+time = 12,210 ms.
+? b - zeta(4/3)
+%3 = 1.05... E-300 \\@com better
+@eprog
+
+Since the \emph{complex} values of the function are used, beware of
+determination problems. For instance:
+\bprog
+? \p 308
+? tab = sumnuminit([2,-3/2]);
+time = 1,870 ms.
+? sumnum(n=1,[2,-3/2], 1/(n*sqrt(n)), tab,1) - zeta(3/2)
+time = 690 ms.
+%1 = -1.19... E-305 \\@com fast and correct
+? sumnum(n=1,[2,-3/2], 1/sqrt(n^3), tab,1) - zeta(3/2)
+time = 730 ms.
+%2 = -1.55... \\@com nonsense. However
+? sumnum(n=1,[2,-3/2], 1/n^(3/2), tab,1) - zeta(3/2)
+time = 8,990 ms.
+%3 = -1.19... E-305 \\@com perfect, as $1/(n*\sqrt{n})$ above but much slower
+@eprog
+
+For exponentially decreasing functions, \kbd{sumnum} is given for
+completeness, but one of \tet{suminf} or \tet{sumpos} should always be
+preferred. If you experiment with such functions and \kbd{sumnum} anyway,
+indicate the exact rate of decrease and increase $m$ by $1$ or $2$:
+
+\bprog
+? suminf(n=1, 2^(-n)) - 1
+time = 10 ms.
+%1 = -1.11... E-308 \\@com fast and perfect
+? sumpos(n=1, 2^(-n)) - 1
+time = 10 ms.
+%2 = -2.78... E-308 \\@com also fast and perfect
+? sumnum(n=1,2, 2^(-n)) - 1
+   *** sumnum: precision too low in mpsc1 \\@com nonsense
+? sumnum(n=1, [2,log(2)], 2^(-n), /*omitted*/, 1) - 1 \\@com of real type
+time = 5,860 ms.
+%3 = -1.5... E-236 \\@com slow and lost $70$ decimals
+? m = intnumstep()
+%4 = 9
+? sumnum(n=1,[2,log(2)], 2^(-n), m+1, 1) - 1
+time = 11,770 ms.
+%5 = -1.9... E-305 \\@com now perfect, but slow.
+@eprog
+
+\synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long
+flag, long prec}.
+
+\subsecidx{sumnumalt}$(X=a,sig,\var{expr},\{\var{tab}\},\{\fl=0\})$: numerical
+summation of $(-1)^X\var{expr}(X)$, the variable $X$ taking integer values from 
+ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic 
+function for $\Re(X)\ge sig$ (or $sig[1]$). $sig$ is coded as in \kbd{sumnum}.
+However for slowly decreasing functions (where $sig$ is coded as
+$[\sigma,\alpha]$ with $\alpha<-1$), it is not really important to indicate
+$\alpha$. In fact, as for \kbd{sumalt}, the program will often give meaningful
+results (usually analytic continuations) even for divergent series.
+On the other hand the exponential decrease must be indicated.
+Uses the intnum routines, and \var{tab} is as in intnum, but if used must be 
+initialized with \kbd{sumnuminit}. If \fl is nonzero, assumes that the 
+function $f$ to be summed is of real type, i.e. satisfies 
+$\overline{f(z)}=f(\overline{z})$, and then twice faster when
+\var{tab} is precomputed: Orders of magnitude slower than \kbd{sumalt}, so not
+to be used in practice, but only given for completeness. Warning: the 
+expression \var{expr} must {\bf not} include the $(-1)^X$ coefficient. Thus 
+$\kbd{sumalt}(n=a,(-1)^nf(n))$ is (approximately) equal to 
+$\kbd{sumnumalt}(n=a,sig,f(n))$.
+
+\bprog
+? \p 308
+? tab = sumnuminit(2,,-1); \\@com abcissa $\sigma=2$, alternating sums.
+time = 1,620 ms. \\@com slow, but done once and for all.
+? a = sumnumalt(n=1,2,1/(n^3+n+1),tab,1);
+time = 230 ms. \\@com similar speed to \kbd{sumnum}
+? b = sumalt(n=1,(-1)^n/(n^3+n+1));
+time = 0 ms. \\@com infinitely faster!
+? a - b 
+time = 0 ms.
+%1 = -1.66... E-308 \\@com perfect
+@eprog
+
+\synt{sumnumalt}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long
+flag, long prec}.
+
+\subsecidx{sumnuminit}$(sig,{m=0},{sgn=1})$: initialize tables for numerical 
+summation using \kbd{sumnum} (with $\var{sgn}=1$) or \kbd{sumnumalt} (with
+$\var{sgn}=-1$), $sig$ is the abcissa of integration coded as in \kbd{sumnum},
+and $m$ is as in \kbd{intnuminit}.
+
+\synt{sumnuminit}{GEN sig, long m, long sgn, long prec}.
+
 \subsecidx{sumpos}$(X=a,\var{expr},\{\fl=0\})$: numerical summation of the
 series \var{expr}, which must be a series of terms having the same sign,
 the formal
 variable $X$ starting at $a$. The algorithm used is Van Wijngaarden's trick
-for converting such a series into an alternating one, and is quite slow.
+for converting such a series into an alternating one, and is quite slow. For
+regular functions, the function \kbd{sumnum} is in general much faster once the
+initializations have been made using \kbd{sumnuminit}.
 
 If $\fl=1$, use slightly different polynomials. Sometimes faster.
 
@@ -7105,7 +7727,7 @@ $y$-coordinates going downwards.
 
    Note that in the present version \vers\ all plotting functions (both low
 and high level) are written for the X11-window system (hence also for GUI's
-based on X11 such as Openwindows and Motif) only, though very little code
+based on X11 such as Openwindows and Motif) only, though little code
 remains which is actually platform-dependent. It is also possible to compile
 \kbd{gp} with either of the Qt or FLTK graphical libraries. A
 Suntools/Sunview, Macintosh, and an Atari/Gem port were provided for previous
@@ -7159,7 +7781,7 @@ scratchpad before commiting the part you're interested in to the final
 picture.
 
 \subsecidx{plotcolor}$(w,c)$: set default color to $c$ in rectwindow $w$.
-In present version \vers, this is only implemented for X11 window system,
+In present version \vers, this is only implemented for the X11 window system,
 and you only have the following palette to choose from:
 
 1=black, 2=blue, 3=sienna, 4=red, 5=cornsilk, 6=grey, 7=gainsborough.
@@ -7224,14 +7846,13 @@ curves.
 \kbd{ploth(X=0,2*Pi,[X,X,sin(X),cos(X)],1)} will draw a circle and the line
 $y=x$.
 
-
 \item $2 = \kbd{Recursive}$: \tev{recursive plot}. If this flag is set,
-only \emph{one} curve can be drawn at time, i.e.~\var{expr} must be either a
+only \emph{one} curve can be drawn at a time, i.e.~\var{expr} must be either a
 two-component vector (for a single parametric curve, and the parametric flag
 \emph{has} to be set), or a scalar function. The idea is to choose pairs of
 successive reference points, and if their middle point is not too far away
 from the segment joining them, draw this as a local approximation to the
-curve. Otherwise, add the middle point to the reference points. This is very
+curve. Otherwise, add the middle point to the reference points. This is
 fast, and usually more precise than usual plot. Compare the results of
 $$\kbd{ploth(X=-1,1,sin(1/X),2)}\quad
  \text{and}\quad\kbd{ploth(X=-1,1,sin(1/X))}$$
@@ -7241,9 +7862,9 @@ to the original curve. For instance you should \emph{never} plot recursively
 an odd function in a symmetric interval around 0. Try
 \bprog
   ploth(x = -20, 20, sin(x), 2)
-@eprog
-\noindent to see why. Hence, it's usually a good idea to try and plot the same
-curve with slightly different parameters.
+@eprog\noindent
+to see why. Hence, it's usually a good idea to try and plot the same curve
+with slightly different parameters.
 
 The other values toggle various display options:
 
@@ -7260,7 +7881,7 @@ on a rectwindow (as a \tet{plotrecth} call), in conjunction with
 
 \item $64 = \kbd{no\_Lines}$: only plot reference points, do not join them.
 
-\item $128 = \kbd{Points_too}$: plot both lines and points.
+\item $128 = \kbd{Points\_too}$: plot both lines and points.
 
 \item $256 = \kbd{Splines}$: use splines to interpolate the points.
 
@@ -7499,7 +8120,7 @@ example, the following prints all subgroups of index less than 2 in $G =
 [1; 2]
 [2; 1]
 [1, 0; 1, 1]
-@eprog
+@eprog\noindent
 The last one, for instance is generated by $(g_1, g_1 + g_2)$. This
 routine is intended to treat huge groups, when \tet{subgrouplist} is not an
 option due to the sheer size of the output.
@@ -7681,7 +8302,7 @@ p = 3   \\@com fix characteristic
 ...
 forprime(p = 2, N, ...)
 f(p) = ...
-@eprog
+@eprog\noindent
 since within the loop or within the function's body (even worse: in the
 subroutines called in that scope), the true global value of \kbd{p} will be
 hidden. If the statement \kbd{global(p = 3)} appears at the beginning of
@@ -7727,7 +8348,7 @@ called by the \kbd{+} operator of course):
 ? install("addii", "GG")
 ? addii(1, 2)
 %1 = 3
-@eprog
+@eprog\noindent
 Re-installing a function will print a Warning, and update the prototype code
 if needed, but will reload a symbol from the library, even it the latter has
 been recompiled.
@@ -7801,8 +8422,7 @@ You could for instance do:\sidx{logfile}
 default(logfile, "new.tex");
 default(log, 1);
 printtex(result);
-@eprog
-\noindent
+@eprog\noindent
 (You can use the automatic string expansion/concatenation process to have
 dynamic file names if you wish).
 
@@ -7872,8 +8492,8 @@ If no recovery code is given (\var{rec} is omitted) a \tev{break loop} will
 be started (see \secref{se:breakloop}). In particular
 \bprog
 ? trap()
-@eprog
-\noindent by itself installs a default error handler, that will start a break
+@eprog\noindent
+by itself installs a default error handler, that will start a break
 loop whenever an exception is raised.
 
 If \var{rec} is the empty string \kbd{""} the default handler (for that error
@@ -7940,8 +8560,8 @@ their names. Reading such a ``named object'' back in a \kbd{gp} session will set
 the corresponding user variable to the saved value. E.g after
 \bprog
 x = 1; writebin("log")
-@eprog
-\noindent reading \kbd{log} into a clean session will set \kbd{x} to $1$.
+@eprog\noindent
+reading \kbd{log} into a clean session will set \kbd{x} to $1$.
 The relative variables priorities (see \secref{se:priority}) of new variables
 set in this way remain the same (preset variables retain their former
 priority, but are set to the new value). In particular, reading such a

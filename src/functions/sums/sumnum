@@ -1,0 +1,11 @@
+Function: sumnum
+Section: sums
+C-Name: sumnum0
+Prototype: V=GGEDGD0,L,p
+Help: sumnum(X=a,sig,s,{tab},{flag=0}): numerical summation of s from 
+ X = ceiling(a) to +infinity. sig is either a scalar or a two-component vector
+ coded as in intnum, and the scalar part is larger than all the real parts of 
+ the poles of s. Uses intnum, hence tab is as in intnum. If flag is nonzero,
+ assumes that the function to be summed satisfies conj(f(z))=f(conj(z)), and
+ then up to twice faster.
+

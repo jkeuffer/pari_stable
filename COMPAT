@@ -105,6 +105,9 @@ Incompatible changes:
     gres --> grem
   - rename divise --> dvdii, gdivise --> gdvd, mpdivis --> dvdiiz, mpdivisis
     --> dvdisz
+  - library interface of functions intnum, prodeuler, suminf, sumalt,
+       sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
+       (*eval)(GEN,void*) everywhere instead of entree * ]
 
 Partially compatible changes:
 -----------------------------
