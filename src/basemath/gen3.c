@@ -1501,7 +1501,7 @@ recip(GEN x)
         u[j] = lsub((GEN)u[j], p1);
       }
       p1 = gmulsg(i,(GEN)x[i+1]);
-      for (k=2; k<max(i,mi); k++)
+      for (k=2; k<min(i,mi); k++)
       {
         p2 = gmul((GEN)x[k+1],(GEN)u[i-k+2]);
         p1 = gadd(p1, gmulsg(k,p2));
