@@ -83,6 +83,17 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 ***************************   BUGS (GP specific) ****************************
 
+-  v = vector(2); v[1] = v = 0  --> SEGV. Occurs with high probability if
+   any variable is "deleted", while it (or part of it) is still in use 
+   Reference count could be helpful here.
+
+-  saving an object containing high variable numbers in binary form, then
+   reading it back in a virgin session will create an invalid object,
+   accessing undefined variables (SEGV).
+   Should replace direct access to polx[] and polun[] arrays by a wrapper
+   which would check variable number first. Or fill them completely on 
+   startup.
+
 5  readline: assume a file 'foo' exists, \rf<TAB> --> \foo [\r f<TAB> is OK]
 
 4  changing primelimit from within forprime loop yields unpredictable results
