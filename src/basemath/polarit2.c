@@ -3469,10 +3469,9 @@ polfnf(GEN a, GEN t)
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
   vt=varn(t); v=varn(a);
-  if (vt<=v)
-    err(talker,"polynomial variable must be of higher priority than number field variable\nin factornf");
+  a = fix_relative_pol(t,a,0);
+  a = gdiv(a, content(a));
   dent=discsr(t); unt = gmodulsg(1,t);
-  a = gmul(a, unt);
   alift=lift(a);
   u = lift(gdiv(a, gmul(unt,nfgcd(alift,derivpol(alift), t, dent))));
   n = ZY_ZXY_resultant(t, u, &k);

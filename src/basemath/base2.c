@@ -2694,7 +2694,7 @@ check_pol(GEN x, long v)
 }
 
 GEN
-fix_relative_pol(GEN nf, GEN x)
+fix_relative_pol(GEN nf, GEN x, int chk_lead)
 {
   GEN xnf = (typ(nf) == t_POL)? nf: (GEN)nf[1];
   long i, vnf = varn(xnf), lx = lg(x);
@@ -2707,7 +2707,8 @@ fix_relative_pol(GEN nf, GEN x)
       check_pol((GEN)x[i], vnf);
       x[i] = lmodulcp((GEN)x[i], xnf);
     }
-  if (!gcmp1(leading_term(x))) err(impl,"non-monic relative polynomials");
+  if (chk_lead && !gcmp1(leading_term(x)))
+    err(impl,"non-monic relative polynomials");
   return x;
 }
 
@@ -2718,7 +2719,7 @@ rnfround2all(GEN nf, GEN pol, long all)
   GEN p1,p2,p3,p4,polnf,list,unnf,id,matId,I,W,pseudo,y,discpol,d,D,sym;
 
   nf=checknf(nf); polnf=(GEN)nf[1]; vpol=varn(pol);
-  pol = fix_relative_pol(nf,pol);
+  pol = fix_relative_pol(nf,pol,1);
   N=lgef(polnf)-3; n=lgef(pol)-3; discpol=discsr(pol);
   list=idealfactor(nf,discpol); ep=(long*)list[2]; list=(GEN)list[1];
   nbidp=lg(list)-1; for(i=1;i<=nbidp;i++) ep[i]=itos((GEN)ep[i]);
@@ -3095,7 +3096,7 @@ rnfequation0(GEN nf, GEN pol2, long flall)
   GEN pol1,p1,p2,rk,y,a;
 
   if (typ(nf)==t_POL) pol1=nf; else { nf=checknf(nf); pol1=(GEN)nf[1]; }
-  pol2 = fix_relative_pol(nf,pol2);
+  pol2 = fix_relative_pol(nf,pol2,1);
   v=varn(pol1); vpol=varn(pol2);
 
   l1=lgef(pol1); l2=lgef(pol2);

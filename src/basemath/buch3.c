@@ -1126,7 +1126,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
         fprintferr("       prime ideal Q: %Z\n",Q);
       eltgen = gscalcol_i(lift(gener(qgen)), N);
       for (j=1; j<=sizeofmat; j++)
-        newcol[j] = (long)nfshanks(nf,(GEN)beta[j],eltgen,Q,qrhall);
+        newcol[j] = (long)nf_PHlog(nf,(GEN)beta[j],eltgen,Q,qrhall);
       if (DEBUGLEVEL>3)
       {
         fprintferr("       generator of (Zk/Q)^*: %Z\n",eltgen);
@@ -1427,7 +1427,7 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
   nf=(GEN)bnf[7];
-  polrel = fix_relative_pol(nf,polrel);
+  polrel = fix_relative_pol(nf,polrel,1);
   if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
   reldeg=lgef(polrel)-3;
   /* reldeg-th powers are in norm group */

@@ -927,18 +927,19 @@ mul_matvec_mod_pr(GEN mat, GEN y, GEN prh)
   avma = av; return res;
 }
 
-/* smallest integer n such that g0^n=x modulo p prime */
+/* smallest integer n such that g0^n=x modulo p prime. Assume g0 has order q
+ * (p-1 if q = NULL) */
 static GEN
-Fp_shanks(GEN x,GEN g0,GEN p)
+Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 {
   long av=avma,av1,lim,lbaby,i,k,c;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
   x = modii(x,p);
   if (is_pm1(x) || egalii(p,gdeux)) { avma = av; return gzero; }
-  p1 = addsi(-1, p);
-  if (egalii(p1,x)) { avma = av; return shifti(p,-1); }
-  p1 = racine(p1);
+  p1 = addsi(-1, p); if (!q) q = p1;
+  if (egalii(p1,x)) { avma = av; return shifti(q,-1); }
+  p1 = racine(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
   lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
   g0inv = mpinvmod(g0, p); p1 = x;
@@ -977,27 +978,57 @@ Fp_shanks(GEN x,GEN g0,GEN p)
   }
 }
 
-/* smallest integer n such that g0^n=x modulo pr, assume g0 reduced  */
-/* TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
+/* Pohlig-Hellman */
 GEN
-nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall)
+Fp_PHlog(GEN a, GEN g, GEN p)
+{
+  ulong av = avma;
+  GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
+  GEN ord = subis(p,1), fa = factor(ord), ex = (GEN)fa[2];
+  long e,i,j,l;
+
+  if (typ(g) == t_INTMOD) g = lift_intern(g);
+  fa = (GEN)fa[1];
+  l = lg(fa);
+  ginv = mpinvmod(g,p);
+  v = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
+  {
+    q = (GEN)fa[i];
+    e = itos((GEN)ex[i]);
+    if (DEBUGLEVEL) 
+      fprintferr("Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
+    qj = new_chunk(e+1); qj[0] = un;
+    for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
+    t0 = divii(ord, (GEN)qj[e]);
+    a0 = powmodulo(a, t0, p); 
+    ginv0 = powmodulo(ginv, t0, p); /* order q^e */
+    g_q = powmodulo(g, divii(ord,q), p); /* order q */
+    n_q = gzero;
+    for (j=0; j<e; j++)
+    {
+      b = modii(mulii(a0, powmodulo(ginv0, n_q, p)), p);
+      b = powmodulo(b, (GEN)qj[e-1-j], p);
+      b = Fp_shanks(b, g_q, p, q);
+      n_q = addii(n_q, mulii(b, (GEN)qj[j]));
+    }
+    v[i] = lmodulcp(n_q, (GEN)qj[e]);
+  }
+  return gerepileuptoint(av, lift(chinese(v,NULL)));
+}
+
+/* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
+ * q = order of g0  (Npr - 1 if q = NULL)
+ * TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
+static GEN
+nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall,GEN q)
 {
   long av=avma,av1,lim,lbaby,i,k, f = itos((GEN)pr[4]);
   GEN p1,smalltable,giant,perm,v,g0inv,prh = (GEN)prhall[1];
   GEN multab, p = (GEN)pr[1];
 
   x = lift_intern(nfreducemodpr(nf,x,prhall));
-  if (f == 1) return gerepileuptoint(av, Fp_shanks((GEN)x[1],(GEN)g0[1],p));
-  p1 = addsi(-1, gpowgs(p,f));
-  if (isnfscalar(x))
-  {
-    x = (GEN)x[1];
-    if (gcmp1(x) || egalii((GEN)pr[1], gdeux)) { avma = av; return gzero; }
-    if (egalii(x, p1)) return gerepileuptoint(av,shifti(p1,-1));
-    v = divii(p1, addsi(-1,p));
-    g0 = lift_intern((GEN)element_powmodpr(nf,g0,v,prhall)[1]);
-    return gerepileuptoint(av, mulii(v, Fp_shanks(x,g0,p)));
-  }
+  p1 = q? q: addsi(-1, gpowgs(p,f));
   p1 = racine(p1);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in nfshanks");
   lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
@@ -1044,6 +1075,59 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall)
   }
 }
 
+/* same in nf.zk / pr
+ * TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
+GEN
+nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
+{
+  ulong av = avma;
+  GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
+  GEN ord = subis(idealnorm(nf,pr),1), fa = factor(ord), ex = (GEN)fa[2];
+  long e,i,j,l;
+
+  a = lift_intern(nfreducemodpr(nf,a,prhall));
+  if (isnfscalar(a))
+  { /* can be done in Fp^* */
+    GEN p = (GEN)pr[1], ordp = subis(p, 1);
+    a = (GEN)a[1];
+    if (gcmp1(a) || egalii(p, gdeux)) { avma = av; return gzero; }
+    if (egalii(a, ordp)) /* -1 */
+      return gerepileuptoint(av, shifti(ord,-1));
+    if (!egalii(ord, ordp)) /* we want < g > = Fp^* */
+      g = element_powmodpr(nf,g, divii(ord,ordp), prhall);
+    g = lift_intern((GEN)g[1]);
+    return gerepileuptoint(av, Fp_PHlog(a,g,p));
+  }
+  fa = (GEN)fa[1];
+  l = lg(fa);
+  ginv = lift_intern(element_invmodpr(nf, g, prhall));
+  v = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
+  {
+    q = (GEN)fa[i];
+    e = itos((GEN)ex[i]);
+    if (DEBUGLEVEL) 
+      fprintferr("nf_Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
+    qj = new_chunk(e+1); qj[0] = un;
+    for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
+    t0 = divii(ord, (GEN)qj[e]);
+    a0 = element_powmodpr(nf, a, t0, prhall); 
+    ginv0 = element_powmodpr(nf, ginv, t0, prhall); /* order q^e */
+    g_q = element_powmodpr(nf, g, divii(ord,q), prhall); /* order q */
+    n_q = gzero;
+    for (j=0; j<e; j++)
+    {
+      b = element_mulmodpr(nf,a0,
+                              element_powmodpr(nf, ginv0, n_q, prhall), prhall);
+      b = element_powmodpr(nf, b, (GEN)qj[e-1-j], prhall);
+      b = nfshanks(nf,b, g_q, pr,prhall, q);
+      n_q = addii(n_q, mulii(b, (GEN)qj[j]));
+    }
+    v[i] = lmodulcp(n_q, (GEN)qj[e]);
+  }
+  return gerepileuptoint(av, lift(chinese(v,NULL)));
+}
+
 GEN
 znlog(GEN x, GEN g0)
 {
@@ -1059,7 +1143,7 @@ znlog(GEN x, GEN g0)
       err(talker,"not an element of (Z/pZ)* in znlog");
     case t_INTMOD: x = (GEN)x[2]; break;
   }
-  return gerepileuptoint(av, Fp_shanks(x,(GEN)g0[2],p));
+  return gerepileuptoint(av, Fp_PHlog(x,(GEN)g0[2],p));
 }
 
 GEN
@@ -1350,9 +1434,8 @@ zinternallog(GEN nf,GEN list_set,long nbgen,GEN arch,GEN fa,GEN a,long index)
       p1 = (GEN)list[j]; cyc=(GEN)p1[1]; gen=(GEN)p1[2];
       if (j==1)
       {
-        if (DEBUGLEVEL>5) { fprintferr("do nfshanks\n"); flusherr(); }
         a=ainit; p3=nfmodprinit(nf,pr);
-        p3 = nfshanks(nf,a,(GEN)gen[1],pr,p3);
+        p3 = nf_PHlog(nf,a,(GEN)gen[1],pr,p3);
       }
       else
       {
