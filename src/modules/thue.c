@@ -195,7 +195,8 @@ static GEN
 inithue(GEN P, GEN bnf, long flag, long prec)
 {
   GEN MatFU, x0, tnf, tmp, gpmin, dP, csts, ALH, eps5, ro, c1, c2;
-  int k,j, s,t, n = degpol(P);
+  int k,j, n = degpol(P);
+  long s,t;
 
   if (!bnf)
   {
@@ -203,7 +204,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
     if (bnf != checkbnf_discard(bnf)) err(talker,"non-monic polynomial in thue");
     if (flag) (void)certifybuchall(bnf);
   }
-  nf_get_sign(checknf(bnf), (long*)&s, (long*)&t);
+  nf_get_sign(checknf(bnf), &s, &t);
   ro = tnf_get_roots(P, prec, s, t);
   MatFU = Conj_LH(gmael(bnf,8,5), &ALH, ro, prec);
   if (!MatFU) return NULL; /* FAIL */
@@ -602,15 +603,15 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
 {
   GEN Vect, P, ro, bnf, MatFU, A, csts, dP, vecdP;
   GEN c1,c2,c3,c4,c10,c11,c13,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5;
-  int iroot, ine, n, i, r,s,t;
-  long upb, bi1, Prec, prec;
+  int iroot, ine, n, i, r;
+  long upb, bi1, Prec, prec, s,t;
   baker_s BS;
   gpmem_t av = avma;
 
   bnf  = (GEN)tnf[2];
   if (!ne) ne = bnfisintnorm(bnf, rhs);
   if (lg(ne)==1) return NULL;
-  nf_get_sign(checknf(bnf), (long*)&s, (long*)&t);
+  nf_get_sign(checknf(bnf), &s, &t);
   BS.r = r = s+t-1;
   P      = (GEN)tnf[1]; n = degpol(P);
   ro     = (GEN)tnf[3];
