@@ -10,7 +10,7 @@ if test "$osname" = "nextstep" -o "$osname" = "linux"
 then
   level0=$src/kernel/none/asm0.h
 else
-  level0=$kercom/level0_common.h
+  level0="$kercom/level0_common.h $ker/level0.h"
 fi
 
 cat >> $file << EOT
