@@ -979,7 +979,7 @@ err_seek(long n)
 {
   while (err_catch_stack)
   {
-    cell *t = err_catch_stack->value;
+    cell *t = (cell*)err_catch_stack->value;
     if (t->flag == n || t->flag == noer) return t;
     pop_catch_cell(&err_catch_stack);
   }

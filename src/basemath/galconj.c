@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 extern GEN respm(GEN x,GEN y,GEN pm);
-extern GEN ZX_disc_all(GEN,long);
+extern GEN ZX_disc_all(GEN,ulong);
 extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
 extern GEN znstar_hnf_elts(GEN Z, GEN H);
 extern long ZX_get_prec(GEN x);
