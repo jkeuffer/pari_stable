@@ -1102,7 +1102,7 @@ long
 LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
                    long id, long *ti_LLL)
 {
-  GEN B, norm, u;
+  GEN B, norm, u, up;
   long i, s, R;
 
   if (DEBUGLEVEL>2) (void)gentimer(id);
@@ -1123,9 +1123,13 @@ LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
   for (i=1; i<=R; i++) setlg(u[i], r+1);
   if (C != 1) u = gdivexact(u, stoi(C));
 
-  s = R; u = image(u); R = lg(u)-1;
-  if (DEBUGLEVEL>2 && R < s)
-    fprintferr("LLL_cmbf: free rank decrease = %ld\n", R - s);
+  up = FpM_image(u, stoi(27449)); /* inexpensive test */
+  if (lg(up) != lg(u))
+  {
+    s = R; u = image(u); R = lg(u)-1;
+    if (DEBUGLEVEL>2 && R < s)
+      fprintferr("LLL_cmbf: free rank decrease = %ld\n", R - s);
+  }
   *ML = gmul(*ML, u); return R;
 }
 
@@ -1170,7 +1174,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   /* tmax = current number of traces used (and computed so far) */
   for (tmax = 0;; tmax += N)
   {
-    long b, goodb, S = tmax + N;
+    long bmin, b, goodb, S = tmax + N;
 
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
@@ -1178,10 +1182,10 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     C = (long)ceil(sqrt(N*n0*n0/4. / BvS));
     Bnorm = dbltor((BvS * C*C + N*n0*n0/4.) * 1.00001);
 
-    b = (long)ceil(b0 + S*logBr);
-    if (a <= b)
+    bmin = (long)ceil(b0 + S*logBr);
+    if (a <= bmin)
     {
-      a = (long)ceil(b + 3*N*logBr) + 1; /* enough for 3 more rounds */
+      a = (long)ceil(bmin + 3*N*logBr) + 1; /* enough for 3 more rounds */
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
       for (i=1; i<=n0; i++) TT[i] = 0;
@@ -1209,7 +1213,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     T2 = gmod( gmul(T, ML), pa );
     r = lg(T2)-1;
     goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
-    if (goodb > b) b = goodb;
+    b = max(bmin, goodb);
     if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b);
 
     m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
@@ -1381,7 +1385,7 @@ DDF(GEN a, long hint)
   const int MAXNP = max(5, (long)sqrt((double)da));
   long id = get_timer(0), ti = 0;
 
-  if (DEBUGLEVEL>2) ti = gentimer(0);
+  if (DEBUGLEVEL>2) ti = gentimer(id);
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) (void)timer2();
   lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
