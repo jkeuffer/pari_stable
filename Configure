@@ -621,7 +621,7 @@ case "$osname" in
   darwin) LIBS= ;;
 esac
 case "$osname-$arch" in
-  linux-*|cygwin*)
+  linux-*|cygwin*|freebsd-*)
       LD=$CC; LDFLAGS="$cflags -Xlinker -export-dynamic"
       runpathprefix='-Xlinker -rpath -Xlinker ';;
   osf1-alpha)
