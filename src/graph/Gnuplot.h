@@ -476,9 +476,16 @@ static void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax,
 /* If DLL has it, but was compiled with older Gnuplot.h */
 #  define set_mouse_feedback_rectangle	(*my_term_ftablep->mouse_feedback_func)
 #else
-#  define set_mouse_feedback_rectangle(term_xmin, term_xmax, term_ymin, term_ymax, plot_xmin, plot_xmax, plot_ymin, plot_ymax)	\
-	((my_term_ftablep->loaded & 2) ?	\
-	 ((*my_term_ftablep->mouse_feedback_func)(term_xmin, term_xmax, term_ymin, term_ymax, plot_xmin, plot_xmax, plot_ymin, plot_ymax), 0) : 0)
+#  define set_mouse_feedback_rectangle __set_mouse_feedback_rectangle
+static void
+__set_mouse_feedback_rectangle(int term_xmin, int term_xmax, 
+			     int term_ymin, int term_ymax,
+			     double plot_xmin, double plot_xmax,
+			     double plot_ymin, double plot_ymax)
+{
+  if (my_term_ftablep->loaded & 2)
+    (*my_term_ftablep->mouse_feedback_func)(term_xmin, term_xmax, term_ymin, term_ymax, plot_xmin, plot_xmax, plot_ymin, plot_ymax);
+}
 #endif	/* defined USE_SET_FEEDBACK_RECTANGLE */
 
 #  define scaled_xmax()	((int)(termprop(xmax)*plotsizes_scale_get(0)))
