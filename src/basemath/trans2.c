@@ -444,37 +444,45 @@ gsh(GEN x, long prec)
 static GEN
 mpth(GEN x)
 {
-  long l;
+  long l, s = signe(x);
   pari_sp av;
-  GEN y, p1;
+  GEN y, t;
 
-  if (!signe(x)) return realzero_bit(expo(x));
-  l = lg(x); y = cgetr(l); av = avma;
-  p1 = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
-  affrr(divrr(p1, addsr(2,p1)), y);
-  if (signe(x) < 0) setsigne(y, -signe(y)); /* tanh is odd */
-  avma = av; return y;
+  if (!s) return realzero_bit(expo(x));
+  l = lg(x);
+  if (cmprs(x, bit_accuracy(l)) >= 0) {
+    y = realun(l);
+  } else {
+    y = cgetr(l); av = avma;
+    t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
+    affrr(divrr(t, addsr(2,t)), y);
+    avma = av;
+  }
+  if (s < 0) setsigne(y, -signe(y)); /* tanh is odd */
+  return y;
 }
 
 GEN
 gth(GEN x, long prec)
 {
-  pari_sp av, tetpil;
-  GEN y, p1;
+  pari_sp av;
+  GEN y, t;
 
   switch(typ(x))
   {
     case t_REAL: return mpth(x);
     case t_COMPLEX:
-      av=avma; p1=gexp(gmul2n(x,1),prec);
-      p1=gdivsg(-2,gaddgs(p1,1)); tetpil=avma;
-      return gerepile(av,tetpil,gaddsg(1,p1));
+      av = avma;
+      t = gexp(gmul2n(x,1),prec);
+      t = gdivsg(-2, gaddgs(t,1));
+      return gerepileupto(av, gaddsg(1,t));
     case t_INTMOD: case t_PADIC: err(typeer,"gth");
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (gcmp0(y)) return gcopy(y);
-      p1 = gexp(gmul2n(y, 1),prec);
-      return gerepileupto(av, gdiv(gsubgs(p1,1), gaddgs(p1,1)));
+      t = gexp(gmul2n(y, 1),prec);
+      t = gdivsg(-2, gaddgs(t,1));
+      return gerepileupto(av, gaddsg(1,t));
   }
   return transc(gth,x,prec);
 }
