@@ -1540,6 +1540,7 @@ GEN     FpXV_FpV_innerprod(GEN V, GEN W, GEN p);
 GEN     FpXV_prod(GEN V, GEN p);
 GEN     FpXV_red(GEN z, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
+GEN     FpX_rescale(GEN P, GEN h, GEN p);
 GEN     FpY_FpXY_resultant(GEN a, GEN b0, GEN p);
 GEN     Fq_inv(GEN x, GEN pol, GEN p);
 GEN     Fq_invsafe(GEN x, GEN pol, GEN p);

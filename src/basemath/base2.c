@@ -1002,10 +1002,12 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 }
 
 static GEN
-get_partial_order_as_pols(GEN p, GEN f)
+get_partial_order_as_pols(GEN p, GEN f, GEN *d)
 {
   GEN b = maxord(p,f, ggval(ZX_disc(f),p));
-  return mat_to_vecpol(b, varn(f));
+  GEN z = Q_remove_denom( mat_to_vecpol(b, varn(f)), d );
+  if (!*d) *d = gun;
+  return z;
 }
 
 long
@@ -1023,6 +1025,7 @@ FpX_val(GEN x0, GEN t, GEN p, GEN *py)
   *py = x; return k;
 }
 
+#if 0
 /* e in Qp, f i Zp. Return r = e mod (f, pk) */
 static GEN
 QpX_mod(GEN e, GEN f, GEN pk)
@@ -1035,13 +1038,25 @@ QpX_mod(GEN e, GEN f, GEN pk)
   if (d) e = gdiv(e, d);
   return e;
 }
+#endif
+
+static void
+update_den(GEN *e, GEN *de)
+{
+  GEN ce = Q_content(*e);
+  if (ce != gun) { 
+    ce = gcdii(*de, ce);
+    *de = diviiexact(*de, ce);
+    *e  = gdivexact(*e, ce);
+  }
+}
 
 /* if flag != 0, factorization to precision r (maximal order otherwise)
  * nu irreducible mod p, divides chi */
 GEN
 Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 {
-  GEN fred,res,pr,pk,ph,pdr,b1,b2,a,e,f1,f2;
+  GEN fred, res, pr, pk, ph, pdr, b1, b2, a, e, de, f1, f2, dt, th;
 
   if (DEBUGLEVEL>2)
   {
@@ -1054,36 +1069,45 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
     }
     fprintferr("\n");
   }
+  pdr = respm(f, derivpol(f), gpowgs(p,mf+1));
 
   if (!FpX_val(chi, nu, p, &b1))
     err(talker, "bug in Decomp (not a factor), is p = %Z a prime?", p);
   b2 = FpX_div(chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
-  pdr = respm(f, derivpol(f), gpowgs(p,mf+1));
-  e = RX_RXQ_compo(a, theta, f);
-  e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
+  /* E = e / de, e in Z[X], de in Z,  E = a(theta) mod (f, p) */
+  th = Q_remove_denom(theta, &dt);
+  if (!dt) dt = gun;
+  de = gpowgs(dt, degpol(a));
+  pr = mulii(p, de);
+  e = FpX_FpXQ_compo(FpX_rescale(a, dt, pr), th, f, pr);
+  update_den(&e, &de);
 
   pr = flag? gpowgs(p,flag): mulii(p,sqri(pdr));
   pk = p; ph = mulii(pdr,pr);
   /* E(t) - e(t) belongs to p^k Op, which is contained in p^(k-df)*Zp[xi] */
   while (cmpii(pk,ph) < 0)
-  { /* e <-- e^2(3-2e) mod p^2k */
+  { /* E <-- E^2(3-2E) mod p^2k, with E = e/de */
+    GEN D;
     pk = sqri(pk);
-    e = gmul(gsqr(e), gsubsg(3,gmul2n(e,1)));
-    e = QpX_mod(e, f, pk);
+    e = gmul(gsqr(e), gsub(mulsi(3,de), gmul2n(e,1)));
+    de= mulii(de, sqri(de));
+    D = mulii(pk, de);
+    e = FpX_rem(e, centermod(f, D), D); /* e/de defined mod pk */
+    update_den(&e, &de);
   }
+  ph = mulii(de, pr);
   fred = centermod(f, ph);
-  f1 = gcdpm(fred, gmul(pdr,gsubsg(1,e)), ph);
+  e    = centermod(e, ph);
+
+  f1 = gcdpm(fred, gsub(de, e), ph);
   fred = centermod(fred, pr); /* pr | ph */
-  f1 = centermod(f1, pr);
+  f1   = centermod(f1,   pr);
   f2 = FpX_div(fred,f1, pr);
   f2 = FpX_center(f2, pr);
 
   if (DEBUGLEVEL>5)
-  {
-    fprintferr("  leaving Decomp");
-    fprintferr(" with parameters: f1 = %Z\nf2 = %Z\ne = %Z\n\n", f1,f2,e);
-  }
+    fprintferr("  leaving Decomp with parameters: f1 = %Z\nf2 = %Z\ne = %Z\nde= %Z\n", f1,f2,e,de);
 
   if (flag)
   {
@@ -1094,19 +1118,28 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   }
   else
   {
-    GEN ib1, ib2;
+    GEN D = de, d1, d2, ib1, ib2;
     long n, n1, n2, i;
-    ib1 = get_partial_order_as_pols(p,f1); n1 = lg(ib1)-1;
-    ib2 = get_partial_order_as_pols(p,f2); n2 = lg(ib2)-1;
-    n = n1+n2;
+    ib1 = get_partial_order_as_pols(p,f1, &d1); n1 = lg(ib1)-1;
+    ib2 = get_partial_order_as_pols(p,f2, &d2); n2 = lg(ib2)-1; n = n1+n2;
+    i = cmpii(d1, d2);
+    if (i < 0) {
+      ib1 = gmul(ib1, diviiexact(d2, d1));
+      d1 = d2;
+    }
+    else if (i > 0) {
+      ib2 = gmul(ib2, diviiexact(d1, d2));
+    }
+    D = mulii(d1, D);
+    fred = centermod(f, D);
     res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
-      res[i] = (long)QpX_mod(gmul(gmul(pdr,(GEN)ib1[i]),e), f, pdr);
-    e = gsubsg(1,e); ib2 -= n1;
+      res[i] = (long)centermod(FpX_rem(gmul((GEN)ib1[i],e), fred, D), D);
+    e = gsub(de, e); ib2 -= n1;
     for (   ; i<=n; i++)
-      res[i] = (long)QpX_mod(gmul(gmul(pdr,(GEN)ib2[i]),e), f, pdr);
+      res[i] = (long)centermod(FpX_rem(gmul((GEN)ib2[i],e), fred, D), D);
     res = vecpol_to_mat(res, n);
-    return gdiv(hnfmodidraw(res,pdr), pdr); /* normalized integral basis */
+    return gdiv(hnfmodidraw(res,D), D); /* normalized integral basis */
   }
 }
 
@@ -1129,22 +1162,26 @@ vstar(GEN p,GEN h, long *L, long *E)
   *E = k/w;
 }
 
-/* reduce the element elt modulo rd, taking first care of the denominators */
+/* reduce the element a modulo N, taking first care of the denominators */
 static GEN
-redelt(GEN elt, GEN rd, GEN pd)
+redelt(GEN a, GEN N, GEN p)
 {
-  GEN den, nelt, nrd, relt;
-
-  den  = ggcd(Q_denom(elt), pd);
-  nelt = gmul(den, elt);
-  nrd  = gmul(den, rd);
-
-  if (typ(elt) == t_POL)
-    relt = polmodi(nelt, nrd);
-  else
-    relt = centermod(nelt, nrd);
-
-  return gdiv(relt, den);
+  GEN da, z;
+  a = Q_remove_denom(a, &da);
+  if (da) 
+  {
+    long v = pvaluation(da, p, &z);
+    if (v) {
+      da = gpowgs(p, v);
+      N  = mulii(da, N);
+    }
+    else
+      da = NULL;
+    if (!is_pm1(z)) a = gmul(a, mpinvmod(z, N));
+  }
+  a = centermod(a, N);
+  if (da) a = gdiv(a, da);
+  return a;
 }
 
 /* compute the Newton sums of g(x) mod pp from its coefficients */
@@ -1327,7 +1364,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   /* this can happen only if gamma is incorrect (not an integer) */
   if (divise(Q_denom(chi), p)) return NULL;
 
-  return redelt(chi, pp, pp);
+  return redelt(chi, pp, p);
 }
 
 /* Factor characteristic polynomial of beta mod p */
@@ -1483,7 +1520,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
   {
     npmr  = mulii(sqri(pdr), p);
     nchi  = polmodi(nchi, npmr);
-    nalph = redelt(nalph? nalph: alph, npmr, pmf);
+    nalph = redelt(nalph, npmr, p);
   }
 
   affii(gzero, (GEN)ns[1]); /* kill cache again (contains data for fx) */
@@ -1542,8 +1579,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
   for(;;)
   {
-    /* kappa needs to be recomputed */
-    kapp = NULL;
+    kapp = NULL; /* needs to be recomputed */
     Fa   = degpol(nu);
     /* the prime element in Zp[alpha] */
     pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
@@ -1558,7 +1594,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       pdr  = (GEN)w[4];
       pia  = getprime(p, chi, polx[v], chi, nu, &La, &Ea);
     }
-    pia  = redelt(pia, pmr, pmf);
+    pia  = redelt(pia, pmr, p);
 
     oE = Ea; opa = RX_RXQ_compo(pia, alph, fx);
 
@@ -1568,7 +1604,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     /* we change alpha such that nu = pia */
     if (La > 1)
     {
-      alph = gadd(alph, RX_RXQ_compo(pia, alph, fx));
+      alph = gadd(alph, opa);
       w = update_alpha(p, fx, alph, NULL, pmr, pmf, mf, ns);
       alph = (GEN)w[1];
       chi  = (GEN)w[2];
@@ -1581,7 +1617,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     {
       if (flag) { avma = av; return NULL; }
 
-      alph = redelt(alph, sqri(p), pmf);
+      alph = redelt(alph, sqri(p), p);
       return dbasis(p, fx, mf, alph, p);
     }
 
@@ -1650,11 +1686,11 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (!kapp)
 	{
 	  kapp = QX_invmod(nu, chi);
-	  kapp = redelt(kapp, pmr, pmf);
+	  kapp = redelt(kapp, pmr, p);
 	  kapp = gmodulcp(kapp, chi);
 	}
 	gamm = lift(gmul(gamm, gpowgs(kapp, er)));
-	gamm = redelt(gamm, p, pmf);
+	gamm = redelt(gamm, p, p);
       }
 
       if (DEBUGLEVEL >= 6)
@@ -1693,7 +1729,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  {
 	    gamm = gmul(gamm, gpowgs(nu, er));
 	    gamm = gmod(gamm, chi);
-	    gamm = redelt(gamm, p, pmr);
+	    gamm = redelt(gamm, p, p);
 	  }
 	  chig = mycaract(chi, gamm, p, pmf, ns);
 	  if (fm && !gcmp1(Q_denom(chig))) { fm = -1; continue; }
@@ -1706,7 +1742,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (l > 1)
 	{ /* at least 2 factors mod p ==> chi can be split */
 	  phi  = RX_RXQ_compo(gamm, alph, fx);
-	  phi  = redelt(phi, p, pmf);
+	  phi  = redelt(phi, p, p);
 	  if (flag) mf += 3;
 	  return Decomp(p, fx, mf, phi, chig, nug, flag);
 	}
@@ -1719,7 +1755,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  if (gcmp1((GEN)w[1]))
 	  { /* at least 2 factors mod p ==> chi can be split */
 	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
-	    phi = redelt(phi, p, pmf);
+	    phi = redelt(phi, p, p);
 	    if (flag) mf += 3;
 	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
 	  }
@@ -1786,7 +1822,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
           /* there are at least 2 factors mod. p => chi can be split */
           (void)delete_var();
           phi = RX_RXQ_compo(eta, alph, fx);
-          phi = redelt(phi, p, pmf);
+          phi = redelt(phi, p, p);
           if (flag) mf += 3;
           return Decomp(p, fx, mf, phi, chie, nue, flag);
         }
@@ -1809,14 +1845,14 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	{
 	  if (DEBUGLEVEL >= 5)
 	    fprintferr("  Increasing Ea\n");
-	  pie = redelt(pie, p, pmf);
+	  pie = redelt(pie, p, p);
 	  /* we compute a new element such E = lcm(Ea, Ee) */	
 	  w = testc2(p, chi, pmr, pmf, nu, Ea, pie, Ee, ns);
 	  if (gcmp1((GEN)w[1]))
 	  {
 	    /* there are at least 2 factors mod. p => chi can be split */
 	    phi = RX_RXQ_compo((GEN)w[2], alph, fx);
-	    phi = redelt(phi, p, pmf);
+	    phi = redelt(phi, p, p);
 	    if (flag) mf += 3;
 	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
 	  }
@@ -1854,7 +1890,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	p1 = (GEN)factmod0(chi, p)[1];
 	l  = lg(p1) - 1;
 	if (l == 1) { avma = av; return NULL; }
-	phi = redelt(alph, p, pmf);
+	phi = redelt(alph, p, p);
 	return Decomp(p, fx, ggval(pmf, p), phi, chi, (GEN)p1[l], flag);
       }
       else
@@ -1916,7 +1952,7 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
   c2 = lift_intern(gpowgs(gmodulcp(thet2, fa), r));
   c3 = gdiv(gmod(gmul(c1, c2), fa), gpowgs(p, t));
 
-  psi = redelt(c3, pmr, pmr);
+  psi = redelt(c3, pmr, p);
   phi = gadd(polx[v], psi);
 
   w = factcp(p, fa, phi, pmf, ns);
