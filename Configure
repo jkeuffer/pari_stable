@@ -959,7 +959,7 @@ case "$osname" in
 esac
 case "$osname-$arch" in
   linux-*|cygwin*)
-      LD=$CC; LDFLAGS="-Xlinker -export-dynamic"
+      LD=$CC; LDFLAGS="$cflags -Xlinker -export-dynamic"
       runpathprefix='-Xlinker -rpath -Xlinker ';;
   osf1-alpha)
       LD=$ld; LIBS="$LIBS -lots -lc"; runpathprefix='-rpath '
@@ -967,12 +967,12 @@ case "$osname-$arch" in
       case "$optimization" in
 	full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
       esac;;
-  solaris-*) LD=$CC; LDFLAGS=; runpathprefix=-R ;;
-  os2-*)     LD=$CC; LDFLAGS=-Zexe
+  solaris-*) LD=$CC; LDFLAGS=$cflags; runpathprefix=-R ;;
+  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe"
       case "$optimization" in
 	full) LDFLAGS="$LDFLAGS -s";;
       esac;;
-  *)         LD=$CC; LDFLAGS=;;
+  *)         LD=$CC; LDFLAGS=$cflags ;;
 esac
 
 if test "$fastread" != yes; then
