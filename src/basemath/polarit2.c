@@ -2843,7 +2843,7 @@ Q_remove_denom(GEN x, GEN d)
       for (j=1; j<l; j++)
       {
         GEN c = (GEN)x[j], C = cgetg(h,t_COL);
-        for (i=1; i<l; i++) C[i] = (long)_rd((GEN)c[i], d);
+        for (i=1; i<h; i++) C[i] = (long)_rd((GEN)c[i], d);
         y[j] = (long)C;
       }
       break;
