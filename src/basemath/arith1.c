@@ -766,7 +766,7 @@ kross(long x, long y)
     if (odd(r) && ome(x)) s = -s;
     y1 >>= r;
   }
-  x %= y1; if (x < 0) x += y1;
+  x = x % (long)y1; if (x < 0) x += y1;
   return krouu((ulong)x, y1, s);
 }
 
