@@ -1891,15 +1891,15 @@ identifier(void)
         err(talker2, "local() bloc must appear before any other expression",
                      mark.identifier,mark.start);
       match('=');
-      while (strncmp(analyseur,"local(",6) == 0)
-      {
-        analyseur += 6;
-        nloc += check_args();
-        match(')'); while(separe(*analyseur)) analyseur++;
-      }
       { /* checking function definition */
         char *oldredef = redefine_fun;
         skipping_fun_def++;
+        while (strncmp(analyseur,"local(",6) == 0)
+        {
+          analyseur += 6;
+          nloc += check_args();
+          match(')'); while(separe(*analyseur)) analyseur++;
+        }
         start = analyseur; skipseq(); len = analyseur-start;
         skipping_fun_def--; redefine_fun = oldredef;
       }
