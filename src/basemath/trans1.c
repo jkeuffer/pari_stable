@@ -418,93 +418,13 @@ rpowuu(ulong a, ulong n, long prec)
   return gerepileuptoleaf(av, y);
 }
 
-GEN
-gpowgs(GEN x, long n)
-{
-  long m;
-  pari_sp av;
-  static long gn[3] = {evaltyp(t_INT)|_evallg(3), 0, 0};
-  GEN y;
-
-  if (n == 0) return puiss0(x);
-  if (n == 1) return gcopy(x);
-  if (n ==-1) return ginv(x);
-  if (n>0) { gn[1] = evalsigne( 1) | evallgefint(3); gn[2]= n; }
-  else     { gn[1] = evalsigne(-1) | evallgefint(3); gn[2]=-n; }
- /* Under current word and bit field sizes, an integer power with multiword
-  * exponent will overflow.  But it seems easier to call powii|Fp_pow() with a
-  * mock-up GEN as 2nd argument than to write separate versions for a long
-  * exponent.  Note that n = HIGHBIT is an invalid argument. */
-  switch(typ(x))
-  {
-    case t_INT:
-    {
-      long sx = signe(x), sr = (sx<0 && (n&1))? -1: 1;
-      GEN t;
-      if (n>0) return powiu(x, n, sr);
-      if (!sx) err(gdiver);
-      t = (sr > 0)? gun: negi(gun);
-      if (is_pm1(x)) return t;
-      /* n<0, |x|>1 */
-      y = cgetg(3,t_FRAC);
-      y[1] = (long)t;
-      y[2] = (long)powiu(x, -n, 1); /* force denominator > 0 */
-      return y;
-    }
-    case t_INTMOD:
-      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      y[2] = (long)Fp_pow((GEN)x[2],(GEN)gn,(GEN)x[1]);
-      return y;
-    case t_FRAC:
-    {
-      GEN a = (GEN)x[1], b = (GEN)x[2];
-      long sr = (n&1 && (signe(a)!=signe(b))) ? -1 : 1;
-      if (n > 0) { if (!signe(a)) return gzero; }
-      else
-      { /* n < 0 */
-        if (!signe(a)) err(gdiver);
-        /* +-1/x[2] inverts to an integer */
-        n = -n;
-        if (is_pm1(a)) return powiu(b, n, sr);
-        y = b; b = a; a = y;
-      }
-      y = cgetg(3, t_FRAC);
-      y[1] = (long)powiu(a, n, sr);
-      y[2] = (long)powiu(b, n, 1);
-      return y;
-    }
-    case t_PADIC: case t_POL: case t_POLMOD:
-      return powgi(x,gn);
-    case t_RFRAC:
-    {
-      av = avma; y = cgetg(3, t_RFRAC); m = labs(n);
-      y[1] = lpowgs((GEN)x[1],m);
-      y[2] = lpowgs((GEN)x[2],m);
-      if (n < 0) y = ginv(y);
-      return gerepileupto(av,y);
-    }
-    default:
-      m = labs(n); av = avma; y = NULL;
-      for (; m>1; m>>=1)
-      {
-        if (m&1) y = y? gmul(y,x): x;
-        x = gsqr(x);
-      }
-      y = y? gmul(y,x): x;
-      if (n < 0) y = ginv(y);
-      return gerepileupto(av,y);
-  }
-}
-
 /* assume x != 0 */
-GEN
-pow_monome(GEN x, GEN N)
+static GEN
+pow_monome(GEN x, long n)
 {
-  long n, i, dx, d;
+  long i, dx, d;
   GEN A, b, y;
 
-  if (is_bigint(N)) err(talker,"degree overflow in pow_monome");
-  n = itos(N);
   if (n < 0) { n = -n; y = cgetg(3, t_RFRAC); } else y = NULL;
   
   dx = degpol(x);
@@ -530,6 +450,77 @@ pow_monome(GEN x, GEN N)
   A[d] = (long)b; return y;
 }
 
+GEN
+gpowgs(GEN x, long n)
+{
+  long m;
+  pari_sp av;
+  GEN y;
+
+  if (n == 0) return puiss0(x);
+  if (n == 1) return gcopy(x);
+  if (n ==-1) return ginv(x);
+  switch(typ(x))
+  {
+    case t_INT:
+    {
+      long sx = signe(x), sr = (sx<0 && (n&1))? -1: 1;
+      GEN t;
+      if (n>0) return powiu(x, n, sr);
+      if (!sx) err(gdiver);
+      t = (sr > 0)? gun: negi(gun);
+      if (is_pm1(x)) return t;
+      /* n<0, |x|>1 */
+      y = cgetg(3,t_FRAC);
+      y[1] = (long)t;
+      y[2] = (long)powiu(x, -n, 1); /* force denominator > 0 */
+      return y;
+    }
+    case t_FRAC:
+    {
+      GEN a = (GEN)x[1], b = (GEN)x[2];
+      long sr = (n&1 && (signe(a)!=signe(b))) ? -1 : 1;
+      if (n > 0) { if (!signe(a)) return gzero; }
+      else
+      { /* n < 0 */
+        if (!signe(a)) err(gdiver);
+        /* +-1/x[2] inverts to an integer */
+        n = -n;
+        if (is_pm1(a)) return powiu(b, n, sr);
+        y = b; b = a; a = y;
+      }
+      y = cgetg(3, t_FRAC);
+      y[1] = (long)powiu(a, n, sr);
+      y[2] = (long)powiu(b, n, 1);
+      return y;
+    }
+    case t_PADIC: case t_POLMOD: case t_INTMOD:
+    {
+      static long gn[3] = {evaltyp(t_INT)|_evallg(3), 0, 0};
+      if (n>0) { gn[1] = evalsigne( 1) | evallgefint(3); gn[2]= n; }
+      else     { gn[1] = evalsigne(-1) | evallgefint(3); gn[2]=-n; }
+      return powgi(x,gn);
+    }
+    case t_RFRAC:
+    {
+      av = avma; y = cgetg(3, t_RFRAC); m = labs(n);
+      y[1] = lpowgs((GEN)x[1],m);
+      y[2] = lpowgs((GEN)x[2],m);
+      if (n < 0) y = ginv(y);
+      return gerepileupto(av,y);
+    }
+    case t_POL:
+      if (ismonome(x)) return pow_monome(x, n);
+    default:
+    {
+      pari_sp av = avma;
+      y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqr, &_mul);
+      if (n < 0) y = ginv(y);
+      return av==avma? gcopy(y): gerepileupto(av,y);
+    }
+  }
+}
+
 extern GEN powrealform(GEN x, GEN n);
 
 /* n is assumed to be an integer */
@@ -539,20 +530,20 @@ powgi(GEN x, GEN n)
   long sn = signe(n);
   GEN y;
 
-  if (typ(n) != t_INT) err(talker,"not an integral exponent in powgi");
   if (!sn) return puiss0(x);
-
   switch(typ(x))
   {
     case t_INT:
     {
       long sx = signe(x), sr = (sx<0 && mod2(n))? -1: 1;
+      GEN t;
       if (sn>0) return powii(x,n,sr);
       if (!sx) err(gdiver);
-      if (is_pm1(x)) return (sr < 0)? icopy(x): gun;
+      t = (sr > 0)? gun: negi(gun);
+      if (is_pm1(x)) return t;
       /* n<0, |x|>1 */
       y = cgetg(3,t_FRAC);
-      y[1] = (sr>0)? un: lnegi(gun);
+      y[1] = (long)t;
       y[2] = (long)powii(x,n,1);
       return y;
     }
@@ -604,7 +595,7 @@ powgi(GEN x, GEN n)
     case t_QFR:
       if (signe(x[4])) return powrealform(x,n);
     case t_POL:
-      if (ismonome(x)) return pow_monome(x,n);
+      return gpowgs(x, itos(n));
     default:
     {
       pari_sp av = avma;
