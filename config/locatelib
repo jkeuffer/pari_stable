@@ -1,3 +1,4 @@
+_pb= # to detect missing .so when .so.x is found
 for dir in $pth; do
   case "$osname" in
     os2)
@@ -5,6 +6,7 @@ for dir in $pth; do
     *)
       ok=`(ls $dir/lib$lib.* | head -1) 2> /dev/null`
       if test -n "$ok"; then
+        _pb="$ok"
         # for .so and .sl
         try=`ls $dir/lib$lib.s? 2> /dev/null` 
         # for .a
@@ -23,12 +25,9 @@ for dir in $pth; do
 done
 # not found? detect missing lib*.so (missing *-devel package)
 if test -z "$try"; then
-  if test "$osname" = linux; then
-    try=`ls -l /usr/lib/lib$lib.* 2> /dev/null`
-    if test -n "$try"; then
-      echo "###"
-      echo "### lib$lib.so not found. Please install $lib-devel.rpm"
-      echo "###"
-    fi
+  if test "$osname" = linux -a  -n "$_pb"; then
+    echo "###"
+    echo "### lib$lib.so not found. Please install $lib-devel.rpm"
+    echo "###"
   fi
 fi
