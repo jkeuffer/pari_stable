@@ -54,7 +54,7 @@ filtre0(filtre_t *F)
 
   if (F->more_input == 1) F->more_input = 0;
 
-  if (! F->in_comment)
+  if (! (F->in_comment | F->in_string))
   {
     while (isspace((int)*s)) s++; /* Skip space */
     if (*s == LBRACE) { s++; F->more_input = 2; F->wait_for_brace = 1; }

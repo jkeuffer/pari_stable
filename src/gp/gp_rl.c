@@ -673,7 +673,7 @@ print_escape_string(char *s)
       case DATA_END:
       case DATA_ESCAPE: *t++ = DATA_ESCAPE; continue;
 
-      case '\\': 
+      case '\\':
       case '"': *t++ = '\\'; continue;
     }
   *t++ = '"';
@@ -698,7 +698,7 @@ completion_word(long end)
 
       case '\\': i++; break;
     }
-  
+
   }
   if (found_quote) return found_quote + 1; /* return next char after quote */
 
@@ -768,10 +768,17 @@ gprl_input(Buffer *b, char **endp, input_method *IM)
 {
   long used = *endp - b->buf;
   long left = b->len - used, l;
-  char *s;
-  
+  char *s, *t;
+
   if (! (s = readline(IM->prompt)) ) return NULL; /* EOF */
-  l = strlen(s);
+  gp_add_history(s); /* Makes a copy */
+  l = strlen(s) + 1;
+  /* put back \n that readline stripped. This is needed for
+   * { print("a
+   *   b"); }
+   * and conforms with the other input methods anyway. */
+  t = gpmalloc(l + 1);
+  (void)sprintf(t,"%s\n", s);
   if ((ulong)left < l)
   {
     long incr = b->len;
@@ -780,8 +787,7 @@ gprl_input(Buffer *b, char **endp, input_method *IM)
     fix_buffer(b, b->len + incr);
     *endp = b->buf + used;
   }
-  gp_add_history(s); /* Makes a copy */
-  return s;
+  return t;
 }
 
 static void
@@ -803,7 +809,7 @@ get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
   const int index = history_length;
   char *s;
   input_method IM;
- 
+
   IM.prompt = prompt;
   IM.getline= &gprl_input;
   IM.free = 1;
@@ -821,7 +827,7 @@ get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
       }
       gp_add_history(s);
     }
-  
+
     /* update logfile */
     if (logfile) fprintf(logfile, "%s%s\n",bare_prompt,s);
   }
