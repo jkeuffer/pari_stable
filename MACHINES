@@ -92,6 +92,7 @@ AMD K6-2     350Mhz  Linux-2.0.36    gcc            5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
+PentiumIV   1695MHz  FreeBSD 4.6.2   gcc-2.95.3      904     918  2.2.5     MW
 PentiumIV   1600MHz  Linux-2.4.18-3  gcc-2.96        938     960  2.2.4
 PentiumIV   1400MHz  Linux-2.4.4-4   gcc-2.95.3     1318    1354  2.1.3     HG
 PentiumIII  1400MHz  FreeBSD-4.6.2   gcc-2.95.3      752     757  2.2.4(35) IS
@@ -319,6 +320,7 @@ Contributors:
   KK = Kimitoshi Kono
   LG = Louis Granboulan
   MS = Michael Stoll
+  MW = Mariusz Wodzicki
   NI = Nathaniel Irons
   PE = Philippe Elbaz-Vincent
   OT = Olivier Thibault
