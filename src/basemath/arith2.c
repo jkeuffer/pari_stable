@@ -656,36 +656,25 @@ removeprimes(GEN prime)
 /**       COMPUTING THE MATRIX OF PRIME DIVISORS AND EXPONENTS        **/
 /**                                                                   **/
 /***********************************************************************/
-
-/* Configure may/should define this to 1 if MPQS is not installed --GN */
-#ifndef decomp_default_hint
-#define decomp_default_hint 0
-#endif
-
-/* Some overkill removed from this  (15 spsp for an integer < 2^32 ?!).
-   Should really revert to isprime() once the new primality tester is ready
-   --GN */
-#if 0
-#define pseudoprime(p) millerrabin(p,3*lgefint(p))
-#else /* remove further overkill :-)  --KB */
-#define pseudoprime(p) BSW_psp(p)
-#endif
+const long decomp_default_hint = 0;
 
 /* where to stop trial dividing in factorization */
-
 static ulong
-tridiv_bound(GEN n, long all)
+default_bound(GEN n, ulong all)
 {
-  ulong size = (ulong)expi(n) + 1;
-  if (all > 1)                /* bounded factoring */
-    return all;               /* use the given limit */
-  if (all == 0)
-    return (ulong)VERYBIGINT; /* smallfact() case */
-  if (size <= 32)
-    return 16384UL;
-  else if (size <= 512)
-    return (size-16) << 10;
-  return 1UL<<19;             /* Rho will generally be faster above this */
+  ulong l;
+  if (all > 1) return all; /* bounded factoring, use given limit */
+  if (!all) return (ulong)VERYBIGINT; /* smallfact() case */
+  l = (ulong)expi(n) + 1;
+  if (l <= 32)  return 16384UL;
+  if (l <= 512) return (l-16) << 10;
+  return 1UL<<19; /* Rho will generally be faster above this */
+}
+static ulong
+tridiv_bound(GEN n, ulong all)
+{
+  ulong p = maxprime(), l = default_bound(n, all);
+  return (p < l)? p: l;
 }
 
 static GEN
@@ -710,12 +699,12 @@ aux_end(GEN n, long nb)
 
 GEN
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
-                  GEN state, long all, long hint)
+                  GEN state, ulong all, long hint)
 {
   pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
-  long nb = 0,i,k,lp;
-  ulong p, lim1;
+  long nb = 0, i, lp;
+  ulong p, k, lim;
   byteptr d=diffptr+1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -732,17 +721,18 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     av=avma; affii(shifti(n,-i), n); avma=av;
   }
   if (is_pm1(n)) return aux_end(n,nb);
-  lim1 = tridiv_bound(n, all);
+  lim = tridiv_bound(n, all);
 
   /* trial division */
   p = 2;
-  while (*d && p <= lim1)
+  for(;;)
   {
     NEXT_PRIME_VIADIFF(p,d);
+    if (p >= lim) break;
     if (dvdisz(n,p,n))
     {
       nb++; k=1; while (dvdisz(n,p,n)) k++;
-      (void)utoi(p); (void)stoi(k);
+      (void)utoi(p); (void)utoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
   }
@@ -761,12 +751,12 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     if (dvdiiz(n,(GEN) primetab[i],n))
     {
       nb++; k=1; while (dvdiiz(n,(GEN) primetab[i],n)) k++;
-      (void)icopy((GEN) primetab[i]); (void)stoi(k);
+      (void)icopy((GEN) primetab[i]); (void)utoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
 
   /* test primality (unless all != 1 (i.e smallfact))*/
-  if ((k && cmpii(pp,n) > 0) || (all==1 && pseudoprime(n)))
+  if ((k && cmpii(pp,n) > 0) || (all==1 && BSW_psp(n)))
   {
     nb++;
     (void)icopy(n); (void)stoi(1); return aux_end(n,nb);
@@ -812,7 +802,7 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 }
 
 static GEN
-auxdecomp0(GEN n, long all, long hint)
+auxdecomp0(GEN n, ulong all, long hint)
 {
   return auxdecomp1(n, NULL, gzero, all, hint);
 }
@@ -961,9 +951,9 @@ chk_arith(GEN n) {
 long
 mu(GEN n)
 {
-  byteptr d = diffptr+1;        /* point at 3 - 2 */
+  byteptr d = diffptr+1; /* point at 3 - 2 */
   pari_sp av = avma;
-  ulong p, lim1;
+  ulong p, lim;
   long s, v;
 
   chk_arith(n);
@@ -971,23 +961,24 @@ mu(GEN n)
   v = vali(n);
   if (v>1) return 0;
   s = v ? -1 : 1;
-  n=absi(shifti(n,-v)); p = 2;
+  n = absi(shifti(n,-v));
   if (is_pm1(n)) return s;
-  lim1 = tridiv_bound(n,1);
 
-  while (*d && p < lim1)
+  lim = tridiv_bound(n,1);
+  p = 2;
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
     {
-      if (smodis(n,p) == 0) { avma=av; return 0; }
+      if (!smodis(n,p)) { avma=av; return 0; }
       s = -s; if (is_pm1(n)) { avma=av; return s; }
     }
   }
   /* we normally get here with p==nextprime(PRE_TUNE), which will already
      have been tested against n, so p^2 >= n  (instead of p^2 > n)  is
      enough to guarantee n is prime */
-  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n)) { avma=av; return -s; }
+  if (cmpii(sqru(p),n) >= 0 || BSW_psp(n)) { avma=av; return -s; }
   /* large composite without small factors */
   v = ifac_moebius(n, decomp_default_hint);
   avma=av;
@@ -1003,7 +994,7 @@ gissquarefree(GEN x)
 long
 issquarefree(GEN x)
 {
-  ulong p, lim1;
+  ulong p, lim;
   pari_sp av = avma;
   long tx;
   GEN d;
@@ -1015,22 +1006,22 @@ issquarefree(GEN x)
     long v;
     byteptr d=diffptr+1;
     if (is_pm1(x)) return 1;
-    if((v = vali(x)) > 1) return 0;
+    v = vali(x); if(v > 1) return 0;
     x = absi(shifti(x,-v));
     if (is_pm1(x)) return 1;
-    lim1 = tridiv_bound(x,1);
 
+    lim = tridiv_bound(x,1);
     p = 2;
-    while (*d && p < lim1)
+    while (p < lim)
     {
       NEXT_PRIME_VIADIFF(p,d);
       if (dvdisz(x,p,x))
       {
-        if (smodis(x,p) == 0) { avma = av; return 0; }
+        if (!smodis(x,p)) { avma = av; return 0; }
         if (is_pm1(x)) { avma = av; return 1; }
       }
     }
-    if (cmpii(sqru(p),x) >= 0 || pseudoprime(x)) { avma = av; return 1; }
+    if (cmpii(sqru(p),x) >= 0 || BSW_psp(x)) { avma = av; return 1; }
     v = ifac_issquarefree(x, decomp_default_hint);
     avma = av; return v;
   }
@@ -1051,18 +1042,17 @@ omega(GEN n)
   byteptr d=diffptr+1;
   pari_sp av = avma;
   long nb,v;
-  ulong p, lim1;
+  ulong p, lim;
 
   chk_arith(n);
   if (is_pm1(n)) return 0;
-  v=vali(n);
-  nb = v ? 1 : 0;
+  v = vali(n); nb = v ? 1 : 0;
   n = absi(shifti(n,-v));
   if (is_pm1(n)) return nb;
 
-  lim1 = tridiv_bound(n,1);
+  lim = tridiv_bound(n,1);
   p = 2;
-  while (*d && p < lim1)
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
@@ -1071,7 +1061,7 @@ omega(GEN n)
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
-  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n)) { avma = av; return nb+1; }
+  if (cmpii(sqru(p),n) >= 0 || BSW_psp(n)) { avma = av; return nb+1; }
   /* large composite without small factors */
   nb += ifac_omega(n, decomp_default_hint);
   avma=av; return nb;
@@ -1087,19 +1077,19 @@ long
 bigomega(GEN n)
 {
   byteptr d=diffptr+1;
-  ulong p, lim1;
+  ulong p, lim;
   pari_sp av = avma;
   long nb,v;
 
   chk_arith(n);
   if (is_pm1(n)) return 0;
-  nb=v=vali(n);
-  n=absi(shifti(n,-v));
+  nb = v = vali(n);
+  n = absi(shifti(n,-v));
   if (is_pm1(n)) { avma = av; return nb; }
 
-  lim1 = tridiv_bound(n,1);
+  lim = tridiv_bound(n,1);
   p = 2;
-  while (*d && p < lim1)
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
@@ -1108,7 +1098,7 @@ bigomega(GEN n)
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
-  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n)) { avma = av; return nb+1; }
+  if (cmpii(sqru(p),n) >= 0 || BSW_psp(n)) { avma = av; return nb+1; }
   nb += ifac_bigomega(n, decomp_default_hint);
   avma=av; return nb;
 }
@@ -1124,7 +1114,7 @@ phi(GEN n)
 {
   byteptr d = diffptr+1;
   GEN m;
-  ulong p, lim1;
+  ulong p, lim;
   pari_sp av = avma;
   long v;
 
@@ -1133,27 +1123,27 @@ phi(GEN n)
   v = vali(n);
   n = absi(shifti(n,-v));
   m = (v > 1 ? shifti(gun,v-1) : stoi(1));
-  if (is_pm1(n)) { return gerepileupto(av,m); }
+  if (is_pm1(n)) return gerepileuptoint(av,m);
 
+  lim = tridiv_bound(n,1);
   p = 2;
-  lim1 = tridiv_bound(n,1);
-  while (*d && p < lim1)
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
     {
       m = mulis(m, p-1);
       while (dvdisz(n,p,n)) m = mulis(m,p);
-      if (is_pm1(n)) { return gerepileupto(av,m); }
+      if (is_pm1(n)) return gerepileuptoint(av,m);
     }
   }
-  if (cmpii(sqru(p),n) >= 0 || pseudoprime(n))
+  if (cmpii(sqru(p),n) >= 0 || BSW_psp(n))
   {
-    m = mulii(m,addsi(-1,n));
-    return gerepileupto(av,m);
+    m = mulii(m, addsi(-1,n));
+    return gerepileuptoint(av,m);
   }
   m = mulii(m, ifac_totient(n, decomp_default_hint));
-  return gerepileupto(av,m);
+  return gerepileuptoint(av,m);
 }
 
 GEN
@@ -1168,7 +1158,7 @@ numbdiv(GEN n)
   byteptr d=diffptr+1;
   GEN m;
   long l, v;
-  ulong p, lim1;
+  ulong p, lim;
   pari_sp av = avma;
 
   chk_arith(n);
@@ -1176,23 +1166,20 @@ numbdiv(GEN n)
   v = vali(n);
   n = absi(shifti(n,-v));
   m = stoi(v+1);
-  if (is_pm1(n)) return gerepileupto(av,m);
+  if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim1 = tridiv_bound(n,1);
+  lim = tridiv_bound(n,1);
   p = 2;
-  while (*d && p < lim1)
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     l=1; while (dvdisz(n,p,n)) l++;
-    m = mulsi(l,m); if (is_pm1(n)) { return gerepileupto(av,m); }
+    m = mulsi(l,m); if (is_pm1(n)) return gerepileuptoint(av,m);
   }
-  if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
-  {
-    m = shifti(m,1);
-    return gerepileupto(av,m);
-  }
+  if(cmpii(sqru(p),n) >= 0 || BSW_psp(n))
+    return gerepileuptoint(av, shifti(m,1));
   m = mulii(m, ifac_numdiv(n, decomp_default_hint));
-  return gerepileupto(av,m);
+  return gerepileuptoint(av,m);
 }
 
 GEN
@@ -1206,7 +1193,7 @@ sumdiv(GEN n)
 {
   byteptr d=diffptr+1;
   GEN m,m1;
-  ulong p, lim1;
+  ulong p, lim;
   pari_sp av=avma;
   long v;
 
@@ -1215,27 +1202,24 @@ sumdiv(GEN n)
   v = vali(n);
   n = absi(shifti(n,-v));
   m = (v ? addsi(-1,shifti(gun,v+1)) : stoi(1));
-  if (is_pm1(n)) { return gerepileupto(av,m); }
+  if (is_pm1(n)) return gerepileuptoint(av,m);
 
-  lim1 = tridiv_bound(n,1);
+  lim = tridiv_bound(n,1);
   p = 2;
-  while (*d && p < lim1)
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
     {
       m1 = utoi(p+1);
       while (dvdisz(n,p,n)) m1 = addsi(1, mului(p,m1));
-      m = mulii(m1,m); if (is_pm1(n)) { return gerepileupto(av,m); }
+      m = mulii(m1,m); if (is_pm1(n)) return gerepileuptoint(av,m);
     }
   }
-  if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
-  {
-    m = mulii(m,addsi(1,n));
-    return gerepileupto(av,m);
-  }
+  if(cmpii(sqru(p),n) >= 0 || BSW_psp(n))
+    return gerepileuptoint(av, mulii(m,addsi(1,n)));
   m = mulii(m, ifac_sumdiv(n, decomp_default_hint));
-  return gerepileupto(av,m);
+  return gerepileuptoint(av,m);
 }
 
 GEN
@@ -1249,7 +1233,7 @@ sumdivk(GEN n, long k)
 {
   byteptr d=diffptr+1;
   GEN n1,m,m1,pk;
-  ulong p, lim1;
+  ulong p, lim;
   pari_sp av = avma;
   long k1,v;
 
@@ -1266,9 +1250,9 @@ sumdivk(GEN n, long k)
   while (v--)  m = addsi(1,shifti(m,k));
   if (is_pm1(n)) goto fin;
 
-  lim1 = tridiv_bound(n,1);
+  lim = tridiv_bound(n,1);
   p = 2;
-  while (*d && p < lim1)
+  while (p < lim)
   {
     NEXT_PRIME_VIADIFF(p,d);
     if (dvdisz(n,p,n))
@@ -1278,7 +1262,7 @@ sumdivk(GEN n, long k)
       m = mulii(m1,m); if (is_pm1(n)) goto fin;
     }
   }
-  if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
+  if(cmpii(sqru(p),n) >= 0 || BSW_psp(n))
   {
     pk = gpuigs(n,k);
     m = mulii(m,addsi(1,pk));
@@ -1746,7 +1730,7 @@ gbitor(GEN x, GEN y)
       break;
     default: return NULL;
   }
-  return gerepileupto(ltop, inegate(z));
+  return gerepileuptoint(ltop, inegate(z));
 }
 
 GEN
@@ -1771,7 +1755,7 @@ gbitand(GEN x, GEN y)
       break;
     default: return NULL;
   }
-  return gerepileupto(ltop, z);
+  return gerepileuptoint(ltop, z);
 }
 
 GEN
@@ -1796,7 +1780,7 @@ gbitxor(GEN x, GEN y)
       break;
     default: return NULL;
   }
-  return gerepileupto(ltop,z);
+  return gerepileuptoint(ltop,z);
 }
 
 /* x & ~y */
@@ -1822,5 +1806,5 @@ gbitnegimply(GEN x, GEN y)
       break;
     default: return NULL;
   }
-  return gerepileupto(ltop,z);
+  return gerepileuptoint(ltop,z);
 }
