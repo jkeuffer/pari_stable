@@ -1831,7 +1831,8 @@ identifier(void)
       noparen=1; /* no argument, but valence is ok */
     }
     /* return type */
-    if      (*s == 'v') { ret = RET_VOID; s++; }
+    if      (*s <  'a')   ret = RET_GEN; 
+    else if (*s == 'v') { ret = RET_VOID; s++; }
     else if (*s == 'i') { ret = RET_INT;  s++; }
     else if (*s == 'l') { ret = RET_LONG; s++; }
     else                  ret = RET_GEN;
@@ -2013,7 +2014,7 @@ identifier(void)
     }
     else switch (ret)
     {
-      default: /* case RET_GEN: */
+      case RET_GEN:
 	res = ((PFGEN)call)(_ARGS_);
 	break;
 
