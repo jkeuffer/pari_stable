@@ -36,9 +36,11 @@ Done for version 2.2.1 (released ??/??/2001):
     1- typo in factornf (factor of degree 3 --> error message)
     2- rnflllgram(), idealinv() didn't check their arguments
     3- [readline] \r<TAB> would complete using files matching r*
+    4- wrong result in ZY_ZXY_resultant when degree dropped in ERS
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
+    2- major update of bnr* functions
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
