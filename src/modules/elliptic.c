@@ -688,22 +688,18 @@ ell_sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
 GEN
 powell(GEN e, GEN z, GEN n)
 {
-  pari_sp av;
+  pari_sp av = avma;
   long s;
-  GEN y;
 
   checksell(e); checkpt(z);
   if (typ(n)==t_QUAD) return CM_powell(e,z,n);
-  if (typ(n)!=t_INT)
-    err(impl,"powell for nonintegral or non CM exponents");
+  if (typ(n) != t_INT) err(impl,"powell for non integral, non CM, exponents");
   s = signe(n);
   if (!s || lg(z) == 2) return _vec(gzero);
-  av = avma;
   if (s < 0) z = invell(e,z);
-  if (is_pm1(n)) return z;
-  z = gclone(z); avma = av;
-  y = leftright_pow(z, n, (void*)e, &ell_sqr, (GEN(*)(void*,GEN,GEN))&addell);
-  gunclone(z); return y;
+  if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
+  z = leftright_pow(z, n, (void*)e, &ell_sqr, (GEN(*)(void*,GEN,GEN))&addell);
+  return gerepileupto(av, z);
 }
 
 GEN
