@@ -92,6 +92,7 @@ PentiumIII   800MHz  Linux-2.2.14   egcs X11 dl2    1900    1882  2.0.20    CL
 PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl2    2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc X11 dl2    2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
+PentiumII    450MHz  Linux-2.0.35    gcc X11 dl2    3220    3230  2.1.1     TT
 PentiumII    400MHz  Linux-2.3.99    gcc X11 dl2    3392    3410  2.0.20(27)GH
 PentiumII    400MHz  Linux-2.2.14    gcc X11 dl2    3886    3902  2.0.20    GH
 PentiumII    350MHz  Linux-2.2.16    gcc X11 dl2    3848    3876  2.1.0 (23)
@@ -275,4 +276,5 @@ Contributors:
   QL = Qing Liu
   SH = Steve Harding
   TP = Thomas Papanikolaou
+  TT = Tibor I. Toth
   XR = Xavier Roblot
