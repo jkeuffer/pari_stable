@@ -1321,7 +1321,7 @@ gentypes(void)
   t_MAT    : matrix            [ code ] [ col_1 ] ... [ col_k ]\n\
   t_LIST   : list              [ code ] [ cod2 ] [ x_1 ] ... [ x_k ]\n\
   t_STR    : string            [ code ] [ man_1 ] ... [ man_k ]\n\
-  t_VECSMALL: vector small int [ code ] [ x_1 ] ... [ x_k ]\n\
+  t_VECSMALL: vec. small ints  [ code ] [ x_1 ] ... [ x_k ]\n\
 \n");
 }
 
