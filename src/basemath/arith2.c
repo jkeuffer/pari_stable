@@ -56,8 +56,8 @@ pith(long n)
   ulong prime = 0, res = 0;
 
   if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
-  if (maxprime() <= n) err(primer1);
-  while (prime<=n) { prime += *p++; res++; }
+  if (maxprime() <= (ulong)n) err(primer1);
+  while (prime<=(ulong)n) { prime += *p++; res++; }
   return stoi(res-1);
 }
 
@@ -160,7 +160,7 @@ initprimes0(ulong maxnum, long *lenp, long *lastp)
   asize = ARENA_IN_ROOTS * rootnum;	/* Make % overhead negligeable. */
   if (asize < PRIME_ARENA) asize = PRIME_ARENA;
   if (asize > remains) asize = remains + 1;/* + room for a sentinel byte */
-  alloced = (avma - bot < asize>>1); /* enough room on the stack ? */
+  alloced = (avma - bot < (ulong)asize>>1); /* enough room on the stack ? */
   if (alloced)
     p = (byteptr) gpmalloc(asize);
   else

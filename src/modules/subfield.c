@@ -108,7 +108,7 @@ calc_block(long N,GEN Z,long d,GEN Y,GEN vbs,ulong maxl)
           setlg(Zpp, u);
 	  vbs = calc_block(N,Zpp,d,Yp,vbs,maxl);
 	}
-        if (vbs && lg(vbs) > maxl) return vbs;
+        if (vbs && (ulong)lg(vbs) > maxl) return vbs;
         avma=av;
       }
     }
