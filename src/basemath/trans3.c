@@ -2090,13 +2090,12 @@ eta(GEN x, long prec)
 static GEN
 sqrt32(long prec) { GEN z = sqrtr(stor(3, prec)); setexpo(z, -1); return z; }
 
-/* exp(i x), x = k pi/12 */
+/* exp(i x), x = k pi/12, assume 0 <= k < 24 */
 static GEN
-e12(long k, long prec)
+e12(ulong k, long prec)
 {
   int s, sPi, sPiov2;
   GEN z, t;
-  k %= 24;
   if (k >12) { s = 1; k = 24 - k; } else s = 0; /* x -> 2pi - x */
   if (k > 6) { sPi = 1; k = 12 - k; } else sPi = 0; /* x -> pi  - x */
   if (k > 3) { sPiov2 = 1; k = 6 - k; } else sPiov2 = 0; /* x -> pi/2 - x */
@@ -2125,7 +2124,8 @@ e12(long k, long prec)
 GEN
 trueeta(GEN x, long prec)
 {
-  long tx = typ(x), Nmod24;
+  long tx = typ(x);
+  ulong Nmod24;
   pari_sp av = avma;
   GEN q, q24, N, n, m, run;
 
@@ -2142,10 +2142,9 @@ trueeta(GEN x, long prec)
     x = gdivsg(-1,x);
     m = gmul(m, gsqrt(mulcxmI(x), prec));
   }
-  Nmod24 = smodis(N, 24);
+  Nmod24 = umodiu(N, 24);
   if (Nmod24) m = gmul(m, e12(Nmod24, prec));
-  q = gmul(PiI2(prec), x);
-  q24 = gexp(gdivgs(q, 24),prec);
+  q24 = gexp(gdivgs(gmul(PiI2(prec), x), 24),prec); /* e(x/24) */
   q = gpowgs(q24, 24);
   return gerepileupto(av, gmul(gmul(m,q24), inteta(q)));
 }
