@@ -1076,16 +1076,19 @@ u_FpX_addmul(GEN x, GEN y, long c, long p)
 {
   long i,lx,ly,l;
   if (!c) return;
-  lx = lgef(x); ly = lgef(y); l = min(lx,ly);
+  lx = lgef(x);
+  ly = lgef(y); l = min(lx,ly);
   if (p & ~MAXHALFULONG)
   {
     for (i=2; i<l;  i++) x[i] = ((ulong)x[i]+ (ulong)mulssmod(c,y[i],p)) % p;
-    for (   ; i<ly; i++) x[i] = mulssmod(c,y[i],p);
+    if (l == lx)
+      for (   ; i<ly; i++) x[i] = mulssmod(c,y[i],p);
   }
   else
   {
     for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + (ulong)(c*y[i])) % p;
-    for (   ; i<ly; i++) x[i] = (c*y[i]) % p;
+    if (l == lx)
+      for (   ; i<ly; i++) x[i] = (c*y[i]) % p;
   }
   (void)u_normalizepol(x,i);
 }

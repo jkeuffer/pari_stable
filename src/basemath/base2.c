@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
+extern GEN gmul_mat_smallvec(GEN x, GEN y);
+extern GEN norm_by_embed(long r1, GEN x);
 extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
@@ -1814,11 +1816,325 @@ nbasis(GEN ibas,GEN pd)
   return gdiv(hnfmodid(a,pd), pd);
 }
 
+#if 0
+static void
+setprec(GEN x, long prec)
+{
+  long i,j, n=lg(x);
+  for (i=1;i<n;i++)
+  {
+    GEN p2,p1 = (GEN)x[i];
+    for (j=1;j<n;j++)
+    {
+      p2 = (GEN)p1[j];
+      if (typ(p2) == t_REAL) setlg(p2, prec);
+    }
+  }
+}
+
+/* find a basis of x whose elements have small norm
+ * M a bound for the size of coeffs of x */
+GEN
+ideal_better_basis(GEN nf, GEN x, GEN M)
+{
+  GEN a,b;
+  long nfprec = nfgetprec(nf);
+  long prec = DEFAULTPREC + (expi(M) >> TWOPOTBITS_IN_LONG);
+
+  if (typ(nf[5]) != t_VEC) return x;
+  if ((prec<<1) < nfprec) prec = (prec+nfprec) >> 1;
+  x = lllint_ip(x,4);
+  a = qf_base_change(gmael(nf,5,3),x,1);
+  setprec(a,prec);
+  b = lllgramintern(a,4,1,prec);
+  if (!b)
+  {
+    if (DEBUGLEVEL)
+      err(warner, "precision too low in ideal_better_basis (1)");
+    if (nfprec > prec)
+    {
+      setprec(a,nfprec);
+      b = lllgramintern(a,4,1,nfprec);
+    }
+  }
+  if (b) x = gmul(x, b);
+  else if (DEBUGLEVEL)
+    err(warner, "precision too low in ideal_better_basis (2)");
+  return x;
+}
+#endif
+
+/*******************************************************************/
+/*                                                                 */
+/*    2-ELT REPRESENTATION FOR PRIME IDEALS (dividing index)       */
+/*                                                                 */
+/*******************************************************************/
+/* beta = generators of prime ideal (vectors). Return "small" random elt in P */
+static GEN
+random_elt_in_P(GEN beta, long small)
+{
+  long z, i, j, la, lbeta = lg(beta);
+  GEN a = NULL, B;
+
+  /* compute sum random(-7..8) * beta[i] */
+  if (small)
+  {
+    la = lg(beta[1]);
+    if (small > 7) small = 0;
+    for (i=1; i<lbeta; i++)
+    { /* Warning: change definition of 'small' if you change this */
+      z = mymyrand() >> (BITS_IN_RANDOM-5); /* in [0,15] */
+      if (z >= 9) z -= 7;
+      if (small) z %= small;
+      if (!z) continue;
+      B = (GEN)beta[i];
+      if (a)
+        for (j = 1; j < la; j++) a[j] += z * B[j];
+      else {
+        a = cgetg(la, t_VECSMALL);
+        for (j = 1; j <la; j++) a[j] = z * B[j];
+      }
+    }
+  }
+  else
+    for (i=1; i<lbeta; i++)
+    {
+      z = mymyrand() >> (BITS_IN_RANDOM-5);
+      if (z >= 9) z -= 7;
+      if (!z) continue;
+      B = gmulsg(z, (GEN)beta[i]);
+      a = a? gadd(a, B): B;
+    }
+  return a;
+}
+
+/* routines to check uniformizer algebraically (as t_POL) */
+
+/* a t_POL, D t_INT (or NULL if 1), q = p^(f+1). a/D in pr | p, norm(pr) = pf.
+ * Return 1 if (a/D,p) = pr, and 0 otherwise */
+static int
+is_uniformizer(GEN D, GEN a, GEN T, GEN q)
+{
+  GEN N = ZX_resultant_all(T, a, D, 0); /* norm(a) */
+  return (resii(N, q) != gzero);
+}
+
+/* a/D or a/D + p uniformizer ? */
+static GEN
+prime_check_elt(GEN D, GEN Dp, GEN a, GEN T, GEN q, int ramif)
+{
+  if (is_uniformizer(D,a,T,q)) return a;
+  /* can't succeed if e > 1 */
+  if (!ramif && is_uniformizer(D,gadd(a,Dp),T,q)) return a;
+  return NULL;
+}
+
+static GEN
+random_unif_loop_pol(GEN nf, GEN P, GEN D, GEN Dp, GEN beta, GEN pol,
+                     GEN p, GEN q)
+{
+  long small, i, c = 0, m = lg(P)-1, N = degpol(nf[1]), keep = getrand();
+  int ramif;
+  GEN a, P2;
+  gpmem_t av;
+
+  for(i=1; i<=m; i++)
+    if ((a = prime_check_elt(D,Dp,(GEN)beta[i],pol,q,0))) return a;
+
+  (void)setrand(1);
+  if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
+  P2 = cgetg(m+1, t_MAT);
+  for (i=1; i<=m; i++)
+    P2[i] = element_sqri(nf, (GEN)P[i]);
+  P2 = hnfmodid(P2, sqri(p)); /* HNF of pr^2 */
+  ramif = egalii(gcoeff(P2,1,1), p); /* pr/p ramified ? */
+
+  a = mulis(Dp, 8*degpol(nf[1]));
+  if (is_bigint(a)) small = 0;
+  else
+  {
+    ulong mod = itou(Dp);
+    small = itos(p);
+    for (i=1; i<=m; i++)
+      beta[i] = (long)u_Fp_FpV(pol_to_vec((GEN)beta[i], N), mod);
+  }
+
+  for(av = avma; ;avma = av)
+  {
+    if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
+    a = random_elt_in_P(beta, small);
+    if (!a) continue;
+    if (small) a = small_to_col(a);
+    a = centermod(a, Dp);
+    a = vec_to_pol(a, varn(pol));
+    if ((a = prime_check_elt(D,Dp,a,pol,q,ramif)))
+    {
+      if (DEBUGLEVEL) fprintferr("\n");
+      (void)setrand(keep); return a;
+    }
+  }
+}
+
+/* routines to check uniformizer numerically (as t_COL) */
+
+static int
+vec_is_uniformizer(GEN a, GEN q, long r1)
+{
+  long e;
+  GEN N = grndtoi( norm_by_embed(r1, a), &e );
+  if (e > -5) err(precer, "vec_is_uniformizer");
+  return (resii(N, q) != gzero);
+}
+
+static GEN
+prime_check_eltvec(GEN a, GEN M, GEN p, GEN q, long r1, long small, int ramif)
+{
+  GEN ar;
+  long i,l;
+  a = centermod(a, p);
+  if (small) ar = gmul_mat_smallvec(M, a);
+  else       ar = gmul(M, a);
+
+  if (vec_is_uniformizer(ar, q, r1)) return small? small_to_col(a): a;
+  /* can't succeed if e > 1 */
+  if (ramif) return NULL;
+  l = lg(ar);
+  for (i=1; i<l; i++) ar[i] = ladd((GEN)ar[i], p);
+  if (!vec_is_uniformizer(ar, q, r1)) return NULL;
+  if (small) a = small_to_col(a);
+  a[1] = laddii((GEN)a[1],p); return a;
+}
+
+static GEN
+random_unif_loop_vec(GEN nf, GEN P, GEN p, GEN q)
+{
+  long small, r1, i, c = 0, m = lg(P)-1, keep = getrand();
+  int ramif;
+  GEN a, P2, beta, M = gmael(nf,5,1);
+  gpmem_t av;
+
+  r1 = nf_get_r1(nf);
+  a = mulis(p, 8*degpol(nf[1]));
+  if (is_bigint(a)) { small = 0; beta = P; }
+  else
+  {
+    small = itos(p); beta = cgetg(m+1, t_MAT);
+    for (i=1; i<=m; i++)
+      beta[i] = (long)u_Fp_FpV((GEN)P[i], itou(p));
+  }
+  for(i=1; i<=m; i++)
+    if ((a = prime_check_eltvec((GEN)beta[i],M,p,q,r1,small,0))) return a;
+
+  (void)setrand(1);
+  if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
+  P2 = cgetg(m+1, t_MAT);
+  for (i=1; i<=m; i++)
+    P2[i] = element_sqri(nf, (GEN)P[i]);
+  P2 = hnfmodid(P2, sqri(p)); /* HNF of pr^2 */
+  ramif = egalii(gcoeff(P2,1,1), p); /* pr/p ramified ? */
+
+  for(av = avma; ;avma = av)
+  {
+    if (DEBUGLEVEL && (++c & 0x3f) == 0) fprintferr("%d ", c);
+    a = random_elt_in_P(beta, small);
+    if (!a) continue;
+    if ((a = prime_check_eltvec(a,M,p,q,r1,small,0)))
+    {
+      if (DEBUGLEVEL) fprintferr("\n");
+      (void)setrand(keep); return a;
+    }
+  }
+}
+
+/* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
+ * Output: x such that P = (p,x) */
+static GEN
+uniformizer(GEN nf, GEN p, GEN P)
+{
+  GEN M, q, D, Dp, w, beta, a, T = (GEN)nf[1];
+  long prec, ex, i, f, N = degpol(T), m = lg(P)-1;
+  gpmem_t av;
+
+  if (!m) return gscalcol_i(p,N);
+
+  /* we want v_p(Norm(beta)) = p^f, f = N-m */
+  av = avma; f = N-m;
+  P = centermod(P, p);
+  q = mulii(gpowgs(p,f), p);
+
+  M = gmael(nf,5,1);
+  prec = gprecision(M);
+  ex = gexpo(M) + gexpo(mulsi(8 * N, p));
+  if (N * ex <= bit_accuracy(prec))
+  { /* enough prec to use norm_by_embed */
+    a = random_unif_loop_vec(nf, P, p, q);
+    return gerepilecopy(av,a);
+  }
+
+  w = (GEN)nf[7];
+  D = denom(content(w)); if (is_pm1(D)) D = NULL;
+  if (D)
+  {
+    long v = pvaluation(D, p, &a);
+    w = gmul(w, D);
+    D = gpowgs(p, v);
+    Dp = mulii(D, p);
+  } else {
+    w = dummycopy(w);
+    Dp = p;
+  }
+  for (i=1; i<=N; i++)
+    w[i] = (long)FpX_red((GEN)w[i], Dp); /* w[i] / D defined mod p */
+  beta = gmul(w, P);
+  a = random_unif_loop_pol(nf,P,D,Dp,beta,T,p,q);
+  a = algtobasis_i(nf,a);
+  if (D) a = gdivexact(a,D);
+  a = centermod(a, p);
+  if (!is_uniformizer(D,gmul(w,a), T,q)) a[1] = laddii((GEN)a[1],p);
+  return gerepilecopy(av,a);
+}
+
+/* Assuming P = (p,u) prime, return tau such that p Z + tau Z = p P^(-1)*/
+static GEN
+anti_uniformizer(GEN nf, GEN p, GEN u)
+{
+  gpmem_t av = avma;
+  GEN mat = eltmul_get_table(nf, u);
+  return gerepileupto(av, FpM_deplin(mat,p));
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                   BUCHMANN-LENSTRA ALGORITHM                    */
 /*                                                                 */
 /*******************************************************************/
+
+/* pr = (p,u) of ramification index e */
+GEN
+apply_kummer(GEN nf,GEN u,GEN e,GEN p)
+{
+  GEN t, T = (GEN)nf[1], pr = cgetg(6,t_VEC);
+  long f = degpol(u), N = degpol(T);
+
+  pr[1] = (long)p;
+  pr[3] = (long)e;
+  pr[4] = lstoi(f);
+  if (f == N) /* inert */
+  {
+    pr[2] = (long)gscalcol_i(p,N);
+    pr[5] = (long)gscalcol_i(gun,N);
+  }
+  else
+  { /* make sure v_pr(u) = 1 (automatic if e>1) */
+    if (is_pm1(e) && !is_uniformizer(NULL,u, T, gpowgs(p,f+1)))
+      u[2] = laddii((GEN)u[2], p);
+    t = algtobasis_i(nf, FpX_div(T,u,p));
+    pr[2] = (long)algtobasis_i(nf,u);
+    pr[5] = (long)centermod(t, p);
+  }
+  return pr;
+}
+
 /* return a Z basis of Z_K's p-radical, phi = x--> x^p-x */
 static GEN
 pradical(GEN nf, GEN p, GEN *phi)
@@ -1867,174 +2183,6 @@ pol_min(GEN mul, GEN p)
   return gerepileupto(av, gtopolyrev(z,0));
 }
 
-/* a/D in pr | p, norm(pr) = pf. Return 1 if (a/D,p) = pr, and 0 otherwise */
-static int
-is_uniformizer(GEN D, GEN a, GEN T, GEN pf, GEN p)
-{
-  GEN N = ZX_resultant_all(T, a, D, 0); /* norm(a) */
-  return (resii(diviiexact(N,pf), p) != gzero);
-}
-
-static GEN
-prime_check_elt(GEN D, GEN Dp, GEN a, GEN T, GEN p, GEN pf)
-{
-  if (a == gzero) return NULL;
-  if (is_uniformizer(D,a,T,pf,p)) return a;
-  /* FIXME: can't succeed if e > 1, can we know this at this point ? */
-  if (is_uniformizer(D,gadd(a,Dp),T,pf,p)) return a;
-  return NULL;
-}
-
-static GEN
-random_uniformizer_loop(GEN D, GEN beta, GEN pol, GEN p, GEN pf)
-{
-  long z,i, m = lg(beta)-1;
-  long keep = getrand();
-  int c = 0;
-  GEN a, Dp = D? mulii(D,p): p;
-  gpmem_t av = avma;
-  ulong pu = is_bigint(p)? 0: itou(p);
-
-  if (pu > 7) pu = 0;
-  for(i=1; i<=m; i++)
-    if ((a = prime_check_elt(D,Dp,(GEN)beta[i],pol,p,pf))) return a;
-  (void)setrand(1);
-  if (DEBUGLEVEL) fprintferr("uniformizer_loop, hard case: ");
-  for(;;avma=av)
-  {
-    if (DEBUGLEVEL) fprintferr("%d ", ++c);
-    a = gzero;
-    for (i=1; i<=m; i++)
-    {
-      z = mymyrand() >> (BITS_IN_RANDOM-5); /* in [0,15] */
-      if (z >= 9) z -= 7;
-      if (pu) z %= pu;
-      if (!z) continue;
-      a = gadd(a, gmulsg(z,(GEN)beta[i]));
-    }
-    if ((a = prime_check_elt(D,Dp,a,pol,p,pf)))
-    {
-      if (DEBUGLEVEL) fprintferr("\n");
-      (void)setrand(keep); return a;
-    }
-  }
-}
-
-static void
-setprec(GEN x, long prec)
-{
-  long i,j, n=lg(x);
-  for (i=1;i<n;i++)
-  {
-    GEN p2,p1 = (GEN)x[i];
-    for (j=1;j<n;j++)
-    {
-      p2 = (GEN)p1[j];
-      if (typ(p2) == t_REAL) setlg(p2, prec);
-    }
-  }
-}
-
-/* find a basis of x whose elements have small norm
- * M a bound for the size of coeffs of x */
-GEN
-ideal_better_basis(GEN nf, GEN x, GEN M)
-{
-  GEN a,b;
-  long nfprec = nfgetprec(nf);
-  long prec = DEFAULTPREC + (expi(M) >> TWOPOTBITS_IN_LONG);
-
-  if (typ(nf[5]) != t_VEC) return x;
-  if ((prec<<1) < nfprec) prec = (prec+nfprec) >> 1;
-  x = lllint_ip(x,4);
-  a = qf_base_change(gmael(nf,5,3),x,1);
-  setprec(a,prec);
-  b = lllgramintern(a,4,1,prec);
-  if (!b)
-  {
-    if (DEBUGLEVEL)
-      err(warner, "precision too low in ideal_better_basis (1)");
-    if (nfprec > prec)
-    {
-      setprec(a,nfprec);
-      b = lllgramintern(a,4,1,nfprec);
-    }
-  }
-  if (b) x = gmul(x, b);
-  else
-  {
-    if (DEBUGLEVEL)
-      err(warner, "precision too low in ideal_better_basis (2)");
-  }
-  return x;
-}
-
-/* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
- * Output: x such that P = (p,x) */
-static GEN
-uniformizer(GEN nf, GEN p, GEN P)
-{
-  GEN D,w,beta,a,pf, T = (GEN)nf[1];
-  long f, N=degpol(T), m=lg(P)-1;
-  gpmem_t av;
-
-  if (!m) return gscalcol_i(p,N);
-
-  /* we want v_p(Norm(beta)) = p^f, f = N-m */
-  av = avma; f = N-m; pf = gpowgs(p,f);
-  P = centermod(P, p);
-  P = concatsp(gscalcol(p,N), P);
-  P = ideal_better_basis(nf, P, p);
-  w = (GEN)nf[7];
-  D = denom(content(w)); if (is_pm1(D)) D = NULL;
-  if (D) w = gmul(w, D);
-  beta = gmul(w, P);
-
-  a = random_uniformizer_loop(D,beta,T,p,pf);
-  a = algtobasis_i(nf,a);
-  if (D) a = gdivexact(a,D);
-  a = centermod(a, p);
-  if (!is_uniformizer(D,gmul(w,a), T,pf,p)) a[1] = laddii((GEN)a[1],p);
-
-  return gerepilecopy(av,a);
-}
-
-/* pr = (p,u) of ramification index e */
-GEN
-apply_kummer(GEN nf,GEN u,GEN e,GEN p)
-{
-  GEN T = (GEN)nf[1], pr = cgetg(6,t_VEC);
-  long f = degpol(u), N = degpol(T);
-
-  pr[1] = (long)p;
-  pr[3] = (long)e;
-  pr[4] = lstoi(f);
-  if (f == N) /* inert */
-  {
-    pr[2] = (long)gscalcol_i(p,N);
-    pr[5] = (long)gscalcol_i(gun,N);
-  }
-  else
-  {
-    GEN t, pf = f==1? p: gpowgs(p,f);
-    /* make sure v_pr(u) = 1 (automatic if e>1) */
-    if (is_pm1(e) && !is_uniformizer(NULL,u, T,pf,p))
-      u[2] = laddii((GEN)u[2], p);
-    t = algtobasis_i(nf, FpX_div(T,u,p));
-    pr[2] = (long)algtobasis_i(nf,u);
-    pr[5] = (long)centermod(t, p);
-  }
-  return pr;
-}
-
-/* Assuming P = (p,u) prime, return tau such that p Z + tau Z = p P^(-1)*/
-static GEN
-anti_uniformizer(GEN nf, GEN p, GEN u)
-{
-  gpmem_t av = avma;
-  GEN mat = eltmul_get_table(nf, u);
-  return gerepileupto(av, FpM_deplin(mat,p));
-}
 
 static GEN
 get_pr(GEN nf, GEN p, GEN H, long f)
@@ -2150,11 +2298,14 @@ primedec(GEN nf, GEN p)
         {
           H = (GEN)h[--c]; k = lg(H)-1;
           L[iL++] = (long)get_pr(nf,p,H, N-k);
+          if (DEBUGLEVEL>2) msgtimer("L[%ld]",iL-1);
         }
     }
     else /* A2 field ==> H maximal, f = N-k = dim(A2) */
+    {
       L[iL++] = (long)get_pr(nf,p,H, N-k);
-    if (DEBUGLEVEL>2) msgtimer("h[%ld]",c);
+      if (DEBUGLEVEL>2) msgtimer("*L[%ld]",iL-1);
+    }
   }
   setlg(L, iL);
   return gerepileupto(av, gen_sort(L,0,cmp_prime_over_p));

@@ -27,8 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define both_odd(a,b) ((a)&(b)&1)
 
 extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
-
+extern long u_center(ulong u, ulong p, ulong ps2);
 extern GEN Fq_mul(GEN x, GEN y, GEN T, GEN p);
+
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
  * If T != NULL, compute mod (T,N) [assume integer coeffs if N != NULL]
@@ -156,6 +157,14 @@ centermodii(GEN x, GEN p, GEN po2)
   return y;
 }
 
+long
+s_centermod(long x, ulong pp, ulong pps2)
+{
+  long y = x % (long)pp;
+  if (y < 0) y += pp;
+  return u_center(y, pp,pps2);
+}
+
 /* for internal use */
 GEN
 centermod_i(GEN x, GEN p, GEN ps2)
@@ -187,6 +196,14 @@ centermod_i(GEN x, GEN p, GEN ps2)
       y = cgetg(lx,t_MAT);
       for (i=1; i<lx; i++) y[i] = (long)centermod_i((GEN)x[i],p,ps2);
       return y;
+    
+    case t_VECSMALL: lx = lg(x);
+    {
+      ulong pp = itou(p), pps2 = itou(ps2);
+      y = cgetg(lx,t_VECSMALL);
+      for (i=1; i<lx; i++) y[i] = s_centermod(x[i], pp, pps2);
+      return y;
+    }
   }
   return x;
 }
