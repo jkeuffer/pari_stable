@@ -61,10 +61,12 @@ XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
 XR  8- added flag in rnfconductor to check extension is abelian (under GRH)
     9- made Vec("pari") return ["p","a","r","i"] instead of ["pari"]
    10- renamed library function gsize() to sizedigit()  [conflict with gtk]
+XR 11- bnrstark: check if N0 is too large (=> computation impossible)
 
   Added
     1- file README.WIN
 GN  2- Jebelean extended gcd
+XR  3- new flag to rnfconductor (check extension is abelian)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.1.0 (released 17/11/2000):
