@@ -91,6 +91,7 @@ MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
    41- bnfinit: used too much memory when needing huge number of relations
        [when computing fundamental units]
    42- bnrL1(bnr with conductor 1) --> SEGV
+   43- "impossible inverse modulo ..." when using addprimes() + ROUND 2
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -112,6 +113,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    13- improved bnfisprincipal when class group large: use factorisation
        (+idealred) instead of arch. components (require much less precision)
    14- allow arbitrary prime degree in rnfkummer
+   15- [library:] allow trapping invmoder and recovering the offending INTMOD
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h

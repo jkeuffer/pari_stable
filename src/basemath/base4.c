@@ -2132,12 +2132,21 @@ END:
 
   switch(typ(aI))
   {
-    case t_POLMOD: case t_MAT: /* compute y, I0 = J y */
+    case t_POLMOD: /* compute y, I0 = J y */
       if (!Nx) y = c1;
       else
       {
         c = mul_content(c,c1);
         y = c? gmul(x, gdiv(c,Nx)): gdiv(x, Nx);
+      }
+      break;
+
+    case t_MAT: /* compute y, I0 = J y */
+      if (!Nx) y = c1;
+      else
+      {
+        c = mul_content(c,c1);
+        y = c? gmul(y, gdiv(c,Nx)): gdiv(y, Nx);
       }
       break;
 

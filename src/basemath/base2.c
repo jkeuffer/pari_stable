@@ -604,8 +604,9 @@ fnz(GEN x,long j)
 GEN
 allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  GEN w, w1, w2, a, da, b, db, p1;
-  long n, mf, lw, i, j, k, l;
+  VOLATILE GEN w1, w2, a, da, b, db, p1;
+  VOLATILE long n, mf, lw, i, j, k, l;
+  GEN w;
 
   if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,ptw);
   w = ptw? *ptw: NULL;
@@ -617,7 +618,23 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   da = NULL;
   for (i=1; i<lw; i++)
   {
-    mf=itos((GEN)w2[i]); if (mf == 1) continue;
+    jmp_buf env;
+    void *catcherr;
+
+    mf = itos((GEN)w2[i]); if (mf == 1) continue;
+
+    if (setjmp(env))
+    { /* caught a false prime, update factorization */
+      GEN x = (GEN)global_err_data;
+      GEN p = mppgcd((GEN)x[1], (GEN)x[2]);
+      if (DEBUGLEVEL) err(warner,"impossible inverse: %Z", x);
+      w1[i] = (long)p;
+      w1 = concatsp(w1, diviiexact((GEN)x[1], p));
+      w2 = concatsp(w2, (GEN)w2[i]);
+      lw++;
+    }
+    catcherr = err_catch(invmoder, env, NULL);
+
     if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
 
     b = maxord((GEN)w1[i],f,mf); db = gun;
@@ -628,7 +645,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     }
     if (db != gun)
     { /* db = denom(diag(b)), (da,db) = 1 */
-      b = gmul(b,db);
+      b = Q_muli_to_int(b,db);
       if (!da) { da=db; a=b; }
       else
       {
@@ -647,6 +664,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     }
     if (DEBUGLEVEL>5)
       fprintferr("Result for prime %Z is:\n%Z\n",w1[i],b);
+    err_leave(&catcherr);
   }
   *dK = *dx;
   if (da)

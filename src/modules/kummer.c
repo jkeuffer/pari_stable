@@ -505,7 +505,7 @@ isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
   for (i=rc+1; i<l; i++)
   {
     GEN e = modii(mulii((GEN)logdisc[i],(GEN)u[i]), gell);
-    b = famat_mul(b, famat_pow((GEN)cycgen[i], e));
+    if (signe(e)) b = famat_mul(b, famat_pow((GEN)cycgen[i], e));
   }
   y = cgetg(3,t_VEC);
   y[1] = (long)logdisc; setlg(logdisc,rc+1);
@@ -518,7 +518,7 @@ famat_factorback(GEN v, GEN e)
   long i, l = lg(v);
   GEN V = cgetg(1, t_MAT);
   for (i=1; i<l; i++) 
-    V = famat_mul(V, famat_pow((GEN)v[i], (GEN)e[i]));
+    if (signe(e[i])) V = famat_mul(V, famat_pow((GEN)v[i], (GEN)e[i]));
   return V;
 }
 
@@ -539,7 +539,7 @@ get_Selmer(GEN bnf, GEN cycgen, long rc)
 {
   GEN fu = check_units(bnf,"rnfkummer");
   GEN tu = gmael3(bnf,8,4,2);
-  return concatsp(concatsp(fu,tu), vecextract_i(cycgen,1,rc));
+  return concatsp(algtobasis(bnf,concatsp(fu,tu)), vecextract_i(cycgen,1,rc));
 }
 
 /* if all!=0, give all equations of degree 'all'. Assume bnr modulus is the
@@ -867,7 +867,7 @@ compositum_red(compo_s *C, GEN P, GEN Q)
   /* reduce R */
   z = polredabs0(C->R, nf_ORIG|nf_PARTIALFACT);
   C->R = (GEN)z[1];
-  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z",C->R);
+  if (DEBUGLEVEL>1) fprintferr("polred(compositum) = %Z\n",C->R);
   a    = (GEN)z[2];
   C->p = poleval(lift_intern(C->p), a);
   C->q = poleval(lift_intern(C->q), a);
@@ -1009,9 +1009,9 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 
   /* step 12 */
   if (DEBUGLEVEL>2) fprintferr("Step 12\n");
-  vecBp = cgetg(lSp+1,t_VEC);
-  vecAp= cgetg(lSp+1,t_VEC);
-  matP = cgetg(lSp+1,t_MAT);
+  vecAp = cgetg(lSp+1, t_VEC);
+  vecBp = cgetg(lSp+1, t_VEC);
+  matP  = cgetg(lSp+1, t_MAT);
   for (j=1; j<=lSp; j++)
   {
     GEN e, a, ap;
@@ -1030,8 +1030,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   }
   /* step 13 */
   if (DEBUGLEVEL>2) fprintferr("Step 13\n");
-  vecWB = concatsp(vecW, vecBp);
   vecWA = concatsp(vecW, vecAp);
+  vecWB = concatsp(vecW, vecBp);
 
   /* step 14, 15, and 17 */
   if (DEBUGLEVEL>2) fprintferr("Step 14, 15 and 17\n");

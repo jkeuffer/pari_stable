@@ -1089,6 +1089,7 @@ err(long numerr, ...)
 
   va_start(ap,numerr);
 
+  global_err_data = NULL;
   if (err_catch_stack && !is_warn(numerr))
   {
     int trap = 0;
@@ -1097,16 +1098,22 @@ err(long numerr, ...)
       if (err_catch_array[numerr]) trap = numerr;
       else if (err_catch_array[noer]) trap = noer;
     }
-    if (trap) trapped = err_seek(trap); else err_clean();
+    if (!trap) err_clean();
+    else if ( (trapped = err_seek(trap)) )
+    {
+      void *e = trapped->env;
+      if (e)
+      {
+        if (numerr == invmoder)
+        {
+          (void)va_arg(ap, char*); /* junk 1st arg */
+          global_err_data = (void*)va_arg(ap, GEN);
+        }
+        longjmp(e, numerr);
+      }
+      global_err_data = trapped->data;
+    }
   }
-  if (trapped)
-  { /* all errors (noer), or numerr individually trapped */
-    void *e = trapped->env;
-    global_err_data = trapped->data;
-    if (e) longjmp(e, numerr);
-  }
-  else
-    global_err_data = NULL;
 
   if (!added_newline) { pariputc('\n'); added_newline=1; }
   pariflush(); pariOut = pariErr;
