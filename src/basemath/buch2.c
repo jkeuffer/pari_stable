@@ -184,6 +184,25 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   F->subFB = gcopy(yes);
   F->powsubFB = NULL; return 1;
 }
+static int
+subFBgen_increase(FB_t *F, GEN nf, long step)
+{
+  GEN yes, D = (GEN)nf[3];
+  long i, iyes, lv = F->KC + 1, minsFB = lg(F->subFB)-1 + step;
+
+  yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
+  for (i = 1; i < lv; i++)
+  {
+    long t = F->perm[i];
+    if (!ok_subFB(F, t, D)) continue;
+
+    yes[iyes++] = t;
+    if (iyes > minsFB) break;
+  }
+  if (i == lv) return 0;
+  F->subFB = yes;
+  F->powsubFB = NULL; return 1;
+}
 
 static GEN
 mulred(GEN nf,GEN x, GEN I, long prec)
@@ -811,6 +830,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
   nbtest = 1; nbtest_lim = 4;
   for(;;)
   {
+    gpmem_t av = avma;
     if (DEBUGLEVEL>2) fprintferr("# ideals tried = %ld\n",nbtest);
     id = x0;
     for (i=1; i<lgsub; i++)
@@ -838,6 +858,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
       for (i=1; i<ru; i++) vdir[i] = 0;
       vdir[bou] = 10;
     }
+    avma = av;
     if (++nbtest > nbtest_lim)
     {
       nbtest = 0;
@@ -2872,7 +2893,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   gpmem_t av = avma, av0, av1, limpile;
   long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,seed,MAXRELSUP;
-  long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
+  long sfb_increase, sfb_trials, precdouble=0, precadd=0;
   long cglob; /* # of relations found so far */
   double cbach, cbach2, drc, LOGD2;
   GEN vecG,fu,zu,nf,D,A,W,R,Res,z,h,list_jideal;
@@ -3042,8 +3063,7 @@ MORE:
     {
       if (DEBUGLEVEL) fprintferr("*** Increasing sub factor base\n");
       sfb_increase = 0;
-      if (++sfb_trials > SFB_MAX) goto START;
-      if (! subFBgen(&F, nf, min(lim,LIMC2) + 0.5, lg(F.subFB)-1+SFB_STEP))
+      if (++sfb_trials > SFB_MAX || !subFBgen_increase(&F, nf, SFB_STEP))
         goto START;
       nreldep = nrelsup = 0;
     }
