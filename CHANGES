@@ -29,6 +29,13 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 ===========================================================================
+Done for version 2.0.22 (released ??/??/2000):
+
+  Fixed
+    1- non portable \e in es.c (pb with Sun cc)
+    2- ^C while prettyprinter in action --> gp crash
+
+===========================================================================
 Done for version 2.0.21 (released 27/10/2000):
   Fixed
     1- trap(gdiver2,a,1/0) <C-D> trap(,a,1/0); trap(gdiver2,a,1/0) --> crash
