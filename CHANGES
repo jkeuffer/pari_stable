@@ -94,6 +94,9 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    38- many problems in matfrobenius for _inexact_ matrices
 LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
        on a t_INT, which is no longer valid ]
+   40- [library:] precision() output "wrong" value for small non-zero t_REAL
+       (depended on exponent, not the bit accuracy of the input). Change so
+       that true bit accuracy is used unless input is 0 (then use exponent).
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

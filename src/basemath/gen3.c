@@ -109,9 +109,11 @@ precision(GEN x)
 
   if (tx==t_REAL)
   {
-    k=2-(expo(x)>>TWOPOTBITS_IN_LONG);
-    l=lg(x); if (l>k) k=l;
-    return k;
+    if (!signe(x)) {
+      long e = expo(x);
+      return (e < 0)? 2 - (e >> TWOPOTBITS_IN_LONG): 2;
+    }
+    return lg(x);
   }
   if (tx==t_COMPLEX)
   {
