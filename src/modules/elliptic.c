@@ -26,7 +26,7 @@ checkpt(GEN z)
   if (typ(z)!=t_VEC) err(elliper1);
 }
 
-long
+void
 checkell(GEN e)
 {
   long lx=lg(e);
@@ -379,12 +379,12 @@ GEN
 coordch(GEN e, GEN ch)
 {
   GEN y,p1,p2,v,v2,v3,v4,v6,r,s,t,u;
-  long i,lx = checkell(e);
+  long i,lx;
   gpmem_t av = avma;
 
-  checkch(ch);
+  checkch(ch); checkell(e);
   u=(GEN)ch[1]; r=(GEN)ch[2]; s=(GEN)ch[3]; t=(GEN)ch[4];
-  y=cgetg(lx,t_VEC);
+  lx = lg(e); y=cgetg(lx,t_VEC);
   v=ginv(u); v2=gsqr(v); v3=gmul(v,v2);v4=gsqr(v2); v6=gsqr(v3);
   y[1] = lmul(v,gadd((GEN)e[1],gmul2n(s,1)));
   y[2] = lmul(v2,gsub(gadd((GEN)e[2],gmulsg(3,r)),gmul(s,gadd((GEN)e[1],s))));
@@ -1297,7 +1297,7 @@ weipell(GEN e, long PREC)
 {
   GEN c4 = (GEN)e[10];
   GEN c6 = (GEN)e[11];
-  (void)checkell(e); return _weipell(c4,c6,PREC);
+  checkell(e); return _weipell(c4,c6,PREC);
 }
 
 GEN
