@@ -460,7 +460,7 @@ QuickNormL1(GEN x,long prec)
 /*******************************************************************/
 
 /* lift( conj(Mod(x, y)) ), assuming degpol(y) = 2, degpol(x) < 2 */
-GEN 
+GEN
 quad_polmod_conj(GEN x, GEN y)
 {
   GEN z, u, v, a, b;
@@ -468,7 +468,7 @@ quad_polmod_conj(GEN x, GEN y)
   long d;
   if (typ(x) != t_POL || varn(x) != varn(y) || (d = degpol(x)) <= 0)
     return gcopy(x);
-  a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/ 
+  a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/
   b = (GEN)y[3]; v = (GEN)x[2];
   z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
   z[2] = lpileupto(av, gadd(v, gdiv(gmul(u,gneg(b)), a)));
@@ -483,7 +483,7 @@ quad_polmod_norm(GEN x, GEN y)
   if (typ(x) != t_POL || varn(x) != varn(y) || (d = degpol(x)) <= 0)
     return gsqr(x);
   a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/
-  b = (GEN)y[3]; v = (GEN)x[2];  
+  b = (GEN)y[3]; v = (GEN)x[2];
   c = (GEN)y[2]; av = avma;
   z = gmul(u, gadd( gmul(c, u), gmul(gneg(b), v)));
   if (!gcmp1(a)) z = gdiv(z, a);
@@ -855,9 +855,7 @@ sqred2(GEN a, long signature)
     }
   }
   if (!signature) return gerepilecopy(av, a);
-  avma = av; a = cgetg(3,t_VEC);
-  a[1] = lstoi(sp);
-  a[2] = lstoi(sn); return a;
+  avma = av; return _vec2s(sp, sn);
 }
 
 GEN
@@ -2000,7 +1998,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       CC += l;
       m0 += l;
       a += l; if (a > L) { l = L - (a - l); a = L; }
-      gerepileall(av, 4, &H,&C,ptB,ptdep); 
+      gerepileall(av, 4, &H,&C,ptB,ptdep);
     }
   }
   *ptC = C; return H;
@@ -2344,15 +2342,15 @@ FpV_Fp_mul_part_ip(GEN z, GEN u, GEN p, long k)
   long i;
   if (is_pm1(u)) {
     if (signe(u) > 0) {
-      for (i = 1; i <= k; i++) 
+      for (i = 1; i <= k; i++)
         if (signe(z[i])) z[i] = lmodii((GEN)z[i], p);
     } else {
-      for (i = 1; i <= k; i++) 
+      for (i = 1; i <= k; i++)
         if (signe(z[i])) z[i] = lmodii(negi((GEN)z[i]), p);
     }
   }
   else {
-    for (i = 1; i <= k; i++) 
+    for (i = 1; i <= k; i++)
       if (signe(z[i])) z[i] = lmodii(mulii(u,(GEN)z[i]), p);
   }
 }
@@ -3474,14 +3472,7 @@ gsmithall(GEN x,long all)
       coeff(x,k,k) = (long)T;
     }
   }
-  if (!all) z = mattodiagonal_i(x);
-  else
-  {
-    z = cgetg(4, t_VEC);
-    z[1] = (long)gtrans_i(U);
-    z[2] = (long)V;
-    z[3] = (long)x;
-  }
+  z = all? _vec3(gtrans_i(U), V, x): mattodiagonal_i(x);
   return gerepilecopy(av, z);
 }
 
@@ -3510,7 +3501,7 @@ gsmith2(GEN x) { return gsmithall(x,1); }
  * 0 = G U R --> G D = 0,  g = G newU  and  G = g newUi */
 GEN
 smithrel(GEN H, GEN *newU, GEN *newUi)
-{ 
+{
   GEN U, V, Ui, D = smithall(H, &U, newUi? &V: NULL);
   long i, j, c, l = lg(D);
 
@@ -3599,7 +3590,7 @@ build_frobeniusbc(GEN V, long n)
   return M;
 }
 
-static GEN 
+static GEN
 build_basischange(GEN N, GEN U)
 {
   long n = lg(N);
@@ -3621,19 +3612,16 @@ GEN matfrobenius(GEN M, long flag)
   pari_sp ltop=avma;
   long n;
   GEN D,A,N,B,R;
-  GEN p3;
   if (typ(M)!=t_MAT) err(typeer,"matfrobenius");
-  if (gvar(M)==0) 
+  if (gvar(M)==0)
     err(talker,"matrix coefficients must no use variable x");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) err(mattype1,"matfrobenius");
   if (flag<2)
   {
     D = matsnf0(gaddmat(gneg(polx[0]),M),6);
-    if (flag==1)
-      return gerepileupto(ltop, D);
-    else 
-      return gerepileupto(ltop, Frobeniusform(D, n));
+    if (flag != 1) D = Frobeniusform(D, n);
+    return gerepileupto(ltop, D);
   }
   if (flag>2) err(flagerr,"matfrobenius");
   A = matsnf0(gaddmat(gneg(polx[0]),M),3);
@@ -3641,8 +3629,5 @@ GEN matfrobenius(GEN M, long flag)
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);
   R = build_basischange(N, gmul(B,(GEN) A[1]));
-  p3 = cgetg(3, t_VEC);
-  p3[1] = (long) N;
-  p3[2] = (long) R;
-  return gerepilecopy(ltop,p3);
+  return gerepilecopy(ltop, _vec2(N,R));
 }

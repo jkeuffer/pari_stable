@@ -339,9 +339,8 @@ znstar(GEN n)
 	gen[i]=lmul((GEN)gen[i], powgi((GEN)gen[j], mulii(v,q)));
       }
   q=gun; for (i=1; i<=sizeh && !gcmp1((GEN)h[i]); i++) q=mulii(q,(GEN)h[i]);
-  setlg(h,i); setlg(gen,i); z=cgetg(4,t_VEC);
-  z[1]=(long)q; z[2]=(long)h; z[3]=(long)gen;
-  return gerepilecopy(av,z);
+  setlg(h,i); setlg(gen,i); 
+  return gerepilecopy(av, _vec3(q,h,gen));
 }
 
 /*********************************************************************/
@@ -1643,10 +1642,8 @@ init_montdata(GEN N, montdata *s)
 GEN
 init_remiimul(GEN M)
 {
-  GEN sM = cgetg(3, t_VEC);
-  sM[1] = (long)M;
-  sM[2] = (long)linv( itor(M, lgefint(M) + 1) ); /* 1. / M */
-  return sM;
+  GEN iM = ginv( itor(M, lgefint(M) + 1) ); /* 1. / M */
+  return _vec2(M, iM);
 }
 
 typedef struct {
@@ -1937,11 +1934,7 @@ BSW_isprime(GEN x)
   F = (GEN)auxdecomp(subis(x,1), 0)[1];
   l = lg(F); p = (GEN)F[l-1];
   if (BSW_psp(p))
-  { /* smooth */
-    GEN z = cgetg(3, t_VEC);
-    z[1] = (long)x;
-    z[2] = (long)F; res = isprimeSelfridge(z);
-  }
+    res = isprimeSelfridge(_vec2(x,F)); /* smooth */
   else
     res = isprimeAPRCL(x);
   avma = av; return res;
