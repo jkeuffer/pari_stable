@@ -805,11 +805,13 @@ disable_dbg(long val)
 void
 errcontext(char *msg, char *s, char *entry)
 {
-  char *prefix = "  ***   ";
   int past = (s-entry);
   char str[STR_LEN + 2];
-  char *buf = gpmalloc(strlen(msg) + MAX_PAST + 5), *t = buf;
+  char *buf, *t;
 
+  if (!s || !entry) { print_text(msg); return; }
+
+  t = buf = gpmalloc(strlen(msg) + MAX_PAST + 5);
   sprintf(t,"%s: ", msg);
   if (past <= 0) past = 0;
   else
@@ -821,7 +823,7 @@ errcontext(char *msg, char *s, char *entry)
   
   t = str; if (!past) *t++ = ' ';
   strncpy(t, s, STR_LEN); t[STR_LEN] = 0;
-  print_prefixed_text(buf, prefix, str); free(buf);
+  print_prefixed_text(buf, "  ***   ", str); free(buf);
 }
 
 void *
@@ -1081,7 +1083,7 @@ err(long numerr, ...)
   pariOut = out;
   if (ret || (trapped && default_exception_handler &&
               default_exception_handler(numerr))) { flusherr(); return; }
-  err_recover(numerr); exit(1); /* not reached */
+  err_recover(numerr);
 }
 
 /*******************************************************************/

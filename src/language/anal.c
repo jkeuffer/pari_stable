@@ -144,6 +144,12 @@ _analyseur(void)
   return analyseur;
 }
 
+void
+_set_analyseur(char *s)
+{
+  analyseur = s;
+}
+
 /* Do not modify (analyseur,mark.start) */
 static GEN
 lisseq0(char *t, GEN (*f)(void))
