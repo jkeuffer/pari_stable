@@ -2395,6 +2395,9 @@ GEN qfbsolve(GEN Q,GEN n)
 /**                                                                 **/
 /*********************************************************************/
 
+INLINE GEN
+inegate(GEN z) { return subsi(-1,z); }
+
 GEN
 binaire(GEN x)
 {
@@ -2479,6 +2482,13 @@ bittest(GEN x, long n)
   long l;
 
   if (!signe(x) || n < 0) return 0;
+  if (signe(x) < 0)
+  {
+    pari_sp ltop=avma;
+    long b = !bittest(inegate(x),n);
+    avma=ltop;
+    return b;
+  }
   l = n>>TWOPOTBITS_IN_LONG;
   if (l+3 > lgefint(x)) return 0;
   u = (1UL << (n & (BITS_IN_LONG-1))) & *int_W(x,l);
@@ -2498,9 +2508,6 @@ gbittest(GEN x, GEN n)
 /**                                                                   **/
 /***********************************************************************/
 extern GEN int_normalize(GEN x, long known_zero_words);
-
-INLINE GEN
-inegate(GEN z) { return subsi(-1,z); }
 
 /* Truncate a non-negative integer to a number of bits.  */
 static GEN
