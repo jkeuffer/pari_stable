@@ -2082,6 +2082,10 @@ hnfmerge_get_1(GEN A, GEN B)
 
   t = NULL; /* -Wall */
   b = gcoeff(B,1,1); lb = lgefint(b);
+  if (!signe(b)) {
+    if (gcmp1(gcoeff(A,1,1))) return gscalcol(gun, l-1);
+    l = 0; /* trigger error */
+  }
   for (j = 1; j < l; j++)
   {
     c = j+1;
@@ -2095,10 +2099,9 @@ hnfmerge_get_1(GEN A, GEN B)
       if (gcmp0(t)) continue;
       setlg(C[c], k+1);
       ZV_elem(t, gcoeff(C,k,k), C, U, c, k);
-      if (k > 1 && lgefint(gcoeff(C,k,k)) > lb)
-        C[k] = (long)FpV_red((GEN)C[k], b);
+      if (lgefint(gcoeff(C,k,k)) > lb) C[k] = (long)FpV_red((GEN)C[k], b);
     }
-    t = gcoeff(C,1,1); /* >= 0 */
+    t = gcdii(b, gcoeff(C,1,1)); /* >= 0 */
     if (signe(t) && is_pm1(t)) break;
   }
   if (j >= l) err(talker, "non coprime ideals in hnfmerge");
