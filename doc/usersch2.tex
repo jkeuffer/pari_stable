@@ -1374,8 +1374,8 @@ follows:\sidx{zeta function}
 \bprog
 zet(s) =
 {
-  local(j); /* not needed, and possibly confusing (see below) */
-  sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
+  local(n); /* not needed, and possibly confusing (see below) */
+  sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 }
 @eprog
 
@@ -1390,10 +1390,10 @@ is pushed on entry and pulled on exit. So, it is not necessary for a function
 using such a construct to declare the variable as a dummy formal parameter.
 
 In particular, since loop variables are not visible outside their loops,
-the variable \kbd{j} need not be declared in the protoype of our \kbd{zet}
+the variable \kbd{n} need not be declared in the protoype of our \kbd{zet}
 function above.
 \bprog
-zet(s) = sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
+zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 @eprog
 
 \noindent would be a perfectly sensible (and in fact better) definition.
@@ -1542,7 +1542,9 @@ definition for it. On the other hand, as a safety measure, you can't redefine
 the built-in member functions, so typing the above text would in fact produce
 an error (you'd have to call it e.g.~\kbd{x.j2} in order for GP to accept it).
 
-Typing \b{um} will output the list of user-defined member functions.
+\misctitle{Warning:} contrary to user functions arguments, the structure
+accessed by a member function is \var{not} copied before being used.
+Any modification to the structure's components will be permanent.
 
 \misctitle{Note:} Member functions were not meant to be too complicated or to
 depend on any data that wouldn't be global. Hence they do no have parameters
@@ -1562,6 +1564,7 @@ correct_ell_if_needed(x) =
 }
 x.j = correct_ell_if_needed(x)[13];
 @eprog
+Typing \b{um} will output the list of user-defined member functions.
 
 \subsec{Strings and Keywords}\sidx{string}\sidx{keyword}
 \label{se:strings}
@@ -1930,8 +1933,7 @@ program or in the PARI system), you will usually stay under Emacs, but the GP
 buffer will be killed. To recover it, simply type again \kbd{M-x gp} (or
 \kbd{C-u M-x gp}), and a new session of GP will be started after the old one,
 so you can recover what you have typed. Note that this will of course
-\var{not} work if for some reason you exited Emacs before coming back (except
-for the \kbd{C-z} temporary stopping command).
+\var{not} work if for some reason you kill Emacs and start a new session.
 
 \smallskip
 You also have at your disposal a few other commands and many possible
