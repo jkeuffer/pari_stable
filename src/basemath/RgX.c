@@ -21,10 +21,9 @@ is_rational(GEN x) { long t = typ(x); return is_rational_t(t); }
 int
 RgX_is_rational(GEN x)
 {
-  long i, t = typ(x);
-  if (t != t_POL) return is_rational_t(t);
-  for (i=lg(x)-1; i>1; i--)
-    if (!is_rational((GEN)t[i])) return 0;
+  long i;
+  for (i = lg(x)-1; i>1; i--)
+    if (!is_rational((GEN)x[i])) return 0;
   return 1;
 }
 
