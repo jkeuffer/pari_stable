@@ -54,7 +54,7 @@ case "$arch" in
   arm*)          asmarch=none;          pretty=$arch ;;
   mips)          asmarch=none;          pretty=Mips ;;
   fx2800)        asmarch=none;          pretty="Alliant FX/2800" ;;
-  ppc)           asmarch=none;          pretty="Power PC" ;;
+  ppc)           asmarch=ppc;           pretty="Power PC" ;;
   s390)          asmarch=none;          pretty="S/390" ;;
   none)          asmarch=none;          pretty="unknown" ;;
   *)             asmarch=none;          pretty=$arch
@@ -79,8 +79,8 @@ An optimized Pari kernel is available for these architectures
 ("none" means that we will use the portable C version of GP/PARI)
 ("-gmp" means we will use the GMP library (that needs to be installed))
 EOM
-  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa
-  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp'
+  rep='none sparcv7 sparcv8_super sparcv8_micro ix86 alpha hppa ppc
+  none-gmp sparcv7-gmp sparcv8_super-gmp sparcv8_micro-gmp ix86-gmp alpha-gmp hppa-gmp ppc-gmp'
   . ./display
   echo $n ..."Which of these apply, if any ? $c"
   dflt=$asmarch; . ./myread; 
