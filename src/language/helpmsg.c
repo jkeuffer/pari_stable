@@ -113,7 +113,7 @@ char *helpmessages_basic[]={
   "dirmul(x,y): multiplication of the Dirichlet series x by the Dirichlet series y",
   "dirzetak(nf,b): Dirichlet series of the Dedekind zeta function of the number field nf up to the bound b-1",
   "divisors(x): gives a vector formed by the divisors of x in increasing order",
-  "divrem(x,y): euclidean division of x by y giving as a 2-dimensional column vector the quotient and the remainder",
+  "divrem(x,y,{v}): euclidean division of x by y giving as a 2-dimensional column vector the quotient and the remainder, with respect to v (to main variable if v is omitted)",
   "eint1(x,{n}): exponential integral E1(x). If n is present, computes the vector of the first n values of the exponential integral E1(n.x) (x > 0)",
   "elladd(e,z1,z2): sum of the points z1 and z2 on elliptic curve e",
   "ellak(e,n): computes the n-th Fourier coefficient of the L-function of the elliptic curve e",

@@ -849,6 +849,28 @@ gdiventres(GEN x, GEN y)
   z[1]=zero; z[2]=lcopy(x); return z;
 }
 
+GEN swap_vars(GEN b0, long v);
+
+GEN
+divrem(GEN x, GEN y, long v)
+{
+  ulong av = avma;
+  long vx,vy;
+  GEN z,q,r;
+  if (v < 0 || typ(y) != t_POL || typ(x) != t_POL) return gdiventres(x,y);
+  vx = varn(x); if (vx != v) x = swap_vars(x,v);
+  vy = varn(y); if (vy != v) y = swap_vars(y,v);
+  q = poldivres(x,y, &r);
+  if (v && (vx != v || vy != v))
+  {
+    q = poleval(q, polx[v]);
+    r = poleval(r, polx[v]);
+  }
+  z = cgetg(3,t_COL);
+  z[1] = (long)q;
+  z[2] = (long)r; return gerepilecopy(av, z);
+}
+
 GEN
 gdivmod(GEN x, GEN y, GEN *pr)
 {

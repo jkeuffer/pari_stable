@@ -2047,7 +2047,7 @@ entree functions_basic[]={
 {"dirmul",2,(void*)dirmul,4,"GG"},
 {"dirzetak",2,(void*)dirzetak,6,"GG"},
 {"divisors",18,(void*)divisors,4,"G"},
-{"divrem",2,(void*)gdiventres,1,"GG"},
+{"divrem",2,(void*)divrem,1,"GGDn"},
 {"eint1",99,(void*)veceint1,3,"GDGp"},
 {"elladd",3,(void*)addell,5,"GGG"},
 {"ellak",2,(void*)akell,5,"GG"},
