@@ -292,10 +292,12 @@ Beware that
 
 \syn{gpow}{x,n,\var{prec}} for $x\hbox{\kbd{\pow}}n$.
 
-\subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $|x|$ starting
+\subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $x$ starting
 from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
 The result is 0 or 1. To extract several bits at once as a vector, pass a
 vector for $n$.
+
+See \secref{se:bitand} for the behaviour at negative arguments.
 
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
@@ -580,58 +582,70 @@ vector/matrix.
 
 \syn{binaire}{x}.
 
-\subsecidx{bitand}$(x,y)$: bitwise \tet{and}\sidx{bitwise and} of two
-integers $x$ and $y$, that is the integer
-$$\sum (x_i~\kbd{and}~y_i) 2^i$$
+\subsecidx{bitand}$(x,y)$:\label{se:bitand} bitwise \tet{and}\sidx{bitwise
+and} of two integers $x$ and $y$, that is the integer
+$$\sum_i (x_i~\kbd{and}~y_i) 2^i$$
 
-Negative numbers behave as if modulo a huge power of $2$.
+Negative numbers behave $2$-adically, i.e.~the result is the $2$-adic limit
+of \kbd{bitand}$(x_n,y_n)$, where $x_n$ and $y_n$ are non-negative integers
+tending to $x$ and $y$ respectively. (The result is an ordinary integer,
+possibly negative.)
+
+\bprog
+? bitand(5, 3)
+%1 = 1
+? bitand(-5, 3)
+%2 = 3
+? bitand(-5, -3)
+%3 = -7
+@eprog
 
 \syn{gbitand}{x,y}.
 
 \subsecidx{bitneg}$(x,\{n=-1\})$: \idx{bitwise negation} of an integer $x$,
-truncated to $n$ bits, that is the integer
-$$\sum_{i=0}^n \kbd{not}(x_i) 2^i$$
-The special case $n=-1$ means no truncation: an infinite sequence of
+truncated to $n$ bits, that is the integer $$\sum_{i=0}^n \kbd{not}(x_i)
+2^i$$ The special case $n=-1$ means no truncation: an infinite sequence of
 leading $1$ is then represented as a negative number.
 
-Negative numbers behave as if modulo a huge power of $2$.
+See \secref{se:bitand} for the behaviour for negative arguments.
 
 \syn{gbitneg}{x}.
 
-\subsecidx{bitnegimply}$(x,y)$: bitwise negated imply of two integers $x$
-and $y$ (or \kbd{not} $(x \Rightarrow y)$), that is the integer
-$$\sum (x_i~\kbd{and not}(y_i)) 2^i$$
+\subsecidx{bitnegimply}$(x,y)$: bitwise negated imply of two integers $x$ and
+$y$ (or \kbd{not} $(x \Rightarrow y)$), that is the integer $$\sum
+(x_i~\kbd{and not}(y_i)) 2^i$$
 
-Negative numbers behave as if modulo a huge power of $2$.
+See \secref{se:bitand} for the behaviour for negative arguments.
 
 \syn{gbitnegimply}{x,y}.
 
 \subsecidx{bitor}$(x,y)$: \sidx{bitwise inclusive or}bitwise (inclusive)
-\tet{or} of two integers $x$ and $y$, that is the integer
-$$\sum (x_i~\kbd{or}~y_i) 2^i$$
+\tet{or} of two integers $x$ and $y$, that is the integer $$\sum
+(x_i~\kbd{or}~y_i) 2^i$$
 
-Negative numbers behave as if modulo a huge power of $2$.
+See \secref{se:bitand} for the behaviour for negative arguments.
 
 \syn{gbitor}{x,y}.
 
 \subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $|x|$ starting
-from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
-The result is 0 or 1. To extract several bits at once as a vector, pass a
-vector for $n$.
+from the right (i.e.~the coefficient of $2^n$ in the binary expansion of
+$x$). The result is 0 or 1. To extract several bits at once as a vector, pass
+a vector for $n$.
 
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
 \subsecidx{bitxor}$(x,y)$: bitwise (exclusive) \tet{or}\sidx{bitwise
-exclusive or} of two integers $x$ and $y$, that is the integer
-$$\sum (x_i~\kbd{xor}~y_i) 2^i$$
-Negative numbers behave as if modulo a huge power of $2$.
+exclusive or} of two integers $x$ and $y$, that is the integer $$\sum
+(x_i~\kbd{xor}~y_i) 2^i$$
+
+See \secref{se:bitand} for the behaviour for negative arguments.
 
 \syn{gbitxor}{x,y}.
 
-\subsecidx{ceil}$(x)$: ceiling of $x$. When $x$ is in $\R$,
-the result is the smallest integer greater than or equal to $x$. Applied to a
-rational function, $\kbd{ceil}(x)$ returns the euclidian quotient of the
-numerator by the denominator.
+\subsecidx{ceil}$(x)$: ceiling of $x$. When $x$ is in $\R$, the result is the
+smallest integer greater than or equal to $x$. Applied to a rational
+function, $\kbd{ceil}(x)$ returns the euclidian quotient of the numerator by
+the denominator.
 
 \syn{gceil}{x}.
 
