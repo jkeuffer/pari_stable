@@ -1433,9 +1433,14 @@ isunit(GEN bnf,GEN x)
       ex = grndtoi(gauss(rlog, rx), &e);
       if (gcmp0((GEN)ex[RU]) && e < -4) break;
     }
-
-    if (++i > 4) err(precer,"isunit");
-    prec = (prec-1)<<1;
+    if (i == 1)
+      prec = MEDDEFAULTPREC + (gexpo(x) >> TWOPOTBITS_IN_LONG);
+    else
+    {
+      if (i > 4) err(precer,"isunit");
+      prec = (prec-1)<<1;
+    }
+    i++;
     if (DEBUGLEVEL) err(warnprec,"isunit",prec);
     nf = nfnewprec(nf, prec);
   }
