@@ -1050,7 +1050,6 @@ GEN     factormod0(GEN f, GEN p,long flag);
 GEN     factorpadic0(GEN f,GEN p,long r,long flag);
 GEN     factorpadic2(GEN x, GEN p, long r);
 GEN     factorpadic4(GEN x, GEN p, long r);
-GEN     factpol2(GEN x, long klim);
 int     gdivise(GEN x, GEN y);
 GEN     gred(GEN x);
 GEN     gred_rfrac(GEN x);

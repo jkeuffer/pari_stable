@@ -182,7 +182,7 @@ entree oldfonctions[]={
 {"factorpadic",32,(void *)factorpadic4,7,"GGL"},
 {"factorpadic2",32,(void *)factorpadic2,7,"GGL"},
 {"factpol",33,(void *)factpol,7,"GLL"},
-{"factpol2",21,(void *)factpol2,7,"GL"},
+{"factpol2",1,(void *)suppressed,6,"G"},
 {"fibo",11,(void *)fibo,4,"L"},
 {"floor",1,(void *)gfloor,2,"G"},
 {"for",83,(void *)forpari,11,"vV=GGI"},

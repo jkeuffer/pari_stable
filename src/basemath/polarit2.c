@@ -135,69 +135,6 @@ centermod_i(GEN x, GEN p, GEN ps2)
 GEN
 centermod(GEN x, GEN p) { return centermod_i(x,p,NULL); }
 
-static GEN
-decpol(GEN x, long klim)
-{
-  short int pos[200];
-  long av=avma,av1,k,kin,i,j,i1,i2,fl,d,nbfact;
-  GEN res,p1,p2;
-
-  kin=1; res=cgetg(lgef(x)-2,t_VEC); nbfact=0;
-  p1=roots(x,DEFAULTPREC); d=lg(p1)-1; if (!klim) klim=d;
-  do
-  {
-    fl=1;
-    for (k=kin; k+k <= d && k<=klim; k++)
-    {
-      for (i=0; i<=k; i++) pos[i]=i;
-      do
-      {
-	av1=avma; p2=gzero; j=0;
-	for (i1=1; i1<=k; i1++) p2=gadd(p2,(GEN)p1[pos[i1]]);
-	if (gexpo(gimag(p2))<-20 && gexpo(gsub(p2,ground(p2)))<-20)
-	{
-	  p2=gun;
-	  for (i1=1; i1<=k; i1++)
-	    p2=gmul(p2,gsub(polx[0],(GEN)p1[pos[i1]]));
-          p2 = ground(p2);
-	  if (gcmp0(gimag(p2)) && gcmp0(gmod(x,p2)))
-	  {
-	    res[++nbfact]=(long)p2; x=gdiv(x,p2);
-            kin=k; p2=cgetg(d-k+1,t_COL);
-            for (i=i1=i2=1; i<=d; i++)
-	    {
-	      if (i1<=k && i==pos[i1]) i1++;
-	      else p2[i2++]=p1[i];
-	    }
-	    p1=p2; d-=k; fl=0; break;
-	  }
-	}
-	avma=av1; pos[k]++;
-	while (pos[k-j] > d-j) { j++; pos[k-j]++; }
-	for (i=k-j+1; i<=k; i++) pos[i]=i+pos[k-j]-k+j;
-      }
-      while (j<k);
-      if (!fl) break;
-    }
-    if (lgef(x)<=3) break;
-  }
-  while (!fl || (k+k <= d && k<=klim));
-  if (lgef(x)>3) res[++nbfact]=(long)x;
-  setlg(res,nbfact+1);
-  return gerepileupto(av,greal(res));
-}
-
-/* Note that PARI's idea of the maximum possible coefficient involves the
- * limit on the degree (klim).  Consider revising this.  If I don't respect
- * the degree limit when testing potential factors, there's the possibility
- * that I might identify a high degree factor that isn't irreducible, because
- * it's lower degree divisors were missed because they had a coefficient
- * outside the Borne limit for klim, but the higher degree factor had it's
- * coefficients within Borne.  This would still have the property that any
- * factors of degree <= klim were guaranteed irr, but higher degrees
- * (> 2*klim) might not be irr.
- */
-
 /* assume same variables, y normalized, non constant */
 static GEN
 polidivis(GEN x, GEN y, GEN bound)
@@ -261,7 +198,7 @@ min_deg(long jmax,ulong tabbit[])
 /* tabkbit is a bit vector (only lowest 32 bits of each word are used
  * on 64bit architecture): reading from right to left, bit i+1 is set iff
  * degree i is attainable from the factorisation mod p.
- *   
+ *
  * record N modular factors of degree d. */
 static void
 record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
@@ -280,7 +217,6 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
     for (j=jmax-a; j>=0; j--) tabkbit[j] |= tmp[j];
   }
 }
-
 
 /***********************************************************************/
 /**                                                                   **/
@@ -354,7 +290,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
 
 /* au + bv = 1 (p0), ab = f (p0). Lift mod p1 = p0 pd (<= p0^2).
  * If noinv is set, don't lift the inverses u and v */
-static void 
+static void
 HenselLift(GEN V, GEN W, long j, GEN f, GEN pd, GEN p0, int noinv)
 {
   const long space = lgef(f) * (lgefint(pd) + lgefint(p0) - 2);
@@ -416,7 +352,7 @@ TreeLift(GEN link, GEN v, GEN w, GEN p, long e0, long e1, GEN f, int noinv)
   GEN p0 = gpowgs(p, e0);
   GEN pd = gpowgs(p, e1-e0);
   RecTreeLift(link, v, w, pd, p0, f, lg(v)-2, noinv);
-} 
+}
 
 /* a = modular factors of f mod p, lift to precision e0
  * flag = 0: standard.
@@ -445,7 +381,7 @@ MultiLift(GEN f, GEN a, GEN p, long e0, int flag)
     w = cgetg(2*k - 2 + 1, t_VEC);
     link=cgetg(2*k - 2 + 1, t_VECSMALL);
     BuildTree(link, v, w, a, p);
-    if (DEBUGLEVEL > 3) msgtimer("building tree"); 
+    if (DEBUGLEVEL > 3) msgtimer("building tree");
   }
   else
   {
@@ -482,7 +418,7 @@ MultiLift(GEN f, GEN a, GEN p, long e0, int flag)
 }
 
 /* Q list of (coprime, monic) factors of pol mod p. Lift mod p^e = pe */
-GEN   
+GEN
 hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pe, long e)
 {
   if (lg(Q) == 2) { GEN d = cgetg(2, t_VEC); d[1] = (long)pol; return d; }
@@ -514,7 +450,7 @@ BezoutPropagate(GEN link, GEN v, GEN w, GEN pe, GEN U, GEN f, long j)
 /* as above, but return the Bezout coefficients for the lifted modular factors
  *   U[i] = 1 mod Qlift[i]
  *          0 mod Qlift[j], j != i */
-GEN   
+GEN
 bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
 {
   GEN E, link, v, w, pe;
@@ -538,20 +474,20 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
 
 /* Front-end for hensel_lift_fact:
    lift the factorization of pol mod p given by fct to p^exp (if possible) */
-GEN 
+GEN
 polhensellift(GEN pol, GEN fct, GEN p, long exp)
 {
   GEN p1, p2;
   long av = avma, i, j, l;
 
   /* we check the arguments */
-  if (typ(pol) != t_POL) 
+  if (typ(pol) != t_POL)
     err(talker, "not a polynomial in polhensellift");
   if ((typ(fct) != t_COL && typ(fct) != t_VEC) || (lg(fct) < 3))
     err(talker, "not a factorization in polhensellift");
   if (typ(p) != t_INT || !isprime(p))
     err(talker, "not a prime number in polhensellift");
-  if (exp < 1) 
+  if (exp < 1)
     err(talker, "not a positive exponent in polhensellift");
 
   p1 = lift(fct); /* make sure the coeffs are integers and not intmods */
@@ -567,19 +503,19 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
   if (gcmp0(discsr(FpX(pol, p))))
   {
     for (i = 1; i <= l; i++)
-      for (j = 1; j < i; j++) 
+      for (j = 1; j < i; j++)
         if (lgef(FpX_gcd((GEN)p1[i], (GEN)p1[j], p)) != 3)
           err(talker, "polhensellift: factors %Z and %Z are not coprime",
                      p1[i], p1[j]);
   }
-  return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, p, 
+  return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, p,
 						 gpowgs(p, exp), exp)));
 }
 
 #if 0
 /* cf Beauzamy et al: upper bound for
  *      lc(x) * [2^(5/8) / pi^(3/8)] e^(1/4n) 2^(n/2) sqrt([x]_2)/ n^(3/8)
- * where [x]_2 = sqrt(\sum_i=0^n x[i]^2 / binomial(n,i)). One factor has 
+ * where [x]_2 = sqrt(\sum_i=0^n x[i]^2 / binomial(n,i)). One factor has
  * all coeffs less than then bound */
 static GEN
 two_factor_bound(GEN x)
@@ -702,7 +638,7 @@ nextK:
   i = 1; curdeg = deg[ind[1]];
   for(;;)
   { /* try all combinations of K factors */
-    for (j = i; j < K; j++) 
+    for (j = i; j < K; j++)
     {
       degsofar[j] = curdeg;
       ind[j+1] = ind[j]+1; curdeg += deg[ind[j+1]];
@@ -758,7 +694,7 @@ nextK:
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
         if (j <= K && i == ind[j]) j++;
-        else 
+        else
         {
           famod[k] = famod[i];
           trace[k] = trace[i];
@@ -772,7 +708,7 @@ nextK:
       lc = absi(leading_term(target));
       lctarget = gmul(lc,target);
       if (DEBUGLEVEL > 2)
-      { 
+      {
         fprintferr("\n"); msgtimer("to find factor %Z",y);
         fprintferr("remaining modular factor(s): %ld\n", lfamod);
       }
@@ -831,7 +767,7 @@ get_e(GEN B, GEN p, GEN *ptpe)
   *ptpe =  pe; return e;
 }
 
-/* recombination of modular factors: Hoeij's algorithm */
+/* recombination of modular factors: van Hoeij's algorithm */
 
 /* compute Newton sums of P (i-th powers of roots, i=1..n)
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
@@ -903,7 +839,7 @@ root_bound(GEN P)
     if (egalii(x,z)) break;
     if (cmpii(poleval(P0,z), mulii(lP, gpowgs(z, d))) < 0)
       y = z;
-    else 
+    else
       x = z;
   }
   return y;
@@ -964,7 +900,7 @@ special_pivot(GEN x)
 }
 
 /* x matrix: compute a bound for | \sum e_i x_i | ^ 2, e_i = 0,1 */
-static GEN 
+static GEN
 my_norml2(GEN x)
 {
   long i,j, co = lg(x), li;
@@ -1005,8 +941,8 @@ extern GEN sindexrank(GEN x);
 extern GEN vconcat(GEN Q1, GEN Q2);
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
- * van Hoeij's knapsack 
- * 
+ * van Hoeij's knapsack
+ *
  * P = monic squarefree in Z[X].
  * famod = array of (lifted) modular factors mod p^a
  * bound = Mignotte bound for the size of divisors of P (sor the sup norm)
@@ -1040,7 +976,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   BL = idmat(n0);
   /* tmax = current number of traces used (and computed so far)
    * S = number of traces used at the round's end = tmax + s */
-  for(tmax = 0;; tmax = S) 
+  for(tmax = 0;; tmax = S)
   {
     GEN pas2, pa_b, BE;
     long b, goodb;
@@ -1121,7 +1057,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       if (cmprr((GEN)norm[i], M) < 0) break;
     if (i > r)
     { /* no progress */
-      avma = av2; BitPerFactor += 2; 
+      avma = av2; BitPerFactor += 2;
       if (DEBUGLEVEL>2)
         fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
 #if 0
@@ -1276,20 +1212,18 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
 
 extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
 
-/* assume degree(a) > 0, a(0) != 0, and a squarefree
- * klim only used by decpol */
+/* assume degree(a) > 0, a(0) != 0, and a squarefree */
 static GEN
-squff(GEN a, long klim, long hint)
+squff(GEN a, long hint)
 {
   GEN res,Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
   long av=avma,va=varn(a),da=deg(a);
-  long chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,lgg,nf,nft;
+  long klim,chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,lgg,nf,nft;
   ulong *tabbit, *tabkbit, *tmp;
   byteptr pt=diffptr;
   const int NOMBDEP = 5;
 
-  if (hint < 0) return decpol(a,klim);
-  if (!hint) hint = 1;
+  if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) timer2();
   lbit=(da>>4)+1; nmax=da+1; klim=da>>1;
   chosenp = 0;
@@ -1412,12 +1346,12 @@ polinflate(GEN x0, long d)
 }
 
 GEN
-squff2(GEN x, long klim, long hint)
+squff2(GEN x, long hint)
 {
   GEN L;
   long m;
   x = poldeflate(x, &m);
-  L = squff(x, klim, hint);
+  L = squff(x, hint);
   if (m > 1)
   {
     GEN e, v, fa = decomp(stoi(m));
@@ -1437,7 +1371,7 @@ squff2(GEN x, long klim, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = concatsp(L2, squff(polinflate((GEN)L[i], v[k]), klim,hint));
+        L2 = concatsp(L2, squff(polinflate((GEN)L[i], v[k]), hint));
       L = L2;
     }
   }
@@ -1485,7 +1419,7 @@ factpol(GEN x, long klim, long hint)
     if (k) { t=modulargcd(x,w); x=gdeuc(x,t); w=gdeuc(w,t); } else t=x;
     if (deg(t) > 0)
     {
-      fa[ex] = (long)squff2(t,klim,hint);
+      fa[ex] = (long)squff2(t,hint);
       nbfac += lg(fa[ex])-1;
     }
   }
@@ -1500,12 +1434,6 @@ END: av2=avma;
     }
   gerepilemanyvec(av,av2,y+1,2);
   return sort_factor(y, cmpii);
-}
-
-GEN
-factpol2(GEN x, long klim)
-{
-  return factpol(x,klim,-1);
 }
 
 /***********************************************************************/
@@ -2562,7 +2490,7 @@ init_resultant(GEN x, GEN y)
 }
 
 /* return coefficients s.t x = x_0 X^n + ... + x_n */
-static GEN 
+static GEN
 revpol(GEN x)
 {
   long i,n = deg(x);
@@ -2854,7 +2782,7 @@ Lazard(GEN x, GEN y, long n)
 {
   long a, b;
   GEN c;
-  
+
   if (n<=1) return x;
   a=1; while (n >= (b=a+a)) a=b;
   c=x; n-=a;
@@ -2921,7 +2849,7 @@ resultantducos(GEN P, GEN Q)
 {
   long delta, av=avma, tetpil, lim = stack_lim(av,1);
   GEN Z, s;
-  
+
   if ((Z = init_resultant(P,Q))) return Z;
   delta = degree(P) - degree(Q);
   if (delta < 0)
@@ -2995,7 +2923,7 @@ sylvestermatrix_i(GEN x, GEN y)
   return M;
 }
 
-GEN 
+GEN
 sylvestermatrix(GEN x, GEN y)
 {
   long i,j,lx;
@@ -3444,7 +3372,7 @@ polfnf(GEN a, GEN t)
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
   /* n guaranteed to be squarefree */
-  fa = squff2(n,0,0); lx = lg(fa);
+  fa = squff2(n,0); lx = lg(fa);
   y = cgetg(3,t_MAT);
   p1 = cgetg(lx,t_COL); y[1] = (long)p1;
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;
@@ -3482,7 +3410,7 @@ GEN FpM(GEN z, GEN p);
 GEN polpol_to_mat(GEN v, long n);
 GEN mat_to_polpol(GEN x, long v, long w);
 
-static 
+static
 GEN to_frac(GEN a, GEN b)
 {
   GEN f = cgetg(3, t_FRAC);
@@ -3494,7 +3422,7 @@ GEN to_frac(GEN a, GEN b)
  * If one components fails, return NULL.
  * See ratlift.
  * If denom is not NULL, check that the denominators divide denom
- * 
+ *
  * FIXME: NOT stack clean ! a & b stay on the stack.
  * If we suppose mod and denom coprime, then a and b are coprime
  * so we can do a cgetg(t_FRAC).
@@ -3545,11 +3473,11 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
 }
 
 /* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
- * 
+ *
  * We essentially follows the paper of M. Encarnacion
  * "On a modular Algorithm for computing GCDs of polynomials over
  * number fields" in the proceeding of ISSAC'94.
- * 
+ *
  * We procede as follows :
  * We compute the gcd modulo primes discarding bad primes as they are detected.
  * We try reconstruct the result with matratlift, stoping as soon as we get
@@ -3565,7 +3493,7 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
  * If not NULL, den must a a multiple of the denominator of the gcd,
  * for example the discriminant of nf.
  * Use resultantducos for now.(ref: polresultant0)
- * 
+ *
  * NOTE: if nf is not irreducible, nfgcd may loop forever, especially if the
  * gcd divides nf !
  */
@@ -3621,7 +3549,7 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       mod = mulis(mod, p);
       M = lift(FpM(M, mod));
       /* I suspect it must be better to take amax > bmax*/
-      bo = racine(shifti(mod, -1)); 
+      bo = racine(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL)
         continue;
       dens = denom(sol);
