@@ -173,11 +173,10 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
 #endif
 
 /* set z <-- x*y, floating point multiplication.
- * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z) */
+ * lz = lg(z) = lg(x) <= ly <= lg(y), sz = signe(z). flag = lg(x) < lg(y) */
 INLINE void
-mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
+mulrrz_i(GEN z, GEN x, GEN y, long lz, long flag, long sz)
 {
-  const int flag = (lz != ly);
   long ez = expo(x) + expo(y);
   long i, j, lzz, p1;
   ulong garde;
@@ -193,7 +192,7 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
 #else
     GEN hi = muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
 #endif
-    long i, garde = hi[lz];
+    garde = hi[lz];
     if (hi[2] < 0)
     {
       ez++;
@@ -201,15 +200,24 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
     }
     else
     {
-      garde <<= 1;
       shift_left(z,hi,2,lz-1, garde, 1);
+      garde <<= 1;
     }
-    if (garde < 0)
+    if (garde & HIGHBIT)
     { /* round to nearest */
       i = lz; do z[--i]++; while (z[i]==0 && i > 1);
       if (i == 1) { z[2] = HIGHBIT; ez++; }
     }
     z[1] = evalsigne(sz)|evalexpo(ez);
+#if 0
+{
+GEN U;
+KARATSUBA_MULR_LIMIT = 100000;
+U = mulrr(x, y);
+KARATSUBA_MULR_LIMIT = 4;
+if (!gegal(U, z)) err(talker,"toto");
+}
+#endif
     avma = av; return;
   }
   if (lz == 3)
@@ -273,22 +281,35 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
     z[i] = addll(addmul(p1,y1[i]), z[i]);
   }
   z[2] = hiremainder+overflow;
-  if (z[2] < 0) ez++; else shift_left(z,z,2,lzz,garde, 1);
+
+  if (z[2] < 0)
+    ez++;
+  else
+  {
+    shift_left(z,z,2,lzz, garde, 1);
+    garde <<= 1;
+  }
+  if (garde & HIGHBIT)
+  { /* round to nearest */
+    i = lz; do z[--i]++; while (z[i]==0 && i > 1);
+    if (i == 1) { z[2] = HIGHBIT; ez++; }
+  }
   z[1] = evalsigne(sz) | evalexpo(ez);
 }
 
 GEN
 mulrr(GEN x, GEN y)
 {
-  long ly, lz, sx = signe(x), sy = signe(y);
+  long flag, ly, lz, sx = signe(x), sy = signe(y);
   GEN z;
 
   if (!sx || !sy) return realzero_bit(expo(x) + expo(y));
   if (sy < 0) sx = -sx;
   lz = lg(x);
-  ly = lg(y); if (lz > ly) { lz = ly; z = x; x = y; y = z; }
+  ly = lg(y);
+  if (lz > ly) { lz = ly; swap(x, y); flag = 1; } else flag = (lz != ly);
   z = cgetr(lz);
-  mulrrz_i(z, x,y, lz,ly, sx);
+  mulrrz_i(z, x,y, lz,flag, sx);
   return z;
 }
 
@@ -303,9 +324,8 @@ mulir(GEN x, GEN y)
   sy = signe(y);
   if (!sy) return realzero_bit(expi(x) + expo(y));
   if (sy < 0) sx = -sx;
-  lz = lg(y);
-  z = cgetr(lz);
-  mulrrz_i(z, itor(x,lz),y, lz,lz, sx);
+  lz = lg(y); z = cgetr(lz);
+  mulrrz_i(z, itor(x,lz),y, lz,0, sx);
   avma = (pari_sp)z; return z;
 }
 
