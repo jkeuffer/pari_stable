@@ -1,6 +1,6 @@
 LIBRARY '<DLL_BASE>' INITINSTANCE TERMINSTANCE
-; Can't put http://www.parigp-home.de/ in VENDOR, since it is split on :
-; One needs to be glad that www.parigp-home.de/ is good enough...
+; Can't put http://.../ in VENDOR, since it is split on :
+; One should be be glad that .../ is good enough
 DESCRIPTION '@#<VENDOR>:<VERSION>#@<DESCR>'
 CODE LOADONCALL
 DATA LOADONCALL NONSHARED MULTIPLE

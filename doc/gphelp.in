@@ -45,7 +45,7 @@
 $version= "@version@";
 $miscdir= "@miscdir@";
 # no expanded material (@key@) below
-$wwwsite= "http://www.parigp-home.de/";
+$wwwsite= "http://pari.math.u-bordeaux.fr/";
 $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
 
 if (!defined $docdir) {

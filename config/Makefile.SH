@@ -509,7 +509,7 @@ EXPORT_FILE_BASE = $src/systems/os2/pari.def.base
 VERSION_VERBOSE = $pari_release_verbose
 
 \$(EXPORT_FILE): \$(OBJS) \$(EXPORT_FILE_BASE)
-	cat \$(EXPORT_FILE_BASE) | sed 's/<DLL_BASE>/\$(DLLIBPARI)/' | sed 's/<VENDOR>/www.parigp-home.de\//' | sed 's/<VERSION>/\$(VERSION_VERBOSE)/' | sed 's/<DESCR>/GP\/PARI compiled with \$(CFLAGS)/' > \$@
+	cat \$(EXPORT_FILE_BASE) | sed 's/<DLL_BASE>/\$(DLLIBPARI)/' | sed 's/<VENDOR>/pari.math.u-bordeaux.fr\//' | sed 's/<VERSION>/\$(VERSION_VERBOSE)/' | sed 's/<DESCR>/GP\/PARI compiled with \$(CFLAGS)/' > \$@
 	\$(EXPORT_CREATE) \$(OBJS) >> \$@
 
 \$(DLLIBPARI)\$(_A): \$(EXPORT_FILE)

@@ -1286,7 +1286,7 @@ community(void)
 reference manual, a tutorial, a reference card and quite a few examples. They \
 should have been installed in the directory '%s'. If not, ask the person \
 who installed PARI on your system where they can be found. You can also \
-download them from the PARI WWW site 'http://www.parigp-home.de/'",
+download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'",
 GPMISCDIR);
   print_text(s); free(s);
 
