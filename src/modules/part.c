@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *             (sqrt(q)/(2*sqrt(2)*b*Pi))*(a*cosh(a*c)-(sinh(a*c)/c))
  * L(n, q) = if(q==1,1,sum(h=1,q-1,if(gcd(h,q)>1,0,cos((g(h,q)-2*h*n)*Pi/q))))
  * g(h, q) = if(q<3,0,sum(k=1,q-1,k*(frac(h*k/q)-1/2)))
- * part(n) = round(sum(q=1,max(5,0.24*sqrt(n)+2),L(n,q)*Psi(n,q)))
+ * part(n) = round(sum(q=1,5 + 0.24*sqrt(n),L(n,q)*Psi(n,q)))
  *
  * only faster. It is a translation of the C/mpfr version at
  * http://www.ark.in-berlin.de/part.c
@@ -156,7 +156,7 @@ pinit(GEN n, GEN *c, GEN *d, GEN *Pi, ulong prec)
   *d = ginv( mulrr(pi2sqrt2, mulrr(b,sqrtb)) );
 }
 
-/* part(n) = round(sum(q=1,max(5,0.24*sqrt(n)+2), L(n,q)*Psi(n,q))) */
+/* part(n) = round(sum(q=1,5 + 0.24*sqrt(n), L(n,q)*Psi(n,q))) */
 GEN
 numbpart(GEN n)
 {
