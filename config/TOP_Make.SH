@@ -44,12 +44,16 @@ dft target::
 	@echo "	clean, cleantest         Cleaning up"
 	@echo "For pari maintainers..."
 	@echo "	all			Compile gp-[sta|dyn] and lib-[sta|dyn]"
+	@echo "	gp.dbg	                Compile gp binary suitable for debugging"
 	@echo "	distrib			Create a new distribution"
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 
 gp all bench test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
 	cd $objdir; \$(MAKE) \$@
+
+gp.dbg: $objdir.dbg/gp-sta
+	cd $objdir.dbf; \$(MAKE) gp
 
 doc docps docpdf gpman cleandoc::
 	cd doc; \$(MAKE) \$@
