@@ -191,6 +191,8 @@ GEN
 principalideal(GEN nf, GEN x)
 {
   GEN z = cgetg(2,t_MAT);
+
+  nf = checknf(nf);
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:

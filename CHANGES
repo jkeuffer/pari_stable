@@ -72,7 +72,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    26- ideallistarch(nfinit(x),[1,1],0); --> SEGV [bad input]
    27- factor(x-I) --> x - #<16382>
    28- ellsigma(...,matid(1)) --> SEGV [bad input]
-
+   29- ideleprincipal([],1) --> SEGV [bad input]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
