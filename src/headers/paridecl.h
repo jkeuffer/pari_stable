@@ -761,7 +761,7 @@ GEN     galoisconj4(GEN T, GEN den, long flag);
 GEN     galoisfixedfield(GEN gal, GEN v, long flag, long y);
 GEN     galoisinit(GEN nf, GEN den);
 GEN     galoispermtopol(GEN gal, GEN perm);
-GEN     galoissubcyclo(long n, GEN H, GEN Z, long v);
+GEN     galoissubcyclo(long n, GEN H, GEN Z, long v, long flag);
 long    numberofconjugates(GEN T, long pdepart);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den);
 /* gen1.c */

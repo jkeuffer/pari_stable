@@ -1116,7 +1116,7 @@ GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord)
   {
     gen[j] = 1;
     for (h = 1; h < lg(lss); h++)
-      gen[j] = (gen[j] * itos(powmodulo((GEN)zn3[h],gmael(lss,j,h),m)))% n;
+      gen[j] = mulssmod(gen[j], itos(powmodulo((GEN)zn3[h],gmael(lss,j,h),m)),n);
     ord[j] = zn2[j] / itos(gmael(lss,j,j));
   }
   avma=ltop;
@@ -1145,7 +1145,7 @@ hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
   {
     int     c = l * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      sg[++l] = (sg[k] * gen[j]) % n;
+      sg[++l] = mulssmod(sg[k], gen[j], n);
   }
   avma=ltop;
   return sg;
@@ -3207,13 +3207,21 @@ long znconductor(long n, GEN v, GEN V)
     e=itos(gcoeff(F,i,2));
     if (DEBUGLEVEL>=4)
       fprintferr("SubCyclo:testing %ld^%ld\n",p,e);
-    while (e>1)
+    while (e>=1)
     {
+      int z;
       q=n/p;
       for(j=1;j<p;j++)
-	if (!W[1+j*q]) break;
+      {
+	z=1+j*q;
+	if (!W[z] && z%p) break;
+      }
       if (j<p)
+      {
+	if (DEBUGLEVEL>=4)
+	  fprintferr("SubCyclo:%ld not found\n",z);
 	break;
+      }
       e--;
       n=q;
       if (DEBUGLEVEL>=4)
@@ -3234,8 +3242,19 @@ long znconductor(long n, GEN v, GEN V)
  */
 static GEN modulo;
 static GEN gsmul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
+static GEN gscycloconductor(GEN g, long n, long flag)
+{
+  if (flag==2)
+  {
+    GEN V=cgetg(3,t_VEC);
+    V[1]=lcopy(g);
+    V[2]=lstoi(n);
+    return V;
+  }
+  return g;
+}
 GEN 
-galoissubcyclo(long n, GEN H, GEN Z, long v)
+galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
 {
   ulong ltop=avma,av;
   GEN l,borne,le,powz,z,V;
@@ -3243,6 +3262,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   long e,val;
   long u,o,j;
   GEN O,g;
+  if (flag<0 || flag>2) err(flagerr,"galoisubcyclo");
   if ( v==-1 ) v=0;
   if ( n<1 ) err(arither2);
   if ( n>=VERYBIGINT) 
@@ -3277,6 +3297,7 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   if (DEBUGLEVEL >= 1)
     timer2();
   n = znconductor(n,H,V);
+  if (flag==1)  {avma=ltop;return stoi(n);}
   if (DEBUGLEVEL >= 1)
     msgtimer("znconductor.");
   H = V;
@@ -3285,14 +3306,14 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
     msgtimer("subgroupcoset.");
   if (DEBUGLEVEL >= 6)
     fprintferr("Subcyclo: orbit=%Z\n",O);
+  if (lg(O)==1 || lg(O[1])==2)
+  {
+    avma=ltop;
+    return gscycloconductor(cyclo(n,v),n,flag);
+  }
   u=lg(O)-1;o=lg(O[1])-1;
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: %ld orbits with %ld elements each\n",u,o);
-  if (o==1)
-  {
-    avma=ltop;
-    return cyclo(n,v);
-  }
   l=stoi(n+1);e=1;
   while(!isprime(l)) 
   { 
@@ -3339,5 +3360,5 @@ galoissubcyclo(long n, GEN H, GEN Z, long v)
   if (DEBUGLEVEL >= 1)
     msgtimer("computing products."); 
   g=FpX_redc(g,le);
-  return gerepileupto(ltop,g);
+  return gerepileupto(ltop,gscycloconductor(g,n,flag));
 }

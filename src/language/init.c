@@ -1847,7 +1847,7 @@ entree functions_basic[]={
 {"galoisfixedfield",99,(void*)galoisfixedfield,6,"GGD0,L,Dn"},
 {"galoisinit",99,(void*)galoisinit,6,"GDG"},
 {"galoispermtopol",2,(void*)galoispermtopol,6,"GG"},
-{"galoissubcyclo",99,(void*)galoissubcyclo,6,"LGDGDn"},
+{"galoissubcyclo",99,(void*)galoissubcyclo,6,"LGDGDnD0,L,"},
 {"gamma",1,(void*)ggamma,3,"Gp"},
 {"gammah",1,(void*)ggamd,3,"Gp"},
 {"gcd",99,(void*)gcd0,4,"GDGD0,L,"},

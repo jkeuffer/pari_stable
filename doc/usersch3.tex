@@ -3450,12 +3450,16 @@ is greater or equal to $2$.
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
-\subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\})$: compute a polynomial
+\subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\},\{fl=0\})$: If $fl=0$, compute a polynomial
 defining the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of
 $\Z/n\Z$. The subgroup \var{H} can be given by a generator, a set of
 generators given by a vector or a HNF matrix. If present \kbd{Z} must be
 \kbd{znstar(n)}, and is currently only used when \var{H} is a HNF matrix. If
 \var{v} is given, the polynomial is given in the variable \var{v}.
+
+If $fl=1$, compute only the (finite part of) conductor of the abelian extension.
+
+If $fl=2$, output $[pol, f_0]$, where $pol$ is the polynomial as output when $fl=0$ and $f_0$ the conductor as output when $fl=1$.
 
 The following function can be used to compute all subfields of
 $\Q(\zeta_n)$ (of order less than \kbd{d}, if \kbd{d} is set):
@@ -3474,6 +3478,8 @@ subcyclo(n, d = -1)=
   S
 }
 @eprog
+
+\misctitle{Note:} The interface to this function need to be cleaned up, and so is subject to change.
 
 \syn{galoissubcyclo}{n,H,Z,v} where n is a C long integer.
 
