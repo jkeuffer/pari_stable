@@ -188,6 +188,7 @@ GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    17- routine ellminimalmodel()
 IZ 18- systems/ directory (currently for OS/2 only)
 IZ 19- [OS/2:] install() for OS/2 system  (using builtin dlopen)
+IZ 20- gnuplot and X11 are now simultaneously supported
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
