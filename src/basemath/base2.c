@@ -24,6 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
 extern GEN addone_aux2(GEN nf, GEN x, GEN y);
+extern GEN addshiftw(GEN x, GEN y, long d);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN norm_by_embed(long r1, GEN x);
 extern GEN ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound);
@@ -41,7 +42,6 @@ extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
 extern GEN _ei(long n, long i);
 extern GEN col_to_ff(GEN x, long v);
 extern GEN element_mulidid(GEN nf, long i, long j);
-extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN eltmulid_get_table(GEN nf, long i);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN mat_to_vecpol(GEN x, long v);
@@ -52,7 +52,6 @@ extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
-extern GEN respm(GEN f1,GEN f2,GEN pm);
 extern GEN sqr_by_tab(GEN tab, GEN x);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN unnf_minus_x(GEN x);
@@ -594,7 +593,6 @@ GEN nilord(GEN p,GEN fx,long mf,GEN gx,long flag);
 GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
-static GEN nbasis(GEN ibas,GEN pd);
 static GEN testb2(GEN p,GEN fa,long Fa,GEN theta,GEN pmf,long Ft,GEN ns);
 static GEN testc2(GEN p,GEN fa,GEN pmr,GEN pmf,GEN alph2,
 		  long Ea,GEN thet2,long Et,GEN ns);
@@ -927,6 +925,92 @@ polmodi_keep(GEN x, GEN y)
   z[1]=x[1]; return normalizepol_i(z, lx);
 }
 
+/* evaluate h(a) mod f */
+GEN
+eleval(GEN f,GEN h,GEN a)
+{
+  gpmem_t av,tetpil;
+  long n;
+  GEN y;
+
+  if (typ(h) != t_POL) return gcopy(h);
+  av = tetpil = avma;
+  n=lgef(h)-1; y=(GEN)h[n];
+  for (n--; n>=2; n--)
+  {
+    y = gadd(gmul(y,a),(GEN)h[n]);
+    tetpil=avma; y = gmod(y,f);
+  }
+  return gerepile(av,tetpil,y);
+}
+
+static GEN
+shiftpol(GEN x, long v)
+{
+  x = addshiftw(x, zeropol(v), 1);
+  setvarn(x,v); return x;
+}
+
+/* Sylvester's matrix, mod p^m (assumes f1 monic) */
+static GEN
+sylpm(GEN f1,GEN f2,GEN pm)
+{
+  long n,j,v=varn(f1);
+  GEN a,h;
+
+  n=degpol(f1); a=cgetg(n+1,t_MAT);
+  h = FpX_res(f2,f1,pm);
+  for (j=1;; j++)
+  {
+    a[j] = (long)pol_to_vec(h,n);
+    if (j == n) break;
+    h = FpX_res(shiftpol(h,v),f1,pm);
+  }
+  return hnfmodid(a,pm);
+}
+
+/* polynomial gcd mod p^m (assumes f1 monic) */
+GEN
+gcdpm(GEN f1,GEN f2,GEN pm)
+{
+  gpmem_t av=avma,tetpil;
+  long n,c,v=varn(f1);
+  GEN a,col;
+
+  n=degpol(f1); a=sylpm(f1,f2,pm);
+  for (c=1; c<=n; c++)
+    if (signe(resii(gcoeff(a,c,c),pm))) break;
+  if (c > n) { avma=av; return zeropol(v); }
+
+  col = gdiv((GEN)a[c], gcoeff(a,c,c)); tetpil=avma;
+  return gerepile(av,tetpil, gtopolyrev(col,v));
+}
+
+/* reduced resultant mod p^m (assumes x monic) */
+GEN
+respm(GEN x,GEN y,GEN pm)
+{
+  gpmem_t av = avma;
+  GEN p1 = sylpm(x,y,pm);
+
+  p1 = gcoeff(p1,1,1);
+  if (egalii(p1,pm)) { avma = av; return gzero; }
+  return gerepileuptoint(av, icopy(p1));
+}
+
+GEN
+QX_denom(GEN x)
+{
+  long i, l = lgef(x);
+  GEN r, d = gun;
+  for (i=2; i<l; i++)
+  {
+    r = (GEN)x[i];
+    if (typ(r) == t_FRAC) d = mpppcm(d, (GEN)r[2]);
+  }
+  return d;
+}
+
 static GEN
 dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 {
@@ -957,23 +1041,22 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
     }
     else
     {
-      GEN c, mod;
+      GEN d, mod;
       ha = gmul(ha,alpha);
-      ha = Q_primitive_part(ha, &c);
-      if (!c)
-        mod = pdp;
-      else if (typ(c)==t_INT)
-        mod = diviiexact(pdp, mppgcd(pdp,c));
+      d = QX_denom(ha); if (gcmp1(d)) d = NULL;
+      if (!d) mod = pdp;
       else
-        mod = mulii(pdp, (GEN)c[2]); /* c = a / p^e */
+      {
+        ha = Q_remove_denom(ha, d);
+        mod = mulii(pdp, d);
+      }
       ha = FpX_res(ha, f, mod);
-      if (c) ha = gmul(ha,c);
     }
     b[i] = (long)pol_to_vec(ha,n);
   }
   b = hnfmodid(b,pd);
   if (DEBUGLEVEL>5) fprintferr("  new order: %Z\n",b);
-  return gdiv(b,pd);
+  return gdiv(b, pd);
 }
 
 static GEN
@@ -983,11 +1066,44 @@ get_partial_order_as_pols(GEN p, GEN f)
   return mat_to_vecpol(b, varn(f));
 }
 
+long
+FpX_val(GEN x0, GEN t, GEN p, GEN *py)
+{
+  long k;
+  GEN r, y, x = x0;
+
+  for (k=0; ; k++)
+  {
+    y = FpX_divres(x, t, p, &r);
+    if (signe(r)) break;
+    x = y;
+  }
+  *py = x; return k;
+}
+
+/* e in Qp, f i Zp. Return r = e mod (f, pk) */
+static GEN
+QpX_mod(GEN e, GEN f, GEN pk)
+{
+  GEN mod, den = QX_denom(e);
+  if (gcmp1(den)) {
+    den = NULL;
+    mod = pk;
+  } else {
+    e = Q_remove_denom(e, den);
+    mod = mulii(pk,den);
+  }
+  e = FpX_res(e, centermod(f, mod), mod);
+  e = FpX_center(e, mod);
+  if (den) e = gdiv(e, den);
+  return e;
+}
+
 /* if flag != 0, factorization to precision r (maximal order otherwise) */
 GEN
 Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 {
-  GEN fred, res,pr,pk,ph,pdr,b1,b2,b3,a1,e,f1,f2;
+  GEN fred,res,pr,pk,ph,pdr,b1,b2,a,e,f1,f2;
 
   if (DEBUGLEVEL>2)
   {
@@ -1000,49 +1116,29 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
     }
     fprintferr("\n");
   }
-  b1 = FpX_red(chi, p);
-  a1 = gun; b2 = gun;
-  b3 = FpX_red(nu, p);
-  while (degpol(b3) > 0)
-  {
-    GEN p1;
-    b1 = FpX_div(b1,b3, p);
-    b2 = FpX_red(gmul(b2,b3), p);
-    b3 = FpX_extgcd(b2,b1, p, &a1,&p1); /* p1 = junk */
-    p1 = leading_term(b3);
-    if (!gcmp1(p1))
-    { /* FpX_extgcd does not return normalized gcd */
-      p1 = mpinvmod(p1,p);
-      b3 = gmul(b3,p1);
-      a1 = gmul(a1,p1);
-    }
-  }
+
+  (void)FpX_val(chi, nu, p, &b1); /* nu irreducible mod p */
+  b2 = FpX_div(chi, b1, p);
+  a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   pdr = respm(f, derivpol(f), gpowgs(p,mf+1));
-  pk = mulii(pdr, p);
-  fred = FpX_red(f, pk);
-  e = eleval(fred, FpX_red(gmul(a1,b2), p), theta);
-  e = gdiv(polmodi(gmul(pdr,e), pk),pdr);
+  e = eleval(f, a, theta);
+  e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
 
   pr = flag? gpowgs(p,flag): mulii(p,sqri(pdr));
   pk = p; ph = mulii(pdr,pr);
-  fred = FpX_red(f, mulii(pdr, ph));
   /* E(t) - e(t) belongs to p^k Op, which is contained in p^(k-df)*Zp[xi] */
   while (cmpii(pk,ph) < 0)
   { /* e <-- e^2(3-2e) mod p^2k */
-    GEN pd, num, ce;
     pk = sqri(pk);
     e = gmul(gsqr(e), gsubsg(3,gmul2n(e,1)));
-    e = Q_primitive_part(e, &ce);
-    pd = ce? denom(ce): gun;
-    e = FpX_res(e, fred, mulii(pk, pd));
-    if (ce && !gcmp1(num = numer(ce))) e = gmul(e, num);
-    if (pd != gun) e = gdiv(e, pd);
+    e = QpX_mod(e, f, pk);
   }
-  fred = FpX_red(fred, ph);
-  f1 = gcdpm(FpX_red(fred,ph), gmul(pdr,gsubsg(1,e)), ph);
-  fred = FpX_red(fred, pr);
-  f1 = FpX_res(f1, fred, pr);
-  f2 = FpX_res(FpX_div(fred,f1, pr), fred, pr);
+  fred = centermod(f, ph);
+  f1 = gcdpm(fred, gmul(pdr,gsubsg(1,e)), ph);
+  fred = centermod(fred, pr); /* pr | ph */
+  f1 = centermod(f1, pr);
+  f2 = FpX_div(fred,f1, pr);
+  f2 = FpX_center(f2, pr);
 
   if (DEBUGLEVEL>2)
   {
@@ -1062,17 +1158,18 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
   else
   {
     GEN ib1, ib2;
-    long n1, n2, i;
-    ib1 = get_partial_order_as_pols(p,f1); n1=lg(ib1)-1;
-    ib2 = get_partial_order_as_pols(p,f2); n2=lg(ib2)-1;
-    res = cgetg(n1+n2+1, t_VEC);
-    fred = FpX_red(f, pdr);
+    long n, n1, n2, i;
+    ib1 = get_partial_order_as_pols(p,f1); n1 = lg(ib1)-1;
+    ib2 = get_partial_order_as_pols(p,f2); n2 = lg(ib2)-1;
+    n = n1+n2;
+    res = cgetg(n+1, t_VEC);
     for (i=1; i<=n1; i++)
-      res[i] = (long)FpX_res(gmul(gmul(pdr,(GEN)ib1[i]),e), fred, pdr);
+      res[i] = (long)QpX_mod(gmul(gmul(pdr,(GEN)ib1[i]),e), f, pdr);
     e = gsubsg(1,e); ib2 -= n1;
-    for (   ; i<=n1+n2; i++)
-      res[i] = (long)FpX_res(gmul(gmul(pdr,(GEN)ib2[i]),e), fred, pdr);
-    return nbasis(res,pdr);
+    for (   ; i<=n; i++)
+      res[i] = (long)QpX_mod(gmul(gmul(pdr,(GEN)ib2[i]),e), f, pdr);
+    res = vecpol_to_mat(res, n);
+    return gdiv(hnfmodid(res,pdr), pdr); /* normalized integral basis */
   }
 }
 
@@ -1101,7 +1198,7 @@ redelt(GEN elt, GEN rd, GEN pd)
 {
   GEN den, nelt, nrd, relt;
 
-  den  = ggcd(denom(content(elt)), pd);
+  den  = ggcd(QX_denom(elt), pd);
   nelt = gmul(den, elt);
   nrd  = gmul(den, rd);
 
@@ -1272,7 +1369,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   if (!pp) return chi;
 
   /* this can happen only if gamma is incorrect (not an integer) */
-  if (divise(denom(content(chi)), p)) return NULL;
+  if (divise(QX_denom(chi), p)) return NULL;
 
   return redelt(chi, pp, pp);
 }
@@ -1526,7 +1623,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	chig = polmodi(chig, pmf);
       }
 
-      if (!chig || !gcmp1(denom(content(chig))))
+      if (!chig || !gcmp1(QX_denom(chig)))
       {
 	/* Valuation of beta was wrong. This means that
 	   gamma fails the v*-test */
@@ -1737,91 +1834,6 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
   b[3] = w[1];
   b[4] = w[2];
   return b;
-}
-
-/* evaluate h(a) mod f */
-GEN
-eleval(GEN f,GEN h,GEN a)
-{
-  gpmem_t av,tetpil;
-  long n;
-  GEN y;
-
-  if (typ(h) != t_POL) return gcopy(h);
-  av = tetpil = avma;
-  n=lgef(h)-1; y=(GEN)h[n];
-  for (n--; n>=2; n--)
-  {
-    y = gadd(gmul(y,a),(GEN)h[n]);
-    tetpil=avma; y = gmod(y,f);
-  }
-  return gerepile(av,tetpil,y);
-}
-
-GEN addshiftw(GEN x, GEN y, long d);
-
-static GEN
-shiftpol(GEN x, long v)
-{
-  x = addshiftw(x, zeropol(v), 1);
-  setvarn(x,v); return x;
-}
-
-/* Sylvester's matrix, mod p^m (assumes f1 monic) */
-static GEN
-sylpm(GEN f1,GEN f2,GEN pm)
-{
-  long n,j,v=varn(f1);
-  GEN a,h;
-
-  n=degpol(f1); a=cgetg(n+1,t_MAT);
-  h = FpX_res(f2,f1,pm);
-  for (j=1;; j++)
-  {
-    a[j] = (long)pol_to_vec(h,n);
-    if (j == n) break;
-    h = FpX_res(shiftpol(h,v),f1,pm);
-  }
-  return hnfmodid(a,pm);
-}
-
-/* polynomial gcd mod p^m (assumes f1 monic) */
-GEN
-gcdpm(GEN f1,GEN f2,GEN pm)
-{
-  gpmem_t av=avma,tetpil;
-  long n,c,v=varn(f1);
-  GEN a,col;
-
-  n=degpol(f1); a=sylpm(f1,f2,pm);
-  for (c=1; c<=n; c++)
-    if (signe(resii(gcoeff(a,c,c),pm))) break;
-  if (c > n) { avma=av; return zeropol(v); }
-
-  col = gdiv((GEN)a[c], gcoeff(a,c,c)); tetpil=avma;
-  return gerepile(av,tetpil, gtopolyrev(col,v));
-}
-
-/* reduced resultant mod p^m (assumes x monic) */
-GEN
-respm(GEN x,GEN y,GEN pm)
-{
-  gpmem_t av = avma;
-  GEN p1 = sylpm(x,y,pm);
-
-  p1 = gcoeff(p1,1,1);
-  if (egalii(p1,pm)) { avma = av; return gzero; }
-  return gerepileuptoint(av, icopy(p1));
-}
-
-/* Normalized integral basis */
-static GEN
-nbasis(GEN ibas,GEN pd)
-{
-  long k, n = lg(ibas)-1;
-  GEN a = cgetg(n+1,t_MAT);
-  for (k=1; k<=n; k++) a[k] = (long)pol_to_vec((GEN)ibas[k],n);
-  return gdiv(hnfmodid(a,pd), pd);
 }
 
 #if 0
@@ -2138,7 +2150,7 @@ uniformizer(GEN nf, GEN P, GEN p)
   }
 
   w = (GEN)nf[7];
-  D = denom(content(w)); if (is_pm1(D)) D = NULL;
+  D = QX_denom(w); if (is_pm1(D)) D = NULL;
   if (D)
   {
     long v = pvaluation(D, p, &a);
@@ -4020,7 +4032,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   N = degpol(pol);
   n = degpol(nf[1]); m = n*N;
 
-  den = denom(content(plg));
+  den = QX_denom(plg);
   plg0= Q_remove_denom(plg, den); /* plg = plg0/den */
   vbs = cgetg(n+1,t_VEC);
   /* nf = K = Q(a), vbs[i+1] = a^i as an elt of L = Q[X] / polabs */
