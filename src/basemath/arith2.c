@@ -1281,7 +1281,7 @@ real_unit_form(GEN x)
 {
   long av = avma, prec;
   GEN D;
-  if (typ(x) != t_QFI) err(typeer,"real_unit_form");
+  if (typ(x) != t_QFR) err(typeer,"real_unit_form");
   prec = precision((GEN)x[4]);
   if (!prec) err(talker,"not a t_REAL in 4th component of a t_QFR");
   D = qf_disc(x,NULL,NULL);
