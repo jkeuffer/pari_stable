@@ -78,6 +78,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        issquare(1/x^2) --> SEGV [ typo in polcarrecomplet ]
    28- rnfkummer(over Q) --> type error.
    29- allow qfbprimeform(d > 0, p < 0)
+   30- Since exp(-1e100) --> 0. [ tolerable: alternative being underflow
+       error ], we shouldn't have exp(-1e100) --> truncation error. Fixed.
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

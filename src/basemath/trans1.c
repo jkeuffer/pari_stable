@@ -1270,8 +1270,9 @@ cxexp(GEN x, long prec)
 {
   GEN r,p1,p2, y = cgetg(3,t_COMPLEX);
   pari_sp av = avma, tetpil;
-  r=gexp((GEN)x[1],prec);
-  gsincos((GEN)x[2],&p2,&p1,prec);
+  r = gexp(gel(x,1),prec);
+  if (!signe(r)) { gel(y,1) = r; gel(y,2) = r; return y; }
+  gsincos(gel(x,2),&p2,&p1,prec);
   tetpil = avma;
   y[1] = lmul(r,p1);
   y[2] = lmul(r,p2);
