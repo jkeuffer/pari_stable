@@ -1024,8 +1024,9 @@ parameters(GEN p, double *mu, double *gamma,
 static void
 dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 {
-  GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2;
-  long limite,n=degpol(p),i,j,K,ltop;
+  GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2,*gptr[3];
+  long n=degpol(p),i,j,K;
+  ulong ltop;
 
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
@@ -1049,7 +1050,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 
   if (polreal) K=K/2+1;
 
-  ltop=avma; limite = stack_lim(ltop,1);
+  ltop=avma;
   W=cgetg(k+1,t_VEC); U=cgetg(k+1,t_VEC);
   for (i=1; i<=k; i++) W[i]=U[i]=zero;
 
@@ -1100,13 +1101,8 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
       }
     }
     prim2=gmul(prim2,prim);
-    if (low_stack(limite, stack_lim(ltop,1)))
-    {
-      GEN *gptr[3];
-      if(DEBUGMEM>1) err(warnmem,"dft");
-      gptr[0]=&W; gptr[1]=&U; gptr[2]=&prim2;
-      gerepilemany(ltop,gptr,3);
-    }
+    gptr[0]=&W; gptr[1]=&U; gptr[2]=&prim2;
+    gerepilemany(ltop,gptr,3);
   }
 
   for (i=1; i<=k; i++)
