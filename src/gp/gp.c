@@ -1117,24 +1117,41 @@ user_member()
 }
 
 static void
+center(char *s)
+{
+  long i, pad = term_width() - strlen(s);
+  char *u = thestring;
+
+  if (pad<0) pad=0; else pad >>= 1;
+  for (i=0; i<pad; i++) *u++ = ' ';
+  while (*s) *u++ = *s++;
+  *u++='\n'; *u=0; pariputs(thestring);
+}
+
+static void
 community()
 {
-  pariputs("The standard distribution of GP/PARI includes a reference manual, a tutorial\n\
-and a reference card and you should ask the person who installed PARI on\n\
-your system where they can be found. You can also download them\n\
-from the PARI WWW site http://www.parigp-home.de/\n\
-\n\
-Three mailing lists are devoted to PARI:\n\
+  long len = strlen(GPMISCDIR) + 1024;
+  char *s = gpmalloc(len);
+  
+  sprintf(s, "The standard distribution of GP/PARI includes a reference manual,\
+a tutorial, a reference card and quite a few examples. They should have been \
+installed in the following directory: %s. If not you should ask the person who \
+installed PARI on your system where they can be found. You can also download \
+them from the PARI WWW site http://www.parigp-home.de/", GPMISCDIR);
+  print_text(s); free(s);
+
+  pariputs("\nThree mailing lists are devoted to PARI:\n\
   - pari-announce (moderated) to announce major version changes.\n\
   - pari-dev for everything related to the development of PARI, including\n\
     suggestions, technical questions, bug reports and patch submissions.\n\
-  - pari-users for everything else !\n\
-To subscribe, send an empty message to <list name>-subscribe@list.cr.yp.to\n\
-You can only send messages to these lists if you have subscribed !\n\
-An archive is kept at the WWW site mentioned above.\n\n\
-In case you don't want to subscribe, you can reach the authors directly by\n\
-email: pari@math.u-bordeaux.fr (answer not guaranteed).");
-}
+  - pari-users for everything else!\n");
+  print_text("\
+To subscribe, send an empty message to <listname>-subscribe@list.cr.yp.to. You \
+can only send messages to the lists you have subscribed to! An archive is kept \
+at the WWW site mentioned above. In case you don't want to subscribe, you can \
+reach the authors directly by email: pari@math.u-bordeaux.fr (answer not \
+guaranteed)."); }
 
 static void
 gentypes(void)
@@ -1546,19 +1563,6 @@ print_hash_list(char *s)
   for (n=0; n<functions_tblsz; n++)
     for (ep=functions_hash[n]; ep; ep=ep->next)
       print_entree(ep,n);
-}
-
-
-static void
-center(char *s)
-{
-  long i, pad = term_width() - strlen(s);
-  char *u = thestring;
-
-  if (pad<0) pad=0; else pad >>= 1;
-  for (i=0; i<pad; i++) *u++ = ' ';
-  while (*s) *u++ = *s++;
-  *u++='\n'; *u=0; pariputs(thestring);
 }
 
 static char *

@@ -1898,30 +1898,31 @@ possible to use GP as a subprocess of GNU \idx{Emacs}. (Of course, you need
 GNU Emacs to be installed on your machine!). To use this, you should
 include in your \kbd{.emacs} file the following lines:
 \bprog
-(autoload 'gp-mode "@miscdir/pari" nil t)
-(autoload 'gp-script-mode "@miscdir/pari" nil t)
-(autoload 'gp "@miscdir/pari" nil t)
-(autoload 'gpman "@miscdir/pari" nil t)
+(defconst pari-el-file "@miscdir/emacs/pari")
+(autoload 'gp-mode pari-el-file nil t)
+(autoload 'gp-script-mode pari-el-file nil t)
+(autoload 'gp pari-el-file nil t)
+(autoload 'gpman pari-el-file nil t)
 (setq auto-mode-alist
   (cons '("\\.gp$" . gp-script-mode) auto-mode-alist))
 @eprog
 
-where \kbd{pari.el} is the name of the file that will have to be loaded by
-GNU Emacs (if you have changed the name, or if you have the file in a
-different directory, you must of course supply the correct name). This file
-is included in the PARI distribution and probably has been installed at the
-same time as GP.
+\noindent where \kbd{\miscdir/emacs/pari.el} is the name of the file that
+will have to be loaded by GNU Emacs (if you have changed the name, or if
+you have the file in a different directory, you must of course supply the
+correct name). This file is included in the PARI distribution and probably
+has been installed at the same time as GP.
 
 Once this is done, under GNU Emacs if you type \kbd{M-x gp} (where as usual
 \kbd{M} is the \kbd{Meta} key, i.e.~Escape, or on SUN keyboards, the Left
 key), a special shell will be started, which in particular launches GP with
 the default stack size, prime limit and input buffer size. If you type
 instead \kbd{C-u M-x gp}, you will be asked for the name of the GP
-executable, the stack size, the prime limit and the input buffer size before
-the execution of GP begins. If for any of these you simply type return, the
-default value will be used. On UNIX machines it will be the place you told
-\kbd{Configure} (usually \kbd{/usr/local/bin/gp}) for the executable, 4000000
-for the stack, 500000 for the prime limit and 30000 for the buffer size.
+executable, the stack size and the prime limit before the execution of GP
+begins. If for any of these you simply type return, the default value will
+be used. On UNIX machines it will be the place you told \kbd{Configure}
+(usually \kbd{/usr/local/bin/gp}) for the executable, \kbd{10M} for the
+stack and \kbd{500k} for the prime limit.
 
 \smallskip
   You can then work as usual under GP, but with two notable advantages (which

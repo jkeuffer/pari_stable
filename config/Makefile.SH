@@ -7,12 +7,13 @@ echo Extracting $file
 rm -f $file
 
 # Path to directories
-case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
-case "$misc_dir"   in /*) misc=$misc_dir ;;    *) misc=../$misc_dir ;; esac
+case "$config_dir" in /*) cfg=$config_dir ;; *) cfg=../$config_dir ;; esac
 case "$data_dir"   in /*) data=$data_dir ;;  *) data=../$data_dir ;; esac
 case "$doc_dir"    in /*) doc=$doc_dir ;;    *) doc=../$doc_dir ;; esac
 case "$emacs_dir"  in /*) emx=$emacs_dir ;;  *) emx=../$emacs_dir ;; esac
-case "$config_dir" in /*) cfg=$config_dir ;; *) cfg=../$config_dir ;; esac
+case "$examples_dir" in /*) ex=$examples_dir ;; *) ex=../$examples_dir ;; esac
+case "$misc_dir"   in /*) misc=$misc_dir ;;  *) misc=../$misc_dir ;; esac
+case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
 
 # File lists
 kernel="kernel mp"
@@ -162,12 +163,16 @@ LN = $ln_s
 
 # Change these installation directories to suit your needs.
 # DESTDIR is used to install to a false hierachy (to build a Debian package)
+INCLUDEDIR = \$(DESTDIR)$includedir
 LIBDIR = \$(DESTDIR)$libdir
 BINDIR = \$(DESTDIR)$bindir
 DATADIR= \$(DESTDIR)$datadir
 MANDIR = \$(DESTDIR)$mandir
-MISCDIR = \$(DESTDIR)$miscdir
-INCLUDEDIR = \$(DESTDIR)$includedir
+ALLDIR = \$(DESTDIR)$miscdir
+DOCDIR  = \$(ALLDIR)/doc
+EMACSDIR= \$(ALLDIR)/emacs
+EXDIR   = \$(ALLDIR)/examples
+MISCDIR = \$(ALLDIR)/misc
 
 INSTALL = $cfg/install
 INSTALL_PROGRAM = \$(INSTALL)
@@ -258,7 +263,7 @@ clean: cleanobj
 .headers: $HEADERS
 	@touch \$@
 
-install: install-lib-$dft install-include install-bin install-man install-misc install-data install-doc
+install: install-lib-$dft install-include install-bin install-man install-misc install-data install-doc install-examples
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)
@@ -294,26 +299,70 @@ install-man::
 	-\$(RM) \$(MANDIR)/pari.1
 	-\$(LN) gp.1 \$(MANDIR)/pari.1
 
-install-misc: $install_emacs_files
+install-misc: $install_emacs_files install-top
+	-mkdir -p \$(MISCDIR) \$(BINDIR)
 	\$(INSTALL_PROGRAM) $misc/tex2mail \$(BINDIR)
+	\$(INSTALL_DATA) $misc/README    \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/color.dft \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/gpalias   \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/gpflog    \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/gprc.dft  \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/new.dic   \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/pari.xpm  \$(MISCDIR)
+	\$(INSTALL_DATA) $misc/xgp       \$(MISCDIR)
 
-install-doc:
-	-mkdir -p \$(MISCDIR)
-	-mkdir -p \$(BINDIR)
+install-top::
+	-mkdir -p \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/AUTHORS      \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/Announce.2.1 \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/CHANGES      \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/COMPAT       \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/COPYING      \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/CVS.txt      \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/MACHINES     \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/NEW          \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/README       \$(ALLDIR)
+	\$(INSTALL_DATA) $TOP/TODO         \$(ALLDIR)
+
+install-doc::
+	-mkdir -p \$(ALLDIR) \$(BINDIR) \$(DOCDIR)
 	-cd $doc; \$(MAKE) all
 	-\$(INSTALL_PROGRAM) $doc/gphelp    \$(BINDIR)
-	-\$(INSTALL_DATA) $doc/translations \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/paricfg.tex  \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/parimacro.tex \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/usersch1.tex \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/usersch2.tex \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/usersch3.tex \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/usersch4.tex \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/usersch5.tex \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/users.dvi    \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/tutorial.dvi \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/refcard.dvi  \$(MISCDIR)
-	-\$(INSTALL_DATA) $doc/refcard.ps   \$(MISCDIR)
+	-\$(INSTALL_DATA) $doc/Makefile     \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/translations \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/appa.tex     \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/appb.tex     \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/appc.tex     \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/paricfg.tex.in \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/parimacro.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/pdfmacs.tex  \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/refcard.tex  \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/tutorial.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/users.tex    \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/usersch1.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/usersch2.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/usersch3.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/usersch4.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/usersch5.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/users.dvi    \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/tutorial.dvi \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/refcard.dvi  \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/refcard.ps   \$(DOCDIR)
+
+install-examples:
+	-mkdir -p \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/EXPLAIN     \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/Inputrc     \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/Makefile    \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/bench.gp    \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/cl.gp       \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/classno.gp  \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/contfrac.gp \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/lucas.gp    \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/matexp.c    \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/rho.gp      \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/squfof.gp   \$(EXDIR)
+	-\$(INSTALL_DATA) $ex/taylor.gp   \$(EXDIR)
 
 install-data:
 	-mkdir -p \$(DATADIR)
@@ -390,12 +439,12 @@ $pari_elc: $emx/pari.el
 	-cd $emx; $emacs -batch -l compile
 
 $install_emacs_files: $pari_elc
-	-mkdir -p \$(MISCDIR)
-	-\$(INSTALL_DATA)   $pari_elc           \$(MISCDIR)
-	\$(INSTALL_DATA)    $emx/pari.el        \$(MISCDIR)
-	\$(INSTALL_DATA)    $emx/pariemacs.txt  \$(MISCDIR)
-	\$(INSTALL_DATA)    $emx/with-syntax.el     \$(MISCDIR)
-	\$(INSTALL_DATA)    $emx/pari-translator.el \$(MISCDIR)
+	-mkdir -p \$(EMACSDIR)
+	-\$(INSTALL_DATA)   $pari_elc           \$(EMACSDIR)
+	\$(INSTALL_DATA)    $emx/pari.el        \$(EMACSDIR)
+	\$(INSTALL_DATA)    $emx/pariemacs.txt  \$(EMACSDIR)
+	\$(INSTALL_DATA)    $emx/with-syntax.el     \$(EMACSDIR)
+	\$(INSTALL_DATA)    $emx/pari-translator.el \$(EMACSDIR)
 EOT
 fi
 
