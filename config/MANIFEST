@@ -182,6 +182,7 @@ src/kernel/ppc/kerPPC.s
 src/kernel/sparcv7/Makefile.SH
 src/kernel/sparcv7/level0.S
 src/kernel/sparcv8/Makefile.SH
+src/kernel/sparcv8/MakeVar.SH
 src/kernel/sparcv8/level0.S
 src/kernel/sparcv8/level0.h
 src/kernel/sparcv8/level0_sparcv8_micro.S

@@ -7,10 +7,6 @@
 #   compiled with gcc or with cc. We should try to find a workaround.
 # For NextStep or Linux
 #   We don't accept "asm inline" since it does not work (Ptitboul)
-
-if test -z "$__gnuc__" -o "$osname" = "nextstep" -o "$osname" = "linux"; then
-  kernel="$kernel kernel2"
-fi
 if test "$gnuas" = "yes"; then do_cpp=yes; fi
 
 ker=$src/kernel/sparcv8

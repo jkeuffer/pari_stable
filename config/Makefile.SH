@@ -5,6 +5,10 @@ case "$asmarch" in
   *) ASMARCH=$asmarch;;
 esac
 
+if test -s $src_dir/kernel/$ASMARCH/MakeVar.SH; then
+  . $src_dir/kernel/$ASMARCH/MakeVar.SH
+fi
+
 echo Extracting $file
 rm -f $file
 
