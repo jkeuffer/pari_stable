@@ -365,7 +365,7 @@ removeprimes(GEN prime)
 #if 0
 #define pseudoprime(p) millerrabin(p,3*lgefint(p))
 #else /* remove further overkill :-)  --KB */
-#define pseudoprime(p) IsLucasPsP(p)
+#define pseudoprime(p) BSW_psp(p)
 #endif
 
 /* where to stop trial dividing in factorization */

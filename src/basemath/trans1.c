@@ -644,7 +644,7 @@ gpow(GEN x, GEN n, long prec)
   if (tx==t_INTMOD && typ(n)==t_FRAC)
   {
     GEN p1;
-    if (!IsLucasPsP((GEN)x[1])) err(talker,"modulus must be prime in gpow");
+    if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gpow");
     y=cgetg(3,tx); copyifstack(x[1],y[1]);
     av=avma;
     p1=mpsqrtnmod((GEN)x[2],(GEN)n[2],(GEN)x[1],NULL);
@@ -1141,7 +1141,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   case t_INTMOD:
     z=gzero;
     /*This is not great, but else it will generate too much trouble*/
-    if (!IsLucasPsP((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
+    if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) 
     {
       z=cgetg(3,tx); copyifstack(x[1],z[1]);

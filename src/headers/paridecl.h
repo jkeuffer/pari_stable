@@ -966,7 +966,7 @@ GEN     zeroser(long v, long prec);
 
 /* ifactor1.c */
 
-long    IsLucasPsP(GEN N);
+long    BSW_psp(GEN N);
 long    millerrabin(GEN n, long k);
 GEN     nextprime(GEN n);
 GEN     plisprime(GEN N, long flag);

@@ -1602,38 +1602,65 @@ gisprime(GEN x, long flag)
   return 0;
 }
 
-extern long IsLucasPsP(GEN N);
-
 long
 isprimeSelfridge(GEN x) { return (plisprime(x,0)==gun); }
+
+/* assume x BSW pseudoprime. Check whether it's small enough to be certified
+ * prime */
+int
+BSW_isprime_small(GEN x)
+{
+  long l = lgefint(x);
+  if (l < 4) return 1;
+  if (l == 4)
+  {
+    gpmem_t av = avma;
+    long t = cmpii(x, u2toi(0x918UL, 0x4e72a000UL)); /* 10^13 */
+    avma = av;
+    if (t < 0) return 1;
+  }
+  return 0;
+}
+
+/* assume x a BSW pseudoprime */
+int
+BSW_isprime(GEN x)
+{
+  gpmem_t av = avma;
+  long l, res;
+  GEN F, p;
+ 
+  if (BSW_isprime_small(x)) return 1;
+  F = (GEN)auxdecomp(subis(x,1), 0)[1];
+  l = lg(F); p = (GEN)F[l-1];
+  if (BSW_psp(p))
+  { /* smooth */
+    GEN z = cgetg(3, t_VEC);
+    z[1] = (long)x;
+    z[2] = (long)F; res = isprimeSelfridge(z);
+  }
+  else
+    res = isprimeAPRCL(x);
+  avma = av; return res;
+}
 
 long
 isprime(GEN x)
 {
-  if (!IsLucasPsP(x)) return 0;
-  if (lgefint(x) <= 4)
-  {
-    gpmem_t av = avma;
-    long t;
-    t = cmpii(x, u2toi(0x918UL, 0x4e72a000UL)); /* 10^13. FIXME: better bound?*/
-    avma = av;
-    if (t < 0) return 1;
-  }
-  if (expi(x) < 110) return isprimeSelfridge(x);
-  return isprimeAPRCL(x);
+  return BSW_psp(x) && BSW_isprime(x);
 }
 
 GEN
 gispseudoprime(GEN x, long flag)
 {
-  if (flag == 0) return arith_proto(IsLucasPsP,x,1);
+  if (flag == 0) return arith_proto(BSW_psp,x,1);
   return gmillerrabin(x, flag);
 }
 
 long
 ispseudoprime(GEN x, long flag)
 {
-  if (flag == 0) return IsLucasPsP(x);
+  if (flag == 0) return BSW_psp(x);
   return millerrabin(x, flag);
 }
 

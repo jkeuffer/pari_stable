@@ -237,7 +237,7 @@ IsLucasPsP0(GEN N)
 }
 
 long
-IsLucasPsP(GEN N)
+BSW_psp(GEN N)
 {
   gpmem_t av = avma;
   int k;
@@ -297,7 +297,7 @@ static long pl831(GEN N, GEN p)
  * flag 0: return gun (prime), gzero (composite)
  * flag 1: return gzero (composite), gun (small prime), matrix (large prime)
  *
- * The matrix has 3 columns, [a,b,c] with 
+ * The matrix has 3 columns, [a,b,c] with
  * a[i] prime factor of N-1,
  * b[i] witness for a[i] as in pl831
  * c[i] plisprime(a[i])
@@ -306,42 +306,52 @@ extern GEN decomp_limit(GEN n, GEN limit);
 GEN
 plisprime(GEN N, long flag)
 {
-  gpmem_t ltop=avma;
-  long i;
+  gpmem_t ltop = avma;
+  long i, l, t = typ(N);
   int eps;
-  GEN C,F;
-  if ( typ(N) != t_INT ) err(arither1);
+  GEN C, F = NULL;
+ 
+  if (t == t_VEC)
+  { /* [ N, [p1,...,pk] ], pi list of pseudoprime divisors of N */
+    F = (GEN)N[2];
+    N = (GEN)N[1]; t = typ(N);
+  }
+  if (t != t_INT) err(arither1);
+  if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
+ 
   eps = absi_cmp(N,gdeux);
   if (eps<=0) return eps? gzero: gun;
+ 
   N = absi(N);
-#if 0 /* assume N a BSW pseudoprime */
-  /* Use Jaeschke results. See above */
-  if (miller(N,7))
-  { /* compare to 341550071728321 */
-    if (cmpii(N, u2toi(0x136a3, 0x52b2c8c1)) < 0) { avma=ltop; return gun; }
-  }
-  else { avma=ltop; return gzero; }
-#endif
-  F=(GEN)decomp_limit(addis(N,-1),racine(N))[1];
-  if (DEBUGLEVEL>=3) fprintferr("P.L.:factor O.K.\n");
-  C=cgetg(4,t_MAT);
-  C[1]=lgetg(lg(F),t_COL); 
-  C[2]=lgetg(lg(F),t_COL);
-  C[3]=lgetg(lg(F),t_COL);
-  for(i=1;i<lg(F);i++)
+  if (!F)
   {
-    long witness;
-    GEN p;
-    p=(GEN)F[i];
-    witness=pl831(N,p);
-    if (!witness) { avma=ltop; return gzero; }
-    mael(C,1,i)=lcopy(p);
-    mael(C,2,i)=lstoi(witness);
-    mael(C,3,i)=(long)plisprime(p,flag);
-    if (gmael(C,3,i)==gzero)
-      err(talker,"Sorry false prime number %Z in plisprime",p);
+    F = (GEN)decomp_limit(addis(N,-1), racine(N))[1];
+    if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }
-  if (!flag) { avma=ltop; return gun; }
+ 
+  C = cgetg(4,t_MAT); l = lg(F);
+  C[1] = lgetg(l,t_COL);
+  C[2] = lgetg(l,t_COL);
+  C[3] = lgetg(l,t_COL);
+  for(i=1; i<l; i++)
+  {
+    GEN p = (GEN)F[i], r;
+    long witness = pl831(N,p);
+
+    if (!witness) { avma = ltop; return gzero; }
+    mael(C,1,i) = licopy(p);
+    mael(C,2,i) = lstoi(witness);
+    if (!flag) r = BSW_isprime(r)? gun: gzero;
+    else
+    {
+      if (BSW_isprime_small(p)) r = gun;
+      else if (expi(p) > 250) r = isprimeAPRCL(p)? gdeux: gzero;
+      else r = plisprime(p,flag);
+    }
+    mael(C,3,i) = (long)r;
+    if (r == gzero) err(talker,"False prime number %Z in plisprime", p);
+  }
+  if (!flag) { avma = ltop; return gun; }
   return gerepileupto(ltop,C);
 }
 
@@ -425,7 +435,7 @@ nextprime(GEN n)
   av2 = av1 = avma;
   for(;;)
   {
-    if (IsLucasPsP(n)) break;
+    if (BSW_psp(n)) break;
     av1 = avma;
     rcd = prc210_d1[rcn];
     if (++rcn > 47) rcn = 0;
@@ -468,7 +478,7 @@ precprime(GEN n)
   av2 = av1 = avma;
   for(;;)
   {
-    if (IsLucasPsP(n)) break;
+    if (BSW_psp(n)) break;
     av1 = avma;
     if (rcn == 0)
     { rcd = 2; rcn = 47; }
@@ -1693,7 +1703,7 @@ pollardbrent(GEN n)
     /* 301 gives 48121 + tune_pb_min */
     c0 = tune_pb_min + size - 60 +
       ((size-73)>>1)*((size-70)>>3)*((size-56)>>4);
-  else 
+  else
     c0 = 49152;			/* ECM is faster when it'd take longer */
 
   c = c0 << 5;			/* 32 iterations per round */
@@ -3420,7 +3430,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
       continue;
     }
     scan[2] =
-      (IsLucasPsP((GEN)(*scan)) ?
+      (BSW_psp((GEN)(*scan)) ?
        (larger_compos ? un : deux) : /* un- or finished prime */
        zero);			/* composite */
 
@@ -3582,7 +3592,7 @@ ifac_crack(GEN *partial, GEN *where)
   } /* while carrecomplet */
 
   /* check whether our composite hasn't become prime */
-  if (exp1 > 1 && hint != 15 && IsLucasPsP((GEN)(**where)))
+  if (exp1 > 1 && hint != 15 && BSW_psp((GEN)(**where)))
   {
     (*where)[2] = un;
     if (DEBUGLEVEL >= 4)
@@ -3623,7 +3633,7 @@ ifac_crack(GEN *partial, GEN *where)
       if (moebius_mode) return 0; /* no need to carry on... */
     } /* while is_odd_power */
 
-    if (exp2 > 1 && hint != 15 && IsLucasPsP((GEN)(**where)))
+    if (exp2 > 1 && hint != 15 && BSW_psp((GEN)(**where)))
     { /* Something nice has happened and our composite has become prime */
       (*where)[2] = un;
       if (DEBUGLEVEL >= 4)
@@ -4045,7 +4055,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
  */
 
 #define ifac_overshoot 64	/* lgefint(n)+64 words reserved */
-/* ifac_decomp_break: 
+/* ifac_decomp_break:
  *
  * Find primary factors of n until ifac_break return true, or n is
  * factored if ifac_break is NULL.

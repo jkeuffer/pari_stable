@@ -499,7 +499,7 @@ rootmod(GEN f, GEN p)
         y[j+lb] = (long)FpX_div(a,b, p);
         y[j]    = (long)b; break;
       }
-      if (pol0[2] == 100 && !IsLucasPsP(p))
+      if (pol0[2] == 100 && !BSW_psp(p))
         err(talker, "not a prime in polrootsmod");
     }
   }
