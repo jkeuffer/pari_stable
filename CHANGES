@@ -82,6 +82,8 @@ IZ 41- (obsolete, probably unused) CLK_TCK may reside in time.h
    44- install() accepted gpnames which were not valid identifiers
    45- bnfinit(x^4+65,,[.1]) --> SEGV   (whenever c < c2)
    46- when host badily configured (~ not expanded), gp would die on startup 
+XR 47- factorpadic(, not a prime, ) --> SEGV
+
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
