@@ -864,6 +864,7 @@ recover(int flag)
 
  /* disable recover() and SIGINT. Better: sigint_[block|release] as in
   * readline/rltty.c ? */
+ if (DEBUGMEM) fprintferr("entering recover(), loc = %ld\n", listloc);
   try_to_recover=0;
   sigfun = os_signal(SIGINT, SIG_IGN);
 
@@ -890,6 +891,7 @@ recover(int flag)
           }
       }
     }
+ if (DEBUGMEM) fprintferr("leaving recover()\n");
 #if 0
  /* This causes SEGV on lists and GP-2.0 vectors: internal component is
   * destroyed while global object is not updated. Two solutions:

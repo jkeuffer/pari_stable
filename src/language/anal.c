@@ -571,12 +571,8 @@ typedef struct var_cell {
   char flag; /* status of _current_ ep->value: PUSH or COPY ? */
 } var_cell;
 #define INITIAL NULL
-#define PUSH_VAL 0
-#define COPY_VAL 1
-#define copyvalue(v,x) new_val_cell(get_ep(v), x, COPY_VAL)
-#define pushvalue(v,x) new_val_cell(get_ep(v), x, PUSH_VAL)
+enum {PUSH_VAL = 0, COPY_VAL = 1};
 #define killvalue(v) pop_val(get_ep(v))
-
 /* Push x on value stack associated to ep. Assume EpVALENCE(ep)=EpVAR/EpGVAR */
 static void
 new_val_cell(entree *ep, GEN x, char flag)
@@ -586,12 +582,29 @@ new_val_cell(entree *ep, GEN x, char flag)
   v->prev   = (var_cell*) ep->args;
   v->flag   = flag;
 
-  ep->args  = (void*) v;
   ep->value = (flag == COPY_VAL)? gclone(x): x;
+  /* Do this last. In case the clone is <C-C>'ed before completion ! */
+  ep->args  = (void*) v;
 }
 
+static entree*
+get_ep(long v)
+{
+  entree *ep = varentries[v];
+  if (!ep) err(talker2,"this function uses a killed variable",
+               mark.identifier, mark.start);
+  return ep;
+}
+
+INLINE void
+copyvalue(long v, GEN x) {
+  new_val_cell(get_ep(v), x, typ(x) >= t_VEC ? COPY_VAL: PUSH_VAL);
+}
+INLINE void
+pushvalue(long v, GEN x) { new_val_cell(get_ep(v), x, PUSH_VAL); }
+
 void
-push_val(entree *ep, GEN a) { new_val_cell(ep,a,PUSH_VAL); }
+push_val(entree *ep, GEN a) { new_val_cell(ep, a, PUSH_VAL); }
 
 /* kill ep->value and replace by preceding one, poped from value stack */
 void
@@ -617,6 +630,7 @@ pop_val_if_newer(entree *ep, long loc)
   if (v->flag == COPY_VAL)
   {
     GEN x = (GEN)ep->value;
+    if (DEBUGMEM) fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
     if (bl_num(x) < loc) return 0; /* older */
     killbloc((GEN)ep->value);
   }
@@ -631,7 +645,7 @@ void
 changevalue(entree *ep, GEN x)
 {
   var_cell *v = (var_cell*) ep->args;
-  if (v == INITIAL) new_val_cell(ep,x, COPY_VAL);
+  if (v == INITIAL) new_val_cell(ep, x, COPY_VAL);
   else
   {
     x = gclone(x); /* beware: killbloc may destroy old x */
@@ -685,15 +699,6 @@ kill_from_hashlist(entree *ep)
       ep1->next = ep->next;
       freeep(ep); return;
     }
-}
-
-static entree*
-get_ep(long v)
-{
-  entree *ep = varentries[v];
-  if (!ep) err(talker2,"this function uses a killed variable",
-               mark.identifier, mark.start);
-  return ep;
 }
 
 /* Kill entree ep, i.e free all memory it occupies, remove it from hashtable.
@@ -1546,7 +1551,7 @@ matrix_block(GEN p)
 /* x = gzero: no default value, otherwise a t_STR, formal expression for
  * default argument. Evaluate and return. */
 static GEN
-make_arg(GEN x) { return (x==gzero)? x: geval(x); }
+make_arg(GEN x) { return (x==gzero)? x: flisseq(GSTR(x)); }
 
 static GEN
 fun_seq(char *p)

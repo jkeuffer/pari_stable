@@ -154,6 +154,8 @@ BA 67- matsnf(Mat([])) was returning a matrix instead of a vector.
        make the routine more robust ]
    69- give meaningful error messages (with context) for 1<<(1<<32), 1<<Pi
        (1<<32)! allocatement(1<<32)  [ was: "impossible assignment I-->S" ]
+   70- memory possibly freed twice in pop_val_if_newer() [ race condition on
+       interrupt (<C-C>) during new_val_cell() ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
@@ -229,6 +231,9 @@ BA 21- type() does not allow to change object types anymore.
        invumod --> Fl_inv, invsmod --> Fl_inv_signed, powuumod --> Fl_pow
        powiumod --> Fp_powu, mpsqrtmod --> Fp_sqrt, mpsqrtnmod --> Fp_sqrtn
    45- rename mpsqrt --> sqrtr, mpsqrtn --> sqrtnr
+   46- don't copy arguments of user functions for types which have no
+       modifiable components (anything but VEC, COL, MAT, LIST, VECSMALL):
+       much faster.
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
