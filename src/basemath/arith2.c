@@ -2353,7 +2353,7 @@ binaire(GEN x)
       lx=lg(x); y=cgetg(lx,tx);
       for (i=1; i<lx; i++) y[i]=(long)binaire((GEN)x[i]);
       break;
-    default: err(typeer,"binaire");
+    default: err(typeer,"binary");
       return NULL; /* not reached */
   }
   return y;
