@@ -115,6 +115,7 @@ IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
    22- allow lift(t_PADIC)
    23- faster polroots for Q of the form P(x^k)
    24- allow nfsubfields(pol,)  [had to be nf]
+   25- allow subst(t, x^n, x)
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
