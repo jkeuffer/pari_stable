@@ -617,19 +617,19 @@ factorgensimple(GEN nf,GEN ideal)
   if (gcmp1(x)) { avma=av1; primfact[0]=0; return 1; }
   for (lo=0, i=1; i<lg(vectbase); i++)
   {
-    GEN p1=(GEN)vectbase[i], p=(GEN)p1[1];
-    if (!smodis(x,itos(p))) /* if p | x */
+    GEN P=(GEN)vectbase[i], p=(GEN)P[1];
+    if (!smodis(x,itos(p))) /* <==> p | x = Nideal */
     {
-      v=idealval(nf,ideal,p1);
+      v = idealval(nf,ideal,P);
       if (v)
       {
 	lo++; primfact[lo]=i; expoprimfact[lo]=v;
-	x = divii(x, gpuigs(p, v * itos((GEN)p1[4])));
+	x = divii(x, gpuigs(p, v * itos((GEN)P[4])));
 	if (gcmp1(x)) { avma=av1; primfact[0]=lo; return 1; }
       }
     }
   }
-  avma=av1; primfact[0]=lo; return 0;
+  avma=av1; return 0;
 }
 
 static void

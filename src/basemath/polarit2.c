@@ -50,20 +50,29 @@ polcmp(GEN x, GEN y)
   return 0;
 }
 
-/* sort factorization so that factors appear by decreasing degree, in place */
+/* sort polynomial factorization so that factors appear by decreasing
+ * degree, sorting coefficients according to cmp. In place */
 GEN
 sort_factor(GEN y, int (*cmp)(GEN,GEN))
 {
-  GEN w,c1,c2, p1 = (GEN)y[1], p2 = (GEN)y[2];
-  long av=avma, n=lg(p1), i;
   int (*old)(GEN,GEN) = polcmp_coeff_cmp;
-
-  c1 = new_chunk(n); c2 = new_chunk(n);
   polcmp_coeff_cmp = cmp;
-  w = gen_sort(p1, cmp_IND | cmp_C, polcmp);
-  for (i=1; i<n; i++) { c1[i]=p1[w[i]]; c2[i]=p2[w[i]]; }
-  for (i=1; i<n; i++) { p1[i]=c1[i]; p2[i]=c2[i]; }
-  polcmp_coeff_cmp = old; avma = av; return y;
+  (void)sort_factor_gen(y,polcmp);
+  polcmp_coeff_cmp = old; return y;
+}
+
+/* sort generic factorisation */
+GEN
+sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
+{
+  long n,i, av = avma;
+  GEN a,b,A,B,w;
+  a = (GEN)y[1]; n = lg(a); A = new_chunk(n);
+  b = (GEN)y[2];            B = new_chunk(n);
+  w = gen_sort(a, cmp_IND | cmp_C, cmp);
+  for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
+  for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
+  avma = av; return y;
 }
 
 /* for internal use */

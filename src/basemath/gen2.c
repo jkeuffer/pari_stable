@@ -832,7 +832,7 @@ pvaluation(GEN x, GEN p, GEN *py)
   if (egalii(p,gdeux))
   {
     v = vali(x);
-    *py = shifti(x, -v);
+    if (py) *py = shifti(x, -v);
     return v;
   }
   if (!is_bigint(x))
@@ -842,12 +842,12 @@ pvaluation(GEN x, GEN p, GEN *py)
     {
       v = svaluation(x[2],p[2], &y);
       if (signe(x) < 0) y = -y;
-      *py = stoi(y);
+      if (py) *py = stoi(y);
     }
     else
     {
       v = 0;
-      *py = icopy(x);
+      if (py) *py = icopy(x);
     }
     return v;
   }
@@ -855,7 +855,7 @@ pvaluation(GEN x, GEN p, GEN *py)
   for(;;)
   {
     p1 = dvmdii(x,p,&p2);
-    if (p2 != gzero) { avma=av; *py = icopy(x); return v; }
+    if (p2 != gzero) { avma=av; if (py) *py = icopy(x); return v; }
     v++; x = p1;
   }
 }

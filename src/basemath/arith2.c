@@ -394,7 +394,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN stat
 static GEN
 aux_end(GEN n, long nb)
 {
-  GEN p,p1,p2, z = (GEN)avma;
+  GEN p1,p2, z = (GEN)avma;
   long i;
 
   if (n) gunclone(n);
@@ -405,20 +405,9 @@ aux_end(GEN n, long nb)
     p2[i] = (long)z; z += lg(z);
     p1[i] = (long)z; z += lg(z);
   }
-  z[1]=(long)p1;
-  z[2]=(long)p2;
-  if (nb)
-  {
-    long av = avma;
-    GEN p1old = dummycopy(p1), p2old = dummycopy(p2);
-    p=sindexsort(p1);
-    for (i=1;i<=nb; i++)
-    {
-      p1[i]=p1old[p[i]];
-      p2[i]=p2old[p[i]];
-    }
-    avma = av;
-  }
+  z[1] = (long)p1;
+  z[2] = (long)p2;
+  if (nb) (void)sort_factor_gen(z,cmpii);
   return z;
 }
 

@@ -1831,6 +1831,7 @@ prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
 {
   GEN norme=subres(pol,a);
   if (resii(divii(norme,pf),p) != gzero) return a;
+  /* Note: a+p can't succeed if e > 1, can we know this at this point ? */
   a=gadd(a,p); norme=subres(pol,a);
   if (resii(divii(norme,pf),p) != gzero) return a;
   return NULL;
@@ -1838,7 +1839,7 @@ prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
 #endif
 
 #if 0
-GEN
+static GEN
 prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
 {
   long av, m = lg(beta)-1;
@@ -1880,7 +1881,7 @@ nextK:
 }
 #endif
 
-GEN
+static GEN
 random_prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
 {
   long av = avma, z,i, m = lg(beta)-1;

@@ -370,33 +370,35 @@ idealhermite2(GEN nf, GEN a, GEN b)
   return idealhnf0(nf,a,b);
 }
 
+/* x = (xZ, a) ? Use sufficient condition gcd(Na/Nx, xZ) = 1 */
 static GEN
-check_elt(GEN a, GEN pol, GEN pnorm, GEN idz)
+check_elt(GEN a, GEN pol, GEN Nx, GEN xZ)
 {
-  GEN x,norme, p2,p1;
+  GEN yZ,y,norm, ck,c;
   
   if (!signe(a)) return NULL;
-  p1 = content(a);
-  if (gcmp1(p1)) { x=a; p2=NULL; }
-  else { x=gdiv(a,p1); p2=gpowgs(p1, lgef(pol)-3); }
+  c = content(a);
+  if (gcmp1(c)) {y=a; ck=NULL;} else {y=gdiv(a,c); ck=gpowgs(c, lgef(pol)-3);}
 
-  norme = resultantducos(pol,x); if (p2) norme = gmul(norme,p2);
-  if (gcmp1(mppgcd(divii(norme,pnorm),pnorm))) return a;
+  norm = resultantducos(pol,y); if (ck) norm = gmul(norm,ck);
+  if (gcmp1(mppgcd(divii(norm,Nx), xZ))) return a;
 
-  if (p2)
+  /* try a + xZ = c (y + yZ) */
+  yZ = xZ;
+  if (ck)
   { 
-    idz=gdiv(idz,p1);
-    if (typ(idz) == t_FRAC) /* should be exceedingly rare */
+    yZ = gdiv(xZ,c);
+    if (typ(yZ) == t_FRAC) /* should be exceedingly rare */
     {
-      x = gmul(x,(GEN)idz[2]);
-      p2 = gdiv(p2, gpowgs((GEN)idz[2], lgef(pol)-3));
-      idz = (GEN)idz[1];
+      y = gmul(y,(GEN)yZ[2]);
+      ck = gdiv(ck, gpowgs((GEN)yZ[2], lgef(pol)-3));
+      yZ = (GEN)yZ[1];
     }
   }
-  x = gadd(x,idz);
+  y = gadd(y,yZ);
 
-  norme = resultantducos(pol,x); if (p2) norme = gmul(norme,p2);
-  if (gcmp1(mppgcd(divii(norme,pnorm),pnorm))) return a;
+  norm = resultantducos(pol,y); if (ck) norm = gmul(norm,ck);
+  if (gcmp1(mppgcd(divii(norm,Nx), xZ))) return a;
   return NULL;
 }
 
@@ -451,7 +453,7 @@ ideal_better_basis(GEN nf, GEN x, GEN M)
 static GEN
 mat_ideal_two_elt(GEN nf, GEN x)
 {
-  GEN y,a,beta,pnorm,con,idz, pol = (GEN)nf[1];
+  GEN y,a,beta,Nx,cx,xZ, pol = (GEN)nf[1];
   long av,tetpil,i,z, N = lgef(pol)-3;
 
   y=cgetg(3,t_VEC); av=avma;
@@ -462,29 +464,29 @@ mat_ideal_two_elt(GEN nf, GEN x)
     y[2] = lcopy((GEN)x[2]); return y;
   }
 
-  con=content(x); if (!gcmp1(con)) x = gdiv(x,con);
+  cx=content(x); if (!gcmp1(cx)) x = gdiv(x,cx);
   if (lg(x) != N+1) x = idealhermite_aux(nf,x);
-  idz=gcoeff(x,1,1); 
-  if (gcmp1(idz))
+  xZ = gcoeff(x,1,1); 
+  if (gcmp1(xZ))
   { 
-    y[1]=lpileupto(av,gcopy(con));
-    y[2]=(long)gscalcol(con,N); return y;
+    y[1] = lpileupto(av,gcopy(cx));
+    y[2] = (long)gscalcol(cx,N); return y;
   }
-  pnorm = dethnf(x);
+  Nx = dethnf_i(x);
   beta = gmul((GEN)nf[7], x);
   a = NULL; /* gcc -Wall */
   for (i=2; i<=N; i++)
   {
-    a = check_elt((GEN)beta[i], pol, pnorm, idz);
+    a = check_elt((GEN)beta[i], pol, Nx, xZ);
     if (a) break;
   }
   if (i>N)
   {
-    x = ideal_better_basis(nf,x,pnorm);
+    x = ideal_better_basis(nf,x,xZ);
     beta = gmul((GEN)nf[7], x);
     for (i=1; i<=N; i++)
     {
-      a = check_elt((GEN)beta[i], pol, pnorm, idz);
+      a = check_elt((GEN)beta[i], pol, Nx, xZ);
       if (a) break;
     }
   }
@@ -503,14 +505,14 @@ mat_ideal_two_elt(GEN nf, GEN x)
         z -= 7; /* in [-7, 8] */
         a = gadd(a, gmulsg(z,(GEN)beta[i]));
       }
-      a = check_elt(a, pol, pnorm, idz);
+      a = check_elt(a, pol, Nx, xZ);
       if (a) break;
       avma=av1;
     }
     if (DEBUGLEVEL>3) fprintferr("\n");
   }
-  a = centermod(algtobasis_intern(nf,a), idz);
-  tetpil=avma; y[1]=lmul(idz,con); y[2]=lmul(a,con);
+  a = centermod(algtobasis_intern(nf,a), xZ);
+  tetpil=avma; y[1]=lmul(xZ,cx); y[2]=lmul(a,cx);
   gerepilemanyvec(av,tetpil,y+1,2); return y;
 }
 
@@ -558,11 +560,35 @@ ideal_two_elt(GEN nf, GEN x)
 
 /* factorization */
 
+/* x integral ideal in HNF, return v_p(Nx), *vz = v_p(x \cap Z)
+ * Use x[i,i] | x[1,1], i > 0 */
+long
+val_norm(GEN x, GEN p, long *vz)
+{
+  long i,l = lg(x), v;
+  *vz = v = pvaluation(gcoeff(x,1,1), p, NULL);
+  if (!v) return 0;
+  for (i=2; i<l; i++)
+    v += pvaluation(gcoeff(x,i,i), p, NULL);
+  return v;
+}
+
+/* return factorization of Nx */
+GEN
+factor_norm(GEN x)
+{
+  GEN f = factor(gcoeff(x,1,1)), p = (GEN)f[1], e = (GEN)f[2];
+  long i,k, l = lg(p);
+  for (i=1; i<l; i++)
+    e[i] = (long)val_norm(x,(GEN)p[i], &k);
+  settyp(e, t_VECSMALL); return f;
+}
+
 GEN
 idealfactor(GEN nf, GEN x)
 {
-  long av,tx, tetpil,i,j,k,lf,lff,N,ls,v,vd;
-  GEN d,f,f1,f2,ff,ff1,ff2,y1,y2,y,p1,p2,denx;
+  long av,tx, tetpil,i,j,k,lf,lc,N,l,v,vc,e;
+  GEN f,f1,f2,c1,c2,y1,y2,y,p1,p2,cx,P;
 
   tx = idealtyp(&x,&y);
   if (tx == id_PRIME)
@@ -576,65 +602,78 @@ idealfactor(GEN nf, GEN x)
 
   N=lgef(nf[1])-3; if (lg(x) != N+1) x = idealmat_to_hnf(nf,x);
   if (lg(x)==1) err(talker,"zero ideal in idealfactor");
-  denx=denom(x);
-  if (gcmp1(denx))
+  cx = content(x);
+  if (gcmp1(cx))
   {
-    ff1 = ff2 = NULL; /* gcc -Wall */
-    lff=1;
+    c1 = c2 = NULL; /* gcc -Wall */
+    lc=1;
   }
   else
   {
-    ff=factor(denx); ff1=(GEN)ff[1]; ff2=(GEN)ff[2];
-    lff=lg(ff1); x=gmul(denx,x);
+    f = factor(cx); x = gdiv(x,cx);
+    c1 = (GEN)f[1];
+    c2 = (GEN)f[2]; lc = lg(c1);
   }
-  d = dethnf_i(x);
-  f=factor(absi(d)); f1=(GEN)f[1]; f2=(GEN)f[2]; lf=lg(f1);
-  y1=cgetg((lf+lff-2)*N+1,t_COL); y2=new_chunk((lf+lff-2)*N+1);
-  k=0;
+  f = factor_norm(x);
+  f1 = (GEN)f[1];
+  f2 = (GEN)f[2]; lf = lg(f1);
+  y1 = cgetg((lf+lc-2)*N+1,t_COL);
+  y2 = cgetg((lf+lc-2)*N+1,t_VECSMALL);
+  k = 1;
   for (i=1; i<lf; i++)
   {
-    p1=primedec(nf,(GEN)f1[i]); ls=itos((GEN)f2[i]);
-    vd=ggval(denx,(GEN)f1[i]);
+    p1 = primedec(nf,(GEN)f1[i]);
+    l = f2[i]; /* = v_p(Nx) */
+    vc = ggval(cx,(GEN)f1[i]);
     for (j=1; j<lg(p1); j++)
     {
-      p2=(GEN)p1[j];
-      if (ls)
-      {
-	v = idealval(nf,x,p2);
-	ls -= v*itos((GEN)p2[4]);
-        v -= vd*itos((GEN)p2[3]);
-      }
-      else v = - vd*itos((GEN)p2[3]);
-      if (v) { y1[++k]=(long)p2; y2[k]=v; }
+      P = (GEN)p1[j]; e = itos((GEN)P[3]);
+      v = idealval(nf,x,P);
+      l -= v*itos((GEN)P[4]);
+      v += vc*e; if (!v) continue;
+      y1[k] = (long)P;
+      y2[k] = v; k++;
+      if (l == 0) break; /* now only the content contributes */
+    }
+    if (vc == 0) continue;
+    for (j++; j<lg(p1); j++)
+    {
+      P = (GEN)p1[j]; e = itos((GEN)P[3]);
+      y1[k] = (long)P;
+      y2[k] = vc*e; k++;
     }
   }
-  for (i=1; i<lff; i++)
-    if (!divise(d,(GEN)ff1[i]))
+  for (i=1; i<lc; i++)
+  {
+    /* p | Nx already treated */
+    if (divise(gcoeff(x,1,1),(GEN)c1[i])) continue;
+    p1 = primedec(nf,(GEN)c1[i]);
+    vc = itos((GEN)c2[i]);
+    for (j=1; j<lg(p1); j++)
     {
-      p1=primedec(nf,(GEN)ff1[i]);
-      for (j=1; j<lg(p1); j++)
-      {
-	p2=(GEN)p1[j]; y1[++k]=(long)p2;
-	y2[k] = -itos((GEN)ff2[i])*itos((GEN)p2[3]);
-      }
+      P = (GEN)p1[j]; e = itos((GEN)P[3]);
+      y1[k] = (long)P;
+      y2[k] = vc*e; k++;
     }
+  }
   tetpil=avma; y=cgetg(3,t_MAT);
-  p1=cgetg(k+1,t_COL); y[1]=(long)p1;
-  p2=cgetg(k+1,t_COL); y[2]=(long)p2;
-  for (i=1; i<=k; i++) { p1[i]=lcopy((GEN)y1[i]); p2[i]=lstoi(y2[i]); }
-  return gerepile(av,tetpil,y);
+  p1=cgetg(k,t_COL); y[1]=(long)p1;
+  p2=cgetg(k,t_COL); y[2]=(long)p2;
+  for (i=1; i<k; i++) { p1[i]=lcopy((GEN)y1[i]); p2[i]=lstoi(y2[i]); }
+  y = gerepile(av,tetpil,y);
+  return sort_factor_gen(y, cmp_prime_ideal);
 }
 
-/* vp prime ideal in primedec format. Return valuation(ix) at vp */
+/* P prime ideal in primedec format. Return valuation(ix) at P */
 long
-idealval(GEN nf, GEN ix, GEN vp)
+idealval(GEN nf, GEN ix, GEN P)
 {
-  long N,v,vd,w,av=avma,av1,lim,i,j,k, tx = typ(ix);
-  GEN mul,mat,a,x,y,r,bp,p,cx;
+  long N,v,vd,w,av=avma,av1,lim,e,f,i,j,k, tx = typ(ix);
+  GEN mul,mat,a,x,y,r,bp,p,pk,cx;
 
-  nf=checknf(nf); checkprimeid(vp);
-  if (is_extscalar_t(tx) || tx==t_COL) return element_val(nf,ix,vp);
-  p=(GEN)vp[1]; N=lgef(nf[1])-3;
+  nf=checknf(nf); checkprimeid(P);
+  if (is_extscalar_t(tx) || tx==t_COL) return element_val(nf,ix,P);
+  p=(GEN)P[1]; N=lgef(nf[1])-3;
   tx = idealtyp(&ix,&a);
   cx = content(ix); if (!gcmp1(cx)) ix = gdiv(ix,cx);
   if (tx != id_MAT)
@@ -644,11 +683,17 @@ idealval(GEN nf, GEN ix, GEN vp)
     checkid(ix,N);
     if (lg(ix) != N+1) ix=idealmat_to_hnf(nf,ix);
   }
-  v = ggval(dethnf_i(ix), p);
-  vd = ggval(cx,p) * itos((GEN)vp[3]); /* v_p * e */
-  if (!v) return vd;
+  e = itos((GEN)P[3]);
+  f = itos((GEN)P[4]);
+  /* 0 <= v_P(ix) <= floor[v_p(Nix) / f] */
+  i = val_norm(ix,p, &k) / f;
+  /* 0 <= ceil[v_P(ix) / e] <= v_p(ix \cap Z) --> v_P <= e * v_p */
+  j = k * e;
+  v = min(i,j); /* v_P(ix) <= v */
+  vd = ggval(cx,p) * e;
+  if (!v) { avma = av; return vd; }
 
-  mul = cgetg(N+1,t_MAT); bp=(GEN)vp[5]; 
+  mul = cgetg(N+1,t_MAT); bp=(GEN)P[5]; 
   mat = cgetg(N+1,t_MAT);
   for (j=1; j<=N; j++) 
   {
@@ -661,12 +706,15 @@ idealval(GEN nf, GEN ix, GEN vp)
       for (k=2; k<=j; k++) a = addii(a, mulii((GEN)x[k], gcoeff(mul,i,k)));
       /* is it divisible by p ? */
       y[i] = ldvmdii(a,p,&r);
-      if (signe(r)) { avma=av; return vd; }
+      if (signe(r)) { avma = av; return vd; }
     }
   }
+  pk = gpowgs(p, v-1);
   av1 = avma; lim=stack_lim(av1,3);
   y = cgetg(N+1,t_COL);
+  /* can compute mod p^(v-w) */
   for (w=1; w<v; w++)
+  {
     for (j=1; j<=N; j++)
     {
       x = (GEN)mat[j];
@@ -676,17 +724,20 @@ idealval(GEN nf, GEN ix, GEN vp)
         for (k=2; k<=N; k++) a = addii(a, mulii((GEN)x[k], gcoeff(mul,i,k)));
         /* is it divisible by p ? */
         y[i] = ldvmdii(a,p,&r);
-        if (signe(r)) { avma=av; return w + vd; }
+        if (signe(r)) { avma = av; return w + vd; }
+        if (lgefint(y[i]) > lgefint(pk)) y[i] = lresii((GEN)y[i], pk);
       }
       r=x; mat[j]=(long)y; y=r;
       if (low_stack(lim,stack_lim(av1,3)))
       {
-        GEN *gptr[2]; gptr[0]=&y; gptr[1]=&mat;
+        GEN *gptr[3]; gptr[0]=&y; gptr[1]=&mat; gptr[2]=&pk;
 	if(DEBUGMEM>1) err(warnmem,"idealval");
-        gerepilemany(av1,gptr,2);
+        gerepilemany(av1,gptr,3);
       }
     }
-  avma=av; return w + vd;
+    pk = gdivexact(pk,p);
+  }
+  avma = av; return w + vd;
 }
 
 /* gcd and generalized Bezout */
