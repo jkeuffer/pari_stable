@@ -3636,9 +3636,8 @@ static GEN
 rnfdiv(GEN x, GEN y)
 {
   long i, ru = lg(x);
-  GEN z;
+  GEN z = cgetg(ru,t_COL);
 
-  z=cgetg(ru,t_COL);
   for (i=1; i<ru; i++) z[i]=(long)gdiv((GEN)x[i],(GEN)y[i]);
   return z;
 }
@@ -3647,9 +3646,8 @@ static GEN
 rnfmul(GEN x, GEN y)
 {
   long i, ru = lg(x);
-  GEN z;
+  GEN z = cgetg(ru,t_COL);
 
-  z=cgetg(ru,t_COL);
   for (i=1; i<ru; i++) z[i]=(long)gmul((GEN)x[i],(GEN)y[i]);
   return z;
 }
@@ -3658,47 +3656,46 @@ static GEN
 rnfvecmul(GEN x, GEN v)
 {
   long i, lx = lg(v);
-  GEN y;
+  GEN y = cgetg(lx,typ(v));
 
-  y=cgetg(lx,typ(v));
   for (i=1; i<lx; i++) y[i]=(long)rnfmul(x,(GEN)v[i]);
   return y;
 }
 
 static GEN
-allonge(GEN v, long N)
+allonge(GEN v, long l)
 {
-  long r,r2,i;
-  GEN y;
+  long r, r2, i;
+  GEN y = cgetg(l,t_COL);
 
-  r=lg(v)-1; r2=N-r;
-  y=cgetg(N+1,t_COL);
-  for (i=1; i<=r; i++) y[i]=v[i];
-  for ( ; i<=N; i++) y[i]=(long)gconj((GEN)v[i-r2]);
+  r = lg(v); r2 = l-r;
+  for (i=1; i < r; i++) y[i] = v[i];
+  for (   ; i < l; i++) y[i] = lconj((GEN)v[i-r2]);
   return y;
 }
 
 static GEN
 findmin(GEN nf, GEN ideal, GEN muf,long prec)
 {
-  gpmem_t av=avma,tetpil;
-  long N,i;
-  GEN m,y;
+  gpmem_t av = avma;
+  long i, l;
+  GEN m,y, G = gmael(nf,5,3);
 
-  m = qf_base_change(gmael(nf,5,3), ideal, 0); /* nf[5][3] = T2 */
-  m = lllgramintern(m,4,1,prec);
+  m = gmul(G, ideal);
+  m = lllintern(m,4,1,prec);
   if (!m)
   {
-    m = qf_base_change(gmael(nf,5,3), lllint_ip(ideal,4), 0);
-    m = lllgramintern(m,4,1,prec);
+    ideal = lllint_ip(ideal,4);
+    m = gmul(G, ideal);
+    m = lllintern(m,4,1,prec);
     if (!m) err(precer,"rnflllgram");
   }
-  ideal=gmul(ideal,m);
-  N=lg(ideal)-1; y=cgetg(N+1,t_MAT);
-  for (i=1; i<=N; i++)
-    y[i] = (long) allonge(nftocomplex(nf,(GEN)ideal[i]),N);
-  m=ground(greal(gauss(y,allonge(muf,N))));
-  tetpil=avma; return gerepile(av,tetpil,gmul(ideal,m));
+  ideal = gmul(ideal,m);
+  l = lg(ideal); y = cgetg(l,t_MAT);
+  for (i=1; i<l; i++)
+    y[i] = (long)allonge(nftocomplex(nf,(GEN)ideal[i]),l);
+  m = ground(greal(gauss(y, allonge(muf,l))));
+  return gerepileupto(av, gmul(ideal,m));
 }
 
 #define swap(x,y) { long _t=x; x=y; y=_t; }
