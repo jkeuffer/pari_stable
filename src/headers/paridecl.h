@@ -1115,6 +1115,7 @@ GEN     cyclicperm(long l, long d);
 GEN     cyc_powtoperm(GEN cyc, long exp);
 GEN     group_elts(GEN G, long n);
 long    group_isabelian(GEN G);
+long    group_order(GEN G);
 GEN     group_subgroups(GEN G);
 GEN     perm_cycles(GEN v);
 GEN     perm_identity(long l);
