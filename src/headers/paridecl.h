@@ -1508,10 +1508,12 @@ GEN     vecbezoutres(GEN x, GEN y);
 
 /* polarit3.c */
 
+ulong   Fl_pow(ulong x, ulong n, ulong p);
 GEN     Fp_factor_irred(GEN P, GEN Q, GEN l);
 void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
+GEN     Fp_powu(GEN x, ulong n0, GEN p);
 GEN     FpM(GEN z, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpV(GEN z, GEN p);
@@ -1545,6 +1547,7 @@ GEN     FpXQ_mul(GEN y,GEN x,GEN T,GEN p);
 GEN     FpXQ_pow(GEN x, GEN n, GEN T, GEN p);
 GEN     FpXQ_powers(GEN x, long l, GEN T, GEN p);
 GEN     FpXQ_sqr(GEN y, GEN T, GEN p);
+GEN     FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     FpXQX_mul(GEN x, GEN y, GEN T, GEN p);
 GEN     FpXQX_red(GEN z, GEN T, GEN p);
 GEN     FpXQX_sqr(GEN x, GEN T, GEN p);
@@ -1585,10 +1588,7 @@ GEN     ZX_resultant(GEN A, GEN B);
 GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
 long    brent_kung_optpow(long d, long n);
-GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
-GEN     Fp_powu(GEN x, ulong n0, GEN p);
-ulong   Fl_pow(ulong x, ulong n, ulong p);
 GEN     rescale_pol(GEN P, GEN h);
 GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(ulong m, ulong p, long v);
