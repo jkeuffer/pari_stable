@@ -787,34 +787,26 @@ _mul(void *data, GEN x, GEN y)
 GEN
 FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
 {
-  pari_sp av;
   FpX_muldata D;
-  long vx;
+  pari_sp av;
   GEN y;
-  if (!pol) err(bugparier,"FpXQ_pow, pol is NULL");
-  vx = varn(x);
-  if (!signe(n)) return polun[vx];
+
+  if (!signe(n)) return polun[ varn(x) ];
+  if (is_pm1(n)) /* +/- 1 */
+    return (signe(n) < 0)? FpXQ_inv(x,pol,p): gcopy(x);
   av = avma;
-  if (signe(n) < 0)
-  {
-    x=FpXQ_inv(x,pol,p);
-    if (is_pm1(n)) return x; /* n = -1*/
-  }
-  else
-    if (is_pm1(n)) return gcopy(x); /* n = 1 */
   if (!is_bigint(p))
   {
     ulong pp = p[2];
     pol = ZX_Flx(pol, pp);
     x   = ZX_Flx(x,   pp);
-    y = Flxq_pow(x, n, pol, pp);
-    y = Flx_ZX(y);
+    y = Flx_ZX( Flxq_pow(x, n, pol, pp) );
   }
   else
   {
-    av = avma;
     D.pol = pol;
     D.p   = p;
+    if (signe(n) < 0) x = FpXQ_inv(x,pol,p);
     y = leftright_pow(x, n, (void*)&D, &_sqr, &_mul);
   }
   return gerepileupto(av, y);
@@ -1599,9 +1591,9 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
        dubious to treat cases apart...)*/
     {
       GEN L,An,Bn,ipg,z;
-      z=FpX_roots(cyclo(pg,-1),l);
+      z=FpX_roots(FpX_red(cyclo(pg,-1),l), l);
       if (lg(z)<2) err(talker,"%Z is not a prime in Fp_intersect",l);
-      z=negi(lift((GEN)z[1]));
+      z=negi((GEN)z[1]);
       ipg=stoi(pg);
       if (DEBUGLEVEL>=4) (void)timer2();
       A=FpM_ker(gaddmat(z, MA),l);
