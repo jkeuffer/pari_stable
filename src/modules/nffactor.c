@@ -1332,7 +1332,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   long i, m, n, nbf, ct, maxf, dpol = degpol(pol);
   ulong pp;
   pari_sp av = avma;
-  GEN pr, C0, C, dk, bad, polbase, pk, init_fa;
+  GEN pr, C0, C, dk, bad, polbase, pk, init_fa = NULL;
   GEN N2, rep, p, polmod, polred, lt, nfpol;
   byteptr pt = diffptr;
   double bestind = 1.;
@@ -1383,7 +1383,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     double ind;
     pari_timer ti_pr;
 
-    GEN list, r = NULL;
+    GEN list, r = NULL, fa = NULL;
     pari_sp av2 = avma;
     if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
     for (;;)
@@ -1424,8 +1424,8 @@ nfsqff(GEN nf, GEN pol, long fl)
       GEN q;
       if (!FqX_is_squarefree(red,aT,ap)) continue;
       q = gpowgs(ap, degpol(aT));
-      anbf = fl? FqX_split_deg1(&init_fa, red, q, aT, ap)
-               : FqX_split_by_degree(&init_fa, red, q, aT, ap);
+      anbf = fl? FqX_split_deg1(&fa, red, q, aT, ap)
+               : FqX_split_by_degree(&fa, red, q, aT, ap);
     }
     if (fl == 2 && anbf < dpol) return cgetg(1,t_VEC);
     if (anbf <= 1)
@@ -1439,7 +1439,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     if (!nbf || ind <= bestind)
     {
       bestind = ind; nbf = anbf; pr = apr;
-      L.Tp = aT;
+      L.Tp = aT; init_fa = fa;
     }
     if (DEBUGLEVEL>3)
       fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",

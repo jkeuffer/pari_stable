@@ -2444,7 +2444,7 @@ add(GEN z, GEN g, long d)
 long
 FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
 {
-  long d, dg, N = degpol(u);
+  long dg, N = degpol(u);
   GEN v, S, g, X, z = cget1(N+1, t_VEC);
 
   *pz = z;
@@ -2455,8 +2455,8 @@ FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p)
   v = spec_Fq_pow_mod_pol(v, S, T, p);
   g = FqX_gcd(gsub(v,X),u, T,p);
   dg = degpol(g);
-  if (dg > 0) add(z, g, dg / d);
-  return dg / d;
+  if (dg > 0) add(z, g, dg);
+  return dg;
 }
 
 /* return number of factors */
@@ -2479,8 +2479,11 @@ FqX_split_by_degree(GEN *pz, GEN u, GEN q, GEN T, GEN p)
     /* all factors of g have degree d */
     add(z, g, dg / d); nb += dg / d;
     N -= dg;
-    u = FqX_div(u,g, T,p);
-    v = FqX_rem(v,u, T,p);
+    if (N)
+    {
+      u = FqX_div(u,g, T,p);
+      v = FqX_rem(v,u, T,p);
+    }
   }
   if (N) { add(z, u, 1); nb++; }
   return nb;
@@ -2532,8 +2535,11 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
     FqX_split(t, d, q, S, T, p);
     t += dg / d;
     N -= dg;
-    u = FqX_div(u,g, T,p);
-    v = FqX_rem(v,u, T,p);
+    if (N)
+    {
+      u = FqX_div(u,g, T,p);
+      v = FqX_rem(v,u, T,p);
+    }
   }
   if (N) *t++ = u;
   return t - t0;
