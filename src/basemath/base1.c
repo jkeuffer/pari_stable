@@ -281,6 +281,41 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
   if (ptlead) *ptlead = lead; return res;
 }
 
+GEN
+primitive_pol_to_monic_factor(GEN pol, GEN *ptlead)
+{
+  long i,j,n = lgef(pol)-3;
+  GEN p1,lead,fa,e, a = dummycopy(pol);
+
+  a += 2; lead = (GEN)a[n];
+  if (gcmp1(lead)) { if (ptlead) *ptlead = NULL; return a; }
+  lead = (GEN) a[n];
+  p1 = gun;
+  fa = auxdecomp(lead,0); lead = gun;
+  e = (GEN)fa[2]; fa = (GEN)fa[1];
+  for (i=lg(e)-1; i>0;i--) e[i] = itos((GEN)e[i]);
+  for (i=lg(fa)-1; i>0; i--)
+  {
+    GEN p = (GEN)fa[i], pd, pk, pkn;
+    long k = ceil((double)e[i] / n); /* try to replace x by x p^k */
+    long d = e[i] % n; /* have to multiply a by p^d */
+    for (j=n-1; j>0; j--)
+    {
+      long v = ggval((GEN)a[j], p);
+      while (v < d + k * j) { k++; d += n; }
+    }
+    pd = gpowgs(p,d);
+    pk = gpowgs(p,k); pkn = gun;
+    for (j=0; j<=n; j++)
+    {
+      a[j] = ldivii(mulii((GEN)a[j], pd), pkn);
+      pkn = mulii(pkn, pk);
+    }
+    lead = mulii(lead, pk);
+  }
+  if (ptlead) *ptlead = lead; return a-2;
+}
+
 /* compute x1*x2^2 + x2*x3^2 + x3*x4^2 + x4*x1^2 */
 static GEN
 get_F4(GEN x)

@@ -9,7 +9,7 @@
 extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
 
 /* scalar product x.x */
-static GEN
+GEN
 sqscal(GEN x)
 {
   long i,av,lx;
@@ -24,7 +24,7 @@ sqscal(GEN x)
 }
 
 /* scalar product x.y */
-static GEN
+GEN
 gscal(GEN x,GEN y)
 {
   long i,av,lx;
