@@ -576,10 +576,10 @@ new_val_cell(entree *ep, GEN x, char flag)
 
   /* beware: f(p) = Nv = 0
    *         Nv = p; f(Nv) --> this call would destroy p [ isclone ] */
-  if (x && isclone(x)) x = forcecopy(x);
-  ep->value = (flag == COPY_VAL)? gclone(x): x;
+  ep->value = (flag == COPY_VAL)? gclone(x):
+                                  (x && isclone(x))? forcecopy(x): x;
   /* Do this last. In case the clone is <C-C>'ed before completion ! */
-  ep->args  = (void*) v;
+  ep->args  = (void*)v;
 }
 
 static entree*
@@ -625,9 +625,9 @@ pop_val_if_newer(entree *ep, long loc)
   if (v->flag == COPY_VAL)
   {
     GEN x = (GEN)ep->value;
+    if (bl_num(x) < loc) return 0; /* older */
     if (DEBUGMEM>2)
       fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
-    if (bl_num(x) < loc) return 0; /* older */
     killbloc((GEN)ep->value);
   }
   ep->value = v->value;
@@ -1153,8 +1153,13 @@ typedef struct matcomp
   GEN *ptcell;
   GEN parent;
   int full_col, full_row;
-  void *extra; /* so far used by check_pointers only */
 } matcomp;
+typedef struct gp_pointer
+{
+  matcomp c;
+  GEN x;
+  entree *ep;
+} gp_pointer;
 
 /* Return the content of the matrix cell and sets members of corresponding
  * matrix component 'c'.  Assume *analyseur = '[' */
@@ -1580,9 +1585,8 @@ call_fun(GEN p, GEN *arg, gp_args *f)
   for (i=0; i<f->nloc; i++) pushvalue(*p++, make_arg(*loc++));
   /* dumps arglist from identifier() to the garbage zone */
   res = fun_seq((char *)p);
-  /* pop out ancient values of formal parameters */
-  for (i=0; i<f->nloc; i++) killvalue(*--p);
-  for (i=0; i<f->narg; i++) killvalue(*--p);
+  /* pop out values of formal parameters */
+  for (i=0; i < f->nloc + f->narg; i++) killvalue(*--p);
   return res;
 }
 /* p = NULL + array of variable numbers (longs) + function text */
@@ -1627,23 +1631,14 @@ global0()
 }
 
 static void
-check_pointers(unsigned int ptrs, matcomp *init[])
+check_pointers(gp_pointer ptrs[], unsigned int ind)
 {
   unsigned int i;
-  for (i=0; ptrs; i++,ptrs>>=1)
-    if (ptrs & 1)
-    {
-      matcomp *c = init[i];
-      GEN *pt = c->ptcell, x = gclone(*pt);
-      if (c->parent == NULL)
-      {
-        if (isclone(c->extra)) killbloc((GEN)c->extra);
-        *pt = x;
-      }
-      else
-        (void)change_compo(c, x);
-      free((void*)c);
-    }
+  for (i=0; i<ind; i++)
+  {
+    gp_pointer *g = &(ptrs[i]);
+    if (g->ep) changevalue(g->ep, g->x); else (void)change_compo(&(g->c), g->x);
+  }
 }
 
 #define match_comma() \
@@ -1866,11 +1861,11 @@ identifier(void)
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;
-    unsigned int ret, noparen, has_pointer=0;
+    unsigned int ret, noparen, ind_pointer=0;
     long fake;
     void *call = ep->value;
     GEN argvec[9];
-    matcomp *init[9];
+    gp_pointer ptrs[9];
     char *flags = NULL;
 
     deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
@@ -1936,20 +1931,16 @@ identifier(void)
         case '&': /* *GEN */
 	  match_comma(); match('&'); mark.symbol=analyseur;
         {
-          matcomp *c = (matcomp*)malloc(sizeof(matcomp));
           entree *ep = entry();
+          gp_pointer *g = &ptrs[ind_pointer++];
 
-          if (*analyseur == '[')
-            (void)matcell((GEN)ep->value, c);
-          else
-          {
-            c->parent = NULL;
-            c->ptcell = (GEN*)&ep->value;
-            c->extra = (GEN*)ep->value;
+          if (*analyseur == '[') {
+            (void)matcell((GEN)ep->value, &(g->c));
+            g->ep = NULL;
           }
-          has_pointer |= (1 << i);
-          init[i] = c;
-	  argvec[i++] = (GEN)c->ptcell; break;
+          else
+            g->ep = ep;
+	  argvec[i++] = (GEN)&(g->x); break;
         }
         /* Input position */
         case 'E': /* expr */
@@ -2094,7 +2085,7 @@ identifier(void)
       }
     gp_function_name = oldname;
 }
-    if (has_pointer) check_pointers(has_pointer,init);
+    if (ind_pointer) check_pointers(ptrs, ind_pointer);
     if (!noparen) match(')');
     return res;
   }
