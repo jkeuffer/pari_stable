@@ -955,8 +955,8 @@ hil(GEN x, GEN y, GEN p)
 ulong
 Fl_sqrt(ulong a, ulong p)
 {
-  long i, e;
-  ulong k, p1, q, v, y, w, m;
+  long i, e, k;
+  ulong p1, q, v, y, w, m;
 
   if (!a) return 0;
   p1 = p - 1; e = vals(p1);

@@ -2494,7 +2494,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   else
   {
     /*We need to normalise result so that psi[g]=1*/
-    long im=Fl_inv_signed(gf->psi[g],deg);
+    long im=Fl_inv(gf->psi[g],deg);
     GEN cp=perm_pow(res, im);
     for(i=1;i<lg(res);i++) res[i]=cp[i];
     for(i=1;i<lg(gf->psi);i++) gf->psi[i] = (long)Fl_mul(im,gf->psi[i],deg);

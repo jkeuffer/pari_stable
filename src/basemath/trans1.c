@@ -1474,7 +1474,7 @@ mplog(GEN x)
   b = sqrt((BITS_IN_HALFULONG/3.0) * l);
   if (a <= b)
   {
-    n = 1 + (long)3*b;
+    n = 1 + (long)(3*b);
     m = 1 + (long)(b-a);
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
