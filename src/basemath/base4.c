@@ -2110,93 +2110,6 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
 /*                                                                 */
 /*******************************************************************/
 
-/* assume L is a list of prime ideals. Return the product */
-GEN
-idealprodprime(GEN nf, GEN L)
-{
-  long l = lg(L), i;
-  GEN z;
-
-  if (l == 1) return idmat(degpol(nf[1]));
-  z = prime_to_ideal(nf, (GEN)L[1]);
-  for (i=2; i<l; i++) z = idealmulprime(nf,z, (GEN)L[i]);
-  return z;
-}
-
-/* assume L is a list of prime ideals. Return prod L[i]^e[i] */
-GEN
-factorbackprime(GEN nf, GEN L, GEN e)
-{
-  long l = lg(L), i;
-  GEN z;
-
-  if (l == 1) return idmat(degpol(nf[1]));
-  z = idealpow(nf, (GEN)L[1], (GEN)e[1]);
-  for (i=2; i<l; i++)
-    if (signe(e[i])) z = idealmulpowprime(nf,z, (GEN)L[i],(GEN)e[i]);
-  return z;
-}
-
-/* compute anti-uniformizer for pr, coprime to f outside of pr, integral
- * outside of p below pr.
- * sqf = product or primes dividing f, NULL if f a prime power*/
-GEN
-anti_unif_mod_f(GEN nf, GEN pr, GEN sqf)
-{
-  GEN U, V, UV, uv, cx, t, p = (GEN)pr[1];
-  if (!sqf) return gdiv((GEN)pr[5], p);
-  else
-  {
-    U = idealpow(nf,pr,gdeux);
-    V = idealdivpowprime(nf,sqf,pr,gun);
-    uv = addone_nored(nf, U, V);
-    UV = idealmul(nf,sqf,pr);
-    t = (GEN)pr[2];
-    t = makeprimetoideal(nf, UV, uv, t); /* cf unif_mod_f */
-
-    t = element_inv(nf, t);
-    t = primitive_part(t, &cx);
-    cx = gmod(gmul(cx,p), gcoeff(sqf,1,1)); /* mod (sqf \cap Z) = VZ * p */
-    t = gdiv(colreducemodHNF(gmul(cx,t), gmul(p,V), NULL), p);
-    return t; /* v_pr[i](t) = -1, v_pr[j](t) = 0 if i != j */
-  }
-}
-
-/* compute integral uniformizer for pr, coprime to f outside of pr.
- * sqf = product or primes dividing f, NULL if f a prime power*/
-GEN
-unif_mod_f(GEN nf, GEN pr, GEN sqf)
-{
-  GEN U, V, UV, uv, t = (GEN)pr[2];
-  if (!sqf) return t;
-  else
-  {
-    U = idealpow(nf,pr,gdeux);
-    V = idealdivpowprime(nf,sqf,pr,gun);
-    uv = addone_nored(nf, U, V);
-    UV = idealmulprime(nf,sqf,pr);
-    return makeprimetoideal(nf, UV, uv, t);
-  }
-}
-
-static GEN
-appr_reduce(GEN s, GEN y)
-{
-  long i, N = lg(y)-1;
-  GEN d, u, z = cgetg(N+2,t_MAT);
-
-  s = gmod(s, gcoeff(y,1,1));
-  y = lllint_ip(y,100);
-  for (i=1; i<=N; i++) z[i] = y[i];
-  z[N+1] = (long)s;
-  u = (GEN)ker(z)[1];
-  d = denom(u);
-  if (!gcmp1(d)) u = Q_remove_denom(u, d);
-  d = (GEN)u[N+1]; setlg(u,N+1);
-  for (i=1; i<=N; i++) u[i] = (long)diviiround((GEN)u[i],d);
-  return gadd(s, gmul(y,u));
-}
-
 /* write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
 static GEN
 coprime_part(GEN x, GEN f)
@@ -2241,6 +2154,97 @@ nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
   x2 = x1? idealdivexact(nf, x, x1): x;
 #endif
   return x2;
+}
+
+/* assume L is a list of prime ideals. Return the product */
+GEN
+idealprodprime(GEN nf, GEN L)
+{
+  long l = lg(L), i;
+  GEN z;
+
+  if (l == 1) return idmat(degpol(nf[1]));
+  z = prime_to_ideal(nf, (GEN)L[1]);
+  for (i=2; i<l; i++) z = idealmulprime(nf,z, (GEN)L[i]);
+  return z;
+}
+
+/* assume L is a list of prime ideals. Return prod L[i]^e[i] */
+GEN
+factorbackprime(GEN nf, GEN L, GEN e)
+{
+  long l = lg(L), i;
+  GEN z;
+
+  if (l == 1) return idmat(degpol(nf[1]));
+  z = idealpow(nf, (GEN)L[1], (GEN)e[1]);
+  for (i=2; i<l; i++)
+    if (signe(e[i])) z = idealmulpowprime(nf,z, (GEN)L[i],(GEN)e[i]);
+  return z;
+}
+
+/* compute anti-uniformizer for pr, coprime to f outside of pr, integral
+ * outside of p below pr.
+ * sqf = product or primes dividing f, NULL if f a prime power*/
+GEN
+anti_unif_mod_f(GEN nf, GEN pr, GEN sqf)
+{
+  GEN U, V, UV, uv, cx, t, p = (GEN)pr[1];
+  if (!sqf) return gdiv((GEN)pr[5], p);
+  else
+  {
+    GEN d,d1,d2, sqfZ = gcoeff(sqf,1,1); /* = (sqf \cap Z) = (V \cap Z) * p */
+    U = idealpow(nf,pr,gdeux);
+    V = idealdivpowprime(nf,sqf,pr,gun);
+    uv = addone_nored(nf, U, V);
+    UV = idealmul(nf,sqf,pr);
+    t = (GEN)pr[2];
+    t = makeprimetoideal(nf, UV, uv, t); /* cf unif_mod_f */
+
+    t = element_inv(nf, t);
+    t = primitive_part(t, &cx); /* p | denom(cx) */
+    d = denom(cx);
+    d2 = coprime_part(d, sqfZ);
+    d1 = diviiexact(d, d2); /* p | d1 */
+    cx = gmod(gmul(cx,d1), mulii(d1, gcoeff(V,1,1)));
+    t = gdiv(colreducemodHNF(gmul(cx,t), gmul(d1,V), NULL), d1);
+    return t; /* v_pr[i](t) = -1, v_pr[j](t) = 0 if i != j */
+  }
+}
+
+/* compute integral uniformizer for pr, coprime to f outside of pr.
+ * sqf = product or primes dividing f, NULL if f a prime power*/
+GEN
+unif_mod_f(GEN nf, GEN pr, GEN sqf)
+{
+  GEN U, V, UV, uv, t = (GEN)pr[2];
+  if (!sqf) return t;
+  else
+  {
+    U = idealpow(nf,pr,gdeux);
+    V = idealdivpowprime(nf,sqf,pr,gun);
+    uv = addone_nored(nf, U, V);
+    UV = idealmulprime(nf,sqf,pr);
+    return makeprimetoideal(nf, UV, uv, t);
+  }
+}
+
+static GEN
+appr_reduce(GEN s, GEN y)
+{
+  long i, N = lg(y)-1;
+  GEN d, u, z = cgetg(N+2,t_MAT);
+
+  s = gmod(s, gcoeff(y,1,1));
+  y = lllint_ip(y,100);
+  for (i=1; i<=N; i++) z[i] = y[i];
+  z[N+1] = (long)s;
+  u = (GEN)ker(z)[1];
+  d = denom(u);
+  if (!gcmp1(d)) u = Q_remove_denom(u, d);
+  d = (GEN)u[N+1]; setlg(u,N+1);
+  for (i=1; i<=N; i++) u[i] = (long)diviiround((GEN)u[i],d);
+  return gadd(s, gmul(y,u));
 }
 
 /* L0 in K^*. 
@@ -2330,7 +2334,8 @@ idealapprfact_i(GEN nf, GEN x)
   x = factorbackprime(nf, list,e2);
   if (flag) /* denominator */
   {
-    d = denom(z); z = Q_remove_denom(z, d);
+    d = denom(z);
+    z = Q_remove_denom(z, d);
     x = Q_remove_denom(x, d);
   }
   else d = NULL;
