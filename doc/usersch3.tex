@@ -6028,13 +6028,13 @@ any type.
 
 If $x$ is known to have integral entries, set $\fl=1$.
 
-\noindent Note: The library function $\tet{FpM_ker}(x, p)$, where $x$ has
-integer entries and $p$ is prime, which is equivalent to but many orders of
-magnitude faster than \kbd{matker(x*Mod(1,p))} and needs much less stack
-space. To use it under GP, type \kbd{install(FpM\_ker, GG)} first.
+\misctitle{Note:} The library function $\tet{FpM_ker}(x, p)$, where $x$ has
+integer entries \emph{reduced mod p} and $p$ is prime, is equivalent to, but
+orders of magnitude faster than, \kbd{matker(x*Mod(1,p))} and needs much
+less stack space. To use it under GP, type \kbd{install(FpM\_ker, GG)} first.
 
 \syn{matker0}{x,\fl}. Also available are $\teb{ker}(x)$ ($\fl=0$),
-$\teb{keri}(x)$ ($\fl=1$) and $\kbd{ker\_mod\_p}(x,p)$.
+$\teb{keri}(x)$ ($\fl=1$) and $\kbd{FpM\_ker}(x,p)$.
 
 \subsecidx{matkerint}$(x,\{\fl=0\})$: gives an \idx{LLL}-reduced $\Z$-basis
 for the lattice equal to the kernel of the matrix $x$ as columns of the
