@@ -137,6 +137,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    15- separated mpadd functions from [none|gmp]/mp.c --> kernel/add.c
    16- use 'lgeflist' for t_LIST: remove the 65536 limit on list size
    17- subst(1 + x^2 + O(x^5), x^2, y) --> 1 + y + O(y^2)
+   18- nffactor: allow modular factorization over primes of degree > 1
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
