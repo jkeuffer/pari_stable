@@ -54,6 +54,7 @@ XR 22- bnrstark(): fixed inconsistency between 32bit & 64bit versions +
 PW 23- hyperu bad input bug
 PW 24- intnum(x=1,2,0) --> oo loop
    25- sin(x + y) --> error
+   26- next(i > 1) didn't work (part of the last loop could be executed)
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument

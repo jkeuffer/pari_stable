@@ -126,7 +126,7 @@ extern void *PARI_stack_limit;
 #define bl_num(x)  (((GEN)x)[-1])
 
 /* break */
-enum { br_NONE, br_BREAK, br_NEXT, br_RETURN }; /* break status */
+enum { br_NONE, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN }; /* break status */
 
 /* formatted printing */
 #ifndef LONG_IS_64BIT

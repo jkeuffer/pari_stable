@@ -3018,6 +3018,9 @@ loop_break()
 {
   switch(br_status)
   {
+    case br_MULTINEXT :
+      if (! --br_count) br_status = br_NEXT;
+      return 1;
     case br_BREAK : if (! --br_count) br_status = br_NONE; /* fall through */
     case br_RETURN: return 1;
 
@@ -3045,7 +3048,7 @@ next0(long n)
   else
   {
     br_count = n-1;
-    br_status = br_BREAK;
+    br_status = br_MULTINEXT;
   }
   return NULL;
 }
