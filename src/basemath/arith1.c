@@ -1679,7 +1679,7 @@ seq_umul(ulong a, ulong b)
     for (k=a+1; k<=b; k++) x = mului(k,x);
     return gerepileuptoint(av, x);
   }
-  lx = 1; x = cgetg(1 + n/2, t_VEC);
+  lx = 1; x = cgetg(2 + n/2, t_VEC);
   N = b + a;
   for (k = a;; k++)
   {
@@ -1700,31 +1700,6 @@ mpfact(long n)
     return gun;
   }
   return seq_umul(2UL, (ulong)n);
-}
-
-GEN
-mpfactr(long n, long prec)
-{
-  pari_sp av = avma, lim;
-  long k;
-  GEN f = realun(prec);
-
-  if (n<2)
-  {
-    if (n<0) err(facter);
-    return f;
-  }
-  lim = stack_lim(av,1);
-  for (k=2; k<=n; k++)
-  {
-    f = mulsr(k,f);
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"mpfactr k=%ld",k);
-      f = gerepileuptoleaf(av,f);
-    }
-  }
-  return gerepileuptoleaf(av,f);
 }
 
 /*******************************************************************/

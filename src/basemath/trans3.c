@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+extern int OK_bern(long nb, long prec);
 extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrsns(GEN x, long i);
 extern GEN divgsns(GEN x, long i);
@@ -1091,7 +1092,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   double s, t, sn, alpha, beta, n;
   long p;
   if (typ(S) == t_REAL) {
-    s = rtodbl(S); 
+    s = rtodbl(S);
     t = 0.;
   } else {
     s = rtodbl((GEN)S[1]);
@@ -1134,7 +1135,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       }
     }
     else
-    { 
+    {
       beta = 1.0 - s + t * get_xinf(beta);
       if (beta > 0)
       {
@@ -1222,7 +1223,8 @@ czeta(GEN s0, long prec)
 }
 #endif
 
-/* 1/zeta(n) using Euler product. lba = log(bit_accuracy) we _really_ require */
+/* 1/zeta(n) using Euler product.
+ * if (lba != 0) it is log(bit_accuracy) we _really_ require */
 GEN
 inv_szeta_euler(long n, double lba, long prec)
 {
@@ -1261,7 +1263,7 @@ bernreal_using_zeta(long n, GEN iz, long prec)
 {
   long l = prec + 1;
   GEN z;
-  
+
   if (!iz) iz = inv_szeta_euler(n, 0., l);
   z = divrr(mpfactr(n, l), mulrr(gpowgs(Pi2n(1, l), n), iz));
   setexpo(z, expo(z) + 1); /* 2 * n! / ((2Pi)^n zeta(n)) */
@@ -1377,6 +1379,24 @@ szeta_odd(long k, long prec)
   return gerepileuptoleaf(av, y);
 }
 
+/* assume k > 0 even. Return B_k */
+static GEN
+single_bern(long k, long prec)
+{
+  pari_sp av;
+  GEN B;
+  if (OK_bern(k >> 1, prec)) B = bernreal(k, prec);
+  else if (k * (log(k) - 2.83) > (prec-2) * pariC2)
+    B = bernreal_using_zeta(k, NULL, prec);
+  else
+  {
+    B = cgetr(prec);
+    av = avma; gaffect(bernfrac(k), B);
+    avma = av;
+  }
+  return B;
+}
+
 /* assume k != 1 */
 GEN
 szeta(long k, long prec)
@@ -1388,24 +1408,25 @@ szeta(long k, long prec)
   if (!k) { y = real2n(-1, prec); setsigne(y,-1); return y; }
   if (k < 0)
   {
-    GEN s;
     if ((k&1) == 0) return gzero;
-    if (-k <= bit_accuracy(prec)+1)
-      return gerepileuptoleaf(av, divrs(bernreal(1-k,prec), k-1));
-    s = stoi(1 - k);
-    y = gdiv(ggamma(s, prec), powgi(Pi2n(1, prec), s));
-    if ((k&3) == 3) setsigne(y, -1);
-    return gerepileuptoleaf(av, gmul2n(y, 1));
+    return gerepileuptoleaf(av, divrs(single_bern(1 - k, prec), k - 1));
   }
   if (k > bit_accuracy(prec)+1) return realun(prec);
   if ((k&1) == 0)
   {
-    GEN p1 = mulrr(gpowgs(Pi2n(1, prec), k), bernreal(k,prec));
-    y = divrr(p1, mpfactr(k,prec));
-    setexpo(y, expo(y)-1); setsigne(y, 1);
+    if (!OK_bern(k >> 1, prec) && (k * (log(k) - 2.83) > (prec-2) * pariC2))
+      y = ginv( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
+    else
+    {
+      y = mulrr(gpowgs(Pi2n(1, prec), k), single_bern(k, prec));
+      y = divrr(y, mpfactr(k,prec));
+      y[1] = evalsigne(1) | evalexpo(expo(y)-1);
+    }
     return gerepileuptoleaf(av, y);
   }
   /* k > 1 odd */
+  if (k * log(k) > (prec-2) * pariC2) /* heuristic */
+    gerepileuptoleaf(av, ginv( inv_szeta_euler(k, 0, prec) ));
   return szeta_odd(k, prec);
 }
 
@@ -1455,7 +1476,7 @@ czeta(GEN s0, long prec)
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
-  if (gexpo(gsub(s, gun)) < -5 || 
+  if (gexpo(gsub(s, gun)) < -5 ||
       (gexpo(s) > -5 && (signe(sig) <= 0 || expo(sig) < -1)))
   { /* s <--> 1-s */
     if (typ(s0) == t_INT)
@@ -1537,7 +1558,7 @@ czeta(GEN s0, long prec)
   }
   else /* typ(s0) != t_INT */
   {
-    GEN s1, s2, s3, s4, s5; 
+    GEN s1, s2, s3, s4, s5;
     s1 = gsub(gmul2n(s,1), unr);
     s2 = gmul(s, gsub(s,unr));
     s3 = gmul2n(invn2,3);
@@ -1991,7 +2012,7 @@ e12(long k, long prec)
       z[1] = lmpsqrt(t);
       z[2] = lmul2n(ginv((GEN)z[1]), -2); break;
 
-    case 2: z[1] = (long)sqrt32(prec); 
+    case 2: z[1] = (long)sqrt32(prec);
             z[2] = (long)real2n(-1, prec); break;
 
     case 3: z[1] = linv( gsqrt(gdeux, prec) );
@@ -2212,7 +2233,7 @@ logagm(GEN q)
   lim = - (bit_accuracy(prec) >> 1);
   q1 = NULL; /* gcc -Wall */
   for (n=0; expo(q) >= lim; n++) { q1 = q; q = gsqr(q); }
-  
+
   if (!n) q1 = mpsqrt(q);
   y = divrr(mppi(prec), agm(addsr(1,gmul2n(q,2)), gmul2n(q1,2),prec));
   y = gmul2n(y,-n); if (s) setsigne(y,-1);
