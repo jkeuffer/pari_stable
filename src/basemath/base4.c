@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN hnfmerge_get_1(GEN A, GEN B);
 extern GEN makeprimetoideal(GEN nf,GEN UV,GEN uv,GEN x);
 extern GEN gauss_triangle_i(GEN A, GEN B,GEN t);
 extern GEN hnf_invimage(GEN A, GEN b);
@@ -839,97 +840,30 @@ idealadd(GEN nf, GEN x, GEN y)
   return gerepileupto(av,z);
 }
 
-/* Assume x,y integral non zero (presumably coprime, which is checked).
- * Return a in x such that 1-a in y. If (x + y) \cap Z is 1, then addone_aux
- * is more efficient. */
-GEN
-addone_aux2(GEN x, GEN y)
-{
-  GEN U, H = hnfall_i(concatsp(x,y), &U, 1);
-  if (!gcmp1(gcoeff(H,1,1)))
-    err(talker,"ideals don't sum to Z_K in idealaddtoone");
-  U = (GEN)U[ lg(H) ]; setlg(U, lg(x));
-  return gmul(x, U);
-}
-
-#if 0
-/* A,B integral in HNF. Find u in Z^n (v in Z^n not computed), such that
- * Au + Bv = 1 */
-GEN
-hnfmerge_get_1(GEN A, GEN B)
-{
-  long i, j, c, l = lg(A);
-  GEN U = cgetg(l, t_MAT), C = cgetg(l + 1, t_MAT);
-  for (j = 1; j < l; j++)
-  {
-    c = j+1;
-    U[j] = (long)_ei(l-1, j);
-    C[j] = (long)dummycopy((GEN)A[j]);
-    C[c] = (long)dummycopy((GEN)B[j]);
-    for (k = j; k > 0; k--)
-      ZV_elem(gcoeff(C,k,c),gcoeff(C,k,k), C, U, k, c);
-    if (gcmp1(gcoeff(C,1,1))) break;
-    ZM_reduce(C, U, k)
-  }
-  return (GEN)U[1];
-}
-#endif
-
-/* assume x,y integral, non zero in HNF */
 static GEN
-addone_aux(GEN x, GEN y)
+get_hnfid(GEN nf, GEN x)
 {
-  GEN a, b, u;
-  a = gcoeff(x,1,1);
-  b = gcoeff(y,1,1);
-  if (typ(a) != t_INT || typ(b) != t_INT)
-    err(talker,"ideals don't sum to Z_K in idealaddtoone");
-  if (invmod(a,b,&u)) return gmul(u,(GEN)x[1]);
-  return addone_aux2(x, y);
+  GEN junk;
+  long t = idealtyp(&x, &junk);
+  return (t != id_MAT || lg(x) == 1 || lg(x) != lg(x[1]) || !ishnfall(x))
+    ? idealhermite_aux(nf,x): x;
 }
 
 GEN
 idealaddtoone_i(GEN nf, GEN x, GEN y)
 {
-  long t, fl = 1;
-  GEN p1,xh,yh;
-
+  GEN a;
   if (DEBUGLEVEL>4)
   {
     fprintferr(" entering idealaddtoone:\n");
     fprintferr(" x = %Z\n",x);
     fprintferr(" y = %Z\n",y);
   }
-  t = idealtyp(&x,&p1);
-  if (t != id_MAT || lg(x) == 1 || lg(x) != lg(x[1]))
-    xh = idealhermite_aux(nf,x);
-  else
-    { xh = x; fl = isnfscalar((GEN)x[1]); }
-  t = idealtyp(&y,&p1);
-  if (t != id_MAT || lg(y) == 1 || lg(y) != lg(y[1]))
-    yh = idealhermite_aux(nf,y);
-  else
-    { yh = y; if (fl) fl = isnfscalar((GEN)y[1]); }
-  if (lg(xh) == 1)
-  {
-    if (lg(yh) == 1 || !gcmp1(gabs(gcoeff(yh,1,1),0)))
-      err(talker,"ideals don't sum to Z_K in idealaddtoone");
-    return algtobasis(nf, gzero);
-  }
-  if (lg(yh) == 1)
-  {
-    p1 = gcoeff(xh,1,1);
-    if (!gcmp1(gabs(p1,0)))
-      err(talker,"ideals don't sum to Z_K in idealaddtoone");
-    return algtobasis(nf, gneg(p1));
-  }
-
-  if (fl) p1 = addone_aux (xh,yh); /* xh[1], yh[1] scalar */
-  else    p1 = addone_aux2(xh,yh);
-  p1 = element_reduce(nf,p1, idealmullll(nf,x,y));
-  if (DEBUGLEVEL>4 && !gcmp0(p1))
-    fprintferr(" leaving idealaddtoone: %Z\n",p1);
-  return p1;
+  a = hnfmerge_get_1(get_hnfid(nf, x), get_hnfid(nf, y));
+  a = element_reduce(nf,a, idealmullll(nf,x,y));
+  if (DEBUGLEVEL>4 && !gcmp0(a))
+    fprintferr(" leaving idealaddtoone: %Z\n",a);
+  return a;
 }
 
 /* ideal should be an idele (not mandatory). For internal use. */
@@ -942,7 +876,7 @@ ideleaddone_aux(GEN nf,GEN x,GEN ideal)
   (void)idealtyp(&ideal,&arch);
   if (!arch) return idealaddtoone_i(nf,x,ideal);
 
-  R1=itos(gmael(nf,2,1));
+  R1 = nf_get_r1(nf);
   if (typ(arch)!=t_VEC && lg(arch)!=R1+1)
     err(talker,"incorrect idele in idealaddtoone");
   for (nba=0,i=1; i<lg(arch); i++)
@@ -990,7 +924,7 @@ addone_nored(GEN x, GEN y)
 {
   GEN z = cgetg(3,t_VEC), a;
   pari_sp av = avma;
-  a = gerepileupto(av, addone_aux(x,y));
+  a = gerepileupto(av, hnfmerge_get_1(x,y));
   z[1] = (long)a;
   z[2] = (long)unnf_minus_x(a); return z;
 }
@@ -1012,16 +946,14 @@ ideleaddone(GEN nf,GEN x,GEN idele)
 GEN
 element_invmodideal(GEN nf, GEN x, GEN y)
 {
-  pari_sp av=avma;
-  long N,i, fl = 1;
-  GEN v,p1,xh,yh;
+  pari_sp av = avma;
+  long N;
+  GEN v, a, xh, yh;
 
-  nf=checknf(nf); N=degpol(nf[1]);
+  nf = checknf(nf); N = degpol(nf[1]);
   if (gcmp1(gcoeff(y,1,1))) return zerocol(N);
-  i = lg(y);
-  if (typ(y)!=t_MAT || i==1 || i != lg(y[1])) yh=idealhermite_aux(nf,y);
-  else
-    { yh=y; fl = isnfscalar((GEN)y[1]); }
+
+  yh = get_hnfid(nf, y);
   switch (typ(x))
   {
     case t_POL: case t_POLMOD: case t_COL:
@@ -1029,10 +961,9 @@ element_invmodideal(GEN nf, GEN x, GEN y)
     default: err(typeer,"element_invmodideal");
       return NULL; /* not reached */
   }
-  if (fl) p1 = addone_aux (xh,yh);
-  else    p1 = addone_aux2(xh,yh);
-  p1 = element_div(nf,p1,x);
-  v = gerepileupto(av, nfreducemodideal(nf,p1,y));
+  a = hnfmerge_get_1(xh, yh);
+  a = element_div(nf,a,x);
+  v = gerepileupto(av, nfreducemodideal(nf, a, y));
   return v;
 }
 

@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
-extern GEN addone_aux2(GEN x, GEN y);
 extern GEN addshiftw(GEN x, GEN y, long d);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN hnf_invimage(GEN A, GEN b);

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+extern GEN imagecomplspec(GEN x, long *nlze);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1401,8 +1402,6 @@ hnf_special(GEN x, long remove)
 /*                SPECIAL HNF (FOR INTERNAL USE !!!)               */
 /*                                                                 */
 /*******************************************************************/
-extern GEN imagecomplspec(GEN x, long *nlze);
-
 static int
 count(long **mat, long row, long len, long *firstnonzero)
 {
@@ -2070,6 +2069,40 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
     if (U)
       U[j] = (long)ZV_lincomb(gun,q, (GEN)U[j], (GEN)U[j0]);
   }
+}
+
+/* A,B integral ideals in HNF. Return u in Z^n (v in Z^n not computed), such
+ * that Au + Bv = 1 */
+GEN
+hnfmerge_get_1(GEN A, GEN B)
+{
+  pari_sp av = avma;
+  long j, k, c, l = lg(A), lb;
+  GEN b, t, U = cgetg(l + 1, t_MAT), C = cgetg(l + 1, t_VEC);
+
+  t = NULL; /* -Wall */
+  b = gcoeff(B,1,1); lb = lgefint(b);
+  for (j = 1; j < l; j++)
+  {
+    c = j+1;
+    U[j] = (long)_ei(l-1, j);
+    U[c] = (long)zerocol(l-1); /* dummy */
+    C[j] = (long)vecextract_i((GEN)A[j], 1,j);
+    C[c] = (long)vecextract_i((GEN)B[j], 1,j);
+    for (k = j; k > 0; k--)
+    {
+      t = gcoeff(C,k,c);
+      if (gcmp0(t)) continue;
+      setlg(C[c], k+1);
+      ZV_elem(t, gcoeff(C,k,k), C, U, c, k);
+      if (k > 1 && lgefint(gcoeff(C,k,k)) > lb)
+        C[k] = (long)FpV_red((GEN)C[k], b);
+    }
+    t = gcoeff(C,1,1); /* >= 0 */
+    if (signe(t) && is_pm1(t)) break;
+  }
+  if (j >= l) err(talker, "non coprime ideals in hnfmerge");
+  return gerepileupto(av, gmul(A,(GEN)U[1]));
 }
 
 /* remove: throw away lin.dep.columns */
