@@ -47,7 +47,7 @@ dft target::
 
 gp all bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
-	@if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
+	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@
 
 dbg gp.dbg::
