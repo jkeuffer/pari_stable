@@ -2464,7 +2464,7 @@ galoisconj4(GEN T, GEN den, long flag)
   n = degree(T);
   if (n == 1)			/* Too easy! */
   {
-    res = cgetg(2, t_VEC);
+    res = cgetg(2, t_COL);
     res[1] = (long) polx[varn(T)];
     return res;
   }
@@ -2531,7 +2531,7 @@ galoisconj4(GEN T, GEN den, long flag)
     grp[6]=(long)res;
     return gerepile(ltop, lbot, grp);
   }
-  aut = cgetg(n + 1, t_VEC);
+  aut = cgetg(n + 1, t_COL);
   for (i = 1; i <= n; i++)
     aut[i] = (long) permtopol((GEN) res[i], L2, M2, den, varn(T));
   if (DEBUGLEVEL >= 1)
