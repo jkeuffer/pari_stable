@@ -64,7 +64,7 @@ static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
-#define BREAK_LOOP_PROMPT "> "
+#define BREAK_LOOP_PROMPT "break> "
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""

@@ -149,6 +149,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    19- nffactor: call factornf when deg(pol) << deg(nf) + remove a priori
        overlift for d-1/d-2 test [major overkill]
    20- input format to rnfisnorm() [use rnfisnorminit]
+   21- [GP:] break loop prompt from '>' to 'break>'
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
