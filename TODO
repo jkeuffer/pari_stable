@@ -9,6 +9,7 @@ Priority classification (first column): [subjective and debatable!]
 3    nice to have
 2    maybe not
 1    probably not
+0    no
 -    unclassified
 
 ***************************   BUGS (general)     ****************************
@@ -103,8 +104,6 @@ Kernel:
 
 Misc:
 =====
-4  graphics: allow FIG output (besides PostScript) [easier to edit!]
-
 4  decent finite field package (remove all the nfxxxmodpr functions)
 
 4  rnfkummer (very slow)
@@ -119,6 +118,9 @@ Misc:
 3  2-adic initell
 
 3  p-adic ellztopoint
+
+0  graphics: allow FIG output (besides PostScript) [easier to edit!]
+   [ use pstoedit ]
 
 ***************************   LIBRARY DESIGN   ****************************
 

@@ -147,6 +147,9 @@ HC 12- gamma function for integral/rational arguments
        use Gram matrix; unified code).
    29- INCOMPATIBILITY: the internal components of nf[5] have changed (MC and
        T2 not needed anymore)
+   30- INCOMPATIBILITY: [library] polred & polredabs do not take a 'prec'
+       argument anymore
+   31- unified nfinit, polred* [use dedicated structs internally]
 
   Added
     1- mplog2() function --> faster mplog()
