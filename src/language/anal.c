@@ -1206,12 +1206,10 @@ strtoGENstr(char *s, long flag)
   return x;
 }
 
+/* x = gzero: no default value, otherwise a t_STR, formal expression for
+ * default argument. Evaluate and return. */
 static GEN
-make_arg(GEN x)
-{
-  return (x==gzero)? x
-                   : (typ(x) == t_STR)? geval(x): x;
-}
+make_arg(GEN x) { return (x==gzero)? x: geval(x); }
 
 static GEN
 fun_seq(char *p)
