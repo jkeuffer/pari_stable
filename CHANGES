@@ -148,6 +148,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
  IZ 6- mnemonics for flags
     7- internal flag nf_GEN_IF_PRINCIPAL to bnfisprincipal [isprincipalall]
     8- routine rnfisnorminit()
+ BA 9- [Makefile:] bzdist target
 
   Removed
     1- (useless, undocumented) macros buchgen*, buchinit*
