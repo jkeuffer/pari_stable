@@ -1974,7 +1974,7 @@ to_Fq_fact(GEN P, GEN E, GEN T, GEN p, pari_sp av)
   }
   y = gerepileupto(av, y); u = (GEN)y[1];
   p = icopy(p);
-  T =  FpX_to_mod(T, p);
+  T = FpX_to_mod(T, p);
   for (j=1; j<nbf; j++) u[j] = (long)to_Fq_pol((GEN)u[j], T,p);
   return y;
 }
@@ -2443,7 +2443,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
 GEN
 factorff(GEN f, GEN p, GEN T)
 {
-  pari_sp av = avma;
+  pari_sp av;
   long v;
   GEN z;
 
@@ -2451,7 +2451,8 @@ factorff(GEN f, GEN p, GEN T)
   v = varn(T);
   if (varncmp(v, varn(f)) <= 0)
     err(talker,"polynomial variable must have higher priority in factorff");
-  z = FqX_factor_i(RgX_to_FqX(f, T,p), RgX_to_FpX(T, p), p);
+  T = RgX_to_FpX(T, p); av = avma;
+  z = FqX_factor_i(RgX_to_FqX(f, T,p), T, p);
   return to_Fq_fact((GEN)z[1],(GEN)z[2], T,p,av);
 }
 /* factorization of x modulo (T,p). Assume x already reduced */
