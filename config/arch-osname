@@ -19,6 +19,7 @@ if test -n "$myuname"; then
   osf1)     case "$5" in alpha) arch=alpha;; esac;;
   cygwin*)  arch=${HOSTTYPE:-i386}; osname=cygwin;;
   linux)    arch=`uname -m`
+            if test "$arch" = sparc64; then arch=sparcv9; fi
 	    case "`cat /proc/cpuinfo`" in
 	    *SuperSparc*)   arch=sparcv8_super;;
 	    *TMS390Z5[05]*) arch=sparcv8_super;; # SuperSparc I or II
