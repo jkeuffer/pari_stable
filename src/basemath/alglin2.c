@@ -196,7 +196,7 @@ caradj(GEN x, long v, GEN *py)
   if (l == 3) {
     GEN a = gcoeff(x,1,1), b = gcoeff(x,1,2);
     GEN c = gcoeff(x,2,1), d = gcoeff(x,2,2);
-    if (py) { 
+    if (py) {
       y = cgetg(3, t_MAT);
       y[1] = (long)coefs_to_col(2, gcopy(d), gneg(c));
       y[2] = (long)coefs_to_col(2, gneg(b), gcopy(a));
@@ -767,39 +767,40 @@ sqred2(GEN a, long no_signature)
   pari_sp av,av1,lim;
   long n,i,j,k,l,sp,sn,t;
 
-  if (typ(a)!=t_MAT) err(typeer,"sqred2");
+  if (typ(a) != t_MAT) err(typeer,"sqred2");
   n = lg(a); if (n > 1 && lg(a[1]) != n) err(mattype1,"sqred2");
+  n--;
 
   av = avma; mun = negi(gun);
-  r = vecsmall_const(n-1, 1);
+  r = vecsmall_const(n, 1);
   av1= avma; lim = stack_lim(av1,1);
   a = dummycopy(a);
-  n--; t = n; sp = sn = 0;
+  t = n; sp = sn = 0;
   while (t)
   {
-    k=1; while (k<=n && (gcmp0(gcoeff(a,k,k)) || !r[k])) k++;
+    k=1; while (k<=n && (!r[k] || gcmp0(gcoeff(a,k,k)))) k++;
     if (k<=n)
     {
-      p=gcoeff(a,k,k); if (gsigne(p)>0) sp++; else sn++;
-      r[k]=0; t--;
+      p = gcoeff(a,k,k); if (gsigne(p) > 0) sp++; else sn++;
+      r[k] = 0; t--;
       for (j=1; j<=n; j++)
-	coeff(a,k,j)=r[j] ? ldiv(gcoeff(a,k,j),p) : zero;
+	coeff(a,k,j) = r[j] ? ldiv(gcoeff(a,k,j),p) : zero;
 	
       for (i=1; i<=n; i++) if (r[i])
 	for (j=1; j<=n; j++)
 	  coeff(a,i,j) = r[j] ? lsub(gcoeff(a,i,j),
 	                             gmul(gmul(gcoeff(a,k,i),gcoeff(a,k,j)),p))
 			      : zero;
-      coeff(a,k,k)=(long)p;
+      coeff(a,k,k) = (long)p;
     }
     else
     {
       for (k=1; k<=n; k++) if (r[k])
       {
-	l=k+1; while (l<=n && (gcmp0(gcoeff(a,k,l)) || !r[l])) l++;
-	if (l<=n)
+	l=k+1; while (l<=n && (!r[l] || gcmp0(gcoeff(a,k,l)))) l++;
+	if (l <= n)
 	{
-	  p=gcoeff(a,k,l); r[k]=r[l]=0; sp++; sn++; t-=2;
+	  p = gcoeff(a,k,l); r[k] = r[l] = 0; sp++; sn++; t -= 2;
 	  for (i=1; i<=n; i++) if (r[i])
 	  {
 	    for (j=1; j<=n; j++)
@@ -809,20 +810,22 @@ sqred2(GEN a, long no_signature)
 				     gmul(gcoeff(a,k,j),gcoeff(a,l,i))),
 				p))
 		    : zero;
-	    coeff(a,k,i)=ldiv(gadd(gcoeff(a,k,i),gcoeff(a,l,i)),p);
-	    coeff(a,l,i)=ldiv(gsub(gcoeff(a,k,i),gcoeff(a,l,i)),p);
+	    coeff(a,k,i) = ldiv(gadd(gcoeff(a,k,i),gcoeff(a,l,i)),p);
+	    coeff(a,l,i) = ldiv(gsub(gcoeff(a,k,i),gcoeff(a,l,i)),p);
 	  }
-	  coeff(a,k,l)=un; coeff(a,l,k)=(long)mun;
-	  coeff(a,k,k)=lmul2n(p,-1); coeff(a,l,l)=lneg(gcoeff(a,k,k));
+	  coeff(a,k,l) = un;
+          coeff(a,l,k) = (long)mun;
+	  coeff(a,k,k) = lmul2n(p,-1);
+          coeff(a,l,l) = lneg(gcoeff(a,k,k));
 	  if (low_stack(lim, stack_lim(av1,1)))
 	  {
 	    if(DEBUGMEM>1) err(warnmem,"sqred2");
-	    a=gerepilecopy(av1,a);
+	    a = gerepilecopy(av1, a);
 	  }
 	  break;
 	}
       }
-      if (k>n) break;
+      if (k > n) break;
     }
   }
   if (no_signature) return gerepilecopy(av, a);
@@ -886,7 +889,7 @@ jacobi(GEN a, long prec)
   while (e1-e2 < de)
   {
     pari_sp av2 = avma;
-    /* compute associated rotation in the plane formed by basis vectors number 
+    /* compute associated rotation in the plane formed by basis vectors number
      * p and q */
     x = divrr(subrr((GEN)L[q],(GEN)L[p]), shiftr(gcoeff(a,p,q),1));
     y = mpsqrt(addrr(unr, mulrr(x,x)));
@@ -1143,7 +1146,7 @@ matrixqz3(GEN x)
   {
     j=1; while (j<n && (c[j] || gcmp0(gcoeff(x,k,j)))) j++;
     if (j==n) continue;
-   
+
     c[j]=k; x[j]=ldiv((GEN)x[j],gcoeff(x,k,j));
     for (j1=1; j1<n; j1++)
       if (j1!=j)
@@ -1419,7 +1422,7 @@ hnf_special(GEN x, long remove)
     if (s)
     {
       if (s < 0)
-      { 
+      {
         x[def] = lneg((GEN)x[def]); p1 = gcoeff(x,i,def);
         x2[def]= lneg((GEN)x2[def]);
       }
@@ -1443,7 +1446,7 @@ hnf_special(GEN x, long remove)
   if (remove)
   {                            /* remove null columns */
     for (i=1,j=1; j<co; j++)
-      if (!gcmp0((GEN)x[j])) 
+      if (!gcmp0((GEN)x[j]))
       {
         x[i]  = x[j];
         x2[i] = x2[j]; i++;
@@ -1971,7 +1974,7 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
   {
     p1 = cgetg(ly,t_COL); z[i] = (long)p1;
     p2 = (GEN)x[i];
-    for (j=1; j<ly; j++) 
+    for (j=1; j<ly; j++)
     {
       if (is_bigint(p2[j])) goto TOOLARGE;
       p1[j] = itos((GEN)p2[j]);
@@ -2871,7 +2874,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
   r--; /* first r cols are in the image the n-r (independent) last ones */
   for (j=1; j<=r; j++)
     for (i=h[j]; i; i--)
-    { 
+    {
       a = gcoeff(A,i,j);
       if (!signe(a)) continue;
 
@@ -3136,7 +3139,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       if (!c)
       {
 	b = gcoeff(x,i,i); if (!signe(b)) break;
-       
+
         for (k=1; k<i; k++)
         {
           for (j=1; j<i; j++)
@@ -3144,7 +3147,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
           if (j != i) break;
         }
         if (k == i) break;
-       
+
         /* x[k,j] != 0 mod b */
         for (j=1; j<=i; j++)
           coeff(x,i,j) = laddii(gcoeff(x,i,j),gcoeff(x,k,j));
@@ -3210,7 +3213,7 @@ smithclean(GEN z)
   if (typ(z) != t_VEC) err(typeer,"smithclean");
   l = lg(z); if (l == 1) return cgetg(1,t_VEC);
   u=(GEN)z[1];
-  if (l != 4 || typ(u) != t_MAT) 
+  if (l != 4 || typ(u) != t_MAT)
   {
     if (typ(u) != t_INT) err(typeer,"smithclean");
     for (c=1; c<l; c++)
