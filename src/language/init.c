@@ -1112,7 +1112,8 @@ err(long numerr, ...)
   term_color(c_NONE); va_end(ap);
   if (numerr==errpile) 
   {
-    fprintferr("\n  current stack size: %.1f Mbytes\n", (double)(top-bot)/1E6);
+    fprintferr("\n  current stack size: %ld (%.3f Mbytes)\n",
+      top-bot, (top-bot)/1048576.);
     fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
   }
   pariOut = out;
@@ -1317,7 +1318,8 @@ allocatemoremem(ulong newsize)
   if (!newsize)
   {
     newsize = sizeold << 1;
-    err(warner,"doubling stack size; new stack = %.1f MBytes",newsize/1E6);
+    err(warner,"doubling stack size; new stack = %ld (%.3f Mbytes)",
+                newsize, newsize/1048576.);
   }
   else if ((long)newsize < 1000L)
     err(talker,"required stack memory too small");
