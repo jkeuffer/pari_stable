@@ -27,6 +27,8 @@ extern ulong ucarrecomplet(ulong A);
 extern GEN mpqs(GEN N);/* in src/modules/mpqs.c,
 		        * returns a factor, a vector of factors, or NULL */
 
+/*C++ on ia64 do not like (long)NULL*/
+#define LNULL ((long)(GEN)NULL)
 /*********************************************************************/
 /**                                                                 **/
 /**                        PSEUDO PRIMALITY                         **/
@@ -2029,19 +2031,19 @@ fin:
     res = cgetg(7, t_VEC);
     res[1] = licopy(g);         /* factor */
     res[2] = un;		/* exponent 1 */
-    res[3] = (g1!=n? zero: (long)NULL); /* known composite when g1!=n */
+    res[3] = (g1!=n? zero: LNULL); /* known composite when g1!=n */
 
     res[4] = ldivii(n,g);       /* cofactor */
     res[5] = un;		/* exponent 1 */
-    res[6] = (long)NULL;	/* unknown */
+    res[6] = LNULL;	/* unknown */
     return res;
   }
   /* g < g1 < n : our lucky day -- we've split g1, too */
   res = cgetg(10, t_VEC);
   /* unknown status for all three factors */
-  res[1] = licopy(g);    res[2] = un; res[3] = (long)NULL;
-  res[4] = ldivii(g1,g); res[5] = un; res[6] = (long)NULL;
-  res[7] = ldivii(n,g1); res[8] = un; res[9] = (long)NULL;
+  res[1] = licopy(g);    res[2] = un; res[3] = LNULL;
+  res[4] = ldivii(g1,g); res[5] = un; res[6] = LNULL;
+  res[7] = ldivii(n,g1); res[8] = un; res[9] = LNULL;
   if (DEBUGLEVEL >= 4)
   {
     rho_dbg(c0-(c>>5), 0);
@@ -2110,7 +2112,7 @@ squfof(GEN n, long quiet)
       res = cgetg(4, t_VEC);
       res[1] = lstoi(d1);	/* factor */
       res[2] = deux;		/* exponent 2 */
-      res[3] = (long)NULL;	/* unknown whether prime or composite */
+      res[3] = LNULL;	/* unknown whether prime or composite */
       return res;
     }
     D2 = mulsi(5,n);
@@ -2124,7 +2126,7 @@ squfof(GEN n, long quiet)
       res = cgetg(4, t_VEC);
       res[1] = lstoi(d2/5);	/* factor */
       res[2] = deux;		/* exponent 2 */
-      res[3] = (long)NULL;	/* unknown whether prime or composite */
+      res[3] = LNULL;	/* unknown whether prime or composite */
       return res;
     }
   }
@@ -2141,7 +2143,7 @@ squfof(GEN n, long quiet)
       res = cgetg(4, t_VEC);
       res[1] = lstoi(d1/3);	/* factor */
       res[2] = deux;		/* exponent 2 */
-      res[3] = (long)NULL;	/* unknown whether prime or composite */
+      res[3] = LNULL;	/* unknown whether prime or composite */
       return res;
     }
     D2 = shifti(n,2);
@@ -2340,7 +2342,7 @@ squfof(GEN n, long quiet)
 	    res = cgetg(4, t_VEC);
 	    res[1] = lstoi(q);	/* factor */
 	    res[2] = deux;	/* exponent 2 */
-	    res[3] = (long)NULL; /* unknown whether prime or composite */
+	    res[3] = LNULL; /* unknown whether prime or composite */
 	    return res;
 	  }
 
@@ -2449,7 +2451,7 @@ squfof(GEN n, long quiet)
 	    res = cgetg(4, t_VEC);
 	    res[1] = lstoi(q);	/* factor */
 	    res[2] = deux;	/* exponent 2 */
-	    res[3] = (long)NULL; /* unknown whether prime or composite */
+	    res[3] = LNULL; /* unknown whether prime or composite */
 	    return res;
 	  }
 
@@ -3214,7 +3216,7 @@ ifac_start(GEN n, long moebius, long hint)
 
   part = cgetg(ifac_initial_length, t_VEC);
   here = part + ifac_initial_length;
-  part[1] = moebius? un : (long)NULL;
+  part[1] = moebius? un : LNULL;
   switch(hint)
   {
   case 0:
@@ -3237,7 +3239,7 @@ ifac_start(GEN n, long moebius, long hint)
   *--here = un;			/* initial exponent 1 */
   *--here = (long) n;
   /* and NULL out the remaining slots */
-  while (here > part + 3) *--here = (long)NULL;
+  while (here > part + 3) *--here = LNULL;
   return part;
 }
 
@@ -3299,7 +3301,7 @@ ifac_defrag(GEN *partial, GEN *where)
   scan_new += 3;		/* back up to last slot written */
   *where = scan_new;
   while (scan_new > *partial + 3)
-    *--scan_new = (long)NULL;	/* erase junk */
+    *--scan_new = LNULL;	/* erase junk */
 }
 
 /* and complex version combined with reallocation.  If new_lg is 0, we
@@ -3331,7 +3333,7 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
   {
     new_lg = old_lg;
     if ((*partial)[3] &&	/* structure full */
-	((*partial)[5]==zero || (*partial)[5]==(long)NULL))
+	((*partial)[5]==zero || (*partial)[5]==LNULL))
 				/* and first entry composite or unknown */
       new_lg += 6;		/* give it a little more breathing space */
   }
@@ -3372,7 +3374,7 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
   }
   scan_new += 3;		/* back up to last slot written */
   while (scan_new > newpart + 3)
-    *--scan_new = (long)NULL;
+    *--scan_new = LNULL;
   *partial = newpart;
 }
 
@@ -3486,9 +3488,9 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   /* move the value over */
   *scan = scan[-3];
   /* null out the vacated slot below */
-  *--scan = (long)NULL;
-  *--scan = (long)NULL;
-  *--scan = (long)NULL;
+  *--scan = LNULL;
+  *--scan = LNULL;
+  *--scan = LNULL;
   /* finally, see whether *where should be pulled in */
   if (scan == *where) *where += 3;
   return 0;
@@ -3629,7 +3631,7 @@ ifac_divide(GEN *partial, GEN *where)
       exponent = newexp;
       if (is_pm1((GEN)(*scan))) /* factor dissolved completely */
       {
-	*scan = scan[1] = (long)NULL;
+	*scan = scan[1] = LNULL;
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("IFAC: a factor was a power of another prime factor\n");
       }
@@ -3638,7 +3640,7 @@ ifac_divide(GEN *partial, GEN *where)
 	fprintferr("IFAC: a factor was divisible by another prime factor,\n");
 	fprintferr("\tleaving a cofactor = %Z\n", *scan);
       }
-      scan[2] = (long)NULL;	/* at any rate it's Unknown now */
+      scan[2] = LNULL;	/* at any rate it's Unknown now */
       res = 1;
       if (DEBUGLEVEL >= 5)
       {
@@ -3875,8 +3877,8 @@ ifac_crack(GEN *partial, GEN *where)
   cmp_res = cmpii(factor, (GEN)(**where));
   if (cmp_res < 0)		/* common case */
   {
-    (*where)[2] = (long)NULL;	/* mark cofactor `unknown' */
-    (*where)[-1] = (long)NULL;	/* mark factor `unknown' */
+    (*where)[2] = LNULL;	/* mark cofactor `unknown' */
+    (*where)[-1] = LNULL;	/* mark factor `unknown' */
     (*where)[-2] =
       isonstack(exponent) ? licopy(exponent) : (long)exponent;
     *where -= 3;
@@ -3888,7 +3890,7 @@ ifac_crack(GEN *partial, GEN *where)
     err(warner,
 	"square not found by carrecomplet, ifac_crack recovering");
     cgiv(factor);
-    (*where)[2] = (long)NULL;	/* mark the sqrt `unknown' */
+    (*where)[2] = LNULL;	/* mark the sqrt `unknown' */
     if (exponent == gun)	/* double the exponent */
       (*where)[1] = deux;
     else if (exponent == gdeux)
@@ -3905,8 +3907,8 @@ ifac_crack(GEN *partial, GEN *where)
   }
   else				/* factor > cofactor, rearrange */
   {
-    (*where)[2] = (long)NULL;	/* mark factor `unknown' */
-    (*where)[-1] = (long)NULL;	/* mark cofactor `unknown' */
+    (*where)[2] = LNULL;	/* mark factor `unknown' */
+    (*where)[-1] = LNULL;	/* mark cofactor `unknown' */
     (*where)[-2] =
       isonstack(exponent) ? licopy(exponent) : (long)exponent;
     *where -= 3;
@@ -4160,7 +4162,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
 
   res = icopy((GEN)(*here));
   *exponent = itos((GEN)(here[1]));
-  here[2] = here[1] = *here = (long)NULL;
+  here[2] = here[1] = *here = LNULL;
   return res;
 }
 
@@ -4251,7 +4253,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
 	fprintferr("IFAC: (Partial fact.)Stop requested.\n");
       break;
     }
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4289,7 +4291,7 @@ ifac_moebius(GEN n, long hint)
     if (itos((GEN)(here[1])) > 1)
     { here = gzero; break; }	/* shouldn't happen */
     mu = -mu;
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4313,7 +4315,7 @@ ifac_issquarefree(GEN n, long hint)
   {
     if (itos((GEN)(here[1])) > 1)
     { here = gzero; break; }	/* shouldn't happen */
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4337,7 +4339,7 @@ ifac_omega(GEN n, long hint)
   while (here != gun)
   {
     omega++;
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4361,7 +4363,7 @@ ifac_bigomega(GEN n, long hint)
   while (here != gun)
   {
     Omega += itos((GEN)(here[1]));
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4399,7 +4401,7 @@ ifac_totient(GEN n, long hint)
 	phi = mulii(phi, gpowgs((GEN)(*here), exponent-1));
       }
     }
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4438,7 +4440,7 @@ ifac_numdiv(GEN n, long hint)
   {
     exponent = (GEN)(here[1]);
     tau = mulii(tau, addsi(1, exponent));
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4476,7 +4478,7 @@ ifac_sumdiv(GEN n, long hint)
     for (; exponent > 1; exponent--)
       contrib = addsi(1, mulii((GEN)(*here), contrib));
     sigma = mulii(sigma, contrib);
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -4518,7 +4520,7 @@ ifac_sumdivk(GEN n, long k, long hint)
     for (; exponent > 1; exponent--)
       contrib = addsi(1, mulii(q, contrib));
     sigma = mulii(sigma, contrib);
-    here[2] = here[1] = *here = (long)NULL;
+    here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
