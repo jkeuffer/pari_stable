@@ -956,7 +956,7 @@ root_bound(GEN P0)
   Q = normalizepol_i(Q, d+2);
   for (k=lgef(Q)-1; k>1; k--) Q[k] = labsi((GEN)Q[k]);
   k = gexpo( cauchy_bound(P0) );
-  for (k--; k >= 0; k--)
+  for (  ; k >= 0; k--)
   {
     pari_sp av = avma;
     /* y = 2^k; Q(y) >= lP y^d ? */
