@@ -1196,7 +1196,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
   }
   if (i < lx)
   {
-    p2 = cgetg(4,t_POL); p1[k++] = (long)p2;
+    p2 = cgetg(4,t_VECSMALL); p1[k++] = (long)p2;
     p2[1] = vs;
     p2[2] = a[i]?p - a[i]:0;
     p2[3] = 1;
