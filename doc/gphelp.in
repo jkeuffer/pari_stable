@@ -1,16 +1,16 @@
 #!@perl@
 #
 # $Id$
-# 
+#
 # Copyright (C) 2000  The PARI group.
-# 
+#
 # This file is part of the PARI/GP package.
-# 
+#
 # PARI/GP is free software; you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation. It is distributed in the hope that it will be useful, but WITHOUT
 # ANY WARRANTY WHATSOEVER.
-# 
+#
 # Check the License for details. You should have received a copy of it, along
 # with the package; see the file 'COPYING'. If not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -46,33 +46,12 @@ $version= "@version@";
 $datadir= "@datadir@";
 # no expanded material (@key@) below
 $wwwsite= "http://pari.math.u-bordeaux.fr/";
-$docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
-
-if (!defined $docdir) {
-  # work from TOPDIR/Oarch or TOPDIR too: may be uninstalled yet;
-  my $d = $0; $d =~ s,/gphelp,,;
-  for ("$datadir", '.', '..', $d) {
-    my $t = "$_/doc";
-    if (-r "$t/translations") {
-      $docdir = $t;
-      last;
-    }
-  }
-  $docdir ||= "$datadir/doc";	# Last resort
-}
-
-if ($docdir =~ /^\./) {
-  eval {
-    require Cwd;
-    $docdir = Cwd::cwd() . "/$docdir";
-    $docdir =~ s,doc/\.\./doc,doc,;
-  }
-}
 
 $xdvi = $ENV{GPXDVI} || "xdvi";
 $xdviref = $ENV{GPXDVIREF} || "$xdvi -paper 29.7x21cm";
 $gzip = "gzip";
 $zcat = "$gzip -dc";
+$docdir = &get_docdir();
 
 $refcard = (@ARGV and $ARGV[-1] =~ /refcard/i);
 
@@ -108,8 +87,7 @@ sub help {
   exit(1);
 }
 
-sub options
-{
+sub options {
   $raw = $detex = $fromgp = $apropos = 0;
   $ch = $cb = $cu = '';
   while ($_ = $ARGV[0])
@@ -139,8 +117,27 @@ sub options
   $detex = 1 if (!$detex && !$ENV{DISPLAY});
 }
 
-sub init
-{
+sub get_docdir {
+  my $d = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
+  if (!defined $d) {
+    # work from TOPDIR/Oarch or TOPDIR too: may be uninstalled yet;
+    my $d = $0; $d =~ s,/gphelp,,;
+    for ("$datadir", '.', '..', $d) {
+      my $t = "$_/doc";
+      if (-r "$t/translations") { $d = $t; last; }
+    }
+    $d ||= "$datadir/doc";	# Last resort
+  }
+  if ($d =~ /^\./) {
+    eval { require Cwd;
+      $d = Cwd::cwd() . "/$d";
+      $d =~ s,doc/\.\./doc,doc,;
+    }
+  }
+  return $d;
+}
+
+sub init {
   $gpmsg = "ugly_kludge_done\n";
   &inittr();
 
@@ -162,19 +159,16 @@ sub init
   close(IN);
 }
 
-sub not_found
-{
-  local($help) = shift;
+sub not_found {
+  my($help) = shift;
   $help =~ s/\\\\/_B#K#S_/g;
   $help =~ s/\\(.)/$1/g;
   $help =~ s/_B#K#S_/\\/g;
   print "'$help' not found !\n";
 }
 
-sub choose_chap
-{
-  while (s/\@([0-9])$//)
-    { $docfile = "usersch$1.tex"; }
+sub choose_chap {
+  while (s/\@([0-9])$//) { $docfile = "usersch$1.tex"; }
   if (-r $docfile) { $pipe = ""; }
   else
   {
@@ -186,8 +180,7 @@ sub choose_chap
   }
 }
 
-sub safe_setsid
-{
+sub safe_setsid {
   eval {
     require POSIX;
     POSIX::setsid(); # detach from terminal (^C will not kill xdvi)
@@ -195,8 +188,7 @@ sub safe_setsid
 }
 
 # assume we're in $docdir
-sub open_viewer_then_quit
-{
+sub open_viewer_then_quit {
   my $F = shift;
   my ($f, $viewer, $redirect);
   my $win32 = ($^O =~ /(cyg|ms)win/);
@@ -233,9 +225,8 @@ sub open_viewer_then_quit
   cleanexit();
 }
 
-sub treat
-{
-  local($help);
+sub treat {
+  my($help);
   $_ = $_[0];
   s/_QUOTE/'/g;
   s/_BACKQUOTE/`/g;
@@ -302,29 +293,26 @@ sub treat
 #  A propos
 #
 
-sub apropos_print_list
-{
+sub apropos_print_list {
   $current = "";
   @_ = sort(@_);
   for (@_)
-  { 
+  {
     next if ($_ eq $current);
     $current = $_; print "$indent$_\n";
   }
 }
 
-sub apropos_raw_print
-{
+sub apropos_raw_print {
   $indent = "";
   &apropos_print_list(@sentence_list);
   &apropos_print_list(@list);
 }
 
-sub apropos_final_print
-{
-  local($maxlen) = 0;
-  local($i,$nbcol,$current);
-  local($cols) = ($ENV{'COLUMNS'} || 80) - 1;
+sub apropos_final_print {
+  my($maxlen) = 0;
+  my($i,$nbcol,$current);
+  my($cols) = ($ENV{'COLUMNS'} || 80) - 1;
 
   if ($raw) { &apropos_raw_print(); return; }
   @list = sort(@list);
@@ -334,7 +322,7 @@ sub apropos_final_print
     $maxlen = $i if ($i > $maxlen);
   }
   $maxlen++; $nbcol = $cols / $maxlen;
-  $nbcol =~ s/\..*//; 
+  $nbcol =~ s/\..*//;
   $nbcol-- if  ($nbcol * $maxlen == $cols);
   $nbcol = 1 if (!$nbcol);
 
@@ -358,22 +346,24 @@ sub apropos_final_print
   }
 }
 
-sub apropos_check
-{
-  local($_) = $line;
-  s/\n/ /g;
-  return if (! /$help/i);
+sub apropos_check {
+  my($line, $current) = @_;
+  $line =~ s/\n/ /g;
+  return if ($line !~ /$help/i);
 
   $_ = $current;
-  s/\\b{(.)}/\\$1/; s/\{\}//g;
-  s/\\pow/^/; s/\\%/%/; s/\\bs/\\/; s/\\\#/\#/g;
+  s/\\b{(.)}/\\$1/;
+  s/\{\}//g;
+  s/\\pow/^/;
+  s/\\%/%/;
+  s/\\bs/\\/;
+  s/\\\#/\#/g;
   s,\+\$/\$-,+/-,;
   if (/ /) { push(@sentence_list,$_); } else { push(@list,$_); }
 }
 
-sub apropos
-{
-  local($line,$current,$new);
+sub apropos {
+  my($line,$current,$new);
   $help = $_[0];
   $help='\\\\pow' if ($help eq '\^');
   $help='\\\\til' if ($help eq '\~');
@@ -383,27 +373,25 @@ sub apropos
     if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){/)
     {
       $new = &get_match($_,'{','}');
-      &apropos_check();
+      &apropos_check($line, $current);
       $current = $new; $line = "";
     }
     $line .= $_;
   }
-  &apropos_check();
+  &apropos_check($line, $current);
 }
 
 #
 #  Tex Part
 #
-sub tex_mktmp
-{
+sub tex_mktmp {
   my $basedir = $ENV{GPHELP_TMPDIR} || $ENV{GPTMPDIR} || $ENV{TMPDIR} || "/tmp";
   $tmpdir = "$basedir/gp.help$$";
   mkdir $tmpdir, 0755 || die("Cannot create temporary directory");
   $texfile = "$tmpdir/gp.help";
 }
 
-sub pretex
-{
+sub pretex {
   &tex_mktmp;
   open(TEX,">$texfile.tex") || die "Couldn't open $texfile.tex";
   print TEX << "EOT";
@@ -412,8 +400,7 @@ sub pretex
 EOT
 }
 
-sub tex
-{
+sub tex {
   print TEX "$first";
   while (<DOC>)
   {
@@ -423,8 +410,7 @@ sub tex
   close(DOC);
 }
 
-sub posttex
-{
+sub posttex {
   print TEX "\\vfill\\eject\\bye";
   close(TEX) || die "Error closing '$texfile.tex': $!";
 
@@ -436,8 +422,7 @@ sub posttex
   system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log;rmdir $tmpdir)&");
 }
 
-sub clean
-{
+sub clean {
   unlink("$texfile.tex","$texfile.dvi","$texfile.log");
   rmdir("$tmpdir");
 }
@@ -445,9 +430,8 @@ sub clean
 #
 #  Detex Part
 #
-sub fit_loop
-{
-  local($i);
+sub fit_loop {
+  my($i);
   return if ($miss > 9);
   while ($miss > 0)
   {
@@ -478,11 +462,10 @@ sub fit_loop
   }
 }
 
-sub fit_line
-{
-  local($wi, @a);
-  local($l) = -1;
-  local($rem) = $_[0];
+sub fit_line {
+  my($wi, @a);
+  my($l) = -1;
+  my($rem) = $_[0];
   for (@l)
   {
      $l2 = $l; $l += ($_ + 1);
@@ -497,22 +480,19 @@ sub fit_line
 
 # empty output line
 sub is_void {
-  local($in) = shift;
+  my($in) = shift;
   $in =~ s/\@\[\w+\]//g;
   $in =~ s/\@[012]//g;
   ($in =~ /^\s*$/)? 1: 0;
 }
 
-sub nl {
-  push(@f_text, shift);
-}
+sub nl { push(@f_text, shift); }
 
-sub format_text
-{
-  local($last_void) = 0;
-  local($add_stuff) = 0;
-  local($cols) = ($ENV{'COLUMNS'} || 80) - 1;
-  local($first) = $cols - length($indent);
+sub format_text {
+  my($last_void) = 0;
+  my($add_stuff) = 0;
+  my($cols) = ($ENV{'COLUMNS'} || 80) - 1;
+  my($first) = $cols - length($indent);
 
   for (@text)
   {
@@ -557,11 +537,10 @@ sub format_text
 
 # argument has the form s1${open}s2${close}s3
 # Return 's2'. Set $remainder to 's3'.
-sub get_match
-{
-  local ($_, $open, $close) = (shift,shift,shift);
-  local (@tmp, $arg,$parity,$ok);
-  local ($obr) = 1;
+sub get_match {
+  local ($_, $open, $close) = @_;
+  my (@tmp, $arg,$parity,$ok);
+  my ($obr) = 1;
   $parity = ($open eq $close);
   /$open/; $_ = $'; # remove everything before (and including) first $open
 
@@ -582,9 +561,8 @@ sub get_match
   return $arg;
 }
 
-sub detex
-{
-  local ($fun,$args);
+sub detex {
+  my($fun,$args);
   chomp;
 # 1: get the function "prototype"
   $fun = &get_match($_,'{','}');
@@ -607,7 +585,7 @@ sub detex
   $args .= ":" if ($args !~ /: *$/ && ($args || $fun !~ /: */));
 
   $fun = "\@[startbold]$fun\@[endbold]$args";
-  if ($raw) { print("$fun "); } else { &TeXprint($fun); } 
+  if ($raw) { print("$fun "); } else { &TeXprint($fun); }
 # 2: start parsing the function description
   if ($_) { s/^ *://; &presubst(); }
   while (<DOC>)
@@ -616,7 +594,7 @@ sub detex
     &presubst();
   }
   if ($raw) { print join("\n", @text); return; }
-    
+
   &format_text();
   for (@f_text) { &TeXprint("$_"); }
 }
@@ -674,8 +652,7 @@ sub inittr {
 
 sub indent_equally { my $in = shift; $in =~ s/^[ \t]*/    /mg; $in}
 
-sub basic_subst
-{
+sub basic_subst {
   local($_) = shift;
 
   s/(\S)[ \t]*\n[ \t]+/$1\n/gm;
@@ -762,14 +739,13 @@ sub basic_subst
   s/ *(\\|\@)[lc]?dots(?![a-zA-Z]) */.../g;
   s/\\(Cl|log|sin|cos|lim(proj)?|tan|mod|sqrt|exp|ln|det|Re|Im|deg|wp|cap|oplus)(?![a-zA-Z])/$tr{startlword}$1$tr{endlword}/g;
   s/\\pi(?![a-zA-Z])/$tr{startword}Pi$tr{endword}/g;
-  s/\\(Alpha | Beta | Chi | Delta | Epsilon | Phi | Gamma
-       | Eta | Iota | vartheta | Kappa | Lambda | Mu | Nu | Omicron
-       | Pi | Theta | Rho | Sigma | Tau | Ypsilon | varsigma | Omega
-       | Xi | Psi | Zeta | alpha | beta | chi | delta | varepsilon | phi | gamma
-       | eta | iota | varphi | kappa | lambda | mu | nu | omicron
-       | pi | theta | rho | sigma | tau | ypsilon | varpi | omega
-       | xi | psi | zeta | int
-       | expr | seq | args | gcd | sum | prod | Re | infty )
+  s/\\(Alpha | Beta | Chi | Delta | Epsilon | Phi | Gamma | Eta | Iota
+      | vartheta | Kappa | Lambda | Mu | Nu | Omicron | Pi | Theta | Rho
+      | Sigma | Tau | Ypsilon | varsigma | Omega | Xi | Psi | Zeta
+      | alpha | beta | chi | delta | epsilon | varepsilon | phi | gamma | eta
+      | iota | varphi | kappa | lambda | mu | nu | omicron | pi | theta | rho
+      | sigma | tau | ypsilon | varpi | omega | xi | psi | zeta
+      | int | expr | seq | args | gcd | sum | prod | Re | infty )
       (?![a-zA-Z])/$tr{startword}$1$tr{endword}/xg;
   s/ *\\in(?![a-zA-Z]) */ belongs to /g;
   s/\\pm(?![a-zA-Z])/$tr{pm}/g;
@@ -983,7 +959,7 @@ sub TeXprint_topod {
   /\Q$tr{podleader}\Ehead1|\\title(?![a-zA-Z])\s*\{/o and $seen_start = 1
     or $seen_start or return;	# Skip now!
 
-  s/\\title\s*\{([^{}\s]*)(\s+([^{}]*))?\}(\s*\\centerline\s*\{([^{}]*)\})?\s*/$tr{podleader}head1 NAME\n\n$1 - $3.  $5\n\n/ and $seen_title++ 
+  s/\\title\s*\{([^{}\s]*)(\s+([^{}]*))?\}(\s*\\centerline\s*\{([^{}]*)\})?\s*/$tr{podleader}head1 NAME\n\n$1 - $3.  $5\n\n/ and $seen_title++
     unless $seen_title;
   s/\\title\s*\{([^{}\s]*)(\s+([^{}]*))?\}(\s*\\centerline\s*\{([^{}]*)\})?\s*/\n\n/;
   s/\\parskip.*/\n/g;		# Up to end of the line
@@ -1032,7 +1008,7 @@ sub TeXprint_topod {
   s/\$\$(.*?)\$\$\s*/\n\nS<  >$tr{startcode}$1$tr{endcode}\n\n/gs;
   s/\$([^\$]+)\$/$tr{startcode}$1$tr{endcode}/g;
 
-  s/\\s(?:ref|idx){\s*([^{}]*)}/"X<" . for_index($1) . ">"/ge; # 
+  s/\\s(?:ref|idx){\s*([^{}]*)}/"X<" . for_index($1) . ">"/ge; #
   s/\\(?:ref|idx){\s*([^{}]*)}/"X<" . for_index($1) . ">$1"/ge;
 
 # Conflict between different versions of PARI and refcard:
@@ -1095,9 +1071,8 @@ sub TeXprint_topod {
   print;
 }
 
-sub color
-{
-  local($a);
+sub color {
+  my($a);
   $_ = $_[0];
   if (/[^0-9]/ || $_ < 0 || $_ > 17)
     { print "bad color in gphelp: $_\n"; return ""; }
@@ -1105,12 +1080,10 @@ sub color
   return "\e[0;${a}m";
 }
 
-sub TeXprint
-{
+sub TeXprint {
   local($_) = $_[0];
   s/\@\[obr\]/{/g;
   s/\@\[cbr\]/}/g;
-  # This should better be put in Latin1...  Or Win1251?  ;-)
   s/\@\[ouml\]/"o/g;
   s/\@\[uuml\]/"u/g;
   s/\@\[agrave\]/`a/g;
@@ -1137,13 +1110,10 @@ sub to_pod {
 	      );
   foreach $suffix (keys %compress) {
     ($patt = $suffix) =~ s/(\W)/\\$1/;
-    if ($to_pod =~ /$patt$/) {
-      $pipe = $compress{$suffix};
-      last;
-    }
+    if ($to_pod =~ /$patt$/) { $pipe = $compress{$suffix}; last; }
   }
   if ($pipe) {
-    open(DOC,"$pipe $parifile |") || 
+    open(DOC,"$pipe $parifile |") ||
       die "Cannot open pipe $pipe from $parifile: $!, stopped";
   } else {
     open(DOC,$parifile) || die "Cannot find file $parifile: $!, stopped";
