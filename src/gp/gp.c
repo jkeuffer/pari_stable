@@ -423,9 +423,9 @@ sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
-      char s[128];
-      sprintf(s, "default: incorrect value for %s [%lu-%lu]", s, Min, Max);
-      err(talker2, s, v,v);
+      char buf[128];
+      sprintf(buf, "default: incorrect value for %s [%lu-%lu]", s, Min, Max);
+      err(talker2, buf, v,v);
     }
     *ptn = n;
   }
