@@ -1953,10 +1953,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
           get_cS_cT(&cScT, n);
           p1 = gadd(p1, gmul(an,        cScT.cS[n]));
           p2 = gadd(p2, gmul(gconj(an), cScT.cT[n]));
-          if (++c == 256)
-          { GEN *gptr[2]; gptr[0]=&p1; gptr[1]=&p2;
-            gerepilemany(av2,gptr,2); c = 0;
-          }
+          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
         }
       gaffect(p1, (GEN)S[t]);
       gaffect(p2, (GEN)T[t]);

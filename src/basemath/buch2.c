@@ -198,13 +198,6 @@ col_0(long n)
    return c;
 }
 
-GEN
-cgetalloc(GEN x, size_t l, long t)
-{
-  x = (GEN)gprealloc((void*)x, l * sizeof(long));
-  x[0] = evaltyp(t) | evallg(l); return x;
-}
-
 static void
 reallocate(RELCACHE_t *M, long len)
 {

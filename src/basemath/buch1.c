@@ -60,7 +60,6 @@ extern GEN codeform5(GEN x, long prec);
 extern GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
 extern GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-extern GEN cgetalloc(GEN x, size_t l, long t);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -1663,6 +1662,13 @@ quad_be_honest()
 }
 
 GEN
+cgetalloc(long t, size_t l)
+{
+  GEN x = (GEN)gpmalloc(l * sizeof(long));
+  x[0] = evaltyp(t) | evallg(l); return x;
+}
+
+GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 {
   pari_sp av0 = avma, av;
@@ -1735,10 +1741,10 @@ START: avma = av; cbach = check_bach(cbach,6.);
 
   KCCO = KC + RELSUP;
   if (DEBUGLEVEL) fprintferr("KC = %ld, KCCO = %ld\n",KC,KCCO);
-  mat = (long**)cgetalloc(NULL, KCCO+1, t_VEC);
+  mat = (long**)cgetalloc(t_VEC, KCCO+1);
   for (i=1; i<=KCCO; i++)
   {
-    GEN t = cgetalloc(NULL, KC+1, t_VECSMALL);
+    GEN t = cgetalloc(t_VECSMALL, KC+1);
     for (j=1; j<=KC; j++) t[j]=0;
     mat[i] = t;
   }

@@ -2157,68 +2157,60 @@ rootsof1(GEN nf)
 static GEN
 dirzetak0(GEN nf, long N0)
 {
-  GEN vect,p1,pol,disc,c,c2;
-  pari_sp av=avma;
-  long i,j,k,limk,lx;
-  ulong q,p,rem;
-  byteptr d=diffptr;
+  GEN vect, c, c2, pol = (GEN)nf[1], index = (GEN)nf[4];
+  pari_sp av = avma;
+  long i, j, k, limk, lx;
+  ulong q, p, rem;
+  byteptr d = diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
 
-  pol=(GEN)nf[1]; disc=(GEN)nf[4];
-  c  = (GEN) gpmalloc((N0+1)*sizeof(long));
-  c2 = (GEN) gpmalloc((N0+1)*sizeof(long));
-  c2[0] = c[0] = evaltyp(t_VEC) | evallg(N0+1);
-  c2[1] = c[1] = 1; for (i=2; i<=N0; i++) c[i]=0;
-  court[2] = 0;
+  c  = cgetalloc(t_VECSMALL, N0+1);
+  c2 = cgetalloc(t_VECSMALL, N0+1);
+  c2[1] = c[1] = 1; for (i=2; i<=N0; i++) c[i] = 0;
 
   maxprime_check((ulong)N0);
-  while (court[2]<=N0)
+  court[2] = 0;
+  while (court[2] <= N0)
   {
     NEXT_PRIME_VIADIFF(court[2], d);
-    if (smodis(disc,court[2])) /* court does not divide index */
-      { vect = (GEN) simplefactmod(pol,court)[1]; lx=lg(vect); }
+    if (smodis(index, court[2])) /* court does not divide index */
+      { vect = (GEN) simplefactmod(pol,court)[1]; lx = lg(vect); }
     else
     {
-      p1=primedec(nf,court); lx=lg(p1); vect=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) vect[i]=mael(p1,i,4);
+      GEN p1 = primedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_COL);
+      for (i=1; i<lx; i++) vect[i] = mael(p1,i,4);
     }
     for (j=1; j<lx; j++)
     {
-      p1=powgi(court, (GEN)vect[j]); /* p1 = court^f */
-      if (cmpis(p1,N0) > 0) continue;
+      GEN N = powgi(court, (GEN)vect[j]); /* N = court^f */
+      if (cmpis(N, N0) > 0) continue;
 
-      q = p = (ulong)p1[2]; limk=N0/q;
-      for (k=2; k<=N0; k++) c2[k]=c[k];
-      while (q<=(ulong)N0)
+      q = p = (ulong)N[2]; limk = N0/q;
+      for (k=2; k <= N0; k++) c2[k] = c[k];
+      while (q <= (ulong)N0)
       {
         for (k=1; k<=limk; k++) c2[k*q] += c[k];
-        q = umuluu(q,p,&rem);
-        if (rem) break;
+        q = umuluu(q, p, &rem); if (rem) break;
         limk /= p;
       }
-      p1 = c; c = c2; c2 = p1;
+      N = c; c = c2; c2 = N;
     }
-    avma=av;
-    if (DEBUGLEVEL>6) fprintferr(" %ld",court[2]);
+    avma = av;
   }
-  if (DEBUGLEVEL>6) { fprintferr("\n"); flusherr(); }
   free(c2); return c;
 }
 
 GEN
 dirzetak(GEN nf, GEN b)
 {
-  GEN z,c;
-  long i;
+  GEN z, c;
 
-  if (typ(b)!=t_INT) err(talker,"not an integer type in dirzetak");
-  if (signe(b)<=0) return cgetg(1,t_VEC);
+  if (typ(b) != t_INT) err(talker,"not an integer type in dirzetak");
+  if (signe(b) <= 0) return cgetg(1,t_VEC);
   nf = checknf(nf);
   if (is_bigint(b)) err(talker,"too many terms in dirzetak");
-  c = dirzetak0(nf,itos(b));
-  i = lg(c); z=cgetg(i,t_VEC);
-  for (i-- ; i; i--) z[i]=lstoi(c[i]);
-  free(c); return z;
+  c = dirzetak0(nf, itos(b));
+  z = zv_ZV(c); free(c); return z;
 }
 
 /* N_0 = floor( C_K / limx ) */
@@ -2272,11 +2264,9 @@ long
 zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
-  long i0;
-  GEN B;
-  B = mpsqrt( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) );
-  B = gmul(B, gmul2n(gpowgs(stoi(5), r1), bit + r2));
-  i0 = get_i0(r1, r2, B, limx);
+  GEN B = gmul(mpsqrt( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
+               gmul2n(gpowgs(stoi(5), r1), bit + r2));
+  long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
   avma = av; return i0;
 }
@@ -2330,10 +2320,10 @@ initzeta(GEN pol, long prec)
   (void)switch_stack(zone,0);
 
   /********** compute a(i,j) **********/
-  zet=cgetg(R,t_VEC); zet[1] = lmpeuler(prec);
+  zet = cgetg(R,t_VEC); zet[1] = lmpeuler(prec);
   for (i=2; i<R; i++) zet[i] = (long)szeta(i, prec);
 
-  aij=cgetg(i0+1,t_VEC);
+  aij = cgetg(i0+1,t_VEC);
   for (i=1; i<=i0; i++) aij[i] = lgetg(R,t_VEC);
 
   c_even = real2n(r1, prec);
@@ -2342,7 +2332,7 @@ initzeta(GEN pol, long prec)
   ck_even = cgetg(R,t_VEC); ck_odd = cgetg(r2+2,t_VEC);
   for (k=1; k<R; k++)
   {
-    GEN t = gmul((GEN)zet[k], gadd(gr2,gmul2n(gr1,-k)));
+    GEN t = gmul((GEN)zet[k], gadd(gr2, gmul2n(gr1,-k)));
     if (k&1) t = gneg(t);
     ck_even[k] = (long)t;
   }
@@ -2380,25 +2370,28 @@ initzeta(GEN pol, long prec)
     p1 = gr2; p2 = gru;
     for (k=1; k<R; k++)
     {
-      p1=gdivgs(p1,2*i-1); p2=gdivgs(p2,2*i);
+      p1 = gdivgs(p1,2*i-1); p2 = gdivgs(p2,2*i);
       ck_even[k] = ladd((GEN)ck_even[k], gadd(p1,p2));
     }
     p1 = gru; p2 = gr2;
     for (k=1; k<=r2+1; k++)
     {
-      p1=gdivgs(p1,2*i+1); p2=gdivgs(p2,2*i);
+      p1 = gdivgs(p1,2*i+1); p2 = gdivgs(p2,2*i);
       ck_odd[k] = ladd((GEN)ck_odd[k], gadd(p1,p2));
     }
   }
   aij = gerepilecopy(av, aij);
   if (DEBUGLEVEL>1) msgtimer("a(i,j)");
   p1=cgetg(5,t_VEC);
-  p1[1]=lstoi(r1); p1[2]=lstoi(r2); p1[3]=lstoi(i0); p1[4]=(long)bnf;
-  nfz[1]=(long)p1;
-  nfz[2]=(long)resi;
-  nfz[5]=(long)cst;
-  nfz[6]=llog(cst,prec);
-  nfz[7]=(long)aij;
+  p1[1] = lstoi(r1);
+  p1[2] = lstoi(r2);
+  p1[3] = lstoi(i0);
+  p1[4] = (long)bnf;
+  nfz[1] = (long)p1;
+  nfz[2] = (long)resi;
+  nfz[5] = (long)cst;
+  nfz[6] = llog(cst,prec);
+  nfz[7] = (long)aij;
 
   /************* Calcul du nombre d'ideaux de norme donnee *************/
   coef = dirzetak0(nf,N0); tabj = cgetg(N0+1,t_MAT);
@@ -2414,30 +2407,28 @@ initzeta(GEN pol, long prec)
       for (j=2; j<=r; j++)
       {
         pari_sp av2 = avma;
-        p2 = gmul((GEN)t[j], p1);
-        t[j+1] = (long)gerepileuptoleaf(av2, divrs(p2,j));
+        t[j+1] = (long)gerepileuptoleaf(av2, divrs(gmul((GEN)t[j], p1), j));
       }
       /* tabj[n,j]=coef(n)*ln(c/n)^(j-1)/(j-1)! */
       tabj[i] = (long)t;
     }
-    else tabj[i]=(long)colzero;
+    else
+      tabj[i] = (long)colzero;
   if (DEBUGLEVEL>1) msgtimer("a(n)");
 
   coeflog=cgetg(N0+1,t_VEC); coeflog[1]=zero;
   for (i=2; i<=N0; i++)
     if (coef[i])
     {
-      court[2]=i; p1=glog(court,prec);
-      setsigne(p1,-1); coeflog[i]=(long)p1;
+      court[2] = i; p1 = glog(court,prec);
+      setsigne(p1, -1); coeflog[i] = (long)p1;
     }
     else coeflog[i] = zero;
   if (DEBUGLEVEL>1) msgtimer("log(n)");
 
-  nfz[3]=(long)tabj;
-  p1 = cgetg(N0+1,t_VECSMALL);
-  for (i=1; i<=N0; i++) p1[i] = coef[i];
-  nfz[8]=(long)p1;
-  nfz[9]=(long)coeflog;
+  nfz[3] = (long)tabj;
+  nfz[8] = (long)vecsmall_copy(coef);
+  nfz[9] = (long)coeflog;
 
   /******************** Calcul des coefficients Cik ********************/
   C = cgetg(r+1,t_MAT);
