@@ -3,7 +3,7 @@ pre=O
 cst_objdir=$pre$osname-$arch;
 objdir=$cst_objdir
 if test -n "$dfltobjdir"; then
-  if test "$dfltobjdir"=auto; then
+  if test "$dfltobjdir" = auto; then
     case "$kernlvl0" in
       $asmarch);;
       sparcv8_micro)
