@@ -546,7 +546,7 @@ Check_Small(int bound, GEN poly, GEN rhs)
 
 	/* Verifier ... */
 	xxnm1=xxn; j=2;
-	while(gegal(interm,gzero))
+	while(gcmp0(interm))
 	  {
 	    xxnm1=gdiv(xxnm1,xx);
 	    interm=gmul((GEN)poly[++j],xxnm1);
@@ -563,7 +563,7 @@ Check_Small(int bound, GEN poly, GEN rhs)
 		  if (_thue_new(u)) SOL=concatsp(SOL,zz);
 		}	
 	    }
-	     else if(gegal(gmod(interm,yy),gzero))
+	     else if (gcmp0(gmod(interm,yy)))
 	       if(gegal(poleval(poly,gdiv(yy,xx)),gdiv(rhs,xxn)))
 		/* Remplacer par un eval *homogene* */
 		 {
@@ -743,7 +743,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
 		    bd=gmul(denom(bestappr(delta,gadd(B0,gabs(q2,Prec))))
 			    ,delta);
 		    bd=gabs(gsub(bd,ground(bd)),Prec);
-		    if(gcmp(bd,ep)==1 && !gegal(q3, gzero))
+		    if(gcmp(bd,ep)==1 && !gcmp0(q3))
 		      {
 			fs=1;
                       B0=gdiv(glog(gdiv(gmul(q3,c15),gsub(bd,ep)), Prec),c13);
