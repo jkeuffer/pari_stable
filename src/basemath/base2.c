@@ -1614,7 +1614,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       for (i = 1;; i++)
       {
 	if (i >= lg(w))
-          err(talker, "bug in nilord (no suitable root), is p a prime?");
+          err(talker, "bug in nilord (no suitable root), is p = % a prime?", 
+	      p);
         delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
         eta  = gsub(gamm, delt);	  
         if (typ(delt) == t_INT)
