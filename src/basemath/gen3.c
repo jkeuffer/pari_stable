@@ -112,7 +112,7 @@ gprecision(GEN x)
     case t_RFRAC: case t_RFRACN:
     {
       k=gprecision((GEN)x[1]);
-      l=gprecision((GEN)x[2]); if (l && l<k) k=l;
+      l=gprecision((GEN)x[2]); if (l && (!k || l<k)) k=l;
       return k;
     }
     case t_QFR:
