@@ -2653,42 +2653,37 @@ break_loop(long numerr)
   static char *old = NULL;
   static Buffer *b = NULL;
   VOLATILE int go_on = 0;
-  char *s, *t, *msg;
+  char *s, *t;
   filtre_t F;
 
   if (b) jump_to_given_buffer(b);
   push_stack(&bufstack, (void*)new_buffer());
   b = current_buffer; /* buffer created above */
-  if (setjmp(b->env))
+
+  old = s = get_analyseur();
+  t = NULL;
+  if (bufstack->prev)
   {
-    msg = "back to break loop";
-    s = t = NULL;
+    Buffer *oldb = (Buffer*)bufstack->prev->value;
+    t = oldb->buf;
+    /* something fishy, probably a ^C, or we overran analyseur */
+    if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
   }
-  else
-  {
-    msg = "Starting break loop (type 'break' or Control-d to go back to GP)";
-    old = s = get_analyseur();
-    t = NULL;
-    if (bufstack->prev)
-    {
-      Buffer *oldb = (Buffer*)bufstack->prev->value;
-      t = oldb->buf;
-      /* something fishy, probably a ^C, or we overran analyseur */
-      if (!s || !s[-1] || s < t || s >= t + oldb->len) s = NULL;
-    }
-    b->flenv = 1; oldinfile = infile;
-  }
+  oldinfile = infile;
   init_filtre(&F, (void*)b);
 
   term_color(c_ERR); pariputc('\n');
-  errcontext(msg, s, t); if (s) pariputc('\n');
+  errcontext("Break loop (type 'break' or Control-d to go back to GP)", s, t);
+  if (s) pariputc('\n');
   term_color(c_NONE);
   if (numerr == siginter)
-    pariputs("[type <Return> in an empty line to continue]\n");
+    pariputs("[type <Return> in empty line to continue]\n");
   infile = stdin;
+  b->flenv = 1;
   for(;;)
   {
     GEN x;
+    if (setjmp(b->env)) pariputc('\n');
     if (! read_line(&F, BREAK_LOOP_PROMPT))
     {
       if (popinfile()) break;
