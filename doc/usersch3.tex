@@ -1983,7 +1983,7 @@ should be used if $x$ is known to be of type integer.
 \subsecidx{isprime}$(x,\{\fl=0\})$: true (1) if $x$ is a (proven) prime
 number, false (0) otherwise. This can be very slow when $x$ is indeed
 prime and has more than $1000$ digits, say. Use \tet{ispseudoprime} to
-quickly check for pseudo primality.
+quickly check for pseudo primality. See also \kbd{factor}.
 
 If $\fl=0$, use a combination of Baillie-PSW pseudo primality test (see
 \tet{ispseudoprime}), Selfridge ``$p-1$'' test if $x-1$ is smooth enough, and
@@ -2880,8 +2880,8 @@ $\bullet$ $\tev{rnf}$ denotes a relative number field (see below).
 
 $\bullet$ $\tev{ideal}$ can mean any of the following:
 
-\quad -- a $\Z$-basis, in \idx{Hermite normal form}
-(HNF) or not. In this case $x$ is a square matrix.
+\quad -- a $\Z$-basis, in Hermite normal form (HNF) or not. In this case $x$
+is a square matrix.
 
 \quad -- an \tev{idele}, i.e.~a 2-component vector, the first being an
 ideal given as a $\Z$--basis, the second being a $r_1+r_2$-component row
@@ -4117,9 +4117,9 @@ intersection of any two $\Z$-modules. The result is given in HNF.
 \syn{idealintersect}{\var{nf},x,y}.
 
 \subsecidx{idealinv}$(\var{nf},x)$: inverse of the ideal $x$ in the
-number field $\var{nf}$. The result is the Hermite normal form of the inverse
-of the ideal, together with the opposite of the Archimedean information if it
-is given.
+number field $\var{nf}$. The result is the Hermite normal form of the
+inverse of the ideal, together with the opposite of the Archimedean
+information if it is given.
 
 \syn{idealinv}{\var{nf},x}.
 
@@ -4244,7 +4244,7 @@ If \var{vdir} is present, it must be an $r1+r2$-component vector ($r1$ and
 $r2$ number of real and complex places of \var{nf} as usual).
 
 This function finds a ``small'' $a$ in $I$ (it is an LLL pseudo-minimum
-along direction \var{vdir}). The result is the \idx{Hermite normal form} of
+along direction \var{vdir}). The result is the Hermite normal form of
 the LLL-reduced ideal $r I/a$, where $r$ is a rational number such that the
 resulting ideal is integral and primitive. This is often, but not always, a
 reduced ideal in the sense of \idx{Buchmann}. If $I$ is an idele, the
@@ -4714,15 +4714,54 @@ monic one, then reduce it (see $\fl=3$). It is allowed, though not very
 useful given the existence of \tet{nfnewprec}, to input a \kbd{nf} or a
 \kbd{bnf} instead of a polynomial.
 
-The special input format $[x,B]$ is also accepted where $x$ is a polynomial
-as above and $B$ is the integer basis, as would be computed by \tet{nfbasis}.
-This can be useful if the integer basis is known in advance.
+\bprog
+  ? nf = nfinit(x^3 - 12); \\ initialize number field Q[X] / (X^3 - 12)
+  ? nf.pol   \\ defining polynomial
+  %2 = x^3 - 12
+  ? nf.disc  \\ field discriminant
+  %3 = -972
+  ? nf.index \\ index of power basis order in maximal order
+  %4 = 2
+  ? nf.zk    \\ integer basis, lifted to Q[X]
+  %5 = [1, x, 1/2*x^2]
+  ? nf.sign  \\ signature
+  %6 = [1, 1]
+  ? factor(abs(nf.disc ))  \\ determines ramified primes
+  %7 = 
+  [2 2]
+
+  [3 5]
+  ? idealfactor(nf, 2)
+  %8 =
+  [[2, [0, 0, -1]~, 3, 1, [0, 1, 0]~] 3]  \\ @com $\goth{P}_2^3$
+@eprog
+
+In case \var{pol} has a huge discriminant which is difficult to factor,
+the special input format $[\var{pol},B]$ is also accepted where \var{pol} is a
+polynomial as above and $B$ is the integer basis, as would be computed by
+\tet{nfbasis}. This is useful if the integer basis is known in advance,
+or was computed conditionnally.
+\bprog
+  ? pol = polcompositum(x^5 - 101, polcyclo(7))[1];
+  ? B = nfbasis(pol, 1);   \\ faster than nfbasis(pol), but conditional
+  ? nf = nfinit( [pol, B] );
+  ? factor( abs(nf.disc) )
+  [5 18]
+
+  [7 25]
+
+  [101 24]
+@eprog
+\kbd{B} is conditional when its discriminant, which is \kbd{nf.disc}, can't be
+factored. In this example, the above factorization proves the correctness of
+the computation.
+\medskip
 
 If $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the same
-number field, which is as simple as can easily be found using the
-\kbd{polred} algorithm, and all the subsequent computations are done using
-this new polynomial. In particular, the first component of the result is the
-modified polynomial.
+number field, which is as simple as can easily be found using the \kbd{polred}
+algorithm, and all the subsequent computations are done using this new
+polynomial. In particular, the first component of the result is the modified
+polynomial.
 
 If $\fl=3$, does a \kbd{polred} as in case 2, but outputs
 $[\var{nf},\kbd{Mod}(a,P)]$, where $\var{nf}$ is as before and
@@ -5490,8 +5529,7 @@ that the ideal class of the last ideal of $I$, which is well defined, is the
 \subsecidx{subgrouplist}$(\var{bnr},\{\var{bound}\},\{\fl=0\})$:
 \var{bnr} being as output by \kbd{bnrinit} or a list of cyclic components
 of a finite Abelian group $G$, outputs the list of subgroups of $G$. Subgroups
-are given as HNF\sidx{Hermite normal form} left divisors of the
-SNF\sidx{Smith normal form} matrix corresponding to $G$.
+are given as HNF left divisors of the SNF matrix corresponding to $G$.
 
 \misctitle{Warning:} the present implementation cannot treat a group $G$
 where any cyclic factor has more than $2^{31}$, resp.~$2^{63}$ elements on a
@@ -7379,8 +7417,8 @@ routine is intended to treat huge groups, when \tet{subgrouplist} is not an
 option due to the sheer size of the output.
 
 For maximal speed the subgroups have been left as produced by the algorithm.
-To print them in canonical form (as left divisors of $G$ in
-HNF\sidx{Hermite normal form} form), one can for instance use
+To print them in canonical form (as left divisors of $G$ in HNF form), one
+can for instance use
 \bprog
 ? G = matdiagonal([2,2]); forsubgroup(H=G, 2, print(mathnf(concat(G,H))))
 [2, 1; 0, 1]
