@@ -99,10 +99,10 @@ nffactormod(GEN nf, GEN x, GEN pr)
 {
   long j, l, vx = varn(x), vn;
   pari_sp av = avma;
-  GEN z, rep, xrd, modpr, T, p;
+  GEN F, E, rep, xrd, modpr, T, p;
 
   nf = checknf(nf);
-  vn = varn((GEN)nf[1]);
+  vn = varn(nf[1]);
   if (typ(x)!=t_POL) err(typeer,"nffactormod");
   if (varncmp(vx,vn) >= 0)
     err(talker,"polynomial variable must have highest priority in nffactormod");
@@ -110,8 +110,12 @@ nffactormod(GEN nf, GEN x, GEN pr)
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
   xrd = modprX(x, nf, modpr);
   rep = FqX_factor(xrd,T,p);
-  z = (GEN)rep[1]; l = lg(z);
-  for (j = 1; j < l; j++) z[j] = (long)modprX_lift((GEN)z[j], modpr);
+  F = gel(rep,1); l = lg(F);
+  E = gel(rep,2); settyp(E, t_COL);
+  for (j = 1; j < l; j++) {
+    gel(F,j) = modprX_lift(gel(F,j), modpr);
+    gel(E,j) = stoi(E[j]);
+  }
   return gerepilecopy(av, rep);
 }
 
