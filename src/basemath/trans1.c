@@ -1333,7 +1333,7 @@ mpexp(GEN x)
   if (sx<0) 
   {
     long ex = expo(x);
-    if (ex >= EXMAX) return realzero_bit(- (long) ((1<<EXMAX) / LOG2));
+    if (ex >= EXMAX) return realzero_bit(- (long) ((1L<<EXMAX) / LOG2));
     setsigne(x,1); 
   }
   av = avma; y = addsr(1, mpexp1(x));

@@ -2,6 +2,7 @@
 AW = Aleksander Wittlin
 BA = Bill Allombert
 BD = Bill Daly
+BG = Brian Gladman
 BH = Bruno Haible
 CB = Cliff Bergman
 CW = Carl Witty
@@ -107,6 +108,7 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
        not output subfields sorted by degree
    44- [Windows installer:] online help did not work on most installations
    45- lines continuation with \ did not work with DOS fileformat
+BG 46- random(2^31) returned integers in [0, 2^32-1]  [ long/ulong problem ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

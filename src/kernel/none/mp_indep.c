@@ -75,7 +75,8 @@ pari_rand(void)
 GEN
 randomi(GEN N)
 {
-  long lx, i, n;
+  ulong n;
+  long lx, i;
   GEN x, xMSW, xd, Nd;
 
   lx = lgefint(N); x = cgeti(lx);
@@ -83,7 +84,7 @@ randomi(GEN N)
   xMSW = xd = int_MSW(x);
   for (i=2; i<lx; i++) { *xd = pari_rand(); xd = int_precW(xd); }
 
-  Nd = int_MSW(N); n = *Nd;
+  Nd = int_MSW(N); n = (ulong)*Nd;
   xd = xMSW;
   if (lx == 3) n--;
   else
@@ -97,7 +98,7 @@ randomi(GEN N)
       }
     }
   /* MSW needs to be generated between 0 and n */
-  if (n) n = (long)((((ulong)*xMSW) / (HIGHBIT*2.)) * (n + 1));
+  if (n) n = (ulong)((((ulong)*xMSW) / (HIGHBIT*2.)) * (n + 1));
   *xMSW = (long)n;
   if (!n) x = int_normalize(x, 1);
   return x;
