@@ -1063,8 +1063,8 @@ realloc_buf(char *bp, long len, char **ptbuf,char **ptlimit)
 static char *
 expand_string(char *bp, char **ptbuf, char **ptlimit)
 {
-  char *tmp;
-  long len;
+  char *tmp = NULL; /* -Wall */
+  long len = 0; /* -Wall */
   int alloc = 1;
 
   if (is_keyword_char(*analyseur))
@@ -1976,7 +1976,8 @@ constante()
   {
     default: return y; /* integer */
     case '.':
-      if (is_key(analyseur[1])) return y; /* member function */
+      if (isalpha(analyseur[1]) && analyseur[1] != 'e' && analyseur[1] != 'E')
+        return y; /* member function */
       analyseur++; i = 0;
       while (isdigit((int)*analyseur))
       {
@@ -2712,7 +2713,8 @@ skipconstante(void)
   if ( *analyseur!='.' && *analyseur!='e' && *analyseur!='E' ) return;
   if (*analyseur=='.')
   {
-    if (is_key(analyseur[1])) return; /* member function */
+    if (isalpha(analyseur[1]) && analyseur[1] != 'e' && analyseur[1] != 'E')
+      return; /* member function */
     analyseur++;
   }
   while (isdigit((int)*analyseur)) analyseur++;
