@@ -3678,7 +3678,7 @@ srgcd(GEN x, GEN y)
     if (vmod < 0) return modulargcd(x,y); /* Q[X] */
   }
 
-  if (issimplefield(x) || issimplefield(y)) x = polgcdnun(x,y);
+  if (issimplepol(x) || issimplepol(y)) x = polgcdnun(x,y);
   else
   {
     dx=lgef(x); dy=lgef(y);
