@@ -30,6 +30,7 @@ config/MANIFEST
 config/Makefile.DLLs
 config/Makefile.SH
 config/TOP_Make.SH
+config/arch-osname
 config/display
 config/endian.c
 config/extract_files
@@ -62,6 +63,7 @@ doc/paricfg.tex.in
 doc/parimacro.tex
 doc/pdfmacs.tex
 doc/refcard.tex
+doc/tex2mail.1
 doc/translations
 doc/tutorial.tex
 doc/users.tex
