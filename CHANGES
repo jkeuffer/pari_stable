@@ -114,6 +114,7 @@ BA 52- Oxxx/Makefile was not compatible with BSD make.
    57- (-2/x)/(-1/x) --> -2/-1
 BA 58- [GP internals:] trap() had an invalid prototype [DI,DI]
    59-  M[,2][1]=1 --> error; M[1,][2]=1 --> no effect  [ now <==> M[1,2]= 2 ]
+   60- [GP:] newline in multiline comments /* */ was not ignored
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

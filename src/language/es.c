@@ -82,7 +82,11 @@ filtre0(filtre_t *F)
       {
         while (c != '*' || *s != '/')
         {
-          if (!*s) goto END;
+          if (!*s) 
+          {
+            if (!F->more_input) F->more_input = 1;
+            goto END;
+          }
           c = *s++;
         }
         s++;
