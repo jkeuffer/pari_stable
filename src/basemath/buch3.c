@@ -1206,7 +1206,20 @@ certifybuchall(GEN bnf)
   cycgen = check_and_build_cycgen(bnf);
   for (bad=gun,i=1; i<=nbgen; i++)
     bad = mpppcm(bad, gcoeff(gen[i],1,1));
-  /* p | bad <--> p | some cycgen[i]  */
+  for (i=1; i<=nbgen; i++)
+  {
+    p1 = (GEN)cycgen[i];
+    if (typ(p1) == t_MAT)
+    {
+      GEN h, g = (GEN)p1[1];
+      for (j=1; j<lg(g); j++)
+      {
+        h = idealhermite(nf, (GEN)g[j]);
+        big = mpppcm(big, gcoeff(h,1,1));
+      }
+    }
+  }
+  /* p | bad <--> p | some element occurring in cycgen[i]  */
 
   funits = dummycopy(funits);
   for (i=1; i<lg(funits); i++)
