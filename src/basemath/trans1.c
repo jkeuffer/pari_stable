@@ -1124,7 +1124,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   case t_INTMOD:
     z=gzero;
     /*This is not great, but else it will generate too much trouble*/
-    if (!isprime((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
+    if (!IsLucasPsP((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) 
     {
       z=cgetg(3,tx); copyifstack(x[1],z[1]);
