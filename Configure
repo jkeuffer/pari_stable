@@ -166,6 +166,7 @@ for variable in\
   $_perl_list\
   $_cc_list\
   $_ld_list\
+  $_dl_list\
   $_dlld_list\
   $_readline_list\
   $_gmp_list\

@@ -11,7 +11,7 @@ MP_C=$kern/mp.c $kern/cmp.c $kern/gcdll.c $kern/ratlift.c $kern/gcd.c $kern/invm
 mp.c: \$(MP_C)
 	cat \$(MP_C) > mp.c
 mp\$(_O): .headers mp.c
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o mp\$(_O) mp.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mp\$(_O) mp.c
 mpinl\$(_O): .headers parilvl1.h
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $kern/level1.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $kern/level1.c
 EOT

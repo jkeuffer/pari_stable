@@ -177,6 +177,7 @@ CC_FLAVOR  =
 CC         = $CC \$(CC_FLAVOR)
 CPPFLAGS   = $CPPFLAGS
 CFLAGS     = $CFLAGS
+DLCFLAGS   = $DLCFLAGS
 LD_FLAVOR  = \$(CC_FLAVOR)
 LD         = $LD \$(LD_FLAVOR)
 LDFLAGS    = $LDFLAGS
@@ -223,7 +224,6 @@ DLLD_IGNORE   = $dlld_ignore
 RUNPTH       = $RUNPTH
 RUNPTH_FINAL = $RUNPTH_FINAL
 LDDYN        = $LDDYN
-DLCFLAGS     = $DLCFLAGS
 LIBS         = $LIBS
 
 RM = rm -f
@@ -612,12 +612,19 @@ for dir in basemath modules language gp graph graphdyn systems; do
     ;;
   es|sumiter)
     depend="$src/language/anal.h"
+    cflags="$cflags \$(DLCFLAGS)"
     ;;
+  whatnow);;
   init)
     depend="$src/language/anal.h $src/language/init.h"
+    cflags="$cflags \$(DLCFLAGS)"
     ;;
   anal)
     depend="$src/language/anal.h $src/language/members.h"
+    cflags="$cflags \$(DLCFLAGS)"
+    ;;
+  *)
+    cflags="$cflags \$(DLCFLAGS)"
     ;;
   esac
 HUGELINE="$HUGELINE

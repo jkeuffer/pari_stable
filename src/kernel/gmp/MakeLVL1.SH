@@ -12,7 +12,7 @@ MP_C= $kern/mp.c $knone/cmp.c $knone/gcdll.c $knone/ratlift.c $knone/invmod.c $k
 mp.c: \$(MP_C)
 	cat \$(MP_C) > mp.c
 mp\$(_O): .headers mp.c
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(GMPINCLUDE) -o mp\$(_O) mp.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) \$(GMPINCLUDE) -o mp\$(_O) mp.c
 mpinl\$(_O): .headers parilvl1.h
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $knone/level1.c
+	\$(CC) -c \$(CFLAGS) \$(DLCFLAGS) \$(CPPFLAGS) -o mpinl\$(_O) $knone/level1.c
 EOT
