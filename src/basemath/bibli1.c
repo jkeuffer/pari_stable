@@ -2044,7 +2044,6 @@ expodb(double x)
   union { double f; ulong i; } fi;
   const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
   const int exp_mid = 0x3ff;/* exponent bias */
-  const int expo_len = 11; /* number of bits of exponent */
 
   if (x==0) return -308;
   fi.f = x;
