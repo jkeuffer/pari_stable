@@ -89,7 +89,7 @@ BA  1- New function 'vectorsmall'.
     3- GP operator #l for length(l)
     4- a warning in zsign ("increase precision?") when dubious result
     5- Montgomery reduction (only used in powmodulo() for now)
-    6- [experimental] basic tuning utilities (src/test/tune.c)
+    6- [experimental] basic tuning utilities (src/test/tune.c) [make tune]
  
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
