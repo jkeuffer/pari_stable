@@ -858,7 +858,7 @@ is_warn(long num)
   return num == warner || num == warnmem || num == warnfile || num == warnprec;
 }
 
-VOLATILE void
+void
 err(long numerr, ...)
 {
   char s[128], *ch1;
