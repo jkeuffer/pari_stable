@@ -650,7 +650,7 @@ nf_pol_eval(GEN nf,GEN pol,GEN elt)
 GEN
 nffactor(GEN nf,GEN pol)
 { GEN y,p1,p2,den,p3,p4,quot, rep = cgetg(3,t_MAT);
-  long av = avma,tetpil,i,d;
+  long av = avma,tetpil,i,j,d;
 
   if (DEBUGLEVEL >= 4) timer2();
 
@@ -713,9 +713,9 @@ nffactor(GEN nf,GEN pol)
 
     quot=nf_pol_divres(nf,p1,p2,NULL);
     p3=(GEN)gpmalloc((i+1) * sizeof(long));
-    for ( ; i>=1; i--)
+    for (j=i; j>=1; j--)
     {
-      GEN fact=(GEN)y[i], quo = quot, rem;
+      GEN fact=(GEN)y[j], quo = quot, rem;
       long e = 0;
 
       do
@@ -724,10 +724,10 @@ nffactor(GEN nf,GEN pol)
 	e++;
       }
       while (gcmp0(rem));
-      p3[i]=lstoi(e);
+      p3[j]=lstoi(e);
     }
     avma = (long)y; y = gerepile(av, tetpil, y);
-    p2=cgetg(i+1, t_COL); for (; i>=1; i--) p2[i]=lstoi(p3[i]);
+    p2=cgetg(i+1, t_COL); for (; i>=1; i--) p2[i]=lcopy((GEN)p3[i]);
     free(p3);
   }
   else
