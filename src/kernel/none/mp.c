@@ -1812,7 +1812,7 @@ gcdii(GEN a, GEN b)
   }
 
   /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
-  av = avma; (void)new_chunk(lgefint(b)+1); /* HACK */
+  av = avma; (void)new_chunk(lgefint(b)); /* HACK */
   t = resii(a,b);
   if (!signe(t)) { avma=av; return absi(b); }
 
