@@ -777,7 +777,7 @@ static GEN
 sd_primelimit(const char *v, int flag)
 {
   ulong n = primelimit;
-  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)VERYBIGINT,NULL);
+  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(VERYBIGINT-1024) + 1,NULL);
   if (n != primelimit)
   {
     if (flag != d_INITRC)
