@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /////////////////////////////////////////////////////////////////////////////
 //
 //  High resolution plot using FLTK library
-//  Bill Alombert 2003
+//  Bill Allombert 2003
 //
 //  Based on plotQt by Nils-Peter Skoruppa (www.countnumber.de)
 /////////////////////////////////////////////////////////////////////////////
