@@ -1870,7 +1870,7 @@ u2toi(ulong a, ulong b)
   return x;
 }
 
-/* return a_n x^n + ... + a_0 */
+/* return a_(n-1) x^(n-1) + ... + a_0 */
 GEN
 coefs_to_pol(long n, ...)
 {
