@@ -1852,8 +1852,8 @@ trunc_error(GEN x)
 static GEN
 compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptlambda)
 {
-  GEN T,v,mdet,mdet_t,Im_mdet,kR,lambda,xreal, *gptr[2];
-  long av = avma, i,j, zc = lg(xarch)-1, R1 = 2*RU - N;
+  GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda, *gptr[2];
+  long av = avma, i, zc = lg(xarch)-1, R1 = 2*RU - N;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = greal(xarch); /* = (log |sigma_i(u_j)|) */
@@ -1877,18 +1877,28 @@ compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptlambda)
 
   kR = mpabs(kR);
   lambda = gauss(Im_mdet,xreal); /* approximate rational entries */
-  for (i=1; i<=zc; i++)
-  {
-    GEN p1 = (GEN)lambda[i]; setlg(p1, RU);
-    for (j=1; j<RU; j++)
-      if (trunc_error((GEN)p1[j])) { *ptlambda = NULL; return gzero; }
-  }
-  *ptlambda = lambda;
-  gptr[0]=ptlambda; gptr[1]=&kR;
-  gerepilemany(av,gptr,2); return kR;
+  for (i=1; i<=zc; i++) setlg(lambda[i], RU);
+  gptr[0]=&lambda; gptr[1]=&kR; gerepilemany(av,gptr,2); 
+  *ptlambda = lambda; return kR;
 }
 
 extern GEN hnflll_i(GEN A, GEN *ptB, int remove);
+
+static GEN
+bestappr_noer(GEN x, GEN k)
+{
+  VOLATILE GEN y;
+  jmp_buf env;
+  void *c;
+  if (setjmp(env)) return NULL;
+  else
+  {
+    c = err_catch(precer, env, NULL);
+    y = bestappr(x,k);
+  }
+  err_leave(&c);
+  return y;
+}
 
 /* c = Rz = 2n, according to Dirichlet's formula. Compute a tentative
  * regulator (not a multiple this time). *ptkR = multiple of regulator */
@@ -1902,7 +1912,13 @@ compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   gc = gmul(*ptkR,z);
-  lambda = bestappr(lambda,gc); den = denom(lambda);
+  lambda = bestappr_noer(lambda,gc);
+  if (!lambda)
+  {
+    if (DEBUGLEVEL) fprintferr("truncation error in bestappr\n");
+    return PRECI;
+  }
+  den = denom(lambda);
   if (gcmp(den,gc) > 0)
   {
     if (DEBUGLEVEL) fprintferr("c = %Z\nden = %Z\n",gc,den);
