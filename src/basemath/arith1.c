@@ -1558,10 +1558,8 @@ GEN
 init_remainder(GEN M)
 {
   GEN sM = cgetg(3, t_VEC);
-  GEN Mr = cgetr(lgefint(M) + 1);
-  affir(M, Mr);
   sM[1] = (long)M;
-  sM[2] = (long)linv(Mr);
+  sM[2] = (long)linv( itor(M, lgefint(M) + 1) ); /* 1. / M */
   return sM;
 }
 
@@ -1876,9 +1874,8 @@ mpfactr(long n, long prec)
 {
   gpmem_t av = avma, lim;
   long k;
-  GEN f = cgetr(prec);
+  GEN f = realun(prec);
 
-  affsr(1,f);
   if (n<2)
   {
     if (n<0) err(facter);
@@ -2390,7 +2387,7 @@ regula(GEN x, long prec)
   rsqd = gsqrt(x,prec);
   if (egalii(sqri(sqd),x)) err(talker,"square argument in regula");
 
-  rexp=0; reg=cgetr(prec); affsr(2,reg);
+  rexp=0; reg = stor(2, prec);
   av2=avma; lim = stack_lim(av2,2);
   u = stoi(r); v = gdeux;
   for(;;)

@@ -1129,7 +1129,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     if (cmbf_precs(p, C, T.BS_2, &a, &b, &pa, &pb))
     { /* Rare */
       if (DEBUGLEVEL) err(warner,"nffactor: overlift for d-1/d-2 test");
-      C = cgetr(DEFAULTPREC); affir(pa, C);
+      C = itor(pa, DEFAULTPREC);
     }
   }
 

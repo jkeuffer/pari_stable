@@ -770,7 +770,7 @@ facteur(void)
       case '^':
 	analyseur++; p1 = facteur();
         if (br_status) err(breaker,"here (after ^)");
-        x = gpui(x,p1,prec); break;
+        x = gpow(x,p1,prec); break;
       case '\'':
 	analyseur++; x = deriv(x,gvar9(x)); break;
       case '~':
@@ -1986,13 +1986,13 @@ constante()
   l=lgefint(y); if (l<prec) l=prec;
   if (n)
   {
-    (void)new_chunk(l); /* hack: mulrr and divrr need exactly l words */
-    z=cgetr(l); affir(y,z);
-    y=cgetr(l); affsr(10,y); y = gpuigs(y, labs(n));
+    (void)new_chunk(l); /* HACK: mulrr and divrr need exactly l words */
+    z = itor(y, l);
+    y = gpowgs(stor(10,l), labs(n));
     avma = av; /* hidden gerepile */
     return n > 0 ?  mulrr(z,y) : divrr(z,y);
   }
-  z=cgetr(l); affir(y,z); return z;
+  return itor(y, l);
 }
 
 /********************************************************************/

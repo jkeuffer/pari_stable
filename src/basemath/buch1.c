@@ -1609,18 +1609,18 @@ gcdreal(GEN a,GEN b,long *pte)
   if (typ(a)==t_INT)
   {
     if (typ(b)==t_INT) return mppgcd(a,b);
-    k1=cgetr(lg(b)); affir(a,k1); a=k1;
+    a = itor(a, lg(b));
   }
   else if (typ(b)==t_INT)
   {
-    k1=cgetr(lg(a)); affir(b,k1); b=k1;
+    b = itor(b, lg(a));
   }
   if (expo(a)<-5) return absr(b);
   if (expo(b)<-5) return absr(a);
   a=absr(a); b=absr(b);
   while (expo(b) >= -5  && signe(b))
   {
-    k1=gcvtoi(divrr(a,b),&e);
+    k1 = gcvtoi(divrr(a,b),&e);
     if (e > 0) return NULL;
     r=subrr(a,mulir(k1,b)); a=b; b=r;
   }
@@ -1684,7 +1684,9 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   if (!isfundamental(Disc))
     err(warner,"not a fundamental discriminant in quadclassunit");
   buch_init(); RELSUP = RELSUP0;
-  dr=cgetr(3); affir(Disc,dr); drc=fabs(rtodbl(dr)); LOGD=log(drc);
+  dr = itor(Disc, 3);
+  drc = fabs(rtodbl(dr));
+  LOGD = log(drc);
 
   lim = sqrt(drc);
   resc = dbltor(lim); Res = Lval1(Disc);

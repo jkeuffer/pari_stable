@@ -559,18 +559,17 @@ addir(GEN x, GEN y)
 #else /* design issue: make 0.0 "absorbing" */
     if (e>0) return rcopy(y);
 #endif
-    z = cgetr(3 + ((-e)>>TWOPOTBITS_IN_LONG));
-    affir(x,z); return z;
+    return itor(x, 3 + ((-e)>>TWOPOTBITS_IN_LONG));
   }
 
   ly=lg(y);
-  if (e>0)
+  if (e > 0)
   {
     l = ly - (e>>TWOPOTBITS_IN_LONG);
     if (l<3) return rcopy(y);
   }
   else l = ly + ((-e)>>TWOPOTBITS_IN_LONG)+1;
-  z=cgetr(l); affir(x,z); y=addrr(z,y);
+  y = addrr(itor(x,l), y);
   z = y+l; ly = lg(y); while (ly--) z[ly] = y[ly];
   avma=(gpmem_t)z; return z;
 }
@@ -917,8 +916,7 @@ mulir(GEN x, GEN y)
 
   if (sy<0) sx = -sx;
   lz=lg(y); z=cgetr(lz);
-  y1=cgetr(lz+1);
-  affir(x,y1); x=y; y=y1;
+  y1 = itor(x, lz+1); x = y; y = y1;
   e = expo(y)+ey;
   if (lz==3)
   {
@@ -1146,79 +1144,87 @@ divis(GEN y, long x)
 GEN
 divir(GEN x, GEN y)
 {
-  GEN xr,z;
+  GEN z;
   long ly;
   gpmem_t av;
 
   if (!signe(y)) err(diver5);
   if (!signe(x)) return gzero;
-  ly=lg(y); z=cgetr(ly); av=avma; xr=cgetr(ly+1); affir(x,xr);
-  affrr(divrr(xr,y),z); avma=av; return z;
+  ly = lg(y); z = cgetr(ly); av = avma; 
+  affrr(divrr(itor(x, ly+1), y), z);
+  avma = av; return z;
 }
 
 GEN
 divri(GEN x, GEN y)
 {
-  GEN yr,z;
-  long lx, s=signe(y);
+  long lx, s = signe(y);
   gpmem_t av;
+  GEN z;
 
   if (!s) err(diver8);
   if (!signe(x)) return realzero_bit(expo(x) - expi(y));
   if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
 
-  lx=lg(x); z=cgetr(lx);
-  av=avma; yr=cgetr(lx+1); affir(y,yr);
-  affrr(divrr(x,yr),z); avma=av; return z;
+  lx = lg(x); z = cgetr(lx); av = avma;
+  affrr(divrr(x, itor(y, lx+1)), z);
+  avma = av; return z;
 }
 
 void
 diviiz(GEN x, GEN y, GEN z)
 {
-  long lz;
-  gpmem_t av=avma;
-  GEN xr,yr;
-
-  if (typ(z)==t_INT) { affii(divii(x,y),z); avma=av; return; }
-  lz=lg(z); xr=cgetr(lz); affir(x,xr); yr=cgetr(lz); affir(y,yr);
-  affrr(divrr(xr,yr),z); avma=av;
+  gpmem_t av = avma;
+  if (typ(z) == t_INT) affii(divii(x,y), z);
+  else {
+    long lz = lg(z);
+    affrr(divrr(itor(x,lz), itor(y,lz)), z);
+  }
+  avma = av;
 }
 
 void
 mpdivz(GEN x, GEN y, GEN z)
 {
-  gpmem_t av=avma;
+  gpmem_t av = avma;
+  GEN r;
 
   if (typ(z)==t_INT)
   {
-    if (typ(x)==t_REAL || typ(y)==t_REAL) err(divzer1);
-    affii(divii(x,y),z); avma=av; return;
+    if (typ(x) == t_REAL || typ(y) == t_REAL) err(divzer1);
+    affii(divii(x,y), z);
+    avma = av; return;
   }
-  if (typ(x)==t_INT)
-  {
-    GEN xr,yr;
-    long lz;
 
-    if (typ(y)==t_REAL) { affrr(divir(x,y),z); avma=av; return; }
-    lz=lg(z); xr=cgetr(lz); affir(x,xr); yr=cgetr(lz); affir(y,yr);
-    affrr(divrr(xr,yr),z); avma=av; return;
+  if (typ(x) == t_INT)
+  {
+    if (typ(y) == t_REAL)
+      r = divir(x,y);
+    else
+    {
+      long lz = lg(z);
+      r = divrr(itor(x,lz), itor(y,lz));
+    }
   }
-  if (typ(y)==t_REAL) { affrr(divrr(x,y),z); avma=av; return; }
-  affrr(divri(x,y),z); avma=av;
+  else if (typ(y) == t_REAL)
+    r = divrr(x,y);
+  else
+    r = divri(x,y);
+  affrr(r, z); avma = av;
 }
 
 GEN
 divsr(long x, GEN y)
 {
-  long ly;
   gpmem_t av;
-  GEN p1,z;
+  long ly;
+  GEN z;
 
   if (!signe(y)) err(diver3);
   if (!x) return gzero;
-  ly=lg(y); z=cgetr(ly); av=avma;
-  p1=cgetr(ly+1); affsr(x,p1); affrr(divrr(p1,y),z);
-  avma=av; return z;
+  ly = lg(y); z = cgetr(ly); av = avma;
+  affrr(divrr(stor(x,ly+1), y), z);
+  avma = av; return z;
 }
 
 GEN
@@ -2445,12 +2451,11 @@ GEN
 karamulir(GEN x, GEN y, long flag)
 {
   long sx=signe(x),lz,i;
-  GEN z,temp,z1;
+  GEN z, z1;
 
   if (!sx) return gzero;
-  lz=lg(y); z=cgetr(lz);
-  temp=cgetr(lz+1); affir(x,temp);
-  z1=karamulrr(temp,y,flag);
+  lz = lg(y); z = cgetr(lz);
+  z1 = karamulrr(itor(x, lz+1), y, flag);
   for (i=1; i<lz; i++) z[i]=z1[i];
   avma=(gpmem_t)z; return z;
 }

@@ -57,10 +57,10 @@ constpi(long prec)
 
   prec++;
 
-  n=(long)(1+(prec-2)/alpha2);
-  n1=6*n-1; p1=cgetr(prec);
-  p2=addsi(k2,mulss(n,k1));
-  affir(p2,p1);
+  n = (long)(1 + (prec-2)/alpha2);
+  n1 = 6*n - 1;
+  p2 = addsi(k2, mulss(n,k1));
+  p1 = itor(p2, prec);
 
   /* initialisation longueur mantisse */
   if (prec>=4) l=4; else l=prec;
@@ -139,9 +139,9 @@ consteuler(long prec)
   prec++;
 
   l = prec+1; x = (long) (1 + (bit_accuracy(l) >> 2) * LOG2);
-  a=cgetr(l); affsr(x,a); u=mplog(a); setsigne(u,-1); affrr(u,a);
-  b=realun(l);
-  v=realun(l);
+  a = stor(x,l); u=mplog(a); setsigne(u,-1); affrr(u,a);
+  b = realun(l);
+  v = realun(l);
   n=(long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
   av2 = avma;
   if (x < SQRTVERYBIGINT)
@@ -333,7 +333,6 @@ typedef struct {
   long prec, a;
   GEN (*sqr)(GEN);
   GEN (*mulsg)(long,GEN);
-  GEN unr;
 } sr_muldata;
 
 static GEN
@@ -347,11 +346,11 @@ static GEN
 _rpowsi_sqr(void *data, GEN x)
 {
   sr_muldata *D = (sr_muldata *)data;
-  if (lgefint(x) >= D->prec && typ(x) == t_INT)
+  if (typ(x) == t_INT && lgefint(x) >= D->prec)
   { /* switch to t_REAL */
     D->sqr   = &gsqr;
     D->mulsg = &mulsr;
-    affir(x, D->unr); x = D->unr;
+    x = itor(x, D->prec);
   }
   return D->sqr(x);
 }
@@ -361,21 +360,21 @@ _rpowsi_sqr(void *data, GEN x)
 GEN
 rpowsi(ulong a, GEN n, long prec)
 {
-  gpmem_t av = avma;
-  GEN y, unr = realun(prec);
+  gpmem_t av;
+  GEN y;
   sr_muldata D;
 
-  if (a == 1) return unr;
-  if (a == 2) { setexpo(unr, itos(n)); return unr; }
-  if (is_pm1(n)) { affsr(a, unr); return unr; }
+  if (a == 1) return realun(prec);
+  if (a == 2) return real2n(itos(n), prec);
+  if (is_pm1(n)) return stor(a, prec);
+  av = avma;
   D.sqr   = &sqri; 
   D.mulsg = &mulsi;
   D.prec = prec;
-  D.unr = unr;
   D.a = a;
   y = leftright_pow(stoi(a), n, (void*)&D, &_rpowsi_sqr, &_rpowsi_mul);
-  if (typ(y) == t_INT) { affir(y, unr); y = unr ; }
-  return gerepileuptoleaf(av,y);
+  if (typ(y) == t_INT) y = itor(y, prec);
+  return gerepileuptoleaf(av, y);
 }
 
 GEN

@@ -2733,8 +2733,8 @@ LABDOUB:
     InitPrimes(gmael(dataCR,1,4), n, &LIST);
 
     p0 = cgetg(3, t_COMPLEX);
-    p0[1] = lgetr(newprec); affsr(0, (GEN)p0[1]);
-    p0[2] = lgetr(newprec); affsr(0, (GEN)p0[2]);
+    p0[1] = (long)realzero(newprec);
+    p0[2] = (long)realzero(newprec);
 
     L1 = cgetg(cl+1, t_VEC);
     /* we use the formulae L(1) = sum (an / n) */

@@ -61,8 +61,8 @@ int main()
   z = mulii(z,z); _voir(z);
   z = mulii(z,z); _voir(z);
   printf("invmod:"); invmod(y,z,&r); _voir(r);
-  xr = cgetr(DEFAULTPREC); affir(x, xr);
-  yr = cgetr(DEFAULTPREC); affir(y, yr);
+  xr = itor(x, DEFAULTPREC);
+  yr = itor(y, DEFAULTPREC);
   printf("\nREAL: %f\n", rtodbl(xr));
   printf("conv1:"); _voir(xr);
   printf("conv2:"); _voir(dbltor(rtodbl(xr)));

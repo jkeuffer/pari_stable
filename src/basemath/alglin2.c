@@ -853,9 +853,8 @@ jacobi(GEN a, long prec)
   r=cgetg(l,t_MAT); ja[2]=(long)r;
   for (j=1; j<=n; j++)
   {
-    r[j]=lgetg(l,t_COL);
-    for (i=1; i<=n; i++)
-      affsr(i==j, (GEN)(coeff(r,i,j)=lgetr(prec)));
+    r[j] = lgetg(l,t_COL);
+    for (i=1; i<=n; i++) coeff(r,i,j) = (long)stor(i==j, prec);
   }
   av1=avma;
 

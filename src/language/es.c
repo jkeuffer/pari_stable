@@ -837,13 +837,13 @@ wr_float(pariout_t *T, GEN x)
 static void
 wr_exp(pariout_t *T, GEN x)
 {
-  GEN dix = cgetr(lg(x)+1);
-  long ex = expo(x);
+  GEN dix = stor(10, lg(x)+1);
+  long e = expo(x);
 
-  ex = (ex>=0)? (long)(ex*L2SL10): (long)(-(-ex*L2SL10)-1);
-  affsr(10,dix); if (ex) x = mulrr(x,gpuigs(dix,-ex));
-  if (absr_cmp(x, dix) >= 0) { x=divrr(x,dix); ex++; }
-  wr_float(T,x); sp(T); pariputsf("E%ld",ex);
+  e = (e>=0)? (long)(e*L2SL10): (long)(-(-e*L2SL10)-1);
+  if (e) x = mulrr(x, gpowgs(dix,-e));
+  if (absr_cmp(x, dix) >= 0) { x = divrr(x,dix); e++; }
+  wr_float(T,x); sp(T); pariputsf("E%ld",e);
 }
 
 /* Write real number x.

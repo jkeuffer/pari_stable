@@ -647,8 +647,8 @@ max_modulus(GEN p, double tau)
     e = findpower(q);
   }
   if (!signe(r)) { avma = ltop; return realun(DEFAULTPREC); } 
-  aux = cgetr(DEFAULTPREC);
-  affir(r,aux); r = aux; setexpo(r, expo(r) - M);
+  r = itor(r, DEFAULTPREC);
+  setexpo(r, expo(r) - M);
   rho = rtodbl(r);
   /* rho = sum e_i 2^-i */
   avma = ltop;

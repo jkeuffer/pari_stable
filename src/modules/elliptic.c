@@ -2290,7 +2290,8 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   }
   flun = gcmp1(A) && gcmp1(s);
   eps = ellrootno_all(e,gun,&N);
-  if (flun && eps<0) { z=cgetr(prec); affsr(0,z); return z; }
+  if (flun && eps < 0) return realzero(prec);
+
   cg1=mppi(prec); setexpo(cg1,2); cg=divrr(cg1,gsqrt(N,prec));
   cga=gmul(cg,A); cgb=gdiv(cg,A);
   l=(long)((pariC2*(prec-2) + fabs(gtodouble(s)-1.)*log(rtodbl(cga)))

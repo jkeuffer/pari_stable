@@ -410,7 +410,7 @@ kbessel(GEN nu, GEN gx, long prec)
     }
     gmulz(s,zf,u); t=gmul2n(t,-1);
     gdivgsz(gadd(gmul(t,zf),gmul(u,nu)),-n2,v); avma=av1;
-    affsr(n2,q=cgetr(l1));
+    q = stor(n2, l1);
     r=gmul2n(x,1); av1=avma;
     for(;;)
     {
@@ -752,7 +752,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
       t=gadd(gaddsg(k,a),gmul(p1,t));
     }
     gmulz(s,zf,u); t=gmul(t,zz); gmulz(t,zf,v); avma=av1;
-    q=cgetr(l1); affsr(n,q); r=x; av1=avma;
+    q = stor(n, l1); r=x; av1=avma;
     do
     {
       p1=divsr(5,q); if (expo(p1)>= -1) p1=ghalf;

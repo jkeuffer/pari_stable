@@ -924,7 +924,7 @@ bernreal(long n, long prec)
 {
   GEN B;
 
-  if (n==1) { B=cgetr(prec); affsr(-1,B); setexpo(B,-1); return B; }
+  if (n==1) { B = stor(-1, prec); setexpo(B,-1); return B; }
   if (n<0 || n&1) return gzero;
   n >>= 1; mpbern(n+1,prec); B=cgetr(prec);
   affrr(bern(n),B); return B;
@@ -1340,11 +1340,10 @@ ggamma(GEN x, long prec)
   {
     case t_INT:
       if (signe(x)<=0) err(gamer2);
-      p2 = cgetr(prec); av = avma;
       if (cmpis(x,481177) > 0) err(talker,"argument too large in ggamma");
 /* heuristic */
-      if (cmpis(x,350 + 70*(prec-2)) > 0)
-	return transc(ggamma,x,prec);
+      if (cmpis(x,350 + 70*(prec-2)) > 0) return transc(ggamma,x,prec);
+      p2 = cgetr(prec); av = avma;
       p1 = mpfact(itos(x) - 1);
       affir(p1,p2); avma = av;
       return p2;
@@ -1819,7 +1818,7 @@ mppsi(GEN z)  /* version p=2 */
   x=(long)(1 + (bit_accuracy(l)>>1)*LOG2 + 1.58*rtodbl(absr(z)));
   if (expo(z)>=15 || x>46340) err(impl,"psi(x) for x>=29000");
   xx=x*x; n=(long)(1+3.591*x);
-  affsr(x,a=cgetr(l));
+  a = stor(x, l);
   a = mplog(a);
   gaffect(a,u=cgetr(l));
   gaffsg(1,b=cgetr(l));
@@ -1855,8 +1854,7 @@ mppsi(GEN z)
     gerepile(head, tail, subrr(s, a));
   }
 
-  a = cgetr(len);
-  affsr(0, a);
+  a = stor(0, len);
   x = cgetr(len);
   affrr(z, x);
   tail = avma;

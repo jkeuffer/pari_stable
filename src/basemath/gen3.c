@@ -1179,6 +1179,9 @@ gmul2n(GEN x, long n)
   return NULL; /* not reached */
 }
 
+GEN
+real2n(long n, long prec) { GEN z = realun(prec); setexpo(z, n); return z; }
+
 /*******************************************************************/
 /*                                                                 */
 /*                      INVERSE D'UN GEN                           */

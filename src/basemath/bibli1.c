@@ -1061,7 +1061,7 @@ lll_scaled(int MARKED, GEN X0, long D)
   gpmem_t lim, av, av0 = avma;
   int retry = 0;
 
-  delta = cgetr(DEFAULTPREC); affsr(D-1,delta);
+  delta = stor(D-1, DEFAULTPREC);
   delta = divrs(delta,D);
   E  = vecsmall_const(N-1, 0);
   F  = vecsmall_const(N-1, 0);
@@ -1142,7 +1142,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
 
   hx = lg(x[1]);
   if (gram && hx != lx) err(mattype1,"lllfp");
-  delta = cgetr(DEFAULTPREC); affsr(D-1,delta);
+  delta = stor(D-1, DEFAULTPREC);
   delta = divrs(delta,D);
   xinit = x;
   av = avma; lim = stack_lim(av,1);
