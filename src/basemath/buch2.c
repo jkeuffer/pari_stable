@@ -1981,10 +1981,8 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN vperm,GEN *ptclg1,GEN *ptclg2,long prec)
 
   if (DEBUGLEVEL)
     { fprintferr("\n#### Computing class group generators\n"); timer2(); }
-  z = smith2(W); /* U W V = D, D diagonal, G = g Ui (G=new gens, g=old)  */
-  U = (GEN)z[1]; Ui = ginv(U);
-  V = (GEN)z[2];
-  D = (GEN)z[3];
+  D = smithall(W,&U,&V); /* UWV = D, D diagonal, G = g Ui (G=new gens, g=old) */
+  Ui = ginv(U);
   lo0 = lo = lg(D);
  /* we could set lo = lg(cyc) and truncate all matrices below
   *   setlg_col(D && U && Y, lo) + setlg(D && V && X && Ui, lo)

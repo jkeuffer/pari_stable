@@ -1693,7 +1693,7 @@ padicff2(GEN nf,GEN p,long pr)
   {
     p1 = (GEN)dec_p[i];
     pke = idealpows(nf,p1, pr * itos((GEN)p1[3]));
-    p1=smith2(pke); V=(GEN)p1[3]; D=(GEN)p1[1];
+    V = smithall(pke, &D, NULL);
     for (d=1; d<=N; d++)
       if (! egalii(gcoeff(V,d,d),pk)) break;
     a=ginv(D); theta=gmael(nf,8,2); mat=cgetg(d,t_MAT);

@@ -2965,208 +2965,220 @@ trivsmith(long all)
   z[3]=lgetg(1,t_MAT); return z;
 }
 
-/* Return the smith normal form d of matrix x. If all != 0 return [d,u,v],
- * where d = u.x.v
- */
-static GEN
-smithall(GEN x, long all)
+static void
+snf_pile(ulong av, GEN *x, GEN *U, GEN *V)
 {
-  long av,tetpil,i,j,k,l,c,fl,n,s1,s2,lim;
-  GEN p1,p2,p3,p4,z,b,u,v,d,ml,mr,mun,mdet,ys;
+  GEN *gptr[3];
+  int c = 1; gptr[0]=x;
+  if (*U) gptr[c++] = U;
+  if (*V) gptr[c++] = V;
+  gerepilemany(av,gptr,c);
+}
+
+/* Return the SNF of matrix x. If all != 0 return [d,u,v],
+ * where d = u.x.v */
+GEN
+smithall(GEN x, GEN *ptU, GEN *ptV)
+{
+  ulong av = avma, lim = stack_lim(av,1);
+  long i,j,k,l,c,n,s1,s2;
+  GEN p1,p2,p3,p4,b,u,v,d,U,V,mun,mdet,ys;
 
   if (typ(x)!=t_MAT) err(typeer,"smithall");
-  if (DEBUGLEVEL>=9) outerr(x);
-  n=lg(x)-1;
-  if (!n) return trivsmith(all);
+  if (DEBUGLEVEL>8) outerr(x);
+  n = lg(x)-1;
+  if (!n) {
+    if (ptU) *ptU = cgetg(1,t_MAT);
+    if (ptV) *ptV = cgetg(1,t_MAT);
+    return cgetg(1,t_MAT);
+  }
   if (lg(x[1]) != n+1) err(mattype1,"smithall");
   for (i=1; i<=n; i++)
     for (j=1; j<=n; j++)
       if (typ(coeff(x,i,j)) != t_INT)
         err(talker,"non integral matrix in smithall");
 
-  av = avma; lim = stack_lim(av,1);
-  x = dummycopy(x); mdet = detint(x);
-  if (ishnfall(x)) { if (all) { ml=idmat(n); mr=idmat(n); } }
+  U = ptU? gun: NULL;
+  V = ptV? gun: NULL;
+  x = dummycopy(x);
+  if (ishnfall(x))
+  {
+    mdet = dethnf_i(x);
+    if (V) V = idmat(n);
+  }
   else
   {
+    mdet = detint(x);
     if (signe(mdet))
     {
-      p1=hnfmod(x,mdet);
-      if (all) { ml=idmat(n); mr=gauss(x,p1); }
+      p1 = hnfmod(x,mdet);
+      if (V) V = gauss(x,p1);
     }
     else
     {
-      if (all)
-      {
-        p1 = hnfall0(x,0);
-        ml = idmat(n); mr = (GEN)p1[2]; p1 = (GEN)p1[1];
-      }
-      else
-        p1 = hnf0(x,0);
+      p1 = hnfall_i(x, ptV, 0);
+      if (ptV) V = *ptV;
     }
     x = p1;
   }
+  if (U) U = idmat(n);
+ 
   p1=cgetg(n+1,t_VEC); for (i=1; i<=n; i++) p1[i]=lnegi(gcoeff(x,i,i));
-  p2=sindexsort(p1); ys=cgetg(n+1,t_MAT);
+  p2=sindexsort(p1);
+  ys = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
     p1=cgetg(n+1,t_COL); ys[j]=(long)p1;
     for (i=1; i<=n; i++) p1[i]=coeff(x,p2[i],p2[j]);
   }
   x = ys;
-  if (all)
+  if (U)
   {
-    p3=cgetg(n+1,t_MAT); p4=cgetg(n+1,t_MAT);
-    for (j=1; j<=n; j++) { p3[j]=ml[p2[j]]; p4[j]=mr[p2[j]]; }
-    ml=p3; mr=p4;
+    p1 = cgetg(n+1,t_MAT);
+    for (j=1; j<=n; j++) p1[j]=U[p2[j]];
+    U = p1;
   }
+  if (V)
+  {
+    p1 = cgetg(n+1,t_MAT);
+    for (j=1; j<=n; j++) p1[j]=V[p2[j]];
+    V = p1;
+  }
+ 
   if (signe(mdet))
   {
     p1 = hnfmod(x,mdet);
-    if (all) mr=gmul(mr,gauss(x,p1));
+    if (V) V = gmul(V, gauss(x,p1));
   }
   else
   {
-    if (all)
-    {
-      p1 = hnfall0(x,0);
-      mr = gmul(mr,(GEN)p1[2]); p1 = (GEN)p1[1];
-    }
-    else
-      p1 = hnf0(x,0);
+    p1 = hnfall_i(x,ptV,0);
+    if (ptV) V = gmul(V, *ptV);
   }
-  x=p1; mun = negi(gun);
+  x = p1; mun = negi(gun);
 
-  if (DEBUGLEVEL>7) {fprintferr("starting SNF loop");flusherr();}
-  for (i=n; i>=2; i--)
+  if (DEBUGLEVEL>7) fprintferr("starting SNF loop");
+  for (i=n; i>1; i--)
   {
-    if (DEBUGLEVEL>7) {fprintferr("\ni = %ld: ",i);flusherr();}
+    if (DEBUGLEVEL>7) fprintferr("\ni = %ld: ",i);
     for(;;)
     {
       c = 0;
       for (j=i-1; j>=1; j--)
       {
 	p1=gcoeff(x,i,j); s1 = signe(p1);
-	if (s1)
-	{
-	  p2=gcoeff(x,i,i);
-          if (!absi_cmp(p1,p2))
+	if (!s1) continue;
+       
+        p2=gcoeff(x,i,i);
+        if (!absi_cmp(p1,p2))
+        {
+          s2=signe(p2);
+          if (s1 == s2) { d=p1; u=gun; p4=gun; }
+          else
           {
-            s2=signe(p2);
-            if (s1 == s2) { d=p1; u=gun; p4=gun; }
-            else
-	    {
-              if (s2>0) { u = gun; p4 = mun; }
-              else      { u = mun; p4 = gun; }
-	      d=(s1>0)? p1: absi(p1);
-	    }
-            v = gzero; p3 = u;
+            if (s2>0) { u = gun; p4 = mun; }
+            else      { u = mun; p4 = gun; }
+            d=(s1>0)? p1: absi(p1);
           }
-          else { d=bezout(p2,p1,&u,&v); p3=divii(p2,d); p4=divii(p1,d); }
-	  for (k=1; k<=i; k++)
-	  {
-	    b=addii(mulii(u,gcoeff(x,k,i)),mulii(v,gcoeff(x,k,j)));
-	    coeff(x,k,j)=lsubii(mulii(p3,gcoeff(x,k,j)),
-	                        mulii(p4,gcoeff(x,k,i)));
-	    coeff(x,k,i)=(long)b;
-	  }
-	  if (all) update(u,v,p3,p4,(GEN*)(mr+i),(GEN*)(mr+j));
-          if (low_stack(lim, stack_lim(av,1)))
-	  {
-	    if (DEBUGMEM>1) err(warnmem,"[1]: smithall");
-	    if (all)
-	    {
-	      GEN *gptr[3]; gptr[0]=&x; gptr[1]=&ml; gptr[2]=&mr;
-	      gerepilemany(av,gptr,3);
-	    }
-	    else x=gerepileupto(av, ZM_copy(x));
-	  }
-	}
+          v = gzero; p3 = u;
+        }
+        else { d=bezout(p2,p1,&u,&v); p3=divii(p2,d); p4=divii(p1,d); }
+        for (k=1; k<=i; k++)
+        {
+          b=addii(mulii(u,gcoeff(x,k,i)),mulii(v,gcoeff(x,k,j)));
+          coeff(x,k,j)=lsubii(mulii(p3,gcoeff(x,k,j)),
+                              mulii(p4,gcoeff(x,k,i)));
+          coeff(x,k,i)=(long)b;
+        }
+        if (V) update(u,v,p3,p4,(GEN*)(V+i),(GEN*)(V+j));
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if (DEBUGMEM>1) err(warnmem,"[1]: smithall");
+          snf_pile(av, &x,&U,&V);
+        }
       }
-      if (DEBUGLEVEL>=8) {fprintferr("; ");flusherr();}
+      if (DEBUGLEVEL>7) fprintferr("; ");
       for (j=i-1; j>=1; j--)
       {
 	p1=gcoeff(x,j,i); s1 = signe(p1);
-	if (s1)
-	{
-	  p2=gcoeff(x,i,i);
-	  if (!absi_cmp(p1,p2))
+	if (!s1) continue;
+       
+        p2=gcoeff(x,i,i);
+        if (!absi_cmp(p1,p2))
+        {
+          s2 = signe(p2);
+          if (s1 == s2) { d=p1; u=gun; p4=gun; }
+          else
           {
-            s2 = signe(p2);
-            if (s1 == s2) { d=p1; u=gun; p4=gun; }
-            else
-	    {
-              if (s2>0) { u = gun; p4 = mun; }
-              else      { u = mun; p4 = gun; }
-	      d=(s1>0)? p1: absi(p1);
-	    }
-            v = gzero; p3 = u;
+            if (s2>0) { u = gun; p4 = mun; }
+            else      { u = mun; p4 = gun; }
+            d=(s1>0)? p1: absi(p1);
           }
-          else { d=bezout(p2,p1,&u,&v); p3=divii(p2,d); p4=divii(p1,d); }
-	  for (k=1; k<=i; k++)
-	  {
-	    b=addii(mulii(u,gcoeff(x,i,k)),mulii(v,gcoeff(x,j,k)));
-	    coeff(x,j,k)=lsubii(mulii(p3,gcoeff(x,j,k)),
-	                        mulii(p4,gcoeff(x,i,k)));
-	    coeff(x,i,k)=(long)b;
-	  }
-	  if (all) update(u,v,p3,p4,(GEN*)(ml+i),(GEN*)(ml+j));
-	  c = 1;
-	}
+          v = gzero; p3 = u;
+        }
+        else { d=bezout(p2,p1,&u,&v); p3=divii(p2,d); p4=divii(p1,d); }
+        for (k=1; k<=i; k++)
+        {
+          b=addii(mulii(u,gcoeff(x,i,k)),mulii(v,gcoeff(x,j,k)));
+          coeff(x,j,k)=lsubii(mulii(p3,gcoeff(x,j,k)),
+                              mulii(p4,gcoeff(x,i,k)));
+          coeff(x,i,k)=(long)b;
+        }
+        if (U) update(u,v,p3,p4,(GEN*)(U+i),(GEN*)(U+j));
+        c = 1;
       }
       if (!c)
       {
-	b=gcoeff(x,i,i); fl=1;
-	if (signe(b))
-	{
-	  for (k=1; k<i && fl; k++)
-	    for (l=1; l<i && fl; l++)
-	      fl = (int)!signe(resii(gcoeff(x,k,l),b));
-          /* cast to (int) necessary for gcc-2.95 on sparcv9-64 (IS) */
-	  if (!fl)
-	  {
-	    k--;
-	    for (l=1; l<=i; l++)
-	      coeff(x,i,l)=laddii(gcoeff(x,i,l),gcoeff(x,k,l));
-	    if (all) ml[i]=ladd((GEN)ml[i],(GEN)ml[k]);
-	  }
-	}
-        if (fl) break;
+	b = gcoeff(x,i,i);
+	if (!signe(b)) break;
+       
+        for (k=1; k<i; k++)
+        {
+          for (l=1; l<i; l++)
+            if (signe(resii(gcoeff(x,k,l),b))) break;
+          if (l != i) break;
+        }
+        if (k == i) break;
+       
+        /* x[k,l] != 0 mod b */
+        for (l=1; l<=i; l++)
+          coeff(x,i,l) = laddii(gcoeff(x,i,l),gcoeff(x,k,l));
+        if (U) U[i] = ladd((GEN)U[i],(GEN)U[k]);
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	if (DEBUGMEM>1) err(warnmem,"[2]: smithall");
-	if (all)
-	{
-	  GEN *gptr[3]; gptr[0]=&x; gptr[1]=&ml; gptr[2]=&mr;
-	  gerepilemany(av,gptr,3);
-	}
-	else x=gerepileupto(av,ZM_copy(x));
+        if (DEBUGMEM>1) err(warnmem,"[2]: smithall");
+        snf_pile(av, &x,&U,&V);
       }
     }
   }
-  if (DEBUGLEVEL>7) {fprintferr("\n");flusherr();}
-  if (all)
-  {
-    for (k=1; k<=n; k++)
-      if (signe(gcoeff(x,k,k))<0)
-        { mr[k]=lneg((GEN)mr[k]); coeff(x,k,k)=lnegi(gcoeff(x,k,k)); }
-    tetpil=avma; z=cgetg(4,t_VEC);
-    z[1]=ltrans(ml); z[2]=lcopy(mr); z[3]=lcopy(x);
-    return gerepile(av,tetpil,z);
-  }
-  tetpil=avma; z=cgetg(n+1,t_VEC); j=n;
-  for (k=n; k; k--)
-    if (signe(gcoeff(x,k,k))) z[j--]=labsi(gcoeff(x,k,k));
-  for (   ; j; j--) z[j]=zero;
-  return gerepile(av,tetpil,z);
+  if (DEBUGLEVEL>7) fprintferr("\n");
+  for (k=1; k<=n; k++)
+    if (signe(gcoeff(x,k,k)) < 0)
+    {
+      if (V) V[k]=lneg((GEN)V[k]);
+      coeff(x,k,k) = lnegi(gcoeff(x,k,k));
+    }
+  if (!U && !V)
+    return gerepileupto(av, mattodiagonal(x));
+   
+  if (U) U = gtrans_i(U);
+  snf_pile(av, &x,&U,&V);
+  if (ptU) *ptU = U;
+  if (ptV) *ptV = V;
+  return x;
 }
 
 GEN
-smith(GEN x) { return smithall(x,0); }
+smith(GEN x) { return smithall(x, NULL,NULL); }
 
 GEN
-smith2(GEN x) { return smithall(x,1); }
+smith2(GEN x)
+{
+  GEN z = cgetg(4, t_VEC);
+  z[3] = (long)smithall(x, (GEN*)(z+1),(GEN*)(z+2));
+  return z;
+}
 
 /* Assume z was computed by [g]smithall(). Remove the 1s on the diagonal */
 GEN
@@ -3326,10 +3338,10 @@ matsnf0(GEN x,long flag)
   long av = avma;
   if (flag > 7) err(flagerr,"matsnf");
   if (typ(x) == t_VEC && flag & 4) return smithclean(x);
-  if (flag & 2) x = gsmithall(x,flag & 1);
-  else          x = smithall(x, flag & 1);
-  if (flag & 4) x = smithclean(x);
-  return gerepileupto(av, x);
+  if (flag & 2) x = flag&1 ? gsmith2(x): gsmith(x);
+  else          x = flag&1 ?  smith2(x):  smith(x);
+  if (flag & 4) x = gerepileupto(av, smithclean(x));
+  return x;
 }
 
 GEN

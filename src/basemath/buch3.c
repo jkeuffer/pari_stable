@@ -35,19 +35,6 @@ extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN ideallllred_elt(GEN nf, GEN I);
 
-/* U W V = D, Ui = U^(-1) */
-GEN
-compute_class_number(GEN W, GEN *D,GEN *Ui,GEN *V)
-{
-  GEN S = smith2(W);
-
-  *Ui= ginv((GEN)S[1]);
-  if (V) *V = (GEN)S[2];
-  *D = (GEN)S[3];
-  if (DEBUGLEVEL>=4) msgtimer("smith/class group");
-  return dethnf_i(*D);
-}
-
 /* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
 static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
@@ -91,7 +78,7 @@ GEN
 buchnarrow(GEN bnf)
 {
   GEN nf,_0,_1,cyc,gen,v,matsign,arch,cycgen,logs;
-  GEN dataunit,p1,p2,h,clh,basecl,met,u1;
+  GEN dataunit,p1,p2,h,basecl,met,u1;
   long r1,R,i,j,ngen,sizeh,t,lo,c;
   ulong av = avma;
 
@@ -134,12 +121,12 @@ buchnarrow(GEN bnf)
     vconcat(diagonal(cyc), logs),
     vconcat(zeromat(ngen, r1-t), gscalmat(gdeux,r1-t))
   );
-  clh = compute_class_number(h,&met,&u1,NULL);
-  lo = lg(met)-1;
-  for (c=1; c<=lo; c++)
-    if (gcmp1(gcoeff(met,c,c))) break;
+ 
+  lo = lg(h)-1;
+  met = smithrel(h,NULL,&u1);
+  c = lg(met);
+  if (DEBUGLEVEL>3) msgtimer("smith/class group");
 
-  u1 = reducemodmatrix(u1,h);
   basecl = cgetg(c,t_VEC);
   for (j=1; j<c; j++)
   {
@@ -152,15 +139,15 @@ buchnarrow(GEN bnf)
       if (signe(p1))
       {
 	p2 = idealmul(nf,p2, idealpow(nf,(GEN)gen[i],p1));
-        p1 = content(p2); if (!gcmp1(p1)) p2 = gdiv(p2,p1);
+        p2 = primpart(p2);
       }
     }
     basecl[j] = (long)p2;
   }
   v = cgetg(4,t_VEC);
-  v[1] = lcopy(clh); setlg(met,c);
-  v[2] = (long)mattodiagonal(met);
-  v[3] = lcopy(basecl); return gerepileupto(av, v);
+  v[1] = (long)dethnf_i(h);
+  v[2] = (long)met;
+  v[3] = (long)basecl; return gerepilecopy(av, v);
 }
 
 /* given two coprime ideals x (integral) and id, compute alpha in x,
@@ -248,7 +235,7 @@ static GEN
 buchrayall(GEN bnf,GEN module,long flag)
 {
   GEN nf,cyc,gen,genplus,fa2,sarch,hmatu,u,clg,logs;
-  GEN dataunit,p1,p2,h,clh,genray,met,u1,u2,u1old,cycgen;
+  GEN dataunit,p1,p2,h,genray,met,u1,u2,U,cycgen;
   GEN racunit,bigres,bid,cycbid,genbid,x,y,funits,hmat,vecel;
   long RU,Ri,i,j,ngen,lh,lo,c,av=avma;
 
@@ -330,15 +317,19 @@ buchrayall(GEN bnf,GEN module,long flag)
     vconcat(diagonal(cyc), gneg_i(logs)),
     vconcat(zeromat(ngen, Ri), hmat)
   );
-  clh = compute_class_number(h,&met,&u1,NULL);
-  u1old = u1; lo = lg(met)-1;
+  h = hnf(h);
+ 
+  met = smithall(h, &U, NULL); /* cf smithrel */
+  lo = lg(met)-1;
   for (c=1; c<=lo; c++)
     if (gcmp1(gcoeff(met,c,c))) break;
-
+  setlg(met,c);
+ 
   if (flag & nf_GEN)
   {
     GEN Id = idmat(degpol(nf[1])), arch = (GEN)module[2];
-    u1 = reducemodmatrix(u1,h);
+    u1 = ginv(U); setlg(u1,c);
+    u1 = reducemodHNF(U, h, NULL);
     genray = cgetg(c,t_VEC);
     for (j=1; j<c; j++)
     {
@@ -365,8 +356,9 @@ buchrayall(GEN bnf,GEN module,long flag)
     }
     clg = cgetg(4,t_VEC); clg[3] = lcopy(genray);
   } else clg = cgetg(3,t_VEC);
-  clg[1] = licopy(clh); setlg(met,c);
-  clg[2] = (long)mattodiagonal(met);
+  met = mattodiagonal(met);
+  clg[1] = (long)dethnf_i(h);
+  clg[2] = (long)met;
   if (!(flag & nf_INIT)) return gerepileupto(av,clg);
 
   u2 = cgetg(Ri+1,t_MAT);
@@ -374,17 +366,17 @@ buchrayall(GEN bnf,GEN module,long flag)
   for (j=1; j<=RU; j++) { u1[j]=u[j]; setlg(u[j],RU+1); }
   u += RU;
   for (j=1; j<=Ri; j++) { u2[j]=u[j]; setlg(u[j],RU+1); }
-  p1 = lllint(u1); p2 = ginv(hmat);
+ 
   y = cgetg(7,t_VEC);
-  y[1] = lcopy(bnf);
-  y[2] = lcopy(bid);
-  y[3] = lcopy(vecel);
-  y[4] = linv(u1old);
-  y[5] = lcopy(clg); u = cgetg(3,t_VEC);
+  y[1] = (long)bnf;
+  y[2] = (long)bid;
+  y[3] = (long)vecel;
+  y[4] = (long)U;
+  y[5] = (long)clg; u = cgetg(3,t_VEC);
   y[6] = (long)u;
-    u[1] = lmul(u2,p2);
-    u[2] = lmul(u1,p1);
-  return gerepileupto(av,y);
+    u[1] = lmul(u2, ginv(hmat));
+    u[2] = lmul(u1, lllint(u1));
+  return gerepilecopy(av,y);
 }
 
 GEN

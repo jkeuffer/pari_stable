@@ -913,12 +913,11 @@ element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
 GEN
 smithrel(GEN H, GEN *newU, GEN *newUi)
 { 
-  GEN z,U,Ui,D,p1;
+  GEN U,Ui,D,p1;
   long l,c;
 
-  z = smith2(H);
-  U = (GEN)z[1];
-  D = (GEN)z[3]; l = lg(D);
+  D = smithall(H, &U, NULL);
+  l = lg(D);
   for (c=1; c<l; c++)
   {
     p1 = gcoeff(D,c,c);

@@ -251,25 +251,18 @@ static GEN InitChar0(GEN dataD, long prec);
 static GEN
 InitQuotient0(GEN DA, GEN C)
 {
-  long i, l;
-  GEN MQ, MrC, H, snf, snf2, rep, p1;
+  GEN D, MQ, MrC, H, U, rep;
 
-  l = lg(DA)-1;
   H = gcmp0(C)? DA: C;
   MrC  = gauss(H, DA);
-  snf  = smith2(hnf(MrC));
-  MQ   = concatsp(gmul(H, (GEN)snf[1]), DA);
-  snf2 = smith2(hnf(MQ));
+  D = diagonal(smith(hnf(MrC)));
+  MQ   = concatsp(gmul(H, D), DA);
+  D = smithall(hnf(MQ), &U, NULL);
 
   rep = cgetg(5, t_VEC);
-
-  p1  = cgetg(l + 1, t_VEC);
-  for (i = 1; i <= l; i++)
-    p1[i] = lcopy(gcoeff((GEN)snf2[3], i, i));
-
-  rep[1] = (long)dethnf((GEN)snf2[3]);
-  rep[2] = (long)p1;
-  rep[3] = lcopy((GEN)snf2[1]);
+  rep[1] = (long)dethnf_i(D);
+  rep[2] = (long)mattodiagonal(D);
+  rep[3] = lcopy(U);
   rep[4] = lcopy(C);
 
   return rep;
@@ -344,19 +337,18 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
 {
   ulong av = avma;
   long nb, i;
-  GEN snf, Mr, U, CU, subgrp;
+  GEN D, Mr, U, T, subgrp;
 
   disable_dbg(0); 
 
   Mr = diagonal(gmael(bnr, 5, 2));
-  snf = smith2(gauss(C, Mr));
-  U = ginv((GEN)snf[1]);
-  CU = gmul(C,U);
-  subgrp  = subgrouplist((GEN)snf[3], gdeux);
+  D = smithall(gauss(C, Mr), &U, NULL);
+  T = gmul(C,ginv(U));
+  subgrp  = subgrouplist(D, gdeux);
   nb = lg(subgrp) - 1;
 
   for (i = 1; i < nb; i++) /* skip Id which comes last */
-    subgrp[i] = (long)hnf(concatsp(gmul(CU, (GEN)subgrp[i]), Mr));
+    subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
 
   disable_dbg(-1); 
   return gerepilecopy(av, subgrp);

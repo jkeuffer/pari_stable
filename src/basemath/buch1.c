@@ -1116,24 +1116,19 @@ Lval1(GEN Disc)
 static GEN
 get_clgp(GEN Disc, GEN W, GEN *ptmet, long prec)
 {
-  GEN p1,p2,res,*init, u1u2=smith2(W), u1=(GEN)u1u2[1], met=(GEN)u1u2[3];
-  long c,i,j, l = lg(met);
+  GEN res,*init, u1, met = smithrel(W,NULL,&u1);
+  long c,i,j, l = lg(W);
 
-  u1 = reducemodmatrix(ginv(u1), W);
-  for (c=1; c<l; c++)
-    if (gcmp1(gcoeff(met,c,c))) break;
+  c = lg(met);
   if (DEBUGLEVEL) msgtimer("smith/class group");
   res=cgetg(c,t_VEC); init = (GEN*)cgetg(l,t_VEC);
   for (i=1; i<l; i++)
     init[i] = primeform(Disc,stoi(labs(vectbase[vperm[i]])),prec);
   for (j=1; j<c; j++)
   {
-    p1 = NULL;
+    GEN p1 = NULL;
     for (i=1; i<l; i++)
-    {
-      p2 = gpui(init[i], gcoeff(u1,i,j), prec);
-      p1 = comp(p1,p2);
-    }
+      p1 = comp(p1, powgi(init[i], gcoeff(u1,i,j)));
     res[j] = (long)p1;
   }
   if (DEBUGLEVEL) msgtimer("generators");
@@ -1649,7 +1644,8 @@ get_reg(GEN matc, long sreg)
 GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 {
-  long av0 = avma,av,tetpil,KCCO,KCCOPRO,i,j,s, *ex,**mat;
+  ulong av0 = avma, av;
+  long KCCO,KCCOPRO,i,j,s, *ex,**mat;
   long extrarel,nrelsup,nreldep,LIMC,LIMC2,cp,nbram,nlze;
   GEN p1,h,W,met,res,basecl,dr,pdep,C,B,extramat,extraC;
   GEN R,vecexpo,glog2,resc,Res,z;
@@ -1825,15 +1821,14 @@ EXTRAREL:
     err(warner,"suspicious check. Suggest increasing extra relations.");
   }
   basecl = get_clgp(Disc,W,&met,PRECREG);
-  s = lg(basecl); desalloc(mat); tetpil=avma;
+  s = lg(basecl); desalloc(mat);
 
   res=cgetg(6,t_VEC);
-  res[1]=lcopy(h); p1=cgetg(s,t_VEC);
-  for (i=1; i<s; i++) p1[i] = (long)icopy(gcoeff(met,i,i));
-  res[2]=(long)p1;
-  res[3]=lcopy(basecl);
-  res[4]=lcopy(R);
-  res[5]=(long)dbltor(c_1); return gerepile(av0,tetpil,res);
+  res[1]=(long)h;
+  res[2]=(long)met;
+  res[3]=(long)basecl;
+  res[4]=(long)R;
+  res[5]=(long)dbltor(c_1); return gerepilecopy(av0,res);
 }
 
 GEN

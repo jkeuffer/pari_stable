@@ -508,9 +508,9 @@ bnfsunit(GEN bnf,GEN S,long prec)
   card = gun;
   if (lg(H) > 1)
   { /* non trivial (rare!) */
-    GEN SNF, ClS = cgetg(4,t_VEC);
+    GEN D,U, ClS = cgetg(4,t_VEC);
 
-    SNF = smith2(H); p1 = (GEN)SNF[3];
+    D = smithall(H, &U, NULL);
     card = dethnf_i(p1);
     ClS[1] = (long)card; /* h */
     for(i=1; i<lg(p1); i++)
@@ -518,7 +518,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     setlg(p1,i);
     ClS[2]=(long)p1; /* cyc */
 
-    p1=cgetg(i,t_VEC); pow=ZM_inv((GEN)SNF[1],gun);
+    p1=cgetg(i,t_VEC); pow=ZM_inv(U,gun);
     for(i--; i; i--)
       p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
     ClS[3]=(long)p1; /* gen */
