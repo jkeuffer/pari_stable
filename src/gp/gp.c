@@ -2035,9 +2035,6 @@ gprc_get(char *path)
   FILE *f = NULL;
   char *str, *s, c;
   long l;
-#ifdef macintosh
-  f = gprc_chk("gprc");
-#else
   s = os_getenv("GPRC");
   if (s) f = gprc_chk(s);
   if (!f)
@@ -2073,7 +2070,6 @@ gprc_get(char *path)
     }
     free(str);
   }
-#endif
   return f;
 }
 

@@ -19,13 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#ifdef macintosh
-#  include "rect.h"
-#  include "anal.h"
-#else
-#  include "../graph/rect.h"
-#  include "../language/anal.h"
-#endif
+#include "../graph/rect.h"
+#include "../language/anal.h"
 
 extern void kill0(entree *ep);
 

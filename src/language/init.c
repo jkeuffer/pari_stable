@@ -1921,20 +1921,7 @@ _get_time(pari_timer *T, long Ticks, long TickPerSecond)
   T->s  = s; return delay;
 }
 
-#ifdef WINCE
-long
-TIMER(pari_timer *T)
-{
-  return _get_time(T, GetTickCount(), 1000);
-}
-#elif defined(macintosh)
-# include <Events.h>
-long
-TIMER(pari_timer *T)
-{
-  return _get_time(T, TickCount(), 60);
-}
-#elif USE_TIMES
+#ifdef USE_TIMES
 
 # include <sys/times.h>
 # include <sys/time.h>
@@ -1974,6 +1961,19 @@ TIMER(pari_timer *T)
   delay = 1000 * (t.time - T->s) + (t.millitm - T->us / 1000);
   T->us = t.millitm * 1000;
   T->s  = t.time; return delay;
+}
+#elif WINCE
+long
+TIMER(pari_timer *T)
+{
+  return _get_time(T, GetTickCount(), 1000);
+}
+#elif defined(macintosh)
+# include <Events.h>
+long
+TIMER(pari_timer *T)
+{
+  return _get_time(T, TickCount(), 60);
 }
 #else
 

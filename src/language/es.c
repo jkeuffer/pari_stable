@@ -3379,7 +3379,7 @@ unix_shell()
 static int
 pari_is_rwx(char *s)
 {
-#if defined(UNIX) || defined (__EMX__) /* TODO: ok for macintosh? */
+#if defined(UNIX) || defined (__EMX__)
   return access(s, R_OK | W_OK | X_OK) == 0;
 #else
   return 1;
