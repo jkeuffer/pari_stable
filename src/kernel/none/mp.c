@@ -241,6 +241,8 @@ affir(GEN x, GEN y)
       return;
     }
     shift_left(y,x,2,ly-1, x[ly],sh);
+    /* lx > ly: round properly */
+    if ((x[ly]<<sh) & HIGHBIT) roundr_up_ip(y, ly);
   }
   else {
     if (lx <= ly)
@@ -250,9 +252,9 @@ affir(GEN x, GEN y)
       return;
     }
     for (i=2; i<ly; i++) y[i]=x[i];
+    /* lx > ly: round properly */
+    if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
   }
-  /* lx > ly: round properly */
-  if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
 }
 
 void
