@@ -39,7 +39,7 @@ if test ! -f $Xincroot/X11/Xos.h; then
     /usr/local/x11r5/lib\
     /usr/lpp/Xamples/lib\
   ";
-  pth=`echo $x11pth | s,/lib,/include,g`
+  pth=`echo $x11pth | sed 's,/lib,/include,g'`
   x=`./locate X11/Xos.h '' $pth`
   case $x in
    /*) Xincroot=`echo $x | sed 's,/X11/Xos.h,,'`;;
