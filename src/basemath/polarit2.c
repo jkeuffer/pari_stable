@@ -2659,6 +2659,7 @@ polfnf(GEN a, GEN t)
     n = subres(t, poleval(g,n));
     if (lgef(ggcd(n,derivpol(n))) == 3) break;
   }
+  if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
   fa=factor(n); fa=(GEN)fa[1]; lx=lg(fa);
   y=cgetg(3,t_MAT);
   p1=cgetg(lx,t_COL); y[1]=(long)p1;
