@@ -9,7 +9,7 @@ DLSUFFIX=so
 soname=.$soname_num
 do_dll=yes
 case "$osname" in
-  aix|osf1|solaris|linux|freebsd)
+  gnu|aix|osf1|solaris|linux|freebsd)
     case $libpari_base in
       pari) sodest=.$version.$patch;; # released version
       *)    sodest=.$patch.0.0;;      # unstable version

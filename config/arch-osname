@@ -52,6 +52,8 @@ if test -n "$myuname"; then
 	    sun4u)    arch=sparcv9;;
             i*pc) arch=ix86;;
 	    esac;;
+  gnu)      arch=`uname -m`;
+            case $arch in i386-*) arch=i386;;esac;;
   esac
 fi
 echo $arch-$osname
