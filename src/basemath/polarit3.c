@@ -166,6 +166,22 @@ addshiftwcopy(GEN x, GEN y, long d)
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
 }
 
+/* shift polynomial in place. assume i free cells have been left before x */
+static GEN
+shiftpol_ip(GEN x, long v)
+{
+  long i, lx;
+  GEN y;
+  if (v <= 0 || !signe(x)) return x;
+  lx = lgef(x);
+  x += 2; y = x + v;
+  for (i = lx-3; i>=0; i--) y[i] = x[i];
+  for (i = 0   ; i< v; i++) x[i] = zero;
+  lx += v;
+  *--x = evalsigne(1) | evallgef(lx);
+  *--x = evaltyp(t_POL) | evallg(lx); return x;
+}
+
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
  * b+2 were sent instead. na, nb = number of terms of a, b.
  * Only c, c0, c1, c2 are genuine GEN.
@@ -174,10 +190,15 @@ GEN
 quickmul(GEN a, GEN b, long na, long nb)
 {
   GEN a0,c,c0;
-  long av,n0,n0a,i;
+  long av,n0,n0a,i, v = 0;
+
+  while (na && isexactzero((GEN)a[0])) { a++; na--; v++; }
+  while (nb && isexactzero((GEN)b[0])) { b++; nb--; v++; }
+  if (v) (void)new_chunk(v);
 
   if (na < nb) swapspec(a,b, na,nb);
-  if (nb < MUL_LIMIT) return mulpol(a,b,na,nb);
+  if (nb < MUL_LIMIT)
+    return shiftpol_ip(mulpol(a,b,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+n0; n0a=n0;
   while (n0a && isexactzero((GEN)a[n0a-1])) n0a--;
@@ -205,7 +226,7 @@ quickmul(GEN a, GEN b, long na, long nb)
     c0 = quickmul(a0,b,na,nb);
   }
   c0 = addshiftwcopy(c0,c,n0);
-  return gerepileupto(av,c0);
+  return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
 GEN
@@ -249,9 +270,11 @@ GEN
 quicksqr(GEN a, long na)
 {
   GEN a0,c,c0,c1;
-  long av,n0,n0a,i;
+  long av,n0,n0a,i, v = 0;
 
-  if (na<SQR_LIMIT) return sqrpol(a,na);
+  while (na && isexactzero((GEN)a[0])) { a++; na--; v += 2; }
+  if (v) (void)new_chunk(v);
+  if (na<SQR_LIMIT) return shiftpol_ip(sqrpol(a,na), v);
   i=(na>>1); n0=na-i; na=i;
   av=avma; a0=a+n0; n0a=n0;
   while (n0a && isexactzero((GEN)a[n0a-1])) n0a--;
@@ -261,7 +284,7 @@ quicksqr(GEN a, long na)
   c1 = gmul2n(quickmul(a0,a, na,n0a), 1);
   c0 = addshiftw(c0,c1, n0);
   c0 = addshiftwcopy(c0,c,n0);
-  return gerepileupto(av,c0);
+  return shiftpol_ip(gerepileupto(av,c0), v);
 }
 
 /* x,pol in Z[X], p in Z, n in N, compute lift(x^n mod (p, pol)) */
