@@ -485,12 +485,9 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
 GEN
 subcyclo_complex_roots(long n, long real, long prec)
 {
-  GEN powz;
-  GEN pi=mppi(prec); 
-  GEN z = cgetg(3,t_COMPLEX);
-  long i,k = (n+3)>>1;
-  setexpo(pi,2); /* a = 2\pi */ 
-  gsincos(divrs(pi,n),(GEN*)(z+2),(GEN*)(z+1),prec); /* z = e_n(1) */
+  GEN powz, z = exp_Ir(divrs(Pi2n(prec,1), n)); /* = e_n(1) */
+  long i, k = (n+3)>>1;
+
   powz = cgetg(n,t_VEC);
   powz[1] = (long)z;
   for (i=2; i<k; i++) powz[i] = lmul(z,(GEN)powz[i-1]);
