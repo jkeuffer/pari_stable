@@ -187,6 +187,10 @@ ZX_Flx(GEN x, ulong p)
   return Flx_renormalize(a,lx);
 }
 
+/* Note: vs is used _only_ for the t_INT. It must match
+ * the shifted variable of any t_POL coefficients.
+ */
+
 GEN 
 ZXX_Flxy(GEN B, ulong p, long vs)
 {
@@ -1178,7 +1182,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
 {
   long i,k,lx = lg(a);
   GEN p1,p2;
-  if (lx == 1) return polun[0];
+  if (lx == 1) return Fl_Flx(1,vs);
   p1 = cgetg(lx, t_VEC); global_pp = p;
   for (k=1,i=1; i<lx-1; i+=2)
   {
@@ -1188,13 +1192,13 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
     p2[3] = a[i] + a[i+1];
     if ((ulong)p2[3] >= p) p2[3] -= p;
     if (p2[3]) p2[3] = p - p2[3]; /* - (a[i] + a[i+1]) mod p */
-    p2[4] = 1; p2[1] = 0;
+    p2[4] = 1; 
   }
   if (i < lx)
   {
     p2 = cgetg(4,t_POL); p1[k++] = (long)p2;
-    p2[1] = 0;
-    p2[2] = p - a[i];
+    p2[1] = vs;
+    p2[2] = a[i]?p - a[i]:0;
     p2[3] = 1;
   }
   setlg(p1, k); return divide_conquer_prod(p1, _Flx_mul);
