@@ -137,6 +137,7 @@ HC 12- gamma function for integral/rational arguments
        divided the index (use approximation theorem)
    25- content(scalar) = abs(scalar) [when it makes sense]
    26- changed the interface to ispseudoprime and isprime
+   27- [internal] element_muli: check input is consistent
 
   Added
     1- mplog2() function --> faster mplog()
