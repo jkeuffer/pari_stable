@@ -4984,18 +4984,27 @@ Also available is $\teb{algdep}(x,k,\var{prec})$ ($\fl=0$).
 \subsecidx{charpoly}$(A,\{v=x\},\{\fl=0\})$: \idx{characteristic polynomial}
 of $A$ with respect to the variable $v$, i.e.~determinant of $v*I-A$ if $A$
 is a square matrix, determinant of the map ``multiplication by $A$'' if $A$
-is a scalar, in particular a polmod (e.g.~\kbd{charpoly(I,x)=x\pow2+1}),
-error if $A$ is of any other type. The value of $\fl$ is only significant
-for matrices.
+is a scalar, in particular a polmod (e.g.~\kbd{charpoly(I,x)=x\pow2+1}).
+Note that in the latter case, the \idx{minimal polynomial} can be obtained
+as
+\bprog
+minpoly(A)=
+\obr
+\q  local(y);
+\q  y = charpoly(A);
+\q  y / gcd(y,y')
+\cbr
+\eprog
+\noindent The value of $\fl$ is only significant for matrices.
 
 If $\fl=0$, the method used is essentially the same as for computing the
 adjoint matrix, i.e.~computing the traces of the powers of $A$.
 
 If $\fl=1$, uses Lagrange interpolation which is almost always slower.
 
-If $\fl=2$, uses the Hessenberg form. This is faster than the default when the
-coefficients are integermod a prime or real numbers, but is usually slower in
-other base rings.
+If $\fl=2$, uses the Hessenberg form. This is faster than the default when
+the coefficients are integermod a prime or real numbers, but is usually
+slower in other base rings.
 
 \syn{charpoly0}{A,v,\fl}, where $v$ is the variable number. Also available
 are the functions $\teb{caract}(A,v)$ ($\fl=1$), $\teb{carhess}(A,v)$
