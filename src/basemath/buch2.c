@@ -1445,6 +1445,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       {
         GEN u = (GEN)y[2];
         if (!gen || typ(y) != t_VEC) return gerepileupto(av,y);
+        if (lg(u) == 1) return gerepilecopy(av,y);
         y[2] = (long)add_principal_part(nf, u, (GEN)id[2], flag);
       }
       return gerepilecopy(av, y);
