@@ -577,7 +577,8 @@ gach(GEN x, long prec)
     case t_COMPLEX:
       av = avma; 
       p1 = gadd(x, gsqrt(gaddsg(-1,gsqr(x)), prec)); /* x + sqrt(x^2-1) */
-      y = glog(p1,prec); if (signe(y[2]) < 0) y = gneg(y);
+      y = glog(p1,prec);
+      if (typ(y) == t_COMPLEX && signe(y[2]) < 0) y = gneg(y);
       return gerepileupto(av, y);
 
     case t_INTMOD: case t_PADIC: err(typeer,"gach");
