@@ -837,8 +837,13 @@ extern HIST_ENTRY *history_get(int);
 static int
 history_is_new(char *s)
 {
-  return (*s && (!history_length ||
-                  strcmp(s, history_get(history_length)->line)));
+  HIST_ENTRY *e;
+  if (!*s) return 0;
+  if (!history_length) return 1;
+  e = history_get(history_length);
+  /* paranoia: e should be non-NULL, unless readline is in a weird state */
+  if (!e) return 0;
+  return strcmp(s, e->line);
 }
 
 static void

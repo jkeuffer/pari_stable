@@ -157,6 +157,8 @@ BA 67- matsnf(Mat([])) was returning a matrix instead of a vector.
    70- memory possibly freed twice in pop_val_if_newer() [ race condition on
        interrupt (<C-C>) during new_val_cell() ]
    71- ellap(ellinit([0,1,0,1,0]),100) --> SEGV  [ 100 is not prime ! ]
+MS 72- recover from readline history corruption [ don't trust history_length
+       in history_is_new() ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
