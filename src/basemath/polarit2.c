@@ -3020,6 +3020,7 @@ content(GEN x)
     }
     if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gun; }
   }
+  i = typ(p1); if (is_matvec_t(i)) err(typeer, "content");
   return av==avma? gcopy(p1): gerepileupto(av,p1);
 }
 

@@ -166,6 +166,8 @@ MS 72- recover from readline history corruption [ don't trust history_length
 JD 74- [Configure:] detection of times()
    75- Forbid t_POL + t_VEC: useless and inconsistent [ we had: 1 + [] -->
        error, x + [] --> OK but x * [] --> [] instead of '[]*x' , etc. ]
+   76- obscure bugs wrt polynomials with t_MAT coefficients created via Pol()
+       [ e.g content(x*[;]) --> [;], primitive_part(x*[;]) --> [;] ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
