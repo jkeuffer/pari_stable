@@ -83,6 +83,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    31- rnfkummer(bnrinit(bnfinit(y),nextprime(10^20),1),Mat(3)) --> module
        too large in Fp_shanks [ conductor() was computing unnecessarily
        tough discrete logs ]
+   32- [Configure:] add /lib64 and /usr/lib64 to library search path
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

@@ -34,6 +34,8 @@ case "$osname" in
       /lib\
       /usr/lib\
       /opt/lib\
+      /lib64\
+      /usr/lib64\
       /opt/local/lib\
       /opt/gnu/lib\
       /lib/pa1.1\
