@@ -38,7 +38,6 @@ t_INT           @Integers@2
 INT             @Integers@2
 integer         @Integers@2
 REAL            @Real numbers@2
-real            @Real numbers@2
 real number     @Real numbers@2
 INTMOD          @Integermods@2
 intmod          @Integermods@2
