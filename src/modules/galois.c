@@ -134,7 +134,7 @@ _cr(IND a,...)
   va_list args;
   long i;
 
-  va_start(args, a); x[0] = N; x[1] = a;
+  va_start(args, a); x[0] = (IND)N; x[1] = a;
   for (i=2; i<=N; i++) x[i] = va_arg(args,int);
   va_end(args); return x;
 }
@@ -145,7 +145,7 @@ permmul(PERM s1, PERM s2)
   long i, n1 = s1[0];
   PERM s3 = (PERM)gpmalloc((n1+1) * sizeof(IND));
   for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
-  s3[0]=n1; return s3;
+  s3[0] = (IND)n1; return s3;
 }
 
 static void
@@ -2475,7 +2475,7 @@ galoisbig(GEN pol, long prec)
   long tab11[]={0, 11,22,55,110,660,7920,19958400,39916800};
 
   N = degpol(pol); dpol = ZX_disc(pol); EVEN = carreparfait(dpol);
-  ID[0] = N;
+  ID[0] = (IND)N;
   
   if (DEBUGLEVEL)
   {

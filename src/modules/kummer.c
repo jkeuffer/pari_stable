@@ -930,8 +930,9 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   degKz = degpol(COMPO.R);
   m = degKz / degK;
   d = (ell-1) / m;
-  g = powuumod(u_gener(ell), d, ell);
-  if (powuumod(g, m, ell*ell) == 1) g += ell; /* ord(g)=m in all (Z/ell^k)^* */
+  g = (long)powuumod(u_gener(ell), d, ell);
+  if (powuumod((ulong)g, m, ell*ell) == 1) g += ell;
+  /* ord(g) = m in all (Z/ell^k)^* */
   /* step 3 */
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");
   /* could factor disc(R) using th. 2.1.6. */

@@ -113,8 +113,8 @@ L(GEN n, ulong q, GEN Pi, long prec)
   
   if (q == 1) return stor(1, prec);
   if (q == 2) return stor(nmodq? -1: 1, prec);
-  pr = (2*prec) / q + 1; 
-  if (pr < DEFAULTPREC) pr = DEFAULTPREC;
+  pr = (2*(ulong)prec) / q + 1; 
+  if (pr < (ulong)DEFAULTPREC) pr = (ulong)DEFAULTPREC;
   pi = gprec_w(Pi, pr);
   res = stor(0, pr); av = avma;
   for (h = 1; h < q; h++, avma = av)
