@@ -101,6 +101,7 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
        same effect as M-h (used to insert args).
 IZ 19- faster computation of prime number table [better cache use]
 IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
+   21- make bench ('elliptic'): explained [BUG] message
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
