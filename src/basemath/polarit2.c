@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define swap(a,b) { GEN _x = a; a = b; b = _x; }
 #define lswap(a,b) { long _x = a; a = b; b = _x; }
 #define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
-#define both_even(a,b) ((((a)|(b))&1) == 0)
+#define both_odd(a,b) ((a)&(b)&1)
 
 GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
 
@@ -2841,13 +2841,13 @@ subresall(GEN u, GEN v, GEN *sol)
   if ((r = init_resultant(u,v))) return r;
 
   if (isinexactfield(u) || isinexactfield(v)) return resultant2(u,v);
-  dx=lgef(u); dy=lgef(v); signh=1;
-  if (dx<dy)
+  dx=degpol(u); dy=degpol(v); signh=1;
+  if (dx < dy)
   {
     swap(u,v); lswap(dx,dy);
-    if (both_even(dx, dy)) signh = -signh;
+    if (both_odd(dx, dy)) signh = -signh;
   }
-  if (dy==3) return gpowgs((GEN)v[2],dx-3);
+  if (dy==0) return gpowgs((GEN)v[2],dx);
   av = avma;
   u = primitive_part(u, &cu);
   v = primitive_part(v, &cv);
@@ -2860,7 +2860,7 @@ subresall(GEN u, GEN v, GEN *sol)
       if (sol) { avma = (long)(r+2); *sol=gerepileupto(av,v); } else avma = av;
       return gzero;
     }
-    du = lgef(u); dv = lgef(v); degq = du-dv;
+    du = degpol(u); dv = degpol(v); degq = du-dv;
     u = v; p1 = g; g = leading_term(u);
     switch(degq)
     {
@@ -2871,7 +2871,7 @@ subresall(GEN u, GEN v, GEN *sol)
         p1 = gmul(gpowgs(h,degq),p1);
         h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    if (both_even(du,dv)) signh = -signh;
+    if (both_odd(du,dv)) signh = -signh;
     v = gdivexact(r,p1);
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
@@ -2882,11 +2882,11 @@ subresall(GEN u, GEN v, GEN *sol)
     }
   }
   z = (GEN)v[2];
-  if (dv > 4) z = gdivexact(gpowgs(z,dv-3), gpowgs(h,dv-4));
+  if (dv > 1) z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1));
   if (signh < 0) z = gneg(z); /* z = resultant(ppart(x), ppart(y)) */
   p2 = gun;
-  if (cu) p2 = gmul(p2, gpowgs(cu,dy-3));
-  if (cv) p2 = gmul(p2, gpowgs(cv,dx-3));
+  if (cu) p2 = gmul(p2, gpowgs(cu,dy));
+  if (cv) p2 = gmul(p2, gpowgs(cv,dx));
   z = gmul(z, p2);
 
   if (sol) u = gclone(u);
@@ -2898,8 +2898,7 @@ subresall(GEN u, GEN v, GEN *sol)
 static GEN
 scalar_res(GEN x, GEN y, GEN *U, GEN *V)
 {
-  long dx=lgef(x)-4;
-  *V=gpuigs(y,dx); *U=gzero; return gmul(y,*V);
+  *V=gpuigs(y,degpol(x)-1); *U=gzero; return gmul(y,*V);
 }
 
 /* compute U, V s.t Ux + Vy = resultant(x,y) */
@@ -2922,15 +2921,15 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   if (varn(x) != varn(y))
     return (varn(x)<varn(y))? scalar_res(x,y,U,V)
                             : scalar_res(y,x,V,U);
-  dx = lgef(x); dy = lgef(y); signh = 1;
+  dx = degpol(x); dy = degpol(y); signh = 1;
   if (dx < dy)
   {
     pswap(U,V); lswap(dx,dy); swap(x,y);
-    if (both_even(dx, dy)) signh = -signh;
+    if (both_odd(dx, dy)) signh = -signh;
   }
-  if (dy == 3)
+  if (dy == 0)
   {
-    *V = gpowgs((GEN)y[2],dx-4);
+    *V = gpowgs((GEN)y[2],dx-1);
     *U = gzero; return gmul(*V,(GEN)y[2]);
   }
   av = avma;
@@ -2943,9 +2942,9 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     q = pseudodiv(u,v, &r); dr = lgef(r);
     if (dr == 2) { *U = *V = gzero; avma = av; return gzero; }
 
-    du = lgef(u); dv = lgef(v); degq = du-dv;
+    du = degpol(u); dv = degpol(v); degq = du-dv;
     /* lead(v)^(degq + 1) * um1 - q * uze */
-    p1 = gsub(gmul(gpowgs((GEN)v[dv-1],degq+1),um1), gmul(q,uze));
+    p1 = gsub(gmul(gpowgs((GEN)v[dv+2],degq+1),um1), gmul(q,uze));
     um1 = uze; uze = p1;
     u = v; p1 = g; g = leading_term(u);
     switch(degq)
@@ -2956,7 +2955,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
         p1 = gmul(gpowgs(h,degq),p1);
         h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    if (both_even(du, dv)) signh = -signh;
+    if (both_odd(du, dv)) signh = -signh;
     v  = gdivexact(r,p1);
     uze= gdivexact(uze,p1);
     if (dr==3) break;
@@ -2969,10 +2968,10 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     }
   }
   z = (GEN)v[2];
-  if (dv > 4) 
+  if (dv > 1) 
   {
-    /* z = gdivexact(gpowgs(z,dv-3), gpowgs(h,dv-4)); */
-    p1 = gpowgs(gdiv(z,h),dv-4);
+    /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
+    p1 = gpowgs(gdiv(z,h),dv-1);
     z = gmul(z,p1); uze = gmul(uze,p1);
   }
   if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
@@ -2980,8 +2979,8 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   if (!poldivis(p1,yprim,&vze)) err(bugparier,"subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
   p2 = gun;
-  if (cu) p2 = gmul(p2, gpowgs(cu,dy-3));
-  if (cv) p2 = gmul(p2, gpowgs(cv,dx-3));
+  if (cu) p2 = gmul(p2, gpowgs(cu,dy));
+  if (cv) p2 = gmul(p2, gpowgs(cv,dx));
   cu = cu? gdiv(p2,cu): p2;
   cv = cv? gdiv(p2,cv): p2;
 
@@ -3028,12 +3027,12 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
   if (varn(x)!=varn(y))
     return (varn(x)<varn(y))? scalar_bezout(x,y,U,V)
                             : scalar_bezout(y,x,V,U);
-  dx = lgef(x); dy = lgef(y);
+  dx = degpol(x); dy = degpol(y);
   if (dx < dy)
   {
     pswap(U,V); lswap(dx,dy); swap(x,y);
   }
-  if (dy==3) return scalar_bezout(x,y,U,V);
+  if (dy==0) return scalar_bezout(x,y,U,V);
 
   u = primitive_part(x, &cu); xprim = u;
   v = primitive_part(y, &cv); yprim = v;
@@ -3044,8 +3043,8 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
     q = pseudodiv(u,v, &r); dr = lgef(r);
     if (dr == 2) break;
 
-    du = lgef(u); dv = lgef(v); degq = du-dv;
-    p1 = gsub(gmul(gpowgs((GEN)v[dv-1],degq+1),um1), gmul(q,uze));
+    du = degpol(u); dv = degpol(v); degq = du-dv;
+    p1 = gsub(gmul(gpowgs((GEN)v[dv+2],degq+1),um1), gmul(q,uze));
     um1 = uze; uze = p1;
     u = v; p1 = g; g  = leading_term(u);
     switch(degq)
