@@ -1657,7 +1657,7 @@ typedef struct {
   GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
   long n; /* length */
 } forvec_data;
-GEN forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*));
+GEN forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*,GEN));
 
 GEN     direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c);
 GEN     direuler(entree *ep, GEN a, GEN b, char *ch);

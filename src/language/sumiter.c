@@ -206,14 +206,15 @@ fordiv(GEN a, entree *ep, char *ch)
  *   fl = 2:        a1 <  ... <  an
  */
 
-static GEN
-forvec_dummy(forvec_data *d) { return NULL; } /* used for empty vector, n = 0 */
+static GEN /* used for empty vector, n = 0 */
+forvec_dummy(forvec_data *d, GEN a) { (void)d; (void)a; return NULL; }
 
 /* increment and return d->a [over integers]*/
 static GEN
-forvec_next_i(forvec_data *d)
+forvec_next_i(forvec_data *d, GEN ignored)
 {
   long i = d->n;
+  (void)ignored;
   for (;;) {
     d->a[i] = incloop(d->a[i]);
     if (cmpii(d->a[i], d->M[i]) <= 0) return (GEN)d->a;
@@ -224,23 +225,25 @@ forvec_next_i(forvec_data *d)
 }
 /* increment and return d->a [generic]*/
 static GEN
-forvec_next(forvec_data *d)
+forvec_next(forvec_data *d, GEN v0)
 {
   long i = d->n;
+  GEN *v = (GEN*)v0;
   for (;;) {
-    d->a[i] = gaddgs(d->a[i], 1);
-    if (gcmp(d->a[i], d->M[i]) <= 0) return (GEN)d->a;
-    d->a[i] = d->m[i];
+    v[i] = gaddgs(v[i], 1);
+    if (gcmp(v[i], d->M[i]) <= 0) return (GEN)v;
+    v[i] = d->m[i];
     if (--i <= 0) return NULL;
   }
-  return (GEN)d->a;
+  return (GEN)v;
 }
 
 /* non-decreasing order [over integers] */
 static GEN
-forvec_next_le_i(forvec_data *d)
+forvec_next_le_i(forvec_data *d, GEN ignored)
 {
   long i = d->n, imin = d->n;
+  (void)ignored;
   for (;;) {
     d->a[i] = incloop(d->a[i]);
     if (cmpii(d->a[i], d->M[i]) <= 0)
@@ -271,42 +274,44 @@ forvec_next_le_i(forvec_data *d)
 }
 /* non-decreasing order [generic] */
 static GEN
-forvec_next_le(forvec_data *d)
+forvec_next_le(forvec_data *d, GEN v0)
 {
   long i = d->n, imin = d->n;
+  GEN *v = (GEN*)v0;
   for (;;) {
-    d->a[i] = gaddgs(d->a[i], 1);
-    if (gcmp(d->a[i], d->M[i]) <= 0)
+    v[i] = gaddgs(v[i], 1);
+    if (gcmp(v[i], d->M[i]) <= 0)
     {
       while (i < d->n)
       {
         i++;
-        if (gcmp(d->a[i-1], d->a[i]) <= 0) continue;
-        while (gcmp(d->a[i-1], d->M[i]) > 0)
+        if (gcmp(v[i-1], v[i]) <= 0) continue;
+        while (gcmp(v[i-1], d->M[i]) > 0)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
-          d->a[i] = gaddgs(d->a[i], 1);
-          if (gcmp(d->a[i], d->M[i]) <= 0) break;
+          v[i] = gaddgs(v[i], 1);
+          if (gcmp(v[i], d->M[i]) <= 0) break;
         } 
         if (i > 1) { /* a >= a[i-1] - a[i] */
-          GEN a = gceil(gsub(d->a[i-1], d->a[i]));
-          d->a[i] = gadd(d->a[i], a);
+          GEN a = gceil(gsub(v[i-1], v[i]));
+          v[i] = gadd(v[i], a);
         }
       }
-      return (GEN)d->a;
+      return (GEN)v;
     }
-    d->a[i] = d->m[i];
+    v[i] = d->m[i];
     if (--i <= 0) return NULL;
     if (i < imin) imin = i;
   }
-  return (GEN)d->a;
+  return (GEN)v;
 }
 /* strictly increasing order [over integers] */
 static GEN
-forvec_next_lt_i(forvec_data *d)
+forvec_next_lt_i(forvec_data *d, GEN ignored)
 {
   long i = d->n, imin = d->n;
+  (void)ignored;
   for (;;) {
     d->a[i] = incloop(d->a[i]);
     if (cmpii(d->a[i], d->M[i]) <= 0)
@@ -337,40 +342,41 @@ forvec_next_lt_i(forvec_data *d)
 }
 /* strictly increasing order [generic] */
 static GEN
-forvec_next_lt(forvec_data *d)
+forvec_next_lt(forvec_data *d, GEN v0)
 {
   long i = d->n, imin = d->n;
+  GEN *v = (GEN*)v0;
   for (;;) {
-    d->a[i] = gaddgs(d->a[i], 1);
-    if (gcmp(d->a[i], d->M[i]) <= 0)
+    v[i] = gaddgs(v[i], 1);
+    if (gcmp(v[i], d->M[i]) <= 0)
     {
       while (i < d->n)
       {
         i++;
-        if (gcmp(d->a[i-1], d->a[i]) < 0) continue;
-        while (gcmp(d->a[i-1], d->M[i]) > 0)
+        if (gcmp(v[i-1], v[i]) < 0) continue;
+        while (gcmp(v[i-1], d->M[i]) > 0)
         {
           i = imin - 1; if (!i) return NULL;
           imin = i;
-          d->a[i] = gaddgs(d->a[i], 1);
-          if (gcmp(d->a[i], d->M[i]) <= 0) break;
+          v[i] = gaddgs(v[i], 1);
+          if (gcmp(v[i], d->M[i]) <= 0) break;
         } 
         if (i > 1) { /* a > a[i-1] - a[i] */
-          GEN a = addis(gfloor(gsub(d->a[i-1], d->a[i])), 1);
-          d->a[i] = gadd(d->a[i], a);
+          GEN a = addis(gfloor(gsub(v[i-1], v[i])), 1);
+          v[i] = gadd(v[i], a);
         }
       }
-      return (GEN)d->a;
+      return (GEN)v;
     }
-    d->a[i] = d->m[i];
+    v[i] = d->m[i];
     if (--i <= 0) return NULL;
     if (i < imin) imin = i;
   }
-  return (GEN)d->a;
+  return (GEN)v;
 }
 
 GEN
-forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*))
+forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*,GEN))
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
 
@@ -424,12 +430,12 @@ forvec(entree *ep, GEN x, char *c, long flag)
 {
   pari_sp av = avma;
   forvec_data D;
-  GEN (*next)(forvec_data *);
+  GEN (*next)(forvec_data *,GEN);
   GEN v = forvec_start(&D, x, flag, &next);
   push_val(ep, v);
   while (v) {
     pari_sp av2 = avma; lisseq_void(c); avma = av2;
-    v = next(&D);
+    v = next(&D, v);
   }
   pop_val(ep); avma = av;
 }
