@@ -144,7 +144,7 @@ inithue(GEN poly, long flag)
 
 /* Computation of M, its inverse A and check of the precision (see paper) */
 static void
-T_A_Matrices()
+T_A_Matrices(void)
 {
   GEN mask, eps1, eps2, nia, m1, IntM;
   int i,j;
@@ -182,7 +182,7 @@ T_A_Matrices()
 
 /* Computation of the constants c5, c7, c10, c12, c15 */
 static void
-ComputeConstants()
+ComputeConstants(void)
 {
   int k;
 
@@ -497,7 +497,7 @@ GuessQi(GEN *q1, GEN *q2, GEN *q3)
 }
 
 static void
-TotRat()
+TotRat(void)
 {
   err(bugparier,"thue (totally rational case)");
 }

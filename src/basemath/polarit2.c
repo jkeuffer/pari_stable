@@ -2190,7 +2190,7 @@ resultantducos(GEN P, GEN Q)
 /*                                                                 */
 /*******************************************************************/
 static GEN
-_zeropol()
+_zeropol(void)
 {
   GEN x = cgetg(3,t_POL);
   x[1] = evallgef(3);

@@ -220,7 +220,7 @@ GEN     gsumdiv(GEN n);
 GEN     gsumdivk(GEN n,long k);
 byteptr initprimes(long maxnum);
 long    issquarefree(GEN x);
-ulong   maxprime();
+ulong   maxprime(void);
 long    mu(GEN n);
 GEN     nucomp(GEN x, GEN y, GEN l);
 GEN     nudupl(GEN x, GEN l);

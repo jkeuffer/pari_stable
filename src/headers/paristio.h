@@ -23,8 +23,8 @@ typedef struct entree {
 typedef struct PariOUT {
   void (*putch)(char);
   void (*puts)(char*);
-  void (*flush)();     /* Finalize a report of a non fatal-error. */
-  void (*die)();       /* If not-NULL, should be called to finalize
+  void (*flush)(void);     /* Finalize a report of a non fatal-error. */
+  void (*die)(void);       /* If not-NULL, should be called to finalize
                           a report of a fatal error (no "\n" required). */
 } PariOUT;
 

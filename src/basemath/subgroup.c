@@ -95,7 +95,7 @@ treatsub(GEN Hp)
 
 /* assume t>0 and l>1 */
 static void
-dogroup()
+dogroup(void)
 {
   long av = avma,av1, e,i,j,k,r,n,t2,ind, t = mmu[0], l = lam[0];
 
@@ -163,7 +163,7 @@ loop(long r)
 }
 
 static void
-dopsubtyp()
+dopsubtyp(void)
 {
   long av = avma, i,r, l = lam[0], t = mmu[0]; 
 

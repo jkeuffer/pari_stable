@@ -886,7 +886,7 @@ mymyrand()
 GEN muluu(ulong x, ulong y);
 
 static ulong
-gp_rand()
+gp_rand(void)
 {
 #define GLUE2(hi, lo) (((hi) << BITS_IN_HALFULONG) | (lo))
 #if !defined(LONG_IS_64BIT) || BITS_IN_RANDOM == 64
