@@ -2626,13 +2626,12 @@ nfreducemodpr(GEN nf, GEN x, GEN modpr)
   checkmodpr(modpr);
   pr = (GEN)modpr[mpr_PR];
   p = (GEN)pr[1];
-  if (typ(x) != t_COL) x = algtobasis(nf,x);
+  x = _algtobasis(nf,x);
   for (i=lg(x)-1; i>0; i--)
     if (typ(x[i]) == t_INTMOD) { x = lift(x); break; }
   x = kill_denom(x, nf, p, modpr);
   x = ff_to_nf(zk_to_ff(x,modpr), modpr);
-  if (typ(x) != t_COL) x = algtobasis(nf, x);
-  return gerepileupto(av, FpV(x, p));
+  return gerepileupto(av, FpV(_algtobasis(nf,x), p));
 }
 
 GEN

@@ -28,15 +28,15 @@ GEN
 matbasistoalg(GEN nf,GEN x)
 {
   long i, j, li, lx = lg(x);
-  GEN p1, z = cgetg(lx,t_MAT);
+  GEN c, z = cgetg(lx,t_MAT);
 
   if (typ(x) != t_MAT) err(talker,"argument must be a matrix in matbasistoalg");
   if (lx == 1) return z;
   li = lg(x[1]);
   for (j=1; j<lx; j++)
   {
-    p1 = cgetg(li,t_COL); z[j] = (long)p1;
-    for (i=1; i<li; i++) p1[i] = (long)basistoalg(nf,gcoeff(x,i,j));
+    c = cgetg(li,t_COL); z[j] = (long)c;
+    for (i=1; i<li; i++) c[i] = (long)basistoalg(nf,gcoeff(x,i,j));
   }
   return z;
 }
@@ -45,20 +45,15 @@ GEN
 matalgtobasis(GEN nf,GEN x)
 {
   long i, j, li, lx = lg(x);
-  GEN p1, c, z = cgetg(lx, t_MAT);
+  GEN c, z = cgetg(lx, t_MAT);
 
   if (typ(x) != t_MAT) err(talker,"argument must be a matrix in matalgtobasis");
   if (lx == 1) return z;
   li = lg(x[1]);
   for (j=1; j<lx; j++)
   {
-    p1 = cgetg(li,t_COL); z[j] = (long)p1;
-    for (i=1; i<li; i++)
-    {
-      c = gcoeff(x,i,j);
-      c = typ(c)==t_COL? gcopy(c): algtobasis(nf,c);
-      p1[i] = (long)c;
-    }
+    c = cgetg(li,t_COL); z[j] = (long)c;
+    for (i=1; i<li; i++) c[i] = (long)_algtobasis_cp(nf, gcoeff(x,i,j));
   }
   return z;
 }
@@ -224,7 +219,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
 GEN
 rnfbasistoalg(GEN rnf,GEN x)
 {
-  long tx=typ(x), lx=lg(x), i, n;
+  long tx=typ(x), lx=lg(x), i;
   gpmem_t av=avma, tetpil;
   GEN p1,z,nf;
 
@@ -232,20 +227,15 @@ rnfbasistoalg(GEN rnf,GEN x)
   switch(tx)
   {
     case t_VEC:
-      x=gtrans(x); /* fall through */
     case t_COL:
-      n=lg(x)-1; p1=cgetg(n+1,t_COL);
-      for (i=1; i<=n; i++)
-      {
-	if (typ(x[i])==t_COL) p1[i]=(long)basistoalg(nf,(GEN)x[i]);
-	else p1[i]=x[i];
-      }
-      p1=gmul(gmael(rnf,7,1),p1); tetpil=avma;
-      return gerepile(av,tetpil,gmodulcp(p1,(GEN)rnf[1]));
+      p1 = cgetg(lx,t_COL);
+      for (i=1; i<lx; i++) p1[i] = (long)_basistoalg(nf, (GEN)x[i]);
+      p1 = gmul(gmael(rnf,7,1),p1); tetpil = avma;
+      return gerepile(av,tetpil, gmodulcp(p1,(GEN)rnf[1]));
 
     case t_MAT:
-      z=cgetg(lx,tx);
-      for (i=1; i<lx; i++) z[i]=(long)rnfbasistoalg(rnf,(GEN)x[i]);
+      z = cgetg(lx,tx);
+      for (i=1; i<lx; i++) z[i] = (long)rnfbasistoalg(rnf,(GEN)x[i]);
       return z;
 
     case t_POLMOD:
@@ -625,10 +615,12 @@ rnfidealreltoabs(GEN rnf,GEN x)
 {
   long i, j, n, m;
   gpmem_t av = avma;
-  GEN nf,basinv,om,id,t,M,p1,p2,c;
+  GEN nf,basinv,oms,om,ids,id,t,M,p1,p2,c;
 
   nf = (GEN)rnf[10];
   x = rnfidealhermite(rnf,x);
+  oms = (GEN)x[1];
+  ids = (GEN)x[2];
   n = degpol(rnf[1]);
   m = degpol(nf[1]);
   basinv = gmael(rnf,11,5);
@@ -636,9 +628,9 @@ rnfidealreltoabs(GEN rnf,GEN x)
   M = cgetg(n*m+1,t_MAT);
   for (i=1; i<=n; i++)
   {
-    om = rnfbasistoalg(rnf,gmael(x,1,i));
+    om = rnfbasistoalg(rnf, (GEN)oms[i]);
     om = rnfelementreltoabs(rnf,om);
-    id = gmael(x,2,i);
+    id = (GEN)ids[i];
     for (j=1; j<=m; j++)
     {
       p1 = gmul((GEN)nf[7],(GEN)id[j]);

@@ -403,6 +403,9 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */
 
+GEN     _algtobasis(GEN nf, GEN x);
+GEN     _algtobasis_cp(GEN nf, GEN x);
+GEN     _basistoalg(GEN nf, GEN x);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     algtobasis_i(GEN nf,GEN x);
 GEN     basistoalg(GEN nf, GEN x);

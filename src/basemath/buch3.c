@@ -355,8 +355,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     la = lg(e); newL = cgetg(la, t_VEC);
     for (k=1; k<la; k++)
     {
-      GEN L0, cx, LL = (GEN)L[k];
-      if (typ(LL) != t_COL) LL = algtobasis(nf, LL);
+      GEN L0, cx, LL = _algtobasis(nf, (GEN)L[k]);
 
       L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
       for (j=1; j<lp; j++)

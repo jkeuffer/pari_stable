@@ -138,7 +138,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
   r1 = nf_get_r1(nf);
   if (!b)
   {
-    if (typ(be) != t_COL) be = algtobasis(nf, be);
+    be = _algtobasis(nf, be);
     b = gmul(gmael(nf,5,1), be);
   }
   n = max((itos(ell)>>1), 3);
@@ -174,7 +174,7 @@ static GEN
 reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
 {
   GEN c, fa;
-  if (typ(be) != t_COL) be = algtobasis(bnfz, be);
+  be = _algtobasis(bnfz, be);
   be = primitive_part(be, &c);
   if (c)
   {
@@ -821,7 +821,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     {
       if (! b_suitable(b, r, k, ell)) continue;
       z = factorbackelt(powtaubet, compute_t(b, r, m, ell), nfz);
-      if (typ(z) == t_COL) z = basistoalg(nfz, z);
+      z = _basistoalg(nfz, z);
       g = gadd(g, gmul(get_multinomial(b), z));
     } while (increment_inc(b, k, m));
     S[k] = lmul(gmulsg(ell, e), tracetoK(T,g));

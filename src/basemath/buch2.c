@@ -1229,12 +1229,11 @@ static GEN
 triv_gen(GEN nf, GEN x, long c, long flag)
 {
   GEN y;
-  if (flag & nf_GEN_IF_PRINCIPAL)
-    return (typ(x) == t_COL)? gcopy(x): algtobasis(nf,x);
+  if (flag & nf_GEN_IF_PRINCIPAL) return _algtobasis_cp(nf,x);
   if (!(flag & (nf_GEN|nf_GENMAT))) return zerocol(c);
   y = cgetg(4,t_VEC);
   y[1] = (long)zerocol(c);
-  y[2] = (long)((typ(x) == t_COL)? gcopy(x): algtobasis(nf,x));
+  y[2] = (long)_algtobasis_cp(nf,x);
   y[3] = lstoi(BIGINT); return y;
 }
 

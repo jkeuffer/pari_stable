@@ -537,7 +537,7 @@ eltmul_get_table(GEN nf, GEN x)
 {
   long i, N = degpol(nf[1]);
   GEN mul = cgetg(N+1,t_MAT);
-  if (typ(x) != t_COL) x = algtobasis(nf,x);
+  x = _algtobasis(nf, x);
   mul[1] = (long)x; /* assume w_1 = 1 */
   for (i=2; i<=N; i++) mul[i] = (long)element_mulid(nf,x,i);
   return mul;
@@ -660,6 +660,16 @@ basistoalg(GEN nf, GEN x)
       z[2]=lmul(x,polun[varn(nf[1])]); return z;
   }
 }
+
+GEN
+_basistoalg(GEN nf, GEN x)
+{ return typ(x) == t_COL? basistoalg(nf, x): x; }
+GEN
+_algtobasis(GEN nf, GEN x)
+{ return typ(x) == t_COL? x: algtobasis(nf, x); }
+GEN
+_algtobasis_cp(GEN nf, GEN x)
+{ return typ(x) == t_COL? gcopy(x): algtobasis(nf, x); }
 
 /* gmul(A, pol_to_vec(x)), A t_MAT (or t_VEC) of compatible dimensions */
 GEN

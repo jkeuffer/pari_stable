@@ -1428,8 +1428,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   prkZ = gcoeff(prk, 1,1);
   for (i=1; i < l; i++)
   {
-    x = (GEN)g[i];
-    if (typ(x) != t_COL) x = algtobasis(nf, x);
+    x = _algtobasis(nf, (GEN)g[i]);
     x = Q_remove_denom(x, &cx);
     if (cx)
     {
@@ -1514,8 +1513,7 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   e = (GEN)fa[2]; l = lg(e);
   for (i=1; i<l; i++)
   {
-    GEN t, x = (GEN)g[i];
-    if (typ(x) != t_COL) x = algtobasis(nf,x);
+    GEN t, x = _algtobasis(nf, (GEN)g[i]);
     x = Q_primpart(x);
     /* multiplicative arch would be better (save logs), but exponents overflow
      * [ could keep track of expo separately, but not worth it ] */
@@ -2612,12 +2610,12 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
   GEN cx, b;
 
   nf = checknf(nf);
-  if (typ(a) != t_COL) a = algtobasis(nf, a);
+  a = _algtobasis(nf, a);
   x = idealhermite_aux(nf,x);
   if (gcmp0(x))
   {
     if (!gcmp0(a)) err(talker,"element not in ideal in ideal_two_elt2");
-    avma=av; return gcopy(a);
+    avma = av; return gcopy(a);
   }
   x = Q_primitive_part(x, &cx);
   if (cx) a = gdiv(a, cx);
@@ -3036,8 +3034,7 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
   z = nf_to_ff(nf,x,modpr);
   z = FpXQ_pow(z,k,T,p);
   z = ff_to_nf(z,modpr);
-  if (typ(z) != t_COL) z = algtobasis(nf, z);
-  return gerepilecopy(av, z);
+  return gerepilecopy(av, _algtobasis(nf,z));
 }
 
 GEN
