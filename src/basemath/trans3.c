@@ -532,22 +532,21 @@ gerfc(GEN x, long prec)
 static GEN
 czeta(GEN s, long prec)
 {
-  long av,n,p,n1,l,flag1,flag2,i,i2;
+  long av,n,p,n1,flag1,flag2,i,i2;
   double st,sp,sn,ssig,ns,alpha,beta,maxbeta,xinf;
   GEN y,z,res,sig,ms,p1,p2,p3,p31,pitemp;
 
-  l=precision(s);
+  i=precision(s); if (i) prec = i;
   if (typ(s)==t_COMPLEX)
   {
-    if (!l) l=prec;
-    res = cgetc(l); av=avma;
-    p1=cgetc(l+1);
+    res = cgetc(prec); av=avma;
+    p1=cgetc(prec+1);
     gaffect(s,p1); s=p1; sig=(GEN)s[1];
   }
   else
   {
-    res = cgetr(l); av=avma;
-    p1=cgetr(l+1); affrr(s,p1); sig=s=p1;
+    res = cgetr(prec); av=avma;
+    p1=cgetr(prec+1); affrr(s,p1); sig=s=p1;
   }
 
   if (signe(sig)>0 && expo(sig)>-2) flag1 = 0;
