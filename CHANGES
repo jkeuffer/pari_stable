@@ -30,7 +30,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 
-Done for version 2.2.1 (released 15/10/2001):
+Done for version 2.2.1 (released 16/10/2001):
 
   Fixed
     1- typo in factornf (factor of degree 3 --> error message)
@@ -156,6 +156,7 @@ IZ 14- add flag to shift() to enable consistency with 2-complement semantic
 IZ 15- default 'prompt_cont' for continuation lines
 IZ 16- default 'readline' to switch readline on/off in readline-able binaries
 IZ 17- capabilities to 'bittest' (return bitmap, 2-complement arithmetic)
+GH 18- inline assembler micro-kernel for alpha + recent gcc (at least 2.95.3)
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
