@@ -73,7 +73,7 @@ extern int   term_width(void);
   *PL_sv_yes, *PL_sv_no, *PL_curpad, *PL_op
 extern int EXTERM_DLL_DPES;
 int EXTERM_DLL_DPES;
-#endif	/* defined BOTH_GNUPLOT_AND_X11 */ 
+#endif	/* defined BOTH_GNUPLOT_AND_X11 */
 
 typedef struct cell {
   void *env;
@@ -937,8 +937,12 @@ errcontext(char *msg, char *s, char *entry)
 void *
 err_catch(long errnum, jmp_buf env, void *data)
 {
-  cell *v = (cell*)gpmalloc(sizeof(cell));
+  cell *v;
+  /* for fear of infinite recursion don't trap memory errors */
+  if (errnum == memer) err(talker, "can't trap memory errors");
   if (errnum < 0) errnum = noer;
+  if (errnum > noer) err(talker, "no such error number: %ld", errnum);
+  v = (cell*)gpmalloc(sizeof(cell));
   v->data = data;
   v->env  = env;
   v->flag = errnum;
@@ -947,93 +951,75 @@ err_catch(long errnum, jmp_buf env, void *data)
   return (void*)v;
 }
 
+static void
+pop_catch_cell(stack **s)
+{
+  cell *c = (cell*)pop_stack(s);
+  if (c)
+  {
+    err_catch_array[c->flag]--;
+    free(c);
+  }
+}
+
 /* kill last handler for error n */
 static void
 err_leave_default(long n)
 {
-  stack *s = err_catch_stack, *lasts = NULL;
+  stack *s = err_catch_stack, *lasts;
 
   if (n < 0) n = noer;
   if (!s || !err_catch_array[n]) return;
-  for ( ;s ; lasts = s, s = s->prev)
-  {
-    cell *c = (cell*)s->value;
-    if (c->flag == n)
-    { /* kill */
-      stack *v = s->prev;
-      free((void*)s); s = v;
-      if (lasts) lasts->prev = s;
-      break;
-    }
-  }
-  if (!lasts)
-  {
-    err_catch_stack = s;
-    if (!s) reset_traps(0);
-  }
+  for (lasts = NULL; s; lasts = s, s = s->prev)
+    if (((cell*)s->value)->flag == n) break;
+  pop_catch_cell(&s);
+  if (!lasts) err_catch_stack = s; else lasts->prev = s;
 }
 
 /* reset traps younger than V (included) */
 void
 err_leave(void **V)
 {
-  cell *t, *v = (cell*)*V;
-
-  for (;;)
+  cell *v = (cell*)*V;
+  while (err_catch_stack)
   {
-    t = (cell*)pop_stack(&err_catch_stack);
-    if (t == v || !t) break;
-    err_catch_array[t->flag]--;
-    free(t);
+    cell *t = (cell*)err_catch_stack->value;
+    pop_catch_cell(&err_catch_stack);
+    if (t == v) return;
   }
-  if (!t) reset_traps(1);
-  err_catch_array[v->flag]--;
-  free(v);
+  reset_traps(1);
 }
 
-/* get last (most recent) handler for error n */
+/* We know somebody is trapping n (from err_catch_array).
+ * Get last (most recent) handler for error n (or generic noer) killing all
+ * more recent non-applicable handlers (now obsolete) */
 static cell *
 err_seek(long n)
 {
-  stack *s = err_catch_stack;
-  cell *t = NULL;
-
-  for (;s; s = s->prev)
+  while (err_catch_stack)
   {
-    t = (cell*)s->value;
-    if (!t || t->flag == n) break;
+    cell *t = err_catch_stack->value;
+    if (t->flag == n || t->flag == noer) return t;
+    pop_catch_cell(&err_catch_stack);
   }
-  if (!t) reset_traps(1);
-  return t;
+  reset_traps(1); return NULL;
 }
 
-/* untrapped error: remove all traps depending from a longjmp */
+/* untrapped error: find oldest trap depending from a longjmp, and kill
+ * everything more recent */
 void
 err_clean(void)
 {
   stack *s = err_catch_stack, *lasts = NULL;
-  cell *c;
-
-  if (!s) return;
-  while (s)
+  for ( ; s; s = s->prev)
   {
-    c = (cell*)s->value;
-    if (c->env)
-    { /* kill */
-      stack *v = s->prev;
-      free((void*)s); s = v;
-      if (lasts) lasts->prev = s;
-    }
-    else
-    { /* preserve */
-      if (lasts) lasts->prev = s; else err_catch_stack = s;
-      lasts = s; s = s->prev;
-    }
+    cell *c = (cell*)s->value;
+    if (c->env) lasts = s;
   }
-  if (!lasts)
+  if (lasts) 
   {
-    err_catch_stack = NULL;
-    reset_traps(0);
+    void *c = (void*)s->value;
+    err_leave(&c);
   }
 }
 
@@ -1075,14 +1061,8 @@ err(long numerr, ...)
   global_err_data = NULL;
   if (err_catch_stack && !is_warn(numerr))
   {
-    int trap = 0;
-    if (numerr != memer)
-    { /* for fear of infinite recursion don't trap memory errors */
-      if (err_catch_array[numerr]) trap = numerr;
-      else if (err_catch_array[noer]) trap = noer;
-    }
-    if (!trap) err_clean();
-    else if ( (trapped = err_seek(trap)) )
+    if (!err_catch_array[numerr] && !err_catch_array[noer]) err_clean();
+    else if ( (trapped = err_seek(numerr)) )
     {
       void *e = trapped->env;
       if (e)
@@ -1455,7 +1435,7 @@ void
 shiftaddress(GEN x, long dec)
 {
   long i,lx,tx;
-  
+
   tx = typ(x);
   if (is_recursive_t(tx))
   {
@@ -1535,7 +1515,7 @@ gerepilemany(gpmem_t av, GEN* gptr[], int n)
   free(l);
 }
 
-void 
+void
 gerepileall(gpmem_t av, int n, ...)
 {
   GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
