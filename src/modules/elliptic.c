@@ -1339,14 +1339,15 @@ multi_invmod(GEN x, GEN p)
 static GEN
 addsell(GEN e, GEN z1, GEN z2, GEN p)
 {
-  GEN p1,p2,x,x1,x2,y,y1,y2;
-  long av = avma;
+  GEN z,p1,p2,x,x1,x2,y,y1,y2;
+  ulong av;
 
   if (!z1) return z2;
   if (!z2) return z1;
 
   x1 = (GEN)z1[1]; y1 = (GEN)z1[2];
   x2 = (GEN)z2[1]; y2 = (GEN)z2[2];
+  z = cgetg(3, t_VEC); av = avma;
   p2 = subii(x2, x1);
   if (p2 == gzero)
   {
@@ -1356,14 +1357,14 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
     p1 = resii(p1, p);
   }
   else p1 = subii(y2,y1);
-  (void)new_chunk(lgefint(p) << 3); /* gerepile HACK */
   p1 = mulii(p1, mpinvmod(p2, p));
   p1 = resii(p1, p);
-  x = subii(sqri(p1), addii(x1,x2)); x = modii(x,p);
+  x = subii(sqri(p1), addii(x1,x2));
   y = negi(addii(y1, mulii(p1,subii(x,x1))));
-  avma = av; p1 = cgetg(3,t_VEC);
-  p1[1] = licopy(x);
-  p1[2] = lmodii(y, p); return p1;
+  x = modii(x,p);
+  y = modii(y,p); avma = av;
+  z[1] = licopy(x);
+  z[2] = licopy(y); return z;
 }
 
 /* z1 <-- z1 + z2 */
