@@ -22,10 +22,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN mulmat_pol(GEN A, GEN x);
 
 static ulong ctglob, sgtaut, sgt6, sgtjac; /* DEBUG */
+static GEN sgt, ctsgt;
 
 static ulong kglob;
 static int ishack;
-static GEN *tabaall,*tabtall,*tabcyc,tabE,tabTH,tabeta,*tabmatvite,*tabmatinvvite,globfa,tabfaq,tabj,sgt,ctsgt,tabavite,tabpkvite,errfill;
+static GEN *tabaall, *tabtall, *tabcyc, *tabmatvite, *tabmatinvvite;
+static GEN tabE, tabeta, tabavite, tabpkvite;
 #define pkfalse (ishack ? 1 : pk)
 #define dotime (DEBUGLEVEL>=3)
 
@@ -313,7 +315,7 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
     R->red = &_red; _sqr = &sqrmod3;
   } else if (pk == 5) {
     R->red = &_red; _sqr = &sqrmod5;
-  } else if (k == 1 && pk >= 7) {
+  } else if (k == 1) {
     R->n = pk;
     R->red = &_red_cyclop; _sqr = &sqrmod;
   } else {
@@ -325,19 +327,19 @@ powpolmod(red_t *R, int k, int pk, GEN jac)
 static GEN
 e(ulong t)
 {
-  GEN fa,pr,ex,s;
-  ulong nbd,m,k,d;
-  int lfa,i,j;
+  GEN fa, P, E, s;
+  ulong nbd, m, k, d;
+  int lfa, i, j;
 
-  fa = decomp(stoi(t));
-  pr = (GEN)fa[1]; settyp(pr, t_VECSMALL);
-  ex = (GEN)fa[2]; settyp(ex, t_VECSMALL); lfa = lg(pr);
+  fa = decomp(utoi(t));
+  P = (GEN)fa[1]; settyp(P, t_VECSMALL);
+  E = (GEN)fa[2]; settyp(E, t_VECSMALL); lfa = lg(P);
   nbd = 1;
   for (i=1; i<lfa; i++)
   {
-    ex[i] = itos((GEN)ex[i]) + 1;
-    pr[i] = itos((GEN)pr[i]);
-    nbd *= ex[i];
+    E[i] = itos((GEN)E[i]) + 1;
+    P[i] = itos((GEN)P[i]);
+    nbd *= E[i];
   }
   s = gdeux; /* nbd = number of divisors */
   for (k=0; k<nbd; k++)
@@ -345,11 +347,11 @@ e(ulong t)
     m = k; d = 1;
     for (j=1; m; j++)
     {
-      d *= u_pow(pr[j], m % ex[j]);
-      m /= ex[j];
+      d *= u_pow(P[j], m % E[j]);
+      m /= E[j];
     }
     /* d runs through the divisors of t */
-    if (BSW_psp(stoi(++d)))
+    if (BSW_psp(utoi(++d)))
       s = muliu(s, (ulong)u_pow(d, 1 + u_val(t,d)));
   }
   return s;
@@ -472,20 +474,15 @@ compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
 
 /* p odd prime */
 static GEN
-get_jac(ulong q, ulong p, int k, GEN tabf, GEN tabg)
+get_jac(ulong q, ulong p, int k, GEN tabf, GEN tabg, GEN C)
 {
-  GEN ze, vpk;
-  ulong i, x, pk, qm3s2;
-
-  pk = u_pow(p,k);
-  vpk = cgetg(pk+1,t_VECSMALL);
-  for (i=1; i<=pk; i++) vpk[i] = 0;
-  ze = tabcyc[pkfalse];
+  ulong x, qm3s2, pk = u_pow(p,k);
+  GEN vpk = vecsmall_const(pk, 0);
 
   qm3s2 = (q-3)>>1;
   for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
   vpk[ (2*tabf[qm3s2+1])%pk + 1 ]++;
-  return u_red(vpk,ze);
+  return u_red(vpk, C);
 }
 
 /* p = 2 */
@@ -500,8 +497,7 @@ get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
   compute_fg(q,0, &tabf,&tabg);
 
   pk = u_pow(2,k);
-  vpk = cgetg(pk+1,t_VECSMALL);
-  for (i=1; i<=pk; i++) vpk[i] = 0;
+  vpk = vecsmall_const(pk, 0);
 
   qm3s2 = (q-3)>>1;
   for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
@@ -527,34 +523,36 @@ get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
 }
 
 static void
-calcjac(GEN et)
+calcjac(GEN globfa, GEN *ptabfaq, GEN *ptabj)
 {
-  pari_sp av;
+  GEN J, tabf, tabg, faq, tabfaq, tabj, P, E;
+  int lfaq, p, e, j;
   ulong i, q, l;
-  int lfaq,p,k,j;
-  GEN J,tabf,tabg,faq,faqpr,faqex;
+  pari_sp av;
 
-  globfa = (GEN)decomp(shifti(et,-vali(et)))[1];
-  l = lg(globfa);
-  tabfaq= cgetg(l,t_VEC);
-  tabj  = cgetg(l,t_VEC);
+  l = lg(globfa); settyp(globfa, t_VECSMALL);
+  *ptabfaq = tabfaq= cgetg(l,t_VEC);
+  *ptabj   = tabj  = cgetg(l,t_VEC);
   for (i=1; i<l; i++)
   {
     q = itos((GEN)globfa[i]); /* odd prime */
-    faq = decomp(stoi(q-1)); tabfaq[i] = (long)faq;
-    faqpr = (GEN)faq[1];
-    faqex = (GEN)faq[2]; lfaq = lg(faqpr);
+    globfa[i] = q;
+    faq = decomp( utoi(q-1) ); tabfaq[i] = (long)faq;
+    P = (GEN)faq[1]; settyp(P, t_VECSMALL);
+    E = (GEN)faq[2]; settyp(E, t_VECSMALL); lfaq = lg(P);
+    P[1] = 2;
+    E[1] = itos((GEN)E[1]);
 
     av = avma;
     compute_fg(q, 1, &tabf, &tabg);
 
     J = cgetg(lfaq,t_VEC);
     J[1] = lgetg(1,t_STR); /* dummy */
-    for (j=2; j<lfaq; j++) /* skip p = faqpr[1] = 2 */
+    for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
     {
-      p = itos((GEN)faqpr[j]);
-      k = itos((GEN)faqex[j]);
-      J[j] = (long)get_jac(q,p,k,tabf,tabg);
+      p = itos((GEN)P[j]); P[j] = p;
+      e = itos((GEN)E[j]); E[j] = e;
+      J[j] = (long)get_jac(q, p, e, tabf, tabg, (GEN)tabcyc[u_pow(p,e)]);
     }
     tabj[i] = (long)gerepilecopy(av, J);
   }
@@ -569,7 +567,6 @@ inittabs(int lv)
   tabcyc  = (GEN*)cgetg(lv,t_VEC);
   for (i=1; i<lv; i++) tabcyc[i] = gzero;
   tabE = cgetg(lv,t_VEC);
-  tabTH= cgetg(lv,t_VEC);
   tabeta=cgetg(lv,t_VEC);
   tabmatvite = (GEN*)cgetg(lv,t_VEC);
   tabmatinvvite = (GEN*)cgetg(lv,t_VEC);
@@ -577,10 +574,7 @@ inittabs(int lv)
   tabpkvite = cgetg(lv,t_VEC);
   sgt  = cgetg(lv,t_VECSMALL);
   ctsgt= cgetg(lv,t_VECSMALL);
-  for (i=1; i<lv; i++)
-  {
-    tabE[i] = tabTH[i] = tabeta[i] = zero;
-  }
+  for (i=1; i<lv; i++) { tabE[i] = tabeta[i] = zero; }
   for (i=1; i<lv; i++)
   {
     tabmatvite[i] = tabmatinvvite[i] = 0;
@@ -616,22 +610,24 @@ finda(GEN N, int pk, int p, int step5)
       a = powmodulo(utoi(u), N1, N);
       b = powmodulo(a, ph, N);
     }
-    /* checking b^p = 1 mod N is done economically back in filltabs */
+    /* checking b^p = 1 mod N done economically in caller */
     b = mppgcd(addis(b,-1), N);
-    if (!gcmp1(b)) { errfill = b; return NULL; }
+    if (!gcmp1(b)) err(invmoder,"%Z",gmodulcp(b,N)); /* trap this! */
+    
     if (!step5) tabavite[p] = (long)a; /* a has order p^v */
   }
   return powmodulo(a, divis((GEN)tabpkvite[p], pk), N);
 }
 
-static void
+/* return 0: N not a prime, 1: no problem so far */
+static int
 filltabs(GEN N, int p, int k, ulong ltab, int step5)
 {
   const ulong mask = (1<<kglob)-1;
   pari_sp av;
-  int pk, pk2, i, j, LE = 0;
+  int pk, pk2, i, j;
   long e;
-  GEN tabt, taba, m, E, p1;
+  GEN tabt, taba, m, p1;
 
   pk = u_pow(p,k);
   ishack = step5 && (pk >= lg((GEN)tabcyc) || !signe(tabcyc[pk]));
@@ -643,39 +639,28 @@ filltabs(GEN N, int p, int k, ulong ltab, int step5)
     p1[i] = (long)FpX_res(gpowgs(polx[0],i-1), tabcyc[pk2], N);
   tabeta[pk2] = (long)p1;
 
-  E = NULL;
   if (p > 2)
   {
-    LE = pk - pk/p + 1; E = cgetg(LE, t_VECSMALL);
+    int LE = pk - pk/p + 1;
+    GEN E = cgetg(LE, t_VECSMALL);
     for (i=1,j=0; i<pk; i++)
       if (i%p) E[++j] = i;
+    tabE[pk2] = (long)E;
   }
   else if (k >= 3)
   {
-    LE = (pk>>2) + 1; E = cgetg(LE, t_VECSMALL);
+    int LE = (pk>>2) + 1;
+    GEN E = cgetg(LE, t_VECSMALL);
     for (i=1,j=0; i<pk; i++)
       if ((i%8)==1 || (i%8)==3) E[++j] = i;
-  }
-  if (E)
-  {
     tabE[pk2] = (long)E;
-    p1 = cgetg(LE, t_VEC);
-    for (i=1; i<LE; i++)
-    {
-      GEN p2 = cgetg(3, t_VECSMALL);
-      p2[1] = p2[2] = E[i];
-      p1[i] = (long)p2;
-    }
-    tabTH[pk2] = (long)p1;
   }
 
   if (pk > 2 && smodis(N,pk) == 1)
   {
     GEN vpa, p1, p2, p3, a2 = NULL, a = finda(N, pk, p, step5);
-    int ph, jj;
-    if (!a) return;
+    int jj, ph = pk - pk/p;
 
-    ph = pk - pk/p;
     vpa = cgetg(ph+1,t_COL); vpa[1] = (long)a;
     if (k > 1) a2 = modii(sqri(a), N);
     jj = 1;
@@ -684,11 +669,7 @@ filltabs(GEN N, int p, int k, ulong ltab, int step5)
         jj++;
         vpa[jj] = lmodii( mulii((i%p==1) ? a2 : a, (GEN)vpa[jj-1]), N );
       }
-    if (!gcmp1( modii( mulii(a, (GEN)vpa[ph]), N) ))
-    {
-      if (signe(errfill) <= 0) errfill = stoi(-1);
-      return;
-    }
+    if (!gcmp1( modii( mulii(a, (GEN)vpa[ph]), N) )) return 0;
     p1 = cgetg(ph+1,t_MAT);
     p2 = cgetg(ph+1,t_COL); p1[1] = (long)p2;
     for (i=1; i<=ph; i++) p2[i] = un;
@@ -717,14 +698,15 @@ filltabs(GEN N, int p, int k, ulong ltab, int step5)
   if (e > ltab) err(bugparier,"filltabs");
   setlg(taba, e); tabaall[pk2] = taba;
   setlg(tabt, e); tabtall[pk2] = tabt;
+  return 1;
 }
 
 
 static GEN
 calcglobs(GEN N, ulong t, ulong *pltab)
 {
-  GEN fat,fapr,faex;
-  int lfa,pk,p,ex,i,k;
+  GEN fat, P, E;
+  int lfa, pk, p, e, i, k;
   ulong ltab, ltaball, NBITSN;
 
   NBITSN = bit_accuracy(lgefint(N)) - 1;
@@ -733,50 +715,65 @@ calcglobs(GEN N, ulong t, ulong *pltab)
   kglob=3; while (((kglob+1)*(kglob+2) << (kglob-1)) < NBITSN) kglob++;
   *pltab = ltab = (NBITSN/kglob) + 2;
 
-  fat = decomp(stoi(t));
-  fapr = (GEN)fat[1];
-  faex = (GEN)fat[2];
-  lfa = lg(fapr); ltaball = 1;
+  fat = decomp(utoi(t));
+  P = (GEN)fat[1]; settyp(P, t_VECSMALL);
+  E = (GEN)fat[2]; settyp(E, t_VECSMALL); lfa = lg(P);
+  ltaball = 1;
   for (i=1; i<lfa; i++)
   {
-    pk = u_pow(itos((GEN)fapr[i]), itos((GEN)faex[i]));
+    p = itos((GEN)P[i]); P[i] = p;
+    e = itos((GEN)E[i]); E[i] = e;
+    pk = u_pow(p, e);
     if ((ulong)pk > ltaball) ltaball = (ulong)pk;
   }
   inittabs(ltaball+1);
   if (DEBUGLEVEL) fprintferr("Fast pk-values: ");
   for (i=1; i<lfa; i++)
   {
-    p = itos((GEN)fapr[i]);
-    ex= itos((GEN)faex[i]);
-    for (k=1; k<=ex; k++)
-    {
-      filltabs(N,p,k,ltab, 0);
-      if (signe(errfill)) break;
-    }
+    p = P[i];
+    e = E[i];
+    for (k=1; k<=e; k++)
+      if (!filltabs(N,p,k,ltab, 0)) return NULL;
   }
   if (DEBUGLEVEL) fprintferr("\n");
-  return fapr;
+  return P;
 }
 
-/* Calculer sig_a^{-1}(z) pour z dans Q(ze) et sig_a: ze -> ze^a */
+/* sig_a^{-1}(z) for z in Q(ze) and sig_a: ze -> ze^a */
 static GEN
-aut(int pk, GEN z,int a)
+aut(int pk, GEN z, int a, GEN C)
 {
   GEN v = cgetg(pk+1,t_VEC);
   int i;
   for (i=1; i<=pk; i++)
     v[i] = (long)polcoeff0(z, (a*(i-1))%pk, 0);
-  return gmodulcp(gtopolyrev(v,0), tabcyc[pkfalse]);
+  return gmodulcp(gtopolyrev(v,0), C);
 }
 
-/* calculer z^v pour v dans Z[G] represente par des couples [sig_x^{-1},y] */
+/* z^v for v in Z[G], represented by couples [sig_x^{-1},y] */
 static GEN
-autvec(int pk, GEN z, GEN v)
+autvec(int pk, GEN z, GEN v, GEN C)
 {
   int i,lv = lg(v);
   GEN s = gun;
   for (i=1; i<lv; i++)
-    if (mael(v,i,2)) s = gmul(s, gpowgs(aut(pk,z,mael(v,i,1)), mael(v,i,2)));
+  {
+    long y = mael(v,i,2);
+    if (y) s = gmul(s, gpowgs(aut(pk,z,mael(v,i,1), C), y));
+  }
+  return s;
+}
+/* z^v for v in Z[G], represented by couples [sig_x^{-1},x] */
+static GEN
+autvec_TH(int pk, GEN z, GEN v, GEN C)
+{
+  int i,lv = lg(v);
+  GEN s = gun;
+  for (i=1; i<lv; i++)
+  {
+    long y = v[i];
+    if (y) s = gmul(s, gpowgs(aut(pk,z,y, C), y));
+  }
   return s;
 }
 
@@ -810,28 +807,29 @@ look_eta(int pk, GEN s)
 static int
 step4a(GEN N, ulong q, int p, int k, GEN jpq)
 {
-  int pk, pk2, ind;
+  const int pk = u_pow(p,k);
+  int ind, pk2;
   GEN s1, s2, s3;
   red_t R;
+  
+  pk2 = pkfalse;
+  R.N = N;
+  R.C = tabcyc[pk2];
 
-  pk = u_pow(p,k); pk2=pkfalse;
   if (dotime) (void)timer2();
   if (!jpq)
   {
     GEN tabf, tabg;
-
     compute_fg(q,1, &tabf,&tabg);
-    jpq = get_jac(q,p,k,tabf,tabg);
+    jpq = get_jac(q, p, k, tabf, tabg, R.C);
     if (dotime) sgtjac+=timer2();
   }
-  
-  s1 = autvec(pk,jpq,(GEN)tabTH[pk2]);
+
+  s1 = autvec_TH(pk,jpq,(GEN)tabE[pk2], R.C);
   if (dotime) sgtaut+=timer2();
-  R.N = N;
-  R.C = tabcyc[pk2];
-  s2 = powpolmod(&R,k,pk, lift_intern(s1));
+  s2 = powpolmod(&R, k,pk, lift_intern(s1));
   if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;};
-  s3 = autvec(pk, jpq, get_AL(N, pk));
+  s3 = autvec(pk, jpq, get_AL(N, pk), R.C);
   if (dotime) sgtaut+=timer2();
   s3 = _red(gmul(lift(s3),s2), &R);
   if (dotime) sgt[pk2]+=timer2();
@@ -857,19 +855,19 @@ step4b(GEN N, ulong q, int k)
   GEN s1, s2, s3, j2q, j3q;
   red_t R;
 
+  pk2 = pkfalse;
+  R.N = N;
+  R.C = tabcyc[pk2];
+
   if (dotime) (void)timer2();
   (void)get_jac2(N,q,k, &j2q,&j3q);
   if (dotime) sgtjac+=timer2();
 
-  pk2 = pkfalse;
-
-  s1 = autvec(pk,j3q,(GEN)tabTH[pk2]);
+  s1 = autvec_TH(pk,j3q,(GEN)tabE[pk2], R.C);
   if (dotime) sgtaut+=timer2();
-  R.N = N;
-  R.C = tabcyc[pk2];
   s2 = powpolmod(&R, k,pk, lift_intern(s1));
   if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;}
-  s3 = autvec(pk, j3q, get_AL(N, pk));
+  s3 = autvec(pk, j3q, get_AL(N, pk), R.C);
   if (dotime) sgtaut+=timer2();
   s3 = _red(gmul(lift(s3),s2), &R);
   if (mod8(N) >= 5) s3 = _red(gmul(j2q, s3), &R);
@@ -880,7 +878,7 @@ step4b(GEN N, ulong q, int k)
   if ((ind&1)==0) return 0;
   else
   {
-    s3 = powmodulo(stoi(q), shifti(N,-1), N);
+    s3 = powmodulo(utoi(q), shifti(N,-1), N);
     if (dotime) {sgt[pk2]+=timer2();ctsgt[pk2]++;}
     return is_m1(s3, N);
   }
@@ -911,7 +909,7 @@ step4c(GEN N, ulong q)
   if ((ind&1)==0) return 0;
   else
   {
-    s3 = powmodulo(stoi(q), shifti(N,-1), N);
+    s3 = powmodulo(utoi(q), shifti(N,-1), N);
     if (dotime) sgt[pk2]+=timer2();
     return is_m1(s3,N);
   }
@@ -924,7 +922,7 @@ step4d(GEN N, ulong q)
   GEN s1;
 
   if (dotime) (void)timer2();
-  s1 = powmodulo(negi(stoi(q)), shifti(N,-1), N);
+  s1 = powmodulo(negi(utoi(q)), shifti(N,-1), N);
   if (dotime) {sgt[2]+=timer2();ctsgt[2]++;}
   if (gcmp1(s1)) return 0;
   if (is_m1(s1,N)) return (mod4(N) == 1);
@@ -947,19 +945,19 @@ step5(GEN N, int p, GEN et, ulong ltab)
 
     if (smodis(N,q) == 0) return -1;
     k = u_val(q-1, p);
-    filltabs(N,p,k,ltab, 1);
-    if (p>=3)        fl = step4a(N,q,p,k, NULL);
+    if (!filltabs(N,p,k,ltab, 1)) return 0; 
+    if (p >= 3)      fl = step4a(N,q,p,k, NULL);
     else if (k >= 3) fl = step4b(N,q,k);
     else if (k == 2) fl = step4c(N,q);
     else             fl = step4d(N,q);
     tabmatvite[1] = 0;
     if (fl == -1) return (int)(-q);
     if (fl == 1) {ctglob = max(ctglob,ct); return 1;}
-    ct++;
-    avma = av;
+    ct++; avma = av;
    repeat:
     NEXT_PRIME_VIADIFF(q,d);
   }
+  err(bugparier,"aprcl test fails! this is highly improbable");
   return 0;
 }
 
@@ -997,7 +995,7 @@ _res(long a, long b)
   return z;
 }
 
-void
+static void
 seetimes()
 {
   int i;
@@ -1016,10 +1014,10 @@ seetimes()
 GEN
 aprcl(GEN N)
 {
-  GEN et, fat, flaglp, faq, faqpr, faqex, res;
+  GEN et, fat, flaglp, tabfaq, tabj, res, globfa;
   long fl;
   ulong ltab, lfat, p, q, lfaq, k, t, i, j, l;
-  pari_sp av,av2,avinit = avma;
+  pari_sp av, av2;
 
   if (cmpis(N,12) <= 0)
     switch(itos(N))
@@ -1035,47 +1033,40 @@ aprcl(GEN N)
   if (cmpii(sqri(et),N) < 0) err(bugparier,"aprcl: e(t) too small");
   if (!gcmp1(mppgcd(N,mulsi(t,et)))) return _res(1,0);
 
-  errfill = gzero;
-  fat = calcglobs(N, t, &ltab); lfat = lg(fat);
-  if (signe(errfill))
-  {
-    GEN z;
-
-    avma = avinit;
-    if (signe(errfill)<0) return _res(1,0);
-    else {z=cgetg(3,t_VEC); z[1]=(long)errfill; z[2]=zero; return z;}
-  }
-  p = itos((GEN)fat[lfat-1]); /* largest p | t */
+  fat = calcglobs(N, t, &ltab); 
+  if (!fat) return _res(1,0);
+  lfat = lg(fat); p = fat[lfat-1]; /* largest p | t */
   flaglp = cgetg(p+1, t_VECSMALL);
   flaglp[2] = 0;
   for (i=2; i<lfat; i++)
   {
-    p = itos((GEN)fat[i]); q = p*p;
+    p = fat[i]; q = p*p;
     flaglp[p] = (powuumod(smodis(N,q),p-1,q) != 1);
   }
-  calcjac(et);
+  globfa = (GEN)decomp(shifti(et, -vali(et)))[1];
+  calcjac(globfa, &tabfaq, &tabj);
+  
   sgtaut = 0;
   av = avma; l = lg(globfa);
   if (dotime)
   {
     sgtjac = timer2();
     fprintferr("Jacobi sums and tables computed\n");
-    fprintferr("q-values (# = %ld, largest = %Z): ", l-1, globfa[l-1]);
+    fprintferr("q-values (# = %ld, largest = %ld): ", l-1, globfa[l-1]);
   }
   for (i=1; i<l; i++)
   {
+    GEN P, E, faq;
     avma = av;
-    q = itos((GEN)globfa[i]);
-    if (dotime) fprintferr("%ld ",q);
+    q = globfa[i]; if (DEBUGLEVEL>2) fprintferr("%ld ",q);
     faq = (GEN)tabfaq[i];
-    faqpr = (GEN)faq[1];
-    faqex = (GEN)faq[2]; lfaq = lg(faqpr);
+    P = (GEN)faq[1];
+    E = (GEN)faq[2]; lfaq = lg(P);
     av2 = avma;
-    for (j=1; j<lfaq; j++)
+    for (j=1; j<lfaq; j++, avma = av2)
     {
-      avma = av2;
-      p = itos((GEN)faqpr[j]);
-      k = itos((GEN)faqex[j]);
+      p = P[j];
+      k = E[j];
       if (p >= 3)      fl = step4a(N,q,p,k, gmael(tabj,i,j));
       else if (k >= 3) fl = step4b(N,q,k);
       else if (k == 2) fl = step4c(N,q);
@@ -1087,22 +1078,11 @@ aprcl(GEN N)
   if (dotime) fprintferr("\nNormal test done; testing conditions lp\n");
   for (i=1; i<lfat; i++)
   {
-    p = itos((GEN)fat[i]);
-    if (flaglp[p] == 0)
-    {
-      errfill = gzero;
-      fl = step5(N, p, et, ltab);
-      if (signe(errfill))
-      {
-	GEN z;
+    p = fat[i]; if (flaglp[p]) continue;
 
-	avma = avinit;
-	if (signe(errfill)<0) return _res(1,0);
-	else {z=cgetg(3,t_VEC); z[1]=(long)errfill; z[2]=zero; return z;}
-      }
-      if (fl < 0) return _res(fl,p);
-      if (fl==0) err(talker,"aprcl test fails! this is highly improbable");
-    }
+    fl = step5(N, p, et, ltab);
+    if (!fl) return _res(1,0);
+    if (fl < 0) return _res(fl,p);
   }
   if (dotime) fprintferr("Conditions lp done, doing step6\n");
   res = step6(N,t,et);
