@@ -7,8 +7,9 @@
 /* $Id$ */
 #include "pari.h"
 #include "parinf.h"
-long addcolumntomatrix(long *V, long n,GEN *INVP,long *L);
+int addcolumntomatrix(GEN Ai, GEN invp, long *L);
 double check_bach(double cbach, double B);
+GEN gmul_mat_smallvec(GEN x, GEN y);
 GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 GEN get_arch(GEN nf,GEN x,long prec);
 GEN get_roots(GEN x,long r1,long ru,long prec);
@@ -1076,23 +1077,6 @@ quad_form(GEN *cbase,GEN ideal,GEN T2vec,GEN prvec)
   return NULL;
 }
 
-/* y is a vector of LONG, of length ly. x is a hx x ly matrix */
-GEN
-gmul_mat_smallvec(GEN x, GEN y, long hx, long ly)
-{
-  GEN z=cgetg(hx+1,t_COL), p1;
-  long i,j,av;
-
-  for (i=1; i<=hx; i++)
-  {
-    p1=gzero; av=avma;
-    for (j=1; j<=ly; j++)
-      p1 = gadd(p1, gmulgs(gcoeff(x,i,j),y[j]));
-    z[i]=lpileupto(av,p1);
-  }
-  return z;
-}
-
 static double
 get_minkovski(long N, long R1, GEN D, GEN gborne)
 {
@@ -1126,7 +1110,7 @@ void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
 static long
 small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 		       long PRECREG,GEN nf,GEN gborne,long nbrelpid,GEN invp,
-		       long *L)
+		       GEN L)
 {
   const double eps = 0.000001;
   double *y,*zz,**qq,*vv, MINKOVSKI_BOUND,IDEAL_BOUND,normideal;
@@ -1212,7 +1196,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	  if (!x[1] && y[1]<=eps) { flbreak=1; break; }
 	  if (ccontent(x)==1) /* primitive */
 	  {
-	    alpha=gmul(ideal,gmul_mat_smallvec(cbase,x,N,N));
+	    alpha=gmul(ideal,gmul_mat_smallvec(cbase,x));
 	    j=N; while (j>=2 && !signe(alpha[j])) --j;
 	    if (j!=1)
 	    {
@@ -1248,7 +1232,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 	for (i=1; i<=KC; i++) V[i]=0;
 	for (i=1; i<=primfact[0]; i++) V[primfact[i]] = expoprimfact[i];
 	
-        if (! addcolumntomatrix(V,KC,&invp,L))
+        if (! addcolumntomatrix(V,invp,L))
         {
           if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
           avma = av3; continue;
@@ -1791,117 +1775,73 @@ compute_matt2(long RU,GEN nf)
   return matt2;
 }
 
-/* no garbage collecting. destroys y */
-static GEN
-relationrank_partial(GEN ptinvp, GEN y, long k, long n)
-{
-  long i,j;
-  GEN res=cgetg(n+1,t_MAT), p1;
-
-  for (i=k+1; i<=n; i++) y[i] = ldiv(gneg_i((GEN)y[i]),(GEN)y[k]);
-  for (j=1; j<=k; j++)
-  {
-    p1=cgetg(n+1,t_COL); res[j]=(long)p1;
-    for (i=1; i<j; i++) p1[i]=zero;
-    for (   ; i<k; i++) p1[i]=coeff(ptinvp,i,j);
-    p1[k]=ldiv(gcoeff(ptinvp,k,j),(GEN)y[k]);
-    if (j==k)
-      for (i=k+1; i<=n; i++)
-	p1[i]=lmul((GEN)y[i],gcoeff(ptinvp,k,k));
-    else
-      for (i=k+1; i<=n; i++)
-	p1[i]=ladd(gcoeff(ptinvp,i,j), gmul((GEN)y[i], gcoeff(ptinvp,k,j)));
-  }
-  for (  ; j<=n; j++) res[j]=ptinvp[j];
-  return res;
-}
-
-/* Programmes de calcul du rang d'une matrice A de M_{ n,r }(Q) avec rang(A)=
- * r <= n On transforme peu a peu la matrice  I dont les colonnes sont les
- * vecteurs de la base canonique de Q^n en une matrice de changement de base
- * P obtenue en prenant comme base les colonnes de A independantes et des
- * vecteurs de la base canonique. On rend P^(-1), L un vecteur ligne a n
- * composantes valant 0 ou 1 selon que le le vecteur correspondant de P est
- * e_i ou x_i (e_i vecteur de la base canonique, x_i i-eme colonne de A)
- */
-static GEN
-relationrank(long **mat,long n,long r,long *L)
-{
-  long av = avma,i,j,lim;
-  GEN ptinvp,y;
-
-  if (r>n) err(talker,"incorrect matrix in relationrank");
-  if (DEBUGLEVEL)
-  {
-    fprintferr("After trivial relations, cmptglob = %ld\n",r);
-    msgtimer("mat & matarch");
-  }
-  lim=stack_lim(av,1); ptinvp=idmat(n);
-  for (i=1; i<=r; i++)
-  {
-    j=1; y = gmul_mat_smallvec(ptinvp,mat[i],n,n);
-    while (j<=n && (gcmp0((GEN)y[j]) || L[j])) j++;
-    if (j>n && i==r) err(talker,"not a maximum rank matrix in relationrank");
-    ptinvp = relationrank_partial(ptinvp,y,j,n); L[j]=1;
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"relationrank");
-      ptinvp = gerepileupto(av, gcopy(ptinvp));
-    }
-  }
-  ptinvp = gerepileupto(av, gcopy(ptinvp));
-  if (DEBUGLEVEL>1)
-    { fprintferr("\nRank of trivial relations matrix: %ld\n",r); flusherr(); }
-  return ptinvp;
-}
-
 /* Input: a matrix in M_{ n,r }(Q), of maximal rank r < n, a n-dimensional
- * column vector V, the matrix *INVP and the row vector *L as given by
+ * column vector V, the matrix INVP and the row vector *L as given by
  * relationrank()
  *
  * If V depends linearly from the columns of the matrix, return 0.
- * Otherwise, update *INVP and *L and return 1.
+ * Otherwise, update INVP and L and return 1.
+ * no GC. Destroys Ai (column of A)
  */
-long
-addcolumntomatrix(long *V, long n,GEN *INVP,long *L)
+int
+addcolumntomatrix(GEN Ai, GEN invp, long *L)
 {
-  GEN ptinvp,y;
-  long i, k;
+  GEN a = gmul_mat_smallvec(invp,Ai);
+  long i,j,k, n = lg(invp);
 
-  if (DEBUGLEVEL>4)
-  {
-    fprintferr("\n*** Entering addcolumntomatrix(). AVMA = %ld\n",avma);
-    flusherr();
-  }
-  ptinvp=*INVP; y=gmul_mat_smallvec(ptinvp,V,n,n);
   if (DEBUGLEVEL>6)
   {
-    fprintferr("vector = [\n");
-    for (i=1; i<n; i++) fprintferr("%ld,",V[i]);
-    fprintferr("%ld]~\n",V[n]); flusherr();
-    fprintferr("vector in new basis = \n"); outerr(y);
-    fprintferr("base change matrix = \n"); outerr(ptinvp);
-    fprintferr("list = [");
-    for (i=1; i<n; i++) fprintferr("%ld,",L[i]);
-    fprintferr("%ld]\n",L[n]); flusherr();
+    fprintferr("adding vector = %Z\n",Ai);
+    fprintferr("vector in new basis = %Z\n",a);
+    fprintferr("list = %Z\n",L);
+    fprintferr("base change matrix =\n"); outerr(invp);
   }
-  k=1; while (k<=n && (gcmp0((GEN)y[k]) || L[k])) k++;
-  if (k > n) return 0;
-
-    *INVP = relationrank_partial(ptinvp,y,k,n);
+  k = 1; while (k<n && (L[k] || gcmp0((GEN)a[k]))) k++;
+  if (k == n) return 0;
   L[k] = 1;
-  if (DEBUGLEVEL>4)
+  for (i=k+1; i<n; i++) a[i] = ldiv(gneg_i((GEN)a[i]),(GEN)a[k]);
+  for (j=1; j<=k; j++)
   {
-    fprintferr("*** Leaving addcolumntomatrix(). AVMA = %ld\n",avma);
-    flusherr();
+    GEN c = (GEN)invp[j], ck = (GEN)c[k];
+    if (gcmp0(ck)) continue;
+    c[k] = ldiv(ck, (GEN)a[k]);
+    if (j==k)
+      for (i=k+1; i<n; i++)
+	c[i] = lmul((GEN)a[i], ck);
+    else
+      for (i=k+1; i<n; i++)
+	c[i] = ladd((GEN)c[i], gmul((GEN)a[i], ck));
   }
   return 1;
 }
 
-/* a usage special: uniquement pour passer du format smallbnf au format bnf
- * Ici, vectbase est deja permute, donc pas de vperm. A l'effet de
- * compute_class_number() suivi de class_group_gen().
+/* compute the rank of A in M_n,r(Z) (C long), where rank(A) = r <= n.
+ * Starting from the identity (canonical basis of Q^n), we obtain a base
+ * change matrix P by taking the independant columns of A and vectors from
+ * the canonical basis. Update invp = 1/P, and L in {0,1}^n, with L[i] = 0
+ * of P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
  */
+static GEN
+relationrank(long **A,long r,long *L)
+{
+  long i, n = lg(L)-1, av = avma, lim = stack_lim(av,1);
+  GEN invp = idmat(n);
+
+  if (!r) return invp;
+  if (r>n) err(talker,"incorrect matrix in relationrank");
+  for (i=1; i<=r; i++)
+  {
+    if (! addcolumntomatrix(A[i],invp,L) && i == r)
+      err(talker,"not a maximum rank matrix in relationrank");
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"relationrank");
+      invp = gerepileupto(av, gcopy(invp));
+    }
+  }
+  return gerepileupto(av, gcopy(invp));
+}
+
 static void
 classintern(GEN nf,GEN W,GEN *ptcl, GEN *ptcl2)
 {
@@ -2623,9 +2563,11 @@ INCREASEGEN:
       p2[2]=lgetr(PRECREG); p1[j]=(long)p2;
     }
   }
-  av1 = avma; liste = new_chunk(KC+1);
+  if (DEBUGLEVEL)
+    fprintferr("After trivial relations, cmptglob = %ld\n",cmptglob);
+  av1 = avma; liste = cgetg(KC+1,t_VECSMALL);
   for (i=1; i<=KC; i++) liste[i]=0;
-  invp = cmptglob? relationrank(mat,KC,cmptglob,liste): idmat(KC);
+  invp = relationrank(mat,cmptglob,liste);
 
   /* relations through elements of small norm */
   cmptglob = small_norm_for_buchall(cmptglob,mat,C,KCCO,(long)LIMC,

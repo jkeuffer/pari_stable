@@ -2403,16 +2403,49 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-long addcolumntomatrix(long *V,long n,GEN *INVP,long *L);
-GEN gmul_mat_smallvec(GEN x, GEN y, long hx, long ly);
+long addcolumntomatrix(long *V,GEN INVP,long *L);
+
+/* x is a non-empty matrix, y is a compatible VECSMALL (dimension > 0). */
+GEN
+gmul_mat_smallvec(GEN x, GEN y)
+{
+  long c = lg(x), l = lg(x[1]), av,i,j;
+  GEN z=cgetg(l,t_COL), s;
+
+  for (i=1; i<l; i++)
+  {
+    av = avma; s = gmulgs(gcoeff(x,i,1),y[1]);
+    for (j=2; j<c; j++)
+       if (y[j]) s = gadd(s, gmulgs(gcoeff(x,i,j),y[j]));
+    z[i] = lpileupto(av,s);
+  }
+  return z;
+}
+
+/* same, x integral */
+GEN
+gmul_mati_smallvec(GEN x, GEN y)
+{
+  long c = lg(x), l = lg(x[1]), av,i,j;
+  GEN z=cgetg(l,t_COL), s;
+
+  for (i=1; i<l; i++)
+  {
+    av = avma; s = mulis(gcoeff(x,i,1),y[1]);
+    for (j=2; j<c; j++)
+      if (y[j]) s = addii(s, mulis(gcoeff(x,i,j),y[j]));
+    z[i]=(long)gerepileuptoint(av,s);
+  }
+  return z;
+}
 
 void
-minim_alloc(long n, double ***q, long **x, double **y,  double **z, double **v)
+minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
 {
   long i, s;
   double **Q;
 
-  *x = (long*)    new_chunk(n);
+  *x = cgetg(n, t_VECSMALL);
   *q = (double**) new_chunk(n);
 
   /* correct alignment for the following */
@@ -2440,8 +2473,8 @@ minim_alloc(long n, double ***q, long **x, double **y,  double **z, double **v)
 static GEN
 minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
-  GEN res,p1,u,r,liste,gnorme,gnorme_max,invp,V, *gptr[2];
-  long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank,*x;
+  GEN x,res,p1,u,r,liste,gnorme,gnorme_max,invp,V, *gptr[2];
+  long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank;
   double p,borne,*v,*y,*z,**q, eps = 0.000001;
 
   maxrank = 0; res = V = NULL; /* gcc -Wall */
@@ -2496,7 +2529,8 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_PERF:
       BORNE = gerepileupto(av1,BORNE);
       maxrank = (n*(n+1))>>1;
-      liste = new_chunk(1+maxrank); V = new_chunk(1+maxrank);
+      liste = cgetg(1+maxrank, t_VECSMALL);
+      V     = cgetg(1+maxrank, t_VECSMALL);
       for (i=1; i<=maxrank; i++) liste[i]=0;
   }
 
@@ -2552,7 +2586,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       case min_FIRST:
         if (! gnorme_max || gcmp(gnorme,BORNE)>0) break;
 
-        tetpil=avma; gnorme = icopy(gnorme); r = gmul_mat_smallvec(r,x,n,n);
+        tetpil=avma; gnorme = icopy(gnorme); r = gmul_mat_smallvec(r,x);
         gptr[0]=&gnorme; gptr[1]=&r; gerepilemanysp(av,tetpil,gptr,2);
         res[1]=(long)gnorme;
         res[2]=(long)r; return res;
@@ -2563,7 +2597,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
         for (i=1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
-        if (! addcolumntomatrix(V,maxrank,&invp,liste))
+        if (! addcolumntomatrix(V,invp,liste))
         {
           if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
           avma=av2; continue;
@@ -2601,7 +2635,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   tetpil = avma; p1=cgetg(k+1,t_MAT);
   for (j=1; j<=k; j++)
-    p1[j] = (long) gmul_mat_smallvec(u,(GEN)liste[j],n,n);
+    p1[j] = (long) gmul_mat_smallvec(u,(GEN)liste[j]);
   liste = p1;
   r = gnorme_max? gnorme_max: BORNE;
 
