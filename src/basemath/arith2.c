@@ -1062,34 +1062,54 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
 }
 
 /* composition */
-
 static void
+sq_gen(GEN z, GEN x)
+{
+  GEN d1,x2,y2,v1,v3,b3,c3,m,p1,r;
+
+  d1 = bezout((GEN)x[2],(GEN)x[1],&x2,&y2);
+  if (gcmp1(d1)) v1 = v3 = (GEN)x[1];
+  else
+  {
+    v1 = divii((GEN)x[1],d1);
+    v3 = mulii(v1,mppgcd(d1,(GEN)x[3]));
+  }
+  m=mulii((GEN)x[3],x2); setsigne(m,-signe(m));
+  r=modii(m,v3); p1=mulii(v1,r); b3=shifti(p1,1);
+  c3=addii(mulii((GEN)x[3],d1),mulii(r,addii((GEN)x[2],p1)));
+  z[1]=lmulii(v3,v1);
+  z[2]=laddii((GEN)x[2],b3);
+  z[3]=ldivii(c3,v3);
+}
+
+void
 comp_gen(GEN z,GEN x,GEN y)
 {
-  GEN s,n,d,d1,x1,x2,y1,y2,v1,v2,v3,b3,c3,m,p1,r;
+  GEN s,n,d,d1,x1,x2,y1,y2,v1,v2,b3,c3,m,p1,r;
 
+  if (x == y) { sq_gen(z,x); return; }
   s=shifti(addii((GEN)x[2],(GEN)y[2]),-1);
   n=subii((GEN)y[2],s);
   d = bezout((GEN)y[1],(GEN)x[1],&y1,&x1);
   d1 = bezout(s,d,&x2,&y2);
   if (gcmp1(d1))
   {
-    v3 = (GEN)x[1];
+    v1 = (GEN)x[1];
     v2 = (GEN)y[1];
   }
   else
   {
     v1=divii((GEN)x[1],d1);
     v2=divii((GEN)y[1],d1);
-    v3 = mulii(v1, mppgcd(d1,mppgcd((GEN)x[3],mppgcd((GEN)y[3],n))));
+    v1 = mulii(v1, mppgcd(d1,mppgcd((GEN)x[3],mppgcd((GEN)y[3],n))));
   }
   m = addii(mulii(mulii(y1,y2),n), mulii((GEN)y[3],x2));
   setsigne(m,-signe(m));
-  r=modii(m,v3); p1=mulii(v2,r); b3=shifti(p1,1);
+  r=modii(m,v1); p1=mulii(v2,r); b3=shifti(p1,1);
   c3=addii(mulii((GEN)y[3],d1),mulii(r,addii((GEN)y[2],p1)));
-  z[1]=lmulii(v3,v2);
+  z[1]=lmulii(v1,v2);
   z[2]=laddii((GEN)y[2],b3);
-  z[3]=ldivii(c3,v3);
+  z[3]=ldivii(c3,v1);
 }
 
 static GEN
@@ -1134,26 +1154,6 @@ compraw(GEN x, GEN y)
   return (typ(x)==t_QFI)? compimagraw(x,y): comprealraw(x,y);
 }
 
-static void
-sq_gen(GEN z, GEN x)
-{
-  GEN d1,x2,y2,v1,v3,b3,c3,m,p1,r;
-
-  d1 = bezout((GEN)x[2],(GEN)x[1],&x2,&y2);
-  if (gcmp1(d1)) v1 = v3 = (GEN)x[1];
-  else
-  {
-    v1 = divii((GEN)x[1],d1);
-    v3 = mulii(v1,mppgcd(d1,(GEN)x[3]));
-  }
-  m=mulii((GEN)x[3],x2); setsigne(m,-signe(m));
-  r=modii(m,v3); p1=mulii(v1,r); b3=shifti(p1,1);
-  c3=addii(mulii((GEN)x[3],d1),mulii(r,addii((GEN)x[2],p1)));
-  z[1]=lmulii(v3,v1);
-  z[2]=laddii((GEN)x[2],b3);
-  z[3]=ldivii(c3,v3);
-}
-
 GEN
 sqcompimag0(GEN x, long raw)
 {
@@ -1188,34 +1188,72 @@ sqcompimag(GEN x) { return sqcompimag0(x,0); }
 GEN
 sqcompimagraw(GEN x) { return sqcompimag0(x,1); }
 
+static GEN
+real_unit_form_by_disc(GEN D, long prec)
+{
+  GEN y = cgetg(5,t_QFR), sqrtD;
+  long av = avma;
+
+  if (typ(D) != t_INT || signe(D) <= 0) err(typeer,"real_unit_form_by_disc");
+  switch(mod4(D))
+  {
+    case 2:
+    case 3: err(funder2,"real_unit_form_by_disc");
+  }
+  y[1]=un; sqrtD = racine(D);
+  /* we know that D and sqrtD are non-zero */
+  if (mod2(D) != mod2(sqrtD))
+    sqrtD = gerepileuptoint(av, addsi(-1,sqrtD));
+  y[2] = (long)sqrtD; av = avma;
+  y[3] = (long)gerepileuptoint(av, shifti(subii(sqri(sqrtD),D),-2));
+  y[4] = (long)realzero(prec); return y;
+}
+
 GEN
 real_unit_form(GEN x)
 {
-  long av = avma, tetpil,prec;
-  GEN p1,p2, y = cgetg(5,t_QFR);
+  long av = avma, prec = precision((GEN)x[4]);
+  GEN D, y = cgetg(5,t_QFR);
 
-  y[1]=un; p1=qf_disc(x,NULL,NULL); p2=racine(p1);
-  /* we know that p1 and p2 are non-zero */
-  if (mod2(p1) != mod2(p2)) p2=addsi(-1,p2);
-  y[2]=(long)p2;
-  y[3]=lshifti(subii(sqri(p2),p1),-2);
-  prec = precision((GEN)x[4]);
-  if (!prec)
-    err(talker,"not a type real in 4th component of a t_QFR");
-  y[4]=(long)realzero(prec); tetpil=avma;
-  return gerepile(av,tetpil,gcopy(y));
+  if (!prec) err(talker,"not a t_REAL in 4th component of a t_QFR");
+  D = qf_disc(x,NULL,NULL);
+  return gerepileupto(av, real_unit_form_by_disc(D,prec));
+}
+
+static GEN
+imag_unit_form_by_disc(GEN D)
+{
+  GEN y = cgetg(4,t_QFI);
+  long isodd;
+
+  if (typ(D) != t_INT || signe(D) >= 0) err(typeer,"real_unit_form_by_disc");
+  switch(4 - mod4(D))
+  {
+    case 2:
+    case 3: err(funder2,"imag_unit_form_by_disc");
+  }
+  y[1] = un; isodd = mpodd(D);
+  y[2] = isodd? un: zero;
+  /* y[3] = (1-D) / 4 or -D / 4, whichever is an integer */
+  y[3] = lshifti(D,-2); setsigne(y[3],1);
+  if (isodd)
+  {
+    long av = avma;
+    y[3] = (long)gerepileuptoint(av, addis((GEN)y[3],1));
+  }
+  return y;
 }
 
 GEN
 imag_unit_form(GEN x)
 {
-  long av,tetpil;
   GEN p1,p2, y = cgetg(4,t_QFI);
-  y[1]=un;
-  y[2]=mpodd((GEN)x[2])? un: zero;
-  av=avma; p1=mulii((GEN)x[1],(GEN)x[3]);
-  p2=shifti(sqri((GEN)x[2]),-2); tetpil=avma;
-  y[3]=lpile(av,tetpil,subii(p1,p2));
+  long av;
+  y[1] = un;
+  y[2] = mpodd((GEN)x[2])? un: zero;
+  av = avma; p1 = mulii((GEN)x[1],(GEN)x[3]);
+  p2 = shifti(sqri((GEN)x[2]),-2);
+  y[3] = (long)gerepileuptoint(av, subii(p1,p2));
   return y;
 }
 
@@ -1226,7 +1264,7 @@ powrealraw(GEN x, long n)
   GEN y;
 
   if (typ(x) != t_QFR)
-    err(talker,"not a real quadratic form in powreal");
+    err(talker,"not a real quadratic form in powrealraw");
   if (!n) return real_unit_form(x);
   if (n== 1) return gcopy(x);
   if (n==-1) return ginv(x);
@@ -1584,6 +1622,7 @@ qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
   return NULL; /* not reached */
 }
 
+/* special case: p = 1 return unit form */
 GEN
 primeform(GEN x, GEN p, long prec)
 {
@@ -1592,6 +1631,9 @@ primeform(GEN x, GEN p, long prec)
 
   if (typ(x) != t_INT || !s) err(arither1);
   if (typ(p) != t_INT || signe(p) <= 0) err(arither1);
+  if (is_pm1(p))
+    return s<0? imag_unit_form_by_disc(x)
+              : real_unit_form_by_disc(x,prec);
   if (s < 0)
   {
     y = cgetg(4,t_QFI); s = 8-mod8(x);
@@ -1605,7 +1647,7 @@ primeform(GEN x, GEN p, long prec)
   {
     case 2: case 3: err(funder2,"primeform");
   }
-  y[1] = (long)icopy(p); av=avma;
+  y[1] = (long)icopy(p); av = avma;
   if (egalii(p,gdeux))
   {
     switch(s)
