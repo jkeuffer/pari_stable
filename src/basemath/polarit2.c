@@ -1346,7 +1346,7 @@ DDF(GEN a, long hint)
   ulong *tabbit, *tabkbit, *tmp;
   gpmem_t av = avma;
   byteptr pt=diffptr;
-  const int MAXNP = max(5, (long)sqrt(da));
+  const int MAXNP = max(5, (long)sqrt((double)da));
 
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) (void)timer2();
