@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000  The PARI group.
+Copyright (C) 2000-2003  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -2168,6 +2168,7 @@ entree functions_basic[]={
 {"forsubgroup",99,(void*)forsubgroup,11,"vV=GDGI"},
 {"forvec",87,(void*)forvec,11,"vV=GID0,L,"},
 {"frac",18,(void*)gfrac,2,"G"},
+{"galoisexport",99,(void*)galoisexport,6,"GD0,L,"},
 {"galoisfixedfield",99,(void*)galoisfixedfield,6,"GGD0,L,Dn"},
 {"galoisinit",99,(void*)galoisinit,6,"GDGD0,L,"},
 {"galoisisabelian",99,(void*)galoisisabelian,6,"GD0,L,"},

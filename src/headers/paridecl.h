@@ -835,6 +835,7 @@ GEN     galoisconj(GEN nf);
 GEN     galoisconj0(GEN nf, long flag, GEN d, long prec);
 GEN     galoisconj2(GEN x, long nbmax, long prec);
 GEN     galoisconj4(GEN T, GEN den, long flag, long karma);
+GEN     galoisexport(GEN gal, long format);
 GEN     galoisfixedfield(GEN gal, GEN v, long flag, long y);
 GEN     galoisinit(GEN nf, GEN den, long karma);
 GEN     galoisisabelian(GEN gal, long flag);
