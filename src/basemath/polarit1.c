@@ -1932,7 +1932,7 @@ padicff(GEN x,GEN p,long pr)
 
   nf = cgetg(10,t_VEC); nf[1] = (long)x;
   if (is_pm1(q)) {
-    e = mkcol(gone);
+    e = mkcol(utoi(v));
     g = mkcol(p);
   } else {
     e = mkcol2(stoi(v), gone);
