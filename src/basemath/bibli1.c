@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern int addcolumntomatrix(GEN V,GEN INVP,GEN L);
+extern long expodb(double x);
 
 /* default quality ratio for LLL: 99/100 */
 #define LLLDFT 100
@@ -2213,46 +2214,6 @@ restoreprecdoubles()
   }
 }
 
-/* a mettre dans mp.c. Recupere l'exposant d'un double */
-
-#ifdef LONG_IS_64BIT
-
-long
-expodb(double x)
-{
-  union { double f; ulong i; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-
-  if (x==0) return -308;
-  fi.f = x;
-  return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
-}
-
-#else /* LONG_IS_32BIT */
-
-#if   PARI_DOUBLE_FORMAT == 1
-#  define INDEX0 1
-#elif PARI_DOUBLE_FORMAT == 0
-#  define INDEX0 0
-#endif
-
-long
-expodb(double x)
-{
-  union { double f; ulong i[2]; } fi;
-  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
-  const int exp_mid = 0x3ff;/* exponent bias */
-  const int shift = mant_len-32;
-  const ulong a = fi.i[INDEX0];
-
-  if (x==0) return -308;
-  fi.f = x;
-  return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
-}
-
-#endif
-
 long
 checkentries()
 {
@@ -2321,7 +2282,7 @@ pslqtwolevel(GEN x, long prec)
 {
   GEN ga,tabga,s,s1,sinv,p1,p2,res,t0,t1,t2,t3,t4,tinv,M;
   long lx = lg(x), tx = typ(x), n = lx-1, k, i, j, m, ct, ctpro, fl, flreal, flit, flilong;
-  gpmem_t av = avma, lim = stack_lim(av,1), av0,tetpil;
+  gpmem_t av = avma, lim = stack_lim(av,1), av0;
   long tvmind=0, t12=0, t1234=0, treda=0, tfin=0;
   const long EXP = - bit_accuracy(prec) + 2*n;
   double *tabgabar, gabar, resbar, *respt, tinvbar, t1bar, t2bar, t3bar, t4bar;
@@ -2539,7 +2500,7 @@ endpslqtwo:
   }
   free(tabgabar); free(ybar); free(Hbar); free(Abar); free(Bbar);
   free(ybarst); free(Hbarst); free(Abarst); free(Bbarst);
-  tetpil = avma; return gerepile(av,tetpil,gcopy(res));
+  return gerepilecopy(av, res);
 }
 
 /* x is a vector of elts of a p-adic field */

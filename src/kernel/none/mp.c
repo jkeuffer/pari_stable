@@ -2462,6 +2462,18 @@ karamulir(GEN x, GEN y, long flag)
 #endif
 
 #ifdef LONG_IS_64BIT
+long
+expodb(double x)
+{
+  union { double f; ulong i; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+
+  if (x==0) return -1023;
+  fi.f = x;
+  return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
+}
+
 GEN
 dbltor(double x)
 {
@@ -2514,6 +2526,20 @@ rtodbl(GEN x)
 #  define INDEX0 0
 #  define INDEX1 1
 #endif
+
+long
+expodb(double x)
+{
+  union { double f; ulong i[2]; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int shift = mant_len-32;
+  const ulong a = fi.i[INDEX0];
+
+  if (x==0) return -1023;
+  fi.f = x;
+  return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+}
 
 GEN
 dbltor(double x)
