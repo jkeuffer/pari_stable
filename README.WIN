@@ -1,11 +1,11 @@
-This file describes the various ways you can run PARI/GP in a (relatively
-recent) Windows environment (95 or higher). For earlier versions of Windows,
-see README.DOS.
+This file describes the various ways you can run PARI/GP in a win32 environment
+(Windows 95,98,2000,NT). For earlier versions of Windows, see README.DOS.
 
 The only way to have a fully functional GP is to install GNU/Linux. It's a
 one hour job to install a minimal Linux system from current Linux
 distributions, without any technical background. The LILO boot system enables
-you to have Windows and Linux coexisting peacefully on your hard drive.
+you to have Windows and Linux coexisting peacefully on your hard drive, so
+you can have the best of both worlds.
 
 The other solutions all stick to the Windows environment and suffer from
 various problems. It is advised, but not mandatory to get the Documentation
@@ -17,7 +17,7 @@ which contains the following directories:
 
   + DOC, containing
      - user's manual, tutorial and reference card in TeX format You will
-       need TeX to compile them (see www.CTAN.org for how to get TeX) The
+       need TeX to compile them (see www.CTAN.org for how to get TeX). The
        same documents are available in PDF and PostScript format from
 
          ftp://megrez.math.u-bordeaux.fr/pub/pari/manuals/
@@ -39,26 +39,36 @@ which contains the following directories:
   + EXAMPLES, containing sample GP scripts, and a sample INPUTRC file (for
     readline, you can use it to customize GP line editing).
 
-NOTE: all .gz and .ZIP files are compressed files (or archives). You can
-process them with Winzip (see www.winzip.com) for instance.
+NOTE: all .gz and .ZIP files are compressed files (or archives). Extract them
+[ with Winzip (see www.winzip.com) for instance ] once you have downloaded them.
 
 %%%%%%%%%%%%%  Solution 1: The CYGWIN library  %%%%%%%%%%%%%%%%%%%%%%%%
 
-Fetch the cygwin library (CYGWIN1.DLL) from Cygnus Solutions (now a
-subsidiary of Red Hat) from http://sources.redhat.com/cygwin/ [ the Download
-and Installation process is automated and quite simple, you should be home in
-a few mouse clicks. Be sure to install at least the "cygwin" package! ].
+This is the preferred solution, but it requires fetching the cygwin
+compatibility library first. We provide this file as 
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin/cygwin1.dll.gz
+
+(size: 268k, 600k uncompressed). It needs to be downloaded only once.
 Then fetch the GP binary
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin/gp-xxx.exe.gz
-
-You can also download a full Cygwin distribution which includes many useful
-tools (including PERL for instance). Then you will be able to build GP from
-the general (unix) sources.
+ 
+and put it in the same directory as the dll (or dump the dll with your system
+libraries, as you prefer).
 
 PROBLEMS:
   * no hi-res plots, most graphics commands disabled (you can still output to
     a PostScript file)
+
+NOTE: you might wish to download the full cygwin distribution from
+http://sources.redhat.com/cygwin/ [ the Download and Installation process is
+automated and quite simple, you should be home in a few mouse
+clicks...provided your internet connection is good enough. ]. It provides a
+neat gcc-based development environment under Windows, under which most Unix
+pacakges can easily be ported. In particular you will be able to build GP
+from the generic (unix) sources.
+
 
 %%%%%%%%%%%%%  Solution 2: The native (mingw) binary %%%%%%%%%%%%%%%%%
 
