@@ -543,30 +543,30 @@ gauss_realimag(GEN x, GEN y)
 }
 
 GEN
-getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
+getfu(GEN nf,GEN *ptA,GEN reg,long flun,long *pte,long prec)
 {
   long e, i, j, R1, RU, N=degpol(nf[1]);
   gpmem_t av = avma;
-  GEN p1,p2,u,y,matep,s,xarch,vec;
+  GEN p1,p2,u,y,matep,s,A,vec;
   GEN *gptr[2];
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
   R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
   if (RU==1) { *pte=BIGINT; return cgetg(1,t_VEC); }
 
-  *pte = 0; xarch = *ptxarch;
+  *pte = 0; A = *ptA;
   if (gexpo(reg) < -8) return not_given(av,flun,RELAT);
 
   matep = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
-    s = gzero; for (i=1; i<=RU; i++) s = gadd(s,greal(gcoeff(xarch,i,j)));
+    s = gzero; for (i=1; i<=RU; i++) s = gadd(s,greal(gcoeff(A,i,j)));
     s = gdivgs(s, -N);
     p1=cgetg(RU+1,t_COL); matep[j]=(long)p1;
-    for (i=1; i<=R1; i++) p1[i] = ladd(s, gcoeff(xarch,i,j));
-    for (   ; i<=RU; i++) p1[i] = ladd(s, gmul2n(gcoeff(xarch,i,j),-1));
+    for (i=1; i<=R1; i++) p1[i] = ladd(s, gcoeff(A,i,j));
+    for (   ; i<=RU; i++) p1[i] = ladd(s, gmul2n(gcoeff(A,i,j),-1));
   }
-  if (prec <= 0) prec = gprecision(xarch);
+  if (prec <= 0) prec = gprecision(A);
   u = lllintern(greal(matep),100,1,prec);
   if (!u) return not_given(av,flun,PRECI);
 
@@ -579,7 +579,7 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
   for (j=1; j<RU; j++)
     if (!gcmp1(idealnorm(nf, (GEN)y[j]))) break;
   if (j < RU) { *pte = 0; return not_given(av,flun,PRECI); }
-  xarch = gmul(xarch,u);
+  A = gmul(A,u);
 
   /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
   y = gmul((GEN)nf[7], y);
@@ -594,18 +594,18 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
     if (gcmp(QuickNormL2(p2,DEFAULTPREC),
              QuickNormL2(p1,DEFAULTPREC)) < 0)
     {
-      xarch[j] = lneg((GEN)xarch[j]);
+      A[j] = lneg((GEN)A[j]);
       p1 = p2;
     }
     if (gsigne(leading_term(p1)) < 0)
     {
-      xarch[j] = ladd((GEN)xarch[j], vec);
+      A[j] = ladd((GEN)A[j], vec);
       p1 = gneg(p1);
     }
     y[j] = (long)p1;
   }
   if (DEBUGLEVEL) msgtimer("getfu");
-  *ptxarch=xarch; gptr[0]=ptxarch; gptr[1]=&y;
+  *ptA=A; gptr[0]=ptA; gptr[1]=&y;
   gerepilemany(av,gptr,2); return y;
 }
 
@@ -614,16 +614,16 @@ buchfu(GEN bnf)
 {
   long c;
   gpmem_t av = avma;
-  GEN nf,xarch,reg,res, y = cgetg(3,t_VEC);
+  GEN nf,A,reg,res, y = cgetg(3,t_VEC);
 
-  bnf = checkbnf(bnf); xarch = (GEN)bnf[3]; nf = (GEN)bnf[7];
+  bnf = checkbnf(bnf); A = (GEN)bnf[3]; nf = (GEN)bnf[7];
   res = (GEN)bnf[8]; reg = (GEN)res[2];
   if (lg(res)==7 && lg(res[5])==lg(nf[6])-1)
   {
     y[1] = lcopy((GEN)res[5]);
     y[2] = lcopy((GEN)res[6]); return y;
   }
-  y[1] = (long)getfu(nf,&xarch,reg,2,&c,0);
+  y[1] = (long)getfu(nf,&A,reg,2,&c,0);
   y[2] = lstoi(c); return gerepilecopy(av, y);
 }
 
@@ -1871,16 +1871,16 @@ trunc_error(GEN x)
                         && (expo(x)>>TWOPOTBITS_IN_LONG) + 3 > lg(x);
 }
 
-/* xarch = complex logarithmic embeddings of units (u_j) found so far */
+/* A = complex logarithmic embeddings of units (u_j) found so far */
 static GEN
-compute_multiple_of_R(GEN xarch,long RU,long N,GEN *ptlambda)
+compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
 {
   GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda, *gptr[2];
-  long i, zc = lg(xarch)-1, R1 = 2*RU - N;
+  long i, zc = lg(A)-1, R1 = 2*RU - N;
   gpmem_t av = avma;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
-  xreal = greal(xarch); /* = (log |sigma_i(u_j)|) */
+  xreal = greal(A); /* = (log |sigma_i(u_j)|) */
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) T[i] = un;
   for (   ; i<=RU; i++) T[i] = deux;
@@ -1928,8 +1928,10 @@ bestappr_noer(GEN x, GEN k)
  * *ptkR = regulator of sublambda = multiple of regulator of lambda
  * Compute R = true regulator of lambda.
  *
- * If c := Rz = 2, by Dirichlet's formula, then lambda is the full group of
+ * If c := Rz ~ 1, by Dirichlet's formula, then lambda is the full group of
  * units AND the full set of relations for the class group has been computed.
+ *
+ * In fact z is a very rough approximation and we only expect 0.75 < Rz < 1.5
  *
  * Output: *ptkR = R, *ptU = basis of fundamental units (in terms lambda) */
 static int
@@ -1937,35 +1939,35 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
   gpmem_t av = avma;
   long r;
-  GEN L,H,gc,den,R;
+  GEN L,H,D,den,R;
   double c;
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
-  gc = gmul(*ptkR,z);
-  lambda = bestappr_noer(lambda,gc);
+  D = gmul2n(gmul(*ptkR,z), 1); /* bound for denom(lambda) */
+  lambda = bestappr_noer(lambda,D);
   if (!lambda)
   {
     if (DEBUGLEVEL) fprintferr("truncation error in bestappr\n");
     return PRECI;
   }
   den = denom(lambda);
-  if (gcmp(den,gc) > 0)
+  if (gcmp(den,D) > 0)
   {
-    if (DEBUGLEVEL) fprintferr("c = %Z\nden = %Z\n",gc,den);
+    if (DEBUGLEVEL) fprintferr("D = %Z\nden = %Z\n",D,den);
     return PRECI;
   }
-  L = gmul(lambda,den);
+  L = Q_muli_to_int(lambda, den);
   H = hnfall_i(L, NULL, 1); r = lg(H)-1;
   R = gdiv(dethnf_i(H), gpowgs(den, r));
   R = mpabs(gmul(*ptkR,R)); /* tentative regulator */
-  c = gtodouble(gmul(R,z)); /* should be 2n (= 2 if we are done) */
+  c = gtodouble(gmul(R,z)); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {
     msgtimer("bestappr/regulator");
-    fprintferr("\n ***** check = %f\n",c/2);
+    fprintferr("\n ***** check = %f\n",c);
   }
-  if (c < 1.5) return PRECI;
-  if (c > 3.) { avma = av; return RELAT; }
+  if (c < 0.75) return PRECI;
+  if (c > 1.5 ) { avma = av; return RELAT; }
   *ptkR = R; *ptL = L; return LARGE;
 }
 
@@ -2753,7 +2755,7 @@ cgetc_col(long n, long prec)
 static GEN
 buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
             GEN reg, GEN c_1, GEN zu, GEN W, GEN B,
-            GEN xarch, GEN matarch, GEN vectbase, GEN vperm)
+            GEN A, GEN matarch, GEN vectbase, GEN vperm)
 {
   long i, l = labs(fl)>1? 11: fl? 9: 8;
   GEN p1,z, RES = cgetg(11,t_COL);
@@ -2776,7 +2778,7 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
   z=cgetg(11,t_VEC);
   z[1]=(long)W;
   z[2]=(long)B;
-  z[3]=(long)xarch;
+  z[3]=(long)A;
   z[4]=(long)matarch;
   z[5]=(long)vectbase;
   for (i=lg(vperm)-1; i>0; i--) vperm[i]=lstoi(vperm[i]);
@@ -2795,17 +2797,63 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
 {
   long k = EXP220;
   gpmem_t av = avma;
-  GEN W,B,xarch,matarch,vectbase,vperm;
+  GEN W,B,A,matarch,vectbase,vperm;
   GEN fu=cgetg(1,t_VEC), reg=gun, c_1=gun, zu=cgetg(3,t_VEC);
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
 
   clg1[1]=un; clg1[2]=clg1[3]=clg2[2]=clg2[3]=lgetg(1,t_VEC);
   clg2[1]=lgetg(1,t_MAT);
   zu[1]=deux; zu[2]=lnegi(gun);
-  W=B=xarch=matarch=cgetg(1,t_MAT);
+  W=B=A=matarch=cgetg(1,t_MAT);
   vectbase=cgetg(1,t_COL); vperm=cgetg(1,t_VEC);
 
-  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,xarch,matarch,vectbase,vperm));
+  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,A,matarch,vectbase,vperm));
+}
+
+/* return (small set of) indices of columns generating the same lattice as x.
+ * Assume HNF(x) is inexpensive (few rows, many columns).
+ * Dichotomy approach since interesting columns may be at the very end */
+GEN
+extract_full_lattice(GEN x)
+{
+  long dj, j, k, l = lg(x);
+  GEN h, h2, H, v;
+
+  if (l < 200) return NULL; /* not worth it */
+
+  v = cgetg(l, t_VECSMALL);
+  setlg(v, 1);
+  H = hnfall_i(x, NULL, 1);
+  h = cgetg(1, t_MAT);
+  dj = 1;
+  for (j = 1; j < l; )
+  {
+    gpmem_t av = avma;
+    long lv = lg(v);
+
+    for (k = 0; k < dj; k++) v[lv+k] = j+k;
+    setlg(v, lv + dj);
+    h2 = hnfall_i(vecextract_p(x, v), NULL, 1);
+    if (gegal(h, h2))
+    { /* these dj columns can be eliminated */
+      avma = av; setlg(v, lv);
+      j += dj;
+      if (j >= l) break; /* shouldn't occur */
+      dj <<= 1;
+      if (j + dj >= l) dj = (l - j) >> 1;
+    }
+    else if (dj > 1)
+    { /* at least one interesting column, try with first half of this set */
+      avma = av; setlg(v, lv);
+      dj >>= 1;
+    }
+    else
+    { /* this column should be kept */
+      if (gegal(h2, H)) break;
+      h = h2; j++;
+    }
+  }
+  return v;
 }
 
 GEN
@@ -2814,11 +2862,10 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 {
   gpmem_t av = avma, av0, av1, limpile;
   long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
-  long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob;
+  long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob,seed;
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
-  long seed;
   double cbach,cbach2,drc,LOGD2;
-  GEN p1,vecG,fu,zu,nf,D,xarch,W,R,Res,z,h,vperm,subFB;
+  GEN vecG,fu,zu,nf,D,A,W,R,Res,z,h,vperm,subFB;
   GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase,first_nz, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
@@ -2862,7 +2909,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   resc = mulri(resc,(GEN)zu[1]);
   if (DEBUGLEVEL)
   {
-    fprintferr("N = %ld, R1 = %ld, R2 = %ld, RU = %ld\n",N,R1,R2,RU);
+    fprintferr("N = %ld, R1 = %ld, R2 = %ld\n",N,R1,R2);
     fprintferr("D = %Z\n",D);
   }
   av0 = avma; mat = NULL; FB = NULL; first_nz = NULL;
@@ -2926,16 +2973,16 @@ START:
   cglob = 0; z = zerocol(RU);
   for (i=1; i<=KCZ; i++)
   {
-    GEN P = idealbase[i];
+    GEN c, P = idealbase[i];
     if (isclone(P))
     { /* all prime divisors in FB */
       unsetisclone(P); cglob++;
       C[cglob] = (long)z; /* 0 */
-      mat[cglob] = p1 = col_0(KC);
+      mat[cglob] = c = col_0(KC);
       k = numideal[FB[i]];
       first_nz[cglob] = k+1;
-      p1 += k;
-      for (j=lg(P)-1; j; j--) p1[j] = itos(gmael(P,j,3));
+      c += k;
+      for (j=lg(P)-1; j; j--) c[j] = itos(gmael(P,j,3));
     }
   }
   if (DEBUGLEVEL) fprintferr("After trivial relations, cglob = %ld\n",cglob);
@@ -3067,9 +3114,9 @@ MORE:
 
   /* first attempt at regulator for the check */
   zc = (lg(mat)-1) - (lg(B)-1) - (lg(W)-1);
-  xarch = cgetg(zc+1,t_MAT); /* cols corresponding to units */
-  for (j=1; j<=zc; j++) xarch[j] = C[j];
-  R = compute_multiple_of_R(xarch,RU,N,&lambda);
+  A = cgetg(zc+1,t_MAT); /* cols corresponding to units */
+  for (j=1; j<=zc; j++) A[j] = C[j];
+  R = compute_multiple_of_R(A,RU,N,&lambda);
   if (!R)
   { /* not full rank for units */
     if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
@@ -3084,8 +3131,8 @@ MORE:
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Z\n", h);
 
   /* z ~ h R if enough relations, a multiple otherwise */
-  z = mulrr(Res,resc); p1 = gmul2n(divir(h,z), 1);
-  switch (compute_R(lambda,p1,&L,&R))
+  z = mulrr(Res,resc);
+  switch (compute_R(lambda, divir(h,z), &L, &R))
   {
     case PRECI: /* precision problem unless we cheat on Bach constant */
       if (!precdouble) precpb = "compute_R";
@@ -3102,13 +3149,19 @@ MORE:
   /* fundamental units */
   if (flun < 0 || flun > 1)
   {
-    xarch = gmul(xarch, lllint(L)); /* arch. components of fund. units */
-    xarch = cleancol(xarch,N,PRECREG);
+    GEN v = extract_full_lattice(L); /* L may be very large */
+    if (v)
+    {
+      A = vecextract_p(A, v);
+      L = vecextract_p(L, v);
+    }
+    /* arch. components of fund. units */
+    A = cleancol(gmul(A,lllint(L)), N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleancol");
   }
   if (labs(flun) > 1)
   {
-    fu = getfu(nf,&xarch,R,flun,&k,PRECREG);
+    fu = getfu(nf,&A,R,flun,&k,PRECREG);
     if (k <= 0 && labs(flun) > 2)
     {
       if (k < 0) precadd = (DEFAULTPREC-2) + ((-k) >> TWOPOTBITS_IN_LONG);
@@ -3126,5 +3179,5 @@ MORE:
   c1 = gdiv(gmul(R,h), z);
   desallocate(&mat, &first_nz);
 
-  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,R,c1,zu,W,B,xarch,C,vectbase,vperm));
+  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,R,c1,zu,W,B,A,C,vectbase,vperm));
 }
