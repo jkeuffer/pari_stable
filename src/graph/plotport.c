@@ -101,13 +101,17 @@ fill_gap(screen scr, long i, int jnew, int jpre)
   if (up>=0) while (up > mid) scr[i_up][up--] = ':';
 }
 
+static double
+todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
+
 #define QUARK  ((char*)NULL) /* Used as a special-case */
 static GEN quark_gen;
 
-#define READ_EXPR(s)	((s)==QUARK? quark_gen : lisexpr(s))
-
-static double
-todbl(GEN x) { return rtodbl(gtofp(x, 3)); }
+static GEN
+READ_EXPR(char *s, entree *ep, GEN x) {
+  if (s == QUARK) return gsubst(quark_gen,0,x);
+  ep->value = x; return lisexpr(s);
+}
 
 void
 plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
@@ -128,14 +132,14 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   for (j=1; j<=JSCR; j++) scr[1][j]=scr[ISCR][j]=YY;
   for (i=2; i<ISCR; i++)
   {
-    scr[i][1] = XX_LOWER;
-    scr[i][JSCR]=XX_UPPER;
-    for (j=2; j<JSCR; j++) scr[i][j]=BLANK;
+    scr[i][1]   = XX_LOWER;
+    scr[i][JSCR]= XX_UPPER;
+    for (j=2; j<JSCR; j++) scr[i][j] = BLANK;
   }
   av2=avma; limite=stack_lim(av2,1);
   for (i=1; i<=ISCR; i++)
   {
-    gaffect(READ_EXPR(ch),y[i]);
+    gaffect(READ_EXPR(ch,ep,x), y[i]);
     if (gcmp(y[i],ysml)<0) ysml=y[i];
     if (gcmp(y[i],ybig)>0) ybig=y[i];
     x = addrr(x,dx);
@@ -145,7 +149,6 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
       if (DEBUGMEM>1) err(warnmem,"plot");
       x = gerepile(av2,tetpil,rcopy(x));
     }
-    ep->value = (void*)x;
   }
   if (ysmlu) ysml=ysmlu;
   if (ybigu) ybig=ybigu;
@@ -156,7 +159,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
   av2=avma; z = PICTZERO(jz); jz = jz/3;
   for (i=1; i<=ISCR; i++)
   {
-    if (0<=jz && jz<=JSCR) scr[i][jz]=z; 
+    if (0<=jz && jz<=JSCR) scr[i][jz]=z;
     j = 3+gtolong(gmul(gsub(y[i],ysml),dyj));
     jnew = j/3;
     if (i > 1) fill_gap(scr, i, jnew, jpre);
@@ -460,7 +463,7 @@ rectticks(PARI_plot *WW, long ne,
   if (!nticks) return;
 
   /* Now we want to find nticks (or less) "round" numbers between l1 and l2.
-     For our purpose round numbers have "last significant" digit either 
+     For our purpose round numbers have "last significant" digit either
 	*) any;
 	*) even;
 	*) divisible by 5.
@@ -932,12 +935,12 @@ clipline(double xmin, double xmax, double ymin, double ymax,
 	xmn = xmin;
 	rc |= (x1_is_xmn ? CLIPLINE_CLIP_1 : CLIPLINE_CLIP_2);
     }
-    
+
     if (xmx > xmax) {
 	xmx = xmax;
 	rc |= (x1_is_xmn ? CLIPLINE_CLIP_2 : CLIPLINE_CLIP_1);
     }
-    
+
     if (xmn > xmx)
 	return 0;
 
@@ -1032,11 +1035,11 @@ rectclip(long rect)
 	      goto remove;
 	  goto do_next;
       case ROt_LN:
-	  if (!clipline(xmin, xmax, ymin, ymax, 
+	  if (!clipline(xmin, xmax, ymin, ymax,
 			&RoLNx1(p1), &RoLNy1(p1), &RoLNx2(p1), &RoLNy2(p1)))
 	      goto remove;
 	  goto do_next;
-      case ROt_MP: 
+      case ROt_MP:
       {
 	  int c = RoMPcnt(p1);
 	  int f = 0, t = 0;
@@ -1070,7 +1073,7 @@ rectclip(long rect)
 	      /* Endpoint of this segment is the startpoint of the
 		 next one, so we need to preserve it if it is clipped. */
 	      oxn = RoMLxs(p1)[f + 1], oyn = RoMLys(p1)[f + 1];
-	      rc = clipline(xmin, xmax, ymin, ymax, 
+	      rc = clipline(xmin, xmax, ymin, ymax,
 			    /* &RoMLxs(p1)[f], &RoMLys(p1)[f], */
 			    &ox, &oy,
 			    &RoMLxs(p1)[f+1], &RoMLys(p1)[f+1]);
@@ -1125,7 +1128,7 @@ rectclip(long rect)
 		  RoMLys(n) = (double*) gpmalloc(sizeof(double)*(c - f));
 		  memcpy(RoMPxs(n),RoMPxs(p1) + f, sizeof(double)*(c - f));
 		  memcpy(RoMPys(n),RoMPys(p1) + f, sizeof(double)*(c - f));
-		  RoMPxs(n)[0] = oxn; RoMPys(n)[0] = oyn; 
+		  RoMPxs(n)[0] = oxn; RoMPys(n)[0] = oyn;
 		  RoNext(n) = next;
 		  RoNext(p1) = n;
 		  next = n;
@@ -1147,7 +1150,7 @@ rectclip(long rect)
 	  break;
 #endif
       default: {
-	do_next:  
+	do_next:
 	      prevp = &RoNext(p1);
 	      break;
 	  }
@@ -1274,8 +1277,8 @@ single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,GEN yleft,
 
   if (depth==RECUR_MAXDEPTH) return;
 
-  xx = gmul2n(gadd(xleft,xright),-1); ep->value = (void*) xx;
-  yy = gtofp(READ_EXPR(ch), 3);
+  xx = gmul2n(gadd(xleft,xright),-1);
+  yy = gtofp(READ_EXPR(ch,ep,xx), 3);
 
   if (dy)
   {
@@ -1304,7 +1307,7 @@ param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,GEN xleft,
   if (depth==PARAMR_MAXDEPTH) return;
 
   tt=gmul2n(gadd(tleft,tright),-1);
-  ep->value = (void*)tt; p1 = READ_EXPR(ch);
+  p1 = READ_EXPR(ch,ep,tt);
   xx = gtofp((GEN)p1[1], 3);
   yy = gtofp((GEN)p1[2], 3);
 
@@ -1358,7 +1361,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   dx=gdivgs(gsub(b,a),testpoints-1);
 
   x = gtofp(a, prec); push_val(ep, x);
-  av2=avma; p1=READ_EXPR(ch); tx=typ(p1);
+  av2=avma; p1=READ_EXPR(ch,ep,x); tx=typ(p1);
   if (!is_matvec_t(tx))
   {
     xsml = gtodouble(a);
@@ -1410,15 +1413,16 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     {
       tleft=cgetr(prec); tright=cgetr(prec);
       av2=avma;
-      gaffect(a,tleft); ep->value = (void*)tleft; p1=READ_EXPR(ch);
-      gaffect((GEN)p1[1],xleft); gaffect((GEN)p1[2],yleft);
+      gaffect(a,tleft); p1=READ_EXPR(ch,ep,tleft);
+      gaffect((GEN)p1[1],xleft);
+      gaffect((GEN)p1[2],yleft);
       for (i=0; i<testpoints-1; i++)
       {
 	if (i) {
 	  gaffect(tright,tleft); gaffect(xright,xleft); gaffect(yright,yleft);
 	 }
-	gaddz(tleft,dx,tright); ep->value = (void*)tright;
-        p1 = READ_EXPR(ch);
+	gaddz(tleft,dx,tright);
+        p1 = READ_EXPR(ch,ep,tright);
         if (lg(p1) != 3) err(talker,"inconsistent data in rectplothin");
         gaffect((GEN)p1[1],xright); gaffect((GEN)p1[2],yright);
 
@@ -1434,12 +1438,12 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     else /* single_c */
     {
       av2=avma;
-      gaffect(a,xleft); ep->value = (void*) xleft;
-      gaffect(READ_EXPR(ch),yleft);
+      gaffect(a,xleft);
+      gaffect(READ_EXPR(ch,ep,xleft), yleft);
       for (i=0; i<testpoints-1; i++)
       {
-        gaddz(xleft,dx,xright); ep->value = (void*) xright;
-	gaffect(READ_EXPR(ch),yright);
+        gaddz(xleft,dx,xright);
+	gaffect(READ_EXPR(ch,ep,xright),yright);
 
 	Appendx(&pl[0],&pl[0],rtodbl(xleft));
 	Appendy(&pl[0],&pl[1],rtodbl(yleft));
@@ -1457,7 +1461,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     if (single_c)
       for (i=0; i<testpoints; i++)
       {
-	p1 = READ_EXPR(ch);
+	p1 = READ_EXPR(ch,ep,x);
 	pl[0].d[i]=gtodouble(x);
 	Appendy(&pl[0],&pl[1],gtodouble(p1));
 	gaddz(x,dx,x); avma=av2;
@@ -1469,7 +1473,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 
       for (i=0; i<testpoints; i++)
       {
-	p1 = READ_EXPR(ch);
+	p1 = READ_EXPR(ch,ep,x);
         if (lg(p1) != nl+1) err(talker,"inconsistent data in rectplothin");
 	for (j=0; j<nl; j=k)
 	{
@@ -1485,7 +1489,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     else /* plothmult */
       for (i=0; i<testpoints; i++)
       {
-	p1 = READ_EXPR(ch);
+	p1 = READ_EXPR(ch,ep,x);
         if (lg(p1) != nl) err(talker,"inconsistent data in rectplothin");
 	pl[0].d[i]=gtodouble(x);
 	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble((GEN)p1[j])); }
@@ -1508,42 +1512,41 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   GEN tas, xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
   entree *var0 = varentries[ordvar[0]];
 
-  if (lx < 4)
-      err(talker, "Too few points (%ld) for spline plot", lx);
+  if (lx < 4) err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
-      xa[i] = (long) dbltor(x[i-1]);
-      ya[i] = (long) dbltor(y[i-1]);
+    xa[i] = (long) dbltor(x[i-1]);
+    ya[i] = (long) dbltor(y[i-1]);
   }
   if (flag & PLOT_PARAMETRIC) {
-      tas = new_chunk(4);
-      for (j = 1; j <= 4; j++) tas[j-1] = lstoi(j);
-      quark_gen = cgetg(2 + 1, t_VEC);
+    tas = new_chunk(4);
+    for (j = 1; j <= 4; j++) tas[j-1] = lstoi(j);
+    quark_gen = cgetg(3, t_VEC);
   }
   else tas = NULL; /* for lint */
   for (i = 0; i <= lx - 4; i++) {
-      pari_sp oavma = avma;
+    pari_sp av = avma;
 
-      xa++; ya++;
-      if (flag & PLOT_PARAMETRIC) {
-	  quark_gen[1] = (long)polint_i(tas, xa, polx[0], 4, NULL);
-	  quark_gen[2] = (long)polint_i(tas, ya, polx[0], 4, NULL);
-      } else {
-	  quark_gen = polint_i(xa, ya, polx[0], 4, NULL);
-          tas = xa;
-      }
-      rectploth(ne, var0,
-                 (GEN)(i==0 ? tas[0] : tas[1]),
-                 (GEN)(i==lx-4 ? tas[3] : tas[2]),
-                 QUARK,
-		 DEFAULTPREC,		/* XXXX precision */
-		 PLOT_RECURSIVE
-                   | PLOT_NO_RESCALE
-                   | PLOT_NO_FRAME
-		   | PLOT_NO_AXE_Y
-                   | PLOT_NO_AXE_X
-                   | (flag & PLOT_PARAMETRIC),
-		 2);			/* Start with 3 points */
-      avma = oavma;
+    xa++; ya++;
+    if (flag & PLOT_PARAMETRIC) {
+      quark_gen[1] = (long)polint_i(tas, xa, polx[0], 4, NULL);
+      quark_gen[2] = (long)polint_i(tas, ya, polx[0], 4, NULL);
+    } else {
+      quark_gen = polint_i(xa, ya, polx[0], 4, NULL);
+      tas = xa;
+    }
+    rectploth(ne, var0,
+               (GEN)(i==0 ? tas[0] : tas[1]),
+               (GEN)(i==lx-4 ? tas[3] : tas[2]),
+               QUARK,
+               DEFAULTPREC,		/* XXXX precision */
+               PLOT_RECURSIVE
+                 | PLOT_NO_RESCALE
+                 | PLOT_NO_FRAME
+                 | PLOT_NO_AXE_Y
+                 | PLOT_NO_AXE_X
+                 | (flag & PLOT_PARAMETRIC),
+               2);			/* Start with 3 points */
+    avma = av;
   }
   avma = oldavma;
 }
@@ -1850,7 +1853,7 @@ plothsizes_flag(long flag)
   return vect;
 }	
 
-void 
+void
 plot_count(long *w, long lw, col_counter rcolcnt)
 {
   RectObj *O;
@@ -1992,7 +1995,7 @@ postdraw00(long *w, long *x, long *y, long lw, long scale)
   if (scale) {
     double postxsize, postysize;
 
-    PARI_get_psplot(); 
+    PARI_get_psplot();
     postxsize = pari_psplot.width;
     postysize = pari_psplot.height;
     PARI_get_plot(0);

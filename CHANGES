@@ -39,8 +39,10 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.9 (released 25/11/2004):
+Done for version 2.2.9 (released ??/??/2004):
   Fixed
+    1- ploth(,256). splines had stopped working
+
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
        on 64 bit machines. Bumped BINARY_VERSION for writebin --> objects
