@@ -1913,7 +1913,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
   ulong av = avma;
   long r;
-  GEN U,L,H,gc,den,R;
+  GEN L,H,gc,den,R;
   double c;
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
