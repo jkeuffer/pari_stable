@@ -2410,7 +2410,7 @@ gen_output(GEN x, pariout_t *T)
 void
 brute(GEN g, char f, long d)
 {
-  pariout_t T; _initout(&T,f,d,1,0, f_RAW);
+  pariout_t T; _initout(&T,f,d,0,0, f_RAW);
   gen_output(g, &T);
 }
 

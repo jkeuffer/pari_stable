@@ -800,7 +800,9 @@ sd_output(const char *v, int flag)
                  "(external prettyprint)", NULL};
   ulong n = GP_DATA->fmt->prettyp;
   GEN z = sd_ulong(v,flag,"output", &n, 0,3,msg);
-  GP_DATA->fmt->prettyp = n; return z;
+  GP_DATA->fmt->prettyp = n;
+  GP_DATA->fmt->sp = (n != f_RAW);
+  return z;
 }
 
 void
