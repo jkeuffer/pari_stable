@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
-extern GEN LLL_nfbasis(GEN x, GEN polr, GEN base, long prec);
+extern GEN LLL_nfbasis(GEN x, GEN *polr, GEN base, long r1, long prec);
 
 /* default quality ratio for LLL: 99/100 */
 #define LLLDFT 100
@@ -2524,7 +2524,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
       base = (GEN)nf[7]; x = (GEN)nf[1];
     }
   }
-  if (!nf) base = gmul(base, LLL_nfbasis(x,NULL,base,prec));
+  if (!nf) base = gmul(base, LLL_nfbasis(x,NULL,base,sturm(x),prec));
   y = pols_for_polred(x, base, pta, check, arg);
   if (check)
   {

@@ -1180,22 +1180,22 @@ nftohnfbasis(GEN nf, GEN x)
 static GEN
 get_red_T2(GEN x, GEN *polr, GEN base, long r1, long prec)
 {
-  GEN M, basden, G2, u, u0 = NULL;
+  GEN ro, M, basden, G2, u, u0 = NULL;
   gpmem_t av;
   long i;
 
   basden = get_bas_den(base);
   av = avma;
 
-  if (!*polr) *polr = get_roots(x,r1,prec);
   for (i=1; ; i++)
   {
-    M = make_M(basden, *polr);
+    ro = get_roots(x,r1,prec);
+    M = make_M(basden, ro);
     G2 = make_Cholevsky_T2(M, r1, prec);
     if (u0) G2 = gmul(G2, u0);
     if ((u = lllfp_marked(1, G2, 100, 2, prec, 0)))
     {
-      if (typ(u) == t_MAT) return u0? gmul(u0,u): u;
+      if (typ(u) == t_MAT) break;
       u = (GEN)u[1];
       if (u0) u0 = gerepileupto(av, gmul(u0,u));
       else    u0 = gerepilecopy(av, u);
@@ -1203,8 +1203,9 @@ get_red_T2(GEN x, GEN *polr, GEN base, long r1, long prec)
     if (i == MAXITERPOL) err(accurer,"red_T2");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
-    *polr = get_roots(x,r1, prec);
   }
+  if (polr) *polr = ro;
+  return u0? gmul(u0,u): u;
 }
 
 /* Return the base change matrix giving the an LLL-reduced basis for the
@@ -1212,19 +1213,22 @@ get_red_T2(GEN x, GEN *polr, GEN base, long r1, long prec)
  * base = vector of elts in Z[Y]/(x) generating the maximal order
  * polr = roots of x, computed to precision prec */
 GEN
-LLL_nfbasis(GEN x, GEN *polr, GEN base, long prec)
+LLL_nfbasis(GEN x, GEN *polr, GEN base, long r1, long prec)
 {
-  int r1, n = degpol(x);
+  int n = degpol(x);
   GEN t;
 
   if (typ(x) != t_POL || n == 1) return idmat(n); /* nf, or degree 1 */
 
   if (typ(base) != t_VEC || lg(base)-1 != n)
     err(talker,"incorrect Zk basis in LLL_nfbasis");
-  if (!prec || (r1 = sturm(x)) == n)
-    return lllint_marked(1, make_T(x, base), 100, 1, &t,NULL,NULL);
-
-  if (!polr) { t = NULL; polr = &t; }
+  if (!prec || r1 == n)
+  {
+    t = lllint_marked(1, make_T(x, base), 100, 1, &t,NULL,NULL);
+    if (polr)
+      *polr = get_roots(x,r1, prec + (gexpo(t) >> TWOPOTBITS_IN_LONG));
+    return t;
+  }
   return get_red_T2(x, polr, base, r1, prec);
 }
 
@@ -1236,7 +1240,8 @@ LLL_nfbasis(GEN x, GEN *polr, GEN base, long prec)
  * base updated in place.
  * prec = 0 <==> field is totally real */
 static void
-nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
+nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase,
+              long r1, long prec)
 {
   GEN chbas,a,phimax,dxn,p1,p2,polmax,rev;
   GEN x = *px, dx = *pdx, base = *pbase;
@@ -1247,7 +1252,7 @@ nfinit_reduce(long flag, GEN *px, GEN *pdx, GEN *prev, GEN *pbase, long prec)
     *px = gsub(polx[v],gun); *pdx = gun;
     *prev = polymodrecip(gmodulcp(gun, x)); return;
   }
-  chbas = LLL_nfbasis(x,NULL,base,prec);
+  chbas = LLL_nfbasis(x, NULL, base, r1, prec);
   if (DEBUGLEVEL) msgtimer("LLL basis");
 
   nmax = (flag & nf_PARTIAL)? min(n,3): n;
@@ -1360,7 +1365,7 @@ initalgall0(GEN x, long flag, long prec)
   rev = NULL;
   if (flag & nf_REDUCE)
   {
-    nfinit_reduce(flag, &x, &dx, &rev, &bas, r2? PRECREG: 0);
+    nfinit_reduce(flag, &x, &dx, &rev, &bas, r1, PRECREG);
     if (!(flag & nf_ORIG)) rev = NULL;
     if (lead && rev) rev = gdiv(rev, lead);
     if (DEBUGLEVEL) msgtimer("polred");
@@ -1368,9 +1373,7 @@ initalgall0(GEN x, long flag, long prec)
   if (!carrecomplet(diviiexact(dx,dK),&index))
     err(bugparier,"nfinit (incorrect discriminant)");
 
-  ro = get_roots(x,r1,PRECREG);
-  if (DEBUGLEVEL) msgtimer("roots");
-  bas = gmul(bas, LLL_nfbasis(x,&ro,bas, r2? PRECREG: 0));
+  bas = gmul(bas, LLL_nfbasis(x,&ro,bas, r1, PRECREG));
   if (DEBUGLEVEL) msgtimer("LLL basis");
 
   nf=cgetg(10,t_VEC);
