@@ -1127,7 +1127,7 @@ gmul(GEN x, GEN y)
     }
     err(bugparier,"multiplication");
   }
-  if (is_noncalc_t(tx) || is_noncalc_t(tx)) err(operf,"*",tx,ty);
+  if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"*",tx,ty);
 
   /* here !isscalar(y) */
   if (is_matvec_t(ty))
