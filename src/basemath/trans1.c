@@ -1571,6 +1571,20 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 	}
       }
       return;
+    /* transc doesn't work for this prototype */
+    case t_QUAD:
+      av = avma; p1=gmul(x,realun(prec)); tetpil = avma;
+      gsincos(p1,s,c,prec);
+      gptr[0]=s; gptr[1]=c;
+      gerepilemanysp(av,tetpil,gptr,2);
+      return;
+
+    case t_POL: case t_RFRAC: case t_RFRACN:
+      av = avma; p1=tayl(x,gvar(x),precdl); tetpil=avma;
+      gsincos(p1,s,c,prec);
+      gptr[0]=s; gptr[1]=c;
+      gerepilemanysp(av,tetpil,gptr,2);
+      return;
   }
   err(typeer,"gsincos");
 }
