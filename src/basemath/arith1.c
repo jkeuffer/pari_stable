@@ -741,6 +741,7 @@ mpsqrtmod(GEN a, GEN p)
   GEN p1,q,v,y,w,m;
 
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
+  if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in mpsqrtmod");
   p1 = addsi(-1,p); e = vali(p1);
   if (e == 0) /* p = 2 */
   {
@@ -752,9 +753,16 @@ mpsqrtmod(GEN a, GEN p)
   }
   q = shifti(p1,-e); /* q = (p-1)/2^oo is odd */
   if (e == 1) y = p1;
-  else
+  else /* look for an odd power of a primitive root */
     for (k=2; ; k++)
     { /* loop terminates for k < p (even if p composite) */
+  
+      i = krosg(k,p);
+      if (i >= 0)
+      {
+        if (i) continue;
+        err(talker,"composite modulus in mpsqrtmod: %Z",p);
+      }
       av1 = avma;
       y = m = powmodulo(stoi(k),q,p);
       for (i=1; i<e; i++)
