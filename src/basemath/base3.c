@@ -429,6 +429,7 @@ element_mulid(GEN nf, GEN x, long i)
 
   if (i==1) return gcopy(x);
   N = lgef(nf[1])-3;
+  if (lg(x) != N+1) err(typeer,"element_mulid");
   tab = (GEN)nf[9]; tab += (i-1)*N;
   v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
