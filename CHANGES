@@ -36,9 +36,9 @@ Done for version 2.0.21 (released ??/09/2000):
 XR  3- not enough GC in bezout()
     4- use hnfmodid in ideallllred  (work mod I \cap Z, not mod N(I))
 IS  5- C++ compilation problem (compl is a C++ operator + casts)
-    6- idealinv( , incorrect type) --> SEGV
-    7- factor(x^2 - 16810110*x + 62994937599000) --> division by 0
-BA  8- Pocklington-Lehmer didn't stop factorisation after sqrt(N)
+    6- factor(x^2 - 16810110*x + 62994937599000) --> division by 0
+BA  7- Pocklington-Lehmer didn't stop factorisation after sqrt(N)
+    8- exp(log(Pi+x+y)*1.) --> SEGV (still gives an error, but a decent one)
     9- factorff needed a prime field F_p where p was single precision
    10- more digits than were significant could be printed (ex: precision(Pi,1))
    11- rnfisnorm didn't accept vectors on Zk basis as argument
@@ -47,10 +47,11 @@ IS 13- function prototypes (missing 'extern')
    14- quadray(bnf, ...) didn't work when bnf.disc < 0. Could also return
        a relative equation over an intermediate field
    15- deficient argument checks: asinh(2*x-1), agm(1,1-x), zetakinit(2*x-1),
-       nfnewprec([2*x-1]), thueinit(non-monic or degree 1), lcm(x, 0)
-       rnfidealmul(2*x-1,0), galoisfixedfield(2*x-1), qfbnupow(2*x-1, 0),
-       polred([x,x]), bezout(Mod(x,x^2+1),0), numtoperm(-1,0), polred(nf),
-       idealhnf(nf,y+z): SEGV
+       idealinv( , wrongtype), nfnewprec([2*x-1]), thueinit(non-monic or
+       degree 1), lcm(x, 0) rnfidealmul(2*x-1,0), galoisfixedfield(2*x-1),
+       qfbnupow(2*x-1, 0), polred([x,x]), bezout(Mod(x,x^2+1),0),
+       numtoperm(-1,0), polred(nf), idealhnf(nf,y+z), factorpadic(,y,),
+       nfelftreduce, rnfsteinitz: SEGV
    16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
    17- factorcantor(x^4 - x^3 - 2*x - 1, 3) --> SEGV [typo!]
    18- matsupplement(non-exact entries): fixed zero test (--> |x| < eps)
@@ -80,6 +81,8 @@ IZ 34- external prettyprinter incompatible with colors
    42- huge precision losses in bnfinit computations (--> truncation error)
    43- mateigen([1,2;3,4]) wouldn't work at default precision
    44- leftover debugging statements in gphelp -to_pod
+   45- zeta(x) didn't always use the precision of x (contrary to the other
+       trans. functions)
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -98,7 +101,7 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
    12- better TeXization (\left / \right)
    13- allow color changes in error messages (when sample input is given)
    14- format for bnf[9] (new isprincipal)
-   15- cleaned up isprincipal + bnfinit aftermath (getfu, class_group_gen)
+   15- cleaned up isprincipal + bnfinit (small_norm, getfu, class_group_gen)
 
   Added
     1- new library function zerovec
