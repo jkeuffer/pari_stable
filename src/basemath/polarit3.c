@@ -1000,7 +1000,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
     if (!U) { avma = ltop; return NULL; }
     do /* set P := P % Q */
     {
-      q = Fq_mul(U, gneg(leading_term(P)), T, p);
+      q = Fq_mul(U, Fq_neg(leading_term(P), T, p), T, p);
       P = gadd(P, FpXQX_mul(monomial(q, dg, vx), Q, T, p));
       P = FpXQX_red(P, T, p); /* wasteful, but negligible */
       dg = lg(P)-lg(Q);
@@ -1921,7 +1921,7 @@ FpX_red(GEN z, GEN p)
 {
   long i,l;
   GEN x;
-  if (typ(z) == t_INT) return modii(z,p);
+  if (typ(z) != t_POL) err(bugparier," FpX_red(z, p), z is not a polynomial");
   l = lg(z); x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lmodii((GEN)z[i],p);
   x[1] = z[1]; return FpX_renormalize(x,l);
@@ -2050,7 +2050,6 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!p) err(bugparier,"FpX_divrem, p==NULL");
   if (!signe(y)) err(gdiver);
   vx = varn(x);
   dy = degpol(y);
@@ -2074,9 +2073,9 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    if (gcmp1(lead)) return gcopy(x);
-    av0 = avma; x = gmul(x, mpinvmod(lead,p)); tetpil = avma;
-    return gerepile(av0,tetpil,FpX_red(x,p));
+    av0 = avma; z = FpX_normalize(x, p); 
+    if (z==x) return gcopy(z);
+    else return gerepileupto(av0, z);
   }
   av0 = avma; dz = dx-dy;
   if (OK_ULONG(p))
@@ -2086,10 +2085,10 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     GEN b = ZX_Flx(y, pp);
     z = Flx_divrem(a,b,pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
-    setlg(z, lg(z)); z = dummycopy(z);
+    z = dummycopy(z);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
-      setlg(*pr, lg(*pr)); *pr = dummycopy(*pr);
+      *pr = dummycopy(*pr);
       *pr = Flx_ZX_inplace(*pr);
     }
     return Flx_ZX_inplace(z);
@@ -2163,7 +2162,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     if (pr)
     {
       av0 = avma; x = FpXQX_red(x, T, p);
-      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: gzero; }
+      if (pr == ONLY_DIVIDES) { avma=av0; return signe(x)? NULL: zeropol(vx); }
       if (pr == ONLY_REM) return x;
       *pr = x;
     }
@@ -2177,30 +2176,43 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    if (gcmp1(lead)) return gcopy(x);
-    av0 = avma; x = gmul(x, Fq_inv(lead,T,p)); tetpil = avma;
+    av0 = avma; x = FpXQX_normalize(x, T,p); tetpil = avma;
     return gerepile(av0,tetpil,FpXQX_red(x,T,p));
   }
   av0 = avma; dz = dx-dy;
-#if 0 /* FIXME: to be done */
   if (OK_ULONG(p))
   { /* assume ab != 0 mod p */
+    {
+      GEN *gptr[2];
+      ulong pp = (ulong)p[2];
+      long v = varn(T);
+      GEN a = ZXX_FlxX(x, pp, v);
+      GEN b = ZXX_FlxX(y, pp, v);
+      GEN t = ZX_Flx(T, pp);
+      z = FlxqX_divrem(a,b,t,pp,pr);
+      tetpil=avma;
+      if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
+        *pr = FlxX_ZXX(*pr);
+      else return gerepile(av0,tetpil,FlxX_ZXX(z));
+      gptr[0]=pr; gptr[1]=&z;
+      gerepilemanysp(av0,tetpil,gptr,2);
+      return z;
+    }
   }
-#endif
   lead = gcmp1(lead)? NULL: gclone(Fq_inv(lead,T,p));
   avma = av0;
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
 
   p1 = (GEN)x[dx]; av = avma;
-  z[dz] = lead? lpileupto(av, FpX_rem(gmul(p1,lead), T, p)): lcopy(p1);
+  z[dz] = lead? lpileupto(av, Fq_mul(p1,lead, T, p)): lcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=(GEN)x[i];
     for (j=i-dy+1; j<=i && j<=dz; j++)
-      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    if (lead) p1 = gmul(FpX_rem(p1, T, p), lead);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil,FpX_rem(p1, T, p));
+      p1 = Fq_sub(p1, Fq_mul((GEN)z[j],(GEN)y[i-j],NULL,p),NULL,p);
+    if (lead) p1 = Fq_mul(p1, lead, NULL,p);
+    tetpil=avma; z[i-dy] = lpile(av,tetpil,Fq_red(p1,T,p));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
@@ -2209,8 +2221,8 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   {
     p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
-      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    tetpil=avma; p1 = FpX_rem(p1, T, p); if (signe(p1)) { sx = 1; break; }
+      p1 = Fq_sub(p1, Fq_mul((GEN)z[j],(GEN)y[i-j],NULL,p),NULL,p);
+    tetpil=avma; p1 = Fq_red(p1, T, p); if (signe(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
   }
@@ -2229,8 +2241,8 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   {
     av=avma; p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
-      p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    tetpil=avma; rem[i]=lpile(av,tetpil, FpX_rem(p1, T, p));
+      p1 = Fq_sub(p1, Fq_mul((GEN)z[j],(GEN)y[i-j], NULL,p), NULL,p);
+    tetpil=avma; rem[i]=lpile(av,tetpil, Fq_red(p1, T, p));
   }
   rem -= 2;
   if (lead) gunclone(lead);
