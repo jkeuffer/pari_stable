@@ -1367,11 +1367,11 @@ rootpadiclift(GEN T, GEN S, GEN q, GEN Q)
   ulong   ltop=avma;
   long    x;
   GEN     qold;
-  GEN     W, Tr, Sr, Wr = gzero, Trold;
+  GEN     W, Tr, Sr, Wr = gzero;
   int     flag, init;
   x = varn(T);
   qold = q ;
-  Trold = Tr = Fp_pol_red(T,q);
+  Tr = Fp_pol_red(T,q);
   W=Fp_poleval(deriv(Tr, x),S,q);
   W=mpinvmod(W,q);
   flag = 1; init = 0;
@@ -1397,7 +1397,6 @@ rootpadiclift(GEN T, GEN S, GEN q, GEN Q)
     S = subii(Sr, mulii(Wr, Fp_poleval(Tr, Sr,q)));
     S = modii(S,q);
     qold = q;
-    Trold = Tr;
   }
   return gerepileupto(ltop,S);
 }
@@ -1446,9 +1445,15 @@ rootpadicfast(GEN f, GEN p, GEN pr)
   GEN S,y;
   S=lift(rootmod(f,p));/*no multiplicity*/
   if (lg(S)==1)/*no roots*/
-    return gerepileupto(ltop,S);
+  {
+    avma=ltop;
+    return cgetg(1,t_COL);
+  }
+  S=gclone(S);
+  avma=ltop;
   y=rootpadicliftroots(f,S,p,pr);
-  return gerepileupto(ltop,y);
+  gunclone(S);
+  return y;
 }
 /**************************************************************************/
 static long
