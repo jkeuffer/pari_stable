@@ -1262,14 +1262,14 @@ GEN
 famat_to_Fp_simple(GEN nf, GEN g, GEN e, GEN prh)
 {
   GEN t = gun, h,n, p = gcoeff(prh,1,1), q = subis(p,1);
-  long i, t, lx = lg(g);
+  long i, th, lx = lg(g);
   for (i=1; i<lx; i++)
   {
     n = (GEN)e[i]; n = modii(n,q);
     if (!signe(n)) continue;
-    h = (GEN)g[i]; t = typ(h);
-    if (t == t_POL || t == t_POLMOD) h = algtobasis(nf, h);
-    if (t != t_COL) h = gmod(h, p); else h = nf_to_Fp_simple(h, prh);
+    h = (GEN)g[i]; th = typ(h);
+    if (th == t_POL || th == t_POLMOD) h = algtobasis(nf, h);
+    if (th != t_COL) h = gmod(h, p); else h = nf_to_Fp_simple(h, prh);
     t = mulii(t, powmodulo(h, n, p)); /* not worth reducing */
   }
   return modii(t, p);
