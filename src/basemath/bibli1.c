@@ -2122,7 +2122,7 @@ static GEN
 get_Bnf(GEN nf)
 {
   GEN p = gzero, r = (GEN)nf[6];
-  long i, r1 = itos(gmael(nf,2,1)), ru = lg(r)-1;
+  long i, r1 = nf_get_r1(nf), ru = lg(r)-1;
   for (i=ru; i>0; i--)
   {
     if (i == r1) p = gmul2n(p, 1);

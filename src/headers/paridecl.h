@@ -298,6 +298,8 @@ GEN     initalgred2(GEN x, long prec);
 GEN     initzeta(GEN pol, long prec);
 GEN     mathnf0(GEN x,long flag);
 GEN     matsnf0(GEN x,long flag);
+long    nf_get_r1(GEN nf);
+long    nf_get_r2(GEN nf);
 GEN     nfinit0(GEN x,long flag, long prec);
 long    nfgetprec(GEN x);
 GEN     nfnewprec(GEN nf, long prec);

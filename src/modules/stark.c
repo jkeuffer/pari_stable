@@ -989,20 +989,19 @@ ComputeAChi(GEN dtcr, long flag, long prec)
 static GEN
 InitChar(GEN bnr, GEN listCR, long prec)
 {
-  GEN modul, bnf, dk, r1, r2, C, dataCR, chi, cond, Mr, chic;
-  GEN p1, p2, q;
-  long N, prec2, h, i, j, nbg, av = avma;
+  GEN bnf = checkbnf(bnr), nf = checknf(bnf);
+  GEN modul, dk, C, dataCR, chi, cond, Mr, chic, gr2, p1, p2, q;
+  long N, r1, r2, prec2, h, i, j, nbg, av = avma;
 
   modul = gmael(bnr, 2, 1);
   Mr    = gmael(bnr, 5, 2);
   nbg   = lg(Mr) - 1;
-  bnf   = (GEN)bnr[1];
-  dk    = gmael(bnf, 7, 3);
-  r1    = gmael3(bnf, 7, 2, 1);
-  r2    = gmael3(bnf, 7, 2, 2);
-  N     = degree(gmael(bnf, 7, 1));
+  dk    = (GEN)nf[3];
+  N     = degree((GEN)nf[1]);
+  r1    = nf_get_r1(nf);
+  r2    = (N - r1) >> 1; gr2 = stoi(r2);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
-  C     = gmul2n(gsqrt(gdiv(absi(dk), gpowgs(mppi(prec2),N)), prec2), -itos(r2));
+  C     = gmul2n(gsqrt(gdiv(absi(dk), gpowgs(mppi(prec2),N)), prec2), -r2);
 
   disable_dbg(0);
 
@@ -1014,9 +1013,9 @@ InitChar(GEN bnr, GEN listCR, long prec)
   q = gnorml2((GEN)modul[2]);
   p1 = cgetg(5, t_VEC);
   p1[1] = (long)q;
-  p1[2] = lsub(r1, q);
-  p1[3] = (long)r2;
-  p1[4] = lmax(gaddgs(gadd((GEN)p1[2], r2), 1), gadd(r2, q));
+  p1[2] = lsubsi(r1, q);
+  p1[3] = (long)gr2;
+  p1[4] = lmax(addis((GEN)p1[2], r2+1), addsi(r2, q));
 
   for (i = 1; i <= h; i++)
   {
@@ -1081,9 +1080,9 @@ InitChar(GEN bnr, GEN listCR, long prec)
       q = gnorml2((GEN)cond[2]);
       p2 = cgetg(5, t_VEC);
       p2[1] = (long)q;
-      p2[2] = lsubii(r1, q);
-      p2[3] = (long)r2;
-      p2[4] = lmax(addis(addii((GEN)p2[2], r2), 1), addii(r2, q));
+      p2[2] = lsubsi(r1, q);
+      p2[3] = (long)gr2;
+      p2[4] = lmax(addis((GEN)p2[2], r2+1), addsi(r2, q));
       data[9] = (long)p2;
     }
     else
@@ -1925,7 +1924,7 @@ ppgamma(long a, long b, long c, long i0, long prec)
 static GEN
 GetST(GEN dataCR, long prec)
 {
-  GEN N0, CC, bnr, bnf, Pi, racpi, C, cond, aij, B, S, T, csurn, lncsurn;
+  GEN N0, CC, bnr, bnf, nf, Pi, racpi, C, cond, aij, B, S, T, csurn, lncsurn;
   GEN degs, p1, p2, nsurc, an, rep, powlncn, powracpi;
   long i, j, k, n, av = avma, av1, av2, hk, fj, id, prec2, i0, nmax;
   long a, b, c, rc1, rc2, r, r1, r2;
@@ -1933,9 +1932,10 @@ GetST(GEN dataCR, long prec)
 
   if (DEBUGLEVEL) timer2();
   bnr   = gmael(dataCR, 1, 4);
-  bnf   = (GEN)bnr[1];
-  r1    = itos(gmael3(bnf, 7, 2, 1));
-  r2    = itos(gmael3(bnf, 7, 2, 2));
+  bnf   = checkbnf(bnr);
+  nf    = checknf(bnf);
+  r1    = nf_get_r1(nf);
+  r2    = nf_get_r2(nf);
   hk    = lg(dataCR) - 1;
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
@@ -2138,35 +2138,31 @@ GetValue(GEN datachi, GEN S, GEN T, long fl, long fl2, long prec)
 static GEN
 GetValue1(GEN bnr, long flag, long prec)
 {
-  GEN bnf, hk, Rk, wk, c, r, r1, r2, rep, mod0, diff;
-  long i, l, av = avma;
+  GEN bnf = checkbnf(bnr), nf = checknf(bnf);
+  GEN hk, Rk, wk, c, rep, mod0, diff;
+  long i, l, r, r1, r2, av = avma;
 
-  bnf = (GEN)bnr[1];
-
-  r1 = gmael3(bnf, 7, 2, 1);
-  r2 = gmael3(bnf, 7, 2, 2);
-
+  r1 = nf_get_r1(nf);
+  r2 = nf_get_r2(nf);
   hk = gmael3(bnf, 8, 1, 1);
   Rk = gmael(bnf, 8, 2);
   wk = gmael3(bnf, 8, 4, 1);
-
   
   c = gneg_i(gdiv(gmul(hk, Rk), wk));
-  r = subis(addii(r1, r2), 1);
+  r = r1 + r2 - 1;
 
   if (flag)
   {
     mod0 = gmael3(bnr, 2, 1, 1);
-    diff = (GEN)idealfactor((GEN)bnf[7], mod0)[1];
+    diff = (GEN)idealfactor(nf, mod0)[1];
 
-    l = lg(diff) - 1;
-    r = addis(r, l);
+    l = lg(diff) - 1; r += l;
     for (i = 1; i <= l; i++)
-      c = gmul(c, glog(idealnorm((GEN)bnf[7], (GEN)diff[i]), prec));
+      c = gmul(c, glog(idealnorm(nf, (GEN)diff[i]), prec));
   }
 
   rep = cgetg(3, t_VEC);
-  rep[1] = (long)r;
+  rep[1] = lstoi(r);
   rep[2] = (long)c;
 
   return gerepileupto(av, gcopy(rep));
@@ -2903,8 +2899,8 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
 
   N     = degree((GEN)nf[1]);
-  r1    = itos(gmael(nf, 2, 1));
-  r2    = itos(gmael(nf, 2, 2));
+  r1    = nf_get_r1(nf);
+  r2    = (N - r1)>>1;
   cond1 = gmael4(data, 1, 2, 1, 2);
   Pi    = mppi(newprec);
 

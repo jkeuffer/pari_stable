@@ -1016,6 +1016,24 @@ get_roots(GEN x,long r1,long ru,long prec)
   roo[0]=evaltyp(t_VEC)|evallg(ru+1); return roo;
 }
 
+/* assume lg(nf) > 3 && typ(nf) = container [hopefully a genuine nf] */
+long
+nf_get_r1(GEN nf)
+{
+  GEN x = (GEN)nf[2];
+  if (typ(x) != t_VEC || lg(x) != 3 || typ(x[1]) != t_INT)
+    err(typeer,"false nf in nf_get_r1");
+  return itos((GEN)x[1]);
+}
+long
+nf_get_r2(GEN nf)
+{
+  GEN x = (GEN)nf[2];
+  if (typ(x) != t_VEC || lg(x) != 3 || typ(x[2]) != t_INT)
+    err(typeer,"false nf in nf_get_r1");
+  return itos((GEN)x[2]);
+}
+
 extern GEN mulmat_pol(GEN A, GEN x);
 
 static GEN
@@ -1102,7 +1120,7 @@ get_nf_matrices(GEN nf, long small)
 {
   GEN x=(GEN)nf[1],dK=(GEN)nf[3],index=(GEN)nf[4],ro=(GEN)nf[6],bas=(GEN)nf[7];
   GEN basden,mul,invbas,M,MC,T,MDI,D,TI,A,dA,mat;
-  long r1 = itos(gmael(nf,2,1)), n = lg(bas)-1;
+  long r1 = nf_get_r1(nf), n = lg(bas)-1;
 
   mat = cgetg(small? 4: 8,t_VEC); nf[5] = (long)mat;
   basden = get_bas_den(bas);
@@ -1191,7 +1209,7 @@ initalgall0(GEN x, long flag, long prec)
       nf=checknf(x);
       bas=(GEN)nf[7]; x=(GEN)nf[1]; n=lgef(x)-3;
       dK=(GEN)nf[3]; dx=mulii(dK, sqri((GEN)nf[4]));
-      r1 = itos(gmael(nf,2,1));
+      r1 = nf_get_r1(nf);
     }
     bas[1]=lpolun[varn(x)]; /* it may be gun => SEGV later */
   }
@@ -1286,8 +1304,8 @@ nfnewprec(GEN nf, long prec)
   (void)checknf(nf);
   y = dummycopy(nf);
   pol=(GEN)nf[1]; n=degree(pol);
-  r1=itos(gmael(nf,2,1));
-  r2=itos(gmael(nf,2,2)); ru=r1+r2;
+  r1 = nf_get_r1(nf);
+  r2 = (n - r1) >> 1; ru = r1+r2;
   mat=dummycopy((GEN)nf[5]);
   ro=get_roots(pol,r1,ru,prec);
   y[5]=(long)mat;
@@ -1478,8 +1496,9 @@ initzeta(GEN pol, long prec)
 
   /* Nb de classes et regulateur */
   nf=(GEN)bnf[7]; N=lgef(nf[1])-3;
+  r1 = nf_get_r1(nf); r2 = (N-r1)>>1;
   gr1=gmael(nf,2,1); gr2=gmael(nf,2,2);
-  r1=itos(gr1); r2=itos(gr2); ru=r1+r2; R=ru+2;
+  ru=r1+r2; R=ru+2;
   av=avma; p1=(GEN)bnf[8]; p2 = gmul(gmul2n(gmael(p1,1,1),r1), (GEN)p1[2]);
   tetpil = avma; resi=gerepile(av,tetpil,gdiv(p2, gmael(p1,4,1)));
 

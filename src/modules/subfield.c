@@ -1005,7 +1005,7 @@ compute_data(GEN nf, GEN ff, GEN p, long m, long nn, long vf)
     for (i=2; i<=n[j]; i++) p2[i]=(long)powgi((GEN)p2[i-1],p);
   }
   DATA[7]=(long)tabroots;
-  r1=itos(gmael(nf,2,1));
+  r1 = nf_get_r1(nf);
   MM = bound_for_coeff(m, (GEN)nf[6], r1, &maxroot);
   MM = gmul2n(MM,1);
   DATA[8]=(long)MM;

@@ -431,7 +431,7 @@ nfhilbert(GEN nf,GEN a,GEN b)
 
   al=lift(a); bl=lift(b);
  /* solutions locales aux places infinies reelles */
-  r1=itos(gmael(nf,2,1));
+  r1 = nf_get_r1(nf);
   for (i=1; i<=r1; i++)
     if (signe(poleval(al,gmael(nf,6,i))) < 0 &&
         signe(poleval(bl,gmael(nf,6,i))) < 0)

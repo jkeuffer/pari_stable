@@ -100,7 +100,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
   n = lgef(x) - 3;
   if (n <= 0)
     return cgetg(1, t_VEC);
-  r1 = itos(gmael(nf, 2, 1));
+  r1 = nf_get_r1(nf);
   p1 = (GEN) nf[6];
   prec = precision((GEN) p1[1]);
   /* accuracy in decimal digits */

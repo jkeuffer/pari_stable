@@ -2387,7 +2387,7 @@ static GEN
 get_arch2_i(GEN nf, GEN a, long prec, int units)
 {
   GEN M,N, ro = dummycopy((GEN)nf[6]);
-  long j,k, la = lg(a), ru = lg(ro), r1 = itos(gmael(nf,2,1));
+  long j,k, la = lg(a), ru = lg(ro), r1 = nf_get_r1(nf);
 
   M = cgetg(la,t_MAT); if (la == 1) return M;
   if (typ(a[1]) == t_COL) a = gmul((GEN)nf[7], a);
@@ -2441,10 +2441,9 @@ bnfnewprec(GEN bnf, long prec)
   y = cgetg(11,t_VEC);
   funits = check_units(bnf,"bnfnewprec");
   nf = (GEN)bnf[7];
-  ro = (GEN)nf[6];
-  r1 = itos(gmael(nf,2,1));
-  r2 = itos(gmael(nf,2,2));
-  ru = r1 + r2;
+  ro = (GEN)nf[6]; ru = lg(ro)-1;
+  r1 = nf_get_r1(nf);
+  r2 = (r1 + ru) >> 1;
   pl1 = (ru == 1 && r1 == 0)? 0: gexpo(funits);
   pl2 = gexpo(ro);
   prec1 = prec;
@@ -2497,7 +2496,7 @@ bnfmake(GEN sbnf, long prec)
   if (typ(sbnf)!=t_VEC || lg(sbnf)!=13)
     err(talker,"incorrect sbnf in bnfmake");
   x=(GEN)sbnf[1]; bas=(GEN)sbnf[4]; n=lg(bas)-1;
-  r1=itos((GEN)sbnf[2]); r2=(n-r1)/2; ru=r1+r2;
+  r1=itos((GEN)sbnf[2]); r2=(n-r1)>>1; ru=r1+r2;
   ro=(GEN)sbnf[5];
   if (prec > gprecision(ro)) ro=get_roots(x,r1,ru,prec);
   index = gun;

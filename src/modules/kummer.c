@@ -165,7 +165,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all, long prec)
   GEN vecbeta0;
 
   checkbnrgen(bnr); bnf=(GEN)bnr[1];
-  nf=(GEN)bnf[7]; r1=itos(gmael(nf,2,1));
+  nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
   polnf=(GEN)nf[1]; vnf=varn(polnf);
   if (vnf==0) err(talker,"main variable in kummer must not be x");
   p1=conductor(bnr,all ? gzero : subgroup,2,prec);

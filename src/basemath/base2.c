@@ -3277,7 +3277,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
 /* Compute the relative T2 matrix of powers of theta */
 
   vnf=varn(nf[1]); ronf=(GEN)nf[6]; ru=lg(ronf); poll=lift(pol);
-  r1=itos(gmael(nf,2,1));
+  r1 = nf_get_r1(nf);
   unro=cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i]=un;
   roorder=cgetg(ru,t_VEC);
   for (i=1; i<ru; i++)

@@ -64,13 +64,14 @@ static GEN
 rnfmakematrices(GEN rnf)
 {
   long i,j,k,n,r1,r2,ru,ruk,r1rel,r2rel;
-  GEN nf,pol,rac,base,base1,r1r2,racnf,sig,vecmat,vecM,vecMC,vecT2,rack;
+  GEN nf,pol,rac,base,base1,racnf,sig,vecmat,vecM,vecMC,vecT2,rack;
   GEN M,p2,p3,MC,sigk,T2,T,p1,MD,TI,MDI;
 
   nf=(GEN)rnf[10]; racnf=(GEN)nf[6]; pol=(GEN)rnf[1];
   n=lgef(pol)-3;
   base=(GEN)rnf[7]; base1=(GEN)base[1]; rac=(GEN)rnf[6]; sig=(GEN)rnf[2];
-  r1r2=(GEN)nf[2]; r1=itos((GEN)r1r2[1]); r2=itos((GEN)r1r2[2]); ru=r1+r2;
+  r1 = nf_get_r1(nf);
+  r2 = nf_get_r1(nf); ru = r1+r2;
   vecmat=cgetg(8,t_VEC);
   vecM=cgetg(ru+1,t_VEC); vecmat[1]=(long)vecM;
   vecMC=cgetg(ru+1,t_VEC); vecmat[2]=(long)vecMC;
@@ -111,7 +112,7 @@ GEN
 rnfinitalg(GEN nf,GEN pol,long prec)
 {
   long av=avma,tetpil,m,n,r1,r2,vnf,i,j,k,vpol,v1,r1j,r2j,lfac,degabs;
-  GEN RES,sig,r1r2,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
+  GEN RES,sig,rac,p1,p2,liftpol,delta,RAC,ro,p3,bas;
   GEN f,f2,fac,fac1,fac2,id,p4,p5;
 
   if (typ(pol)!=t_POL) err(notpoler,"rnfinitalg");
@@ -143,7 +144,7 @@ rnfinitalg(GEN nf,GEN pol,long prec)
   RES=cgetg(12,t_VEC);
   RES[1]=(long)pol;
   m=lgef(nf[1])-3; degabs=n*m;
-  r1r2=(GEN)nf[2]; r1=itos((GEN)r1r2[1]); r2=itos((GEN)r1r2[2]);
+  r1 = nf_get_r1(nf); r2 = (m-r1) >> 1;
   sig=cgetg(r1+r2+1,t_VEC); RES[2]=(long)sig;
   rac=(GEN)nf[6]; liftpol=lift(pol);
   RAC=cgetg(r1+r2+1,t_VEC); RES[6]=(long)RAC;

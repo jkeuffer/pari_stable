@@ -806,7 +806,7 @@ minimforunits(GEN nf, long BORNE, long stockmax)
     if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BOUND);
     flusherr();
   }
-  r1 = itos(gmael(nf,2,1));
+  r1 = nf_get_r1(nf);
   a = gmael(nf,5,3); n = lg(a);
   minim_alloc(n, &q, &x, &y, &z, &v);
   n--;
@@ -1355,7 +1355,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
 
   checkbnrgen(bnr); bnf=(GEN)bnr[1]; bid=(GEN)bnr[2];
   cl=(GEN)bnr[5]; cyc=(GEN)cl[2]; gen=(GEN)cl[3];
-  nf=(GEN)bnf[7]; r1=itos(gmael(nf,2,1));
+  nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
   p1=(GEN)bid[1]; ideal=(GEN)p1[1]; arch=(GEN)p1[2];
   if (gcmp0(subgroup)) { trivial=1; clhray=(GEN)cl[1]; }
   else
@@ -1591,7 +1591,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
 
   checkbnrgen(bnr); bnf=(GEN)bnr[1];
   cyc=gmael(bnr,5,2); gen=gmael(bnr,5,3);
-  nf=(GEN)bnf[7]; r1=itos(gmael(nf,2,1));
+  nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
 
   H = NULL; /* gcc -Wall */
   if (gcmp0(subgroup)) { trivial=1; clhray=gmael(bnr,5,1); }
@@ -1875,8 +1875,8 @@ discrayabslist(GEN bnf,GEN listes)
 
   classlist=rayclassnolist(bnf,listes); lx=lg(classlist);
   modulist=(GEN)listes[1];
-  disclist=cgetg(lx,t_VEC); nf=(GEN)bnf[7]; r1=itos(gmael(nf,2,1));
-  degk=lgef(nf[1])-3; dkabs=gabs((GEN)nf[3],0);
+  disclist=cgetg(lx,t_VEC); nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
+  degk=lgef(nf[1])-3; dkabs=absi((GEN)nf[3]);
   nbdezero = 0; dlk = NULL; /* gcc -Wall */
   for (ii=1; ii<lx; ii++)
   {
@@ -2197,7 +2197,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   if (bound <= 0) err(talker,"non-positive bound in discrayabslist");
   av0=avma; bnf = checkbnf(bnf); flbou=0;
   nf=(GEN)bnf[7]; bigres=(GEN)bnf[8]; pol=(GEN)nf[1]; degk=lgef(pol)-3;
-  r1=itos(gmael(nf,2,1)); fadkabs=factor(absi((GEN)nf[3]));
+  r1 = nf_get_r1(nf); fadkabs=factor(absi((GEN)nf[3]));
   clh=gmael(bigres,1,1);
   funits = check_units(bnf,"discrayabslistarchintern");
   racunit=gmael(bigres,4,2);
