@@ -78,7 +78,7 @@ static long
 ccontent(GEN x)
 {
   long i, l = lg(x), s=labs(x[1]);
-  for (i=2; i<l && s>1; i++) s = cgcd(x[i],s);
+  for (i=2; i<l && s!=1; i++) s = cgcd(x[i],s);
   return s;
 }
 
