@@ -1962,9 +1962,22 @@ gtovec(GEN x)
 
   if (!x) return cgetg(1,t_VEC);
   tx = typ(x);
-  if (is_scalar_t(tx) || is_rfrac_t(tx) || tx==t_STR)
+  if (is_scalar_t(tx) || is_rfrac_t(tx))
   {
     y=cgetg(2,t_VEC); y[1]=lcopy(x);
+    return y;
+  }
+  if (tx == t_STR)
+  {
+    char *s = GSTR(x);
+    char t[2];
+    lx = strlen(s); t[1] = 0;
+    y = cgetg(lx+1, t_VEC);
+    for (i=0; i<lx; i++)
+    {
+      t[0] = s[i];
+      y[i+1] = (long)strtoGENstr(t,0);
+    }
     return y;
   }
   if (is_graphicvec_t(tx))
