@@ -919,33 +919,39 @@ bernfracspec(long k)
 #endif
 extern GEN bernfrac_using_zeta(long n);
 
+static GEN
+B2(void){ GEN z = cgetg(3, t_FRAC);
+  z[1] = un; z[2] = lutoi(6UL);
+  return z;
+}
+static GEN
+B4(void) { GEN z = cgetg(3, t_FRAC);
+  z[1] = lstoi(-1); z[2] = lutoi(30UL);
+  return z;
+}
+
 GEN
 bernfrac(long k)
 {
   if (!k) return gun;
   if (k == 1) return gneg(ghalf);
   if (k < 0 || k & 1) return gzero;
-  if (k == 2) { GEN z = cgetg(3, t_FRAC);
-    z[1] = un; z[2] = lutoi(6UL);
-    return z;
-  }
-  if (k == 4) { GEN z = cgetg(3, t_FRAC);
-    z[1] = lstoi(-1); z[2] = lutoi(30UL);
-    return z;
-  }
+  if (k == 2) return B2();
+  if (k == 4) return B4();
   return bernfrac_using_zeta(k);
 }
 
 /* mpbern as exact fractions */
-GEN
-bernvec(long nb)
+static GEN
+bernvec_old(long nb)
 {
-  GEN y = cgetg(nb+2,t_VEC);
   long n, i;
+  GEN y;
 
+  if (nb < 0) return cgetg(1, t_VEC);
   if (nb > 46340 && BITS_IN_LONG == 32) err(impl, "bernvec for n > 46340");
 
-  y[1] = un;
+  y = cgetg(nb+2, t_VEC); y[1] = un;
   for (n = 1; n <= nb; n++)
   { /* compute y[n+1] = B_{2n} */
     pari_sp av = avma;
@@ -962,6 +968,17 @@ bernvec(long nb)
     y[n+1] = lpileupto(av, gdivgs(b, -(1+2*n)));
   }
   return y;
+}
+GEN
+bernvec(long nb)
+{
+  GEN y = cgetg(nb+2, t_VEC), z = y + 1;
+  long i;
+  if (nb < 20) return bernvec_old(nb);
+  for (i = nb; i > 2; i--) z[i] = (long)bernfrac_using_zeta(i << 1);
+  y[3] = (long)B4();
+  y[2] = (long)B2();
+  y[1] = un; return y;
 }
 
 /********************************************************************/

@@ -1150,21 +1150,15 @@ $B_x$, as \kbd{bernfrac}, but $B_x$ is returned as a real number
 \syn{bernreal}{x,\var{prec}}.
 
 \subsecidx{bernvec}$(x)$: creates a vector containing, as rational numbers,
-the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$. These Bernoulli
-numbers can then be used as follows. Assume that this vector has been put
-into a variable, say \kbd{bernint}. Then you can define under GP:
-\bprog
-bern(x) =
-{
-  if (x == 1, return(-1/2));
-  if (x < 0 || x % 2, return(0));
-  bernint[x/2+1]
-}
-@eprog
-\noindent and then \kbd{bern(k)} gives the Bernoulli number of index $k$ as a
-rational number, exactly as \kbd{bernreal(k)} gives it as a real number. If
-you need only a few values, calling \kbd{bernfrac(k)} each time will be much
-more efficient than computing the huge vector above.
+the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$. 
+This routine is obsolete. Use \kbd{bernfrac} instead each time you need a
+Bernoulli number in exact form.
+
+\misctitle{Note:} this routine is implemented using repeated independant
+calls to \kbd{bernfrac}, which is faster than the standard recursion in exact
+arithmetic. It is only kept for backward compatibility: it is not faster than
+individual calls to \kbd{bernfrac}, its output uses a lot of memory space,
+and coping with the index shift is awkward.
 
 \syn{bernvec}{x}.
 

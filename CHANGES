@@ -153,6 +153,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
 HC 21- new implementation of gamma()
    22- renamed Oxxx/dft.Config.in --> pari.cfg
    23- new implementation of bernfrac() [ use zeta(2k), initial GP code by HC]
+   24- bernvec always calls bernfrac()  [ hence has become useless ]
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
