@@ -497,7 +497,7 @@ integer~\kbd{x}, assigns the quotient to the integer~\kbd{z} and returns
 
 \fun{void}{mulsii}{long s, GEN x, GEN z} assigns the product of the long
 \kbd{s} and the integer \kbd{x} into the integer~\kbd{z} (essentially
-dentical to \kbd{mulsiz} except that \kbd{z} is specifically an integer).
+identical to \kbd{mulsiz} except that \kbd{z} is specifically an integer).
 
 \section{Level 2 kernel (operations on general PARI objects)}
 
@@ -874,6 +874,6 @@ into~\kbd{x} for the variable number~\kbd{v}.
 0~otherwise.
 
 \fun{GEN}{gbezout}{GEN x,GEN y, GEN *u,GEN *v} creates the GCD of \kbd{x}
-and~\kbd{y}, and puts (the adresses of) objects $u$ and~$v$ such that
+and~\kbd{y}, and puts (the addresses of) objects $u$ and~$v$ such that
 $u\kbd{x}+v\kbd{y}=\gcd(\kbd{x},\kbd{y})$ into \kbd{*u} and~\kbd{*v}.
 \vfill\eject

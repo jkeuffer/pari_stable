@@ -2588,7 +2588,7 @@ associated to the number field: signature, maximal order, discriminant, etc.
 $\bullet$ $\tev{bnf}$ denotes a big number field, i.e.~a 10-component
 vector in the format output by \tet{bnfinit}. This contains $\var{nf}$ and
 the deeper invariants of the field: units, class groups, as well as a lot of
-technical data necessary for some complex fonctions like \kbd{bnfisprincipal}.
+technical data necessary for some complex functions like \kbd{bnfisprincipal}.
 
 $\bullet$ $\tev{bnr}$ denotes a big ``ray number field'', i.e.~some data
 structure output by \kbd{bnrinit}, even more complicated than $\var{bnf}$,
@@ -2985,7 +2985,7 @@ and obtained as follows.  Let $D = U W V$ obtained by applying the
 \idx{Smith normal form} algorithm to the matrix $W$ (= $\var{bnf}[1]$) and
 let $U_r$ be the reduction of $U$ modulo $D$. The first elements of the
 factorbase are given (in terms of \kbd{bnf.gen}) by the columns of $U_r$,
-with archimedian component $g_a$; let also $GD_a$ be the archimedian
+with Archimedean component $g_a$; let also $GD_a$ be the Archimedean
 components of the generators of the (principal) ideals defined by the
 \kbd{bnf.gen[i]\pow bnf.cyc[i]}. Then $\var{bnf}[9]=[U_r, g_a, GD_a]$.
 
@@ -3333,7 +3333,7 @@ the conductor of this character as a modulus.
 \syn{bnrconductorofchar}{\var{bnr},\var{chi}}.
 
 \subsecidx{bnrdisc}$(a1,\{a2\},\{a3\},\{\fl=0\})$: $a1$, $a2$, $a3$
-defining a big ray number field $L$ over a groud field $K$ (see \kbd{bnr}
+defining a big ray number field $L$ over a ground field $K$ (see \kbd{bnr}
 at the beginning of this section for the
 meaning of $a1$, $a2$, $a3$), outputs a 3-component row vector $[N,R_1,D]$,
 where $N$ is the (absolute) degree of $L$, $R_1$ the number of real places of
@@ -3536,7 +3536,7 @@ computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
 \syn{galoisfixedfield}{\var{gal},\var{perm},p}.
 
 \subsecidx{galoisinit}$(\var{pol},\{den\})$: computes the Galois group
-and all neccessary information for computing the fixed fields of the
+and all necessary information for computing the fixed fields of the
 Galois extension $K/\Q$ where $K$ is the number field defined by
 $\var{pol}$ (monic irreducible polynomial in $\Z[X]$ or
 a number field as output by \tet{nfinit}). The extension $K/\Q$ must be
@@ -4299,7 +4299,7 @@ preferably monic, irreducible polynomial in $\Z[X]$, initializes a
 by \var{pol}. As such, it's a technical object passed as the first argument
 to most \kbd{nf}\var{xxx} functions, but it contains some information which
 may be directly useful. Access to this information via \var{member
-functions} is prefered since the specific data organization specified below
+functions} is preferred since the specific data organization specified below
 may change in the future. Currently, \kbd{nf} is a row vector with 9
 components:
 
@@ -5519,7 +5519,7 @@ as \kbd{NULL}.
 \subsecidx{thueinit}$(P,\{\fl=0\})$: initializes the \var{tnf}
 corresponding to $P$. It is meant to be used in conjunction with \tet{thue}
 to solve Thue equations $P(x,y) = a$, where $a$ is an integer. If $\fl$ is
-non-zero, certify the result unconditionnaly, Otherwise, assume \idx{GRH},
+non-zero, certify the result unconditionnally, Otherwise, assume \idx{GRH},
 this being much faster of course.
 
 \syn{thueinit}{P,\fl,\var{prec}}.
@@ -5540,7 +5540,7 @@ guaranteed to be irreducible!). One can check the closeness either by a
 polynomial evaluation or substitution, or by computing the roots of the
 polynomial given by algdep.
 
-If $x$ is padic, $\fl$ is meaningless and the algorithm LLL-reduces the
+If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces the
 ``dual lattice'' corresponding to the powers of $x$.
 
 Otherwise, if $\fl$ is zero, the algorithm used is a variant of the \idx{LLL}
@@ -6445,7 +6445,7 @@ the positive divisors of $n$.
 Arithmetic functions like \tet{sigma} use the multiplicativity of the
 underlying expression to speed up the computation. In the present version
 \vers, there is no way to indicate that \var{expr} is multiplicative in
-$n$, hence specialized functions should be prefered whenever possible.
+$n$, hence specialized functions should be preferred whenever possible.
 
 \synt{divsum}{entree *ep, GEN num, char *expr}.
 
@@ -6665,7 +6665,7 @@ The other values toggle various display options:
 
 $\bullet$ 4: do not rescale plot according to the computed extrema. This is
 meant to be used when graphing multiple functions on a rectwindow (as a
-\tet{plotrecth} call), in conjuction with \tet{plotscale}.
+\tet{plotrecth} call), in conjunction with \tet{plotscale}.
 
 $\bullet$ 8: do not print the $x$-axis.
 
@@ -6706,7 +6706,7 @@ must be between $0$ and $1$) and internally converted to pixels.
 The plotting device imposes an upper bound for $x$ and $y$, for instance the
 number of pixels for screen output. These bounds are available through the
 \tet{plothsizes} function. The following sequence initializes in a portable
-way (i.e independant of the output device) a window of maximal size, accessed
+way (i.e independent of the output device) a window of maximal size, accessed
 through coordinates in the $[0,1000] \times [0,1000]$ range~:
 
 \bprog
@@ -6782,7 +6782,7 @@ rectwindow $w$ the curve output of \kbd{ploth}$(w,X=a,b,\var{expr},\fl,n)$.
 
 \var{data} is a vector of vectors, each corresponding to a list a coordinates.
 If parametric plot is set, there must be an even number of vectors, each
-successive pair corresponding to a curve. Otherwise, the first one containe
+successive pair corresponding to a curve. Otherwise, the first one contains
 the $x$ coordinates, and the other ones contain the $y$-coordinates
 of curves to plot.
 
@@ -6963,7 +6963,7 @@ statement is \var{not} a loop (obviously!).
 
 \subsubsecidx{next}$(\{n=1\})$: interrupts execution of current $seq$,
 resume the next iteration of the innermost enclosing loop, within the
-current fonction call (or top level loop). If $n$ is specified, resume at
+current function call (or top level loop). If $n$ is specified, resume at
 the $n$-th enclosing loop. If $n$ is bigger than the number of enclosing
 loops, all enclosing loops are exited.
 

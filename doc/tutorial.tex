@@ -745,7 +745,7 @@ All the standard linear algebra programs are available of course, and many
 more. In addition, linear algebra over $\Z$, i.e.~work on lattices, can also
 be performed. Let us see how this works. First of all, a vector space (more
 generally a module) will be given by a generating set of vectors (often a
-basis) which will be representend as {\it column} vectors. This set of vectors
+basis) which will be represented as {\it column} vectors. This set of vectors
 will in turn be represented as a matrix: in PARI, we have chosen to consider
 matrices as row vectors of column vectors. The base field (or ring) can be any
 ring type PARI supports (except $p$-adics which are currently not correctly
@@ -958,7 +958,7 @@ Even better, \kbd{sumalt} can be used to sum divergent series! Type
 \centerline{\tt zet(s)= sumalt(k=1, (-1)\pow(k-1) / k\pow s) / (1 - 2\pow(1-s))}
 
 Then for positive values of \kbd{s} different from 1, \kbd{zet(s)} is equal
-to \kbd{zeta(s)} and the series cvonverges, albeit slowly (sumalt doesn't
+to \kbd{zeta(s)} and the series converges, albeit slowly (sumalt doesn't
 care however). For negative \kbd{s}, the series diverges, but \kbd{zet(s)}
 still gives the correct result! Try \kbd{zet(-1)}, \kbd{zet(-2)},
 \kbd{zet(-1.5)}, and compare with the corresponding values of \kbd{zeta}.
@@ -1199,7 +1199,7 @@ polynomials, and this would first have been slightly slower and also totally
 useless since the coefficients of \kbd{x\pow 40} and above are irrelevant
 anyhow if we stop the product at \kbd{n=39}.
 
-While we are on the subject of modular forms (which, together with taylor
+While we are on the subject of modular forms (which, together with Taylor
 series expansions of common functions, are another great source of power
 series), type \kbd{\b{ps} 122} (which is a shortcut for
 \kbd{default(seriesprecision, 122)}), then \kbd{d = x * eta(x)\pow 24}. This
@@ -2555,7 +2555,7 @@ us plot $\zeta({1\over 2} + it)$:
 @eprog
 
 \noindent This can take quite some time.  (1000 is close to the default for
-many plotting devices, we want to specify it explicitely so that the result
+many plotting devices, we want to specify it explicitly so that the result
 do not depend on the output device.)  Try the recursive plot:
 \bprog
   ploth(t = 100, 110, real(zeta(0.5+I*t)), recursive)
@@ -2640,7 +2640,7 @@ plotrecth(3, X = -2, 2, sin(X^7), recursive)
 @eprog
 (nothing is output yet, these commands only fills the virtual drawing
 boards with PARI graphic objects). Finally, output rectangles 2 and 3 on
-the same plot, with the required offets (counted from upper-left corner):
+the same plot, with the required offsets (counted from upper-left corner):
 \bprog
 plotdraw([2, 0,0,  3, 0.1,0.02], relative)
 @eprog
@@ -2648,7 +2648,7 @@ plotdraw([2, 0,0,  3, 0.1,0.02], relative)
 \kbd{ploth}: there are no coordinates of the corners of the internal
 rectangle.  If your output device supports mouse operations (only
 \kbd{gnuplot} does), you can find coordinates of particular points of the
-graph, but it is nice to have something printed on a hardcopy too.
+graph, but it is nice to have something printed on a hard copy too.
 
 However, it is easy to put $x$- and $y$-limits on the graph.  In the
 coordinate system of the rectangle 2 the corners are $(0.1,0.1)$,
@@ -2735,19 +2735,19 @@ plotdraw([0, 0.05,0.05], relative)
 is not needed either, so we omit them.  One can see that the discrepancies
 between the exact graph and one based on 30 points exist, but are pretty
 small.  On the other hand, decreasing the number of points to 20 makes
-quite a noticable difference.
+quite a noticeable difference.
 
 Keep in mind that \kbd{plotlinetype}, \kbd{plotpointtype},
 \kbd{plotpointsize} may do nothing on some terminals.  
 
 What if we
-want to create a high-resolution hardcopy of the plot?  There may be several
+want to create a high-resolution hard copy of the plot?  There may be several
 possible solutions.  First, the display output device may allow a
-high-resolution hardcopy itself.  Say, PM display (with gnuplot output on
+high-resolution hard copy itself.  Say, PM display (with gnuplot output on
 OS/2) pretends that its resolution is $19500\times 12500$, thus the data
 PARI sends to it are already high-resolution, and printing is available
-through the menubar.  Alternatively, with gnuplot output one can switch
-the output plotting device to many different hardcopy devices:
+through the menu bar.  Alternatively, with gnuplot output one can switch
+the output plotting device to many different hard copy devices:
 \kbd{plotfile("plot.tex")}, \kbd{plotterm("texdraw")}.
 After this all the plotting will go into file {\tt plot.tex} with whatever
 output conventions gnuplot format {\tt texdraw} provides.  To switch output
@@ -2825,7 +2825,7 @@ plotmove(A, 0, 0)
 plotbox(A, 1, 1)
 
 plotdraw([A, 0, 0])
-\\ psdraw([A, 0, 0], relative)          \\ @com if hardcopy is needed
+\\ psdraw([A, 0, 0], relative)          \\ @com if hard copy is needed
 @eprog
 
 The rectangle \kbd{A} plays the role of accumulator, rectangle \kbd{T} is
@@ -2883,7 +2883,7 @@ Here comes the central command of this example:
 
 \noindent What does it do?  The command \kbd{plotrecth(\dots, norescale)}
 scales the graphs according to coordinate system in the 
-rectangle, but it does not pay any other attension to the size of
+rectangle, but it does not pay any other attention to the size of
 the rectangle.  Since \kbd{xlim} is 13, the Taylor polynomials take 
 very large values in the interval \kbd{-xlim...xlim}.  In particular,
 significant part of the graphs is going to be {\it outside} of the rectangle.
@@ -2925,7 +2925,7 @@ using relative sizes and positions for the rectangles.  This is nice, since
 different output devices will have very similar pictures, while we
 did not need to care about particular resolution of the output device.
 On the other hand,
-using relative positions does not guarantie that the pictures will be
+using relative positions does not guarantee that the pictures will be
 similar.  Why?  Even if two output devices have the same resolution,
 the picture may be different.  The devices may use fonts of different
 size, or may have a different ``unit of length''.
@@ -2945,7 +2945,7 @@ What does it show?  Using relative sizes during plotting produces
 ensure that the plottings ``look the same''.  Moreover, ``looking the
 same'' is not a desirable target, ``looking tuned for the environment''
 will be much better.  If you want to produce such fine-tuned plottings,
-you need to abandone a relative-size model, and do your plottings in
+you need to abandon a relative-size model, and do your plottings in
 pixel units.  To do this one removes flag \kbd{relative} from the above
 examples, which will make size and offset arguments interpreted this way.
 After querying sizes with \kbd{plothsizes} one can fine-tune sizes and

@@ -344,7 +344,7 @@ of efficiency, no checking is done in the function \kbd{cgetg}, so
 disasters will occur if you give an incorrect length.
 
 \misctitle{Notes}:
-1)  The main use of this function is to prepare for later assigments
+1)  The main use of this function is to prepare for later assignments
 (see \secref{se:assign}). Most of the time you will use \kbd{GEN} objects
 as they are created and returned by PARI functions. In this case you don't need
 to use \kbd{cgetg} to create space to hold them.
@@ -450,7 +450,7 @@ syntax:
 
 \fun{void}{gaffsg}{long s, GEN y}
 
-\misctitle{Note}: due to the requirements mentionned above, it's usually
+\misctitle{Note}: due to the requirements mentioned above, it's usually
 a bad idea to use \tet{gaffect} statements. Two exceptions:
 
 $\bullet$ for simple objects (e.g.~leaves) whose size is controlled, they can
@@ -1642,7 +1642,7 @@ computation, just print the requested message and go on. The basic example is
 
 \noindent which is the exact equivalent of \kbd{err(talker,...)} except that
 you certainly don't want to stop the program at this point, just inform the
-user that something important has occured (in particular, this output would be
+user that something important has occurred (in particular, this output would be
 suitably highlighted under GP, whereas a simple \kbd{printf} would not).
 
 \subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
@@ -1891,7 +1891,7 @@ where \kbd{n} can be positive or negative. This is much faster than
 There is another function \teb{gshift} with exactly the same syntax.
 When \kbd{n} is non-negative, the effects of these two functions are the same.
 However, when \kbd{n} is negative, \kbd{gshift} acts like a right shift of
-\kbd{-n}, hence does not noramlly perform an exact division on integers. The
+\kbd{-n}, hence does not normally perform an exact division on integers. The
 function  \kbd{gshift} is the PARI analogue of the C or GP operators \kbd{<<}
 and~\kbd{>>}.
 
@@ -2004,7 +2004,7 @@ lists).
 
 Roughly four types of modifications can be made. The first type includes all
 improvements to the documentation, in a broad sense. This includes correcting
-typos or inacurracies of course, but also items which are not really covered
+typos or inaccurracies of course, but also items which are not really covered
 in this document, e.g.~if you happen to write a tutorial, or pieces of code
 exemplifying some fine points that you think were unduly omitted.
 
@@ -2079,13 +2079,13 @@ and \typ{STR} (content \kbd{yy}).
 
 The format to indicate a default value (atom starts with a \kbd{D}) is
 ``\kbd{D\var{value},\var{type},}'', where \var{type} is the code for any
-mandatory atom (previous group), \var{value} is any valide GP expression
+mandatory atom (previous group), \var{value} is any valid GP expression
 which is converted according to \var{type}, and the ending comma is
 mandatory. For instance \kbd{D0,L,} stands for ``this optional argument will
 be converted to a \kbd{long}, and is \kbd{0} by default''. So if the
 user-given argument reads \kbd{1 + 3} at this point, \kbd{(long)4} is sent to
 the function (via \tet{itos}$()$); and \kbd{(long)0} if the argument is
-ommitted. The following special syntaxes are available:
+omitted. The following special syntaxes are available:
 
 \settabs\+\indent\indent&\kbd{Dxxx}\quad& optional \kbd{*GEN},&\cr
 \+&\kbd{DG}& optional \kbd{GEN}, & send \kbd{NULL} if argument omitted.\cr

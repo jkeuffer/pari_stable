@@ -14,7 +14,7 @@ useful as a stand-alone tool. The operations and functions available in
 PARI and GP will be described in the next chapter. In the present one, we
 describe the specific use of the GP programmable calculator.
 
-For starting the calculator, the general commandline syntax is:
+For starting the calculator, the general command line syntax is:
 
 \kbd{gp [-s stacksize] [-p primelimit]}
 
@@ -1010,7 +1010,7 @@ statement \kbd{++$x$} (there is no prefix \kbd{++} operator in GP).
 which is not a boolean operator (comparison or logical).
 \kbd{x~\var{op}=~$y$} assigns $(\kbd{x}~\var{op}~y)$ to~\kbd{x},
 and returns the new value of~\kbd{x}, \var{not} a reference to the
-\idx{variable}~\kbd{x}. (Thus an assignment cannot occur on the lefthand
+\idx{variable}~\kbd{x}. (Thus an assignment cannot occur on the left hand
 side of another assignment.)
 
 \point{Priority 8}
@@ -1077,12 +1077,12 @@ current precision. It behaves as $(f(x))'$ otherwise.
 
 \kbd{/}: exact division (\kbd{3/2}=$3/2$, not $1.5$).
 
-\kbd{\bs}, \kbd{\%}: euclidean quotient and remainder, i.e.~if $x =
+\kbd{\bs}, \kbd{\%}: Euclidean quotient and remainder, i.e.~if $x =
 qy + r$, with $0\le r < y$ (if $x$ and $y$ are polynomials, assume instead
 that $\deg r< \deg y$ and that the leading terms of $r$ and $x$ have the
 same sign), then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$.
 
-\kbd{\bs/}: rounded euclidean quotient for integers (rounded towards
+\kbd{\bs/}: rounded Euclidean quotient for integers (rounded towards
 $+\infty$ when the exact quotient would be a half-integer).
 
 \kbd{<<}, \kbd{>>}: left and right binary shift: \kbd{x<<n}$~=~x * 2^n$
@@ -1358,7 +1358,7 @@ have them ordered when the result is printed, you can also use the function
 \tet{reorder}, but this won't change anything to the internal representation,
 and is not recommended.
 
-\misctitle{Important note:} PARI allows euclidean division of multivariate
+\misctitle{Important note:} PARI allows Euclidean division of multivariate
 polynomials, but assumes that the computation takes place in the fraction
 field of the coefficient ring (if it is not an integral domain, the result
 will a priori not make sense). This can be very tricky; for instance
@@ -1953,7 +1953,7 @@ In any case, GP will open the corresponding file and process the commands in
 there, \var{before} doing anything else, e.g.~creating the PARI stack. If
 the file doesn't exist or cannot be read, GP will proceed to the
 initialization phase at once, eventually emitting a prompt. If any explicit
-commandline switches are given, they will override the values read from the
+command line switches are given, they will override the values read from the
 \kbd{gprc} file.
 
 The syntax in this file (and valid in this file only, at this very precise
