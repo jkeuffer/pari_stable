@@ -791,7 +791,9 @@ static GEN
 mat_to_MP(GEN x, long prec)
 {
   long j, l = lg(x);
-  GEN y = cgetg(l, t_MAT);
+  GEN y;
+  if (typ(x) != t_MAT) return col_to_MP(x, prec);
+  y = cgetg(l, t_MAT);
   for (j=1; j<l; j++) y[j] = (long)col_to_MP((GEN)x[j], prec);
   return y;
 }
