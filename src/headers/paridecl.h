@@ -506,6 +506,7 @@ GEN     idealpowred(GEN nf, GEN ix, GEN n,long prec);
 GEN     idealpows(GEN nf, GEN ideal, long iexp);
 GEN     ideleaddone(GEN nf, GEN x, GEN idele);
 int     ishnfall(GEN x);
+int     isidentity(GEN x);
 GEN     hnfall_i(GEN A, GEN *ptB, long remove);
 long    isideal(GEN nf,GEN x);
 long    isinvector(GEN v, GEN x, long n);

@@ -3686,14 +3686,22 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   if (lx < 3) return gcopy(order);
   if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
   I = dummycopy(I);
-  H = h = NULL;
-  mth = rel_T2(nf, pol, lx, prec);
+  H = NULL;
   MPOL = matbasistoalg(nf, M);
   MCS = cgetg(lx,t_MAT);
   MC = cgetg(lx,t_MAT);
+PRECNF:
+  mth = rel_T2(nf, pol, lx, prec);
+  h = NULL;
 PRECPB:
   if (h)
-  { /* precision problem, recompute from scratch */
+  { /* precision problem, recompute */
+    if (isidentity(h))
+    { /* no progress: increase nf precision */
+      prec = (prec<<1)-2;
+      if (DEBUGLEVEL) err(warnprec,"rnflllgram",prec);
+      nf = nfnewprec(nf,prec); goto PRECNF;
+    }
     H = H? gmul(H, h): h;
     MPOL = gmul(MPOL, h);
   }

@@ -127,6 +127,23 @@ idealmat_to_hnf(GEN nf, GEN x)
 }
 
 int
+isidentity(GEN x)
+{
+  long i,j, lx = lg(x);
+  for (j=1; j<lx; j++)
+  {
+    GEN c = (GEN)x[j];
+    for (i=1; i<j; )
+      if (!gcmp0((GEN)c[i++])) return 0;
+    /* i = j */
+      if (!gcmp1((GEN)c[i++])) return 0;
+    for (   ; i<lx; )
+      if (!gcmp0((GEN)c[i++])) return 0;
+  }
+  return 1;
+}
+
+int
 ishnfall(GEN x)
 {
   long i,j, lx = lg(x);
