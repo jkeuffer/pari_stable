@@ -1935,7 +1935,7 @@ gtovec(GEN x)
 
   if (!x) return cgetg(1,t_VEC);
   tx = typ(x);
-  if (is_scalar_t(tx) || is_rfrac_t(tx))
+  if (is_scalar_t(tx) || is_rfrac_t(tx) || tx==t_STR)
   {
     y=cgetg(2,t_VEC); y[1]=lcopy(x);
     return y;
