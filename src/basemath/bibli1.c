@@ -3059,7 +3059,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
                   prec,gprecision(rinvtrans));
     p1 = lllintern(rinvtrans,flag&1, (gprecision(rinvtrans)<<1)-2);
     if (!p1) goto PRECPB;
-    if (isdiagonal(p1)) break; /* Id */
+    if (ishnfall(p1)) break; /* upper triangular */
     if (v) v = gmul(v,p1); else v = p1;
     rinvtrans = gmul(rinvtrans,p1);
   }
