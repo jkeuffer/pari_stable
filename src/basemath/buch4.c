@@ -866,6 +866,8 @@ rnfisnorm(GEN T, GEN x, long flag)
     x = (GEN)x[2]; /* rational number */
     if (typ(x) == t_POL) x = (GEN)x[2];
   }
+  if (typ(aux) == t_POLMOD && degpol(nf[1]) == 1)
+    aux[2] = (long)lift_intern((GEN)aux[2]);
   res[1] = (long)aux;
   res[2] = (long)x;
   return gerepilecopy(av, res);
@@ -876,7 +878,5 @@ bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
   gpmem_t av = avma;
   GEN T = rnfisnorminit(polx[MAXVARN], bnf, flag == 0? 1: 2);
-  GEN y = rnfisnorm(T, x, flag), z = (GEN)y[1];
-  if (typ(y) == t_POLMOD) y[1] = lmodulcp(lift((GEN)z[2]), (GEN)z[1]);
-  return gerepilecopy(av, y);
+  return gerepileupto(av, rnfisnorm(T, x, flag));
 }
