@@ -41,12 +41,12 @@ else
     exe=$osname-$arch-rlv$$
     $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
     if test -r $exe; then
-      gmp=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
+      gmp_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
     else
-      gmp="?.?";
+      gmp_version="?.?";
     fi
     rm -f $exe $exe$exe_suff
-    echo "Using GNU MP, version $gmp"
+    echo "Using GNU MP, version $gmp_version"
   fi
 
   if test "$fastread" != yes; then
@@ -64,11 +64,11 @@ fi
 if test -n "$gmp"; then
   case "$pretty" in
     *GMP*)
-      pretty=`echo $pretty | sed "s,GMP,GMP-$gmp,"` ;;
+      pretty=`echo $pretty | sed "s,GMP,GMP-$gmp_version,"` ;;
     /$kernlvl1)
-      pretty=`echo $pretty | sed "s,$kernlvl1,GMP-$gmp,"` ;;
+      pretty=`echo $pretty | sed "s,$kernlvl1,GMP-$gmp_version,"` ;;
     *)
-      pretty=`echo $pretty | sed "s, *kernel,/GMP-$gmp kernel,"` ;;
+      pretty=`echo $pretty | sed "s, *kernel,/GMP-$gmp_version kernel,"` ;;
   esac
   kernlvl1=gmp
 fi

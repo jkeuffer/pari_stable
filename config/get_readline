@@ -1,5 +1,5 @@
 #exported variables
-_readline_list="readline readline_enabledp CPPF_defined \
+_readline_list="readline readline_version readline_enabledp CPPF_defined \
 rl_library_version rl_fake_library_version rl_history
 rl_refresh_line_oldproto rl_appendchar rl_message \
 rl_save_prompt rl_fake_save_prompt _rl_save_prompt\
@@ -162,22 +162,22 @@ else
     exe=$osname-$arch-rlv$$
     $CC $extraflag $rl_extra_flags $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
     if test -r $exe; then
-      readline=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$readline" $exe`;
+      readline_version=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$readline" $exe`;
     else
-      readline="?.?";
+      readline_version="?.?";
     fi
-    if test -z "$rl_library_version" -a "X$readline" != "X?.?"; then
+    if test -z "$rl_library_version" -a "X$readline_version" != "X?.?"; then
       echo "!!! Possible mismatch between readline headers and library:"
-      echo "!!!  header is apparently for v1.0, library reports $readline!"
-      case "$readline" in
+      echo "!!!  header is apparently for v1.0, library reports $readline_version!"
+      case "$readline_version" in
         # rl_save_prompt was not in 2.1, is in 4.1; do not know more...
         4.[1-9]*|[5-9]*) rl_fake_save_prompt=yes;;
       esac
-      readline="1.0=Header/$readline=Lib"
+      readline_version="1.0=Header/$readline_version=Lib"
       rl_fake_library_version=yes
     fi
     rm -f $exe $exe$exe_suff
-    echo "Using GNU readline, version $readline"
+    echo "Using GNU readline, version $readline_version"
   fi
   if test -z "$rl_appendchar"; then
     echo ..."Library readline does not have completion_append_char"

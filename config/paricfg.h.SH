@@ -80,7 +80,7 @@ if test -n "$readline"; then
 /*  Use GNU readline library
  *  This is incompatible with SUN commandtools (not with shelltools).
  */
-#define READLINE "$readline"
+#define READLINE "$readline_version"
 EOT
   if test -n "$rl_appendchar"; then
     echo '#define HAS_COMPLETION_APPEND_CHAR' >> $file
