@@ -31,9 +31,11 @@ Done for version 2.0.19.beta (released ??/??/2000):
 IS+BA 3- various fixes necessary for g++
     4- prototype inconsistency in level1.h (evalexpo/evalvalp)
     5- trouble with pgcc -mk6 + variable k6 in elliptic.c
+HC  6- nfnewprec(bnf) could contain objects of low accuracy
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
+    2- allow some functions to modify bnf/bnr structures (matal + cycgen)
 
 ===========================================================================
 Done for version 2.0.18.beta (released 20/12/1999):

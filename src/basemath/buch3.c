@@ -11,6 +11,7 @@ GEN compute_class_number(GEN mit,GEN *met,GEN *u1,GEN *u2);
 GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
 GEN vconcat(GEN Q1, GEN Q2);
 GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
+GEN check_and_build_cycgen(GEN bnf);
 
 static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN vecsign, GEN gen,
@@ -53,7 +54,7 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN vecsign, GEN gen,
 GEN
 buchnarrow(GEN bnf)
 {
-  GEN nf,_0mod2,_1mod2,cyc,gen,v,matsign,arch;
+  GEN nf,_0mod2,_1mod2,cyc,gen,v,matsign,arch,cycgen;
   GEN dataunit,p1,p2,p3,h,vecsign,clh,basecl,met,u1,u2;
   long R1,R,i,j,ngen,sizeh,t,lo,c;
   long av=avma,tetpil;
@@ -83,12 +84,11 @@ buchnarrow(GEN bnf)
 
   h=cgetg(sizeh+1,t_MAT); arch = cgetg(R1+1,t_VEC);
   for (i=1; i<=R1; i++) arch[i]=un;
+  cycgen = check_and_build_cycgen(bnf);
   for (j=1; j<=ngen; j++)
   {
     p1 = cgetg(sizeh+1,t_COL); h[j]=(long)p1;
-    p2 = idealpow(nf, (GEN)gen[j], (GEN)cyc[j]);
-    p2 = (GEN)isprincipalall(bnf,p2,nf_GEN | nf_FORCE)[2];
-    p2 = gmul(v,zsigne(nf,p2,arch));
+    p2 = gmul(v,zsigne(nf,(GEN)cycgen[j],arch));
     for (i=1; i<=ngen;  i++) p1[i] = (i==j)? cyc[j]: zero;
     for (   ; i<=sizeh; i++) p1[i] = llift((GEN)p2[i+t-ngen]);
   }
@@ -223,7 +223,7 @@ static GEN
 buchrayall(GEN bnf,GEN module,long flag,long prec)
 {
   GEN nf,cyc,gen,genplus,fa2,sarch,hmatu,u,clg;
-  GEN dataunit,p1,p2,h,clh,basecl,met,u1,u2,u1old;
+  GEN dataunit,p1,p2,h,clh,basecl,met,u1,u2,u1old,cycgen;
   GEN racunit,bigres,bid,resbid2,resbid3,x,y,funits,hmat,vecel;
   long RU,R3,i,j,ngen,lh,lo,c,av=avma,N;
 
@@ -286,12 +286,12 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
       p1[i] = (i==(j-RU))? resbid2[i]: zero;
   }
   h=cgetg(lh+1,t_MAT);
+  cycgen = check_and_build_cycgen(bnf);
   for (j=1; j<=ngen; j++)
   {
     p1=cgetg(lh+1,t_COL); h[j]=(long)p1;
-    p2 = idealpow(nf, (GEN)gen[j], (GEN)cyc[j]);
-    p2 = (GEN)isprincipalall(bnf,p2,nf_GEN | nf_FORCE)[2];
-    p2 = element_mul(nf,p2,element_pow(nf,(GEN)vecel[j],(GEN)cyc[j]));
+    p2 = element_mul(nf, (GEN)cycgen[j], 
+                         element_pow(nf,(GEN)vecel[j],(GEN)cyc[j]));
     p2 = zideallog(nf,p2,bid);
     for (i=1; i<=ngen;  i++) p1[i] = (i==j)? cyc[j]: zero;
     for (   ; i<=lh; i++) p1[i] = lnegi((GEN)p2[i-ngen]);
@@ -357,7 +357,7 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
   y[5]=lcopy(clg); u=cgetg(3,t_VEC);
   y[6]=(long)u;
   u[1]=lmul(u2,p2);
-    u[2]=lmul(u1,p1);
+  u[2]=lmul(u1,p1);
   return gerepileupto(av,y);
 }
 
@@ -443,7 +443,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   checkbnr(bnr); bnf=(GEN)bnr[1]; bid=(GEN)bnr[2];
   vecel=(GEN)bnr[3]; matu=(GEN)bnr[4];
   rayclass=(GEN)bnr[5]; nf=(GEN)bnf[7]; ngen=lg(vecel)-1;
-  idep=isprincipalall(bnf,x,nf_GEN | nf_FORCE);
+  idep=isprincipalgenforce(bnf,x);
   if (lg(idep[1]) != ngen+1)
     err(talker,"incorrect generator length in isprincipalray");
   pol=(GEN)nf[1]; N=lgef(pol)-3;
@@ -471,7 +471,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   genray=(GEN)rayclass[3]; p1=idmat(N);
   for (i=1; i<c; i++)
     p1=idealmul(nf,idealpow(nf,(GEN)genray[i],(GEN)y[i]),p1);
-  alphaall = isprincipalall(bnf,idealdiv(nf,x,p1),nf_GEN | nf_FORCE);
+  alphaall = isprincipalgenforce(bnf,idealdiv(nf,x,p1));
   if (!gcmp0((GEN)alphaall[1])) err(bugparier,"isprincipalray (bug1)");
 
   res=(GEN)bnf[8];
@@ -1155,7 +1155,7 @@ long
 certifybuchall(GEN bnf)
 {
   long av = avma, nbgen,i,j,pp,N,R1,R2,R,nfa,nbf1,bound;
-  GEN big,nf,reg,rootsofone,funits,gen,p1,gbound,DK,alpha,factfd1,f1,h,cyc;
+  GEN big,nf,reg,rootsofone,funits,gen,p1,gbound,DK,cycgen,factfd1,f1,h,cyc;
   byteptr delta = diffptr;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1177,12 +1177,7 @@ certifybuchall(GEN bnf)
     fprintferr("Roots of one = "); outerr(rootsofone);
     fprintferr("Fundamental units = "); outerr(funits);
   }
-  alpha=cgetg(nbgen+1,t_VEC);
-  for (i=1; i<=nbgen; i++)
-  {
-    p1=idealpow(nf,(GEN)gen[i],(GEN)cyc[i]);
-    alpha[i]=isprincipalall(bnf,p1,nf_GEN | nf_FORCE)[2];
-  }
+  cycgen = check_and_build_cycgen(bnf);
   gbound = ground(gdiv(reg,lowerboundforregulator(bnf,funits)));
   if (is_bigint(gbound))
     err(talker,"sorry, too many primes to check");
@@ -1196,7 +1191,7 @@ certifybuchall(GEN bnf)
   for (big=gun,i=1; i<=nbgen; i++)
     big = mulii(big,idealnorm(nf,(GEN)gen[i]));
   for (pp = *delta++; pp <= bound; pp += *delta++)
-    check_prime(pp,bnf,h,cyc,R,alpha,funits,rootsofone,big);
+    check_prime(pp,bnf,h,cyc,R,cycgen,funits,rootsofone,big);
 
   nfa = 0;
   if (nbgen)
@@ -1211,7 +1206,7 @@ certifybuchall(GEN bnf)
   for (j=1; j<=nfa; j++)
   {
     pp = itos((GEN)f1[nbf1-j]);
-    check_prime(pp,bnf,gzero,cyc,R,alpha,funits,rootsofone,big);
+    check_prime(pp,bnf,gzero,cyc,R,cycgen,funits,rootsofone,big);
   }
   avma=av; return 1;
 }
