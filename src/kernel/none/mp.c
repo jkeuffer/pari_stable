@@ -1710,7 +1710,8 @@ sqrtremi(GEN N, GEN *r)
   {
     if (ln == 2) return sqrtispec2_sh(n, r);
     if (ln == 1) return sqrtispec1_sh(n, r);
-    *r = gen_0; return gen_0;
+    if (r) *r = gen_0;
+    return gen_0;
   }
   av = avma;
   sh = bfffo(n[0]) >> 1;
