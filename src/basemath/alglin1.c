@@ -1153,7 +1153,7 @@ u_Fp_inv(long a, long p)
 #endif
 
 /* assume 0 <= a[i,j], invpiv < p */
-static GEN
+static ulong *
 u_Fp_gauss_get_col_OK(GEN a, GEN b, ulong invpiv, long li, ulong p)
 {
   ulong *u = (ulong*)cgetg(li+1,t_VECSMALL);
@@ -1174,7 +1174,7 @@ u_Fp_gauss_get_col_OK(GEN a, GEN b, ulong invpiv, long li, ulong p)
   }
   return u;
 }
-static GEN
+static ulong
 u_Fp_gauss_get_col(GEN a, GEN b, ulong invpiv, long li, ulong p)
 {
   ulong *u = (ulong*)cgetg(li+1,t_VECSMALL);
@@ -1234,7 +1234,7 @@ _u_Fp_addmul(ulong *b, long k, long i, ulong m, ulong p)
 }
 /* same m = 1 */
 static void
-_u_Fp_add(GEN b, long k, long i, ulong p)
+_u_Fp_add(ulong *b, long k, long i, ulong p)
 {
   b[k] += b[i];
   if (b[k] & MASK) b[k] %= p;
