@@ -474,7 +474,7 @@ element_mulid(GEN nf, GEN x, long i)
 }
 
 /* valuation of integer x, with resp. to prime ideal P above p.
- * p.P^(-1) = b Z_K, v <= val_p(norm(x)), and N = deg(nf)
+ * p.P^(-1) = b Z_K, v >= val_p(norm(x)), and N = deg(nf)
  * [b may be given as the 'multiplication by b' matrix]
  */
 long

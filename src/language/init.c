@@ -2306,7 +2306,7 @@ entree functions_basic[]={
 {"sqrtint",18,(void*)racine,4,"G"},
 {"sqrtn",99,(void*)gsqrtn,3,"GGD&p"},
 {"subgrouplist",99,(void*)subgrouplist0,6,"GD0,L,D0,L,p"},
-{"subst",26,(void*)gsubst,7,"GnG"},
+{"subst",99,(void*)gsubst0,7,"GGG"},
 {"sum",48,(void*)somme,9,"V=GGEDG"},
 {"sumalt",99,(void*)sumalt0,9,"V=GED0,L,p"},
 {"sumdiv",22,(void*)divsum,9,"GVE"},

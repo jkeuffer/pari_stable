@@ -1112,6 +1112,19 @@ gconvsp(GEN x, int flpile)
 }
 
 GEN
+gsubst0(GEN x, GEN T, GEN y)
+{
+  ulong av;
+  long d, v;
+  if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
+    err(talker,"variable number expected in subst");
+  d = degpol(T); v = varn(T);
+  if (d == 1) return gsubst(x, v, y);
+  av = avma;
+  return gerepilecopy(av, gsubst(gdeflate(x, v, d), v, y));
+}
+
+GEN
 gsubst(GEN x, long v, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);

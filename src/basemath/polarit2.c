@@ -1411,39 +1411,92 @@ squff(GEN a, long hint)
   return gerepileupto(av, gcopy(res));
 }
 
+/* A(X^d) --> A(X) */
 GEN
-poldeflate(GEN x0, long *m)
+poldeflate_i(GEN x0, long d)
 {
-  long d = 0, i, id, lx = lgef(x0)-2;
-  GEN x = x0 + 2;
+  GEN z, y, x;
+  long i,id, dy, dx = degpol(x0);
+  if (d == 1) return x0;
+  if (dx < 0) return zeropol(varn(x0));
+  dy = dx/d;
+  y = cgetg(dy+3, t_POL);
+  y[1] = evalsigne(1)|evaldeg(dy)|evalvarn(varn(x0));
+  z = y + 2;
+  x = x0+ 2;
+  for (i=id=0; i<=dy; i++,id+=d) z[i] = x[id];
+  return y;
+}
 
-  for (i=1; i<lx; i++)
-    if (!gcmp0((GEN)x[i])) { d = cgcd(d,i); if (d == 1) break; }
-  *m = d;
-  if (d > 1)
-  {
-    GEN z, y;
-    long ly = (lx-1)/d + 3;
-    y = cgetg(ly, t_POL);
-    y[1] = evalsigne(1)|evallgef(ly)|evalvarn(varn(x0));
-    z = y + 2; ly -= 2;
-    for (i=id=0; i<ly; i++,id+=d) z[i] = x[id];
-    x0 = y;
-  }
-  return x0;
+long
+checkdeflate(GEN x)
+{
+  long d = 0, i, lx = lgef(x);
+  for (i=3; i<lx; i++)
+    if (!gcmp0((GEN)x[i])) { d = cgcd(d,i-2); if (d == 1) break; }
+  return d;
 }
 
 GEN
+gdeflate(GEN x, long v, long d)
+{
+  long i, lx, tx = typ(x);
+  GEN z;
+  if (is_scalar_t(tx)) return gcopy(x);
+  if (tx == t_POL)
+  {
+    long vx = varn(x);
+    ulong av;
+    if (vx < v)
+    {
+      lx = lgef(x);
+      z = cgetg(lx,t_POL); z[1] = x[1];
+      for (i=2; i<lx; i++) z[i] = (long)gdeflate((GEN)x[i],v,d);
+      return z;
+    }
+    if (vx > v) return gcopy(x);
+    av = avma;
+    if (checkdeflate(x) % d != 0)
+      err(talker,"impossible substitution in gdeflate");
+    return gerepilecopy(av, poldeflate_i(x,d));
+  }
+  if (tx == t_RFRAC)
+  {
+    z = cgetg(3, t_RFRAC);
+    z[1] = (long)gdeflate((GEN)x[1],v,d);
+    z[2] = (long)gdeflate((GEN)x[2],v,d);
+    return z;
+  }
+  if (is_matvec_t(tx))
+  {
+    lx = lg(x); z = cgetg(lx, tx);
+    for (i=1; i<lx; i++) z[i] = (long)gdeflate((GEN)x[i],v,d);
+    return z;
+  }
+  err(typeer,"gdeflate");
+  return NULL; /* not reached */
+}
+
+/* set *m to the largest d such that x0 = A(X^d); return A */
+GEN
+poldeflate(GEN x, long *m)
+{
+  *m = checkdeflate(x);
+  return poldeflate_i(x, *m);
+}
+
+/* return x0(X^d) */
+GEN
 polinflate(GEN x0, long d)
 {
-  long i, id, ly, lx = lgef(x0)-2;
+  long i, id, dy, dx = degpol(x0);
   GEN x = x0 + 2, z, y;
-  ly = (lx-1)*d + 3;
-  y = cgetg(ly, t_POL);
-  y[1] = evalsigne(1)|evallgef(ly)|evalvarn(varn(x0));
-  z = y + 2; ly -= 2;
-  for (i=0; i<ly; i++) z[i] = zero;
-  for (i=id=0; i<lx; i++,id+=d) z[id] = x[i];
+  dy = dx*d;
+  y = cgetg(dy+3, t_POL);
+  y[1] = evalsigne(1)|evaldeg(dy)|evalvarn(varn(x0));
+  z = y + 2;
+  for (i=0; i<=dy; i++) z[i] = zero;
+  for (i=id=0; i<=dx; i++,id+=d) z[id] = x[i];
   return y;
 }
 
