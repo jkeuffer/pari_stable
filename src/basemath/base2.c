@@ -1243,16 +1243,9 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
     }
   }
  
-  if (n%2)
-  {
-    for (k = 1; k <= n+1; k += 2) 
-      c[k] = lneg((GEN)c[k]);
-  }
-  else
-  {
-    for (k = 2; k <= n+1; k += 2) 
-      c[k] = lneg((GEN)c[k]);
-  }
+  k = (n%2)? 1: 2;
+  for (  ; k <= n+1; k += 2) 
+    c[k] = lneg((GEN)c[k]);
 
   return gerepileupto(av, gtopoly(c, vn));
 }
