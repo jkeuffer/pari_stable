@@ -33,6 +33,7 @@ long   addssmod(long a, long b, long p);
 void   addssz(long x, long y, GEN z);
 void   affii(GEN x, GEN y);
 void   affsi(long s, GEN x);
+void   affui(long s, GEN x);
 void   affsr(long s, GEN x);
 GEN    cgetg(long x, long y);
 GEN    cgeti(long x);
@@ -63,6 +64,7 @@ double gtodouble(GEN x);
 GEN    icopy(GEN x);
 GEN    icopy_av(GEN x, GEN y);
 long   itos(GEN x);
+ulong  itou(GEN x);
 GEN    modis(GEN x, long y);
 GEN    mpabs(GEN x);
 GEN    mpadd(GEN x, GEN y);
@@ -261,13 +263,12 @@ stoi(long x)
 INLINE long
 itos(GEN x)
 {
-  const long s=signe(x);
-  long p1;
+  const long s = signe(x);
+  long u;
 
   if (!s) return 0;
-  if (lgefint(x)>3) err(affer2);
-  p1=x[2]; if (p1 < 0) err(affer2);
-  return (s>0) ? p1 : -(long)p1;
+  u = (long)x[2]; if (lgefint(x) > 3 || u < 0) err(affer2);
+  return (s>0) ? u : -u;
 }
 
 INLINE void
@@ -283,10 +284,13 @@ affii(GEN x, GEN y)
 INLINE void
 affsi(long s, GEN x)
 {
-  if (!s) { x[1]=2; return; }
-  if (lg(x)<3) err(affer1);
-  if (s>0) { x[1] = evalsigne(1) | evallgefint(3); x[2] = s; }
-  else { x[1] = evalsigne(-1) | evallgefint(3); x[2] = -s; }
+  if (!s) x[1] = evalsigne(0) | evallgefint(2);
+  else
+  {
+    if (lg(x) < 3) err(affer1);
+    if (s > 0) { x[1] = evalsigne( 1) | evallgefint(3); x[2] =  s; }
+    else       { x[1] = evalsigne(-1) | evallgefint(3); x[2] = -s; }
+  }
 }
 
 INLINE void
@@ -676,6 +680,27 @@ mpdivis(GEN x, GEN y, GEN z)
 
 /* THE FOLLOWING ONES ARE NOT IN mp.s */
 #  endif /* !defined(__M68K__) */
+
+INLINE ulong
+itou(GEN x)
+{
+  const long s = signe(x);
+
+  if (!s) return 0;
+  if (lgefint(x) > 3) err(affer2);
+  return x[2];
+}
+
+INLINE void
+affui(ulong u, GEN x)
+{
+  if (!u) x[1] = evalsigne(0) | evallgefint(2);
+  else
+  {
+    if (lg(x) < 3) err(affer1);
+    x[1] = evalsigne(1) | evallgefint(3); x[2] = u;
+  }
+}
 
 INLINE int
 mpdivisis(GEN x, long y, GEN z)
