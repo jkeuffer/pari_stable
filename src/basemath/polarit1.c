@@ -68,12 +68,11 @@ poldivrem(GEN x, GEN y, GEN *pr)
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
-  f = gdiv;
   if (is_scalar_t(ty))
   {
     if (pr == ONLY_REM) return gzero;
     if (pr && pr != ONLY_DIVIDES) *pr=gzero;
-    return f(x,y);
+    return gdiv(x,y);
   }
   tx=typ(x); vy=gvar9(y);
   if (is_scalar_t(tx) || gvar9(x)>vy)
@@ -93,10 +92,10 @@ poldivrem(GEN x, GEN y, GEN *pr)
       p1 = zeropol(vx); if (pr == ONLY_REM) return p1;
       *pr = p1;
     }
-    return f(x,y);
+    return gdiv(x,y);
   }
 
-  if (!signe(y)) err(talker,"division by zero in poldivrem");
+  if (!signe(y)) err(gdiver);
   dy = degpol(y);
   y_lead = (GEN)y[dy+2];
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
@@ -115,7 +114,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    return f(x, constant_term(y));
+    return gdiv(x, constant_term(y));
   }
   dx = degpol(x);
   if (varncmp(vx, vy) > 0 || dx<dy)
@@ -146,7 +145,7 @@ poldivrem(GEN x, GEN y, GEN *pr)
       f = gmul; mod = gmodulcp(gun, (GEN)y_lead[1]);
       break;
     default: if (gcmp1(y_lead)) y_lead = NULL;
-      mod = NULL;
+      f = gdiv; mod = NULL;
   }
   avy=avma;
   z = cgetg(dz+3,t_POL); z[1] = x[1];

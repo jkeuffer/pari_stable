@@ -430,7 +430,7 @@ gpowgs(GEN x, long n)
     {
       long sx=signe(x), sr = (sx<0 && (n&1))? -1: 1;
       if (n>0) return puissii(x,(GEN)gn,sr);
-      if (!sx) err(talker, "division by zero in gpowgs");
+      if (!sx) err(gdiver);
       if (is_pm1(x)) return (sr < 0)? icopy(x): gun;
       /* n<0, |x|>1 */
       y=cgetg(3,t_FRAC); setsigne(gn,1);
@@ -449,7 +449,7 @@ gpowgs(GEN x, long n)
       if (n > 0) { if (!signe(a)) return gzero; }
       else
       { /* n < 0 */
-        if (!signe(a)) err(talker, "division by zero fraction in gpowgs");
+        if (!signe(a)) err(gdiver);
         /* +-1/x[2] inverts to an integer */
         if (is_pm1(a)) return puissii(b,(GEN)gn,sr);
         y = b; b = a; a = y;
@@ -546,7 +546,7 @@ powgi(GEN x, GEN n)
     {
       long sx=signe(x), sr = (sx<0 && mod2(n))? -1: 1;
       if (sn>0) return puissii(x,n,sr);
-      if (!sx) err(talker, "division by zero in powgi");
+      if (!sx) err(gdiver);
       if (is_pm1(x)) return (sr < 0)? icopy(x): gun;
       /* n<0, |x|>1 */
       y=cgetg(3,t_FRAC); setsigne(n,1); /* temporarily replace n by abs(n) */
@@ -565,7 +565,7 @@ powgi(GEN x, GEN n)
       if (sn > 0) { if (!signe(a)) return gzero; }
       else
       { /* n < 0 */
-        if (!signe(a)) err(talker, "division by zero fraction in powgi");
+        if (!signe(a)) err(gdiver);
         /* +-1/b inverts to an integer */
         if (is_pm1(a)) return puissii(b,n,sr);
         y = b; b = a; a = y;
@@ -583,7 +583,7 @@ powgi(GEN x, GEN n)
       
       if (!signe(x[4]))
       {
-        if (sn < 0) err(talker, "division by 0 p-adic in powgi");
+        if (sn < 0) err(gdiver);
         return padiczero(p, e);
       }
       y = cgetg(5,t_PADIC);

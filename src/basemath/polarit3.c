@@ -2003,7 +2003,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   GEN z,p1,rem,lead;
 
   if (!p) err(bugparier,"FpX_divrem, p==NULL");
-  if (!signe(y)) err(talker,"division by zero in FpX_divrem");
+  if (!signe(y)) err(gdiver);
   vx = varn(x);
   dy = degpol(y);
   dx = (typ(x)==t_INT)? 0: degpol(x);
@@ -2108,7 +2108,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
 
   if (!p) return poldivrem(x,y,pr);
   if (!T) return FpX_divrem(x,y,p,pr);
-  if (!signe(y)) err(talker,"division by zero in FpX_divrem");
+  if (!signe(y)) err(gdiver);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
   if (dx < dy)
   {
@@ -2220,7 +2220,7 @@ RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!signe(y)) err(talker,"division by zero in RXQX_divrem");
+  if (!signe(y)) err(gdiver);
   vx = varn(x);
   dx = degpol(x);
   dy = degpol(y);
@@ -2961,7 +2961,7 @@ u_FpXX_pseudorem(GEN x, GEN y, ulong p)
   long vx = varn(x), dx, dy, dz, i, lx, dp;
   pari_sp av = avma, av2, lim;
 
-  if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
+  if (!signe(y)) err(gdiver);
   (void)new_chunk(2);
   dx=degpol(x); x = revpol(x);
   dy=degpol(y); y = revpol(y); dz=dx-dy; dp = dz+1;

@@ -3449,7 +3449,7 @@ pseudorem_i(GEN x, GEN y, GEN mod)
 
   if (mod) red = (typ(mod) == t_INT)? &FpX_red: &gmod;
 
-  if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
+  if (!signe(y)) err(gdiver);
   (void)new_chunk(2);
   dx=degpol(x); x = revpol(x);
   dy=degpol(y); y = revpol(y); dz=dx-dy; p = dz+1;
@@ -3512,7 +3512,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
   pari_sp av = avma, av2, lim;
   GEN z, r, ypow;
 
-  if (!signe(y)) err(talker,"euclidean division by zero (pseudodiv)");
+  if (!signe(y)) err(gdiver);
   (void)new_chunk(2);
   dx=degpol(x); x = revpol(x);
   dy=degpol(y); y = revpol(y); dz=dx-dy; p = dz+1;
