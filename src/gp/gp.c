@@ -2438,9 +2438,9 @@ gp_main_loop(int ismain)
 
     if (! read_line(&F, NULL))
     {
-    #ifdef _WIN32
+#ifdef _WIN32
       Sleep(10); if (win32ctrlc) dowin32ctrlc();
-    #endif
+#endif
       if (popinfile()) gp_quit();
       if (ismain) continue;
       pop_buffer(); return z;
