@@ -128,7 +128,7 @@ else
     hpux-*) # -Ae is for ANSI C + defines HPUX_SOURCE, +z for PIC code (HPUX cc)
                   OPTFLAGS=-O; cflags=-Ae; DLCFLAGS=+z;;
     # best tuning option, even for PPC604:
-    aix-*)        OPTFLAGS=-O2; cflags='-qlanglvl=ansi -qtune=601';;
+    aix-*)        OPTFLAGS=-O2; cflags='-qlanglvl=ansi -qtune=601 -qmaxmem=8192';;
     cygwin*|linux-i?86|freebsd-i?86)
                   OPTFLAGS=-O2; cflags=-m486;;
     osf1-*)       OPTFLAGS='-O4 -migrate -ifo -Olimit 9999';;
