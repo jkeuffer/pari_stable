@@ -858,7 +858,7 @@ long    polvaluation(GEN x, GEN *z);
 GEN     pureimag(GEN x);
 long    pvaluation(GEN x, GEN p, GEN *py);
 long    sizedigit(GEN x);
-long    svaluation(ulong x, ulong p, long *py);
+long    svaluation(ulong x, ulong p, ulong *py);
 GEN     vecmax(GEN x);
 GEN     vecmin(GEN x);
 

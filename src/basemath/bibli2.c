@@ -272,7 +272,8 @@ subcyclo(GEN nn, GEN dd, int v)
     err(impl,"subcyclo in non-cyclic case");
   if (d < n)
   {
-    k = 1 + svaluation(d,p,&i);
+    ulong dummy;
+    k = 1 + svaluation(d,p,&dummy);
     if (k<al) { al = k; nn = gpowgs(stoi(p),al); n = nn[2]; }
   }
   avma=av; q = (n/p)*(p-1); /* = phi(n) */

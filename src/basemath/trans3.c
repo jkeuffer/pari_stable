@@ -780,7 +780,7 @@ pows(long x, long n)
 
 /* return n^-s, n > 1 odd. tab[q] := q^-s, q prime power */
 static GEN
-n_s(long n, GEN *tab)
+n_s(ulong n, GEN *tab)
 {
   byteptr d =  diffptr + 2;
   GEN x = NULL;
@@ -831,7 +831,7 @@ extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrs2_safe(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
 extern double dnorm(double s, double t);
-extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, long *av, GEN *res);
+extern GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, ulong *av, GEN *res);
 
 /* s0 a t_INT, t_REAL or t_COMPLEX.
  * If a t_INT, assume it's not a trivial case (i.e we have s0 > 1, odd)
@@ -841,7 +841,8 @@ czeta(GEN s0, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, unr;
   GEN sim, ms, s1, s2, s3, s4, s5, *tab, tabn;
-  long p, i, sqn, nn, lim, lim2, ct, av, av2 = avma, avlim;
+  long p, i, sqn, nn, lim, lim2, ct;
+  ulong av, av2 = avma, avlim;
   int funeq = 0;
   byteptr d;
 

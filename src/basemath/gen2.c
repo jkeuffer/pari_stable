@@ -689,7 +689,7 @@ ggval(GEN x, GEN p)
 
 /* x is non-zero */
 long
-svaluation(ulong x, ulong p, long *py)
+svaluation(ulong x, ulong p, ulong *py)
 {
   ulong v = 0;
   for(;;)
@@ -718,14 +718,17 @@ pvaluation(GEN x, GEN p, GEN *py)
     if (py) { *py = v? negi(x): icopy(x); }
     return v;
   }
-  if (!is_bigint(x))
+  if (lgefint(x) == 3)
   {
-    long y;
-    if (!is_bigint(p))
+    if (lgefint(p) == 3)
     {
-      v = svaluation(x[2],p[2], &y);
-      if (signe(x) < 0) y = -y;
-      if (py) *py = stoi(y);
+      ulong y;
+      v = svaluation((ulong)x[2],(ulong)p[2], &y);
+      if (py)
+      {
+        *py = utoi(y);
+        if (signe(x) < 0) setsigne(*py, -1);
+      }
     }
     else
     {
@@ -1023,7 +1026,6 @@ void
 gaffsg(long s, GEN x)
 {
   long l,i,v;
-  GEN p;
 
   switch(typ(x))
   {
@@ -1043,11 +1045,13 @@ gaffsg(long s, GEN x)
       gaffsg(s,(GEN)x[1]); gaffsg(0,(GEN)x[2]); break;
 
     case t_PADIC:
+    {
+      GEN y;
       if (!s) { padicaff0(x); break; }
-      p = (GEN)x[2];
-      v = (is_bigint(p))? 0: svaluation(s,p[2], &i);
-      setvalp(x,v); modsiz(i,(GEN)x[3],(GEN)x[4]);
+      v = pvaluation(stoi(s), (GEN)x[2], &y);
+      setvalp(x,v); modiiz(y,(GEN)x[3],(GEN)x[4]);
       break;
+    }
 
     case t_QUAD:
       gaffsg(s,(GEN)x[2]); gaffsg(0,(GEN)x[3]); break;

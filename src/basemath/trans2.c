@@ -1178,7 +1178,7 @@ double
 dnorm(double s, double t) { return s*s + t*t; }
 
 GEN 
-trans_fix_arg(long *prec, GEN *s0, GEN *sig, long *av, GEN *res)
+trans_fix_arg(long *prec, GEN *s0, GEN *sig, ulong *av, GEN *res)
 {
   GEN s, p1;
   long l;
