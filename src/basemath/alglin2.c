@@ -223,7 +223,7 @@ caradj(GEN x, long v, GEN *py)
   i = gvar2(p);
   if (i == v) err(talker,"incorrect variable in caradj");
   if (i < v) p = gerepileupto(av0, poleval(p, polx[v]));
-  if (py) *py = (l & 1)? forcecopy(y): stackify(gneg(y));
+  if (py) *py = (l & 1)? stackify(gneg(y)): forcecopy(y);
   gunclone(y); return p;
 }
 
