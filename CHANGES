@@ -159,6 +159,7 @@ BA 15- error messages now mention the GP function when the error occured.
    16- intro message [ no point in displaying "realprecision",
        "seriesprecision" and "format" on startup. One can query them
        individually, or ask for all defaults ]
+BA 17- macro varncmp(vx,vy) should now be used to compare variable numbers.
 
   Added
     1- make test-all [ all test suite (SLOW !)]
