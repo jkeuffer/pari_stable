@@ -886,7 +886,7 @@ czeta(GEN s0, long prec)
     if (l < l2) l = l2;
     lim = (long) ceil(l); if (lim < 2) lim = 2;
     l2 = (lim+ssig/2.-.25);
-    nn = (long) 1 + ceil( sqrt(l2*l2 + st*st/4) * la / PI );
+    nn = 1 + (long)ceil( sqrt(l2*l2 + st*st/4) * la / PI );
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
     if ((ulong)nn >= maxprime()) err(primer1);
   }

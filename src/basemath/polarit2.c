@@ -1136,8 +1136,8 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       for (i=1; i<=n0; i++)
         TT[i] = (long)polsym_gen((GEN)famod[i], NULL, tmax, pa);
     }
-    goodb = (long) a - 0.12 * n0 * n0 / logp;
-    if ((a - goodb)*logp < 64*LOG2) goodb = (long) a - 64*LOG2/logp;
+    goodb = (long) (a - 0.12 * n0 * n0 / logp);
+    if ((a - goodb)*logp < 64*LOG2) goodb = (long) (a - 64*LOG2/logp);
     if (goodb > b) b = goodb;
     pa_b = gpowgs(p, a-b); pb_as2 = shifti(pa_b,-1);
     pb   = gpowgs(p, b);   pbs2    = shifti(pb,-1);

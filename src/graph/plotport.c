@@ -244,9 +244,9 @@ initrect_gen(long ne, GEN x, GEN y, long flag)
     PARI_get_plot(0);
     xi = w_width - 1;  yi = w_height - 1;
     if (xd)
-      xi = xd*xi + 0.5;
+      xi = (long)(xd*xi + 0.5);
     if (yd)
-      yi = yd*yi + 0.5;
+      yi = (long)(yd*yi + 0.5);
   } else {
     xi = itos(x);  yi = itos(y);
     if (!xi || !yi)
@@ -471,8 +471,8 @@ rectticks(PARI_plot *WW, long ne,
     dx /= h_unit;
     dy /= v_unit;
   }
-  dxy = sqrt(dx*dx + dy*dy);
-  nticks = (dxy + 2.5)/4;
+  dxy = (long)sqrt(dx*dx + dy*dy);
+  nticks = (long) ((dxy + 2.5)/4);
   if (!nticks) return;
 
   /* Now we want to find nticks (or less) "round" numbers between l1 and l2.
@@ -502,7 +502,7 @@ rectticks(PARI_plot *WW, long ne,
       minl = ceil(l_min/step);
       maxl = floor(l_max/step);
       if (minl <= maxl && maxl - minl + 1 <= nticks) {
-	nticks = maxl - minl + 1;
+	nticks = (long) (maxl - minl + 1);
         l_min = minl * step;
         l_max = maxl * step; break;
       }
@@ -825,8 +825,8 @@ rectcopy_gen(long source, long dest, GEN xoff, GEN yoff, long flag)
 
     PARI_get_plot(0);
     xi = w_width - 1;  yi = w_height - 1;
-    xi = xd*xi + 0.5;
-    yi = yd*yi + 0.5;
+    xi = (long)(xd*xi + 0.5);
+    yi = (long)(yd*yi + 0.5);
   } else {
     xi = itos(xoff);  yi = itos(yoff);
   }
@@ -914,14 +914,13 @@ rectcopy(long source, long dest, long xoff, long yoff)
 
 /* A simpler way is to clip by 4 half-planes */
 static int
-clipline(long xmin, long xmax, long ymin, long ymax, double *x1p, double *y1p, double *x2p, double *y2p)
+clipline(double xmin, double xmax, double ymin, double ymax,
+         double *x1p, double *y1p, double *x2p, double *y2p)
 {
     int xy_exch = 0, rc = CLIPLINE_NONEMPTY;
-    double t;
-    double xi, yi;
-    double sl;
-    double xmn, xmx;
-    double ymn, ymx;
+    double t, sl;
+    double xi, xmn, xmx;
+    double yi, ymn, ymx;
     int x1_is_ymn, x1_is_xmn;
     double x1 = *x1p, x2 = *x2p, y1 = *y1p, y2 = *y2p;
 
@@ -929,10 +928,10 @@ clipline(long xmin, long xmax, long ymin, long ymax, double *x1p, double *y1p, d
 	return 0;
     if (fabs(x1 - x2) < fabs(y1 - y2)) { /* Exchange x and y */
 	xy_exch = 1;
-	t = xmin, xmin = ymin, ymin = t;
-	t = xmax, xmax = ymax, ymax = t;
-	t = x1, x1 = y1, y1 = t;
-	t = x2, x2 = y2, y2 = t;
+	t = xmin; xmin = ymin; ymin = t;
+	t = xmax; xmax = ymax; ymax = t;
+	t = x1; x1 = y1; y1 = t;
+	t = x2; x2 = y2; y2 = t;
     }
 
     /* Build y as a function of x */
@@ -1931,8 +1930,8 @@ gendraw(GEN list, long ps, long flag)
       long xi, yi;
 
       xi = w_width - 1;  yi = w_height - 1;
-      xi = xd*xi + 0.5;
-      yi = yd*yi + 0.5;
+      xi = (long)(xd*xi + 0.5);
+      yi = (long)(yd*yi + 0.5);
       x[i] = xi; y[i] = yi;
     } else {
       x[i]=itos(x0); y[i]=itos(y0);
@@ -1994,7 +1993,7 @@ postdraw00(long *w, long *x, long *y, long lw, long scale)
     postysize = pari_psplot.height;
     PARI_get_plot(0);
     xscale *= postxsize * 1.0/w_width;
-    fontsize = fontsize/(postxsize * 1.0/w_width);
+    fontsize = (long) (fontsize/(postxsize * 1.0/w_width));
     yscale *= postysize * 1.0/w_height;
     xtick = h_unit;  ytick = v_unit;
   }

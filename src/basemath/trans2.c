@@ -1266,7 +1266,7 @@ gammanew(GEN s0, long la, long prec)
 
     l = (pariC2*(prec-2) - l2) / (2. * (1.+ log((double)la)));
     if (l < 0) l = 0.;
-    lim = (long) 1 + ceil(l);
+    lim = 1 + (long)ceil(l);
 
     u = (lim-0.5) * la / PI;
     l2 = u*u - st*st;

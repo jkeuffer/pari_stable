@@ -112,7 +112,7 @@ sinitp(long a, long c, byteptr *ptr)
 static void
 update_p(entree *ep, byteptr *ptr, long prime[])
 {
-  GEN z = ep->value;
+  GEN z = (GEN)ep->value;
   long a, c;
 
   if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
