@@ -38,10 +38,6 @@ _checkbnf(GEN bnf)
     {
       case 11: return bnf;
       case 7:  return checkbnf((GEN)bnf[1]);
-
-      case 3:
-        if (typ(bnf[2])==t_POLMOD)
-          return checkbnf((GEN)bnf[1]);
     }
   return NULL;
 }
@@ -1480,7 +1476,7 @@ _initalg(GEN x, long flag, long prec)
     {
       if (!rev) rev = polx[varn(T.x)]; /* no improvement */
       if (T.lead) rev = gdiv(rev, T.lead);
-      rev = to_polmod(rev, T.x);
+      rev = mkpolmod(rev, T.x);
     }
   }
 
@@ -1871,7 +1867,7 @@ storeeval(GEN a, GEN x, GEN z, GEN lead)
 {
   GEN beta = modreverse_i(a, x);
   if (lead) beta = gdiv(beta, lead);
-  return mkvec2(z, to_polmod(beta,z));
+  return mkvec2(z, mkpolmod(beta,z));
 }
 
 static void
