@@ -88,6 +88,7 @@ BA 49- better arguments checking for galoisfixedfield
    50- psi(I) --> incorrect type in rtodbl
 XR 51- increase precision automatically when needed in quadhilbertreal
    52- idealstar(bnfinit(polcyclo(5)),11).clgp --> stack error
+   53- default(format,"g0.4"); 3./10 --> 0.300004577  [now: 0.3000]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
