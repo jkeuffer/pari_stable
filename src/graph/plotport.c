@@ -387,6 +387,7 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_L
   double dx,dy,dxy,xmin,xmax,ymin,ymax,x1,y1,x2,y2;
   PariRect *e = check_rect_init(ne);
   RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
+  const double c = 1 + 1e-10;
 
   x1 = RXcursor(e)*RXscale(e) + RXshift(e);
   y1 = RYcursor(e)*RYscale(e) + RYshift(e);
@@ -417,7 +418,7 @@ rectline0(long ne, double gx2, double gy2, long relative) /* code = ROt_MV/ROt_L
   RoLNx1(z) = xmin; RoLNx2(z) = xmax;
   if (dx*dy<0) { RoLNy1(z) = ymax; RoLNy2(z) = ymin; }
   else { RoLNy1(z) = ymin; RoLNy2(z) = ymax; }
-  RoType(z) = ((xmin>xmax)||(ymin>ymax)) ? ROt_MV : ROt_LN;
+  RoType(z) = (xmin>xmax*c || ymin>ymax*c) ? ROt_MV : ROt_LN;
   if (!RHead(e)) RHead(e)=RTail(e)=z;
   else { RoNext(RTail(e))=z; RTail(e)=z; }
   RoCol(z)=current_color[ne];
