@@ -1724,7 +1724,9 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
       An=(GEN) FpXQ_pow(A,ipg,P,l)[2];
       Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
-      z=modii(mulii(An,mpinvmod(Bn,l)),l);
+      if (!invmod(Bn,l,&z))
+        err(talker,"Polynomials not irreducible in Fp_intersect");
+      z=modii(mulii(An,z),l);
       L=mpsqrtnmod(z,ipg,l,NULL);
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
