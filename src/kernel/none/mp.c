@@ -2134,30 +2134,37 @@ resiimul(GEN x, GEN sy)
   return gerepileuptoint(av, r); /* = resii(x, y) */
 }
 
-/* x % (2^n) */
+/* x % (2^n), assuming x, n >= 0 */
 GEN
 resmod2n(GEN x, long n)
 {
-  long l,k,lx,ly;
-  GEN y, z, t;
+  long hi,l,k,lx,ly;
+  GEN z, xd, zd;
   
-  if (!signe(x)) return gzero;
+  if (!signe(x) || !n) return gzero;
 
-  l = n % BITS_IN_LONG;
-  k = n / BITS_IN_LONG;
-  ly = l? k+3: k+2;
+  l = n & (BITS_IN_LONG-1);    /* n % BITS_IN_LONG */   
+  k = n >> TWOPOTBITS_IN_LONG; /* n / BITS_IN_LONG */
   lx = lgefint(x);
-  if (lx < ly) return icopy(x);
-  z = cgeti(ly);
-  z[1] = evalsigne(1)|evallgefint(ly);
-  y = z + ly;
-  t = x + lx;
-  for ( ;k; k--) *--y = *--t;
-  if (l) *--y = *--t & ((1<<l) - 1);
-#if 0
-  if (!egalii(z, resii(x, shifti(gun,n))))
-    err(talker,"bug in resmod2n: n = %ld, x = %Z\n",n,x);
-#endif
+  if (lx < k+3) return icopy(x);
+
+  xd = x + (lx-k-1);
+  /* x = |_|...|#|1|...|k| : copy the last l bits of # and the last k words
+   *            ^--- initial xd  */
+  hi = *xd & ((1<<l) - 1); /* last l bits of # = top bits of result */
+  if (!hi)
+  { /* strip leading zeroes from result */
+    xd++; while (k && !*xd) { k--; xd++; }
+    if (!k) return gzero;
+    ly = k+2;
+  }
+  else
+    ly = k+3;
+
+  zd = z = cgeti(ly);
+  *++zd = evalsigne(1) | evallgefint(ly);
+  if (hi) *++zd = hi;
+  for ( ;k; k--) *++zd = *++xd;
   return z;
 }
 
