@@ -92,7 +92,7 @@ static char *prettyprinter;
 static char *prettyprinter_dft = "tex2mail -TeX -noindent -ragged -by_par";
 static pariFILE *prettyprinter_file;
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
-static long chrono, pariecho, primelimit, parisize, strictmatch;
+static long chrono, pariecho, primelimit, strictmatch;
 static long tglobal, histsize, paribufsize, lim_lines;
 static int tm_is_waiting = 0, handle_C_C = 0;
 static gp_format fmt;
@@ -133,35 +133,31 @@ usage(char *s)
 
 /* must be called BEFORE pari_init() */
 static void
-gp_preinit(int force)
+gp_preinit()
 {
-  static char *dflt;
-  char *help;
   long i;
 
-  if (force)
-  {
-    primelimit = 500000; parisize = 1000000*sizeof(long);
-    dflt = DFT_PROMPT;
-  }
-  strcpy(prompt, dflt);
+  primelimit = 500000; 
+  bot = 0;
+  top = 1000000*sizeof(long);
+  strcpy(prompt, DFT_PROMPT);
   strcpy(prompt_cont, CONTPROMPT);
 
-#if defined(UNIX) || defined(__EMX__)
-#  if defined(__EMX__) || defined(__CYGWIN32__)
-  path = pari_strdup(".;C:;C:/gp");
-#  else
-  path = pari_strdup(".:~:~/gp");
-#  endif
-  help = getenv("GPHELP");
-# ifdef GPHELP
-    if (!help) help = GPHELP;
-# endif
+#if defined(__EMX__) || defined(__CYGWIN32__)
+  path = ".;C:;C:/gp";
+#elif defined(UNIX)
+  path = ".:~:~/gp";
 #else
-  path = pari_strdup(".");
-  help = NULL;
+  path = ".";
 #endif
-  help_prg = help? pari_strdup(help): NULL;
+  path = pari_strdup(path);
+
+  help_prg = os_getenv("GPHELP");
+# ifdef GPHELP
+  if (!help_prg) help_prg = GPHELP;
+# endif
+  if (help_prg) help_prg = pari_strdup(help_prg);
+
   prettyp = f_PRETTYMAT;
   strictmatch = simplifyflag = 1;
   tglobal = 0;
@@ -438,7 +434,7 @@ sd_numeric(char *v, int flag, char *s, long *ptn, long Min, long Max,
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
-      sprintf(thestring, "default: incorrect value for %s [%ld-%ld]",
+      sprintf(thestring, "default: incorrect value for %s [%ud-%ud]",
 	      s, Min, Max);
       err(talker2, thestring, v,v);
     }
@@ -454,10 +450,10 @@ sd_numeric(char *v, int flag, char *s, long *ptn, long Min, long Max,
 	  msg++; /* single msg, always printed */
 	else
 	  msg += n; /* one per possible value */
-	pariputsf("   %s = %ld %s\n", s, n, *msg);
+	pariputsf("   %s = %ud %s\n", s, n, *msg);
       }
       else if (Max != 1 || Min != 0)
-	pariputsf("   %s = %ld\n", s, n);
+	pariputsf("   %s = %ud\n", s, n);
       else /* toggle */
       {
 	if (n==1) pariputsf("   %s = 1 (on)\n", s);
@@ -754,7 +750,7 @@ extern void err_clean();
 void
 allocatemem0(unsigned long newsize)
 {
-  parisize = allocatemoremem(newsize);
+  (void)allocatemoremem(newsize);
   err_clean();
   jump_to_buffer();
 }
@@ -762,13 +758,10 @@ allocatemem0(unsigned long newsize)
 static GEN
 sd_parisize(char *v, int flag)
 {
-  long n = parisize;
+  long n = top-bot;
   GEN r = sd_numeric(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
-  if (n != parisize)
-  {
+  if (n != top-bot)
     if (flag != d_INITRC) allocatemem0(n);
-    parisize = n;
-  }
   return r;
 }
 
@@ -1586,7 +1579,7 @@ print_hash_list(char *s)
 
     for(; n<=m; n++)
     {
-      pariputsf("*** hashcode = %ld\n",n);
+      pariputsf("*** hashcode = %ud\n",n);
       for (ep=functions_hash[n]; ep; ep=ep->next)
 	print_entree(ep,n);
     }
@@ -1643,7 +1636,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
   sd_realprecision  ("",d_ACKNOWLEDGE);
   sd_seriesprecision("",d_ACKNOWLEDGE);
   sd_format         ("",d_ACKNOWLEDGE);
-  pariputsf("\nparisize = %ld, primelimit = %ld\n", top-bot, primelimit);
+  pariputsf("\nparisize = %ud, primelimit = %ud\n", top-bot, primelimit);
 }
 
 static void
@@ -2524,7 +2517,7 @@ gp_main_loop(int ismain)
       {
         char *s = (char*)global_err_data;
         if (s && *s) outerr(lisseq(s));
-	avma = top; parisize = top - bot;
+	avma = top;
 	j = tglobal - tloc; i = (tglobal-1)%histsize;
 	while (j)
 	{
@@ -2801,7 +2794,7 @@ read_opt(long argc, char **argv)
   /* override the values from gprc */
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, &primelimit);
-  testint(s, &parisize);
+  testint(s, &top);
   if (under_emacs || under_texmacs) disable_color=1;
   pari_outfile=stdout; return pre;
 }
@@ -2820,7 +2813,7 @@ main(int argc, char **argv)
 #endif
   char **flist;
 
-  init_defaults(1); gp_preinit(1);
+  init_defaults(1); gp_preinit();
   if (setjmp(environnement))
   {
     pariputs("### Errors on startup, exiting...\n\n");
@@ -2835,7 +2828,7 @@ main(int argc, char **argv)
   pari_addfunctions(&pari_oldmodules, functions_oldgp,helpmessages_oldgp);
 
   init_graph(); INIT_SIG_off;
-  pari_init(parisize, primelimit);
+  pari_init(top-bot, primelimit);
   INIT_SIG_on;
   pari_sig_init(gp_sighandler);
 #ifdef READLINE

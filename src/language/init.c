@@ -471,7 +471,7 @@ init_stack(long size)
     for(s = old;; s>>=1)
     {
       if (!s) err(memer); /* no way out. Die */
-      err(warner,"not enough memory, new stack %ld",s);
+      err(warner,"not enough memory, new stack %lu",s);
       bot = (ulong)__gpmalloc(s);
       if (bot) break;
     }
@@ -620,7 +620,7 @@ newbloc(long n)
   {
     if (!n) err(warner,"mallocing NULL object in newbloc");
     if (DEBUGMEM > 2)
-      fprintferr("new bloc, size %6ld (no %ld): %08lx\n", n, next_bloc-1, x);
+      fprintferr("new bloc, size %6lu (no %ld): %08lx\n", n, next_bloc-1, x);
   }
   return cur_bloc = x;
 }
@@ -1165,7 +1165,7 @@ err(long numerr, ...)
   term_color(c_NONE); va_end(ap);
   if (numerr==errpile)
   {
-    fprintferr("\n  current stack size: %ld (%.3f Mbytes)\n",
+    fprintferr("\n  current stack size: %lu (%.3f Mbytes)\n",
       top-bot, (top-bot)/1048576.);
     fprintferr("  [hint] you can increase GP stack with allocatemem()\n");
   }
@@ -1555,7 +1555,7 @@ allocatemoremem(ulong newsize)
   if (!newsize)
   {
     newsize = (top - bot) << 1;
-    err(warner,"doubling stack size; new stack = %ld (%.3f Mbytes)",
+    err(warner,"doubling stack size; new stack = %lu (%.3f Mbytes)",
                 newsize, newsize/1048576.);
   }
   return init_stack(newsize);
