@@ -98,6 +98,7 @@ IZ 37- [OS/2:] ^C would only work once
    47- increase subFB sooner in buchall() + add GC in Q_denom { bnfinit(x^8 -
 4*x^7 + 462*x^6 - 1372*x^5 + 85789*x^4 - 169296*x^3 + 7540560*x^2 - 7456140*x
 + 263038707) } took a long time, then overflowed the stack
+   48- make test-kernel did not work anymore (prototype error in kerntest.c)
 
 
   Changed:
