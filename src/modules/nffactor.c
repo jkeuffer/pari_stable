@@ -1079,7 +1079,7 @@ AGAIN:
     if (!delta)
     { /* initialize lattice, using few p-adic digits for traces */
       a = gexpo(T2);
-      bgood = (long)(a - BitPerFactor * r);
+      bgood = (long)(a - max(32, BitPerFactor * r));
       b = max(bmin, bgood);
       delta = a - b;
       q = shifti(gun, b);

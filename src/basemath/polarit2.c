@@ -1037,7 +1037,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final,
                    pari_timer *T, long *ti_LLL)
 {
   GEN B, norm, u;
-  long i, r, R;
+  long i, R;
 
   if (DEBUGLEVEL>2) (void)TIMER(T);
   u = lllint_i(m, final? 1000: 4, 0, NULL, NULL, &B);
@@ -1045,17 +1045,13 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final,
   norm = GS_norms(B, DEFAULTPREC);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr((GEN)norm[R], Bnorm) < 0) break;
-  for (r=i=1; i<=R; i++)
+  for (i=1; i<=R; i++) setlg(u[i], n0+1);
+  if (R <= 1)
   {
-    setlg(u[i], n0+1);
-    if (!gcmp0((GEN)u[i])) u[r++] = u[i];
-  }
-  if (r <= 2)
-  {
-    if (r == 1) err(bugparier,"LLL_cmbf [no factor]");
+    if (!R) err(bugparier,"LLL_cmbf [no factor]");
     return NULL; /* irreducible */
   }
-  setlg(u, r); return u;
+  setlg(u, R+1); return u;
 }
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
