@@ -1437,16 +1437,24 @@ lllintpartial(GEN mat)
 
 /********************************************************************/
 /**                                                                **/
-/**                   LINEAR & ALGEBRAIC DEPENDANCE                **/
+/**                   LINEAR & ALGEBRAIC DEPENDENCE                **/
 /**                                                                **/
 /********************************************************************/
+
+GEN pslq(GEN x, long prec);
+GEN pslqtwolevel(GEN x, long prec);
 
 GEN
 lindep0(GEN x,long bit,long prec)
 {
-  if (!bit) return lindep(x,prec);
-  if (bit>0) return lindep2(x,bit);
-  return deplin(x);
+  switch (bit)
+  {
+    case 0: return pslq(x,prec);
+    case -1: return lindep(x,prec);
+    case -2: return deplin(x);
+    case -3: return pslqtwolevel(x,prec);
+    default: return lindep2(x,labs(bit));
+  }
 }
 
 static int
@@ -1614,6 +1622,750 @@ lindep(GEN x, long prec)
   return gerepileupto(av, gtrans(p2));
 }
 
+/* PSLQ Programs. Not nice to have global variables. Change */
+
+static GEN y, H, A, B, Abargen, Bbargen;
+static double *ybar, **Hbar, **Abar, **Bbar, *Wbar, **Pbar;
+static double *ybarst, **Hbarst, **Abarst, **Bbarst;
+
+/* attention : pour les matrices en double, A[i] est la i-ieme LIGNE de A */
+
+
+double
+sqrd(double a)
+{
+  return a*a;
+}
+
+static GEN
+cxground(GEN x)
+{
+  GEN p1;
+  
+  if (typ(x)==t_COMPLEX)
+  {
+    p1 = cgetg(3,t_COMPLEX);
+    p1[1]=(long)ground((GEN)x[1]); p1[2]=(long)ground((GEN)x[2]);
+    return p1;
+  }
+  else return ground(x);
+}
+
+static void
+redall(long i, long jsup)
+{
+  long j, k;
+  GEN t,p2;
+  const GEN p1 = (GEN)B[i];
+
+  for (j=jsup; j>=1; j--)
+  {
+    p2 = (GEN)B[j];
+/* modifier en grndtoi */
+    t = cxground(gdiv(gcoeff(H,i,j),gcoeff(H,j,j)));
+    y[j] = ladd((GEN)y[j],gmul(t,(GEN)y[i]));
+    for (k=1; k<=j; k++)
+      coeff(H,i,k) = lsub(gcoeff(H,i,k),gmul(t,gcoeff(H,j,k)));
+    for (k=1; k<lg(y); k++)
+    {
+      coeff(A,i,k) = lsub(gcoeff(A,i,k),gmul(t,gcoeff(A,j,k)));
+      p2[k] = ladd((GEN)p2[k],gmul(t,(GEN)p1[k]));
+    }
+  }
+}
+
+static void
+redallbar(long i, long jsup)
+{
+  long j, k;
+  double t;
+  double *p1 = Hbar[i], *p2 = Abar[i], *p3, *p4;
+
+  for (j=jsup; j>=1; j--)
+  {
+    p3 = Hbar[j]; p4 = Abar[j];
+    t = floor(0.5+p1[j]/p3[j]);
+    ybar[j] += t*ybar[i];
+    for (k=1; k<=j; k++) p1[k] -= t*p3[k];
+    for (k=1; k<lg(y); k++) {p2[k] -= t*p4[k]; Bbar[k][j] += t*Bbar[k][i];}
+  }
+}
+
+long
+vecmaxind(GEN v)
+{
+  long n = lg(v), m, i;
+  GEN la;
+
+  la=(GEN)v[1]; m=1;
+  for (i=2; i<n; i++)
+    if (gcmp((GEN)v[i],la)>0) {la=(GEN)v[i]; m=i;}
+  return m;
+}
+
+long
+vecmaxindbar(double *v, long n)
+{
+  long m, i;
+  double la;
+
+  la=v[1]; m=1;
+  for (i=2; i<=n; i++)
+    if (v[i]>la) {la=v[i]; m=i;}
+  return m;
+}
+
+GEN
+maxnorml2()
+{
+  long n = lg(y) - 1, i, j;
+  GEN ma = gzero,s;
+
+  for (i=1; i<=n; i++)
+  {
+    s = gzero;
+    for (j=1; j<n; j++)
+      s = gadd(s,gnorm(gcoeff(H,i,j)));
+    ma = gmax(ma,s);
+  }
+  return ma;
+}
+
+double
+maxnorml2bar()
+{
+  long n = lg(y) - 1, i, j;
+  double ma = 0.0,s;
+
+  for (i=1; i<=n; i++)
+  {
+    s = 0.0;
+    for (j=1; j<n; j++) s += sqrd(Hbar[i][j]);
+    if (s > ma) ma = s;
+  }
+  return ma;
+}
+
+GEN
+pslq(GEN x, long prec)
+{
+  GEN ga,tabga,s,s1,sinv,p1,p2,res,t0,t1,t2,t3,t4,tinv,M;
+  long lx = lg(x), tx = typ(x), n = lx-1, k, i, j, m, ct, fl, flreal;
+  gpmem_t av = avma, lim = stack_lim(av,1), av0,tetpil;
+  long tvmind=0, t12=0, t1234=0, treda=0, tfin=0;
+  const long EXP = - bit_accuracy(prec) + 2*n;
+
+  if (! is_vec_t(tx)) err(typeer,"pslq");
+  if (n <= 1) return cgetg(1,t_VEC);
+  if (DEBUGLEVEL>=3) timer();
+  if (gexpo(gimag(x)) > EXP)
+  { 
+    return lindep(x,prec);
+/*    err(impl,"pslq for complex arguments"); */
+    ga = gsqrt(gdeux,prec); flreal = 0;
+  }
+  else
+  {
+    x = greal(x); flreal = 1;
+    ga = gsqrt(gdiv(stoi(4),stoi(3)),prec);
+  }
+  x = gmul(x, realun(prec));
+  tabga = cgetg(n,t_VEC); tabga[1] = (long)ga;
+  for (i=2; i<n; i++) tabga[i] = lmul((GEN)tabga[i-1],ga);
+  A = idmat(n); B = idmat(n);
+  s1 = cgetg(lx,t_VEC); s = cgetg(lx,t_VEC);
+  s1[n] = lnorm((GEN)x[n]); s[n] = (long)gabs((GEN)x[n],prec);
+  for (k=n-1; k>=1; k--)
+  {
+    s1[k] = ladd((GEN)s1[k+1],gnorm((GEN)x[k]));
+    s[k] = (long)gsqrt((GEN)s1[k],prec);
+  }
+  sinv = ginv((GEN)s[1]);
+  y = gmul(sinv,x);
+  s = gmul(sinv,s);
+  H = cgetg(n,t_MAT);
+  for (j=1; j<n; j++)
+  {
+    p1 = cgetg(lx,t_COL); H[j] = (long)p1;
+    for (i=1; i<j; i++) p1[i] = zero;
+    p1[j] = ldiv((GEN)s[j+1],(GEN)s[j]);
+    p2 = gneg(gdiv((GEN)y[j],gmul((GEN)s[j],(GEN)s[j+1])));
+    for (i=j+1; i<=n; i++) p1[i] = lmul(gconj((GEN)y[i]),p2);
+  }
+  for (i=2; i<=n; i++) redall(i,i-1);
+  av0 = avma; ct = 0;
+  if (DEBUGLEVEL>=3) printf("Initialization time = %ld\n",timer());
+  for (;;)
+  {
+    ct++;
+    p1 = cgetg(n,t_VEC);
+    for (i=1; i<n; i++) p1[i] = lmul((GEN)tabga[i],gabs(gcoeff(H,i,i),prec));
+    m = vecmaxind(p1);
+    if (DEBUGLEVEL>=4) tvmind += timer();
+    res = (GEN)y[m]; y[m] = y[m+1]; y[m+1] = (long)res;
+    for (j=1; j<=n; j++)
+    {
+      res = gcoeff(A,m,j); coeff(A,m,j) = coeff(A,m+1,j);
+      coeff(A,m+1,j)=(long)res;
+    }
+    for (j=1; j<n; j++)
+    {
+      res = gcoeff(H,m,j); coeff(H,m,j) = coeff(H,m+1,j);
+      coeff(H,m+1,j)=(long)res;
+    }
+    res = (GEN)B[m]; B[m] = B[m+1]; B[m+1] = (long)res;
+    if (m <= n-2)
+    {
+      t0 = gsqrt(gadd(gnorm(gcoeff(H,m,m)),gnorm(gcoeff(H,m,m+1))),prec);
+      tinv = ginv(t0);
+      t1 = gmul(tinv,gcoeff(H,m,m)); t2 = gmul(tinv,gcoeff(H,m,m+1));
+      if (DEBUGLEVEL>=4) t12 += timer();
+      for (i=m; i<=n; i++)
+      {
+	t3 = gcoeff(H,i,m); t4 = gcoeff(H,i,m+1);
+	if (flreal) coeff(H,i,m) = ladd(gmul(t1,t3),gmul(t2,t4));
+	else coeff(H,i,m) = ladd(gmul(gconj(t1),t3),gmul(gconj(t2),t4));
+	coeff(H,i,m+1) = lsub(gmul(t1,t4),gmul(t2,t3));
+      }
+      if (DEBUGLEVEL>=4) t1234 += timer();
+    }
+    fl = 1;
+    for (i=1; i<=n-1; i++)
+      if (gexpo(gcoeff(H,i,i))<=EXP) {fl = 0; break;}
+    if (fl)
+    {
+      for (i=m+1; i<=n; i++) redall(i,min(i-1,m+1));
+      M = ginv(gsqrt(maxnorml2(),prec));
+      if (DEBUGLEVEL>=4) treda += timer();
+      if (gexpo(vecmax(gabs(A,prec)))>= -EXP)
+      {
+	tetpil = avma; return gerepile(av,tetpil,gcopy(M));
+      }
+    }
+    if ((!fl) || gexpo(vecmin(gabs(y,prec)))<= EXP)
+    {
+      m = vecmaxind(gneg(gabs(y,prec)));
+      tetpil = avma; return gerepile(av,tetpil,gcopy((GEN)B[m]));
+    }
+    if (low_stack(lim, stack_lim(av0,1)))
+    {
+      GEN *gptr[4];
+      if(DEBUGMEM>1) err(warnmem,"pslq");
+      gptr[0]=&y; gptr[1]=&H; gptr[2]=&A;
+      gptr[3]=&B; gerepilemany(av0,gptr,4);
+    }
+    if (DEBUGLEVEL>=4) tfin += timer();
+    if (DEBUGLEVEL==3 && (ct%100) == 0)
+    {
+      printf("time for ct = %ld : %ld\n",ct,timer());
+      fflush(stdout);
+    }
+    if (DEBUGLEVEL>=4 && (ct%100) == 0)
+    {
+      printf("time [vecmax,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",tvmind,t12,t1234,treda,tfin);
+      fflush(stdout);
+    }
+  }
+}
+
+/* W de longueur n-1 */
+
+static double
+dnorml2(double *W, long row)
+{
+  const long n = lg(y)-1;
+  long i;
+  double s = 0.;
+
+  for (i=row; i<n; i++) s += W[i]*W[i];
+  return s;
+}
+
+/* computes Hbar*Pbar */
+
+static void
+dmatmul(long row)
+{
+  const long n = lg(y)-1;
+  long i, j, k;
+  double s;
+
+  for (i=row; i<=n; i++)
+  {
+    for (j=row; j<n; j++)
+    {
+      s = 0.;
+      for (k=row; k<n; k++) s += Hbar[i][k]*Pbar[k][j];
+      Wbar[j] = s;
+    }
+    for (j=row; j<n; j++) Hbar[i][j] = Wbar[j];
+  }
+}
+
+/* compute n-1 times n-1 matrix Pbar */
+
+static void
+dmakep(double *C, long row)
+{
+  const n = lg(y)-1;
+  long i, j;
+  double pro, nc;
+
+  nc = sqrt(dnorml2(C,row));
+  Wbar[row] = (C[row] < 0) ? C[row] - nc : C[row] + nc;
+  for (i=row; i<n; i++) Wbar[i] = C[i];
+  pro = -2.0/dnorml2(Wbar,row);
+      /* dnorml2(Wbar,row) doit etre egal a 2*nc*(nc+fabs(C[1])) */
+  for (j=row; j<n; j++)
+  {
+    for (i=j+1; i<n; i++)
+    {
+      Pbar[j][i] = Pbar[i][j] = pro*Wbar[i]*Wbar[j];
+    }
+    Pbar[j][j] = 1.0 + pro*Wbar[j]*Wbar[j];
+  }
+}
+
+static void
+dLQdec()
+{
+  const long n = lg(y)-1;
+  long row, j;
+  
+  for (row=1; row<n; row++)
+  {
+    dmakep(Hbar[row],row);
+    dmatmul(row);
+    for (j=row+1; j<n; j++) Hbar[row][j] = 0.0;
+  }
+}
+
+static void
+dprintvec(double *V, long m)
+{
+  long i;
+  printf("[");
+  for (i=1; i<m; i++) printf("%15.15e, ",V[i]);
+  printf("%15.15e]\n",V[m]); fflush(stdout);
+}
+
+static void
+dprintmat(double **M, long r, long c)
+{
+  long i, j;
+  printf("[");
+  for (i=1; i<r; i++)
+  {
+    for (j=1; j<c; j++) printf("%15.15e, ",M[i][j]);
+    printf("%15.15e; ",M[i][c]);
+  }
+  for (j=1; j<c; j++) printf("%15.15e, ",M[r][j]);
+  printf("%15.15e]\n",M[r][c]); fflush(stdout);
+}
+
+static long
+initializedoubles(long prec)
+{
+  long flit, i, j, n = lg(y)-1;
+  GEN ypro;
+  gpmem_t av = avma;
+  
+  ypro = gdiv(y,vecmax(gabs(y,prec)));
+  flit = 1;
+  for (i=1; i<=n; i++)
+  {
+    if (gexpo((GEN)ypro[i])< -0x3ff) {flit = 0; break;}
+    else ybar[i] = rtodbl((GEN)ypro[i]);
+  }
+  avma = av;
+  if (flit)
+    for (j=1; j<=n; j++)
+    {
+      for (i=1; i<=n; i++)
+      {
+	if (i==j) Abar[i][j] = Bbar[i][j] = 1.0;
+	else Abar[i][j] = Bbar[i][j] = 0.0;
+	if (j<n)
+	{
+	  GEN pro = gcoeff(H,i,j);
+	  
+	  if ((!gcmp0(pro)) && (labs(gexpo(pro))> 0x3ff)) {flit = 0; break;}
+	  else Hbar[i][j] = rtodbl(gcoeff(H,i,j));
+	}
+      }
+      if (!flit) break;
+    }
+  return flit;
+}
+
+void
+storeprecdoubles()
+{
+  long n = lg(y)-1, i, j;
+
+  for (i=1; i<=n; i++)
+  {
+    for (j=1; j<n; j++)
+    {
+      Hbarst[i][j] = Hbar[i][j];
+      Abarst[i][j] = Abar[i][j];
+      Bbarst[i][j] = Bbar[i][j];
+    }
+    Abarst[i][n] = Abar[i][n]; Bbarst[i][n] = Bbar[i][n];
+    ybarst[i] = ybar[i];
+  }
+}
+
+void
+restoreprecdoubles()
+{
+  long n = lg(y)-1, i, j;
+
+  for (i=1; i<=n; i++)
+  {
+    for (j=1; j<n; j++)
+    {
+      Hbar[i][j] = Hbarst[i][j];
+      Abar[i][j] = Abarst[i][j];
+      Bbar[i][j] = Bbarst[i][j];
+    }
+    Abar[i][n] = Abarst[i][n]; Bbar[i][n] = Bbarst[i][n];
+    ybar[i] = ybarst[i];
+  }
+}
+
+/* a mettre dans mp.c. Recupere l'exposant d'un double */
+
+#ifdef LONG_IS_64BIT
+
+long
+expodb(double x)
+{
+  union { double f; ulong i; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int expo_len = 11; /* number of bits of exponent */
+
+  if (x==0) return -308;
+  fi.f = x; z = cgetr(DEFAULTPREC);
+  return ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
+}
+
+#else /* LONG_IS_32BIT */
+
+#if   PARI_DOUBLE_FORMAT == 1
+#  define INDEX0 1
+#elif PARI_DOUBLE_FORMAT == 0
+#  define INDEX0 0
+#endif
+
+long
+expodb(double x)
+{
+  union { double f; ulong i[2]; } fi;
+  const int mant_len = 52;  /* mantissa bits (excl. hidden bit) */
+  const int exp_mid = 0x3ff;/* exponent bias */
+  const int shift = mant_len-32;
+  const ulong a = fi.i[INDEX0];
+
+  if (x==0) return -308;
+  fi.f = x;
+  return ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+}
+
+#endif
+
+long
+checkentries()
+{
+  long n = lg(y)-1, i, j;
+  double *p1, *p2;
+  
+  for (i=1; i<=n; i++)
+  {
+    p1 = Abar[i]; p2 = Bbar[i];
+    for (j=1; j<=n; j++)
+      if ((expodb(p1[j]) > 43) || (expodb(p2[j]) > 43)) return 0;
+    if (expodb(ybar[i]) < -46) return 0;
+  }
+  return 1;
+}
+
+long
+makeABbargen()
+{
+  long n = lg(y)-1, i, j;
+  double *p1, *p2;
+
+  for (i=1; i<=n; i++)
+  {
+    p1 = Abar[i]; p2 = Bbar[i];
+    for (j=1; j<=n; j++)
+    {
+      if ((expodb(p1[j]) >= 52) || (expodb(p2[j]) >= 52)) return 0;
+      coeff(Abargen,i,j) = (long)mpent(dbltor(p1[j]));
+      coeff(Bbargen,i,j) = (long)mpent(dbltor(p2[j]));
+    }
+  }
+  return 1;
+}
+
+static double
+conjd(double x)
+{
+  return x;
+}
+
+static long
+checkend(GEN *ptres, long prec)
+{
+  long fl, i, m, n=lg(y)-1;
+  const long EXP = - bit_accuracy(prec) + 2*n;  
+  GEN M;
+  
+  fl = 1;
+  for (i=1; i<=n-1; i++) if (gexpo(gcoeff(H,i,i))<=EXP) {fl = 0; break;}
+  if (fl)
+  {
+    M = ginv(gsqrt(maxnorml2(),prec));
+    if (gexpo(vecmax(gabs(A,prec)))>= -EXP) {*ptres = M; return 1;}
+  }
+  if ((!fl) || gexpo(vecmin(gabs(y,prec)))<= EXP)
+  {
+    m = vecmaxind(gneg(gabs(y,prec)));
+    *ptres = (GEN)B[m]; return 1;
+  }
+  return 0;
+}
+ 
+GEN
+pslqtwolevel(GEN x, long prec)
+{
+  GEN ga,tabga,s,s1,sinv,p1,p2,res,t0,t1,t2,t3,t4,tinv,M;
+  long lx = lg(x), tx = typ(x), n = lx-1, k, i, j, m, ct, ctpro, fl, flreal, flit, flilong;
+  gpmem_t av = avma, lim = stack_lim(av,1), av0,tetpil;
+  long tvmind=0, t12=0, t1234=0, treda=0, tfin=0;
+  const long EXP = - bit_accuracy(prec) + 2*n;
+  double *tabgabar, gabar, resbar, *respt, tinvbar, t1bar, t2bar, t3bar, t4bar;
+
+  if (! is_vec_t(tx)) err(typeer,"pslq");
+  if (n <= 1) return cgetg(1,t_COL);
+  if (DEBUGLEVEL>=3) timer();
+  if (gexpo(gimag(x)) > EXP)
+  { 
+    return lindep(x,prec);
+/*    err(impl,"pslq for complex arguments"); */
+    ga = gsqrt(gdeux,prec); flreal = 0;
+  }
+  else
+  {
+    x = greal(x); flreal = 1;
+    ga = gsqrt(gdiv(stoi(4),stoi(3)),prec);
+  }
+  x = gmul(x, realun(prec));
+  settyp(x,t_VEC);
+  tabga = cgetg(n,t_VEC); tabga[1] = (long)ga;
+  for (i=2; i<n; i++) tabga[i] = lmul((GEN)tabga[i-1],ga);
+  A = idmat(n); B = idmat(n); Abargen = idmat(n); Bbargen = idmat(n);
+  s1 = cgetg(lx,t_VEC); s = cgetg(lx,t_VEC);
+  s1[n] = lnorm((GEN)x[n]); s[n] = (long)gabs((GEN)x[n],prec);
+  for (k=n-1; k>=1; k--)
+  {
+    s1[k] = ladd((GEN)s1[k+1],gnorm((GEN)x[k]));
+    s[k] = (long)gsqrt((GEN)s1[k],prec);
+  }
+  sinv = ginv((GEN)s[1]);
+  y = gmul(sinv,x);
+  s = gmul(sinv,s);
+  H = cgetg(n,t_MAT);
+  for (j=1; j<n; j++)
+  {
+    p1 = cgetg(lx,t_COL); H[j] = (long)p1;
+    for (i=1; i<j; i++) p1[i] = zero;
+    p1[j] = ldiv((GEN)s[j+1],(GEN)s[j]);
+    p2 = gneg(gdiv((GEN)y[j],gmul((GEN)s[j],(GEN)s[j+1])));
+    for (i=j+1; i<=n; i++) p1[i] = lmul(gconj((GEN)y[i]),p2);
+  }
+  for (i=2; i<=n; i++) redall(i,i-1);
+  av0 = avma; ct = 0;
+  if (DEBUGLEVEL>=3) printf("Initialization time = %ld\n",timer());
+
+  tabgabar = (double*)malloc((n+1)*sizeof(double));
+  gabar=gtodouble(ga);
+  tabgabar[1] = gabar;
+  for (i=2; i<n; i++) tabgabar[i] = tabgabar[i-1]*gabar;
+  ybar = (double*)malloc((n+1)*sizeof(double));
+  Hbar = (double**)malloc((n+1)*sizeof(double*));
+  for (i=1; i<=n; i++) Hbar[i] = (double*)malloc(n*sizeof(double));
+  Abar = (double**)malloc((n+1)*sizeof(double*));
+  for (i=1; i<=n; i++) Abar[i] = (double*)malloc((n+1)*sizeof(double));
+  Bbar = (double**)malloc((n+1)*sizeof(double*));
+  for (i=1; i<=n; i++) Bbar[i] = (double*)malloc((n+1)*sizeof(double));
+  ybarst = (double*)malloc((n+1)*sizeof(double));
+  Hbarst = (double**)malloc((n+1)*sizeof(double*));
+  for (i=1; i<=n; i++) Hbarst[i] = (double*)malloc(n*sizeof(double));
+  Abarst = (double**)malloc((n+1)*sizeof(double*));
+  for (i=1; i<=n; i++) Abarst[i] = (double*)malloc((n+1)*sizeof(double));
+  Bbarst = (double**)malloc((n+1)*sizeof(double*));
+  for (i=1; i<=n; i++) Bbarst[i] = (double*)malloc((n+1)*sizeof(double));
+  Wbar = (double*)malloc((n+1)*sizeof(double));
+  Pbar = (double**)malloc(n*sizeof(double*));
+  for (i=1; i<n; i++) Pbar[i] = (double*)malloc((n+1)*sizeof(double));
+startagain:
+  flit = initializedoubles(prec);
+  ctpro = 0;
+  storeprecdoubles();
+  if (flit) dLQdec();
+  for (;;)
+  {
+    ct++;
+    if (flit)
+    {
+      ctpro++;
+      for (i=1; i<n; i++) Wbar[i] = tabgabar[i]*fabs(Hbar[i][i]);
+      m = vecmaxindbar(Wbar,n-1);
+      resbar = ybar[m]; ybar[m] = ybar[m+1]; ybar[m+1] = resbar;
+      respt = Abar[m]; Abar[m] = Abar[m+1]; Abar[m+1] = respt;
+      respt = Hbar[m]; Hbar[m] = Hbar[m+1]; Hbar[m+1] = respt;
+      for (j=1; j<=n; j++)
+      {
+	resbar = Bbar[j][m]; Bbar[j][m] = Bbar[j][m+1]; Bbar[j][m+1] = resbar;
+      }
+      if (m <= n-2)
+      {
+	tinvbar = 1.0/sqrt(sqrd(Hbar[m][m]) + sqrd(Hbar[m][m+1]));
+	t1bar = tinvbar*Hbar[m][m]; t2bar = tinvbar*Hbar[m][m+1];
+	if (DEBUGLEVEL>=4) t12 += timer();
+	for (i=m; i<=n; i++)
+	{
+	  t3bar = Hbar[i][m]; t4bar = Hbar[i][m+1];
+	  if (flreal) Hbar[i][m] = t1bar*t3bar + t2bar*t4bar;
+	  else Hbar[i][m] = conjd(t1bar)*t3bar + conjd(t2bar)*t4bar;
+	  Hbar[i][m+1] = t1bar*t4bar - t2bar*t3bar;
+	}
+	if (DEBUGLEVEL>=4) t1234 += timer();
+      }
+      flit = checkentries();
+      
+      if (!flit)
+      {
+	flilong = makeABbargen();
+	if (flilong)
+	{
+	  y = gmul(y,Bbargen);
+	  B = gmul(B,Bbargen);
+	  A = gmul(Abargen,A);
+	  H = gmul(Abargen,H);
+	  if (checkend(&res,prec)) goto endpslqtwo;
+	  else goto startagain;
+	}
+	else
+	{
+	  if (ctpro>1)
+	  {
+	    restoreprecdoubles();
+	    flilong = makeABbargen();
+	    if (!flilong) err(talker,"bug in pslqtwolevel");
+	    y = gmul(y,Bbargen);
+	    B = gmul(B,Bbargen);
+	    A = gmul(Abargen,A);
+	    H = gmul(Abargen,H);
+	    if (checkend(&res,prec)) goto endpslqtwo;
+	    else goto startagain;
+	  }
+	  else goto dogen;
+	}
+      }
+      else
+      {
+	storeprecdoubles();
+	for (i=m+1; i<=n; i++) redallbar(i,min(i-1,m+1));
+      }
+    }
+    else
+    {
+dogen:      
+      p1 = cgetg(n,t_VEC);
+      for (i=1; i<n; i++) p1[i] = lmul((GEN)tabga[i],gabs(gcoeff(H,i,i),prec));
+      m = vecmaxind(p1);
+      if (DEBUGLEVEL>=4) tvmind += timer();
+      res = (GEN)y[m]; y[m] = y[m+1]; y[m+1] = (long)res;
+      for (j=1; j<=n; j++)
+      {
+	res = gcoeff(A,m,j); coeff(A,m,j) = coeff(A,m+1,j);
+	coeff(A,m+1,j)=(long)res;
+      }
+      for (j=1; j<n; j++)
+      {
+	res = gcoeff(H,m,j); coeff(H,m,j) = coeff(H,m+1,j);
+	coeff(H,m+1,j)=(long)res;
+      }
+      res = (GEN)B[m]; B[m] = B[m+1]; B[m+1] = (long)res;
+      if (m <= n-2)
+      {
+	t0 = gsqrt(gadd(gnorm(gcoeff(H,m,m)),gnorm(gcoeff(H,m,m+1))),prec);
+	tinv = ginv(t0);
+	t1 = gmul(tinv,gcoeff(H,m,m)); t2 = gmul(tinv,gcoeff(H,m,m+1));
+	if (DEBUGLEVEL>=4) t12 += timer();
+	for (i=m; i<=n; i++)
+        {
+	  t3 = gcoeff(H,i,m); t4 = gcoeff(H,i,m+1);
+	  if (flreal) coeff(H,i,m) = ladd(gmul(t1,t3),gmul(t2,t4));
+	  else coeff(H,i,m) = ladd(gmul(gconj(t1),t3),gmul(gconj(t2),t4));
+	  coeff(H,i,m+1) = lsub(gmul(t1,t4),gmul(t2,t3));
+	}
+	if (DEBUGLEVEL>=4) t1234 += timer();
+      }
+      fl = 1;
+      for (i=1; i<=n-1; i++)
+	if (gexpo(gcoeff(H,i,i))<=EXP) {fl = 0; break;}
+      if (fl)
+      {
+	for (i=m+1; i<=n; i++) redall(i,min(i-1,m+1));
+	M = ginv(gsqrt(maxnorml2(),prec));
+	if (DEBUGLEVEL>=4) treda += timer();
+	if (gexpo(vecmax(gabs(A,prec)))>= -EXP)
+        {
+	  res = M; goto endpslqtwo;
+	}
+      }
+      if ((!fl) || gexpo(vecmin(gabs(y,prec)))<= EXP)
+      {
+	m = vecmaxind(gneg(gabs(y,prec)));
+	res = (GEN)B[m]; goto endpslqtwo;
+      }
+    }
+    if (low_stack(lim, stack_lim(av0,1)))
+    {
+      GEN *gptr[4];
+      if(DEBUGMEM>1) err(warnmem,"pslq");
+      gptr[0]=&y; gptr[1]=&H; gptr[2]=&A;
+      gptr[3]=&B; gerepilemany(av0,gptr,4);
+    }
+    if (DEBUGLEVEL>=4) tfin += timer();
+    if (DEBUGLEVEL==3 && (ct%100) == 0)
+    {
+      printf("time for ct = %ld : %ld\n",ct,timer());
+      fflush(stdout);
+    }
+    if (DEBUGLEVEL>=4 && (ct%100) == 0)
+    {
+      printf("time [vecmax,t12,loop,reds,fin] = [%ld, %ld, %ld, %ld, %ld]\n",tvmind,t12,t1234,treda,tfin);
+      fflush(stdout);
+    }
+  }
+endpslqtwo:
+  for (i=1; i<=n; i++)
+  {
+    free(Hbar[i]); free(Abar[i]); free(Bbar[i]);
+    if (i<n) free(Pbar[i]);
+    free(Bbarst[i]); free(Abarst[i]); free(Hbarst[i]);
+  }
+  free(tabgabar); free(ybar); free(Hbar); free(Abar); free(Bbar);
+  free(ybarst); free(Hbarst); free(Abarst); free(Bbarst);
+  tetpil = avma; return gerepile(av,tetpil,gcopy(res));
+}
+
 /* x is a vector of elts of a p-adic field */
 GEN
 plindep(GEN x)
@@ -1675,10 +2427,21 @@ algdep0(GEN x, long n, long bit, long prec)
   if (typ(x) == t_PADIC)
     p1 = plindep(p1);
   else
-    p1 = bit? lindep2(p1,bit): lindep(p1,prec);
+  {
+    switch(bit)
+    {
+      case 0: p1 = pslq(p1,prec); break;
+      case -1: p1 = lindep(p1,prec); break;
+      case -2: p1 = deplin(p1); break;
+      default: p1 = lindep2(p1,bit);
+    }
+  }
+  if ((!bit) && (typ(p1) == t_REAL))
+  {
+    y = gcopy(p1); return gerepileupto(av,y);
+  }
   if (lg(p1) < 2)
     err(talker,"higher degree than expected in algdep");
-
   y=cgetg(n+3,t_POL);
   y[1] = evalsigne(1) | evalvarn(0);
   k=1; while (gcmp0((GEN)p1[k])) k++;
