@@ -69,7 +69,7 @@ static GEN quark_gen;
 #define READ_EXPR(s)	((s)==QUARK? quark_gen : lisexpr(s))
 
 void
-plot(entree *ep, GEN a, GEN b, char *ch, long prec)
+plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
 {
   long av = avma, av2,limite,jz,j,i,sig;
   int jnew, jpre = 0; /* for lint */
@@ -106,6 +106,8 @@ plot(entree *ep, GEN a, GEN b, char *ch, long prec)
     }
     ep->value = (void*)x;
   }
+  if (ysmlu) ysml=ysmlu;
+  if (ybigu) ybig=ybigu;
   avma=av2; diff=gsub(ybig,ysml);
   if (gcmp0(diff)) { ybig=gaddsg(1,ybig); diff=gun; }
   dyj = gdivsg((JSCR-1)*3+2,diff);
@@ -113,7 +115,8 @@ plot(entree *ep, GEN a, GEN b, char *ch, long prec)
   av2=avma; z = PICTZERO(jz); jz = jz/3;
   for (i=1; i<=ISCR; i++)
   {
-    scr[i][jz]=z; j=3+gtolong(gmul(gsub(y[i],ysml),dyj));
+    if (0<=jz && jz<=JSCR) scr[i][jz]=z; 
+    j=3+gtolong(gmul(gsub(y[i],ysml),dyj));
     jnew = j/3;
     if (i > 1)
     {
@@ -132,11 +135,15 @@ plot(entree *ep, GEN a, GEN b, char *ch, long prec)
       }
       if (domid)
       {
-        while (lo <= mid) scr[i_lo][lo++] = ':';
-        while (up > mid)  scr[i_up][up--] = ':';
+	if (mid>JSCR) mid=JSCR; else if (mid<0) mid=0;
+	if (lo<0) lo=0;
+	if (lo<=JSCR) while (lo <= mid) scr[i_lo][lo++] = ':';
+	if (up>JSCR) up=JSCR;
+        if (up>=0) while (up > mid)  scr[i_up][up--] = ':';
       }
     }
-    scr[i][jnew] = PICT(j); avma=av2;
+    if (0<=jnew && jnew<=JSCR) scr[i][jnew] = PICT(j);
+    avma=av2;
     jpre = jnew;
   }
   p1=cgetr(3); gaffect(ybig,p1); pariputc('\n');

@@ -3359,6 +3359,34 @@ absolutely equivalent to \kbd{ nfgaloisconj(pol)}, if degree of
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
+\subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\})$: Compute a polynomial
+defining the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H}
+of $\Z/n\Z$. The subgroup \var{H} can be given by a generator, a set
+of generator given by a vector or a HNF matrix. If present \kbd{Z}
+must be \kbd{znstar(n)}, currently it is used only when \var{H} is a
+HNF matrix. If \var{v} is given, the polynomial is given in the
+variable \var{v}.
+
+The following function can be used to compute all subfields of
+$\Q(\zeta_n)$, of order less than \kbd{d}, if \kbd{d} is set:
+
+\bprog
+subcyclo(n,d=-1)=
+{
+	local(Z,G,S);
+	Z=znstar(n);
+	if(d==-1,d=n);
+	G=matdiagonal(Z[2]);
+	S=[];
+	forsubgroup(H=G,d,
+		S=concat(S,galoissubcyclo(n,mathnf(concat(G,H)),Z));
+	);
+	S
+}
+@eprog
+
+\syn{galoissubcyclo}{n,H,Z,v} where n is a C long integer.
+
 \subsecidx{idealadd}$(\var{nf},x,y)$: sum of the two ideals $x$ and $y$ in the
 number field $\var{nf}$. When $x$ and $y$ are given by $\Z$-bases, this does
 not depend on $\var{nf}$ and can be used to compute the sum of any two
@@ -6091,8 +6119,11 @@ convenient, but simple-minded, visual aid. If you really insist on using
 these in your program (we warned you), the source (\kbd{plot*.c}) should be
 readable enough for you to achieve something.
 
-\subsecidx{plot}$(X=a,b,\var{expr})$: crude (ASCII) plot of the function
-represented by expression \var{expr} from $a$ to $b$.
+\subsecidx{plot}$(X=a,b,\var{expr},\{\var{Ymin}\},\{\var{Ymax}\})$: crude
+(ASCII) plot of the function represented by expression \var{expr} from
+$a$ to $b$, with \var{Y} ranging from \var{Ymin} to \var{Ymax}. If
+\var{Ymin} (resp. \var{Ymax}) is not given, the minima (resp. the
+maxima) of the computed values of the expression is used instead.
 
 \subsecidx{plotbox}$(w,x2,y2)$: let $(x1,y1)$ be the current position of the
 virtual cursor. Draw in the rectwindow $w$ the outline of the rectangle which

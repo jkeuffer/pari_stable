@@ -581,8 +581,6 @@ static GEN nbasis(GEN ibas,GEN pd);
 static GEN testb2(GEN p,GEN fa,long Fa,GEN theta,long Ft);
 static GEN testc2(GEN p,GEN fa,GEN pmr,GEN alph2,long Ea,GEN thet2,long Et);
 
-static long clcm(long a,long b);
-
 static int
 fnz(GEN x,long j)
 {
@@ -1615,19 +1613,6 @@ nbasis(GEN ibas,GEN pd)
     for (   ; j<=n; j++) coeff(a,j,k)=zero;
   }
   return gdiv(hnfmodid(a,pd), pd);
-}
-
-static long
-clcm(long a,long b)
-{
-  long d,r,v1;
-
-  d=a; r=b;
-  for(;;)
-  {
-    if (!r) return (a*b)/d;
-    v1=r; r=d%r; d=labs(v1);
-  }
 }
 
 /*******************************************************************/

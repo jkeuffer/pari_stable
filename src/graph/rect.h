@@ -222,7 +222,7 @@ extern long  rectline_itype;
 void    initrect(long ne, long x, long y);
 void    initrect_gen(long ne, GEN x, GEN y, long flag);
 void    killrect(long ne);
-void    plot(entree *ep, GEN a, GEN b, char *ch, long prec);
+void    plot(entree *ep, GEN a, GEN b, char *ch, GEN ysmlu, GEN ybigu, long prec);
 GEN     ploth(entree *ep, GEN a, GEN b, char *ch, long prec, long flag, long numpoints);
 GEN     ploth2(entree *ep, GEN a, GEN b, char *ch, long prec);
 GEN     plothmult(entree *ep, GEN a, GEN b, char *ch, long prec);

@@ -142,16 +142,26 @@ galoisconj2(GEN nf, long nbmax, long prec)
   7: memory
   9: complete detail
 */
-/* Calcule les bornes sur les coefficients a chercher */
-struct galois_borne
+GEN vectosmall(GEN H)
 {
-  GEN     l;
-  long    valsol;
-  long    valabs;
-  GEN     bornesol;
-  GEN     ladicsol;
-  GEN     ladicabs;
-};
+  GEN V;
+  long l,i;
+  if ( typ(H) == t_VECSMALL )
+    return H;
+  if ( typ(H) == t_INT )
+  {
+    GEN u = cgetg(2, t_VECSMALL);
+    u[1] = itos(H);
+    return u;
+  } 
+  if (typ(H)!=t_VEC && typ(H)!=t_COL)
+    err(typeer,"vectosmall");
+  l=lg(H);
+  V=cgetg(l,t_VECSMALL);
+  for(i=1;i<l;i++)
+    V[i]=itos((GEN)H[i]);
+  return V;
+}
 /*Unclean*/
 static GEN
 myceil(GEN x)
@@ -171,6 +181,16 @@ mylogint(GEN x, GEN y, long prec)
 {
   return itos(myceil(gdiv(glog(x,prec),glog(y,prec))));
 }
+/* Calcule les bornes sur les coefficients a chercher */
+struct galois_borne
+{
+  GEN     l;
+  long    valsol;
+  long    valabs;
+  GEN     bornesol;
+  GEN     ladicsol;
+  GEN     ladicabs;
+};
 void
 initborne(GEN T, GEN disc, struct galois_borne *gb, long ppp)
 {
@@ -1109,6 +1129,58 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
     fprintferr("GaloisConj:%d hop sur %d iterations\n", hop, N);
   return gzero;
 }
+/* Compute generators for the subgroup of (Z/nZ)* given in HNF. 
+ * I apologize for the following spec:
+ * If zns=znstar(2) then
+ * zn2=vectosmall((GEN)zns[2]);
+ * zn3=lift((GEN)zns[3]);
+ * gen and ord : VECSMALL of length lg(zn3).
+ * the result is in gen. 
+ * ord contains the relatives orders of the generators.
+ */
+GEN hnftogeneratorslist(long n, GEN zn2, GEN zn3, GEN lss, GEN gen, GEN ord)
+{
+  ulong ltop=avma;
+  int j,h;
+  GEN m=stoi(n);
+  for (j = 1; j < lg(gen); j++)
+  {
+    gen[j] = 1;
+    for (h = 1; h < lg(lss); h++)
+      gen[j] = (gen[j] * itos(powmodulo((GEN)zn3[h],gmael(lss,j,h),m)))% n;
+    ord[j] = zn2[j] / itos(gmael(lss,j,j));
+  }
+  avma=ltop;
+  return gen;
+}
+/* Compute the elements of the subgroup of (Z/nZ)* given in HNF. 
+ * I apologize for the following spec:
+ * If zns=znstar(2) then
+ * zn2=vectosmall((GEN)zns[2]);
+ * zn3=lift((GEN)zns[3]);
+ * card=cardinal of the subgroup(i.e phi(n)/det(lss))
+ */
+GEN
+hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
+{
+  ulong   ltop;
+  GEN     sg, gen, ord;
+  int     k, j, l;
+  sg = cgetg(1 + card, t_VECSMALL);
+  ltop=avma;
+  gen = cgetg(lg(zn3), t_VECSMALL);
+  ord = cgetg(lg(zn3), t_VECSMALL);
+  sg[1] = 1;
+  hnftogeneratorslist(n,zn2,zn3,lss,gen,ord);
+  for (j = 1, l = 1; j < lg(gen); j++)
+  {
+    int     c = l * (ord[j] - 1);
+    for (k = 1; k <= c; k++)	/* I like it */
+      sg[++l] = (sg[k] * gen[j]) % n;
+  }
+  avma=ltop;
+  return sg;
+}
 
 /*
  * Calcule la liste des sous groupes de \ZZ/m\ZZ d'ordre divisant p et
@@ -1118,8 +1190,8 @@ GEN
 listsousgroupes(long m, long p)
 {
   ulong   ltop = avma, lbot;
-  GEN     zns, lss, res, sg, gen, ord, res1;
-  int     k, card, i, j, l, n, phi, h;
+  GEN     zns, lss, sg, res, zn2, zn3;
+  int     k, card, i, phi;
   if (m == 2)
   {
     res = cgetg(2, t_VEC);
@@ -1130,11 +1202,11 @@ listsousgroupes(long m, long p)
   }
   zns = znstar(stoi(m));
   phi = itos((GEN) zns[1]);
+  zn2 = vectosmall((GEN)zns[2]);
+  zn3 = lift((GEN)zns[3]);
   lss = subgrouplist((GEN) zns[2], 0);
-  gen = cgetg(lg(zns[3]), t_VECSMALL);
-  ord = cgetg(lg(zns[3]), t_VECSMALL);
-  res1 = cgetg(lg(lss), t_VECSMALL);
   lbot = avma;
+  res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {
     long    av;
@@ -1142,33 +1214,10 @@ listsousgroupes(long m, long p)
     card = phi / itos(det((GEN) lss[i]));
     avma = av;
     if (p % card == 0)
-    {
-      sg = cgetg(1 + card, t_VECSMALL);
-      sg[1] = 1;
-      av = avma;
-      for (j = 1; j < lg(gen); j++)
-      {
-	gen[j] = 1;
-	for (h = 1; h < lg(lss[i]); h++)
-	  gen[j] = (gen[j] * itos(lift(powgi(((GEN **) zns)[3][h],
-					     ((GEN ***)
-					      lss)[i][j][h])))) % m;
-	ord[j] = itos(((GEN **) zns)[2][j]) / itos(((GEN ***) lss)[i][j][j]);
-      }
-      avma = av;
-      for (j = 1, l = 1; j < lg(gen); j++)
-      {
-	int     c = l * (ord[j] - 1);
-	for (n = 1; n <= c; n++)	/* I like it */
-	  sg[++l] = (sg[n] * gen[j]) % m;
-      }
-      res1[k++] = (long) sg;
-    }
+      res[k++] = (long) hnftoelementslist(m,zn2,zn3,(GEN)lss[i],card);
   }
-  res = cgetg(k, t_VEC);
-  for (i = 1; i < k; i++)
-    res[i] = res1[i];
-  return gerepile(ltop, lbot, res);
+  setlg(res,k);
+  return gerepileupto(ltop,gcopy(res));
 }
 
 /* retourne la permutation identite */
@@ -3105,4 +3154,251 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     res[3] = (long) fixedfieldfactor((GEN) gal[3],O,(GEN)gal[6],PL,PM,Pden,gmael(gal,2,1),x,y);
     return gerepile(ltop, lbot, res);
   }
+}
+/* Calcule les orbites d'un sous-groupe de Z/nZ donne par un
+ * generateur ou d'un ensemble de generateur donne par un vecteur. 
+ */
+GEN
+subgroupcoset(long n, GEN v)
+{
+  ulong   ltop = avma, lbot;
+  int     i, j, k = 1, l, m, o, p, flag;
+  GEN     bit, cycle, cy;
+  cycle = cgetg(n, t_VEC);
+  bit = cgetg(n, t_VECSMALL);
+  for (i = 1; i < n; i++)
+    if (cgcd(i,n)==1)
+      bit[i] = 0;
+    else
+    {
+      bit[i] = -1;
+      k++;
+    }
+  for (l = 1; k < n;)
+  {
+    for (j = 1; bit[j]; j++);
+    cy = cgetg(n, t_VECSMALL);
+    m = 1;
+    cy[m++] = j;
+    bit[j] = 1;
+    k++;
+    do
+    {
+      flag = 0;
+      for (o = 1; o < lg(v); o++)
+      {
+	for (p = 1; p < m; p++)	/* m varie! */
+	{
+	  j = mulssmod(v[o],cy[p],n);
+	  if (!bit[j])
+	  {
+	    flag = 1;
+	    bit[j] = 1;
+	    k++;
+	    cy[m++] = j;
+	  }
+	}
+      }
+    }
+    while (flag);
+    setlg(cy, m);
+    cycle[l++] = (long) cy;
+  }
+  setlg(cycle, l);
+  lbot = avma;
+  cycle = gcopy(cycle);
+  return gerepile(ltop, lbot, cycle);
+}
+/* Calcule les elements d'un sous-groupe H de Z/nZ donne par un
+ * generateur ou d'un ensemble de generateur donne par un vecteur (v). 
+ *
+ * cy liste des elements   VECSMALL de longueur au moins card H.
+ * bit bitmap des elements VECSMALL de longueur au moins n.
+ * retourne le nombre d'elements+1
+ */
+long
+sousgroupeelem(long n, GEN v, GEN cy, GEN bit)
+{
+  int     j, k, m, o, p, flag;
+  for(j=1;j<n;j++) 
+    bit[j]=0;
+  m = 1;
+  bit[m] = 1;
+  cy[m++] = 1;
+  k++;
+  do
+  {
+    flag = 0;
+    for (o = 1; o < lg(v); o++)
+    {
+      for (p = 1; p < m; p++)	/* m varie! */
+      {
+	j = mulssmod(v[o],cy[p],n);
+	if (!bit[j])
+	{
+	  flag = 1;
+	  bit[j] = 1;
+	  k++;
+	  cy[m++] = j;
+	}
+      }
+    }
+  }
+  while (flag);
+  return m;
+}
+/* n,v comme precedemment.
+ * Calcule le conducteur et retourne le nouveau groupe de congruence dans V
+ * V doit etre un t_VECSMALL de taille n+1 au moins.
+ */
+long znconductor(long n, GEN v, GEN V)
+{
+  ulong ltop;
+  int i,j;
+  long m;
+  GEN F,W;
+  W = cgetg(n, t_VECSMALL);
+  ltop=avma;
+  m = sousgroupeelem(n,v,V,W);
+  setlg(V,m);
+  if (DEBUGLEVEL>=6)
+    fprintferr("SubCyclo:elements:%Z\n",V);
+  F = factor(stoi(n));  
+  for(i=lg((GEN)F[1])-1;i>0;i--)
+  {
+    long p,e,q;
+    p=itos(gcoeff(F,i,1));
+    e=itos(gcoeff(F,i,2));
+    if (DEBUGLEVEL>=4)
+      fprintferr("SubCyclo:testing %d^%d\n",p,e);
+    while (e>1)
+    {
+      q=n/p;
+      for(j=1;j<p;j++)
+	if (!W[1+j*q]) break;
+      if (j<p)
+	break;
+      e--;
+      n=q;
+      if (DEBUGLEVEL>=4)
+	fprintferr("SubCyclo:new conductor:%d\n",n);
+      m=sousgroupeelem(n,v,V,W);
+      setlg(V,m); 
+      if (DEBUGLEVEL>=6)
+	fprintferr("SubCyclo:elements:%Z\n",V);
+    }
+  } 
+  if (DEBUGLEVEL>=6)
+    fprintferr("SubCyclo:conductor:%d\n",n);
+  avma=ltop;
+  return n;
+}
+/* Hack to use divide_and_conquer_prod. Sometimes a copy-paste seems
+ * better.  
+ */
+static GEN modulo;
+static GEN gsmul(GEN a,GEN b){return Fp_mul(a,b,modulo);}
+GEN 
+galoissubcyclo(long n, GEN H, GEN Z, long v)
+{
+  ulong ltop=avma,av;
+  GEN l,borne,le,powz,z,V;
+  long i;
+  long e,val;
+  long u,o,j;
+  GEN O,g;
+  if ( v==-1 ) v=0;
+  if ( n<1 ) err(arither2);
+  if ( n>=VERYBIGINT) 
+    err(impl,"galoissubcyclo for huge conductor");    
+  if ( typ(H)==t_MAT )
+  {
+    GEN zn2, zn3, gen, ord;
+    if (lg(H) != lg(H[1]))
+      err(talker,"not a HNF matrix in galoissubcyclo");
+    if (!Z)
+      Z=znstar(stoi(n));
+    else if (typ(Z)!=t_VEC || lg(Z)!=4) 
+      err(talker,"Optionnal parameter must be as output by znstar in galoissubcyclo");
+    zn2 = vectosmall((GEN)Z[2]);
+    zn3 = lift((GEN)Z[3]);
+    if ( lg(zn2) != lg(H) || lg(zn3) != lg(H))
+      err(talker,"Matrix of wrong dimensions in galoissubcyclo");
+    gen = cgetg(lg(zn3), t_VECSMALL);
+    ord = cgetg(lg(zn3), t_VECSMALL);
+    hnftogeneratorslist(n,zn2,zn3,H,gen,ord);
+    H=gen;
+  }
+  else
+  {
+    H=vectosmall(H);
+    /*Should check H[i] are >0*/
+  }
+  V = cgetg(n, t_VECSMALL);
+  if (DEBUGLEVEL >= 1)
+    timer2();
+  n = znconductor(n,H,V);
+  if (DEBUGLEVEL >= 1)
+    msgtimer("znconductor.");
+  H = V;
+  O = subgroupcoset(n,H);
+  if (DEBUGLEVEL >= 1)
+    msgtimer("subgroupcoset.");
+  if (DEBUGLEVEL >= 6)
+    fprintferr("Subcyclo: orbit=%Z\n",O);
+  u=lg(O)-1;o=lg(O[1])-1;
+  if (DEBUGLEVEL >= 4)
+    fprintferr("Subcyclo: %d orbits with %d elements each\n",u,o);
+  if (o==1)
+  {
+    avma=ltop;
+    return cyclo(n,v);
+  }
+  l=stoi(n+1);e=1;
+  while(!isprime(l)) 
+  { 
+    l=addis(l,n);
+    e++;
+  }
+  if (DEBUGLEVEL >= 4)
+    fprintferr("Subcyclo: prime l=%Z\n",l);
+  av=avma;
+  /*Borne utilise': 
+    Vecmax(Vec((x+o)^u)=max{binome(u,i)*o^i ;1<=i<=u} 
+  */
+  i=u-(1+u)/(1+o);
+  borne=mulii(binome(stoi(u),i),gpowgs(stoi(o),i));
+  if (DEBUGLEVEL >= 4)
+    fprintferr("Subcyclo: borne=%Z\n",borne);
+  val=mylogint(shifti(borne,1),l,DEFAULTPREC);
+  avma=av;
+  if (DEBUGLEVEL >= 4)
+    fprintferr("Subcyclo: val=%d\n",val);
+  le=gpowgs(l,val);
+  z=lift(gpowgs(gener(l),e));
+  z=padicsqrtnlift(gun,stoi(n),z,l,le);
+  if (DEBUGLEVEL >= 1)
+    msgtimer("padicsqrtnlift.");
+  powz = cgetg(n,t_VEC); powz[1] = (long)z;
+  for (i=2; i<n; i++) powz[i] = lmodii(mulii(z,(GEN)powz[i-1]),le);
+  if (DEBUGLEVEL >= 1)
+    msgtimer("computing roots.");  
+  g=cgetg(u+1,t_VEC);
+  for(i=1;i<=u;i++)
+  {
+    GEN s;
+    s=gzero;
+    for(j=1;j<=o;j++)
+      s=addii(s,(GEN)powz[mael(O,i,j)]);
+    s=modii(negi(s),le);
+    g[i]=(long)deg1pol(gun,s,v);
+  }
+  if (DEBUGLEVEL >= 1)
+    msgtimer("computing new roots."); 
+  modulo=le;
+  g=divide_conquer_prod(g,&gsmul);
+  if (DEBUGLEVEL >= 1)
+    msgtimer("computing products."); 
+  g=Fp_centermod(g,le);
+  return gerepileupto(ltop,g);
 }

@@ -1448,6 +1448,45 @@ rootpadicfast(GEN f, GEN p, GEN pr)
   gunclone(S);
   return y;
 }
+/* Same as rootpadiclift for the polynomial X^n-a,
+ * but here, n can be much larger. 
+ * TODO: generalize to sparse polynomials.
+ */
+GEN
+padicsqrtnlift(GEN a, GEN n, GEN S, GEN q, GEN Q)
+{
+  ulong   ltop=avma;
+  GEN     qold;
+  GEN     W, Sr, Wr = gzero;
+  int     flag, init;
+  qold = q ;
+  W=modii(mulii(n,powmodulo(S,subii(n,gun),q)),q);
+  W=mpinvmod(W,q);
+  flag = 1; init = 0;
+  while (flag)
+  {
+    q = sqri(q);
+    if (cmpii(q,Q)>= 0)
+    {
+      flag = 0;
+      q = Q;
+    }
+    Sr = S;
+    if (init)
+    {
+      W = modii(mulii(Wr,mulii(n,powmodulo(Sr,subii(n,gun),qold))),qold);
+      W = subii(gdeux,W);
+      W = modii(mulii(Wr, W),qold);
+    }
+    else
+      init = 1;
+    Wr = W;
+    S = subii(Sr, mulii(Wr, subii(powmodulo(Sr,n,q),a)));
+    S = modii(S,q);
+    qold = q;
+  }
+  return gerepileupto(ltop,S);
+}
 /**************************************************************************/
 static long
 getprec(GEN x, long prec, GEN *p)

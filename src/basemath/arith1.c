@@ -1020,6 +1020,14 @@ cgcd(long a,long b)
   else
     return ((long)ugcd((ulong)b, (ulong)a)) << v;
 }
+long
+clcm(long a,long b)
+{
+  long d;
+  d=cgcd(a,b);
+  if(d!=1) return a*b/d;
+  return a*b;
+}
 
 /* assume a>b>0, return gcd(a,b) as a GEN (for mppgcd) */
 static GEN
