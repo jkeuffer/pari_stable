@@ -1160,8 +1160,8 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
 {
   int val = 0; /* assume failure */
   GEN newf, newpsf = NULL;
-  long newd, ltop, i;
-  gpmem_t av;
+  long newd, i;
+  gpmem_t av, ltop;
 
   /* Assertion: fxn <= nfcmbf.nfactmod && dlim > 0 */
 

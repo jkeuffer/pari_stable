@@ -803,8 +803,7 @@ rnfisnorm(GEN bnf,GEN ext,GEN x,long flag,long PREC)
 GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
-  long lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   GEN ext = cgetg(4,t_VEC);
 
   bnf = checkbnf(bnf);

@@ -21,8 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 GEN
 subgroupcoset(long n, GEN v)
 {
-  ulong lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   int     i, j, k = 1, l, m, o, p, flag;
   GEN     bit, cycle, cy;
   cycle = cgetg(n, t_VEC);
@@ -112,7 +111,7 @@ sousgroupeelem(long n, GEN v, GEN cy, GEN bit)
  */
 long znconductor(long n, GEN v, GEN V)
 {
-  ulong ltop;
+  gpmem_t ltop;
   int i,j;
   long m;
   GEN F,W;

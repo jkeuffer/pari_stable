@@ -1406,8 +1406,7 @@ mplog2(long prec)
 GEN
 mplog(GEN x)
 {
-  ulong ltop;
-  gpmem_t av;
+  gpmem_t ltop, av;
   long EX,l,l1,l2,m,n,k,ex,s;
   double alpha,a,b;
   GEN z,p1,y,y2,p4,p5,unr;

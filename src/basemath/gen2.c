@@ -1710,7 +1710,7 @@ normalize(GEN x)
       GEN p1 = cgetg(lx-i+2,t_SER);
       p1[1] = evalsigne(1) | evalvalp(valp(x)+i-2) | evalvarn(varn(x));
       j=i; i=2; while (j<lx) p1[i++] = lcopy((GEN)x[j++]);
-      return gerepile((long) (x+lx),tetpil,p1);
+      return gerepile((gpmem_t) (x+lx),tetpil,p1);
     }
   avma = (long) (x+lx); return zeroser(varn(x),lx-2);
 }

@@ -2569,10 +2569,10 @@ galoisfindgroups(GEN lo, GEN sg, long f)
 static long
 galoisfrobeniustest(GEN aut, struct galois_lift *gl, GEN frob)
 {
-  gpmem_t ltop=avma;
+  gpmem_t ltop = avma;
   GEN tlift = FpX_center(FpX_Fp_mul(aut,gl->den,gl->Q), gl->Q);
-  long gl, res=poltopermtest(tlift, frob);
-  avma=ltop;
+  long res = poltopermtest(tlift, gl, frob);
+  avma = ltop;
   return res;
 }
 

@@ -1279,7 +1279,7 @@ FpXQX_red(GEN z, GEN T, GEN p)
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
-  ulong ltop;
+  gpmem_t ltop;
   GEN z,kx,ky;
   long vx;
   if (!T) return FpX_mul(x,y,p);
@@ -1570,8 +1570,7 @@ If a=0 ,return 0 and if zetan is not NULL zetan is set to gun
 */
 GEN ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 {
-  ulong lbot=0;
-  gpmem_t ltop=avma, av1, lim;
+  gpmem_t lbot=0, ltop=avma, av1, lim;
   long i,j,e;
   GEN m,u1,u2;
   GEN q,r,zeta,y,l,z;
@@ -1651,8 +1650,7 @@ matrixpow(long n, long m, GEN y, GEN P,GEN l)
 GEN
 Fp_inv_isom(GEN S,GEN T, GEN p)
 {
-  ulong lbot;
-  gpmem_t ltop = avma;
+  gpmem_t lbot, ltop = avma;
   GEN     M, V;
   int     n, i;
   long    x;
@@ -1788,8 +1786,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
 void
 Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 {
-  ulong lbot;
-  gpmem_t ltop=avma;
+  gpmem_t lbot, ltop=avma;
   long vp,vq,np,nq,e,pg;
   GEN q;
   GEN A,B,Ap,Bp;
@@ -2753,7 +2750,7 @@ GEN
 FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
 {
   GEN a,b,q,r,u,v,d,d1,v1;
-  long ltop,lbot;
+  gpmem_t ltop, lbot;
 
   if (OK_ULONG(p)) return FpX_extgcd_long(x,y,p,ptu,ptv);
   ltop=avma;
@@ -2787,7 +2784,7 @@ GEN
 FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
 {
   GEN a,b,q,r,u,v,d,d1,v1;
-  long ltop,lbot;
+  gpmem_t ltop, lbot;
 
 #if 0 /* FIXME To be done...*/ 
   if (OK_ULONG(p)) return FpXQX_extgcd_long(x,y,T,p,ptu,ptv);

@@ -95,7 +95,8 @@ static GEN
 mysquare(GEN p)
 {
   GEN s,aux1,aux2;
-  long i,j,n=degpol(p),nn,ltop,lbot;
+  long i, j, n=degpol(p), nn;
+  gpmem_t ltop, lbot;
 
   if (n==-1) return gcopy(p);
   nn=n<<1; s=cgetg(nn+3,t_POL);
@@ -140,7 +141,7 @@ karasquare(GEN p)
 {
   GEN p1,s0,s1,s2,aux;
   long n=degpol(p),n0,n1,i,var,nn0;
-  ulong ltop;
+  gpmem_t ltop;
 
   if (n<=KARASQUARE_LIMIT) return mysquare(p);
   ltop=avma;
@@ -812,7 +813,7 @@ gmulbyi(GEN z)
 static void
 fft(GEN Omega, GEN p, GEN f, long Step, long l)
 {
-  ulong ltop;
+  gpmem_t ltop;
   long i,l1,l2,l3,rap=Lmax/l,rapi,Step4;
   GEN f1,f2,f3,f02,f13,g02,g13,ff;
 
@@ -942,8 +943,8 @@ parameters(GEN p, double *mu, double *gamma,
            long polreal, double param, double param2)
 {
   GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
-  long n=degpol(p), bitprec, NN, K, i, j, ltop2;
-  gpmem_t ltop=avma, limite=stack_lim(ltop, 1);
+  long n=degpol(p), bitprec, NN, K, i, j;
+  gpmem_t ltop2, ltop=avma, limite=stack_lim(ltop, 1);
   double lx;
 
   bitprec=gexpo(p)+(long)param2+8;
@@ -1010,7 +1011,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 {
   GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2,*gptr[3];
   long n=degpol(p),i,j,K;
-  ulong ltop;
+  gpmem_t ltop;
 
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
@@ -1142,8 +1143,8 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
 {
   GEN pp,FF,GG,r,HH,f0;
   long error, i, bitprec1=0, bitprec2, shiftbitprec;
-  gpmem_t ltop=avma;
-  long shiftbitprec2,n=degpol(p),enh,normF,normG,limite=stack_lim(ltop,1);
+  long shiftbitprec2, n=degpol(p), enh, normF, normG;
+  gpmem_t ltop=avma, limite=stack_lim(ltop, 1);
 
   FF=*F; HH=H;
   GG=poldivres(p,*F,&r);
@@ -1796,7 +1797,8 @@ append_root(GEN roots_pol, GEN a)
 static GEN
 split_complete(GEN p, long bitprec, GEN roots_pol)
 {
-  long n=degpol(p),decprec,ltop;
+  long n=degpol(p), decprec;
+  gpmem_t ltop;
   GEN p1,F,G,a,b,m1,m2,m;
 
   if (n==1)

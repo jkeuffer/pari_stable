@@ -850,7 +850,8 @@ wr_exp(GEN x)
 static void
 wr_real(GEN x, long nosign)
 {
-  long ltop, sx = signe(x), ex = expo(x);
+  gpmem_t ltop;
+  long sx = signe(x), ex = expo(x);
 
   if (!sx) /* real 0 */
   {
