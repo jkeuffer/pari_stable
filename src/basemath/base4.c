@@ -1420,10 +1420,19 @@ famat_to_arch(GEN nf, GEN fa, long prec)
   {
     GEN t, x = (GEN)g[i];
     if (typ(x) != t_COL) x = algtobasis(nf,x);
+    x = primpart(x);
     t = vecpow(gmul(M, x), (GEN)e[i]);
     y = y? vecmul(y,t): t;
   }
-  return y? glog(y, prec): zerocol(lg(M[1])-1);
+  if (!y) y = zerovec(lg(M[1])-1);
+  else
+  {
+    long r1 = nf_get_r1(nf);
+    l = lg(y); settyp(y, t_VEC);
+    for (i=1; i<=r1;i++) y[i] = llog((GEN)y[i], prec);
+    for (   ; i<l; i++)  y[i] = lmul2n(glog((GEN)y[i], prec), 1);
+  }
+  return y;
 }
 
 GEN

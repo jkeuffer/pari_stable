@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
 extern GEN to_famat_all(GEN x, GEN y);
 extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
 extern double check_bach(double cbach, double B);
@@ -2042,7 +2043,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN Vbase,long prec, GEN nf0,
       neg_row(Ur,j); X[j] = lneg((GEN)X[j]);
     }
     G[j] = (long)J[1]; /* generator, order cyc[j] */
-    Ga[j]= (long)famat_to_arch(nf, (GEN)J[2], prec);
+    Ga[j]= lneg(famat_to_arch(nf, (GEN)J[2], prec));
   }
   /* at this point Y = PY, Ur = PUr, V = VP, X = XP */
 
