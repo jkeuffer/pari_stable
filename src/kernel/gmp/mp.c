@@ -2129,5 +2129,5 @@ int_normalize(GEN x, long known_zero_words)
   long i =  lgefint(x) - 1 - known_zero_words;
   for ( ; i > 1; i--)
     if (x[i]) { setlgefint(x, i+1); return x; }
-  setsigne(x,0); return x;
+  x[1] = evalsigne(0) | evallgefint(2); return x;
 }
