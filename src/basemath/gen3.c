@@ -2435,9 +2435,12 @@ geval(GEN x)
     case t_POL:
       lx=lgef(x); if (lx==2) return gzero;
       {
+#define initial_value(ep) (GEN)((ep)+1) /* cf anal.h */
         entree *ep = varentries[varn(x)];
         if (!ep) return gcopy(x);
         z = (GEN)ep->value;
+        if (gegal(x, initial_value(ep))) return gcopy(z);
+#undef initial_value
       }
       y=gzero; av=avma;
       for (i=lx-1; i>1; i--)
@@ -2530,7 +2533,7 @@ simplify(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*              EVALUATION OF SOME SIMPLE FORMAL OBJECTS           */
+/*                EVALUATION OF SOME SIMPLE OBJECTS                */
 /*                                                                 */
 /*******************************************************************/
 static GEN
