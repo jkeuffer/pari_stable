@@ -990,7 +990,7 @@ interp(GEN h, GEN s, long j, long lim, long KLOC)
 
   e1 = gexpo(ss);
   e2 = gexpo(dss);
-  if (e1-e2 <= lim && e1 >= -lim) { avma = av; return NULL; }
+  if (e1-e2 <= lim && (j <= 10 || e1 >= -lim)) { avma = av; return NULL; }
   if (gcmp0(imag_i(ss))) ss = real_i(ss);
   return ss;
 }
@@ -1001,7 +1001,6 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   const long JMAX = 25, KLOC = 4;
   GEN ss,s,h,p1,p2,qlint,del,x,sum;
   long j, j1, it, sig;
-  pari_sp av;
 
   a = fix(a,prec);
   b = fix(b,prec);
@@ -1018,13 +1017,19 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   s[0] = lmul2n(gmul(qlint,gadd(p1,p2)),-1);
   for (it=1,j=1; j<JMAX; j++, it<<=1)
   {
+    pari_sp av, av2;
     h[j] = lshiftr((GEN)h[j-1],-2);
     av = avma; del = divrs(qlint,it);
     x = addrr(a, shiftr(del,-1));
+    av2 = avma;
     for (sum = gzero, j1 = 1; j1 <= it; j1++, x = addrr(x,del))
+    {
       sum = gadd(sum, eval(x, dat));
+      if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
+    }
     sum = gmul(sum,del); p1 = gadd((GEN)s[j-1], sum);
     s[j] = lpileupto(av, gmul2n(p1,-1));
+    if (DEBUGLEVEL>3) fprintferr("qrom3: iteration %ld: %Z\n", j,s[j]);
 
     if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-j-6, KLOC)))
       return gmulsg(sig,ss);
@@ -1038,7 +1043,6 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   const long JMAX = 16, KLOC = 4;
   GEN ss,s,h,p1,qlint,del,ddel,x,sum;
   long j, j1, it, sig;
-  pari_sp av;
 
   a = fix(a, prec);
   b = fix(b, prec);
@@ -1054,16 +1058,20 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
   s[0] = lmul(qlint, eval(p1, dat));
   for (it=1, j=1; j<JMAX; j++, it*=3)
   {
+    pari_sp av, av2;
     h[j] = ldivrs((GEN)h[j-1],9);
     av = avma; del = divrs(qlint,3*it); ddel = shiftr(del,1);
     x = addrr(a, shiftr(del,-1));
+    av2 = avma;
     for (sum = gzero, j1 = 1; j1 <= it; j1++)
     {
       sum = gadd(sum, eval(x, dat)); x = addrr(x,ddel);
       sum = gadd(sum, eval(x, dat)); x = addrr(x,del);
+      if ((j1 & 0x1ff) == 0) gerepileall(av2, 2, &sum,&x);
     }
     sum = gmul(sum,del); p1 = gdivgs((GEN)s[j-1],3);
     s[j] = lpileupto(av, gadd(p1,sum));
+    if (DEBUGLEVEL>3) fprintferr("qrom2: iteration %ld: %Z\n", j,s[j]);
 
     if (j >= KLOC && (ss = interp(h, s, j, bit_accuracy(prec)-(3*j/2)-6, KLOC)))
       return gmulsg(sig, ss);
