@@ -245,11 +245,18 @@ so an error message is issued.
 \fun{void}{affrr}{GEN x, GEN z} assigns the real \kbd{x} into the real~\kbd{z}.
 \smallskip
 
-\fun{GEN}{stoi}{long s} creates the PARI integer corresponding to the
-long~\kbd{s}.
+\fun{GEN}{itor}{GEN x, long prec} assigns the \typ{INT} \kbd{x} into a
+\typ{REAL} of length \kbd{prec} and return the latter.
 
 \fun{long}{itos}{GEN x} converts the PARI integer \kbd{x} to a C long (if
 possible, otherwise an error message is issued).
+
+\fun{GEN}{stoi}{long s} creates the PARI integer corresponding to the
+long~\kbd{s}.
+
+\fun{GEN}{stor}{long s, long prec} assigns the long \kbd{s} into a
+\typ{REAL} of length \kbd{prec} and return the latter.
+
 \smallskip
 
 \fun{GEN}{mptrunc[z]}{GEN x[, GEN z]} truncates the integer or real~\kbd{x}
