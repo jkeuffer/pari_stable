@@ -861,7 +861,7 @@ lllgramintern(GEN x, long alpha, long flag, long prec)
   {
     GEN p1=(GEN)x[j];
     for (i=1; i<=j; i++)
-      if (typ(p1[i]) == t_REAL) { l = lg((GEN)p1[i]); if (l>k) k=l; }
+      if (typ(p1[i]) == t_REAL) { l = lg(p1[i]); if (l>k) k=l; }
   }
   if (k == 2)
   {
