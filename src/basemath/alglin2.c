@@ -125,7 +125,7 @@ easychar(GEN x, int v, GEN *py)
 GEN
 caract(GEN x, int v)
 {
-  long k;
+  long k, n;
   gpmem_t av=avma;
   GEN  p1,p2,p3,p4,x_k;
 

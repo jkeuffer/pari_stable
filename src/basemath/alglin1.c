@@ -1853,7 +1853,7 @@ static void
 gauss_pivot(GEN x0, GEN *dd, long *rr)
 {
   GEN x,c,d,d0,mun,p;
-  long j, k, r, t, n, m;
+  long i, j, k, r, t, n, m;
   gpmem_t av, lim;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
@@ -2580,7 +2580,7 @@ Fq_res(GEN x, GEN T, GEN p)
 
 static void
 Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
-                      gpmem_t av);
+                      gpmem_t av)
 {
   gpmem_t tetpil = avma,A;
   long dec,u,i;

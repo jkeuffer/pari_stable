@@ -738,7 +738,7 @@ omega(GEN n)
 {
   byteptr d=diffptr+1;
   gpmem_t av = avma;
-  long nb,v, lim1;
+  long p,nb,v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);

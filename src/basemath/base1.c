@@ -1676,7 +1676,7 @@ initzeta(GEN pol, long prec)
       for (j=2; j<=ru; j++)
       {
         gpmem_t av2 = avma;
-        p2 = gmul((GEN)t[j], long p1);
+        p2 = gmul((GEN)t[j], p1);
         t[j+1] = (long)gerepileuptoleaf(av2, divrs(p2,j));
       }
       /* tabj[n,j]=coef(n)*ln(c/n)^(j-1)/(j-1)! */
