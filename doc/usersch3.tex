@@ -888,13 +888,23 @@ power series. For that, see \kbd{truncate}.
 $\teb{ggprecision}(x)$ (result is a \kbd{GEN}) and $\teb{gprec}(x,n)$, where
 $n$ is a \kbd{long}.
 
-\subsecidx{random}$(\{N=2^{31}\})$: gives a random integer between 0 and
-$N-1$. $N$ can be arbitrary large. This is an internal PARI function and does
-not depend on the system's random number generator. Note that the resulting
-integer is obtained by means of linear congruences and will not be well
-distributed in arithmetic progressions.
+\subsecidx{random}$(\{N=2^{31}\})$: returns a random integer between $0$ and
+$N-1$. $N$ is an integer, which can be arbitrary large. This is an internal
+PARI function and does not depend on the system's random number generator.
 
-\syn{genrand}{N}.
+The resulting integer is obtained by means of linear congruences and will not
+be well distributed in arithmetic progressions. The random seed may be
+obtained via \tet{getrand}, and reset using \tet{setrand}.
+
+Note that \kbd{random(2\pow31)} is \emph{not} equivalent to \kbd{random()},
+although both return an integer between $0$ and $2^{31}-1$. In fact, calling
+\kbd{random} with an argument generates a number of random words (32bit or
+64bit depending on the architecture), rescaled to the desired interval.
+The default uses directly a 31-bit generator.
+
+\syn{genrand}{N}. Also available are \tet{pari_rand}$()$ which returns a 
+random \kbd{unsigned long} (32bit or 64bit depending on the architecture), and 
+\tet{pari_rand31}$()$ which returns a 31bit \kbd{long} integer.
 
 \subsecidx{real}$(x)$: real part of $x$. In the case where $x$ is a quadratic
 number, this is the coefficient of $1$ in the ``canonical'' integral basis
