@@ -1156,7 +1156,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
 {
   long toadd;
   gpmem_t av=avma, lim, av1;
-  GEN zinit,p1,pii2,q,u,y,y1,u1,qn,negu,uinv,et,etnew,uhalf;
+  GEN Z,zinit,p1,pii2,q,u,y,y1,u1,qn,negu,uinv,et,etnew,uhalf;
   int doprod = (flag >= 2);
   int dolog = (flag & 1);
   SL2_red T;
