@@ -1555,14 +1555,13 @@ rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
   GEN p1,p2, y = cgetg(6,t_VEC);
   GEN b = (GEN)x[2];
   GEN c = (GEN)x[3];
-  long s = signe(c);
 
   y[1] = (long)c;
   p2 = (absi_cmp(isqrtD,c) >= 0)? isqrtD: c;
-  setsigne(c,1);
   p1 = shifti(c,1);
+  if (p1 == gzero) err(talker, "reducible form in rhoreal");
+  setsigne(p1,1); /* |2c| */
   p2 = divii(addii(p2,b), p1);
-  setsigne(c,s);
   y[2] = lsubii(mulii(p2,p1), b);
 
   p1 = shifti(subii(sqri((GEN)y[2]),D),-2);
