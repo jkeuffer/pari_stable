@@ -401,6 +401,7 @@ GEN     rnfsimplifybasis(GEN bnf, GEN order);
 GEN     rnfsteinitz(GEN nf, GEN order);
 GEN     smallbase(GEN x, GEN *y);
 GEN     smalldiscf(GEN x);
+long    val_fact(ulong n, ulong p);
 GEN     zk_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
 GEN     zk_to_ff(GEN x, GEN modpr);
 GEN     zkmodprinit(GEN nf, GEN pr);

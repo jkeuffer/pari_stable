@@ -1290,14 +1290,12 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 }
 
 /* return v_p(n!) */
-static long
-val_fact(long n, GEN pp)
+long
+val_fact(ulong n, ulong p)
 {
-  long p, q, v;
-  if (is_bigint(pp)) return 0;
-  q = p = itos(pp); v = 0;
+  ulong q = p, v = 0;
   do { v += n/q; q *= p; } while (n >= q);
-  return v;
+  return (long)v;
 }
 
 static GEN
@@ -1313,7 +1311,8 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     chi = ZX_caract(f, beta, v);
   else
   {
-    npp = mulii(pp, gpowgs(p, val_fact(n, p)));
+    npp = pp;
+    if (lgefint(p) > 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
     if (p1) npp = mulii(npp, gpowgs(denom(p1), n));
 
     chi = newtoncharpoly(beta, f, npp, ns);

@@ -1663,8 +1663,8 @@ quaddisc(GEN x)
 /**                              FACTORIAL                          **/
 /**                                                                 **/
 /*********************************************************************/
-/* returm a * (a+1) * ... * b. Assume a <= b */
-/* TODO: factor out powers of 2 and use binary splitting */
+/* return a * (a+1) * ... * b. Assume a <= b  [ note: factoring out powers of 2
+ * first is slower ... ] */
 GEN
 seq_umul(ulong a, ulong b)
 {
@@ -1689,8 +1689,6 @@ seq_umul(ulong a, ulong b)
   if (l == k) x[lx++] = lutoi(k);
   setlg(x, lx);
   return gerepileuptoint(av, divide_conquer_prod(x, mulii));
-
-
 }
 
 GEN
