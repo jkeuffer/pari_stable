@@ -13,10 +13,11 @@ gp \- PARI calculator
 .IR primelimit ]
 
 .SH DESCRIPTION
-Invokes the PARI-GP calculator. GP is an advanced programmable calculator,
+Invokes the PARI-GP calculator. gp is an advanced programmable calculator,
 which computes symbolically as long as possible, numerically where needed,
 and contains a wealth of number-theoretic functions (elliptic curves, class
-field theory...). Its basic data types are
+field theory...). It can be programmed with the GP scripting language. Its
+basic data types are
 .TP
 numbers
 integers, real numbers, exact rational numbers, algebraic numbers,
@@ -50,7 +51,7 @@ at the user's convenience. In that case the argument is multiplied by 1000
 or 1000000 respectively. The following command line options are available:
 .TP
 .B \-emacs
-GP can be run in an
+gp can be run in an
 .I Emacs
 shell (see GP User's manual for details). This flag is then required for
 smooth interaction with the relevant
@@ -69,7 +70,7 @@ Fast start (or factory settings). Do not read
 Quiet mode. Don't print headers or history numbers, don't say goodbye.
 .TP
 .BI \-p " primelimit"
-Upon startup, GP computes a table of small primes used in most
+Upon startup, gp computes a table of small primes used in most
 number-theoretic applications. If
 .I primelimit
 is set here, include primes up to that bound instead of the default.
@@ -78,12 +79,12 @@ small values will cause some number-theoretic functions to fail with the
 message "not enough precomputed primes".
 .TP
 .BI \-s " stacksize"
-Size of GP internal stack allocated on startup. When GP runs out of space, it
+Size of gp internal stack allocated on startup. When gp runs out of space, it
 interrupts the current computation and raises a 
 .BI "stack overflow"
 exception. If this occurs frequently (especially if you make heavy use
 of linear algebra), start with a bigger stack. The stack size can also be
-increased from within GP, using
+increased from within gp, using
 .B default(parisize, ...)
 ; it may be convenient to set 
 .B stacksize
@@ -96,7 +97,7 @@ computations should need less than 20MB.
 
 .TP
 .B \-test
-run GP in test mode: suppress printing of history numbers and wrap long
+run gp in test mode: suppress printing of history numbers and wrap long
 output lines (to get readable diff output). For benches only.
 .SH USE
 .TP
@@ -177,7 +178,7 @@ shell. Must be loaded from your
 file.
 .TP
 .I *.gp
-gp programs
+GP programs
 
 .SH ENVIRONMENT
 .TP
