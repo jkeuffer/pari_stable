@@ -2699,7 +2699,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     tau = lift(gmul(tau,gmodulcp(gun,ip)));
     tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
-    tau = FpX_Fp_mul(tau, mpinvmod(leading_term(tau), ip), ip);
+    tau = FpX_normalize(tau, ip);
     for (g = 1; g <= gp; g++)
       if (gegal(tau, (GEN) Pmod[g]))
 	break;
@@ -2735,7 +2735,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       tau = lift(gmul(tau,gmodulcp(gun,ip)));
       tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
       tau = FpX_gcd(Pp, tau,ip);
-      tau = FpX_Fp_mul(tau,mpinvmod(leading_term(tau),ip),ip);
+      tau = FpX_normalize(tau, ip);
       for (g = 1; g < lg(Pmod); g++)
 	if (gegal(tau, (GEN) Pmod[g]))
 	  break;
