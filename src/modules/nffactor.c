@@ -1532,6 +1532,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   L.p = (GEN)pr[1];
   if (L.Tp && degpol(L.Tp) == 1) L.Tp = NULL;
   bestlift_init(0, nf, pr, C, &L);
+  if (DEBUGLEVEL>2) TIMERstart(&ti);
   polred = ZqX_normalize(polbase, lt, &L); /* monic */
 
   if (fl) return gerepilecopy(av,
