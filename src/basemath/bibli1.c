@@ -2571,7 +2571,7 @@ kerint(GEN x)
   if (h) h = lll_finish(h,fl, lll_KER);
   else   h = lll_trivial(x, lll_KER);
   if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
-  return gerepileupto(av, gmul(h, lllint(h)));
+  return gerepilecopy(av, lllint_ip(h, 100));
 }
 
 /********************************************************************/
