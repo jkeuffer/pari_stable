@@ -147,6 +147,7 @@ IZ 19- try to output usable TeX (avoid braces, let TeX split lines)
    20- [libpari internals:] jmp_buf 'environnement' no longer global
 MS 21- allow poltchebi(n < 0) [ := poltchebi(-n), still satisfies the 3-term
        recursion ]
+IZ 22- prime sieve optimization [ primelimit ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

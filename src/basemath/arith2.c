@@ -119,70 +119,92 @@ initprimes1(ulong size, long *lenp, long *lastp)
 /*  Timing in ms (Athlon/850; reports 512K of secondary cache; looks
     like there is 64K of quickier cache too).
 
-    The algorithm of allocation starts to work regularly from
-    2pi(sqrt(lim)); we skip or double-quote what is less than this.
+      arena|    30m     100m    300m    1000m    2000m	<-- primelimit
+      =================================================
+      16K       1.1053  1.1407  1.2589  1.4368   1.6086 
+      24K       1.0000  1.0625  1.1320  1.2443   1.3095 
+      32K       1.0000  1.0469  1.0761  1.1336   1.1776 
+      48K       1.0000  1.0000  1.0254  1.0445   1.0546 
+      50K       1.0000  1.0000  1.0152  1.0345   1.0464 
+      52K       1.0000  1.0000  1.0203  1.0273   1.0362 
+      54K       1.0000  1.0000  1.0812  1.0216   1.0281 
+      56K       1.0526  1.0000  1.0051  1.0144   1.0205 
+      58K       1.0000  1.0000  1.0000  1.0086   1.0123 
+      60K       0.9473  0.9844  1.0051  1.0014   1.0055 
+      62K       1.0000  0.9844  0.9949  0.9971   0.9993 
+      64K       1.0000  1.0000  1.0000  1.0000   1.0000 
+      66K       1.2632  1.2187  1.2183  1.2055   1.1953 
+      68K       1.4211  1.4844  1.4721  1.4425   1.4188 
+      70K       1.7368  1.7188  1.7107  1.6767   1.6421 
+      72K       1.9474  1.9531  1.9594  1.9023   1.8573 
+      74K       2.2105  2.1875  2.1827  2.1207   2.0650 
+      76K       2.4211  2.4219  2.4010  2.3305   2.2644 
+      78K       2.5789  2.6250  2.6091  2.5330   2.4571 
+      80K       2.8421  2.8125  2.8223  2.7213   2.6380 
+      84K       3.1053  3.1875  3.1776  3.0819   2.9802 
+      88K       3.5263  3.5312  3.5228  3.4124   3.2992 
+      92K       3.7895  3.8438  3.8375  3.7213   3.5971 
+      96K       4.0000  4.1093  4.1218  3.9986   3.9659 
+      112K      4.3684  4.5781  4.5787  4.4583   4.6115 
+      128K      4.7368  4.8750  4.9188  4.8075   4.8997 
+      192K      5.5263  5.7188  5.8020  5.6911   5.7064 
+      256K      6.0000  6.2187  6.3045  6.1954   6.1033 
+      384K      6.7368  6.9531  7.0405  6.9181   6.7912 
+      512K      7.3158  7.5156  7.6294  7.5000   7.4654 
+      768K      9.1579  9.4531  9.6395  9.5014   9.1075 
+      1024K    10.368  10.7497 10.9999 10.878   10.8201
+      1536K    12.579  13.3124 13.7660 13.747   13.4739
+      2048K    13.737  14.4839 15.0509 15.151   15.1282
+      3076K    14.789  15.5780 16.2993 16.513   16.3365
 
-     arena| 10m   30m   100m   300m   1000m   2000m    4000m
-     =================================================================
-        1K  360
-       1.5  250  1150
-        2K  210   840
-        3K  180   660   3160
-        4K  160   580   2530  11930  "36680" "84730" "262850"
-       12K  150   460   1730   5590   26010   65500  "184520"
-       20K  150   430   1500   4900   25450   56420   143220
-     ...
-       64K  140   410   1400   4360   22150   32850   122820
+    Now the same number relative to the model
 
-    Timing relative to 64K:
+    (1 + 0.36*sqrt(primelimit)/arena) * (arena <= 64 ? 1.05 : (arena-64)**0.38)
 
-     20K    1.071  1.049  1.071  1.124  1.149  1.718  1.166
-     28K    1.071  1.000  1.043  1.067  1.115  1.256  1.326
-     36K    1.000  1.024  1.029  1.034  0.946  1.075  1.087
-     44K    1.000  1.049  1.007  1.016  1.006  1.056  0.974
-     52K    1.000  0.976  1.007  1.009  1.023  1.035  0.910
-     56K    0.929  1.024  1.000  1.002  1.023  1.022  0.893
-     58K    1.143  0.976  1.000  1.002  0.995  1.016  0.888
-     60K    1.000  1.024  1.000  0.998  1.016  1.010  0.865
-     62K    1.000  1.000  1.000  0.995  1.023  1.004  0.922
-     64K    1.000  1.000  1.000  1.000  1.000  1.000  1.000
-     66K    1.071  1.049  1.014  0.993  1.025  0.995  0.938
-     68K    1.071  1.098  1.086  1.050  0.939  0.991  0.926
-     70K    1.214  1.171  1.164  1.124  1.061  1.023  0.860
-     72K    1.214  1.244  1.221  1.181  1.070  1.081  0.852
-     76K    1.357  1.415  1.371  1.305  1.154  1.260  0.841
-     84K    1.643  1.610  1.614  1.546  1.340  1.426  0.954
-     92K    1.857  1.878  1.850  1.773  1.475  1.640  1.063
-     96K    2.000  2.073  2.057  2.016  1.380  1.710  1.127
-    128K    2.214  2.341  2.371  2.328  1.624  2.118  1.429
-    192K    2.500  2.707  2.743  2.729  1.901  2.495  1.626
-    256K    2.786  2.902  2.979  2.977  2.077  2.680  1.791
-    384K    3.143  3.293  3.371  3.392  2.344  3.050  1.906
-    512K    3.286  3.488  3.521  3.537  2.445  3.441  2.130
-    768K    3.857  4.171  4.264  4.319  2.977  4.045  2.490
-   1024K    4.429  4.707  4.879  4.947  3.435  4.900  2.941
-   1536K    5.071  5.659  6.029  6.197  4.393  6.237  3.662
-   2048K    5.357  6.195  6.593  6.995  4.857  6.886  4.039
-   3072K    5.786  6.488  7.029  7.356  5.264  7.425  4.402
+     [SLOW2_IN_ROOTS = 0.36, ALPHA = 0.38]
 
-    Values after 92K are from different run...  Matters much for 4000m
-    one, when swapping starts; also 1000m run looks not very much
-    reproducible...
+      arena|    30m     100m    300m    1000m    2000m	<-- primelimit
+      =================================================
+        16K    1.014    0.9835  0.9942  0.9889  1.004
+        24K    0.9526   0.9758  0.9861  0.9942  0.981
+        32K    0.971    0.9939  0.9884  0.9849  0.9806
+        48K    0.9902   0.9825  0.996   0.9945  0.9885
+        50K    0.9917   0.9853  0.9906  0.9926  0.9907
+        52K    0.9932   0.9878  0.9999  0.9928  0.9903
+        54K    0.9945   0.9902  1.064   0.9939  0.9913
+        56K    1.048    0.9924  0.9925  0.993   0.9921
+        58K    0.9969   0.9945  0.9909  0.9932  0.9918
+        60K    0.9455   0.9809  0.9992  0.9915  0.9923
+        62K    0.9991   0.9827  0.9921  0.9924  0.9929
+        64K    1        1       1       1       1
+        66K    1.02     0.9849  0.9857  0.9772  0.9704
+        68K    0.8827   0.9232  0.9176  0.9025  0.8903
+        70K    0.9255   0.9177  0.9162  0.9029  0.8881
+        72K    0.9309   0.936   0.9429  0.9219  0.9052
+        74K    0.9715   0.9644  0.967   0.9477  0.9292
+        76K    0.9935   0.9975  0.9946  0.9751  0.9552
+        78K    0.9987   1.021   1.021   1.003   0.9819
+        80K    1.047    1.041   1.052   1.027   1.006
+        84K    1.052    1.086   1.092   1.075   1.053
+        88K    1.116    1.125   1.133   1.117   1.096
+        92K    1.132    1.156   1.167   1.155   1.134
+        96K    1.137    1.177   1.195   1.185   1.196
+       112K    1.067    1.13    1.148   1.15    1.217
+       128K    1.04     1.083   1.113   1.124   1.178
+       192K    0.9368   0.985   1.025   1.051   1.095
+       256K    0.8741   0.9224  0.9619  0.995   1.024
+       384K    0.8103   0.8533  0.8917  0.9282  0.9568
+       512K    0.7753   0.8135  0.8537  0.892   0.935
+       768K    0.8184   0.8638  0.9121  0.9586  0.9705
+      1024K    0.8241   0.8741  0.927   0.979   1.03
+      1536K    0.8505   0.9212  0.9882  1.056   1.096
+      2048K    0.8294   0.8954  0.9655  1.041   1.102
 
-    The stats for small arena lead to the value of ARENA_IN_ROOTS for i386.
-
-    Similar data for Sparc leads to 10.
-
-    TODO: need to create macro for (small) OVERHEAD_100_IN_ROOTS where the
-    overhead of subdivision is 100%; likewise one needs to estimate
-    the overhead of having the arena larger than the cache size.  Then
-    one can intelligently optimize the arena size taking both effects
-    into the account...
 */
 
 #ifndef SLOW2_IN_ROOTS
   /* SLOW2_IN_ROOTS below 3: some slowdown starts to be noticable
-   * when things fit into the cache.
+   * when things fit into the cache on Sparc.
    * XXX The choice of 2.6 gives a slowdown of 1-2% on UltraSparcII,
    * but makes calculations for "maximum" of 436273009 (not applicable anymore)
    * fit into 256K cache (still common for some architectures).
@@ -190,7 +212,7 @@ initprimes1(ulong size, long *lenp, long *lastp)
    * One may change it when small caches become uncommon, but the gain
    * is not going to be very noticable... */
 #  ifdef i386           /* gcc defines this? */
-#    define SLOW2_IN_ROOTS      0.4
+#    define SLOW2_IN_ROOTS      0.36
 #  else
 #    define SLOW2_IN_ROOTS      2.6
 #  endif
@@ -204,8 +226,8 @@ initprimes1(ulong size, long *lenp, long *lastp)
 #  endif
 #endif
 
-#define CACHE_ALPHA	(0.29)		/* Cache performance model parameter */
-#define CACHE_CUTOFF	(0.055)		/* Cache performance not smooth here */
+#define CACHE_ALPHA	(0.38)		/* Cache performance model parameter */
+#define CACHE_CUTOFF	(0.018)		/* Cache performance not smooth here */
 
 static double slow2_in_roots = SLOW2_IN_ROOTS;
 
@@ -248,17 +270,17 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
 
      1 + slow2_size/arena due to initialization overhead;
 
-     max(1, 2.33 * overhead^0.29 ) due to footprint > cache size.
+     max(1, 4.63 * overhead^0.38 ) due to footprint > cache size.
 
      [The latter is hard to substantiate theoretically, but this
      function describes benchmarks pretty close; it does not hurt that
      one can minimize it explicitly too ;-).  The switch between
-     diffenent choices of max() happens whe overhead=0.055.]
+     diffenent choices of max() happens whe overhead=0.018.]
 
      Thus the problem is minimizing (1 + slow2_size/arena)*overhead**0.29.
      This boils down to F=((X+A)/(X+B))X^alpha, X=overhead, 
      B = (1 - fixed_to_cache/cache_arena), A = B +
-     slow2_size/cache_arena, alpha = 0.29, and X>=0.055, X>-B.  It
+     slow2_size/cache_arena, alpha = 0.38, and X>=0.018, X>-B.  It
      turns out that the minimization problem is not very nasty.  (As
      usual with minimization problems which depend on parameters,
      different values of A,B lead to different algorithms.  However,
@@ -266,8 +288,8 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
      algorithms work are explicitly calculatable.)
 
      Thus we need to find the rightmost root of (X+A)*(X+B) -
-     alpha(A-B)X to the right of 0.055 (if such exists and is below
-     Xmax).  Then we manually check the remaining region [0, 0.055].
+     alpha(A-B)X to the right of 0.018 (if such exists and is below
+     Xmax).  Then we manually check the remaining region [0, 0.018].
 
      Since we cannot trust the purely-experimental cache-hit slowdown
      function, as a sanity check always prefer fitting into the
@@ -393,7 +415,7 @@ set_optimize(long what, GEN g)
 }
 
 static void
-sieve_chunk(byteptr known_primes, ulong start, byteptr data, ulong cnt)
+sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
 {   /* start must be odd;
        prime differences (starting from (5-3)=2) start at known_primes[2],
        are terminated by a 0 byte;
@@ -402,21 +424,38 @@ sieve_chunk(byteptr known_primes, ulong start, byteptr data, ulong cnt)
        starting at data to 0 or 1 depending on whether the
        corresponding odd number is prime or not */
     ulong p;
-    byteptr q, start_sieve, end_sieve = data + cnt;
+    byteptr q;
+    register byteptr write_to = data;	/* Better code with gcc 2.8.1 */
+    register ulong   cnt      = count;	/* Better code with gcc 2.8.1 */
+    register ulong   start    = s;	/* Better code with gcc 2.8.1 */
+    register ulong   delta    = 1;	/* Better code with gcc 2.8.1 */
 
     memset(data, 0, cnt);
+    start >>= 1;			/* (start - 1)/2 */
+    start += cnt;			/* Corresponds to the end */
+    cnt -= 1;
     /* data corresponds to start.  q runs over primediffs.  */
     /* Don't care about DIFFPTR_SKIP: false positives provide no problem */
-    for (q = known_primes + 2, p = 3; *q; p += *q++) {
+    for (q = known_primes + 1, p = 3; delta; delta = *++q, p += delta) {
 	/* first odd number which is >= start > p and divisible by p
 	   = last odd number which is <= start + 2p - 1 and 0 (mod p)
 	   = p + the last even number which is <= start + p - 1 and 0 (mod p)
 	   = p + the last even number which is <= start + p - 2 and 0 (mod p)
-	   = p + start + p - 2 - (start + p - 2) % 2p. */
-      start_sieve = data - (((start+p-2) % (p << 1)) >> 1) + p - 1;
-      for (; start_sieve < end_sieve; start_sieve += p) *start_sieve = 1;
+	   = p + start + p - 2 - (start + p - 2) % 2p
+	   = start + 2(p - 1 - ((start-1)/2 + (p-1)/2) % p). */
+      long off = cnt - ((start+(p>>1)) % p);
+
+      while (off >= 0) {
+	  write_to[off] = 1;
+	  off -= p;
+      }
     }
 }
+
+/* Do not inline sieve_chunk()!  It fits into registers in ix86 non-inlined */
+extern void (*sieve_chunk_p)(byteptr known_primes, ulong s, byteptr data, ulong count);
+void (*sieve_chunk_p)(byteptr known_primes, ulong s, byteptr data, ulong count)
+    = sieve_chunk;
 
 /* Here's the workhorse.  This is recursive, although normally the first
    recursive call will bottom out and invoke initprimes1() at once.
@@ -436,6 +475,10 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   maxnum |= 1;                  /* make it odd. */
 
   /* Checked to be enough up to 40e6, attained at 155893 */
+  /* Due to multibyte representation of large gaps, this estimate will
+     be broken by large enough maxnum.  However, assuming exponential
+     distribution of gaps with the average log(n), we are safe up to
+     circa exp(-256/log(1/0.09)) = 1.5e46.  OK with LONG_BITS <= 128. ;-) */
   size = (long) (1.09 * maxnum/log((double)maxnum)) + 145;
   p1 = (byteptr) gpmalloc(size);
   rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
@@ -480,7 +523,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
     was_delta = *p_prime_above;
     *p_prime_above = 0;			/* Put a 0 sentinel for sieve_chunk */
 
-    sieve_chunk(p1, curlow, p, asize);
+    (*sieve_chunk_p)(p1, curlow, p, asize);
 
     *p_prime_above = was_delta;		/* Restore */
     p[asize] = 0;			/* Put a 0 sentinel for ZZZ */
