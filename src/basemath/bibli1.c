@@ -1131,10 +1131,10 @@ PRECPB:
 GEN
 lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
 {
-  GEN xinit,L,h,B,L1,delta, Q;
+  GEN xinit,L,h,B,L1,delta, Q, H = NULL;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   pari_sp av0 = avma, av, lim;
-  int isexact;
+  int isexact, gram_can_leave = 0;
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1187,6 +1187,7 @@ PRECPB:
     case 1:
       if (DEBUGLEVEL > 3) fprintferr("\n");
       if (flag == 2) return _vec(h);
+      gram_can_leave = 0;
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
         prec = (prec<<1)-2; kmax = 1;
@@ -1197,7 +1198,7 @@ PRECPB:
           x = gmul(x, realun(prec+1)); 
           retry = 1; /* never abort if x is exact */
         }
-        gerepileall(av,2,&h,&x);
+        gerepileall(av,H? 4: 2,&h,&x,&H,&xinit);
         if (DEBUGLEVEL) err(warner,"lllfp starting over");
         break;
       } /* fall through */
@@ -1249,6 +1250,7 @@ PRECPB:
       else if (MARKED == k-1) MARKED = k;
       if (!B[k]) goto PRECPB;
       Q[k] = Q[k-1] = zero;
+      gram_can_leave = 0;
       if (k>2) k--;
     }
     else
@@ -1262,7 +1264,7 @@ PRECPB:
           if (low_stack(lim, stack_lim(av,1)))
           {
             if(DEBUGMEM>1) err(warnmem,"lllfp[1], kmax = %ld", kmax);
-            gerepileall(av,5,&B,&L,&h,&x,&Q);
+            gerepileall(av,H? 7: 5,&B,&L,&h,&x,&Q,&H,&xinit);
           }
         }
       if (++k > n)
@@ -1274,13 +1276,27 @@ PRECPB:
           if (!j) goto PRECPB;
           k = 2; continue;
         }
+        if (gram && isexact)
+        {
+          if (gram_can_leave) { h = H; break; }
+
+          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
+          H = H? gmul(H, h): h;
+          xinit = qf_base_change(xinit, h, 1);
+          x = xinit; h = idmat(n);
+          prec = n + (gexpo(x) >> TWOPOTBITS_IN_LONG);
+          if (prec < DEFAULTPREC) prec = DEFAULTPREC;
+          x = gmul(x, realun(prec));
+          gram_can_leave = 1;
+          k = 2; kmax = 1; continue;
+        }
         break;
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lllfp[2], kmax = %ld", kmax);
-      gerepileall(av,5,&B,&L,&h,&x,&Q);
+      gerepileall(av,H? 7: 5,&B,&L,&h,&x,&Q,&H,&xinit);
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
