@@ -1428,7 +1428,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
   for(;;)
   {
-    /* kappa need to be recomputed */
+    /* kappa needs to be recomputed */
     kapp = NULL;
     Fa   = degpol(nu);
     /* the prime element in Zp[alpha] */
@@ -1530,14 +1530,15 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (!chig || !gcmp1(denom(content(chig))))
       {
-	/* the valuation of beta was wrong... This also means
-	   that chi_gamma has more than one factor modulo p   */
-	if (!chig) chig = mycaract(chi, gamm, p, NULL, NULL);
-
-	vb = vstar(p, chig);
+	/* the valuation of beta was wrong... This means that
+	   either gamma fails the v*-test */
+	if (!chib) chib = mycaract(chi, beta, p, NULL, ns);
+	vb = vstar(p, chib);
 	eq = (long)(-vb[0] / vb[1]);
 	er = (long)(-vb[0]*Ea / vb[1] - eq*Ea);
-	if (eq) gamm = gmul(gamm, gpowgs(p, eq));
+
+ 	if (eq) gamm = gmul(beta, gpowgs(p, eq));
+	else gamm = beta;
 	if (er)
 	{
 	  gamm = gmul(gamm, gpowgs(nu, er));
@@ -1545,6 +1546,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  gamm = redelt(gamm, p, pmr);
 	}
 	if (eq || er) chig = mycaract(chi, gamm, p, pmf, ns);
+	else chig = chib;
       }
 
       nug  = (GEN)factmod(chig, p)[1];
