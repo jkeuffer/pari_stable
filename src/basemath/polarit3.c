@@ -3712,8 +3712,7 @@ u_FpV_polint(GEN xa, GEN ya, ulong p)
   GEN T,dP, P = NULL, Q = u_FpV_roots_to_pol(xa, p);
   long i, n = lg(xa);
   ulong inv;
-  gpmem_t av;
-  av = avma; (void)new_chunk(n+3); /* storage space for P */
+  gpmem_t av = avma;
   for (i=1; i<n; i++)
   {
     if (!ya[i]) continue;
@@ -3726,10 +3725,9 @@ u_FpV_polint(GEN xa, GEN ya, ulong p)
     }
     else
       dP = u_FpX_Fp_mul(T, mulssmod(ya[i],inv,p), p, 0);
-    if (P) avma = av;
     P = P? u_FpX_add(P, dP, p): dP;
   }
-  return P? P: u_zeropol(0);
+  return P? gerepileupto(av, P): u_zeropol(0);
 }
 
 GEN
@@ -4423,6 +4421,13 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
   if (!bound)
   {
     bound = ZY_ZXY_ResBound(A, B);
+    if (bound > 50000)
+    {
+      GEN run = realun(MEDDEFAULTPREC);
+      GEN Ar = gmul(A, run), Br = gmul(B, run);
+      GEN R = subres(Ar,Br);
+      bound = gexpo(R) + 1;
+    }
     if (dB) bound -= (long)(mylog2(dB)*degA);
   }
   if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);
