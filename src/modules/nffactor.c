@@ -41,7 +41,7 @@ extern GEN vconcat(GEN A, GEN B);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern int isrational(GEN x);
 extern long LLL_check_progress(GEN Bnorm, long n0, GEN m, GEN *CM_L, long *BPF, pari_timer *T, long *ti_LLL);
-extern void remake_GM(GEN nf, long prec, nffp_t *F);
+extern void remake_GM(GEN nf, nffp_t *F, long prec);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 
@@ -365,8 +365,8 @@ vecbinome(long n)
   C[0] = gun;
   for (k=1; k <= d; k++)
   {
-    gpmem_t av = avma;
-    C[k] = gerepileuptoint(av, diviiexact(mulsi(k+1, C[k-1]), stoi(n-k)));
+    gpmem_t av = avma;  
+    C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), stoi(k)));
   }
   for (   ; k <= n; k++) C[k] = C[n - k];
   return bin;
@@ -417,8 +417,9 @@ nf_factor_bound(GEN nf, GEN polbase)
     if (j > n) break; /* done */
 PRECPB:
     prec = (prec<<1)-2;
-    remake_GM(nf, prec, &F); G = F.G;
+    remake_GM(nf, &F, prec); G = F.G;
     if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
+    matGS = gtrans_i(matGS);
   }
 
   /* Take sup over 0 <= i <= d of
