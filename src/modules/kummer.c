@@ -31,7 +31,6 @@ extern GEN famat_inv(GEN f);
 extern GEN famat_pow(GEN f, GEN n);
 extern GEN famat_mul(GEN f, GEN g);
 extern GEN famat_reduce(GEN fa);
-extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN to_famat(GEN g, GEN e);
 
 typedef struct {
