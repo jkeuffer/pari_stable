@@ -625,6 +625,7 @@ gadd(GEN x, GEN y)
           lx = lg(x);
           ly = signe(y)? lg(y): 2;
 	  ly += l; if (lx<ly) ly=lx;
+	  av = avma;
           z=cgetg(ly,t_SER);
 	  if (l)
 	  {
@@ -639,7 +640,7 @@ gadd(GEN x, GEN y)
 	  }
           if (ly>2)
           {
-            l=avma;
+            tetpil = avma;
             for (i=2; i<ly; i++)
             {
               p1 = gadd((GEN)x[i],(GEN)y[i]);
@@ -652,9 +653,10 @@ gadd(GEN x, GEN y)
                   z[j-l]=ladd((GEN)x[j],(GEN)y[j]);
                 z[2]=(long)p1; return z;
               }
-              avma=l;
+              avma = tetpil;
             }
           }
+          avma = av;
           return zeroser(vx,ly-2+valp(y));
 	
 	case t_RFRAC: case t_RFRACN:
