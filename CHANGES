@@ -74,6 +74,7 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
    25- addressed TODO item: quadclassunit not reliable when fed non
        fundamental discriminants (infinite loop [e.g quadclassunit(-352)],
        wrong result).   [ fix: increase factor base ]
+   26- sign of elleisnum(E, 6, 1) was wrong
 
   Changed
     1- rnf structure (removed useless components)
