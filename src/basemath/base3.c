@@ -1358,19 +1358,10 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr)
 GEN
 znlog(GEN x, GEN g0)
 {
-  pari_sp av=avma;
+  pari_sp av = avma;
   GEN p = (GEN)g0[1];
-  if (typ(g0) != t_INTMOD)
-    err(talker,"not an element of (Z/pZ)* in znlog");
-  switch(typ(x))
-  {
-    case t_INT: break;
-    default: x = gmul(x, gmodulsg(1,p));
-    if (typ(x) != t_INTMOD)
-      err(talker,"not an element of (Z/pZ)* in znlog");
-    case t_INTMOD: x = (GEN)x[2]; break;
-  }
-  return gerepileuptoint(av, Fp_PHlog(x,(GEN)g0[2],p,NULL));
+  if (typ(g0) != t_INTMOD) err(talker,"not an element of (Z/pZ)* in znlog");
+  return gerepileuptoint(av, Fp_PHlog(Rg_to_Fp(x,p),(GEN)g0[2],p,NULL));
 }
 
 GEN

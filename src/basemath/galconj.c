@@ -417,27 +417,25 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
  * que P(S)=0 [p,Q] Relever S en S_0 tel que P(S_0)=0 [p^e,Q]
  * Unclean stack.
  */
-static long monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN frob)
+static long
+monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN frob)
 {
-  pari_sp ltop=avma;
   GEN tlift = polratlift(S,q,qm1old,qm1old,gl->den);
   if (tlift)
   {
+    pari_sp ltop = avma;
     if(DEBUGLEVEL>=4)
       fprintferr("MonomorphismLift: trying early solution %Z\n",tlift);
     /*Rationals coefficients*/
-    tlift=lift(gmul(tlift,gmodulcp(gl->den,gl->gb->ladicsol)));
+    tlift = FpX_red(Q_muli_to_int(tlift, gl->den), gl->gb->ladicsol);
     if (poltopermtest(tlift, gl, frob))
     {
-      if(DEBUGLEVEL>=4)
-	fprintferr("MonomorphismLift: true early solution.\n");
-      avma=ltop;
-      return 1;
+      if(DEBUGLEVEL>=4) fprintferr("MonomorphismLift: true early solution.\n");
+      avma = ltop; return 1;
     }
-    if(DEBUGLEVEL>=4)
-      fprintferr("MonomorphismLift: false early solution.\n");
+    avma = ltop; 
+    if(DEBUGLEVEL>=4) fprintferr("MonomorphismLift: false early solution.\n");
   }
-  avma=ltop;
   return 0;
 }
 
@@ -1167,7 +1165,7 @@ sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
   pari_sp ltop=avma;
   long i, j, npows;
   GEN  s, f, pows;
-  sigma=lift(gmul(sigma,gmodulsg(1,p)));
+  sigma = RgX_to_FpX(sigma, p);
   f=polx[varn(sigma)];
   s=zeropol(varn(sigma));
   for(j=1;j<lg(sym);j++)
@@ -2558,7 +2556,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     mael3(PG,1,1,1)=2;
     mael3(PG,1,1,2)=1;
     tau = deg1pol_i(gen_m1, negi((GEN)P[3]), x);
-    tau = lift(gmul(tau,gmodulcp(gen_1,ip)));
+    tau = RgX_to_FpX(tau, ip);
     tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
     tau = FpX_gcd(Pp, tau,ip);
     tau = FpX_normalize(tau, ip);
@@ -2594,7 +2592,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     {
       pari_sp btop=avma;
       tau = permtopol(gmael(PG,1,j), PL, PM, Pden, Pladicabs, x);
-      tau = lift(gmul(tau,gmodulsg(1,ip)));
+      tau = RgX_to_FpX(tau, ip);
       tau = FpX_FpXQ_compo((GEN) Pmod[gp], tau,Pp,ip);
       tau = FpX_gcd(Pp, tau,ip);
       tau = FpX_normalize(tau, ip);

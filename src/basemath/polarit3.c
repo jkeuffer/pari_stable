@@ -48,6 +48,90 @@ ZX_renormalize(GEN x, long lx)
 
 /* In practice, p is not assumed to be prime. */
 
+/* p > 0 a t_INT, return lift(x * Mod(1,p)).
+ * If x is an INTMOD, assume modulus is a multiple of p. */
+GEN
+Rg_to_Fp(GEN x, GEN p)
+{
+  switch(typ(x))
+  {
+    case t_INT: return modii(x, p);
+    case t_FRAC:
+      if (lgefint(p) == 3)
+      {
+        ulong q = (ulong)p[2], z = umodiu((GEN)x[1], q);
+        if (!z) return gen_0;
+        return utoipos(Fl_div(z, umodiu((GEN)x[2], q), q));
+      }
+      else
+      {
+        pari_sp av = avma;
+        GEN z = modii((GEN)x[1], p);
+        if (z == gen_0) return gen_0;
+        return gerepileuptoint(av, resii(mulii(z, Fp_inv((GEN)x[2], p)), p));
+      }
+    case t_PADIC: return ptolift(x, p);
+    case t_INTMOD: {
+      GEN q = (GEN)x[1], a = (GEN)x[2];
+      if (equalii(q, p)) return icopy(a);
+      return resii(a, p);
+    }
+    default: err(typeer, "R_to_Fp");
+      return NULL; /* not reached */
+  }
+}
+/* If x is a POLMOD, assume modulus is a multiple of T. */
+GEN
+Rg_to_FpXQ(GEN x, GEN T, GEN p)
+{
+  long ta, tx = typ(x), v = varn(T);
+  GEN a, b;
+  if (is_const_t(tx)) return scalarpol(Rg_to_Fp(x, p), v);
+  switch(tx)
+  {
+    case t_POLMOD:
+      b = (GEN)x[1];
+      a = (GEN)x[2]; ta = typ(a);
+      if (is_const_t(ta)) return Rg_to_Fp(a, p);
+      b = RgX_to_FpX(b, p); if (varn(b) != v) break;
+      a = RgX_to_FpX(a, p); if (gequal(b,T)) return a;
+      return FpX_rem(a, T, p);
+    case t_POL:
+      if (varn(x) != v) break;
+      return FpX_rem(RgX_to_FpX(x,p), T, p);
+    case t_RFRAC:
+      a = Rg_to_FpXQ((GEN)x[1], T,p);
+      b = Rg_to_FpXQ((GEN)x[2], T,p);
+      return FpXQ_div(a,b, T,p);
+  }
+  err(typeer,"R_to_FpXQ");
+  return NULL; /* not reached */
+}
+GEN
+RgX_to_FpX(GEN x, GEN p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_POL); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = (long)Rg_to_Fp((GEN)x[i], p);
+  return normalizepol_i(z, l);
+}
+GEN
+RgX_to_FpXQX(GEN x, GEN T, GEN p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_POL); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = (long)Rg_to_FpXQ((GEN)x[i], T,p);
+  return normalizepol_i(z, l);
+}
+GEN
+RgX_to_FqX(GEN x, GEN T, GEN p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_POL); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = (long)simplify_i(Rg_to_FpXQ((GEN)x[i], T,p));
+  return normalizepol_i(z, l);
+}
+
 /*********************************************************************
 These functions suppose polynomials to be already reduced.
 They are clean and memory efficient.

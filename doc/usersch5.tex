@@ -1303,6 +1303,14 @@ in $(\Z/\kbd{p}\Z)[X]$.
 \subsubsec{Basic operations}. In what follows \kbd{p} is always a \typ{INT},
 not necessarily prime.
 
+\fun{GEN}{Rg_to_Fp}{GEN z, GEN p}, \kbd{z} a scalar which can be mapped to
+$\Z/p\Z$: a \typ{INT}, a \typ{INTMOD} whose modulus is divisible by $p$,
+a \typ{FRAC} whose denominator is coprime to $p$, or a \typ{PADIC} with
+underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized.
+
+\fun{GEN}{RgX_to_FpX}{GEN z, GEN p}, \kbd{z} a \typ{POL}, returns the
+\kbd{FpX} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
+
 \fun{GEN}{FpX_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z *
 Mod(1,p)}, normalized. Hence the returned value has \typ{INTMOD}
 coefficients.
@@ -1449,6 +1457,19 @@ behind on the stack (their output is still suitable for \kbd{gerepileupto}).
 Besides \kbd{T} and \kbd{p}, arguments are either \kbd{FpXQ} or \kbd{Fq}
 depending on the function name. (All \kbd{Fq} routines accept \kbd{FpXQ}s by
 definition, not the other way round.)
+
+\fun{GEN}{Rg_to_FpXQ}{GEN z, GEN T, GEN p}, \kbd{z} a \kbd{GEN} which can be
+mapped to $\F_p[X]/(T)$: anything \kbd{Rg\_to\_Fp} can be applied to,
+a \typ{POL} to which \kbd{RgX\_to\_FpX} can be applied to, a \typ{POLMOD}
+whose modulus is divisible by $T$ (once mapped to a \kbd{FpX}), a suitable
+\typ{RFRAC}. Returns \kbd{z} as an \kbd{FpXQ}, normalized.
+
+\fun{GEN}{RgX_to_FpXQX}{GEN z, GEN T, GEN p}, \kbd{z} a \typ{POL}, returns the
+\kbd{FpXQ} obtained by applying \kbd{Rg\_to\_FpXQ} coefficientwise.
+
+\fun{GEN}{RgX_to_FqX}{GEN z, GEN T, GEN p}, \kbd{z} a \typ{POL}, returns the
+\kbd{FpXQ} obtained by applying \kbd{Rg\_to\_FpXQ} coefficientwise and
+simplifying scalars to \typ{INT}s.
 
 \fun{GEN}{Fq_red}{GEN x, GEN T, GEN p}, \kbd{x} a \kbd{ZX} or \typ{INT},
 reduce it to an \kbd{Fq} ($\kbd{T} = \kbd{NULL}$ is allowed iff \kbd{x} is a

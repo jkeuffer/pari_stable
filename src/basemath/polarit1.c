@@ -232,13 +232,6 @@ poldivrem(GEN x, GEN y, GEN *pr)
 /*           ROOTS MODULO a prime p (no multiplicities)            */
 /*                                                                 */
 /*******************************************************************/
-static GEN
-mod(GEN x, GEN y)
-{
-  GEN z = cgetg(3,t_INTMOD);
-  z[1]=(long)y; z[2]=(long)x; return z;
-}
-
 static ulong
 init_p(GEN pp)
 {
@@ -253,17 +246,13 @@ init_p(GEN pp)
 }
 
 static long
-factmod_init(GEN *F, GEN pp)
+factmod_init(GEN *F, GEN p)
 {
-  GEN f = *F;
-  long i, d;
-
-  if (typ(f)!=t_POL || typ(pp)!=t_INT) err(typeer,"factmod");
-  f = lift_intern( gmul(f, mod(gen_1,pp)) );
-  d = lg(f); if (d <= 2) err(zeropoler,"factmod");
-  for (i=2; i<d; i++)
-    if (typ(f[i])!=t_INT) err(impl,"factormod for general polynomials");
-  *F = f; return d - 3;
+  long d;
+  if (typ(*F)!=t_POL || typ(p)!=t_INT) err(typeer,"factmod");
+  *F = RgX_to_FpX(*F, p);
+  d = degpol(*F); if (d < 0) err(zeropoler,"factmod");
+  return d;
 }
 
 static GEN
@@ -2092,6 +2081,12 @@ factorpadic0(GEN f,GEN p,long r,long flag)
 static GEN spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p);
 
 static GEN
+mod(GEN x, GEN y)
+{
+  GEN z = cgetg(3,t_INTMOD);
+  z[1]=(long)y; z[2]=(long)x; return z;
+}
+static GEN
 to_Fq(GEN x, GEN T, GEN p)
 {
   long i,lx, tx = typ(x);
@@ -2103,8 +2098,7 @@ to_Fq(GEN x, GEN T, GEN p)
   {
     if (tx != t_POL) err(typeer,"to_Fq");
     lx = lg(x);
-    y = cgetg(lx,t_POL);
-    y[1] = x[1];
+    y = cgetg(lx,t_POL); y[1] = x[1];
     for (i=2; i<lx; i++) y[i] = (long)mod((GEN)x[i], p);
   }
   /* assume deg(y) < deg(T) */
@@ -2122,17 +2116,10 @@ to_Fq_pol(GEN x, GEN T, GEN p)
   return x;
 }
 
-/* assume T a clone */
 static GEN
-copy_then_free(GEN T)
+to_Fq_fact(GEN t, GEN E, GEN T, GEN p, pari_sp av)
 {
-  GEN t = forcecopy(T); gunclone(T); return t;
-}
-
-static GEN
-to_Fq_fact(GEN t, GEN E, GEN unfq, pari_sp av)
-{
-  GEN T = (GEN)unfq[1]/*clone*/, y = cgetg(3,t_MAT), u,v,p;
+  GEN y = cgetg(3,t_MAT), u, v;
   long j, l = lg(t), nbf = lg(t);
 
   u = cgetg(nbf,t_COL); y[1] = (long)u;
@@ -2142,10 +2129,9 @@ to_Fq_fact(GEN t, GEN E, GEN unfq, pari_sp av)
     u[j] = (long)simplify((GEN)t[j]); /* may contain pols of degree 0 */
     v[j] = lutoi((ulong)E[j]);
   }
-  y = gerepileupto(av, y);
-  T = copy_then_free(T);
-  p = (GEN)leading_term(T)[1];
-  u = (GEN)y[1];
+  y = gerepileupto(av, y); u = (GEN)y[1];
+  p = icopy(p);
+  T =  FpX_to_mod(T, p);
   for (j=1; j<nbf; j++) u[j] = (long)to_Fq_pol((GEN)u[j], T,p);
   return y;
 }
@@ -2508,18 +2494,14 @@ factmod9(GEN f, GEN p, GEN T)
 {
   pari_sp av = avma;
   long v;
-  GEN z, unfp, unfq;
+  GEN z;
 
   if (typ(T)!=t_POL || typ(f)!=t_POL || typ(p)!=t_INT) err(typeer,"factmod9");
   v = varn(T);
   if (varncmp(v, varn(f)) <= 0)
     err(talker,"polynomial variable must have higher priority in factorff");
-  unfp = gmodulsg(1,p); T = gmul(unfp,T);
-  unfq = gmodulo(gmul(unfp,polun[v]), T);
-  f = simplify(lift_intern(lift_intern( gmul(unfq,f)) ));
-  T = lift_intern(T);
-  z = FqX_factor_i(f, T, p);
-  return to_Fq_fact((GEN)z[1],(GEN)z[2], unfq,av);
+  z = FqX_factor_i(RgX_to_FqX(f, T,p), RgX_to_FpX(T, p), p);
+  return to_Fq_fact((GEN)z[1],(GEN)z[2], T,p,av);
 }
 /* factorization of x modulo (T,p). Assume x already reduced */
 GEN

@@ -56,6 +56,7 @@ GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
     2- exported FFTinit() / FFT() wrappers to rootpol.c:fft() [not under GP yet]
+    3- routines Rg_to_Fp, RgX_to_FpX, RgX_to_FpXQX, RgX_to_FqX, 
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
