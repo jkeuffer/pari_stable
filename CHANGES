@@ -56,6 +56,8 @@ BA 14- inline alpha assembler broken (registers clobbered)
 GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    16- "break loop" did not react correctly to allocatemem() read from a file
        with \r (stopped reading file right away)
+   17- matker(x, 1): internal loop forgot a pointer when garbage collecting
+       --> SEGV (or weird error, e.g division by 0)
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
