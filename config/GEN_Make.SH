@@ -66,7 +66,7 @@ EXTRALIBS  =
 
 RUNPTH     = $RUNPTH
 DLCFLAGS   = $DLCFLAGS
-LIBS       = $LIBS -L$libdir -l$libpari_base
+LIBS       = $LIBS -L$libdir -lpari
 
 RM = rm -f
 

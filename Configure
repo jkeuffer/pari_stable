@@ -86,6 +86,16 @@ if test "$optimization" != profiling; then
     echo ...none
   fi
 fi
+#############################################################################
+case $kernlvl1 in
+gmp) libpari_base=pari-gmp;;
+none) libpari_base=pari;;
+esac
+
+if test `expr $VersionMinor % 2` = 0; then
+  libpari_base=$libpari_base-$version
+fi
+
 ####################### CONFIGURE - MAKE ####################################
 . ./get_install # $_install_list
 . ./get_objdir  # objdir, cdobjdir
@@ -93,7 +103,7 @@ fi
 echo "Hi-Res Graphics: $which_graphic_lib"
 # For dynamic linking, before and after installing
 runpath="$libdir" 
-LDDYN="-L$libdir -l$libpari_base"
+LDDYN="-L$libdir -lpari"
 # Which copy, SHELL ?
 case "$osname" in
   os2) ln_s=cp;      make_sh=sh;;
