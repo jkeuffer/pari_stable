@@ -87,7 +87,15 @@ Incompatible changes:
     quotient [ used to  depend on the type of z: if t_REAL computed exact
     quotien ]. Use rdivii, rdivis, rdivsi, rdivss for analogous
     functionality (no "z" variant);
+  - mpdivz(x,y,z) assigns the euclidean quotient when x,y are t_INT (used
+    to depend on the type of z)
   - removed inconsistently named macros mpinv[sir]r [ were "z" functions ]
+  - rename mpent --> mpfloor
+  - removed useless routine shifts [ use shifti( stoi() ) ]
+  - rename resss --> remss, ressi --> remsi, resis --> remis, resii --> remii,
+    gres --> grem
+  - rename divise --> dvdii, gdivise --> gdvd, mpdivis --> dvdiiz, mpdivisis
+    --> dvdisz
 
 Partially compatible changes:
 -----------------------------

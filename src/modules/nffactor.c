@@ -132,25 +132,6 @@ unifpol(GEN nf, GEN x, long flag)
   return unifpol0(nf, (GEN)x, flag);
 }
 
-/* factorization of x modulo (T,p). Assume x already reduced */
-GEN
-FqX_factor(GEN x, GEN T, GEN p)
-{
-  GEN rep;
-  if (!T)
-  {
-    rep = factmod0(x, p);
-    rep[2] = (long)zv_ZC((GEN)rep[2]);
-    settyp(rep, t_MAT);
-  }
-  else
-  {
-    rep = factmod9(x, p, T);
-    rep = lift_intern(lift_intern(rep));
-  }
-  return rep;
-}
-
 GEN
 nffactormod(GEN nf, GEN x, GEN pr)
 {
@@ -1468,7 +1449,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
       if (! umodiu(bad,pp)) continue;
       ap = utoi(pp);
-      list = (GEN)factmod0(nfpol, ap)[1];
+      list = (GEN)FpX_factor(nfpol, ap)[1];
       if (maxf == 1)
       { /* deg.1 factors are best */
         r = (GEN)list[1];

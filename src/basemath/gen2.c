@@ -640,9 +640,9 @@ ggval(GEN x, GEN p)
       av=avma;
       p1=cgeti(lgefint(x[1]));
       p2=cgeti(lgefint(x[2]));
-      if (tp!=t_INT || !mpdivis((GEN)x[1],p,p1)) break;
-      if (!mpdivis((GEN)x[2],p,p2)) { avma=av; return 0; }
-      val=1; while (mpdivis(p1,p,p1) && mpdivis(p2,p,p2)) val++;
+      if (tp!=t_INT || !dvdiiz((GEN)x[1],p,p1)) break;
+      if (!dvdiiz((GEN)x[2],p,p2)) { avma=av; return 0; }
+      val=1; while (dvdiiz(p1,p,p1) && dvdiiz(p2,p,p2)) val++;
       avma=av; return val;
 
     case t_PADIC:
@@ -654,9 +654,9 @@ ggval(GEN x, GEN p)
       if (tp != t_POL) break;
       if (varn(x[1]) != varn(p)) return 0;
       av = avma;
-      if (!poldivis((GEN)x[1],p,&p1)) break;
-      if (!poldivis((GEN)x[2],p,&p2)) { avma=av; return 0; }
-      val=1; while (poldivis(p1,p,&p1)&&poldivis(p2,p,&p2)) val++;
+      if (!poldvd((GEN)x[1],p,&p1)) break;
+      if (!poldvd((GEN)x[2],p,&p2)) { avma=av; return 0; }
+      val=1; while (poldvd(p1,p,&p1)&&poldvd(p2,p,&p2)) val++;
       avma = av; return val;
 
     case t_POL:
@@ -671,7 +671,7 @@ ggval(GEN x, GEN p)
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
 	  {
-	    if (!poldivis(x,p,&x)) break;
+	    if (!poldvd(x,p,&x)) break;
             if (low_stack(limit, stack_lim(av,1)))
 	    {
 	      if(DEBUGMEM>1) err(warnmem,"ggval");
@@ -1103,7 +1103,7 @@ ptolift(GEN x, GEN Y) {
   z = (GEN)x[4];
   if (!signe(z) || vy > vx + precp(x)) err(operi,"",x, gmodulsg(1,Y));
   if (vx) z = mulii(z, gpowgs((GEN)x[2],vx));
-  return resii(z, Y);
+  return remii(z, Y);
 }
 
 void
@@ -1123,7 +1123,7 @@ gaffect(GEN x, GEN y)
       err(overwriter,"gaffect (gnil)");
     case t_REAL: affrr(x,y); return;
     case t_INTMOD:
-      if (!divise((GEN)x[1],(GEN)y[1])) err(operi,"",x,y);
+      if (!dvdii((GEN)x[1],(GEN)y[1])) err(operi,"",x,y);
       modiiz((GEN)x[2],(GEN)y[1],(GEN)y[2]); return;
     case t_FRAC:
       affii((GEN)x[1],(GEN)y[1]);
@@ -1140,7 +1140,7 @@ gaffect(GEN x, GEN y)
       affii((GEN)x[2],(GEN)y[2]);
       affii((GEN)x[3],(GEN)y[3]); return;
     case t_POLMOD:
-      if (! gdivise((GEN)x[1],(GEN)y[1])) err(operi,"",x,y);
+      if (! gdvd((GEN)x[1],(GEN)y[1])) err(operi,"",x,y);
       gmodz((GEN)x[2],(GEN)y[1],(GEN)y[2]); return;
     case t_POL:
       vx = varn(x);
@@ -1489,7 +1489,7 @@ cvtop2(GEN x, GEN y)
       z[2] = (long)p;
       z[3] = y[3];
       if (!gcmp1(den)) num = mulii(num, mpinvmod(den, (GEN)z[3]));
-      z[4] = lresii(num, (GEN)z[3]); return z;
+      z[4] = lremii(num, (GEN)z[3]); return z;
     }
     case t_COMPLEX: return ctop(x, p, d);
     case t_QUAD: return qtop(x, p, d);
@@ -1533,7 +1533,7 @@ cvtop(GEN x, GEN p, long d)
       icopyifstack(p, z[2]);
       z[3] = lpowgs(p, d);
       if (!gcmp1(den)) num = mulii(num, mpinvmod(den, (GEN)z[3]));
-      z[4] = lresii(num, (GEN)z[3]); return z; /* not memory-clean */
+      z[4] = lremii(num, (GEN)z[3]); return z; /* not memory-clean */
     }
     case t_COMPLEX: return ctop(x, p, d);
     case t_PADIC: return gprec(x,d);

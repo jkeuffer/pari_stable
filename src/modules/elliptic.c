@@ -1449,13 +1449,13 @@ multi_invmod(GEN x, GEN p)
 
   y[1] = x[1];
   for (i=2; i<lx; i++)
-    y[i] = lresii(mulii((GEN)y[i-1], (GEN)x[i]), p);
+    y[i] = lremii(mulii((GEN)y[i-1], (GEN)x[i]), p);
 
   u = mpinvmod((GEN)y[--i], p);
   for ( ; i > 1; i--)
   {
-    y[i] = lresii(mulii(u, (GEN)y[i-1]), p);
-    u = resii(mulii(u, (GEN)x[i]), p); /* u = 1 / (x[1] ... x[i-1]) */
+    y[i] = lremii(mulii(u, (GEN)y[i-1]), p);
+    u = remii(mulii(u, (GEN)x[i]), p); /* u = 1 / (x[1] ... x[i-1]) */
   }
   y[1] = (long)u; return y;
 }
@@ -1477,11 +1477,11 @@ addsell(GEN e, GEN z1, GEN z2, GEN p)
     if (!signe(y1) || !egalii(y1,y2)) return NULL;
     p2 = shifti(y1,1);
     p1 = addii(e, mulii(x1,mulsi(3,x1)));
-    p1 = resii(p1, p);
+    p1 = remii(p1, p);
   }
   else { p1 = subii(y2,y1); p2 = subii(x2, x1); }
   p1 = mulii(p1, mpinvmod(p2, p));
-  p1 = resii(p1, p);
+  p1 = remii(p1, p);
   x = subii(sqri(p1), addii(x1,x2));
   y = negi(addii(y1, mulii(p1,subii(x,x1))));
   x = modii(x,p);
@@ -1501,12 +1501,12 @@ addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
   if (x1 == x2)
   {
     p1 = addii(e, mulii(x1,mulsi(3,x1)));
-    p1 = resii(p1, p);
+    p1 = remii(p1, p);
   }
   else p1 = subii(y2,y1);
 
   p1 = mulii(p1, p2inv);
-  p1 = resii(p1, p);
+  p1 = remii(p1, p);
   x = subii(sqri(p1), addii(x1,x2)); x = modii(x,p);
   y = negi(addii(y1, mulii(p1,subii(x,x1)))); y = modii(y,p);
   affii(x, x1);
@@ -1788,7 +1788,7 @@ FOUND: /* found a point of exponent h on E_u */
     i = (cmpii(B, pordmin) < 0);
     /* If we are not done, update A mod B for the _next_ curve, isomorphic to
      * the quadratic twist of this one */
-    if (i) A = resii(subii(p2p,A), B); /* #E(Fp)+#E'(Fp) = 2p+2 */
+    if (i) A = remii(subii(p2p,A), B); /* #E(Fp)+#E'(Fp) = 2p+2 */
     
     /* h = A mod B, closest lift to p+1 */
     h = closest_lift(A, B, p1p);
@@ -1987,7 +1987,7 @@ apell(GEN e, GEN p)
 {
   checkell(e);
   if (typ(p)!=t_INT || signe(p)<0) err(talker,"not a prime in apell");
-  if (gdivise((GEN)e[12],p)) /* D may be an intmod */
+  if (gdvd((GEN)e[12],p)) /* D may be an intmod */
   {
     long s;
     pari_sp av = avma;
@@ -2028,7 +2028,7 @@ anell(GEN e, long n)
     if (an[p]) continue; /* p not prime */
 
     if (!smodis((GEN)e[12],p)) /* bad reduction, p | D */
-      switch (tab[p&3] * krogs((GEN)e[11],p)) /* (-c6/p) */
+      switch (tab[p&3] * krois((GEN)e[11],p)) /* (-c6/p) */
       {
         case -1:  /* non deployee */
           for (m=p; m<=n; m+=p)
@@ -2093,7 +2093,7 @@ akell(GEN e, GEN n)
     p = (GEN)P[i];
     ex = itos((GEN)E[i]);
     /* FIXME: should factor (n,D) first, then restrict to primes of good red. */
-    if (divise((GEN)e[12], p)) /* bad reduction */
+    if (dvdii((GEN)e[12], p)) /* bad reduction */
     {
       j = kronecker((GEN)e[11],p); /* (c6/p) */
       if (!j) { avma = av; return gzero; }
@@ -2295,7 +2295,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   {
     GEN p = (GEN)Lp[i];
     long u, v, n, n2;
-    if (signe(resii((GEN)e[10],p)))
+    if (signe(remii((GEN)e[10],p)))
     { /* p \nmid c4 */
       long N = ggval((GEN)e[12],p);
       if (!N) continue;

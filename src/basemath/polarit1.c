@@ -29,20 +29,20 @@ extern GEN pol_to_monic(GEN pol, GEN *lead);
 
 /*******************************************************************/
 /*                                                                 */
-/*                           DIVISIBILITE                          */
+/*                           DIVISIBILITY                          */
 /*                 Return 1 if y  |  x,  0 otherwise               */
 /*                                                                 */
 /*******************************************************************/
 
 int
-gdivise(GEN x, GEN y)
+gdvd(GEN x, GEN y)
 {
   pari_sp av=avma;
   x=gmod(x,y); avma=av; return gcmp0(x);
 }
 
 int
-poldivis(GEN x, GEN y, GEN *z)
+poldvd(GEN x, GEN y, GEN *z)
 {
   pari_sp av = avma;
   GEN p1 = poldivrem(x,y,ONLY_DIVIDES);
@@ -65,7 +65,7 @@ GEN
 poldivrem_i(GEN x, GEN y, GEN *pr, long vx)
 {
   pari_sp avy, av, av1;
-  long dx,dy,dz,i,j,sx,lrem;
+  long dx,dy,dz,i,j,sx,lr;
   GEN z,p1,rem,y_lead,mod;
   GEN (*f)(GEN,GEN);
 
@@ -161,10 +161,10 @@ poldivrem_i(GEN x, GEN y, GEN *pr, long vx)
     avma = (pari_sp)rem;
     return gerepileupto(av,z-2);
   }
-  lrem=i+3; rem -= lrem;
+  lr=i+3; rem -= lr;
   if (avma==av1) { avma = (pari_sp)rem; p1 = gcopy(p1); }
   else p1 = gerepileupto((pari_sp)rem,p1);
-  rem[0] = evaltyp(t_POL) | evallg(lrem);
+  rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
   rem += 2;
   rem[i]=(long)p1;
@@ -177,7 +177,7 @@ poldivrem_i(GEN x, GEN y, GEN *pr, long vx)
     rem[i]=avma==av1? lcopy(p1):lpileupto(av1,p1);
   }
   rem -= 2;
-  if (!sx) (void)normalizepol_i(rem, lrem);
+  if (!sx) (void)normalizepol_i(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av,rem);
   z -= 2;
   {
@@ -244,28 +244,31 @@ mod(GEN x, GEN y)
   z[1]=(long)y; z[2]=(long)x; return z;
 }
 
-static long
-factmod_init(GEN *F, GEN pp, ulong *P)
+static ulong
+init_p(GEN pp)
 {
-  GEN f = *F;
-  long i, d;
   ulong p;
-
-  if (typ(f)!=t_POL || typ(pp)!=t_INT) err(typeer,"factmod");
   if ((ulong)expi(pp) > BITS_IN_LONG - 3) p = 0;
   else
   {
     p = itou(pp);
     if (p < 2 || signe(pp) < 0) err(talker,"not a prime in factmod");
   }
-  f = gmul(f, mod(gun,pp));
-  if (!signe(f)) err(zeropoler,"factmod");
-  f = lift_intern(f); d = lg(f);
-  for (i=2; i <d; i++)
+  return p;
+}
+
+static long
+factmod_init(GEN *F, GEN pp)
+{
+  GEN f = *F;
+  long i, d;
+
+  if (typ(f)!=t_POL || typ(pp)!=t_INT) err(typeer,"factmod");
+  f = lift_intern( gmul(f, mod(gun,pp)) );
+  d = lg(f); if (d <= 2) err(zeropoler,"factmod");
+  for (i=2; i<d; i++)
     if (typ(f[i])!=t_INT) err(impl,"factormod for general polynomials");
-  *F = f;
-  if (P) *P = p;
-  return d-3;
+  *F = f; return d - 3;
 }
 
 static GEN
@@ -345,11 +348,8 @@ Flx_roots_naive(GEN f, ulong p)
     s++;
   }
   while (n < d-1 && p > s);
-  if (n == d-1 && p != s)
-  {
-    ulong g = p - invumod((ulong)f[3], p);
-    y[++n] = muluumod(g, (ulong)f[2], p);
-  }
+  if (n == d-1 && p != s) /* -f[2]/f[3] */
+    y[++n] = muluumod(p - invumod((ulong)f[3], p), (ulong)f[2], p);
   setlg(y, n+1); return y;
 }
 
@@ -360,8 +360,8 @@ rootmod2(GEN f, GEN pp)
   ulong p;
   GEN y;
 
-  if (!factmod_init(&f, pp, &p)) { avma = av; return cgetg(1,t_COL); }
-  if (!p) err(talker,"prime too big in rootmod2");
+  if (!factmod_init(&f, pp)) { avma = av; return cgetg(1,t_COL); }
+  p = init_p(pp); if (!p) err(talker,"prime too big in rootmod2");
   if (p & 1) 
     y = Flv_ZV(Flx_roots_naive(ZX_Flx(f,p), p));
   else 
@@ -383,7 +383,7 @@ quadsolvemod(GEN x, GEN p, int unknown)
     return gun;
   }
   D = subii(sqri(b), shifti(c,2));
-  D = resii(D,p);
+  D = remii(D,p);
   if (unknown && kronecker(D,p) == -1) return NULL;
 
   s = mpsqrtmod(D,p);
@@ -468,12 +468,12 @@ FpX_roots(GEN f, GEN p) {
 GEN
 rootmod(GEN f, GEN p)
 {
-  long q;
+  ulong q;
   pari_sp av = avma;
   GEN y;
 
-  if (!factmod_init(&f, p, NULL)) { avma=av; return cgetg(1,t_COL); }
-  q = modBIL(p);
+  if (!factmod_init(&f, p)) { avma=av; return cgetg(1,t_COL); }
+  q = init_p(p); if (!q) q = modBIL(p);
   if (q & 1) 
     y = FpX_roots_i(f, p);
   else 
@@ -926,19 +926,19 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
 }
 
 /* factor f mod pp.
- * If (flag = 1) return the degrees, not the factors
- * If (flag = 2) return NULL if f is not irreducible
- */
+ * flag = 1: return the degrees, not the factors
+ * flag = 2: return NULL if f is not irreducible */
 static GEN
-factcantor0(GEN f, GEN pp, long flag)
+FpX_factcantor_i(GEN f, GEN pp, long flag)
 {
-  long i, j, d, e, vf, nbfact;
+  long j, e, vf, nbfact, d = degpol(f);
   ulong p, k;
-  pari_sp tetpil, av = avma;
   GEN ex,y,f2,g,g1,u,v,pd,q;
   GEN *t;
 
-  if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
+  if (!d) return flag == 2? NULL: trivfact();
+  p = init_p(pp);
+
   /* to hold factors and exponents */
   t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
   vf=varn(f); e = nbfact = 1;
@@ -1009,43 +1009,58 @@ factcantor0(GEN f, GEN pp, long flag)
       }
     }
     j = lg(f2); if (j==3) break;
+    e *= p; f = poldeflate_i(f2, p);
+  }
+  if (flag > 1) return gun; /* irreducible */
+  y = cgetg(3, t_VEC);
+  y[1] = (long)t; setlg(t, nbfact);
+  y[2] = (long)ex;setlg(ex,nbfact); 
+  if (!flag) (void)sort_factor(y,cmpii);
+  return y;
 
-    e*=p; j=(j-3)/p+3; setlg(f,j);
-    for (i=2; i<j; i++) f[i]=f2[p*(i-2)+2];
-  }
-  if (flag > 1) { avma = av; return gun; } /* irreducible */
-  tetpil=avma; y=cgetg(3,t_MAT);
-  if (!flag)
-  {
-    y[1]=(long)t; setlg(t, nbfact);
-    y[2]=(long)ex; (void)sort_factor(y,cmpii);
-  }
-  u=cgetg(nbfact,t_COL); y[1]=(long)u;
-  v=cgetg(nbfact,t_COL); y[2]=(long)v;
+}
+GEN
+FpX_factcantor(GEN f, GEN pp, long flag)
+{
+  pari_sp av = avma;
+  GEN z = FpX_factcantor_i(f,pp,flag);
+  if (flag == 2) { avma = av; return z; }
+  return gerepileupto(av, z);
+}
+GEN
+factcantor0(GEN f, GEN pp, long flag)
+{
+  pari_sp av = avma;
+  long j, nbfact;
+  GEN z, y, t, E, u, v;
+  if (! factmod_init(&f, pp)) { avma=av; return trivfact(); }
+  z = FpX_factcantor_i(f,pp,flag); t = (GEN)z[1]; E = (GEN)z[2];
+  y = cgetg(3, t_MAT); nbfact = lg(t);
+  u = cgetg(nbfact,t_COL); y[1] = (long)u;
+  v = cgetg(nbfact,t_COL); y[2] = (long)v;
   if (flag)
     for (j=1; j<nbfact; j++)
     {
-      u[j] = lstoi((long)t[j]);
-      v[j] = lstoi(ex[j]);
+      u[j] = lutoi((ulong)t[j]);
+      v[j] = lutoi((ulong)E[j]);
     }
   else
     for (j=1; j<nbfact; j++)
     {
-      u[j] = (long)FpX(t[j], pp);
-      v[j] = lstoi(ex[j]);
+      u[j] = (long)FpX((GEN)t[j], pp);
+      v[j] = lutoi((ulong)E[j]);
     }
-  return gerepile(av,tetpil,y);
+  return gerepileupto(av, y);
 }
 
-/* Use only use this function when you think f is reducible, and that there
- * are a lot of factors. If you believe f is irreducible or that it has few
- * factors, then use `FpX_nbfact(f,p)==1' instead. */
+/* Use this function when you think f is reducible, and that there are lots of
+ * factors. If you believe f has few factors, use FpX_nbfact(f,p)==1 instead */
 long
-FpX_is_irred(GEN f, GEN p) { return !!factcantor0(f,p,2); }
-
+FpX_is_irred(GEN f, GEN p) { return !!FpX_factcantor_i(f,p,2); }
+GEN
+FpX_degfact(GEN f, GEN p) { return FpX_factcantor_i(f,p,1); }
 GEN
 factcantor(GEN f, GEN p) { return factcantor0(f,p,0); }
-
 GEN
 simplefactmod(GEN f, GEN p) { return factcantor0(f,p,1); }
 
@@ -1299,16 +1314,9 @@ ZX_deriv(GEN x)
 }
 
 GEN
-FpX_deriv(GEN f, GEN p)
-{
-  return FpX_red(ZX_deriv(f), p);
-}
-
+FpX_deriv(GEN f, GEN p) { return FpX_red(ZX_deriv(f), p); }
 GEN
-FqX_deriv(GEN f, GEN T, GEN p)
-{
-  return FpXQX_red(derivpol(f), T, p);
-}
+FqX_deriv(GEN f, GEN T, GEN p) { return FqX_red(derivpol(f), T, p); }
 
 GEN
 FqX_gcd(GEN P, GEN Q, GEN T, GEN p)
@@ -1364,7 +1372,7 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
         if (lb && lb < la)
         {
-          b = FpXQX_normalize(b, T,p);
+          b = FqX_normalize(b, T,p);
           t[L] = FqX_div(a,b,T,p);
           t[i]= b; L++;
         }
@@ -1375,20 +1383,21 @@ FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p)
   return d;
 }
 
-GEN
-factmod0(GEN f, GEN pp)
+static GEN
+FpX_factor_i(GEN f, GEN pp)
 {
-  long e, N, nbfact, d, val;
-  ulong p, k, i, j;
-  pari_sp av = avma, tetpil;
-  GEN pps2,ex,y,f2,p1,g1,u, *t;
+  long e, N, nbfact, val, d = degpol(f);
+  ulong p, k, j;
+  GEN pps2,E,y,f2,p1,g1,u, *t;
 
-  if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
+  if (!d) return trivfact();
+  p = init_p(pp);
+
   /* to hold factors and exponents */
-  t = (GEN*)cgetg(d+1,t_COL); ex = cgetg(d+1,t_VECSMALL);
+  t = (GEN*)cgetg(d+1,t_COL); E = cgetg(d+1,t_VECSMALL);
   val = ZX_valuation(f, &f);
   e = nbfact = 1;
-  if (val) { t[1] = polx[varn(f)]; ex[1] = val; nbfact++; }
+  if (val) { t[1] = polx[varn(f)]; E[1] = val; nbfact++; }
   pps2 = shifti(pp,-1);
 
   for(;;)
@@ -1411,44 +1420,45 @@ factmod0(GEN f, GEN pp)
       {
         t[nbfact] = FpX_normalize(u,pp);
         d = (N==1)? 1: FpX_split_Berlekamp(t+nbfact, pp);
-        for (j=0; j<(ulong)d; j++) ex[nbfact+j] = e*k;
+        for (j=0; j<(ulong)d; j++) E[nbfact+j] = e*k;
         nbfact += d;
       }
     }
     if (!p) break;
     j = degpol(f2); if (!j) break;
     if (j % p) err(talker, "factmod: %lu is not prime", p);
-    j = j/p + 3;
-
-    e *= p; setlg(f,j);
-    for (i=2; i<j; i++) f[i] = f2[p*(i-2)+2];
+    e *= p; f = poldeflate_i(f2, p);
   }
-  tetpil=avma; y=cgetg(3,t_VEC);
-  setlg((GEN)t, nbfact);
-  setlg(ex, nbfact);
-  y[1]=lcopy((GEN)t);
-  y[2]=lcopy(ex);
-  (void)sort_factor(y,cmpii);
-  return gerepile(av,tetpil,y);
+  y = cgetg(3, t_VEC);
+  y[1] = (long)t; setlg(t, nbfact);
+  y[2] = (long)E; setlg(E, nbfact); return sort_factor(y,cmpii);
 }
 GEN
-factmod(GEN f, GEN pp)
+FpX_factor(GEN f, GEN p)
 {
-  pari_sp tetpil, av=avma;
+  pari_sp av = avma;
+  return gerepilecopy(av, FpX_factor_i(f, p));
+}
+
+GEN
+factmod(GEN f, GEN p)
+{
+  pari_sp av = avma;
   long nbfact;
   long j;
-  GEN y,u,v;
-  GEN z=factmod0(f,pp),t=(GEN)z[1],ex=(GEN)z[2];
-  nbfact=lg(t);
-  tetpil=avma; y=cgetg(3,t_MAT);
-  u=cgetg(nbfact,t_COL); y[1]=(long)u;
-  v=cgetg(nbfact,t_COL); y[2]=(long)v;
+  GEN y, u, v, z, t, E;
+
+  if (!factmod_init(&f, p)) { avma = av; return trivfact(); }
+  z = FpX_factor_i(f, p); t = (GEN)z[1]; E = (GEN)z[2];
+  y = cgetg(3,t_MAT); nbfact = lg(t);
+  u = cgetg(nbfact,t_COL); y[1] = (long)u;
+  v = cgetg(nbfact,t_COL); y[2] = (long)v;
   for (j=1; j<nbfact; j++)
   {
-    u[j] = (long)FpX((GEN)t[j], pp);
-    v[j] = lstoi(ex[j]);
+    u[j] = (long)FpX((GEN)t[j], p);
+    v[j] = lutoi((ulong)E[j]);
   }
-  return gerepile(av,tetpil,y);
+  return gerepileupto(av, y);
 }
 GEN
 factormod0(GEN f, GEN p, long flag)
@@ -2037,7 +2047,7 @@ padicff(GEN x,GEN p,long pr)
 
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
-  nf[4] = divise( diviiexact(dx, dK), p )? (long)p: un;
+  nf[4] = dvdii( diviiexact(dx, dK), p )? (long)p: un;
   invbas = QM_inv(vecpol_to_mat(bas,n), gun);
   mul = get_mul_table(x,bas,invbas);
   nf[7]=(long)bas;
@@ -2117,7 +2127,7 @@ factorpadic4(GEN f,GEN p,long prec)
   for (j=i=1; i<n; i++)
   {
     pari_sp av1 = avma;
-    GEN fx = (GEN)poly[i], fa = factmod0(fx,p);
+    GEN fx = (GEN)poly[i], fa = FpX_factor(fx,p);
     w = (GEN)fa[1];
     if (expo_is_squarefree((GEN)fa[2]))
     { /* no repeated factors: Hensel lift */
@@ -2226,22 +2236,19 @@ copy_then_free(GEN T)
 }
 
 static GEN
-to_Fq_fact(GEN t, GEN ex, long nbf, int sort, GEN unfq, pari_sp av)
+to_Fq_fact(GEN t, GEN E, GEN unfq, pari_sp av)
 {
   GEN T = (GEN)unfq[1]/*clone*/, y = cgetg(3,t_MAT), u,v,p;
-  long j,k, l = lg(t);
+  long j, l = lg(t), nbf = lg(t);
 
   u = cgetg(nbf,t_COL); y[1] = (long)u;
   v = cgetg(nbf,t_COL); y[2] = (long)v;
-  for (j=1,k=0; j<l; j++)
-    if (ex[j])
-    {
-      k++;
-      u[k] = (long)simplify((GEN)t[j]); /* may contain pols of degree 0 */
-      v[k] = lstoi(ex[j]);
-    }
+  for (j=1; j<l; j++)
+  {
+    u[j] = (long)simplify((GEN)t[j]); /* may contain pols of degree 0 */
+    v[j] = lutoi((ulong)E[j]);
+  }
   y = gerepileupto(av, y);
-  if (sort) y = sort_factor(y,cmp_pol);
   T = copy_then_free(T);
   p = (GEN)leading_term(T)[1];
   u = (GEN)y[1];
@@ -2274,7 +2281,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
       for (l=1; l<dT; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
       {
         w = FqX_rem(FqX_sqr(w,T,p), *t, T,p);
-        w = FpXQX_red(gadd(w0,w), NULL,p);
+        w = FpXX_red(gadd(w0,w), p);
       }
     }
     else
@@ -2505,35 +2512,44 @@ FqX_sqf_split(GEN *t0, GEN q, GEN T, GEN p)
   return t - t0;
 }
 
-GEN
-factmod9(GEN f, GEN p, GEN T)
+/* not memory-clean */
+static GEN
+Fp_factor_rel(GEN P,GEN l, GEN Q)
 {
-  pari_sp av = avma;
-  long pg, i, j, k, d, e, N, va, nbfact, nbf, pk;
-  GEN ex, f2, f3, df1, df2, g1, u, q, unfp, unfq,  *t;
-  GEN frobinv;
-
-  if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
-  va = varn(T);
-  if (varncmp(va, varn(f)) <= 0)
-    err(talker,"polynomial variable must have higher priority in factorff");
-  unfp = gmodulsg(1,p); T = gmul(unfp,T);
-  unfq = gmodulo(gmul(unfp,polun[va]), T);
-  f = gmul(unfq,f);
-  if (!signe(f)) err(zeropoler,"factmod9");
-  d = degpol(f); if (!d) { avma = av; return trivfact(); }
-
-  f = simplify(lift_intern(lift_intern(f)));
-  T = lift_intern(T);
-  if (isabsolutepol(f))
+  GEN V,E,y, F = FpX_factor(P,l);
+  long lfact = 1, nmax = lgpol(P), n = lg((GEN)F[1]);
+  long i;
+  V = cgetg(nmax,t_VEC);
+  E = cgetg(nmax,t_VECSMALL);
+  for(i=1;i<n;i++)
   {
-    GEN z = Fp_factor_rel0(f, p, T);
-    return to_Fq_fact((GEN)z[1],(GEN)z[2],lg(z[1]), 0, unfq,av);
+    GEN R = Fp_factor_irred(gmael(F,1,i),Q,l);
+    int j, r = lg(R);
+    for (j=1;j<r;j++)
+    {
+      V[lfact] = R[j];
+      E[lfact] = mael(F,2,i); lfact++;
+    }
   }
+  y = cgetg(3,t_VEC);
+  y[1] = (long)V; setlg(V,lfact);
+  y[2] = (long)E; setlg(E,lfact); return sort_factor(y,cmp_pol);
+}
+
+static GEN
+FqX_factor_i(GEN f, GEN T, GEN p)
+{
+  long pg, i, j, k, d, e, N, nbfact, pk;
+  GEN y, E, f2, f3, df1, df2, g1, u, q, frobinv, *t;
+
+  if (!signe(f)) err(zeropoler,"FqX_factor");
+  d = degpol(f); if (!d) return trivfact();
+
+  if (isabsolutepol(f)) return Fp_factor_rel(f, p, T);
 
   pg = itos_or_0(p);
   df2  = NULL; /* gcc -Wall */
-  t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
+  t = (GEN*)cgetg(d+1,t_VEC); E = new_chunk(d+1);
 
   frobinv = gpowgs(p, degpol(T)-1);
 
@@ -2547,10 +2563,8 @@ factmod9(GEN f, GEN p, GEN T)
     long nb0;
     while (gcmp0(df1))
     { /* needs d >= p: pg = 0 can't happen  */
-      pk *= pg; e = pk;
-      j = degpol(f) / pg + 3; setlg(f,j);
-      for (i=2; i<j; i++)
-        f[i] = (long)Fq_pow((GEN)f[pg*(i-2)+2], frobinv, T,p);
+      pk *= pg; e = pk; f = poldeflate_i(f, pg); j = lg(f);
+      for (i=2; i<j; i++) f[i] = (long)Fq_pow((GEN)f[i], frobinv, T,p);
       df1 = FqX_deriv(f, T, p); f3 = NULL;
     }
     f2 = f3? f3: FqX_gcd(f,df1, T,p);
@@ -2572,31 +2586,59 @@ factmod9(GEN f, GEN p, GEN T)
     if (N)
     {
 #if 0
-      t[nbfact] = FpXQX_normalize(u, T,p);
+      t[nbfact] = FqX_normalize(u, T,p);
       nbfact += (N==1)? 1: FqX_split_berlekamp(t+nbfact, q, T, p);
 #else
       t[nbfact] = u;
       nbfact += (N==1)? 1: FqX_sqf_split(t+nbfact, q, T, p);
 #endif
     }
-    for (j = nb0; j < nbfact; j++) ex[j] = e;
+    for (j = nb0; j < nbfact; j++) E[j] = e;
 
     if (!degpol(f2)) break;
     f = f2; df1 = df2; e += pk;
   }
 
-  nbf = nbfact; setlg(t, nbfact);
   for (j=1; j<nbfact; j++)
   {
-    t[j] = FpXQX_normalize((GEN)t[j], T,p);
+    t[j] = FqX_normalize((GEN)t[j], T,p);
     for (k=1; k<j; k++)
-      if (ex[k] && gegal(t[j],t[k]))
+      if (gegal(t[j],t[k]))
       {
-        ex[k] += ex[j]; ex[j]=0;
-        nbf--; break;
+        E[k] += E[j]; nbfact--;
+        E[j] = E[nbfact];
+        t[j] = t[nbfact]; break;
       }
   }
-  return to_Fq_fact((GEN)t,ex,nbf, 1, unfq,av);
+  y = cgetg(3, t_VEC);
+  y[1] = (long)t; setlg(t, nbfact);
+  y[2] = (long)E; setlg(E, nbfact); return sort_factor(y, cmp_pol);
+}
+GEN
+factmod9(GEN f, GEN p, GEN T)
+{
+  pari_sp av = avma;
+  long v;
+  GEN z, unfp, unfq;
+
+  if (typ(T)!=t_POL || typ(f)!=t_POL || gcmp0(T)) err(typeer,"factmod9");
+  v = varn(T);
+  if (varncmp(v, varn(f)) <= 0)
+    err(talker,"polynomial variable must have higher priority in factorff");
+  unfp = gmodulsg(1,p); T = gmul(unfp,T);
+  unfq = gmodulo(gmul(unfp,polun[v]), T);
+  f = simplify(lift_intern(lift_intern( gmul(unfq,f)) ));
+  T = lift_intern(T);
+  z = FqX_factor_i(f, T, p);
+  return to_Fq_fact((GEN)z[1],(GEN)z[2], unfq,av);
+}
+/* factorization of x modulo (T,p). Assume x already reduced */
+GEN
+FqX_factor(GEN x, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  if (!T) return FpX_factor(x, p);
+  return gerepilecopy(av, FqX_factor_i(x, T, p));
 }
 /* See also: Isomorphisms between finite field and relative
  * factorization in polarit3.c */
@@ -2661,7 +2703,7 @@ rootsold(GEN x, long prec)
   else pax = x;
   xd0 = derivpol(pax); pa = pax;
   pq = NULL; /* for lint */
-  if (gg) { pp=ggcd(pax,xd0); h=isnonscalar(pp); if (h) pq=gdeuc(pax,pp); }
+  if (gg) { pp = ggcd(pax,xd0); h = degpol(pp); if (h) pq=gdeuc(pax,pp); }
   else{ pp=gun; h=0; }
   m = 0;
   while (k != deg0)
@@ -2669,7 +2711,7 @@ rootsold(GEN x, long prec)
     m++;
     if (h)
     {
-      pa=pp; pb=pq; pp=ggcd(pa,derivpol(pa)); h=isnonscalar(pp);
+      pa=pp; pb=pq; pp = ggcd(pa,derivpol(pa)); h = degpol(pp);
       if (h) pq=gdeuc(pa,pp); else pq=pa; ps=gdeuc(pb,pq);
     }
     else ps = pa;

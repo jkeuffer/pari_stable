@@ -413,7 +413,7 @@ Order(GEN cyc, GEN x)
     o = (GEN)cyc[i];
     c = gcdii(o, (GEN)x[i]);
     if (!is_pm1(c)) o = diviiexact(o,c);
-    f = mpppcm(f, o);
+    f = lcmii(f, o);
   }
   return gerepileuptoint(av, f);
 }
@@ -1507,7 +1507,7 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
   R->L11= cget1(l, t_VECSMALL); R->L11ray= (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
   for (p = 2; p <= nmax; prime[2] = p) {
-    switch (krogs(dk, p))
+    switch (krois(dk, p))
     {
     case -1: /* inert */
       if (condZ % p == 0) deg0(R,p); else deg2(R,p);

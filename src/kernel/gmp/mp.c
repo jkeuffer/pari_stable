@@ -52,7 +52,7 @@ int pari_kernel_init(void)
   setmontgomerylimit(0);
   Flx_INVMONTGOMERY_LIMIT  = 600;
   Flx_POW_MONTGOMERY_LIMIT = 100;
-  /*setresiilimit(50);*/
+  /*setremiilimit(50);*/
   /* Use gpmalloc instead of malloc */
   mp_set_memory_functions((void *(*)(size_t)) gpmalloc
 		  	,(void *(*)(void *, size_t, size_t)) gprealloc
@@ -442,16 +442,11 @@ ishiftr_spec(GEN x, long lx, long n)
 }
 
 GEN
-mptrunc(GEN x)
-{
-  long d,e,m,i,s;
-  GEN y;
-
-  if (typ(x)==t_INT) return icopy(x);
+truncr(GEN x)
   if ((s=signe(x)) == 0 || (e=expo(x)) < 0) return gzero;
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  if (d > lg(x)) err(precer, "mptrunc (precision loss in truncation)");
+  if (d > lg(x)) err(precer, "truncr (precision loss in truncation)");
 
   y=cgeti(d); y[1] = evalsigne(s) | evallgefint(d);
   if (++m == BITS_IN_LONG)
@@ -468,16 +463,13 @@ mptrunc(GEN x)
 
 /* integral part */
 GEN
-mpent(GEN x)
+floorr(GEN x)
 {
-  GEN y;
-  long d,e,m,i,lx;
-  if (typ(x)==t_INT) return icopy(x);
-  if (signe(x) >= 0) return mptrunc(x);
+  if (signe(x) >= 0) return truncr(x);
   if ((e=expo(x)) < 0) return stoi(-1);
   d = (e>>TWOPOTBITS_IN_LONG) + 3;
   m = e & (BITS_IN_LONG-1);
-  lx=lg(x); if (d>lx) err(precer, "mpent (precision loss in truncation)");
+  lx=lg(x); if (d>lx) err(precer, "floorr (precision loss in truncation)");
   y = cgeti(d+1);
   if (++m == BITS_IN_LONG)
   {
@@ -1063,9 +1055,9 @@ red_montgomery(GEN T, GEN N, ulong inv)
   {
     long l = lgefint(N)-2, s = BITS_IN_LONG*l;
     GEN R = shifti(gun, s);
-    GEN res = resii(mulii(T, mpinvmod(R, N)), N);
+    GEN res = remii(mulii(T, mpinvmod(R, N)), N);
     if (k > lgefint(N)
-        || !egalii(resii(Td,N),res)
+        || !egalii(remii(Td,N),res)
         || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
   }
 #endif

@@ -52,7 +52,6 @@ long Flx_POW_MONTGOMERY_LIMIT = 1000;
 /**                                                                   **/
 /***********************************************************************/
 
-/* Flx_ZX=zx_ZX*/
 GEN
 Flx_ZX(GEN z)
 {
@@ -403,7 +402,7 @@ Flx_shiftip(pari_sp av, GEN x, long v)
 {
   long i, lx = lg(x), ly;
   GEN y;
-  if (v <= 0 || lx==2) return gerepileupto(av, x);
+  if (v <= 0 || lx==2) return gerepileuptoleaf(av, x);
   avma = av; ly = lx + v;
   x += lx; y = new_chunk(ly) + ly; /*cgetg could overwrite x!*/
   for (i = 2; i<lx; i++) *--y = *--x;
@@ -908,9 +907,7 @@ Flx_invmontgomery_newton(GEN T, ulong p)
   return q;
 }
 
-/*
- * x/polrecip(P)+O(x^n)
- */
+/* x/polrecip(P)+O(x^n) */
 GEN
 Flx_invmontgomery(GEN T, ulong p)
 {
@@ -929,7 +926,7 @@ Flx_invmontgomery(GEN T, ulong p)
   else
     r=Flx_invmontgomery_newton(T,p);
   if (c!=1)  r=Flx_Fl_mul(r,ci,p);
-  return gerepileupto(ltop, r);
+  return gerepileuptoleaf(ltop, r);
 }
 
 /* Compute x mod T where lg(x)<=2*lg(T)-2
@@ -991,7 +988,7 @@ GEN
 Flx_gcd(GEN a, GEN b, ulong p)
 {
   pari_sp av = avma;
-  return gerepileupto(av, Flx_gcd_i(a,b,p));
+  return gerepileuptoleaf(av, Flx_gcd_i(a,b,p));
 }
 
 int
@@ -1097,10 +1094,10 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   }
   res = muluumod(res, powuumod(y[2], dx, p), p);
   lb = muluumod(res, invumod(y[2],p), p);
-  v = gerepileupto(av, Flx_Fl_mul(v, lb, p));
+  v = gerepileuptoleaf(av, Flx_Fl_mul(v, lb, p));
   av = avma;
   u = Flx_sub(Fl_Flx(res,vs), Flx_mul(b,v,p), p);
-  u = gerepileupto(av, Flx_div(u,a,p)); /* = (res - b v) / a */
+  u = gerepileuptoleaf(av, Flx_div(u,a,p)); /* = (res - b v) / a */
   *ptU = u;
   *ptV = v; return res;
 }
@@ -1249,7 +1246,7 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
       dP = Flx_Fl_mul(T, muluumod(ya[i],inv,p), p);
     P = P? Flx_add(P, dP, p): dP;
   }
-  return P? gerepileupto(av, P): Flx_zero(vs);
+  return P? gerepileuptoleaf(av, P): Flx_zero(vs);
 }
 
 /***********************************************************************/
@@ -1334,7 +1331,7 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   }
   else
     y = leftright_pow(x, n, (void*)&D, &_Flxq_sqr, &_Flxq_mul);
-  return gerepileupto(av, y);
+  return gerepileuptoleaf(av, y);
 }
 
 /* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
@@ -1358,7 +1355,7 @@ Flxq_inv(GEN x,GEN T,ulong p)
   pari_sp av=avma;
   GEN U = Flxq_invsafe(x, T, p);
   if (!U) err(talker,"non invertible polynomial in Flxq_inv");
-  return gerepileupto(av, U);
+  return gerepileuptoleaf(av, U);
 }
 
 /* generates the list of powers of x of degree 0,1,2,...,l*/
@@ -1392,7 +1389,7 @@ FlxV_Flv_innerprod(GEN V, GEN W, ulong p)
   GEN z = Flx_Fl_mul((GEN)V[1],W[1],p);
   for(i=2;i<lg(V);i++)
     z=Flx_add(z,Flx_Fl_mul((GEN)V[i],W[i],p),p);
-  return gerepileupto(ltop,z);
+  return gerepileuptoleaf(ltop,z);
 }
 
 GEN
@@ -1625,7 +1622,7 @@ FlxqX_normalize(GEN z, GEN T, ulong p)
 GEN
 FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
 {
-  long vx, dx, dy, dz, i, j, sx, lrem;
+  long vx, dx, dy, dz, i, j, sx, lr;
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
@@ -1691,8 +1688,8 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
     if (sx) { avma=av0; return NULL; }
     avma = (pari_sp)rem; return z-2;
   }
-  lrem=i+3; rem -= lrem;
-  rem[0] = evaltyp(t_POL) | evallg(lrem);
+  lr=i+3; rem -= lr;
+  rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
   p1 = gerepile((pari_sp)rem,tetpil,p1);
   rem += 2; rem[i]=(long)p1;
@@ -1705,7 +1702,7 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) (void)FlxX_renormalize(rem, lrem);
+  if (!sx) (void)FlxX_renormalize(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }

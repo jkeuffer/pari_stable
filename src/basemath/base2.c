@@ -29,7 +29,6 @@ extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN DDF2(GEN x, long hint);
 extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 extern GEN RXQX_mul(GEN x, GEN y, GEN T);
 extern GEN ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LPRS);
@@ -249,7 +248,7 @@ rowred(GEN a, GEN rmod)
 }
 
 /* Calcule d/x  ou  d est entier et x matrice triangulaire inferieure
- * entiere dont les coeff diagonaux divisent d (resultat entier). */
+ * entiere dont les coeff diagonaux dvdiint d (resultat entier). */
 static GEN
 matinv(GEN x, GEN d)
 {
@@ -856,7 +855,7 @@ maxord(GEN p,GEN f,long mf)
     g = FpX_div(f, FpX_gcd(f,derivpol(f), p), p);
   else
   {
-    w = (GEN)factmod0(f,p)[1];
+    w = (GEN)FpX_factor(f,p)[1];
     g = FpXV_prod(w, p);
   }
   res = dedek(f, mf, p, g);
@@ -864,7 +863,7 @@ maxord(GEN p,GEN f,long mf)
     res = dbasis(p, f, mf, polx[varn(f)], res);
   else
   {
-    if (!w) w = (GEN)factmod0(f,p)[1];
+    if (!w) w = (GEN)FpX_factor(f,p)[1];
     res = maxord_i(p, f, mf, w, 0);
   }
   return gerepileupto(av,res);
@@ -1345,7 +1344,7 @@ mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
 static GEN
 get_nu(GEN chi, GEN p, long *ptl)
 {
-  GEN P = (GEN)factmod0(chi, p)[1];
+  GEN P = (GEN)FpX_factor(FpX_red(chi,p), p)[1];
   *ptl = lg(P) - 1;
   return (GEN)P[*ptl];
 }
@@ -1385,7 +1384,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
     }
     if (k < n)
     {
-      B = gdiv(gres(gmul(B, beta), f), pdr);
+      B = gdiv(grem(gmul(B, beta), f), pdr);
       if (!gcmp1(Q_denom(B))) { avma = av; return NULL; }
       B = centermod(B, d);
     }
@@ -1691,7 +1690,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     }
 
     /* nug irreducible mod p */
-    w = Fp_factor_irred(nug, S->p, ch_var(S->nu, nv));
+    w = Fp_factor_irred(nug, ch_var(S->nu, nv), S->p);
     if (degpol(w[1]) != 1)
     {
       if (fm) { fm = -1; continue; }
@@ -1714,7 +1713,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
         chie = TR_pol(chig, delt); /* frequent special case */
       else
       {
-        if (!divise(ZX_QX_resultant(S->chi, eta), S->p)) continue;
+        if (!dvdii(ZX_QX_resultant(S->chi, eta), S->p)) continue;
         chie = mycaract(S->chi, eta, S->p, S->pmr, -1, ns);
       }
       nue = get_nu(chie, S->p, &l);
@@ -1727,7 +1726,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       { /* vp(eta) = vp(gamma - delta) > 0 */
         long Le, Ee;
         GEN pie;
-        if (divise(constant_term(chie), S->pmr))
+        if (dvdii(constant_term(chie), S->pmr))
           chie = mycaract(S->chi, eta, S->p, S->pmf, -1, ns);
         
         pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
@@ -1920,7 +1919,7 @@ get_norm(norm_S *S, GEN a)
 static int
 is_uniformizer(GEN a, GEN q, norm_S *S)
 {
-  return (resii(get_norm(S,a), q) != gzero);
+  return (remii(get_norm(S,a), q) != gzero);
 }
 
 /* return x * y, x, y are t_MAT (Fp-basis of in O_K/p), assume (x,y)=1.
@@ -2268,7 +2267,7 @@ _primedec(GEN nf, GEN p)
 {
   GEN Lpr = cgetg(iL, t_VEC);
   GEN LV = get_LV(nf, L,p,N);
-  int ramif = divise((GEN)nf[3], p);
+  int ramif = dvdii((GEN)nf[3], p);
   norm_S S; init_norm(&S, nf, p);
   for (i=1; i<iL; i++)
     Lpr[i] = (long)get_pr(nf, &S, p, (GEN)L[i], (GEN)LV[i], ramif);
@@ -2419,7 +2418,7 @@ modprinit(GEN nf, GEN pr, int zk)
       ffproj[i] = lneg((GEN)prh[i]);
   }
   ffproj = rowextract_p(ffproj, c);
-  if (! divise((GEN)nf[4], p))
+  if (! dvdii((GEN)nf[4], p))
   {
     GEN basis = (GEN)nf[7];
     if (N == f) T = (GEN)nf[1]; /* pr inert */
@@ -2574,7 +2573,7 @@ nfreducemodpr_i(GEN x, GEN prh)
   x = dummycopy(x);
   for (i=lg(x)-1; i>=2; i--)
   {
-    GEN t = (GEN)prh[i], p1 = resii((GEN)x[i], p);
+    GEN t = (GEN)prh[i], p1 = remii((GEN)x[i], p);
     x[i] = (long)p1;
     if (signe(p1) && is_pm1(t[i]))
     {
@@ -2583,7 +2582,7 @@ nfreducemodpr_i(GEN x, GEN prh)
       x[i] = zero;
     }
   }
-  x[1] = lresii((GEN)x[1], p); return x;
+  x[1] = lremii((GEN)x[1], p); return x;
 }
 
 GEN
@@ -2782,10 +2781,10 @@ mymod(GEN x, GEN p)
   long i,lx, tx = typ(x);
   GEN y,p1;
 
-  if (tx == t_INT) return resii(x,p);
+  if (tx == t_INT) return remii(x,p);
   if (tx == t_FRAC)
   {
-    p1 = resii((GEN)x[2], p);
+    p1 = remii((GEN)x[2], p);
     if (p1 != gzero) { cgiv(p1); return gmod(x,p); }
     return x;
   }
@@ -2936,7 +2935,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
     GEN Wainv, Waa;
     GEN Ip, A, Ainv, MWmod, F;
     GEN pseudo, G;
-    if (DEBUGLEVEL>1) fprintferr("    %ld%s pass\n",cmpt,eng_ord(cmpt));
+    if (DEBUGLEVEL>1) fprintferr("    pass no %ld\n",cmpt);
     for (j=1; j<=n; j++)
     {
       GEN tau, tauinv;
@@ -2970,7 +2969,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
           z = mulmat_pol(Wainv, z);
         for (k=1; k<=n; k++)
         {
-          GEN c = gres((GEN)z[k], nfT);
+          GEN c = grem((GEN)z[k], nfT);
           coeff(MW, k, (i-1)*n+j) = (long)c;
           coeff(MW, k, (j-1)*n+i) = (long)c;
         }
@@ -3003,7 +3002,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
         GEN z = gmul(Ainv, gmod(element_mulid(MW, (GEN)A[j],k), nfT));
         for (i=1; i<=n; i++)
         {
-          GEN c = gres((GEN)z[i], nfT);
+          GEN c = grem((GEN)z[i], nfT);
           coeff(C, (j-1)*n+i, k) = (long)nf_to_ff(nf,c,modpr);
         }
       }
@@ -3963,7 +3962,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     GEN w = element_mulvec(nf, (GEN)vpro[i], (GEN)ids[i]);
     for(j=1; j<=n; j++)
     {
-      p1 = gres(gmul(bs, (GEN)w[j]), polabs);
+      p1 = grem(gmul(bs, (GEN)w[j]), polabs);
       B[k++] = (long)pol_to_vec(p1, m);
     }
   }

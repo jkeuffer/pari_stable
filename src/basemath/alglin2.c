@@ -1079,7 +1079,7 @@ QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
   GEN p1,u,v,d, D;
 
   if (gcmp0(ak)) { lswap(A[j],A[k]); return; }
-  D = mpppcm(denom(aj), denom(ak));
+  D = lcmii(denom(aj), denom(ak));
   if (!is_pm1(D)) { aj = gmul(aj,D); ak = gmul(ak,D); }
   d = bezout(aj,ak,&u,&v);
   /* frequent special case (u,v) = (1,0) or (0,1) */
@@ -2055,6 +2055,14 @@ TOOLARGE:
 
 /* same as Flv_ZV, Flv_ZC, Flm_ZM but do not assume positivity */
 GEN
+zx_ZX(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_POL);
+  for (i=2; i<l; i++) x[i] = lstoi(z[i]);
+  x[1] = evalsigne(l-2!=0)| z[1]; return x;
+}
+GEN
 zv_ZV(GEN z)
 {
   long i, l = lg(z);
@@ -2079,7 +2087,7 @@ zm_ZM(GEN z)
   return x;
 }
 GEN
-ZC_zc(GEN z)
+ZV_zv(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l, t_VECSMALL);
@@ -2091,7 +2099,7 @@ ZM_zm(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)ZC_zc((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)ZV_zv((GEN)z[i]);
   return x;
 }
 
@@ -2262,7 +2270,7 @@ hnfmerge_get_1(GEN A, GEN B)
         GEN u = (GEN)U[k];
         long h;
         for (h=1; h<l; h++)
-          if (lgefint(u[h]) > lb) u[h] = lresii((GEN)u[h], b);
+          if (lgefint(u[h]) > lb) u[h] = lremii((GEN)u[h], b);
       }
     }
     if (j == 1)
@@ -2397,22 +2405,22 @@ allhnfmod(GEN x, GEN dm, int flag)
   ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
-    coeff(x,i,def) = lresii(gcoeff(x,i,def), dm);
+    coeff(x,i,def) = lremii(gcoeff(x,i,def), dm);
     for (j = def-1; j; j--)
     {
-      coeff(x,i,j) = lresii(gcoeff(x,i,j), dm);
+      coeff(x,i,j) = lremii(gcoeff(x,i,j), dm);
       a = gcoeff(x,i,j);
       if (!signe(a)) continue;
 
       k = (j==1)? def: j-1;
-      coeff(x,i,k) = lresii(gcoeff(x,i,k), dm);
+      coeff(x,i,k) = lremii(gcoeff(x,i,k), dm);
       ZV_elem(a,gcoeff(x,i,k), x,NULL, j,k);
       p1 = (GEN)x[j];
       p2 = (GEN)x[k];
       for (k = 1; k < i; k++)
       {
-        if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
-        if (lgefint(p2[k]) > ldm) p2[k] = lresii((GEN)p2[k], dm);
+        if (lgefint(p1[k]) > ldm) p1[k] = lremii((GEN)p1[k], dm);
+        if (lgefint(p2[k]) > ldm) p2[k] = lremii((GEN)p2[k], dm);
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
@@ -2449,7 +2457,7 @@ allhnfmod(GEN x, GEN dm, int flag)
         continue;
       }
       c = cgetg(li, t_COL);
-      for (j = 1; j < i; j++) c[j] = lresii(gcoeff(x,j,i),d);
+      for (j = 1; j < i; j++) c[j] = lremii(gcoeff(x,j,i),d);
       for (     ; j <li; j++) c[j] = zero;
       if (!egalii(dm, d)) c = gmul(c, diviiexact(dm, d));
       x[li] = (long)c;
@@ -2487,7 +2495,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   if (!modid)
   { /* compute optimal value for dm */
     dm = gcoeff(x,1,1);
-    for (i = 2; i < li; i++) dm = mpppcm(dm, gcoeff(x,i,i));
+    for (i = 2; i < li; i++) dm = lcmii(dm, gcoeff(x,i,i));
   }
 
   ldm = lgefint(dm);
@@ -2500,7 +2508,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       p1 = ZV_lincomb(gun,b, (GEN)x[j], (GEN)x[i]);
       x[j] = (long)p1;
       for (k=1; k<i; k++)
-        if (lgefint(p1[k]) > ldm) p1[k] = lresii((GEN)p1[k], dm);
+        if (lgefint(p1[k]) > ldm) p1[k] = lremii((GEN)p1[k], dm);
       if (low_stack(lim, stack_lim(av,1)))
       {
         if (DEBUGMEM>1) err(warnmem,"allhnfmod[2]. i=%ld", i);
@@ -3293,7 +3301,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
         for (k=1; k<i; k++)
         {
           for (j=1; j<i; j++)
-            if (signe(resii(gcoeff(x,k,j),b))) break;
+            if (signe(remii(gcoeff(x,k,j),b))) break;
           if (j != i) break;
         }
         if (k == i) break;

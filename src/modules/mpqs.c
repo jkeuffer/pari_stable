@@ -980,7 +980,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
         p1 = divis(A, (long)p);
         p1 = muliu(p1, invumod(umodiu(p1, p), p));
         p1 = muliu(p1, sqrt_mod_p_kN[start_index_FB + 1 + j]);
-        affii(resii(p1, A), H[i++]); avma = av;
+        affii(remii(p1, A), H[i++]); avma = av;
       }
 
     /* Each B is of the form sum(v_i * H_i, 0 <= i < bound) where each v_j is
@@ -1208,8 +1208,8 @@ mpqs_factorback(long *FB, char *relations, GEN kN)
   {
     e = atol(s); if (!e) break;
     s = strtok(NULL, " \n");
-    p_e = powgumod(stoi(FB[atol(s)]), (ulong)e, kN);
-    prod = resii(mulii(prod, p_e), kN);
+    p_e = powiumod(stoi(FB[atol(s)]), (ulong)e, kN);
+    prod = remii(mulii(prod, p_e), kN);
     s = strtok(NULL, " \n");
   }
   free(t); return prod;
@@ -1274,7 +1274,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
     if (absi_cmp(A_2x_plus_B, Y) < 0) Y = A_2x_plus_B;
     /* absolute value of smallest absolute residue of A_2x_plus_B mod kN */
 
-    Qx = resii(sqri(Y), kN);
+    Qx = remii(sqri(Y), kN);
 
     /* Most of the time, gcd(Qx, kN) = 1 or k.  However, it may happen that
      * Qx is a multiple of N, esp. when N is small, leading to havoc below --
@@ -1304,7 +1304,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
     }
 #endif
 
-    Qx = resii(mulii(Qx, inv_A4), kN);
+    Qx = remii(mulii(Qx, inv_A4), kN);
 
     /* check the sign of Qx */
     if (z1 < x_minus_M && x_minus_M < z2)
@@ -1365,7 +1365,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
       {
         pari_sp av1 = avma;
 	GEN rhs = mpqs_factorback(FB, relations, kN);
-	GEN Qx_2 = resii(sqri(Y), kN);
+	GEN Qx_2 = remii(sqri(Y), kN);
 	if (!egalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
@@ -1392,7 +1392,7 @@ mpqs_eval_cand(GEN A, GEN inv_A4, GEN B, GEN kN, long k, double sqrt_kN,
       {
         pari_sp av1 = avma;
         GEN rhs = mpqs_factorback(FB, relations, kN);
-	GEN Qx_2 = resii(sqri(Y), kN);
+	GEN Qx_2 = remii(sqri(Y), kN);
 
         rhs = modii(mulii(rhs, Qx), kN);
 	if (!egalii(Qx_2, rhs))
@@ -1831,7 +1831,7 @@ mpqs_add_relation(GEN Y_prod, GEN N_or_kN, long *ei, char *rel)
   s = strchr(rel, ':') - 1;
   *s = '\0';
   Y = lisexpr(rel);
-  res = resii(mulii(Y_prod, Y), N_or_kN);
+  res = remii(mulii(Y_prod, Y), N_or_kN);
 
   s = strtok(s + 3, " \n");
   while (s != NULL)
@@ -1989,7 +1989,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
       if (ei[j])
       {
         if (ei[j] & 1) err(bugparier, "MPQS (relation is a nonsquare)");
-	X = resii(mulii(X, powgumod(stoi(FB[j]), (ulong)ei[j]>>1, N_or_kN)),
+	X = remii(mulii(X, powiumod(stoi(FB[j]), (ulong)ei[j]>>1, N_or_kN)),
 		  N_or_kN);
 	if (low_stack(lim3, stack_lim(av3,1)))
 	{
@@ -2000,7 +2000,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
     X = gerepileuptoint(av3, X);
     if (MPQS_DEBUGLEVEL >= 1)
     {
-      if (signe(resii(subii(sqri(X), sqri(Y_prod)), N_or_kN)))
+      if (signe(remii(subii(sqri(X), sqri(Y_prod)), N_or_kN)))
       { /* shouldn't happen */
 	fprintferr("MPQS: X^2 - Y^2 != 0 mod %s\n",
 		   (N_or_kN == kN ? "kN" : "N"));
@@ -2024,7 +2024,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
         if (DEBUGLEVEL >= 5)
           fprintferr("MPQS: splitting N after %ld kernel vector%s\n",
                      i+1, (i? "s" : ""));
-        (void)mpdivis(N, D1, N); /* divide N in place */
+        (void)dvdiiz(N, D1, N); /* divide N in place */
         res[1] = (long)N;	/* we'll gcopy this anyway before exiting */
         res[2] = (long)D1;
         res_last = res_next = 3;
@@ -2078,7 +2078,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 	  }
 	  /* now there is room; divide into existing factor and store the
 	     new gcd.  Remove the known-composite flag from the old entry */
-	  (void)mpdivis((GEN)res[j], D1, (GEN)res[j]);
+	  (void)dvdiiz((GEN)res[j], D1, (GEN)res[j]);
 	  res[res_next] = (long)D1; res[res_size+j] = 0;
 	  if (++res_next > res_max) break; /* all possible factors seen */
 
@@ -2327,7 +2327,7 @@ mpqs(GEN N)
     /* compute the approximations of the logarithms of p_i */
     log_FB[i] = (unsigned char) (log_multiplier * log2((double)p) * 2);
     /* compute the x_i such that x_i^2 = (kN % p_i) mod p_i */
-    sqrt_mod_p_kN[i] = usqrtmod(umodiu(kN, p), p);
+    sqrt_mod_p_kN[i] = sqrtumod(umodiu(kN, p), p);
   }
 
   if (DEBUGLEVEL >= 5)

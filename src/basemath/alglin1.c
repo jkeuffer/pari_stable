@@ -1109,15 +1109,15 @@ Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = lresii(mulii((GEN)b[li], invpiv), p);
+  u[li] = lremii(mulii((GEN)b[li], invpiv), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
     m = (GEN)b[i];
     for (j=i+1; j<=li; j++)
       m = subii(m, mulii(gcoeff(a,i,j), (GEN)u[j]));
-    m = resii(m, p);
-    u[i] = lpileuptoint(av, resii(mulii(m, mpinvmod(gcoeff(a,i,i), p)), p));
+    m = remii(m, p);
+    u[i] = lpileuptoint(av, remii(mulii(m, mpinvmod(gcoeff(a,i,i), p)), p));
   }
   return u;
 }
@@ -1196,7 +1196,7 @@ _addmul(GEN b, long k, long i, GEN m)
 static void
 _Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
 {
-  if (lgefint(b[i]) > lgefint(p)) b[i] = lresii((GEN)b[i], p);
+  if (lgefint(b[i]) > lgefint(p)) b[i] = lremii((GEN)b[i], p);
   b[k] = laddii((GEN)b[k], mulii(m, (GEN)b[i]));
 }
 
@@ -1469,7 +1469,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     /* k is the line where we find the pivot */
     for (k = i; k <= li; k++)
     {
-      piv = resii(gcoeff(a,k,i), p);
+      piv = remii(gcoeff(a,k,i), p);
       coeff(a,k,i) = (long)piv;
       if (signe(piv)) break;
     }
@@ -1487,12 +1487,12 @@ FpM_gauss(GEN a, GEN b, GEN p)
     minvpiv = negi(invpiv);
     for (k=i+1; k<=li; k++)
     {
-      coeff(a,k,i) = lresii(gcoeff(a,k,i), p);
+      coeff(a,k,i) = lremii(gcoeff(a,k,i), p);
       m = gcoeff(a,k,i); coeff(a,k,i) = zero;
       if (signe(m))
       {
 	
-        m = resii(mulii(m, minvpiv), p); /* -1/piv mod p */
+        m = remii(mulii(m, minvpiv), p); /* -1/piv mod p */
 	for (j=i+1; j<=aco; j++) _Fp_addmul((GEN)a[j],k,i,m, p);
         for (j=1  ; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p);
       }
@@ -2470,16 +2470,12 @@ FpM_mul(GEN x, GEN y, GEN p)
     z[j] = lgetg(l,t_COL);
     for (i=1; i<l; i++)
     {
-      pari_sp av;
-      GEN p1,p2;
+      pari_sp av = avma;
+      GEN p1 = mulii(gcoeff(x,i,1),gcoeff(y,1,j));
       long k;
-      p1=gzero; av=avma;
-      for (k=1; k<lx; k++)
-      {
-	p2=mulii(gcoeff(x,i,k),gcoeff(y,k,j));
-	p1=addii(p1,p2);
-      }
-      coeff(z,i,j)=lpileupto(av,p?modii(p1,p):p1);
+      for (k=2; k<lx; k++)
+	p1 = addii(p1, mulii(gcoeff(x,i,k),gcoeff(y,k,j)));
+      coeff(z,i,j) = lpileuptoint(av, p?modii(p1,p):p1);
     }
   }
   return z;
@@ -2499,14 +2495,13 @@ FpC_FpV_mul(GEN x, GEN y, GEN p)
     z[j] = lgetg(lx,t_COL);
     for (i=1; i<lx; i++)
     {
-      pari_sp av=avma;
-      GEN p1=mulii((GEN)x[i],(GEN)y[j]);
-      coeff(z,i,j)=p?lpileupto(av,modii(p1,p)):(long)p1;
+      pari_sp av = avma;
+      GEN p1 = mulii((GEN)x[i],(GEN)y[j]);
+      coeff(z,i,j) = p?lpileuptoint(av,modii(p1,p)):(long)p1;
     }
   }
   return z;
 }
-
 
 /*If p is NULL no reduction is performed.*/
 GEN
@@ -2521,10 +2516,10 @@ FpM_FpV_mul(GEN x, GEN y, GEN p)
   for (i=1; i<l; i++)
   {
     pari_sp av = avma;
-    GEN p1 = gzero;
-    for (k=1; k<lx; k++)
+    GEN p1 = mulii(gcoeff(x,i,1),(GEN)y[1]);
+    for (k = 2; k < lx; k++)
       p1 = addii(p1, mulii(gcoeff(x,i,k),(GEN)y[k]));
-    z[i] = lpileupto(av,p?modii(p1,p):p1);
+    z[i] = lpileuptoint(av, p?modii(p1,p):p1);
   }
   return z;
 }

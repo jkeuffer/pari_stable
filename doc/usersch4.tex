@@ -17,6 +17,7 @@ the PARI library.
 To make the following descriptions valid both for 32-bit and 64-bit machines,
 we will set \B\ to be equal to 32 (resp.~64), an abbreviation of
 \kbd{BITS\_IN\_LONG}, which is what is actually used in the source code.
+\kbdsidx{BIL}
 
 \section{Introduction: initializations, universal objects}
 \label{se:intro4}
@@ -257,7 +258,7 @@ of the header files you include (through \kbd{pari.h}) will have been modified
 to match the library.
 
 Portable macros are defined to bypass most machine dependencies. If you
-want your programs to run identically on 32-bit and 64-bit machines, you 
+want your programs to run identically on 32-bit and 64-bit machines, you
 have to use these, and not the corresponding numeric values, whenever the
 precise size of your \kbd{long} integers might matter. Here are the most
 important ones:
@@ -491,7 +492,8 @@ pointer to random garbage.
 \noindent which cleans the stack between \kbd{ltop} and the \emph{connected}
 object \kbd{q} and returns \kbd{q} updated. For this to work, \kbd{q} must
 have been created \emph{before} all its components, otherwise they would
-belong to the garbage zone! Documented PARI functions guarantee this.
+belong to the garbage zone! Unless mentioned otherwise, documented PARI
+functions guarantee this.
 
 \noindent$\bullet$ Another variant (a special case of \tet{gerepileall}
 below, where $n=1$) is
@@ -807,29 +809,6 @@ use \kbd{cgetg} to create space to hold them.
 \noindent 3) The macros \teb{lgetg}, \teb{lgeti}, \teb{lgetr} are predefined
 as \kbd{(long)cgetg}, \kbd{(long)cgeti}, \kbd{(long)cgetr}, respectively.
 
-\noindent 4) Finally, there are two low-level routines to allocate space on
-the PARI stack:
-
-\fun{GEN}{new_chunk}{size\_t n}
-
-allocates a \kbd{GEN} with $n$ components, \emph{without} filling the
-required code words. This is the low-level constructor underlying
-\kbd{cgetg}, which calls \kbd{new\_chunk}, then sets the first code word. It
-works by simply returning the address \kbd{((GEN)avma) - n}, after checking
-that it is larger than \kbd{(GEN)bot}.
-
-\fun{char*}{stackmalloc}{size\_t n}
-
-allocates memory on the stack for $n$ chars (\emph{not} $n$ \kbd{GEN}s). This
-is faster than using \kbd{malloc}, and easier to use in most situations when
-temporary storage is needed. In particular there is no need to \kbd{free}
-individually all variables thus allocated: a simple \kbd{avma = oldavma}
-might be enough. On the other hand, beware that this is not permanent
-independant storage, but part of the PARI stack.
-
-Note that objects allocated through these last two functions cannot be
-\kbd{gerepile}'d. They are not valid \kbd{GEN}s since they have no PARI type.
-
 \misctitle{Examples}: 1) Both \kbd{z = cgeti(DEFAULTPREC)} and
 \kbd{cgetg(DEFAULTPREC, t\_INT)} create a \typ{INT} whose ``precision'' is
 \kbd{bit\_accuracy(DEFAULTPREC)} = 64. This means \kbd{z} can hold rational
@@ -1110,7 +1089,7 @@ are stringent restrictions on their use.
 The possible second codeword is used differently by the different types, and
 we will describe it as we now consider each of them in turn:
 
-\subsec{Type \typ{INT} (integer):}\sidx{integer}\kbdsidx{t_INT} this type has
+\subsec{Type \typ{INT} (integer)}:\sidx{integer}\kbdsidx{t_INT} this type has
 a second codeword \kbd{z[1]} which contains the following information:
 
 the sign of \kbd{z}: coded as $1$, $0$ or $-1$ if $\kbd{z} > 0$, $\kbd{z} = 0$,
@@ -1211,7 +1190,7 @@ These macros directly access the binary data and are thus much faster than
 the generic modulo functions. Besides, they return long integers instead of
 \kbd{GEN}s, so they do not clutter up the stack.
 
-\subsec{Type \typ{REAL} (real number):}\kbdsidx{t_REAL}\sidx{real number}
+\subsec{Type \typ{REAL} (real number)}:\kbdsidx{t_REAL}\sidx{real number}
 this type has a second codeword z[1] which also encodes its sign, obtained
 or set using the same functions as for a \typ{INT}, and a binary exponent.
 This exponent is handled using the following macros:
@@ -1245,9 +1224,9 @@ represented as \kbd{z[0]} (encoding $\kbd{type} = \typ{REAL}$, \kbd{lg(z)}),
 \kbd{z[1]} (encoding $\kbd{sign} = 1$, $\kbd{expo} = 1$), $\kbd{z[2]} =
 \kbd{0xe0000000}$, $\kbd{z[3]} =\dots = \kbd{z[lg(z)-1]} = \kbd{0x0}$.
 
-\subsec{Type \typ{INTMOD} (intmod):}\kbdsidx{t_INTMOD}\sidx{intmod}
+\subsec{Type \typ{INTMOD} (intmod)}:\kbdsidx{t_INTMOD}\sidx{intmod}
 \kbd{z[1]} points to the modulus, and \kbd{z[2]} at the number representing
-the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be 
+the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be
 \typ{INT}s, satisfying the inequality $0 \le \kbd{z[2]} < \kbd{z[1]}$.
 
 It is good practice to keep the modulus object on the heap, so that new
@@ -1255,18 +1234,18 @@ intmods resulting from operations can point at this common object,
 instead of carrying along their own copies of it on the stack. The library
 functions implement this practice almost by default.
 
-\subsec{Type \typ{FRAC} (rational number):}%
+\subsec{Type \typ{FRAC} (rational number)}:%
 \kbdsidx{t_FRAC}\sidx{rational number}
 \kbd{z[1]} points to the numerator, and \kbd{z[2]} to the denominator. Both
 must be of \typ{INT}s and $\kbd{z[2]} > 0$.
 
-\subsec{Type \typ{COMPLEX} (complex number):}%
+\subsec{Type \typ{COMPLEX} (complex number)}:%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
 \kbd{z[1]} points to the real part, and \kbd{z[2]} to the imaginary part. A
 priori \kbd{z[1]} and \kbd{z[2]} can be of any type, but only certain types
 are useful and make sense (mostly \typ{INT}, \typ{REAL} and \typ{FRAC}).
 
-\subsec{Type \typ{PADIC} ($p$-adic numbers):}%
+\subsec{Type \typ{PADIC} ($p$-adic numbers)}:%
 \sidx{p-adic number}\kbdsidx{t_PADIC} this type has a second codeword
 \kbd{z[1]} which contains the following information: the $p$-adic precision
 (the exponent of $p$ modulo which the $p$-adic unit corresponding to
@@ -1294,7 +1273,7 @@ a\typ{INT} representing the $p$-adic unit associated to \kbd{z} modulo
 $$ \kbd{z} = p^{\text{valp(z)}} * (\kbd{z[4]} + O(\kbd{z[3]})),\quad
 \text{where}\quad \kbd{z[3]} = O(p^{\text{precp(z)}}). $$
 
-\subsec{Type \typ{QUAD} (quadratic number):}\sidx{quadratic
+\subsec{Type \typ{QUAD} (quadratic number)}:\sidx{quadratic
 number}\kbdsidx{t_QUAD} \kbd{z[1]} points to the canonical polynomial $P$
 defining the quadratic field (as output by \tet{quadpoly}), \kbd{z[2]} to the
 ``real part'' and \kbd{z[3]} to the ``imaginary part''. The latter are of
@@ -1304,7 +1283,7 @@ $\Q[X]/(P(X))$, see~\secref{se:compquad}. Exact complex numbers may be
 implemented as quadratics, but \typ{COMPLEX} is in general more versatile
 (\typ{REAL} components are allowed) and more efficient.
 
-\subsec{Type \typ{POLMOD} (polmod):}\kbdsidx{t_POLMOD}\sidx{polmod} exactly as
+\subsec{Type \typ{POLMOD} (polmod)}:\kbdsidx{t_POLMOD}\sidx{polmod} exactly as
 for intmods, \kbd{z[1]} points to the modulus, and \kbd{z[2]} to a
 polynomial representing the class of~\kbd{z}. Both must be of type
 \typ{POL} in the same variable. However, \kbd{z[2]} is allowed to be a
@@ -1316,7 +1295,7 @@ constant term of a polynomial of degree 0 in the correct variable. On the
 other hand a variable of \emph{greater} priority is not acceptable;
 see \secref{se:priority} for the problems which may arise.
 
-\subsec{Type \typ{POL} (polynomial):}\kbdsidx{t_POL}\sidx{polynomial} this
+\subsec{Type \typ{POL} (polynomial)}:\kbdsidx{t_POL}\sidx{polynomial} this
 type has a second codeword. It contains a ``\emph{sign}'': 0 if the
 polynomial is equal to~0, and 1 if not (see however the important remark
 below) and a \emph{variable number} (e.g.~0 for $x$, 1 for $y$, etc\dots).
@@ -1339,12 +1318,12 @@ to \tet{BIGINT}, which has lower priority than any other variable number.
 The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to the
 coefficients of the polynomial \emph{in ascending order}, with \kbd{z[2]}
 being the constant term and so on. For an object of type \typ{POL},
-the macros \tet{leading_term}, \tet{constant_term}, \tet{degpol}
-return a pointer to the leading term (with respect to the main variable of
-course), constant term, and degree of the polynomial (with the convention
-$\deg(0) = -1$). Applied to any other type, the result is unspecificied. Note
-that no copy is made on the pari stack so the returned value is not safe for
-a basic \kbd{gerepile} call. Note that $\kbd{degpol(z)} = \kbd{lg(z)} - 3$.
+\tet{leading_term}, \tet{constant_term}, \tet{degpol} return a pointer to the
+leading term (with respect to the main variable of course), constant term,
+and degree of the polynomial (with the convention $\deg(0) = -1$). Applied to
+any other type, the result is unspecificied. Note that no copy is made on the
+pari stack so the returned value is not safe for a basic \kbd{gerepile} call.
+Note that $\kbd{degpol(z)} = \kbd{lg(z)} - 3$.
 
 \fun{long}{degree}{GEN x} returns the degree of \kbd{x} with respect to its
 main variable even when \kbd{x} is not a polynomial (a rational function for
@@ -1355,7 +1334,7 @@ fact that its sign is~0. However, its length may be greater than 2, meaning
 that all the coefficients of the polynomial are equal to zero, but the
 leading term \kbd{z[lg(z)-1]} is not an exact zero.
 
-\subsec{Type \typ{SER} (power series):}\kbdsidx{t_SER}\sidx{power series}
+\subsec{Type \typ{SER} (power series)}:\kbdsidx{t_SER}\sidx{power series}
 This type also has a second codeword, which encodes a ``\emph{sign}'', i.e.~0
 if the power series is 0, and 1 if not, a \emph{variable number} as for
 polynomials, and an \emph{exponent}. This information can be handled with the
@@ -1370,32 +1349,32 @@ If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
 power series can be negative, i.e.~we are then dealing with a Laurent series
 (with a finite number of negative terms).
 
-\subsec{Type \typ{RFRAC} (rational function):}%
+\subsec{Type \typ{RFRAC} (rational function)}:%
 \kbdsidx{t_RFRAC}\sidx{rational function} \kbd{z[1]} points to the numerator,
 and \kbd{z[2]} on the denominator. The denominator must be of type \typ{POL},
 with variable of higher priority than the numerator.
 
-\subsec{Type \typ{QFR} (indefinite binary quadratic form):}%
+\subsec{Type \typ{QFR} (indefinite binary quadratic form)}:%
 \kbdsidx{t_QFR}\sidx{indefinite binary quadratic form} \kbd{z[1]},
 \kbd{z[2]}, \kbd{z[3]} point to the three coefficients of the form and are of
 type \typ{INT}. \kbd{z[4]} is Shanks's distance function, and must be of type
 \typ{REAL}.
 
-\subsec{Type \typ{QFI} (definite binary quadratic form):}%
+\subsec{Type \typ{QFI} (definite binary quadratic form)}:%
 \kbdsidx{t_QFI}\sidx{definite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
 \kbd{z[3]} point to the three coefficients of the form. All three are
 of type \typ{INT}.
 
-\subsec{Type \typ{VEC} and \typ{COL} (vector):}%
+\subsec{Type \typ{VEC} and \typ{COL} (vector)}:%
 \kbdsidx{t_VEC}\kbdsidx{t_COL}\sidx{row vector}\sidx{column vector}
 \kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the components of the
 vector.
 
-\subsec{Type \typ{MAT} (matrix):}\kbdsidx{t_MAT}\sidx{matrix} \kbd{z[1]},
+\subsec{Type \typ{MAT} (matrix)}:\kbdsidx{t_MAT}\sidx{matrix} \kbd{z[1]},
 \kbd{z[2]},\dots \kbd{z[lg(z)-1]} point to the column vectors of \kbd{z},
 i.e.~they must be of type \typ{COL} and of the same length.
 
-\subsec{Type \typ{VECSMALL} (vector of small integers):}\kbdsidx{t_VECSMALL}
+\subsec{Type \typ{VECSMALL} (vector of small integers)}:\kbdsidx{t_VECSMALL}
 \kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} are ordinary signed long
 integers. This type is used instead of a \typ{VEC} of \typ{INT}s for
 efficiency reasons, for instance to implement efficiently permutations,
@@ -1406,18 +1385,18 @@ you are better off using the standard malloc'ed C constructs when programming
 in library mode. We quote them for completeness, advising you not to use
 them:
 
-\subsec{Type \typ{LIST} (list):}\kbdsidx{t_LIST}\sidx{list} This one has a
+\subsec{Type \typ{LIST} (list)}:\kbdsidx{t_LIST}\sidx{list} This one has a
 second codeword which contains an effective length (handled through
 \teb{lgeflist}~/ \teb{setlgeflist}). \kbd{z[2]},\dots, \kbd{z[lgeflist(z)-1]}
 contain the components of the list.
 
-\subsec{Type \typ{STR} (character string):}%
+\subsec{Type \typ{STR} (character string)}:%
 \kbdsidx{t_STR}\sidx{character string}
 
 \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character of the
 (\kbd{NULL}-terminated) string.
 
-\misctitle{Implementation note:} for the types including an exponent (or a
+\misctitle{Implementation note}: for the types including an exponent (or a
 valuation), we actually store a biased non-negative exponent (bit-ORing the
 biased exponent to the codeword), obtained by adding a constant to the true
 exponent: either \kbd{HIGHEXPOBIT} (for \typ{REAL}) or \kbd{HIGHVALPBIT} (for
@@ -1501,10 +1480,10 @@ and returns its variable number.
 \bprog
 long v = fetch_user_var("y");
 GEN gy = polx[v];
-@eprog\noindent 
+@eprog\noindent
 This function raises an error if $s$ is already registered as a function name.
 
-\misctitle{Caveat:} it is possible to use \teb{flissexpr}
+\misctitle{Caveat}: it is possible to use \teb{flissexpr}
 (see~\secref{se:flisexpr}) to execute a GP command and create GP variables
 on the fly as needed:
 
@@ -1978,7 +1957,7 @@ for this possibility, if \kbd{s} is of type \typ{REAL}, we use the function
 value. Note that here, since we are using a numeric value for a \kbd{cget}
 function, the program will run slightly differently on 32-bit and 64-bit
 machines: we want to use the smallest possible bit accuracy, and this is equal
-to \kbd{BITS\_IN\_LONG}. 
+to \kbd{BITS\_IN\_LONG}.
 
 In the fifth place, it is unnecessary to take the square root at all since we
 only want to test whether the norm exceeds~$1$. So the statement \kbd{s =
@@ -2381,14 +2360,14 @@ completely identical to the GP function \kbd{bnfinit} but \kbd{gp} does not
 need to know about this, only that it can be found somewhere in the shared
 library \kbd{libpari.so}.
 
-\misctitle{Important note:} You see in this example that it is the
+\misctitle{Important note}: You see in this example that it is the
 function's responsibility to correctly interpret its operands: \kbd{data =
 NULL} is interpreted \emph{by the function} as an empty vector. Note that
 since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
 enables you to distinguish between a default value and actual input: the
 user could explicitly supply an empty vector!
 
-\misctitle{Note:} If \kbd{install} is not available, we have to add a file
+\misctitle{Note}: If \kbd{install} is not available, we have to add a file
 
  \kbd{functions/number\_fields/ClassGroupInit}
 

@@ -86,7 +86,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
     {
       setlg(p1, n + 1);
       p2 = gdiv(gtopolyrev(p1, v), negi((GEN) p1[n + 1]));
-      if (gdivise(poleval(x, p2), x))
+      if (gdvd(poleval(x, p2), x))
       {
 	y[++nbauto] = (long) p2;
 	if (DEBUGLEVEL > 1)
@@ -141,7 +141,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
       setlg(p1, n + 1);
       settyp(p1, t_COL);
       p2 = gdiv(gmul((GEN) nf[7], p1), negi((GEN) p1[n + 1]));
-      if (gdivise(poleval(x, p2), x))
+      if (gdvd(poleval(x, p2), x))
       {
 	y[++nbauto] = (long) p2;
 	if (DEBUGLEVEL > 1)
@@ -1466,7 +1466,7 @@ galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
  * de Frobenius:
  * 
  * p: nombre premier a relever deg: degre du lift a effectuer pgp: plus grand
- * diviseur premier du degre de T. 
+ * dvdiiur premier du degre de T. 
  * l: un nombre premier tel que T est totalement decompose
  * modulo l ppp:  plus petit diviseur premier du degre de T. primepointer:
  * permet de calculer les premiers suivant p.
@@ -1563,8 +1563,8 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
          && (nbtest < 3 * nbmax || !(group&ga_non_wss)) ;)
   {
     pari_sp av;
-    GEN     ip,FS,p1;
-    long o,norm_o=1;
+    GEN ip, FS;
+    long d, o, norm_o = 1;
 
     NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
     /*discard small primes*/
@@ -1575,24 +1575,21 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       continue;
     nbtest++;
     av=avma;
-    FS=(GEN)simplefactmod(T,ip)[1];
-    p1=(GEN)FS[1];
+    FS=(GEN)FpX_degfact(T,ip)[1];
+    d = FS[1];
     for(i=2;i<lg(FS);i++)
-      if (cmpii(p1,(GEN)FS[i]))
-	break;
+      if (d != FS[i]) break;
     if (i<lg(FS))
     {
-      avma = ltop;
       if (DEBUGLEVEL >= 2)
 	fprintferr("GaloisAnalysis:non Galois for p=%ld\n", p);
       ga->p = p;
       ga->deg = 0;
-      return;		/* Not a Galois polynomial */
+      avma = ltop; return; /* Not a Galois polynomial */
     }
     o=n/(lg(FS)-1);
     avma=av;
-    if (!O[o]) 
-      O[o]=p;
+    if (!O[o]) O[o]=p;
     if (o % deg == 0)
     {
       /*We try to find a power of the Frobenius which generate
@@ -3023,22 +3020,17 @@ numberofconjugates(GEN T, long pdepart)
     GEN     S;
 
     NEXT_PRIME_VIADIFF_CHECK(p,primepointer);
-    if (p < pdepart)
-      continue;
-    S = (GEN) simplefactmod(T, stoi(p));
+    if (p < pdepart) continue;
+    S = FpX_degfact(T, stoi(p));
     isram = 0;
     for (i = 1; i < lg(S[2]) && !isram; i++)
-      if (!gcmp1(gmael(S,2,i)))
-        isram = 1;
-    if (isram == 0)
+      if (mael(S,2,i) != 1) isram = 1;
+    if (!isram)
     {
-      for (i = 1; i <= n; i++)
-        L[i] = 0;
-      for (i = 1; i < lg(S[1]) && !isram; i++)
-        L[itos(gmael(S,1,i))]++;
+      for (i = 1; i <= n; i++) L[i] = 0;
+      for (i = 1; i < lg(S[1]) && !isram; i++) L[ mael(S,1,i) ]++;
       s = L[1];
-      for (i = 2; i <= n; i++)
-	s = cgcd(s, L[i] * i);
+      for (i = 2; i <= n; i++) s = cgcd(s, L[i] * i);
       card = cgcd(s, card);
     }
     if (DEBUGLEVEL >= 6)

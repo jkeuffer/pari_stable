@@ -181,8 +181,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lreal   (long)greal
 #define lrecip  (long)recip
 #define lred    (long)gred
-#define lresii  (long)resii
-#define lres    (long)gres
+#define lremii  (long)remii
+#define lrem    (long)grem
 #define lrndtoi (long)grndtoi
 #define lroots  (long)roots
 #define lround  (long)ground

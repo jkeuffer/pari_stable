@@ -736,7 +736,7 @@ nfiso0(GEN a, GEN b, long fliso)
        || !gegal((GEN)nfa[3],(GEN)nfb[3])) return gzero;
     }
     else
-      if (!divise((GEN)nfb[3], gpowgs((GEN)nfa[3],n/m))) return gzero;
+      if (!dvdii((GEN)nfb[3], gpowgs((GEN)nfa[3],n/m))) return gzero;
   }
   else
   {
@@ -754,7 +754,7 @@ nfiso0(GEN a, GEN b, long fliso)
       GEN fa=factor(da), ex=(GEN)fa[2];
       fa=(GEN)fa[1]; lx=lg(fa);
       for (i=1; i<lx; i++)
-        if (mod2((GEN)ex[i]) && !divise(db,gpowgs((GEN)fa[i],q)))
+        if (mod2((GEN)ex[i]) && !dvdii(db,gpowgs((GEN)fa[i],q)))
           { avma=av; return gzero; }
     }
   }
@@ -953,7 +953,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
     for (j=i; j<=n; j++)
     {
       pari_sp av = avma;
-      z = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
+      z = grem(gmul((GEN)bas[j],(GEN)bas[i]), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
       {
@@ -987,7 +987,7 @@ make_Tr(GEN x, GEN w)
     for (   ; j<=n; j++)
     {
       av = avma;
-      p2 = gres(gmul((GEN)w[i],(GEN)w[j]), x);
+      p2 = grem(gmul((GEN)w[i],(GEN)w[j]), x);
       t = quicktrace(p2, sym);
       if (den)
       {
@@ -2160,7 +2160,7 @@ dirzetak0(GEN nf, long N0)
   GEN vect, c, c2, pol = (GEN)nf[1], index = (GEN)nf[4];
   pari_sp av = avma;
   long i, j, k, limk, lx;
-  ulong q, p, rem;
+  ulong q, p;
   byteptr d = diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
 
@@ -2174,23 +2174,24 @@ dirzetak0(GEN nf, long N0)
   {
     NEXT_PRIME_VIADIFF(court[2], d);
     if (smodis(index, court[2])) /* court does not divide index */
-      { vect = (GEN) simplefactmod(pol,court)[1]; lx = lg(vect); }
+      { vect = (GEN) FpX_degfact(pol,court)[1]; lx = lg(vect); }
     else
     {
       GEN p1 = primedec(nf,court); lx = lg(p1); vect = cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) vect[i] = mael(p1,i,4);
+      for (i=1; i<lx; i++) vect[i] = itou( gmael(p1,i,4) );
     }
     for (j=1; j<lx; j++)
     {
-      GEN N = powgi(court, (GEN)vect[j]); /* N = court^f */
+      GEN N = gpowgs(court, vect[j]); /* N = court^f */
       if (cmpis(N, N0) > 0) continue;
 
       q = p = (ulong)N[2]; limk = N0/q;
       for (k=2; k <= N0; k++) c2[k] = c[k];
       while (q <= (ulong)N0)
       {
+        LOCAL_HIREMAINDER;
         for (k=1; k<=limk; k++) c2[k*q] += c[k];
-        q = umuluu(q, p, &rem); if (rem) break;
+        q = mulll(q, p); if (hiremainder) break;
         limk /= p;
       }
       N = c; c = c2; c2 = N;

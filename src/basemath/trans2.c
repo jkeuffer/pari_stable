@@ -914,7 +914,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   }
   if (typ(s)==t_REAL)
   {
-    p1 = mpent(s);
+    p1 = floorr(s);
     if (gcmp0(subri(s,p1))) *s0 = p1;
   }
   *prec = l; return s;
@@ -929,7 +929,7 @@ red_mod_2z(GEN x, GEN z)
   /* require little accuracy */
   if (!signe(d)) return x;
   setlg(d, 3 + ((expo(d) - expo(Z)) >> TWOPOTBITS_IN_LONG));
-  return addrr(mulir(mpent(divrr(d, Z)), Z), x);
+  return addrr(mulir(floorr(divrr(d, Z)), Z), x);
 }
 #endif
 

@@ -235,7 +235,7 @@ element_div(GEN nf, GEN x, GEN y)
     }
 
   p1 = gmul(gmul((GEN)nf[7],x), QX_invmod(gmul((GEN)nf[7],y), (GEN)nf[1]));
-  p1 = algtobasis_i(nf, gres(p1, (GEN)nf[1]));
+  p1 = algtobasis_i(nf, grem(p1, (GEN)nf[1]));
   if (p) p1 = FpV(p1,p);
   return gerepileupto(av,p1);
 }
@@ -718,7 +718,7 @@ algtobasis_i(GEN nf, GEN x)
   {
     if (varn(x) != varn(P))
       err(talker,"incompatible variables in algtobasis");
-    if (degpol(x) >= N) x = gres(x,P);
+    if (degpol(x) >= N) x = grem(x,P);
     return mulmat_pol((GEN)nf[8], x);
   }
   return gscalcol(x,N);
@@ -1109,9 +1109,9 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
     if (is_pm1(p1)) { avma=av; return stoi(i-1); }
     smalltable[i]=(long)p1; if (i==lbaby) break;
     (void)new_chunk(c); p1 = mulii(p1,g0inv); /* HACK */
-    avma = av1; p1 = resii(p1, p);
+    avma = av1; p1 = remii(p1, p);
   }
-  giant = resii(mulii(x, mpinvmod(p1,p)), p);
+  giant = remii(mulii(x, mpinvmod(p1,p)), p);
   p1=cgetg(lbaby+1,t_VEC);
   perm = gen_sort(smalltable, cmp_IND | cmp_C, cmpii);
   for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
@@ -1126,7 +1126,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
       v=addis(mulss(lbaby-1,k),perm[i]);
       return gerepileuptoint(av,addsi(-1,v));
     }
-    p1 = resii(mulii(p1,giant), p);
+    p1 = remii(mulii(p1,giant), p);
 
     if (low_stack(lim, stack_lim(av1,2)))
     {
@@ -1951,7 +1951,7 @@ check_nfelt(GEN x, GEN *den)
     {
       case t_INT: case t_INTMOD: break;
       case t_FRAC:
-        if (!d) d = (GEN)t[2]; else d = mpppcm(d, (GEN)t[2]);
+        if (!d) d = (GEN)t[2]; else d = lcmii(d, (GEN)t[2]);
         break;
       default: err(talker,"%Z not a nfelt", x);
     }

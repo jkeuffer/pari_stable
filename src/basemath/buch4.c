@@ -621,7 +621,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   for (i=1; i<ls; i++)
   {
     GEN P = (GEN)S[i];
-    v[i] = (resii(N, (GEN)P[1]) == gzero)? element_val(bnf,xb,P): 0;
+    v[i] = (remii(N, (GEN)P[1]) == gzero)? element_val(bnf,xb,P): 0;
   }
   /* here, x = S v */
   p1 = cgetg(ls, t_COL);
@@ -681,7 +681,7 @@ bnfissunit(GEN bnf,GEN suni,GEN x)
 static void
 pr_append(GEN nf, GEN rel, GEN p, GEN *prod, GEN *S1, GEN *S2)
 {
-  if (divise(*prod, p)) return;
+  if (dvdii(*prod, p)) return;
   *prod = mulii(*prod, p);
   *S1 = concatsp(*S1, primedec(nf,p));
   *S2 = concatsp(*S2, primedec(rel,p));

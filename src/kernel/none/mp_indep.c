@@ -345,30 +345,16 @@ void
 mpdivz(GEN x, GEN y, GEN z)
 {
   pari_sp av = avma;
-  GEN r;
+  long tx = typ(x), ty = typ(y);
+  GEN q = tx==t_INT && ty==t_INT? divii(x,y): mpdiv(x,y);
 
-  if (typ(z)==t_INT)
-  {
-    if (typ(x) == t_REAL || typ(y) == t_REAL) err(gdiver);
-    affii(divii(x,y), z);
-    avma = av; return;
-  }
-
-  if (typ(x) == t_INT)
-  {
-    if (typ(y) == t_REAL)
-      r = divir(x,y);
-    else
-    {
-      long lz = lg(z);
-      r = divrr(itor(x,lz), itor(y,lz));
-    }
-  }
-  else if (typ(y) == t_REAL)
-    r = divrr(x,y);
+  if (typ(z) == t_REAL) affrr(q, z);
   else
-    r = divri(x,y);
-  affrr(r, z); avma = av;
+  {
+    if (typ(q) == t_REAL) err(gdiver);
+    affii(q, z); 
+  }
+  avma = av;
 }
 
 GEN
@@ -391,12 +377,12 @@ modii(GEN x, GEN y)
   switch(signe(x))
   {
     case 0: return gzero;
-    case 1: return resii(x,y);
+    case 1: return remii(x,y);
     default:
     {
       pari_sp av = avma;
       (void)new_chunk(lgefint(y));
-      x = resii(x,y); avma=av;
+      x = remii(x,y); avma=av;
       if (x==gzero) return x;
       return subiispec(y+2,x+2,lgefint(y)-2,lgefint(x)-2);
     }
@@ -475,7 +461,7 @@ mulii(GEN a,GEN b)
 }
 
 GEN
-resiimul(GEN x, GEN sy)
+remiimul(GEN x, GEN sy)
 {
   GEN r, q, y = (GEN)sy[1], invy;
   long k;
@@ -487,7 +473,7 @@ resiimul(GEN x, GEN sy)
   q = mulir(x,invy);
   q = mptrunc(q); /* <= divii(x, y) (at most 1 less) */
   r = subii(x, mulii(y,q));
-  /* resii(x,y) + y >= r >= resii(x,y) */
+  /* remii(x,y) + y >= r >= remii(x,y) */
   k = cmpii(r, y);
   if (k >= 0)
   {
@@ -495,11 +481,11 @@ resiimul(GEN x, GEN sy)
     r = subiispec(r+2, y+2, lgefint(r)-2, lgefint(y)-2);
   }
 #if 0
-  q = subii(r,resii(x,y));
+  q = subii(r,remii(x,y));
   if (signe(q))
-    err(talker,"bug in resiimul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
+    err(talker,"bug in remiimul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
 #endif
-  return gerepileuptoint(av, r); /* = resii(x, y) */
+  return gerepileuptoint(av, r); /* = remii(x, y) */
 }
 
 GEN
@@ -550,7 +536,7 @@ setrand(long seed) { return (pari_randseed = seed); }
 long
 getrand(void) { return pari_randseed; }
 
-ulong
+static ulong
 pari_rand(void)
 {
 #define GLUE2(hi, lo) (((hi) << BITS_IN_HALFULONG) | (lo))

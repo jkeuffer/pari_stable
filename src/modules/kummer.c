@@ -925,7 +925,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   gell = get_gell(bnr,subgroup,all);
   if (gcmp1(gell)) return polx[vnf];
   if (!isprime(gell)) err(impl,"kummer for composite relative degree");
-  if (divise(wk,gell)) return rnfkummersimple(bnr, subgroup, gell, all);
+  if (dvdii(wk,gell)) return rnfkummersimple(bnr, subgroup, gell, all);
 
   bid = (GEN)bnr[2];
   ideal = gmael(bid,1,1);
@@ -940,7 +940,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   degKz = degpol(COMPO.R);
   m = degKz / degK;
   d = (ell-1) / m;
-  g = (long)powuumod(u_gener(ell), d, ell);
+  g = (long)powuumod(Fl_gener(ell), d, ell);
   if (powuumod((ulong)g, m, ell*ell) == 1) g += ell;
   /* ord(g) = m in all (Z/ell^k)^* */
   /* step 3 */

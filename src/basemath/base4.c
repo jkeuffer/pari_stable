@@ -565,7 +565,7 @@ END:
   tetpil = avma;
   y[1] = lmul(xZ,cx);
   y[2] = lmul(a, cx);
-  gerepilemanyvec(av,tetpil,y+1,2); return y;
+  gerepilecoeffssp(av,tetpil,y+1,2); return y;
 }
 
 /* Given an ideal x, returns [a,alpha] such that a is in Q,
@@ -730,7 +730,7 @@ idealfactor(GEN nf, GEN x)
   for (i=1; i<lc; i++)
   {
     /* p | Nx already treated */
-    if (divise(gcoeff(X,1,1),(GEN)c1[i])) continue;
+    if (dvdii(gcoeff(X,1,1),(GEN)c1[i])) continue;
     p1 = primedec(nf,(GEN)c1[i]);
     vc = itos((GEN)c2[i]);
     for (j=1; j<lg(p1); j++)
@@ -839,7 +839,7 @@ idealval(GEN nf, GEN ix, GEN P)
         /* a = (x.t_0)_i; p | a ? */
         a = dvmdii(a,p,&r);
         if (signe(r)) { avma = av; return v + vd; }
-        if (lgefint(a) > lgefint(pk)) a = resii(a, pk);
+        if (lgefint(a) > lgefint(pk)) a = remii(a, pk);
         y[i] = lpileuptoint(av2, a);
       }
       B[j] = (long)y; y = x;
@@ -871,7 +871,7 @@ idealadd(GEN nf, GEN x, GEN y)
   if (lg(x) == 1) return gerepileupto(av,y);
   if (lg(y) == 1) return gerepileupto(av,x); /* check for 0 ideal */
   dx = Q_denom(x);
-  dy = Q_denom(y); dz = mpppcm(dx,dy);
+  dy = Q_denom(y); dz = lcmii(dx,dy);
   if (gcmp1(dz)) dz = NULL; else {
     x = Q_muli_to_int(x, dz);
     y = Q_muli_to_int(y, dz);
@@ -1988,7 +1988,7 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   if (gcmp0(Nx)) { avma = av; return gcopy(x0); } /* numerator is zero */
 
   y = gdiv(y0,cy); Ny = idealnorm(nf,y);
-  if (!gcmp1(denom(x)) || !divise(Nx,Ny))
+  if (!gcmp1(denom(x)) || !dvdii(Nx,Ny))
     err(talker, "quotient not integral in idealdivexact");
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
@@ -2028,7 +2028,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   z = kerint(concatsp(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = gmul(x,z);
-  z = hnfmodid(z, mpppcm(gcoeff(x,1,1), gcoeff(y,1,1)));
+  z = hnfmodid(z, lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
   if (dx) z = gdiv(z,dx);
   return gerepileupto(av,z);
 }
@@ -2346,7 +2346,7 @@ init_unif_mod_fZ(GEN L)
   for (i = 1; i < r; i++)
   {
     pr = (GEN)L[i]; p = (GEN)pr[1];
-    if (!divise(F, p)) F = mulii(F,p);
+    if (!dvdii(F, p)) F = mulii(F,p);
   }
   return F;
 }

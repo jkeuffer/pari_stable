@@ -855,7 +855,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
     zp <<= 1;
     if (zp < pp) mod = sqri(mod); else { zp = pp; mod = modx; }
     inv2 = shifti(mod, -1); /* = (mod + 1)/2 = 1/2 */
-    z = addii(z, resii(mulii(x, mpinvmod(z,mod)), mod));
+    z = addii(z, remii(mulii(x, mpinvmod(z,mod)), mod));
     z = mulii(z, inv2);
     z = modii(z, mod); /* (z + x/z) / 2 */
     if (pp <= zp) return z;
@@ -1334,7 +1334,7 @@ cxexp(GEN x, long prec)
   tetpil = avma;
   y[1] = lmul(r,p1);
   y[2] = lmul(r,p2);
-  gerepilemanyvec(av,tetpil,y+1,2);
+  gerepilecoeffssp(av,tetpil,y+1,2);
   return y;
 }
 
@@ -1540,7 +1540,7 @@ teich(GEN x)
   else
   {
     p1 = addsi(-1, p);
-    z = resii(z, p);
+    z = remii(z, p);
     aux = diviiexact(addsi(-1,q),p1); n = precp(x);
     for (k=1; k<n; k<<=1)
       z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,powmodulo(z,p1,q))))), q);
@@ -1679,7 +1679,7 @@ mpsc1(GEN x0, long *ptmod8)
     z = addrr(x,pitemp); /* = x + Pi/4 */
     if (expo(z) >= bit_accuracy(min(l, lg(z))) + 3) err(precer,"mpsc1");
     setexpo(pitemp, 0);
-    q = mpent( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
+    q = floorr( divrr(z,pitemp) ); /* round ( x / (Pi/2) ) */
     if (signe(q))
     {
       x = subrr(x, mulir(q, Pi2n(-1, l+1))); /* x mod Pi/2  */

@@ -945,7 +945,7 @@ RX_RXQ_compo(GEN f, GEN x, GEN T)
   limit = stack_lim(av, 1);
   for (l--; l>=2; l--)
   {
-    y = gres(gadd(gmul(y,x), (GEN)f[l]), T);
+    y = grem(gadd(gmul(y,x), (GEN)f[l]), T);
     if (low_stack(limit,stack_lim(av,1)))
     {
       if (DEBUGMEM > 1) err(warnmem, "RX_RXQ_compo");
@@ -967,7 +967,7 @@ RXQ_powers(GEN a, GEN T, long l)
   v = cgetg(l,t_VEC);
   v[1] = un; if (l == 2) return v;
 
-  if (degpol(a) >= degpol(T)) a = gres(a, T);
+  if (degpol(a) >= degpol(T)) a = grem(a, T);
   v[2] = (long)a;
   for (i=3; i<l; i++) v[i] = lres(gmul((GEN)v[i-1], a), T);
   return v;

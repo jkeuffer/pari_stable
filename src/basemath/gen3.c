@@ -29,23 +29,28 @@ extern GEN ptolift(GEN x, GEN Y);
 /**                 PRINCIPAL VARIABLE NUMBER                      **/
 /**                                                                **/
 /********************************************************************/
-
 int
 gvar(GEN x)
 {
-  long tx=typ(x),i,v,w;
-
-  if (is_polser_t(tx)) return varn(x);
-  if (tx==t_POLMOD) return varn(x[1]);
-  if (is_const_t(tx) || is_qf_t(tx) || is_noncalc_t(tx)) return BIGINT;
-  v=BIGINT;
-  for (i=1; i < lg(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
-  return v;
+  long i, v, w;
+  switch(typ(x))
+  {
+    case t_POL: case t_SER: return varn(x);
+    case t_POLMOD: return varn(x[1]);
+    case t_RFRAC:
+      v = gvar((GEN)x[1]);
+      w = gvar((GEN)x[2]); return min(v,w);
+    case t_VEC: case t_COL: case t_MAT:
+      v = BIGINT;
+      for (i=1; i < lg(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
+      return v;
+  }
+  return BIGINT;
 }
 
-/* assume x POLMOD */
+/* assume x POLMOD or RFRAC */
 static int
-_varPOLMOD(GEN x)
+_var2(GEN x)
 {
   long v = gvar2((GEN)x[1]);
   long w = gvar2((GEN)x[2]); if (w<v) v=w;
@@ -55,27 +60,29 @@ _varPOLMOD(GEN x)
 int
 gvar2(GEN x)
 {
-  long tx=typ(x),i,v,w;
-
-  if (is_const_t(tx) || is_qf_t(tx) || is_noncalc_t(tx)) return BIGINT;
-  v = BIGINT;
-  switch(tx)
+  long i, v, w;
+  switch(typ(x))
   {
-    case t_POLMOD:
-      return _varPOLMOD(x);
+    case t_POLMOD: case t_RFRAC:
+      return _var2(x);
 
     case t_POL: case t_SER:
+      v = BIGINT;
       for (i=2; i < lg(x); i++) { w=gvar((GEN)x[i]); if (w<v) v=w; }
       return v;
+
+    case t_VEC: case t_COL: case t_MAT:
+      v = BIGINT;
+      for (i=1; i < lg(x); i++) { w=gvar2((GEN)x[i]); if (w<v) v=w; }
+      return v;
   }
-  for (i=1; i<lg(x); i++) { w=gvar2((GEN)x[i]); if (w<v) v=w; }
-  return v;
+  return BIGINT;
 }
 
 int
 gvar9(GEN x)
 {
-  return (typ(x) == t_POLMOD)? _varPOLMOD(x): gvar(x);
+  return (typ(x) == t_POLMOD)? _var2(x): gvar(x);
 }
 
 GEN
@@ -473,12 +480,12 @@ gmod(GEN x, GEN y)
       switch(tx)
       {
 	case t_POL:
-	  return gres(x,y);
+	  return grem(x,y);
 
 	case t_RFRAC:
 	  av=avma;
 	  p1=gmul((GEN)x[1],ginvmod((GEN)x[2],y)); tetpil=avma;
-          return gerepile(av,tetpil,gres(p1,y));
+          return gerepile(av,tetpil,grem(p1,y));
 
         case t_SER:
           if (ismonome(y) && varn(x) == varn(y))
@@ -1504,8 +1511,8 @@ integ(GEN x, long v)
       if (typ(y)==t_RFRAC && lg(y[1]) == lg(y[2]))
       {
         GEN p2;
-	tx=typ(y[1]); p1=is_scalar_t(tx)? (GEN)y[1]: leading_term(y[1]);
-	tx=typ(y[2]); p2=is_scalar_t(tx)? (GEN)y[2]: leading_term(y[2]);
+	tx=typ(y[1]); p1=is_scalar_t(tx)? (GEN)y[1]: leading_term((GEN)y[1]);
+	tx=typ(y[2]); p2=is_scalar_t(tx)? (GEN)y[2]: leading_term((GEN)y[2]);
 	y=gsub(y, gdiv(p1,p2));
       }
       return gerepileupto(av,y);
@@ -1533,21 +1540,14 @@ gfloor(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_POL:
-      return gcopy(x);
-
-    case t_REAL:
-      return mpent(x);
-
-    case t_FRAC:
-      return truedvmdii((GEN)x[1],(GEN)x[2],NULL);
-
-    case t_RFRAC:
-      return gdeuc((GEN)x[1],(GEN)x[2]);
-
+    case t_INT:
+    case t_POL: return gcopy(x);
+    case t_REAL: return floorr(x);
+    case t_FRAC: return truedvmdii((GEN)x[1],(GEN)x[2],NULL);
+    case t_RFRAC: return gdeuc((GEN)x[1],(GEN)x[2]);
     case t_VEC: case t_COL: case t_MAT:
-      lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=lfloor((GEN)x[i]);
+      lx = lg(x); y = cgetg(lx,tx);
+      for (i=1; i<lx; i++) y[i] = lfloor((GEN)x[i]);
       return y;
   }
   err(typeer,"gfloor");
@@ -1559,8 +1559,16 @@ gfrac(GEN x)
 {
   pari_sp av = avma, tetpil;
   GEN p1 = gneg_i(gfloor(x));
+  tetpil = avma; return gerepile(av,tetpil,gadd(x,p1));
+}
 
-  tetpil=avma; return gerepile(av,tetpil,gadd(x,p1));
+/* assume x t_REAL */
+GEN
+ceilr(GEN x) {
+  pari_sp av = avma;
+  GEN y = floorr(x);
+  if (cmpri(x, y)) return gerepileuptoint(av, addsi(1,y));
+  return y;
 }
 
 GEN
@@ -1572,14 +1580,8 @@ gceil(GEN x)
 
   switch(tx)
   {
-    case t_INT: case t_POL:
-      return gcopy(x);
-
-    case t_REAL:
-      av = avma; y = mpent(x);
-      if (cmpri(x, y)) return gerepileuptoint(av, addsi(1,y));
-      return y;
-
+    case t_INT: case t_POL: return gcopy(x);
+    case t_REAL: return ceilr(x);
     case t_FRAC:
       av = avma; y = dvmdii((GEN)x[1],(GEN)x[2],&p1);
       if (p1 != gzero && gsigne(x) > 0)
@@ -1610,7 +1612,7 @@ round0(GEN x, GEN *pte)
 
 /* assume x a t_REAL */
 GEN
-mpround(GEN x)
+roundr(GEN x)
 {
   long ex, s = signe(x);
   pari_sp av;
@@ -1619,7 +1621,7 @@ mpround(GEN x)
   if (ex < 0) return s>0? gun: negi(gun);
   av = avma;
   t = real2n(-1, 3 + (ex>>TWOPOTBITS_IN_LONG)); /* = 0.5 */
-  return gerepileuptoint(av, mpent( addrr(x,t) ));
+  return gerepileuptoint(av, floorr( addrr(x,t) ));
 }
 
 GEN
@@ -1632,7 +1634,7 @@ ground(GEN x)
   switch(tx)
   {
     case t_INT: case t_INTMOD: case t_QUAD: return gcopy(x);
-    case t_REAL: return mpround(x);
+    case t_REAL: return roundr(x);
     case t_FRAC: return diviiround((GEN)x[1], (GEN)x[2]);
     case t_POLMOD: y=cgetg(3,t_POLMOD);
       copyifstack(x[1],y[1]);
@@ -1765,7 +1767,7 @@ gcvtoi(GEN x, long *e)
 }
 
 /* smallest integer greater than any incarnations of the real x
- * [avoid mpent() and "precision loss in truncation"] */
+ * [avoid mpfloor() and "precision loss in truncation"] */
 GEN
 ceil_safe(GEN x)
 {

@@ -149,7 +149,7 @@ static double speed_karasqri (speed_param *s) { KARASQRFUN_i( sqri, s); }
 extern  GEN init_remainder(GEN M);
 extern ulong invrev(ulong b);
 extern GEN red_montgomery(GEN T, GEN N, ulong inv);
-extern GEN resiimul(GEN x, GEN sy);
+extern GEN remiimul(GEN x, GEN sy);
 
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
@@ -169,13 +169,13 @@ static double speed_redc(speed_param *s) {
 static double speed_modii(speed_param *s) {
   GEN op;
   INIT_RED(s, op);
-  TIME_FUN( resii(op, s->y) );
+  TIME_FUN( remii(op, s->y) );
 };
-static double speed_resiimul(speed_param *s) {
+static double speed_remiimul(speed_param *s) {
   GEN op, sM;
   INIT_RED(s, op);
   sM = init_remainder(s->y);
-  TIME_FUN( resiimul(op, sM) );
+  TIME_FUN( remiimul(op, sM) );
 }
 
 /* ========================================================== */
@@ -450,7 +450,7 @@ main(int argc, char **argv)
     param.name[0] = "RESIIMUL_LIMIT";
     param.min_size[0] = MONTGOMERY_LIMIT;
     param.fun1 = &speed_modii;
-    param.fun2 = &speed_resiimul;
+    param.fun2 = &speed_remiimul;
     (void)one(&param);
   }
 

@@ -227,10 +227,9 @@ programs can be written for such huge numbers.
 Integers and real numbers are non-recursive types and are sometimes called
 \tet{leaves}.
 
-\subsec{Intmods, rational numbers (irreducible or not), $p$-adic numbers,
-polmods, and rational functions}:\sidx{intmod}\sidx{rational
-number}\sidx{p-adic number} \sidx{polmod} these are recursive, but in a
-restricted way.
+\subsec{Intmods, rational numbers, $p$-adic numbers, polmods, and rational
+functions}:\sidx{intmod}\sidx{rational number}\sidx{p-adic number}
+\sidx{polmod} these are recursive, but in a restricted way.
 
 For intmods or polmods, there are two components: the modulus, which must
 be of type integer (resp.\ polynomial), and the representative number (resp.\
@@ -259,7 +258,7 @@ correspond to the very important special case
 $w=\sqrt{-1}$.\label{se:compquad}
 
 Complex numbers are partially recursive: the two components $a$
-and $b$ can be of type \typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}, or 
+and $b$ can be of type \typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}, or
 \typ{PADIC}, and can be mixed, subject to the limitations mentioned above.
 For example, $a+bi$ with $a$ and $b$ $p$-adic is in $\Q_p[i]$, but this is
 equal to $\Q_p$ when $p\equiv 1 \mod 4$, hence we must exclude these $p$ when

@@ -448,7 +448,7 @@ subgroup_engine(subgp_iter *T)
     cyc = mattodiagonal(cyc);
   }
   for (i=1; i<n-1; i++)
-    if (!divise((GEN)cyc[i], (GEN)cyc[i+1]))
+    if (!dvdii((GEN)cyc[i], (GEN)cyc[i+1]))
       err(talker,"not a group in forsubgroup");
   if (n == 1) { T->fun(T, cyc); return; }
   if (!signe(cyc[1]))

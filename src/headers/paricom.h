@@ -98,15 +98,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nfdivres nfdivrem
 #define gred gcopy
 
+#define resii  remii
+#define resis  remis
+#define ressi  remsi
+#define resss  remss
+#define resiiz  remiiz
+#define resisz  remisz
+#define ressiz  remsiz
+#define resssz  remssz
+#define gres    grem
+#define lres    lrem
 #define rcopy mpcopy
+#define gdivise gdvd
+#define divise dvdii
+#define mpdivis dvdiiz
+#define mpdivisis dvdisz
 #define absr  mpabs
 #define absi  mpabs
 #define negi  mpneg
 #define negr  mpneg
+#define mpent mpfloor
+#define mpentz mpfloorz
 #define mpnegz(x,y) \
-  STMT_START {pari_sp av=avma;mpaff(mpneg(x),y);avma=av;} STMT_END
+  STMT_START {pari_sp _av=avma;mpaff(mpneg(x),y);avma=_av;} STMT_END
 #define mpabsz(x,y) \
-  STMT_START {pari_sp av=avma;mpaff(mpabs(x),y);avma=av;} STMT_END
+  STMT_START {pari_sp _av=avma;mpaff(mpabs(x),y);avma=_av;} STMT_END
 #define absrz(x,z)  mpabsz((x),(z))
 #define negrz(x,z)  mpnegz((x),(z))
 
@@ -297,8 +313,6 @@ enum manage_var_t {
 #define is_pm1(n)    is_pm1_lg   (n, lgefint(n))
 #define is_bigint(n) is_bigint_lg(n, lgefint(n))
 
-#define leading_term(x) ((GEN)(((GEN)(x))[lg(x)-1]))
-#define constant_term(x) (signe(x)? ((GEN)(((GEN)(x))[2])): gzero)
 #define degpol(a) ((long)lg(a)-3)
 #define lgpol(a) ((long)lg(a)-2)
 
@@ -308,7 +322,7 @@ enum manage_var_t {
 #define ONLY_REM ((GEN*)0x1L)
 #define ONLY_DIVIDES ((GEN*)0x2L)
 #define gdeuc(x,y) (poldivrem((x),(y),NULL))
-#define gres(x,y) (poldivrem((x),(y),ONLY_REM))
+#define grem(x,y) (poldivrem((x),(y),ONLY_REM))
 #define FpX_div(x,y,p) (FpX_divrem((x),(y),(p), NULL))
 #define FpX_rem(x,y,p) (FpX_divrem((x),(y),(p), ONLY_REM))
 

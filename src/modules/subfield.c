@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 extern GEN matrixpow(long n, long m, GEN y, GEN P,GEN l);
-extern GEN Fp_factor_irred(GEN P,GEN l, GEN Q);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern long ZX_get_prec(GEN x);
@@ -355,7 +354,7 @@ polsimplify(GEN x)
 {
   long i,lx = lg(x);
   for (i=2; i<lx; i++)
-    if (typ(x[i]) == t_POL) x[i] = (long)constant_term(x[i]);
+    if (typ(x[i]) == t_POL) x[i] = (long)constant_term((GEN)x[i]);
   return x;
 }
 
@@ -491,7 +490,7 @@ chinese_retrieve_pol(GEN DATA, GEN listdelta)
   S = NULL; l = lg(interp);
   for (i=1; i<l; i++)
   { /* h(firstroot[i]) = listdelta[i] */
-    p1 = FpXQX_FpXQ_mul((GEN)interp[i], (GEN)listdelta[i], T,p);
+    p1 = FqX_Fq_mul((GEN)interp[i], (GEN)listdelta[i], T,p);
     p1 = poltrace(p1, (GEN)Trk[i], p);
     p1 = gmul(p1, (GEN)bezoutC[i]);
     S = S? gadd(S,p1): p1;
@@ -585,7 +584,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
     a = gmul(gneg(h0), gdivexact(a, p));
     w1 = gadd(w0, gmul(p, FpX_rem(a, T,p)));
 
-    w1_Q = centermod(gmul(w1, resii(ind,q)), q);
+    w1_Q = centermod(gmul(w1, remii(ind,q)), q);
     if (gegal(w1_Q, w0_Q) || cmpii(q,maxp) > 0)
     {
       GEN G = gcmp1(ind)? g: rescale_pol(g,ind);
@@ -639,7 +638,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
     while (!smodis(dpol,p[2]))
       NEXT_PRIME_VIADIFF(p[2], di);
     if (k > 50) err(talker,"sorry, too many block systems in nfsubfields");
-    ff=(GEN)factmod0(pol,p)[1]; r=lg(ff)-1;
+    ff=(GEN)FpX_factor(pol,p)[1]; r=lg(ff)-1;
     if (r == 1 || r == N) goto repeat;
 
     n = cgetg(r+1, t_VECSMALL);
@@ -737,15 +736,14 @@ interpol(GEN H, GEN T, GEN p)
   long i, m = lg(H);
   GEN X = polx[0],d,p1,p2,a;
 
-  p1=polun[0]; p2=gun; a = gneg(constant_term(H[1])); /* = D[1] */
+  p1=polun[0]; p2=gun; a = gneg(constant_term((GEN)H[1])); /* = D[1] */
   for (i=2; i<m; i++)
   {
-    d = constant_term(H[i]); /* -D[i] */
+    d = constant_term((GEN)H[i]); /* -D[i] */
     p1 = FpXQX_mul(p1,gadd(X,d), T,p);
     p2 = Fq_mul(p2, gadd(a,d), T,p);
   }
-  p2 = Fq_inv(p2, T,p);
-  return FpXQX_FpXQ_mul(p1,p2, T,p);
+  return FqX_Fq_mul(p1,Fq_inv(p2, T,p), T,p);
 }
 
 struct poldata
@@ -803,12 +801,12 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
       if (degpol(interp[i]) > 0) /* do not turn polun[0] into gun */
       {
         p1 = TR_pol((GEN)interp[i], mun);
-        interp[i] = (long)FpXQX_red(p1, NULL,p);
+        interp[i] = (long)FpXX_red(p1, p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
         p1 = TR_pol((GEN)bezoutC[i], mun);
-        bezoutC[i] = (long)FpXQX_red(p1, NULL,p);
+        bezoutC[i] = (long)FpXX_red(p1, p);
       }
     }
     p1 = cgetg(lff, t_VEC);
@@ -826,7 +824,7 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
     fk = cgetg(N+1,t_VEC);
     for (l=1,j=1; j<lff; j++)
     { /* compute roots and fix ordering (Frobenius cycles) */
-      p1 = Fp_factor_irred((GEN)ff[j], p,T);
+      p1 = Fp_factor_irred((GEN)ff[j], T, p);
       interp[j] = (long)interpol(p1,T,p);
       firstroot[j] = l;
       for (i=1; i<lg(p1); i++,l++) fk[l] = p1[i];

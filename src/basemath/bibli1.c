@@ -1835,8 +1835,8 @@ lindep(GEN x, long prec)
       if (!qzer[j])
       {
         p1 = mpadd(m[k][j], mulir(r,m[i][j]));
-        affrr(m[i][j],m[k][j]);
-        mpaff(p1,m[i][j]);
+        affrr(m[i][j], m[k][j]);
+        affrr(p1, m[i][j]);
       }
     c1 = addrr(bn[k], mulrr(gsqr(f),bn[i]));
     if (!quazero(c1))
@@ -2401,8 +2401,8 @@ applybar(pslq_M *M, pslqL2_M *Mbar, GEN Abargen, GEN Bbargen)
     for (j=1; j<=n; j++)
     {
       if (expodb(p1[j]) >= 52 || expodb(p2[j]) >= 52) return 0;
-      coeff(Abargen,i,j) = (long)mpent(dbltor(p1[j]));
-      coeff(Bbargen,i,j) = (long)mpent(dbltor(p2[j]));
+      coeff(Abargen,i,j) = lstoi((long)floor(p1[j]));
+      coeff(Bbargen,i,j) = lstoi((long)floor(p2[j]));
     }
   }
   M->y = gmul(M->y, Bbargen);
@@ -2748,7 +2748,7 @@ RV_zc_mul_i(GEN x, GEN y, long l)
   return gerepileupto(av, z);
 }
 GEN
-RV_zc_mul(GEN x, GEN y, long l) { return RV_zc_mul_i(x, y, lg(x)); }
+RV_zc_mul(GEN x, GEN y) { return RV_zc_mul_i(x, y, lg(x)); }
 
 GEN 
 RV_zm_mul(GEN x, GEN y)

@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define fix_frac_if_int_GC(z,tetpil) { if (is_pm1(z[2]))\
   z = gerepileupto((pari_sp)(z+3), (GEN)z[1]);\
 else\
-  gerepilemanyvec((pari_sp)z, tetpil, z+1, 2); }
+  gerepilecoeffssp((pari_sp)z, tetpil, z+1, 2); }
 
 extern GEN shiftpol_i(GEN x, long v);
 extern GEN quad_polmod_conj(GEN x, GEN y);
@@ -111,7 +111,7 @@ divRc(GEN x, GEN y) {
   b = gmul(x, (GEN)y[2]); if(!gcmp0(b)) b = gneg_i(b);
   N = gnorm(y); tetpil = avma;
   z[1] = ldiv(a, N);
-  z[2] = ldiv(b, N); gerepilemanyvec(av,tetpil,z+1,2); return z;
+  z[2] = ldiv(b, N); gerepilecoeffssp(av,tetpil,z+1,2); return z;
 }
 static GEN
 divcR(GEN x, GEN y) {
@@ -198,7 +198,7 @@ mul_intmod_same(GEN z, GEN X, GEN x, GEN y) {
     avma = (pari_sp)z; z[2] = lutoi(u);
   }
   else
-    z[2] = lpileuptoint((pari_sp)z, resii(mulii(x,y), X) );
+    z[2] = lpileuptoint((pari_sp)z, remii(mulii(x,y), X) );
   icopyifstack(X, z[1]); return z;
 }
 /* cf add_intmod_same */
@@ -212,7 +212,7 @@ div_intmod_same(GEN z, GEN X, GEN x, GEN y)
     avma = (pari_sp)z; z[2] = lutoi(u);
   }
   else
-    z[2] = lpileuptoint((pari_sp)z, resii(mulii(x, mpinvmod(y,X)), X) );
+    z[2] = lpileuptoint((pari_sp)z, remii(mulii(x, mpinvmod(y,X)), X) );
   icopyifstack(X, z[1]); return z;
 }
 
@@ -289,21 +289,17 @@ gred_rfrac2_i(GEN n, GEN d)
     n = gdiv(n,cd);
     return d? gred_rfrac_copy(n, d): n;
   }
-  else
+  if (!gcmp1(cn))
   {
-    if (!gcmp1(cn))
-    {
-      n = gdiv(n,cn);
-      c = gdiv(cn,cd);
-    }
-    else
-      c = ginv(cd);
-    y = poldivrem(n,d,&p1);
-    if (!signe(p1)) return gmul(c,y);
-    p1 = ggcd(d,p1);
+    n = gdiv(n,cn);
+    c = gdiv(cn,cd);
   }
-
-  if (!isscalar(p1)) { n=gdeuc(n,p1); d=gdeuc(d,p1); }
+  else
+    c = ginv(cd);
+  y = poldivrem_i(n, d, &p1, varn(n));
+  if (!signe(p1)) return gmul(c,y);
+  p1 = ggcd(d,p1);
+  if (degpol(p1)) { n=gdeuc(n,p1); d=gdeuc(d,p1); }
   if (typ(c) == t_POL)
   {
     cd = denom(content(c));
@@ -391,7 +387,7 @@ addpp(GEN x, GEN y)
     r = d+ry; z = gpowgs(p,d);
     if (r < rx) mod = mulii(z,(GEN)y[3]); else { r = rx; mod = (GEN)x[3]; }
     u = addii((GEN)x[4], mulii(z,(GEN)y[4]));
-    u = resii(u, mod);
+    u = remii(u, mod);
   }
   else
   {
@@ -407,7 +403,7 @@ addpp(GEN x, GEN y)
       r -= c;
       e += c;
     }
-    u = resii(u, mod);
+    u = remii(u, mod);
   }
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);
@@ -594,7 +590,7 @@ add_rfrac_scal(GEN y, GEN x)
       tetpil = avma;
       z[1] = ldiv(num, p1);
       z[2] = ldiv((GEN)y[2], p1);
-      gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
+      gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
     }
   }
   avma = av;
@@ -686,7 +682,7 @@ add_rfrac(GEN x, GEN y)
       return gerepileupto((pari_sp)(z+3), p1);
     }
     z[1]=(long)p1; z[2]=(long)d;
-    gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
+    gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
   }
   p1 = ggcd(delta, r);
   if (gcmp1(p1))
@@ -701,7 +697,7 @@ add_rfrac(GEN x, GEN y)
     z[1] = ldeuc(n,p1);
   }
   z[2] = lmul(d,delta);
-  gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
+  gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
 
 GEN
@@ -721,7 +717,7 @@ gadd(GEN x, GEN y)
         return add_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y);
       av = avma; p1 = addii((GEN)x[2],(GEN)y[2]);
-      z[2] = (long)gerepileuptoint(av, resii(p1, (GEN)z[1])); return z;
+      z[2] = (long)gerepileuptoint(av, remii(p1, (GEN)z[1])); return z;
     }
     case t_FRAC: return addfrac(x,y);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
@@ -926,7 +922,7 @@ gadd(GEN x, GEN y)
     }
     return add_scal(y, x, ty, vy);
   }
-  /* !isscalar(x && y), ty != t_MAT */
+  /* x and y are not scalars, ty != t_MAT */
   vx = gvar(x);
   vy = gvar(y);
   if (vx != vy) { /* x or y is treated as a scalar */
@@ -1015,7 +1011,7 @@ mul_rfrac_scal(GEN y, GEN x)
     long td;
     p1 = ggcd(x,d);
     while (typ(p1) == t_POL && lg(p1) == 3) p1 = (GEN)p1[2];
-    if (isnonscalar(p1)) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
+    if (typ(p1) == t_POL && lg(p1) > 3) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
     while (typ(x) == t_POL && lg(x) == 3) x = (GEN)x[2];
     while ((td = typ(d)) == t_POL && lg(d) == 3) d = (GEN)d[2];
     if (is_scalar_t(td))
@@ -1040,7 +1036,7 @@ mul_rfrac_scal(GEN y, GEN x)
   z[1] = lmul(n, cn);
   p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
   if (p1) return gerepileupto(av, p1);
-  gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
+  gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
 
 static GEN
@@ -1058,7 +1054,7 @@ mul_rfrac(GEN x, GEN y)
   z[1] = lmul(x1,y1);
   p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
   if (p1) return gerepileupto((pari_sp)(z+3), p1);
-  gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
+  gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
 
 /* Mod(y, Y) * x,  assuming x scalar */
@@ -1191,7 +1187,7 @@ mulcc(GEN x, GEN y)
     avma = av2;
     return gerepileupto((pari_sp)(z+3), (GEN)z[1]);
   }
-  gerepilemanyvec(av,tetpil, z+1,2); return z;
+  gerepilecoeffssp(av,tetpil, z+1,2); return z;
 }
 /* x,y PADIC */
 static GEN
@@ -1205,7 +1201,7 @@ mulpp(GEN x, GEN y) {
 
   t = (precp(x) > precp(y))? y: x;
   z = cgetp(t); setvalp(z,l); av = avma;
-  resiiz(mulii((GEN)x[4],(GEN)y[4]), (GEN)t[3], (GEN)z[4]);
+  remiiz(mulii((GEN)x[4],(GEN)y[4]), (GEN)t[3], (GEN)z[4]);
   avma = av; return z;
 }
 /* x,y QUAD */
@@ -1235,7 +1231,7 @@ mulqq(GEN x, GEN y) {
   tetpil = avma;
   z[2] = ladd(p2,p4);
   z[3] = ladd(p1,p3);
-  gerepilemanyvec(av,tetpil,z+2,2); return z;
+  gerepilecoeffssp(av,tetpil,z+2,2); return z;
 }
 
 GEN
@@ -1256,7 +1252,7 @@ gmul(GEN x, GEN y)
       if (X==Y || egalii(X,Y))
         return mul_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y); av = avma; p1 = mulii((GEN)x[2],(GEN)y[2]);
-      z[2] = (long)gerepileuptoint(av, resii(p1, (GEN)z[1])); return z;
+      z[2] = (long)gerepileuptoint(av, remii(p1, (GEN)z[1])); return z;
     }
     case t_FRAC:
     {
@@ -1396,7 +1392,7 @@ gmul(GEN x, GEN y)
       {
         case t_FRAC: { GEN X = (GEN)x[1];
           z = cgetg(3, t_INTMOD); p1 = modii(mulii((GEN)y[1], (GEN)x[2]), X);
-          return div_intmod_same(z, X, p1, resii((GEN)y[2], X)); 
+          return div_intmod_same(z, X, p1, remii((GEN)y[2], X)); 
         }
         case t_COMPLEX: return mulRc(x, y);
         case t_PADIC: { GEN X = (GEN)x[1];
@@ -1522,7 +1518,7 @@ gmul(GEN x, GEN y)
     return mul_scal(y, x, ty);
   }
 
-  /* !isscalar(x && y) + !is_matvec_t(x && y) */
+  /* x and y are not scalars, nor matvec */
   vx = gvar(x);
   vy = gvar(y);
   if (vx != vy) { /* x or y is treated as a scalar */
@@ -1630,7 +1626,7 @@ gsqr(GEN x)
       case t_REAL: return mulrr(x,x);
       case t_INTMOD: { GEN X = (GEN)x[1];
         z = cgetg(3,t_INTMOD);
-        z[2] = lpileuptoint((pari_sp)z, resii(sqri((GEN)x[2]), X));
+        z[2] = lpileuptoint((pari_sp)z, remii(sqri((GEN)x[2]), X));
         icopyifstack(X,z[1]); return z;
       }
       case t_FRAC: z=cgetg(3,t_FRAC);
@@ -1648,7 +1644,7 @@ gsqr(GEN x)
 	p3 = gmul((GEN)x[1],(GEN)x[2]);
 	tetpil = avma;
 	z[1] = lmul(p1,p2);
-        z[2] = lshift(p3,1); gerepilemanyvec(av,tetpil,z+1,2); return z;
+        z[2] = lshift(p3,1); gerepilecoeffssp(av,tetpil,z+1,2); return z;
 	
       case t_PADIC:
 	z = cgetg(5,t_PADIC);
@@ -1657,7 +1653,7 @@ gsqr(GEN x)
         z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
 	icopyifstack(x[2], z[2]);
         z[3] = lshifti((GEN)x[3], i); av = avma;
-	z[4] = lpileuptoint(av, resii(sqri((GEN)x[4]), (GEN)z[3]));
+	z[4] = lpileuptoint(av, remii(sqri((GEN)x[4]), (GEN)z[3]));
 	return z;
 	
       case t_QUAD: z = cgetg(4,t_QUAD);
@@ -1680,12 +1676,12 @@ gsqr(GEN x)
         tetpil = avma;
 	z[2] = ladd(p2,p4);
         z[3] = ladd(p1,p3);
-	gerepilemanyvec(av,tetpil,z+2,2); return z;
+	gerepilecoeffssp(av,tetpil,z+2,2); return z;
 
       case t_POLMOD:
         z=cgetg(3,t_POLMOD); copyifstack(x[1],z[1]);
 	av=avma; p1=gsqr((GEN)x[2]); tetpil=avma;
-        z[2]=lpile(av,tetpil, gres(p1,(GEN)z[1]));
+        z[2]=lpile(av,tetpil, grem(p1,(GEN)z[1]));
 	return z;
     }
 
@@ -1898,7 +1894,7 @@ divpp(GEN x, GEN y) {
   z[1] = evalprecp(b) | evalvalp(valp(x) - valp(y));
   icopyifstack(x[2], z[2]);
   z[3] = licopy(M); av = avma;
-  z[4] = lpileuptoint(av, resii(mulii((GEN)x[4], mpinvmod((GEN)y[4], M)), M) );
+  z[4] = lpileuptoint(av, remii(mulii((GEN)x[4], mpinvmod((GEN)y[4], M)), M) );
   return z;
 }
 
@@ -1930,7 +1926,7 @@ gdiv(GEN x, GEN y)
         return div_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
       z[1] = (long)gcdii(X,Y); av = avma;
       p1 = mulii((GEN)x[2], mpinvmod((GEN)y[2], (GEN)z[1]));
-      z[2] = lpileuptoint(av, resii(p1, (GEN)z[1])); return z;
+      z[2] = lpileuptoint(av, remii(p1, (GEN)z[1])); return z;
     }
     case t_FRAC: {
       GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
@@ -2091,7 +2087,7 @@ gdiv(GEN x, GEN y)
           z = cgetg(3, t_INTMOD);
           return div_intmod_same(z, (GEN)x[1], (GEN)x[2], modii(y, (GEN)x[1]));
         case t_FRAC: { GEN X = (GEN)x[1];
-          z = cgetg(3,t_INTMOD); p1 = resii(mulii((GEN)y[2], (GEN)x[2]), X);
+          z = cgetg(3,t_INTMOD); p1 = remii(mulii((GEN)y[2], (GEN)x[2]), X);
           return div_intmod_same(z, X, p1, modii((GEN)y[1], X));
         }
         case t_COMPLEX:
@@ -2134,7 +2130,7 @@ gdiv(GEN x, GEN y)
           return gerepile(av, tetpil, divir((GEN)x[1], p1));
 
         case t_INTMOD: { GEN Y = (GEN)y[1];
-          z = cgetg(3,t_INTMOD); p1 = resii(mulii((GEN)y[2],(GEN)x[2]), Y);
+          z = cgetg(3,t_INTMOD); p1 = remii(mulii((GEN)y[2],(GEN)x[2]), Y);
           return div_intmod_same(z, Y, (GEN)x[1], p1);
         }
         case t_COMPLEX: return divRc(x, y);

@@ -258,7 +258,7 @@ If the exponent is an integer, then exact operations are performed using
 binary (left-shift) powering techniques. In particular, in this case $x$
 cannot be a vector or matrix unless it is a square matrix (and moreover
 invertible if the exponent is negative). If $x$ is a $p$-adic number, its
-precision will increase if $v_p(n) > 0$. Powering a binary quadratic form 
+precision will increase if $v_p(n) > 0$. Powering a binary quadratic form
 (types \typ{QFI} and \typ{QFR}) returns a reduced representative of the
 class, provided the input is reduced. In particular, $x\hbox{\kbd{\pow}}1$ is
 identical to $x$.
@@ -449,7 +449,7 @@ and the associated big matrix is returned.
   ? Col( [1,2; 3,4] )
   %4 = [[1, 2], [3, 4]]~
   ? Mat(%)
-  %5 = 
+  %5 =
   [1 2]
 
   [3 4]
@@ -847,7 +847,7 @@ $\R$ is its square, so as to be compatible with the complex norm.
 
 \syn{gnorm}{x}.
 
-\subsecidx{norml2}$(x)$: square of the $L^2$-norm of $x$. More precisely, 
+\subsecidx{norml2}$(x)$: square of the $L^2$-norm of $x$. More precisely,
 if $x$ is a scalar, $\kbd{norml2}(x)$ is defined to be \kbd{$x$ * conj($x$)}.
 If $x$ is a (row or column) vector or a matrix, \kbd{norml2($x$)} is
 defined recursively as $\sum_i \kbd{norml2}(x_i)$, where $(x_i)$ run through
@@ -872,7 +872,7 @@ components.
 or function, the meaning is clear. When $x$ is an integer or a polynomial,
 the result is $x$ itself. When $x$ is a vector or a matrix, then
 \kbd{numerator(x)} is defined to be \kbd{denominator(x)*x}. All other types
-are forbidden. 
+are forbidden.
 
 \misctitle{Warning:} multivariate objects are created according to variable
 priorities, with possibly surprising side effects ($x/y$ is a polynomial, but
@@ -938,8 +938,8 @@ although both return an integer between $0$ and $2^{31}-1$. In fact, calling
 64bit depending on the architecture), rescaled to the desired interval.
 The default uses directly a 31-bit generator.
 
-\syn{genrand}{N}. Also available are \tet{pari_rand}$()$ which returns a 
-random \kbd{unsigned long} (32bit or 64bit depending on the architecture), and 
+\syn{genrand}{N}. Also available are \tet{pari_rand}$()$ which returns a
+random \kbd{unsigned long} (32bit or 64bit depending on the architecture), and
 \tet{pari_rand31}$()$ which returns a 31bit \kbd{long} integer.
 
 \subsecidx{real}$(x)$: real part of $x$. In the case where $x$ is a quadratic
@@ -1211,7 +1211,7 @@ $B_x$, as \kbd{bernfrac}, but $B_x$ is returned as a real number
 \syn{bernreal}{x,\var{prec}}.
 
 \subsecidx{bernvec}$(x)$: creates a vector containing, as rational numbers,
-the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$. 
+the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$.
 This routine is obsolete. Use \kbd{bernfrac} instead each time you need a
 Bernoulli number in exact form.
 
@@ -3475,7 +3475,7 @@ number field.
 
 This function is mostly useless, since it will only succeed if
 \var{bnf} contains the units, in which case \kbd{bnf.fu} is recommanded
-instead, or \var{bnf} was produced with \kbd{bnfinit(,,2)}, which is itself 
+instead, or \var{bnf} was produced with \kbd{bnfinit(,,2)}, which is itself
 deprecated.
 
 \syn{buchfu}{\var{bnf}}.
@@ -3573,8 +3573,8 @@ the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
 
   If $\fl = 0$, returns $f$.
 
-  If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group 
-modulo $f$, as output by $\tet{bnrclass}(,f,1)$, and $H$ is the 
+  If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group
+modulo $f$, as output by $\tet{bnrclass}(,f,1)$, and $H$ is the
 subgroup of $Cl_f$ defining the extension. If $a_1$ is a \kbd{bnr}, the
 algorithm requires that it has been computed by $\tet{bnrinit}(,,1)$,
 i.e.~with generators.
@@ -3831,7 +3831,7 @@ Eick and Eamonn O'Brien.
 This command also accepts subgroups returned by \kbd{galoissubgroups}.
 
 The current implementation is limited to degree less or equal to $127$.
-Some larger ``easy'' orders are also supported. 
+Some larger ``easy'' orders are also supported.
 
 The output is similar to the output of the function \kbd{IdGroup} in GAP4.
 Note that GAP4 \kbd{IdGroup} handles all groups of order less than $2000$
@@ -4000,7 +4000,7 @@ group \kbd{gal}. A subgroup is a vector [\var{gen}, \var{orders}], with the same
 as for $\var{gal}.gen$ and $\var{gal}.orders$. Hence \var{gen} is a vector of
 permutations generating the subgroup, and \var{orders} is the relatives
 orders of the generators. The cardinal of a subgroup is the product of the
-relative orders. Such subgroup can be used instead of a Galois group in the 
+relative orders. Such subgroup can be used instead of a Galois group in the
 following command: \kbd{galoisisabelian}, \kbd{galoissubgroups}, \kbd{galoisexport} and \kbd{galoisidentify}.
 
 To get the subfield fixed by a subgroup \var{sub} of \var{gal}, use
@@ -4210,7 +4210,7 @@ and $\alpha=\sum_i a_i\omega_i$ where the $\omega_i$ form the integral basis
 and $b$ represents a $\beta\in\Z_K$ such that $P^{-1}=\Z_K+\beta/p\Z_K$
 which will be useful for computing valuations, but which the user can ignore.
 The number $\alpha$ is guaranteed to have a valuation equal to 1 at the prime
-ideal (this is automatic if $e>1$). 
+ideal (this is automatic if $e>1$).
 
 The components of \kbd{P} may conveniently be accessed by member functions:
 \kbd{P.p}, \kbd{P.e}, \kbd{P.f}, and \kbd{P.gen} (returns the vector
@@ -4591,7 +4591,7 @@ $K$-automorphism for any base field $K$ as follows:
     N = nfgaloisconj(polabs) % R;     \\ Q-automorphisms of L
     H = [];
     for(i=1, #N,                      \\ select the ones that fix K
-      if (subst(R, variable(R), Mod(N[i],R)) == 0, 
+      if (subst(R, variable(R), Mod(N[i],R)) == 0,
         H = concat(H,N[i])
       )
     ); H
@@ -4827,7 +4827,7 @@ in $\Z_K/\var{pr}$, where $a$ is a matrix and $b$ a column vector, and where
 \syn{nfsolvemodpr}{\var{nf},a,b,\var{pr}}.
 
 \subsecidx{polcompositum}$(P,Q,\{\fl=0\})$:\sidx{compositum} $P$ and $Q$
-being squarefree polynomials in $\Z[X]$ in the same variable, outputs 
+being squarefree polynomials in $\Z[X]$ in the same variable, outputs
 the simple factors of the \'etale $\Q$-algebra $A = \Q(X, Y) / (P(X), Q(Y))$.
 The factors are given by a list of polynomials $R$ in $\Z[X]$, associated to
 the number field $\Q(X)/ (R)$, and sorted by increasing degree (with respect
@@ -5224,7 +5224,7 @@ the form of a $\Z$-basis, given by a vector of polynomials (modulo
 \kbd{rnf.pol}).
 The following routine might be useful:
 \bprog
-    \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form 
+    \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form
     \\ associated to nf = nfinit( rnf.pol );
     idealgentoHNF(nf, y) = mathnf( Mat( nfalgtobasis(nf, y) ) );
 @eprog
@@ -5580,7 +5580,7 @@ can be applied to other types.
 equal to 2) or power series zero (in all other cases), with precision given
 by $e$.
 
-\syn{zeropadic}{p,e} for a $p$-adic and \teb{zerser}(v,e) for a
+\syn{zeropadic}{p,e} for a $p$-adic and \teb{zeroser}(v,e) for a
 power series zero in variable $v$ (so $v$ is a long and $p = \kbd{polx[v]}$),
 where the precision $e$ is a \kbd{long}.
 
@@ -6272,11 +6272,11 @@ columns of $x$ and $y$ respectively. See also the function
 
 \syn{intersect}{x,y}.
 
-\subsecidx{matinverseimage}$(x,y)$: gives a column vector belonging to the
-inverse image of the column vector $y$ by the matrix $x$ if one exists, the
-empty vector otherwise. To get the complete inverse image, it suffices to add
-to the result any element of the kernel of $x$ obtained for example by
-\kbd{matker}.
+\subsecidx{matinverseimage}$(M,y)$: gives a column vector belonging to the
+inverse image $z$ of the column vector or matrix $y$ by the matrix $M$ if one
+exists (i.e such that $Mz = y$), the empty vector otherwise. To get the
+complete inverse image, it suffices to add to the result any element of the
+kernel of $x$ obtained for example by \kbd{matker}.
 
 \syn{inverseimage}{x,y}.
 
@@ -6413,7 +6413,7 @@ in which case all the $y_i$ (resp.~$d_i$) above are taken to be equal to $y$
   ? m = [1,2;3,4];
   ? matsolvemod(m, [3,4], [1,2]~)
   %2 = [-2, 0]~
-  ? matsolvemod(m, 3, 1) \\ m X = [1,1]~ over F_3 
+  ? matsolvemod(m, 3, 1) \\ m X = [1,1]~ over F_3
   %3 = [-1, 1]~
 @eprog
 
@@ -7768,7 +7768,7 @@ the keywords to \kbd{gp}, and there are currently far too many useless ones):
 
 \kbd{user}: user error (from the \kbd{error} function)
 
-\subsubsecidx{type}$(x)$: this is useful only under \kbd{gp}. Returns the 
+\subsubsecidx{type}$(x)$: this is useful only under \kbd{gp}. Returns the
 internal type name of the PARI object $x$ as a  string.  Check out
 existing type names with the metacommand \b{t}.\label{se:gptype}
 For example \kbd{type(1)} will return "\typ{INT}".

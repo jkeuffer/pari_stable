@@ -27,18 +27,24 @@ paricfg.tex: paricfg.tex.in
 	tex \$<
 
 libpari.pdf: \$(PARI_TEX) \$(MACROS)
-	rm -f libpari.std; pdftex libpari;
+	-rm -f libpari.std
+	pdftex libpari
+	pdftex libpari
 	make libpari.std; pdftex libpari; rm -f libpari.std
 libpari.dvi: \$(PARI_TEX) \$(MACROS)
-	rm -f libpari.std; tex libpari;
+	-rm -f libpari.std
+	tex libpari
+	tex libpari
 	make libpari.std; tex libpari; rm -f libpari.std
 
 tutorial.pdf: tutorial.tex \$(MACROS)
-	pdftex tutorial; touch tutorial.std
-	pdftex tutorial; rm -f tutorial.std
+	-rm -f tutorial.std
+	pdftex tutorial
+	pdftex tutorial
 tutorial.dvi: tutorial.tex \$(MACROS)
-	tex tutorial; touch tutorial.std
-	tex tutorial; rm -f tutorial.std
+	-rm -f tutorial.std
+	tex tutorial
+	tex tutorial
 
 %.ps: %.dvi
 	dvips \$< -o \$@
@@ -54,11 +60,15 @@ refcard.ps: refcard.dvi
 	sed -e 's/!00*\([0-9]*\)!/!\1!/' > \$@;
 
 users.dvi: \$(USERS_TEX)
-	rm -f users.std; tex users;
+	-rm -f users.std
+	tex users
+	tex users
 	make users.std; tex users; rm -f users.std
 
 users.pdf: \$(USERS_TEX)
-	-rm -f users.std; pdftex users;
+	-rm -f users.std
+	pdftex users
+	pdftex users
 	make users.std; pdftex users; rm -f users.std
 
 gpman: gp.1

@@ -775,7 +775,7 @@ GEN polsubcyclo(long n, long d, long v)
   pari_sp ltop=avma;
   GEN L, Z=znstar(stoi(n));
   /*subcyclo is twice faster but Z must be cyclic*/
-  if (lg(Z[2]) == 2 && divise((GEN)Z[1],stoi(d)))
+  if (lg(Z[2]) == 2 && dvdii((GEN)Z[1],stoi(d)))
   {
     avma=ltop; 
     return subcyclo(n, d, v);

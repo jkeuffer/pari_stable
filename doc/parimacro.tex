@@ -54,20 +54,25 @@
 \font\seventt=cmtt8 scaled 875
 \scriptfont\ttfam=\seventt % we should really set the \hyphenchar etc first
 \parskip=6pt plus 3pt minus 1.5pt
-\overfullrule=0pt
+%\overfullrule=0pt
 
 %%
 %% TABLE OF CONTENTS
 %%
+\newwrite\toc
 \def\tableofcontents{\begintitle
 \openin\std=\jobname.toc
 \ifeof\std
 \else
+  \begingroup
   \centerline{\bf Table of Contents}\medskip
   \parskip=0pt plus 1pt
   \parindent=0pt
+  \catcode`\_=11 % make _ an ordinary char (frequent in function names)
   \obeylines\input\jobname.toc
+  \endgroup
 \fi
+\openout\toc=\jobname.toc
 \endtitle}
 
 %%
@@ -76,6 +81,7 @@
 \newif\ifsecondpass
 \newwrite\out
 \newwrite\aux
+\newwrite\index
 \ifGPHELP % disable crossreferences
   \def\condwrite#1#2{}
   \def\idx#1{#1}
@@ -93,9 +99,6 @@
   \ifeof\std
     \secondpassfalse
     \typeout{FIRST PASS}
-    \csname newwrite\endcsname\toc
-    \csname newwrite\endcsname\index
-    \openout\toc=\jobname.toc
     \openout\index=\jobname.idx
     \let\condwrite=\write
   \else
@@ -239,11 +242,11 @@
   \fi
   \centerline{\let\bf\chaptertitlebf \chaptertitlefont #2}\vskip1cm}
 \def\sectitle#1{%
-  \tocwrite{{%\sevenrm
-\hskip0.5cm#1\string\dotfill\the\pageno}}%
   \vskip 0pt plus 54pt\penalty-600% good break
   \vskip 24pt plus -45pt minus 9pt%
   \putchapdest%
+  \tocwrite{{%\sevenrm
+\hskip0.5cm#1\string\dotfill\the\pageno}}%
   \leftline{\sectionhook{\sectiontitlebf #1}.}
   \penalty10000 % impossible break
   \smallskip}% whatever follows will add a \parskip
@@ -251,6 +254,8 @@
 \def\subsectitle#1{%
   \vskip 0pt plus 45pt\penalty-300
   \vskip 6pt plus -42pt minus 3pt
+  \tocwrite{{\sevenrm
+\hskip1cm#1\string\dotfill\the\pageno}}%
   \sectionhook\noindent{\bf#1}}
 
 \def\subsubsectitle#1{% a \parskip is being added anyway by \noindent

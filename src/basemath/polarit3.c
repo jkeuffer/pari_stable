@@ -460,7 +460,6 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
 {
   GEN z, U, V;
 
-  if (typ(x) != t_POL) err(bugparier,"FpXQ_invsafe, not a polynomial");
   z = FpX_extgcd(x, T, p, &U, &V);
   if (degpol(z)) return NULL;
   z = mpinvmodsafe((GEN)z[2], p);
@@ -476,10 +475,7 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
 GEN
 FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
 {
-  GEN z;
-  if (typ(x) == t_INT || typ(y) == t_INT)
-    err(bugparier,"FpXQ_mul, not a polynomial");
-  z = quickmul(y+2, x+2, lgpol(y), lgpol(x)); setvarn(z,varn(y));
+  GEN z = quickmul(y+2, x+2, lgpol(y), lgpol(x)); setvarn(z,varn(y));
   z = FpX_red(z, p); return FpX_rem(z,T, p);
 }
 
@@ -560,22 +556,22 @@ powuumod(ulong x, ulong n0, ulong p)
 }
 
 GEN
-powgumod(GEN x, ulong n0, GEN p)
+powiumod(GEN x, ulong n0, GEN p)
 {
   GEN y, z;
   ulong n;
   if (n0 <= 2)
   { /* frequent special cases */
-    if (n0 == 2) return resii(sqri(x),p);
+    if (n0 == 2) return remii(sqri(x),p);
     if (n0 == 1) return x;
     if (n0 == 0) return gun;
   }
   y = gun; z = x; n = n0;
   for(;;)
   {
-    if (n&1) y = resii(mulii(y,z),p);
+    if (n&1) y = remii(mulii(y,z),p);
     n>>=1; if (!n) return y;
-    z = resii(sqri(z),p);
+    z = remii(sqri(z),p);
   }
 }
 
@@ -588,12 +584,8 @@ powgumod(GEN x, ulong n0, GEN p)
 GEN
 FpXQ_inv(GEN x,GEN T,GEN p)
 {
-  pari_sp av;
-  GEN U;
-
-  if (!T) err(bugparier,"FpXQ_inv, T=NULL");
-  av = avma;
-  U = FpXQ_invsafe(x, T, p);
+  pari_sp av = avma;
+  GEN U = FpXQ_invsafe(x, T, p);
   if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
   return gerepileupto(av, U);
 }
@@ -758,11 +750,11 @@ FpX_eval(GEN x,GEN y,GEN p)
     for (j=i; !signe((GEN)x[j]); j--)
       if (j==2)
       {
-	if (i!=j) y = powgumod(y,i-j+1,p);
+	if (i!=j) y = powiumod(y,i-j+1,p);
 	p1=mulii(p1,y);
 	goto fppoleval;/*sorry break(2) no implemented*/
       }
-    r = (i==j)? y: powgumod(y,i-j+1,p);
+    r = (i==j)? y: powiumod(y,i-j+1,p);
     p1 = modii(addii(mulii(p1,r), (GEN)x[j]),p);
   }
  fppoleval:
@@ -910,28 +902,26 @@ FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
 }
 
 GEN
+FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpXX_red(z, p); }
+GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
-  GEN res;
   int i, l = lg(z);
-  res = cgetg(l,t_POL); res[1] = z[1];
+  GEN res = cgetg(l,t_POL); res[1] = z[1];
   for(i=2;i<l;i++)
     if (typ(z[i]) == t_INT)
       res[i] = lmodii((GEN)z[i],p);
-    else if (T)
-      res[i] = (long)FpX_rem((GEN)z[i],T,p);
     else
-      res[i] = (long)FpX_red((GEN)z[i],p);
+      res[i] = (long)FpX_rem((GEN)z[i],T,p);
   return FpXQX_renormalize(res,lg(res));
 }
+
 GEN
 FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
   pari_sp ltop=avma;
   GEN z,kx,ky;
-  long vx;
-  if (!T) err(bugparier,"FpXQX_mul, T==NULL");
-  vx = min(varn(x),varn(y));
+  long vx = min(varn(x),varn(y));
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
   z = quickmul(ky+2, kx+2, lgpol(ky), lgpol(kx));
@@ -953,13 +943,11 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
 }
 
 GEN
-FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
+FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
 {
   int i, lP = lg(P);
-  GEN res = cgetg(lP,t_POL);
-  res[1] = P[1];
-  for(i=2; i<lP; i++)
-    res[i] = (long)Fq_mul(U,(GEN)P[i], T,p);
+  GEN res = cgetg(lP,t_POL); res[1] = P[1];
+  for(i=2; i<lP; i++) res[i] = (long)Fq_mul(U,(GEN)P[i], T,p);
   return FpXQX_renormalize(res,lg(res));
 }
 
@@ -1013,7 +1001,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
     }
     swap(P, Q); dg = -dg;
   }
-  Q = FpXQX_FpXQ_mul(Q, U, T, p); /* normalize GCD */
+  Q = FqX_Fq_mul(Q, U, T, p); /* normalize GCD */
   return gerepileupto(ltop, Q);
 }
 
@@ -1173,6 +1161,7 @@ Fq_sub(GEN x, GEN y, GEN T/*unused*/, GEN p)
 GEN
 Fq_neg(GEN x, GEN T/*unused*/, GEN p)
 {
+  (void)T;
   switch(typ(x)==t_POL)
   {
     case 0: return signe(x)?subii(p,x):gzero;
@@ -1272,20 +1261,20 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
 static GEN Tmodulo;
 static GEN _FpXQX_mul(GEN a,GEN b){return FpXQX_mul(a,b,Tmodulo,modulo);}
 GEN 
-FpXQXV_prod(GEN V, GEN Tp, GEN p)
+FpXQXV_prod(GEN V, GEN T, GEN p)
 {
-  modulo = p; Tmodulo = Tp;
+  modulo = p; Tmodulo = T;
   return divide_conquer_prod(V, &_FpXQX_mul);
 }
 GEN
-FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
+FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
 {
   pari_sp ltop = avma;
   long k;
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    W[k] = (long)deg1pol(gun,Fq_neg((GEN)V[k],Tp,p),v);
-  return gerepileupto(ltop, FpXQXV_prod(W, Tp, p));
+    W[k] = (long)deg1pol(gun,Fq_neg((GEN)V[k],T,p),v);
+  return gerepileupto(ltop, FpXQXV_prod(W, T, p));
 }
 
 GEN
@@ -1464,34 +1453,22 @@ GEN
 Fp_inv_isom(GEN S,GEN T, GEN p)
 {
   pari_sp ltop = avma;
-  GEN     M, V;
-  int     n, i;
-  long    x;
-  x = varn(T);
-  n = degpol(T);
-  M = matrixpow(n,n,S,T,p);
-  V = cgetg(n + 1, t_COL);
-  for (i = 1; i <= n; i++)
-    V[i] = zero;
-  V[2] = un;
-  V = FpM_invimage(M,V,p);
-  V = gtopolyrev(V, x);
-  return gerepileupto(ltop, V);
+  int n = degpol(T);
+  GEN V, M = matrixpow(n,n,S,T,p);
+  V = FpM_invimage(M, vec_ei(n, 2), p);
+  return gerepileupto(ltop, gtopolyrev(V, varn(T)));
 }
 
 /* Let M the matrix of the x^p Frobenius automorphism.
- * Compute x^(p^i) for i=0..r
- */
+ * Compute x^(p^i) for i=0..r */
 static GEN
 FpM_Frobenius(GEN M, long r, GEN p, long v)
 {
-  GEN V,W;
+  GEN W, V = cgetg(r+2,t_VEC);
   long i;
-  V = cgetg(r+2,t_VEC);
-  V[1] = (long) polx[v];
-  if (r == 0) return V;
+  V[1] = (long) polx[v]; if (!r) return V;
   V[2] = (long) vec_to_pol((GEN)M[2],v);
-  W = (GEN) M[2];
+  W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
   {
     W = FpM_FpV_mul(M,W,p);
@@ -1501,18 +1478,15 @@ FpM_Frobenius(GEN M, long r, GEN p, long v)
 }
 
 /* Let M the matrix of the x^p Frobenius automorphism.
- * Compute x^(p^i) for i=0..r
- */
+ * Compute x^(p^i) for i=0..r */
 static GEN
 Flm_Frobenius(GEN M, long r, ulong p, long v)
 {
-  GEN V,W;
+  GEN W, V = cgetg(r+2,t_VEC);
   long i;
-  V = cgetg(r+2,t_VEC);
-  V[1] = (long) Flx_polx(v);
-  if (r == 0) return V;
+  V[1] = (long) Flx_polx(v); if (!r) return V;
   V[2] = (long) Flv_Flx((GEN)M[2],v);
-  W = (GEN) M[2];
+  W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
   {
     W = Flm_Flv_mul(M,W,p);
@@ -1520,7 +1494,6 @@ Flm_Frobenius(GEN M, long r, ulong p, long v)
   }
   return V;
 }
-
 
 /* Let P a polynomial != 0 and M the matrix of the x^p Frobenius automorphism in
  * FFp[X]/T. Compute P(M)
@@ -1608,8 +1581,7 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
   pari_sp ltop=avma;
   long i,l=degpol(T);
   GEN R, W = (GEN) M[2];
-  for (i = 2; i <= d; ++i)
-    W = FpM_FpV_mul(M,W,p);
+  for (i = 2; i <= d; ++i) W = FpM_FpV_mul(M,W,p);
   R=matrixpow(l,l,vec_to_pol(W,varn(T)),T,p);
   return gerepilecopy(ltop,R);
 }
@@ -1748,7 +1720,7 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
       if ( !L )
         err(talker,"Polynomials not irreducible in Fp_intersect");
-      B=FpXQX_FpXQ_mul(B,L,U,l);
+      B=FqX_Fq_mul(B,L,U,l);
       B=gsubst(B,MAXVARN,gzero);
       A=gsubst(A,MAXVARN,gzero);
     }
@@ -1807,14 +1779,14 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
  * monomorphism between FF_l[X]/(P) and FF_l[X]/(Q) as a polynomial R such
  * that Q | P(R) mod l.  If P and Q have the same degree, it is of course an
  * isomorphism.  */
-GEN Fp_isom(GEN P,GEN Q,GEN l)
+GEN
+Fp_isom(GEN P,GEN Q,GEN l)
 {
-  pari_sp ltop=avma;
-  GEN SP,SQ,R;
+  pari_sp av = avma;
+  GEN SP, SQ, R;
   Fp_intersect(degpol(P),P,Q,l,&SP,&SQ,NULL,NULL);
-  R=Fp_inv_isom(SP,P,l);
-  R=FpX_FpXQ_compo(R,SQ,Q,l);
-  return gerepileupto(ltop,R);
+  R = Fp_inv_isom(SP,P,l);
+  return gerepileupto(av, FpX_FpXQ_compo(R,SQ,Q,l));
 }
 GEN
 Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
@@ -1847,7 +1819,7 @@ Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
 /* P,Q irreducible over F_l. Factor P over FF_l[X] / Q  [factors are ordered as
  * a Frobenius cycle] */
 GEN
-Fp_factor_irred(GEN P,GEN l, GEN Q)
+Fp_factor_irred(GEN P, GEN Q, GEN l)
 {
   pari_sp ltop=avma, av;
   GEN SP,SQ,MP,MQ,M,FP,FQ,E,V,IR,res;
@@ -1914,54 +1886,6 @@ Fp_factor_irred(GEN P,GEN l, GEN Q)
   if (DEBUGLEVEL>=4) msgtimer("factor_irred");
   return gerepilecopy(ltop,res);
 }
-GEN Fp_factor_rel0(GEN P,GEN l, GEN Q)
-{
-  pari_sp ltop=avma, tetpil;
-  GEN V,ex,F,y,R;
-  long n,nbfact=0,nmax=lgpol(P);
-  long i;
-  F=factmod0(P,l);
-  n=lg((GEN)F[1]);
-  V=cgetg(nmax,t_VEC);
-  ex=cgetg(nmax,t_VECSMALL);
-  for(i=1;i<n;i++)
-  {
-    int j,r;
-    R=Fp_factor_irred(gmael(F,1,i),l,Q);
-    r=lg(R);
-    for (j=1;j<r;j++)
-    {
-      V[++nbfact]=R[j];
-      ex[nbfact]=mael(F,2,i);
-    }
-  }
-  setlg(V,nbfact+1);
-  setlg(ex,nbfact+1);
-  tetpil=avma; y=cgetg(3,t_VEC);
-  y[1]=lcopy(V);
-  y[2]=lcopy(ex);
-  (void)sort_factor(y,cmp_pol);
-  return gerepile(ltop,tetpil,y);
-}
-GEN Fp_factor_rel(GEN P, GEN l, GEN Q)
-{
-  pari_sp tetpil, av=avma;
-  long nbfact;
-  long j;
-  GEN y,u,v;
-  GEN z=Fp_factor_rel0(P,l,Q),t = (GEN) z[1],ex = (GEN) z[2];
-  nbfact=lg(t);
-  tetpil=avma; y=cgetg(3,t_MAT);
-  u=cgetg(nbfact,t_COL); y[1]=(long)u;
-  v=cgetg(nbfact,t_COL); y[2]=(long)v;
-  for (j=1; j<nbfact; j++)
-  {
-    u[j] = lcopy((GEN)t[j]);
-    v[j] = lstoi(ex[j]);
-  }
-  return gerepile(av,tetpil,y);
-}
-
 /*******************************************************************/
 static GEN
 to_intmod(GEN x, GEN p)
@@ -2015,7 +1939,6 @@ FpX_red(GEN z, GEN p)
 {
   long i,l;
   GEN x;
-  if (typ(z) != t_POL) err(bugparier," FpX_red(z, p), z is not a polynomial");
   l = lg(z); x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lmodii((GEN)z[i],p);
   x[1] = z[1]; return FpX_renormalize(x,l);
@@ -2060,12 +1983,12 @@ FpX_normalize(GEN z, GEN p)
 }
 
 GEN
-FpXQX_normalize(GEN z, GEN T, GEN p)
+FqX_normalize(GEN z, GEN T, GEN p)
 {
   GEN p1 = leading_term(z);
   if (lg(z) == 2 || gcmp1(p1)) return z;
   if (!T) return FpX_normalize(z,p);
-  return FpXQX_FpXQ_mul(z, Fq_inv(p1,T,p), T,p);
+  return FqX_Fq_mul(z, Fq_inv(p1,T,p), T,p);
 }
 
 /* z in R[X,Y] representing an elt in R[X,Y] mod T(Y) in Kronecker form,
@@ -2162,12 +2085,11 @@ umodratu(GEN a, ulong p)
 GEN
 FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
 {
-  long vx, dx, dy, dz, i, j, sx, lrem;
+  long vx, dx, dy, dz, i, j, sx, lr;
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
   if (!signe(y)) err(gdiver);
-  if (typ(x) != t_POL) err(bugparier," FpX_divrem(x, y, p), x is not a polynomial");
   vx = varn(x);
   dy = degpol(y);
   dx = degpol(x);
@@ -2243,8 +2165,8 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     if (sx) { avma=av0; return NULL; }
     avma = (pari_sp)rem; return z-2;
   }
-  lrem=i+3; rem -= lrem;
-  rem[0] = evaltyp(t_POL) | evallg(lrem);
+  lr=i+3; rem -= lr;
+  rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
   p1 = gerepile((pari_sp)rem,tetpil,p1);
   rem += 2; rem[i]=(long)p1;
@@ -2257,7 +2179,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) (void)FpX_renormalize(rem, lrem);
+  if (!sx) (void)FpX_renormalize(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2266,12 +2188,10 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
 GEN
 FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
 {
-  long vx, dx, dy, dz, i, j, sx, lrem;
+  long vx, dx, dy, dz, i, j, sx, lr;
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
-  if (!p) err(bugparier," FpXQX_divrem(x, y, T, p, pr), p is NULL");
-             
   if (!T) return FpX_divrem(x,y,p,pr);
   if (!signe(y)) err(gdiver);
   vx=varn(x); dy=degpol(y); dx=degpol(x);
@@ -2294,7 +2214,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       if (pr == ONLY_REM) return zeropol(vx);
       *pr = zeropol(vx);
     }
-    av0 = avma; x = FpXQX_normalize(x, T,p); tetpil = avma;
+    av0 = avma; x = FqX_normalize(x, T,p); tetpil = avma;
     return gerepile(av0,tetpil,FpXQX_red(x,T,p));
   }
   av0 = avma; dz = dx-dy;
@@ -2351,8 +2271,8 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
     if (sx) { avma=av0; return NULL; }
     avma = (pari_sp)rem; return z-2;
   }
-  lrem=i+3; rem -= lrem;
-  rem[0] = evaltyp(t_POL) | evallg(lrem);
+  lr=i+3; rem -= lr;
+  rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
   p1 = gerepile((pari_sp)rem,tetpil,p1);
   rem += 2; rem[i]=(long)p1;
@@ -2365,7 +2285,7 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) (void)FpXQX_renormalize(rem, lrem);
+  if (!sx) (void)FpXQX_renormalize(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2395,7 +2315,7 @@ RXQV_red(GEN P, GEN T)
 GEN
 RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
 {
-  long vx, dx, dy, dz, i, j, sx, lrem;
+  long vx, dx, dy, dz, i, j, sx, lr;
   pari_sp av0, av, tetpil;
   GEN z,p1,rem,lead;
 
@@ -2433,14 +2353,14 @@ RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = (GEN)x[dx]; av = avma;
-  z[dz] = lead? lpileupto(av, gres(gmul(p1,lead), T)): lcopy(p1);
+  z[dz] = lead? lpileupto(av, grem(gmul(p1,lead), T)): lcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=(GEN)x[i];
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    if (lead) p1 = gmul(gres(p1, T), lead);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil, gres(p1, T));
+    if (lead) p1 = gmul(grem(p1, T), lead);
+    tetpil=avma; z[i-dy] = lpile(av,tetpil, grem(p1, T));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
@@ -2450,7 +2370,7 @@ RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
     p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    tetpil=avma; p1 = gres(p1, T); if (signe(p1)) { sx = 1; break; }
+    tetpil=avma; p1 = grem(p1, T); if (signe(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
   }
@@ -2460,8 +2380,8 @@ RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
     if (sx) { avma=av0; return NULL; }
     avma = (pari_sp)rem; return z-2;
   }
-  lrem=i+3; rem -= lrem;
-  rem[0] = evaltyp(t_POL) | evallg(lrem);
+  lr=i+3; rem -= lr;
+  rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
   p1 = gerepile((pari_sp)rem,tetpil,p1);
   rem += 2; rem[i]=(long)p1;
@@ -2470,11 +2390,11 @@ RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
     av=avma; p1 = (GEN)x[i];
     for (j=0; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul((GEN)z[j],(GEN)y[i-j]));
-    tetpil=avma; rem[i]=lpile(av,tetpil, gres(p1, T));
+    tetpil=avma; rem[i]=lpile(av,tetpil, grem(p1, T));
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) (void)normalizepol_i(rem, lrem);
+  if (!sx) (void)normalizepol_i(rem, lr);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2808,7 +2728,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     if (dc < 0) { avma = av; return 0; }
 
     if (both_odd(da,db)) res = subii(p, res);
-    if (!gcmp1(lb)) res = muliimod(res, powgumod(lb, da - dc, p), p);
+    if (!gcmp1(lb)) res = muliimod(res, powiumod(lb, da - dc, p), p);
     if (low_stack(lim,stack_lim(av,2)))
     {
       if (DEBUGMEM>1) err(warnmem,"FpX_resultant (da = %ld)",da);
@@ -2817,7 +2737,7 @@ FpX_resultant(GEN a, GEN b, GEN p)
     da = db; /* = degpol(a) */
     db = dc; /* = degpol(b) */
   }
-  res = muliimod(res, powgumod((GEN)b[2], da, p), p);
+  res = muliimod(res, powiumod((GEN)b[2], da, p), p);
   return gerepileuptoint(av, res);
 }
 
@@ -3099,7 +3019,7 @@ FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
   int drop;
   GEN ev = vec_FpX_eval_gen(b, n, p, &drop);
   GEN r = FpX_resultant(a, ev, p);
-  if (drop && !gcmp1(la)) r = muliimod(r, powgumod(la, drop,p),p);
+  if (drop && !gcmp1(la)) r = muliimod(r, powiumod(la, drop,p),p);
   return r;
 }
 
@@ -3158,7 +3078,7 @@ u_FpXX_pseudorem(GEN x, GEN y, ulong p)
     if (low_stack(lim,stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"pseudorem dx = %ld >= %ld",dx,dy);
-      gerepilemanycoeffs(av2,x,dx+1);
+      gerepilecoeffs(av2,x,dx+1);
     }
   }
   if (dx < 0) return Flx_zero(0);

@@ -669,7 +669,7 @@ treatspecialsigma(GEN nf, GEN gf, int raw, long prec)
     fl = 1; tryf = shifti(p1,-1);
   }
   /* tryf integer > 0 */
-  if (cmpis(tryf, 3) <= 0 || signe(resii(D, tryf)) || !isprime(tryf))
+  if (cmpis(tryf, 3) <= 0 || signe(remii(D, tryf)) || !isprime(tryf))
     return NULL;
 
   i = itos(tryf); if (fl) i *= 4;
@@ -1003,7 +1003,7 @@ is_bad(GEN D, ulong p)
     if (r && signe(D) < 0) r = 8-r;
     return (r < 4);
   }
-  r = (resii(D, muluu(p,p)) == gzero); /* p^2 | D ? */
+  r = (remii(D, muluu(p,p)) == gzero); /* p^2 | D ? */
   avma = av; return r;
 }
 
@@ -1026,7 +1026,7 @@ FBquad(GEN Disc, long n2, long n)
     NEXT_PRIME_VIADIFF(p, d);
     if (!KC && p > n) KC = i;
     if (p > n2) break;
-    s = krogs(Disc,p);
+    s = krois(Disc,p);
     switch (s)
     {
       case -1: break; /* inert */
@@ -1042,7 +1042,7 @@ FBquad(GEN Disc, long n2, long n)
   LIM = (expi(Disc) < 16)? 100: 1000;
   while (p < LIM)
   {
-    s = krogs(Disc,p);
+    s = krois(Disc,p);
     Res = mulsr(p, divrs(Res, p - s));
     NEXT_PRIME_VIADIFF(p, d);
   }

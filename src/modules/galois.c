@@ -243,10 +243,10 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!smodis(dpol,p)) continue; /* p divides dpol */
 
-    p1 = simplefactmod(pol,stoi(p));
-    p1 = (GEN)p1[1]; l = lg(p1);
+    p1 = (GEN)FpX_degfact(pol,stoi(p))[1];
+    l = lg(p1);
     dtyp[0] = evaltyp(t_VECSMALL)|evallg(l);
-    for (i=1; i<l; i++) dtyp[i] = itos((GEN)p1[l-i]);
+    for (i=1; i<l; i++) dtyp[i] = p1[l-i]; /* decreasing order */
     n = numerotyp(TYP,dtyp);
     if (!n) return 1; /* only for N=11 */
     nbremain -= rayergroup(GR,n,gr);

@@ -54,8 +54,8 @@ ugcd(ulong x, ulong y)         /* assume y&1==1, y > 1 */
   while (!(x&1)) x>>=1;
   if (x==1) return 1;
   if (x==y) return y;
-  else if (x>y) goto xislarger;/* again, a decent [g]cc should notice that
-                                  it can re-use the comparison */
+  else if (x>y) goto xislarger;
+
   goto yislarger;
 }
 /* Gotos are useful, and Programming is an Art.  D.E.Knuth. */

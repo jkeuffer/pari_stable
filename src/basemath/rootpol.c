@@ -72,7 +72,7 @@ quickmulcc(GEN x, GEN y)
       x=addii((GEN)x[1],(GEN)x[2]); y=addii((GEN)y[1],(GEN)y[2]);
       y=mulii(x,y); x=addii(p1,p2);
       tetpil=avma; z[1]=lsubii(p1,p2); z[2]=lsubii(y,x);
-      gerepilemanyvec(av,tetpil,z+1,2);
+      gerepilecoeffssp(av,tetpil,z+1,2);
       return z;
     }
   }
@@ -297,12 +297,12 @@ square_free_factorization(GEN pol)
   if (deg > 1)
   {
     t1 = modulargcd(pol,derivpol(pol));
-    if (isscalar(t1)) deg = 1;
+    if (degpol(t1) == 1) deg = 1;
   }
   if (deg==1)
   {
-    x[1]=lgetg(2,t_COL); p1=(GEN)x[1]; p1[1]=un;
-    x[2]=lgetg(2,t_COL); p1=(GEN)x[2]; p1[1]=(long)pol; return x;
+    x[1] = (long)_col(gun);
+    x[2] = (long)_col(pol); return x;
   }
   A=new_chunk(deg+1); v1=gdivexact(pol,t1); v=v1; i=0;
   while (lg(v)>3)
@@ -313,7 +313,7 @@ square_free_factorization(GEN pol)
   }
   m=1; x[1]=lgetg(deg+1,t_COL); x[2]=lgetg(deg+1,t_COL);
   for (j=1; j<=i; j++)
-    if (isnonscalar(A[j]))
+    if (degpol(A[j]))
     {
       p1=(GEN)x[1]; p1[m] = lstoi(j);
       p1=(GEN)x[2]; p1[m] = A[j];
@@ -1074,7 +1074,7 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
   pari_sp ltop=avma, limite=stack_lim(ltop, 1);
   long error=0,i,bitprec1,bitprec2;
 
-  D=gsub(gun,gres(gmul(HH,G),F)); error=gexpo(D);
+  D=gsub(gun,grem(gmul(HH,G),F)); error=gexpo(D);
   bitprec2=bitprec+shiftbitprec;
 
   for (i=0; (error>-bitprec && i<NEWTON_MAX) && error<=0; i++)
@@ -1087,12 +1087,12 @@ refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
     bitprec1=-error+shiftbitprec;
     aux=gmul(mygprec(H,bitprec1),mygprec(D,bitprec1));
     aux=mygprec(aux,bitprec1);
-    aux=gres(aux,mygprec(F,bitprec1));
+    aux=grem(aux,mygprec(F,bitprec1));
 
     bitprec1=-error*2+shiftbitprec;
     if (bitprec1>bitprec2) bitprec1=bitprec2;
     H=gadd(mygprec(H,bitprec1),aux);
-    D=gsub(gun,gres(gmul(H,G),F));
+    D=gsub(gun,grem(gmul(H,G),F));
     error=gexpo(D); if (error<-bitprec1) error=-bitprec1;
   }
   if (error>-bitprec/2) return NULL; /* FAIL */
@@ -1138,7 +1138,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
     bitprec1=-error+shiftbitprec;
     r=gmul(mygprec(HH,bitprec1),mygprec(r,bitprec1));
     r=mygprec(r,bitprec1);
-    f0=gres(r,mygprec(FF,bitprec1));
+    f0=grem(r,mygprec(FF,bitprec1));
 
     bitprec1=-2*error+shiftbitprec;
     if (bitprec1>bitprec2) bitprec1=bitprec2;

@@ -752,9 +752,9 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   while (*d && p <= lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
-      nb++; k=1; while (mpdivisis(n,p,n)) k++;
+      nb++; k=1; while (dvdisz(n,p,n)) k++;
       (void)utoi(p); (void)stoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
@@ -771,9 +771,9 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   /* trial divide by the "special primes" (usually huge composites...) */
   lp = lg(primetab); k=0;
   for (i=1; i<lp; i++)
-    if (mpdivis(n,(GEN) primetab[i],n))
+    if (dvdiiz(n,(GEN) primetab[i],n))
     {
-      nb++; k=1; while (mpdivis(n,(GEN) primetab[i],n)) k++;
+      nb++; k=1; while (dvdiiz(n,(GEN) primetab[i],n)) k++;
       (void)icopy((GEN) primetab[i]); (void)stoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
@@ -995,7 +995,7 @@ mu(GEN n)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
       if (smodis(n,p) == 0) { avma=av; return 0; }
       s = -s; if (is_pm1(n)) { avma=av; return s; }
@@ -1041,7 +1041,7 @@ issquarefree(GEN x)
     while (*d && p < lim1)
     {
       NEXT_PRIME_VIADIFF(p,d);
-      if (mpdivisis(x,p,x))
+      if (dvdisz(x,p,x))
       {
         if (smodis(x,p) == 0) { avma = av; return 0; }
         if (is_pm1(x)) { avma = av; return 1; }
@@ -1082,9 +1082,9 @@ omega(GEN n)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
-      nb++; while (mpdivisis(n,p,n)); /* empty */
+      nb++; while (dvdisz(n,p,n)); /* empty */
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
@@ -1119,9 +1119,9 @@ bigomega(GEN n)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
-      do nb++; while (mpdivisis(n,p,n));
+      do nb++; while (dvdisz(n,p,n));
       if (is_pm1(n)) { avma = av; return nb; }
     }
   }
@@ -1157,10 +1157,10 @@ phi(GEN n)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
       m = mulis(m, p-1);
-      while (mpdivisis(n,p,n)) m = mulis(m,p);
+      while (dvdisz(n,p,n)) m = mulis(m,p);
       if (is_pm1(n)) { return gerepileupto(av,m); }
     }
   }
@@ -1200,7 +1200,7 @@ numbdiv(GEN n)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    l=1; while (mpdivisis(n,p,n)) l++;
+    l=1; while (dvdisz(n,p,n)) l++;
     m = mulsi(l,m); if (is_pm1(n)) { return gerepileupto(av,m); }
   }
   if(cmpii(sqru(p),n) >= 0 || pseudoprime(n))
@@ -1239,10 +1239,10 @@ sumdiv(GEN n)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
       m1 = utoi(p+1);
-      while (mpdivisis(n,p,n)) m1 = addsi(1, mului(p,m1));
+      while (dvdisz(n,p,n)) m1 = addsi(1, mului(p,m1));
       m = mulii(m1,m); if (is_pm1(n)) { return gerepileupto(av,m); }
     }
   }
@@ -1288,10 +1288,10 @@ sumdivk(GEN n, long k)
   while (*d && p < lim1)
   {
     NEXT_PRIME_VIADIFF(p,d);
-    if (mpdivisis(n,p,n))
+    if (dvdisz(n,p,n))
     {
       pk = gpowgs(utoi(p),k); m1 = addsi(1,pk);
-      while (mpdivisis(n,p,n)) m1 = addsi(1, mulii(pk,m1));
+      while (dvdisz(n,p,n)) m1 = addsi(1, mulii(pk,m1));
       m = mulii(m1,m); if (is_pm1(n)) goto fin;
     }
   }

@@ -90,7 +90,7 @@ bad_for_base(miller_t *S, GEN a)
   /* go fishing for -1, not for 1 (saves one squaring) */
   for (r = S->r1 - 1; r; r--) /* r1 - 1 squarings */
   {
-    c2 = c; c = resii(sqri(c), S->n);
+    c2 = c; c = remii(sqri(c), S->n);
     if (egalii(S->t, c)) return miller_ok(S, c2);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1718,7 +1718,7 @@ PB_RETRY:
   {
     /* use the polynomial  x^2 + delta */
 #define one_iter() {\
-    avma = GGG; x = resii(sqri(x), n); /* to garbage zone */\
+    avma = GGG; x = remii(sqri(x), n); /* to garbage zone */\
     avma = avx; x = addsi(delta,x);    /* erase garbage */\
     avma = GGG; P = mulii(P, subii(x1, x));\
     avma = avP; P = modii(P,n); }
@@ -1818,7 +1818,7 @@ fin:
   }
   for(;;) /* backtrack until period recovered. Must terminate */
   {
-    avma = GGG; y = resii(sqri(y), g1);
+    avma = GGG; y = remii(sqri(y), g1);
     avma = avx; y = addsi(delta,y);
     g = gcdii(subii(x1, y), g1); if (!is_pm1(g)) break;
 
@@ -2689,7 +2689,7 @@ ifac_start(GEN n, long moebius, long hint)
   part[1] = moebius? un : LNULL;
   part[2] = lstoi(hint);
   if (isonstack(n)) n = absi(n);
-  /* make copy, because we'll later want to mpdivis() into it in place.
+  /* make copy, because we'll later want to dvdiiz() into it in place.
    * If it's not on stack, then we assume it is a clone made for us by
    * auxdecomp0(), and we assume the sign has already been set positive */
   /* fill first slot at the top end */
@@ -3008,8 +3008,8 @@ ifac_divide(GEN *partial, GEN *where)
   {
     if (scan[2] != zero) continue; /* the other thing ain't composite */
     otherexp = 0;
-    /* let mpdivis divide in place to keep stack clutter minimal */
-    while (mpdivis((GEN)(*scan), (GEN)(**where), (GEN)(*scan)))
+    /* let dvdiiz divide in place to keep stack clutter minimal */
+    while (dvdiiz((GEN)(*scan), (GEN)(**where), (GEN)(*scan)))
     {
       if (moebius_mode) return 1; /* immediately */
       if (!otherexp) otherexp = itos((GEN)(scan[1]));
@@ -3200,7 +3200,7 @@ ifac_crack(GEN *partial, GEN *where)
   }
 #endif
   /* got single integer back:  work out the cofactor (in place) */
-  if (!mpdivis((GEN)(**where), factor, (GEN)(**where)))
+  if (!dvdiiz((GEN)(**where), factor, (GEN)(**where)))
   {
     fprintferr("IFAC: factoring %Z\n", **where);
     fprintferr("\tyielded `factor\' %Z\n\twhich isn't!\n", factor);
@@ -3432,7 +3432,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
  * primes will turn up.  The following discipline achieves this:  When
  * ifac_decomp() is called, n should point at an object older than the oldest
  * small prime/exponent pair  (auxdecomp0() guarantees this since it
- * mpdivis()es any divisors it discovers off its own copy of the original N).
+ * dvdiiz()es any divisors it discovers off its own copy of the original N).
  * We allocate sufficient space to accommodate several pairs -- eleven pairs
  * ought to fit in a space not much larger than n itself -- before calling
  * ifac_start().  If we manage to complete the factorization before we run out

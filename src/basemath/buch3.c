@@ -32,7 +32,6 @@ extern GEN unif_mod_fZ(GEN pr, GEN F);
 extern GEN init_unif_mod_fZ(GEN L);
 extern void testprimes(GEN bnf, long bound);
 extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
-extern GEN FqX_factor(GEN x, GEN T, GEN p);
 extern GEN arch_mul(GEN x, GEN y);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
@@ -1207,7 +1206,7 @@ certifybuchall(GEN bnf)
   }
   cycgen = check_and_build_cycgen(bnf);
   for (bad=gun,i=1; i<=nbgen; i++)
-    bad = mpppcm(bad, gcoeff(gen[i],1,1));
+    bad = lcmii(bad, gcoeff(gen[i],1,1));
   for (i=1; i<=nbgen; i++)
   {
     GEN p1 = (GEN)cycgen[i];
@@ -1218,7 +1217,7 @@ certifybuchall(GEN bnf)
       for (j = 1; j < lg(g); j++)
       {
         h = idealhermite(nf, (GEN)g[j]);
-        bad = mpppcm(bad, gcoeff(h,1,1));
+        bad = lcmii(bad, gcoeff(h,1,1));
       }
     }
   }
@@ -1464,7 +1463,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   long i, j, reldeg, p, nfac, k;
   pari_sp av = avma;
   GEN bnf,index,discnf,nf,raycl,group,detgroup,fa,greldeg;
-  GEN famo,ep,fac,col;
+  GEN famo, fac, col;
   byteptr d = diffptr;
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
@@ -1510,7 +1509,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
       famo = FqX_factor(polr, T, pp);
       fac = (GEN)famo[1]; f = degpol((GEN)fac[1]);
-      ep  = (GEN)famo[2]; nfac = lg(ep)-1;
+      nfac = lg(fac)-1;
       /* check decomposition of pr has Galois type */
       for (j=2; j<=nfac; j++)
         if (degpol(fac[j]) != f)

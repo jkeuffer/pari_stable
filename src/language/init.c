@@ -1669,7 +1669,7 @@ gerepileall(pari_sp av, int n, ...)
 }
 
 void
-gerepilemanycoeffs(pari_sp av, GEN x, int n)
+gerepilecoeffs(pari_sp av, GEN x, int n)
 {
   int i;
   for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
@@ -1678,7 +1678,7 @@ gerepilemanycoeffs(pari_sp av, GEN x, int n)
 }
 
 void
-gerepilemanycoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
+gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
 {
   int i;
   for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
@@ -1698,6 +1698,17 @@ dec_gerepile(pari_sp *x, pari_sp av0, pari_sp av, pari_sp tetpil, size_t dec)
   }
 }
 
+void
+gerepileallsp(pari_sp av, pari_sp tetpil, int n, ...)
+{
+  const pari_sp av0 = avma;
+  const size_t dec = av-tetpil;
+  int i;
+  va_list a; va_start(a, n);
+  (void)gerepile(av,tetpil,NULL);
+  for (i=0; i<n; i++) dec_gerepile((pari_sp*)va_arg(a,GEN*), av0,av,tetpil,dec);
+}
+
 /* Takes an array of pointers to GENs, of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
@@ -1713,7 +1724,7 @@ gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n)
 /* Takes an array of GENs (cast to longs), of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
-gerepilemanyvec(pari_sp av, pari_sp tetpil, long *g, int n)
+gerepilecoeffssp(pari_sp av, pari_sp tetpil, long *g, int n)
 {
   const pari_sp av0 = avma;
   const size_t dec = av-tetpil;

@@ -197,7 +197,7 @@ ggener(GEN m)
 
 /* assume p prime */
 ulong
-u_gener_fact(ulong p, GEN fa)
+Fl_gener_fact(ulong p, GEN fa)
 {
   const pari_sp av = avma;
   const ulong q = p - 1;
@@ -219,7 +219,7 @@ u_gener_fact(ulong p, GEN fa)
   avma = av; return x;
 }
 ulong
-u_gener(ulong p) { return u_gener_fact(p, NULL); }
+Fl_gener(ulong p) { return Fl_gener_fact(p, NULL); }
 
 /* assume p prime */
 GEN
@@ -229,7 +229,7 @@ Fp_gener_fact(GEN p, GEN fa)
   long k, i;
   GEN x, q, V;
   if (egalii(p, gdeux)) return gun;
-  if (lgefint(p) == 3) return utoi(u_gener_fact((ulong)p[2], fa));
+  if (lgefint(p) == 3) return utoi(Fl_gener_fact((ulong)p[2], fa));
 
   q = subis(p, 1);
   if (!fa) { fa = V = (GEN)decomp(q)[1]; k = lg(fa)-1; }
@@ -358,7 +358,7 @@ znstar(GEN n)
   
   for (i=sizeh; i>=2; i--)
     for (j=i-1; j>=1; j--)
-      if (!divise((GEN)h[j],(GEN)h[i]))
+      if (!dvdii((GEN)h[j],(GEN)h[i]))
       {
 	d=bezout((GEN)h[i],(GEN)h[j],&u,&v);
         q=diviiexact((GEN)h[j],d);
@@ -725,17 +725,17 @@ kronecker(GEN x, GEN y)
     }
     /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
     if (modBIL(x) & modBIL(y) & 2) s = -s;
-    z = resii(y,x); y = x; x = z;
+    z = remii(y,x); y = x; x = z;
   }
   avma = av;
   return krouu_s(itou(x), itou(y), s);
 }
 
 GEN
-gkrogs(GEN x, long y) { return arith_proto2gs(krogs,x,y); }
+gkrogs(GEN x, long y) { return arith_proto2gs(krois,x,y); }
 
 long
-krogs(GEN x, long y)
+krois(GEN x, long y)
 {
   ulong y1;
   long s = 1, r;
@@ -758,7 +758,7 @@ krogs(GEN x, long y)
 }
 
 long
-krosg(long x, GEN y)
+krosi(long x, GEN y)
 {
   const pari_sp av = avma;
   long s = 1, r;
@@ -954,7 +954,7 @@ hil(GEN x, GEN y, GEN p)
 #define sqrumod(m, p) (muluumod(m,m,p))
 /* Tonelli-Shanks. Assume p is prime and (a,p) = -1. */
 ulong
-usqrtmod(ulong a, ulong p)
+sqrtumod(ulong a, ulong p)
 {
   long i, e;
   ulong k, p1, q, v, y, w, m;
@@ -963,7 +963,7 @@ usqrtmod(ulong a, ulong p)
   p1 = p - 1; e = vals(p1);
   if (e == 0) /* p = 2 */
   {
-    if (p != 2) err(talker,"composite modulus in usqrtmod: %lu",p);
+    if (p != 2) err(talker,"composite modulus in sqrtumod: %lu",p);
     return ((a & 1) == 0)? 0: 1;
   }
   q = p1 >> e; /* q = (p-1)/2^oo is odd */
@@ -992,7 +992,7 @@ usqrtmod(ulong a, ulong p)
        a square --> w even power of y, hence w^(2^(e-1)) = 1 */
     p1 = sqrumod(w,p);
     for (k=1; p1 != 1 && k < e; k++) p1 = sqrumod(p1,p);
-    if (k == e) err(talker,"composite modulus in usqrtmod: %lu?", p);
+    if (k == e) err(talker,"composite modulus in sqrtumod: %lu?", p);
     /* w ^ (2^k) = 1 --> w = y ^ (u * 2^(e-k)), u odd */
     p1 = y;
     for (i=1; i < e-k; i++) p1 = sqrumod(p1,p);
@@ -1004,7 +1004,7 @@ usqrtmod(ulong a, ulong p)
   return v;
 }
 
-#define sqrmod(x,p) (resii(sqri(x),p))
+#define sqrmod(x,p) (remii(sqri(x),p))
 static GEN ffsqrtmod(GEN a, GEN p);
 
 /* Tonelli-Shanks. Assume p is prime and return NULL if (a,p) = -1. */
@@ -1018,7 +1018,7 @@ mpsqrtmod(GEN a, GEN p)
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
   if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in mpsqrtmod");
   if (lgefint(p) == 3) 
-    return utoi( usqrtmod(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
+    return utoi( sqrtumod(umodiu(a, (ulong)p[2]), (ulong)p[2]) );
 
   p1 = addsi(-1,p); e = vali(p1);
   
@@ -1044,7 +1044,7 @@ mpsqrtmod(GEN a, GEN p)
     for (k=2; ; k++)
     { /* loop terminates for k < p (even if p composite) */
   
-      i = krosg(k,p);
+      i = krosi(k,p);
       if (i >= 0)
       {
         if (i) continue;
@@ -1139,7 +1139,7 @@ ffsqrtmod(GEN a, GEN p)
       { /* u+vX := (u+vX)^2 (t+X) */
         d = addii(u, mulsi(t,v));
         d2 = sqri(d);
-        b = resii(mulii(a,v), p);
+        b = remii(mulii(a,v), p);
         u = modii(subii(mulsi(t,d2), mulii(b,addii(u,d))), p);
         v = modii(subii(d2, mulii(b,v)), p);
       }
@@ -1345,18 +1345,10 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
 /*********************************************************************/
 
 GEN
-mppgcd(GEN a, GEN b)
-{
-  if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
-  return gcdii(a,b);
-}
-
-GEN
-mpppcm(GEN x, GEN y)
+lcmii(GEN x, GEN y)
 {
   pari_sp av;
   GEN p1,p2;
-  if (typ(x) != t_INT || typ(y) != t_INT) err(arither1);
   if (!signe(x)) return gzero;
   av = avma;
   p1 = gcdii(x,y); if (!is_pm1(p1)) y = diviiexact(y,p1);
@@ -1422,7 +1414,7 @@ chinois(GEN x, GEN y)
       p2 = gadd((GEN)x[2], gmul(gmul(u,p1), gadd((GEN)y[2],gneg((GEN)x[2]))));
 
       tetpil=avma; z[1]=lmul(p1,(GEN)y[1]); z[2]=lmod(p2,(GEN)z[1]);
-      gerepilemanyvec(av,tetpil,z+1,2); return z;
+      gerepilecoeffssp(av,tetpil,z+1,2); return z;
 
     case t_POL:
       lx=lg(x); z = cgetg(lx,tx); z[1] = x[1];
@@ -1483,9 +1475,9 @@ mpinvmodsafe(GEN a, GEN m)
 /**                                                                 **/
 /*********************************************************************/
 extern ulong invrev(ulong b);
-extern GEN resiimul(GEN x, GEN y);
+extern GEN remiimul(GEN x, GEN y);
 
-static GEN _resii(GEN x, GEN y) { return resii(x,y); }
+static GEN _remii(GEN x, GEN y) { return remii(x,y); }
 
 /* Montgomery reduction */
 
@@ -1515,7 +1507,7 @@ static long RESIIMUL_LIMIT   = 150;
 static long MONTGOMERY_LIMIT = 32;
 
 void
-setresiilimit(long n) { RESIIMUL_LIMIT = n; }
+setremiilimit(long n) { RESIIMUL_LIMIT = n; }
 void
 setmontgomerylimit(long n) { MONTGOMERY_LIMIT = n; }
 
@@ -1557,11 +1549,11 @@ _muli2invred(GEN x, GEN y/* ignored */, GEN N) {
 }
 /* xy mod N */
 static GEN
-_muliired(GEN x, GEN y, GEN N) { return resii(mulii(x,y), N); }
+_muliired(GEN x, GEN y, GEN N) { return remii(mulii(x,y), N); }
 static GEN
 _muliimontred(GEN x, GEN y, GEN N) { return montred(mulii(x,y), N); }
 static GEN
-_muliiinvred(GEN x, GEN y, GEN N) { return resiimul(mulii(x,y), N); }
+_muliiinvred(GEN x, GEN y, GEN N) { return remiimul(mulii(x,y), N); }
 
 static GEN
 _mul(void *data, GEN x, GEN y)
@@ -1591,7 +1583,7 @@ powmodulo(GEN A, GEN k, GEN N)
   s = signe(k);
   if (!s)
   {
-    t = signe(resii(A,N)); avma = av;
+    t = signe(remii(A,N)); avma = av;
     return t? gun: gzero;
   }
   if (s < 0) y = mpinvmod(A,N);
@@ -1619,7 +1611,7 @@ powmodulo(GEN A, GEN k, GEN N)
   if (use_montgomery)
   {
     init_montdata(N, &S);
-    y = resii(shifti(y, bit_accuracy(lN)), N);
+    y = remii(shifti(y, bit_accuracy(lN)), N);
     D.mulred = base_is_2? &_muli2montred: &_muliimontred;
     D.res = &montred;
     D.N = (GEN)&S;
@@ -1628,13 +1620,13 @@ powmodulo(GEN A, GEN k, GEN N)
        && (lgefint(k) > 3 || (((double)k[2])*expi(A)) > 2 + expi(N)))
   {
     D.mulred = base_is_2? &_muli2invred: &_muliiinvred;
-    D.res = &resiimul;
+    D.res = &remiimul;
     D.N = init_remainder(N);
   }
   else
   {
     D.mulred = base_is_2? &_muli2red: &_muliired;
-    D.res = &_resii;
+    D.res = &_remii;
     D.N = N;
   }
   y = leftright_pow(y, k, (void*)&D, &_sqr, &_mul);
@@ -2227,7 +2219,7 @@ bestappr(GEN x, GEN k)
       if (!signe(x)) return gzero; /* faster. Besides itor crashes on x = 0 */
       kr = itor(k, lg(x));
       y = x;
-      p1 = gun; a = p0 = mpent(x); q1 = gzero; q0 = gun;
+      p1 = gun; a = p0 = floorr(x); q1 = gzero; q0 = gun;
       while (cmpii(q0,k) <= 0)
       {
 	x = mpsub(x,a); /* 0 <= x < 1 */
@@ -2641,7 +2633,7 @@ classno(GEN x)
     long d;
     NEXT_PRIME_VIADIFF(c,p);
 
-    k = krogs(D,c); if (!k) continue;
+    k = krois(D,c); if (!k) continue;
     if (k > 0)
     {
       if (lforms < MAXFORM) forms[lforms++] = c; 
@@ -2742,7 +2734,7 @@ classno2(GEN x)
   {
     for (i=1; i<=n; i++)
     {
-      k = krogs(D,i); if (!k) continue;
+      k = krois(D,i); if (!k) continue;
       p2 = mulir(mulss(i,i),p4);
       p5 = subsr(1,mulrr(p7,incgamc(ghalf,p2,DEFAULTPREC)));
       p5 = addrr(divrs(mulrr(p1,p5),i), eint1(p2,DEFAULTPREC));
@@ -2755,7 +2747,7 @@ classno2(GEN x)
     p1 = gdiv(p1,Pi);
     for (i=1; i<=n; i++)
     {
-      k = krogs(D,i); if (!k) continue;
+      k = krois(D,i); if (!k) continue;
       p2 = mulir(mulss(i,i),p4);
       p5 = subsr(1,mulrr(p7,incgamc(ghalf,p2,DEFAULTPREC)));
       p5 = addrr(p5, divrr(divrs(p1,i),mpexp(p2)));
@@ -3139,7 +3131,7 @@ nucomp(GEN x, GEN y, GEN l)
   a2 = (GEN)y[1]; d = bezout(a2,a1,&u,&v);
   if (gcmp1(d)) { a = negi(gmul(u,n)); d1 = d; }
   else
-    if (divise(s,d)) /* d | s */
+    if (dvdii(s,d)) /* d | s */
     {
       a = negi(mulii(u,n)); d1 = d;
       a1 = diviiexact(a1,d1);
@@ -3157,8 +3149,8 @@ nucomp(GEN x, GEN y, GEN l)
         s = diviiexact(s,d1);
         d = diviiexact(d,d1);
       }
-      p1 = resii((GEN)x[3],d);
-      p2 = resii((GEN)y[3],d);
+      p1 = remii((GEN)x[3],d);
+      p2 = remii((GEN)y[3],d);
       p3 = modii(negi(mulii(u1,addii(mulii(u,p1),mulii(v,p2)))), d);
       a = subii(mulii(p3,divii(a1,d)), mulii(u,divii(n,d)));
     }
@@ -3566,10 +3558,10 @@ rhorealnod(GEN x, GEN isqrtD)
 GEN
 qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
-  long tx=typ(x),fl;
+  long tx = typ(x), fl;
   pari_sp av;
 
-  if (!is_qf_t(tx)) err(talker,"not a quadratic form in qfbred");
+  if (tx != t_QFI && tx != t_QFR) err(talker,"not a quadratic form in qfbred");
   if (!D) D = qf_disc(x,NULL,NULL);
   switch(signe(D))
   {

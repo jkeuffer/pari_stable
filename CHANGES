@@ -213,6 +213,14 @@ BA 21- type() does not allow to change object types anymore.
    35- renamed padiczero --> zeropadic [ as in zero[pol|ser|vec|col|mat] ]
    36- macroified gcosz, gsinz, gexpz, etc + cleanup transcendental functions
    37- macroified mulssz, addssz
+   38- rename mpent --> mpfloor
+   39- rename divise --> dvdii, gdivise --> gdvd, mpdivis --> dvdiiz,
+       mpdivisis --> dvdisz
+   40- rename mpppcm --> lcmii, remove mppgcd [ use gcdii ]
+   41- rename resss --> remss, ressi --> remsi, resis --> remis,
+       resii --> remii, gres --> grem
+   42- rename krogs --> krois, krosg --> krosi
+   43- rename FpXQX_FpXQ_mul -> FqX_Fq_mul, FpXQX_normalize -> FqX_normalize
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -231,10 +239,12 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
    11- new internal library routine itos_or_0
    12- new member function .index
    13- rdivii, rdivis, rdivsi, rdivss to replace diviiz & co.
-   14- new routine mpround
+   14- new routine mpround, mpfloor, mpceil, mptrunc, roundr, floorr, ceilr,
+       truncr
 BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now 
        also accept subgroups returned by galoissubgroups.
-   16- new routine usqrtmod
+   16- new routine sqrtumod
+   17- new routines FpX_factor, FqX_factor, FpX_degfact, FqX_red
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
@@ -252,6 +262,7 @@ BA  4- cornacchia, in favour of qfbsolve.
    10- inconsistently named macros mpinv[sir]r [ were "z" functions ].
    11- public macros refering to static transcendental routines (e.g mpatanz)
    12- undocumented, inconsistently named, useless, mulsii, addsii, divisii
+   13- useless routine umuluu [ use mulll ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):

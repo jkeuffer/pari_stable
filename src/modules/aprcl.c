@@ -126,7 +126,7 @@ smallpolrev(GEN x)
 /* x polynomial in t_VECSMALL form, T t_POL return x mod T */
 static GEN
 u_red(GEN x, GEN T) {
-  return gres(smallpolrev(x), T);
+  return grem(smallpolrev(x), T);
 }
 
 /* special case R->C = polcyclo(2^n) */
@@ -141,7 +141,7 @@ _red_cyclop(GEN x, Red *R) {
 }
 static GEN
 _red(GEN x, Red *R) {
-  return centermod_i(gres(x, R->C), R->N, R->N2);
+  return centermod_i(grem(x, R->C), R->N, R->N2);
 }
 static GEN
 _redsimple(GEN x, Red *R) { return centermodii(x, R->N, R->N2); }
@@ -418,8 +418,6 @@ compt(GEN N)
   avma = av0; return t;
 }
 
-extern ulong u_gener(ulong p);
-
 /* tabdl[i] = discrete log of i+1 in (Z/q)^*, q odd prime */
 static GEN
 computetabdl(ulong q)
@@ -427,7 +425,7 @@ computetabdl(ulong q)
   GEN v = cgetg(q-1,t_VECSMALL), w = v-1; /* w[i] = dl(i) */
   ulong g,qm3s2,qm1s2,a,i;
 
-  g = u_gener(q);
+  g = Fl_gener(q);
   qm3s2 = (q-3)>>1;
   qm1s2 = qm3s2+1;
   w[q-1] = qm1s2; a = 1;
@@ -565,7 +563,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
     }
     else
     {
-      while (krosg(u,N) >= 0) u++;
+      while (krosi(u,N) >= 0) u++;
       a = powmodulo(utoi(u), N1, N);
       b = powmodulo(a, ph, N);
     }
@@ -922,16 +920,16 @@ step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
 static GEN
 step6(GEN N, ulong t, GEN et)
 {
-  GEN r, p1, N1 = resii(N, et);
+  GEN r, p1, N1 = remii(N, et);
   ulong i;
   pari_sp av = avma;
 
   r = gun;
   for (i=1; i<t; i++)
   {
-    r = resii(mulii(r,N1), et);
+    r = remii(mulii(r,N1), et);
     if (gcmp1(r)) break;
-    if (!signe(resii(N,r)) && !egalii(r,N))
+    if (!signe(remii(N,r)) && !egalii(r,N))
     {
       p1 = cgetg(3,t_VEC);
       p1[1] = (long)r;

@@ -133,7 +133,7 @@ rnfmakematrices(GEN rnf)
     GEN c = cgetg(n+1,t_COL); T[j] = (long)c;
     for (i=1; i<=n; i++)
     {
-      GEN d = gres(gmul((GEN)w[i],(GEN)w[j]), pol);
+      GEN d = grem(gmul((GEN)w[i],(GEN)w[j]), pol);
       c[i] = (long)lift_if_rational( quicktrace(d, sym) );
     }
   }
@@ -388,7 +388,7 @@ rnfalgtobasis(GEN rnf,GEN x)
     { /* cf algtobasis_i */
       GEN P = (GEN)rnf[1];
       long N = degpol(P);
-      if (degpol(x) >= N) x = gres(x,P);
+      if (degpol(x) >= N) x = grem(x,P);
       return gerepileupto(av, mulmat_pol((GEN)rnf[8], x));
     }
   }
