@@ -800,6 +800,101 @@ gsqrtz(GEN x, GEN y)
   if (!prec) err(infprecer,"gsqrtz");
   gaffect(gsqrt(x,prec),y); avma=av;
 }
+/********************************************************************/
+/**                                                                **/
+/**                    FONCTION RACINE N-IEME                      **/
+/**                                                                **/
+/********************************************************************/
+GEN
+rootsof1complex(GEN n, long prec)
+{
+  ulong ltop=avma;
+  GEN z,a=mppi(prec); setexpo(a,2); /* a =2*pi */
+  a=divri(a,n);
+  z = cgetg(3,t_COMPLEX);
+  gsincos(a,(GEN*)(z+2),(GEN*)(z+1),prec);
+  return gerepileupto(ltop,z);  
+}
+/*Only the O() of y is used*/
+GEN
+rootsof1padic(GEN n, GEN y)
+{
+  ulong ltop=avma;
+  GEN z,a,r;
+  a=mpsqrtnmod(gun,n,(GEN)y[2],&z);
+  if (z==gzero){avma=ltop;return gzero;}
+  r=cgetg(5,t_PADIC);
+  r[1]=y[1];setvalp(r,0);/*rootsofunity are unramified*/
+  r[2]=licopy((GEN)y[2]);
+  r[3]=licopy((GEN)y[3]);
+  r[4]=(long)padicsqrtnlift(gun,n,z,(GEN)y[2],(GEN)y[3]);
+  return gerepileupto(ltop,r);  
+}
+GEN
+gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
+{
+  long av,tetpil,i,lx,tx;
+  GEN y;
+  if (zetan) *zetan=gzero;
+  if (typ(n)!=t_INT) err(talker,"second arg must be integer in gsqrtn");
+  if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
+  if (is_pm1(n))
+  {
+    if (signe(n)>0)
+      return gcopy(x);
+    return ginv(x);
+  }
+  tx = typ(x);
+  if (is_matvec_t(tx))
+  {
+    lx=lg(x); y=cgetg(lx,tx);
+    for (i=1; i<lx; i++) y[i]=(long)gsqrtn((GEN)x[i],n,NULL,prec);
+    return y;
+  }
+  if (tx==t_SER)
+  {
+    GEN z;
+    if (valp(x))
+      err(talker,"not invertible serie in gsqrtn");
+    if (lg(x) == 2) return gcopy(x); /* O(1) */
+    av=avma;
+    z=ginv(n);
+    z=ser_pui(x,z,prec);
+    return gerepileupto(av,z);
+  }
+  av=avma;
+  if (tx==t_INTMOD)
+  {
+    GEN z;
+    if (!isprime((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
+    if (zetan) 
+    {
+      z=cgetg(3,tx); copyifstack(x[1],z[1]);
+      z[2]=lgetg(lgefint(z[1]),t_INT);
+    }
+    y=cgetg(3,tx); copyifstack(x[1],y[1]);
+    y[2]=(long)mpsqrtnmod((GEN)x[2],n,(GEN)x[1],zetan);
+    if (zetan)
+    {
+      cgiv(*zetan);/*Ole!*/
+      affii(*zetan,(GEN)z[2]);
+      *zetan=z;
+    }
+    if(!y[2]) err(talker,"n-root does not exists in gsqrtn");
+    return y;
+  }
+  i = (long) precision(n); if (i) prec=i;
+  y=gmul(ginv(n),glog(x,prec)); tetpil=avma;
+  y=gerepile(av,tetpil,gexp(y,prec));
+  if (zetan)
+  {
+    if (tx==t_PADIC)
+      *zetan=rootsof1padic(n,y);
+    else 
+      *zetan=rootsof1complex(n,prec);
+  }
+  return y;
+}
 
 /********************************************************************/
 /**                                                                **/

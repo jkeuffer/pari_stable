@@ -936,11 +936,12 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
       for(;j;j--)
       {
 	lbot=avma;
-	a=mpsqrtlmod(a,l,p,q,e,r,y,zeta);
+	if (!is_pm1(a) || signe(a)<0)
+	  a=mpsqrtlmod(a,l,p,q,e,r,y,zeta);
 	if (!a){avma=ltop;if (zetan)  *zetan=gzero;return NULL;}
 	if (low_stack(lim, stack_lim(ltop,1)))/* n can have lots of prime factors*/
 	{
-	  if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
+	  if(DEBUGMEM>1) err(warnmem,"mpsqrtnmod");
 	  if (zetan)
 	  {
 	    z=gcopy(z);

@@ -1177,6 +1177,16 @@ integermod a non-prime (or a non-prime-adic), the result is undefined.
 
 \syn{gsqrt}{x,\var{prec}}.
 
+\subsecidx{sqrtn}$(x,n,&z)$: principal branch of the $n$th root of $x$,
+i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/n, \pi/n]$.
+
+Integermod a prime and $p$-adics are allowed as arguments.
+
+If $z$ is present, it is set to a suitable root of unity allowing to
+recover all the other roots.
+
+\syn{gsqrtn}{x,n,&z\var{prec}}.
+
 \subsecidx{tan}$(x)$: tangent of $x$.
 
 \syn{gtan}{x,\var{prec}}.
