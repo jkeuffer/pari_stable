@@ -612,8 +612,8 @@ idealfactor(GEN nf, GEN x)
   if (tx == id_PRIME)
   {
     y=cgetg(3,t_MAT);
-    y[1]=lgetg(2,t_COL); mael(y,1,1)=lcopy(x);
-    y[2]=lgetg(2,t_COL); mael(y,2,1)=un; return y;
+    y[1]=(long)_col(gcopy(x));
+    y[2]=(long)_col(gun); return y;
   }
   nf=checknf(nf); av=avma;
   if (tx == id_PRINCIPAL) x = principalideal_aux(nf,x);
@@ -1655,18 +1655,31 @@ idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
   if (s < 0) n = negi(n);
   /* now n > 0 */
   x = dummycopy(vp);
-  n1 = dvmdii(n, (GEN)x[3], &r);
-  if (signe(r)) n1 = addis(n1,1); /* n1 = ceil(n/e) */
-  x[1] = (long)powgi((GEN)x[1],n1);
-  if (s < 0)
+  if (is_pm1(n)) /* n = 1 special cased for efficiency */
   {
-    x[2] = ldiv(element_pow(nf,(GEN)x[5],n), powgi((GEN)vp[1],subii(n,n1)));
-    *d = (GEN)x[1];
+    if (s < 0)
+    {
+      x[2] = x[5];
+      *d = (GEN)x[1];
+    }
+    else
+      *d = NULL;
   }
   else
   {
-    x[2] = (long)element_pow(nf,(GEN)x[2],n);
-    *d = NULL;
+    n1 = dvmdii(n, (GEN)x[3], &r);
+    if (signe(r)) n1 = addis(n1,1); /* n1 = ceil(n/e) */
+    x[1] = (long)powgi((GEN)x[1],n1);
+    if (s < 0)
+    {
+      x[2] = ldiv(element_pow(nf,(GEN)x[5],n), powgi((GEN)vp[1],subii(n,n1)));
+      *d = (GEN)x[1];
+    }
+    else
+    {
+      x[2] = (long)element_pow(nf,(GEN)x[2],n);
+      *d = NULL;
+    }
   }
   return x;
 }
@@ -1685,7 +1698,7 @@ idealpowprime(GEN nf, GEN vp, GEN n)
   return x;
 }
 
-/* x * vp^n */
+/* x * vp^n. Assume x in HNF (possibly non-integral) */
 GEN
 idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
 {
@@ -1693,6 +1706,11 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
 
   if (!signe(n)) return x;
   nf = checknf(nf);
+  
+  /* inert, special cased for efficiency */
+  if (absi_equal(n, stoi(degpol(nf[1]))))
+    return gmul(x, powgi((GEN)vp[1], n));
+
   y = idealpowprime_spec(nf, vp, n, &d);
   denx = denom(x);
   if (gcmp1(denx)) denx = d; else
@@ -1702,6 +1720,11 @@ idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n)
   }
   x = idealmulspec(nf,x, (GEN)y[1], (GEN)y[2]);
   return denx? gdiv(x,denx): x;
+}
+GEN
+idealdivpowprime(GEN nf, GEN x, GEN vp, GEN n)
+{
+  return idealmulpowprime(nf,x,vp, negi(n));
 }
 
 /* raise the ideal x to the power n (in Z) */
@@ -2088,10 +2111,10 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
   return gerepileupto(av, principalidele(nf,y,prec));
 }
 static GEN
-appr_reduce(GEN s, GEN y, long N)
+appr_reduce(GEN s, GEN y)
 {
+  long i, N = lg(y)-1;
   GEN p1,u,z = cgetg(N+2,t_MAT);
-  long i;
 
   s=gmod(s,gcoeff(y,1,1)); y=gmul(y,lllint(y));
   for (i=1; i<=N; i++) z[i]=y[i]; z[N+1]=(long)s;
@@ -2102,141 +2125,122 @@ appr_reduce(GEN s, GEN y, long N)
   return gadd(s, gmul(y,u));
 }
 
-/* Given a fractional ideal x (if fl=0) or a prime ideal factorization
- * with possibly zero or negative exponents (if fl=1), gives a b such that
- * v_p(b)=v_p(x) for all prime ideals p dividing x (or in the factorization)
- * and v_p(b)>=0 for all other p, using the (standard) proof given in GTM 138.
- * Certainly not the most efficient, but sure.
- */
+/* all ep[i] >= 0, y  is  prod P[i]^(ep[i]+1)  [or NULL in which case it is
+ * computed]. Return s integral such that v_P[i](s) = ep[i] for all i */
+static GEN
+appr_pos(GEN nf, GEN y, GEN list, GEN ep)
+{
+  long i, r = lg(list);
+  GEN pr,v,s,t, z = cgetg(r,t_VEC);
+
+  if (!y)
+  {
+    y = idmat(degpol(nf[1]));
+    for (i=1; i<r; i++)
+      y = idealmulpowprime(nf,y,(GEN)list[i], addsi(1,(GEN)ep[i]));
+  }
+
+  for (i=1; i<r; i++)
+    z[i] = (long)idealdivpowprime(nf,y,(GEN)list[i], addsi(1,(GEN)ep[i]));
+  v = idealaddmultoone(nf,z); s = NULL;
+  for (i=1; i<r; i++)
+  {
+    t = (GEN)v[i]; pr = (GEN)list[i];
+    if (signe(ep[i]))
+      t = element_mul(nf,t,element_pow(nf,(GEN)pr[2],(GEN)ep[i]));
+    s = s? gadd(s,t): t;
+  }
+  s = appr_reduce(s,y);
+  if (DEBUGLEVEL>2) fprintferr(" sortie de idealappr_pos = %Z\n",s);
+  return s;
+}
+
+/* Given a fractional ideal x (if fl=0) or a prime ideal factorization with
+ * possibly zero or negative exponents (if fl=1), gives b such that
+ * v_p(b)=v_p(x) for all prime ideals p | x and v_p(b)>=0 for all other p,
+ * using the standard proof given in GTM 138. Certainly not the most
+ * efficient, but sure. */
 GEN
 idealappr0(GEN nf, GEN x, long fl)
 {
-  long av=avma,tetpil,i,j,k,l,N,r,r2;
-  GEN fact,fact2,list,ep,ep1,ep2,y,z,v,p1,p2,p3,p4,s,pr,alpha,beta,den;
+  long av=avma,i,j,k,l,N,r,r2;
+  GEN fact,fact2,list,ep,ep1,ep2,y,z,p1,p3,alpha,beta,den;
 
   if (DEBUGLEVEL>4)
   {
-    fprintferr(" entree dans idealappr0() :\n");
-    fprintferr(" x = "); outerr(x);
+    fprintferr(" entering idealappr0() :\n");
+    fprintferr(" x = %Z\n", x);
   }
-  nf=checknf(nf); N=degpol(nf[1]);
+  nf = checknf(nf); N = degpol(nf[1]);
   if (fl)
   {
     if (typ(x)!=t_MAT || lg(x)!=3)
       err(talker,"not a prime ideal factorization in idealappr0");
-    fact=x; list=(GEN)fact[1]; ep=(GEN)fact[2]; r=lg(list);
+    fact=x;
+    list= (GEN)fact[1];
+    ep  = (GEN)fact[2]; r = lg(ep);
     if (r==1) return gscalcol_i(gun,N);
     for (i=1; i<r; i++)
       if (signe(ep[i]) < 0) break;
     if (i < r)
     {
       ep1=cgetg(r,t_COL);
-      for (i=1; i<r; i++)
-        ep1[i] = (signe(ep[i])>=0)? zero: lnegi((GEN)ep[i]);
-      fact[2]=(long)ep1; beta=idealappr0(nf,fact,1);
-      fact2=idealfactor(nf,beta);
+      for (i=1; i<r; i++) ep1[i] = (signe(ep[i])>=0)? zero: lnegi((GEN)ep[i]);
+      beta = appr_pos(nf,NULL,list,ep1);
+      fact2= idealfactor(nf,beta);
       p1=(GEN)fact2[1]; r2=lg(p1);
       ep2=(GEN)fact2[2]; l=r+r2-1;
       z=cgetg(l,t_VEC); for (i=1; i<r; i++) z[i]=list[i];
       ep1=cgetg(l,t_VEC);
-      for (i=1; i<r; i++)
-        ep1[i] = (signe(ep[i])<=0)? zero: licopy((GEN)ep[i]);
-      j=r-1;
+      for (i=1; i<r; i++) ep1[i] = (signe(ep[i])<=0)? zero: ep[i];
+      j = r;
       for (i=1; i<r2; i++)
       {
         p3=(GEN)p1[i]; k=1;
         while (k<r &&
           (    !gegal((GEN)p3[1],gmael(list,k,1))
             || !element_val(nf,(GEN)p3[2],(GEN)list[k]) )) k++;
-        if (k==r) { j++; z[j]=(long)p3; ep1[j]=ep2[i]; }
+        if (k==r) { z[j]=(long)p3; ep1[j]=ep2[i]; j++; }
       }
-      fact=cgetg(3,t_MAT);
-      fact[1]=(long)z; setlg(z,j+1);
-      fact[2]=(long)ep1; setlg(ep1,j+1);
-      alpha=idealappr0(nf,fact,1); tetpil=avma;
-      if (DEBUGLEVEL>2)
-      {
-        fprintferr(" alpha = "); outerr(alpha);
-        fprintferr(" beta = "); outerr(beta);
-      }
-      return gerepile(av,tetpil,element_div(nf,alpha,beta));
+
+      setlg(z,j); setlg(ep1,j);
+      alpha = appr_pos(nf,NULL,z,ep1);
+      if (DEBUGLEVEL>2) fprintferr(" alpha = %Z\nbeta = %Z\n", alpha,beta);
+      return gerepileupto(av, element_div(nf,alpha,beta));
     }	
-    y=idmat(N);
-    for (i=1; i<r; i++)
-    {
-      pr=(GEN)list[i];
-      if (signe(ep[i]))
-      {
-        p4=addsi(1,(GEN)ep[i]); p1=powgi((GEN)pr[1],p4);
-	if (cmpis((GEN)pr[4],N))
-	{
-	  p2=cgetg(3,t_MAT);
-          p2[1]=(long)gscalcol_i(p1, N);
-	  p2[2]=(long)element_pow(nf,(GEN)pr[2],p4);
-          y=idealmat_mul(nf,y,p2);
-	}
-	else y=gmul(p1,y);
-      }
-      else y=idealmulprime(nf,y,pr);
-    }
+    y = NULL;
   }
   else
   {
     den=denom(x); if (gcmp1(den)) den=NULL; else x=gmul(den,x);
     x=idealhermite_aux(nf,x);
     fact=idealfactor(nf,x);
-    list=(GEN)fact[1]; ep=(GEN)fact[2]; r=lg(list);
+    list= (GEN)fact[1];
+    ep  = (GEN)fact[2]; r = lg(ep);
     if (r==1) { avma=av; return gscalcol_i(gun,N); }
     if (den)
     {
       fact2=idealfactor(nf,den);
       p1=(GEN)fact2[1]; r2=lg(p1);
-      l=r+r2-1;
-      z=cgetg(l,t_COL);   for (i=1; i<r; i++) z[i]=list[i];
-      ep1=cgetg(l,t_COL); for (i=1; i<r; i++) ep1[i]=ep[i];
-      j=r-1;
+      l = r+r2-1;
+      z   = cgetg(l,t_COL); for (i=1; i<r; i++) z[i]=list[i];
+      ep1 = cgetg(l,t_COL); for (i=1; i<r; i++) ep1[i]=ep[i];
+      j = r;
       for (i=1; i<r2; i++)
       {
 	p3=(GEN)p1[i]; k=1;
 	while (k<r && !gegal((GEN)list[k],p3)) k++;
-	if (k==r){ j++; z[j]=(long)p3; ep1[j]=zero; }
+	if (k==r) { z[j]=(long)p3; ep1[j]=zero; j++; }
       }
-      fact=cgetg(3,t_MAT);
-      fact[1]=(long)z; setlg(z,j+1);
-      fact[2]=(long)ep1; setlg(ep1,j+1);
-      alpha=idealappr0(nf,fact,1);
-      if (DEBUGLEVEL>2) { fprintferr(" alpha = "); outerr(alpha); }
-      tetpil=avma; return gerepile(av,tetpil,gdiv(alpha,den));
+      y = x; for (k=r; k<j; k++) y = idealmulprime(nf,y,(GEN)z[i]);
+      setlg(z, j); setlg(ep1, j);
+      alpha = appr_pos(nf,y,z,ep1);
+      if (DEBUGLEVEL>2) fprintferr(" alpha = %Z\n",alpha);
+      return gerepileupto(av, gdiv(alpha,den));
     }
-    y=x; for (i=1; i<r; i++) y=idealmulprime(nf,y,(GEN)list[i]);
+    y = x; for (i=1; i<r; i++) y = idealmulprime(nf,y,(GEN)list[i]);
   }
-
-  z=cgetg(r,t_VEC);
-  for (i=1; i<r; i++)
-  {
-    pr=(GEN)list[i]; p4=addsi(1, (GEN)ep[i]); p1=powgi((GEN)pr[1],p4);
-    if (cmpis((GEN)pr[4],N))
-    {
-      p2=cgetg(3,t_MAT);
-      p2[1]=(long)gscalcol_i(p1,N);
-      p2[2]=(long)element_pow(nf,(GEN)pr[5],p4);
-      z[i]=ldiv(idealmat_mul(nf,y,p2),p1);
-    }
-    else z[i]=ldiv(y,p1);
-  }
-  v=idealaddmultoone(nf,z);
-  s=cgetg(N+1,t_COL); for (i=1; i<=N; i++) s[i]=zero;
-  for (i=1; i<r; i++)
-  {
-    pr=(GEN)list[i];
-    if (signe(ep[i]))
-      s=gadd(s,element_mul(nf,(GEN)v[i],element_pow(nf,(GEN)pr[2],(GEN)ep[i])));
-    else s=gadd(s,(GEN)v[i]);
-  }
-  p3 = appr_reduce(s,y,N);
-  if (DEBUGLEVEL>2)
-    { fprintferr(" sortie de idealappr0 p3 = "); outerr(p3); }
-  return gerepileupto(av,p3);
+  return gerepileupto(av, appr_pos(nf,y,list,ep));
 }
 
 /* Given a prime ideal factorization x with possibly zero or negative exponents,
@@ -2319,7 +2323,7 @@ idealchinese(GEN nf, GEN x, GEN y)
   for (i=1; i<r; i++)
     s = gadd(s,element_mul(nf,(GEN)v[i],(GEN)y[i]));
 
-  p3 = appr_reduce(s,t,N);
+  p3 = appr_reduce(s,t);
   if (DEBUGLEVEL>2)
     { fprintferr(" sortie de idealchinese() : p3 = "); outerr(p3); }
   return gerepileupto(av,p3);
@@ -2378,10 +2382,11 @@ idealcoprime(GEN nf, GEN x, GEN y)
     fprintferr(" x = "); outerr(x);
     fprintferr(" y = "); outerr(y);
   }
-  fact=idealfactor(nf,y); list=(GEN)fact[1];
-  r=lg(list); ep = (GEN)fact[2];
-  for (i=1; i<r; i++) ep[i]=lstoi(-idealval(nf,x,(GEN)list[i]));
-  tetpil=avma; p2=idealappr0(nf,fact,1);
+  fact=idealfactor(nf,y);
+  list=(GEN)fact[1];
+  ep = (GEN)fact[2]; r=lg(ep);
+  for (i=1; i<r; i++) ep[i] = lstoi(-idealval(nf,x,(GEN)list[i]));
+  tetpil=avma; p2 = idealappr0(nf,fact,1);
   if (DEBUGLEVEL>4)
     { fprintferr(" sortie de idealcoprime() : p2 = "); outerr(p2); }
   return gerepile(av,tetpil,p2);
