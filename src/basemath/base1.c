@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN R_from_QR(GEN x, long prec);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 extern GEN modreverse_i(GEN a, GEN T);
@@ -1412,7 +1413,6 @@ get_sign(long r1, long n)
   s[2] = lstoi((n - r1) >> 1); return s;
 }
 
-
 /* Initialize the number field defined by the polynomial x (in variable v)
  * flag & nf_RED:     try a polred first.
  * flag & nf_PARTRED: as nf_RED but check the first two elements only.
@@ -1429,9 +1429,10 @@ _initalg(GEN x, long flag, long prec)
 
   nfinit_basic(x, partial, NULL, &T);
 
-  if (T.lead && !(flag & (nf_RED|nf_SMALL)))
+  if (T.lead && !(flag & (nf_RED|nf_PARTRED)))
   {
-    err(warner,"non-monic polynomial. Result of the form [nf,c]");
+    if (!(flag & nf_SMALL))
+      err(warner,"non-monic polynomial. Result of the form [nf,c]");
     flag |= nf_PARTRED | nf_ORIG;
   }
   if (flag & (nf_RED|nf_PARTRED))
@@ -1885,8 +1886,7 @@ polredabs0(GEN x, long flag, long prec)
   chk.f_post = &chk_gen_post;
   chk.data   = (void*)&d;
 
-  if ((ulong)flag >= 16) err(flagerr,"polredabs");
-  nf = _initalg(x,nf_SMALL,prec);
+  nf = _initalg(x, nf_SMALL | (flag & nf_PARTIALFACT),prec);
   phi = NULL;
   if (lg(nf) == 3)
   {
@@ -1906,9 +1906,13 @@ polredabs0(GEN x, long flag, long prec)
   {
     for (i=1; ; i++)
     {
+      GEN R = R_from_QR(gmael(nf,5,2), prec);
       d.nf = nf;
-      v = fincke_pohst(nf,NULL,5000,3,prec, &chk);
-      if (v) break;
+      if (R)
+      {
+        v = fincke_pohst(_vec(R),NULL,5000,3, 0, &chk);
+        if (v) break;
+      }
       if (i==MAXITERPOL) err(accurer,"polredabs0");
       prec = (prec<<1)-2; nf = nfnewprec(nf,prec);
       if (DEBUGLEVEL) err(warnprec,"polredabs0",prec);
@@ -1977,56 +1981,55 @@ is_primitive_root(GEN nf, GEN fa, GEN x, long w)
   return x;
 }
 
+/* only roots of 1 are +/- 1 */
+static GEN
+trivroots(GEN nf)
+{
+  GEN y = cgetg(3, t_VEC);
+  y[1] = deux;
+  y[2] = (long)gscalcol_i(negi(gun), degpol(nf[1]));
+  return y;
+}
+
 GEN
 rootsof1(GEN nf)
 {
-  gpmem_t av;
+  gpmem_t av = avma;
   long N,k,i,ws,prec;
-  GEN algun,p1,y,R1,d,list,w;
+  GEN p1,y,d,list,w;
 
-  y=cgetg(3,t_VEC); av=avma; nf=checknf(nf);
-  R1=gmael(nf,2,1); algun=gmael(nf,8,1);
-  if (signe(R1))
-  {
-    y[1]=deux;
-    y[2]=lneg(algun); return y;
-  }
-  N=degpol(nf[1]); prec=gprecision((GEN)nf[6]);
-#ifdef LONG_IS_32BIT
-  if (prec < 10) prec = 10;
-#else
-  if (prec < 6) prec = 6;
-#endif
+  nf = checknf(nf);
+  if ( nf_get_r1(nf) ) return trivroots(nf);
+
+  N = degpol(nf[1]); prec = nfgetprec(nf);
   for (i=1; ; i++)
   {
-    p1 = fincke_pohst(nf,stoi(N),1000,1,prec,NULL);
-    if (p1) break;
+    GEN R = R_from_QR(gmael(nf,5,2), prec);
+    if (R)
+    {
+      p1 = fincke_pohst(_vec(R),stoi(N),1000,1, 0, NULL);
+      if (p1) break;
+    }
     if (i == MAXITERPOL) err(accurer,"rootsof1");
-    prec=(prec<<1)-2;
+    prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"rootsof1",prec);
-    nf=nfnewprec(nf,prec);
+    nf = nfnewprec(nf,prec);
   }
   if (itos(ground((GEN)p1[2])) != N) err(bugparier,"rootsof1 (bug1)");
-  w=(GEN)p1[1]; ws = itos(w);
-  if (ws == 2)
-  {
-    y[1]=deux; avma=av;
-    y[2]=lneg(algun); return y;
-  }
+  w = (GEN)p1[1]; ws = itos(w);
+  if (ws == 2) { avma = av; return trivroots(nf); }
 
   d = decomp(w); list = (GEN)p1[3]; k = lg(list);
   for (i=1; i<k; i++)
   {
     p1 = (GEN)list[i];
     p1 = is_primitive_root(nf,d,p1,ws);
-    if (p1)
-    {
-      y[2]=lpilecopy(av,p1);
-      y[1]=lstoi(ws); return y;
-    }
+    if (p1) break;
   }
-  err(bugparier,"rootsof1");
-  return NULL; /* not reached */
+  if (!p1) err(bugparier,"rootsof1");
+  y = cgetg(3, t_VEC);
+  y[1] = lstoi(ws);
+  y[2] = (long)p1; return gerepilecopy(av, y);
 }
 
 /*******************************************************************/

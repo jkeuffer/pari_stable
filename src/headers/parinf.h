@@ -17,7 +17,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define id_PRIME     1
 #define id_MAT       2
 
-/* for nfinit_reduce / _initalg */
+/* for _initalg */
 #define nf_NOROOTS     32
 #define nf_PARTIALFACT 16
 #define nf_RED          8
@@ -26,7 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nf_ORIG         1
 
 /* for isprincipal */
-#define nf_GEN   1 /* for polredabs also */
+#define nf_GEN   1
 #define nf_FORCE 2
 #define nf_GIVEPREC 4
 #define nf_GENMAT 8
