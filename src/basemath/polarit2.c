@@ -21,10 +21,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /***********************************************************************/
 #include "pari.h"
 
-#define swap(a,b) { long _x = a; a = b; b = _x; }
+#define swap(a,b) { GEN _x = a; a = b; b = _x; }
+#define lswap(a,b) { long _x = a; a = b; b = _x; }
+#define pswap(a,b) { GEN *_x = a; a = b; b = _x; }
 #define deg(a) (lgef(a)-3)
+#define both_even(a,b) ((((a)|(b))&1) == 0)
 
 GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
+GEN primitive_part(GEN x, GEN *c);
 
 GEN
 polsym(GEN x, long n)
@@ -251,16 +255,16 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
     for (s=j+1; s<i; s++)
       if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
 
-    swap(V[j], V[minp]);
-    swap(link[j], link[minp]);
+    lswap(V[j], V[minp]);
+    lswap(link[j], link[minp]);
 
     minp = j+1;
     mind = deg(V[j+1]);
     for (s=j+2; s<i; s++)
       if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
 
-    swap(V[j+1], V[minp]);
-    swap(link[j+1], link[minp]);
+    lswap(V[j+1], V[minp]);
+    lswap(link[j+1], link[minp]);
 
     V[i] = (long)FpX_mul((GEN)V[j], (GEN)V[j+1], p);
     link[i] = j;
@@ -1212,8 +1216,7 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
       for (i=1; i<lg(L); i++)
       {
         y = (GEN)L[i]; rescale_pol_i(y, lt);
-        p1 = content(y); if (!is_pm1(p1)) y = gdiv(y, p1);
-        L[i] = (long)y;
+        L[i] = (long)primitive_part(y, &p1);
       }
     }
     res = concatsp(res, L);
@@ -1449,7 +1452,7 @@ END: av2=avma;
 
 /***********************************************************************/
 /**                                                                   **/
-/**                          FACTORISATION                            **/
+/**                          FACTORIZATION                            **/
 /**                                                                   **/
 /***********************************************************************/
 #define LT 17
@@ -1464,7 +1467,7 @@ END: av2=avma;
 static long
 poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 {
-  long t[LT]; /* code pour 0,1,2,3,61,62,63,67,7,81,82,83,86,87,91,93,97 */
+  long t[LT]; /* code for 0,1,2,3,61,62,63,67,7,81,82,83,86,87,91,93,97 */
   long tx = typ(x),lx,i,j,s,pa=BIGINT;
   GEN pcx=NULL, p=NULL,pol=NULL,p1,p2;
 
@@ -1873,7 +1876,7 @@ gisirreducible(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                         PGCD GENERAL                            */
+/*                         GENERIC GCD                             */
 /*                                                                 */
 /*******************************************************************/
 
@@ -2298,7 +2301,7 @@ gcdmonome(GEN x, GEN y)
 
 /***********************************************************************/
 /**                                                                   **/
-/**                         BEZOUT GENERAL                            **/
+/**                        GENERIC EXTENDED GCD                       **/
 /**                                                                   **/
 /***********************************************************************/
 
@@ -2383,7 +2386,7 @@ vecbezoutres(GEN x, GEN y)
 
 /*******************************************************************/
 /*                                                                 */
-/*                    CONTENU ET PARTIE PRIMITIVE                  */
+/*                    CONTENT / PRIMITIVE PART                     */
 /*                                                                 */
 /*******************************************************************/
 
@@ -2444,9 +2447,17 @@ content(GEN x)
   return av==avma? gcopy(p1): gerepileupto(av,p1);
 }
 
+GEN
+primitive_part(GEN x, GEN *c)
+{
+  *c = content(x);
+  if (gcmp1(*c)) *c = NULL; else x = gdiv(x,*c);
+  return x;
+}
+
 /*******************************************************************/
 /*                                                                 */
-/*                         SOUS RESULTANT                          */
+/*                           SUBRESULTANT                          */
 /*                                                                 */
 /*******************************************************************/
 GEN diviiexact(GEN x, GEN y);
@@ -2547,15 +2558,75 @@ pseudorem(GEN x, GEN y)
   return gerepileupto(av, gmul(x, gpowgs((GEN)y[0], p)));
 }
 
-/* Si sol != NULL:
- *   met dans *sol le dernier polynome non nul de la polynomial remainder
- *   sequence si elle a ete effectuee, 0 sinon
+extern void gerepilemanycoeffs2(long av, GEN x, long n, GEN y, long o);
+
+/* assume dx >= dy, y non constant
+ * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */
+GEN
+pseudodiv(GEN x, GEN y, GEN *ptr)
+{
+  long av = avma, av2,lim, vx = varn(x),dx,dy,dz,i,iz,lx,lz,p;
+  GEN z, r, ypow;
+
+  if (!signe(y)) err(talker,"euclidean division by zero (pseudorem)");
+  (void)new_chunk(2);
+  dx=deg(x); x = revpol(x);
+  dy=deg(y); y = revpol(y); dz=dx-dy; p = dz+1;
+  lz = dz+3; z = cgetg(lz, t_POL) + 2;
+  ypow = new_chunk(dz+1);
+  ypow[0] = un;
+  for (i=1; i<=dz; i++) ypow[i] = lmul((GEN)ypow[i-1], (GEN)y[0]);
+  av2 = avma; lim = stack_lim(av2,1);
+  for (iz=0;;)
+  {
+    p--;
+    z[iz++] = lmul((GEN)x[0], (GEN)ypow[p]);
+    x[0] = lneg((GEN)x[0]);
+    for (i=1; i<=dy; i++)
+      x[i] = ladd(gmul((GEN)y[0], (GEN)x[i]), gmul((GEN)x[0],(GEN)y[i]));
+    for (   ; i<=dx; i++)
+      x[i] = lmul((GEN)y[0], (GEN)x[i]);
+    x++; dx--; 
+    while (dx >= dy && gcmp0((GEN)x[0])) { x++; dx--; z[iz++] = zero; }
+    if (dx < dy) break;
+    if (low_stack(lim,stack_lim(av2,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"pseudodiv dx = %ld >= %ld",dx,dy);
+      gerepilemanycoeffs2(av2,x,dx+1, z,iz);
+    }
+  }
+  while (dx >= 0 && gcmp0((GEN)x[0])) { x++; dx--; }
+  if (dx < 0) 
+    x = zeropol(vx);
+  else
+  {
+    lx = dx+3; x -= 2;
+    x[0] = evaltyp(t_POL) | evallg(lx);
+    x[1] = evalsigne(1) | evalvarn(vx) | evallgef(lx);
+    x = revpol(x) - 2;
+  }
+
+  z -= 2;
+  z[0] = evaltyp(t_POL) | evallg(lz);
+  z[1] = evalsigne(1) | evalvarn(vx) | evallgef(lz);
+  z = revpol(z) - 2;
+  r = gmul(x, (GEN)ypow[p]);
+  {
+    GEN *gptr[2]; gptr[0] = &z; gptr[1] = &r;
+    gerepilemany(av,gptr,2);
+  }
+  *ptr = r; return z;
+}
+
+/* Return resultant(u,v). If sol != NULL: set *sol to the last non-zero
+ * polynomial in the prs IF the sequence was computed, and gzero otherwise
  */
 GEN
 subresall(GEN u, GEN v, GEN *sol)
 {
-  long degq,av,av2,lim,tetpil,dx,dy,du,dv,dr,signh;
-  GEN g,h,r,p1,p2,cu,cv;
+  ulong av,av2,lim;
+  long degq,dx,dy,du,dv,dr,signh;
+  GEN z,g,h,r,p1,p2,cu,cv;
 
   if (sol) *sol=gzero;
   if ((r = init_resultant(u,v))) return r;
@@ -2564,35 +2635,34 @@ subresall(GEN u, GEN v, GEN *sol)
   dx=lgef(u); dy=lgef(v); signh=1;
   if (dx<dy)
   {
-    p1=u; u=v; v=p1; du=dx; dx=dy; dy=du;
-    if ((dx&1) == 0 && (dy&1) == 0) signh = -signh;
+    swap(u,v); lswap(dx,dy);
+    if (both_even(dx, dy)) signh = -signh;
   }
   if (dy==3) return gpowgs((GEN)v[2],dx-3);
-  av=avma;
-  cu=content(u); if (gcmp1(cu)) cu=NULL; else u=gdiv(u,cu);
-  cv=content(v); if (gcmp1(cv)) cv=NULL; else v=gdiv(v,cv);
-  g=gun; h=gun; av2 = avma; lim = stack_lim(av2,1);
+  av = avma;
+  u = primitive_part(u, &cu);
+  v = primitive_part(v, &cv);
+  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
     r = pseudorem(u,v); dr = lgef(r);
-    if (dr==2)
+    if (dr == 2)
     {
-      if (sol) {avma = (long)(r+2); *sol=gerepileupto(av,v);} else avma = av;
+      if (sol) { avma = (long)(r+2); *sol=gerepileupto(av,v); } else avma = av;
       return gzero;
     }
-    du=lgef(u); dv=lgef(v);
-    degq=du-dv; u=v;
-    p1 = g; g = leading_term(u);
+    du = lgef(u); dv = lgef(v); degq = du-dv;
+    u = v; p1 = g; g = leading_term(u);
     switch(degq)
     {
       case 0: break;
       case 1:
         p1 = gmul(h,p1); h = g; break;
       default:
-        p1 = gmul(gpuigs(h,degq),p1);
-        h = gdivexact(gpuigs(g,degq), gpuigs(h,degq-1));
+        p1 = gmul(gpowgs(h,degq),p1);
+        h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    if ((du&1) == 0 && (dv&1) == 0) signh = -signh;
+    if (both_even(du,dv)) signh = -signh;
     v = gdivexact(r,p1);
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
@@ -2602,21 +2672,18 @@ subresall(GEN u, GEN v, GEN *sol)
       gerepilemany(av2,gptr,4);
     }
   }
-  if (dv==4) { tetpil=avma; p2=gcopy((GEN)v[2]); }
-  else
-  {
-    if (dv == 3) err(bugparier,"subres");
-    p1=gpuigs((GEN)v[2],dv-3); p2=gpuigs(h,dv-4);
-    tetpil=avma; p2=gdiv(p1,p2);
-  }
-  if (cu) { p1=gpuigs(cu,dy-3); tetpil=avma; p2=gmul(p2,p1); }
-  if (cv) { p1=gpuigs(cv,dx-3); tetpil=avma; p2=gmul(p2,p1); }
-  if (signh<0) { tetpil=avma; p2=gneg(p2); }
-  {
-    GEN *gptr[2]; gptr[0]=&p2; if (sol) { *sol=gcopy(u); gptr[1]=sol; }
-    gerepilemanysp(av,tetpil,gptr,sol?2:1);
-    return p2;
-  }
+  z = (GEN)v[2];
+  if (dv > 4) z = gdivexact(gpowgs(z,dv-3), gpowgs(h,dv-4));
+  if (signh < 0) z = gneg(z); /* z = resultant(ppart(x), ppart(y)) */
+  p2 = gun;
+  if (cu) p2 = gmul(p2, gpowgs(cu,dy-3));
+  if (cv) p2 = gmul(p2, gpowgs(cv,dx-3));
+  z = gmul(z, p2);
+
+  if (sol) u = gclone(u);
+  z = gerepileupto(av, z);
+  if (sol) { *sol = forcecopy(u); gunclone(u); }
+  return z;
 }
 
 static GEN
@@ -2626,12 +2693,13 @@ scalar_res(GEN x, GEN y, GEN *U, GEN *V)
   *V=gpuigs(y,dx); *U=gzero; return gmul(y,*V);
 }
 
-/* calcule U et V tel que Ux+By=resultant(x,y) */
+/* compute U, V s.t Ux + Vy = resultant(x,y) */
 GEN
 subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
-  long degq,av,tetpil,tx,ty,dx,dy,du,dv,dr,signh;
-  GEN z,g,h,r,p1,p2,p3,p4,u,v,lpu,um1,uze, *gptr[2];
+  ulong av,av2,tetpil,lim;
+  long degq,tx,ty,dx,dy,du,dv,dr,signh;
+  GEN q,z,g,h,r,p1,p2,cu,cv,u,v,um1,uze,vze,xprim,yprim;
 
   if (gcmp0(x) || gcmp0(y)) { *U = *V = gzero; return gzero; }
   tx=typ(x); ty=typ(y);
@@ -2639,63 +2707,82 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   {
     if (tx==t_POL) return scalar_res(x,y,U,V);
     if (ty==t_POL) return scalar_res(y,x,V,U);
-    *U=ginv(x); *V=gzero; return gun;
+    *U = ginv(x); *V = gzero; return gun;
   }
   if (tx!=t_POL || ty!=t_POL) err(typeer,"subresext");
-  if (varn(x)!=varn(y))
+  if (varn(x) != varn(y))
     return (varn(x)<varn(y))? scalar_res(x,y,U,V)
                             : scalar_res(y,x,V,U);
-  dx=lgef(x); dy=lgef(y); signh=1;
-  if (dx<dy)
+  dx = lgef(x); dy = lgef(y); signh = 1;
+  if (dx < dy)
   {
-    GEN *W = U; U=V; V=W;
-    du=dx; dx=dy; dy=du; p1=x; x=y; y=p1;
-    if ((dx&1) == 0 && (dy&1) == 0) signh = -signh;
+    pswap(U,V); lswap(dx,dy); swap(x,y);
+    if (both_even(dx, dy)) signh = -signh;
   }
-  if (dy==3)
+  if (dy == 3)
   {
-    *V=gpuigs((GEN)y[2],dx-4);
-    *U=gzero; return gmul(*V,(GEN)y[2]);
+    *V = gpowgs((GEN)y[2],dx-4);
+    *U = gzero; return gmul(*V,(GEN)y[2]);
   }
-  av=avma;
-  p3=content(x); if (gcmp1(p3)) {p3 = NULL; u=x; } else u=gdiv(x,p3);
-  p4=content(y); if (gcmp1(p4)) {p4 = NULL; v=y; } else v=gdiv(y,p4);
-  g=gun; h=gun; um1=gun; uze=gzero;
+  av = avma;
+  u = primitive_part(x, &cu); xprim = u;
+  v = primitive_part(y, &cv); yprim = v;
+  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
+  um1 = gun; uze = gzero;
   for(;;)
   {
-    du=lgef(u); dv=lgef(v); degq=du-dv;
-    lpu=gpuigs((GEN)v[dv-1],degq+1);
-    p1=gmul(lpu,u); p2=poldivres(p1,v,&r);
-    dr=lgef(r); if (dr==2) { *U=gzero; *V=gzero; avma=av; return gzero; }
+    q = pseudodiv(u,v, &r); dr = lgef(r);
+    if (dr == 2) { *U = *V = gzero; avma = av; return gzero; }
 
-    p1=gsub(gmul(lpu,um1),gmul(p2,uze));
-    um1=uze; uze=p1; u=v;
-    p1 = g; g = leading_term(u);
+    du = lgef(u); dv = lgef(v); degq = du-dv;
+    /* lead(v)^(degq + 1) * um1 - q * uze */
+    p1 = gsub(gmul(gpowgs((GEN)v[dv-1],degq+1),um1), gmul(q,uze));
+    um1 = uze; uze = p1;
+    u = v; p1 = g; g = leading_term(u);
     switch(degq)
     {
       case 0: break;
       case 1: p1 = gmul(h,p1); h = g; break;
       default:
-        p1 = gmul(gpuigs(h,degq),p1);
-        h = gdivexact(gpuigs(g,degq), gpuigs(h,degq-1));
+        p1 = gmul(gpowgs(h,degq),p1);
+        h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    if ((du & 1) == 0 && (dv & 1) == 0) signh= -signh;
-    v=gdivexact(r,p1); uze=gdivexact(uze,p1);
+    if (both_even(du, dv)) signh = -signh;
+    v  = gdivexact(r,p1);
+    uze= gdivexact(uze,p1);
     if (dr==3) break;
+    if (low_stack(lim,stack_lim(av2,1)))
+    {
+      GEN *gptr[6]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
+      gptr[4]=&uze; gptr[5]=&um1;
+      if(DEBUGMEM>1) err(warnmem,"subresext, dr = %ld",dr);
+      gerepilemany(av2,gptr,6);
+    }
   }
+  z = (GEN)v[2];
+  if (dv > 4) 
+  {
+    /* z = gdivexact(gpowgs(z,dv-3), gpowgs(h,dv-4)); */
+    p1 = gpowgs(gdiv(z,h),dv-4);
+    z = gmul(z,p1); uze = gmul(uze,p1);
+  }
+  if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
+  p1 = gadd(z, gneg(gmul(uze,xprim)));
+  if (!poldivis(p1,yprim,&vze)) err(bugparier,"subresext");
+  /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
+  p2 = gun;
+  if (cu) p2 = gmul(p2, gpowgs(cu,dy-3));
+  if (cv) p2 = gmul(p2, gpowgs(cv,dx-3));
+  cu = cu? gdiv(p2,cu): p2;
+  cv = cv? gdiv(p2,cv): p2;
 
-  p2=(dv==4)?gun:gpuigs(gdiv((GEN)v[2],h),dv-4);
-  if (p3) p2 = gmul(p2,gpuigs(p3,dy-3));
-  if (p4) p2 = gmul(p2,gpuigs(p4,dx-3));
-  if (signh<0) p2=gneg_i(p2);
-  p3 = p3? gdiv(p2,p3): p2;
-
-  tetpil=avma; z=gmul((GEN)v[2],p2); uze=gmul(uze,p3);
-  gptr[0]=&z; gptr[1]=&uze; gerepilemanysp(av,tetpil,gptr,2);
-
-  av=avma; p1 = gadd(z, gneg(gmul(uze,x))); tetpil = avma;
-  if (!poldivis(p1,y,&p1)) err(bugparier,"subresext");
-  *U=uze; *V=gerepile(av,tetpil,p1); return z;
+  tetpil = avma;
+  z = gmul(z,p2); uze = gmul(uze,cu); vze = gmul(vze,cv);
+  {
+    GEN *gptr[3]; gptr[0]=&z; gptr[1]=&uze; gptr[2]=&vze;
+    gerepilemanysp(av,tetpil,gptr,3); 
+  }
+  *U = uze; *V = vze; return z;
 }
 
 static GEN
@@ -2711,13 +2798,13 @@ zero_bezout(GEN y, GEN *U, GEN *V)
   *U=gzero; *V = ginv(x); return gmul(y,*V);
 }
 
-/* calcule U et V tel que Ux+Vy=GCD(x,y) par le sous-resultant */
+/* compute U, V s.t Ux + Vy = GCD(x,y) using subresultant */
 GEN
 bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
 {
-  long degq,av,tetpil,tx,ty,dx,dy,du,dv,dr;
-  GEN g,h,r,p1,p2,p3,p4,u,v,lpu,um1,uze,vze,xprim,yprim;
-  GEN *gptr[3];
+  ulong av,av2,tetpil,lim;
+  long degq,tx,ty,dx,dy,du,dv,dr;
+  GEN q,z,g,h,r,p1,cu,cv,u,v,um1,uze,vze,xprim,yprim, *gptr[3];
 
   if (gcmp0(x)) return zero_bezout(y,U,V);
   if (gcmp0(y)) return zero_bezout(x,V,U);
@@ -2726,59 +2813,69 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
   {
     if (tx==t_POL) return scalar_bezout(x,y,U,V);
     if (ty==t_POL) return scalar_bezout(y,x,V,U);
-    *U=ginv(x); *V=gzero; return polun[0];
+    *U = ginv(x); *V = gzero; return polun[0];
   }
   if (tx!=t_POL || ty!=t_POL) err(typeer,"bezoutpol");
   if (varn(x)!=varn(y))
     return (varn(x)<varn(y))? scalar_bezout(x,y,U,V)
                             : scalar_bezout(y,x,V,U);
-  dx=lgef(x); dy=lgef(y);
-  if (dx<dy)
+  dx = lgef(x); dy = lgef(y);
+  if (dx < dy)
   {
-    GEN *W=U; U=V; V=W;
-    p1=x; x=y; y=p1; du=dx; dx=dy; dy=du;
+    pswap(U,V); lswap(dx,dy); swap(x,y);
   }
   if (dy==3) return scalar_bezout(x,y,U,V);
 
-  p3=content(x); u=gdiv(x,p3);
-  p4=content(y); v=gdiv(y,p4);
-  xprim=u; yprim=v; g=gun; h=gun; um1=gun; uze=gzero;
+  u = primitive_part(x, &cu); xprim = u;
+  v = primitive_part(y, &cv); yprim = v;
+  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
+  um1 = gun; uze = gzero;
   for(;;)
   {
-    du=lgef(u); dv=lgef(v); degq=du-dv;
-    lpu=gpuigs((GEN)v[dv-1],degq+1);
-    p1=gmul(lpu,u); p2=poldivres(p1,v,&r);
-    dr=lgef(r); if (dr<=2) break;
-    p1=gsub(gmul(lpu,um1),gmul(p2,uze)); um1=uze; uze=p1;
+    q = pseudodiv(u,v, &r); dr = lgef(r);
+    if (dr == 2) break;
 
-    u=v; p1 = g; g  = leading_term(u);
+    du = lgef(u); dv = lgef(v); degq = du-dv;
+    p1 = gsub(gmul(gpowgs((GEN)v[dv-1],degq+1),um1), gmul(q,uze));
+    um1 = uze; uze = p1;
+    u = v; p1 = g; g  = leading_term(u);
     switch(degq)
     {
       case 0: break;
       case 1:
         p1 = gmul(h,p1); h = g; break;
       default:
-        p1 = gmul(gpuigs(h,degq), p1);
-        h = gdiv(gpuigs(g,degq), gpuigs(h,degq-1));
+        p1 = gmul(gpowgs(h,degq), p1);
+        h = gdiv(gpowgs(g,degq), gpowgs(h,degq-1));
     }
-    v=gdiv(r,p1); uze=gdiv(uze,p1);
+    v  = gdivexact(r,p1);
+    uze= gdivexact(uze,p1);
     if (dr==3) break;
+    if (low_stack(lim,stack_lim(av2,1)))
+    {
+      GEN *gptr[6]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
+      gptr[4]=&uze; gptr[5]=&um1;
+      if(DEBUGMEM>1) err(warnmem,"bezoutpol, dr = %ld",dr);
+      gerepilemany(av2,gptr,6);
+    }
   }
   if (!poldivis(gsub(v,gmul(uze,xprim)),yprim, &vze))
-    err(warner,"non-exact computation in bezoutpol");
-  uze=gdiv(uze,p3); vze=gdiv(vze,p4); p1=ginv(content(v));
+    err(warner,"inexact computation in bezoutpol");
+  if (cu) uze = gdiv(uze,cu);
+  if (cv) vze = gdiv(vze,cv);
+  p1 = ginv(content(v)); tetpil = avma;
 
-  tetpil=avma; uze=gmul(uze,p1); vze=gmul(vze,p1); p1=gmul(v,p1);
-  gptr[0]=&uze; gptr[1]=&vze; gptr[2]=&p1;
+  uze = gmul(uze,p1);
+  vze = gmul(vze,p1);
+  z = gmul(v,p1);
+  gptr[0]=&uze; gptr[1]=&vze; gptr[2]=&z;
   gerepilemanysp(av,tetpil,gptr,3);
-  *U=uze; *V=vze; return p1;
+  *U = uze; *V = vze; return z;
 }
-
-
 
 /*******************************************************************/
 /*                                                                 */
-/*               RESULTANT PAR L'ALGORITHME DE DUCOS               */
+/*                RESULTANT USING DUCOS VARIANT                    */
 /*                                                                 */
 /*******************************************************************/
 
@@ -2853,15 +2950,15 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 GEN
 resultantducos(GEN P, GEN Q)
 {
-  ulong av = avma, lim = stack_lim(av,1);
+  ulong av = avma, av2,lim;
   long dP,dQ,delta;
   GEN cP,cQ,Z,s;
 
   if ((Z = init_resultant(P,Q))) return Z;
   dP = degree(P);
   dQ = degree(Q);
-  cP = content(P); if (gcmp1(cP)) cP = NULL; else P = gdiv(P,cP);
-  cQ = content(Q); if (gcmp1(cQ)) cQ = NULL; else Q = gdiv(Q,cQ);
+  P = primitive_part(P, &cP);
+  Q = primitive_part(Q, &cQ);
   delta = dP - dQ;
   if (delta < 0)
   {
@@ -2871,6 +2968,7 @@ resultantducos(GEN P, GEN Q)
   s = gun;
   if (degree(Q) > 0)
   {
+    av2 = avma; lim = stack_lim(av2,1);
     s = gpuigs(leading_term(Q),delta);
     Z = Q;
     Q = pseudorem(P, gneg(Q));
@@ -2881,7 +2979,7 @@ resultantducos(GEN P, GEN Q)
       {
         GEN *gptr[2]; gptr[0]=&P; gptr[1]=&Q;
         if(DEBUGMEM>1) err(warnmem,"resultantducos, deg Q = %ld",degree(Q));
-        gerepilemany(av,gptr,2); s = leading_term(P);
+        gerepilemany(av2,gptr,2); s = leading_term(P);
       }
       delta = degree(P) - degree(Q);
       Z = Lazard2(Q, leading_term(Q), s, delta);
@@ -2900,7 +2998,7 @@ resultantducos(GEN P, GEN Q)
 
 /*******************************************************************/
 /*                                                                 */
-/*               RESULTANT PAR MATRICE DE SYLVESTER                */
+/*               RESULTANT USING SYLVESTER MATRIX                  */
 /*                                                                 */
 /*******************************************************************/
 static GEN
@@ -2984,8 +3082,7 @@ fix_pol(GEN x, long v, long *mx)
 }
 
 /* resultant of x and y with respect to variable v, or with respect to their
- * main variable if v < 0.
- */
+ * main variable if v < 0. */
 GEN
 polresultant0(GEN x, GEN y, long v, long flag)
 {
@@ -3009,7 +3106,7 @@ polresultant0(GEN x, GEN y, long v, long flag)
 
 /*******************************************************************/
 /*                                                                 */
-/*           P.G.C.D PAR L'ALGORITHME DU SOUS RESULTANT            */
+/*                  GCD USING SUBRESULTANT                         */
 /*                                                                 */
 /*******************************************************************/
 
@@ -3157,7 +3254,7 @@ reduceddiscsmith(GEN pol)
 
 /***********************************************************************/
 /**							              **/
-/**	                 ALGORITHME DE STURM                          **/
+/**	                  STURM ALGORITHM                             **/
 /**	         (number of real roots of x in ]a,b])		      **/
 /**								      **/
 /***********************************************************************/
@@ -3243,7 +3340,7 @@ sturmpart(GEN x, GEN a, GEN b)
 
 /*******************************************************************/
 /*                                                                 */
-/*         POLYNOME QUADRATIQUE ASSOCIE A UN DISCRIMINANT          */
+/*         QUADRATIC POLYNOMIAL ASSOCIATED TO A DISCRIMINANT       */
 /*                                                                 */
 /*******************************************************************/
 
@@ -3294,7 +3391,7 @@ quadgen(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
-/*                    INVERSE MODULO GENERAL                       */
+/*                    GENERIC (modular) INVERSE                    */
 /*                                                                 */
 /*******************************************************************/
 
@@ -3497,19 +3594,17 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
 
 /* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
  *
- * We essentially follows the paper of M. Encarnacion
- * "On a modular Algorithm for computing GCDs of polynomials over
- * number fields" in the proceeding of ISSAC'94.
+ * We essentially follow M. Encarnacion "On a modular Algorithm for computing
+ * GCDs of polynomials over number fields" (ISSAC'94).
  *
- * We procede as follows :
- * We compute the gcd modulo primes discarding bad primes as they are detected.
- * We try reconstruct the result with matratlift, stoping as soon as we get
- * weird denominators.
- *
- * If matratlift succeed, we then try the full division.
+ * We procede as follows
+ *  1:compute the gcd modulo primes discarding bad primes as they are detected.
+ *  2:reconstruct the result via matratlift, stoping as soon as we get weird
+ *    denominators.
+ *  3:if matratlift succeeds, try the full division.
  * Suppose we does not have sufficient accuracy to get the result right:
- * It is extremly rare that matratlift will succeed, and even if it does, the
- * polynomial we get has reasonnable coefficients, so the full division will
+ * it is extremly rare that matratlift will succeed, and even if it does, the
+ * polynomial we get has sensible coefficients, so the full division will
  * not be too costly.
  *
  * FIXME: Handle rational coefficient for P and Q.
@@ -3520,7 +3615,8 @@ polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
  * NOTE: if nf is not irreducible, nfgcd may loop forever, especially if the
  * gcd divides nf !
  */
-GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
+GEN
+nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 {
   ulong ltop = avma;
   GEN sol, mod = NULL;
@@ -3584,4 +3680,3 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   }
   return gerepileupto(ltop, gcopy(sol));
 }
-
