@@ -3,5 +3,5 @@ Section: number_theoretical
 C-Name: znlog
 Prototype: GG
 Help: znlog(x,g): g as output by znprimroot (modulo a prime). Return
- smallest positive n such that g^n = x
+ smallest non-negative n such that g^n = x
 
