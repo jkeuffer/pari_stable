@@ -177,17 +177,11 @@ extern ulong hiremainder;
    __value; \
 })
 
-#ifndef _ASMI386INLINE_H_
-#  define _ASMI386INLINE_H_
-#  ifdef INLINE
-static inline int
-bfffo(ulong x)
-{
-  int leading_one_position;
-  __asm__ ("bsrl %1,%0" : "=r" (leading_one_position) : "rm" (x));
-  return 31-leading_one_position;
-}
-#  endif
-#endif
+#define bfffo(x) \
+({ ulong __arg = (x); \
+   int leading_one_position; \
+  __asm__ ("bsrl %1,%0" : "=r" (leading_one_position) : "rm" (__arg)); \
+  31 - leading_one_position; \
+})
 
 #endif /* ASMINLINE */

@@ -178,6 +178,7 @@ IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
        to call GENtostr] (used to be a NULL-terminated list)
    41- [gphelp:] if perl not available, don't pretend extended help is.
    42- try harder to detect precision problems in floating point lllgram
+   43- [ix86 kernel:] macroified bfffo()
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
