@@ -166,12 +166,16 @@ use POSIX 'setsid';
 sub open_dvi_then_quit
 {
   local($dvifile, $viewer)= @_;
-  $dvifile = "$docdir/$dvifile" if (! -f "$dvifile");
-  die "could not find $dvifile" if (! -f "$dvifile");
+  local($f) = "$dvifile";
+  $f = "$dvifile.gz" if (! -f "$f");
+  $f = "$docdir/$dvifile" if (! -f "$f");
+  $f = "$docdir/$dvifile.gz" if (! -f "$f");
+  die "could not find $f" if (! -f "$f");
   (!$ENV{DISPLAY} && !$ENV{GPXDVI}) && die "xdvi needs X-Windows";
-  print "displaying \'$docdir/$dvifile\'.";
+  if ($f =~ /\//) { $dvifile = "$f"; } else { $dvifile = "$docdir/$f"; }
+  print "displaying \'$dvifile\'.";
   setsid; # detach from terminal (^C will not kill xdvi)
-  system("$viewer $dvifile 2>/dev/null >/dev/null&");
+  system("$viewer $f 2>/dev/null >/dev/null&");
   cleanexit();
 }
 
