@@ -2148,7 +2148,7 @@ minideal(GEN nf, GEN x, GEN vdir, long prec)
 /*******************************************************************/
 
 /* write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
-static GEN
+GEN
 coprime_part(GEN x, GEN f)
 {
   for (;;)
