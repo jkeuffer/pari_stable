@@ -1199,7 +1199,7 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
-                 a,b, lg(oldCM_L)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = _col(P); break; }
     if (b > bmin) 
     {

@@ -613,13 +613,27 @@ normlp(GEN L, long p, long n)
  *    | S vS + P vP |^2 < Btra
  * This implies | S1 vS + P1 vP |^2 < Blow, assuming q > sqrt(Btra).
  * d = dimension of low part (= [nf:Q])
- * BvS = bound for |vS|^2
+ * n0 = bound for |vS|^2
  * */
 static double
-get_Blow(long BvS, long d)
+get_Blow(long n0, long d, GEN q)
 {
-  double sqrtBvS = sqrt((double)BvS);
-  double t = sqrtBvS + sqrt((double)d) * (sqrtBvS + 1);
+#if 0
+  double sqrtn0 = sqrt((double)n0);
+  double t = sqrtn0 + sqrt((double)d) * (sqrtn0 + 1);
+#else
+  double sqrtd = sqrt((double)d);
+  double t, aux;
+  
+  if (gexpo(q)>30)
+    aux = 1.0001;
+  else
+  {
+    aux = gtodouble(q);
+    aux = sqrt(1 + 4/(aux*aux));
+  }
+  t = n0*sqrtd + sqrtd/2 * aux * (sqrtd * (n0+1)); /* assume pr degree 1 */
+#endif
   t = 1. + 0.5 * t;
   return t * t;
 }
@@ -663,7 +677,7 @@ get_trace(GEN ind, trace_data *T)
       v[i] = - (long)r;
   }
   return gadd(s, gmul_mati_smallvec(T->P1, v));
-}
+} 
 
 static trace_data *
 init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
@@ -734,7 +748,8 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
-  const double Blow = get_Blow(lfamod, dnf);
+  GEN q = ceil_safe(mpsqrt(T->BS_2));
+  const double Blow = get_Blow(lfamod, dnf, q);
   trace_data _T1, _T2, *T1, *T2;
 
   if (maxK < 0) maxK = lfamod-1;
@@ -744,9 +759,8 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   lcpol = lc? gmul(lc,pol): pol;
 
   {
-    GEN t1,t2, q, lc2 = lc? sqri(lc): NULL;
+    GEN t1,t2, lc2 = lc? sqri(lc): NULL;
 
-    q = ceil_safe(mpsqrt(T->BS_2));
     for (i=1; i <= lfamod; i++)
     {
       GEN P = (GEN)famod[i];
@@ -1049,8 +1063,9 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   n0 = lg(famod) - 1;
  /* Lattice: (S PRK), small vector (vS vP). To find k bound for the image,
   * write S = S1 q + S0, P = P1 q + P0
-  * q(S1 vS + P1 vP) <= Blow for all (vS,vP) assoc. to true factors */
-  Blow = get_Blow(n0, dnf);
+  * |S1 vS + P1 vP|^2 <= Blow for all (vS,vP) assoc. to true factors */
+  Btra = mulrr(ZC, mulsr(dP*dP, normlp(Br, 2, dnf)));
+  Blow = get_Blow(n0, dnf, gceil(Btra));
   C = (long)ceil(sqrt(Blow/n0)) + 1; /* C^2 n0 ~ Blow */
   Bnorm = dbltor( n0 * C * C + Blow );
   ZERO = zeromat(n0, dnf);
@@ -1226,7 +1241,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 static GEN
 nfsqff(GEN nf, GEN pol, long fl)
 {
-  long i, a, m, n, nbf, ct, dpol = degpol(pol);
+  long i, m, n, nbf, ct, dpol = degpol(pol);
   gpmem_t av = avma;
   GEN pr, C0, C, dk, bad, polbase, pk;
   GEN N2, rep, p, ap, polmod, polred, lt, nfpol;
@@ -1235,15 +1250,23 @@ nfsqff(GEN nf, GEN pol, long fl)
   nflift_t L;
 
   if (DEBUGLEVEL>3) msgtimer("square-free");
-  nfpol = (GEN)nf[1];
+  nfpol = (GEN)nf[1]; n = degpol(nfpol);
   polbase = unifpol(nf,pol,0);
   polmod  = unifpol(nf,pol,1);
+  /* heuristic */
+#if 0
+  if (dpol*4 < n) 
+  {
+    if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
+    return gerepilecopy(av, (GEN)polfnf(polmod, nfpol)[1]);
+  }
+#endif
+
   pol = simplify_i(lift(polmod));
   lt  = (GEN)leading_term(polbase)[1]; /* t_INT */
 
   dk = absi((GEN)nf[3]);
   bad = mulii(mulii(dk,(GEN)nf[4]), lt);
-  n = degpol(nfpol);
 
   p = polred = pr = NULL; /* gcc -Wall */
   nbf = 0; ap = NULL;
@@ -1299,6 +1322,7 @@ nfsqff(GEN nf, GEN pol, long fl)
 
   if (fl)
     (void)logint(C, p, &pk);
+#if 0 /* overkill */
   else
   { /* overlift needed for d-1/d-2 tests? */
     GEN pb; long b; /* junk */
@@ -1308,6 +1332,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       C = itor(pk, DEFAULTPREC);
     }
   }
+#endif
 
   bestlift_init(0, nf, pr, C, &L);
   T.pr = pr;
