@@ -53,6 +53,7 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
     8- gp -p 51234567890 --> internal overflow and primelimit set to smaller
        integer
     9- [ GMP kernel ] incorrect resmod2n --> wrong 2-adic sqrt
+   10- [hi-res plot: fltk] fix compilation with g++-3.4
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length

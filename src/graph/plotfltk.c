@@ -253,7 +253,7 @@ void Plotter::alloc() {
 	points[col]=new Point[c[ROt_PT]];
 	seg[col] = new Segment[c[ROt_LN]];
 	rec[col] = new Rectangle[c[ROt_BX]];
-        lines[col] = new (Point*)[c[ROt_ML]];
+        lines[col] = new Point*[c[ROt_ML]];
 	textPos[col] = new Point[c[ROt_ST]];
 	texts[col] = new String[c[ROt_ST]];
         numpoints[col] = new long[c[ROt_ST]];
