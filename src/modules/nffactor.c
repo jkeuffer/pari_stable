@@ -311,8 +311,9 @@ nffactor(GEN nf,GEN pol)
   GEN A,g,y,p1,rep,T;
   long l, j, d = degpol(pol);
   pari_sp av;
-  if (DEBUGLEVEL>3) (void)timer2();
+  pari_timer ti;
 
+  if (DEBUGLEVEL>2) { TIMERstart(&ti); fprintferr("\nEntering nffactor:\n"); }
   nf = checknf(nf); T = (GEN)nf[1];
   if (typ(pol) != t_POL) err(notpoler,"nffactor");
   if (varn(pol) >= varn(T))
@@ -332,11 +333,11 @@ nffactor(GEN nf,GEN pol)
     return gerepileupto(av, factpol(simplify(pol), 0));
 
   A = primpart( lift_intern(A) );
-  if (DEBUGLEVEL>3) fprintferr("test if polynomial is square-free\n");
   g = nfgcd(A, derivpol(A), T, NULL);
 
   A = QXQ_normalize(A, T);
   A = primpart(A);
+  if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
 
   if (degpol(g))
   { /* not squarefree */
@@ -766,6 +767,9 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN q = ceil_safe(mpsqrt(T->BS_2));
   const double Blow = get_Blow(lfamod, dnf, q);
   trace_data _T1, _T2, *T1, *T2;
+  pari_timer ti;
+
+  TIMERstart(&ti);
 
   if (maxK < 0) maxK = lfamod-1;
 
@@ -892,7 +896,7 @@ nextK:
       lcpol = lc? gmul(lc,pol): pol;
       if (DEBUGLEVEL > 2)
       {
-        fprintferr("\n"); msgtimer("to find factor %Z",y);
+        fprintferr("\n"); msgTIMER(&ti, "to find factor %Z",y);
         fprintferr("remaining modular factor(s): %ld\n", lfamod);
       }
       continue;
@@ -1026,7 +1030,9 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
   const double alpha = ((double)D-1) / D; /* LLL parameter */
   pari_sp av = avma;
   GEN prk, PRK, B, GSmin, pk;
+  pari_timer ti;
 
+  TIMERstart(&ti);
   if (!a) a = (long)bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
 
   for (;; avma = av, a<<=1)
@@ -1042,7 +1048,9 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
       GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
-  if (DEBUGLEVEL>2) fprintferr("for this exponent, GSmin = %Z\n",GSmin);
+  if (DEBUGLEVEL>2)
+    fprintferr("for this exponent, GSmin = %Z\nTime reduction: %ld\n",
+      GSmin, TIMER(&ti));
   T->k = a;
   T->pk = T->den = pk;
   T->prk = PRK;
@@ -1224,15 +1232,18 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
 {
   GEN z, res, L, listmod, famod = T->fact, nf = T->nf;
   long i, m, l, maxK = 3, nft = lg(famod)-1;
+  pari_timer ti;
 
+  if (DEBUGLEVEL>2) TIMERstart(&ti);
   T->fact = hensel_lift_fact(polred,famod,NULL,p,T->pk,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
-  if (DEBUGLEVEL>3) msgtimer("Hensel lift");
+  if (DEBUGLEVEL>2) msgTIMER(&ti, "Hensel lift");
 
   /* FIXME: neither nfcmbf nor LLL_cmbf can handle the non-nf case */
 
   T->res      = cgetg(nft+1,t_VEC);
   L = nfcmbf(T, p, a, maxK, klim);
+  if (DEBUGLEVEL>2) msgTIMER(&ti, "Naive recombination");
 
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod)-1;
@@ -1244,7 +1255,6 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
-  if (DEBUGLEVEL>3) msgtimer("computation of the factors");
 
   m = lg(res); z = cgetg(m, t_VEC);
   for (i=1;i<m; i++) z[i] = (long)unifpol(nf,(GEN)res[i],1);
@@ -1266,8 +1276,9 @@ nfsqff(GEN nf, GEN pol, long fl)
   byteptr pt=diffptr;
   nfcmbf_t T;
   nflift_t L;
+  pari_timer ti, ti_tot;
 
-  if (DEBUGLEVEL>3) msgtimer("square-free");
+  if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
   nfpol = (GEN)nf[1]; n = degpol(nfpol);
   polbase = unifpol(nf,pol,0);
   polmod  = unifpol(nf,pol,1);
@@ -1322,8 +1333,8 @@ nfsqff(GEN nf, GEN pol, long fl)
     }
     if (--ct <= 0) break;
   }
-  if (DEBUGLEVEL>3) {
-    msgtimer("choice of a prime ideal");
+  if (DEBUGLEVEL>2) {
+    msgTIMER(&ti, "choice of a prime ideal");
     fprintferr("Prime ideal chosen: %Z\n", pr);
   }
 
@@ -1341,7 +1352,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   T.BS_2 = mulrr(T.ZC, N2); /* bound for |S_2|^2 on chosen Z-basis */
 
   if (DEBUGLEVEL>2) {
-    msgtimer("bound computation");
+    msgTIMER(&ti, "bound computation");
     fprintferr("  1) T_2 bound for %s: %Z\n", fl?"root":"factor", C0);
     fprintferr("  2) Conversion from T_2 --> | |^2 bound : %Z\n", T.ZC);
     fprintferr("  3) Final bound: %Z\n", C);
@@ -1397,6 +1408,8 @@ nfsqff(GEN nf, GEN pol, long fl)
   T.hint  = 1; /* useless */
 
   rep = nf_combine_factors(&T, polred, p, L.k, dpol-1);
+  if (DEBUGLEVEL>2)
+    fprintferr("Total Time: %ld\n===========\n", TIMER(&ti));
   return gerepileupto(av, rep);
 }
 
