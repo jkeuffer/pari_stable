@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
 extern GEN idealprodprime(GEN nf, GEN L);
 extern GEN anti_unif_mod_f(GEN nf, GEN pr, GEN sqf);
 extern GEN unif_mod_f(GEN nf, GEN pr, GEN sqf);
@@ -161,44 +162,6 @@ buchnarrow(GEN bnf)
 /**                                                                **/
 /********************************************************************/
 
-/* "compare" two nf elt. Goal is to quickly sort for uniqueness of
- * representation, not uniqueness of represented element ! */
-static int
-elt_cmp(GEN x, GEN y)
-{
-  long tx = typ(x), ty = typ(y);
-  if (ty == tx)
-    return tx == t_POL? cmp_pol(x,y): lexcmp(x,y);
-  return tx - ty;
-}
-
-static GEN
-famat_reduce(GEN fa)
-{
-  GEN E, F, G, L, g, e;
-  long i, k, l;
-
-  if (lg(fa) == 1) return fa;
-  g = (GEN)fa[1]; l = lg(g);
-  e = (GEN)fa[2];
-  L = gen_sort(g, cmp_IND|cmp_C, &elt_cmp);
-  G = cgetg(l, t_COL);
-  E = cgetg(l, t_COL);
-  for (k=i=1; i<l; i++,k++) 
-  {
-    G[k] = g[L[i]];
-    E[k] = e[L[i]];
-    if (k > 1 && gegal((GEN)G[k], (GEN)G[k-1]))
-    {
-      E[k-1] = laddii((GEN)E[k], (GEN)E[k-1]);
-      k--;
-    }
-  }
-  F = cgetg(3, t_MAT);
-  setlg(G, k); F[1] = (long)G;
-  setlg(E, k); F[2] = (long)E; return F;
-}
-
 static GEN
 compute_fact(GEN nf, GEN u1, GEN gen)
 {
@@ -283,88 +246,6 @@ idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
   a = set_sign_mod_idele(nf, NULL, A, idele, sarch);
   if (a != A && too_big(nf,A) > 0) { avma = av; return x; }
   return idealmul(nf, a, x);
-}
-
-/* write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
-static GEN
-coprime_part(GEN x, GEN f)
-{
-  for (;;)
-  {
-    f = mppgcd(x, f); if (is_pm1(f)) break;
-    x = diviiexact(x, f);
-  }
-  return x;
-}
-
-/* x t_INT, f ideal. Write x = x1 x2, sqf(x1) | f, (x2,f) = 1. Return x2 */
-static GEN
-nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
-{
-  long v, j, lp = lg(listpr), N = degpol(nf[1]);
-  GEN x1, x2, ex, p, pr;
-
-#if 0 /*1) via many gcds. Expensive ! */
-  f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
-  x = gscalmat(x, N);
-  for (;;)
-  {
-    if (gcmp1(gcoeff(f,1,1))) break;
-    x = idealdivexact(nf, x, f);
-    f = hnfmodid(concatsp(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
-  }
-  x2 = x;
-#else /*2) from prime decomposition */
-  x1 = NULL;
-  for (j=1; j<lp; j++)
-  {
-    pr = listpr[j]; p = (GEN)pr[1];
-    v = ggval(x, p); if (!v) continue;
-
-    ex = mulsi(v, (GEN)pr[3]); /* = v_pr(x) > 0 */
-    x1 = x1? idealmulpowprime(nf, x1, pr, ex)
-           : idealpow(nf, pr, ex);
-  }
-  x = gscalmat(x, N);
-  x2 = x1? idealdivexact(nf, x, x1): x;
-#endif
-  return x2;
-}
-
-/* L0 in K^*. 
- * If ptd1 == NULL, assume (L0,f) = 1
- *   return L integral, L0 = L mod f 
- *
- * Otherwise, assume v_pr(L0) <= 0 for all pr | f and set *ptd1 = d1
- *   return L integral, L0 = L/d1 mod f, and such that 
- *   if (L*I,f) = 1 for some integral I, then d1 | L*I  */
-GEN
-make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1)
-{
-  GEN fZ, t, L, D2, d1, d2, d = denom(L0);
-
-  if (ptd1) *ptd1 = NULL;
-
-  if (is_pm1(d)) return L0;
-  
-  L = Q_remove_denom(L0, d); /* L0 = L / d, L integral */
-  fZ = gcoeff(f,1,1);
-  /* Kill denom part coprime to fZ */
-  d2 = coprime_part(d, fZ);
-  t = mpinvmod(d2, fZ); if (!is_pm1(t)) L = gmul(L,t);
-  if (egalii(d, d2)) return L;
-
-  d1 = diviiexact(d, d2);
-  /* L0 = (L / d1) mod f. d1 not coprime to f
-   * write (d1) = D1 D2, D2 minimal, (D2,f) = 1. */
-  D2 = nf_coprime_part(nf, d1, f, listpr);
-  t = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
-  L = element_muli(nf,t,L);
-
-  /* if (L0, f) = 1, then L in D1 ==> in D1 D2 = (d1) */
-  if (!ptd1) return Q_div_to_int(L, d1); /* exact division */
-
-  *ptd1 = d1; return L;
 }
 
 /* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
