@@ -277,7 +277,7 @@ rectscale(long ne, GEN x1, GEN x2, GEN y1, GEN y2)
  * }
  */
 
-#define DTOL(t) ((long)(t))
+#define DTOL(t) ((long)(t + 0.5))
 
 static void
 rectmove0(long ne, double x, double y, long relative)

@@ -39,6 +39,9 @@ DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
    10- sumdiv(N,...) required single precision N
 BA 11- bound problems in nfgaloisconj()
    12- infinite loop in do_agm()
+   13- "Warning: in Gauss lg(a)=1..." from isprincipalall0
+   14- specific error for precision problems with p-adic ell. curves 
+IZ 15- ploth() plots are 1/2-pixel off
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
