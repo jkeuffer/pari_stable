@@ -822,6 +822,12 @@ pvaluation(GEN x, GEN p, GEN *py)
   long av,v;
   GEN p1,p2;
 
+  if (egalii(p,gdeux))
+  {
+    v = vali(x);
+    *py = shifti(x, -v);
+    return v;
+  }
   if (!is_bigint(x))
   {
     long y;
