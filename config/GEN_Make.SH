@@ -18,7 +18,7 @@ if test -n "$runpathprefix"; then
 fi
 
 # remove soname imformation
-MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]*[,= \t]*\\$(LIBPARI.*)//'`
+MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/,*-[hsoname]*[,= \t]*\\$(LIBPARI.*)//'`
 
 cat > $file << EOT
 # Generic Makefile for PARI programs -- $pretty
