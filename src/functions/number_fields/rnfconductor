@@ -7,6 +7,5 @@ Help: rnfconductor(bnf,polrel,{flag=0}): conductor of the Abelian extension
  where conductor is the conductor itself, rayclassgroup the structure of the
  corresponding full ray class group, and subgroup the HNF defining the norm
  group (Artin or Takagi group) on the given generators rayclassgroup[3]. If
- flag is non-zero, check (under GRH) that polrel indeed defines an Abelian
- extension
+ flag is non-zero, check that polrel indeed defines an Abelian extension
 
