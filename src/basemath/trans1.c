@@ -832,8 +832,8 @@ GEN
 rootsof1padic(GEN n, GEN y)
 {
   ulong ltop=avma;
-  GEN z,a,r;
-  a=mpsqrtnmod(gun,n,(GEN)y[2],&z);
+  GEN z,r;
+  (void)mpsqrtnmod(gun,n,(GEN)y[2],&z);
   if (z==gzero){avma=ltop;return gzero;}/*should not happen*/
   r=cgetg(5,t_PADIC);
   r[1]=y[1];setvalp(r,0);/*rootsofunity are unramified*/

@@ -1116,7 +1116,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
   double *y,*zz,**qq,*vv, MINKOVSKI_BOUND,IDEAL_BOUND,normideal;
   long av=avma,av1,av2,tetpil,limpile, *x,i,j,k,noideal;
   long nbsmallnorm,nbsmallfact,R1,RU, N = lgef(nf[1])-3;
-  GEN V,alpha,M,T2,ideal,rrr,cbase,T2vec,prvec,oldinvp;
+  GEN V,alpha,M,T2,ideal,rrr,cbase,T2vec,prvec;
 
   if (gsigne(gborne)<=0) return t;
   if (DEBUGLEVEL)
@@ -1226,7 +1226,6 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
       }
       if (flbreak) { flbreak=0; break; }
 
-      oldinvp = invp;
       if (t && t < KC)
       {
 	for (i=1; i<=KC; i++) V[i]=0;

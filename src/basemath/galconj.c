@@ -9,11 +9,10 @@ GEN
 galoisconj(GEN nf)
 {
   GEN     x, y, z;
-  long    i, lz, lx, v, av = avma;
+  long    i, lz, v, av = avma;
   nf = checknf(nf);
   x = (GEN) nf[1];
   v = varn(x);
-  lx = lgef(x) - 2;
   if (v == 0)
     nf = gsubst(nf, 0, polx[MAXVARN]);
   else
@@ -2148,10 +2147,9 @@ s4galoisgen(struct galois_lift *gl)
   GEN     pj;
   GEN     p,Q,TQ,Tp;
   GEN     bezoutcoeff, pauto, liftpow;
-  long    v;
+
   p = gl->p;
   Q = gl->Q;
-  v = varn(gl->T);
   res = cgetg(3, t_VEC);
   ry  = cgetg(5, t_VEC);
   res[1] = (long) ry;
@@ -2996,7 +2994,6 @@ GEN galoiscoset(GEN perm, GEN O)
   GEN coset,RO;
   int i,j,l,n,o;
   long u,v;
-  n=lg(perm)-1;/*number of perms*/
   o=lg(O)-1;   /*number of orbits and cosets*/
   l=lg(O[1])-1;/*number of elements in orbits*/
   coset=cgetg(lg(O),t_VEC);/*allocate memory*/

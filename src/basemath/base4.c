@@ -1281,7 +1281,7 @@ GEN
 idealpow(GEN nf, GEN x, GEN n)
 {
   long tx,N,av,s,i;
-  GEN res,ax,m,denx,denz,dx,n1,a,alpha;
+  GEN res,ax,m,denx,denz,n1,a,alpha;
 
   if (typ(n) != t_INT) err(talker,"non-integral exponent in idealpow");
   tx = idealtyp(&x,&ax);
@@ -1308,7 +1308,6 @@ idealpow(GEN nf, GEN x, GEN n)
 
         denx=denom(x); if (gcmp1(denx)) denx=NULL; else x = gmul(x,denx);
         a=ideal_two_elt(nf,x); alpha=(GEN)a[2]; a=(GEN)a[1];
-        dx = gcoeff(x,1,1);
         m = cgetg(N+1,t_MAT); a = gpui(a,n1,0);
         alpha = element_pow(nf,alpha,n1);
         for (i=1; i<=N; i++) m[i]=(long)element_mulid(nf,alpha,i);

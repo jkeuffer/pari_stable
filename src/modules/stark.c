@@ -1910,14 +1910,13 @@ GetST(GEN dataCR, long prec)
 {
   GEN N0, CC, bnr, bnf, Pi, racpi, C, cond, aij, B, S, T, csurn, lncsurn;
   GEN degs, p1, p2, nsurc, an, rep, powlncn, powracpi;
-  long i, j, k, n, av = avma, av1, av2, N, hk, fj, id, prec2, i0, nmax;
+  long i, j, k, n, av = avma, av1, av2, hk, fj, id, prec2, i0, nmax;
   long a, b, c, rc1, rc2, r, r1, r2;
   int ***matan;
 
   if (DEBUGLEVEL) timer2();
   bnr   = gmael(dataCR, 1, 4);
   bnf   = (GEN)bnr[1];
-  N     = degree(gmael(bnf, 7, 1));
   r1    = itos(gmael3(bnf, 7, 2, 1));
   r2    = itos(gmael3(bnf, 7, 2, 2));
   hk    = lg(dataCR) - 1;

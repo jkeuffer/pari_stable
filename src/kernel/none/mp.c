@@ -2083,11 +2083,10 @@ GEN
 resiimul(GEN x, GEN sy)
 {
   GEN r, q, y = (GEN)sy[1], invy;
-  long av = avma, k, lx;
+  long av = avma, k;
 
   k = cmpii(x, y);
   if (k <= 0) return k? icopy(x): gzero;
-  lx = lgefint(x);
   invy = (GEN)sy[2];
   q = mulir(x,invy);
   q = mptrunc(q); /* <= divii(x, y) (at most 1 less) */
@@ -2102,7 +2101,7 @@ resiimul(GEN x, GEN sy)
 #if 0
   q = subii(r,resii(x,y));
   if (signe(q))
-    err(talker,"bug in resirmul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
+    err(talker,"bug in resiimul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
 #endif
   return gerepileuptoint(av, r); /* = resii(x, y) */
 }

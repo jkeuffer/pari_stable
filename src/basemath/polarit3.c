@@ -718,8 +718,7 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p ,GEN q,long e, GEN r, GEN y, GEN m)
 {
   long av = avma,tetpil,lim,i,k;
   GEN p1,p2,u1,u2,v,w,z;
-  long x;
-  x=varn(T);
+
   bezout(r,l,&u1,&u2);
   v=Fp_pow_mod_pol(a,u2,T,p);
   w=Fp_pow_mod_pol(a,modii(mulii(negi(u1),r),q),T,p);
@@ -871,11 +870,10 @@ GEN
 Fp_inv_isom(GEN S,GEN T, GEN p)
 {
   ulong   ltop = avma, lbot;
-  GEN     M, U, V;
+  GEN     M, V;
   int     n, i;
   long    x;
   x = varn(T);
-  U = polun[x];
   n = degree(T);
   M = matrixpow(n,n,S,T,p);
   V = cgetg(n + 1, t_COL);

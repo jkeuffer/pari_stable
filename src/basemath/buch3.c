@@ -443,7 +443,7 @@ rayclassno(GEN bnf,GEN ideal)
 GEN
 isprincipalrayall(GEN bnr, GEN x, long flag)
 {
-  long av=avma,i,j,c,N,ngen,ngzk;
+  long av=avma,i,j,c,ngen,ngzk;
   GEN bnf,nf,bid,vecel,vecep,matu,ep,p1,p2,beta,idep,y,rayclass;
   GEN divray,genray,alpha,alphaall,racunit,res,funit,pol;
 
@@ -461,7 +461,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     idep = isprincipalgenforce(bnf,x);
   if (lg(idep[1]) != ngen+1)
     err(talker,"incorrect generator length in isprincipalray");
-  pol=(GEN)nf[1]; N=lgef(pol)-3;
+  pol=(GEN)nf[1];
   ep  =(GEN)idep[1];
   beta=(GEN)idep[2]; p2 = NULL;
   for (i=1; i<=ngen; i++)
