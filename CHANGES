@@ -123,6 +123,7 @@ BA 60- add "const" keyword to allow building with g++
    64- short help message for isprime/ispseudoprime
    65- issquare(t_FRAC or t_RFRAC, &x) did not work [ worked without &x ]
    66- nfgaloisconj(x^2+1,4, 0) --> SEGV [ bad input ]
+   67- typo in quadhilbert(-D): required O(D) memory instead of O(sqrt(D)) 
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
