@@ -1286,11 +1286,9 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   
   if (!pp) return chi2;
 
-  if (cmpii(denom(content(chi2)), pp) > 0)
-  { /* this can happen if gamma is incorrect */
-    if (p1) beta = gmul(beta, p1);
-    return mycaract(f, beta, p, NULL, NULL);
-  }
+  /* this can happen only if gamma is incorrect (not an integer) */
+  if (divise(denom(content(chi2)), p))
+    return NULL;
   
   return redelt(chi2, pp, pp);
 }
@@ -1321,7 +1319,7 @@ getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, GEN pmf,
   if (gegal(nup, polx[v]))
     chin = chip;
   else
-    chin = mycaract(chip, nup, p, pmf, ns);
+    chin = mycaract(chip, nup, p, NULL, NULL);
   
   vn = vstar(p, chin);
   L  = vn[0]; 
@@ -1507,7 +1505,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       if (DEBUGLEVEL >= 5)
 	fprintferr("  beta = %Z\n", beta);
 
-      p1 = gnorm(gmodulcp(beta, chi));
+      /* if pmf divides norm(beta) then it's useless */
+      p1 = gmod(gnorm(gmodulcp(beta, chi)), pmf);
       if (signe(p1))
       {
 	chib = NULL;
@@ -1552,10 +1551,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	chig = polmodi(chig, pmf);
       }
 
-      if (!gcmp1(denom(content(chig))))
+      if (!chig || !gcmp1(denom(content(chig))))
       {
 	/* the valuation of beta was wrong... This also means 
 	   that chi_gamma has more than one factor modulo p   */
+	if (!chig) chig = mycaract(chi, gamm, p, NULL, NULL);
+
 	vb = vstar(p, chig);
 	eq = (long)(-vb[0] / vb[1]);
 	er = (long)(-vb[0]*Ea / vb[1] - eq*Ea);
