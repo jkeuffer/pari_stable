@@ -2643,7 +2643,7 @@ classno2(GEN x)
   GEN p1,p2,p3,p4,p5,p7,Hf,Pi,reg,logd,d,D;
 
   if (typ(x) != t_INT) err(arither1);
-  if (!s) err(arither2);
+  if (!s) err(arither3);
   if (s < 0 && cmpis(x,-12) >= 0) return gun;
 
   Hf = conductor_part(x, &D, &reg, NULL);

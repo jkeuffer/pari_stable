@@ -194,7 +194,9 @@ char *errmessage[]=
 /* arither1 */
   "not an integer argument in an arithmetic function",
 /* arither2 */
-  "negative or zero argument in an arithmetic function",
+  "non-positive argument (<= 0) in an arithmetic function",
+/* arither3 */
+  "zero argument in an arithmetic function",
 /* facter */
   "negative argument in factorial function",
 /* hiler1 */
