@@ -2,8 +2,8 @@
 \e
 gettime; ellinit([0,0,0,-1,0])
 ellinit([0,0,0,-17,0],1)
+ellsub(%,[-1,4],[-4,2])
 ellj(I)
-ellsub(ellinit([0,0,0,-17,0]),[-1,4],[-4,2])
 \\
 acurve=ellinit([0,0,1,-1,0])
 apoint=[2,2]

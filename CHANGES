@@ -72,6 +72,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    23- idealaddtoone(nfinit(y),[0]) --> SEGV [ BIB ]
    24- aprcl would wrongly report composites [ introduced aprcl.c:1.48,
        before release-2-2-8 ]
+   25- ellchangecurve(e over Qp) --> e.w not updated
+   26- ellheight(e over Fp, pt) -->  SEGV
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -111,6 +113,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    12- reinstate cornacchia + cornacchia2 with a different interface [ use
        cornacchia in qfbsolve ]
    13- allow non-real arguments in incgamc
+MW 14- ellap: if E has CM by a principal order, use Cornacchia instead
+       of Shanks/Mestre
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private

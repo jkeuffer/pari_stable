@@ -23,34 +23,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void
 checkpt(GEN z)
-{
-  if (typ(z)!=t_VEC) err(elliper1);
-}
-
-void
-checkell(GEN e)
-{
-  long lx=lg(e);
-  if (typ(e)!=t_VEC || lx<14) err(elliper1);
-}
-
-void
-checkbell(GEN e)
-{
-  if (typ(e)!=t_VEC || lg(e)<20) err(elliper1);
-}
-
+{ if (typ(z)!=t_VEC) err(elliper1); }
 void
 checksell(GEN e)
-{
-  if (typ(e)!=t_VEC || lg(e)<6) err(elliper1);
-}
+{ if (typ(e)!=t_VEC || lg(e) < 6) err(elliper1); }
+void
+checkell(GEN e)
+{ if (typ(e)!=t_VEC || lg(e) < 14) err(elliper1); }
+void /* check for roots, we don't want a curve over Fp */
+checkbell(GEN e)
+{ if (typ(e)!=t_VEC || lg(e) < 20 || typ(e[14]) != t_COL) err(elliper1); }
 
 static void
 checkch(GEN z)
-{
-  if (typ(z)!=t_VEC || lg(z)!=5) err(elliper1);
-}
+{ if (typ(z)!=t_VEC || lg(z) != 5) err(elliper1); }
 
 /* 4 X^3 + b2 X^2 + 2b4 X + b6 */
 static GEN
@@ -67,11 +53,11 @@ RHSpol(GEN e)
 static GEN
 ellRHS(GEN e, GEN x)
 {
-  GEN p1;
-  p1 = gadd((GEN)e[2],x);
-  p1 = gadd((GEN)e[4], gmul(x,p1));
-  p1 = gadd((GEN)e[5], gmul(x,p1));
-  return p1;
+  GEN z;
+  z = gadd((GEN)e[2],x);
+  z = gadd((GEN)e[4], gmul(x,z));
+  z = gadd((GEN)e[5], gmul(x,z));
+  return z;
 }
 
 /* a1 x + a3 */
@@ -102,42 +88,56 @@ d_ellLHS(GEN e, GEN z)
   return gadd(ellLHS0(e, (GEN)z[1]), gmul2n((GEN)z[2],1));
 }
 
+static GEN
+ell_to_small(GEN E)
+{
+  long i;
+  GEN e;
+  if (lg(E) <= 14) return E;
+  e = cgetg(14,t_VEC);
+  for (i = 1; i < 14; i++) e[i] = E[i];
+  return e;
+}
+
 static void
 smallinitell0(GEN x, GEN y)
 {
-  GEN b2, b4, b6, b8, d, j, a11, a13, a33, a64, b81, b22, c4, c6;
-  long i;
+  GEN b2, b4, b6, b8, D, j, a11, a13, a33, b22, c4, c6;
 
-  checksell(x); for (i=1; i<=5; i++) y[i] = x[i];
+  checksell(x);
+  y[1] = x[1];
+  y[2] = x[2];
+  y[3] = x[3];
+  y[4] = x[4];
+  y[5] = x[5];
   a11 = gsqr((GEN)y[1]);
   b2 = gadd(a11, gmul2n((GEN)y[2],2));
-  y[6] = (long)b2;
+  y[6] = (long)b2; /* a1^2 + 4a2 */
 
   a13 = gmul((GEN)y[1],(GEN)y[3]);
   b4 = gadd(a13, gmul2n((GEN)y[4],1));
-  y[7] = (long)b4;
+  y[7] = (long)b4; /* a1 a3 + 2a4 */
 
   a33 = gsqr((GEN)y[3]);
-  a64 = gmul2n((GEN)y[5],2); b6 = gadd(a33,a64);
-  y[8] = (long)b6;
-
-  b81 = gadd(gadd(gmul(a11,(GEN)y[5]),gmul(a64,(GEN)y[2])),gmul((GEN)y[2],a33));
-  b8 = gsub(b81,gmul((GEN)y[4],gadd((GEN)y[4],a13)));
-  y[9] = (long)b8;
+  b6 = gadd(a33, gmul2n((GEN)y[5],2));
+  y[8] = (long)b6; /* a3^2 + 4 a6 */
+  b8 = gsub(gadd(gmul(a11,(GEN)y[5]), gmul(b6, (GEN)y[2])),
+            gmul((GEN)y[4], gadd((GEN)y[4],a13)));
+  y[9] = (long)b8; /* a1^2 a6 + 4a6 a2 + a2 a3^2 + 4 a6 - a4(a4 + a1 a3) */
 
   b22 = gsqr(b2);
-  c4 = gadd(b22,gmulsg(-24,b4));
-  y[10] = (long)c4;
+  c4 = gadd(b22, gmulsg(-24,b4));
+  y[10] = (long)c4; /* b2^2 - 24 b4 */
 
   c6 = gadd(gmul(b2,gsub(gmulsg(36,b4),b22)),gmulsg(-216,b6));
-  y[11] = (long)c6;
+  y[11] = (long)c6; /* 36 b2 b4 - b2^3 - 216 b6 */
 
-  b81 = gadd(gmul(b22,b8),gmulsg(27,gsqr(b6)));
-  d = gsub(gmul(b4,gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),b81);
-  y[12] = (long)d;
-  if (gcmp0(d)) err(talker,"singular curve in ellinit");
+  D = gsub(gmul(b4, gadd(gmulsg(9,gmul(b2,b6)),gmulsg(-8,gsqr(b4)))),
+           gadd(gmul(b22,b8),gmulsg(27,gsqr(b6))));
+  y[12] = (long)D;
+  if (gcmp0(D)) err(talker,"singular curve in ellinit");
 
-  j = gdiv(gmul(gsqr(c4),c4), d);
+  j = gdiv(gmul(gsqr(c4),c4), D);
   y[13] = (long)j;
 }
 
@@ -165,13 +165,11 @@ void
 ellprint(GEN e)
 {
   pari_sp av = avma;
-  long vx = fetch_var();
-  long vy = fetch_var();
+  long vx, vy;
   GEN z;
-  if (typ(e) != t_VEC || lg(e) < 6)
-    err(talker, "not an elliptic curve in ellprint");
-  name_var(vx, "X");
-  name_var(vy, "Y"); z = mkvec2(polx[vx], polx[vy]);
+  checksell(e);
+  vx = fetch_var(); name_var(vx, "X");
+  vy = fetch_var(); name_var(vy, "Y"); z = mkvec2(polx[vx], polx[vy]);
   fprintferr("%Z - (%Z)\n", ellLHS(e, z), ellRHS(e, polx[vx]));
   (void)delete_var();
   (void)delete_var(); avma = av;
@@ -181,10 +179,10 @@ ellprint(GEN e)
 static GEN
 new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 {
-  GEN a,b,p1,p2,w, e1 = gmael(e,14,1), b2 = (GEN)e[6];
-  long ty = typ(e[12]);
+  GEN a, b, p1, p2, w, e1 = gmael(e,14,1), b2 = (GEN)e[6];
+  long ty = typ(e1);
 
-  p2 = gmul2n(gadd(mulsr(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
+  p2 = gmul2n(gadd(gmulsg(12,e1), b2), -2); /* = (12 e1 + b2) / 4 */
   if (ty == t_PADIC)
     w = (GEN)e[18];
   else
@@ -193,7 +191,7 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
     if (!is_const_t(ty)) err(typeer,"zell");
 
     /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
-    w = sqrtr( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulsr(6,e1)))),1) );
+    w = sqrtr( gmul2n(gadd(b4, gmul(e1,gadd(b2, mulur(6,e1)))),1) );
     if (gsigne(p2) > 0) setsigne(w, -1);
   }
   *pta = a = gmul2n(gsub(w,p2),-2);
@@ -241,7 +239,7 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
 {
   GEN p1, a, b, bmod1, bmod = modii((GEN)b1[4],p), x = *ptx;
   long mi;
-  
+
   if (!x) x = gmul2n(gsub(a1,b1),-2);
   mi = min(precp(a1),precp(b1));
   for(;;)
@@ -263,16 +261,15 @@ do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
 static GEN
 padic_initell(GEN y, GEN p, long prec)
 {
- GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
+  GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
-  q = gadd(gen_1, zeropadic(p,prec));
-  for (i=1; i<=13; i++) y[i] = lmul(q,(GEN)y[i]);
+  for (i=1; i<=13; i++) y[i] = (long)gcvtop((GEN)y[i], p, prec);
   if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
   if (equaliu(p,2))
   {
-    pv = utoipos(4); 
+    pv = utoipos(4);
     err(impl,"initell for 2-adic numbers");
   }
   else
@@ -281,8 +278,7 @@ padic_initell(GEN y, GEN p, long prec)
   b2 = (GEN)y[6];
   b4 = (GEN)y[7];
   c4 = (GEN)y[10];
-  c6 = (GEN)y[11];
-  alpha = valp(c4) >> 1;
+  c6 = (GEN)y[11]; alpha = valp(c4) >> 1;
   setvalp(c4,0);
   setvalp(c6,0);
   e1 = gdiv(c6, gmulsg(6,c4));
@@ -291,7 +287,7 @@ padic_initell(GEN y, GEN p, long prec)
   do
   {
     GEN e2 = gsqr(e1);
-    e0 = e1;
+    e0 = e1;  /* (c6 + 2e1^3) / (3e1^2 - c4) */
     e1 = gdiv(gadd(gmul2n(gmul(e0,e2),1),c6), gsub(gmulsg(3,e2),c4));
   }
   while (!gequal(e0,e1));
@@ -316,18 +312,31 @@ padic_initell(GEN y, GEN p, long prec)
 
   y[14] = (long)mkvec(e1);
   y[15] = (long)u2;
-  y[16] = (kronecker((GEN)u2[4],p) <= 0 || (valp(u2)&1))? (long)gen_0: lsqrt(u2,0);
+  y[16] = ((valp(u2)&1) || kronecker((GEN)u2[4],p) <= 0)? (long)gen_0: lsqrt(u2,0);
   y[17] = (long)q;
   y[19] = (long)gen_0; return y;
 }
-  
+
 static int
 invcmp(GEN x, GEN y) { return -gcmp(x,y); }
+
+static void
+set_dummy(GEN y) { y[14]=y[15]=y[16]=y[17]=y[18]=y[19] = (long)gen_0; }
+
+/* 2iPi/x, more efficient when x pure imaginary */
+static GEN
+PiI2div(GEN x, long prec) { return gdiv(Pi2n(1, prec), mulcxmI(x)); }
+/* exp(I x y), more efficient for x in R, y pure imaginary */
+static GEN
+expIxy(GEN x, GEN y, long prec) { return gexp(gmul(x, mulcxI(y)), prec); }
+static GEN
+check_real(GEN q)
+{ return (typ(q) == t_COMPLEX && gcmp0((GEN)q[2]))? (GEN)q[1]: q; }
 
 static GEN
 initell0(GEN x, long prec)
 {
-  GEN D, p1, T, p, w, a1, b1, x1, u2, q, pi, pi2, tau, w1, w2;
+  GEN D, R, T, p, w, a1, b1, x1, u2, q, pi, pi2, tau, w1, w2;
   GEN y = cgetg(20,t_VEC);
   long ty, i, e;
 
@@ -346,17 +355,16 @@ initell0(GEN x, long prec)
         err(talker,"incompatible p-adic numbers in initell");
     }
   }
-  if (e<BIGINT) return padic_initell(y,p,e);
+  if (e < BIGINT) return padic_initell(y,p,e);
 
   D = (GEN)y[12]; ty = typ(D);
-  if (!prec || !is_const_t(ty) || ty==t_INTMOD)
-    { y[14]=y[15]=y[16]=y[17]=y[18]=y[19]= (long)gen_0; return y; }
+  if (!prec || !is_const_t(ty) || ty==t_INTMOD) { set_dummy(y); return y; }
 
-  p1 = roots(RHSpol(y),prec);
-  if (gsigne(D) < 0) p1[1] = (long)real_i((GEN)p1[1]);
+  R = roots(RHSpol(y),prec);
+  if (gsigne(D) < 0) R[1] = (long)real_i((GEN)R[1]);
   else /* sort roots in decreasing order */
-    p1 = gen_sort(real_i(p1), 0, invcmp);
-  y[14] = (long)p1;
+    R = gen_sort(real_i(R), 0, invcmp);
+  y[14] = (long)R;
 
   (void)new_coords(y, NULL, &a1, &b1, 0, 0);
   u2 = do_agm(&x1,a1,b1); /* 1/4M */
@@ -378,18 +386,19 @@ initell0(GEN x, long prec)
     q = gsqrt(q,prec);
   else
   {
-    w1= gmul2n(gabs((GEN)w2[1],prec), 1);
-    q = gexp(gmul(PiI2n(0,prec), gdiv(w2,w1)), prec);
+    w1= gmul2n(mpabs((GEN)w2[1]), 1);
+    q = mpexp(mulrr(negr(mppi(prec)), divrr((GEN)w2[2],w1)));
+    if (signe(w2[1]) < 0) setsigne(q, -1);
+    q = pureimag(q);
   }
   y[15] = (long)w1;
   y[16] = (long)w2;
   T = vecthetanullk(q, 2, prec);
   if (gcmp0((GEN)T[1])) err(precer,"initell");
-  T = gdiv((GEN)T[2], (GEN)T[1]);
-  if (typ(T) == t_COMPLEX && gcmp0((GEN)T[2])) T = (GEN)T[1];
+  T = check_real(gdiv((GEN)T[2], (GEN)T[1]));
   /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
   y[17] = ldiv(gmul(gsqr(pi),T), gmulsg(6,w1));
-  y[18] = ldiv(gsub(gmul((GEN)y[17],w2), mulcxI(pi)), w1);
+  y[18] = ldiv(gadd(gmul((GEN)y[17],w2), mulcxmI(pi)), w1);
   return y;
 }
 
@@ -400,53 +409,74 @@ initell(GEN x, long prec)
   return gerepilecopy(av, initell0(x,prec));
 }
 
-GEN
-_coordch(GEN e, GEN u, GEN r, GEN s, GEN t)
+/********************************************************************/
+/**                                                                **/
+/**                       Coordinate Change                        **/
+/**                                                                **/
+/********************************************************************/
+/* [1,0,0,0] */
+static GEN
+init_ch() {
+  GEN v = cgetg(5,t_VEC);
+  v[1] = (long)gen_1; v[2] = v[3] = v[4] = (long)gen_0; return v;
+}
+
+static GEN
+coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
 {
-  GEN y, p1, p2, v, v2, v3, v4, v6;
+  GEN y, p1, p2, v, v2, v3, v4, v6, r2, b2r, rx3 = gmulsg(3,r);
   long i, lx = lg(e);
-  pari_sp av = avma;
 
   y = cgetg(lx,t_VEC);
-  v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2);v4 = gsqr(v2); v6 = gsqr(v3);
+  v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2); v4 = gsqr(v2); v6 = gsqr(v3);
+  /* A1 = (a1 + 2s) / u */
   y[1] = lmul(v,gadd((GEN)e[1],gmul2n(s,1)));
-  y[2] = lmul(v2,gsub(gadd((GEN)e[2],gmulsg(3,r)),gmul(s,gadd((GEN)e[1],s))));
+  /* A2 = (a2 + 3r - (a1 s + s^2)) / u^2 */
+  y[2] = lmul(v2,gsub(gadd((GEN)e[2],rx3),gmul(s,gadd((GEN)e[1],s))));
   p2 = ellLHS0(e,r);
   p1 = gadd(gmul2n(t,1), p2);
+  /* A3 = (2t + a1 r + a3) / u^3 */
   y[3] = lmul(v3,p1);
   p1 = gsub((GEN)e[4],gadd(gmul(t,(GEN)e[1]),gmul(s,p1)));
-  y[4] = lmul(v4,gadd(p1,gmul(r,gadd(gmul2n((GEN)e[2],1),gmulsg(3,r)))));
-  p2 = gmul(t,gadd(t, p2));
-  y[5] = lmul(v6,gsub(ellRHS(e,r),p2));
-  y[6] = lmul(v2,gadd((GEN)e[6],gmulsg(12,r)));
-  y[7] = lmul(v4,gadd((GEN)e[7],gmul(r,gadd((GEN)e[6],gmulsg(6,r)))));
-  y[8] = lmul(v6,gadd((GEN)e[8],gmul(r,gadd(gmul2n((GEN)e[7],1),gmul(r,gadd((GEN)e[6],gmul2n(r,2)))))));
-  p1 = gadd(gmulsg(3,(GEN)e[7]),gmul(r,gadd((GEN)e[6],gmulsg(3,r))));
-  y[9] = lmul(gsqr(v4),gadd((GEN)e[9],gmul(r,gadd(gmulsg(3,(GEN)e[8]),gmul(r,p1)))));
+  /* A4 = (a4 - (a1 t + s (2t + a1 r + a3)) + 2a2 r + 3r^2) / u^4 */
+  y[4] = lmul(v4,gadd(p1,gmul(r,gadd(gmul2n((GEN)e[2],1),rx3))));
+  /* A6 = (r^3 + a2 r^2 + a4 r + a6 - t(t + a1 r + a3)) / u^6 */
+  y[5] = lmul(v6,gsub(ellRHS(e,r), gmul(t,gadd(t, p2))));
+
+  /* B2 = (b2 + 12r) / u^2 */
+  y[6] = lmul(v2,gadd((GEN)e[6],gmul2n(rx3,2)));
+  b2r = gmul(r, (GEN)e[6]);
+  r2 = gsqr(r);
+  /* B4 = (b4 + b2 r + 6r^2) / u^4 */
+  y[7] = lmul(v4,gadd((GEN)e[7],gadd(b2r, gmulsg(6,r2))));
+  /* B6 = (b6 + 2b4 r + 2b2 r^2 + 4r^3) / u^6 */
+  y[8] = lmul(v6,gadd((GEN)e[8],gmul(r,gadd(gmul2n((GEN)e[7],1),
+                                            gadd(b2r,gmul2n(r2,2))))));
+  /* B8 = (b8 + 3b6r + 3b4 r^2 + b2 r^3 + 3r^4) / u^8 */
+  p1 = gadd(gmulsg(3,(GEN)e[7]),gadd(b2r, gmulsg(3,r2)));
+  y[9] = lmul(gsqr(v4),
+              gadd((GEN)e[9], gmul(r,gadd(gmulsg(3,(GEN)e[8]), gmul(r,p1)))));
   y[10] = lmul(v4,(GEN)e[10]);
   y[11] = lmul(v6,(GEN)e[11]);
   y[12] = lmul(gsqr(v6),(GEN)e[12]);
   y[13] = e[13];
   if (lx > 14)
   {
-    p1 = (GEN)e[14];
-    if (gcmp0(p1))
-    {
-      y[14] = y[15] = y[16] = y[17] = y[18] = y[19] = (long)gen_0;
-    }
+    GEN R = (GEN)e[14];
+    if (typ(R) != t_COL) set_dummy(y);
     else if (typ(e[1])==t_PADIC)
     {
-      y[14] = (long)mkvec( gmul(v2, gsub((GEN)p1[1],r)) );
+      y[14] = (long)mkvec( gmul(v2, gsub((GEN)R[1],r)) );
       y[15] = lmul((GEN)e[15], gsqr(u));
       y[16] = lmul((GEN)e[16], u);
       y[17] = e[17];
-      y[18] = e[18]; /* FIXME: how do q and w change ? */
+      y[18] = lmul((GEN)e[18], v2);
       y[19] = (long)gen_0;
     }
     else
     {
       p2 = cgetg(4,t_COL);
-      for (i=1; i<=3; i++) p2[i] = lmul(v2, gsub((GEN)p1[i],r));
+      for (i=1; i<=3; i++) p2[i] = lmul(v2, gsub((GEN)R[i],r));
       y[14] = (long)p2;
       y[15] = lmul((GEN)e[15], u);
       y[16] = lmul((GEN)e[16], u);
@@ -455,16 +485,74 @@ _coordch(GEN e, GEN u, GEN r, GEN s, GEN t)
       y[19] = lmul((GEN)e[19], gsqr(u));
     }
   }
-  return gerepilecopy(av,y);
+  return y;
 }
-
+static GEN
+_coordch(GEN e, GEN w)
+{ return coordch4(e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]); }
 GEN
-coordch(GEN e, GEN ch)
+coordch(GEN e, GEN w)
 {
-  checkch(ch); checkell(e);
-  return _coordch(e, (GEN)ch[1], (GEN)ch[2], (GEN)ch[3], (GEN)ch[4]);
+  pari_sp av = avma;
+  checkch(w); checkell(e);
+  return gerepilecopy(av, _coordch(e, w));
 }
 
+/* accumulate the effects of variable changes [u,r,s,t] and [U,R,S,T], all of
+ * them integers. Frequent special cases: (U = 1) or (r = s = t = 0) */
+static void
+cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t)
+{
+  GEN U2,U,R,S,T, v = *vtotal;
+  pari_sp av;
+
+  U = gel(v,1);
+  R = gel(v,2);
+  S = gel(v,3);
+  T = gel(v,4);
+  if (gcmp1(U))
+  {
+    gel(v,1) = u;
+    gel(v,2) = addii(R, r);
+    gel(v,3) = addii(S, s); av = avma;
+    gel(v,4) = gerepileuptoint(av, addii(T, addii(t, mulii(S, r))));
+  }
+  else if (!signe(r) && !signe(s) && !signe(t))
+    gel(v,1) = mulii(U, u);
+  else /* general case */
+  {
+    U2 = sqri(U);
+    gel(v,1) = mulii(U, u);
+    gel(v,2) = addii(R, mulii(U2, r));
+    gel(v,3) = addii(S, mulii(U, s));
+    gel(v,4) = addii(T, mulii(U2, addii(mulii(U, t), mulii(S, r))));
+  }
+}
+/* as above, no assumption */
+static void
+gcumulev(GEN *vtotal, GEN w)
+{
+  GEN u,r,s,t,U2,U,R,S,T, v = *vtotal;
+
+  u = gel(w,1);
+  r = gel(w,2);
+  s = gel(w,3);
+  t = gel(w,4);
+  U = gel(v,1); gel(v,1) = gmul(U, u); U2 = gsqr(U);
+  R = gel(v,2); gel(v,2) = gadd(R, gmul(U2, r));
+  S = gel(v,3); gel(v,3) = gadd(S, gmul(U, s));
+  T = gel(v,4); gel(v,4) = gadd(T, gmul(U2, gadd(gmul(U, t), gmul(S, r))));
+}
+
+static void
+cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t)
+{
+  *e = coordch4(*e, u, r, s, t);
+  cumulev(vtotal, u, r, s, t);
+}
+
+/* X = (x-r)/u^2
+ * Y = (y - s(x-r) - t) / u^3 */
 static GEN
 pointch0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
 {
@@ -481,7 +569,7 @@ pointch0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
 GEN
 pointch(GEN x, GEN ch)
 {
-  GEN y,v,v2,v3,mor,r,s,t,u;
+  GEN y, v, v2, v3, mor, r, s, t, u;
   long tx, i, lx = lg(x);
   pari_sp av = avma;
 
@@ -493,7 +581,7 @@ pointch(GEN x, GEN ch)
   t = (GEN)ch[4];
   v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2);
   mor = gneg_i(r);
-  tx = typ(x[1]); 
+  tx = typ(x[1]);
   if (is_matvec_t(tx))
   {
     y = cgetg(lx,tx);
@@ -548,15 +636,15 @@ oncurve(GEN e, GEN z)
 GEN
 addell(GEN e, GEN z1, GEN z2)
 {
-  GEN p1,p2,x,y,x1,x2,y1,y2;
-  pari_sp av=avma, tetpil;
+  GEN p1, p2, x, y, x1, x2, y1, y2;
+  pari_sp av = avma, tetpil;
 
   checksell(e); checkpt(z1); checkpt(z2);
   if (lg(z1)<3) return gcopy(z2);
   if (lg(z2)<3) return gcopy(z1);
 
-  x1=(GEN)z1[1]; y1=(GEN)z1[2];
-  x2=(GEN)z2[1]; y2=(GEN)z2[2];
+  x1 = (GEN)z1[1]; y1 = (GEN)z1[2];
+  x2 = (GEN)z2[1]; y2 = (GEN)z2[2];
   if (x1 == x2 || gequal(x1,x2))
   { /* y1 = y2 or -LHS0-y2 */
     if (y1 != y2)
@@ -566,113 +654,115 @@ addell(GEN e, GEN z1, GEN z2)
         eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
       else
         eq = gequal(y1,y2);
-      if (!eq) { avma=av; return mkvec(gen_0); }
+      if (!eq) { avma = av; return mkvec(gen_0); }
     }
     p2 = d_ellLHS(e,z1);
-    if (gcmp0(p2)) { avma=av; return mkvec(gen_0); }
+    if (gcmp0(p2)) { avma = av; return mkvec(gen_0); }
     p1 = gadd(gsub((GEN)e[4],gmul((GEN)e[1],y1)),
               gmul(x1,gadd(gmul2n((GEN)e[2],1),gmulsg(3,x1))));
   }
-  else { p1=gsub(y2,y1); p2=gsub(x2,x1); }
+  else {
+    p1 = gsub(y2,y1);
+    p2 = gsub(x2,x1);
+  }
   p1 = gdiv(p1,p2);
   x = gsub(gmul(p1,gadd(p1,(GEN)e[1])), gadd(gadd(x1,x2),(GEN)e[2]));
   y = gadd(gadd(y1, ellLHS0(e,x)), gmul(p1,gsub(x,x1)));
-  tetpil=avma; p1=cgetg(3,t_VEC); p1[1]=lcopy(x); p1[2]=lneg(y);
-  return gerepile(av,tetpil,p1);
+  tetpil = avma; p1 = cgetg(3,t_VEC);
+  p1[1] = lcopy(x);
+  p1[2] = lneg(y); return gerepile(av,tetpil,p1);
 }
 
 static GEN
 invell(GEN e, GEN z)
 {
-  GEN p1;
-
-  if (lg(z)<3) return z;
-  p1=cgetg(3,t_VEC); p1[1]=z[1];
-  p1[2]=(long)gneg_i(gadd((GEN)z[2], ellLHS0(e,(GEN)z[1])));
-  return p1;
+  GEN t;
+  if (lg(z) < 3) return z;
+  t = cgetg(3,t_VEC);
+  t[1] = z[1];
+  t[2] = (long)gneg_i(gadd((GEN)z[2], ellLHS0(e,(GEN)z[1])));
+  return t;
 }
 
 GEN
 subell(GEN e, GEN z1, GEN z2)
 {
-  pari_sp av=avma, tetpil;
-
+  pari_sp av = avma;
   checksell(e); checkpt(z2);
-  z2=invell(e,z2); tetpil=avma;
-  return gerepile(av,tetpil,addell(e,z1,z2));
+  return gerepileupto(av, addell(e, z1, invell(e,z2)));
 }
 
 GEN
 ordell(GEN e, GEN x, long prec)
 {
-  long td, i, lx, tx=typ(x);
-  pari_sp av=avma;
-  GEN D,a,b,d,pd,p1,y;
+  long td, i, tx = typ(x);
+  pari_sp av = avma;
+  GEN D, a, b, d, y;
 
   checksell(e);
   if (is_matvec_t(tx))
   {
-    lx=lg(x); y=cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i]=(long)ordell(e,(GEN)x[i],prec);
+    long lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) y[i] = (long)ordell(e,(GEN)x[i],prec);
     return y;
   }
 
-  a=ellRHS(e,x);
-  b=ellLHS0(e,x); /* y*(y+b) = a */
-  D=gadd(gsqr(b),gmul2n(a,2)); td=typ(D);
-  if (gcmp0(D))
-  {
-    b = gneg_i(b);
-    y = cgetg(2,t_VEC);
-    if (td == t_INTMOD && equaliu((GEN)D[1], 2))
+  a = ellRHS(e,x);
+  b = ellLHS0(e,x); /* y*(y+b) = a */
+  D = gadd(gsqr(b), gmul2n(a,2));
+  td = typ(D);
+  if (td == t_INTMOD && equaliu((GEN)D[1], 2))
+  { /* curve over F_2 */
+    avma = av;
+    if (!signe(D[2])) {
+      y = cgetg(2,t_VEC);
       y[1] = (long)mkintmodu(gcmp0(a)?0:1, 2);
-    else
-      y[1] = lmul2n(b,-1);
-    return gerepileupto(av,y);
+    } else {
+      if (!gcmp0(a)) return cgetg(1,t_VEC);
+      y = cgetg(3,t_VEC);
+      y[1] = (long)mkintmodu(0,2);
+      y[2] = (long)mkintmodu(1,2);
+    }
+    return y;
   }
 
-  if (is_rational_t(td))
-  {
-    pd = (td==t_INT)? NULL: (GEN)D[2];
-    if (pd) D = mulii((GEN)D[1],pd);
-    if (!carrecomplet(D,&d)) { avma=av; return cgetg(1,t_VEC); }
-    if (pd) d = gdiv(d,pd);
+  if (gcmp0(D)) {
+    b = gneg_i(b);
+    y = cgetg(2,t_VEC);
+    y[1] = lmul2n(b,-1);
+    return gerepileupto(av,y);
   }
-  else
+  switch(td)
   {
-    if (td==t_INTMOD)
-    {
-      if (equaliu((GEN)D[1],2))
-      {
-        avma=av;
-        if (!gcmp0(a)) return cgetg(1,t_VEC);
-        y = cgetg(3,t_VEC);
-        y[1] = (long)mkintmodu(0,2);
-        y[2] = (long)mkintmodu(1,2); return y;
-      }
-      if (kronecker((GEN)D[2],(GEN)D[1]) == -1)
-        { avma=av; return cgetg(1,t_VEC); }
-    }
-    d = gsqrt(D,prec);
+    case t_INT:
+      if (!carrecomplet(D,&d)) { avma = av; return cgetg(1,t_VEC); }
+      break;
+    case t_FRAC:
+      if (!gcarrecomplet(D,&d)) { avma = av; return cgetg(1,t_VEC); }
+    case t_INTMOD:
+      if (kronecker((GEN)D[2],(GEN)D[1]) < 0) {
+        avma = av; return cgetg(1,t_VEC);
+      } /* fall through */
+    default:
+      d = gsqrt(D,prec);
   }
-  p1=gsub(d,b); y = cgetg(3,t_VEC);
-  y[1] = lmul2n(p1,-1);
+  a = gsub(d,b); y = cgetg(3,t_VEC);
+  y[1] = lmul2n(a, -1);
   y[2] = lsub((GEN)y[1],d);
   return gerepileupto(av,y);
 }
 
 /* n t_QUAD */
 static GEN
-CM_powell(GEN e, GEN z, GEN n)
+CM_ellpow(GEN e, GEN z, GEN n)
 {
-  GEN x,y,p0,p1,q0,q1,z1,z2,pol,grdx;
+  GEN x, y, p0, p1, q0, q1, z1, z2, pol, grdx, b2ov12;
   long ln, ep, vn;
   pari_sp av = avma;
 
   if (lg(z) < 3) return gcopy(z);
   pol = (GEN)n[1];
-  if (signe(discsr(pol)) >= 0)
-    err(talker,"not a negative quadratic discriminant in CM");
+  if (signe(pol[2]) < 0) err(typeer,"CM_ellpow");
   if (typ(n[2]) != t_INT || typ(n[3]) != t_INT)
     err(impl, "powell for nonintegral CM exponent");
 
@@ -681,9 +771,10 @@ CM_powell(GEN e, GEN z, GEN n)
   vn = (ln-4)>>2;
   z1 = weipell(e, ln);
   z2 = gsubst(z1, 0, gmul(n,polx[0]));
-  grdx = gadd((GEN)z[1], gdivgs((GEN)e[6],12));
+  b2ov12 = gdivgs((GEN)e[6], 12); /* x - b2/12 */
+  grdx = gadd((GEN)z[1], b2ov12);
   p0 = gen_0; p1 = gen_1;
-  q0 = gen_1;   q1 = gen_0;
+  q0 = gen_1; q1 = gen_0;
   do
   {
     GEN p2,q2, ss = gen_0;
@@ -702,8 +793,9 @@ CM_powell(GEN e, GEN z, GEN n)
   while (degpol(p1) < vn);
   if (degpol(p1) > vn || signe(z2))
     err(talker,"not a complex multiplication in powell");
-  x = gdiv(p1,q1); y = gdiv(deriv(x,0),n);
-  x = gsub(poleval(x,grdx), gdivgs((GEN)e[6],12));
+  x = gdiv(p1,q1);
+  y = gdiv(deriv(x,0),n);
+  x = gsub(poleval(x,grdx), b2ov12);
   y = gsub( gmul(d_ellLHS(e,z), poleval(y,grdx)), ellLHS0(e,x));
   z = cgetg(3,t_VEC);
   z[1] = lcopy(x);
@@ -711,7 +803,9 @@ CM_powell(GEN e, GEN z, GEN n)
 }
 
 static GEN
-ell_sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
+_sqr(void *e, GEN x) { return addell((GEN)e, x, x); }
+static GEN
+_mul(void *e, GEN x, GEN y) { return addell((GEN)e, x, y); }
 
 GEN
 powell(GEN e, GEN z, GEN n)
@@ -720,92 +814,27 @@ powell(GEN e, GEN z, GEN n)
   long s;
 
   checksell(e); checkpt(z);
-  if (typ(n)==t_QUAD) return CM_powell(e,z,n);
+  if (typ(n)==t_QUAD) return CM_ellpow(e,z,n);
   if (typ(n) != t_INT) err(impl,"powell for non integral, non CM, exponents");
   s = signe(n);
   if (!s || lg(z) == 2) return mkvec(gen_0);
   if (s < 0) z = invell(e,z);
   if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
-  z = leftright_pow(z, n, (void*)e, &ell_sqr, (GEN(*)(void*,GEN,GEN))&addell);
-  return gerepileupto(av, z);
+  return gerepileupto(av, leftright_pow(z, n, (void*)e, &_sqr, &_mul));
 }
 
-GEN
-mathell(GEN e, GEN x, long prec)
-{
-  GEN y, h, pdiag;
-  long lx = lg(x),i,j,tx=typ(x);
-  pari_sp av = avma;
-
-  if (!is_vec_t(tx)) err(elliper1);
-  y = cgetg(lx,t_MAT); pdiag = new_chunk(lx);
-  for (i=1; i<lx; i++)
-  {
-    pdiag[i] = (long)ghell(e,(GEN)x[i],prec);
-    y[i] = lgetg(lx,t_COL);
-  }
-  for (i=1; i<lx; i++)
-  {
-    coeff(y,i,i) = pdiag[i];
-    for (j=i+1; j<lx; j++)
-    {
-      h = ghell(e, addell(e,(GEN)x[i],(GEN)x[j]), prec);
-      h = gsub(h, gadd((GEN)pdiag[i],(GEN)pdiag[j]));
-      coeff(y,j,i) = coeff(y,i,j) = lmul2n(h, -1);
-    }
-  }
-  return gerepilecopy(av,y);
-}
-
-static GEN
-bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
-{
-  long lz1=lg(z1), tx, i;
-  pari_sp av = avma;
-  GEN y,p1,p2;
-
-  if (lz1==1) return cgetg(1,typ(z1));
-
-  tx = typ(z1[1]);
-  if (!is_matvec_t(tx))
-  {
-    p1 = ghell(e, addell(e,z1,z2),prec);
-    p2 = gadd(h2, ghell(e,z1,prec));
-    return gerepileupto(av, gmul2n(gsub(p1,p2), -1));
-  }
-  y = cgetg(lz1, typ(z1));
-  for (i=1; i<lz1; i++) y[i] = (long)bilhells(e,(GEN)z1[i],z2,h2,prec);
-  return y;
-}
-
-GEN
-bilhell(GEN e, GEN z1, GEN z2, long prec)
-{
-  GEN p1, h2;
-  long tz1 = typ(z1), tz2 = typ(z2);
-  pari_sp av = avma;
-
-  if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) err(elliper1);
-  if (lg(z1)==1) return cgetg(1,tz1);
-  if (lg(z2)==1) return cgetg(1,tz2);
-
-  tz1 = typ(z1[1]);
-  tz2 = typ(z2[1]);
-  if (is_matvec_t(tz2))
-  {
-    if (is_matvec_t(tz1)) err(talker,"two vector/matrix types in bilhell");
-    p1 = z1; z1 = z2; z2 = p1;
-  }
-  h2 = ghell(e,z2,prec);
-  return gerepileupto(av, bilhells(e,z1,z2,h2,prec));
-}
+/********************************************************************/
+/**                                                                **/
+/**                       ELLIPTIC FUNCTIONS                       **/
+/**                                                                **/
+/********************************************************************/
 
 GEN
 zell(GEN e, GEN z, long prec)
 {
   long ty, sw, fl;
   pari_sp av = avma;
-  GEN t,u,p1,p2,a,b,x1,u2,D = (GEN)e[12];
+  GEN t, u, p1, p2, a, b, x1, u2, D = (GEN)e[12];
 
   checkbell(e);
   ty = typ(D);
@@ -859,7 +888,7 @@ zell(GEN e, GEN z, long prec)
     GEN z1,z2;
     int bad;
 
-    z1 = pointell(e,t,3); /* we don't need much precision */
+    z1 = pointell(e,gprec_w(t,3),3); /* we don't need much precision */
     /* Either z = z1 (ok: keep t), or z = z2 (bad: t <-- -t) */
     z2 = invell(e, z1);
     bad = (gexpo(gsub(z,z1)) > gexpo(gsub(z,z2)));
@@ -875,10 +904,9 @@ zell(GEN e, GEN z, long prec)
     }
   }
   /* send t to the fundamental domain if necessary */
-  p2 = gdiv(imag_i(t), gmael(e,16,2));
-  p1 = gsub(p2, mkfrac(gen_1, utoipos(4)));
-  if (gcmp(gabs(p1,prec),ghalf) >= 0)
-    t = gsub(t, gmul((GEN)e[16],gfloor(gadd(p2,dbltor(0.1)))));
+  p2 = mpdiv(imag_i(t), imag_i((GEN)e[16]));
+  if (expo(subrr(p2, real2n(-2, 3))) >= -1) /* |Im(t)/Im(w2) - 1/4| >= 1/2 */
+    t = gsub(t, gmul((GEN)e[16], floorr(addrr(p2,dbltor(0.1)))));
   if (gsigne(real_i(t)) < 0) t = gadd(t,(GEN)e[15]);
   return gerepileupto(av,t);
 }
@@ -949,20 +977,14 @@ get_periods(GEN e, SL2_red *T)
   return 0;
 }
 
-static GEN
-check_real(GEN q)
-{
-  return (typ(q) == t_COMPLEX && gcmp0((GEN)q[2]))? (GEN)q[1]: q;
-}
-
 /* Return E_k(tau). Slow if tau is not in standard fundamental domain */
-static GEN 
+static GEN
 trueE(GEN tau, long k, long prec)
 {
   pari_sp lim, av;
-  GEN p1, q, y, qn, n, pii2 = PiI2(prec);
+  GEN p1, q, y, qn, n;
 
-  q = gexp(gmul(pii2, tau), prec);
+  q = expIxy(Pi2n(1, prec), tau, prec);
   q = check_real(q);
   y = gen_0; n = utoi(1);
   av = avma; lim = stack_lim(av,2); qn = gen_1; n[2] = 0;
@@ -986,7 +1008,7 @@ static GEN
 _elleisnum(SL2_red *T, long k, long prec)
 {
   GEN y = trueE(T->Tau, k, prec);
-  y = gmul(y, gpowgs(gdiv(PiI2(prec), T->W2),k));
+  y = gmul(y, gpowgs(mulcxI(gdiv(Pi2n(1,prec), T->W2)),k));
   return check_real(y);
 }
 
@@ -1005,8 +1027,8 @@ elleisnum(GEN om, long k, long flag, long prec)
   y = _elleisnum(&T, k, prec);
   if (k==2 && signe(T.c))
   {
-    p1 = gmul(PiI2(prec), mulsi(12, T.c));
-    y = gsub(y, gdiv(p1, gmul(T.w2, T.W2)));
+    p1 = gmul(Pi2n(1,prec), mulsi(12, T.c));
+    y = gsub(y, mulcxI(gdiv(p1, gmul(T.w2, T.W2))));
   }
   else if (k==4 && flag) y = gdivgs(y,  12);
   else if (k==6 && flag) y = gdivgs(y,-216);
@@ -1017,9 +1039,9 @@ elleisnum(GEN om, long k, long flag, long prec)
 static GEN
 _elleta(SL2_red *T, long prec)
 {
-  GEN y, y1, y2, e2 = gdivgs(_elleisnum(T,2,prec), 12); 
+  GEN y, y1, y2, e2 = gdivgs(_elleisnum(T,2,prec), 12);
   y2 = gmul(T->W2, e2);
-  y1 = gadd(gdiv(PiI2(prec), T->W2), gmul(T->W1,e2));
+  y1 = gadd(PiI2div(T->W2, prec), gmul(T->W1,e2));
   y = cgetg(3,t_VEC);
   y[1] = lneg(y1);
   y[2] = lneg(y2); return y;
@@ -1038,16 +1060,16 @@ elleta(GEN om, long prec)
   {
     GEN u = gdiv(T.w2, T.W2);
     /* E2 := u^2 E2 + 6iuc/pi = E_2(tau) */
-    E2 = gadd(gmul(gsqr(u), E2), gmul(gi, gdiv(gmul(mulsi(6,T.c), u), pi)));
+    E2 = gadd(gmul(gsqr(u), E2), mulcxI(gdiv(gmul(mulsi(6,T.c), u), pi)));
   }
   y2 = gdiv(gmul(E2, gsqr(pi)), gmulsg(3, T.w2));
   if (T.swap)
   {
-    y1 = y2; 
-    y2 = gadd(gmul(T.tau,y1), gdiv(PiI2(prec), T.w2));
+    y1 = y2;
+    y2 = gadd(gmul(T.tau,y1), PiI2div(T.w2, prec));
   }
   else
-    y1 = gsub(gmul(T.tau,y2), gdiv(PiI2(prec), T.w2));
+    y1 = gsub(gmul(T.tau,y2), PiI2div(T.w2, prec));
   return gerepilecopy(av, mkvec2(y1,y2));
 }
 
@@ -1075,17 +1097,17 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
 {
   long toadd;
   pari_sp av=avma, lim, av1;
-  GEN p1,pii2,q,u,y,yp,u1,u2,qn,v;
+  GEN p1, pi2, q, u, y, yp, u1, u2, qn, v;
 
   z = reduce_z(z, T);
   if (!z) return NULL;
 
   /* Now L,z normalized to <1,tau>. z in fund. domain of <1, tau> */
-  pii2 = PiI2(prec);
-  q = gexp(gmul(pii2,T->Tau),prec);
-  u = gexp(gmul(pii2,z),prec);
-  u1= gsub(gen_1,u); u2=gsqr(u1);
-  y = gadd(ginv(utoi(12)), gdiv(u,u2));
+  pi2 = Pi2n(1, prec);
+  q = expIxy(pi2, T->Tau, prec);
+  u = expIxy(pi2, z, prec);
+  u1= gsub(gen_1,u); u2 = gsqr(u1);
+  y = gadd(mkfrac(gen_1, utoipos(12)), gdiv(u,u2));
   if (flall) yp = gdiv(gadd(gen_1,u), gmul(u1,u2));
   toadd = (long)ceil(9.065*gtodouble(imag_i(z)));
 
@@ -1106,7 +1128,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     {
       p1 = gadd(gdiv(gadd(gen_1,qnu),gmul(qnu1,qnu2)),
                 gdiv(gadd(qn,u),gmul(qnu3,qnu4)));
-      
+
       yp = gadd(yp, gmul(qn,p1));
     }
     qn = gmul(q,qn);
@@ -1119,7 +1141,7 @@ weipellnumall(SL2_red *T, GEN z, long flall, long prec)
     }
   }
 
-  u1 = gdiv(pii2, T->W2);
+  u1 = gdiv(pi2, mulcxmI(T->W2));
   u2 = gsqr(u1);
   y = gmul(u2,y); /* y *= (2i pi / w2)^2 */
   if (flall)
@@ -1136,7 +1158,7 @@ ellzeta(GEN om, GEN z, long prec)
 {
   long toadd;
   pari_sp av = avma, lim, av1;
-  GEN Z, pii2, q, u, y, qn, et = NULL;
+  GEN Z, pi2, q, u, y, qn, et = NULL;
   SL2_red T;
 
   if (!get_periods(om, &T)) err(typeer,"ellzeta");
@@ -1148,16 +1170,16 @@ ellzeta(GEN om, GEN z, long prec)
     et = gadd(gmul(T.x,(GEN)et[1]), gmul(T.y,(GEN)et[2]));
   }
 
-  pii2 = PiI2(prec);
-  q = gexp(gmul(pii2,T.Tau),prec);
-  u = gexp(gmul(pii2,Z),prec);
-  
-  y = gdiv(gmul(gsqr(T.W2),_elleisnum(&T,2,prec)), pii2);
+  pi2 = Pi2n(1, prec);
+  q = expIxy(pi2, T.Tau, prec);
+  u = expIxy(pi2, Z, prec);
+
+  y = mulcxmI(gdiv(gmul(gsqr(T.W2),_elleisnum(&T,2,prec)), pi2));
   y = gadd(ghalf, gdivgs(gmul(Z,y),-12));
   y = gadd(y, ginv(gsubgs(u, 1)));
   toadd = (long)ceil(9.065*gtodouble(imag_i(Z)));
   av1 = avma; lim = stack_lim(av1,1);
-  
+
   /* y += sum q^n ( u/(u*q^n - 1) + 1/(u - q^n) ) */
   for (qn = q;;)
   {
@@ -1171,7 +1193,7 @@ ellzeta(GEN om, GEN z, long prec)
       gerepileall(av1,2, &y,&qn);
     }
   }
-  y = gmul(gdiv(pii2,T.W2), y);
+  y = mulcxI(gmul(gdiv(pi2,T.W2), y));
   if (et) y = gadd(y, et);
   return gerepileupto(av, y);
 }
@@ -1182,9 +1204,8 @@ ellsigma(GEN w, GEN z, long flag, long prec)
 {
   long toadd;
   pari_sp av = avma, lim, av1;
-  GEN Z,zinit,p1,pii2,q,u,y,y1,u1,qn,uinv,et,etnew,uhalf;
-  int doprod = (flag >= 2);
-  int dolog = (flag & 1);
+  GEN Z, zinit, p1, pi, pi2, q, u, y, y1, u1, qn, uinv, et, etnew, uhalf;
+  int doprod = (flag >= 2), dolog = (flag & 1);
   SL2_red T;
 
   if (!get_periods(w, &T)) err(typeer,"ellsigma");
@@ -1197,24 +1218,23 @@ ellsigma(GEN w, GEN z, long flag, long prec)
   et = _elleta(&T, prec);
   etnew = gadd(gmul(T.x,(GEN)et[1]), gmul(T.y,(GEN)et[2]));
 
-  pii2 = PiI2(prec);
+  pi2 = Pi2n(1,prec);
+  pi  = mppi(prec);
   zinit = gmul(Z,T.W2);
-  p1 = gadd(zinit, gmul2n(gadd(gmul(T.x,T.W1),gmul(T.y,T.W2)),-1));
+  p1 = gadd(zinit, gmul2n(gadd(gmul(T.x,T.W1), gmul(T.y,T.W2)),-1));
   etnew = gmul(etnew, p1);
-  if (mpodd(T.x) || mpodd(T.y)) etnew = gadd(etnew, gmul2n(pii2,-1));
+  if (mpodd(T.x) || mpodd(T.y)) etnew = gadd(etnew, mulcxI(pi));
 
   y1 = gadd(etnew, gmul2n(gmul(gmul(Z,zinit),(GEN)et[2]),-1));
 
-  /* 9.065 = 2*Pi/log(2) */
-  toadd = (long)ceil(9.065*fabs(gtodouble(imag_i(Z))));
-  uhalf = gexp(gmul(gmul2n(pii2,-1),Z),prec);
+  toadd = (long)ceil((2*PI/LOG2) * fabs(gtodouble(imag_i(Z))));
+  uhalf = expIxy(pi, Z, prec); /* exp(i Pi Z) */
   u = gsqr(uhalf);
-  if (doprod)
-  { /* use product */
-    q = gexp(gmul(pii2,T.Tau),prec);
+  if (doprod) { /* use product */
+    q = expIxy(pi2, T.Tau, prec);
     uinv = ginv(u);
     u1 = gsub(uhalf,ginv(uhalf));
-    y = gdiv(gmul(T.W2,u1),pii2);
+    y = mulcxmI(gdiv(gmul(T.W2,u1), pi2));
     av1 = avma; lim = stack_lim(av1,1); qn=q;
     for(;;)
     {
@@ -1229,12 +1249,10 @@ ellsigma(GEN w, GEN z, long flag, long prec)
         gerepileall(av1,2, &y,&qn);
       }
     }
-  }
-  else
-  { /* use sum */
+  } else { /* use sum */
     GEN q8, qn2, urn, urninv;
     long n;
-    q8 = gexp(gmul2n(gmul(pii2,T.Tau),-3),prec);
+    q8 = expIxy(gmul2n(pi2,-3), T.tau, prec);
     q = gpowgs(q8,8);
     u = gneg_i(u); uinv = ginv(u);
     y = gen_0;
@@ -1245,7 +1263,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
     {
       y = gadd(y,gmul(qn2,gsub(urn,urninv)));
       qn2 = gmul(qn,qn2);
-      qn = gmul(q,qn);
+      qn  = gmul(q,qn);
       urn = gmul(urn,u);
       urninv = gmul(urninv,uinv);
       if (gexpo(qn2) + n*toadd <= - bit_accuracy(prec) - 5) break;
@@ -1255,13 +1273,11 @@ ellsigma(GEN w, GEN z, long flag, long prec)
         gerepileall(av1,5, &y,&qn,&qn2,&urn,&urninv);
       }
     }
-    p1 = gmul(q8,gmul(gdiv(gdiv(T.W2,pii2),gpowgs(trueeta(T.Tau,prec),3)),y));
+    p1 = gmul(gmul(y,q8),
+              gdiv(mulcxmI(T.W2), gmul(pi2,gpowgs(trueeta(T.Tau,prec),3))));
   }
-
-  if (dolog)
-    return gerepileupto(av, gadd(y1, glog(p1,prec)));
-  else
-    return gerepileupto(av, gmul(p1, gexp(y1,prec)));
+  y1 = dolog? gadd(y1, glog(p1,prec)): gmul(p1, gexp(y1,prec));
+  return gerepileupto(av, y1);
 }
 
 GEN
@@ -1283,33 +1299,36 @@ static GEN
 _weipell(GEN c4, GEN c6, long PREC)
 {
   long i, k, l, precres = 2*PREC;
-  pari_sp av1, tetpil;
-  GEN P,p1,s,t, res = cgetg(precres+2,t_SER);
+  pari_sp av;
+  GEN t, res = cgetg(precres+2,t_SER), *P = (GEN*)(res + 2);
 
   res[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
   if (!PREC) { setsigne(res,0); return res; }
 
-  P = res + 2;
-  for (i=1; i<precres; i+=2) P[i]= (long)gen_0;
+  for (i=1; i<precres; i+=2) P[i]= gen_0;
   switch(PREC)
   {
-    default:P[6] = ldivgs(c6,6048);
-    case 3: P[4] = ldivgs(c4, 240);
-    case 2: P[2] = (long)gen_0;
-    case 1: P[0] = (long)gen_1;
+    default:P[6] = gdivgs(c6,6048);
+    case 3: P[4] = gdivgs(c4, 240);
+    case 2: P[2] = gen_0;
+    case 1: P[0] = gen_1;
     case 0: break;
   }
-  for (k=4; k<PREC; k++)
+  if (PREC == 4) return res;
+  av = avma;
+  P[8] = gerepileupto(av, gdivgs(gsqr(P[4]), 3));
+  for (k=5; k<PREC; k++)
   {
-    av1 = avma;
-    s = k&1? gen_0: gsqr((GEN)P[k]);
-    t = gen_0;
-    for (l=2; l+l<k; l++)
-      t = gadd(t, gmul((GEN)P[l<<1],(GEN)P[(k-l)<<1]));
-    p1 = gmulsg(3,gadd(s,gmul2n(t,1)));
-    tetpil = avma;
-    p1 = gdivgs(p1, (k-3)*(2*k+1));
-    P[k<<1] = lpile(av1,tetpil, p1);
+    av = avma;
+    t = gmul(P[4], P[(k-2)<<1]);
+    for (l=3; (l<<1) < k; l++) t = gadd(t, gmul(P[l<<1], P[(k-l)<<1]));
+    t = gmul2n(t, 1);
+    if ((k & 1) == 0) t = gadd(gsqr(P[k]), t);
+    if (k % 3 == 2)
+      t = gdivgs(gmulsg(3, t), (k-3)*(2*k+1));
+    else
+      t = gdivgs(t, ((k-3)*(2*k+1)) / 3);
+    P[k<<1] = gerepileupto(av, t);
   }
   return res;
 }
@@ -1327,17 +1346,9 @@ weipell0(GEN e, long prec, long PREC)
 {
   GEN c4,c6;
 
-  if (lg(e) > 3)
-  {
-    checkell(e);
-    c4 = (GEN)e[10];
-    c6 = (GEN)e[11];
-  }
-  else
-  {
-    c4 = elleisnum(e, 4, 0, prec);
-    c6 = elleisnum(e, 6, 0, prec); c6 = gneg(c6);
-  }
+  if (lg(e) > 3) return weipell(e, PREC);
+  c4 = elleisnum(e, 4, 0, prec);
+  c6 = elleisnum(e, 6, 0, prec); c6 = gneg(c6);
   return _weipell(c4,c6,PREC);
 }
 
@@ -1383,9 +1394,768 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
   }
 }
 
+/********************************************************************/
+/**                                                                **/
+/**                 Tate's algorithm e (cf Anvers IV)              **/
+/**               Kodaira types, global minimal model              **/
+/**                                                                **/
+/********************************************************************/
+
+/* Given an integral elliptic curve in ellinit form, and a prime p, returns the
+  type of the fiber at p of the Neron model, as well as the change of variables
+  in the form [f, kod, v, c].
+
+  * The integer f is the conductor's exponent.
+
+  * The integer kod is the Kodaira type using the following notation:
+    II , III , IV  -->  2, 3, 4
+    I0  -->  1
+    Inu --> 4+nu for nu > 0
+  A '*' negates the code (e.g I* --> -2)
+
+  * v is a quadruple [u, r, s, t] yielding a minimal model
+
+  * c is the Tamagawa number.
+
+  Uses Tate's algorithm (Anvers IV). Given the remarks at the bottom of
+  page 46, the "long" algorithm is used for p = 2,3 only. */
+static GEN
+localred_result(long f, long kod, long c, GEN v)
+{
+  GEN z = cgetg(5, t_VEC);
+  z[1] = lstoi(f);
+  z[2] = lstoi(kod);
+  z[3] = lcopy(v);
+  z[4] = lstoi(c); return z;
+}
+
+/* Here p > 3. e assumed integral */
+static GEN
+localred_p(GEN e, GEN p, int minim)
+{
+  long k, f, kod, c, nuj, nuD;
+  GEN p2, v = init_ch();
+  GEN c4, c6, D, tri;
+
+  c4 = (GEN)e[10];
+  c6 = (GEN)e[11];
+  D  = (GEN)e[12];
+  nuj = gcmp0((GEN)e[13])? 0: - ggval((GEN)e[13], p);
+  nuD = Z_pval(D, p);
+  k = (nuj > 0 ? nuD - nuj : nuD) / 12;
+  if (k <= 0)
+  {
+    if (minim) return v;
+  }
+  else
+  { /* model not minimal */
+    GEN pk = gpowgs(p,k), p2k = sqri(pk), p4k = sqri(p2k), p6k = mulii(p4k,p2k);
+    GEN r, s, t;
+
+    s = negi((GEN)e[1]);
+    if (mpodd(s)) s = addii(s, pk);
+    s = shifti(s, -1);
+
+    r = subii((GEN)e[2], mulii(s, addii((GEN)e[1], s))); /* a_2' */
+    switch(umodiu(r, 3))
+    {
+      default: break; /* 0 */
+      case 2: r = addii(r, p2k); break;
+      case 1: r = subii(r, p2k); break;
+    }
+    r = negi( diviuexact(r, 3) );
+
+    t = negi(ellLHS0_i(e,r)); /* - a_3' */
+    if (mpodd(t)) t = addii(t, mulii(pk, p2k));
+    t = shifti(t, -1);
+
+    v[1] = (long)pk;
+    v[2] = (long)r;
+    v[3] = (long)s;
+    v[4] = (long)t;
+    if (minim) return v;
+
+    nuD -= 12 * k;
+    c4 = diviiexact(c4, p4k);
+    c6 = diviiexact(c6, p6k);
+    D = diviiexact(D, sqri(p6k));
+  }
+
+  if (nuj > 0) switch(nuD - nuj)
+  {
+    case 0: f = 1; kod = 4+nuj; /* Inu */
+      switch(kronecker(negi(c6),p))
+      {
+	case  1: c = nuD; break;
+	case -1: c = odd(nuD)? 1: 2; break;
+	default: err(bugparier,"localred (p | c6)");
+          return NULL; /* not reached */
+      }
+      break;
+    case 6: f = 2; kod = -4-nuj; /* Inu* */
+      if (nuj & 1)
+	c = 3 + kronecker(diviiexact(mulii(c6, D),gpowgs(p, 9+nuj)), p);
+      else
+	c = 3 + kronecker(diviiexact(D, gpowgs(p, 6+nuj)), p);
+      break;
+    default: err(bugparier,"localred (nu_D - nu_j != 0,6)");
+      return NULL; /* not reached */
+  }
+  else switch(nuD)
+  {
+    case  0: f = 0; kod = 1; c = 1; break; /* I0, regular */
+    case  2: f = 2; kod = 2; c = 1; break; /* II   */
+    case  3: f = 2; kod = 3; c = 2; break; /* III  */
+    case  4: f = 2; kod = 4; /* IV   */
+      c = 2 + kronecker(mulis(diviiexact(c6,sqri(p)), -6), p);
+      break;
+    case  6: f = 2; kod = -1; /* I0*  */
+      p2 = sqri(p);
+      /* x^3 - 3c4/p^2 x - 2c6/p^3 */
+      tri = coefs_to_pol(4, gen_1, gen_0,
+                            negi(mulsi(3, diviiexact(c4, p2))),
+                            negi(shifti(diviiexact(c6, mulii(p2,p)), 1)));
+      c = 1 + FpX_nbroots(tri, p);
+      break;
+    case  8: f = 2; kod = -4; /* IV*  */
+      c = 2 + kronecker(mulsi(-6, diviiexact(c6, sqri(sqri(p)))), p);
+      break;
+    case  9: f = 2; kod = -3; c = 2; break; /* III* */
+    case 10: f = 2; kod = -2; c = 1; break; /* II*  */
+    default: err(bugparier,"localred");
+      return NULL; /* not reached */
+  }
+  return localred_result(f, kod, c, v);
+}
+
+/* return a_{ k,l } in Tate's notation, pl = p^l */
+static int
+aux(GEN ak, int q, int pl)
+{
+  return (int)umodiu(ak, q) / pl;
+}
+
+static int
+aux2(GEN ak, int p, GEN pl)
+{
+  pari_sp av = avma;
+  ulong res = umodiu(diviiexact(ak, pl), p);
+  avma = av; return (int)res;
+}
+
+/* number of distinct roots of X^3 + aX^2 + bX + c modulo p
+ * if there's a multiple root, put it in *mult */
+static int
+numroots3(int a, int b, int c, int p, int *mult)
+{
+  if (p == 2)
+  {
+    if ((c + a * b) & 1) return 3;
+    else { *mult = b; return (a + b) & 1 ? 2 : 1; }
+  }
+  else
+  {
+    if (a % 3) { *mult = a * b; return (a * b * (1 - b) + c) % 3 ? 3 : 2; }
+    else { *mult = -c; return b % 3 ? 3 : 1; }
+  }
+}
+
+/* same for aX^2 +bX + c */
+static int
+numroots2(int a, int b, int c, int p, int *mult)
+{
+  if (p == 2) { *mult = c; return b & 1 ? 2 : 1; }
+  else { *mult = a * b; return (b * b - a * c) % 3 ? 2 : 1; }
+}
+
+/* p = 2 or 3 */
+static GEN
+localred_23(GEN e, long p)
+{
+  long c, nu, nuD, r, s, t;
+  int a21, a42, a63, a32, a64, theroot, al, be, ga, p2, p3, p4, p5, p6;
+  GEN pk, p2k, pk1;
+  GEN v;
+
+  nuD = Z_lval((GEN)e[12], (ulong)p);
+  v = init_ch();
+  if (p == 2) { p2 = 4; p3 = 8;  p4 = 16; p5 = 32; p6 = 64;}
+  else        { p2 = 9; p3 = 27; p4 = 81; p5 =243; p6 =729; }
+
+  for (;;)
+  {
+    if (!nuD) return localred_result(0, 1, 1, v);
+        /* I0   */
+    if (umodiu((GEN)e[6], p)) /* p \nmid b2 */
+    {
+      if (umodiu(negi((GEN)e[11]), p == 2 ? 8 : 3) == 1)
+        c = nuD;
+      else
+        c = 2 - (nuD & 1);
+      return localred_result(1, 4 + nuD, c, v);
+    }
+        /* Inu  */
+    if (p == 2)
+    {
+      r = umodiu((GEN)e[4], 2);
+      s = umodiu((GEN)e[2], 2);
+      t = umodiu((GEN)e[5], 2);
+      if (r) { t = (s + t) & 1; s = (s + 1) & 1; }
+    }
+    else /* p == 3 */
+    {
+      r = - umodiu((GEN)e[8], 3);
+      s = umodiu((GEN)e[1], 3);
+      t = umodiu((GEN)e[3], 3);
+      if (s) { t  = (t + r*s) % 3; if (t < 0) t += 3; }
+    }
+    /* p | (a1, a2, a3, a4, a6) */
+    if (r || s || t) cumule(&v, &e, gen_1, stoi(r), stoi(s), stoi(t));
+    if (umodiu((GEN)e[5], p2))
+      return localred_result(nuD, 2, 1, v);
+        /* II   */
+    if (umodiu((GEN)e[9], p3))
+      return localred_result(nuD - 1, 3, 2, v);
+        /* III  */
+    if (umodiu((GEN)e[8], p3))
+    {
+      if (umodiu((GEN)e[8], (p==2)? 32: 27) == (ulong)p2)
+        c = 3;
+      else
+        c = 1;
+      return localred_result(nuD - 2, 4, c, v);
+    }
+        /* IV   */
+
+    if (umodiu((GEN)e[5], p3))
+      cumule(&v, &e, gen_1, gen_0, gen_0, p == 2? gen_2: modis((GEN)e[3], 9));
+        /* p | a1, a2; p^2  | a3, a4; p^3 | a6 */
+    a21 = aux((GEN)e[2], p2, p);
+    a42 = aux((GEN)e[4], p3, p2);
+    a63 = aux((GEN)e[5], p4, p3);
+    switch (numroots3(a21, a42, a63, p, &theroot))
+    {
+      case 3:
+        if (p == 2)
+          c = 1 + (a63 == 0) + ((a21 + a42 + a63) & 1);
+        else
+          c = 1 + (a63 == 0) + (((1 + a21 + a42 + a63) % 3) == 0)
+                             + (((1 - a21 + a42 - a63) % 3) == 0);
+        return localred_result(nuD - 4, -1, c, v);
+            /* I0*  */
+      case 2: /* compute nu */
+        if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
+            /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
+        nu = 1;
+        pk  = utoipos(p2);
+        p2k = utoipos(p4);
+        for(;;)
+        {
+          be =  aux2((GEN)e[3], p, pk);
+          ga = -aux2((GEN)e[5], p, p2k);
+          al = 1;
+          if (numroots2(al, be, ga, p, &theroot) == 2) break;
+          if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, mulsi(theroot,pk));
+          pk1 = pk;
+          pk  = mulsi(p, pk);
+          p2k = mulsi(p, p2k); nu++;
+
+          al = a21;
+          be = aux2((GEN)e[4], p, pk);
+          ga = aux2((GEN)e[5], p, p2k);
+          if (numroots2(al, be, ga, p, &theroot) == 2) break;
+          if (theroot) cumule(&v, &e, gen_1, mulsi(theroot, pk1), gen_0, gen_0);
+          p2k = mulsi(p, p2k); nu++;
+        }
+        if (p == 2)
+          c = 4 - 2 * (ga & 1);
+        else
+          c = 3 + kross(be * be - al * ga, 3);
+        return localred_result(nuD - 4 - nu, -4 - nu, c, v);
+            /* Inu* */
+      case 1:
+        if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
+            /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
+        a32 = aux((GEN)e[3], p3, p2);
+        a64 = aux((GEN)e[5], p5, p4);
+        if (numroots2(1, a32, -a64, p, &theroot) == 2)
+        {
+          if (p == 2)
+            c = 3 - 2 * a64;
+          else
+            c = 2 + kross(a32 * a32 + a64, 3);
+          return localred_result(nuD - 6, -4, c, v);
+        }
+            /* IV*  */
+        if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p*p));
+            /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
+        if (umodiu((GEN)e[4], p4))
+          return localred_result(nuD - 7, -3, 2, v);
+            /* III* */
+
+        if (umodiu((GEN)e[5], p6))
+          return localred_result(nuD - 8, -2, 1, v);
+            /* II*  */
+        cumule(&v, &e, utoipos(p), gen_0, gen_0, gen_0); /* not minimal */
+        nuD -= 12;
+    }
+  }
+}
+
+static GEN
+localred(GEN e, GEN p, int minim)
+{
+  if (cmpiu(p, 3) > 0) /* p != 2,3 */
+    return localred_p(e,p, minim);
+  else
+  {
+    GEN z = localred_23(e,itos(p));
+    return minim? (GEN)z[3]: z;
+  }
+}
+
+GEN
+localreduction(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  checkell(e);
+  if (typ(e[12]) != t_INT)
+    err(talker,"not an integral curve in localreduction");
+  return gerepileupto(av, localred(e, p, 0));
+}
+
+static GEN
+ellintegralmodel(GEN e)
+{
+  GEN a = cgetg(6,t_VEC), v, L, u;
+  long i, l, k;
+
+  checkell(e);
+  L = cgetg(1, t_VEC);
+  for (i = 1; i < 6; i++)
+  {
+    a[i] = e[i]; u = (GEN)a[i];
+    switch(typ(u))
+    {
+      case t_INT: break;
+      case t_FRAC: /* partial factorization */
+        L = concatsp(L, (GEN)auxdecomp((GEN)u[2], 0)[1]);
+        break;
+      default: err(talker, "not a rational curve in ellintegralmodel");
+    }
+  }
+  /* a = [a1, a2, a3, a4, a6] */
+  l = lg(L);
+  if (l == 1) return NULL;
+  L = sort(L);
+  for (k = i = 2; i < l; i++)
+    if (!equalii((GEN)L[i], (GEN)L[i-1])) L[k++] = L[i];
+
+  l = k; u = gen_1;
+  for (k = 1; k < l; k++)
+  {
+    GEN p = (GEN)L[k];
+    int n = 0, m;
+    for (i = 1; i < 6; i++)
+      if (!gcmp0((GEN)a[i]))
+      {
+        int r = (i == 5)? 6: i; /* a5 is missing */
+	m = r * n + ggval((GEN)a[i], p);
+	while (m < 0) { n++; m += r; }
+      }
+    u = mulii(u, gpowgs(p, n));
+  }
+  v = init_ch(); v[1] = linv(u); return v;
+}
+
+/* e integral model */
+static void
+standard_model(GEN e, GEN *pv)
+{
+  GEN r, t, s = truedivis((GEN)e[1], -2), s2 = sqri(s);
+  r = truedivis(addis(addii((GEN)e[2], s2), 1), -3);
+  t = truedivis(ellLHS0_i(e,r), -2);
+  cumulev(pv, gen_1, r, s, t);
+}
+
+GEN
+ellminimalmodel(GEN E, GEN *ptv)
+{
+  pari_sp av = avma;
+  GEN c4, c6, e, v, v0, P;
+  long l, k;
+
+  v0 = ellintegralmodel(E);
+  e = ell_to_small(E);
+  if (v0) e = _coordch(e, v0);
+  v = init_ch();
+  c4 = (GEN)e[10];
+  c6 = (GEN)e[11];
+  P = (GEN)decomp(gcdii(c4,c6))[1];
+  l = lg(P);
+  for (k = 1; k < l; k++)
+  {
+    GEN w = localred(e, (GEN)P[k], 1);
+    if (!gcmp1((GEN)w[1]))
+      cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
+  }
+  standard_model(e, &v);
+  if (v0) { gcumulev(&v0, v); v = v0; }
+  e = _coordch(E, v);
+  if (ptv) { gerepileall(av, 2, &e, &v); *ptv = v; }
+  else e = gerepileupto(av, e);
+  return e;
+}
+
+/* Reduction of a rational curve E to its standard minimal model
+ * (a1,a3 = 0 or 1, a2 = -1, 0 or 1).
+ *
+ * Return [N, [u,r,s,t], c], where
+ *   N = arithmetic conductor of E
+ *   c = product of the local Tamagawa numbers cp
+ *   [u, r, s, t] = the change of variable reducing E to its minimal model,
+ *     with u > 0 */
+GEN
+globalreduction(GEN E)
+{
+  long k, l;
+  pari_sp av = avma;
+  GEN c, P, N, v, v0, e, c4, c6, D;
+
+  v0 = ellintegralmodel(E);
+  e = ell_to_small(E);
+  if (v0) e = _coordch(e, v0);
+  v = init_ch();
+  c4 = (GEN)e[10];
+  c6 = (GEN)e[11];
+  D  = (GEN)e[12];
+  P = (GEN)decomp(gcdii(c4,c6))[1];
+  l = lg(P);
+  for (k = 1; k < l; k++) (long)Z_pvalrem(D, (GEN)P[k], &D);
+  if (!is_pm1(D)) P = concatsp(P, (GEN)decomp(absi(D))[1]);
+  l = lg(P); c = N = gen_1;
+  for (k = 1; k < l; k++)
+  {
+    GEN p = (GEN)P[k], q = localred(e, p, 0), w = (GEN)q[3];
+    N = mulii(N, powgi(p, (GEN)q[1]));
+    c = mulii(c, (GEN)q[4]);
+    if (!gcmp1((GEN)w[1]))
+      cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
+  }
+  standard_model(e, &v);
+  if (v0) { gcumulev(&v0, v); v = v0; }
+  return gerepilecopy(av, mkvec3(N,v,c));
+}
+
+/********************************************************************/
+/**                                                                **/
+/**           ROOT NUMBER (after Halberstadt at p = 2,3)           **/
+/**                                                                **/
+/********************************************************************/
+
+/* p = 2 or 3 */
+static long
+neron(GEN e, long p, long* ptkod)
+{
+  long kod, v4, v6, vd;
+  pari_sp av=avma;
+  GEN c4, c6, d, nv;
+
+  nv = localred_23(e,p);
+  *ptkod = kod = itos((GEN)nv[2]);
+  c4=(GEN)e[10]; c6=(GEN)e[11]; d=(GEN)e[12];
+  v4 = gcmp0(c4) ? 12 : Z_lval(c4,p);
+  v6 = gcmp0(c6) ? 12 : Z_lval(c6,p);
+  vd = Z_lval(d,p); avma = av;
+  if (p == 2) {
+    if (kod > 4) return 1;
+    switch(kod)
+    {
+      case 1: return (v6>0) ? 2 : 1;
+      case 2:
+        if (vd==4) return 1;
+        else
+        {
+          if (vd==7) return 3;
+          else return v4==4 ? 2 : 4;
+        }
+      case 3:
+        switch(vd)
+        {
+          case 6: return 3;
+          case 8: return 4;
+          case 9: return 5;
+          default: return v4==5 ? 2 : 1;
+        }
+      case 4: return v4>4 ? 2 : 1;
+      case -1:
+        switch(vd)
+        {
+          case 9: return 2;
+          case 10: return 4;
+          default: return v4>4 ? 3 : 1;
+        }
+      case -2:
+        switch(vd)
+        {
+          case 12: return 2;
+          case 14: return 3;
+          default: return 1;
+        }
+      case -3:
+        switch(vd)
+        {
+          case 12: return 2;
+          case 14: return 3;
+          case 15: return 4;
+          default: return 1;
+        }
+      case -4: return v6==7 ? 2 : 1;
+      case -5: return (v6==7 || v4==6) ? 2 : 1;
+      case -6:
+        switch(vd)
+        {
+          case 12: return 2;
+          case 13: return 3;
+          default: return v4==6 ? 2 : 1;
+        }
+      case -7: return (vd==12 || v4==6) ? 2 : 1;
+      default: return v4==6 ? 2 : 1;
+    }
+  } else {
+    if (labs(kod) > 4) return 1;
+    switch(kod)
+    {
+      case -1: case 1: return v4&1 ? 2 : 1;
+      case -3: case 3: return (2*v6>vd+3) ? 2 : 1;
+      case -4: case 2:
+        switch (vd%6)
+        {
+          case 4: return 3;
+          case 5: return 4;
+          default: return v6%3==1 ? 2 : 1;
+        }
+      default: /* kod = -2 et 4 */
+        switch (vd%6)
+        {
+          case 0: return 2;
+          case 1: return 3;
+          default: return 1;
+        }
+    }
+  }
+}
+
+static long
+val_aux(GEN x, long p, long pk, long *u) {
+  long v;
+  GEN z;
+  if (!signe(x)) { *u = 0; return 12; }
+  v = Z_lvalrem(x,p,&z);
+  *u = umodiu(z,pk); return v;
+}
+static void
+val_init(GEN e, long p, long pk,
+         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
+{
+  GEN c4 = (GEN)e[10], c6 = (GEN)e[11], D = (GEN)e[12];
+  pari_sp av = avma;
+  *v4 = val_aux(c4, p,pk, u);
+  *v6 = val_aux(c6, p,pk, v);
+  *vd = val_aux(D , p,pk, d1); avma = av;
+}
+
+static long
+ellrootno_2(GEN e)
+{
+  long n2, kod, u, v, x1, y1, d1, vd, v4, v6;
+
+  val_init(e, 2, 64, &v4, &u, &v6, &v, &vd, &d1);
+  if (!vd) return 1;
+  n2 = neron(e,2,&kod);
+  if (kod>=5)
+    return odd(umodiu((GEN)e[2],2) + umodiu((GEN)e[3],2)) ? 1 : -1;
+  if (kod<-9) return (n2==2) ? -kross(-1,v) : -1;
+  x1 = u+v+v;
+  switch(kod)
+  {
+    case 1: return 1;
+    case 2:
+      switch(n2)
+      {
+	case 1:
+	  switch(v4)
+	  {
+	    case 4: return kross(-1,u);
+	    case 5: return 1;
+	    default: return -1;
+	  }
+	case 2: return (v6==7) ? 1 : -1;
+	case 3: return (v%8==5 || (u*v)%8==5) ? 1 : -1;
+	case 4: if (v4>5) return kross(-1,v);
+	  return (v4==5) ? -kross(-1,u) : -1;
+      }
+    case 3:
+      switch(n2)
+      {
+	case 1: return -kross(2,u*v);
+	case 2: return -kross(2,v);
+	case 3: y1 = (u - (v << (v6-5))) % 16;
+	  return (y1==7 || y1==11) ? 1 : -1;
+	case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
+	case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
+      }
+    case -1:
+      switch(n2)
+      {
+	case 1: return -kross(2,x1);
+	case 2: return (v%8==7) || (x1%32==11) ? 1 : -1;
+	case 3: return v4==6 ? 1 : -1;
+	case 4: if (v4>6) return kross(-1,v);
+	  return v4==6 ? -kross(-1,u*v) : -1;
+      }
+    case -2: return n2==1 ? kross(-2,v) : kross(-1,v);
+    case -3:
+      switch(n2)
+      {
+	case 1: y1=(u-2*v)%64; if (y1<0) y1+=64;
+	  return (y1==3) || (y1==19) ? 1 : -1;
+	case 2: return kross(2*kross(-1,u),v);
+	case 3: return -kross(-1,u)*kross(-2*kross(-1,u),u*v);
+	case 4: return v6==11 ? kross(-2,x1) : -kross(-2,u);
+      }
+    case -5:
+      if (n2==1) return x1%32==23 ? 1 : -1;
+      else return -kross(2,2*u+v);
+    case -6:
+      switch(n2)
+      {
+	case 1: return 1;
+	case 2: return v6==10 ? 1 : -1;
+	case 3: return (u%16==11) || ((u+4*v)%16==3) ? 1 : -1;
+      }
+    case -7:
+      if (n2==1) return 1;
+      else
+      {
+	y1 = (u + (v << (v6-6))) % 16;
+	if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
+	else return (y1==9 || y1==5) ? 1 : -1;
+      }
+    case -8: return n2==2 ? kross(-1,v*d1) : -1;
+    case -9: return n2==2 ? -kross(-1,d1) : -1;
+    default: return -1;
+  }
+}
+
+static long
+ellrootno_3(GEN e)
+{
+  long n2, kod, u, v, d1, r6, K4, K6, vd, v4, v6;
+
+  val_init(e, 3, 81, &v4, &u, &v6, &v, &vd, &d1);
+  if (!vd) return 1;
+  n2 = neron(e,3,&kod);
+  K6 = kross(v,3); if (kod>4) return K6;
+  r6 = v%9; K4 = kross(u,3);
+  switch(kod)
+  {
+    case 1: case 3: case -3: return 1;
+    case 2:
+      switch(n2)
+      {
+	case 1: return (r6==4 || r6>6) ? 1 : -1;
+	case 2: return -K4*K6;
+	case 3: return 1;
+	case 4: return -K6;
+      }
+    case 4:
+      switch(n2)
+      {
+	case 1: return K6*kross(d1,3);
+	case 2: return -K4;
+	case 3: return -K6;
+      }
+    case -2: return n2==2 ? 1 : K6;
+    case -4:
+      switch(n2)
+      {
+	case 1:
+	  if (v4==4) return (r6==4 || r6==8) ? 1 : -1;
+	  else return (r6==1 || r6==2) ? 1 : -1;
+	case 2: return -K6;
+	case 3: return (r6==2 || r6==7) ? 1 : -1;
+	case 4: return K6;
+      }
+    default: return -1;
+  }
+}
+
+/* assume p > 3, p^ex || N(E) */
+static long
+ellrootno_p(GEN e, GEN p, ulong ex)
+{
+  GEN j;
+  long ep,z;
+
+  if (ex == 1) return -kronecker(negi((GEN)e[11]),p);
+  j=(GEN)e[13];
+  if (!gcmp0(j) && ggval(j,p) < 0) return krosi(-1,p);
+  ep = 12 / cgcd(12, Z_pval((GEN)e[12],p));
+  if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
+  return krosi(-z, p);
+}
+
+static long
+ellrootno_global(GEN e, GEN N)
+{
+  long i, v, s = -1;
+  GEN fa, P, E;
+  
+  v = Z_lvalrem(N, 2, &N); if (v) s *= ellrootno_2(e);
+  v = Z_lvalrem(N, 3, &N); if (v) s *= ellrootno_3(e);
+  fa = decomp(N);
+  P = (GEN)fa[1];
+  E = (GEN)fa[2];
+  for (i=1; i<lg(P); i++) s *= ellrootno_p(e, (GEN)P[i], itou((GEN)E[i]));
+  return s;
+}
+
+/* local epsilon factor at p (over Q), including p=0 for the infinite place.
+ * Global if p==1 or NULL. */
+long
+ellrootno(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  long s;
+  GEN gr, N;
+  e = ell_to_small(e); gr = globalreduction(e);
+  e = _coordch(e,(GEN)gr[2]); N = (GEN)gr[1];
+  if (!p || gcmp1(p))
+    s = ellrootno_global(e, N);
+  else
+  {
+    if (typ(p) != t_INT || signe(p) < 0) err(typeer,"ellrootno");
+    if (cmpiu(p,3) > 0) s = ellrootno_p(e,p, Z_pval(N, p));
+    else switch(itou(p))
+    {
+      case 2: s = ellrootno_2(e); break;
+      case 3: s = ellrootno_3(e); break;
+      default: s = -1; break; /* local factor at infinity */
+    }
+  }
+  avma = av; return s;
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                       TRACE OF FROBENIUS                       **/
+/**                                                                **/
+/********************************************************************/
+
 /* compute a_2 */
 static GEN
-_a_2(GEN e)
+a2(GEN e)
 { /* solve y(1 + a1x + a3) = x (1 + a2 + a4) + a6 */
   pari_sp av = avma;
   ulong a1 = Rg_to_Fl((GEN)e[1], 2);
@@ -1400,25 +2170,23 @@ _a_2(GEN e)
   else if (a2 ^ a4 ^ a6) N += 2; /* x = 1, y arbitrary */
   avma = av; return stoi(3 - N);
 }
-
 /* a_p using Jacobi sums */
 static GEN
-apell2_intern(GEN e, ulong p)
+ap_jacobi(GEN e, ulong p)
 {
-  if (p == 2) return _a_2(e);
+  if (p == 2) return a2(e);
   else
   {
     ulong i;
     ulong e6 = Rg_to_Fl((GEN)e[6], p);
     ulong e8 = Rg_to_Fl((GEN)e[8], p);
     ulong e72= Rg_to_Fl((GEN)e[7], p) << 1;
-    long s = krouu(e8, p);
-
+    long s = krouu(e8, p) + krouu((e8 + e72 + e6 + 4) % p, p); /* i = 0,1 */
     if (p < 757UL)
-      for (i=1; i<p; i++)
-        s += krouu(e8 + i*(e72 + i*(e6 + (i<<2))), p);
+      for (i=2; i<p; i++)
+        s += krouu((e8 + i*(e72 + i*(e6 + (i<<2)))) % p, p);
     else
-      for (i=1; i<p; i++)
+      for (i=2; i<p; i++)
         s += krouu(e8 + Fl_mul(i, e72 + Fl_mul(i, e6 + (i<<2), p), p), p);
     return stoi(-s);
   }
@@ -1428,15 +2196,8 @@ GEN
 apell2(GEN e, GEN pp)
 {
   checkell(e); if (typ(pp)!=t_INT) err(elliper1);
-  if (expi(pp) > 29)
-    err(talker,"prime too large in jacobi apell2, use apell instead");
-
-  return apell2_intern(e, (ulong)pp[2]);
-}
-
-GEN ellap0(GEN e, GEN p, long flag)
-{
-  return flag? apell2(e,p): apell(e,p);
+  if (expi(pp) > 29) err(talker,"prime too large in apell2, use apell");
+  return ap_jacobi(e, (ulong)pp[2]);
 }
 
 /* invert all elements of x mod p using Montgomery's trick */
@@ -1788,7 +2549,7 @@ FOUND: /* found a point of exponent h on E_u */
     /* If we are not done, update A mod B for the _next_ curve, isomorphic to
      * the quadratic twist of this one */
     if (i) A = remii(subii(p2p,A), B); /* #E(Fp)+#E'(Fp) = 2p+2 */
-    
+
     /* h = A mod B, closest lift to p+1 */
     h = closest_lift(A, B, p1p);
     if (!i) break;
@@ -1879,10 +2640,7 @@ typedef struct
 } multiple;
 
 static int
-compare_multiples(multiple *a, multiple *b)
-{
-  return a->x - b->x;
-}
+compare_multiples(multiple *a, multiple *b) { return a->x - b->x; }
 
 /* assume e has good reduction at p. Should use Montgomery.
  * See apell1() */
@@ -1896,12 +2654,12 @@ apell0(GEN e, ulong p)
   pari_sp av;
   multiple *table;
 
-  if (p < 99) return apell2_intern(e,(ulong)p);
+  if (p < 99) return ap_jacobi(e,(ulong)p);
   table = NULL;
 
   av = avma;
-  c4 = itou( lift_intern( gmodgs(gdivgs((GEN)e[10],  -48), (long)p) ) );
-  c6 = itou( lift_intern( gmodgs(gdivgs((GEN)e[11], -864), (long)p) ) );
+  c4 = Rg_to_Fl(gdivgs((GEN)e[10],  -48), p);
+  c6 = Rg_to_Fl(gdivgs((GEN)e[11], -864), p);
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
@@ -1986,52 +2744,191 @@ FOUND:
   return stoi(KRO==1? p1p-h: h-p1p);
 }
 
+/** apell from CM (original code contributed by Mark Watkins) **/
+
+static ulong
+Mod16(GEN x) {
+  long s = signe(x);
+  ulong m;
+  if (!s) return 0;
+  m = mod16(x); if (!m) return m;
+  if (s < 0) m = 16 - m;
+  return m;
+}
+#define Mod2(x) (Mod16(x) & 1)
+#define Mod4(x) (Mod16(x) & 3)
+#define Mod8(x) (Mod16(x) & 7)
+
+static GEN
+ap_j0(GEN E,GEN p)
+{
+  GEN a, b, e, d;
+  if (umodiu(p,3) != 1) return gen_0;
+  (void)cornacchia2(utoipos(27),p, &a,&b);
+  if (umodiu(a, 3) == 1) a = negi(a);
+  d = Rg_to_Fp(gmulgs((GEN)E[11], 8), p);
+  e = diviuexact(shifti(p,-1), 3); /* (p-1) / 6 */
+  return centermod(mulii(a, Fp_pow(d, e, p)), p);
+}
+static GEN
+ap_j1728(GEN E,GEN p)
+{
+  GEN a, b, d, e;
+  if (mod4(p) != 1) return gen_0;
+  (void)cornacchia2(utoipos(4),p, &a,&b);
+  if (Mod4(a)==0) a = b;
+  if (Mod2(a)==1) a = shifti(a,1);
+  if (Mod8(a)==6) a = negi(a);
+  d = Rg_to_Fp(gmulgs((GEN)E[10], -27), p);
+  e = shifti(p,-2); /* (p-1) / 4 */
+  return centermod(mulii(a, Fp_pow(d, e, p)), p);
+}
+static GEN
+ap_j8000(GEN p)
+{
+  GEN a, b;
+  int r = mod8(p);
+  if (r != 1 && r != 3) return gen_0;
+  (void)cornacchia2(utoipos(8),p, &a,&b);
+  switch(Mod16(a)) {
+    case 2: case 6:   if (Mod4(b)) a = negi(a);
+      break;
+    case 10: case 14: if (!Mod4(b)) a = negi(a);
+      break;
+  }
+  return a;
+}
+static GEN
+ap_j287496(GEN p)
+{
+  GEN a, b;
+  if (mod4(p) != 1) return gen_0;
+  (void)cornacchia2(utoipos(4),p, &a,&b);
+  if (Mod4(a)==0) a = b;
+  if (Mod2(a)==1) a = shifti(a,1);
+  if (Mod8(a)==6) a = negi(a);
+  if (krosi(2,p) < 0) a = negi(a);
+  return a;
+}
+static GEN
+ap_cm(int CM, GEN p)
+{
+  GEN a, b;
+  if (krosi(CM,p) < 0) return gen_0;
+  (void)cornacchia2(utoipos(-CM),p, &a, &b);
+  if ((CM&3) == 0) CM >>= 2;
+  if ((krois(a, -CM) > 0) ^ (CM == -7)) a = negi(a);
+  return a;
+}
+static GEN
+ec_ap_cm(GEN J,GEN C6B,GEN C6E,int CM,GEN jd,GEN jn,GEN p)
+{
+  GEN a;
+  if (!equalii(modii(mulii(jd,J),p), jn)) return NULL;
+  if      (CM == -8)  a = ap_j8000(p);
+  else if (CM == -16) a = ap_j287496(p);
+  else                a = ap_cm(CM,p);
+  if (kronecker(mulii(C6E,C6B), p) < 0) a = negi(a);
+  return a;
+}
+
+static GEN
+ap_bad_red(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  GEN c6 = Rg_to_Fp((GEN)e[11], p);
+  long s = kronecker(c6, p);
+  if (mod4(p) == 3) s = -s;
+  avma = av; return stoi(s);
+}
+static GEN
+u2tonegi(ulong a, ulong b) { GEN z = u2toi(a,b); setsigne(z, -1); return z; }
+
+GEN
+CM_ellap(GEN E, GEN p)
+{
+  pari_sp av = avma;
+  GEN C4E, C6E, jn, jd, a, t, u;
+
+  if (cmpiu(p, 99) < 0) return ap_jacobi(E, itou(p));
+  if (!signe(Rg_to_Fp((GEN)E[12], p))) { avma = av; return ap_bad_red(E,p); }
+#define CHECK(CM,J,C6B) a = ec_ap_cm(J,C6B,C6E,CM,jd,jn,p); if (a) goto DONE;
+  C4E = Rg_to_Fp((GEN)E[10], p);
+  if (!signe(C4E)) { a = ap_j0(E,p); goto DONE;}
+  C6E = Rg_to_Fp((GEN)E[11], p);
+  if (!signe(C6E)) { a = ap_j1728(E,p); goto DONE;}
+  jn = Rg_to_Fp(numer((GEN)E[13]), p);
+  jd = Rg_to_Fp(denom((GEN)E[13]), p); /* j = jn/jd */
+  CHECK(-7,  utoineg(3375),      utoipos(1323));
+  CHECK(-8,  utoipos(8000),      utoineg(1792));
+  CHECK(-12, utoipos(54000),     utoineg(19008));
+  CHECK(-11, utoineg(32768),     utoineg(6776));
+  CHECK(-16, utoipos(287496),    utoipos(12096));
+  CHECK(-19, utoineg(884736),    utoineg(77976));
+  CHECK(-27, utoineg(12288000),  utoineg(54648));
+  CHECK(-7,  utoipos(16581375),  utoipos(75411));
+  CHECK(-43, utoineg(884736000), utoineg(8387064));
+  t = u2tonegi(0x00000022UL, 0x45ae8000UL); /* -27878400*5280 */
+  CHECK(-67, t, utoineg(210408408));
+  t = u2tonegi(0x03a4b862UL, 0xc4b40000UL); /* -640320^3 */
+  u = u2tonegi(0x000000f8UL, 0x4414c858UL); /* -705220967*1512 */
+  CHECK(-163, t, u);
+#undef CHECK
+  avma = av; return NULL;
+DONE:
+  return gerepileuptoint(av, icopy(a));
+}
+
 GEN
 apell(GEN e, GEN p)
 {
+  GEN a;
   checkell(e);
   if (typ(p)!=t_INT || signe(p) <= 0) err(talker,"not a prime in apell");
-  if (equaliu(p,2)) return _a_2(e);
-  if (gdvd((GEN)e[12],p)) /* D may be an intmod */
-  {
-    pari_sp av = avma;
-    GEN c6 = Rg_to_Fp((GEN)e[11], p);
-    long s = kronecker(c6, p);
-    if (mod4(p) == 3) s = -s;
-    avma = av; return stoi(s);
-  }
+  a = CM_ellap(e, p); if (a) return a;
+
   if (cmpiu(p, 0x3fffffff) > 0) return apell1(e, p);
   return apell0(e, itou(p));
 }
 
-/* TEMPC is the largest prime whose square is less than HIGHBIT */
-#ifndef LONG_IS_64BIT
-#  define TEMPC 46337
-#else
-#  define TEMPC 3037000493
-#endif
+GEN
+ellap0(GEN e, GEN p, long flag) { return flag? apell2(e,p): apell(e,p); }
+
+static void
+checkell_int(GEN e)
+{
+  checkell(e);
+  if (typ(e[1]) != t_INT || typ(e[2]) != t_INT || typ(e[3]) != t_INT
+   || typ(e[4]) != t_INT || typ(e[5]) != t_INT)
+    err(talker,"not an integral model");
+}
 
 GEN
-anell(GEN e, long n)
+anell(GEN e, long n0)
 {
   long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] not used */
-  long p, i, m;
-  GEN p1, p2, *an;
+  ulong p, m, n = (ulong)n0;
+  GEN *an, D, c6;
+#ifndef LONG_IS_64BIT
+  const ulong TEMPC = 46337UL; /* largest prime p, such that p^2 < HIGHBIT */
+#else
+  const ulong TEMPC = 3037000493UL;
+#endif
 
-  checkell(e);
-  for (i=1; i<=5; i++)
-    if (typ(e[i]) != t_INT) err(typeer,"anell");
-  if (n <= 0) return cgetg(1,t_VEC);
-  if ((ulong)n >= LGBITS) err(impl,"anell for n >= %lu", LGBITS);
+  checkell_int(e);
+  if (n0 <= 0) return cgetg(1,t_VEC);
+  if (n >= LGBITS) err(impl,"anell for n >= %lu", LGBITS);
+  c6= (GEN)e[11];
+  D = (GEN)e[12];
 
   an = (GEN*)cgetg(n+1,t_VEC); an[1] = gen_1;
-  for (i=2; i <= n; i++) an[i] = NULL;
+  for (p=2; p <= n; p++) an[p] = NULL;
   for (p=2; p<=n; p++)
   {
     if (an[p]) continue; /* p not prime */
 
-    if (!smodis((GEN)e[12],p)) /* bad reduction, p | D */
-      switch (tab[p&3] * krois((GEN)e[11],p)) /* (-c6/p) */
+    if (!umodiu(D,p)) /* bad reduction, p | D */
+      switch (tab[p&3] * krois(c6,p)) /* (-c6/p) */
       {
         case -1:  /* non deployee */
           for (m=p; m<=n; m+=p)
@@ -2042,32 +2939,29 @@ anell(GEN e, long n)
           continue;
         case 1:   /* deployee */
           for (m=p; m<=n; m+=p)
-            if (an[m/p]) an[m] = icopy(an[m/p]);
+            if (an[m/p]) an[m] = an[m/p];
           continue;
       }
     else /* good reduction */
     {
-      GEN ap = apell0(e, (ulong)p);
+      GEN ap = apell0(e, p);
 
-      if (p < TEMPC)
-      {
+      if (p < TEMPC) {
         ulong pk, oldpk = 1;
-        for (pk=p; pk <= (ulong)n; oldpk=pk, pk *= p)
+        for (pk=p; pk <= n; oldpk=pk, pk *= p)
         {
-          if (pk == (ulong)p) an[pk] = ap;
+          if (pk == p) an[pk] = ap;
           else
           {
             pari_sp av = avma;
-            p1 = mulii(ap, an[oldpk]);
-            p2 = mulsi(p, an[oldpk/p]);
-            an[pk] = gerepileuptoint(av, subii(p1,p2));
+            GEN u = mulii(ap, an[oldpk]);
+            GEN v = mului(p, an[oldpk/p]);
+            an[pk] = gerepileuptoint(av, subii(u,v));
           }
           for (m = n/pk; m > 1; m--)
             if (an[m] && m%p) an[m*pk] = mulii(an[m], an[pk]);
         }
-      }
-      else
-      {
+      } else {
         an[p] = ap;
         for (m = n/p; m > 1; m--)
           if (an[m] && m%p) an[m*p] = mulii(an[m], an[p]);
@@ -2080,48 +2974,120 @@ anell(GEN e, long n)
 GEN
 akell(GEN e, GEN n)
 {
-  long i, j, ex;
+  long i, j, s, ex;
   pari_sp av = avma;
-  GEN fa, P, E, D, ap, u, v, w, y, p;
+  GEN fa, P, E, D, c6, ap, u, v, w, y, p;
 
   checkell(e);
-  if (typ(n) != t_INT) err(talker,"not an integer type in akell");
+  if (typ(n) != t_INT) err(typeer,"akell");
   if (signe(n)<= 0) return gen_0;
-  y = gen_1; if (gcmp1(n)) return y;
-  fa = auxdecomp(n,1);
-  P = (GEN)fa[1];
-  E = (GEN)fa[2];
+  if (gcmp1(n)) return gen_1;
+  c6= (GEN)e[11];
   D = (GEN)e[12];
-  if (typ(D) != t_INT) err(talker,"not an integer type in akell");
-  for (i=1; i<lg(P); i++)
-  {
-    p = (GEN)P[i];
-    ex = itos((GEN)E[i]);
-    /* FIXME: should factor (n,D) first, then restrict to primes of good red. */
-    if (dvdii(D, p)) /* bad reduction */
+  if (typ(D) != t_INT) err(talker,"not an integral model in akell");
+  u = coprime_part(n, D);
+  s = 1;
+  if (!equalii(u, n))
+  { /* bad reduction at primes dividing n/u */
+    fa = decomp(diviiexact(n, u));
+    P = (GEN)fa[1];
+    E = (GEN)fa[2];
+    for (i=1; i<lg(P); i++)
     {
-      j = kronecker((GEN)e[11],p); /* (c6/p) */
-      if (!j) { avma = av; return gen_0; }
-      if (odd(ex))
+      p = (GEN)P[i];
+      j = kronecker(c6,p); if (!j) { avma = av; return gen_0; }
+      if (mod2((GEN)E[i]))
       {
         if (mod4(p) == 3) j = -j;
-        if (j < 0) y = negi(y);
+        if (j < 0) s = -s;
       }
     }
-    else /* good reduction */
+  }
+  y = stoi(s); fa = decomp(u);
+  P = (GEN)fa[1];
+  E = (GEN)fa[2];
+  for (i=1; i<lg(P); i++)
+  { /* good reduction */
+    p = (GEN)P[i];
+    ex = itos((GEN)E[i]);
+    ap = apell(e,p);
+    u = ap; v = gen_1;
+    for (j=2; j<=ex; j++)
     {
-      ap = apell(e,p);
-      u = ap; v = gen_1;
-      for (j=2; j<=ex; j++)
-      {
-	w = subii(mulii(ap,u), mulii(p,v));
-	v = u; u = w;
-      }
-      y = mulii(u,y);
+      w = subii(mulii(ap,u), mulii(p,v));
+      v = u; u = w;
     }
+    y = mulii(u,y);
   }
   return gerepileuptoint(av,y);
 }
+
+GEN
+lseriesell(GEN e, GEN s, GEN A, long prec)
+{
+  pari_sp av = avma, av1, lim;
+  ulong l, n;
+  long eps, flun;
+  GEN z, cg, v, cga, cgb, s2, ns, gs, N, gr;
+
+  if (!A) A = gen_1;
+  else
+  {
+    if (gsigne(A)<=0)
+      err(talker,"cut-off point must be positive in lseriesell");
+    if (gcmpgs(A,1) < 0) A = ginv(A);
+  }
+  if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gen_0; }
+  flun = gcmp1(A) && gcmp1(s);
+  e = ell_to_small(e); gr = globalreduction(e);
+  e = _coordch(e,(GEN)gr[2]);
+  N = (GEN)gr[1];
+  eps = ellrootno_global(e, N);
+  if (flun && eps < 0) { avma = av; return realzero(prec); }
+
+  gs = ggamma(s, prec);
+  cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
+  cga = gmul(cg, A);
+  cgb = gdiv(cg, A);
+  l = (ulong)((bit_accuracy_mul(prec, LOG2) +
+              fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
+            / rtodbl(cgb) + 1);
+  if ((long)l < 1) l = 1;
+  v = anell(e, min(l,LGBITS-1));
+  s2 = ns = NULL; /* gcc -Wall */
+  if (!flun) { s2 = gsubsg(2,s); ns = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
+  z = gen_0;
+  av1 = avma; lim = stack_lim(av1,1);
+  for (n = 1; n <= l; n++)
+  {
+    GEN p1, an, gn = utoipos(n);
+    an = ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,gn);
+    if (!signe(an)) continue;
+
+    p1 = gdiv(incgam0(s,mulur(n,cga),gs,prec), gpow(gn,s,prec));
+    if (flun)
+      p1 = gmul2n(p1, 1);
+    else
+    {
+      GEN p2 = gdiv(gmul(ns, incgam(s2,mulur(n,cgb),prec)), gpow(gn, s2,prec));
+      if (eps < 0) p2 = gneg_i(p2);
+      p1 = gadd(p1, p2);
+    }
+    z = gadd(z, gmul(p1, an));
+    if (low_stack(lim, stack_lim(av1,1)))
+    {
+      if(DEBUGMEM>1) err(warnmem,"lseriesell");
+      z = gerepilecopy(av1,z);
+    }
+  }
+  return gerepileupto(av, gdiv(z,gs));
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                       CANONICAL HEIGHT                         **/
+/**                                                                **/
+/********************************************************************/
 
 /* h' := h_oo(a) + 1/2 log(denom(a)) */
 GEN
@@ -2134,7 +3100,7 @@ hell(GEN e, GEN a, long prec)
   checkbell(e);
   pi2surw = gdiv(Pi2n(1, prec), (GEN)e[15]);
   z = gmul(real_i(zell(e,a,prec)), pi2surw);
-  q = real_i( gexp(gmul((GEN)e[16], pureimag(pi2surw)),prec) );
+  q = real_i( expIxy(pi2surw, (GEN)e[16], prec) );
   y = gsin(z,prec); qn = gen_1; ps = gneg_i(q);
   for (n = 3; ; n += 2)
   {
@@ -2165,19 +3131,14 @@ hells(GEN e, GEN x, long prec)
   lim = 15 + bit_accuracy(prec);
   for (n = 3; n < lim; n += 2)
   {
+    /* 4 + b2 t + 2b4 t^2 + b6 t^3 */
     w = gmul(t, gaddsg(4, gmul(t, gadd(b2, gmul(t, gadd(b42, gmul(t, b6)))))));
-    z = gsub(gen_1, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t,b8))))));
+    /* 1 - (b4 t^2 + 2b6 t^3 + b8 t^4) */
+    z = gsub(gen_1, gmul(gsqr(t), gadd(b4, gmul(t, gadd(b62, gmul(t, b8))))));
     mu = gadd(mu, gmul2n(glog(z,prec), -n));
     t = gdiv(w, z);
   }
   return mu;
-}
-
-/* [1,0,0,0] */
-static GEN
-init_ch() {
-  GEN v = cgetg(5,t_VEC);
-  v[1] = (long)gen_1; v[2] = v[3] = v[4] = (long)gen_0; return v;
 }
 
 GEN
@@ -2190,8 +3151,8 @@ hell2(GEN e, GEN x, long prec)
   D = (GEN)e[12];
   ro= (GEN)e[14];
   e3 = (gsigne(D) < 0)? (GEN)ro[1]: (GEN)ro[3];
-  v = init_ch(); v[2] = laddgs(gfloor(e3),-1);
-  return gerepileupto(av, hells(coordch(e,v), pointch(x,v), prec));
+  v = init_ch(); v[2] = laddis(gfloor(e3),-1);
+  return gerepileupto(av, hells(_coordch(e,v), pointch(x,v), prec));
 }
 
 /* exp( h_oo(z) ), assume z on neutral component.
@@ -2294,7 +3255,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
     gsub(gadd((GEN)e[4],gmul(x,gadd(shifti((GEN)e[2],1),gmulsg(3,x)))),
          gmul((GEN)e[1],y)) );
-  Lp = (GEN)factor(gcdii(psi2,phi2))[1];
+  Lp = (GEN)decomp(gcdii(psi2,phi2))[1];
   lx = lg(Lp);
   for (i=1; i<lx; i++)
   {
@@ -2327,633 +3288,140 @@ ghell2(GEN e, GEN a, long prec) { return ellheight0(e,a,0,prec); }
 GEN
 ghell(GEN e, GEN a, long prec) { return ellheight0(e,a,2,prec); }
 
-static long ellrootno_all(GEN e, GEN p, GEN* ptcond);
+GEN
+mathell(GEN e, GEN x, long prec)
+{
+  GEN y, h, pdiag;
+  long lx = lg(x),i,j,tx=typ(x);
+  pari_sp av = avma;
+
+  if (!is_vec_t(tx)) err(elliper1);
+  y = cgetg(lx,t_MAT); pdiag = new_chunk(lx);
+  for (i=1; i<lx; i++)
+  {
+    pdiag[i] = (long)ghell(e,(GEN)x[i],prec);
+    y[i] = lgetg(lx,t_COL);
+  }
+  for (i=1; i<lx; i++)
+  {
+    coeff(y,i,i) = pdiag[i];
+    for (j=i+1; j<lx; j++)
+    {
+      h = ghell(e, addell(e,(GEN)x[i],(GEN)x[j]), prec);
+      h = gsub(h, gadd((GEN)pdiag[i],(GEN)pdiag[j]));
+      coeff(y,j,i) = coeff(y,i,j) = lmul2n(h, -1);
+    }
+  }
+  return gerepilecopy(av,y);
+}
+
+static GEN
+bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
+{
+  long lz1=lg(z1), tx, i;
+  pari_sp av = avma;
+  GEN y,p1,p2;
+
+  if (lz1==1) return cgetg(1,typ(z1));
+
+  tx = typ(z1[1]);
+  if (!is_matvec_t(tx))
+  {
+    p1 = ghell(e, addell(e,z1,z2),prec);
+    p2 = gadd(h2, ghell(e,z1,prec));
+    return gerepileupto(av, gmul2n(gsub(p1,p2), -1));
+  }
+  y = cgetg(lz1, typ(z1));
+  for (i=1; i<lz1; i++) y[i] = (long)bilhells(e,(GEN)z1[i],z2,h2,prec);
+  return y;
+}
 
 GEN
-lseriesell(GEN e, GEN s, GEN A, long prec)
+bilhell(GEN e, GEN z1, GEN z2, long prec)
 {
-  pari_sp av = avma, av1, lim;
-  long l, n, eps, flun;
-  GEN z, cg, v, cga, cgb, s2, ns, gs, N;
+  GEN p1, h2;
+  long tz1 = typ(z1), tz2 = typ(z2);
+  pari_sp av = avma;
 
-  if (!A) A = gen_1;
-  else
-  {
-    if (gsigne(A)<=0)
-      err(talker,"cut-off point must be positive in lseriesell");
-    if (gcmpgs(A,1) < 0) A = ginv(A);
-  }
-  if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gen_0; }
-  flun = gcmp1(A) && gcmp1(s);
-  eps = ellrootno_all(e, gen_1, &N);
-  if (flun && eps < 0) { avma = av; return realzero(prec); }
+  if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) err(elliper1);
+  if (lg(z1)==1) return cgetg(1,tz1);
+  if (lg(z2)==1) return cgetg(1,tz2);
 
-  gs = ggamma(s, prec);
-  cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
-  cga = gmul(cg, A);
-  cgb = gdiv(cg, A);
-  l = (long)((bit_accuracy_mul(prec, LOG2) +
-              fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
-            / rtodbl(cgb) + 1);
-  if (l < 1) l = 1;
-  v = anell(e, min((ulong)l,LGBITS-1));
-  s2 = ns = NULL; /* gcc -Wall */
-  if (!flun) { s2 = gsubsg(2,s); ns = gpow(cg, gsubgs(gmul2n(s,1),2),prec); }
-  z = gen_0;
-  av1 = avma; lim = stack_lim(av1,1);
-  for (n = 1; n <= l; n++)
+  tz1 = typ(z1[1]);
+  tz2 = typ(z2[1]);
+  if (is_matvec_t(tz2))
   {
-    GEN p1, gn = utoipos(n);
-    p1 = gdiv(incgam0(s,mulsr(n,cga),gs,prec), gpow(gn,s,prec));
-    if (flun)
-      p1 = gmul2n(p1, 1);
-    else
-    {
-      GEN p2 = gdiv(gmul(ns, incgam(s2,mulsr(n,cgb),prec)), gpow(gn, s2,prec));
-      if (eps < 0) p2 = gneg_i(p2);
-      p1 = gadd(p1, p2);
-    }
-    z = gadd(z, gmul(p1, ((ulong)n<LGBITS)? (GEN)v[n]: akell(e,gn)));
-    if (low_stack(lim, stack_lim(av1,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"lseriesell");
-      z = gerepilecopy(av1,z);
-    }
+    if (is_matvec_t(tz1)) err(talker,"two vector/matrix types in bilhell");
+    p1 = z1; z1 = z2; z2 = p1;
   }
-  return gerepileupto(av, gdiv(z,gs));
+  h2 = ghell(e,z2,prec);
+  return gerepileupto(av, bilhells(e,z1,z2,h2,prec));
 }
 
 /********************************************************************/
 /**                                                                **/
-/**                 Tate's algorithm e (cf Anvers IV)              **/
-/**               Kodaira types, global minimal model              **/
-/**                                                                **/
-/********************************************************************/
-
-/* Given an integral elliptic curve in ellinit form, and a prime p, returns the
-  type of the fiber at p of the Neron model, as well as the change of variables
-  in the form [f, kod, v, c].
-
-  * The integer f is the conductor's exponent.
-
-  * The integer kod is the Kodaira type using the following notation:
-    II , III , IV  -->  2, 3, 4
-    I0  -->  1
-    Inu --> 4+nu for nu > 0
-  A '*' negates the code (e.g I* --> -2)
-
-  * v is a quadruple [u, r, s, t] yielding a minimal model
-
-  * c is the Tamagawa number.
-
-  Uses Tate's algorithm (Anvers IV). Given the remarks at the bottom of
-  page 46, the "long" algorithm is used for p < 4 only. */
-static void cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t);
-static void cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t);
-
-static GEN
-localred_result(long f, long kod, long c, GEN v)
-{
-  GEN z = cgetg(5, t_VEC);
-  z[1] = lstoi(f);
-  z[2] = lstoi(kod);
-  z[3] = lcopy(v);
-  z[4] = lstoi(c); return z;
-}
-
-/* Here p > 3. e assumed integral */
-static GEN
-localred_carac_p(GEN e, GEN p, int minim)
-{
-  long k, f, kod, c, nuj, nudelta;
-  GEN p2, v = init_ch();
-  GEN c4, c6, delta, tri;
-
-  c4    = (GEN)e[10];
-  c6    = (GEN)e[11];
-  delta = (GEN)e[12];
-  nuj   = gcmp0((GEN)e[13])? 0: - ggval((GEN)e[13], p);
-  nudelta = Z_pval(delta, p);
-  k = (nuj > 0 ? nudelta - nuj : nudelta) / 12;
-  if (k <= 0)
-  {
-    if (minim) return v;
-  }
-  else
-  { /* model not minimal */
-    GEN pk = gpowgs(p,k), p2k = sqri(pk), p4k = sqri(p2k), p6k = mulii(p4k,p2k);
-    GEN r, s, t;
-
-    s = negi((GEN)e[1]);
-    if (mpodd(s)) s = addii(s, pk);
-    s = shifti(s, -1);
-
-    r = subii((GEN)e[2], mulii(s, addii((GEN)e[1], s))); /* a_2' */
-    switch(smodis(r, 3))
-    {
-      default: break; /* 0 */
-      case 2: r = addii(r, p2k); break;
-      case 1: r = subii(r, p2k); break;
-    }
-    r = negi( divis(r, 3) );
-
-    t = negi(ellLHS0_i(e,r)); /* - a_3' */
-    if (mpodd(t)) t = addii(t, mulii(pk, p2k));
-    t = shifti(t, -1);
-
-    v[1] = (long)pk;
-    v[2] = (long)r;
-    v[3] = (long)s;
-    v[4] = (long)t;
-    if (minim) return v;
-
-    nudelta -= 12 * k;
-    c4 = diviiexact(c4, p4k);
-    c6 = diviiexact(c6, p6k);
-    delta = diviiexact(delta, sqri(p6k));
-  }
-
-  if (nuj > 0) switch(nudelta - nuj)
-  {
-    case 0: f = 1; kod = 4+nuj; /* Inu */
-      switch(kronecker(negi(c6),p))
-      {
-	case  1: c = nudelta; break;
-	case -1: c = odd(nudelta)? 1: 2; break;
-	default: err(bugparier,"localred (p | c6)");
-          return NULL; /* not reached */
-      }
-      break;
-    case 6: f = 2; kod = -4-nuj; /* Inu* */
-      if (nuj & 1)
-	c = 3 + kronecker(diviiexact(mulii(c6, delta),gpowgs(p, 9+nuj)), p);
-      else
-	c = 3 + kronecker(diviiexact(delta, gpowgs(p, 6+nuj)), p);
-      break;
-    default: err(bugparier,"localred (nu_delta - nu_j != 0,6)");
-      return NULL; /* not reached */
-  }
-  else switch(nudelta)
-  {
-    case  0: f = 0; kod = 1; c = 1; break; /* I0, regular */
-    case  2: f = 2; kod = 2; c = 1; break; /* II   */
-    case  3: f = 2; kod = 3; c = 2; break; /* III  */
-    case  4: f = 2; kod = 4; /* IV   */
-      c = 2 + kronecker(diviiexact(mulis(c6, -6), sqri(p)), p);
-      break;
-    case  6: f = 2; kod = -1; /* I0*  */
-      p2 = sqri(p);
-      /* x^3 - 3c4/p^2 x - 2c6/p^3 */
-      tri = coefs_to_pol(4, gen_1, gen_0,
-                            negi(diviiexact(gmulsg(3, c4), p2)),
-                            negi(diviiexact(gmul2n(c6,1),  mulii(p2,p))));
-      c = 1 + FpX_nbroots(tri, p);
-      break;
-    case  8: f = 2; kod = -4; /* IV*  */
-      c = 2 + kronecker(gdiv(mulis(c6,-6), gpowgs(p,4)), p);
-      break;
-    case  9: f = 2; kod = -3; c = 2; break; /* III* */
-    case 10: f = 2; kod = -2; c = 1; break; /* II*  */
-    default: err(bugparier,"localred");
-      return NULL; /* not reached */
-  }
-  return localred_result(f, kod, c, v);
-}
-
-/* return a_{ k,l } in Tate's notation */
-static int
-aux(GEN ak, int p, int l)
-{
-  pari_sp av = avma;
-  ulong res = umodiu(diviuexact(ak, (ulong)u_pow(p, l)), p);
-  avma = av; return (int)res;
-}
-
-static int
-aux2(GEN ak, int p, GEN pl)
-{
-  pari_sp av = avma;
-  ulong res = umodiu(diviiexact(ak, pl), p);
-  avma = av; return (int)res;
-}
-
-/* number of distinct roots of X^3 + aX^2 + bX + c modulo p
- * if there's a multiple root, put it one *mult */
-static int
-numroots3(int a, int b, int c, int p, int *mult)
-{
-  if (p == 2)
-  {
-    if ((c + a * b) & 1) return 3;
-    else { *mult = b; return (a + b) & 1 ? 2 : 1; }
-  }
-  else
-  {
-    if (a % 3) { *mult = a * b; return (a * b * (1 - b) + c) % 3 ? 3 : 2; }
-    else { *mult = -c; return b % 3 ? 3 : 1; }
-  }
-}
-
-/* same for aX^2 +bX + c */
-static int
-numroots2(int a, int b, int c, int p, int *mult)
-{
-  if (p == 2) { *mult = c; return b & 1 ? 2 : 1; }
-  else { *mult = a * b; return (b * b - a * c) % 3 ? 2 : 1; }
-}
-
-/* p = 2 or 3 */
-static GEN
-localred_carac_23(GEN e, long p)
-{
-  long c, nu, nudelta, r, s, t;
-  int a21, a42, a63, a32, a64, theroot, al, be, ga, p2, p3, p4;
-  GEN pk, p2k, pk1;
-  GEN v;
-
-  nudelta = Z_lval((GEN)e[12], (ulong)p);
-  v = init_ch();
-
-  for (;;)
-  {
-    if (!nudelta)
-      return localred_result(0, 1, 1, v);
-        /* I0   */
-    if (smodis((GEN)e[6], p)) /* p \nmid b2 */
-    {
-      if (smodis(negi((GEN)e[11]), p == 2 ? 8 : 3) == 1)
-        c = nudelta;
-      else
-        c = 2 - (nudelta & 1);
-      return localred_result(1, 4 + nudelta, c, v);
-    }
-        /* Inu  */
-    if (p == 2)
-    {
-      r = smodis((GEN)e[4], 2);
-      s = smodis((GEN)e[2], 2);
-      t = smodis((GEN)e[5], 2);
-      if (r) { t = (s + t) & 1; s = (s + 1) & 1; }
-    }
-    else /* p == 3 */
-    {
-      r = - smodis((GEN)e[8], 3);
-      s = smodis((GEN)e[1], 3);
-      t = smodis((GEN)e[3], 3);
-      if (s) { t  = (t + r*s) % 3; if (t < 0) t += 3; }
-    }
-    /* p | (a1, a2, a3, a4, a6) */
-    cumule(&v, &e, gen_1, stoi(r), stoi(s), stoi(t));
-    p2 = p * p;
-    if (smodis((GEN)e[5], p2))
-      return localred_result(nudelta, 2, 1, v);
-        /* II   */
-    p3 = p2 * p;
-    if (smodis((GEN)e[9], p3))
-      return localred_result(nudelta - 1, 3, 2, v);
-        /* III  */
-    if (smodis((GEN)e[8], p3))
-    {
-      if (smodis((GEN)e[8], (p==2)? 32: 27) == p2)
-        c = 3;
-      else
-        c = 1;
-      return localred_result(nudelta - 2, 4, c, v);
-    }
-        /* IV   */
-
-    if (smodis((GEN)e[5], p3))
-      cumule(&v, &e, gen_1, gen_0, gen_0, p == 2? gen_2: modis((GEN)e[3], 9));
-        /* p | a1, a2; p^2  | a3, a4; p^3 | a6 */
-    a21 = aux((GEN)e[2], p, 1);
-    a42 = aux((GEN)e[4], p, 2);
-    a63 = aux((GEN)e[5], p, 3);
-    switch (numroots3(a21, a42, a63, p, &theroot))
-    {
-      case 3:
-        if (p == 2)
-          c = 1 + (a63 == 0) + ((a21 + a42 + a63) & 1);
-        else
-          c = 1 + (a63 == 0) + (((1 + a21 + a42 + a63) % 3) == 0)
-                             + (((1 - a21 + a42 - a63) % 3) == 0);
-        return localred_result(nudelta - 4, -1, c, v);
-            /* I0*  */
-      case 2: /* compute nu */
-        if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
-            /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
-        nu = 1;
-        pk  = utoipos(p2);
-        p2k = utoipos(p2 * p2);
-        for(;;)
-        {
-          be =  aux2((GEN)e[3], p, pk);
-          ga = -aux2((GEN)e[5], p, p2k);
-          al = 1;
-          if (numroots2(al, be, ga, p, &theroot) == 2) break;
-          if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, mulsi(theroot,pk));
-          pk1 = pk;
-          pk  = mulsi(p, pk);
-          p2k = mulsi(p, p2k); nu++;
-
-          al = a21;
-          be = aux2((GEN)e[4], p, pk);
-          ga = aux2((GEN)e[5], p, p2k);
-          if (numroots2(al, be, ga, p, &theroot) == 2) break;
-          if (theroot) cumule(&v, &e, gen_1, mulsi(theroot, pk1), gen_0, gen_0);
-          p2k = mulsi(p, p2k); nu++;
-        }
-        if (p == 2)
-          c = 4 - 2 * (ga & 1);
-        else
-          c = 3 + kross(be * be - al * ga, 3);
-        return localred_result(nudelta - 4 - nu, -4 - nu, c, v);
-            /* Inu* */
-      case 1:
-        if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
-            /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
-        a32 = aux((GEN)e[3], p, 2);
-        a64 = aux((GEN)e[5], p, 4);
-        if (numroots2(1, a32, -a64, p, &theroot) == 2)
-        {
-          if (p == 2)
-            c = 3 - 2 * a64;
-          else
-            c = 2 + kross(a32 * a32 + a64, 3);
-          return localred_result(nudelta - 6, -4, c, v);
-        }
-            /* IV*  */
-        if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p*p));
-            /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
-        p4 = p2 * p2;
-        if (smodis((GEN)e[4], p4))
-          return localred_result(nudelta - 7, -3, 2, v);
-            /* III* */
-        
-        if (smodis((GEN)e[5], p4 * p2))
-          return localred_result(nudelta - 8, -2, 1, v);
-            /* II*  */
-        cumule(&v, &e, utoipos(p), gen_0, gen_0, gen_0); /* not minimal */
-        nudelta -= 12;
-    }
-  }
-  /* Not reached */
-}
-
-static GEN
-localred(GEN e, GEN p, int minim)
-{
-  if (cmpiu(p, 3) > 0) /* p != 2,3 */
-    return localred_carac_p(e,p, minim);
-  else
-  {
-    GEN z = localred_carac_23(e,itos(p));
-    return minim? (GEN)z[3]: z;
-  }
-}
-
-GEN
-localreduction(GEN e, GEN p)
-{
-  pari_sp av = avma;
-  checkell(e);
-  if (typ(e[12]) != t_INT)
-    err(talker,"not an integral curve in localreduction");
-  return gerepileupto(av, localred(e, p, 0));
-}
-
-static GEN
-ell_to_small(GEN E)
-{
-  long i;
-  GEN e;
-  if (lg(E) <= 14) return E;
-  e = cgetg(14,t_VEC);
-  for (i = 1; i < 14; i++) e[i] = E[i];
-  return e;
-}
-
-static GEN
-ellintegralmodel(GEN e)
-{
-  GEN a = cgetg(6,t_VEC), v, L, u;
-  long i, l, k;
-
-  checkell(e);
-  L = cgetg(1, t_VEC);
-  for (i = 1; i < 6; i++)
-  {
-    a[i] = e[i]; u = (GEN)a[i];
-    switch(typ(u))
-    {
-      case t_INT: break;
-      case t_FRAC: /* partial factorization */
-        L = concatsp(L, (GEN)auxdecomp((GEN)u[2], 0)[1]);
-        break;
-      default: err(talker, "not a rational curve in ellintegralmodel");
-    }
-  }
-  /* a = [a1, a2, a3, a4, a6] */
-  l = lg(L);
-  if (l == 1) return NULL;
-  L = sort(L);
-  for (k = i = 2; i < l; i++)
-    if (!equalii((GEN)L[i], (GEN)L[i-1])) L[k++] = L[i];
-
-  l = k; u = gen_1;
-  for (k = 1; k < l; k++)
-  {
-    GEN p = (GEN)L[k];
-    int n = 0, m;
-    for (i = 1; i < 6; i++)
-      if (!gcmp0((GEN)a[i]))
-      {
-        int r = (i == 5)? 6: i; /* a5 is missing */
-	m = r * n + ggval((GEN)a[i], p);
-	while (m < 0) { n++; m += r; }
-      }
-    u = mulii(u, gpowgs(p, n));
-  }
-  v = init_ch(); v[1] = linv(u); return v;
-}
-
-static void
-standard_model(GEN e, GEN *pv)
-{
-  GEN r, s, t;
-  s = gdiventgs((GEN)e[1], -2);
-  r = gdiventgs(gaddgs(gsub(gsub((GEN)e[2], gmul(s,(GEN)e[1])), gsqr(s)), 1), -3);
-  t = gdiventgs(ellLHS0(e,r), -2);
-  cumulev(pv, gen_1, r, s, t);
-}
-
-GEN
-ellminimalmodel(GEN E, GEN *ptv)
-{
-  pari_sp av = avma;
-  GEN c4, c6, e, v, P;
-  long l, k;
-
-  v = ellintegralmodel(E);
-  e = ell_to_small(E);
-  if (v) e = coordch(e, v); else v = init_ch();
-  c4 = (GEN)e[10];
-  c6 = (GEN)e[11];
-  P = (GEN)decomp(gcdii(c4,c6))[1];
-  l = lg(P);
-  for (k = 1; k < l; k++)
-  {
-    GEN w = localred(e, (GEN)P[k], 1);
-    if (!gcmp1((GEN)w[1]))
-      cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
-  }
-  standard_model(e, &v);
-  e = coordch(E, v);
-  if (ptv) { gerepileall(av, 2, &e, &v); *ptv = v; }
-  else e = gerepileupto(av, e);
-  return e;
-}
-
-/* Reduction of a rational curve E to its standard minimal model
- * (a1,a3 = 0 or 1, a2 = -1, 0 or 1).
- *
- * Return [N, [u,r,s,t], c], where
- *   N = arithmetic conductor of E
- *   c = product of the local Tamagawa numbers cp
- *   [u, r, s, t] = the change of variable reducing E to its minimal model,
- *     with u > 0 */
-GEN
-globalreduction(GEN E)
-{
-  long k, l;
-  pari_sp av = avma;
-  GEN c, P, N, v, e, c4, c6, D;
-
-  v = ellintegralmodel(E);
-  e = ell_to_small(E);
-  if (v) e = coordch(e, v); else v = init_ch();
-
-  c4 = (GEN)e[10];
-  c6 = (GEN)e[11];
-  D  = (GEN)e[12];
-  P = (GEN)decomp(gcdii(c4,c6))[1];
-  l = lg(P);
-  for (k = 1; k < l; k++) (long)Z_pvalrem(D, (GEN)P[k], &D);
-  if (!is_pm1(D)) P = concatsp(P, (GEN)decomp(absi(D))[1]);
-  l = lg(P); c = N = gen_1;
-  for (k = 1; k < l; k++)
-  {
-    GEN p = (GEN)P[k];
-    GEN q = localreduction(e, p);
-    GEN w = (GEN)q[3];
-    N = mulii(N, powgi(p, (GEN)q[1]));
-    c = mulii(c, (GEN)q[4]);
-    if (!gcmp1((GEN)w[1]))
-      cumule(&v, &e, (GEN)w[1], (GEN)w[2], (GEN)w[3], (GEN)w[4]);
-  }
-  standard_model(e, &v);
-  return gerepilecopy(av, mkvec3(N,v,c));
-}
-
-/* accumulate the effects of variable changes [u,r,s,t] and [U,R,S,T].
- * Frequent special cases: (U = 1) or (r = s = t = 0) */
-static void
-cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t)
-{
-  GEN U,R,S,T,UU,RR,SS,TT, v = *vtotal, w = cgetg(5, t_VEC);
-  pari_sp av = avma;
-
-  U = (GEN)v[1];
-  R = (GEN)v[2];
-  S = (GEN)v[3];
-  T = (GEN)v[4];
-  if (gcmp1(U))
-  {
-    UU = gcopy(u);
-    RR = gadd(R, r);
-    SS = gadd(S, s); av = avma;
-    TT = gerepileupto(av, gadd(T, gadd(t, gmul(S, r))));
-  }
-  else if (gcmp0(r) && gcmp0(s) && gcmp0(t))
-  {
-    UU = gmul(U, u);
-    RR = gcopy(R);
-    SS = gcopy(S);
-    TT = gcopy(T);
-  }
-  else /* general case */
-  {
-    GEN U2 = gsqr(U);
-    UU = gmul(U, u);
-    RR = gadd(R, gmul(U2, r));
-    SS = gadd(S, gmul(U, s));
-    TT = gadd(T, gmul(U2, gadd(gmul(U, t), gmul(S, r))));
-    gerepileall(av, 4, &UU,&RR,&SS,&TT);
-  }
-  w[1] = (long)UU;
-  w[2] = (long)RR;
-  w[3] = (long)SS;
-  w[4] = (long)TT; *vtotal = w;
-}
-
-static void
-cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t)
-{
-  *e = _coordch(*e, u, r, s, t);
-  cumulev(vtotal, u, r, s, t);
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                   Parametrisation modulaire                    **/
+/**                    Modular Parametrization                     **/
 /**                                                                **/
 /********************************************************************/
 
 GEN
 taniyama(GEN e)
 {
-  GEN v,w,c,d,s1,s2,s3;
-  long n, m;
+  GEN x, w, c, d, s1, s2, s3, X, C;
+  long n, m, prec = (long)precdl;
   pari_sp av=avma, tetpil;
 
-  checkell(e); v = cgetg(precdl+3,t_SER);
-  v[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
-  v[2] = (long)gen_1;
-  c=gtoser(anell(e,precdl+1),0); setvalp(c,1);
-  d=ginv(c); c=gsqr(d);
-  for (n=-3; n<=(long)precdl-4; n++)
+  checkell(e); x = cgetg(prec+3,t_SER);
+  x[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
+  x[2] = (long)gen_1;
+  d = ginv(gtoser(anell(e,prec+1), 0)); setvalp(d,-1);
+  /* 2y(t) + a1x + a3 = d tx'(t). Solve for x(t),y(t):
+   * 4y^2 = 4x^3 + b2 x^2 + 2b4 x + b6 */
+
+  if (!prec) goto END;
+  c = gsqr(d);
+  /* 4x^3 + b2 x^2 + 2b4 x + b6 = c (t x'(t))^2; c = 1/t^2 + O(1/t) */
+  C = c+4; /* C[i] = coeff(c, t^i) */
+  X = x+4;
+  /* n = -3 */
+  X[-1] = (long)gmul2n(gmul((GEN)X[-2],(GEN)C[-1]), -1);
+  for (n=-2; n <= prec-4; n++)
   {
-    if (n!=2)
+    if (n != 2)
     {
-      s3=n?gen_0:(GEN)e[7];
-      if (n>-3) s3=gadd(s3,gmul((GEN)e[6],(GEN)v[n+4]));
-      s2=gen_0;
+      s3 = gmul((GEN)e[6],(GEN)X[n]);
+      if (!n) s3 = gadd(s3, (GEN)e[7]);
+      s2 = gen_0;
       for (m=-2; m<=n+1; m++)
-	s2 = gadd(s2,gmulsg(m*(n+m),gmul((GEN)v[m+4],(GEN)c[n-m+4])));
-      s2=gmul2n(s2,-1);
-      s1=gen_0;
+	s2 = gadd(s2,gmulsg(m*(n+m),gmul((GEN)X[m],(GEN)C[n-m])));
+      s2 = gmul2n(s2,-1);
+      s1 = gen_0;
       for (m=-1; m+m<=n; m++)
       {
 	if (m+m==n)
-          s1=gadd(s1,gsqr((GEN)v[m+4]));
+          s1 = gadd(s1, gsqr((GEN)X[m]));
 	else
-          s1=gadd(s1,gmul2n(gmul((GEN)v[m+4],(GEN)v[n-m+4]),1));
+          s1 = gadd(s1, gmul2n(gmul((GEN)X[m],(GEN)X[n-m]),1));
       }
-      v[n+6]=ldivgs(gsub(gadd(gmulsg(6,s1),s3),s2),(n+2)*(n+1)-12);
+      X[n+2] = ldivgs(gsub(gadd(gmulsg(6,s1),s3),s2), (n+2)*(n+1)-12);
     }
     else
     {
-      setlg(v,9); v[8]=(long)polx[MAXVARN];
-      w=deriv(v,0); setvalp(w,-2);
-      s1=gadd((GEN)e[8],gmul(v,gadd(gmul2n((GEN)e[7],1),gmul(v,gadd((GEN)e[6],gmul2n(v,2))))));
-      setlg(v,precdl+3);
-      s2=gsub(s1,gmul(c,gsqr(w)));
-      s2=gsubst((GEN)s2[2],MAXVARN,polx[0]);
-      v[n+6]=lneg(gdiv((GEN)s2[2],(GEN)s2[3]));
+      setlg(x, 9); x[8] = (long)polx[MAXVARN];
+      w = derivser(x); setvalp(w,-2); /* 4v^3 + b2 x^2 + 2b4 x + b6 */
+      s1 = gadd((GEN)e[8], gmul(x, gadd(gmul2n((GEN)e[7],1),
+                                        gmul(x,gadd((GEN)e[6],gmul2n(x,2))))));
+      setlg(x, prec+3);
+      s2 = gsub(s1, gmul(c,gsqr(w)));
+      s2 = (GEN)s2[2];
+      X[n+2] = lneg(gdiv((GEN)s2[2],(GEN)s2[3]));
     }
   }
-  w=gsub(gmul(polx[0],gmul(d,deriv(v,0))), ellLHS0(e,v));
+END:
+  w = gmul(d,derivser(x)); setvalp(w, valp(w)+1);
+  w = gsub(w, ellLHS0(e,x));
   tetpil = avma; s1 = cgetg(3,t_VEC);
-  s1[1] = lcopy(v);
+  s1[1] = lcopy(x);
   s1[2] = lmul2n(w,-1); return gerepile(av,tetpil,s1);
 }
 
@@ -2962,213 +3430,6 @@ taniyama(GEN e)
 /**                       TORSION POINTS (over Q)                  **/
 /**                                                                **/
 /********************************************************************/
-/* assume e is defined over Q (use Mazur's theorem) */
-static long
-_orderell(GEN e, GEN p)
-{
-  pari_sp av = avma;
-  GEN p1 = p;
-  long k;
-  for (k = 1; k < 16; k++)
-  {
-    if (lg(p1) < 3) { avma = av; return k; }
-    p1 = addell(e, p1, p);
-  }
-  avma = av; return 0;
-}
-GEN
-orderell(GEN e, GEN p)
-{
-  long t;
-  checkell(e); checkpt(p);
-  t = typ(e[13]);
-  if (!is_rational_t(t)) err(impl,"orderell for nonrational elliptic curves");
-  return utoipos( _orderell(e, p) );
-}
-
-/* Using Lutz-Nagell */
-
-/* p is a polynomial of degree exactly 3 with integral coefficients
- * and leading term 4. Outputs the vector of rational roots of p
- */
-static GEN
-ratroot(GEN p)
-{
-  GEN v,a,ld;
-  long i,t;
-
-  i=2; while (!signe(p[i])) i++;
-  if (i==5) return mkvec(gen_0);
-  if (i==4)
-    { v=cgetg(3,t_VEC); v[1]= (long)gen_0; v[2]=ldivgs((GEN)p[4],-4); return v; }
-
-  v=cgetg(4,t_VEC); t=1;
-  if (i==3) v[t++]= (long)gen_0;
-  ld=divisors(gmul2n((GEN)p[i],2));
-  for (i=1; i<lg(ld); i++)
-  {
-    a = gmul2n((GEN)ld[i],-2);
-    if (!gsigne(poleval(p,a))) v[t++]=(long)a;
-    a = gneg_i(a);
-    if (!gsigne(poleval(p,a))) v[t++]=(long)a;
-  }
-  setlg(v,t); return v;
-}
-
-static int
-is_new_torsion(GEN e, GEN v, GEN p, long t2) {
-  GEN pk = p, pkprec = NULL;
-  long k,l;
-
-  for (k=2; k<=6; k++)
-  {
-    pk=addell(e,pk,p);
-    if (lg(pk)==2) return 1;
-
-    for (l=2; l<=t2; l++)
-      if (gequal((GEN)pk[1],gmael(v,l,1))) return 1;
-
-    if (pkprec && k<=5)
-      if (gequal((GEN)pk[1],(GEN)pkprec[1])) return 1;
-    pkprec=pk;
-  }
-  return 0;
-}
-
-GEN
-torsellnagelllutz(GEN e)
-{
-  GEN d,ld,pol,p1,lr,r,v,w,w2,w3;
-  long i, j, nlr, t, t2, k, k2;
-  pari_sp av=avma;
-
-  v = ellintegralmodel(e);
-  if (v) e = coordch(e,v);
-  pol = RHSpol(e);
-  lr=ratroot(pol); nlr=lg(lr)-1;
-  r=cgetg(17,t_VEC); r[1]=(long)mkvec(gen_0);
-  for (t=1,i=1; i<=nlr; i++)
-  {
-    p1=cgetg(3,t_VEC);
-    p1[1] = lr[i];
-    p1[2] = lmul2n(gneg(ellLHS0(e,(GEN)lr[i])), -1);
-    r[++t]=(long)p1;
-  }
-  ld = factor(gmul2n(absi((GEN)e[12]), 4));
-  p1 = (GEN)ld[2]; k = lg(p1);
-  for (i=1; i<k; i++) p1[i] = lshifti((GEN)p1[i], -1);
-  ld = divisors(ld);
-  for (t2=t,j=1; j<lg(ld); j++)
-  {
-    d=(GEN)ld[j]; lr=ratroot(gsub(pol,gsqr(d)));
-    for (i=1; i<lg(lr); i++)
-    {
-      p1 = cgetg(3,t_VEC);
-      p1[1] = lr[i];
-      p1[2] = lmul2n(gsub(d,ellLHS0(e,(GEN)lr[i])), -1);
-
-      if (is_new_torsion(e,r,p1,t2))
-      {
-        GEN p2 = cgetg(3,t_VEC);
-        p2[1] = p1[1];
-        p2[2] = lsub((GEN)p1[2],d);
-	r[++t]=(long)p1;
-        r[++t]=(long)p2;
-      }
-    }
-  }
-  if (t==1)
-  {
-    avma=av; w=cgetg(4,t_VEC);
-    w[1] = (long)gen_1;
-    w[2] = lgetg(1,t_VEC);
-    w[3] = lgetg(1,t_VEC);
-    return w;
-  }
-
-  if (nlr<3)
-  {
-    w2 = mkvec( utoipos(t) );
-    for (k=2; k<=t; k++)
-      if (_orderell(e,(GEN)r[k]) == t) break;
-    if (k>t) err(bugparier,"torsell (bug1)");
-
-    w3 = mkvec( (GEN)r[k] );
-  }
-  else
-  {
-    if (t&3) err(bugparier,"torsell (bug2)");
-    t2 = t>>1;
-    w2 = mkvec2(utoipos(t2), gen_2);
-    for (k=2; k<=t; k++)
-      if (_orderell(e,(GEN)r[k]) == t2) break;
-    if (k>t) err(bugparier,"torsell (bug3)");
-
-    p1 = powell(e,(GEN)r[k],utoipos(t>>2));
-    k2 = (lg(p1)==3 && gequal((GEN)r[2],p1))? 3: 2;
-    w3 = mkvec2((GEN)r[k], (GEN)r[k2]);
-  }
-  if (v)
-  {
-    v[1] = linv((GEN)v[1]);
-    w3 = pointch(w3,v);
-  }
-  return gerepilecopy(av, mkvec3(utoipos(t), w2,w3));
-}
-
-/* Using Doud's algorithm */
-
-/* finds a bound for #E_tor */
-static long
-torsbound(GEN e)
-{
-  long m, b, bold, prime = 2;
-  pari_sp av = avma;
-  byteptr p = diffptr;
-  GEN D = (GEN)e[12];
-  long n = bit_accuracy(lgefint(D)) >> 3;
-  /* n = number of primes to try ~ 1 prime every 8 bits in D */
-  b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
-  m = 0; p++;
-  while (m < n)
-  {
-    NEXT_PRIME_VIADIFF_CHECK(prime,p);
-    if (smodis(D, prime))
-    {
-      b = cgcd(b, prime+1 - itos(apell0(e, (ulong)prime)));
-      avma = av;
-      if (b == 1) break;
-      if (b == bold) m++; else { bold = b; m = 0; }
-    }
-  }
-  return b;
-}
-
-static GEN
-_round(GEN x, long *e)
-{
-  GEN y = grndtoi(x,e);
-  if (*e > -5 && bit_accuracy(gprecision(x)) < gexpo(y) - 10)
-    err(talker, "ellinit data not accurate enough. Increase precision");
-  return y;
-}
-
-/* E the curve, w in C/Lambda ~ E of order n, returns q = pointell(w) as a
- * rational point on the curve, or NULL if q is not rational. */
-static GEN
-torspnt(GEN E, GEN w, long n, long prec)
-{
-  GEN p = cgetg(3,t_VEC), q = pointell(E, w, prec);
-  long e;
-  p[1] = lmul2n(_round(gmul2n((GEN)q[1],2), &e),-2);
-  if (e > -5 || typ(p[1]) == t_COMPLEX) return NULL;
-  p[2] = lmul2n(_round(gmul2n((GEN)q[2],3), &e),-3);
-  if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
-  return (oncurve(E,p)
-      && lg(powell(E,p,utoipos(n))) == 2
-      && _orderell(E,p) == n)? p: NULL;
-}
-
 static int
 smaller_x(GEN p, GEN q)
 {
@@ -3238,8 +3499,198 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
   return r;
 }
 
+/* assume e is defined over Q (use Mazur's theorem) */
+static long
+_orderell(GEN e, GEN p)
+{
+  pari_sp av = avma;
+  GEN p1 = p;
+  long k;
+  for (k = 1; k < 16; k++)
+  {
+    if (lg(p1) < 3) { avma = av; return k; }
+    p1 = addell(e, p1, p);
+  }
+  avma = av; return 0;
+}
 GEN
-torselldoud(GEN e)
+orderell(GEN e, GEN p)
+{
+  long t;
+  checkell(e); checkpt(p); t = typ(e[13]);
+  if (!is_rational_t(t)) err(impl,"orderell for nonrational elliptic curves");
+  return utoi( _orderell(e, p) );
+}
+
+/* Using Lutz-Nagell */
+
+/* p in Z[X] of degree 3. Return vector of x/4, x integral root of p */
+GEN
+ratroot(GEN p)
+{
+  GEN L, a, ld;
+  long i, t, v = ZX_valuation(p, &p);
+
+  if (v == 3) return mkvec(gen_0);
+  if (v == 2) return mkvec2(gen_0, gmul2n(negi((GEN)p[2]), -2));
+
+  L = cgetg(4,t_VEC); t = 1;
+  if (v == 1) L[t++] = (long)gen_0;
+  ld = divisors((GEN)p[2]);
+  for (i=1; i<lg(ld); i++)
+  {
+    a = (GEN)ld[i];
+    if (!signe(poleval(p,a))) gel(L,t++) = gmul2n(a, -2);
+    a = negi(a);
+    if (!signe(poleval(p,a))) gel(L,t++) = gmul2n(a, -2);
+  }
+  setlg(L,t); return L;
+}
+
+static int
+is_new_torsion(GEN e, GEN v, GEN p, long t2) {
+  GEN pk = p, pkprec = NULL;
+  long k,l;
+
+  for (k=2; k<=6; k++)
+  {
+    pk = addell(e,pk,p); /* = [k] p */
+    if (lg(pk)==2) return 1;
+
+    for (l=2; l<=t2; l++)
+      if (gequal((GEN)pk[1],gmael(v,l,1))) return 1;
+
+    if (pkprec && k<=5)
+      if (gequal((GEN)pk[1],(GEN)pkprec[1])) return 1;
+    pkprec=pk;
+  }
+  return 0;
+}
+
+static GEN
+nagelllutz(GEN e)
+{
+  GEN ld, pol, p1, lr, r, v, w2, w3;
+  long i, j, nlr, t, t2, k, k2;
+  pari_sp av=avma;
+
+  v = ellintegralmodel(e);
+  if (v) e = _coordch(e,v);
+  pol = RgX_rescale(RHSpol(e), utoipos(4));
+  r = cgetg(17, t_VEC);
+  r[1] = (long)mkvec(gen_0);
+  lr = ratroot(pol); nlr=lg(lr)-1;
+  for (t=1,i=1; i<=nlr; i++)
+  {
+    GEN x = gel(lr,i), y = gmul2n(gneg(ellLHS0(e,x)), -1);
+    r[++t] = (long)mkvec2(x, y);
+  }
+  ld = decomp(gmul2n(absi((GEN)e[12]), 4));
+  p1 = (GEN)ld[2]; k = lg(p1);
+  for (i=1; i<k; i++) p1[i] = lshifti((GEN)p1[i], -1);
+  ld = divisors(ld);
+  for (t2=t,j=1; j<lg(ld); j++)
+  {
+    GEN d = (GEN)ld[j];
+    lr = ratroot(gsub(pol, shifti(sqri(d), 6)));
+    for (i=1; i<lg(lr); i++)
+    {
+      GEN x = gel(lr,i), y = gmul2n(gadd(d, gneg(ellLHS0(e,x))), -1);
+      p1 = mkvec2(x, y);
+      if (is_new_torsion(e,r,p1,t2))
+      {
+	r[++t] = (long)p1;
+        r[++t] = (long)mkvec2(x, gsub(y, d));
+      }
+    }
+  }
+  if (t == 1) { avma = av; return tors(e,1,NULL,NULL,v); }
+
+  if (nlr < 3)
+  {
+    w2 = mkvec( utoipos(t) );
+    for (k=2; k<=t; k++)
+      if (_orderell(e,(GEN)r[k]) == t) break;
+    if (k>t) err(bugparier,"torsell (bug1)");
+
+    w3 = mkvec( (GEN)r[k] );
+  }
+  else
+  {
+    if (t&3) err(bugparier,"torsell (bug2)");
+    t2 = t>>1;
+    w2 = mkvec2(utoipos(t2), gen_2);
+    for (k=2; k<=t; k++)
+      if (_orderell(e,(GEN)r[k]) == t2) break;
+    if (k>t) err(bugparier,"torsell (bug3)");
+
+    p1 = powell(e,(GEN)r[k],utoipos(t>>2));
+    k2 = (lg(p1)==3 && gequal((GEN)r[2],p1))? 3: 2;
+    w3 = mkvec2((GEN)r[k], (GEN)r[k2]);
+  }
+  if (v)
+  {
+    v[1] = linv((GEN)v[1]);
+    w3 = pointch(w3,v);
+  }
+  return gerepilecopy(av, mkvec3(utoipos(t), w2,w3));
+}
+
+/* Using Doud's algorithm */
+
+/* finds a bound for #E_tor */
+static long
+torsbound(GEN e)
+{
+  long m, b, bold, prime = 2;
+  pari_sp av = avma;
+  byteptr p = diffptr;
+  GEN D = (GEN)e[12];
+  long n = bit_accuracy(lgefint(D)) >> 3;
+  /* n = number of primes to try ~ 1 prime every 8 bits in D */
+  b = bold = 5040; /* = 2^4 * 3^2 * 5 * 7 */
+  m = 0; p++;
+  while (m < n)
+  {
+    NEXT_PRIME_VIADIFF_CHECK(prime,p);
+    if (umodiu(D, prime))
+    {
+      b = cgcd(b, prime+1 - itos(apell0(e, (ulong)prime)));
+      avma = av;
+      if (b == 1) break;
+      if (b == bold) m++; else { bold = b; m = 0; }
+    }
+  }
+  return b;
+}
+
+static GEN
+_round(GEN x, long *e)
+{
+  GEN y = grndtoi(x,e);
+  if (*e > -5 && bit_accuracy(gprecision(x)) < gexpo(y) - 10)
+    err(talker, "ellinit data not accurate enough. Increase precision");
+  return y;
+}
+
+/* E the curve, w in C/Lambda ~ E of order n, returns q = pointell(w) as a
+ * rational point on the curve, or NULL if q is not rational. */
+static GEN
+torspnt(GEN E, GEN w, long n, long prec)
+{
+  GEN p = cgetg(3,t_VEC), q = pointell(E, w, prec);
+  long e;
+  p[1] = lmul2n(_round(gmul2n((GEN)q[1],2), &e),-2);
+  if (e > -5 || typ(p[1]) == t_COMPLEX) return NULL;
+  p[2] = lmul2n(_round(gmul2n((GEN)q[2],3), &e),-3);
+  if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
+  return (oncurve(E,p)
+      && lg(powell(E,p,utoipos(n))) == 2
+      && _orderell(E,p) == n)? p: NULL;
+}
+
+GEN
+torsell(GEN e)
 {
   long B, i, ord, pr, prec, k = 1;
   pari_sp av=avma;
@@ -3247,15 +3698,15 @@ torselldoud(GEN e)
 
   checkbell(e);
   v = ellintegralmodel(e);
-  if (v) e = coordch(e,v);
- 
+  if (v) e = _coordch(e,v);
+
   B = torsbound(e); /* #E_tor | B */
   if (B == 1) { avma = av; return tors(e,1,NULL,NULL, v); }
 
   pr = DEFAULTPREC + ((lgefint((GEN)e[12])-2) >> 1); /* pr >= size of sqrt(D) */
   w1 = (GEN)e[15];
   prec = precision(w1);
-  if (prec < pr) err(precer, "torselldoud");
+  if (prec < pr) err(precer, "torsell");
   if (pr < prec) { prec = pr; e = gprec_w(e, pr); w1 = (GEN)e[15]; }
   if (v) v[1] = linv((GEN)v[1]);
   w22 = gmul2n((GEN)e[16],-1);
@@ -3352,320 +3803,9 @@ elltors0(GEN e, long flag)
 {
   switch(flag)
   {
-    case 0: return torselldoud(e);
-    case 1: return torsellnagelllutz(e);
+    case 0: return torsell(e);
+    case 1: return nagelllutz(e);
     default: err(flagerr,"torsell");
   }
   return NULL; /* not reached */
-}
-
-/* par compatibilite */
-GEN torsell(GEN e) {return torselldoud(e);}
-
-/* LOCAL ROOT NUMBERS, after HALBERSTADT */
-
-/* p = 2 or 3 */
-static long
-neron(GEN e, long p, long* ptkod)
-{
-  long kod, v4, v6, vd;
-  pari_sp av=avma;
-  GEN c4, c6, d, nv;
-
-  nv = localred_carac_23(e,p);
-  *ptkod = kod = itos((GEN)nv[2]);
-  c4=(GEN)e[10]; c6=(GEN)e[11]; d=(GEN)e[12];
-  v4 = gcmp0(c4) ? 12 : Z_lval(c4,p);
-  v6 = gcmp0(c6) ? 12 : Z_lval(c6,p);
-  vd = Z_lval(d,p); avma = av;
-  if (p == 2) {
-    if (kod > 4) return 1;
-    switch(kod)
-    {
-      case 1: return (v6>0) ? 2 : 1;
-      case 2:
-        if (vd==4) return 1;
-        else
-        {
-          if (vd==7) return 3;
-          else return v4==4 ? 2 : 4;
-        }
-      case 3:
-        switch(vd)
-        {
-          case 6: return 3;
-          case 8: return 4;
-          case 9: return 5;
-          default: return v4==5 ? 2 : 1;
-        }
-      case 4: return v4>4 ? 2 : 1;
-      case -1:
-        switch(vd)
-        {
-          case 9: return 2;
-          case 10: return 4;
-          default: return v4>4 ? 3 : 1;
-        }
-      case -2:
-        switch(vd)
-        {
-          case 12: return 2;
-          case 14: return 3;
-          default: return 1;
-        }
-      case -3:
-        switch(vd)
-        {
-          case 12: return 2;
-          case 14: return 3;
-          case 15: return 4;
-          default: return 1;
-        }
-      case -4: return v6==7 ? 2 : 1;
-      case -5: return (v6==7 || v4==6) ? 2 : 1;
-      case -6:
-        switch(vd)
-        {
-          case 12: return 2;
-          case 13: return 3;
-          default: return v4==6 ? 2 : 1;
-        }
-      case -7: return (vd==12 || v4==6) ? 2 : 1;
-      default: return v4==6 ? 2 : 1;
-    }
-  } else {
-    if (labs(kod) > 4) return 1;
-    switch(kod)
-    {
-      case -1: case 1: return v4&1 ? 2 : 1;
-      case -3: case 3: return (2*v6>vd+3) ? 2 : 1;
-      case -4: case 2:
-        switch (vd%6)
-        {
-          case 4: return 3;
-          case 5: return 4;
-          default: return v6%3==1 ? 2 : 1;
-        }
-      default: /* kod = -2 et 4 */
-        switch (vd%6)
-        {
-          case 0: return 2;
-          case 1: return 3;
-          default: return 1;
-        }
-    }
-  }
-}
-
-static long
-val_aux(GEN x, long p, long pk, long *u) {
-  long v;
-  GEN z;
-  if (!signe(x)) { *u = 0; return 12; }
-  v = Z_lvalrem(x,p,&z);
-  *u = smodis(z,pk); return v;
-}
-static void
-val_init(GEN e, long p, long pk,
-         long *v4, long *u, long *v6, long *v, long *vd, long *d1)
-{
-  GEN c4 = (GEN)e[10], c6 = (GEN)e[11], D = (GEN)e[12];
-  pari_sp av = avma;
-  *v4 = val_aux(c4, p,pk, u);
-  *v6 = val_aux(c6, p,pk, v);
-  *vd = val_aux(D , p,pk, d1); avma = av;
-}
-
-static long
-ellrootno_2(GEN e)
-{
-  long n2, kod, u, v, x1, y1, d1, vd, v4, v6;
-
-  val_init(e, 2, 64, &v4, &u, &v6, &v, &vd, &d1);
-  n2 = neron(e,2,&kod);
-  if (kod>=5)
-    return odd(smodis((GEN)e[2],2) + smodis((GEN)e[3],2)) ? 1 : -1;
-  if (kod<-9) return (n2==2) ? -kross(-1,v) : -1;
-  x1 = u+v+v;
-  switch(kod)
-  {
-    case 1: return 1;
-    case 2:
-      switch(n2)
-      {
-	case 1:
-	  switch(v4)
-	  {
-	    case 4: return kross(-1,u);
-	    case 5: return 1;
-	    default: return -1;
-	  }
-	case 2: return (v6==7) ? 1 : -1;
-	case 3: return (v%8==5 || (u*v)%8==5) ? 1 : -1;
-	case 4: if (v4>5) return kross(-1,v);
-	  return (v4==5) ? -kross(-1,u) : -1;
-      }
-    case 3:
-      switch(n2)
-      {
-	case 1: return -kross(2,u*v);
-	case 2: return -kross(2,v);
-	case 3: y1 = (u - (v << (v6-5))) % 16;
-	  return (y1==7 || y1==11) ? 1 : -1;
-	case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
-	case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
-      }
-    case -1:
-      switch(n2)
-      {
-	case 1: return -kross(2,x1);
-	case 2: return (v%8==7) || (x1%32==11) ? 1 : -1;
-	case 3: return v4==6 ? 1 : -1;
-	case 4: if (v4>6) return kross(-1,v);
-	  return v4==6 ? -kross(-1,u*v) : -1;
-      }
-    case -2: return n2==1 ? kross(-2,v) : kross(-1,v);
-    case -3:
-      switch(n2)
-      {
-	case 1: y1=(u-2*v)%64; if (y1<0) y1+=64;
-	  return (y1==3) || (y1==19) ? 1 : -1;
-	case 2: return kross(2*kross(-1,u),v);
-	case 3: return -kross(-1,u)*kross(-2*kross(-1,u),u*v);
-	case 4: return v6==11 ? kross(-2,x1) : -kross(-2,u);
-      }
-    case -5:
-      if (n2==1) return x1%32==23 ? 1 : -1;
-      else return -kross(2,2*u+v);
-    case -6:
-      switch(n2)
-      {
-	case 1: return 1;
-	case 2: return v6==10 ? 1 : -1;
-	case 3: return (u%16==11) || ((u+4*v)%16==3) ? 1 : -1;
-      }
-    case -7:
-      if (n2==1) return 1;
-      else
-      {
-	y1 = (u + (v << (v6-6))) % 16;
-	if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
-	else return (y1==9 || y1==5) ? 1 : -1;
-      }
-    case -8: return n2==2 ? kross(-1,v*d1) : -1;
-    case -9: return n2==2 ? -kross(-1,d1) : -1;
-    default: return -1;
-  }
-}
-
-static long
-ellrootno_3(GEN e)
-{
-  long n2, kod, u, v, d1, r6, K4, K6, vd, v4, v6;
-
-  val_init(e, 3, 81, &v4, &u, &v6, &v, &vd, &d1);
-  n2 = neron(e,3,&kod);
-  K6 = kross(v,3); if (kod>4) return K6;
-  r6 = v%9; K4 = kross(u,3);
-  switch(kod)
-  {
-    case 1: case 3: case -3: return 1;
-    case 2:
-      switch(n2)
-      {
-	case 1: return (r6==4 || r6>6) ? 1 : -1;
-	case 2: return -K4*K6;
-	case 3: return 1;
-	case 4: return -K6;
-      }
-    case 4:
-      switch(n2)
-      {
-	case 1: return K6*kross(d1,3);
-	case 2: return -K4;
-	case 3: return -K6;
-      }
-    case -2: return n2==2 ? 1 : K6;
-    case -4:
-      switch(n2)
-      {
-	case 1:
-	  if (v4==4) return (r6==4 || r6==8) ? 1 : -1;
-	  else return (r6==1 || r6==2) ? 1 : -1;
-	case 2: return -K6;
-	case 3: return (r6==2 || r6==7) ? 1 : -1;
-	case 4: return K6;
-      }
-    default: return -1;
-  }
-}
-
-/* assume p > 3 */
-static long
-ellrootno_p(GEN e, GEN p, GEN ex)
-{
-  GEN j;
-  long ep,z;
-
-  if (gcmp1(ex)) return -kronecker(negi((GEN)e[11]),p);
-  j=(GEN)e[13];
-  if (!gcmp0(j) && ggval(j,p) < 0) return krosi(-1,p);
-  ep = 12/cgcd(12,ggval((GEN)e[12],p));
-  if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
-  return krosi(-z, p);
-}
-
-static long
-ellrootno_intern(GEN e, GEN p, GEN ex)
-{
-  if (cmpiu(p,3) > 0) return ellrootno_p(e,p,ex);
-  switch(itos(p))
-  {
-    case 3: return ellrootno_3(e);
-    case 2: return ellrootno_2(e);
-    default: err(talker,"incorrect prime in ellrootno_intern");
-  }
-  return 0; /* not reached */
-}
-	
-/* local epsilon factor at p, including p=0 for the infinite place. Global
-   if p==1. The equation can be non minimal, but must be over Q. Internal,
-   no garbage collection. */
-static long
-ellrootno_all(GEN e, GEN p, GEN* ptcond)
-{
-  long s, i;
-  GEN fa, cond, pr, ex, gr = globalreduction(e);
-
-  e = coordch(e,(GEN)gr[2]);
-  cond = (GEN)gr[1]; if(ptcond) *ptcond = cond;
-  if (typ(e[12]) != t_INT) err(talker,"not an integral curve in ellrootno");
-  if (typ(p) != t_INT || signe(p) <= 0) err(typeer,"ellrootno");
-  if (cmpiu(p,2) >= 0)
-  {
-    long exs = ggval(cond,p);
-    if (!exs) return 1;
-    if (cmpiu(p,3) > 0) return ellrootno_p(e,p, utoipos(exs));
-  }
-  switch(itos(p))
-  {
-    case 3: return ellrootno_3(e);
-    case 2: return ellrootno_2(e);
-    case 1: s = -1; fa = factor(cond);
-      pr = (GEN)fa[1];
-      ex = (GEN)fa[2];
-      for (i=1; i<lg(pr); i++) s *= ellrootno_intern(e,(GEN)pr[i],(GEN)ex[i]);
-      return s;
-    default: return -1; /* case 0: local factor at infinity = -1 */
-  }
-}
-
-long
-ellrootno(GEN e, GEN p)
-{
-  pari_sp av = avma;
-  long s;
-  if (!p) p = gen_1;
-  s = ellrootno_all(e, p, NULL);
-  avma = av; return s;
 }
