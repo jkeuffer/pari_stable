@@ -221,7 +221,7 @@ pari_init_stackcheck(void *stack_base)
 
   if (getrlimit(RLIMIT_STACK, &rip)) return;
   size = rip.rlim_cur;
-  if (size == RLIM_INFINITY || size > (ulong)stack_base)
+  if (size == (ulong)RLIM_INFINITY || size > (ulong)stack_base)
     PARI_stack_limit = (void*)(((ulong)stack_base) / 16);
   else
     PARI_stack_limit = (void*)((ulong)stack_base - (size/16)*15);
