@@ -1282,6 +1282,7 @@ GEN     sumpos0(entree *ep, GEN a, char *ch, long flag,long prec);
 GEN     sumpos2(entree *ep, GEN a, char *ch, long prec);
 GEN     suminf(entree *ep, GEN a, char *ch, long prec);
 GEN     vecteur(GEN nmax, entree *ep, char *ch);
+GEN     vecteursmall(GEN nmax, entree *ep, char *ch);
 GEN     vvecteur(GEN nmax, entree *ep, char *ch);
 GEN     zbrent(entree *ep, GEN a, GEN b, char *ch, long prec);
 

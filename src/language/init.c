@@ -2396,6 +2396,7 @@ entree functions_basic[]={
 {"vecmin",18,(void*)vecmin,1,"G"},
 {"vecsort",99,(void*)vecsort0,8,"GDGD0,L,"},
 {"vector",28,(void*)vecteur,8,"GDVDI"},
+{"vectorsmall",28,(void*)vecteursmall,8,"GDVDI"},
 {"vectorv",28,(void*)vvecteur,8,"GDVDI"},
 {"weber",99,(void*)weber0,3,"GD0,L,p"},
 {"while",81,NULL,11,NULL},

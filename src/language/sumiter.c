@@ -657,6 +657,32 @@ vecteur(GEN nmax, entree *ep, char *ch)
 }
 
 GEN
+vecteursmall(GEN nmax, entree *ep, char *ch)
+{
+  GEN y,p1;
+  long i,m;
+  long c[]={evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+
+  if (typ(nmax)!=t_INT || signe(nmax) < 0)
+    err(talker,"bad number of components in vector");
+  m=itos(nmax); y=cgetg(m+1,t_VECSMALL);
+  if (!ep || !ch)
+  {
+    for (i=1; i<=m; i++) y[i] = 0;
+    return y;
+  }
+  push_val(ep, c);
+  for (i=1; i<=m; i++)
+  {
+    c[2]=i; p1 = lisseq(ch);
+    if (did_break()) err(breaker,"vector");
+    y[i] = itos(p1);
+  }
+  pop_val(ep); return y;
+}
+
+
+GEN
 vvecteur(GEN nmax, entree *ep, char *ch)
 {
   GEN y = vecteur(nmax,ep,ch);
