@@ -1768,37 +1768,48 @@ discriminant of a quadratic field, false (0) otherwise.
 simpler function $\teb{isfundamental}(x)$ which returns a \kbd{long}
 should be used if $x$ is known to be of type integer.
 
-\subsecidx{isprime}$(x,\{\fl=0\})$: if $\fl=0$ (default), true (1) if $x$ is a strong pseudo-prime
-for 10 randomly chosen bases, false (0) otherwise.
+\subsecidx{isprime}$(x,\{\fl=0\})$: true (1) if $x$ is a (proven) prime
+number, false (0) otherwise. This can be very slow when $x$ is indeed
+prime and has more than $1000$ digits, say. Use \tet{ispseudoprime} to
+quickly check for primality.
 
-If $\fl=1$, use Pocklington-Lehmer ``P-1'' test. true (1) if $x$ is
-prime, false (0) otherwise.
+If $\fl=0$, use a combination of (strong) Rabin-Miller tests (with end
+matching) for small $x$, Selfridge ``$p-1$'' test if $x-1$ is smooth enough,
+and APRCL for general $x$.
 
-If $\fl=2$, use Pocklington-Lehmer ``P-1'' test and output a primality
-certificate as follows: return 0 if $x$ is composite, 1 if $x$ is a
-small prime (currently strictly less than $341 550 071 728 321$), and
-a matrix if $x$ is a large prime.  The matrix has three columns. The
-first contains the prime factors $p$, the second the corresponding
-elements $a_p$ as in Proposition~8.3.1 in GTM~138, and the third the
-output of isprime(p,2).
+If $\fl=1$, use Selfridge-Pocklington-Lehmer ``$p-1$'' test and output a
+primality certificate as follows: return 0 if $x$ is composite, 1 if $x$ is a
+small prime (currently $x < 341 550 071 728 321$) passing enough Rabin-Miller
+tests to guarantee its primality, and a matrix if $x$ is a large prime.  The
+matrix has three columns. The first contains the prime factors $p$, the
+second the corresponding elements $a_p$ as in Proposition~8.3.1 in GTM~138,
+and the third the output of isprime(p,1).  The algorithm fails if one of the
+pseudo-prime factors is not prime, which is exceedingly unlikely (and well
+worth a bug report).
 
-In the two last cases, the algorithm fails if one of the (strong
-pseudo-)prime factors is not prime, but it should be exceedingly rare.
-
+If $\fl=2$, use Adleman-Pomerance-Rumely-Cohen-Lenstra APRCL.
 
 \syn{gisprime}{x,\fl}, but the simpler function $\teb{isprime}(x)$
 which returns a \kbd{long} should be used if $x$ is known to be of
-type integer. Also available is $\teb{plisprime}(N,\fl)$,
-corresponding to $\teb{gisprime}(x,\fl+1)$ if $x$ is known to be of
-type integer.
+type integer. Also available is $\teb{plisprime}(N,1)$, corresponding to
+$\teb{gisprime}(x,1)$ if $x$ is known to be of type integer.
 
+\subsecidx{ispseudoprime}$(x,\{\fl\})$: true (1) if $x$ is a strong pseudo
+prime (see below), false (0) otherwise. If this function returns false, $x$
+is not prime; if, on the other hand it returns true, it is only highly likely
+that $x$ is a prime number. Use \tet{isprime} (which is of course much
+slower) to prove that $x$ is indeed prime.
 
-\subsecidx{ispseudoprime}$(x)$: true (1) if $x$ is a strong
-pseudo-prime for a randomly chosen base, false (0) otherwise.
+If $\fl = 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime
+for the base $2$ and a strong Lucas pseudoprime (there are no known composite
+numbers passing this test).
 
-\syn{gispsp}{x}, but the
-simpler function $\teb{ispsp}(x)$ which returns a \kbd{long}
-should be used if $x$ is known to be of type integer.
+If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime for
+$\fl$ randomly chosen bases.
+
+\syn{gispseudoprime}{x,\f}, but the simpler function $\teb{ispseudoprime}(x)$
+which returns a \kbd{long} should be used if $x$ is known to be of type
+integer.
 
 \subsecidx{issquare}$(x,\{\&n\})$: true (1) if $x$ is square, false (0) if
 not. $x$ can be of any type. If $n$ is given and an exact square root had to
