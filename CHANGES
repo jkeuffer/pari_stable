@@ -49,6 +49,7 @@ x1=1e100; y1=ellordinate(E,x1)[1];
 ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
        [ precision error ]
     5- erfc(non scalar) --> type error
+    6- raising to t_FRAC power didn't work with p-adics: (-1+O(5))^(1/2) --> 1
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
