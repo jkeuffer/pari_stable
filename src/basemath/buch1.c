@@ -1113,7 +1113,7 @@ get_clgp(GEN Disc, GEN W, GEN *ptD, long prec)
         t = qfr3_pow(init[i], u, Disc, isqrtD);
         g = g? qfr3_comp(g, t, Disc, isqrtD): t;
       }
-      g = qfr3_to_qfr(qfr3_canon(g), Z);
+      g = qfr3_to_qfr(qfr3_canon(qfr3_red(g, Disc, isqrtD)), Z);
     }
     else
     {
@@ -1182,17 +1182,17 @@ imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
   pari_sp av;
   GEN col, form, ex = cgetg(lgsub, t_VECSMALL);
 
-  if (!current) current = lgsub;
+  if (!current) current = lgsub-1;
   av = avma;
   for(;;)
   {
     if (s >= need) break;
     if (first && s >= lim) {
-      first = 0; current = lgsub;
+      first = 0;
       if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av;
-    if (++current > KC) current = lgsub;
+    if (++current > KC) current = 1; /* _not_ lgsub */
     form = qfi_pf(Disc, FB[current]);
     form = compimag(form, qfi_random(ex));
     nbtest++; fpc = factorquad(form,KC,LIMC);
@@ -1280,6 +1280,7 @@ real_relations(long need, long *pc, long lim, ulong LIMC, GEN mat, GEN C)
   pari_sp av, av1, limstack;
   GEN d, col, form, form0, form1, ex = cgetg(lgsub, t_VECSMALL);
 
+  if (!current) current = lgsub-1;
   if (lim > need) lim = need;
   av = avma; limstack = stack_lim(av,1);
   for(;;)
@@ -1287,12 +1288,12 @@ real_relations(long need, long *pc, long lim, ulong LIMC, GEN mat, GEN C)
 NEW:
     if (s >= need) break;
     if (first && s >= lim) {
-      first = 0; current = lgsub;
+      first = 0;
       if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av; form = qfr3_random(ex);
     if (!first) {
-      if (++current > KC) current = lgsub;
+      if (++current > KC) current = 1; /* _not_ lgsub */
       form = QFR3_comp(form, qfr3_pf(Disc, FB[current]));
     }
     av1 = avma;
@@ -1520,7 +1521,7 @@ GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 {
   pari_sp av0 = avma, av, av2;
-  long KCCO, i, s, current, triv, nrelsup, nreldep, need;
+  long i, s, current, triv, nrelsup, nreldep, need;
   ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
   double drc, lim, LOGD, LOGD2;
@@ -1579,14 +1580,14 @@ START: avma = av; cbach = check_bach(cbach,6.);
   limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
   for (i=0; i<HASHT; i++) hashtab[i] = NULL;
 
-  need = KC;
-  KCCO = current = 0;
+  need = KC + RELSUP - 2;
+  current = 0;
   W = NULL;
   s = lg(subFB)-1 + RELSUP;
   av2 = avma;
 
 MORE:
-  need += RELSUP;
+  need += 2;
   if (DEBUGLEVEL) {
     if (!W) fprintferr("KC = %ld, need %ld relations\n", KC, need);
     else    fprintferr("...need %ld more relations\n", need);
@@ -1619,7 +1620,6 @@ MORE:
     W = hnfspec_i((long**)mat,vperm,&dep,&B,&C,lg(subFB)-1);
   else
     W = hnfadd_i(W,vperm,&dep,&B,&C, mat,extraC);
-  KCCO += lg(mat)-1;
   gerepileall(av2, 4, &W,&C,&B,&dep);
   need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
   if (need)
@@ -1632,7 +1632,7 @@ MORE:
   if (DEBUGLEVEL) fprintferr("\n#### Tentative class number: %Z\n", h);
 
   z = mulrr(Res, resc); /* ~ hR if enough relations, a multiple otherwise */
-  switch(get_R(C, KCCO - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
+  switch(get_R(C, (lg(C)-1) - (lg(B)-1) - (lg(W)-1), divir(h,z), &R))
   {
     case fupb_PRECI:
       PRECREG = (PRECREG<<1)-2;
