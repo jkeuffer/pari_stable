@@ -684,8 +684,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     {
       if (!gcmp1(polnum))
       {
-        if (!gcmp_1(polnum))
-          err(talker,"constant term not equal to 1 in direuler");
+        if (!gcmp_1(polnum)) err(talker,"constant term != 1 in direuler");
         polden = gneg(polden);
       }
     }
@@ -693,48 +692,47 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     {
       ulong k1, q, qlim;
       if (tx != t_POL) err(typeer,"direuler");
-      c = truecoeff(polnum,0);
+      lx = degpol(polnum);
+      if (lx < 0) err(talker,"constant term != 1 in direuler");
+      c = (GEN)polnum[2];
       if (!gcmp1(c))
       {
-        if (!gcmp_1(c))
-          err(talker,"constant term not equal to 1 in direuler");
+        if (!gcmp_1(c)) err(talker,"constant term != 1 in direuler");
         polnum = gneg(polnum);
         polden = gneg(polden);
       }
       for (i=1; i<=n; i++) y[i]=x[i];
-      lx=degpol(polnum);
-      q = p; qlim = n/p; j=1;
-      while (q<=n && j<=lx)
+      q = p; qlim = n/p;
+      for (j = 1; q<=n && j<=lx; j++)
       {
-	c=(GEN)polnum[j+2];
+	c = (GEN)polnum[j+2];
 	if (!gcmp0(c))
 	  for (k=1,k1=q; k1<=n; k1+=q,k++)
 	    x[k1] = ladd((GEN)x[k1], gmul(c,(GEN)y[k]));
         if (q > qlim) break;
-	q*=p; j++;
+	q *= p;
       }
     }
     tx = typ(polden);
     if (is_scalar_t(tx))
     {
-      if (!gcmp1(polden))
-	err(talker,"constant term not equal to 1 in direuler");
+      if (!gcmp1(polden)) err(talker,"constant term != 1 in direuler");
     }
     else
     {
       if (tx != t_POL) err(typeer,"direuler");
-      c = truecoeff(polden,0);
-      if (!gcmp1(c)) err(talker,"constant term not equal to 1 in direuler");
-      lx=degpol(polden);
+      c = (GEN)polden[2];
+      if (!gcmp1(c)) err(talker,"constant term != 1 in direuler");
+      lx = degpol(polden);
       for (i=p; i<=n; i+=p)
       {
-	s=gzero; k=i; j=1;
-	while (!(k%p) && j<=lx)
+	s = gzero; k = i;
+	for (j = 1; !(k%p) && j<=lx; j++)
 	{
-	  c=(GEN)polden[j+2]; k/=p; j++;
-	  if (!gcmp0(c)) s=gadd(s,gmul(c,(GEN)x[k]));
+	  c = (GEN)polden[j+2]; k /= p;
+	  if (!gcmp0(c)) s = gadd(s, gmul(c,(GEN)x[k]));
 	}
-	x[i]=lsub((GEN)x[i],s);
+	x[i] = lsub((GEN)x[i],s);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))

@@ -622,7 +622,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
 * evaluations, hence the time doubles when m increases by 1. */
 
 /* All inner functions such as intn, etc... must be called with a
- * valid 'tab' table. The wrapper intnall provides a higher level interface */
+ * valid 'tab' table. The wrapper intnum provides a higher level interface */
 
 /* compute $\int_a^b f(t)dt$ with [a,b] compact and f nonsingular. */
 static GEN
@@ -633,8 +633,8 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   long m, k, L, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabsimp(tab)) err(typeer,"intnall");
-  if (!isinC(a) || !isinC(b)) err(typeer,"intnall");
+  if (!checktabsimp(tab)) err(typeer,"intnum");
+  if (!isinC(a) || !isinC(b)) err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -672,7 +672,7 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   if (typ(a) != t_VEC) return intn(E, eval, a, b, tab, prec);
   if (lg(a) != 3) err(typeer,"intnsing");
   if (gsigne((GEN)a[2]) >= 0) return intn(E, eval, (GEN)a[1], b, tab, prec);
-  if (!checktabsimp(tab)) err(typeer,"intnall");
+  if (!checktabsimp(tab)) err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -713,7 +713,7 @@ intninfpm(void *E, GEN (*eval)(GEN, void*), GEN a, long si, GEN tab, long prec)
   long m, L, k, h = 0, pas, i;
   pari_sp ltop = avma, av;
 
-  if (!checktabdoub(tab)) err(typeer,"intnall");
+  if (!checktabdoub(tab)) err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -750,7 +750,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
   long m, L, k, i, spf;
   pari_sp ltop = avma;
 
-  if (!checktabsimp(tab)) err(typeer,"intnall");
+  if (!checktabsimp(tab)) err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
@@ -840,7 +840,7 @@ code_aux(GEN a2, int warn)
   }
   if (gcmp0(a2R) || gcmpgs(a2R, -2)<=0) return f_YSLOW;
   if (gsigne(a2R) > 0) return f_YFAST;
-  if (gcmpgs(a2R, -1) >= 0) err(talker,"incorrect a or b in intnall");
+  if (gcmpgs(a2R, -1) >= 0) err(talker,"incorrect a or b in intnum");
   return f_YVSLO;
 }
 
@@ -852,19 +852,19 @@ transcode(GEN a, long warn)
 
   if (typ(a) != t_VEC) return f_REG;
   la = lg(a);
-  if (la == 1 || la > 3) err(talker,"incorrect a or b in intnall");
+  if (la == 1 || la > 3) err(talker,"incorrect a or b in intnum");
   if (la == 2) return gsigne((GEN)a[1]) > 0 ? f_YSLOW : -f_YSLOW;
   a1 = (GEN)a[1];
   a2 = (GEN)a[2];
   if (typ(a1) != t_VEC)
   {
-    if (!isinC(a1)) err(talker,"incorrect a or b in intnall");
+    if (!isinC(a1)) err(talker,"incorrect a or b in intnum");
     if (!isinR(a2) || gcmpgs(a2, -1) <= 0)
-      err(talker,"incorrect a or b in intnall");
+      err(talker,"incorrect a or b in intnum");
     return gsigne(a2) < 0 ? f_SING : f_REG;
   }
-  if (lg(a1) != 2) err(talker,"incorrect a or b in intnall");
-  if (!isinC(a2)) err(talker,"incorrect a or b in intnall");
+  if (lg(a1) != 2) err(talker,"incorrect a or b in intnum");
+  if (!isinC(a2)) err(talker,"incorrect a or b in intnum");
   return gsigne((GEN)a1[1]) * code_aux(a2, warn);
 }
 
@@ -1266,7 +1266,7 @@ intfuncinit(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, l
 /* if tab = m is an int, initialize, otherwise don't, tab contains the
  * necessary data. */
 static GEN
-intnall_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
+intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 {
   GEN tmp, S = gzero, res1, res2, tm, pi2, pi2p, pis2, pis2p, kma, kmb;
   GEN SP, SN;
@@ -1343,7 +1343,7 @@ intnall_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
       SP = intninfpm(E, eval, coupeb, 1, (GEN)tab[2], prec);
     else
     {
-      if (codeb != f_YOSCC) err(bugparier, "code error in intnall");
+      if (codeb != f_YOSCC) err(bugparier, "code error in intnum");
       if (gegal(kma, kmb))
 	SP = intninfpm(E, eval, coupeb, 1, (GEN)tab[2], prec);
       else
@@ -1360,7 +1360,7 @@ intnall_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 }
 
 GEN
-intnall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
+intnum(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 {
   pari_sp ltop = avma;
   long l = prec + 1;
@@ -1368,7 +1368,7 @@ intnall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 
   tab = intnuminit0(a, b, tab, prec); /* prec + 1 is done in intnuminit0 */
 
-  S = intnall_i(E, eval, gprec_w(a, l), gprec_w(b, l), tab, l);
+  S = intnum_i(E, eval, gprec_w(a, l), gprec_w(b, l), tab, l);
   if (gprecision(S) > prec) S = gprec_w(S, prec);
   return gerepilecopy(ltop, S);
 }
@@ -1400,7 +1400,7 @@ intcirc(void *E, GEN (*eval)(GEN, void*), GEN a, GEN R, GEN tab, long prec)
   D.pi = mppi(prec);
   D.f = eval;
   D.E = E;
-  z = intnall(&D, &auxcirc, realmun(prec), realun(prec), tab, prec);
+  z = intnum(&D, &auxcirc, realmun(prec), realun(prec), tab, prec);
   return gmul2n(gmul(R, z), -1);
 }
 
@@ -1453,16 +1453,16 @@ intinvintern(void *E, GEN (*eval)(GEN, void*), GEN sig, GEN x, GEN tab, long fla
     tmpP = gettmpP(mulcxI(gabs(x, prec)));
     tmpN = gettmpN(tmpP);
     tab = intnuminit0(tmpN, tmpP, tab, prec);
-    zR = intnall_i(&D, &auxinvcos, tmpN, tmpP, tab, prec);
+    zR = intnum_i(&D, &auxinvcos, tmpN, tmpP, tab, prec);
     tmpP[2] = lneg((GEN)tmpP[2]);
-    zI = intnall_i(&D, &auxinvsin, gettmpN(tmpP), tmpP, tab, prec);
+    zI = intnum_i(&D, &auxinvsin, gettmpN(tmpP), tmpP, tab, prec);
     z = gadd(zR, mulcxI(zI));
   }
   else
   {
     D.R = mulcxI(x);
     tmpP = gettmpP((GEN)sig[2]);
-    z = intnall(&D, &auxinvexp, gettmpN(tmpP), tmpP, tab, prec);
+    z = intnum(&D, &auxinvexp, gettmpN(tmpP), tmpP, tab, prec);
   }
   return gdiv(gmul(gexp(gmul((GEN)sig[1], x), prec), z), Pi2n(1, prec));
 }
@@ -1510,7 +1510,7 @@ intmellininvshort(GEN sig, GEN x, GEN tab, long prec)
   D.L = mulcxI(LX);
   D.prec = prec;
   tmpP = gettmpP((GEN)sig[2]);
-  z = intnall_i(&D, &auxmelshort, gettmpN(tmpP), tmpP, tab, prec);
+  z = intnum_i(&D, &auxmelshort, gettmpN(tmpP), tmpP, tab, prec);
   return gdiv(gmul(gexp(gmul((GEN)sig[1], LX), prec), z), Pi2n(1, prec));
 }
 
@@ -1565,7 +1565,7 @@ intfouriersin(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
   D.prec = prec;
   D.f = eval;
   D.E = E;
-  z = intnall(&D, &auxfoursin, mytra(a, tmp, 0), mytra(b, tmp, 0), tab, prec);
+  z = intnum(&D, &auxfoursin, mytra(a, tmp, 0), mytra(b, tmp, 0), tab, prec);
   return z;
 }
 
@@ -1575,14 +1575,14 @@ intfouriercos(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN x, GEN tab, lo
   auxint_t D;
   GEN z, tmp;
 
-  if (gcmp0(x)) return intnall(E, eval, a, b, tab, prec);
+  if (gcmp0(x)) return intnum(E, eval, a, b, tab, prec);
   tmp = gmul(x, Pi2n(1, prec));
   D.a = tmp;
   D.R = NULL;
   D.prec = prec;
   D.f = eval;
   D.E = E;
-  z = intnall(&D, &auxfourcos, mytra(a, tmp, 1), mytra(b, tmp, 1), tab, prec);
+  z = intnum(&D, &auxfourcos, mytra(a, tmp, 1), mytra(b, tmp, 1), tab, prec);
   return z;
 }
 
@@ -1608,7 +1608,7 @@ intnumromb0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec)
 { EXPR_WRAP(ep,ch, intnumromb(EXPR_ARG, a, b, flag, prec)); }
 GEN
 intnum0(entree *ep, GEN a, GEN b, char *ch, GEN tab, long prec)
-{ EXPR_WRAP(ep,ch, intnall(EXPR_ARG, a, b, tab, prec)); }
+{ EXPR_WRAP(ep,ch, intnum(EXPR_ARG, a, b, tab, prec)); }
 GEN
 intcirc0(entree *ep, GEN a, GEN R, char *ch, GEN tab, long prec)
 { EXPR_WRAP(ep,ch, intcirc(EXPR_ARG, a, R, tab, prec)); }
@@ -1680,7 +1680,7 @@ intnumdoubintern(GEN x, void *E)
   A.x = x;
   A.f = D->f;
   A.E = D->Ef;
-  return intnall(&A, &auxf, c, d, D->tabintern, D->prec);
+  return intnum(&A, &auxf, c, d, D->tabintern, D->prec);
 }
 
 GEN
@@ -1702,7 +1702,7 @@ intnumdoub(void *Ef, GEN (*evalf)(GEN, GEN, void*), void *Ec, GEN (*evalc)(GEN, 
     E.tabintern = intnuminit0(C, D, tabint, prec);
   }
   else E.tabintern = tabint;
-  return intnall(&E, &intnumdoubintern, a, b, tabext, prec);
+  return intnum(&E, &intnumdoubintern, a, b, tabext, prec);
 }
 
 GEN
@@ -1792,7 +1792,7 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
   D.E = E;
   D.prec = prec;
   if (!flii)
-    S = intnall_i(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
+    S = intnum_i(&D, sgn > 0? (flag ? &auxsum1 : &auxsum0)
                              : (flag ? &auxsumalt1 : &auxsumalt0),
                       gzero, b, tab, prec);
   else

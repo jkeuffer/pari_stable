@@ -1683,6 +1683,7 @@ void    forprime(entree *ep, GEN a, GEN b, char *ch);
 void    forstep(entree *ep, GEN a, GEN b, GEN s, char *ch);
 void    forvec(entree *ep, GEN x, char *ch, long flag);
 GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
+GEN     intnum(void *E, GEN (*e)(GEN, void*), GEN a,GEN b, GEN tab, long prec);
 long    intnumstep(long prec);
 GEN     intnumromb0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec);
 GEN     intnum0(entree *ep, GEN a, GEN b, char *ch, GEN tab, long prec);

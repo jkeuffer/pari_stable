@@ -6838,48 +6838,49 @@ expression, including of course expressions using loops.
 
 \misctitle{Library mode.}
 Since it is easier to program directly the loops in library mode, these
-functions are mainly useful for GP programming. Their use library mode is
-tricky and its explanation will be mostly omitted, although the reader can
-try and figure it out by himself by checking the example given for \tet{sum}.
+functions are mainly useful for GP programming. Using them in library mode is
+tricky we will not give any details, although the reader can try and figure
+it out by himself by checking the example given for \tet{sum}.
 
-On the other hand, numerical functions code a function (to be integrated,
+On the other hand, numerical routines code a function (to be integrated,
 summed, etc.) with two parameters named
 \bprog
   GEN (*eval)(GEN,void*)
   void *E;
 @eprog\noindent
 The second is meant to contain all auxilliary data needed by your function.
-The first is a pointer to a function whose first parameter is a \kbd{GEN} and
-the second a \kbd{void*}, and it is assumed that \kbd{eval(x, E)} returns
-the value of your function evaluated at \kbd{x}. For instance, one might code
-the translation by (a fixed) \kbd{t} via
+The first is such that \kbd{eval(x, E)} returns your function evaluated at
+\kbd{x}. For instance, one may code the family of functions 
+$f_t: x \to (x+t)^2$ via
 \bprog
-GEN translate(GEN x, void *E) { return gadd(x, (GEN)E); }
-@eprog
-One would then use \kbd{\&translate} as evaluation function \kbd{eval},
-and \kbd{(void*)t} as data \kbd{E}. Of course, you can set \kbd{E} to a
-pointer to any \kbd{struct} (typecast to \kbd{void*}), so the above mechanism
-handles arbitrary functions. For simple functions without extra parameters,
-you may set \kbd{E = NULL} and ignore that argument in your function
-definition.
+GEN f(GEN x, void *t) { return gsqr(gadd(x, (GEN)t)); }
+@eprog\noindent
+One could then integrate $f_1$ between $a$ and $b$ with the call
+\bprog
+intnum((void*)stoi(1), &fun, a, b, NULL, prec);
+@eprog\noindent
+Since you can set \kbd{E} to a pointer to any \kbd{struct} (typecast to
+\kbd{void*}) the above mechanism handles arbitrary functions. For simple
+functions without extra parameters, you may set \kbd{E = NULL} and ignore
+that argument in your function definition.
 
 \misctitle{Numerical integration.}\sidx{numerical integration} 
 Starting with version 2.2.9 the powerful ``double exponential'' univariate
-integration method has been implemented in the routine \tet{intnum} and its
-variants. Romberg integration is still available under the name
-\kbd{intnumromb}, but superseded. It is possible to compute numerically
-integrals to thousands of decimal places in reasonable time, as long as the
-integrand is regular, as is usually the case. It is also reasonable to
-compute numerically integrals in several variables, although more than two
-becomes lengthy. The integration domain may be non-compact, and the integrand
-may have reasonable singularities at endpoints. To use \kbd{intnum}, the user
-must split the integral into a sum of subintegrals where the function has
-(possible) singularities only at the endpoints. Polynomials in logarithms are
-not considered singular, and neglecting these logs, singularities are assumed
-to be algebraic (in other words asymptotic to $C(x-a)^{-\alpha}$ for some
-$\alpha$ such that $\alpha>-1$ when $x$ is close to $a$), or to correspond to
-simple discontinuities of some (higher) derivative of the function. For
-instance, the point $0$ is a singularity of $\text{abs}(x)$.
+integration method is implemented in \tet{intnum} and its variants. Romberg
+integration is still available under the name \kbd{intnumromb}, but
+superseded. It is possible to compute numerically integrals to thousands of
+decimal places in reasonable time, as long as the integrand is regular. It is
+also reasonable to compute numerically integrals in several variables,
+although more than two becomes lengthy. The integration domain may be
+non-compact, and the integrand may have reasonable singularities at
+endpoints. To use \kbd{intnum}, the user must split the integral into a sum
+of subintegrals where the function has (possible) singularities only at the
+endpoints. Polynomials in logarithms are not considered singular, and
+neglecting these logs, singularities are assumed to be algebraic (in other
+words asymptotic to $C(x-a)^{-\alpha}$ for some $\alpha$ such that
+$\alpha>-1$ when $x$ is close to $a$), or to correspond to simple
+discontinuities of some (higher) derivative of the function. For instance,
+the point $0$ is a singularity of $\text{abs}(x)$.
 
 See also the discrete summation methods below (sharing the prefix \kbd{sum}).
 
@@ -7289,9 +7290,8 @@ time = 120 ms.
 %3 = -7.23... E-60 \\@com $64 = 2^6$ times faster, lost $45$ decimals.
 @eprog
 
-\synt{intnall}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,GEN tab, 
-long prec}, where $\kbd{eval}(x, E)$ returns the value of the function at $x$
-and an omitted \var{tab} is coded as \kbd{NULL}.
+\synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN b,GEN tab, 
+long prec}, where an omitted \var{tab} is coded as \kbd{NULL}.
 
 \subsecidx{intnuminit}$(a,b,\{m=0\})$: initialize tables for integration from
 $a$ to $b$, where $a$ and $b$ are coded as in \kbd{intnum}. Only the
