@@ -70,8 +70,8 @@ typedef int (*QSCOMP)(const void *, const void *);
 
 #ifdef LONG_IS_64BIT
 #  define   LGnumBITS 32
-#  define EXPOnumBITS 48
-#  define LGEFnumBITS 32
+#  define EXPOnumBITS 48 /* otherwise MAXVARN too large */
+#  define LGEFnumBITS 46
 #  define VALPnumBITS 32
 #else
 # ifdef OLD_CODES
