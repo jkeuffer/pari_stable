@@ -836,7 +836,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     S[k] = (long)z;
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
-  delete_var(); return pol_from_Newton(S);
+  (void)delete_var(); return pol_from_Newton(S);
 }
 
 typedef struct {

@@ -1337,7 +1337,7 @@ gsubst_expr(GEN pol, GEN from, GEN to)
   else					/* Vector? */
     tmp = lift0(tmp, gvar(from));
   tmp = gsubst(tmp, v, to);
-  delete_var();
+  (void)delete_var();
   return gerepilecopy(av, tmp);
 }
 
