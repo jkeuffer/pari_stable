@@ -432,7 +432,6 @@ GEN     idealhnf0(GEN nf, GEN a, GEN b);
 GEN     idealintersect(GEN nf, GEN x, GEN y);
 GEN     idealinv(GEN nf, GEN ix);
 GEN     ideallllred(GEN nf,GEN ix,GEN vdir,long prec);
-GEN     ideallllredall(GEN nf, GEN ix, GEN vdir, long prec, long precint);
 GEN     idealmul(GEN nf, GEN ix, GEN iy);
 GEN     idealmul0(GEN nf, GEN ix, GEN iy, long flag, long prec);
 GEN     idealmulelt(GEN nf, GEN elt, GEN x);
