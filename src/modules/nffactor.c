@@ -142,15 +142,17 @@ nffactormod(GEN nf, GEN x, GEN pr)
 }
 
 static GEN
-QXQ_normalize(GEN P, GEN T)
+QXQX_normalize(GEN P, GEN T)
 {
-  GEN t = leading_term(P);
-  if (!gcmp1(t))
+  GEN P0 = leading_term(P);
+  if (!gcmp1(P0))
   {
-    if (is_rational_t(typ(t)))
-      P = gdiv(P, t);
+    long t = typ(P0);
+    if (t == t_POL && !degpol(P0)) P0 = (GEN)P0[2];
+    if (is_rational_t(t))
+      P = gdiv(P, P0);
     else
-      P = RgXQX_mul(QX_invmod(t,T), P, T);
+      P = RgXQX_RgXQ_mul(P, QXQ_inv(P0,T), T);
   }
   return P;
 }
@@ -185,10 +187,10 @@ nfroots(GEN nf,GEN pol)
 
   if (degpol(g))
   { /* not squarefree */
-    g = QXQ_normalize(g, T);
+    g = QXQX_normalize(g, T);
     A = RgXQX_div(A,g,T);
   }
-  A = QXQ_normalize(A, T);
+  A = QXQX_normalize(A, T);
   A = Q_primpart(A);
   A = nfsqff(nf,A,1);
   return gerepileupto(av, gen_sort(A, 0, cmp_pol));
@@ -295,7 +297,7 @@ nffactor(GEN nf,GEN pol)
   A = Q_primpart( lift_intern(A) );
   g = nfgcd(A, derivpol(A), T, (GEN)nf[4]);
 
-  A = QXQ_normalize(A, T);
+  A = QXQX_normalize(A, T);
   A = Q_primpart(A);
   if (DEBUGLEVEL>2) msgTIMER(&ti, "squarefree test");
 
@@ -303,7 +305,7 @@ nffactor(GEN nf,GEN pol)
   { /* not squarefree */
     pari_sp av1;
     GEN ex;
-    g = QXQ_normalize(g, T);
+    g = QXQX_normalize(g, T);
     A = RgXQX_div(A,g, T);
 
     y = nfsqff(nf,A,0); av1 = avma;
@@ -857,7 +859,7 @@ nextK:
       for (i=1; i<=K; i++) list[i] = famod[ind[i]];
 
       y = Q_primpart(y);
-      fa[cnt++] = (long)QXQ_normalize(y, nfpol);
+      fa[cnt++] = (long)QXQX_normalize(y, nfpol);
       /* fix up pol */
       pol = q;
       for (i=j=k=1; i <= lfamod; i++)
@@ -904,7 +906,7 @@ END:
   { /* leftover factor */
     if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
 
-    if (C2lt && lfamod < 2*K) pol = QXQ_normalize(Q_primpart(pol), nfpol);
+    if (C2lt && lfamod < 2*K) pol = QXQX_normalize(Q_primpart(pol), nfpol);
     setlg(famod, lfamod+1);
     listmod[cnt] = (long)dummycopy(famod);
     fa[cnt++] = (long)pol;
@@ -962,7 +964,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
     if (!pol) return NULL;
 
     y = Q_primpart(y);
-    list[i] = (long)QXQ_normalize(y, nfT);
+    list[i] = (long)QXQX_normalize(y, nfT);
     if (++i >= r) break;
 
     if (C2lt) pol = Q_primpart(pol);
@@ -972,7 +974,7 @@ nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
     C2ltpol = C2lt? gmul(C2lt,pol): pol;
   }
   y = Q_primpart(pol);
-  list[i] = (long)QXQ_normalize(y, nfT); return list;
+  list[i] = (long)QXQX_normalize(y, nfT); return list;
 }
 
 static GEN
@@ -1255,7 +1257,7 @@ AGAIN:
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
-    if (!CM_L) { list = _col(QXQ_normalize(P,nfT)); break; }
+    if (!CM_L) { list = _col(QXQX_normalize(P,nfT)); break; }
     if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
@@ -1483,7 +1485,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     if (anbf <= 1)
     {
       if (!fl) /* irreducible */
-        return gerepilecopy(av, _vec(QXQ_normalize(polmod, nfpol)));
+        return gerepilecopy(av, _vec(QXQX_normalize(polmod, nfpol)));
       if (!anbf) return cgetg(1,t_VEC); /* no root */
     }
 

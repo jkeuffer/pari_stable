@@ -1578,7 +1578,7 @@ GEN     FqX_red(GEN z, GEN T, GEN p);
 GEN     FqX_rem(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_mul(GEN x, GEN y, GEN T, GEN p);
 GEN     FqX_sqr(GEN x, GEN T, GEN p);
-GEN     QX_invmod(GEN A, GEN B);
+GEN     QXQ_inv(GEN A, GEN B);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
 int     ZX_is_squarefree(GEN x);

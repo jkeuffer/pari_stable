@@ -73,7 +73,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
   if (P_lead)
   {
     if (N) P_lead = Fq_inv(P_lead,T,N);
-    else if (T) P_lead = QX_invmod(P_lead,T);
+    else if (T) P_lead = QXQ_inv(P_lead,T);
   }
   for (k=m; k<=n; k++)
   {

@@ -1589,7 +1589,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
     if (!S->invnu)
     {
       while (gdvd(S->chi, S->nu)) S->nu = gadd(S->nu, S->p);
-      S->invnu = QX_invmod(S->nu, S->chi);
+      S->invnu = QXQ_inv(S->nu, S->chi);
       S->invnu = redelt_i(S->invnu, S->pmr, S->p, &(S->Dinvnu));
     }
     if (S->Dinvnu) Dg = mulii(Dg, gpowgs(S->Dinvnu, er));
@@ -3459,7 +3459,7 @@ polcompositum0(GEN A, GEN B, long flall)
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
     { /* invmod possibly very costly */
-      a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], (GEN)C[i]));
+      a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], (GEN)C[i]));
       a = gneg_i(gmod(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
@@ -3532,7 +3532,7 @@ rnfequation0(GEN A, GEN B, long flall)
   {
     GEN w,a; /* a,b,c root of A,B,C = compositum, c = b + k a */
     /* invmod possibly very costly */
-    a = gmul((GEN)LPRS[1], QX_invmod((GEN)LPRS[2], C));
+    a = gmul((GEN)LPRS[1], QXQ_inv((GEN)LPRS[2], C));
     a = gneg_i(gmod(a, C));
     /* b = gadd(polx[varn(A)], gmulsg(k,a)); */
     w = cgetg(4,t_VEC); /* [C, a, n ] */

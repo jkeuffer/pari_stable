@@ -172,7 +172,7 @@ element_inv(GEN nf, GEN x)
       p = gmael(x,i,1);
       x = lift(x); break;
     }
-  p1 = QX_invmod(gmul((GEN)nf[7],x), (GEN)nf[1]);
+  p1 = QXQ_inv(gmul((GEN)nf[7],x), (GEN)nf[1]);
   p1 = algtobasis_i(nf,p1);
 
   if (p) p1 = FpV_to_mod(p1, p);
@@ -235,7 +235,7 @@ element_div(GEN nf, GEN x, GEN y)
       y = lift(y); break;
     }
 
-  p1 = gmul(gmul((GEN)nf[7],x), QX_invmod(gmul((GEN)nf[7],y), (GEN)nf[1]));
+  p1 = gmul(gmul((GEN)nf[7],x), QXQ_inv(gmul((GEN)nf[7],y), (GEN)nf[1]));
   p1 = algtobasis_i(nf, grem(p1, (GEN)nf[1]));
   if (p) p1 = FpV_to_mod(p1,p);
   return gerepileupto(av,p1);

@@ -776,7 +776,7 @@ getfu(GEN nf,GEN *ptA,long fl,long *pte,long prec)
   p2 = PiI2n(1,prec); for (   ; i<=RU; i++) vec[i] = (long)p2;
   for (j=1; j<RU; j++)
   {
-    p1 = (GEN)y[j]; p2 = QX_invmod(p1, (GEN)nf[1]);
+    p1 = (GEN)y[j]; p2 = QXQ_inv(p1, (GEN)nf[1]);
     if (gcmp(QuickNormL2(p2,DEFAULTPREC),
              QuickNormL2(p1,DEFAULTPREC)) < 0)
     {

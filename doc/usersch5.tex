@@ -1637,7 +1637,6 @@ collecting garbage.
 
 \fun{GEN}{Flx_pow}{GEN x, long n, ulong p}
 
-
 \subsubsec{Miscellaneous operations}
 
 \fun{GEN}{Flx_normalize}{GEN z, ulong p}, as \kbd{FpX\_normalize}.
@@ -1739,6 +1738,11 @@ returning an \kbd{Flx} in variable $v$.
 place (destroys~\kbd{x}).
 
 \fun{GEN}{Flm_mul}{GEN x, GEN y, ulong p}
+
+\subsec{\kbd{QX}}.
+
+\fun{GEN}{QXQ_inv}{GEN A, GEN B} returns the inverse of \kbd{A} modulo \kbd{B}
+where \kbd{A} and \kbd{B} are \kbd{QX}s.
 
 \subsec{\kbd{RgX}}.
 

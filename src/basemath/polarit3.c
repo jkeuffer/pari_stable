@@ -3262,7 +3262,7 @@ next:
 
 /* lift(1 / Mod(A,B)). B0 a t_POL, A0 a scalar or a t_POL. Rational coeffs */
 GEN
-QX_invmod(GEN A0, GEN B0)
+QXQ_inv(GEN A0, GEN B0)
 {
   GEN a,b,D,A,B,q,qp,Up,Vp,U,V,res;
   long stable;
@@ -3270,11 +3270,11 @@ QX_invmod(GEN A0, GEN B0)
   pari_sp av2, av = avma, avlim = stack_lim(av, 1);
   byteptr d;
 
-  if (typ(B0) != t_POL) err(notpoler,"QX_invmod");
+  if (typ(B0) != t_POL) err(notpoler,"QXQ_inv");
   if (typ(A0) != t_POL)
   {
     if (is_scalar_t(typ(A0))) return ginv(A0);
-    err(notpoler,"QX_invmod");
+    err(notpoler,"QXQ_inv");
   }
   if (degpol(A0) < 15) return ginvmod(A0,B0);
   A = Q_primitive_part(A0, &D);
@@ -3296,7 +3296,7 @@ QX_invmod(GEN A0, GEN B0)
       V = ZX_init_CRT(Vp,p,varn(A0));
       q = utoi(p); continue;
     }
-    if (DEBUGLEVEL>5) msgtimer("QX_invmod: mod %ld (bound 2^%ld)", p,expi(q));
+    if (DEBUGLEVEL>5) msgtimer("QXQ_inv: mod %ld (bound 2^%ld)", p,expi(q));
     qp = muliu(q,p);
     stable  = ZX_incremental_CRT(&U, Up, q,qp, p);
     stable &= ZX_incremental_CRT(&V, Vp, q,qp, p);
@@ -3304,12 +3304,12 @@ QX_invmod(GEN A0, GEN B0)
     { /* all stable: check divisibility */
       res = gadd(gmul(A,U), gmul(B,V));
       if (degpol(res) == 0) break; /* DONE */
-      if (DEBUGLEVEL) fprintferr("QX_invmod: char 0 check failed");
+      if (DEBUGLEVEL) fprintferr("QXQ_inv: char 0 check failed");
     }
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      if (DEBUGMEM>1) err(warnmem,"QX_invmod");
+      if (DEBUGMEM>1) err(warnmem,"QXQ_inv");
       gerepileall(av2, 3, &q,&U,&V);
     }
   }

@@ -1713,7 +1713,7 @@ idealinv(GEN nf, GEN x)
           case t_COL: x = gmul((GEN)nf[7],x); break;
           case t_POLMOD: x = (GEN)x[2]; break;
         }
-        x = QX_invmod(x,(GEN)nf[1]);
+        x = QXQ_inv(x,(GEN)nf[1]);
       }
       x = idealhermite_aux(nf,x); break;
     case id_PRIME:
@@ -2136,7 +2136,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   }
 
   x = gmul((GEN)nf[7], y); /* algebraic integer */
-  b = Q_remove_denom(QX_invmod(x,pol), &T);
+  b = Q_remove_denom(QXQ_inv(x,pol), &T);
   b = algtobasis_i(nf,b);
   if (T)
   {
@@ -2974,7 +2974,7 @@ element_invmodpr(GEN nf, GEN y, GEN modpr)
   pari_sp av=avma;
   GEN p1;
 
-  p1 = QX_invmod(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1]);
+  p1 = QXQ_inv(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1]);
   p1 = algtobasis_i(nf,p1);
   return gerepileupto(av, nfreducemodpr(nf,p1,modpr));
 }
