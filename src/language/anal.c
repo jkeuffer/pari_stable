@@ -1063,26 +1063,31 @@ realloc_buf(char *bp, long len, char **ptbuf,char **ptlimit)
 static char *
 expand_string(char *bp, char **ptbuf, char **ptlimit)
 {
-  char *tmp, *s = analyseur;
-  long len, alloc;
+  char *tmp;
+  long len;
+  int alloc = 1;
 
-  while (is_keyword_char(*s)) s++;
+  if (is_keyword_char(*analyseur))
+  {
+    char *s = analyseur;
+    do s++; while (is_keyword_char(*s));
 
-  if ((*s == '"' || *s == ',' || *s == ')') && !is_entry(analyseur))
-  { /* Do not create new user variable. Consider as a literal */
-    tmp = analyseur;
-    len = s - analyseur;
-    analyseur = s;
-    alloc = 0;
+    if ((*s == '"' || *s == ',' || *s == ')') && !is_entry(analyseur))
+    { /* Do not create new user variable. Consider as a literal */
+      tmp = analyseur;
+      len = s - analyseur;
+      analyseur = s;
+      alloc = 0;
+    }
   }
-  else
+
+  if (alloc)
   {
     gpmem_t av = avma;
     GEN p1 = expr();
     if (br_status) err(breaker,"here (expanding string)");
     tmp = GENtostr0(p1, &DFLT_OUTPUT, &gen_output);
     len = strlen(tmp); avma = av;
-    alloc = 1;
   }
   if (ptlimit && bp + len > *ptlimit)
     bp = realloc_buf(bp, len, ptbuf,ptlimit);
@@ -1131,28 +1136,22 @@ static GEN
 any_string()
 {
   long n = 0, len = 16;
-  GEN p1, res = new_chunk(len + 1);
+  GEN res = new_chunk(len + 1);
 
   while (*analyseur)
   {
-    if (*analyseur == '"')
-    {
-      res[n++] = (long) strtoGENstr_t();
-      continue;
-    }
     if (*analyseur == ')' || *analyseur == ';') break;
     if (*analyseur == ',')
       analyseur++;
     else
     {
-      p1 = expr();
+      res[n++] = (long)expr();
       if (br_status) err(breaker,"here (print)");
-      res[n++] = (long) p1;
     }
     if (n == len)
     {
       long newlen = len << 1;
-      p1 = new_chunk(newlen + 1);
+      GEN p1 = new_chunk(newlen + 1);
       for (n = 0; n < len; n++) p1[n] = res[n];
       res = p1; len = newlen;
     }
@@ -1214,6 +1213,18 @@ make_arg(GEN x)
                    : (typ(x) == t_STR)? geval(x): x;
 }
 
+static GEN
+fun_seq(char *p)
+{
+  GEN res = lisseq(p);
+  if (br_status != br_NONE)
+    br_status = br_NONE;
+  else
+    if (! is_universal_constant(res)) /* important for gnil */
+      res = forcecopy(res); /* make result safe */
+  return res;
+}
+
 /* p = NULL + array of variable numbers (longs) + function text */
 static GEN
 call_fun(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
@@ -1226,16 +1237,24 @@ call_fun(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   for (i=0; i<narg; i++) copyvalue(*p++, *arg++);
   for (i=0; i<nloc; i++) pushvalue(*p++, make_arg(*loc++));
   /* dumps arglist from identifier() to the garbage zone */
-  res = lisseq((char *)p);
-  if (br_status != br_NONE)
-    br_status = br_NONE;
-  else
-    if (! is_universal_constant(res)) /* important for gnil */
-      res = forcecopy(res); /* make result safe */
-
+  res = fun_seq((char *)p);
   /* pop out ancient values of formal parameters */
   for (i=0; i<nloc; i++) killvalue(*--p);
   for (i=0; i<narg; i++) killvalue(*--p);
+  return res;
+}
+/* p = NULL + array of variable numbers (longs) + function text */
+static GEN
+call_member(GEN p, GEN x)
+{
+  GEN res;
+
+  p++; /* skip NULL */
+  /* push new values for formal parameters */
+  pushvalue(*p++, x);
+  res = fun_seq((char *)p);
+  /* pop out ancient values of formal parameters */
+  killvalue(*--p);
   return res;
 }
 
@@ -1606,10 +1625,7 @@ identifier(void)
           while (*analyseur)
           {
             if (*analyseur == ',' || *analyseur == ')') break;
-            if (*analyseur == '"')
-              bp = readstring_i(bp, &buf,&limit);
-            else
-              bp = expand_string(bp, &buf,&limit);
+            bp = expand_string(bp, &buf,&limit);
           }
           *bp++ = 0; argvec[i++] = (GEN)buf;
           break;
@@ -3328,7 +3344,7 @@ read_member(GEN x)
       gunclone((GEN)ep->value); return NULL;
     }
     if (EpVALENCE(ep) == EpMEMBER)
-      return call_fun((GEN)ep->value, NULL, &x, 0, 1);
+      return call_member((GEN)ep->value, x);
     else
     {
       GEN y = ((F1GEN)ep->value)(x);
