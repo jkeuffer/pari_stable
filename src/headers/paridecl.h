@@ -1671,7 +1671,7 @@ GEN     subgrouplist(GEN cyc, GEN bound);
 
 GEN     bnrL1(GEN bnr, GEN sbgrp, long flag, long prec);
 GEN     bnrrootnumber(GEN bnr, GEN chi, long flag, long prec);
-GEN     bnrstark(GEN bnr, GEN subgroup, long flag, long prec);
+GEN     bnrstark(GEN bnr, GEN subgroup, long prec);
 
 /* sumiter.c */
 
@@ -1832,3 +1832,5 @@ GEN     vecthetanullk(GEN q, long k, long prec);
 GEN     weber0(GEN x, long flag,long prec);
 GEN     wf(GEN x, long prec);
 GEN     wf2(GEN x, long prec);
+
+GEN     padicfieldslist(GEN p, GEN m, GEN d, long flag);

@@ -502,9 +502,8 @@ CplxModulus(GEN data, long *newprec, long prec)
    index 2 of Im(C) in Clk(m), no prime dividing f splits in the
    corresponding quadratic extension and m is of minimal norm. Return
    bnr(m), D, quotient Ck(m) / D and Clk(m) / C */
-/* If fl != 0, try bnd extra moduli */
 static GEN
-FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
+FindModulus(GEN dataC, long *newprec, long prec)
 {
   const long limnorm = 400;
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
@@ -622,13 +621,13 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
               rep    = gclone(p2);
               oldcpl = cpl;
             }
-            if (!fl || oldcpl < rb) goto END; /* OK */
+            if (oldcpl < rb) goto END; /* OK */
 
             if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
             first--;
           }
 	}
-        if (first <= bnd)
+        if (first <= 0)
 	{
 	  if (DEBUGLEVEL>1)
 	    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",
@@ -640,8 +639,8 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
     /* if necessary compute more ideals */
     minnorm = maxnorm;
     maxnorm <<= 1;
-    if (maxnorm > limnorm)
-      err(talker, "Cannot find a suitable modulus in FindModulus");
+    if (maxnorm > limnorm) return NULL;
+
   }
 END:
   rep[5] = (long)InitChar((GEN)rep[1], (GEN)rep[5], *newprec);
@@ -2493,10 +2492,7 @@ GenusField(GEN bnf)
   return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT));
 }
 
-/* if flag = 0 returns the reduced polynomial,  flag = 1 returns the
-   non-reduced polynomial,  flag = 2 returns an absolute reduced
-   polynomial,  flag = 3 returns the polynomial of the Stark's unit,
-   flag = -1 computes a fast and crude approximation of the result */
+/* if flag != 0, computes a fast and crude approximation of the result */
 static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
@@ -2524,7 +2520,7 @@ LABDOUB:
   av = avma;
   vChar = sortChars(dataCR, N==2);
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
-  if (flag >= 0)
+  if (!flag)
   {
     /* compute S,T differently if nf is real quadratic */
     if (degpol(nf[1]) == 2) 
@@ -2596,36 +2592,43 @@ LABDOUB:
   }
   if (DEBUGLEVEL >= 2) fprintferr("zetavalues = %Z\n", veczeta);
 
-  if (flag >=0 && flag <= 3) sq = 0;
+  if (DEBUGLEVEL > 1 && !flag)
+    fprintferr("Checking the square-root of the Stark unit...\n");
 
-  ro = cgetg(h+1, t_VEC); /* roots */
-
-  for (;;)
+  for (j = 1; j <= h; j++)
   {
-    if (DEBUGLEVEL > 1 && !sq)
-      fprintferr("Checking the square-root of the Stark unit...\n");
+    if (flag) veczeta[j] = lmul2n((GEN)veczeta[j], 1);
+    veczeta[j] = lmul2n(gch((GEN)veczeta[j], newprec), 1);    
+  }
+  polrelnum = roots_to_pol_intern(realun(newprec),veczeta, 0,0);
+  if (DEBUGLEVEL)
+  {
+    if (DEBUGLEVEL >= 2) fprintferr("polrelnum = %Z\n", polrelnum);
+    msgtimer("Compute %s", (flag)? "quickpol": "polrelnum");
+  }
+  
+  if (flag) 
+    return gerepilecopy(av, polrelnum);
 
+  /* we try to recognize this polynomial */
+  polrel = RecCoeff(nf, polrelnum, v, newprec);
+
+  if (!polrel)
+  {
+    if (DEBUGLEVEL > 1)
+    fprintferr("It's not a square...\n");
     for (j = 1; j <= h; j++)
-    {
-      p1 = gexp(gmul2n((GEN)veczeta[j], sq), newprec);
-      ro[j] = ladd(p1, ginv(p1));
-    }
-    polrelnum = roots_to_pol_intern(realun(newprec),ro, 0,0);
+      veczeta[j] = lsubgs(gsqr((GEN)veczeta[j]), 2);
+    polrelnum = roots_to_pol_intern(realun(newprec),veczeta, 0,0);
     if (DEBUGLEVEL)
     {
       if (DEBUGLEVEL >= 2) fprintferr("polrelnum = %Z\n", polrelnum);
-      msgtimer("Compute %s", (flag < 0)? "quickpol": "polrelnum");
+      msgtimer("Compute polrelnum");
     }
-
-    if (flag < 0)
-      return gerepilecopy(av, polrelnum);
-
     /* we try to recognize this polynomial */
     polrel = RecCoeff(nf, polrelnum, v, newprec);
-
-    if (polrel || (sq++ == 1)) break;
   }
-
+  
   if (!polrel) /* if it fails... */
   {
     long pr;
@@ -2645,29 +2648,10 @@ LABDOUB:
     goto LABDOUB;
   }
 
-  /* and we compute the polynomial of eps if flag = 3 */
-  if (flag == 3)
-  {
-    n  = fetch_var();
-    p1 = gsub(polx[0], gadd(polx[n], ginv(polx[n])));
-    polrel = polresultant0(polrel, p1, 0, 0);
-    polrel = gmul(polrel, gpowgs(polx[n], h));
-    polrel = gsubst(polrel, n, polx[0]);
-    polrel = gmul(polrel, leading_term(polrel));
-    (void)delete_var();
-  }
-
   if (DEBUGLEVEL >= 2) fprintferr("polrel = %Z\n", polrel);
   if (DEBUGLEVEL) msgtimer("Recpolnum");
 
-  /* we want a reduced relative polynomial */
-  if (!flag) return gerepileupto(av, rnfpolredabs(nf, polrel, nf_PARTIALFACT));
-
-  /* we just want the polynomial computed */
-  if (flag!=2) return gerepilecopy(av, polrel);
-
-  /* we want a reduced absolute polynomial */
-  return gerepileupto(av, rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_PARTIALFACT));
+  return gerepilecopy(av, polrel);
 }
 
 /********************************************************************/
@@ -2677,7 +2661,7 @@ LABDOUB:
 /* compute the polynomial over Q of the Hilbert class field of
    Q(sqrt(D)) where D is a positive fundamental discriminant */
 GEN
-quadhilbertreal(GEN D, GEN flag, long prec)
+quadhilbertreal(GEN D, long prec)
 {
   pari_sp av = avma;
   long newprec;
@@ -2718,7 +2702,21 @@ START:
     /* find the modulus defining N */
     bnr   = buchrayinitgen(bnf, gone);
     dataC = InitQuotient(bnr, gzero);
-    bnrh  = FindModulus(dataC, 1, &newprec, prec, flag? -1: 0);
+    bnrh  = FindModulus(dataC, &newprec, prec);
+
+    if (!bnrh)
+    {
+      GEN Mcyc = diagonal(gmael(bnr, 5, 2));
+      long i, l = lg(Mcyc);
+      GEN vec = cgetg(l, t_VEC), M;
+      for (i = 1; i < l; i++)
+	{
+	  M = gcopy(Mcyc);
+	  coeff(M,i,i) = one;
+	  vec[i] = (long)rnfequation(bnf, bnrstark(bnr, M, prec));
+	}  
+      return (vec);
+    }
 
     if (DEBUGLEVEL) msgtimer("FindModulus");
 
@@ -2727,7 +2725,7 @@ START:
       if (DEBUGLEVEL >= 2) fprintferr("new precision: %ld\n", newprec);
       nf = nfnewprec(nf, newprec);
     }
-    pol = AllStark(bnrh, nf, 1, newprec);
+    pol = AllStark(bnrh, nf, 0, newprec);
   } ENDCATCH;
   if (!pol) goto START;
 
@@ -2744,14 +2742,11 @@ get_subgroup(GEN subgp, GEN cyc)
 }
 
 GEN
-bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
+bnrstark(GEN bnr, GEN subgrp, long prec)
 {
-  long N, newprec, bnd = 0;
+  long N, newprec;
   pari_sp av = avma;
   GEN bnf, dataS, p1, Mcyc, nf, data;
-
-  if (flag >= 4) { bnd = -10; flag -= 4; }
-  if (flag < 0 || flag > 3) err(flagerr,"bnrstark");
 
   /* check the bnr */
   checkbnrgen(bnr);
@@ -2787,7 +2782,20 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
 
   /* find a suitable extension N */
   dataS = InitQuotient(bnr, subgrp);
-  data  = FindModulus(dataS, 1, &newprec, prec, bnd);
+  data  = FindModulus(dataS, &newprec, prec);
+
+  if (!data)
+  {
+    long i, l = lg(Mcyc);
+    GEN vec = cgetg(l, t_VEC), M;
+    for (i = 1; i < l; i++)
+    {
+      M = gcopy(subgrp);
+      coeff(M,i,i) = one;
+      vec[i] = (long)bnrstark(bnr, M, prec);
+    }  
+    return (vec);
+  }
 
   if (newprec > prec)
   {
@@ -2795,7 +2803,7 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
     nf = nfnewprec(nf, newprec);
   }
 
-  return gerepileupto(av, AllStark(data, nf, flag, newprec));
+  return gerepileupto(av, AllStark(data, nf, 0, newprec));
 }
 
 /* For each character of Cl(bnr)/subgp, compute L(1, chi) (or equivalently

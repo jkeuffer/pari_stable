@@ -283,7 +283,7 @@ quadhilbert(GEN D, GEN flag, long prec)
   }
   else if (!isfundamental(D))
     err(talker,"quadhilbert needs a fundamental discriminant");
-  return (signe(D)>0)? quadhilbertreal(D,flag,prec)
+  return (signe(D)>0)? quadhilbertreal(D,prec)
                      : quadhilbertimag(D,flag);
 }
 
@@ -726,7 +726,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   bnr = bnrinit0(bnf,f,1);
   if (gcmp1(gmael(bnr,5,1))) { avma = av; return polx[0]; }
   if (signe(D) > 0)
-    y = bnrstark(bnr,gzero, flag?1:5, prec);
+    y = bnrstark(bnr,gzero,prec);
   else
   {
     if (!flag) flag = get_lambda(bnr);

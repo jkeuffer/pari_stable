@@ -292,7 +292,7 @@ GEN    perm_to_arch(GEN nf, GEN archp);
 GEN    pidealprimeinv(GEN nf, GEN x);
 GEN    primedec_apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 GEN    prodid(GEN nf, GEN I);
-GEN    quadhilbertreal(GEN D, GEN flag, long prec);
+GEN    quadhilbertreal(GEN D, long prec);
 GEN    rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);
 GEN    _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
 GEN    special_anti_uniformizer(GEN nf, GEN pr);
