@@ -70,6 +70,7 @@ long   expi(GEN x);
 double gtodouble(GEN x);
 GEN    icopy(GEN x);
 GEN    icopy_av(GEN x, GEN y);
+GEN    init_gen_op(GEN x, long tx, long *lx, long *i);
 GEN    itor(GEN x, long prec);
 long   itos(GEN x);
 long   itos_or_0(GEN x);
