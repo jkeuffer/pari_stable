@@ -557,17 +557,15 @@ init_universal_constants(void)
   gi[2] = un;
 }
 
-static long
+static size_t
 fix_size(size_t a)
 {
-  /* BYTES_IN_LONG*ceil(a/BYTES_IN_LONG) */
-  size_t b = a+BYTES_IN_LONG - (((a-1) & (BYTES_IN_LONG-1)) + 1);
-  if (b > VERYBIGINT) err(talker,"stack too large");
+  size_t b = a - (a & (BYTES_IN_LONG-1)); /* sizeof(long) | b <= a */
   if (b < 1024) b = 1024;
   return b;
 }
 
-static long
+static size_t
 init_stack(size_t size)
 {
   size_t s = fix_size(size), old = 0;
