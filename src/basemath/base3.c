@@ -1591,34 +1591,35 @@ elt_mulpow_modideal(GEN nf, GEN a, GEN g, GEN n, GEN id)
 static GEN
 zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
 {
-  GEN a = a0, L, e, cyc, gen;
+  GEN a = a0, L, e, cyc, gen, s, U;
   long i,j, llist = lg(list)-1;
   
-  e = NULL; /* gcc -Wall */
   for (j = 1; j <= llist; j++)
   {
     L = (GEN)list[j];
     cyc = (GEN)L[1];
     gen = (GEN)L[2];
+    s   = (GEN)L[4];
+    U   = (GEN)L[5];
     if (j == 1)
       e = _col( nf_PHlog(nf, a, (GEN)gen[1], pr) );
+    else if (typ(a) == t_INT)
+      e = gmul(subis(a, 1), (GEN)U[1]);
     else
-    {
+    { /* t_COL */
       GEN t = (GEN)a[1];
       a[1] = laddsi(-1, (GEN)a[1]); /* a -= 1 */
-      e = gmul((GEN)L[5], a);
+      e = gmul(U, a);
       a[1] = (long)t; /* restore */
     }
     /* here lg(e) == lg(cyc) */
     for (i = 1; i < lg(cyc); i++)
     {
       GEN t = modii(negi((GEN)e[i]), (GEN)cyc[i]);
-      *++y = lnegi(t);
-      if (!signe(t)) continue;
+      *++y = lnegi(t); if (!signe(t)) continue;
 
-      if (mpodd(t)) *psigne = *psigne? gadd(*psigne, gmael(L,4,i)): gmael(L,4,i);
-      if (j != llist)
-        a = elt_mulpow_modideal(nf, a, (GEN)gen[i], t, prk);
+      if (mod2(t)) *psigne = *psigne? gadd(*psigne, (GEN)s[i]): (GEN)s[i];
+      if (j != llist) a = elt_mulpow_modideal(nf, a, (GEN)gen[i], t, prk);
     }
   }
   return y;
