@@ -1284,9 +1284,10 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
 
 /* return the transform of x under a standard Gauss pivot. r = dim ker(x).
  * d[k] contains the index of the first non-zero pivot in column k
+ * If a != NULL, use x - a Id instead (for eigen)
  */
 static GEN
-gauss_pivot_ker(GEN x0, long prec, GEN *dd, long *rr)
+gauss_pivot_ker(GEN x0, GEN a, long prec, GEN *dd, long *rr)
 {
   GEN x,c,d,p,mun;
   long i,j,k,r,t,n,m,av,lim;
@@ -1294,10 +1295,15 @@ gauss_pivot_ker(GEN x0, long prec, GEN *dd, long *rr)
 
   if (typ(x0)!=t_MAT) err(typeer,"gauss_pivot");
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
+  m=lg(x0[1])-1; r=0;
 
   x = dummycopy(x0); mun = negi(gun);
+  if (a)
+  {
+    if (n != m) err(consister,"gauss_pivot_ker");
+    for (k=1; k<=n; k++) coeff(x,k,k) = lsub(gcoeff(x,k,k), a);
+  }
   get_pivot = use_maximal_pivot(x)? gauss_get_pivot_max: gauss_get_pivot_NZ;
-  m=lg(x[1])-1; r=0;
   c=cgetg(m+1,t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   d=cgetg(n+1,t_VECSMALL);
   av=avma; lim=stack_lim(av,1);
@@ -1386,13 +1392,14 @@ gauss_pivot(GEN x0, long prec, GEN *dd, long *rr)
   *dd=d; *rr=r;
 }
 
+/* compute ker(x - aI) */
 static GEN
-ker0(GEN x, long prec)
+ker0(GEN x, GEN a, long prec)
 {
   GEN d,y;
   long i,j,k,r,n, av = avma, tetpil;
 
-  x = gauss_pivot_ker(x,prec,&d,&r);
+  x = gauss_pivot_ker(x,a,prec,&d,&r);
   if (!r) { avma=av; return cgetg(1,t_MAT); }
   n = lg(x)-1; tetpil=avma; y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; j++,k++)
@@ -1416,7 +1423,7 @@ ker0(GEN x, long prec)
 GEN
 ker(GEN x) /* Programme pour types exacts */
 {
-  return ker0(x,0);
+  return ker0(x,NULL,0);
 }
 
 GEN
@@ -2135,7 +2142,7 @@ Fq_ker(GEN x, GEN T, GEN p)
 GEN
 eigen(GEN x, long prec)
 {
-  GEN y,z,rr,p,ssesp,r1,r2,r3;
+  GEN y,rr,p,ssesp,r1,r2,r3;
   long i,k,l,ly,av,tetpil,nbrac,ex, n = lg(x);
 
   if (typ(x)!=t_MAT) err(typeer,"eigen");
@@ -2143,7 +2150,7 @@ eigen(GEN x, long prec)
   if (n<=2) return gcopy(x);
 
   av=avma; ex = 16 - bit_accuracy(prec);
-  y=cgetg(n,t_MAT); z=dummycopy(x);
+  y=cgetg(n,t_MAT);
   p=caradj(x,0,NULL); rr=roots(p,prec); nbrac=lg(rr)-1;
   for (i=1; i<=nbrac; i++)
   {
@@ -2154,9 +2161,7 @@ eigen(GEN x, long prec)
   for(;;)
   {
     r3 = ground(r2); if (gexpo(gsub(r2,r3)) < ex) r2 = r3;
-    for (i=1; i<n; i++)
-      coeff(z,i,i) = lsub(gcoeff(x,i,i),r2);
-    ssesp=ker0(z,prec); l=lg(ssesp);
+    ssesp = ker0(x,r2,prec); l = lg(ssesp);
     if (l == 1)
       err(talker, "precision too low in eigen");
     for (i=1; i<l; ) y[ly++]=ssesp[i++]; /* done with this eigenspace */
