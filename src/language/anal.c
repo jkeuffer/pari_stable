@@ -3072,6 +3072,57 @@ skipentry(void)
   return (*analyseur == '(') ? &fakeEpNEW : &fakeEpVAR;
 }
 
+/*
+ * Only letters and digits in member names. AT MOST 8 of THEM
+ * (or modify gp_rl.c::pari_completion)
+ */
+entree gp_member_list[] = {
+{"a1",0,(void*)member_a1},
+{"a2",0,(void*)member_a2},
+{"a3",0,(void*)member_a3},
+{"a4",0,(void*)member_a4},
+{"a6",0,(void*)member_a6},
+{"area",0,(void*)member_area},
+{"b2",0,(void*)member_b2},
+{"b4",0,(void*)member_b4},
+{"b6",0,(void*)member_b6},
+{"b8",0,(void*)member_b8},
+{"bnf",0,(void*)member_bnf},
+{"c4",0,(void*)member_c4},
+{"c6",0,(void*)member_c6},
+{"clgp",0,(void*)member_clgp},
+{"codiff",0,(void*)member_codiff},
+{"cyc",0,(void*)member_cyc},
+{"diff",0,(void*)member_diff},
+{"disc",0,(void*)member_disc},
+{"e",0,(void*)member_e},
+{"eta",0,(void*)member_eta},
+{"f",0,(void*)member_f},
+{"fu",0,(void*)member_fu},
+{"futu",0,(void*)member_futu},
+{"gen",0,(void*)member_gen},
+{"group",0,(void*)member_group},
+{"j",0,(void*)member_j},
+{"mod",0,(void*)member_mod},
+{"nf",0,(void*)member_nf},
+{"no",0,(void*)member_no},
+{"omega",0,(void*)member_omega},
+{"orders",0,(void*)member_orders},
+{"p",0,(void*)member_p},
+{"pol",0,(void*)member_pol},
+{"reg",0,(void*)member_reg},
+{"roots",0,(void*)member_roots},
+{"sign",0,(void*)member_sign},
+{"tate",0,(void*)member_tate},
+{"t2",0,(void*)member_t2},
+{"tu",0,(void*)member_tu},
+{"tufu",0,(void*)member_tufu},
+{"w",0,(void*)member_w},
+{"zk",0,(void*)member_zk},
+{"zkst",0,(void*)member_zkst},
+{NULL,0,NULL}
+};
+
 static entree*
 find_member()
 {
