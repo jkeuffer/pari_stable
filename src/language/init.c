@@ -1040,7 +1040,7 @@ err(long numerr, ...)
           print_text("\nFor full compatibility with GP 1.39, type \"default(compatible,3)\" (you can also set \"compatible = 3\" in your GPRC file)");
           pariputc('\n');
           ch1 = va_arg(ap,char *);
-          whatnow_fun(ch1, - va_arg(ap,int));
+          (void)whatnow_fun(ch1, - va_arg(ap,int));
         }
         break;
 
@@ -1324,7 +1324,7 @@ bin_copy(GENbin *p)
 void
 stackdummy(GEN z, long l) { z[0] = evaltyp(t_STR) | evallg(l); }
 
-/* gerepileupto(av, gcopy(x)) */
+/* gerepileupto(av, forcecopy(x)) */
 GEN
 gerepilecopy(long av, GEN x)
 {
