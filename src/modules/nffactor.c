@@ -1538,7 +1538,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   if (DEBUGLEVEL>2) msgTIMER(&ti, "splitting mod %Z", pr);
   T.pr = pr;
   T.L  = &L;
-  T.fact  = rep;
+  T.fact  = sort_vecpol(rep);
   T.polbase = polbase;
   T.pol   = pol;
   T.nf    = nf;
