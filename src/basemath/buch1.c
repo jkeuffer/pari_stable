@@ -1727,7 +1727,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
   subFB = subFBquad(Disc, lim + 0.5, KC);
   if (!subFB) goto START;
   powsubFB = powsubFBquad(CBUCH+1);
-  limhash = ((ulong)LIMC < (MAXHALFULONG>>1))? LIMC*LIMC: HIGHBIT>>1;
+  limhash = ((ulong)LIMC < (MAXHALFULONG>>1))? LIMC*LIMC: (long)(HIGHBIT>>1);
   for (i=0; i<HASHT; i++) hashtab[i]=NULL;
 
   KCCO = KC + RELSUP;

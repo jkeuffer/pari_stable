@@ -2949,7 +2949,7 @@ u_FpX_sub(GEN x, GEN y, ulong p)
   {
     lz = ly; z = cgetg(lz,t_VECSMALL);
     for (i=2; i<lx; i++) z[i] = subssmod(x[i],y[i],p);
-    for (   ; i<ly; i++) z[i] = y[i]? p - y[i]: y[i];
+    for (   ; i<ly; i++) z[i] = y[i]? (long)(p - y[i]): y[i];
   }
   z[1]=0; return u_normalizepol(z, lz);
 }
