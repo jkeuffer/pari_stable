@@ -656,8 +656,8 @@ intn(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   return gerepileupto(ltop, gmul(S, gmul2n(bma, -m)));
 }
 
-/* compute $\int_{a[1]}^{b[1]} f(t)dt$ with [a,b] compact, possible
- *  singularity with exponents a[2] at lower extremity, b regular.
+/* compute $\int_{a[1]}^{b} f(t)dt$ with [a,b] compact, possible
+ *  singularity with exponent a[2] at lower extremity, b regular.
  *  Use tanh(sinh(t)). */
 static GEN
 intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
@@ -666,9 +666,6 @@ intnsing(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
   long m, k, L, i;
   pari_sp ltop = avma, av;
 
-  if (typ(a) != t_VEC) return intn(E, eval, a, b, tab, prec);
-  if (lg(a) != 3) err(typeer,"intnsing");
-  if (gsigne((GEN)a[2]) >= 0) return intn(E, eval, (GEN)a[1], b, tab, prec);
   if (!checktabsimp(tab)) err(typeer,"intnum");
   m = itos(TABm(tab));
   tabx0 = TABx0(tab); tabw0 = TABw0(tab);
@@ -1258,8 +1255,6 @@ intfuncinit(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m, long flag, l
   return gerepilecopy(ltop, T);
 }
 
-/* if tab = m is an int, initialize, otherwise don't, tab contains the
- * necessary data. */
 static GEN
 intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
 {
@@ -1308,7 +1303,8 @@ intnum_i(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, GEN tab, long prec)
       tm = subis(gfloor(tm), 1);
     tm = gmul(pi2p, tm);
     if (labs(codeb) == f_YOSCC) tm = gsub(tm, pis2p);
-    res1 = intnsing (E, eval, a,  tm,  (GEN)tab[1], prec);
+    res1 = codea==f_SING? intnsing(E, eval, a,  tm,  (GEN)tab[1], prec)
+                        : intn    (E, eval, a,  tm,  (GEN)tab[1], prec);
     res2 = intninfpm(E, eval, tm, tmpi,(GEN)tab[2], prec);
     if (tmpi < 0) res2 = gneg(res2);
     res1 = gadd(res1, res2);
