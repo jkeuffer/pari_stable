@@ -478,7 +478,7 @@ GEN
 subcyclo_complex_roots(long n, long real, long prec)
 {
   long i;
-  long m=(long)1+sqrt((double) n);
+  long m = (long)(1+sqrt((double) n));
   GEN powbab, powgig, powz;
   powz      = cgetg(real?4:3,t_VEC);
   powbab    = cgetg(m+1,t_VEC);
@@ -512,7 +512,7 @@ subcyclo_roots(long n, GEN zl)
   GEN z=(GEN) zl[2];
   long lle=lg(le)*3; /*Assume dvmdii use lx+ly space*/
   long i;
-  long m=(long)1+sqrt((double) n);
+  long m = (long)(1+sqrt((double) n));
   GEN powbab, powgig, powz;
   powz=cgetg(3,t_VEC);
   powbab    = cgetg(m+1,t_VEC);
