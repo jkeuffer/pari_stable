@@ -914,7 +914,6 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (!vnf) err(talker,"main variable in kummer must not be x");
   wk = gmael3(bnf,8,4,1);
   /* step 7 */
-  if (all) subgroup = NULL;
   p1 = conductor(bnr, subgroup, 2);
   if (DEBUGLEVEL) msgTIMER(&t, "[rnfkummer] conductor");
   bnr      = (GEN)p1[2]; 
