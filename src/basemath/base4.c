@@ -454,7 +454,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
     /* mul[i] = { canonical generators for x[i] O/xZ as Z-module } */
     mul[lm] = (long)t; lm++;
   }
-  if (i>N)
+  if (i > N)
   {
     GEN z = cgetg(lm, t_VECSMALL);
     gpmem_t av1;
@@ -462,12 +462,13 @@ mat_ideal_two_elt(GEN nf, GEN x)
 
     setlg(mul, lm);
     setlg(beta,lm);
-    if (DEBUGLEVEL>3) fprintferr("ideal_two_elt, hard case: ");
+    if (DEBUGLEVEL>3) fprintferr("ideal_two_elt, hard case:\n");
     for(av1=avma;;avma=av1)
     {
-      c++;
-      if (DEBUGLEVEL>3 && (c & 0x3f) == 0) fprintferr("%ld ", c);
-      if (c == 100) { a = mat_ideal_two_elt2(nf, x, xZ); goto END; }
+      if (++c == 100) {
+        if (DEBUGLEVEL>3) fprintferr("using approximation theorem\n");
+        a = mat_ideal_two_elt2(nf, x, xZ); goto END;
+      }
       for (a=NULL,i=1; i<lm; i++)
       {
         long t = (mymyrand() >> (BITS_IN_RANDOM-5)) - 7; /* in [-7,8] */
@@ -479,7 +480,6 @@ mat_ideal_two_elt(GEN nf, GEN x)
     }
     for (a=NULL,i=1; i<lm; i++)
       a = addmul_col(a, z[i], (GEN)beta[i]);
-    if (DEBUGLEVEL>3) fprintferr("\n");
   }
 END:
   a = centermod(a, xZ);
