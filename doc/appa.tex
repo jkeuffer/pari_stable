@@ -304,6 +304,11 @@ The \kbd{make bench} and \kbd{make test-compat} runs produce a Postscript
 file \kbd{pari.ps} in \kbd{O$xxx$} which you can send to a Postscript
 printer. The output should bear some similarity to the screen images.
 
+Finally, \kbd{make test-kernel} is only useful to developpers, and should
+only be applied to an optimized gp build (not a debugging one): it checks
+whether the inline assembler kernel seems to work, and provides simple
+diagnostics if it does not.
+
 \section{Installation} When everything looks fine, type
 
 \kbd{make install}
