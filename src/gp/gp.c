@@ -246,15 +246,21 @@ get_sep_colon_ok(const char *t)
 static ulong
 my_int(char *s)
 {
-  ulong n = 0;
+  ulong m, n = 0;
   char *p = s;
 
-  while (isdigit((int)*p)) { n = 10*n + (*p++ - '0'); }
+  while (isdigit((int)*p)) { 
+    m = n;
+    n = 10*n + (*p++ - '0');
+    if (n < m) err(talker2,"integer too large",s,s);
+  }
+  m = n;
   switch(*p)
   {
     case 'k': case 'K': n *= 1000;    p++; break;
     case 'm': case 'M': n *= 1000000; p++; break;
   }
+  if (n < m) err(talker2,"integer too large",s,s);
   if (*p) err(talker2,"I was expecting an integer here", s, s);
   return n;
 }
@@ -270,7 +276,7 @@ get_int(const char *s, long dflt)
   if (!isdigit((int)*p)) return dflt;
 
   n = (long)my_int(p);
-  if (n < 0) err(talker2,"integer too large in get_int",s,s);
+  if (n < 0) err(talker2,"integer too large",s,s);
   return minus? -n: n;
 }
 

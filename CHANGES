@@ -101,7 +101,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
          x = vector(2); y = vectorv(2);
          while(1, m = matrix(2,2); m[2, ] = x; m[, 2] = y) --> out of memory
    40- factor(12345)[,1][3] --> error
-
+   41- overflow in some GP interface routines: e.g default(realprecision,10^125) 
   Changed
     1- rnf structure (removed useless components)
     2- rnfidealreltoabs, rnfidealup: now return a Z-basis as a vector of
