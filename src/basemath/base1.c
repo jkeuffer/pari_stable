@@ -1537,24 +1537,43 @@ nfgetprec(GEN x)
   return (typ(ro)==t_VEC)? precision((GEN)ro[1]): DEFAULTPREC;
 }
 
-GEN
-nfnewprec(GEN nf, long prec)
+/* assume nf is an nf */
+static GEN
+_nfnewprec(GEN nf, long prec)
 {
   pari_sp av = avma;
-  GEN NF;
+  GEN NF = dummycopy(nf);
   nffp_t F;
 
-  if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
-  if (lg(nf) == 11) return bnfnewprec(nf,prec);
-  if (lg(nf) ==  7) return bnrnewprec(nf,prec);
   (void)checknf(nf);
-  NF = dummycopy(nf);
   NF[5] = (long)dummycopy((GEN)NF[5]);
   remake_GM(NF, &F, prec);
   NF[6]  = (long)F.ro;
   mael(NF,5,1) = (long)F.M;
   mael(NF,5,2) = (long)F.G;
   return gerepilecopy(av, NF);
+}
+
+GEN
+nfnewprec(GEN nf, long prec)
+{
+  long l = lg(nf);
+  GEN z, res = NULL;
+
+  if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
+  if (l == 3) {
+    res = cgetg(3, t_VEC);
+    res[2] = lcopy((GEN)nf[2]);
+    nf = (GEN)nf[1]; l = lg(nf);
+  }
+  switch(l)
+  {
+    case 11: z = bnfnewprec(nf,prec); break;
+    case  7: z = bnrnewprec(nf,prec); break;
+    default: z = _nfnewprec(nf,prec); break;
+  }
+  if (res) res[1] = (long)z; else res = z;
+  return res;
 }
 
 /********************************************************************/

@@ -126,6 +126,7 @@ BA 60- add "const" keyword to allow building with g++
    67- typo in quadhilbert(-D): required O(D) memory instead of O(sqrt(D)) 
    68- all signed/unsigned compiler warnings
    69- \p29, tan(Pi/2) --> "division by zero". Made error more explicit
+   70- nfnewprec(nfinit(x,3)) --> SEGV
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
