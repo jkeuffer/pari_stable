@@ -757,8 +757,8 @@ if test -z "$CC"; then
     echo GNU compiler version $__gnuc__
   fi
   case "$osname" in
-    osf1|aix) __gnuc__=;; # Native compilers are faster
-    hpux)     __gnuc__=;; # versions older than 2.7 cannot build PIC code
+    aix)   __gnuc__=;; # Native compilers are faster
+    hpux)  __gnuc__=;; # versions older than 2.7 cannot build PIC code
                             # gp built with recent versions has bugs
     concentrix) case "$__gnuc__" in 2.[78].*);; *)
               __gnuc__=;; esac;;
