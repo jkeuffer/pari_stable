@@ -1728,9 +1728,9 @@ to_Kronecker(GEN P, GEN Q)
   GEN p1, y = cgetg((N-2)*(lx-2) + 2, t_POL);
   for (k=i=2; i<lx; i++)
   {
-    p1 = (GEN)P[i];
-    if ((l=typ(p1)) == t_POLMOD) { p1 = (GEN)p1[2]; l = typ(p1); }
-    if (is_scalar_t(l) || varn(p1)<vQ) { y[k++] = (long)p1; j = 3; }
+    p1 = (GEN)P[i]; l = typ(p1);
+    if (l == t_POLMOD) { p1 = (GEN)p1[2]; l = typ(p1); }
+    if (is_scalar_t(l) || varn(p1) > vQ) { y[k++] = (long)p1; j = 3; }
     else
     {
       l = lg(p1);
