@@ -103,7 +103,9 @@ if test -n "$__gnuc__"; then
   OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn"
   DBGFLAGS=${DBGFLAGS:-"-g $warn"}
   # Some architectures need -fPIC for building dynamic lib
-  case "$osname" in hpux) DLCFLAGS=-fPIC;; esac
+  case "$osname-$arch" in
+    hpux-*|*-ia64) DLCFLAGS=-fPIC ;;
+  esac
   # Specific optimisations for some architectures
   case "$arch" in
     sparcv8*) cflags=-mv8;;
