@@ -1279,17 +1279,17 @@ isunit(GEN bnf,GEN x)
   {
     GEN rx, rlog = greal(logunit);
     long e, prec = nfgetprec(nf);
-    for (i=1; i<=5; i++)
+    for (i=1;;)
     {
       rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
       ex = grndtoi(gauss(rlog, rx), &e);
       if (gcmp0((GEN)ex[RU]) && e < -4) break;
 
+      if (++i > 4) err(talker,"insufficient precision in isunit");
       prec = (prec-1)<<1;
       if (DEBUGLEVEL) err(warnprec,"isunit",prec);
       nf = nfnewprec(nf, prec);
     }
-    if (i > 5) err(talker,"insufficient precision in isunit");
   }
 
   setlg(ex, RU);
