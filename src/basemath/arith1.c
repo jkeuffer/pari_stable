@@ -2293,7 +2293,7 @@ two_rank(GEN x)
 #if 0 /* gcc-ism */
 #  define _low(x) ({GEN __x=(GEN)x; modBIL(__x);})
 #else
-#  define _low(x) modBIL(x)
+#  define _low(x) (__x = (GEN)(x), modBIL(__x))
 #endif
 
 /* h(x) for x<0 using Baby Step/Giant Step.
@@ -2308,6 +2308,7 @@ classno(GEN x)
   GEN a,b,count,index,tabla,tablb,hash,p1,p2,hin,h,f,fh,fg,ftest;
   GEN Hf,D,fa;
   byteptr p = diffptr;
+  GEN __x;
 
   if (typ(x) != t_INT) err(arither1);
   s=signe(x); if (s>=0) return classno2(x);
