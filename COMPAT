@@ -4,11 +4,18 @@ This file lists the incompatible changes between Version 2.x and older versions
 
 * The calculator GP:
 ====================
+  - Default args for user defined functions now evaluated when function is
+    called (used to be: at definition time)
+    E.g f(x) = local(z = x); z. 
+    Before: f(2) --> x
+    Now:    f(2) --> 2
 
 * The library PARI:
 ===================
   - gsize() renamed to sizedigit()  [conflict with gtk]
   - hnfhavas removed (didn't work properly, hnflll provides an alternative)
+  - real zeroes are now coded on 2 words. Beware of constructs like
+    t = cgetg(lg(x), t_REAL); gaffect(y, t). If x = 0, so will be t
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
