@@ -2271,8 +2271,9 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
   avma = av; return NULL;
 }
 
-/* Attempts to find an algebraic integer close to beta at the place v
-   and less than B at all the others */
+/* Attempts to find a polynomial with coefficients in nf such that 
+   its coefficients are close to those of pol at the place v and 
+   less than B at all the other places */
 GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
@@ -2715,35 +2716,43 @@ recbeta2(GEN nf,  GEN beta,  GEN bound,  long prec)
 }
 #endif
 
+/* return 1 if the absolute polynomial pol (over Q) defines the
+   Hilbert class field of the real quadratic field bnf */
+int
+define_hilbert(GEN bnf, GEN pol)
+{
+  long cl;
+  GEN dk;
+
+  cl = itos(gmael3(bnf, 8, 1, 1));
+  dk = gmael(bnf, 7, 3);
+ 
+  if (degree(pol) == cl)
+    if ((cl%2) || !egalii(discf(pol), gpowgs(dk,cl>>1))) return 1;
+
+  return 0;
+}
+
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
    disjoint */
 static GEN
-makescind(GEN nf, GEN polabs, long cl, long prec)
+makescind(GEN bnf, GEN polabs, long cl, long prec)
 {
   long av = avma, i, l;
   GEN pol, p1, nf2, dabs, dk, bas;
 
   /* check the result (a little): signature and discriminant */
   bas = allbase4(polabs,0,&dabs,NULL);
-  dk  = (GEN)nf[3];
+  dk  = gmael(bnf,7,3);
   if (!egalii(dabs, gpowgs(dk,cl)) || sturm(polabs) != 2*cl)
     err(bugparier, "quadhilbert");
 
   /* attempt to find the subfields using polred */
   p1 = cgetg(3,t_VEC); p1[1]=(long)polabs; p1[2]=(long)bas;
-  p1 = polred(p1, (prec<<1) - 2);
-  l = lg(p1);
-
-  for (i = 1; i < l; i++)
-  {
-    pol = (GEN)p1[i];
-    if (degree(pol) == cl)
-      if (cl % 2 || !gegal(sqri(discf(pol)), dabs)) break;
-  }
+  pol = polredfirstpol(p1, (prec<<1) - 2, &define_hilbert, bnf);
   if (DEBUGLEVEL) msgtimer("polred");
 
-  /* ... if it fails, then use nfsubfields */
-  if (i == l)
+  if (!pol)
   {
     nf2 = nfinit0(polabs, 1, prec);
     p1  = subfields(nf2, stoi(cl));
@@ -2753,13 +2762,13 @@ makescind(GEN nf, GEN polabs, long cl, long prec)
     for (i = 1; i < l; i++)
     {
       pol = gmael(p1, i, 1);
-      if (cl % 2 || !gegal(sqri(discf(pol)), (GEN)nf2[3])) break;
+      if ((cl%2) || !gegal(sqri(discf(pol)), (GEN)nf2[3])) break;
     }
     if (i == l)
       for (i = 1; i < l; i++)
       {
         pol = gmael(p1, i, 1);
-        if (degree(gcoeff(nffactor(nf, pol), 1, 1)) == cl) break;
+        if (degree(gcoeff(nffactor(bnf, pol), 1, 1)) == cl) break;
       }
     if (i == l)
       err(bugparier, "makescind (no polynomial found)");
@@ -3049,7 +3058,7 @@ quadhilbertreal(GEN D,  long prec)
   /* use the generic function AllStark */
   pol = AllStark(bnrh, nf, 2, newprec);
   delete_var();
-  return gerepileupto(av, makescind(nf, pol, cl, prec));
+  return gerepileupto(av, makescind(bnf, pol, cl, prec));
 }
 
 GEN
