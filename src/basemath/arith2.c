@@ -49,7 +49,7 @@ prime(long n)
   return stoi(prime);
 }
 
-GEN
+long
 pith(long n)
 {
   byteptr p = diffptr;
@@ -61,7 +61,7 @@ pith(long n)
     NEXT_PRIME_VIADIFF(prime,p);
     res++;
   }
-  return stoi(res-1);
+  return res-1;
 }
 
 GEN
@@ -989,7 +989,7 @@ sumdivk(GEN n, long k)
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
   k1 = k; n1 = n;
-  if (k==-1) { m=sumdiv(n); goto fin; }
+  if (k==-1) { m=sumdiv(n); k = 1; goto fin; }
   if (k<0)  k = -k;
   v=vali(n);
   n=absi(shifti(n,-v));
