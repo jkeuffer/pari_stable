@@ -1776,19 +1776,20 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   CG_data *d = (CG_data*)chk->data;
   nfbasic_t *T = d->T;
   GEN P, bound, prev, x, M = cgetg(1, t_MAT);
-  long l = lg(r), N = l-1, i, dx, prec, rankM = 0;
+  long l = lg(r), N = l-1, i, v, dx, prec, rankM = 0;
   int skipfirst = 0;
 
   d->u = mat;
   d->ZKembed = gmul(d->M, mat);
 
+  v = varn(T->x);
   bound = d->bound;
   prev = NULL;
   x = zerocol(N);
   for (i = 1; i < l; i++)
   {
     GEN y1, y, M2, B = norm_ei_from_Q(r, i);
-    long j, new;
+    long j, h, new;
     if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
 
     x[i] = un; P = get_polmin(d,x); dx = degpol(P);
@@ -1802,20 +1803,30 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
     if (skipfirst != i-1) continue;
     y1 = (GEN)T->bas[i];
     y = Q_primpart(y1);
-    if (y == y1) y = dummycopy(y1);
-    y1 = y;
-    M2 = cgetg(dx, t_MAT);
-    y1[2] = zero; /* zero constant coeff */
-    for (j = 1; j < dx; j++)
+    if (y == y1) y = dummycopy(y);
+    y[2] = zero; /* zero constant coeff */
+    for (h = 1; h < dx; h++)
     {
-      if (j > 1) { y = gmul(y, y1); y = Q_primpart(gres(y, T->x)); }
-      y[2] = zero; /* zero constant coeff */
-      M2[j] = (long)pol_to_vec(y, N);
+      long k = 1;
+      if (h > 1) M2 = cgetg(rankM+1, t_MAT);
+      else
+      {
+        M2 = cgetg(rankM+2, t_MAT);
+        M2[k++] = (long)pol_to_vec(y, N);
+      }
+      for (j = 1; j <= rankM; j++)
+      {
+        GEN c = gmul(y, vec_to_pol((GEN)M[j], v));
+        c = Q_primpart(gres(c, T->x));
+        c[2] = zero; /* zero constant coeff */
+        M2[k++] = (long)pol_to_vec(c, N);
+      }
+      M = image(concatsp(M, M2));
+      new = lg(M) - 1;
+      if (new == rankM) break;
+      if (new > rankM) rankM = new;
     }
-    M = image(concatsp(M, M2));
-    new = lg(M) - 1;
-    if (new > rankM) rankM = new;
-    if (rankM == N-1) continue; /* 1 (constant coeff) is implicit */
+    if (rankM+1 == N) continue; /* 1 (constant coeff) is implicit */
 
     /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
     skipfirst++;
