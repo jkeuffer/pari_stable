@@ -313,13 +313,11 @@ perm_pow(GEN perm, long exp)
  * orders (vecsmall): relatives orders of generators.
  */
 
-GEN trivialsubgroups(long l)
+GEN trivialsubgroups(void)
 {
-  GEN p2,p3,p4;	  /* vec */
+  GEN p2,p3;	  /* vec */
   p2 = cgetg(2, t_VEC);
   p3 = cgetg(3, t_VEC);
-  p4 = cgetg(2, t_VEC);
-  p4[1] = (long) perm_identity(l);
   p3[1] = (long) cgetg(1,t_VEC);
   p3[2] = (long) cgetg(1,t_VECSMALL);
   p2[1] = (long) p3;
@@ -611,10 +609,10 @@ GEN liftlistsubgroups(GEN L, GEN C, long r)
  * Return all the subgroups K of G such that
  * S= K mod H and K inter H={1}.
  */
-static GEN liftsubgroup(GEN C, GEN H, GEN S, long l)
+static GEN liftsubgroup(GEN C, GEN H, GEN S)
 {
   gpmem_t ltop=avma;
-  GEN V = trivialsubgroups(l-1);
+  GEN V = trivialsubgroups();
   long n = lg(S[1]);
   long i;
   /*Loop over generators of S*/
@@ -637,10 +635,10 @@ GEN group_subgroups(GEN G)
   long i, j;
   GEN gen=(GEN)G[1], ord=(GEN)G[2];
   GEN H;
-  long l = lg(gen[1]);
-  long n = lg(gen);
+  long l, n = lg(gen);
   if (n == 1)
-    return trivialsubgroups(l-1);
+    return trivialsubgroups();
+  l = lg(gen[1]);/*now lg(gen)>1*/
   if ( ( n == 4 || n == 5) && ord[1]==2 && ord[2]==2 && ord[3]==3 
       && (n == 4 || ord[4]==2) )
   {
@@ -686,7 +684,7 @@ GEN group_subgroups(GEN G)
   sg2 = cgetg(lM, t_VEC);
   /* Loop over all subgroups of G/H */
   for (j = 1; j < lM; ++j)
-    sg2[j] = (long) liftsubgroup(C, H, (GEN) M[j], l);
+    sg2[j] = (long) liftsubgroup(C, H, (GEN) M[j]);
   p1 = concat(sg1, concat(sg2, NULL));
   if (sg3)
     p1 = concat(p1, sg3);
