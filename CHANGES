@@ -56,6 +56,7 @@ GN  6- [Solaris + cc:] fix linker warnings (missing object types in
        As a result maximal degree jumps to ~ 2^24 on 32bit machines
     2- renamed *res(te) routines to *rem(ainder). Eg poldivres --> poldivrem,
        nfdivres --> nfdivrem
+BA  3- Internal u_Fp* routines now are renamed Fl* and made public.
 
   Added
     1- make test-all [ all test suite (SLOW !)]
