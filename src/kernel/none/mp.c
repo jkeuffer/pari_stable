@@ -158,7 +158,7 @@ addsispec(long s, GEN x, long nx)
 
 #define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
 
-GEN
+static GEN
 addiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;
@@ -214,7 +214,7 @@ subisspec(GEN x, long s, long nx)
 }
 
 /* assume x > y */
-GEN
+static GEN
 subiispec(GEN x, GEN y, long nx, long ny)
 {
   GEN xd,yd,zd;

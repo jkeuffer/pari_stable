@@ -1214,7 +1214,7 @@ divrs(GEN x, long y)
 }
 
 /* We keep llx bits of x and lly bits of y*/
-GEN
+static GEN
 divrr_with_gmp(GEN x, GEN y)
 {
   long lx=RNLIMBS(x),ly=RNLIMBS(y);

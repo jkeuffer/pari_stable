@@ -27,7 +27,7 @@ resiu(GEN y, ulong x)
 }
 
 /* Assume x>y>0, both of them odd. return x-y if x=y mod 4, x+y otherwise */
-void
+static void
 gcd_plus_minus(GEN x, GEN y, GEN res)
 {
   pari_sp av = avma;
