@@ -1030,7 +1030,7 @@ get_R(GEN M)
 { 
   GEN R = sqred1_from_QR(M, DEFAULTPREC + (gexpo(M) >> TWOPOTBITS_IN_LONG));
   long i, l = lg(R);
-  for (i=1; i<l; i++) gcoeff(R,i,i) = un;
+  for (i=1; i<l; i++) coeff(R,i,i) = un;
   return R;
 }
 
