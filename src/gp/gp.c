@@ -2876,6 +2876,7 @@ read_opt(growarray *A, long argc, char **argv)
     }
   }
   if (GP_DATA->flags & TEXMACS) tm_start_output();
+  if (GP_DATA->flags & TEST) init80col(0);
   if (initrc)
   {
     gp_initrc(A, argv[0]);

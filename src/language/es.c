@@ -471,11 +471,8 @@ puts80(const char *s)
 }
 PariOUT pariOut80= {putc80, puts80, normalOutF, NULL};
 
-static void
-init80(long n)
-{
-  col_index = n; pariOut = &pariOut80;
-}
+void
+init80col(long n) { col_index = n; pariOut = &pariOut80; }
 
 /* output stopped after max_line have been printed (for default(lines,)) */
 static void
@@ -2372,7 +2369,7 @@ void
 gp_output(GEN z, gp_data *G)
 {
   if (G->flags & TEST) {
-    init80(0);
+    init80col(0);
     gen_output(z, G->fmt); pariputc('\n');
   }
   else if (G->flags & TEXMACS)

@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void recover(int flag);
 void pari_addfunctions(module **modlist_p, entree *func, char **help);
+void init80col(long n);
 int term_height(void);
 int term_width(void);
 void hit_return(void);
