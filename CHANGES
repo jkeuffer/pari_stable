@@ -29,7 +29,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 ===========================================================================
-Done for version 2.0.21 (released ??/09/2000):
+Done for version 2.0.21 (released 27/10/2000):
   Fixed
     1- trap(gdiver2,a,1/0) <C-D> trap(,a,1/0); trap(gdiver2,a,1/0) --> crash
     2- lllgramintern could reduce a wrong lattice (after precision problems)
@@ -91,6 +91,8 @@ XR 50- round 4: possible problems when increasing p-adic precision
    51- stack corruption in mppgcd(huge t_FRAC, huge t_FRAC)
 BA 52- abs(t_SER) not allowed
    53- nfdisc(non monic polynomial,, disc factorization) returned wrong answer
+   54- rnfidealnormrel(rnfinit(nfinit(y^2-2),x),2) --> SIGBUS
+   55- hardcoded paths in a few scripts (tex2mail, gpflog, make_vi_tags)
 
   Changed
 BA  1- more efficient quadratic Hensel lift
