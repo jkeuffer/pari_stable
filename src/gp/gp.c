@@ -2359,7 +2359,7 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
     }
     /* received ^C  in fgets, retry (as is "\n" were input) */
   }
-  input_loop(F,buf,file,prompt);
+  (void)input_loop(F,buf,file,prompt);
 
   if (*s && prompt) /* don't echo if from gprc */
   {
