@@ -1488,17 +1488,17 @@ cvtop2(GEN x, GEN y)
     case t_FRAC: { GEN num = (GEN)x[1], den = (GEN)x[2];
       if (!signe(num)) return zeropadic(p, d);
       v = pvaluation(num, p, &num);
-      if (!v) v = -pvaluation(den, p, &den);
+      if (!v) v = -pvaluation(den, p, &den); /* assume (num,den) = 1 */
       if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       z[2] = (long)p;
       z[3] = y[3];
-      if (!gcmp1(den)) num = mulii(num, Fp_inv(den, (GEN)z[3]));
-      z[4] = lremii(num, (GEN)z[3]); return z;
+      if (!is_pm1(den)) num = mulii(num, Fp_inv(den, (GEN)z[3]));
+      z[4] = lmodii(num, (GEN)z[3]); return z;
     }
     case t_COMPLEX: return ctop(x, p, d);
-    case t_QUAD: return qtop(x, p, d);
+    case t_QUAD:    return qtop(x, p, d);
   }
   err(typeer,"cvtop2");
   return NULL; /* not reached */
@@ -1532,14 +1532,14 @@ cvtop(GEN x, GEN p, long d)
     case t_FRAC: { GEN num = (GEN)x[1], den = (GEN)x[2];
       if (!signe(num)) return zeropadic(p, d);
       v = pvaluation(num, p, &num);
-      if (!v) v = -pvaluation(den, p, &den);
+      if (!v) v = -pvaluation(den, p, &den); /* assume (num,den) = 1 */
       if (d <= 0) return zeropadic(p, v);
       z = cgetg(5, t_PADIC);
       z[1] = evalprecp(d) | evalvalp(v);
       icopyifstack(p, z[2]);
       z[3] = lpowgs(p, d);
-      if (!gcmp1(den)) num = mulii(num, Fp_inv(den, (GEN)z[3]));
-      z[4] = lremii(num, (GEN)z[3]); return z; /* not memory-clean */
+      if (!is_pm1(den)) num = mulii(num, Fp_inv(den, (GEN)z[3]));
+      z[4] = lmodii(num, (GEN)z[3]); return z; /* not memory-clean */
     }
     case t_COMPLEX: return ctop(x, p, d);
     case t_PADIC: return gprec(x,d);
