@@ -507,60 +507,8 @@ struct galois_testlift
   GEN     bezoutcoeff;
   GEN     pauto;
 };
-/*
- * Si polb est un polynomes de Z[X] et pola un facteur modulo p, retourne b*v
- * telqu' il existe u et a tel que: a=pola [mod p] a*b=polb [mod p^e]
- * b*v+a*u=1 [mod p^e]
- */
-GEN
-bezout_lift_fact(GEN pola, GEN polb, GEN p, long e)
-{
-  long    i;
-  GEN     ae, be, u, v, ae2, be2, s, t, pe, pe2, pem1, z, g;
-  long    ltop = avma, lbot;
-  long    nb, mask;
-  if (DEBUGLEVEL >= 1)
-    timer2();
-  nb=hensel_lift_accel(e, &mask);
-  ae = pola;
-  be = FpX_divres(polb, ae, p, NULL);
-  g = (GEN) FpX_extgcd(ae, be, p, &u, &v)[2];	/* deg g = 0 */
-  if (!gcmp1(g))
-  {
-    g = mpinvmod(g, p);
-    u = FpX_Fp_mul(u,g,NULL);
-    v = FpX_Fp_mul(v,g,NULL);
-  }
-  for (pe = p,pem1 = gun, i = 0; i < nb; i++)
-  {
-    pem1 = (mask&(1<<i))?sqri(pem1):mulii(pem1, pe);
-    pe2  =  mulii(pem1, p);
-    g = FpX_sub(polb, FpX_mul(ae, be,NULL),pe2);
-    g = gdivexact(g, pe);
-    z = FpX_mul(v, g, pe);
-    t = FpX_divres(z, ae, pe, &s);
-    t = FpX_add(FpX_mul(u, g,NULL), FpX_mul(t, be,NULL),pe);
-    be2 = FpX_add(be, FpX_Fp_mul(t, pe,NULL),NULL);
-    ae2 = FpX_add(ae, FpX_Fp_mul(s, pe,NULL),NULL);	/* already reduced mod pe2 */
-    g = FpX_add(FpX_mul(u, ae2,NULL), FpX_mul(v, be2,NULL),pe2);
-    g = FpX_Fp_add(FpX_neg(g,pe2),gun,pe2);
-    g = gdivexact(g, pe);
-    z = FpX_mul(v, g, pe);
-    t = FpX_divres(z, ae, pe, &s);
-    t = FpX_add(FpX_mul(u, g,NULL), FpX_mul(t, be,NULL),pe);
-    u = FpX_add(u, FpX_Fp_mul(t, pe,NULL),NULL);
-    v = FpX_add(v, FpX_Fp_mul(s, pe,NULL),NULL);
-    pe = pe2;
-    ae = ae2;
-    be = be2;
-  }
-  lbot = avma;
-  g = FpX_mul(v, be,NULL);
-  g = gerepile(ltop, lbot, g);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("bezout_lift_fact()");
-  return g;
-}
+GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
+
 static long
 inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
 	     struct galois_testlift *gt, GEN frob, long exit)
@@ -599,9 +547,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
     return 0;
   if (DEBUGLEVEL >= 7)
     fprintferr("GaloisConj:inittestlift()2:avma=%ld\n", avma);
-  gt->bezoutcoeff = cgetg(gt->g + 1, t_VEC);
-  for (i = 1; i <= gt->g; i++)
-    gt->bezoutcoeff[i] = (long) bezout_lift_fact((GEN) Tmod[i], gl->T, gl->p, gl->e);
+  gt->bezoutcoeff = bezout_lift_fact(gl->T, Tmod, gl->p, gl->e);
   if (DEBUGLEVEL >= 1)
     timer2();
   gt->pauto = cgetg(gt->f + 1, t_VEC);
