@@ -124,6 +124,7 @@ HC  7- Implemented all Bessel functions J, I, N, K, H1, H2, and Bessel functions
 HC  8- Implemented PSLQ [preliminary]
 GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    10- library functions FpM_ker, FpM_deplin, diviiround, centermodii
+   11- library function gerepileall
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
