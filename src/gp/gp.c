@@ -1139,6 +1139,47 @@ zk   : integral basis                                      nf, bnf, bnr\n\
 zkst : structure of (Z_K/m)^* (valid for idealstar also)            bnr\n");
 }
 
+#define QUOTE "_QUOTE"
+#define DOUBQUOTE "_DOUBQUOTE"
+#define BACKQUOTE "_BACKQUOTE"
+
+static char *
+_cat(char *s, char *t)
+{
+  *s = 0; strcat(s,t); return s + strlen(t);
+}
+
+static char *
+filter_quotes(char *s)
+{
+  int i, l = strlen(s);
+  int quote = 0;
+  int backquote = 0;
+  int doubquote = 0;
+  char *str, *t;
+
+  for (i=0; i < l; i++) 
+    switch(s[i])
+    {
+      case '\'': quote++; break;
+      case '`' : backquote++; break;
+      case '"' : doubquote++;
+    }
+  str = (char*)gpmalloc(l + quote * (strlen(QUOTE)-1)
+                          + doubquote * (strlen(DOUBQUOTE)-1)
+                          + backquote * (strlen(BACKQUOTE)-1) + 1);
+  t = str;
+  for (i=0; i < l; i++) 
+    switch(s[i])
+    {
+      case '\'': t = _cat(t, QUOTE); break;
+      case '`' : t = _cat(t, BACKQUOTE); break;
+      case '"' : t = _cat(t, DOUBQUOTE); break;
+      default: *t++ = s[i];
+    }
+  *t = 0; return str;
+}
+
 #define MAX_LINE_LEN 255
 static void
 external_help(char *s, int num)
@@ -1149,6 +1190,7 @@ external_help(char *s, int num)
   FILE *f;
 
   if (!help_prg) err(talker,"no external help program");
+  s = filter_quotes(s);
   str = gpmalloc(strlen(help_prg) + strlen(s) + 64);
   if (num < 0)
     opt = "-k";
@@ -1156,7 +1198,7 @@ external_help(char *s, int num)
     { ar = thestring; sprintf(ar,"@%d",num); }
   sprintf(str,"%s -fromgp %s %c%s%s%c",help_prg,opt, SHELL_Q,s,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
-  free(str);
+  free(str); free(s);
   while (fgets(buf,MAX_LINE_LEN,f))
   {
     if (!strncmp("ugly_kludge_done",buf,16)) break;

@@ -30,7 +30,7 @@
 $version= "@version@";
 $miscdir= "@miscdir@";
 # no expanded material (@key@) below
-$wwwsite= "http://hasse.mathematik.tu-muenchen.de/ntsw/pari/";
+$wwwsite= "http://www.parigp-home.de/";
 $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR} || $miscdir;
 $xdvi = $ENV{GPXDVI} || "xdvi";
 $xdviref = $ENV{GPXDVIREF} || "$xdvi -paper 29.7x21cm";
@@ -97,7 +97,6 @@ sub options
 sub init
 {
   $gpmsg = "ugly_kludge_done\n";
-  $notfound = "not found !\n";
   &inittr();
 
   $indent = "   ";
@@ -115,6 +114,15 @@ sub init
     $transl{$key} = join('@',@_);
   }
   close(IN);
+}
+
+sub not_found
+{
+  local($help) = shift;
+  $help =~ s/\\\\/_B#K#S_/g;
+  $help =~ s/\\(.)/$1/g;
+  $help =~ s/_B#K#S_/\\/g;
+  print "'$help' not found !\n";
 }
 
 sub choose_chap
@@ -146,7 +154,11 @@ sub open_dvi_then_quit
 
 sub treat
 {
-  $_ = $_[0]; s/^ *"(.*)"([^"]*) *$/$1$2/;
+  $_ = $_[0];
+  s/_QUOTE/'/g;
+  s/_BACKQUOTE/`/g;
+  s/_DOUBQUOTE/"/g;
+  s/^ *"(.*)"([^"]*) *$/$1$2/;
   if (s/\@$//)
   {
     $found = 0;
@@ -165,7 +177,7 @@ sub treat
         }
       }
     }
-    if (!$found && !$apropos) { print "$help $notfound"; return }
+    return not_found($help) if (!$found && !$apropos);
     $searchall = 0;
     $apropos = 0; return;
   }
@@ -191,7 +203,7 @@ sub treat
     if (/^\\(subsubsec[a-z]*|subsec[a-z]*|section|chapter){$help}/)
       { $first = $_; last; }
   }
-  if (eof(DOC) && !$searchall) { print "$help $notfound"; return }
+  return not_found($help) if (eof(DOC) && !$searchall);
   $found = 1;
 
   if (!$detex) { &tex(); return; }
