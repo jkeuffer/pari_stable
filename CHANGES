@@ -87,6 +87,8 @@ XR 48- rare bug in bnrL1 (wrong value!)
    56- (ultra-rare) stack corruption in mpqs_solve_linear_system()
    57- rl_refresh_line() prototype changed across readline's versions
    58- incorrect handling of INTMODs modulo integers of different magnitude
+XR 59- matsnf(3 x 3 matrix, 4) --> SEGV
+   60- some pathological bnfinit() computations (strive to get maximal rank)
 
   Changed
 XR  1- modulus choice in bnrstark
@@ -118,7 +120,8 @@ BA 20- improved algorithms in galconj.c
 YU  3- support for FreeBSD ELF binary format
     4- file CVS.DOC
     5- support for Windows CE (Nigel Smart + coworkers)
-BA  6- functions related to Galois theory: galoisinit ,galoisfixedfield, etc
+BA  6- functions related to Galois theory: galoisinit, galoisfixedfield, etc
+    7- [library] trivial function realun()
 
   Removed 
     1- #define HIGHBITM1 (useless)

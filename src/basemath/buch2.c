@@ -23,22 +23,23 @@ GEN make_TI(GEN nf, GEN TI, GEN con);
 #define SFB_STEP 2
 #define MIN_EXTRA 1
 
-static const int CBUCHG = (1<<4) - 1; /* of the forme 2^k-1 */
-static const int randshift = BITS_IN_RANDOM-1 - 4; /* BITS_IN_RANDOM-1 - k */
+#define RANDOM_BITS 4
+static const int CBUCHG = (1<<RANDOM_BITS) - 1;
+static const int randshift = BITS_IN_RANDOM-1 - RANDOM_BITS;
+#undef RANDOM_BITS
 
 static long KC,KCZ,KCZ2,MAXRELSUP;
 static long primfact[500],expoprimfact[500];
 static long *factorbase, *numfactorbase, *numideal;
-static GEN *idealbase, vectbase, subfactorbase, **powsubfactorbase;
+static GEN *idealbase, vectbase, powsubfb;
 
 /* factorbase[i]     i-th rational prime used in factor base
  * numfactorbase[i]  index k such that factorbase[k]=i (0 if i is not prime)
  *
- * subfactorbase     part of factorbase used to build random relations
- * powsubfactorbase  matrix lg(subfactorbase) x (CBUCHG+1) =
- *                     all powers up to CBUCHG
- *
  * vectbase          vector of all ideals in factorbase
+ * vecbase o subfb = part of factorbase used to build random relations
+ * powsubfb  array lg(subfb) x (CBUCHG+1) = all powers up to CBUCHG
+ *
  * idealbase[i]      prime ideals above i in factorbase
  * numideal[i]       index k such that idealbase[k] = i.
  *
@@ -67,29 +68,27 @@ desallocate(long **matcopy)
 {
   long i;
   free(numfactorbase); free(factorbase); free(numideal); free(idealbase);
-  if (powsubfactorbase)
-  {
-    for (i=lg(powsubfactorbase)-1; i; i--) free(powsubfactorbase[i]);
-    free(powsubfactorbase); powsubfactorbase = NULL;
-  }
   if (matcopy)
   {
     for (i=lg(matcopy)-1; i; i--) free(matcopy[i]);
     free(matcopy); matcopy = NULL;
   }
+  powsubfb = NULL;
 }
 
-/* creates subfactorbase, vperm. Return ss = number of rational primes
- * whose divisors are all in factorbase
+/* Return the list of indexes or the primes chosen for the subfactorbase.
+ * Fill vperm (if !=0): primes ideals sorted by increasing norm (except the
+ * ones in subfactorbase come first [dense rows come first for hnfspec])
+ * ss = number of rational primes whose divisors are all in factorbase
  */
-static long
-subfactorbasegen(long N,long m,long minsfb,GEN vperm)
+static GEN
+subfactorbasegen(long N,long m,long minsfb,GEN vperm, long *ptss)
 {
-  long av=avma,i,j, lv=lg(vectbase),s=0,s1=0,n=0,ss=0,z=0;
-  GEN y1,y2,perm,perm1,P,Q;
+  long av = avma,i,j, lv=lg(vectbase),s=0,s1=0,n=0,ss=0,z=0;
+  GEN y1,y2,subfb,perm,perm1,P,Q;
   double prod;
 
-  (void)new_chunk(lv);
+  (void)new_chunk(lv); /* room for subfb */
   y1 = cgetg(lv,t_COL);
   y2 = cgetg(lv,t_COL);
   for (i=1,P=(GEN)vectbase[i];;P=Q)
@@ -111,7 +110,7 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
       s=0; s1=0;
     }
   }
-  if (z+minsfb >= lv) return -1;
+  if (z+minsfb >= lv) return NULL;
 
   prod = 1.0;
   perm = sindexsort(y1) + z; /* skip "zeroes" (excluded ideals) */
@@ -120,7 +119,7 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
     if (++n > minsfb && (z+n >= lv || prod > m + 0.5)) break;
     prod *= gtodouble((GEN)y1[perm[n]]);
   }
-  if (prod < m) return -1;
+  if (prod < m) return NULL;
   n--;
 
   /* take the first (non excluded) n ideals (wrt norm), put them first, and
@@ -128,13 +127,13 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
   for (j=1; j<=n; j++) y2[perm[j]] = zero;
   perm1 = sindexsort(y2); avma = av;
 
+  subfb = cgetg(n+1, t_VECSMALL);
   if (vperm)
   {
     for (j=1; j<=n; j++) vperm[j] = perm[j];
     for (   ; j<lv; j++) vperm[j] = perm1[j];
   }
-  subfactorbase=cgetg(n+1,t_COL);
-  for (j=1; j<=n; j++) subfactorbase[j] = vectbase[perm[j]];
+  for (j=1; j<=n; j++) subfb[j] = perm[j];
 
   if (DEBUGLEVEL)
   {
@@ -143,13 +142,16 @@ subfactorbasegen(long N,long m,long minsfb,GEN vperm)
       fprintferr("\n***** IDEALS IN FACTORBASE *****\n\n");
       for (i=1; i<=KC; i++) fprintferr("no %ld = %Z\n",i,vectbase[i]);
       fprintferr("\n***** IDEALS IN SUB FACTORBASE *****\n\n");
-      outerr(subfactorbase);
+      P=cgetg(n+1,t_COL);
+      for (j=1; j<=n; j++) P[j] = vectbase[subfb[j]];
+      outerr(P);
       fprintferr("\n***** INITIAL PERMUTATION *****\n\n");
       fprintferr("vperm = %Z\n\n",vperm);
     }
     msgtimer("subfactorbase (%ld elements)",n);
   }
-  return ss;
+  *ptss = ss;
+  return subfb;
 }
 
 static GEN
@@ -169,16 +171,15 @@ mulred(GEN nf,GEN x, GEN I, long prec,long precint)
 }
 
 /* Compute powers of prime ideals (P^0,...,P^a) in subfactorbase (assume a > 1)
- * powsubfactorbase[j][i] contains P_i^j in LLL form + archimedean part
+ * powsubfb[j][i] contains P_i^j in LLL form + archimedean part
  */
 static void
-powsubfactgen(GEN nf,long a,long prec,long precint)
+powsubfbgen(GEN nf,GEN subfb,long a,long prec,long precint)
 {
-  long i,j,n=lg(subfactorbase),N=lgef(nf[1])-3,RU;
+  long i,j,n=lg(subfb),N=lgef(nf[1])-3,RU;
   GEN id, *pow;
 
-  powsubfactorbase = (GEN**) gpmalloc(sizeof(GEN*)*n);
-  setlg(powsubfactorbase,n);
+  powsubfb = cgetg(n, t_VEC);
   if (DEBUGLEVEL)
   { fprintferr("Computing powers for sub-factor base:\n"); flusherr(); }
   RU=itos(gmael(nf,2,1)); RU = RU + (N-RU)/2;
@@ -188,10 +189,10 @@ powsubfactgen(GEN nf,long a,long prec,long precint)
 
   for (i=1; i<n; i++)
   {
-    GEN vp = (GEN)subfactorbase[i];
+    GEN vp = (GEN)vectbase[subfb[i]];
     GEN z = cgetg(4,t_VEC);
-    pow = (GEN*)gpmalloc(sizeof(GEN)*(a+1));
-    powsubfactorbase[i] = pow; pow[0]=id;
+    pow = (GEN*)cgetg(a+1,t_VEC);
+    powsubfb[i] = (long)pow; pow[0]=id;
     pow[1]=cgetg(3,t_VEC);
     pow[1][1] = (long)z;
     z[1]=vp[1]; z[2]=vp[2]; z[3]=(long)powgi((GEN)vp[1], (GEN)vp[4]);
@@ -211,13 +212,13 @@ powsubfactgen(GEN nf,long a,long prec,long precint)
       fprintferr("**** POWERS IN SUB-FACTOR BASE ****\n\n");
       for (i=1; i<n; i++)
       {
-        pow = powsubfactorbase[i];
-	fprintferr("powsubfactorbase[%ld]:\n",i);
+        pow = (GEN*)powsubfb[i];
+	fprintferr("powsubfb[%ld]:\n",i);
 	for (j=0; j<=a; j++) fprintferr("^%ld = %Z\n", j,pow[j]);
 	fprintferr("\n");
       }
     }
-    msgtimer("powsubfactgen");
+    msgtimer("powsubfbgen");
   }
 }
 
@@ -306,7 +307,7 @@ factorbasegen(GEN nf,long n2,long n)
   return lfun;
 }
 
-/* can we factor I / m (m pseudo minimum, computed in ideallllredpart1spec)? */
+/* can we factor I / m (m pseudo minimum, computed in ideallllredpart1)? */
 static long
 factorisegen(GEN nf,GEN idealvec,long kcz,long limp)
 {
@@ -1333,7 +1334,7 @@ small_norm_for_buchall(long t,long **mat,GEN matarch,long nbrel,long LIMC,
 
 /* I assumed to be integral HNF */
 static GEN
-ideallllredpart1spec(GEN nf, GEN I, GEN matt2, long N, long PRECREGINT)
+ideallllredpart1(GEN nf, GEN I, GEN matt2, long N, long PRECREGINT)
 {
   GEN y,m,idealpro;
 
@@ -1353,57 +1354,46 @@ ideallllredpart1spec(GEN nf, GEN I, GEN matt2, long N, long PRECREGINT)
   return idealpro;
 }
 
-static GEN
-ideallllredpart2(GEN nf, GEN arch, GEN gamma, long prec)
+static void
+ideallllredpart2(GEN colarch, GEN nf, GEN arch, GEN gamma, long prec)
 {
   GEN v = get_arch(nf,gamma,prec);
   long i;
-  for (i=lg(v)-1; i; i--) v[i] = ladd((GEN)arch[i],gneg((GEN)v[i]));
-  return v;
+  for (i=lg(v)-1; i; i--)
+    gaffect(gadd((GEN)arch[i],gneg((GEN)v[i])), (GEN)colarch[i]);
 }
 
 static void
-dbg_newrel(long iz,long jideal, long bouext,long bou, long phase,
-           long cmptglob, GEN vperm, long *col, GEN colarch, long lim)
+dbg_newrel(long jideal, long jdir, long phase, long cmptglob, long *col,
+           GEN colarch, long lim)
 {
   fprintferr("\n++++ cmptglob = %ld: new relation (need %ld)", cmptglob, lim);
   wr_rel(col);
   if (DEBUGLEVEL>3)
   {
-    fprintferr("(iz=%ld,jideal=%ld,bouext=%ld,bou=%ld,phase=%ld)",
-	        iz,jideal,bouext,bou,phase);
+    fprintferr("(jideal=%ld,jdir=%ld,phase=%ld)", jideal,jdir,phase);
     msgtimer("for this relation");
   }
-  if (DEBUGLEVEL>6)
-  {
-    fprintferr("archimedian part = %Z\n",colarch);
-    fprintferr("vperm = %Z\n",vperm);
-  }
+  if (DEBUGLEVEL>6) fprintferr("archimedian part = %Z\n",colarch);
   flusherr() ;
 }
 
 static void
-dbg_cancelrel(long i,long iz,long jideal,long bouext,long bou,long phase,
-              long *col)
+dbg_cancelrel(long i,long jideal,long jdir,long phase, long *col)
 {
   fprintferr("rel. cancelled. phase %ld: %ld ",phase,i);
-  if (DEBUGLEVEL>3)
-    fprintferr("(iz=%ld,jideal=%ld,bouext=%ld,bou=%ld,phase=%ld)",
-	        iz,jideal,bouext,bou,phase);
+  if (DEBUGLEVEL>3) fprintferr("(jideal=%ld,jdir=%ld)",jideal,jdir);
   wr_rel(col); flusherr();
 }
 
 static void
-dbg_outrel(long iz,long jideal,long bouext,long bou,long phase,long cmptglob,
-	   GEN vperm,long **ma,GEN maarch)
+dbg_outrel(long phase,long cmptglob, GEN vperm,long **ma,GEN maarch)
 {
   long av,i,j;
   GEN p1,p2;
 
   if (phase == 0)
   {
-    fprintferr("Upon exit: iz=%ld,jideal=%ld,bouext=%ld,bou=%ld,phase=%ld\n",
-	       iz,jideal,bouext,bou,phase);
     av=avma; p2=cgetg(cmptglob+1,t_MAT);
     for (j=1; j<=cmptglob; j++)
     {
@@ -1435,7 +1425,7 @@ dbg_outrel(long iz,long jideal,long bouext,long bou,long phase,long cmptglob,
 
 /* check if we already have a column mat[l] equal to mat[s] */
 static long
-already_found_relation_of_long(long **mat,long s)
+already_found_relation(long **mat,long s)
 {
   long l,bs,cl,*coll,*cols = mat[s];
 
@@ -1473,126 +1463,106 @@ already_found_relation_of_long(long **mat,long s)
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
 random_relation(long phase,long cmptglob,long lim,long LIMC,long N,long RU,
-                long PRECREG,long PRECREGINT,GEN nf,GEN vperm,long *subvperm,
-		long **ma,GEN maarch,GEN lmatt2,long *ex)
+                long PRECREG,long PRECREGINT,GEN nf,GEN subfb,GEN lmatt2,
+		long **ma,GEN maarch,long *ex,GEN list_jideal)
 {
-  static long iz, jideal, bou, bouext;
-  long i,pz,fl,av,cptzer,nbmatt2,nobreak,lgsub;
-  GEN ideal,idealpro,idealcourant,pgen1;
+  static long jideal, jdir;
+  long i,av,av1,cptzer,nbmatt2,lgsub, jlist = 1, *col;
+  GEN colarch,ideal,idealpro,P;
 
-  if (phase != 1) { iz=jideal=bouext=1; if (phase<0) return 0; }
+  if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
   nbmatt2 = lg(lmatt2)-1;
-  lgsub = lg(subfactorbase);
-  cptzer = 0; av = avma;
-  for(;;)
+  lgsub = lg(subfb);
+  cptzer = 0;
+  if (list_jideal) fprintferr("looking hard for %Z\n",list_jideal);
+  for (av = avma;;)
   {
-    pz = factorbase[iz]; /* 1<= iz <= KCZ */
-    idealcourant = idealbase[numfactorbase[pz]];
-    if (phase != 1) jideal = 1;
-    for ( ; jideal < lg(idealcourant); jideal++)
+    if (list_jideal && jlist < lg(list_jideal) && jdir <= nbmatt2) 
+      jideal = list_jideal[jlist++];
+    if (!list_jideal || jdir <= nbmatt2)
     {
-      ideal = prime_to_ideal(nf,(GEN)idealcourant[jideal]);
-      do
-      {
-        for (i=1; i<lgsub; i++)
-        {
-          ex[i] = mymyrand()>>randshift;
-          if (ex[i])
-            ideal = idealmulh(nf,ideal,powsubfactorbase[i][ex[i]]);
-        }
-      }
-      while (typ(ideal)==t_MAT); /* If ex  = 0, try another */
-
-      fl = ideal_is_zk((GEN)ideal[1],N);
-      nobreak = 1; if (phase != 1) bouext = 1;
-      for ( ; nobreak && bouext <= nbmatt2; bouext++)
-      {
-	if (phase != 1) bou = bouext; else { phase=2; bou++; }
-	for ( ; nobreak; bou++)
-	{
-          long av1 = avma;
-	  if (bou > nbmatt2)
-	  {
-	    if (fl) nobreak=0;
-	    break;
-	  }
-	  if (DEBUGLEVEL>2)
-	  {
-	    fprintferr("iz=%ld,jideal=%ld,bouext=%ld,",iz,jideal,bouext);
-	    fprintferr("bou=%ld,phase=%ld,rand=%ld\n",bou,phase,getrand());
-	    flusherr();
-	  }
-	  idealpro = ideallllredpart1spec(nf,(GEN)ideal[1],
-					  gcoeff(lmatt2,bouext,bou), N,
-					  PRECREGINT);
-          if (!idealpro) return -2;
-	  if (factorisegen(nf,idealpro,KCZ,LIMC))
-	  {
-	    long *col = ma[++cmptglob];
-	    GEN colarch;
-	
-	    for (i=1; i<lgsub; i++) col[subvperm[i]] = -ex[i];
-	    for (i=1; i<=primfact[0]; i++) col[primfact[i]] += expoprimfact[i];
-	    col[numideal[pz]+jideal]--;
-
-	    i = already_found_relation_of_long(ma,cmptglob);
-	    if (i)
-	    {
-	      if (DEBUGLEVEL>1) dbg_cancelrel(i,iz,jideal,bouext,bou,phase,col);
-	      cmptglob--; for (i=1; i<=KC; i++) col[i]=0;
-	      if (++cptzer > MAXRELSUP) return -1;
-	    }
-	    else
-	    {
-	      pgen1 = ideallllredpart2(nf,(GEN)ideal[2],(GEN)idealpro[2],
-	                               PRECREG);
-	      cptzer=0; colarch = (GEN) maarch[cmptglob];
-	      for (i=1; i<=RU; i++)
-		gaffect((GEN)pgen1[i],(GEN)colarch[i]);
-	      if (DEBUGLEVEL)
-		dbg_newrel(iz,jideal,bouext,bou,phase,cmptglob,vperm,col,
-		           colarch,lim);
-
-	      if (cmptglob == lim)
-	      {
-		if (DEBUGLEVEL>2)
-		  dbg_outrel(iz,jideal,bouext,bou,phase,cmptglob,vperm,ma,
-		             maarch);
-		if (phase)
-		{
-		  bouext=1; bou=1; jideal++;
-		  if (jideal >= lg(idealcourant))
-		  {
-		    jideal=1;
-		    if (iz == KCZ) iz=1; else iz++;
-		  }
-		}
-		avma = av; return cmptglob;
-	      }
-	      nobreak=0;
-	    }
-	  }
-	  else if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
-	  if (fl) nobreak=0;
-          avma = av1;
-	}
-      }
       avma = av;
+      P = prime_to_ideal(nf, (GEN)vectbase[jideal]);
     }
-    if (iz == KCZ) iz=1; else iz++;
+    ideal = P;
+    do {
+      for (i=1; i<lgsub; i++)
+      {
+        ex[i] = mymyrand()>>randshift;
+        if (ex[i])
+          ideal = idealmulh(nf,ideal, gmael(powsubfb,i,ex[i]));
+      }
+    }
+    while (typ(ideal)==t_MAT); /* If ex  = 0, try another */
+  
+    if (phase != 1) jdir = 1; else phase = 2;
+    for (av1 = avma; jdir <= nbmatt2; jdir++, avma = av1)
+    { /* reduce along various directions */
+      if (DEBUGLEVEL>2)
+        fprintferr("phase=%ld,jideal=%ld,jdir=%ld,rand=%ld\n",
+                   phase,jideal,jdir,getrand());
+      idealpro = ideallllredpart1(nf,(GEN)ideal[1], (GEN)lmatt2[jdir],
+                                  N, PRECREGINT);
+      if (!idealpro) return -2;
+      if (!factorisegen(nf,idealpro,KCZ,LIMC))
+      {
+        if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
+        continue;
+      }
+      /* can factor ideal, record relation */
+      col = ma[++cmptglob];
+      for (i=1; i<lgsub; i++) col[subfb[i]] = -ex[i];
+      for (i=1; i<=primfact[0]; i++) col[primfact[i]] += expoprimfact[i];
+      col[jideal]--;
+      i = already_found_relation(ma,cmptglob);
+      if (i)
+      { /* already known. Forget it */
+        if (DEBUGLEVEL>1) dbg_cancelrel(i,jideal,jdir,phase,col);
+        cmptglob--; for (i=1; i<=KC; i++) col[i]=0;
+        if (++cptzer > MAXRELSUP)
+        {
+          if (list_jideal) { cptzer -= 10; break; }
+          return -1;
+        }
+        continue;
+      }
+
+      /* Record archimedian part */
+      cptzer=0; colarch = (GEN)maarch[cmptglob];
+      ideallllredpart2(colarch,nf,(GEN)ideal[2],(GEN)idealpro[2],PRECREG);
+      if (DEBUGLEVEL)
+        dbg_newrel(jideal,jdir,phase,cmptglob,col,colarch,lim);
+
+      /* Need more, try next P */
+      if (cmptglob < lim) break;
+
+      /* We have found enough. Return */
+      if (phase)
+      {
+        jdir = 1;
+        if (jideal == KC) jideal=1; else jideal++;
+      }
+      else if (DEBUGLEVEL>2)
+        fprintferr("Upon exit: jideal=%ld,jdir=%ld\n",jideal,jdir);
+      avma = av; return cmptglob;
+    }
+    if (!list_jideal)
+    {
+      if (jideal == KC) jideal=1; else jideal++;
+    }
   }
 }
 
 static long
-be_honest(GEN nf,long RU,long PRECREGINT)
+be_honest(GEN nf,GEN subfb,long RU,long PRECREGINT)
 {
-  long av,ex,i,j,k,iz,nbtest, N = lgef(nf[1])-3, lgsub = lg(subfactorbase);
+  long av,ex,i,j,k,iz,nbtest, N = lgef(nf[1])-3, lgsub = lg(subfb);
   GEN exu=new_chunk(RU+1), MCtw = cgetg(RU+1,t_MAT);
   GEN p1,p2,ideal,idealpro, MC = gmael(nf,5,2), M = gmael(nf,5,1);
 
   if (DEBUGLEVEL)
   {
-    fprintferr("be honest for primes from %ld to %ld\n",
+    fprintferr("Be honest for primes from %ld to %ld\n",
 		factorbase[KCZ+1],factorbase[KCZ2]);
     flusherr();
   }
@@ -1608,7 +1578,7 @@ be_honest(GEN nf,long RU,long PRECREGINT)
 	for (i=1; i<lgsub; i++)
 	{
 	  ex = mymyrand()>>randshift;
-	  if (ex) ideal = idealmulh(nf,ideal,(GEN)powsubfactorbase[i][ex][1]);
+	  if (ex) ideal = idealmulh(nf,ideal,gmael3(powsubfb,i,ex,1));
 	}
 	for (k=1; k<=RU; k++)
 	{
@@ -1622,7 +1592,7 @@ be_honest(GEN nf,long RU,long PRECREGINT)
           for (i=1; i<=RU; i++)
             MCtw[i] = exu[i]? lmul2n((GEN)MC[i],exu[i]<<1): MC[i];
           p2 = mulmat_real(MCtw,M);
-          idealpro = ideallllredpart1spec(nf,ideal,p2,N,PRECREGINT);
+          idealpro = ideallllredpart1(nf,ideal,p2,N,PRECREGINT);
           if (idealpro &&
 	      factorisegen(nf,idealpro,iz-1,factorbase[iz-1])) break;
 	  nbtest++; if (nbtest==20) return 0;
@@ -1806,25 +1776,23 @@ class_group_gen(GEN nf,GEN cyc,GEN clh,GEN u1,GEN u2,GEN vperm,
 static GEN
 compute_matt2(long RU,GEN nf)
 {
-  GEN p1,matt2, MCcopy, MCshif, M = gmael(nf,5,1), MC = gmael(nf,5,2);
-  long i,j,k,n = min(RU,9);
+  GEN matt2, MCcopy, MCshif, M = gmael(nf,5,1), MC = gmael(nf,5,2);
+  long i,j,k,n = min(RU,9), N = n*(n+1)/2, ind = 1;
 
   MCcopy=cgetg(RU+1,t_MAT); MCshif=cgetg(n+1,t_MAT);
   for (k=1; k<=RU; k++) MCcopy[k]=MC[k];
   for (k=1; k<=n; k++) MCshif[k]=lmul2n((GEN)MC[k],20);
-  matt2=cgetg(n+1,t_MAT);
+  matt2=cgetg(N+1,t_VEC);
   for (j=1; j<=n; j++)
   {
-    p1=cgetg(n+1,t_COL); matt2[j]=(long)p1;
     MCcopy[j]=MCshif[j];
     for (i=1; i<=j; i++)
     {
       MCcopy[i]=MCshif[i];
-      p1[i] = (long)mulmat_real(MCcopy,M);
+      matt2[ind++] = (long)mulmat_real(MCcopy,M);
       MCcopy[i]=MC[i];
     }
     MCcopy[j]=MC[j];
-    for (   ; i<=n; i++) p1[i]=zero;
   }
   if (DEBUGLEVEL) msgtimer("weighted T2 matrices");
   return matt2;
@@ -2423,11 +2391,11 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long N,R1,R2,RU,PRECREG,PRECREGINT,KCCO,KCCOPRO,RELSUP;
   long extrarel,nlze,sreg,nrelsup,nreldep,phase,slim,matcopymax;
   long first = 1, sfb_increase = 0, sfb_trials = 0;
-  long **mat,**matcopy,*vperm,*subvperm,*ex;
+  long **mat,**matcopy,*ex;
   double cbach,cbach2,drc,LOGD2,lim,LIMC,LIMC2;
-  GEN p1,p2,lmatt2,fu,zu,nf,D,xarch,met,W,reg,lfun,z,clh;
+  GEN p1,p2,lmatt2,fu,zu,nf,D,xarch,met,W,reg,lfun,z,clh,vperm,subfb;
   GEN B,C,u1,u2,c1,sublambda,pdep,parch,liste,invp,clg1,clg2;
-  GEN CHANGE=NULL, extramat=NULL, extraC=NULL;
+  GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal = NULL;
 
   if (DEBUGLEVEL) timer2();
 
@@ -2471,7 +2439,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   }
   av0 = avma;
   matcopy = NULL;
-  powsubfactorbase = NULL;
+  powsubfb = NULL;
 
 INCREASEGEN:
   if (first) first = 0; else { desallocate(matcopy); avma = av0; }
@@ -2483,16 +2451,15 @@ INCREASEGEN:
   if (LIMC2 < LIMC) LIMC2=LIMC;
   if (DEBUGLEVEL) { fprintferr("LIMC = %.1f, LIMC2 = %.1f\n",LIMC,LIMC2); }
 
-  /* initialize factorbase, subfactorbase, vperm */
+  /* initialize factorbase, [sub]vperm */
   lfun = factorbasegen(nf,(long)LIMC2,(long)LIMC);
   if (!lfun) goto INCREASEGEN;
 
-  vperm = cgetg(KC+1,t_VECSMALL);
-  ss = subfactorbasegen(N,(long)min(lim,LIMC2), minsfb, vperm);
-  if (ss == -1) goto INCREASEGEN;
-  lgsub = lg(subfactorbase);
+  vperm = cgetg(lg(vectbase), t_VECSMALL);
+  subfb = subfactorbasegen(N,(long)min(lim,LIMC2), minsfb, vperm, &ss);
+  if (!subfb) goto INCREASEGEN;
+  lgsub = lg(subfb);
   ex = cgetg(lgsub,t_VECSMALL);
-  subvperm = gcopy(vperm);
 
   PRECREGINT = DEFAULTPREC
              + ((expi(D)*(lgsub-2)+((N*N)>>2))>>TWOPOTBITS_IN_LONG);
@@ -2571,17 +2538,14 @@ INCREASEGEN:
     if (sfb_increase)
     { /* increase subfactorbase */
       sfb_increase = 0;
-      if (++sfb_trials >= SFB_MAX ||
-          subfactorbasegen(N,(long)min(lim,LIMC2), lgsub-1+SFB_STEP, NULL) < 0)
-        goto INCREASEGEN;
+      if (++sfb_trials >= SFB_MAX) goto INCREASEGEN;
+      subfb = subfactorbasegen(N, (long)min(lim,LIMC2),
+                                  lgsub-1+SFB_STEP, NULL, &ss);
+      if (!subfb) goto INCREASEGEN;
       if (DEBUGLEVEL) fprintferr("*** Increasing subfactorbase\n");
-      if (powsubfactorbase)
-      { /* desallocate using _old_ lgsub value */
-        for (i=lgsub-1; i; i--) free(powsubfactorbase[i]);
-        free(powsubfactorbase); powsubfactorbase = NULL;
-      }
-      lgsub = lg(subfactorbase);
+      powsubfb = NULL;
       nreldep = nrelsup = 0;
+      lgsub = lg(subfb);
     }
 
     if (phase == 0) { ma = mat; maarch = C; }
@@ -2609,15 +2573,11 @@ INCREASEGEN:
     if (!lmatt2)
     {
       lmatt2 = compute_matt2(RU,nf);
-      av1 = avma;
-    }
-    if (!powsubfactorbase)
-    {
-      powsubfactgen(nf,CBUCHG+1,PRECREG,PRECREGINT);
+      powsubfbgen(nf,subfb,CBUCHG+1,PRECREG,PRECREGINT);
       av1 = avma;
     }
     ss = random_relation(phase,cmptglob,slim,(long)LIMC,N,RU,PRECREG,
-                         PRECREGINT,nf,vperm,subvperm,ma,maarch,lmatt2,ex);
+                         PRECREGINT,nf,subfb,lmatt2,ma,maarch,ex,list_jideal);
     if (ss < 0) /* could not find relations */
     {
       if (phase == 0) { for (j=1; j<=KCCO; j++) free(mat[j]); free(mat); }
@@ -2630,6 +2590,7 @@ INCREASEGEN:
       }
       goto INCREASEGEN;
     }
+    if (DEBUGLEVEL > 2) dbg_outrel(phase,cmptglob,vperm,ma,maarch);
     if (phase)
       for (j=1; j<=extrarel; j++)
       {
@@ -2654,6 +2615,11 @@ INCREASEGEN:
     * extrarel goes down
     */
     nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
+    if (nlze)
+    {
+      list_jideal = cgetg(nlze+1, t_VECSMALL);
+      for (i=1; i<=nlze; i++) list_jideal[i] = vperm[i];
+    }
     extrarel = nlze; /* in case the regulator is 0 */
     if (extrarel < MIN_EXTRA) extrarel = MIN_EXTRA;
     extramat =cgetg(extrarel+1,t_MAT);
@@ -2672,12 +2638,13 @@ INCREASEGEN:
   }
   else
   {
+    list_jideal = NULL;
     if (low_stack(limpile, stack_lim(av1,1)))
     {
       GEN *gptr[6];
       if(DEBUGMEM>1) err(warnmem,"buchall");
-      gptr[0]=&W; gptr[1]=&C; gptr[2]=&B;
-      gptr[3]=&pdep; gptr[4]=&extramat; gptr[5]=&extraC;
+      gptr[0]=&W; gptr[1]=&C; gptr[2]=&B; gptr[3]=&pdep;
+      gptr[4]=&extramat; gptr[5]=&extraC;
       gerepilemany(av1,gptr,6);
     }
     W = hnfadd(W,vperm,&pdep,&B,&C, extramat,extraC);
@@ -2742,9 +2709,9 @@ INCREASEGEN:
   /* Phase "be honest" */
   if (KCZ2 > KCZ)
   {
-    if (!powsubfactorbase)
-      powsubfactgen(nf,CBUCHG+1,PRECREG,PRECREGINT);
-    if (!be_honest(nf,RU,PRECREGINT)) goto INCREASEGEN;
+    if (!powsubfb)
+      powsubfbgen(nf,subfb,CBUCHG+1,PRECREG,PRECREGINT);
+    if (!be_honest(nf,subfb,RU,PRECREGINT)) goto INCREASEGEN;
   }
 
   /* regulator, roots of unity, fundamental units */
