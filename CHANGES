@@ -77,6 +77,8 @@ MSo20- bittest(1,32) --> 1  [ off-by-1 error ]
        term sqrt(disc(K)) in norm bound ]
    26- allow conj(t_POLMOD) provided the modulus degree is <= 2.
 MSo27- ?0 with _many_ user functions defined --> SEGV [ typo in commands() ]
+   28- quadclassunit(5) --> PLEASE REPORT  [ can't build subfactorbase,
+       introduced in 2.2.6 ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

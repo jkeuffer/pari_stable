@@ -1715,7 +1715,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
   if (!PRECREG) lim /= sqrt(3.);
   R = gun;
   cp = (long)exp(sqrt(LOGD*log(LOGD)/8.0));
-  if (cp < 13) cp = 13;
+  if (cp < 20) cp = 20;
   av = avma; cbach /= 2;
   mat = NULL;
 
