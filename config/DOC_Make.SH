@@ -12,7 +12,7 @@ manual: users.dvi
 tutorial: tutorial.dvi
 refcard: refcard.ps
 
-.SUFFIXES: .tex .ipf .pod .inf
+.SUFFIXES: .tex .ipf .pod .inf .dumbpod
 
 paricfg.tex: paricfg.tex.in
 	sed -e 's/@version@/$version.$patch/'\\
@@ -95,6 +95,9 @@ veryclean: clean
 .tex.pod:
 	perl gphelp -to_pod \$*.tex > tmp_pod && mv tmp_pod \$*.pod
 
+.tex.dumbpod:
+	perl gphelp -to_dumb_pod $*.tex > tmp_pod && mv tmp_pod $*.dumbpod
+
 .ipf.inf:
 	ipfc /INF \$*.ipf
 
@@ -105,4 +108,13 @@ veryclean: clean
 
 pari.ipf:  refcard.pod tutorial.pod usersch1.pod usersch1.pod usersch2.pod usersch3.pod usersch4.pod usersch5.pod appa.pod appb.pod appc.pod
 	pod2ipf --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.pod --file=tutorial.pod --section-name="User guide" --file=usersch1.pod --file=usersch1.pod --file=usersch2.pod --file=usersch3.pod --file=usersch4.pod --file=usersch5.pod --section-name=Appendices --file=appa.pod --file=appb.pod --file=appc.pod > tmp_ipf && mv tmp_ipf pari.ipf
+
+# Wrong syntax...  How to convert a group of files?
+#pari.html:  refcard.dumbpod tutorial.dumbpod usersch1.dumbpod usersch1.dumbpod usersch2.dumbpod usersch3.dumbpod usersch4.dumbpod usersch5.dumbpod appa.dumbpod appb.dumbpod appc.dumbpod
+#	pod2html --title="PARI/GP Manual" --by-files --section-name="Getting started" --file=refcard.dumbpod --file=tutorial.dumbpod --section-name="User guide" --file=usersch1.dumbpod --file=usersch1.dumbpod --file=usersch2.dumbpod --file=usersch3.dumbpod --file=usersch4.dumbpod --file=usersch5.dumbpod --section-name=Appendices --file=appa.dumbpod --file=appb.dumbpod --file=appc.dumbpod > tmp_ipf && mv tmp_ipf pari.html
+
+.dumbpod.html:
+	pod2html --title="PARI/GP Manual $* Getting started" --file=$*.dumbpod > tmp_html && mv tmp_html $*.html
+
+
 EOT
