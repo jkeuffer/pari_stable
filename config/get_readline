@@ -9,7 +9,7 @@ rl_completion_matches rl_completion_func_t \
 RLINCLUDE RLLIBS"
 
 readline=
-if test -z "$disable_readline"; then
+if test -z "$without_readline"; then
   readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
   pth="$with_readline_lib $readline_add $libpth"
   lib=readline; . ./locatelib

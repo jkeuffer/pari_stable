@@ -4,7 +4,7 @@ if test -n "$with_gmp"; then
   with_gmp_lib="$with_gmp_lib $with_gmp/lib"
   with_gmp_includes="$with_gmp_includes $with_gmp/include"
 fi
-if test -z "$disable_gmp"; then
+if test -z "$without_gmp"; then
   gmp_add="$TOP/gmp-$osname-$arch $TOP/gmp"
   pth="$with_gmp_lib $gmp_add $libpth"
   lib=gmp; . ./locatelib
