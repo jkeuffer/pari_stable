@@ -2456,14 +2456,11 @@ $\Q_p$. $E$ must be given by a Weierstrass equation minimal at $p$.
 to $\fl=0$, and $\teb{apell2}(E,p)$ ($\fl=1$).
 
 \subsecidx{ellbil}$(E,z1,z2)$: if $z1$ and $z2$ are points on the elliptic
-curve $E$, this function computes the value of the canonical bilinear form on
-$z1$, $z2$:
-$$
- \kbd{ellheight}(E,z1\kbd{+}z2) - \kbd{ellheight}(E,z1) - \kbd{ellheight}(E,z2)
-$$
+curve $E$, assumed to be integral given by a minimal model, this function
+computes the value of the canonical bilinear form on $z1$, $z2$:
+$$ ( h(E,z1\kbd{+}z2) - h(E,z1) - h(E,z2) ) / 2 $$
 where \kbd{+} denotes of course addition on $E$. In addition, $z1$ or $z2$
-(but not both) can be vectors or matrices. Note that this is equal to twice
-some normalizations. $E$ is assumed to be integral, given by a minimal model.
+(but not both) can be vectors or matrices.
 
 \syn{bilhell}{E,z1,z2,\var{prec}}.
 
@@ -2516,12 +2513,12 @@ product of the local Tamagawa numbers $c_p$, a quantity which enters in the
 
 \syn{globalreduction}{E}.
 
-\subsecidx{ellheight}$(E,z,\{\fl=0\})$: global \idx{N\'eron-Tate height} of
-the point $z$ on the elliptic curve $E$. The vector $E$ must be a long vector
-of the type given by \kbd{ellinit}, with $\fl=1$. If $\fl=0$, this
+\subsecidx{ellheight}$(E,z,\{\fl = 2\})$: global \idx{N\'eron-Tate height} of
+the point $z$ on the elliptic curve $E$, assumed to be integral, given by a minimal model. The vector $E$ must be a long vector
+of the type given by \kbd{ellinit(,1)}. If $\fl=0$, this
 computation is done using sigma and theta-functions and a trick due to J.
-Silverman. If $\fl=1$, use Tate's $4^n$ algorithm, which is much slower.
-$E$ is assumed to be integral, given by a minimal model.
+Silverman. If $\fl=1$, use Tate's $4^n$ algorithm, which is much slower. If
+$\fl=2$, use Mestre's AGM algorithm.
 
 \syn{ellheight0}{E,z,\fl,\var{prec}}. The Archimedean
 contribution alone is given by the library function

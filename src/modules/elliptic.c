@@ -711,11 +711,12 @@ mathell(GEN e, GEN x, long prec)
   }
   for (i=1; i<lx; i++)
   {
-    coeff(y,i,i) = lmul2n(pdiag[i],1);
+    coeff(y,i,i) = pdiag[i];
     for (j=i+1; j<lx; j++)
     {
       h = ghell(e, addell(e,(GEN)x[i],(GEN)x[j]), prec);
-      coeff(y,j,i) = coeff(y,i,j) = lsub(h, gadd(pdiag[i],pdiag[j]));
+      h = gsub(h, gadd(pdiag[i],pdiag[j]));
+      coeff(y,j,i) = coeff(y,i,j) = lmul2n(h, -1);
     }
   }
   return gerepilecopy(av,y);
@@ -735,7 +736,7 @@ bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
   {
     p1 = ghell(e, addell(e,z1,z2),prec);
     p2 = gadd(h2, ghell(e,z1,prec));
-    return gerepileupto(av, gsub(p1,p2));
+    return gerepileupto(av, gmul2n(gsub(p1,p2), -1));
   }
   y = cgetg(lz1, typ(z1));
   for (i=1; i<lz1; i++) y[i] = (long)bilhells(e,(GEN)z1[i],z2,h2,prec);
@@ -2246,20 +2247,21 @@ exphellagm(GEN e, GEN z, long prec)
 }
 
 /* Assume e integral, given by a minimal model */
-static GEN
-ghell0(GEN e, GEN a, long flag, long prec)
+GEN
+ellheight0(GEN e, GEN a, long flag, long prec)
 {
   long lx, i, tx = typ(a);
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
 
+  if (flag > 2 || flag < 0) err(flagerr,"ellheight");
   checkbell(e); if (!is_matvec_t(tx)) err(elliper1);
   lx = lg(a); if (lx==1) return cgetg(1,tx);
   tx = typ(a[1]);
   if (is_matvec_t(tx))
   {
     z = cgetg(lx,tx);
-    for (i=1; i<lx; i++) z[i] = (long)ghell0(e,(GEN)a[i],flag,prec);
+    for (i=1; i<lx; i++) z[i] = (long)ellheight0(e,(GEN)a[i],flag,prec);
     return z;
   }
   if (lg(a) < 3) return gzero;
@@ -2314,27 +2316,14 @@ ghell0(GEN e, GEN a, long flag, long prec)
     /* z -= u log(p) / v */
     z = gadd(z, divrs(mulsr(-u, glog(p,prec)), v));
   }
-  return gerepileupto(av,z);
+  return gerepileupto(av, gmul2n(z, 1));
 }
 
 GEN
-ellheight0(GEN e, GEN a, long flag, long prec)
-{
-  switch(flag)
-  {
-    case 0: return ghell0(e,a,0,prec);
-    case 1: return ghell0(e,a,1,prec);
-    case 2: return ghell0(e,a,2,prec);
-  }
-  err(flagerr,"ellheight");
-  return NULL; /* not reached */
-}
+ghell2(GEN e, GEN a, long prec) { return ellheight0(e,a,0,prec); }
 
 GEN
-ghell2(GEN e, GEN a, long prec) { return ghell0(e,a,0,prec); }
-
-GEN
-ghell(GEN e, GEN a, long prec) { return ghell0(e,a,2,prec); }
+ghell(GEN e, GEN a, long prec) { return ellheight0(e,a,2,prec); }
 
 static long ellrootno_all(GEN e, GEN p, GEN* ptcond);
 

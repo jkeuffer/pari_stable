@@ -86,6 +86,12 @@ BA  3- Internal u_Fp* routines now are renamed Fl* and made public.
 BA  4- [GMP kernel] Library soname changed to libpari-gmp[-2.2].so.N.
 BA  5- Library .so link changed to libpari.so for all versions.
        Static library changed to libpari.a for all versions.
+    6- COMPAT: ellheight now uses the standard normalization: twice the value
+    it used to return. The values returned by ellbil() and ellheightmatrix are
+    unaffected. In particular, ellheightmatrix() is the polar form of 
+    elleight(), and ellbil now satisfies the proper identity for B(P, Q) =
+    (h(P+Q)-h(P)-h(Q)) / 2, and
+
 
   Added
     1- make test-all [ all test suite (SLOW !)]

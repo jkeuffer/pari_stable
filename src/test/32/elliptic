@@ -59,9 +59,9 @@
 ? ellglobalred(acurve)
 [37, [1, -1, 2, 2], 1]
 ? ellheight(acurve,apoint)
-0.40889126591975072188708879805553617281
+0.81778253183950144377417759611107234563
 ? ellheight(acurve,apoint,1)
-0.40889126591975072188708879805553617289
+0.81778253183950144377417759611107234577
 ? ellordinate(acurve,1)
 [8, 3]
 ? ellztopoint(acurve,ellpointtoz(acurve,apoint))
@@ -160,5 +160,5 @@ q^101)
 ? getheap
 [57, 4646]
 ? print("Total time spent: ",gettime);
-Total time spent: 80
+Total time spent: 220
 ? \q
