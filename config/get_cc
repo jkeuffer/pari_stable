@@ -119,6 +119,7 @@ if test -n "$__gnuc__"; then
   # Some architectures need -fPIC for building dynamic lib
   case "$osname-$arch" in
     hpux-*|*-ia64) DLCFLAGS=-fPIC ;;
+    darwin-*) DLCFLAGS=-fno-common;;
   esac
   # Specific optimisations for some architectures
   case "$arch" in
