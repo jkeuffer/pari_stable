@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "gp.h"
 
 extern void  addhelp(entree *ep, char *s);
-extern void  allocatemem0(unsigned long newsize);
+extern void  allocatemem0(size_t newsize);
 extern GEN   default0(char *a, char *b, long flag);
 extern void  error0(GEN *g);
 extern GEN   extern0(char *cmd);

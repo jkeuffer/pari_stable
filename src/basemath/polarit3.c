@@ -1722,7 +1722,7 @@ matpolfrobenius(GEN V, GEN P, GEN T, GEN p)
     Mi=FpXV_FpV_innerprod(W2,PV,p);
     W=gcopy(W2);
     gerepilemanysp(btop,bbot,gptr,2);
-    btop=(ulong)W;
+    btop=(gpmem_t)W;
     M[i]=(long)Mi;
   }
   return vecpol_to_mat(M,l);

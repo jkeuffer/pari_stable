@@ -66,7 +66,9 @@ lemma6(GEN pol,GEN p,long nu,GEN x)
 
 static long
 lemma7(GEN pol,long nu,GEN x)
-{ long i,odd4,lambda,mu,mnl,ltop=avma;
+{
+  long i,odd4,lambda,mu,mnl;
+  gpmem_t ltop=avma;
   GEN gx,gpx,oddgx;
 
   for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)

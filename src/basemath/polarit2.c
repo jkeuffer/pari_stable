@@ -3935,8 +3935,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     den = mulii(den, mppgcd(ZX_resultant(lP, nf), ZX_resultant(lQ, nf)));
   /*Modular GCD*/
   {
-    gpmem_t btop = avma;
-    ulong st_lim = stack_lim(btop, 1);
+    gpmem_t btop = avma, st_lim = stack_lim(btop, 1);
     long p;
     long dM=0, dR;
     GEN M, dsol, dens;

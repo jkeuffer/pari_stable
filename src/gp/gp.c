@@ -136,7 +136,7 @@ gp_preinit(void)
 
   primelimit = 500000; 
   bot = 0;
-  top = 1000000*sizeof(long);
+  top = (gpmem_t)1000000*sizeof(long);
   strcpy(prompt, DFT_PROMPT);
   strcpy(prompt_cont, CONTPROMPT);
 
@@ -745,7 +745,7 @@ sd_output(char *v, int flag)
 extern void err_clean(void);
 
 void
-allocatemem0(unsigned long newsize)
+allocatemem0(size_t newsize)
 {
   (void)allocatemoremem(newsize);
   err_clean();
@@ -755,7 +755,7 @@ allocatemem0(unsigned long newsize)
 static GEN
 sd_parisize(char *v, int flag)
 {
-  long n = top-bot;
+  size_t n = top-bot;
   GEN r = sd_numeric(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
   if (n != top-bot)
   {
@@ -2767,7 +2767,7 @@ read_opt(long argc, char **argv)
 {
   char *b=NULL, *p=NULL, *s=NULL, **pre;
   int i=1, initrc=1;
-  long TOP;
+  gpmem_t TOP;
 
   pari_outfile=stderr;
   while (i<argc)
@@ -2805,8 +2805,7 @@ read_opt(long argc, char **argv)
   /* override the values from gprc */
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, &primelimit);
-  TOP = (long)top;
-  testint(s, &TOP); top = (ulong)TOP;
+  testint(s, (gpmem_t*)&top);
   if (under_emacs || under_texmacs) disable_color=1;
   pari_outfile=stdout; return pre;
 }

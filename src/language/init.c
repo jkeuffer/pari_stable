@@ -1637,9 +1637,9 @@ switch_stack(stackzone *z, long n)
 {
   if (!z)
   { /* create parallel stack */
-    long size = n*sizeof(long) + sizeof(stackzone);
+    size_t size = n*sizeof(long) + sizeof(stackzone);
     z = (stackzone*) gpmalloc(size);
-    z->zonetop = ((long)z) + size;
+    z->zonetop = ((gpmem_t)z) + size;
     return z;
   }
 

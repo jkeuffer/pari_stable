@@ -704,7 +704,7 @@ GEN group_abelianHNF(GEN G)
   M=cgetg(n,t_MAT);
   for(i=1;i<n;i++)
   {
-    ulong btop;
+    gpmem_t btop;
     GEN P;
     long k;
     M[i]=lgetg(n,t_COL);
