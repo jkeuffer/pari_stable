@@ -2960,8 +2960,8 @@ content(GEN x)
 
     case t_POL:
     case t_SER:
-      if (!signe(x)) return gzero;
-      lx = lg(x); break;
+      lx = lg(x); if (lx == 2) return gzero;
+      break;
     case t_QFR: case t_QFI:
       lx = 4; break;
 

@@ -134,9 +134,20 @@ gred_rfrac2_i(GEN x1, GEN x2)
   if (varn(x2) > varn(x1)) return gdiv(x1,x2);
 
   /* now x1 and x2 are polynomials with the same variable */
-  xx1=content(x1); if (!gcmp1(xx1)) x1=gdiv(x1,xx1);
-  xx2=content(x2); if (!gcmp1(xx2)) x2=gdiv(x2,xx2);
-  x3=gdiv(xx1,xx2);
+  xx2 = content(x2); if (!gcmp1(xx2)) x2 = gdiv(x2,xx2);
+  xx1 = content(x1);
+  if (gcmp0(xx1))
+  {
+    x1 = gmul(x1,xx2);
+    x3 = gun;
+  }
+  else if (!gcmp1(xx1))
+  {
+    x1 = gdiv(x1,xx1);
+    x3 = gdiv(xx1,xx2);
+  }
+  else
+    x3 = ginv(xx2);
   y = poldivrem(x1,x2,&p1);
   if (!signe(p1)) return gmul(x3,y);
 
@@ -157,20 +168,20 @@ gred_rfrac2_i(GEN x1, GEN x2)
   p1[2]=lmul(x2,xx2); return p1;
 }
 
-static GEN 
+static GEN
 gred_rfrac_i(GEN x)
 {
   return gred_rfrac2_i((GEN)x[1], (GEN)x[2]);
 }
 
-GEN 
+GEN
 gred_rfrac2(GEN x1, GEN x2)
 {
   pari_sp av = avma;
   return gerepileupto(av, gred_rfrac2_i(x1, x2));
 }
 
-GEN 
+GEN
 gred_rfrac(GEN x)
 {
   return gred_rfrac2((GEN)x[1], (GEN)x[2]);
@@ -280,7 +291,7 @@ addpadic(GEN x, GEN y)
 static GEN
 gaddpex(GEN x, GEN y)
 {
-  pari_sp av;  
+  pari_sp av;
   long tx,vy,py,d,r,e;
   GEN z,q,p,p1,p2,mod,u;
 
@@ -1056,7 +1067,7 @@ gmul_err(GEN x, GEN y, long tx, long ty)
       case t_VECSMALL: /* multiply as permutation. cf perm_mul */
         l = lg(x); z = cgetg(l, t_VECSMALL);
         if (l != lg(y)) break;
-        for (i=1; i<l; i++) 
+        for (i=1; i<l; i++)
 	{
 	  long yi = y[i];
 	  if (yi < 1 || yi >= l) err(operf,"*",x,y);
@@ -1075,7 +1086,7 @@ VC_mul(GEN x, GEN y, long l)
   pari_sp av = avma;
   GEN z = gzero;
   long i;
-  for (i=1; i<l; i++)   
+  for (i=1; i<l; i++)
   {
     GEN c = (GEN)y[i];
     if (!isexactzeroscalar(c)) z = gadd(z, gmul((GEN)x[i], c));
@@ -1450,7 +1461,7 @@ gmul(GEN x, GEN y)
 
   if (vx>vy || (vx==vy && is_scalar_t(tx)))
   {
-    if (isexactzero(x)) 
+    if (isexactzero(x))
     {
       if (vy == BIGINT) err(operf,"*",x,y);
       return zeropol(vy);
@@ -1493,7 +1504,7 @@ gmul(GEN x, GEN y)
 	case t_POL:
         {
 #if 0
-/* Too dangerous / cumbersome to correct here. Don't use t_POLMODS of 
+/* Too dangerous / cumbersome to correct here. Don't use t_POLMODS of
  * t_INTMODs to represent elements of finite fields. Implement a finite
  * field type instead and compute with polynomials with integer coeffs in
  * Kronecker form...
@@ -1774,7 +1785,7 @@ gdiv(GEN x, GEN y)
       case  1:
         if (is_pm1(x)) return ginv(y);
         break;
-      case -1: 
+      case -1:
         if (is_pm1(x)) { av = avma; return gerepileupto(av, ginv(gneg(y))); }
     }
     switch(ty)
@@ -1783,7 +1794,7 @@ gdiv(GEN x, GEN y)
         return gred_frac2(x,y);
       case t_REAL:
         return divir(x,y);
-            
+
       case t_INTMOD:
         z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
         (void)new_chunk(lgefint(p2)<<2); /* HACK */
@@ -1810,7 +1821,7 @@ gdiv(GEN x, GEN y)
         else
           fix_frac_if_int(z);
         return z;
-            
+
       case t_FRACN:
         z=cgetg(3,t_FRACN);
         z[1]=lmulii((GEN)y[2], x);
@@ -1820,7 +1831,7 @@ gdiv(GEN x, GEN y)
       case t_PADIC:
         av=avma; p1=cgetp(y); gaffect(x,p1); tetpil=avma;
         return gerepile(av,tetpil,gdiv(p1,y));
-            
+
       case t_COMPLEX: case t_QUAD:
         av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
         return gerepile(av,tetpil,gdiv(p2,p1));
@@ -1925,7 +1936,7 @@ gdiv(GEN x, GEN y)
             z[1] = licopy((GEN)x[1]);
           }
           z[2] = lmulii((GEN)x[2],y);
-          fix_frac(z); 
+          fix_frac(z);
           if (tetpil) fix_frac_if_int_GC(z,tetpil);
           return z;
 
@@ -2082,7 +2093,7 @@ gdiv(GEN x, GEN y)
   }
 
   vx=gvar(x); vy=gvar(y);
-  if (ty == t_POLMOD || ty == t_INTMOD) 
+  if (ty == t_POLMOD || ty == t_INTMOD)
   {
     av = avma;
     return gerepileupto(av, gmul(x, ginv(y)));
@@ -2124,7 +2135,7 @@ gdiv(GEN x, GEN y)
     err(operf,"/",x,y);
   }
 
-  ly = lg(y); 
+  ly = lg(y);
   if (vy<vx || (vy==vx && is_scalar_t(tx)))
   {
     switch(ty)
