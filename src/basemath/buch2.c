@@ -2986,7 +2986,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   long N, R1, R2, RU, LIMC, LIMC2, lim, zc, i, jid;
   long nreldep, sfb_trials, need, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
-  GEN G0, fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
+  GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int minsFB = 3;
