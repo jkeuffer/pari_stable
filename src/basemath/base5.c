@@ -531,32 +531,62 @@ rnfidealhermite(GEN rnf,GEN x)
   return NULL; /* not reached */
 }
 
+static GEN
+prodid(GEN nf, GEN I)
+{
+  long i, l = lg(I);
+  GEN z;
+
+  if (l == 1) return idmat(degpol(nf[1]));
+  z = (GEN)I[1];
+  for (i=2; i<l; i++) z = idealmul(nf, z, (GEN)I[i]);
+  return z;
+}
+
+static GEN
+prodidnorm(GEN I)
+{
+  long i, l = lg(I);
+  GEN z;
+
+  if (l == 1) return gun;
+  z = dethnf((GEN)I[1]);
+  for (i=2; i<l; i++) z = gmul(z, dethnf((GEN)I[i]));
+  return z;
+}
+
 GEN
 rnfidealnormrel(GEN rnf,GEN id)
 {
-  long i, n;
   gpmem_t av = avma;
-  GEN z,id2,nf;
+  GEN z, t, nf;
+  long n;
 
-  id = rnfidealhermite(rnf,id); id2 = (GEN)id[2];
+  checkrnf(rnf); nf = (GEN)rnf[10];
   n = degpol(rnf[1]);
-  nf = (GEN)rnf[10];
   if (n == 1) { avma = av; return idmat(degpol(nf[1])); }
-  z = (GEN)id2[1]; for (i=2; i<=n; i++) z = idealmul(nf,z,(GEN)id2[i]);
-  return gerepileupto(av, z);
+
+  id = rnfidealhermite(rnf,id);
+  t = prodid(nf, gmael(rnf,7,2));
+  z = prodid(nf, (GEN)id[2]);
+  return gerepileupto(av, idealdiv(nf,z,t));
 }
 
 GEN
 rnfidealnormabs(GEN rnf,GEN id)
 {
-  long i, n;
   gpmem_t av = avma;
-  GEN z,id2;
+  GEN z, t;
+  long n;
 
-  id = rnfidealhermite(rnf,id); id2 = (GEN)id[2];
+  checkrnf(rnf);
   n = degpol(rnf[1]);
-  z = gun; for (i=1; i<=n; i++) z = gmul(z, dethnf((GEN)id2[i]));
-  return gerepileupto(av,z);
+  if (n == 1) return gun;
+
+  id = rnfidealhermite(rnf,id);
+  z = prodidnorm((GEN)id[2]);
+  t = prodidnorm(gmael(rnf,7,2));
+  return gerepileupto(av, gdiv(z, t));
 }
 
 GEN
