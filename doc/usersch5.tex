@@ -1194,11 +1194,9 @@ argument.
 
   \kbd{compo}: composition
 
-%  \kbd{red}: reduction to some normal form (canonical representative)
-
-\subsec{\kbd{ZX}, \kbd{ZM}} A \kbd{ZV} (resp.~a~\kbd{ZM}, resp.~a~\kbd{ZX})
-is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT}, resp.~\typ{POL}) with \typ{INT}
-coefficients.
+\subsec{\kbd{ZX}, \kbd{ZV}, \kbd{ZM}}. A \kbd{ZV} (resp.~a~\kbd{ZM},
+resp.~a~\kbd{ZX}) is a \typ{VEC} or \typ{COL} (resp.~\typ{MAT},
+resp.~\typ{POL}) with \typ{INT} coefficients.
 
 %GEN     ZX_caract(GEN A, GEN B, long v);
 %GEN     ZX_disc(GEN x);
@@ -1222,8 +1220,9 @@ in $(\Z/\kbd{p}\Z)[X]$.
 \subsubsec{Basic operations}. In what follows \kbd{p} is always a \typ{INT},
 not necessarily prime.
 
-\fun{GEN}{FpX}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z * Mod(1,p)},
-normalized (hence with \typ{INTMOD} coefficients).
+\fun{GEN}{FpX_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z *
+Mod(1,p)}, normalized. Hence the returned value has \typ{INTMOD}
+coefficients.
 
 \fun{GEN}{FpX_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}, returns \kbd{lift(z *
 Mod(1,p))}, normalized.
@@ -1521,11 +1520,11 @@ same with \kbd{Fp} coordinates; operations are understood over $\Z/p\Z$. An
 
 \subsubsec{Basic operations}
 
-\fun{GEN}{FpV}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{z * Mod(1,p)},
-hence with \typ{INTMOD} coefficients.
+\fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{z *
+Mod(1,p)}, hence with \typ{INTMOD} coefficients.
 
-\fun{GEN}{FpM}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z * Mod(1,p)},
-hence with \typ{INTMOD} coefficients.
+\fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
+Mod(1,p)}, hence with \typ{INTMOD} coefficients.
 
 \fun{GEN}{FpV_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{lift(z *
 Mod(1,p))}, which is an \kbd{FpV}
@@ -1873,6 +1872,64 @@ result is a \typ{INTMOD}, or \kbd{x} is a scalar or a \typ{POL} and \kbd{y} a
 \fun{GEN}{gmodulo}{GEN x, GEN y} same as \key{gmodulcp} except that the
 modulus \kbd{y} is cloned onto the heap, not copied onto the PARI stack.
 
+\subsubsec{Between polynomials and coefficient arrays}
+
+\fun{GEN}{gtopoly}{GEN x, long v} converts or truncates the object~\kbd{x}
+into a \typ{POL} with main variable number~\kbd{v}. A common application
+would be the conversion of coefficient vectors (coefficients are given by
+decreasing degree). E.g.~\kbd{[2,3]} goes to \kbd{2*v + 3}
+
+\fun{GEN}{gtopolyrev}{GEN x, long v} converts or truncates the object~\kbd{x}
+into a \typ{POL} with main variable number~\kbd{v}, but vectors are
+converted in reverse order compared to \kbd{gtopoly} (coefficients are given
+by increasing degree). E.g.~\kbd{[2,3]} goes to \kbd{3*v + 2}. In other words
+the vector represents a polynomial in the basis $(1,v,v^2,v^3,\dots)$.
+
+\fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
+(with all coefficients correctly set except that \kbd{leading\_term(x)} might
+be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
+internal use.
+
+The following routines do \emph{not} copy coefficients on the stack (they
+only move pointers around), hence are very fast but not suitable for
+\kbd{gerepile} calls. Recall that an \kbd{RV} (resp.~an \kbd{RX}, resp.~an
+\kbd{RM}) is a \typ{VEC} or \typ{COL} (resp.~a \typ{POL}, resp.~a \typ{MAT})
+with arbitrary components. Similarly, an \kbd{RXV} is a \typ{VEC} or \typ{COL}
+with \kbd{RX} components, etc.
+
+\fun{GEN}{RV_to_RX}{GEN x, long v} converts the \kbd{RV}~\kbd{x} to a
+(normalized) polynomial in variable~\kbd{v} (as \kbd{gtopolyrev}, without
+copy).
+
+\fun{GEN}{RX_to_RV}{GEN x, long N} converts the \typ{POL}~\kbd{x} to 
+a \typ{COL}~\kbd{v} with \kbd{N} components. Other types than \typ{POL} are
+allowed for \kbd{x}, which is then considered as a constant polynomial.
+Coefficients of \kbd{x} are listed by increasing degree, so that \kbd{y[i]}
+is the coefficient of the term of degree $i-1$ in \kbd{x}.
+
+\fun{GEN}{RM_to_RXV}{GEN x, long v} converts the \kbd{RM}~\kbd{x}
+to a \typ{VEC} of \kbd{RX}, by repeated calls to \kbd{RV\_to\_RX}.
+
+\fun{GEN}{RXV_to_RM}{GEN v, long N} converts the vector of \kbd{RX}~\kbd{v}
+to a~\typ{MAT} with \kbd{N}~rows, by repeated calls to \kbd{RX\_to\_RV}.
+
+\fun{GEN}{RM_to_RXX}{GEN x, long v,long w} converts the \kbd{RM}~\kbd{x} into
+a \typ{POL} in variable~\kbd{v}, whose coefficients are \typ{POL}s in
+variable~\kbd{w}. This is a shortcut for
+\bprog
+  RV_to_RX( RM_to_RXV(x, w), v );
+@eprog\noindent
+There are no consistency checks with respect to variable
+priorities: the above is an invalid object if $\kbd{varncmp(v, w)} \geq 0$.
+
+\fun{GEN}{RXX_to_RM}{GEN x, long N} converts the \typ{POL}~\kbd{x} with
+\kbd{RX} (or constant) coefficients to a matrix with \kbd{N} rows.
+
+\fun{GEN}{RXY_swap}{GEN P, long n, long w} converts the bivariate polynomial
+$\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} coefficients) to
+$P(\kbd{polx[w]},u)$, assuming \kbd{n} is an upper bound for
+$\deg_v(\kbd{P})$.
+
 \subsubsec{Other types}
 
 \fun{GEN}{greffe}{GEN x, long l, int use\_stack} applied to a
@@ -1880,14 +1937,6 @@ modulus \kbd{y} is cloned onto the heap, not copied onto the PARI stack.
 with~\kbd{x}, but without actually copying the coefficients, just the
 pointers. If \kbd{use\_stack} is $0$, this is created through malloc, and
 must be freed after use. Intended for internal use only.
-
-\fun{GEN}{gtopoly}{GEN x, long v} converts or truncates the object~\kbd{x}
-into a \typ{POL} with main variable number~\kbd{v}. A common application
-would be the conversion of coefficient vectors.
-
-\fun{GEN}{gtopolyrev}{GEN x, long v} converts or truncates the object~\kbd{x}
-into a \typ{POL} with main variable number~\kbd{v}, but vectors are
-converted in reverse order.
 
 \fun{GEN}{gtoser}{GEN x, long v} converts the object~\kbd{x} into a \typ{SER}
 with main variable number~\kbd{v}.
@@ -1905,11 +1954,6 @@ with main variable number~\kbd{v}.
 (i.e.~type \typ{SER} with all coefficients correctly set except that \kbd{x[2]}
 might be zero), normalizes \kbd{x} correctly in place. Returns~\kbd{x}.
 For internal use.
-
-\fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
-(with all coefficients correctly set except that \kbd{leading\_term(x)} might
-be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
-internal use.
 
 \subsec{Constructors}
 
