@@ -1851,10 +1851,10 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
   av0 = avma; dz = dx-dy;
   if (OK_ULONG(p))
   { /* assume ab != 0 mod p */
-    ulong *a, *b, *zz, pp = (ulong)p[2];
-    a = u_Fp_FpX(x,1, pp);
-    b = u_Fp_FpX(y,1, pp);
-    zz = u_FpX_divres(a,b,pp,1, pr);
+    ulong pp = (ulong)p[2];
+    GEN a = u_Fp_FpX(x,1, pp);
+    GEN b = u_Fp_FpX(y,1, pp);
+    GEN zz= u_FpX_divres(a,b,pp,1, pr);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
       rem = small_to_pol(*pr);
