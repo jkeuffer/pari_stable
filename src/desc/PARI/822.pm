@@ -89,6 +89,7 @@ sub read
                 die("New function $value") if (($check&2) and !defined($ret->{$entry}));
                 $invars=1;
 	}
+        die("$file is not terminated") if ($invars);
         return 0;
 }
 
