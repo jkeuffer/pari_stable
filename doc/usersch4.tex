@@ -2078,7 +2078,7 @@ don't use the resulting \kbd{long}\cr
  global variable \kbd{precdl} for the library)\cr
 
 \noindent $\bullet$ Return type: \kbd{GEN} by default, otherwise the
-following can appear anywhere in the code string:
+following can appear at the start of the code string:
 %
 \+& \kbd{l} & return \kbd{long}\cr
 \+& \kbd{v} & return \kbd{void}\cr
@@ -2103,7 +2103,7 @@ don't involve default values):
 GEN name(GEN x, GEN y, long prec)   ----> "GGp"
 void name(GEN x, GEN y, long prec)  ----> "vGGp"
 void name(GEN x, long y, long prec) ----> "vGLp"
-long name(GEN x)                    ----> "Gl"
+long name(GEN x)                    ----> "lG"
 @eprog
 
 If you want more examples, GP gives you easy access to the parser codes
@@ -2139,9 +2139,11 @@ a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
 \fun{void}{fprintferr}{char *s}: write \kbd{s} to the GP error stream (this
 function is in fact much more versatile, see \secref{se:dbg_output}).
 
-Declare all public functions in \kbd{paridecl.h} (you want the outside
-world to know about them). The other ones should be declared \kbd{static} in
-your file.
+Declare all public functions in an appropriate header file, if you
+expect somebody will access them from C.  For example, if dynamic
+loading is not available, you may need to modify PARI to access these
+functions, so put them in \kbd{paridecl.h}. The other functions should
+be declared \kbd{static} in your file.
 
 Your function is now ready to be used in library mode after compilation and
 creation of the library. If possible, compile it as a shared library (see
@@ -2164,12 +2166,13 @@ Now, assuming your Operating System is supported by \tet{install}, simply
 write a GP script like the following:
 
 \bprog
-install(name, code, gpname, library)
+install(libname, code, gpname, library)
 addhelp(gpname, "some help text")
 @eprog
 \noindent(see \secref{se:addhelp} and~\ref{se:install}). The \idx{addhelp}
 part is not mandatory, but very useful if you want others to use your
-module.
+module.  \kbd{libname} is how the function is named in the library,
+usually the same name as one visible from C.
 
 Read that file from your GP session (from your \idx{preferences file} for
 instance, see \secref{se:gprc}), and that's it, you can use the new
@@ -2198,9 +2201,12 @@ come before letters), in a line of the form:
 \kbd{secno} is the section number of Chapter~3 in which this function would
 belong (type \kbd{?} in GP to see the list),
 
-\kbd{V} is a number between 0 and 99. Right now, there are only two
+\kbd{V} is a number between 0 and 99. Right now, for PARI there are only two
 significant values: zero means that it's possible to call the function
 without argument, and non-zero means it needs at least one argument.
+A binding of PARI to an external language (such as \kbd{Math::Pari}
+Perl module) may actually distinguish between different non-zero values.
+Better use 99 if you want a non-zero value which will not confuse anybody.
 
 \kbd{code} is the parser code.
 
