@@ -15,22 +15,22 @@ cat > $file << EOT
 
 #define PARIVERSION "GP/PARI CALCULATOR Version ${version}.${patch} (${status})"
 #ifdef __cplusplus
-#  if defined(__EMX__)
-#    define PARIINFO "C++ ix86 running EMX (ix86 kernel) 32-bit version"
-#  elsif defined(WINCE)
-#    define PARIINFO "C++ Windows CE 32-bit version"
-#  else
-#    define PARIINFO "C++ ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
-#  endif
+#  define PARI_I_PRE "C++"
 #else
-#  if defined(__EMX__)
-#    define PARIINFO "ix86 running EMX (ix86 kernel) 32-bit version"
-#  elsif defined(WINCE)
-#    define PARIINFO "Windows CE 32-bit version"
-#  else
-#    define PARIINFO "ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
-#  endif
+#  define PARI_I_PRE ""
 #endif
+#if defined(__EMX__)
+#  define PARI_I_POST "ix86 running EMX (ix86 kernel) 32-bit version"
+#endif
+#if defined(WINCE)
+#  define PARI_I_POST "Windows CE 32-bit version"
+#endif
+#if !defined(PARI_I_POST)
+#  define PARI_I_POST "ix86 running Windows 3.2 (ix86 kernel) 32-bit version"
+#endif
+#define PARIINFO PARI_I_PRE/**/PARI_I_POST
+#undef PARI_I_PRE
+#undef PARI_I_POST
 
 #define PARI_BYTE_ORDER    1234
 #ifdef _MSC_VER /* MSVC inline directive */
