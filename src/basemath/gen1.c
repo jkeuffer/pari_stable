@@ -2045,12 +2045,15 @@ gdiv(GEN x, GEN y)
      || (vx==vy && is_scalar_t(ty)) || (is_matvec_t(tx) && !is_matvec_t(ty)))
   {
     if (tx == t_RFRAC) return divrfracscal(x,y);
-    z = cgetg(lx,tx);
+    z = new_chunk(lx); z[0] = x[0];
     switch(tx)
     {
-      case t_POL: case t_SER: z[1] = x[1];
+      case t_POL: case t_SER:
+        z[1] = x[1];
+        for (i=2; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
+        return z;
       case t_VEC: case t_COL: case t_MAT:
-        for (i=lontyp[tx]; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
+        for (i=1; i<lx; i++) z[i]=ldiv((GEN)x[i],y);
         return z;
     }
     err(operf,"/",x,y);

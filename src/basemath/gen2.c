@@ -1605,17 +1605,19 @@ cvtop(GEN x, GEN p, long l)
 GEN
 gcvtop(GEN x, GEN p, long r)
 {
-  long i,lx, tx=typ(x);
+  long i, lx, tx = typ(x);
   GEN y;
 
   if (is_const_t(tx)) return cvtop(x,p,r);
-  lx = lg(x); y = cgetg(lx,tx);
+  lx = lg(x); y = new_chunk(lx); y[0] = x[0];
   switch(tx)
   {
     case t_POL: case t_SER: y[1] = x[1];
+      for (i=2; i<lx; i++) y[i]=(long)gcvtop((GEN)x[i],p,r);
+      break;
     case t_POLMOD: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      for (i=lontyp[tx]; i<lx; i++) y[i]=(long)gcvtop((GEN)x[i],p,r);
+      for (i=1; i<lx; i++) y[i]=(long)gcvtop((GEN)x[i],p,r);
       break;
 
     default: err(typeer,"gcvtop");
@@ -1643,7 +1645,7 @@ gexpo(GEN x)
 
     case t_COMPLEX:
       e = gexpo((GEN)x[1]);
-      f = gexpo((GEN)x[2]); return max(e,f);
+      f = gexpo((GEN)x[2]); return max(e, f);
 
     case t_QUAD: {
       GEN p = (GEN)x[1]; /* mod = X^2 + {0,1}* X - {D/4, (1-D)/4})*/
