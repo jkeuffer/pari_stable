@@ -375,7 +375,7 @@ install: install-lib-$dft install-include install-bin install-man install-misc i
 install-include:
 	-mkdir -p \$(INCLUDEDIR)
 	\$(INSTALL_DATA) paricfg.h                \$(INCLUDEDIR)
-        \$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)
+	\$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)
 	-for i in $hlist; do \\
 	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR); done
 	-\$(RM) \$(INCLUDEDIR)/genpari.h
