@@ -1070,14 +1070,14 @@ has_ext_help(void)
 {
   if (GP_DATA->help)
   {
-    char *buf = pari_strdup(GP_DATA->help), *s;
+    char *buf = pari_strdup(GP_DATA->help), *s, *t;
     FILE *file;
 
-    for (s = buf; *s; s++)
+    for (t = s = buf; *s; *t++ = *s++)
     {
       if (*s == '\\') s++; else if (*s == ' ') break;
     }
-    *s = 0; file = fopen(buf,"r");
+    *t = 0; file = fopen(buf,"r");
     free(buf);
     if (file) { fclose(file); return 1; }
   }
