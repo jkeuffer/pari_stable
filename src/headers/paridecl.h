@@ -994,6 +994,7 @@ GEN     precprime(GEN n);
 /* init.c */
 
 long    TIMER(pari_timer *T);
+void    TIMERstart(pari_timer *T);
 long    allocatemoremem(size_t newsize);
 GEN     changevar(GEN x, GEN y);
 void    checkmemory(GEN x);

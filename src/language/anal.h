@@ -52,6 +52,25 @@ typedef struct stack {
   void *value;
 } stack;
 
+/* history */
+typedef struct {
+  GEN *res;    /* array of previous results, FIFO */
+  size_t size; /* # res */
+  ulong total; /* # of results computed since big bang */
+} gp_hist;
+
+/* prettyprinter */
+typedef struct {
+  pariFILE *file;
+  char *cmd;
+} gp_pp;
+
+/* path */
+typedef struct {
+  char *PATH;
+  char **dirs;
+} gp_path;
+
 void push_stack(stack **pts, void *a);
 void *pop_stack(stack **pts);
 
@@ -65,6 +84,8 @@ char   *readstring(char *src, char *s);
 long   loop_break(void);
 long   did_break(void);
 void   print_prefixed_text(char *s, char *prefix, char *str);
+GEN    gp_history(gp_hist *H, long p, char *old, char *entry);
+GEN    set_hist_entry(gp_hist *H, GEN x);
 
 void term_color(int c);
 char *term_get_color(int c);
@@ -77,7 +98,6 @@ extern ulong prec;
 extern GEN gnil;
 
 extern char *current_function;
-extern GEN  (*gp_history_fun)(long, long, char *, char *);
 extern int  (*whatnow_fun)(char *, int);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
@@ -116,10 +136,6 @@ enum { NONE, WARN, OLDFUN, OLDALL };
 
 /* return type for GP functions */
 enum { RET_GEN, RET_INT, RET_VOID };
-
-/* emacs/texmacs interface */
-extern int under_emacs;
-extern int under_texmacs;
 
 #ifdef STACK_CHECK
 extern void *PARI_stack_limit;
@@ -242,3 +258,31 @@ extern void matbruti(GEN g, pariout_t *T);
 extern void sori(GEN g, pariout_t *T);
 extern void texi(GEN g, pariout_t *T, int nosign);
 extern pariout_t DFLT_OUTPUT;
+
+/* GP_DATA->flags */
+enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
+       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512, LOG=1024};
+/* GP */
+#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
+
+#if 0 /* to debug TeXmacs interface */
+#define DATA_BEGIN  ((char) 'B')
+#define DATA_END    ((char) 'E')
+#else
+#define DATA_BEGIN  ((char) 2)
+#define DATA_END    ((char) 5)
+#endif
+#define DATA_ESCAPE ((char) 27)
+
+typedef struct {
+  gp_hist *hist;
+  gp_pp *pp;
+  gp_path *path;
+  pariout_t *fmt;
+  ulong flags, lim_lines;
+  char *help;
+  pari_timer *T;
+} gp_data;
+
+extern gp_data *GP_DATA;
+

@@ -27,12 +27,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  include "../language/anal.h"
 #endif
 
-void kill0(entree *ep);
-ulong secure;
+extern void kill0(entree *ep);
 
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>
-char *expand_tilde(char *s);
+extern char *expand_tilde(char *s);
 
 void 
 install0(char *name, char *code, char *gpname, char *lib)
@@ -119,7 +118,7 @@ install0(char *name, char *code, char *gpname, char *lib) { err(archer); }
 void 
 gpinstall(char *s, char *code, char *gpname, char *lib)
 {
-  if (secure)
+  if (GP_DATA->flags & SECURE)
   {
     fprintferr("[secure mode]: about to install '%s'. OK ? (^C if not)\n",s);
     hit_return();

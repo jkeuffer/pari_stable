@@ -33,7 +33,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifdef READLINE
   extern void init_readline(void);
-  long use_readline = 1;
   int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
@@ -49,30 +48,21 @@ BEGINEXTERN
 ENDEXTERN
 #endif
 
-char*  _analyseur(void);
-void   _set_analyseur(char *s);
-void   err_recover(long numerr);
-void   free_graph(void);
-void   gp_expand_path(char *v);
-int    gp_init_entrees(module *modlist, entree **hash, int force);
-long   gptimer(void);
-void   init80(long n);
-void   init_defaults(int force);
-void   initout(int initerr);
-void   init_graph(void);
-void   init_lim_lines(char *s, long max);
-extern void   install0(char *name, char *code, char *gpname, char *lib);
-void   pari_sig_init(void (*f)(int));
-int    whatnow(char *s, int flag);
+extern void  err_clean(void);
+extern void  gp_output(GEN z, gp_data *G);
+extern char* _analyseur(void);
+extern void  _set_analyseur(char *s);
+extern void  errcontext(char *msg, char *s, char *entry);
+extern void  err_recover(long numerr);
+extern void  free_graph(void);
+extern void  gp_expand_path(gp_path *p);
+extern int   gp_init_entrees(module *modlist, entree **hash, int force);
+extern void  init_defaults(int force);
+extern void  init_graph(void);
+extern void  pari_sig_init(void (*f)(int));
+extern int   whatnow(char *s, int flag);
 
-#if 0 /* to debug TeXmacs interface */
-#define DATA_BEGIN  ((char) 'B')
-#define DATA_END    ((char) 'E')
-#else
-#define DATA_BEGIN  ((char) 2)
-#define DATA_END    ((char) 5)
-#endif
-#define DATA_ESCAPE ((char) 27)
+static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
@@ -80,24 +70,16 @@ int    whatnow(char *s, int flag);
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""
-static GEN *hist;
-static char *help_prg,*path;
-static char prompt[MAX_PROMPT_LEN];
-static char prompt_cont[MAX_PROMPT_LEN];
+static char prompt[MAX_PROMPT_LEN], prompt_cont[MAX_PROMPT_LEN];
+
+static int tm_is_waiting = 0, handle_C_C = 0, gpsilent = 0;
 static char thestring[256];
-static char *prettyprinter;
-static char *prettyprinter_dft = "tex2mail -TeX -noindent -ragged -by_par";
-static pariFILE *prettyprinter_file;
-static ulong test_mode, quiet_mode, gpsilent, simplifyflag;
-static ulong chrono, pariecho, primelimit, strictmatch;
-static ulong tglobal, histsize, paribufsize, lim_lines;
-static int tm_is_waiting = 0, handle_C_C = 0;
-static pariout_t *fmt;
+
+static ulong paribufsize, primelimit;
 
 #define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
 
-#define pariputs_opt(s) if (!quiet_mode) pariputs(s)
 #define skip_space(s) while (isspace((int)*s)) s++
 #define skip_alpha(s) while (isalpha((int)*s)) s++
 
@@ -118,51 +100,99 @@ usage(char *s)
   exit(0);
 }
 
+static void
+init_hist(gp_hist *H, size_t l, ulong total)
+{
+  H->total = total;
+  H->size = l;
+  H->res = (GEN *) gpmalloc(l * sizeof(GEN));
+  memset(H->res,0, l * sizeof(GEN));
+}
+
+static void
+init_path(gp_path *path)
+{
+  char *p;
+#if defined(__EMX__) || defined(__CYGWIN32__)
+  p = ".;C:;C:/gp";
+#elif defined(UNIX)
+  p = ".:~:~/gp";
+#else
+  p = ".";
+#endif
+  path->PATH = pari_strdup(p);
+  path->dirs = NULL;
+}
+
+static char *
+init_help()
+{
+  char *h = os_getenv("GPHELP");
+# ifdef GPHELP
+  if (!h) h = GPHELP;
+# endif
+  if (h) h = pari_strdup(h);
+  return h;
+}
+
+static pariout_t *
+init_fmt()
+{
+  pariout_t *f = &DFLT_OUTPUT;
+  f->prettyp= f_PRETTYMAT;
+#ifdef LONG_IS_64BIT
+  f->sigd     = 38;
+#else
+  f->sigd     = 28;
+#endif
+  return f;
+}
+
+static void
+init_pp(gp_pp *p)
+{
+  p->cmd = pari_strdup(DFT_PRETTYPRINTER);
+  p->file = NULL;
+}
+
 /* must be called BEFORE pari_init() */
 static void
 gp_preinit(void)
 {
+  static gp_data __GP_DATA;
+  static gp_hist __HIST;
+  static gp_pp   __PP;
+  static gp_path __PATH;
+  static pari_timer __T;
   long i;
+
+  bufstack = NULL;
 
   primelimit = 500000; 
   bot = (gpmem_t)0;
   top = (gpmem_t)(1000000*sizeof(long));
-  strcpy(prompt, DFT_PROMPT);
+  strcpy(prompt,      DFT_PROMPT);
   strcpy(prompt_cont, CONTPROMPT);
 
-#if defined(__EMX__) || defined(__CYGWIN32__)
-  path = ".;C:;C:/gp";
-#elif defined(UNIX)
-  path = ".:~:~/gp";
-#else
-  path = ".";
-#endif
-  path = pari_strdup(path);
-
-  help_prg = os_getenv("GPHELP");
-# ifdef GPHELP
-  if (!help_prg) help_prg = GPHELP;
-# endif
-  if (help_prg) help_prg = pari_strdup(help_prg);
-
-  strictmatch = simplifyflag = 1;
-  tglobal = 0;
-  bufstack = NULL;
-  secure = test_mode = under_emacs = under_texmacs = chrono = pariecho = 0;
-  prettyprinter = prettyprinter_dft;
-  prettyprinter_file = NULL;
-  fmt = &DFLT_OUTPUT;
-  fmt->prettyp= f_PRETTYMAT;
-#ifdef LONG_IS_64BIT
-  fmt->sigd     = 38;
-#else
-  fmt->sigd     = 28;
-#endif
-  lim_lines = 0;
-  histsize = 5000; paribufsize = 1024;
-  i = histsize*sizeof(GEN);
-  hist = (GEN *) gpmalloc(i); memset(hist,0,i);
+  paribufsize = 1024;
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
+
+  GP_DATA = &__GP_DATA;
+#ifdef READLINE
+  GP_DATA->flags = (STRICTMATCH | SIMPLIFY | USE_READLINE);
+#else
+  GP_DATA->flags = (STRICTMATCH | SIMPLIFY);
+#endif
+  GP_DATA->lim_lines = 0;
+  GP_DATA->T    = &__T;
+  GP_DATA->hist = &__HIST;
+  GP_DATA->pp   = &__PP;
+  GP_DATA->path = &__PATH;
+  GP_DATA->help = init_help();
+  GP_DATA->fmt  = init_fmt();
+  init_hist(GP_DATA->hist, 5000, 0);
+  init_path(GP_DATA->path);
+  init_pp(GP_DATA->pp);
 }
 
 #ifdef MAXPATHLEN
@@ -269,7 +299,7 @@ tm_end_output(void)
 void
 print0(GEN *g, long flag)
 {
-  pariout_t T = *fmt;
+  pariout_t T = *(GP_DATA->fmt); /* copy */
 
   added_newline = (flag & f_NOEOL) == 0;
   T.prettyp = flag & ~f_NOEOL;
@@ -290,7 +320,7 @@ write0(char *s, GEN *g, long flag)
 {
   int i = added_newline;
   s = expand_tilde(s);
-  if (secure)
+  if (GP_DATA->flags & SECURE)
   {
     fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",s);
     hit_return();
@@ -304,7 +334,7 @@ void
 gpwritebin(char *s, GEN x)
 {
   s = expand_tilde(s);
-  if (secure)
+  if (GP_DATA->flags & SECURE)
   {
     fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",s);
     hit_return();
@@ -379,14 +409,43 @@ jump_to_given_buffer(Buffer *buf)
 /*                                                                  */
 /********************************************************************/
 static void
-do_strftime(char *s, char *buf)
+do_strftime(char *s, char *buf, long max)
 {
 #ifdef HAS_STRFTIME
   time_t t = time(NULL);
-  strftime(buf,MAX_PROMPT_LEN-1,s,localtime(&t));
+  strftime(buf,max,s,localtime(&t));
 #else
   strcpy(buf,s);
 #endif
+}
+
+static GEN
+sd_toggle(char *v, int flag, char *s, ulong FLAG)
+{
+  int state = (GP_DATA->flags & FLAG)? 1: 0;
+  if (*v)
+  {
+    int n = (int)get_int(v,0);
+    if (n == state) return gnil;
+    if (n != !state)
+    {
+      char s[128];
+      sprintf(s, "default: incorrect value for %s [0:off / 1:on]", s);
+      err(talker2, s, v,v);
+    }
+    if (n) GP_DATA->flags |=  FLAG;
+    else   GP_DATA->flags &= ~FLAG;
+    state = n;
+  }
+  switch(flag)
+  {
+    case d_RETURN: return utoi(state);
+    case d_ACKNOWLEDGE:
+      if (state) pariputsf("   %s = 1 (on)\n", s);
+      else       pariputsf("   %s = 0 (off)\n", s);
+      break;
+  }
+  return gnil;
 }
 
 static GEN
@@ -401,9 +460,9 @@ sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
-      sprintf(thestring, "default: incorrect value for %s [%lu-%lu]",
-	      s, Min, Max);
-      err(talker2, thestring, v,v);
+      char s[128];
+      sprintf(s, "default: incorrect value for %s [%lu-%lu]", s, Min, Max);
+      err(talker2, s, v,v);
     }
     *ptn = n;
   }
@@ -413,19 +472,12 @@ sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     case d_ACKNOWLEDGE:
       if (msg)
       {
-	if (!*msg)
-	  msg++; /* single msg, always printed */
-	else
-	  msg += n; /* one per possible value */
+	if (!*msg) msg++; /* single msg, always printed */
+	else       msg += n; /* one per possible value */
 	pariputsf("   %s = %lu %s\n", s, n, *msg);
       }
-      else if (Max != 1 || Min != 0)
+      else
 	pariputsf("   %s = %lu\n", s, n);
-      else /* toggle */
-      {
-	if (n==1) pariputsf("   %s = 1 (on)\n", s);
-	else      pariputsf("   %s = 0 (off)\n", s);
-      } /* fall through */
     default: return gnil;
   }
 }
@@ -434,6 +486,7 @@ sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
 static GEN
 sd_realprecision(char *v, int flag)
 {
+  pariout_t *fmt = GP_DATA->fmt;
   if (*v)
   {
     long newnb = get_int(v, fmt->sigd);
@@ -448,7 +501,8 @@ sd_realprecision(char *v, int flag)
   {
     long n = PRECDIGIT;
     pariputsf("   realprecision = %ld significant digits", n);
-    if (n != fmt->sigd) pariputsf(" (%ld digits displayed)", fmt->sigd);
+    if (n != fmt->sigd)
+      pariputsf(" (%ld digits displayed)", fmt->sigd);
     pariputc('\n');
   }
   return gnil;
@@ -465,6 +519,7 @@ sd_seriesprecision(char *v, int flag)
 static GEN
 sd_format(char *v, int flag)
 {
+  pariout_t *fmt = GP_DATA->fmt;
   if (*v)
   {
     char c = *v;
@@ -483,8 +538,9 @@ sd_format(char *v, int flag)
   }
   if (flag == d_RETURN)
   {
-    sprintf(thestring, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
-    return strtoGENstr(thestring,0);
+    char s[128];
+    sprintf(s, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
+    return strtoGENstr(s,0);
   }
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   format = %c%ld.%ld\n", fmt->format, fmt->fieldw, fmt->sigd);
@@ -517,7 +573,7 @@ gp_get_color(char **st)
   }
   if (trans) c = c | (1<<12);
   while (*v && *v++ != ',') /* empty */;
-  if (c != c_NONE) disable_color=0;
+  if (c != c_NONE) disable_color = 0;
   *st = v; return c;
 }
 
@@ -525,7 +581,7 @@ static GEN
 sd_colors(char *v, int flag)
 {
   long c,l;
-  if (*v && !under_emacs && !under_texmacs)
+  if (*v && !(GP_DATA->flags & (EMACS|TEXMACS)))
   {
     char *v0;
     disable_color=1;
@@ -545,31 +601,31 @@ sd_colors(char *v, int flag)
   }
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
-    char *s = thestring;
+    char s[128], *t = s;
     int col[3], n;
-    for (*s=0,c=c_ERR; c < c_LAST; c++)
+    for (*t=0,c=c_ERR; c < c_LAST; c++)
     {
       n = gp_colors[c];
       if (n == c_NONE) 
-        sprintf(s,"no");
+        sprintf(t,"no");
       else
       {
         decode_color(n,col);
         if (n & (1<<12))
         {
           if (col[0])
-            sprintf(s,"[%d,,%d]",col[1],col[0]);
+            sprintf(t,"[%d,,%d]",col[1],col[0]);
           else
-            sprintf(s,"%d",col[1]);
+            sprintf(t,"%d",col[1]);
         }
         else
-          sprintf(s,"[%d,%d,%d]",col[1],col[2],col[0]);
+          sprintf(t,"[%d,%d,%d]",col[1],col[2],col[0]);
       }
-      s += strlen(s);
-      if (c < c_LAST - 1) { *s++=','; *s++=' '; }
+      t += strlen(t);
+      if (c < c_LAST - 1) { *t++=','; *t++=' '; }
     }
-    if (flag==d_RETURN) return strtoGENstr(thestring,0);
-    pariputsf("   colors = \"%s\"\n",thestring);
+    if (flag==d_RETURN) return strtoGENstr(s,0);
+    pariputsf("   colors = \"%t\"\n",s);
   }
   return gnil;
 }
@@ -598,12 +654,12 @@ sd_compatible(char *v, int flag)
 static GEN
 sd_secure(char *v, int flag)
 {
-  if (*v && secure)
+  if (*v && (GP_DATA->flags & SECURE))
   {
     fprintferr("[secure mode]: Do you want to modify the 'secure' flag? (^C if not)\n");
     hit_return();
   }
-  return sd_ulong(v,flag,"secure",&secure, 0,1,NULL);
+  return sd_toggle(v,flag,"secure", SECURE);
 }
 
 static GEN
@@ -618,15 +674,12 @@ static GEN
 sd_rl(char *v, int flag)
 {
 #ifdef READLINE
-    if (!readline_init && *v && *v != '0') {
-      init_readline();
-      readline_init = 1;
-    }
-    return sd_ulong(v,flag,"readline",(ulong*)&use_readline, 0,20,NULL);
-#else	/* !( defined READLINE ) */
-    ulong dummy;
-    return sd_ulong(v,flag,"readline",&dummy, 0,20,NULL);
+  if (!readline_init && *v && *v != '0') {
+    init_readline();
+    readline_init = 1;
+  }
 #endif
+  return sd_toggle(v,flag,"readline", USE_READLINE);
 }
 
 static GEN
@@ -639,45 +692,49 @@ sd_debugmem(char *v, int flag)
 
 static GEN
 sd_echo(char *v, int flag)
-{ return sd_ulong(v,flag,"echo",&pariecho, 0,1,NULL); }
+{ return sd_toggle(v,flag,"echo", ECHO); }
 
 static GEN
 sd_lines(char *v, int flag)
-{ return sd_ulong(v,flag,"lines",&lim_lines, 0,VERYBIGINT,NULL); }
+{ return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,VERYBIGINT,NULL); }
 
 static GEN
 sd_histsize(char *v, int flag)
 {
-  ulong n = histsize;
+  gp_hist *H = GP_DATA->hist;
+  ulong n = H->size;
   GEN r = sd_ulong(v,flag,"histsize",&n, 1,
                      (VERYBIGINT / sizeof(long)) - 1,NULL);
-  if (n != histsize)
+  if (n != H->size)
   {
-    long i = n*sizeof(GEN);
-    GEN *gg = (GEN *) gpmalloc(i); memset(gg,0,i);
+    const ulong total = H->total;
+    long g, h, k, kmin;
+    GEN *resG = H->res, *resH; /* G = old data, H = new one */
+    size_t sG = H->size, sH;
 
-    if (tglobal)
+    init_hist(H, n, total);
+    if (!total) return r;
+
+    resH = H->res;
+    sH   = H->size;
+    /* copy relevant history entries */
+    g     = (total-1) % sG;
+    h = k = (total-1) % sH;
+    kmin = k - min(sH, sG);
+    for ( ; k > kmin; k--, g--, h--)
     {
-      long k = (tglobal-1) % n;
-      long kmin = k - min(n,histsize), j = k;
-
-      i = (tglobal-1) % histsize;
-      while (k > kmin)
-      {
-	gg[j] = hist[i];
-	hist[i] = NULL;
-	if (!i) i = histsize;
-	if (!j) j = n;
-	i--; j--; k--;
-      }
-      while (hist[i])
-      {
-	gunclone(hist[i]);
-	if (!i) i = histsize;
-	i--;
-      }
+      resH[h] = resG[g];
+      resG[g] = NULL;
+      if (!g) g = sG;
+      if (!h) h = sH;
     }
-    free((void*)hist); hist=gg; histsize=n;
+    /* clean up */
+    for ( ; resG[g]; g--)
+    {
+      gunclone(resG[g]);
+      if (!g) g = sG;
+    }
+    free((void*)resG);
   }
   return r;
 }
@@ -685,23 +742,23 @@ sd_histsize(char *v, int flag)
 static GEN
 sd_log(char *v, int flag)
 {
-  ulong vlog = logfile? 1: 0, old = vlog;
-  GEN r = sd_ulong(v,flag,"log",&vlog, 0,1,NULL);
-  if (vlog != old)
-  {
-    if (vlog)
-    {
+  int old = GP_DATA->flags;
+  GEN r = sd_toggle(v,flag,"log",LOG);
+  if (GP_DATA->flags != old)
+  { /* toggled LOG */
+    if (old & LOG)
+    { /* close log */
+      if (flag == d_ACKNOWLEDGE)
+        pariputsf("   [logfile was \"%s\"]\n", current_logfile);
+      fclose(logfile); logfile = NULL;
+    }
+    else
+    { /* open log */
       logfile = fopen(current_logfile, "a");
       if (!logfile) err(openfiler,"logfile",current_logfile);
 #ifndef WINCE
       setbuf(logfile,(char *)NULL);
 #endif
-    }
-    else
-    {
-      if (flag == d_ACKNOWLEDGE)
-        pariputsf("   [logfile was \"%s\"]\n", current_logfile);
-      fclose(logfile); logfile=NULL;
     }
   }
   return r;
@@ -710,11 +767,10 @@ sd_log(char *v, int flag)
 static GEN
 sd_output(char *v, int flag)
 {
-  char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)", "(external prettyprint)", NULL};
-  return sd_ulong(v,flag,"output",(ulong*) &(fmt->prettyp), 0,3,msg);
+  char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
+                 "(external prettyprint)", NULL};
+  return sd_ulong(v,flag,"output",(ulong*) &(GP_DATA->fmt->prettyp), 0,3,msg);
 }
-
-extern void err_clean(void);
 
 void
 allocatemem0(size_t newsize)
@@ -756,25 +812,28 @@ sd_primelimit(char *v, int flag)
 
 static GEN
 sd_simplify(char *v, int flag)
-{ return sd_ulong(v,flag,"simplify",&simplifyflag, 0,1,NULL); }
+{ return sd_toggle(v,flag,"simplify", SIMPLIFY); }
 
 static GEN
 sd_strictmatch(char *v, int flag)
-{ return sd_ulong(v,flag,"strictmatch",&strictmatch, 0,1,NULL); }
+{ return sd_toggle(v,flag,"strictmatch", STRICTMATCH); }
 
 static GEN
 sd_timer(char *v, int flag)
-{ return sd_ulong(v,flag,"timer",&chrono, 0,1,NULL); }
+{ return sd_toggle(v,flag,"timer", CHRONO); }
 
 static GEN
 sd_filename(char *v, int flag, char *s, char **f)
 {
   if (*v)
   {
-    char *old = *f;
+    char *s, *old = *f;
+    long l;
     v = expand_tilde(v);
-    do_strftime(v,thestring); free(v);
-    *f = pari_strdup(thestring); free(old);
+    l = strlen(v) + 256;
+    s = malloc(l);
+    do_strftime(v,s, l-1); free(v);
+    *f = pari_strdup(s); free(s); free(old);
   }
   if (flag == d_RETURN) return strtoGENstr(*f,0);
   if (flag == d_ACKNOWLEDGE) pariputsf("   %s = \"%s\"\n",s,*f);
@@ -811,11 +870,11 @@ sd_help(char *v, int flag)
   char *str;
   if (*v)
   {
-    if (secure) err_secure("help",v);
-    if (help_prg) free(help_prg);
-    help_prg = expand_tilde(v);
+    if (GP_DATA->flags & SECURE) err_secure("help",v);
+    if (GP_DATA->help) free(GP_DATA->help);
+    GP_DATA->help = expand_tilde(v);
   }
-  str = help_prg? help_prg: "none";
+  str = GP_DATA->help? GP_DATA->help: "none";
   if (flag == d_RETURN) return strtoGENstr(str,0);
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   help = \"%s\"\n", str);
@@ -825,30 +884,32 @@ sd_help(char *v, int flag)
 static GEN
 sd_path(char *v, int flag)
 {
+  gp_path *p = GP_DATA->path;
   if (*v)
   {
-    char *old = path;
-    path = pari_strdup(v); free(old);
+    free((void*)p->PATH);
+    p->PATH = pari_strdup(v);
     if (flag == d_INITRC) return gnil;
-    gp_expand_path(path);
+    gp_expand_path(p);
   }
-  if (flag == d_RETURN) return strtoGENstr(path,0);
+  if (flag == d_RETURN) return strtoGENstr(p->PATH,0);
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   path = \"%s\"\n",path);
+    pariputsf("   path = \"%s\"\n",p->PATH);
   return gnil;
 }
 
 static GEN
 sd_prettyprinter(char *v, int flag)
 {
-  if (*v && !under_texmacs)
+  gp_pp *pp = GP_DATA->pp;
+  if (*v && !(GP_DATA->flags & TEXMACS))
   {
-    char *old = prettyprinter;
+    char *old = pp->cmd;
     int cancel = (!strcmp(v,"no"));
 
-    if (secure) err_secure("prettyprinter",v);
-    if (!strcmp(v,"yes")) v = prettyprinter_dft;
-    if (old && strcmp(old,v) && prettyprinter_file)
+    if (GP_DATA->flags & SECURE) err_secure("prettyprinter",v);
+    if (!strcmp(v,"yes")) v = DFT_PRETTYPRINTER;
+    if (old && strcmp(old,v) && pp->file)
     {
       pariFILE *f;
       if (cancel) f = NULL;
@@ -861,16 +922,16 @@ sd_prettyprinter(char *v, int flag)
           return gnil;
         }
       }
-      pari_fclose(prettyprinter_file);
-      prettyprinter_file = f;
+      pari_fclose(pp->file);
+      pp->file = f;
     }
-    prettyprinter = cancel? NULL: pari_strdup(v);
-    if (old && old != prettyprinter_dft) free(old);
+    pp->cmd = cancel? NULL: pari_strdup(v);
+    if (old) free(old);
     if (flag == d_INITRC) return gnil;
   }
-  if (flag == d_RETURN) return strtoGEN(prettyprinter? prettyprinter: "");
+  if (flag == d_RETURN) return strtoGEN(pp->cmd? pp->cmd: "");
   if (flag == d_ACKNOWLEDGE)
-    pariputsf("   prettyprinter = \"%s\"\n",prettyprinter? prettyprinter: "");
+    pariputsf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
 }
 
@@ -969,15 +1030,15 @@ setdefault(char *s,char *v, int flag)
 static int
 has_ext_help(void)
 {
-  if (help_prg)
+  if (GP_DATA->help)
   {
-    char *buf = pari_strdup(help_prg), *s = buf;
+    char *buf = pari_strdup(GP_DATA->help), *s = buf;
     FILE *file;
 
     while (*s && *s != ' ') s++;
     *s = 0; file = fopen(buf,"r");
-    if (file) { fclose(file); return 1; }
     free(buf);
+    if (file) { fclose(file); return 1; }
   }
   return 0;
 }
@@ -1351,16 +1412,17 @@ external_help(char *s, int num)
   pariFILE *z;
   FILE *f;
 
-  if (!help_prg) err(talker,"no external help program");
+  if (!GP_DATA->help) err(talker,"no external help program");
   s = filter_quotes(s);
-  str = gpmalloc(strlen(help_prg) + strlen(s) + 64);
+  str = gpmalloc(strlen(GP_DATA->help) + strlen(s) + 64);
   if (num < 0)
     opt = "-k";
   else if (s[strlen(s)-1] != '@')
     { ar = thestring; sprintf(ar,"@%d",num); }
-  sprintf(str,"%s -fromgp %s %c%s%s%c",help_prg,opt, SHELL_Q,s,ar,SHELL_Q);
+  sprintf(str,"%s -fromgp %s %c%s%s%c",GP_DATA->help,opt, SHELL_Q,s,ar,SHELL_Q);
   z = try_pipe(str,0); f = z->file;
-  free(str); free(s);
+  free(str);
+  free(s);
   while (fgets(buf,MAX_LINE_LEN,f))
   {
     if (!strncmp("ugly_kludge_done",buf,16)) break;
@@ -1576,12 +1638,7 @@ print_hash_list(char *s)
 static char *
 what_readline(void)
 {
-#ifdef READLINE
-  if (use_readline)
-    return "v"READLINE" enabled";
-  else
-#endif
-  return "disabled";
+  return (GP_DATA->flags & USE_READLINE)? "v"READLINE" enabled": "disabled";
 }
 
 static void
@@ -1626,131 +1683,8 @@ gp_quit(void)
   if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
   pariputs_opt("Goodbye!\n");
-  if (under_texmacs) tm_end_output();
+  if (GP_DATA->flags & TEXMACS) tm_end_output();
   exit(0);
-}
-
-/* history management function:
- *   flag < 0, called from freeall()
- *   flag = 0, called from %num in anal.c:truc()
- *   flag > 0, called from %` in anal.c:truc(), p > 0
- */
-static GEN
-gp_history(long p, long flag, char *old, char *entrypoint)
-{
-  int er1 = 0;
-  if (flag < 0) { free((void *)hist); return NULL; }
-  if (!tglobal) er1 = 1;
-  if (flag)
-  {
-    p = tglobal - p;
-    if (p <= 0) er1 = 1;
-  }
-  else if ((ulong)p > tglobal)
-    err(talker2,"I can't see into the future",old,entrypoint);
-  if (!p) p = tglobal;
-  if (tglobal - p >= histsize) er1 = 1;
-  p = (p-1) % histsize;
-  if (er1 || !hist[p])
-    err(talker2,"I can't remember before the big bang",old,entrypoint);
-  return hist[p];
-}
-
-static void
-texmacs_output(GEN z, long n)
-{
-  pariout_t T = *fmt;
-  char *sz;
-
-  T.prettyp = f_TEX;
-  T.fieldw = 0;
-  sz = GENtostr0(z, &T, &gen_output);
-  printf("%clatex:", DATA_BEGIN);
-  printf("\\magenta\\%%%ld = $\\blue ", n);
-  printf("%s$%c", sz,DATA_END); free(sz);
-  fflush(stdout);
-}
-
-/* Wait for prettyprinter for finish, to prevent new prompt from overwriting
- * the output.  Fill the output buffer, wait until it is read.
- * Better than sleep(2): give possibility to print */
-static void
-prettyp_wait(void)
-{
-  char *s = "                                                     \n";
-  int i = 400;
-
-  pariputs("\n\n"); pariflush(); /* start translation */
-  while (--i) pariputs(s);
-  pariputs("\n"); pariflush();
-}
-
-/* initialise external prettyprinter (tex2mail) */
-static int
-prettyp_init(void)
-{
-  if (!prettyprinter_file)
-    prettyprinter_file = try_pipe(prettyprinter, mf_OUT | mf_TEST);
-  if (prettyprinter_file) return 1;
-
-  err(warner,"broken prettyprinter: '%s'",prettyprinter);
-  if (prettyprinter != prettyprinter_dft) free(prettyprinter);
-  prettyprinter = NULL; return 0;
-}
-
-/* n = history number. if n = 0 no history */
-static int
-tex2mail_output(GEN z, long n)
-{
-  FILE *o_out;
-  pariout_t T = *fmt;
-  
-  if (!(prettyprinter && prettyp_init())) return 0;
-  o_out = pari_outfile; /* save state */
-
-  /* Emit first: there may be lines before the prompt */
-  if (n) term_color(c_OUTPUT);
-  pariflush();
-  pari_outfile = prettyprinter_file->file;
-  T.prettyp = f_TEX;
-
-  /* history number */
-  if (n)
-  {
-    if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
-    {
-      char col1[80];
-      strcpy(col1, term_get_color(c_HIST));
-      sprintf(thestring, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
-              col1, n, term_get_color(c_OUTPUT));
-    }
-    else
-      sprintf(thestring, "\\%%%ld = ", n);
-    pariputs_opt(thestring);
-  }
-  /* output */
-  gen_output(z, &T);
-
-  /* flush and restore */
-  prettyp_wait();
-  pari_outfile = o_out;
-  if (n) term_color(c_NONE);
-  return 1;
-}
-
-static void
-normal_output(GEN z, long n)
-{
-  /* history number */
-  term_color(c_HIST);
-  sprintf(thestring, "%%%ld = ", n);
-  pariputs_opt(thestring);
-  /* output */
-  term_color(c_OUTPUT);
-  init_lim_lines(thestring,lim_lines);
-  gen_output(z, fmt);
-  init_lim_lines(NULL,lim_lines);
-  term_color(c_NONE); pariputc('\n');
 }
 
 static GEN
@@ -1758,15 +1692,6 @@ gpreadbin(char *s)
 {
   GEN x = readbin(s,infile);
   popinfile(); return x;
-}
-
-static GEN
-set_hist_entry(GEN x)
-{
-  GEN z = gclone(x);
-  int i = tglobal % histsize;
-  if (hist[i]) gunclone(hist[i]);
-  tglobal++; hist[i] = z; return z;
 }
 
 static void
@@ -1804,13 +1729,24 @@ escape0(char *tch)
 	d = atol(s); if (*s == '-') s++;
 	while (isdigit((int)*s)) s++;
       }
-      x = gp_history(d, 0, tch+1,tch-1);
+      x = gp_history(GP_DATA->hist, d, tch+1,tch-1);
       switch (c)
       {
-	case 'a': brute   (x, fmt->format, -1); break;
-	case 'm': matbrute(x, fmt->format, -1); break;
-	case 'B': if (tex2mail_output(x,0)) return;  /* fall through */
-	case 'b': sor     (x, fmt->format, -1, fmt->fieldw); break;
+	case 'B':
+        { /* prettyprinter */
+          gp_data G = *GP_DATA; /* copy */
+          gp_hist   h = *(G.hist); /* copy */
+          pariout_t f = *(G.fmt);  /* copy */
+
+          G.hist = &h; h.total = 0; /* no hist number */
+          G.fmt  = &f; f.prettyp = f_PRETTY;
+          G.flags &= ~(TEST|TEXMACS);
+          G.lim_lines = 0;
+          gp_output(x, &G); break;
+        }
+	case 'a': brute   (x, GP_DATA->fmt->format, -1); break;
+	case 'm': matbrute(x, GP_DATA->fmt->format, -1); break;
+	case 'b': sor(x, GP_DATA->fmt->format, -1, GP_DATA->fmt->fieldw); break;
 	case 'x': voir(x, get_int(s, -1)); 
         case 'w':
 	{
@@ -1826,7 +1762,7 @@ escape0(char *tch)
     case 'd': help_default(); break;
     case 'e':
       s = get_sep(s);
-      if (!*s) s = pariecho?"0":"1";
+      if (!*s) s = (GP_DATA->flags & ECHO)? "0": "1";
       sd_echo(s,d_ACKNOWLEDGE); break;
     case 'g':
       switch (*s)
@@ -1865,7 +1801,7 @@ escape0(char *tch)
         {
           long i, l = lg(x);
           err(warner,"setting %ld history entries", l-1);
-          for (i=1; i<l; i++) (void)set_hist_entry((GEN)x[i]);
+          for (i=1; i<l; i++) (void)set_hist_entry(GP_DATA->hist, (GEN)x[i]);
         }
       }
       break;
@@ -1881,7 +1817,7 @@ escape0(char *tch)
     case 'v': print_version(); break;
     case 'y':
       s = get_sep(s);
-      if (!*s) s = simplifyflag?"0":"1";
+      if (!*s) s = (GP_DATA->flags & SIMPLIFY)? "0": "1";
       sd_simplify(s,d_ACKNOWLEDGE); break;
     default: err(caracer1,tch-1,tch-2);
   }
@@ -1907,16 +1843,8 @@ escape(char *tch)
 static int
 get_preproc_value(char *s)
 {
-  if (!strncmp(s,"EMACS",5)) return under_emacs || under_texmacs;
-  if (!strncmp(s,"READL",5))
-  {
-#ifdef READLINE
-    if (use_readline)
-      return 1;
-    else
-#endif
-    return 0;
-  }
+  if (!strncmp(s,"EMACS",5)) return GP_DATA->flags & (EMACS| TEXMACS);
+  if (!strncmp(s,"READL",5)) return GP_DATA->flags & USE_READLINE;
   return -1;
 }
 
@@ -1946,7 +1874,7 @@ static FILE *
 gprc_chk(char *s)
 {
   FILE *f = fopen(s, "r");
-  if (f && !quiet_mode)
+  if (f && !(GP_DATA->flags & QUIET))
   {
     fprintferr("Reading GPRC: %s ...", s);
     added_newline = 0;
@@ -2020,7 +1948,7 @@ gp_initrc(void)
     if (!get_line_from_file(NULL,&F,file))
     {
       del_buffer(b);
-      if (!quiet_mode) fprintferr("Done.\n\n");
+      if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
       fclose(file); flist[find] = NULL;
       return flist;
     }
@@ -2073,7 +2001,7 @@ gp_initrc(void)
 /********************************************************************/
 /* flag:
  *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (chrono = 1)
+ *   ti_REGULAR   print elapsed time (flags & CHRONO)
  *   ti_LAST      print last elapsed time (##)
  *   ti_INTERRUPT received a SIGINT
  */
@@ -2081,7 +2009,7 @@ static char *
 do_time(long flag)
 {
   static long last = 0;
-  long delay = (flag == ti_LAST)? last: gptimer();
+  long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
   char *s;
 
   last = delay;
@@ -2092,7 +2020,7 @@ do_time(long flag)
     case ti_LAST:      s = "  ***   last result computed in "; break;
     default: return NULL;
   }
-  strcpy(thestring,s); s=thestring+strlen(s);
+  strcpy(thestring,s); s = thestring+strlen(s);
   strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
   if (delay >= 3600000)
   {
@@ -2126,7 +2054,7 @@ gp_handle_SIGINT(void)
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
 #else
-  if (under_texmacs) tm_start_output();
+  if (GP_DATA->flags & TEXMACS) tm_start_output();
   err(siginter, do_time(ti_INTERRUPT));
 #endif
 }
@@ -2165,10 +2093,10 @@ gp_sighandler(int sig)
 
 #ifdef SIGPIPE
     case SIGPIPE:
-      if (prettyprinter_file && pari_outfile == prettyprinter_file->file)
+      if (GP_DATA->pp->file && pari_outfile == GP_DATA->pp->file->file)
       {
-        pariFILE *f = prettyprinter_file;
-        prettyprinter_file = NULL; /* to avoid oo recursion on error */
+        pariFILE *f = GP_DATA->pp->file;
+        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
         pari_outfile = stdout; pari_fclose(f);
       }
       err(talker, "Broken Pipe, resetting file stack...");
@@ -2200,7 +2128,7 @@ do_prompt(int in_comment, char *p)
   static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
   char *s;
   
-  if (test_mode) return prompt;
+  if (GP_DATA->flags & TEST) return prompt;
   s = buf; *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
   brace_color(s, c_PROMPT, 0);
@@ -2208,7 +2136,7 @@ do_prompt(int in_comment, char *p)
   if (in_comment) 
     strcpy(s, COMMENTPROMPT);
   else
-    do_strftime(p,s);
+    do_strftime(p,s, MAX_PROMPT_LEN-1);
   s += strlen(s);
   brace_color(s, c_INPUT, 1); return buf;
 }
@@ -2292,7 +2220,7 @@ input_loop(filtre_t *F, input_method *IM)
 static int
 get_line_from_file(char *prompt, filtre_t *F, FILE *file)
 {
-  const int TeXmacs = (under_texmacs && file == stdin);
+  const int TeXmacs = ((GP_DATA->flags & TEXMACS) && file == stdin);
   char *s;
   input_method IM;
  
@@ -2310,13 +2238,13 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
   s = ((Buffer*)F->data)->buf;
   if (*s && prompt) /* don't echo if from gprc */
   {
-    if (pariecho)
+    if (GP_DATA->flags & ECHO)
       { pariputs(prompt); pariputs(s); pariputc('\n'); }
     else
       if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
     pariflush();
   }
-  if (under_texmacs) tm_start_output();
+  if (GP_DATA->flags & TEXMACS) tm_start_output();
   return 1;
 }
 
@@ -2330,11 +2258,12 @@ get_line_from_user(char *prompt, filtre_t *F)
 static int
 is_interactive(void)
 {
+  ulong f = GP_DATA->flags;
 #if defined(UNIX) || defined(__EMX__)
-  return (infile == stdin && !under_texmacs
-                          && (under_emacs || isatty(fileno(stdin))));
+  return (infile == stdin && !(f & TEXMACS)
+                          && (f & EMACS || isatty(fileno(stdin))));
 #else
-  return (infile == stdin && !under_texmacs);
+  return (infile == stdin && !(f & TEXMACS));
 #endif
 }
 
@@ -2349,12 +2278,10 @@ read_line(filtre_t *F, char *PROMPT)
   if (is_interactive())
   {
     if (!PROMPT) PROMPT = do_prompt(F->in_comment, prompt);
-#ifdef READLINE
-    if (use_readline)
+    if (GP_DATA->flags & USE_READLINE)
       res = get_line_from_readline(PROMPT, F);
     else
-#endif
-    res = get_line_from_user(PROMPT, F);
+      res = get_line_from_user(PROMPT, F);
     if (!disable_color) term_color(c_NONE);
   }
   else
@@ -2371,7 +2298,7 @@ chron(char *s)
     if (*s) return 0;
     pariputs(do_time(ti_LAST));
   }
-  else { chrono = 1-chrono; sd_timer("",d_ACKNOWLEDGE); }
+  else { GP_DATA->flags ^= CHRONO; sd_timer("",d_ACKNOWLEDGE); }
   return 1;
 }
 
@@ -2396,6 +2323,7 @@ check_meta(char *buf)
 static GEN
 gp_main_loop(int ismain)
 {
+  gp_hist *H  = GP_DATA->hist;
   long i, j;
   gpmem_t av;
   VOLATILE GEN z = gnil;
@@ -2414,20 +2342,25 @@ gp_main_loop(int ismain)
     if (ismain)
     {
       static long tloc, outtyp;
-      tloc = tglobal; outtyp = fmt->prettyp; recover(0);
+      tloc = H->total;
+      outtyp = GP_DATA->fmt->prettyp;
+      recover(0);
       if (setjmp(environnement))
       {
         char *s = (char*)global_err_data;
+
         if (s && *s) outerr(lisseq(s));
 	avma = top;
-	j = tglobal - tloc; i = (tglobal-1)%histsize;
-	while (j)
+        i = (H->total-1) % H->size;
+	j = H->total - tloc;
+	for ( ; j; i--,j--)
 	{
-	  gunclone(hist[i]); hist[i]=NULL;
-	  if (!i) i = histsize;
-	  i--; j--;
+	  gunclone(H->res[i]);
+          H->res[i] = NULL;
+	  if (!i) i = H->size;
 	}
-        tglobal = tloc; fmt->prettyp = outtyp;
+        H->total = tloc;
+        GP_DATA->fmt->prettyp = outtyp;
         kill_all_buffers(b);
       }
     }
@@ -2450,29 +2383,22 @@ gp_main_loop(int ismain)
     {
       char c = b->buf[strlen(b->buf) - 1];
       gpsilent = separe(c);
-      (void)gptimer();
+      TIMERstart(GP_DATA->T);
     }
     av = avma;
-    z = readseq(b->buf, strictmatch);
+    z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
     if (!added_newline) pariputc('\n'); /* last output was print1() */
     if (! ismain) continue;
-    if (chrono) pariputs(do_time(ti_REGULAR)); else do_time(ti_NOPRINT);
+    if (GP_DATA->flags & CHRONO)
+      pariputs(do_time(ti_REGULAR));
+    else
+      do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
-    if (simplifyflag) z = simplify_i(z);
-    z = set_hist_entry(z);
+    if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
+    z = set_hist_entry(H, z);
     avma = av;
-    if (gpsilent) continue;
-
-    if (test_mode) { init80(0); gen_output(z, fmt); pariputc('\n'); }
-    else
-    {
-      if (under_texmacs)
-        texmacs_output(z,tglobal);
-      else if (fmt->prettyp != f_PRETTY || !tex2mail_output(z,tglobal))
-        normal_output(z,tglobal);
-    }
-    pariflush();
+    if (!gpsilent) gp_output(z, GP_DATA);
   }
 }
 
@@ -2487,7 +2413,7 @@ read0(char *s)
 static void
 check_secure(char *s)
 {
-  if (secure)
+  if (GP_DATA->flags & SECURE)
     err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
@@ -2551,8 +2477,6 @@ error0(GEN *g)
   err_recover(talker);
 }
 
-void errcontext(char *msg, char *s, char *entry);
-
 int
 break_loop(long numerr)
 {
@@ -2605,7 +2529,7 @@ break_loop(long numerr)
       }
       if (x == gnil) continue;
 
-      term_color(c_OUTPUT); gen_output(x, fmt);
+      term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
       term_color(c_NONE); pariputc('\n');
     }
     /* break loop initiated by ^C. Empty input --> continue computation */
@@ -2627,15 +2551,6 @@ gp_exception_handler(long numerr)
     return break_loop(numerr);
   }
   return 0;
-}
-
-long
-setprecr(long n)
-{
-  long m = fmt->sigd;
-
-  if (n>0) {fmt->sigd = n; prec = (long)(n*pariK1 + 3);}
-  return m;
 }
 
 static void
@@ -2675,30 +2590,30 @@ read_opt(long argc, char **argv)
 
       case 'e':
 	if (strncmp(t,"macs",4)) usage(argv[0]);
-        under_emacs = 1; break;
+        GP_DATA->flags |= EMACS; break;
       case 'q':
-        quiet_mode = 1; break;
+        GP_DATA->flags |= QUIET; break;
       case 't':
 	if (strncmp(t,"est",3)) usage(argv[0]);
-        disable_color = 1; test_mode = 1; /* fall through */
+        disable_color = 1; GP_DATA->flags |= TEST; /* fall through */
       case 'f':
 	initrc = 0; break;
       case '-':
         if (strcmp(t, "version") == 0) { print_version(); exit(0); }
-        if (strcmp(t, "texmacs") == 0) { under_texmacs = 1; break; }
+        if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
        /* fall through */
       default:
 	usage(argv[0]);
     }
   }
-  if (under_texmacs) tm_start_output();
+  if (GP_DATA->flags & TEXMACS) tm_start_output();
   pre = initrc? gp_initrc(): NULL;
 
   /* override the values from gprc */
   testint(b, (long*)&paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, (long*)&primelimit);
   testint(s, (long*)&top);
-  if (under_emacs || under_texmacs) disable_color=1;
+  if (GP_DATA->flags & (EMACS|TEXMACS)) disable_color = 1;
   pari_outfile=stdout; return pre;
 }
 
@@ -2730,32 +2645,32 @@ main(int argc, char **argv)
   pari_addfunctions(&pari_modules, functions_highlevel,helpmessages_highlevel);
   pari_addfunctions(&pari_oldmodules, functions_oldgp,helpmessages_oldgp);
 
-  init_graph(); INIT_SIG_off;
+  init_graph();
+  INIT_SIG_off;
   pari_init(top-bot, primelimit);
   INIT_SIG_on;
   pari_sig_init(gp_sighandler);
 #ifdef READLINE
-  if (use_readline) {
+  if (GP_DATA->flags & USE_READLINE) {
     init_readline();
     readline_init = 1;
   }
 #endif
-  gp_history_fun = gp_history;
   whatnow_fun = whatnow;
   default_exception_handler = gp_exception_handler;
-  gp_expand_path(path);
+  gp_expand_path(GP_DATA->path);
 
-  if (!quiet_mode) gp_head();
+  if (!(GP_DATA->flags & QUIET)) gp_head();
   if (flist)
   {
-    long c=chrono, e=pariecho;
-    FILE *l=logfile;
+    ulong f = GP_DATA->flags;
+    FILE *l = logfile;
     char **s = flist;
-    chrono=0; pariecho=0; logfile=NULL;
+    GP_DATA->flags &= ~(CHRONO|ECHO); logfile = NULL;
     for ( ; *s; s++) { read0(*s); free(*s); }
-    chrono=c; pariecho=e; logfile=l; free(flist);
+    GP_DATA->flags = f; logfile = l; free(flist);
   }
-  (void)gptimer(); (void)timer(); (void)timer2();
+  TIMERstart(GP_DATA->T); (void)timer(); (void)timer2();
   (void)gp_main_loop(1);
   gp_quit(); return 0; /* not reached */
 }

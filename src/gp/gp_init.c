@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "../language/anal.h"
 #include "gp.h"
 
-extern void  addhelp(entree *ep, char *s);
 extern void  allocatemem0(size_t newsize);
 extern GEN   default0(char *a, char *b, long flag);
 extern void  error0(GEN *g);
@@ -34,14 +33,12 @@ extern GEN   input0(void);
 extern void  kill0(entree *ep);
 extern void  print0(GEN *g,long flag);
 extern GEN   read0(char *s);
-extern long  setprecr(long n);
 extern void  system0(char *cmd);
 extern GEN   trap0(char *e, char *f, char *r);
 extern int   whatnow(char *s, int silent);
 extern void  write0(char *s, GEN *g, long flag);
 
 static void whatnow0(char *s) { whatnow(s,0); }
-
 static void print   (GEN *g) { print0(g, f_RAW); }
 static void printp  (GEN *g) { print0(g, f_PRETTYOLD); }
 static void printtex(GEN *g) { print0(g, f_TEX); }
@@ -115,6 +112,14 @@ setserieslength(long n)
 {
   long m=precdl;
   if(n>0) precdl=n;
+  return m;
+}
+
+static long
+setprecr(long n)
+{
+  long m = GP_DATA->fmt->sigd;
+  if (n > 0) { GP_DATA->fmt->sigd = n; prec = (long)(n*pariK1 + 3); }
   return m;
 }
 

@@ -141,7 +141,7 @@ pari_rl_matched_insert(int count, int key)
   if (count <= 0)
     return change_state("electric parens", &do_matched_insert, count);
   while (paropen[i] && paropen[i] != key) i++;
-  if (!paropen[i] || !do_matched_insert || under_emacs)
+  if (!paropen[i] || !do_matched_insert || GP_DATA->flags & EMACS)
     return ((RLCI)rl_insert)(count,key);
   rl_begin_undo_group();
   ((RLCI)rl_insert)(count,key);
@@ -319,7 +319,7 @@ get_matches(int end, char *text, char* f(char*,int))
     else if (add_comma(end))
       match_concat(matches,",");
   }
-  if (under_emacs) matches = matches_for_emacs(text,matches);
+  if (GP_DATA->flags & EMACS) matches = matches_for_emacs(text,matches);
   return matches;
 }
 #undef add_comma
@@ -620,7 +620,7 @@ init_readline(void)
   rl_attempted_completion_function = (rl_completion_func_t*) pari_completion;
 
   /* we always want the whole list of completions under emacs */
-  if (under_emacs) rl_completion_query_items = 0x8fff;
+  if (GP_DATA->flags & EMACS) rl_completion_query_items = 0x8fff;
 
 #define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
   ((a), (Function*)(b), (c)))

@@ -888,11 +888,16 @@ truc(void)
       free(table); return p1;
 
     case '%':
-      old = analyseur-1; p = 0;
-      if (!gp_history_fun) err(talker2,"history not available",old,mark.start);
+    old = analyseur-1;
+    if (!GP_DATA) err(talker2,"history not available", old, mark.start);
+    else
+    {
+      gp_hist *H = GP_DATA->hist;
+      p = 0;
       while (*analyseur == '`') { analyseur++; p++; }
-      return p ? gp_history_fun(p         ,1,old,mark.start)
-               : gp_history_fun(number(&n),0,old,mark.start);
+      return p ? gp_history(H, -p        , old, mark.start)
+               : gp_history(H, number(&n), old, mark.start);
+    }
   }
   err(caracer1,analyseur-1,mark.start);
   return NULL; /* not reached */

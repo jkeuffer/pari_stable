@@ -28,7 +28,7 @@ void
 hit_return(void)
 {
   int c;
-  if (under_texmacs || under_emacs) return;
+  if (GP_DATA && (GP_DATA->flags & (EMACS|TEXMACS))) return;
   pariputs("---- (type RETURN to continue) ----");
   /* if called from a readline callback, may be in a funny TTY mode,  */
   do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r' && c != ' ');
@@ -364,8 +364,8 @@ term_width_intern(void)
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!under_emacs && !under_texmacs && !ioctl(0, TIOCGWINSZ, &s))
-      return s.ws_col;
+    if (!(GP_DATA && (GP_DATA->flags & (EMACS|TEXMACS)))
+     && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_col;
   }
 #endif
 #ifdef UNIX
@@ -389,8 +389,8 @@ term_height_intern(void)
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!under_emacs && !under_texmacs && !ioctl(0, TIOCGWINSZ, &s))
-      return s.ws_row;
+    if (!(GP_DATA && (GP_DATA->flags & (EMACS|TEXMACS)))
+     && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_row;
   }
 #endif
 #ifdef UNIX
@@ -443,7 +443,7 @@ puts80(char *s)
 }
 PariOUT pariOut80= {putc80, puts80, normalOutF, NULL};
 
-void
+static void
 init80(long n)
 {
   col_index = n; pariOut = &pariOut80;
@@ -481,16 +481,18 @@ puts_lim_lines(char *s)
 
 PariOUT pariOut_lim_lines= {putc_lim_lines, puts_lim_lines, normalOutF, NULL};
 
-/* s = prefix already printed (print up to max lines) */
+/* n = length of prefix already printed (print up to max lines) */
 void
-init_lim_lines(char *s, long max)
+lim_lines_output(GEN z, pariout_t *fmt, long n, long max)
 {
-  if (!max) return;
-  if (!s) { pariOut = &defaultOut; return; }
+  PariOUT *tmp = pariOut;
   max_width = term_width();
   max_lin = max;
-  lin_index = 1; col_index = strlen(s);
+  lin_index = 1;
+  col_index = n;
   pariOut = &pariOut_lim_lines;
+  gen_output(z, fmt);
+  pariOut = tmp;
 }
 
 #define is_blank_or_null(c) (!(c) || is_blank(c))
@@ -1340,7 +1342,7 @@ wr_texnome(pariout_t *T, GEN a, char *v, long d)
     }
     if (d)
     {
-      if (under_texmacs) pariputs("\\*");
+      if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
       texnome(v,d);
     }
   }
@@ -1384,7 +1386,7 @@ wr_lead_texnome(pariout_t *T, GEN a, char *v, long d, int nosign)
     }
     if (d)
     {
-      if (under_texmacs) pariputs("\\*");
+      if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
       texnome(v,d);
     }
   }
@@ -1930,9 +1932,145 @@ texi(GEN g, pariout_t *T, int nosign)
 
 /*******************************************************************/
 /**                                                               **/
+/**                          GP OUTPUT                            **/
+/**                                                               **/
+/*******************************************************************/
+
+/* EXTERNAL PRETTYPRINTER */
+
+/* Wait for prettinprinter to finish, to prevent new prompt from overwriting
+ * the output.  Fill the output buffer, wait until it is read.
+ * Better than sleep(2): give possibility to print */
+static void
+prettyp_wait(void)
+{
+  char *s = "                                                     \n";
+  int i = 400;
+
+  pariputs("\n\n"); pariflush(); /* start translation */
+  while (--i) pariputs(s);
+  pariputs("\n"); pariflush();
+}
+
+/* initialise external prettyprinter (tex2mail) */
+static int
+prettyp_init(void)
+{
+  gp_pp *pp = GP_DATA->pp;
+  if (!pp->cmd) return 0;
+  if (!pp->file)
+    pp->file = try_pipe(pp->cmd, mf_OUT | mf_TEST);
+  if (pp->file) return 1;
+
+  err(warner,"broken prettyprinter: '%s'",pp->cmd);
+  free(pp->cmd); pp->cmd = NULL; return 0;
+}
+
+/* n = history number. if n = 0 no history */
+static int
+tex2mail_output(GEN z, long n)
+{
+  pariout_t T = *(GP_DATA->fmt); /* copy */
+  FILE *o_out;
+  
+  if (!prettyp_init()) return 0;
+  o_out = pari_outfile; /* save state */
+
+  /* Emit first: there may be lines before the prompt */
+  if (n) term_color(c_OUTPUT);
+  pariflush();
+  pari_outfile = GP_DATA->pp->file->file;
+  T.prettyp = f_TEX;
+
+  /* history number */
+  if (n)
+  {
+    char s[128];
+    if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
+    {
+      char col1[80];
+      strcpy(col1, term_get_color(c_HIST));
+      sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
+              col1, n, term_get_color(c_OUTPUT));
+    }
+    else
+      sprintf(s, "\\%%%ld = ", n);
+    pariputs_opt(s);
+  }
+  /* output */
+  gen_output(z, &T);
+
+  /* flush and restore */
+  prettyp_wait();
+  pari_outfile = o_out;
+  if (n) term_color(c_NONE);
+  return 1;
+}
+
+/* TEXMACS */
+
+static void
+texmacs_output(GEN z, long n)
+{
+  pariout_t T = *(GP_DATA->fmt); /* copy */
+  char *sz;
+
+  T.prettyp = f_TEX;
+  T.fieldw = 0;
+  sz = GENtostr0(z, &T, &gen_output);
+  printf("%clatex:", DATA_BEGIN);
+  if (n)
+    printf("\\magenta\\%%%ld = $\\blue ", n);
+  else
+    printf("$\\blue ");
+  printf("%s$%c", sz,DATA_END); free(sz);
+  fflush(stdout);
+}
+
+/* REGULAR */
+
+static void
+normal_output(GEN z, long n)
+{
+  long l = 0;
+  /* history number */
+  if (n)
+  {
+    char s[64];
+    term_color(c_HIST);
+    sprintf(s, "%%%ld = ", n);
+    pariputs_opt(s);
+    l = strlen(s);
+  }
+  /* output */
+  term_color(c_OUTPUT);
+  if (GP_DATA->lim_lines)
+    lim_lines_output(z, GP_DATA->fmt, l, GP_DATA->lim_lines);
+  else
+    gen_output(z, GP_DATA->fmt);
+  term_color(c_NONE); pariputc('\n');
+}
+
+void
+gp_output(GEN z, gp_data *G)
+{
+  if (G->flags & TEST) {
+    init80(0);
+    gen_output(z, G->fmt); pariputc('\n');
+  }
+  else if (G->flags & TEXMACS)
+    texmacs_output(z, G->hist->total);
+  else if (G->fmt->prettyp != f_PRETTY || !tex2mail_output(z, G->hist->total))
+    normal_output(z, G->hist->total);
+  pariflush();
+}
+
+/*******************************************************************/
+/**                                                               **/
 /**                        USER OUTPUT FUNCTIONS                  **/
 /**                                                               **/
 /*******************************************************************/
+
 void
 gen_output(GEN x, pariout_t *T)
 {
@@ -1963,9 +2101,9 @@ _initout(pariout_t *T, char f, long sigd, long sp, long fieldw, int prettyp)
 }
 
 void
-bruteall(GEN g, char f, long d, long flag)
+bruteall(GEN g, char f, long d, long sp)
 {
-  pariout_t T; _initout(&T,f,d,flag,0, f_RAW);
+  pariout_t T; _initout(&T,f,d,sp,0, f_RAW);
   gen_output(g, &T);
 }
 
@@ -2342,7 +2480,6 @@ os_getenv(char *s)
 /**                                                               **/
 /*******************************************************************/
 static char *last_filename = NULL;
-static char **dir_list = NULL;
 
 #ifdef HAS_OPENDIR
 #  include <dirent.h>
@@ -2460,6 +2597,18 @@ expand_tilde(char *s)
   return _expand_env(_expand_tilde(s));
 }
 
+void
+delete_dirs(gp_path *p)
+{
+  char **v = p->dirs, **dirs;
+  if (v)
+  {
+    p->dirs = NULL; /* in case of error */
+    for (dirs = v; *dirs; dirs++) free(*dirs);
+    free(v);
+  }
+}
+
 #if defined __EMX__ || defined _WIN32
 #  define PATH_SEPARATOR ';'
 #else
@@ -2467,29 +2616,26 @@ expand_tilde(char *s)
 #endif
 
 void
-gp_expand_path(char *v)
+gp_expand_path(gp_path *p)
 {
-  char **path, **old, *s;
+  char **dirs, *s, *v = p->PATH;
   int i, n = 0;
 
+  delete_dirs(p);
   v = pari_strdup(v);
   for (s=v; *s; s++)
     if (*s == PATH_SEPARATOR) { *s = 0; n++; }
-  path = (char**) gpmalloc((n + 2)*sizeof(char *));
+  dirs = (char**) gpmalloc((n + 2)*sizeof(char *));
 
   for (s=v, i=0; i<=n; i++)
   {
     char *end = s + strlen(s), *f = end;
     while (f > s && *--f == '/') *f = 0;
-    path[i] = expand_tilde(s);
+    dirs[i] = expand_tilde(s);
     s = end + 1; /* next path component */
   }
-  path[i] = NULL; old = dir_list; dir_list = path;
-  if (old)
-  {
-    for (path=old; *path; path++) free(*path);
-    free(old);
-  }
+  free((void*)v);
+  dirs[i] = NULL; p->dirs = dirs;
 }
 
 /* name is a malloc'ed (existing) filename. Accept it as new infile
@@ -2566,9 +2712,9 @@ switchin(char *name0)
   /* if name contains '/',  don't use dir_list */
   s=name; while (*s && *s != '/' && *s != '\\') s++;
   if (*s) { if (try_name(name)) return; }
-  else
+  else if (GP_DATA)
   {
-    char **tmp = dir_list;
+    char **tmp = GP_DATA->path->dirs;
     for ( ; *tmp; tmp++)
     { /* make room for '/' and '\0', try_name frees it */
       s = gpmalloc(2 + strlen(*tmp) + strlen(name));
@@ -2835,6 +2981,38 @@ readbin(char *name, FILE *f)
     setisclone(x); /* HACK */
   }
   return x;
+}
+
+/*******************************************************************/
+/**                                                               **/
+/**                       HISTORY HANDLING                        **/
+/**                                                               **/
+/*******************************************************************/
+/* history management function:
+ *   p > 0, called from %p
+ *   p <= 0, called from %` (p backquotes, possibly 0) */
+GEN
+gp_history(gp_hist *H, long p, char *old, char *entry)
+{
+  GEN z;
+
+  if (p <= 0) p += H->total; /* count |p| entries starting from last */
+  if ((ulong)p > H->total)
+    err(talker2, "I can't see into the future", old, entry);
+
+  z = H->res[ (p-1) % H->size ];
+  if (!z || p <= 0 || p <= (long)(H->total - H->size))
+    err(talker2, "I can't remember before the big bang", old, entry);
+  return z;
+}
+
+GEN
+set_hist_entry(gp_hist *H, GEN x)
+{
+  int i = H->total % H->size;
+  H->total++;
+  if (H->res[i]) gunclone(H->res[i]);
+  return H->res[i] = gclone(x);
 }
 
 /*******************************************************************/

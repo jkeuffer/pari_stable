@@ -37,7 +37,6 @@ byteptr diffptr;
 char    *current_logfile, *current_psfile;
 int     gp_colors[c_LAST];
 int     disable_color = 1, added_newline = 1;
-int     under_emacs = 0, under_texmacs = 0;
 
 int     functions_tblsz = 135; /* size of functions_hash          */
 entree  **varentries;
@@ -45,11 +44,13 @@ entree  **varentries;
 void    *global_err_data;
 jmp_buf environnement;
 long    *ordvar;
-ulong   DEBUGFILES,DEBUGLEVEL,DEBUGMEM,compatible;
-ulong   prec,precdl;
+ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, compatible;
+ulong   prec, precdl;
 ulong   init_opts = INIT_JMPm | INIT_SIGm;
 gpmem_t bot = 0, top = 0, avma;
 size_t memused;
+
+gp_data *GP_DATA = NULL;
 
 void *foreignHandler; 	              /* Handler for foreign commands.   */
 char foreignExprSwitch = 3; 	      /* Just some unprobable char.      */
@@ -58,10 +59,10 @@ entree * (*foreignAutoload)(char*, long); /* Autoloader                      */
 void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 int  (*default_exception_handler)(long);
-GEN  (*gp_history_fun)(long, long, char *, char *);
 int  (*whatnow_fun)(char *, int);
 pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, 0, f_RAW };
 
+extern void  delete_dirs(gp_path *p);
 extern void  initout(int initerr);
 extern int   term_width(void);
 
@@ -542,7 +543,6 @@ pari_init(size_t parisize, long maxprime)
   for (i = 0; i < functions_tblsz; i++) members_hash[i] = NULL;
   gp_init_entrees(pari_membermodules, members_hash, 1);
 
-  gp_history_fun = NULL;
   whatnow_fun = NULL;
   err_catch_array = (long *) gpmalloc((noer + 1) *sizeof(long));
   reset_traps(0);
@@ -551,6 +551,33 @@ pari_init(size_t parisize, long maxprime)
   (void)manage_var(2,NULL); /* init nvar */
   var_not_changed = 1; (void)fetch_named_var("x", 0);
   try_to_recover=1;
+}
+
+static void
+delete_hist(gp_hist *h)
+{
+  if (h->res) free((void*)h->res);
+}
+static void
+delete_pp(gp_pp *p)
+{
+  if (p->cmd) free((void*)p->cmd);
+}
+static void
+delete_path(gp_path *p)
+{
+  delete_dirs(p);
+  free((void*)p->PATH);
+}
+
+static void
+free_gp_data(gp_data *D)
+{
+  if (!D) return;
+  delete_hist(D->hist);
+  delete_path(D->path);
+  delete_pp(D->pp);
+  if (D->help) free((void*)D->help);
 }
 
 void
@@ -562,17 +589,15 @@ freeall(void)
   while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
   {
-    for (ep = functions_hash[i]; ep; ep = ep1)
-    {
-      ep1 = ep->next; freeep(ep);
-    }
-    for (ep = members_hash[i]; ep; ep = ep1)
-    {
-      ep1 = ep->next; freeep(ep);
-    }
+    for (ep = functions_hash[i]; ep; ep = ep1) { ep1 = ep->next; freeep(ep); }
+    for (ep =   members_hash[i]; ep; ep = ep1) { ep1 = ep->next; freeep(ep); }
   }
-  free((void*)varentries); free((void*)ordvar); free((void*)polvar);
-  free((void*)polx[MAXVARN]); free((void*)polx); free((void*)polun);
+  free((void*)varentries);
+  free((void*)ordvar);
+  free((void*)polvar);
+  free((void*)polx[MAXVARN]);
+  free((void*)polx);
+  free((void*)polun);
   free((void*)primetab);
   free((void*)universal_constants);
 
@@ -580,12 +605,12 @@ freeall(void)
   while (cur_bloc) { *cur_bloc=0; killbloc(cur_bloc); }
   killallfiles(1);
   free((void *)functions_hash);
-  free((void *)bot); free((void *)diffptr);
+  free((void *)bot);
+  free((void *)diffptr);
   free(current_logfile);
   free(current_psfile);
 
-  if (gp_history_fun)
-    (void)gp_history_fun(0,-1,NULL,NULL);
+  free_gp_data(GP_DATA);
 }
 
 GEN
@@ -1789,9 +1814,9 @@ TIMER(pari_timer *T)
   return _get_time(T, clock(), CLOCKS_PER_SEC);
 }
 #endif
+void
+TIMERstart(pari_timer *T) { (void)TIMER(T); }
 
-long
-gptimer(void) { static pari_timer T; return TIMER(&T);}
 long
 timer(void)   { static pari_timer T; return TIMER(&T);}
 long
