@@ -2315,8 +2315,8 @@ factor(GEN x)
 
 /* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
 GEN
-leftright_pow(GEN x, GEN n, void *data,
-             GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN))
+leftright_pow(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
+                                        GEN (*mul)(void*,GEN,GEN))
 {
   GEN nd = int_MSW(n), y = x;
   long i, m = *nd, j = 1+bfffo((ulong)m);
@@ -2341,6 +2341,29 @@ leftright_pow(GEN x, GEN n, void *data,
     nd=int_precW(nd);
     m = *nd; j = BITS_IN_LONG;
   }
+}
+/* assume n > 0. Compute x^n using left-right binary powering */
+GEN
+leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
+                                            GEN (*mul)(void*,GEN,GEN))
+{
+  GEN y;
+  long m, j;
+
+  if (n == 1) return gcopy(x);
+
+  m = (long)n; j = 1+bfffo(m);
+  y = x;
+
+  /* normalize, i.e set highest bit to 1 (we know m != 0) */
+  m<<=j; j = BITS_IN_LONG-j;
+  /* first bit is now implicit */
+  for (; j; m<<=1,j--)
+  {
+    y = sqr(data,y);
+    if (m < 0) y = mul(data,y,x); /* first bit set: multiply by base */
+  }
+  return y;
 }
 
 GEN

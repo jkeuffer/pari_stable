@@ -61,7 +61,6 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 
 extern int term_width(void);
 extern GEN addumului(ulong a, ulong b, GEN Y);
-extern GEN rpowsi(ulong a, GEN n, long prec);
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -2417,8 +2416,10 @@ constante()
   y = itor(y, l);
   if (n)
   {
-    GEN t = rpowsi(10UL, stoi(labs(n)), l+1); /* 10^|n| */
-    y = (n > 0)? mulrr(y,t): divrr(y,t);
+    if (n > 0)
+      y = mulrr(y, rpowuu(10UL, (ulong)n, l+1));
+    else
+      y = divrr(y, rpowuu(10UL, (ulong)-n, l+1));
     y = gerepileuptoleaf(av, y);
   }
   return y;

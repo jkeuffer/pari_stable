@@ -321,20 +321,36 @@ _muli(void *data /* ignored */, GEN x, GEN y) {
   (void)data; return mulii(x,y);
 }
 
-/* INTEGER POWERING (a^|n| for integer a and integer |n| > 1)
- *
- * Nonpositive powers and exponent one should be handled by gpow() and
- * gpowgs() in trans1.c, which at the time of this writing is the only place
- * where the following is [slated to be] used.
+/* INTEGER POWERING (a^|n| for integer a and integer n != 0)
  *
  * Use left shift binary algorithm (RS is wasteful: multiplies big numbers,
  * with LS one of them is the base, hence small). If result is nonzero, its
- * sign is set to s (= +-1) regardless of what it would have been. This makes
- * life easier for gpow()/gpowgs(), which otherwise might do a
- * setsigne(gun,-1)... -- GN1998May04
- */
+ * sign is set to s (= +-1) regardless of what it would have been. Makes
+ * life easier for caller, which otherwise might do a setsigne(gun,-1) */
 static GEN
-puissii(GEN a, GEN n, long s)
+powii(GEN a, GEN n, long s)
+{
+  pari_sp av;
+  GEN y;
+  ulong N;
+
+  if (!signe(a)) return gzero; /* a==0 */
+  if (lgefint(a)==3)
+  { /* easy if |a| < 3 */
+    if (a[2] == 1) return (s>0)? gun: negi(gun);
+    if (a[2] == 2) { a = shifti(gun, labs(itos(n))); setsigne(a,s); return a; }
+  }
+  if (lgefint(n) > 3) err(errlg);
+  
+  N = n[2];
+  if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
+  if (N == 2) return sqri(a);
+  av = avma;
+  y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
+  setsigne(y,s); return gerepileuptoint(av,y);
+}
+static GEN
+powiu(GEN a, ulong N, long s)
 {
   pari_sp av;
   GEN y;
@@ -343,15 +359,15 @@ puissii(GEN a, GEN n, long s)
   if (lgefint(a)==3)
   { /* easy if |a| < 3 */
     if (a[2] == 1) return (s>0)? gun: negi(gun);
-    if (a[2] == 2) { a = shifti(gun, labs(itos(n))); setsigne(a,s); return a; }
+    if (a[2] == 2) {
+      if (N & HIGHBIT) err(errlg);
+      a = shifti(gun, N); setsigne(a,s); return a;
+    }
   }
-  if (lgefint(n)==3)
-  { /* or if |n| < 3 */
-    if (n[2] == 1) { a = icopy(a); setsigne(a,s); return a; }
-    if (n[2] == 2) return sqri(a);
-  }
+  if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
+  if (N == 2) return sqri(a);
   av = avma;
-  y = leftright_pow(a, n, NULL, &_sqri, &_muli);
+  y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
   setsigne(y,s); return gerepileuptoint(av,y);
 }
 
@@ -362,14 +378,14 @@ typedef struct {
 } sr_muldata;
 
 static GEN
-_rpowsi_mul(void *data, GEN x, GEN y/*unused*/)
+_rpowuu_mul(void *data, GEN x, GEN y/*unused*/)
 {
   sr_muldata *D = (sr_muldata *)data;
   (void)y; return D->mulsg(D->a, x);
 }
 
 static GEN
-_rpowsi_sqr(void *data, GEN x)
+_rpowuu_sqr(void *data, GEN x)
 {
   sr_muldata *D = (sr_muldata *)data;
   if (typ(x) == t_INT && lgefint(x) >= D->prec)
@@ -381,24 +397,23 @@ _rpowsi_sqr(void *data, GEN x)
   return D->sqr(x);
 }
 
-/* return a^n as a t_REAL of precision prec. Adapted from puissii().
- * Assume a > 0, n > 0 */
+/* return a^n as a t_REAL of precision prec. Assume a > 0, n > 0 */
 GEN
-rpowsi(ulong a, GEN n, long prec)
+rpowuu(ulong a, ulong n, long prec)
 {
   pari_sp av;
   GEN y;
   sr_muldata D;
 
   if (a == 1) return realun(prec);
-  if (a == 2) return real2n(itos(n), prec);
-  if (is_pm1(n)) return stor(a, prec);
+  if (a == 2) return real2n(n, prec);
+  if (n == 1) return stor(a, prec);
   av = avma;
   D.sqr   = &sqri; 
   D.mulsg = &mulsi;
   D.prec = prec;
   D.a = (long)a;
-  y = leftright_pow(stoi(a), n, (void*)&D, &_rpowsi_sqr, &_rpowsi_mul);
+  y = leftright_pow_u(utoi(a), n, (void*)&D, &_rpowuu_sqr, &_rpowuu_mul);
   if (typ(y) == t_INT) y = itor(y, prec);
   return gerepileuptoleaf(av, y);
 }
@@ -406,8 +421,8 @@ rpowsi(ulong a, GEN n, long prec)
 GEN
 gpowgs(GEN x, long n)
 {
-  long m, tx;
-  pari_sp lim, av;
+  long m;
+  pari_sp av;
   static long gn[3] = {evaltyp(t_INT)|_evallg(3), 0, 0};
   GEN y;
 
@@ -416,30 +431,29 @@ gpowgs(GEN x, long n)
   if (n ==-1) return ginv(x);
   if (n>0) { gn[1] = evalsigne( 1) | evallgefint(3); gn[2]= n; }
   else     { gn[1] = evalsigne(-1) | evallgefint(3); gn[2]=-n; }
- /* If gpowgs were only ever called from gpow, the switch wouldn't be needed.
-  * In fact, under current word and bit field sizes, an integer power with
-  * multiword exponent will always overflow.  But it seems easier to call
-  * puissii|Fp_pow() with a mock-up GEN as 2nd argument than to write
-  * separate versions for a long exponent.  Note that n = HIGHBIT is an
-  * invalid argument. --GN
-  */
-  switch((tx=typ(x)))
+ /* Under current word and bit field sizes, an integer power with multiword
+  * exponent will overflow.  But it seems easier to call powii|Fp_pow() with a
+  * mock-up GEN as 2nd argument than to write separate versions for a long
+  * exponent.  Note that n = HIGHBIT is an invalid argument. */
+  switch(typ(x))
   {
     case t_INT:
     {
       long sx = signe(x), sr = (sx<0 && (n&1))? -1: 1;
-      if (n>0) return puissii(x,(GEN)gn,sr);
+      GEN t;
+      if (n>0) return powiu(x, n, sr);
       if (!sx) err(gdiver);
-      if (is_pm1(x)) return (sr < 0)? icopy(x): gun;
+      t = (sr > 0)? gun: negi(gun);
+      if (is_pm1(x)) return t;
       /* n<0, |x|>1 */
-      y = cgetg(3,t_FRAC); setsigne(gn,1);
-      y[1] = (sr>0)? un: lnegi(gun);
-      y[2] = (long)puissii(x,(GEN)gn,1); /* force denominator > 0 */
+      y = cgetg(3,t_FRAC);
+      y[1] = (long)t;
+      y[2] = (long)powiu(x, -n, 1); /* force denominator > 0 */
       return y;
     }
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      y[2] = (long)Fp_pow((GEN)(x[2]),(GEN)gn,(GEN)(x[1]));
+      y[2] = (long)Fp_pow((GEN)x[2],(GEN)gn,(GEN)x[1]);
       return y;
     case t_FRAC:
     {
@@ -450,13 +464,13 @@ gpowgs(GEN x, long n)
       { /* n < 0 */
         if (!signe(a)) err(gdiver);
         /* +-1/x[2] inverts to an integer */
-        if (is_pm1(a)) return puissii(b,(GEN)gn,sr);
+        n = -n;
+        if (is_pm1(a)) return powiu(b, n, sr);
         y = b; b = a; a = y;
       }
-      /* HACK: puissii disregards the sign of gn */
       y = cgetg(3, t_FRAC);
-      y[1] = (long)puissii(a,(GEN)gn,sr);
-      y[2] = (long)puissii(b,(GEN)gn,1);
+      y[1] = (long)powiu(a, n, sr);
+      y[2] = (long)powiu(b, n, 1);
       return y;
     }
     case t_PADIC: case t_POL: case t_POLMOD:
@@ -470,17 +484,11 @@ gpowgs(GEN x, long n)
       return gerepileupto(av,y);
     }
     default:
-      m = labs(n);
-      av = avma; y = NULL; lim = stack_lim(av,1);
+      m = labs(n); av = avma; y = NULL;
       for (; m>1; m>>=1)
       {
         if (m&1) y = y? gmul(y,x): x;
         x = gsqr(x);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"[3]: gpowgs");
-          gerepileall(av, y? 2: 1, &x, &y);
-        }
       }
       y = y? gmul(y,x): x;
       if (n < 0) y = ginv(y);
@@ -528,33 +536,29 @@ extern GEN powrealform(GEN x, GEN n);
 GEN
 powgi(GEN x, GEN n)
 {
-  long tx, sn = signe(n);
+  long sn = signe(n);
   GEN y;
 
   if (typ(n) != t_INT) err(talker,"not an integral exponent in powgi");
   if (!sn) return puiss0(x);
 
-  switch(tx=typ(x))
-  {/* catch some types here, instead of trying gpowgs() first, because of
-    * the simpler call interface to puissii() and Fp_pow() -- even though
-    * for integer/rational bases other than 0,+-1 and non-wordsized
-    * exponents the result will be certain to overflow. --GN
-    */
+  switch(typ(x))
+  {
     case t_INT:
     {
-      long sx=signe(x), sr = (sx<0 && mod2(n))? -1: 1;
-      if (sn>0) return puissii(x,n,sr);
+      long sx = signe(x), sr = (sx<0 && mod2(n))? -1: 1;
+      if (sn>0) return powii(x,n,sr);
       if (!sx) err(gdiver);
       if (is_pm1(x)) return (sr < 0)? icopy(x): gun;
       /* n<0, |x|>1 */
-      y=cgetg(3,t_FRAC); setsigne(n,1); /* temporarily replace n by abs(n) */
-      y[1]=(sr>0)? un: lnegi(gun);
-      y[2]=(long)puissii(x,n,1);
-      setsigne(n,-1); return y;
+      y = cgetg(3,t_FRAC);
+      y[1] = (sr>0)? un: lnegi(gun);
+      y[2] = (long)powii(x,n,1);
+      return y;
     }
     case t_INTMOD:
-      y=cgetg(3,tx); copyifstack(x[1],y[1]);
-      y[2]=(long)Fp_pow((GEN)x[2],n,(GEN)x[1]);
+      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y[2] = (long)Fp_pow((GEN)x[2],n,(GEN)x[1]);
       return y;
     case t_FRAC:
     {
@@ -565,13 +569,12 @@ powgi(GEN x, GEN n)
       { /* n < 0 */
         if (!signe(a)) err(gdiver);
         /* +-1/b inverts to an integer */
-        if (is_pm1(a)) return puissii(b,n,sr);
+        if (is_pm1(a)) return powii(b,n,sr);
         y = b; b = a; a = y;
       }
-      /* HACK: puissii disregards the sign of n */
-      y = cgetg(3,tx);
-      y[1] = (long)puissii(a,n,sr);
-      y[2] = (long)puissii(b,n,1);
+      y = cgetg(3,t_FRAC);
+      y[1] = (long)powii(a,n,sr);
+      y[2] = (long)powii(b,n,1);
       return y;
     }
     case t_PADIC:

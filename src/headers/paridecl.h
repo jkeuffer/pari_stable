@@ -1469,6 +1469,7 @@ GEN     glcm(GEN x, GEN y);
 GEN     glcm0(GEN x, GEN y);
 GEN     hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 GEN     leftright_pow(GEN,GEN,void*,GEN (*sqr)(void*,GEN),GEN (*mul)(void*,GEN,GEN));
+GEN     leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN));
 long    logint(GEN B, GEN y, GEN *ptq);
 GEN     newtonpoly(GEN x, GEN p);
 GEN     nfgcd(GEN P, GEN Q, GEN nf, GEN den);

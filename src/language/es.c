@@ -927,7 +927,6 @@ wr_vecsmall(pariout_t *T, GEN g)
 /**                                                                **/
 /********************************************************************/
 extern ulong u_pow10(int n);
-extern GEN rpowsi(ulong a, GEN n, long prec);
 
 /* e binary exponent, return exponent in base ten */
 static long
@@ -974,8 +973,10 @@ wr_float(pariout_t *T, GEN x, int f_format)
   beta = ex10(dif);
   if (beta)
   {
-    z = rpowsi(10UL, stoi(labs(beta)), lx+1);
-    z = (beta > 0)? mulrr(x, z): divrr(x, z);
+    if (beta > 0)
+      z = mulrr(x, rpowuu(10UL, (ulong)beta, lx+1));
+    else
+      z = divrr(x, rpowuu(10UL, (ulong)-beta, lx+1));
     setsigne(z, 1);
   }
   else z = mpabs(x);

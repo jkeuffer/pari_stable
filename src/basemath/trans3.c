@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 extern int OK_bern(long nb, long prec);
-extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrsns(GEN x, long i);
 extern GEN divgsns(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
@@ -1215,12 +1214,12 @@ czeta(GEN s0, long prec)
 }
 #endif
 
-/* 1/zeta(n) using Euler product.
+/* 1/zeta(n) using Euler product. Assume n > 0.
  * if (lba != 0) it is log(bit_accuracy) we _really_ require */
 GEN
 inv_szeta_euler(long n, double lba, long prec)
 {
-  GEN z, N, res = cgetr(prec);
+  GEN z, res = cgetr(prec);
   pari_sp av0 = avma;
   byteptr d =  diffptr + 2;
   double A = n / pariC2, D;
@@ -1230,7 +1229,6 @@ inv_szeta_euler(long n, double lba, long prec)
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (long)ceil(D);
   maxprime_check((ulong)lim);
-  N = stoi(n);
 
   prec++;
   z = gsub(gun, real2n(-n, prec));
@@ -1241,7 +1239,7 @@ inv_szeta_euler(long n, double lba, long prec)
 
     if (l < 3)         l = 3;
     else if (l > prec) l = prec;
-    h = divrr(z, rpowsi((ulong)p, N, l));
+    h = divrr(z, rpowuu((ulong)p, (ulong)n, l));
     z = subrr(z, h);
     NEXT_PRIME_VIADIFF(p,d);
   }
@@ -1459,7 +1457,8 @@ czeta(GEN s0, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, unr;
   GEN sim, *tab, tabn;
-  long p, i, sqn, nn, lim, lim2, ct;
+  ulong p;
+  long i, sqn, nn, lim, lim2, ct;
   pari_sp av, av2 = avma, avlim;
   int funeq = 0;
   byteptr d;
@@ -1472,8 +1471,8 @@ czeta(GEN s0, long prec)
   { /* s <--> 1-s */
     if (typ(s0) == t_INT)
     {
-      p = itos(s0); avma = av2;
-      return szeta(p,prec);
+      i = itos(s0); avma = av2;
+      return szeta(i, prec);
     }
     funeq = 1; s = gsub(gun, s); sig = real_i(s);
   }
@@ -1486,18 +1485,19 @@ czeta(GEN s0, long prec)
   d = diffptr + 1;
   if (typ(s0) == t_INT)
   { /* no explog for 1/p^s */
+    ulong k = itou(s0);
     for (p=2; p < nn;) {
-      tab[p] = divrr(unr, rpowsi(p, s0, prec));
+      tab[p] = divrr(unr, rpowuu(p, k, prec));
       NEXT_PRIME_VIADIFF(p,d);
     }
-    a = divrr(unr, rpowsi(nn, s0, prec));
+    a = divrr(unr, rpowuu((ulong)nn, k, prec));
   }
   else
   { /* general case */
     GEN ms = gneg(s), rp = cgetr(prec);
     for (p=2; p < nn;)
     {
-      affsr(p, rp);
+      affur(p, rp);
       tab[p] = gexp(gmul(ms, mplog(rp)), prec);
       NEXT_PRIME_VIADIFF(p,d);
     }

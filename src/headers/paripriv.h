@@ -96,3 +96,4 @@ GEN quicktrace(GEN x, GEN sym);
 #define sqru(b) muluu((b),(b))
 ulong usqrtsafe(ulong a);
 ulong dblmantissa(double x);
+GEN rpowuu(ulong a, ulong n, long prec);
