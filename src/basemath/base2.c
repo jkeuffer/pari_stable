@@ -23,6 +23,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
 #define FpX_rem(x,y,p) FpX_divres((x),(y),(p),ONLY_REM)
+extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
+extern GEN FqX_factor(GEN x, GEN T, GEN p);
 extern GEN DDF2(GEN x, long hint);
 extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
@@ -42,6 +44,7 @@ extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN merge_factor_i(GEN f, GEN g);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
+extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
 extern GEN pol_to_vec(GEN x, long N);
 extern GEN quicktrace(GEN x, GEN sym);
@@ -2398,6 +2401,33 @@ ff_to_nf(GEN x, GEN modpr)
   if (lg(modpr) < 7) return x;
   return mulmat_pol((GEN)modpr[6], x);
 }
+GEN
+modprM_lift(GEN x, GEN modpr)
+{
+  long i,j,h,l = lg(x);
+  GEN y = cgetg(l, t_MAT);
+  if (l == 1) return y;
+
+  h = lg(x[1]);
+  for (j=1; j<l; j++)
+  {
+    GEN p1 = cgetg(h,t_COL); y[j] = (long)p1;
+    for (i=1; i<h; i++) p1[i]=(long)ff_to_nf(gcoeff(x,i,j), modpr);
+  }
+  return y;
+}
+GEN
+modprX_lift(GEN x, GEN modpr)
+{
+  long i, l;
+  GEN z;
+
+  if (typ(x)!=t_POL) return gcopy(x); /* scalar */
+  l = lgef(x);
+  z = cgetg(l, t_POL); z[1] = x[1];
+  for (i=2; i<l; i++) z[i] = (long)ff_to_nf((GEN)x[i], modpr); 
+  return z;
+}
 
 /* reduce the coefficients of pol modulo modpr */
 GEN
@@ -2510,6 +2540,7 @@ rnfelementid_powmod(GEN multab, long h, GEN n, GEN T, GEN p)
   return gerepilecopy(av, y);
 }
 
+#if 0
 GEN
 mymod(GEN x, GEN p)
 {
@@ -2529,21 +2560,82 @@ mymod(GEN x, GEN p)
   for (i=1; i<lx; i++) y[i] = (long)mymod((GEN)x[i],p);
   return y;
 }
+#endif
 
-static GEN
-mat_ff_to_nf(GEN x, GEN modpr)
+#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
+#define FqX_mul FpXQX_mul
+
+/* relative Dedekind criterion over nf, applied to the order defined by a
+ * root of irreducible polynomial P, modulo the prime ideal pr. Returns
+ * [flag,basis,val], where basis is a pseudo-basis of the enlarged order,
+ * flag is 1 iff this order is pr-maximal, and val is the valuation at pr of
+ * the order discriminant */
+GEN
+rnfdedekind(GEN nf,GEN P0,GEN pr)
 {
-  long i,j,h,l = lg(x);
-  GEN y = cgetg(l, t_MAT);
-  if (l == 1) return y;
+  long vt, r, d, n, m, i, j;
+  gpmem_t av = avma;
+  GEN Prd,P,p1,p2,p,tau,g,matid;
+  GEN modpr,res,h,k,base,nfT,T,gzk,hzk;
 
-  h = lg(x[1]);
-  for (j=1; j<l; j++)
+  nf = checknf(nf); nfT = (GEN)nf[1]; P = lift(P0);
+  res = cgetg(4,t_VEC);
+  modpr = nf_to_ff_init(nf,&pr, &T, &p);
+  tau = gmul((GEN)nf[7], (GEN)pr[5]);
+  n = degpol(nfT);
+  m = degpol(P);
+
+  Prd = modprX(P, nf, modpr);
+  p1 = (GEN)FqX_factor(Prd,T,p)[1];
+  r = lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
+  g = (GEN)p1[1];
+  for (i=2; i<r; i++) g = FqX_mul(g, (GEN)p1[i], T, p);
+  h = FqX_div(Prd,g, T, p);
+  gzk = modprX_lift(g, modpr);
+  hzk = modprX_lift(h, modpr);
+
+  k = gsub(P, RXQX_mul(gzk,hzk, nfT));
+  k = gdiv(RXQX_mul(tau,k,nfT), p);
+  k = modprX(k, nf, modpr);
+
+  p2 = FqX_gcd(g,h,  T,p);
+  k  = FqX_gcd(p2,k, T,p); d = degpol(k);  /* <= m */
+
+  vt = idealval(nf,discsr(P0),pr) - 2*d;
+  res[3] = lstoi(vt);
+  res[1] = (!d || vt<=1)? un: zero;
+
+  base = cgetg(3,t_VEC);
+  p1 = cgetg(m+d+1,t_MAT); base[1] = (long)p1;
+  p2 = cgetg(m+d+1,t_VEC); base[2] = (long)p2;
+ /* if d > 0, base[2] temporarily multiplied by p, for the final nfhermitemod
+  * [ which requires integral ideals ] */
+  matid = gscalmat(d? p: gun, n);
+  for (j=1; j<=m; j++)
   {
-    GEN p1 = cgetg(h,t_COL); y[j] = (long)p1;
-    for (i=1; i<h; i++) p1[i]=(long)ff_to_nf(gcoeff(x,i,j), modpr);
+    p2[j]=(long)matid;
+    p1[j]=lgetg(m+1,t_COL);
+    for (i=1; i<=m; i++) coeff(p1,i,j) = (i==j)?un:zero;
   }
-  return y;
+  if (d)
+  {
+    GEN prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
+    GEN X = polx[varn(P)], pal;
+
+    pal = FqX_div(Prd,k, T,p);
+    pal = modprX_lift(pal, modpr);
+    for (   ; j<=m+d; j++)
+    {
+      p1[j] = (long)pol_to_vec(pal,m);
+      p2[j] = (long)prinvp;
+      pal = RXQX_rem(RXQX_mul(pal,X,nfT),P,nfT);
+    }
+    /* the modulus is integral */
+    base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),
+				      idealpows(nf, prinvp, d)));
+    base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
+  }
+  res[2]=(long)base; return gerepilecopy(av, res);
 }
 
 static GEN
@@ -2633,7 +2725,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr)
       R[j] = (long) rnfelementid_powmod(multabmod,j,q1,T,p);
     baseIp = FqM_ker(R,T,p);
     baseOp = lg(baseIp)==1? rnfId: FqM_suppl(baseIp,T,p);
-    alpha = mat_ff_to_nf(baseOp, modpr);
+    alpha = modprM_lift(baseOp, modpr);
     for (j=1; j<lg(baseIp); j++)
     {
       p1 = (GEN)alpha[j];
@@ -2669,7 +2761,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr)
       }
     }
     matG = FqM_ker(matC,T,p); m = lg(matG)-1;
-    matG = mat_ff_to_nf(matG, modpr);
+    matG = modprM_lift(matG, modpr);
     vecpro = cgetg(3,t_VEC);
     vecpro[1] = (long)concatsp(matG,rnfId);
 
@@ -3590,16 +3682,16 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   vbs[1] = un;
   vbs[2] = (long)plg; vbspro = gmul(den,plg);
   for(i=3;i<=n;i++)
-    vbs[i] = ldiv(gmul((GEN)vbs[i-1],vbspro),den);
+    vbs[i] = ldiv(gmul((GEN)vbs[i-1],vbspro), den);
   bs = gmul(vbs, vecpol_to_mat((GEN)nf[7],n));
 
   vpro = cgetg(N+1,t_VEC);
-  for (i=1;i<=N;i++) vpro[i] = (long)to_polmod(gpowgs(polx[v],i-1), polabs);
-  vpro = gmul(vpro,elts); B = cgetg(m+1, t_MAT);
+  for (i=1;i<=N;i++) vpro[i] = lpowgs(polx[v], i-1);
+  vpro = gmul(vpro, elts); B = cgetg(m+1, t_MAT);
   for(i=1;i<=N;i++)
     for(j=1;j<=n;j++)
     {
-      p1 = gmul(bs, element_mul(nf,(GEN)vpro[i],gmael(ids,i,j)));
+      p1 = gmul(bs, element_mul(nf, (GEN)vpro[i], gmael(ids,i,j)));
       B[(i-1)*n+j] = (long)pol_to_vec(lift_intern(p1), m);
     }
   p1 = denom(B); B = gmul(B,p1);

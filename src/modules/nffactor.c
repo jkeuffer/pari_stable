@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
-extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 extern double bound_vS(long tmax, GEN *BL);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
@@ -31,7 +30,6 @@ extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, lon
 extern GEN nf_get_T2(GEN base, GEN polr);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN nfreducemodpr_i(GEN x, GEN prh);
-extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
 extern GEN special_pivot(GEN x);
@@ -42,9 +40,6 @@ extern GEN RXQX_red(GEN P, GEN T);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
-#define FqX_div(x,y,T,p) FpXQX_divres((x),(y),(T),(p),NULL)
-#define FqX_mul FpXQX_mul
-#define FqX_red FpXQX_red
 
 static GEN nfsqff(GEN nf,GEN pol,long fl);
 
@@ -114,23 +109,9 @@ unifpol(GEN nf,GEN pol,long flag)
   return unifpol0(nf,(GEN) pol, flag);
 }
 
-/* lift coeffs of pol to Zk (as t_POL) */
-static GEN
-zkX(GEN x, GEN modpr)
-{
-  long i, l;
-  GEN z;
-
-  if (typ(x)!=t_POL) return gcopy(x);
-  l = lgef(x);
-  z = cgetg(l, t_POL); z[1] = x[1];
-  for (i=2; i<l; i++) z[i] = (long)ff_to_nf((GEN)x[i], modpr); 
-  return z;
-}
-
 /* factorization of x modulo pr. Assume x already reduced */
-static GEN
-nffactormod_i(GEN x, GEN T, GEN p)
+GEN
+FqX_factor(GEN x, GEN T, GEN p)
 {
   GEN rep;
   if (!T)
@@ -161,9 +142,9 @@ nffactormod(GEN nf, GEN x, GEN pr)
 
   modpr = nf_to_ff_init(nf, &pr, &T, &p);
   xrd = modprX(x, nf, modpr);
-  rep = nffactormod_i(xrd,T,p);
+  rep = FqX_factor(xrd,T,p);
   z = (GEN)rep[1]; l = lg(z);
-  for (j = 1; j < l; j++) z[j] = (long)zkX((GEN)z[j], modpr);
+  for (j = 1; j < l; j++) z[j] = (long)modprX_lift((GEN)z[j], modpr);
   return gerepilecopy(av, rep);
 }
 
@@ -671,79 +652,6 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
     return gerepileupto(av, gsub(polx[v], alpha));
   p1 = caract2(unifpol(nf,T,1), unifpol(nf,alpha,1), v);
   return gerepileupto(av, unifpol(nf,p1,1));
-}
-
-/* relative Dedekind criterion over nf, applied to the order defined by a
- * root of irreducible polynomial P, modulo the prime ideal pr. Returns
- * [flag,basis,val], where basis is a pseudo-basis of the enlarged order,
- * flag is 1 iff this order is pr-maximal, and val is the valuation at pr of
- * the order discriminant */
-GEN
-rnfdedekind(GEN nf,GEN P0,GEN pr)
-{
-  long vt, r, d, n, m, i, j;
-  gpmem_t av = avma;
-  GEN Prd,P,p1,p2,p,tau,g,matid;
-  GEN modpr,res,h,k,base,nfT,T,gzk,hzk;
-
-  nf = checknf(nf); nfT = (GEN)nf[1]; P = lift(P0);
-  res = cgetg(4,t_VEC);
-  modpr = nf_to_ff_init(nf,&pr, &T, &p);
-  tau = gmul((GEN)nf[7], (GEN)pr[5]);
-  n = degpol(nfT);
-  m = degpol(P);
-
-  Prd = modprX(P, nf, modpr);
-  p1 = (GEN)nffactormod_i(Prd,T,p)[1];
-  r = lg(p1); if (r < 2) err(constpoler,"rnfdedekind");
-  g = (GEN)p1[1];
-  for (i=2; i<r; i++) g = FqX_mul(g, (GEN)p1[i], T, p);
-  h = FqX_div(Prd,g, T, p);
-  gzk = zkX(g, modpr);
-  hzk = zkX(h, modpr);
-
-  k = gsub(P, RXQX_mul(gzk,hzk, nfT));
-  k = gdiv(RXQX_mul(tau,k,nfT), p);
-  k = modprX(k, nf, modpr);
-
-  p2 = FqX_gcd(g,h,  T,p);
-  k  = FqX_gcd(p2,k, T,p); d = degpol(k);  /* <= m */
-
-  vt = idealval(nf,discsr(P0),pr) - 2*d;
-  res[3] = lstoi(vt);
-  res[1] = (!d || vt<=1)? un: zero;
-
-  base = cgetg(3,t_VEC);
-  p1 = cgetg(m+d+1,t_MAT); base[1] = (long)p1;
-  p2 = cgetg(m+d+1,t_VEC); base[2] = (long)p2;
- /* if d > 0, base[2] temporarily multiplied by p, for the final nfhermitemod
-  * [ which requires integral ideals ] */
-  matid = gscalmat(d? p: gun, n);
-  for (j=1; j<=m; j++)
-  {
-    p2[j]=(long)matid;
-    p1[j]=lgetg(m+1,t_COL);
-    for (i=1; i<=m; i++) coeff(p1,i,j) = (i==j)?un:zero;
-  }
-  if (d)
-  {
-    GEN prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
-    GEN X = polx[varn(P)], pal;
-
-    pal = FqX_div(Prd,k, T,p);
-    pal = zkX(pal, modpr);
-    for (   ; j<=m+d; j++)
-    {
-      p1[j] = (long)pol_to_vec(pal,m);
-      p2[j] = (long)prinvp;
-      pal = RXQX_rem(RXQX_mul(pal,X,nfT),P,nfT);
-    }
-    /* the modulus is integral */
-    base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),
-				      idealpows(nf, prinvp, d)));
-    base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
-  }
-  res[2]=(long)base; return gerepilecopy(av, res);
 }
 
 #if 0
