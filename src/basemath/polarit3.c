@@ -3838,8 +3838,8 @@ ZY_ZXY_ResBound(GEN A, GEN B, GEN dB)
   }
   loga = mylog2(a);
   logb = mylog2(b); if (dB) logb -= 2 * mylog2(dB);
-  avma = av;
-  return 1 + (ulong)((degpol(B) * loga + degpol(A) * logb) / 2);
+  i = (long)((degpol(B) * loga + degpol(A) * logb) / 2);
+  avma = av; return (i <= 0)? 1: 1 + (ulong)i;
 }
 
 /* return Res(a(Y), b(n,Y)) over Fp. la = leading_term(a) [for efficiency] */
