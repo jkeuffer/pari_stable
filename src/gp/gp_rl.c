@@ -90,7 +90,7 @@ extern void* _rl_save_prompt(void);
 typedef char** (*CF)(char*, char* (*)(void)); /* completion function */
 typedef char* (*GF)(const char*, int); /* generator function */
 #  define COMPLETION_MATCHES(a,b) \
-      ((CF)completion_matches)((char*)(a),(*GF)(b))
+      ((CF)completion_matches)((char*)(a),(GF)(b))
 #  define FILE_COMPLETION ((GF)filename_completion_function)
 #  define USER_COMPLETION ((GF)username_completion_function)
 #  define DING ding
