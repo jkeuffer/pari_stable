@@ -1585,10 +1585,166 @@ END:
   gaffect(y,res); avma = av; return res;
 }
 
+/* return 0 if p divides x, w(x) otherwise */
+static GEN
+quickteich(GEN vz, GEN p, GEN x)
+{
+  GEN y;
+
+  if (!vz) return teich(x);
+  y  = (typ(x) == t_PADIC)? gtrunc(x): x;
+  if (divise(y, p)) return gzero;
+  return (GEN)vz[itos(modii(y, p))];
+}
+
+/* compute phi^(m)_s(x); s must be an integer */ 
+static GEN 
+phi_ms(GEN vz, GEN p, long m, GEN s, GEN x)
+{
+  GEN p1, p2; 
+
+  if (valp(x) > 0) return gzero;
+  p1 = powgi(quickteich(vz, p, x), addis(s, m));
+  p2 = powgi(x, negi(s));
+  return gmul(p1, p2);
+}
+
+/* compute the coefficients of the power series corresponding 
+   to the twisted partial zeta function Z_f(a, c, s) for a 
+   in va; skip the constant coefficient which is zero */
+static GEN 
+twistpartialpowser(GEN p, long pp, long N, long f, long c, GEN va)
+{
+  long j, k, lva = lg(va)-1, a;
+  pari_sp av, lim;
+  GEN x = polx[0], y = polx[fetch_user_var("y")], eta, one, mon, den;
+  GEN cyc, psm, invden, rep, ser;
+
+  cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
+  eta = gmodulcp(y, cyc);
+  psm = polsym(cyc, degpol(cyc) - 1); 
+  one = gmodulsg(1, gpowgs(p, pp)); /* gaddsg(1, zeropadic(p, pp)); */
+  eta = gmul(eta, one);
+  mon = gmul(one, gadd(gaddsg(1, x), zeroser(0, N + 5)));
+  den = gsubsg(1, gmul(gpowgs(eta, f), gpowgs(mon, f)));
+  mon = gmul(eta, mon);
+  invden = ginv(den);
+  av = avma; lim = stack_lim(av, 1);
+  rep = zerovec(lva);
+  ser = gmul(mon, invden); /* a = 1 is always the first element of va */
+  a   = 1;
+  for (j = 1; j <= lva; j++)
+  {
+    GEN p2 = zerovec(N);
+    for (k = 1; k <= N; k++)
+    {
+      GEN p3 = polcoeff0(ser, k, 0);
+      p2[k] = (long)lift(quicktrace((GEN)p3[2], psm));
+    }
+    rep[j] = (long)p2;    
+    if (j < lva) 
+    {
+      ser = gmul(ser, gpowgs(mon, va[j+1] - a));
+      a   = va[j+1];
+    }
+    if (low_stack(lim, stack_lim(av, 1)))
+    {
+      if(DEBUGMEM>1) err(warnmem, "twistpartialpowser");
+      gerepileall(av, 2, &rep, &ser);
+    }
+  }
+  return rep;
+}
+
+static GEN
+gzetap(GEN s)
+{
+  long pp, j, k, N, f, c, xp;
+  pari_sp av = avma;
+  GEN p, q, vz, is, cff, vtz, val, va, cft;
+
+  if (valp(s) < 0)
+    err(talker, "argument must be a p-adic integer");
+
+  p  = (GEN)s[2];
+  xp = 3; /* the extra precision; FIXME: quite arbitrary */
+  pp = precp(s);
+  is = gtrunc(s);  /* make s an integer */
+  N  = itos(mulis(p, pp))+2*xp; /* FIXME: crude estimation */
+  q  = gpowgs(p, pp+xp);
+
+  /* initialize the roots of unity for the computation 
+     of the Teichmuller character (also the values of f and c) */
+  if (cmpis(p, 2) == 0)
+  {  
+    vz = NULL;
+    f = 4; c = 3;
+  }
+  else
+  {
+    GEN x = polx[0];
+    GEN p1 = gsubgs(powgi(x, subis(p, 1)), 1);
+    vz = cgetg(itos(p), t_VEC);
+    for (j = 1; cmpsi(j, p) < 0; j++)
+      vz[j] = (long)gsubgs(x, j);
+    p1 = hensel_lift_fact(p1, vz, NULL, p, q, pp+xp);
+    /* p1 = polhensellift(p1, vz, p, pp+xp); */
+    for (j = 1; cmpsi(j, p) < 0; j++)
+      vz[j] = (long)gadd(gneg(polcoeff0((GEN) p1[j], 0, 0)), 
+			 zeropadic(p, pp+xp));
+    f = itos(p); c = 2;      
+  }
+
+  /* compute the first N coefficients of the Malher expansion 
+     of phi^(-1)_s skipping the first one (which is zero) */
+  cff = cgetg(N+1, t_VEC);
+  for (k = 1; k <= N; k++)
+  {
+    pari_sp av2 = avma;
+    GEN p1, A = phi_ms(vz, p, -1, is, gaddsg(k, zeropadic(p, pp+xp))), bn;
+    bn = stoi(k);
+    A  = gtrunc(A);
+    p1 = gzero;
+    for (j = 1; j < k; j++)
+    {
+      p1 = addii(p1, mulii(bn, (GEN)cff[j]));
+      bn = diviuexact(mulis(bn, k-j), j+1); /* bn = binom(k, j+1) */
+    }
+    cff[k] = (long)gerepileupto(av2, modii(subii(A, p1), q));
+  }
+
+  /* compute the coefficients of the power series corresponding 
+     to the twisted partial zeta function Z_f(a, c, s) for a in va */
+  va = cgetg(f, t_VECSMALL);
+  /* The line below looks a bit stupid but it is to keep the 
+     possibility of later adding p-adic Dirichlet L-functions */
+  for (j = 1; j < f; j++) va[j] = j;
+  vtz = twistpartialpowser(p, pp+xp, N, f, c, va);
+  
+  /* sum over all a's the coefficients of the twisted 
+     partial zeta functions and integrate */
+  val = gzero;
+  for (k = 1; k <= N; k++)
+  {
+    GEN p1 = gzero;
+    for (j = 1; j < f; j++)
+      p1 = gadd(p1, gcoeff(vtz, k, j));
+    val = gadd(val, gmul(p1, (GEN)cff[k]));
+  }
+
+  /* finally we multiply by the corrective factor */
+  cft = gsubgs(gmulsg(c, phi_ms(vz, p, -1, is,
+				gaddsg(c, zeropadic(p, pp+xp)))), 1);
+  val = gdiv(val, cft);
+
+  /* adjust the precision and return */
+  return gerepileupto(av, gadd(val, zeropadic(p, pp)));
+}
+
 GEN
 gzeta(GEN x, long prec)
 {
-  if (gcmp1(x)) err(talker,"argument equal to one in zeta");
+  if (gcmp1(x)) err(talker, "argument equal to one in zeta");
   switch(typ(x))
   {
     case t_INT:
@@ -1602,11 +1758,16 @@ gzeta(GEN x, long prec)
     case t_REAL: case t_COMPLEX:
       return czeta(x,prec);
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gzeta");
+    case t_INTMOD: err(typeer,"gzeta");
+
+    case t_PADIC: 
+      return gzetap(x);
+
     case t_SER: err(impl,"zeta of power series");
   }
   return transc(gzeta,x,prec);
 }
+
 /***********************************************************************/
 /**                                                                   **/
 /**                    FONCTIONS POLYLOGARITHME                       **/
