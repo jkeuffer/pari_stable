@@ -39,7 +39,7 @@ extern GEN mulmat_pol(GEN A, GEN x);
 void
 checkrnf(GEN rnf)
 {
-  if (typ(rnf)!=t_VEC || lg(rnf)!=13) err(idealer1);
+  if (typ(rnf)!=t_VEC || lg(rnf)!=13) err(typeer,"checkrnf");
 }
 
 GEN
@@ -79,7 +79,7 @@ checkbnf(GEN x)
   if (!bnf)
   {
     if (_checknf(x)) err(talker,"please apply bnfinit first");
-    err(idealer1);
+    err(typeer,"checkbnf");
   }
   return bnf;
 }
@@ -100,7 +100,7 @@ checknf(GEN x)
   if (!nf)
   {
     if (typ(x)==t_POL) err(talker,"please apply nfinit first");
-    err(idealer1);
+    err(typeer,"checknf");
   }
   return nf;
 }
@@ -132,7 +132,7 @@ check_units(GEN BNF, char *f)
 void
 checkid(GEN x, long N)
 {
-  if (typ(x)!=t_MAT) err(idealer2);
+  if (typ(x)!=t_MAT) err(talker,"incorrect ideal");
   if (lg(x) == 1 || lg(x[1]) != N+1)
     err(talker,"incorrect matrix for ideal");
 }
@@ -697,7 +697,7 @@ get_bnfpol(GEN x, GEN *bnf, GEN *nf)
   *bnf = _checkbnf(x);
   *nf  = _checknf(x);
   if (*nf) return (GEN)(*nf)[1];
-  if (typ(x) != t_POL) err(idealer1);
+  if (typ(x) != t_POL) err(typeer,"get_bnfpol");
   return x;
 }
 

@@ -125,10 +125,6 @@ char *errmessage[]=
   "reducible polynomial",
 /* zeropoler */
   "zero polynomial",
-/* idealer1 */
-  "not a number field in some number field-related function",
-/* idealer2 */
-  "not an ideal in an ideal-related function",
 
   /*  BIBLI.C  */
 

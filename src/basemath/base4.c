@@ -75,13 +75,13 @@ idealtyp(GEN *ideal, GEN *arch)
       }
       break;
 
-    case t_VEC: if (lg(x)!=6) err(idealer2);
+    case t_VEC: if (lg(x)!=6) err(talker, "incorrect ideal in idealtyp");
       t = id_PRIME; break;
 
     case t_POL: case t_POLMOD: case t_COL:
       t = id_PRINCIPAL; break;
     default:
-      if (!is_rational_t(tx)) err(idealer2);
+      if (!is_rational_t(tx)) err(talker, "incorrect ideal in idealtyp");
       t = id_PRINCIPAL;
   }
   *ideal = x; return t;
@@ -183,8 +183,8 @@ idealhermite_aux(GEN nf, GEN x)
     x = eltmul_get_table(nf, x);
     return idealmat_to_hnf(nf,x);
   }
-  N=degpol(nf[1]); lx = lg(x);
-  if (lg(x[1]) != N+1) err(idealer2);
+  N = degpol(nf[1]); lx = lg(x);
+  if (lg(x[1]) != N+1) err(talker,"incorrect matrix for ideal in idealhermite");
 
   if (lx == N+1 && ishnfall(x)) return x;
   if (lx <= N) return idealmat_to_hnf(nf,x);
