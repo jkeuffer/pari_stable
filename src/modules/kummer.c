@@ -30,8 +30,8 @@ extern GEN famat_to_nf(GEN nf, GEN f);
 static long rc,ell,degK,degKz,m,d,vnf,dv;
 static GEN matexpoteta1,nf,raycyc,polnf;
 static GEN bnfz,nfz,U,uu,gell,cyc,gencyc,vecalpha,R,g;
-static GEN listmod,listprSp,listbid,listunif,listellrank;
-static GEN listbidsup,listellranksup,vecw;
+static GEN listprSp,listunif;
+static GEN vecw;
 
 /* row vector B x matrix T : c_j=prod_i (b_i^T_ij) */
 static GEN
@@ -369,7 +369,7 @@ tauofideal(GEN id)
   p1=gsubst(gmul((GEN)nfz[7],id),vnf,U);
   p2=cgetg(lg(p1),t_MAT);
   for (j=1; j<lg(p1); j++) p2[j]=(long)algtobasis(nfz,(GEN)p1[j]);
-  return p2;
+  return hnfmodid(p2, gcoeff(id,1,1));
 }
 
 static GEN
@@ -601,29 +601,15 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup)
 }
 
 static GEN
-ideallogaux(long i, GEN al)
+ideallogaux(long i, GEN al, GEN bid, long ellrank)
 {
-  long llogli,valal;
+  long valal;
   GEN p1;
 
   valal = element_val(nfz,al,(GEN)listprSp[i]);
   al = gmul(al,gpuigs((GEN)listunif[i],valal));
-  p1 = zideallog(nfz,al,(GEN)listbid[i]);
-  llogli = listellrank[i];
-  setlg(p1,llogli+1); return p1;
-}
-
-static GEN
-ideallogauxsup(long i, GEN al)
-{
-  long llogli,valal;
-  GEN p1;
-
-  valal = element_val(nfz,al,(GEN)listprSp[i]);
-  al = gmul(al,gpuigs((GEN)listunif[i],valal));
-  p1 = zideallog(nfz,al,(GEN)listbidsup[i]);
-  llogli = listellranksup[i];
-  setlg(p1,llogli+1); return p1;
+  p1 = zideallog(nfz,al,bid);
+  setlg(p1,ellrank+1); return p1;
 }
 
 static GEN
@@ -913,9 +899,10 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   GEN p1,p2,p3,p4,wk,pr;
   GEN bnf,rayclgp,bid,ideal,cycgen,vselmer;
   GEN kk,clgp,fununits,torsunit,vecB,vecC,Tc,Tv,P;
-  GEN Q,Qt,idealz,gothf,factgothf,listpr,listex,factell,p,vecnul;
-  GEN M,al,K,Msup,X,finalresult,y,module,A1,A2,vecMsup;
-  GEN listmodsup,vecalphap,vecbetap,mginv,matP,ESml2,Sp,Sm,Sml1,Sml2,Sl;
+  GEN Q,idealz,gothf,factgothf,factell,p;
+  GEN listellrank,listbid,listmod,listpr,listex;
+  GEN M,al,K,X,finalresult,y,module,A1,A2,vecMsup;
+  GEN vecalphap,vecbetap,mginv,matP,ESml2,Sp,Sm,Sml1,Sml2,Sl;
 
   checkbnrgen(bnr);
   wk = gmael4(bnr,1,8,4,1);
@@ -1051,7 +1038,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       /* step 6 */
   if (DEBUGLEVEL>2) fprintferr("Step 6\n");
   Q = FpM_ker(gsub(gtrans(Tc), g), gell);
-  Qt = gtrans(Q); dc = lg(Q)-1;
+  dc = lg(Q)-1;
       /* step 7 done above */
       /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 7 and 8\n");
@@ -1160,22 +1147,28 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     listellrank[i] = ellrank(gmael3(listbid,i,2,2), ell);
   }
   mginv = modii(mulsi(m, mpinvmod(g,gell)), gell);
-  vecnul=cgetg(dc+1,t_COL); for (i=1; i<=dc; i++) vecnul[i]=zero;
-  M=cgetg(nbcol+1,t_MAT);
+  M = cgetg(nbcol+1,t_MAT);
   for (j=1; j<=dv; j++)
   {
-    p1=cgetg(1,t_COL);
-    al=(GEN)vecw[j];
-    for (i=1; i<=lSl2; i++) p1 = concatsp(p1,ideallogaux(i,al));
-    p1=gmul(mginv,p1);
-    M[j]=(long)concatsp(p1,vecnul);
+    al = (GEN)vecw[j];
+    p1 = cgetg(1,t_COL);
+    for (i=1; i<=lSl2; i++)
+      p1 = concatsp(p1, ideallogaux(i,al,(GEN)listbid[i],listellrank[i]));
+    p1 = gmul(mginv,p1);
+    M[j] = (long)p1;
   }
   for (   ; j<=nbcol; j++)
   {
-    p1=cgetg(1,t_COL);
-    al=(GEN)vecalphap[j-dv];
-    for (i=1; i<=lSl2; i++) p1 = concatsp(p1,ideallogaux(i,al));
-    M[j]=(long)concatsp(p1,gmul(Qt,(GEN)matP[j-dv]));
+    al = (GEN)vecalphap[j-dv];
+    p1 = cgetg(1,t_COL);
+    for (i=1; i<=lSl2; i++)
+      p1 = concatsp(p1, ideallogaux(i,al,(GEN)listbid[i],listellrank[i]));
+    M[j] = (long)p1;
+  }
+  if (dc)
+  {
+    GEN QtP = gmul(gtrans_i(Q),matP);
+    M = vconcat(M, concatsp(zeromat(dc,dv), QtP));
   }
       /* step 16 */
   if (DEBUGLEVEL>2) fprintferr("Step 16\n");
@@ -1183,21 +1176,17 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   dK= lg(K)-1; if (!dK) { avma=av; return gzero; }
       /* step 17 */
   if (DEBUGLEVEL>2) fprintferr("Step 17\n");
-  listmodsup=cgetg(lSml2+1,t_VEC);
-  listbidsup=cgetg(lSml2+1,t_VEC);
-  listellranksup=cgetg(lSml2+1,t_VECSMALL);
-  for (i=1; i<=lSml2; i++)
-  {
-    listmodsup[i]=(long)idealmul(nfz,(GEN)listprSp[i],(GEN)listmod[i]);
-    listbidsup[i]=(long)zidealstarinitgen(nfz,(GEN)listmodsup[i]);
-    listellranksup[i] = ellrank(gmael3(listbidsup,i,2,2), ell);
-  }
   vecMsup=cgetg(lSml2+1,t_VEC);
   for (i=1; i<=lSml2; i++)
   {
-    Msup=cgetg(nbcol+1,t_MAT); vecMsup[i]=(long)Msup;
-    for (j=1; j<=dv; j++) Msup[j]=lmul(mginv,ideallogauxsup(i,(GEN)vecw[j]));
-    for (   ; j<=nbcol; j++) Msup[j]=(long)ideallogauxsup(i,(GEN)vecalphap[j-dv]);
+    GEN modsup = idealmul(nfz,(GEN)listprSp[i],(GEN)listmod[i]);
+    GEN bidsup = zidealstarinitgen(nfz,modsup);
+    long ellranksup = ellrank(gmael(bidsup,2,2), ell);
+    GEN Msup = cgetg(nbcol+1,t_MAT); vecMsup[i] = (long)Msup;
+    for (j=1; j<=dv; j++)
+      Msup[j] = lmul(mginv, ideallogaux(i,(GEN)vecw[j],bidsup,ellranksup));
+    for (   ; j<=nbcol; j++)
+      Msup[j] = (long)ideallogaux(i,(GEN)vecalphap[j-dv],bidsup,ellranksup);
   }
       /* step 18 */
   if (DEBUGLEVEL>2) fprintferr("Step 18\n");
