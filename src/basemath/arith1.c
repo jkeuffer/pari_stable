@@ -449,37 +449,48 @@ carrecomplet(GEN x, GEN *pt)
 static long
 polcarrecomplet(GEN x, GEN *pt)
 {
-  pari_sp av,av2;
+  pari_sp av;
   long v, l = degpol(x);
-  GEN y,a,b;
+  GEN y, a, b;
 
-  if (!signe(x)) return 1;
+  if (!signe(x))
+  {
+    if (pt) *pt = gcopy(x);
+    return 1;
+  }
+  if (pt) *pt = gen_0;
   if (l&1) return 0; /* odd degree */
+  av = avma;
   v = polvaluation(x, &x);
-  if (v&1) return 0;
-  av2 = avma; a = (GEN)x[2];
+  if (v) {
+    l = degpol(x);
+    if (l&1) return 0;
+  }
+  a = (GEN)x[2];
   switch (typ(a))
   {
-    case t_POL: case t_INT:
-      y = gcarrecomplet(a,&b); break;
-    default:
-      y = gcarreparfait(a); b = NULL; break;
+    case t_INT: y =    carrecomplet(a,&b)? gen_1: gen_0; break;
+    case t_POL: y = polcarrecomplet(a,&b)? gen_1: gen_0; break;
+    default: y = gcarreparfait(a); b = NULL; break;
   }
-  if (y == gen_0) { avma = av2; return 0; }
-  av = avma; x = gdiv(x,a);
-  y = gtrunc(gsqrt(greffe(x,l,1),0)); av2 = avma;
+  if (y == gen_0) { avma = av; return 0; }
+  if (!l) {
+    if (!pt) { avma = av; return 1; }
+    if (!b) b = gsqrt(a,DEFAULTPREC);
+    y = scalarpol(b, varn(x)); goto END;
+  }
+  x = gdiv(x,a);
+  y = gtrunc(gsqrt(greffe(x,l,1),0));
   if (!gequal(gsqr(y), x)) { avma = av; return 0; }
-  if (pt)
+  if (!pt) { avma = av; return 1; }
+
+  if (!gcmp1(a))
   {
-    avma = av2;
-    if (!gcmp1(a))
-    {
-      if (!b) b = gsqrt(a,DEFAULTPREC);
-      y = gmul(b,y);
-    }
-    *pt = v? gerepilecopy(av, gmulXn(y, v >> 1)): gerepileupto(av, y);
+    if (!b) b = gsqrt(a,DEFAULTPREC);
+    y = gmul(b, y);
   }
-  else avma = av;
+END:
+  *pt = v? gerepilecopy(av, gmulXn(y, v >> 1)): gerepileupto(av, y);
   return 1;
 }
 
@@ -507,13 +518,13 @@ gcarrecomplet(GEN x, GEN *pt)
   }
   switch(tx)
   {
-    case t_INT: return stoi( carrecomplet(x, pt) );
+    case t_INT: l = carrecomplet(x, pt); goto END;
     case t_FRAC:
       av = avma;
       l = carrecomplet(mulii((GEN)x[1],(GEN)x[2]), pt);
       break;
 
-    case t_POL: return stoi( polcarrecomplet(x,pt) );
+    case t_POL: l = polcarrecomplet(x,pt); goto END;
     case t_RFRAC:
       av = avma;
       l = polcarrecomplet(gmul((GEN)x[1],(GEN)x[2]), pt);
@@ -523,6 +534,7 @@ gcarrecomplet(GEN x, GEN *pt)
       return NULL; /* not reached */
   }
   if (l) *pt = gerepileupto(av, gdiv(*pt, (GEN)x[2])); else avma = av;
+END:
   return l? gen_1: gen_0;
 }
 
