@@ -145,7 +145,7 @@ case "$optimization" in
   debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $cflags";;
 esac
 
-CFLAGS="$CFLAGS $cflags"
+CFLAGS="$cflags $CFLAGS"
 if test "$fastread" != yes; then
   echo $n ..."With which flags ? $c"
   dflt=$CFLAGS; rep=; . ./myread

@@ -39,7 +39,7 @@ case "$osname-$arch" in
                full) ldflags="$ldflags -s";;
              esac;;
 esac
-LDFLAGS="$LDFLAGS $ldflags"
+LDFLAGS="$ldflags $LDFLAGS"
 
 if test "$fastread" != yes; then
   echo $n ..."With which flags ? $c"
