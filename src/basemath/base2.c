@@ -3041,8 +3041,72 @@ print_elt(long a)
   flusherr();
 }
 
+extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
+extern GEN squff2(GEN x, long klim, long hint);
+extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
+
+static void
+gsetvarn(GEN x, long v)
+{
+  switch(typ(x))
+  {
+    case t_POL: setvarn(x,v); break;
+    case t_POLMOD:
+      setvarn(x[1],v);
+      if (typ(x[2]) == t_POL) setvarn(x[2],v); break;
+  }
+}
+
+/* modular version. TODO: check that compositum2 is not slower */
 GEN
-polcompositum0(GEN pol1, GEN pol2, long flall)
+polcompositum0(GEN A, GEN B, long flall)
+{
+  ulong av = avma;
+  long v,k;
+  GEN p1,y;
+
+  if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
+  if (lgef(A)<=3 || lgef(B)<=3) err(constpoler,"compositum");
+  v = varn(A);
+  if (varn(B) != v) err(talker,"not the same variable in compositum");
+  p1 = content(A); if (!gcmp1(p1)) A = gdiv(A, p1);
+  p1 = content(B); if (!gcmp1(p1)) B = gdiv(B, p1);
+  if (!issquarefree(A)) err(talker,"compositum: %Z not separable", A);
+  if (!issquarefree(B)) err(talker,"compositum: %Z not separable", B);
+
+  p1 = ZY_ZXY_resultant(A, B, &k);
+  /* p1 = Res_Y (A, B(X - kY)) guaranteed to be squarefree */
+  y = squff2(p1,0,0); settyp(y, t_VEC);
+  if (flall)
+  {
+    long i,l = lg(y);
+    GEN Ba, w,a,c; /* a,b,c root of A,B,C = compositum, c = b + k a */
+    for (i=1; i<l; i++)
+    {
+      c = gmodulcp(polx[v], (GEN)y[i]);
+      if (v == 0) gsetvarn(c, MAXVARN);
+      /* Ba = polynomial in X, st Ba(a) = 0 */
+      Ba = poleval(B, gadd(c , gmulsg(-k,polx[0])));
+      Ba = lift_intern(Ba);
+      /* should be nfgcd(subst(A,v,0),...) but nfgcd doesn't use varn */
+      p1 = nfgcd(A, Ba, (GEN)c[1], NULL);
+      if (lgef(p1) != 4) err(bugparier,"compositum");
+      /* p1 = uX + v, with a as root, u in Q, v in Q(c) */
+      a = gneg_i(gdiv((GEN)p1[2], (GEN)p1[3]));
+      if (v == 0) { gsetvarn(a, 0); gsetvarn(c, 0); }
+      w = cgetg(5,t_VEC); /* [C, a, b, n ] */
+      w[1] = y[i]; 
+      w[2] = lmodulcp(a, (GEN)y[1]);
+      w[3] = ladd(c, gmulsg(-k,a));
+      w[4] = lstoi(k); y[i] = (long)w;
+    }
+  }
+  return gerepileupto(av, gcopy(y));
+}
+
+/* FIXME: obsolete, to be deleted */
+GEN
+polcompositumold(GEN pol1, GEN pol2, long flall)
 {
   long av=avma,i,v,k,l;
   GEN p1,p2,fa,rk,y,a;
@@ -3052,7 +3116,7 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
   v = varn(pol1);
   if (varn(pol2)!=v) err(talker,"not the same variable in compositum");
   if (!issquarefree(pol1) || !issquarefree(pol2))
-    err(talker,"not k separable polynomial in compositum");
+    err(talker,"not a separable polynomial in compositum");
 
   for (k=1; ; k=nexta(k))
   {
