@@ -2873,7 +2873,7 @@ zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
   long av, tetpil;
   GEN pab,d;
 
-  d=idealmulelt(nf,b,B); *di=idealinv(nf,d);
+  d=idealmulelt(nf,b,B); *di=idealinv(nf,idealmat_to_hnf(nf,d));
   av=avma; pab=idealmul(nf,A,B); tetpil=avma;
   *w=gerepile(av,tetpil, idealmul(nf,pab,*di));
   *v=element_inv(nf,b);
