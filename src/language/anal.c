@@ -836,7 +836,7 @@ matrix_block(GEN p, entree *ep)
         {
           GEN p2 = cgetg(lg(p),t_VEC);
           analyseur++;
-          if (*analyseur != '[') full_row = 1;
+          if (*analyseur != '[') full_row = r;
           for (c=1; c<lg(p); c++) p2[c] = coeff(p,r,c);
           pt = &p2;
         }
@@ -930,8 +930,8 @@ matrix_block(GEN p, entree *ep)
 
     for (c=1; c<lg(p); c++)
     {
-      GEN p2 = gcoeff(p,r,c); if (isclone(p2)) killbloc(p2);
-      coeff(p,r,c) = lclone((GEN)res[c]);
+      GEN p2 = gcoeff(p,full_row,c); if (isclone(p2)) killbloc(p2);
+      coeff(p,full_row,c) = lclone((GEN)res[c]);
     }
     return res;
   }
@@ -977,25 +977,26 @@ static char *
 expand_string(char *bp, char **ptbuf, char **ptlimit)
 {
   char *tmp, *s = analyseur;
-  long len, alloc = 1;
+  long len, alloc;
 
   while (is_keyword_char(*s)) s++;
-  if (*s == '"' || *s == ',' || *s == ')')
-  { /* Do not create new user variables */
-    if (! is_entry_intern(analyseur, functions_hash,0))
-    { /* consider as a literal */
-      tmp = analyseur;
-      len = s - analyseur;
-      analyseur = s; alloc = 0;
-    }
+
+  if ((*s == '"' || *s == ',' || *s == ')')
+    && (! is_entry_intern(analyseur, functions_hash,0)))
+  { /* Do not create new user variable. Consider as a literal */ 
+    tmp = analyseur;
+    len = s - analyseur;
+    analyseur = s;
+    alloc = 0;
   }
-  if (alloc)
+  else
   {
     long av = avma;
     GEN p1 = expr();
     if (br_status) err(breaker,"here (expanding string)");
     tmp = GENtostr0(p1, output_fun);
     len = strlen(tmp); avma = av;
+    alloc = 1;
   }
   if (ptlimit && bp + len > *ptlimit)
     bp = realloc_buf(bp, len, ptbuf,ptlimit);
@@ -1436,7 +1437,7 @@ identifier(void)
 #endif
     switch (ret)
     {
-      case RET_GEN:
+      default: /* case RET_GEN: */
 	res = ((PFGEN)call)(argvec[0], argvec[1], argvec[2], argvec[3],
 	          argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
 	break;
@@ -1548,6 +1549,7 @@ identifier(void)
         res = gnil; break;
 
       default: err(valencer1);
+        return NULL; /* not reached */
     }
     match(')'); return res;
   }
@@ -3103,6 +3105,7 @@ trap0(char *e, char *r, char *f)
 {
   long av = avma, numerr = -1;
   GEN x = gnil;
+  char *F;
        if (!strcmp(e,"errpile")) numerr = errpile;
   else if (!strcmp(e,"typeer")) numerr = typeer;
   else if (!strcmp(e,"gdiver2")) numerr = gdiver2;
@@ -3111,15 +3114,17 @@ trap0(char *e, char *r, char *f)
   else if (*e) err(impl,"this trap keyword");
   /* TO BE CONTINUED */
 
-  if (!f) { f = r; r = NULL; } /* define a default handler */
-  if (r)
+  if (f && r)
   { /* explicit recovery text */
+    long *NUMERR = &numerr; /* prevent longjmp from clobbering av + numerr */
+    long *AV = &av;         /* volatile would be cleaner, but not portable */
+    char *a = analyseur;    /* pointers are never clobbered ! */
     jmp_buf env;
-    char *a = analyseur;
+
     if (setjmp(env)) 
     {
-      avma = av;
-      (void)err_leave(numerr);
+      avma = *AV;
+      (void)err_leave(*NUMERR);
       x = lisseq(r);
       skipseq();
     }
@@ -3133,11 +3138,12 @@ trap0(char *e, char *r, char *f)
     return x;
   }
 
- /* default will execute f (or start a break loop), then jump to
+  F = f? f: r; /* define a default handler */
+ /* default will execute F (or start a break loop), then jump to
   * environnement */
-  if (f)
+  if (F)
   {
-    if (!*f || (*f == '"' && f[1] == '"')) /* unset previous handler */
+    if (!*F || (*F == '"' && F[1] == '"')) /* unset previous handler */
     {/* TODO: find a better interface
       * TODO: no leaked handler from the library should have survived
       */
@@ -3145,9 +3151,9 @@ trap0(char *e, char *r, char *f)
       if (a) free(a);
       return x;
     }
-    f = pari_strdup(f);
+    F = pari_strdup(F);
   }
-  err_catch(numerr, NULL, f);
+  err_catch(numerr, NULL, F);
   return x;
 }
 
