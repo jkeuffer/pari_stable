@@ -1526,7 +1526,7 @@ gdiv(GEN x, GEN y)
         return gerepile(l,tetpil,gdiv(p2,p1));
     }
   }
-  if (gcmp0(y)) err(gdiver2);
+  if (gcmp0(y) && ty != t_MAT) err(gdiver2);
 
   if (is_const_t(tx) && is_const_t(ty))
   {
@@ -1855,7 +1855,6 @@ gdiv(GEN x, GEN y)
         z[2]=lcopy((GEN)y[1]); return z;
 
       case t_MAT:
-	if (ly==1 || lg(y[1])!=ly) err(operi,"/",tx,ty);
 	l=avma; p1=invmat(y); tetpil=avma;
 	return gerepile(l,tetpil,gmul(x,p1));
 
