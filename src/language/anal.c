@@ -1700,7 +1700,7 @@ constante()
   {
     m = number(&nb);
     y = addsi(m, mulsi(pw10[nb],y));
-    if (low_stack(limite, stack_lim(av,1))) y = gerepileupto(av,y);
+    if (low_stack(limite, stack_lim(av,1))) y = gerepileuptoint(av,y);
   }
   switch(*analyseur)
   {
@@ -1711,9 +1711,13 @@ constante()
       {
         m = number(&nb); n -= nb;
         y = addsi(m, mulsi(pw10[nb],y));
-        if (low_stack(limite, stack_lim(av,1))) y = gerepileupto(av,y);
+        if (low_stack(limite, stack_lim(av,1))) y = gerepileuptoint(av,y);
       }
-      if (*analyseur != 'E' && *analyseur != 'e') break;
+      if (*analyseur != 'E' && *analyseur != 'e') 
+      {
+        if (!signe(y)) { avma = av; return realzero(prec); }
+        break;
+      }
     /* Fall through */
     case 'E': case 'e':
     {
@@ -1725,6 +1729,13 @@ constante()
         default: n += number(&nb);
       }
       if (nb > 8) err(talker2,"exponent too large: ",old,mark.start);
+      if (!signe(y))
+      {
+        avma = av; y = cgetr(3);
+        n = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
+        y[1] = evalsigne(0) | evalexpo(n);
+        y[2] = 0; return y;
+      }
     }
   }
   l=lgefint(y); if (l<prec) l=prec;
