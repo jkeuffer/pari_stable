@@ -1991,11 +1991,11 @@ roots_from_deg1(GEN x)
 }
 
 static GEN
-quad_to_gauss(GEN x)
+vec_to_gauss(GEN x)
 {
   GEN y = cgetg(3, t_COMPLEX);
-  y[1] = x[2];
-  y[2] = x[3]; return y;
+  y[1] = x[1];
+  y[2] = x[2]; return y;
 }
 
 static GEN
@@ -2087,7 +2087,7 @@ gauss_factor(GEN x)
     if (is2)
     { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
     else
-      w = quad_to_gauss(cornacchia(gun, p));
+      w = vec_to_gauss(qfbimagsolvep(qfi(gun,gzero,gun),p));
     w2 = gauss_normal( gconj(w) );
     /* w * w2 * I^3 = p, w2 = gconj(w) * I */
     pe = gpowgs(p, e);
@@ -2144,7 +2144,7 @@ gauss_factor(GEN x)
       if (is2)
       { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
       else
-        w = quad_to_gauss(cornacchia(gun, p));
+        w = vec_to_gauss(qfbimagsolvep(qfi(gun,gzero,gun),p));
       P[i] = (long)w;
       if (is2)
         E[i] = lstoi(e << 1);

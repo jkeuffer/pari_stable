@@ -175,7 +175,7 @@ BA  2- add support for GNU/Hurd.
     4- output support for zm / Flm matrices (t_MAT with t_VECSMALLs instead
        of t_COLs)
     5- FpM_rank
-    6- declare cornacchia, cornacchia2 + allow factor( an elt in Z[i] )
+    6- allow factor( an elt in Z[i] )
     7- put back bruteall [ used by Math::Pari ]
 BA  8- Configure support for sparc64, x86_64 and ppc64
 BA  9- x86_64 level0 inline assembly kernel
@@ -188,6 +188,7 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
        removed from the documentation]. Use leading_term.
     2- obsolete undocumented type t_SMALL
 BA  3- revert 2.2.1 A14 and A17 (broken with GMP kernel, unmaintainable).
+BA  4- cornacchia, in favour of qfbsolve.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):
