@@ -674,7 +674,7 @@ cmbf(GEN pol, GEN famod, GEN p, long a, long b,
     {
       GEN T1,T2, P = (GEN)famod[i];
       long d = degpol(P);
-      
+
       degpol[i] = d; P += 2;
       T1 = (GEN)P[d-1];/* = - S_1 */
       T2 = sqri(T1);
@@ -2865,7 +2865,7 @@ Q_remove_denom(GEN x, GEN d)
 {
   long i, j, h, l;
   GEN y;
-  
+
   if (typ(d) != t_INT) err(typeer,"Q_remove_denom");
 
   switch (typ(x))
@@ -3009,7 +3009,7 @@ init_resultant(GEN x, GEN y)
 }
 
 /* return coefficients s.t x = x_0 X^n + ... + x_n */
-static GEN
+GEN
 revpol(GEN x)
 {
   long i,n = degpol(x);
@@ -3205,78 +3205,6 @@ subresall(GEN u, GEN v, GEN *sol)
   z = gerepileupto(av, z);
   if (sol) { *sol = forcecopy(u); gunclone(u); }
   return z;
-}
-
-static GEN
-_div(GEN x, GEN y, GEN p)
-{
-  if (typ(y) == t_INT)
-    return FpX_red(gmul(x, mpinvmod(y,p)), p);
-  return FpX_div(x,y,p);
-}
-
-static GEN
-_divX(GEN x, GEN y, GEN p)
-{
-  long i, l;
-  GEN z;
-  if (typ(y) == t_INT)
-  {
-    if (gcmp1(y)) return x;
-    z = FpXX_red(gmul(x, mpinvmod(y,p)), p);
-  }
-  else
-  {
-    l = lgef(x); z = cgetg(l, t_POL); z[1] = x[1];
-    for (i=2; i<l; i++) z[i] = (long)FpX_div((GEN)x[i],y,p);
-  }
-  return z;
-}
-
-GEN
-FpYX_subres(GEN u, GEN v, GEN p)
-{
-  gpmem_t av = avma, av2, lim;
-  long degq,dx,dy,du,dv,dr,signh;
-  GEN z,g,h,r,p1;
-
-  dx=degpol(u); dy=degpol(v); signh=1;
-  if (dx < dy)
-  {
-    swap(u,v); lswap(dx,dy);
-    if (both_odd(dx, dy)) signh = -signh;
-  }
-  if (dy==0) return gerepileupto(av, FpX_red(gpowgs((GEN)v[2],dx), p));
-
-  g = h = gun; av2 = avma; lim = stack_lim(av2,1);
-  for(;;)
-  {
-    r = pseudorem_i(u,v,p); dr = lgef(r);
-    if (dr == 2) { avma = av; return gzero; }
-    du = degpol(u); dv = degpol(v); degq = du-dv;
-    u = v; p1 = g; g = leading_term(u);
-    switch(degq)
-    {
-      case 0: break;
-      case 1:
-        p1 = FpX_red(gmul(h,p1), p); h = g; break;
-      default:
-        p1 = FpX_red(gmul(FpX_red(gpowgs(h,degq), p),p1), p);
-        h = _div(gpowgs(g,degq), gpowgs(h,degq-1), p);
-    }
-    if (both_odd(du,dv)) signh = -signh;
-    v = _divX(r, p1, p);
-    if (dr==3) break;
-    if (low_stack(lim,stack_lim(av2,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"subresall, dr = %ld",dr);
-      gerepileall(av2,4, &u, &v, &g, &h);
-    }
-  }
-  z = (GEN)v[2];
-  if (dv > 1) z = _div(gpowgs(z,dv), gpowgs(h,dv-1), p);
-  if (signh < 0) z = gneg(z); /* z = resultant(ppart(x), ppart(y)) */
-  return gerepileupto(av, FpX_red(z, p));
 }
 
 static GEN
