@@ -4096,60 +4096,6 @@ sturmpart(GEN x, GEN a, GEN b)
 
 /*******************************************************************/
 /*                                                                 */
-/*         QUADRATIC POLYNOMIAL ASSOCIATED TO A DISCRIMINANT       */
-/*                                                                 */
-/*******************************************************************/
-
-GEN
-quadpoly0(GEN x, long v)
-{
-  long res, i, l, sx, tx = typ(x);
-  pari_sp av;
-  GEN y,p1;
-
-  if (is_matvec_t(tx))
-  {
-    l = lg(x); y = cgetg(l,tx);
-    for (i=1; i<l; i++) y[i] = (long)quadpoly0((GEN)x[i],v);
-    return y;
-  }
-  if (tx != t_INT) err(arither1);
-  if (v < 0) v = 0;
-  sx = signe(x);
-  if (!sx) err(talker,"zero discriminant in quadpoly");
-  if (carreparfait(x)) err(talker,"square discriminant in quadpoly");
-  res = mod4(x); if (sx < 0 && res) res = 4-res;
-  if (res > 1) err(funder2,"quadpoly");
-
-  y = cgetg(5,t_POL);
-  y[1] = evalsigne(1) | evalvarn(v) | evallgef(5);
-
-  av = avma; p1 = shifti(x,-2); setsigne(p1,-signe(p1));
-  y[2] = (long) p1;
-  if (!res) y[3] = zero;
-  else
-  {
-    if (sx < 0) y[2] = lpileuptoint(av, addsi(1,p1));
-    y[3] = lnegi(gun);
-  }
-  y[4] = un; return y;
-}
-
-GEN
-quadpoly(GEN x)
-{
-  return quadpoly0(x,-1);
-}
-
-GEN
-quadgen(GEN x)
-{
-  GEN y=cgetg(4,t_QUAD);
-  y[1]=lquadpoly(x); y[2]=zero; y[3]=un; return y;
-}
-
-/*******************************************************************/
-/*                                                                 */
 /*                    GENERIC (modular) INVERSE                    */
 /*                                                                 */
 /*******************************************************************/

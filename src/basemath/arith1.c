@@ -2187,7 +2187,7 @@ cornacchia2(GEN d, GEN p)
   if (cmpis(d, 0) <= 0)
     err(talker, "d must be >0");
   if (mod4(d)==1 || mod4(d)==2)
-    err(talker,"dmust be 0 or 3 mod 4");
+    err(talker,"d must be 0 or 3 mod 4");
   px4=shifti(p,2);
   if (cmpii(px4, d) < 0) {avma=ltop; return gzero;}
   if (egalii(p,gdeux))
@@ -2236,6 +2236,68 @@ cornacchia2(GEN d, GEN p)
   return gerepileupto(ltop,p1);
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*         QUADRATIC POLYNOMIAL ASSOCIATED TO A DISCRIMINANT       */
+/*                                                                 */
+/*******************************************************************/
+
+void
+check_quaddisc(GEN x, long *s, long *r, char *f)
+{
+  if (typ(x) != t_INT) err(arither1);
+  *s = signe(x); if (!*s) err(talker,"zero discriminant in %s", f);
+  if (carreparfait(x)) err(talker,"square discriminant in %s", f);
+  *r = mod4(x); if (*s < 0 && *r) *r = 4 - *r;
+  if (*r > 1) err(funder2, f);
+}
+void
+check_quaddisc_real(GEN x, long *r, char *f)
+{
+  long sx; check_quaddisc(x, &sx, r, f);
+  if (sx < 0) err(talker, "negative discriminant in %s", f);
+}
+
+GEN
+quadpoly0(GEN x, long v)
+{
+  long res, i, sx, tx = typ(x);
+  pari_sp av;
+  GEN y, p1;
+
+  if (is_matvec_t(tx))
+  {
+    long l = lg(x);
+    y = cgetg(l, tx);
+    for (i=1; i<l; i++) y[i] = (long)quadpoly0((GEN)x[i],v);
+    return y;
+  }
+  if (v < 0) v = 0;
+  check_quaddisc(x, &sx, &res, "quadpoly");
+  y = cgetg(5,t_POL);
+  y[1] = evalsigne(1) | evalvarn(v) | evallgef(5);
+
+  av = avma; p1 = shifti(x,-2); setsigne(p1,-signe(p1));
+  y[2] = (long) p1; /* - floor(x/4) [ = -x/4 or (1-x)/4 ] */
+  if (!res) y[3] = zero;
+  else
+  {
+    if (sx < 0) y[2] = lpileuptoint(av, addsi(1,p1));
+    y[3] = lnegi(gun);
+  }
+  y[4] = un; return y;
+}
+
+GEN
+quadpoly(GEN x) { return quadpoly0(x, -1); }
+
+GEN
+quadgen(GEN x)
+{
+  GEN y = cgetg(4,t_QUAD);
+  y[1] = lquadpoly(x); y[2] = zero; y[3] = un; return y;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**         FUNDAMENTAL UNIT AND REGULATOR (QUADRATIC FIELDS)         **/
@@ -2243,18 +2305,16 @@ cornacchia2(GEN d, GEN p)
 /***********************************************************************/
 
 GEN
-gfundunit(GEN x)
-{
-  return garith_proto(fundunit,x,1);
-}
+gfundunit(GEN x) { return garith_proto(fundunit,x,1); }
 
 static GEN
 get_quad(GEN f, GEN pol, long r)
 {
-  GEN y, c=(GEN)f[2], p1=(GEN)c[1], q1=(GEN)c[2];
-  y=cgetg(4,t_QUAD); y[1]=(long)pol;
-  y[2]=r? lsubii(p1,q1): (long)p1;
-  y[3]=(long)q1; return y;
+  GEN y = cgetg(4,t_QUAD), c = (GEN)f[2], p1 = (GEN)c[1], q1 = (GEN)c[2];
+  
+  y[1] = (long)pol;
+  y[2] = r? lsubii(p1,q1): (long)p1;
+  y[3] = (long)q1; return y;
 }
 
 /* replace f by f * [a,1; 1,0] */
@@ -2262,74 +2322,64 @@ static void
 update_f(GEN f, GEN a)
 {
   GEN p1;
-  p1=gcoeff(f,1,1);
-  coeff(f,1,1)=laddii(mulii(a,p1), gcoeff(f,1,2));
-  coeff(f,1,2)=(long)p1;
+  p1 = gcoeff(f,1,1);
+  coeff(f,1,1) = laddii(mulii(a,p1), gcoeff(f,1,2));
+  coeff(f,1,2) = (long)p1;
 
-  p1=gcoeff(f,2,1);
-  coeff(f,2,1)=laddii(mulii(a,p1), gcoeff(f,2,2));
-  coeff(f,2,2)=(long)p1;
+  p1 = gcoeff(f,2,1);
+  coeff(f,2,1) = laddii(mulii(a,p1), gcoeff(f,2,2));
+  coeff(f,2,2) = (long)p1;
 }
 
 GEN
 fundunit(GEN x)
 {
   pari_sp av = avma, av2, lim;
-  long r,flp,flq;
-  GEN pol,y,a,u,v,u1,v1,sqd,f;
+  long r, flp, flq;
+  GEN pol, y, a, u, v, u1, v1, sqd, f;
 
-  if (typ(x) != t_INT) err(arither1);
-  if (signe(x)<=0) err(arither2);
-  r=mod4(x); if (r==2 || r==3) err(funder2,"fundunit");
-
-  sqd=racine(x); av2=avma; lim=stack_lim(av2,2);
+  check_quaddisc_real(x, &r, "fundunit");
+  sqd = racine(x); av2 = avma; lim = stack_lim(av2,2);
   a = shifti(addsi(r,sqd),-1);
-  f=cgetg(3,t_MAT); f[1]=lgetg(3,t_COL); f[2]=lgetg(3,t_COL);
-  coeff(f,1,1)=(long)a; coeff(f,1,2)=un;
-  coeff(f,2,1)=un;      coeff(f,2,2)=zero;
+  f = cgetg(3,t_MAT); f[1] = lgetg(3,t_COL); f[2] = lgetg(3,t_COL);
+  coeff(f,1,1) = (long)a; coeff(f,1,2) = un;
+  coeff(f,2,1) = un;      coeff(f,2,2) = zero;
   v = gdeux; u = stoi(r);
   for(;;)
   {
-    u1=subii(mulii(a,v),u);       flp=egalii(u,u1); u=u1;
-    v1=divii(subii(x,sqri(u)),v); flq=egalii(v,v1); v=v1;
+    u1 = subii(mulii(a,v),u);       flp = egalii(u,u1); u = u1;
+    v1 = divii(subii(x,sqri(u)),v); flq = egalii(v,v1); v = v1;
     if (flq) break; a = divii(addii(sqd,u),v);
     if (flp) break; update_f(f,a);
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      GEN *gptr[4]; gptr[0]=&a; gptr[1]=&f; gptr[2]=&u; gptr[3]=&v;
       if(DEBUGMEM>1) err(warnmem,"fundunit");
-      gerepilemany(av2,gptr,4);
+      gerepileall(av2,4, &a,&f,&u,&v);
     }
   }
-  pol = quadpoly(x); y = get_quad(f,pol,r);
+  pol = quadpoly(x);
+  y = get_quad(f,pol,r);
   if (!flq) v1 = y; else { update_f(f,a); v1 = get_quad(f,pol,r); }
 
-  u1=gconj(y); y=gdiv(v1,u1);
+  y = gdiv(v1, gconj(y));
   if (signe(y[3]) < 0) y = gneg(y);
   return gerepileupto(av, y);
 }
 
 GEN
-gregula(GEN x, long prec)
-{
-  return garith_proto2gs(regula,x,prec);
-}
+gregula(GEN x, long prec) { return garith_proto2gs(regula,x,prec); }
 
 GEN
 regula(GEN x, long prec)
 {
-  pari_sp av = avma,av2,lim;
-  long r,fl,rexp;
-  GEN reg,rsqd,y,u,v,u1,v1, sqd = racine(x);
+  pari_sp av = avma, av2, lim;
+  long r, fl, rexp;
+  GEN reg, rsqd, y, u, v, u1, v1, sqd = racine(x);
 
-  if (signe(x)<=0) err(arither2);
-  r=mod4(x); if (r==2 || r==3) err(funder2,"regula");
-
+  check_quaddisc_real(x, &r, "regula");
   rsqd = gsqrt(x,prec);
-  if (egalii(sqri(sqd),x)) err(talker,"square argument in regula");
-
-  rexp=0; reg = stor(2, prec);
-  av2=avma; lim = stack_lim(av2,2);
+  rexp = 0; reg = stor(2, prec);
+  av2 = avma; lim = stack_lim(av2,2);
   u = stoi(r); v = gdeux;
   for(;;)
   {
@@ -2366,16 +2416,10 @@ regula(GEN x, long prec)
 /*************************************************************************/
 
 static GEN
-gclassno(GEN x)
-{
-  return garith_proto(classno,x,1);
-}
+gclassno(GEN x) { return garith_proto(classno,x,1); }
 
 static GEN
-gclassno2(GEN x)
-{
-  return garith_proto(classno2,x,1);
-}
+gclassno2(GEN x) { return garith_proto(classno2,x,1); }
 
 GEN
 qfbclassno0(GEN x,long flag)
