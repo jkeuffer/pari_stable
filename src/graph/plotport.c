@@ -655,12 +655,11 @@ rectpoints(long ne, GEN listx, GEN listy)
   long i,lx, tx=typ(listx), ty=typ(listy);
   double *px,*py;
 
-  if (!is_matvec_t(tx) || !is_matvec_t(ty))
-  {
+  if (!is_matvec_t(tx) || !is_matvec_t(ty)) {
     rectpoint(ne, listx, listy); return;
   }
-  if (tx == t_MAT || ty == t_MAT) err(ploter4);
-  lx=lg(listx); if (lg(listy)!=lx) err(ploter5);
+  lx = lg(listx);
+  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) err(typeer,"rectpoints");
   lx--; if (!lx) return;
 
   px = (double*) gpmalloc(lx*sizeof(double));
@@ -711,8 +710,7 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   {
     rectline(ne, listx, listy); return;
   }
-  if (tx == t_MAT || ty == t_MAT) err(ploter4);
-  if (lg(listy)!=lx) err(ploter5);
+  if (tx == t_MAT || ty == t_MAT || lg(listy) != lx) err(typeer,"rectlines");
   lx--; if (!lx) return;
 
   x = (double*) gpmalloc(lx*sizeof(double));
@@ -1196,7 +1194,7 @@ gtodblList(GEN data, long flags)
   long param=(flags & PLOT_PARAMETRIC);
   GEN x,y;
 
-  if (! is_vec_t(tx)) err(talker,"not a vector in gtodblList");
+  if (! is_vec_t(tx)) err(typeer,"gtodblList");
   if (!nl) return NULL;
   lx1 = lg(data[1]);
 
@@ -1206,11 +1204,10 @@ gtodblList(GEN data, long flags)
   for (i=0; i<nl-1; i+=2)
   {
     u = i+1;
-    x = (GEN)data[u];   tx = typ(x);
+    x = (GEN)data[u];   tx = typ(x); lx = lg(x);
     y = (GEN)data[u+1]; ty = typ(y);
-    if (!is_vec_t(tx) || !is_vec_t(ty)) err(ploter4);
-    lx = lg(x); if (lg(y) != lx) err(ploter5);
-    if (!param && lx != lx1) err(ploter5);
+    if (!is_vec_t(tx) || !is_vec_t(ty) || lg(y) != lx
+        || (!param && lx != lx1)) err(typeer,"gtodblList");
 
     lx--;
     l[i].d = (double*) gpmalloc(lx*sizeof(double));
@@ -1372,8 +1369,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
     xbig = gtodouble(b);
     ysml = ybig = gtodouble(p1);
     nc=1; nl=2; /* nc = nb of curves; nl = nb of coord. lists */
-    if (param)
-      err(warner,"flag PLOT_PARAMETRIC ignored");
+    if (param) err(warner,"flag PLOT_PARAMETRIC ignored");
     single_c=1; param=0;
   }
   else

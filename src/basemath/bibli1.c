@@ -682,7 +682,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   for (j=1; j<lx; j++)
   {
     for (i=1; i<hx; i++)
-      if (typ(gcoeff(x,i,j)) != t_INT) err(lllger4);
+      if (typ(gcoeff(x,i,j)) != t_INT) err(typeer,"lllint_marked");
     fl[j] = 0; L[j] = (long)zerocol(n);
   }
   h = pth? idmat(n): NULL;
@@ -912,7 +912,7 @@ incrementalGSgen(GEN x, GEN L, GEN B, long k, GEN fl)
     if (j==k || fl[j])
     {
       u = gcoeff(x,k,j); tu = typ(u);
-      if (! is_extscalar_t(tu)) err(lllger4);
+      if (! is_extscalar_t(tu)) err(typeer,"incrementalGSgen");
       for (i=1; i<j; i++)
         if (fl[i])
         {

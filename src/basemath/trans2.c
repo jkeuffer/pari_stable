@@ -995,170 +995,6 @@ bernvec(long nb)
 /**                                                                **/
 /********************************************************************/
 
-#if 0
-static GEN
-mpgamma(GEN x)
-{
-  GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
-  long l, l1, l2, flag, i, k, e, s, sx, n, p;
-  pari_sp av, av1;
-  double alpha,beta,dk;
-
-  sx=signe(x); if (!sx) err(gamer2);
-  l=lg(x); y=cgetr(l); av=avma;
-
-  l2=l+1; p1=cgetr(l2);
-  flag = (expo(x)<-1 || sx<0);
-  if (!flag) p2 = x;
-  else
-  {
-    p2=gfrac(x); if (gcmp0(p2)) err(gamer2);
-    p2 = subsr(1,x);
-  }
-  affrr(p2,p1);
-  alpha=rtodbl(p1); beta=((bit_accuracy(l)>>1)*LOG2/PI) - alpha;
-  if (beta>=0) n=(long)(1 + pariK2*beta); else n=0;
-  if (n)
-  {
-    p = (long)(1 + PI*(alpha+n));
-    l2 += n>>TWOPOTBITS_IN_LONG;
-    p2 = cgetr(l2); addsrz(n,p1,p2);
-  }
-  else
-  {
-    dk = pariK4*alpha/(l-2); beta = log(dk)/LOG2;
-    if (beta>1.) beta += log(beta)/LOG2;
-    p = (long)((bit_accuracy(l)>>1)/beta + 1);
-    p2 = p1;
-  }
-  mpbern(p,l2); p3=mplog(p2);
-
-  p4 = real2n(-1, l2);
-  p6 = subrr(p2,p4); p6 = mulrr(p6,p3);
-  p6 = subrr(p6,p2);
-  pitemp = mppi(l2); setexpo(pitemp,2);
-  p7 = mplog(pitemp); setexpo(pitemp,1);
-  setexpo(p7,-1); addrrz(p6,p7,p4);
-
-  affrr(ginv(gsqr(p2)), p3); e=expo(p3);
-
-  p5=cgetr(l2); setlg(p5,4);
-  p71=cgetr(l2); p7 = bern(p);
-  if (bernzone[2]>4) { setlg(p71,4); affrr(p7,p71); p7=p71; }
-  p7 = divrs(p7, 2*p*(2*p-1)); affrr(p7,p5);
-
-  s=0; l1=4; av1=avma;
-  for (k=p-1; k>0; k--)
-  {
-    setlg(p3,l1); p6 = mulrr(p3,p5); p7 = bern(k);
-    if (bernzone[2]>l1) { setlg(p71,l1); affrr(p7,p71); p7=p71; }
-    p7 = divrs(p7, (2*k)*(2*k-1));
-    s -= e; l1 += (s>>TWOPOTBITS_IN_LONG); if (l1>l2) l1=l2;
-    s &= (BITS_IN_LONG-1); p7 = addrr(p7,p6);
-    setlg(p5,l1); affrr(p7,p5); avma=av1;
-  }
-  setlg(p5,l2); p6 = divrr(p5,p2);
-  p4 = addrr(p4,p6); setlg(p4,l2); p4 = mpexp(p4);
-  for (i=1; i<=n; i++)
-  {
-    addsrz(-1,p2,p2); p4 = divrr(p4,p2);
-  }
-  if (flag)
-  {
-    setlg(pitemp,l+1); p1 = mulrr(pitemp,x);
-    p4 = mulrr(mpsin(p1), p4); p4 = divrr(pitemp,p4);
-  }
-  affrr(p4,y); avma=av; return y;
-}
-
-static GEN
-cxgamma(GEN x, long prec)
-{
-  GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
-  long l, l1, l2, flag, i, k, e, s, n, p;
-  pari_sp av, av1;
-  double alpha,beta,dk;
-
-  if (gcmp0((GEN)x[2])) return ggamma((GEN)x[1],prec);
-  l = precision(x); if (!l) l = prec;
-  l2 = l+1; y = cgetc(l); av = avma;
-
-  p1 = cgetc(l2);
-  flag = (gsigne((GEN)x[1])<=0 || gexpo((GEN)x[1]) < -1);
-  p2 = flag? gsub(gun,x): x;
-  gaffect(p2,p1);
-
-  alpha = rtodbl(gabs(p1,DEFAULTPREC));
-  beta = (bit_accuracy(l)>>1) * LOG2 / PI - alpha;
-  if (beta>=0) n=(long)(1 + pariK2*beta); else n=0;
-  if (n)
-  {
-    p = (long)(1+PI*(alpha+n));
-    l2 += n>>TWOPOTBITS_IN_LONG;
-    p2 = cgetc(l2);
-    addsrz(n,(GEN)p1[1],(GEN)p2[1]);
-    affrr((GEN)p1[2],   (GEN)p2[2]);
-  }
-  else
-  {
-    dk = pariK4*alpha/(l-2); beta = log(dk)/LOG2;
-    if (beta>1.) beta += log(beta)/LOG2;
-    p = (long)((bit_accuracy(l)>>1)/beta + 1);
-    p2 = p1;
-  }
-  mpbern(p,l2); p3 = glog(p2,l2);
-
-  p4 = cgetg(3,t_COMPLEX);
-  p4[1] = (long)subrr((GEN)p2[1], real2n(-1, l2));
-  p4[2] = (long)rcopy((GEN)p2[2]);
-  gsubz(gmul(p4, p3), p2, p4);
-
-  pitemp = mppi(l2); setexpo(pitemp,2);
-  p7 = mplog(pitemp); setexpo(p7,-1);
-  setexpo(pitemp,1);
-  addrrz((GEN)p4[1],p7, (GEN)p4[1]);
-
-  p5 = cgetc(l2);
-  setlg(p5[1], 4);
-  setlg(p5[2], 4);
-  p71 = cgetr(l2); p7 = bern(p);
-  if (bernzone[2]>4) { setlg(p71,4); affrr(p7,p71); p7=p71; }
-  p7 = divrs(p7, 2*p*(2*p-1)); gaffect(p7,p5);
-  p3 = ginv(gsqr(p2)); e = gexpo(p3);
-
-  s=0; l1=4; av1=avma;
-  for (k=p-1; k>0; k--)
-  {
-    setlg(p3[1], l1);
-    setlg(p3[2], l1);
-    p6 = gmul(p3,p5); p7 = bern(k);
-    if (bernzone[2]>l1) { setlg(p71,l1); affrr(p7,p71); p7=p71; }
-    p7 = divrs(p7, (2*k)*(2*k-1));
-    s -= e; l1 += (s>>TWOPOTBITS_IN_LONG); if (l1>l2) l1=l2;
-    s &= (BITS_IN_LONG-1); p7 = addrr(p7, (GEN)p6[1]);
-    setlg(p5[1],l1); affrr(p7, (GEN)p5[1]); p7 = (GEN)p6[2];
-    setlg(p5[2],l1); affrr(p7, (GEN)p5[2]); avma=av1;
-  }
-  setlg(p5[1],l2);
-  setlg(p5[2],l2);
-  p6 = gdiv(p5,p2); setlg(p6[1],l2); setlg(p6[2],l2);
-  p4 = gadd(p4,p6); setlg(p4[1],l2); setlg(p4[2],l2);
-
-  p4 = gexp(p4,l2);
-  for (i=1; i<=n; i++)
-  {
-    addsrz(-1,(GEN)p2[1],(GEN)p2[1]); p4 = gdiv(p4,p2);
-  }
-  if (flag)
-  {
-    setlg(pitemp,l+1); p1 = gmul(pitemp,x);
-    p4 = gmul(gsin(p1,l+1), p4);
-    p4 = gdiv(pitemp,p4);
-  }
-  gaffect(p4,y); avma=av; return y;
-}
-#endif
-
 /* x / (i*(i+1)) */
 GEN
 divrsns(GEN x, long i)
@@ -1490,7 +1326,7 @@ ggamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x)<=0) err(gamer2);
+      if (signe(x) <= 0) err(talker,"non-positive integer argument in ggamma");
       if (cmpis(x,481177) > 0) err(talker,"argument too large in ggamma");
       return mpfactr(itos(x) - 1, prec);
 
@@ -1550,7 +1386,7 @@ glngamma(GEN x, long prec)
   switch(typ(x))
   {
     case t_INT:
-      if (signe(x) <= 0) err(gamer2);
+      if (signe(x) <= 0) err(talker,"non-positive integer argument in glngamma");
       y = cgetr(prec); av = avma;
 /* heuristic */
       if (cmpis(x,200 + 50*(prec-2)) > 0)

@@ -88,27 +88,6 @@ char *errmessage[]=
   "impossible assignment I-->I",
 /* shier2 */
   "overflow in real shift",
-/* diver1 */
-  "division by zero in S/S",
-/* diver2 */
-  "division by zero in S/I",
-/* diver3 */
-  "division by zero in S/R",
-/* diver4 */
-  "division by zero in I/S",
-/* diver5 */
-  "division by zero in I/R",
-/* diver6 */
-  "division by zero in R/S",
-/* diver8 */
-  "division by zero in R/I",
-
-/* diver9 */
-  "division by zero in R/R",
-/* divzer1 */
-  "forbidden division R/R-->I or I/R-->I or R/I-->I",
-/* dvmer1 */
-  "division by zero in dvmdii",
 
 /* errpile */
   "the PARI stack overflows !",
@@ -145,8 +124,6 @@ char *errmessage[]=
   "non-positive argument (<= 0) in an arithmetic function",
 /* arither3 */
   "zero argument in an arithmetic function",
-/* hiler1 */
-  "insufficient precision for p=2 in hilbert",
 /* funder2 */
   "discriminant not congruent to 0 or 1 mod 4",
 /* generer */
@@ -182,8 +159,6 @@ char *errmessage[]=
   "too many iterations for desired precision in integration routine",
 /* lllger3 */
   "not a definite matrix in lllgram",
-/* lllger4 */
-  "not an integral matrix in lllgramint",
 
   /*  ELLIPTIC.C  */
 
@@ -197,7 +172,7 @@ char *errmessage[]=
 /* operf */
   "forbidden",
 /* gdiver */
-  "division by zero in gdiv, gdivgs or ginv",
+  "division by zero",
 /* inter2 */
   "a log/atan appears in the integration, PARI cannot handle that",
 /* overwriter */
@@ -210,22 +185,6 @@ char *errmessage[]=
 /* gerper */
   "significant pointers are lost in gerepile !!! (please report)",
 
-  /*  PLOT.C  */
-
-/* ploter4 */
-  "not vectors in plothraw",
-/* ploter5 */
-  "vectors not of the same length in plothraw",
-
-  /*  POLARIT.C */
-
-/* rootper1 */
-  "incorrect type(s) or zero polynomial in rootpadic or factorpadic",
-/* rootper2 */
-  "root does not exist in rootpadic",
-/* rootper4 */
-  "nonpositive precision in rootpadic",
-
   /*  TRANS.C  */
 
 /* infprecer */
@@ -234,10 +193,6 @@ char *errmessage[]=
   "negative exponent",
 /* sqrter5 */
   "non quadratic residue in gsqrt",
-/* gamer2 */
-  "negative or zero integer argument in mpgamma",
-/* thetaer1 */
-  "q>=1 in theta",
 
 /* noer */
   "what's going on ?"

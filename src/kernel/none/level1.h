@@ -532,7 +532,7 @@ sdivss_rem(long x, long y, long *rem)
 {
   long q;
   LOCAL_HIREMAINDER;
-  if (!y) err(diver1);
+  if (!y) err(gdiver);
   hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (y < 0) q = -q;
@@ -556,7 +556,7 @@ sdivsi_rem(long x, GEN y, long *rem)
   long q, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) err(diver2);
+  if (!s) err(gdiver);
   if (!x || lgefint(y)>3 || ((long)y[2])<0) { *rem = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
@@ -633,7 +633,7 @@ INLINE ulong
 umodui(ulong x, GEN y)
 {
   LOCAL_HIREMAINDER;
-  if (!signe(y)) err(diver2);
+  if (!signe(y)) err(gdiver);
   if (!x || lgefint(y) > 3) return x;
   hiremainder = 0; (void)divll(x, y[2]); return hiremainder;
 }

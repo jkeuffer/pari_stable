@@ -1609,7 +1609,7 @@ apprgen(GEN f, GEN a)
   pari_sp av = avma;
   if (typ(f) != t_POL) err(notpoler,"apprgen");
   if (gcmp0(f)) err(zeropoler,"apprgen");
-  if (typ(a) != t_PADIC) err(rootper1);
+  if (typ(a) != t_PADIC) err(typeer,"apprgen");
   return gerepilecopy(av, apprgen_i(padic_pol_to_int(f), a));
 }
 
@@ -1684,7 +1684,7 @@ rootpadic(GEN f, GEN p, long prec)
 
   if (typ(f)!=t_POL) err(notpoler,"rootpadic");
   if (gcmp0(f)) err(zeropoler,"rootpadic");
-  if (prec <= 0) err(rootper4);
+  if (prec <= 0) err(talker,"non-positive precision in rootpadic");
   f = padic_pol_to_int(f);
   f = pnormalize(f, p, prec, 1, &lead, &PREC, &reverse);
 
@@ -1884,7 +1884,7 @@ apprgen9(GEN f, GEN a)
   if (typ(f)!=t_POL) err(notpoler,"apprgen9");
   if (gcmp0(f)) err(zeropoler,"apprgen9");
   if (typ(a)==t_PADIC) return apprgen(f,a);
-  if (typ(a)!=t_POLMOD) err(rootper1);
+  if (typ(a)!=t_POLMOD) err(typeer,"apprgen9");
   fp = derivpol(f); u = ggcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   T = (GEN)a[1];
@@ -1892,11 +1892,11 @@ apprgen9(GEN f, GEN a)
   prec = BIGINT;
   getprec((GEN)a[2], &prec, &p);
   getprec(T, &prec, &p);
-  if (!p) err(rootper1);
+  if (!p) err(typeer,"apprgen9");
 
-  p1 = poleval(f,a); v = ggval(lift_intern(p1),p); if (v<=0) err(rootper2);
+  p1 = poleval(f,a); v = ggval(lift_intern(p1),p);
   fl2 = egalii(p,gdeux);
-  if (fl2 && v==1) err(rootper2);
+  if (v <= 0 || (fl2 && v==1)) err(talker,"root does not exist in apprgen9");
   v = ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
   {
@@ -2034,8 +2034,9 @@ factorpadic2(GEN f, GEN p, long prec)
   long n,i,l;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
+  if (typ(p)!=t_INT) err(arither1);
   if (gcmp0(f)) err(zeropoler,"factorpadic");
-  if (prec<=0) err(rootper4);
+  if (prec <= 0) err(talker,"non-positive precision in factorpadic");
 
   n = degpol(f);
   if (n==0) return trivfact();
@@ -2082,7 +2083,7 @@ factorpadic4(GEN f,GEN p,long prec)
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
   if (typ(p)!=t_INT) err(arither1);
   if (gcmp0(f)) err(zeropoler,"factorpadic");
-  if (prec<=0) err(rootper4);
+  if (prec <= 0) err(talker,"non-positive precision in factorpadic");
 
   if (n==0) return trivfact();
   if (n==1) return padic_trivfact(f,p,prec);

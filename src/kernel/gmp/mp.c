@@ -923,7 +923,7 @@ divsi(long x, GEN y)
   long p1, s = signe(y);
   LOCAL_HIREMAINDER;
 
-  if (!s) err(diver2);
+  if (!s) err(gdiver);
   if (!x || lgefint(y)>3 || ((long)y[2])<0) return gzero;
   hiremainder=0; p1=divll(labs(x),y[2]);
   if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
@@ -936,7 +936,7 @@ umodiu(GEN y, ulong x)
 {
   long sy=signe(y);
   ulong hi;
-  if (!x) err(diver4);
+  if (!x) err(gdiver);
   if (!sy) return 0;
   hi = mpn_mod_1(LIMBS(y),NLIMBS(y),x);
   if (!hi) return 0;
@@ -950,7 +950,7 @@ diviu_rem(GEN y, ulong x, ulong *rem)
   long ly;
   GEN z;
 
-  if (!x) err(diver4);
+  if (!x) err(gdiver);
   if (!signe(y)) { *rem = 0; return gzero; }
 
   ly = lgefint(y);
@@ -969,7 +969,7 @@ divis_rem(GEN y, long x, long *rem)
   long sy=signe(y),ly,s;
   GEN z;
 
-  if (!x) err(diver4);
+  if (!x) err(gdiver);
   if (!sy) { *rem = 0; return gzero; }
   if (x<0) { s = -sy; x = -x; } else s = sy;
 
@@ -990,7 +990,7 @@ divis(GEN y, long x)
   long sy=signe(y),ly,s;
   GEN z;
 
-  if (!x) err(diver4);
+  if (!x) err(gdiver);
   if (!sy) return gzero;
   if (x<0) { s = -sy; x = -x; } else s=sy;
 
@@ -1011,7 +1011,7 @@ divir(GEN x, GEN y)
   long ly;
   pari_sp av;
 
-  if (!signe(y)) err(diver5);
+  if (!signe(y)) err(gdiver);
   if (!signe(x)) return gzero;
   ly = lg(y); z = cgetr(ly); av = avma; 
   affrr(divrr(itor(x, ly+1), y), z);
@@ -1025,7 +1025,7 @@ divri(GEN x, GEN y)
   pari_sp av;
   GEN z;
 
-  if (!s) err(diver8);
+  if (!s) err(gdiver);
   if (!signe(x)) return realzero_bit(expo(x) - expi(y));
   if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
 
@@ -1054,7 +1054,7 @@ mpdivz(GEN x, GEN y, GEN z)
 
   if (typ(z)==t_INT)
   {
-    if (typ(x) == t_REAL || typ(y) == t_REAL) err(divzer1);
+    if (typ(x) == t_REAL || typ(y) == t_REAL) err(gdiver);
     affii(divii(x,y), z);
     avma = av; return;
   }
@@ -1083,7 +1083,7 @@ divsr(long x, GEN y)
   long ly;
   GEN z;
 
-  if (!signe(y)) err(diver3);
+  if (!signe(y)) err(gdiver);
   if (!x) return gzero;
   ly = lg(y); z = cgetr(ly); av = avma;
   affrr(divrr(stor(x,ly+1), y), z);
@@ -1122,7 +1122,7 @@ divrs(GEN x, long y)
   GEN z;
   LOCAL_HIREMAINDER;
 
-  if (!y) err(diver6);
+  if (!y) err(gdiver);
   if (!s) return realzero_bit(expo(x) - (BITS_IN_LONG-1)+bfffo(y));
   if (y<0) { s = -s; y = -y; }
   if (y==1) { z=rcopy(x); setsigne(z,s); return z; }
@@ -1186,7 +1186,7 @@ divrr(GEN x, GEN y)
   ulong si,saux;
   GEN r,r1;
 
-  if (!sy) err(diver9);
+  if (!sy) err(gdiver);
   e = expo(x) - expo(y);
   if (!sx) return realzero_bit(e);
   if (sy<0) sx = -sx;
@@ -1302,7 +1302,7 @@ dvmdii(GEN x, GEN y, GEN *z)
   pari_sp av;
   GEN r,q;
 
-  if (!sy) err(dvmer1);
+  if (!sy) err(gdiver);
   if (!sx)
   {
     if (!z || z == ONLY_REM) return gzero;

@@ -34,10 +34,6 @@ enum {
 
   affer1, affer2, affer3, shier2,
   
-  diver1, diver2, diver3, diver4, diver5,
-  diver6, diver8, diver9,
-  divzer1, dvmer1,
-  
   errpile, errlg,
   errexpo, errvalp, rtodber,
 
@@ -51,7 +47,7 @@ enum {
 
 /* arith.c  */
 
-  arither1, arither2, arither3, hiler1,
+  arither1, arither2, arither3,
   funder2, generer, primer1, primer2, invmoder,
 
 /* base.c   */
@@ -60,7 +56,7 @@ enum {
 
 /* bibli.c  */
 
-  changer1, intger2, lllger3, lllger4,
+  changer1, intger2, lllger3,
 
 /* elliptic.c */
 
@@ -73,18 +69,9 @@ enum {
 
   memer, gerper,
 
-/* plot.c */
-
-  ploter4, ploter5,
-
-/* polarit.c */
-
-  rootper1, rootper2, rootper4,
-
 /* trans.c */
 
-  infprecer, negexper, sqrter5, gamer2,
-  thetaer1,
+  infprecer, negexper, sqrter5,
 
 /* PAS D'ERREUR */
 

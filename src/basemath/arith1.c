@@ -777,52 +777,64 @@ hil0(GEN x, GEN y, GEN p)
 
 #define eps(t) (((signe(t)*(modBIL(t)))&3)==3)
 long
+hilii(GEN x, GEN y, GEN p)
+{
+  pari_sp av;
+  long a, b, z;
+  GEN u, v;
+
+  if (signe(p)<=0)
+    return (signe(x)<0 && signe(y)<0)? -1: 1;
+  av = avma;
+  a = odd(pvaluation(x,p,&u));
+  b = odd(pvaluation(y,p,&v));
+  if (egalii(p,gdeux))
+  {
+    z = (eps(u) && eps(v))? -1: 1;
+    if (a && gome(v)) z = -z;
+    if (b && gome(u)) z = -z;
+  }
+  else
+  {
+    z = (a && b && eps(p))? -1: 1;
+    if (a && kronecker(v,p)<0) z = -z;
+    if (b && kronecker(u,p)<0) z = -z;
+  }
+  avma = av; return z;
+}
+
+static void
+err_at2() { err(talker, "insufficient precision for p = 2 in hilbert"); }
+
+long
 hil(GEN x, GEN y, GEN p)
 {
   pari_sp av;
-  long a,b,tx,ty,z;
-  GEN p1,p2,u,v;
+  long a,tx,ty,z;
+  GEN p1,p2;
 
   if (gcmp0(x) || gcmp0(y)) return 0;
-  av=avma; tx=typ(x); ty=typ(y);
+  av = avma; tx = typ(x); ty = typ(y);
   if (tx>ty) { p1=x; x=y; y=p1; a=tx,tx=ty; ty=a; }
-  switch(tx)
+  switch(tx) /* <= ty */
   {
     case t_INT:
       switch(ty)
       {
-	case t_INT:
-	  if (signe(p)<=0)
-	    return (signe(x)<0 && signe(y)<0)? -1: 1;
-	  a = odd(pvaluation(x,p,&u));
-          b = odd(pvaluation(y,p,&v));
-	  if (egalii(p,gdeux))
-          {
-	    z = (eps(u) && eps(v))? -1: 1;
-	    if (a && gome(v)) z= -z;
-	    if (b && gome(u)) z= -z;
-          }
-          else
-	  {
-	    z = (a && b && eps(p))? -1: 1;
-	    if (a && kronecker(v,p)<0) z= -z;
-	    if (b && kronecker(u,p)<0) z= -z;
-	  }
-	  avma=av; return z;
+	case t_INT: return hilii(x,y,p);
 	case t_REAL:
 	  return (signe(x)<0 && signe(y)<0)? -1: 1;
 	case t_INTMOD:
-          p = (GEN)y[1];
-	  if (egalii(gdeux,p)) err(hiler1);
-	  return hil(x,(GEN)y[2],p);
+          p = (GEN)y[1]; if (egalii(gdeux,p)) err_at2();
+	  return hilii(x, (GEN)y[2], p);
 	case t_FRAC:
-	  p1=mulii((GEN)y[1],(GEN)y[2]); z=hil(x,p1,p);
-	  avma=av; return z;
+	  z = hilii(x, mulii((GEN)y[1],(GEN)y[2]), p);
+	  avma = av; return z;
 	case t_PADIC:
           p = (GEN)y[2];
-	  if (egalii(gdeux,p) && precp(y) <= 1) err(hiler1);
+	  if (egalii(gdeux,p) && precp(y) <= 1) err_at2();
 	  p1 = odd(valp(y))? mulii(p,(GEN)y[4]): (GEN)y[4];
-	  z=hil(x,p1,p); avma=av; return z;
+	  z = hilii(x, p1, p); avma = av; return z;
       }
       break;
 
@@ -832,13 +844,12 @@ hil(GEN x, GEN y, GEN p)
       return signe(y[1])*signe(y[2]);
 
     case t_INTMOD:
-      p = (GEN)x[1];
-      if (egalii(gdeux,p)) err(hiler1);
+      p = (GEN)x[1]; if (egalii(gdeux,p)) err_at2();
       switch(ty)
       {
         case t_INTMOD:
           if (!egalii(p, (GEN)y[1])) break;
-          return hil((GEN)x[2],(GEN)y[2],p);
+          return hilii((GEN)x[2],(GEN)y[2],p);
         case t_FRAC:
 	  return hil((GEN)x[2],y,p);
         case t_PADIC:
@@ -848,24 +859,24 @@ hil(GEN x, GEN y, GEN p)
       break;
 
     case t_FRAC:
-      p1=mulii((GEN)x[1],(GEN)x[2]);
+      p1 = mulii((GEN)x[1],(GEN)x[2]);
       switch(ty)
       {
 	case t_FRAC:
-	  p2=mulii((GEN)y[1],(GEN)y[2]);
-	  z=hil(p1,p2,p); avma=av; return z;
+	  p2 = mulii((GEN)y[1],(GEN)y[2]);
+	  z = hilii(p1,p2,p); avma = av; return z;
 	case t_PADIC:
-	  z=hil(p1,y,NULL); avma=av; return z;
+	  z = hil(p1,y,NULL); avma = av; return z;
       }
       break;
 
     case t_PADIC:
       p = (GEN)x[2];
       if (ty != t_PADIC || !egalii(p,(GEN)y[2])) break;
-      if (egalii(p, gdeux) && (precp(x) <= 1 || precp(y) <= 1)) err(hiler1);
+      if (egalii(p, gdeux) && (precp(x) <= 1 || precp(y) <= 1)) err_at2();
       p1 = odd(valp(x))? mulii(p,(GEN)x[4]): (GEN)x[4];
       p2 = odd(valp(y))? mulii(p,(GEN)y[4]): (GEN)y[4];
-      z=hil(p1,p2,p); avma=av; return z;
+      z = hilii(p1,p2,p); avma = av; return z;
   }
   err(talker,"forbidden or incompatible types in hil");
   return 0; /* not reached */
