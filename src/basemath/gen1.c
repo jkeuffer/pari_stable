@@ -21,7 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 
-#define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
+#define swap(x,y) {GEN _x = x; x = y; y = _x; }
+#define lswap(x,y) {long _x = x; x = y; y = _x; }
 #define fix_frac(z) if (signe(z[2])<0)\
 {\
   setsigne(z[1],-signe(z[1]));\
@@ -242,7 +243,7 @@ addpadic(GEN x, GEN y)
   (void)new_chunk(5+lgefint(x[3])+lgefint(y[3]));
   e = valp(x);
   r = valp(y); d = r-e;
-  if (d < 0) { GEN p1=x; x=y; y=p1; e = r; d = -d; }
+  if (d < 0) { swap(x,y); e = r; d = -d; }
   rx = precp(x); p = (GEN)x[2];
   ry = precp(y);
   if (d) /* v(x) < v(y) */
@@ -485,7 +486,7 @@ gadd(GEN x, GEN y)
 
   if (is_const_t(tx) && is_const_t(ty))
   {
-    if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
+    if (tx>ty) { swap(x,y); lswap(tx,ty); }
     switch(tx)
     {
       case t_INT:
@@ -675,12 +676,7 @@ gadd(GEN x, GEN y)
   }
 
   vx=gvar(x); vy=gvar(y);
-  if (vx<vy || (vx==vy && tx>ty))
-  {
-    p1=x; x=y; y=p1;
-    i=tx; tx=ty; ty=i;
-    i=vx; vx=vy; vy=i;
-  }
+  if (vx<vy || (vx==vy && tx>ty)) { swap(x,y); lswap(tx,ty); lswap(vx,vy); }
   if (ty==t_POLMOD) return op_polmod(gadd,x,y,tx);
 
   /* here !isscalar(y) and vx >= vy */
@@ -759,14 +755,14 @@ gadd(GEN x, GEN y)
   }
 
   /* here !isscalar(x) && isscalar(y) && (vx=vy || ismatvec(x and y)) */
-  if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
+  if (tx>ty) { swap(x,y); lswap(tx,ty); }
   switch(tx)
   {
     case t_POL:
       switch (ty)
       {
 	case t_POL:
-          lx = lgef(x); ly = lgef(y); if (lx < ly) swapspec(x,y, lx,ly);
+          lx = lgef(x); ly = lgef(y); if (lx < ly) { swap(x,y); lswap(lx,ly); }
           z = cgetg(lx,t_POL); z[1] = x[1];
           for (i=2; i<ly; i++) z[i]=ladd((GEN)x[i],(GEN)y[i]);
           for (   ; i<lx; i++) z[i]=lcopy((GEN)x[i]);
@@ -777,10 +773,10 @@ gadd(GEN x, GEN y)
 	case t_SER:
 	  if (gcmp0(x)) return gcopy(y);
           ly = signe(y)? lg(y): 3;
-	  i = ly+valp(y)-gval(x,vx);
-	  if (i<3) return gcopy(y);
+	  i = ly + valp(y) - polvaluation(x, NULL);
+	  if (i < 3) return gcopy(y);
 
-	  p1=greffe(x,i,0); y=gadd(p1,y);
+	  p1 = greffe(x,i,0); y = gadd(p1,y);
           free(p1); return y;
 	
         case t_RFRAC: return addscalrfrac(x,y);
@@ -796,14 +792,15 @@ gadd(GEN x, GEN y)
       switch(ty)
       {
 	case t_SER:
-	  l=valp(y)-valp(x);
-	  if (l<0) { l= -l; p1=x; x=y; y=p1; }
-	  if (gcmp0(x)) return gcopy(x);
+	  l = valp(y) - valp(x);
+	  if (l < 0) { l = -l; swap(x,y); }
+          /* v(x) <= v(y) */
+	  if (!signe(x)) return gcopy(x);
           lx = lg(x);
           ly = signe(y)? lg(y): 2;
-	  ly += l; if (lx<ly) ly=lx;
+	  ly += l; if (lx < ly) ly = lx;
 	  av = avma;
-          z=cgetg(ly,t_SER);
+          z = cgetg(ly,t_SER);
 	  if (l)
 	  {
 	    if (l>=ly-2)
@@ -1089,7 +1086,7 @@ gmul(GEN x, GEN y)
   tx = typ(x); ty = typ(y);
   if (is_const_t(tx) && is_const_t(ty))
   {
-    if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
+    if (tx>ty) { swap(x,y); lswap(tx,ty); }
     switch(tx)
     {
       case t_INT:
@@ -1329,11 +1326,10 @@ gmul(GEN x, GEN y)
 
   vx=gvar(x); vy=gvar(y);
   if (!is_matvec_t(ty))
-    if (is_matvec_t(tx) || vx<vy || (vx==vy && tx>ty))
-    {
-      p1=x; x=y; y=p1;
-      i=tx; tx=ty; ty=i;
-      i=vx; vx=vy; vy=i;
+    if (is_matvec_t(tx) || vx<vy || (vx==vy && tx>ty)) {
+      swap(x,y);
+      lswap(tx,ty);
+      lswap(vx,vy);
     }
   if (ty==t_POLMOD) return op_polmod(gmul,x,y,tx);
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) return gmul_err(x,y,tx,ty);
@@ -1501,7 +1497,7 @@ gmul(GEN x, GEN y)
     }
   }
 
-  if (tx>ty) { p1=x; x=y; y=p1; i=tx; tx=ty; ty=i; }
+  if (tx>ty) { swap(x,y); lswap(tx,ty); }
   switch(tx)
   {
     case t_POL:
