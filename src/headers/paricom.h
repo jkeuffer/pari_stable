@@ -229,12 +229,13 @@ extern void* global_err_data;
 #define bern(i)       (bernzone + 3 + (i)*bernzone[2])
 
 /* works only for POSITIVE integers */
-#define mod64(x)  (((x)[lgefint(x)-1]) & 63)
-#define mod32(x)  (((x)[lgefint(x)-1]) & 31)
-#define mod16(x)  (((x)[lgefint(x)-1]) & 15)
-#define mod8(x)   (((x)[lgefint(x)-1]) & 7)
-#define mod4(x)   (((x)[lgefint(x)-1]) & 3)
-#define mod2(x)   (((x)[lgefint(x)-1]) & 1)
+#define modBIL(x) (((x)[lgefint(x)-1]))
+#define mod64(x)  (modBIL(x) & 63)
+#define mod32(x)  (modBIL(x) & 31)
+#define mod16(x)  (modBIL(x) & 15)
+#define mod8(x)   (modBIL(x) & 7)
+#define mod4(x)   (modBIL(x) & 3)
+#define mod2(x)   (modBIL(x) & 1)
 #define is_pm1(n)    ((lgefint(n)==3) && (((GEN)(n))[2]==1))
 #define is_bigint(n) ((lgefint(n)>3) || \
 		      ((lgefint(n)==3) && ((((GEN)(n))[2]) < 0)))
