@@ -39,7 +39,7 @@ $$\hbox{%
 }$$
 typing in \kbd{foo(6,4)} would give
 you \kbd{foo(6,4,3)}. In the rare case when you want to set some far away
-flag, and leave the defaults in between as they stand, you can use the
+argument, and leave the defaults in between as they stand, you can use the
 ``empty arg'' trick alluded to above: \kbd{foo(6,,1)} would yield
 \kbd{foo(6,2,1)}. By the way, \kbd{foo()} by itself yields
 \kbd{foo(1,2,3)} as was to be expected. In this rather special case of a
@@ -50,15 +50,55 @@ to put optional arguments at the end of the argument list (of course, since
 they would not make sense otherwise), and in order of decreasing usefulness
 so that, most of the time, you will be able to ignore them.
 
-\misctitle{Binary Flags}.\sidx{binary flag} For some of these optional
-flags, we adopted the customary binary notation as a compact way to
-represent many toggles with just one number. Letting $(p_0,\dots,p_n)$ be a
-list of switches (i.e.~of properties which can be assumed to take either
-the value $0$ or~$1$), the number $2^3 + 2^5=40$ means that $p_3$ and $p_5$
+\misctitle{Flags}. A \tev{flag} is an argument which, rather than conveying
+actual information to the routine, intructs it to change its default
+behaviour, e.g.~return more or less information. All such
+flags are optional, and will be called \fl\ in the function descriptions to
+follow. There are two different kind of flags
+
+$\bullet$ generic: all valid values for the flag are individually
+described (``If \fl\ is equal to $1$, then\dots'').
+
+$\bullet$ binary:\sidx{binary flag} use customary binary notation as a
+compact way to represent many toggles with just one number. Letting
+$(p_0,\dots,p_n)$ be a list of switches (i.e.~of properties which take either
+the value $0$ or~$1$), the number $2^3 + 2^5 = 40$ means that $p_3$ and $p_5$
 have been set (that is, set to $1$), and none of the others were (that is,
-they were set to 0). This will usually be announced as ``The binary digits
-of $\fl$ mean 1: $p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the
-available consecutive powers of~$2$.
+they were set to $0$). This is announced as ``The binary digits of $\fl$ mean
+1: $p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the available consecutive
+powers of~$2$.
+
+\misctitle{Mneumonics for flags}. Numeric flags as mentionned above are
+obscure, error-prone, and quite rigid: should the authors
+want to adopt a new flag numbering scheme (for instance when noticing
+flags with the same meaning but different numeric values), it would break
+backward compatibility. The only advantage of explicit numeric values is that
+they are fast to type, so their use is only advised when using the calculator
+GP.
+
+As an alternative, one can replace a numeric flag by a character string
+containing symbolic identifiers. For a generic flag, the mneumonic
+corresponding to the numeric identifier is given after it as in (taken from
+description of $\tet{log}(x,\{\fl=0\})$):
+
+\centerline{If \fl\ is equal to $1 = \kbd{AGM}$, use an agm formula\dots}
+
+\noindent which means that one can use indifferently \kbd{log($x$, 1)} or
+\kbd{log($x$, AGM)}.
+
+For a binary flag, mneumonics corresponding to the various toggles are given
+after each of them. They can be negated by prepending \kbd{no\_} to the
+mneumonic, or by removing such a prefix. These toggles are grouped together
+using any punctuation character (such as ',' or ';'). For instance (taken
+from description of $\tet{ploth}(X=a,b,\var{expr},\{\fl=0\},\{n=0\})$)
+
+\centerline{Binary digits of flags mean: $1=\kbd{Parametric}$,
+$2=\kbd{Recursive}$, \dots}
+
+\noindent so that, instead of $1$, one could use the mneumonic
+\kbd{"Parametric; no\_Recursive"}, or simply \kbd{"Parametric"} since
+\kbd{Recursive} is unset by default (default value of $\fl$ is $0$,
+i.e.~everything unset).
 
 \misctitle{Pointers}.\sidx{pointer} If a parameter in the function
 prototype is prefixed with a \& sign, as in 
@@ -71,15 +111,17 @@ to be typed in explicitly. As of version \vers, this \tet{pointer} argument
 is optional for all documented functions, hence the \& will always appear
 between brackets as in \kbd{issquare}$(x,\{\&e\})$.
 
-\misctitle{About library programming}. To finish with our generic
-simple-minded example, the \var{library} function \kbd{foo}, as defined
-above, is seen to have two mandatory arguments, $x$ and \fl (no PARI
-mathematical function has been implemented so as to accept a variable
-number of arguments). When not mentioned otherwise, the result and
-arguments of a function are assumed implicitly to be of type \kbd{GEN}.
-Most other functions return an object of type \kbd{long} integer in C (see
-Chapter~4). The variable or parameter names \var{prec} and \fl\ always
-denote \kbd{long} integers.
+\misctitle{About library programming}.
+the \var{library} function \kbd{foo}, as defined
+at the beginning of this section, is seen to have two mandatory arguments,
+$x$ and \fl: no PARI mathematical function has been implemented so as to
+accept a variable number of arguments, so all arguments are mandatory when
+programming with the library (often, variants are provided corresponding to
+the various flag values). When not mentioned otherwise, the result and
+arguments of a function are assumed implicitly to be of type \kbd{GEN}. Most
+other functions return an object of type \kbd{long} integer in C (see
+Chapter~4). The variable or parameter names \var{prec} and \fl\ always denote
+\kbd{long} integers.
 
 The \tet{entree} type is used by the library to implement iterators (loops,
 sums, integrals, etc.) when a formal variable has to successively assume a
@@ -529,8 +571,8 @@ Negative numbers behave as if modulo a huge power of $2$.
 
 \syn{gbitnegimply}{x,y}.
 
-\subsecidx{bitor}$(x,y)$: bitwise (inclusive) \tet{or}\sidx{bitwise
-inclusive or} of two integers $x$ and $y$, that is the integer
+\subsecidx{bitor}$(x,y)$: \sidx{bitwise inclusive or}bitwise (inclusive)
+\tet{or} of two integers $x$ and $y$, that is the integer
 $$\sum (x_i~\kbd{or}~y_i) 2^i$$
 
 Negative numbers behave as if modulo a huge power of $2$.

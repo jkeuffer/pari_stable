@@ -88,6 +88,194 @@ static entree *check_new_fun;
 static long br_status, br_count;
 static GEN br_res = NULL;
 
+/* TEMPLATE is assumed to be ";"-separated list of items.  Each item
+   may have one of the following forms: id=value id==value id|value id&~value.
+   Each id consists of alphanum characters, dashes and underscores.
+   IDs are case-sensitive.
+
+   ARG consists of several IDs separated by punctuation (and optional
+   whitespace).  Each modifies the return value in a "natural" way: an
+   ID from id=value should be the first in the sequence and sets RETVAL to
+   VALUE (and cannot be negated), ID from id|value bit-ORs RETVAL with
+   VALUE (and bit-ANDs RETVAL with ~VALUE if negated), ID from
+   id&~value behaves as if it were noid|value, ID from
+   id==value behaves the same as id=value, but should come alone.
+
+   For items of the form id|value and id&~value negated forms are
+   allowed: either when arg looks like no[-_]id, or when id looks like
+   this, and arg is not-negated.
+ */
+
+#define A_ACTION_ASSIGN		1
+#define A_ACTION_SET		2
+#define A_ACTION_UNSET		3
+
+#define PARSEMNU_TEMPL_TERM_NL	1
+#define PARSEMNU_ARG_WHITESP	2
+
+#define IS_ID(c)	(isalnum((int)c) || ((c) == '_') || ((c) == '-'))
+#define STMT_START	do
+#define STMT_END	while (0)
+#define ERR(reason)	STMT_START {	\
+    if (failure && first) {		\
+	*failure = reason; *failure_arg = NULL; return 0;		\
+    } else err(talker,reason); } STMT_END
+#define ERR2(reason,s)	STMT_START {	\
+    if (failure && first) {		\
+	*failure = reason; *failure_arg = s; return 0;		\
+    } else err(talker,reason,s); } STMT_END
+
+unsigned long
+parse_option_string(char *arg, char *template, long flag, char **failure, char **failure_arg)
+{
+    unsigned long retval = 0;
+    char *etemplate = NULL;
+
+    if (flag & PARSEMNU_TEMPL_TERM_NL)
+	etemplate = strchr(template, '\n');
+    if (!etemplate)
+	etemplate = template + strlen(template);
+
+    if (failure)
+	*failure = NULL;
+    while (1) {
+	long numarg;
+	char *e, *id;
+	char *negated;			/* action found with 'no'-ID */
+	int negate;			/* Arg has 'no' prefix removed */
+	int l, action = 0, first = 1, singleton = 0;
+	char b[80], *buf, *inibuf;
+
+	if (flag & PARSEMNU_ARG_WHITESP)
+	    while (isspace((int)*arg)) arg++;
+	if (!*arg)
+	    break;
+	e = arg;
+	while (IS_ID(*e))
+	    e++;
+	/* Now the ID is whatever is between arg and e. */
+	l = e - arg;
+	if (l >= sizeof(b))
+	    ERR("id too long in a stringified flag");
+	if (!l)				/* Garbage after whitespace? */
+	    ERR("a stringified flag does not start with an id");
+	strncpy(b, arg, l);
+	b[l] = 0;
+	arg = e;
+	e = inibuf = buf = b;
+	while (('0' <= *e) && (*e <= '9'))
+	    e++;
+	if (*e == 0)
+	    ERR("numeric id in a stringified flag");	
+	negate = 0;
+	negated = NULL;
+      find:
+	id = template;
+	while ((id = strstr(id, buf)) && id < etemplate) {
+	    if (IS_ID(id[l])) {		/* We do not allow abbreviations yet */
+		id = id + l;		/* False positive */
+		continue;
+	    }
+	    if ((id >= template + 2) && (IS_ID(id[-1]))) {
+		char *s = id;
+
+		if ( !negate && s >= template+3
+		     && ((id[-1] == '_') || (id[-1] == '-')) )
+		    s--;
+		/* Check whether we are preceeded by "no" */
+		if ( negate		/* buf initially started with "no" */
+		     || (s < template+2) || (s[-1] != 'o') || (s[-2] != 'n')
+		     || (s >= template+3 && IS_ID(s[-3]))) {
+		    id = id + l;		/* False positive */
+		    continue;
+		}
+		/* Found noID in the template! */
+		negated = id + l;
+		id = id + l;
+		continue;		/* Try to find without 'no'. */
+	    }
+	    /* Found as is */
+	    id = id + l;
+	    break;
+	}
+	if ( !id && !negated && !negate 
+	     && (l > 2) && buf[0] == 'n' && buf[1] == 'o' ) {
+	    /* Try to find the flag without the prefix "no". */
+	    buf += 2; l -= 2;
+	    if ((buf[0] == '_') || (buf[0] == '-')) { buf++; l--; }
+	    negate = 1;
+	    if (buf[0])
+		goto find;
+	}
+	if (!id && negated) {	/* Negated and AS_IS forms, prefer AS_IS */
+	    id = negated;	/* Otherwise, use negated form */
+	    negate = 1;
+	}
+	if (!id)
+	    ERR2("Unrecognized id '%s' in a stringified flag", inibuf);
+	if (singleton && !first)
+	    ERR("Singleton id non-single in a stringified flag");
+	if (id[0] == '=') {
+	    if (negate)
+		ERR("Cannot negate id=value in a stringified flag");
+	    if (!first)
+		ERR("Assign action should be first in a stringified flag");
+	    action = A_ACTION_ASSIGN;
+	    id++;
+	    if (id[0] == '=') {
+		singleton = 1;
+		id++;
+	    }
+	} else if (id[0] == '^') {
+	    if (id[1] != '~')
+		err(talker, "Unrecognized action in a template");
+	    id += 2;
+	    if (negate)
+		action = A_ACTION_SET;
+	    else
+		action = A_ACTION_UNSET;
+	} else if (id[0] == '|') {
+	    id++;
+	    if (negate)
+		action = A_ACTION_UNSET;
+	    else
+		action = A_ACTION_SET;
+	}
+
+	e = id;
+
+	while ((*e >= '0' && *e <= '9')) e++;
+	while (isspace((int)*e))
+	    e++;
+	if (*e && (*e != ';') && (*e != ','))
+	    err(talker, "Non-numeric argument of an action in a template");
+	numarg = atol(id);		/* Now it is safe to get it... */
+	switch (action) {
+	case A_ACTION_SET:
+	    retval |= numarg;
+	    break;
+	case A_ACTION_UNSET:
+	    retval &= ~numarg;
+	    break;
+	case A_ACTION_ASSIGN:
+	    retval = numarg;
+	    break;
+	default:
+	    ERR("error in parse_option_string");
+	}
+	first = 0;
+	if (flag & PARSEMNU_ARG_WHITESP)
+	    while (isspace((int)*arg))
+		arg++;
+	if (*arg && !(ispunct((int)*arg) && *arg != '-'))
+	    ERR("Junk after an id in a stringified flag");
+	/* Skip punctuation */
+	if (*arg)
+	    arg++;
+    }
+    return retval;
+}
+
 /*  Special characters:
  *     ' ', '\t', '\n', '\\' are forbidden internally (suppressed by filtre).
  *     { } are forbidden everywhere and will be used to denote optional
@@ -1518,6 +1706,7 @@ identifier(void)
     void *call = ep->value;
     GEN argvec[9];
     matcomp *init[9];
+    char *flags = NULL;
 
     deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
     if (*analyseur == '(')
@@ -1547,7 +1736,7 @@ identifier(void)
     }
     if (*s == 'p') { argvec[i++] = (GEN) prec; s++; }
 
-    while (*s)
+    while (*s && *s != '\n')
       switch (*s++)
       {
 	case 'G': /* GEN */
@@ -1616,6 +1805,24 @@ identifier(void)
 	  }
 	  *bp++ = 0; argvec[i++] = (GEN) buf;
 	  break;
+
+	case 'M': /* Mneumonic flag */
+	  match_comma(); argvec[i] = expr();
+          if (br_status) err(breaker,"here (argument reading)");
+	  if (typ(argvec[i]) == t_STR) {
+	      if (!flags)
+		  flags = ep->code;
+	      flags = strchr(flags, '\n'); /* Skip to the following '\n' */
+	      if (!flags)
+		  err(talker, "not enough flags in string function signature");
+	      flags++;
+	      argvec[i] = (GEN) parse_option_string((char*)(argvec[i] + 1),
+			  flags, PARSEMNU_ARG_WHITESP | PARSEMNU_TEMPL_TERM_NL,
+			  NULL, NULL);
+	  } else
+	      argvec[i] = (GEN)itos(argvec[i]);
+	  i++;
+          break;
 
 	case 's': /* expanded string; empty arg yields "" */
 	  match_comma();
@@ -2550,9 +2757,9 @@ skipidentifier(void)
     /* Optimized for G and p. */
     while (*s == 'G') { match_comma(); skipexpr(); s++; }
     if (*s == 'p') s++;
-    while (*s) switch (*s++)
+    while (*s && *s != '\n') switch (*s++)
     {
-      case 'G': case 'n': case 'L':
+      case 'G': case 'n': case 'L': case 'M':
         match_comma();
         if (*analyseur == ',' || *analyseur == ')') break;
         skipexpr(); break;
@@ -2610,6 +2817,8 @@ skipidentifier(void)
         match('='); matchcomma = 0; break;
       case ',':
         matchcomma=1; break;
+      case '\n':			/* Before the mneumonic */
+	break;
       default:
         err(bugparier,"skipidentifier (unknown code)");
     }

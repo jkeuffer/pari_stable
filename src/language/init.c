@@ -1912,6 +1912,8 @@ geni(void) { return gi; }
  *     The unquoted components can be of any pari type (converted according to
  *     the current output format)
  *  s* any number of strings (see s)
+ *  M  Mneumonic or a flag (converted to a long); description follows
+ *	 after \n at the end of the argument description
  *  D  Has a default value. Format is "Dvalue,type," (the ending comma is
  *     mandatory). Ex: D0,L, (arg is long, 0 by default).
  *     Special syntax:
