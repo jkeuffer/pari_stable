@@ -317,7 +317,6 @@ affsi(long s, GEN x)
   if (!s) x[1] = evalsigne(0) | evallgefint(2);
   else
   {
-    if (lg(x) < 3) err(affer1);
     if (s > 0) { x[1] = evalsigne( 1) | evallgefint(3); x[2] =  s; }
     else       { x[1] = evalsigne(-1) | evallgefint(3); x[2] = -s; }
   }
@@ -378,7 +377,7 @@ shiftr(GEN x, long n)
   const long e = evalexpo(expo(x)+n);
   const GEN y = rcopy(x);
 
-  if (e & ~EXPOBITS) err(shier2);
+  if (e & ~EXPOBITS) err(talker,"overflow in real shift");
   y[1] = (y[1]&~EXPOBITS) | e; return y;
 }
 
@@ -778,11 +777,7 @@ INLINE void
 affui(ulong u, GEN x)
 {
   if (!u) x[1] = evalsigne(0) | evallgefint(2);
-  else
-  {
-    if (lg(x) < 3) err(affer1);
-    x[1] = evalsigne(1) | evallgefint(3); x[2] = u;
-  }
+  else  { x[1] = evalsigne(1) | evallgefint(3); x[2] = u; }
 }
 
 INLINE int

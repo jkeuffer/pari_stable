@@ -253,7 +253,10 @@ many examples.
 real~\kbd{z}.
 
 \fun{void}{affsi}{long s, GEN z} assigns the long \kbd{s} into the
-integer~\kbd{z}.
+integer~\kbd{z}. This routine assumes that \kbd{lg(z) > 2}.
+
+\fun{void}{affui}{ulong u, GEN z} assigns the unsigned long \kbd{u} into the
+integer~\kbd{z}. This routine assumes that \kbd{lg(z) > 2}.
 
 \fun{void}{affsr}{long s, GEN z} assigns the long \kbd{s} into the
 real~\kbd{z}.

@@ -170,6 +170,7 @@ BA 21- type() does not allow to change object types anymore.
        then assumed they were connected [ true for the current allocation
        model ]. Remove that unecessary assumption.
    23- more informative error messages in concat()
+   24- in affsi / affui (s, z) : do not check that lg(z) >= 3
 
   Added
     1- make test-all [ all available test suites (SLOW !)]

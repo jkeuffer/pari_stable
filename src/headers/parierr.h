@@ -20,7 +20,7 @@ enum {
 
 /* Always catched up to this point */
 
-  caracer1, member,
+  caracer1,
   paramer1, varer1, obsoler, openfiler, talker2,
 
 /* NO CONTEXT now */
@@ -32,10 +32,9 @@ enum {
 
 /* mp.s ou mp.c */
 
-  affer1, affer2, affer3, shier2,
+  affer2, affer3,
   
-  errpile, errlg,
-  errexpo, errvalp, rtodber,
+  errpile, errlg, errexpo, errvalp, rtodber,
 
 /* alglin.c */
 

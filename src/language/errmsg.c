@@ -72,14 +72,10 @@ char *errmessage[]=
 
     /*  MP.S  */
 
-/* affer1 */
-  "impossible assignment S-->I",
 /* affer2 */
   "impossible assignment I-->S",
 /* affer3 */
   "impossible assignment I-->I",
-/* shier2 */
-  "overflow in real shift",
 
 /* errpile */
   "the PARI stack overflows !",
