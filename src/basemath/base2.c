@@ -1259,41 +1259,36 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns, long c)
 /* compute the characteristic polynomial of a mod chi (a in Z[X])
    to a precision of pp using Newton sums */
 static GEN
-newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
+newtoncharpoly(GEN a, GEN chi, GEN pp, GEN p, GEN ns)
 {
-  GEN v, c, s, t;
+  GEN NS, c;
   long n = degpol(chi), j, k, vn = varn(chi);
-  pari_sp av = avma, av2, lim;
+  pari_sp av = avma;
 
-  v = newtonsums(a, chi, pp, ns, n);
-  av2 = avma;
-  lim = stack_lim(av2, 1);
+  NS = newtonsums(a, chi, pp, ns, n);
   c = cgetg(n + 2, t_VEC);
-  c[1] = un;
-  if (n%2) c[1] = lneg((GEN)c[1]);
+  c[1] = lstoi((n % 2)? -1: 1);
   for (k = 2; k <= n+1; k++) c[k] = zero;
-
   for (k = 2; k <= n+1; k++)
   {
-    s = gzero;
+    pari_sp av2 = avma;
+    GEN z,  s = gzero, d = stoi(k - 1);
+    long v = pvaluation(d, p, &z);
     for (j = 1; j < k; j++)
     {
-      t = gmul((GEN)v[j], (GEN)c[k-j]);
-      if (!(j%2)) t = gneg(t);
-      s = gadd(s, t);
+      GEN t = mulii((GEN)NS[j], (GEN)c[k-j]);
+      if (!(j%2)) t = negi(t);
+      s = addii(s, t);
     }
-    c[k] = ldiv(s, stoi(k - 1));
-
-    if (low_stack(lim, stack_lim(av2, 1)))
-    {
-      if(DEBUGMEM>1) err(warnmem, "newtoncharpoly");
-      c = gerepilecopy(av2, c);
+    if (v) {
+      s = gdiv(s, gpowgs(p, v));
+      if (typ(s) != t_INT) return NULL;
     }
+    s = mulii(s, mpinvmod(z, pp));
+    c[k] = (long)gerepileuptoint(av2, centermod(s, pp));
   }
-
   k = (n%2)? 1: 2;
-  for (  ; k <= n+1; k += 2)
-    c[k] = lneg((GEN)c[k]);
+  for (  ; k <= n+1; k += 2) c[k] = lnegi((GEN)c[k]);
 
   return gerepileupto(av, gtopoly(c, vn));
 }
@@ -1345,15 +1340,13 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     if (lgefint(p) == 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
     if (d) npp = mulii(npp, gpowgs(denom(d), n));
 
-    chi = newtoncharpoly(beta, f, npp, ns);
+    chi = newtoncharpoly(beta, f, npp, p, ns);
+    /* can happen only if gamma is incorrect (not an integer) */
+    if (!chi) return NULL;
   }
   if (d) chi = rescale_pol(chi, d);
-  if (!pp) return chi;
-
-  /* this can happen only if gamma is incorrect (not an integer) */
-  if (divise(Q_denom(chi), p)) return NULL;
-
-  return redelt(chi, pp, p);
+  if (pp) chi = centermod(chi, pp);
+  return chi;
 }
 
 /* Factor characteristic polynomial of beta mod p */
