@@ -2291,7 +2291,16 @@ _expand_tilde(char *s)
 
   if (*s != '~') return pari_strdup(s);
   s++; u = s; /* skip ~ */
-  if (!*s || *s == '/') p = getpwuid(geteuid());
+  if (!*s || *s == '/')
+  {
+    p = getpwuid(geteuid());
+    if (!p) 
+    { /* host badly configured, don't kill session on startup
+       * (when expanding path) */
+      err(warner,"can't expand ~");
+      return pari_strdup(s);
+    }
+  }
   else
   {
     char *tmp;
