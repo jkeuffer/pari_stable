@@ -1303,55 +1303,89 @@ mpinvmod(GEN a, GEN m)
 
 /*********************************************************************/
 /**                                                                 **/
-/**                   POWERING MODULO (a^n mod m)                   **/
+/**                   POWERING MODULO (A^N mod M)                   **/
 /**                                                                 **/
 /*********************************************************************/
+GEN resiimul(GEN x, GEN y);
+GEN resmod2n(GEN x, GEN y);
+GEN _resii(GEN x, GEN y) { return resii(x,y); }
 
 GEN
-powmodulo(GEN a, GEN n, GEN m)
+init_remainder(GEN M)
+{
+  GEN sM = cgetg(3, t_VEC);
+  GEN Mr = cgetr(lgefint(M) + 1);
+  affir(M, Mr);
+  sM[1] = (long)M;
+  sM[2] = (long)linv(Mr);
+  return sM;
+}
+
+/* optimal on UltraSPARC */
+static long RESIIMUL_LIMIT = 150;
+
+void
+setresiilimit(long n) { RESIIMUL_LIMIT = n; }
+
+GEN
+powmodulo(GEN A, GEN N, GEN M)
 {
   GEN y;
-  long av = avma,av1,lim,*p,man,k,nb;
+  long av = avma,av1,lim,man,k,nb,s, *p;
   GEN (*mul)(GEN,GEN) = mulii;
+  GEN (*res)(GEN,GEN) = _resii;
 
-  if (typ(a) != t_INT || typ(n) != t_INT || typ(m) != t_INT) err(arither1);
-  switch (signe(n))
+  if (typ(A) != t_INT || typ(N) != t_INT || typ(M) != t_INT) err(arither1);
+  s = signe(N);
+  if (!s)
   {
-    case 0:
-      k = signe(resii(a,m)); avma=av;
-      return k? gun: gzero;
+    k = signe(resii(A,M)); avma=av;
+    return k? gun: gzero;
+  }
+  if (s < 0) { A = mpinvmod(A,M); N = absi(N); }
+  else
+  {
+    A = modii(A,M);
+    if (!signe(A)) { avma=av; return gzero; }
+  }
+  y = A;
+  if (lgefint(y)==3) switch(y[2])
+  {
+    case 1: /* y = 1 */
+      avma=av; return gun;
+    case 2: /* y = 2, use shifti not mulii */
+    mul = (GEN (*)(GEN,GEN))shifti; A = (GEN)1;
+  }
 
-    case -1:
-      a = mpinvmod(a,m); n = absi(n); /* fall through */
-    case 1:
-      y = modii(a,m);
-      if (!signe(y)) { avma=av; return gzero; }
-      if (lgefint(y)==3)
-        switch(y[2])
-        {
-          case 1: /* y = 1 */
-            avma=av; return gun;
-          case 2: /* y = 2, use shifti not mulii */
-            mul = (GEN (*)(GEN,GEN))shifti; a = (GEN)1;
-        }
-      p = n+2; man = *p; /* see puissii */
-      k = 1+bfffo(man); man<<=k; k = BITS_IN_LONG-k;
-      av1=avma; lim=stack_lim(av1,1);
-      for (nb=lgefint(n)-2;;)
+  /* TODO: Move this out of here and use for general modular computations */
+  if ((k = vali(M)) && k == expi(M))
+  { /* M is a power of 2 */
+    M = (GEN)k;
+    res = (GEN(*)(GEN,GEN))resmod2n;
+  }
+  else if (lgefint(M) > RESIIMUL_LIMIT && (lgefint(N) > 3 || N[2] > 4))
+  { /* compute x % M using multiplication by 1./M */
+    M = init_remainder(M);
+    res = (GEN(*)(GEN,GEN))resiimul;
+  }
+
+  p = N+2; man = *p; /* see puissii */
+  k = 1+bfffo(man); man<<=k; k = BITS_IN_LONG-k;
+  av1=avma; lim=stack_lim(av1,1);
+  for (nb=lgefint(N)-2;;)
+  {
+    for (; k; man<<=1,k--)
+    {
+      y = res(sqri(y), M);
+      if (man < 0) y = res(mul(y,A), M);
+      if (low_stack(lim, stack_lim(av1,1)))
       {
-        for (; k; man<<=1,k--)
-        {
-          y=resii(sqri(y), m);
-          if (man<0) y = modii(mul(y,a), m);
-          if (low_stack(lim, stack_lim(av1,1)))
-          {
-            if (DEBUGMEM>1) err(warnmem,"powmodulo");
-            y = gerepileupto(av1,y);
-          }
-        }
-        if (--nb == 0) break;
-        man = *++p, k = BITS_IN_LONG;
+        if (DEBUGMEM>1) err(warnmem,"powmodulo");
+        y = gerepileuptoint(av1,y);
       }
+    }
+    if (--nb == 0) break;
+    man = *++p, k = BITS_IN_LONG;
   }
   return gerepileupto(av,y);
 }
@@ -1364,13 +1398,13 @@ powmodulo(GEN a, GEN n, GEN m)
 GEN
 gnextprime(GEN n)
 {
-  return garith_proto(nextprime,n,0); /* accept non-integers */
+  return garith_proto(nextprime,n,0);
 }
 
 GEN
 gprecprime(GEN n)
 {
-  return garith_proto(precprime,n,0); /* accept non-integers */
+  return garith_proto(precprime,n,0);
 }
 
 GEN

@@ -271,22 +271,14 @@ puissii(GEN a, GEN n, long s)
     for (; k; man<<=1,k--)
     {
       y = sqri(y);
+      if (man < 0) y = mulii(y,a); /* first bit is set: multiply by base */
       if (low_stack(lim, stack_lim(av,1)))
       {
-        if (DEBUGMEM>1) err(warnmem,"[1]: puissii");
-        y = gerepileupto(av,y);
-      }
-      if (man < 0)
-      { /* first bit is set: multiply by the base */
-        y = mulii(y,a);
-        if (low_stack(lim, stack_lim(av,1)))
-        {
-          if (DEBUGMEM>1) err(warnmem,"[2]: puissii");
-          y = gerepileupto(av,y);
-        }
+        if (DEBUGMEM>1) err(warnmem,"puissii");
+        y = gerepileuptoint(av,y);
       }
     }
-    nb--; if (nb == 0) break;
+    if (--nb == 0) break;
     man = *++p, k = BITS_IN_LONG;
   }
   setsigne(y,s); return gerepileupto(av,y);

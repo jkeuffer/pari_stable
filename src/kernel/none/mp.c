@@ -135,7 +135,7 @@ subisspec(GEN x, long s, long nx)
   avma=(long)zd; return zd;
 }
 
-/* assume x >= y */
+/* assume x > y */
 #ifdef INLINE
 INLINE
 #endif
@@ -2076,6 +2076,61 @@ mulii(GEN a,GEN b)
   if (sb<0) sa = -sa;
   z = quickmulii(a+2,b+2, lgefint(a)-2,lgefint(b)-2);
   setsigne(z,sa); return z;
+}
+
+GEN
+resiimul(GEN x, GEN sy)
+{
+  GEN r, q, y = (GEN)sy[1], invy;
+  long av = avma, k, lx;
+
+  k = cmpii(x, y);
+  if (k <= 0) return k? icopy(x): gzero;
+  lx = lgefint(x);
+  invy = (GEN)sy[2];
+  q = mulir(x,invy);
+  q = mptrunc(q); /* <= divii(x, y) (at most 1 less) */
+  r = subii(x, mulii(y,q));
+  /* resii(x,y) + y >= r >= resii(x,y) */
+  k = cmpii(r, y);
+  if (k >= 0)
+  {
+    if (k == 0) { avma = av; return gzero; }
+    r = subiispec(r+2, y+2, lgefint(r)-2, lgefint(y)-2);
+  }
+#if 0
+  q = subii(r,resii(x,y));
+  if (signe(q))
+    err(talker,"bug in resirmul: x = %Z\ny = %Z\ndif = %Z", x,y,q);
+#endif
+  return gerepileuptoint(av, r); /* = resii(x, y) */
+}
+
+/* x % (2^n) */
+GEN
+resmod2n(GEN x, long n)
+{
+  long l,k,lx,ly;
+  GEN y, z, t;
+  
+  if (!signe(x)) return gzero;
+
+  l = n % BITS_IN_LONG;
+  k = n / BITS_IN_LONG;
+  ly = l? k+3: k+2;
+  lx = lgefint(x);
+  if (lx < ly) return icopy(x);
+  z = cgeti(ly);
+  z[1] = evalsigne(1)|evallgefint(ly);
+  y = z + ly;
+  t = x + lx;
+  for ( ;k; k--) *--y = *--t;
+  if (l) *--y = *--t & ((1<<l) - 1);
+#if 0
+  if (!egalii(z, resii(x, shifti(gun,n))))
+    err(talker,"bug in resmod2n: n = %ld, x = %Z\n",n,x);
+#endif
+  return z;
 }
 
 static GEN
