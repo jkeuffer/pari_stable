@@ -575,7 +575,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   vecWB = concatsp(vecW, vecBp);
 
   prec = DEFAULTPREC +
-    ((gexpo(vecWB) + gexpo(gmael(nf,5,1))) >> TWOPOTBYTES_IN_LONG);
+    ((gexpo(vecWB) + gexpo(gmael(nf,5,1))) >> TWOPOTBITS_IN_LONG);
   if (nfgetprec(nf) < prec) nf = nfnewprec(nf, prec);
   msign = zsigns(nf, vecWB);
 

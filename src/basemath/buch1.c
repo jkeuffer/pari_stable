@@ -975,7 +975,7 @@ largeprime(long q, long *ex, long np, long nrho)
   {
     if (!pt)
     {
-      pt = (long*) gpmalloc((l+3)<<TWOPOTBYTES_IN_LONG);
+      pt = (long*) gpmalloc((l+3) * sizeof(long));
       *pt++ = nrho; /* nrho = pt[-3] */
       *pt++ = np;   /* np   = pt[-2] */
       *pt++ = q;    /* q    = pt[-1] */

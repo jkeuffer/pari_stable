@@ -1079,7 +1079,7 @@ readstring(char *src, char *s)
 static GEN
 _strtoGENstr(const char *s, long n0)
 {
-  long n = (n0+1+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
+  long n = nchar2nlong(n0+1);
   GEN x = cgetg(n+1, t_STR);
   char *t = GSTR(x);
   strncpy(t, s, n0); t[n0] = 0; return x;
@@ -1302,8 +1302,8 @@ truc(void)
 
     case '"': /* string */
       analyseur++; old = analyseur;
-      skipstring(); n = analyseur - old; /* do not count enclosing '"' */
-      n = (n+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
+      skipstring();
+      n = nchar2nlong(analyseur - old); /* do not count enclosing '"' */
       z = cgetg(n+1, t_STR);
       (void)translate(&old, GSTR(z), NULL,NULL);
       return z;
@@ -1780,7 +1780,7 @@ identifier(void)
         ep = installep(NULL,ch1,len,EpMEMBER,0, members_hash + hashvalue(ch1));
         ch1 = analyseur; skipseq(); len = analyseur-ch1;
 
-        newfun=ptr= (GEN) newbloc(1 + (len>>TWOPOTBYTES_IN_LONG) + 4);
+        newfun=ptr= (GEN) newbloc(2 + nchar2nlong(len+1));
         newfun++; /* this bloc is no GEN, leave the first cell alone ( = 0) */
         *newfun++ = v;
 
@@ -2218,16 +2218,16 @@ identifier(void)
         skipping_fun_def--;
       }
       /* function is ok. record it */
-      newfun = ptr = (GEN) newbloc(narg+nloc + (len>>TWOPOTBYTES_IN_LONG) + 4);
-      newfun++; /* this bloc is no GEN, leave the first cell alone ( = 0) */
-
       /* record default args */
       f = (gp_args*) gpmalloc((narg+nloc)*sizeof(GEN) + sizeof(gp_args));
       ep->args = (void*) f;
       f->nloc = nloc;
       f->narg = narg;
       f->arg = defarg = (GEN*)(f + 1);
+
       narg += nloc; /* record default args and local variables */
+      newfun = ptr = (GEN) newbloc(1 + narg + nchar2nlong(len+1));
+      newfun++; /* this bloc is no GEN, leave the first cell alone ( = 0) */
       for (i = 1; i <= narg; i++)
       {
         GEN cell = tmpargs-(i<<1);

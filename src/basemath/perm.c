@@ -421,9 +421,8 @@ perm_to_GAP(GEN p)
   }
   nb++;
   /*Real run*/
-  nb = (nb+2*BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG;
-  gap = cgetg(nb,t_STR);
-  s = (char*)(gap+1);
+  gap = cgetg(nchar2nlong(nb) + 1, t_STR);
+  s = GSTR(gap);
   for (i = 1; i < lg(x); ++i)
   {
     long j;
@@ -436,7 +435,7 @@ perm_to_GAP(GEN p)
         s[c++] = ','; s[c++] = ' ';
       }
       sprintf(s+c,"%ld",z[j]);
-      while(s[c++]); c--;
+      while(s[c++]) /* empty */; c--;
     }
     s[c++] = ')';
   }

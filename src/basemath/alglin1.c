@@ -120,9 +120,8 @@ strconcat(GEN x, GEN y)
 
   if (typ(x)==t_STR) sx = GSTR(x); else { flx=1; sx = GENtostr(x); }
   if (typ(y)==t_STR) sy = GSTR(y); else { fly=1; sy = GENtostr(y); }
-  l = strlen(sx) + strlen(sy) + 1;
-  l = (l+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
-  x = cgetg(l+1, t_STR); str = GSTR(x);
+  l = nchar2nlong(strlen(sx) + strlen(sy) + 1);
+  x = cgetg(l + 1, t_STR); str = GSTR(x);
   strcpy(str,sx);
   strcat(str,sy);
   if (flx) free(sx);

@@ -1517,7 +1517,7 @@ taille(GEN x)
 }
 
 long
-taille2(GEN x) { return taille(x)<<TWOPOTBYTES_IN_LONG; }
+taille2(GEN x) { return taille(x) * sizeof(long); }
 
 #define LG(x, tx) tx == t_POL? lgef(x): tx == t_LIST? lgeflist(x): lg(x)
 

@@ -800,7 +800,7 @@ itostr(GEN x, int minus)
 {
   long l, d;
   ulong *res = convi(x, &l);
-  char *s = (char*)new_chunk(l + minus + 1), *t = s;
+  char *s = (char*)new_chunk(nchar2nlong(l*9 + minus + 1)), *t = s;
 
   if (minus) *t++ = '-';
   d = numdig(*--res);
