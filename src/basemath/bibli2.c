@@ -345,7 +345,7 @@ GEN
 matqpascal(long n, GEN q)
 {
   long i,j,I, av = avma;
-  GEN m, *qpow;
+  GEN m, *qpow = NULL; /* gcc -Wall */
 
   if (n<0) n = -1;
   n++; m = cgetg(n+1,t_MAT);
@@ -594,6 +594,7 @@ binome(GEN n, long k)
 /**                                                                **/
 /********************************************************************/
 
+/* assume n > 1 */
 GEN
 polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
 {
@@ -612,6 +613,7 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
   c=new_chunk(n);
   d=new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = ya[i];
   y=(GEN)d[ns--];
+  dy = NULL; tetpil = 0; /* gcc -Wall */
   for (m=1; m<n; m++)
   {
     for (i=0; i<n-m; i++)
@@ -719,14 +721,14 @@ setsearch(GEN x, GEN y, long flag)
   }
   if (lx==1) return flag? 1: 0;
 
-  li=1; ri=lx-1;
   if (typ(y) != t_STR) y = gtostr(y);
-  while (ri>=li)
+  li=1; ri=lx-1;
+  do
   {
     j = (ri+li)>>1; fl = gcmp((GEN)x[j],y);
     if (!fl) { avma=av; return flag? 0: j; }
     if (fl<0) li=j+1; else ri=j-1;
-  }
+  } while (ri>=li);
   avma=av; if (!flag) return 0;
   return (fl<0)? j+1: j;
 }
@@ -964,22 +966,27 @@ permute(long n, GEN x)
 GEN
 permuteInv(GEN x)
 {
-  long av=avma,tetpil, len=lg(x)-1, ini=len, last, ind;
+  long av=avma, lx=lg(x)-1, ini=lx, last, ind, tx = typ(x);
   GEN ary,res;
 
-  if (typ(x)!=t_VEC && typ(x)!=t_COL) err(talker,"not a vector in permuteInv");
-  res=gzero; ary=cgetg(len+1,t_VEC);
-  for (ind=1; ind<=len; ind++) ary[ind]=*++x;
-  ary++;
-  for (last=len; last>0; last--)
+  if (!is_vec_t(tx)) err(talker,"not a vector in permuteInv");
+  ary=cgetg(lx+1,t_VECSMALL);
+  for (ind=1; ind<=lx; ind++)
   {
-    len--; ind=len;
-    while (ind>0 && itos((GEN)ary[ind])!=last) ind--;
-    res=mulis(res,last); tetpil=avma; res=addis(res,ind);
-    while (ind++<len) ary[ind-1]=ary[ind];
+    res = (GEN)*++x;
+    if (typ(res) != t_INT) err(typeer,"permuteInv");
+    ary[ind] = itos(res);
   }
-  if (!signe(res)) { tetpil=avma; res=mpfact(ini); }
-  return gerepile(av,tetpil,res);
+  ary++; res = gzero;
+  for (last=lx; last>0; last--)
+  {
+    lx--; ind=lx;
+    while (ind>0 && ary[ind] != last) ind--;
+    res = addis(mulis(res,last), ind);
+    while (ind++<lx) ary[ind-1] = ary[ind];
+  }
+  if (!signe(res)) res=mpfact(ini);
+  return gerepileuptoint(av, res);
 }
 
 /********************************************************************/
