@@ -1150,33 +1150,18 @@ GEN
 polzag(long n, long m)
 {
   pari_sp av = avma;
-  long d1, d, r, k;
-  GEN A, B, Bx, g, s;
+  long k, d = n - m;
+  GEN A, Bx, g, s;
 
-  if (m >= n || m < 0)
-    err(talker,"first index must be greater than second in polzag");
-  d1 = n-m; d = d1<<1; d1--;
-  A = gsub(gun, gmul2n(polx[0],1)); /* 1 - 2x */
-  B = gsub(gun, polx[0]); /* 1 - x */
-  Bx = gmul(polx[0],B); /* x - x^2 */
-  r = (m+1)>>1;
-  g = gzero;
-  for (k=0; k<=d1; k++)
-  {
-    s = binome(stoi(d), (k<<1)+1); if (k&1) s = negi(s);
-    g = gadd(g, gmul(s, gmul(gpowgs(polx[0],k), gpowgs(B,d1-k))));
-  }
-  g = gmul(g, gpowgs(Bx,r));
-  if (!(m&1)) g = gadd(gmul(A,g), gmul2n(gmul(Bx,derivpol(g)),1));
-  for (k=1; k<=r; k++)
-  {
-    g = derivpol(g);
-    g = gadd(gmul(A,g), gmul2n(gmul(Bx,derivpol(g)),1));
-  }
-  g = m? gmul2n(g,(m-1)>>1): gmul2n(g,-1);
-  s = mulsi(n-m, mpfact(m+1));
+  if (d <= 0 || m < 0) return gzero;
+  A  = gsub(gun, gmul2n(polx[0],1)); /* 1 - 2x */
+  Bx = gmul2n( gmul(polx[0], gsub(gun, polx[0])), 1); /* 2x - 2x^2 */
+  g = gmul(poleval(derivpol(tchebi(d,0)), A), gpowgs(Bx, (m+1)>>1));
+  for (k = m; k >= 0; k--)
+    g = (k&1)? derivpol(g): gadd(gmul(A,g), gmul(Bx,derivpol(g)));
+  s = mulsi(d, mulsi(d, mpfact(m+1)));
   return gerepileupto(av, gdiv(g,s));
-}
+} 
 
 #ifdef _MSC_VER /* Bill Daly: work around a MSVC bug */
 #pragma optimize("g",off)
@@ -1184,30 +1169,28 @@ polzag(long n, long m)
 GEN
 polzagreel(long n, long m, long prec)
 {
-  long d1, d, r, j, k, k2;
+  long r, j, k, k2, d = n - m, d2 = d<<1;
   pari_sp av = avma;
-  GEN Bx,B,g,h,v,b,s;
+  GEN Bx, g, h, v, b, s;
 
-  if (m >= n || m < 0)
-    err(talker,"first index must be greater than second in polzag");
-  d1 = n-m; d = d1<<1; d1--;
-  B = gadd(gun,polx[0]);
-  Bx = gmul(polx[0],B);
-  r = (m+1)>>1;
-  v = cgetg(d1+2,t_VEC);
-  g = cgetg(d1+2,t_VEC);
-  v[d1+1] = un; b = stor(d, prec);
-  g[d1+1] = (long)b;
-  for (k=1; k<=d1; k++)
+  if (d <= 0 || m < 0) return gzero;
+  Bx = gmul(polx[0], gadd(gun, polx[0])); /* x + x^2 */
+  v = cgetg(d+1,t_VEC);
+  g = cgetg(d+1,t_VEC);
+  v[d] = un; b = stor(d2, prec);
+  g[d] = (long)b;
+  for (k = 1; k < d; k++)
   {
-    v[d1-k+1] = un;
+    v[d-k] = un;
     for (j=1; j<k; j++)
-      v[d1-k+j+1] = laddii((GEN)v[d1-k+j+1], (GEN)v[d1-k+j+2]);
-    k2 = k+k; b = divri(mulri(b,mulss(d-k2+1,d-k2)), mulss(k2,k2+1));
+      v[d-k+j] = laddii((GEN)v[d-k+j], (GEN)v[d-k+j+1]);
+    /* v[d-k+j] = binom(k, j), j = 0..k */
+    k2 = k+k; b = divri(mulri(b,mulss(d2-k2+1,d2-k2)), mulss(k2,k2+1));
     for (j=1; j<=k; j++)
-      g[d1-k+j+1] = lmpadd((GEN)g[d1-k+j+1], mulri(b,(GEN)v[d1-k+j+1]));
-    g[d1-k+1] = (long)b;
+      g[d-k+j] = lmpadd((GEN)g[d-k+j], mulri(b,(GEN)v[d-k+j]));
+    g[d-k] = (long)b;
   }
+  r = (m+1)>>1;
   g = gmul(vec_to_pol(g,0), gpowgs(Bx,r));
   for (j=0; j<=r; j++)
   {
@@ -1224,7 +1207,7 @@ polzagreel(long n, long m, long prec)
     }
   }
   g = m? gmul2n(g,(m-1)>>1): gmul2n(g,-1);
-  s = mulsi(n-m, mpfact(m+1));
+  s = mulsi(d, mpfact(m+1));
   return gerepileupto(av, gdiv(g,s));
 }
 #ifdef _MSC_VER
