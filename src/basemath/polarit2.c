@@ -893,7 +893,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     pa_b = gpowgs(p, a-b);
     ps2 = shifti(pa_b,-1);
     C = (long)(sqrt((double)s*n)/ 2);
-    M = dbltor(C*C*n + s*n*n/4.);
+    M = dbltor((C*C*n + s*n*n/4.) * 1.00001);
 
     if (DEBUGLEVEL>3)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
