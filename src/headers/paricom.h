@@ -92,6 +92,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define evallgef(x) 0
 #define lgef lg
 #define setlgef setlg
+#define leadingcoeff(x) (pollead((x),-1))
 
 #define rcopy mpcopy
 #define absr  mpabs
@@ -327,7 +328,6 @@ enum manage_var_t {
 #define subres(x,y) (subresall((x),(y),NULL))
 /* #define subres(x,y) (resultantducos((x),(y))) */
 
-#define leadingcoeff(x) (pollead((x),-1))
 #define lift_intern(x) (lift_intern0((x),-1))
 #define invmat(a) (gauss((a),NULL))
 

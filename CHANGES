@@ -48,6 +48,10 @@ Done for version 2.2.8 (released ??/??/2004):
 
   Added
 
+  Removed
+    1- obsolete macro leadingcoeff [kept for backward compatibility but
+       removed from the documentation]. Use leading_term.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):
   Fixed

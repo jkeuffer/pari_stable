@@ -3393,10 +3393,8 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
   long k, lA, lB;
   GEN nf, C;
 
-  A = get_nfpol(A, &nf);
-  B = fix_relative_pol(A,B,1);
-  lA = lg(A);
-  lB = lg(B);
+  A = get_nfpol(A, &nf);       lA = lg(A);
+  B = fix_relative_pol(A,B,1); lB = lg(B);
   if (lA<=3 || lB<=3) err(constpoler,"rnfequation");
 
   check_pol_int(A,"rnfequation");
@@ -3408,7 +3406,7 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
     err(talker,"inseparable relative equation in rnfequation");
 
   *pk = 0; C = ZY_ZXY_resultant_all(A, B, pk, pLPRS);
-  if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
+  if (gsigne(leading_term(C)) < 0) C = gneg_i(C);
   *pk = -*pk; return primpart(C);
 }
 

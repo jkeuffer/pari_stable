@@ -1296,8 +1296,15 @@ to \tet{BIGINT}.
 
 The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to the
 coefficients of the polynomial \emph{in ascending order}, with \kbd{z[2]}
-being the constant term and so on. Note that the \idx{degree} of the
-polynomial is equal to its length minus three. The function
+being the constant term and so on. For an object of type \typ{POL},
+the macros \teb{leading_term}, \teb{constant_term}, \teb{degpol}
+return a pointer to the leading term (with respect to the main variable of
+course), constant term, and degree of the polynomial. Applied to any other
+type, the result is unspecificied. Note that no copy is made on the pari
+stack so the returned value is not safe for a basic \kbd{gerepile} call.
+
+Note that the \idx{degree} of the polynomial is equal to its length minus
+three. The function
 
 \fun{long}{degree}{GEN x} returns the degree of \kbd{x} with respect to its
 main variable even when \kbd{x} is not a polynomial (a rational function for
@@ -1305,9 +1312,9 @@ instance). By convention, the degree of $0$ is~$-1$.
 
 \misctitle{Important remark}. A zero polynomial can be characterized by the
 fact that its sign is~0. However, its length may be greater than 2, meaning
-that all the coefficients of the polynomial are equal to zero (as they should
-for a zero polynomial), but not all of these zeros are exact zeros, and more
-precisely the leading term \kbd{z[lg(z)-1]} is not an exact zero.
+that all the coefficients of the polynomial are equal to zero, but not all of
+these zeros are exact zeros, and more precisely the leading term
+\kbd{z[lg(z)-1]} is not an exact zero.
 
 \subsec{Type \typ{SER} (power series):}\kbdsidx{t_SER}\sidx{power series}
 This type also has a second codeword, which encodes a ``\emph{sign}'', i.e.~0
@@ -1360,9 +1367,9 @@ second codeword which contains an effective length (handled through
 \teb{lgeflist}~/ \teb{setlgeflist}). \kbd{z[2]},\dots, \kbd{z[lgeflist(z)-1]}
 contain the components of the list.
 
-\subsec{Type \typ{STR} (character string):}%
-\kbdsidx{t_STR}\sidx{character string} \fun{char *}{GSTR}{z} (= \kbd{(z+1)})
-points to the first character of the (\kbd{NULL}-terminated) string.
+\subsec{Type \typ{STR} (character string):}% \kbdsidx{t_STR}\sidx{character
+string} \fun{char *}{GSTR}{z} (= \kbd{(z+1)}) points to the first character
+of the (\kbd{NULL}-terminated) string.
 
 \misctitle{Implementation note:} for the types including an exponent (or a
 valuation), we actually store a biased non-negative exponent (bit-ORing the
