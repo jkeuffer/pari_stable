@@ -478,14 +478,14 @@ factor_quad(GEN x, GEN res, long *ptcnt)
 {
   GEN a = (GEN)x[4], b = (GEN)x[3], c = (GEN)x[2], d, u, z1, z2, t;
   GEN D = subii(sqri(b), shifti(mulii(a,c), 2));
-  long v, cnt;
+  long v, cnt = *ptcnt;
 
-  if (!carrecomplet(D, &d)) return;
+  if (!carrecomplet(D, &d)) { res[cnt++] = (long)x; *ptcnt = cnt; return; }
 
   t = shifti(negi(addii(b, d)), -1);
   z1 = gdiv(t, a); u = denom(z1);
   z2 = gdiv(addii(t, d), a);
-  v = varn(x); cnt = *ptcnt;
+  v = varn(x);
   res[cnt++] = lmul(u, gsub(polx[v], z1)); u = divii(a, u);
   res[cnt++] = lmul(u, gsub(polx[v], z2)); *ptcnt = cnt;
 }
