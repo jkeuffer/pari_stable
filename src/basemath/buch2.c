@@ -1651,7 +1651,7 @@ dbg_outrel(long cglob, GEN *mat,GEN maarch)
 static long
 already_found_relation(GEN *mat, long s, GEN first_nz)
 {
-  GEN cols = mat[s], nz = first_nz;
+  GEN cols = mat[s];
   long i, bs, l = lg(cols);
 
   bs = 1; while (bs < l && !cols[bs]) bs++;
@@ -1659,7 +1659,7 @@ already_found_relation(GEN *mat, long s, GEN first_nz)
 
   for (i=s-1; i; i--)
   {
-    if (bs == nz[s]) /* = index of first non zero elt in coll */
+    if (bs == first_nz[i]) /* = index of first non zero elt in cols */
     {
       GEN coll = mat[i];
       long b = bs;
@@ -1667,7 +1667,7 @@ already_found_relation(GEN *mat, long s, GEN first_nz)
       if (b == l) return i;
     }
   }
-  cols[0] = bs; return 0;
+  first_nz[s] = bs; return 0;
 }
 
 /* I integral ideal in HNF form */
@@ -2722,7 +2722,7 @@ col_0(long n)
    GEN c = (GEN) gpmalloc(sizeof(long)*(n+1));
    long i;
    for (i=1; i<=n; i++) c[i]=0;
-   c[0] = evaltyp(t_VECSMALL) | evallg(n);
+   c[0] = evaltyp(t_VECSMALL) | evallg(n+1);
    return c;
 }
 
