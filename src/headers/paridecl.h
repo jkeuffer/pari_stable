@@ -22,6 +22,7 @@ BEGINEXTERN
 /* alglin1.c */
 GEN     _col(GEN x);
 GEN     _vec(GEN x);
+GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_image(GEN x, GEN p);
 GEN     FpM_invimage(GEN m, GEN v, GEN p);
 GEN     FpM_inv(GEN x, GEN p);
@@ -54,6 +55,7 @@ GEN     gscalcol_proto(GEN z, GEN myzero, long n);
 GEN     gscalmat(GEN x, long n);
 GEN     gscalsmat(long x, long n);
 GEN     gtomat(GEN x);
+GEN     gtrans_i(GEN x);
 GEN     gtrans(GEN x);
 GEN     hnfadd(GEN mit,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN     hnfspec(long** mat,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
@@ -1069,9 +1071,12 @@ int     gdivise(GEN x, GEN y);
 long    hensel_lift_accel(long n, long *pmask);
 GEN     incloop(GEN a);
 GEN     is_irred_mod_p(GEN f, GEN p);
+GEN     mat_to_polpol(GEN x, long v,long w);
+GEN     mat_to_vecpol(GEN x, long v);
 GEN     padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e);
 int     poldivis(GEN x, GEN y, GEN *z);
 GEN     poldivres(GEN x, GEN y, GEN *pr);
+GEN     polpol_to_mat(GEN v, long n);
 GEN     rootmod(GEN f, GEN p);
 GEN     rootmod0(GEN f, GEN p,long flag);
 GEN     rootmod2(GEN f, GEN p);
@@ -1083,6 +1088,7 @@ GEN     roots2(GEN pol,long PREC);
 GEN     rootsold(GEN x, long l);
 GEN     setloop(GEN a);
 GEN     simplefactmod(GEN f, GEN p);
+GEN     vecpol_to_mat(GEN v, long n);
 
 /* polarit2.c */
 
