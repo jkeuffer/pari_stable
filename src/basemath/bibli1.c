@@ -1269,7 +1269,7 @@ PRECPB:
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); B[j] = zero; }
   if (gram && !incrementalGS(x, L, B, 1))
   {
-    if (!flag) return NULL;
+    if (flag) return NULL;
     err(lllger3);
   }
   if (DEBUGLEVEL>5) fprintferr("k =");
