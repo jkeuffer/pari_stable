@@ -1947,8 +1947,8 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
           return 0;
         }
       }
-      F->KCZ++; /* SUCCESS, "enlarge" factorbase */
     }
+    F->KCZ++; /* SUCCESS, "enlarge" factorbase */
   }
   if (DEBUGLEVEL)
   {
