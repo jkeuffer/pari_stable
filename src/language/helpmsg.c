@@ -54,7 +54,7 @@ char *helpmessages_basic[]={
   "binomial(x,y): binomial coefficient x*(x-1)...*(x-y+1)/y! defined for y in Z and any x",
   "bitand(x,y): bitwise \"and\" of two integers x and y.  Negative numbers behave as if modulo big power of 2",
   "bitneg(x,{n=-1}): bitwise negation of an integers x truncated to n bits.  n=-1 means represent infinite sequences of bit 1 as negative numbers.  Negative numbers behave as if modulo big power of 2",
-  "bitnegimpy(x,y): bitwise \"negated imply\" of two integers x and y, in other words, x BITAND BITNEG(y).  Negative numbers behave as if modulo big power of 2",
+  "bitnegimply(x,y): bitwise \"negated imply\" of two integers x and y, in other words, x BITAND BITNEG(y).  Negative numbers behave as if modulo big power of 2",
   "bitor(x,y): bitwise \"or\" of two integers x and y.  Negative numbers behave as if modulo big power of 2",
   "bittest(x,n,{c=1}): extracts |c| bits starting from  number n (coefficient of 2^n) of the integer x, returning the bits as an integer bitmap; negative c means: treat negative values of x as if modulo big power of 2; bits at negative offsets are zeros",
   "bitxor(x,y): bitwise \"exclusive or\" of two integers x and y.  Negative numbers behave as if modulo big power of 2",
