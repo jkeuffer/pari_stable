@@ -831,25 +831,25 @@ if test -n "$__gnuc__"; then
   case "$osname-$arch" in
     linux-i?86|cygwin*) OPTFLAGS="$OPTFLAGS \
       -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
-    os2-*)        CFLAGS=-Zmt;;
+    os2-*) cflags=-Zmt;;
+    *-sparcv8*) cflags=-mv8;;
   esac
   # omit-frame-pointer incompatible with -pg
   PRFFLAGS="-pg $OPTFLAGS"
   case "$optimization" in
     full) OPTFLAGS="$OPTFLAGS -fomit-frame-pointer";;
   esac
-  case "$osname-$asmarch" in *-sparcv8*) CFLAGS="$CFLAGS -mv8" ;; esac
 else
-  CFLAGS=
+  cflags=
   DBGFLAGS="-g"
   PRFFLAGS="-pg"
   case "$osname-$arch" in
     hpux-*) # -Aa is for ANSI C, +z for PIC code (for commercial HPUX compilers)
-                  OPTFLAGS=-O; CFLAGS=-Aa; DLCFLAGS=+z;;
+                  OPTFLAGS=-O; cflags=-Aa; DLCFLAGS=+z;;
     # best tuning option, even for PPC604:
-    aix-*)        OPTFLAGS=-O2; CFLAGS='-qlanglvl=ansi -qtune=601';;
+    aix-*)        OPTFLAGS=-O2; cflags='-qlanglvl=ansi -qtune=601';;
     cygwin*|linux-i?86|freebsd-i?86)
-                  OPTFLAGS=-O2; CFLAGS=-m486;;
+                  OPTFLAGS=-O2; cflags=-m486;;
     osf1-*)       OPTFLAGS='-O4 -migrate -ifo -Olimit 9999';;
     sunos-*)      OPTFLAGS=-fast; PRFFLAGS='-pg -Bstatic';;
     solaris-*)    OPTFLAGS=-fast; PRFFLAGS=-xpg;;
@@ -858,21 +858,21 @@ else
   esac
   PRFFLAGS="$PRFFLAGS $OPTFLAGS"
 fi
-CFLAGS="$CFLAGS $DLCFLAGS"
+cflags="$cflags $DLCFLAGS"
 
 case "$osname" in
-  nextstep)  CFLAGS="-traditional-cpp $CFLAGS";;
+  nextstep)  cflags="-traditional-cpp $cflags";;
 esac
 
 case "$optimization" in
-  full)      suffix=; cflags="$OPTFLAGS $CFLAGS";;
-  profiling) suffix=.prf; cflags="$PRFFLAGS $CFLAGS";;
-  debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $CFLAGS";;
+  full)      suffix=; cflags="$OPTFLAGS $cflags";;
+  profiling) suffix=.prf; cflags="$PRFFLAGS $cflags";;
+  debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $cflags";;
 esac
 
 if test "$fastread" != yes; then
   echo $n ..."With which flags ? $c"
-  dflt=$cflags; rep=; . ./myread
+  dflt=${CFLAGS:-cflags}; rep=; . ./myread
   cflags=$ans
 fi
 
