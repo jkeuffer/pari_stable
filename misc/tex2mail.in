@@ -737,12 +737,13 @@ sub center {
   local($h1,$l1,$b1,$sp1,$str1)=split(/,/,$_[0],5);
   $h1 || $h1++;
   if (($left=$len-$l1)<=0) {return $_[0];}
-  $left=int($left/2);
+  local($LHS,$RHS);
+  $LHS = int($left/2); $RHS = $left - $LHS;
   local($out,$first)=("",1);
   for (split(/\n/,$str1,$h1)) {
     if ($first) {$first=0;}
     else {$out .= "\n";}
-    $out .= " " x $left . $_;
+    $out .= " " x $LHS. $_ . " " x $RHS;
   } 
   return "$h1,$len,$b1,0,$out";
 } 
