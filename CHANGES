@@ -120,6 +120,7 @@ BA 60- add "const" keyword to allow building with g++
    61- agm(1+x,2+x) --> oo loop
    62- lindep([1,0]) --> error [ problem with trivial cases in PSLQ ]
    63- wrong reconstruction bounds in nffactor
+   64- short help message for isprime/ispseudoprime
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
