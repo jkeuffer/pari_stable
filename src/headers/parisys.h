@@ -43,9 +43,6 @@
 #        define INLINE __inline__ static
 #      endif
 #    endif
-#    ifdef __STRICT_ANSI__
-#      define ULONG_NOT_DEFINED
-#    endif
 #  else
 #    define VOLATILE
 
