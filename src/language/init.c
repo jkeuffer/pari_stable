@@ -2116,12 +2116,15 @@ geni(void) { return gi; }
  ****************************************************************************
  * If new codes are added, change identifier and skipidentifier.
  *
- * Currently the following functions have no code word:
+ * Currently the following functions have no code word, but a valence code.
  * 'O' 50, 'if' 80, 'until' 82, 'while' 81, 'global' 88,
- *
- * Valence 0 reserved for functions without mandatory args.
- * Valence 99 reserved for codes which do not correspond 1-to-1 to valences.
- * Any other valence (what to do with 0?) should correspond to exactly
- *  one code.
+ * Valences: 
+ * 0  for functions without mandatory args.
+ * 1  for functions with mandatory args.
+ * 50 'O'
+ * 80 'if'
+ * 82 'until'
+ * 81 'while'
+ * 88 'global'
  */
 #include "init.h"
