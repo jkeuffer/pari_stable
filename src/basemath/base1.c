@@ -942,7 +942,7 @@ GEN
 get_mul_table(GEN x,GEN bas,GEN *ptT)
 {
   long i,j,k, n = lgef(x)-3;
-  GEN T,sym,mul=cgetg(n*n+1,t_MAT);
+  GEN T,sym, mul = cgetg(n*n+1,t_MAT), den = cgetg(n+1,t_VEC);
   
   for (j=1; j<=n*n; j++) mul[j]=lgetg(n+1,t_COL);
   if (ptT)
@@ -950,13 +950,22 @@ get_mul_table(GEN x,GEN bas,GEN *ptT)
     sym = polsym(x,n-1); T=cgetg(n+1,t_MAT); *ptT = T;
     for (j=1; j<=n; j++) T[j]=lgetg(n+1,t_COL);
   }
+  bas = dummycopy(bas);
+  for (i=1; i<=n; i++)
+  {
+    den[i] = (long)denom(content((GEN)bas[i]));
+    bas[i] = lmul((GEN)bas[i],(GEN)den[i]);
+  }
+
   for (i=1; i<=n; i++)
     for (j=i; j<=n; j++)
     {
-      GEN t = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
+      GEN d,t = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
       GEN a = (GEN)mul[j+(i-1)*n];
       GEN b = (GEN)mul[i+(j-1)*n];
       long l = lgef(t)-1;
+      d = mulii((GEN)den[i], (GEN)den[j]);
+      if (!is_pm1(d)) t = gdiv(t, d);
       for (k=1; k<l ; k++) a[k] = b[k] = t[k+1];
       for (   ; k<=n; k++) a[k] = b[k] = zero;
       if (ptT) coeff(T,i,j) = coeff(T,j,i) = (long)quicktrace(t,sym);

@@ -1806,6 +1806,8 @@ canon_pol(GEN z)
   return 0;
 }
 
+GEN caractducos(GEN p, GEN x, int v);
+
 static GEN
 pols_for_polred0(GEN x, GEN base, GEN LLLbase, GEN *pta, 
 		int (*check)(GEN, GEN), GEN arg)
@@ -1817,21 +1819,20 @@ pols_for_polred0(GEN x, GEN base, GEN LLLbase, GEN *pta,
   y=cgetg(n,t_VEC);
   for (i=1; i<n; i++)
   {
-    if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
+    if (DEBUGLEVEL > 2) { fprintferr("i = %ld\n",i); flusherr(); }
     p1=(GEN)a[i]; p3=content(p1);
     if (gcmp1(p3)) p3 = NULL; else p1 = gdiv(p1,p3);
-    p1 = caract2(x,p1,v);
+    p1 = caractducos(x,p1,v);
     if (p3)
       for (p2=gun, j=lgef(p1)-2; j>=2; j--)
       {
         p2 = gmul(p2,p3); p1[j] = lmul((GEN)p1[j], p2);
       }
-    p2=modulargcd(derivpol(p1),p1); p3=leading_term(p2);
-    if (!gcmp1(p3)) p2=gdiv(p2,p3);
+    p2 = modulargcd(derivpol(p1),p1);
+    p3 = leading_term(p2); if (!gcmp1(p3)) p2=gdiv(p2,p3);
     p1 = gdiv(p1,p2);
-    if (canon_pol(p1) < 0 && pta)
-      a[i] = (long) gneg_i((GEN)a[i]);
-    y[i] = (long)p1; if (DEBUGLEVEL>=4) outerr(p1);
+    if (canon_pol(p1) < 0 && pta) a[i] = (long)gneg_i((GEN)a[i]);
+    y[i] = (long)p1; if (DEBUGLEVEL > 3) outerr(p1);
     if (check && check(arg, p1)) return p1; 
   }
   if (check) return NULL; /* no suitable polynomial found */
@@ -1861,6 +1862,48 @@ nf_get_T2(GEN base, GEN polr)
   return mulmat_real(gconj(gtrans(p2)),p2);
 }
 
+/* compute Tr(w_i w_j) */
+static GEN
+nf_get_T(GEN x, GEN w)
+{
+  long i,j,k, n = lgef(x)-3;
+  GEN p1,p2,p3;
+  GEN ptrace = cgetg(n+2,t_VEC);
+  GEN den = cgetg(n+1,t_VEC);
+  GEN T = cgetg(n+1,t_MAT);
+
+  ptrace[2]=lstoi(n);
+  for (k=2; k<=n; k++)
+  { /* cf polsym */
+    GEN y = x + (n-k+1);
+    p1 = mulsi(k-1,(GEN)y[2]);
+    for (i=3; i<=k; i++)
+      p1 = addii(p1,mulii((GEN)y[i],(GEN)ptrace[i]));
+    ptrace[i] = lnegi(p1);
+  }
+  w = dummycopy(w);
+  for (i=1; i<=n; i++)
+  {
+    den[i] = (long)denom(content((GEN)w[i]));
+    w[i] = lmul((GEN)w[i],(GEN)den[i]);
+  }
+  
+  for (i=1; i<=n; i++)
+  {
+    p1=cgetg(n+1,t_COL); T[i]=(long)p1;
+    for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
+    for (   ; j<=n; j++)
+    { /* cf quicktrace */
+      p2 = gres(gmul((GEN)w[i],(GEN)w[j]),x);
+      p3 = gzero;
+      for (k=lgef(p2)-1; k>1; k--)
+        p3 = addii(p3, mulii((GEN)p2[k],(GEN)ptrace[k]));
+      p1[j]=(long)divii(p3, mulii((GEN)den[i],(GEN)den[j]));
+    }
+  }
+  return T;
+}
+
 /* Return the base change matrix giving the an LLL-reduced basis for the
  * maximal order of the nf given by x. Expressed in terms of the standard
  * HNF basis (as polynomials) given in base (ignored if x is an nf)
@@ -1869,7 +1912,7 @@ GEN
 LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
 {
   GEN T2,p1, x = *ptx;
-  int totally_real,n,i,j;
+  int totally_real,n,i;
 
   if (typ(x) != t_POL)
   {
@@ -1884,34 +1927,7 @@ LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
     if (!totally_real)
       T2 = nf_get_T2(base,polr? polr: roots(x,prec));
     else
-    { /* totally real */
-      GEN ptrace=cgetg(n+2,t_VEC);
-      long k;
-
-      ptrace[2]=lstoi(n);
-      for (k=2; k<=n; k++)
-      { /* cf polsym */
-	GEN y = x + (n-k+1);
-	p1 = gmulsg(k-1,(GEN)y[2]);
-	for (i=3; i<=k; i++)
-	  p1 = gadd(p1,gmul((GEN)y[i],(GEN)ptrace[i]));
-	ptrace[i] = lneg(p1);
-      }
-      T2=cgetg(n+1,t_MAT);
-      for (i=1; i<=n; i++)
-      {
-	p1=cgetg(n+1,t_COL); T2[i]=(long)p1;
-	for (j=1; j<i ; j++) p1[j] = coeff(T2,i,j);
-	for (   ; j<=n; j++)
-	{ /* cf quicktrace */
-	  GEN p2 = gres(gmul((GEN)base[i],(GEN)base[j]),x);
-          GEN p3 = gzero;
-	  for (k=lgef(p2)-1; k>1; k--)
-	    p3 = gadd(p3, gmul((GEN)p2[k],(GEN)ptrace[k]));
-	  p1[j]=(long)p3;
-	}
-      }
-    }
+      T2 = nf_get_T(x, base);
   }
   if (totally_real) return lllgramint(T2);
   for (i=1; ; i++)
@@ -2769,9 +2785,20 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   pr = gprecision(a);
   if (pr) prec = pr; else a = gmul(a,realun(prec));
   if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-  v1 = lllgramintern(a,4,flag&1, (prec<<1)-2);
-  if (v1 == NULL) goto PRECPB;
-  r = qf_base_change(a,v1,1);
+  if (nf && !signe(gmael(nf,2,2))) /* totally real */
+  {
+    GEN T = nf_get_T((GEN)nf[1], (GEN)nf[7]);
+    v1 = lllgramint(T);
+    nf = nfnewprec(nf, prec + 2 * (gexpo(v1) >> TWOPOTBITS_IN_LONG));
+    r = qf_base_change(T,v1,1);
+    r = gmul(r, realun(prec));
+  }
+  else
+  {
+    v1 = lllgramintern(a,4,flag&1, (prec<<1)-2);
+    if (v1 == NULL) goto PRECPB;
+    r = qf_base_change(a,v1,1);
+  }
   r = sqred1intern(r,flag&1);
   if (r == NULL) goto PRECPB;
 
@@ -2805,7 +2832,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   B = gcoeff(gram,n-1,n-1);
   if (gexpo(B) >= bit_accuracy(lg(B)-2)) goto PRECPB;
 
-  if (check && nf) basis = init_chk(nf,uperm,NULL);
+  if (nf) basis = init_chk(nf,uperm,NULL);
   if (!bound)
   { /* polred */
     GEN x = cgetg(n,t_COL);
@@ -2820,10 +2847,9 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
       x[j]=zero;
     }
   }
+  if (nf && !(prec = (long)init_chk(nf,uperm,bound))) goto PRECPB;
 
   if (DEBUGLEVEL>2) {fprintferr("entering smallvectors\n"); flusherr();}
-  if (check && nf) 
-    if (! (prec = (long)init_chk(nf,uperm,bound))) goto PRECPB;
   i = check? 2: 1; if (i == n) i--;
   for (   ; i<n; i++)
   {
