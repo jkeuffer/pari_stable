@@ -131,8 +131,10 @@ DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
    22- minor improvements in plindep() [p-adic lindep/algdep]
    23- 'make all' now builds the documentation [ that way, 'make install' need
        not run a bunch of TeX commands as root ]
-   24- improved idealaddtoone [use dedicated HNF variant]
+   24- improved idealaddtoone/idealchinese/idealapprfact [use dedicated HNF
+       variant + simpler uniformizers in idealapprfact]
    25- rnfkummer: do not return rational coeffs as POLMODs: -1, not Mod(-1,pol)
+   26- improved idealval()
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
@@ -143,6 +145,7 @@ IZ  5- File README.os2
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)
+    2- appr_reduce() [static base4.c]: lllreducemodmatrix does the same. Faster.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.4 (released 12/09/2002):
