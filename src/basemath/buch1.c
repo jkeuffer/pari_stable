@@ -101,8 +101,8 @@ isoforder2(GEN form)
 GEN
 getallforms(GEN D, long *pth, GEN *ptz)
 {
-  long d = itos(D), t, b2, a, b, c, h, dover3 = labs(d)/3;
-  GEN z, L = cgetg((long)sqrt(dover3), t_VEC);
+  long d = itos(D), dabs = labs(d),  dover3 = dabs/3, t, b2, a, b, c, h;
+  GEN z, L = cgetg((long)sqrt(dabs) * log2(dabs), t_VEC);
   b2 = b = (d&1); h = 0; z=gun;
   while (b2 <= dover3)
   {
@@ -225,27 +225,30 @@ quadhilbertimag(GEN D, GEN flag)
 {
   long h, i, e, prec;
   pari_sp av=avma;
-  GEN z,L,P,p,q,qfp,qfq,up,uq,u;
+  GEN z,L,P,p,q,qfp,u;
   int raw = ((typ(flag)==t_INT && signe(flag)));
 
-  if (DEBUGLEVEL>=2) (void)timer2();
+  if (DEBUGLEVEL>1) (void)timer2();
   if (gcmpgs(D,-11) >= 0) return polx[0];
   L = getallforms(D,&h,&z);
-  if (DEBUGLEVEL>=2) msgtimer("class number = %ld",h);
+  if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
   if (h == 1) { avma=av; return polx[0]; }
 
   get_pq(D, z, flag, &p, &q);
   e = 24 / cgcd((smodis(p,24)-1) * (smodis(q,24)-1), 24);
-  if(DEBUGLEVEL>=2) fprintferr("p = %Z, q = %Z, e = %ld\n",p,q,e);
-  qfp = primeform(D,p,0); up = gmodulcp((GEN)qfp[2],shifti(p,1));
+  if(DEBUGLEVEL>1) fprintferr("p = %Z, q = %Z, e = %ld\n",p,q,e);
+  qfp = primeform(D,p,0);
   if (egalii(p,q))
   {
+    q = p;
     u = (GEN)compimagraw(qfp,qfp)[2];
-    u = gmodulcp(u, shifti(mulii(p,q),1));
+    u = gmodulcp(u, shifti(sqri(p),1));
   }
   else
   {
-    qfq = primeform(D,q,0); uq = gmodulcp((GEN)qfq[2],shifti(q,1));
+    GEN qfq = primeform(D,q,0);
+    GEN up = gmodulcp((GEN)qfp[2], shifti(p,1));
+    GEN uq = gmodulcp((GEN)qfq[2], shifti(q,1));
     u = chinois(up,uq);
   }
   prec = raw? DEFAULTPREC: 3;
@@ -258,6 +261,7 @@ quadhilbertimag(GEN D, GEN flag)
     for (i=1; i<=h; i++)
     {
       GEN v, s = gpq((GEN)L[i], p, q, e, sqd, u, prec);
+      if (DEBUGLEVEL>3) fprintferr("%ld ", i);
       if (raw)
       {
         v = cgetg(3,t_VEC); P[i] = (long)v;
@@ -267,14 +271,14 @@ quadhilbertimag(GEN D, GEN flag)
       else P[i] = (long)s;
       ex = gexpo(s); if (ex > 0) exmax += ex;
     }
-    if (DEBUGLEVEL>=2) msgtimer("roots");
+    if (DEBUGLEVEL>1) msgtimer("roots");
     if (raw) { P = gcopy(P); break; }
     /* to avoid integer overflow (1 + 0.) */
     lead = (exmax < bit_accuracy(prec))? gun: realun(prec);
 
     P = greal(roots_to_pol_intern(lead,P,0,0));
     P = grndtoi(P,&exmax);
-    if (DEBUGLEVEL>=2) msgtimer("product, error bits = %ld",exmax);
+    if (DEBUGLEVEL>1) msgtimer("product, error bits = %ld",exmax);
     if (exmax <= -10)
     {
       if (typ(flag)==t_VEC && !issquarefree(P)) { avma=av; return gzero; }
