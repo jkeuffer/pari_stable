@@ -85,7 +85,7 @@ rand_Flx(long n)
 {
   pari_sp av = avma;
   GEN x;
-  do x = FpX_rand(n+1, 0, utoi(DFLT_mod)); while (degpol(x) < n);
+  do x = FpX_rand(n+1, 0, utoipos(DFLT_mod)); while (degpol(x) < n);
   return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 
@@ -94,7 +94,7 @@ static GEN
 rand_NFlx(long n)
 {
   pari_sp av = avma;
-  GEN x = gadd(gpowgs(polx[0], n), FpX_rand(n, 0, utoi(DFLT_mod)));
+  GEN x = gadd(gpowgs(polx[0], n), FpX_rand(n, 0, utoipos(DFLT_mod)));
   return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 
@@ -214,11 +214,11 @@ static double speed_remiimul(speed_param *s) {
 
 static double speed_Flxq_pow_redc(speed_param *s) {
   ulong p = DFLT_mod;
-  enable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
+  enable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoipos(p), s->y, p) );
 }
 static double speed_Flxq_pow_mod(speed_param *s) {
   ulong p = DFLT_mod;
-  disable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
+  disable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoipos(p), s->y, p) );
 }
 
 enum { PARI = 1, GMP = 2 };
