@@ -86,6 +86,7 @@ MW 33- (recent) typo in localred (char 2)
    37- galoisinit(x^4 + 5264*x^3 + 8034856*x^2 + 4205424384*x + 504485485632)
        --> weird error
    38- qfsign([;]) --> SEGV
+MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

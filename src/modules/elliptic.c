@@ -3088,12 +3088,12 @@ _round(GEN x, long *e)
   return y;
 }
 
-/* Input the curve, a point q of order n (approx.), returns q as a rational
- * point on the curve, or NULL if q is not rational. */
+/* E the curve, w in C/Lambda ~ E of order n, returns q = pointell(w) as a
+ * rational point on the curve, or NULL if q is not rational. */
 static GEN
-torspnt(GEN E, GEN q, long n)
+torspnt(GEN E, GEN w, long n, long prec)
 {
-  GEN p = cgetg(3,t_VEC);
+  GEN p = cgetg(3,t_VEC), q = pointell(E, w, prec);
   long e;
   p[1] = lmul2n(_round(gmul2n((GEN)q[1],2), &e),-2);
   if (e > -5) return NULL;
@@ -3179,7 +3179,7 @@ torselldoud(GEN e)
 {
   long b, i, ord, prec, k = 1;
   gpmem_t av=avma;
-  GEN v,w1,w22,w1j,w12,p,tor1,tor2;
+  GEN v,w,w1,w22,w1j,w12,p,tor1,tor2;
 
   checkbell(e);
   v = ellintegralmodel(e);
@@ -3195,17 +3195,17 @@ torselldoud(GEN e)
   if (v) v[1] = linv((GEN)v[1]);
   w22 = gmul2n((GEN)e[16],-1);
   if (b % 4)
-  {
+  { /* cyclic of order 1, p, 2p, p <= 5 */
     p = NULL;
     for (i=10; i>1; i--)
     {
       if (b%i != 0) continue;
       w1j = gdivgs(w1,i);
-      p = torspnt(e,pointell(e,w1j,prec),i);
+      p = torspnt(e,w1j,i,prec);
       if (!p && i%2==0)
       {
-        p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
-        if (!p) p = torspnt(e,pointell(e,gadd(w22,gmul2n(w1j,1)),prec),i);
+        p = torspnt(e,gadd(w22,w1j),i,prec);
+        if (!p) p = torspnt(e,gadd(w22,gmul2n(w1j,1)),i,prec);
       }
       if (p) { k = i; break; }
     }
@@ -3214,16 +3214,23 @@ torselldoud(GEN e)
 
   ord = 0; tor1 = tor2 = NULL;
   w12 = gmul2n(w1,-1);
-  if ((p = torspnt(e,pointell(e,w12,prec),2)))
+  if ((p = torspnt(e,w12,2,prec)))
   {
     tor1 = p; ord++;
   }
-  if ((p = torspnt(e,pointell(e,w22,prec),2))
-   || (!ord && (p = torspnt(e,pointell(e,gadd(w12,w22),prec),2))))
+  w = w22;
+  if ((p = torspnt(e,w,2,prec)))
   {
     tor2 = p; ord += 2;
   }
-
+  if (!ord)
+  {
+    w = gadd(w12,w22);
+    if ((p = torspnt(e,w,2,prec)))
+    {
+      tor2 = p; ord += 2;
+    }
+  }
   p = NULL;
   switch(ord)
   {
@@ -3232,7 +3239,7 @@ torselldoud(GEN e)
       {
         if (b%i!=0) continue;
         w1j = gdivgs(w1,i);
-        p = torspnt(e,pointell(e,w1j,prec),i);
+        p = torspnt(e,w1j,i,prec);
         if (p) { k = i; break; }
       }
       break;
@@ -3242,20 +3249,20 @@ torselldoud(GEN e)
       {
         if (b%i!=0) continue;
         w1j = gdivgs(w1,i);
-        p = torspnt(e,pointell(e,w1j,prec),i);
+        p = torspnt(e,w1j,i,prec);
         if (!p && i%4==0)
-          p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i);
+          p = torspnt(e,gadd(w22,w1j),i,prec);
         if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
       break;
 
-    case 2: /* 1 point of order 2: w2 / 2 or (w1+w2) / 2 */
+    case 2: /* 1 point of order 2: w = w2/2 or (w1+w2)/2 */
       for (i=5; i>1; i-=2)
       {
         if (b%i!=0) continue;
         w1j = gdivgs(w1,i);
-        p = torspnt(e,pointell(e,gadd(w22,w1j),prec),i+i);
+        p = torspnt(e,gadd(w,w1j),2*i,prec);
         if (p) { k = 2*i; break; }
       }
       if (!p) { p = tor2; k = 2; }
@@ -3266,7 +3273,7 @@ torselldoud(GEN e)
       {
         if (b%(2*i)!=0) continue;
         w1j = gdivgs(w1,i);
-        p = torspnt(e,pointell(e,w1j,prec),i);
+        p = torspnt(e,w1j,i,prec);
         if (p) { k = i; break; }
       }
       if (!p) { p = tor1; k = 2; }
