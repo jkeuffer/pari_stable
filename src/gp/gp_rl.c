@@ -659,6 +659,59 @@ init_readline(void)
 #endif
 }
 
+static char *
+escape_string(char *s)
+{
+  long l = strlen(s);
+  char *t, *t0 = gpmalloc(l * 3 + 3);
+
+  t = t0; *t++ = '"';
+  for ( ;*s; *t++ = *s++)
+    switch(*s)
+    {
+      case DATA_BEGIN:
+      case DATA_END:
+      case DATA_ESCAPE: *t++ = DATA_ESCAPE; continue;
+
+      case '\\': 
+      case '"': *t++ = '\\'; continue;
+    }
+  *t++ = '"';
+  *t++ = 0; return t0;
+}
+
+void
+texmacs_completion(char *s, long pos)
+{
+  char **matches, *text;
+  long i, l = strlen(s)-1;
+  if (rl_line_buffer) free(rl_line_buffer);
+  rl_line_buffer = pari_strdup(s);
+  text = rl_line_buffer + pos;
+  while (text >  rl_line_buffer && isalpha((int)*text)) text--;
+  rl_point = pos;
+  rl_end = l;
+  matches = pari_completion(text, pos, l);
+  printf("%cscheme:(tuple",DATA_BEGIN);
+  if (matches)
+  {
+    char *t;
+    long prelen = ((rl_line_buffer+pos) - text) + 1;
+    matches[0] = t = gpmalloc(l+1); /* prefix */
+    strncpy(t, text, prelen); t[prelen] = 0;
+    for (i=0; matches[i]; i++)
+    {
+      t = escape_string(matches[i] + (i? prelen: 0));
+      printf(" ");
+      printf(t); free(t);
+      free(matches[i]);
+    }
+    free(matches);
+  }
+  printf(")%c", DATA_END);
+  fflush(stdout);
+}
+
 static int
 history_is_new(char *s)
 {

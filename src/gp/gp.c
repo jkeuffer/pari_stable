@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifdef READLINE
   extern void init_readline(void);
+  extern void texmacs_completion(char *s, long pos);
   int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
@@ -1988,17 +1989,42 @@ next_expr(char *t)
   }
 }
 
+typedef struct {
+  void **v;
+  long len; /* len cells allocated */
+  long n; /* first n cells occupied */
+} growarray;
+
+void
+grow_append(growarray *A, void *e)
+{
+  if (A->n == A->len-1)
+  {
+    A->len <<= 1;
+    A->v = (void**)gprealloc(A->v, A->len * sizeof(void*));
+  }
+  A->v[A->n++] = e;
+}
+
+static void
+grow_init(growarray *A)
+{
+  A->len = 4;
+  A->n   = 0;
+  A->v   = (void**)gpmalloc(A->len * sizeof(void*));
+}
+
 static char **
 gp_initrc(void)
 {
-  char **flist, *nexts,*s,*t;
+  char *nexts,*s,*t;
   FILE *file = gprc_get();
-  long fnum = 4, find = 0;
   Buffer *b;
   filtre_t F;
+  growarray A;
 
   if (!file) return NULL;
-  flist = (char **) gpmalloc(fnum * sizeof(char*));
+  grow_init(&A);
   b = new_buffer();
   init_filtre(&F, (void*)b);
   for(;;)
@@ -2031,14 +2057,9 @@ gp_initrc(void)
       if (!strncmp(s,"read",4))
       { /* read file */
 	s += 4;
-	if (find == fnum-1)
-	{
-	  fnum <<= 1;
-	  flist = (char**)gprealloc(flist, fnum*sizeof(char*));
-	}
-	flist[find++] = t = gpmalloc(strlen(s) + 1);
-	if (*s == '"') (void)readstring(s, t);
-	else strcpy(t,s);
+	t = gpmalloc(strlen(s) + 1);
+	if (*s == '"') (void)readstring(s, t); else strcpy(t,s);
+        grow_append(&A, t);
       }
       else
       { /* set default */
@@ -2052,8 +2073,8 @@ gp_initrc(void)
   }
   del_buffer(b);
   if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
-  fclose(file); flist[find] = NULL;
-  return flist;
+  grow_append(&A, NULL);
+  fclose(file); return (char**)A.v;
 }
 
 /********************************************************************/
@@ -2272,6 +2293,60 @@ input_loop(filtre_t *F, input_method *IM)
   return 1;
 }
 
+typedef struct {
+  char *cmd;
+  long n; /* number of args */
+  char **v; /* args */
+} tm_cmd;
+
+static char *
+pari_strndup(char *s, long n)
+{
+  char *t = gpmalloc(n+1);
+  memcpy(t,s,n); t[n] = 0; return t;
+}
+
+static void
+parse_texmacs_command(tm_cmd *c, char *ch)
+{
+  long l = strlen(ch);
+  char *t, *s = ch, *send = s+l-1;
+  growarray A;
+
+fprintferr(ch); flusherr();
+  if (*s != DATA_BEGIN || *send-- != DATA_END)
+    err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
+  s++;
+  if (strncmp(s, "special:", 8)) err(talker, "unrecognized TeXmacs command");
+  s += 8;
+  if (*s != '(' || *send-- != ')')
+    err(talker, "missing enclosing parentheses for TeXmacs command");
+  s++; t = s;
+  skip_alpha(s);
+  c->cmd = pari_strndup(t, s - t);
+  grow_init(&A);
+  for (c->n = 0; s <= send; c->n++)
+  {
+    char *u = gpmalloc(strlen(s) + 1);
+    skip_space(s);
+    if (*s == '"') s = readstring(s, u);
+    {
+      t = s;
+      while (isdigit((int)*s)) s++;
+      strncpy(u, t, s - t);
+    }
+    grow_append(&A, (void*)u);
+  }
+  c->v = (char**)A.v;
+}
+
+static void
+free_cmd(tm_cmd *c)
+{
+  while (c->n--) free((void*)c->v[c->n]);
+  free((void*)c->v);
+}
+
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
 get_line_from_file(char *prompt, filtre_t *F, FILE *file)
@@ -2300,7 +2375,26 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
       if (logfile) fprintf(logfile, "%s%s\n",prompt,s);
     pariflush();
   }
-  if (GP_DATA->flags & TEXMACS) tm_start_output();
+  if (GP_DATA->flags & TEXMACS) 
+  {
+    if (TeXmacs && *s == DATA_BEGIN)
+    {
+#ifdef READLINE
+      tm_cmd c;
+      parse_texmacs_command(&c, s);
+      if (strcmp(c.cmd, "complete"))
+        err(talker,"TeXmacs command %s not implemented", c.cmd);
+      if (c.n != 2) 
+        err(talker,"was expecting 2 arguments for TeXmacs command");
+      texmacs_completion(c.v[0], atol(c.v[1]));
+      free_cmd(&c); *s = 0;
+#else
+      err(talker, "readline not available");
+#endif
+      return 1;
+    }
+    tm_start_output();
+  }
   return 1;
 }
 
