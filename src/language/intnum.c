@@ -555,7 +555,7 @@ suminit_start(GEN sig)
     sig  = (GEN)sig[1];
   }
   else sig2 = gzero;
-  if (!isinR(sig) || !isinR(sig2)) err(talker, "incorrect abcissa in sumnum");
+  if (!isinR(sig) || !isinR(sig2)) err(talker, "incorrect abscissa in sumnum");
   if (gsigne(sig2) > 0) sig2 = mulcxmI(sig2);
   return mkvec2(mkvec(gone), sig2);
 }
@@ -858,13 +858,11 @@ transcode(GEN a, long warn)
   a2 = (GEN)a[2];
   if (typ(a1) != t_VEC)
   {
-    if (!isinC(a1)) err(talker,"incorrect a or b in intnum");
-    if (!isinR(a2) || gcmpgs(a2, -1) <= 0)
+    if (!isinC(a1) || !isinR(a2) || gcmpgs(a2, -1) <= 0)
       err(talker,"incorrect a or b in intnum");
     return gsigne(a2) < 0 ? f_SING : f_REG;
   }
-  if (lg(a1) != 2) err(talker,"incorrect a or b in intnum");
-  if (!isinC(a2)) err(talker,"incorrect a or b in intnum");
+  if (lg(a1) != 2 || !insinC(a2)) err(talker,"incorrect a or b in intnum");
   return gsigne((GEN)a1[1]) * code_aux(a2, warn);
 }
 
