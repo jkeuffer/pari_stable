@@ -23,6 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define numberof(x) (sizeof(x) / sizeof((x)[0]))
 
+int option_trace = 0;
+long Step_Factor = .01; /* small steps by default */
+ulong DFLT_mod = 17UL;
+
 typedef struct {
   ulong reps, size, type;
   long *var;
@@ -62,12 +66,6 @@ static double speed_endtime() { return (double)TIMER(&__T)/1000.; }
 #endif
 
 /* ========================================================== */
-#if 1
-const ulong DFLT_l = 46337UL; /* default modulus for Flx */
-#else
-const ulong DFLT_l = 0xeffffffUL; /* default modulus for Flx */
-#endif
-
 /* int, n words */
 static GEN
 rand_INT(long n)
@@ -87,8 +85,8 @@ rand_Flx(long n)
 {
   pari_sp av = avma;
   GEN x;
-  do x = FpX_rand(n+1, 0, utoi(DFLT_l)); while (degpol(x) < n);
-  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_l));
+  do x = FpX_rand(n+1, 0, utoi(DFLT_mod)); while (degpol(x) < n);
+  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 
 /* normalized Flx, degree n */
@@ -96,8 +94,8 @@ static GEN
 rand_NFlx(long n)
 {
   pari_sp av = avma;
-  GEN x = gadd(gpowgs(polx[0], n), FpX_rand(n, 0, utoi(DFLT_l)));
-  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_l));
+  GEN x = gadd(gpowgs(polx[0], n), FpX_rand(n, 0, utoi(DFLT_mod)));
+  return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 
 #define t_Flx  100
@@ -156,21 +154,21 @@ static double speed_invmodgmp(speed_param *s)
 { GEN T; enable(s); TIME_FUN(invmod(s->x, s->y, &T)); }
 
 static double speed_Flx_sqr(speed_param *s)
-{ ulong p = DFLT_l; disable(s); TIME_FUN(Flx_sqr(s->x, p)); }
+{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_sqr(s->x, p)); }
 static double speed_Flx_karasqr(speed_param *s)
-{ ulong p = DFLT_l; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
+{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_sqr(s->x, p)); }
 
 static double speed_Flx_inv(speed_param *s)
-{ ulong p = DFLT_l; disable(s);
+{ ulong p = DFLT_mod; disable(s);
   TIME_FUN(Flx_invmontgomery(s->x, p)); }
 static double speed_Flx_invnewton(speed_param *s)
-{ ulong p = DFLT_l; enable(s);
+{ ulong p = DFLT_mod; enable(s);
   TIME_FUN(Flx_invmontgomery(s->x, p)); }
 
 static double speed_Flx_mul(speed_param *s)
-{ ulong p = DFLT_l; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+{ ulong p = DFLT_mod; disable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
 static double speed_Flx_karamul(speed_param *s)
-{ ulong p = DFLT_l; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
+{ ulong p = DFLT_mod; enable(s); TIME_FUN(Flx_mul(s->x, s->y, p)); }
 
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
@@ -192,11 +190,11 @@ static double speed_remiimul(speed_param *s) {
   TIME_FUN( remiimul(op, sM) ); }
 
 static double speed_Flxq_pow_redc(speed_param *s) {
-  ulong p = DFLT_l;
+  ulong p = DFLT_mod;
   enable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
 }
 static double speed_Flxq_pow_mod(speed_param *s) {
-  ulong p = DFLT_l;
+  ulong p = DFLT_mod;
   disable(s); TIME_FUN( Flxq_pow(polx_Flx(0), utoi(p), s->y, p) );
 }
 
@@ -218,17 +216,15 @@ static tune_param param[] = {
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
 {GMP, var(INVMOD_GMP_LIMIT),       t_INT, 3,0, speed_invmod,speed_invmodgmp},
-{0,   var(Flx_MUL_LIMIT),          t_Flx, 1,0, speed_Flx_mul,speed_Flx_karamul},
-{0,   var(Flx_SQR_LIMIT),          t_Flx, 1,0, speed_Flx_sqr,speed_Flx_karasqr},
-{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,1,0,
-                                   speed_Flx_inv,speed_Flx_invnewton},
+{0,   var(Flx_MUL_LIMIT),          t_Flx, 4,0, speed_Flx_mul,speed_Flx_karamul},
+{0,   var(Flx_SQR_LIMIT),          t_Flx, 4,0, speed_Flx_sqr,speed_Flx_karasqr},
+{0,   var(Flx_INVMONTGOMERY_LIMIT),t_NFlx,10,30000,
+                                   speed_Flx_inv,speed_Flx_invnewton,0.3},
 {0,  var(Flx_POW_MONTGOMERY_LIMIT),t_NFlx,1,0,
                                    speed_Flxq_pow_redc,speed_Flxq_pow_mod}
 };
 
 /* ========================================================== */
-int option_trace = 0;
-
 int ndat = 0, allocdat = 0;
 struct dat_t {
   long size;
@@ -346,9 +342,9 @@ one(tune_param *param)
 
 #define DEFAULT(x,n)  if (! (param->x))  param->x = (n);
   DEFAULT(fun2, param->fun1);
-  DEFAULT(step_factor, 0.01); /* small steps by default */
+  DEFAULT(step_factor, Step_Factor);
   DEFAULT(stop_factor, 1.2);
-  DEFAULT(max_size, 1000);
+  DEFAULT(max_size, 10000);
 
   s.type = param->type;
   s.size = param->min_size;
@@ -440,7 +436,21 @@ main(int argc, char **argv)
     char *s = argv[i];
     if (*s == '-') {
       switch(*++s) {
-        case 't': option_trace++; break;
+        case 't': option_trace += 2; break;
+        case 'p':
+          if (!*s)
+          {
+            if (++i == argc) error(argv);
+            s = argv[i];
+          }
+          DFLT_mod = (ulong)atol(s); break;
+        case 's':
+          if (!*s)
+          {
+            if (++i == argc) error(argv);
+            s = argv[i];
+          }
+          Step_Factor = atof(s); break;
         case 'u': s++;
           if (!*s)
           {
