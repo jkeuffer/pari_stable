@@ -857,25 +857,17 @@ gboundfact(GEN n, long lim)
 GEN
 boundfact(GEN n, long lim)
 {
-  GEN p1,p2,p3,p4,p5,y;
-  pari_sp av = avma,tetpil;
+  GEN p1, p2;
+  pari_sp av = avma;
 
-  if (lim<=1) lim=0;
+  if (lim <= 1) lim = 0;
   switch(typ(n))
   {
-    case t_INT:
-      return auxdecomp(n,lim);
+    case t_INT: return auxdecomp(n,lim);
     case t_FRAC:
-      p1=auxdecomp((GEN)n[1],lim);
-      p2=auxdecomp((GEN)n[2],lim);
-      p4=concatsp((GEN)p1[1],(GEN)p2[1]);
-      p5=concatsp((GEN)p1[2],gneg((GEN)p2[2]));
-      p3=indexsort(p4);
-
-      tetpil=avma; y=cgetg(3,t_MAT);
-      y[1]=(long)extract(p4,p3);
-      y[2]=(long)extract(p5,p3);
-      return gerepile(av,tetpil,y);
+      p1 = auxdecomp((GEN)n[1],lim);
+      p2 = auxdecomp((GEN)n[2],lim); p2[2] = (long)gneg_i((GEN)p2[2]);
+      return gerepilecopy(av, merge_factor_i(p1,p2));
   }
   err(arither1);
   return NULL; /* not reached */
