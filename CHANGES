@@ -102,6 +102,8 @@ BA  4- [Description system] Store GP functions in a database in
 MSo 8- allow numtoperm(0,k)  [ --> [] ]
     9- simplify result of basic op. involving complex numbers,
        e.g. I*I --> -1 as t_INT  (was t_COMPLEX)
+   10- embedings of number fields: use x + iy --> (x + y, x - y) instead of
+       (sqrt(2)x, sqrt(2)y) to map complex embeddings to R^2.
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*

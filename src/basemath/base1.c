@@ -1069,27 +1069,28 @@ make_M(nffp_t *F, int trunc)
 static void
 make_G(nffp_t *F)
 {
-  GEN G, m, g, r, M = F->M, sqrt2 = gsqrt(gdeux, F->prec + F->extraprec);
+  GEN G, M = F->M;
   long i, j, k, r1 = F->r1, l = lg(M);
 
   G = cgetg(l, t_MAT);
   for (j=1; j<l; j++)
   {
-    g = cgetg(l, t_COL);
-    G[j] = (long)g; m = (GEN)M[j];
+    GEN g = cgetg(l, t_COL);
+    GEN m = (GEN)M[j];
+    G[j] = (long)g;
     for (k=i=1; i<=r1; i++) g[k++] = m[i];
     for (     ; k < l; i++)
     {
-      r = (GEN)m[i];
+      GEN r = (GEN)m[i];
       if (typ(r) == t_COMPLEX)
       {
-        g[k++] = lmpmul(sqrt2, (GEN)r[1]);
-        g[k++] = lmpmul(sqrt2, (GEN)r[2]);
+        g[k++] = lmpadd((GEN)r[1], (GEN)r[2]);
+        g[k++] = lmpsub((GEN)r[1], (GEN)r[2]);
       }
       else
       {
-        g[k++] = lmpmul(sqrt2, r);
-        g[k++] = zero;
+        g[k++] = (long)r;
+        g[k++] = (long)r;
       }
     }
   }
