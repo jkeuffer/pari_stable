@@ -39,16 +39,15 @@ meaningless.
 \subsec{Conversions}
 
 \fun{long}{ndec2nlong}{long x} convert a number of decimal digits to a number
-of words. Returns
-$$ 1 + \kbd{floor}(x \times \B \log_2 10). $$
+of words. Returns $ 1 + \kbd{floor}(x \times \B \log_2 10)$.
 
 \fun{long}{nbits2nlong}{long x} converts a number of bits to a number of
-words. Returns
-$$ \kbd{floor}((x+\B-1) / \B). $$
+words. Returns the smallest word count containing $x$ bits, i.e $
+\kbd{ceil}(x / \B)$.
 
-\fun{long}{nchar2nlong}{long x} converts a number of chars to a number of
-words. Returns 
-$$ \kbd{floor}((x+\kbd{sizeof(long)}-1) / \kbd{sizeof(long)}). $$
+\fun{long}{nchar2nlong}{long x} converts a number of bytes to number of
+words. Returns the smallest word count containing $x$ bytes, i.e
+$\kbd{ceil}(x / \kbd{sizeof(long)})$.
 
 \fun{long}{bit_accuracy}{long x} converts a \typ{REAL} length into a number
 of significant bits. Returns $(x - 2)\B$. The macro \tet{bit_accuracy_mul(x,y)}
