@@ -1455,7 +1455,7 @@ zidealstarinitall(GEN nf, GEN ideal,long add_gen)
   }
   x = idealhermite(nf,ideal);
   if (!gcmp1(denom(x)))
-    err(talker,"zidealstarinit needs an integral ideal. x =\n%Z",x);
+    err(talker,"zidealstarinit needs an integral ideal: %Z",x);
   p1=cgetg(3,t_VEC); ideal=p1;
   p1[1]=(long)x;
   p1[2]=(long)arch;
