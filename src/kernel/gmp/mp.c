@@ -2284,7 +2284,7 @@ sqri(GEN a) { return sqrispec(a+2, lgefint(a)-2); }
  /**                                                                **/
  /********************************************************************/
 
- #ifdef LONG_IS_64BIT
+#ifdef LONG_IS_64BIT
 long
 expodb(double x)
 {
