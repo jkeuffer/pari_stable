@@ -1124,8 +1124,8 @@ cxgamma(GEN s0, int dolog, long prec)
       { /* 2 Pi ceil( (2Re(s) - 3)/4 ) */
         GEN p2 = mulri(pi2, gceil(gmul2n(subrs(gmul2n(sig,1), 3), -2)));
         /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s) */
-        y = gsub(gadd(glog(gmul2n(Pi2n(-1,prec),-1), prec), y),
-                      glog(gsin(gmul(s,pi), prec), prec));
+        y = gsub(gadd(y, gmul2n(mplog(Pi2n(-1,prec)), -1)),
+                 glog(gsin(gmul(s,pi), prec), prec));
         if (gsigne(imag_i(s)) < 0) setsigne(p2, -signe(p2));
         y[2] = (long)addrr((GEN)y[2], p2);
         p1 = gneg(p1);
