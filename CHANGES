@@ -25,6 +25,7 @@ MD = Mark Dickinson
 MS = Michael Stoll
 MSo= Michael Somos
 MW = Mark Watkins
+NS = Nils Skoruppa
 OR = Olivier Ramare
 OV = Oliver Voigt
 PM = Peter Montgomery
@@ -185,6 +186,7 @@ GH 11- IA64 level0 inline assembly kernel
 BA 12- GP function galoisidentify and groups identification facility
    13- public function GENtoGENstr [ for GP2C ]. (was private: gtostr())
    14- function coefs_to_vec()
+NS 15- support for Qt graphical library [ hi-res plot ]
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]

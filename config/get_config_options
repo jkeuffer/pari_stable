@@ -93,6 +93,10 @@ while test $# -gt 0; do
       with_gmp_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --with-gmp-include=*)
       with_gmp_include=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+
+  --with-qt) with_qt=yes ;;
+  --with-qt=*)
+      with_qt=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   *) echo "*** Unrecognized option $1." >&2; error=true;;
   esac
   shift
@@ -111,7 +115,7 @@ Options: some names can be abbreviated to one character (e.g -h = -help)
 Build Options:
   --host=<arch-osname>  target achitecture
   --kernel=<kern>       kernel used
-  --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot 
+  --graphic=<gr>        graphic library used (default X11) (none X11 Qt gnuplot 
 	gnuplot-dynamic builtin.X11-gnuplot builtin.X11-gnuplot-dynamic)
   --builddir=<dir>      directory where the object files will be created
 Additional developer options:
@@ -139,6 +143,8 @@ Optional libraries:
   --with-gmp[=DIR]            use the GMP kernel [prefix for gmp files]
   --with-gmp-include=DIR      specify location of gmp headers
   --with-gmp-lib=DIR          specify location of gmp libs
+
+  --with-qt[=DIR]             use the Qt graphical library [prefix for Qt dir.]
 
 EOT
 exit 1

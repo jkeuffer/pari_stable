@@ -57,6 +57,11 @@ none)
   plotrunpath=
   graph="$graph plotnull"
   ;;
+qt)
+  PLOTCFLAGS='-D__FANCY_WIN__ -I$(QTDIR)/include'
+  PLOTLIBS='-L$(QTDIR)/lib -lqt'
+  graph="$graph plotQt"
+  ;;
 gnuplot)
   PLOTCFLAGS=
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
@@ -273,9 +278,12 @@ RLLIBS    = $RLLIBS
 # GMP
 GMPINCLUDE = $GMPINCLUDE
 # Graphic library.
+QTDIR      = $QTDIR
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
 GNUPLOT_OBJS = $GNUPLOT_OBJS
+CPLUSPLUS  = g++
+MOC        = \$(QTDIR)/bin/moc
 # Try uncommenting this line if you're using X11 and linking fails
 #  PLOTLIBS=-L$X11 -lX11
 
@@ -579,6 +587,7 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   source="$SRC/$f.c"
   depend=
   cflags="\$(CFLAGS) \$(CPPFLAGS)"
+  compile='$(CC)'
   case "$f" in
   gp|gp_rl)
     cflags="$cflags -I$src/language \$(RLINCLUDE)"
@@ -587,6 +596,11 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   gp_init|plotport)
     cflags="$cflags -I$src/graph"
     depend="$src/graph/rect.h"
+    ;;
+  plotQt)
+    cflags="$cflags \$(PLOTCFLAGS)"
+    depend="$src/graph/rect.h"
+    compile="\$(MOC) -o plotQt.moc.cpp $src/graph/plotQt.c; \$(CPLUSPLUS)"
     ;;
   plot*)
     cflags="$cflags \$(PLOTCFLAGS)"
@@ -604,7 +618,7 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
   esac
 HUGELINE="$HUGELINE
 $f\$(_O): .headers $depend $source
-	\$(CC) -c $cflags -o $f\$(_O) $source"
+	$compile -c $cflags -o $f\$(_O) $source"
   done
 done
 #to avoid execing too many "cat".
