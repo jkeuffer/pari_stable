@@ -9,17 +9,27 @@
 
 # Skip language/init.c, gp/gp_init.c and language/helpmessages.c:
 
+errors='language/errmsg.c'
 messages='language/helpmsg.c'
 gp_init='gp/gp_init.c'
 init_c='language/init.c'
 
 excluded=`perl -e 'print join "\n",
                       grep { $_ ne "'$init_c'"
+			     and $_ ne "'$errors'"
 			     and $_ ne "'$messages'"
 			     and $_ ne "'$gp_init'" }
                            <*/*.[chs]>, <*/*/*.[chs]>'`
 
-etags $excluded
+# Start with errmessages (otherwise enums will come first):
+#  /* suppler2 */
+
+errre='\/\*[ \t]*\([a-zA-Z_0-9]+\)[ \t]*\*\/'
+
+etags -r "/$errre/\\1/"  $errors
+
+# All files which do not require a special processing
+etags -a $excluded
 
 # Process declarations like
 
