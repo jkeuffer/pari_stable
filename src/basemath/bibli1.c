@@ -2684,27 +2684,24 @@ canon_pol(GEN z)
 }
 
 static GEN
-pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta, 
+pols_for_polred(GEN x, GEN a, GEN *pta, 
 		int (*check)(void *, GEN), void *arg)
 {
-  long i, v = varn(x), n = lg(base);
-  GEN p1,p2,p3,y, a = cgetg(n,t_VEC);
+  long i, v = varn(x), n = lg(a);
+  GEN ch,d,y;
 
-  for (i=1; i<n; i++) a[i] = lmul(base,(GEN)LLLbase[i]);
   y=cgetg(n,t_VEC);
   for (i=1; i<n; i++)
   {
     if (DEBUGLEVEL > 2) { fprintferr("i = %ld\n",i); flusherr(); }
-    p1=(GEN)a[i];
-    p1 = primitive_part(p1, &p3);
-    p1 = ZX_caract(x,p1,v);
-    if (p3) p1 = rescale_pol(p1,p3);
-    p2 = modulargcd(derivpol(p1),p1);
-    p3 = leading_term(p2); if (!gcmp1(p3)) p2=gdiv(p2,p3);
-    p1 = gdiv(p1,p2);
-    if (canon_pol(p1) < 0 && pta) a[i] = (long)gneg_i((GEN)a[i]);
-    y[i] = (long)p1; if (DEBUGLEVEL > 3) outerr(p1);
-    if (check && check(arg, p1)) return p1; 
+    ch = QX_caract(x, (GEN)a[i], v);
+    d = modulargcd(derivpol(ch), ch);
+    if (degpol(d)) ch = gdivexact(ch,d);
+
+    if (canon_pol(ch) < 0 && pta) a[i] = (long)gneg_i((GEN)a[i]);
+    if (DEBUGLEVEL > 3) outerr(ch);
+    if (check && check(arg, ch)) return ch; 
+    y[i] = (long)ch;
   }
   if (check) return NULL; /* no suitable polynomial found */
   (void)remove_duplicates(y,a);
@@ -2769,42 +2766,51 @@ nf_get_T(GEN x, GEN w)
   return T;
 }
 
+static GEN
+get_red_T2(GEN T2, GEN base, GEN x, long prec)
+{
+  long i;
+  GEN u;
+  for (i=1; ; i++)
+  {
+    if ((u = lllgramintern(T2,100,1,prec))) return u;
+    if (i == MAXITERPOL) err(accurer,"red_T2");
+    prec = (prec<<1)-2; 
+    if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
+    T2 = nf_get_T2(base, roots(x,prec));
+  }
+}
+
+GEN
+nf_get_LLL(GEN nf)
+{
+  long prec;
+
+  nf = checknf(nf);
+  if (! nf_get_r2(nf)) return lllgramint( gmael(nf,5,4) );
+  prec = nfgetprec(nf);
+  return get_red_T2( gmael(nf,5,3), (GEN)nf[7], (GEN)nf[1], prec );
+}
+
 /* Return the base change matrix giving the an LLL-reduced basis for the
- * maximal order of the nf given by x. Expressed in terms of the standard
- * HNF basis (as polynomials) given in base (ignored if x is an nf)
- */
+ * integer basis of the nf(x). 
+ * base = vector of elts in Z[Y]/(x) generating the maximal order
+ * polr = roots of x, computed to precision prec */
 GEN
 LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
 {
-  GEN T2,p1, x = *ptx;
-  int totally_real,n,i;
+  GEN T2, x = *ptx;
+  int n;
 
-  if (typ(x) != t_POL)
-  {
-    p1=checknf(x); *ptx=x=(GEN)p1[1];
-    base=(GEN)p1[7]; n=degpol(x);
-    totally_real = !signe(gmael(p1,2,2));
-    T2=gmael(p1,5,3); if (totally_real) T2 = ground(T2);
-  }
-  else
-  {
-    n=degpol(x); totally_real = (!prec || sturm(x)==n);
-    if (typ(base) != t_VEC || lg(base)-1 != n)
-      err(talker,"incorrect Zk basis in LLL_nfbasis");
-    if (!totally_real)
-      T2 = nf_get_T2(base,polr? polr: roots(x,prec));
-    else
-      T2 = nf_get_T(x, base);
-  }
-  if (totally_real) return lllgramint(T2);
-  for (i=1; ; i++)
-  {
-    if ((p1 = lllgramintern(T2,100,1,prec))) return p1;
-    if (i == MAXITERPOL) err(accurer,"allpolred");
-    prec=(prec<<1)-2; 
-    if (DEBUGLEVEL) err(warnprec,"allpolred",prec);
-    T2=nf_get_T2(base,roots(x,prec));
-  }
+  if (typ(x) != t_POL) { *ptx = (GEN)x[1]; return nf_get_LLL(x); }
+
+  n = degpol(x);
+  if (typ(base) != t_VEC || lg(base)-1 != n)
+    err(talker,"incorrect Zk basis in LLL_nfbasis");
+  if (!prec || sturm(x)==n) return lllgramint(nf_get_T(x, base));
+
+  T2 = nf_get_T2(base, polr? polr: roots(x,prec));
+  return get_red_T2(T2, base, x, prec);
 }
 
 /* x can be a polynomial, but also an nf or a bnf */
@@ -2840,7 +2846,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
     }
   }
   p1 = LLL_nfbasis(&x,polr,base,prec);
-  y = pols_for_polred(x,base,p1,pta,check,arg);
+  y = pols_for_polred(x, gmul(base,p1), pta, check, arg);
   if (check)
   {
     if (y) return gerepileupto(av, y);
@@ -2950,7 +2956,7 @@ get_polmin(CG_data *d, GEN x)
 {
   GEN g = get_polchar(d,x);
   GEN h = modulargcd(g,derivpol(g));
-  if (lgef(h) > 3) g = gdivexact(g,h);
+  if (degpol(h)) g = gdivexact(g,h);
   return g;
 }
 
@@ -2960,7 +2966,8 @@ chk_gen(void *data, GEN x)
 {
   gpmem_t av = avma;
   GEN g = get_polchar((CG_data*)data,x);
-  if (lgef(modulargcd(g,derivpol(g))) > 3) { avma=av; return NULL; }
+  GEN h = modulargcd(g,derivpol(g));
+  if (degpol(h)) { avma = av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
   return g;
 }
@@ -3150,8 +3157,7 @@ polredabs0(GEN x, long flun, long prec)
   }
   nv = lg(a);
   for (i=1; i<nv; i++)
-    if (canon_pol((GEN)y[i]) < 0 && phimax)
-      a[i] = (long) gneg_i((GEN)a[i]);
+    if (canon_pol((GEN)y[i]) < 0 && phimax) a[i] = (long)gneg_i((GEN)a[i]);
   nv = remove_duplicates(y,a);
 
   if (DEBUGLEVEL)
@@ -3200,25 +3206,25 @@ polredabsnored(GEN x, long prec)
 GEN
 polred(GEN x, long prec)
 {
-  return allpolred(x,(GEN*)0,0,prec);
+  return allpolred(x,NULL,0,prec);
 }
 
 GEN 
 polredfirstpol(GEN x, long prec, int (*check)(void *,GEN), void *arg)
 {
-  return allpolred0(x,(GEN*)0,0,prec,check,arg);
+  return allpolred0(x,NULL,0,prec,check,arg);
 }
 
 GEN
 smallpolred(GEN x, long prec)
 {
-  return allpolred(x,(GEN*)0,1,prec);
+  return allpolred(x,NULL,1,prec);
 }
 
 GEN
 factoredpolred(GEN x, GEN p, long prec)
 {
-  return allpolred(x,(GEN*)0,(long)p,prec);
+  return allpolred(x,NULL,(long)p,prec);
 }
 
 GEN
