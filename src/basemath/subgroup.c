@@ -437,7 +437,7 @@ subgroup_engine(subgp_iter *T)
   if (typ(cyc) != t_VEC)
   {
     if (typ(cyc) != t_MAT) err(typeer,"forsubgroup");
-    cyc = mattodiagonal(cyc);
+    cyc = mattodiagonal_i(cyc);
   }
   for (i=1; i<n-1; i++)
     if (!dvdii((GEN)cyc[i], (GEN)cyc[i+1]))
@@ -449,7 +449,7 @@ subgroup_engine(subgp_iter *T)
       case b_EXACT: break;
       default: T->fun(T, cyc);
     }
-    return;
+    avma = av; return;
   }
   if (!signe(cyc[1])) err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) (void)timer2();
