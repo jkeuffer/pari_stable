@@ -3135,10 +3135,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   /* find the modulus defining N */
   bnr   = buchrayinitgen(bnf, gun);
   dataC = InitQuotient(bnr, gzero);
-  if (gcmp0(flag)) 
-    bnrh  = FindModulus(dataC, 1, &newprec, prec, 0);
-  else
-    bnrh  = FindModulus(dataC, 1, &newprec, prec, -10);
+  bnrh  = FindModulus(dataC, 1, &newprec, prec, gcmp0(flag)? 0: -10);
 
   if (DEBUGLEVEL) msgtimer("FindModulus");
 
