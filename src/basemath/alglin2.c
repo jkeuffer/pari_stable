@@ -1504,7 +1504,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   if (DEBUGLEVEL>5) fprintferr("    first pass in hnffinal done\n");
 
   /* s = # extra redundant generators taken from H
-   *          zc  col-s  co   zc = col ­ lnz
+   *          zc  col-s  co   zc = col - lnz
    *       [ 0 |dep |     ]    i = lnze + lnz - s = lig - s
    *  nlze [--------|  B' ]
    *       [ 0 | H' |     ]    H' = H minus the s rows with a 1 on diagonal
@@ -1634,7 +1634,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     T = cgetg(co, t_MAT); updateT = 0;
     for (j=1; j<co; j++) T[j] = (long)z;
   }
-  /* Look for lines with a single non­0 entry, equal to ±1 */
+  /* Look for lines with a single non-0 entry, equal to ±1 */
   while (i > lk0)
     switch( count(mat,perm[i],col,&n) )
     {

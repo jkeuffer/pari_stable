@@ -1447,7 +1447,7 @@ strtoGENstr_t()
   return x;
 }
 
-/* return the first n0 chars of s as a GEN [s may not be 0­terminated] */
+/* return the first n0 chars of s as a GEN [s may not be 0-terminated] */
 static GEN
 _strtoGENstr(char *s, long n0)
 {

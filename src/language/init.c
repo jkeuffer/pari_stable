@@ -489,9 +489,8 @@ init_stack(size_t size)
   memused = 0; return s;
 }
 
-/* initialise les donnees de la bibliotheque PARI. Peut être précédée d'un
- * appel à pari_addfunctions si on ajoute d'autres fonctions au pool de base.
- */
+/* initialize PARI data. You can call pari_addfunctions() first to add other
+ * routines to the default set */
 void
 pari_init(size_t parisize, ulong maxprime)
 {

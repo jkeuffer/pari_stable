@@ -1,4 +1,4 @@
-AW = Aleksander Wittlin 
+AW = Aleksander Wittlin
 BA = Bill Allombert
 BD = Bill Daly
 BH = Bruno Haible
@@ -38,7 +38,7 @@ Done for version 2.2.5 (released ??/11/2002): [hopefully]
     1- [bnfinit:] typo in be_honest() --> SEGV when cbach2 > cbach [from 2.2.4]
     2- apprpadic() when p = 2 (could not work) + typos
     3- typo in gphelp [detex mode]: ubiquitous "var" in translation [from 2.2.4]
-    4- typo in var_make_safe() [ protecting user variables after trapped 
+    4- typo in var_make_safe() [ protecting user variables after trapped
        "stack overflow" ] --> possible SEGV  [from 2.2.4]
 BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
     6- typo in gp_main_loop: avma not restored properly after allocatemem.
@@ -51,7 +51,7 @@ BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
    10- stack corruption in addition (t_INT + t_PADIC)
    11- factorpadic(z+y,2,4) --> SEGV
    12- wrong result in idealchinese when the y_i had denominator
-BA 13- sigma(n,-1) output a wrong result. 
+BA 13- sigma(n,-1) output a wrong result.
 BA 14- inline alpha assembler broken (registers clobbered)
 GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    16- "break loop" did not react correctly to allocatemem() read from a file
@@ -111,7 +111,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    13- [CVS:] warnings about unknown files (added .cvsignore files)
    14- f()=return \\ return "void"
        g()=return(f()) \\ return eval("void") = 0
-       now g() returns "void" also 
+       now g() returns "void" also
    15- f(x=11,y=x)=local(t=ff(),u=t);1 --> parse error
    16- conjvec([[],[],[]]) --> SEGV
    17- galoisisabelian(x) --> SEGV
@@ -123,7 +123,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
          v = [0,0]; v + [v=0,v=0] --> SEGV
          u = Mod(x*Mod(1,2),polcyclo(25)*Mod(1,2)); sum(i=1,4,u=u^32) --> SEGV
    22- typo in to_Fp_simple [ bnfcertify(bnfinit(x^2-40!)) --> type error ]
-   23- memory leak in gp when handling '&' arguments 
+   23- memory leak in gp when handling '&' arguments
    24- removed hack in gcopy [ did not reset the isclone() flag because
        gunclone checks isonstack(). But other routines may want to use it ].
    25- apparent oo loop in bnfcertify [when computing lower bound for
@@ -161,7 +161,7 @@ MSo44- [gp: \x] missing 'break' statement in escape()
    49- typos in hilbert(), e.g
          hilbert(Mod(1,2), y) --> SEGV,
          hilbert(-1+O(2^3), 12 + O(2^3)) accepted wheras 2-adic precision too
-         low to decide 
+         low to decide
 BA 50- [FreeBSD:] PORTOBJFORMAT undefined by the system --> Configure fails
    51- rnfisnorm() [errors, SEGV]. Had to change the prototype.
 BA 52- Oxxx/Makefile was not compatible with BSD make.
@@ -308,7 +308,7 @@ BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    64- besselj(0,O(1)) [or besseli] --> precision<=0 in gprec.
    65- O(1)' --> O(x^-1)
    66- gcd(O(2^1), O(2^10)) --> O(2^10)
-   67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"  
+   67- polrootspadic(x^2+8*x+4,2,2) -->  "impossible assignment"
    68- one could write() an object to a binary file, corrupting it
 MW 69- ellap(ellinit([0,0,1,-7077,235516]), 1075060289) --> "zero argument in
        an arithmetic function"
@@ -456,7 +456,7 @@ BA  1- New function 'vectorsmall'.
     4- a warning in zsign ("increase precision?") when dubious result
     5- Montgomery reduction (only used in powmodulo() for now)
     6- [experimental] basic tuning utilities (src/test/tune.c) [make tune]
- 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
 
@@ -509,7 +509,7 @@ IZ 41- CLK_TCK may reside in time.h
    43- on \q, "Good bye" --> Goodbye
    44- install() accepted gpnames which were not valid identifiers
    45- bnfinit(x^4+65,,[.1]) --> SEGV   (whenever c < c2)
-   46- when host badily configured (~ not expanded), gp would die on startup 
+   46- when host badily configured (~ not expanded), gp would die on startup
 XR 47- factorpadic(, not a prime, ) --> SEGV
    48- matrix(2,2,i,i, ...) allowed, with weird result
 BA 49- better arguments checking for galoisfixedfield
@@ -518,7 +518,7 @@ XR 51- increase precision automatically when needed in quadhilbertreal
    52- idealstar(bnfinit(polcyclo(5)),11).clgp --> stack error
    53- default(format,"g0.4"); 3./10 --> 0.300004577  [now: 0.3000]
    54- subst() didn't check its arguments (e.g SEGV on t_STR)
-   55- qfbclassno(x < 0): wrong algo when x non fundamental 
+   55- qfbclassno(x < 0): wrong algo when x non fundamental
    56- obscure bugs with types FRACN/RFRACN [when simplifies to INT/POL]
 IZ 57- readline history: while inputing continuation lines, the partial
        command was not put into history until full command was run
@@ -567,7 +567,7 @@ IZ 30- readline history: lines are remembered as they were input (whitespace
        was deleted)
 
   Added
-BA  1- function pith() [= pi(x), naïve implementation]
+BA  1- function pith() [= pi(x), naive implementation]
     2- new target for Makefile: gp.dbg
 BA  3- library functions FpX_roots_to_pol, FqX_roots_to_pol
 BA  4- library function FpX_FpXQ_compo (Brent & Kung)
@@ -653,7 +653,7 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
    53- nfhilbert(nf,a,b, pr | 2) would give bogus result if nf in variable 0 (x)
 MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-4) !]
    55- wrong HNF (reduction not finished) when nblines >> nbcol [hnf(,0) only]
-   56- rare problem in isprincipal (large non Galois base field)--> wrong 
+   56- rare problem in isprincipal (large non Galois base field)--> wrong
        result (generators not required) or infinite loop.
    57- compatibility problems with readline-4.2 (build would fail)
 BA 58- pari format %Z (pariputsf) treated incorrectly on 64bit machines
@@ -721,7 +721,7 @@ TH  5- support cygwin version 1
     9- qfminim(,,,1) --> nonsensical result (typo)
    10- SPARC + gcc-2.97 --> bug in addsmulsi (register reset too soon)
    11- trapping allocatemem() could crash GP
-   
+
   Changed
     1- release PARI under the GNU GPL. Remove COPYRIGHT file, add COPYING
 
@@ -824,7 +824,7 @@ GN  6- squfof implementation
 XR  8- GP interface to hensel_lift functions (polhensellift)
 
   Removed
-    1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
+    1- quadrayimagwei, preliminary implementation to quadray(D < 0)
 
 ===========================================================================
 Done for version 2.0.20.beta (released 07/06/2000):
@@ -863,7 +863,7 @@ PW 29- various bugs in qfminim(,,2) [bound was rounded up + stack corruption]
    31- factorint: isprime() used on factors even within smallfact()
 GN 32- SEGV in mpqs main sieving routine (unsigned comparison)
    33- prevent polredabs from keeping small vectors accumulating in a subfield
-  
+
   Changed
     1- renamed .DOC files to .txt (Explorer was getting confused...)
     2- moved MANIFEST to config/MANIFEST
@@ -944,7 +944,7 @@ DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
 BA 11- bound problems in nfgaloisconj()
    12- infinite loop in do_agm()
    13- "Warning: in Gauss lg(a)=1..." from isprincipalall0
-   14- specific error for precision problems with p-adic ell. curves 
+   14- specific error for precision problems with p-adic ell. curves
 IZ 15- ploth() plots are 1/2-pixel off
 BA 16- result was not always complete in nfgaloisconj()
    17- type(1/y, RFRACN) --> SEGV + check compatibility before applying type()
@@ -952,7 +952,7 @@ BA 16- result was not always complete in nfgaloisconj()
    19- gettime() called the wrong timer(): was reset in debug mode
    20- missing case (doubling) in apell1
    21- gmod(x, mod) replaced by gmul(x, gmodulcp(gun,mod)) in poldivres
-       [obscure bugs when dividing complicated polynomials with mixed 
+       [obscure bugs when dividing complicated polynomials with mixed
         polmods/intmods].
    22- Make sure result is a t_POL before doing a setvarn in caract2_i()
    23- precision problems in ClxModulus (bnrstark()) [check leading term!=0]
@@ -962,7 +962,7 @@ BA 16- result was not always complete in nfgaloisconj()
    27- 'make clean' wasn't thorough
    28- ellpointtoz(e, [0,0]) could correspond to the inverse point
    29- "ideals not coprime" in rnfsteinitz
-BA 30- typo in Configure [CPP] (cc --> CC) 
+BA 30- typo in Configure [CPP] (cc --> CC)
 BA 31- member functions for galoisinit
    32- allowed power series in Mod(). Fixed cryptic error messages.
    33- precision problems in zsigne
@@ -1107,7 +1107,7 @@ IS 27- C++ keywords (new, class) occurred as variable names
    29- Mod(t_FRAC or t_PADIC, t_INT) --> garbage
    30- gcmp1(t_REAL) always false: polylog(2, 1) --> error
    31- (spurious) compiler warnings about variables used before initialization
-   32- memory (possibly) freed twice in buchall + unsafe allocation of matcopy 
+   32- memory (possibly) freed twice in buchall + unsafe allocation of matcopy
    33- online help for matsnf not updated
    34- rnfequation() didn't check its arguments correctly
    35- removed spurious special case in compute_class_number()
@@ -1173,7 +1173,7 @@ YU  3- support for FreeBSD ELF binary format
 BA  6- functions related to Galois theory: galoisinit, galoisfixedfield, etc
     7- [library] trivial function realun()
 
-  Removed 
+  Removed
     1- #define HIGHBITM1 (useless)
     2- files config/tar_[include | exclude] (obsoleted by MANIFEST)
 
@@ -1181,7 +1181,7 @@ BA  6- functions related to Galois theory: galoisinit, galoisfixedfield, etc
 Done for version 2.0.16.beta (released 29/06/1999):
 
   Fixed
-    1- paricfg.tex (needed to compile INSTALL.tex) missing if Configure is 
+    1- paricfg.tex (needed to compile INSTALL.tex) missing if Configure is
        not run. Added a test in parimacro.tex
     2- non-portable casts in galconj.c
     3- 64-bit graph benches (extra spaces)
@@ -1272,7 +1272,7 @@ GH 38- weird bugs in thue() on alpha: typo int <--> long in thue.c
    10- src/kernel/sparcv7/level0.s --> level0.S + include preprocessing stuff
    11- extended matsnf flags: immediate cleanup (backward compatible)
    12- arguments swapped in veceint1
-   13- allow @ markers (??keyword@) in extended help (was apropos only) 
+   13- allow @ markers (??keyword@) in extended help (was apropos only)
    14- do all computations in mppgcd in place (as in Changed-6)
 OR 15- new pari.el (cf emacs/pariemacs.txt)
    16- search multiple lines in apropos extended help (???key)
@@ -1360,7 +1360,7 @@ GH 58- uninitialized variable in poldisc0 (purify warning)
        (starting from a patch by DF+XR)
 GN 60- lllintpartial did not output the right matrix
    61- huge memory leaks in bnrstark
-   62- signed int overflow in allocatemem 
+   62- signed int overflow in allocatemem
    63- parisize (local to gp/gp.c) not updated properly
    64- *sol not properly initialized in subresall
    65- in idealpowred, check whether |n| < 16, not n < 16 (would slow down
@@ -1670,7 +1670,7 @@ GN 43- rare memory bug in ellfacteur
    45- polredabs(,2) didn't handle non-monic polynomials
    46- check for various overflows (x ^ 1000000, etc.)
    47- printtex(I) --> missing closing brace
-   48- setisset() did not check that elements were strings 
+   48- setisset() did not check that elements were strings
    49- typo in gdiv(t_POLMOD, t_POLMOD) with different variables
 KO 50- missing ; in level1.h (Windows specific code)
    51- forprime(p=0,10,) indeed started at p=0
@@ -2429,13 +2429,13 @@ LG 28- incorrect handling of integrals of vectors
    10- Due to 9, pari.el now supposes the prompt starts in col. 1
    11- Better handling of version numbers (LG)
    12- decodefactor() renamed to factorback()
- 
+
    Removed:
     1- The (unused, undocumented) Malloc_Procs functions and macros
     2- The (now unused) error message numvarer
     3- some (useless, undocumented) targets in the top Makefile
     4- (useless, undocumented) function polgcd()
- 
+
    Added:
     1- This file !
     2- new flags -ch, -cb, -cu (colour support) to gphelp (see its header)

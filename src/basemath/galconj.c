@@ -806,8 +806,7 @@ alloue_ardoise(long n, long s)
   return ar;
 }
 
-/*
- * structure contenant toutes les données pour le tests des permutations:
+/* structure containing all data for permutation test:
  * 
  * ordre :ordre des tests pour verifie_test ordre[lg(ordre)]: numero du test
  * principal borne : borne sur les coefficients a trouver ladic: modulo
@@ -873,11 +872,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
     fprintferr("GaloisConj:Sortie Init Test\n");
 }
 
-/*
- * liberer les clones de la structure galois_test
- * 
- * Reservé a l'accreditation ultra-violet:Liberez les clones! Paranoia(tm)
- */
+/* liberer les clones de la structure galois_test */
 static void
 freetest(struct galois_test *td)
 {
@@ -1556,7 +1551,7 @@ splitorbite(GEN O)
  * structure qui contient l'analyse du groupe de Galois par etude des degres
  * de Frobenius:
  * 
- * p: nombre premier a relever deg: degre du lift à effectuer pgp: plus grand
+ * p: nombre premier a relever deg: degre du lift a effectuer pgp: plus grand
  * diviseur premier du degre de T. 
  * l: un nombre premier tel que T est totalement decompose
  * modulo l ppp:  plus petit diviseur premier du degre de T. primepointer:
