@@ -1385,7 +1385,11 @@ cxgamma(GEN s0, int dolog, long prec)
   if (dolog)
   {
     y = gadd(p1, glog(y, prec));
-    if (typ(y) == t_COMPLEX) y[2] = (long)red_mod_2z((GEN)y[2], pi);
+    if (typ(y) == t_COMPLEX) 
+    {
+      y[2] = (long)red_mod_2z((GEN)y[2], pi);
+      if (typ(res) == t_REAL) return gerepilecopy(av, y);
+    }
   }
   else
     y = gmul(gexp(p1, prec), y);
