@@ -2300,6 +2300,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   Uses Tate's algorithm (Anvers IV). Given the remarks at the bottom of
   page 46, the "long" algorithm is used for p < 4 only. */
 static void cumule(GEN *vtotal, GEN *e, GEN u, GEN r, GEN s, GEN t);
+static void cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t);
 
 static GEN
 localred_result(long f, long kod, long c, GEN v)
