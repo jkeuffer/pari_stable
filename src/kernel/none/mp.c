@@ -3341,6 +3341,7 @@ mpsqrtl(GEN a)
     LOCAL_HIREMAINDER;
     LOCAL_OVERFLOW;
     hiremainder = a[2];
+    if (hiremainder >= x) return x;
     z = addll(x, divll(a[3],x));
     z >>= 1; if (overflow) z |= HIGHBIT;
     y = x; x = z;
