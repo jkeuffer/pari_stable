@@ -2901,7 +2901,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
 static GEN
 get_subgroup(GEN subgp, GEN cyc)
 {
-  if (gcmp0(subgp)) return cyc;
+  if (!subgp || gcmp0(subgp)) return cyc;
   return gcmp1(denom(gauss(subgp, cyc)))? subgp: NULL;
 }
 
