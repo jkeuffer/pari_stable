@@ -2082,7 +2082,7 @@ pari_safefopen(char *s, char *mode)
 }
 #else
 pariFILE *
-pari_safeopen(char *s, char *mode)
+pari_safefopen(char *s, char *mode)
 {
   return pari_fopen(s, mode);
 }
