@@ -142,6 +142,7 @@ BA 47- bitneg(1,0) --> SEGV (caused by 2.2.5 A10).
        non-existing components if list not full ]
 BA 59- quoted strings were not displayed properly quoted.
    60- bestappr(0.1, 8) --> 0 [ should be 1/8 ]
+   61- rare bugs in copying routines [ clone bit sometimes not unset ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

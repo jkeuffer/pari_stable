@@ -41,6 +41,7 @@ void   affsi(long s, GEN x);
 void   affui(long s, GEN x);
 void   affsr(long s, GEN x);
 GEN    cgetg(long x, long y);
+GEN    cgetg_copy(long lx, GEN x);
 GEN    cgeti(long x);
 GEN    cgetr(long x);
 int    cmpir(GEN x, GEN y);
@@ -167,6 +168,13 @@ new_chunk(size_t x) /* x is a number of bytes */
   return z;
 }
 
+/* cgetg(lg(x), typ(x)), assuming lx = lg(x). Implicit unsetisclone() */
+INLINE GEN
+cgetg_copy(long lx, GEN x) {
+  GEN y = new_chunk((size_t)lx);
+  y[0] = x[0] & (TYPBITS|LGBITS); return y;
+}
+
 INLINE GEN
 cgetg(long x, long y)
 {
@@ -196,9 +204,8 @@ INLINE GEN
 mpcopy(GEN x)
 {
   register long lx = lg(x);
-  const GEN y = new_chunk((size_t)lx);
-
-  while (--lx >= 0) y[lx]=x[lx];
+  const GEN y = cgetg_copy(lx, x);
+  while (--lx > 0) y[lx] = x[lx];
   return y;
 }
 
@@ -207,8 +214,7 @@ icopy(GEN x)
 {
   register long lx = lgefint(x);
   const GEN y = cgeti(lx);
-
-  while (--lx > 0) y[lx]=x[lx];
+  while (--lx > 0) y[lx] = x[lx];
   return y;
 }
 
