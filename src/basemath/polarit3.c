@@ -733,23 +733,23 @@ FpX_sqr(GEN x,GEN p)
   return FpX_red(z, p);
 }
 static GEN u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr);
+static GEN u_FpX_rem(GEN x, GEN y, ulong p);
 static GEN u_Fp_FpX(GEN x,int malloc, ulong p);
-#define u_FpX_div(x,y,p,malloc) u_FpX_divrem((x),(y),(p),(malloc),NULL)
-#define u_FpX_rem(x,y,p,malloc) u_FpX_divrem((x),(y),(p),(malloc),ONLY_REM)
+#define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
 
 /* Product of y and x in Z/pZ[X]/(pol), as t_VECSMALL. Assume OK_ULONG(p) */
 static GEN
 u_FpXQ_mul(GEN y,GEN x,GEN pol,ulong p)
 {
   GEN z = u_FpX_mul(y,x,p);
-  return u_FpX_rem(z,pol,p, 0);
+  return u_FpX_rem(z,pol,p);
 }
 /* Square of y in Z/pZ[X]/(pol), as t_VECSMALL. Assume OK_ULONG(p) */
 static GEN
 u_FpXQ_sqr(GEN y,GEN pol,ulong p)
 {
   GEN z = u_FpX_sqr(y,p);
-  return u_FpX_rem(z,pol,p, 0);
+  return u_FpX_rem(z,pol,p);
 }
 
 /* Product of y and x in Z/pZ[X]/(pol)
@@ -1904,18 +1904,19 @@ u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr)
     return u_FpX_Fp_mul(x, u_invmod(y[2], p), p, malloc);
   }
   dx = deg(x);
-  x += 2;
-  y += 2; dz = dx-dy;
+  dz = dx-dy;
   if (dz < 0)
   {
     if (pr)
     {
-      c = u_copy(x-2, malloc);
+      c = u_copy(x, malloc);
       if (pr == ONLY_REM) return c;
       *pr = c;
     }
     return u_zeropol(malloc);
   }
+  x += 2;
+  y += 2;
   z = u_allocpol(dz, malloc || (pr == ONLY_REM)) + 2;
   inv = y[dy];
   if (inv != 1UL) inv = u_invmod(inv,p);
@@ -2087,7 +2088,7 @@ u_FpX_gcd(GEN a, GEN b, ulong p)
   if (lgef(b) > lgef(a)) swap(a, b);
   while (signe(b))
   {
-    c = u_FpX_rem(a,b,p,0);
+    c = u_FpX_rem(a,b,p);
     a = b; b = c;
   }
   return a;
@@ -2186,7 +2187,7 @@ FpX_extgcd_long(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
     u=r; d=d1; d1=u;
   }
   u = u_FpX_sub(d, u_FpX_mul(b,v,pp), pp);
-  u = u_FpX_div(u,a,pp,0);
+  u = u_FpX_div(u,a,pp);
   *ptu = u;
   *ptv = v;
   {
@@ -2415,22 +2416,24 @@ powuumod(ulong x, ulong n0, ulong p)
   }
 }
 
-/* set x = x % y */
+/* separate from u_FpX_divrem for maximal speed. Implicitly malloc = 0  */
 static GEN
-u_FpX_rem2(GEN x, GEN y, ulong p)
+u_FpX_rem(GEN x, GEN y, ulong p)
 {
-  GEN z;
+  GEN z, c;
   long dx,dy,dz,i,j;
   ulong p1,inv;
 
-  dy = deg(y); if (!dy) { setsigne(x,0); return x; }
+  dy = deg(y); if (!dy) return u_zeropol(0);
   dx = deg(x);
+  dz = dx-dy; if (dz < 0) return u_copy(x, 0);
   x += 2;
-  y += 2; dz = dx-dy; if (dz < 0) return x;
+  y += 2;
   z = u_allocpol(dz, 1) + 2;
   inv = y[dy];
   if (inv != 1UL) inv = u_invmod(inv,p);
 
+  c = u_allocpol(dy,0) + 2;
   if (u_OK_ULONG(p))
   {
     z[dz] = (inv*x[dx]) % p;
@@ -2445,6 +2448,16 @@ u_FpX_rem2(GEN x, GEN y, ulong p)
       p1 %= p;
       z[i-dy] = p1? ((p - p1)*inv) % p: 0;
     }
+    for (i=0; i<dy; i++)
+    {
+      p1 = z[0]*y[i];
+      for (j=1; j<=i && j<=dz; j++)
+      {
+        p1 += z[j]*y[i-j];
+        if (p1 & HIGHBIT) p1 = p1 % p;
+      }
+      c[i] = subssmod(x[i], p1%p, p);
+    }
   }
   else
   {
@@ -2456,34 +2469,16 @@ u_FpX_rem2(GEN x, GEN y, ulong p)
         p1 = addssmod(p1, mulssmod(z[j],y[i-j],p), p);
       z[i-dy] = p1? mulssmod(p - p1, inv, p): 0;
     }
-  }
-
-  if (u_OK_ULONG(p))
-  {
-    for (i=0; i<dy; i++)
-    {
-      p1 = z[0]*y[i];
-      for (j=1; j<=i && j<=dz; j++)
-      {
-        p1 += z[j]*y[i-j];
-        if (p1 & HIGHBIT) p1 = p1 % p;
-      }
-      x[i] = subssmod(x[i], p1%p, p);
-    }
-  }
-  else
-  {
     for (i=0; i<dy; i++)
     {
       p1 = mulssmod(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
         p1 = addssmod(p1, mulssmod(z[j],y[i-j],p), p);
-      x[i] = subssmod(x[i], p1, p);
+      c[i] = subssmod(x[i], p1, p);
     }
   }
-  i=dy-1; while (i>=0 && !x[i]) i--;
-  x = u_normalizepol(x-2, i+3);
-  free(z-2); return x;
+  i = dy-1; while (i>=0 && !c[i]) i--;
+  free(z-2); return u_normalizepol(c-2, i+3);
 }
 
 ulong
@@ -2506,7 +2501,7 @@ u_FpX_resultant(GEN a, GEN b, ulong p)
   while (db)
   {
     lb = b[db+2]; if (da & db & 1) res = p - res;
-    c = u_FpX_rem(a,b, p,0);
+    c = u_FpX_rem(a,b, p);
     a = b; b = c; dc = deg(c);
     if (dc < 0) { avma = av; return 0; }
   
@@ -2734,22 +2729,24 @@ vec_u_FpX_eval(GEN b, ulong x, ulong p)
   z[i] = leadz; return z;
 }
 
-/* interpolate at roots of 1 and use Hadamard bound for univariate resultant */
-static GEN
+/* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
+ *   bound = N_2(A)^deg B N_2(B)^deg(A),  where  N_2(A) = sqrt(sum (N_1(Ai))^2)
+ * Return B such that bound < 2^B */
+static ulong
 ZY_ZXY_ResBound(GEN A, GEN B)
 {
   ulong av = avma;
-  GEN a = gzero, b = gzero;
+  GEN a = gzero, b = gzero, run = realun(DEFAULTPREC);
   long i , lA = lgef(A), lB = lgef(B);
-  for (i=2; i<lA; i++) a = addii(a, sqri((GEN)A[i]));
+  for (i=2; i<lA; i++) a = gadd(a, gmul(gsqr((GEN)A[i]),run));
   for (i=2; i<lB; i++)
   {
-    GEN t = (GEN)B[i];
-    if (typ(t) != t_INT) t = gnorml1(t, 0);
-    b = addii(b, sqri(t));
+    GEN t = gmul((GEN)B[i], run);
+    if (typ(t) == t_POL) t = gnorml1(t, 0);
+    b = gadd(b, gsqr(t));
   }
-  b = mulii(gpowgs(a, deg(B)), gpowgs(b, deg(A)));
-  return gerepileupto(av, addis(racine(b), 1));
+  b = gmul(gpowgs(a, deg(B)), gpowgs(b, deg(A)));
+  avma = av; return 1 + (gexpo(b)>>1);
 }
 
 /* If lambda = NULL, assume A in Z[Y], B in Q[Y][X], return Res_Y(A,B)
@@ -2759,11 +2756,11 @@ GEN
 ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
 {
   int checksqfree = lambda? 1: 0, delete = 0;
-  ulong av = avma, av2, lim;
+  ulong av = avma, av2, lim, bound;
   long i,n, lb, dres = deg(A)*deg(B0), nmax = (dres+1)>>1;
   long vX = varn(B0), vY = varn(A); /* assume vX < vY */
   GEN x = cgetg(dres+2, t_VECSMALL);
-  GEN y = cgetg(dres+2, t_VECSMALL), cB,B,q,a,b,ev,H,Hp,bound;
+  GEN y = cgetg(dres+2, t_VECSMALL), cB,B,q,a,b,ev,H,Hp;
   byteptr d = diffptr + 3000;
   ulong p = 27449; /* p = prime(3000) */
 
@@ -2788,7 +2785,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
     B = poleval(B0, polx[MAXVARN]);
   lb = lgef(B); b = u_allocpol(deg(B), 0);
   bound = ZY_ZXY_ResBound(A,B);
-  if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: %Z\n",bound);
+  if (DEBUGLEVEL>4) fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
 
   for(;;)
   {
@@ -2826,7 +2823,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
         if (DEBUGLEVEL>4)
         {
           fprintferr("Restarting with lambda = %ld\n",*lambda);
-          fprintferr("bound for resultant coeffs: %Z\n",bound);
+          fprintferr("bound for resultant coeffs: 2^%ld\n",bound);
         }
         continue;
       }
@@ -2835,18 +2832,18 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
       H = init_CRT(Hp, &q, p);
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
       (void)incremental_CRT(H, Hp, &q, p);
-    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld", p);
-    if (cmpii(q, bound) >= 0) break; /* DONE */
+    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
+    if (expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
-      GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &bound; gptr[3] = &B;
+      GEN *gptr[3]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &B;
       if (DEBUGMEM>1) err(warnmem,"ZY_ZXY_resultant");
-      gerepilemany(av2,gptr,lambda? 4: 2); b = u_allocpol(deg(B), 0);
+      gerepilemany(av2,gptr,lambda? 3: 2); b = u_allocpol(deg(B), 0);
     }
   }
   setvarn(H, vX); if (delete) delete_var();
   H = cB? gmul(H, gpowgs(cB, deg(A))): gcopy(H);
-  return gerepileupto(av, gcopy(H));
+  return gerepileupto(av, H);
 }
 
 /* If lambda = NULL, return caract(Mod(B, A)), A,B in Z[X].
@@ -2895,15 +2892,15 @@ ZX_caract(GEN A, GEN B, long v)
 GEN
 ZX_resultant(GEN A, GEN B)
 {
-  ulong av = avma, av2, lim, Hp;
-  GEN q, a, b, H, bound;
+  ulong av = avma, av2, lim, Hp, bound;
+  GEN q, a, b, H;
   byteptr d = diffptr + 3000;
   ulong p = 27449; /* p = prime(3000) */
 
   q = H = NULL;
   av2 = avma; lim = stack_lim(av,2);
   bound = ZY_ZXY_ResBound(A,B);
-  if (DEBUGLEVEL>4) fprintferr("bound for resultant: %Z\n",bound);
+  if (DEBUGLEVEL>4) fprintferr("bound for resultant: 2^%ld\n",bound);
 
   for(;;)
   {
@@ -2915,8 +2912,8 @@ ZX_resultant(GEN A, GEN B)
       H = init_CRT_i(Hp, &q, p);
     else /* could make it probabilistic ??? [e.g if stable twice, etc] */
       (void)incremental_CRT_i(&H, Hp, &q, p);
-    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld", p);
-    if (cmpii(q, bound) >= 0) break; /* DONE */
+    if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
+    if (expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[2]; gptr[0] = &H; gptr[1] = &q;
