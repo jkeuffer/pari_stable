@@ -3940,7 +3940,7 @@ srgcd(GEN x, GEN y)
     if (dx<dy) { swap(x,y); lswap(dx,dy); }
     p1=content(x); p2=content(y); d=ggcd(p1,p2);
 
-    tetpil=avma; d=gmul(d,polun[vx]);
+    tetpil=avma; d = scalarpol(d, vx);
     if (dy==3) return gerepile(av,tetpil,d);
 
     av1=avma; lim=stack_lim(av1,1);
@@ -3982,7 +3982,7 @@ srgcd(GEN x, GEN y)
     x = gmul(d,v);
   }
 
-  if (typ(x)!=t_POL) x = gmul(polun[vx],x);
+  if (typ(x)!=t_POL) x = scalarpol(x, vx);
   else
   {
     p1=leading_term(x); ty=typ(p1);
