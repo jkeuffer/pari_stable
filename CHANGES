@@ -70,6 +70,7 @@ BA 33- bad PARI prototypes in init.c [were confusing GP2C]
 XR 34- nfdisc: fixed cache system in nilord (esp. precision handling)
 BA 35- nfgaloisconj(polcyclo(40)): accuracy lost
        nfgaloisconj(polcyclo(11)+1): oo loop
+IS 36- typo in squfof tuning on 64bit machines
 
   Changed
     1- DOS distribution archives (GPM removed)
