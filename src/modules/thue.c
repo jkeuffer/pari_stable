@@ -1248,14 +1248,11 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
 static long
 get_unit_1(GEN bnf, GEN *unit)
 {
-  GEN tu, v, nf = checknf(bnf);
+  GEN v, nf = checknf(bnf);
   long i, n = degpol(nf[7]);
 
   if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
-
-  tu = gmael3(bnf,8,4,2);
-  /* torsion unit ok iff is -1 and odd degree */
-  if (odd(n) && gcmp_1(tu)) { *unit = tu; return 1; }
+  if (odd(n)) { *unit = stoi(-1); return 1; }
   v = signunits(bnf);
   for (i = 1; i < lg(v); i++)
   {
@@ -1269,36 +1266,49 @@ get_unit_1(GEN bnf, GEN *unit)
 }
 
 GEN
-bnfisintnorm(GEN bnf, GEN a)
+bnfisintnormabs(GEN bnf, GEN a)
 {
-  GEN nf, res, unit, x, Primes;
-  long sa, i, norm_1;
-  pari_sp av = avma;
+  GEN nf, res, x, Primes;
+  long i;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(a)!=t_INT)
     err(talker,"expected an integer in bnfisintnorm");
-  sa = signe(a);
-  if (sa == 0)  return _vec(gzero);
+  if (!signe(a))  return _vec(gzero);
   if (gcmp1(a)) return _vec(gun);
 
   get_sol_abs(bnf, absi(a), &Primes);
 
-  res = cgetg(1,t_VEC); unit = NULL;
-  norm_1 = 0; /* gcc -Wall */
+  res = cget1(sindex+1, t_VEC);
   for (i=1; i<=sindex; i++)
   {
-    long sNx;
     x = normsol[i];
-    if (!Nprimes) { sNx = 1; x = gun; }
+    if (!Nprimes) x = gun;
     else
     {
       x = isprincipalfact(bnf, Primes, vecsmall_to_col(x), NULL,
                           nf_FORCE | nf_GEN_IF_PRINCIPAL);
-      x = basistoalg(nf, x);
-      sNx = signe(gnorm(x));
+      x = gmul((GEN)nf[7], x);
     }
     /* x solution, up to sign */
+    appendL(res, x);
+  }
+  return res;
+}
+
+GEN
+bnfisintnorm(GEN bnf, GEN a)
+{
+  pari_sp av = avma;
+  GEN unit = NULL, z, x, res = bnfisintnormabs(bnf, a), nf = checknf(bnf);
+  long sNx, i, j = 1, l = lg(res), sa = signe(a);
+  long norm_1 = 0; /* gcc -Wall */
+
+  z = cgetg(l, t_VEC);
+  for (i=1; i<l; i++)
+  {
+    x = (GEN)res[1];
+    sNx = signe(subres(x, (GEN)nf[1]));
     if (sNx != sa)
     {
       if (! unit) norm_1 = get_unit_1(bnf, &unit);
@@ -1309,7 +1319,8 @@ bnfisintnorm(GEN bnf, GEN a)
         continue;
       }
     }
-    res = concatsp(res, lift_intern(x));
+    z[j++] = (long)x;
   }
-  return gerepilecopy(av,res);
+  setlg(z, j);
+  return gerepilecopy(av, z);
 }
