@@ -161,6 +161,7 @@ HC 12- gamma function for integral/rational arguments
    33- extracted FpXQ_gener from idealstar
    34- allow more types in gdivround
    35- improved root_bound (first step in factor() over Z[X]) for huge pols.
+   36- faster bernfrac / bernvec
 
   Added
     1- mplog2() function --> faster mplog()
