@@ -1788,6 +1788,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 
     /* that can happen if p does not divide the field discriminant! */
     if (is_pm1(pmr))
+    {
       if (flag)
       {
 	p1 = lift((GEN)factmod(chi, p)[1]);
@@ -1798,6 +1799,7 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
       }
       else
 	return dbasis(p, fx, mf, alph, chi);
+    }
   }
 }
 
