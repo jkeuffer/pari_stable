@@ -1095,6 +1095,8 @@ inteta(GEN q)
   y=gun; qn=gun; ps=gun;
   if (tx==t_PADIC)
   {
+    if (valp(q) <= 0)
+      err(talker,"non-positive valuation in inteta");
     for(;;)
     {
       p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -1108,7 +1110,11 @@ inteta(GEN q)
 
     if (is_scalar_t(tx)) l = -bit_accuracy(precision(q));
     else
-      { v=gvar(q); tx = 0; }
+    {
+      v=gvar(q); tx = 0;
+      if (valp(q) <= 0)
+        err(talker,"non-positive valuation in inteta");
+    }
     for(;;)
     {
       p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
@@ -1178,7 +1184,7 @@ jell(GEN x, long prec)
   long av=avma,tetpil,tx = typ(x);
   GEN p1;
 
-  if (!is_scalar_t(tx))
+  if (!is_scalar_t(tx) || tx == t_PADIC)
   {
     GEN p2,q = qq(x,prec);
     p1=gdiv(inteta(gsqr(q)), inteta(q));
