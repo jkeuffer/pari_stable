@@ -412,6 +412,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
 {
   long l, i, e = e0, k = lg(a) - 1;
   GEN E, v, w, link;
+  pari_timer Ti;
 
   if (k < 2 || e < 1) err(talker, "MultiLift: bad args");
   if (e == 1) return a;
@@ -422,7 +423,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   l = 0; E[++l] = e;
   while (e > 1) { e = (e+1)/2; E[++l] = e; }
 
-  if (DEBUGLEVEL > 3) (void)timer2();
+  if (DEBUGLEVEL > 3) TIMERstart(&Ti);
 
   if (flag != 2)
   {
@@ -430,7 +431,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
     w = cgetg(2*k - 2 + 1, t_VEC);
     link=cgetg(2*k - 2 + 1, t_VECSMALL);
     BuildTree(link, v, w, a, T, p);
-    if (DEBUGLEVEL > 3) msgtimer("building tree");
+    if (DEBUGLEVEL > 3) msgTIMER(&Ti, "building tree");
   }
   else
   {
@@ -443,7 +444,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   for (i = l; i > 1; i--) {
     if (E[i-1] < e) continue;
     TreeLift(link, v, w, T, p, E[i], E[i-1], f, (flag == 0) && (i == 2));
-    if (DEBUGLEVEL > 3) msgtimer("lifting to prec %ld", E[i-1]);
+    if (DEBUGLEVEL > 3) msgTIMER(&Ti, "lifting to prec %ld", E[i-1]);
   }
 
   if (flag)
@@ -1257,6 +1258,21 @@ unscale_pol(GEN P, GEN h)
   return Q;
 }
 
+GEN
+rescale_pol_to_monic(GEN P)
+{
+  long i, l = lgef(P);
+  GEN h, Q = cgetg(l,t_POL), hi = gun;
+  h = (GEN)P[l-1]; Q[l-1] = un;
+  for (i=l-2; i>=2; i--)
+  {
+    Q[i] = lmul((GEN)P[i], hi);
+    hi = gmul(hi,h);
+  }
+  Q[1] = P[1]; return Q;
+}
+
+
 /* Return h^degpol(P) P(x / h) */
 GEN
 rescale_pol(GEN P, GEN h)
@@ -1363,7 +1379,9 @@ u_FpM_Frobenius(GEN u, ulong p)
 {
   long j,N = degpol(u);
   GEN v,w,Q;
-  if (DEBUGLEVEL > 7) (void)timer2();
+  pari_timer T;
+
+  if (DEBUGLEVEL > 7) TIMERstart(&T);
   Q = cgetg(N+1,t_MAT); 
   Q[1] = (long)vecsmall_const(N, 0);
   coeff(Q,1,1) = 1;
@@ -1377,31 +1395,71 @@ u_FpM_Frobenius(GEN u, ulong p)
       w = gerepileupto(av, u_FpX_rem(u_FpX_mul(w, v, p), u, p));
     }
   }
-  if (DEBUGLEVEL > 7) msgtimer("frobenius");
+  if (DEBUGLEVEL > 7) msgTIMER(&T, "frobenius");
   return Q;
+}
+
+long
+u_FpX_nbfact(GEN z, long p)
+{
+  long lgg, nfacp = 0, d = 0, e = degpol(z);
+  GEN g, w, MP = u_FpM_Frobenius(z, p), PolX = pol_to_small(polx[0]);
+
+  w = PolX;
+  while (d < (e>>1))
+  { /* here e = degpol(z) */
+    d++;
+    w = u_FpM_FpX_mul(MP, w, p); /* w^p mod (z,p) */
+    g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
+    lgg = degpol(g);
+    if (!lgg) continue;
+
+    e -= lgg;
+    nfacp += lgg/d;
+    if (DEBUGLEVEL>5)
+      fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
+    if (!e) break;
+    z = u_FpX_div(z, g, p);
+    w = u_FpX_rem(w, z, p);
+  }
+  if (e)
+  {
+    if (DEBUGLEVEL>5) fprintferr("   %3ld factor of degree %3ld\n",1,e);
+    nfacp++;
+  }
+  return nfacp;
+}
+long
+u_FpX_nbroots(GEN f, long p)
+{
+  long n=lgef(f);
+  pari_sp av = avma;
+  GEN z, X;
+  if (n <= 4) return n-3;
+  X = pol_to_small(polx[varn(f)]);
+  z = u_FpXQ_pow(X, utoi(p), f, p);
+  z = u_FpX_sub(z, X, p);
+  z = u_FpX_gcd(z, f, p);
+  avma = av; return degpol(z);
 }
 
 /* Assume a squarefree, degree(a) > 0, a(0) != 0 */
 static GEN
-DDF(GEN a, long hint)
+DDF(GEN a, long hint, int fl)
 {
-  GEN MP, PolX, lead, prime, famod, z, w;
+  GEN lead, prime, famod, z;
   const long da = degpol(a);
-  long chosenp, p, nfacp, d, e, np, nmax;
+  long chosenp, p, nfacp, np, nmax, ti = 0;
   pari_sp av = avma, av1;
   byteptr pt = diffptr;
   const int MAXNP = max(5, (long)sqrt((double)da));
-  long ti = 0;
-  pari_timer T;
+  pari_timer T, T2;
 
-  if (DEBUGLEVEL>2) (void)TIMER(&T);
+  if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }
   if (hint <= 0) hint = 1;
-  if (DEBUGLEVEL > 2) (void)timer2();
   nmax = da+1;
   chosenp = 0;
-  prime = icopy(gun);
   lead = (GEN)a[da+2]; if (gcmp1(lead)) lead = NULL;
-  PolX = u_Fp_FpX(polx[0], 2);
   av1 = avma;
   for (p = np = 0; np < MAXNP; avma = av1)
   {
@@ -1410,53 +1468,46 @@ DDF(GEN a, long hint)
     z = u_Fp_FpX(a, p);
     if (!u_FpX_is_squarefree(z, p)) continue;
 
-    MP = u_FpM_Frobenius(z, p);
-
-    d = 0; e = da; nfacp = 0;
-    w = PolX; prime[2] = p;
-    while (d < (e>>1))
-    {
-      long lgg;
-      GEN g;
-      /* here e = degpol(z) */
-      d++;
-      w = u_FpM_FpX_mul(MP, w, p); /* w^p mod (z,p) */
-      g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
-      lgg = degpol(g);
-      if (!lgg) continue;
-
-      e -= lgg;
-      nfacp += lgg/d;
-      if (DEBUGLEVEL>5)
-        fprintferr("   %3ld fact. of degree %3ld\n", lgg/d, d);
-      if (!e) break;
-      z = u_FpX_div(z, g, p);
-      w = u_FpX_rem(w, z, p);
-    }
-    if (e)
-    {
-      if (DEBUGLEVEL>5) fprintferr("   %3ld factor of degree %3ld\n",1,e);
-      nfacp++;
-    }
+    nfacp = fl? u_FpX_nbroots(z, p): u_FpX_nbfact(z, p);
     if (DEBUGLEVEL>4)
-      fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
-                  p, nfacp, nfacp==1?"": "s", timer2());
+      fprintferr("...tried prime %3ld (%-3ld %s). Time = %ld\n",
+                  p, nfacp, fl?"roots": "factors", TIMER(&T2));
     if (nfacp < nmax)
     {
-      if (nfacp == 1) { avma = av; return _col(a); }
+      if (nfacp <= 1)
+      {
+        if (!fl) { avma = av; return _col(a); } /* irreducible */
+        if (!nfacp) return cgetg(1, t_VEC); /* no root */
+      }
       nmax = nfacp; chosenp = p;
-      if (nmax < 5) break; /* very few factors. Enough */
+      if (da > 100 && nmax < 5) break; /* large degree, few factors. Enough */
     }
     np++;
   }
-  prime[2] = chosenp;
+  prime = stoi(chosenp);
+  if (fl)
+  { /* roots only */
+    GEN pe;
+    long i, m, e;
+    if (lead) a = rescale_pol_to_monic(a);
+    e = logint(root_bound(a), prime, &pe);
+    z = rootpadicfast(a, prime, e);
+    for (m=1,i=1; i<lg(z); i++)
+    {
+      GEN r = centermod((GEN)z[i], pe);
+      if (gcmp0(poleval(a, r))) z[m++] = (long)(lead? gdiv(r,lead): r);
+    }
+    z[0] = evaltyp(t_VEC) | evallg(m);
+    return gerepilecopy(av, z);
+  }
+
   famod = cgetg(nmax+1,t_COL);
   famod[1] = (long)(lead? FpX_normalize(a, prime): FpX_red(a, prime));
-  if (nmax != FpX_split_berlekamp((GEN*)(famod+1),prime))
+  if (nmax != FpX_split_berlekamp((GEN*)(famod+1), prime))
     err(bugparier,"DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
   {
-    if (DEBUGLEVEL>4) msgtimer("splitting mod p = %ld",chosenp);
+    if (DEBUGLEVEL>4) msgTIMER(&T2, "splitting mod p = %ld", chosenp);
     ti = TIMER(&T);
     fprintferr("Time setup: %ld\n", ti);
   }
@@ -1564,7 +1615,7 @@ DDF2(GEN x, long hint)
   GEN L;
   long m;
   x = poldeflate(x, &m);
-  L = DDF(x, hint);
+  L = DDF(x, hint, 0);
   if (m > 1)
   {
     GEN e, v, fa = decomp(stoi(m));
@@ -1584,7 +1635,7 @@ DDF2(GEN x, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = concatsp(L2, DDF(polinflate((GEN)L[i], v[k]), hint));
+        L2 = concatsp(L2, DDF(polinflate((GEN)L[i], v[k]), hint, 0));
       L = L2;
     }
   }
@@ -1663,6 +1714,19 @@ factpol(GEN x, long hint)
   }
   y = fact_from_DDF(fa,ex,n);
   return gerepileupto(av, sort_factor(y, cmpii));
+}
+
+GEN
+polrootsQ(GEN x)
+{
+  pari_sp av = avma;
+  GEN z, d;
+  
+  if (typ(x)!=t_POL) err(notpoler,"polrootsQ");
+  if (!signe(x)) err(zeropoler,"polrootsQ");
+  d = modulargcd(derivpol(x), x);
+  z = DDF(gdeuc(x, d), 1, 1);
+  return gerepilecopy(av, z);
 }
 
 /***********************************************************************/
