@@ -483,7 +483,8 @@ sub get_match
 
   while ($_) {
     @tmp = split(/($open|$close)/);
-    while ($_ = shift(@tmp)) {
+    while ($#tmp >= 0) {
+      $_ = shift(@tmp);
       $obr++ if (/^$open$/);
       if ($parity && $obr == 2) { $ok = 1; last }
       $obr-- if (/^$close$/);
@@ -501,16 +502,19 @@ sub detex
 {
   local ($fun,$args);
   chomp;
+# 1: get the function "prototype"
   $fun = &get_match($_,'{','}');
+  # name
   $fun = &basic_subst($fun);
   $_ = $remainder;
+  # args as $(x)$ in \subsecidx{sin}$(x)$:
   if (/^ *\$/)
   {
     $args = &basic_subst(&get_match($_,'\$','\$'));
     $_ = $remainder;
   }
-  $_ = &basic_subst($_);
-  $_ = <DOC> if (!$_);
+  $_ = <DOC> if (!&basic_subst($_));
+  # dft value as (...) in \subsecidx{echo} (default \kbd{0})
   if (/^ *\(/)
   {
     $args .= ' (' . &basic_subst(&get_match($_,'\(','\)')) . ')';
@@ -520,7 +524,7 @@ sub detex
 
   $fun = "\@[startbold]$fun\@[endbold]$args";
   if ($raw) { print("$fun "); } else { &TeXprint($fun); } 
-
+# 2: start parsing the function description
   if ($_) { s/^ *://; &presubst(); }
   while (<DOC>)
   {
