@@ -1808,19 +1808,12 @@ rootpadicliftroots(GEN f, GEN S, GEN q, long e)
 GEN
 rootpadicfast(GEN f, GEN p, long e)
 {
-  pari_sp ltop=avma;
-  GEN S,y;
-  S=lift(rootmod(f,p));/*no multiplicity*/
-  if (lg(S)==1)/*no roots*/
-  {
-    avma=ltop;
-    return cgetg(1,t_COL);
-  }
-  S=gclone(S);
-  avma=ltop;
-  y=rootpadicliftroots(f,S,p,e);
-  gunclone(S);
-  return y;
+  pari_sp av = avma;
+  GEN y, S = FpX_roots(f, p); /*no multiplicity*/
+  if (lg(S)==1) { avma = av; return cgetg(1,t_COL); }
+  S = gclone(S); avma = av;
+  y = rootpadicliftroots(f,S,p,e);
+  gunclone(S); return y;
 }
 /* Same as rootpadiclift for the polynomial X^n-a,
  * but here, n can be much larger.
