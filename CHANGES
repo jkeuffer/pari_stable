@@ -48,6 +48,11 @@ XR 11- bnrstark initializations (incorrect when field not totally real)
    17- sqrt(Mod(0,1)) --> oo loop (+ improved a bit mpsqrtmod)
    18- no GC in norml2
 IZ 19- tex2mail had difficulties with rational functions
+   20- (rare) SIGBUS in quadclassunit(non-fundamental discriminant)
+   21- g()=f()==0 --> syntax error
+   22- } as last char of an input file (missing a final \n) caused problems
+   23- ??keyword@ didn't work properly (pattern modified between chapters)
+BA 24- bug in galconj.c:corediscpartial (could return half integer)
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
@@ -57,6 +62,7 @@ IZ  4- output of \x (a bit more verbose)
 
   Added
 BA  1- Pocklington-Lehmer primality prover
+BA  2- Fp-isom (library)
 
 ===========================================================================
 Done for version 2.0.19.beta (released 17/03/2000):
