@@ -1109,7 +1109,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   cyc = gmael3(bnf,8,1,2); c = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3);
   ex = cgetg(c+1,t_COL);
-  if (c == 0 && !(flag & (nf_GEN|nf_GEN_IF_PRINCIPAL))) return ex;
+  if (c == 0 && !(flag & (nf_GEN|nf_GENMAT|nf_GEN_IF_PRINCIPAL))) return ex;
 
   /* factor x */
   x = Q_primitive_part(x, &xc);
@@ -1133,7 +1133,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
     Q[i] = (long)truedvmdii((GEN)Q[i], (GEN)cyc[i], (GEN*)(ex+i));
   if ((flag & nf_GEN_IF_PRINCIPAL))
     { if (!gcmp0(ex)) return gzero; }
-  else if (!(flag & nf_GEN))
+  else if (!(flag & (nf_GEN|nf_GENMAT)))
     return gcopy(ex);
 
   /* compute arch component of the missing principal ideal */
@@ -1195,7 +1195,7 @@ triv_gen(GEN nf, GEN x, long c, long flag)
   GEN y;
   if (flag & nf_GEN_IF_PRINCIPAL)
     return (typ(x) == t_COL)? gcopy(x): algtobasis(nf,x);
-  if (!(flag & nf_GEN)) return zerocol(c);
+  if (!(flag & (nf_GEN|nf_GENMAT))) return zerocol(c);
   y = cgetg(4,t_VEC);
   y[1] = (long)zerocol(c);
   y[2] = (long)((typ(x) == t_COL)? gcopy(x): algtobasis(nf,x));
@@ -1246,7 +1246,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   long l = lg(e), i, prec, c;
   gpmem_t av = avma;
   GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
-  int gen = flag & (nf_GEN | nf_GENMAT);
+  int gen = flag & (nf_GEN|nf_GENMAT);
 
   prec = prec_arch(bnf);
   if (gen)
@@ -1275,17 +1275,17 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
     GEN y = _isprincipal(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
-      if (gen && typ(y) == t_VEC)
+      GEN u = (GEN)y[2];
+      if (!gen || typ(y) != t_VEC) return gerepileupto(av,y);
+      if (flag & nf_GENMAT)
+        y[2] = (isnfscalar(u) && gcmp1((GEN)u[1]))? id[2]
+                                                  :(long)arch_mul((GEN)id[2],u);
+      else
       {
-        GEN u = lift_intern(basistoalg(nf, (GEN)y[2]));
-        if (flag & nf_GENMAT)
-          y[2] = (gcmp1(u)&&lg(id[2])>1)? id[2]:
-                                          (long)arch_mul((GEN)id[2], (GEN)y[2]);
-        else
-          y[2] = (long)algtobasis(nf, gmul((GEN)id[2], u));
-        y = gcopy(y);
+        u = lift_intern(basistoalg(nf, u));
+        y[2] = (long)algtobasis(nf, gmul((GEN)id[2], u));
       }
-      return gerepileupto(av,y);
+      return gerepilecopy(av, y);
     }
 
     if (flag & nf_GIVEPREC)
@@ -2346,8 +2346,7 @@ makecycgen(GEN bnf)
       if (y && !fact_ok(nf,y,NULL,gen,(GEN)D[i])) y = NULL;
       if (y) { h[i] = (long)to_famat_all(y,gun); continue; }
     }
-    y = isprincipalfact(bnf, gen, (GEN)D[i], NULL,
-                        nf_GEN|nf_GENMAT|nf_FORCE);
+    y = isprincipalfact(bnf, gen, (GEN)D[i], NULL, nf_GENMAT|nf_FORCE);
     h[i] = y[2];
   }
   return h;
@@ -2386,7 +2385,7 @@ makematal(GEN bnf)
       ma[j] = (long)y; continue;
     }
 
-    if (!y) y = isprincipalfact(bnf,pFB,ex,C, nf_GEN|nf_FORCE|nf_GIVEPREC);
+    if (!y) y = isprincipalfact(bnf,pFB,ex,C, nf_GENMAT|nf_FORCE|nf_GIVEPREC);
     if (typ(y) != t_INT)
     {
       if (DEBUGLEVEL>1) fprintferr("%ld ",j);
