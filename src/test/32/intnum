@@ -3,7 +3,7 @@
 ? \p96
    realprecision = 96 significant digits
 ? intcirc(s=1,0.5,zeta(s))-1
--1.001878740 E-94 - 8.04830905 E-97*I
+-1.001878740 E-94 - 1.176277285 E-97*I
 ? intlaplaceinv(x=2,1,1/x)-1
 7.37240875280988848267836598625171458524622502643 E-55 + 1.71877297004949632
 7338218359953890598325317989596 E-54*I
@@ -85,5 +85,5 @@
 ? a-b
 -1.390671162 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 89440
+Total time spent: 91650
 ? \q
