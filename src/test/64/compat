@@ -2073,7 +2073,6 @@ mod(2, 7)
 mod(2, 7)
 ? mod(10873,49649)^-1
   ***   impossible inverse modulo: mod(131, 49649).
-
 ? modreverse(mod(x^2+1,x^3-x-1))
 mod(x^2 - 3*x + 2, x^3 - 5*x^2 + 8*x - 5)
 ? move(0,243,583);cursor(0)
