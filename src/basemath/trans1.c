@@ -1358,6 +1358,10 @@ gexp(GEN x, long prec)
 /**                      FONCTION LOGARITHME                       **/
 /**                                                                **/
 /********************************************************************/
+
+long LOGAGM_LIMIT  = 60 ;
+
+
 /* 2 * atanh(1/3) */
 GEN
 constlog2(long prec)
@@ -1405,16 +1409,17 @@ GEN
 mplog(GEN x)
 {
   pari_sp ltop, av;
-  long EX,l,l1,l2,m,n,k,ex,s;
+  long EX,l1,l2,m,n,k,ex,s;
   double a, b;
   GEN z,p1,y,y2,p4,p5,unr;
   ulong u;
+  long l = lg(x);
 
   if (typ(x)!=t_REAL) err(typeer,"mplog");
   if (signe(x)<=0) err(talker,"non positive argument in mplog");
-
+  if (l>LOGAGM_LIMIT) return logagm(x);
   av = avma;
-  l = lg(x); EX = expo(x);
+  EX = expo(x);
   z = cgetr(l); ltop = avma;
 
   l2 = l+1; y=p1=cgetr(l2); affrr(x,p1);
