@@ -928,26 +928,7 @@ Fp_isom(GEN l,GEN P,GEN Q)
   R=Fp_compo_mod_pol(R,B,Q,l);
   return gerepileupto(ltop,R);
 }
-#if 0
-static bnfactor(P,l,d)
-{
-	GEN A,R;
-	long n,k,m;
-	n=poldegree(P);
-	A=;
-	m=n/d;
-	R=polun[varn(P)];
-	for(k=0,k<m;k++)
-	{
-	  R=Fp_mul(R,deg1pol(
-	  prod(k=0,n/d-1,x-A^(l^(d*k)));
-	}
-}
-GEN factorrel(GEN P, GEN l, GEN Q)
-{
-  
-}
-#endif 
+
 /*******************************************************************/
 int ff_poltype(GEN *x, GEN *p, GEN *pol);
 
