@@ -59,7 +59,7 @@ if test -n "$DLLD"; then
   else # DLLD != GNU ld
     case "$osname" in
       aix)     DLLDFLAGS="-brtl -r" ;;
-      hpux)    DLLDFLAGS="-b -E" ;;
+      hpux)    DLLDFLAGS="-b" ;;
       freebsd) DLLDFLAGS="-Bshareable -x" ;;
       irix)    DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
       osf1)    DLLDFLAGS="-shared" ;;

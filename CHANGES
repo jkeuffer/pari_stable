@@ -60,6 +60,7 @@ IS 13- gp-dyn build on AIX
    16- Conpiling with g++ + gmp, missing gmp version number [missing stdio.h]
 IS 17- [AIX:] various compilation problems + select better CFLAGS
        (-qtune=auto -qmaxmem=8192)
+IS 18- [HPUX:] remove -E from DLCFLAGS
 
   Changed
     1- rnf structure (removed useless components)
