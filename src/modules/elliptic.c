@@ -2684,7 +2684,7 @@ taniyama(GEN e)
   v[2] = un;
   c=gtoser(anell(e,precdl+1),0); setvalp(c,1);
   d=ginv(c); c=gsqr(d);
-  for (n=-3; n<=precdl-4; n++)
+  for (n=-3; n<=(long)precdl-4; n++)
   {
     if (n!=2)
     {
