@@ -119,8 +119,6 @@ Kernel:
 
 4  benchmark / profile basic functions and see what needs to be done
 
-4  finish t_REAL Karatsuba and diviiexact
-
 4  inline level0 routines should operate on _limbs_, not on words.
 
 4  use divide & conquer approach in string / integer conversions

@@ -157,6 +157,7 @@ IZ 29- improve portability of make_vi_tags (cf 'make ctags')
    30- using install() twice on the same symbol now updates the prototype code
    31- re-enable ranlib support (disabled in 2.0.13)
    32- declare first argument in pariputs[f] as 'const char*'
+   33- enabled Karatsuba multiplication for t_REAL
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

@@ -907,22 +907,74 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
+#define MULRR_LIMIT  32
+#define MULRR2_LIMIT 32
+
+static GEN addshiftw(GEN x, GEN y, long d);
+static GEN quickmulii(GEN a, GEN b, long na, long nb);
+
+static GEN
+karamulrr1(GEN y, GEN x, long ly, long lz)
+{
+  long i, l, lz2 = (lz+2)>>1, lz3 = lz-lz2;
+  GEN lo1, lo2, hi;
+
+  hi = quickmulii(x,y, lz2,lz2);
+  i = lz2; while (i<lz && !x[i]) i++;
+  lo1 = quickmulii(y,x+i, lz2,lz-i);
+  i = lz2; while (i<ly && !y[i]) i++;
+  lo2 = quickmulii(x,y+i, lz2,ly-i);
+  if (signe(lo1))
+  {
+    if (ly!=lz) { lo2 = addshiftw(lo1,lo2,1); lz3++; }
+    else lo2 = addii(lo1,lo2);
+  }
+  l = lgefint(lo2)-(lz3+2);
+  if (l > 0) hi = addiispec(hi+2,lo2+2, lgefint(hi)-2,l);
+  return hi;
+}
+
 GEN
 mulrr(GEN x, GEN y)
 {
-  long sx = signe(x), sy = signe(y);
-  long i,j,ly,lz,lzz,e,flag,p1;
+  long sx = signe(x), sy = signe(y), e = expo(x)+expo(y);
+  long i, j, ly, lz, lzz, flag, p1;
   ulong garde;
   GEN z, y1;
   LOCAL_HIREMAINDER;
   LOCAL_OVERFLOW;
 
-  e = expo(x)+expo(y);
   if (!sx || !sy) return realzero_bit(e);
-  if (sy<0) sx = -sx;
-  lz=lg(x); ly=lg(y);
+  if (sy < 0) sx = -sx;
+  lz = lg(x); ly = lg(y);
   if (lz>ly) { lz=ly; z=x; x=y; y=z; flag=1; } else flag = (lz!=ly);
-  z=cgetr(lz);
+  z = cgetr(lz);
+  if (lz > MULRR_LIMIT) 
+  { /* use Karatsuba */
+#if 1
+    GEN hi = quickmulii(y+2, x+2, lz+flag-2, lz-2);
+#else
+    GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2);
+#endif
+    long i, garde = hi[lz];
+    if (hi[2] < 0)
+    {
+      e++;
+      for (i=2; i<lz ; i++) z[i] = hi[i];
+    }
+    else
+    {
+      garde <<= 1;
+      shift_left(z,hi,2,lz-1, garde, 1);
+    }
+    if (garde < 0)
+    { /* round to nearest */
+      i=lz; do z[--i]++; while (z[i]==0);
+      if (i==1) z[2] = HIGHBIT;
+    }
+    z[1] = evalsigne(sx)|evalexpo(e);
+    avma = (pari_sp)z; return z;
+  }
   if (lz==3)
   {
     if (flag)
@@ -933,7 +985,7 @@ mulrr(GEN x, GEN y)
     else
       garde = mulll(x[2],y[2]);
     if ((long)hiremainder<0) { z[2]=hiremainder; e++; }
-    else z[2]=(hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
+    else z[2] = (hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
     z[1] = evalsigne(sx)|evalexpo(e);
     return z;
   }
@@ -2585,118 +2637,6 @@ quicksqri(GEN a, long na)
 
 GEN
 sqri(GEN a) { return quicksqri(a+2, lgefint(a)-2); }
-
-#define MULRR_LIMIT  32
-#define MULRR2_LIMIT 32
-
-#if 0
-GEN
-karamulrr1(GEN x, GEN y)
-{
-  long sx,sy;
-  long i,i1,i2,lx=lg(x),ly=lg(y),e,flag,garde;
-  long lz2,lz3,lz4;
-  GEN z,lo1,lo2,hi;
-
-  /* ensure that lg(y) >= lg(x) */
-  if (lx>ly) { lx=ly; z=x; x=y; y=z; flag=1; } else flag = (lx!=ly);
-  if (lx < MULRR_LIMIT) return mulrr(x,y);
-  sx=signe(x); sy=signe(y); e = expo(x)+expo(y);
-  if (!sx || !sy) return realzero_bit(e);
-  if (sy<0) sx = -sx;
-  ly=lx+flag; z=cgetr(lx);
-  lz2 = (lx>>1); lz3 = lx-lz2;
-  x += 2; lx -= 2;
-  y += 2; ly -= 2;
-  hi = quickmulii(x,y,lz2,lz2);
-  i1=lz2; while (i1<lx && !x[i1]) i1++;
-  lo1 = quickmulii(y,x+i1,lz2,lx-i1);
-  i2=lz2; while (i2<ly && !y[i2]) i2++;
-  lo2 = quickmulii(x,y+i2,lz2,ly-i2);
-
-  if (signe(lo1))
-  {
-    if (flag) { lo2 = addshiftw(lo1,lo2,1); lz3++; } else lo2=addii(lo1,lo2);
-  }
-  lz4=lgefint(lo2)-lz3;
-  if (lz4>0) hi = addiispec(hi+2,lo2+2, lgefint(hi)-2,lz4);
-  if (hi[2] < 0)
-  {
-    e++; garde=hi[lx+2];
-    for (i=lx+1; i>=2 ; i--) z[i]=hi[i];
-  }
-  else
-  {
-    garde = (hi[lx+2] << 1);
-    shift_left(z,hi,2,lx+1, garde, 1);
-  }
-  z[1]=evalsigne(sx) | evalexpo(e);
-  if (garde < 0)
-  { /* round to nearest */
-    i=lx+2; do z[--i]++; while (z[i]==0);
-    if (i==1) z[2]=HIGHBIT;
-  }
-  avma=(pari_sp)z; return z;
-}
-
-GEN
-karamulrr2(GEN x, GEN y)
-{
-  long sx,sy,i,lx=lg(x),ly=lg(y),e,flag,garde;
-  GEN z,hi;
-
-  if (lx>ly) { lx=ly; z=x; x=y; y=z; flag=1; } else flag = (lx!=ly);
-  if (lx < MULRR2_LIMIT) return mulrr(x,y);
-  ly=lx+flag; sx=signe(x); sy=signe(y);
-  e = expo(x)+expo(y);
-  if (!sx || !sy) return realzero_bit(e);
-  if (sy<0) sx = -sx;
-  z=cgetr(lx);
-  hi=quickmulii(y+2,x+2,ly-2,lx-2);
-  if (hi[2] < 0)
-  {
-    e++; garde=hi[lx];
-    for (i=2; i<lx ; i++) z[i]=hi[i];
-  }
-  else
-  {
-    garde = (hi[lx] << 1);
-    shift_left(z,hi,2,lx-1, garde, 1);
-  }
-  z[1]=evalsigne(sx) | evalexpo(e);
-  if (garde < 0)
-  { /* round to nearest */
-    i=lx; do z[--i]++; while (z[i]==0);
-    if (i==1) z[2]=HIGHBIT;
-  }
-  avma=(pari_sp)z; return z;
-}
-
-GEN
-karamulrr(GEN x, GEN y, long flag)
-{
-  switch(flag)
-  {
-    case 1: return karamulrr1(x,y);
-    case 2: return karamulrr2(x,y);
-    default: err(flagerr,"karamulrr");
-  }
-  return NULL; /* not reached */
-}
-
-GEN
-karamulir(GEN x, GEN y, long flag)
-{
-  long sx=signe(x),lz,i;
-  GEN z, z1;
-
-  if (!sx) return gzero;
-  lz = lg(y); z = cgetr(lz);
-  z1 = karamulrr(itor(x, lz+1), y, flag);
-  for (i=1; i<lz; i++) z[i]=z1[i];
-  avma=(pari_sp)z; return z;
-}
-#endif
 
 #ifdef LONG_IS_64BIT
 long
