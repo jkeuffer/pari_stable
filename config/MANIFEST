@@ -29,6 +29,7 @@ config/MANIFEST
 config/Makefile.DLLs
 config/Makefile.SH
 config/TOP_Make.SH
+config/ansi.c
 config/arch-osname
 config/display
 config/endian.c

@@ -72,13 +72,16 @@ EOT
   CC=$ans
 fi
 
-exe=$osname-$arch-gnu$$
-if ($CC gnu.c 2>/dev/null); then :
+exe=$osname-$arch-ansi$$
+if ($CC ansi.c 2>/dev/null); then :
 else
-  echo "***************************************************************"
-  echo "*  C compiler is not functional. Aborting.                    *"
-  echo "***************************************************************"
-  echo "Compiler was: $CC"
+  cat << EOT
+******************************************************************
+* C compiler does not work. PARI/GP requires an ANSI C compiler! *
+* Aborting.                                                      *
+******************************************************************
+Compiler was: $CC"
+EOT
   exit 1;
 fi
 rm -f $exe $exe$exe_suff
@@ -165,7 +168,6 @@ if test "$fastread" != yes; then
   CFLAGS=$ans
 fi
 
-# Here we should check it is an ANSI compiler...
 echo "C compiler is          $CC  $CFLAGS"
 
 # Which C PreProcessor ?
