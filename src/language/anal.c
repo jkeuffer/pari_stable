@@ -3115,6 +3115,7 @@ trap0(char *e, char *r, char *f)
   if (r)
   { /* explicit recovery text */
     jmp_buf env;
+    char *a = analyseur;
     if (setjmp(env)) 
     {
       avma = av;
@@ -3128,6 +3129,7 @@ trap0(char *e, char *r, char *f)
       x = lisseq(f);
       (void)err_leave(numerr);
     }
+    analyseur = a;
     return x;
   }
 

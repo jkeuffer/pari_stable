@@ -37,6 +37,8 @@ Done for version ??? (released ??/??/2000):
     7- 'make clean' didn't affect doc
     8- Configure didn't detect some SuperSparc + Linux combination
     9- forprime (and friends) could crash when loop index was tampered with
+   10- trap(, -1, (1/0)) == -1 ---> -1 (analyseur not reset)
+
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
