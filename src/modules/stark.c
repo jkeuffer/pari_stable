@@ -2600,16 +2600,20 @@ define_hilbert(void *S, GEN pol)
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
    disjoint */
 static GEN
-makescind(GEN bnf, GEN polabs, long cl, long prec)
+makescind(GEN nf, GEN polrel, long cl, long prec)
 {
   long i, l;
   gpmem_t av = avma;
-  GEN pol, p1, nf2, dabs, dk, bas;
+  GEN pol, polabs, p1, nf2, dabs, dk, bas;
   DH_t T;
 
-  /* check the result (a little): signature and discriminant */
-  bas = allbase4(polabs,0,&dabs,NULL);
-  dk  = gmael(bnf,7,3);
+  p1 = rnfpolredabs(nf, polrel, 6, prec);
+  polabs = (GEN)p1[1];
+  bas    = (GEN)p1[2];
+  dabs = gmul(ZX_disc(polabs), gsqr(det2(vecpol_to_mat(bas, 2*cl))));
+
+  /* check result (a little): signature and discriminant */
+  dk  = (GEN)nf[3];
   if (!egalii(dabs, gpowgs(dk,cl)) || sturm(polabs) != 2*cl)
     err(bugparier, "quadhilbert");
 
@@ -2622,7 +2626,7 @@ makescind(GEN bnf, GEN polabs, long cl, long prec)
 
   if (!pol)
   {
-    nf2 = nfinit0(polabs, 1, prec);
+    nf2 = nfinit0(p1, 1, prec);
     p1  = subfields(nf2, stoi(cl));
     l = lg(p1);
     if (DEBUGLEVEL) msgtimer("subfields");
@@ -2636,7 +2640,7 @@ makescind(GEN bnf, GEN polabs, long cl, long prec)
       for (i = 1; i < l; i++)
       {
         pol = gmael(p1, i, 1);
-        if (degpol(gcoeff(nffactor(bnf, pol), 1, 1)) == cl) break;
+        if (degpol(gcoeff(nffactor(nf, pol), 1, 1)) == cl) break;
       }
     if (i == l)
       err(bugparier, "makescind (no polynomial found)");
@@ -2933,10 +2937,11 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   }
 
   /* use the generic function AllStark */
-  pol = AllStark(bnrh, nf, 2, newprec);
-  (void)delete_var();
+  pol = AllStark(bnrh, nf, 1, newprec);
   err_leave(&catcherr);
-  return gerepileupto(av, makescind(bnf, pol, cl, prec));
+  pol = makescind(nf, pol, cl, prec);
+  (void)delete_var();
+  return gerepileupto(av, pol);
 }
 
 static GEN

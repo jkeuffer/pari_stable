@@ -3765,11 +3765,12 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
 /* relative polredabs. Returns
  * flag = 0: relative polynomial
  * flag = 1: relative polynomial + element
- * flag = 2: absolute polynomial */
+ * flag = 2: absolute polynomial
+ * flag = 6: absolute polynomial + integer basis */
 GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
 {
-  GEN eq,p1,bpol,elt,pol,T,a;
+  GEN red, bas, eq, p1, elt, POL, pol, T, a;
   long v;
   gpmem_t av = avma;
 
@@ -3783,18 +3784,33 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
   if (signe(a))
     relpol = poleval(relpol, gsub(polx[v],
                              gmul(a, gmodulcp(polx[varn(T)],T))));
-  p1 = makebasis(nf, relpol, eq);
+  bas = makebasis(nf, relpol, eq);
+  POL = (GEN)bas[1];
   if (DEBUGLEVEL>1)
   {
     msgtimer("absolute basis");
-    fprintferr("original absolute generator: %Z\n",p1[1]);
+    fprintferr("original absolute generator: %Z\n", POL);
   }
-  p1 = polredabs0(p1, nf_RAW | nf_NORED, prec);
-  bpol = (GEN)p1[1];
-  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",bpol);
-  if (flag==2) return gerepileupto(av,bpol);
+  red = polredabs0(bas, (flag==6)? nf_ORIG: nf_RAW | nf_NORED, prec);
+  pol = (GEN)red[1];
+  if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
+  if (flag == 2) return gerepileupto(av,pol);
+  if (flag == 6)
+  {
+    GEN v, t = (GEN)red[2], B = (GEN)bas[2];
+    long i, l = lg(B);
 
-  elt = eltabstorel((GEN)p1[2], T, relpol, a);
+    v = cgetg(l, t_VEC);
+    v[1] = un; t = lift_intern(t);
+    v[2] = (long)t;
+    for (i=3; i<l; i++) v[i] = lres(gmul((GEN)v[i-1], t), pol);
+    p1 = cgetg(3, t_VEC);
+    p1[1] = (long)pol; v = gmul(v,B);
+    p1[2] = (long)v;
+    return gerepilecopy(av, p1);
+  }
+
+  elt = eltabstorel((GEN)red[2], T, relpol, a);
 
   p1 = cgetg(3,t_VEC);
   pol = rnfcharpoly(nf,relpol,elt,v);
