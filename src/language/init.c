@@ -795,24 +795,6 @@ disable_dbg(long val)
     { oldval = DEBUGLEVEL; DEBUGLEVEL = val; }
 }
 
-void
-err_recover(long numerr)
-{
-  initout(0);
-  disable_dbg(-1);
-  get_timer(-1);
-  killallfiles(0);
-
-  if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
-  global_err_data = NULL;
-  fprintferr("\n"); flusherr();
-  if (!environnement) exit(1);
-
-  /* reclaim memory stored in "blocs" */
-  if (try_to_recover) recover(1);
-  longjmp(environnement, numerr);
-}
-
 #define MAX_PAST 25
 #define STR_LEN 20
 /* Outputs a beautiful error message
@@ -855,7 +837,7 @@ err_catch(long errnum, jmp_buf env, void *data)
   return (void*)v;
 }
 
-/* reset traps younger than V (included) and return the data associated to V */
+/* reset traps younger than V (included) */
 void
 err_leave(void **V)
 {
@@ -952,6 +934,25 @@ static int
 is_warn(long num)
 {
   return num == warner || num == warnmem || num == warnfile || num == warnprec;
+}
+
+void
+err_recover(long numerr)
+{
+  initout(0);
+  disable_dbg(-1);
+  get_timer(-1);
+  killallfiles(0);
+
+  if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
+  global_err_data = NULL;
+  err_clean();
+  fprintferr("\n"); flusherr();
+  if (!environnement) exit(1);
+
+  /* reclaim memory stored in "blocs" */
+  if (try_to_recover) recover(1);
+  longjmp(environnement, numerr);
 }
 
 void
