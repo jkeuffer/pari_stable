@@ -1141,8 +1141,11 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
   pari_sp av = avma;
   GEN q,n_q,ord,ordp;
 
-  if (gcmp1(a) || egalii(p, gdeux)) { avma = av; return gzero; }
-
+  if (gcmp1(a)) { avma = av; return gzero; }
+  if (egalii(p, gdeux)) {
+    if (!signe(a)) err(talker,"a not invertible in ff_PHlog_Fp");
+    avma = av; return gzero;
+  }
   ordp = subis(p, 1);
   ord = T? subis(gpowgs(p,degpol(T)), 1): p;
   if (egalii(a, ordp)) /* -1 */
