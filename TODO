@@ -25,8 +25,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 4  qfbclassno(x < 0) may give a wrong result [e.g x = -2878367]
 
-4  zeta(599065705248735808.) --> exponent to large in exp.
-
 4  t_SER computations much too slow when number of terms increase, even
    when applying a trivial formula, e.g cos(x) at \ps 10000
 
