@@ -44,7 +44,6 @@ static long isin_G_H(buildroot *BR, long n1, long n2);
 static IND ID_data[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
 static PERM ID = ID_data;
 static long N, EVEN;
-static char *str_base = GPDATADIR;
 
 static long *par_vec;
 
@@ -308,16 +307,10 @@ allocgroup(long n, long card)
 static char *
 name(char *pre, long n, long n1, long n2, long no)
 {
-  static char chn[128];
-  static char *base = NULL;
+  static char chn[256];
   char ch[6];
 
-  if (!base) {
-    base = os_getenv("GP_DATA_DIR");
-    if (!base)
-      base = str_base;
-  }
-  sprintf(chn, "%s/%s%ld_%ld_%ld", base, pre, n, n1, n2);
+  snprintf(chn, 250, "%s/galdata/%s%ld_%ld_%ld", pari_datadir, pre, n, n1, n2);
   if (no) { sprintf(ch,"_%ld",no); strcat(chn, ch); }
   return chn;
 }
@@ -334,7 +327,7 @@ galopen(char *s)
 {
   long fd = os_open(s,O_RDONLY);
   if (fd == -1)
-    err(talker,"galois files not available in this version, sorry");
+    err(talker,"galois files not available, sorry\n[missing %s]",s);
   if (DEBUGLEVEL > 3) msgtimer("opening %s",s);
   return fd;
 }

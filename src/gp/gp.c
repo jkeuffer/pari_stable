@@ -916,6 +916,22 @@ sd_help(char *v, int flag)
 }
 
 static GEN
+sd_datadir(char *v, int flag)
+{
+  const char *str;
+  if (*v)
+  {
+    if (pari_datadir) free(pari_datadir);
+    pari_datadir = expand_tilde(v);
+  }
+  str = pari_datadir? pari_datadir: "none";
+  if (flag == d_RETURN) return STRtoGENstr(str);
+  if (flag == d_ACKNOWLEDGE)
+    pariputsf("   datadir = \"%s\"\n", str);
+  return gnil;
+}
+
+static GEN
 sd_path(char *v, int flag)
 {
   gp_path *p = GP_DATA->path;
@@ -1005,6 +1021,7 @@ default_type gp_default_list[] =
   {"buffersize",(void*)sd_buffersize},
   {"colors",(void*)sd_colors},
   {"compatible",(void*)sd_compatible},
+  {"datadir",(void*)sd_datadir},
   {"debug",(void*)sd_debug},
   {"debugfiles",(void*)sd_debugfiles},
   {"debugmem",(void*)sd_debugmem},

@@ -125,11 +125,14 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
    11- disallow Ser( t_MAT )  [ resulted in a series with t_COL coefficients ]
    12- nf format to improve idealinv() [ nf[5][6] and nf[5][7] ]
    13- disallow sqrtint( x < 0 )
+   14- meaning of the GP_DATA_DIR global variable: now points to the
+       directory _containing_ galdata, not to the galdata files
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
 BA  2- support for FLTK graphical library [ hi-res plot ]
 BA  3- galoisidentify for order 96 to 127.
+    4- default 'datadir' [ to allow relocating 'galdata' for polgalois ]
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]

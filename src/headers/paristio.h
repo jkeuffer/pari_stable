@@ -75,7 +75,7 @@ extern pari_sp avma,bot,top;
 extern size_t memused;
 extern byteptr diffptr;
 extern entree  **varentries;
-extern char    *errmessage[], *current_psfile;
+extern char    *errmessage[], *current_psfile, *pari_datadir;
 
 #define is_universal_constant(x) ((GEN)(x) >= gzero && (GEN)(x) <= gi)
 

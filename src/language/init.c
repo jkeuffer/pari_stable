@@ -35,7 +35,7 @@ GEN     gnil, gzero, gun, gdeux, ghalf, polvar, gi;
 GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
-char    *current_logfile, *current_psfile;
+char    *current_logfile, *current_psfile, *pari_datadir;
 int     gp_colors[c_LAST];
 int     disable_color = 1, added_newline = 1;
 
@@ -650,6 +650,8 @@ pari_init(size_t parisize, ulong maxprime)
   (void)manage_var(manage_var_init,NULL); /* init nvar */
   var_not_changed = 1; (void)fetch_named_var("x", 0);
   try_to_recover=1;
+  pari_datadir = os_getenv("GP_DATA_DIR");
+  if (!pari_datadir) pari_datadir = GPDATADIR;
 }
 
 static void
