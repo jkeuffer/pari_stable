@@ -189,6 +189,7 @@ IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
        prototype (use ulong arguments, return ulong)  [ was already the case,
        with various casts ]
    30- renamed u_invmod --> invumod. Documented all level0 modular routines.
+       [ also added invsmod ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

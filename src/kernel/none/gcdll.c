@@ -1061,10 +1061,10 @@ invumod(ulong x, ulong p)
   return xv;
 }
 
+/* assume m > 0 */
 long
 invsmod(long a, long m)
 {
-  m = labs(m);
   if (a >= 0)
   {
     if (a > m) a %= m;
