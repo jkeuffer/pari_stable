@@ -59,6 +59,7 @@ Done for version 2.2.2 (released ??/??/2001):
    24- nfnewprec(bnf) could change bnf.gen (due to round-off errors)
    25- SEGV in gcd(x,y) when operands have coeffs of the form Mod(t_INT,t_POL)
    26- not enough GC in poldivres (= t_POL % t_POL)
+   27- issquare(Mod(3,27)) = 1  [from 2.2.1 C 10]
 
   Changed
     1- allow compressing *.dvi files for the online help system
