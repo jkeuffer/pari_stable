@@ -925,15 +925,14 @@ elldouble(long nbc, GEN *X1, GEN *X2)
   GEN lambda,v, *Y1 = X1+nbc, *Y2 = X2+nbc;
   GEN W[nbcmax+1];		/* W[0] never used */
   long i;
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma, av2;
   /*W[0] = gun;*/ W[1] = Y1[0];
-  for (i=1; i<nbc; i++)
-    W[i+1] = modii(mulii(Y1[i], W[i]), N);
-  tetpil = avma;
+  for (i=1; i<nbc; i++) W[i+1] = modii(mulii(Y1[i], W[i]), N);
+  av2 = avma;
 
   if (!invmod(W[nbc], N, &gl))
   {
-    if (!egalii(N,gl)) { gl = gerepile(av,tetpil,gl); return 2; }
+    if (!egalii(N,gl)) return 2;
     if (X1 != X2)
     {
       long k;
@@ -955,7 +954,7 @@ elldouble(long nbc, GEN *X1, GEN *X2)
     if (i) gl = modii(mulii(gl, Y1[i]), N);
     modiiz(subii(mulii(lambda, subii(X1[i], v)), Y1[i]), N, Y2[i]);
     affii(v, X2[i]);
-    if (!(i&7) && i) gl = gerepileupto(tetpil, gl);
+    if (!(i&7) && i) gl = gerepileupto(av2, gl);
   }
   avma = av; return 0;
 }
@@ -977,21 +976,15 @@ static int
 ellmult(long nbc, ulong k, GEN *X1, GEN *X2) /* k>2 prime, not checked */
 {
   long i, d, e, e1, r;
-  pari_sp av=avma, tetpil;
   int res;
   GEN *A=X2, *B=XAUX, *S, *T=XAUX+2*nbc;
 
   for (i = 2*nbc; i--; ) { affii(X1[i],XAUX[i]); }
-  tetpil = avma;
 
   /* first doubling picks up X1;  after this we'll be working in XAUX and
    * X2 only, mostly via A and B and T
    */
-  if ((res = elldouble(nbc, X1, X2)) != 0)
-  {
-    if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-    return res;
-  }
+  if ((res = elldouble(nbc, X1, X2)) != 0) return res;
 
   /* split the work at the golden ratio */
   r = (long)(k*0.61803398875 + .5);
@@ -999,34 +992,24 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2) /* k>2 prime, not checked */
 
   while (d != e)
   {
-
     /* apply one of the nine transformations from PM's Table 4.  We first
      * figure out which, and then go into an eight-way switch, because
      * some of the transformations are similar enough to share code.
      */
     if (d <= e + (e>>2))	/* floor(1.25*e) */
     {
-      if ((d+e)%3 == 0)
-      { i = 0;	goto apply; }	/* Table 4, rule 1 */
-      else if ((d-e)%6 == 0)
-      { i = 1; goto apply; }	/* rule 2 */
-      /* else fall through */
-    }
-    if ((d+3)>>2 <= e)		/* equiv to d <= 4*e but cannot ofl */
-    { i = 2; goto apply; }	/* rule 3, the most common case */
-    if ((d&1)==(e&1))
-    { i = 1; goto apply; }	/* rule 4, which does the same as rule 2 */
-    if (!(d&1))
-    { i = 3; goto apply; }	/* rule 5 */
-    if (d%3 == 0)
-    { i = 4; goto apply; }	/* rule 6 */
-    if ((d+e)%3 == 0)
-    { i = 5; goto apply; }	/* rule 7 */
-    if ((d-e)%3 == 0)
-    { i = 6; goto apply; }	/* rule 8 */
+      if ((d+e)%3 == 0) { i = 0; goto apply; } /* rule 1 */
+      if ((d-e)%6 == 0) { i = 1; goto apply; } /* rule 2 */
+    } /* else fall through */
+    /* d <= 4*e but no ofl */
+    if ((d+3)>>2 <= e){ i = 2; goto apply; }	/* rule 3, common case */
+    if ((d&1)==(e&1)) { i = 1; goto apply; }	/* rule 4 = rule 2 */
+    if (!(d&1))       { i = 3; goto apply; }	/* rule 5 */
+    if (d%3 == 0)     { i = 4; goto apply; }	/* rule 6 */
+    if ((d+e)%3 == 0) { i = 5; goto apply; }	/* rule 7 */
+    if ((d-e)%3 == 0) { i = 6; goto apply; }	/* rule 8 */
     /* when we get here, e must be even, for otherwise one of rules 4,5
-     * would have applied
-     */
+     * would have applied */
     i = 7;			/* rule 9 */
 
   apply:
@@ -1034,107 +1017,50 @@ ellmult(long nbc, ulong k, GEN *X1, GEN *X2) /* k>2 prime, not checked */
     {
     case 0:			/* rule 1 */
       e1 = d - e; d = (d + e1)/3; e = (e - e1)/3;
-      if ((res = elladd(nbc, A, B, T)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
-      if ((res = elladd2(nbc, T, A, A, T, B, B)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elladd(nbc, A, B, T)) != 0) return res;
+      if ((res = elladd2(nbc, T, A, A, T, B, B)) != 0) return res;
       break;			/* end of rule 1 */
     case 1:			/* rules 2 and 4, part 1 */
       d -= e;
-      if ((res = elladd(nbc, A, B, B)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elladd(nbc, A, B, B)) != 0) return res;
       /* FALL THROUGH */
     case 3:			/* rule 5, and 2nd part of rules 2 and 4 */
       d >>= 1;
-      if ((res = elldouble(nbc, A, A)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elldouble(nbc, A, A)) != 0) return res;
       break;			/* end of rules 2, 4, and 5 */
     case 4:			/* rule 6 */
       d /= 3;
-      if ((res = elldouble(nbc, A, T)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
-      if ((res = elladd(nbc, T, A, A)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elldouble(nbc, A, T)) != 0) return res;
+      if ((res = elladd(nbc, T, A, A)) != 0) return res;
       /* FALL THROUGH */
     case 2:			/* rule 3, and 2nd part of rule 6 */
       d -= e;
-      if ((res = elladd(nbc, A, B, B)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elladd(nbc, A, B, B)) != 0) return res;
       break;			/* end of rules 3 and 6 */
     case 5:			/* rule 7 */
       d = (d - e - e)/3;
-      if ((res = elldouble(nbc, A, T)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
-      if ((res = elladd2(nbc, T, A, A, T, B, B)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elldouble(nbc, A, T)) != 0) return res;
+      if ((res = elladd2(nbc, T, A, A, T, B, B)) != 0) return res;
       break;			/* end of rule 7 */
     case 6:			/* rule 8 */
       d = (d - e)/3;
-      if ((res = elladd(nbc, A, B, B)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
-      if ((res = elldouble(nbc, A, T)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
-      if ((res = elladd(nbc, T, A, A)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elladd(nbc, A, B, B)) != 0) return res;
+      if ((res = elldouble(nbc, A, T)) != 0) return res;
+      if ((res = elladd(nbc, T, A, A)) != 0) return res;
       break;			/* end of rule 8 */
     case 7:			/* rule 9 */
       e >>= 1;
-      if ((res = elldouble(nbc, B, B)) != 0)
-      {
-	if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-	return res;
-      }
+      if ((res = elldouble(nbc, B, B)) != 0) return res;
       break;			/* end of rule 9 */
-    default:			/* never reached */
-      break;
+    default: break; /* notreached */
     }
     /* end of Table 4 processing */
 
     /* swap d <-> e and A <-> B if necessary */
     if (d < e) { r = d; d = e; e = r; S = A; A = B; B = S; }
   } /* while */
-  if ((res = elladd(nbc, XAUX, X2, X2)) != 0)
-  {
-    if (res > 1) { gl = gerepile(av,tetpil,gl); } else avma = av;
-    return res;
-  }
-  avma = av; return 0;
+  if ((res = elladd(nbc, XAUX, X2, X2)) != 0) return res;
+  return 0;
 }
 
 /* PRAC implementation notes - main changes against the paper version:
@@ -1468,19 +1394,24 @@ ellfacteur(GEN n, int insist)
     /* p=3,...,nextprime(B1) */
     while (p < B1 && p <= B2_rt)
     {
+      pari_sp av = avma;
       p = snextpr(p, &d, &rcn, NULL, miller_k1);
       B2_p = B2/p;		/* beware integer overflow on 32-bit CPUs */
       for (m=1; m<=B2_p; m*=p)
       {
 	if ((rflag = ellmult(nbc, p, X, X)) > 1) goto fin;
 	else if (rflag) break;
+        avma = av;
       }
+      avma = av;
     }
     /* primes p larger than sqrt(B2) can appear only to the 1st power */
     while (p < B1)
     {
+      pari_sp av = avma;
       p = snextpr(p, &d, &rcn, NULL, miller_k1);
       if (ellmult(nbc, p, X, X) > 1) goto fin; /* p^2 > B2: no loop */
+      avma = av;
     }
 
     if (DEBUGLEVEL >= 4)
@@ -1769,7 +1700,7 @@ fin:
 	       timer2(), p, res);
     flusherr();
   }
-  avma=av;
+  avma = av;
   if (use_clones) { gunclone(w0); gunclone(x); }
   return res;
 }
