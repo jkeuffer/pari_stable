@@ -446,7 +446,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
   for (p = 0;;) /* p <= n2 */
   {
     pari_sp av = avma, av1;
-    long k, l;
+    long k, l, m;
     GEN P, a, b;
 
     NEXT_PRIME_VIADIFF(p, delta);
@@ -473,6 +473,11 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
     if (l == 2 && itos(gmael(P,1,3)) == 1) continue; /* p inert */
 
     /* keep non-inert ideals with Norm <= n2 */
+    for (m = 1; m < k; m++) 
+    {
+      GEN t = (GEN)P[m];
+      t[5] = (long)eltmul_get_table(nf, (GEN)t[5]);
+    }
     if (k == l)
       setisclone(P); /* flag it: all prime divisors in FB */
     else
@@ -907,9 +912,6 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
   FB = cgetg(l, t_VECSMALL);
   iLP= cgetg(l, t_VECSMALL);
   LV = cgetg(l, t_VEC);
-#if 1 /* for debugging */
-  for (p=1;p<l;p++) FB[p]=iLP[p]=LV[p]=0;
-#endif
   for (p = 2; p < l; p++)
   {
     if (!L[p]) continue;

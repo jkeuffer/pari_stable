@@ -536,12 +536,16 @@ eltmulid_get_table(GEN nf, long i)
 GEN
 eltmul_get_table(GEN nf, GEN x)
 {
-  long i, N = degpol(nf[1]);
-  GEN mul = cgetg(N+1,t_MAT);
-  x = _algtobasis(nf, x);
-  mul[1] = (long)x; /* assume w_1 = 1 */
-  for (i=2; i<=N; i++) mul[i] = (long)element_mulid(nf,x,i);
-  return mul;
+  if (typ(x) == t_MAT) return x;
+  else
+  {
+    long i, N = degpol(nf[1]);
+    GEN mul = cgetg(N+1,t_MAT);
+    x = _algtobasis(nf, x);
+    mul[1] = (long)x; /* assume w_1 = 1 */
+    for (i=2; i<=N; i++) mul[i] = (long)element_mulid(nf,x,i);
+    return mul;
+  }
 }
 
 /* valuation of integer x, with resp. to prime ideal P above p.

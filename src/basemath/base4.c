@@ -726,6 +726,7 @@ idealval(GEN nf, GEN ix, GEN P)
   pari_sp av = avma, av1, lim;
   long N, vmax, vd, v, e, f, i, j, k, tx = typ(ix);
   GEN mul, B, a, x, y, r, t0, p, pk, cx, vals;
+  int do_mul;
 
   if (is_extscalar_t(tx) || tx==t_COL) return element_val(nf,ix,P);
   tx = idealtyp(&ix,&a);
@@ -755,15 +756,25 @@ idealval(GEN nf, GEN ix, GEN P)
   i = i / f;
   vmax = min(i,j); /* v_P(ix) <= vmax */
 
-  mul = cgetg(N+1,t_MAT); t0 = (GEN)P[5];
+  t0 = (GEN)P[5];
+  if (typ(t0) == t_MAT)
+  { /* t0 given by a multiplication table */
+    mul = t0;
+    do_mul = 0;
+  }
+  else
+  {
+    mul = cgetg(N+1,t_MAT);
+    mul[1] = (long)t0;
+    do_mul = 1;
+  }
   B = cgetg(N+1,t_MAT);
   pk = gpowgs(p, (long)ceil((double)vmax / e));
-  mul[1] = (long)t0;
   /* B[1] not needed: v_pr(ix[1]) = v_pr(ix \cap Z) is known already */
   B[1] = zero; /* dummy */
   for (j=2; j<=N; j++)
   {
-    mul[j] = (long)element_mulid(nf,t0,j);
+    if (do_mul) mul[j] = (long)element_mulid(nf,t0,j);
     x = (GEN)ix[j];
     y = cgetg(N+1, t_COL); B[j] = (long)y;
     for (i=1; i<=N; i++)
