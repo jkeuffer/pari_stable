@@ -1025,10 +1025,12 @@ small_to_pol(GEN z, long l, long p)
   return normalizepol_i(x,l);
 }
 
-/* z in ?[X,Y] mod Q(Y) in Kronecker form ((subst(lift(z), x, y^(2deg(z)-1)))
- * Recover the "real" z, normalized */
+/* z in Z[X,Y] representing an elt in F_p[X,Y] mod pol(Y) i.e F_q[X])
+ * in Kronecker form. Recover the "real" z, normalized
+ * If p = NULL, use generic functions and the coeff. ring implied by the
+ * coefficients of z */
 GEN
-from_Kronecker(GEN z, GEN pol)
+FqX_from_Kronecker(GEN z, GEN pol, GEN p)
 {
   long i,j,lx,l = lgef(z), N = ((lgef(pol)-3)<<1) + 1;
   GEN a,x, t = cgetg(N,t_POL);
@@ -1041,14 +1043,22 @@ from_Kronecker(GEN z, GEN pol)
     a[1] = (long)pol;
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    a[2] = lres(normalizepol_i(t,N), pol);
+    a[2] = (long)Fp_res(normalizepol_i(t,N), pol,p);
   }
   a = cgetg(3,t_POLMOD); x[i] = (long)a;
   a[1] = (long)pol;
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  a[2] = lres(normalizepol_i(t,N), pol);
+  a[2] = (long)Fp_res(normalizepol_i(t,N), pol,p);
   return normalizepol_i(x, i+1);
+}
+
+/* z in ?[X,Y] mod Q(Y) in Kronecker form ((subst(lift(z), x, y^(2deg(z)-1)))
+ * Recover the "real" z, normalized */
+GEN
+from_Kronecker(GEN z, GEN pol)
+{
+  return FqX_from_Kronecker(z,pol,NULL);
 }
 
 /*******************************************************************/
@@ -1160,6 +1170,7 @@ Fp_poldivres(GEN x, GEN y, GEN p, GEN *pr)
   long vx,dx,dy,dz,i,j,av0,av,tetpil,sx,lrem;
   GEN z,p1,rem,lead;
 
+  if (!p) return poldivres(x,y,pr);
   if (!signe(y)) err(talker,"division by zero in Fp_poldivres");
   vx=varn(x); dy=lgef(y)-3; dx=lgef(x)-3;
   if (dx < dy)
@@ -1371,7 +1382,7 @@ modulargcd(GEN a, GEN b)
       Cp = normalize_mod_p(Cp, p);
     else
     { /* very rare */
-      p1 = mulii(g, mpinvmod((GEN)Cp[m+2],p));
+      p1 = modii(mulii(g, mpinvmod((GEN)Cp[m+2],p)),p);
       Cp = Fp_pol_red(gmul(p1,Cp), p);
     }
     if (m<n) { q=icopy(p); H=Cp; limit=shifti(limit,m-n); n=m; }
@@ -1379,7 +1390,7 @@ modulargcd(GEN a, GEN b)
       if (m==n && H)
       {
         GEN q2 = mulii(q,p);
-        for (i=2; i<=n+2; i++)
+        for (i=2; i<=n+2; i++) /* lc(H) = g (mod q2) */
           H[i]=(long) chinois_int_coprime((GEN)H[i],(GEN)Cp[i],q,p,q2);
         q = q2;
 	if (cmpii(limit,q) <= 0)
