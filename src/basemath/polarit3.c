@@ -635,7 +635,7 @@ There are clean and memory efficient.
 **********************************************************************/
 
 GEN
-FpX_redc(GEN T,GEN mod)
+FpX_center(GEN T,GEN mod)
 {/*OK centermod exists, but is not so clean*/
   ulong av;
   long i, l=lg(T);

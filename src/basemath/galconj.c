@@ -583,7 +583,7 @@ inittestlift(GEN Tmod, long elift, struct galois_lift *gl,
   else if (frob)
   {
     GEN     tlift;
-    tlift = FpX_redc(FpX_Fp_mul(plift,gl->den,gl->Q), gl->Q);
+    tlift = FpX_center(FpX_Fp_mul(plift,gl->den,gl->Q), gl->Q);
     if (poltopermtest(tlift, gl, frob))
     {
       avma = ltop;
@@ -749,7 +749,7 @@ frobeniusliftall(GEN sg, GEN *psi, struct galois_lift *gl,
 	u = v;
 	for (j = 1; j < m; j++)
 	  u = FpX_add(u, gmael(C,1+sg[pf[j]],j),NULL);
-	u = FpX_redc(FpX_red(u, gl->Q), gl->Q);
+	u = FpX_center(FpX_red(u, gl->Q), gl->Q);
 	if (poltopermtest(u, gl, frob))
 	{
 	  if (DEBUGLEVEL >= 4 )
@@ -1415,7 +1415,7 @@ fixedfieldorbit(GEN O, GEN L, GEN mod, GEN l, GEN p, GEN *U, long *e,long v)
     P=FpV_roots_to_pol(s,mod,v);
     if (!FpX_is_squarefree(P,l))
       continue;
-    P=FpX_redc(P,mod);
+    P=FpX_center(P,mod);
     if (FpX_is_squarefree(P,p))
       break;
   }
@@ -1451,7 +1451,7 @@ corpsfixeorbitemod(GEN L, GEN O, long x, GEN mod, GEN l, GEN p, GEN *U)
       g = FpX_mul(g, deg1pol(gun,negi(p1),x),mod);
     }
     lbot = avma;
-    g = FpX_redc(g,mod);
+    g = FpX_center(g,mod);
     av = avma;
     if (DEBUGLEVEL >= 6)
       fprintferr("GaloisConj:corps fixe:%d:%Z\n", d, g);
@@ -2313,7 +2313,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
     z = FpX_Fp_mul((GEN) liftpow[i], (GEN) u[i + 2],NULL);
     res = FpX_add(res,z ,gl->Q);
   }
-  res = FpX_redc(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q);
+  res = FpX_center(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q);
   if (DEBUGLEVEL >= 6)
     msgtimer("s4test()");
   bl = poltopermtest(res, gl, phi);
@@ -3619,6 +3619,6 @@ galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
   g=FpV_roots_to_pol(g,le,v);
   if (DEBUGLEVEL >= 1)
     msgtimer("computing products."); 
-  g=FpX_redc(g,le);
+  g=FpX_center(g,le);
   return gerepileupto(ltop,gscycloconductor(g,n,flag));
 }
