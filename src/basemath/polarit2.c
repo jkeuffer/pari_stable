@@ -1120,7 +1120,7 @@ LLL_check_progress(GEN Bnorm, long n0, GEN m, int final,
 static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
-  const long N0 = 2; /* # of traces added at each step */
+  const long N0 = 1; /* # of traces added at each step */
   double BitPerFactor = 0.5; /* nb bits in p^(a-b) / modular factor */
   long i,j,tmax,n0,C, dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
