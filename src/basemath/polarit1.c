@@ -1938,6 +1938,7 @@ padicff(GEN x,GEN p,long pr)
   e = cgetg(3,t_COL); fa[2] = (long)e;
   g[1] = (long)p; e[1] = lstoi(Z_pvalrem(dx,p,&q));
   g[2] = (long)q; e[2] = un;
+  if (is_pm1(q)) { setlg(g, 2); setlg(e, 2); }
 
   bas = nfbasis(x, &dK, 0, fa);
   nf[3] = (long)dK;
