@@ -1786,6 +1786,15 @@ gpreadbin(char *s)
   popinfile(); return x;
 }
 
+static GEN
+set_hist_entry(GEN x)
+{
+  GEN z = gclone(x);
+  int i = tglobal % histsize;
+  if (hist[i]) gunclone(hist[i]);
+  tglobal++; hist[i] = z; return z;
+}
+
 static void
 escape0(char *tch)
 {
@@ -1875,7 +1884,16 @@ escape0(char *tch)
     case 'r':
       s = get_sep_colon_ok(s);
       switchin(s);
-      if (file_is_binary(infile)) gpreadbin(s);
+      if (file_is_binary(infile))
+      {
+        GEN x = gpreadbin(s);
+        if (isclone(x)) /* many BIN_GEN */
+        {
+          long i, l = lg(x);
+          err(warner,"setting %ld history entries", l-1);
+          for (i=1; i<l; i++) set_hist_entry((GEN)x[i]);
+        }
+      }
       break;
     case 's': etatpile(0); break;
     case 't': gentypes(); break;
@@ -2513,9 +2531,8 @@ gp_main_loop(int ismain)
     if (z == gnil) continue;
 
     if (simplifyflag) z = simplify_i(z);
-    i = tglobal % histsize; tglobal++;
-    if (hist[i]) gunclone(hist[i]);
-    hist[i] = z = gclone(z); avma = av;
+    z = set_hist_entry(z);
+    avma = av;
     if (gpsilent) continue;
 
     if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }

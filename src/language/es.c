@@ -2532,7 +2532,7 @@ switchout(char *name)
 #define _cfwrite(a,b,c) _fwrite((a),sizeof(char),(b),(c))
 
 #define BIN_GEN 0
-#define NAM_GEN  1
+#define NAM_GEN 1
 
 static long
 rd_long(FILE *f)
@@ -2610,7 +2610,7 @@ rdGEN(FILE *f)
 }
 
 GEN
-readobj(FILE *f)
+readobj(FILE *f, int *ptc)
 {
   int c = fgetc(f);
   GEN x = NULL;
@@ -2633,7 +2633,7 @@ readobj(FILE *f)
     case EOF: break;
     default: err(talker,"unknown code in readobj");
   }
-  return x;
+  *ptc = c; return x;
 }
 
 #define MAGIC "\020\001\022\011-\007\020" /* ^P^A^R^I-^G^P */
@@ -2722,13 +2722,30 @@ writebin(char *name, GEN x)
   fclose(f);
 }
 
-/* read all objects in file and return last one */
+/* read all objects in f. If f contains BIN_GEN that would be silently ignored
+ * [i.e f contains more than one objet, not all of them 'named GENs'], return
+ * them all in a vector with clone bit set (special marker). */
 GEN
 readbin(char *name, FILE *f)
 {
-  GEN y, x = NULL;
-  check_magic(name,f);
-  while ((y = readobj(f))) x = y;
+  ulong av = avma;
+  GEN x,y,z;
+  int cx,cy;
+  check_magic(name,f); x = y = z = NULL;
+  cx = 0; /* gcc -Wall */
+  while ((y = readobj(f, &cy)))
+  {
+    if (x && cx == BIN_GEN) z = z? concatsp(z, _vec(x)): _vec(x);
+    x = y; cx = cy;
+  }
+  if (z)
+  {
+    if (x && cx == BIN_GEN) z = z? concatsp(z, _vec(x)): _vec(x);
+    err(warner,"%ld unnamed objects read. Returning then in a vector",
+        lg(z)-1);
+    x = gerepilecopy(av, z);
+    setisclone(x); /* HACK */
+  }
   return x;
 }
 
