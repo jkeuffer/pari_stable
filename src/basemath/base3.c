@@ -238,6 +238,8 @@ element_muli(GEN nf, GEN x, GEN y)
   GEN p1,s,v,c,tab;
 
   tab = get_tab(nf, &N);
+  if (typ(x) != t_COL || lg(x) != N+1
+   || typ(y) != t_COL || lg(y) != N+1) err(typeer,"element_muli");
   v=cgetg(N+1,t_COL); av=avma;
   for (k=1; k<=N; k++)
   {
