@@ -710,17 +710,25 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   gpmem_t av = avma;
   long i, l, drel;
-  GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res, k;
+  GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
   T = get_bnfpol(T, &bnf, &nf);
   if (!bnf) bnf = bnfinit0(nf? nf: T, 1, NULL, DEFAULTPREC);
   if (!nf) nf = checknf(bnf);
+
+  relpol = get_bnfpol(relpol, &rel, &nfrel);
+  drel = degpol(relpol);
+
   rnfeq = NULL; /* no reltoabs needed */
-  if (relpol && !gcmp0(relpol))
+  if (degpol(nf[1]) == 1)
+  { /* over Q */
+    polabs = lift(relpol);
+    k = gzero;
+  }
+  else
   {
-    GEN polabs;
-    if (galois == 2 && poldegree(relpol, varn(T)))
+    if (galois == 2 && drel > 2)
     { /* needs reltoabs */
       rnfeq = rnfequation2(bnf, relpol);
       polabs = (GEN)rnfeq[1];
@@ -732,17 +740,10 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
       polabs = _rnfequation(bnf, relpol, &sk, NULL);
       k = stoi(sk);
     }
-    rel = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
   }
-  else
-  { /* over Q */
-    rel = bnf; k = gzero;
-    relpol = T; T = polx[MAXVARN];
-    bnf = bnfinit0(T, 2, NULL, 0);
-    nf = (GEN)bnf[7];
-  }
-  nfrel = checknf(rel);
-  drel = degpol(relpol);
+  if (!rel || !gcmp0(k)) rel = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
+  if (!nfrel) nfrel = checknf(rel);
+
   if (galois < 0 || galois > 2) err(flagerr, "rnfisnorminit");
   if (galois == 2)
   {
@@ -859,7 +860,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   /* Y: sols of MY = A over Q */
   setlg(Y, L);
   aux = factorback(sunitrel, gfloor(Y));
-  x = gdiv(x, gnorm(gmodulcp(lift(aux),relpol)));
+  x = gdiv(x, gnorm(gmodulcp(lift_intern(aux), relpol)));
   if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(x[2])))
   {
     x = (GEN)x[2]; /* rational number */
@@ -874,8 +875,8 @@ GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
   gpmem_t av = avma;
-  GEN T = rnfisnorminit(bnf, NULL, flag == 0? 1: 2);
+  GEN T = rnfisnorminit(polx[MAXVARN], bnf, flag == 0? 1: 2);
   GEN y = rnfisnorm(T, x, flag), z = (GEN)y[1];
-  y[1] = lmodulcp(lift((GEN)z[2]), (GEN)z[1]);
+  if (typ(y) == t_POLMOD) y[1] = lmodulcp(lift((GEN)z[2]), (GEN)z[1]);
   return gerepilecopy(av, y);
 }
