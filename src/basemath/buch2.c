@@ -1160,10 +1160,11 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       id2 = idealpowred(bnf,z, (GEN)e[i],prec);
       id = id? idealmulred(nf,id,id2,prec): id2;
     }
-  if (id == C)
+  if (id == C) /* e = 0 */
   {
-    if (!C) id = gun;
-    return isprincipalall(bnf, id, flag);
+    if (!C) return isprincipalall(bnf, gun, flag);
+    C = idealhermite(nf,C); id = z;
+    if (gen) id[1] = (long)C; else id = C;
   }
   c = getrand();
   for (;;)
