@@ -255,7 +255,7 @@ extern  GEN     ploth(entree *ep, GEN a, GEN b, char *ch, long prec, long flag, 
 extern  GEN     ploth2(entree *ep, GEN a, GEN b, char *ch, long prec);
 extern  GEN     plothmult(entree *ep, GEN a, GEN b, char *ch, long prec);
 extern  GEN     plothraw(GEN listx, GEN listy, long flag);
-extern  GEN     plothsizes();
+extern  GEN     plothsizes(void);
 extern  GEN     plothsizes_flag(long flag);
 extern  void    postdraw(GEN list);
 extern  void    postdraw_flag(GEN list, long flag);

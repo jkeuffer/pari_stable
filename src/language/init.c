@@ -170,7 +170,7 @@ gprealloc(void *pointer, size_t size)
 }
 
 static void
-pari_handle_SIGINT()
+pari_handle_SIGINT(void)
 {
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
@@ -424,7 +424,7 @@ reset_traps(int warn)
 }
 
 static void
-init_universal_constants()
+init_universal_constants(void)
 {
   /* 2 (gnil) + 2 (gzero) + 3 (gun) + 3 (gdeux) + 3 (half) + 3 (gi) */
   GEN p = universal_constants = (long*) gpmalloc(16*sizeof(long));
@@ -992,7 +992,7 @@ err_leave_default(long n)
 
 /* untrapped error: remove all traps depending from a longjmp */
 void
-err_clean()
+err_clean(void)
 {
   stack *s = err_catch_stack, *lasts = NULL;
   cell *c;
@@ -1677,10 +1677,10 @@ checkmemory(GEN z)
 #endif
 
 void
-fill_stack()
+fill_stack(void)
 {
   GEN x = ((GEN)bot);
-  while (x < (GEN)avma) *x++ = 0xfefefefe;
+  while (x < (GEN)avma) *x++ = 0xfefefefeUL;
 }
 
 /*******************************************************************/
@@ -1781,7 +1781,7 @@ fill_stack()
 
 #define is_valid_timer(t) ((t) < MAX_TIMER || (t) >= MIN_TIMER)
 long
-gptimer() {return timer_proto(0);}
+gptimer(void) {return timer_proto(0);}
 long
 timer(void)   {return timer_proto(1);}
 long

@@ -287,7 +287,7 @@ puissii(GEN a, GEN n, long s)
   av=avma; lim=stack_lim(av,1);
   y = a; p = n+2; m = *p;
   /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  k = 1+bfffo(m); m<<=k; k = BITS_IN_LONG-k;
+  k = 1+bfffo((ulong)m); m<<=k; k = BITS_IN_LONG-k;
   /* first bit is now implicit */
   for (i=lgefint(n)-2;;)
   {
@@ -324,7 +324,7 @@ rpowsi(ulong a, GEN n, long prec)
   av=avma; lim=stack_lim(av,1);
   y = stoi(a); p = n+2; m = *p;
   /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  k = 1+bfffo(m); m<<=k; k = BITS_IN_LONG-k;
+  k = 1+bfffo((ulong)m); m<<=k; k = BITS_IN_LONG-k;
   /* first bit is now implicit */
   sq = &sqri; mulsg = &mulsi;
   for (i=lgefint(n)-2;;)
@@ -540,7 +540,7 @@ powgi(GEN x, GEN n)
     default:
       av=avma; lim=stack_lim(av,1);
       p1 = n+2; m = *p1;
-      y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+      y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
       for (i=lgefint(n)-2;;)
       {
         for (; j; m<<=1,j--)
@@ -682,7 +682,7 @@ mpsqrt(GEN x)
   p2=cgetr(l+1); p2[1]=evalexpo(0) | evalsigne(1);
   beta=sqrt((eps+1) * (2 + p1[2]/C31));
   p2[2]=(long)((beta-2)*C31);
-  if (!p2[2]) { p2[2]=HIGHBIT; setexpo(p2,1); }
+  if (!p2[2]) { p2[2]=(long)HIGHBIT; setexpo(p2,1); }
   for (i=3; i<=l; i++) p2[i]=0;
   setlg(p2,3);
 

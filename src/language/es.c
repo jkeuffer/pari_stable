@@ -30,10 +30,10 @@ static char format;
 static long decimals, chmp, initial;
 
 /* output a space or do nothing depending on original caller */
-static void (*sp)();
+static void (*sp)(void);
 
 void
-hit_return()
+hit_return(void)
 {
   int c;
   if (under_texmacs || under_emacs) return;
@@ -342,7 +342,7 @@ static int col_index, lin_index, max_width, max_lin;
 #endif
 
 static int
-term_width_intern()
+term_width_intern(void)
 {
 #ifdef HAS_TIOCGWINSZ
   {
@@ -367,7 +367,7 @@ term_width_intern()
 }
 
 static int
-term_height_intern()
+term_height_intern(void)
 {
 #ifdef HAS_TIOCGWINSZ
   {
@@ -395,14 +395,14 @@ term_height_intern()
 #define DFT_TERM_HEIGHT 20
 
 int
-term_width()
+term_width(void)
 {
   int n = term_width_intern();
   return (n>1)? n: DFT_TERM_WIDTH;
 }
 
 int
-term_height()
+term_height(void)
 {
   int n = term_height_intern();
   return (n>1)? n: DFT_TERM_HEIGHT;
@@ -649,8 +649,8 @@ GENtostr(GEN x) { return GENtostr0(x,outbrute); }
 #define sp_plus_sp() sp(), pariputc('+'), sp()
 #define comma_sp() pariputc(','), sp()
 
-static void wr_space() {pariputc(' ');}
-static void no_space() {}
+static void wr_space(void) {pariputc(' ');}
+static void no_space(void) {}
 
 static void
 blancs(long nb) { while (nb-- > 0) pariputc(' '); }
@@ -1914,7 +1914,7 @@ void
 bruteall(GEN g, char f, long d, long flag)
 {
   long av = avma;
-  void (*oldsp)() = sp;
+  void (*oldsp)(void) = sp;
 
   sp = flag? &wr_space: &no_space;
   format = f; decimals = d;
@@ -2131,7 +2131,7 @@ pari_unlink(char *s)
  * Check for leaked file handlers (temporary files)
  */
 int
-popinfile()
+popinfile(void)
 {
   pariFILE *f;
 
@@ -2842,7 +2842,7 @@ env_ok(char *s)
 }
 
 static char*
-pari_tmp_dir()
+pari_tmp_dir(void)
 {
   char *s;
 #ifdef WINCE

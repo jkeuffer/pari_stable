@@ -28,7 +28,7 @@ extern void  error0(GEN *g);
 extern GEN   extern0(char *cmd);
 extern void  gp_quit(void);
 extern void  gpwritebin(char *s, GEN x);
-extern GEN   input0();
+extern GEN   input0(void);
 extern void  kill0(entree *ep);
 extern void  print0(GEN *g,long flag);
 extern GEN   read0(char *s);

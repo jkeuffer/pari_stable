@@ -26,7 +26,7 @@ extern void pop_val(entree *ep);
 extern void postdraw0(long *w, long *x, long *y, long lw);
 extern void postdraw00(long *w, long *x, long *y, long lw, long scale);
 extern void rectdraw0(long *w, long *x, long *y, long lw, long do_free);
-static void PARI_get_psplot();
+static void PARI_get_psplot(void);
 
 static long current_color[NUMRECT];
 PariRect **rectgraph = NULL;
@@ -186,7 +186,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
 /**                                                                **/
 /********************************************************************/
 void
-init_graph()
+init_graph(void)
 {
   int n;
 
@@ -203,7 +203,7 @@ init_graph()
 }
 
 void
-free_graph()
+free_graph(void)
 {
   int i;
 
@@ -1828,7 +1828,7 @@ postploth2(entree *ep, GEN a, GEN b, char *ch, long prec,
 }
 
 GEN
-plothsizes()
+plothsizes(void)
 {
   return plothsizes_flag(0);
 }
@@ -1879,7 +1879,7 @@ static void ps_string(FILE *psfile, int x, int y, char *c, long dir);
 #define JSCR 800  /* 1120 en haute resolution */
 
 static void
-PARI_get_psplot()
+PARI_get_psplot(void)
 {
   pari_psplot.height = JSCR - 60;
   pari_psplot.width  = ISCR - 40;

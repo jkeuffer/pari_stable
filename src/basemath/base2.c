@@ -142,7 +142,7 @@ powmati(GEN x, long m)
   long av=avma,j;
   GEN y = x;
 
-  j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
   for (; j; m<<=1,j--)
   {
     y=mulmati(y,y);
@@ -2452,7 +2452,7 @@ rnfelementid_powmod(GEN nf, GEN multab, GEN matId, long h, GEN n, GEN prhall)
 
   if (!signe(n)) return unrnf;
   y = (GEN)matId[h]; p1 = n+2; m = *p1;
-  k = 1+bfffo(m); m<<=k; k = BITS_IN_LONG-k;
+  k = 1+bfffo((ulong)m); m<<=k; k = BITS_IN_LONG-k;
   for (i=lgefint(n)-2;;)
   {
     for (; k; m<<=1,k--)

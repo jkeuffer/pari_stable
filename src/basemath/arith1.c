@@ -1455,7 +1455,7 @@ powmodulo(GEN A, GEN N, GEN M)
   }
 
   p = N+2; man = *p; /* see puissii */
-  k = 1+bfffo(man); man<<=k; k = BITS_IN_LONG-k;
+  k = 1+bfffo((ulong)man); man<<=k; k = BITS_IN_LONG-k;
   av1=avma; lim=stack_lim(av1,1);
   for (nb=lgefint(N)-2;;)
   {

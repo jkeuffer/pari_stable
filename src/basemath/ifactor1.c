@@ -1582,7 +1582,7 @@ pollardbrent(GEN n)
   if (tf >= 4)
     size = expi(n) + 1;
   else if (tf == 3)		/* try to keep purify happy...  */
-    size = BITS_IN_LONG - bfffo(n[2]);
+    size = BITS_IN_LONG - bfffo((ulong)n[2]);
 
   if (size <= 28)
     c0 = 32;			/* amounts very nearly to `insist'.
@@ -1846,10 +1846,10 @@ squfof(GEN n, long quiet)
   if (cmpis(n,5) <= 0) return NULL; /* input n <= 5 */
 
 #ifdef LONG_IS_64BIT
-  if (tf > 3 || (tf == 3 && bfffo(n[2]) < 5)) /* n too large */
+  if (tf > 3 || (tf == 3 && bfffo((ulong)n[2]) < 5)) /* n too large */
     return NULL;
 #else  /* 32 bits */
-  if (tf > 4 || (tf == 4 && bfffo(n[2]) < 5)) /* n too large */
+  if (tf > 4 || (tf == 4 && bfffo((ulong)n[2]) < 5)) /* n too large */
     return NULL;
 #endif
   /* now we have 5 < n < 2^59 */

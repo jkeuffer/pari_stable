@@ -46,7 +46,7 @@ static GEN
 _factpol(GEN x, long unused, long hint) { return factpol(x,hint); }
 
 static void
-suppressed(ANYARG) {err(talker,"this function has been suppressed");}
+suppressed(void) {err(talker,"this function has been suppressed");}
 
 entree oldfonctions[]={
 {"O",50,NULL,7,NULL},

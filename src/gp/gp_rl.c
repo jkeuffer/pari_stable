@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "gp.h"
 
 #ifdef READLINE
-typedef char** (*CF)(char*, char* (*)()); /* completion function */
+typedef char** (*CF)(char*, char* (*)(void)); /* completion function */
 typedef char* (*GF)(char*, int); /* generator function */
 typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */
 
@@ -47,8 +47,6 @@ extern char *filename_completion_function(char *text,int state);
 extern char *username_completion_function(char *text,int state);
 #endif
 char **pari_completion(char *text, int start, int end);
-extern int rl_completion_query_items;
-extern int rl_bind_key_in_map();
 ENDEXTERN
 
 void print_fun_list(char **matches, int nbli);
@@ -302,7 +300,7 @@ get_matches(int end, char *text, char* f(char*,int))
   rl_completion_append_character = ' ';
 #endif
   current_ep = NULL;
-  matches = COMPLETION_MATCHES(text, (char *(*)())f);
+  matches = COMPLETION_MATCHES(text, (char *(*)(void))f);
   if (matches && !matches[1]) /* a single match */
   {
     if (add_paren(end))
@@ -601,7 +599,7 @@ rl_long_help(int count, int key)
 }
 
 void
-init_readline()
+init_readline(void)
 {
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "Pari-GP";

@@ -32,7 +32,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "gp.h"
 
 #ifdef READLINE
-  extern void init_readline();
+  extern void init_readline(void);
   long use_readline = 1;
   int readline_init = 1;
 BEGINEXTERN
@@ -133,7 +133,7 @@ usage(char *s)
 
 /* must be called BEFORE pari_init() */
 static void
-gp_preinit()
+gp_preinit(void)
 {
   long i;
 
@@ -189,7 +189,7 @@ gp_preinit()
 static char*
 get_sep0(char *t, int colon)
 {
-  static char buf[GET_SEP_SIZE], *lim = buf + GET_SEP_SIZE-1;
+  static char buf[GET_SEP_SIZE], *lim = buf + (GET_SEP_SIZE-1);
   char *s = buf;
   int outer=1;
 
@@ -264,7 +264,7 @@ get_int(char *s, long dflt)
 
 /* tell TeXmacs GP will start outputing data */
 static void
-tm_start_output()
+tm_start_output(void)
 {
   if (!tm_is_waiting) { printf("%cverbatim:",DATA_BEGIN); fflush(stdout); }
   tm_is_waiting = 1;
@@ -272,7 +272,7 @@ tm_start_output()
 
 /* tell TeXmacs GP is done and is waiting for new data */
 static void
-tm_end_output()
+tm_end_output(void)
 {
   if (tm_is_waiting) { printf("%c", DATA_END); fflush(stdout); } 
   tm_is_waiting = 0;
@@ -346,7 +346,7 @@ gpwritebin(char *s, GEN x)
 }
 
 Buffer *
-new_buffer()
+new_buffer(void)
 {
   Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
   b->len = paribufsize;
@@ -362,7 +362,7 @@ del_buffer(Buffer *b)
 }
 
 static void
-pop_buffer()
+pop_buffer(void)
 {
   Buffer *b = (Buffer*) pop_stack(&bufstack);
   del_buffer(b);
@@ -380,7 +380,7 @@ kill_all_buffers(Buffer *B)
 }
 
 static void
-jump_to_buffer()
+jump_to_buffer(void)
 {
   Buffer *b;
   while ( (b = current_buffer) )
@@ -745,7 +745,7 @@ sd_output(char *v, int flag)
   return sd_numeric(v,flag,"output",&prettyp, 0,3,msg);
 }
 
-extern void err_clean();
+extern void err_clean(void);
 
 void
 allocatemem0(unsigned long newsize)
@@ -967,12 +967,12 @@ default_type gp_default_list[] =
 };
 
 static void
-help_default()
+help_default(void)
 {
   default_type *dft;
 
   for (dft=gp_default_list; dft->fun; dft++)
-    ((void (*)(ANYARG)) dft->fun)("", d_ACKNOWLEDGE);
+    ((void (*)(char*,int)) dft->fun)("", d_ACKNOWLEDGE);
 }
 
 static GEN
@@ -985,7 +985,7 @@ setdefault(char *s,char *v, int flag)
     if (!strcmp(s,dft->name))
     {
       if (flag == d_EXISTS) return gun;
-      return ((GEN (*)(ANYARG)) dft->fun)(v,flag);
+      return ((GEN (*)(char*,int)) dft->fun)(v,flag);
     }
   if (flag == d_EXISTS) return gzero;
   err(talker,"unknown default: %s",s);
@@ -998,7 +998,7 @@ setdefault(char *s,char *v, int flag)
 /**                                                                **/
 /********************************************************************/
 static int
-has_ext_help()
+has_ext_help(void)
 {
   if (help_prg)
   {
@@ -1137,7 +1137,7 @@ print_user_member(entree *ep)
 }
 
 static void
-user_fun()
+user_fun(void)
 {
   entree *ep;
   int hash;
@@ -1152,7 +1152,7 @@ user_fun()
 }
 
 static void
-user_member()
+user_member(void)
 {
   entree *ep;
   int hash;
@@ -1179,7 +1179,7 @@ center(char *s)
 }
 
 static void
-community()
+community(void)
 {
   long len = strlen(GPMISCDIR) + 1024;
   char *s = gpmalloc(len);
@@ -1605,7 +1605,7 @@ print_hash_list(char *s)
 }
 
 static char *
-what_readline()
+what_readline(void)
 {
 #ifdef READLINE
   if (use_readline)
@@ -1616,7 +1616,7 @@ what_readline()
 }
 
 static void
-print_version()
+print_version(void)
 {
   char buf[64];
 
@@ -1627,7 +1627,7 @@ print_version()
 }
 
 static void
-gp_head()
+gp_head(void)
 {
   print_version(); pariputs("\n");
   center("Copyright (C) 2000 The PARI Group");
@@ -1650,7 +1650,7 @@ fix_buffer(Buffer *b, long newlbuf)
 }
 
 void
-gp_quit()
+gp_quit(void)
 {
   free_graph(); freeall();
   kill_all_buffers(NULL);
@@ -1703,7 +1703,7 @@ texmacs_output(GEN z, long n)
  * the output.  Fill the output buffer, wait until it is read.
  * Better than sleep(2): give possibility to print */
 static void
-prettyp_wait()
+prettyp_wait(void)
 {
   char *s = "                                                     \n";
   int i = 400;
@@ -1715,7 +1715,7 @@ prettyp_wait()
 
 /* initialise external prettyprinter (tex2mail) */
 static int
-prettyp_init()
+prettyp_init(void)
 {
   if (!prettyprinter_file)
     prettyprinter_file = try_pipe(prettyprinter, mf_OUT | mf_TEST);
@@ -1986,7 +1986,7 @@ gprc_chk(char *s)
 
 /* Look for [._]gprc: $GPRC, then in $HOME, /, C:/ */
 static FILE *
-gprc_get()
+gprc_get(void)
 {
   FILE *f = NULL;
   char *str, *s, c;
@@ -2024,7 +2024,7 @@ static int get_line_from_file(char *prompt, Buffer *b, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
 
 static char **
-gp_initrc()
+gp_initrc(void)
 {
   char **flist, *s,*s1,*s2;
   FILE *file = gprc_get();
@@ -2140,7 +2140,7 @@ do_time(long flag)
 }
 
 static void
-gp_handle_SIGINT()
+gp_handle_SIGINT(void)
 {
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
@@ -2233,7 +2233,7 @@ do_prompt(char *p)
 }
 
 static void
-unblock_SIGINT()
+unblock_SIGINT(void)
 {
 #ifdef USE_SIGRELSE
   sigrelse(SIGINT);
@@ -2457,7 +2457,7 @@ get_line_from_user(char *prompt, Buffer *b)
 #endif
 
 static int
-is_interactive()
+is_interactive(void)
 {
 #if defined(UNIX) || defined(__EMX__)
   return (infile == stdin && !under_texmacs
@@ -2611,7 +2611,7 @@ extern0(char *s)
 }
 
 static int
-silent()
+silent(void)
 {
   if (gpsilent) return 1;
   { char c = _analyseur()[1]; return separe(c); }
@@ -2627,7 +2627,7 @@ default0(char *a, char *b, long flag)
 }
 
 GEN
-input0()
+input0(void)
 {
   Buffer *b = new_buffer();
   GEN x;

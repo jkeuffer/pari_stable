@@ -375,7 +375,7 @@ element_pow(GEN nf, GEN x, GEN n)
   cx = content(x);
   if (gcmp1(cx)) cx = NULL; else x = gdiv(x,cx);
   p1 = n+2; m = *p1;
-  y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
   {
     for (; j; m<<=1,j--)
@@ -410,7 +410,7 @@ element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
     y[1] = (long)powmodulo((GEN)x[1],n,p); return y;
   }
   p1 = n+2; m = *p1;
-  y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
   {
     for (; j; m<<=1,j--)
@@ -440,7 +440,7 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   if (!s || I == 1) return gscalcol_i(gun,N);
   p1 = n+2; m = *p1;
   y = zerocol(N); y[I] = un;
-  j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
   {
     for (; j; m<<=1,j--)

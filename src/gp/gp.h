@@ -21,9 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 void recover(int flag);
 void pari_addfunctions(module **modlist_p, entree *func, char **help);
-int term_height();
-int term_width();
-void hit_return();
+int term_height(void);
+int term_width(void);
+void hit_return(void);
 
 extern ulong init_opts;
 extern char *current_logfile;

@@ -1917,7 +1917,7 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
   av=avma; lim=stack_lim(av,1);
   p1 = n+2; m = *p1;
 
-  y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  y=x; j=1+bfffo((ulong)m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
   {
     for (; j; m<<=1,j--)
