@@ -900,7 +900,10 @@ exp_i(GEN x)
 static GEN
 RUgen(long N, long bitprec)
 {
-  GEN pi2 = gmul2n(mppi(bitprec/BITS_IN_LONG+3), 1);
+  GEN pi2;
+  if (N == 2) return mpneg(realun(bitprec));
+  if (N == 4) return gi;
+  pi2 = gmul2n(mppi(bitprec/BITS_IN_LONG+3), 1);
   return exp_i(gdivgs(pi2,N));
 }
 
@@ -933,7 +936,7 @@ initRUgen(long N, long bitprec)
 {
   GEN *RU = (GEN*)cgetg(N+1,t_VEC), z = RUgen(N,bitprec);
   long i, k = (N+3)>>1;
-  RU[0] = myrealun(bitprec);
+  RU[0] = gun;
   RU[1] = z;
   for (i=2; i<k; i++) RU[i] = gmul(z, RU[i-1]);
   for (   ; i<N; i++) RU[i] = gconj(RU[N-i]);
@@ -1922,9 +1925,13 @@ all_roots(GEN p, long bitprec)
   long bitprec0, bitprec2,n=lgef(p)-3,i,e,h,av;
 
   roots_pol=cgetg(n+1,t_VEC); av=avma;
+#if 0
   pd = poldeflate(p, &h);
+#else
+  pd = p; h = 1;
+#endif
   e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
-  bitprec0=bitprec + gexpo(pd) - gexpo(leading_term(pd)) + (long)log2(n) + 1+e;
+  bitprec0=bitprec + gexpo(pd) - gexpo(leading_term(pd)) + (long)log2(n/h)+1+e;
   for (i=1;; i++)
   {
     setlg(roots_pol,1); 
@@ -2069,7 +2076,7 @@ isrealappr(GEN x, long e)
 static int
 isconj(GEN x, GEN y, long e)
 {
-  long av = avma;
+  ulong av = avma;
   long i= (gexpo( gsub((GEN)x[1],(GEN)y[1]) ) < e
         && gexpo( gadd((GEN)x[2],(GEN)y[2]) ) < e);
   avma = av; return i;
@@ -2081,47 +2088,49 @@ isconj(GEN x, GEN y, long e)
 GEN
 roots(GEN p, long l)
 {
-  long av,n,i,k,s,e;
-  GEN c,c2,r,p1,p2,res;
+  ulong av = avma;
+  long n,i,k,s,t,e;
+  GEN c,L,p1,res,rea,com;
 
   if (gcmp0(p)) err(zeropoler,"roots");
-  av=avma; r=roots_com(p,l); n=lg(r);
-  if (n <= 1) return r;
+  L=roots_com(p,l); n=lg(L);
+  if (n <= 1) return L;
 
   if (!isreal(p))
   {
     res = cgetg(n,t_COL);
-    for (i=1; i<n; i++) res[i]=(long)tocomplex((GEN)r[i],l);
+    for (i=1; i<n; i++) res[i]=(long)tocomplex((GEN)L[i],l);
     return gerepileupto(av,res);
   }
   e = 5 - bit_accuracy(l);
-  p1=cgetg(n,t_COL); s=0;
+  rea=cgetg(n,t_COL); s = 0;
+  com=cgetg(n,t_COL); t = 0;
   for (i=1; i<n; i++)
   {
-    p2=(GEN)r[i];
-    if (typ(p2) != t_COMPLEX) { p1[++s]=(long)p2; r[i]=zero; }
-    else if (isrealappr(p2,e)) { p1[++s]=p2[1]; r[i]=zero; }
-  }
-  setlg(p1,s+1); p2=sort(p1);
-  res = cgetg(n,t_COL);
-  for (i=1; i<=s; i++) res[i]=(long)tocomplex((GEN)p2[i],l);
-  for (i=1; i<n; i++)
-  {
-    c=(GEN)r[i];
-    if (typ(c) == t_COMPLEX)
-    {
-      res[++s]=(long)tocomplex(c,l);
-      for (k=i+1; k<n; k++)
-      {
-        c2=(GEN)r[k];
-        if (typ(c2) == t_COMPLEX && isconj(c,c2,e))
-        {
-          res[++s]=(long)tocomplex(c2,l);
-          r[k]=zero; break;
-        }
-      }
-      if (k==n) err(bugparier,"roots (conjugates)");
+    p1 = (GEN)L[i];
+    if (isrealappr(p1,e)) {
+      if (typ(p1) == t_COMPLEX) p1 = (GEN)p1[1];
+      rea[++s] = (long)p1;
     }
+    else com[++t] = (long)p1;
+  }
+  setlg(rea,s+1); rea = sort(rea);
+  res = cgetg(n,t_COL);
+  for (i=1; i<=s; i++) res[i] = (long)tocomplex((GEN)rea[i],l);
+  for (i=1; i<=t; i++)
+  {
+    c = (GEN)com[i]; if (!c) continue;
+    res[++s] = (long)tocomplex(c,l);
+    for (k=i+1; k<=t; k++)
+    {
+      p1 = (GEN)com[k]; if (!p1) continue;
+      if (isconj(c,p1,e))
+      {
+        res[++s] = (long)tocomplex(p1,l);
+        com[k] = 0; break;
+      }
+    }
+    if (k==n) err(bugparier,"roots (conjugates)");
   }
   return gerepileupto(av,res);
 }
