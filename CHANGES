@@ -91,12 +91,14 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
    13- rnfequation: use modular (bivariate) resultant
    14- polynomial gcd (srgcd): uses modular algo (modulargcd,nfgcd) if possible
    15- unified internal hnf* functions
+   16- improved nfsubfields [better Hensel lift]
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
     2- new target for Makefile: gp.dbg
 BA  3- library functions FpX_roots_to_pol, FqX_roots_to_pol
 BA  4- library function FpX_FpXQ_compo (Brent & Kung)
+    5- library function FpM_inv and FpM_gauss
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
