@@ -1798,15 +1798,16 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
     flusherr();
   }
   av = avma;
-  for (iz=KCZ+1; iz<=KCZ2; iz++)
+  for (iz=KCZ+1; iz<=KCZ2; iz++, avma = av)
   {
     if (DEBUGLEVEL>1) fprintferr("%ld ", FB[iz]);
     P = idealbase[numFB[FB[iz]]]; J = lg(P);
     /* if unramified, check all but 1 */
-    if (!divise(D, gmael(P,1,1))) J--;
+    if (J > 1 && !divise(D, gmael(P,1,1))) J--;
     for (j=1; j<J; j++)
     {
       GEN ideal0 = prime_to_ideal(nf,(GEN)P[j]);
+      ulong av2 = avma;
       for(nbtest=0;;)
       {
 	ideal = ideal0;
@@ -1831,7 +1832,7 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
           if (idealpro && factorgen(nf,idealpro,iz-1,FB[iz-1])) break;
 	  nbtest++; if (nbtest==200) return 0;
 	}
-	avma = av; if (k < ru) break;
+	avma = av2; if (k < ru) break;
       }
     }
   }
