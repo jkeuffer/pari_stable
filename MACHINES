@@ -34,7 +34,7 @@ alpha21264   500MHz  OSF1-V4.0       cc  X11 dl2    3156    3466  2.0.20    GH
 alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl2    4270    4350  2.0.19    IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
-alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl2    5249    5250  2.0.21(13)
+alpha21164   500Mhz  Linux-2.2.13   egcs X11 dl2    5219    5337  2.1.0 (13)
 alpha21064   172Mhz  OSF1-3.0        cc  X11 dl2   34501   35670  2.0.21
 ------------------------------------------------------------------------------
 Sun/SPARC
@@ -58,11 +58,11 @@ UltraSPARC   200MHz  Solaris-2.5.1   gcc X11 dl2    9226    9268  2.0.16    IS
 UltraSPARC   200MHz  Solaris-2.5.1    cc X11 dl2   11226   11755  2.0.16    IS
 UltraSPARC   167MHz  Solaris-2.6     gcc X11 dl2   10767   11218  2.0.16    IS
 UltraSPARC   167MHz  Solaris-2.6      cc X11 dl2   13677   13967  2.0.16    IS
-UltraSPARC   167MHz  Solaris-2.7     gcc X11 dl2   10598   11104  2.0.21
+UltraSPARC   167MHz  Solaris-2.7     gcc X11 dl2   10646   10872  2.1.0
 UltraSPARC   167MHz  Solaris-2.5     g++ X11 dl2   13474   13418  2.0.9 (7) LG
 UltraSPARC   167MHz  Solaris-2.5     CC  X11 -     15778   16400  2.0.9     LG
 UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl2   16241   17048  2.0.9     LG
-UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   12438   12621  2.0.21
+UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   12426   12716  2.1.0
 
 SuperSPARC2   75MHz  Solaris-2.5     gcc X11 dl2   16969   17013  2.0.10    LG
 SuperSPARC    50Mhz  Linux-2.2.14    gcc X11 dl2   41126   40854  2.0.18(22)BA
@@ -71,7 +71,7 @@ SuperSPARC    40Mhz  Solaris-2.5     gcc X11 dl2   31528   31576  2.0.16
 TurboSPARC   170MHz  Solaris-2.5     gcc X11 dl2   15907   16529  2.0.9     LG
 MicroSPARC2  110MHz  NextStep-v3     cc    -   -   37794       -  2.0.9     LG
 MicroSPARC2  110MHz  SunOS-4.1.4     gcc X11 dl2   31476   32123  2.0.9     LG
-MicroSPARC2  110MHz  Solaris-2.5     gcc X11 dl2   26201   26181  2.0.21
+MicroSPARC2  110MHz  Solaris-2.5     gcc X11 dl2   25888   26695  2.1.0
 SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc X11 dl   115212  115364  2.0.9     LG
 SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc X11   -  139406       -  2.0.8     GN
 SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107074  106494  2.0.16(21)DE
@@ -103,7 +103,7 @@ PentiumII    333Mhz  Linux-2.0.32    gcc X11 dl2   (3842)  (4164) 2.0.12    JC
 PentiumII    300MHz  NextStep-3.3    cc    -   -    5325       -  2.0.10
 PentiumII    233MHz  FreeBSD-2.2.5   gcc X11 dl2   (6251)  (6114) 2.0.11
 PentiumII    233MHz  Linux-2.0.35    gcc X11 dl2   (7460)  (7586) 2.0.12    HG
-PentiumPro   200MHz  Linux-2.2.12   egcs X11 dl2    7706    7824  2.0.21
+PentiumPro   200MHz  Linux-2.2.12   egcs X11 dl2    7820    7828  2.1.0
 Pentium      266Mhz  Linux-2.0.29    gcc X11 dl2   (7256)  (7044) 2.0.11
 Pentium      200MHz  Linux-2.2.10    gcc X11 dl2   12062   12340  2.0.18    MS
 Pentium      200Mhz  NextStep-3.3    cc    -   -   16035       -  2.0.06    MS
