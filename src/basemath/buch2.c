@@ -1850,23 +1850,23 @@ pseudomin(GEN I, GEN G)
 }
 
 static void
-dbg_newrel(RELCACHE_t *cache, long jideal, long jdir, long phase)
+dbg_newrel(RELCACHE_t *cache, long jideal, long jdir)
 {
   fprintferr("\n++++ cglob = %ld: new relation (need %ld)", 
              cache->last - cache->base, cache->end - cache->base);
   wr_rel(cache->last->R);
   if (DEBUGLEVEL>3)
   {
-    fprintferr("(jideal=%ld,jdir=%ld,phase=%ld)", jideal,jdir,phase);
+    fprintferr("(jideal=%ld,jdir=%ld)", jideal,jdir);
     msgtimer("for this relation");
   }
   flusherr() ;
 }
 
 static void
-dbg_cancelrel(long jideal,long jdir,long phase, GEN col)
+dbg_cancelrel(long jideal, long jdir, GEN col)
 {
-  fprintferr("rel. cancelled. phase %ld: ",phase);
+  fprintferr("relation cancelled: ");
   if (DEBUGLEVEL>3) fprintferr("(jideal=%ld,jdir=%ld)",jideal,jdir);
   wr_rel(col); flusherr();
 }
@@ -1961,8 +1961,7 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
     for (av1 = avma; jdir <= nbG; jdir++, avma = av1)
     { /* reduce along various directions */
       if (DEBUGLEVEL>2)
-        fprintferr("phase=%ld,jideal=%ld,jdir=%ld,rand=%ld\n",
-                   phase,jideal,jdir,getrand());
+        fprintferr("jideal=%ld,jdir=%ld,rand=%ld\n", jideal,jdir,getrand());
       m = pseudomin(IDEAL, (GEN)vecG[jdir]);
       if (!m) err(bugparier, "precision too low in random_relation");
       if (!factorgen(F,nf,ideal,m))
@@ -1976,7 +1975,7 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
       for (i=1; i<lgsub; i++) col[ F->subFB[i] ] -= ex[i];
       if (already_known(cache))
       { /* forget it */
-        if (DEBUGLEVEL>1) dbg_cancelrel(jideal,jdir,phase,col);
+        if (DEBUGLEVEL>1) dbg_cancelrel(jideal,jdir,col);
         cache->last--; unset_fact(col); col[jideal] = 0;
         for (i=1; i<lgsub; i++) col[ F->subFB[i] ] = 0;
 
@@ -1990,7 +1989,7 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
       cache->last->m = gclone(m);
       cache->last->ex = gclone(ex);
       cache->last->pow= F->pow;
-      if (DEBUGLEVEL) dbg_newrel(cache, jideal, jdir, phase);
+      if (DEBUGLEVEL) dbg_newrel(cache, jideal, jdir);
       /* Need more, try next P */
       if (cache->last < cache->end) { cptzer = 0; break; }
 
