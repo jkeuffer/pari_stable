@@ -1356,9 +1356,10 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
   {
     if (signe(pdr)) break;
     if (!nalph) nalph = gadd(alph, gmul(p, polx[v]));
-    /* nchi was too reduced at this point */
-    nchi = mycaract(fx, nalph, NULL, NULL, ns);
-    pdr = respm(nchi, derivpol(nchi), pmf);
+    /* nchi was too reduced at this point; try a larger precision */
+    pmf  = sqri(pmf);
+    nchi = mycaract(fx, nalph, p, pmf, ns);
+    pdr  = respm(nchi, derivpol(nchi), pmf);
     if (signe(pdr)) break;
     if (DEBUGLEVEL >= 6)
       fprintferr("  non separable polynomial in update_alpha!\n");
@@ -1544,7 +1545,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	eq = (long)(-L / E);
 	er = (long)(-L*Ea / E - eq*Ea);
 
- 	if (eq) gamm = gmul(beta, gpowgs(p, eq));
+	if (eq) gamm = gmul(beta, gpowgs(p, eq));
 	else gamm = beta;
 	if (er)
 	{
