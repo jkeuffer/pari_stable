@@ -2401,7 +2401,7 @@ gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
   gpmem_t av;
-  VOLATILE GEN z = gnil;
+  GEN z = gnil;
   Buffer *b = new_buffer();
   filtre_t F;
 
@@ -2438,7 +2438,8 @@ gp_main_loop(int ismain)
       Sleep(10); if (win32ctrlc) dowin32ctrlc();
     #endif
       if (popinfile()) gp_quit();
-      if (!ismain) { pop_buffer(); return z; }
+      if (ismain) continue;
+      pop_buffer(); return z;
     }
     if (check_meta(b->buf)) continue;
 
@@ -2533,7 +2534,7 @@ break_loop(long numerr)
   static FILE *oldinfile = NULL;
   static char *old = NULL;
   static Buffer *b = NULL;
-  VOLATILE int go_on = 0;
+  int go_on = 0;
   char *s, *t, *msg;
   filtre_t F;
 
