@@ -2059,9 +2059,8 @@ factorpadic2(GEN f, GEN p, long prec)
 /***********************/
 /*   Using ROUND 4     */
 /***********************/
-extern GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
-extern GEN nilord(GEN p, GEN fx, long mf, GEN gx, long flag);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pev, long e);
+extern GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
 
 static int
 expo_is_squarefree(GEN e)
@@ -2076,8 +2075,8 @@ GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
   pari_sp av = avma;
-  GEN w,g,poly,y,p1,p2,ex,pols,exps,ppow,lead,lead_orig;
-  long v=varn(f),n=degpol(f),mfx,i,k,j,r,pr,d;
+  GEN w,poly,y,p1,p2,ex,pols,exps,ppow,lead,lead_orig;
+  long n=degpol(f),i,k,j,pr,d;
   int reverse = 0;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
@@ -2111,11 +2110,7 @@ factorpadic4(GEN f,GEN p,long prec)
       continue;
     }
     /* use Round 4 */
-    mfx = ggval(ZX_disc(fx),p);
-    r = lg(w)-1;
-    g = (GEN)w[r];
-    p2 = (r == 1)? nilord(p,fx,mfx,g,pr)
-                 : Decomp(p,fx,mfx,polx[v],fx,g, (pr<=mfx)? mfx+1: pr);
+    p2 = maxord_i(p, fx, ggval(ZX_disc(fx),p), w, pr);
     if (p2)
     {
       p2 = gerepilecopy(av1,p2);
