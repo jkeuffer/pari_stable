@@ -384,6 +384,7 @@ freeall()
   long i;
   entree *ep,*ep1;
 
+  while (delete_var()) /* empty */;
   for (i = 0; i < functions_tblsz; i++)
   {
     for (ep = functions_hash[i]; ep; ep = ep1)
@@ -408,7 +409,6 @@ freeall()
   free(current_logfile);
   free(current_psfile);
 
-  while (delete_var()) /* empty */;
   if (gp_history_fun)
     gp_history_fun(0,-1,NULL,NULL);
 }
