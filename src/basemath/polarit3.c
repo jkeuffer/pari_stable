@@ -3988,7 +3988,7 @@ QX_invmod(GEN A0, GEN B0)
   }
   if (degpol(A0) < 15) return ginvmod(A0,B0);
   A = primitive_part(A0, &D);
-  B = primitive_part(B0, NULL);
+  B = primpart(B0);
   /* A, B in Z[X] */
   av2 = avma; U = NULL;
   d += 3000; /* 27449 = prime(3000) */

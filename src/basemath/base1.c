@@ -368,7 +368,7 @@ galois(GEN x, long prec)
   if (typ(x)!=t_POL) err(notpoler,"galois");
   n=degpol(x); if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
-  x = primitive_part(x,NULL);
+  x = primpart(x);
   check_pol_int(x, "galois");
   if (gisirreducible(x) != gun)
     err(impl,"galois of reducible polynomial");

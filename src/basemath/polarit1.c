@@ -1843,7 +1843,7 @@ factorpadic4(GEN f,GEN p,long prec)
     for (i=1; i<j; i++)
     {
       p1 = (GEN)pols[i]; unscale_pol_i(p1, lead);
-      pols[i] = (long)primitive_part(p1,NULL);
+      pols[i] = (long)primpart(p1);
     }
   y = cgetg(3,t_MAT);
   p1 = cgetg(j,t_COL); p = icopy(p); ppow = gpowgs(p,prec);

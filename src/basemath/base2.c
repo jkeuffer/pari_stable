@@ -3088,7 +3088,7 @@ rnfequation0(GEN nf, GEN B, long flall)
 
   k = 0; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
-  C = primitive_part(C, NULL);
+  C = primpart(C);
   if (flall)
   {
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */

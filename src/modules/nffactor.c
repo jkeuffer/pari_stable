@@ -349,8 +349,7 @@ localpol(GEN nf, GEN pr)
   if (degpol(pol) == itos((GEN)pr[4])) return pol; /* pr inert */
 
   g = gmul((GEN)nf[7], (GEN)pr[2]); /* uniformizer */
-  g = primitive_part(g, NULL);
-  return FpX_gcd(g,pol,p);
+  g = primpart(g); return FpX_gcd(g,pol,p);
 }
 
 /* factorization of x modulo pr */
