@@ -6,11 +6,11 @@ Description:
  (small, small):bool:parens             $(1) == $(2)
  (lg, lg):bool:parens                   $(1) == $(2)
  (small, int):bool:parens               cmpsi($1, $2) == 0
- (mp, 0):bool                           !signe(x)
- (@int, 1):bool:parens                  is_pm1(x) && signe(x)==1
- (int, 1):bool                          gcmp1($1, $2)
- (@int, -1):bool:parens                 is_pm1(x) && signe(x)==-1
- (int, -1):bool                         gcmp_1($1, $2)
+ (mp, 0):bool                           !signe($1)
+ (@int, 1):bool:parens                  is_pm1($1) && signe($1)==1
+ (int, 1):bool                          gcmp1($1)
+ (@int, -1):bool:parens                 is_pm1($1) && signe($1)==-1
+ (int, -1):bool                         gcmp_1($1)
  (int, small):bool:parens               cmpis($1, $2) == 0
  (int, int):bool                        egalii($1, $2)
  (gen, 0):bool                          gcmp0($1)
