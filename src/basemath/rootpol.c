@@ -499,7 +499,7 @@ pol_to_gaussint(GEN p, long shift)
 {
   long i, l = lgef(p);
   GEN q = cgetg(l, t_POL); q[1] = p[1];
-  for (i=2; i<l; i++) q[i] = (long)floor_mpshift((GEN)p[i], shift);
+  for (i=2; i<l; i++) q[i] = (long)gfloor2n((GEN)p[i], shift);
   return q;
 }
 

@@ -274,15 +274,15 @@ affrr(GEN x, GEN y)
   if (x[ly] & HIGHBIT) roundr_up_ip(y, ly);
 }
 
-GEN
-mpshift_special(GEN x, long lx, long n)
+static GEN
+shifti_spec(GEN x, long lx, long n)
 {
   long ly, i, m, s = signe(x);
   GEN y;
   if (!s) return gzero;
   if (!n) 
   {
-    y = cgeti(lx); /* cf icopy. But also applies to a t_REAL! */
+    y = cgeti(lx); 
     y[1] = evalsigne(s) | evallgefint(lx);
     while (--lx > 1) y[lx]=x[lx];
     return y;
@@ -330,14 +330,14 @@ mpshift_special(GEN x, long lx, long n)
 GEN
 shifti(GEN x, long n)
 {
-  return mpshift_special(x, lgefint(x), n);
+  return shifti_spec(x, lgefint(x), n);
 }
 
 GEN
 shifti3(GEN x, long n, long flag)
 {
   long s, lyorig, ly, i, m, lx = lgefint(x);
-  GEN y = mpshift_special(x, lx, n);
+  GEN y = shifti_spec(x, lx, n);
 
   if (!flag || n >= 0 || (s = signe(x)) >= 0) return y;
   if (y == gzero) return stoi(-1);
@@ -362,6 +362,23 @@ shifti3(GEN x, long n, long flag)
   }
   y[1] = evalsigne(s)|evallgefint(ly);
   y[0] = evaltyp(t_INT)|evallg(ly); return y;
+}
+
+GEN ishiftr_spec(GEN x, long lx, long n)
+{
+  /*This is a kludge since x is not an integer*/
+  return shifti_spec(x, lx, n);
+}
+
+
+GEN ishiftr(GEN x, long s)
+{
+  long ex,lx,n;
+  if (!signe(x)) return gzero;
+  ex = expo(x) + s; if (ex < 0) return gzero;
+  lx = lg(x);
+  n=ex - bit_accuracy(lx) + 1;
+  return ishiftr_spec(x, lx, n);
 }
 
 GEN

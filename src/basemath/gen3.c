@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                 PRINCIPAL VARIABLE NUMBER                      **/
 /**                                                                **/
 /********************************************************************/
+extern GEN ishiftr_spec(GEN x, long lx, long n);
 
 int
 gvar(GEN x)
@@ -1929,8 +1930,8 @@ grndtoi(GEN x, long *e)
         *e=expo(addsr(1,x)); avma=av; return negi(gun);
       }
       lx=lg(x); e1 = ex - bit_accuracy(lx) + 1;
-      settyp(p1,t_INT); setlgefint(p1,lx);
-      y=shifti(p1,e1); if (signe(x)<0) y=addsi(-1,y);
+      y = ishiftr_spec(p1, lx, e1);
+      if (signe(x)<0) y=addsi(-1,y);
       y = gerepileuptoint(av,y);
 
       if (e1<=0) { av=avma; e1=expo(subri(x,y)); avma=av; }
@@ -1956,29 +1957,23 @@ grndtoi(GEN x, long *e)
   return NULL; /* not reached */
 }
 
-extern GEN mpshift_special(GEN x, long lx, long n);
-
 /* floor(x * 2^s) */
 GEN
-floor_mpshift(GEN x, long s)
+gfloor2n(GEN x, long s)
 {
-  long ex, lx;
   GEN z;
   switch(typ(x))
   {
     case t_INT:
       return shifti(x, s);
     case t_REAL:
-      if (!signe(x)) return gzero;
-      ex = expo(x) + s; if (ex < 0) return gzero;
-      lx = lg(x);
-      return mpshift_special(x, lx, ex - bit_accuracy(lx) + 1);
+      return ishiftr(x, s);
     case t_COMPLEX:
       z = cgetg(3, t_COMPLEX);
-      z[1] = (long)floor_mpshift((GEN)x[1], s);
-      z[2] = (long)floor_mpshift((GEN)x[2], s);
+      z[1] = (long)gfloor2n((GEN)x[1], s);
+      z[2] = (long)gfloor2n((GEN)x[2], s);
       return z;
-    default: err(typeer,"floor_mpshift");
+    default: err(typeer,"gfloor2n");
       return NULL; /* not reached */
   }
 }
@@ -1994,7 +1989,7 @@ gcvtoi(GEN x, long *e)
   {
     ex = expo(x); if (ex < 0) { *e = ex; return gzero; }
     lx = lg(x); e1 = ex - bit_accuracy(lx) + 1;
-    y = mpshift_special(x, lx, e1);
+    y = ishiftr_spec(x, lx, e1);
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;
   }
