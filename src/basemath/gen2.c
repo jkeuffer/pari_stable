@@ -981,7 +981,7 @@ gabs(GEN x, long prec)
       y[2]=licopy((GEN)x[2]); return y;
 
     case t_COMPLEX:
-      av=avma; p1=gnorm(x);
+      av=avma; p1=cxnorm(x);
       switch(typ(p1))
       {
         case t_INT:

@@ -2130,7 +2130,7 @@ trueeta(GEN x, long prec)
   {
     n = ground( real_i(x) );
     if (signe(n)) { x = gsub(x,n); N = addii(N, n); }
-    if (gcmp(gnorm(x), run) > 0) break;
+    if (gcmp(cxnorm(x), run) > 0) break;
     x = gdivsg(-1,x);
     m = gmul(m, gsqrt(mulcxmI(x), prec));
   }

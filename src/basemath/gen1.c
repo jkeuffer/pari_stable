@@ -103,7 +103,7 @@ divRc(GEN x, GEN y) {
   pari_sp tetpil, av = avma;
   a = gmul(x, (GEN)y[1]);
   b = gmul(x, (GEN)y[2]); if(!gcmp0(b)) b = gneg_i(b);
-  N = gnorm(y); tetpil = avma;
+  N = cxnorm(y); tetpil = avma;
   z[1] = ldiv(a, N);
   z[2] = ldiv(b, N); gerepilecoeffssp(av,tetpil,z+1,2); return z;
 }
@@ -1981,7 +1981,7 @@ gdiv(GEN x, GEN y)
       return z;
     }
     case t_COMPLEX:
-      av=avma; p1 = gnorm(y); p2 = mulcc(x, gconj(y)); tetpil = avma;
+      av=avma; p1 = cxnorm(y); p2 = mulcc(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_PADIC:
@@ -1990,7 +1990,7 @@ gdiv(GEN x, GEN y)
 
     case t_QUAD:
       if (!gegal((GEN)x[1],(GEN)y[1])) err(operi,"/",x,y);
-      av = avma; p1 = gnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
+      av = avma; p1 = quadnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_POLMOD: av = avma;
@@ -2099,7 +2099,7 @@ gdiv(GEN x, GEN y)
       case t_COMPLEX: return divRc(x,y);
       case t_PADIC: return divTp(x, y);
       case t_QUAD:
-        av = avma; p1 = gnorm(y); p2 = mulRq(x, gconj(y)); tetpil = avma;
+        av = avma; p1 = quadnorm(y); p2 = mulRq(x, gconj(y)); tetpil = avma;
         return gerepile(av, tetpil, gdiv(p2,p1));
     }
   }
@@ -2130,11 +2130,11 @@ gdiv(GEN x, GEN y)
           return div_intmod_same(z, X, p1, modii((GEN)y[1], X));
         }
         case t_COMPLEX:
-          av = avma; p1 = gnorm(y); p2 = mulRc(x, gconj(y)); tetpil = avma;
+          av = avma; p1 = cxnorm(y); p2 = mulRc(x, gconj(y)); tetpil = avma;
           return gerepile(av,tetpil, gdiv(p2,p1));
 
         case t_QUAD:
-          av = avma; p1 = gnorm(y); p2 = gmul(x,gconj(y)); tetpil = avma;
+          av = avma; p1 = quadnorm(y); p2 = gmul(x,gconj(y)); tetpil = avma;
           return gerepile(av,tetpil, gdiv(p2,p1));
 
         case t_PADIC: { GEN X = (GEN)x[1];
@@ -2179,7 +2179,7 @@ gdiv(GEN x, GEN y)
           return divTp(x, y);
 
         case t_QUAD:
-          av=avma; p1=gnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
+          av=avma; p1=quadnorm(y); p2=gmul(x,gconj(y)); tetpil=avma;
           return gerepile(av,tetpil,gdiv(p2,p1));
       }
 

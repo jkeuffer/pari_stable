@@ -676,7 +676,7 @@ CM_powell(GEN e, GEN z, GEN n)
   if (typ(n[2]) != t_INT || typ(n[3]) != t_INT)
     err(impl, "powell for nonintegral CM exponent");
 
-  ln = itos_or_0( shifti(addsi(1, gnorm(n)), 2) );
+  ln = itos_or_0( shifti(addsi(1, quadnorm(n)), 2) );
   if (!ln) err(talker, "norm too large in CM");
   vn = (ln-4)>>2;
   z1 = weipell(e, ln);
@@ -912,7 +912,7 @@ set_gamma(SL2_red *T)
       a = addii(a, mulii(n,c));
       b = addii(b, mulii(n,d));
     }
-    m = gnorm(t); if (gcmp(m,run) > 0) break;
+    m = cxnorm(t); if (gcmp(m,run) > 0) break;
     t = gneg_i(gdiv(gconj(t), m)); /* apply S */
     p1 = negi(c); c = a; a = p1;
     p1 = negi(d); d = b; b = p1;
