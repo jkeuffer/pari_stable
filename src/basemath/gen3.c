@@ -1526,8 +1526,10 @@ integ(GEN x, long v)
 	return gerepile(av,tetpil,changevar(y,p1));
       }
 
-      n=lgef(x[1])+lgef(x[2])-4;
-      y=gdiv(gtrunc(gmul((GEN)x[2], integ(tayl(x,v,n),v))), (GEN)x[2]);
+      tx = typ(x[1]); i = is_scalar_t(tx)? 0: lgef(x[1])-3;
+      tx = typ(x[2]); j = is_scalar_t(tx)? 0: lgef(x[2])-3;
+      n = i+j + 2;
+      y = gdiv(gtrunc(gmul((GEN)x[2], integ(tayl(x,v,n),v))), (GEN)x[2]);
       if (!gegal(deriv(y,v),x)) err(inter2);
       if (typ(y)==t_RFRAC && lgef(y[1]) == lgef(y[2]))
       {
