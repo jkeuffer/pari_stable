@@ -43,6 +43,7 @@ Done for version 2.2.2 (released ??/??/2001):
     9- libpari.so included symbols from libc without linking it explicitly
        (Debian requirement, and cleaner anyway)
    10- recent pdftex failed to compile users.tex  (\pdfannotlink undefined)
+   11- !nf.sign[1] was parsed as (!nf.sign)[1]
 
   Changes
     1- allow compressing *.dvi files for the online help system
