@@ -555,57 +555,63 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 }
 
 GEN
-direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c)
+direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
-  GEN p1,x,x1,s,polnum,polden,c0;
-  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,n,i,j,k,tx,lx;
-  byteptr p = diffptr;
+  long prime[] = {evaltyp(t_INT)|m_evallg(3), evalsigne(1)|evallgefint(3), 0};
+  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, p,n,i,j,k,tx,lx,a,b;
+  GEN x,y,s,polnum,polden;
+  byteptr d;
 
-  if (!c) c = b;
-  if (typ(a) != t_INT || typ(c) != t_INT)
-    err(talker,"non integral index in direuler");
-  n = itos(c);
-  if (gcmpgs(b,2) < 0 || n <= 0) { x=cgetg(2,t_VEC); x[1]=un; return x; }
-  if (gcmpgs(a,2) < 0) a = gdeux;
+  d = prime_loop_init(ga,gb, &a,&b, prime);
+  n = c? itos(c): b;
+  if (!d || b < 2 || n <= 0) { x=cgetg(2,t_VEC); x[1]=un; return x; }
+  if (n < b) b = n;
+  push_val(ep, prime);
 
-  x1 = cgetg(n+1,t_VEC);
-  b = (gcmp(c,b) < 0) ? gcopy(c) : gcopy(b);
-  av = avma;
-  x=cgetg(n+1,t_VEC); x[1]=un; for (i=2; i<=n; i++) x[i]=zero;
-
-  while (*p && gcmpgs(a,prime) > 0) prime += *p++;
-  a = stoi(prime); push_val(ep, a);
-  while (gcmp(a,b)<=0)
+  y = cgetg(n+1,t_VEC); av = avma;
+  x = cgetg(n+1,t_VEC); x[1]=un; for (i=2; i<=n; i++) x[i]=zero;
+  p = prime[2];
+  while (p <= b)
   {
-    if (!*p) err(primer1);
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"direuler");
-    polnum=numer(p1); polden=denom(p1);
+    s = lisexpr(ch); if (did_break()) err(breaker,"direuler");
+    polnum = numer(s);
+    polden = denom(s);
     tx = typ(polnum);
     if (is_scalar_t(tx))
     {
       if (!gcmp1(polnum))
-	err(talker,"constant term not equal to 1 in direuler");
+      {
+        if (!gcmp_1(polnum))
+          err(talker,"constant term not equal to 1 in direuler");
+        polden = gneg(polden);
+      }
     }
     else
     {
       ulong k1,q, qlim;
       if (tx != t_POL) err(typeer,"direuler");
-      c0 = truecoeff(polnum,0);
-      if (!gcmp1(c0)) err(talker,"constant term not equal to 1 in direuler");
-      for (i=1; i<=n; i++) x1[i]=x[i];
-      prime=itos(a); lx=lgef(polnum)-3;
-      q=prime; qlim = n/prime; j=1;
+      c = truecoeff(polnum,0);
+      if (!gcmp1(c))
+      {
+        if (!gcmp_1(c))
+          err(talker,"constant term not equal to 1 in direuler");
+        polnum = gneg(polnum);
+        polden = gneg(polden);
+      }
+      for (i=1; i<=n; i++) y[i]=x[i];
+      lx=lgef(polnum)-3;
+      q=p; qlim = n/p; j=1;
       while (q<=n && j<=lx)
       {
-	c0=(GEN)polnum[j+2];
-	if (!gcmp0(c0))
+	c=(GEN)polnum[j+2];
+	if (!gcmp0(c))
 	  for (k=1,k1=q; k1<=n; k1+=q,k++)
-	    x[k1] = ladd((GEN)x[k1], gmul(c0,(GEN)x1[k]));
+	    x[k1] = ladd((GEN)x[k1], gmul(c,(GEN)y[k]));
         if (q > qlim) break;
-	q*=prime; j++;
+	q*=p; j++;
       }
     }
-    tx=typ(polden);
+    tx = typ(polden);
     if (is_scalar_t(tx))
     {
       if (!gcmp1(polden))
@@ -614,27 +620,27 @@ direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c)
     else
     {
       if (tx != t_POL) err(typeer,"direuler");
-      c0 = truecoeff(polden,0);
-      if (!gcmp1(c0)) err(talker,"constant term not equal to 1 in direuler");
-      prime=itos(a); lx=lgef(polden)-3;
-      for (i=prime; i<=n; i+=prime)
+      c = truecoeff(polden,0);
+      if (!gcmp1(c)) err(talker,"constant term not equal to 1 in direuler");
+      lx=lgef(polden)-3;
+      for (i=p; i<=n; i+=p)
       {
 	s=gzero; k=i; j=1;
-	while (!(k%prime) && j<=lx)
+	while (!(k%p) && j<=lx)
 	{
-	  c0=(GEN)polden[j+2]; k/=prime; j++;
-	  if (!gcmp0(c0)) s=gadd(s,gmul(c0,(GEN)x[k]));
+	  c=(GEN)polden[j+2]; k/=p; j++;
+	  if (!gcmp0(c)) s=gadd(s,gmul(c,(GEN)x[k]));
 	}
 	x[i]=lsub((GEN)x[i],s);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&x; gptr[1]=&a;
       if (DEBUGMEM>1) err(warnmem,"direuler");
-      gerepilemany(av,gptr,2);
+      x = gerepileupto(av, gcopy(x));
     }
-    a = addsi(*p++,a); ep->value = (void*) a;
+    p += *d++; if (!*d) err(primer1);
+    prime[2] = p;
   }
   pop_val(ep); tetpil=avma;
   return gerepile(av0,tetpil,gcopy(x));
