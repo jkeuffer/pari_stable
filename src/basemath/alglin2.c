@@ -3364,17 +3364,19 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
   d = RgX_extgcd(a,b, pu,pv);
   if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
   else if (typ(d[2]) == t_REAL && lg(d[2]) == 3)
-#if 0
+#if 1
   { /* possible accuracy problem */
     GEN D = RgX_gcd_simple(a,b);
     if (degpol(D)) { 
+      D = gdiv(D, leading_term(D));
       a = RgX_div(a, D); b = RgX_div(b, D);
       d = RgX_extgcd(a,b, pu,pv); /* retry now */
+      d = gmul(d, D);
     }
   }
 #else
-  {
-    GEN d = RgX_extgcd_simple(a,b, pu,pv);
+  { /* less stable */
+    d = RgX_extgcd_simple(a,b, pu,pv);
     if (degpol(d)) { a = RgX_div(a, d); b = RgX_div(b, d); }
   }
 #endif
@@ -3457,7 +3459,12 @@ gsmithall(GEN x,long all)
         for (k=1; k<i; k++)
         {
           for (j=1; j<i; j++)
-            if (signe(gmod(gcoeff(x,k,j),b))) break;
+          {
+            GEN r = gmod(gcoeff(x,k,j), b);
+            if (signe(r) && (! isinexactreal(r) ||
+                   gexpo(r) > 16 + gexpo(b) - bit_accuracy(gprecision(r)))
+               ) break;
+          }
           if (j != i) break;
         }
         if (k == i) break;
