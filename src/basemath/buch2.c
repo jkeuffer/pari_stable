@@ -1280,8 +1280,11 @@ isunit(GEN bnf,GEN x)
     for (i=1;;)
     {
       rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
-      ex = grndtoi(gauss(rlog, rx), &e);
-      if (gcmp0((GEN)ex[RU]) && e < -4) break;
+      if (rx)
+      {
+        ex = grndtoi(gauss(rlog, rx), &e);
+        if (gcmp0((GEN)ex[RU]) && e < -4) break;
+      }
 
       if (++i > 4) err(talker,"insufficient precision in isunit");
       prec = (prec-1)<<1;

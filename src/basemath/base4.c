@@ -244,9 +244,9 @@ get_arch(GEN nf,GEN x,long prec)
 
   R1=itos(gmael(nf,2,1)); RU = R1+itos(gmael(nf,2,2));
   if (typ(x)!=t_COL) x = algtobasis_intern(nf,x);
+  v = cgetg(RU+1,t_VEC);
   if (isnfscalar(x)) /* rational number */
   {
-    v = cgetg(RU+1,t_VEC);
     p1 = glog((GEN)x[1],prec);
     p2 = (RU > R1)? gmul2n(p1,1): NULL;
     for (i=1; i<=R1; i++) v[i]=(long)p1;
@@ -254,13 +254,15 @@ get_arch(GEN nf,GEN x,long prec)
   }
   else
   {
-    x = gmul(gmael(nf,5,1),x); v = cgetg(RU+1,t_VEC);
+    x = gmul(gmael(nf,5,1),x);
     for (i=1; i<=R1; i++) v[i] = (long)mylog((GEN)x[i],prec);
     for (   ; i<=RU; i++) v[i] = lmul2n(mylog((GEN)x[i],prec),1);
   }
   return v;
 }
 
+/* as above but return NULL if precision problem, and set *emb to the
+ * embeddings of x */
 GEN
 get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
 {
@@ -269,10 +271,10 @@ get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
 
   R1=itos(gmael(nf,2,1)); RU = R1+itos(gmael(nf,2,2));
   if (typ(x)!=t_COL) x = algtobasis_intern(nf,x);
+  v = cgetg(RU+1,t_COL);
   if (isnfscalar(x)) /* rational number */
   {
     GEN u = (GEN)x[1];
-    v = cgetg(RU+1,t_COL);
     i = signe(u);
     if (!i) err(talker,"0 in get_arch_real");
     p1= (i > 0)? glog(u,prec): gzero;
@@ -282,9 +284,18 @@ get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
   }
   else
   {
-    x = gmul(gmael(nf,5,1),x); v = cgetg(RU+1,t_COL);
-    for (i=1; i<=R1; i++) v[i] = llog(gabs((GEN)x[i],prec),prec);
-    for (   ; i<=RU; i++) v[i] = llog(gnorm((GEN)x[i]),prec);
+    GEN t;
+    x = gmul(gmael(nf,5,1),x);
+    for (i=1; i<=R1; i++)
+    {
+      t = gabs((GEN)x[i],prec); if (gcmp0(t)) return NULL;
+      v[i] = llog(t,prec);
+    }
+    for (   ; i<=RU; i++)
+    {
+      t = gnorm((GEN)x[i]); if (gcmp0(t)) return NULL;
+      v[i] = llog(t,prec);
+    }
   }
   *emb = x; return v;
 }
@@ -1345,9 +1356,11 @@ famat_ideallog(GEN nf, GEN g, GEN e, GEN bid)
   ulong av = avma;
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
   GEN cyc = gmael(bid,2,2), list_set = (GEN)bid[4], U = (GEN)bid[5];
-  GEN p1,y0,x,y, psigne = zsigne(nf, to_famat(g,e), arch);
+  GEN p1,y0,x,y, psigne;
   long i;
+  if (lg(cyc) == 1) return cgetg(1,t_COL);
   y0 = y = cgetg(lg(U), t_COL);
+  psigne = zsigne(nf, to_famat(g,e), arch);
   for (i=1; i<lg(vp); i++)
   {
     GEN pr = (GEN)vp[i], prk;
