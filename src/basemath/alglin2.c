@@ -2974,6 +2974,9 @@ bezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv, GEN mun)
   }
 }
 
+static int
+invcmpii(GEN x, GEN y) { return -cmpii(x,y); }
+
 /* Return the SNF D of matrix X. If ptU/ptV non-NULL set them to U/V
  * to that D = UXV */
 GEN
@@ -2981,7 +2984,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
 {
   pari_sp av0 = avma, av, lim = stack_lim(av0,1);
   long i, j, k, m, n0, n;
-  GEN p1,p2, u, v, U, V, V0, mun, mdet, ys;
+  GEN p1, u, v, U, V, V0, mun, mdet, ys;
 
   if (typ(x)!=t_MAT) err(typeer,"smithall");
   n0 = n = lg(x)-1;
@@ -3023,6 +3026,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
         else
           p1 = hnfall_i(x, ptV, 1);
       }
+      mdet = dethnf_i(p1);
     }
     else
       p1 = hnfall_i(x, ptV, 1);
@@ -3057,27 +3061,18 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     }
     goto THEEND;
   }
+  if (U) U = idmat(n);
 
   /* square, maximal rank n */
-  if (U) U = idmat(n);
- 
-  p1 = cgetg(n+1,t_VEC); for (i=1; i<=n; i++) p1[i] = lnegi(gcoeff(x,i,i));
-  p2 = sindexsort(p1);
+  p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &invcmpii);
   ys = cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++) ys[j] = (long)vecextract_p((GEN)x[p2[j]], p2);
+  for (j=1; j<=n; j++) ys[j] = (long)vecextract_p((GEN)x[p1[j]], p1);
   x = ys;
-  if (U) U = vecextract_p(U, p2);
-  if (V) V = vecextract_p(V, p2);
-  if (signe(mdet))
-  {
-    p1 = hnfmod(x,mdet);
-    if (V) V = gmul(V, gauss(x,p1));
-  }
-  else
-  {
-    p1 = hnfall_i(x,ptV,0);
-    if (ptV) V = gmul(V, *ptV);
-  }
+  if (U) U = vecextract_p(U, p1);
+  if (V) V = vecextract_p(V, p1);
+
+  p1 = hnfmod(x, mdet);
+  if (V) V = gmul(V, gauss(x,p1));
   x = p1;
 
   if (DEBUGLEVEL>7) fprintferr("starting SNF loop");
@@ -3122,8 +3117,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       }
       if (!c)
       {
-	b = gcoeff(x,i,i);
-	if (!signe(b)) break;
+	b = gcoeff(x,i,i); if (!signe(b)) break;
        
         for (k=1; k<i; k++)
         {
@@ -3314,8 +3308,7 @@ gsmithall(GEN x,long all)
       }
       if (!c)
       {
-	b = gcoeff(x,i,i);
-	if (!signe(b)) break;
+	b = gcoeff(x,i,i); if (!signe(b)) break;
 
         for (k=1; k<i; k++)
         {
@@ -3345,7 +3338,7 @@ gsmithall(GEN x,long all)
       coeff(x,k,k) = (long)T;
     }
   }
-  if (!all) z = mattodiagonal(x);
+  if (!all) z = mattodiagonal_i(x);
   else
   {
     z = cgetg(4, t_VEC);
