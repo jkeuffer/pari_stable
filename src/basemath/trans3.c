@@ -824,8 +824,10 @@ czeta(GEN s0, long prec)
     p1 = cgetr(prec+1); mpaff(s,p1); sig = s = p1;
   }
 
-  /* s <--> 1-s */
-  if (signe(sig) < 0) { funeq = 1; s = gsub(gun, s); sig = greal(s); }
+  if (signe(sig) < 0 || expo(sig) < -1)
+  { /* s <--> 1-s */
+    funeq = 1; s = gsub(gun, s); sig = greal(s);
+  }
   if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
 
   { /* find "optimal" parameters [lim, nn] */
