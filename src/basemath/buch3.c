@@ -618,15 +618,15 @@ GEN
 isprincipalrayall(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
-  pari_sp av=avma;
-  GEN bnf,nf,bid,matu,El,ep,p1,beta,idep,ex,rayclass;
-  GEN divray,genray,alpha,alphaall,racunit,res,funit;
+  pari_sp av = avma;
+  GEN bnf, nf, bid, U, El, ep, p1, beta, idep, ex, rayclass, divray, genray;
+  GEN alpha;
 
   checkbnr(bnr);
   bnf = (GEN)bnr[1]; nf = (GEN)bnf[7];
   bid = (GEN)bnr[2];
   El  = (GEN)bnr[3];
-  matu= (GEN)bnr[4];
+  U   = (GEN)bnr[4];
   rayclass=(GEN)bnr[5];
   divray = (GEN)rayclass[2]; c = lg(divray)-1;
   ex = cgetg(c+1,t_COL);
@@ -642,7 +642,7 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = arch_mul(to_famat_all((GEN)El[i], negi((GEN)ep[i])), beta);
-  p1 = gmul(matu, concatsp(ep, zideallog(nf,beta,bid)));
+  p1 = gmul(U, concatsp(ep, zideallog(nf,beta,bid)));
   ex = vecmodii(p1, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
@@ -652,30 +652,19 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
 
   genray = (GEN)rayclass[3];
   /* TODO: should be using nf_GENMAT and function should return a famat */
-  alphaall = isprincipalfact(bnf, genray, gneg(ex), x, nf_GEN | nf_FORCE);
-  if (!gcmp0((GEN)alphaall[1])) err(bugparier,"isprincipalray (bug1)");
-
-  res = (GEN)bnf[8];
-  funit = check_units(bnf,"isprincipalrayall");
-  alpha = basistoalg(nf,(GEN)alphaall[2]);
-  p1 = zideallog(nf,(GEN)alphaall[2],bid);
-  if (lg(p1) > 1)
+  p1 = isprincipalfact(bnf, genray, gneg(ex), x, nf_GEN | nf_FORCE);
+  if (!gcmp0((GEN)p1[1])) err(bugparier,"isprincipalray");
+  alpha = (GEN)p1[2];
+  if (lg(bid[5]) > 1 && lg(mael(bid,5,1)) > 1)
   {
-    GEN mat = (GEN)bnr[6], pol = (GEN)nf[1];
-    p1 = gmul((GEN)mat[1],p1);
-    if (!gcmp1(denom(p1))) err(bugparier,"isprincipalray (bug2)");
-
-    x = reducemodinvertible(p1,(GEN)mat[2]);
-    racunit = gmael(res,4,2);
-    p1 = powgi(gmodulcp(racunit,pol), (GEN)x[1]);
-    for (j=1; j<lg(funit); j++)
-      p1 = gmul(p1, powgi(gmodulcp((GEN)funit[j],pol), (GEN)x[j+1]));
-    alpha = gdiv(alpha,p1);
+    GEN u = (GEN)bnr[6], y = gmul((GEN)u[1], zideallog(nf, alpha, bid));
+    y = reducemodinvertible(y, (GEN)u[2]);
+    alpha = element_div(nf, alpha, factorbackelt(init_units(bnf), y, nf));
   }
   p1 = cgetg(3,t_VEC);
-  p1[1] = lcopy(ex);
-  p1[2] = (long)algtobasis(nf,alpha);
-  return gerepileupto(av, p1);
+  p1[1] = (long)ex;
+  p1[2] = (long)alpha;
+  return gerepilecopy(av, p1);
 }
 
 GEN
