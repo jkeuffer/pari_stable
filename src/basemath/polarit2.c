@@ -2460,7 +2460,6 @@ primitive_part(GEN x, GEN *c)
 /*                           SUBRESULTANT                          */
 /*                                                                 */
 /*******************************************************************/
-GEN diviiexact(GEN x, GEN y);
 /* for internal use */
 GEN
 gdivexact(GEN x, GEN y)
