@@ -991,13 +991,13 @@ _elleisnum(SL2_red *T, long k, long prec)
   }
   y = gadd(gun, gmul(y, gdiv(gdeux, gzeta(stoi(1-k),prec)))); /* = E_k(tau) */
 
-  y = gmul(y, gpowgs(gdiv((GEN)pii2[2],T->W2),k)); /* mul by (2Pi/w_2)^k */
+  y = gmul(y, gpowgs(gdiv(pii2,T->W2),k)); /* mul by (2iPi/w_2)^k */
   return check_real(y);
 }
 
-/* Return (2Pi)^k E_k(L) = (2Pi/w2)^k E_k(tau), with L = <w1,w2>, k > 0 even
+/* Return (2iPi)^k E_k(L) = (2iPi/w2)^k E_k(tau), with L = <w1,w2>, k > 0 even
  * E_k(tau) = 1 + 2/zeta(1-k) * sum(n>=1, n^(k-1) q^n/(1-q^n))
- * If flag is != 0 and k=4 or 6, compute g2 = E4/12 or g3 = E6/216 resp. */
+ * If flag is != 0 and k=4 or 6, compute g2 = E4/12 or g3 = -E6/216 resp. */
 GEN
 elleisnum(GEN om, long k, long flag, long prec)
 {
@@ -1013,8 +1013,8 @@ elleisnum(GEN om, long k, long flag, long prec)
     p1 = gmul(PiI2(prec), mulsi(12, T.c));
     y = gsub(y, gdiv(p1, gmul(T.w2, T.W2)));
   }
-  else if (k==4 && flag) y = gdivgs(y, 12);
-  else if (k==6 && flag) y = gdivgs(y,216);
+  else if (k==4 && flag) y = gdivgs(y,  12);
+  else if (k==6 && flag) y = gdivgs(y,-216);
   return gerepileupto(av,y);
 }
 
