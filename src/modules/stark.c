@@ -3169,6 +3169,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   /* use the generic function AllStark */
   pol = AllStark(bnrh, nf, 2, newprec);
   delete_var();
+  err_leave(&catcherr);
   return gerepileupto(av, makescind(bnf, pol, cl, prec));
 }
 
