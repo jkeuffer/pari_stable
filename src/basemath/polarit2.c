@@ -932,77 +932,27 @@ gram_schmidt(GEN e, GEN *ptB)
   *ptB = B; return f;
 }
 
-extern GEN lincomb_integral(GEN u, GEN v, GEN X, GEN Y);
+extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 
-/* gauss pivot on integer matrix x. Check that each line contains a single
- * non zero entry, equal to \pm 1 */
-GEN 
+GEN
 special_pivot(GEN x)
 {
-  long i,j,k,lx = lg(x), hx = lg(x[1]);
-  GEN p,p1,p2, c = cgetg(lx, t_VECSMALL);
-
-  for (i=1; i<lx; i++) c[i] = 0;
-
-  x = dummycopy(x);
-  for (i=1; i<lx; i++)
+  GEN t, H = hnfall_i(x, NULL, 1);
+  long i,j, l = lg(H), h = lg(H[1]);
+  for (i=1; i<h; i++)
   {
-    p1 = (GEN)x[i]; p = NULL;
-    for (j=1; j<hx; j++)
+    int fl = 0;
+    for (j=1; j<l; j++)
     {
-      long a = absi_cmp((GEN)p1[j], gun);
-      if (a == 0) { p = (GEN)p1[j]; c[i] = j; break; }
-    }
-    if (!p) return NULL;
-
-    p = negi(p);
-    for (k=i+1; k<lx; k++)
-    {
-      p2 = (GEN)x[k];
-      if (!signe(p2[j])) continue;
-      x[k] = (long)lincomb_integral(gun, mulii(p, (GEN)p2[j]), p2, p1);
-    }
-  }
-  for (i=1; i<lx; i++)
-    if (!c[i]) return NULL;
-  for (i=1; i<hx; i++)
-  {
-    for (j=1; j<lx; j++)
-      if (signe(gcoeff(x,i,j))) break;
-    if (j==lx) return NULL;
-  }
-
-  for (i=lx-1; i>0; i--)
-  {
-    p1 = (GEN)x[i];
-    for (j=1; j<hx; j++)
-    {
-      long a = absi_cmp((GEN)p1[j], gun);
-      if (a > 0) return NULL;
-    }
-    j = c[i]; p = negi((GEN)p1[j]);
-    for (k=1; k<i; k++)
-    {
-      p2 = (GEN)x[k];
-      if (!signe(p2[j])) continue;
-      x[k] = (long)lincomb_integral(gun, mulii(p, (GEN)p2[j]), p2, p1);
-    }
-  }
-  for (i=1; i<hx; i++)
-  {
-    long fl = 0;
-    for (j=1; j<lx; j++)
-    {
-      long a = absi_cmp(gcoeff(x,i,j), gun);
-      if (a > 0) continue;
-      if (a == 0)
+      t = gcoeff(H,i,j);
+      if (signe(t))
       {
-        if (fl) return NULL;
+        if (!is_pm1(t) || fl) return NULL;
         fl = 1;
       }
     }
   }
-  return x;
+  return H;
 }
 
 /* x matrix: compute a bound for | \sum e_i x_i | ^ 2, e_i = 0,1 */
@@ -1034,11 +984,12 @@ my_norml2(GEN x)
 
 /* each entry < 2^e */
 static long
-init_padic_prec(long e, int Max, long n0, double logp)
+init_padic_prec(long e, int BitPerFactor, long n0, double LOGp2)
 {
-  long b, goodb = (long) ((e - 0.175 * n0 * n0)  * LOG2/logp);
-  b = (long) ((e -     32)*LOG2/logp); if (b < goodb) goodb = b;
-//  b = (long) ((e - Max*32)*LOG2/logp); if (b > goodb) goodb = b;
+/* long b, goodb = (long) ((e - 0.175 * n0 * n0)  * LOGp2); */
+  long b, goodb = (long) (((e - BitPerFactor*n0)) * LOGp2);
+  b = (long) ((e -     32)*LOGp2); if (b < goodb) goodb = b;
+  /* b = (long) ((e - Max*32)*LOGp2); if (b > goodb) goodb = b; */
   return goodb;
 }
 
@@ -1057,11 +1008,13 @@ GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   long s = 2; /* # of traces added at each step */
-  long i,j,C,r,S,tmax,n0,n,dP = deg(P), MAX = 6;
-  double logp = log(gtodouble(p));
+  long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
+  long i,j,C,r,S,tmax,n0,n,dP = deg(P);
+  double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
-  GEN y, T, T2, TT, BL, m, mGram, u, norm, target, M, piv, list;
+  GEN y, T, T2, TT, BL, m, u, norm, target, M, piv, list;
+  GEN run = realun(DEFAULTPREC);
   ulong av,av2, lim;
   int did_recompute_famod = 0;
 
@@ -1081,25 +1034,24 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
    * S = number of traces used at the round's end = tmax + s */
   for(tmax = 0;; tmax = S) 
   {
-    GEN pas2, pa_b, pb_as2, pbs2, pb, BE;
+    GEN pas2, pa_b, BE;
     long b, goodb;
+    double Nx;
 
     if (DEBUGLEVEL>3)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
     av2 = avma;
     if (tmax > 0)
-    {
-      double Nx = gtodouble(my_norml2(invmat(BL)));
+    { /* bound small vector in terms of a modified L2 norm of a
+       * left inverse of BL */
+      Nx = gtodouble(my_norml2(gmul(run, invmat(BL))));
       avma = av2;
-      C = (long)sqrt(s*n0*n0/4. / Nx);
-      if (C == 0) C = 1;
-      M = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
     }
     else
-    { /* first time: BL = id */
-      C = (long)sqrt(s*n0/4.);
-      M = dbltor((n0 * (C*C + s*n0/4.)) * 1.00001);
-    }
+      Nx = (double)n0; /* first time: BL = id */
+    C = (long)sqrt(s*n0*n0/4. / Nx);
+    if (C == 0) C = 1; /* frequent after a few iterations */
+    M = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
 
     S = tmax + s;
     b = (long)ceil(b0 + S*k);
@@ -1124,18 +1076,22 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     av2 = avma;
     T2 = gmod( gmul(T, BL), pa );
-    goodb = init_padic_prec(gexpo(T2), MAX, n0, logp);
+    goodb = init_padic_prec(gexpo(T2), BitPerFactor, n0, LOGp2);
     if (goodb > b) b = goodb;
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a, b) = (%ld, %ld), expo(T) = %ld\n",
                  a,b,gexpo(T2));
-    pa_b = gpowgs(p, a-b); pb_as2 = shifti(pa_b,-1);
-    pb   = gpowgs(p, b);   pbs2   = shifti(pb,-1);
-    for (i=1; i<=r; i++)
+    pa_b = gpowgs(p, a-b);
     {
-      GEN p1 = (GEN)T2[i];
-      for (j=1; j<=s; j++)
-        p1[j] = (long)TruncTrace((GEN)p1[j],pb,pa_b,pb_as2,pbs2);
+      GEN pb = gpowgs(p, b);
+      GEN pb_as2 = shifti(pa_b,-1);
+      GEN pbs2   = shifti(pb,-1);
+      for (i=1; i<=r; i++)
+      {
+        GEN p1 = (GEN)T2[i];
+        for (j=1; j<=s; j++)
+          p1[j] = (long)TruncTrace((GEN)p1[j],pb,pa_b,pb_as2,pbs2);
+      }
     }
     if (gcmp0(T2)) { avma = av2; continue; }
 
@@ -1150,21 +1106,21 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_S ]   T2 = T * BL  truncated
      */
-    mGram = gram_matrix(m);
-    u = lllgramintern(mGram, 4, 0, 0);
+    u = lllgramintern(gram_matrix(m), 4, 0, 0);
     m = gmul(m,u);
-    (void)gram_schmidt(gmul(m, realun(DEFAULTPREC)), &norm);
+    (void)gram_schmidt(gmul(run,m), &norm);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
     if (i > r)
-    {
-      avma = av2; MAX += 2; 
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: increasing MAX = %ld\n", MAX);
+    { /* no progress */
+      avma = av2; BitPerFactor += 2; 
+      if (DEBUGLEVEL>2)
+        fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
 #if 0
       s++; for (i=1; i<=n; i++) T[i] = lgetg(s+1, t_COL);
       if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: increasing s = %ld\n", s);
-      continue;
 #endif
+      continue;
     }
 
     n = r; r = i;
@@ -1188,13 +1144,13 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     av2 = avma;
     piv = special_pivot(BL);
-    if (DEBUGLEVEL) output(BL);
+    if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
     if (!piv) { avma = av2; continue; }
 
     pas2 = shifti(pa,-1); target = P;
     for (i=1; i<=r; i++)
     {
-      GEN q, p1 = (GEN)piv[i];
+      GEN p1 = (GEN)piv[i];
       if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
 
       y = gun;
@@ -1203,9 +1159,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
           y = centermod_i(gmul(y, (GEN)famod[j]), pa, pas2);
 
       /* y is the candidate factor */
-      if (! (q = polidivis(target,y,bound)) ) break;
-      if (signe(leading_term(y)) < 0) y = gneg(y);
-      target = gdiv(q, leading_term(y));
+      if (! (target = polidivis(target,y,bound)) ) break;
       list[i] = (long)y;
     }
     if (i > r)
