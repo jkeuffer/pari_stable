@@ -915,7 +915,8 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
   if(!signe(n))
     err(talker,"1/0 exponent in mpsqrtnmod");
   if(gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
-  if(gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
+  a=modii(a,p);
+  if(gcmp0(a)) {if (zetan) *zetan=gun;avma=ltop;return gzero;}
   q=addsi(-1,p);
   m=bezout(n,q,&u1,&u2);
   if (zetan) z=gun;
@@ -936,7 +937,7 @@ mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
       {
 	lbot=avma;
 	a=mpsqrtlmod(a,l,p,q,e,r,y,zeta);
-	if (!a){avma=ltop;if (zetan)  *zetan=gzero;return gzero;}/*NULL*/
+	if (!a){avma=ltop;if (zetan)  *zetan=gzero;return NULL;}
 	if (low_stack(lim, stack_lim(ltop,1)))/* n can have lots of prime factors*/
 	{
 	  if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
