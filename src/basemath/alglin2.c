@@ -3525,3 +3525,98 @@ gsmith(GEN x) { return gsmithall(x,0); }
 
 GEN
 gsmith2(GEN x) { return gsmithall(x,1); }
+
+/***********************************************************************
+ ****                                                               ****
+ ****         Frobenius form and Jordan form of a matrix            ****
+ ****                                                               ****
+ ***********************************************************************/
+
+GEN
+Frobeniusform(GEN V, long n)
+{
+  long i,j,k;
+  GEN M = cgetg(n+1, t_MAT);
+  for(i=1; i<=n; i++)
+    M[i] = (long) zerocol(n);
+  for (k=1,i=1;i<lg(V);i++,k++)
+  {
+    GEN  P = (GEN)V[i];
+    long d = degpol(P);
+    for (j=0; j<d-1; j++, k++)
+      coeff(M,k+1,k) = un;
+    for (j=0; j<d; j++)
+      coeff(M,k-j,k) = lneg((GEN)P[1+d-j]);
+  }
+  return M;
+}
+
+static GEN
+build_frobeniusbc(GEN V, long n)
+{
+  long i,j,k,l;
+  GEN z;
+  long m=lg(V)-1;
+  GEN M = cgetg(n+1, t_MAT);
+  for(i=1; i<=n; i++)
+    M[i] = (long) zerocol(n);
+  z = gneg(polx[0]);
+  for (k=1,l=1+m,i=1;i<=m;i++,k++)
+  {
+    GEN  P = (GEN)V[i];
+    long d = degpol(P);
+    coeff(M,k,i) = un;
+    for (j=1; j<d; j++,k++,l++)
+    {
+      coeff(M,k,l)   = (long) z;
+      coeff(M,k+1,l) = un;
+    }
+  }
+  return M;
+}
+
+static GEN 
+build_basischange(GEN N, GEN U)
+{
+  long n = lg(N);
+  long i, j;
+  GEN p2 = cgetg(n, t_MAT);
+  for (j = 1; j < n; ++j)
+  {
+    pari_sp btop=avma;
+    GEN p3 = gzero;
+    for (i = 1; i < n; ++i)
+      p3 = gadd(p3, (GEN) gsubst(gcoeff(U, i, j), 0, N)[i]);
+    p2[j] = lpileupto(btop, p3);
+  }
+  return p2;
+}
+
+GEN matfrobenius(GEN M, long flag)
+{
+  pari_sp ltop=avma;
+  long n;
+  GEN D,A,N,B,R;
+  GEN p3;
+  if (typ(M)!=t_MAT) err(typeer,"matfrobenius");
+  n = lg(M)-1;
+  if (n && lg(M[1])!=n+1) err(mattype1,"matfrobenius");
+  if (flag<2)
+  {
+    D = matsnf0(gaddmat(gneg(polx[0]),M),6);
+    if (flag==1)
+      return gerepileupto(ltop, D);
+    else 
+      return gerepileupto(ltop, Frobeniusform(D, n));
+  }
+  if (flag>2) err(flagerr,"matfrobenius");
+  A = matsnf0(gaddmat(gneg(polx[0]),M),3);
+  D = smithclean(mattodiagonal_i((GEN) A[3]));
+  N = Frobeniusform(D, n);
+  B = build_frobeniusbc(D, n);
+  R = build_basischange(N, gmul(B,(GEN) A[1]));
+  p3 = cgetg(3, t_VEC);
+  p3[1] = (long) N;
+  p3[2] = (long) R;
+  return gerepilecopy(ltop,p3);
+}
