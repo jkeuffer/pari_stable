@@ -604,27 +604,37 @@ minval(GEN x, GEN p, long first, long lx)
   return val;
 }
 
+static GEN
+shiftpol(GEN x, long v)
+{
+  long i, lz;
+  GEN z;
+  if (!v) return x;
+  lz = lgef(x)-v; z = cgetg(lz, t_POL);
+  z[1] = (x[1] & (VARNBITS|SIGNBITS)) | evallgef(lz);
+  x += v;
+  for (i=2; i<lz; i++) z[i] = x[i];
+  return z;
+}
+
 long 
 polvaluation(GEN x, GEN *Z)
 {
   long v;
-
   if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
   for (v = 0;; v++)
     if (!isexactzero((GEN)x[2+v])) break;
-  if (Z)
-  {
-    if (!v) *Z = x;
-    else
-    {
-      long i, lz = lgef(x)-v;
-      GEN z = cgetg(lz, t_POL);
-      z[1] = (x[1] & (VARNBITS|SIGNBITS)) | evallgef(lz);
-      x += v;
-      for (i=2; i<lz; i++) z[i] = x[i];
-      *Z = z;
-    }
-  }
+  if (Z) *Z = shiftpol(x, v);
+  return v;
+}
+long 
+polvaluation_inexact(GEN x, GEN *Z)
+{
+  long v;
+  if (!signe(x)) { if (Z) *Z = zeropol(varn(x)); return VERYBIGINT; }
+  for (v = 0;; v++)
+    if (!gcmp0((GEN)x[2+v])) break;
+  if (Z) *Z = shiftpol(x, v);
   return v;
 }
 

@@ -1940,20 +1940,37 @@ solve_exact_pol(GEN p, long bitprec)
 
 /* return the roots of p with absolute error bitprec */
 static GEN
-roots_com(GEN p, long l)
+roots_com(GEN q, long bitprec)
 {
-  long bitprec;
-
-  if (typ(p)!=t_POL)
+  GEN L, p;
+  long v = polvaluation_inexact(q, &p);
+  if (lgef(p) == 3) L = cgetg(1,t_VEC); /* constant polynomial */
+  else L = isexactpol(p)? solve_exact_pol(p,bitprec): all_roots(p,bitprec);
+  if (v)
   {
-    if (!isvalidcoeff(p)) err(typeer,"roots");
-    return cgetg(1,t_VEC); /* constant polynomial */
+    GEN M, z, t = (GEN)q[2];
+    long i, x, y, l, n;
+
+    if (isexactzero(t)) x = bitprec;
+    else
+    {
+      n = gexpo(t);
+      x = n / v; l = degpol(q);
+      for (i = v; i <= l; i++)
+      {
+        t  = (GEN)q[i+2];
+        if (isexactzero(t)) continue;
+        y = (n - gexpo(t)) / i;
+        if (y < x) x = y;
+      }
+    } 
+    z = realzero_bit(x); l = v + lg(L);
+    M = cgetg(l, t_VEC); L -= v;
+    for (i = 1; i <= v; i++) M[i] = (long)z;
+    for (     ; i <  l; i++) M[i] = L[i];
+    L = M;
   }
-  if (!isvalidpol(p)) err(talker,"invalid coefficients in roots");
-  if (lgef(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
-  if (l<3) l=3;
-  bitprec=bit_accuracy(l);
-  return isexactpol(p)? solve_exact_pol(p,bitprec): all_roots(p,bitprec);
+  return L;
 }
 
 static GEN
@@ -2009,13 +2026,20 @@ GEN
 roots(GEN p, long l)
 {
   pari_sp av = avma;
-  long n,i,k,s,t,e;
-  GEN c,L,p1,res,rea,com;
+  long n, i, k, s, t, e;
+  GEN c, L, p1, res, rea, com;
 
   if (gcmp0(p)) err(zeropoler,"roots");
-  L=roots_com(p,l); n=lg(L);
-  if (n <= 1) return L;
+  if (typ(p) != t_POL)
+  {
+    if (!isvalidcoeff(p)) err(typeer,"roots");
+    return cgetg(1,t_VEC); /* constant polynomial */
+  }
+  if (!isvalidpol(p)) err(talker,"invalid coefficients in roots");
+  if (lgef(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
 
+  if (l < 3) l = 3;
+  L = roots_com(p, bit_accuracy(l)); n = lg(L);
   if (!isreal(p))
   {
     res = cgetg(n,t_COL);
@@ -2023,8 +2047,8 @@ roots(GEN p, long l)
     return gerepileupto(av,res);
   }
   e = 5 - bit_accuracy(l);
-  rea=cgetg(n,t_COL); s = 0;
-  com=cgetg(n,t_COL); t = 0;
+  rea = cgetg(n,t_COL); s = 0;
+  com = cgetg(n,t_COL); t = 0;
   for (i=1; i<n; i++)
   {
     p1 = (GEN)L[i];

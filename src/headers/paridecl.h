@@ -927,6 +927,7 @@ GEN     normalize(GEN x);
 GEN     normalizepol(GEN x);
 GEN     normalizepol_i(GEN x, long lx);
 long    polvaluation(GEN x, GEN *z);
+long    polvaluation_inexact(GEN x, GEN *Z);
 GEN     pureimag(GEN x);
 long    pvaluation(GEN x, GEN p, GEN *py);
 GEN     quadtoc(GEN x, long l);
