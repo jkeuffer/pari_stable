@@ -2053,24 +2053,19 @@ decodemodule(GEN nf, GEN fa)
  * arch the triple [N,R1,D], with N, R1, D as in discrayabs; D is in factored
  * form.
  *
- * + otherwise [m,N,R1,D]
- *
- * FIXME: remove the flag 'ramip'.
- * If ramip != 0 and -1, keep only modules which are squarefree outside ramip
- * If ramip < 0, only pick square conductors.
- */
-static GEN
-Discrayabslistarch(GEN bnf, GEN arch, long bound, long ramip)
+ * + otherwise [m,N,R1,D] */
+GEN
+discrayabslistarch(GEN bnf, GEN arch, long bound)
 {
   byteptr dif = diffptr + 1;
-  int allarch = (arch==NULL), flbou = 0, square = (ramip < 0);
+  int allarch = (arch==NULL), flbou = 0;
   long degk, i, j, k, sqbou, l, nba, nbarch, ii, r1, c;
   pari_sp av0 = avma,  av,  av1,  lim;
   GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY;
   GEN res, embunit, clh, Ray;
   GEN discall, idealrel, idealrelinit, fadkabs;
 
-  if (bound <= 0) err(talker,"non-positive bound in discrayabslist");
+  if (bound <= 0) err(talker,"non-positive bound in Discrayabslist");
   res = discall = NULL; /* -Wall */
 
   bnf = checkbnf(bnf);
@@ -2081,13 +2076,12 @@ Discrayabslistarch(GEN bnf, GEN arch, long bound, long ramip)
   U = init_units(bnf);
   sgnU = zsignunits(bnf, NULL, 1);
 
-  if (square) { ramip = -ramip; if (ramip == 1) ramip = 0; }
   if (allarch) arch = vec_const(r1, gen_1);
   bidp = Idealstar(nf, mkvec2(gen_1, arch), 0);
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);
     bidp = Idealstar(nf,idmat(degk),0);
-    if (r1>15) err(talker,"r1>15 in Discrayabslistarch");
+    if (r1>15) err(talker,"r1>15 in discrayabslistarch");
     nba = r1;
   } else {
     matarchunit = (GEN)NULL;
@@ -2160,7 +2154,6 @@ Discrayabslistarch(GEN bnf, GEN arch, long bound, long ramip)
           if (lg(pz) > 1) p2 = concatsp(pz,p2);
           bigel(Ray,i) = p2;
         }
-        if (ramip && ramip % p[2]) break;
         Q = itos_or_0( mulss(Q, q) );
         if (!Q || Q > bound) break;
 
@@ -2195,14 +2188,13 @@ Discrayabslistarch(GEN bnf, GEN arch, long bound, long ramip)
   EMPTY = mkvec3(gen_0,gen_0,gen_0);
   idealrelinit = trivfact();
   av1 = avma; lim = stack_lim(av1,1);
-  if (square) bound = sqbou-1;
   Disc = bigcgetvec(bound);
   for (i=1; i<=bound; i++) bigel(Disc,i) = cgetg(1,t_VEC);
   for (ii=1; ii<=bound; ii++)
   {
     GEN sous, sousdisc;
     long ls;
-    i = square? ii*ii: ii;
+    i = ii;
     sous = bigel(Ray,i);
     ls = lg(sous); bigel(Disc,ii) = sousdisc = cgetg(ls,t_VEC);
     for (j=1; j<ls; j++)
@@ -2266,14 +2258,11 @@ STORE:  gel(discall,karch+1) = res;
   return gerepilecopy(av0, Disc);
 }
 GEN
-discrayabslistarch(GEN bnf, GEN arch, long bound)
-{ return Discrayabslistarch(bnf,arch,bound, 0); }
-GEN
-discrayabslistlong(GEN bnf, long bound)
-{ return Discrayabslistarch(bnf,NULL,bound, 0); }
-GEN
-discrayabslistarchsquare(GEN bnf, GEN arch, long bound)
-{ return Discrayabslistarch(bnf,arch,bound, -1); }
+discrayabslistlong(GEN bnf, long bound) {
+  GEN nf = checknf(bnf);
+  long r1 = nf_get_r1(nf);
+  return discrayabslistarch(bnf,zerovec(r1),bound);
+}
 
 static GEN
 subgroupcond(GEN bnr, GEN indexbound)
@@ -2317,5 +2306,5 @@ GEN
 bnrdisclist0(GEN bnf, GEN borne, GEN arch)
 {
   if (typ(borne)!=t_INT) return discrayabslist(bnf,borne);
-  return Discrayabslistarch(bnf,arch,itos(borne),0);
+  return discrayabslistarch(bnf,arch,itos(borne));
 }
