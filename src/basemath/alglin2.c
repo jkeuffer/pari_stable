@@ -1519,16 +1519,14 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     GEN z = (GEN)H[j];
     if (diagH1[j])
     { /* hit exactly s times */
-      i1++;
-      C[i1+col] = Cnew[j+zc];
+      i1++; C[i1+col] = Cnew[j+zc];
       p1 = cgetg(lig+1,t_COL); Bnew[i1] = (long)p1;
       for (i=1; i<=nlze; i++) p1[i] = coeff(dep,i,j);
       p1 += nlze;
     }
     else
     {
-      j1++;
-      C[j1+zc] = Cnew[j+zc];
+      j1++; C[j1+zc] = Cnew[j+zc];
       p1 = cgetg(lnz+1,t_COL); Hnew[j1] = (long)p1;
       depnew[j1] = dep[j];
     }
@@ -1560,10 +1558,10 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
 
 /* for debugging */
 static void
-p_mat(long **mat, GEN perm, long k0)
+p_mat(long **mat, GEN perm, long k)
 {
   gpmem_t av = avma;
-  if (k0) perm = vecextract_i(perm, 1, lg(perm)-1 - k0);
+  perm = vecextract_i(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
     fprintferr("matgen = %Z\n", small_to_mat( rowextract_p((GEN)mat, perm) ));
@@ -1676,7 +1674,7 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   while (lig > lk0 && s < (HIGHBIT>>1))
   {
     for (i=lig; i>lk0; i--)
-      if (count(mat,perm[i],col,&n) >= 0) break;
+      if (count(mat,perm[i],col,&n) > 0) break;
     if (i == lk0) break;
 
     /* only 0, ±1 entries, at least 2 of them non-zero */
@@ -1727,8 +1725,8 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       if ( (n = count2(mat,perm[i],col)) ) break;
     if (i == lk0) break;
 
-    lswap(perm[i], perm[lig]);
     lswap(vmax[n], vmax[col]);
+    lswap(perm[i], perm[lig]);
     swap(mat[n], mat[col]); p = mat[col];
     lswap(T[n], T[col]); p1 = (GEN)T[col];
     if (p[perm[lig]] < 0)
@@ -1768,7 +1766,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   if (DEBUGLEVEL>5)
   {
     fprintferr("    after phase2:\n");
-    p_mat(mat,perm,k0);
+    p_mat(mat,perm,lk0);
   }
   for (i=li-2; i>lig; i--)
   {
