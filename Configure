@@ -382,13 +382,16 @@ esac
 #
 case "$osname" in 
   cygwin*) ver=`uname -r | cut -d. -f1`
-    cygtop=/Cygnus/cygwin/B$ver
+    cygtop=/cygdrive/c
     if test ! -d $cygtop; then
-      cygtop=/Cygnus/cygwin-B$ver
+      cygtop=/Cygnus/cygwin/B$ver
       if test ! -d $cygtop; then
-        cygtop=/usr/${arch}-pc-cygwin
+        cygtop=/Cygnus/cygwin-B$ver
         if test ! -d $cygtop; then
-          echo ..."I could not find Cygwin top directory" >&2
+          cygtop=/usr/${arch}-pc-cygwin
+          if test ! -d $cygtop; then
+            echo ..."I could not find Cygwin top directory" >&2
+          fi
         fi
       fi
     fi;;
@@ -397,11 +400,20 @@ readline_enabledp="nil"
 if test "$optimization" != profiling; then
 # First, construct the PATHs
  case "$osname" in
-   cygwin*) libpth="
-        $cygtop/lib\
- 	$cygtop/H-${arch}-cygwin32/lib\
- 	$cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
-     ";;
+   cygwin*) if test "$cygtop" = /cygdrive/c; then
+# cygnus for version 1.*
+	libpth="
+            /lib\
+	    /usr/local/lib\
+        "
+	cygtop=/
+        else
+# cygnus for version 0.*
+	libpth="
+ 	    $cygtop/H-${arch}-cygwin32/lib\
+ 	    $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
+        "
+	fi;;
       os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
  	*) libpth="\
  	/usr/local/lib\
