@@ -148,6 +148,8 @@ BA 60- add "const" keyword to allow building with g++
        --> division by zero [ double overflow ]
    87- LLL-reduction over polynomial rings (almost always failed)
    88- (x/y)*(y/x) --> y/y 
+   89- fix pari_init_stackcheck to avoid bogus "deep recursion" messages on
+       broken machines.
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
