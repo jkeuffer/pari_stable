@@ -210,15 +210,10 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   GEN y, perm, yes, no, D = (GEN)nf[3];
   long i, j, k, iyes, ino, lv = F->KC + 1;
   double prod;
-  const int init = (F->perm == NULL);
   pari_sp av;
 
-  if (init)
-  {
-    F->LP   = cgetg(lv, t_VEC);
-    F->perm = cgetg(lv, t_VECSMALL);
-  }
-
+  F->LP   = cgetg(lv, t_VEC);
+  F->perm = cgetg(lv, t_VECSMALL);
   av = avma;
   y = cgetg(lv,t_COL); /* Norm P */
   for (k=0, i=1; i <= F->KCZ; i++)
@@ -230,7 +225,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
       GEN P = (GEN)LP[j];
       k++;
       y[k]     = (long)powgi((GEN)P[1], (GEN)P[4]);
-      F->LP[k] = (long)P; /* noop if init = 1 */
+      F->LP[k] = (long)P;
     }
   }
   /* perm sorts LP by increasing norm */
@@ -248,23 +243,19 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
     if (iyes > minsFB && prod > PROD) break;
   }
   if (i == lv) return 0;
-  avma = av; /* HACK: gcopy(yes) still safe */
-  if (init)
-  {
-    GEN p = F->perm;
-    for (j=1; j<iyes; j++)     p[j] = yes[j];
-    for (i=1; i<ino; i++, j++) p[j] =  no[i];
-    for (   ; j<lv; j++)       p[j] =  perm[j];
-  }
   setlg(yes, iyes);
-  F->subFB = gcopy(yes);
-  F->pow = NULL; return 1;
+  for (j=1; j<iyes; j++)     F->perm[j] = yes[j];
+  for (i=1; i<ino; i++, j++) F->perm[j] =  no[i];
+  for (   ; j<lv; j++)       F->perm[j] =  perm[j];
+  F->subFB = gclone(yes);
+  F->pow = NULL; avma = av; return 1;
 }
 static int
 subFB_increase(FB_t *F, GEN nf, long step)
 {
   GEN yes, D = (GEN)nf[3];
   long i, iyes, lv = F->KC + 1, minsFB = lg(F->subFB)-1 + step;
+  pari_sp av = avma;
 
   yes = cgetg(minsFB+1, t_VECSMALL); iyes = 1;
   for (i = 1; i < lv; i++)
@@ -276,8 +267,9 @@ subFB_increase(FB_t *F, GEN nf, long step)
     if (iyes > minsFB) break;
   }
   if (i == lv) return 0;
-  F->subFB = yes;
-  F->pow = NULL; return 1;
+  gunclone(F->subFB);
+  F->subFB = gclone(yes);
+  F->pow = NULL; avma = av; return 1;
 }
 
 static GEN
@@ -1664,19 +1656,21 @@ powFB_fill(RELCACHE_t *cache, GEN M)
   avma = av;
 }
 
-static void
-set_fact(REL_t *rel)
+INLINE GEN
+col_0(long n)
 {
-  long i;
-  GEN c = rel->R; rel->nz = primfact[1];
-  for (i=1; i<=primfact[0]; i++) c[primfact[i]] = exprimfact[i];
+   GEN c = (GEN)calloc(n + 1, sizeof(long));
+   if (!c) err(memer);
+   c[0] = evaltyp(t_VECSMALL) | evallg(n + 1);
+   return c;
 }
 
 static void
-unset_fact(GEN c)
+set_fact(REL_t *rel, FB_t *F)
 {
   long i;
-  for (i=1; i<=primfact[0]; i++) c[primfact[i]] = 0;
+  GEN c = rel->R = col_0(F->KC); rel->nz = primfact[1];
+  for (i=1; i<=primfact[0]; i++) c[primfact[i]] = exprimfact[i];
 }
 
 static void
@@ -1690,13 +1684,13 @@ small_norm_for_buchall(RELCACHE_t *cache, FB_t *F, long PRECREG, double LOGD,
   pari_sp av = avma, av1, av2, limpile;
   long nbsmallnorm, nbfact, j, k, noideal, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf);
-  GEN x, xembed, gx, Mlow, M, G, r, Gvec, prvec;
+  GEN x, gx, Mlow, M, G, r, Gvec, prvec;
   REL_t *rel = cache->last;
 
   if (DEBUGLEVEL)
     fprintferr("\n#### Looking for %ld relations (small norms)\n",
                cache->end - cache->base);
-  xembed = gx = NULL; /* gcc -Wall */
+  gx = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
   M = gmael(nf,5,1);
   G = gmael(nf,5,2);
@@ -1720,7 +1714,7 @@ small_norm_for_buchall(RELCACHE_t *cache, FB_t *F, long PRECREG, double LOGD,
   for (noideal=F->KC; noideal; noideal--)
   {
     pari_sp av0 = avma;
-    long nbrelideal=0, dependent = 0, try_factor = 0;
+    long nbrelideal = 0, dependent = 0, try_factor = 0;
     GEN IDEAL, ideal = (GEN)F->LP[noideal];
     REL_t *oldrel = rel;
 
@@ -1750,10 +1744,9 @@ small_norm_for_buchall(RELCACHE_t *cache, FB_t *F, long PRECREG, double LOGD,
     for(;; x[1]--)
     {
       pari_sp av3 = avma;
-      double p;
-
-      for(;;) /* looking for primitive element of small norm */
-      { /* cf minim00 */
+      for(;;) /* look for primitive element of small norm, cf minim00 */
+      {
+        double p;
 	if (k>1)
 	{
 	  long l = k-1;
@@ -1775,12 +1768,12 @@ small_norm_for_buchall(RELCACHE_t *cache, FB_t *F, long PRECREG, double LOGD,
 	  if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
 	  if (ccontent(x)==1) /* primitive */
 	  {
-            GEN Nx;
-            pari_sp av4;
             gx = gmul_mati_smallvec(IDEAL,x);
             if (!isnfscalar(gx))
             {
-              xembed = gmul(Mlow, gx); av4 = avma; nbsmallnorm++;
+              pari_sp av4 = avma;
+              GEN Nx, xembed = gmul(Mlow, gx); 
+              nbsmallnorm++;
               if (++try_factor > maxtry_FACT) goto ENDIDEAL;
               Nx = ground( norm_by_embed(R1,xembed) );
               setsigne(Nx, 1);
@@ -1792,14 +1785,13 @@ small_norm_for_buchall(RELCACHE_t *cache, FB_t *F, long PRECREG, double LOGD,
 	  x[1]--;
 	}
       }
-      rel++; set_fact(rel);
+      set_fact(++rel, F);
       /* make sure we get maximal rank first, then allow all relations */
       if (rel - cache->base > 1 && rel - cache->base <= F->KC
                                 && ! addcolumntomatrix(rel->R,invp,L))
       { /* Q-dependent from previous ones: forget it */
-        unset_fact(rel->R);
-        if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
-        rel--;
+        free((void*)rel->R); rel--;
+        if (DEBUGLEVEL>1) fprintferr("*");
         if (++dependent > maxtry_DEP) break;
         avma = av3; continue;
       }
@@ -1881,16 +1873,16 @@ dbg_outrel(RELCACHE_t *cache)
 /* Check if we already have a column mat[i] equal to mat[s]
  * General check for colinearity useless since exceedingly rare */
 static int
-already_known(RELCACHE_t *cache)
+already_known(RELCACHE_t *cache, REL_t *rel)
 {
   REL_t *r;
-  GEN cols = cache->last->R;
+  GEN cols = rel->R;
   long bs, l = lg(cols);
 
   bs = 1; while (bs < l && !cols[bs]) bs++;
   if (bs == l) return -1; /* zero relation */
 
-  for (r = cache->last - 1; r > cache->base; r--)
+  for (r = rel - 1; r > cache->base; r--)
   {
     if (bs == r->nz) /* = index of first non zero elt in cols */
     {
@@ -1900,7 +1892,7 @@ already_known(RELCACHE_t *cache)
       if (b == l) return 1;
     }
   }
-  cache->last->nz = bs; return 0;
+  rel->nz = bs; return 0;
 }
 
 /* I integral ideal in HNF form */
@@ -1914,13 +1906,13 @@ remove_content(GEN I)
 
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static int
-random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
-                GEN nf,GEN vecG, GEN L_jideal, FB_t *F)
+random_rel(long phase, RELCACHE_t *cache, FB_t *F, long PRECREG,
+           long MAXRELSUP, GEN nf,GEN vecG, GEN L_jideal)
 {
   static long jideal, jdir;
   long i, cptlist, cptzer, nbG, lgsub, r1, jlist = 1;
   pari_sp av, av1;
-  GEN col, ideal, IDEAL, m, P, ex;
+  GEN ideal, IDEAL, m, P, ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase < 0) return 0; }
   if (!F->pow) powFBgen(F, nf, CBUCHG+1);
@@ -1932,17 +1924,17 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
   P = NULL; /* gcc -Wall */
   for (av = avma;;)
   {
-    if (L_jideal && jlist < lg(L_jideal) && jdir <= nbG)
+    REL_t *rel = cache->last;
+    if (L_jideal && jlist < lg(L_jideal))
     {
-      jideal = L_jideal[jlist++]; cptlist = 0;
-    }
-    if (!L_jideal || jdir <= nbG)
-    {
-      avma = av;
-      P = prime_to_ideal(nf, (GEN)F->LP[jideal]);
+      if (++cptlist > 10) { jideal = L_jideal[jlist++]; cptlist = 0; }
     }
     else
-    { if (++cptlist > 300) return 0; }
+    {
+      if (jideal == F->KC) jideal=1; else jideal++;
+    }
+    avma = av;
+    P = prime_to_ideal(nf, (GEN)F->LP[jideal]);
     ideal = P;
     do {
       for (i=1; i<lgsub; i++)
@@ -1961,22 +1953,20 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
       if (DEBUGLEVEL>2)
         fprintferr("jideal=%ld,jdir=%ld,rand=%ld\n", jideal,jdir,getrand());
       m = pseudomin(IDEAL, (GEN)vecG[jdir]);
-      if (!m) err(bugparier, "precision too low in random_relation");
+      if (!m) err(bugparier, "precision too low in random_rel");
       if (!factorgen(F,nf,ideal,m))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
         continue;
       }
       /* can factor ideal, record relation */
-      cache->last++; set_fact(cache->last);
-      col = cache->last->R; col[jideal]--;
-      for (i=1; i<lgsub; i++) col[ F->subFB[i] ] -= ex[i];
-      if (already_known(cache))
+      set_fact(++rel, F);
+      rel->R[jideal]--;
+      for (i=1; i<lgsub; i++) rel->R[ F->subFB[i] ] -= ex[i];
+      if (already_known(cache, rel))
       { /* forget it */
-        if (DEBUGLEVEL>1) dbg_cancelrel(jideal,jdir,col);
-        cache->last--; unset_fact(col); col[jideal] = 0;
-        for (i=1; i<lgsub; i++) col[ F->subFB[i] ] = 0;
-
+        if (DEBUGLEVEL>1) dbg_cancelrel(jideal,jdir,rel->R);
+        free((void*)rel->R); rel--;
         if (++cptzer > MAXRELSUP)
         {
           if (L_jideal) { cptzer -= 10; break; }
@@ -1984,12 +1974,12 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
         }
         continue;
       }
-      cache->last->m = gclone(m);
-      cache->last->ex = gclone(ex);
-      cache->last->pow= F->pow;
+      rel->m = gclone(m);
+      rel->ex = gclone(ex);
+      rel->pow = F->pow; cache->last = rel;
       if (DEBUGLEVEL) dbg_newrel(cache, jideal, jdir);
       /* Need more, try next P */
-      if (cache->last < cache->end) { cptzer = 0; break; }
+      if (rel < cache->end) { cptzer = 0; break; }
 
       /* We have found enough. Return */
       if (phase)
@@ -1998,12 +1988,11 @@ random_relation(long phase, RELCACHE_t *cache, long PRECREG,long MAXRELSUP,
         if (jideal == F->KC) jideal=1; else jideal++;
       }
       if (DEBUGLEVEL>2)
+      {
         fprintferr("Upon exit: jideal=%ld,jdir=%ld\n",jideal,jdir);
+        if (DEBUGLEVEL > 3 && phase == 0) dbg_outrel(cache);
+      }
       avma = av; return 1;
-    }
-    if (!L_jideal)
-    {
-      if (jideal == F->KC) jideal=1; else jideal++;
     }
   }
 }
@@ -2173,6 +2162,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   if (DEBUGLEVEL)
   {
     msgtimer("bestappr/regulator");
+    fprintferr("\n#### Tentative regulator : %Z\n", R);
     fprintferr("\n ***** check = %f\n",c);
   }
   if (c < 0.8 || c > 1.3) { avma = av; return fupb_RELAT; }
@@ -2857,16 +2847,6 @@ regulator(GEN P, GEN data, long prec)
   return gerepilecopy(av,(GEN)z[6]);
 }
 
-INLINE GEN
-col_0(long n)
-{
-   GEN c = (GEN) gpmalloc(sizeof(long)*(n+1));
-   long i;
-   for (i=1; i<=n; i++) c[i]=0;
-   c[0] = evaltyp(t_VECSMALL) | evallg(n+1);
-   return c;
-}
-
 GEN
 cgetc_col(long n, long prec)
 {
@@ -2962,7 +2942,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   pari_sp av = avma, av0, av2, limpile;
   long N, R1, R2, RU, PRECREG, PRECLLL, KCCO, RELSUP, LIMC, LIMC2, lim;
   long nlze, zc, nrelsup, nreldep, phase, i, j, k, MAXRELSUP;
-  long sfb_increase, sfb_trials, precdouble = 0, precadd = 0;
+  long sfb_change, sfb_trials, precdouble = 0, precadd = 0;
   double cbach, cbach2, drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jideal, PERM;
   GEN M, res, L, resc, B, C, lambda, pdep, liste, invp, clg1, clg2, Vbase;
@@ -3063,14 +3043,12 @@ START:
     rel++;
   }
   cache.last = rel - 1;
-  /* initialize for other relations */
-  cache.end = cache.base + KCCO;
-  for (rel = cache.last + 1; rel <= cache.end; rel++) rel->R = col_0(F.KC);
   if (DEBUGLEVEL)
     fprintferr("After trivial relations, cglob = %ld\n",
                cache.last - cache.base);
-
-  sfb_trials = sfb_increase = nreldep = nrelsup = 0;
+  /* initialize for other relations */
+  cache.end = cache.base + KCCO;
+  sfb_trials = sfb_change = nreldep = nrelsup = 0;
 
   /* PRECLLL = prec for LLL-reductions (idealred)
    * PRECREG = prec for archimedean components */
@@ -3097,17 +3075,18 @@ START:
 
   /* Random relations */
   if (cache.last == cache.end)
-    ((void(*)(long))random_relation)(-1); /* enough rels. Init nevertheless */
+    ((void(*)(long))random_rel)(-1); /* enough rels. Init nevertheless */
   else
   {
     if (DEBUGLEVEL) fprintferr("\n#### Looking for random relations\n");
 MORE:
-    if (sfb_increase)
+    if (++nreldep > MAXRELSUP) sfb_change = 2;
+    if (sfb_change)
     {
-      if (DEBUGLEVEL) fprintferr("*** Increasing sub factor base\n");
-      if (++sfb_trials > SFB_MAX || !subFB_increase(&F, nf, sfb_increase))
+      if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
+      if (++sfb_trials > SFB_MAX || !subFB_increase(&F, nf, sfb_change-1))
         goto START;
-      sfb_increase = nreldep = nrelsup = 0;
+      sfb_change = nreldep = nrelsup = 0;
     }
 
     if (phase)
@@ -3117,7 +3096,6 @@ MORE:
       if (slim > cache.len) reallocate(&cache, slim << 1);
       cache.end = cache.base + slim;
       oldrel = cache.last;
-      for (rel = oldrel + 1; rel <= cache.end; rel++) rel->R = col_0(F.KC);
       if (DEBUGLEVEL)
 	fprintferr("\n(need %ld more relation%s)\n", lgex, (lgex==1)?"":"s");
     }
@@ -3126,9 +3104,8 @@ MORE:
       vecG = compute_vecG(nf,PRECLLL);
       av2 = avma;
     }
-    if (!random_relation(phase, &cache, PRECREG,MAXRELSUP,
-                         nf,vecG,L_jideal,&F)) goto START;
-    if (DEBUGLEVEL > 3 && phase == 0) dbg_outrel(&cache);
+    if (!random_rel(phase, &cache, &F, PRECREG, MAXRELSUP,
+                    nf, vecG, L_jideal)) goto START;
     L_jideal = NULL;
   }
 
@@ -3136,10 +3113,8 @@ PRECPB:
   if (precpb)
   {
     precdouble++;
-    if (precadd)
-    { PRECREG += precadd; precadd = 0; }
-    else
-      PRECREG = (PRECREG<<1)-2;
+    if (precadd) { PRECREG += precadd; precadd = 0; }
+    else           PRECREG = (PRECREG<<1)-2;
     if (DEBUGLEVEL)
     {
       char str[64]; sprintf(str,"buchall (%s)",precpb);
@@ -3165,6 +3140,7 @@ PRECPB:
       C[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
     }
     W = hnfspec(mat, F.perm, &pdep, &B, &C, lg(F.subFB)-1);
+    phase = 1;
   }
   else
   { /* update */
@@ -3179,17 +3155,19 @@ PRECPB:
     if (low_stack(limpile, stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"buchall");
-      gerepileall(av2,6, &W,&C,&B,&pdep,&nf,&F.subFB);
+      gerepileall(av2,5, &W,&C,&B,&pdep,&nf);
     }
   }
   nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
-  if (nlze) /* dependent rows */
-  {
-    if (phase && (++nreldep > MAXRELSUP || nlze > 40)) sfb_increase = 1;
-    if (!phase) L_jideal = vecextract_i(F.perm, 1, nlze);
-    phase = 1; goto MORE;
+  if (nlze)
+  { /* dependent rows */
+    if (nlze > 5)
+    {
+      if (nlze > 20) sfb_change = 1;
+      L_jideal = vecextract_i(F.perm, 1, nlze);
+    }
+    goto MORE;
   }
-  phase = 1;
 
   zc = (cache.end - cache.base) - (lg(B)-1) - (lg(W)-1);
   A = vecextract_i(C, 1, zc); /* cols corresponding to units */
@@ -3197,10 +3175,8 @@ PRECPB:
   if (!R)
   { /* not full rank for units */
     if (DEBUGLEVEL) fprintferr("regulator is zero.\n");
-    if (++nrelsup > MAXRELSUP) goto START;
     nlze = MIN_EXTRA; goto MORE;
   }
-  /* anticipate precision problems */
   if (!lambda) { precpb = "bestappr"; goto PRECPB; }
 
   h = dethnf_i(W);
@@ -3213,8 +3189,7 @@ PRECPB:
       if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
       goto START;
     case fupb_RELAT: /* not enough relations */
-      if (++nrelsup <= MAXRELSUP) nlze = MIN_EXTRA; else sfb_increase = 1;
-      goto MORE;
+      nlze = MIN_EXTRA; goto MORE;
   }
   /* DONE */
 
@@ -3245,6 +3220,7 @@ PRECPB:
     }
   }
   desallocate(&cache);
+  gunclone(F.subFB);
 
   /* class group generators */
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
