@@ -659,11 +659,25 @@ the degree of a polynomial is equal to its length minus 1. If $x$ has type
 
 \subsecidx{lift}$(x,\{v\})$: lifts an element $x=a \bmod n$ of $\Z/n\Z$ to
 $a$ in $\Z$, and similarly lifts a polmod to a polynomial if $v$ is omitted.
-Otherwise, lifts only polmods with main variable $v$ (if $v$ does not occur
-in $x$, lifts only intmods). If $x$ is of type fraction, complex, quadratic,
-polynomial, power series, rational function, vector or matrix, the lift is
-done for each coefficient. For $p$-adics, this routine acts as
-\tet{truncate}. It is not allowed to have $x$ of type \typ{REAL}.
+Otherwise, lifts only polmods whose modulus has main variable $v$ (if $v$
+does not occur in $x$, lifts only intmods). If $x$ is of recursive (non
+modular) type, the lift is done coefficientwise. For $p$-adics, this routine
+acts as \tet{truncate}. It is not allowed to have $x$ of type \typ{REAL}.
+
+\bprog
+? lift(Mod(5,3))
+%1 = 2
+? lift(3 + O(3^9))
+%2 = 3
+? lift(Mod(x,x^2+1))
+%3 = x
+? lift(x * Mod(1,3) + Mod(2,3))
+%4 = x + 2
+? lift(x * Mod(y,y^2+1) + Mod(2,3))
+%5 = y*x + Mod(2, 3)   \\@com do you understand this one ?
+? lift(x * Mod(y,y^2+1) + Mod(2,3), x)
+%6 = Mod(y, y^2+1) * x + Mod(2, y^2+1)
+@eprog
 
 \syn{lift0}{x,v}, where $v$ is a \kbd{long} and an omitted $v$ is coded as
 $-1$. Also available is \teb{lift}$(x)$ = \kbd{lift0($x$,-1)}.
@@ -2573,10 +2587,10 @@ determinant of a pseudo-matrix is the determinant of any pseudo-basis of the
 module it generates.
 
 Finally, when defining a relative extension, the base field should be
-defined by a variable having a lower priority (i.e.~a higher number)
-than the variable defining the extension. For example, under GP you can
-use the variable name $y$ (or $t$) to define the base field, and the
-variable name $x$ to define the relative extension.
+defined by a variable having a lower priority (i.e.~a higher number, see
+\secref{se:priority}) than the variable defining the extension. For example,
+under GP you can use the variable name $y$ (or $t$) to define the base field,
+and the variable name $x$ to define the relative extension.
 
 Now a last set of definitions concerning the way big ray number fields
 (or \var{bnr}) are input, using class field theory.
@@ -3372,8 +3386,8 @@ considered as a \idx{Dirichlet series}.
 \subsecidx{factornf}$(x,t)$: factorization of the univariate polynomial $x$
 over the number field defined by the (univariate) polynomial $t$. $x$ may
 have coefficients in $\Q$ or in the number field. The main variable of
-$t$ must be of \var{lower} priority than that of $x$ (in other words the
-variable number of $t$ must be \var{greater} than that of $x$). However if
+$t$ must be of \var{lower} priority than that of $x$ (see
+\secref{se:priority}). However if
 the coefficients of the number field occur explicitly (as polmods) as
 coefficients of $x$, the variable of these polmods \var{must} be the same as
 the main variable of $t$. For example
@@ -3402,9 +3416,8 @@ If $\fl=1$ return only the polynomial $P$.
 If $\fl=2$ return $[P,x,F]$ where $P$ and $x$ are as above and $F$ is the
 factorization of $\var{gal}.pol$ over the field defined by $P$, where
 variable $v$ ($y$ by default) stands for a root of $P$. The priority of $v$
-must be less than the priority of the variable of $\var{gal}.pol$.
-
-Example:
+must be less than the priority of the variable of $\var{gal}.pol$ (see
+\secref{se:priority}). Example:
 
 \bprog
 G = galoisinit(x^4+1);
@@ -4024,11 +4037,10 @@ principal ideal), but it would be less efficient.
 polynomial $x$ over the number field $\var{nf}$ given by \kbd{nfinit}. $x$
 has coefficients in $\var{nf}$ (i.e.~either scalar, polmod, polynomial or
 column vector). The main variable of $\var{nf}$ must be of \var{lower}
-priority than that of $x$ (in other words, the variable number of $\var{nf}$
-must be \var{greater} than that of $x$). However if the polynomial defining
-the number field occurs explicitly  in the coefficients of $x$ (as modulus of
-a \typ{POLMOD}), its main variable must be \var{the same} as the main
-variable of $x$. For example,
+priority than that of $x$ (see \secref{se:priority}). However if
+the polynomial defining the number field occurs explicitly  in the
+coefficients of $x$ (as modulus of a \typ{POLMOD}), its main variable must be
+\var{the same} as the main variable of $x$. For example,
 \bprog
 ? nf = nfinit(y^2 + 1);
 ? nffactor(nf, x^2 + y); \\@com OK
@@ -4045,11 +4057,11 @@ polmod, polynomial, column vector) or modulo the prime ideal (integermod
 modulo the rational prime under \var{pr}, polmod or polynomial with
 integermod coefficients, column vector of integermod). The prime ideal
 \var{pr} \var{must} be in the format output by \kbd{idealprimedec}. The
-main variable of $\var{nf}$ must be of lower priority than that of $x$ (in
-other words the variable number of $\var{nf}$ must be greater than that of
-$x$). However if the coefficients of the number field occur explicitly (as
-polmods) as coefficients of $x$, the variable of these polmods \var{must}
-be the same as the main variable of $t$ (see \kbd{nffactor}).
+main variable of $\var{nf}$ must be of lower priority than that of $x$
+(see \secref{se:priority}). However if the coefficients of the number
+field occur explicitly (as polmods) as coefficients of $x$, the variable of
+these polmods \var{must} be the same as the main variable of $t$ (see
+\kbd{nffactor}).
 
 \syn{nffactormod}{\var{nf},x,\var{pr}}.
 
@@ -4322,11 +4334,10 @@ corrected, using the ideas from \kbd{nfgaloisconj}.\sidx{Galois}\sidx{subfield}
 field $\var{nf}$ given by \kbd{nfinit} without multiplicity. $x$ has
 coefficients in the number field (scalar, polmod, polynomial, column
 vector). The main variable of $\var{nf}$ must be of lower priority than that
-of $x$ (in other words the variable number of $\var{nf}$ must be greater than
-that of $x$). However if the coefficients of the number field occur
-explicitly (as polmods) as coefficients of $x$, the variable of these
-polmods \var{must} be the same as the main variable of $t$ (see
-\kbd{nffactor}).
+of $x$ (see \secref{se:priority}). However if the coefficients of the
+number field occur explicitly (as polmods) as coefficients of $x$, the
+variable of these polmods \var{must} be the same as the main variable of $t$
+(see \kbd{nffactor}).
 
 \syn{nfroots}{\var{nf},x}.
 
@@ -4568,7 +4579,8 @@ the relative
 discriminant of $L$. This is a two-element row vector $[D,d]$, where $D$ is
 the relative ideal discriminant and $d$ is the relative discriminant
 considered as an element of $\var{nf}^*/{\var{nf}^*}^2$. The main variable of
-$\var{nf}$ \var{must} be of lower priority than that of \var{pol}.
+$\var{nf}$ \var{must} be of lower priority than that of \var{pol}, see
+\secref{se:priority}.
 
 Note: As usual, $\var{nf}$ can be a $\var{bnf}$ as output by \kbd{nfinit}.
 
@@ -4629,11 +4641,11 @@ $\theta = \beta+k\alpha$ where $\theta$ is a root of $z$ and $\beta$ a root
 of $\var{pol}$.
 
   The main variable of $\var{nf}$ \var{must} be of lower priority than that
-of \var{pol}. Note that for efficiency, this does not check whether the
-relative equation is irreducible over $\var{nf}$, but only if it is
-squarefree. If it is reducible but squarefree, the result will be the
-absolute equation of the \'etale algebra defined by \var{pol}. If \var{pol}
-is not squarefree, an error message will be issued.
+of \var{pol} (see \secref{se:priority}). Note that for efficiency, this does
+not check whether the relative equation is irreducible over $\var{nf}$, but
+only if it is squarefree. If it is reducible but squarefree, the result will
+be the absolute equation of the \'etale algebra defined by \var{pol}. If
+\var{pol} is not squarefree, an error message will be issued.
 
 \syn{rnfequation0}{\var{nf},\var{pol},\fl}.
 
@@ -4732,8 +4744,8 @@ the ideal list starts with $x$, all the other ideals being $\Z_K$).
 format considered as base field, and \var{pol} a polynomial defining a relative
 extension over $\var{nf}$, this computes all the necessary data to work in the
 relative extension. The main variable of \var{pol} must be of higher priority
-(i.e.~lower number) than that of $\var{nf}$, and the coefficients of \var{pol}
-must be in $\var{nf}$.
+(i.e.~lower number, see \secref{se:priority}) than that of $\var{nf}$, and
+the coefficients of \var{pol} must be in $\var{nf}$.
 
 The result is an 11-component row vector as follows (most of the components
 are technical), the numbering being very close to that of \kbd{nfinit}. In
@@ -4839,7 +4851,7 @@ components are:
 $\var{ext}[1]$: a relative equation of the number field \var{ext} over
 \var{bnf}. As usual, the priority of the variable of the polynomial
 defining the ground field \var{bnf} (say $y$) must be lower than the
-main variable of $\var{ext}[1]$, say $x$.
+main variable of $\var{ext}[1]$, say $x$ (see \secref{se:priority}).
 
 $\var{ext}[2]$: the generator $y$ of the base field as a polynomial in $x$ (as
 given by \kbd{rnfequation} with $\fl = 1$).
@@ -7183,10 +7195,11 @@ the corresponding user variable to the saved value. E.g after
 x = 1; writebin("log")
 @eprog
 \noindent reading \kbd{log} into a clean session will set \kbd{x} to $1$.
-The relative variables priorities of new variables set in this way remain the
-same (preset variables retain their former priority, but are set to the new
-value). In particular, reading such a session log into a clean session will
-restore all variables exactly as they were in the original one.
+The relative variables priorities (see \secref{se:priority}) of new variables
+set in this way remain the same (preset variables retain their former
+priority, but are set to the new value). In particular, reading such a
+session log into a clean session will restore all variables exactly as they
+were in the original one.
 
 User functions, installed functions and history objects can not be saved via
 this function. Just as a regular input file, a binary file can be compressed

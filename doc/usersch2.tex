@@ -845,15 +845,17 @@ polynomial $y$. This allows us to work easily in \idx{number field}s, finite
 extensions of the $p$-adic field $\Q_p$, or \idx{finite field}s.
 
 \label{se:rempolmod}
-\misctitle{Important remark.} Since the variables\sidx{variable} occurring
-in a polmod are not free variables, it is essential in order to avoid
-inconsistencies that polmods use the same variable in internal operations
-(i.e.~between polmods) and variables of lower priority (which have been
-introduced later in the GP session) for external operations (typically
-between a polynomial and a polmod). For example, PARI will not recognize
-that \kbd{Mod(y, y\pow2 + 1)} is the same as \kbd{Mod(x, x\pow2 + 1)}.
-Hopefully, this problem will pass away when type ``element of a number
-field'' is eventually introduced.
+\misctitle{Important remark.}\sidx{variable (priority)} Since the
+variables\sidx{variable} occurring in a polmod are not free variables, it is
+essential in order to avoid inconsistencies that polmods use the same
+variable in internal operations (i.e.~between polmods) and variables of lower
+priority (which have been introduced later in the GP session) for external
+operations (typically between a polynomial and a polmod). For example, PARI
+will not recognize that \kbd{Mod(y, y\pow2 + 1)} is the same as \kbd{Mod(x,
+x\pow2 + 1)}. Hopefully, this problem will pass away when type ``element of a
+number field'' is eventually introduced. See \secref{se:priority} for a
+definition of ``priority'' and a discussion of (PARI's idea of) multivariate
+polynomial arithmetic.
 
 On the other hand, \kbd{Mod(x, x\pow2 + 1) + Mod(x, x\pow2 + 1)}
 (which gives \kbd{Mod(2*x, x\pow2 + 1)}) and \kbd{x + Mod(y, y\pow2 + 1)}
@@ -881,7 +883,8 @@ functions, which you ought to know about (use \b{u} if you are subject to
 memory lapses). The total number of different variable names is limited to
 $16384$ and $65536$ on 32-bit and 64-bit machines respectively, which
 should be enough. If you ever need hundreds of variables, you should
-probably be using vectors instead.
+probably be using vectors instead. See \secref{se:priority} for a discussion 
+of multivariate polynomial rings.
 
 \subsec{Power series}\sidx{power series}\label{se:series}
 (type \tet{t_SER}): type a rational function or
@@ -1282,19 +1285,7 @@ to restrict the use of a given variable by declaring it to be \tet{global} or
 \tet{local}. This can be useful to enforce clean programming style, but is in
 no way mandatory.
 
-\misctitle{(Technical) Note:} Variables are numbered in the order that they
-appear since the beginning of the session, and the main variable of an
-expression is always the lowest numbered variable. Hence if you are working
-with expressions involving several variables and want to have them ordered in
-a specific manner {\it in the internal representation}, the simplest is just
-to write down the variables one after the other under GP before starting any
-real computations. If you already have started working and want to change the
-names of the variables in an object, use the function \tet{changevar}. If you
-only want to have them ordered when the result is printed, you can also use
-the function \tet{reorder}, but this won't change anything to the internal
-representation.
-
-\misctitle{(Very technical) Note:}
+\misctitle{(Technical) Note:}
 Each variable has a stack of values, implemented as a linked list. When a new
 scope is entered (during a function call which uses it as a parameter, or if
 the variable is used as a loop index, see \secref{se:user_defined} and
@@ -1302,11 +1293,103 @@ the variable is used as a loop index, see \secref{se:user_defined} and
 stack. If the parameter is not supplied, a special $0$ value called
 \teb{gnil} is pushed on the stack (this value is not printed if it is
 returned as the result of a GP expression sequence). Upon exit, the stack
-decreases. You can \kbd{kill} a variable, decreasing the stack yourself. This
-should be used only at the top level of GP, to undo the effect of an
-assignment, not from a function. However, the stack has a bottom: the value
-of a variable is the monomial of degree 1 in this variable, as is natural for
-a mathematician.
+decreases. You can \kbd{kill} a variable, decreasing the stack yourself.
+However, the stack has a bottom: the value of a variable is the monomial of
+degree 1 in this variable, as is natural for a mathematician.
+
+\subsec{Variable priorities:}\sidx{variable (priority)}\label{se:priority}
+PARI has no intelligent ``sparse'' representation of polynomials. So a
+multivariate polynomial in PARI is just a polynomial (in one variable), whose
+coefficients are themselves polynomials, arbitrary but for the fact that they 
+do not involve the main variable. All computations are then just done
+formally on the coefficients as if the polynomial was univariate.
+
+This is not symmetrical. So if I enter \kbd{x + y} in a clean session,
+what happens ? This is understood as
+$$ x^1 + y*x^0 \in (\Z[y])[x] $$
+but how can GP decide that $x$ is ``more important'' than $y$ ? Why not
+$y^1 + x*y^0$, which is the same mathematical entity after all ?
+
+The answer is that variables are ordered implicitly by the GP interpreter:
+when a new identifier (e.g~$x$, or $y$ as above) is input, the corresponding
+variable is registered as having a stricly lower priority than any variable in
+use at this point\footnote{*}{This is not strictly true: if an
+identifier is interpreted as a user function, no variable is registered. Also,
+the variable $x$ is predefined and always has the highest possible priority.}
+%
+. To see the ordering used by GP at any given time, type $\tet{reorder}()$.
+
+Given such an ordering, multivariate polynomials are stored so that the
+variable with the highest priority is the main variable. And so on,
+recursively, until all variables are exhausted. A different storage pattern
+(which could only be obtained via library mode) would produce an illegal
+object, and eventually a disaster.
+
+In any case, if you are working with expressions involving several variables
+and want to have them ordered in a specific manner in the internal
+representation just described, the simplest is just to write down the
+variables one after the other under GP before starting any real computations.
+You could also define variables from your GPRC to have a consistant
+ordering of common variable names in all your GP sessions, e.g read in a file
+\kbd{variables.gp} containing
+\bprog
+x;y;z;t;a;b;c;d
+@eprog
+
+If you already have started working and want to change the names of the
+variables in an object, use the function \tet{changevar}. If you only want to
+have them ordered when the result is printed, you can also use the function
+\tet{reorder}, but this won't change anything to the internal representation,
+and is not recommended.
+
+\misctitle{Important note:} PARI allows euclidean division of multivariate
+polynomials, but assumes that the computation takes place in the fraction
+field of the coefficient ring (if it is not an integral domain, the result
+will a priori not make sense). This can be very tricky; for instance
+assume $x$ has highest priority (which is always the case), then
+$y$, then $z$:
+\bprog
+? x % y
+%1 = 0
+? y % x
+%2 = y             \\@com these two take place in $\Q(y)[x]$
+? x * Mod(1,y)
+%3 = Mod(1, y)*x   \\@com in $(\Q(y)/y\Q(y))[x] \sim \Q[x]$
+? Mod(x,y)
+%4 = 0
+@eprog
+\noindent In the last exemple, the division by $y$ takes place in
+$\Q(y)[x]$, 
+hence the \kbd{Mod} object is a coset in $(\Q(y)[x]) / (y\Q(y)[x])$, which
+is the null ring since $y$ is invertible! So be very wary of variable
+ordering when your computations involve implicit divisions and many
+variables. This also affects functions like \tet{numerator}/\tet{denominator}
+or \tet{content}:
+\bprog
+? denominator(x / y)
+%1 = 1
+? denominator(y / x)
+%2 = x
+? content(x / y)
+%3 = 1/y
+? content(y / x)
+%4 = 1
+? content(2 / x)
+%5 = 2
+@eprog
+\noindent Can you see why ? Hint: $x/y = (1/y) * x$ is in $\Q(y)[x]$ and
+denominator is taken with respect to $\Q(y)(x)$; $y/x = (y*x^0) / x$ is in
+$\Q(y)(x)$ so $y$ is invertible in the coefficient ring. On the other hand,
+$2/x$ involves a single variable and the coefficient ring is simply $\Z$.
+
+These problems arise because the variable ordering defines an {\it
+implicit} variable with respect to which division takes place. This is
+the price to pay to allow \kbd{\%} and \kbd{/} operators on polynomials
+instead of requiring a more cumbersome \kbd{divrem($x$, $y$, \var{var})}
+(which also exists). Unfortunately, in some functions like \tet{content} and
+\tet{denominator}, there is no way to set explicitly a main variable like in
+\tet{divrem} and remove the dependance on implicit orderings. This will
+hopefully be corrected in future versions.
 
 \subsec{Expressions and expression sequences}.
 

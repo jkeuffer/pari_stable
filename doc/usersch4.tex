@@ -1189,10 +1189,10 @@ polynomial representing the class of~\kbd{z}. Both must be of type
 \typ{POL} in the same variable. However, \kbd{z[2]} is allowed to be a
 simplification of such a polynomial, e.g a scalar. This is quite tricky
 considering the hierarchical structure of the variables; in particular, a
-polynomial in variable of \var{lesser} priority than the modulus variable
-is valid, since it can be considered as the constant term of a polynomial
-of degree 0 in the correct variable. On the other hand a variable of
-\var{greater} priority would not be acceptable.
+polynomial in variable of \var{lesser} priority (see \secref{se:priority})
+than the modulus variable is valid, since it can be considered as the
+constant term of a polynomial of degree 0 in the correct variable. On the
+other hand a variable of \var{greater} priority would not be acceptable.
 
 \subsec{Type \typ{POL} (polynomial):}\kbdsidx{t_POL}\sidx{polynomial} this
 type has a second codeword which is analogous to the one for integers. It
@@ -1214,6 +1214,8 @@ not (see however the important remark below), a {\it variable number\/}
 \fun{void}{setvarn}{GEN z, long v} sets the variable number of \kbd{z} to
 \kbd{v}.
 
+The variable numbers encode the relative priorities of variables as discussed
+in \secref{se:priority}. We will give more details in \secref{se:vars}.
 Note also the function \fun{long}{gvar}{GEN z} which tries to return a
 \idx{variable number} for \kbd{z}, even if \kbd{z} is not a polynomial or
 power series. The variable number of a scalar type is set by definition
@@ -1294,18 +1296,14 @@ contain the components of the list.
 (\kbd{NULL}-terminated) string.
 
 \section{PARI variables}\label{se:vars}
-\subsec{Multivariate objects}
+\subsec{Multivariate objects}\sidx{variable (priority)}
 
 \noindent
-We now consider variables and formal computations. As we have seen in
-\secref{se:impl}, the codewords for types \typ{POL} and \typ{SER}
-encode a ``variable number''. This is an integer, ranging from $0$ to
-\kbd{MAXVARN}. The lower it is, the higher the variable priority. PARI does
-not know anything about intelligent ``sparse'' representation of polynomials.
-So a multivariate polynomial in PARI is just a polynomial (in one variable),
-whose coefficients are themselves (arbitrary) polynomials. All computations
-are then just done formally on the coefficients as if the polynomial was
-univariate.
+We now consider variables and formal computations, and give the technical
+details corresponding to the general discussion in \secref{se:priority}. As
+we have seen in \secref{se:impl}, the codewords for types \typ{POL} and
+\typ{SER} encode a ``variable number''. This is an integer, ranging from $0$
+to \kbd{MAXVARN}. The lower it is, the higher the variable priority.
 
 In fact, the way an object will be considered in formal computations depends
 entirely on its ``principal variable number'' which is given by the function
@@ -1317,18 +1315,27 @@ is not a polynomial or power series. The variable number of a scalar type is
 set by definition equal to \tet{BIGINT} which is bigger than any legal
 variable number. The variable number of a recursive type which is not a
 polynomial or power series is the minimal variable number of its components.
-But for polynomials and power series only the ``outermost'' number counts:
-the representation is not symmetrical at all.
+But for polynomials and power series only the ``outermost'' number counts (we
+directly access $\tet{varn}(x)$ in the codewords): the representation is not
+symmetrical at all.
 
 Under GP, one need not worry too much since the interpreter will define
-the variables as it sees them and do the right thing with the polynomials
-produced (however, have a look at the remark in \secref{se:rempolmod}). But
-in library mode, they are tricky objects if you intend to build polynomials
-yourself (and not just let PARI functions produce them, which is usually less
-efficient). For instance, it does not make sense to have a variable number
-occur in the components of a polynomial whose main variable has a higher
-number (lower priority), even though there's nothing PARI can do to prevent
-you from doing it.
+the variables as it sees them\footnote{*}{
+More precisely, the first time a given identifier is read by the GP parser
+(and is not immediately interpreted as a function) a new variable is created,
+and it is assigned a strictly lower priority than any variable in use at this
+point. On startup, before any user input has taken place, 'x' is defined in
+this way and will thus always have maximal priority (and variable number $0$).}
+%
+and do the right thing with the polynomials produced (however, have a look at
+the remark in \secref{se:rempolmod}). 
+
+But in library mode, they are tricky objects if you intend to build
+polynomials yourself (and not just let PARI functions produce them, which is
+usually less efficient). For instance, it does not make sense to have a
+variable number occur in the components of a polynomial whose main variable
+has a higher number (lower priority), even though there's nothing PARI can do
+to prevent you from doing it.
 
 \subsec{Creating variables}
 A basic difficulty is to ``create'' a variable. As we have seen in
@@ -1342,9 +1349,11 @@ properly defined before you can use a given integer as a variable number.
 
 Initially, this is done for $0$ (the variable \kbd{x} under GP), and
 \tet{MAXVARN}, which is there to address the need for a ``temporary'' new
-variable, which would not be used in regular objects (created by the
-library). We call the latter type a ``temporary variable''. The regular
-variables meant to be used in regular objects, are called ``user
+variable in library mode and cannot be input under GP.
+No documented library function can create from scratch an object involving
+\tet{MAXVARN} (of course, if the operands originally involve \kbd{MAXVARN},
+the function will abide). We call the latter type a ``temporary variable''.
+The regular variables meant to be used in regular objects, are called ``user
 variables\sidx{variable (user)}''.
 
 \subsubsec{User variables}\sidx{variable (user)}:
