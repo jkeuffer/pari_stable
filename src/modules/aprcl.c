@@ -544,8 +544,8 @@ inittabs(int lv)
   tabeta=cgetg(lv,t_VEC);
   tabmatvite = (GEN*)cgetg(lv,t_VEC);
   tabmatinvvite = (GEN*)cgetg(lv,t_VEC);
-  tabavite = cgetg(lv,t_VEC);
-  tabpkvite = cgetg(lv,t_VECSMALL);
+  tabavite  = cgetg(lv,t_VEC);
+  tabpkvite = cgetg(lv,t_VEC);
   for (i=1; i<lv; i++)
   {
     tabE[i] = tabTH[i] = tabeta[i] = tabavite[i] = zero;
@@ -559,38 +559,36 @@ inittabs(int lv)
 static GEN
 finda(GEN N, int pk, int p)
 {
-  int ph,k;
-  ulong u;
-  GEN a,b,N1;
-
-  if (!isinstep5 && tabpkvite[p])
-    return gpowgs((GEN)tabavite[p],tabpkvite[p]/pk);
+  GEN a;
+  if (!isinstep5 && tabpkvite[p]) a = (GEN)tabavite[p];
   else
   {
-    k = pvaluation(addis(N,-1),stoi(p),&N1);
-    ph = u_pow(p,k-1); tabpkvite[p] = p*ph;
-    u = 2;
-    if (p>2)
+    GEN gp = utoi(p), ph, b, N1;
+    ulong u = 2;
+    int k = pvaluation(addis(N,-1), gp, &N1);
+    ph = gpowgs(gp, k-1); tabpkvite[p] = lmulis(ph, p);
+    if (p > 2)
     {
-      for(;;u++)
+      for (;;u++)
       {
-	a = powgi(gmodulcp(stoi(u),N),N1);
-	b = gpowgs(a,ph);
+	a = powmodulo(utoi(u), N1, N);
+	b = powmodulo(a, ph, N);
 	if (!gcmp1(b)) break;
       }
     }
     else
     {
-      while(krosg(u,N)!=-1) u++;
-      a = powgi(gmodulcp(stoi(u),N),N1);
-      b = gpowgs(a,ph);
+      while (krosg(u,N) >= 0) u++;
+      a = powmodulo(utoi(u), N1, N);
+      b = powmodulo(a, ph, N);
     }
-    if (!isinstep5) tabavite[p] = (long)a;
 /* Checking b^p = 1 mod N is done economically in filltabs */
-    b = mppgcd(addis(lift(b),-1),N);
-    if (!gcmp1(b)) {errfill = b; return NULL;}
-    return gpowgs(a,(p*ph)/pk);
+    b = mppgcd(addis(b,-1), N);
+    if (!gcmp1(b)) { errfill = b; return NULL; }
+    a = gmodulcp(a, N);
+    if (!isinstep5) tabavite[p] = (long)a;
   }
+  return powgi(a, divis((GEN)tabpkvite[p], pk));
 }
 
 static void
