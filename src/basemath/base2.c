@@ -1301,13 +1301,13 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   GEN v, p1;
   long m, n = degpol(chi), j, c;
 
-  if (gegal(p, gdeux))
+  if (egalii(p, gdeux))
     c = 2*n/3;
   else
     c = (n > 2*E)? 2*E: n;
   if (c < 2) c = 2;
   a = Q_primitive_part(a,&p1);
-  m = ggval(p1, p);
+  m = ggval(p1, p); /* <= 0 */
   v = newtonsums(a, chi, gpowgs(p, -(m-1)*c+1), ns, c);
   for (j = 1; j <= c; j++)
     if (signe((GEN)v[j]) && E*ggval((GEN)v[j], p) + j*(E*m-1) < 0) return 0;
@@ -1514,29 +1514,23 @@ update_alpha(GEN p, GEN fx, GEN dred, GEN alph, GEN chi, GEN pmr, GEN pmf,
 }
 
 /* Returns 1 if phi non-primary
- *         0 otherwise with F_phi = lcm(F_alpha, F_theta) and E_phi = E_alpha
+ *         0 otherwise, F_phi = lcm(F_alpha, F_theta) = D and E_phi = E_alpha
  * set w = [phi,chi,nu] */
 static int
-testb2(GEN *ptw, GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
+testb2(GEN *ptw, GEN p, GEN fa, long D, GEN theta, GEN pmf, GEN ns)
 {
-  long Dat, l, v = varn(fa);
-  ulong t, m;
+  long l, v = varn(fa);
+  ulong t, m = is_bigint(p)? 0: (ulong)p[2];
   GEN b, w, phi, h;
-
-  Dat = clcm(Fa, Ft) + 3;
-  b = cgetg(4, t_VEC);
-  m = p[2];
-  if (degpol(p) > 0 || ((long)m) < 0) m = 0;
 
   for (t = 1;; t++)
   {
     h = m? stopoly(t, m, v): scalarpol(utoi(t), v);
     phi = gadd(theta, gmod(h, fa));
     w = factcp(p, fa, phi, pmf, ns, &l);
-    if (l > 1) { b[1] = un; break; }
-    if (lg(w[2]) == Dat) { b[1] = deux; break; }
+    if (l > 1 || degpol(w[2]) == D) break;
   }
-
+  b = cgetg(4, t_VEC);
   b[1] = (long)phi;
   b[2] = w[1];
   b[3] = w[2]; *ptw = b; return (l > 1);
@@ -1549,10 +1543,8 @@ static int
 testc2(GEN *ptw, GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea,
        GEN thet2, long Et, GEN ns)
 {
-  GEN b, c1, c2, c3, psi, phi, w;
+  GEN b, c1, c2, c3, phi, w;
   long l, r, s, t, v = varn(fa);
-
-  b=cgetg(4, t_VEC);
 
   (void)cbezout(Ea, Et, &r, &s); t = 0;
   while (r < 0) { r = r + Et; t++; }
@@ -1561,11 +1553,10 @@ testc2(GEN *ptw, GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea,
   c1 = lift_intern(gpowgs(gmodulcp(alph2, fa), s));
   c2 = lift_intern(gpowgs(gmodulcp(thet2, fa), r));
   c3 = gdiv(gmod(gmul(c1, c2), fa), gpowgs(p, t));
-
-  psi = redelt(c3, pmr, p);
-  phi = gadd(polx[v], psi);
+  phi = gadd(polx[v], redelt(c3, pmr, p));
 
   w = factcp(p, fa, phi, pmf, ns, &l);
+  b = cgetg(4, t_VEC);
   b[1] = (long)phi;
   b[2] = w[1];
   b[3] = w[2]; *ptw = b; return (l > 1);
@@ -1785,7 +1776,7 @@ nilord(GEN p, GEN fx, GEN dred, long mf, GEN gx, long flag)
 	{ /* compute a new element such that F = lcm(Fa, Fg) */
 	  if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
 	
-	  if (testb2(&w, p, chi, Fa, gamm, pmf, Fg, ns))
+	  if (testb2(&w, p, chi, clcm(Fa,Fg), gamm, pmf, ns))
 	  { /* at least 2 factors mod p ==> chi can be split */
 	    phi = RX_RXQ_compo((GEN)w[1], alph, fx);
 	    phi = redelt(phi, p, p);
