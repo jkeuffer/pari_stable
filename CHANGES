@@ -35,12 +35,11 @@ BA  1- gpflog could print some lines twice
     2- return() could forget objects on heap
     3- polhensellift didn't accept factors which were not squarefree
     4- Configure missed some shared libraries (when only .so.version was there)
-    5- non-standard major/minor version number combo in libpari.so (Linux)
-    6- possible symlink attacks against mpqs()
-    7- internal requests for precision of bnfinit(x) [ = Q ] could yield SEGV
-    8- compatible = 3 not taken into account when reading a file
-    9- cbezout(0,0) = 1 (should be 0)
-   10- default(lines, > 0) + GP error (e.g 1/0) --> I/O broken
+    5- possible symlink attacks against mpqs()
+    6- internal requests for precision of bnfinit(x) [ = Q ] could yield SEGV
+    7- compatible = 3 not taken into account when reading a file
+    8- cbezout(0,0) = 1 (should be 0)
+    9- when lines > 0, output driver didn't reset properly after user output
 
   Changed
     1- DOS distribution archives (GPM removed)
