@@ -1044,19 +1044,17 @@ element_powmodidele(GEN nf,GEN x,GEN k,GEN idele,GEN sarch)
 GEN
 smithrel(GEN H, GEN *newU, GEN *newUi)
 { 
-  GEN U,Ui,D,p1;
-  long l,c;
+  GEN U, Ui, D = smithall(H, &U, NULL);
+  long c, l = lg(D);
 
-  D = smithall(H, &U, NULL);
-  l = lg(D);
   for (c=1; c<l; c++)
   {
-    p1 = gcoeff(D,c,c);
-    if (is_pm1(p1)) break;
+    GEN t = gcoeff(D,c,c);
+    if (is_pm1(t)) break;
   }
   if (newU) *newU = rowextract_i(U, 1, c-1);
   if (newUi) {
-    Ui = ginv(U); setlg(Ui, c);
+    Ui = ZM_inv(U, gun); setlg(Ui, c);
     *newUi = reducemodHNF(Ui, H, NULL);
   }
   setlg(D, c); return mattodiagonal_i(D);
