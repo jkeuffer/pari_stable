@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN cauchy_bound(GEN p);
 extern GEN small_to_pol_i(GEN z, long l);
 extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
 
@@ -252,43 +253,6 @@ galmodp(GEN pol, GEN dpol, GEN TYP, long *gr, long **GR)
     if (nbremain==1) return 1;
   }
   return 0;
-}
-
-static long
-_aux(GEN z)
-{
-  long bit = expo(z) + (signe(z)? 165-bit_accuracy(lg(z)): 101);
-  return bit >> TWOPOTBITS_IN_LONG;
-}
-
-static long
-suffprec(GEN z)
-{
-  if (typ(z)==t_COMPLEX)
-  {
-    long s = _aux((GEN)z[1]);
-    long t = _aux((GEN)z[2]); return max(t, s);
-  }
-  return _aux(z);
-}
-
-static int
-is_zero(GEN g) { return !signe(g) || (lg(g) <= DEFAULTPREC && expo(g) < -100); }
-
-static GEN
-is_int(GEN g)
-{
-  GEN gint;
-  pari_sp av;
-
-  if (typ(g) == t_COMPLEX)
-  {
-    if (!is_zero((GEN)g[2])) return NULL;
-    g = (GEN)g[1];
-  }
-  gint = ground(g); av = avma;
-  if (!is_zero(subri(g, gint))) return NULL;
-  avma = av; return gint;
 }
 
 static void
@@ -802,6 +766,43 @@ moreprec(buildroot *BR)
   preci(BR, BR->pr);
 }
 
+static int
+is_zero(GEN g) { return !signe(g) || (lg(g) <= DEFAULTPREC && expo(g) < -100); }
+
+static GEN
+is_int(GEN g)
+{
+  GEN gint;
+  pari_sp av;
+
+  if (typ(g) == t_COMPLEX)
+  {
+    if (!is_zero((GEN)g[2])) return NULL;
+    g = (GEN)g[1];
+  }
+  gint = ground(g); av = avma;
+  if (!is_zero(subri(g, gint))) return NULL;
+  avma = av; return gint;
+}
+
+/* bit_accuracy - expo = # significant bits in fractional part */
+static long
+aux(GEN z)
+{
+  return 4*32 + expo(z) - (signe(z)? bit_accuracy(lg(z)): 0);
+}
+
+static long
+suffprec(GEN z)
+{
+  if (typ(z)==t_COMPLEX)
+  {
+    long s = aux((GEN)z[1]);
+    long t = aux((GEN)z[2]); return max(t, s);
+  }
+  return aux(z);
+}
+
 static GEN
 get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
 {
@@ -813,7 +814,7 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
     for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
     ro = R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
     sp = suffprec(ro); if (sp <= 0) return ro;
-    BR->pr += sp; moreprec(BR);
+    BR->pr += 1 + (sp >> TWOPOTBITS_IN_LONG); moreprec(BR);
   }
 }
 
@@ -2426,7 +2427,7 @@ isin_G_H(buildroot *BR, long n1, long n2)
 }
 
 GEN
-galoisbig(GEN pol, long prec)
+galoisbig(GEN pol)
 {
   GEN dpol, res = cgetg(4,t_VEC);
   long *tab, t = 0;
@@ -2470,7 +2471,7 @@ galoisbig(GEN pol, long prec)
     for (i = 1; i <= N; i++) z[i] = (long)u_getpol(i-1);
     BR.coef = z;
     BR.p = pol;
-    BR.pr = prec + 2 * (MEDDEFAULTPREC-2);
+    BR.pr = (gexpo( cauchy_bound(pol) ) >> TWOPOTBITS_IN_LONG) + BIGDEFAULTPREC;
     BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
     BR.r = cget1(N+1, t_VEC);
     appendL(BR.r, gclone ( cleanroots(BR.p, BR.prmax) ));
