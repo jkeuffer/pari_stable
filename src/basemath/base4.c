@@ -2216,7 +2216,7 @@ GEN
 idealappr0(GEN nf, GEN x, long fl)
 {
   gpmem_t av = avma;
-  GEN tau, pi, z, d, sqf, list, e, e2;
+  GEN tau, pi, z, d, sqf, sqfsafe, list, e, e2;
   long s, flag, i, r, N;
 
   nf = checknf(nf);
@@ -2234,6 +2234,7 @@ idealappr0(GEN nf, GEN x, long fl)
     if (r==1) return gscalcol_i(gun, N);
 
     sqf = (r == 2)? NULL: idealprodprime(nf, list);
+    sqfsafe = NULL;
     z = gun; flag = 0;
     for (i=1; i<r; i++)
     {
@@ -2241,8 +2242,9 @@ idealappr0(GEN nf, GEN x, long fl)
       if (s < 0)
       {
         flag = 1;
+        if (!sqfsafe) sqfsafe = sqf? sqf: prime_to_ideal(nf, (GEN)list[1]);
         tau = anti_unif_mod_f(nf, (GEN)list[i], sqf);
-        tau = make_integral(nf, tau, sqf, (GEN*)list, &d);
+        tau = make_integral(nf, tau, sqfsafe, (GEN*)list, &d);
         tau = gdiv(tau, d);
         z = element_mul(nf, z, element_pow(nf, tau, negi((GEN)e[i])));
       }
