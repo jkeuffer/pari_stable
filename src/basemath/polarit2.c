@@ -3939,33 +3939,34 @@ GEN
 quadpoly0(GEN x, long v)
 {
   long res, i, l, sx, tx = typ(x);
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN y,p1;
 
   if (is_matvec_t(tx))
   {
-    l=lg(x); y=cgetg(l,tx);
-    for (i=1; i<l; i++) y[i]=(long)quadpoly0((GEN)x[i],v);
+    l = lg(x); y = cgetg(l,tx);
+    for (i=1; i<l; i++) y[i] = (long)quadpoly0((GEN)x[i],v);
     return y;
   }
-  if (tx!=t_INT) err(arither1);
+  if (tx != t_INT) err(arither1);
   if (v < 0) v = 0;
-  sx=signe(x);
+  sx = signe(x);
   if (!sx) err(talker,"zero discriminant in quadpoly");
-  y=cgetg(5,t_POL);
-  y[1]=evalsigne(1) | evalvarn(v) | evallgef(5); y[4]=un;
-  res=mod4(x); if (sx<0 && res) res=4-res;
-  if (res>1) err(funder2,"quadpoly");
+  res = mod4(x); if (sx < 0 && res) res = 4-res;
+  if (res > 1) err(funder2,"quadpoly");
 
-  av=avma; p1=shifti(x,-2); setsigne(p1,-signe(p1));
+  y = cgetg(5,t_POL);
+  y[1] = evalsigne(1) | evalvarn(v) | evallgef(5);
+
+  av = avma; p1 = shifti(x,-2); setsigne(p1,-signe(p1));
   y[2] = (long) p1;
   if (!res) y[3] = zero;
   else
   {
-    if (sx<0) { tetpil=avma; y[2] = lpile(av,tetpil,addsi(1,p1)); }
+    if (sx < 0) y[2] = lpileuptoint(av, addsi(1,p1));
     y[3] = lnegi(gun);
   }
-  return y;
+  y[4] = un; return y;
 }
 
 GEN
