@@ -897,8 +897,9 @@ err_leave_default(long n)
   stack *s = err_catch_stack, *lasts = NULL;
   cell *c;
 
-  if (!s) return;
-  while (s)
+  if (n < 0) n = noer;
+  if (!s || !err_catch_array[n]) return;
+  for (;s; s = s->prev)
   {
     c = (cell*)s->value;
     if (c->flag == n)

@@ -3150,9 +3150,8 @@ trap0(char *e, char *r, char *f)
 
   if (f && r)
   { /* explicit recovery text */
-    long *NUMERR = &numerr; /* prevent longjmp from clobbering av + numerr */
-    long *AV = &av;         /* volatile would be cleaner, but not portable */
-    char *a = analyseur;    /* pointers are never clobbered ! */
+    long *AV = &av;      /* prevent longjmp from clobbering av + numerr */
+    char *a = analyseur; /* volatile would be cleaner, but not portable */
     void *catch;
     jmp_buf env;
 
