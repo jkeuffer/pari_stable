@@ -1396,6 +1396,21 @@ unset_fact(GEN c)
   for (i=1; i<=primfact[0]; i++) c[primfact[i]] = 0;
 }
 
+/* as small_to_mat, with explicit dimension d */
+static GEN
+small_to_mat_i(GEN z, long d)
+{
+  long i,j, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (j=1; j<l; j++)
+  {
+    GEN c = cgetg(d+1, t_COL), cz = (GEN)z[j];
+    x[j] = (long)c;
+    for (i=1; i<=d; i++) c[i] = lstoi(cz[i]);
+  }
+  return x;
+}
+
 #define MAXTRY 20
 
 /* return -1 in case of precision problems. t = current number of relations */
@@ -1406,7 +1421,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   const double eps = 0.000001;
   double *y,*z,**q,*v, MINKOVSKI_BOUND,BOUND;
   ulong av = avma, av1,av2,limpile;
-  long i,j,k,noideal, nbrel = lg(mat)-1;
+  long j,k,noideal, nbrel = lg(mat)-1;
   long alldep = 0, nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
   GEN x,xembed,M,T2,r,cbase,invcbase,T2vec,prvec;
 
@@ -1506,6 +1521,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       }
       cglob++; col = mat[cglob];
       set_fact(col);
+      /* make sure we get maximal rank first, then allow all relations */
       if (cglob > 1 && cglob <= KC && ! addcolumntomatrix(col,invp,L))
       { /* Q-dependent from previous ones: forget it */
         cglob--; unset_fact(col);
@@ -1539,27 +1555,12 @@ ENDIDEAL:
 END:
   if (DEBUGLEVEL)
   {
-    fprintferr("\n");
-    msgtimer("small norm relations");
-    if (DEBUGLEVEL>1)
-    {
-      GEN p1,tmp=cgetg(cglob+1,t_MAT);
-
-      fprintferr("Elements of small norm gave %ld relations.\n",cglob);
-      fprintferr("Computing rank: "); flusherr();
-      for(j=1;j<=cglob;j++)
-      {
-	p1=cgetg(KC+1,t_COL); tmp[j]=(long)p1;
-	for(i=1;i<=KC;i++) p1[i]=lstoi(mat[j][i]);
-      }
-      tmp = (GEN)sindexrank(tmp)[2]; k=lg(tmp)-1;
-      fprintferr("%ld; independent columns: %Z\n",k,tmp);
-    }
-    if(nbsmallnorm)
-      fprintferr("\nnb. fact./nb. small norm = %ld/%ld = %.3f\n",
+    fprintferr("\n"); msgtimer("small norm relations");
+    fprintferr("  small norms gave %ld relations, rank = %ld.\n",
+               cglob, rank(small_to_mat_i((GEN)mat, KC)));
+    if (nbsmallnorm)
+      fprintferr("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
-    else
-      fprintferr("\nnb. small norm = 0\n");
   }
   avma = av; return cglob;
 }
@@ -2968,7 +2969,7 @@ MORE:
       if (slim > matmax)
       {
         matmax = 2 * slim;
-        mat = (long**)gprealloc(mat, (matmax+1) * sizeof(long*));
+        mat = (GEN*)gprealloc(mat, (matmax+1) * sizeof(GEN));
       }
       setlg(mat, slim+1);
       if (DEBUGLEVEL)
