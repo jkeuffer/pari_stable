@@ -437,7 +437,7 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
 {
   GEN z, U, V;
 
-  if (typ(x) != t_POL) err(bugparier,"not a polynomial in FpXQ_invsafe");
+  if (typ(x) != t_POL) err(bugparier,"FpXQ_invsafe, not a polynomial");
   z = FpX_extgcd(x, T, p, &U, &V);
   if (degpol(z)) return NULL;
   z = mpinvmodsafe((GEN)z[2], p);
@@ -455,7 +455,7 @@ FpXQ_mul(GEN y,GEN x,GEN T,GEN p)
 {
   GEN z;
   if (typ(x) == t_INT || typ(y) == t_INT)
-    err(bugparier,"FpXQ_mul, t_INT are absolutely forbidden");
+    err(bugparier,"FpXQ_mul, not a polynomial");
   z = quickmul(y+2, x+2, lgpol(y), lgpol(x)); setvarn(z,varn(y));
   z = FpX_red(z, p); return FpX_rem(z,T, p);
 }
@@ -568,7 +568,7 @@ FpXQ_inv(GEN x,GEN T,GEN p)
   pari_sp av;
   GEN U;
 
-  if (!T) err(bugparier,"T=NULL in FpXQ_inv");
+  if (!T) err(bugparier,"FpXQ_inv, T=NULL");
   av = avma;
   U = FpXQ_invsafe(x, T, p);
   if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
@@ -909,7 +909,7 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   pari_sp ltop=avma;
   GEN z,kx,ky;
   long vx;
-  if (!T) err(bugparier,"FpXQX_mul (T==NULL)");
+  if (!T) err(bugparier,"FpXQX_mul, T==NULL");
   vx = min(varn(x),varn(y));
   kx= to_Kronecker(x,T);
   ky= to_Kronecker(y,T);
@@ -2452,7 +2452,7 @@ FpXQX_extgcd(GEN x, GEN y, GEN T, GEN p, GEN *ptu, GEN *ptv)
   if (OK_ULONG(p)) return FpXQX_extgcd_long(x,y,T,p,ptu,ptv);
   if (!T) return FpX_extgcd(x,y,p,ptu,ptv);
 #endif
-  if (!T) err(bugparier,"T==NULL in FpXQX_extgcd");
+  if (!T) err(bugparier,"FpXQX_extgcd, T==NULL");
   ltop=avma;
   a = FpXQX_red(x, T, p);
   b = FpXQX_red(y, T, p);
