@@ -95,6 +95,7 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    37- Ser([1,2]) --> 1 + 2*x + O(x^2) [ OK ], but Ser([0,0]) --> O(x^16)
    38- writebin() still produced incompatible output depending on the
        multiprecision kernel.
+   39- [alg | lin]dep( t_PADIC ) had stopped working in 2.2.6
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

@@ -2575,7 +2575,7 @@ plindep(GEN x)
     coeff(m,1  ,i) = x[i+1];
   }
   for (i=1; i<=lx; i++) coeff(m,i,lx-1+i) = (long)pn;
-  m = lllint_fp_ip(m, 100);
+  m = lllint_ip(m, 100);
   return gerepilecopy(av, (GEN)m[1]);
 }
 
