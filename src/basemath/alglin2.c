@@ -3389,23 +3389,6 @@ gbezout_step(GEN *pa, GEN *pb, GEN *pu, GEN *pv)
   *pb = b; return d;
 }
 
-/* return x or -x such that leading term is > 0 if meaningful */
-static int
-canon(GEN *px)
-{
-  GEN x = *px;
-  if (typ(x) == t_POL && signe(x))
-  {
-    GEN d = leading_term(x);
-    switch (typ(d))
-    {
-      case t_INT: case t_REAL: case t_FRAC:
-        if (gsigne(d) < 0) { *px = gneg(x); return 1; }
-    }
-  }
-  return 0;
-}
-
 static GEN
 gsmithall(GEN x,long all)
 {
@@ -3488,10 +3471,14 @@ gsmithall(GEN x,long all)
   for (k=1; k<=n; k++)
   {
     GEN T = gcoeff(x,k,k);
-    if (canon(&T))
+    if (typ(T) == t_POL && signe(x))
     {
-      if (all) V[k] = lneg((GEN)V[k]);
-      coeff(x,k,k) = (long)T;
+      GEN d = leading_term(T);
+      if (!gcmp1(d))
+      {
+        gcoeff(x,k,k) = gdiv(T,d);
+        if (all) gel(V,k) = gdiv(gel(V,k), d);
+      }
     }
   }
   z = all? mkvec3(gtrans_i(U), V, x): mattodiagonal_i(x);
