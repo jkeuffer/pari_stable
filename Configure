@@ -119,12 +119,21 @@ case "$osname" in
     *) shell_q="'"; echo "shell_q=\"'\"" >> $dflt_conf_file;;
 esac
 
+mydlldflags=`echo "$DLLDFLAGS" | \
+   sed -e "s/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//" \
+       -e "s/\\$(CFLAGS)/$CFLAGS/"`
+
+if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
+myextradlldflags=`eval echo $EXTRADLLDFLAGS`
+
+myincludedir=`echo "$includedir" | sed -e 's/\/pari\/*$//'`
+modules_build="$CC -c -o %s.o $CFLAGS -I$myincludedir %s.c && $DLLD -o %s.$DLSUFFIX $mydlldflags %s.o $myextradlldflags"
+
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1\
-  gnuas AS ASFLAGS KERNELCPPFLAGS\
-  LD LIBS\
+  gnuas AS ASFLAGS KERNELCPPFLAGS LIBS modules_build\
   dir_sep runpath runpathprefix LDDYN DYNLIBS DYNFLAGS DYNRELOC\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
