@@ -94,7 +94,7 @@ HC  4- "double exponential method" for numerical integration and sumation.
        intfouriersin, intfuncinit, intlaplaceinv, intmellininv,
        intmellininvshort, intnuminit, intnuminitgen, intnumromb, intnumstep,
        sumnum, sumnumalt, sumnuminit
-    5- new universal constant gminusone
+    5- new universal constant gen_m1
     6- [bench suite] test-intnum and test-stark toplevel targets
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
