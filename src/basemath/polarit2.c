@@ -251,7 +251,7 @@ polidivis(GEN x, GEN y, GEN bound)
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii((GEN)z[j],(GEN)y[i-j]));
     if (y_lead) p1 = diviiexact(p1,y_lead);
-    if (absi_cmp(p1, bound) > 0) return NULL;
+    if (bound && absi_cmp(p1, bound) > 0) return NULL;
     p1 = gerepileupto(av,p1);
     z[i-dy] = (long)p1;
   }
@@ -793,7 +793,7 @@ nextK:
         if (y) q = mulii(y, q);
         y = centermod_i(q, pa, pas2);
       }
-      if (!signe(y) || resii((GEN)lcpol[2], y) != gzero)
+      if (!signe(y) || resii(constant_term(lcpol), y) != gzero)
       {
         if (DEBUGLEVEL>3) fprintferr("T");
         avma = av; goto NEXT;
@@ -817,11 +817,11 @@ nextK:
       listmod[cnt] = (long)list;
       for (i=1; i<=K; i++) list[i] = famod[ind[i]];
 
-      y = primpart(y);
+      y = Q_primpart(y);
       fa[cnt++] = (long)y;
       /* fix up pol */
       pol = q;
-      if (lc) pol = gdivexact(pol, leading_term(y));
+      if (lc) pol = Q_div_to_int(pol, leading_term(y));
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
         if (j <= K && i == ind[j]) j++;
@@ -839,7 +839,7 @@ nextK:
       bound = factor_bound(pol);
       if (lc) lc = absi(leading_term(pol));
       lcpol = lc? gmul(lc,pol): pol;
-      if (DEBUGLEVEL > 2)
+      if (DEBUGLEVEL>3)
         fprintferr("\nfound factor %Z\nremaining modular factor(s): %ld\n",
                    y, lfamod);
       continue;
@@ -932,31 +932,43 @@ END:
 
 /* recombination of modular factors: van Hoeij's algorithm */
 
+/* Q in Z[X], return Q(2^n) */
+static GEN
+shifteval(GEN Q, long n)
+{
+  long i, l = lgef(Q);
+  GEN s;
+
+  if (!signe(Q)) return gzero;
+  s = (GEN)Q[l-1];
+  for (i = l-2; i > 1; i--) s = addii((GEN)Q[i], shifti(s, n));
+  return s;
+}
+
 /* return integer y such that all |a| <= y if P(a) = 0 */
 static GEN
 root_bound(GEN P0)
 {
-  GEN Q = dummycopy(P0), lP = absi(leading_term(Q)), P,x,y,z;
+  GEN Q = dummycopy(P0), lP = absi(leading_term(Q)), x,y,z;
   long k, d = degpol(Q);
 
-  setlgef(Q, d+2); /* P = lP x^d + Q */
-  P = Q+2; /* strip codewords */
-  for (k=0; k<d; k++) P[k] = labsi((GEN)P[k]);
-
-  k = gexpo(cauchy_bound(P0)) - 5;
-  if (k < 0) k = 0;
-  x = y = shifti(gun, k);
-  for (k=0; ; k++)
+  /* P0 = lP x^d + Q, deg Q < d */
+  Q = normalizepol_i(Q, d+2);
+  for (k=lgef(Q)-1; k>1; k--) Q[k] = labsi((GEN)Q[k]);
+  k = gexpo( cauchy_bound(P0) );
+  for (k--; k >= 0; k--)
   {
     pari_sp av = avma;
-    if (cmpii(poleval(Q,y), mulii(lP, gpowgs(y, d))) < 0) break;
+    /* y = 2^k; Q(y) >= lP y^d ? */
+    if (cmpii(shifteval(Q,k), shifti(lP, d*k)) >= 0) break;
     avma = av;
-    x = y; y = shifti(y,1);
   }
+  x = shifti(gun, k);
+  y = shifti(gun, k+1);
   for(k=0; ; k++)
   {
     z = shifti(addii(x,y), -1);
-    if (egalii(x,z) || k == 20) break;
+    if (egalii(x,z) || k > 5) break;
     if (cmpii(poleval(Q,z), mulii(lP, gpowgs(z, d))) < 0)
       y = z;
     else
@@ -1444,12 +1456,72 @@ u_FpX_nbroots(GEN f, long p)
   avma = av; return degpol(z);
 }
 
+/* assume pol(0) != 0, polp = pol/lc(pol) mod p.
+ * Return vector of rational roots of a */
+static GEN
+DDF_roots(GEN pol, GEN polp, GEN p)
+{
+  GEN lc, lcpol, z, pe, pes2, bound;
+  long i, m, e, lz, v = varn(pol);
+  pari_sp av, lim;
+  int split;
+  pari_timer T;
+
+  if (DEBUGLEVEL>2) TIMERstart(&T);
+  lc = absi(leading_term(pol));
+  if (is_pm1(lc)) lc = NULL;
+  lcpol = lc? gmul(lc,pol): pol;
+
+  bound = root_bound(pol);
+  if (lc) bound = mulii(lc, bound);
+  e = logint(shifti(bound, 1), p, &pe);
+  pes2 = shifti(pe, -1);
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
+
+  av = avma; lim = stack_lim(av,2);
+  z = lift_intern( rootmod(pol, p) );
+  split = (lg(z) - 1 == degpol(pol));
+  if (split)
+    z = deg1_from_roots(z, v);
+  else
+    z = FpX_div(polp, FpV_roots_to_pol(z, p, v), p);
+  z = hensel_lift_fact(pol, z, NULL, p, pe, e);
+  lz = lg(z); if (!split) lz--;
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Z^%ld)", p,e);
+
+  for (m=1, i=1; i < lz; i++)
+  {
+    GEN q, r, y = (GEN)z[i];
+    if (lc) y = gmul(y, lc);
+    y = centermod_i(y, pe, pes2);
+    if (! (q = polidivis(lcpol, y, NULL)) ) continue;
+
+    lcpol = pol = q;
+    r = negi( constant_term(y) );
+    if (lc) {
+      r = gdiv(r,lc);
+      pol = Q_primpart(pol);
+      lc = absi( leading_term(pol) );
+      if (is_pm1(lc)) lc = NULL; else lcpol = gmul(lc, pol);
+    }
+    z[m++] = (long)r;
+    if (low_stack(lim, stack_lim(av,2)))
+    {
+      if (DEBUGMEM>1) err(warnmem,"DDF_roots, m = %ld", m);
+      gerepileall(av, lc? 4:2, &z, &pol, &lc, &lcpol);
+    
+    }
+  }
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Recombination");
+  z[0] = evaltyp(t_VEC) | evallg(m); return z;
+}
+
 /* Assume a squarefree, degree(a) > 0, a(0) != 0.
  * If fl != 0 look only for rational roots */
 static GEN
 DDF(GEN a, long hint, int fl)
 {
-  GEN lead, prime, famod, z;
+  GEN lead, prime, famod, z, ap;
   const long da = degpol(a);
   long chosenp, p, nfacp, np, nmax, ti = 0;
   pari_sp av = avma, av1;
@@ -1487,35 +1559,11 @@ DDF(GEN a, long hint, int fl)
     np++;
   }
   prime = stoi(chosenp);
-  if (fl)
-  { /* roots only */
-    GEN pe;
-    long i, m, e;
-    int split;
-    if (lead) a = rescale_pol_to_monic(a);
-    e = logint(shifti(root_bound(a), 1), prime, &pe);
-    if (DEBUGLEVEL>2) msgTIMER(&T, "Root bound");
-    z = lift_intern( rootmod(a, prime) );
-    split = (lg(z) - 1 == da);
-    if (split)
-      z = deg1_from_roots(z, varn(a));
-    else
-      z = FpX_div(a, FpV_roots_to_pol(z, prime, varn(a)), prime);
-    z = hensel_lift_fact(a, z, NULL, prime, pe, e);
-    if (!split) setlg(z, lg(z)-1);
-    z = roots_from_deg1(z);
-    if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift (mod %Z^%ld)", prime,e);
-    for (m=1,i=1; i<lg(z); i++)
-    {
-      GEN r = centermod((GEN)z[i], pe);
-      if (gcmp0(poleval(a, r))) z[m++] = (long)(lead? gdiv(r,lead): r);
-    }
-    z[0] = evaltyp(t_VEC) | evallg(m);
-    return gerepilecopy(av, z);
-  }
+  ap = lead? FpX_normalize(a, prime): FpX_red(a, prime);
+  if (fl) return gerepilecopy(av, DDF_roots(a, ap, prime));
 
   famod = cgetg(nmax+1,t_COL);
-  famod[1] = (long)(lead? FpX_normalize(a, prime): FpX_red(a, prime));
+  famod[1] = (long)ap;
   if (nmax != FpX_split_berlekamp((GEN*)(famod+1), prime))
     err(bugparier,"DDF: wrong numbers of factors");
   if (DEBUGLEVEL>2)
@@ -1734,11 +1782,14 @@ nfrootsQ(GEN x)
 {
   pari_sp av = avma;
   GEN z, d;
+  long val;
   
   if (typ(x)!=t_POL) err(notpoler,"nfrootsQ");
   if (!signe(x)) err(zeropoler,"nfrootsQ");
+  val = polvaluation(x, &x);
   d = modulargcd(derivpol(x), x);
   z = DDF(gdeuc(x, d), 1, 1);
+  if (val) concatsp(z, gzero);
   return gerepilecopy(av, z);
 }
 
@@ -2955,11 +3006,47 @@ primitive_part(GEN x, GEN *ptc)
   return x;
 }
 
+/* NOT MEMORY CLEAN
+ * As content(), but over Q. Treats polynomial as elts of Q[x1,...xn], instead
+ * of Q(x2,...,xn)[x1] */
+GEN
+Q_content(GEN x)
+{
+  long i, l = lgef(x);
+  GEN d;
+  pari_sp av;
+
+  switch(typ(x))
+  {
+    case t_INT:
+    case t_FRAC: return x;
+
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x); if (l == 1) return gun;
+      av = avma; d = Q_content((GEN)x[1]);
+      for (i=2; i<l; i++)
+      {
+        d = ggcd(d, Q_content((GEN)x[i]));
+        if ((i & 255) == 0) d = gerepileupto(av, d);
+      }
+      return gerepileupto(av, d);
+
+    case t_POL:
+      l = lgef(x); if (l == 2) return gzero;
+      av = avma; d = Q_content((GEN)x[2]);
+      for (i=3; i<l; i++)
+        d = ggcd(d, Q_content((GEN)x[i]));
+      return gerepileupto(av, d);
+  }
+  err(typeer,"Q_content");
+  return NULL; /* not reached */
+}
+
 GEN
 Q_primitive_part(GEN x, GEN *ptc)
 {
   pari_sp av = avma;
-  GEN c = content(x);
+  GEN c = Q_content(x);
   if (gcmp1(c)) { avma = av; c = NULL; }
   else if (!gcmp0(c)) x = Q_div_to_int(x,c);
   if (ptc) *ptc = c;

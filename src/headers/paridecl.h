@@ -1212,6 +1212,7 @@ GEN     vecpol_to_mat(GEN v, long n);
 
 /* polarit2.c */
 
+GEN     Q_content(GEN x);
 GEN     Q_denom(GEN x);
 GEN     Q_div_to_int(GEN x, GEN c);
 GEN     Q_muli_to_int(GEN x, GEN d);
