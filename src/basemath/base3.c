@@ -805,7 +805,7 @@ GEN
 lllreducemodmatrix(GEN x,GEN y)
 {
   gpmem_t av = avma;
-  GEN z = gmul(y,lllint(y));
+  GEN z = lllint_ip(y);
   return gerepileupto(av, reducemodinvertible(x, z));
 }
 

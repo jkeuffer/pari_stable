@@ -40,7 +40,6 @@ extern GEN col_to_ff(GEN x, long v);
 extern GEN element_mulidid(GEN nf, long i, long j);
 extern GEN eleval(GEN f,GEN h,GEN a);
 extern GEN eltmulid_get_table(GEN nf, long i);
-extern GEN ideal_better_basis(GEN nf, GEN x, GEN M);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN mat_to_vecpol(GEN x, long v);
 extern GEN merge_factor_i(GEN f, GEN g);
@@ -1921,6 +1920,55 @@ random_uniformizer_loop(GEN D, GEN beta, GEN pol, GEN p, GEN pf)
   }
 }
 
+static void
+setprec(GEN x, long prec)
+{
+  long i,j, n=lg(x);
+  for (i=1;i<n;i++)
+  {
+    GEN p2,p1 = (GEN)x[i];
+    for (j=1;j<n;j++)
+    {
+      p2 = (GEN)p1[j];
+      if (typ(p2) == t_REAL) setlg(p2, prec);
+    }
+  }
+}
+
+/* find a basis of x whose elements have small norm
+ * M a bound for the size of coeffs of x */
+GEN
+ideal_better_basis(GEN nf, GEN x, GEN M)
+{
+  GEN a,b;
+  long nfprec = nfgetprec(nf);
+  long prec = DEFAULTPREC + (expi(M) >> TWOPOTBITS_IN_LONG);
+
+  if (typ(nf[5]) != t_VEC) return x;
+  if ((prec<<1) < nfprec) prec = (prec+nfprec) >> 1;
+  x = lllint_ip(x);
+  a = qf_base_change(gmael(nf,5,3),x,1);
+  setprec(a,prec);
+  b = lllgramintern(a,4,1,prec);
+  if (!b)
+  {
+    if (DEBUGLEVEL)
+      err(warner, "precision too low in ideal_better_basis (1)");
+    if (nfprec > prec)
+    {
+      setprec(a,nfprec);
+      b = lllgramintern(a,4,1,nfprec);
+    }
+  }
+  if (b) x = gmul(x, b);
+  else
+  {
+    if (DEBUGLEVEL)
+      err(warner, "precision too low in ideal_better_basis (2)");
+  }
+  return x;
+}
+
 /* Input: an ideal mod p, P != Z_K (Fp-basis, in matrix form)
  * Output: x such that P = (p,x) */
 static GEN
@@ -3459,8 +3507,7 @@ findmin(GEN nf, GEN ideal, GEN muf,long prec)
   m = lllgramintern(m,4,1,prec);
   if (!m)
   {
-    m = lllint(ideal);
-    m = qf_base_change(gmael(nf,5,3), gmul(ideal,m), 0);
+    m = qf_base_change(gmael(nf,5,3), lllint_ip(ideal), 0);
     m = lllgramintern(m,4,1,prec);
     if (!m) err(precer,"rnflllgram");
   }

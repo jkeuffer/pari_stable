@@ -505,7 +505,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   y[5] = (long)clg; u = cgetg(3,t_VEC);
   y[6] = (long)u;
     u[1] = lmul(u2, ginv(hmat));
-    u[2] = lmul(u1, lllint(u1));
+    u[2] = (long)lllint_ip(u1);
   return gerepilecopy(av,y);
 }
 

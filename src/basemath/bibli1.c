@@ -156,49 +156,83 @@ lll_finish(GEN h,GEN fl,long flag)
 #define swap(x,y) { long _t=x; x=y; y=_t; }
 #define gswap(x,y) { GEN _t=x; x=y; y=_t; }
 
+/* h[,k] += q * h[,l] */
 static void
-REDI(long k, long l, GEN x, GEN h, GEN L, GEN B, long K, int gram)
+update_h(long k, long l, GEN q, long K, GEN h)
+{
+  GEN *hl, *hk;
+  long i;
+
+  if (!h) return;
+  hl = (GEN*)h[l]; hk = (GEN*)h[k];
+  if (is_pm1(q))
+  {
+    if (signe(q) > 0)
+      for (i=1;i<=K;i++) hk[i] = addii(hk[i],hl[i]);
+    else
+      for (i=1;i<=K;i++) hk[i] = subii(hk[i],hl[i]);
+  } else
+      for (i=1;i<=K;i++) hk[i] = addii(hk[i],mulii(q,hl[i]));
+}
+
+/* L[k,] += q * L[l,], l < k */
+static void
+update_LI(long k, long l, GEN q, GEN L, GEN B)
+{
+  long i;
+  if (is_pm1(q))
+  {
+    if (signe(q) > 0)
+    {
+      for (i=1;i<l; i++) coeff(L,k,i) = laddii(gcoeff(L,k,i),gcoeff(L,l,i));
+      coeff(L,k,l) = laddii(gcoeff(L,k,l), B);
+    } else {
+      for (i=1;i<l; i++) coeff(L,k,i) = lsubii(gcoeff(L,k,i),gcoeff(L,l,i));
+      coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B));
+    }
+  } else {
+    for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), mulii(q,B));
+  }
+}
+
+static void
+REDI_gram(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
 {
   long i,lx;
   GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
-  GEN *hk,*hl,xk,xl;
+  GEN xk,xl;
   if (!signe(q)) return;
   q = negi(q);
   xl = (GEN) x[l]; xk = (GEN) x[k];
-  if (h) { hl = (GEN*)h[l]; hk = (GEN*)h[k]; }
   lx = lg(xl);
   if (is_pm1(q))
   {
     if (signe(q) > 0)
     {
-      if (h) for (i=1;i<=K;i++) hk[i] = addii(hk[i],hl[i]);
-      if (gram) {
-        xk[k] = laddii((GEN)xk[k], (GEN)xl[k]);
-        for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = laddii((GEN)xk[i], (GEN)xl[i]);
-      }
-      for (i=1;i<l; i++) coeff(L,k,i) = laddii(gcoeff(L,k,i),gcoeff(L,l,i));
-      coeff(L,k,l) = laddii(gcoeff(L,k,l), B);
+      xk[k] = laddii((GEN)xk[k], (GEN)xl[k]);
+      for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = laddii((GEN)xk[i], (GEN)xl[i]);
     } else {
-      if (h) for (i=1;i<=K;i++) hk[i] = subii(hk[i],hl[i]);
-      if (gram) {
-        xk[k] = lsubii((GEN)xk[k], (GEN)xl[k]);
-        for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = lsubii((GEN)xk[i], (GEN)xl[i]);
-      }
-      for (i=1;i<l; i++) coeff(L,k,i) = lsubii(gcoeff(L,k,i),gcoeff(L,l,i));
-      coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B));
+      xk[k] = lsubii((GEN)xk[k], (GEN)xl[k]);
+      for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = lsubii((GEN)xk[i], (GEN)xl[i]);
     }
   } else { /* h[,k] += q* h[,l]. x[,k] += q * x[,l]. L[k,] += q* L[l,] */
-    if (h) for(i=1;i<=K;i++) hk[i] = addii(hk[i],mulii(q,hl[i]));
-    if (gram)
-    {
-      xk[k] = laddii((GEN)xk[k], mulii(q,(GEN)xl[k]));
-      for(i=1;i<lx;i++) coeff(x,k,i)=xk[i]=laddii((GEN)xk[i],mulii(q,(GEN)xl[i]));
-    }
-    for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
-
-    coeff(L,k,l) = laddii(gcoeff(L,k,l), mulii(q,B));
+    xk[k] = laddii((GEN)xk[k], mulii(q,(GEN)xl[k]));
+    for(i=1;i<lx;i++) coeff(x,k,i)=xk[i]=laddii((GEN)xk[i],mulii(q,(GEN)xl[i]));
   }
-  if (!gram) x[k] = (long)ZV_lincomb(gun, q, xk, xl);
+  update_LI(k,l,q,L,B);
+  update_h (k,l,q,K,h);
+}
+
+static void
+REDI(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
+{
+  GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
+  if (!signe(q)) return;
+  q = negi(q);
+  update_LI(k,l,q,L,B);
+  update_h (k,l,q,K,h);
+  x[k] = (long)ZV_lincomb(gun, q, (GEN)x[k], (GEN)x[l]);
 }
 
 /* b[k] <-- b[k] - round(L[k,l]) b[l], only b[1] ... b[K] modified so far
@@ -208,33 +242,30 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
 {
   long e,i,lx;
   GEN q = grndtoi(gcoeff(L,k,l),&e);
-  GEN *hk,*hl,xk,xl;
+  GEN xk,xl;
   if (DEBUGLEVEL>8)
     fprintferr("error bits when rounding in lllgram: %ld\n",e);
   if (!signe(q)) return;
   q = negi(q); lx = lg(x);
-  xl = (GEN)x[l]; hl = (GEN*)h[l];
-  xk = (GEN)x[k]; hk = (GEN*)h[k];
+  xk = (GEN)x[k]; xl = (GEN)x[l];
   if (is_pm1(q))
   {
     if (signe(q) > 0)
     {
-      for (i=1;i<=K;i++) hk[i]=addii(hk[i],hl[i]);
       xk[k] = ladd((GEN)xk[k], (GEN)xl[k]);
       for (i=1;i<lx;i++) coeff(x,k,i)=xk[i]=ladd((GEN)xk[i], (GEN)xl[i]);
       for (i=1;i<l; i++) coeff(L,k,i)=ladd(gcoeff(L,k,i),gcoeff(L,l,i));
     } else {
-      for (i=1;i<=K;i++) hk[i]=subii(hk[i],hl[i]);
       xk[k] = lsub((GEN)xk[k], (GEN)xl[k]);
       for (i=1;i<lx;i++) coeff(x,k,i)=xk[i]=lsub((GEN)xk[i], (GEN)xl[i]);
       for (i=1;i<l; i++) coeff(L,k,i)=lsub(gcoeff(L,k,i),gcoeff(L,l,i));
     }
   } else {
-    for (i=1;i<=K;i++) hk[i]=addii(hk[i],mulii(q,hl[i]));
     xk[k] = ladd((GEN)xk[k], gmul(q,(GEN)xl[k]));
     for (i=1;i<lx;i++) coeff(x,k,i)=xk[i]=ladd((GEN)xk[i], gmul(q,(GEN)xl[i]));
     for (i=1;i<l; i++) coeff(L,k,i)=ladd(gcoeff(L,k,i),gmul(q,gcoeff(L,l,i)));
   }
+  update_h(k,l,q,K,h);
   coeff(L,k,l) = ladd(gcoeff(L,k,l),q);
 }
 
@@ -414,7 +445,11 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
       incrementalGS(x, L, B, k, fl, gram);
       kmax = k;
     }
-    if (k != MARKED) REDI(k,k-1, x,h,L,(GEN)B[k],kmax,gram);
+    if (k != MARKED)
+    {
+      if (!gram) REDI(k,k-1, x,h,L,(GEN)B[k],kmax);
+      else  REDI_gram(k,k-1, x,h,L,(GEN)B[k],kmax);
+    }
     if (do_SWAPI(x,h,L,B,kmax,k,alpha,fl,gram))
     {
       if      (MARKED == k)   MARKED = k-1;
@@ -426,7 +461,8 @@ lllint_marked(long MARKED, GEN x, long alpha, int gram,
       if (k != MARKED)
         for (l=k-2; l; l--)
         {
-          REDI(k,l, x,h,L,(GEN)B[l+1],kmax, gram);
+          if (!gram) REDI(k,l, x,h,L,(GEN)B[l+1],kmax);
+          else  REDI_gram(k,l, x,h,L,(GEN)B[l+1],kmax);
           if (low_stack(lim, stack_lim(av,1)))
           {
             if(DEBUGMEM>1) err(warnmem,"lllint[1]");
@@ -456,6 +492,13 @@ GEN
 lllint_i(GEN x, long alpha, int gram, GEN *pth, GEN *ptfl, GEN *ptB)
 {
   return lllint_marked(0, x,alpha,gram,pth,ptfl,ptB);
+}
+
+/* return x * lllint(x) */
+GEN
+lllint_ip(GEN x)
+{
+  return lllint_i(x, LLLDFT, 0, NULL, NULL, NULL);
 }
 
 GEN
@@ -1154,7 +1197,7 @@ lindep2(GEN x, long bit)
     p1[lx]           = lcvtoi(gshift((GEN)re[i],bit),&e);
     if (im) p1[lx+1] = lcvtoi(gshift((GEN)im[i],bit),&e);
   }
-  p1 = (GEN)gmul(p2,lllint(p2))[1];
+  p1 = (GEN)lllint_ip(p2)[1];
   p1[0] = evaltyp(t_VEC) | evallg(lx);
   return gerepilecopy(av, p1);
 }

@@ -1439,7 +1439,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
     ideal = prime_to_ideal(nf,ideal);
-    IDEAL = gmul(ideal, lllint(ideal)); /* should be almost T2-reduced */
+    IDEAL = lllint_ip(ideal); /* should be almost T2-reduced */
     r = red_ideal(&IDEAL,T2vec,prvec);
     if (!r) return -1; /* precision problem */
 

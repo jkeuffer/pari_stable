@@ -390,54 +390,6 @@ ok_elt(GEN x, GEN xZ, GEN y)
   avma = av; return r;
 }
 
-static void
-setprec(GEN x, long prec)
-{
-  long i,j, n=lg(x);
-  for (i=1;i<n;i++)
-  {
-    GEN p2,p1 = (GEN)x[i];
-    for (j=1;j<n;j++)
-    {
-      p2 = (GEN)p1[j];
-      if (typ(p2) == t_REAL) setlg(p2, prec);
-    }
-  }
-}
-
-/* find a basis of x whose elements have small norm
- * M a bound for the size of coeffs of x */
-GEN
-ideal_better_basis(GEN nf, GEN x, GEN M)
-{
-  GEN a,b;
-  long nfprec = nfgetprec(nf);
-  long prec = DEFAULTPREC + (expi(M) >> TWOPOTBITS_IN_LONG);
-
-  if (typ(nf[5]) != t_VEC) return x;
-  if ((prec<<1) < nfprec) prec = (prec+nfprec) >> 1;
-  a = qf_base_change(gmael(nf,5,3),x,1);
-  setprec(a,prec);
-  b = lllgramintern(a,4,1,prec);
-  if (!b)
-  {
-    if (DEBUGLEVEL)
-      err(warner, "precision too low in ideal_better_basis (1)");
-    if (nfprec > prec)
-    {
-      setprec(a,nfprec);
-      b = lllgramintern(a,4,1,nfprec);
-    }
-  }
-  if (!b)
-  {
-    if (DEBUGLEVEL)
-      err(warner, "precision too low in ideal_better_basis (2)");
-    b = lllint(x); /* better than nothing */
-  }
-  return gmul(x, b);
-}
-
 static GEN
 addmul_col(GEN a, long s, GEN b)
 {
@@ -2234,7 +2186,7 @@ appr_reduce(GEN s, GEN y)
   GEN d, u, z = cgetg(N+2,t_MAT);
 
   s = gmod(s, gcoeff(y,1,1));
-  y = gmul(y, lllint(y));
+  y = lllint_ip(y);
   for (i=1; i<=N; i++) z[i] = y[i];
   z[N+1] = (long)s;
   u = (GEN)ker(z)[1];
