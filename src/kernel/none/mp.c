@@ -337,22 +337,6 @@ shifti_spec(GEN x, long lx, long n)
   y[0] = evaltyp(t_INT)|evallg(ly); return y;
 }
 
-/* 2^n = shifti(gen_1, n) */
-GEN
-int2n(long n) {
-  long i, m, d, l;
-  GEN z;
-  if (n < 0) return gen_0;
-  if (n == 0) return gen_1;
-
-  d = n>>TWOPOTBITS_IN_LONG;
-  m = n & (BITS_IN_LONG-1);
-  l = d + 3; z = cgeti(l);
-  z[1] = evalsigne(1) | evallgefint(l);
-  for (i = 2; i < l; i++) z[i] = 0;
-  *int_MSW(z) = 1L << m; return z;
-}
-
 GEN
 shifti(GEN x, long n)
 {
