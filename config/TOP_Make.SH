@@ -4,6 +4,7 @@ rm -f $file
 
 case "$status" in
   alpha|beta|kernel) suf_status=".$status";;
+  development*) suf_status=".alpha";;
   *) suf_status=;;
 esac
 
