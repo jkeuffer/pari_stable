@@ -108,6 +108,7 @@ Incompatible changes:
   - library interface of functions intnum, prodeuler, suminf, sumalt,
        sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
        (*eval)(GEN,void*) everywhere instead of entree * ]
+  - renamed gun --> gone, gdeux --> gtwo  [ un -> one, deux -> two ]
 
 Partially compatible changes:
 -----------------------------
