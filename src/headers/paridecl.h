@@ -58,7 +58,6 @@ ulong   Flx_resultant(GEN a, GEN b, ulong p);
 GEN     Flx_sqr(GEN x, ulong p);
 GEN     Flx_sub(GEN x, GEN y, ulong p);
 long    Flx_valuation(GEN x);
-GEN     Flx_zero(long v);
 GEN     FlxV_Flm(GEN v, long n);
 GEN     FlxV_Flv_innerprod(GEN V, GEN W, ulong p);
 GEN     FlxX_Flm(GEN v, long n);
@@ -82,6 +81,7 @@ GEN     ZV_Flv(GEN x, ulong p);
 GEN     ZX_Flx(GEN x, ulong p);
 GEN     ZXV_FlxV(GEN v, ulong p);
 GEN     ZXX_FlxX(GEN B, ulong p, long v);
+GEN     zero_Flx(long v);
 
  /* alglin1.c */
 
