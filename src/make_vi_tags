@@ -1,14 +1,24 @@
 eval 'exec perl $0 $1'
   if $running_under_some_shell;
+use File::Find 'find';
+
 # Build a (sorted) VI(M) tags file including GP functions
 #
 $src=$ARGV[0] || "$ENV{HOME}/PARI/src";
 $tmptags="$src/tags.tmp";
-$tags="$src/tags";
+
+# Case sensitive?
+$tags = $^O eq 'os2' ? "$src/ctags" : "$src/tags";
 
 @tags=""; $old="";
+
+@files = ();
+
+find \&filter_c, $src;
+
 # assume ctags outputs sorted tags (e.g Exuberant Ctags)
-system("ctags -f $tmptags `find $src -name '*.[chs]' -type f -print`");
+system('ctags', '-f', $tmptags,  @files);
+
 getnames("$src/gp/gp_init.c");
 getnames("$src/language/init.c");
 geterrs("$src/language/errmsg.c");
@@ -58,4 +68,10 @@ sub geterrs
     }
   }
   close(A);
+}
+
+sub filter_c {
+  return unless /\.[chs]\Z/;
+  return unless -f;
+  push @files, "$File::Find::name";
 }
