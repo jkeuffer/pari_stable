@@ -3631,44 +3631,32 @@ is greater or equal to $2$.
 
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
-\subsecidx{galoissubcyclo}$(N,H,\{fl=0\},\{v\})$: computes the abelian
-extension of the rational field given by the modulus \var{N} and the
-congruence subgroup \var{H}.
+\subsecidx{galoissubcyclo}$(N,H,\{fl=0\},\{v\})$: computes the subextension
+of $\Q(\zeta_n)$ fixed by the subgroup $H \subset (\Z/n\Z)^*$. By the
+Kronecker-Weber theorem, all abelian number fields can be generated in this
+way (uniquely if $n$ is taken to be minimal).
 
-\noindent The modulus \var{N} can be: 
+\noindent The pair $(n, H)$ is deduced from the parameters $(N, H)$ as follows
 
-$\bullet$ A module, i.e an ideal in any form for \kbd{nfinit(y)}, or a
-2-component row vector containing an ideal and a 1-component row vector of
-flags indicating whether the infinite place is included in the modulus. For
-instance, a non-zero integer is a valid input, corresponding to a real
-abelian field.
+$\bullet$ $N$ an integer: then $n = N$; $H$ is a generator, i.e. an
+integer or an integer modulo $n$; or a vector of generators.
 
-$\bullet$ The output of \kbd{bnrinit(bnfinit(y), m, 1)} where \kbd{m} is
-a module as above
+$\bullet$ $N$ the output of \kbd{znstar($n$)}. $H$ as in the first case
+above, or a matrix, taken to be a HNF left divisor of the SNF for $(\Z/n\Z)^*$
+(of type \kbd{$N$.cyc}), giving the generators of $H$ in terms of \kbd{$N$.gen}.
 
-$\bullet$ The output of \kbd{znstar(n)}, in which case the modulus is
-assumed to be \kbd{[n, [1]]}, i.e $n\infty$.
+$\bullet$ $N$ the output of \kbd{bnrinit(bnfinit(y), $m$, 1)} where $m$ is a
+module. $H$ as in the first case, or a matrix taken to be a HNF left
+divisor of the SNF for the ray class group modulo $m$
+(of type \kbd{$N$.cyc}), giving the generators of $H$ in terms of \kbd{$N$.gen}.
 
-\noindent The subgroup \var{H} can be given by:
+In this last case, beware that $H$ is understood relatively to $N$; in
+particular, if the infinite place does not divide the module, e.g if $m$ is
+an integer, then it is not a subgroup of $(\Z/n\Z)^*$, but of its quotient by
+$\{\pm 1\}$.
 
-$\bullet$ a matrix, taken to be a HNF left divisor of the SNF
-giving the ray class group modulo \var{N}.
-
-$\bullet$ a generator, i.e. an integer or an integer modulo \var{n}.
-
-$\bullet$ a vector of generators.
-
-Beware that \var{H} is understood relatively to \var{N}; in particular, if
-the infinite place does not divide the module, e.g if \var{N} is an integer,
-then it is not a subgroup of $(\Z/N\Z)^*$, but of its quotient by 
-$\{\pm 1\}$. For instance, \kbd{galoissubcyclo(8, 3)} is $\Q$ since it has
-Galois group $(\Z/8\Z)^* / \{-1,3\} = \{1\}$, whereas
-\kbd{galoissubcyclo([8,[1]], 3)} is a quadratic field.
-
-If $fl=0$, compute a polynomial (in the variable \var{v}) defining the class
-field associated to $(N,H)$, i.e the subfield of $\Q(\zeta_n)$ fixed by the
-subgroup \var{H} of $(\Z/n\Z)^*$ if $\infty | N$ or $(\Z/n\Z)^*/\{\pm1\}$
-if not. 
+If $fl=0$, compute a polynomial (in the variable \var{v}) defining the
+the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of $(\Z/n\Z)^*$.
 
 If $fl=1$, compute only the conductor of the abelian extension, as a module.
 
