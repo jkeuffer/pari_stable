@@ -772,9 +772,13 @@ gsqrt(GEN x, long prec)
       e=valp(x);
       if (gcmp0(x)) return zeroser(varn(x), (e+1)>>1);
       if (e & 1) err(sqrter6);
+      av = avma;
       /* trick: ser_pui assumes valp(x) = 0 */
       y = ser_pui(x,ghalf,prec);
-      y[1] = evalsigne(1) | evalvalp(e>>1) | evalvarn(varn(x));
+      if (typ(y) == t_SER) /* generic case */
+        y[1] = evalsigne(1) | evalvalp(e>>1) | evalvarn(varn(x));
+      else /* e.g coeffs are POLMODs */
+        y = gerepileupto(av, gmul(y, gpowgs(polx[varn(x)], e>>1)));
       return y;
   }
   return transc(gsqrt,x,prec);
