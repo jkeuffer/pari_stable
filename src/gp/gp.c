@@ -143,8 +143,8 @@ gp_preinit(int force)
   strcpy(prompt, dflt);
 
 #if defined(UNIX) || defined(__EMX__)
-#  ifdef __EMX__
-  path = pari_strdup(".;C:/;C:/gp");
+#  if defined(__EMX__) || defined(__CYGWIN32__)
+  path = pari_strdup(".;C:;C:/gp");
 #  else
   path = pari_strdup(".:~:~/gp");
 #  endif
