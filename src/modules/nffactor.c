@@ -861,6 +861,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
+  if (DEBUGLEVEL>2) fprintferr("for this exponent, GSmin = %Z\n",GSmin);
   T->a = a;
   T->pa = T->den = pa;
   T->prk = PRK;
@@ -995,10 +996,8 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
     BL = gerepileupto(av2, gmul(BL, u));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[8]; gptr[0]=&BL; gptr[1]=&TT; gptr[2]=&Tra; gptr[3]=&famod;
-      gptr[4]=&GSmin; gptr[5]=&PRK; gptr[6]=&PRKinv; gptr[7]=&pa;
       if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
-      gerepilemany(av, gptr, 8);
+      gerepileall(av, 8, &BL,&TT,&Tra,&famod,&GSmin,&PRK,&PRKinv,&pa);
     }
     if (rec && r*rec >= n0) continue;
 
@@ -1029,7 +1028,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
   famod = (GEN)listmod[l];
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
-    L = nf_LLL_cmbf(T, p, a, 0);
+    L = nf_LLL_cmbf(T, p, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
