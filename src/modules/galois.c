@@ -25,8 +25,8 @@ extern GEN ZX_caract_sqf(GEN A, GEN B, long *lambda, long v);
 
 #define NMAX 11 /* maximum degree */
 
-typedef char INT;
-typedef INT *PERM;
+typedef char IND;
+typedef IND *PERM;
 typedef PERM *GROUP;
 typedef struct {
   PERM *a;
@@ -40,7 +40,7 @@ typedef struct {
 
 static long isin_G_H(buildroot *BR, long n1, long n2);
 
-static INT ID_data[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+static IND ID_data[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
 static PERM ID = ID_data;
 static long N, EVEN, coeff[9][10];
 static char *str_base = GPDATADIR;
@@ -127,9 +127,9 @@ _typ(long l,...)
 
 /* create a permutation with the N arguments of the function */
 static PERM
-_cr(INT a,...)
+_cr(IND a,...)
 {
-  static INT x[NMAX+1];
+  static IND x[NMAX+1];
   va_list args;
   long i;
 
@@ -142,7 +142,7 @@ static PERM
 permmul(PERM s1, PERM s2)
 {
   long i, n1 = s1[0];
-  PERM s3 = (PERM)gpmalloc((n1+1) * sizeof(INT));
+  PERM s3 = (PERM)gpmalloc((n1+1) * sizeof(IND));
   for (i=1; i<=n1; i++) s3[i] = s1[(int)s2[i]];
   s3[0]=n1; return s3;
 }
@@ -324,7 +324,7 @@ static PERM *
 alloc_pobj(long n, long m)
 {
   long i;
-  PERM *g = (PERM*) gpmalloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(INT) );
+  PERM *g = (PERM*) gpmalloc( (m+1)*sizeof(PERM) + (n+1)*m * sizeof(IND) );
   PERM gpt = (PERM) (g + (m+1));
 
   for (i=1; i<=m; i++) { g[i] = gpt; gpt += (n+1); }
