@@ -1627,11 +1627,11 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (!kapp)
 	{
 	  kapp = ginvmod(nu, chi);
-	  kapp = redelt(kapp, pmr, pmr);
+	  kapp = redelt(kapp, pmr, pmf);
 	  kapp = gmodulcp(kapp, chi);
 	}
 	gamm = lift(gmul(gamm, gpowgs(kapp, er)));
-	gamm = redelt(gamm, p, pmr);
+	gamm = redelt(gamm, p, pmf);
       }
 
       if (DEBUGLEVEL >= 6)
