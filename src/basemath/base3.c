@@ -1336,7 +1336,7 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   }
   else
   {
-    GEN T, modpr = nf_to_ff_init(nf, &pr, &T, &p);
+    GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);
     long k, vT = varn(T);
 
     list = (GEN)factor(pf_1)[1];

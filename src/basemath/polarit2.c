@@ -1081,8 +1081,7 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
     list[i] = (long)y;
   }
   y = primpart(target);
-  list[i] = (long)y;
-  return list;
+  list[i] = (long)y; return list;
 }
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
@@ -1092,7 +1091,7 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
  * famod = array of (lifted) modular factors mod p^a
  * bound = Mignotte bound for the size of divisors of P (for the sup norm)
  * previously recombined all set of factors with less than rec elts */
-GEN
+static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   const long s = 2; /* # of traces added at each step */
@@ -1265,7 +1264,7 @@ FpX_rescale(GEN P, GEN h, GEN p)
 static GEN
 combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
-  GEN la, B2, B, res,L, pa, pb, listmod, N2;
+  GEN la, B2, B, res, L, pa, pb, listmod, N2;
   long a,b,goodb,l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
   double logp = log((double)itos(p));
 

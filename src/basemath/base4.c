@@ -2779,7 +2779,7 @@ nfkermodpr(GEN nf, GEN x, GEN pr)
   if (typ(x)!=t_MAT) err(typeer,"nfkermodpr");
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   x = modprM(lift(x), nf, modpr);
-  return gerepileupto(av, FqM_ker(x,T,p));
+  return gerepilecopy(av, modprM_lift(FqM_ker(x,T,p), modpr));
 }
 
 /* a.x=b ou b est un vecteur */
@@ -2794,7 +2794,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   a = modprM(lift(a), nf, modpr);
   b = modprM(lift(b), nf, modpr);
-  return gerepileupto(av, FqM_gauss(a,b,T,p));
+  return gerepilecopy(av, modprM_lift(FqM_gauss(a,b,T,p), modpr));
 }
 
 GEN
@@ -2807,7 +2807,7 @@ nfsuppl(GEN nf, GEN x, long n, GEN pr)
   if (typ(x)!=t_MAT) err(typeer,"nfkermodpr");
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   x = modprM(lift(x), nf, modpr);
-  return gerepileupto(av, FqM_suppl(x,T,p));
+  return gerepilecopy(av, modprM_lift(FqM_suppl(x,T,p), modpr));
 }
 
 /* Given a pseudo-basis pseudo, outputs a multiple of its ideal determinant */

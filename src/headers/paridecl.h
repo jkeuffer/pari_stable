@@ -355,7 +355,9 @@ GEN     fix_relative_pol(GEN nf, GEN x, int chk_lead);
 GEN     gcdpm(GEN f1,GEN f2,GEN pm);
 long    idealval(GEN nf,GEN ix,GEN vp);
 GEN     modprX(GEN x, GEN nf,GEN modpr);
+GEN     modprX_lift(GEN x, GEN modpr);
 GEN     modprM(GEN z, GEN nf,GEN modpr);
+GEN     modprM_lift(GEN z, GEN modpr);
 GEN     nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
 GEN     nf_to_ff(GEN nf, GEN x, GEN modpr);
 GEN     nfbasis(GEN x, GEN *y,long flag,GEN p);
@@ -383,6 +385,8 @@ GEN     rnfsimplifybasis(GEN bnf, GEN order);
 GEN     rnfsteinitz(GEN nf, GEN order);
 GEN     smallbase(GEN x, GEN *y);
 GEN     smalldiscf(GEN x);
+GEN     zk_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
+GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */
 
