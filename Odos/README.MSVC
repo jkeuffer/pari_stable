@@ -6,25 +6,24 @@ compiler under WIN32.
 
 1. Unzip the archive, preserving folder names so that the directory
 structure is correct. I use WinZip to do this, and I put the files on my D:
-drive, so that the files for pari-2.0.16.beta for example will be stored
-under D:\pari-2.0.16.beta. Note that the archive as downloaded, pari.tgz,
-is an archive of an archive. Winzip doesn't know how to unzip pari.tgz, so
-I use Aladdin Expander to do this, which will create for example the file
-pari-2.0.16.beta.tar in the same directory as pari.tgz. Unfortunately,
-Aladdin Expander doesn't know how to unzip this file, so I use Winzip to do
-it. Isn't Windows wonderful?
+drive, so that the files for pari-2.1.0 for example will be stored under
+D:\pari-2.1.0. Note that the archive as downloaded, pari.tgz, is an archive
+of an archive. Winzip doesn't know how to unzip pari.tgz, so I use Aladdin
+Expander to do this, which will create for example the file pari-2.1.0.tar in
+the same directory as pari.tgz. Unfortunately, Aladdin Expander doesn't know
+how to unzip this file, so I use Winzip to do it. Isn't Windows wonderful?
 
-2. MSVC doesn't like names of the form "pari-2.0.16.beta", so rename the
-base directory to something like "pari216b". Now the files are stored under
-D:\pari216b.
+2. MSVC doesn't like names of the form "pari-2.1.0", so rename the base
+directory to something like "pari210". Now the files are stored under
+D:\pari210.
 
 3. Start MSVC (I use version 6, but earlier versions will probably work the
 same way).
 
 4. Select "File\New..." and pick the "Project" tab to create a new project.
 Select "Win32 Console Application" as the project type, and specify the
-project name as "pari216b". Make sure that the "Location" of the files is
-D:\pari216b. Click "OK", then select "An empty project" (should be the
+project name as "pari210". Make sure that the "Location" of the files is
+D:\pari210. Click "OK", then select "An empty project" (should be the
 default anyway) and click "Finish".
 
 5. Select "Project\Add to project\Files..." to add files to the project.
@@ -35,7 +34,7 @@ and rect.h in src\graph.c; and the file src\kernel\none\mp.c.
 
 6. Select "Project\Settings" and pick the "C/C++" tab. Select
 "Preprocessor" from the "Category" menu, and enter
-"D:\pari216b\src\headers,D:\pari216b\win32" into the "Additional include
+"D:\pari210\src\headers,D:\pari210\Odos" into the "Additional include
 directories" box. (I also select the "Code Generation" category and change
 the "Struct member alignment" to "1 byte", but this may not be necessary.)
 It is usually convenient for debugging to select the "Debug" tab and
