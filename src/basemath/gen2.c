@@ -1008,8 +1008,8 @@ gabs(GEN x, long prec)
         case t_FRACN:
         {
           GEN a,b;
-          if (!carrecomplet(p1[1], &a)) break;
-          if (!carrecomplet(p1[2], &b)) break;
+          if (!carrecomplet((GEN)p1[1], &a)) break;
+          if (!carrecomplet((GEN)p1[2], &b)) break;
           return gerepileupto(l, gdiv(a,b));
         }
       }
