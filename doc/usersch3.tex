@@ -9,9 +9,8 @@ quite different types as arguments, but others are more restricted. The list
 of acceptable types will be given for each function or class of functions.
 Except when stated otherwise, it is understood that a function or operation
 which should make natural sense is legal. In this chapter, we will describe
-the functions according to a rough classification. For the functions in
-alphabetical order, see the general index. The general entry looks something
-like:
+the functions according to a rough classification. The general entry looks
+something like:
 
 \key{foo}$(x,\{\fl=0\})$: short description.
 
@@ -45,26 +44,18 @@ to put optional arguments at the end of the argument list (of course, since
 they would not make sense otherwise), and in order of decreasing usefulness
 so that, most of the time, you will be able to ignore them.
 
-For some of these optional flags, we adopted the customary binary notation as
-a compact way to represent many toggles with just one number. Letting
-$(p_0,\dots,p_n)$ be a list of switches (i.e.~of properties which can be
-assumed to take either the value $0$ or~$1$), the number $2^3 + 2^5=40$
-means that $p_3$ and $p_5$ have been set (that is, set to $1$), and none
-of the others were (that is, they were set to 0). This will usually be
-announced as ``The binary digits of $\fl$ mean 1: $p_0$, 2: $p_1$, 4:
-$p_2$'', and so on, using the available consecutive powers of~$2$.
+\misctitle{Binary Flags}.\sidx{binary flag} For some of these optional
+flags, we adopted the customary binary notation as a compact way to
+represent many toggles with just one number. Letting $(p_0,\dots,p_n)$ be a
+list of switches (i.e.~of properties which can be assumed to take either
+the value $0$ or~$1$), the number $2^3 + 2^5=40$ means that $p_3$ and $p_5$
+have been set (that is, set to $1$), and none of the others were (that is,
+they were set to 0). This will usually be announced as ``The binary digits
+of $\fl$ mean 1: $p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the
+available consecutive powers of~$2$.
 
-To finish with our generic simple-minded example, the \var{library} function
-\kbd{foo}, as defined above, is seen to have two mandatory arguments,
-$x$ and \fl (no PARI mathematical function has been implemented so
-as to accept a variable number of arguments). When not mentioned otherwise,
-the result and arguments of a function are assumed implicitly to be of type
-\kbd{GEN}. Most other functions return an object of type \kbd{long} integer
-in C (see Chapter~4). The variable or parameter names \var{prec} and \fl\ 
-always denote \kbd{long} integers.
-
-\misctitle{Pointers}. If a parameter in the function prototype is prefixed
-with a \& sign, as in 
+\misctitle{Pointers}.\sidx{pointer} If a parameter in the function
+prototype is prefixed with a \& sign, as in 
 
 \key{foo}$(x,\&e)$
 
@@ -73,6 +64,23 @@ $e$ may be set as a side effect. When passing the argument, the \& sign has
 to be typed in explicitly. As of version \vers, this \tet{pointer} argument
 is optional for all documented functions, hence the \& will always appear
 between brackets as in \kbd{issquare}$(x,\{\&e\})$.
+
+\misctitle{About library programming}. To finish with our generic
+simple-minded example, the \var{library} function \kbd{foo}, as defined
+above, is seen to have two mandatory arguments, $x$ and \fl (no PARI
+mathematical function has been implemented so as to accept a variable
+number of arguments). When not mentioned otherwise, the result and
+arguments of a function are assumed implicitly to be of type \kbd{GEN}.
+Most other functions return an object of type \kbd{long} integer in C (see
+Chapter~4). The variable or parameter names \var{prec} and \fl\ always
+denote \kbd{long} integers.
+
+The \tet{entree} type is used by the library to implement iterators (loops,
+sums, integrals, etc.) when a formal variable has to successively assume a
+number of values in a given set. When programming with the library, it is
+easier and much more efficient to code loops and the like directly. Hence
+this type is not documented, although it does appear in a few library
+function prototypes below. See \secref{se:sums} for more details.
 
 \section{Standard monadic or dyadic operators}
 
@@ -360,6 +368,14 @@ the constant term. Note that this is the reverse of \kbd{Pol} if $x$ is a
 vector, otherwise it is identical to \kbd{Pol}.
 
 \syn{gtopolyrev}{x,v}, where $v$ is a variable number.
+
+\subsecidx{Qfb}$(a,b,c,\{D=0.\})$: creates the binary quadratic form
+$ax^2+bxy+cy^2$. If $b^2-4ac>0$, initialize \idx{Shanks}' distance
+function to $D$.
+
+\syn{Qfb0}{a,b,c,D,\var{prec}}. Also available are
+$\teb{qfi}(a,b,c)$ (when $b^2-4ac<0$), and
+$\teb{qfr}(a,b,c,d)$ (when $b^2-4ac>0$).\sidx{binary quadratic form}
 
 \subsecidx{Ser}$(x,\{v=x\})$: transforms the object $x$ into a power series
 with main variable $v$ ($x$ by default). If $x$ is a scalar, this gives a
@@ -1276,15 +1292,6 @@ after 10 successful trials of the \idx{Rabin-Miller} test are declared
 primes.
 
 \bigskip
-\subsecidx{Qfb}$(a,b,c,\{D=0.\})$: creates the binary quadratic form
-$ax^2+bxy+cy^2$. If $b^2-4ac>0$, initialize \idx{Shanks}' distance
-function to $D$.
-
-\syn{Qfb0}{a,b,c,D,\var{prec}}. Also available are
-$\teb{qfi}(a,b,c)$ (when $b^2-4ac<0$), and
-$\teb{qfr}(a,b,c,d)$ (when $b^2-4ac>0$).\sidx{binary quadratic form}
-
-
 \subsecidx{addprimes}$(\{x=[\,]\})$: adds the primes contained in the vector
 $x$ (or the single integer $x$) to the table computed upon GP initialization
 (by \kbd{pari\_init} in library mode), and returns a row vector whose first
@@ -1432,7 +1439,6 @@ the local factor) $\var{expr}(p^{-s})$. If $c$ is present, output only the
 first $c$ coefficients in the series.
 
 \synt{direuler}{entree *ep, GEN a, GEN b, char *expr}
-(see the section on sums and products for explanations of this).
 
 \subsecidx{dirmul}$(x,y)$: $x$ and $y$ being vectors of perhaps different
 lengths considered as \idx{Dirichlet series}, computes the product of
@@ -1577,6 +1583,13 @@ $\teb{simplefactmod}(x,p)$ (= $\teb{factormod}(x,p,1)$).
 \subsecidx{fibonacci}$(x)$: $x^{\text{th}}$ Fibonacci number.
 
 \syn{fibo}{x}. $x$ must be a \kbd{long}.
+
+\subsecidx{ffinit}$(p,n,\{v=x\})$: computes a monic polynomial of degree
+$n$ which is irreducible over $\F_p$. For instance if
+\kbd{P = ffinit(3,2,y)}, you can represent elements in $\F_{3^2}$ as polmods
+modulo \kbd{P}.
+
+\syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
 \subsecidx{gcd}$(x,y,\{\fl=0\})$: creates the greatest common divisor of $x$
 and $y$. $x$ and $y$ can be of quite general types, for instance both
@@ -3308,13 +3321,6 @@ the main variable of $t$. For example
 @eprog
 
 \syn{polfnf}{x,t}.
-
-\subsecidx{ffinit}$(p,n,\{v=x\})$: computes a monic polynomial of degree
-$n$ which is irreducible over $\F_p$. For instance if
-\kbd{P = ffinit(3,2,y)}, you can represent elements in $\F_{3^2}$ as polmods
-modulo \kbd{P}.
-
-\syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
 \subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{fl=0\},\{v=y\}))$: \var{gal} 
 being be a Galois field as output by galoisinit and \var{perm} an
@@ -5592,6 +5598,15 @@ to omit $q$. Also available is \teb{matpascal}{x}.
 
 \syn{rank}{x}, and the result is a \kbd{long}.
 
+\subsecidx{matrix}$(m,n,\{X\},\{Y\},\{\var{expr}=0\})$: creation of the
+$m\times n$ matrix whose coefficients are given by the expression
+\var{expr}. There are two formal parameters in \var{expr}, the first one
+($X$) corresponding to the rows, the second ($Y$) to the columns, and $X$
+goes from 1 to $m$, $Y$ goes from 1 to $n$. If one of the last 3 parameters
+is omitted, fill the matrix with zeroes.
+
+\synt{matrice}{GEN nlig,GEN ncol,entree *e1,entree *e2,char *expr}.
+
 \subsecidx{matrixqz}$(x,p)$: $x$ being an $m\times n$ matrix with $m\ge n$
 with rational or integer entries, this function has varying behaviour
 depending on the sign of $p$:
@@ -5934,7 +5949,20 @@ $v[1]\dots v[n]$ contain the indices. Note that the resulting $v$ is
 \var{not} a generic PARI object, but is in general easier to use in C
 programs!
 
+\subsecidx{vector}$(n,\{X\},\{\var{expr}=0\})$: creates a row vector (type
+\typ{VEC}) with $n$ components whose components are the expression
+\var{expr} evaluated at the integer points between 1 and $n$. If one of the
+last two arguments is omitted, fill the vector with zeroes.
+
+\synt{vecteur}{GEN nmax, entree *ep, char *expr}.
+
+\subsecidx{vectorv}$(n,X,\var{expr})$: as \teb{vector}, but returns a
+column vector (type \typ{COL}).
+
+\synt{vvecteur}{GEN nmax, entree *ep, char *expr}.
+
 \section{Sums, products, integrals and similar functions}
+\label{se:sums}
 
 Although the GP calculator is programmable, it is useful to have
 preprogrammed a number of loops, including sums, products, and a certain
@@ -5998,15 +6026,6 @@ If $\fl=3$, the function is allowed to be undefined (but continuous) at $a$
 or $b$, for example the function $\sin(x)/x$ at $x=0$.
 
 \synt{intnum0}{entree$\,$*e,GEN a,GEN b,char$\,$*expr,long \fl,long prec}.
-
-\subsecidx{matrix}$(m,n,\{X\},\{Y\},\{\var{expr}=0\})$: creation of the
-$m\times n$ matrix whose coefficients are given by the expression
-\var{expr}. There are two formal parameters in \var{expr}, the first one
-($X$) corresponding to the rows, the second ($Y$) to the columns, and $X$
-goes from 1 to $m$, $Y$ goes from 1 to $n$. If one of the last 3 parameters
-is omitted, fill the matrix with zeroes.
-
-\synt{matrice}{GEN nlig,GEN ncol,entree *e1,entree *e2,char *expr}.
 
 \subsecidx{prod}$(X=a,b,\var{expr},\{x=1\})$: product of expression \var{expr},
 initialized at $x$, the formal parameter $X$ going from $a$ to $b$. As for
@@ -6136,18 +6155,6 @@ terms which are equal to 0 will create problems and should be removed.
 If $\fl=1$, use slightly different polynomials. Sometimes faster.
 
 \synt{sumpos}{entree *ep, GEN a, char *expr, long \fl, long prec}.
-
-\subsecidx{vector}$(n,\{X\},\{\var{expr}=0\})$: creates a row vector (type
-\typ{VEC}) with $n$ components whose components are the expression
-\var{expr} evaluated at the integer points between 1 and $n$. If one of the
-last two arguments is omitted, fill the vector with zeroes.
-
-\synt{vecteur}{GEN nmax, entree *ep, char *expr}.
-
-\subsecidx{vectorv}$(n,X,\var{expr})$: as \teb{vector}, but returns a
-column vector (type \typ{COL}).
-
-\synt{vvecteur}{GEN nmax, entree *ep, char *expr}.
 
 \section{Plotting functions}
 
