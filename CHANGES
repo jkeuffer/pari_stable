@@ -100,6 +100,8 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
     2- src/kernel/sparcv8_[micro|super]
     3- in emacs/ : pari-completion.el pari-conf.el.in pari-fontification.el
        pari-help.el pari-messages.el sli-tools.el
+    4- Configure --builddir : find a decent name for build directory
+       depending on kernel options (with/without gmp, exotic assembler kernel)
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
