@@ -1832,7 +1832,7 @@ matbruti(GEN g, pariout_t *T)
   if (typ(g) != t_MAT) { bruti(g,T,1); return; }
 
   r=lg(g); if (r==1 || lg(g[1])==1) { pariputs("[;]\n"); return; }
-  pariputc('\n'); l = lg(g[1]);
+  l = lg(g[1]); pariputc('\n');
   print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
   for (i=1; i<l; i++)
   {
@@ -2005,8 +2005,8 @@ sori(GEN g, pariout_t *T)
       void (*print)(GEN, pariout_t *);
       long lx = lg(g);
 
-      if (lx==1) { pariputs("[;]\n"); return; }
-      pariputc('\n'); l=lg(g[1]);
+      if (lx==1 || lg(g[1]) == 1) { pariputs("[;]\n"); return; }
+      l = lg(g[1]); pariputc('\n');
       print = (typ(g[1]) == t_VECSMALL)? sors: sori;
       for (i=1; i<l; i++)
       {
