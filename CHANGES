@@ -99,6 +99,7 @@ HC 12- gamma function for integral/rational arguments
    18- rewrote factorff() to use new modular functions
    19- rewrote primedec() to use new modular functions
    20- rewrote most *modpr functions [IN PROGRESS]
+   21- modified diagnostics for integral LLL to match floating point version
 
   Added
     1- mplog2() function --> faster mplog()
