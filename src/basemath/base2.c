@@ -448,16 +448,12 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     if (epsilon < 2) break;
     if (low_stack(limit,stack_lim(av2,1)))
     {
-      GEN *gptr[3]; gptr[0]=&m; gptr[1]=&delta;
       if(DEBUGMEM>1) err(warnmem,"ordmax");
-      gerepilemany(av2, gptr,2);
+      gerepileall(av2, 2, &m, &delta);
     }
   }
-  {
-    GEN *gptr[2]; gptr[0]=&m; gptr[1]=&delta;
-    gerepilemany(av,gptr,2);
-  }
-  *ptdelta=delta; return m;
+  gerepileall(av, 2, &m, &delta);
+  *ptdelta = delta; return m;
 }
 
 /* Input:
@@ -1195,15 +1191,14 @@ manage_cache(GEN chi, GEN pp, GEN ns)
   if (!signe((GEN)ns[1]))
   {
     ns2 = polsymmodpp(chi, pp);
-    for (j = 1; j <= n; j++)
-      affii((GEN)ns2[j], (GEN)ns[j]);
+    for (j = 1; j <= n; j++) affii((GEN)ns2[j], (GEN)ns[j]);
   }
 
   return ns;
 }
 
 /* compute the Newton sums modulo pp of the characteristic
-   polynomial of a(x) mod g(x) */
+   polynomial of a(x) mod chi(x), a in Z[X] */
 static GEN
 newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
 {
@@ -1216,18 +1211,13 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
   av2 = avma;
   lim = stack_lim(av2, 1);
 
-  pa = gun;
+  pa = polun[varn(a)];
   va = zerovec(n);
 
   for (j = 1; j <= n; j++)
   {
-    pa = gmul(pa, a);
-    pa = polmodi(pa, pp);
-    pa = gmod(pa, chi);
-    pa = polmodi(pa, pp);
-
+    pa = FpX_rem(FpX_mul(pa, a, pp), chi, pp);
     s  = gzero;
-
     for (k = 0; k <= n-1; k++)
       s = addii(s, mulii(polcoeff0(pa, k, -1), (GEN)ns2[k+1]));
 
@@ -1235,17 +1225,15 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
 
     if (low_stack(lim, stack_lim(av2, 1)))
     {
-      GEN *gptr[2];
-      gptr[0]=&pa; gptr[1]=&va;
       if(DEBUGMEM>1) err(warnmem, "newtonsums");
-      gerepilemany(av2, gptr, 2);
+      gerepileall(av2, 2, &pa, &va);
     }
   }
 
   return va;
 }
 
-/* compute the characteristic polynomial of a mod g
+/* compute the characteristic polynomial of a mod chi (a in Z[X])
    to a precision of pp using Newton sums */
 static GEN
 newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
@@ -1693,11 +1681,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (low_stack(limit,stack_lim(av2,1)))
       {
-	GEN *gptr[2];
-	long c = 2; 
-	gptr[0]=&beta; if (kapp) { gptr[1]=&kapp; } else { c = 1; }
 	if (DEBUGMEM > 1) err(warnmem, "nilord");
-	gerepilemany(av2, gptr, c);
+	gerepileall(av2, kapp? 2: 1, &beta, &kapp);
       }
     }
 
