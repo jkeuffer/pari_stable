@@ -10,9 +10,9 @@ General notes:
  a star (*) in the first column means GP was built using portable kernel.
 
 - Bench, as output by `make bench'
- can vary with load, available memory, compiler version ...
- is not the actual time spent: bench "nfields" is weighted by 1/5.
- An ! present next to the timing means that install() did not work with
+ 1) can vary with load, available memory, compiler version ...
+ 2) is not the actual time spent: bench "nfields" is weighted by 1/5.
+ 3) An ! present next to the timing means that install() did not work with
  that configuration ([BUG] in 'program' bench)
 
 NOTE: bench timings in version 2.0.11 and 2.0.12 were not correct (given
@@ -255,6 +255,9 @@ hppa kernel. Remove +z from compiler flags
 produce a broken binary]
 (28) gp-dyn: add -fPIC to CFLAGS [or linking fails].
      gcc-2.96 fails
+(29) added -mcpu=athlon -march=athlon to CFLAGS (very minor speedup).
+     Don't know clock frequency for Athlon 1800+ (something like 1500-1600MHz)
+
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
