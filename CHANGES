@@ -124,6 +124,7 @@ GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    46- qfgaussred(a) did not work if coefficients of a did not support the
        "sign" operation [ signature was computed internally ]
    47- factorback([;]) didn't work [ should be 1 ]
+   48- f = factor(n); divisors(f) destroyed the factorization stored in f
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

@@ -1338,16 +1338,18 @@ divisors(GEN n)
 {
   pari_sp tetpil, av = avma;
   long i, j, l, nbdiv;
-  GEN *d, *t, *t1, *t2, *t3, e;
+  GEN *d, *t, *t1, *t2, *t3, P, E, e;
 
   if (typ(n) != t_MAT || lg(n) != 3) n = auxdecomp(n,1);
 
-  e = (GEN) n[2], n = (GEN) n[1]; l = lg(n);
-  if (l>1 && signe(n[1]) < 0) { e++; n++; l--; } /* skip -1 */
+  P = (GEN)n[1]; l = lg(P);
+  E = (GEN)n[2];
+  if (l>1 && signe(n) < 0) { E++; P++; l--; } /* skip -1 */
+  e = cgetg(l, t_VECSMALL);
   nbdiv = 1;
   for (i=1; i<l; i++)
   {
-    e[i] = itos((GEN)e[i]);
+    e[i] = itos((GEN)E[i]);
     nbdiv = itos_or_0( mulss(nbdiv, 1+e[i]) );
   }
   if (!nbdiv || nbdiv & ~LGBITS)
@@ -1356,9 +1358,8 @@ divisors(GEN n)
   *++d = gun;
   for (i=1; i<l; i++)
     for (t1=t,j=e[i]; j; j--,t1=t2)
-      for (t2=d,t3=t1; t3<t2; )
-        *++d = mulii(*++t3, (GEN)n[i]);
-  tetpil=avma; return gerepile(av,tetpil,sort((GEN)t));
+      for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, (GEN)P[i]);
+  tetpil = avma; return gerepile(av,tetpil,sort((GEN)t));
 }
 
 static GEN
