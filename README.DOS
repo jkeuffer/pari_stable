@@ -29,19 +29,27 @@ xxxx stands for a version number
   (DOS, OS/2) or RSX\README.TXT (Windows). The runtime packages themselves
   are in GPRT.ZIP. Note that GP.EXE is twice slower than a native Linux binary.
 
-2) Documentation and Examples (GPD): GPD_xxxx.ZIP
-  + user's manual, tutorial and reference card
-    You wil need TeX to compile them (see www.CTAN.org for how to get TeX)
-    The same documents are available in PDF and PostScript format from PARI
-    home page, or from the main FTP site (subdirectory 'manuals').
-  + the script GPHELP (translates Pari documentation to plain text and
-    handles "apropos help"), which requires PERL (see www.CPAN.org for how to
-    get it). You may have to fix paths in the first lines of the script.
-  + an EXAMPLES directory, containing sample GP scripts
-  + a MISC directory containing 
+2) Documentation and Examples (GPD): GPD_xxxx.ZIP, containing the directories
+  + DOC, containing
+     - user's manual, tutorial and reference card in TeX format You wil
+       need TeX to compile them (see www.CTAN.org for how to get TeX) The
+       same documents are available in PDF and PostScript format from
+
+         ftp://megrez.math.u-bordeaux.fr/pub/pari/manuals/
+
+     - the script GPHELP (translates Pari documentation to plain text and
+       handles "apropos help"), which requires PERL (see www.CPAN.org for how
+       to get it). You may have to fix paths in the first lines of the script.
+       Set your GPRC file so that the 'help' default points to the place where
+       you deposit GPHELP (see MISC/GPRC.DOS).
+
+  + MISC, containing
       - a sample GPRC file (GPRC.DOS). Copy it to C:\_GPRC (or \etc\GPRC) and
         adapt it to your needs
       - a sample alias file (GPALIAS).
+
+  + EXAMPLES, containing sample GP scripts
+
 
 3) EMX/RSX runtime package (GPRT): GPRT.ZIP
   files you will need if the provided binary GP.EXE doesn't work as is.

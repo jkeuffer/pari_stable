@@ -73,10 +73,9 @@ distrib: tar setdir
 	gzip $tarfile
 	mv $tarfile.gz $ztarfile
 
-dosdistrib: docps gpman
-	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS examples ../EMX/README.DOC ../RSX/README.TXT
-	-zip -k GPD${dosversion}.ZIP doc/users.ps doc/refcard.ps doc/tutorial.ps
-	-zip -k GPM${dosversion}.ZIP doc/*.tex doc/gphelp doc/gp.man
+dosdistrib: gpman
+	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS ../EMX/README.DOC ../RSX/README.TXT
+	-zip -k GPD${dosversion}.ZIP doc/*.tex doc/gphelp doc/gp.man examples misc/gprc* misc/gpalias
 
 etags:
 	cd src; sh make_emacs_tags
