@@ -3406,7 +3406,10 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
     O = vecperm_orbits(perm, n);
   }
   else if (typ(perm) != t_VECSMALL || lg(perm)!=n+1 )
+  {
     err(typeer, "galoisfixedfield");
+    return NULL; /* not reached */
+  }
   else
     O = perm_cycles(perm);
   {
