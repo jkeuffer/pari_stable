@@ -129,6 +129,7 @@ HC  8- Implemented PSLQ [preliminary]
 GTo 9- Implemented Cipolla's algorithm for sqrt(Mod(x, p))
    10- library functions FpM_ker, FpM_deplin, diviiround, centermodii
    11- library function gerepileall
+   12- library functions corepartial, core2partial
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
