@@ -538,7 +538,7 @@ rnfidealnormrel(GEN rnf,GEN id)
   checkrnf(rnf);
   id=rnfidealhermite(rnf,id); id2=(GEN)id[2];
   n=lgef(rnf[1])-3; nf=(GEN)rnf[10];
-  if (n==1) { avma=av; return idmat(lgef(nf[1]-3)); }
+  if (n==1) { avma=av; return idmat(lgef(nf[1])-3); }
   z=(GEN)id2[1]; for (i=2; i<=n; i++) z=idealmul(nf,z,(GEN)id2[i]);
   return gerepileupto(av,z);
 }
