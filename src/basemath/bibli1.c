@@ -134,7 +134,7 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
   }
   else
     for (i=1; i<k; i++) coeff(mu,i,k) = x[i];
-  return (typ(x2) != t_REAL || lg(x2) >  3 || expo(x2) < 10);
+  return (typ(x2) != t_REAL || lg(x2) >  3 || expo(x2) < (BITS_IN_LONG>>1));
 }
 
 static void
