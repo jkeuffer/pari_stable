@@ -260,7 +260,6 @@ EMACSDIR  = \$(DESTDIR)$emacsdir
 DATADIR   = \$(DESTDIR)$datadir
 SYSDATADIR= \$(DESTDIR)$sysdatadir
 
-READMEDIR = \$(DATADIR)/etc
 EXDIR     = \$(DATADIR)/examples
 MISCDIR   = \$(DATADIR)/misc
 DOCDIR    = \$(DATADIR)/doc
