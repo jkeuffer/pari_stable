@@ -131,14 +131,14 @@ ccontent(GEN x)
 }
 
 static void
-desallocate(GEN **M, GEN *first_nz)
+desallocate(GEN *M, GEN *first_nz)
 {
-  GEN *m = *M;
+  GEN m = *M;
   long i;
   if (m)
   {
-    for (i=lg(m)-1; i; i--) free(m[i]);
-    free((void*)*M); *M = NULL;
+    for (i=lg(m)-1; i; i--) free((void*)m[i]);
+    free((void*)m); *M = NULL;
     free((void*)*first_nz); *first_nz = NULL;
   }
 }
@@ -1589,7 +1589,7 @@ small_to_mat_i(GEN z, long d)
 
 /* return -1 in case of precision problems. t = current # of relations */
 static long
-small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
+small_norm_for_buchall(long cglob,GEN mat,GEN first_nz, GEN matarch,
                        long PRECREG, FB_t *F,
                        GEN nf,long nbrelpid,GEN invp,GEN L)
 {
@@ -1688,7 +1688,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
 	  x[1]--;
 	}
       }
-      cglob++; col = mat[cglob];
+      cglob++; col = (GEN)mat[cglob];
       set_fact(col, first_nz, cglob);
       /* make sure we get maximal rank first, then allow all relations */
       if (cglob > 1 && cglob <= F->KC && ! addcolumntomatrix(col,invp,L))
@@ -1702,7 +1702,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
       set_log_embed((GEN)matarch[cglob], xembed, R1, PRECREG);
       dependent = 0;
 
-      if (DEBUGLEVEL) { nbfact++; dbg_rel(cglob, mat[cglob]); }
+      if (DEBUGLEVEL) { nbfact++; dbg_rel(cglob, (GEN)mat[cglob]); }
       if (cglob >= nbrel) goto END; /* we have enough */
       if (++nbrelideal == nbrelpid) break;
 
@@ -1721,7 +1721,7 @@ END:
   {
     fprintferr("\n"); msgtimer("small norm relations");
     fprintferr("  small norms gave %ld relations, rank = %ld.\n",
-               cglob, rank(small_to_mat_i((GEN)mat, F->KC)));
+               cglob, rank(small_to_mat_i(mat, F->KC)));
     if (nbsmallnorm)
       fprintferr("  nb. fact./nb. small norm = %ld/%ld = %.3f\n",
                   nbfact,nbsmallnorm,((double)nbfact)/nbsmallnorm);
@@ -1767,19 +1767,19 @@ dbg_cancelrel(long jideal,long jdir,long phase, long *col)
 }
 
 static void
-dbg_outrel(long cglob, GEN *mat,GEN maarch)
+dbg_outrel(long cglob, GEN mat,GEN maarch)
 {
   pari_sp av = avma;
   GEN p1;
   long j;
 
   p1 = cgetg(cglob+1, t_MAT);
-  for (j=1; j<=cglob; j++) p1[j] = (long)small_to_col(mat[j]);
+  for (j=1; j<=cglob; j++) p1[j] = (long)small_to_col((GEN)mat[j]);
   fprintferr("\nRank = %ld\n", rank(p1));
   if (DEBUGLEVEL>3)
   {
     fprintferr("relations = \n");
-    for (j=1; j <= cglob; j++) wr_rel(mat[j]);
+    for (j=1; j <= cglob; j++) wr_rel((GEN)mat[j]);
     fprintferr("\nmatarch = %Z\n",maarch);
   }
   avma = av; flusherr();
@@ -1788,9 +1788,9 @@ dbg_outrel(long cglob, GEN *mat,GEN maarch)
 /* Check if we already have a column mat[i] equal to mat[s]
  * General check for colinearity useless since exceedingly rare */
 static long
-already_found_relation(GEN *mat, long s, GEN first_nz)
+already_found_relation(GEN mat, long s, GEN first_nz)
 {
-  GEN cols = mat[s];
+  GEN cols = (GEN)mat[s];
   long i, bs, l = lg(cols);
 
   bs = 1; while (bs < l && !cols[bs]) bs++;
@@ -1800,7 +1800,7 @@ already_found_relation(GEN *mat, long s, GEN first_nz)
   {
     if (bs == first_nz[i]) /* = index of first non zero elt in cols */
     {
-      GEN coll = mat[i];
+      GEN coll = (GEN)mat[i];
       long b = bs;
       do b++; while (b < l && cols[b] == coll[b]);
       if (b == l) return i;
@@ -1821,7 +1821,7 @@ remove_content(GEN I)
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
 random_relation(long phase,long cglob,long PRECREG,long MAXRELSUP,
-                GEN nf,GEN vecG,GEN *mat,GEN first_nz,GEN matarch,
+                GEN nf,GEN vecG,GEN mat,GEN first_nz,GEN matarch,
                 GEN list_jideal, FB_t *F)
 {
   static long jideal, jdir;
@@ -1879,7 +1879,7 @@ random_relation(long phase,long cglob,long PRECREG,long MAXRELSUP,
         continue;
       }
       /* can factor ideal, record relation */
-      cglob++; col = mat[cglob];
+      cglob++; col = (GEN)mat[cglob];
       set_fact(col, first_nz, cglob); col[jideal]--;
       for (i=1; i<lgsub; i++) col[ F->subFB[i] ] -= ex[i];
       if (already_found_relation(mat, cglob, first_nz))
@@ -2309,7 +2309,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
  * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
  */
 static GEN
-relationrank(GEN *A, long r, GEN L)
+relationrank(GEN A, long r, GEN L)
 {
   long i, n = lg(L)-1;
   pari_sp av = avma, lim = stack_lim(av, 1);
@@ -2319,7 +2319,7 @@ relationrank(GEN *A, long r, GEN L)
   if (r>n) err(talker,"incorrect matrix in relationrank");
   for (i=1; i<=r; i++)
   {
-    if (! addcolumntomatrix(A[i],invp,L) && i == r)
+    if (! addcolumntomatrix((GEN)A[i],invp,L) && i == r)
       err(talker,"not a maximum rank matrix in relationrank");
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -2876,7 +2876,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   double cbach, cbach2, drc, LOGD2;
   GEN vecG,fu,zu,nf,D,A,W,R,Res,z,h,list_jideal;
   GEN res,L,resc,B,C,lambda,pdep,liste,invp,clg1,clg2,Vbase;
-  GEN *mat;     /* raw relations found (as VECSMALL, not HNF-reduced) */
+  GEN mat;     /* raw relations found (as VECSMALL, not HNF-reduced) */
   GEN first_nz; /* first_nz[i] = index of 1st non-0 entry in mat[i] */
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL;
   char *precpb = NULL;
@@ -2985,7 +2985,7 @@ START:
                RELSUP, F.KCZ, F.KC, KCCO);
   MAXRELSUP = min(50, 4*F.KC);
   matmax = 10*KCCO + MAXRELSUP; /* make room for lots of relations */
-  reallocate(matmax, (GEN*)&mat, &first_nz);
+  reallocate(matmax, &mat, &first_nz);
   setlg(mat, KCCO+1);
   C = cgetg(KCCO+1,t_MAT);
   /* trivial relations (p) = prod P^e */
@@ -2999,7 +2999,8 @@ START:
     /* all prime divisors in FB */
     cglob++;
     C[cglob] = (long)z; /* 0 */
-    mat[cglob] = c = col_0(F.KC);
+    c = col_0(F.KC);
+    mat[cglob] = (long)c;
     k = F.iLP[p];
     first_nz[cglob] = k+1;
     c += k;
@@ -3009,7 +3010,7 @@ START:
   /* initialize for other relations */
   for (i=cglob+1; i<=KCCO; i++)
   {
-    mat[i] = col_0(F.KC);
+    mat[i] = (long)col_0(F.KC);
     C[i] = (long)cgetc_col(RU,PRECREG);
   }
   av1 = avma; liste = vecsmall_const(F.KC, 0);
@@ -3057,12 +3058,12 @@ MORE:
       if (slim > matmax)
       {
         matmax = 2 * slim;
-        reallocate(matmax, (GEN*)&mat, &first_nz);
+        reallocate(matmax, &mat, &first_nz);
       }
       setlg(mat, slim+1);
       if (DEBUGLEVEL)
 	fprintferr("\n(need %ld more relation%s)\n", lgex, (lgex==1)?"":"s");
-      for (j=cglob+1; j<=slim; j++) mat[j] = col_0(F.KC);
+      for (j=cglob+1; j<=slim; j++) mat[j] = (long)col_0(F.KC);
       matarch = extraC - cglob; /* start at 0, the others at cglob */
     }
     if (!vecG)
@@ -3090,7 +3091,7 @@ MORE:
     if (phase)
       for (j=lg(extramat)-1; j>0; j--)
       {
-	GEN c = mat[cglob+j], *g = (GEN*) extramat[j];
+	GEN c = (GEN)mat[cglob+j], *g = (GEN*) extramat[j];
 	for (k=1; k<=F.KC; k++) g[k] = stoi(c[F.perm[k]]);
       }
     cglob = ss;
@@ -3100,7 +3101,7 @@ MORE:
   if (phase == 0)
   { /* never reduced before */
     long lgex;
-    W = hnfspec(mat,F.perm,&pdep,&B,&C, lg(F.subFB)-1);
+    W = hnfspec((long**)mat,F.perm,&pdep,&B,&C, lg(F.subFB)-1);
     phase = 1;
     nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
     if (nlze) list_jideal = vecextract_i(F.perm, 1, nlze);
