@@ -2418,10 +2418,10 @@ allhnfmod(GEN x, GEN dm, int flag)
       co++; def++; x = a;
     }
   }
+  x += co - li;
   if (modid)
   { /* w[li] is an accumulator, discarded at the end */
     GEN w = cgetg(li+1, t_MAT);
-    x += co - li;
     for (i = li-1; i > ldef; i--) w[i] = x[i];
     for (        ; i > 0;    i--) w[i] = (long)vec_Cei(li-1, i, dm);
     x = w;
@@ -2455,11 +2455,9 @@ allhnfmod(GEN x, GEN dm, int flag)
         }
       }
     }
-    setlg(w, li); /* discard accumulator */
   }
   else
   {
-    x += co - li; x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns */
     b = dm;
     for (i = li-1; i > 0; i--)
     {
@@ -2469,6 +2467,7 @@ allhnfmod(GEN x, GEN dm, int flag)
       if (i > 1) b = diviiexact(b,d);
     }
   }
+  x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns / discard accumulator */
   if (flag & hnf_PART) return x;
 
   b = cgetg(li, t_VEC);
