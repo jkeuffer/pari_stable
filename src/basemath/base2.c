@@ -331,7 +331,8 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
 
   for(;;)
   {
-    long j,k,h, av0 = avma;
+    long j, k, h;
+    gpmem_t av0 = avma;
     GEN t,b,jp,hh,index,p1, dd = sqri(delta), ppdd = mulii(dd,pp);
 
     if (DEBUGLEVEL > 3)
@@ -2070,7 +2071,8 @@ prime_check_elt(GEN a, GEN pol, GEN p, GEN pf)
 static GEN
 prime_two_elt_loop(GEN beta, GEN pol, GEN p, GEN pf)
 {
-  long av, m = lg(beta)-1;
+  long m = lg(beta)-1;
+  gpmem_t av;
   int i,j,K, *x = (int*)new_chunk(m+1);
   GEN a;
 

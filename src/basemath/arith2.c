@@ -409,9 +409,9 @@ GEN
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 		  GEN state, long all, long hint)
 {
-  gpmem_t lim1, av;
+  gpmem_t av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
-  long nb = 0,i,k,lp,p;
+  long nb = 0,i,k,lp,p,lim1;
   byteptr d=diffptr+1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -597,10 +597,10 @@ boundfact(GEN n, long lim)
 GEN
 decomp_primary_small(long n)
 {
-  ulong ltop=avma;
+  gpmem_t ltop=avma;
   GEN F = factor(stoi(n));
   GEN fc = cgetg(lg(F[1]), t_VECSMALL);
-  ulong av=avma;
+  gpmem_t av=avma;
   long i;
   for (i = 1; i < lg(fc); i++)
     fc[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
@@ -649,9 +649,9 @@ long
 mu(GEN n)
 {
   byteptr d = diffptr+1;	/* point at 3 - 2 */
-  gpmem_t lim1, av = avma;
+  gpmem_t av = avma;
   ulong p;
-  long s, v;
+  long s, v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -691,8 +691,9 @@ gissquarefree(GEN x)
 long
 issquarefree(GEN x)
 {
-  ulong av = avma,lim1,p;
-  long tx;
+  ulong p;
+  gpmem_t av = avma;
+  long tx, lim1;
   GEN d;
 
   if (gcmp0(x)) return 0;
@@ -736,8 +737,8 @@ long
 omega(GEN n)
 {
   byteptr d=diffptr+1;
-  ulong p, lim1, av = avma;
-  long nb,v;
+  gpmem_t av = avma;
+  long nb,v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -773,8 +774,9 @@ long
 bigomega(GEN n)
 {
   byteptr d=diffptr+1;
-  ulong av = avma, p,lim1; 
-  long nb,v;
+  ulong p;
+  gpmem_t av = avma;
+  long nb,v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -809,8 +811,9 @@ phi(GEN n)
 {
   byteptr d = diffptr+1;
   GEN m;
-  ulong av = avma, lim1, p;
-  long v;
+  ulong p;
+  gpmem_t av = avma;
+  long v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -851,8 +854,9 @@ numbdiv(GEN n)
 {
   byteptr d=diffptr+1;
   GEN m;
-  long l, v;
-  ulong av = avma, p,lim1;
+  long l, v, lim1;
+  ulong p;
+  gpmem_t av = avma;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -889,8 +893,9 @@ sumdiv(GEN n)
 {
   byteptr d=diffptr+1;
   GEN m,m1;
-  ulong av=avma,lim1,p;
-  long v;
+  ulong p;
+  gpmem_t av=avma;
+  long v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -931,8 +936,9 @@ sumdivk(GEN n, long k)
 {
   byteptr d=diffptr+1;
   GEN n1,m,m1,pk;
-  ulong av = avma, p, lim1;
-  long k1,v;
+  ulong p;
+  gpmem_t av = avma;
+  long k1,v, lim1;
 
   if (!k) return numbdiv(n);
   if (k==1) return sumdiv(n);

@@ -1618,7 +1618,7 @@ keri(GEN x)
     else
     {
       GEN p0 = p;
-      long av1;
+      gpmem_t av1;
 
       c[j]=k; d[k]=j; p = gcoeff(x,j,k);
 
@@ -1853,7 +1853,8 @@ static void
 gauss_pivot(GEN x0, GEN *dd, long *rr)
 {
   GEN x,c,d,d0,mun,p;
-  long i,j,k,r,t,n,m,av,lim;
+  long j, k, r, t, n, m;
+  gpmem_t av, lim;
   long (*get_pivot)(GEN,GEN,GEN,long);
 
   if (typ(x0)!=t_MAT) err(typeer,"gauss_pivot");
@@ -2579,7 +2580,7 @@ Fq_res(GEN x, GEN T, GEN p)
 
 static void
 Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long m, long n, long k, long t,
-                      ulong av)
+                      gpmem_t av);
 {
   gpmem_t tetpil = avma,A;
   long dec,u,i;

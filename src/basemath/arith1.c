@@ -1230,7 +1230,8 @@ ulong mppgcd_resiu(GEN y, ulong x);
 GEN
 mppgcd(GEN a, GEN b)
 {
-  long av,v,w;
+  long v, w;
+  gpmem_t av;
   GEN t, p1;
 
   if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
@@ -1880,7 +1881,7 @@ sfcont(GEN x, GEN x1, long k)
           p1 = p2; p2 = p3;
 	  if (f && !egalii((GEN)x1[i], (GEN)y[i]))
           {
-            ulong av1 = avma;
+            gpmem_t av1 = avma;
             p1 = subii((GEN)x1[i], (GEN)y[i]);
             if (is_pm1(p1))
             {

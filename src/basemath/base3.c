@@ -1313,8 +1313,8 @@ makeprimetoidealvec(GEN nf,GEN UV,GEN uv,GEN gen)
 static GEN
 zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
 {
-  gpmem_t av=avma,av1;
-  long N,f,nbp,j,n,m,tetpil,i,e,a,b;
+  gpmem_t av=avma,av1,tetpil;
+  long N, f, nbp, j, n, m, i, e, a, b;
   GEN prh,p,pf_1,list,v,p1,p3,p4,prk,uv,g0,newgen,pra,prb;
   GEN *gptr[2];
 
@@ -1406,7 +1406,8 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
 GEN
 zarchstar(GEN nf,GEN x,GEN arch,long nba)
 {
-  long av,N,i,j,k,r,rr,limr,zk,lgmat;
+  long limr, N, i, j, k, r, rr, zk, lgmat;
+  gpmem_t av;
   GEN p1,y,bas,genarch,mat,lambda,nfun,vun;
 
   if (nba < 0)

@@ -2462,7 +2462,8 @@ element_mulvecrow(GEN nf, GEN x, GEN m, long i, long lim)
 GEN
 element_reduce(GEN nf, GEN x, GEN ideal)
 {
-  long tx=typ(x),av=avma,tetpil,N,i;
+  long tx = typ(x), N, i;
+  gpmem_t av=avma, tetpil;
   GEN p1,u;
 
   if (is_extscalar_t(tx))
@@ -2491,7 +2492,8 @@ element_reduce(GEN nf, GEN x, GEN ideal)
 GEN
 nfhermite(GEN nf, GEN x)
 {
-  long av0 = avma, av,lim,i,j,def,k,m;
+  long i, j, def, k, m;
+  gpmem_t av0 = avma, av, lim;
   GEN p1,p2,y,A,I,J;
 
   nf=checknf(nf);
@@ -2591,7 +2593,8 @@ nfhermite(GEN nf, GEN x)
 GEN
 nfsmith(GEN nf, GEN x)
 {
-  long av,tetpil,i,j,k,l,lim,c,n,m,N;
+  long i, j, k, l, c, n, m, N;
+  gpmem_t av, tetpil, lim;
   GEN p1,p2,p3,p4,z,b,u,v,w,d,dinv,unnf,A,I,J;
 
   nf=checknf(nf); N=degpol(nf[1]);
@@ -2718,7 +2721,7 @@ nfsmith(GEN nf, GEN x)
 GEN
 element_mulmodpr2(GEN nf, GEN x, GEN y, GEN prhall)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN p1;
 
   nf=checknf(nf); checkprhall(prhall);
@@ -2733,7 +2736,7 @@ element_mulmodpr2(GEN nf, GEN x, GEN y, GEN prhall)
 GEN
 element_divmodpr(GEN nf, GEN x, GEN y, GEN prhall)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN p1;
 
   nf=checknf(nf); checkprhall(prhall);
@@ -2746,7 +2749,7 @@ element_divmodpr(GEN nf, GEN x, GEN y, GEN prhall)
 GEN
 element_invmodpr(GEN nf, GEN y, GEN prhall)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN p1;
 
   p1=QX_invmod(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1]);
@@ -2757,7 +2760,8 @@ element_invmodpr(GEN nf, GEN y, GEN prhall)
 GEN
 element_powmodpr(GEN nf,GEN x,GEN k,GEN prhall)
 {
-  long av=avma,N,s;
+  long N, s;
+  gpmem_t av=avma;
   GEN y,z;
 
   nf=checknf(nf); checkprhall(prhall);
@@ -2783,7 +2787,7 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN prhall)
 GEN
 nfkermodpr(GEN nf, GEN x, GEN prhall)
 {
-  ulong av0,av,av1,lim;
+  gpmem_t av0, av, av1, lim;
   long i,j,k,r,t,n,m,N;
   GEN c,d,y,unnf,munnf,zeromodp,zeronf,p,pp,prh;
 
@@ -2844,7 +2848,7 @@ nfkermodpr(GEN nf, GEN x, GEN prhall)
 GEN
 nfsolvemodpr(GEN nf, GEN a, GEN b, GEN prhall)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long nbli,nbco,i,j,k;
   GEN aa,x,p,m,u;
 
@@ -2906,7 +2910,8 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN prhall)
 GEN
 nfsuppl(GEN nf, GEN x, long n, GEN prhall)
 {
-  long av=avma,av2,k,s,t,N,lx=lg(x);
+  long k, s, t, N, lx=lg(x);
+  gpmem_t av=avma, av2;
   GEN y,p1,p2,p,unmodp,zeromodp,unnf,zeronf,prh;
   stackzone *zone;
 
@@ -2938,7 +2943,7 @@ nfsuppl(GEN nf, GEN x, long n, GEN prhall)
 GEN
 nfidealdet1(GEN nf, GEN a, GEN b)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN x,p1,res,da,db;
 
   a = idealinv(nf,a);
@@ -2960,7 +2965,8 @@ GEN
 nfdetint(GEN nf,GEN pseudo)
 {
   GEN pass,c,v,det1,piv,pivprec,vi,p1,x,I,unnf,zeronf,id,idprod;
-  long i,j,k,rg,n,n1,m,m1,av=avma,av1,tetpil,lim,cm=0,N;
+  long i, j, k, rg, n, n1, m, m1, cm=0, N;
+  gpmem_t av=avma, av1, tetpil, lim;
 
   nf=checknf(nf); N=degpol(nf[1]);
   if (typ(pseudo)!=t_VEC || lg(pseudo)!=3)
@@ -3057,7 +3063,7 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN detmat)
 static GEN
 zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 {
-  long av, tetpil;
+  gpmem_t av, tetpil;
   GEN pab,d;
 
   d=idealmulelt(nf,b,B); *di=idealinv(nf,idealmat_to_hnf(nf,d));
@@ -3075,7 +3081,7 @@ static GEN
 nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *u,GEN *v,GEN *w,GEN *di)
 {
   GEN pab,pu,pv,pw,uv,d,dinv,pa,pb,pa1,pb1, *gptr[5];
-  long av,tetpil;
+  gpmem_t av, tetpil;
 
   if (gcmp0(a))
   {
@@ -3132,7 +3138,8 @@ idealmulelt(GEN nf, GEN elt, GEN x)
 GEN
 nfhermitemod(GEN nf, GEN pseudo, GEN detmat)
 {
-  long av0=avma,li,co,av,tetpil,i,j,jm1,def,ldef,lim,N;
+  long li, co, i, j, jm1, def, ldef, N;
+  gpmem_t av0=avma, av, tetpil, lim;
   GEN b,q,w,p1,p2,d,u,v,den,x,I,J,dinv,unnf,wh;
 
   nf=checknf(nf); N=degpol(nf[1]);
