@@ -223,7 +223,6 @@ init_defaults(int force)
   current_psfile = pari_strdup("pari.ps");
   current_logfile= pari_strdup("pari.log");
   logfile = NULL;
-  infile = stdin; pari_outfile = stdout; errfile = stderr;
   initout(); next_bloc=0;
 }
 
@@ -787,7 +786,7 @@ disable_dbg(long val)
 void
 err_recover(long numerr)
 {
-  pari_outfile=stdout; errfile=stderr;
+  initout();
   disable_dbg(-1);
   get_timer(-1);
   killallfiles(0);

@@ -178,6 +178,7 @@ PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
 void
 initout(void)
 {
+  infile = stdin; pari_outfile = stdout; errfile = stderr;
   pariOut = &defaultOut;
   pariErr = &defaultErr;
 }
