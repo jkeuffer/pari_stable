@@ -1809,8 +1809,8 @@ sori(GEN g, pariout_t *T)
       sori(a,T); pariputs(" mod "); sori(b,T); break;
 	
     case t_FRAC: case t_FRACN:
-      a=(GEN)g[1]; wr_int(T,a,1); pariputs(" /");
-      b=(GEN)g[2]; wr_int(T,b,1); break;
+      a=(GEN)g[1]; wr_int(T,a,0); pariputs(" /");
+      b=(GEN)g[2]; wr_int(T,b,0); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
       a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
