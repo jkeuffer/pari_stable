@@ -1437,13 +1437,13 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 /*                                                                 */
 /*******************************************************************/
 GEN
-matrixpow(long n, long m, GEN y, GEN P,GEN l)
+FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l)
 {
   return vecpol_to_mat(FpXQ_powers(y,m-1,P,l),n);
 }
 
 GEN
-Flxq_matrix_pow(GEN y, long n, long m, GEN P,ulong l)
+Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 {
   return FlxV_Flm(Flxq_powers(y,m-1,P,l),n);
 }
@@ -1454,7 +1454,7 @@ Fp_inv_isom(GEN S,GEN T, GEN p)
 {
   pari_sp ltop = avma;
   int n = degpol(T);
-  GEN V, M = matrixpow(n,n,S,T,p);
+  GEN V, M = FpXQ_matrix_pow(n,n,S,T,p);
   V = FpM_invimage(M, vec_ei(n, 2), p);
   return gerepileupto(ltop, gtopolyrev(V, varn(T)));
 }
@@ -1582,7 +1582,7 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
   long i,l=degpol(T);
   GEN R, W = (GEN) M[2];
   for (i = 2; i <= d; ++i) W = FpM_FpV_mul(M,W,p);
-  R=matrixpow(l,l,vec_to_pol(W,varn(T)),T,p);
+  R=FpXQ_matrix_pow(l,l,vec_to_pol(W,varn(T)),T,p);
   return gerepilecopy(ltop,R);
 }
 
@@ -1664,8 +1664,8 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   e=pvaluation(stoi(n),l,&q);
   pg=itos(q);
   avma=ltop;
-  if(!MA) MA=matrixpow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
-  if(!MB) MB=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
+  if(!MA) MA=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
+  if(!MB) MB=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
   A=Ap=zeropol(vp);
   B=Bp=zeropol(vq);
   if (pg > 1)
@@ -1833,9 +1833,9 @@ Fp_factor_irred(GEN P, GEN Q, GEN l)
     return res;
   }
   if (DEBUGLEVEL>=4) (void)timer2();
-  FP=matrixpow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
-  FQ=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
-  if (DEBUGLEVEL>=4) msgtimer("matrixpows");
+  FP=FpXQ_matrix_pow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
+  FQ=FpXQ_matrix_pow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
+  if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
   Fp_intersect(d,P,Q,l,&SP,&SQ,FP,FQ);
   av=avma;
   E=Fp_factorgalois(P,l,d,vq,FP);
@@ -1865,12 +1865,12 @@ Fp_factor_irred(GEN P, GEN Q, GEN l)
   else
   {
     E = polpol_to_mat(E,np);
-    MP= matrixpow(np,d,SP,P,l);
+    MP= FpXQ_matrix_pow(np,d,SP,P,l);
     IR= (GEN)FpM_indexrank(MP,l)[1];
     E = rowextract_p(E, IR);
     M = rowextract_p(MP,IR);
     M = FpM_inv(M,l);
-    MQ= matrixpow(nq,d,SQ,Q,l);
+    MQ= FpXQ_matrix_pow(nq,d,SQ,Q,l);
     M = FpM_mul(MQ,M,l);
     M = FpM_mul(M,E,l);
     M = gerepileupto(av,M);

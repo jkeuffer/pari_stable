@@ -20,7 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-extern GEN matrixpow(long n, long m, GEN y, GEN P,GEN l);
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern long ZX_get_prec(GEN x);
@@ -699,7 +698,7 @@ static GEN
 init_traces(GEN ff, GEN T, GEN p)
 {
   long N = degpol(T),i,j,k, r = lg(ff);
-  GEN Frob = matrixpow(N,N, FpXQ_pow(polx[varn(T)],p, T,p), T,p);
+  GEN Frob = FpXQ_matrix_pow(N,N, FpXQ_pow(polx[varn(T)],p, T,p), T,p);
   GEN y,p1,p2,Trk,pow,pow1;
 
   k = degpol(ff[r-1]); /* largest degree in modular factorization */
