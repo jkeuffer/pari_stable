@@ -123,6 +123,7 @@ XR 63- smarter precision increase in update_alpha() (ROUND 4) [stick to
        Ex: factorpadic(polzagier(18,3), 2, 30) much faster than before.
    64- E=ellinit([0,0,0,-10301051460877581926458079712219,-12725370882271967125361344545020920373899020890]); ellap(E,1167254453) --> wrong result
    65- factor(x^2 + I*1.) --> SEGV
+   66- when printing x < 0 t_REAL, was rounding in the wrong direction
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
