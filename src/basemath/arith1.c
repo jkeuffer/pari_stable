@@ -892,7 +892,9 @@ hil(GEN x, GEN y, GEN p)
 
 #define sqrmod(x,p) (resii(sqri(x),p))
 
-/* Assume p is prime. return NULL if (a,p) = -1 */
+static GEN ffsqrtmod(GEN a, GEN p);
+
+/* Tonelli-Shanks. Assume p is prime and return NULL if (a,p) = -1. */
 GEN
 mpsqrtmod(GEN a, GEN p)
 {
@@ -903,6 +905,15 @@ mpsqrtmod(GEN a, GEN p)
   if (typ(a) != t_INT || typ(p) != t_INT) err(arither1);
   if (signe(p) <= 0 || is_pm1(p)) err(talker,"not a prime in mpsqrtmod");
   p1 = addsi(-1,p); e = vali(p1);
+  
+  /* If `e' is "too big", use Cipolla algorithm ! [GTL] */
+  if (e*(e-1)-20 > 8 * bit_accuracy(lgefint(p)))
+  {
+    v = ffsqrtmod(a,p);
+    if (!v) { avma = av; return NULL; }
+    return gerepileuptoint(av,v);
+  }
+
   if (e == 0) /* p = 2 */
   {
     avma = av;
@@ -960,6 +971,113 @@ mpsqrtmod(GEN a, GEN p)
   return gerepileuptoint(av, v);
 }
 
+/* Cipolla's algorithm is better when e = v_2(p-1) is "too big".
+ * Otherwise, is a constant times worse than the above one.
+ * For p = 3 (mod 4), is about 3 times worse, and in average
+ * is about 2 or 2.5 times worse.
+ * 
+ * But try both algorithms for e.g. S(n)=(2^n+3)^2-8 with
+ * n = 750, 771, 779, 790, 874, 1176, 1728, 2604, etc.
+ *
+ * If X^2 = t^2 - a  is not a square in F_p, then
+ * 
+ *   (t+X)^(p+1) = (t+X)(t-X) = a
+ *    
+ * so we get sqrt(a) in F_p^2 by
+ * 
+ *   sqrt(a) = (t+X)^((p+1)/2)
+ *    
+ * If (a|p)=1, then sqrt(a) is in F_p.
+ *
+ * cf: LNCS 2286, pp 430-434 (2002)  [Gonzalo Tornaria] */
+static GEN  
+ffsqrtmod(GEN a, GEN p)
+{
+  gpmem_t av = avma, av1, lim;
+  long e, t, man, k, nb;
+  GEN q, n, u, v, d, d2, b, u2, v2, qptr;
+
+  if (kronecker(a, p) < 0) return NULL;
+  
+  av1 = avma;
+  for(t=1; ; t++)
+  {
+    n = subsi(t*t, a);
+    if (kronecker(n, p) < 0) break;
+    avma = av1;
+  }
+
+  u = stoi(t); v = gun; /* u+vX = t+X */
+  e = vali(addsi(-1,p)); q = shifti(p, -e);
+  /* p = 2^e q + 1  and  (p+1)/2 = 2^(e-1)q + 1 */
+
+  /* Compute u+vX := (t+X)^q */
+  av1 = avma; lim = stack_lim(av1, 1); 
+  qptr = q+2; man = *qptr;
+  k = 1+bfffo(man); man<<=k; k=BITS_IN_LONG-k;
+  for (nb=lgefint(q)-2;nb; nb--)
+  {
+    for (; k; man<<=1, k--)
+    {
+      if (man < 0)
+      { /* u+vX := (u+vX)^2 (t+X) */
+        d = addii(u, mulsi(t,v));
+        d2 = sqri(d);
+        b = resii(mulii(a,v), p);
+        u = modii(subii(mulsi(t,d2), mulii(b,addii(u,d))), p);
+        v = modii(subii(d2, mulii(b,v)), p);
+      }
+      else
+      { /* u+vX := (u+vX)^2 */
+        u2 = sqri(u);
+        v2 = sqri(v);
+        v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
+        u = modii(addii(u2, mulii(v2,n)), p);
+      }
+    }
+    
+    if (low_stack(lim, stack_lim(av1, 1)))
+    {
+       GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
+       if (DEBUGMEM>1) err(warnmem, "ffsqrtmod");
+       gerepilemany(av1,gptr,2);
+    }
+    
+    man = *++qptr; k = BITS_IN_LONG;
+  }
+
+  while (--e)
+  { /* u+vX := (u+vX)^2 */
+    u2 = sqri(u);
+    v2 = sqri(v);
+    v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
+    u = modii(addii(u2, mulii(v2,n)), p);
+
+    if (low_stack(lim, stack_lim(av1, 1)))
+    {
+       GEN *gptr[2]; gptr[0]=&u; gptr[1]=&v;
+       if (DEBUGMEM>1) err(warnmem, "ffsqrtmod");
+       gerepilemany(av1,gptr,2);
+    }
+  }
+     
+  /* Now u+vX = (t+X)^(2^(e-1)q); thus
+   * 
+   *   (u+vX)(t+X) = sqrt(a) + 0 X
+   *    
+   * Whence,
+   * 
+   *   sqrt(a) = (u+vt)t - v*a
+   *   0       = (u+vt) 
+   *    
+   * Thus a square root is v*a */
+     
+  v = modii(mulii(v,a), p);
+
+  u = subii(p,v); if (cmpii(v,u) > 0) v = u;
+  return gerepileuptoint(av,v);
+}
+ 
 /*******************************************************************/
 /*                                                                 */
 /*                       n-th ROOT MODULO p                        */
