@@ -31,7 +31,7 @@ extern GEN pol_to_monic(GEN pol, GEN *lead);
 GEN
 setloop(GEN a)
 {
-  a=icopy(a); new_chunk(2); /* dummy to get two cells of extra space */
+  a=icopy(a); (void)new_chunk(2); /* dummy to get two cells of extra space */
   return a;
 }
 
@@ -256,7 +256,7 @@ poldivres(GEN x, GEN y, GEN *pr)
     rem[i]=avma==av1? lcopy(p1):lpileupto(av1,p1);
   }
   rem -= 2;
-  if (!sx) normalizepol_i(rem, lrem);
+  if (!sx) (void)normalizepol_i(rem, lrem);
   if (pr == ONLY_REM) return gerepileupto(av,rem);
   z -= 2;
   {
@@ -1069,7 +1069,7 @@ u_FpX_addmul(GEN x, GEN y, long c, long p)
     for (i=2; i<l;  i++) x[i] = ((ulong)x[i] + (ulong)(c*y[i])) % p;
     for (   ; i<ly; i++) x[i] = (c*y[i]) % p;
   }
-  u_normalizepol(x,i);
+  (void)u_normalizepol(x,i);
 }
 
 static long
@@ -1085,7 +1085,7 @@ FpX_rand(long d1, long v, GEN p)
   GEN y;
   y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<d; i++) y[i] = (long)genrand(p);
-  normalizepol_i(y,d); return y;
+  (void)normalizepol_i(y,d); return y;
 }
 
 /* return a random polynomial in F_q[v], degree < d1 */
@@ -1096,7 +1096,7 @@ FqX_rand(long d1, long v, GEN T, GEN p)
   GEN y;
   y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
   for (i=2; i<d; i++) y[i] = (long)FpX_rand(k, w, p);
-  normalizepol_i(y,d); return y;
+  (void)normalizepol_i(y,d); return y;
 }
 
 #define set_irred(i) { if ((i)>ir) swap(t[i],t[ir]); ir++;}

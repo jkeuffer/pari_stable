@@ -1131,7 +1131,7 @@ mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
   long k;
   GEN p1,u1,u2,v,w,z,dl;
   /* y contient un generateur de (Z/pZ)^* eleve a la puis (p-1)/(l^e) */
-  bezout(r,l,&u1,&u2);
+  (void)bezout(r,l,&u1,&u2);
   v=powmodulo(a,u2,p);
   w=powmodulo(a,modii(mulii(negi(u1),r),q),p);
   lim = stack_lim(av,1);
@@ -1372,7 +1372,7 @@ mppgcd(GEN a, GEN b)
   }
 
   /* larger than gcd: "avma=av" gerepile (erasing t) is valid */
-  av = avma; new_chunk(lgefint(b)); /* HACK */
+  av = avma; (void)new_chunk(lgefint(b)); /* HACK */
   t = resii(a,b);
   if (!signe(t)) { avma=av; return absi(b); }
 

@@ -1139,7 +1139,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
     if (y) return gerepileupto(av,y);
 
     if (DEBUGLEVEL) err(warnprec,"isprincipalall0",pr);
-    avma = av1; bnf = bnfnewprec(bnf,pr); setrand(c);
+    avma = av1; bnf = bnfnewprec(bnf,pr); (void)setrand(c);
   }
 }
 
@@ -1198,7 +1198,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
       avma = av; return stoi(prec);
     }
     if (DEBUGLEVEL) err(warnprec,"isprincipalall0",prec);
-    avma = av1; bnf = bnfnewprec(bnf,prec); setrand(c);
+    avma = av1; bnf = bnfnewprec(bnf,prec); (void)setrand(c);
   }
 }
 
@@ -2303,7 +2303,7 @@ makematal(GEN bnf)
     prec = itos(y); j--;
     if (DEBUGLEVEL) err(warnprec,"makematal",prec);
     nf = nfnewprec(nf,prec);
-    bnf = bnfinit0(nf,1,NULL,prec); setrand(c);
+    bnf = bnfinit0(nf,1,NULL,prec); (void)setrand(c);
   }
   if (DEBUGLEVEL>1) fprintferr("\n");
   return ma;

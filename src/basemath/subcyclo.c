@@ -209,7 +209,7 @@ GEN subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
     gpmem_t ltop=avma;
     long ex=base;
     GEN s=gzero;
-    new_chunk(lle);
+    (void)new_chunk(lle); /* HACK */
     for (k=0; k<m; k++, ex = mulssmod(ex,g,n))
       s=addii(s,(GEN)powz[ex]);
     avma=ltop;
@@ -232,7 +232,7 @@ GEN subcyclo_orbits(GEN O, GEN powz, GEN le)
     new_chunk(lle);
     for(j=1;j<=m;j++)
       s=addii(s,(GEN)powz[mael(O,i,j)]);
-    avma=av;
+    avma=av; /* HACK */
     V[i]=(long)modii(s,le);
   }
   return V;
@@ -289,7 +289,7 @@ subcyclo_roots(long n, GEN zl)
   {
     gpmem_t av=avma;
     GEN p1;
-    new_chunk(lle);
+    (void)new_chunk(lle); /* HACK */
     p1 = mulii(z,(GEN)powz[i-1]);
     avma=av;
     powz[i] = lmodii(p1,le);
@@ -453,7 +453,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
           err(talker,"Matrix of wrong dimensions in galoissubcyclo");
         H = cgetg(lg(zn3), t_VECSMALL);
         ord = cgetg(lg(zn3), t_VECSMALL);
-        hnftogeneratorslist(n,zn2,zn3,sg,H,ord);
+        (void)hnftogeneratorslist(n,zn2,zn3,sg,H,ord);
       }
       break;
     default:

@@ -282,7 +282,7 @@ addprimes(GEN p)
   tx = typ(p);
   if (is_vec_t(tx))
   {
-    for (i=1; i < lg(p); i++) addprimes((GEN) p[i]);
+    for (i=1; i < lg(p); i++) (void)addprimes((GEN) p[i]);
     return primetab;
   }
   if (tx != t_INT) err(typeer,"addprime");
@@ -305,7 +305,7 @@ addprimes(GEN p)
   }
   primetab = (GEN) gprealloc(primetab, (lp+1)*sizeof(long));
   primetab[i] = lclone(p); setlg(primetab, lp+1);
-  if (k > 1) { cleanprimetab(); setlg(L,k); addprimes(L); }
+  if (k > 1) { cleanprimetab(); setlg(L,k); (void)addprimes(L); }
   avma = av; return primetab;
 }
 
@@ -341,7 +341,7 @@ removeprimes(GEN prime)
     }
     else
     {
-      for (i=1; i < lg(prime); i++) removeprime((GEN) prime[i]);
+      for (i=1; i < lg(prime); i++) (void)removeprime((GEN) prime[i]);
     }
     return primetab;
   }
@@ -420,15 +420,15 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 
   if (typ(n) != t_INT) err(arither1);
   i=signe(n); if (!i) err(arither2);
-  cgetg(3,t_MAT);
-  if (i<0) { stoi(-1); stoi(1); nb++; }
+  (void)cgetg(3,t_MAT);
+  if (i<0) { (void)stoi(-1); (void)stoi(1); nb++; }
   if (is_pm1(n)) return aux_end(NULL,nb);
 
   n = gclone(n);  setsigne(n,1);
   i = vali(n);
   if (i)
   {
-    stoi(2); stoi(i); nb++;
+    (void)stoi(2); (void)stoi(i); nb++;
     av=avma; affii(shifti(n,-i), n); avma=av;
   }
   if (is_pm1(n)) return aux_end(n,nb);
@@ -442,7 +442,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     if (mpdivisis(n,p,n))
     {
       nb++; k=1; while (mpdivisis(n,p,n)) k++;
-      utoi(p); stoi(k);
+      (void)utoi(p); (void)stoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
   }
@@ -452,7 +452,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if (cmpii(pp,n) > 0)
   {
     nb++;
-    icopy(n); stoi(1); return aux_end(n,nb);
+    (void)icopy(n); (void)stoi(1); return aux_end(n,nb);
   }
 
   /* trial divide by the "special primes" (usually huge composites...) */
@@ -461,7 +461,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
     if (mpdivis(n,(GEN) primetab[i],n))
     {
       nb++; k=1; while (mpdivis(n,(GEN) primetab[i],n)) k++;
-      icopy((GEN) primetab[i]); stoi(k);
+      (void)icopy((GEN) primetab[i]); (void)stoi(k);
       if (is_pm1(n)) return aux_end(n,nb);
     }
 
@@ -469,7 +469,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   if ((k && cmpii(pp,n) > 0) || (all==1 && pseudoprime(n)))
   {
     nb++;
-    icopy(n); stoi(1); return aux_end(n,nb);
+    (void)icopy(n); (void)stoi(1); return aux_end(n,nb);
   }
 
   /* now we have a large composite.  Use hint as is if all==1 */

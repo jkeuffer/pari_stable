@@ -1537,12 +1537,12 @@ initzeta(GEN pol, long prec)
   zone  = switch_stack(NULL,i + 2*(N0+1) + 6*prec);
   zone1 = switch_stack(NULL,2*i);
   zone0 = switch_stack(NULL,2*i);
-  switch_stack(zone,1);
+  (void)switch_stack(zone,1);
   tabcstn  = (GEN*) cgetg(N0+1,t_VEC);
   tabcstni = (GEN*) cgetg(N0+1,t_VEC);
   p1 = ginv(cst);
   for (i=1; i<=N0; i++) { tabcstni[i] = gun; tabcstn[i] = mulsr(i,p1); }
-  switch_stack(zone,0);
+  (void)switch_stack(zone,0);
 
   /********** Calcul des coefficients a(i,j) independants de s **********/
 
@@ -1680,11 +1680,11 @@ initzeta(GEN pol, long prec)
     }
     /* use a parallel stack */
     z = i&1? zone1: zone0;
-    switch_stack(z, 1);
+    (void)switch_stack(z, 1);
     for (n=1; n<=N0; n++)
       if (coef[n]) tabcstni[n] = mpmul(tabcstni[n],tabcstn[n]);
     /* come back */
-    switch_stack(z, 0);
+    (void)switch_stack(z, 0);
   }
   nfz[4] = (long) C;
   if (DEBUGLEVEL>=2) msgtimer("Cik");

@@ -480,7 +480,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
  *
  *  2) discriminant of K (in *y).
  */
-GEN
+static GEN
 allbase(GEN f, long code, GEN *y)
 {
   GEN w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
@@ -576,7 +576,7 @@ discf2(GEN x)
   GEN y;
   gpmem_t av=avma,tetpil;
 
-  allbase(x,0,&y); tetpil=avma;
+  (void)allbase(x,0,&y); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
 }
 
@@ -816,7 +816,7 @@ discf(GEN x)
   GEN y;
   gpmem_t av=avma,tetpil;
 
-  allbase4(x,0,&y,NULL); tetpil=avma;
+  (void)allbase4(x,0,&y,NULL); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
 }
 
@@ -826,7 +826,7 @@ smalldiscf(GEN x)
   GEN y;
   gpmem_t av=avma,tetpil;
 
-  allbase4(x,1,&y,NULL); tetpil=avma;
+  (void)allbase4(x,1,&y,NULL); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
 }
 
@@ -836,7 +836,7 @@ factoreddiscf(GEN x, GEN p)
   GEN y;
   gpmem_t av=avma,tetpil;
 
-  allbase4(x,(long)p,&y,NULL); tetpil=avma;
+  (void)allbase4(x,(long)p,&y,NULL); tetpil=avma;
   return gerepile(av,tetpil,icopy(y));
 }
 
@@ -1304,7 +1304,7 @@ getprime(GEN p, GEN chi, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
     chin = mycaract(chip, nup, p, NULL, NULL);
 
   vstar(p, chin, &L, &E);
-  cbezout(L, -E, &r, &s);
+  (void)cbezout(L, -E, &r, &s);
   if (r <= 0)
   {
     long q = 1 + ((-r) / E);
@@ -1608,7 +1608,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         if (l > 1)
         {
           /* there are at least 2 factors mod. p => chi can be split */
-          delete_var();
+          (void)delete_var();
           phi = eleval(fx, eta, alph);
           phi = redelt(phi, p, pmf);
           if (flag) mf += 3;
@@ -1618,7 +1618,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
         /* if vp(eta) = vp(gamma - delta) > 0 */
         if (gegal(nue, polx[v])) break;
       }
-      delete_var();
+      (void)delete_var();
 
       if (!signe(modii(constant_term(chie), pmr)))
 	chie = mycaract(chi, eta, p, pmf, ns);
@@ -1718,7 +1718,7 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
 
   b=cgetg(5, t_VEC);
 
-  cbezout(Ea, Et, &r, &s); t = 0;
+  (void)cbezout(Ea, Et, &r, &s); t = 0;
   while (r < 0) { r = r + Et; t++; }
   while (s < 0) { s = s + Ea; t++; }
 

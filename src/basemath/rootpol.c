@@ -1805,7 +1805,7 @@ split_complete(GEN p, long bitprec, GEN roots_pol)
   if (n==1)
   {
     a=gneg_i(gdiv((GEN)p[2],(GEN)p[3]));
-    append_root(roots_pol,a); return p;
+    (void)append_root(roots_pol,a); return p;
   }
   ltop = avma;
   if (n==2)

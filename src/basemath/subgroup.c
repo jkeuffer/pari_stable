@@ -100,7 +100,7 @@ std_fun(subgp_iter *T, GEN x)
 {
   expr_t *E = (expr_t *)T->fundata;
   E->ep->value = (void*)x;
-  lisseq(E->s); T->countsub++;
+  (void)lisseq(E->s); T->countsub++;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */
 static void
@@ -458,7 +458,7 @@ subgroup_engine(subgp_iter *T)
   if (n == 1) { T->fun(T, cyc); return; }
   if (!signe(cyc[1]))
     err(talker,"infinite group in forsubgroup");
-  if (DEBUGLEVEL) timer2();
+  if (DEBUGLEVEL) (void)timer2();
   fa = factor((GEN)cyc[1]); primlist = (GEN)fa[1];
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;

@@ -1759,7 +1759,7 @@ pslq(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"pslq");
   if (n <= 1) return cgetg(1,t_VEC);
-  if (DEBUGLEVEL>=3) timer();
+  if (DEBUGLEVEL>=3) (void)timer();
   if (gexpo(gimag(x)) > EXP)
   { 
     return lindep(x,prec);
@@ -2151,7 +2151,7 @@ pslqtwolevel(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"pslq");
   if (n <= 1) return cgetg(1,t_COL);
-  if (DEBUGLEVEL>=3) timer();
+  if (DEBUGLEVEL>=3) (void)timer();
   if (gexpo(gimag(x)) > EXP)
   { 
     return lindep(x,prec);
@@ -2447,7 +2447,7 @@ algdep0(GEN x, long n, long bit, long prec)
   y[1] = evalsigne(1) | evalvarn(0);
   k=1; while (gcmp0((GEN)p1[k])) k++;
   for (i=0; i<=n+1-k; i++) y[i+2] = p1[k+i];
-  normalizepol_i(y, n+4-k);
+  (void)normalizepol_i(y, n+4-k);
   y = (gsigne(leading_term(y)) > 0)? gcopy(y): gneg(y);
   return gerepileupto(av,y);
 }

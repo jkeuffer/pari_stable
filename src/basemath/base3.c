@@ -144,7 +144,7 @@ element_inv(GEN nf, GEN x)
   nf=checknf(nf); N=degpol(nf[1]);
   if (is_extscalar_t(tx))
   {
-    if (tx==t_POLMOD) checknfelt_mod(nf,x,"element_inv");
+    if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_inv");
     else if (tx==t_POL) x=gmodulcp(x,(GEN)nf[1]);
     return gerepileupto(av, algtobasis(nf, ginv(x)));
   }
@@ -178,10 +178,10 @@ element_div(GEN nf, GEN x, GEN y)
   GEN p1,p;
 
   nf=checknf(nf); N=degpol(nf[1]);
-  if (tx==t_POLMOD) checknfelt_mod(nf,x,"element_div");
+  if (tx==t_POLMOD) (void)checknfelt_mod(nf,x,"element_div");
   else if (tx==t_POL) x=gmodulcp(x,(GEN)nf[1]);
 
-  if (ty==t_POLMOD) checknfelt_mod(nf,y,"element_div");
+  if (ty==t_POLMOD) (void)checknfelt_mod(nf,y,"element_div");
   else if (ty==t_POL) y=gmodulcp(y,(GEN)nf[1]);
 
   if (is_extscalar_t(tx))
@@ -1020,7 +1020,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
     av1 = avma;
     if (is_pm1(p1)) { avma=av; return stoi(i-1); }
     smalltable[i]=(long)p1; if (i==lbaby) break;
-    new_chunk(c); p1 = mulii(p1,g0inv);
+    (void)new_chunk(c); p1 = mulii(p1,g0inv); /* HACK */
     avma = av1; p1 = resii(p1, p);
   }
   giant = resii(mulii(x, mpinvmod(p1,p)), p);

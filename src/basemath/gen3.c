@@ -1116,7 +1116,7 @@ gmul2n(GEN x, long n)
       if (n > 0)
       {
         y=cgetg(3,t_INTMOD); p2=(GEN)x[1];
-        av=avma; new_chunk(2 * lgefint(p2) + n); /* HACK */
+        av=avma; (void)new_chunk(2 * lgefint(p2) + n); /* HACK */
         p1 = shifti((GEN)x[2],n); avma=av;
         y[2]=lmodii(p1,p2); icopyifstack(p2,y[1]); return y;
       }

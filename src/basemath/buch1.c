@@ -1290,7 +1290,7 @@ imag_relations(long lim, long s, long LIMC, long *ex, long **mat)
       if (DEBUGLEVEL) { fprintferr(" %ld",s); flusherr(); }
       oldfact = primfact; oldexp = exprimfact;
       primfact = primfact1; exprimfact = exprimfact1;
-      factorisequad(form1,KC,LIMC);
+      (void)factorisequad(form1,KC,LIMC);
 
       if (b1==b2)
       {
@@ -1500,7 +1500,7 @@ real_relations(long lim, long s, long LIMC, long *ex, long **mat, GEN glog2,
         s++; col = mat[s]; if (DEBUGLEVEL) fprintferr(" %ld",s);
         oldfact = primfact; oldexp = exprimfact;
         primfact = primfact1; exprimfact = exprimfact1;
-        factorisequad(form2,KC,LIMC);
+        (void)factorisequad(form2,KC,LIMC);
         if (b1==b2)
         {
           for (i=1; i<=lgsub; i++)

@@ -229,7 +229,7 @@ initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
     if (lg(T[i]) > prec)
       prec = lg(T[i]);
   /*prec++;*/
-  if (DEBUGLEVEL>=4) gentimer(3);
+  if (DEBUGLEVEL>=4) (void)gentimer(3);
   L = roots(T, prec);
   if (DEBUGLEVEL>=4) genmsgtimer(3,"roots");
   for (i = 1; i <= n; i++)
@@ -239,7 +239,7 @@ initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
       break;
     L[i] = z[1];
   }
-  if (DEBUGLEVEL>=4) gentimer(3);
+  if (DEBUGLEVEL>=4) (void)gentimer(3);
   prep=vandermondeinverseprep(L);
   if (!dn)
   {
@@ -1159,7 +1159,7 @@ hnftoelementslist(long n, GEN zn2, GEN zn3, GEN lss, long card)
   gen = cgetg(lg(zn3), t_VECSMALL);
   ord = cgetg(lg(zn3), t_VECSMALL);
   sg[1] = 1;
-  hnftogeneratorslist(n,zn2,zn3,lss,gen,ord);
+  (void)hnftogeneratorslist(n,zn2,zn3,lss,gen,ord);
   for (j = 1, l = 1; j < lg(gen); j++)
   {
     int     c = l * (ord[j] - 1);
@@ -1601,7 +1601,7 @@ indexpartial(GEN P, GEN DP)
   long i, nb;
   GEN fa, p1, res = gun, dP;
   dP = derivpol(P);
-  if(DEBUGLEVEL>=5) gentimer(3);
+  if(DEBUGLEVEL>=5) (void)gentimer(3);
   if(!DP) DP = ZX_disc(P);
   DP = mpabs(DP);
   if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: discriminant");
@@ -3266,7 +3266,7 @@ isomborne(GEN P, GEN den, GEN p)
   gpmem_t ltop=avma;
   struct galois_borne gb;
   gb.l=p;
-  galoisborne(P,den,&gb,degpol(P));
+  (void)galoisborne(P,den,&gb,degpol(P));
   avma=ltop;
   return gb.valsol;
 }

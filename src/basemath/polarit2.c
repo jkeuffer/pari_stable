@@ -1890,7 +1890,7 @@ factor(GEN x)
           switch (typ1(tx))
           {
             case t_POLMOD:
-              if (killv) delete_var();
+              if (killv) (void)delete_var();
               return gerepileupto(av,p1);
             case t_COMPLEX: p5 = gi; break;
             case t_QUAD: p5=cgetg(4,t_QUAD);
@@ -1909,7 +1909,7 @@ factor(GEN x)
               if(typ(p4)==t_POLMOD) p3[j]=lsubst((GEN)p4[2],v,p5);
             }
           }
-          if (killv) delete_var();
+          if (killv) (void)delete_var();
           tetpil=avma; y=cgetg(3,t_MAT);
           y[1]=lcopy(p2);y[2]=lcopy((GEN)p1[2]);
           return gerepile(av,tetpil,y);

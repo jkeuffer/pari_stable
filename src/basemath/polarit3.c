@@ -1588,7 +1588,7 @@ ffsqrtlmod(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
   long i,k;
   GEN p1,p2,u1,u2,v,w,z;
   if(gcmp1(a)) return gcopy(a);
-  bezout(r,l,&u1,&u2);
+  (void)bezout(r,l,&u1,&u2);
   v=FpXQ_pow(a,u2,T,p);
   w=FpXQ_pow(a,modii(mulii(negi(u1),r),q),T,p);
   lim = stack_lim(av,1);
@@ -2627,7 +2627,7 @@ FpX_divres(GEN x, GEN y, GEN p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) normalizepol_i(rem, lrem);
+  if (!sx) (void)normalizepol_i(rem, lrem);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2732,7 +2732,7 @@ FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) normalizepol_i(rem, lrem);
+  if (!sx) (void)normalizepol_i(rem, lrem);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -2842,7 +2842,7 @@ RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   }
   rem -= 2;
   if (lead) gunclone(lead);
-  if (!sx) normalizepol_i(rem, lrem);
+  if (!sx) (void)normalizepol_i(rem, lrem);
   if (pr == ONLY_REM) return gerepileupto(av0,rem);
   *pr = rem; return z-2;
 }
@@ -4093,7 +4093,7 @@ INIT:
     }
   }
 END:
-  setvarn(H, vX); if (delvar) delete_var();
+  setvarn(H, vX); if (delvar) (void)delete_var();
   if (cB) H = gmul(H, gpowgs(cB, degpol(A)));
   if (LERS)
   {
@@ -4146,7 +4146,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   B0[2] = (long)gneg_i(B);
   B0[3] = un;
   R = ZY_ZXY_resultant(A, B0, lambda);
-  if (delvar) delete_var();
+  if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(A);
   if (!gcmp1(a)) R = gdiv(R, gpowgs(a, dB));
   return gerepileupto(av, R);

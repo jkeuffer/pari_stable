@@ -1274,7 +1274,7 @@ compute_M0(GEN M_star,long N)
       if (!M0) avma = av; else M0 = gerepilecopy(av, M0);
     }
   }
-  for (i=1;i<=4;i++) delete_var();
+  for (i=1;i<=4;i++) (void)delete_var();
   return M0? M0: gzero;
 }
 
