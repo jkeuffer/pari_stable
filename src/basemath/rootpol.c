@@ -1585,17 +1585,19 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
 
 /* put in F and G two polynomials such that |P-FG|<2^(-bitprec)|P|,
 where the maximum modulus of the roots of p is < 0.5 */
-static void
+static int
 split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,b,FF,GG;
   long n=lgef(p)-3,k,bitprec2,i, eq;
-  double aux;
+  double aux = mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]);
 
-  step4=1;
+  /* beware double overflow */
+  if (aux >= 0 && (aux > 1e4 || exp2(aux) > 2.5*n)) return 0;
+
+  step4 = 1;
   
-  aux = exp2(mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]));
-  aux = (double) n*log2(1 + aux/(double)n);
+  aux = (aux < -300)? 0.: (double) n*log2(1 + exp2(aux)/(double)n);
   bitprec2=bitprec+1+(long) (log2((double)n)+aux);
 
   q=mygprec(p,bitprec2);
@@ -1626,7 +1628,7 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
   }
   GG = mygprec(GG,bitprec2);
   *F = shiftpol(FF,b);
-  *G = shiftpol(GG,b);
+  *G = shiftpol(GG,b); return 1;
 }
 
 /* put in F and G two polynomials such that |P-FG|<2^(-bitprec)|P|,
@@ -1636,16 +1638,12 @@ split_0_1(GEN p, long bitprec, GEN *F, GEN *G)
 {
   GEN q,FF,GG;
   long n=lgef(p)-3,bitprec2,normp;
-  double aux;
 
-  normp=gexpo(p);
-  aux = mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]);
-  /* take care of double overflow */
-  if (aux < 0 || (aux < 1e5 && exp2(aux) <= 2.5*n))
-    { split_0_2(p,bitprec,F,G); return; }
+  if  (split_0_2(p,bitprec,F,G)) return;
 
+  normp = gexpo(p);
   scalepol2n(p,2); /* p <- 4^(-n) p(4*x) */
-  bitprec2=bitprec+2*n+gexpo(p)-normp;
+  bitprec2 = bitprec+2*n+gexpo(p)-normp;
   q=mygprec(p,bitprec2);
   split_1(q,bitprec2,&FF,&GG);
   scalepol2n(FF,-2); scalepol2n(GG,-2);
