@@ -1465,7 +1465,7 @@ gerepilemany(gpmem_t av, GEN* gptr[], int n)
 }
 
 void 
-gerepileall(ulong av, int n, ...)
+gerepileall(gpmem_t av, int n, ...)
 {
   GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
   GEN **gptr  = (GEN**)  gpmalloc(n*sizeof(GEN*));
