@@ -108,7 +108,8 @@ IZ 12- [OS/2:] enable dynamic-linking build
 IZ 13- [OS/2:] use same CFLAGS as under Linux
 IZ 14- when using external prettyprinter, write in raw format to logfile 
        [not in TeX format sent to prettyprinter]
-IZ 15- don't output color escape sequences to logfile
+IZ 15- don't output pseudo-TeX sequences to logfile when using external
+       prettyprinter (raw format)
 IZ 16- make X11.builtin-gnuplot-dynamic the default graphic library.
 IZ 17- allow changing the gnuplot DLL name for gnuplot-dynamic at Configure-time
        e.g. Configure --graphic=gnuplot-dynamic,gnpltdrw

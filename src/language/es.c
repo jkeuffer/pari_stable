@@ -318,11 +318,7 @@ pariputsf(char *format, ...)
 void
 term_color(int c)
 {
-  FILE *o_logfile = logfile;
-
-  logfile = 0;				/* Ugly hack... */
   pariputs(term_get_color(c));
-  logfile = o_logfile;
 }
 
 void
