@@ -80,11 +80,13 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 2  HTML version (pod ? SGML ? yodl ???)
 
-***************************   DEVELOPMENT     ****************************
+***************************  MISCELLANEOUS    ****************************
 
 5  write decent (specialized) benches
 
 3  switch to autoconf
+
+3  use stat() instead of opendir() to check if a file is a directory.
 
 ***************************   ALGORITHMS      ****************************
 
