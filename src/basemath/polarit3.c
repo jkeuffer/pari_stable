@@ -2938,6 +2938,18 @@ vec_u_FpX_eval(GEN b, ulong x, ulong p)
   z[i] = leadz; return z;
 }
 
+/* as above, but don't care about degree drop */
+static GEN
+vec_u_FpX_eval_gen(GEN b, ulong x, ulong p)
+{
+  GEN z;
+  long i, lb = lgef(b);
+  z = u_allocpol(lb-3, 0);
+  for (i=2; i<lb; i++)
+    z[i] = u_FpX_eval((GEN)b[i], x, p);
+  return u_normalizepol(z, lb);
+}
+
 /* Interpolate at roots of 1 and use Hadamard bound for univariate resultant:
  *   bound = N_2(A)^deg B N_2(B)^deg(A),  where  N_2(A) = sqrt(sum (N_1(Ai))^2)
  * Return B such that bound < 2^B */
@@ -3063,14 +3075,14 @@ INIT:
       * where P_i is Lagrange polynomial: P_i(j) = 1 if i=j, 0 otherwise */
       for (i=0,n = 1; n <= nmax; n++)
       {
-        ev = vec_u_FpX_eval(b, n, p);
+        ev = vec_u_FpX_eval_gen(b, n, p);
         i++; x[i] = n;   y[i] = u_FpX_resultant(a, ev, p);
-        ev = vec_u_FpX_eval(b, p-n, p);
+        ev = vec_u_FpX_eval_gen(b, p-n, p);
         i++; x[i] = p-n; y[i] = u_FpX_resultant(a, ev, p);
       }
       if (i == dres)
       {
-        ev = vec_u_FpX_eval(b, 0, p);
+        ev = vec_u_FpX_eval_gen(b, 0, p);
         i++; x[i] = 0;   y[i] = u_FpX_resultant(a, ev, p);
       }
       Hp = u_FpV_polint(x,y, p);
