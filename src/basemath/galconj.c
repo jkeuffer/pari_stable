@@ -733,7 +733,8 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   NQ=dvmdis(NN,N1,&NR);
   if (cmpis(NQ,1000000000)>0)
   {
-    err(warner,"Combinatorics too hard : would need %Z tests!\nI will skip it, but it may induce an infinit loop",NN);
+    err(warner,"Combinatorics too hard : would need %Z tests!\n"
+	"I will skip it,but it may induce galoisinit to loop",NN);
     avma = ltop;
     *psi = NULL;
     return 0;
@@ -3058,10 +3059,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     long j;
     galoisanalysis(P, &Pga, 0, 0);
     if (Pga.deg == 0)
-    {
-      avma = ltop;
       return NULL;		/* Avoid computing the discriminant */
-    }
     Pgb.l = gb->l;
     Pden = galoisborne(P, NULL, &Pgb, Pga.ppp);
     Pladicabs=Pgb.ladicabs;
@@ -3185,14 +3183,14 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     Sp = fixedfieldpolsigma(sigma,ip,Tp,sym,dg,deg);
     Pmod = fixedfieldfactmod(Sp,ip,Tmod);
     PG=galoisgenfixedfield(Tp, Pmod, V, ip, gb, Pg);
+    if (PG == NULL)
+    {
+      avma = ltop;
+      return gzero;
+    }
+    if (DEBUGLEVEL >= 4)
+      fprintferr("GaloisConj:Back to Earth:%Z\n", PG);
     PG=gerepileupto(btop, PG);
-  }
-  if (DEBUGLEVEL >= 4)
-    fprintferr("GaloisConj:Retour sur Terre:%Z\n", PG);
-  if (PG == gzero)
-  {
-    avma = ltop;
-    return gzero;
   }
   inittest(L, M, gb->bornesol, gb->ladicsol, &td);
   lbot = avma;
