@@ -2190,18 +2190,6 @@ compo(GEN x, long n)
   return gcopy((GEN)x[l]);
 }
 
-/* assume x a t_RFRAC(n) */
-static GEN
-_rfraccoeff(GEN x, long n, long v)
-{
-  long ex, w = precdl;
-  if (v<0) v = gvar(x);
-  ex = ggval((GEN)x[2], polx[v]);
-  precdl = n + ex + 1; x = gtoser(x, v);
-  precdl = w;
-  return _sercoeff(x,n,v);
-}
-
 /* assume x a t_POL */
 static GEN
 _polcoeff(GEN x, long n, long v)
@@ -2243,6 +2231,19 @@ _sercoeff(GEN x, long n, long v)
   for (i=2; i<dx+3; i++) z[i] = (long)polcoeff_i((GEN)x[i], n, v);
   return normalizepol(z);
 }
+
+/* assume x a t_RFRAC(n) */
+static GEN
+_rfraccoeff(GEN x, long n, long v)
+{
+  long ex, w = precdl;
+  if (v<0) v = gvar(x);
+  ex = ggval((GEN)x[2], polx[v]);
+  precdl = n + ex + 1; x = gtoser(x, v);
+  precdl = w;
+  return _sercoeff(x,n,v);
+}
+
 
 GEN
 polcoeff_i(GEN x, long n, long v)
