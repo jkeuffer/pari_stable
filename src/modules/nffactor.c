@@ -51,7 +51,7 @@ extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 extern GEN vconcat(GEN A, GEN B);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern int isrational(GEN x);
-extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, pari_timer *T, long *ti_LLL);
+extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
 extern void remake_GM(GEN nf, nffp_t *F, long prec);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
@@ -1154,9 +1154,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   double Bhigh;
   pari_sp av, av2, lim;
   long ti_LLL = 0, ti_CF = 0;
-  pari_timer ti, ti2, TI;
-
-  if (DEBUGLEVEL>2) (void)TIMER(&ti);
+  pari_timer ti2, TI;
 
   lP = absi(leading_term(P));
   if (is_pm1(lP)) lP = NULL;
@@ -1260,7 +1258,7 @@ AGAIN:
        *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
        */
     }
-    CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
+    CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: b =%4ld; r =%3ld -->%3ld, time = %ld\n",
                  b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
@@ -1281,7 +1279,8 @@ AGAIN:
 
     if (i <= r && i*rec < n0)
     {
-      if (DEBUGLEVEL>2) (void)TIMER(&ti);
+      pari_timer ti;
+      if (DEBUGLEVEL>2) TIMERstart(&ti);
       list = nf_check_factors(T, P, Q_div_to_int(CM_L,stoi(C)), famod, pk);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;

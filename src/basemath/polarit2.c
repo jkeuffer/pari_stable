@@ -1065,15 +1065,15 @@ check_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
 }
 
 GEN
-LLL_check_progress(GEN Bnorm, long n0, GEN m, int final,
-                   pari_timer *T, long *ti_LLL)
+LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL)
 {
   GEN B, norm, u;
   long i, R;
+  pari_timer T;
 
-  if (DEBUGLEVEL>2) (void)TIMER(T);
+  if (DEBUGLEVEL>2) TIMERstart(&T);
   u = lllint_i(m, final? 1000: 4, 0, NULL, NULL, &B);
-  if (DEBUGLEVEL>2) *ti_LLL += TIMER(T);
+  if (DEBUGLEVEL>2) *ti_LLL += TIMER(&T);
   norm = GS_norms(B, DEFAULTPREC);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr((GEN)norm[R], Bnorm) < 0) break;
@@ -1112,9 +1112,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   GEN lP, Br, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
   pari_sp av, av2, lim;
   long ti_LLL = 0, ti_CF  = 0;
-  pari_timer ti, ti2, TI;
-
-  if (DEBUGLEVEL>2) (void)TIMER(&ti);
 
   lP = absi(leading_term(P));
   if (is_pm1(lP)) lP = NULL;
@@ -1142,6 +1139,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     long b, bmin, bgood, delta, tnew = tmax + N0, r = lg(CM_L)-1;
     GEN M_L, q, CM_Lp, oldCM_L;
     int first = 1;
+    pari_timer ti2, TI;
     
     bmin = (long)ceil(b0 + tnew*logBr);
     if (DEBUGLEVEL>2)
@@ -1212,7 +1210,7 @@ AGAIN:
        */
     }
 
-    CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
+    CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
                  a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
@@ -1240,7 +1238,8 @@ AGAIN:
 
     if (i <= r && i*rec < n0)
     {
-      if (DEBUGLEVEL>2) (void)TIMER(&ti);
+      pari_timer ti;
+      if (DEBUGLEVEL>2) TIMERstart(&ti);
       list = check_factors(P, Q_div_to_int(CM_L,stoi(C)), bound, famod, pa);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
