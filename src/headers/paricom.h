@@ -18,7 +18,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*              PARI header file (common to all versions)         */
 /*                                                                */
 /******************************************************************/
-
+#ifdef STMT_START /* perl headers */
+#  undef STMT_START
+#endif
+#ifdef STMT_END
+#  undef STMT_END
+#endif
+/* STMT_START { statements; } STMT_END;
+ * can be used as a single statement, as in
+ * if (x) STMT_START { ... } STMT_END; else ...
+ * [ avoid "dangling else" problem in macros ] */
+#define STMT_START	do
+#define STMT_END	while (0)
+/*=====================================================================*/
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
 
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
@@ -39,8 +51,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define absi  mpabs
 #define negi  mpneg
 #define negr  mpneg
-#define mpnegz(x,y) {gpmem_t av=avma;mpaff(mpneg(x),y);avma=av;}
-#define mpabsz(x,y) {gpmem_t av=avma;mpaff(mpabs(x),y);avma=av;}
+#define mpnegz(x,y) \
+  STMT_START {gpmem_t av=avma;mpaff(mpneg(x),y);avma=av;} STMT_END
+#define mpabsz(x,y) \
+  STMT_START {gpmem_t av=avma;mpaff(mpabs(x),y);avma=av;} STMT_END
 #define absrz(x,z)  mpabsz((x),(z))
 #define negrz(x,z)  mpnegz((x),(z))
 

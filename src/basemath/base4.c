@@ -222,6 +222,42 @@ mylog(GEN x, long prec)
   return glog(x,prec);
 }
 
+GEN get_arch(GEN nf,GEN x,long prec);
+
+static GEN
+famat_get_arch(GEN nf, GEN x, long prec)
+{
+  GEN A, a, g = (GEN)x[1], e = (GEN)x[2];
+  long i, l = lg(e);
+
+  if (l <= 1)
+    return get_arch(nf, gun, prec);
+  A = NULL; /* -Wall */
+  for (i=1; i<l; i++)
+  {
+    a = get_arch(nf, (GEN)g[i], prec);
+    a = gmul((GEN)e[i], a);
+    A = (i == 1)? a: gadd(A, a);
+  }
+  return A;
+}
+
+static GEN
+scalar_get_arch(long R1, long RU, GEN x, long prec)
+{
+  GEN v = cgetg(RU+1,t_VEC);
+  GEN p1 = glog(x, prec);
+  long i;
+
+  for (i=1; i<=R1; i++) v[i] = (long)p1;
+  if (i <= RU)
+  {
+    p1 = gmul2n(p1,1);
+    for (   ; i<=RU; i++) v[i] = (long)p1;
+  }
+  return v;
+}
+
 /* For internal use. Get archimedean components: [e_i log( sigma_i(x) )],
  * with e_i = 1 (resp 2.) for i <= R1 (resp. > R1) */
 GEN
@@ -231,7 +267,17 @@ get_arch(GEN nf,GEN x,long prec)
   GEN v;
 
   RU = lg(nf[6]) - 1;
-  if (typ(x) != t_COL) x = algtobasis_i(nf,x);
+  switch(typ(x))
+  {
+    case t_MAT: return famat_get_arch(nf,x,prec);
+    case t_POLMOD:
+    case t_POL: x = algtobasis_i(nf,x);   /* fall through */
+    case t_COL: if (!isnfscalar(x)) break;
+      x = (GEN)x[1]; /* fall through */
+    default: /* rational number */
+      return scalar_get_arch(R1, RU, x, prec);
+  }
+
   v = cgetg(RU+1,t_VEC);
   if (isnfscalar(x)) /* rational number */
   {
@@ -244,12 +290,9 @@ get_arch(GEN nf,GEN x,long prec)
       for (   ; i<=RU; i++) v[i] = (long)p1;
     }
   }
-  else
-  {
-    x = gmul(gmael(nf,5,1),x);
-    for (i=1; i<=R1; i++) v[i] = (long)mylog((GEN)x[i],prec);
-    for (   ; i<=RU; i++) v[i] = lmul2n(mylog((GEN)x[i],prec),1);
-  }
+  x = gmul(gmael(nf,5,1),x);
+  for (i=1; i<=R1; i++) v[i] = (long)mylog((GEN)x[i],prec);
+  for (   ; i<=RU; i++) v[i] = lmul2n(mylog((GEN)x[i],prec),1);
   return v;
 }
 

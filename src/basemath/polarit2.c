@@ -2333,7 +2333,7 @@ ggcd(GEN x, GEN y)
 
       case t_INTMOD: z=cgetg(3,t_INTMOD);
         if (egalii((GEN)x[1],(GEN)y[1]))
-          { copyifstack(x[1],z[1]); }
+          copyifstack(x[1],z[1]);
         else
           z[1] = lmppgcd((GEN)x[1],(GEN)y[1]);
         if (gcmp1((GEN)z[1])) z[2] = zero;
@@ -2448,7 +2448,7 @@ ggcd(GEN x, GEN y)
       {
 	case t_POLMOD: z=cgetg(3,t_POLMOD);
           if (gegal((GEN)x[1],(GEN)y[1]))
-	    { copyifstack(x[1],z[1]); }
+	    copyifstack(x[1],z[1]);
           else
             z[1] = lgcd((GEN)x[1],(GEN)y[1]);
 	  if (lgef(z[1])<=3) z[2]=zero;

@@ -65,8 +65,7 @@ static struct
 /* when skipidentifier() detects that user function f() is being redefined,
  * (f()= ... ) this is set pointing to the opening parenthesis. Checked in
  * identifier(). Otherwise definition like f(x=1)= would change the value of
- * global variable x
- */
+ * global variable x */
 static char *redefine_fun = NULL;
 
 /* points to the part of the string that remains to be parsed */
@@ -79,42 +78,35 @@ static long skipping_fun_def;
  * being checked). Used by the compatibility engine in the following way:
  *   when user types in a function whose name has changed, it is understood
  *   as EpNEW; first syntax error (missing = after function definition
- *   usually) triggers err_new_fun() if check_new_fun is set.
- */
+ *   usually) triggers err_new_fun() if check_new_fun is set. */
 static entree *check_new_fun;
 
 /* for control statements (check_break) */
 static long br_status, br_count;
 static GEN br_res = NULL;
 
-/* TEMPLATE is assumed to be ";"-separated list of items.  Each item
-   may have one of the following forms: id=value id==value id|value id&~value.
-   Each id consists of alphanum characters, dashes and underscores.
-   IDs are case-sensitive.
+/* Mnemonic codes parser:
+ *
+ * TEMPLATE is assumed to be ";"-separated list of items.  Each item
+ * may have one of the following forms: id=value id==value id|value id&~value.
+ * Each id consists of alphanum characters, dashes and underscores.
+ * IDs are case-sensitive.
 
-   ARG consists of several IDs separated by punctuation (and optional
-   whitespace).  Each modifies the return value in a "natural" way: an
-   ID from id=value should be the first in the sequence and sets RETVAL to
-   VALUE (and cannot be negated), ID from id|value bit-ORs RETVAL with
-   VALUE (and bit-ANDs RETVAL with ~VALUE if negated), ID from
-   id&~value behaves as if it were noid|value, ID from
-   id==value behaves the same as id=value, but should come alone.
+ * ARG consists of several IDs separated by punctuation (and optional
+ * whitespace).  Each modifies the return value in a "natural" way: an
+ * ID from id=value should be the first in the sequence and sets RETVAL to
+ * VALUE (and cannot be negated), ID from id|value bit-ORs RETVAL with
+ * VALUE (and bit-ANDs RETVAL with ~VALUE if negated), ID from
+ * id&~value behaves as if it were noid|value, ID from
+ * id==value behaves the same as id=value, but should come alone.
 
-   For items of the form id|value and id&~value negated forms are
-   allowed: either when arg looks like no[-_]id, or when id looks like
-   this, and arg is not-negated.
- */
+ * For items of the form id|value and id&~value negated forms are
+ * allowed: either when arg looks like no[-_]id, or when id looks like
+ * this, and arg is not-negated. */
 
-#define A_ACTION_ASSIGN		1
-#define A_ACTION_SET		2
-#define A_ACTION_UNSET		3
-
-#define PARSEMNU_TEMPL_TERM_NL	1
-#define PARSEMNU_ARG_WHITESP	2
-
+enum { A_ACTION_ASSIGN, A_ACTION_SET, A_ACTION_UNSET };
+enum { PARSEMNU_TEMPL_TERM_NL, PARSEMNU_ARG_WHITESP };
 #define IS_ID(c)	(isalnum((int)c) || ((c) == '_') || ((c) == '-'))
-#define STMT_START	do
-#define STMT_END	while (0)
 #define ERR(reason)	STMT_START {	\
     if (failure && first) {		\
 	*failure = reason; *failure_arg = NULL; return 0;		\
@@ -424,7 +416,8 @@ readseq(char *c, int strict)
   GEN z;
   check_new_fun=NULL; skipping_fun_def=0;
   added_newline = 1;
-  doskipseq(c, strict); z = lisseq(c);
+  doskipseq(c, strict);
+  z = lisseq0(c, seq); /* not lisseq: don't reset redefine_fun */
   if (!added_newline) pariputc('\n'); /* last output was print1() */
   return z;
 }
@@ -807,7 +800,7 @@ err_match(char *s, char c)
 
 #define match2(s,c) if (*s != c) err_match(s,c);
 #define match(c) \
-  do { match2(analyseur, c); analyseur++; } while (0)
+  STMT_START { match2(analyseur, c); analyseur++; } STMT_END
 
 static long
 readlong()
@@ -1499,7 +1492,7 @@ check_pointers(unsigned int ptrs, matcomp *init[])
 }
 
 #define match_comma() \
-  do { if (matchcomma) match(','); else matchcomma = 1; } while (0)
+  STMT_START { if (matchcomma) match(','); else matchcomma = 1; } STMT_END
 
 static void
 skipdecl(void)

@@ -1894,7 +1894,7 @@ gdiv(GEN x, GEN y)
 
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1]; p1=(GEN)y[1];
 	    if (p1==p2 || egalii(p1,p2))
-            { icopyifstack(p2,z[1]); }
+              icopyifstack(p2,z[1]);
             else
             { p2 = mppgcd(p1,p2); z[1] = (long)p2; }
             av=avma; (void)new_chunk(lgefint(x[1])+(lgefint(p1)<<1)); /* HACK */
