@@ -1515,7 +1515,7 @@ x
 ? lift(chinese(mod(7,15),mod(4,21)))
 67
 ? lindep([(1-3*sqrt(2))/(3-2*sqrt(3)),1,sqrt(2),sqrt(3),sqrt(6)])
-[-3, -3, 9, -2, 6]
+[-3, -3, 9, -2, 6]~
 ? lindep2([(1-3*sqrt(2))/(3-2*sqrt(3)),1,sqrt(2),sqrt(3),sqrt(6)],14)
 [-3, -3, 9, -2, 6]
 ? move(0,0,900);line(0,900,0)
@@ -2688,5 +2688,5 @@ d(391, 3120), mod(2081, 3120)]]
 ? getheap()
 [620, 118301]
 ? print("Total time spent: ",gettime());
-Total time spent: 1100
+Total time spent: 1420
 ? \q
