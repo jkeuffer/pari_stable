@@ -462,17 +462,23 @@ install(void *f, char *name, char *code)
   long hash;
   entree *ep = is_entry_intern(name, functions_hash, &hash);
 
-  if (ep) err(warner,"[install] '%s' already there. Not replaced", name);
+  check_proto(code);
+  if (ep)
+  {
+    if (ep->valence != EpINSTALL)
+      err(talker,"[install] identifier '%s' already in use", name);
+    err(warner, "[install] updating '%s' prototype; module not reloaded", name);
+    if (ep->code) free(ep->code);
+  }
   else
   {
     char *s = name;
     if (isalpha((int)*s))
       while (is_keyword_char(*++s)) /* empty */;
     if (*s) err(talker2,"not a valid identifier", s, name);
-    check_proto(code);
     ep = installep(f, name, strlen(name), EpINSTALL, 0, functions_hash + hash);
-    ep->code = pari_strdup(code);
   }
+  ep->code = pari_strdup(code);
   return ep;
 }
 
