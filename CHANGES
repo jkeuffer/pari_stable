@@ -137,6 +137,7 @@ BA 60- add "const" keyword to allow building with g++
    76- lex(x,"y") --> error [ should be -1 ]
    77- algdep(0,1) --> 0 [ should be x ]
    78- log(1, AGM) --> oo loop
+   79- [Configure+gcc] remove useless -m* arguments from CFLAGS [ obsolete ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -209,6 +210,7 @@ BA 46- --disable-kernel Configure option replaced by --kernel=none
    48- simplified fincke_pohst() [don't recompute gram_matrix]
    49- faster trueeta(), faster quadhilbert(D < 0)
    50- faster isprime (trial divide by small primes, recognize 1-word moduli)
+   51- ellheight: use Mestre's AGM to compute Archimedean height
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

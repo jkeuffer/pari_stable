@@ -2091,7 +2091,7 @@ entree functions_basic[]={
 {"elleisnum",99,(void*)elleisnum,5,"GLD0,L,p"},
 {"elleta",1,(void*)elleta,5,"Gp"},
 {"ellglobalred",18,(void*)globalreduction,5,"G"},
-{"ellheight",99,(void*)ellheight0,5,"GGD0,L,p"},
+{"ellheight",99,(void*)ellheight0,5,"GGD2,L,p"},
 {"ellheightmatrix",29,(void*)mathell,5,"GGp"},
 {"ellinit",99,(void*)ellinit0,5,"GD0,L,p"},
 {"ellisoncurve",20,(void*)oncurve,5,"lGG"},

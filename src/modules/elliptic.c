@@ -209,15 +209,15 @@ do_padic_agm(GEN *ptx1, GEN a1, GEN b1, GEN p)
   mi = min(precp(a1),precp(b1));
   for(;;)
   {
-    a=a1; b=b1; x=x1;
-    b1=gprec(gsqrt(gmul(a,b),0),mi); bmod1=modii((GEN)b1[4],p);
+    a = a1; b = b1; x = x1;
+    b1 = gprec(gsqrt(gmul(a,b),0),mi); bmod1 = modii((GEN)b1[4],p);
     if (!egalii(bmod1,bmod)) b1 = gneg_i(b1);
-    a1=gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
-    r1=gsub(a1,b1);
-    if (gcmp0(r1)) {x1=x; break;}
-    p1=gsqrt(gdiv(gadd(x,r1),x),0);
+    a1 = gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
+    r1 = gsub(a1,b1);
+    if (gcmp0(r1)) {x1 = x; break;}
+    p1 = gsqrt(gdiv(gadd(x,r1),x),0);
     if (! gcmp1(modii((GEN)p1[4],p))) p1 = gneg_i(p1);
-    x1=gmul(x,gsqr(gmul2n(gaddsg(1,p1),-1)));
+    x1 = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
   }
   *ptx1 = x1; return ginv(gmul2n(a1,2));
 }
@@ -334,7 +334,7 @@ initell0(GEN x, long prec)
   if (gsigne(p2) > 0) w = gneg_i(w);
   a1 = gmul2n(gsub(w,p2),-2);
   b1 = gmul2n(w,-1); sw = signe(w);
-  u2 = do_agm(&x1,a1,b1,prec,sw);
+  u2 = do_agm(&x1,a1,b1,prec,sw); /* 1/4M */
 
   w = gaddsg(1,ginv(gmul2n(gmul(u2,x1),1)));
   q = gsqrt(gaddgs(gsqr(w),-1),prec);
@@ -775,10 +775,11 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
   return gerepileupto(av, bilhells(e,z1,z2,h2,prec));
 }
 
+/* compute a,b such that E1: y^2 = x(x-a)(x-b) ~ E0 */
 static GEN
-new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, long prec)
+new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 {
-  GEN a,b,r0,r1,p1,p2,w, e1 = gmael(e,14,1), b2 = (GEN)e[6];
+  GEN a,b,r0,p1,p2,w, e1 = gmael(e,14,1), b2 = (GEN)e[6];
   long ty = typ(e[12]);
 
   r0 = gmul2n(b2,-2);
@@ -790,18 +791,23 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, long prec)
     GEN b4 = (GEN)e[7];
     if (!is_const_t(ty)) err(typeer,"zell");
 
-    /* w = sqrt(2b4 + 2b2 e1 + 12 e1^2) */
+    /* w^2 = 2b4 + 2b2 e1 + 12 e1^2 = 4(e1-e2)(e1-e3) */
     w = gsqrt(gmul2n(gadd(b4, gmul(e1,gadd(b2,gmulsg(6,e1)))),1),prec);
     if (gsigne(greal(p2)) > 0) w = gneg_i(w);
   }
-  a = gmul2n(gsub(w,p2),-2);
-  b = gmul2n(w,-1);
-  r1 = gsub(a,b);
-  p1 = gadd(x, gmul2n(gadd(e1,r0),-1));
-  p1 = gmul2n(p1,-1);
-  p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,r1)), prec));
-  *pta = a; *ptb = b;
-  return gmul(p1,gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,r1),p1),prec)),-1)));
+  *pta = a = gmul2n(gsub(w,p2),-2);
+  *ptb = b = gmul2n(w,-1);
+  if (flag)
+  {
+    GEN r1 = gsub(a,b);
+    p1 = gadd(x, gmul2n(gadd(e1,r0),-1));
+    p1 = gmul2n(p1,-1);
+    p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,r1)), prec));
+    return gmul(p1, gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,r1),p1),prec)),-1)));
+  }
+  x = gsub(x, e1);
+  p1 = gadd(x, b);
+  return gmul2n(gadd(p1, gsqrt(gsub(gsqr(p1), gmul2n(gmul(a,x),2)),prec)), -1);
 }
 
 GEN
@@ -817,7 +823,7 @@ zell(GEN e, GEN z, long prec)
   if (ty==t_INTMOD) err(typeer,"zell");
   if (lg(z)<3) return (ty==t_PADIC)? gun: gzero;
 
-  x1 = new_coords(e,(GEN)z[1],&a,&b,prec);
+  x1 = new_coords(e,(GEN)z[1],&a,&b,1, prec);
   if (ty==t_PADIC)
   {
     u2 = do_padic_agm(&x1,a,b,(GEN)D[2]);
@@ -831,7 +837,7 @@ zell(GEN e, GEN z, long prec)
   }
 
   sw = gsigne(greal(b)); fl=0;
-  for(;;) /* agm */
+  for(;;) /* ~ agm */
   {
     GEN a0=a, b0=b, x0=x1, r1;
 
@@ -2108,6 +2114,7 @@ akell(GEN e, GEN n)
   return gerepileuptoint(av,y);
 }
 
+/* h' := h_oo(a) + 1/2 log(denom(a)) */
 GEN
 hell(GEN e, GEN a, long prec)
 {
@@ -2134,6 +2141,7 @@ hell(GEN e, GEN a, long prec)
   return gerepileupto(av, gneg(p1));
 }
 
+/* h' := h_oo(x) + 1/2 log(denom(x)) */
 static GEN
 hells(GEN e, GEN x, long prec)
 {
@@ -2163,70 +2171,67 @@ init_ch() {
   v[1] = un; v[2] = v[3] = v[4] = zero; return v;
 }
 
-static GEN
-_vhell2(GEN e, GEN x, long prec)
-{
-  long i, lx = lg(x) ;
-  GEN mu = cgetg(lx, typ(x));
-  for (i=1; i<lx; i++) mu[i] = (long)hells(e, (GEN)x[i], prec);
-  return mu;
-}
-
 GEN
 hell2(GEN e, GEN x, long prec)
 {
-  GEN ep, e3, ro, p1, mu, d, xp;
-  long lx, i, tx;
+  GEN e3, ro, v, D;
   pari_sp av = avma;
 
-  d = (GEN)e[12];
+  if (lg(x) < 3) return gzero;
+  D = (GEN)e[12];
   ro= (GEN)e[14];
-  e3 = (gsigne(d) < 0)? (GEN)ro[1]: (GEN)ro[3];
-  p1 = init_ch(); p1[2] = laddgs(gfloor(e3),-1);
-  ep = coordch(e, p1);
-  xp = pointch(x, p1);
-  tx = typ(x[1]); lx = lg(x);
-  if (!is_matvec_t(tx))
-  {
-    if (lx < 3) { avma = av; return gzero; }
-    mu = hells(ep,xp,prec);
-  }
-  else if (typ(x) != t_MAT) mu = _vhell2(ep, xp, prec);
-  else
-  {
-    mu = cgetg(lx, t_MAT);
-    for (i=1; i<lx; i++) mu[i] = (long)_vhell2(ep, (GEN)xp[i], prec);
-  }
-  return gerepileupto(av, mu);
+  e3 = (gsigne(D) < 0)? (GEN)ro[1]: (GEN)ro[3];
+  v = init_ch(); v[2] = laddgs(gfloor(e3),-1);
+  return gerepileupto(av, hells(coordch(e,v), pointch(x,v), prec));
 }
 
-GEN
-hell0(GEN e, GEN z, long prec)
+/* exp( h_oo(z) ) */
+static GEN
+exphellagm(GEN e, GEN z, long prec)
 {
-  GEN a,b,s,x,u,v,u1,p1,p2,r;
-  long n,i, ex = 5-bit_accuracy(prec);
+  GEN x_a, a, b, r;
+  GEN V = cgetg(1, t_VEC), x = (GEN)z[1];
+  long n, ex = 5-bit_accuracy(prec);
+  GEN e1 = gmael(e,14,1);
 
-  /* FIXME: cf. zell But doesn't work. How to fix?? K.B. */
-  x = new_coords(e,(GEN)z[1],&a,&b,prec);
+  if (gcmp(x, e1) < 0) /* z not on neutral component */
+  {
+    GEN exph = exphellagm(e, addell(e, z,z), prec);
+    /* h_oo(2P) = 4h_oo(P) - log |2y + a1x + a3| */
+    return mpsqrt(mpsqrt( gmul(exph, gabs(d_ellLHS(e, z), prec)) ));
+  }
+  
+  x = new_coords(e, x, &a,&b, 0, prec);
+  x_a = gsub(x, a);
+  if (gsigne(a) > 0)
+  {
+    GEN a0 = a;
+    x = gsub(x, b);
+    a = gneg(b);
+    b = gsub(a0, b);
+  }
+  a = gsqrt(gneg(a), prec);
+  b = gsqrt(gneg(b), prec);
 
-  u = gmul2n(gadd(a,b), -1);
-  v = gsqrt(gmul(a,b), prec); s = gun;
+  /* compute height on isogenous curve E1 ~ E0 */
   for(n=0; ; n++)
   {
-    p1 = gmul2n(gsub(x, gsqr(v)), -1);
-    p2 = gsqr(u);
-    x = gadd(p1, gsqrt(gadd(gsqr(p1), gmul(x, p2)), prec));
-    p2 = gadd(x, p2);
-    for (i=1; i<=n; i++) p2 = gsqr(p2);
-    s = gmul(s, p2);
-    u1 = gmul2n(gadd(u,v), -1);
-    r = gsub(u,u1);
+    GEN p1, p2, ab, a0 = a;
+    a = gmul2n(gadd(a0,b), -1);
+    r = gsub(a, a0);
     if (gcmp0(r) || gexpo(r) < ex) break;
+    ab = gmul(a0, b);
+    b = gsqrt(ab, prec);
 
-    v = gsqrt(gmul(u,v), prec);
-    u = u1;
+    p1 = gmul2n(gsub(x, ab), -1);
+    p2 = gsqr(a);
+    x = gadd(p1, gsqrt(gadd(gsqr(p1), gmul(x, p2)), prec));
+    V = concatsp(V, gadd(x, p2));
   }
-  return gmul2n(glog(gdiv(gsqr(p2), s), prec) ,-1);
+  x = (GEN)V[n];
+  while (--n > 0) x = gdiv(gsqr(x), (GEN)V[n]);
+  /* height on E1 is log(x)/2. Go back to E0 */
+  return gdiv(x, mpsqrt( mpabs(x_a) ));
 }
 
 /* Assume e integral, given by a minimal model */
@@ -2254,8 +2259,14 @@ ghell0(GEN e, GEN a, long flag, long prec)
   switch(flag)
   {
     case 0:  z = hell2(e,a,prec); break; /* Tate 4^n */
-    case 1:  z = hell(e,a,prec);  break; /* Silverman's trick */
-    default: z = hell0(e,a,prec); break; /* Mestre's trick */
+    case 1:  z = hell(e,a,prec);  break; /* Silverman's log(sigma) */
+    default: z = exphellagm(e,a,prec);
+    {
+      GEN d = denom((GEN)a[1]);
+      if (!z) return gzero;
+      if (!is_pm1(d)) z = gmul(z, gsqrt(d, prec));
+      z = mplog(z); break; /* Mestre's AGM */
+    }
   }
   x = (GEN)a[1];
   y = (GEN)a[2];
@@ -2300,8 +2311,8 @@ ellheight0(GEN e, GEN a, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: return ghell(e,a,prec);
-    case 1: return ghell2(e,a,prec);
+    case 0: return ghell0(e,a,0,prec);
+    case 1: return ghell0(e,a,1,prec);
     case 2: return ghell0(e,a,2,prec);
   }
   err(flagerr,"ellheight");
@@ -2309,16 +2320,10 @@ ellheight0(GEN e, GEN a, long flag, long prec)
 }
 
 GEN
-ghell2(GEN e, GEN a, long prec)
-{
-  return ghell0(e,a,0,prec);
-}
+ghell2(GEN e, GEN a, long prec) { return ghell0(e,a,0,prec); }
 
 GEN
-ghell(GEN e, GEN a, long prec)
-{
-  return ghell0(e,a,1,prec);
-}
+ghell(GEN e, GEN a, long prec) { return ghell0(e,a,2,prec); }
 
 static long ellrootno_all(GEN e, GEN p, GEN* ptcond);
 
