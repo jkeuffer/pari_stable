@@ -282,6 +282,9 @@ BA 51- support for gp2c-run on Darwin
    53- made .fu and .tu return t_POLMOD, not t_POL
 BA 54- [GMP kernel] use mpn_sqrtrem for sqrtr_abs
    55- nfsubfields (use much less memory)
+GH 56- more robust thue(): faster enumeration of small solution, don't assume
+       that the full unit group is known, warn when conditional result is
+       obtained.
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
