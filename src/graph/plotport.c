@@ -309,22 +309,6 @@ rectscale(long ne, GEN x1, GEN x2, GEN y1, GEN y2)
   rectscale0(ne, gtodouble(x1), gtodouble(x2), gtodouble(y1), gtodouble(y2));
 }
 
-/*
- * #ifdef LONG_IS_64BIT
- * #  define MAXDTOL 9223372036854775807.0
- * #else
- * #  define MAXDTOL 2147483647.0
- * #endif
- *
- *
- * long
- * DTOL(double t)
- * {
- *   if (fabs(t) > MAXDTOL) err(affer2);
- *   return (long)t;
- * }
- */
-
 static void
 rectmove0(long ne, double x, double y, long relative)
 {
