@@ -1063,7 +1063,7 @@ isprincipalall0(GEN bnf, GEN x, long *ptprec, long flag)
   { /* g A = G Ur A + [ga]A, Ur A = D Q + R as above (R = ex)
            = G R + [GD]Q + [ga]A */
     GEN ga = (GEN)clg2[2], GD = (GEN)clg2[3];
-    col = act_arch(Bex, WB_C + lW);
+    if (lB) col = act_arch(Bex, WB_C + lW); else col = zerovec(1); /* nf=Q ! */
     if (lW) col = gadd(col, act_arch(A, ga));
     if (c)  col = gadd(col, act_arch(Q, GD));
   }
@@ -2708,7 +2708,7 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
     RES[2]=nf[2]; p1=cgetg(3,t_VEC); p1[1]=nf[3]; p1[2]=nf[4];
     RES[3]=(long)p1;
     RES[4]=nf[7];
-    z=cgetg(2,t_MAT); z[1]=lcopy(RES); return z;
+    z=cgetg(2,t_MAT); z[1]=(long)RES; return z;
   }
   z=cgetg(11,t_VEC);
   z[1]=(long)W;
@@ -2724,7 +2724,7 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
   z[9]=(long)clg2;
   z[10]=zero; /* dummy: we MUST have lg(bnf) != lg(nf) */
   if (CHANGE) { p1=cgetg(3,t_VEC); p1[1]=(long)z; p1[2]=(long)CHANGE; z=p1; }
-  return gcopy(z);
+  return z;
 }
 
 static GEN
@@ -2735,13 +2735,13 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
   GEN fu=cgetg(1,t_VEC), reg=gun, c_1=gun, zu=cgetg(3,t_VEC);
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
 
-  clg1[1]=un; clg1[2]=clg1[3]=clg2[3]=lgetg(1,t_VEC);
-  clg2[1]=clg2[2]=lgetg(1,t_MAT);
+  clg1[1]=un; clg1[2]=clg1[3]=clg2[2]=clg2[3]=lgetg(1,t_VEC);
+  clg2[1]=lgetg(1,t_MAT);
   zu[1]=deux; zu[2]=lnegi(gun);
   W=B=xarch=matarch=cgetg(1,t_MAT);
   vectbase=cgetg(1,t_COL); vperm=cgetg(1,t_VEC);
 
-  return gerepileupto(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,xarch,matarch,vectbase,vperm));
+  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,xarch,matarch,vectbase,vperm));
 }
 
 static GEN
@@ -3075,5 +3075,5 @@ MORE:
   c1 = gdiv(gmul(R,h), z);
   desallocate(&mat);
 
-  return gerepileupto(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,R,c1,zu,W,B,xarch,C,vectbase,vperm));
+  return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,R,c1,zu,W,B,xarch,C,vectbase,vperm));
 }
