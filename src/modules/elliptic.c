@@ -447,18 +447,6 @@ pointch(GEN x, GEN ch)
   tetpil=avma; return gerepile(av,tetpil,gcopy(y));
 }
 
-static long
-ellexpo(GEN e)
-{
-  long i,k2, k = gexpo((GEN)e[1]);
-  for (i=2; i<6; i++)
-  {
-    k2 = gexpo((GEN)e[i]);
-    if (k<k2) k = k2;
-  }
-  return k;
-}
-
 /* Exactness of lhs and rhs in the following depends in non-obvious ways
    on the coeffs of the curve as well as on the components of the point z.
    Thus if e is exact, with a1==0, and z has exact y coordinate only, the
@@ -477,8 +465,7 @@ oncurve(GEN e, GEN z)
   q = precision(p2);
   if (!p && !q) { avma=av; return 0; } /* both of p1, p2 are exact */
   if (!q || (p && p < q)) q = p; /* min among nonzero elts of {p,q} */
-  /* the constant 0.93 is arbitrary */
-  q = (gexpo(x)-ellexpo(e) < - bit_accuracy(q) * 0.93);
+  q = (gexpo(x) < gexpo(p1) - bit_accuracy(q) + 15);
   avma = av; return q;
 }
 
@@ -802,7 +789,7 @@ zell(GEN e, GEN z, long prec)
     return gerepileupto(av,t);
   }
 
-  sw=gsigne(greal(b)); fl=0;
+  sw = gsigne(greal(b)); fl=0;
   for(;;) /* agm */
   {
     GEN a0=a, b0=b, x0=x1, r1;
@@ -821,7 +808,7 @@ zell(GEN e, GEN z, long prec)
     }
     else fl = 0;
   }
-  u=gdiv(x1,a); t=gaddsg(1,u);
+  u = gdiv(x1,a); t = gaddsg(1,u);
   if (gcmp0(t) || gexpo(t) <  5 - bit_accuracy(prec))
     t = negi(gun);
   else

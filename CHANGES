@@ -60,12 +60,17 @@ BA 16- result was not always complete in nfgaloisconj()
    29- "ideals not coprime" in rnfsteinitz
 BA 30- typo in Configure [CPP] (cc --> CC) 
 BA 31- member functions for galoisinit
+   32- allowed power series in Mod(). Fixed cryptic error messages.
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
     2- improved on-line help wrt to defaults and ambiguities
        (? default/some_default, ? some_default)
     3- library functions gentimer, genmsgtimer, get_timer
+
+  Changed
+    1- default binary produced by Configure -g is now static
+    2- improved the heuristics in ellisoncurve
 
 ===========================================================================
 Done for version 2.0.17.beta (released 24/09/99):
