@@ -139,10 +139,11 @@ IZ  4- set of default colors (boldfg)
        characteristic polynomial of algebraic numbers, nfgcd).
        [undocumented, experminental]
     6- Pohlig-Hellman discrete log over Fp and nf.zk / pr
+BA  7- flag to galoissubcyclo (also output conductor)
 
   Changed
     1- start using the new modular functions [polcompositum]
-    2- mpsqrtnmod (modular n-th root of 1) uses Fp_shanks now
+BA  2- sqrtn, aka mpsqrtnmod (modular n-th root) uses Fp_shanks now
 
   Removed
     1- obsolete undocumented functions oldidealinv, idealinv0
