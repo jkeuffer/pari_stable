@@ -32,7 +32,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.4 (released 10/07/2002) [hopefully]:
+Done for version 2.2.4 (released ??/07/2002) [hopefully]:
   Fixed
     1- add default 'newgaloisformat' to make 2.2.3 C-22 optional (by default,
        old format will be used, preserving compatibility)
@@ -64,6 +64,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
          v = [0,0]; v + [v=0,v=0] --> SEGV
          u = Mod(x*Mod(1,2),polcyclo(25)*Mod(1,2)); sum(i=1,4,u=u^32) --> SEGV
    22- typo in to_Fp_simple [ bnfcertify(bnfinit(x^2-40!)) --> type error ]
+   23- memory leak in gp when handling '&' arguments 
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

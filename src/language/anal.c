@@ -684,7 +684,8 @@ typedef struct matcomp
 {
   GEN *ptcell;
   GEN parent;
-  long full_col, full_row;
+  int full_col, full_row;
+  void *extra; /* so far used by check_pointers only */
 } matcomp;
 
 /* Return the content of the matrix cell and sets members of corresponding
@@ -693,7 +694,8 @@ static GEN
 matcell(GEN p, matcomp *C)
 {
   GEN *pt = &p;
-  long c,r, tx, full_col, full_row;
+  long c,r, tx;
+  int full_col, full_row;
   tx = full_col = full_row = 0; 
   do {
     analyseur++; p = *pt; tx = typ(p);
@@ -989,10 +991,11 @@ affect_block(GEN *res)
 
 /* assign res at *pt in "simple array object" p */
 static GEN
-change_compo(matcomp c, GEN res)
+change_compo(matcomp *c, GEN res)
 {
-  GEN p = c.parent, *pt = c.ptcell;
-  long i, full_row = c.full_row, full_col = c.full_col;
+  GEN p = c->parent, *pt = c->ptcell;
+  long i;
+  int full_row = c->full_row, full_col = c->full_col;
   char *old = analyseur;
 
   if (typ(p) == t_VECSMALL)
@@ -1036,7 +1039,7 @@ matrix_block(GEN p)
   if (res)
   {
     if (fun) res = fun(cpt, res);
-    res = change_compo(c,res);
+    res = change_compo(&c,res);
     analyseur = end;
   }
   else res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
@@ -1295,11 +1298,11 @@ check_pointers(unsigned int ptrs, matcomp *init[])
       GEN *pt = c->ptcell, x = gclone(*pt);
       if (c->parent == NULL)
       {
-        if (isclone(*pt)) killbloc(*pt);
+        if (isclone(c->extra)) killbloc((GEN)c->extra);
         *pt = x;
       }
       else
-        (void)change_compo(*c, x);
+        (void)change_compo(c, x);
       free((void*)c);
     }
 }
@@ -1583,6 +1586,7 @@ identifier(void)
           {
             c->parent = NULL;
             c->ptcell = (GEN*)&ep->value;
+            c->extra = (GEN*)ep->value;
           }
           has_pointer |= (1 << i);
           init[i] = c;
