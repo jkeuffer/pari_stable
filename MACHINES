@@ -242,6 +242,10 @@ Binutils: 2.9.1.0.4 or 2.9.1.0.15
 (12) used LD = cc -Wl,-rpath,my_exotic_DLL_path
 
 (13) use /opt/SUNWspro/bin/fpversion to get explicit recommended CFLAGS.
+     use -fsimple=1;  the Sun FD6U2 cc 5.3 defaults to -fsimple=2 at higher
+optimization levels, which is deadly to PARI.
+(these options must be given _after_ the -fast macro if -fast is used, or the
+-fast expansion will override them.)
 
 (14) use asmarch=sparcv7
 (15) Configure defaults to hpux-none. Use Configure -a and specify the
