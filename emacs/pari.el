@@ -56,6 +56,15 @@ and furthering of constructs"
 :group 'gp :prefix "gp-")
 
 (eval-and-compile
+;; The next two variables are here to pacify the compiler !
+;; Do *not* assign any value to them or they may override ....
+(defvar gp-tutorial-requiredp)
+(defvar gp-auto-indent);
+
+(defvar gp-prompt-pattern
+  "^\\([?>]\\) [\n\t ]*"
+  "Regexp used to match gp prompts.
+Can be set with gp-set-prompt (bound to M-\\ p)")
 (require 'pari-conf)
 (require 'pari-messages)   ;; Provides: functions: gp-messager.
 (require 'pari-completion) ;; Provides: functions: gp-quit-cpl-edit.
@@ -66,19 +75,7 @@ and furthering of constructs"
   ;; Provides: variable:  gp-fontification-keywords
   ;;           functions: gp-update-fontification, gp-find-global-var
 (require 'sli-tools))
-(defvar gp-auto-indent); Do not define it here ! But at the end of this file.
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CAUTION :
-;; Because of the new prompt capabilities in gp-2 (e.g self-modifying...),
-;; it is now the user responsibility to set gp-prompt-pattern correctly.
-;; This can't be done automagically in a satisfactory way.
-(eval-and-compile
-(defvar gp-prompt-pattern
-  "^\\([?>]\\) [\n\t ]*"
-  "Regexp used to match gp prompts.
-Can be set with gp-set-prompt (bound to M-\\ p)")
-)
 (unless (fboundp 'gp-update-fontification)
   (defun gp-update-fontification nil nil))
 (unless (boundp 'gp-fontification-keywords)

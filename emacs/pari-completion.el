@@ -39,10 +39,6 @@
   (defun gp-find-global-var (l) (print "Feature pari-fontification is absent ..." "*Messages*"))))
 
 (defvar gp-process nil "Defined in pari.el")
-;; The next two variables are here to pacify the compiler !
-;; Do *not* assign any value to them or they may override ....
-(defvar gp-prompt-pattern)
-(defvar gp-tutorial-requiredp)
 (defcustom gp-readline-enabledp t
 "t if readline is enabled. Emacs will try to set it properly
 whenever a gp-session is started."
