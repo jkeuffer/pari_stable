@@ -1042,6 +1042,8 @@ type_name(long t)
     case t_LIST   : s="t_LIST";    break;
     case t_STR    : s="t_STR";     break;
     case t_VECSMALL:s="t_VECSMALL";break;
+    default: err(talker,"unknown type %ld",t);
+      s = NULL; /* not reached */
   }
   return s;
 }

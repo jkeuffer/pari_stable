@@ -144,6 +144,8 @@ pari_sighandler(int sig)
       msg="bus error: bug in PARI or calling program";
       break;
 #endif
+    default:
+      msg="unknown signal";
   }
   signal(sig,pari_sighandler);
   err(talker,msg);
@@ -350,7 +352,7 @@ pari_sig_init(void (*f)(int))
 void
 pari_init(long parisize, long maxprime)
 {
-  long i;
+  long i, size;
   GEN p;
 
 #ifdef STACK_CHECK
@@ -365,20 +367,20 @@ pari_init(long parisize, long maxprime)
 #ifndef WINCE
   if (INIT_SIG) pari_sig_init(pari_sighandler);
 #endif
-  parisize = fix_size(parisize);
+  size = fix_size(parisize);
 #if __MWERKS__
   {
     OSErr resultCode;
-    Handle newHand = TempNewHandle(parisize,&resultCode);
+    Handle newHand = TempNewHandle(size,&resultCode);
 
     if (!newHand) err(memer);
     HLock(newHand);
     bot = (long)*newHand;
   }
 #else
-  bot = (long) gpmalloc(parisize);
+  bot = (long) gpmalloc(size);
 #endif
-  top = avma = memused = bot+parisize;
+  top = avma = memused = bot+size;
   diffptr = initprimes(maxprime);
 
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
