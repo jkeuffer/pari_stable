@@ -225,6 +225,7 @@ BA 46- --disable-kernel Configure option replaced by --kernel=none
    50- faster isprime (trial divide by small primes, recognize 1-word moduli)
    51- ellheight: use Mestre's AGM to compute Archimedean height
    52- poldegree(0) is now VERYBIGINT
+   53- alpha + gcc: compile with -O3 [ since F14 fixed the optimizer "bugs" ]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
