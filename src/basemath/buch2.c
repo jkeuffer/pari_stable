@@ -359,7 +359,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   if (cache) pre_allocate(cache, n);
   for (i=1; i<n; i++)
   {
-    GEN m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
+    GEN M, m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
     GEN z = cgetg(3,t_VEC); z[1] = vp[1]; z[2] = vp[2];
     id2 = cgetg(a+1,t_VEC); Id2[i] = (long)id2; id2[1] = (long)z;
     alg = cgetg(a+1,t_VEC); Alg[i] = (long)alg; alg[1] = un;
@@ -370,7 +370,6 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
       if (!J)
       {
-        GEN M;
         if (j == 2 && !red(nf, vp, &M)) { j = 1; m = M; }
         break;
       }
@@ -386,10 +385,11 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
       rel->R[ rel->nz ] = j;
       for (k = 2; k < j; k++) m = element_mul(nf, m, (GEN)alg[k]);
       rel->m = gclone(m);
-      rel->ex= NULL; cache->last = rel;
-      /* trouble with subFB: include ideal even though it's principal */
-      if (j == 1 && F->sfb_chg == sfb_UNSUITABLE) j = 2;
+      rel->ex= NULL;
+      cache->last = rel;
     }
+    /* trouble with subFB: include ideal even though it's principal */
+    if (j == 1 && F->sfb_chg == sfb_UNSUITABLE) j = 2;
     setlg(id2, j);
     setlg(alg, j); Ord[i] = j; if (c < 64) c *= j;
     if (DEBUGLEVEL>1) fprintferr("\n");
@@ -2975,7 +2975,7 @@ nf_cloneprec(GEN nf, long prec, GEN *pnf)
 }
 
 static void
-trivial_rel(RELCACHE_t *cache, FB_t *F, long RU)
+init_rel(RELCACHE_t *cache, FB_t *F, long RU)
 {
   const long RELSUP = 5;
   const long n = F->KC + RU-1 + RELSUP; /* expected # of needed relations */
@@ -3057,7 +3057,7 @@ START:
   if (!Res || !subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
-  trivial_rel(&cache, &F, RU);
+  init_rel(&cache, &F, RU); /* trivial relations */
   if (nbrelpid > 0) {small_norm(&cache,&F,LOGD,nf,nbrelpid,LIMC2); avma = av2;}
 
   /* Random relations */
@@ -3085,7 +3085,6 @@ MORE:
   if (precpb)
   {
 PRECPB:
-    precdouble++;
     if (precadd) { PRECREG += precadd; precadd = 0; }
     else           PRECREG = (PRECREG<<1)-2;
     if (DEBUGLEVEL)
@@ -3093,18 +3092,17 @@ PRECPB:
       char str[64]; sprintf(str,"buchall (%s)",precpb);
       err(warnprec,str,PRECREG);
     }
-    precpb = NULL;
+    precdouble++; precpb = NULL;
     nf = nf_cloneprec(nf, PRECREG, pnf);
     if (F.pow && F.pow->arc) { gunclone(F.pow->arc); F.pow->arc = NULL; }
     for (i = 1; i < lg(PERM); i++) F.perm[i] = PERM[i];
     cache.chk = cache.base; W = NULL; /* recompute arch components + reduce */
   }
-  /* Reduce relation matrices */
   M = gmael(nf, 5, 1); 
   if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
-  {
-    long l = cache.last - cache.chk, j;
-    GEN mat = cgetg(l+1, t_VEC), emb = cgetg(l+1, t_MAT);
+  { /* Reduce relation matrices */
+    long l = cache.last - cache.chk + 1, j;
+    GEN mat = cgetg(l, t_VEC), emb = cgetg(l, t_MAT);
     REL_t *rel;
     for (j=1,rel = cache.chk + 1; rel <= cache.last; rel++,j++)
     {
