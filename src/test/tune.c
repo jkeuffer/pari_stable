@@ -149,7 +149,7 @@ int speed_option_verbose = 0;
 extern double speed_unittime;
 extern int    speed_precision;
 #else
-static double speed_unittime = 1e-5;
+static double speed_unittime = 1e-4;
 static int    speed_precision= 1000;
 static void speed_starttime() { (void)TIMER(); }
 static double speed_endtime() { return TIMER(); }
@@ -464,14 +464,34 @@ one(tune_param *param)
   return thresh_idx;
 }
 
+void error(int argc/* ignored */, char **argv)
+{
+  (void)argv;
+  err(talker, "usage: %s [-t] [-t] [-u unittime]", argv[0]);
+}
+
 int
 main(int argc, char **argv)
 {
   int i, MONTGOMERY_LIMIT;
   pari_init(4000000, 2);
-  if (argc > 3) err(talker, "usage: %s [-t] [-t]", argv[0]);
   for (i = 1; i < argc; i++)
-    if (strcmp(argv[i], "-t") == 0) option_trace++;
+  {
+    char *s = argv[i];
+    if (*s++ != '-') error(argc,argv);
+    switch(*s) {
+      case 't': option_trace++; continue;
+      case 'u': s++;
+        if (!*s)
+        {
+          if (++i == argc) error(argc,argv);
+          s = argv[i];
+        }
+        speed_unittime = atof(s);
+        break;
+      default: error(argc,argv);
+    }
+  }
   
   { static tune_param param; 
     param.name[0] = "KARATSUBA_MULI_LIMIT";
