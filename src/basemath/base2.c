@@ -455,149 +455,6 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   *ptdelta=delta; return m;
 }
 
-#if 0
-static void
-to_col(GEN x, GEN col)
-{
-  long i,n = lg(col), k = lgef(x)-1;
-  x++;
-  for (i=1; i<k; i++) col[i] = x[i];
-  for (   ; i<n; i++) col[i] = zero;
-}
-
-static GEN
-ordmax2(GEN f, GEN p, long epsilon, GEN *ptdelta)
-{
-  long sp,i,n=lgef(f)-3,av=avma, av2,limit;
-  GEN col,sym,hard_case_exponent,T2,Tn,m,v,delta,w,a;
-  const GEN pp = sqri(p);
-
-  if (cmpis(p,n) > 0)
-  {
-    hard_case_exponent = NULL;
-    sym = polsym(f,n-1);
-  }
-  else
-  {
-    long k; k = sp = itos(p);
-    while (k < n) k *= sp;
-    hard_case_exponent = stoi(k);
-  }
-  col = cgetg(n+1,t_COL);
-  T2=cgetg(2*n+1,t_MAT); for (i=1; i<=2*n; i++) T2[i]=lgetg(n+1,t_COL);
-  Tn=cgetg(n*n+1,t_MAT); for (i=1; i<=n*n; i++) Tn[i]=lgetg(n+1,t_COL);
-  v = new_chunk(n+1);
-
-  av2 = avma; limit = stack_lim(av2,1);
-  delta=gun; m=idmat(n);
-
-  for(;;)
-  {
-    long j,k,h, av0 = avma;
-    GEN hh,index,p1;
-
-    if (DEBUGLEVEL > 3)
-      fprintferr("ROUND2: epsilon = %ld\tavma = %ld\n",epsilon,avma);
-
-    w = mat_to_vecpol(m, 0);
-    if (hard_case_exponent)
-    {
-      for (i=1; i<=n; i++)
-      {
-        p1 = Fp_pow_mod_pol((GEN)w[i], hard_case_exponent, f,p);
-        to_col(p1, (GEN)T2[i]);
-      }
-      for (i=1; i<=n; i++) /* transpose */
-        for (j=1; j<i; j++)
-        {
-          p1 = gcoeff(T2,i,j);
-          coeff(T2,i,j) = coeff(T2,j,i);
-          coeff(T2,j,i)= (long)p1;
-        }
-    }
-    else
-    {
-      for (i=1; i<=n; i++)
-      {
-	for (j=1; j<i; j++)
-	{
-          p1 = Fp_res(gmul((GEN)w[i], (GEN)w[j]), f, p);
-	  coeff(T2,j,i) = coeff(T2,i,j) = lresii(quicktrace(p1,sym), p);
-	}
-        p1 = Fp_res(gsqr((GEN)w[i]), f, p);
-        coeff(T2,i,i) = lresii(quicktrace(p1,sym), p);
-      }
-    }
-    for (i=1; i<=n; i++)
-      for (j=1; j<=n; j++)
-	coeff(T2,j,n+i)=(i==j)? (long)p : zero;
-    rowred(T2,pp);
-    a = mat_to_vecpol(matinv(T2,p,n), 0);
-    if (2*expi(pp)+2<BITS_IN_LONG)
-    {
-      for (k=1; k<=n; k++)
-      {
-        long av1=avma;
-        for (h=i=1; i<=n; i++)
-        {
-          p1 = gres(gmul((GEN)a[i], (GEN)w[k]), f);
-          to_col(p1, col);
-          for (j=1; j<=n; j++)
-            { coeff(Tn,k,h)=itos(divii((GEN)col[j],p)); h++; }
-        }
-        avma=av1;
-      }
-      avma = av0;
-      rowred_long(Tn,pp[2]);
-    }
-    else
-    {
-      for (k=1; k<=n; k++)
-      {
-        for (h=i=1; i<=n; i++)
-        {
-          p1 = gres(gmul((GEN)a[i], (GEN)w[k]), f);
-          to_col(p1, col);
-          for (j=1; j<=n; j++)
-  #if 0
-            { coeff(Tn,k,h)=ldivii((GEN)col[j],p); h++; }
-  #endif
-            { coeff(Tn,k,h)=col[j]; h++; }
-        }
-      }
-      rowred(Tn,pp);
-    }
-    for (index=gun,i=1; i<=n; i++)
-      index = mulii(index,gcoeff(Tn,i,i));
-    if (gcmp1(index)) break;
-
-    m = mulmati(matinv(Tn,index,n), m);
-    hh = delta = mulii(index,delta);
-    for (i=1; i<=n; i++)
-      for (j=1; j<=n; j++)
-        hh = mppgcd(gcoeff(m,i,j),hh);
-    if (!is_pm1(hh))
-    {
-      m = gdiv(m,hh);
-      delta = divii(delta,hh);
-    }
-    epsilon -= 2 * ggval(index,p);
-    if (epsilon < 2) break;
-    if (low_stack(limit,stack_lim(av2,1)))
-    {
-      GEN *gptr[3]; gptr[0]=&m; gptr[1]=&delta;
-      if(DEBUGMEM>1) err(warnmem,"ordmax");
-      gerepilemany(av2, gptr,2);
-    }
-  }
-  {
-    GEN *gptr[2]; gptr[0]=&m; gptr[1]=&delta;
-    gerepilemany(av,gptr,2);
-  }
-  *ptdelta=delta; return m;
-}
-#endif
-
 /* Input:
  *  x normalized integral polynomial of degree n, defining K=Q(theta).
  *
@@ -716,18 +573,11 @@ discf2(GEN x)
 /*                                                                 */
 /*******************************************************************/
 
-static GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu);
-GEN Decomppadic(GEN p,long r,GEN f,long mf,GEN theta,GEN chi,GEN nu);
+GEN nilord2(GEN p,GEN fx,long mf,GEN gx,long flag);
+GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 static GEN dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U);
 static GEN maxord(GEN p,GEN f,long mf);
 static GEN nbasis(GEN ibas,GEN pd);
-#if 0
-static GEN eltppm(GEN f,GEN pd,GEN theta,GEN k);
-static GEN nilord(GEN p,GEN fx,long mf,GEN gx);
-static GEN testd(GEN p,GEN fa,long c,long Da,GEN alph2,long Ma,GEN theta);
-static GEN testb(GEN p,GEN fa,long Da,GEN theta,long Dt);
-#endif
-GEN nilord2(GEN p,GEN fx,long mf,GEN gx,long flag);
 static GEN testb2(GEN p,GEN fa,long Fa,GEN theta,long Ft);
 static GEN testc2(GEN p,GEN fa,GEN pmr,GEN alph2,long Ea,GEN thet2,long Et);
 
@@ -990,11 +840,7 @@ maxord(GEN p,GEN f,long mf)
   else
   {
     if (flw) { w=(GEN)factmod(f,p)[1]; r=lg(w)-1; h=lift_intern((GEN)w[r]); }
-#if 0
-    res = (r==1)? nilord(p,f,mf,h): Decomp(p,f,mf,polx[varn(f)],f,h);
-#else
-    res = (r==1)? nilord2(p,f,mf,h,0): Decomp(p,f,mf,polx[varn(f)],f,h);
-#endif
+    res = (r==1)? nilord2(p,f,mf,h,0): Decomp(p,f,mf,polx[varn(f)],f,h,0);
   }
   return gerepileupto(av,res);
 }
@@ -1103,26 +949,24 @@ get_partial_order_as_pols(GEN p, GEN f)
   return ib;
 }
 
-static GEN
-Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu)
+/* if flag != 0, factorization to precision r (maximal order otherwise) */
+GEN
+Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 {
-  GEN pk,ph,pdr,pmr,unmodp;
-  GEN b1,b2,b3,a1,e,f1,f2,ib1,ib2,ibas;
-  long n1,n2,j;
+  GEN res,pr,pk,ph,pdr,unmodp,b1,b2,b3,a1,e,f1,f2;
 
-  if (DEBUGLEVEL>=3)
+  if (DEBUGLEVEL>2)
   {
     fprintferr("  entering Decomp ");
     if (DEBUGLEVEL>5)
     {
       fprintferr("with parameters: p=%Z, expo=%ld\n",p,mf);
+      if (flag) fprintferr("precision = %ld\n",flag);
       fprintferr("  f=%Z",f);
     }
     fprintferr("\n");
   }
-  pdr=respm(f,derivpol(f),gpuigs(p,mf));
-
-  unmodp=gmodulsg(1,p);
+  unmodp = gmodulsg(1,p);
   b1=lift_intern(gmul(chi,unmodp));
   a1=gun; b2=gun;
   b3=lift_intern(gmul(nu,unmodp));
@@ -1140,40 +984,52 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu)
       a1 = gmul(a1,p1);
     }
   }
-  e=eleval(f,Fp_pol_red(gmul(a1,b2), p),theta);
-  e=gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
+  pdr = respm(f,derivpol(f),gpuigs(p,mf));
+  e = eleval(f,Fp_pol_red(gmul(a1,b2), p),theta);
+  e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
 
-  pk=p; pmr=mulii(p,sqri(pdr)); ph=mulii(pdr,pmr);
-  /* E(t)- e(t) belongs to p^k Op, which is contained in p^(k-df)*Zp[xi] */
+  pr = flag? gpowgs(p,flag): mulii(p,sqri(pdr));
+  pk=p; ph=mulii(pdr,pr);
+  /* E(t) - e(t) belongs to p^k Op, which is contained in p^(k-df)*Zp[xi] */
   while (cmpii(pk,ph) < 0)
   {
     e = gmul(gsqr(e), gsubsg(3,gmul2n(e,1)));
     e = gres(e,f); pk = sqri(pk);
-    e=gdiv(polmodi(gmul(pdr,e), mulii(pk,pdr)), pdr);
+    e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,pk)), pdr);
   }
   f1 = gcdpm(f,gmul(pdr,gsubsg(1,e)), ph);
-  f1 = Fp_res(f1,f, pmr);
-  f2 = Fp_res(Fp_deuc(f,f1, pmr), f, pmr);
-  f1 = polmodi(f1,pmr);
-  f2 = polmodi(f2,pmr);
+  f1 = Fp_res(f1,f, pr);
+  f2 = Fp_res(Fp_deuc(f,f1, pr), f, pr);
 
-  if (DEBUGLEVEL>=3)
+  if (DEBUGLEVEL>2)
   {
     fprintferr("  leaving Decomp");
     if (DEBUGLEVEL>5)
       fprintferr(" with parameters: f1 = %Z\nf2 = %Z\ne = %Z\n", f1,f2,e);
     fprintferr("\n");
   }
-  ib1 = get_partial_order_as_pols(p,f1); n1=lg(ib1)-1;
-  ib2 = get_partial_order_as_pols(p,f2); n2=lg(ib2)-1;
-  ibas=cgetg(n1+n2+1,t_VEC);
 
-  for (j=1; j<=n1; j++)
-    ibas[j]=(long)polmodi(gmod(gmul(gmul(pdr,(GEN)ib1[j]),e),f), pdr);
-  e=gsubsg(1,e);
-  for (   ; j<=n1+n2; j++)
-    ibas[j]=(long)polmodi(gmod(gmul(gmul(pdr,(GEN)ib2[j-n1]),e),f), pdr);
-  return nbasis(ibas,pdr);
+  if (flag)
+  {
+    b1=factorpadic4(f1,p,flag);
+    b2=factorpadic4(f2,p,flag); res=cgetg(3,t_MAT);
+    res[1]=lconcat((GEN)b1[1],(GEN)b2[1]);
+    res[2]=lconcat((GEN)b1[2],(GEN)b2[2]); return res;
+  }
+  else
+  {
+    GEN ib1,ib2;
+    long n1,n2,i;
+    ib1 = get_partial_order_as_pols(p,f1); n1=lg(ib1)-1;
+    ib2 = get_partial_order_as_pols(p,f2); n2=lg(ib2)-1;
+    res=cgetg(n1+n2+1,t_VEC);
+    for (i=1; i<=n1; i++)
+      res[i]=(long)polmodi(gmod(gmul(gmul(pdr,(GEN)ib1[i]),e),f), pdr);
+    e=gsubsg(1,e); ib2 -= n1;
+    for (   ; i<=n1+n2; i++)
+      res[i]=(long)polmodi(gmod(gmul(gmul(pdr,(GEN)ib2[i]),e),f), pdr);
+    return nbasis(res,pdr);
+  }
 }
 
 /* minimum extension valuation: res[0]/res[1] (both are longs) */
@@ -1194,78 +1050,6 @@ vstar(GEN p,GEN h)
   m = cgcd(v,k);
   res[0]=v/m; res[1]=k/m; return res;
 }
-
-#if 0
-/* Returns [theta,chi,nu] with theta non-primary */
-static GEN
-csrch(GEN p,GEN fa,GEN gamma)
-{
-  GEN b,h,theta,w;
-  long pp,t,v=varn(fa);
-
-  pp = p[2]; if (lgef(p)>3 || pp<0) pp=0;
-  for (t=1; ; t++)
-  {
-    h = pp? stopoly(t,pp,v): scalarpol(stoi(t),v);
-    theta = gadd(gamma,gmod(h,fa));
-    w=factcp(p,fa,theta); h=(GEN)w[3];
-    if (h[2] > 1)
-    {
-      b=cgetg(5,t_VEC); b[1]=un; b[2]=(long)theta;
-      b[3]=w[1]; b[4]=w[2]; return b;
-    }
-  }
-}
-
-/* Returns
- *  [1,theta,chi,nu] if theta non-primary
- *  [2,phi, * , * ]  if D_phi > D_alpha or M_phi > M_alpha
- */
-static GEN
-bsrch(GEN p,GEN fa,long ka,GEN eta,long Ma)
-{
-  long n=lgef(fa)-3,Da=lgef(eta)-3;
-  long c,r,j,MaVb,av=avma;
-  GEN famod,pc,pcc,beta,gamma,delta,pik,w,h;
-
-  pc=respm(fa,derivpol(fa),gpuigs(p,ka));
-  c=ggval(pc,p); pcc=sqri(pc);
-  famod=polmodi_keep(fa,pcc);
-
-  r=1+(long)ceil(c/(double)(Da)+gtodouble(gdivsg(c*n-2,mulsi(Da,subis(p,1)))));
-
-  beta=gdiv(lift_intern(gpuigs(gmodulcp(eta,famod),Ma)),p);
-
-  for(;;)
-  { /* Compute modulo pc. denom(pik, delta)=1. denom(beta, gamma) | pc */
-    beta=gdiv(polmodi(gmul(pc,beta),pcc), pc);
-    w=testd(p,fa,c,Da,eta,Ma,beta);
-    h=(GEN)w[1]; if (h[2] < 3) return gerepileupto(av,w);
-
-    w = vstar(p,(GEN)w[3]);
-    MaVb = (w[0]*Ma) / w[1];
-    pik=eltppm(famod,pc,eta,stoi(MaVb));
-
-    gamma=gmod(gmul(beta,(GEN)(vecbezout(pik,famod))[1]),famod);
-    gamma=gdiv(polmodi(gmul(pc,gamma),pcc),pc);
-    w=testd(p,fa,c,Da,eta,Ma,gamma);
-    h=(GEN)w[1]; if (h[2] < 3) return gerepileupto(av,w);
-
-    delta=eltppm(famod,pc,gamma,gpuigs(p,r*Da));
-    delta=gdiv(polmodi(gmul(pc,delta),pcc),pc);
-    w=testd(p,fa,c,Da,eta,Ma,delta);
-    h=(GEN)w[1]; if (h[2] < 3) return gerepileupto(av,w);
-
-    for (j=lgef(delta)-1; j>1; j--)
-      if (typ(delta[j]) != t_INT)
-      {
-        w = csrch(p,fa,gamma);
-        return gerepileupto(av,gcopy(w));
-      }
-    beta=gsub(beta,gmod(gmul(pik,delta),famod));
-  }
-}
-#endif
 
 static GEN 
 mycaract(GEN f, GEN beta)
@@ -1300,118 +1084,7 @@ factcp(GEN p,GEN f,GEN beta)
   b[3]=lstoi(l); return b;
 }
 
-#if 0 
-/* USED TO Return [theta_1,theta_2,L_theta,M_theta] with theta non-primary */
-/* Now return theta_2 */
-static GEN
-setup(GEN p,GEN f,GEN theta,GEN nut, long *La, long *Ma)
-{
-  GEN t1,t2,v,dt,pv;
-  long Lt,Mt,r,s,av=avma,tetpil,m,n,k;
-
-  n=lgef(nut)-1; pv=p;
-  for (m=1; ; m++) /* compute mod p^(2^m) */
-  {
-    t1=gzero; pv = sqri(pv);
-    for (k=n; k>=2; k--)
-    {
-      t1 = gres(gadd(gmul(t1,theta),(GEN)nut[k]), f);
-      dt = denom(content(t1));
-      if (gcmp1(dt))
-        t1 = polmodi(t1,pv);
-      else
-        t1 = gdiv(polmodi(gmul(t1,dt),mulii(dt,pv)),dt);
-    }
-    v = vstar(p, mycaract(f,t1));
-    if (v[0] < (v[1]<<m)) break;
-  }
-  Lt=v[0]; Mt=v[1]; cbezout(Lt,-Mt,&r,&s);
-  if (r<=0) { long q = (-r) / Mt; q++; r += q*Mt; s += q*Lt; }
-  t2 = lift_intern(gpuigs(gmodulcp(t1,f),r));
-  p = gpuigs(p,s); tetpil=avma; *La=Lt; *Ma=Mt;
-  return gerepile(av,tetpil,gdiv(t2,p));
-}
-#endif 0
-
 #define RED 1
-
-#if 0
-static GEN
-nilord(GEN p,GEN fx,long mf,GEN gx)
-{
-  long La,Ma,first=1,v=varn(fx);
-  GEN h,res,alpha,chi,nu,eta,w,phi,pmf,Dchi,pdr,pmr;
-
-  if (DEBUGLEVEL>=3)
-  {
-    fprintferr("  entering Nilord");
-    if (DEBUGLEVEL>5)
-    {
-      fprintferr(" with parameters: p=%Z, expo=%ld\n",p,mf);
-      fprintferr("  fx=%Z, gx=%Z",fx,gx);
-    }
-    fprintferr("\n");
-  }
-  pmf=gpuigs(p,mf+1); alpha=polx[v];
-  nu=gx; chi=fx; Dchi=gpuigs(p,mf);
-#if RED
-  pdr=respm(fx,derivpol(fx), Dchi);
-  pmr=mulii(sqri(pdr),p); chi = dummycopy(chi);
-#endif
-
-  for(;;)
-  {
-#if RED
-    chi = polmodi(chi, pmr);
-#endif
-    if (first) first=0;
-    else
-    {
-      res=dedek(chi,mf,p,nu);
-      if (res) return dbasis(p,fx,mf,alpha,res);
-    }
-    if (vstar(p,chi)[0] > 0)
-    {
-      alpha = gadd(alpha,gun);
-      chi = poleval(chi, gsub(polx[v],gun));
-#if RED
-      chi = polmodi(chi, pmr);
-#endif
-      nu  = polmodi(poleval(nu, gsub(polx[v],gun)), p);
-    }
-    eta=setup(p,chi,polx[v],nu, &La,&Ma);
-    if (La>1)
-      alpha=gadd(alpha,eleval(fx,eta,alpha));
-    else
-    {
-      w=bsrch(p,chi,ggval(Dchi,p),eta,Ma);
-      phi=eleval(fx,(GEN)w[2],alpha);
-      if (gcmp1((GEN)w[1]))
-        return Decomp(p,fx,mf,phi,(GEN)w[3],(GEN)w[4]);
-      alpha=gdiv(polmodi(gmul(pmf,phi), mulii(pmf,p)),pmf);
-    }
-
-    for (;;)
-    {
-      w=factcp(p,fx,alpha); chi=(GEN)w[1]; nu=(GEN)w[2]; h=(GEN)w[3];
-      if (h[2] > 1) return Decomp(p,fx,mf,alpha,chi,nu);
-#if 0
-      Dchi = respm(chi,derivpol(chi), pmf);
-#endif
-      Dchi = modii(discsr(polmodi_keep(chi,pmf)), pmf);
-      if (gcmp0(Dchi))
-      {
-        Dchi= discsr(chi);
-        if (gcmp0(Dchi)) { alpha=gadd(alpha,gmul(p,polx[v])); continue; }
-#if RED
-        pmr = gpowgs(p, 2 * ggval(Dchi,p) + 1);
-#endif
-      }
-      break;
-    }
-  }
-}
-#endif
 
 /* reduce the element elt modulo rd, taking first of the denominators */
 static GEN
@@ -1485,7 +1158,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf)
     nchi = (GEN)w[1]; 
     nnu  = (GEN)w[2]; 
     l    = itos((GEN)w[3]);
-    if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu);
+    if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
     pdr = modii(respm(nchi, derivpol(nchi), pmr), pmr);
   }
 
@@ -1513,7 +1186,7 @@ GEN
 nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
   long Fa, La, Ea, oE, Fg, eq, er, v = varn(fx), i, nv, Le, Ee, N, l, vn;
-  GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib, pfl;
+  GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib;
   GEN gamm, chig, nug, delt, beta, eta, chie, nue, pia, vb, opa;
 
   if (DEBUGLEVEL >= 3)
@@ -1530,8 +1203,6 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
     fprintferr("\n");
   }
   
-  if (flag) pfl = gpowgs(p, flag);
-
   /* this is quite arbitrary; what is important is that >= mf + 1 */
   pmf = gpowgs(p, mf + 3);
   pdr = respm(fx, derivpol(fx), pmf);
@@ -1676,10 +1347,8 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	/* there are at least 2 factors mod. p => chi can be split */
 	phi  = eleval(fx, gamm, alph);
 	phi  = redelt(phi, p, pmf);
-	if (flag)
-	  return Decomppadic(p, flag, fx, ggval(pmf, p), phi, chig, nug);
-	else
-	  return Decomp(p, fx, mf, phi, chig, nug);
+	if (flag) mf = ggval(pmf, p);
+        return Decomp(p, fx, mf, phi, chig, nug, flag);
       }
 
       Fg = degree(nug);
@@ -1694,11 +1363,8 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  /* there are at least 2 factors mod. p => chi can be split */
 	  phi = eleval(fx, (GEN)w[2], alph);
 	  phi = redelt(phi, p, pmf);
-	  if (flag)
-	    return Decomppadic(p, flag, fx, ggval(pmf, p), phi, 
-			       (GEN)w[3], (GEN)w[4]);
-	  else
-	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4]);
+	  if (flag) mf = ggval(pmf, p);
+          return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
 	}
 	break;
       }
@@ -1735,10 +1401,8 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	    delete_var();      
 	    phi = eleval(fx, eta, alph);
 	    phi = redelt(phi, p, pmf);
-	    if (flag)
-	      return Decomppadic(p, flag, fx, ggval(pmf, p), phi, chie, nue);
-	    else
-	      return Decomp(p, fx, mf, phi, chie, nue);
+	    if (flag) mf = ggval(pmf, p);
+            return Decomp(p, fx, mf, phi, chie, nue, flag);
 	  }
 	  
 	  /* if vp(eta) = vp(gamma - delta) > 0 */
@@ -1761,11 +1425,8 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  /* there are at least 2 factors mod. p => chi can be split */
 	  phi = eleval(fx, (GEN)w[2], alph);
 	  phi = redelt(phi, p, pmf);
-	  if (flag)
-	    return Decomppadic(p, flag, fx, ggval(pmf, p), phi, 
-			       (GEN)w[3], (GEN)w[4]);
-	  else 
-	    return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4]);
+	  if (flag) mf = ggval(pmf, p);
+          return Decomp(p, fx, mf, phi, (GEN)w[3], (GEN)w[4], flag);
 	}
 	break;
       }
@@ -1795,37 +1456,13 @@ nilord2(GEN p, GEN fx, long mf, GEN gx, long flag)
 	l  = lg(p1) - 1;
 	if (l == 1) return NULL;
 	phi = redelt(alph, p, pmf);
-	return Decomppadic(p, flag, fx, ggval(pmf, p), phi, chi, (GEN)p1[l]);
+	return Decomp(p, fx, ggval(pmf, p), phi, chi, (GEN)p1[l], flag);
       }
       else
 	return dbasis(p, fx, mf, alph, chi);
     }
   }
 }
-
-#if 0
-/* Returns [1,phi,chi,nu] if phi non-primary
- *         [2,phi,chi,nu] if D_phi = lcm (D_alpha, D_theta)
- */
-static GEN
-testb(GEN p,GEN fa,long Da,GEN theta,long Dt)
-{
-  long pp,Dat,t,v=varn(fa);
-  GEN b,w,phi,h;
-
-  Dat=clcm(Da,Dt)+3; b=cgetg(5,t_VEC);
-  pp = p[2]; if (lgef(p)>3 || pp<0) pp=0;
-  for (t=1; ; t++)
-  {
-    h = pp? stopoly(t,pp,v): scalarpol(stoi(t),v);
-    phi = gadd(theta,gmod(h,fa));
-    w=factcp(p,fa,phi); h=(GEN)w[3];
-    if (h[2] > 1) { b[1]=un; break; }
-    if (lgef(w[2]) == Dat) { b[1]=deux; break; }
-  }
-  b[2]=(long)phi; b[3]=w[1]; b[4]=w[2]; return b;
-}
-#endif 
 
 /* Returns [1,phi,chi,nu] if phi non-primary
  *         [2,phi,chi,nu] with F_phi = lcm (F_alpha, F_theta) 
@@ -1858,34 +1495,6 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, long Ft)
   return b;
 }
 
-#if 0
-/* Returns [1,phi,chi,nu] if phi non-primary
- *         [2,phi,chi,nu] if M_phi = lcm (M_alpha, M_theta)
- */
-static GEN
-testc(GEN p, GEN fa, long c, GEN alph2, long Ma, GEN thet2, long Mt)
-{
-  GEN b,pc,ppc,c1,c2,c3,psi,phi,w,h;
-  long r,s,t,v=varn(fa);
-
-  b=cgetg(5,t_VEC); pc=gpuigs(p,c); ppc=mulii(pc,p);
-
-  cbezout(Ma,Mt,&r,&s); t=0;
-  while (r<0) { r=r+Mt; t++; }
-  while (s<0) { s=s+Ma; t++; }
-
-  c1=lift_intern(gpuigs(gmodulcp(alph2,fa),s));
-  c2=lift_intern(gpuigs(gmodulcp(thet2,fa),r));
-  c3=gdiv(gmod(gmul(c1,c2),fa),gpuigs(p,t));
-  psi=gdiv(polmodi(gmul(pc,c3),ppc),pc);
-  phi=gadd(polx[v],psi);
-
-  w=factcp(p,fa,phi); h=(GEN)w[3];
-  b[1] = (h[2] > 1)? un: deux;
-  b[2]=(long)phi; b[3]=w[1]; b[4]=w[2]; return b;
-}
-#endif 
-
 /* Returns [1, phi, chi, nu] if phi non-primary
  *         [2, phi, chi, nu] if E_phi = lcm (E_alpha, E_theta)
  */
@@ -1916,42 +1525,6 @@ testc2(GEN p, GEN fa, GEN pmr, GEN alph2, long Ea, GEN thet2, long Et)
   return b;
 }
 
-#if 0
-/* Returns
- *  [1,phi,chi,nu] if theta non-primary
- *  [2,phi,chi,nu] if D_phi > D_aplha or M_phi > M_alpha
- *  [3,phi,chi,nu] otherwise
- */
-static GEN
-testd(GEN p,GEN fa,long c,long Da,GEN alph2,long Ma,GEN theta)
-{
-  long Lt,Mt,Dt,av=avma,tetpil;
-  GEN chi,nu,thet2,b,w,h;
-
-  b=cgetg(5,t_VEC); w=factcp(p,fa,theta);
-  chi=(GEN)w[1]; nu=(GEN)w[2]; h=(GEN)w[3];
-  if (h[2] > 1)
-  {
-    b[1]=un; b[2]=(long)theta; b[3]=(long)chi; b[4]=(long)nu;
-  }
-  else
-  {
-    Dt=lgef(nu)-3;
-    if (Da < clcm(Da,Dt)) b = testb(p,fa,Da,theta,Dt);
-    else
-    {
-      thet2=setup(p,fa,theta,nu, &Lt,&Mt);
-      if (Ma < clcm(Ma,Mt)) b = testc(p,fa,c,alph2,Ma,thet2,Mt);
-      else
-      {
-        b[1]=lstoi(3); b[2]=(long)theta; b[3]=(long)chi; b[4]=(long)nu;
-      }
-    }
-  }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(b));
-}
-#endif 
-
 /* evaluate h(a) mod f */
 GEN
 eleval(GEN f,GEN h,GEN a)
@@ -1969,34 +1542,6 @@ eleval(GEN f,GEN h,GEN a)
   }
   return gerepile(av,tetpil,y);
 }
-
-#if 0
-/* Compute theta^k mod (f,pd) */
-static GEN
-eltppm(GEN f,GEN pd,GEN theta,GEN k)
-{
-  GEN phi,psi,D, q = k;
-  long av = avma, av1, lim = stack_lim(av,2);
-
-  if (!signe(k)) return polun[varn(f)];
-  D = mulii(pd, sqri(pd)); av1 = avma;
-  phi=pd; psi=gmul(pd,theta);
-
-  for(;;)
-  {
-    if (mod2(q)) phi = gdivexact(Fp_res(gmul(phi,psi), f, D), pd);
-    q=shifti(q,-1); if (!signe(q)) break;
-    psi = gdivexact(Fp_res(gsqr(psi), f, D), pd);
-    if (low_stack(lim,stack_lim(av,2)))
-    {
-      GEN *gptr[3]; gptr[0]=&psi; gptr[1]=&phi; gptr[2]=&q;
-      if(DEBUGMEM>1) err(warnmem,"eltppm");
-      gerepilemany(av1,gptr,3);
-    }
-  }
-  return gerepileupto(av,gdiv(phi,pd));
-}
-#endif 
 
 GEN addshiftw(GEN x, GEN y, long d);
 

@@ -667,6 +667,42 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   splitgen(m,t,  d,p,q,r);
 }
 
+/* return S = [ x^p, x^2p, ... x^(n-1)p ] mod (p, T) */
+static GEN
+init_pow_p_mod_pT(GEN p, GEN T)
+{
+  long i, n = lgef(T)-3, v = varn(T);
+  GEN p1, S = cgetg(n, t_VEC);
+  S[1] = (long)Fp_pow_mod_pol(polx[v], p, T, p);
+  for (i=2; i < n; i+=2)
+  {
+    p1 = gsqr((GEN)S[i>>1]);
+    S[i]   = (long)Fp_res(p1, T, p);
+    if (i == n-1) break;
+    p1 = gmul((GEN)S[i], (GEN)S[1]);
+    S[i+1] = (long)Fp_res(p1, T, p);
+  }
+  return S;
+}
+
+/* compute x^p, S is as above */
+static GEN
+spec_Fp_pow_mod_pol(GEN x, GEN p, GEN S)
+{
+  long i,dx = lgef(x)-3;
+  GEN x0 = x+2, z;
+  z = (GEN)x0[0];
+  for (i = 1; i <= dx; i++)
+  {
+    GEN d, c = (GEN)x0[i]; /* assume coeffs in [0, p-1] */
+    if (!signe(c)) continue;
+    d = (GEN)S[i]; if (!gcmp1(c)) d = gmul(c,d);
+    z = gadd(z, d);
+  }
+  z = Fp_pol_red(z, p);
+  return z;
+}
+
 /* factor f mod pp. If (simple) ouput only the degrees, not the factors */
 static GEN
 factcantor0(GEN f, GEN pp, long simple)
@@ -687,6 +723,8 @@ factcantor0(GEN f, GEN pp, long simple)
     k = 0;
     while (lgef(g1)>3)
     {
+      long du,dg;
+      GEN S;
       k++; if (p && !(k%p)) { k++; f2 = Fp_deuc(f2,g1,pp); }
       p1 = Fp_pol_gcd(f2,g1, pp); u = g1; g1 = p1;
       if (!gcmp1(p1))
@@ -694,49 +732,52 @@ factcantor0(GEN f, GEN pp, long simple)
         u = Fp_deuc( u,p1,pp);
         f2= Fp_deuc(f2,p1,pp);
       }
-      if (lgef(u)>3)
+      du = lgef(u)-3;
+      if (du <= 0) continue;
+
+      /* here u is square-free (product of irred. of multiplicity e * k) */
+      S = init_pow_p_mod_pT(pp, u);
+      pd=gun; v=polx[vf];
+      for (d=1; d <= du>>1; d++)
       {
-        /* here u is square-free (product of irred. of multiplicity e * k) */
-        pd=gun; v=polx[vf];
-        for (d=1; d <= (lgef(u)-3)>>1; d++)
-        {
-          pd=mulii(pd,pp); v=Fp_pow_mod_pol(v,pp, u,pp);
-          g = Fp_pol_gcd(gadd(v, gneg(polx[vf])), u, pp);
+        if (!simple) pd = mulii(pd,pp);
+        // v = Fp_pow_mod_pol(v,pp, u,pp);
+        v = spec_Fp_pow_mod_pol(v, pp, S);
+        g = Fp_pol_gcd(gadd(v, gneg(polx[vf])), u, pp);
+        dg = lgef(g)-3;
+        if (dg <= 0) continue;
 
-          if (lgef(g)>3)
-          {
-           /* Ici g est produit de pol irred ayant tous le meme degre d; */
-            j=nbfact+(lgef(g)-3)/d;
+        /* Ici g est produit de pol irred ayant tous le meme degre d; */
+        j=nbfact+dg/d;
 
-            if (simple)
-              for ( ; nbfact<j; nbfact++)
-                { t[nbfact]=(GEN)d; ex[nbfact]=e*k; }
-            else
-            {
-              long r;
-              g = normalize_mod_p(g, pp);
-              t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
-              r = vali(q); q = shifti(q,-r);
-             /* le premier parametre est un entier variable m qui sera
-              * converti en un polynome w dont les coeff sont ses digits en
-              * base p (initialement m = p --> X) pour faire pgcd de g avec
-              * w^(p^d-1)/2 jusqu'a casser. p = 2 will be treated separately.
-              */
-              if (p)
-                split(p,t+nbfact,d,pp,q,r);
-              else
-                splitgen(pp,t+nbfact,d,pp,q,r);
-              for (; nbfact<j; nbfact++) ex[nbfact]=e*k;
-            }
-            u=Fp_deuc(u,g,pp);
-            v=Fp_res(v,u,pp);
-          }
-        }
-        if (lgef(u)>3)
+        if (simple)
+          for ( ; nbfact<j; nbfact++)
+            { t[nbfact]=(GEN)d; ex[nbfact]=e*k; }
+        else
         {
-          t[nbfact] = simple? (GEN)(lgef(u)-3): u;
-          ex[nbfact++]=e*k;
+          long r;
+          g = normalize_mod_p(g, pp);
+          t[nbfact]=g; q = subis(pd,1); /* also ok for p=2: unused */
+          r = vali(q); q = shifti(q,-r);
+         /* le premier parametre est un entier variable m qui sera
+          * converti en un polynome w dont les coeff sont ses digits en
+          * base p (initialement m = p --> X) pour faire pgcd de g avec
+          * w^(p^d-1)/2 jusqu'a casser. p = 2 is treated separately.
+          */
+          if (p)
+            split(p,t+nbfact,d,pp,q,r);
+          else
+            splitgen(pp,t+nbfact,d,pp,q,r);
+          for (; nbfact<j; nbfact++) ex[nbfact]=e*k;
         }
+        du -= dg;
+        u = Fp_deuc(u,g,pp);
+        v = Fp_res(v,u,pp);
+      }
+      if (du)
+      {
+        t[nbfact] = simple? (GEN)du: normalize_mod_p(u, pp);
+        ex[nbfact++]=e*k;
       }
     }
     j = lgef(f2); if (j==3) break;
@@ -1429,80 +1470,8 @@ factorpadic2(GEN x, GEN p, long r)
 /*                FACTORISATION P-adique avec ROUND 4              */
 /*                                                                 */
 /*******************************************************************/
-GEN polmodi(GEN x, GEN y);
-GEN polmodi_keep(GEN x, GEN y);
+GEN Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long r);
 GEN nilord2(GEN p, GEN fx, long mf, GEN gx, long flag);
-
-GEN
-Decomppadic(GEN p,long r,GEN f,long mf,GEN theta,GEN chi,GEN nu)
-{
-  GEN pk,ph,pdr,unmodp;
-  GEN pr,res,b1,b2,b3,a1,e,f1,f2;
-  long valk;
-
-  if (DEBUGLEVEL>=3)
-  {
-    fprintferr("  entering Decomp_padic ");
-    if (DEBUGLEVEL>=4)
-    {
-      fprintferr("with params: p=%Z, exponent=%ld, prec=%ld\n", p,mf,r);
-      fprintferr("  f=%Z",f);
-    }
-    fprintferr("\n");
-  }
-  unmodp=gmodulsg(1,p);
-
-  pdr = respm(f, derivpol(f), gpuigs(p,mf));
-
-  b1=lift_intern(gmul(chi,unmodp)); a1=gun;
-  b2=gun; b3=lift_intern(gmul(nu,unmodp));
-  while (lgef(b3) > 3)
-  {
-    GEN p1;
-    b1 = Fp_deuc(b1,b3, p);
-    b2 = Fp_pol_red(gmul(b2,b3), p);
-    b3 = Fp_pol_extgcd(b2,b1, p, &a1,&p1);
-    p1 = leading_term(b3);
-    if (!gcmp1(p1))
-    {
-      p1 = mpinvmod(p1,p);
-      b3 = gmul(b3,p1);
-      a1 = gmul(a1,p1);
-    }
-  }
-  e=eleval(f,Fp_pol_red(gmul(a1,b2), p),theta);
-  if (padicprec(e,p) > 0)
-    e=gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
-
-  pk=p; pr=gpuigs(p,r); ph=mulii(pdr,pr); valk = 1;
-  /* E(t)-e(t) belongs to p^k Op, which is contained in p^(k-df)*Zp[xi] */
-  while (cmpii(pk,ph) < 0)
-  {
-    e = gmul(e,gmul(e,gsubsg(3,gmul2n(e,1))));
-    e = gres(e,f); pk=sqri(pk); valk <<= 1;
-    if (valk<=padicprec(e,p))
-      e = gdiv(polmodi(gmul(pdr,e), mulii(pk,pdr)), pdr);
-  }
-  f1=gcdpm(f,gmul(pdr,gsubsg(1,e)), ph);
-  f1 = Fp_res(f1,f, pr);
-  f2 = Fp_res(Fp_deuc(f,f1, pr), f, pr);
-
-  if (DEBUGLEVEL>=4)
-  {
-    fprintferr("  leaving Decomp_padic with parameters: ");
-    fprintferr("f1=%Z, f2=%Z\n",f1,f2);
-  }
-  b1=factorpadic4(f1,p,r);
-  b2=factorpadic4(f2,p,r); res=cgetg(3,t_MAT);
-  res[1]=lconcat((GEN)b1[1],(GEN)b2[1]);
-  res[2]=lconcat((GEN)b1[2],(GEN)b2[2]); return res;
-}
-
-static GEN
-nilordpadic(GEN p,long r,GEN fx,long mf,GEN gx)
-{
-  return nilord2(p, fx, mf, gx, r);
-}
 
 static GEN
 squarefree(GEN f, GEN *ex)
@@ -1551,8 +1520,8 @@ factorpadic4(GEN f,GEN p,long prec)
     m = (pr<=mfx)?mfx+1:pr;
     w = (GEN)factmod(fx,p)[1]; r = lg(w)-1;
     g = lift_intern((GEN)w[r]);
-    p2 = (r == 1)? nilordpadic(p,pr,fx,mfx,g)
-                 : Decomppadic(p,m,fx,mfx,polx[v],fx,g);
+    p2 = (r == 1)? nilord2(p,fx,mfx,g,pr)
+                 : Decomp(p,fx,mfx,polx[v],fx,g,m);
     if (p2)
     {
       p2 = gerepileupto(av1,p2);
