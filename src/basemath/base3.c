@@ -590,9 +590,15 @@ basistoalg(GEN nf, GEN x)
 GEN
 pol_to_vec(GEN x, long N)
 {
-  long i,l=lgef(x)-1;
+  long i, l;
   GEN z = cgetg(N+1,t_COL);
-  x++;
+  if (typ(x) != t_POL)
+  {
+    z[1] = (long)x;
+    for (i=2; i<=N; i++) z[i]=zero;
+    return z;
+  }
+  l = lgef(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
   for (   ; i<=N; i++) z[i]=zero;
   return z;
