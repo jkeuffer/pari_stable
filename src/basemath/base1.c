@@ -1895,7 +1895,7 @@ _polredabs(nfbasic_t *T, GEN *u)
 
   d.v = varn(T->x);
   d.r1= T->r1;
-  d.bound = T2_from_embed(F.ro, d.r1);
+  d.bound = gmul(T2_from_embed(F.ro, d.r1), dbltor(1.00000001));
   for (i=1; ; i++)
   {
     GEN R = R_from_QR(F.G, prec);
