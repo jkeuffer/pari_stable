@@ -28,7 +28,7 @@ improvements.
    * Polynomials:
      - much faster factorization over Z[X] (van Hoeij's algorithm) or Fq[X]
        (more efficient modular kernel), esp. when the polynomial is defined
-       over a subfield.
+       over Fp.
      - Ducos' subresultant algorithm for resultants
 
    * Number field:
