@@ -83,7 +83,7 @@ arith_proto2(long f(GEN,GEN), GEN x, GEN n)
   return stoi(f(x,n));
 }
 
-static GEN
+GEN
 arith_proto2gs(long f(GEN,long), GEN x, long y)
 {
   long l,i,tx = typ(x);
@@ -1904,7 +1904,7 @@ sfcont2(GEN b, GEN x, long k)
 
   if (k)
   {
-    if (k>=l1) err(typeer,"sfcont2");
+    if (k>=l1) err(talker,"list of numerators too short in sfcontf2");
     l1 = k+1;
   }
   y=cgetg(l1,t_VEC);
