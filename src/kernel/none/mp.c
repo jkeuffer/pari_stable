@@ -1463,84 +1463,103 @@ sqrispec(GEN a, long na)
 
 /********************************************************************/
 /**                                                                **/
-/**                      INTEGER SQUARE ROOT                       **/
+/**                    KARATSUBA SQUARE ROOT                       **/
+/**      adapted from Paul Zimmermann's implementation of          **/
+/**      his algorithm in GMP (mpn_sqrtrem)                        **/
 /**                                                                **/
 /********************************************************************/
 
-#if 0
-/* Assume a has <= 4 words, return trunc[sqrt(abs(a))] */
-static ulong
-mpsqrtl(GEN a)
-{
-  long l = lgefint(a);
-  ulong x,y,z,k,m;
-  int L, s;
+/* Square roots table */
+static const unsigned char approx_tab[192] = {
+  128,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,
+  143,144,144,145,146,147,148,149,150,150,151,152,153,154,155,155,
+  156,157,158,159,160,160,161,162,163,163,164,165,166,167,167,168,
+  169,170,170,171,172,173,173,174,175,176,176,177,178,178,179,180,
+  181,181,182,183,183,184,185,185,186,187,187,188,189,189,190,191,
+  192,192,193,193,194,195,195,196,197,197,198,199,199,200,201,201,
+  202,203,203,204,204,205,206,206,207,208,208,209,209,210,211,211,
+  212,212,213,214,214,215,215,216,217,217,218,218,219,219,220,221,
+  221,222,222,223,224,224,225,225,226,226,227,227,228,229,229,230,
+  230,231,231,232,232,233,234,234,235,235,236,236,237,237,238,238,
+  239,240,240,241,241,242,242,243,243,244,244,245,245,246,246,247,
+  247,248,248,249,249,250,250,251,251,252,252,253,253,254,254,255
+};
 
-  if (l <= 3) return l==2? 0: usqrtsafe((ulong)a[2]);
-  s = bfffo(a[2]);
-  if (s > 1)
-  {
-    s &= ~1UL; /* make it even */
-    z = BITS_IN_LONG - s;
-    m = (ulong)(a[2] << s) | (a[3] >> z);
-    L = z>>1;
+/* N[0], assume N[0] >= 2^(BIL-2).
+ * Return r,s such that s^2 + r = N, 0 <= r <= 2s */
+static void
+p_sqrtu1(ulong *N, ulong *ps, ulong *pr)
+{
+  ulong r, s, q, u, n0 = N[0];
+  int prec;
+
+  q = n0 >> (BITS_IN_LONG - 8);
+  /* 2^6 = 64 <= q < 256 = 2^8 */
+  s = approx_tab[q - 64];				/* 128 <= s < 255 */
+  r = (n0 >> (BITS_IN_LONG - 16)) - s * s;		/* r <= 2*s */
+  if (r > (s << 1)) { r -= (s << 1) | 1; s++; }
+
+  /* 8-bit approximation from the high 8-bits of N[0] */
+  prec = 8;
+  n0 <<= 2 * prec;
+  while (2 * prec < BITS_IN_LONG)
+  { /* invariant: s has prec bits, and r <= 2*s */
+    r = (r << prec) + (n0 >> (BITS_IN_LONG - prec));
+    n0 <<= prec;
+    u = 2 * s;
+    q = r / u; u = r - q * u;
+    s = (s << prec) + q;
+    u = (u << prec) + (n0 >> (BITS_IN_LONG - prec));
+    q = q * q;
+    r = u - q;
+    if (u < q) { s--; r += (s << 1) | 1; }
+    n0 <<= prec;
+    prec = 2 * prec;
   }
-  else
-  {
-    m = (ulong)a[2];
-    L = BITS_IN_LONG/2;
-  }
-  /* m = BIL-1 (bffo odd) or BIL first bits of a */
-  k = (long) sqrt((double)m);
-  if (L == BITS_IN_LONG/2 && k == MAXHALFULONG)
-    x = MAXULONG;
-  else
-    x = (k+1) << L;
-  do
-  {
-    LOCAL_HIREMAINDER;
-    LOCAL_OVERFLOW;
-    hiremainder = a[2];
-    if (hiremainder >= x) return x;
-    z = addll(x, divll(a[3],x));
-    z >>= 1; if (overflow) z |= HIGHBIT;
-    y = x; x = z;
-  }
-  while (x < y);
-  return y;
+  *ps = s;
+  *pr = r;
 }
 
-/* Use l as lgefint(a) [a may have more digits] */
-static GEN
-racine_r(GEN a, long l)
+/* N[0..1], assume N[0] >= 2^(BIL-2).
+ * Return 1 if remainder overflows, 0 otherwise */
+static int
+p_sqrtu2(ulong *N, ulong *ps, ulong *pr)
 {
-  pari_sp av;
-  long s;
-  GEN x,y,z;
+  ulong cc, qhl, r, s, q, u, n1 = N[1];
+  LOCAL_OVERFLOW;
 
-  if (l <= 4) return utoi(mpsqrtl(a));
-  av = avma;
-  s = 2 + ((l-1) >> 1);
-  setlgefint(a, s);
-  x = addis(racine_r(a, s), 1); setlgefint(a, l);
-  /* x = good approx (from above) of sqrt(a): about l/2 correct bits */
-  x = shifti(x, (l - s)*(BITS_IN_LONG/2));
-  do
-  { /* one or two iterations should do the trick */
-    z = shifti(addii(x,divii(a,x)), -1);
-    y = x; x = z;
+  p_sqrtu1(N, &s, &r); /* r <= 2s */
+  qhl = 0; while (r >= s) { qhl++; r -= s; }
+  /* now r < s < 2^(BIL/2) */
+  r = (r << BITS_IN_HALFULONG) | (n1 >> BITS_IN_HALFULONG);
+  u = s << 1;
+  q = r / u; u = r - q * u;
+  q += (qhl & 1) << (BITS_IN_HALFULONG - 1);
+  qhl >>= 1;
+  /* (initial r)<<(BIL/2) + n1>>(BIL/2) = (qhl<<(BIL/2) + q) * 2s + u */
+  s = ((s + qhl) << BITS_IN_HALFULONG) + q;
+  cc = u >> BITS_IN_HALFULONG;
+  r = (u << BITS_IN_HALFULONG) | (n1 & LOWMASK);
+  r = subll(r, q * q);
+  cc -= overflow + qhl;
+  /* now subtract 2*q*2^(BIL/2) + 2^BIL if qhl is set */
+  if ((long)cc < 0)
+  {
+    if (s) {
+      r = addll(r, s);
+      cc += overflow;
+      s--;
+    } else {
+      cc++;
+      s = ~0UL;
+    }
+    r = addll(r, s);
+    cc += overflow;
   }
-  while (cmpii(x,y) < 0);
-  avma = (pari_sp)y;
-  return gerepileuptoint(av,y);
+  *ps = s;
+  *pr = r; return cc;
 }
 
-/* Return trunc(sqrt(a))). a must be an non-negative integer*/
-GEN isqrti(GEN a) {return racine_r(a,lgefint(a));}
-#endif
-
-/* Karatsuba square root, adapted from Paul Zimmermann's implementation
- * in GMP (mpn_sqrtrem) */
 static void
 xmpn_zero(GEN x, long n)
 {
@@ -1604,57 +1623,6 @@ static ulong
 sqrtu2_1(ulong *a) { return dblmantissa( sqrt(2. * a[0]) ); }
 #endif
 
-/* n[0] */
-static GEN
-sqrtispec1(GEN n, GEN *r)
-{
-  ulong a = usqrtsafe(n[0]);
-  GEN S = utoi(a);
-  if (r) *r = utoi(n[0] - a*a);
-  return S;
-}
-/* n[0..1], assume u0 >= 2^(BIL-2). Return 1 if remainder overflows */
-static int
-p_sqrtu2(ulong *n, ulong *ps, ulong *pr)
-{
-  ulong hi, r, s, t, u0 = n[0], u1 = n[1];
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
-
-  s = sqrtu2(n); /* high bit of s is set */
-  t = mulll(s, s);
-  hi = u0 - hiremainder;
-  if ((long)hi < 0)
-  { /* rare but may occur */
-    s--;
-    t -= (s << 1) | 1; /* t := t - (2s + 1) */
-    *ps = s;
-    *pr = u1 - t; return 0;
-  }
-  if (!hi && t > u1)
-  { /* rare but may occur */
-    s--;
-    t -= (s << 1) | 1; /* t := t - (2s + 1) */
-    *ps = s;
-    *pr = u1 - t; return 1;
-  }
-  r = subll(u1, t); if (overflow) hi--;
-  /* remainder R = hi*2^BIL + r. hi <= 2 */
-
-  if (hi == 2)
-  { /* correction, r := (2|r) - 2s - 1 */
-    r = subll(r, (s << 1) | 1);
-    *pr = r;
-    *ps = s + 1; return !overflow;
-  }
-  if (hi && (r > (s<<1)))
-  { /* correction, r := (1|r) - 2s - 1 */
-    r -= (s << 1) | 1;
-    s++; hi = 0;
-  }
-  *ps = s;
-  *pr = r; return hi;
-}
 /* sqrt n[0..1], assume n normalized */
 static GEN
 sqrtispec2(GEN n, GEN *pr)
@@ -1663,6 +1631,42 @@ sqrtispec2(GEN n, GEN *pr)
   int hi = p_sqrtu2((ulong*)n, &s, &r);
   GEN S = utoi(s);
   *pr = hi? cat1u(r): utoi(r);
+  return S;
+}
+
+#if 0
+/* n[0] */
+static GEN
+sqrtispec1_sh(GEN n, GEN *r)
+{
+  ulong a = usqrtsafe(n[0]);
+  GEN S = utoi(a);
+  if (r) *r = utoi(n[0] - a*a);
+  return S;
+}
+#endif
+
+/* sqrt n[0], _dont_ assume n normalized */
+static GEN
+sqrtispec1_sh(GEN n, GEN *pr)
+{
+  GEN S;
+  ulong r, s, u0 = (ulong)n[0];
+  int sh = bfffo(u0) & ~1UL;
+  if (sh) u0 <<= sh;
+  p_sqrtu1(&u0, &s, &r);
+  /* s^2 + r = u0, s < 2^(BIL/2). Rescale back:
+   * 2^(2k) n = S^2 + R
+   * so 2^(2k) n = (S - s0)^2 + (2*S*s0 - s0^2 + R), s0 = S mod 2^k. */
+  if (sh) {
+    int k = sh >> 1;
+    ulong s0 = s & ((1<<k) - 1);
+    r += s * (s0<<1);
+    s >>= k;
+    r >>= sh;
+  }
+  S = utoi(s);
+  if (pr) *pr = utoi(r);
   return S;
 }
 
@@ -1741,7 +1745,7 @@ sqrtremi(GEN N, GEN *r)
   if (ln <= 2)
   {
     if (ln == 2) return sqrtispec2_sh(n, r);
-    if (ln == 1) return sqrtispec1(n, r);
+    if (ln == 1) return sqrtispec1_sh(n, r);
     *r = gzero; return gzero;
   }
   av = avma;
