@@ -1967,13 +1967,13 @@ sqrispec(GEN x, long nx)
   /* add the squares */
   xd = x + nx; zd = z0 + lz;
   p1 = *--xd;
-  *--zd = mulll(p1,p1);
-  *--zd = addll(hiremainder, *zd);
+  zd--; *zd = mulll(p1,p1);
+  zd--; *zd = addll(hiremainder, *zd);
   while (xd > x)
   {
     p1 = *--xd;
-    *--zd = addll(mulll(p1,p1)+ overflow, *zd);
-    *--zd = addll(hiremainder + overflow, *zd);
+    zd--; *zd = addll(mulll(p1,p1)+ overflow, *zd);
+    zd--; *zd = addll(hiremainder + overflow, *zd);
   }
 
 END:
