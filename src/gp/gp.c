@@ -2767,7 +2767,6 @@ read_opt(long argc, char **argv)
 {
   char *b=NULL, *p=NULL, *s=NULL, **pre;
   int i=1, initrc=1;
-  gpmem_t TOP;
 
   pari_outfile=stderr;
   while (i<argc)
