@@ -1654,7 +1654,7 @@ FlxqX_from_Kronecker(GEN z, GEN T, ulong p)
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
   x[i] = (long)Flx_rem(Flx_renormalize(t,N), T,p);
-  return Flx_renormalize(x, i+1);
+  return FlxX_renormalize(x, i+1);
 }
 
 GEN
@@ -1699,7 +1699,7 @@ FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p)
   res[1] = P[1];
   for(i=2; i<lP; i++)
     res[i] = (long)Flxq_mul(U,(GEN)P[i], T,p);
-  return Flx_renormalize(res,lg(res));
+  return FlxX_renormalize(res,lg(res));
 }
 
 GEN
