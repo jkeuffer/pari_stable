@@ -1158,7 +1158,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   pari_sp av0 = avma, av, lim;
-  int isexact, exact_can_leave = 1, count = 0, count_max = 8;
+  int isexact, exact_can_leave, count, count_max = 8;
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1218,7 +1218,6 @@ PRECPB:
     case 1:
       if (DEBUGLEVEL>3) fprintferr("\n");
       if (flag == 2) return _vec(h);
-      exact_can_leave = count = 0;
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
         if (prec < PREC_THRESHOLD)
@@ -1251,6 +1250,8 @@ PRECPB:
       if (flag) { avma=av; return NULL; }
       err(lllger3);
   }
+  exact_can_leave = 1;
+  count = 0;
   Q = zerovec(n);
   L = cgetg(lx,t_MAT);
   B = cgetg(lx,t_COL);
