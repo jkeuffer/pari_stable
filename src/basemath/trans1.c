@@ -558,7 +558,7 @@ powgi(GEN x, GEN n)
           }
         }
         if (--i == 0) break;
-        m = *++p1, j = BITS_IN_LONG;
+        m = *++p1; j = BITS_IN_LONG;
       }
       if (sn < 0) y = ginv(y);
       return av==avma? gcopy(y): gerepileupto(av,y);

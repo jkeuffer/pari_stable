@@ -375,7 +375,7 @@ element_pow(GEN nf, GEN x, GEN n)
       if (m<0) y=element_mul(nf, y, x);
     }
     if (--i == 0) break;
-    m = *++p1, j = BITS_IN_LONG;
+    m = *++p1; j = BITS_IN_LONG;
   }
   if (s<0) y = element_inv(nf, y);
   if (cx) y = gmul(y, powgi(cx, n));
@@ -411,7 +411,7 @@ element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p)
       y = FpV_red(y, p);
     }
     if (--i == 0) break;
-    m = *++p1, j = BITS_IN_LONG;
+    m = *++p1; j = BITS_IN_LONG;
   }
   if (s<0)  y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);
@@ -441,7 +441,7 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
       y = FpV_red(y, p);
     }
     if (--i == 0) break;
-    m = *++p1, j = BITS_IN_LONG;
+    m = *++p1; j = BITS_IN_LONG;
   }
   if (s<0)  y = FpV_red(element_inv(nf,y), p);
   return av==avma? gcopy(y): gerepileupto(av,y);

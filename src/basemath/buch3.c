@@ -224,7 +224,7 @@ static GEN
 idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
 {
   long i,m,av=avma;
-  GEN y;
+  GEN y, p1;
   ulong j;
 
   if (cmpis(n, 16) < 0)
@@ -235,6 +235,7 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
     return gerepileupto(av,x);
   }
 
+#if 0
   i = lgefint(n)-1; m=n[i]; j=HIGHBIT;
   while ((m&j)==0) j>>=1;
   y = x;
@@ -251,6 +252,21 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
       if (m&j) y = idealmul(nf,y,x);
       y = idealmodidele(nf,y,ideal,sarch,arch);
     }
+#else
+  p1 = n+2; m = *p1;
+  y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
+  for (i=lgefint(n)-2;;)
+  {
+    for (; j; m<<=1,j--)
+    {
+      y = idealmul(nf,y,y);
+      if (m<0) y = idealmul(nf,y,x);
+      y = idealmodidele(nf,y,ideal,sarch,arch);
+    }
+    if (--i == 0) break;
+    m = *++p1; j = BITS_IN_LONG;
+  }
+#endif
   return gerepileupto(av,y);
 }
 

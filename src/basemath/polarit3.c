@@ -1084,7 +1084,7 @@ u_FpXQ_pow(GEN x, GEN n, GEN pol, ulong p)
         y = u_FpXQ_mul(y,x,pol,p);
     }
     if (--i == 0) break;
-    m = *++p1, j = BITS_IN_LONG;
+    m = *++p1; j = BITS_IN_LONG;
   }
   return gerepileupto(av, y);
 }
@@ -1136,7 +1136,7 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
         }
       }
       if (--i == 0) break;
-      m = *++p1, j = BITS_IN_LONG;
+      m = *++p1; j = BITS_IN_LONG;
     }
   }
   return gerepileupto(ltop,y);
