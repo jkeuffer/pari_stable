@@ -555,8 +555,8 @@ pariinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > pariinl.h
 
 $src/funclist::
-	@ls -l $src/functions/*/* > $src/funclist.tmp
-	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
+	@-cksum $src/functions/*/* | grep -v CVS > $src/funclist.tmp
+	@-sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
 	@cd $desc && \$(MAKE) 
 
 $src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h $src/language/members.h: $add_funclist
