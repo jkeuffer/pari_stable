@@ -89,11 +89,13 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
    12- command-line options to Configure (installation directories)
    13- rnfequation: use modular (bivariate) resultant
    14- polynomial gcd (srgcd): uses modular algo (modulargcd,nfgcd) if possible
+   15- unified internal hnf* functions
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
     2- new target for Makefile: gp.dbg
 BA  3- library functions FpX_roots_to_pol, FqX_roots_to_pol
+BA  4- library function FpX_FpXQ_compo (Brent & Kung)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
@@ -929,7 +931,7 @@ XR  8- new function bnrL1
     9- new function gdivexact (used in subresultant, Gauss-Bareiss...)
    10- new function bnfnewprec
    11- optional argument to \l and \e shortcut
-   12- nfinit,polred[abs] accept input of the form [pol, HNF basis fro Z_K]
+   12- nfinit,polred[abs] accept input of the form [pol, HNF basis for Z_K]
    13- q-Pascal triangle (matpascal(n,q))
    14- file src/basemath/subgroup.c, new function forsubgroup()
 IZ 15- function plotclip
