@@ -2813,7 +2813,7 @@ GenusField(GEN bnf, long prec)
 static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
-  long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300;
+  long cl, i, j, cpt = 0, av, av2, N, h, v, n, bnd = 300, sq = 1;
   int ***matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig, valchi;
   GEN degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
@@ -2915,24 +2915,35 @@ LABDOUB:
   }
   if (DEBUGLEVEL >= 2) fprintferr("zetavalues = %Z\n", veczeta);
 
+  if ((flag >=0) && (flag <= 3)) sq = 0;
+
   ro = cgetg(h+1, t_VEC); /* roots */
-  for (j = 1; j <= h; j++)
+  
+  for (;;)
   {
-    p1 = gexp(gmul2n((GEN)veczeta[j], 1), newprec);
-    ro[j] = ladd(p1, ginv(p1));
-  }
-  polrelnum = roots_to_pol_intern(realun(newprec),ro, 0,0);
-  if (DEBUGLEVEL)
-  {
-    if (DEBUGLEVEL >= 2) fprintferr("polrelnum = %Z\n", polrelnum);
-    msgtimer("Compute %s", (flag < 0)? "quickpol": "polrelnum");
-  }
+    if (!sq && (DEBUGLEVEL > 1))
+      fprintferr("Checking the square-root of the Stark unit...\n");
 
-  if (flag < 0)
-    return gerepileupto(av, gcopy(polrelnum));
+    for (j = 1; j <= h; j++)
+    {
+      p1 = gexp(gmul2n((GEN)veczeta[j], sq), newprec);
+      ro[j] = ladd(p1, ginv(p1));
+    }
+    polrelnum = roots_to_pol_intern(realun(newprec),ro, 0,0);
+    if (DEBUGLEVEL)
+    {
+      if (DEBUGLEVEL >= 2) fprintferr("polrelnum = %Z\n", polrelnum);
+      msgtimer("Compute %s", (flag < 0)? "quickpol": "polrelnum");
+    }
+    
+    if (flag < 0)
+      return gerepileupto(av, gcopy(polrelnum));
+    
+    /* we try to recognize this polynomial */
+    polrel = RecCoeff(nf, polrelnum, v, newprec);
 
-  /* we try to recognize this polynomial */
-  polrel = RecCoeff(nf, polrelnum, v, newprec);
+    if (polrel || (sq++ == 1)) break;
+  }
 
   if (!polrel) /* if it fails... */
   {
