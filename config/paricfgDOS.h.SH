@@ -31,7 +31,7 @@ cat > $file << EOT
 #endif
 #define PARIINFO PARIINFO_PRE/**/PARIINFO_POST
 
-#define PARI_BYTE_ORDER    1234
+#define PARI_DOUBLE_FORMAT 1
 #ifdef _MSC_VER /* MSVC inline directive */
 #  define INLINE __inline
 #endif
@@ -68,8 +68,8 @@ cat > $file << EOT
 /* Timings: Don't use times because of the HZ / CLK_TCK confusion. */
 #  define USE_FTIME 1
 #  define HAS_STRFTIME
- /* comment this one if not on NT ??? */
-#  define HAS_OPENDIR
+/* This might work on NT ??? */
+/* #  define HAS_OPENDIR */
 #endif
 
 #endif
