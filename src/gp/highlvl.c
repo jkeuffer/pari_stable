@@ -49,8 +49,14 @@ install0(char *name, char *code, char *gpname, char *lib)
 #endif
   if (! *gpname) gpname=name;
   if (lib) lib = expand_tilde(lib);
-  
+
+/* OSF1 has dlopen but not RTLD_GLOBAL*/
+#ifndef RTLD_GLOBAL
+#define RTLD_GLOBAL 0
+#endif
+
   handle = dlopen(lib,RTLD_LAZY|RTLD_GLOBAL);
+
   if (!handle)
   {
     const char *s = dlerror(); if (s) fprintferr("%s\n\n",s);
