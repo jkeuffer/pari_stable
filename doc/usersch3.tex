@@ -3236,20 +3236,18 @@ otherwise. This is slightly faster than \kbd{bnrconductor}.
 \syn{bnrisconductor}{a1,a2,a3} and the result is a \kbd{long}.
 
 \subsecidx{bnrisprincipal}$(\var{bnr},x,\{\fl=1\})$: \var{bnr} being the
-number field
-data which is output by \kbd{bnrinit} and $x$ being an ideal in any form,
-outputs the components of $x$ on the ray class group generators in a way
-similar to \kbd{bnfisprincipal}. That is a 3-component vector $v$ where
-$v[1]$ is the vector of components of $x$ on the ray class group generators,
-$v[2]$ gives on the integral basis an element $\alpha$ such that
-$x=\alpha\prod_ig_i^{x_i}$. Finally $v[3]$ indicates the number of bits of
-accuracy left in the result. In any case the result is checked for
+number field data which is output by \kbd{bnrinit}$(,,1)$ and $x$ being an
+ideal in any form, outputs the components of $x$ on the ray class group
+generators in a way similar to \kbd{bnfisprincipal}. That is a 3-component
+vector $v$ where $v[1]$ is the vector of components of $x$ on the ray class
+group generators, $v[2]$ gives on the integral basis an element $\alpha$ such
+that $x=\alpha\prod_ig_i^{x_i}$. Finally $v[3]$ indicates the number of bits
+of accuracy left in the result. In any case the result is checked for
 correctness, but $v[3]$ is included to see if it is necessary to increase the
 accuracy in other computations.
 
-If $\fl=0$, outputs only $v_1$.
-
-{\it The settings $\fl=2$ or $3$ are not available in this case}.
+If $\fl=0$, outputs only $v_1$. In that case, \var{bnr} need not contain the
+ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
 
 \syn{isprincipalrayall}{\var{bnr},x,\fl}.
 
