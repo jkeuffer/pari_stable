@@ -1537,7 +1537,7 @@ czeta(GEN s0, long prec)
   y = gadd(y, gmul2n(a,-1));
   if (DEBUGLEVEL>2) msgtimer("sum from 1 to N-1");
 
-  invn2 = divrs(unr, nn*nn); lim2 = lim<<1;
+  invn2 = divri(unr, mulss(nn,nn)); lim2 = lim<<1;
   tes = bernreal(lim2, prec);
   if (typ(s0) == t_INT)
   {

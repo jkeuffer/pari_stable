@@ -41,6 +41,7 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.8 (released ??/??/2004):
   Fixed
     1- gp --version: stack overflow
+    2- overflow (in C long multiplication) in zeta(4.45+292532.0*I)
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
