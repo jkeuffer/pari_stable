@@ -583,7 +583,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
   {
     for (i = 1; i <= l; i++)
       for (j = 1; j < i; j++)
-        if (lgef(FpX_gcd((GEN)p1[i], (GEN)p1[j], p)) != 3)
+        if (degpol(FpX_gcd((GEN)p1[i], (GEN)p1[j], p)))
           err(talker, "polhensellift: factors %Z and %Z are not coprime",
                      p1[i], p1[j]);
   }
@@ -625,14 +625,10 @@ two_factor_bound(GEN x)
 #endif
 
 static GEN
-uniform_Mignotte_bound(GEN x)
+uniform_Mignotte_bound(GEN x, GEN N2)
 {
-  long e, n = degpol(x);
-  GEN p1, N2 = mpsqrt(QuickNormL2(x,DEFAULTPREC));
-
-  p1 = grndtoi(gmul2n(N2, n), &e);
-  if (e>=0) p1 = addii(p1, shifti(gun, e));
-  return p1;
+  if (!N2) N2 = mpsqrt(QuickNormL2(x,DEFAULTPREC));
+  return ceil_safe(gmul2n(N2, degpol(x)));
 }
 
 /* all factors have coeffs less than the bound */
@@ -654,15 +650,16 @@ all_factor_bound(GEN x)
  * target = polynomial we want to factor
  * famod = array of modular factors.  Product should be congruent to
  * target/lc(target) modulo p^a
- * All rational factors are bounded by p^b, b <= a and p^(b-a) < 2^(BIL-1) */
+ * For true factors: S1,S2 <= p^b, with b <= a and p^(b-a) < 2^31 */
 static GEN
-cmbf(GEN target, GEN famod, GEN p, long b, long a,
+cmbf(GEN target, GEN famod, GEN p, long a, long b,
      long maxK, long klim,long hint)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
-  long spa_b, spa_bs2;
+  long spa_b, spa_bs2, Sbound;
   GEN lc, lctarget, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
-  GEN trace    = cgetg(lfamod+1, t_VECSMALL);
+  GEN trace1   = cgetg(lfamod+1, t_VECSMALL);
+  GEN trace2   = cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
@@ -677,21 +674,31 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
   lctarget = gmul(lc,target);
 
   {
-    GEN pa_b,pa_bs2,pb,pbs2;
-    pa_b = gpowgs(p, a-b); /* make sure p^(a-b) < 2^(BIL-1) */
-    while (is_bigint(pa_b)) { b++; pa_b = diviiexact(pa_b, p); }
+    GEN pa_b,pa_bs2,pb,pbs2, lc2;
+    lc2 = sqri(lc);
+    pa_b = gpowgs(p, a-b); /* < 2^31 */
     pa_bs2 = shifti(pa_b,-1);
     pb= gpowgs(p, b); pbs2 = shifti(pb,-1);
     for (i=1; i <= lfamod; i++)
     {
-      GEN T, p1 = (GEN)famod[i];
-      degpol[i] = degpol(p1);
-      T = (GEN)p1[degpol[i]+1]; /* d-1 term */
-      if (!gcmp1(lc)) T = modii(mulii(lc, T), pa);
-      trace[i] = itos(diviiround(T, pb));
+      GEN d_2,T1,T2, P = (GEN)famod[i];
+      long d = degpol(P);
+      
+      degpol[i] = d; P += 2;
+      T1 = (GEN)P[d-1];/* = - S_1 */
+      d_2= (GEN)P[d-2];
+      T2 = subii(sqri(T1), shifti(d_2,1)); /* = S_2 Newton sum */
+      T2 = modii(T2, pa);
+      if (!gcmp1(lc))
+      {
+        T1 = modii(mulii(lc, T1), pa);
+        T2 = modii(mulii(lc2,T2), pa);
+      }
+      trace1[i] = itos(diviiround(T1, pb));
+      trace2[i] = itos(diviiround(T2, pb));
     }
-    spa_b   =   pa_b[2]; /* < 2^(BIL-1) */
-    spa_bs2 = pa_bs2[2]; /* < 2^(BIL-1) */
+    spa_b   =   pa_b[2]; /* < 2^31 */
+    spa_bs2 = pa_bs2[2]; /* < 2^31 */
   }
   degsofar[0] = 0; /* sentinel */
 
@@ -699,9 +706,10 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
    * 1 <= ind[i] <= lfamod */
 nextK:
   if (K > maxK || 2*K > lfamod) goto END;
-  if (DEBUGLEVEL > 4)
+  if (DEBUGLEVEL > 3)
     fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
+  Sbound = ((K+1)>>1);
   i = 1; curdeg = degpol[ind[1]];
   for(;;)
   { /* try all combinations of K factors */
@@ -712,28 +720,37 @@ nextK:
     }
     if (curdeg <= klim && curdeg % hint == 0) /* trial divide */
     {
-      GEN y, q, cont, list;
+      GEN y, q, list;
       gpmem_t av;
       long t;
 
-      /* d - 1 test,  overflow is not a problem (correct mod 2^BIL) */
-      for (t=trace[ind[1]],i=2; i<=K; i++)
-        t = addssmod(t, trace[ind[i]], spa_b);
+      /* d - 1 test */
+      for (t=trace1[ind[1]],i=2; i<=K; i++)
+        t = addssmod(t, trace1[ind[i]], spa_b);
       if (t > spa_bs2) t -= spa_b;
-      if (labs(t) > ((K+1)>>1))
+      if (labs(t) > Sbound)
       {
         if (DEBUGLEVEL>6) fprintferr(".");
         goto NEXT;
       }
-      av = avma;
+      /* d - 2 test */
+      for (t=trace2[ind[1]],i=2; i<=K; i++)
+        t = addssmod(t, trace2[ind[i]], spa_b);
+      if (t > spa_bs2) t -= spa_b;
+      if (labs(t) > Sbound)
+      {
+        if (DEBUGLEVEL>6) fprintferr("|");
+        goto NEXT;
+      }
 
+      av = avma;
       /* check trailing coeff */
       y = lc;
       for (i=1; i<=K; i++)
         y = centermod_i(mulii(y, gmael(famod,ind[i],2)), pa, pas2);
       if (!signe(y) || resii((GEN)lctarget[2], y) != gzero)
       {
-        if (DEBUGLEVEL>6) fprintferr("T");
+        if (DEBUGLEVEL>3) fprintferr("T");
         avma = av; goto NEXT;
       }
       y = lc; /* full computation */
@@ -743,28 +760,27 @@ nextK:
       /* y is the candidate factor */
       if (! (q = polidivis(lctarget,y,bound)) )
       {
-        if (DEBUGLEVEL>6) fprintferr("*");
+        if (DEBUGLEVEL>3) fprintferr("*");
         avma = av; goto NEXT;
       }
       /* found a factor */
-      cont = content(y);
-      if (signe(leading_term(y)) < 0) cont = negi(cont);
-      y = gdiv(y, cont);
-
       list = cgetg(K+1, t_VEC);
       listmod[cnt] = (long)list;
       for (i=1; i<=K; i++) list[i] = famod[ind[i]];
 
+      y = primpart(y);
       fa[cnt++] = (long)y;
       /* fix up target */
-      target = gdiv(q, leading_term(y));
+      target = q;
+      if (!is_pm1(lc)) target = gdivexact(target, leading_term(y));
       for (i=j=k=1; i <= lfamod; i++)
       { /* remove used factors */
         if (j <= K && i == ind[j]) j++;
         else
         {
           famod[k] = famod[i];
-          trace[k] = trace[i];
+          trace1[k] = trace1[i];
+          trace2[k] = trace2[i];
           degpol[k] = degpol[i]; k++;
         }
       }
@@ -866,7 +882,7 @@ END:
   if (ptq) *ptq = gerepileuptoint(av, icopy(r)); else avma = av;
   return e;
 }
-    
+
 /* recombination of modular factors: van Hoeij's algorithm */
 
 /* return integer y such that all roots of P are less than y */
@@ -1037,10 +1053,52 @@ GS_norms(GEN B, long prec)
   return v;
 }
 
+static GEN
+check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
+{
+  long i, j, r, n0;
+  GEN target = P, lctarget, lc, list, piv, y, pas2;
+
+  piv = special_pivot(BL);
+  if (!piv) return NULL;
+  if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
+
+  pas2 = shifti(pa,-1);
+  r  = lg(piv)-1;
+  n0 = lg(piv[1])-1;
+  list = cgetg(r+1, t_VEC);
+  lc = absi(leading_term(target));
+  lctarget = gmul(lc, target);
+  for (i=1; i<r; i++)
+  {
+    GEN c = (GEN)piv[i];
+    if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
+
+    y = lc;
+    for (j=1; j<=n0; j++)
+      if (signe(c[j]))
+        y = centermod_i(gmul(y, (GEN)famod[j]), pa, pas2);
+
+    /* y is the candidate factor */
+    if (! (target = polidivis(lctarget,y,bound)) ) return NULL;
+    y = primpart(y);
+    if (!is_pm1(lc))
+    {
+      target = gdivexact(target, leading_term(y));
+      lc = absi(leading_term(target));
+      lctarget = gmul(lc, target);
+    }
+    list[i] = (long)y;
+  }
+  y = primpart(target);
+  list[i] = (long)y;
+  return list;
+}
+
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
  * van Hoeij's knapsack
  *
- * P = monic squarefree in Z[X].
+ * P = squarefree in Z[X].
  * famod = array of (lifted) modular factors mod p^a
  * bound = Mignotte bound for the size of divisors of P (for the sup norm)
  * previously recombined all set of factors with less than rec elts */
@@ -1050,12 +1108,16 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   const long s = 2; /* # of traces added at each step */
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
   long i,j,C,r,S,tmax,n0,n,dP = degpol(P);
-  double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
-  double b0 = log((double)dP*2) / logp;
-  double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
-  GEN B, y, T, T2, TT, BL, m, u, norm, target, M, piv, list;
+  double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
+  double b0 = log((double)dP*2) / logp, logBr;
+  GEN lP, Br, B, Bnorm, T, T2, TT, BL, m, u, norm, list;
   gpmem_t av, av2, lim;
-  int did_recompute_famod = 0;
+
+  lP = absi(leading_term(P));
+  if (is_pm1(lP)) lP = NULL;
+  Br = root_bound(P);
+  if (lP) Br = gmul(lP, Br);
+  logBr = gtodouble(glog(Br, DEFAULTPREC)) / logp;
 
   n0 = n = r = lg(famod) - 1;
   list = cgetg(n0+1, t_COL);
@@ -1071,33 +1133,29 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   BL = idmat(n0);
   /* tmax = current number of traces used (and computed so far)
    * S = number of traces used at the round's end = tmax + s */
-  for(tmax = 0;; tmax = S)
+  for (tmax = 0;; tmax = S)
   {
-    GEN pas2;
     long b, goodb;
     double Nx;
 
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
     Nx = bound_vS(tmax,&BL);
-    r = lg(BL)-1;
 
     C = (long)sqrt(s*n0*n0/4. / Nx);
     if (C == 0) C = 1; /* frequent after a few iterations */
-    M = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
+    Bnorm = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
 
     S = tmax + s;
-    b = (long)ceil(b0 + S*k);
+    b = (long)ceil(b0 + S*logBr);
     if (a <= b)
     {
-      a = (long)ceil(b + 3*s*k) + 1; /* enough for 3 more rounds */
+      a = (long)ceil(b + 3*s*logBr) + 1; /* enough for 3 more rounds */
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
-      /* recompute old Newton sums to new precision */
-      for (i=1; i<=n0; i++)
-        TT[i] = (long)polsym_gen((GEN)famod[i], NULL, tmax, NULL, pa);
-      did_recompute_famod = 1;
+      for (i=1; i<=n0; i++) TT[i] = 0;
     }
+
     for (i=1; i<=n0; i++)
     {
       GEN p1 = (GEN)T[i];
@@ -1105,14 +1163,23 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       TT[i] = (long)p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
       for (j=1; j<=s; j++) p1[j] = p2[j];
+      if (lP)
+      { /* make Newton sums integral */
+        GEN lPpow = gpowgs(lP, tmax);
+        for (j=1; j<=s; j++)
+        {
+          lPpow = mulii(lPpow,lP);
+          p1[j] = lmulii((GEN)p1[j], lPpow);
+        }
+      }
     }
 
     av2 = avma;
     T2 = gmod( gmul(T, BL), pa );
+    r = lg(T2)-1;
     goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
     if (goodb > b) b = goodb;
-    if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b,gexpo(T2));
+    if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b);
 
     m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
                   vconcat( zeromat(r, s),   gscalmat(gpowgs(p,a-b), s) ) );
@@ -1123,7 +1190,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     u = lllgramint_i(gram_matrix(m), 4, NULL, &B);
     norm = GS_norms(B, DEFAULTPREC);
     for (i=r+s; i>0; i--)
-      if (cmprr((GEN)norm[i], M) < 0) break;
+      if (cmprr((GEN)norm[i], Bnorm) < 0) break;
     if (i > r)
     { /* no progress. Note: even if i == r we may have made some progress */
       avma = av2; BitPerFactor += 2;
@@ -1136,8 +1203,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (r <= 1)
     {
       if (r == 0) err(bugparier,"LLL_cmbf [no factor]");
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: 1 factor\n");
-      list[1] = (long)P; setlg(list,2); return list;
+      return _vec(P);
     }
 
     setlg(u, r+1);
@@ -1145,38 +1211,15 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     BL = gerepileupto(av2, gmul(BL, u));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[4]; gptr[0]=&BL; gptr[1]=&TT; gptr[2]=&T; gptr[3]=&famod;
       if(DEBUGMEM>1) err(warnmem,"LLL_cmbf");
-      gerepilemany(av, gptr, did_recompute_famod? 4: 3);
+      gerepileall(av, 4, &BL, &TT, &T, &famod);
     }
     if (r*rec >= n0) continue;
 
     av2 = avma;
-    piv = special_pivot(BL);
-    if (!piv) { avma = av2; continue; }
-    if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
-
-    pas2 = shifti(pa,-1); target = P;
-    r = lg(piv)-1; /* BL need not have maximal rank */
-    for (i=1; i<=r; i++)
-    {
-      GEN p1 = (GEN)piv[i];
-      if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
-
-      y = gun;
-      for (j=1; j<=n0; j++)
-        if (signe(p1[j]))
-          y = centermod_i(gmul(y, (GEN)famod[j]), pa, pas2);
-
-      /* y is the candidate factor */
-      if (! (target = polidivis(target,y,bound)) ) break;
-      list[i] = (long)y;
-    }
-    if (i > r)
-    {
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: %ld factors\n", r);
-      setlg(list,i); return list;
-    }
+    list = check_factors(P, BL, bound, famod, pa);
+    if (list) return list;
+    avma = av2;
   }
 }
 
@@ -1230,55 +1273,46 @@ FpX_rescale(GEN P, GEN h, GEN p)
 
 /* use van Hoeij's knapsack algorithm */
 static GEN
-combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
+combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
-  GEN B = uniform_Mignotte_bound(a), res,lt,L,pe,pE,listmod;
-  long i,E,e,l, maxK = 3, nft = lg(famod)-1;
+  GEN la, B2, B, res,L, pa, pb, listmod, N2;
+  long a,b,goodb,l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
+  double logp = log((double)itos(p));
 
-  e = logint(B, p, &pe);
-  if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z^%ld\n", p,e);
+  N2 = mpsqrt(QuickNormL2(target,DEFAULTPREC));
+  B = uniform_Mignotte_bound(target, N2);
+  a = logint(B, p, &pa);
+  if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z^%ld\n", p,a);
 
-  { /* overlift for the d-1 test */
-    int over = (int) (32 * LOG2 / log((double)itos(p)));
-    pE = mulii(pe, gpowgs(p,over)); E = e + over;
+  la = absi(leading_term(target));
+  B2 = mulsi(n, sqri(gmul(la, root_bound(target)))); /* = bound for S_2 */
+  b = logint(B2,p, &pb);
+
+  /* b >= goodb implies p^(a-b) < 2^31 */
+  goodb = (long)ceil(a - 31*LOG2/logp + 1e-5);
+  if (b > goodb)
+  { /* overlift for d-1 && d-2 tests. Rare! */
+    a += (b - goodb);
+    pa = mulii(pa, gpowgs(p, b - goodb));
+    goodb = b;
   }
-  famod = hensel_lift_fact(a,famod,NULL,p,pE,E);
-
-  if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   else
-  {
-    lt = leading_term(a);
-    if (!is_pm1(lt) && nft < 13) maxK = -1;
-  }
-  L = cmbf(a, famod, p, e, E, maxK, klim, hint);
+    b = goodb;
+
+  famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
+  if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
+  L = cmbf(target, famod, p, a, b, maxK, klim, hint);
 
   res     = (GEN)L[1];
-  listmod = (GEN)L[2]; l = lg(listmod);
-  famod = (GEN)listmod[l-1];
+  listmod = (GEN)L[2]; l = lg(listmod)-1;
+  famod = (GEN)listmod[l];
   if (maxK >= 0 && lg(famod)-1 > 2*maxK)
   {
-    a = (GEN)res[l-1];
-    lt = leading_term(a);
-    if (signe(lt) < 0) { a = gneg_i(a); lt = leading_term(a); }
+    if (l!=1) B = uniform_Mignotte_bound((GEN)res[l], NULL);
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
-    if (gcmp1(lt)) lt = NULL;
-    else
-    {
-      if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
-      a = primitive_pol_to_monic(a, &lt);
-      B = uniform_Mignotte_bound(a);
-      e = logint(B, p, &pe);
-      /* renormalize modular factors */
-      for (i = 1; i<lg(famod); i++)
-        famod[i] = (long)FpX_rescale((GEN)famod[i], lt, p);
-      famod = hensel_lift_fact(a,famod,NULL,p,pe,e);
-    }
-    setlg(res, l-1); /* remove last elt (possibly unfactored) */
-    L = LLL_cmbf(a, famod, p, pe, B, e, maxK);
-    if (lt)
-      for (i=1; i<lg(L); i++)
-        L[i] = (long)primpart( unscale_pol((GEN)L[i], lt) );
-    res = concatsp(res, L);
+    L = LLL_cmbf((GEN)res[l], famod, p, pa, B, a, maxK);
+    /* remove last elt, possibly unfactored. Add all new ones. */
+    setlg(res, l); res = concatsp(res, L);
   }
   return res;
 }
@@ -1312,6 +1346,7 @@ DDF(GEN a, long hint)
   for (p = np = 0; np < MAXNP; )
   {
     gpmem_t av0 = avma;
+
     p += *pt++; if (!*pt) err(primer1);
     if (!smodis(lead,p)) continue;
     z = u_Fp_FpX(a,0, p);
@@ -1327,7 +1362,7 @@ DDF(GEN a, long hint)
       d++; w = u_FpXQ_pow(w, prime, z, p);
       g = u_FpX_gcd(z, u_FpX_sub(w, PolX, p), p);
       lgg = degpol(g);
-      if (lgg == 0) g = NULL;
+      if (!lgg) g = NULL;
       else
       {
 	z = u_FpX_div(z, g, p); e = degpol(z);
@@ -1346,10 +1381,8 @@ DDF(GEN a, long hint)
       record_factors(1, e, lbit-1, tabkbit, tmp);
     }
 
-    if (np)
-      for (j=0; j<lbit; j++) tabbit[j] &= tabkbit[j];
-    else
-      for (j=0; j<lbit; j++) tabbit[j] = tabkbit[j];
+    if (np) for (j=0; j<lbit; j++) tabbit[j] &= tabkbit[j];
+    else    for (j=0; j<lbit; j++) tabbit[j] = tabkbit[j];
     if (DEBUGLEVEL > 4)
       fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
                   p, nfacp, nfacp==1?"": "s", timer2());
@@ -1358,6 +1391,7 @@ DDF(GEN a, long hint)
     {
       nmax = nfacp; tabd = tabdnew; chosenp = p;
       for (j=d+1; j<e; j++) tabd[j] = NULL;
+      if (nmax < 5) break; /* very few factors. Enough */
       tabdnew = (GEN*)new_chunk(da);
     }
     else avma = av0;
@@ -1368,7 +1402,7 @@ DDF(GEN a, long hint)
   y = cgetg(nf+1,t_COL); famod = cgetg(nf+1,t_COL);
   for (d = 1; nft <= nf; d++)
   {
-    g = tabd[d]; 
+    g = tabd[d];
     if (g)
     {
       long n = degpol(g)/d;
@@ -1520,10 +1554,10 @@ ZX_squff(GEN f, GEN *ex)
   n = 1 + degpol(f); if (val) n++;
   e = cgetg(n,t_VECSMALL);
   P = cgetg(n,t_COL);
- 
+
   cf = content(f); if (gsigne(leading_term(f)) < 0) cf = gneg_i(cf);
   if (!gcmp1(cf)) f = gdiv(f,cf);
- 
+
   T = modulargcd(derivpol(f), f);
   V = gdeuc(f,T);
   for (k=i=1;; k++)
@@ -1544,7 +1578,7 @@ fact_from_DDF(GEN fa, GEN e, long n)
 {
   GEN v,w, y = cgetg(3, t_MAT);
   long i,j,k, l = lg(fa);
- 
+
   v = cgetg(n+1,t_COL); y[1] = (long)v;
   w = cgetg(n+1,t_COL); y[2] = (long)w;
   for (k=i=1; i<l; i++)
@@ -1927,7 +1961,7 @@ leftright_pow(GEN x, GEN n, void *data,
   GEN nd = n+2, y = x;
   long i, m = *nd, j = 1+bfffo((ulong)m);
   gpmem_t av = avma, lim = stack_lim(av, 1);
- 
+
   /* normalize, i.e set highest bit to 1 (we know m != 0) */
   m<<=j; j = BITS_IN_LONG-j;
   /* first bit is now implicit */
@@ -2010,7 +2044,7 @@ factorback_i(GEN fa, GEN e, GEN nf, int red)
     _mul = &gmul;
     _pow = &powgi;
   }
- 
+
   if (e) /* supplied vector of exponents */
     p = fa;
   else /* genuine factorization */
@@ -2180,7 +2214,7 @@ isrational(GEN x)
 
 static int
 cx_isrational(GEN x)
-{ 
+{
   return (isrational((GEN)x[1]) && isrational((GEN)x[2]));
 }
 
@@ -2536,7 +2570,7 @@ can_use_modular_gcd(GEN x, GEN *mod, long *v)
         break;
       case t_POL:
         if (!isrational(p1)) return 0;
-        if (*v >= 0) 
+        if (*v >= 0)
         {
           if (*v != varn(p1)) return 0;
         } else *v = varn(p1);
@@ -2851,7 +2885,7 @@ pseudorem_i(GEN x, GEN y, GEN mod)
   x = revpol(x) - 2;
   if (mod) x = gmul(x, gmodulcp(gun, mod));
   if (p)
-  { /* multiply by y[0]^p   [beware dummy vars from FpY_FpXY_resultant] */  
+  { /* multiply by y[0]^p   [beware dummy vars from FpY_FpXY_resultant] */
     GEN t = (GEN)y[0];
     if (mod) t = gmodulcp(t, mod);
     t = gpowgs(t, p);
@@ -2893,7 +2927,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
       x[i] = ladd(gmul((GEN)y[0], (GEN)x[i]), gmul((GEN)x[0],(GEN)y[i]));
     for (   ; i<=dx; i++)
       x[i] = lmul((GEN)y[0], (GEN)x[i]);
-    x++; dx--; 
+    x++; dx--;
     while (dx >= dy && gcmp0((GEN)x[0])) { x++; dx--; z[iz++] = zero; }
     if (dx < dy) break;
     if (low_stack(lim,stack_lim(av2,1)))
@@ -2903,7 +2937,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
     }
   }
   while (dx >= 0 && gcmp0((GEN)x[0])) { x++; dx--; }
-  if (dx < 0) 
+  if (dx < 0)
     x = zeropol(vx);
   else
   {
@@ -2918,10 +2952,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
   z[1] = evalsigne(1) | evalvarn(vx) | evallgef(lz);
   z = revpol(z) - 2;
   r = gmul(x, (GEN)ypow[p]);
-  {
-    GEN *gptr[2]; gptr[0] = &z; gptr[1] = &r;
-    gerepilemany(av,gptr,2);
-  }
+  gerepileall(av, 2, &z, &r);
   *ptr = r; return z;
 }
 
@@ -2973,9 +3004,8 @@ subresall(GEN u, GEN v, GEN *sol)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      GEN *gptr[4]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
       if(DEBUGMEM>1) err(warnmem,"subresall, dr = %ld",dr);
-      gerepilemany(av2,gptr,4);
+      gerepileall(av2,4, &u, &v, &g, &h);
     }
   }
   z = (GEN)v[2];
@@ -3058,14 +3088,12 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      GEN *gptr[6]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
-      gptr[4]=&uze; gptr[5]=&um1;
       if(DEBUGMEM>1) err(warnmem,"subresext, dr = %ld",dr);
-      gerepilemany(av2,gptr,6);
+      gerepileall(av2,6, &u,&v,&g,&h,&uze,&um1);
     }
   }
   z = (GEN)v[2];
-  if (dv > 1) 
+  if (dv > 1)
   {
     /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
     p1 = gpowgs(gdiv(z,h),dv-1);
@@ -3085,7 +3113,7 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
   z = gmul(z,p2); uze = gmul(uze,cu); vze = gmul(vze,cv);
   {
     GEN *gptr[3]; gptr[0]=&z; gptr[1]=&uze; gptr[2]=&vze;
-    gerepilemanysp(av,tetpil,gptr,3); 
+    gerepilemanysp(av,tetpil,gptr,3);
   }
   *U = uze; *V = vze; return z;
 }
@@ -3158,10 +3186,8 @@ bezoutpol(GEN x, GEN y, GEN *U, GEN *V)
     if (dr==3) break;
     if (low_stack(lim,stack_lim(av2,1)))
     {
-      GEN *gptr[6]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
-      gptr[4]=&uze; gptr[5]=&um1;
       if(DEBUGMEM>1) err(warnmem,"bezoutpol, dr = %ld",dr);
-      gerepilemany(av2,gptr,6);
+      gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
   if (!poldivis(gsub(v,gmul(uze,xprim)),yprim, &vze))
@@ -3240,9 +3266,8 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
     A = gadd(A,gmul((GEN)P[j+2],H));
     if (low_stack(lim,stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&A; gptr[1]=&H;
       if(DEBUGMEM>1) err(warnmem,"nextSousResultant j = %ld/%ld",j,p);
-      gerepilemany(av,gptr,2);
+      gerepileall(av,2,&A,&H);
     }
   }
   P = normalizepol_i(P, q+2);
@@ -3283,9 +3308,8 @@ resultantducos(GEN P, GEN Q)
     {
       if (low_stack(lim,stack_lim(av,1)))
       {
-        GEN *gptr[2]; gptr[0]=&P; gptr[1]=&Q;
         if(DEBUGMEM>1) err(warnmem,"resultantducos, degpol Q = %ld",degpol(Q));
-        gerepilemany(av2,gptr,2); s = leading_term(P);
+        gerepileall(av2,2,&P,&Q); s = leading_term(P);
       }
       delta = degpol(P) - degpol(Q);
       Z = Lazard2(Q, leading_term(Q), s, delta);
@@ -3493,9 +3517,8 @@ srgcd(GEN x, GEN y)
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
-        GEN *gptr[4]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
         if(DEBUGMEM>1) err(warnmem,"srgcd");
-        gerepilemany(av1,gptr,4);
+        gerepileall(av1,4,&u,&v,&g,&h);
       }
     }
     p1 = content(v); if (!gcmp1(p1)) v = gdiv(v,p1);
@@ -3660,9 +3683,8 @@ sturmpart(GEN x, GEN a, GEN b)
     v = gdivexact(r,p1);
     if (low_stack(lim,stack_lim(av,1)))
     {
-      GEN *gptr[4]; gptr[0]=&u; gptr[1]=&v; gptr[2]=&g; gptr[3]=&h;
       if(DEBUGMEM>1) err(warnmem,"polsturm, dr = %ld",dr);
-      gerepilemany(av,gptr,4);
+      gerepileall(av,4,&u,&v,&g,&h);
     }
   }
 }
@@ -3980,9 +4002,8 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
-	GEN *bptr[2]; bptr[0]=&M; bptr[1]=&mod;
 	if (DEBUGMEM>1) err(warnmem,"nfgcd");
-	gerepilemany(btop, bptr, 2);
+	gerepileall(btop, 2, &M, &mod);
       }
 
       ax = gmulgs(mpinvmod(stoi(p), mod), p);
