@@ -218,17 +218,17 @@ kbessel2(GEN nu, GEN x, long prec)
 }
 
 GEN
-incgam(GEN a, GEN x, long prec)
+incgam(GEN s, GEN x, long prec)
 {
   GEN p1,z = cgetr(prec);
   long av = avma;
 
-  if (gcmp0(x)) return ggamma(a,prec);
+  if (gcmp0(x)) return ggamma(s,prec);
   if (typ(x)!=t_REAL) { gaffect(x,z); x=z; }
-  if (gcmp(subrs(x,1),a) > 0 || gsigne(greal(a)) <= 0)
-    p1 = incgam2(a,x,prec);
+  if (gcmp(subrs(x,1),s) > 0 || gsigne(greal(s)) <= 0)
+    p1 = incgam2(s,x,prec);
   else
-    p1 = gsub(ggamma(a,prec), incgam3(a,x,prec));
+    p1 = gsub(ggamma(s,prec), incgam3(s,x,prec));
   affrr(p1,z); avma = av; return z;
 }
 
@@ -304,7 +304,7 @@ incgam2(GEN a, GEN x, long prec)
 }
 
 GEN
-incgam3(GEN a, GEN x, long prec)
+incgam3(GEN s, GEN x, long prec)
 {
   GEN b,p1,p2,p3,y, z = cgetr(prec);
   long av = avma, av1,l,n,i;
@@ -313,21 +313,27 @@ incgam3(GEN a, GEN x, long prec)
   l=lg(x); n = -bit_accuracy(l)-1;
   p3 = realun(l);
   p2 = rcopy(p3);
-  i = typ(a);
-  if (i == t_REAL) b = a;
+  i = typ(s);
+  if (i == t_REAL) b = s;
   else
   {
-    gaffect(a,p1=cgetr(prec));
-    b = (i == t_INT)? a: p1;
-    a = p1;
+    gaffect(s,p1=cgetr(prec));
+    b = (i == t_INT)? s: p1;
+    s = p1;
+  }
+  if (signe(s) <= 0)
+  {
+    p1 = gcvtoi(s, &i);
+    if (i < 5 - bit_accuracy(prec))
+      err(talker,"negative argument too close to an integer in incgamc");
   }
   av1 = avma;
   for (i=1; expo(p2) >= n; i++)
   {
-    affrr(divrr(mulrr(x,p2), addsr(i,a)), p2);
+    affrr(divrr(mulrr(x,p2), addsr(i,s)), p2);
     affrr(addrr(p2,p3), p3); avma = av1;
   }
-  y = gdiv(mulrr(mpexp(negr(x)), gpui(x,b,prec)), a);
+  y = gdiv(mulrr(mpexp(negr(x)), gpui(x,b,prec)), s);
   affrr(mulrr(y,p3), z);
   avma = av; return z;
 }
