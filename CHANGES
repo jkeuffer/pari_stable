@@ -39,6 +39,9 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.7 (released ??/07/2003):
   Fixed
 
+  Changed
+    1- bnfinit: [small_norm phase] speed up norm computations.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):
   Fixed
