@@ -87,8 +87,7 @@ extern char    *errmessage[], *current_psfile, *pari_datadir;
 #define isonstack(x) ((pari_sp)(x)>=bot && (pari_sp)(x)<top)
 
 /* Define this to (1) locally (in a given file, NOT here) to check
- * "random" garbage collecting
- */
+ * "random" garbage collecting */
 #ifdef DYNAMIC_STACK
 #  define low_stack(x,l) (avma < (pari_sp)(l))
 #else
