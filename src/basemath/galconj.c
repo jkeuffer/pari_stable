@@ -537,7 +537,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   if (DEBUGLEVEL == 1)
     timer2();
   x = varn(P);
-  rt = brent_kung_optpow(degpol(Q),2);
+  rt = brent_kung_optpow(degpol(Q),1);
   q = p; qm1 = gun; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);
   Pr = FpX_red(P,q);
@@ -568,7 +568,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     if (i)
     {
       /*W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);*/
-      W = FpXQ_mul(Wr, FpX_FpXQV_compo(deriv(Pr,-1),Spow,Qrold,qold), Qrold, qold);
+      W = FpXQ_mul(Wr, FpX_FpXQV_compo(deriv(Pr,-1),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
       W = FpX_neg(W, qold);
       W = FpX_Fp_add(W, gdeux, qold);
       W = FpXQ_mul(Wr, W, Qrold, qold);
