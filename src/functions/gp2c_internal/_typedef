@@ -11,6 +11,26 @@ Description:
  (C!pari_sp)       pari_sp $1
  (C!func_GG)       GEN (*$1)(GEN, GEN)
 
+Function: _decl_base
+Class: gp2c_internal
+Description: 
+ (C!void)          void
+ (C!long)          long
+ (C!int)           int
+ (C!GEN)           GEN
+ (C!char*)         char
+ (C!byteptr)       byteptr
+ (C!GEN*[])        GEN
+ (C!pari_sp)       pari_sp
+ (C!func_GG)       GEN
+
+Function: _decl_ext
+Class: gp2c_internal
+Description: 
+ (C!char*)         *$1
+ (C!GEN*[])        *$1[]
+ (C!func_GG)       (*$1)(GEN, GEN)
+
 Function: _typedef
 Class: gp2c_internal
 Description:
