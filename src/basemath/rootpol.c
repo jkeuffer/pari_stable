@@ -443,10 +443,8 @@ myshiftic(GEN z, long e)
 static GEN
 myrealun(long bitprec)
 {
-  GEN x;
   if (bitprec < 0) bitprec = 0;
-  x = cgetr(bitprec/BITS_IN_LONG+3);
-  affsr(1,x); return x;
+  return realun(bitprec/BITS_IN_LONG+3);
 }
 
 static GEN
@@ -575,33 +573,34 @@ static double
 lower_bound(GEN p, long *k, double eps)
 {
   long n=degpol(p),i,j,ltop=avma;
-  GEN a,s,icd;
+  GEN a,s,S,icd;
   double r,*rho;
 
   if (n<4) { *k=n; return 0.; }
-  a=cgetg(6,t_POL); s=cgetg(6,t_POL);
+  S = cgetg(5,t_VEC);
+  a = cgetg(5,t_VEC);
   rho=(double *) gpmalloc(4*sizeof(double));
   icd = gdiv(realun(DEFAULTPREC), (GEN) p[n+2]);
-  for (i=1; i<=4; i++) a[i+1]=lmul(icd,(GEN)p[n+2-i]);
+  for (i=1; i<=4; i++) a[i] = lmul(icd,(GEN)p[n+2-i]);
   for (i=1; i<=4; i++)
   {
-    s[i+1]=lmulsg(i,(GEN)a[i+1]);
+    s = gmulsg(i,(GEN)a[i]);
     for (j=1; j<i; j++)
-      s[i+1]=ladd((GEN)s[i+1],gmul((GEN)s[j+1],(GEN)a[i+1-j]));
-    s[i+1]=lneg((GEN)s[i+1]);
-    r=gtodouble(gabs((GEN) s[i+1],3));
-    if (r<=0.)  /* should not be strictly negative */
-      rho[i-1]=0.;
+      s = gadd(s, gmul((GEN)S[j],(GEN)a[i-j]));
+    S[i] = lneg(s); /* Newton sum S_i */
+    r = gtodouble(gabs(s,3));
+    if (r == 0.)
+      rho[i-1] = 0.;
     else
-      rho[i-1]=exp(log(r/(double)n)/(double) i);
+      rho[i-1] = exp(log(r/(double)n)/(double) i);
   }
-  r=0.;
+  r = 0.;
   for (i=0; i<4; i++) if (r<rho[i]) r=rho[i];
   if (r>0. && eps<1.2)
-    *k=(long) floor((n*rho[0]/r+n)/(1+exp(-eps)*cos(eps)));
+    *k = (long) floor((n*rho[0]/r+n)/(1+exp(-eps)*cos(eps)));
   else
-    *k=n;
-  free(rho); avma=ltop; return r;
+    *k = n;
+  free(rho); avma = ltop; return r;
 }
 
 /* returns the maximum of the modulus of p with a relative error tau */
@@ -613,40 +612,37 @@ max_modulus(GEN p, double tau)
   double r,rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
 
   eps = - 1/log(1.5*tau2); /* > 0 */
-  bitprec=(long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
-  gunr=myrealun(bitprec+2*n);
-  aux=gdiv(gunr,(GEN) p[2+n]);
-  q=gmul(aux,p); q[2+n]=lcopy(gunr);
-  k=nn=n;
-  e=findpower(q); homothetie2n(q,e); r=-(double) e;
-  q=mygprec(q,bitprec+(n<<1));
+  bitprec = (long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
+  gunr = myrealun(bitprec+2*n);
+  aux = gdiv(gunr,(GEN) p[2+n]);
+  q = gmul(aux,p); q[2+n] = (long)gunr;
+  e = findpower(q);
+  homothetie2n(q,e);
+  r = (double) e;
+  q = mygprec(q,bitprec+(n<<1));
   pol_to_gaussint(q,bitprec);
   imax = (long) (log2( log(4.*n) / (2*tau2) )) + 2;
+  nn = n;
   for (i=0,e=0;;)
   { /* nn = deg(q) */
     rho = lower_bound(q,&k,eps);
     if (rho > exp2(-(double) e)) e = (long) -floor(log2(rho));
-    r -= e / exp2((double)i);
-    if (++i == imax) {
-      avma = ltop;
-      if (fabs(r) * exp2(i) < 1) return realun(DEFAULTPREC); /* r = 0 */
-      return gpui(dbltor(2.),dbltor(r),DEFAULTPREC);
-    }
+    r += e / exp2((double)i);
+    if (++i == imax) break;
 
-    if (k<nn)
-      bitprec=(long) ((double) k* log2(1./tau2)+
-                      (double) (nn-k)*log2(1./eps)+
-                      3*log2((double) nn))+1;
-    else /* k = nn */
-      bitprec=(long) ((double) k* log2(1./tau2)+
-                      3.*log2((double) nn))+1;
+    bitprec = (long) ((double) k* log2(1./tau2) +
+                     (double) (nn-k)*log2(1./eps) + 3*log2((double) nn)) + 1;
     homothetie_gauss(q,e,bitprec-(long)floor(mylog2((GEN) q[2+nn])+0.5));
     nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(ltop, graeffe(q));
-    tau2 *= 1.5; eps = 1/log(1./tau2);
+    tau2 *= 1.5; eps = -1/log(tau2);
     e = findpower(q);
   }
+  /* r = sum e_i 2^-i */
+  avma = ltop;
+  if (fabs(r) * exp2(i) < 1) return realun(DEFAULTPREC); /* r = 0 */
+  return mpexp(dbltor(-r * LOG2)); /* 2^-r */
 }
 
 /* return the k-th modulus (in ascending order) of p, rel. error tau*/
@@ -662,11 +658,11 @@ modulus(GEN p, long k, double tau)
   decprec=(long) ((double) bitprec * L2SL10)+1;
   gunr=myrealun(bitprec);
   av = avma;
-  q=gprec(p,decprec);
-  q=gmul(gunr,q);
-  e=newton_polygon(q,k);
+  q = gprec(p,decprec);
+  q = gmul(gunr,q);
+  e = newton_polygon(q,k);
   homothetie2n(q,e);
-  r=(double) e;
+  r = (double) e;
   imax=(long) ((log2(3./tau)+log2(log(4.*(double) n)) ))+1;
   for (i=1; i<imax; i++)
   {
@@ -681,7 +677,7 @@ modulus(GEN p, long k, double tau)
     q=gmul(gunr,q);
     homothetie2n(q,e);
 
-    tau2=1.5*tau2; if (tau2>1.) tau2=1.;
+    tau2 *= 1.5; if (tau2 > 1.) tau2 = 1.;
     bitprec= 1+(long) ((double) nn*(2.+log2(3.*(double) nn)+log2(1./tau2)));
   }
   avma=ltop; return mpexp(dbltor(-r * LOG2));
