@@ -533,6 +533,7 @@ set_term_ftable(struct t_ftable *p)
 extern struct t_ftable *get_term_ftable();
 
 #else /* !DYNAMIC_PLOTTING */
+#define set_mouse_feedback_rectangle  mys_mouse_feedback_rectangle
 
 extern struct termentry term_tbl[];
 extern double min_array[], max_array[];
