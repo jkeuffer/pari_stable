@@ -1,7 +1,9 @@
 # Version number and patch level.
 . ./version
+patchlevel_verbose=
 if test -d CVS -a $status = development; then
  status="$status CHANGES-"`grep CHANGES $TOP/CVS/Entries | awk -F/ '{print $3}'`
+ patchlevel_verbose="[ $status ]"
 fi
 
 version=$VersionMajor.$VersionMinor
@@ -13,7 +15,7 @@ else
   pari_release_verbose="$pari_release (DEVELOPMENT VERSION)"
   libpari_base=pari-$version
 fi
-echo "Configuring pari-$pari_release_verbose"
+echo "Configuring pari-$pari_release_verbose $patchlevel_verbose"
 
 # Processing Options
 dflt_conf_file=dft.Config.in
