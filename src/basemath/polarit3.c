@@ -878,6 +878,14 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
     V[i] = (long) FpXQ_mul((GEN) V[i-1],x,T,p);
   return V;
 }
+/*Return otpimal parameter l for the evaluation of n polynomials of degree d*/
+long brent_kung_optpow(long d, long n)
+{
+  long l=n*d;
+  if (n*d<=1) return 1;
+  l=(long)d/sqrt((double) n*d);
+  return (d+l-1)/l;
+}
 
 static GEN
 spec_compo_powers(GEN P, GEN V, long a, long n)
@@ -891,6 +899,10 @@ spec_compo_powers(GEN P, GEN V, long a, long n)
 }
 /*Try to implement algorithm in Brent & Kung (Fast algorithms for
  *manipulating formal power series, JACM 25:581-595, 1978)
+ 
+ V must be as output by FpXQ_powers.
+ For optimal permformance, l (of FpXQ_powers) must as ouput by
+ brent_kung_optpow
  */
 
 GEN

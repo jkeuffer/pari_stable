@@ -566,7 +566,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   if (DEBUGLEVEL == 1)
     timer2();
   x = varn(P);
-  rt = (long) sqrt((double) ((lgef(Q)-3)<<1)-1);
+  rt = brent_kung_optpow(lgef(Q)-3,2);
   q = p; qm1 = gun; /*during the run, we have p*qm1=q*/
   nb=hensel_lift_accel(e, &mask);
   Pr = FpX_red(P,q);
@@ -678,7 +678,7 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   {
     ulong ltop=avma;
     int i;
-    long nautpow=(long) sqrt((double) (gt->f-2)*(gt->n-1));
+    long nautpow=brent_kung_optpow(gt->n-1,gt->f-2);
     GEN autpow;
     if (DEBUGLEVEL >= 1) timer2();
     autpow = FpXQ_powers(plift,nautpow,gl->TQ,gl->Q);
@@ -1411,7 +1411,7 @@ fixedfieldpolsigma(GEN sigma, GEN p, GEN Tp, GEN sym, GEN deg, long g)
     {
       s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(deg[j]),Tp,p),stoi(sym[j]),p),p);
     }
-  npows = (long)sqrt((double)(g-1)*(lgef(Tp)-4));
+  npows = brent_kung_optpow(lgef(Tp)-4,g-1);
   pows  = FpXQ_powers(sigma,npows,Tp,p);
   for(i=2; i<=g;i++)
   {
@@ -1446,7 +1446,7 @@ fixedfieldnewtonsumaut(GEN sigma, GEN p, GEN Tp, GEN e, long g)
   long rt;
   sigma=lift(gmul(sigma,gmodulsg(1,p)));
   f=polx[varn(sigma)];
-  rt=(long)sqrt((double)(g-1)*(lgef(Tp)-4));
+  rt=brent_kung_optpow(lgef(Tp)-4,g-1);
   V=FpXQ_powers(sigma,rt,Tp,p);
   s=FpXQ_pow(f,e,Tp,p);
   for(i=2; i<=g;i++)

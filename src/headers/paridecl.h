@@ -1168,6 +1168,7 @@ GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
 GEN     ZX_disc(GEN x);
 GEN     ZX_invmod(GEN A, GEN B);
 GEN     ZX_resultant(GEN A, GEN B);
+long    brent_kung_optpow(long d, long n);
 GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
