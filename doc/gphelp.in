@@ -140,8 +140,10 @@ sub init
 
   chdir($docdir);
   $docfile = "usersch3.tex";
-  $tmpdir = $ENV{GPTMPDIR} || $ENV{TMPDIR} || $ENV{GPHELP_TMPDIR} || "/tmp";
-  $texfile = "$tmpdir/gp.help$$";
+  $basedir = $ENV{GPHELP_TMPDIR} || $ENV{GPTMPDIR} || $ENV{TMPDIR} || "/tmp";
+  $tmpdir = "$basedir/gp.help$$";
+  mkdir $tmpdir, 0755 || die("Cannot create temporary directory");
+  $texfile = "$tmpdir/gp.help";
 
   open(IN,"translations") || die("Could not find translation file, docdir='$docdir'");
   while(<IN>)
@@ -394,6 +396,7 @@ sub posttex
 sub clean
 {
   unlink("$texfile.tex","$texfile.dvi","$texfile.log");
+  rmdir("$tmpdir");
 }
 
 #
