@@ -744,6 +744,7 @@ lllgramintern(GEN x, long alpha, long flag, long prec)
 {
   GEN xinit,L,h,A,B,L1,L2,q,cst;
   long retry = 2, av = avma,tetpil,lim,l,i,j,k,k1,lx=lg(x),n,kmax;
+  long last_prec;
 
   if (typ(x) != t_MAT) err(typeer,"lllgram");
   n=lx-1; if (n && lg((GEN)x[1])!=lx) err(mattype1,"lllgram");
@@ -787,6 +788,7 @@ LABLLLGRAM:
       if (DEBUGLEVEL) outerr(xinit);
       err(lllger3);
   }
+  last_prec = prec;
   cst = cgetr(prec+1); affsr(alpha-1,cst);
   cst = divrs(cst,alpha);
 
@@ -832,8 +834,9 @@ LABLLLGRAM:
         fprintferr("%ld: %Z\n",i,qfeval(x,(GEN)h[i]));
       flusherr();
     }
-    if (2*gexpo(L1) > bit_accuracy(lg(L1)))
+    if (2*gexpo(L1) > bit_accuracy(lg(L1)) || 2*lg(L1) < last_prec)
     {
+      last_prec = lg(L1);
       if (DEBUGLEVEL>3)
       {
 	fprintferr("\nRecomputing Gram-Schmidt, kmax = %ld\n",kmax);
