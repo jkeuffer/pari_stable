@@ -21,6 +21,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern long init_padic_prec(long e, int BitPerFactor, long r, double LOGp2);
+extern double bound_vS(long tmax, GEN *BL);
+extern GEN GS_norms(GEN B, long prec);
+extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p,GEN *beta);
 extern GEN gauss_intern(GEN a, GEN b);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
@@ -29,7 +33,6 @@ extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, lon
 extern GEN nf_get_T2(GEN base, GEN polr);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN nfreducemodpr_i(GEN x, GEN prh);
-extern GEN norml2_spec(GEN x);
 extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
@@ -114,29 +117,6 @@ unifpol(GEN nf,GEN pol,long flag)
   }
   return unifpol0(nf,(GEN) pol, flag);
 }
-
-#if 0
-/* return a monic polynomial of degree d with random coefficients in Z_nf */
-static GEN
-random_pol(GEN nf,long d)
-{
-  long i,j, n = degpol(nf[1]);
-  GEN pl,p;
-
-  pl=cgetg(d+3,t_POL);
-  for (i=2; i<d+2; i++)
-  {
-    p=cgetg(n+1,t_COL); pl[i]=(long)p;
-    for (j=1; j<=n; j++)
-      p[j] = lstoi(mymyrand()%101 - 50);
-  }
-  p=cgetg(n+1,t_COL); pl[i]=(long)p;
-  p[1]=un; for (i=2; i<=n; i++) p[i]=zero;
-
-  pl[1] = evalsigne(1) | evallgef(d+3) | evalvarn(0);
-  return pl;
-}
-#endif
 
 /* reduce the coefficients of pol modulo prhall */
 static GEN
@@ -740,7 +720,7 @@ bestlift_init(GEN nf, GEN pr, GEN C, long *kmax, GEN *prkmax)
   long k, prec, n = degpol(nf[1]);
   gpmem_t av = avma, av1, av2;
   int tot_real = !signe(gmael(nf,2,2)), early_try = (n <= 6);
-  GEN prk,dk,logdk, PRK,p1,u,C2,T2,T2PRK;
+  GEN dk,logdk,prk,PRK,p1,u,C2,T2,T2PRK;
   GEN p = (GEN)pr[1], logp = glog(p,DEFAULTPREC);
   GEN *gptr[2];
 
@@ -996,7 +976,7 @@ nfsqff(GEN nf,GEN pol, long fl)
   T.nfactmod = m-1;
   T.pr       = pr;
   T.hint     = 1;
-#if 1
+#if 0
   nfcmbf(&T, 1,NULL,degpol(pol));
   m = T.nfact + 1;
   if (degpol(T.pol))
@@ -1360,108 +1340,121 @@ normlp(GEN L, long p)
   return z;
 }
 
+/* assume pr has degree 1 */
 GEN
 nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
 {
-  GEN dn, pa = T->den, famod = T->fact, nfT = (GEN)(T->nf[1]);
-  GEN P0 = simplify(lift(T->pol));
+  GEN dn, pb, pa = T->den, famod = T->fact, nfT = (GEN)(T->nf[1]);
+  GEN P = simplify(T->pol);
   GEN ZC = L2_bound(nfT, &dn);
-  GEN B = nf_root_bounds(P0, nfT);
-  GEN C, Btra, PRK = T->h;
-  long dnf = degpol(nfT), expPRK;
+  GEN Br = nf_root_bounds(P, nfT);
+  GEN B, Btra, PRK = T->h, PRK_GSmin;
+  long dnf = degpol(nfT), dP = degpol(P);
 
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
-  long i,j,r,tmax,n0,n;
+  long i,j,C,r,tmax,tnew,n0,n;
+  double logp = log(gtodouble(p)), LOGp2 = LOG2/logp;
   GEN y, Tra, T2, TT, BL, m, u, norm, target, M, piv, list;
-  GEN run = realun(DEFAULTPREC);
   gpmem_t av, av2, lim;
   int did_recompute_famod = 0;
 
   n0 = n = r = lg(famod) - 1;
   list = cgetg(n0+1, t_COL);
 
-  expPRK = gexpo(gnorml2((GEN)PRK[1]));
   av = avma; lim = stack_lim(av, 1);
   TT = cgetg(n0+1, t_VEC);
   Tra  = cgetg(n0+1, t_MAT);
   for (i=1; i<=n0; i++) TT[i] = 0;
   BL = idmat(n0);
+  /* FIXME: wasteful, but PRK should be close to LLL reduced already */
+  u = lllgramint_i(gram_matrix(PRK), 4, NULL, &B);
+  PRK_GSmin = vecmin(GS_norms(B, DEFAULTPREC));
+
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {
-    double Nx;
-
+    long b, goodb;
+    double BvS, Blow;
     if (DEBUGLEVEL>2)
       fprintferr("nf_LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
-    av2 = avma;
-    if (tmax > 0)
-    { /* bound small vector in terms of a modified L2 norm of a
-       * left inverse of BL */
-      GEN z = gauss_intern(BL,NULL); /* 1/BL */
-      if (!z) /* not maximal rank */
-      {
-        avma = av2;
-        BL = hnfall_i(BL,NULL,1);
-        av2 = avma;
-        r = lg(BL)-1; z = invmat(BL);
-      }
-      Nx = gtodouble(norml2_spec(gmul(run, z)));
-      avma = av2;
-    }
-    else
-      Nx = (double)n0; /* first time: BL = id */
 
+    /* Lattice: (S PRK), small vector (vS vP). Find a bound for the image 
+     * write S = S1 p^b + S0, P = P1 p^b + P0 */
+    BvS = bound_vS(tmax, &BL);
+    r = lg(BL)-1;
+    tnew = tmax+1;
     { /* bound for f . S_k(genuine factor) */
-      GEN N2 = gmulsg(n*n, normlp(B, tmax+1));
-      Btra = gmul(ZC, N2);
-      C = ceil_safe( mpsqrt(gdiv(Btra, dbltor(Nx))) );
-      M = gadd( gmul(dbltor(Nx), sqri(C)), Btra ); /* ~ 2 Btra */
+      GEN N2 = mulsr(dP*dP, normlp(Br, tnew)); /* bound for T_2(S_tnew) */
+      Btra = mulrr(ZC, N2);
+      /* assume p^b  > sqrt(Btra) */
+      Blow = 1. + 0.25*(3*sqrt(BvS) + sqrt((double)dnf));
+
+      Blow *= Blow;
+      /* q(S1 vS + P1 vP) <= Blow for all (vS,vP) assoc. to true factors */
+      /* C^2 BvS ~ Blow */ 
+      C = (long)ceil(sqrt(Blow/BvS)) + 1;
+      M = dbltor( BvS * C * C + Blow );
     }
 
-    if (expPRK <= gexpo(Btra))
+    b = (long)ceil( 0.5 * gtodouble(mplog(Btra)) / logp ) + 1;
+    if (a <= b || gcmp(PRK_GSmin, Btra) < 0)
     {
-      for (;;)
+      GEN prk, polred;
+      av2 = avma;
+      if (a <= b) a = b + 5;
+      for (;; avma = av2, a<<=1)
       {
-        PRK = idealpows(T->nf, T->pr, a);
-        pa = gcoeff(PRK,1,1);
-        PRK = gmul(PRK, lllintpartial(PRK));
-        expPRK = gexpo(gnorml2((GEN)PRK[1]));
-        if (expPRK > gexpo(Btra)) break;
-        a <<= 1;
-      }
-      PRK = gmul(PRK, lllint(PRK));
+        prk = idealpows(T->nf, T->pr, a);
+        pa = gcoeff(prk,1,1);
+        prk = gmul(prk, lllintpartial(prk));
 
-      famod = hensel_lift_fact(P0,famod,NULL,p,pa,a);
-      /* recompute old Newton sums to new precision */
-      for (i=1; i<=n0; i++)
-      {
-        GEN p2 = polsym_gen((GEN)famod[i], NULL, tmax, NULL, pa);
-        if (!gcmp1(dn)) { p2 = gmul(p2,dn); p2 = FpV_red(p2, pa); }
-        TT[i] = (long)p2;
+        u = lllgramint_i(gram_matrix(prk), 4, NULL, &B);
+        PRK_GSmin = vecmin(GS_norms(B, DEFAULTPREC));
+        if (gcmp(PRK_GSmin, Btra) >= 0) { PRK = gmul(prk, u); break; }
       }
+
+      polred = nf_pol_red(unifpol(T->nf,P,0), prk);
+      famod = hensel_lift_fact(polred,famod,NULL,p,pa,a);
+      /* recompute old Newton sums to new precision */
+      if (tmax)
+        for (i=1; i<=n0; i++)
+        {
+          GEN p2 = polsym_gen((GEN)famod[i], NULL, tmax, NULL, pa);
+          if (!gcmp1(dn)) { p2 = gmul(p2,dn); p2 = FpV_red(p2, pa); }
+          TT[i] = (long)p2;
+        }
       did_recompute_famod = 1;
     }
 
     for (i=1; i<=n0; i++)
     {
-      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tmax+1, NULL, pa);
+      GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], tnew, NULL, pa);
       if (!gcmp1(dn)) { p2 = gmul(p2,dn); p2 = FpV_red(p2, pa); }
       TT[i] = (long)p2;
-      Tra[i] = (long)gscalcol((GEN)p2[tmax+1], dnf);
+      Tra[i] = (long)gscalcol((GEN)p2[tnew+1], dnf); /* S_tnew(famod) */
     }
 
     av2 = avma;
     T2 = gmod( gmul(Tra, BL), pa );
     T2 = gsub(T2, gmul(PRK, ground(gauss(PRK, T2))));
+
+#if 0 /* without truncation */
     m = concatsp( vconcat( gscalmat(C, r), T2 ),
                   vconcat(zeromat(r, dnf), PRK));
+#else
+    goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
+    if (goodb > b) b = goodb;
+
+    pb = gpowgs(p, b);
+    m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, pb) ),
+                  vconcat(zeromat(r, dnf),  gdivround(PRK,pb)));
+#endif
     /*     [  C     0  ]
      * m = [           ]   square matrix
      *     [ T2    PRK ]   T2 = Tra * BL  truncated
      */
-    u = lllgramintern(gram_matrix(m), 4, 0, 0);
-    m = gmul(m,u);
-    (void)gram_schmidt(gmul(run,m), &norm);
+    u = lllgramint_i(gram_matrix(m), 4, NULL, &B);
+    norm = GS_norms(B, DEFAULTPREC);
     for (i=r+dnf; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
     if (i > r)
@@ -1485,16 +1478,17 @@ nf_LLL_cmbf(nfcmbf_t *T, long a, GEN p, long rec)
     BL = gerepileupto(av2, gmul(BL, u));
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[4]; gptr[0]=&BL; gptr[1]=&TT; gptr[2]=&Tra; gptr[3]=&famod;
+      GEN *gptr[5]; gptr[0]=&BL; gptr[1]=&TT; gptr[2]=&Tra; gptr[3]=&famod;
+      gptr[4]=&PRK_GSmin;
       if(DEBUGMEM>1) err(warnmem,"nf_LLL_cmbf");
-      gerepilemany(av, gptr, did_recompute_famod? 4: 3);
+      gerepilemany(av, gptr, did_recompute_famod? 5: 4);
     }
     if (rec && r*rec >= n0) continue;
 
     av2 = avma;
     piv = special_pivot(BL);
-    if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
     if (!piv) { avma = av2; continue; }
+    if (DEBUGLEVEL) fprintferr("special_pivot output:\n%Z\n",piv);
 
     target = T->pol;
     for (i=1; i<=r; i++)

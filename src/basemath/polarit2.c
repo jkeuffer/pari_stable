@@ -637,12 +637,30 @@ all_factor_bound(GEN x)
 
 /* x defined mod p^a, return mods ( (x - mods(x, p^b)) / p^b , p^(b-a) )  */
 static GEN
-TruncTrace(GEN x, GEN pb, GEN pa_b, GEN pa_bs2, GEN pbs2)
+Truncate_p(GEN x, GEN pb, GEN pa_b, GEN pa_bs2, GEN pbs2)
 {
   GEN r, q = dvmdii(x, pb, &r);
   if (cmpii(r,  pbs2) > 0) q = addis(q,1);
   if (pa_bs2 && cmpii(q,pa_bs2) > 0) q = subii(q,pa_b);
   return q;
+}
+
+/* in place */
+GEN
+MatTruncate_p(GEN T, GEN p, long a, long b)
+{
+  GEN pb = gpowgs(p, b);
+  GEN pa_b = gpowgs(p, a-b);
+  GEN pa_bs2 = shifti(pa_b,-1);
+  GEN pbs2   = shifti(pb,-1);
+  long i,j, r = lg(T)-1, s = lg(T[1])-1;
+  for (i=1; i<=r; i++)
+  {
+    GEN c = (GEN)T[i];
+    for (j=1; j<=s; j++)
+      c[j] = (long)Truncate_p((GEN)c[j],pb,pa_b,pa_bs2,pbs2);
+  }
+  return T;
 }
 
 /* Naive recombination of modular factors: combine up to maxK modular
@@ -687,7 +705,7 @@ cmbf(GEN target, GEN famod, GEN p, long b, long a,
         T = modii(mulii(lc, (GEN)p1[degpol[i]+1]), pa);
       else
         T = (GEN)p1[degpol[i]+1]; /* d-1 term */
-      trace[i] = itos( TruncTrace(T, pb,pa_b,NULL,pbs2) );
+      trace[i] = itos( Truncate_p(T, pb,pa_b,NULL,pbs2) );
     }
     spa_b   =   pa_b[2]; /* < 2^(BIL-1) */
     spa_bs2 = pa_bs2[2]; /* < 2^(BIL-1) */
@@ -954,11 +972,13 @@ special_pivot(GEN x)
 
 /* x matrix: compute a bound for | \sum e_i x_i | ^ 2, e_i = 0,1 */
 GEN
-norml2_spec(GEN x)
+norml2_spec(GEN x, long prec)
 {
   long i,j, co = lg(x), li;
   GEN S = gzero;
   if (co == 1) return S;
+
+  x = gmul(x, realun(prec));
   li = lg(x[1]);
   for (i=1; i<li; i++)
   {
@@ -980,13 +1000,11 @@ norml2_spec(GEN x)
 }
 
 /* each entry < 2^e */
-static long
-init_padic_prec(long e, int BitPerFactor, long n0, double LOGp2)
+long
+init_padic_prec(long e, int BitPerFactor, long r, double LOGp2)
 {
-/* long b, goodb = (long) ((e - 0.175 * n0 * n0)  * LOGp2); */
-  long b, goodb = (long) (((e - BitPerFactor*n0)) * LOGp2);
-  b = (long) ((e -     32)*LOGp2); if (b < goodb) goodb = b;
-  /* b = (long) ((e - Max*32)*LOGp2); if (b > goodb) goodb = b; */
+  long b, goodb = (long) (((e - BitPerFactor*r)) * LOGp2);
+  b = (long) ((e - 32)*LOGp2); if (b < goodb) goodb = b;
   return goodb;
 }
 
@@ -994,6 +1012,35 @@ extern GEN sindexrank(GEN x);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN gauss_intern(GEN a, GEN b);
 extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
+
+/* bound for q(vS) := || vS ||_2^2 */
+double
+bound_vS(long tmax, GEN *ptB)
+{
+  gpmem_t av = avma;
+  double Nx;
+  GEN z, B = *ptB;
+  if (tmax > 0)
+  { /* bound small vector in terms of a modified L2 norm of a
+     * left inverse of BL */
+    z = gauss_intern(B,NULL); /* 1/BL */
+    if (!z) /* not maximal rank */
+    {
+      avma = av;
+      B = hnfall_i(B,NULL,1);
+      av = avma;
+      z = invmat(B);
+    }
+    Nx = gtodouble(norml2_spec(z, DEFAULTPREC));
+    avma = av;
+  }
+  else
+  {
+    long n0 = lg(B)-1;
+    Nx = (double)n0; /* first time: BL = id */
+  }
+  *ptB = B; return Nx;
+}
 
 /* B grom lllgramint_i: return [ |b_i^*|^2, i ] */
 GEN
@@ -1024,7 +1071,6 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   double b0 = log((double)dP*2) / logp;
   double k = gtodouble(glog(root_bound(P), DEFAULTPREC)) / logp;
   GEN B, y, T, T2, TT, BL, m, u, norm, target, M, piv, list;
-  GEN run = realun(DEFAULTPREC);
   gpmem_t av, av2, lim;
   int did_recompute_famod = 0;
 
@@ -1050,23 +1096,9 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
-    av2 = avma;
-    if (tmax > 0)
-    { /* bound small vector in terms of a modified L2 norm of a
-       * left inverse of BL */
-      GEN z = gauss_intern(BL,NULL); /* 1/BL */
-      if (!z) /* not maximal rank */
-      {
-        avma = av2;
-        BL = hnfall_i(BL,NULL,1);
-        av2 = avma;
-        r = lg(BL)-1; z = invmat(BL);
-      }
-      Nx = gtodouble(norml2_spec(gmul(run, z)));
-      avma = av2;
-    }
-    else
-      Nx = (double)n0; /* first time: BL = id */
+    Nx = bound_vS(tmax,&BL);
+    r = lg(BL)-1;
+
     C = (long)sqrt(s*n0*n0/4. / Nx);
     if (C == 0) C = 1; /* frequent after a few iterations */
     M = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
@@ -1094,26 +1126,16 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     av2 = avma;
     T2 = gmod( gmul(T, BL), pa );
-    goodb = init_padic_prec(gexpo(T2), BitPerFactor, n0, LOGp2);
+    goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
     if (goodb > b) b = goodb;
     if (DEBUGLEVEL>2)
       fprintferr("LLL_cmbf: (a, b) = (%ld, %ld), expo(T) = %ld\n",
                  a,b,gexpo(T2));
-    pa_b = gpowgs(p, a-b);
-    {
-      GEN pb = gpowgs(p, b);
-      GEN pa_bs2 = shifti(pa_b,-1);
-      GEN pbs2   = shifti(pb,-1);
-      for (i=1; i<=r; i++)
-      {
-        GEN p1 = (GEN)T2[i];
-        for (j=1; j<=s; j++)
-          p1[j] = (long)TruncTrace((GEN)p1[j],pb,pa_b,pa_bs2,pbs2);
-      }
-    }
+    T2 = MatTruncate_p(T2,p, a,b);
     if (gcmp0(T2)) { avma = av2; continue; }
 
     BE = cgetg(s+1, t_MAT);
+    pa_b = gpowgs(p, a-b);
     for (i=1; i<=s; i++)
     {
       BE[i] = (long)zerocol(r+s);
