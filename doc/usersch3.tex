@@ -4617,8 +4617,9 @@ polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
 
 The following binary digits of $\fl$ are significant:
 
-1: does a partial reduction only. This means that only a suborder of the
-maximal order may be used.
+1: possibly use a suborder of the maximal order. The primes dividing the
+index of the order chosen are larger than \tet{primelimit} or divide integers
+stored in the \tet{addprimes} table.
 
 2: gives also elements. The result is a two-column matrix, the first column
 giving the elements defining these subfields, the second giving the
@@ -4640,7 +4641,8 @@ polynomials, \kbd{nf}, \kbd{bnf}, \kbd{[x,Z\_K\_basis]}).
 \misctitle{Warning:} this routine uses an exponential-time algorithm to
 enumerate all potential generators, and may be exceedingly slow when the
 number field has many subfields, hence a lot of elements of small $T2$-norm.
-E.g. do not try it on the compositum of many quadratic fields\dots
+E.g. do not try it on the compositum of many quadratic fields, use
+\tet{polred} instead.
 
 The binary digits of $\fl$ mean
 
