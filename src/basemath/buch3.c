@@ -44,7 +44,6 @@ extern GEN subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
 extern GEN to_Fp_simple(GEN nf, GEN x, GEN ffproj);
 extern GEN to_famat_all(GEN x, GEN y);
 extern GEN trivfact(void);
-extern GEN unif_mod_f(GEN nf, GEN pr, GEN sqf);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
@@ -340,10 +339,10 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     mulI = NULL;
     for (j=1; j<lp; j++)
     {
-      invpi = vecinvpi[j];
       pr    = listpr[j]; 
       v = idealval(nf, I, pr);
       if (v) {
+        invpi = vecinvpi[j];
         if (!invpi) invpi = vecinvpi[j] = anti_unif_mod_f(nf, pr, sqf);
         t = element_pow(nf,invpi,stoi(v));
         mulI = mulI? element_mul(nf, mulI, t): t;
@@ -360,10 +359,10 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       L0 = Q_primitive_part(LL, &cx); /* LL = L0*cx (faster element_val) */
       for (j=1; j<lp; j++)
       {
-        invpi = vecinvpi[j];
         pr  = listpr[j];
         v = fast_val(nf, L0,cx, pr,vectau[j]); /* = val_pr(LL) */
         if (v) {
+          invpi = vecinvpi[j];
           if (!invpi) invpi = vecinvpi[j] = anti_unif_mod_f(nf, pr, sqf);
           t = element_pow(nf,invpi,stoi(v));
           LL = element_mul(nf, LL, t);
