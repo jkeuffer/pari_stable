@@ -2141,10 +2141,10 @@ TestOne(GEN plg, RC_data *d)
 }
 
 static GEN
-chk_reccoeff_init(FP_chk_fun *chk, GEN gram, GEN mat)
+chk_reccoeff_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
   RC_data *d = (RC_data*)chk->data;
-  (void)gram; d->U = mat; return d->nB;
+  (void)r; d->U = mat; return d->nB;
 }
 
 static GEN

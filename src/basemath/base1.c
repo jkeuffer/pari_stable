@@ -1748,13 +1748,13 @@ chk_gen(void *data, GEN x)
   return g;
 }
 
-/* mat = base change matrix, gram = LLL-reduced T2 matrix */
+/* mat = base change matrix, r = Cholesky form of the quadratic form */
 static GEN
-chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
+chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
 {
   CG_data *d = (CG_data*)chk->data;
   GEN P,bound,prev,x,B;
-  long l = lg(gram), N = l-1,i,prec,prec2;
+  long l = lg(r), N = l-1,i,prec,prec2;
   int skipfirst = 0;
 
   d->u = mat;
@@ -1765,7 +1765,7 @@ chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat)
   x = zerocol(N);
   for (i=1; i<l; i++)
   {
-    B = gcoeff(gram,i,i);
+    B = QuickNormL2((GEN)r[i], DEFAULTPREC);
     if (gcmp(B,bound) >= 0) continue; /* don't assume increasing norms */
 
     /* use canon_pol to recognized trivial automorphism P --> P(-x) */

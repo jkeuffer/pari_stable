@@ -615,7 +615,7 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN delta, int gram)
   B[k] = lmpmul((GEN)B[k-1], BK);
   B[k-1] = (long)BB;
 
-  swap(h[k-1],h[k]);
+  if (h) swap(h[k-1],h[k]);
   swap(x[k-1],x[k]); lx = lg(x);
   if (gram)
     for (j=1; j < lx; j++) swap(coeff(x,k-1,j), coeff(x,k,j));
@@ -729,7 +729,10 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
   if (pth)  *pth = h;
   if (MARKED && MARKED != 1)
   {
-    if (h) { swap(h[1], h[MARKED]); } else swap(x[1], x[MARKED]);
+    if (B)  { swap( B[1],  B[MARKED]); }
+    if (fl) { swap(fl[1], fl[MARKED]); }
+    if (h)  { swap( h[1],  h[MARKED]); }
+    swap(x[1], x[MARKED]);
   }
   return h? h: x;
 }
@@ -1177,8 +1180,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
     if (gram) err(mattype1,"lllfp");
     if (lx > hx) err(talker,"dependant vectors in lllfp");
   }
-  delta = stor(D-1, DEFAULTPREC);
-  delta = divrs(delta,D);
+  delta = divrs(stor(D-1, DEFAULTPREC), D);
   xinit = x;
   av = avma; lim = stack_lim(av,1);
   if (gram) {
@@ -2944,17 +2946,17 @@ perf(GEN a)
   return minim00(a,gzero,gzero,min_PERF);
 }
 
+/* q is the Gauss reduction (sqred1) of the quadratic form */
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
- * If (noer) return NULL on precision problems (no error).
  * If (check != NULL consider only vectors passing the check [ assumes
  *   stockmax > 0 and we only want the smallest possible vectors ] */
 static GEN
-smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
+smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
 {
   long N, n, i, j, k, s, epsbit, prec, checkcnt = 1;
   pari_sp av, av1, lim;
-  GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
+  GEN u,S,x,y,z,v,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
   int skipfirst = CHECK? CHECK->skipfirst: 0;
@@ -2962,9 +2964,6 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
   if (DEBUGLEVEL)
     fprintferr("smallvectors looking for norm <= %Z\n",gprec_w(BORNE,3));
 
-  q = sqred1intern(a, noer);
-  if (q == NULL) return NULL;
-  if (DEBUGLEVEL>5) fprintferr("q = %Z",q);
   prec = gprecision(q);
   epsbit = bit_accuracy(prec) >> 1;
   eps = real2n(-epsbit, prec);
@@ -3156,7 +3155,7 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
 {
   pari_sp av = avma;
   VOLATILE long i,j,l, round = 0;
-  VOLATILE GEN B,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram, bound = B0;
+  VOLATILE GEN r,rinvtrans,u,v,res,z,vnorm,rperm,perm,uperm, bound = B0;
 
   if (DEBUGLEVEL>2) fprintferr("entering fincke_pohst\n");
   if (typ(a) == t_VEC)
@@ -3191,13 +3190,13 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
     }
   }
   /* now r~ * r = a in LLL basis */
-  rinvtrans = gtrans(invmat(r));
+  rinvtrans = gtrans_i( invmat(r) );
   if (DEBUGLEVEL>2)
       fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lllintern(rinvtrans, 100, noer, 0);
   if (!v) return NULL;
-  rinvtrans = gmul(rinvtrans, v);
 
+  rinvtrans = gmul(rinvtrans, v);
   v = ZM_inv(gtrans_i(v),gun);
   r = gmul(r,v);
   u = u? gmul(u,v): v;
@@ -3205,35 +3204,26 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
   l = lg(r);
   vnorm = cgetg(l,t_VEC);
   for (j=1; j<l; j++) vnorm[j] = lnorml2((GEN)rinvtrans[j]);
-  sperm = cgetg(l,t_MAT);
+  rperm = cgetg(l,t_MAT);
   uperm = cgetg(l,t_MAT); perm = sindexsort(vnorm);
-  for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; sperm[l-i] = r[perm[i]]; }
+  for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; rperm[l-i] = r[perm[i]]; }
 
-  gram = gram_matrix(sperm);
-  B = gcoeff(gram,l-1,l-1);
-  if (gexpo(B) >= bit_accuracy(lg(B)-2)) return NULL;
+  r = sqred1_from_QR(rperm, gprecision(rperm));
+  if (!r) return NULL;
 
   res = NULL;
   CATCH(precer) { }
   TRY {
     if (CHECK && CHECK->f_init)
     {
-      bound = CHECK->f_init(CHECK,gram,uperm);
+      bound = CHECK->f_init(CHECK, r, uperm);
       if (!bound) err(precer,"fincke_pohst");
     }
-    if (!bound) bound = gcoeff(gram,1,1);
-
-    if (DEBUGLEVEL>2) fprintferr("entering smallvectors\n");
-    for (i=1; i<l; i++)
-    {
-      res = smallvectors(gram, bound, stockmax,noer,CHECK);
-      if (!res) err(precer,"fincke_pohst");
-      if (!CHECK || bound || lg(res[2]) > 1) break;
-      if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
-    }
+    if (!bound) bound = QuickNormL2((GEN)r[1], DEFAULTPREC);
+    res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
-  if (CHECK || !res) return res;
+  if (CHECK) return res;
 
   z = cgetg(4,t_VEC);
   z[1] = lcopy((GEN)res[1]);

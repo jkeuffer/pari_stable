@@ -119,6 +119,7 @@ IZ 59- [readline:] support old versions (1.0), try to recover from
 BA 60- add "const" keyword to allow building with g++
    61- agm(1+x,2+x) --> oo loop
    62- lindep([1,0]) --> error [ problem with trivial cases in PSLQ ]
+   63- wrong reconstruction bounds in nffactor
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -188,6 +189,7 @@ BA 45- split kernel Makefiles in MakeLVL0 and MakeLVL1.
 BA 46- --disable-kernel Configure option replaced by --kernel=none
    47- compute_polrel() [rnfkummer] was very slow for [L:K] > 5 (compute
        Newton sums directly)
+   48- simplified fincke_pohst() [don't recompute gram_matrix]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
