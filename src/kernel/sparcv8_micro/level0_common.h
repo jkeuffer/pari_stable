@@ -89,6 +89,7 @@ __value; })
          : "cc"); \
 __value; })								
 
+#if 0
 #define shiftl(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "neg %3,%%o4; \
@@ -108,6 +109,7 @@ __value; })
 	 : "r" (__arg1), "r" (__arg2) \
          : "%o4"); \
 __value; }) 			
+#endif
 
 #define mulll(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
@@ -118,13 +120,13 @@ __value; })
 __value;})								
 
 #define addmul(a,b) \
-({ ulong __value, __arg1 = (a), __arg2 = (b); \
-   __asm__ ( "umul %2,%3,%0; \
-          rd  %%y,%%o4; \
+({ ulong __value, __arg1 = (a), __arg2 = (b), __tmp; \
+   __asm__ ( "umul %3,%4,%0; \
+          rd  %%y,%2; \
           addcc %0,%1,%0; \
-          addx %%g0,%%o4,%1" \
-	 : "=r" (__value), "=r" (hiremainder) \
+          addx %%g0,%2,%1" \
+	 : "=&r" (__value), "=&r" (hiremainder), "=&r" (__tmp) \
 	 : "r" (__arg1), "r" (__arg2), "1" (hiremainder) \
-         : "%o4","cc");	\
+         : "cc");	\
 __value;})								
 #endif /* ASMINLINE */
