@@ -369,11 +369,11 @@ extract(GEN x, GEN l)
   if (tl==t_STR)
   {
     char *s = GSTR(l);
-    long first, last, compl;
-    if (! get_range(s, &first, &last, &compl, lx))
+    long first, last, cmpl;
+    if (! get_range(s, &first, &last, &cmpl, lx))
       err(talker, "incorrect range in extract");
     if (lx == 1) return gcopy(x);
-    if (compl)
+    if (cmpl)
     {
       if (first <= last)
       {
