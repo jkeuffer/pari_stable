@@ -1555,16 +1555,20 @@ mpqs_eval_sieve(unsigned char *sieve_array, ulong M, long *candidates)
  **
  **/
 
-#ifdef INLINE
-INLINE void
-mpqs_add_factor(char *s, ulong ei, ulong pi)
-{
-  sprintf(s + strlen(s), " %lu %lu", ei, pi);
+static void
+mpqs_add_factor(char **last, ulong ei, ulong pi) {
+  sprintf(*last, " %lu %lu", ei, pi);
+  *last += strlen(*last);
 }
-#else
-#define mpqs_add_factor(s,ei,pi) \
-	sprintf(s + strlen(s), " %lu %lu", (ulong)ei, (ulong)pi)
-#endif
+
+/* concatenate " 0" */
+static void
+mpqs_add_0(char **last) {
+  char *s = *last;
+  *s++ = ' ';
+  *s++ = '0';
+  *s++ = 0; *last = s;
+}
 
 /**
  ** divide and return the remainder.  Leaves both the quotient and
@@ -1585,6 +1589,29 @@ mpqs_div_rem(GEN x, long y, GEN *q)
   return 0;
 }
 
+#ifdef DEBUG
+static GEN
+mpqs_factorback(long *FB, char *relations, GEN kN)
+{
+  char *s, *t = pari_strdup(relations);
+  GEN pi_ei, prod = gun;
+  long pi, ei;
+
+  s = strtok(t, " \n");
+  while (s != NULL)
+  {
+    ei = atol(s);
+    if (ei == 0) break;
+    s = strtok(NULL, " \n");
+    pi = atol(s);
+    pi_ei = powmodulo(stoi(FB[pi]), stoi(ei), kN);
+    prod = modii(mulii(prod, pi_ei), kN);
+    s = strtok(NULL, " \n");
+  }
+  free(t); return prod;
+}
+#endif
+
 static long
 mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 		     double sqrt_kN,
@@ -1595,66 +1622,51 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 		     FILE *FREL, FILE *LPREL)
      /* NB FREL, LPREL are actually FNEW, LPNEW when we get called */
 {
-  GEN Qx, A_2x_plus_B, Y, Qx_div_p;
   double a, b, inv_2_a;
-  long powers_of_2, p, tmp_p, remd_p, bi;
   pari_sp av;
-  long z1, z2, x, number_of_relations, x_minus_M;
+  long z1, z2, number_of_relations = 0;
   char *relations;
-  ulong i, pi, ei, size_of_FB;
-  int useless_cand;
+  ulong i, pi, size_of_FB;
 #ifdef MPQS_DEBUG_VERBOSE
   static char complaint[256], complaint0[256];
+  complaint[0] = '\0';
 #endif
 
-  /* FIXME: this is probably right !!! */
-
-  /*
-   * compute the roots of Q(X); this will be used to find the sign of
-   * Q(x) after reducing mod kN
-   */
-
-  a = gtodouble(A);
-  inv_2_a = 1 / (2.0 * a);
+  /* roots of Q(X), used to find sign(Q(x)) after reducing mod kN */
+  a = gtodouble(A); inv_2_a = 1 / (2.0 * a);
   b = gtodouble(B);
   z1 = (long) ((-b - sqrt_kN) * inv_2_a);
   z2 = (long) ((-b + sqrt_kN) * inv_2_a);
 
-  number_of_relations = 0;
-  /* FIXME: this is definitely too loooooong ... */
-  /* then take the size of the FB into account.
-     We have in the worst case:  a leading " 1 1", a trailing " 0\n" with
-     the final NUL character, and in between up to size_of_FB pairs each
-     consisting of an exponent, a subscript into FB, and two spaces.
-     Moreover, subscripts into FB fit into 5 digits, and exponents fit
-     into 3 digits with room to spare -- anything needing 3 or more digits
-     for the subscript must come with an exponent of at most 2 digits.
-     Moreover the product of the first 58 primes is larger than 10^110,
-     so there cannot be more than 60 pairs in all, even if size_of_FB > 10^4.
-     --GN */
+  /* Worst case:  
+   * + leading " 1 1"
+   * + trailing " 0\n" with final NUL character
+   * + in between up to size_of_FB pairs each consisting of an exponent, a
+   *   subscript into FB, and two spaces.
+   * Subscripts into FB fit into 5 digits, and exponents fit into 3 digits
+   * with room to spare -- anything needing 3 or more digits for the
+   * subscript must come with an exponent of at most 2 digits. Moreover the
+   * product of the first 58 primes is larger than 10^110, so there cannot be
+   * more than 60 pairs in all, even if size_of_FB > 10^4. --GN */
   size_of_FB = FB[0];		/* one less than usually: don't count FB[1] */
   if (size_of_FB > 60) size_of_FB = 60;
-  relations =
-    (char *) gpmalloc((8 + size_of_FB * 9) * sizeof(char));
-#ifdef MPQS_DEBUG_VERBOSE
-  complaint[0] = '\0';
-#endif
-#ifdef MPQS_DEBUG
-  size_of_FB = FB[0] + 1;	/* last useful subscript into FB */
-#endif
+  relations = (char *) gpmalloc((8 + size_of_FB * 9) * sizeof(char));
 
-  i = 0;
-  while (i < (ulong)number_of_candidates)
+  av = avma;
+  for (i = 0; i < (ulong)number_of_candidates; i++, avma = av)
   {
-#ifdef MPQS_DEBUG_VERYVERBOSE	/* this one really fills the screen... */
+    GEN Qx, A_2x_plus_B, Y;
+    long powers_of_2, p, bi;
+    long x = candidates[i];
+    long x_minus_M = x - M;
+    char *relations_end = relations;
+
+    *relations_end = 0;
+#ifdef MPQS_DEBUG_VERYVERBOSE
     fprintferr("%c", (char)('0' + i%10));
 #endif
-    x = candidates[i++];
-    relations[0] = '\0';
-    av = avma;
 
     /* A_2x_plus_B = (A*(2x)+B), Qx = (A*(2x)+B)^2/(4*A) = Q(x) */
-    x_minus_M = x - M;
     A_2x_plus_B = modii(addii(mulis(A, x_minus_M << 1), B), kN);
     Y = subii(kN, A_2x_plus_B);
     if (absi_cmp(A_2x_plus_B, Y) < 0) Y = A_2x_plus_B;
@@ -1662,18 +1674,16 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 
     Qx = modii(sqri(Y), kN);
 
-    /* Most of the time, gcd(Qx, kN) will be either 1 or k.  However,
-       it may happen that Qx is a multiple of N, especially when N
-       is small, and this will lead to havoc below -- so we have to be
-       a little bit careful.  Of course we cannot possibly afford to
-       compute the gcd each time through this loop unless we are
-       debugging... --GN */
+    /* Most of the time, gcd(Qx, kN) = 1 or k.  However, it may happen that
+     * Qx is a multiple of N, esp. when N is small, leading to havoc below --
+     * so we have to be a bit careful.  Of course we cannot afford to compute
+     * the gcd each time through this loop unless we are debugging... --GN */
 #ifdef MPQS_DEBUG
     {
       long ks;
       pari_sp av1 = avma;
       GEN g = mppgcd(Qx, kN);
-/*      if ((ks = kronecker(divii(Qx, g), divii(kN, g))) != 1) */
+/*    if ((ks = kronecker(divii(Qx, g), divii(kN, g))) != 1) */
       if (is_pm1(g))
       {
 	if ((ks = kronecker(Qx, kN)) != 1)
@@ -1683,19 +1693,19 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 	  err(talker, "MPQS: 4*A*Q(x) is not a square (mod kN)");
 	}
       }
-#ifdef MPQS_DEBUG_VERBOSE
+#  ifdef MPQS_DEBUG_VERBOSE
       else if (cmpis(g,k) /* != 0 */ )
       {
 	char *gs = GENtostr(g);
 	sprintf(complaint, "\nMPQS: gcd(4*A*Q(x), kN) = %s\n", gs);
 	free(gs);
-	if (strcmp(complaint, complaint0) != 0)
+	if (strcmp(complaint, complaint0))
 	{
 	  fprintferr(complaint);
 	  strcpy(complaint0, complaint);
 	}
       }
-#endif
+#  endif
       avma = av1;
     }
 #endif
@@ -1706,48 +1716,36 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
     if (z1 < x_minus_M && x_minus_M < z2)
     {
        Qx = subii(kN, Qx);
-       /* i = 1, ei = 1, pi */
-       mpqs_add_factor(relations, 1, 1);
+       mpqs_add_factor(&relations_end, 1, 1); /* i = 1, ei = 1, pi */
     }
     if (!signe(Qx))
     {
 #ifdef MPQS_DEBUG_VERBOSE
       fprintferr("<+>");
 #endif
-      avma = av;
       continue;
     }
 
-    /* divide by powers of 2;  note that we're really dealing with
-       4*A*Q(x), so we remember an extra factor 2^2 */
+    /* divide by powers of 2;  we're really dealing with 4*A*Q(x), so we
+     * remember an extra factor 2^2 */
     powers_of_2 = vali(Qx);
     Qx = shifti(Qx, -powers_of_2);
-    mpqs_add_factor(relations, powers_of_2 + 2, 2);
-    if (!signe(Qx))		/* this shouldn't happen */
-    {
-#ifdef MPQS_DEBUG_VERBOSE
-      fprintferr("<*>");
-#endif
-      avma = av;
-      continue;
-    }
+    mpqs_add_factor(&relations_end, powers_of_2 + 2, 2);
 
     /* we handled the case p = 2 already */
-    pi = 3;
     bi = bin_index;
-    useless_cand = 0;
 #ifdef MPQS_DEBUG_VERBOSE
     fprintferr("a");
 #endif
-
-    /* FB[3] .. FB[start_index_FB_for_A] do not divide A .
+    /* FB[3 .. start_index_FB_for_A] do not divide A.
      * p = FB[start_index_FB_for_A+j+1] divides A (to the first power)
      * iff the 2^j bit in bin_index is set */
-    while ((p = FB[pi]) != 0 && !useless_cand)
+    for (pi = 3; (p = FB[pi]) != 0; pi++)
     {
-      tmp_p = x % p;
+      long tmp_p = x % p;
+      ulong ei = 0;
+      GEN Qx_div_p;
 
-      ei = 0;
       if (bi && pi > (ulong)start_index_FB_for_A)
       {
 	ei = bi & 1;	/* either 0 or 1 */
@@ -1755,173 +1753,111 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
       }
 
       if (tmp_p == start_1[pi] || tmp_p == start_2[pi])
-      {
-        /* p divides Q(x) and possibly A */
-        remd_p = mpqs_div_rem(Qx, p, &Qx_div_p);
-	if (remd_p)
-	{
-	  useless_cand = 1;
-	  break;
-	}
+      { /* p divides Q(x) and possibly A */
+        long remd_p = mpqs_div_rem(Qx, p, &Qx_div_p);
+	if (remd_p) break; /* useless candidate: abort */
+
         do
         {
-	  ei++;
-	  Qx = Qx_div_p;
+	  ei++; Qx = Qx_div_p;
 	  remd_p = mpqs_div_rem(Qx, p, &Qx_div_p);
         } while (remd_p == 0);
       }
       if (ei)			/* p might divide A but not Q(x) */
-        mpqs_add_factor(relations, ei, pi);
-
-      pi++;
+        mpqs_add_factor(&relations_end, ei, pi);
     }
-
-    if (useless_cand)
+    if (p)
     {
 #ifdef MPQS_DEBUG_VERBOSE
       fprintferr("\b<");
 #endif
-      avma = av;
-      continue;
+      continue; /* loop aborted: useless candidate */
     }
+
 #ifdef MPQS_DEBUG_VERBOSE
     fprintferr("\bb");
 #endif
-
     if (is_pm1(Qx))
     {
       char *Qxstring = GENtostr(Y);
-      strcat(relations, " 0");
+      mpqs_add_0(&relations_end);
       fprintf(FREL, "%s :%s\n", Qxstring, relations);
+      free(Qxstring);
       number_of_relations++;
 
 #ifdef MPQS_DEBUG
       {
-	GEN Qx_2, prod_pi_ei, pi_ei;
-	long lr = strlen(relations);
-	char *s, *t = gpmalloc(lr+1);
-	long pi, ei;
         pari_sp av1 = avma;
-
-#ifdef MPQS_DEBUG_VERBOSE
-	fprintferr("\b(");
-#endif
-	Qx_2 = modii(sqri(Y), kN);
-	prod_pi_ei = gun;
-	strcpy(t, relations);
-	s = strtok(relations, " \n");
-	while (s != NULL)
-        {
-	  ei = atol(s);
-	  if (ei == 0) break;
-	  s = strtok(NULL, " \n");
-	  pi = atol(s);
-	  pi_ei = powmodulo(stoi(FB[pi]), stoi(ei), kN);
-	  prod_pi_ei = modii(mulii(prod_pi_ei, pi_ei), kN);
-	  s = strtok(NULL, " \n");
-	}
-
-	if (!egalii(Qx_2, prod_pi_ei))
+	GEN rhs = mpqs_factorback(FB, relations, kN);
+	GEN Qx_2 = modii(sqri(Y), kN);
+	if (!egalii(Qx_2, rhs))
 	{
 #ifdef MPQS_DEBUG_VERBOSE
-	  fprintferr("!)\n");
+	  fprintferr("\b(!)\n");
 #endif
-	  fprintferr("MPQS: %s :%s\n", Qxstring, t);
+	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
 	  fprintferr("\tQx_2 = %Z\n", Qx_2);
-	  fprintferr("\t rhs = %Z\n", prod_pi_ei);
+	  fprintferr("\t rhs = %Z\n", rhs);
 	  err(talker, "MPQS: wrong full relation found!!");
 	}
 #ifdef MPQS_DEBUG_VERBOSE
 	else
-	  fprintferr(":)");
+	  fprintferr("\b(:)");
 #endif
 	avma = av1;
-	free(t);
       }
 #endif
-
-      free(Qxstring);
     }
     else if (cmpis(Qx, lp_bound) > 0)
-    {
-      /* TO BE DONE: check for double large prime */
-      /* moved this else clause here where I think it belongs -- GN */
+    { /* TODO: check for double large prime */
 #ifdef MPQS_DEBUG_VERBOSE
       fprintferr("\b.");
 #endif
     }
     else if (k==1 || cgcd(k, itos(Qx)) == 1)
-    {
-      /* if (mpqs_isprime(itos(Qx))) */
+    { /* if (mpqs_isprime(itos(Qx))) */
       char *Qxstring = GENtostr(Y);
       char *L1string = GENtostr(Qx);
-      strcat(relations, " 0");
+      mpqs_add_0(&relations_end);
       fprintf(LPREL, "%s @ %s :%s\n", L1string, Qxstring, relations);
+      free(Qxstring);
+      free(L1string);
 
 #ifdef MPQS_DEBUG
       {
-	GEN Qx_2, prod_pi_ei, pi_ei;
-	long lr = strlen(relations);
-	char *s, *t = gpmalloc(lr+1);
-	long pi, ei;
         pari_sp av1 = avma;
+        GEN rhs = mpqs_factorback(FB, relations, kN);
+	GEN Qx_2 = modii(sqri(Y), kN);
 
-#ifdef MPQS_DEBUG_VERBOSE
-	fprintferr("\b(");
-#endif
-	Qx_2 = modii(sqri(Y), kN);
-	prod_pi_ei = gun;
-	strcpy(t, relations);
-	s = strtok(relations, " \n");
-	while (s != NULL)
-        {
-	  ei = atol(s);
-	  if (ei == 0) break;
-	  s = strtok(NULL, " \n");
-	  pi = atol(s);
-	  pi_ei = powmodulo(stoi(FB[pi]), stoi(ei), kN);
-	  prod_pi_ei = modii(mulii(prod_pi_ei, pi_ei), kN);
-	  s = strtok(NULL, " \n");
-	}
-	prod_pi_ei = modii(mulii(prod_pi_ei, Qx), kN);
-
-	if (!egalii(Qx_2, prod_pi_ei))
+        rhs = modii(mulii(rhs, Qx), kN);
+	if (!egalii(Qx_2, rhs))
 	{
 #ifdef MPQS_DEBUG_VERBOSE
-	  fprintferr("!)\n");
+	  fprintferr("\b(!)\n");
 #endif
-	  fprintferr("MPQS: %s @ %s :%s\n",
-		     L1string, Qxstring, t);
+	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
 	  fprintferr("\tQx_2 = %Z\n", Qx_2);
-	  fprintferr("\t rhs = %Z\n", prod_pi_ei);
+	  fprintferr("\t rhs = %Z\n", rhs);
 	  err(talker, "MPQS: wrong large prime relation found!!");
 	}
 #ifdef MPQS_DEBUG_VERBOSE
 	else
-	  fprintferr(";)");
+	  fprintferr("\b(;)");
 #endif
 	avma = av1;
-	free(t);
       }
 #endif
-
-      free(Qxstring);
-      free(L1string);
     }
 #ifdef MPQS_DEBUG_VERBOSE
     else
       fprintferr("\b<k>");
 #endif
-
-    avma = av;
-  } /* while */
+  } /* for */
 
 #ifdef MPQS_DEBUG_VERBOSE
   fprintferr("\n");
 #endif
-
-  free(relations);
-  return number_of_relations;
+  free(relations); return number_of_relations;
 }
 
 /******************************/
