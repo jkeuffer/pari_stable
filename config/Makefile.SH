@@ -118,7 +118,7 @@ if test -z "$DLLD"; then
 else
   exec="gp-sta gp-dyn"
 fi
-doexec="env \"LD_LIBRARY_PATH=.;\$\$LD_LIBRARY_PATH\" $src/test/dotest $sizeof_long"
+doexec="env \"LD_LIBRARY_PATH=.;\$\$LD_LIBRARY_PATH\" \$(SHELL) $src/test/dotest $sizeof_long"
 case "$sizeof_long" in
   4) numbits=32;;
   8) numbits=64;;
