@@ -63,13 +63,12 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
 	vecsign[i] = (gsigne(gsubst(alpha,va,(GEN)rac[i])) > 0)? (long)_0
                                                                : (long)_1;
       v1 = concatsp(v, vecsign);
-      if (rank(v1) == rankinit) avma=av1;
-      else
-      {
-	v=v1; rankinit++; ngen++;
-        gen[ngen] = (long) alpha;
-	if (rankinit == rankmax) return ginv(v); /* full rank */
-      }
+      if (rank(v1) == rankinit) { avma = av1; continue; }
+
+      v=v1; rankinit++; ngen++;
+      gen[ngen] = (long) alpha;
+      if (rankinit == rankmax) return ginv(v); /* full rank */
+      vecsign = cgetg(rankmax+1,t_COL);
     }
   }
 }
