@@ -3529,8 +3529,8 @@ int
 ZX_is_squarefree(GEN x)
 {
   pari_sp av = avma;
-  int d = (lg(modulargcd(x,derivpol(x))) == 3);
-  avma = av; return d;
+  GEN d = modulargcd(x,derivpol(x));
+  int r = (lg(d) == 3); avma = av; return r;
 }
 
 static GEN
