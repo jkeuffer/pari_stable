@@ -220,10 +220,9 @@ affir(GEN x, GEN y)
     return;
   }
 
-  lx=lgefint(x); sh=bfffo(x[2]);
+  lx = lgefint(x); sh = bfffo(x[2]);
   y[1] = evalsigne(s) | evalexpo(bit_accuracy(lx)-sh-1);
-  if (sh)
-  {
+  if (sh) {
     if (lx>ly)
     { shift_left(y,x,2,ly-1, x[ly],sh); }
     else
@@ -231,15 +230,15 @@ affir(GEN x, GEN y)
       for (i=lx; i<ly; i++) y[i]=0;
       shift_left(y,x,2,lx-1, 0,sh);
     }
-    return;
   }
-
-  if (lx>=ly)
-    for (i=2; i<ly; i++) y[i]=x[i];
-  else
-  {
-    for (i=2; i<lx; i++) y[i]=x[i];
-    for (   ; i<ly; i++) y[i]=0;
+  else {
+    if (lx>=ly)
+      for (i=2; i<ly; i++) y[i]=x[i];
+    else
+    {
+      for (i=2; i<lx; i++) y[i]=x[i];
+      for (   ; i<ly; i++) y[i]=0;
+    }
   }
 }
 
@@ -311,7 +310,7 @@ shifti3(GEN x, long n, long flag)
         ly--; avma = (ulong)(++y);
       }
     } else {
-      for (i=2; i<ly; i++) y[i]=x[i]; 
+      for (i=2; i<ly; i++) y[i]=x[i];
     }
     /* With FLAG: round up instead of rounding down */
     if (flag) {				/* Check low bits of x */
@@ -1682,10 +1681,103 @@ truedvmdii(GEN x, GEN y, GEN *z)
   return q;
 }
 
+/* Montgomery reduction.
+ * N has k words, assume T >= 0 has less than 2k.
+ * Return res := T / B^k mod N, where B = 2^BIL
+ * such that 0 <= res < T/B^k + N  and  res has less than k words */
+GEN
+red_montgomery(GEN T, GEN N, ulong inv)
+{
+  ulong av;
+  GEN Te,Td,Ne,Nd, scratch;
+  ulong m,t,d,k = lgefint(N)-2;
+  long i,j;
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  if (k == 0) return gzero;
+  d = lgefint(T)-2; /* <= 2*k */
+  if (k == 1)
+  { /* as below, special cased for efficiency */
+    ulong n = (ulong)N[2];
+    t = (ulong)T[d+1];
+    m = t * inv;
+    (void)addll(mulll(m, n), t); /* = 0 */
+    t = hiremainder + overflow;
+    if (d == 2)
+    {
+      t = addll((ulong)T[2], t);
+      if (overflow) t -= n; /* t > n doesn't fit in 1 word */
+    }
+    return utoi(t);
+  }
+  /* assume k >= 2 */
+  av = avma; scratch = new_chunk(k<<1); /* >= k + 2: result fits */
+
+  /* copy T to scratch space (pad with zeroes to 2k words) */
+  Td = (GEN)av;
+  Te = T + (d+2);
+  for (i=0; i < d     ; i++) *--Td = *--Te;
+  for (   ; i < (k<<1); i++) *--Td = 0;
+
+  Te = (GEN)av; /* 1 beyond end of T mantissa */
+  Ne = N + k+2; /* 1 beyond end of N mantissa */
+
+  for (i=0; i<k; i++) /* set T := T/B nod N, k times */
+  {
+    Td = Te; /* one beyond end of (new) T mantissa */
+    Nd = Ne;
+    m = *--Td * inv; /* solve T + m N = O(B) */
+
+    /* set T := (T + mN) / B */
+    Te = Td;
+    (void)addll(mulll(m, *--Nd), *Td); /* = 0 */
+    for (j=1; j<k; j++)
+    {
+      hiremainder += overflow;
+      t = addll(addmul(m, *--Nd), *--Td); *Td = t;
+    }
+    overflow += hiremainder;
+    while (overflow)
+    {
+      if (Td > scratch) { t = addll(overflow, *--Td); *Td = t; }
+      else
+      { /* Td > N overflows (k+1 words), set Td := Td - N */
+        Td = Te;
+        Nd = Ne;
+        t = subll(*--Td, *--Nd); *Td = t;
+        while (Td > scratch) { t = subllx(*--Td, *--Nd); *Td = t; }
+#if DEBUG
+        assert(!overflow && i == k-1);
+#endif
+        goto END;
+      }
+    }
+  }
+END: /* copy result */
+  Td = (GEN)av;
+  while (! *scratch) scratch++; /* strip leading zeroes */
+  while (Te > scratch) *--Td = *--Te;
+  k = ((GEN)av - Td) + 2;
+  *--Td = evalsigne(1) | evallgefint(k);
+  *--Td = evaltyp(t_INT) | evallg(k);
+#if DEBUG
+{
+  long l = lgefint(N)-2, s = BITS_IN_LONG*l;
+  GEN R = shifti(gun, s);
+  GEN res = resii(mulii(T, mpinvmod(R, N)), N);
+  if (k > lgefint(N)
+    || !egalii(resii(Td,N),res)
+    || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
+}
+#endif
+  avma = (ulong)Td; return Td;
+}
+
 /* EXACT INTEGER DIVISION */
 
 /* Find c such that 1=c*b mod 2^BITS_IN_LONG, assuming b odd (unchecked) */
-static ulong
+ulong
 invrev(ulong b)
 {
   ulong x;
@@ -1705,7 +1797,7 @@ invrev(ulong b)
 }
 
 /* assume xy>0, y odd */
-GEN 
+GEN
 diviuexact(GEN x, ulong y)
 {
   long i,lz,lx;
@@ -1775,7 +1867,7 @@ diviiexact(GEN x, GEN y)
   avma = av; /* will erase our x,y when exiting */
   /* now y is odd */
   ly = lgefint(y);
-  if (ly == 3) 
+  if (ly == 3)
   {
     x = diviuexact(x,(ulong)y[2]);
     if (signe(x)) setsigne(x,sx*sy); /* should have x != 0 at this point */
@@ -1800,7 +1892,7 @@ diviiexact(GEN x, GEN y)
     /* x := x - q * y */
     (void)mulll(q,y[0]); limj = max(lx - lz, ii+3-ly);
     { /* update neither lowest word (could set it to 0) nor highest ones */
-      register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj; 
+      register GEN x0 = x + (ii - 1), y0 = y - 1, xlim = x + limj;
       for (; x0 >= xlim; x0--, y0--)
       {
         *x0 = subll(*x0, addmul(q,*y0));
@@ -1984,7 +2076,7 @@ sqrispec(GEN x, long nx)
     *--zd = hiremainder; goto END;
   }
   xd = x + nx;
-  
+
   /* compute double products --> zd */
   p1 = *--xd; yd = xd; --zd;
   *--zd = mulll(p1, *--yd); z2e = zd;
@@ -2157,10 +2249,10 @@ resmod2n(GEN x, long n)
 {
   long hi,l,k,lx,ly;
   GEN z, xd, zd;
-  
+
   if (!signe(x) || !n) return gzero;
 
-  l = n & (BITS_IN_LONG-1);    /* n % BITS_IN_LONG */   
+  l = n & (BITS_IN_LONG-1);    /* n % BITS_IN_LONG */
   k = n >> TWOPOTBITS_IN_LONG; /* n / BITS_IN_LONG */
   lx = lgefint(x);
   if (lx < k+3) return icopy(x);
@@ -2534,7 +2626,7 @@ cgiv(GEN x)
  *
  * Note that these routines do not know and do not need to know about the
  * PARI stack.
- * 
+ *
  * Added 2001Jan15:
  * rgcduu() is a variant of xxgcduu() which does not have f  (the effect is
  * that of f=0),  but instead has a ulong vmax parameter, for use in rational
@@ -2755,7 +2847,7 @@ rgcduu(ulong d, ulong d1, ulong vmax,
  * as many partial quotients of d/d1 as possible, and assigns to [u,u1;v,v1]
  * the product of all the [0, 1; 1, q_j] thus obtained, where the leftmost
  * factor arises from the quotient of the first division step.
- * 
+ *
  * For use in rational reconstruction, input param vmax can be given a
  * nonzero value.  In this case, we will return early as soon as v1 > vmax
  * (i.e. it is guaranteed that v <= vmax). --2001Jan15
@@ -3290,7 +3382,7 @@ lgcdii(ulong* d, ulong* d1,
       *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
       break;
     }
-  
+
     res++; /* commit dd, xu1, xv1 */
     dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
@@ -3311,7 +3403,7 @@ lgcdii(ulong* d, ulong* d1,
  *==================================
  *    If a is invertible, return 1, and set res  = a^{ -1 }
  *    Otherwise, return 0, and set res = gcd(a,b)
- * 
+ *
  * This is sufficiently different from bezout() to be implemented separately
  * instead of having a bunch of extra conditionals in a single function body
  * to meet both purposes.
@@ -3810,18 +3902,13 @@ cbezout(long a,long b,long *uu,long *vv)
      AUTHOR = {Collins, George E. and Encarnaci{\'o}n, Mark J.},
       TITLE = {Efficient rational number reconstruction},
     JOURNAL = {J. Symbolic Comput.},
-   FJOURNAL = {Journal of Symbolic Computation},
      VOLUME = {20},
        YEAR = {1995},
      NUMBER = {3},
       PAGES = {287--297},
-       ISSN = {0747-7171},
-    MRCLASS = {11Y16 (68Q40)},
-   MRNUMBER = {97c:11116},
- MRREVIEWER = {Maurice Mignotte},
  }
- *    Preprint available from:
- *    ftp://ftp.risc.uni-linz.ac.at/pub/techreports/1994/94-64.ps.gz
+ * Preprint available from:
+ * ftp://ftp.risc.uni-linz.ac.at/pub/techreports/1994/94-64.ps.gz
  */
 
 /* #define DEBUG_RATLIFT */
@@ -3912,7 +3999,7 @@ ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
    * Furthermore, at the start of the loop body we have in fact
    * (c') 0 <= v < v1 <= bmax, d > d1 > amax >= 0,
    * (and are never done already).
-   * 
+   *
    * Main loop is similar to those of invmod() and bezout(), except for
    * having to determine appropriate vmax bounds, and checking termination
    * conditions.  The signe(d1) condition is only for paranoia
@@ -4217,7 +4304,7 @@ mpsqrtl(GEN a)
   long l = lgefint(a);
   ulong x,y,z,k,m;
   int L, s;
-  
+
   if (l <= 3) return l==2? 0: usqrtsafe((ulong)a[2]);
   s = bfffo(a[2]);
   if (s > 1)
