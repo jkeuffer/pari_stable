@@ -813,38 +813,38 @@ gmulbyi(GEN z)
 }
 
 static void
-fft(GEN Omega, GEN p, GEN f, long step, long l)
+fft(GEN Omega, GEN p, GEN f, long Step, long l)
 {
-  long i,l1,l2,l3,rap=Lmax/l,rapi,step4,ltop,lbot;
+  long i,l1,l2,l3,rap=Lmax/l,rapi,Step4,ltop,lbot;
   GEN f1,f2,f3,f02,f13,g02,g13,ff;
 
   if (l==2)
   {
-    f[0]=ladd((GEN)p[0],(GEN)p[step]);
-    f[1]=lsub((GEN)p[0],(GEN)p[step]); return;
+    f[0]=ladd((GEN)p[0],(GEN)p[Step]);
+    f[1]=lsub((GEN)p[0],(GEN)p[Step]); return;
   }
   if (l==4)
   {
-    f1=gadd((GEN)p[0],(GEN)p[(step<<1)]);
-    f3=gadd((GEN)p[step],(GEN)p[3*step]);
+    f1=gadd((GEN)p[0],(GEN)p[(Step<<1)]);
+    f3=gadd((GEN)p[Step],(GEN)p[3*Step]);
     f[0]=ladd(f1,f3);
     f[2]=lsub(f1,f3);
 
-    f2=gsub((GEN)p[0],(GEN)p[(step<<1)]);
-    f02=gsub((GEN)p[step],(GEN)p[3*step]);
+    f2=gsub((GEN)p[0],(GEN)p[(Step<<1)]);
+    f02=gsub((GEN)p[Step],(GEN)p[3*Step]);
     f02=gmulbyi(f02);
     f[1]=ladd(f2,f02);
     f[3]=lsub(f2,f02);
     return;
   }
 
-  l1=(l>>2); l2=(l1<<1); l3=l1+l2; step4=(step<<2);
+  l1=(l>>2); l2=(l1<<1); l3=l1+l2; Step4=(Step<<2);
 
   ltop=avma;
-  fft(Omega,p,f,step4,l1);
-  fft(Omega,p+step,f+l1,step4,l1);
-  fft(Omega,p+(step<<1),f+l2,step4,l1);
-  fft(Omega,p+3*step,f+l3,step4,l1);
+  fft(Omega,p,f,Step4,l1);
+  fft(Omega,p+Step,f+l1,Step4,l1);
+  fft(Omega,p+(Step<<1),f+l2,Step4,l1);
+  fft(Omega,p+3*Step,f+l3,Step4,l1);
 
   ff=cgetg(l+1,t_VEC);
   for (i=0; i<l1; i++)
@@ -1403,76 +1403,62 @@ split_2(GEN p, long bitprec, double thickness, GEN *F, GEN *G)
 {
   GEN rmin,rmax,rho,invrho;
   double kappa,aux,delta,param,param2;
-  long n=lgef(p)-3,i,j,k,disti,diste,bitprec2;
+  long n=lgef(p)-3,i,j,k,bitprec2;
   GEN q,FF,GG,R,aux2;
 
   radius = (GEN*) cgetg(n+1, t_VEC);
   for (i=1; i<n; i++) radius[i]=realzero(3);
-  radius[1] = rmin = min_modulus(p, thickness/(double) n/4.);
-  radius[n] = rmax = max_modulus(p, thickness/(double) n/4.);
+  aux = thickness/(double) n/4.;
+  radius[1] = rmin = min_modulus(p, aux);
+  radius[n] = rmax = max_modulus(p, aux);
   i=1; j=n;
   rho = mpsqrt(mulrr(rmin,rmax));
-  k=dual_modulus(p,rho,thickness/(double) n/4.,1);
+  k = dual_modulus(p,rho,aux,1);
   if (k<n/5. || (n/2.<k && k<(4*n)/5.))
     { rmax=rho; j=k+1; affrr(rho, radius[j]); }
   else
     { rmin=rho; i=k; affrr(rho, radius[i]); }
   while (j>i+1)
   {
-    disti= (i<n-j)? i: n-j; /* min(i,n-j) */
-    diste= (j<n-i)? j: n-i;
-    kappa=1. - log(1.+(double)disti) / log(1.+(double)diste);
-    if (i+j<n+1)
-      rho = mpexp(
-        divrr(addrr( mulrr(mplog(rmax),dbltor(1+kappa)), mplog(rmin) ),
-              dbltor(2+kappa))
-      );
-    else if (i+j==n+1)
+    if (i+j==n+1)
       rho = mpsqrt(mulrr(rmin,rmax));
     else
-      rho = mpexp(
-        divrr(addrr( mulrr(mplog(rmin),dbltor(1+kappa)), mplog(rmax)),
-              dbltor(2+kappa))
-      );
+    {
+      kappa = 1. - log(1.+(double)min(i,n-j)) / log(1.+(double)min(j,n-i));
+      if (i+j<n+1)
+        rho = addrr(mulrr(mplog(rmax),dbltor(1+kappa)), mplog(rmin));
+      else
+        rho = addrr(mulrr(mplog(rmin),dbltor(1+kappa)), mplog(rmax));
+      rho = mpexp(divrr(rho, dbltor(2+kappa)));
+    }
     aux = rtodbl(mplog(divrr(rmax,rmin))) / (j-i) / 4.;
-
-    k = min(i,n+1-j);
-    k = dual_modulus(p,rho,aux,k);
-    if (k-i < j-k-1)
+    k = dual_modulus(p,rho,aux, min(i,n+1-j));
+    if (k-i < j-k-1 || (k-i == j-k-1 && 2*k > n))
       { rmax=rho; j=k+1; affrr(mulrr(rho, dbltor(exp(-aux))), radius[j]); }
     else
-    {
-      if (k-i > j-k-1)
-        { rmin=rho; i=k; affrr(mulrr(rho, dbltor(exp(aux))), radius[i]); }
-      else
-      {
-	if (2*k>n)
-          { rmax=rho; j=k+1; affrr(mulrr(rho, dbltor(exp(-aux))), radius[j]); }
-	else
-          { rmin=rho; i=k; affrr(mulrr(rho, dbltor(exp(aux))), radius[i]); }
-      }
-    }
+      { rmin=rho; i=k; affrr(mulrr(rho, dbltor(exp(aux))), radius[i]); }
   }
   aux = rtodbl(mplog(divrr(rmax, rmin)));
 
   if (step4==0)
   {
+    aux /= 10.;
     if (k>1)
     {
       i=k-1; while (i>0 && !signe(radius[i])) i--;
-      rmin = pre_modulus(p,k,aux/10., radius[i], radius[k]);
+      rmin = pre_modulus(p,k,aux, radius[i], radius[k]);
     }
     else /* k=1 */
-      rmin = min_modulus(p,aux/10.);
+      rmin = min_modulus(p,aux);
     affrr(rmin, radius[k]);
 
     if (k+1<n)
     {
       i=k+2; while (i<=n && !signe(radius[i])) i++;
-      rmax = pre_modulus(p,k+1,aux/10., radius[k+1], radius[i]);
+      rmax = pre_modulus(p,k+1,aux, radius[k+1], radius[i]);
     }
     else /* k+1=n */
-      rmax = max_modulus(p,aux/10.);
+      rmax = max_modulus(p,aux);
     affrr(rmax, radius[k+1]);
 
     rho = mpsqrt(mulrr(rmin,rmax));
@@ -1503,29 +1489,30 @@ split_2(GEN p, long bitprec, double thickness, GEN *F, GEN *G)
       param += fabs(rtodbl(aux2));
       if (cmprs(aux2, 1) > 0) param2 += log2ir(aux2);
     }
-    bitprec2 = bitprec + (long) ((double)n * fabs(log2ir(rho)) + 1.);
 
-    R=mygprec(invrho,bitprec2);
-    q=scalepol(p,R,bitprec2);
+    bitprec2 = bitprec + (long) ((double)n * fabs(log2ir(rho)) + 1.);
+    R = mygprec(invrho,bitprec2);
+    q = scalepol(p,R,bitprec2);
+
     optimize_split(q,k,delta,bitprec2,&FF,&GG,param,param2);
-    bitprec2 += n; R=ginv(R);
   }
   else
   {
     rho = mpsqrt(mulrr(rmax,rmin));
     invrho = ginv(rho);
-    bitprec2 = bitprec + (long) ((double)n * fabs(log2ir(rho)) + 1.);
-
-    R = mygprec(invrho,bitprec2);
-    q = scalepol(p,R,bitprec2);
     for (i=1; i<=n; i++)
       if (signe(radius[i])) affrr(mulrr(radius[i],invrho), radius[i]);
 
+    bitprec2 = bitprec + (long) ((double)n * fabs(log2ir(rho)) + 1.);
+    R = mygprec(invrho,bitprec2);
+    q = scalepol(p,R,bitprec2);
+
     conformal_mapping(q, k, bitprec2, aux, &FF, &GG);
-    bitprec2 += n; R = ginv(mygprec(R,bitprec2));
   }
-  *F = mygprec(scalepol(FF,R,bitprec2), bitprec+n);
-  *G = mygprec(scalepol(GG,R,bitprec2), bitprec+n);
+  bitprec  += n;
+  bitprec2 += n; R = ginv(mygprec(R,bitprec2));
+  *F = mygprec(scalepol(FF,R,bitprec2), bitprec);
+  *G = mygprec(scalepol(GG,R,bitprec2), bitprec);
 }
 
 /* procedure corresponding to steps 5,6,.. page 44 in the RR n. 1852 */
@@ -1685,7 +1672,7 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
       }
       else
       {
-	step4=0;
+	step4 = 0;
 	split_2(p,bitprec,1.2837,&FF,&GG);
       }
     }
