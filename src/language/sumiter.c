@@ -1186,12 +1186,12 @@ polzagreel(long n, long m, long prec)
 /**            SEARCH FOR REAL ZEROS of an expression              **/
 /**                                                                **/
 /********************************************************************/
-
+/* Brent's method, [a,b] bracketing interval */
 GEN
 zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  long av=avma,tetpil,sig,iter,itmax;
-  GEN c,d,e,tol,toli,min1,min2,fa,fb,fc,p,q,r,s,xm;
+  long av = avma,sig,iter,itmax;
+  GEN c,d,e,tol,tol1,min1,min2,fa,fb,fc,p,q,r,s,xm;
 
   a = fix(a,prec);
   b = fix(b,prec); sig=cmprr(b,a);
@@ -1210,53 +1210,51 @@ zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
   {
     if (gsigne(fb)*gsigne(fc) > 0)
     {
-      c=a; fc=fa; d=subrr(b,a); e=d;
+      c = a; fc = fa; e = d = subrr(b,a);
     }
     if (gcmp(gabs(fc,0),gabs(fb,0)) < 0)
     {
-      a=b; b=c; c=a; fa=fb; fb=fc; fc=fa;
+      a = b; b = c; c = a; fa = fb; fb = fc; fc = fa;
     }
-    toli=mulrr(tol,gmax(tol,absr(b)));
-    xm=shiftr(subrr(c,b),-1);
-    if (cmprr(absr(xm),toli) <= 0 || gcmp0(fb))
-    {
-      tetpil=avma; pop_val(ep);
-      return gerepile(av,tetpil,rcopy(b));
-    }
-    if (cmprr(absr(e),toli) >= 0 && gcmp(gabs(fa,0),gabs(fb,0)) > 0)
-    {
-      s=gdiv(fb,fa);
-      if (cmprr(a,b)==0)
+    tol1 = mulrr(tol, gmax(tol,absr(b)));
+    xm = shiftr(subrr(c,b),-1);
+    if (cmprr(absr(xm),tol1) <= 0 || gcmp0(fb)) break; /* SUCCESS */
+
+    if (cmprr(absr(e),tol1) >= 0 && gcmp(gabs(fa,0),gabs(fb,0)) > 0)
+    { /* attempt interpolation */
+      s = gdiv(fb,fa);
+      if (cmprr(a,c)==0)
       {
-	p=gmul2n(gmul(xm,s),1); q=gsubsg(1,s);
+	p = gmul2n(gmul(xm,s),1); q = gsubsg(1,s);
       }
       else
       {
-	q=gdiv(fa,fc); r=gdiv(fb,fc);
-	p=gmul2n(gmul(gsub(q,r),gmul(xm,q)),1);
-	p=gmul(s,gsub(p,gmul(gsub(b,a),gsubgs(r,1))));
-	q=gmul(gmul(gsubgs(q,1),gsubgs(r,1)),gsubgs(s,1));
+	q = gdiv(fa,fc); r = gdiv(fb,fc);
+	p = gmul2n(gmul(gsub(q,r),gmul(xm,q)),1);
+	p = gmul(s, gsub(p, gmul(gsub(b,a),gsubgs(r,1))));
+	q = gmul(gmul(gsubgs(q,1),gsubgs(r,1)),gsubgs(s,1));
       }
-      if (gsigne(p) > 0) q=gneg_i(q); else p=gneg_i(p);
-      min1=gsub(gmulsg(3,gmul(xm,q)),gabs(gmul(q,toli),0));
-      min2=gabs(gmul(e,q),0);
-      if (gcmp(gmul2n(p,1),gmin(min1,min2)) < 0)
-        { e=d; d=gdiv(p,q); }
+      if (gsigne(p) > 0) q = gneg_i(q); else p = gneg_i(p);
+      min1 = gsub(gmulsg(3,gmul(xm,q)), gabs(gmul(q,tol1),0));
+      min2 = gabs(gmul(e,q),0);
+      if (gcmp(gmul2n(p,1), gmin(min1,min2)) < 0)
+        { e = d; d = gdiv(p,q); } /* interpolation OK */
       else
-        { d=xm; e=d; }
+        { d = xm; e = d; } /* failed, use bisection */
     }
-    else { d=xm; e=d; }
-    a=b; fa=fb;
-    if (gcmp(gabs(d,0),toli) > 0) b=gadd(b,d);
+    else { d = xm; e = d; } /* bound decreasing too slowly, use bisection */
+    a = b; fa = fb;
+    if (gcmp(gabs(d,0),tol1) > 0) b = gadd(b,d);
     else
     {
-      if (gsigne(xm)>0)
-        b = addrr(b,toli);
+      if (gsigne(xm) > 0)
+        b = addrr(b,tol1);
       else
-        b = subrr(b,toli);
+        b = subrr(b,tol1);
     }
-    ep->value = (void*)b; fb=lisexpr(ch);
+    ep->value = (void*)b; fb = lisexpr(ch);
   }
-  err(talker,"too many iterations in solve");
-  return NULL; /* not reached */
+  if (iter > itmax) err(talker,"too many iterations in solve");
+  pop_val(ep);
+  return gerepileuptoleaf(av, rcopy(b));
 }
