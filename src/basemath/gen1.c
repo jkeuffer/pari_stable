@@ -2501,7 +2501,7 @@ gmul2n(GEN x, long n)
         icopyifstack(p2,z[1]); return z;
       }
       return div_intmod_same(z, (GEN)x[1], (GEN)x[2],
-                                           modii(shifti(gun,n), (GEN)x[1]));
+                                           modii(shifti(gun,-n), (GEN)x[1]));
     case t_FRAC:
       l = vali((GEN)x[1]);
       k = vali((GEN)x[2]);
