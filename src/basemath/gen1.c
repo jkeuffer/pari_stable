@@ -235,84 +235,90 @@ gsub(GEN x, GEN y)
 static GEN
 addpadic(GEN x, GEN y)
 {
-  long c,e,r,d,r1,r2,av,tetpil;
-  GEN z,p1,p2, p = (GEN)x[2];
+  ulong av = avma;
+  long c,d,e,r,rx,ry;
+  GEN u,z,p,mod;
 
-  z=cgetg(5,t_PADIC); icopyifstack(p, z[2]); av=avma;
-  e=valp(x); r=valp(y); d = r-e;
-  if (d<0) { p1=x; x=y; y=p1; e=r; d = -d; }
-  r1=precp(x); r2=precp(y);
-  if (d)
+  (void)new_chunk(5+lgefint(x[3])+lgefint(y[3]));
+  e = valp(x);
+  r = valp(y); d = r-e;
+  if (d < 0) { GEN p1=x; x=y; y=p1; e = r; d = -d; }
+  rx = precp(x); p = (GEN)x[2];
+  ry = precp(y);
+  if (d) /* v(x) < v(y) */
   {
-    r = d+r2;
-    p1 = (d==1)? p: gclone(gpuigs(p,d));
-    avma=av;
-    if (r<r1) z[3]=lmulii(p1,(GEN)y[3]);
-    else
+    r = d+ry; z = gpowgs(p,d);
+    if (r < rx) mod = mulii(z,(GEN)y[3]); else { r = rx; mod = (GEN)x[3]; }
+    u = addii((GEN)x[4], mulii(z,(GEN)y[4]));
+  }
+  else
+  {
+    if (ry < rx) { r=ry; mod = (GEN)x[3]; } else { r=rx; mod = (GEN)y[3]; }
+    u = addii((GEN)x[4], (GEN)y[4]);
+    if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
     {
-      r=r1; z[3]=licopy((GEN)x[3]);
+      avma = av; return padiczero(p, e+r);
     }
-    av=avma; p2=mulii(p1,(GEN)y[4]);
-    if (d!=1) gunclone(p1);
-    p1=addii(p2,(GEN)x[4]); tetpil=avma;
-    z[4]=lpile(av,tetpil, modii(p1,(GEN)z[3]));
-    z[1]=evalprecp(r) | evalvalp(e); return z;
-  }
-  if (r2<r1) { r=r2; p1=x; x=y; y=p1; } else r=r1;
-  p1 = addii((GEN)x[4],(GEN)y[4]);
-  if (!signe(p1) || (c = pvaluation(p1,p,&p2)) >=r)
-  {
-    avma=av; z[4]=zero; z[3]=un;
-    z[1]=evalvalp(e+r); return z;
-  }
-  if (c)
-  {
-    p2=gclone(p2); avma=av;
-    if (c==1)
-      z[3] = ldivii((GEN)x[3], p);
-    else
+    if (c)
     {
-      p1 = gpuigs(p,c); tetpil=avma;
-      z[3] = lpile(av,tetpil, divii((GEN)x[3], p1));
+      mod = divii(mod, gpowgs(p,c));
+      r -= c;
+      e += c;
     }
-    z[4]=lmodii(p2,(GEN)z[3]); gunclone(p2);
-    z[1]=evalprecp(r-c) | evalvalp(e+c); return z;
   }
-  tetpil=avma;
-  z[4]=lpile(av,tetpil,modii(p1,(GEN)x[3]));
-  z[3]=licopy((GEN)x[3]);
-  z[1]=evalprecp(r) | evalvalp(e); return z;
+  avma = av; z = cgetg(5,t_PADIC);
+  z[1] = evalprecp(r) | evalvalp(e);
+  z[3] = licopy(mod);
+  z[4] = lmodii(u,(GEN)z[3]);
+  icopyifstack(p, z[2]); return z;
 }
 
 /* return x + y, where x is t_INT or t_FRAC(N), y t_PADIC */
 static GEN
 gaddpex(GEN x, GEN y)
 {
-  long tx,e1,e2,e3,av,tetpil;
-  GEN z,p,p1,p2;
+  ulong av;
+  long tx,d,r,e;
+  GEN z,q,p,p1,p2,mod,u;
 
   if (gcmp0(x)) return gcopy(y);
 
-  av=avma; p=(GEN)y[2]; tx=typ(x);
-  z=cgetg(5,t_PADIC); z[2]=(long)p;
-  e3 = (tx == t_INT)? pvaluation(x,p,&p1)
+  av = avma; p = (GEN)y[2]; tx = typ(x);
+  e = (tx == t_INT)? pvaluation(x,p,&p1)
                     : pvaluation((GEN)x[1],p,&p1) -
                       pvaluation((GEN)x[2],p,&p2);
-  e1 = valp(y)-e3; e2 = signe(y[4])? e1+precp(y): e1;
-  if (e2<=0)
+  d = valp(y)-e; r = d+precp(y);
+  if (r<=0) { avma = av; return gcopy(y); }
+  mod = (GEN)y[3];
+  u   = (GEN)y[4];
+  (void)new_chunk(5 + lgefint(mod) + lgefint(p)*labs(d));
+
+  if (d > 0)
   {
-    z[1] = evalprecp(0) | evalvalp(e3);
-    z[3] = un;
-    z[4] = zero;
+    q = gpowgs(p,d);
+    mod = mulii(mod, q);
+    u   = mulii(u, q);
+    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
   }
-  else
+  else if (d < 0)
   {
-    if (tx != t_INT && !is_pm1(p2)) p1 = gdiv(p1,p2);
-    z[1] = evalprecp(e2) | evalvalp(e3);
-    z[3] = e1? lmul((GEN)y[3], gpuigs(p,e1)): y[3];
-    z[4] = lmod(p1,(GEN)z[3]);
+    q = gpowgs(p,-d);
+    mod = divii(mod, q);
+    u   = modii(u, mod);
+    if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
+    p1 = mulii(p1, q);
   }
-  tetpil=avma; return gerepile(av,tetpil,addpadic(z,y));
+  u = addii(u, p1);
+  if (!d)
+  {
+    long c = pvaluation(u,p,&u);
+    if (c) { r-=c; e+=c; mod = divii(mod, gpowgs(p,c)); }
+  }
+  avma = av; z = cgetg(5,t_PADIC);
+  z[1] = evalprecp(r) | evalvalp(e);
+  z[3] = licopy(mod);
+  z[4] = lmodii(u,(GEN)z[3]);
+  icopyifstack(p, z[2]); return z;
 }
 
 static long

@@ -1454,58 +1454,60 @@ teich(GEN x)
   affii(z,(GEN)y[4]); avma=av; return y;
 }
 
+/* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
+ * log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k.
+ * palogaux(x) returns the last sum (not multiplied by 2) */
 static GEN
 palogaux(GEN x)
 {
-  long av1=avma,tetpil,k,e,pp;
-  GEN y,s,y2;
+  long k,e,pp;
+  GEN y,s,y2, p = (GEN)x[2];
 
-  if (egalii(gun,(GEN)x[4]))
+  if (egalii(gun, (GEN)x[4]))
   {
-    y=gaddgs(x,-1);
-    if (egalii(gdeux,(GEN)x[2]))
-    {
-      setvalp(y,valp(y)-1);
-      if (!gcmp1((GEN)y[3])) y[3]=lshifti((GEN)y[3],-1);
-    }
-    return gerepilecopy(av1,y);
+    long v = valp(x);
+    if (egalii(gdeux,p)) v--;
+    return padiczero(p, v);
   }
-  y=gdiv(gaddgs(x,-1),gaddgs(x,1)); e=valp(y); pp=e+precp(y);
-  if (egalii(gdeux,(GEN)x[2])) pp--;
+  y = gdiv(gaddgs(x,-1), gaddgs(x,1));
+  e = valp(y); pp = e+precp(y);
+  if (egalii(gdeux,p)) pp--;
   else
   {
-    long av=avma;
     GEN p1;
-
-    for (p1=stoi(e); cmpsi(pp,p1)>0; pp++)
-      p1 = mulii(p1,(GEN)x[2]);
-    avma=av; pp-=2;
+    for (p1=stoi(e); cmpsi(pp,p1)>0; pp++) p1 = mulii(p1, p);
+    pp -= 2;
   }
-  k=pp/e; if (!odd(k)) k--;
-  y2=gsqr(y); s=gdivgs(gun,k);
-  while (k>=3)
+  k = pp/e; if (!odd(k)) k--;
+  y2 = gsqr(y); s = gdivgs(gun,k);
+  while (k > 2)
   {
-    k-=2; s=gadd(gmul(y2,s),gdivgs(gun,k));
+    k -= 2; s = gadd(gmul(y2,s), gdivgs(gun,k));
   }
-  tetpil=avma; return gerepile(av1,tetpil,gmul(s,y));
+  return gmul(s,y);
 }
 
 GEN
 palog(GEN x)
 {
-  long av=avma,tetpil;
-  GEN p1,y;
+  ulong av = avma;
+  GEN y, p = (GEN)x[2];
 
   if (!signe(x[4])) err(talker,"zero argument in palog");
-  if (cmpis((GEN)x[2],2))
+  if (egalii(p, gdeux))
   {
-    y=cgetp(x); p1=gsubgs((GEN)x[2],1);
-    affii(powmodulo((GEN)x[4],p1,(GEN)x[3]),(GEN)y[4]);
-    y=gmulgs(palogaux(y),2); tetpil=avma;
-    return gerepile(av,tetpil,gdiv(y,p1));
+    y = gsqr(x); setvalp(y,0);
+    y = palogaux(y);
   }
-  y=gsqr(x); setvalp(y,0); tetpil=avma;
-  return gerepile(av,tetpil,palogaux(y));
+  else
+  { /* compute log(x^(p-1)) / (p-1) */
+    GEN mod = (GEN)x[3], p1 = subis(p,1);
+    y = cgetp(x);
+    y[4] = (long)powmodulo((GEN)x[4], p1, mod);
+    p1 = divii(subis(mod,1), p1); /* 1/(1-p) */
+    y = gmul(palogaux(y), mulis(p1, -2));
+  }
+  return gerepileupto(av,y);
 }
 
 GEN
