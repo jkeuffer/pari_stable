@@ -28,9 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 #define LOCAL_OVERFLOW
-#define SAVE_OVERFLOW
 #define LOCAL_HIREMAINDER
-#define SAVE_HIREMAINDER
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
 ulong overflow, hiremainder;

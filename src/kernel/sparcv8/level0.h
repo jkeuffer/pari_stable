@@ -31,9 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*   files with gcc                                               */
 
 #define LOCAL_OVERFLOW
-#define SAVE_OVERFLOW
 #define LOCAL_HIREMAINDER
-#define SAVE_HIREMAINDER
 
 BEGINEXTERN
 extern long divll(ulong x, ulong y);
@@ -107,15 +105,6 @@ __value; })
          : "%o4","%g5"); \
 __value; })								
 
-#define shiftl2(a,b,c) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __arg3 = (c); \
-   __asm__ ( "srl %2,%4,%1; \
-          sll %2,%3,%0" \
-	 : "=r" (__value), "=r" (hiremainder) \
-	 : "r" (__arg1), "r" (__arg2), "r" (__arg3) \
-         : "%g5"); \
-__value; }) 			
-
 #define shiftlr(a,b) \
 ({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "neg %3,%%o4; \
@@ -124,24 +113,6 @@ __value; })
 	 : "=r" (__value), "=r" (hiremainder) \
 	 : "r" (__arg1), "r" (__arg2) \
          : "%o4","%g5"); \
-__value; }) 			
-
-#define shiftlr1(a) \
-({ ulong __value, __arg1 = (a); \
-   __asm__ ( "sll %2,31,%1; \
-          srl %2,1,%0" \
-	 : "=r" (__value), "=r" (hiremainder) \
-	 : "r" (__arg1) \
-         : "%g5"); \
-__value; }) 			
-
-#define shiftlr2(a,b,c) \
-({ ulong __value, __arg1 = (a), __arg2 = (b), __arg3 = (c); \
-   __asm__ ( "sll %2,%4,%1; \
-          srl %2,%3,%0" \
-	 : "=r" (__value), "=r" (hiremainder) \
-	 : "r" (__arg1), "r" (__arg2), "r" (__arg3) \
-         : "%g5"); \
 __value; }) 			
 
 #define mulll(a,b) \

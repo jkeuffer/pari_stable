@@ -1239,20 +1239,31 @@ resss(long x, long y)
 }
 
 GEN
+divsi_rem(long x, GEN y, ulong *rem)
+{
+  long p1, s = signe(y);
+  LOCAL_HIREMAINDER;
+
+  if (!s) err(diver2);
+  if (!x || lgefint(y)>3 || ((long)y[2])<0) { *rem = x; return gzero; }
+  hiremainder=0; p1=divll(labs(x),y[2]);
+  if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
+  if (s<0) p1 = -p1;
+  *rem = hiremainder; return stoi(p1);
+}
+
+GEN
 divsi(long x, GEN y)
 {
   long p1, s = signe(y);
   LOCAL_HIREMAINDER;
 
   if (!s) err(diver2);
-  if (!x || lgefint(y)>3 || ((long)y[2])<0)
-  {
-    hiremainder=x; SAVE_HIREMAINDER; return gzero;
-  }
+  if (!x || lgefint(y)>3 || ((long)y[2])<0) return gzero;
   hiremainder=0; p1=divll(labs(x),y[2]);
   if (x<0) { hiremainder = -((long)hiremainder); p1 = -p1; }
   if (s<0) p1 = -p1;
-  SAVE_HIREMAINDER; return stoi(p1);
+  return stoi(p1);
 }
 
 GEN
@@ -1286,23 +1297,22 @@ modiu(GEN y, ulong x) { return utoi(umodiu(y,x)); }
 
 /* return |y| \/ x */
 GEN
-dvmdiu(GEN y, ulong x, ulong *rem)
+diviu_rem(GEN y, ulong x, ulong *rem)
 {
-  long sy=signe(y),ly;
+  long ly;
   GEN z;
-  LOCAL_HIREMAINDER;
 
   if (!x) err(diver4);
-  if (!sy) { *rem = 0; return gzero; }
+  if (!signe(y)) { *rem = 0; return gzero; }
 
   ly = lgefint(y);
   if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = (ulong)y[2]; return gzero; }
 
   z = cgeti(ly); 
-  hiremainder = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
+  *rem = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
   if (z [ly - 1] == 0) ly--;
   z[1] = evallgefint(ly) | evalsigne(1);
-  *rem = hiremainder; return z;
+  return z;
 }
 
 GEN
@@ -1329,26 +1339,44 @@ modsi(long x, GEN y)
 }
 
 GEN
+divis_rem(GEN y, long x, ulong *rem)
+{
+  long sy=signe(y),ly,s;
+  GEN z;
+
+  if (!x) err(diver4);
+  if (!sy) { *rem = 0; return gzero; }
+  if (x<0) { s = -sy; x = -x; } else s = sy;
+
+  ly = lgefint(y);
+  if (ly == 3 && (ulong)x > (ulong)y[2]) { *rem = itos(y); return gzero; }
+
+  z = cgeti(ly); 
+  *rem = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
+  if (sy<0) *rem = - ((long)*rem);
+  if (z[ly - 1] == 0) ly--;
+  z[1] = evallgefint(ly) | evalsigne(s);
+  return z;
+}
+
+GEN
 divis(GEN y, long x)
 {
   long sy=signe(y),ly,s;
   GEN z;
-  LOCAL_HIREMAINDER;
 
   if (!x) err(diver4);
-  if (!sy) { hiremainder=0; SAVE_HIREMAINDER; return gzero; }
+  if (!sy) return gzero;
   if (x<0) { s = -sy; x = -x; } else s=sy;
 
   ly = lgefint(y);
-  if (ly == 3 && (ulong)x > (ulong)y[2])
-  { hiremainder = itos(y); SAVE_HIREMAINDER; return gzero; }
+  if (ly == 3 && (ulong)x > (ulong)y[2]) return gzero;
 
   z = cgeti(ly); 
-  hiremainder = mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
-  if (sy<0) hiremainder = - ((long)hiremainder);
+  (void)mpn_divrem_1(LIMBS(z), 0, LIMBS(y), NLIMBS(y), x);
   if (z[ly - 1] == 0) ly--;
   z[1] = evallgefint(ly) | evalsigne(s);
-  SAVE_HIREMAINDER; return z;
+  return z;
 }
 
 GEN
@@ -1853,13 +1881,6 @@ diviiexact(GEN x, GEN y)
 {
   /*TODO: use mpn_bdivmod instead*/
   return divii(x,y);
-}
-
-long
-smodsi(long x, GEN y)
-{
-  if (x<0) err(talker,"negative small integer in smodsi");
-  (void)divsi(x,y); return hiremainder;
 }
 
 /* x and y are integers. Return 1 if |x| == |y|, 0 otherwise */

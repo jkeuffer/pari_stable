@@ -18,9 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifndef ASMINLINE
 #define LOCAL_OVERFLOW
-#define SAVE_OVERFLOW
 #define LOCAL_HIREMAINDER
-#define SAVE_HIREMAINDER
 
 BEGINEXTERN
 extern  ulong overflow;
@@ -39,29 +37,14 @@ ENDEXTERN
 
 #else /* ASMINLINE */
 
-/* $Id$ */
 /* Written by Bruno Haible, 1996-1998. */
 
 /* This file can assume the GNU C extensions.
    (It is included only if __GNUC__ is defined.) */
 
-
 /* Use local variables whenever possible. */
 #define LOCAL_HIREMAINDER  register ulong hiremainder
-#define SAVE_OVERFLOW \
-     { ulong _temp_overf = overflow; \
-       extern ulong overflow; \
-       overflow = _temp_overf; }
-#define LOCAL_OVERFLOW  ulong overflow
-#define SAVE_HIREMAINDER \
-     { ulong _temp_hirem = hiremainder; \
-       extern ulong hiremainder; \
-       hiremainder = _temp_hirem; }
-/* The global variable `hiremainder' is still necessary for the 2nd value of
-   divss, divis, divsi. The global variable `overflow' is not necessary. */
-extern ulong overflow;
-extern ulong hiremainder;
-
+#define LOCAL_OVERFLOW     register ulong overflow
 
 /* Different assemblers have different syntax for the "shldl" and "shrdl"
    instructions. */
