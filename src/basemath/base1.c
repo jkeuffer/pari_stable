@@ -401,7 +401,11 @@ galois(GEN x, long prec)
     /* n = 3 */
     f = carreparfait(ZX_disc(x));
     avma = av;
-    return f? _res(3,1,1): _res(6,-1,2);
+    return f? _res(3,1,1): 
+              _res(6,-1, new_galois_format? 2: 1);
+    /* using new_galois_format here is a hack: should be done in _res. But
+     * from [n,s,k] there is no way to distinguish S_3 as a subgroup of S_3
+     * or S_6 */
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
   if (n > 7) return galoisbig(x, prec);
