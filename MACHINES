@@ -29,7 +29,8 @@ Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 ==============================================================================
 DEC/Alpha
 alpha21264   667Mhz  FreeBSD-4.0     gcc X11 dl     2626    2656  2.0.20    IS
-alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3218    3614  2.0.18(20)JC
+alpha21264   500MHz  OSF1-V4.0      gcc  X11 dl2    3032    3293  2.0.18(20)JC
+alpha21264   500MHz  OSF1-V4.0       cc  X11 dl2    3156    3466  2.0.20    GH
 alpha21164a  600MHz  Linux-2.2.13   egcs X11 dl2    4270    4350  2.0.19    IS
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
@@ -77,6 +78,8 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107074  106494  2.0.16(21)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -   -   98488       -  2.0.16(15)DE
 ------------------------------------------------------------------------------
 Intel/x86
+AMD Duron    700MHz  Linux-2.4.0    egcs X11 dl2    2066    2138  2.0.20    QL
+AMD Duron   1000MHz  Linux-2.4.0    egcs  -  dl2    1364    1428  2.0.20    QL
 AMD Athlon   500MHz  Linux-2.2.13    gcc X11 dl2    2736    2724  2.0.18    MS
 AMD K6-2     350Mhz  Linux-2.0.34   egcs X11 dl2   (4856)  (4756) 2.0.11    SH
 AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17 
@@ -87,6 +90,8 @@ PentiumIII   933MHz  Linux-2.2.15   egcs X11 dl2    1450    1485  2.0.20    IS
 PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl2    2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc X11 dl2    2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
+PentiumII    400MHz  Linux-2.3.99    gcc X11 dl2    3392    3410  2.0.20(25)GH
+PentiumII    400MHz  Linux-2.2.14    gcc X11 dl2    3886    3902  2.0.20    GH
 PentiumII    350MHz  Linux-2.0.35    gcc X11 dl2    4312    4488  2.0.20
 PentiumII    350MHz  Cygwin-B20.1    gcc   -   -    6585       -  2.0.20(23)
 PentiumII    350MHz  Win98 + RSX     gcc   -   -    9436       -  2.0.20(24)
@@ -221,12 +226,13 @@ hppa kernel. Remove +z from compiler flags
 (17) CFLAGS = -mk6 -march=i586 -O6
 (18) 256kb L2 Cache - Ultra U5
 (19) 2  MB L2 Cache - Ultra U10
-(20) gcc-2.8.1 also works and produces a faster binary [sta=3032, dyn=3293]
+(20) gcc-2.8.1
 (21) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
 (22) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
 (23) same machine as the line above, running Win98. Used 'make gp-sta'
      (gp-dyn is the default, and compilation fails [ld -shared no supported])
 (24) same machine as above, using the RSX compatibility package
+(25) Xeon
 
 =============================================================================
 Contributors:
@@ -236,6 +242,7 @@ Contributors:
   BN = Balasubramanian Narasimhan
   DE = Denis Excoffier
   EK = Emmanuel Kowalski
+  GH = Guillaume Hanrot
   GN = Gerhard Niklasch
   HC = Henri Cohen
   HG = Herbert Gangl

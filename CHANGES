@@ -32,7 +32,7 @@ YU = Yoshiaki Uchikawa
 Done for version ??? (released ??/??/2000):
   Fixed
     1- trap(gdiver2,a,1/0) <C-D> trap(,a,1/0); trap(gdiver2,a,1/0) --> crash
-    2- lllgramintern could change the lattice (after many precision problems)
+    2- lllgramintern could reduce a wrong lattice (after precision problems)
 XR  3- not enough GC in bezout()
     4- use hnfmodid in ideallllred  (work mod I \cap Z, not mod N(I))
 IS  5- C++ compilation problem (compl is a C++ operator + casts)
@@ -72,6 +72,7 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
 
   Added
     1- new library function zerovec
+    2- Hoeij's algorithm for modular factors recombination (factor over Z[X])
 
   Removed
     1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
