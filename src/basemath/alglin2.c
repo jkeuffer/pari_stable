@@ -1659,6 +1659,29 @@ col_dup(long n, GEN col)
    return c;
 }
 
+/* M_k <- M_k + q M_i  (col operations) */
+static void
+elt_col(GEN Mk, GEN Mi, GEN q)
+{
+  long j;
+  if (is_pm1(q))
+  {
+    if (signe(q) > 0)
+    {
+      for (j = lg(Mk)-1; j; j--)
+        if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], (GEN)Mi[j]);
+    }
+    else
+    {
+      for (j = lg(Mk)-1; j; j--)
+        if (signe(Mi[j])) Mk[j] = lsubii((GEN)Mk[j], (GEN)Mi[j]);
+    }
+  }
+  else
+    for (j = lg(Mk)-1; j; j--)
+      if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], mulii(q, (GEN)Mi[j]));
+}
+
 /* HNF reduce a relation matrix (column operations + row permutation)
 ** Input:
 **   mat = (li-1) x (co-1) matrix of long
@@ -1677,14 +1700,11 @@ col_dup(long n, GEN col)
 GEN
 hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
-  pari_sp av=avma,av2,lim;
-  long *p,i,j,k,lk0,col,lig,*matj, **mat;
-  long n,s,t,nlze,lnz,nr;
-  GEN p1,p2,matb,matbnew,vmax,matt,T,extramat;
-  GEN B,H,dep,permpro;
-  long co = lg(mat0);
-  long li = lg(perm); /* = lg(mat0[1]) */
-  int updateT = 1;
+  pari_sp av = avma, av2, lim;
+  long n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj, **mat;
+  GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, H, dep, permpro;
+  const long co = lg(mat0);
+  const long li = lg(perm); /* = lg(mat0[1]) */
 
   if (!k0) mat = mat0; /* in place */
   else
@@ -1707,37 +1727,31 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   vmax = cgetg(co,t_VECSMALL);
   av2 = avma; lim = stack_lim(av2,1);
 
-  i=lig=li-1; col=co-1; lk0=k0;
-  if (k0 || (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)) T = idmat(col);
-  else
-  { /* dummy ! */
-    GEN z = cgetg(1,t_COL);
-    T = cgetg(co, t_MAT); updateT = 0;
-    for (j=1; j<co; j++) T[j] = (long)z;
-  }
+  i = lig = li-1; col = co-1; lk0 = k0;
+  T = (k0 || (lg(*ptC) > 1 && lg((*ptC)[1]) > 1))? idmat(col): NULL;
   /* Look for lines with a single non-0 entry, equal to 1 in absolute value */
   while (i > lk0)
     switch( count(mat,perm[i],col,&n) )
     {
       case 0: /* move zero lines between k0+1 and lk0 */
 	lk0++; lswap(perm[i], perm[lk0]);
-        i=lig; continue;
+        i = lig; continue;
 
       case 1: /* move trivial generator between lig+1 and li */
 	lswap(perm[i], perm[lig]);
-        lswap(T[n], T[col]);
+        if (T) lswap(T[n], T[col]);
 	swap(mat[n], mat[col]); p = mat[col];
 	if (p[perm[lig]] < 0) /* = -1 */
 	{ /* convert relation -g = 0 to g = 0 */
 	  for (i=lk0+1; i<lig; i++) p[perm[i]] = -p[perm[i]];
-          if (updateT)
+          if (T)
           {
             p1 = (GEN)T[col];
-            for (i=1; ; i++)
+            for (i=1; ; i++) /* T is a permuted identity: single non-0 entry */
               if (signe((GEN)p1[i])) { p1[i] = lnegi((GEN)p1[i]); break; }
           }
 	}
-	lig--; col--; i=lig; continue;
+	lig--; col--; i = lig; continue;
 
       default: i--;
     }
@@ -1761,34 +1775,30 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     /* only 0, +/- 1 entries, at least 2 of them non-zero */
     lswap(perm[i], perm[lig]);
     swap(mat[n], mat[col]); p = mat[col];
-    lswap(T[n], T[col]); p1 = (GEN)T[col];
+    if (T) lswap(T[n], T[col]);
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
-      p1 = gneg(p1); T[col] = (long)p1;
+      if (T) ZV_neg_ip((GEN)T[col]);
     }
     for (j=1; j<col; j++)
     {
+      long t;
       matj = mat[j];
       if (! (t = matj[perm[lig]]) ) continue;
-      if (t == 1)
-      { /* t = 1 */
-        for (i=lk0+1; i<=lig; i++)
-          absmax(s, matj[perm[i]] -= p[perm[i]]);
-        T[j] = lsub((GEN)T[j], p1);
+      if (t == 1) {
+        for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= p[perm[i]]);
       }
-      else
-      { /* t = -1 */
-        for (i=lk0+1; i<=lig; i++)
-          absmax(s, matj[perm[i]] += p[perm[i]]);
-        T[j] = ladd((GEN)T[j], p1);
+      else { /* t = -1 */
+        for (i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] += p[perm[i]]);
       }
+      if (T) elt_col((GEN)T[j], (GEN)T[col], stoi(-t));
     }
     lig--; col--;
     if (low_stack(lim, stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"hnfspec[1]");
-      T = gerepilecopy(av2, T);
+      if (T) T = gerepilecopy(av2, T); else avma = av2;
     }
   }
   /* As above with lines containing a +/- 1 (no other assumption).
@@ -1808,29 +1818,29 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     lswap(vmax[n], vmax[col]);
     lswap(perm[i], perm[lig]);
     swap(mat[n], mat[col]); p = mat[col];
-    lswap(T[n], T[col]); p1 = (GEN)T[col];
+    if (T) lswap(T[n], T[col]);
     if (p[perm[lig]] < 0)
     {
       for (i=lk0+1; i<=lig; i++) p[perm[i]] = -p[perm[i]];
-      p1 = gneg(p1); T[col] = (long)p1;
+      if (T) ZV_neg_ip((GEN)T[col]);
     }
     for (j=1; j<col; j++)
     {
+      long t;
       matj = mat[j];
       if (! (t = matj[perm[lig]]) ) continue;
       if (vmax[col] && (ulong)labs(t) >= (HIGHBIT-vmax[j]) / vmax[col])
         goto END2;
 
-      for (s=0, i=lk0+1; i<=lig; i++)
-        absmax(s, matj[perm[i]] -= t*p[perm[i]]);
+      for (s=0, i=lk0+1; i<=lig; i++) absmax(s, matj[perm[i]] -= t*p[perm[i]]);
       vmax[j] = s;
-      T[j] = (long)ZV_lincomb(gun,stoi(-t), (GEN)T[j],p1);
+      if (T) elt_col((GEN)T[j], (GEN)T[col], stoi(-t));
     }
     lig--; col--;
     if (low_stack(lim, stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"hnfspec[2]");
-      T = gerepilecopy(av2,T);
+      if (T) T = gerepilecopy(av2,T); else avma = av2;
     }
   }
 
@@ -1850,54 +1860,41 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   }
   for (i=li-2; i>lig; i--)
   {
-    long i1, i0 = i - k0, k = i + co-li;
+    long h, i0 = i - k0, k = i + co-li;
     GEN Bk = (GEN)matb[k];
-    GEN Tk = (GEN)T[k];
     for (j=k+1; j<co; j++)
     {
-      p1=(GEN)matb[j]; p2=(GEN)p1[i0];
-      if (! (s=signe(p2)) ) continue;
+      GEN Bj = (GEN)matb[j], v = (GEN)Bj[i0];
+      s = signe(v); if (!s) continue;
 
-      p1[i0] = zero;
-      if (is_pm1(p2))
+      Bj[i0] = zero;
+      if (is_pm1(v))
       {
-        if (s > 0)
-        { /* p2 = 1 */
-          for (i1=1; i1<i0; i1++)
-            p1[i1] = lsubii((GEN)p1[i1], (GEN)Bk[i1]);
-          T[j] = lsub((GEN)T[j], Tk);
-        }
-        else
-        { /* p2 = -1 */
-          for (i1=1; i1<i0; i1++)
-            p1[i1] = laddii((GEN)p1[i1], (GEN)Bk[i1]);
-          T[j] = ladd((GEN)T[j], Tk);
-        }
+        if (s > 0) /* v = 1 */
+        { for (h=1; h<i0; h++) Bj[h] = lsubii((GEN)Bj[h], (GEN)Bk[h]); }
+        else /* v = -1 */
+        { for (h=1; h<i0; h++) Bj[h] = laddii((GEN)Bj[h], (GEN)Bk[h]); }
       }
-      else
-      {
-        for (i1=1; i1<i0; i1++)
-          p1[i1] = lsubii((GEN)p1[i1], mulii(p2,(GEN) Bk[i1]));
-        T[j] = (long)ZV_lincomb(gun,negi(p2), (GEN)T[j],Tk);
+      else {
+        for (h=1; h<i0; h++) Bj[h] = lsubii((GEN)Bj[h], mulii(v,(GEN) Bk[h]));
       }
+      if (T) elt_col((GEN)T[j], (GEN)T[k], negi(v));
       if (low_stack(lim, stack_lim(av2,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
-        for (j=1; j<co; j++) setlg(matb[j], i0+1); /* bottom can be forgotten */
-        gerepileall(av2, 2, &T, &matb);
+        for (h=1; h<co; h++) setlg(matb[h], i0+1); /* bottom can be forgotten */
+        gerepileall(av2, T? 2: 1, &matb, &T);
+        Bk = (GEN)matb[k];
       }
     }
   }
-  gerepileall(av2, 2, &T, &matb);
-  if (DEBUGLEVEL>5)
-  {
-    fprintferr("    matb cleaned up (using Id block)\n");
-    if (DEBUGLEVEL>6) outerr(matb);
-  }
+  for (j=1; j<co; j++) setlg(matb[j], lig-k0+1); /* bottom can be forgotten */
+  gerepileall(av2, T? 2: 1, &matb, &T);
+  if (DEBUGLEVEL>5) fprintferr("    matb cleaned up (using Id block)\n");
 
   nlze = lk0 - k0;  /* # of 0 rows */
   lnz = lig-nlze+1; /* 1 + # of non-0 rows (!= 0...0 1 0 ... 0) */
-  if (updateT) matt = gmul(matt,T); /* update top rows */
+  if (T) matt = gmul(matt,T); /* update top rows */
   extramat = cgetg(col+1,t_MAT); /* = new C minus the 0 rows */
   for (j=1; j<=col; j++)
   {
@@ -1962,7 +1959,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       p1[k] = (i <= k0)? y[i]: z[i];
     }
   }
-  if (updateT) *ptC = gmul(*ptC,T);
+  if (T) *ptC = gmul(*ptC,T);
   *ptdep = dep;
   *ptB = B;
   H = hnffinal(matbnew,perm,ptdep,ptB,ptC);
@@ -2394,29 +2391,6 @@ ZV_neg_ip(GEN M)
   long i;
   for (i = lg(M)-1; i; i--)
     M[i] = (long)mynegi((GEN)M[i]);
-}
-
-/* M_k = M_k + q M_i  (col operations) */
-static void
-elt_col(GEN Mk, GEN Mi, GEN q)
-{
-  long j;
-  if (is_pm1(q))
-  {
-    if (signe(q) > 0)
-    {
-      for (j = lg(Mk)-1; j; j--)
-        if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], (GEN)Mi[j]);
-    }
-    else
-    {
-      for (j = lg(Mk)-1; j; j--)
-        if (signe(Mi[j])) Mk[j] = lsubii((GEN)Mk[j], (GEN)Mi[j]);
-    }
-  }
-  else
-    for (j = lg(Mk)-1; j; j--)
-      if (signe(Mi[j])) Mk[j] = laddii((GEN)Mk[j], mulii(q, (GEN)Mi[j]));
 }
 
 /* index of first non-zero entry */
