@@ -54,11 +54,13 @@ IZ 11- shift(x > 0,, flag!=0) didn't act as the docs said [flag now ignored]
    19- F() = 0; local(x)  ==> confusing error message
 IZ 20- OS/2: make bench didn't work [env wouldn't start shell scripts]
 BA 21- sqrtn(Mod(1,7),2,&z)-->z=1 should be -1
-HC 22- Standard transcental functions exp, sin, cos, powering, are now
-       orders of magnitude faster for power series arguments.
+HC 22- Standard transcental functions exp, sin, cos, ^, are now orders of
+       magnitude faster for t_POL arguments of small degree.
 HC 23- fixed a severe bug in p-adic/integer addition (1+3^4+O(3^10))+3
        didn't work.
 HC 24- Corrected p-adic initell.
+   25- ellj / eta (t_SER) truncated result to seriesprecision
+   26- multiplication of t_SER much faster when few non-zero terms [see F22]
 
   Changed
 BA  1- improved Fp_isom
@@ -74,6 +76,7 @@ BA  6- improved ffinit()
 BA 10- improved polsubcyclo()
 BA 11- new interface for galoissubcyclo
 HC 12- gamma function for integral/rational arguments
+   13- faster factornf / nfgcd
 
   Added
     1- mplog2() function --> faster mplog()
