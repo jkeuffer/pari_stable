@@ -34,6 +34,8 @@ GEN    mkcol2(GEN x, GEN y);
 GEN    mkcolcopy(GEN x);
 GEN    mkcomplex(GEN x, GEN y);
 GEN    mkfrac(GEN x, GEN y);
+GEN    mkintmod(GEN x, GEN y);
+GEN    mkpolmod(GEN x, GEN y);
 GEN    mkintmodu(ulong x, ulong y);
 GEN    mkmat(GEN x);
 GEN    mkmat2(GEN x, GEN y);
@@ -260,6 +262,12 @@ cgetc(long l)
   GEN u = cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
   return u;
 }
+INLINE GEN
+mkintmod(GEN x, GEN y) { GEN v = cgetg(3, t_INTMOD);
+  v[1] = (long)y; v[2] = (long)x; return v; }
+INLINE GEN
+mkpolmod(GEN x, GEN y) { GEN v = cgetg(3, t_POLMOD);
+  v[1] = (long)y; v[2] = (long)x; return v; }
 INLINE GEN
 mkfrac(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
   v[1] = (long)x; v[2] = (long)y; return v; }

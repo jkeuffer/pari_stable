@@ -2310,6 +2310,13 @@ components set to \kbd{gen\_0}, but the \kbd{i}-th one which us set to
 
 \fun{GEN}{mkcol}{GEN x} creates a 1-dimensional \typ{COL} containing \kbd{x}.
 
+\fun{GEN}{mkintmod}{GEN x, GEN y} creates the \typ{INTMOD} \kbd{Mod(x, y)}.
+The input must be \typ{INT}s satisfying $0 \leq x < y$.
+
+\fun{GEN}{mkpolmod}{GEN x, GEN y} creates the \typ{POLMOD} \kbd{Mod(x, y)}.
+The input must satisfy $\deg x < \deg y$ with respect to the main variable of
+the \typ{POL} $y$. $x$ may be a scalar.
+
 \fun{GEN}{mkmat}{GEN x} creates a 1-by-1 \typ{MAT} containing \kbd{x}.
 
 \fun{GEN}{mkvec}{GEN x} creates a 1-dimensional \typ{VEC} containing \kbd{x}.
