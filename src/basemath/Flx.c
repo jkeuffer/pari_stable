@@ -933,7 +933,7 @@ Flx_invmontgomery(GEN T, ulong p)
  * and mg is the Montgomery inverse of T. 
  */
 GEN
-Flx_redmontgomery(GEN x, GEN mg, GEN T, ulong p)
+Flx_rem_montgomery(GEN x, GEN mg, GEN T, ulong p)
 {
   pari_sp ltop=avma;
   GEN z;
@@ -1285,13 +1285,13 @@ static GEN
 _sqr_montgomery(void *data, GEN x)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flx_redmontgomery(Flx_sqr(x,D->p),D->mg, D->pol, D->p);
+  return Flx_rem_montgomery(Flx_sqr(x,D->p),D->mg, D->pol, D->p);
 }
 static GEN
 _mul_montgomery(void *data, GEN x, GEN y)
 {
   Flxq_muldata *D = (Flxq_muldata*)data;
-  return Flx_redmontgomery(Flx_mul(x,y,D->p),D->mg, D->pol, D->p);
+  return Flx_rem_montgomery(Flx_mul(x,y,D->p),D->mg, D->pol, D->p);
 }
 
 static GEN

@@ -1652,7 +1652,7 @@ the latter are not set).
 of \kbd{T}, i.e.~\kbd{truncate(x / polrecip(T)+O(x\pow n)}. Assumes
 $\kbd{T}(0) \neq 0$.
 
-\fun{GEN}{Flx_redmontgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
+\fun{GEN}{Flx_rem_montgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
 \kbd{x} modulo \kbd{T}, where \kbd{mg} is the Montgomery inverse of \kbd{T}.
 
 \fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
