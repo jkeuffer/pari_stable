@@ -47,19 +47,25 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
 {
   pari_sp av = avma;
   long d;
-  GEN p1, p2 = leading_term(p);
+  GEN ch, L = leading_term(p);
 
   if (!signe(x)) return gpowgs(polx[v], degpol(p));
-  if (typ(x) != t_POL) x = scalarpol(x,v);
-  x = gneg_i(x); x[2] = ladd((GEN)x[2], polx[MAXVARN]);
-  p1=subres_f(p, x, NULL);
-  if (typ(p1) == t_POL && varn(p1)==MAXVARN)
-    setvarn(p1,v);
-  else
-    p1 = gsubst(p1,MAXVARN,polx[v]);
+  if (typ(x) != t_POL)
+    return gerepileupto(av, gpowgs(gsub(polx[v], x), degpol(p)));
+  x = gneg_i(x);
+  if (varn(x) == MAXVARN) { setvarn(x, 0); p = dummycopy(p); setvarn(p, 0); }
+  x[2] = ladd((GEN)x[2], polx[MAXVARN]);
+  ch = subres_f(p, x, NULL);
+  if (v != MAXVARN)
+  {
+    if (typ(ch) == t_POL && varn(ch) == MAXVARN)
+      setvarn(ch, v);
+    else
+      ch = gsubst(ch, MAXVARN, polx[v]);
+  }
 
-  if (!gcmp1(p2) && (d=degpol(x)) > 0) p1 = gdiv(p1, gpowgs(p2,d));
-  return gerepileupto(av,p1);
+  if (!gcmp1(L) && (d = degpol(x)) > 0) ch = gdiv(ch, gpowgs(L,d));
+  return gerepileupto(av, ch);
 }
 
 /* return caract(Mod(x,p)) in variable v */
