@@ -3074,19 +3074,19 @@ polcompositum0(GEN A, GEN B, long flall)
   if (!issquarefree(A)) err(talker,"compositum: %Z not separable", A);
   if (!issquarefree(B)) err(talker,"compositum: %Z not separable", B);
 
-  p1 = ZY_ZXY_resultant(A, B, &k);
-  /* p1 = Res_Y (A, B(X - kY)) guaranteed to be squarefree */
+  k = 1; p1 = ZY_ZXY_resultant(A, B, &k);
+  /* p1 = Res_Y (A, B(X + kY)) guaranteed to be squarefree */
   y = squff2(p1,0,0); settyp(y, t_VEC);
   if (flall)
   {
     long i,l = lg(y);
-    GEN Ba, w,a,c; /* a,b,c root of A,B,C = compositum, c = b + k a */
+    GEN Ba, w,a,c; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
     {
       c = gmodulcp(polx[v], (GEN)y[i]);
       if (v == 0) gsetvarn(c, MAXVARN); else setvarn(A, 0);
       /* Ba = polynomial in X, st Ba(a) = 0 */
-      Ba = poleval(B, gadd(c , gmulsg(-k,polx[0])));
+      Ba = poleval(B, gadd(c , gmulsg(k,polx[0])));
       Ba = lift_intern(Ba);
       p1 = nfgcd(A, Ba, (GEN)c[1], NULL);
       if (lgef(p1) != 4) err(bugparier,"compositum");
@@ -3096,8 +3096,8 @@ polcompositum0(GEN A, GEN B, long flall)
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = y[i]; 
       w[2] = lmodulcp(a, (GEN)y[i]);
-      w[3] = ladd(c, gmulsg(-k,a));
-      w[4] = lstoi(k); y[i] = (long)w;
+      w[3] = ladd(c, gmulsg(k,a));
+      w[4] = lstoi(-k); y[i] = (long)w;
     }
   }
   return gerepileupto(av, gcopy(y));

@@ -3440,18 +3440,19 @@ polfnf(GEN a, GEN t)
   u = nfgcd(alift,derivpol(alift), t, dent);
   sqfree = gcmp1(u);
   u = sqfree? alift: lift_intern(gdiv(a, gmul(unt,u)));
-  n = ZY_ZXY_resultant(t, u, &k);
+  k = 0; n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
   /* n guaranteed to be squarefree */
-  fa = squff2(n,0,0); lx=lg(fa);
+  fa = squff2(n,0,0); lx = lg(fa);
   y=cgetg(3,t_MAT);
-  p1=cgetg(lx,t_COL); y[1]=(long)p1;
-  p2=cgetg(lx,t_COL); y[2]=(long)p2;
-  x0 = gadd(polx[varn(a)], gmulsg(k,polx[varn(t)]));
+  p1 = cgetg(lx,t_COL); y[1] = (long)p1;
+  p2 = cgetg(lx,t_COL); y[2] = (long)p2;
+  x0 = gadd(polx[varn(a)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
   for (i=lx-1; i>1; i--)
   {
-    GEN b, F = nfgcd(u, poleval((GEN)fa[i], x0), t, dent);
+    GEN b, F = lift_intern(poleval((GEN)fa[i], x0));
+    F = nfgcd(u, F, t, dent);
     if (typ(F) != t_POL || deg(F) == 3)
       err(talker,"reducible modulus in factornf");
     F = gmul(unt, F);

@@ -752,6 +752,20 @@ u_FpXQ_sqr(GEN y,GEN pol,ulong p)
   return u_FpX_rem(z,pol,p);
 }
 
+/* Inverse of x in Z/pZ[X]/(pol) or NULL if inverse doesn't exist
+ * return lift(lift(Mod(x*Mod(1,p), pol*Mod(1,p))^-1)) */
+GEN
+FpXQ_invsafe(GEN x, GEN T, GEN p)
+{ 
+  GEN z, U, V;
+
+  if (typ(x) != t_POL) return mpinvmod(x, p);
+  z = FpX_extgcd(x, T, p, &U, &V);
+  if (lgef(z) != 3) return NULL;
+  z = mpinvmod((GEN)z[2], p);
+  return FpX_Fp_mul(U, z, p);
+}
+
 /* Product of y and x in Z/pZ[X]/(pol)
  * return lift(lift(Mod(x*y*Mod(1,p),pol*Mod(1,p)))) */
 GEN
@@ -809,22 +823,15 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
  Clean and with no reduced hypothesis.  Beware that some operations
  will be much slower with big unreduced coefficient
 *****************************************************************/
-
 /* Inverse of x in Z/pZ[X]/(pol)
- * return lift(lift(Mod(x*Mod(1,p),pol*Mod(1,p))^-1));
- */
+ * return lift(lift(Mod(x*Mod(1,p), pol*Mod(1,p))^-1)); */
 GEN
 FpXQ_inv(GEN x,GEN pol,GEN p)
 {
   ulong ltop=avma;
-  GEN ptu,ptv;
-  GEN z;
-  z=FpX_extgcd(x,pol,p,&ptu,&ptv);
-  if (lgef(z)!=3)
-    err(talker,"non invertible polynomial in FpXQ_inv");
-  z=mpinvmod((GEN)z[2],p);
-  ptu=FpX_Fp_mul(ptu,z,p);
-  return gerepileupto(ltop,ptu);
+  GEN U = FpXQ_invsafe(x, pol, p);
+  if (!U) err(talker,"non invertible polynomial in FpXQ_inv");
+  return gerepileupto(ltop, U);
 }
 /* T in Z[X] and  x in Z/pZ[X]/(pol)
  * return lift(lift(subst(T,variable(T),Mod(x*Mod(1,p),pol*Mod(1,p)))));
@@ -1056,22 +1063,42 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
   return gerepileupto(ltop,z);
 }
-/*U must be a t_POL in the variable of T (and never a t_INT)*/
 GEN
 FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
 {
-  GEN res;
-  int i;
-  res=cgetg(lgef(P),t_POL);
-  res[1] = evalsigne(1) | evalvarn(varn(P)) | evallgef(lgef(P));
-  for(i=2;i<lgef(res);i++)
-    if (typ(P[i])!=t_INT)
-      res[i]=(long)FpXQ_mul(U,(GEN)P[i],T,p);
-    else
-      res[i]=(long)FpX_Fp_mul(U,(GEN)P[i],p);
+  int i, lP = lgef(P);
+  GEN res = cgetg(lP,t_POL);
+  res[1] = evalsigne(1) | evalvarn(varn(P)) | evallgef(lP);
+  if (typ(U) == t_INT)
+  {
+    for(i=2; i<lP; i++)
+      if (typ(P[i]) != t_INT)
+        res[i] = (long)FpX_Fp_mul((GEN)P[i],U, p);
+      else
+        res[i] = lmodii(mulii(U,(GEN)P[i]), p);
+  }
+  else
+  {
+    for(i=2; i<lP; i++)
+      if (typ(P[i]) != t_INT)
+        res[i] = (long)FpXQ_mul(U,(GEN)P[i], T,p);
+      else
+        res[i] = (long)FpX_Fp_mul(U,(GEN)P[i], p);
+  }
   return normalizepol_i(res,lgef(res));
 }
 
+/* a X^deg, assume deg >= 0 */
+static GEN
+monomial(GEN a, int deg, int v)
+{
+  long i, lP = deg+3;
+  GEN P = cgetg(lP, t_POL);
+  P[1] = evalsigne(1) | evalvarn(v) | evallgef(lP);
+  lP--; P[lP] = (long)a;
+  for (i=2; i<lP; i++) P[i] = zero;
+  return P;
+}
 
 /* safe mean that if T is not irreducible and some
  * division fail it return NULL*/
@@ -1079,51 +1106,38 @@ GEN
 FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 {
   ulong ltop = avma;
-  GEN U, V, z;
-  long dg, vx=varn(P), vy=varn(T);
-  GEN x = polx[vx];
-  GEN lQ, lP;
+  long dg, vx=varn(P);
+  GEN U, lP;
   T = FpX_red(T, p);
   P = FpXX_red(P, p);
   Q = FpXX_red(Q, p);
-  if (!signe(P) || !signe(Q)) {avma=ltop; return zeropol(vx);}
+  if (!signe(P) || !signe(Q)) { avma=ltop; return zeropol(vx); }
   {
-    ulong btop = avma;
-    ulong st_lim = stack_lim(btop, 1);
-    do
+    ulong btop = avma, st_lim = stack_lim(btop, 1);
+    dg = lgef(P)-lgef(Q);
+    if (dg < 0) { swap(P, Q); dg = -dg; }
+    for(;;)
     {
-      dg = lgef(P)-lgef(Q);
-      if (dg < 0)
-      {
-        swap(P, Q);
-        dg = -dg;
-      }
-      lQ = leading_term(Q);
-      if (typ(lQ)==t_POL)
-      {
-      	z = FpX_extgcd(lQ, T, p, &U, &V);
-      	if (lgef(z) != 3) { avma = ltop; return NULL; }
-        z = mpinvmod((GEN)z[2], p);
-        U = FpX_Fp_mul(U, z, p);
-      }
-      else U = scalarpol(mpinvmod(lQ, p),vy);
+      U = FpXQ_invsafe(leading_term(Q), T, p);
+      if (!U) { avma = ltop; return NULL; }
       Q = FpXQX_FpXQ_mul(Q, U, T, p);
       do
       {
-	lP = leading_term(P);
-	P = gsub(P, FpXQX_mul(gmul(lP, gpowgs(x, dg)), Q, T, p));
+	lP = gneg(leading_term(P));
+	P = gadd(P, FpXQX_mul(monomial(lP, dg, vx), Q, T, p));
 	P = FpXQX_red(P, T, p);
 	dg = lgef(P)-lgef(Q);
-      }while(dg>=0);
+      } while (dg >= 0);
+      if (!signe(P)) break;
+
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
-    	GEN *bptr[2];
-	bptr[0]=&P; bptr[1]=&Q;
-	if (DEBUGLEVEL>1)
-	  err(warnmem,"FpXQX_safegcd");
+    	GEN *bptr[2]; bptr[0]=&P; bptr[1]=&Q;
+	if (DEBUGLEVEL>1) err(warnmem,"FpXQX_safegcd");
 	gerepilemany(btop, bptr, 2);
       }
-    } while(signe(P));
+      swap(P, Q); dg = -dg;
+    }
   }
   return gerepileupto(ltop, Q);
 }
@@ -2735,9 +2749,13 @@ ZY_ZXY_ResBound(GEN A, GEN B)
   avma = av; return 1 + (gexpo(b)>>1);
 }
 
+/* 0, 1, -1, 2, -2, ... */
+#define next_lambda(a) (a>0 ? -a : 1-a)
+
 /* If lambda = NULL, assume A in Z[Y], B in Q[Y][X], return Res_Y(A,B)
- * Otherwise, find a small lambda such that R(X) = Res_Y(A, B(X - lambda Y))
- * is squarefree, set *lambda and return R */
+ * Otherwise, find a small lambda (start from *lambda, use the sequence above)
+ * such that R(X) = Res_Y(A, B(X + lambda Y)) is squarefree, reset *lambda to
+ * the chosen value and return R */
 GEN
 ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
 {
@@ -2763,10 +2781,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
 
   av2 = avma; lim = stack_lim(av,2);
   if (lambda)
-  {
-    *lambda = -1;
-    B = poleval(B0, gadd(polx[MAXVARN], gmulsg(-*lambda, polx[vY])));
-  }
+    B = poleval(B0, gadd(polx[MAXVARN], gmulsg(*lambda, polx[vY])));
   else
     B = poleval(B0, polx[MAXVARN]);
   lb = lgef(B); b = u_allocpol(deg(B), 0);
@@ -2802,8 +2817,8 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
       }
       else
       {
-        (*lambda)++; H = NULL; avma = av2;
-        B = poleval(B0, gadd(polx[MAXVARN], gmulsg(-*lambda, polx[vY])));
+        *lambda = next_lambda(*lambda); H = NULL; avma = av2;
+        B = poleval(B0, gadd(polx[MAXVARN], gmulsg(*lambda, polx[vY])));
         lb = lgef(B); b = u_allocpol(deg(B), 0);
         bound = ZY_ZXY_ResBound(A,B);
         if (DEBUGLEVEL>4)
@@ -2833,7 +2848,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
 }
 
 /* If lambda = NULL, return caract(Mod(B, A)), A,B in Z[X].
- * Otherwise find a small lambda such that caract (Mod(B - lambda Y, A)) is
+ * Otherwise find a small lambda such that caract (Mod(B + lambda Y, A)) is
  * squarefree */
 GEN
 ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
