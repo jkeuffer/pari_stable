@@ -53,6 +53,7 @@ static const int randshift = BITS_IN_RANDOM-1 - RANDOM_BITS;
 static long KC,KCZ,KCZ2,MAXRELSUP;
 static long primfact[500],expoprimfact[500];
 static GEN *idealbase, vectbase, FB, numFB, powsubFB, numideal;
+static GEN first_non_zero;
 
 /* FB[i]     i-th rational prime used in factor base
  * numFB[i]  index k such that FB[k]=i (0 if i is not prime)
@@ -1376,10 +1377,10 @@ set_log_embed(GEN col, GEN x, long R1, long prec)
 }
 
 static void
-set_fact(GEN c)
+set_fact(GEN c, long cglob)
 {
   long i;
-  c[0] = primfact[1]; /* for already_found_relation */
+  first_non_zero[cglob] = primfact[1]; /* for already_found_relation */
   for (i=1; i<=primfact[0]; i++) c[primfact[i]] = expoprimfact[i];
 }
 
@@ -1507,7 +1508,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 	}
       }
       cglob++; col = mat[cglob];
-      set_fact(col);
+      set_fact(col, cglob);
       /* make sure we get maximal rank first, then allow all relations */
       if (cglob > 1 && cglob <= KC && ! addcolumntomatrix(col,invp,L))
       { /* Q-dependent from previous ones: forget it */
@@ -1631,7 +1632,7 @@ dbg_outrel(long phase,long cglob, GEN vperm,GEN *mat,GEN maarch)
 static long
 already_found_relation(GEN *mat,long s)
 {
-  GEN coll, cols = mat[s];
+  GEN cols = mat[s], nz = first_non_zero;
   long l,bs;
 
   bs = 1; while (bs<=KC && !cols[bs]) bs++;
@@ -1639,9 +1640,9 @@ already_found_relation(GEN *mat,long s)
 
   for (l=s-1; l; l--)
   {
-    coll = mat[l];
-    if (bs == coll[0]) /* = index of first non zero elt in coll */
+    if (bs == nz[s]) /* = index of first non zero elt in coll */
     {
+      GEN coll = mat[l];
       long b = bs;
       do b++; while (b<=KC && cols[b] == coll[b]);
       if (b > KC) return l;
@@ -1720,7 +1721,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,
       }
       /* can factor ideal, record relation */
       cglob++; col = mat[cglob];
-      set_fact(col); col[jideal]--;
+      set_fact(col, cglob); col[jideal]--;
       for (i=1; i<lgsub; i++) col[subFB[i]] -= ex[i];
       if (already_found_relation(mat, cglob))
       { /* Already known: forget it */
@@ -2887,6 +2888,7 @@ START:
                RELSUP,ss,KCZ,KC,KCCO);
   matmax = 10*KCCO + MAXRELSUP; /* make room for lots of relations */
   mat = (GEN*)gpmalloc(sizeof(GEN)*(matmax + 1));
+  first_non_zero = cgetg(matmax+1, t_VECSMALL);
   setlg(mat, KCCO+1);
   C = cgetg(KCCO+1,t_MAT);
   /* trivial relations (p) = prod P^e */
@@ -2900,7 +2902,7 @@ START:
       C[cglob] = (long)z; /* 0 */
       mat[cglob] = p1 = col_0(KC);
       k = numideal[FB[i]];
-      p1[0] = k+1; /* for already_found_relation */
+      first_non_zero[cglob] = k+1; /* for already_found_relation */
       p1 += k;
       for (j=lg(P)-1; j; j--) p1[j] = itos(gmael(P,j,3));
     }
