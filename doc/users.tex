@@ -67,7 +67,7 @@
 
 \def\makefootline{\baselineskip=24pt\fullline{\the\footline}}
 
-\output={\if L\lr   %pique dans le TeXbook, p257
+\output={\if L\lr   %cf. The TeXbook, p257
     \global\setbox\leftcolumn=\columnbox\global\let\lr=R
     \else\doubleformat\global\let\lr=L\fi
     \ifnum\outputpenalty>-20000\else\dosupereject\fi}
@@ -94,6 +94,13 @@
 \newskip\dfillskip \dfillskip=.5em plus .98\hsize
 \def\dotfill{\leaders\copy\dbox\hskip\dfillskip\relax}
 
+\def\li#1{\hbox to\hsize{#1\hfill}}
+\li{\var{SomeWord} refers to PARI-GP concepts.}
+
+\li{\kbd{SomeWord} is a PARI-GP keyword.}
+
+\li{SomeWord is a generic index entry.}
+
 %more efficient to parse the glue specs once and keep them in registers
 %for later use.  These govern index lines with too many page numbers to
 %fit in one line
@@ -102,9 +109,14 @@
 \newskip\interskipa \interskipa=-.4\hsize plus -1.5\hsize minus .11em
 \newskip\interskipb \interskipb= .4\hsize plus  1.5\hsize
 
-%cf. The TeXBook, App. D, p393 [GN]:
+%cf. The TeXbook, p393:
 \def\interpage{,\penalty100\kern0.33em%normal space
   \hskip\interskipa\vadjust{}\penalty10000 \hskip\interskipb\relax}
+
+\def\newword{%
+  \relax\endgraf{\csname\thefont\endcsname\theword}\dotfill\thepage%
+  \let\theoldfont\thefont%
+  \let\theoldword\theword}
 
 \loop
   \read\std to\theline
@@ -118,14 +130,10 @@
   \fi
   \let\theoldletter\theletter
   \ifx\theword\theoldword
-    \ifx\thepage\theoldpage
-    \else
-      \interpage\thepage
-    \fi
-  \else
-    \relax\endgraf{\csname\thefont\endcsname\theword}\dotfill\thepage
-    \let\theoldword=\theword
-  \fi
+    \ifx\thefont\theoldfont
+      \ifx\thepage\theoldpage \else \interpage\thepage \fi
+    \else \newword\fi
+  \else \newword\fi
   \let\theoldpage=\thepage
 \repeat
 \end

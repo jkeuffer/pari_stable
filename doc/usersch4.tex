@@ -1848,7 +1848,7 @@ give you the zero with exponent equal to $-\kbd{BITS\_IN\_LONG}$ times the
 number of longwords in the mantissa, i.e.~$-\kbd{bit\_accuracy(lg(s))}$.
 Instead of the above idiom, you can also use the function
 \fun{GEN}{realzero}{long prec}, which simply returns a real zero to
-accuracy $-\idx{bit_accuracy}\var{prec}$.
+accuracy $-\tet{bit_accuracy}(\var{prec})$.
 
 The sixth remark here is about how to determine the approximate size
 of a real number. The fastest way to do this is to look at its binary

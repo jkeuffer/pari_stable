@@ -100,4 +100,6 @@ ell             @Functions related to elliptic curves
 nf              @Functions related to general number fields
 bnf             @Functions related to general number fields
 bnr             @Functions related to general number fields
+ideal           @Functions related to general number fields
+idele           @Functions related to general number fields
 component       @components of a PARI object

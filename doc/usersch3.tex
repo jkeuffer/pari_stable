@@ -225,12 +225,14 @@ Also note that the \kbd{gcmp} and \kbd{gegal} functions return a C-integer,
 and \var{not} a \kbd{GEN} like \kbd{gle} etc.
 
 \smallskip
-GP accepts the following synonyms for some of the above functions: since
-there is no bitwise \kbd{and} or bitwise \kbd{or}, \kbd{|} and \kbd{\&} are
-accepted as\sidx{bitwise and}\sidx{bitwise or} synonyms of \kbd{||} and
-\kbd{\&\&} respectively. Also, \kbd{<>} is accepted as a synonym for
-\kbd{!=}. On the other hand, \kbd{=} is definitely \var{not} a synonym for
-\kbd{==} since it is the assignment statement.
+GP accepts the following synonyms for some of the above functions: since we
+thought it might easily lead to confusion, we don't use the customary C
+operators for bitwise \kbd{and} or bitwise \kbd{or} (use \tet{bitand} or
+\tet{bitor}), hence \kbd{|} and \kbd{\&} are accepted as\sidx{bitwise
+and}\sidx{bitwise or} synonyms of \kbd{||} and \kbd{\&\&} respectively.
+Also, \kbd{<>} is accepted as a synonym for \kbd{!=}. On the other hand,
+\kbd{=} is definitely \var{not} a synonym for \kbd{==} since it is the
+assignment statement.
 
 \subsecidx{lex}$(x,y)$: gives the result of a lexicographic comparison
 between $x$ and $y$. This is to be interpreted in quite a wide sense. For
@@ -397,12 +399,53 @@ vector/matrix.
 
 \syn{binaire}{x}.
 
+\subsecidx{bitand}$(x,y)$: bitwise \tet{and}\sidx{bitwise and} of two
+integers $x$ and $y$, that is the integer
+$$\sum (x_i~\kbd{and}~y_i) 2^i$$
+
+Negative numbers behave as if modulo a huge power of $2$.
+
+\syn{gbitand}{x,y}.
+
+\subsecidx{bitneg}$(x,\{n=-1\})$: \idx{bitwise negation} of an integer $x$,
+truncated to $n$ bits, that is the integer 
+$$\sum_{i=0}^n \kbd{not}(x_i) 2^i$$
+The special case $n=-1$ means no truncation: an infinite sequence of
+leading $1$ is then represented as a negative number.
+
+Negative numbers behave as if modulo a huge power of $2$.
+
+\syn{gbitneg}{x}.
+
+\subsecidx{bitnegimply}$(x,y)$: bitwise negated imply of two integers $x$
+and $y$ (or \kbd{not} $(x \Rightarrow y)$), that is the integer
+$$\sum (x_i~\kbd{and not}(y_i)) 2^i$$
+
+Negative numbers behave as if modulo a huge power of $2$.
+
+\syn{gbitnegimply}{x,y}.
+
+\subsecidx{bitor}$(x,y)$: bitwise (inclusive) \tet{or}\sidx{bitwise
+inclusive or} of two integers $x$ and $y$, that is the integer
+$$\sum (x_i~\kbd{or}~y_i) 2^i$$
+
+Negative numbers behave as if modulo a huge power of $2$.
+
+\syn{gbitor}{x,y}.
+
 \subsecidx{bittest}$(x,n)$: outputs the $n^{\text{th}}$ bit of $|x|$ starting
 from the right (i.e.~the coefficient of $2^n$ in the binary expansion of $x$).
 The result is 0 or 1. To extract several bits at once as a vector, pass a
 vector for $n$.
 
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
+
+\subsecidx{bitxor}$(x,y)$: bitwise (exclusive) \tet{or}\sidx{bitwise
+exclusive or} of two integers $x$ and $y$, that is the integer
+$$\sum (x_i~\kbd{xor}~y_i) 2^i$$
+Negative numbers behave as if modulo a huge power of $2$.
+
+\syn{gbitxor}{x,y}.
 
 \subsecidx{ceil}$(x)$: ceiling of $x$. When $x$ is in $\R$,
 the result is the smallest integer greater than or equal to $x$. Applied to a
@@ -453,15 +496,15 @@ types, which can be recalled by typing \b{t} under GP.
 
 \syn{compo}{x,n}, where $n$ is a \kbd{long}.
 
-The two other methods are more natural but more restricted. First, the
-function \funs{polcoeff}{x,n} gives the coefficient of degree $n$ of the
-polynomial or power series $x$, with respect to the main variable of $x$ (to
-see the order of the variables or to change it, use the function
-\tet{reorder}, see \secref{se:reorder}). In particular if $n$ is less than
-the valuation of $x$ or in the case of a polynomial, greater than the degree,
-the result is zero (contrary to \kbd{compo} which would send an error
-message). If $x$ is a power series and $n$ is greater than the largest
-significant degree, then an error message is issued.
+The two other methods are more natural but more restricted. The function
+\funs{polcoeff}{x,n} gives the coefficient of degree $n$ of the polynomial
+or power series $x$, with respect to the main variable of $x$ (to check
+variable ordering, or to change it, use the function \tet{reorder}, see
+\secref{se:reorder}). In particular if $n$ is less than the valuation of
+$x$ or in the case of a polynomial, greater than the degree, the result is
+zero (contrary to \kbd{compo} which would send an error message). If $x$ is
+a power series and $n$ is greater than the largest significant degree, then
+an error message is issued.
 
 For greater flexibility, vector or matrix types are also accepted for $x$,
 and the meaning is then identical with that of \kbd{compo}.
@@ -1917,14 +1960,15 @@ elliptic curve corresponding to the vector $E$.
 
 \syn{addell}{E,z1,z2}.
 
-\subsecidx{ellak}$(E,n)$: computes the coefficient $a_n$ of the $L$-function
-of the elliptic curve $E$, i.e.~in principle coefficients of a newform of
-weight 2 assuming \idx{Taniyama-Weil}. $E$ must be a medium or long vector
-of the type given by \kbd{ellinit}.
-For this function to work for every $n$ and not
-just those prime to the conductor, $E$ must be a minimal Weierstrass
-equation. If this is not the case, use the function \kbd{ellglobalred} first
-before using \kbd{ellak}.
+\subsecidx{ellak}$(E,n)$: computes the coefficient $a_n$ of the
+$L$-function of the elliptic curve $E$, i.e.~in principle coefficients of a
+newform of weight 2 assuming \idx{Taniyama-Weil conjecture} (which is now
+known to hold in full generality thanks to the work of \idx{Breuil},
+\idx{Conrad}, \idx{Diamond}, \idx{Taylor} and \idx{Wiles}). $E$ must be a
+medium or long vector of the type given by \kbd{ellinit}. For this function
+to work for every $n$ and not just those prime to the conductor, $E$ must
+be a minimal Weierstrass equation. If this is not the case, use the
+function \kbd{ellglobalred} first before using \kbd{ellak}.
 
 \syn{akell}{E,n}.
 
@@ -3437,10 +3481,11 @@ embeddings.
 
 \syn{zideallog}{\var{nf},x,\var{bid}}.
 
-\subsecidx{idealmin}$(\var{nf},x,\var{vdir})$: computes a minimum of the
-ideal $x$ in the direction \var{vdir} in the number field \var{nf}.
+\subsecidx{idealmin}$(\var{nf},x,\{\var{vdir}\})$: computes a minimum of
+the ideal $x$ in the direction \var{vdir} in the number field \var{nf}.
 
-\syn{minideal}{\var{nf},x,\var{vdir},\var{prec}}.
+\syn{minideal}{\var{nf},x,\var{vdir},\var{prec}}, where an omitted
+\var{vdir} is coded as \kbd{NULL}.
 
 \subsecidx{idealmul}$(\var{nf},x,y,\{\fl=0\})$: ideal multiplication of the
 ideals $x$ and $y$ in the number field \var{nf}. The result is a generating
@@ -3502,21 +3547,29 @@ one-column matrix.
 
 \syn{principalideal}{\var{nf},x}.
 
-\subsecidx{idealred}$(\var{nf},x,\{\var{vdir}=0\})$: \idx{LLL} reduction of
-the ideal $x$ in the number field \var{nf}, along the direction \var{vdir}.
-Here \var{vdir} must be either an $r1+r2$-component vector ($r1$ and $r2$
-number of real and complex places of \var{nf} as usual), or the PARI zero,
-in which case \var{vdir} is assumed to be equal to the vector having only
-components equal to 1. The notion of reduction along a direction is
-technical and cannot be explained here. Note that this is \var{not} the
-same as the LLL reduction of the lattice $x$ since ideal operations are
-involved. The result is the \idx{Hermite normal form} of the LLL-reduced
-ideal, which is usually, but not always, a reduced ideal. $x$ may also be a
-2-component vector, the first being as above, and the second containing a
-matrix of Archimedean information. In that case, this matrix is suitably
-updated.
+\subsecidx{idealred}$(\var{nf},I,\{\var{vdir}=0\})$: \idx{LLL} reduction of
+the ideal $I$ in the number field \var{nf}, along the direction \var{vdir}.
+If \var{vdir} is present, it must be an $r1+r2$-component vector ($r1$ and
+$r2$ number of real and complex places of \var{nf} as usual).
 
-\syn{ideallllred}{\var{nf},x,\var{vdir},\var{prec}}.
+This function finds a ``small'' $a$ in $I$ (it is an LLL pseudo-minimum
+along direction \var{vdir}). The result is the \idx{Hermite normal form} of
+the LLL-reduced ideal $r I/a$, where $r$ is a rational number such that the
+resulting ideal is integral and primitive. This is often, but not always, a
+reduced ideal in the sense of \idx{Buchmann}. If $I$ is an idele, the
+logarithmic embeddings of $a$ are subtracted to the Archimedean part.
+
+More often than not, a \idx{principal ideal} will yield the identity
+matrix. This is a quick and dirty way to check if ideals are principal
+without computing a full \kbd{bnf} structure, but it's not a necessary
+condition; hence, a non-trivial result doesn't prove the ideal is
+non-trivial in the class group.
+
+Note that this is \var{not} the same as the LLL reduction of the lattice
+$I$ since ideal operations are involved.
+
+\syn{ideallllred}{\var{nf},x,\var{vdir},\var{prec}}, where an omitted
+\var{vdir} is coded as \kbd{NULL}.
 
 \subsecidx{idealstar}$(\var{nf},I,\{\fl=1\})$: \var{nf} being a number
 field, and $I$
@@ -3887,10 +3940,10 @@ preferably monic, irreducible polynomial in $\Z[X]$, initializes a
 \var{number field} structure (\kbd{nf}) associated to the field $K$ defined
 by \var{pol}. As such, it's a technical object passed as the first argument
 to most \kbd{nf}\var{xxx} functions, but it contains some information which
-may be directly useful. Access to this information via
-\var{member functions} is prefered since the specific data organization
-specified below may change in the future. Currently, \kbd{nf} is a row
-vector with 9 components:
+may be directly useful. Access to this information via \var{member
+functions} is prefered since the specific data organization specified below
+may change in the future. Currently, \kbd{nf} is a row vector with 9
+components:
 
 $\var{nf}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
 
@@ -4449,12 +4502,11 @@ relative extension. The main variable of \var{pol} must be of higher priority
 must be in $\var{nf}$.
 
 The result is an 11-component row vector as follows (most of the components
-are technical), the numbering being very close to that of \kbd{nfinit}.
-In the following description, we let $K$ be the base field defined by
-$\var{nf}$,
-$m$ the degree of the base field, $n$ the relative degree, $L$ the large
-field (of relative degree $n$ or absolute degree $nm$), $r_1$ and $r_2$ the
-number of real and complex places of $K$.
+are technical), the numbering being very close to that of \kbd{nfinit}. In
+the following description, we let $K$ be the base field defined by
+$\var{nf}$, $m$ the degree of the base field, $n$ the relative degree, $L$
+the large field (of relative degree $n$ or absolute degree $nm$), $r_1$ and
+$r_2$ the number of real and complex places of $K$.
 
 $\var{rnf}[1]$ contains the relative polynomial \var{pol}.
 
@@ -4690,20 +4742,21 @@ result may be off by up to 5 or 10 decimal digits.
 $\teb{gzetak}(\var{znf},x,\var{prec})$.
 
 \subsecidx{zetakinit}$(x)$: computes a number of initialization data
-concerning the number field defined by the polynomial $x$ so as to be
-able to compute the \idx{Dedekind} zeta and lambda functions (respectively
+concerning the number field defined by the polynomial $x$ so as to be able
+to compute the \idx{Dedekind} zeta and lambda functions (respectively
 $\kbd{zetak}(x)$ and $\kbd{zetak}(x,1)$). This function calls in particular
 the \kbd{bnfinit} program. The result is a 9-component vector $v$ whose
 components are very technical and cannot really be used by the user except
-through the \kbd{zetak} function. The only component which can be used if it
-has not been computed already is $v[1][4]$ which is the result of the
+through the \kbd{zetak} function. The only component which can be used if
+it has not been computed already is $v[1][4]$ which is the result of the
 \kbd{bnfinit} call.
 
-This function is very inefficient and needs to computes millions of
-coefficients of the corresponding Dirichlet series if the precision is big.
-Unless the discriminant is small it will not be able to handle more than 9
-digits of relative precision (e.g~\kbd{zetakinit(x\pow 8 - 2)} needs 440MB of
-memory at default precision).
+This function is very inefficient and should be rewritten. It needs to
+computes millions of coefficients of the corresponding Dirichlet series if
+the precision is big. Unless the discriminant is small it will not be able
+to handle more than 9 digits of relative precision
+(e.g~\kbd{zetakinit(x\pow 8 - 2)} needs 440MB of memory at default
+precision).
 
 \syn{initzeta}{x}.
 
@@ -6172,8 +6225,11 @@ line from $(x1,y1)$ to $(x2,y2)$ where $(x1,y1)$ is not necessarily the
 position of the virtual cursor, use \kbd{plotmove(w,x1,y1)} before using this
 function.
 
-\subsecidx{plotlinetype}$(w,\var{type})$: this is intended for the
-\kbd{gnuplot} interface and is currently not significant.
+\subsecidx{plotlinetype}$(w,\var{type})$: change the type of lines
+subsequently plotted in rectwindow $w$. \var{type} $-2$ corresponds to
+frames, $-1$ to axes, larger values may correspond to something else. $w =
+-1$ changes highlevel plotting. This is only taken into account by the
+\kbd{gnuplot} interface.
 
 \subsecidx{plotmove}$(w,x,y)$: move the virtual cursor of the rectwindow $w$
 to position $(x,y)$.
@@ -6193,8 +6249,11 @@ the rectwindow $w$ (if it is actually inside $w$), and in any case
 points in rectwindow $w$. If $w = -1$, change it in all rectwindows.
 This only works in the \kbd{gnuplot} interface.
 
-\subsecidx{plotpointtype}$(w,\var{type})$: this is intended for the
-\kbd{gnuplot} interface and is currently not significant.
+\subsecidx{plotpointtype}$(w,\var{type})$:  change the type of
+points subsequently plotted in rectwindow $w$. $\var{type} = -1$
+corresponds to a dot, larger values may correspond to something else. $w = -1$
+changes highlevel plotting. This is only taken into account by the
+\kbd{gnuplot} interface.
 
 \subsecidx{plotrbox}$(w,dx,dy)$: draw in the rectwindow $w$ the outline of
 the rectangle which is such that the points $(x1,y1)$ and $(x1+dx,y1+dy)$ are
@@ -6238,11 +6297,23 @@ downwards since the origin is at the upper left. The function \kbd{plotscale}
 allows to change all these defaults and should be used whenever functions are
 graphed.
 
-\subsecidx{plotstring}$(w,x)$: draw on the rectwindow $w$ the String $x$ (see
-Section 2.4), at the current position of the cursor.
+\subsecidx{plotstring}$(w,x,\{\fl=0\})$: draw on the rectwindow $w$ the
+String $x$ (see \secref{se:strings}), at the current position of the cursor.
 
-\subsecidx{plotterm}$(\var{type})$: this is intended for the \kbd{gnuplot}
-interface and is currently not significant.
+\fl\ is used for justification: bits 1 and 2 regulate horizontal alignment:
+left if 0, right if 2, center if 1. Bits 4 and 8 regulate vertical
+alignment: bottom if 0, top if 8, v-center if 4. Can insert additional
+small gap between point and string: horizontal if bit 16 is set, vertical
+if bit 32 is set (see the tutorial for an example).
+
+\subsecidx{plotterm}$(\var{term})$: sets terminal where high resolution
+plots go (this is currently only taken into account by the \kbd{gnuplot}
+graphical driver). Using the \kbd{gnuplot} driver, possible terminals are
+the same as in gnuplot. If \var{term} is "?", lists possible values. 
+
+Terminal options can be appended to the terminal name and space; terminal
+size can be put immediately after the name, as in \kbd{"gif=300,200"}.
+Positive return value means success.
 
 \subsecidx{psdraw}$(\var{list})$: same as \kbd{plotdraw}, except that the
 output is a PostScript program appended to the \kbd{psfile}.
@@ -6496,9 +6567,10 @@ p = 3   \\@com fix characteristic
 forprime(p = 2, N, ...)
 f(p) = ...
 @eprog
-since within the loop or within the function's body, the true global value of
-\kbd{p} will be hidden. If the statement \kbd{global(p = 3)} appears at the
-beginning of the script, then both expressions will trigger syntax errors.
+since within the loop or within the function's body (even worse: in the
+subroutines called in that scope), the true global value of \kbd{p} will be
+hidden. If the statement \kbd{global(p = 3)} appears at the beginning of
+the script, then both expressions will trigger syntax errors.
 
 Calling \kbd{global} without arguments prints the list of global variables in
 use. In particular, \kbd{eval(global)} will output the values of all local
@@ -6521,7 +6593,16 @@ the name \var{gpname} in this GP session, with argument code \var{code} (see
 omitted, uses \kbd{libpari.so}. If \var{gpname} is omitted, uses
 \var{name}.\label{se:install}
 
-This function is useful for adding custom functions to the GP interpreter.
+This function is useful for adding custom functions to the GP interpreter,
+or picking useful functions from unrelated libraries. For instance, it
+makes the function \tet{system} obsolete:
+
+\bprog
+? install(system, vs, sys, "libc.so")
+? sys("ls gp*")
+gp.c            gp.h            gp_rl.c
+@eprog
+
 But it also gives you access to all (non static) functions defined in the
 PARI library. For instance, the function \kbd{GEN addii(GEN x, GEN y)} adds
 two PARI integers, and is not directly accessible under GP (it's eventually
@@ -6536,12 +6617,9 @@ called by the \kbd{+} operator of course):
 \misctitle{Caution:} This function may not work on all systems, especially
 when GP has been compiled statically. In that case, the first use of an
 installed function will provoke a Segmentation Fault, i.e.~a major internal
-blunder (this should never happen with a dynamically linked executable). This
-\var{used} to be the fate of statically linked gp on \kbd{Linux} and
-\kbd{OSF1} up to and including version 2.0.3.
-
+blunder (this should never happen with a dynamically linked executable).
 Hence, if you intend to use this function, please check first on some
-harmless example such as the one above that it works properly on your
+harmless example such as the ones above that it works properly on your
 machine.
 
 \subsubsecidx{kill}$(x)$:\label{se:kill} kills the present value of the
