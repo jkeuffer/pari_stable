@@ -1065,7 +1065,7 @@ static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
   const long N0 = 2; /* # of traces added at each step */
-  double BitPerFactor = 1.; /* nb bits in p^(a-b) / modular factor */
+  double BitPerFactor = 0.5; /* nb bits in p^(a-b) / modular factor */
   long i,j,tmax,n0,C, dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
   double b0 = log((double)dP*2) / logp, logBr;
@@ -1176,7 +1176,7 @@ AGAIN:
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
     }
-    if (DEBUGLEVEL>2) msgTIMER(&ti2, "this trace");
+    if (DEBUGLEVEL>2) msgTIMER(&ti2, "for this trace");
 
     CM_Lp = FpM_image(CM_L, stoi(27449)); /* inexpensive test */
     if (lg(CM_Lp) != lg(CM_L))
