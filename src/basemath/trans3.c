@@ -1934,29 +1934,29 @@ eta(GEN x, long prec)
 GEN
 trueeta(GEN x, long prec)
 {
-  long tx=typ(x), l;
-  pari_sp av=avma, tetpil;
-  GEN p1,p2,q,q24,n,z,m,unapprox;
+  long tx = typ(x), l;
+  pari_sp av = avma;
+  GEN q, q24, n, z, m, run;
 
   if (!is_scalar_t(tx)) err(typeer,"trueeta");
   if (tx != t_COMPLEX || gsigne((GEN)x[2])<=0)
     err(talker,"argument must belong to upper half-plane");
-  l=precision(x); if (l) prec=l;
-  p2 = PiI2(prec);
-  z=gexp(gdivgs(p2,24),prec); /* exp(2*I*Pi/24) */
-  unapprox=gsub(gun,gpowgs(stoi(10),-8));
-  m=gun;
+  l = precision(x); if (l) prec=l;
+  z = exp_Ir(divrs(mppi(prec),12)); /* exp(2*I*Pi/24) */
+  run = gsub(realun(DEFAULTPREC), gpowgs(stoi(10),-8));
+  m = gun;
   for(;;)
   {
-    n=ground(greal(x));
-    if (signe(n)) {x=gsub(x,n); m=gmul(m,powgi(z,n));}
-    if (gcmp(gnorm(x), unapprox)>=0) break;
-    m=gmul(m,gsqrt(gdiv(gi,x),prec)); x=gdivsg(-1,x);
+    n = ground(greal(x));
+    if (signe(n)) { x = gsub(x,n); m = gmul(m, powgi(z,n)); }
+    if (gcmp(gnorm(x), run) > 0) break;
+    x = gdivsg(-1,x);
+    m = gmul(m, gsqrt(gmul(gi,gneg(x)), prec));
   }
-  q=gmul(p2,x);
-  q24=gexp(gdivgs(q,24),prec); q=gpowgs(q24,24);
-  p1=gmul(m,q24); q = inteta(q); tetpil=avma;
-  return gerepile(av,tetpil,gmul(p1,q));
+  q = gmul(PiI2(prec), x);
+  q24 = gexp(gdivgs(q, 24),prec);
+  q = gpowgs(q24, 24);
+  return gerepileupto(av, gmul(gmul(m,q24), inteta(q)));
 }
 
 GEN
@@ -1969,23 +1969,23 @@ GEN
 jell(GEN x, long prec)
 {
   long tx = typ(x);
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma;
   GEN p1;
 
   if (!is_scalar_t(tx) || tx == t_PADIC)
   {
-    GEN p2,q = qq(x,prec);
-    p1=gdiv(inteta(gsqr(q)), inteta(q));
-    p1=gmul2n(gsqr(p1),1);
-    p1=gmul(q,gpowgs(p1,12));
-    p2=gaddsg(768,gadd(gsqr(p1),gdivsg(4096,p1)));
-    p1=gmulsg(48,p1); tetpil=avma;
-    return gerepile(av,tetpil,gadd(p2,p1));
+    GEN p2, q = qq(x,prec);
+    p1 = gdiv(inteta(gsqr(q)), inteta(q));
+    p1 = gmul2n(gsqr(p1),1);
+    p1 = gmul(q,gpowgs(p1,12));
+    p2 = gaddsg(768,gadd(gsqr(p1),gdivsg(4096,p1)));
+    p1 = gmulsg(48,p1); 
+    return gerepileupto(av, gadd(p2,p1));
   }
-  p1=gdiv(trueeta(gmul2n(x,1),prec),trueeta(x,prec));
-  p1=gsqr(gsqr(gsqr(p1)));
-  p1=gadd(gmul2n(gsqr(p1),8), ginv(p1)); tetpil=avma;
-  return gerepile(av,tetpil,gpowgs(p1,3));
+  p1 = gdiv(trueeta(gmul2n(x,1),prec), trueeta(x,prec));
+  p1 = gsqr(gsqr(gsqr(p1)));
+  p1 = gadd(gmul2n(gsqr(p1),8), ginv(p1));
+  return gerepileupto(av, gpowgs(p1,3));
 }
 
 GEN
