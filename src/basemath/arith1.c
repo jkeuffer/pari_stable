@@ -2093,7 +2093,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
     }
     case t_COMPLEX: case t_POL: case t_SER: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y=cgetg(lx,tx);
+      lx = lg(x); y = cgetg(lx,tx);
       for (i=1; i<lontyp[tx]; i++) y[i]=x[i];
       for (   ; i<lx; i++)
       {
