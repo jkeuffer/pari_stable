@@ -7,4 +7,5 @@ gprc.dft : a sample gprc (generic)
 gprc.dos : a sample gprc for DOS (move it to C:\_GPRC, or to the file $GPRC)
 new.dic  : give new name/syntax for old functions
 pari.xpm : a nice icon drawn by Gerhard Niklasch
+tex2mail : an alternate prettyprinter ( for default(output, 2) or \o2 )
 xgp      : a simple script starting gp in a beefed-up xterm.
