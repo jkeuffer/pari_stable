@@ -1,6 +1,13 @@
-root=/home/cvs/pari/
-cvs status 2>/dev/null | grep Repository | grep -v cvsignore \
-  | sed "s|.*$root\(.*\),v|\1|" | egrep -v "Repository|Attic"
+#root=/home/cvs/pari/
+#cvs status 2>/dev/null | grep Repository | grep -v cvsignore \
+#  | sed "s|.*$root\(.*\),v|\1|" | egrep -v "Repository|Attic"
+for d in `find . -name Entries`; do
+  D=`echo $d | sed -e 's,/*CVS/Entries,,'`
+  for f in `grep -v '^D' $d | sed -e 's,^/\([^/]*\)/.*,\1,' | grep -v cvsignore`
+  do
+    echo $D/$f
+  done
+done
 echo Odos/paricfg.h
 echo src/language/init.h
 echo src/language/members.h
