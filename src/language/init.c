@@ -885,7 +885,7 @@ err(long numerr, ...)
   { /* all non-syntax errors (noer), or numerr individually trapped */
     cell *a = (cell*) err_catch_stack[trap]->value;
     global_err_data = a->data;
-    if (a->env) longjmp((jmp_buf)a->env, numerr);
+    if (a->env) longjmp(a->env, numerr);
   }
   else
   global_err_data = NULL;
