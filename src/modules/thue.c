@@ -1065,7 +1065,7 @@ bnfisintnorm(GEN bnf, GEN a)
 	if (x[j] != 1) id2 = idealpow(nf,id2, stoi(x[j]));
 	id = idealmul(nf,id,id2);
       }
-    x = (GEN) isprincipalgen(bnf,id)[2];
+    x = (GEN) isprincipalgenforce(bnf,id)[2];
     x = gmul((GEN)nf[7],x); /* x possible solution */
     if (signe(gnorm(gmodulcp(x,(GEN)nf[1]))) != sa)
     {
