@@ -1429,13 +1429,13 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
   nf=(GEN)bnf[7];
   polrel = fix_relative_pol(nf,polrel);
   if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
-  reldeg=lgef(polrel)-3; detgroup=(GEN)raycl[1];
+  reldeg=lgef(polrel)-3;
   /* reldeg-th powers are in norm group */
   greldeg = stoi(reldeg);
   group = diagonal(gmod((GEN)raycl[2], greldeg));
   for (i=1; i<lg(group); i++)
     if (!signe(gcoeff(group,i,i))) coeff(group,i,i) = (long)greldeg;
-
+  detgroup = dethnf_i(group);
   k = cmpis(detgroup,reldeg);
   if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!rnf && !k) return group;
