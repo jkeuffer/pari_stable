@@ -17,27 +17,41 @@ tex2mail \- TeX to ascii math prettyprinter
 
 .SH DESCRIPTION
 
-Convert TeX or LaTeX math formulae to ascii art.
+Filter converting TeX or LaTeX math formulae to ASCII art. tex2mail is
+used by the PARI-GP calculator for output method
+.I external prettyprint .
+Under gp, prettyprint mode can be set by
+.B default(output, 3)
+(or \\o3). By default, this switches gp main output to TeX format, filtered
+by 
+
+.RS
+tex2mail \-TeX \-noindent \-ragged \-by_par
+.RE
+
+Flags passed to tex2mail can be modified via the 
+.IR prettyprinter 
+default in gp.
 
 .SH OPTIONS
 The following command line options are available:
 .TP
 .BI \-linelength=length
-Cut at this line.
+Wrap text at this column.
 .TP
 .BI \-maxdef=number
-definition loops: croak if many substitutions.
+definition loops: croak if more than maxdef substitutions in a given
+paragraph.
 .TP
 .BI \-debug=debuglevel
-output debugging messages, I guess.
+output debugging messages.
 .TP
 .BI \-by_par
-Expect each paragraph to be terminated
-by *exactly* 2 "\\n", and do not print
-an extra "\\n" between paragraphs.
+Expect each paragraph to be terminated by *exactly* 2 "\\n", and do not
+print an extra "\\n" between paragraphs.
 .TP
 .BI \-TeX
-Assume it is not LaTeX.
+Assume input formulae are in plain TeX format.
 .TP
 .BI \-ragged
 leave right ragged.
@@ -56,15 +70,15 @@ Ilya Zakharevitch
 
 .SH COPYING
 
-This program is  free  software;  you  can  redistribute  it
-and/or  modify  it under the terms of the GNU General Public
-License as published by the Free Software Foundation.
+This program is  free  software;  you  can  redistribute  it and/or  modify
+it under the terms of the GNU General Public License as published by the
+Free Software Foundation.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A  PARTICULAR  PURPOSE.  See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A  PARTICULAR  PURPOSE.  See the GNU General Public License for
+more details.
 
-You should have received a copy of the  GNU  General  Public
-License  along  with this program; if not, write to the Free
-Software Foundation,  Inc.,  675  Mass  Ave,  Cambridge,  MA
-02139, USA.
+You should have received a copy of the  GNU  General  Public License  along
+with this program; if not, write to the Free Software Foundation,  Inc.,
+675  Mass  Ave,  Cambridge,  MA 02139, USA.
