@@ -2301,9 +2301,12 @@ where $Q$ is a binary quadratic form and $p$ a prime number.
 Return $[x,y]$ as a two-components vector, or zero if there is no solution.
 Note that this functions return only one solution and not all the solutions.
 
-The algorithm used run in probabilistic polynomial time if the form is
-imaginary, and in exponential time (in the discriminant only) if the form is
-real.
+Let $D = \disc Q$. The algorithm used runs in probabilistic polynomial time
+in $p$ (through the computation of a square root of $D$ modulo $p$); it is
+polynomial time in $D$ if $Q$ is imaginary, but exponential time if $Q$ is
+real (through the computation of a full cycle of reduced forms). In the
+latter case, note that \tet{bnfisprincipal} provides a solution in heuristic
+subexponential time in $D$ assuming the GRH.
 
 \syn{qfbsolve}{Q,n}.
 
