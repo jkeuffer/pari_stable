@@ -505,8 +505,6 @@ subgroup_engine(subgp_iter *T)
       (void)pvaluation(T->bound,p,&B);
       B = _vec(B);
     }
-    if (is_bigint(cyc[1]))
-      err(impl,"subgrouplist for large cyclic factors");
     T->expoI = (GEN)cycI[1];
     T->subq = subgrouplist_i(cycI, B, T->expoI, NULL);
 
