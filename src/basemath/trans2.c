@@ -720,31 +720,30 @@ mpach(GEN x)
 GEN
 gach(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN y,p1;
   long v;
 
   switch(typ(x))
   {
     case t_REAL:
-      if (gcmpgs(x,1)>=0) return mpach(x);
+      if (gcmpgs(x,1) >= 0) return mpach(x);
 
-      y=cgetg(3,t_COMPLEX);
-      if (gcmpgs(x,-1)>=0)
+      y = cgetg(3,t_COMPLEX);
+      if (gcmpgs(x,-1) >= 0)
       {
-	y[2]=lmpacos(x); y[1]=zero;
-	return y;
+        y[1] = zero;
+	y[2] = lmpacos(x); return y;
       }
-      av=avma; p1=mpach(gneg_i(x)); tetpil=avma;
-      y[1]=lpile(av,tetpil,gneg(p1));
-      y[2]=lmppi(lg(x));
-      return y;
+      av = avma;
+      y[1] = lpileupto(av, gneg(mpach(gneg_i(x))));
+      y[2] = lmppi(lg(x)); return y;
 
     case t_COMPLEX:
-      av = avma; p1=gaddsg(-1,gsqr(x));
-      p1=gadd(x,gsqrt(p1,prec));
-      y=glog(p1,prec);
-      if (signe(y[2])<0) y = gneg(y);
+      av = avma; p1 = gaddsg(-1,gsqr(x));
+      p1 = gadd(x, gsqrt(p1,prec)); /* x + sqrt(x^2-1) */
+      y = glog(p1,prec);
+      if (signe(y[2]) < 0) y = gneg(y);
       return gerepileupto(av, y);
 
     case t_SER:
