@@ -1704,7 +1704,8 @@ gsqr(GEN x)
       {
         z = quicksqr(x+2, lgpol(x));
         if (p) z = FpX(z,p);
-        z = gerepileupto(av, from_Kronecker(z,pol));
+        if (pol) z = from_Kronecker(z,pol);
+        z = gerepileupto(av, z);
       }
       else
       {
