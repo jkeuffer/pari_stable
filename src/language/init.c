@@ -22,7 +22,8 @@ GEN     primetab; /* private primetable */
 byteptr diffptr;
 char    *current_logfile, *current_psfile;
 int     gp_colors[c_LAST];
-int     disable_color = 1, added_newline = 1, under_emacs = 0;
+int     disable_color = 1, added_newline = 1;
+int     under_emacs = 0, under_texmacs = 0;
 
 int     functions_tblsz = 135; /* size of functions_hash          */
 entree  **varentries;

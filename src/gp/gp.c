@@ -44,6 +44,7 @@ int    gp_init_entrees(module *modlist, entree **hash, int force);
 long   gptimer(void);
 void   init80(long n);
 void   init_defaults(int force);
+void   initout(int initerr);
 void   init_graph(void);
 void   init_lim_lines(char *s, long max);
 extern void   install0(char *name, char *code, char *gpname, char *lib);
@@ -136,7 +137,7 @@ gp_preinit(int force)
   strictmatch = simplifyflag = 1;
   tglobal = 0;
   bufstack = NULL;
-  secure = test_mode = under_emacs = chrono = pariecho = 0;
+  secure = test_mode = under_emacs = under_texmacs = chrono = pariecho = 0;
   prettyprinter = prettyprinter_dft;
   prettyprinter_file = NULL;
   fmt.format = 'g'; fmt.field = 0;
@@ -520,7 +521,7 @@ static GEN
 sd_colors(char *v, int flag)
 {
   long c,l;
-  if (*v && !under_emacs)
+  if (*v && !under_emacs && !under_texmacs)
   {
     char *tmp;
     disable_color=1;
@@ -816,7 +817,7 @@ sd_path(char *v, int flag)
 static GEN
 sd_prettyprinter(char *v, int flag)
 {
-  if (*v)
+  if (*v && !under_texmacs)
   {
     char *old = prettyprinter;
     int cancel = (!strcmp(v,"no"));
@@ -1720,7 +1721,7 @@ escape(char *tch)
 static int
 get_preproc_value(char *s)
 {
-  if (!strncmp(s,"EMACS",5)) return under_emacs;
+  if (!strncmp(s,"EMACS",5)) return under_emacs || under_texmacs;
   if (!strncmp(s,"READL",5))
   {
 #ifdef READLINE
@@ -2096,6 +2097,7 @@ static int
 read_line(char *promptbuf, Buffer *b)
 {
   if (infile == stdin /* interactive use */
+     && !under_texmacs
 #if defined(UNIX) || defined(__EMX__)
      && (under_emacs || isatty(fileno(stdin)))
 #endif
@@ -2198,6 +2200,66 @@ check_meta(char *buf)
   return 1;
 }
 
+static void
+texmacs_output(GEN z, long n)
+{
+  char *sz = GENtostr(z);
+  printf("%cverbatim:",DATA_BEGIN);
+  printf("%clatex:", DATA_BEGIN);
+  printf("\\magenta\\%%%ld = \\blue ", n);
+  printf("%s%c", sz,DATA_END); free(sz);
+  printf("%c",DATA_END); fflush(stdout);
+}
+
+static void
+tex2mail_output(GEN z, long n)
+{
+  FILE *o_out = pari_outfile; /* save state */
+  /* history number */
+  if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
+  {
+    char col1[80];
+    strcpy(col1, term_get_color(c_HIST));
+    sprintf(thestring, "\\LITERALnoLENGTH{%s}\\%%%ld = \\LITERALnoLENGTH{%s}",
+            col1, n, term_get_color(c_OUTPUT));
+  }
+  else
+    sprintf(thestring, "\\%%%ld = ", n);
+  pariputs_opt(thestring);
+  /* output */
+  gp_output(z);
+  term_color(c_NONE);
+
+  /* flush and restore */
+  prettyp_wait();
+  prettyp = f_PRETTY;
+  pari_outfile = o_out;
+}
+
+static void
+pretty_output(GEN z, long n)
+{
+  if (under_texmacs)
+    texmacs_output(z,n);
+  else
+    tex2mail_output(z,n);
+}
+
+static void
+normal_output(GEN z, long n)
+{
+  /* history number */
+  term_color(c_HIST);
+  sprintf(thestring, "%%%ld = ", n);
+  pariputs_opt(thestring);
+  /* output */
+  term_color(c_OUTPUT);
+  init_lim_lines(thestring,lim_lines);
+  gp_output(z);
+  init_lim_lines("",lim_lines);
+  term_color(c_NONE); pariputc('\n');
+}
+
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
@@ -2271,54 +2333,17 @@ gp_main_loop(int ismain)
 
     if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }
     else
-    { /* save state */
-      FILE *o_out = pari_outfile;
-      int prettyprint;
+    {
+      int prettyprint = (prettyprinter && prettyp == f_PRETTY);
 
-      /* Emit before the switch to prettyprinter */
-      if (prettyprinter && prettyp == f_PRETTY)
-        term_color(c_OUTPUT);	/* There may be lines before the prompt */
-      prettyprint = (prettyprinter && prettyp == f_PRETTY && prettyp_init());
+      /* Emit first: there may be lines before the prompt */
+      if (prettyprint) term_color(c_OUTPUT);
 
-      /* history number */
-      if (prettyprint)
-      {
-	if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
-	{
-	  char col1[80];	/* Expect that it would not overflow */
-
-	  strcpy(col1,term_get_color(c_HIST));
-	  sprintf(thestring,
-		  "\\LITERALnoLENGTH{%s}\\%%%ld = \\LITERALnoLENGTH{%s}",
-		  col1, tglobal, term_get_color(c_OUTPUT));
-	}
-	else
-	  sprintf(thestring, "\\%%%ld = ", tglobal);
-      }
+      /* output z */
+      if (under_texmacs || (prettyprint && prettyp_init()))
+        pretty_output(z,tglobal);
       else
-      {
-        term_color(c_HIST);
-        sprintf(thestring,   "%%%ld = ", tglobal);
-      }
-      pariputs_opt(thestring);
-
-      /* output */
-      if (!prettyprint)
-      {
-        term_color(c_OUTPUT);
-        init_lim_lines(thestring,lim_lines);
-      }
-      gp_output(z);
-      if (prettyprint)
-      { /* flush and restore */
-        prettyp_wait();
-        prettyp = f_PRETTY;
-        pari_outfile = o_out;
-      }
-      else init_lim_lines("",lim_lines);
-
-      term_color(c_NONE);
-      if (!prettyprint) pariputc('\n');
+        normal_output(z,tglobal);
     }
     pariflush();
   }
@@ -2529,10 +2554,8 @@ read_opt(long argc, char **argv)
       case 'f':
 	initrc = 0; break;
       case '-':
-        if (strcmp(t, "version") == 0) {
-           print_version();
-           exit(0);
-        }
+        if (strcmp(t, "version") == 0) { print_version(); exit(0); }
+        if (strcmp(t, "texmacs") == 0) { under_texmacs = 1; break; }
        /* fall through */
       default:
 	usage(argv[0]);
@@ -2544,7 +2567,8 @@ read_opt(long argc, char **argv)
   testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testint(p, &primelimit);
   testint(s, &parisize);
-  if (under_emacs) disable_color=1;
+  if (under_emacs || under_texmacs) disable_color=1;
+  if (under_texmacs) initout(1);
   pari_outfile=stdout; return pre;
 }
 

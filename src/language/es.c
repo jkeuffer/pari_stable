@@ -185,11 +185,28 @@ normalErrF(void)
 }
 PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
 
+/**                         TEXMACS INTERFACE                      **/
+static void
+texmacs_putc(char c)
+{
+  printf("%cverbatim:%c", DATA_BEGIN,c);
+  printf("%c", DATA_END);
+}
+static void
+texmacs_puts(char *s)
+{
+  printf("%cverbatim:%s", DATA_BEGIN,s);
+  printf("%c", DATA_END); fflush(stdout);
+}
+
+PariOUT texmacsOut = {texmacs_putc, texmacs_puts, normalOutF, NULL};
+
+/**                         GENERIC PRINTING                       **/
 void
 initout(int initerr)
 {
   infile = stdin; pari_outfile = stdout; errfile = stderr;
-  pariOut = &defaultOut;
+  pariOut = under_texmacs? &texmacsOut: &defaultOut;
   if (initerr) pariErr = &defaultErr;
 }
 
@@ -566,9 +583,9 @@ PariOUT pariErr2Str = {errstr_putc, errstr_puts, outstr_flush, NULL};
 char *
 pari_strdup(char *s)
 {
-   int n = strlen(s)+1;
-   char *t = gpmalloc(n);
-   memcpy(t,s,n); return t;
+  int n = strlen(s)+1;
+  char *t = gpmalloc(n);
+  memcpy(t,s,n); return t;
 }
 
 /* returns a malloc-ed string, which should be freed after usage */
@@ -588,88 +605,6 @@ GENtostr0(GEN x, void(*do_out)(GEN))
 
 char *
 GENtostr(GEN x) { return GENtostr0(x,outbrute); }
-/********************************************************************/
-/**                                                                **/
-/**                         TEXMACS INTERFACE                      **/
-/**                                                                **/
-/********************************************************************/
-extern jmp_buf environnement;
-#include "TeXmacs.h"
-static TeXmacs_exports_1 *TeXmacs;
-
-static char *
-pari_evaluate(char *s, char *session, char **fail)
-{
-  static PariOUT *tmp;
-  static outString *tmps;
-  outString newStr;
-  long av = avma;
-  char *t;
-
-  (void)session;
-  tmp = pariErr; pariErr = &pariErr2Str;
-  tmps = ErrStr; ErrStr  = &newStr;
-  ErrStr->len = 0; ErrStr->size=0; ErrStr->string=NULL;
-  if (setjmp(environnement))
-  {
-    if (!ErrStr)
-    {
-      tmps = ErrStr; ErrStr  = &newStr;
-      ErrStr->string=pari_strdup("Leaving Pari");
-      ErrStr->len=strlen(ErrStr->string);
-    }
-    t = NULL;
-  }
-  else
-  {
-    char *s2 = GENtostr(flisexpr(s));
-    t = TeXmacs->translate_prg(s2,"pari/pari_out","pari/tm_out");
-    avma = av; free(s2);
-  }
-  if (ErrStr->string) ErrStr->string[ErrStr->len] = 0;
-  *fail = ErrStr->string;
-  pariErr = tmp; ErrStr = tmps; return t;
-}
-
-static char *
-pari_install(TeXmacs_exports_1 *_TeXmacs, char *options, char **fail)
-{
-  (void)options;
-  TeXmacs = _TeXmacs;
-  pari_init(1000000, 500000);
-  if (setjmp(environnement))
-  {
-    *fail = pari_strdup("Pari Error");
-    return NULL;
-  }
-  else
-  {
-    *fail = NULL;
-    return pari_strdup("Pari Ready");
-  }
-}
-
-static char *
-pari_execute(char *s, char *session, char **fail)
-{
-  (void)s; (void)session;
-  *fail = NULL; return pari_strdup("");
-}
-
-static package_exports_1 PARI_exports_1 = {
-  "TeXmacs communication protocol 1", 
-  PARIVERSION,
-  &pari_install,
-  &pari_evaluate,
-  &pari_execute
-};
-
-package_exports_1 *
-get_pari_package(int i)
-{
-  (void)i;
-  return &PARI_exports_1;
-}
 
 /********************************************************************/
 /**                                                                **/

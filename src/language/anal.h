@@ -89,8 +89,12 @@ enum { NONE, WARN, OLDFUN, OLDALL };
 /* return type for GP functions */
 enum { RET_GEN, RET_INT, RET_VOID };
 
-/* are we under emacs ? (might change output) */
+/* emacs/texmacs interface */
 extern int under_emacs;
+extern int under_texmacs;
+#define DATA_BEGIN  ((char) 2)
+#define DATA_END    ((char) 5)
+#define DATA_ESCAPE ((char) 27)
 
 #ifdef STACK_CHECK
 extern void *PARI_stack_limit;
