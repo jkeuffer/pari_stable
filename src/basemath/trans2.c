@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-extern int absrnz_egal1(GEN x);
-
 /********************************************************************/
 /**                                                                **/
 /**                          ARCTANGENT                            **/
@@ -452,8 +450,10 @@ mpth(GEN x)
 
   if (!signe(x)) return realzero_bit(expo(x));
   l = lg(x); y = cgetr(l); av = avma;
-  p1 = mpexp1(gmul2n(x,1)); /* exp(2x) - 1 */
-  affrr(divrr(p1,addsr(2,p1)), y); avma = av; return y;
+  p1 = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
+  affrr(divrr(p1, addsr(2,p1)), y);
+  if (signe(x) < 0) setsigne(y, -signe(y)); /* tanh is odd */
+  avma = av; return y;
 }
 
 GEN

@@ -51,6 +51,9 @@ This file lists the incompatible changes between Version 2.x and older versions
     semantics [ x:int, v:vec ]. For the time being the type information is
     discarded.
 
+  - log(x, {flag}): optional flag removed. Decide alone whether to use AGM
+    (unless precision is very low).
+
 * Specific to the PARI library:
 ===============================
 Incompatible changes:

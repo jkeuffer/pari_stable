@@ -147,7 +147,7 @@ consteuler(long prec)
   prec++;
 
   l = prec+1; x = (long) (1 + (bit_accuracy(l) >> 2) * LOG2);
-  a = stor(x,l); u=mplog(a); setsigne(u,-1); affrr(u,a);
+  a = stor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
   b = realun(l);
   v = realun(l);
   n = (long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
@@ -1149,38 +1149,16 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 #  define EXMAX 22
 #endif
 
+/* exp(|x|) - 1, assume x != 0 */
 GEN
-mpexp1(GEN x)
+exp1r_abs(GEN x)
 {
-  long l, l1, l2, i, n, m, ex, s, sx = signe(x);
-  pari_sp av, av2;
-  double a,b,alpha,beta, gama = 2.0 /* optimized for SUN3 */;
-                                    /* KB: 3.0 is better for UltraSparc */
-  GEN y,p1,p2,p3,p4,unr;
-
-  if (typ(x)!=t_REAL) err(typeer,"mpexp1");
-  if (!sx) return realzero_bit(expo(x));
-  l=lg(x); y=cgetr(l); av=avma; /* room for result */
-
-  l2 = l+1; ex = expo(x);
+  long l = lg(x), l2 = l+1, ex = expo(x), l1, i, n, m, s;
+  GEN y = cgetr(l), p1, p2, p3, p4, unr;
+  pari_sp av2, av = avma;
+  double a, b, beta, gama = 2.0 /* optimized for SUN3 */;
+                                /* KB: 3.0 is better for UltraSparc */
   if (ex >= EXMAX) err(talker,"exponent too large in exp");
-#if 0
-  alpha = -1 - log((double)(ulong)x[2]) + (31-ex)*LOG2; /* ~ -1 - log(x) */
-  beta = 5. + bit_accuracy(l)*LOG2;
-  a = sqrt(beta/(gama*LOG2));
-  b = (alpha + log(a*gama))/LOG2;
-  if (a >= b)
-  {
-    n = (long)(1+a*gama);
-    m = (long)(1+a-b);
-    l2 += m>>TWOPOTBITS_IN_LONG;
-  }
-  else
-  {
-    n = (long)(1+beta/alpha);
-    m = 0;
-  }
-#else /* rewritten to save one log() */
   beta = 5. + bit_accuracy(l)*LOG2;
   a = sqrt(beta/(gama*LOG2));
   b = 31 - ex + log2(a * (gama/2.718281828459045) / (double)(ulong)x[2]);
@@ -1189,20 +1167,17 @@ mpexp1(GEN x)
     n = (long)(1+a*gama);
     m = (long)(1+a-b);
     l2 += m>>TWOPOTBITS_IN_LONG;
-  }
-  else
-  { /* rare ! */
-    alpha = -1 - log((double)(ulong)x[2]) + (31-ex)*LOG2; /* ~ -1 - log(x) */
-    n = (long)(1+beta/alpha);
+  } else { /* rare ! */
+    b = -1 - log((double)(ulong)x[2]) + (31-ex)*LOG2; /* ~ -1 - log(x) */
+    n = (long)(1+beta/b);
     m = 0;
   }
-#endif
   unr=realun(l2);
-  p2=rcopy(unr); setlg(p2,4);
-  p4=cgetr(l2); affrr(x,p4); setsigne(p4,1);
-  if (m) setexpo(p4,ex-m);
+  p2 =realun(l2); setlg(p2,4);
+  p4 = cgetr(l2); affrr(x, p4); setsigne(p4, 1);
+  if (m) setexpo(p4, ex-m);
 
-  s=0; l1=4; av2 = avma;
+  s = 0; l1 = 4; av2 = avma;
   for (i=n; i>=2; i--)
   {
     setlg(p4,l1); p3 = divrs(p4,i);
@@ -1219,13 +1194,22 @@ mpexp1(GEN x)
     setlg(p2,l2);
     p2 = mulrr(addsr(2,p2),p2);
   }
-  if (sx == -1)
-  {
-    setlg(unr,l2); p2 = addrr(unr,p2);
-    setlg(p2,l2); p2 = ginv(p2);
-    p2 = subrr(p2,unr);
-  }
   affrr(p2,y); avma = av; return y;
+}
+
+GEN
+mpexp1(GEN x)
+{
+  long sx = signe(x);
+  GEN y, z;
+  pari_sp av;
+  if (typ(x) != t_REAL) err(typeer,"mpexp1");
+  if (!sx) return realzero_bit(expo(x));
+  if (sx > 0) return exp1r_abs(x);
+  /* compute exp(x) * (1 - exp(-x)) */
+  av = avma; y = exp1r_abs(x);
+  z = addsr(1, y); setsigne(z, -1);
+  return gerepileupto(av, divrr(y, z));
 }
 
 /********************************************************************/
@@ -1242,14 +1226,13 @@ mpexp(GEN x)
   GEN y;
 
   if (!sx) return addsr(1,x);
-  if (sx<0) 
+  if (sx < 0) 
   {
     long ex = expo(x);
     if (ex >= EXMAX) return realzero_bit(- (long) ((1L<<EXMAX) / LOG2));
-    setsigne(x,1); 
   }
-  av = avma; y = addsr(1, mpexp1(x));
-  if (sx<0) { y = ginv(y); setsigne(x,-1); }
+  av = avma; y = addsr(1, exp1r_abs(x));
+  if (sx < 0) y = ginv(y);
   return gerepileupto(av,y);
 }
 #undef EXMAX
@@ -1358,8 +1341,7 @@ gexp(GEN x, long prec)
 /**                                                                **/
 /********************************************************************/
 
-long LOGAGM_LIMIT  = 60 ;
-
+long LOGAGM_LIMIT  = 40 ;
 
 /* 2 * atanh(1/3) */
 GEN
@@ -1404,8 +1386,9 @@ mplog2(long prec)
   affrr(constlog2(prec), x); return x;
 } 
 
+/*return log(|x|), assuming x != 0 */
 GEN
-mplog(GEN x)
+logr_abs(GEN x)
 {
   pari_sp ltop, av;
   long EX,l1,l2,m,n,k,ex,s;
@@ -1414,20 +1397,13 @@ mplog(GEN x)
   ulong u;
   long l = lg(x);
 
-  if (typ(x)!=t_REAL) err(typeer,"mplog");
-  if (signe(x)<=0) err(talker,"non positive argument in mplog");
-  if (l>LOGAGM_LIMIT) return logagm(x);
-  av = avma;
+  if (l > LOGAGM_LIMIT) return logagmr_abs(x);
   EX = expo(x);
-  z = cgetr(l); ltop = avma;
+  if (absrnz_egal2n(x)) return EX? mulsr(EX, mplog2(l)): realzero(l);
 
-  l2 = l+1; y=p1=cgetr(l2); affrr(x,p1);
-  setexpo(p1, 0);
-  if (gcmp1(p1)) {
-    if (!EX) { avma = av; return realzero(l); }
-    affrr(mulsr(EX, mplog2(l)), z);
-    avma = ltop; return z;
-  }
+  av = avma; z = cgetr(l); ltop = avma;
+  l2 = l+1; p1 = cgetr(l2); affrr(x,p1);
+  p1[1] = evalsigne(1) | evalexpo(0);
   /* 1 < p1 < 2 */
   av = avma; l -= 2;
   u = ((ulong)p1[2]) & (~HIGHBIT); /* p1[2] - HIGHBIT, assuming HIGHBIT set */
@@ -1482,6 +1458,14 @@ mplog(GEN x)
   setexpo(y, expo(y)+m+1);
   if (EX) y = addrr(y, mulsr(EX, mplog2(l2)));
   affrr(y, z); avma = ltop; return z;
+}
+
+GEN
+mplog(GEN x)
+{
+  if (typ(x)!=t_REAL) err(typeer,"mplog");
+  if (signe(x)<=0) err(talker,"non positive argument in mplog");
+  return logr_abs(x);
 }
 
 GEN
@@ -1587,10 +1571,10 @@ glog(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL:
-      if (signe(x)>=0) return mplog(x);
-      y=cgetg(3,t_COMPLEX); y[2]=lmppi(lg(x));
-      setsigne(x,1); y[1]=lmplog(x);
-      setsigne(x,-1); return y;
+      if (signe(x)>=0) return logr_abs(x);
+      y=cgetg(3,t_COMPLEX);
+      y[1] = (long)logr_abs(x);
+      y[2] = lmppi(lg(x)); return y;
 
     case t_COMPLEX:
       y=cgetg(3,t_COMPLEX); y[2]=larg(x,prec);
@@ -1707,8 +1691,9 @@ mpsc1(GEN x0, long *ptmod8)
     if (l4<=l2) { setlg(p1,l4); setlg(x2,l4); }
     subsrz(1,p2, p1); avma = av;
   }
-  setlg(p1,l2); setlg(x2,l2);
-  setexpo(p1, expo(p1)-1); setsigne(p1, -signe(p1));
+  setlg(p1,l2);
+  setlg(x2,l2);
+  p1[1] = evalsigne(-signe(p1)) | evalexpo(expo(p1)-1); /* p1 := -p1/2 */
   p1 = mulrr(x2,p1);
   /* Now p1 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
   for (i=1; i<=m; i++)

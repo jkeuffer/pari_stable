@@ -1117,7 +1117,7 @@ functions on square matrices, which are not implemented in the present
 version \vers, will have a different name if they are implemented some day.
 
 \subseckbd{\pow}: If $y$ is not of type integer, \kbd{x\pow y} has the same
-effect as \kbd{exp(y*ln(x))}. It can be applied to $p$-adic numbers as well
+effect as \kbd{exp(y*log(x))}. It can be applied to $p$-adic numbers as well
 as to the more usual types.\sidx{powering}
 
 \syn{gpow}{x,y,\var{prec}}.
@@ -1343,8 +1343,7 @@ the present implementation requires $x$ to be positive.
 
 $x$ must be positive and $s$ real. The result returned is $\int_x^\infty
 e^{-t}t^{s-1}\,dt$. When $y$ is given, assume (of course without checking!)
-that $y=\Gamma(s)$. For small $x$, this will tremendously speed up the
-computation.
+that $y=\Gamma(s)$. For small $x$, this will speed up the computation.
 
 \syn{incgam}{s,x,\var{prec}} and $\teb{incgam0}(s,x,y,\var{prec})$,
 respectively (an omitted $y$ is coded as \kbd{NULL}). There exist also the
@@ -1359,18 +1358,19 @@ $\int_0^x e^{-t}t^{s-1}\,dt$, when $x$ is not too large.
 \syn{incgamc}{s,x,\var{prec}}.
 
 \subsecidx{log}$(x,\{\fl=0\})$: principal branch of the natural logarithm of
-$x$, i.e.~such that $\text{Im(ln}(x))\in{} ]-\pi,\pi]$. The result is complex
-(with imaginary part equal to $\pi$) if $x\in \R$ and $x<0$.
+$x$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$. The result is complex
+(with imaginary part equal to $\pi$) if $x\in \R$ and $x < 0$. In general,
+the algorithm uses the formula 
+$$\log(x) \approx {\pi\over 2\text{agm}(1, 4/s)} - m \log 2, $$
+if $s = x 2^m$ is large enough. (The result is exact to $B$ bits provided
+$s > 2^{B/2}$.) At low accuracies, the series expansion near $1$ is used.
 
 $p$-adic arguments are also accepted for $x$, with the convention that
-$\ln(p)=0$. Hence in particular $\exp(\ln(x))/x$ will not in general be
+$\log(p)=0$. Hence in particular $\exp(\log(x))/x$ will not in general be
 equal to 1 but to a $(p-1)$-th root of unity (or $\pm1$ if $p=2$)
 times a power of $p$.
 
-If $\fl$ is equal to $1 = \kbd{AGM}$, use an agm formula suggested by Mestre,
-when $x$ is real, otherwise identical to \kbd{log}.
-
-\syn{glog}{x,\var{prec}} or $\teb{glogagm}(x,\var{prec})$.
+\syn{glog}{x,\var{prec}}.
 
 \subsecidx{lngamma}$(x)$: principal branch of the logarithm of the gamma
 function of $x$. This function is analytic on the complex plane with

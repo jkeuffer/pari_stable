@@ -98,6 +98,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nfdivres nfdivrem
 #define gred gcopy
 
+#define glogagm glog
+#define logagm  mplog
 #define mpsqrtz  gopgz(absr,(x),(y))
 #define adduumod Fl_add
 #define subuumod Fl_sub
