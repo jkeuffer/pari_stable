@@ -1344,7 +1344,7 @@ FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are not varn-clean*/
   return gerepileupto(ltop,z);
 }
-GEN/*Unused/untested*/
+GEN
 FpXQX_sqr(GEN x, GEN T, GEN p)
 {
   pari_sp ltop=avma;
