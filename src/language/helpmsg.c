@@ -310,7 +310,7 @@ char *helpmessages_basic[]={
   "nfkermodpr(nf,x,pr): kernel of the matrix x in Z_K/pr, where pr is in modpr format (see nfmodprinit)",
   "nfmodprinit(nf,pr): transform the 5 element row vector pr representing a prime ideal into modpr format necessary for all operations mod pr in the number field nf (see manual for details about the format)",
   "nfnewprec(nf): transform the number field data nf into new data using the current (usually larger) precision",
-  "nfroots(nf,pol): roots of polynomial pol belonging to nf without multiplicity",
+  "nfroots({nf},pol): roots of polynomial pol belonging to nf (Q if omitted) without multiplicity",
   "nfrootsof1(nf): number of roots of unity and primitive root of unity in the number field nf",
   "nfsnf(nf,x): if x=[A,I,J], outputs [c_1,...c_n] Smith normal form of x",
   "nfsolvemodpr(nf,a,b,pr): solution of a*x=b in Z_K/pr, where a is a matrix and b a column vector, and where pr is in modpr format (see nfmodprinit)",
