@@ -544,7 +544,7 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN listmod  = cgetg(lfamod+1, t_COL);
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
-  const Blow = get_Blow((double)lfamod, (double)degpol(nfpol));
+  const double Blow = get_Blow((double)lfamod, (double)degpol(nfpol));
 
   if (maxK < 0) maxK = lfamod-1;
   (void)dn;
