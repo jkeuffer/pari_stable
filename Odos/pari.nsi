@@ -8,7 +8,7 @@ AutoCloseWindow false
 OutFile "Pari.exe"
 InstallDir "$PROGRAMFILES\PARI"
 InstallDirRegKey HKLM "Software\PARI" ""
-LicenseData "COPYING"
+LicenseData "..\COPYING"
 
 !define MUI_WELCOMEPAGE
 !define MUI_LICENSEPAGE
@@ -25,10 +25,10 @@ LicenseData "COPYING"
 
 Section "pari (required)" SecCopy
   SetOutPath "$INSTDIR"
-  File /oname="gp.exe" "..\Ocygwin-i386\gp-dyn.exe"
+  File /oname=gp.exe "..\Ocygwin-i386\gp-dyn.exe"
   File "makegprc"
   File "..\misc\tex2mail"
-  File "libpari-2.2.dll"
+  File "..\Ocygwin-i386\libpari-2.2.dll"
   File "\cygwin\bin\cygwin1.dll"
   File "\cygwin\bin\cygncurses6.dll"
   File "\cygwin\bin\cygreadline5.dll"
@@ -54,6 +54,7 @@ SectionEnd
 Function .onInstSuccess
   SetOutPath "$INSTDIR"
   ExecWait "perl makegprc $INSTDIR"
+  Delete "$INSTDIR\makegprc"
   MessageBox MB_OK "Thanks for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP (colors, script search path, etc.)."
   ExecShell "open" "$INSTDIR"
 FunctionEnd
