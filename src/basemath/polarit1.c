@@ -1367,13 +1367,13 @@ factmod0(GEN f, GEN pp)
       {
         t[nbfact] = FpX_normalize(u,pp);
         d = (N==1)? 1: FpX_split_Berlekamp(t+nbfact, pp);
-        for (j=0; j<d; j++) ex[nbfact+j] = e*k;
+        for (j=0; j<(ulong)d; j++) ex[nbfact+j] = e*k;
         nbfact += d;
       }
     }
     if (!p) break;
     j = degpol(f2); if (!j) break;
-    if (j % p) err(talker, "factmod: %Z is not prime", pp);
+    if (j % p) err(talker, "factmod: %lu is not prime", p);
     j = j/p + 3;
 
     e *= p; setlg(f,j);
