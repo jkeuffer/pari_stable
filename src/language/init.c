@@ -869,6 +869,12 @@ err_leave(long errnum)
   a = v->data; free(v); return a;
 }
 
+static int
+is_warn(long num)
+{
+  return num == warner || num == warnmem || num == warnfile || num == warnprec;
+}
+
 VOLATILE void
 err(long numerr, ...)
 {
@@ -879,16 +885,23 @@ err(long numerr, ...)
 
   va_start(ap,numerr);
 
-  if (err_catch_stack && numerr != memer)
-  { /* can't trap memer --> infinite recursion if we need a temp buffer */
+  if (err_catch_stack && !is_warn(numerr))
+  {
     if (err_catch_stack[numerr]) trap = numerr;
-    else if (err_catch_stack[noer] && numerr >= talker) trap = noer;
+    else if (err_catch_stack[noer]) trap = noer;
   }
   if (trap)
-  { /* all non-syntax errors (noer), or numerr individually trapped */
+  { /* all errors (noer), or numerr individually trapped */
     cell *a = (cell*) err_catch_stack[trap]->value;
+    void *e = a->env;
     global_err_data = a->data;
-    if (a->env) longjmp(a->env, numerr);
+    /* disable trap to avoid infinite recursion if we need a temp buffer */
+    if (numerr == memer)
+    {
+      err(warner,"not enough memory: trap disabled");
+      (void)err_leave(trap);
+    }
+    if (e) longjmp(e, numerr);
   }
   else
   global_err_data = NULL;
