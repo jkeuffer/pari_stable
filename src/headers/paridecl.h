@@ -1456,6 +1456,7 @@ GEN     Q_primitive_part(GEN x, GEN *ptc);
 GEN     Q_primpart(GEN x);
 GEN     Q_remove_denom(GEN x, GEN *ptd);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
+GEN     ZX_squff(GEN f, GEN *ex);
 GEN     centermod(GEN x, GEN p);
 GEN     centermod_i(GEN x, GEN p, GEN ps2);
 GEN     centermodii(GEN x, GEN p, GEN po2);
@@ -1516,7 +1517,6 @@ GEN     subresext(GEN x, GEN y, GEN *U, GEN *V);
 GEN     sylvestermatrix(GEN x,GEN y);
 GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
-GEN     ZX_squff(GEN f, GEN *ex);
 
 /* polarit3.c */
 
