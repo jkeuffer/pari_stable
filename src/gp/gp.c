@@ -2551,7 +2551,7 @@ break_loop(long numerr)
   }
   else
   {
-    msg = "Starting break loop (type 'break' to go back to GP)";
+    msg = "Starting break loop (type 'break' or Control-d to go back to GP)";
     old = s = get_analyseur();
     t = NULL;
     if (bufstack->prev)
@@ -2568,7 +2568,8 @@ break_loop(long numerr)
   term_color(c_ERR); pariputc('\n');
   errcontext(msg, s, t); if (s) pariputc('\n');
   term_color(c_NONE);
-  if (numerr == siginter) pariputs("['' or 'next' will continue]\n");
+  if (numerr == siginter)
+    pariputs("[type <Return> in an empty line to continue]\n");
   infile = stdin;
   for(;;)
   {
@@ -2584,15 +2585,7 @@ break_loop(long numerr)
       continue;
     }
     x = lisseq(b->buf);
-    if (did_break())
-    {
-      if (numerr == siginter && did_break() == br_NEXT)
-      {
-        (void)loop_break(); /* clear status flag */
-        go_on = 1;
-      }
-      break;
-    }
+    if (did_break()) break;
     if (x == gnil || is_silent(b->buf)) continue;
 
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
