@@ -7,7 +7,7 @@ if test "$fastread" != yes; then
 ==========================================================================
 GP contains high resolution plotting functions. Choose among
        none       $addX11         $addgnuplot	gnuplot-dynamic
-The `*-dynamic' version may be trailed by `,dll_base_name'.
+The '*-dynamic' version may be trailed by ',dll_base_name'.
 EOT
   echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
   rep="none $addX11 $addgnuplot gnuplot-dynamic";
