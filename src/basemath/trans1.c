@@ -1729,7 +1729,7 @@ mpsc1(GEN x, long *ptmod8)
     if (l4<=l2) { setlg(p2,l4); setlg(p4,l4); }
     subsrz(1,p3,p2); avma=av;
   }
-  if (l4<=l2) { setlg(p2,l4); setlg(p4,l4); }
+  setlg(p2,l2); setlg(p4,l2);
   setexpo(p4,expo(p4)-1); setsigne(p4, -signe(p4));
   p2 = mulrr(p4,p2);
   for (i=1; i<=m; i++)
