@@ -1889,8 +1889,8 @@ ground(GEN x)
       if (ex < 0) return s>0? gun: negi(gun);
       av=avma; p1 = realun(3 + (ex>>TWOPOTBITS_IN_LONG));
       setexpo(p1,-1); /* p1 = 0.5 */
-      p1 = addrr(x,p1); tetpil = avma;
-      return gerepile(av,tetpil,mpent(p1));
+      p1 = addrr(x,p1);
+      return gerepileuptoint(av, mpent(p1));
     }
     case t_FRAC: case t_FRACN:
       av=avma; p1 = addii(shifti((GEN)x[2], -1), (GEN)x[1]);
@@ -1939,7 +1939,7 @@ grndtoi(GEN x, long *e)
       lx=lg(x); e1 = ex - bit_accuracy(lx) + 1;
       settyp(p1,t_INT); setlgefint(p1,lx);
       y=shifti(p1,e1); if (signe(x)<0) y=addsi(-1,y);
-      y = gerepileupto(av,y);
+      y = gerepileuptoint(av,y);
 
       if (e1<=0) { av=avma; e1=expo(subri(x,y)); avma=av; }
       *e=e1; return y;
@@ -2013,7 +2013,7 @@ GEN
 gtrunc(GEN x)
 {
   long tx=typ(x), i, v;
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN y;
 
   switch(tx)
@@ -2033,12 +2033,12 @@ gtrunc(GEN x)
       if (!v) return gcopy((GEN)x[4]);
       if (v>0)
       { /* here p^v is an integer */
-        av=avma; y=gpuigs((GEN)x[2],v); tetpil=avma;
-        return gerepile(av,tetpil, mulii(y,(GEN)x[4]));
+        av = avma; y = gpowgs((GEN)x[2],v);
+        return gerepileuptoint(av, mulii(y,(GEN)x[4]));
       }
       y=cgetg(3,t_FRAC);
-      y[1]=licopy((GEN)x[4]);
-      y[2]=lpuigs((GEN)x[2],-v);
+      y[1] = licopy((GEN)x[4]);
+      y[2] = lpowgs((GEN)x[2],-v);
       return y;
 
     case t_RFRAC: case t_RFRACN:
