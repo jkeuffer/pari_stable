@@ -76,7 +76,7 @@ MD 31- oo loop in ellap [uninitialized array length in apell1]
 BA 38- pariformats (e.g %Z) incorrect on 64bit machines
    39- polhensellift(x,[x,1],2,2) --> "bug in multiplication"
    40- glitches in readline completion (random() * ne<TAB) --> inserted args)
-IZ 41- (obsolete, probably unused) CLK_TCK may reside in time.h
+IZ 41- CLK_TCK may reside in time.h
    42- misleading definition for ?omega / ?bigomega
    43- on \q, "Good bye" --> Goodbye
    44- install() accepted gpnames which were not valid identifiers
