@@ -817,44 +817,39 @@ $-\kbd{defaultprecision}$), see \secref{se:whatzero}.
 \kbd{Mod(n,m)}, \emph{not} \kbd{n\%m} (see \secref{se:Mod}).
 
 \subsec{Rational numbers}\sidx{rational number}
-(types \tet{t_FRAC} and \tet{t_FRACN}): under \kbd{gp}, all fractions are
-automatically reduced to lowest terms, so it is in principle impossible to
-work with reducible fractions (of type \typ{FRACN}), although of course in
-library mode this is easy. To enter $n/m$ just type it as written. As
-explained in \secref{se:gdiv}, division will \emph{not} be performed, only
-reduction to lowest terms.\label{se:FRAC}
+(types \tet{t_FRAC}): all fractions are automatically reduced to lowest
+terms, so it is impossible to work with reducible fractions. To enter $n/m$
+just type it as written. As explained in \secref{se:gdiv}, division will
+\emph{not} be performed, only reduction to lowest terms.\label{se:FRAC}
 
-\subsec{Complex numbers}\sidx{complex number}
-(type \tet{t_COMPLEX}): to enter $x+iy$, type \kbd{x + I*y} (\emph{not}
-\kbd{x+i*y}). The letter \tet{I} stands for $\sqrt{-1}$. Recall from
-Chapter 1 that $x$ and $y$ can be of type \typ{INT}, \typ{REAL},
-\typ{INTMOD}, \typ{FRAC}/\typ{FRACN}, or \typ{PADIC}.
+\subsec{Complex numbers}\sidx{complex number} (type \tet{t_COMPLEX}): to
+enter $x+iy$, type \kbd{x + I*y} (\emph{not} \kbd{x+i*y}). The letter \tet{I}
+stands for $\sqrt{-1}$. Recall from Chapter 1 that $x$ and $y$ can be of type
+\typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}, or \typ{PADIC}.
 
-\subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic}
-(type \tet{t_PADIC}): to enter a $p$-adic number, simply write a
-rational or integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$
-and $k$ are integers. This last expression indicates three things to \kbd{gp}:
-first that it is dealing with a \typ{PADIC} type (the fact that $p$ is an
-integer, and not a polynomial, which would be used to enter a series, see
-\secref{se:series}), secondly the ``prime'' $p$ (note that it is not
-checked whether $p$ is indeed prime; you can work on 10-adics if you want, but
-beware of disasters as soon as you do something non-trivial like taking a
-square root), and finally the number of significant $p$-adic digits $k$.
-Note that \kbd{O(25)} is not the same as \kbd{O(5\pow 2)}; you probably
-want the latter!
+\subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic} (type
+\tet{t_PADIC}): to enter a $p$-adic number, simply write a rational or
+integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$ and $k$ are
+integers. This last expression indicates three things to \kbd{gp}: first that
+it is dealing with a \typ{PADIC} type (the fact that $p$ is an integer, and
+not a polynomial, which would be used to enter a series, see
+\secref{se:series}), secondly the ``prime'' $p$ (note that it is not checked
+whether $p$ is indeed prime; you can work on 10-adics if you want, but beware
+of disasters as soon as you do something non-trivial like taking a square
+root), and finally the number of significant $p$-adic digits $k$. Note that
+\kbd{O(25)} is not the same as \kbd{O(5\pow 2)}; you probably want the
+latter!
 
 For example, you can type in the $7$-adic number
 
 \kbd{2*7\pow(-1) + 3 + 4*7 + 2*7\pow 2 + O(7\pow3)}
 
-\noindent
-exactly as shown, or equivalently as
-\kbd{905/7 + O(7\pow3)}.
+\noindent exactly as shown, or equivalently as \kbd{905/7 + O(7\pow3)}.
 
-\subsec{Quadratic numbers}\sidx{quadratic number}
-(type \tet{t_QUAD}): first, you must define the default quadratic order or
-field in which you want to work. This is done using the \tet{quadgen}
-function, in the following way. Write something like
+\subsec{Quadratic numbers}\sidx{quadratic number} (type \tet{t_QUAD}): first,
+you must define the default quadratic order or field in which you want to
+work. This is done using the \tet{quadgen} function, in the following way.
+Write something like
 \bprog
 w = quadgen(d)
 @eprog\noindent
@@ -937,8 +932,8 @@ main variable of \var{expr} (to check the ordering of the variables, or
 to modify it, use the function \kbd{reorder}; see~\secref{se:reorder}).
 
 \subsec{Rational functions}\sidx{rational function}
-(types \tet{t_RFRAC} and \tet{t_RFRACN}): as for fractions, all rational
-functions are automatically reduced to lowest terms under \kbd{gp}. All that was
+(types \tet{t_RFRAC}): as for fractions, all rational
+functions are automatically reduced to lowest terms. All that was
 said about fractions in \secref{se:FRAC} remains valid here.
 
 \subsec{Binary quadratic forms of positive or negative discriminant}%

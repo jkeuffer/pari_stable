@@ -781,8 +781,8 @@ polynomial part.
 rounding is replaced by truncation.
 
 \fun{GEN}{gred[z]}{GEN x[, GEN z]} reduces \kbd{x} to lowest terms if \kbd{x}
-is a fraction or rational function (types \typ{FRAC}, \typ{FRACN},
-\typ{RFRAC} and \typ{RFRACN}), otherwise creates a copy of~\kbd{x}.
+is a fraction or rational function, this is used internally to handle
+types \typ{FRAC} and \typ{RFRAC}.
 
 \fun{GEN}{content}{GEN x} creates the GCD of all the components of~\kbd{x}.
 

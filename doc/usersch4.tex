@@ -337,17 +337,16 @@ the macros described in \secref{se:impl}), or implicitly using an assignment
 statement (using \kbd{gaffect}).
 
 Note that the argument \kbd{length} is predetermined for a number of types:
-3 for types \typ{INTMOD}, \typ{FRAC}, \typ{FRACN}, \typ{COMPLEX},
-\typ{POLMOD}, \typ{RFRAC} and \typ{RFRACN}, 4 for type \typ{QUAD}
-and \typ{QFI}, and 5 for type \typ{PADIC} and \typ{QFR}. However for the sake
-of efficiency, no checking is done in the function \kbd{cgetg}, so
-disasters will occur if you give an incorrect length.
+3 for types \typ{INTMOD}, \typ{FRAC}, \typ{COMPLEX}, \typ{POLMOD},
+\typ{RFRAC}, 4 for type \typ{QUAD} and \typ{QFI}, and 5 for type \typ{PADIC}
+and \typ{QFR}. However for the sake of efficiency, no checking is done in the
+function \kbd{cgetg}, so disasters will occur if you give an incorrect
+length.
 
-\misctitle{Notes}:
-1)  The main use of this function is to prepare for later assignments
-(see \secref{se:assign}). Most of the time you will use \kbd{GEN} objects
-as they are created and returned by PARI functions. In this case you do not need
-to use \kbd{cgetg} to create space to hold them.
+\misctitle{Notes}: 1)  The main use of this function is to prepare for later
+assignments (see \secref{se:assign}). Most of the time you will use \kbd{GEN}
+objects as they are created and returned by PARI functions. In this case you
+do not need to use \kbd{cgetg} to create space to hold them.
 
 \noindent 2) For the creation of leaves, i.e.~integers or reals, which is
 very common,
@@ -359,9 +358,8 @@ very common,
 \noindent should be used instead of \kbd{cgetg(length, t\_INT)} and
 \kbd{cgetg(length, t\_REAL)} respectively.
 
-\noindent 3) The macros \teb{lgetg}, \teb{lgeti}, \teb{lgetr} are
-predefined as \kbd{(long)cgetg}, \kbd{(long)cgeti}, \kbd{(long)cgetr},
-respectively.
+\noindent 3) The macros \teb{lgetg}, \teb{lgeti}, \teb{lgetr} are predefined
+as \kbd{(long)cgetg}, \kbd{(long)cgeti}, \kbd{(long)cgetr}, respectively.
 
 \noindent 4) Finally, there are two low-level routines to allocate space on
 the PARI stack:
@@ -370,9 +368,9 @@ the PARI stack:
 
 allocates a \kbd{GEN} with $n$ components, \emph{without} filling the
 required code words. This is the low-level constructor underlying
-\kbd{cgetg}, which calls \kbd{new\_chunk}, then sets the first code
-word. It works by simply returning the address \kbd{((GEN)avma) - n}, after
-checking that it is larger than \kbd{(GEN)bot}.
+\kbd{cgetg}, which calls \kbd{new\_chunk}, then sets the first code word. It
+works by simply returning the address \kbd{((GEN)avma) - n}, after checking
+that it is larger than \kbd{(GEN)bot}.
 
 \fun{char*}{stackmalloc}{size\_t n}
 
@@ -384,16 +382,15 @@ might be enough. On the other hand, beware that this is not permanent
 independant storage, but part of the PARI stack.
 
 Note that objects allocated through these two functions cannot be
-\kbd{gerepile}'d. They are not valid \kbd{GEN}s since they have no PARI
-type.
+\kbd{gerepile}'d. They are not valid \kbd{GEN}s since they have no PARI type.
 
 \misctitle{Examples}: 1) \kbd{z = cgeti(DEFAULTPREC)} and
 \kbd{cgetg(DEFAULTPREC, t\_INT)} create an integer object whose ``precision''
-is \kbd{bit\_accuracy(DEFAULTPREC)} = 64. This means \kbd{z} can hold rational
-integers of absolute value less than $2^{64}$. Note that in both cases, the
-second codeword will \emph{not} be filled. Of course we could use numerical
-values, e.g.~\kbd{cgeti(4)}, but this would have different meanings on
-different machines as \kbd{bit\_accuracy(4)} equals 64 on 32-bit machines,
+is \kbd{bit\_accuracy(DEFAULTPREC)} = 64. This means \kbd{z} can hold
+rational integers of absolute value less than $2^{64}$. Note that in both
+cases, the second codeword will \emph{not} be filled. Of course we could use
+numerical values, e.g.~\kbd{cgeti(4)}, but this would have different meanings
+on different machines as \kbd{bit\_accuracy(4)} equals 64 on 32-bit machines,
 but 128 on 64-bit machines.
 
 \noindent 2) The following creates a \emph{complex number} whose real and
@@ -1212,12 +1209,10 @@ integermods resulting from operations can point at this common object,
 instead of carrying along their own copies of it on the stack. The library
 functions implement this practice almost by default.
 
-\subsec{Type \typ{FRAC} and \typ{FRACN} (rational number):}%
-\kbdsidx{t_FRAC}\kbdsidx{t_FRACN}\sidx{rational number}
+\subsec{Type \typ{FRAC} (rational number):}%
+\kbdsidx{t_FRAC}\sidx{rational number}
 \kbd{z[1]} points to the numerator, and \kbd{z[2]} to the denominator. Both
-must be of type integer. In principle $\kbd{z[2]} > 0$, but this rule does not
-have to be strictly obeyed. Note that a type \typ{FRACN} rational number can be
-converted to irreducible form using the function \fun{GEN}{gred}{GEN x}.
+must be of type integer and $\kbd{z[2]} > 0$.
 
 \subsec{Type \typ{COMPLEX} (complex number):}%
 \kbdsidx{t_COMPLEX}\sidx{complex number}
@@ -1331,11 +1326,10 @@ If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
 power series can be negative, i.e.~we are then dealing with a Laurent series
 (with a finite number of negative terms).
 
-\subsec{Type \typ{RFRAC} and \typ{RFRACN} (rational function):}%
-\kbdsidx{t_RFRAC}\kbdsidx{t_RFRACN}\sidx{rational function} \kbd{z[1]} points
+\subsec{Type \typ{RFRAC} (rational function):}%
+\kbdsidx{t_RFRAC}\sidx{rational function} \kbd{z[1]} points
 to the numerator, and \kbd{z[2]} on the denominator. The denominator must be
-of type polynomial. Note that a type \typ{RFRACN} rational function can be
-converted to irreducible form using the function \teb{gred}.
+of type polynomial.
 
 \subsec{Type \typ{QFR} (indefinite binary quadratic form):}%
 \kbdsidx{t_QFR}\sidx{indefinite binary quadratic form} \kbd{z[1]},
