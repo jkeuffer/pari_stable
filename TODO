@@ -52,6 +52,8 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 5  life of GP variables too short in pathological cases:
    v = [0,0]; v + [v=0,v=0] --> SEGV
 
+5  readline: assume a file 'foo' exists, \rf<TAB> --> \foo [\r f<TAB> is OK]
+
 4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
