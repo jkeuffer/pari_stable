@@ -1886,26 +1886,22 @@ congruent to 0 or 1 modulo 4.
 
 \subsecidx{quadray}$(D,f,\{\fl=0\})$: relative equation for the ray class
 field of conductor $f$ for the quadratic field of discriminant $D$ (which
-can also be a \kbd{bnf}). 
+can also be a \kbd{bnf}), using analytic methods.
 
-For $D<0$, $\fl$ has the following meaning: if it's an odd integer,
-outputs instead the vector of $[\var{ideal},
-\var{corresponding root}]$. If $\fl=0$ or 1, uses the $\sigma$ function,
-while if $\fl>1$, uses the Weierstrass $\wp$ function, which is less
-efficient and may disappear in future versions (not all special cases have
-been implemented in this case). Finally, \fl\ can also be a two-component
-vector $[\lambda,\fl]$, where \fl\ is as above and $\lambda$ is the
-technical element of bnf necessary for Schertz's method using $\sigma$. In
-that case, returns 0 if $\lambda$ is not suitable.
+For $D<0$, uses the $\sigma$ function. $\fl$ has the following meaning: if
+it's an odd integer, outputs instead the vector of $[\var{ideal},
+\var{corresponding root}]$.
 
-For $D>0$, if $\fl$ is non-zero, try hard to get the simplest
-modulus. See \tet{bnrstark} for more details.
+\fl\ can also be a two-component vector $[\lambda,\fl]$, where \fl\ is as
+above and $\lambda$ is the technical element of \kbd{bnf} necessary for
+Schertz's method. In that case, returns 0 if $\lambda$ is not suitable.
 
-If $D>0$, the function may fail with the following message
+For $D>0$, uses Stark's conjecture. If $\fl$ is non-zero, try hard to get a
+simple modulus. The function may fail with the following message
 \bprog
 "Cannot find a suitable modulus in FindModulus"
 @eprog
-See the comments in \tet{bnrstark} about this problem.
+See \tet{bnrstark} for more details about the real case.
 
 \syn{quadray}{D,f,\fl}.
 

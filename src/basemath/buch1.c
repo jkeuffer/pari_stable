@@ -281,26 +281,6 @@ quadhilbert(GEN D, GEN flag, long prec)
 /* AUXILLIARY ROUTINES FOR QUADRAYIMAGWEI */
 #define to_approx(nf,a) ((GEN)gmul(gmael((nf),5,1), (a))[1])
 
-static GEN
-getal(GEN nf, GEN b, GEN a)
-{
-  GEN x = idealcoprime(nf,idealdiv(nf,b,a),b);
-  return to_approx(nf,x);
-}
-
-/* eta(tau/p) eta(tau/q) eta(tau)^3 / eta(tau/(p*q)) */
-static GEN
-epseta(GEN D, long p, long q, GEN tau, long prec)
-{
-  GEN p1,p2;
-
-  if (cmpis(D,-4) >= 0) return gpuigs(trueeta(tau,prec),4);
-  p1 = trueeta(gdivgs(tau,p),prec);
-  p2 = (p==q)? p1: trueeta(gdivgs(tau,q),prec);
-  p1 = gdiv(gmul(p1,p2),trueeta(gdivgs(tau,p*q),prec));
-  return gmul(p1,gpuigs(trueeta(tau,prec),3));
-}
-
 /* Z-basis for a (over C) */
 static GEN
 get_om(GEN nf, GEN a)
@@ -309,81 +289,6 @@ get_om(GEN nf, GEN a)
   om[1] = (long)to_approx(nf,(GEN)a[2]);
   om[2] = (long)to_approx(nf,(GEN)a[1]);
   return om;
-}
-
-static GEN
-pppfun(GEN nf, GEN z, GEN a, GEN den, long prec)
-{
-  GEN y, om = get_om(nf, a), D = (GEN)nf[3];
-
-  y = gdiv(ellwp0(om,z,0,prec,0), den);
-  if (egalii(D, stoi(-4))) y = gpowgs(y,2);
-  if (egalii(D, stoi(-3))) y = gpowgs(y,3);
-  return y;
-}
-
-static GEN
-get_c(GEN nf, GEN a, GEN den, long q, long prec)
-{
-  byteptr d = diffptr;
-  long i, r = q-1, p = 0;
-  GEN p1,al, D = (GEN)nf[3];
-  p += *d++; p += *d++;
-  do
-  {
-    p += *d++;
-    if (!*d) err(primer1);
-  }
-  while (p % q != r || krogs(D,p)==1);
-  al = getal(nf,idealhermite(nf,(GEN)(primedec(nf,stoi(p))[1])),a);
-  p1 = gzero;
-  for (i=1; i <= ((p-1)>>1); i++)
-    p1 = gadd(p1,pppfun(nf,gmulsg(i,al),a,den,prec));
-  if (q == 4 && kross(2,p) < 0) p1 = gneg(p1);
-  return gneg(p1);
-}
-
-static GEN
-schertzc(GEN nf, GEN a, GEN den, long prec)
-{
-  GEN al,id, D = (GEN)nf[3];
-  long k2,k3;
-
-  if (gcmpgs(D,-3)==0)
-  {
-    id=idealmul(nf,gdeux,(GEN)(primedec(nf,stoi(3))[1]));
-    al=getal(nf,id,a);
-    return pppfun(nf,al,a,den,prec);
-  }
-
-  if (gcmpgs(D,-4)==0)
-  {
-    id=idealmul(nf,(GEN)(primedec(nf,gdeux)[1]),(GEN)(primedec(nf,stoi(5))[1]));
-    al=getal(nf,id,a);
-    return pppfun(nf,al,a,den,prec);
-  }
-
-  k2=krogs(D,2); k3=krogs(D,3);
-  if (k2 < 0)
-  {
-    if (k3 < 0) return gzero;
-    return get_c(nf,a,den,3,prec);
-  }
-
-  if (k3 >= 0)
-  {
-    id=idealmul(nf,(GEN)(primedec(nf,gdeux)[1]),(GEN)(primedec(nf,stoi(3))[1]));
-    al=getal(nf,id,a);
-    return pppfun(nf,al,a,den,prec);
-  }
-
-  if (k2 == 1)
-  {
-    al=getal(nf,idealhermite(nf,gdeux),a);
-    return pppfun(nf,al,a,den,prec);
-  }
-
-  return get_c(nf,a,den,4,prec);
 }
 
 /* Compute all elts in class group G = [|G|,c,g], c=cyclic factors, g=gens.
@@ -498,117 +403,6 @@ get_prec(GEN P, long prec)
   return k;
 }
 
-/*  returns an equation for the ray class field of modulus f of the imaginary
- *  quadratic field bnf if flag=0, a vector of
- *  two-component vectors [id,g(id)] where g() is the root of the equation
- *  if flag is non-zero.
- */
-static GEN
-quadrayimagwei(GEN bnr, int raw, long prec)
-{
-  long av2,clno,clrayno,lc,i,j,ia,ell, first = 1;
-  byteptr p = diffptr;
-  GEN z,allf,f,clray,bnf,nf,D,pol,fa,pp,pi,pial,clgp,cyc,gen,listl,d,al,s,v;
-  GEN listgenray,listray,pp1,pr2,listden,listc,pii2,ida,ap2,om1,om2,tau,P0,P;
-
-  allf = conductor(bnr,gzero,1,prec);
-  f = gmael(allf,1,1); clray=(GEN)allf[2];
-  bnf= (GEN)bnr[1];
-  nf = (GEN)bnf[7];
-  pol= (GEN)nf[1];
-  D  = (GEN)nf[3];
-  z = dethnf_i(f);
-  if (gcmp1(z))
-  {
-    P = quadhilbertimag(D, stoi(raw));
-    if (raw) convert_to_id(P);
-    return gcopy(P);
-  }
-  clgp=gmael(bnf,8,1); cyc=(GEN)clgp[2]; gen=(GEN)clgp[3];
-  lc=lg(gen);
-  listl   = getallelts(nf,clgp);  clno    = lg(listl)-1;
-  listray = getallelts(nf,clray); clrayno = lg(listray)-1;
-  if (gcmpgs(D,-4) < 0)
-  {
-    for (i=1; i<lc; i++) z = mulii(z,dethnf((GEN)gen[i]));
-    ell = 0;
-    do
-    {
-      ell += *p++;
-      if (!*p) err(primer1);
-    }
-    while (ell%12!=11 || !smodis(z, ell) || krogs(D,ell)!=1);
-    pr2 = idealpows(nf,(GEN)(primedec(nf,stoi(ell))[1]), 2);
-  }
-  else { pr2=idmat(2); ell=1; }
-  fa = (GEN)idealfactor(nf,f)[1];
-  if (lg(fa)==2)
-  {
-    pp=(GEN)fa[1]; pi=(GEN)pp[1];
-    if (raw)
-      pial = to_approx(nf,(GEN)pp[2]);
-    else
-      pial = basistoalg(nf,(GEN)pp[2]);
-  }
-  else { pi=gun; pial=gun; }
-  listden=cgetg(clno+1,t_VEC);
-  listc=cgetg(clno+1,t_VEC);
-  listgenray=cgetg(clrayno+1,t_VEC);
-  for (i=1; i<=clrayno; i++)
-    listgenray[i] = (long)isprincipalgenforce(bnf,idealinv(nf,(GEN)listray[i]));
-  av2 = avma;
-PRECPB:
-  if (!first)
-  {
-    if (DEBUGLEVEL) err(warnprec,"quadrayimagwei",prec);
-    nf = gerepileupto(av2, nfnewprec(nf,prec));
-  }
-  first = 0;
-  pii2 = gmul(gi, gmul2n(mppi(prec),1));
-  for (i=1; i<=clno; i++)
-  {
-    ida = (GEN)listl[i]; ap2 = idealmul(nf,ida,pr2);
-    om2 = gcoeff(ida,1,1);
-    om1 = to_approx(nf, (GEN)ap2[2]);
-    tau = gdiv(om1,om2);
-    d = gmul(gsqr(gdiv(pii2,om2)), epseta(D,ell,ell,tau,prec));
-    listden[i] = (long)d;
-    listc[i] = (long)schertzc(nf,(GEN)listl[i],d,prec);
-  }
-  al = to_approx(nf, idealcoprime(nf,f,f));
-  P = cgetg(clrayno+1,t_VEC);
-  for (i=1; i<=clrayno; i++)
-  {
-    pp = (GEN)listgenray[i]; pp1 = (GEN)pp[1];
-    for (ia=0,j=1; j<lc; j++)
-      ia = ia*itos((GEN)cyc[j]) + itos((GEN)pp1[j]);
-    ia++; s = gdiv(al, to_approx(nf,(GEN)pp[2]));
-    s = pppfun(nf,s,(GEN)listl[ia],(GEN)listden[ia],prec);
-    s = gsub(s, (GEN)listc[ia]);
-
-    if (raw)
-    {
-      v = cgetg(3,t_VEC); P[i]= (long)v;
-      v[1] = listray[i];
-      v[2] = lmul(pial,s);
-    }
-    else P[i] = lmul(pi,s);
-   /* should be gmul(pial,s), but bigger coeffs --> may need higher precision
-    * so use (small) pi and correct later */
-  }
-
-  if (DEBUGLEVEL>1) fprintferr("P = %Z\n",P);
-  if (!raw)
-  {
-    P0 = roots_to_pol(P, 0);
-    P = findbezk_pol(nf, P0);
-    if (!P) { prec = get_prec(P0, prec); goto PRECPB; }
-    P = gsubst(P,0,gmul(gdiv(pi,pial),polx[0]));
-    P = gmul(P,gpuigs(gdiv(pial,pi),clrayno));
-  }
-  return gcopy(P);
-}
-
 /* AUXILLIARY ROUTINES FOR QUADRAYSIGMA */
 GEN
 PiI2(long prec)
@@ -649,17 +443,14 @@ ellphist(GEN om, GEN res, GEN z, long prec)
 
 /* Computes phi^*(la,om)/phi^*(1,om) where om is an oriented basis of the
    ideal gf*gc^{-1} */
-
 static GEN
 computeth2(GEN nf, GEN gf, GEN gc, GEN la, long prec)
 {
-  GEN p1,p2,fdiv,omdiv,lanum,res;
+  GEN p1,p2,omdiv,res;
 
-  fdiv = idealdiv(nf,gf,gc);
-  omdiv = get_om(nf,fdiv);
-  lanum = to_approx(nf,la);
+  omdiv = get_om(nf, idealdiv(nf,gf,gc));
   res = ellphistinit(omdiv,prec);
-  p1 = gsub(ellphist(omdiv,res,lanum,prec), ellphist(omdiv,res,gun,prec));
+  p1 = gsub(ellphist(omdiv,res,la,prec), ellphist(omdiv,res,gun,prec));
   p2 = gimag(p1);
   if (gexpo(greal(p1))>20 || gexpo(p2)> bit_accuracy(min(prec,lg(p2)))-10)
     return NULL;
@@ -684,7 +475,7 @@ PRECPB:
     if (DEBUGLEVEL) err(warnprec,"computeP2",prec);
     nf = gerepileupto(av2, nfnewprec(checknf(bnr),prec));
   }
-  first = 0;
+  first = 0; la = to_approx(nf,la);
   P = cgetg(clrayno+1,t_VEC);
   for (i=1; i<=clrayno; i++)
   {
@@ -973,12 +764,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     if (lambda)
       y = computeP2(bnr,lambda,raw,prec);
     else
-    {
-      if (absi_cmp(flag, gun) <= 0)
-        y = quadrayimagsigma(bnr,raw,prec);
-      else
-        y = quadrayimagwei(bnr,raw,prec);
-    }
+      y = quadrayimagsigma(bnr,raw,prec);
   }
   return gerepileupto(av, y);
 }
