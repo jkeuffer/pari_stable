@@ -2315,6 +2315,7 @@ input_loop(filtre_t *F, input_method *IM)
   return 1;
 }
 
+#ifdef READLINE
 typedef struct {
   char *cmd;
   long n; /* number of args */
@@ -2368,6 +2369,7 @@ free_cmd(tm_cmd *c)
   while (c->n--) free((void*)c->v[c->n]);
   free((void*)c->v);
 }
+#endif
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
