@@ -164,7 +164,10 @@ pth="\
   /sbin\
   /usr/sbin\
   /usr/libexec\
+  /usr/openwin/bin\
+  /usr/local/bin\
 "
+# /usr/openwin/bin added for xmkmf
 
 for p in $pth
 do
