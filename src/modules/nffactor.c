@@ -274,11 +274,11 @@ static GEN
 nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *T)
 {
   pari_sp av = avma;
-  GEN u = nf_bestlift(elt,bound,T);
+  GEN v, u = nf_bestlift(elt,bound,T);
   if (!u) return NULL;
-  u = gclone(u); avma = av;
-  u = gmul(T->topow, u); 
-  gunclone(u); return u;
+  v = gclone(u); avma = av;
+  u = gmul(T->topow, v); 
+  gunclone(v); return u;
 }
 
 /* return the T->powden * (lift of pol with coefficients of T2-norm <= C)
