@@ -2130,7 +2130,6 @@ identifier(void)
           { /* user supplied */
             match_comma();
             arglist[i] = expr();
-            skipdecl(); /* we'd be redefining fun, but don't know it yet */
             if (br_status) err(breaker,"here (reading function args)");
           }
         }
