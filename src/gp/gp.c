@@ -76,6 +76,7 @@ int    whatnow(char *s, int flag);
 
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
+#define BREAK_LOOP_PROMPT "> "
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""
@@ -2358,20 +2359,24 @@ extern int get_line_from_readline(char *prompt, filtre_t *F);
 
 /* return 0 if no line could be read (EOF) */
 static int
-read_line(char *promptbuf, filtre_t *F)
+read_line(filtre_t *F, char *PROMPT)
 {
+  int res;
   if (compatible == OLDALL) F->downcase = 1;
   if (is_interactive())
   {
+    if (!PROMPT) PROMPT = do_prompt(F->in_comment, prompt);
 #ifdef READLINE
     if (use_readline)
-      return get_line_from_readline(promptbuf, F);
+      res = get_line_from_readline(PROMPT, F);
     else
 #endif
-    return get_line_from_user(promptbuf, F);
+    res = get_line_from_user(PROMPT, F);
+    if (!disable_color) term_color(c_NONE);
   }
   else
-    return get_line_from_file(DFT_PROMPT,F,infile);
+    res = get_line_from_file(DFT_PROMPT,F,infile);
+  return res;
 }
 
 static int
@@ -2388,7 +2393,7 @@ chron(char *s)
 }
 
 /* return 0: can't interpret *buf as a metacommand
- *        1: did interpret *buf as a metacommand */
+ *        1: did interpret *buf as a metacommand or empty command */
 static int
 check_meta(char *buf)
 {
@@ -2448,10 +2453,7 @@ gp_main_loop(int ismain)
 
     for(;;)
     {
-      int r = read_line(do_prompt(F.in_comment,prompt), &F);
-
-      if (!disable_color) term_color(c_NONE);
-      if (!r)
+      if (! read_line(&F, NULL))
       {
 #ifdef _WIN32
 	Sleep(10); if (win32ctrlc) dowin32ctrlc();
@@ -2605,7 +2607,7 @@ break_loop(long numerr)
   infile = stdin;
   for(;;)
   {
-    if (! read_line("> ", &F)) break;
+    if (! read_line(&F, BREAK_LOOP_PROMPT)) break;
     if (! check_meta(b->buf))
     {
       GEN x = lisseq(b->buf);
