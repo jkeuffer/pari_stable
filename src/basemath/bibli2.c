@@ -178,7 +178,7 @@ cyclo(long n, long v)
       else     yd = addmulXn(yd, gneg(yd), q);
     }
   }
-  tetpil=avma; yn = gerepile(av,tetpil,gdeuc(yn,yd));
+  tetpil=avma; yn = gerepile(av,tetpil,RgX_div(yn,yd));
   setvarn(yn,v); return yn;
 }
 

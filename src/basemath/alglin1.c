@@ -3351,8 +3351,7 @@ static GEN
 mydiv(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y);
-  if (tx == ty && tx == t_POL && varn(x) == varn(y))
-    return gdeuc(x,y);
+  if (tx == ty && tx == t_POL && varn(x) == varn(y)) return RgX_div(x,y);
   return gdiv(x,y);
 }
 
