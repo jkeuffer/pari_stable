@@ -724,27 +724,6 @@ dual_modulus(GEN p, GEN R, double tau, long l)
 /**       CALCUL D'UN FACTEUR PAR INTEGRATION SUR LE CERCLE        **/
 /**                                                                **/
 /********************************************************************/
-
-GEN
-gmulbyi(GEN x)
-{
-  GEN z;
-  if (typ(x) != t_COMPLEX)
-  {
-    z = cgetg(3,t_COMPLEX);
-    z[1] = zero;
-    z[2] = (long)x;
-  }
-  else
-  {
-    if (isexactzero((GEN)x[1])) return gneg((GEN)x[2]);
-    z = cgetg(3,t_COMPLEX);
-    z[1] = lneg((GEN)x[2]);
-    z[2] = x[1];
-  }
-  return z;
-}
-
 static void
 fft(GEN Omega, GEN p, GEN f, long Step, long l)
 {
@@ -766,7 +745,7 @@ fft(GEN Omega, GEN p, GEN f, long Step, long l)
 
     f2=gsub((GEN)p[0],(GEN)p[(Step<<1)]);
     f02=gsub((GEN)p[Step],(GEN)p[3*Step]);
-    f02=gmulbyi(f02);
+    f02=mulcxI(f02);
     f[1]=ladd(f2,f02);
     f[3]=lsub(f2,f02);
     return;
@@ -791,7 +770,7 @@ fft(GEN Omega, GEN p, GEN f, long Step, long l)
     f02=gadd((GEN)f[i],f2);
     g02=gsub((GEN)f[i],f2);
     f13=gadd(f1,f3);
-    g13=gmulbyi(gsub(f1,f3));
+    g13=mulcxI(gsub(f1,f3));
 
     ff[i+1]=ladd(f02,f13);
     ff[i+l1+1]=ladd(g02,g13);
@@ -831,7 +810,7 @@ initRU(long N, long bitprec)
     aux[1]=RU[i][2];
     aux[2]=RU[i][1]; RU[N4-i]=aux;
   }
-  for (i=0; i<N4; i++) RU[i+N4]=gmulbyi(RU[i]);
+  for (i=0; i<N4; i++) RU[i+N4]=mulcxI(RU[i]);
   for (i=0; i<N2; i++) RU[i+N2]=gneg(RU[i]);
   return (GEN)RU;
 }
@@ -874,7 +853,7 @@ parameters(GEN p, double *mu, double *gamma,
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
   prim = exp_Ir(aux);
-  aux = gmulbyi(aux);
+  aux = mulcxI(aux);
   RU = myrealun(bitprec);
 
   Omega=initRU(Lmax,bitprec);
@@ -933,7 +912,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
   prim = exp_Ir(aux);
-  aux = gmulbyi(aux);
+  aux = mulcxI(aux);
   prim2 = myrealun(bitprec);
   RU=cgetg(n+2,t_VEC); RU++;
 
@@ -1432,7 +1411,7 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
   v = cgetg(5,t_VEC);
   v[1] = lmul2n(myrealun(bitprec2), 1);
   v[2] = lneg((GEN)v[1]);
-  v[3] = lmul((GEN)v[1],gi);
+  v[3] = (long)mulcxI((GEN)v[1]);
   v[4] = lneg((GEN)v[3]);
   q = mygprec(q,bitprec2); thickness = realun(3);
   ctr = NULL; imax = polreal? 3: 4;

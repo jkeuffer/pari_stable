@@ -57,7 +57,8 @@ GEN   red_montgomery(GEN T, GEN N, ulong inv);
 GEN   remiimul(GEN x, GEN sy);
 GEN   sqrispec(GEN x, long nx);
 GEN   subrex01(GEN x);
-GEN   gmulbyi(GEN x);
+GEN   mulcxI(GEN x);
+GEN   mulcxmI(GEN x);
 
 int approx_0(GEN x, GEN y);
 GEN bernfrac_using_zeta(long n);

@@ -520,14 +520,14 @@ GEN
 hbessel1(GEN n, GEN z, long prec)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gadd(jbessel(n,z,prec), gmul(gi,nbessel(n,z,prec))));
+  return gerepileupto(av, gadd(jbessel(n,z,prec), mulcxI(nbessel(n,z,prec))));
 }
 
 GEN
 hbessel2(GEN n, GEN z, long prec)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gsub(jbessel(n,z,prec), gmul(gi,nbessel(n,z,prec))));
+  return gerepileupto(av, gadd(jbessel(n,z,prec), mulcxmI(nbessel(n,z,prec))));
 }
 
 GEN kbessel2(GEN nu, GEN x, long prec);
@@ -2132,7 +2132,7 @@ trueeta(GEN x, long prec)
     if (signe(n)) { x = gsub(x,n); N = addii(N, n); }
     if (gcmp(gnorm(x), run) > 0) break;
     x = gdivsg(-1,x);
-    m = gmul(m, gsqrt(gmul(gi,gneg(x)), prec));
+    m = gmul(m, gsqrt(mulcxmI(x), prec));
   }
   Nmod24 = smodis(N, 24);
   if (Nmod24) m = gmul(m, e12(Nmod24, prec));
@@ -2237,7 +2237,7 @@ theta(GEN q, GEN z, long prec)
   else
   {
     GEN lq = glog(q,prec); k = roundr(divrr(zy, real_i(lq)));
-    if (signe(k)) { zold = z; z = gsub(z, gmulbyi(gmul(lq,k))); }
+    if (signe(k)) { zold = z; z = gadd(z, mulcxmI(gmul(lq,k))); }
   }
   qn = gun;
   ps2 = gsqr(q);
@@ -2254,7 +2254,7 @@ theta(GEN q, GEN z, long prec)
   if (signe(k))
   {
     y = gmul(y, gmul(powgi(q,sqri(k)),
-                     gexp(gmul(gmulbyi(zold),shifti(k,1)), prec)));
+                     gexp(gmul(mulcxI(zold),shifti(k,1)), prec)));
     if (mod2(k)) y = gneg_i(y);
   }
   return gerepileupto(av, gmul(y, gmul2n(gsqrt(gsqrt(q,prec),prec),1)));

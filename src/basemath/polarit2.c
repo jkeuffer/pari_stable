@@ -2025,7 +2025,7 @@ static GEN
 gauss_normal(GEN x)
 {
   if (signe(real_i(x)) < 0) x = gneg(x);
-  if (signe(imag_i(x)) < 0) x = gmul(x, gi);
+  if (signe(imag_i(x)) < 0) x = mulcxI(x);
   return x;
 }
 

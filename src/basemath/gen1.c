@@ -1235,6 +1235,45 @@ mulqq(GEN x, GEN y) {
 }
 
 GEN
+mulcxI(GEN x)
+{
+  GEN z;
+  if (typ(x) != t_COMPLEX)
+  {
+    z = cgetg(3,t_COMPLEX);
+    z[1] = zero;
+    z[2] = (long)x;
+  }
+  else
+  {
+    if (isexactzero((GEN)x[1])) return gneg((GEN)x[2]);
+    z = cgetg(3,t_COMPLEX);
+    z[1] = lneg((GEN)x[2]);
+    z[2] = x[1];
+  }
+  return z;
+}
+GEN
+mulcxmI(GEN x)
+{
+  GEN z;
+  if (typ(x) != t_COMPLEX)
+  {
+    z = cgetg(3,t_COMPLEX);
+    z[1] = zero;
+    z[2] = lneg(x);
+  }
+  else
+  {
+    if (isexactzero((GEN)x[1])) return (GEN)x[2];
+    z = cgetg(3,t_COMPLEX);
+    z[1] = x[2];
+    z[2] = lneg((GEN)x[1]);
+  }
+  return z;
+}
+
+GEN
 gmul(GEN x, GEN y)
 {
   long tx, ty, lx, ly, vx, vy, i, j, l;

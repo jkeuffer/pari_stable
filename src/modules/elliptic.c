@@ -389,7 +389,7 @@ initell0(GEN x, long prec)
   if (typ(T) == t_COMPLEX && gcmp0((GEN)T[2])) T = (GEN)T[1];
   /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
   y[17] = ldiv(gmul(gsqr(pi),T), gmulsg(6,w1));
-  y[18] = ldiv(gsub(gmul((GEN)y[17],w2), gmulbyi(pi)), w1);
+  y[18] = ldiv(gsub(gmul((GEN)y[17],w2), mulcxI(pi)), w1);
   return y;
 }
 
