@@ -251,7 +251,13 @@ void
 write0(char *s, GEN *g, long flag)
 {
   int i = added_newline;
-  s = expand_tilde(s); switchout(s); free(s);
+  s = expand_tilde(s);
+  if (secure)
+  {
+    fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",s);
+    hit_return();
+  }
+  switchout(s); free(s);
   print0(g,flag); added_newline = i;
   switchout(NULL);
 }
@@ -478,7 +484,7 @@ sd_secure(char *v, int flag)
 {
   if (secure)
   {
-    fprintferr("Do you want to modify the 'secure' flag? (^C if not)\n");
+    fprintferr("[secure mode]: Do you want to modify the 'secure' flag? (^C if not)\n");
     hit_return();
   }
   return sd_numeric(v,flag,"secure",&secure, 0,1,NULL);
@@ -664,6 +670,8 @@ sd_help(char *v, int flag)
   char *str;
   if (*v)
   {
+    if (secure)
+      err(talker,"[secure mode]: can't modify 'help' default (to %s)",v);
     if (help_prg) free(help_prg);
     help_prg = expand_tilde(v);
   }
@@ -2045,7 +2053,7 @@ static void
 check_secure(char *s)
 {
   if (secure)
-    err(talker, "secure mode: system commands not allowed\nTried to run '%s'",s);
+    err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
 }
 
 GEN
