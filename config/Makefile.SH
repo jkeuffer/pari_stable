@@ -62,14 +62,12 @@ hlist="$hlist paridecl"
 
 case "$which_graphic_lib" in
 none)
-  PLOTFILE=plotnull.c
   PLOTCFLAGS=
   PLOTLIBS=
   plotrunpath=
   graph="$graph plotnull"
   ;;
 gnuplot)
-  PLOTFILE=plotgnuplot.c
   PLOTCFLAGS=
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
   PLOTLIBS="$gnuplot_libs"
@@ -81,14 +79,39 @@ gnuplot)
   graph="$graph plotgnuplot"
   ;;
 gnuplot-dynamic)
-  PLOTFILE=plotgnuplot.c
   PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=NULL"
   PLOTLIBS=
   plotrunpath=
   graph="$graph plotgnuplot"
   ;;
+builtin.X11-gnuplot)
+  cflags="$cflags -DBOTH_GNUPLOT_AND_X11"
+  PLOTCFLAGS=-I$Xincroot
+  GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
+  if test "$osname" = concentrix; then
+    PLOTLIBS="$gnuplot_libs -lX11"
+  else
+    PLOTLIBS="$gnuplot_libs -L$X11 -lX11 $extralib"
+  fi
+  plotrunpath=$X11
+  case "$osname" in
+    os2) libgnuplot=$gnuplot/gnuplot.a;;
+    *) libgnuplot=$gnuplot/libgnuplot.a;;
+  esac
+  graph="$graph plotgnuplot plotX"
+  ;;
+builtin.X11-gnuplot-dynamic)
+  cflags="$cflags -DBOTH_GNUPLOT_AND_X11"
+  PLOTCFLAGS="-I$Xincroot -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=NULL"
+  if test "$osname" = concentrix; then
+    PLOTLIBS="-lX11"
+  else
+    PLOTLIBS="-L$X11 -lX11 $extralib"
+  fi
+  plotrunpath=$X11
+  graph="$graph plotgnuplot plotX"
+  ;;
 X11)
-  PLOTFILE=plotX.c
   PLOTCFLAGS=-I$Xincroot
   PLOTLIBS="-L$X11 -lX11 $extralib"
   if test "$osname" = concentrix; then PLOTLIBS="-lX11"; fi
@@ -232,7 +255,6 @@ INSTALL_PROGRAM = \$(INSTALL)
 INSTALL_DATA = \$(INSTALL) -m 644
 
 # Graphic library.
-PLOTFILE   = $PLOTFILE
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
 GNUPLOT_OBJS = $GNUPLOT_OBJS
