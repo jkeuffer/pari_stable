@@ -124,6 +124,8 @@ MSo20- simplified polzagier()
 DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
        before checking precision ]
    22- minor improvements in plindep() [p-adic lindep/algdep]
+   23- 'make gp' now builds the documentation [ that way, 'make install' need
+       not run a bunch of TeX commands as root ]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

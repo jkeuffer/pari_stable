@@ -46,7 +46,13 @@ dft target::
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
 
-gp all bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
+gp all::
+	@-cd doc && \$(MAKE) doc
+	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
+	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
+	cd \$\$dir && \$(MAKE) \$@
+
+bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@
@@ -62,7 +68,7 @@ prf gp.prf::
 	cd \$\$dir && \$(MAKE) gp
 	
 doc docps docpdf gpman cleandoc::
-	cd doc; \$(MAKE) \$@
+	cd doc && \$(MAKE) \$@
 
 clean:: cleandoc cleanobj
 

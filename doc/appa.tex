@@ -11,9 +11,8 @@
 \section{Required tools}
 
 We assume that you have either an \kbd{ANSI C} or a \kbd{C++} compiler
-available. If your machine does not have one (for example if you still use
-\kbd{/bin/cc} in \kbd{SunOS 4.1.x}), we strongly suggest that you obtain the
-\kbd{gcc/g++} compiler from the Free Software Foundation or by
+available. If your machine does not have one, we strongly suggest that you
+obtain the \kbd{gcc/g++} compiler from the Free Software Foundation or by
 anonymous~\kbd{ftp}. As for all GNU software mentioned afterwards, you can
 find the most convenient site to fetch \kbd{gcc} at the address
 
@@ -55,11 +54,8 @@ independently (\kbd{http://www.perl.com} will direct you to the nearest
 \kbd{CPAN} archive site).
 
   $\bullet$ A colour-capable \kbd{xterm}, which enables GP to use different
-(user configurable) colours for its output. All \kbd{xterm} programs which come
-with current X11R6.3 distributions will satisfy this requirement. Under X11R6,
-you can for instance use \kbd{color\_xterm} (get the latest version at
-\kbd{http://www.clark.net/pub/dickey/xterm}).
-
+(user configurable) colours for its output. All \kbd{xterm} programs which
+come with current X11 distributions satisfy this requirement.
 \vfill\eject
 \section{Compiling the library and the GP calculator}
 
@@ -143,7 +139,7 @@ Even in interactive mode, you cannot directly tell \kbd{Configure}
 where the \kbd{readline} library and include files are. If they are not in a
 standard place, it won't find them. Nonetheless, it first searches the
 distribution toplevel for a \kbd{readline} directory. Thus, if you just want
-to give \kbd{readline} a try (as you probably should), you can get the source
+to give \kbd{readline} a try, as you probably should, you can get the source
 and compile it there (you don't need to install it). You can also use this
 feature together with a symbolic link, named \kbd{readline}, in the PARI
 toplevel directory if you have compiled the readline library somewhere else,
@@ -183,11 +179,11 @@ of PARI can be built.
 
 \kbd{make gp}
 
-\noindent in the distribution directory. If your \kbd{make} program supports
-parallel make, you can speed up the process by going to the \kbd{O$xxx$}
-directory that \kbd{Configure} created and doing a parallel make here (for
-instance \kbd{make -j4} with GNU make). It may even work from the toplevel
-directory.
+\noindent in the distribution directory (this also builds the documentation,
+see below). If your \kbd{make} program supports parallel make, you can speed
+up the process by going to the \kbd{O$xxx$} directory that \kbd{Configure}
+created and doing a parallel make here (for instance \kbd{make -j4} with GNU
+make). It may even work from the toplevel directory.
 
 The GP binary built above is optimized. If you have run \kbd{Configure -g} or
 \kbd{-pg} and want to build a special purpose binary, you can \kbd{cd} to the
@@ -214,23 +210,10 @@ in the \kbd{O$xxx$} directory and the file \kbd{dft.Config.in}).
 
 \misctitle{Known problems:}
 
-$\bullet$ \kbd{elliptic}: the test \kbd{cmcurve=ellinit([0,-3/4,0,-2,-1])}
-may give results which differ slightly from the template (last decimal in a
-few entries). This ultimately depends on the output of
-
-\kbd{polroots(x\pow 3-3/4*x\pow 2-2*x-1)[1]}
-
-\noindent at \kbd{\b{p}38}, which may be $2.0$ or $1.999\dots$ depending on
-your hardware, libraries, compiler\dots Intel Pentiums running Linux often
-trigger this \kbd{BUG} (unrelated to the infamous \kbd{fdiv} bug), which
-can safely be ignored in any case: both results are correct given the
-requested precision.
-
 $\bullet$ \kbd{program}: the GP function \kbd{install} may not be available on
 your platform, triggering an error message (``not yet available for this
-architecture''). Have a look at the \kbd{MACHINES} files (the \kbd{dl}
-column) to check if your system is known not to support it, or has never
-been tested yet.
+architecture''). Have a look at the \kbd{MACHINES} files to check if your
+system is known not to support it, or has never been tested yet.
 
 $\bullet$ If when running \kbd{gp-dyn}, you get a message of the form
 
@@ -318,17 +301,17 @@ current \kbd{misc/gprc.dft}.
 
 \section{Getting Started}
 
-\subsec{Printable Documentation:} To print the user's guide, for which you'll
-need a working (plain) \TeX\ installation, type
+\subsec{Printable Documentation:} Building gp as explained above also builds
+its documentation in directory \kbd{doc}. For this to work, you need a
+working (plain) \TeX\ installation.
 
-\kbd{make doc}
-
-\noindent This will create, in two passes, a file \kbd{doc/users.dvi}
-containing the manual with a table of contents and an index. You must then
-send the \kbd{users.dvi} file to your favourite printer in the usual way,
-probably via \kbd{dvips}. Also included are a short tutorial
-(\kbd{doc/tutorial.dvi}) and a reference card (\kbd{doc/refcard.dvi}
-and \kbd{doc/refcard.ps}) for GP.
+This directory contains various \kbd{dvi} files: \kbd{users.dvi} (manual with
+a table of contents and an index), \kbd{tutorial.dvi} (a short tutorial), and
+\kbd{refcard.dvi} (a reference card for GP). You can send these files to your
+favourite printer in the usual way, probably via \kbd{dvips}. The reference
+card is also provided as a \kbd{PostScript} document, which may be easier to
+print than its \kbd{dvi} equivalent (it is in Landscape orientation and
+assumes A4 paper size).
 
 \noindent If the \kbd{pdftex} package is part of your \TeX\ setup, you can
 produce these documents in PDF format, which may be more convenient for
