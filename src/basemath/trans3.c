@@ -844,8 +844,14 @@ czeta(GEN s0, long prec)
         default: la = 3; break;
       }
     }
+    p1 = gsub(sapprox, gun); /* s too close to 1 ? */
+    if (signe(greal(p1)) <= 0) 
+    {
+      GEN p2 = gsub(greal(s), gun); setlg(p2,3);
+      if (typ(p1) == t_COMPLEX) p1[1] = (long)p2; else p1 = p2;
+    }
     /* l2 = Re( (s - 1/2) log (s-1) ) */
-    l2 = rtodbl(greal(gmul(gsub(sapprox,ghalf), glog(gsub(sapprox,gun),3))));
+    l2 = rtodbl(greal(gmul(gsub(sapprox,ghalf), glog(p1,3))));
     l = (pariC2*(prec-2) - l2 + ssig*2*pariC1) / (2. * (1.+ log((double)la)));
     l2 = sqrt(ns)/2;
     if (l < l2) l = l2;
