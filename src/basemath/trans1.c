@@ -1278,7 +1278,7 @@ mpexp(GEN x)
   if (!sx) return addsr(1,x);
   if (sx<0) setsigne(x,1);
   av = avma; y = addsr(1, mpexp1(x));
-  if (sx<0) { y = divsr(1,y); setsigne(x,-1); }
+  if (sx<0) { y = ginv(y); setsigne(x,-1); }
   return gerepileupto(av,y);
 }
 

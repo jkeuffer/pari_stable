@@ -1859,7 +1859,7 @@ mppsi(GEN z)
   affrr(z, x);
   tail = avma;
   while(cmprs(x, num >> 2) < 0) {
-    gaddz(a, divsr(1, x), a);
+    gaddz(a, ginv(x), a);
     gaddgsz(x, 1, x);
     avma = tail;
   }
@@ -1867,14 +1867,14 @@ mppsi(GEN z)
   s = mplog(x);
   gsubz(s, a, s);
   b = gmul2n(x, 1);
-  gsubz(s, divsr(1, b), s);
+  gsubz(s, ginv(b), s);
 
   mpbern(num, len);
 
   affsr(-1, a);
   gdivgsz(a, 2, a);
   f = mulrr(x, x);
-  f = divsr(1, f);
+  f = ginv(f);
   k = 1;
   do {
     gmulz(a, f, a);

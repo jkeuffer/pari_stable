@@ -778,7 +778,7 @@ sumalt(entree *ep, GEN a, char *ch, long prec)
   push_val(ep, a);
   e1=addsr(3,gsqrt(stoi(8),prec));
   N=(long)(0.4*(bit_accuracy(prec) + 7));
-  d=gpuigs(e1,N); d=shiftr(addrr(d,divsr(1,d)),-1);
+  d=gpuigs(e1,N); d=shiftr(addrr(d, ginv(d)),-1);
   az=negi(gun); c=d; s=gzero;
   for (k=0; ; k++)
   {
@@ -830,7 +830,7 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
   a=subis(a,1); reel=cgetr(prec);
   e1=addsr(3,gsqrt(stoi(8),prec));
   N=(long)(0.4*(bit_accuracy(prec) + 7));
-  d=gpuigs(e1,N); d=shiftr(addrr(d,divsr(1,d)),-1);
+  d=gpuigs(e1,N); d=shiftr(addrr(d, ginv(d)),-1);
   az=negi(gun); c=d; s=gzero;
   G = -bit_accuracy(prec) - 5;
   stock=(GEN*)new_chunk(N+1); for (k=1; k<=N; k++) stock[k]=NULL;

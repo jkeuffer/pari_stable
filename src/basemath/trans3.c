@@ -1267,7 +1267,7 @@ izeta(long k, long prec)
     return gerepileuptoleaf(av, divrs(y,k-1));
   }
   if (k > bit_accuracy(prec)+1) return realun(prec);
-  pi2 = mppi(prec); setexpo(pi2,2); /* 2Pi */
+  pi2 = Pi2n(1, prec);
   if ((k&1) == 0)
   {
     p1 = mulrr(gpuigs(pi2,k),absr(bernreal(k,prec)));
@@ -1293,18 +1293,17 @@ izeta(long k, long prec)
     y = mulrr(divrr(gpuigs(pi2,k),mpfactr(kk,prec)),y);
 
     av2 = avma; limit = stack_lim(av2,1);
-    qn = gsqr(q); z = divsr(1,addrs(q,-1));
+    qn = gsqr(q); z = ginv( addrs(q,-1) );
     for (n=2; ; n++)
     {
-      p1 = divsr(1,mulir(gpuigs(stoi(n),k),addrs(qn,-1)));
+      p1 = ginv( mulir(gpuigs(stoi(n),k),addrs(qn,-1)) );
 
       z = addrr(z,p1); if (expo(p1)< li) break;
       qn = mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        GEN *gptr[2]; gptr[0]=&z; gptr[1]=&qn;
         if (DEBUGMEM>1) err(warnmem,"izeta");
-        gerepilemany(av2,gptr,2);
+        gerepileall(av2,2, &z, &qn);
       }
     }
     setexpo(z,expo(z)+1);
@@ -1335,9 +1334,8 @@ izeta(long k, long prec)
       qn=mulrr(qn,q);
       if (low_stack(limit,stack_lim(av2,1)))
       {
-        GEN *gptr[2]; gptr[0]=&z; gptr[1]=&qn;
         if (DEBUGMEM>1) err(warnmem,"izeta");
-        gerepilemany(av2,gptr,2);
+        gerepileall(av2,2, &z, &qn);
       }
     }
     setexpo(z,expo(z)+1);
