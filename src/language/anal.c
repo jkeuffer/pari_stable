@@ -2247,13 +2247,12 @@ identifier(void)
 }
 
 static ulong
-number(int *pn, char **ps)
+number(int *n, char **s)
 {
-  char *s = *ps;
   ulong m = 0;
-  int n = 0;
-  for (n = 0; n < 9 && isdigit((int)*s); n++) m = 10*m + (*s++ - '0');
-  *ps = s; *pn = n; return m;
+  for (*n = 0; *n < 9 && isdigit((int)**s); (*n)++,(*s)++)
+    m = 10*m + (**s - '0');
+  return m;
 }
 
 ulong
@@ -2285,8 +2284,7 @@ constante()
   long l, n = 0;
   int nb;
   GEN y = utoi(number(&nb, &analyseur));
-
-  y = int_read_more(y, &analyseur);
+  if (nb == 9) y = int_read_more(y, &analyseur);
   switch(*analyseur)
   {
     default: return y; /* integer */
