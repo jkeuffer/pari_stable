@@ -1008,7 +1008,6 @@ bernvec(long nb)
 /**                      FONCTION GAMMA                            **/
 /**                                                                **/
 /********************************************************************/
-extern GEN cgetc(long l);
 
 static GEN
 mpgamma(GEN x)

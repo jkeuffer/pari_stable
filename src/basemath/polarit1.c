@@ -2369,7 +2369,7 @@ factmod9(GEN f, GEN pp, GEN a)
 /*******************************************************************/
 GEN square_free_factorization(GEN pol);
 static GEN laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC);
-static GEN zrhqr(GEN a,long PREC);
+GEN zrhqr(GEN a,long PREC);
 
 GEN
 rootsold(GEN x, long l)
@@ -2779,12 +2779,10 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
 
 /***********************************************************************/
 /**                                                                   **/
-/**                     RACINES D'UN POLYNOME                         **/
-/**                     A COEFFICIENTS REELS                          **/
+/**             ROOTS of a polynomial with REAL coeffs                **/
 /**                                                                   **/
 /***********************************************************************/
-
-#define RADIX 1
+#define RADIX 1L
 #define COF 0.95
 
 /* ONLY FOR REAL COEFFICIENTS MATRIX : replace the matrix x with
@@ -2792,34 +2790,40 @@ laguer(GEN pol,long N,GEN y0,GEN EPS,long PREC)
 static GEN
 balanc(GEN x)
 {
-  long av,tetpil,n,last,j,i,sqrdx;
-  GEN s,r,g,f,c,cofgen,a;
+  ulong av = avma;
+  long last,i,j, sqrdx = (RADIX<<1), n = lg(x);
+  GEN r,c,cofgen,a;
 
-  av=avma; a=gcopy(x); n=lg(a)-1; sqrdx=RADIX+RADIX; last=0; cofgen=dbltor(COF);
+  a = dummycopy(x);
+  last = 0; cofgen = dbltor(COF);
   while (!last)
   {
-    last=1;
-    for (i=1; i<=n; i++)
+    last = 1;
+    for (i=1; i<n; i++)
     {
-      r=c=gzero;
-      for (j=1; j<=n; j++)
-        if (j!=i){ c=gadd(gabs(gcoeff(a,j,i),0),c); r=gadd(gabs(gcoeff(a,i,j),0),r); }
-        if ((!gcmp0(r))&&(!gcmp0(c)))
+      r = c = gzero;
+      for (j=1; j<n; j++)
+        if (j!=i)
         {
-          g=gmul2n(r,-RADIX); f=gun; s=gadd(c,r);
-          while (gcmp(c,g)<0){ f=gmul2n(f,RADIX); c=gmul2n(c,sqrdx); }
-          g=gmul2n(r,RADIX);
-          while (gcmp(c,g)>0){ f=gmul2n(f,-RADIX); c=gmul2n(c,-sqrdx); }
-          if (gcmp(gdiv(gadd(c,r),f),gmul(cofgen,s))<0)
-          {
-            last=0; g=ginv(f);
-            for (j=1; j<=n; j++) coeff(a,i,j)=lmul(gcoeff(a,i,j),g);
-            for (j=1; j<=n; j++) coeff(a,j,i)=lmul(gcoeff(a,j,i),f);
-          }
+          c = gadd(c, gabs(gcoeff(a,j,i),0));
+          r = gadd(r, gabs(gcoeff(a,i,j),0));
         }
+      if (!gcmp0(r) && !gcmp0(c))
+      {
+        GEN g, s = gmul(cofgen, gadd(c,r));
+        long ex = 0;
+        g = gmul2n(r,-RADIX); while (gcmp(c,g) < 0) {ex++; c=gmul2n(c, sqrdx);}
+        g = gmul2n(r, RADIX); while (gcmp(c,g) > 0) {ex--; c=gmul2n(c,-sqrdx);}
+        if (gcmp(gadd(c,r), gmul2n(s,ex)) < 0)
+        {
+          last = 0;
+          for (j=1; j<n; j++) coeff(a,i,j)=lmul2n(gcoeff(a,i,j),-ex);
+          for (j=1; j<n; j++) coeff(a,j,i)=lmul2n(gcoeff(a,j,i), ex);
+        }
+      }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(a));
+  return gerepileupto(av, gcopy(a));
 }
 
 #define SIGN(a,b) ((b)>=0.0 ? fabs(a) : -fabs(a))
@@ -2827,10 +2831,10 @@ static GEN
 hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
 {
   long nn,n,m,l,k,j,its,i,mmin,flj,flk;
-  double **a,p,q,r,s,t,u,v,w,x,y,z,anorm,*wr,*wi,eps;
+  double **a,p,q,r,s,t,u,v,w,x,y,z,anorm,*wr,*wi;
+  const double eps = 0.000001;
   GEN eig;
 
-  eps=0.000001;
   n=lg(mat)-1; a=(double**)gpmalloc(sizeof(double*)*(n+1));
   for (i=1; i<=n; i++) a[i]=(double*)gpmalloc(sizeof(double)*(n+1));
   for (j=1; j<=n; j++)
@@ -2841,8 +2845,7 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
   anorm=fabs(a[1][1]);
   for (i=2; i<=n; i++) for (j=(i-1); j<=n; j++) anorm+=fabs(a[i][j]);
   nn=n; t=0.0;
-  if (DEBUGLEVEL>3)
-  { fprintferr("* Finding eigenvalues\n"); flusherr(); }
+  if (DEBUGLEVEL>3) { fprintferr("* Finding eigenvalues\n"); flusherr(); }
   while (nn>=1)
   {
     its=0;
@@ -2857,11 +2860,12 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
       if (l==nn){ wr[nn]=x+t; wi[nn--]=0.0; }
       else
       {
-        y=a[nn-1][nn-1]; w=a[nn][nn-1]*a[nn-1][nn];
-        if (l==(nn-1))
+        y=a[nn-1][nn-1];
+        w=a[nn][nn-1]*a[nn-1][nn];
+        if (l == nn-1)
         {
           p=0.5*(y-x); q=p*p+w; z=sqrt(fabs(q)); x+=t;
-          if ((q>=0.0)||(fabs(q)<=eps))
+          if (q>=0.0 || fabs(q)<=eps)
           {
             z=p+SIGN(z,p); wr[nn-1]=wr[nn]=x+z;
             if (fabs(z)>eps) wr[nn]=x-w/z;
@@ -2881,9 +2885,11 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
             y=x=0.75*s; w=-0.4375*s*s;
           }
           its++;
-          for (m=(nn-2); m>=l; m--)
+          for (m=nn-2; m>=l; m--)
           {
-            z=a[m][m]; r=x-z; s=y-z; p=(r*s-w)/a[m+1][m]+a[m][m+1]; q=a[m+1][m+1]-z-r-s;
+            z=a[m][m]; r=x-z; s=y-z;
+            p=(r*s-w)/a[m+1][m]+a[m][m+1];
+            q=a[m+1][m+1]-z-r-s;
             r=a[m+2][m+1]; s=fabs(p)+fabs(q)+fabs(r); p/=s; q/=s; r/=s;
             if (m==l) break;
             u=fabs(a[m][m-1])*(fabs(q)+fabs(r));
@@ -2895,24 +2901,31 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
           {
             if (k!=m)
             {
-              p=a[k][k-1]; q=a[k+1][k-1]; r=0.0; if (k!=(nn-1)) r=a[k+2][k-1];
-              if ((x=fabs(p)+fabs(q)+fabs(r))!=0.0){ p/=x; q/=x; r/=x; }
+              p=a[k][k-1]; q=a[k+1][k-1];
+              r = (k != nn-1) a[k+2][k-1]: 0.0;
+              x = fabs(p)+fabs(q)+fabs(r);
+              if (x != 0.0) { p/=x; q/=x; r/=x; }
             }
-            if ((s=SIGN(sqrt(p*p+q*q+r*r),p))!=0.0)
+            s = SIGN(sqrt(p*p+q*q+r*r),p);
+            if (s == 0.0) continue;
+
+            if (k==m)
+              { if (l!=m) a[k][k-1] = -a[k][k-1]; }
+            else
+              a[k][k-1] = -s*x;
+            p+=s; x=p/s; y=q/s; z=r/s; q/=p; r/=p;
+            for (j=k; j<=nn; j++)
             {
-              if (k==m){ if (l!=m) a[k][k-1]=-a[k][k-1]; }else a[k][k-1]=-s*x;
-              p+=s; x=p/s; y=q/s; z=r/s; q/=p; r/=p;
-              for (j=k; j<=nn; j++)
-              {
-                p=a[k][j]+q*a[k+1][j]; if (k!=(nn-1)){ p+=r*a[k+2][j]; a[k+2][j]-=p*z; }
-                a[k+1][j]-=p*y; a[k][j]-=p*x;
-              }
-              mmin=(nn<k+3) ? nn : k+3;
-              for (i=l; i<=mmin; i++)
-              {
-                p=x*a[i][k]+y*a[i][k+1]; if (k!=(nn-1)){ p+=z*a[i][k+2]; a[i][k+2]-=p*r; }
-                a[i][k+1]-=p*q; a[i][k]-=p;
-              }
+              p = a[k][j]+q*a[k+1][j];
+              if (k != nn-1) { p+=r*a[k+2][j]; a[k+2][j]-=p*z; }
+              a[k+1][j] -= p*y; a[k][j] -= p*x;
+            }
+            mmin = (nn < k+3)? nn: k+3;
+            for (i=l; i<=mmin; i++)
+            {
+              p = x*a[i][k]+y*a[i][k+1];
+              if (k != nn-1) { p+=z*a[i][k+2]; a[i][k+2]-=p*r; }
+              a[i][k+1] -= p*q; a[i][k] -= p;
             }
           }
         }
@@ -2934,8 +2947,7 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
     }
     wr[k+1]=x; wi[k+1]=y;
   }
-  if (DEBUGLEVEL>3)
-  { fprintferr("* End of the computation of eigenvalues\n"); flusherr(); }
+  if (DEBUGLEVEL>3) { fprintferr("* Eigenvalues computed\n"); flusherr(); }
   for (i=1; i<=n; i++) free(a[i]); free(a); eig=cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
   {
@@ -2951,62 +2963,43 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
   free(wr); free(wi); return eig;
 }
 
-static GEN
-zrhqr(GEN a,long PREC)
-/*    ONLY FOR POLYNOMIAL WITH REAL COEFFICIENTS : give the roots of
- *  the polynomial a (first, the real roots, then the
- *  non real roots) in increasing order of their real
- *  parts MULTIPLE ROOTS ARE FORBIDDEN.
+/* ONLY FOR POLYNOMIAL WITH REAL COEFFICIENTS : give the roots of the
+ * polynomial a (first, the real roots, then the non real roots) in
+ * increasing order of their real parts MULTIPLE ROOTS ARE FORBIDDEN.
  */
+GEN
+zrhqr(GEN a,long prec)
 {
-  long av,tetpil,n,i,j,k,ct,prec;
-  GEN aa,b,p1,rt,rr,hess,x,dx,y,hessbis,eps,newval;
-  GEN oldval = NULL; /* for lint */
+  ulong av = avma;
+  long i,j,prec2, n = lgef(a)-3, ex = -bit_accuracy(prec);
+  GEN aa,b,p1,rt,rr,hess,x,dx,y,newval,oldval;
 
-  av=avma; n=lgef(a)-3; prec=PREC;
-  hess=cgetg(n+1,t_MAT); for (k=1; k<=n; k++) hess[k]=lgetg(n+1,t_COL);
-  for (k=1; k<=n; k++)
+  hess = cgetg(n+1,t_MAT); 
+  for (j=1; j<=n; j++)
   {
-    p1=(GEN)hess[k]; p1[1]=lneg(gdiv((GEN)a[n-k+2],(GEN)a[n+2]));
-    for (j=2; j<=n; j++){ if (j==(k+1)) p1[j]=un; else p1[j]=zero; }
+    p1 = cgetg(n+1,t_COL); hess[j] = (long)p1; 
+    p1[1] = lneg(gdiv((GEN)a[n-j+2],(GEN)a[n+2]));
+    for (i=2; i<=n; i++) p1[i] = (i==(j+1))? un: zero;
   }
-  rr=cgetg(n+1,t_COL);
+  rt = hqr(balanc(hess));
+  prec2 = 2*prec; /* polishing the roots */
+  aa = gprec_w(a, prec2);
+  b = derivpol(aa); rr = cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
   {
-    rr[i]=lgetg(3,t_COMPLEX);
-    mael(rr,i,1)=lgetr(PREC);
-    mael(rr,i,2)=lgetr(PREC);
-  }
-  hessbis=balanc(hess); rt=hqr(hessbis);
-  eps=cgetr(prec);
-  p1=gpuigs(gdeux,-bit_accuracy(prec)); gaffect(p1,eps);
-  prec=2*PREC; /* polishing the roots */
-  aa=cgetg(n+3,t_POL); aa[1]=a[1];
-  for (i=2; i<=n+2; i++){ aa[i]=lgetr(prec); gaffect((GEN)a[i],(GEN)aa[i]); }
-  b=deriv(aa,varn(aa));
-  for (i=1; i<=n; i++)
-  {
-    ct=0;
-    if (typ(rt[i])==t_REAL) { x=cgetr(prec); affrr((GEN)rt[i],x); }
-    else
-    {
-      x=cgetg(3,t_COMPLEX);
-      x[1]=lgetr(prec); affrr(gmael(rt,i,1),(GEN)x[1]);
-      x[2]=lgetr(prec); affrr(gmael(rt,i,2),(GEN)x[2]);
+    x = gprec_w((GEN)rt[i], prec2);
+    for (oldval=NULL;; oldval=newval, x=y)
+    { /* Newton iteration */
+      dx = poleval(b,x);
+      if (gexpo(dx) < ex)
+        err(talker,"polynomial has probably multiple roots in zrhqr");
+      y = gsub(x, gdiv(poleval(aa,x),dx));
+      newval = gabs(poleval(aa,y),prec2);
+      if (gexpo(newval) < ex || (oldval && gcmp(newval,oldval) > 0)) break;
     }
-  LAB1:
-    dx=poleval(b,x);
-    if (gcmp(gabs(dx,prec),eps) <= 0)
-      err(talker,"the polynomial has probably multiple roots in zrhqr");
-    y=gsub(x,gdiv(poleval(aa,x),dx));
-    newval=gabs(poleval(aa,y),prec);
-    if (gcmp(newval,eps) > 0 && (!ct || gcmp(newval,oldval) < 0))
-    {
-      ct++; oldval=newval; x=y;
-      goto LAB1;
-    }
-    gaffect(y,(GEN)rr[i]);
+    if (DEBUGLEVEL>3) fprintferr("%ld ",i);
+    rr[i] = (long)cgetc(prec); gaffect(y, (GEN)rr[i]);
   }
-  if (DEBUGLEVEL>3){ fprintferr("polished roots = %Z",rr); flusherr(); }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(rr));
+  if (DEBUGLEVEL>3) { fprintferr("\npolished roots = %Z",rr); flusherr(); }
+  return gerepileupto(av, gcopy(rr));
 }

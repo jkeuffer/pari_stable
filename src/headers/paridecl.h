@@ -1298,6 +1298,7 @@ void    mpgamdz(long s, GEN y);
 /* trans3.c */
 
 GEN     agm(GEN x, GEN y, long prec);
+GEN     cgetc(long l);
 GEN     dilog(GEN x, long prec);
 GEN     eint1(GEN x, long prec);
 GEN     eta(GEN x, long prec);
