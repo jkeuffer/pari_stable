@@ -1448,6 +1448,7 @@ bruti(GEN g, long nosign)
     case t_PADIC:
     {
       GEN p = (GEN)g[2];
+      ulong av = avma;
       i = valp(g); l = precp(g)+i;
       g = (GEN)g[4]; v = GENtostr(p);
       for (; i<l; i++)
@@ -1462,6 +1463,7 @@ bruti(GEN g, long nosign)
 	  if (i) padic_nome(v,i);
           sp_plus_sp();
 	}
+        if ((i & 0xfff) == 0) g = gerepileuptoint(av,g);
       }
       pariputs("O("); padic_nome(v,i); pariputc(')');
       free(v); break;
