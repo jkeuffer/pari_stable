@@ -785,6 +785,7 @@ sub basic_subst
   s/\\kbd\s*\{((?:[^{}]|\{[^{}]*\})*)\}/$tr{startcode}$1$tr{endcode}/g;
 
   s/\\key\{((?:[^{}]|\{[^{}]*\})*)\}/$tr{startbold}$1$tr{endbold}/g unless $refcard;
+  s/\\goth\{((?:[^{}]|\{[^{}]*\})*)\}/$tr{startbold}$1$tr{endbold}/g;
 
   if ($refcard) {
     s/\\(?:key|li)\{((?:[^{}]+(?=[{}])|\{[^{}]*\})*)\}\s*\{\}[ \t]*\n/\n\n=back\n\n$1\n\n=over\n\n/g;

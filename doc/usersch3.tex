@@ -1823,7 +1823,7 @@ expected that infinitely such numbers exist.
 If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime (with
 end-matching) for $\fl$ randomly chosen bases.
 
-\syn{gispseudoprime}{x,\f}, but the simpler function $\teb{ispseudoprime}(x)$
+\syn{gispseudoprime}{x,\fl}, but the simpler function $\teb{ispseudoprime}(x)$
 which returns a \kbd{long} should be used if $x$ is known to be of type
 integer.
 
@@ -3017,10 +3017,10 @@ Theory}, Graduate Texts in Maths \key{138}, Springer-Verlag, 1993, Section
 
 $\var{bnf}[1]$ contains the matrix $W$, i.e.~the matrix in Hermite normal
 form giving relations for the class group on prime ideal generators
-$(\p_i)_{1\le i\le r}$.
+$(\wp_i)_{1\le i\le r}$.
 
 $\var{bnf}[2]$ contains the matrix $B$, i.e.~the matrix containing the
-expressions of the prime ideal factorbase in terms of the $\p_i$. It is an
+expressions of the prime ideal factorbase in terms of the $\wp_i$. It is an
 $r\times c$ matrix.
 
 $\var{bnf}[3]$ contains the complex logarithmic embeddings of the system of
@@ -3775,15 +3775,15 @@ $1\le i\le k$ and $\sum_{1\le i\le k}e[i]=1$.
 
 \subsecidx{idealappr}$(\var{nf},x,\{\fl=0\})$: if $x$ is a fractional ideal
 (given in any form), gives an element $\alpha$ in $\var{nf}$ such that for
-all prime ideals $\p$ such that the valuation of $x$ at $\p$ is non-zero, we
-have $v_{\p}(\alpha)=v_{\p}(x)$, and. $v_{\p}(\alpha)\ge0$ for all other
-${\p}$.
+all prime ideals $\wp$ such that the valuation of $x$ at $\wp$ is non-zero, we
+have $v_{\wp}(\alpha)=v_{\wp}(x)$, and. $v_{\wp}(\alpha)\ge0$ for all other
+${\wp}$.
 
 If $\fl$ is non-zero, $x$ must be given as a prime ideal factorization, as
 output by \kbd{idealfactor}, but possibly with zero or negative exponents.
-This yields an element $\alpha$ such that for all prime ideals $\p$ occurring
-in $x$, $v_{\p}(\alpha)$ is equal to the exponent of $\p$ in $x$, and for all
-other prime ideals, $v_{\p}(\alpha)\ge0$. This generalizes
+This yields an element $\alpha$ such that for all prime ideals $\wp$ occurring
+in $x$, $v_{\wp}(\alpha)$ is equal to the exponent of $\wp$ in $x$, and for all
+other prime ideals, $v_{\wp}(\alpha)\ge0$. This generalizes
 $\kbd{idealappr}(\var{nf},x,0)$ since zero exponents are allowed. Note that
 the algorithm used is slightly different, so that
 \kbd{idealappr(\var{nf},idealfactor(\var{nf},x))} may not be the same as
@@ -3796,8 +3796,8 @@ the algorithm used is slightly different, so that
 column integral exponents), $y$ a vector of elements in $\var{nf}$ indexed by
 the ideals in $x$, computes an element $b$ such that
 
-$v_\p(b - y_\p) \geq v_\p(x)$ for all prime ideals in $x$ and $v_\p(b)\geq 0$
-for all other $\p$.
+$v_\wp(b - y_\wp) \geq v_\wp(x)$ for all prime ideals in $x$ and $v_\wp(b)\geq 0$
+for all other $\wp$.
 
 \syn{idealchinese}{\var{nf},x,y}.
 
@@ -5010,13 +5010,13 @@ are the number of real and complex places of $L$ above the $j$-th place of
 $K$ so that $r_{j,1}=0$ and $r_{j,2}=n$ if $j$ is a complex place, while if
 $j$ is a real place we have $r_{j,1}+2r_{j,2}=n$.
 
-$\var{rnf}[3]$ is a two-component row vector $[\d(L/K),s]$ where $\d(L/K)$
-is the relative ideal discriminant of $L/K$ and $s$ is the discriminant of
-$L/K$ viewed as an element of $K^*/(K^*)^2$, in other words it is the output
-of \kbd{rnfdisc}.
+$\var{rnf}[3]$ is a two-component row vector $[\goth{d}(L/K),s]$ where
+$\goth{d}(L/K)$ is the relative ideal discriminant of $L/K$ and $s$ is the
+discriminant of $L/K$ viewed as an element of $K^*/(K^*)^2$, in other words it is
+the output of \kbd{rnfdisc}.
 
-$\var{rnf}[4]$ is the ideal index $\f$, i.e.~such that
-$d(pol)\Z_K=\f^2\d(L/K)$.
+$\var{rnf}[4]$ is the ideal index $\goth{f}$, i.e.~such that
+$d(pol)\Z_K=\goth{f}^2\goth{d}(L/K)$.
 
 $\var{rnf}[5]$ is a vector \var{vm} with 7 entries useful for certain
 computations in the relative extension $L/K$. $\var{vm}[1]$ is a vector of
