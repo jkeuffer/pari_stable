@@ -2202,7 +2202,7 @@ sfcont(GEN x, long k)
         av = avma; lx = lg(x);
         e = bit_accuracy(lx)-1-expo(x);
         if (e < 0) err(talker,"integral part not significant in sfcont");
-        c = ishiftr_spec(x,lx,0);
+        c = ishiftr_lg(x,lx,0);
         a = cgetg(3, t_FRAC);
 	a[1] = (long)c;
 	a[2] = lshifti(gun, e);

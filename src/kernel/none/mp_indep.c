@@ -56,7 +56,7 @@ ishiftr(GEN x, long s)
   ex = expo(x) + s; if (ex < 0) return gzero;
   lx = lg(x);
   n=ex - bit_accuracy(lx) + 1;
-  return ishiftr_spec(x, lx, n);
+  return ishiftr_lg(x, lx, n);
 }
 
 GEN

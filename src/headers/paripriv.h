@@ -50,7 +50,7 @@ GEN   divgsns(GEN x, long i);
 GEN   divrsns(GEN x, long i);
 GEN   init_remiimul(GEN M);
 ulong invrev(ulong b);
-GEN   ishiftr_spec(GEN x, long lx, long n);
+GEN   ishiftr_lg(GEN x, long lx, long n);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   ptolift(GEN x, GEN Y);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);
@@ -84,7 +84,6 @@ GEN padic_sqrtn(GEN x, GEN n, GEN *zetan);
 /* powers */
 #define sqrs(b) mulss((b),(b))
 #define sqru(b) muluu((b),(b))
-GEN    ishiftr_spec(GEN x, long lx, long n);
 GEN    rpowuu(ulong a, ulong n, long prec);
 GEN    powrshalf(GEN x, long s);
 GEN    powrfrac(GEN x, long n, long d);

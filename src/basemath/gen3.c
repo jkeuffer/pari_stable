@@ -1731,7 +1731,7 @@ grndtoi(GEN x, long *e)
         *e = expo(addsr(1,x)); avma = av; return negi(gun);
       }
       lx= lg(x); e1 = ex - bit_accuracy(lx) + 1;
-      y = ishiftr_spec(p1, lx, e1);
+      y = ishiftr_lg(p1, lx, e1);
       if (signe(x)<0) y=addsi(-1,y);
       y = gerepileuptoint(av,y);
 
@@ -1800,7 +1800,7 @@ gcvtoi(GEN x, long *e)
   {
     ex = expo(x); if (ex < 0) { *e = ex; return gzero; }
     lx = lg(x); e1 = ex - bit_accuracy(lx) + 1;
-    y = ishiftr_spec(x, lx, e1);
+    y = ishiftr_lg(x, lx, e1);
     if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;
   }
