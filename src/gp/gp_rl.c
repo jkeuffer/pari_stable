@@ -599,9 +599,9 @@ rl_short_help(int count, int key)
   if (off >= 8) {		/* Check for default(whatever) */
     int t = off - 1;
 
-    while (t >= 7 && isspace(rl_line_buffer[t])) t--;
+    while (t >= 7 && isspace((int)rl_line_buffer[t])) t--;
     if (rl_line_buffer[t--] == '(') {
-      while (t >= 6 && isspace(rl_line_buffer[t])) t--;
+      while (t >= 6 && isspace((int)rl_line_buffer[t])) t--;
       t -= 6;
       if (t >= 0
 	  && strncmp(rl_line_buffer + t, "default", 7) == 0

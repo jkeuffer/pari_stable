@@ -1313,6 +1313,7 @@ extern GEN zinternallog_pk(GEN nf,GEN a0,GEN y,GEN pr,GEN prk,GEN list,GEN *psig
 extern GEN colreducemodmat(GEN x, GEN y, GEN *Q);
 extern GEN special_anti_uniformizer(GEN nf, GEN pr);
 extern GEN set_sign_mod_idele(GEN nf, GEN x, GEN y, GEN idele, GEN sarch);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx, long v);
 
 /* Compute t = prod g[i]^e[i] mod pr^n, assuming (t, pr) = 1.
  * Method: modify each g[i] so that it becomes coprime to pr :

@@ -1205,6 +1205,7 @@ GEN     u_FpX_divrem(GEN x, GEN y, ulong p, int malloc, GEN *pr);
 GEN     u_FpX_rem(GEN x, GEN y, ulong p);
 GEN     u_Fp_FpM(GEN x, ulong p);
 GEN     u_Fp_FpX(GEN x,int malloc, ulong p);
+int     u_FpX_is_squarefree(GEN z, ulong p);
 GEN     u_FpX_normalize(GEN z, ulong p);
 GEN     u_FpX_sub(GEN x, GEN y, ulong p);
 GEN     u_FpX_gcd(GEN a, GEN b, ulong p);

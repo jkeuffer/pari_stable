@@ -1096,6 +1096,7 @@ lowerboundforregulator(GEN bnf)
 }
 
 extern GEN to_Fp_simple(GEN x, GEN prh);
+extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
 
 /* Compute a square matrix of rank length(beta) associated to a family
  * (P_i), 1<=i<=length(beta), of primes s.t. N(P_i) = 1 mod pp, and
