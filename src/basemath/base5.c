@@ -71,7 +71,7 @@ rnfmakematrices(GEN rnf)
   n=lgef(pol)-3;
   base=(GEN)rnf[7]; base1=(GEN)base[1]; rac=(GEN)rnf[6]; sig=(GEN)rnf[2];
   r1 = nf_get_r1(nf);
-  r2 = nf_get_r1(nf); ru = r1+r2;
+  r2 = nf_get_r2(nf); ru = r1+r2;
   vecmat=cgetg(8,t_VEC);
   vecM=cgetg(ru+1,t_VEC); vecmat[1]=(long)vecM;
   vecMC=cgetg(ru+1,t_VEC); vecmat[2]=(long)vecMC;
