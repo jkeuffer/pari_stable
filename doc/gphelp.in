@@ -140,11 +140,6 @@ sub init
 
   chdir($docdir);
   $docfile = "usersch3.tex";
-  $basedir = $ENV{GPHELP_TMPDIR} || $ENV{GPTMPDIR} || $ENV{TMPDIR} || "/tmp";
-  $tmpdir = "$basedir/gp.help$$";
-  mkdir $tmpdir, 0755 || die("Cannot create temporary directory");
-  $texfile = "$tmpdir/gp.help";
-
   open(IN,"translations") || die("Could not find translation file, docdir='$docdir'");
   while(<IN>)
   {
@@ -360,8 +355,17 @@ sub apropos
 #
 #  Tex Part
 #
+sub tex_mktmp
+{
+  $basedir = $ENV{GPHELP_TMPDIR} || $ENV{GPTMPDIR} || $ENV{TMPDIR} || "/tmp";
+  $tmpdir = "$basedir/gp.help$$";
+  mkdir $tmpdir, 0755 || die("Cannot create temporary directory");
+  $texfile = "$tmpdir/gp.help";
+}
+
 sub pretex
 {
+  &tex_mktmp;
   open(TEX,">$texfile.tex") || die "Couldn't open $texfile.tex";
   print TEX << "EOT";
 \\def\\fromgphelp\{\}
@@ -390,7 +394,7 @@ sub posttex
   $? == 0 && -f "$texfile.dvi"
     || die "could not create '$texfile.dvi': status=$?, $out";
   setsid; # detach from terminal (^C will not kill xdvi)
-  system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log)&");
+  system("($xdvi $texfile.dvi 2>/dev/null >/dev/null; rm -f $texfile.tex $texfile.dvi $texfile.log;rmdir $tmpdir)&");
 }
 
 sub clean
