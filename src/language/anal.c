@@ -2755,6 +2755,7 @@ group(GEN x)
   if (t == typ_GAL)
     return (GEN)x[6];
   err(member,"group",mark.member,mark.start);
+  return NULL; /* not reached */
 }
 static GEN
 orders(GEN x)
@@ -2764,6 +2765,7 @@ orders(GEN x)
   if (t == typ_GAL)
     return (GEN)x[8];
   err(member,"orders",mark.member,mark.start);
+  return NULL; /* not reached */
 }
 #define is_ell(x) (typ(x) == t_VEC && lg(x)>=14)
 #define is_bigell(x) (typ(x) == t_VEC && lg(x)>=20)

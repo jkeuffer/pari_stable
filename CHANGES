@@ -61,6 +61,8 @@ BA 16- result was not always complete in nfgaloisconj()
 BA 30- typo in Configure [CPP] (cc --> CC) 
 BA 31- member functions for galoisinit
    32- allowed power series in Mod(). Fixed cryptic error messages.
+   33- precision problems in zsigne
+
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

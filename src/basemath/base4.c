@@ -2906,7 +2906,7 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN detmat)
 static GEN
 zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 {
-  long av, tetpil, j, N=lgef(nf[1])-3;
+  long av, tetpil;
   GEN pab,d;
 
   d=idealmulelt(nf,b,B); *di=idealinv(nf,d);
@@ -2970,7 +2970,7 @@ idealoplll(GEN op(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
 GEN
 idealmulelt(GEN nf, GEN elt, GEN x)
 {
-  long t = typ(elt), lx = lg(x);
+  long t = typ(elt);
   GEN z;
   if (t == t_POL || t == t_POLMOD) elt = algtobasis(nf,elt);
   if (isnfscalar(elt)) elt = (GEN)elt[1];
