@@ -597,25 +597,40 @@ FpX_is_squarefree(GEN f, GEN p)
   avma = av;
   return lgef(z)==3;
 }
-/* idem
- * leading term of f must be prime to p.
- */
-/* Compute the number of roots in Fp without counting multiplicity
- * return -1 for 0 polynomial.
- */
-long
-FpX_nbroots(GEN f, GEN p)
+
+/* product of terms of degree 1 in factorization of f */
+GEN
+FqX_split_part(GEN f, GEN T, GEN p)
 {
-  long n=lgef(f);
+  long n = degpol(f);
+  GEN z, X = polx[varn(f)];
+  if (n <= 1) return f;
+  if (!T)
+  {
+    f = FpX_red(f, p);
+    z = FpXQ_pow(X, p, f, p);
+    z = FpX_sub(z, X, NULL);
+    return FpX_gcd(z,f,p);
+  } else {
+    f = FqX_red(f, T, p);
+    z = FqXQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
+    z = gsub(z, X);
+    return FqX_gcd(z, f, T, p);
+  }
+}
+
+/* Compute the number of roots in Fq without counting multiplicity
+ * return -1 for 0 polynomial. lc(f) must be prime to p. */
+long
+FqX_nbroots(GEN f, GEN T, GEN p)
+{
   pari_sp av = avma;
-  GEN z;
-  if (n <= 4) return n-3;
-  f = FpX_red(f, p);
-  z = FpXQ_pow(polx[varn(f)], p, f, p);
-  z = FpX_sub(z,polx[varn(f)],NULL);
-  z = FpX_gcd(z,f,p),
+  GEN z = FqX_split_part(f, T, p);
   avma = av; return degpol(z);
 }
+long
+FpX_nbroots(GEN f, GEN p) { return FqX_nbroots(f, NULL, p); }
+
 long
 FpX_is_totally_split(GEN f, GEN p)
 {
@@ -626,7 +641,8 @@ FpX_is_totally_split(GEN f, GEN p)
   if (!is_bigint(p) && n > p[2]) return 0;
   f = FpX_red(f, p);
   z = FpXQ_pow(polx[varn(f)], p, f, p);
-  avma = av; return lgef(z)==4 && gcmp1((GEN)z[3]) && !signe(z[2]);
+  avma = av;
+  return degpol(z) == 1 && gcmp1((GEN)z[3]) && !signe(z[2]); /* x^p = x ? */
 }
 /* u in ZZ[X] and p a prime number.
  * u must be squarefree mod p.
@@ -635,7 +651,16 @@ long
 FpX_nbfact(GEN u, GEN p)
 {
   pari_sp av = avma;
-  GEN vker = FpM_Berlekamp_ker(u,p);
+  GEN vker = FpM_Berlekamp_ker(u, p);
+  avma = av; return lg(vker)-1;
+}
+long
+FqX_nbfact(GEN u, GEN T, GEN p)
+{
+  pari_sp av = avma;
+  GEN vker;
+  if (!T) return FpX_nbfact(u, p);
+  vker = FqM_Berlekamp_ker(u, T, gpowgs(p, degpol(T)), p);
   avma = av; return lg(vker)-1;
 }
 
