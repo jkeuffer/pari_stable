@@ -1056,7 +1056,7 @@ qfbimagsolvep(GEN Q, GEN p)
     }
     /* x^2 + xy + ((1-d)/4)y^2 = p <==> (2x + y)^2 - d y^2 = 4p */
     if (!cornacchia2(negi(d), p, &x, &y)) { avma = av; return gen_0; }
-    x = diviu_rem(subii(x,y), 2, &r); if (r) { avma = av; return gen_0; }
+    x = divis_rem(subii(x,y), 2, &r); if (r) { avma = av; return gen_0; }
     return gerepileupto(av, gmul(mkvec2(x,y), gtrans_i(N)));
   }
   b = redimagsl2(primeform(d, p, 0), &M);
