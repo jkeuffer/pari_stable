@@ -35,7 +35,7 @@ case "$osname" in
 	export_file=pari.def; export_create="emxexp -u"
 	# Actually, the build will fail until the switch to -Zomf...
 	dlld_ignore=- ;;
-  darwin) systems=$osname;
+  darwin) systems=$osname;;
   *)   systems=;;
 esac
 
