@@ -951,8 +951,6 @@ check_real(GEN q)
   return (typ(q) == t_COMPLEX && gcmp0((GEN)q[2]))? (GEN)q[1]: q;
 }
 
-extern GEN PiI2(long prec);
-
 GEN
 _elleisnum(SL2_red *T, long k, long prec)
 {
