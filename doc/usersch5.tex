@@ -1345,6 +1345,9 @@ is \kbd{NULL}, the result is not reduced mod \kbd{p} (ordinary \typ{INT}s)
 
 \fun{GEN}{FpX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
+\fun{GEN}{FpX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
+
 \fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} subtracts \kbd{y} from \kbd{x}. If
 \kbd{p} is \kbd{NULL}, the result is not reduced mod \kbd{p} (ordinary
 \typ{INT}s)
@@ -1555,6 +1558,9 @@ overhead at the expense of consistency.
 \fun{GEN}{FpXX_red}{GEN z, GEN p}, \kbd{z} a \typ{POL} whose coefficients are
 either \kbd{ZX}s or \typ{INT}s. Returns the \typ{POL} equal to \kbd{z} with
 all components reduced modulo \kbd{p}.
+
+\fun{GEN}{FpXX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
 
 \subsec{\kbd{FpXQX}, \kbd{FqX}}.
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
@@ -1796,7 +1802,7 @@ $\kbd{T}(0) \neq 0$.
 \fun{GEN}{Flx_rem_montgomery}{GEN x, GEN mg, GEN T, ulong p}, returns
 \kbd{x} modulo \kbd{T}, where \kbd{mg} is the Montgomery inverse of \kbd{T}.
 
-\fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+\fun{GEN}{Flx_renormalize}{GEN x, long l}, as \kbd{FpX_renormalize}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{Flx_shift}{GEN T, long n}, returns \kbd{T} multiplied by $\kbd{x}^n$.
