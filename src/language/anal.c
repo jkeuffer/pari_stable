@@ -1940,8 +1940,8 @@ identifier(void)
               case 'G':
               case '&':
               case 'I':
-              case 'V': argvec[i++]=DFT_GEN; s++; break;
-              case 'n': argvec[i++]=DFT_VAR; s++; break;
+              case 'V': matchcomma=1; argvec[i++]=DFT_GEN; s++; break;
+              case 'n': matchcomma=1; argvec[i++]=DFT_VAR; s++; break;
               default:
                 oldanalyseur = analyseur;
                 analyseur = s; matchcomma = 0;
