@@ -842,12 +842,15 @@ GEN
 RgX_div_by_X_x(GEN a, GEN x, GEN *r)
 {
   long l = lg(a), i;
-  GEN *a0, *z0, z = cgetg(l-1, t_POL);
+  GEN a0, z0, z = cgetg(l-1, t_POL);
   z[1] = a[1];
-  a0 = (GEN*)a + l-1;
-  z0 = (GEN*)z + l-2; *z0 = *a0--;
+  a0 = a + l-1;
+  z0 = z + l-2; *z0 = *a0--;
   for (i=l-3; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
-    *z0 = gadd(*a0--, gmul(x, *z0--));
+  {
+    GEN t = gadd((GEN)*a0--, gmul(x, (GEN)*z0--));
+    *z0 = (long)t;
+  }
   if (r) *r = gadd(*a0, gmul(x, *z0));
   return z;
 }
