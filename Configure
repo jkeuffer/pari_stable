@@ -310,7 +310,6 @@ case "$arch" in
   i?86)          asmarch=ix86 ;         pretty=$arch ;;
   hppa)          asmarch=none ;         pretty=HP
         case "$osname-`uname -r`" in
-        hpux-?.09.*)  asmarch=none  ;;
         hpux-?.10.*)  asmarch=$arch ;;
         esac ;;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
