@@ -50,10 +50,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define subsrz(x,y,z)  {pari_sp av=avma; gaffect(subsr((x),(y)),(z)); avma=av; }
 #define subisz(y,s,z)  (gops2sgz(addsi,-(s),(y),(z)))
 #define subrsz(y,s,z)  (gops2sgz(addsr,-(s),(y),(z)))
-#define subiiz(x,y,z)  {pari_sp av=avma; gaffect(subii((x),(y)),(z)); avma=av; }
-#define subirz(x,y,z)  {pari_sp av=avma; gaffect(subir((x),(y)),(z)); avma=av; }
+#define subiiz(x,y,z)  (gop2z(subii,(x),(y),(z)))
+#define subirz(x,y,z)  (gop2z(subir,(x),(y),(z)))
 #define subriz(x,y,z)  (gop2z(subri,(x),(y),(z)))
-#define subrrz(x,y,z)  {pari_sp av=avma; gaffect(subrr((x),(y)),(z)); avma=av; }
+#define subrrz(x,y,z)  (gop2z(subrr,(x),(y),(z)))
 #define mpmulz(x,y,z)  (gop2z(mpmul,(x),(y),(z)))
 #define mulsiz(s,y,z)  (gops2sgz(mulsi,(s),(y),(z)))
 #define mulsrz(s,y,z)  (gops2sgz(mulsr,(s),(y),)(z))
