@@ -18,15 +18,8 @@ Priority classification (first column): [subjective and debatable!]
 Unless specified otherwise, examples assume default precisions (on a 32
 bit machine)
 
-5  "bad input" problems with hyperu:
-   ? hyperu(0,0,-1) \\ infinite loop
-   ? hyperu(1,2,0)
-   %1 = 51580834970224178120796801.23
-   ? hyperu(1,2,.0)
-   %2 = 2396734.892578125000000000000
-
 5  setrand(5);thueinit(polsubcyclo(precprime(2^17),3))
-  ***   non positive argument in mplog. \\ precision problem
+   ***   non positive argument in mplog. \\ precision problem
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
@@ -36,7 +29,7 @@ bit machine)
    ? rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
      ***   division by zero in gdiv, gdivgs or ginv
 
-4  qfbhclassno(x < 0) may give a wrong result
+4  qfbhclassno(x < 0) may give a wrong result [e.g x = -2878367]
 
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involve it (only affect library programming).
@@ -50,10 +43,10 @@ bit machine)
    C by a cheap trick)
 
 3  polgalois should handle precision problems. Symptom: applied to
-polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
+   polzagier(11,0)/polzagier(1,0), gives wrong result with 38 digits
 
 3  recursive plot easily fooled. One could split intervals in 3 + make sure
-size of neighbouring intervals don't differ too much.
+   size of neighbouring intervals don't differ too much.
 
 ***************************   BUGS (GP specific) ****************************
 
@@ -71,9 +64,9 @@ discarded (ends by a longjmp).
                \r <TAB> works ok.
 
 2  under GP after an error, memory is only recovered from "entire variables".
-Individual components of lists/vectors/matrices are left alone if the
-GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
-occured)
+   Individual components of lists/vectors/matrices are left alone if the
+   GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
+   occured)
 
 ***************************  DOCUMENTATION    ****************************
 
@@ -82,7 +75,7 @@ occured)
 4  add examples for all functions in Chapter 3
 
 4  separate chapter 4 and 5 and document the innards of PARI (entree,
-pariFILE, bloc ...)
+   pariFILE, bloc ...)
 
 3  clean up gphelp / TeX macros
 
@@ -122,12 +115,12 @@ Misc:
 4  rnfkummer (doesn't work)
 
 4  nfsubfields [use known subfields to discard blocs right away] (current uses
-far too much memory)
+   far too much memory)
 
 4  LLL over R (not stable). Clean up bibli1.c (remove duplicate code)
 
 4  rethink the element_mul type of functions: multiplication table is O(n^3),
-polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
+   polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
 
 3  zetak is very inefficient and unable to handle most fields of degree > 6
 
@@ -140,40 +133,42 @@ polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
 ***************************   LIBRARY DESIGN   ****************************
 
 4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
-easily define new ones)
+   easily define new ones)
 
 4  allow generic functions to process and produce t_SMALL's
 
 4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
 
 3  integrate Ilya's code for yet bigger prime tables. Unify functions using
-diffptr (if possible correcting the forprime bug above)
+   diffptr (if possible correcting the forprime bug above)
 
 3  remove global variables gpi, geuler: their precision is unpredictable
-(at least as much as requested in last const[pi|euler](), possibly much more).
-Explicit call to mp[pi|euler] should be required. Will break existing code...
+   (at least as much as requested in last const[pi|euler](), possibly much
+   more). Explicit call to mp[pi|euler] should be required. Will break
+   existing code...
 
 3  rename library functions following GP names
 
 3  rewrite the generic functions (gadd/gmul/gdiv plus a couple of others) to
-use (two-dimensional) table lookups instead of switches
+   use (two-dimensional) table lookups instead of switches
 
 3  introduce "special" types for objects which are really containers and
-should be defined by a secondary type (e.g number fields, finite fields,
-p-adic fields, elliptic curves, ...). Would keep list of types small (and fast)
+   should be defined by a secondary type (e.g number fields, finite fields,
+   p-adic fields, elliptic curves, ...). Would keep list of types small
+   (and fast)
 
 3  better representations for multivariate polynomials
 
 3  type "element in" ([number|finite] field...), "point" on elliptic curve
 
 3  find a way to deal (generically) with "integral object + its content"
-Application (e.g): fractional ideals much more efficient.
+   Application (e.g): fractional ideals much more efficient.
 
 2  "mute" variables for t_POLMOD. Should have Mod(x,x^2+1) == Mod(y,y^2+1).
 
 2  have some header magic (transparently) prepend some prefix (e.g "pari_")
-before all exported functions to prevent name conflicts. Build alias files
-for debuggers
+   before all exported functions to prevent name conflicts. Build alias
+   files for debuggers
 
 2  should use vsnprintf instead of vsprintf in pariputsf. Requires GNU libio.
    [paripusf uses static buffer which should be ok for "most" purposes]
@@ -185,33 +180,33 @@ for debuggers
 4  use divide & conquer approach in string / integer conversions
 
 3  split matrix_block in 2 parts: exploration + assignment. Would allow
-Math::Pari to use complicated x[][][][] constructs
+   Math::Pari to use complicated x[][][][] constructs
 
 3  changevar with explicit (incomplete) permutation. E.g
-changevar(p, [x,y], [a,b]) for x -> a, y -> b
-add a flag to substitute in succession or in parallel (e.g if a involves y)
+   changevar(p, [x,y], [a,b]) for x -> a, y -> b
+   add a flag to substitute in succession or in parallel (e.g if a involves y)
 
 3  possibility to save and load a session (variables, functions, defaults)
 
 3  a type t_FILE [current: stream re-opened/flushed/closed after every single
-write(): disaster when one wants to write often to the same file]
+   write(): disaster when one wants to write often to the same file]
 
 3  add a possibility to increase the maximal recursion depth (need to 
-increase the GP process stack: use setrlimit(RLIMIT_STACK,) + fork)
+   increase the GP process stack: use setrlimit(RLIMIT_STACK,) + fork)
 
 ***************************   TOOLS           ****************************
 
 4  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
 
 3  a script to translate "legacy" GP code into something using GP2 function
-names
+   names
 
 3  write a gp-to-C compiler (adding #defines in anal.c + modifying the
-table of functions in init.c, etc, to include the explicit function name).
-Should be easy: the code is mostly there.
+   table of functions in init.c, etc, to include the explicit function name).
+   Should be easy: the code is mostly there.
 
 3  write an analog of the 'echo' default which would print code as it is
-executed, not as it is read
+   executed, not as it is read
 
 2  write a GP scripts debugger (cf above)
 

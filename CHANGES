@@ -21,6 +21,7 @@ MS = Michael Stoll
 OR = Olivier Ramare
 OV = Oliver Voigt
 PM = Peter Montgomery
+PW = Paul van Wamelen
 TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
@@ -48,8 +49,9 @@ IZ 17- delay rounding in rectplot structures until plotting device
    19- avoid getrusage on alpha (pb with gp-dyn)
    20- incorrect file inclusions when using gas on Sparc (-->undefined symbols)
    21- massive cancellations in zetak(nfz,) when current prec lower than nfz's
-XR 22- bnrstark(): fixed inconsistency between 32bit & 62bit versions +
+XR 22- bnrstark(): fixed inconsistency between 32bit & 64bit versions +
        check maxprime() before starting the computation
+PW 23- hyperu bad input bug
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
