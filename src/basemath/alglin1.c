@@ -3100,6 +3100,15 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
   if (typ(x)!=t_MAT) err(typeer,"FqM_ker");
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
 
+  if (lgefint(p)==3)
+  {
+    pari_sp ltop=avma;
+    ulong l= p[2];
+    GEN Ml = FqM_to_FlxM(x, T, p);
+    GEN Tl = ZX_to_Flx(T,l);
+    GEN p1 = FlxM_to_ZXM(FlxqM_ker(Ml,Tl,l));
+    return gerepileupto(ltop,p1);
+  }
   m=lg(x[1])-1; r=0; av0 = avma;
   x=dummycopy(x); mun=negi(gun);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
