@@ -2584,7 +2584,9 @@ perf(GEN a)
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
  * If (flag & 2) stop as soon as stockmax is reached.
- * If (flag & 1) return NULL on precision problems (no error). */
+ * If (flag & 1) return NULL on precision problems (no error).
+ * If (check != NULL consider only vectors passing the check [assumes
+ *   stockmax > 0 and we only want the smallest possible vectors ] */
 static GEN
 smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
              FP_chk_fun *CHECK)
@@ -2771,11 +2773,11 @@ CONTINUE:
   u=cgetg(4,t_VEC);
   u[1]=lstoi(s<<1);
   u[2]=(long)normax1;
-  if (isclone(S)) { p1 = S; S = forcecopy(S); gunclone(p1); }
   if (stockmax)
   {
     setlg(S,stockmax+1);
     settyp(S,t_MAT);
+    if (isclone(S)) { p1 = S; S = forcecopy(S); gunclone(p1); }
   }
   else
     S = cgetg(1,t_MAT);
