@@ -2271,7 +2271,7 @@ entree functions_basic[]={
 {"polrootsmod",25,(void*)rootmod0,7,"GGD0,L,"},
 {"polrootspadic",32,(void*)rootpadic,7,"GGL"},
 {"polsturm",99,(void*)sturmpart,7,"lGDGDG"},
-{"polsubcyclo",99,(void*)subcyclo,7,"GGDn"},
+{"polsubcyclo",99,(void*)subcyclo,7,"LLDn"},
 {"polsylvestermatrix",2,(void*)sylvestermatrix,7,"GG"},
 {"polsym",21,(void*)polsym,7,"GL"},
 {"poltchebi",99,(void*)tchebi,7,"LDn"},
