@@ -53,15 +53,11 @@ GEN
 pith(long n)
 {
   byteptr p = diffptr;
-  long c, prime = 0, res = 0;
+  ulong prime = 0, res = 0;
 
   if (n <= 0) err(talker, "pith meaningless if n = %ld",n);
-  while (prime<=n)
-  {
-    c = *p++; if (!c) err(primer1);
-    prime += c;
-    res++;
-  }
+  if (maxprime() <= n) err(primer1);
+  while (prime<=n) { prime += *p++; res++; }
   return stoi(res-1);
 }
 
