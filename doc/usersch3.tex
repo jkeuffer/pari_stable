@@ -2343,16 +2343,16 @@ $\Q(\sqrt{x})$, where $x\in\Q$.
 
 \syn{quaddisc}{x}.
 
-\subsecidx{quadhilbert}$(D,\{\fl=0\})$: relative equation defining the
-\idx{Hilbert class field} of the quadratic field of discriminant $D$.
-If $\fl$ is non-zero
-and $D<0$, outputs $[\var{form},\var{root}(\var{form})]$ (to be used for
-constructing subfields). If $\fl$ is non-zero and $D>0$, try hard to
-get the best modulus.
-Uses complex multiplication in the imaginary case and \idx{Stark units}
-in the real case.
+\subsecidx{quadhilbert}$(D,\{pq\})$: relative equation defining the
+\idx{Hilbert class field} of the quadratic field of discriminant $D$. Uses
+complex multiplication in the imaginary case and \idx{Stark units} in the
+real case.
 
-\syn{quadhilbert}{D,\fl,\var{prec}}.
+If $D<0$, $pq$ (if supplied) is a $2$-component vector $[p,q]$ where
+$p$, $q$ are the prime numbers needed for Schertz's method. In that case,
+return $0$ if $[p,q]$ not suitable.
+
+\syn{quadhilbert}{D,pq,\var{prec}}.
 
 \subsecidx{quadgen}$(D)$: \label{se:quadgen}creates the quadratic
 number\sidx{omega} $\omega=(a+\sqrt{D})/2$ where $a=0$ if $x\equiv0\mod4$,
@@ -2369,22 +2369,20 @@ congruent to 0 or 1 modulo 4, which is not a square.
 
 \syn{quadpoly0}{x,v}.
 
-\subsecidx{quadray}$(D,f,\{\fl=0\})$: relative equation for the ray class
-field of conductor $f$ for the quadratic field of discriminant $D$ (which
-can also be a \kbd{bnf}), using analytic methods.
+\subsecidx{quadray}$(D,f,\{\var{lambda}\})$: relative equation for the ray
+class field of conductor $f$ for the quadratic field of discriminant $D$
+using analytic methods. A \kbd{bnf} for $x^2 - D$ is also accepted in place
+of $D$.
 
-For $D<0$, uses the $\sigma$ function. If supplied, $\fl$
-is is the technical element $\lambda$ of \kbd{bnf} necessary for Schertz's
-method. In that case, returns 0 if $\lambda$ is not suitable.
+For $D < 0$, uses the $\sigma$ function. If supplied, \var{lambda} is is the
+technical element $\lambda$ of \kbd{bnf} necessary for Schertz's method. In
+that case, returns 0 if $\lambda$ is not suitable.
 
-For $D>0$, uses Stark's conjecture. If $\fl$ is non-zero, try hard to
-get the best modulus. The function may fail with the following message
-\bprog
-"Cannot find a suitable modulus in FindModulus"
-@eprog\noindent
-See \tet{bnrstark} for more details about the real case.
+For $D>0$, uses Stark's conjecture. See \tet{bnrstark} for more details about
+the real case.
 
-\syn{quadray}{D,f,\fl,prec}, where an omitted $\fl$ is coded as \kbd{NULL}.
+\syn{quadray}{D,f,lambda,prec}, where an omitted \kbd{lambda} is coded as
+\kbd{NULL}.
 
 \subsecidx{quadregulator}$(x)$: regulator of the quadratic field of
 positive discriminant $x$. Returns an error if $x$ is not a discriminant
@@ -3744,7 +3742,7 @@ field and $\zeta = e^{2i\pi/N}$ where $N$ is the order of $g$ ($N=12$ as
 
 \syn{bnrrootnumber}{\var{bnf},\var{chi},\fl}
 
-\subsecidx{bnrstark}${(\var{bnr},\{\var{subgroup}\},\{\fl=0\})}$: \var{bnr}
+\subsecidx{bnrstark}${(\var{bnr},\{\var{subgroup}\})}$: \var{bnr}
 being as output by \kbd{bnrinit(,,1)}, finds a relative equation for the
 class field corresponding to the modulus in \var{bnr} and the given
 congruence subgroup using \idx{Stark units} (omit $\var{subgroup}=0$ if you
@@ -3755,29 +3753,21 @@ base field is $\Q$, the vastly simpler \tet{galoissubcyclo} is used instead.
 \fl\ is optional and may be set to 0 (default) to obtain a reduced relative
 polynomial, 1 to be satisfied with any relative polynomial, 2 to obtain an
 absolute polynomial and 3 to obtain the irreducible relative polynomial of
-the Stark unit. Example:
+the Stark unit.
+For instance
 \bprog
 bnf = bnfinit(y^2 - 3);
 bnr = bnrinit(bnf, 5, 1);
-bnrstark(bnr, 0)
+pol = bnrstark(bnr)
 @eprog\noindent
-returns the ray class field of $\Q(\sqrt{3})$ modulo $5$.
+returns the ray class field of $\Q(\sqrt{3})$ modulo $5$. Usually, one wants
+to apply to the result one of
+\bprog
+rnfpolredabs(bnf, pol, 16)     \\@Ccom compute a reduced relative polynomial
+rnfpolredabs(bnf, pol, 16 + 2) \\@Ccom compute a reduced absolute polynomial
+@eprog\noindent
 
-\misctitle{Remark.} The result of the computation depends on the choice of
-a modulus verifying special conditions. By default the function will try
-few moduli, choosing the one giving the smallest result. In some cases
-where the result is however very large, you can tell the function to
-try more moduli by adding $4$ to the value of flag. Whether this flag is
-set or not, the function may fail in some extreme cases, returning the
-error message
-
-  \kbd{"Cannot find a suitable modulus in FindModule"}.
-
-In this case, the corresponding congruence group is a product of cyclic
-groups and, for the time being, the class field has to be obtained by
-splitting this group into its cyclic components.
-
-\syn{bnrstark}{\var{bnr},\var{subgroup},\fl}, where an omitted \var{subgroup}
+\syn{bnrstark}{\var{bnr},\var{subgroup}}, where an omitted \var{subgroup}
 is coded by \kbd{NULL}.
 
 \subsecidx{dirzetak}$(\var{nf},b)$: gives as a vector the first $b$

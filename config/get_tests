@@ -9,6 +9,7 @@ test_extra="\
   intnum\
   ploth\
   round4\
+  stark\
 "
 
 test_basic="\
