@@ -1216,7 +1216,7 @@ PRECPB:
   {
     case 2: break; /* entry */
     case 1:
-      if (DEBUGLEVEL > 3) fprintferr("\n");
+      if (DEBUGLEVEL>3) fprintferr("\n");
       if (flag == 2) return _vec(h);
       exact_can_leave = count = 0;
       if (isexact || (gram && kmax > 2))
@@ -1235,7 +1235,7 @@ PRECPB:
           h = idmat(n);
           retry = 1; /* never abort if x is exact */
           count_max = min(count_max << 1, 512);
-          if (DEBUGLEVEL) fprintferr("count_max = %ld\n", count_max);
+          if (DEBUGLEVEL>3) fprintferr("count_max = %ld\n", count_max);
         }
         else
         {
@@ -1246,7 +1246,7 @@ PRECPB:
         kmax = 1; break;
       } /* fall through */
     case 0: /* give up */
-      if (DEBUGLEVEL > 3) fprintferr("\n");
+      if (DEBUGLEVEL>3) fprintferr("\n");
       if (DEBUGLEVEL) err(warner,"lllfp giving up");
       if (flag) { avma=av; return NULL; }
       err(lllger3);
@@ -1278,7 +1278,7 @@ PRECPB:
     { /* try to reduce precision */
       count = 0;
       prec = (prec+2) >> 1;
-      if (DEBUGLEVEL) fprintferr("\n...reducing precision to %ld\n",prec);
+      if (DEBUGLEVEL>3) fprintferr("\n...LLL reducing precision to %ld\n",prec);
       H = H? gmul(H, h): h;
       xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
       gerepileall(av, 5,&B,&L,&Q,&H,&xinit);

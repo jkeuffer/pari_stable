@@ -1291,7 +1291,7 @@ get_LLL_basis(nfbasic_t *T, GEN *pro)
   if (T->r1 != degpol(T->x)) u = get_red_G(T, pro);
   else
   {
-    u = lllint_marked(1, make_Tr(T->x, T->bas), 100, 1, &u,NULL,NULL);
+    u = lllfp_marked(1, make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC, 1);
     if (!u) u = idmat(1);
   }
   return u;
