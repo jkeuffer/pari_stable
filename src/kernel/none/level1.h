@@ -13,21 +13,21 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file defines some "level 1" kernel functions                 */
-/* These functions can be inline, with gcc                           */
-/* If not gcc, they are defined externally with "level1.c"           */
-
-/* level1.c includes this file and never needs to be changed         */
-/* The following seven lines are necessary for level0.c and level1.c */
+/* This file defines "level 1" kernel functions.
+ * These functions can be inline; if not they are defined externally in
+ * level1.c, which includes this file and never needs to be changed
+ * The following lines are necessary for level0.c and level1.c */
 #ifdef LEVEL1
+#  undef  INLINE_IS_STATIC
 #  undef  INLINE
 #  define INLINE
 #endif
 #ifdef LEVEL0
+#  undef  INLINE_IS_STATIC
 #  undef  INLINE
 #endif
 
-#ifndef INLINE
+#if !defined(INLINE) || defined(INLINE_IS_STATIC)
 void   addsii(long x, GEN y, GEN z);
 long   addssmod(long a, long b, long p);
 ulong  adduumod(ulong a, ulong b, ulong p);
@@ -105,7 +105,8 @@ ulong  umuluu(ulong x, ulong y, ulong *rem);
 GEN    utoi(ulong x);
 long   vali(GEN x);
 
-#else /* defined(INLINE) */
+#else
+
 INLINE long
 evallg(long x)
 {
@@ -817,5 +818,4 @@ expi(GEN x)
   const long lx=lgefint(x);
   return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-bfffo(*int_MSW(x))-1;
 }
-
 #endif

@@ -13,19 +13,18 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file defines some "level 0" kernel functions                 */
-/* These functions can be inline, with gcc                           */
-/* If not gcc, they are defined externally with "level0.c"           */
-/* NB: Those functions are not defined in mp.s                       */
-
-/* level0.c includes this file and never needs to be changed         */
-/* The following seven lines are necessary for level0.c and level1.c */
+/* This file defines "level 0" kernel functions.
+ * These functions can be inline; if not, they are defined externally in
+ * level0.c, which includes this file and never needs to be changed
+ * The following lines are necessary for level0.c and level1.c */
 #ifdef  LEVEL0
-#undef  INLINE
-#define INLINE
+#  undef  INLINE_IS_STATIC
+#  undef  INLINE
+#  define INLINE
 #endif
 #ifdef  LEVEL1
-#undef  INLINE
+#  undef  INLINE_IS_STATIC
+#  undef  INLINE
 #endif
 
 #define LOCAL_OVERFLOW
@@ -33,20 +32,18 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define LOCAL_HIREMAINDER
 #define SAVE_HIREMAINDER
 
-#ifndef INLINE
-BEGINEXTERN
-  extern ulong overflow, hiremainder;
-  extern long addll(ulong x, ulong y);
-  extern long addllx(ulong x, ulong y);
-  extern long subll(ulong x, ulong y);
-  extern long subllx(ulong x, ulong y);
-  extern long shiftl(ulong x, ulong y);
-  extern long shiftlr(ulong x, ulong y);
-  extern long mulll(ulong x, ulong y);
-  extern long addmul(ulong x, ulong y);
-  extern long divll(ulong x, ulong y);
-  extern int  bfffo(ulong x);
-ENDEXTERN
+#if !defined(INLINE) || defined(INLINE_IS_STATIC)
+ulong overflow, hiremainder;
+long addll(ulong x, ulong y);
+long addllx(ulong x, ulong y);
+long subll(ulong x, ulong y);
+long subllx(ulong x, ulong y);
+long shiftl(ulong x, ulong y);
+long shiftlr(ulong x, ulong y);
+long mulll(ulong x, ulong y);
+long addmul(ulong x, ulong y);
+long divll(ulong x, ulong y);
+int  bfffo(ulong x);
 
 #else
 
