@@ -1426,9 +1426,9 @@ split_2(GEN p, long bitprec, GEN ctr, double thickness, GEN *F, GEN *G)
     aux = rtodbl(mplog(divrr(rmax,rmin))) / (j-i) / 4.;
     k = dual_modulus(p,rho,aux, min(i,n+1-j));
     if (k-i < j-k-1 || (k-i == j-k-1 && 2*k > n))
-      { rmax=rho; j=k+1; affrr(mulrr(rho, dbltor(exp(-aux))), radii[j]); }
+      { rmax=rho; j=k+1; affrr(mulrr(rho, mpexp(dbltor(-aux))), radii[j]); }
     else
-      { rmin=rho; i=k; affrr(mulrr(rho, dbltor(exp(aux))), radii[i]); }
+      { rmin=rho; i=k; affrr(mulrr(rho, mpexp(dbltor(aux))), radii[i]); }
   }
   aux = rtodbl(mplog(divrr(rmax, rmin)));
 
