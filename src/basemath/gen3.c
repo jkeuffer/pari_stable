@@ -1582,28 +1582,30 @@ recip(GEN x)
     }
     for (i=3; i<lx-1; )
     {
+      pari_sp av2;
       for (j=3; j<i+1; j++)
       {
-        p1 = (GEN)x[j];
-        for (k=max(3,j+2-mi); k<j; k++)
+        av2 = avma; p1 = (GEN)x[j];
+        for (k = max(3,j+2-mi); k < j; k++)
           p1 = gadd(p1, gmul((GEN)u[k],(GEN)x[j-k+2]));
-        u[j] = lsub((GEN)u[j], p1);
+        p1 = gneg(p1);
+        u[j] = lpileupto(av2, gadd((GEN)u[j], p1));
       }
+      av2 = avma;
       p1 = gmulsg(i,(GEN)x[i+1]);
-      for (k=2; k<min(i,mi); k++)
+      for (k = 2; k < min(i,mi); k++)
       {
         p2 = gmul((GEN)x[k+1],(GEN)u[i-k+2]);
         p1 = gadd(p1, gmulsg(k,p2));
       }
       i++;
-      u[i] = lneg(p1);
-      y[i] = ldivgs((GEN)u[i],i-1);
+      u[i] = lpileupto(av2, gneg(p1));
+      y[i] = ldivgs((GEN)u[i], i-1);
       if (low_stack(lim, stack_lim(av,2)))
       {
-	GEN *gptr[2];
 	if(DEBUGMEM>1) err(warnmem,"recip");
 	for(k=i+1; k<lx; k++) u[k]=y[k]=zero; /* dummy */
-	gptr[0]=&u; gptr[1]=&y; gerepilemany(av,gptr,2);
+	gerepileall(av,2, &u,&y);
       }
     }
     return gerepilecopy(av,y);

@@ -72,6 +72,7 @@ MSo20- bittest(1,32) --> 1  [ off-by-1 error ]
    22- charpoly( Mod(mat, poly) ) --> SEGV [ out of stack components not
        treated properly ]
    23- memory corruption when parsing floating point constants [ constante() ]
+   24- too little GC in serreverse()
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
