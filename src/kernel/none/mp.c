@@ -1001,7 +1001,7 @@ modss(long x, long y)
 
   if (!y) err(moder1);
   if (y<0) y=-y;
-  hiremainder=0; divll(labs(x),y);
+  hiremainder=0; (void)divll(labs(x),y);
   if (!hiremainder) return gzero;
   return (x < 0) ? stoi(y-hiremainder) : stoi(hiremainder);
 }
@@ -1012,7 +1012,7 @@ resss(long x, long y)
   LOCAL_HIREMAINDER;
 
   if (!y) err(reser1);
-  hiremainder=0; divll(labs(x),labs(y));
+  hiremainder=0; (void)divll(labs(x),labs(y));
   return (x < 0) ? stoi(-((long)hiremainder)) : stoi(hiremainder);
 }
 
