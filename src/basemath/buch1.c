@@ -120,8 +120,8 @@ getallforms(GEN D, long *pth, GEN *ptz)
   *pth = h; *ptz = z; setlg(L,h+1); return L;
 }
 
-#define MOD4(x) ((((GEN)x)[2])&3)
-#define MAXL 300
+#define MOD4(x) ((x)&3)
+#define MAXL 50
 /* find P and Q two non principal prime ideals (above p,q) such that
  *   (pq, z) = 1  [coprime to all class group representatives]
  *   cl(P) = cl(Q) if P has order 2 in Cl(K)
@@ -129,9 +129,9 @@ getallforms(GEN D, long *pth, GEN *ptz)
 void
 get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
 {
-  GEN wp=cgetg(MAXL,t_VEC), wlf=cgetg(MAXL,t_VEC), court=icopy(gun);
-  GEN p, form;
-  long i, ell, l = 1, d = itos(D);
+  GEN wp = cgetg(MAXL,t_VECSMALL), wlf = cgetg(MAXL,t_VEC), court = icopy(gun);
+  GEN form;
+  long i, ell, p, l = 1, d = itos(D);
   byteptr diffell = diffptr + 2;
 
   if (typ(flag)==t_VEC)
@@ -154,24 +154,23 @@ get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
   }
 
   ell = 3;
-  while (l < 3 || ell<=MAXL)
+  while (l < MAXL)
   {
     NEXT_PRIME_VIADIFF_CHECK(ell, diffell);
     if (smodis(z,ell) && kross(d,ell) > 0)
     {
-      court[2]=ell; form = redimag(primeform(D,court,0));
-      if (!gcmp1((GEN)form[1])) {
-        wp[l]  = licopy(court);
-        wlf[l] = (long)form; l++;
-      }
+      court[2] = ell; form = redimag(primeform(D,court,0));
+      if (gcmp1((GEN)form[1])) continue;
+      wlf[l] = (long)form;
+      wp[l]  = ell; l++;
     }
   }
   setlg(wp,l); setlg(wlf,l);
 
   for (i=1; i<l; i++)
-    if (smodis((GEN)wp[i],3) == 1) break;
+    if (wp[i] % 3 == 1) break;
   if (i==l) i = 1;
-  p = (GEN)wp[i]; form = (GEN)wlf[i];
+  p = wp[i]; form = (GEN)wlf[i];
   i = l;
   if (isoforder2(form))
   {
@@ -194,8 +193,8 @@ get_pq(GEN D, GEN z, GEN flag, GEN *ptp, GEN *ptq)
     }
     if (i==l) i = 1;
   }
-  *ptp = p;
-  *ptq = (GEN)wp[i];
+  *ptp = stoi( p );
+  *ptq = stoi( wp[i] );
 }
 #undef MAXL
 
@@ -209,7 +208,7 @@ gpq(GEN form, GEN p, GEN q, long e, GEN sqd, GEN u, long prec)
   al[1] = lneg(gdiv(w,a2));
   al[2] = ldiv(sqd,a2);
   p1 = trueeta(gdiv(al,p),prec);
-  p2 = egalii(p,q)? p1: trueeta(gdiv(al,q),prec);
+  p2 = p == q? p1: trueeta(gdiv(al,q),prec);
   p3 = trueeta(gdiv(al,mulii(p,q)),prec);
   p4 = trueeta(al,prec);
   return gpowgs(gdiv(gmul(p1,p2),gmul(p3,p4)), e);
