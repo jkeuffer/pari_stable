@@ -891,15 +891,13 @@ fix_var(GEN x, long v)
 extern GEN vandermondeinverseprep(GEN T, GEN L);
 extern GEN ZX_disc_all(GEN x, ulong bound);
 extern GEN indexpartial(GEN P, GEN DP);
+extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
 
 void
 subfields_poldata(GEN T, struct poldata *PD)
 {
-  int     i, n;
-  GEN     L, z, prep, den;
-  long    prec;
+  GEN  nf,L,dis;
 
-  GEN nf, dis;
   T = get_nfpol(T, &nf);
   PD->pol = dummycopy(T); /* may change variable number later */
   if (nf)
@@ -907,41 +905,13 @@ subfields_poldata(GEN T, struct poldata *PD)
     PD->den = (GEN)nf[4];
     PD->roo = (GEN)nf[6];
     PD->dis = mulii(absi((GEN)nf[3]), sqri((GEN)nf[4]));
-    return;
   }
-
-  /* copy-paste from galconj.c:galoisborne. Merge as soon as possible */
-  /* start of copy-paste */
-  n = degpol(T);
-  prec = 1;
-  for (i = 2; i < lgef(T); i++)
-    if (lg(T[i]) > prec)
-      prec = lg(T[i]);
-  /*prec++;*/
-  if (DEBUGLEVEL>=4) gentimer(3);
-  L = roots(T, prec);
-  if (DEBUGLEVEL>=4) genmsgtimer(3,"roots");
-  for (i = 1; i <= n; i++)
+  else
   {
-    z = (GEN) L[i];
-    if (signe(z[2]))
-      break;
-    L[i] = z[1];
+    PD->den = initgaloisborne(T,NULL, &L,NULL,&dis,NULL);
+    PD->roo = L;
+    PD->dis = absi(dis);
   }
-  if (DEBUGLEVEL>=4) gentimer(3);
-  prep=vandermondeinverseprep(T, L);
-  /* end of copy-paste */
-  {
-    GEN res = divide_conquer_prod(gabs(prep,prec), mpmul);
-    disable_dbg(0);
-    dis = ZX_disc_all(T, 1+logint(res,gdeux,NULL));
-    disable_dbg(-1);
-    den = indexpartial(T,dis);
-  }
-
-  PD->den = den;
-  PD->roo = L;
-  PD->dis = absi(dis);
 }
 
 GEN

@@ -235,18 +235,15 @@ struct galois_borne
 
 
 GEN indexpartial(GEN,GEN);
-GEN ZX_disc_all(GEN,long);
+extern GEN ZX_disc_all(GEN,long);
 
 GEN
-galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
+initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
 {
-  ulong   ltop = avma, av2;
-  GEN     borne, borneroots, borneabs;
-  int     i, j;
-  int     n;
-  GEN     L, M, z, prep, den;
+  int     n = degpol(T);
+  int     i;
+  GEN     L, z, prep, den;
   long    prec;
-  n = degpol(T);
   prec = 1;
   for (i = 2; i < lgef(T); i++)
     if (lg(T[i]) > prec)
@@ -266,18 +263,36 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   prep=vandermondeinverseprep(T, L);
   if (!dn)
   {
-    GEN res = divide_conquer_prod(gabs(prep,prec), mpmul);
-    GEN dis;
+    GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
     disable_dbg(0);
     dis = ZX_disc_all(T, 1+mylogint(res,gdeux));
     disable_dbg(-1);
-    den = gclone(indexpartial(T,dis));
+    den = indexpartial(T,dis);
+    if (ptdis) *ptdis = dis;
   }
   else
-    den=dn;
+    den = dn;
+  if (ptprep) *ptprep = prep;
+  if (ptprec) *ptprec = prec;
+  *ptL = L; return den;
+}
+
+GEN
+galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
+{
+  ulong   ltop = avma, av2;
+  GEN     borne, borneroots, borneabs;
+  int     i, j;
+  int     n;
+  GEN     L, M, z, prep, den;
+  long    prec;
+
+  den = initgaloisborne(T,dn, &L,&prep,NULL,&prec);
+  if (!dn) den = gclone(den);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (DEBUGLEVEL>=4) genmsgtimer(3,"vandermondeinverse");
   borne = realzero(prec);
+  n = degpol(T);
   for (i = 1; i <= n; i++)
   {
     z = gzero;
@@ -311,11 +326,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   gb->ladicsol = gpowgs(gb->l, gb->valsol);
   gb->ladicabs = gpowgs(gb->l, gb->valabs);
   gb->lbornesol = subii(gb->ladicsol,gb->bornesol);
-  if (!dn)
-  {
-    dn=forcecopy(den);
-    gunclone(den);
-  }
+  if (!dn) { dn = icopy(den); gunclone(den); }
   return dn;
 }
 
