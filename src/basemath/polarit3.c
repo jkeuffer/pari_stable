@@ -1710,12 +1710,17 @@ Fq_res_long(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   return NULL;
 }
 
+ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
+
+/* 1 / Mod(x,p) , or 0 if inverse doesn't exist */
 static ulong
 u_invmod(ulong x, ulong p)
 {
-  long av = avma;
-  GEN t = mpinvmod(utoi(x), utoi(p));
-  avma = av; return (ulong)t[2];
+  long s;
+  ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
+  if (g != 1UL) return 0UL;
+  xv = xv1 % p; if (s < 0) xv = p - xv;
+  return xv;
 }
 
 static GEN 
