@@ -24,6 +24,7 @@ emacs_dir=emacs
 examples_dir=examples
 misc_dir=misc
 src_dir=src
+desc_dir=src/desc
 extract_dir_list="$doc_dir $emacs_dir $misc_dir" # for extract_files
 
 cd $config_dir

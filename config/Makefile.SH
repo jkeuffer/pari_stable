@@ -261,10 +261,10 @@ MANDIR    = \$(DESTDIR)$mandir
 EMACSDIR  = \$(DESTDIR)$emacsdir
 ALLDIR    = \$(DESTDIR)$miscdir
 DESCDIR   = \$(DESTDIR)$descdir
+DOCDIR    = \$(DESTDIR)$docdir
 READMEDIR = \$(ALLDIR)
-DOCDIR    = \$(ALLDIR)/doc
 EXDIR     = \$(ALLDIR)/examples
-MISCDIR   = \$(ALLDIR)/misc
+MISCDIR   = \$(ALLDIR)
 
 INSTALL = $cfg/install
 INSTALL_PROGRAM = \$(INSTALL)

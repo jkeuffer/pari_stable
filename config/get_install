@@ -1,5 +1,5 @@
 # Exported variables
-_install_list="prefix share_prefix bindir descdir emacsdir includedir mandir miscdir libdir paricfgdir datadir"
+_install_list="prefix share_prefix bindir datadir descdir docdir emacsdir includedir libdir mandir miscdir paricfgdir "
 
 dflt=$prefix; rep=
 test "$fastread" = yes || cat <<EOT
@@ -22,7 +22,8 @@ dflt=$share_prefix; . ./myread; share_prefix=$ans
 
 if test -z "$share_prefix"; then
   dfltman=$prefix/man/man1
-  dfltall=$prefix/lib/pari
+  dfltmisc=$prefix/lib/pari/misc
+  dfltdoc=$prefix/lib/pari/doc
   dfltemacs=$prefix/emacs/site-lisp
   possibleemacs=/usr/share/emacs/site-lisp
   if test ! -d $dfltemacs -a $prefix = '/usr/local' -a -d $possibleemacs; then
@@ -31,7 +32,8 @@ if test -z "$share_prefix"; then
   fi
 else
   dfltman=$share_prefix/man/man1
-  dfltall=$share_prefix/doc/pari
+  dfltmisc=$share_prefix/doc/pari
+  dfltdoc=$share_prefix/pari/doc
   dfltemacs=$share_prefix/emacs/site-lisp
 fi
 
@@ -47,11 +49,14 @@ dflt=${dlftincludedir:-$prefix/include/pari}; . ./myread; includedir=$ans
 echo $n ..."pari.cfg file ? $c"
 dflt=${dfltparicfgdir:-$prefix/lib/pari}; . ./myread; paricfgdir=$ans
 
+echo $n ..."documentation (TeX, DVI files) ? $c"
+dflt=${dfltdocdir:-$prefix/doc}; . ./myread; docdir=$ans
+
 echo $n ..."manual pages ? $c"
 dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
 
-echo $n ..."documentation, examples ? $c"
-dflt=${dfltmiscdir:-$dfltall}; . ./myread; miscdir=$ans
+echo $n ..."miscellaneous files, examples ? $c"
+dflt=${dfltmiscdir:-$dfltmisc}; . ./myread; miscdir=$ans
 
 echo $n ..."emacs macros ? $c"
 dflt=${dfltemacsdir:-$dfltemacs}; . ./myread; emacsdir=$ans

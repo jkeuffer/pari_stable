@@ -58,6 +58,7 @@ while test $# -gt 0; do
                share_prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --bindir=*) dfltbindir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --descdir=*) dfltdescdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --docdir=*) dfltdocdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --emacsdir=*) dfltemacsdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --libdir=*) dfltlibdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --paricfgdir=*) dfltparicfgdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
@@ -140,11 +141,12 @@ Installation directories:
   --share-prefix=<dir>  as 'prefix', for architecture independent files
   --bindir=<dir>        for binaries
   --descsdir=<dir>      for data associated to GP's function description system
+  --docdir=<dir>        for manuals and general documentation (TeX, DVI)
   --emacsdir=<dir>      for emacs macros
   --libdir=<dir>        for libraries
   --paricfgdir=<dir>    for pari.cfg file (architecture-dependent config data)
   --mandir=<dir>        for manual pages
-  --miscdir=<dir>       for documentation and examples
+  --miscdir=<dir>       for miscellaneous documentation and examples
   --datadir=<dir>       for precomputed data (Galois resolvents for polgalois)
   --includedir=<dir>    for C header files
 
