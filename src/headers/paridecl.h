@@ -780,6 +780,7 @@ GEN     gdiv(GEN x, GEN y);
 GEN     gmul(GEN x, GEN y);
 GEN     gred(GEN x);
 GEN     gred_rfrac(GEN x);
+GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 
 /* gen2.c */
@@ -822,7 +823,6 @@ GEN     gneg(GEN x);
 GEN     gneg_i(GEN x);
 GEN     greffe(GEN x, long l, long use_stack);
 int     gsigne(GEN x);
-GEN     gsqr(GEN x);
 GEN     gtolist(GEN x);
 long    gtolong(GEN x);
 int     lexcmp(GEN x, GEN y);

@@ -243,6 +243,11 @@ puiss0(GEN x)
       break;
     case t_QFR: return real_unit_form(x);
     case t_QFI: return imag_unit_form(x);
+    case t_VECSMALL:
+      lx = lg(x);
+      y = cgetg(lx, t_VECSMALL);
+      for (i=1; i<lx; i++) y[i] = i;
+      return y;
     default: err(typeer,"gpowgs");
       return NULL; /* not reached */
   }
