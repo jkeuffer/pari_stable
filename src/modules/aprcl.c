@@ -627,8 +627,9 @@ filltabs(GEN N, int p, int k, ulong ltab)
   tabcyc[pk2] = cyclo(pk,0);
 
   p1 = cgetg(pk+1,t_VEC);
-  for (i=1; i<=pk; i++) p1[i] = lmod(gpowgs(polx[0],i-1), tabcyc[pk2]);
-  tabeta[pk2] = (long)FpV_red(p1, N);
+  for (i=1; i<=pk; i++)
+    p1[i] = (long)FpX_res(gpowgs(polx[0],i-1), tabcyc[pk2], N);
+  tabeta[pk2] = (long)p1;
 
   if (p > 2)
   {
