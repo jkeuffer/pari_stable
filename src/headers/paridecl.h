@@ -1066,6 +1066,7 @@ int     cmprr(GEN x, GEN y);
 int     cmpsi(long x, GEN y);
 GEN     dbltor(double x);
 GEN     diviiexact(GEN x, GEN y);
+GEN     diviuexact(GEN x, ulong y);
 void    diviiz(GEN x, GEN y, GEN z);
 GEN     divir(GEN x, GEN y);
 GEN     divis(GEN y, long x);
