@@ -64,6 +64,7 @@ BA 23- fix accuracy problems in vandermondeinverse
    26- element_sqr didn't check its arguments (SEGV if bad input)
    27- possible stack corruption in polroots (+ improved GC there)
    28- typo in nfsubfields (incorrect bound: could miss a subfield)
+   29- typo in zsimpjoin (concat error in bnrdisclist)
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
