@@ -3084,16 +3084,15 @@ polcompositum0(GEN A, GEN B, long flall)
     for (i=1; i<l; i++)
     {
       c = gmodulcp(polx[v], (GEN)y[i]);
-      if (v == 0) gsetvarn(c, MAXVARN);
+      if (v == 0) gsetvarn(c, MAXVARN); else setvarn(A, 0);
       /* Ba = polynomial in X, st Ba(a) = 0 */
       Ba = poleval(B, gadd(c , gmulsg(-k,polx[0])));
       Ba = lift_intern(Ba);
-      /* should be nfgcd(subst(A,v,0),...) but nfgcd doesn't use varn */
       p1 = nfgcd(A, Ba, (GEN)c[1], NULL);
       if (lgef(p1) != 4) err(bugparier,"compositum");
       /* p1 = uX + v, with a as root, u in Q, v in Q(c) */
       a = gneg_i(gdiv((GEN)p1[2], (GEN)p1[3]));
-      if (v == 0) { gsetvarn(a, 0); gsetvarn(c, 0); }
+      if (v == 0) { gsetvarn(a, 0); gsetvarn(c, 0); } else setvarn(A, v);
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
       w[1] = y[i]; 
       w[2] = lmodulcp(a, (GEN)y[i]);
