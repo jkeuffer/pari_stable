@@ -198,6 +198,21 @@ incneg(GEN a)
   return a;
 }
 
+/* assume a initialized by setloop. Do a++ */
+GEN
+incloop(GEN a)
+{
+  switch(signe(a))
+  {
+    case 0:
+      a[0]=evaltyp(t_INT) | _evallg(3);
+      a[1]=evalsigne(1) | evallgefint(3);
+      a[2]=1; return a;
+    case -1: return incneg(a);
+    default: return incpos(a);
+  }
+}
+
 INLINE GEN
 addsispec(long s, GEN x, long nx)
 {
