@@ -369,7 +369,7 @@ lirecoset(long n1, long n2, long n)
   char c, ch[8];
   long no,m,cardgr,fd;
 
-  if (n<11 || n1<8)
+  if (n<11 || n2<8)
   {
     fd = galopen(name("COS", n, n1, n2, 0));
     os_read(fd,&c,1); m=bin(c);
