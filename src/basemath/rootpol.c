@@ -11,9 +11,8 @@ GEN polrecip_i(GEN x);
 #define pariINFINITY 100000
 #define NEWTON_MAX 10
 
-static GEN gunr, globalu;
+static GEN globalu, *radius;
 static long KARASQUARE_LIMIT, COOK_SQUARE_LIMIT, Lmax, step4;
-static GEN *radius;
 
 /********************************************************************/
 /**                                                                **/
@@ -424,6 +423,16 @@ myshiftic(GEN z, long e)
   return signe(z)? mpshift(z,e): gzero;
 }
 
+/* as realun with precision in bits, not in words */
+static GEN
+myrealun(long bitprec)
+{
+  GEN x;
+  if (bitprec < 0) bitprec = 0;
+  x = cgetr(bitprec/BITS_IN_LONG+3);
+  affsr(1,x); return x;
+}
+
 static GEN
 mygprecrc(GEN x, long bitprec, long e)
 {
@@ -565,7 +574,7 @@ lower_bound(GEN p, long *k, double eps)
   if (n<4) { *k=n; return 0.; }
   a=cgetg(6,t_POL); s=cgetg(6,t_POL);
   rho=(double *) gpmalloc(4*sizeof(double));
-  icd=gdiv(gunr,(GEN) p[n+2]);
+  icd = ginv((GEN) p[n+2]);
   for (i=1; i<=4; i++) a[i+1]=lmul(icd,(GEN)p[n+2-i]);
   for (i=1; i<=4; i++)
   {
@@ -599,7 +608,7 @@ max_modulus(GEN p, double tau)
   if (tau>3.0) tau=3.0; /* fix PZ 7.2.98: ensures eps is positive */
   eps=1/log(4./tau); tau2=tau/6.;
   bitprec=(long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
-  new_gunr=mygprec(gunr,bitprec+2*n);
+  new_gunr=myrealun(bitprec+2*n);
   aux=gdiv(new_gunr,(GEN) p[2+n]);
   q=gmul(aux,p); q[2+n]=lcopy(new_gunr);
   k=nn=n;
@@ -650,7 +659,7 @@ modulus(GEN p, long k, double tau)
   tau2=tau/6; nn=n;
   bitprec= (long) ((double) n*(2.+log2(3.*(double) n)+log2(1./tau2)));
   decprec=(long) ((double) bitprec * L2SL10)+1;
-  new_gunr=gprec(gunr,decprec);
+  new_gunr=myrealun(bitprec);
   av = avma;
   q=gprec(p,decprec);
   q=gmul(new_gunr,q);
@@ -714,7 +723,7 @@ pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
     affrr(mulrr(gsqr(aux), dbltor(exp(2*tau2))), aux);
     tau2 *= 1.5;
     bitprec= (long) ((double) n*(2. + log2ir(aux) - log2(1-exp(-tau2))));
-    q = gmul(mygprec(gunr,bitprec),q);
+    q = gmul(myrealun(bitprec),q);
   }
 
   aux2 = rtodbl(mplog(modulus(q,k,exp2((double)imax)*tau/3.)));
@@ -860,30 +869,42 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   for (i=0; i<l; i++) f[i]=ff[i+1];
 }
 
+/* return exp(ix), x a t_REAL */
+static GEN
+exp_i(GEN x)
+{
+  GEN v;
+  
+  if (!signe(x)) return realun(lg(x)); /* should not happen */
+  v = cgetg(3,t_COMPLEX);
+  mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
+  return v;
+}
+
 /* returns a vector RU which contains exp(2*i*k*Pi/NN), k=0..NN-1 */
 static GEN
 initRU(long NN, long bitprec)
 {
-  GEN prim,aux,RU,mygpi;
-  long i,N2=(NN>>1),N4=(NN>>2),N8=(NN>>3),decprec;
+  GEN prim,aux,*RU,mygpi;
+  long i,N2=(NN>>1),N4=(NN>>2),N8=(NN>>3);
 
-  RU=cgetg(NN+1,t_VEC); RU++;
-  mygpi=mppi(bitprec/BITS_IN_LONG+3);
-  aux=gmul(gi,gdivgs(mygpi,NN/2)); /* 2i Pi/NN */
-  decprec=(long) ((double) bitprec * L2SL10)+1;
-  prim=gexp(aux,decprec);
-  RU[0]=lprec(gunr,decprec);
+  RU = (GEN*)cgetg(NN+1,t_VEC); RU++;
+  mygpi = mppi(bitprec/BITS_IN_LONG+3);
+  aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
+  prim = exp_i(aux);
+  aux = gmulbyi(aux);
 
-  for (i=1; i<=N8; i++) RU[i]=lmul(prim,(GEN)RU[i-1]);
+  RU[0] = myrealun(bitprec);
+  for (i=1; i<=N8; i++) RU[i] = gmul(prim, RU[i-1]);
   for (i=1; i<N8; i++)
   {
     aux=cgetg(3,t_COMPLEX);
-    aux[1]=((GEN)RU[i])[2]; aux[2]=((GEN)RU[i])[1];
-    RU[N4-i]=(long) aux;
+    aux[1]=RU[i][2];
+    aux[2]=RU[i][1]; RU[N4-i]=aux;
   }
-  for (i=0; i<N4; i++) RU[i+N4]=(long)gmulbyi((GEN)RU[i]);
-  for (i=0; i<N2; i++) RU[i+N2]=lneg((GEN)RU[i]);
-  return RU;
+  for (i=0; i<N4; i++) RU[i+N4]=gmulbyi(RU[i]);
+  for (i=0; i<N2; i++) RU[i+N2]=gneg(RU[i]);
+  return (GEN)RU;
 }
 
 /* returns 1 if p has only real coefficients, 0 else */
@@ -908,9 +929,10 @@ parameters(GEN p, double *mu, double *gamma,
   NN=(long) (param*3.14)+1; if (NN<Lmax) NN=Lmax;
   K=NN/Lmax; if (K%2==1) K++; NN=Lmax*K;
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
-  aux=gmul(gi,gdivgs(mygpi,NN/2)); /* 2i Pi/NN */
-  prim=gexp(aux,(long) ((double) bitprec * L2SL10)+1);
-  RU=mygprec(gunr,bitprec);
+  aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
+  prim = exp_i(aux);
+  aux = gmulbyi(aux);
+  RU = myrealun(bitprec);
 
   Omega=initRU(Lmax,bitprec);
 
@@ -920,12 +942,12 @@ parameters(GEN p, double *mu, double *gamma,
 
   coef=cgetg(Lmax+1,t_VEC); coef++;
   *mu=(double)pariINFINITY; *gamma=0.;
-  ggamma=gmul(gzero,gunr);
+  ggamma = gzero;
+  aux = myrealun(bitprec);
   if (polreal) K=K/2+1;
   ltop2=avma;
   for (i=0; i<K; i++)
   {
-    aux=mygprec(gunr,bitprec);
     for (j=0; j<=n; j++)
     {
       pc[j]=lmul((GEN)q[j+2],aux);
@@ -968,9 +990,10 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
   long limite,n=lgef(p)-3,i,j,K,ltop;
 
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
-  aux=gmul(gi,gdivgs(mygpi,NN/2)); /* 2i Pi/NN */
-  prim=gexp(aux,(long) ((double) bitprec * L2SL10)+1);
-  prim2=mygprec(gunr,bitprec);
+  aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
+  prim = exp_i(aux);
+  aux = gmulbyi(aux);
+  prim2 = myrealun(bitprec);
   RU=cgetg(n+2,t_VEC); RU++;
 
   Omega=initRU(Lmax,bitprec);
@@ -1250,17 +1273,17 @@ shiftpol(GEN p, GEN b)
 static GEN
 conformal_pol(GEN p, GEN a, long bitprec)
 {
-  GEN r,pui,num,aux;
+  GEN r,pui,num,aux, unr = myrealun(bitprec);
   long n=lgef(p)-3, i;
 
   aux = pui = cgetg(4,t_POL);
   pui[1] = evalsigne(1) | evalvarn(varn(p)) | evallgef(4);
-  pui[2] = (long) mygprec(gneg_i(gunr),bitprec);
+  pui[2] = (long)negr(unr);
   pui[3] = lconj(a);
   num = cgetg(4,t_POL);
   num[1] = pui[1];
   num[2] = lneg(a);
-  num[3] = (long) mygprec(gunr,bitprec);
+  num[3] = (long)unr;
   r=(GEN)p[2+n];
   for (i=n-1; ; i--)
   {
@@ -1280,7 +1303,7 @@ conformal_mapping(GEN p, long k, long bitprec, double aux,GEN *F,GEN *G)
   double delta,param,param2;
 
   bitprec2=bitprec+(long) (n*(2.*log2(2.732)+log2(1.5)))+1;
-  a=gsqrt(stoi(3),10);
+  a=gsqrt(stoi(3), 2*MEDDEFAULTPREC - 2);
   a=gmul(mygprec(a,bitprec2),mygprec(globalu,bitprec2));
   a=gdivgs(a,-6); /* a=-globalu/2/sqrt(3) */
 
@@ -1523,7 +1546,7 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
 
   bitprec3=bitprec2+(long)((double)n*2.*log2(3.)+1);
   v=cgetg(5,t_VEC); v++;
-  v[0]=lmul2n(mygprec(gunr,bitprec3), 1);
+  v[0]=lmul2n(myrealun(bitprec3), 1);
   v[1]=lneg((GEN)v[0]);
   v[2]=lmul((GEN)v[0],gi);
   v[3]=lneg((GEN)v[2]);
@@ -1547,7 +1570,7 @@ split_1(GEN p, long bitprec, GEN *F, GEN *G)
   }
   bitprec3=bitprec2+(long)((double) n*log2(3.)+1)+gexpo(newq)-gexpo(q);
   split_2(newq,bitprec3,rtodbl(mplog(thickness)),&FF,&GG);
-  globalu=gsub(polx[varn(p)],mygprec(globalu,bitprec3));
+  globalu = gsub(polx[varn(p)], mygprec(globalu,bitprec3));
   FF = shiftpol(FF,globalu);
   GG = shiftpol(GG,globalu);
 
@@ -1583,10 +1606,10 @@ split_0_2(GEN p, long bitprec, GEN *F, GEN *G)
   {
     if (k>n/2) k=n/2;
     bitprec2+=(k<<1);
-    FF=cgetg(k+3,t_POL); FF[1]=evalsigne(1)+evalvarn(varn(p))+evallgef(k+3);
+    FF=cgetg(k+3,t_POL); FF[1]=evalsigne(1)|evalvarn(varn(p))|evallgef(k+3);
     for (i=0; i<k; i++) FF[i+2]=zero;
-    FF[k+2]=(long) mygprec(gunr,bitprec2);
-    GG=cgetg(n-k+3,t_POL); GG[1]=evalsigne(1)+evalvarn(varn(p))+evallgef(n-k+3);
+    FF[k+2]=(long) myrealun(bitprec2);
+    GG=cgetg(n-k+3,t_POL); GG[1]=evalsigne(1)|evalvarn(varn(p))|evallgef(n-k+3);
     for (i=0; i<=n-k; i++) GG[i+2]=q[i+k+2];
     b = gsub(polx[varn(p)],mygprec(b,bitprec2));
   }
@@ -1639,8 +1662,8 @@ split_0(GEN p, long bitprec, GEN *F, GEN *G)
     if (k>n/2) k=n/2;
     FF=cgetg(k+3,t_POL);
     FF[1]=evalsigne(1) | evalvarn(varn(p)) | evallgef(k+3);
-    for (i=0; i<k; i++) FF[i+2]=lcopy(gzero);
-    FF[k+2]=(long) mygprec(gunr,bitprec);
+    for (i=0; i<k; i++) FF[i+2] = zero;
+    FF[k+2]=(long) myrealun(bitprec);
     GG=cgetg(n-k+3,t_POL);
     GG[1]=evalsigne(1) | evalvarn(varn(p)) | evallgef(n-k+3);
     for (i=0; i<=n-k; i++) GG[i+2]=p[i+k+2];
@@ -1880,14 +1903,15 @@ static GEN
 all_roots(GEN p, long bitprec)
 {
   GEN q,roots_pol,m;
-  long bitprec2,n=lgef(p)-3,iroots,j,e,av;
+  long bitprec2,n=lgef(p)-3,j,e,av;
 
-  roots_pol=cgetg(n+1,t_VEC); setlg(roots_pol,1); av=avma;
+  roots_pol=cgetg(n+1,t_VEC); av=avma;
   for (j=1; j<=10; j++)
   {
-    iroots=0; e = 2*gexpo(cauchy_bound(p)); if (e<0) e=0;
+    setlg(roots_pol,1); 
+    e = 2*gexpo(cauchy_bound(p)); if (e<0) e=0;
     bitprec2=bitprec+(1<<j)*n+gexpo(p)-gexpo((GEN)p[2+n]) + (long)log2(n)+1+e;
-    q=gmul(mygprec(gunr,bitprec2),mygprec(p,bitprec2));
+    q=gmul(myrealun(bitprec2), mygprec(p,bitprec2));
     m=split_complete(q,bitprec2,roots_pol);
     e = gexpo(gsub(mygprec_special(p,bitprec2),m))
       - gexpo((GEN)q[2+n])+(long) log2((double)n)+1;
@@ -1977,7 +2001,7 @@ roots_com(GEN p, long l)
   if (!isvalidpol(p)) err(talker,"invalid coefficients in roots");
   if (lgef(p) == 3) return cgetg(1,t_VEC); /* constant polynomial */
   if (l<3) l=3;
-  bitprec=bit_accuracy(l); gunr=realun(l);
+  bitprec=bit_accuracy(l);
   return isexactpol(p)? solve_exact_pol(p,bitprec): all_roots(p,bitprec);
 }
 
