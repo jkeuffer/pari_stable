@@ -37,7 +37,7 @@ typedef struct _primedata
   GEN ff; /* factorization of pol mod p */
   GEN Z; /* cycle structure of the above [ Frobenius orbits ] */
   long lcm; /* lcm of the above */
-  GEN T;  /* ffinit(p, n, lcm) */
+  GEN T;  /* ffinit(p, lcm) */
 
   GEN fk;      /* factorization of pol over F_(p^lcm) */
   GEN firstroot; /* *[i] = index of first root of fk[i] */
