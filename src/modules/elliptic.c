@@ -976,7 +976,7 @@ elleta(GEN om, long prec)
 static GEN
 weipellnumall(GEN om1, GEN om2, GEN z, long flall, long prec)
 {
-  long av=avma,tetpil,lim,av1,toadd;
+  long av=avma,lim,av1,toadd;
   GEN p1,pii2,pii4,a,tau,q,u,y,yp,u1,u2,qn,v,ga;
 
   pii2 = PiI2(prec);
@@ -1000,20 +1000,19 @@ weipellnumall(GEN om1, GEN om2, GEN z, long flall, long prec)
   av1=avma; lim=stack_lim(av1,1); qn=q;
   for(;;)
   {
-    GEN p2,qnu,qnu1,qnu2,qnu3,qnu4;
+    GEN qnu,qnu1,qnu2,qnu3,qnu4;
 
     qnu=gmul(qn,u); qnu1=gsub(gun,qnu); qnu2=gsqr(qnu1);
     qnu3=gsub(qn,u); qnu4=gsqr(qnu3);
-    p1=gsub(gmul(u,gadd(ginv(qnu2),ginv(qnu4))),
-	    gmul2n(ginv(gsqr(gsub(gun,qn))),1));
-    p1=gmul(qn,p1);
-    y=gadd(y,p1);
+    p1 = gsub(gmul(u,gadd(ginv(qnu2),ginv(qnu4))),
+              gmul2n(ginv(gsqr(gsub(gun,qn))),1));
+    y = gadd(y, gmul(qn,p1));
     if (flall)
     {
-      p2=gadd(gdiv(gadd(gun,qnu),gmul(qnu1,qnu2)),
-              gdiv(gadd(qn,u),gmul(qnu3,qnu4)));
-      p2=gmul(qn,p2);
-      yp=gadd(yp,p2);
+      p1 = gadd(gdiv(gadd(gun,qnu),gmul(qnu1,qnu2)),
+                gdiv(gadd(qn,u),gmul(qnu3,qnu4)));
+      
+      yp = gadd(yp, gmul(qn,p1));
     }
     qn=gmul(q,qn);
     if (gexpo(qn) <= - bit_accuracy(prec) - 5 - toadd) break;
@@ -1025,14 +1024,18 @@ weipellnumall(GEN om1, GEN om2, GEN z, long flall, long prec)
     }
   }
 
-  pii2=gdiv(pii2,om2);
-  pii4=gsqr(pii2);
+  pii2 = gdiv(pii2,om2);
+  pii4 = gsqr(pii2);
   y = gmul(pii4,y);
-  if (flall) yp=gmul(u,gmul(gmul(pii4,pii2),yp));
-  tetpil=avma;
-  if (flall) { v=cgetg(3,t_VEC); v[1]=lcopy(y); v[2]=lmul2n(yp,-1); }
-  else v=gcopy(y);
-  return gerepile(av,tetpil,v);
+  if (flall)
+  {
+    yp = gmul(u, gmul(gmul(pii4,pii2),yp));
+    v = cgetg(3,t_VEC);
+    v[1] = (long)y;
+    v[2] = lmul2n(yp,-1);
+  }
+  else v = y;
+  return gerepilecopy(av, v);
 }
 
 GEN
@@ -1181,16 +1184,15 @@ ellsigma(GEN om, GEN z, long flag, long prec)
 GEN
 pointell(GEN e, GEN z, long prec)
 {
-  long av=avma,tetpil;
-  GEN y,yp,v,p1;
+  ulong av = avma;
+  GEN v;
 
   checkbell(e);
-  p1=weipellnumall((GEN)e[16],(GEN)e[15],z,1,prec);
-  if (lg(p1)==2) { avma=av; v=cgetg(2,t_VEC); v[1]=zero; return v; }
-  y = gsub((GEN)p1[1], gdivgs((GEN)e[6],12));
-  yp = gsub((GEN)p1[2], gmul2n(ellLHS0(e,y),-1));
-  tetpil=avma; v=cgetg(3,t_VEC); v[1]=lcopy(y); v[2]=lcopy(yp);
-  return gerepile(av,tetpil,v);
+  v = weipellnumall((GEN)e[16],(GEN)e[15],z,1,prec);
+  if (lg(v) == 2) return v;
+  v[1] = lsub((GEN)v[1], gdivgs((GEN)e[6],12));
+  v[2] = lsub((GEN)v[2], gmul2n(ellLHS0(e,(GEN)v[1]),-1));
+  return gerepilecopy(av, v);
 }
 
 GEN
@@ -2886,8 +2888,8 @@ _round(GEN x, long *e)
   return y;
 }
 
-/* Input the curve, a point, and an integer n, returns a point of order n
-   on the curve, or NULL if q is not rational. */
+/* Input the curve, a point q of order n (approx.), returns q as a rational
+ * point on the curve, or NULL if q is not rational. */
 static GEN
 torspnt(GEN E, GEN q, long n)
 {
@@ -2984,10 +2986,9 @@ torselldoud(GEN e)
   v = ellintegralmodel(e);
   if (v) e = coordch(e,v);
 
-  b = lgefint((GEN)e[12]) >> 1; /* b = size of sqrt(D) */
+  b = DEFAULTPREC + (lgefint((GEN)e[12]-2) >> 1); /* b >= size of sqrt(D) */
   prec = precision((GEN)e[15]);
   if (prec < b) err(precer, "torselldoud");
-  b = max(b, DEFAULTPREC);
   if (b < prec) { prec = b; e = gprec_w(e, b); }
   b = torsbound(e);
   if (b==1) { avma=av; return tors(e,1,NULL,NULL, v); }
