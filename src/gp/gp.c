@@ -2432,18 +2432,9 @@ gp_main_loop(int ismain)
     }
     if (paribufsize != b->len) fix_buffer(b, paribufsize);
 
-    for(;;)
-    {
-      if (! read_line(&F, NULL))
-      {
-#ifdef _WIN32
-	Sleep(10); if (win32ctrlc) dowin32ctrlc();
-#endif
-	if (popinfile()) gp_quit();
-	if (!ismain) { pop_buffer(); return z; }
-      }
-      else if (!check_meta(b->buf)) break;
-    }
+    if (! read_line(&F, NULL)) break;
+    if (check_meta(b->buf)) continue;
+
     if (ismain)
     {
       char c = b->buf[strlen(b->buf) - 1];
@@ -2464,6 +2455,12 @@ gp_main_loop(int ismain)
     avma = av;
     if (!gpsilent) gp_output(z, GP_DATA);
   }
+#ifdef _WIN32
+  Sleep(10); if (win32ctrlc) dowin32ctrlc();
+#endif
+  if (popinfile()) gp_quit();
+  if (!ismain) pop_buffer();
+  return z;
 }
 
 GEN
@@ -2570,26 +2567,27 @@ break_loop(long numerr)
   infile = stdin;
   for(;;)
   {
+    GEN x;
     if (! read_line(&F, BREAK_LOOP_PROMPT)) break;
-    if (! check_meta(b->buf))
-    {
-      GEN x = lisseq(b->buf);
-      if (did_break())
-      {
-        if (numerr == siginter && did_break() == br_NEXT)
-        {
-          (void)loop_break(); /* clear status flag */
-          go_on = 1;
-        }
-        break;
-      }
-      if (x == gnil) continue;
-
-      term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
-      term_color(c_NONE); pariputc('\n');
+    if (check_meta(b->buf))
+    { /* break loop initiated by ^C? Empty input --> continue computation */
+      if (numerr == siginter && *(b->buf) == 0) { handle_C_C=go_on=1; break; }
+      continue;
     }
-    /* break loop initiated by ^C. Empty input --> continue computation */
-    if (numerr == siginter && *(b->buf) == 0) { handle_C_C = go_on = 1; break; }
+    x = lisseq(b->buf);
+    if (did_break())
+    {
+      if (numerr == siginter && did_break() == br_NEXT)
+      {
+        (void)loop_break(); /* clear status flag */
+        go_on = 1;
+      }
+      break;
+    }
+    if (x == gnil) continue;
+
+    term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
+    term_color(c_NONE); pariputc('\n');
   }
   if (old && !s) set_analyseur(old);
   b = NULL; infile = oldinfile;
