@@ -3453,7 +3453,7 @@ polfnf(GEN a, GEN t)
   {
     GEN b, F = lift_intern(poleval((GEN)fa[i], x0));
     F = nfgcd(u, F, t, dent);
-    if (typ(F) != t_POL || deg(F) == 3)
+    if (typ(F) != t_POL || deg(F) == 0)
       err(talker,"reducible modulus in factornf");
     F = gmul(unt, F);
     F = gdiv(F, leading_term(F));
