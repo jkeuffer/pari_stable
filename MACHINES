@@ -77,6 +77,7 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107074  106494  2.0.16(21)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -   -   98488       -  2.0.16(15)DE
 ------------------------------------------------------------------------------
 Intel/x86
+AMS Athlon  1100MHz  Linux-2.4.2-2   gcc X11 dl2    1078    1076  2.1.1     DP
 AMD Duron   1000MHz  Linux-2.4.0    egcs  -  dl2    1364    1428  2.0.20    QL
 AMD Athlon   850MHz  Linux-2.2.17    gcc X11 dl2    1364    1342  2.1.0     JC
 AMD Duron    700MHz  Linux-2.4.0    egcs X11 dl2    2066    2138  2.0.20    QL
@@ -262,6 +263,7 @@ Contributors:
   BN = Balasubramanian Narasimhan
   CL = Christian Labesse
   DE = Denis Excoffier
+  DP = David Purdy
   EK = Emmanuel Kowalski
   GH = Guillaume Hanrot
   GN = Gerhard Niklasch
