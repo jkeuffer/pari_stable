@@ -472,7 +472,7 @@ poltrace(GEN x, GEN Trq, GEN p)
 
 /* Find h in Fp[X] such that h(a[i]) = listdelta[i] for all modular factors
  * ff[i], where a[i] is a fixed root of ff[i] in Fq = Z[Y]/(p,T) [namely the
- * first one in Fp_factor_irred output]. Let f = ff[i], A the given root, then
+ * first one in FpX_factorff_irred output]. Let f = ff[i], A the given root, then
  * h mod f is Tr_Fq/Fp ( h(A) f(X)/(X-A)f'(A) ), most of the expression being
  * precomputed. The complete h is recovered via chinese remaindering */
 static GEN
@@ -823,7 +823,7 @@ compute_data(GEN DATA, struct poldata PD, long d, GEN ff, GEN T,GEN p)
     fk = cgetg(N+1,t_VEC);
     for (l=1,j=1; j<lff; j++)
     { /* compute roots and fix ordering (Frobenius cycles) */
-      p1 = Fp_factor_irred((GEN)ff[j], T, p);
+      p1 = FpX_factorff_irred((GEN)ff[j], T, p);
       interp[j] = (long)interpol(p1,T,p);
       firstroot[j] = l;
       for (i=1; i<lg(p1); i++,l++) fk[l] = p1[i];

@@ -2526,7 +2526,7 @@ Fp_factor_rel(GEN P,GEN l, GEN Q)
   E = cgetg(nmax,t_VECSMALL);
   for(i=1;i<n;i++)
   {
-    GEN R = Fp_factor_irred(gmael(F,1,i),Q,l);
+    GEN R = FpX_factorff_irred(gmael(F,1,i),Q,l);
     int j, r = lg(R);
     for (j=1;j<r;j++)
     {

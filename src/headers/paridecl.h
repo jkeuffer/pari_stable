@@ -1506,7 +1506,6 @@ GEN     vecbezoutres(GEN x, GEN y);
 /* polarit3.c */
 
 ulong   Fl_pow(ulong x, ulong n, ulong p);
-GEN     Fp_factor_irred(GEN P, GEN Q, GEN l);
 void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
@@ -1527,6 +1526,7 @@ GEN     FpX_chinese_coprime(GEN x,GEN y,GEN Tx,GEN Ty,GEN Tz,GEN p);
 GEN     FpX_divrem(GEN x, GEN y, GEN p, GEN *pr);
 GEN     FpX_eval(GEN x,GEN y,GEN p);
 GEN     FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv);
+GEN     FpX_factorff_irred(GEN P, GEN Q, GEN l);
 GEN     FpX_gcd(GEN x, GEN y, GEN p);
 GEN     FpX_mul(GEN x,GEN y,GEN p);
 GEN     FpX_neg(GEN x,GEN p);

@@ -1819,7 +1819,7 @@ Fp_factorgalois(GEN P,GEN l, long d, long w, GEN MP)
 /* P,Q irreducible over F_l. Factor P over FF_l[X] / Q  [factors are ordered as
  * a Frobenius cycle] */
 GEN
-Fp_factor_irred(GEN P, GEN Q, GEN l)
+FpX_factorff_irred(GEN P, GEN Q, GEN l)
 {
   pari_sp ltop=avma, av;
   GEN SP,SQ,MP,MQ,M,FP,FQ,E,V,IR,res;

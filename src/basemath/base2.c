@@ -1691,7 +1691,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
     }
 
     /* nug irreducible mod p */
-    w = Fp_factor_irred(nug, ch_var(S->nu, nv), S->p);
+    w = FpX_factorff_irred(nug, ch_var(S->nu, nv), S->p);
     if (degpol(w[1]) != 1)
     {
       if (fm) { fm = -1; continue; }
