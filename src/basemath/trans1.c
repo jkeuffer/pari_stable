@@ -840,6 +840,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
   if (is_pm1(n))
   {
+    if (zetan) *zetan=gun;
     if (signe(n)>0)
       return gcopy(x);
     return ginv(x);
@@ -862,10 +863,10 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     z=ser_pui(x,z,prec);
     return gerepileupto(av,z);
   }
-  av=avma;
   if (tx==t_INTMOD)
   {
-    GEN z;
+    GEN z=gzero;
+    /*This is not great, but else it will generate too much trouble*/
     if (!isprime((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
     if (zetan) 
     {
@@ -884,8 +885,15 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     return y;
   }
   i = (long) precision(n); if (i) prec=i;
-  y=gmul(ginv(n),glog(x,prec)); tetpil=avma;
-  y=gerepile(av,tetpil,gexp(y,prec));
+  if (tx==t_INT && is_pm1(x) && signe(x)>0)
+    y=gun;    /*speed-up since there is no way to call rootsof1complex
+		directly from gp*/
+  else
+  {
+    av=avma;
+    y=gmul(ginv(n),glog(x,prec)); tetpil=avma;
+    y=gerepile(av,tetpil,gexp(y,prec));
+  }
   if (zetan)
   {
     if (tx==t_PADIC)
