@@ -272,8 +272,7 @@ padic_initell(GEN y, GEN p, long prec)
   q=ginv(w);
   if (valp(q)<0) q=ginv(q);
 
-  p1=cgetg(2,t_VEC); p1[1]=(long)e1;
-  y[14]=(long)p1;
+  y[14]=(long)_vec(e1);
   y[15]=(long)u2;
   y[16] = (kronecker((GEN)u2[4],p) <= 0 || (valp(u2)&1))? zero: lsqrt(u2,0);
   y[17]=(long)q;
@@ -540,10 +539,10 @@ addell(GEN e, GEN z1, GEN z2)
         eq = (gexpo(gadd(ellLHS0(e,x1),gadd(y1,y2))) >= gexpo(y1));
       else
         eq = gegal(y1,y2);
-      if (!eq) { avma=av; y=cgetg(2,t_VEC); y[1]=zero; return y; }
+      if (!eq) { avma=av; return _vec(gzero); }
     }
     p2 = d_ellLHS(e,z1);
-    if (gcmp0(p2)) { avma=av; y=cgetg(2,t_VEC); y[1]=zero; return y; }
+    if (gcmp0(p2)) { avma=av; return _vec(gzero); }
     p1 = gadd(gsub((GEN)e[4],gmul((GEN)e[1],y1)),
               gmul(x1,gadd(gmul2n((GEN)e[2],1),gmulsg(3,x1))));
   }
@@ -2976,8 +2975,7 @@ ratroot(GEN p)
   long i,t;
 
   i=2; while (!signe(p[i])) i++;
-  if (i==5)
-    { v=cgetg(2,t_VEC); v[1]=zero; return v; }
+  if (i==5) return _vec(gzero);
   if (i==4)
     { v=cgetg(3,t_VEC); v[1]=zero; v[2]=ldivgs((GEN)p[4],-4); return v; }
 
@@ -3025,7 +3023,7 @@ torsellnagelllutz(GEN e)
   if (v) e = coordch(e,v);
   pol = RHSpol(e);
   lr=ratroot(pol); nlr=lg(lr)-1;
-  r=cgetg(17,t_VEC); p1=cgetg(2,t_VEC); p1[1]=zero; r[1]=(long)p1;
+  r=cgetg(17,t_VEC); r[1]=(long)_vec(gzero);
   for (t=1,i=1; i<=nlr; i++)
   {
     p1=cgetg(3,t_VEC);
@@ -3067,12 +3065,12 @@ torsellnagelllutz(GEN e)
 
   if (nlr<3)
   {
-    w2=cgetg(2,t_VEC); w2[1]=lstoi(t);
+    w2 = _vec( stoi(t) );
     for (k=2; k<=t; k++)
       if (itos(orderell(e,(GEN)r[k])) == t) break;
     if (k>t) err(bugparier,"torsell (bug1)");
 
-    w3=cgetg(2,t_VEC); w3[1]=r[k];
+    w3 = _vec( (GEN)r[k] );
   }
   else
   {
@@ -3204,12 +3202,11 @@ tors(GEN e, long k, GEN p, GEN q, GEN v)
     if (p)
     {
       p = best_in_cycle(e,p,k);
-      if (v)
-        p = pointch(p,v);
+      if (v) p = pointch(p,v);
       r = cgetg(4,t_VEC);
-      r[1] = lstoi(k); p1 = cgetg(2,t_VEC); p1[1] = r[1];
-      r[2] = (long)p1; p1 = cgetg(2,t_VEC); p1[1] = lcopy(p);
-      r[3] = (long)p1;
+      r[1] = lstoi(k);
+      r[2] = (long)_vec( (GEN)r[1] );
+      r[3] = (long)_vec( gcopy(p) );
     }
     else
     {
