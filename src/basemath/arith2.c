@@ -329,7 +329,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
   if (B > 0 && 1.1 * V > A/B)  /* Now Xmin is the minumum.  Compare with 0 */
       Xmin = 0;
 
-  asize = (1 + Xmin)*cache_arena - fixed_to_cache;
+  asize = (ulong)((1 + Xmin)*cache_arena - fixed_to_cache);
   if (asize > total) asize = total;	/* May happen due to approximations */
   return asize;
 }
@@ -449,7 +449,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
 
   /* Actually, we access primes array of psize too; but we access it
      consequently, thus we do not include it in fixed_to_cache */
-  asize = good_arena_size(rootnum * slow2_in_roots, remains + 1, 0,
+  asize = good_arena_size((ulong)(rootnum * slow2_in_roots), remains + 1, 0,
 			  &cache_model, 0) - 1;
   /* enough room on the stack ? */
   alloced = (((byteptr)avma) <= ((byteptr)bot) + asize);
