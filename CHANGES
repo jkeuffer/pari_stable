@@ -125,6 +125,7 @@ BA 60- add "const" keyword to allow building with g++
    66- nfgaloisconj(x^2+1,4, 0) --> SEGV [ bad input ]
    67- typo in quadhilbert(-D): required O(D) memory instead of O(sqrt(D)) 
    68- all signed/unsigned compiler warnings
+   69- \p29, tan(Pi/2) --> "division by zero". Made error more explicit
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
@@ -195,7 +196,7 @@ BA 46- --disable-kernel Configure option replaced by --kernel=none
    47- compute_polrel() [rnfkummer] was very slow for [L:K] > 5 (compute
        Newton sums directly)
    48- simplified fincke_pohst() [don't recompute gram_matrix]
-   49- faster trueeta()
+   49- faster trueeta(), faster quadhilbert(D < 0)
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

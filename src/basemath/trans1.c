@@ -2068,11 +2068,12 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 static GEN
 mptan(GEN x)
 {
-  pari_sp av=avma, tetpil;
-  GEN s,c;
+  pari_sp av = avma;
+  GEN s, c;
 
-  mpsincos(x,&s,&c); tetpil=avma;
-  return gerepile(av,tetpil,divrr(s,c));
+  mpsincos(x,&s,&c);
+  if (!signe(c)) err(talker, "can't compute tan(Pi/2 + kPi)");
+  return gerepileuptoleaf(av, divrr(s,c));
 }
 
 GEN
