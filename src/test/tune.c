@@ -359,7 +359,7 @@ print_define(const char *name, long value)
 { printf("#define __%-25s  %5ld\n\n", name, value); }
 
 void
-one(tune_param *param)
+Test(tune_param *param)
 {
   int since_positive, since_change, thresh, new_thresh;
   speed_param s;
@@ -492,8 +492,8 @@ main(int argc, char **argv)
       v[n++] = r;
     }
   }
-  if (n) { for (i = 0; i < n; i++) one(&param[ v[i] ]); return 0; }
+  if (n) { for (i = 0; i < n; i++) Test(&param[ v[i] ]); return 0; }
   n = numberof(param);
-  for (i = 0; i < n; i++) one(&param[i]);
+  for (i = 0; i < n; i++) Test(&param[i]);
   return 0;
 }
