@@ -1064,11 +1064,12 @@ FBquad(GEN Disc, long n2, long n)
 static GEN
 subFBquad(GEN D, double PROD, long KC)
 {
-  long i, j, lgsub, ino, lv = KC+1;
+  long i, j, lgsub, ino, minSFB, lv = KC+1;
   double prod = 1.;
   pari_sp av;
   GEN no;
 
+  minSFB = (expi(D) > 10)? 3: 2;
   vperm = cgetg(lv, t_VECSMALL);
   av = avma;
   no    = cgetg(lv, t_VECSMALL); ino = 1;
@@ -1080,7 +1081,7 @@ subFBquad(GEN D, double PROD, long KC)
     {
       vperm[i] = j; i++;
       prod *= p;
-      if (i > 2 && prod > PROD) break;
+      if (i > minSFB && prod > PROD) break;
     }
   }
   if (j == lv) return NULL;
@@ -1697,8 +1698,6 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
     default: err(talker,"zero discriminant in quadclassunit");
   }
   if (carreparfait(Disc)) err(talker,"square argument in quadclassunit");
-  if (!isfundamental(Disc))
-    err(warner,"not a fundamental discriminant in quadclassunit");
   buch_init(); RELSUP = RELSUP0;
   drc = fabs(gtodouble(Disc));
   LOGD = log(drc);

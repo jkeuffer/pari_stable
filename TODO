@@ -58,9 +58,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
-3  quadclassunit not reliable when fed non fundamental discriminants
-   (infinite loop [e.g quadclassunit(-352)], wrong result)
-
 3  ellinit over Q_2 doesn't work (AGM loses too much precision)
 
 3  ellpointtoz over Q_p makes no difference between P and -P (corrected over
