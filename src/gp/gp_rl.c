@@ -23,8 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "gp.h"
 
 #ifdef READLINE
-typedef char** (*CF)(char*, char* (*)(void)); /* completion function */
-typedef char* (*GF)(char*, int); /* generator function */
 typedef int (*RLCI)(int, int); /* rl_complete and rl_insert functions */
 
 BEGINEXTERN
@@ -89,8 +87,10 @@ extern void* _rl_save_prompt(void);
 #  define USER_COMPLETION rl_username_completion_function
 #  define DING rl_ding
 #else
+typedef char** (*CF)(char*, char* (*)(void)); /* completion function */
+typedef char* (*GF)(const char*, int); /* generator function */
 #  define COMPLETION_MATCHES(a,b) \
-      ((CF)completion_matches)((a),(char *(*)(void))(b))
+      ((CF)completion_matches)((char*)(a),(*GF)(b))
 #  define FILE_COMPLETION ((GF)filename_completion_function)
 #  define USER_COMPLETION ((GF)username_completion_function)
 #  define DING ding
