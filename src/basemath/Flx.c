@@ -316,7 +316,7 @@ GEN
 Flx_addshift(GEN x, GEN y, ulong p, long d)
 {
   GEN xd,yd,zd = (GEN)avma;
-  long a,lz,ny = lg(y)-2, nx = lg(x)-2;
+  long a,lz,ny = lgpol(y), nx = lgpol(x);
   long vs = x[1];
 
   x += 2; y += 2; a = ny-d;
@@ -460,7 +460,7 @@ Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb)
 GEN
 Flx_mul(GEN x, GEN y, ulong p)
 {
- GEN z = Flx_mulspec(x+2,y+2,p, lg(x)-2,lg(y)-2);
+ GEN z = Flx_mulspec(x+2,y+2,p, lgpol(x),lgpol(y));
  z[1] = x[1]; return z;
 }
 
@@ -550,7 +550,7 @@ Flx_sqrspec(GEN a, ulong p, long na)
 GEN
 Flx_sqr(GEN x, ulong p)
 {
-  GEN z = Flx_sqrspec(x+2,p, lg(x)-2);
+  GEN z = Flx_sqrspec(x+2,p, lgpol(x));
   z[1] = x[1]; return z;
 }
 
@@ -751,7 +751,7 @@ Flx_gcd_i(GEN a, GEN b, ulong p)
 {
   GEN c;
   if (lg(b) > lg(a)) swap(a, b);
-  while (lg(b)-2)
+  while (lgpol(b))
   {
     c = Flx_rem(a,b,p);
     a = b; b = c;
@@ -783,7 +783,7 @@ Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
 
   u = Flx_zero(a[1]);
   v = Fl_Flx(1,a[1]); /* v = 1 */
-  while (lg(y)-2)
+  while (lgpol(y))
   {
     q = Flx_divrem(x,y,p,&z);
     x = y; y = z; /* (x,y) = (y, x - q y) */
@@ -804,7 +804,7 @@ Flx_resultant(GEN a, GEN b, ulong p)
   pari_sp av;
   GEN c;
 
-  if (lg(a)-2==0 || lg(b)-2==0) return 0;
+  if (lgpol(a)==0 || lgpol(b)==0) return 0;
   da = degpol(a);
   db = degpol(b);
   if (db > da)
