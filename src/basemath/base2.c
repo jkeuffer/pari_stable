@@ -2218,9 +2218,8 @@ anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = (GEN)pr[1], z;
   z = gmod(special_anti_uniformizer(nf, pr), p);
-  z = eltmul_get_table(nf, z);
-  z = hnfmodid(z, p);
-  z = idealaddtoone_i(nf,pr,z);
+  z = hnfmodid(eltmul_get_table(nf, z), p);
+  z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
 }
 
