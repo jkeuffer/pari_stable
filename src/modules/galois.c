@@ -1316,12 +1316,10 @@ IMPEVEN_8_45:
 static long
 closure8(GEN po)
 {
-  long nbrac,rep;
+  long rep;
   GEN r[NMAX];
 
-  r[0]=myroots(po,PRMAX); nbrac=lg(r[0])-1;
-  if (nbrac!=N) err(talker,"incompatible number of roots in closure8()");
-  preci(r,PREC);
+  r[0] = myroots(po,PRMAX); preci(r,PREC);
   if (!CAR)
   {
   /* CLOS_8_1: */
@@ -1726,12 +1724,10 @@ IMPEVEN_9_13:
 static long
 closure9(GEN po)
 {
-  long nbrac,rep;
+  long rep;
   GEN r[NMAX];
 
-  r[0]=myroots(po,PRMAX); nbrac=lg(r[0])-1;
-  if (nbrac!=N) err(talker,"incompatible number of roots in closure9()");
-  preci(r,PREC);
+  r[0] = myroots(po,PRMAX); preci(r,PREC);
   if (!CAR)
   {
   /* CLOS_9_1: */
@@ -2152,13 +2148,10 @@ galoisimpodd10(GEN po, GEN *r, long nogr)
 static long
 closure10(GEN po)
 {
-  long nbrac,rep;
+  long rep;
   GEN r[NMAX];
 
-  r[0]=myroots(po,PRMAX); nbrac=lg(r[0])-1;
-  if (nbrac!=N) err(talker,"incompatible number of roots in closure10()");
-
-  preci(r,PREC);
+  r[0] = myroots(po,PRMAX); preci(r,PREC);
   if (CAR)
   {
   /* CLOS_10_1: */
@@ -2309,12 +2302,10 @@ galoismodulo10(GEN pol, GEN dpol)
 static long
 closure11(GEN po)
 {
-  long nbrac,rep;
+  long rep;
   GEN r[NMAX];
 
-  r[0]=myroots(po,PRMAX); nbrac=lg(r[0])-1;
-  if (nbrac!=N) err(talker,"incompatible number of roots in closure11()");
-  preci(r,PREC);
+  r[0] = myroots(po,PRMAX); preci(r,PREC);
   if (CAR)
   {
   /* EVEN_11_1: */
@@ -2506,10 +2497,9 @@ galoisbig(GEN pol, long prec)
   PREC = prec;
   if (DEBUGLEVEL)
   {
-    fprintferr("Entering galoisbig (prec = %ld)\n",prec);
-    fprintferr("Working with reduced polynomial #1 = "); bruterr(pol,'g',-1);
-    fprintferr("\ndiscriminant = "); bruterr(dpol,'g',-1);
-    fprintferr(CAR? "\nEVEN group\n": "\nODD group\n"); flusherr();
+    fprintferr("Galoisbig (prec=%ld): reduced polynomial #1 = %Z\n",prec,pol);
+    fprintferr("discriminant = %Z\n", dpol);
+    fprintferr("%s group\n", CAR? "EVEN": "ODD"); flusherr();
   }
   PRMAX = prec+5; TSCHMAX = 1; SID[0] = N;
   switch(N)
