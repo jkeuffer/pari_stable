@@ -53,7 +53,7 @@ gp all bench test-compat test-graphic install cleanobj cleantest install-bin ins
 	cd $objdir; \$(MAKE) \$@
 
 gp.dbg: $objdir.dbg/gp-sta
-	cd $objdir.dbf; \$(MAKE) gp
+	cd $objdir.dbg; \$(MAKE) gp
 
 doc docps docpdf gpman cleandoc::
 	cd doc; \$(MAKE) \$@
