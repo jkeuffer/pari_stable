@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "parinf.h"
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
+extern GEN make_T2(GEN base, GEN polr, long r1);
+extern GEN make_T(GEN x, GEN w);
 
 /* default quality ratio for LLL: 99/100 */
 #define LLLDFT 100
@@ -2227,72 +2229,8 @@ pols_for_polred(GEN x, GEN a, GEN *pta,
   return y;
 }
 
-GEN
-nf_get_T2(GEN base, GEN polr)
-{
-  long i,j, n = lg(base);
-  GEN p1,p2=cgetg(n,t_MAT);
-
-  for (i=1; i<n; i++)
-  {
-    p1=cgetg(n,t_COL); p2[i]=(long)p1;
-    for (j=1; j<n; j++)
-      p1[j] = (long) poleval((GEN)base[i],(GEN)polr[j]);
-  }
-  return mulmat_real(gconj(gtrans(p2)),p2);
-}
-
-/* compute Tr(w_i w_j) */
 static GEN
-nf_get_T(GEN x, GEN w)
-{
-  long i,j,k, n = degpol(x);
-  GEN p1,p2,t;
-  GEN ptrace = cgetg(n+2,t_VEC);
-  GEN den = cgetg(n+1,t_VEC);
-  GEN T = cgetg(n+1,t_MAT);
-  gpmem_t av;
-
-  ptrace[2] = lstoi(n);
-  for (k=2; k<=n; k++)
-  { /* cf polsym */
-    GEN y = x + (n-k+1);
-    av = avma;
-    t = mulsi(k-1,(GEN)y[2]);
-    for (i=3; i<=k; i++)
-      t = addii(t, mulii((GEN)y[i],(GEN)ptrace[i]));
-    ptrace[i] = (long)gerepileuptoint(av, negi(t));
-  }
-  w = dummycopy(w);
-  for (i=1; i<=n; i++)
-  {
-    den[i] = (long)denom(content((GEN)w[i]));
-    w[i] = (long)Q_remove_denom((GEN)w[i], (GEN)den[i]);
-  }
-
-  for (i=1; i<=n; i++)
-  {
-    p1 = cgetg(n+1,t_COL); T[i] = (long)p1;
-    for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
-    for (   ; j<=n; j++)
-    { /* cf quicktrace */
-      av = avma;
-      p2 = gres(gmul((GEN)w[i],(GEN)w[j]), x);
-      t = gzero;
-      for (k=lgef(p2)-1; k>1; k--)
-        t = addii(t, mulii((GEN)p2[k], (GEN)ptrace[k]));
-      t = diviiexact(t, mulii((GEN)den[i],(GEN)den[j]));
-      p1[j] = (long)gerepileuptoint(av, t);
-    }
-  }
-  return T;
-}
-
-extern GEN lllint_marked(long MARKED, GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB);
-extern GEN lllgram_marked(int MARKED, GEN x, long alpha, long flag, long prec);
-
-static GEN
-get_red_T2(GEN T2, GEN base, GEN x, long prec)
+get_red_T2(GEN T2, GEN base, GEN x, long r1, long prec)
 {
   long i;
   GEN u;
@@ -2302,7 +2240,7 @@ get_red_T2(GEN T2, GEN base, GEN x, long prec)
     if (i == MAXITERPOL) err(accurer,"red_T2");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
-    T2 = nf_get_T2(base, roots(x,prec));
+    T2 = make_T2(base, roots(x,prec), r1);
   }
 }
 
@@ -2315,7 +2253,7 @@ nf_get_LLL(GEN nf)
   if (! nf_get_r2(nf))
     return lllint_marked(1, gmael(nf,5,4), 100, 1, NULL,NULL);
   prec = nfgetprec(nf);
-  return get_red_T2( gmael(nf,5,3), (GEN)nf[7], (GEN)nf[1], prec );
+  return get_red_T2(gmael(nf,5,3), (GEN)nf[7], (GEN)nf[1], nf_get_r1(nf), prec);
 }
 
 /* Return the base change matrix giving the an LLL-reduced basis for the
@@ -2326,18 +2264,18 @@ GEN
 LLL_nfbasis(GEN x, GEN polr, GEN base, long prec)
 {
   GEN T2;
-  int n;
+  int n, r1;
 
   if (typ(x) != t_POL) return nf_get_LLL(x);
 
   n = degpol(x);
   if (typ(base) != t_VEC || lg(base)-1 != n)
     err(talker,"incorrect Zk basis in LLL_nfbasis");
-  if (!prec || sturm(x)==n)
-    return lllint_marked(1, nf_get_T(x, base), 100, 1, NULL,NULL);
+  if (!prec || (r1 = sturm(x)) == n)
+    return lllint_marked(1, make_T(x, base), 100, 1, NULL,NULL);
 
-  T2 = nf_get_T2(base, polr? polr: roots(x,prec));
-  return get_red_T2(T2, base, x, prec);
+  T2 = make_T2(base, polr? polr: roots(x,prec), r1);
+  return get_red_T2(T2, base, x, r1, prec);
 }
 
 /* x can be a polynomial, but also an nf or a bnf */
@@ -2348,16 +2286,18 @@ static GEN
 allpolred0(GEN x, GEN *pta, long code, long prec,
 	   int (*check)(void *,GEN), void *arg)
 {
-  GEN y,p1, base = NULL, polr = NULL;
+  GEN y, base = NULL;
   gpmem_t av = avma;
 
   if (typ(x) == t_POL)
   {
+    GEN p1;
     if (!signe(x)) return gcopy(x);
     check_pol_int(x,"polred");
     if (!gcmp1(leading_term(x)))
       err(impl,"allpolred for nonmonic polynomials");
     base = allbase4(x,code,&p1,NULL); /* p1 is junk */
+    base = gmul(base, LLL_nfbasis(x,NULL,base,prec));
   }
   else
   {
@@ -2365,6 +2305,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
     if (typ(x) == t_VEC && i==3 && typ(x[1])==t_POL)
     { /* polynomial + integer basis */
       base=(GEN)x[2]; x=(GEN)x[1];
+      base = gmul(base, LLL_nfbasis(x,NULL,base,prec));
     }
     else
     {
@@ -2372,8 +2313,7 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
       base=(GEN)x[7]; x=(GEN)x[1];
     }
   }
-  p1 = LLL_nfbasis(x,polr,base,prec);
-  y = pols_for_polred(x, gmul(base,p1), pta, check, arg);
+  y = pols_for_polred(x, base, pta, check, arg);
   if (check)
   {
     if (y) return gerepileupto(av, y);
@@ -3292,27 +3232,6 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   if (typ(a) == t_VEC) { nf = checknf(a); a = gmael(nf,5,3); } else nf = NULL;
   pr = gprecision(a);
   if (pr) prec = pr; else a = gmul(a,realun(prec));
-  if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
-  if (nf && !signe(gmael(nf,2,2))) /* totally real */
-  {
-    GEN T = nf_get_T((GEN)nf[1], (GEN)nf[7]);
-    u = lllgramint(T);
-    prec += 2 * ((gexpo(u) + gexpo((GEN)nf[1])) >> TWOPOTBITS_IN_LONG);
-    nf = nfnewprec(nf, prec);
-    r = qf_base_change(T,u,1);
-    i = PREC + (gexpo(r) >> TWOPOTBITS_IN_LONG);
-    if (i < prec) prec = i;
-    r = gmul(r, realun(prec));
-  }
-  else
-  {
-    u = lllgramintern(a,4,flag&1, (prec<<1)-2);
-    if (!u) goto PRECPB;
-    r = qf_base_change(a,u,1);
-  }
-  r = sqred1intern(r,flag&1);
-  if (!r) goto PRECPB;
-
   n = lg(a);
   if (n == 1)
   {
@@ -3321,6 +3240,20 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     z[1]=z[2]=zero;
     z[3]=lgetg(1,t_MAT); return z;
   }
+  if (nf)
+  { /* T2 already LLL-reduced */
+    u = idmat(n-1);
+    r = a;
+  }
+  else
+  {
+    if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
+    u = lllgramintern(a,4,flag&1, (prec<<1)-2);
+    if (!u) goto PRECPB;
+    r = qf_base_change(a,u,1);
+  }
+  r = sqred1intern(r,flag&1);
+  if (!r) goto PRECPB;
   for (i=1; i<n; i++)
   {
     GEN p1 = gsqrt(gcoeff(r,i,i), prec);

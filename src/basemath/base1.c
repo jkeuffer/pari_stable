@@ -952,18 +952,18 @@ make_M(GEN basden,GEN roo)
 GEN
 make_MC(long r1,GEN M)
 {
-  gpmem_t av,tetpil;
   long i,j,n = lg(M), ru = lg(M[1]);
-  GEN p1,p2,MC=cgetg(ru,t_MAT);
+  GEN p1, MC = cgetg(ru,t_MAT);
 
-  for (j=1; j<ru; j++)
+  for (j=1; j<=r1; j++)
   {
-    p1=cgetg(n,t_COL); MC[j]=(long)p1;
-    for (i=1; i<n; i++)
-    {
-      av=avma; p2=gconj(gcoeff(M,j,i)); tetpil=avma;
-      p1[i] = (j<=r1)? (long)p2: lpile(av,tetpil,gmul2n(p2,1));
-    }
+    p1 = cgetg(n,t_COL); MC[j] = (long)p1;
+    for (i=1; i<n; i++) p1[i] = coeff(M,j,i);
+  }
+  for (   ; j<ru; j++)
+  {
+    p1 = cgetg(n,t_COL); MC[j] = (long)p1;
+    for (i=1; i<n; i++) p1[i] = lmul2n(gconj(gcoeff(M,j,i)), 1);
   }
   if (DEBUGLEVEL>4) msgtimer("matrix MC");
   return MC;
@@ -1040,13 +1040,15 @@ get_T(GEN mul, GEN x, GEN bas, GEN den)
 GEN
 get_bas_den(GEN bas)
 {
-  GEN z,d,den, dbas = dummycopy(bas);
+  GEN z,b,d,den, dbas = dummycopy(bas);
   long i, c = 0, l = lg(bas);
   den = cgetg(l,t_VEC);
   for (i=1; i<l; i++)
   {
-    d = denom(content((GEN)dbas[i]));
-    if (is_pm1(d)) d = NULL; else { dbas[i] = lmul((GEN)dbas[i],d); c++; }
+    b = (GEN)bas[i];
+    d = denom(content(b));
+    if (is_pm1(d)) d = NULL; else { b = Q_remove_denom(b,d); c++; }
+    dbas[i]= (long)b;
     den[i] = (long)d;
   }
   if (!c) den = NULL; /* power basis */
@@ -1125,6 +1127,51 @@ get_nf_matrices(GEN nf, long small)
   mat[5]=(long)D;
   if (DEBUGLEVEL) msgtimer("matrices");
 }
+
+GEN
+make_T2(GEN bas, GEN ro, long r1)
+{
+  GEN M,MC,basden = get_bas_den(bas);
+  M = make_M(basden,ro);
+  MC = make_MC(r1,M);
+  return mulmat_real(MC,M);
+}
+
+/* as get_T, mul_table not precomputed */
+GEN
+make_T(GEN x, GEN w)
+{
+  long i,j, n = degpol(x);
+  GEN p1,p2,t,d;
+  GEN sym = cgetg(n+2,t_VEC);
+  GEN den = cgetg(n+1,t_VEC);
+  GEN T = cgetg(n+1,t_MAT);
+  gpmem_t av;
+
+  sym = polsym(x, n-1);
+  p1 = get_bas_den(w);
+  w   = (GEN)p1[1];
+  den = (GEN)p1[2];
+  for (i=1; i<=n; i++)
+  {
+    p1 = cgetg(n+1,t_COL); T[i] = (long)p1;
+    for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
+    for (   ; j<=n; j++)
+    {
+      av = avma;
+      p2 = gres(gmul((GEN)w[i],(GEN)w[j]), x);
+      t = quicktrace(p2, sym);
+      if (den)
+      {
+        d = _mulii((GEN)den[i],(GEN)den[j]);
+        if (d) t = diviiexact(t, d);
+      }
+      p1[j] = (long)gerepileuptoint(av, t);
+    }
+  }
+  return T;
+}
+
 
 /* Initialize the number field defined by the polynomial x (in variable v)
  * flag & nf_REGULAR

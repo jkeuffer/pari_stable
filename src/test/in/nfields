@@ -19,8 +19,8 @@ setrand(1);bnfinit(x^2-x-100000,1)
 \p19
 setrand(1);sbnf=bnfinit(x^3-x^2-14*x-1,3)
 \p38
-bnrinit(bnf,[[5,3;0,1],[1,0]],1)
-bnr=bnrclass(bnf,[[5,3;0,1],[1,0]],2)
+bnrinit(bnf,[[5,4;0,1],[1,0]],1)
+bnr=bnrclass(bnf,[[5,4;0,1],[1,0]],2)
 rnfinit(nf2,x^5-x-2)
 \\
 bnfcertify(bnf)
@@ -31,13 +31,13 @@ setrand(1);bnfclassunit(x^4+24*x^2+585*x+1791,,[0.1,0.1])
 setrand(1);bnfclgp(17)
 setrand(1);bnfclgp(-31)
 setrand(1);bnfclgp(x^4+24*x^2+585*x+1791)
-bnrconductor(bnf,[[25,13;0,1],[1,1]])
+bnrconductor(bnf,[[25,14;0,1],[1,1]])
 bnrconductorofchar(bnr,[2])
 \\ bnfdecodemodule(bnf,
 \\ bnfisintnorm
 \\ bnfisnorm
-bnfisprincipal(bnf,[5,1;0,1],0)
-bnfisprincipal(bnf,[5,1;0,1])
+bnfisprincipal(bnf,[5,2;0,1],0)
+bnfisprincipal(bnf,[5,2;0,1])
 \\ bnfissunit
 bnfisunit(bnf,Mod(3405*x-27466,x^2-x-57))
 \p19
@@ -48,9 +48,9 @@ bnfreg(x^2-x-57)
 bnfsignunit(bnf)
 \\ bnfsunit(bnf,
 bnfunit(bnf)
-bnrclass(bnf,[[5,3;0,1],[1,0]])
-bnr2=bnrclass(bnf,[[25,13;0,1],[1,1]],2)
-bnrclassno(bnf,[[5,3;0,1],[1,0]])
+bnrclass(bnf,[[5,4;0,1],[1,0]])
+bnr2=bnrclass(bnf,[[25,14;0,1],[1,1]],2)
+bnrclassno(bnf,[[5,4;0,1],[1,0]])
 lu=ideallist(bnf,55,3);
 bnrclassnolist(bnf,lu)
 bnrdisc(bnr,Mat(6))
@@ -134,7 +134,7 @@ nfhilbert(nf,3,5)
 nfhilbert(nf,3,5,idf[1,1])
 nfhnf(nf,[a,aid])
 nfhnfmod(nf,[a,aid],da)
-nfisideal(bnf[7],[5,1;0,1])
+nfisideal(bnf[7],[5,2;0,1])
 nfisincl(x^2+1,x^4+1)
 nfisincl(x^2+1,nfinit(x^4+1))
 nfisisom(x^3+x^2-2*x-1,x^3+x^2-2*x-1)

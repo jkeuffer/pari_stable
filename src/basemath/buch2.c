@@ -368,7 +368,7 @@ factorgen(GEN nf,GEN I,GEN m,long kcz,long limp)
 
 /* can we factor x ? Nx = norm(x) */
 static long
-factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
+factorelt(GEN nf,GEN x,GEN Nx,long kcz,long limp)
 {
   long i,j,n1,ip,v,p,k,lo,ifinal;
   GEN q,r,P,p1,listexpo;
@@ -385,7 +385,6 @@ factorelt(GEN nf,GEN cbase,GEN x,GEN Nx,long kcz,long limp)
   }
   if (cmpis(Nx,limp) > 0) return 0;
 
-  if (cbase) x = gmul(cbase,x);
   ifinal=i; lo = 0;
   for (i=1; i<=ifinal; i++)
   {
@@ -1407,7 +1406,7 @@ small_to_mat_i(GEN z, long d)
 /* return -1 in case of precision problems. t = current number of relations */
 static long
 small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
-                       GEN nf,GEN gborne,long nbrelpid,GEN invp,GEN L,GEN LLLnf)
+                       GEN nf,GEN gborne,long nbrelpid,GEN invp,GEN L)
 {
   const int maxtry_DEP  = 20;
   const int maxtry_FACT = 500;
@@ -1416,7 +1415,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   gpmem_t av = avma, av1, av2, limpile;
   long j,k,noideal, nbrel = lg(mat)-1;
   long nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
-  GEN x,xembed,M,T2,r,cbase,invcbase,T2vec,prvec;
+  GEN x,xembed,M,T2,r,T2vec,prvec;
 
   if (gsigne(gborne)<=0) return cglob;
   if (DEBUGLEVEL)
@@ -1424,8 +1423,8 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   xembed = NULL; /* gcc -Wall */
   nbsmallnorm = nbfact = 0;
   R1 = nf_get_r1(nf);
-  T2 = (GEN)LLLnf[1]; cbase   =(GEN)LLLnf[3];
-  M  = (GEN)LLLnf[2]; invcbase=(GEN)LLLnf[4];
+  M  = gmael(nf,5,1);
+  T2 = gmael(nf,5,3);
 
   prvec = cgetg(3,t_VECSMALL); T2vec = cgetg(3,t_VEC);
   prvec[1] = MEDDEFAULTPREC;   T2vec[1] = (long)gprec_w(T2,prvec[1]);
@@ -1440,8 +1439,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
     ideal = prime_to_ideal(nf,ideal);
-    IDEAL = invcbase? gmul(invcbase, ideal): ideal;
-    IDEAL = gmul(IDEAL, lllint(IDEAL)); /* should be almost T2-reduced */
+    IDEAL = gmul(ideal, lllint(ideal)); /* should be almost T2-reduced */
     r = red_ideal(&IDEAL,T2vec,prvec);
     if (!r) return -1; /* precision problem */
 
@@ -1498,7 +1496,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
               xembed = gmul(M,gx); av4 = avma; nbsmallnorm++;
               if (++try_factor > maxtry_FACT) goto ENDIDEAL;
               Nx = ground(norm_by_embed(R1,xembed)); setsigne(Nx, 1);
-              if (factorelt(nf,cbase,gx,Nx,KCZ,LIMC)) { avma = av4; break; }
+              if (factorelt(nf,gx,Nx,KCZ,LIMC)) { avma = av4; break; }
               if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
             }
 	    avma = av3;
@@ -2767,21 +2765,6 @@ buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
   return gerepilecopy(av, buchall_end(nf,CHANGE,flun,k,fu,clg1,clg2,reg,c_1,zu,W,B,xarch,matarch,vectbase,vperm));
 }
 
-static GEN
-get_LLLnf(GEN nf, long prec)
-{
-  GEN M  = gmael(nf,5,1);
-  GEN T2 = gmael(nf,5,3);
-  GEN cbase = lllgramintern(T2,100,1,prec);
-  GEN v = cgetg(5,t_VEC);
-  if (!cbase) return NULL;
-  if (gegal(cbase, idmat(lg(T2)-1))) cbase = NULL;
-  v[1] = (long) (cbase? qf_base_change(T2, cbase, 1): T2);
-  v[2] = (long) (cbase? gmul(M, cbase): M);
-  v[3] = (long) cbase;
-  v[4] = (long) (cbase? ZM_inv(cbase,gun): NULL); return v;
-}
-
 GEN
 buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
         long minsFB,long flun,long prec)
@@ -2791,7 +2774,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob;
   long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
-  GEN p1,vecT2,fu,zu,nf,LLLnf,D,xarch,W,R,Res,z,h,vperm,subFB;
+  GEN p1,vecT2,fu,zu,nf,D,xarch,W,R,Res,z,h,vperm,subFB;
   GEN L,resc,B,C,c1,lambda,pdep,liste,invp,clg1,clg2,Vbase, *mat;
   GEN CHANGE=NULL, extramat=NULL, extraC=NULL, list_jideal=NULL;
   char *precpb = NULL;
@@ -2862,9 +2845,6 @@ START:
   precadd = 0;
 
   /* T2-LLL-reduce nf.zk */
-  LLLnf = get_LLLnf(nf, PRECREG);
-  if (!LLLnf) { precpb = "LLLnf"; goto START; }
-
   LIMC = (long)(cbach*LOGD2); if (LIMC < 20) LIMC = 20;
   LIMC2= max(3 * N, (long)(cbach2*LOGD2));
   if (LIMC2 < LIMC) LIMC2 = LIMC;
@@ -2926,7 +2906,7 @@ START:
 
   /* relations through elements of small norm */
   cglob = small_norm_for_buchall(cglob,mat,C,(long)LIMC,PRECREG,
-                                 nf,gborne,nbrelpid,invp,liste,LLLnf);
+                                 nf,gborne,nbrelpid,invp,liste);
   if (cglob < 0) { precpb = "small_norm"; goto START; }
   avma = av1; limpile = stack_lim(av1,1);
 

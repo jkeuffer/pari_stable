@@ -30,7 +30,7 @@ extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
-extern GEN nf_get_T2(GEN base, GEN polr);
+extern GEN make_T2(GEN base, GEN polr, long r1);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
@@ -55,7 +55,6 @@ typedef struct {
   GEN iprk;  /* den * prk^-1 */
   GEN GSmin; /* min |b_i^*|^2 */
   GEN ZpProj;/* projector to Zp / \wp^k = Z/p^k  (\wp unramified, degree 1) */
-  GEN LLLinv;
   GEN tozk;
   GEN topow;
 } nflift_t;
@@ -359,7 +358,7 @@ static GEN
 nf_factor_bound(GEN nf, GEN polbase)
 {
   GEN lt,C,run,p1,p2, T2 = gmael(nf,5,3);
-  long i,prec,precnf, d = lgef(polbase), n = degpol(nf[1]);
+  long i,prec,precnf, d = lgef(polbase), n = degpol(nf[1]), r1 = nf_get_r1(nf);
 
   precnf = gprecision(T2);
   prec   = DEFAULTPREC;
@@ -379,7 +378,7 @@ nf_factor_bound(GEN nf, GEN polbase)
     if (prec > precnf)
     {
       if (DEBUGLEVEL>1) err(warnprec, "nfsqff", prec);
-      T2 = nf_get_T2((GEN)nf[7], roots((GEN)nf[1], prec));
+      T2 = make_T2((GEN)nf[7], roots((GEN)nf[1], prec), r1);
     }
   }
   lt = (GEN)leading_term(polbase)[1];
@@ -464,9 +463,7 @@ nf_root_bounds(GEN P, GEN T)
 /* return B such that if x in O_K, K = Z[X]/(T), then the L2-norm of the
  * coordinates of the numerator of x [on the power, resp. integral, basis if T
  * is a polynomial, resp. an nf] is  <= B T_2(x)
- * *ptden = multiplicative bound for denom(x)
- * uinv = inverse of the matrix giving the T2-LLL-reduced basis in terms of
- * the original basis */
+ * *ptden = multiplicative bound for denom(x) */
 static GEN
 L2_bound(GEN T, GEN tozk, GEN *ptden)
 {
@@ -839,14 +836,7 @@ bestlift_bound(GEN C, long n, double alpha, GEN Npr)
 }
 
 static void
-bestlift_init_nf(GEN nf, GEN u, GEN uinv, nflift_t *L)
-{
-  L->tozk = gmul(uinv, (GEN)nf[8]);
-  L->topow= gmul((GEN)nf[7], u);
-}
-
-static void
-bestlift_init_pr(long a, GEN nf, GEN LLLinv, GEN pr, GEN C, nflift_t *T)
+bestlift_init_pr(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
 {
   const int y = 4;
   const double alpha = ((double)y-1) / y; /* LLL parameter */
@@ -860,9 +850,7 @@ bestlift_init_pr(long a, GEN nf, GEN LLLinv, GEN pr, GEN C, nflift_t *T)
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     prk = idealpows(nf, pr, a);
     pa = gcoeff(prk,1,1);
-   /* FIXME: this is ridiculous. The nf operations should be able to handle
-    * directly an LLL-reduced Zk basis */
-    prk2= hnfmodid(gmul(LLLinv, prk), pa);
+    prk2= hnfmodid(prk, pa);
     PRK = gmul(prk2, lllintpartial(prk2));
 
     u = lllint_i(PRK, y, 0, NULL, &B);
@@ -875,7 +863,7 @@ bestlift_init_pr(long a, GEN nf, GEN LLLinv, GEN pr, GEN C, nflift_t *T)
   T->prk = PRK;
   T->iprk = ZM_inv(PRK, pa);
   T->GSmin= GSmin;
-  T->ZpProj = dim1proj(prk); /* original nf (NOT LLL) --> Zp */
+  T->ZpProj = dim1proj(prk); /* nf --> Zp */
 }
 
 /* assume pr has degree 1 */
@@ -935,7 +923,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
       nflift_t L1;
       GEN polred;
 
-      bestlift_init_pr(a<<1, nf, L->LLLinv, T->pr, Btra, &L1);
+      bestlift_init_pr(a<<1, nf, T->pr, Btra, &L1);
       a      = L1.a;
       pa     = L1.pa;
       PRK    = L1.prk;
@@ -1057,7 +1045,7 @@ nfsqff(GEN nf, GEN pol, long fl)
 {
   long i, a, m, n, nbf, ct, dpol = degpol(pol);
   gpmem_t av = avma;
-  GEN pr, C0, C, dk, bad, polbase, pa, u, uinv;
+  GEN pr, C0, C, dk, bad, polbase, pa;
   GEN N2, rep, p, ap, polmod, polred, lt, nfpol;
   byteptr pt=diffptr;
   nfcmbf_t T;
@@ -1105,10 +1093,8 @@ nfsqff(GEN nf, GEN pol, long fl)
     fprintferr("Prime ideal chosen: %Z\n", pr);
   }
 
-  u = nf_get_LLL(nf);
-  uinv = ZM_inv(u, gun);
-
-  bestlift_init_nf(nf, u, uinv, &L);
+  L.tozk = (GEN)nf[8];
+  L.topow= (GEN)nf[7];
   T.ZC = L2_bound(nf, L.tozk, &(T.dn));
   T.Br = gmul(lt, nf_root_bounds(pol, nf));
 
@@ -1139,7 +1125,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     }
   }
 
-  bestlift_init_pr(0, nf, uinv, pr, C, &L);
+  bestlift_init_pr(0, nf, pr, C, &L);
   T.pr = pr;
   T.L  = &L;
 
