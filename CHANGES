@@ -50,6 +50,8 @@ Done for version 2.2.9 (released ??/??/2004):
     5- elllseries did not accept complex arguments
 GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
     7- [libpari] gprec_w didn't behave well for real zero
+    8- gp -p 51234567890 --> internal overflow and primelimit set to smaller
+       integer
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
@@ -59,10 +61,9 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
        "violetred" and "cornsilk" by "green" ]
 
   Added
-    1- new algorithm for log( t_COMPLEX ) [ AGM ]
+    1- new algorithm for log( t_COMPLEX ), log(2) [ AGM ]
     2- new algorithm for Pi [ AGM ]
-    3- new algorithm for log(2) [ AGM ]
-    4- new algorithm for atan, acos, asin [ AGM ]
+    3- new algorithm for atan, acos, asin [ AGM ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.8 (released 25/11/2004):

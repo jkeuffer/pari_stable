@@ -231,8 +231,10 @@ my_int(char *s)
   char *p = s;
 
   while (isdigit((int)*p)) { 
-    ulong m = n;
-    n = 10*n + (*p++ - '0');
+    ulong m;
+    if (n > (~0UL / 10)) err(talker2,"integer too large",s,s);
+    n *= 10; m = n;
+    n += *p++ - '0';
     if (n < m) err(talker2,"integer too large",s,s);
   }
   if (n)
