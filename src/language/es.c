@@ -496,7 +496,7 @@ typedef struct outString {
   char *string;
   ulong len,size;
 } outString;
-static outString *OutStr, *ErrStr;
+static outString *OutStr, *ErrStr = NULL;
 
 #define STEPSIZE 1024
 #define check_output_length(str,l) { \
@@ -581,11 +581,20 @@ pari_evaluate(char *s, char *session, char **fail)
   tmp = pariErr; pariErr = &pariErr2Str;
   tmps = ErrStr; ErrStr  = &newStr;
   ErrStr->len = 0; ErrStr->size=0; ErrStr->string=NULL;
-  if (setjmp(environnement)) t = NULL;
+  if (setjmp(environnement))
+  {
+    if (!ErrStr)
+    {
+      tmps = ErrStr; ErrStr  = &newStr;
+      ErrStr->string=pari_strdup("Leaving Pari");
+      ErrStr->len=strlen(ErrStr->string);
+    }
+    t = NULL;
+  }
   else
   {
     char *s2 = GENtostr(flisexpr(s));
-    t = TeXmacs->translate_prg(s2,"pari_out","tm_out");
+    t = TeXmacs->translate_prg(s2,"pari/pari_out","pari/tm_out");
     avma = av; free(s2);
   }
   if (ErrStr->string) ErrStr->string[ErrStr->len] = 0;
