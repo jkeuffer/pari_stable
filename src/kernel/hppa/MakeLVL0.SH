@@ -1,6 +1,5 @@
 # Level 0 kernel is "asm extern"
-
-$kern=$src/kernel/$kernlvl0
+kern=$src/kernel/$kernlvl0
 
 cat >> $file << EOT
 parilvl0.h: $src/kernel/none/asm0.h 
