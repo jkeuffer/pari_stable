@@ -1278,6 +1278,8 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
       z=modii(mulii(An,mpinvmod(Bn,l)),l);
       L=mpsqrtnmod(z,ipg,l,NULL); 
+      if ( !L )
+        err(talker,"Polynomials not irreducible in Fp_intersect");
       if (DEBUGLEVEL>=4) msgtimer("mpsqrtnmod");
       B=FpX_Fp_mul(B,L,l);
     }
@@ -1309,6 +1311,8 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       z=FpXQ_inv(Bn,lU,l);
       z=FpXQ_mul(An,z,lU,l);
       L=ffsqrtnmod(z,ipg,lU,l,NULL); 
+      if ( !L )
+        err(talker,"Polynomials not irreducible in Fp_intersect");
       if (DEBUGLEVEL>=4) msgtimer("ffsqrtn");
       B=gsubst(lift(lift(gmul(B,L))),MAXVARN,gzero);
       A=gsubst(lift(lift(A)),MAXVARN,gzero);
