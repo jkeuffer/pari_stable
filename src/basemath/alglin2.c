@@ -800,9 +800,9 @@ sqred2(GEN a, long no_signature)
 	l=k+1; while (l<=n && (!r[l] || gcmp0(gcoeff(a,k,l)))) l++;
 	if (l <= n)
 	{
-	  p = gcoeff(a,k,l); r[k] = r[l] = 0; sp++; sn++; t -= 2;
+	  p = gcoeff(a,k,l); r[k] = r[l] = 0;
+          sp++; sn++; t -= 2;
 	  for (i=1; i<=n; i++) if (r[i])
-	  {
 	    for (j=1; j<=n; j++)
 	      coeff(a,i,j) =
 		r[j]? lsub(gcoeff(a,i,j),
@@ -810,9 +810,12 @@ sqred2(GEN a, long no_signature)
 				     gmul(gcoeff(a,k,j),gcoeff(a,l,i))),
 				p))
 		    : zero;
-	    coeff(a,k,i) = ldiv(gadd(gcoeff(a,k,i),gcoeff(a,l,i)),p);
-	    coeff(a,l,i) = ldiv(gsub(gcoeff(a,k,i),gcoeff(a,l,i)),p);
-	  }
+	  for (i=1; i<=n; i++) if (r[i])
+          {
+            GEN u = gcoeff(a,k,i);
+	    coeff(a,k,i) = ldiv(gadd(u, gcoeff(a,l,i)), p);
+	    coeff(a,l,i) = ldiv(gsub(u, gcoeff(a,l,i)), p);
+          }
 	  coeff(a,k,l) = un;
           coeff(a,l,k) = (long)mun;
 	  coeff(a,k,k) = lmul2n(p,-1);

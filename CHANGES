@@ -58,6 +58,9 @@ ellpointtoz(E,[x1,y1]); -->  impossible addition t_VEC + t_VEC.
    11- numbpart(10^15+2) --> SEGV  [ check for x < 10^15 incorrect ]
    12- polcompositum(x,x) --> SEGV [ problem with poldeflate(deg 0 pol) ]
    13- zeta((1+I)/2^225) --> 7e28  [ precision error when using func. eq. ]
+   14- typos in qfsign/qfgaussred() [ aka sqred2 ]: wrong results: e.g
+       qfsign([0, -1, 1, 1; -1, 0, 0, 1; 1, 0, 0, -1; 1, 1, -1, 0]) --> [2,2]
+       ( should be [2,1] )
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
