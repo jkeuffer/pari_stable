@@ -3205,6 +3205,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   GEN id,id2,newid,newor,p1,p2,al,newpol,w,z;
   GEN bnf,zk,newideals,ideals,order,neworder;
 
+  if (typ(pol)!=t_POL) err(typeer,"rnfpolred");
   if (typ(nf)!=t_VEC) err(idealer1);
   switch(lg(nf))
   {
