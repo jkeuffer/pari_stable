@@ -100,7 +100,7 @@ esac
 rm -f gmon.out # created by Configure -pg
 
 ####################### CONFIGURE - SPIT ####################################
-. ./get_tests #test_basic, test_extra
+. ./get_tests #test_basic, test_extra, top_test_extra, top_dotest_extra
 # Now spit out the results
 cat << EOT
 ==========================================================================

@@ -21,3 +21,6 @@ test_extra="\
   galois\
   ploth\
 "
+
+top_test_extra="test-`echo $test_extra | sed -e 's/ \\([^ ]\\)/ test-\\1/g'`"
+top_dotest_extra="dotest-`echo $test_extra | sed -e 's/ \\([^ ]\\)/ dotest-\\1/g'`"

@@ -29,7 +29,7 @@ dft target::
 	@echo "Possible targets are:"
 	@echo "	all             	 Compilation + Documentation"
 	@echo "	gp			 Compilation"
-	@echo "	bench, test-compat       Compilation + test"
+	@echo "	bench                    Compilation + quick test"
 	@echo "	dobench                	 Test only"
 	@echo "	doc			 Documentation"
 	@echo "	install			 Installation"
@@ -42,12 +42,13 @@ dft target::
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
+	@echo "Available extra tests: $top_test_extra"
 
 all::
 	@-cd doc && \$(MAKE) doc
 	@\$(MAKE) gp
 
-gp bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
+gp bench test-kernel $top_test_extra $top_dotest_extra install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@
