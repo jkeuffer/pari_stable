@@ -178,8 +178,15 @@ sort_vecpol(GEN y, int (*cmp)(GEN,GEN))
 GEN
 centermodii(GEN x, GEN p, GEN po2)
 {
-  GEN y = modii(x,p);
-  if (po2 && cmpii(y,po2) > 0) return subii(y,p);
+  GEN y = resii(x, p);
+  switch(signe(y))
+  {
+    case 0: break;
+    case 1: if (po2 && absi_cmp(y,po2) > 0) y = subii(y, p);
+      break;
+    case -1: if (!po2 || absi_cmp(y,po2) > 0) y = addii(y, p);
+      break;
+  }
   return y;
 }
 
