@@ -27,23 +27,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  undef  INLINE
 #endif
 
-#define int_MSW(x) ((x)+2)
-/*x being a t_INT, return a pointer to the most significant word of x.*/
-
-#define int_LSW(x) ((x)+lgefint((x))-1)
-/*x being a t_int, return a pointer to the least significant word of x.*/
-
-#define int_precW(x) ((x)+1)
-/*x pointing to a mantissa word, return the previous (less significant)
- * mantissa word.*/
-
-#define int_nextW(x) ((x)-1)
-/*x pointing to a mantissa word, return the next (more significant) mantissa
- * word.*/
-
-#define int_W(x,l) ((x)+lgefint((x))-1-(l))
-/*x being a t_INT, return a pointer to the l-th least significant word of x.*/
-
 #ifndef INLINE
 void   addsii(long x, GEN y, GEN z);
 long   addssmod(long a, long b, long p);
@@ -492,11 +475,13 @@ divisii(GEN x, long y, GEN z)
 INLINE long
 vali(GEN x)
 {
-  long lx,i;
+  long i;
+  GEN xp;
 
   if (!signe(x)) return -1;
-  i = lx = lgefint(x)-1; while (!x[i]) i--;
-  return ((lx-i)<<TWOPOTBITS_IN_LONG) + vals(x[i]);
+  xp=int_LSW(x); 
+  for (i=0; !*xp; i++) xp=int_nextW(xp);
+  return (i<<TWOPOTBITS_IN_LONG) + vals(*xp);
 }
 
 INLINE GEN
@@ -821,7 +806,7 @@ INLINE long
 expi(GEN x)
 {
   const long lx=lgefint(x);
-  return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-bfffo(x[2])-1;
+  return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-bfffo(*int_MSW(x))-1;
 }
 
 #endif
