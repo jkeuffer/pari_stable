@@ -163,13 +163,42 @@ get_type_num(char *st)
 GEN
 type0(GEN x, char *st)
 {
+  long t, tx;
   if (! *st) 
   {
     char *s = type_name(typ(x));
     return strtoGENstr(s, 0);
   }
-  x = gcopy(x); settyp(x,get_type_num(st));
-  return x;
+  tx = typ(x);
+  t = get_type_num(st);
+
+  if (is_frac_t(tx))
+  {
+    if (!is_frac_t(t) && !is_rfrac_t(t))
+      err(typeer, "type");
+    x = gcopy(x);
+  }
+  else if (is_rfrac_t(tx))
+  {
+    if (is_frac_t(t))
+    {
+      x = gred_rfrac(x);
+      tx = typ(x);
+      if (!is_frac_t(tx)) err(typeer, "type");
+    }
+    else
+    {
+      if (!is_rfrac_t(t)) err(typeer, "type");
+      x = gcopy(x);
+    }
+  }
+  else if (is_vec_t(tx))
+  {
+    if (!is_vec_t(t)) err(typeer, "type");
+    x = gcopy(x);
+  }
+  else if (tx != t) err(typeer, "type");
+  settyp(x, t); return x;
 }
 
 entree functions_highlevel[]={

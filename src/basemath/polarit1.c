@@ -103,7 +103,8 @@ gred_simple(GEN x)
 {
   GEN p1,p2,x2,x3;
 
-  x2=content((GEN)x[2]); if (gcmp1(x2)) return gcopy(x);
+  x2=content((GEN)x[2]);
+  if (gcmp1(x2)) { x = gcopy(x); settyp(x, t_RFRAC); return gcopy(x); }
   x3=gdiv((GEN)x[1],x2); p2=denom(x3);
   x2=gdiv((GEN)x[2],x2);
 
