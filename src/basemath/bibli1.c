@@ -23,6 +23,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 extern GEN roots_to_pol_r1r2(GEN a, long r1, long v);
 
+/* default quality ratio for LLL: 99/100 */
+#define LLLDFT 100
+
 /* scalar product x.x */
 GEN
 sqscal(GEN x)
@@ -88,12 +91,12 @@ gscali(GEN x,GEN y)
 }
 
 static GEN
-lllall_trivial(GEN x, long flag)
+lll_trivial(GEN x, long flag)
 {
   GEN y;
   if (lg(x) == 1)
   { /* dim x = 0 */
-    if (flag != lll_ALL) return cgetg(1,t_MAT);
+    if (! (flag & lll_ALL)) return cgetg(1,t_MAT);
     y=cgetg(3,t_VEC);
     y[1]=lgetg(1,t_MAT);
     y[2]=lgetg(1,t_MAT); return y;
@@ -101,7 +104,7 @@ lllall_trivial(GEN x, long flag)
   /* here dim = 1 */
   if (gcmp0((GEN)x[1]))
   {
-    switch(flag ^ lll_GRAM)
+    switch(flag & (~lll_GRAM))
     {
       case lll_KER: return idmat(1);
       case lll_IM : return cgetg(1,t_MAT);
@@ -122,285 +125,25 @@ lllall_trivial(GEN x, long flag)
 }
 
 static GEN
-lllgramall_finish(GEN h,GEN fl,long flag)
+lll_finish(GEN h,GEN fl,long flag)
 {
   long i, k, l = lg(fl);
   GEN y, g;
 
   k=1; while (k<l && !fl[k]) k++;
-  switch(flag)
+  switch(flag & (~lll_GRAM))
   {
     case lll_KER: setlg(h,k);
       return h;
 
-    case lll_IM: h += k-1; h[0] = evaltyp(t_MAT)| evallg(l-k+1);
+    case lll_IM: h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
       return h;
   }
   y = cgetg(3,t_VEC);
   g = cgetg(k, t_MAT); for (i=1; i<k; i++) g[i] = h[i];
   y[1] = (long)g;
-  h += k-1; h[0] = evaltyp(t_MAT)| evallg(l-k+1);
+  h += k-1; h[0] = evaltyp(t_MAT) | evallg(l-k+1);
   y[2] = (long)h; return y;
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                          LLL with content                      **/
-/**                                                                **/
-/********************************************************************/
-
-/* real Gram matrix has coeffs X[i,j] = x[i,j]*veccon[i]*veccon[j] */
-static GEN
-lllgramintwithcontent(GEN x, GEN veccon, long flag)
-{
-  long lx=lg(x), i, j, k, l, n, kmax;
-  gpmem_t av0=avma, av, lim;
-  GEN u,u2,B,lam,q,r,h,la,bb,p1,p2,p3,p4,fl,corr,corr2,newcon;
-  GEN *gptr[8];
-
-  if (typ(x) != t_MAT) err(typeer,"lllgramintwithcontent");
-  n=lx-1; if (n<=1) return lllall_trivial(x,flag);
-  if (lg((GEN)x[1])!=lx) err(mattype1,"lllgramintwithcontent");
-  fl = cgetg(lx, t_VECSMALL);
-
-  av=avma; lim=stack_lim(av,1);
-  x=dummycopy(x); veccon=dummycopy(veccon);
-  B=cgetg(lx+1,t_COL); B[1]=un;
-  /* B[i+1]=B_i; le vrai B_i est B_i*prod(1,j=1,i,veccon[j]^2) */
-
-  for (i=1; i<lx; i++) { B[i+1]=zero; fl[i]=0; }
-  lam=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++)
-  { p2=cgetg(lx,t_COL); lam[j]=(long)p2; for (i=1; i<lx; i++) p2[i]=zero; }
-/* le vrai lam[i,j] est
-   lam[i,j]*veccon[i]*veccon[j]*prod(1,l=1,j-1,veccon[l]^2) */
-  k=2; h=idmat(n); kmax=1;
-  u=gcoeff(x,1,1); if (typ(u)!=t_INT) err(lllger4);
-  if (signe(u)) { B[2]=(long)u; coeff(lam,1,1)=un; fl[1]=1; }
-  else { B[2]=un; fl[1]=0; }
-  if (DEBUGLEVEL>5) { fprintferr("k = %ld",k); flusherr(); }
-  for(;;)
-  {
-    if (k>kmax)
-    {
-      kmax=k;
-      for (j=1; j<=k; j++)
-      {
-	if (j==k || fl[j])
-	{
-	  u=gcoeff(x,k,j); if (typ(u)!=t_INT) err(lllger4);
-	  for (i=1; i<j; i++)
-	    if (fl[i])
-	      u=divii(subii(mulii((GEN)B[i+1],u),mulii(gcoeff(lam,k,i),gcoeff(lam,j,i))),(GEN)B[i]);
-	  if (j<k) coeff(lam,k,j)=(long)u;
-	  else
-	  {
-	    if (signe(u)) { B[k+1]=(long)u; coeff(lam,k,k)=un; fl[k]=1; }
-	    else { B[k+1]=B[k]; fl[k]=0; }
-	  }
-	}
-      }
-      if (low_stack(lim, stack_lim(av,1)))
-      {
-	if(DEBUGMEM>1) err(warnmem,"[1]: lllgramintwithcontent");
-	gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-	gptr[3]=&x; gptr[4]=&veccon; gerepilemany(av,gptr,5);
-      }
-    }
-    u=shifti(mulii(gcoeff(lam,k,k-1),(GEN)veccon[k]),1);
-    u2=mulii((GEN)B[k],(GEN)veccon[k-1]);
-    if (cmpii(absi(u),u2)>0)
-    {
-      q=dvmdii(addii(u,u2),shifti(u2,1),&r);
-      if (signe(r)<0) q=addsi(-1,q);
-      h[k]=lsub((GEN)h[k],gmul(q,(GEN)h[k-1]));
-      newcon=mppgcd((GEN)veccon[k],(GEN)veccon[k-1]);
-      corr=divii((GEN)veccon[k],newcon); veccon[k]=(long)newcon;
-      if(!gcmp1(corr))
-      {
-	corr2=sqri(corr);
-	for (j=1; j<=n; j++)
-	  coeff(x,j,k)=coeff(x,k,j)=lmulii(corr,gcoeff(x,k,j));
-	coeff(x,k,k)=lmulii(corr,gcoeff(x,k,k));
-	for (j=k; j<=kmax; j++) B[j+1]=lmulii(corr2,(GEN)B[j+1]);
-	for (i=1; i<k; i++) coeff(lam,k,i)=lmulii(corr,gcoeff(lam,k,i));
-	for (i=k+1; i<=kmax; i++)
-	{
-	  coeff(lam,i,k)=lmulii(corr,gcoeff(lam,i,k));
-	  for (j=k+1; j<i; j++)
-	    coeff(lam,i,j)=lmulii(corr2,gcoeff(lam,i,j));
-	}
-      }
-      r=negi(mulii(q,divii((GEN)veccon[k-1],(GEN)veccon[k])));
-      p1=gcoeff(x,k,k-1);
-      for (j=1; j<=n; j++)
-	coeff(x,j,k)=coeff(x,k,j)=laddii(gcoeff(x,j,k),mulii(r,(j==k)?p1:gcoeff(x,j,k-1)));
-      coeff(x,k,k)=laddii(gcoeff(x,k,k),mulii(r,gcoeff(x,k-1,k)));
-      coeff(lam,k,k-1)=laddii(gcoeff(lam,k,k-1),mulii(r,(GEN)B[k]));
-      for (i=1; i<k-1; i++)
-	coeff(lam,k,i)=laddii(gcoeff(lam,k,i),mulii(r,gcoeff(lam,k-1,i)));
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"[2]: lllgramintwithcontent");
-      gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-      gptr[3]=&x; gptr[4]=&veccon; gerepilemany(av,gptr,5);
-    }
-    p3=mulii((GEN)B[k-1],(GEN)B[k+1]);la=gcoeff(lam,k,k-1);p4=mulii(la,la);
-    p2=mulsi(100,mulii(mulii((GEN)veccon[k],(GEN)veccon[k]),addii(p3,p4)));
-    p1=mulii((GEN)veccon[k-1],(GEN)B[k]);p1=mulsi(99,mulii(p1,p1));
-    if (fl[k-1] && (cmpii(p1,p2)>0 || !fl[k]))
-    {
-      if (DEBUGLEVEL>=4 && k==n)
-	{ fprintferr(" (%ld)", expi(p1)-expi(p2)); flusherr(); }
-      p1=(GEN)h[k-1]; h[k-1]=h[k]; h[k]=(long)p1;
-      p1=(GEN)x[k-1]; x[k-1]=x[k]; x[k]=(long)p1;
-      for (j=1; j<=n; j++)
-      { p1=gcoeff(x,k-1,j); coeff(x,k-1,j)=coeff(x,k,j); coeff(x,k,j)=(long)p1; }
-      p1=(GEN)veccon[k-1]; veccon[k-1]=veccon[k]; veccon[k]=(long)p1;
-      for (j=1; j<=k-2; j++)
-      { p1=gcoeff(lam,k-1,j); coeff(lam,k-1,j)=coeff(lam,k,j); coeff(lam,k,j)=(long)p1; }
-      if (fl[k])
-      {
-	for (i=k+1; i<=kmax; i++)
-	{
-	  bb=gcoeff(lam,i,k);
-	  coeff(lam,i,k)=ldivii(subii(mulii((GEN)B[k+1],gcoeff(lam,i,k-1)),mulii(la,bb)),(GEN)B[k]);
-	  coeff(lam,i,k-1)=ldivii(addii(mulii(la,gcoeff(lam,i,k-1)),mulii((GEN)B[k-1],bb)),(GEN)B[k]);
-          if (low_stack(lim, stack_lim(av,1)))
-	  {
-	    if(DEBUGMEM>1) err(warnmem,"[3]: lllgramintwithcontent");
-	    gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-	    gptr[3]=&x; gptr[4]=&la; gptr[5]=&veccon; gptr[6]=&p3;
-	    gptr[7]=&p4; gerepilemany(av,gptr,8);
-	  }
-	}
-	B[k]=ldivii(addii(p3,p4),(GEN)B[k]);
-      }
-      else
-      {
-	if (signe(la))
-	{
-	  p2=(GEN)B[k]; p1=divii(p4,p2);
-	  for (i=k+1; i<=kmax; i++)
-	    coeff(lam,i,k-1)=ldivii(mulii(la,gcoeff(lam,i,k-1)),p2);
-	  for (j=k+1; j<kmax; j++)
-	  {
-	    for (i=j+1; i<=kmax; i++)
-	      coeff(lam,i,j)=ldivii(mulii(p1,gcoeff(lam,i,j)),p2);
-            if (low_stack(lim, stack_lim(av,1)))
-	    {
-	      if(DEBUGMEM>1) err(warnmem,"[4]: lllgramintwithcontent");
-	      gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-	      gptr[3]=&x; gptr[4]=&la; gptr[5]=&veccon; gptr[6]=&p1;
-	      gptr[7]=&p2; gerepilemany(av,gptr,8);
-	    }
-	  }
-	  B[k+1]=B[k]=(long)p1;
-	  for (i=k+2; i<=lx; i++)
-	    B[i]=ldivii(mulii(p1,(GEN)B[i]),p2);
-	}
-	else
-	{
-	  coeff(lam,k,k-1)=zero;
-	  for (i=k+1; i<=kmax; i++)
-	  {
-	    coeff(lam,i,k)=coeff(lam,i,k-1);
-	    coeff(lam,i,k-1)=zero;
-	  }
-	  B[k]=B[k-1]; fl[k]=1; fl[k-1]=0;
-	}
-
-        if (low_stack(lim, stack_lim(av,1)))
-	{
-	  if(DEBUGMEM>1) err(warnmem,"[5]: lllgramintwithcontent");
-	  gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-	  gptr[3]=&x; gptr[4]=&veccon;
-	  gerepilemany(av,gptr,5);
-	}
-      }
-      if (k>2) k--;
-      if (DEBUGLEVEL>5) { fprintferr(" %ld",k); flusherr(); }
-    }
-    else
-    {
-      for (l=k-2; l>=1; l--)
-      {
-	u=shifti(mulii(gcoeff(lam,k,l),(GEN)veccon[k]),1);
-	u2=mulii((GEN)B[l+1],(GEN)veccon[l]);
-	if (cmpii(absi(u),u2)>0)
-	{
-	  q=dvmdii(addii(u,u2),shifti(u2,1),&r);
-	  if (signe(r)<0) q=addsi(-1,q);
-	  h[k]=lsub((GEN)h[k],gmul(q,(GEN)h[l]));
-	  newcon=mppgcd((GEN)veccon[k],(GEN)veccon[l]);
-	  corr=divii((GEN)veccon[k],newcon); veccon[k]=(long)newcon;
-	  if(!gcmp1(corr))
-	  {
-	    corr2=sqri(corr);
-	    for (j=1; j<=n; j++)
-	      coeff(x,j,k)=coeff(x,k,j)=lmulii(corr,gcoeff(x,k,j));
-	    coeff(x,k,k)=lmulii(corr,gcoeff(x,k,k));
-	    for (j=k; j<=kmax; j++) B[j+1]=lmulii(corr2,(GEN)B[j+1]);
-	    for (i=1; i<k; i++) coeff(lam,k,i)=lmulii(corr,gcoeff(lam,k,i));
-	    for (i=k+1; i<=kmax; i++)
-	    {
-	      coeff(lam,i,k)=lmulii(corr,gcoeff(lam,i,k));
-	      for (j=k+1; j<i; j++)
-		coeff(lam,i,j)=lmulii(corr2,gcoeff(lam,i,j));
-	    }
-	  }
-	  r=negi(mulii(q,divii((GEN)veccon[l],(GEN)veccon[k])));
-	  p1=gcoeff(x,k,l);
-	  for (j=1; j<=n; j++)
-	    coeff(x,j,k)=coeff(x,k,j)=laddii(gcoeff(x,j,k),mulii(r,(j==k)?p1:gcoeff(x,j,l)));
-	  coeff(x,k,k)=laddii(gcoeff(x,k,k),mulii(r,gcoeff(x,l,k)));
-	  coeff(lam,k,l)=laddii(gcoeff(lam,k,l),mulii(r,(GEN)B[l+1]));
-	  for (i=1; i<l; i++)
-	    coeff(lam,k,i)=laddii(gcoeff(lam,k,i),mulii(r,gcoeff(lam,l,i)));
-	}
-        if (low_stack(lim, stack_lim(av,1)))
-	{
-	  if(DEBUGMEM>1) err(warnmem,"[6]: lllgramintwithcontent");
-	  gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-	  gptr[3]=&x; gptr[4]=&veccon; gerepilemany(av,gptr,5);
-	}
-      }
-      k++; if (DEBUGLEVEL>5) { fprintferr(" %ld",k); flusherr(); }
-      if (k>n)
-      {
-        if (DEBUGLEVEL>5) { fprintferr("\n"); flusherr(); }
-	return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
-      }
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"[7]: lllgramintwithcontent");
-      gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-      gptr[3]=&x; gptr[4]=&veccon; gerepilemany(av,gptr,5);
-    }
-  }
-}
-
-static GEN
-lllintwithcontent(GEN x)
-{
-  long lx=lg(x), i, j;
-  gpmem_t av;
-  GEN veccon,con,xred,g;
-
-  if (typ(x) != t_MAT) err(typeer,"lllintwithcontent");
-  if (lx==1) return cgetg(1,t_MAT);
-  av=avma; veccon=cgetg(lx,t_VEC); g=cgetg(lx,t_MAT); xred=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++)
-  {
-    g[j]=lgetg(lx,t_COL); con=content((GEN)x[j]);
-    xred[j]=ldiv((GEN)x[j],con); veccon[j]=(long)con;
-  }
-  for (i=1; i<lx; i++)
-    for (j=1; j<=i; j++)
-      coeff(g,i,j)=coeff(g,j,i)=(long)gscal((GEN)xred[i],(GEN)xred[j]);
-  return gerepileupto(av, lllgramintwithcontent(g,veccon,2));
 }
 
 /********************************************************************/
@@ -412,39 +155,48 @@ lllintwithcontent(GEN x)
 #define gswap(x,y) { GEN _t=x; x=y; y=_t; }
 
 static void
-REDI(long k, long l, GEN x, GEN h, GEN L, GEN B, long K)
+REDI(long k, long l, GEN x, GEN h, GEN L, GEN B, long K, int gram)
 {
   long i,lx;
   GEN q = truedvmdii(addii(B,shifti(gcoeff(L,k,l),1)), shifti(B,1), NULL);
   GEN *hk,*hl,xk,xl;
   if (!signe(q)) return;
-  q = negi(q); lx = lg(x);
+  q = negi(q);
   xl = (GEN)x[l]; hl = (GEN*)h[l];
   xk = (GEN)x[k]; hk = (GEN*)h[k];
+  lx = lg(xl);
   if (is_pm1(q))
   {
     if (signe(q) > 0)
     {
       for (i=1;i<=K;i++) hk[i] = addii(hk[i],hl[i]);
-      xk[k] = laddii((GEN)xk[k], (GEN)xl[k]);
-      for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = laddii((GEN)xk[i], (GEN)xl[i]);
+      if (gram) {
+        xk[k] = laddii((GEN)xk[k], (GEN)xl[k]);
+        for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = laddii((GEN)xk[i], (GEN)xl[i]);
+      }
       for (i=1;i<l; i++) coeff(L,k,i) = laddii(gcoeff(L,k,i),gcoeff(L,l,i));
-      q = B;
+      coeff(L,k,l) = laddii(gcoeff(L,k,l), B);
     } else {
       for (i=1;i<=K;i++) hk[i] = subii(hk[i],hl[i]);
-      xk[k] = lsubii((GEN)xk[k], (GEN)xl[k]);
-      for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = lsubii((GEN)xk[i], (GEN)xl[i]);
+      if (gram) {
+        xk[k] = lsubii((GEN)xk[k], (GEN)xl[k]);
+        for (i=1;i<lx;i++) coeff(x,k,i) = xk[i] = lsubii((GEN)xk[i], (GEN)xl[i]);
+      }
       for (i=1;i<l; i++) coeff(L,k,i) = lsubii(gcoeff(L,k,i),gcoeff(L,l,i));
-      q = negi(B);
+      coeff(L,k,l) = laddii(gcoeff(L,k,l), negi(B));
     }
-  } else {
+  } else { /* h[,k] += q* h[,l]. x[,k] += q * x[,l]. L[k,] += q* L[l,] */
     for(i=1;i<=K;i++) hk[i] = addii(hk[i],mulii(q,hl[i]));
-    xk[k] = laddii((GEN)xk[k], mulii(q,(GEN)xl[k]));
-    for(i=1;i<lx;i++) coeff(x,k,i)=xk[i]=laddii((GEN)xk[i],mulii(q,(GEN)xl[i]));
+    if (gram)
+    {
+      xk[k] = laddii((GEN)xk[k], mulii(q,(GEN)xl[k]));
+      for(i=1;i<lx;i++) coeff(x,k,i)=xk[i]=laddii((GEN)xk[i],mulii(q,(GEN)xl[i]));
+    }
     for(i=1;i<l;i++)  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(q,gcoeff(L,l,i)));
-    q = mulii(q,B);
+
+    coeff(L,k,l) = laddii(gcoeff(L,k,l), mulii(q,B));
   }
-  coeff(L,k,l) = laddii(gcoeff(L,k,l), q);
+  if (!gram) x[k] = (long)ZV_lincomb(gun, q, xk, xl);
 }
 
 /* b[k] <-- b[k] - round(L[k,l]) b[l], only b[1] ... b[K] modified so far
@@ -478,30 +230,37 @@ RED(long k, long l, GEN x, GEN h, GEN L, long K)
   } else {
     for (i=1;i<=K;i++) hk[i]=addii(hk[i],mulii(q,hl[i]));
     xk[k] = ladd((GEN)xk[k], gmul(q,(GEN)xl[k]));
-    for (i=1;i<lx;i++) coeff(x,k,i)=xk[i]=ladd((GEN)xk[i], gmul(q,(GEN)xl[i])); 
+    for (i=1;i<lx;i++) coeff(x,k,i)=xk[i]=ladd((GEN)xk[i], gmul(q,(GEN)xl[i]));
     for (i=1;i<l; i++) coeff(L,k,i)=ladd(gcoeff(L,k,i),gmul(q,gcoeff(L,l,i)));
   }
   coeff(L,k,l) = ladd(gcoeff(L,k,l),q);
 }
 
 static int
-do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl)
+do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl,
+         int gram)
 {
-  GEN la,la2,p1,p2,Bk;
+  GEN la,la2,p1,Bk;
   long i, j, lx;
   gpmem_t av;
 
   if (!fl[k-1]) return 0;
-  lx = lg(x); av = avma;
+  av = avma;
   la = gcoeff(L,k,k-1); la2 = sqri(la);
-  p2 = addii(la2, mulii((GEN)B[k-1],(GEN)B[k+1]));
   Bk = (GEN)B[k];
-  if (fl[k] && cmpii(mulsi(alpha-1,sqri(Bk)), mulsi(alpha,p2)) <= 0)
-    { avma = av; return 0; }
-
+  if (fl[k])
+  {
+    GEN q;
+    if (!alpha) return 0; /* only swap non-kernel + kernel vector */
+    q = addii(la2, mulii((GEN)B[k-1],(GEN)B[k+1]));
+    if (cmpii(mulsi(alpha-1,sqri(Bk)), mulsi(alpha,q)) <= 0) {
+      avma = av; return 0;
+    }
+    B[k] = (long)diviiexact(q, Bk);
+  }
   /* SWAPI(k-1,k) */
   if (DEBUGLEVEL>3 && k==kmax)
-  { /* output diagnostics associated to re-normalized rationnal quantities */
+  { /* output diagnostics associated to re-normalized rational quantities */
     gpmem_t av1 = avma;
     GEN d = mulii((GEN)B[k-1],(GEN)B[k+1]);
     p1 = subii(mulsi(alpha-1, sqri(Bk)), mulsi(alpha, la2));
@@ -509,8 +268,9 @@ do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl)
     avma = av1;
   }
   swap(h[k-1], h[k]);
-  swap(x[k-1], x[k]);
-  for (j=1; j< lx; j++) swap(coeff(x,k-1,j), coeff(x,k,j));
+  swap(x[k-1], x[k]); lx = lg(x);
+  if (gram)
+    for (j=1; j< lx; j++) swap(coeff(x,k-1,j), coeff(x,k,j));
   for (j=1; j<k-1; j++) swap(coeff(L,k-1,j), coeff(L,k,j))
   if (fl[k])
   {
@@ -528,7 +288,6 @@ do_SWAPI(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long alpha, GEN fl)
       coeff(L,i,k-1) = (long)icopy_av(p1,(GEN)av);
       av = avma = (gpmem_t)coeff(L,i,k-1);
     }
-    B[k] = (long)diviiexact(p2,Bk);
   }
   else if (signe(la))
   {
@@ -591,18 +350,44 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN QR)
   }
   return 1;
 }
+static void
+incrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
+{
+  GEN u = NULL; /* gcc -Wall */
+  long i, j, s;
+  for (j=1; j<=k; j++)
+    if (j==k || fl[j])
+    {
+      gpmem_t av = avma;
+      u = gram? gcoeff(x,k,j): gscali((GEN)x[k], (GEN)x[j]);
+      for (i=1; i<j; i++) if (fl[i])
+        u = diviiexact(subii(mulii((GEN)B[i+1], u),
+                             mulii(gcoeff(L,k,i), gcoeff(L,j,i))),
+                       (GEN)B[i]);
+      u = gerepileuptoint(av, u);
+      if (j < k) coeff(L,k,j) = (long)u;
+    }
+  s = signe(u);
+  if (s == 0) { B[k+1] = B[k]; fl[k] = 0; }
+  else
+  {
+    if (s < 0) err(lllger3);
+    B[k+1] = (long)u; coeff(L,k,k) = un; fl[k] = 1;
+  }
+}
 
 /* x integer matrix */
 GEN
-lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
+lllint_i(GEN x, long alpha, int gram, GEN *ptfl, GEN *ptB)
 {
-  long lx=lg(x), i, j, k, l, n, s, kmax;
+  long lx = lg(x), hx, i, j, k, l, n, kmax;
   gpmem_t av, lim;
-  GEN u,B,L,h,fl;
+  GEN B,L,h,fl;
 
-  if (typ(x) != t_MAT) err(typeer,"lllgramint");
+  if (typ(x) != t_MAT) err(typeer,"lllint");
   n = lx-1; if (n<=1) return NULL;
-  if (lg((GEN)x[1]) != lx) err(mattype1,"lllgramint");
+  hx = lg(x[1]);
+  if (gram && hx != lx) err(mattype1,"lllint");
   fl = cgetg(lx,t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1); x = dummycopy(x);
@@ -610,48 +395,24 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
-    for (i=1; i<lx; i++)
+    for (i=1; i<hx; i++)
       if (typ(gcoeff(x,i,j)) != t_INT) err(lllger4);
     fl[j] = 0; L[j] = (long)zerocol(n);
   }
-  h = idmat(n); kmax = 1;
-  u = gcoeff(x,1,1);
-  s = signe(u);
-  if (s == 0) B[2]=un;
-  else
-  {
-    if (s < 0) err(lllger3);
-    B[2] = (long)u; coeff(L,1,1) = un; fl[1] = 1;
-  }
+  h = idmat(n);
+  incrementalGS(x, L, B, 1, fl, gram);
+  kmax = 1;
   if (DEBUGLEVEL>5) fprintferr("k = ");
   for (k=2;;)
   {
     if (k > kmax)
     {
       if (DEBUGLEVEL>3) fprintferr("K%ld ",k);
-      for (j=1; j<=k; j++)
-	if (j==k || fl[j])
-	{
-          gpmem_t av1 = avma;
-	  u = gcoeff(x,k,j);
-	  for (i=1; i<j; i++) if (fl[i])
-            u = diviiexact(subii(mulii((GEN)B[i+1],u),
-                                 mulii(gcoeff(L,k,i),gcoeff(L,j,i))),
-                           (GEN)B[i]);
-          u = gerepileuptoint(av1, u);
-	  if (j<k) coeff(L,k,j)=(long)u;
-	}
-      s = signe(u);
-      if (s == 0) { B[k+1] = B[k]; fl[k] = 0; }
-      else
-      {
-        if (s < 0) err(lllger3);
-        B[k+1] = (long)u; coeff(L,k,k) = un; fl[k] = 1;
-      }
+      incrementalGS(x, L, B, k, fl, gram);
       kmax = k;
     }
-    REDI(k,k-1, x,h,L,(GEN)B[k],kmax);
-    if (do_SWAPI(x,h,L,B,kmax,k,alpha,fl))
+    REDI(k,k-1, x,h,L,(GEN)B[k],kmax,gram);
+    if (do_SWAPI(x,h,L,B,kmax,k,alpha,fl,gram))
     {
       if (k > 2) k--;
     }
@@ -659,10 +420,10 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
     {
       for (l=k-2; l; l--)
       {
-        REDI(k,l, x,h,L,(GEN)B[l+1],kmax);
+        REDI(k,l, x,h,L,(GEN)B[l+1],kmax, gram);
         if (low_stack(lim, stack_lim(av,1)))
         {
-          if(DEBUGMEM>1) err(warnmem,"lllgramint[1]");
+          if(DEBUGMEM>1) err(warnmem,"lllint[1]");
           gerepileall(av,4,&B,&L,&h,&x);
         }
       }
@@ -670,7 +431,7 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      if(DEBUGMEM>1) err(warnmem,"lllgramint[2]");
+      if(DEBUGMEM>1) err(warnmem,"lllint[2]");
       gerepileall(av,4,&B,&L,&h,&x);
     }
   }
@@ -681,16 +442,25 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
 }
 
 GEN
-lllgramall(GEN x, long alpha, long flag)
+lllall(GEN x, long alpha, int gram, long flag)
 {
-  gpmem_t av0 = avma;
-  GEN fl, h = lllgramint_i(x,alpha,&fl,NULL);
-  if (!h) return lllall_trivial(x,flag);
-  return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
+  gpmem_t av = avma;
+  GEN fl, h = lllint_i(x, alpha, gram, &fl, NULL);
+  if (!h) return lll_trivial(x,flag);
+  return gerepilecopy(av, lll_finish(h,fl,flag));
 }
 
-static GEN
-lllgramall0(GEN x, long flag) { return lllgramall(x,100,flag); }
+GEN
+lllint(GEN x) { return lllall(x,LLLDFT,0, lll_IM); }
+
+GEN
+lllkerim(GEN x) { return lllall(x,LLLDFT,0, lll_ALL); }
+
+GEN
+lllgramint(GEN x) { return lllall(x,LLLDFT,1, lll_IM | lll_GRAM); }
+
+GEN
+lllgramkerim(GEN x) { return lllall(x,LLLDFT,1, lll_ALL | lll_GRAM); }
 
 static int
 pslg(GEN x)
@@ -709,7 +479,7 @@ lllgramallgen(GEN x, long flag)
   int ps1,ps2,flc;
 
   if (typ(x) != t_MAT) err(typeer,"lllgramallgen");
-  n=lx-1; if (n<=1) return lllall_trivial(x,flag);
+  n=lx-1; if (n<=1) return lll_trivial(x,flag);
   if (lg((GEN)x[1])!=lx) err(mattype1,"lllgramallgen");
 
   fl = cgetg(lx, t_VECSMALL);
@@ -783,14 +553,14 @@ lllgramallgen(GEN x, long flag)
 	  B[k+1]=B[k]=(long)p1;
 	  for (i=k+2; i<=lx; i++)
 	    B[i]=ldiv(gmul(p1,(GEN)B[i]),p2);
-	 }
+	}
 	else
 	{
 	  coeff(lam,k,k-1)=zero;
 	  for (i=k+1; i<lx; i++)
 	  { coeff(lam,i,k)=coeff(lam,i,k-1); coeff(lam,i,k-1)=zero; }
 	  B[k]=B[k-1]; fl[k]=1; fl[k-1]=0;
-	 }
+	}
       }
       if (k>2) k--;
     }
@@ -813,13 +583,11 @@ lllgramallgen(GEN x, long flag)
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[4];
       if(DEBUGMEM>1) err(warnmem,"lllgramallgen");
-      gptr[0]=&B; gptr[1]=&lam; gptr[2]=&h;
-      gerepilemany(av,gptr,3);
+      gerepileall(av,3,&B,&lam,&h);
     }
   }
-  return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
+  return gerepilecopy(av0, lll_finish(h,fl,flag));
 }
 
 /* compute B[k], update mu(k,1..k-1) */
@@ -843,20 +611,22 @@ get_Gram_Schmidt(GEN x, GEN mu, GEN B, long k)
 }
 
 /* x = Gram(b_i). If precision problems return NULL if flag=1, error otherwise.
- * Quality ratio = Q = (alpha-1)/alpha. Suggested value: alpha = 100
- */
+ * Quality ratio = Q = (alpha-1)/alpha. Suggested value: alpha = 100 */
 GEN
 lllgramintern(GEN x, long alpha, long flag, long prec)
 {
   GEN xinit,L,h,B,L1,QR;
   long retry = 2, l, i, j, k, k1, lx=lg(x), n, kmax, KMAX;
-  gpmem_t av = avma, lim;
+  gpmem_t av0 = avma, av, lim;
   long last_prec;
 
   if (typ(x) != t_MAT) err(typeer,"lllgram");
   n=lx-1; if (n && lg((GEN)x[1])!=lx) err(mattype1,"lllgram");
   if (n<=1) return idmat(n);
-  xinit = x; lim = stack_lim(av,1);
+  QR = cgetr(DEFAULTPREC); affsr(alpha-1,QR);
+  QR = divrs(QR,alpha);
+  xinit = x; 
+  av = avma; lim = stack_lim(av,1);
   for (k=2,j=1; j<lx; j++)
   {
     GEN p1=(GEN)x[j];
@@ -868,12 +638,12 @@ lllgramintern(GEN x, long alpha, long flag, long prec)
     if (!prec) return lllgramint(x);
     x = gmul(x, realun(prec+1));
   }
-  else 
+  else
   {
     if (prec < k) prec = k;
     x = gprec_w(x, prec+1);
   }
- /* kmax = maximum column index attained during this run 
+ /* kmax = maximum column index attained during this run
   * KMAX = same over all runs (after PRECPB) */
   kmax = KMAX = 1;
 
@@ -888,10 +658,7 @@ PRECPB:
         if (DEBUGLEVEL > 3) fprintferr("\n");
         if (DEBUGLEVEL) err(warnprec,"lllgramintern",prec);
         x = qf_base_change(gprec_w(xinit,prec),h,1);
-        {
-          GEN *gsav[2]; gsav[0]=&h; gsav[1]=&x;
-          gerepilemany(av, gsav, 2);
-        }
+        gerepileall(av,2,&h,&x);
         if (DEBUGLEVEL) err(warner,"lllgramintern starting over");
         break;
       } /* fall through */
@@ -903,8 +670,6 @@ PRECPB:
       err(lllger3);
   }
   last_prec = prec;
-  QR = cgetr(prec+1); affsr(alpha-1,QR);
-  QR = divrs(QR,alpha);
 
   L=cgetg(lx,t_MAT);
   B=cgetg(lx,t_COL);
@@ -949,24 +714,23 @@ PRECPB:
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[5]; gptr[0]=&B; gptr[1]=&L; gptr[2]=&h; gptr[3]=&x; gptr[4]=&QR;
-      if(DEBUGMEM>1) 
+      if(DEBUGMEM>1)
       {
         if (DEBUGLEVEL > 3) fprintferr("\n");
         err(warnmem,"lllgram");
       }
-      gerepilemany(av,gptr,5);
+      gerepileall(av,4,&B,&L,&h,&x);
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
-  return gerepilecopy(av, h);
+  return gerepilecopy(av0, h);
 }
 
 static GEN
-lllgram_noerr(GEN x,long prec) { return lllgramintern(x,100,1,prec); }
+lllgram_noerr(GEN x,long prec) { return lllgramintern(x,LLLDFT,1,prec); }
 
 GEN
-lllgram(GEN x,long prec) { return lllgramintern(x,100,0,prec); }
+lllgram(GEN x,long prec) { return lllgramintern(x,LLLDFT,0,prec); }
 
 GEN
 qflll0(GEN x, long flag, long prec)
@@ -979,9 +743,7 @@ qflll0(GEN x, long flag, long prec)
     case 3: return lllrat(x);
     case 4: return lllkerim(x);
     case 5: return lllkerimgen(x);
-    case 7: return lll1(x,prec);
     case 8: return lllgen(x);
-    case 9: return lllintwithcontent(x);
     default: err(flagerr,"qflll");
   }
   return NULL; /* not reached */
@@ -996,34 +758,31 @@ qflllgram0(GEN x, long flag, long prec)
     case 1: return lllgramint(x);
     case 4: return lllgramkerim(x);
     case 5: return lllgramkerimgen(x);
-    case 7: return lllgram1(x,prec);
     case 8: return lllgramgen(x);
     default: err(flagerr,"qflllgram");
   }
   return NULL; /* not reached */
 }
 
-/* x est la matrice d'une base b_i; retourne la matrice u (entiere
- * unimodulaire) d'une base LLL-reduite c_i en fonction des b_i (la base
- * reduite est c=b*u).
- */
+/* The columns of b for a lattice L = <b_i>; return u unimodular of an
+ * LLL-reduced basis (c_i) in terms of the b_i. [ c = b * u ] */
 static GEN
-lll_proto(GEN x, GEN f(GEN, long), long prec)
+lll_proto(GEN b, GEN f(GEN, long), long prec)
 {
-  long lx=lg(x), i, j;
+  long lx=lg(b), i, j;
   gpmem_t av, av1;
   GEN g;
 
-  if (typ(x) != t_MAT) err(typeer,"lll_proto");
+  if (typ(b) != t_MAT) err(typeer,"lll_proto");
   if (lx==1) return cgetg(1,t_MAT);
-  av=avma; g=cgetg(lx,t_MAT);
+  av = avma; g = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) g[j]=lgetg(lx,t_COL);
   for (i=1; i<lx; i++)
     for (j=1; j<=i; j++)
-      coeff(g,i,j)=coeff(g,j,i)=(long)gscal((GEN)x[i],(GEN)x[j]);
-  av1=avma; x = f(g,prec);
-  if (!x) { avma=av; return NULL; }
-  return gerepile(av,av1,x);
+      coeff(g,i,j)=coeff(g,j,i)=(long)gscal((GEN)b[i],(GEN)b[j]);
+  av1 = avma; b = f(g,prec);
+  if (!b) { avma = av; return NULL; }
+  return gerepile(av,av1,b);
 }
 
 GEN
@@ -1036,13 +795,7 @@ GEN
 lll(GEN x,long prec) { return lll_proto(x,lllgram,prec); }
 
 GEN
-lll1(GEN x,long prec) { return lll_proto(x,lllgram1,prec); }
-
-GEN
 lllrat(GEN x) { return lll_proto(x,lllgram,lll_ALL); }
-
-GEN
-lllint(GEN x) { return lll_proto(x,lllgramall0,lll_IM); }
 
 GEN
 lllgen(GEN x) { return lll_proto(x,lllgramallgen,lll_IM); }
@@ -1053,8 +806,8 @@ lllgramgen(GEN x) { return lllgramallgen(x,lll_IM); }
 GEN
 lllgramkerimgen(GEN x) { return lllgramallgen(x,lll_ALL); }
 
-static GEN
-lllkerim_proto(GEN x, GEN f(GEN,long))
+GEN
+lllkerimgen(GEN x)
 {
   long lx=lg(x), i, j;
   gpmem_t av, av1;
@@ -1078,105 +831,7 @@ lllkerim_proto(GEN x, GEN f(GEN,long))
   for (i=1; i<lx; i++)
     for (j=1; j<=i; j++)
       coeff(g,i,j)=coeff(g,j,i)=(long)gscal((GEN)x[i],(GEN)x[j]);
-  av1=avma; return gerepile(av,av1,f(g,lll_ALL));
-}
-
-GEN
-lllkerim(GEN x) { return lllkerim_proto(x,lllgramall0); }
-
-GEN
-lllkerimgen(GEN x) { return lllkerim_proto(x,lllgramallgen); }
-
-/* x est ici la matrice de GRAM des bi.  */
-GEN
-lllgram1(GEN x, long prec)
-{
-  GEN mu,u,B,BB,BK,p,q,r,cst,unreel,mu1,mu2;
-  long l, i, j, k, lx=lg(x), n, e;
-  gpmem_t av, lim;
-
-  if (typ(x) != t_MAT) err(typeer,"lllgram1");
-  if (lg((GEN)x[1])!=lx) err(mattype1,"lllgram1"); n=lx-1;
-  if (n<=1) return idmat(n);
-  cst=gdivgs(stoi(99),100); /* LLL proposent 0.75 */
-  if (prec)
-  {
-    unreel = realun(prec+1);
-    x = gmul(x,unreel);
-    cst = gmul(cst,unreel);
-  }
-  av=avma; lim=stack_lim(av,1);
-  mu=gtrans(sqred(x)); B=cgetg(lx,t_COL);
-  for (i=1,l=0; i<=n; i++)
-  {
-    if (gsigne((GEN)(B[i]=coeff(mu,i,i)))>0) l++;
-    coeff(mu,i,i)=un;
-  }
-  if (l<n) err(lllger3);
-
-  u=idmat(n); k=2;
-  do
-  {
-    if (!gcmp0(r=grndtoi(gcoeff(mu,k,k-1),&e)))
-    {
-      u[k]=lsub((GEN)u[k],gmul(r,(GEN)u[k-1]));
-      for (j=1; j<k-1; j++)
-	coeff(mu,k,j)=lsub(gcoeff(mu,k,j),gmul(r,gcoeff(mu,k-1,j)));
-      mu1=(GEN)(coeff(mu,k,k-1)=lsub(gcoeff(mu,k,k-1),r));
-    }
-    else mu1=gcoeff(mu,k,k-1);
-    q=gmul((GEN)B[k-1],gsub(cst,mu2=gsqr(mu1)));
-    if (gcmp(q,(GEN)B[k])>0)
-    {
-      BB=gadd((GEN)B[k],gmul((GEN)B[k-1],mu2));
-      coeff(mu,k,k-1)=ldiv(gmul(mu1,(GEN)B[k-1]),BB);
-      B[k]=lmul((GEN)B[k-1],BK=gdiv((GEN)B[k],BB));
-      B[k-1]=(long)BB;
-      swap(u[k-1],u[k]);
-      for (j=1; j<=k-2; j++) swap(coeff(mu,k-1,j), coeff(mu,k,j));
-      for (i=k+1; i<=n; i++)
-      {
-	p=gcoeff(mu,i,k);
-	coeff(mu,i,k)=lsub(gcoeff(mu,i,k-1),gmul(mu1,p));
-	coeff(mu,i,k-1)=ladd(gmul(BK,p),gmul(gcoeff(mu,k,k-1),gcoeff(mu,i,k-1)));
-      }
-      if (k>2) k--;
-    }
-    else
-    {
-      for (l=k-2; l; l--)
-      {
-	if (!gcmp0(r=grndtoi(gcoeff(mu,k,l),&e)))
-	{
-	  u[k]=lsub((GEN)u[k],gmul(r,(GEN)u[l]));
-	  for (j=1; j<l; j++)
-	    coeff(mu,k,j)=lsub(gcoeff(mu,k,j),gmul(r,gcoeff(mu,l,j)));
-	  coeff(mu,k,l)=lsub(gcoeff(mu,k,l),r);
-	 }
-      }
-      k++;
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      GEN *gptr[3]; gptr[0]=&B; gptr[1]=&u; gptr[2]=&mu;
-      if(DEBUGMEM>1) err(warnmem,"lllgram1");
-      gerepilemany(av,gptr,3);
-    }
-  }
-  while (k<=n);
-  return gerepilecopy(av,u);
-}
-
-GEN
-lllgramint(GEN x)
-{
-  return lllgramall0(x,lll_IM);
-}
-
-GEN
-lllgramkerim(GEN x)
-{
-  return lllgramall0(x,lll_ALL);
+  av1=avma; return gerepile(av,av1,lllgramallgen(g,lll_ALL));
 }
 
 /*  This routine is functionally similar to lllint when all = 0.
@@ -1210,7 +865,7 @@ lllintpartialall(GEN m, long flag)
   const long ncol = lg(m)-1;
   const gpmem_t ltop1 = avma;
   long ncolnz;
-  GEN tm1, tm2, mid, *gptr[4];
+  GEN tm1, tm2, mid;
 
   if (typ(m) != t_MAT) err(typeer,"lllintpartialall");
   if (ncol <= 1) return idmat(ncol);
@@ -1260,11 +915,7 @@ lllintpartialall(GEN m, long flag)
 
       /* Occasionally (including final pass) do garbage collection.  */
       if (npass2 % 8 == 0 || !progress)
-      {
-        gptr[0] = &dot11; gptr[1] = &dot12;
-        gptr[2] = &dot22; gptr[3] = &tm;
-        gerepilemany(ltop1, gptr, 4);
-      }
+        gerepileall(ltop1, 4, &dot11,&dot12,&dot22,&tm);
     } /* while npass2 < 2 || progress */
 
     {
@@ -1314,8 +965,7 @@ lllintpartialall(GEN m, long flag)
     fprintferr("tm1 = %Z",tm1);
     fprintferr("mid = %Z",mid);
   }
-  gptr[0] = &tm1; gptr[1] = &mid;
-  gerepilemany(ltop1, gptr, 2);
+  gerepileall(ltop1,2, &tm1, &mid);
   {
    /* For each pair of column vectors v and w in mid * tm2,
     * try to replace (v, w) by (v, v - q*w) for some q.
@@ -1376,8 +1026,7 @@ lllintpartialall(GEN m, long flag)
         if (low_stack(lim, stack_lim(ltop3,1)))
 	{
           if(DEBUGMEM>1) err(warnmem,"lllintpartialall");
-	  gptr[0] = &dotprd; gptr[1] = &tm2;
-	  gerepilemany(ltop3, gptr, 2);
+	  gerepileall(ltop3, 2, &dotprd,&tm2);
         }
       } /* for icol */
       if (!reductions) break;
@@ -1643,7 +1292,7 @@ static GEN
 cxground(GEN x)
 {
   GEN p1;
-  
+
   if (typ(x)==t_COMPLEX)
   {
     p1 = cgetg(3,t_COMPLEX);
@@ -1761,7 +1410,7 @@ pslq(GEN x, long prec)
   if (n <= 1) return cgetg(1,t_VEC);
   if (DEBUGLEVEL>=3) (void)timer();
   if (gexpo(gimag(x)) > EXP)
-  { 
+  {
     return lindep(x,prec);
 /*    err(impl,"pslq for complex arguments"); */
     ga = gsqrt(gdeux,prec); flreal = 0;
@@ -1851,10 +1500,8 @@ pslq(GEN x, long prec)
     }
     if (low_stack(lim, stack_lim(av0,1)))
     {
-      GEN *gptr[4];
       if(DEBUGMEM>1) err(warnmem,"pslq");
-      gptr[0]=&y; gptr[1]=&H; gptr[2]=&A;
-      gptr[3]=&B; gerepilemany(av0,gptr,4);
+      gerepileall(av0,4,&y,&H,&A,&B);
     }
     if (DEBUGLEVEL>=4) tfin += timer();
     if (DEBUGLEVEL==3 && (ct%100) == 0)
@@ -1933,7 +1580,7 @@ dLQdec()
 {
   const long n = lg(y)-1;
   long row, j;
-  
+
   for (row=1; row<n; row++)
   {
     dmakep(Hbar[row],row);
@@ -1942,7 +1589,7 @@ dLQdec()
   }
 }
 
-static void
+void
 dprintvec(double *V, long m)
 {
   long i;
@@ -1951,7 +1598,7 @@ dprintvec(double *V, long m)
   printf("%15.15e]\n",V[m]); fflush(stdout);
 }
 
-static void
+void
 dprintmat(double **M, long r, long c)
 {
   long i, j;
@@ -1971,7 +1618,7 @@ initializedoubles(long prec)
   long flit, i, j, n = lg(y)-1;
   GEN ypro;
   gpmem_t av = avma;
-  
+
   ypro = gdiv(y,vecmax(gabs(y,prec)));
   flit = 1;
   for (i=1; i<=n; i++)
@@ -1990,7 +1637,7 @@ initializedoubles(long prec)
 	if (j<n)
 	{
 	  GEN pro = gcoeff(H,i,j);
-	  
+	
 	  if ((!gcmp0(pro)) && (labs(gexpo(pro))> 0x3ff)) {flit = 0; break;}
 	  else Hbar[i][j] = rtodbl(gcoeff(H,i,j));
 	}
@@ -2081,7 +1728,7 @@ checkentries()
 {
   long n = lg(y)-1, i, j;
   double *p1, *p2;
-  
+
   for (i=1; i<=n; i++)
   {
     p1 = Abar[i]; p2 = Bbar[i];
@@ -2121,9 +1768,9 @@ static long
 checkend(GEN *ptres, long prec)
 {
   long fl, i, m, n=lg(y)-1;
-  const long EXP = - bit_accuracy(prec) + 2*n;  
+  const long EXP = - bit_accuracy(prec) + 2*n;
   GEN M;
-  
+
   fl = 1;
   for (i=1; i<=n-1; i++) if (gexpo(gcoeff(H,i,i))<=EXP) {fl = 0; break;}
   if (fl)
@@ -2138,7 +1785,7 @@ checkend(GEN *ptres, long prec)
   }
   return 0;
 }
- 
+
 GEN
 pslqtwolevel(GEN x, long prec)
 {
@@ -2153,7 +1800,7 @@ pslqtwolevel(GEN x, long prec)
   if (n <= 1) return cgetg(1,t_COL);
   if (DEBUGLEVEL>=3) (void)timer();
   if (gexpo(gimag(x)) > EXP)
-  { 
+  {
     return lindep(x,prec);
 /*    err(impl,"pslq for complex arguments"); */
     ga = gsqrt(gdeux,prec); flreal = 0;
@@ -2247,7 +1894,7 @@ startagain:
 	if (DEBUGLEVEL>=4) t1234 += timer();
       }
       flit = checkentries();
-      
+
       if (!flit)
       {
 	flilong = makeABbargen();
@@ -2285,7 +1932,7 @@ startagain:
     }
     else
     {
-dogen:      
+dogen:
       p1 = cgetg(n,t_VEC);
       for (i=1; i<n; i++) p1[i] = lmul((GEN)tabga[i],gabs(gcoeff(H,i,i),prec));
       m = vecmaxind(p1);
@@ -2338,10 +1985,8 @@ dogen:
     }
     if (low_stack(lim, stack_lim(av0,1)))
     {
-      GEN *gptr[4];
       if(DEBUGMEM>1) err(warnmem,"pslq");
-      gptr[0]=&y; gptr[1]=&H; gptr[2]=&A;
-      gptr[3]=&B; gerepilemany(av0,gptr,4);
+      gerepileall(av0,4,&y,&H,&A,&B);
     }
     if (DEBUGLEVEL>=4) tfin += timer();
     if (DEBUGLEVEL==3 && (ct%100) == 0)
@@ -2477,7 +2122,6 @@ matkerint0(GEN x, long flag)
   {
     case 0: return kerint(x);
     case 1: return kerint1(x);
-    case 2: return kerint2(x);
     default: err(flagerr,"matkerint");
   }
   return NULL; /* not reached */
@@ -2494,146 +2138,14 @@ kerint1(GEN x)
 }
 
 GEN
-kerint2(GEN x)
-{
-  long lx=lg(x), i, j;
-  gpmem_t av, av1;
-  GEN g,p1;
-
-  if (typ(x) != t_MAT) err(typeer,"kerint2");
-  av=avma; g=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++) g[j]=lgetg(lx,t_COL);
-  for (i=1; i<lx; i++)
-    for (j=1; j<=i; j++)
-      coeff(g,i,j) = coeff(g,j,i) = (long)gscal((GEN)x[i],(GEN)x[j]);
-  g=lllgramall0(g,lll_KER); p1=lllint(g);
-  av1=avma; return gerepile(av,av1,gmul(g,p1));
-}
-
-static GEN
-lllall0(GEN x, long flag)
-{
-  long lx=lg(x), i, j, k, l, n, kmax;
-  gpmem_t av0=avma, av, lim;
-  GEN u,B,L,q,r,h,la,p1,p2,p4,fl;
-
-  if (typ(x) != t_MAT) err(typeer,"lllall0");
-  n=lx-1; if (n<=1) return lllall_trivial(x, flag | lll_GRAM);
-  fl = cgetg(lx, t_VECSMALL);
-
-  av=avma; lim=stack_lim(av,1); x=dummycopy(x);
-  B=gscalcol(gun, lx);
-  L=cgetg(lx,t_MAT);
-  for (k=lg(x[1]),j=1; j<lx; j++)
-  {
-    for (i=1; i<k; i++)
-      if (typ(gcoeff(x,i,j))!=t_INT) err(lllger4);
-    fl[j] = 0; L[j] = (long)zerocol(n);
-  }
-  k=2; h=idmat(n); kmax=1;
-  u=sqscali((GEN)x[1]);
-  if (signe(u)) { B[2]=(long)u; coeff(L,1,1)=un; fl[1]=1; } else B[2]=un;
-  for(;;)
-  {
-    if (k > kmax)
-    {
-      kmax = k;
-      for (j=1; j<=k; j++)
-      {
-	if (j==k || fl[j])
-	{
-          gpmem_t av1 = avma;
-	  u=gscali((GEN)x[k],(GEN)x[j]);
-	  for (i=1; i<j; i++)
-	    if (fl[i])
-              u = divii(subii(mulii((GEN)B[i+1],u),
-                              mulii(gcoeff(L,k,i),gcoeff(L,j,i))),
-                        (GEN)B[i]);
-          u = gerepileuptoint(av1, u);
-	  if (j<k) coeff(L,k,j)=(long)u;
-	  else
-	  {
-	    if (signe(u)) { B[k+1]=(long)u; coeff(L,k,k)=un; fl[k]=1; }
-	    else { B[k+1]=B[k]; fl[k]=0; }
-	  }
-	}
-      }
-    }
-    if (fl[k-1] && !fl[k])
-    {
-      u = shifti(gcoeff(L,k,k-1),1);
-      if (absi_cmp(u, (GEN)B[k]) > 0)
-      {
-	q = truedvmdii(addii(u,(GEN)B[k]),shifti((GEN)B[k],1), NULL);
-        r = negi(q);
-        h[k] = (long)ZV_lincomb(gun,r, (GEN)h[k],(GEN)h[k-1]);
-        x[k] = (long)ZV_lincomb(gun,r, (GEN)x[k],(GEN)x[k-1]);
-	coeff(L,k,k-1)=laddii(gcoeff(L,k,k-1),mulii(r,(GEN)B[k]));
-	for (i=1; i<k-1; i++)
-	  coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(r,gcoeff(L,k-1,i)));
-      }
-      la=gcoeff(L,k,k-1); p4=sqri(la);
-      swap(h[k-1], h[k]);
-      swap(x[k-1], x[k]);
-      for (j=1; j<k-1; j++) swap(coeff(L,k-1,j), coeff(L,k,j));
-      if (signe(la))
-      {
-	p2=(GEN)B[k]; p1=divii(p4,p2);
-	B[k+1]=B[k]=(long)p1;
-	for (i=k+1; i<=kmax; i++)
-	  coeff(L,i,k-1)=ldivii(mulii(la,gcoeff(L,i,k-1)),p2);
-	for (j=k+1; j<kmax; j++)
-	  for (i=j+1; i<=kmax; i++)
-	    coeff(L,i,j)=ldivii(mulii((GEN)p1,gcoeff(L,i,j)),p2);
-	for (i=k+2; i<=kmax+1; i++)
-	  B[i]=ldivii(mulii((GEN)p1,(GEN)B[i]),p2);
-      }
-      else
-      {
-	for (i=k+1; i<=kmax; i++)
-	{ coeff(L,i,k)=coeff(L,i,k-1); coeff(L,i,k-1)=zero; }
-	B[k]=B[k-1]; fl[k]=1; fl[k-1]=0;
-      }
-      if (k>2) k--;
-    }
-    else
-    {
-      for (l=k-1; l>=1; l--)
-      {
-        u = shifti(gcoeff(L,k,l),1);
-	if (absi_cmp(u,(GEN)B[l+1]) > 0)
-	{
-	  q = truedvmdii(addii(u,(GEN)B[l+1]),shifti((GEN)B[l+1],1), NULL);
-          r = negi(q);
-	  h[k] = (long)ZV_lincomb(gun,r,(GEN)h[k],(GEN)h[l]);
-	  x[k] = (long)ZV_lincomb(gun,r,(GEN)x[k],(GEN)x[l]);
-	  coeff(L,k,l)=laddii(gcoeff(L,k,l),mulii(r,(GEN)B[l+1]));
-	  for (i=1; i<l; i++)
-	    coeff(L,k,i)=laddii(gcoeff(L,k,i),mulii(r,gcoeff(L,l,i)));
-	 }
-      }
-      if (++k > n) break;
-    }
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      GEN *gptr[4];
-      if(DEBUGMEM>1) err(warnmem,"lllall0");
-      gptr[0]=&B; gptr[1]=&L; gptr[2]=&h;
-      gptr[3]=&x; gerepilemany(av,gptr,4);
-    }
-  }
-  return gerepilecopy(av0, lllgramall_finish(h,fl,flag));
-}
-
-GEN
 kerint(GEN x)
 {
-  gpmem_t av=avma, av1;
-  GEN g,p1;
-
-  g=lllall0(x,lll_KER); if (lg(g)==1) return g;
-  p1=lllint(g); av1=avma;
-  return gerepile(av,av1,gmul(g,p1));
+  gpmem_t av = avma;
+  GEN fl, h = lllint_i(x, 0, 0, &fl, NULL);
+  if (h) h = lll_finish(h,fl, lll_KER);
+  else   h = lll_trivial(x, lll_KER);
+  if (lg(h)==1) { avma = av; return cgetg(1, t_MAT); }
+  return gerepileupto(av, gmul(h, lllint(h)));
 }
 
 /********************************************************************/
@@ -2684,7 +2196,7 @@ canon_pol(GEN z)
 }
 
 static GEN
-pols_for_polred(GEN x, GEN a, GEN *pta, 
+pols_for_polred(GEN x, GEN a, GEN *pta,
 		int (*check)(void *, GEN), void *arg)
 {
   long i, v = varn(x), n = lg(a);
@@ -2700,7 +2212,7 @@ pols_for_polred(GEN x, GEN a, GEN *pta,
 
     if (canon_pol(ch) < 0 && pta) a[i] = (long)gneg_i((GEN)a[i]);
     if (DEBUGLEVEL > 3) outerr(ch);
-    if (check && check(arg, ch)) return ch; 
+    if (check && check(arg, ch)) return ch;
     y[i] = (long)ch;
   }
   if (check) return NULL; /* no suitable polynomial found */
@@ -2751,7 +2263,7 @@ nf_get_T(GEN x, GEN w)
     den[i] = (long)denom(content((GEN)w[i]));
     w[i] = (long)Q_remove_denom((GEN)w[i], (GEN)den[i]);
   }
-  
+
   for (i=1; i<=n; i++)
   {
     p1 = cgetg(n+1,t_COL); T[i] = (long)p1;
@@ -2777,9 +2289,9 @@ get_red_T2(GEN T2, GEN base, GEN x, long prec)
   GEN u;
   for (i=1; ; i++)
   {
-    if ((u = lllgramintern(T2,100,1,prec))) return u;
+    if ((u = lllgramintern(T2,LLLDFT,1,prec))) return u;
     if (i == MAXITERPOL) err(accurer,"red_T2");
-    prec = (prec<<1)-2; 
+    prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"red_T2",prec);
     T2 = nf_get_T2(base, roots(x,prec));
   }
@@ -2797,7 +2309,7 @@ nf_get_LLL(GEN nf)
 }
 
 /* Return the base change matrix giving the an LLL-reduced basis for the
- * integer basis of the nf(x). 
+ * integer basis of the nf(x).
  * base = vector of elts in Z[Y]/(x) generating the maximal order
  * polr = roots of x, computed to precision prec */
 GEN
@@ -2822,7 +2334,7 @@ LLL_nfbasis(GEN *ptx, GEN polr, GEN base, long prec)
    found such that check(arg, pol) != 0; return NULL
    if there are no such pol */
 static GEN
-allpolred0(GEN x, GEN *pta, long code, long prec, 
+allpolred0(GEN x, GEN *pta, long code, long prec,
 	   int (*check)(void *,GEN), void *arg)
 {
   GEN y,p1, base = NULL, polr = NULL;
@@ -2857,12 +2369,8 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
     avma = av; return NULL;
   }
 
-  if (pta)
-  {
-    GEN *gptr[2]; gptr[0]=&y; gptr[1]=pta;
-    gerepilemany(av,gptr,2); return y;
-  }
-  return gerepileupto(av,y);
+  if (pta) gerepileall(av,2,&y,pta); else y = gerepileupto(av,y);
+  return y;
 }
 
 static GEN
@@ -2934,7 +2442,7 @@ T2_from_embed(GEN x, long r1)
 }
 
 /* return T2 norm of the polynomial defining nf */
-static GEN 
+static GEN
 get_Bnf(GEN nf)
 {
   return T2_from_embed((GEN)nf[6], nf_get_r1(nf));
@@ -2985,7 +2493,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   int skipfirst = 0;
   CG_data *d = (CG_data*)new_chunk(sizeof(CG_data));
 
-  d->r1 = itos(gmael(nf,2,1)); 
+  d->r1 = itos(gmael(nf,2,1));
   d->ZKembed = gmul(M, mat);
   d->ZKLLL   = gmul((GEN)nf[7],mat);
   chk->data = (void*)d;
@@ -3053,13 +2561,16 @@ findmindisc(GEN nf, GEN y, GEN a, GEN phimax, long flun)
   long i,k, c = lg(y);
   GEN v,dmin,z,beta,discs = cgetg(c,t_VEC);
 
-  for (i=1; i<c; i++) discs[i] = labsi(discsr((GEN)y[i]));
+  for (i=1; i<c; i++) discs[i] = labsi(ZX_disc((GEN)y[i]));
   v = sindexsort(discs);
-  k = v[1]; dmin = (GEN)discs[k]; z = (GEN)y[k]; beta = (GEN)a[k];
+  k = v[1];
+  dmin = (GEN)discs[k];
+  z    = (GEN)y[k];
+  beta = (GEN)a[k];
   for (i=2; i<c; i++)
   {
     k = v[i];
-    if (!egalii((GEN)discs[k],dmin)) break;
+    if (!egalii((GEN)discs[k], dmin)) break;
     if (gpolcomp((GEN)y[k],z) < 0) { z = (GEN)y[k]; beta = (GEN)a[k]; }
   }
   if (flun & nf_RAW)
@@ -3213,7 +2724,7 @@ polred(GEN x, long prec)
   return allpolred(x,NULL,0,prec);
 }
 
-GEN 
+GEN
 polredfirstpol(GEN x, long prec, int (*check)(void *,GEN), void *arg)
 {
   return allpolred0(x,NULL,0,prec,check,arg);
@@ -3641,10 +3152,8 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
 
       if (low_stack(lim, stack_lim(av,1)))
       {
-	GEN *gptr[7];
         int cnt = 4;
 	if(DEBUGMEM>1) err(warnmem,"smallvectors");
-	gptr[0]=&x; gptr[1]=&y; gptr[2]=&z; gptr[3]=&normax1;
 	if (stockmax)
         { /* initialize to dummy values */
           GEN T = S;
@@ -3653,10 +3162,10 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
         }
         if (check)
         {
-          cnt+=3; gptr[4]=&borne1; gptr[5]=&borne2; gptr[6]=&norms;
+          cnt+=3;
           for (i=s+1; i<=stockmax; i++) norms[i]=(long)dummy;
         }
-	gerepilemany(av,gptr,cnt);
+	gerepileall(av,cnt,&x,&y,&z,&normax1,&borne1,&borne2,&norms);
       }
       if (DEBUGLEVEL>3)
       {
@@ -3848,7 +3357,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     if (setjmp(env)) goto PRECPB;
     catcherr = err_catch(precer, env, NULL);
   }
-  if (CHECK && CHECK->f_init) 
+  if (CHECK && CHECK->f_init)
   {
     bound = CHECK->f_init(CHECK,nf,gram,uperm, &prec);
     if (!bound) goto PRECPB;

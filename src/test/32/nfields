@@ -1201,10 +1201,11 @@ Mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 ? nfeltval(nf,ba,vp)
 0
 ? nffactor(nf2,x^3+x)
+  ***   Warning: nffactor: overlift for d-1/d-2 test.
 
-[Mod(1, y^3 - y - 1)*x 1]
+[x 1]
 
-[Mod(1, y^3 - y - 1)*x^2 + Mod(1, y^3 - y - 1) 1]
+[x^2 + 1 1]
 
 ? aut=nfgaloisconj(nf3)
 [x, 1/12*x^4 - 1/2*x, -1/12*x^4 - 1/2*x, 1/12*x^4 + 1/2*x, -1/12*x^4 + 1/2*x
@@ -1387,7 +1388,7 @@ x^15 - 15*x^11 + 75*x^7 - x^5 - 125*x^3 + 5*x + 1
 ? sizebyte(%)
 172
 ? getheap
-[199, 133904]
+[199, 133844]
 ? print("Total time spent: ",gettime);
-Total time spent: 1190
+Total time spent: 1180
 ? \q

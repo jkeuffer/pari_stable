@@ -1009,7 +1009,6 @@ init_padic_prec(long e, int BitPerFactor, long r, double LOGp2)
 extern GEN sindexrank(GEN x);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern GEN gauss_intern(GEN a, GEN b);
-extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
 
 /* bound for q(vS) := || vS ||_2^2 */
 double
@@ -1040,7 +1039,7 @@ bound_vS(long tmax, GEN *ptB)
   *ptB = B; return Nx;
 }
 
-/* B grom lllgramint_i: return [ |b_i^*|^2, i ] */
+/* B from lllint_i: return [ |b_i^*|^2, i ] */
 GEN
 GS_norms(GEN B, long prec)
 {
@@ -1190,7 +1189,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
      */
-    u = lllgramint_i(gram_matrix(m), 4, NULL, &B);
+    u = lllint_i(m, 4, 1, NULL, &B);
     norm = GS_norms(B, DEFAULTPREC);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], Bnorm) < 0) break;

@@ -27,7 +27,6 @@ extern GEN centermod_i(GEN x, GEN p, GEN ps2);
 extern GEN max_modulus(GEN p, double tau);
 extern double bound_vS(long tmax, GEN *BL);
 extern GEN GS_norms(GEN B, long prec);
-extern GEN lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
@@ -866,7 +865,7 @@ bestlift_init_pr(long a, GEN nf, GEN LLLinv, GEN pr, GEN C, nflift_t *T)
     prk2= hnfmodid(gmul(LLLinv, prk), pa);
     PRK = gmul(prk2, lllintpartial(prk2));
 
-    u = lllgramint_i(gram_matrix(PRK), y, NULL, &B);
+    u = lllint_i(PRK, y, 0, NULL, &B);
     GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
@@ -979,7 +978,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
      * m = [           ]   square matrix
      *     [ T2r    PRK]   T2r = Tra * BL  truncated
      */
-    u = lllgramint_i(gram_matrix(m), 4, NULL, &B);
+    u = lllint_i(m, 4, 0, NULL, &B);
     norm = GS_norms(B, DEFAULTPREC);
     for (i=r+dnf; i>0; i--)
       if (cmprr((GEN)norm[i], M) < 0) break;
