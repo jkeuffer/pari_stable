@@ -39,22 +39,21 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifdef BOTH_GNUPLOT_AND_X11
 #  ifdef GNUPLOT_AND_X11_PREFER_GNUPLOT
 #    define DEFAULT_IS_BUILTIN 0
-#  else	/* !( defined GNUPLOT_AND_X11_PREFER_GNUPLOT ) */ 
+#  else
 #    define DEFAULT_IS_BUILTIN 1
-#  endif	/* defined GNUPLOT_AND_X11_PREFER_GNUPLOT */ 
-#endif
-#ifndef BOTH_GNUPLOT_AND_X11             /* The switch support in plotgnuplot */
-#  define X11_rectdraw0             rectdraw0
-#  define X11_term_set              term_set
-#  define X11_PARI_get_plot         PARI_get_plot
-#  define X11_set_pointsize         set_pointsize
-#endif
-
-#  ifdef BOTH_GNUPLOT_AND_X11
-int is_builtin = DEFAULT_IS_BUILTIN;
-int X11_init;
-static void my_rectdraw0(long *w, long *x, long *y, long lw, long do_free);
 #  endif
+int X11_init, is_builtin = DEFAULT_IS_BUILTIN;
+extern void  X11_PARI_get_plot(long fatal);
+extern void  X11_rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+extern void  X11_set_pointsize(double d);
+extern long  X11_term_set(char *s);
+static void my_rectdraw0(long *w, long *x, long *y, long lw, long do_free);
+#else
+#  define X11_PARI_get_plot         PARI_get_plot
+#  define X11_rectdraw0             rectdraw0
+#  define X11_set_pointsize         set_pointsize
+#  define X11_term_set              term_set
+#endif
 
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
