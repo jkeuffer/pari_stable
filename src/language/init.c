@@ -1051,6 +1051,8 @@ err_recover(long numerr)
   longjmp(GP_DATA? GP_DATA->env: environnement, numerr);
 }
 
+extern char *gp_function_name;
+
 void
 err(long numerr, ...)
 {
@@ -1125,7 +1127,13 @@ err(long numerr, ...)
   }
   else
   {
-    pariputsf("  ***   %s", errmessage[numerr]);
+    if (gp_function_name)
+    {
+      pariputsf("  *** %s: %s", gp_function_name, errmessage[numerr]);
+      gp_function_name=NULL;
+    }
+    else
+      pariputsf("  ***   %s", errmessage[numerr]);
     switch (numerr)
     {
       case talker: case siginter: case invmoder:

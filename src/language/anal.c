@@ -30,6 +30,8 @@ typedef GEN (*PFGEN)(ANYARG);
 typedef GEN (*F2GEN)(GEN,GEN);
 typedef GEN (*F1GEN)(GEN);
 
+char *gp_function_name=NULL;
+
 extern void killsubblocs(GEN x);
 
 static GEN    constante();
@@ -1806,6 +1808,7 @@ identifier(void)
       err(talker2, "deep recursion", mark.identifier, mark.start);
 #endif
 
+  gp_function_name=ep->name;
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;
@@ -2013,10 +2016,10 @@ identifier(void)
       res = num_deriv(call, argvec);
     }
     else switch (ret)
-    {
+      {
       case RET_GEN:
-	res = ((PFGEN)call)(_ARGS_);
-	break;
+        res = ((PFGEN)call)(_ARGS_);
+        break;
 
       case RET_INT:
 	m = (long)((int (*)(ANYARG))call)(_ARGS_);
@@ -2029,7 +2032,7 @@ identifier(void)
       case RET_VOID:
 	((void (*)(ANYARG))call)(_ARGS_);
 	res = gnil; break;
-    }
+      }
     if (has_pointer) check_pointers(has_pointer,init);
     if (!noparen) match(')');
     return res;

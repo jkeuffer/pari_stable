@@ -514,7 +514,7 @@ z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
 [-60 -105 280 252 -486 471 1290]
 
 ? qflll(m,7)
-  ***   invalid flag in qflll.
+  *** qflll: invalid flag in qflll.
 ? qflllgram(m)
 
 [1 1 27 -27 69 0 141]
@@ -532,7 +532,7 @@ z^2 + Mod(8186, 8191)*z + Mod(8189, 8191)
 [0 1 3 -17 3 -7 3]
 
 ? qflllgram(m,7)
-  ***   invalid flag in qflllgram.
+  *** qflllgram: invalid flag in qflllgram.
 ? qflllgram(m,1)
 
 [1 1 27 -27 69 0 141]

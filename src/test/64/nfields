@@ -430,7 +430,7 @@ x^7 - 98*x^6 + 110*x^5 - 190*x^4 + 189*x^3 + 144*x^2 + 25*x + 1, Mod(3951653
 [1]
 
 ? setrand(1);bnfclassunit(x^2-x-100000)
-  ***   Warning: insufficient precision for fundamental units, not given.
+  *** bnfclassunit: Warning: insufficient precision for fundamental units, not given.
 
 [x^2 - x - 100000]
 
