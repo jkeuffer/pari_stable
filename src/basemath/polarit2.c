@@ -461,10 +461,7 @@ static GEN
 uniform_Mignotte_bound(GEN x)
 {
   long e, n = lgef(x)-3;
-  GEN p1, N2, y = gmul(x, realun(DEFAULTPREC));
-
-  y[1] = evaltyp(t_VEC)|evallg(n+2);
-  N2 = mpsqrt(gnorml2(y+1));
+  GEN p1, N2 = mpsqrt(fastnorml2(x,DEFAULTPREC));
 
   p1 = grndtoi(gmul2n(N2, n), &e);
   if (e>=0) p1 = addii(p1, shifti(gun, e));

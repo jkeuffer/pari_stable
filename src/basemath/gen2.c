@@ -92,24 +92,29 @@ gopgs2z(GEN (*f)(GEN, GEN), GEN y, long s, GEN z)
 /*                                                                 */
 /*******************************************************************/
 
-GEN
-cgetp(GEN x)
-{
-  GEN y = cgetg(5,t_PADIC);
-  y[1] = evalprecp(precp(x)) | evalvalp(0);
-  icopyifstack(x[2], y[2]);
-  y[3] = licopy((GEN)x[3]);
-  y[4] = lgeti(lgefint(x[3])); return y;
-}
-
 /* y[4] not filled */
-GEN
+static GEN
 cgetp2(GEN x, long v)
 {
   GEN y = cgetg(5,t_PADIC);
   y[1] = evalprecp(precp(x)) | evalvalp(v);
   icopyifstack(x[2], y[2]);
   y[3] = licopy((GEN)x[3]); return y;
+}
+
+GEN
+cgetp(GEN x)
+{
+  GEN y = cgetp2(x, 0);
+  y[4] = lgeti(lgefint(x[3])); return y;
+}
+
+GEN 
+pureimag(GEN x)
+{
+  GEN y = cgetg(3,t_COMPLEX);
+  y[1] = zero;
+  y[2] = (long)x; return y;
 }
 
 /*******************************************************************/
@@ -1202,7 +1207,6 @@ gaffsg(long s, GEN x)
 /*         Affect the content of x to y, whenever possible         */
 /*                                                                 */
 /*******************************************************************/
-
 GEN
 realzero(long prec)
 {

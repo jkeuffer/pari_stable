@@ -350,6 +350,16 @@ gnorml2(GEN x)
   return gerepileupto(av,y);
 }
 
+GEN
+fastnorml2(GEN x, long prec)
+{
+  long av = avma;
+  GEN y = gmul(x, realun(prec));
+  if (typ(x) == t_POL)
+    *++y = evaltyp(t_VEC) | evallg(lgef(x)-1);
+  return gerepileupto(av, gnorml2(y));
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                          CONJUGATION                            */

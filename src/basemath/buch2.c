@@ -464,22 +464,20 @@ not_given(long av, long flun, long reason)
 {
   if (labs(flun)==2)
   {
-    char *s=NULL;
+    char *s;
     switch(reason)
     {
-    case RELAT:
-      s = "not enough relations for fundamental units, not given"; break;
-    case LARGE:
-      s = "fundamental units too large, not given"; break;
-    case PRECI:
-      s = "insufficient precision for fundamental units, not given"; break;
+      case RELAT: s = "not enough relations for fundamental units"; break;
+      case LARGE: s = "fundamental units too large"; break;
+      case PRECI: s = "insufficient precision for fundamental units"; break;
+      default: s = "unknown problem with fundamental units";
     }
-    err(warner,s);
+    err(warner,"%s, not given",s);
   }
   avma=av; return cgetg(1,t_MAT);
 }
 
-/* to check whether the exponential will get too big */
+/* check whether exp(x) will get too big */
 static long
 expgexpo(GEN x)
 {
@@ -497,86 +495,98 @@ expgexpo(GEN x)
 }
 
 static GEN
-getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long PRECREG)
+split_realimag_col(GEN z, long r1, long r2)
 {
-  long av=avma,i,j,RU,N=lgef(nf[1])-3,e,R1,R2;
-  GEN pol,p1,p2,p3,y,matep,s,xarch,vec;
+  long i, ru = r1+r2;
+  GEN a, x = cgetg(ru+r2+1,t_COL), y = x + r2;
+  for (i=1; i<=r1; i++) { a = (GEN)z[i]; x[i] = lreal(a); }
+  for (   ; i<=ru; i++) { a = (GEN)z[i]; x[i] = lreal(a); y[i] = limag(a); }
+  return x;
+}
+
+static GEN
+split_realimag(GEN x, long r1, long r2)
+{
+  long i,l; GEN y;
+  if (typ(x) == t_COL) return split_realimag_col(x,r1,r2);
+  l = lg(x); y = cgetg(l, t_MAT);
+  for (i=1; i<l; i++) y[i] = (long)split_realimag_col((GEN)x[i], r1, r2);
+  return y;
+}
+
+/* assume x = (r1+r2) x (r1+2r2) matrix and y compatible vector
+ * r1 first lines of x,y are real. Solve the system obtained by splitting
+ * real and imaginary parts. If x is of nf type, use M instead.
+ */
+static GEN
+gauss_realimag(GEN x, GEN y)
+{
+  GEN M = (typ(x)==t_VEC)? gmael(checknf(x),5,1): x;
+  long l = lg(M), r2 = l - lg(M[1]), r1 = l-1 - 2*r2;
+  M = split_realimag(M,r1,r2);
+  y = split_realimag(y,r1,r2); return gauss(M, y);
+}
+
+static GEN
+getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long prec)
+{
+  long av = avma,e,i,j,R1,RU,N=lgef(nf[1])-3;
+  GEN p1,p2,u,y,matep,s,xarch,vec;
   GEN *gptr[2];
 
-  if (DEBUGLEVEL)
-    { fprintferr("\n#### Computing fundamental units\n"); flusherr(); }
-  R1=itos(gmael(nf,2,1)); R2=(N-R1)>>1; RU=R1+R2;
+  if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
+  R1 = itos(gmael(nf,2,1)); RU = (N+R1)>>1;
   if (RU==1) { *pte=BIGINT; return cgetg(1,t_MAT); }
 
-  *pte = 0; xarch=*ptxarch;
-  if (gexpo(reg)<-8) return not_given(av,flun,RELAT);
+  *pte = 0; xarch = *ptxarch;
+  if (gexpo(reg) < -8) return not_given(av,flun,RELAT);
 
-  matep=cgetg(RU,t_MAT);
+  matep = cgetg(RU,t_MAT);
   for (j=1; j<RU; j++)
   {
-    s=gzero; for (i=1; i<=RU; i++) s=gadd(s,greal(gcoeff(xarch,i,j)));
-    s=gdivgs(s,N);
-    p1=cgetg(N+1,t_COL); matep[j]=(long)p1;
-    for (i=1; i<=R1; i++)
-      p1[i]=lsub(gcoeff(xarch,i,j),s);
-    for (i=R1+1; i<=RU; i++)
-    {
-      p1[i]=lsub(gmul2n(gcoeff(xarch,i,j),-1),s);
-      p1[i+R2]=lconj((GEN)p1[i]);
-    }
+    s = gzero; for (i=1; i<=RU; i++) s = gadd(s,greal(gcoeff(xarch,i,j)));
+    s = gdivgs(s, -N);
+    p1=cgetg(RU+1,t_COL); matep[j]=(long)p1;
+    for (i=1; i<=R1; i++) p1[i] = ladd(s, gcoeff(xarch,i,j));
+    for (   ; i<=RU; i++) p1[i] = ladd(s, gmul2n(gcoeff(xarch,i,j),-1));
   }
-  p1 = lllintern(greal(matep),1,PRECREG);
-  if (!p1) return not_given(av,flun,PRECI);
-  p2 = gmul(matep,p1);
-  if (expgexpo(p2) > 20) return not_given(av,flun,LARGE);
-  matep=gexp(p2,PRECREG);
-  xarch=gmul(xarch,p1);
+  if (prec <= 0) prec = gprecision(xarch);
+  u = lllintern(greal(matep),1,prec);
+  if (!u) return not_given(av,flun,PRECI);
 
-  p1=gmael(nf,5,1);
-  p2=cgetg(N+1,t_MAT);
-  for (j=1; j<=N; j++)
-  {
-    p3=cgetg(N+1,t_COL); p2[j]=(long)p3;
-    for (i=1; i<=R1; i++) p3[i]=coeff(p1,i,j);
-    for (   ; i<=RU; i++)
-    {
-      p3[i]=coeff(p1,i,j);
-      p3[i+R2]=lconj((GEN)p3[i]);
-    }
-  }
-  y=greal(grndtoi(gauss(p2,matep),&e));
+  p1 = gmul(matep,u);
+  if (expgexpo(p1) > 20) return not_given(av,flun,LARGE);
+  matep = gexp(p1,prec);
+  y = grndtoi(gauss_realimag(nf,matep), &e);
   if (e>=0) return not_given(av,flun,PRECI);
-  *pte = -e; pol = (GEN) nf[1];
-  p1 = cgetg(3,t_COMPLEX);
-  p1[1] = zero; p1[2] = lmppi(PRECREG);  /* p1 = i * pi */
-  if (R1<RU) p2 = gshift(p1,1);
-  vec = cgetg(RU+1,t_COL);
+  for (j=1; j<RU; j++)
+    if (!gcmp1(idealnorm(nf, (GEN)y[j]))) break;
+  if (j < RU) return not_given(av,flun,PRECI);
+  *pte = -e; xarch = gmul(xarch,u);
+
+  /* y[i] are unit generators. Normalize: smallest L2 norm + lead coeff > 0 */
+  y = gmul((GEN)nf[7], y);
+  vec = cgetg(RU+1,t_COL); p2 = mppi(prec);
+  p1 = pureimag(p2);
+  p2 = pureimag(gmul2n(p2,1));
   for (i=1; i<=R1; i++) vec[i]=(long)p1;
   for (   ; i<=RU; i++) vec[i]=(long)p2;
-  p3=cgetg(N+1,t_COL);
-
-  for (j=1; j<lg(y); j++)
+  for (j=1; j<RU; j++)
   {
-    p1=(GEN)y[j]; p2=ginvmod(gmul((GEN)nf[7],p1), pol);
-    for (i=1; i<lgef(p2)-1; i++) p3[i]=p2[i+1];
-    for (   ; i<=N; i++) p3[i]=zero;
-    p2=gmul((GEN)nf[8],p3);
-    if (gcmp(gnorml2(p2),gnorml2(p1))<0)
+    p1 = (GEN)y[j]; p2 = ginvmod(p1, (GEN)nf[1]);
+    if (gcmp(fastnorml2(p2,DEFAULTPREC),
+             fastnorml2(p1,DEFAULTPREC)) < 0)
     {
-      p1=p2; xarch[j]=lneg((GEN)xarch[j]);
+      xarch[j] = lneg((GEN)xarch[j]);
+      p1 = p2;
     }
-    i=N; while (i>=1 && gcmp0((GEN)p1[i])) i--;
-    if (gsigne((GEN)p1[i])>=0) y[j]=(long)p1;
-    else
+    if (gsigne(leading_term(p1)) < 0)
     {
-      y[j]=lneg(p1);
-      xarch[j]=ladd((GEN)xarch[j],vec);
+      xarch[j] = ladd((GEN)xarch[j], vec);
+      p1 = gneg(p1);
     }
+    y[j] = (long)p1;
   }
-  p1=gmul((GEN)nf[7],y);
-  for (j=1; j<lg(y); j++)
-    if (!gcmp1(gabs(gnorm(gmodulcp((GEN)p1[j],pol)),0)))
-      { *pte = 0; return not_given(av,flun,LARGE); }
   if (DEBUGLEVEL) msgtimer("getfu");
   *ptxarch=xarch; gptr[0]=ptxarch; gptr[1]=&y;
   gerepilemany(av,gptr,2); return y;
@@ -588,23 +598,18 @@ getfu(GEN nf,GEN *ptxarch,GEN reg,long flun,long *pte,long PRECREG)
 GEN
 buchfu(GEN bnf)
 {
-  GEN nf,xarch,reg,res,fu,y;
-  long av=avma,tetpil,c,RU;
+  long av = avma, c;
+  GEN nf,xarch,reg,res, y = cgetg(3,t_VEC); 
 
-  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
-  RU=itos(gmael(nf,2,1))+itos(gmael(nf,2,2));
-  res=(GEN)bnf[8];
-  if (lg(res)==7 && lg(res[5])==RU)
+  bnf = checkbnf(bnf); xarch = (GEN)bnf[3]; nf = (GEN)bnf[7];
+  res = (GEN)bnf[8]; reg = (GEN)res[2];
+  if (lg(res)==7 && lg(res[5])==lg(nf[6])-1)
   {
-    y=cgetg(3,t_VEC); y[1]=lcopy((GEN)res[5]);
-    y[2]=lcopy((GEN)res[6]); return y;
+    y[1] = lcopy((GEN)res[5]);
+    y[2] = lcopy((GEN)res[6]); return y;
   }
-
-  xarch=(GEN)bnf[3]; reg=(GEN)res[2];
-  fu=getfu(nf,&xarch,reg,2,&c,gprecision(xarch));
-  tetpil=avma; y=cgetg(3,t_VEC);
-  y[1]=c?lmul((GEN)nf[7],fu):lcopy(fu); y[2]=lstoi(c);
-  return gerepile(av,tetpil,y);
+  y[1] = (long)getfu(nf,&xarch,reg,2,&c,0);
+  y[2] = lstoi(c); return gerepileupto(av, gcopy(y));
 }
 
 /*******************************************************************/
@@ -847,30 +852,6 @@ red_mod_units(GEN col, GEN mat, GEN N2, long prec)
   if (signe(x[RU]) < 0) x = gneg_i(x);
   if (!gcmp1((GEN)x[RU])) err(bugparier,"red_mod_units");
   setlg(x,RU); return x;
-}
-
-static GEN
-split_realimag(GEN z, long r1, long r2)
-{
-  long i, ru = r1+r2;
-  GEN a, x = cgetg(ru+r2+1,t_COL), y = x + r2;
-  for (i=1; i<=r1; i++) { a = (GEN)z[i]; x[i] = lreal(a); }
-  for (   ; i<=ru; i++) { a = (GEN)z[i]; x[i] = lreal(a); y[i] = limag(a); }
-  return x;
-}
-
-/* assume x = (r1+r2) x (r1+2r2) matrix and y compatible vector
- * r1 first lines of x,y are real. Solve the system obtained by splitting
- * real and imaginary parts. If x is of nf type, use M instead.
- */
-static GEN
-gauss_realimag(GEN x, GEN y)
-{
-  GEN M = (typ(x)==t_VEC)? gmael(checknf(x),5,1): x;
-  long i, l = lg(M), r2 = l - lg(M[1]), r1 = l-1 - 2*r2;
-  GEN M2 = cgetg(l, t_MAT);
-  for (i=1; i<l; i++) M2[i] = (long)split_realimag((GEN)M[i], r1, r2);
-  return gauss(M2, split_realimag(y,r1,r2));
 }
 
 /* clg2 format changed for version 2.0.21 (contained ideals, now archs)
@@ -1931,7 +1912,7 @@ class_group_gen(GEN nf,GEN W,GEN C,GEN vperm,GEN *ptclg1,GEN *ptclg2,long prec)
   long i,j,s,lo,lo0;
 
   if (DEBUGLEVEL)
-    { fprintferr("#### Computing class group generators\n"); timer2(); }
+    { fprintferr("\n#### Computing class group generators\n"); timer2(); }
   z = smith2(W); /* U W V = D, D diagonal, G = g Ui (G=new gens, g=old)  */
   U = (GEN)z[1]; Ui = ginv(U);
   V = (GEN)z[2];
@@ -2671,7 +2652,7 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
             GEN reg, GEN c_1, GEN zu, GEN W, GEN B,
             GEN xarch, GEN matarch, GEN vectbase, GEN vperm)
 {
-  long l = labs(fl)>1? 11: fl? 9: 8;
+  long i, l = labs(fl)>1? 11: fl? 9: 8;
   GEN p1,z, RES = cgetg(11,t_COL);
 
   setlg(RES,l);
@@ -2695,6 +2676,8 @@ buchall_end(GEN nf,GEN CHANGE,long fl,long k, GEN fu, GEN clg1, GEN clg2,
   z[3]=(long)xarch;
   z[4]=(long)matarch;
   z[5]=(long)vectbase;
+  for (i=lg(vperm)-1; i>0; i--) vperm[i]=lstoi(vperm[i]);
+  settyp(vperm, t_VEC);
   z[6]=(long)vperm;
   z[7]=(long)nf; RES+=4; RES[0]=evaltyp(t_VEC) | evallg(l-4);
   z[8]=(long)RES;
@@ -3051,15 +3034,14 @@ INCREASEGEN:
     err(warner,"suspicious check. Try to increase extra relations");
   }
 
-  /* Phase "be honest" */
   if (KCZ2 > KCZ)
-  {
+  { /* "be honest" */
     if (!powsubfb)
       powsubfbgen(nf,subfb,CBUCHG+1,PRECREG,PRECREGINT);
     if (!be_honest(nf,subfb,RU,PRECREGINT)) goto INCREASEGEN;
   }
 
-  /* regulator, roots of unity, fundamental units */
+  /* fundamental units */
   if (flun < 0 || flun > 1)
   {
     xarch = cleancol(gmul(xarch,parch),N,PRECREG);
@@ -3068,23 +3050,14 @@ INCREASEGEN:
   if (labs(flun) > 1)
   {
     fu = getfu(nf,&xarch,reg,flun,&k,PRECREG);
-    if (k) fu = gmul((GEN)nf[7],fu);
-    else if (labs(flun) > 2) { precpb = "getfu"; goto INCREASEGEN; }
+    if (!k && labs(flun) > 2) { precpb = "getfu"; goto INCREASEGEN; }
   }
-
-  /* cleanup */
-  i = lg(C)-sreg; C += sreg; C[0] = evaltyp(t_MAT)|evallg(i);
-  C = cleancol(C,N,PRECREG);
 
   /* class group generators */
-  if (DEBUGLEVEL) fprintferr("\n");
+  i = lg(C)-sreg; C += sreg; C[0] = evaltyp(t_MAT)|evallg(i);
+  C = cleancol(C,N,PRECREG);
   class_group_gen(nf,W,C,vperm, &clg1, &clg2, PRECREGINT);
 
-  if (flun < 0)
-  {
-    settyp(vperm, t_COL);
-    for (i=1; i<=KC; i++) vperm[i]=lstoi(vperm[i]);
-  }
   c1 = gdiv(gmul(reg,clh), z);
   desallocate(matcopy);
 
