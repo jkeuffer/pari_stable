@@ -101,7 +101,7 @@ IZ 37- [OS/2:] ^C would only work once
    48- make test-kernel did not work anymore (prototype error in kerntest.c)
    49- overflow in u_FpM_gauss (oo loop in ZM_inv for huge matrices)
    50- polcoeff(1+O(x^2),1,y) --> SEGV
-
+   51- content(y/x) --> 1   [ should be y ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
