@@ -40,6 +40,10 @@ Section "pari (required)" SecCopy
   WriteRegStr HKLM ${uninst} "UninstallString" '"$INSTDIR\uninstall.exe"'
   
   WriteUninstaller "$INSTDIR\Uninstall.exe"
+
+  SetOutPath "$INSTDIR"
+  ExecWait "perl makegprc $INSTDIR"
+  Delete "$INSTDIR\makegprc"
 SectionEnd
 
 Section "Galois files" SecGAL
@@ -58,9 +62,6 @@ Section "documentation" SecDOC
 SectionEnd
 
 Function .onInstSuccess
-  SetOutPath "$INSTDIR"
-  ExecWait "perl makegprc $INSTDIR"
-  Delete "$INSTDIR\makegprc"
   MessageBox MB_OK "Thanks for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP (colors, script search path, etc.)."
   ExecShell "open" "$INSTDIR"
 FunctionEnd
