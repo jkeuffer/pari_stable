@@ -2450,8 +2450,8 @@ localred_carac_p(GEN e, GEN p, int minim)
       p2 = sqri(p);
       /* x^3 - 3c4/p^2 x - 2c6/p^3 */
       tri = coefs_to_pol(4, gun, gzero,
-                            negi(divii(gmul2n(c6,1),  mulii(p2,p))),
-                            negi(divii(gmulsg(3, c4), p2)));
+                            negi(divii(gmulsg(3, c4), p2)),
+                            negi(divii(gmul2n(c6,1),  mulii(p2,p))));
       c = 1 + FpX_nbroots(tri, p);
       break;
     case  8: f = 2; kod = -4; /* IV*  */

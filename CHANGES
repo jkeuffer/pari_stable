@@ -60,6 +60,7 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
        --> SEGV (or weird error, e.g division by 0)
    18- ideallog(nfinit(y),2,idealstar(nfinit(y),4,1)) --> SEGV [bad input]
    19- ellrootno(ellinit([0,-25,0,-1250,0])) --> SEGV [from 2.2.3]
+   20- typo in elllocalred (wrong Tamagawa number, case I0). [from 2.2.4]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
