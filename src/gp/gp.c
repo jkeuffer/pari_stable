@@ -1743,11 +1743,10 @@ normal_output(GEN z, long n)
 }
 
 static void
-escape(char *tch)
+escape0(char *tch)
 {
   char *s, c;
 
-  _set_analyseur(tch); /* for error messages */
   if (compatible != NONE)
   {
     s = tch;
@@ -1848,6 +1847,14 @@ escape(char *tch)
   }
 }
 
+static void
+escape(char *tch)
+{
+  char *old = _analyseur();
+  _set_analyseur(tch); /* for error messages */
+  escape0(tch);
+  _set_analyseur(old);
+}
 /********************************************************************/
 /*                                                                  */
 /*                              GPRC                                */
