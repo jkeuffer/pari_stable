@@ -3274,7 +3274,7 @@ gdivexact(GEN x, GEN y)
         case t_INTMOD:
         case t_POLMOD: return gmul(x,ginv(y));
         case t_POL:
-          if (varn(x)==varn(y)) return poldivrem(x,y, ONLY_DIVIDES);
+          if (varn(x)==varn(y)) return poldivrem(x,y, NULL);
       }
       lx = lg(x); z = new_chunk(lx);
       for (i=2; i<lx; i++) z[i] = (long)gdivexact((GEN)x[i],y);

@@ -176,6 +176,7 @@ JD 74- [Configure:] detection of times()
    81- ZX_incremental_CRT: wrong handling of degree increase (--> oo loop)
    82- SEGV in Karatsuba multiplication for polynomials, when high product
        was 0 (over a ring which is not an integral domain!)
+   83- 1 / Mod((a^2-a)*x^2-1,Mod(2,6)*x^3+Mod(1,2)*x^2+1) --> SEGV
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
