@@ -567,7 +567,7 @@ mpent(GEN x)
       if (i==lx) goto END;
     }
   }
-  if (mpn_add_1(LIMBS(y),LIMBS(y),d,1))
+  if (mpn_add_1(LIMBS(y),LIMBS(y),d-2,1))
     y[d++]=1; 
 END:
   y[1] = evalsigne(-1) | evallgefint(d);

@@ -105,6 +105,7 @@ IS 25- config/get_head would not work only if one invoked $PWD/Configure
       --> loop forever in lllintpartial()
       Fix: abort lllintpartial if progress negligible (was: if _no_ progress)
    32- some permanent structs not freed in freeall()
+   33- [--with-gmp] round(-4294967296.1) --> '-0' [ typo in mpent ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
