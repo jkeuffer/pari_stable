@@ -1066,7 +1066,7 @@ cxgamma(GEN x, long prec)
   y[1]=lgetr(l); y[2]=lgetr(l); av=avma;
 
   p1=cgetg(3,t_COMPLEX); p1[1]=lgetr(l2); p1[2]=lgetr(l2);
-  u = (typ(x[1])!=t_REAL && gsigne((GEN)x[1])<=0)? 1: (gexpo((GEN)x[1]) < -1);
+  u = (gsigne((GEN)x[1])<=0 || gexpo((GEN)x[1]) < -1);
   p2 = u? gsub(gun,x): x;
   gaffect(p2,p1);
 
