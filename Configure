@@ -62,7 +62,10 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 # Looking for libraries: gmp, X11, gnuplot, readline
 echo Checking for optional libraries and headers...
 . ./get_libpth # initialize
-if test "$kernlvl1" = gmp -o \( "$kernlvl1" = auto -a -n "$with_gmp" \); then
+if test -n "$kernel"; then # kernel explicitly provided
+  if test "$kernlvl1" = none; then with_gmp=; fi
+fi
+if test -n "$with_gmp"; then
   . ./get_gmp  # $_gmp_list
 fi
 if test "$optimization" != profiling; then
