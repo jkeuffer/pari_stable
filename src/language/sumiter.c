@@ -791,7 +791,7 @@ sumalt(entree *ep, GEN a, char *ch, long prec)
   {
     x = lisexpr(ch); if (did_break()) err(breaker,"sumalt");
     c = gadd(az,c); s = gadd(s,gmul(x,c));
-    az = divii(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
+    az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
     if (k==N-1) break;
     a = addsi(1,a); ep->value = (void*) a;
   }
@@ -867,7 +867,7 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
     }
     c = gadd(az,c); p1 = k&1? gneg_i(c): c;
     s = gadd(s,gmul(x,p1));
-    az = divii(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
+    az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
   }
   tetpil=avma; pop_val(ep);
   return gerepile(av,tetpil,gdiv(s,d));

@@ -1993,18 +1993,18 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
   {
-    GEN p1 = mppgcd(Nz, divii(Nx,Nz));
+    GEN p1 = mppgcd(Nz, diviiexact(Nx,Nz));
     if (is_pm1(p1)) break;
-    Nz = divii(Nz,p1);
+    Nz = diviiexact(Nz,p1);
   }
   /* Replace x/y  by  x+(Nx/Nz) / y+(Ny/Nz) */
   x = idealhermite_aux(nf, x);
-  x = hnfmodid(x, divii(Nx,Nz));
+  x = hnfmodid(x, diviiexact(Nx,Nz));
   /* y reduced to unit ideal ? */
   if (Nz == Ny) return gerepileupto(av, x);
 
   y = idealhermite_aux(nf, y);
-  y = hnfmodid(y, divii(Ny,Nz));
+  y = hnfmodid(y, diviiexact(Ny,Nz));
   y = hnfideal_inv(nf,y);
   return gerepileupto(av, idealmat_mul(nf,x,y));
 }

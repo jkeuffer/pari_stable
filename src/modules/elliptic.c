@@ -2476,9 +2476,9 @@ localred_carac_p(GEN e, GEN p, int minim)
       break;
     case 6: f = 2; kod = -4-nuj; /* Inu* */
       if (nuj & 1)
-	c = 3 + kronecker(divii(mulii(c6, delta),gpowgs(p, 9+nuj)), p);
+	c = 3 + kronecker(diviiexact(mulii(c6, delta),gpowgs(p, 9+nuj)), p);
       else
-	c = 3 + kronecker(divii(delta, gpowgs(p, 6+nuj)), p);
+	c = 3 + kronecker(diviiexact(delta, gpowgs(p, 6+nuj)), p);
       break;
     default: err(bugparier,"localred (nu_delta - nu_j != 0,6)");
       return NULL; /* not reached */
@@ -2489,14 +2489,14 @@ localred_carac_p(GEN e, GEN p, int minim)
     case  2: f = 2; kod = 2; c = 1; break; /* II   */
     case  3: f = 2; kod = 3; c = 2; break; /* III  */
     case  4: f = 2; kod = 4; /* IV   */
-      c = 2 + kronecker(divii(mulis(c6, -6), sqri(p)), p);
+      c = 2 + kronecker(diviiexact(mulis(c6, -6), sqri(p)), p);
       break;
     case  6: f = 2; kod = -1; /* I0*  */
       p2 = sqri(p);
       /* x^3 - 3c4/p^2 x - 2c6/p^3 */
       tri = coefs_to_pol(4, gun, gzero,
-                            negi(divii(gmulsg(3, c4), p2)),
-                            negi(divii(gmul2n(c6,1),  mulii(p2,p))));
+                            negi(diviiexact(gmulsg(3, c4), p2)),
+                            negi(diviiexact(gmul2n(c6,1),  mulii(p2,p))));
       c = 1 + FpX_nbroots(tri, p);
       break;
     case  8: f = 2; kod = -4; /* IV*  */
@@ -2515,16 +2515,16 @@ static int
 aux(GEN ak, int p, int l)
 {
   pari_sp av = avma;
-  long res = smodis(divis(ak, u_pow(p, l)), p);
-  avma = av; return res;
+  ulong res = umodiu(diviuexact(ak, (ulong)u_pow(p, l)), p);
+  avma = av; return (int)res;
 }
 
 static int
 aux2(GEN ak, int p, GEN pl)
 {
   pari_sp av = avma;
-  long res = smodis(divii(ak, pl), p);
-  avma = av; return res;
+  ulong res = umodiu(diviiexact(ak, pl), p);
+  avma = av; return (int)res;
 }
 
 /* number of distinct roots of X^3 + aX^2 + bX + c modulo p

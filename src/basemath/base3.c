@@ -1168,10 +1168,10 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
       fprintferr("Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
-    t0 = divii(ord, (GEN)qj[e]);
+    t0 = diviiexact(ord, (GEN)qj[e]);
     a0 = powmodulo(a, t0, p); 
     ginv0 = powmodulo(ginv, t0, p); /* order q^e */
-    g_q = powmodulo(g, divii(ord,q), p); /* order q */
+    g_q = powmodulo(g, diviiexact(ord,q), p); /* order q */
     n_q = gzero;
     for (j=0; j<e; j++)
     {
@@ -1205,7 +1205,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
   if (!T) q = NULL;
   else 
   { /* we want < g > = Fp^* */
-    q = divii(ord,ordp);
+    q = diviiexact(ord,ordp);
     g = FpXQ_pow(g,q,T,p);
     if (typ(g) == t_POL) g = constant_term(g);
   }
@@ -1294,11 +1294,10 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
     if (DEBUGLEVEL>5) fprintferr("nf_Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
-    t0 = divii(ord, (GEN)qj[e]);
+    t0 = diviiexact(ord, (GEN)qj[e]);
     a0 = FpXQ_pow(a, t0, T,p); 
     ginv0 = FpXQ_pow(ginv, t0, T,p); /* order q^e */
-    g_q = FpXQ_pow(g, divii(ord,q), T,p); /* order q */
-
+    g_q = FpXQ_pow(g, diviiexact(ord,q), T,p); /* order q */
     n_q = gzero;
     for (j=0; j<e; j++)
     {

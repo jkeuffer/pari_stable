@@ -341,7 +341,7 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
     for (j=j0; j<=n; j++)
     {
       if (j > j0) pku = mulii(pku, pk);
-      a[j] = ldivii((GEN)a[j], pku);
+      a[j] = (long)diviiexact((GEN)a[j], pku);
     }
     lead = mulii(lead, pk);
   }

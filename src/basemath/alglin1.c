@@ -984,13 +984,13 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
     GEN u = cgetg(n+1, t_COL), b = (GEN)B[k];
     pari_sp av = avma;
     c[k] = (long)u; m = mulii((GEN)b[n],t);
-    u[n] = lpileuptoint(av, divii(m, gcoeff(A,n,n)));
+    u[n] = lpileuptoint(av, diviiexact(m, gcoeff(A,n,n)));
     for (i=n-1; i>0; i--)
     {
       av = avma; m = mulii(negi((GEN)b[i]),t);
       for (j=i+1; j<=n; j++)
         m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
-      u[i] = lpileuptoint(av, divii(negi(m), gcoeff(A,i,i)));
+      u[i] = lpileuptoint(av, diviiexact(negi(m), gcoeff(A,i,i)));
     }
   }
   return c;
@@ -1694,7 +1694,7 @@ detint(GEN x)
 	      {
 	        p1 = addii(mulii(gcoeff(pass,i,j), piv),
 	 	 	   mulii(gcoeff(pass,t,j), p2));
-                if (rg>1) p1 = divii(p1,pivprec);
+                if (rg>1) p1 = diviiexact(p1,pivprec);
 	        coeff(pass,i,j) = (long)p1;
 	      }
 	    coeff(pass,i,t) = (long)p2;

@@ -2590,11 +2590,11 @@ stopoly(ulong m, ulong p, long v)
 GEN
 stopoly_gen(GEN m, GEN p, long v)
 {
-  GEN y = new_chunk(bit_accuracy(lgefint(m))+2);
+  GEN *y = (GEN*)new_chunk(bit_accuracy(lgefint(m))+2);
   long l = 2;
-  do { y[l++] = lmodii(m,p); m=divii(m,p); } while (signe(m));
-  y[1] = evalsigne(1) | evalvarn(v);
-  y[0] = evaltyp(t_POL) | evallg(l); return y;
+  do { m = dvmdii(m,p,&(y[l])); l++; } while (signe(m));
+  y[1] = (GEN)(evalsigne(1) | evalvarn(v));
+  y[0] = (GEN)(evaltyp(t_POL) | evallg(l)); return (GEN)y;
 }
 
 static GEN

@@ -1071,19 +1071,19 @@ QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
   /* frequent special case (u,v) = (1,0) or (0,1) */
   if (!signe(u))
   { /* ak | aj */
-    p1 = negi(divii(aj,ak));
+    p1 = negi(diviiexact(aj,ak));
     A[j]   = (long)QV_lincomb(gun, p1, (GEN)A[j], (GEN)A[k]);
     return;
   }
   if (!signe(v))
   { /* aj | ak */
-    p1 = negi(divii(ak,aj));
+    p1 = negi(diviiexact(ak,aj));
     A[k]   = (long)QV_lincomb(gun, p1, (GEN)A[k], (GEN)A[j]);
     lswap(A[j], A[k]);
     return;
   }
 
-  if (!is_pm1(d)) { aj = divii(aj,d); ak = divii(ak,d); }
+  if (!is_pm1(d)) { aj = diviiexact(aj,d); ak = diviiexact(ak,d); }
   p1 = (GEN)A[k]; aj = negi(aj);
   A[k] = (long)QV_lincomb(u,v, (GEN)A[j],p1);
   A[j] = (long)QV_lincomb(aj,ak, p1,(GEN)A[j]);
@@ -1410,7 +1410,7 @@ hnf_special(GEN x, long remove)
 
       k = (j==1)? def: j-1;
       b = gcoeff(x,i,k); d = bezout(a,b,&u,&v);
-      if (!is_pm1(d)) { a = divii(a,d); b = divii(b,d); }
+      if (!is_pm1(d)) { a = diviiexact(a,d); b = diviiexact(b,d); }
       p1 = (GEN)x[j]; b = negi(b);
       x[j] = (long)ZV_lincomb(a,b, (GEN)x[k], p1);
       x[k] = (long)ZV_lincomb(u,v, p1, (GEN)x[k]);
@@ -2622,13 +2622,13 @@ hnfswap(GEN A, GEN B, long k, GEN **lambda, GEN *D)
 
     p1 = mulii(lambda[i][k], D[k-2]);
     p2 = mulii(lambda[i][k-1], lambda[k][k-1]);
-    lambda[i][k-1] = divii(addii(p1,p2), D[k-1]);
+    lambda[i][k-1] = diviiexact(addii(p1,p2), D[k-1]);
 
-    lambda[i][k] = divii(t, D[k-1]);
+    lambda[i][k] = diviiexact(t, D[k-1]);
   }
   p1 = mulii(D[k-2],D[k]);
   p2 = sqri(lambda[k][k-1]);
-  D[k-1] = divii(addii(p1,p2), D[k-1]);
+  D[k-1] = diviiexact(addii(p1,p2), D[k-1]);
 }
 
 /* reverse row order in matrix A */

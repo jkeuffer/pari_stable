@@ -1614,7 +1614,7 @@ teich(GEN x)
   {
     p1 = addsi(-1, p);
     z = resii(z, p);
-    aux = divii(addsi(-1,q),p1); n = precp(x);
+    aux = diviiexact(addsi(-1,q),p1); n = precp(x);
     for (k=1; k<n; k<<=1)
       z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,powmodulo(z,p1,q))))), q);
   }
@@ -1671,7 +1671,7 @@ palog(GEN x)
     GEN mod = (GEN)x[3], p1 = subis(p,1);
     y = cgetp(x);
     y[4] = (long)powmodulo((GEN)x[4], p1, mod);
-    p1 = divii(subis(mod,1), p1); /* 1/(1-p) */
+    p1 = diviiexact(subis(mod,1), p1); /* 1/(1-p) */
     y = gmul(palogaux(y), mulis(p1, -2));
   }
   return gerepileupto(av,y);

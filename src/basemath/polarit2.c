@@ -934,7 +934,7 @@ factor_quad(GEN x, GEN res, long *ptcnt)
   z1 = gdiv(t, a); u = denom(z1);
   z2 = gdiv(addii(t, d), a);
   v = varn(x);
-  res[cnt++] = lmul(u, gsub(polx[v], z1)); u = divii(a, u);
+  res[cnt++] = lmul(u, gsub(polx[v], z1)); u = diviiexact(a, u);
   res[cnt++] = lmul(u, gsub(polx[v], z2)); *ptcnt = cnt;
 }
 

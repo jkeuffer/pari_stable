@@ -351,7 +351,7 @@ gaddpex(GEN x, GEN y)
     }
     if (c)
     {
-      mod = divii(mod, gpowgs(p,c));
+      mod = diviiexact(mod, gpowgs(p,c));
       r -= c;
       e += c;
     }
@@ -391,8 +391,8 @@ addfrac(GEN x, GEN y)
     z[1] = laddii(p1,p2);
     z[2] = lmulii(x2,y2); return z;
   }
-  x2 = divii(x2,delta);
-  y2 = divii(y2,delta);
+  x2 = diviiexact(x2,delta);
+  y2 = diviiexact(y2,delta);
   n = addii(mulii(x1,y2), mulii(y1,x2));
   if (!signe(n)) { avma = (pari_sp)(z+3); return gzero; }
   d = mulii(x2, y2);
@@ -407,8 +407,8 @@ addfrac(GEN x, GEN y)
   p1 = mppgcd(delta, p2);
   if (!is_pm1(p1))
   {
-    delta = divii(delta, p1);
-    n = divii(n, p1);
+    delta = diviiexact(delta, p1);
+    n = diviiexact(n, p1);
   }
   d = mulii(d,delta);
   avma = (pari_sp)z;
@@ -1169,8 +1169,8 @@ gmul(GEN x, GEN y)
             }
             else
             {
-              x = divii(x,p1); tetpil = avma;
-              z[2] = ldivii((GEN)y[2], p1);
+              x = diviiexact(x,p1); tetpil = avma;
+              z[2] = (long)diviiexact((GEN)y[2], p1);
               z[1] = lmulii((GEN)y[1], x);
               fix_frac_if_int_GC(z,tetpil);
             }
@@ -1266,9 +1266,9 @@ gmul(GEN x, GEN y)
             GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
             z=cgetg(3,t_FRAC);
             p1 = mppgcd(x1, y2);
-            if (!is_pm1(p1)) { x1 = divii(x1,p1); y2 = divii(y2,p1); }
+            if (!is_pm1(p1)) { x1 = diviiexact(x1,p1); y2 = diviiexact(y2,p1); }
             p1 = mppgcd(x2, y1);
-            if (!is_pm1(p1)) { x2 = divii(x2,p1); y1 = divii(y1,p1); }
+            if (!is_pm1(p1)) { x2 = diviiexact(x2,p1); y1 = diviiexact(y1,p1); }
             tetpil = avma;
             z[2] = lmulii(x2,y2);
             z[1] = lmulii(x1,y1);
@@ -1828,8 +1828,8 @@ gdiv(GEN x, GEN y)
         }
         else
         {
-          x = divii(x,p1); tetpil = avma;
-          z[2] = ldivii((GEN)y[1], p1);
+          x = diviiexact(x,p1); tetpil = avma;
+          z[2] = (long)diviiexact((GEN)y[1], p1);
         }
         z[1] = lmulii((GEN)y[2], x);
         fix_frac(z);
@@ -1943,8 +1943,8 @@ gdiv(GEN x, GEN y)
             }
             else
             {
-              y = divii(y,p1); tetpil = avma;
-              z[1] = ldivii((GEN)x[1], p1);
+              y = diviiexact(y,p1); tetpil = avma;
+              z[1] = (long)diviiexact((GEN)x[1], p1);
             }
           }
           else
@@ -1975,9 +1975,9 @@ gdiv(GEN x, GEN y)
               GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
               GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
               p1 = mppgcd(x1, y1);
-              if (!is_pm1(p1)) { x1 = divii(x1,p1); y1 = divii(y1,p1); }
+              if (!is_pm1(p1)) { x1 = diviiexact(x1,p1); y1 = diviiexact(y1,p1); }
               p1 = mppgcd(x2, y2);
-              if (!is_pm1(p1)) { x2 = divii(x2,p1); y2 = divii(y2,p1); }
+              if (!is_pm1(p1)) { x2 = diviiexact(x2,p1); y2 = diviiexact(y2,p1); }
               tetpil = avma;
               z[2] = lmulii(x2,y1);
               z[1] = lmulii(x1,y2);

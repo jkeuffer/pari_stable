@@ -407,22 +407,18 @@ BSW_psp(GEN N)
 /*assume n>=2*/
 static long pl831(GEN N, GEN p)
 {
-  pari_sp ltop=avma, av;
+  pari_sp ltop = avma, av;
   long a;
-  GEN Nmun,Nmunp;
-  Nmun=addis(N,-1);
-  Nmunp=divii(Nmun,p);
-  av=avma;
+  GEN Nmunp = diviiexact(addis(N,-1), p);
+  av = avma;
   for(a=2;;a++)
   {
-    GEN b;
-    b=powmodulo(stoi(a),Nmunp,N);
+    GEN b = powmodulo(stoi(a),Nmunp,N);
     if (gcmp1(powmodulo(b,p,N)))
     {
-      GEN g;
-      g=mppgcd(addis(b,-1),N);
-      if (gcmp1(g)) { avma=ltop; return a; }
-      if (!gegal(g,N)) { avma=ltop; return 0; }
+      GEN g = gcdii(addis(b,-1), N);
+      if (is_pm1(g)) { avma=ltop; return a; }
+      if (!egalii(g,N)) { avma=ltop; return 0; }
     }
     else { avma=ltop; return 0; }
     avma=av;
@@ -1629,7 +1625,7 @@ ellfacteur(GEN n, int insist)
 	if (k > gss)
 	{
 	  /* take gcd */
-	  gl = mppgcd(gl, n);
+	  gl = gcdii(gl, n);
 	  if (!is_pm1(gl) && !egalii(gl, n)) { p = p2; goto fin; }
 	  gl = gun;
 	  avma = av1;
@@ -1817,7 +1813,7 @@ PB_RETRY:
     flusherr();
   }
   x=gdeux; P=gun; g1 = NULL; k = 1; l = 1;
-  (void)new_chunk(10 + 6 * tf); /* enough for cgetg(10) + 3 divii */
+  (void)new_chunk(10 + 6 * tf); /* enough for cgetg(10) + 3 modii */
   y = cgeti(tf); affsi(2, y);
   x1= cgeti(tf); affsi(2, x1);
   avx = avma;
@@ -1964,7 +1960,7 @@ fin:
     res[2] = un;		/* exponent 1 */
     res[3] = (g1!=n? zero: LNULL); /* known composite when g1!=n */
 
-    res[4] = ldivii(n,g);       /* cofactor */
+    res[4] = (long)diviiexact(n,g);       /* cofactor */
     res[5] = un;		/* exponent 1 */
     res[6] = LNULL;	/* unknown */
     return res;
@@ -1973,8 +1969,8 @@ fin:
   res = cgetg(10, t_VEC);
   /* unknown status for all three factors */
   res[1] = licopy(g);    res[2] = un; res[3] = LNULL;
-  res[4] = ldivii(g1,g); res[5] = un; res[6] = LNULL;
-  res[7] = ldivii(n,g1); res[8] = un; res[9] = LNULL;
+  res[4] = (long)diviiexact(g1,g); res[5] = un; res[6] = LNULL;
+  res[7] = (long)diviiexact(n,g1); res[8] = un; res[9] = LNULL;
   if (DEBUGLEVEL >= 4)
   {
     rho_dbg(c0-(c>>5), 0);

@@ -1216,12 +1216,12 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       tmp1 = (tmp - sqrt_mod_p_kN[j]) % p;
       if (tmp1 < 0) tmp1 += p;
       tmp1 = muluumod(tmp1, inv_A2[j], p);
-      tmp1 = (tmp1 + M_mod_p) % p;
+      tmp1 = adduumod(tmp1, M_mod_p, p);
 
       tmp2 = (tmp + sqrt_mod_p_kN[j]) % p;
       if (tmp2 < 0) tmp2 += p;
       tmp2 = muluumod(tmp2, inv_A2[j], p);
-      tmp2  = (tmp2 + M_mod_p) % p;
+      tmp2 = adduumod(tmp2, M_mod_p, p);
 
       start_1[j] = (tmp1 < 0) ? tmp1 + p : tmp1;
       start_2[j] = (tmp2 < 0) ? tmp2 + p : tmp2;
@@ -1304,11 +1304,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
   }
 
   /* p=2 is a special case */
-  if (FB[2] == 2)
-  {
-    start_1[2] = 0; start_2[2] = 1;
-  }
-
+  if (FB[2] == 2) { start_1[2] = 0; start_2[2] = 1; }
 
   /* now compute zeros of polynomials that have only one zero mod p
      because p divides the coefficient A */
@@ -1316,7 +1312,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
   /* compute coefficient -C */
   av = avma;
   p1 = subii(kN, sqri(B));
-  p2 = divii(p1, shifti(A, 2));
+  p2 = diviiexact(p1, shifti(A, 2));
 
   for (j = 1; (ulong)j <= total_no_of_primes_for_A; j++)
     if (*bin_index & (1 << (j-1)))
@@ -1347,7 +1343,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       p1 = mulis(A, start_1[j] - M_mod_p);
       p1 = addii(p1, B);
       p1 = mulis(p1, start_1[j] - M_mod_p);
-      p2 = divii(subii(sqri(B), kN), shifti(A, 2));
+      p2 = diviiexact(subii(sqri(B), kN), shifti(A, 2));
       p1 = addii(p1, p2);
       if (smodis(p1, p) != 0)
       {
@@ -1360,10 +1356,10 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
 	err(talker, "MPQS: self_init: found wrong polynomial in (1)");
       }
 
-      p1 = mulis(A, start_2[j]-M_mod_p);
+      p1 = mulis(A, start_2[j] - M_mod_p);
       p1 = addii(p1, B);
-      p1 = mulis(p1, start_2[j]-M_mod_p);
-      p2 = divii(subii(sqri(B), kN), shifti(A, 2));
+      p1 = mulis(p1, start_2[j] - M_mod_p);
+      p2 = diviiexact(subii(sqri(B), kN), shifti(A, 2));
       p1 = addii(p1, p2);
       if (smodis(p1, p) != 0)
       {
@@ -1632,7 +1628,6 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
       long ks;
       pari_sp av1 = avma;
       GEN g = mppgcd(Qx, kN);
-/*    if ((ks = kronecker(divii(Qx, g), divii(kN, g))) != 1) */
       if (is_pm1(g))
       {
 	if ((ks = kronecker(Qx, kN)) != 1)

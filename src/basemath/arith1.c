@@ -174,7 +174,7 @@ order(GEN x)
     p=gcoeff(m,i,1); e=itos(gcoeff(m,i,2));
     do
     {
-      GEN o1=divii(o,p), y=powgi(x,o1);
+      GEN o1=diviiexact(o,p), y=powgi(x,o1);
       if (!gcmp1((GEN)y[2])) break;
       e--; o = o1;
     }
@@ -326,7 +326,7 @@ znstar(GEN n)
     for (i=1; i<=sizeh; i++)
     {
       q = (GEN)moduli[i]; a = (GEN)gen[i];
-      u = mpinvmod(q,divii(n,q));
+      u = mpinvmod(q, diviiexact(n,q));
       gen[i] = lmodulcp(addii(a,mulii(mulii(subsi(1,a),u),q)), n);
     }
   
@@ -335,7 +335,7 @@ znstar(GEN n)
       if (!divise((GEN)h[j],(GEN)h[i]))
       {
 	d=bezout((GEN)h[i],(GEN)h[j],&u,&v);
-        q=divii((GEN)h[j],d);
+        q=diviiexact((GEN)h[j],d);
 	h[j]=(long)mulii((GEN)h[i],q); h[i]=(long)d;
 	gen[j]=ldiv((GEN)gen[j], (GEN)gen[i]);
 	gen[i]=lmul((GEN)gen[i], powgi((GEN)gen[j], mulii(v,q)));
@@ -1235,9 +1235,8 @@ mpppcm(GEN x, GEN y)
   if (typ(x) != t_INT || typ(y) != t_INT) err(arither1);
   if (!signe(x)) return gzero;
   av = avma;
-  p1 = gcdii(x,y); if (!is_pm1(p1)) y = divii(y,p1);
-  p2 = mulii(x,y);
-  if (signe(p2) < 0) setsigne(p2,1);
+  p1 = gcdii(x,y); if (!is_pm1(p1)) y = diviiexact(y,p1);
+  p2 = mulii(x,y); if (signe(p2) < 0) setsigne(p2,1);
   return gerepileuptoint(av, p2);
 }
 
@@ -2383,9 +2382,8 @@ regula(GEN x, long prec)
     if (rexp & ~EXPOBITS) err(muler4);
     if (low_stack(lim, stack_lim(av2,2)))
     {
-      GEN *gptr[3]; gptr[0]=&reg; gptr[1]=&u; gptr[2]=&v;
       if(DEBUGMEM>1) err(warnmem,"regula");
-      gerepilemany(av2,gptr,3);
+      gerepileall(av2,3, &reg,&u,&v);
     }
   }
   reg = gsqr(reg); setexpo(reg,expo(reg)-1);
@@ -2439,7 +2437,7 @@ find_order(GEN f, GEN h)
     lim = itos((GEN)e[i]);
     for (j=1; j<=lim; j++)
     {
-      GEN p1 = divii(h,(GEN)p[i]);
+      GEN p1 = diviiexact(h,(GEN)p[i]);
       fh = powgi(f,p1);
       if (!is_pm1(fh[1])) break;
       h = p1;

@@ -273,7 +273,7 @@ matinv(GEN x, GEN d)
         if (p1 != gzero) h=addii(h,p1);
       }
       setsigne(h,-signe(h)); av1=avma;
-      coeff(y,i,j) = lpile(av,av1,divii(h,gcoeff(x,j,j)));
+      coeff(y,i,j) = lpile(av,av1,diviiexact(h,gcoeff(x,j,j)));
       av = avma;
     }
   return y;
@@ -337,7 +337,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
       p1 = mulmati(m, mulmati(T,b));
       for (j=1; j<=n; j++)
 	for (k=1; k<=n; k++)
-	  coeff(p1,j,k)=(long)centermodii(divii(gcoeff(p1,j,k),dd),pp,ppo2);
+	  coeff(p1,j,k)=(long)centermodii(diviiexact(gcoeff(p1,j,k),dd),pp,ppo2);
       w[i] = p1;
     }
 
@@ -414,7 +414,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
         t = mulmati(mulmati(jp,w[k]), T2);
         for (h=i=1; i<=n; i++)
           for (j=1; j<=n; j++)
-            { coeff(Tn,k,h) = itos(divii(gcoeff(t,i,j), p)) % pps; h++; }
+            { coeff(Tn,k,h) = itos(diviiexact(gcoeff(t,i,j), p)) % pps; h++; }
         avma=av1;
       }
       avma = av0;
@@ -427,7 +427,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
         t = mulmati(mulmati(jp,w[k]), T2);
         for (h=i=1; i<=n; i++)
           for (j=1; j<=n; j++)
-            { coeff(Tn,k,h) = ldivii(gcoeff(t,i,j), p); h++; }
+            { coeff(Tn,k,h) = (long)diviiexact(gcoeff(t,i,j), p); h++; }
       }
       rowred(Tn,pp);
     }
@@ -438,12 +438,11 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     m = mulmati(matinv(Tn,index), m);
     hh = delta = mulii(index,delta);
     for (i=1; i<=n; i++)
-      for (j=1; j<=n; j++)
-        hh = mppgcd(gcoeff(m,i,j),hh);
+      for (j=1; j<=n; j++) hh = mppgcd(gcoeff(m,i,j),hh);
     if (!is_pm1(hh))
     {
       m = gdiv(m,hh);
-      delta = divii(delta,hh);
+      delta = diviiexact(delta,hh);
     }
     epsilon -= 2 * ggval(index,p);
     if (epsilon < 2) break;

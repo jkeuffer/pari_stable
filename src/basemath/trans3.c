@@ -612,7 +612,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       {
         pplus = jbesselintern(n,y,flag,prec);
         p2 = gpowgs(y,-k); if (fl2 == 0) p2 = gneg(p2);
-        p3 = gmul2n(divii(mpfact(k + 1),mpfact((k + 1) >> 1)),-(k + 1));
+        p3 = gmul2n(diviiexact(mpfact(k + 1),mpfact((k + 1) >> 1)),-(k + 1));
         p3 = gdivgs(gmul2n(gsqr(p3),1),k);
         p2 = gmul(p2,p3);
         p1 = gsub(pplus,gmul(p2,pmoins));

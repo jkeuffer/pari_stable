@@ -612,7 +612,7 @@ addprimes(GEN p)
     if (! is_pm1(d))
     {
       if (!egalii(p,d)) L[k++] = (long)d;
-      L[k++] = ldivii(n,d);
+      L[k++] = (long)diviiexact(n,d);
       gunclone(n); primetab[i] = 0;
     }
   }
