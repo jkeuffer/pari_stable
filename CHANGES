@@ -28,7 +28,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 ===========================================================================
-Done for version 2.0.20.beta (released 02/06/2000):
+Done for version 2.0.20.beta (released 07/06/2000):
   Fixed
     1- gp -p1e -->SEGV
     2- nfinit([x,1]) --> SEGV
