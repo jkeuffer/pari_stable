@@ -155,11 +155,12 @@ CPP        = $CPP
 
 # HIGHLY EXPERIMENTAL (only tested with gmp-4.0):
 # If you've configured and compiled GMP and would like to tune PARI using
-# the nice cycle counting functions in GMP, uncomment the two lines below
+# the nice cycle counting functions in GMP, uncomment the three lines below
 # (correct the first one to the path to your gmp source tree).
 #
 #GMP     = /some/directory/gmp-4.0/tune
 #GMPOBJS = \$(GMP)/time.o \$(GMP)/freq.o
+#GMPFLAGS= -DGMP_TIMER
 
 _O	   = .o
 _A	   = .a
@@ -262,12 +263,14 @@ test-kernel:: kerntest
 	if test -s kern.dif; then echo "KERNEL BUG"; else echo OK; fi
 
 tune.o: $src/test/tune.c
-	\$(CC) \$(CFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
+	\$(CC) \$(CFLAGS) \$(GMPFLAGS) \$(CPPFLAGS) -o \$@ \$< -c
+
+tune:: tune-sta
 
 tune-dyn: tune.o lib-dyn
-	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< $GMPOBJS -L. \$(LDDYN) \$(LIBS)
+	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
 tune-sta: tune.o lib-sta
-	\$(CC) \$(LDFLAGS) -o \$@ \$< $GMPOBJS ./\$(LIBPARI_STA) \$(LIBS)
+	\$(CC) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
 EOT
 
 if test -n "$ranlib"; then

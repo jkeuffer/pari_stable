@@ -19,9 +19,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * (GMU MP Library is Copyright Free Software Foundation, Inc.) */
 #include <pari.h>
 
-/* uncomment this if you tweaked the Makefile so as to use GMP cycle counting
- * functions */
-/* #define GMP_TIMER */
+/* you might wish to tweaked the Makefile so as to use GMP cycle counting
+ * functions (look for GMP in Oxxx/Makefile) */
 
 #define numberof(x) (sizeof(x) / sizeof((x)[0]))
 
