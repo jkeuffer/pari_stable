@@ -358,20 +358,20 @@ mylog2(GEN z)
   return x+0.5*log2( 1 + exp2(2*(y-x)));
 }
 
-static long
+long
 findpower(GEN p)
 {
-  double x, logbinomial,pente,pentemax=-pariINFINITY;
+  double x, logbinomial,pente, pentemax = -pariINFINITY;
   long n=degpol(p),i;
 
-  logbinomial = mylog2((GEN) p[n+2]);
+  logbinomial = mylog2((GEN)p[n+2]); /* log2(lc * binom(n,i)) */
   for (i=n-1; i>=0; i--)
   {
     logbinomial += log2((double) (i+1) / (double) (n-i));
-    x = mylog2((GEN) p[2+i])-logbinomial;
-    if (x>-pariINFINITY)
+    x = mylog2((GEN)p[i+2]);
+    if (x > -pariINFINITY)
     {
-      pente = x/ (double) (n-i);
+      pente = (x - logbinomial) / (double) (n-i);
       if (pente > pentemax) pentemax = pente;
     }
   }
@@ -380,36 +380,33 @@ findpower(GEN p)
 
 /* returns the exponent for the procedure modulus, from the newton diagram */
 static long
-polygone_newton(GEN p, long k)
+newton_polygon(GEN p, long k)
 {
   double *logcoef,pente;
-  long n=degpol(p),i,j,h,l,*sommet,pentelong;
+  long n=degpol(p),i,j,h,l,*vertex,pentelong;
 
-  logcoef=(double*) gpmalloc((n+1)*sizeof(double));
-  sommet=(long*) gpmalloc((n+1)*sizeof(long));
+  logcoef = (double*) gpmalloc((n+1)*sizeof(double));
+  vertex  = (long*)   gpmalloc((n+1)*sizeof(long));
 
-  /* sommet[i]=1 si i est un sommet, =0 sinon */
-  for (i=0; i<=n; i++) { logcoef[i]=mylog2((GEN)p[2+i]); sommet[i]=0; }
-  sommet[0]=1; i=0;
-  while (i<n)
+  /* vertex[i]=1 if i a vertex of convex hull, 0 otherwise */
+  for (i=0; i<=n; i++) { logcoef[i] = mylog2((GEN)p[2+i]); vertex[i] = 0; }
+  vertex[0]=1;
+  for (i=0; i < n; i=h)
   {
-    pente=logcoef[i+1]-logcoef[i];
-    h=i+1;
+    pente = logcoef[i+1]-logcoef[i];
+    h = i+1;
     for (j=i+1; j<=n; j++)
-    {
-      if (pente<(logcoef[j]-logcoef[i])/(double)(j-i))
+      if (pente < (logcoef[j]-logcoef[i])/(double)(j-i))
       {
-	h=j;
-	pente=(logcoef[j]-logcoef[i])/(double)(j-i);
+	h = j;
+	pente = (logcoef[j]-logcoef[i])/(double)(j-i);
       }
-    }
-    i=h;
-    sommet[h]=1;
+    vertex[h] = 1;
   }
-  h=k; while (!sommet[h]) h++;
-  l=k-1; while (!sommet[l]) l--;
-  pentelong=(long) floor((logcoef[h]-logcoef[l])/(double)(h-l)+0.5);
-  free(logcoef); free(sommet); return pentelong;
+  h = k;   while (!vertex[h]) h++;
+  l = k-1; while (!vertex[l]) l--;
+  pentelong = (long) floor((logcoef[h]-logcoef[l])/(double)(h-l) + 0.5);
+  free(logcoef); free(vertex); return pentelong;
 }
 
 /* change z into z*2^e, where z is real or complex of real */
@@ -629,11 +626,11 @@ max_modulus(GEN p, double tau)
   e=findpower(q); homothetie2n(q,e); r=-(double) e;
   q=mygprec(q,bitprec+(n<<1));
   pol_to_gaussint(q,bitprec);
-  imax=(long) ((log(log(4.*n)/(2*tau2))) / log(2.)) + 2;
+  imax = (long) (log2( log(4.*n) / (2*tau2) )) + 2;
   for (i=0,e=0;;)
-  {
-    rho=lower_bound(q,&k,eps);
-    if (rho>exp2(-(double) e)) e = (long) -floor(log2(rho));
+  { /* nn = deg(q) */
+    rho = lower_bound(q,&k,eps);
+    if (rho > exp2(-(double) e)) e = (long) -floor(log2(rho));
     r -= e / exp2((double)i);
     if (++i == imax) {
       avma=ltop; 
@@ -644,8 +641,8 @@ max_modulus(GEN p, double tau)
       bitprec=(long) ((double) k* log2(1./tau2)+
                       (double) (nn-k)*log2(1./eps)+
                       3*log2((double) nn))+1;
-    else
-      bitprec=(long) ((double) nn* log2(1./tau2)+
+    else /* k = nn */
+      bitprec=(long) ((double) k* log2(1./tau2)+
                       3.*log2((double) nn))+1;
     homothetie_gauss(q,e,bitprec-(long)floor(mylog2((GEN) q[2+nn])+0.5));
     valuat=valuation(q);
@@ -656,7 +653,7 @@ max_modulus(GEN p, double tau)
     }
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(ltop, graeffe(q));
-    tau2=1.5*tau2; eps=1/log(1./tau2);
+    tau2 *= 1.5; eps = 1/log(1./tau2);
     e = findpower(q);
   }
 }
@@ -676,7 +673,7 @@ modulus(GEN p, long k, double tau)
   av = avma;
   q=gprec(p,decprec);
   q=gmul(gunr,q);
-  e=polygone_newton(q,k);
+  e=newton_polygon(q,k);
   homothetie2n(q,e);
   r=(double) e;
   imax=(long) ((log2(3./tau)+log2(log(4.*(double) n)) ))+1;
@@ -695,7 +692,7 @@ modulus(GEN p, long k, double tau)
 
     set_karasquare_limit(bitprec);
     q = gerepileupto(av, graeffe(q));
-    e=polygone_newton(q,kk);
+    e = newton_polygon(q,kk);
     r += e / exp2((double)i);
     q=gmul(gunr,q);
     homothetie2n(q,e);
