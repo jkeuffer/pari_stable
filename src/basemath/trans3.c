@@ -1153,11 +1153,10 @@ bernfrac_using_zeta(long n)
   /* 1.712086 = ??? */
   t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*(1+log2PI) + 1.712086;
   u = t / (LOG2*BITS_IN_LONG); prec = (long)ceil(u);
-  if (prec - u < 0.1) prec++; /* don't take risks */
-  prec += 2;
+  prec += 3;
   iz = inv_szeta_euler(n, t, prec);
-  a = ground( mulir(d, bernreal_using_zeta(n, iz, prec)) );
-  return gerepileupto(av, gdiv(a, d));
+  a = roundr( mulir(d, bernreal_using_zeta(n, iz, prec)) );
+  return gerepilecopy(av, mkfrac(a, d));
 }
 
 /* y = binomial(n,k-2). Return binomial(n,k) */

@@ -127,6 +127,8 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
        allocatemem() does not end by a longjmp anymore; it is still impossible
        to use it in loops
    61- typo in matrixqz: matrixqz(Mat([1,1]~)/2,0) --> "not a rational matrix"
+   62- [cf 2.2.7-F23-] use safer parameters in bernfrac(): bernfrac(166)
+       was wrong.
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
