@@ -45,10 +45,10 @@ XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
    10- numtoperm(2,x) --> SEGV [check arguments now]
    11- rnfkummer could fail with "missing units"
    12- factornf(P, non-monic t) --> error
-   13- forsubgroup/subgrouplist idn't check their arguments nor accepted SNF
+   13- forsubgroup/subgrouplist didn't check their arguments nor accepted SNF
        matrices
 XR 14- typo in nilord4 --> SEGV, e.g.
-       nfdisc(x^16-363*x^14+53550*x^12-4091823*x^10+170172414*x^8 \\
+       nfdisc(x^16-363*x^14+53550*x^12-4091823*x^10+170172414*x^8 \
          -3663509067*x^6+33703350345*x^4-63300912912*x^2+32451860736)
    15- some messages didn't distinguish between MBytes and millions of Bytes
    16- typo in BuildTree [hensel lift]: SEGV
@@ -59,6 +59,8 @@ BA 20- better interface for galoissubcyclo
 BA 21- galoisfixedfield(,,2) now works with non Galois subfields
 BA 22- nfgaloisconj now use `p-1'-test + better strategy
 BA 23- fix accuracy problems in vandermondeinverse
+   24- missed some simplifications when handling multivariate t_RFRAC
+   25- [Cygwin:] incorrect default 'path' (used : instead of ;)
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
