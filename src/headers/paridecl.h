@@ -249,6 +249,7 @@ GEN     coredisc0(GEN n,long flag);
 GEN     coredisc2(GEN n);
 GEN     decomp(GEN n);
 GEN     decomp_primary_small(long n);
+GEN     decomp_small(long n);
 GEN     divisors(GEN n);
 GEN     factorint(GEN n, long flag);
 GEN     gbigomega(GEN n);
@@ -1104,6 +1105,10 @@ GEN     unifpol(GEN nf,GEN pol,long flag);
 /* perm.c */
 
 GEN     abelian_group(GEN G);
+GEN     bitvec_alloc(long n);
+long    bitvec_test(GEN bitvec, long b);
+void    bitvec_set(GEN bitvec, long b);
+void    bitvec_clear(GEN bitvec, long b);
 GEN     cyclicperm(long l, long d);
 GEN     cyc_powtoperm(GEN cyc, long exp);
 GEN     group_elts(GEN G, long n);
