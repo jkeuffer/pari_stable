@@ -473,19 +473,16 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     Qr = (P==Q)?Pr:FpX_red(Q, q);/*A little speed up for automorphismlift*/
     ltop = avma;
     Sr = S;
-    /*Spow = compoTS(Pr, Sr, Qr, q);*/
     Spow = FpXQ_powers(Sr, rt, Qr, q);
 
     if (i)
     {
-      /*W = FpXQ_mul(Wr, calcderivTS(Spow, Prold,qold), Qrold, qold);*/
       W = FpXQ_mul(Wr, FpX_FpXQV_compo(deriv(Pr,-1),FpXV_red(Spow,qold),Qrold,qold), Qrold, qold);
       W = FpX_neg(W, qold);
       W = FpX_Fp_add(W, gdeux, qold);
       W = FpXQ_mul(Wr, W, Qrold, qold);
     }
     Wr = W;
-    /*S = FpXQ_mul(Wr, calcTS(Spow, Pr, Sr, Qr, q),Qr,q);*/
     S = FpXQ_mul(Wr, FpX_FpXQV_compo(Pr, Spow, Qr, q),Qr,q);
     S = FpX_sub(Sr, S, NULL);
     lbot = avma;
@@ -1631,20 +1628,17 @@ splitorbite(GEN O)
 {
   ulong   ltop = avma, lbot;
   int     i, n;
-  GEN     F, fc, res;
+  GEN     fc, res;
   n = lg(O[1]) - 1;
-  F = factor(stoi(n));
-  fc = cgetg(lg(F[1]), t_VECSMALL);
-  for (i = 1; i < lg(fc); i++)
-    fc[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
+  fc = decomp_primary_small(n);
   lbot = avma;
   res = cgetg(3, t_VEC);
   res[1] = lgetg(lg(fc), t_VEC);
   res[2] = lgetg(lg(fc), t_VECSMALL);
   for (i = 1; i < lg(fc); i++)
   {
-    ((GEN **) res)[1][lg(fc) - i] = cyc_powtoperm(O, n / fc[i]);
-    ((GEN *) res)[2][lg(fc) - i] = fc[i];
+    gmael(res,1,lg(fc) - i) = cyc_powtoperm(O, n / fc[i]);
+    mael(res,2,lg(fc) - i) = fc[i];
   }
   if ( DEBUGLEVEL>=4 )
     fprintferr("GaloisConj:splitorbite: %Z\n",res);
@@ -3516,299 +3510,6 @@ GEN galoisisabelian(GEN gal, long flag)
   }
   return M;
 }
-/* Calcule les orbites d'un sous-groupe de Z/nZ donne par un
- * generateur ou d'un ensemble de generateur donne par un vecteur. 
- */
-GEN
-subgroupcoset(long n, GEN v)
-{
-  ulong   ltop = avma, lbot;
-  int     i, j, k = 1, l, m, o, p, flag;
-  GEN     bit, cycle, cy;
-  cycle = cgetg(n, t_VEC);
-  bit = cgetg(n, t_VECSMALL);
-  for (i = 1; i < n; i++)
-    if (cgcd(i,n)==1)
-      bit[i] = 0;
-    else
-    {
-      bit[i] = -1;
-      k++;
-    }
-  for (l = 1; k < n;)
-  {
-    for (j = 1; bit[j]; j++);
-    cy = cgetg(n, t_VECSMALL);
-    m = 1;
-    cy[m++] = j;
-    bit[j] = 1;
-    k++;
-    do
-    {
-      flag = 0;
-      for (o = 1; o < lg(v); o++)
-      {
-	for (p = 1; p < m; p++)	/* m varie! */
-	{
-	  j = mulssmod(v[o],cy[p],n);
-	  if (!bit[j])
-	  {
-	    flag = 1;
-	    bit[j] = 1;
-	    k++;
-	    cy[m++] = j;
-	  }
-	}
-      }
-    }
-    while (flag);
-    setlg(cy, m);
-    cycle[l++] = (long) cy;
-  }
-  setlg(cycle, l);
-  lbot = avma;
-  cycle = gcopy(cycle);
-  return gerepile(ltop, lbot, cycle);
-}
-/* Calcule les elements d'un sous-groupe H de Z/nZ donne par un
- * generateur ou d'un ensemble de generateur donne par un vecteur (v). 
- *
- * cy liste des elements   VECSMALL de longueur au moins card H.
- * bit bitmap des elements VECSMALL de longueur au moins n.
- * retourne le nombre d'elements+1
- */
-long
-sousgroupeelem(long n, GEN v, GEN cy, GEN bit)
-{
-  int     j, m, o, p, flag;
-  for(j=1;j<n;j++) 
-    bit[j]=0;
-  m = 1;
-  bit[m] = 1;
-  cy[m++] = 1;
-  do
-  {
-    flag = 0;
-    for (o = 1; o < lg(v); o++)
-    {
-      for (p = 1; p < m; p++)	/* m varie! */
-      {
-	j = mulssmod(v[o],cy[p],n);
-	if (!bit[j])
-	{
-	  flag = 1;
-	  bit[j] = 1;
-	  cy[m++] = j;
-	}
-      }
-    }
-  }
-  while (flag);
-  return m;
-}
-/* n,v comme precedemment.
- * Calcule le conducteur et retourne le nouveau groupe de congruence dans V
- * V doit etre un t_VECSMALL de taille n+1 au moins.
- */
-long znconductor(long n, GEN v, GEN V)
-{
-  ulong ltop;
-  int i,j;
-  long m;
-  GEN F,W;
-  W = cgetg(n, t_VECSMALL);
-  ltop=avma;
-  m = sousgroupeelem(n,v,V,W);
-  setlg(V,m);
-  if (DEBUGLEVEL>=6)
-    fprintferr("SubCyclo:elements:%Z\n",V);
-  F = factor(stoi(n));  
-  for(i=lg((GEN)F[1])-1;i>0;i--)
-  {
-    long p,e,q;
-    p=itos(gcoeff(F,i,1));
-    e=itos(gcoeff(F,i,2));
-    if (DEBUGLEVEL>=4)
-      fprintferr("SubCyclo:testing %ld^%ld\n",p,e);
-    while (e>=1)
-    {
-      int z = 1;
-      q=n/p;
-      for(j=1;j<p;j++)
-      {
-	z += q;
-	if (!W[z] && z%p) break;
-      }
-      if (j<p)
-      {
-	if (DEBUGLEVEL>=4)
-	  fprintferr("SubCyclo:%ld not found\n",z);
-	break;
-      }
-      e--;
-      n=q;
-      if (DEBUGLEVEL>=4)
-	fprintferr("SubCyclo:new conductor:%ld\n",n);
-      m=sousgroupeelem(n,v,V,W);
-      setlg(V,m); 
-      if (DEBUGLEVEL>=6)
-	fprintferr("SubCyclo:elements:%Z\n",V);
-    }
-  } 
-  if (DEBUGLEVEL>=6)
-    fprintferr("SubCyclo:conductor:%ld\n",n);
-  avma=ltop;
-  return n;
-}
-
-static GEN gscycloconductor(GEN g, long n, long flag)
-{
-  if (flag==2)
-  {
-    GEN V=cgetg(3,t_VEC);
-    V[1]=lcopy(g);
-    V[2]=lstoi(n);
-    return V;
-  }
-  return g;
-}
-static GEN 
-lift_check_modulus(GEN H, GEN n)
-{
-  long t=typ(H), l=lg(H);
-  long i;
-  GEN V;
-  switch(t)
-  {
-    case t_INTMOD:
-      if (cmpii(n,(GEN)H[1]))
-	err(talker,"wrong modulus in galoissubcyclo");
-      H = (GEN)H[2];
-    case t_INT:
-      if (!is_pm1(mppgcd(H,n)))
-	err(talker,"generators must be prime to conductor in galoissubcyclo");
-      return modii(H,n);
-    case t_VEC: case t_COL:
-      V=cgetg(l,t);
-      for(i=1;i<l;i++)
-	V[i] = (long)lift_check_modulus((GEN)H[i],n);
-      return V;
-    case t_VECSMALL:
-      return H;
-  }
-  err(talker,"wrong type in galoissubcyclo");
-  return NULL;/*not reached*/
-}
-
-GEN 
-galoissubcyclo(long n, GEN H, GEN Z, long v, long flag)
-{
-  ulong ltop=avma,av;
-  GEN l,borne,le,powz,z,V;
-  long i;
-  long e,val;
-  long u,o,j;
-  GEN O,g;
-  if (flag<0 || flag>2) err(flagerr,"galoisubcyclo");
-  if ( v==-1 ) v=0;
-  if ( n<1 ) err(arither2);
-  if ( n>=VERYBIGINT) 
-    err(impl,"galoissubcyclo for huge conductor");    
-  if ( typ(H)==t_MAT )
-  {
-    GEN zn2, zn3, gen, ord;
-    if (lg(H) == 1 || lg(H) != lg(H[1]))
-      err(talker,"not a HNF matrix in galoissubcyclo");
-    if (!Z)
-      Z=znstar(stoi(n));
-    else if (typ(Z)!=t_VEC || lg(Z)!=4) 
-      err(talker,"Optionnal parameter must be as output by znstar in galoissubcyclo");
-    zn2 = gtovecsmall((GEN)Z[2]);
-    zn3 = lift((GEN)Z[3]);
-    if ( lg(zn2) != lg(H) || lg(zn3) != lg(H))
-      err(talker,"Matrix of wrong dimensions in galoissubcyclo");
-    gen = cgetg(lg(zn3), t_VECSMALL);
-    ord = cgetg(lg(zn3), t_VECSMALL);
-    hnftogeneratorslist(n,zn2,zn3,H,gen,ord);
-    H=gen;
-  }
-  else
-  {
-    H=lift_check_modulus(H,stoi(n));
-    H=gtovecsmall(H);
-    for (i=1;i<lg(H);i++)
-      if (H[i]<0)
-	H[i]=mulssmod(-H[i],n-1,n);
-    /*Should check components are prime to n, but it is costly*/
-  }
-  V = cgetg(n, t_VECSMALL);
-  if (DEBUGLEVEL >= 1)
-    timer2();
-  n = znconductor(n,H,V);
-  if (flag==1)  {avma=ltop;return stoi(n);}
-  if (DEBUGLEVEL >= 1)
-    msgtimer("znconductor.");
-  H = V;
-  O = subgroupcoset(n,H);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("subgroupcoset.");
-  if (DEBUGLEVEL >= 6)
-    fprintferr("Subcyclo: orbit=%Z\n",O);
-  if (lg(O)==1 || lg(O[1])==2)
-  {
-    avma=ltop;
-    return gscycloconductor(cyclo(n,v),n,flag);
-  }
-  u=lg(O)-1;o=lg(O[1])-1;
-  if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: %ld orbits with %ld elements each\n",u,o);
-  l=stoi(n+1);e=1;
-  while(!isprime(l)) 
-  { 
-    l=addis(l,n);
-    e++;
-  }
-  if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: prime l=%Z\n",l);
-  av=avma;
-  /*Borne utilise': 
-    Vecmax(Vec((x+o)^u)=max{binome(u,i)*o^i ;1<=i<=u} 
-  */
-  i=u-(1+u)/(1+o);
-  borne=mulii(binome(stoi(u),i),gpowgs(stoi(o),i));
-  if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: borne=%Z\n",borne);
-  val=logint(shifti(borne,1),l,NULL);
-  avma=av;
-  if (DEBUGLEVEL >= 4)
-    fprintferr("Subcyclo: val=%ld\n",val);
-  le=gpowgs(l,val);
-  z=lift(gpowgs(gener(l),e));
-  z=padicsqrtnlift(gun,stoi(n),z,l,val);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("padicsqrtnlift.");
-  powz = cgetg(n,t_VEC); powz[1] = (long)z;
-  for (i=2; i<n; i++) powz[i] = lmodii(mulii(z,(GEN)powz[i-1]),le);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("computing roots.");  
-  g=cgetg(u+1,t_VEC);
-  for(i=1;i<=u;i++)
-  {
-    GEN s;
-    s=gzero;
-    for(j=1;j<=o;j++)
-      s=addii(s,(GEN)powz[mael(O,i,j)]);
-    g[i]=(long)modii(negi(s),le);
-  }
-  if (DEBUGLEVEL >= 1)
-    msgtimer("computing new roots."); 
-  g=FpV_roots_to_pol(g,le,v);
-  if (DEBUGLEVEL >= 1)
-    msgtimer("computing products."); 
-  g=FpX_center(g,le);
-  return gerepileupto(ltop,gscycloconductor(g,n,flag));
-}
-
 GEN galoissubgroups(GEN G)
 {
   ulong ltop=avma;
