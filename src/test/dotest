@@ -148,7 +148,7 @@ esac
 if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
 pat=`head -4 $file_diff|tail -1|grep "141,154"`
-if test $len -eq 46  -a  -n "$pat"; then
+if test $len -eq 50  -a  -n "$pat"; then
 cat << EOT
 NOTE: the problem noted in 'elliptic' boils down to different FPU and
 compiler optimizations than on our test machine. It can safely be ignored,
