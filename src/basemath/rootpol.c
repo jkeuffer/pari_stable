@@ -341,11 +341,11 @@ log2ir(GEN x)
   {
     GEN m = int_MSW(x);
     l = (double)(ulong)*m;
-#ifndef LONG_IS_64BIT /* overkill ? The first word should be enough... */
     if (lgefint(x)==3) return log2(l);
+#ifndef LONG_IS_64BIT /* overkill ? The first word should be enough... */
     l += ((double)(ulong)*int_precW(m)) / 4294967296.; /* 2^32 */
 #endif
-    return log2(l) + (double)(32*(lgefint(x)-3));
+    return log2(l) + (double)(BITS_IN_LONG*(lgefint(x)-3));
   }
   /* else t_REAL */
   l = (double)(ulong)x[2];
