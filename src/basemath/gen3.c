@@ -1354,7 +1354,7 @@ gsubst_expr(GEN pol, GEN from, GEN to)
 }
 
 GEN
-gsubst0(GEN x, GEN T, GEN y)
+gsubstpol(GEN x, GEN T, GEN y)
 {
   pari_sp av;
   long d, v;
