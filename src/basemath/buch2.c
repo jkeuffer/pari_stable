@@ -3132,9 +3132,8 @@ PRECPB:
   { /* dependent rows */
     if (nlze > 5)
     {
-      if (cache.last - cache.base > 600 && nlze > 20) sfb_change = 1;
       L_jid = vecextract_i(F.perm, 1, nlze);
-      vecsmall_sort(L_jid); jid = 0;
+      vecsmall_sort(L_jid); jid = 0; sfb_change = 1;
     }
     goto MORE;
   }
