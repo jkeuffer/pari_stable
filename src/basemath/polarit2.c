@@ -1035,8 +1035,6 @@ chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N)
 {
   long i = 1, j, l = lg(famod);
   GEN V = cgetg(l, t_VEC);
-  if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
-
   for (j = 1; j < l; j++)
     if (signe(c[j])) V[i++] = famod[j];
   if (lt && i > 1) V[1] = lmul(lt, (GEN)V[1]);
