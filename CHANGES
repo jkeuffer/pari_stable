@@ -50,6 +50,8 @@ Done for version 2.2.2 (released ??/??/2001):
    15- typo in gcdreal (result < 0) [introduced in 2.2.1]
    16- some obscure problems in rnfkummer
    17- not enough GC in hnflll
+   18- sqrt(25 + O(2^5))^2 - 25 = O(2^4)
+   19- not enough GC when writing a t_PADIC
 
   Changes
     1- allow compressing *.dvi files for the online help system
