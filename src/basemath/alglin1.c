@@ -316,8 +316,8 @@ concat(GEN x, GEN y)
     return gerepilecopy(av,y);
   }
   ty = typ(y);
-  if (tx==t_LIST || ty==t_LIST) return listconcat(x,y);
   if (tx==t_STR  || ty==t_STR)  return strconcat(x,y);
+  if (tx==t_LIST || ty==t_LIST) return listconcat(x,y);
   lx=lg(x); ly=lg(y);
 
   if (tx==t_MAT && lx==1)
