@@ -299,6 +299,7 @@ gaddpex(GEN x, GEN y)
     mod = mulii(mod, q);
     u   = mulii(u, q);
     if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
+    u = addii(u, p1);
   }
   else if (d < 0)
   {
@@ -307,12 +308,22 @@ gaddpex(GEN x, GEN y)
     u   = modii(u, mod);
     if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
     p1 = mulii(p1, q);
+    u = addii(u, p1);
   }
-  u = addii(u, p1);
-  if (!d)
+  else
   {
-    long c = pvaluation(u,p,&u);
-    if (c) { r-=c; e+=c; mod = divii(mod, gpowgs(p,c)); }
+    long c;
+    u = addii(u, p1);
+    if (!signe(u) || (c = pvaluation(u,p,&u)) >= r)
+    {
+      avma = av; return padiczero(p,e+r);
+    }
+    if (c)
+    {
+      mod = divii(mod, gpowgs(p,c));
+      r -= c;
+      e += c;
+    }
   }
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);

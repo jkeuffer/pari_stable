@@ -1465,7 +1465,7 @@ palogaux(GEN x)
 
   if (egalii(gun, (GEN)x[4]))
   {
-    long v = valp(x);
+    long v = valp(x)+precp(x);
     if (egalii(gdeux,p)) v--;
     return padiczero(p, v);
   }
