@@ -1812,7 +1812,7 @@ KerChar(GEN chi, GEN cyc)
 GEN
 bnrconductorofchar(GEN bnr, GEN chi)
 {
-  pari_sp av = avma;
+  pari_sp av = avma; checkbnr(bnr);
   return gerepileupto(av, conductor(bnr, KerChar(chi, gmael(bnr,5,2)), 0));
 }
 
