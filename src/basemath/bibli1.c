@@ -1158,11 +1158,12 @@ good_prec(GEN x, long kmax)
 /* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
  * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100
  *
- * If precision problems:
- *   if (flag = 1): return NULL
- *   if (flag = 2): return _vec ( h )  [ partial transformation matrix ],
- *     unless we could not even start; return NULL in this case.
- *   Error otherwise
+ *   if (flag = 1): if precision problems, return NULL
+ *   if (flag = 2): if precision problems, return _vec ( h )
+ *                  [ partial transformation matrix ], unless we could not
+ *                  even start; return NULL in this case.
+ *   if (flag = 3): assume x exact and !gram; return LLL-reduced basis, not
+ *                  base change
  *
  * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis
  * (which may then not be LLL-reduced) */
@@ -1173,6 +1174,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   pari_sp av0 = avma, av, lim;
   int isexact, exact_can_leave, count, count_max = 8;
+  const int in_place = (flag == 3);
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1244,9 +1246,9 @@ PRECPB:
         if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
         if (isexact)
         {
-          H = H? gmul(H, h): h;
+          if (!in_place) H = H? gmul(H, h): h;
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
-          gerepileall(av, 2, &xinit, &H);
+          gerepileall(av, in_place? 1: 2, &xinit, &H);
           x = mat_to_MP(xinit, prec); 
           h = idmat(n);
           retry = 1; /* never abort if x is exact */
@@ -1297,9 +1299,9 @@ PRECPB:
       count = 0;
       prec = (prec+2) >> 1;
       if (DEBUGLEVEL>3) fprintferr("\n...LLL reducing precision to %ld\n",prec);
-      H = H? gmul(H, h): h;
+      if (!in_place) H = H? gmul(H, h): h;
       xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
-      gerepileall(av, 5,&B,&L,&Q,&H,&xinit);
+      gerepileall(av, in_place? 4: 5,&B,&L,&Q,&xinit, &H);
       x = mat_to_MP(xinit, prec); 
       h = idmat(n);
     }
@@ -1339,7 +1341,7 @@ PRECPB:
           if (low_stack(lim, stack_lim(av,1)))
           {
             if(DEBUGMEM>1) err(warnmem,"lllfp[1], kmax = %ld", kmax);
-            gerepileall(av,H? 7: 5,&B,&L,&h,&x,&Q,&H,&xinit);
+            gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
           }
         }
       if (++k > n)
@@ -1349,19 +1351,10 @@ PRECPB:
           if (exact_can_leave) { if (H) h = H; break; }
 
           if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
-          H = H? gmul(H, h): h;
+          if (!in_place) H = H? gmul(H, h): h;
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
 
           prec = good_prec(xinit, kmax);
-#if 0 /* slower */
-          if (prec == DEFAULTPREC) {
-            if (DEBUGLEVEL>3) fprintferr("switch to integral algorithm\n");
-            h = gram? lllgramint(xinit): lllint(xinit);
-            if (H) h = gmul(H, h);
-
-            break;
-          }
-#endif
           if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
           x = mat_to_MP(xinit, prec);
           h = idmat(n);
@@ -1381,12 +1374,20 @@ PRECPB:
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lllfp[2], kmax = %ld", kmax);
-      gerepileall(av,H? 7: 5,&B,&L,&h,&x,&Q,&H,&xinit);
+      gerepileall(av, H? 7: 6, &B,&L,&h,&x,&Q,&xinit, &H);
     }
   }
+  if (in_place) h = gmul(xinit, h);
   if (DEBUGLEVEL>3) fprintferr("\n");
   if (MARKED && MARKED != 1) swap(h[1], h[MARKED]);
   return gerepilecopy(av0, h);
+}
+
+/* x integral, maximal rank, LLL-reduce in place using fp */
+GEN
+lllint_fp_ip(GEN x, long D)
+{
+  return lllfp_marked(0, x,D, 3,DEFAULTPREC,0);
 }
 
 GEN

@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN lllint_fp_ip(GEN x, long D);
 extern long FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p);
 extern GEN FqX_split_roots(GEN z, GEN T, GEN p, GEN pol);
 extern GEN FqX_split_all(GEN z, GEN T, GEN p);
@@ -977,12 +978,16 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
         GEN q = (GEN)famod[j];
         if (y) q = gmul(y, q);
         y = FqX_centermod(q, Tpk, pk, pks2);
-        if (low_stack(lim, stack_lim(av,2))) y = gerepilecopy(av, y);
+        if (low_stack(lim, stack_lim(av,2)))
+        {
+          if(DEBUGMEM>1) err(warnmem,"nf_check_factors");
+          y = gerepilecopy(av, y);
+        }
       }
     y = nf_pol_lift(y, bound, T);
     if (!y) return NULL;
 
-    if (low_stack(lim, stack_lim(av,2))) y = gerepilecopy(av, y);
+    y = gerepilecopy(av, y);
     /* y is the candidate factor */
     pol = RXQX_divrem(C2ltpol, y, nfT, ONLY_DIVIDES);
     if (!pol) return NULL;
@@ -1062,13 +1067,10 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
     PRK = prk = idealpows(nf, pr, a);
     pk = gcoeff(prk,1,1);
-
-    if (expi(pk) > 1000)
-    { /* reduce size first, "scramble" matrix */
-      PRK = lllintpartial_ip(PRK);
-      /* now floating point reduction is fast */
-      PRK = gmul(PRK, lll(PRK, DEFAULTPREC));
-    }
+    /* reduce size first, "scramble" matrix */
+    PRK = lllintpartial_ip(PRK);
+    /* now floating point reduction is fast */
+    PRK = lllint_fp_ip(PRK, 4);
     PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
     if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
     else
@@ -1373,23 +1375,17 @@ nfsqff(GEN nf, GEN pol, long fl)
   L.Tp = NULL;
 
   /* FIXME: slow factorization of large polynomials over large Fq */
-  maxf = 1;
-  if (dpol > 400) {
-    if (n >= 20) maxf = 10;
-  } else if (dpol > 100) {
-    if (n >= 15) maxf = 10;
-  } else {
-    if (n >= 10) maxf = n;
-  }
-
+  maxf = (n >= 15)? 6: 1;
   for (ct = 5;;)
   {
     GEN aT, apr, ap, modpr, red;
     long anbf;
     double ind;
+    pari_timer ti_pr;
 
     GEN list, r = NULL;
     pari_sp av2 = avma;
+    if (DEBUGLEVEL>3) TIMERstart(&ti_pr);
     for (;;)
     {
       NEXT_PRIME_VIADIFF_CHECK(pp, pt);
@@ -1446,7 +1442,8 @@ nfsqff(GEN nf, GEN pol, long fl)
       L.Tp = aT;
     }
     if (DEBUGLEVEL>3)
-      fprintferr("%3ld %s at prime %Z\n", nbf, fl?"roots": "factors", ap);
+      fprintferr("%3ld %s at prime\n  %Z\nTime: %ld\n",
+                 nbf, fl?"roots": "factors", apr, TIMER(&ti_pr));
     if (--ct <= 0) break;
   }
   if (DEBUGLEVEL>2) {
