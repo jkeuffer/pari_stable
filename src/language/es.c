@@ -805,7 +805,7 @@ wr_float(GEN x)
     d=0;
   }
   res = (long *) confrac(x); decmax = d + *res++;
-  if (dec<0) dec=decmax;
+  if (decmax < (ulong)dec) dec=decmax; /* Hack: includes dec < 0 */
   deceff = dec-decmax; dec -= d;
   while (dec>8)
   {
