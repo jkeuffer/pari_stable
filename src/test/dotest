@@ -134,16 +134,18 @@ for suf in $SUF; do
   fi
 done
 
-case "$buge" in
-  *) end=""
-       file_diff=elliptic-sta.dif;;
-  sta|dyn)
-       end=" (gp-$buge only)"
-       file_diff=elliptic-$buge.dif;;
-  exe)
-       end=" (gp-$buge)"
-       file_diff=elliptic.dif;;
+case "x$buge" in
+  x)  file_diff=;;
+  x*) end=""
+      file_diff=elliptic-sta.dif;;
+  xsta|xdyn)
+      end=" (gp-$buge only)"
+      file_diff=elliptic-$buge.dif;;
+  xexe)
+      end=" (gp-$buge)"
+      file_diff=elliptic.dif;;
 esac
+if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
 pat=`head -4 $file_diff|tail -1|grep "141,154"`
 if test $len -eq 46  -a  -n "$pat"; then
@@ -153,17 +155,20 @@ compiler optimizations than on our test machine. It can safely be ignored,
 the difference being insignificant given the requested precision.
 EOT
 fi
+fi
 
-case "$bugp" in
-  *) end=""
-       file_diff=program-sta.dif;;
-  sta|dyn)
-       end=" (gp-$bugp only)"
-       file_diff=program-$bugp.dif;;
-  exe)
-       end=" (gp-$bugp)"
-       file_diff=program.dif;;
+case "x$bugp" in
+  x)  file_diff=;;
+  x*) end=""
+      file_diff=program-sta.dif;;
+  xsta|xdyn)
+      end=" (gp-$bugp only)"
+      file_diff=program-$bugp.dif;;
+  xexe)
+      end=" (gp-$bugp)"
+      file_diff=program.dif;;
 esac
+if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
 pat=`head -4 $file_diff|tail -1|grep "108,118"`
 if test $len -eq 29  -a  -n "$pat"; then
@@ -172,4 +177,5 @@ NOTE: the problem noted in 'program' is that install() does not work in your
 configuration$end, so you will not be able to use this feature. Otherwise you
 can safely ignore the above warning.
 EOT
+fi
 fi
