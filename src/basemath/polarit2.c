@@ -277,6 +277,7 @@ record_factors(long N, long d, long jmax, ulong *tabkbit, ulong *tmp)
 }
 
 /* lift factorisation mod p: C = lc(C) \prod Q_k  to  mod p^e = pev */
+#if 0
 GEN
 hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
 {
@@ -284,6 +285,8 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
   GEN C = pol, res = cgetg(nf, t_VEC), listb = cgetg(nf, t_VEC);
   GEN lc = leading_term(pol);
   long nb, mask;
+  const long space = lg(C) * lgefint(pev);
+
   nb = hensel_lift_accel(e,&mask)-1;
   if (DEBUGLEVEL > 4) (void)timer2();
   listb[1] = lmodii(lc, p);
@@ -291,7 +294,7 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
     listb[i] = (long)FpX_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
   for (i=nf-1; i>1; i--)
   {
-    GEN a,b,u,v,a2,b2,s,t,pe,pe2,z,g, pem1;
+    GEN a,b,u,v,a2,b2,s,t,pe,z,g, pem1;
     long ltop = avma, lbot;
 
     a = (GEN)Q[i];     /* lead coeff(a) = 1 */
@@ -305,39 +308,46 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
     }
     for(pe=p,pem1=gun,j=0;;j++)
     {
-      if (j != nb )
-      {
-	pem1 = (mask&(1<<j))?sqri(pem1):mulii(pem1, pe);
-	pe2  =  mulii(pem1, p);
-      }
-      else pe2=pev;
+      long av = avma;
+      (void)new_chunk(space);
       g = gadd(C, gneg_i(gmul(a,b)));
 
-      g = FpX_red(g, pe2); g = gdivexact(g, pe);
+      g = gdivexact(g, pe); g = FpX_red(g, pe);
       z = FpX_red(gmul(v,g), pe);
       t = FpX_divres(z,a,pe, &s);
       t = gadd(gmul(u,g), gmul(t,b));
       t = FpX_red(t, pe);
       t = gmul(t,pe);
       s = gmul(s,pe);
-      lbot = avma;
+      avma = av;
+
       b2 = gadd(b, t);
-      a2 = gadd(a, s); /* already reduced mod pe2 */
+      a2 = gadd(a, s); /* already reduced mod pe^2 */
       if (j == nb) break;
 
+      av = avma;
+      (void)new_chunk(space);
       g = gadd(gun, gneg_i(gadd(gmul(u,a2),gmul(v,b2))));
 
-      g = FpX_red(g, pe2); g = gdivexact(g, pe);
+      g = gdivexact(g, pe); g = FpX_red(g, pe);
       z = FpX_red(gmul(v,g), pe);
       t = FpX_divres(z,a,pe, &s);
       t = gadd(gmul(u,g), gmul(t,b));
       t = FpX_red(t, pe);
-      u = gadd(u, gmul(t,pe));
-      v = gadd(v, gmul(s,pe));
-      pe = pe2; a = a2; b = b2;
-    }
-    { GEN *gptr[2]; gptr[0]=&a2; gptr[1]=&b2;
-      gerepilemanysp(ltop, lbot, gptr, 2);
+      t = gmul(t,pe);
+      s = gmul(s,pe);
+      avma = av;
+
+      u = gadd(u, t);
+      v = gadd(v, s);
+
+      a = a2; b = b2;
+      if (j != nb)
+      {
+	pem1= (mask&(1<<j))?sqri(pem1):mulii(pem1, pe);
+	pe  =  mulii(pem1, p);
+      }
+      else pe = pev;
     }
     res[i] = (long)a2; C = b2;
     if (DEBUGLEVEL > 4)
@@ -351,6 +361,179 @@ hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
   }
   res[1] = (long)C; return res;
 }
+#else
+/* adapted from the NTL code (written by V. Shoup) */
+
+/* au + bv = 1 (p0), ab = f (p0). Lift mod p1 = p0 pd (<= p0^2).
+ * If noinv is set, don't lift the inverses u and v */
+static void 
+HenselLift(GEN V, GEN W, long j, GEN f, GEN pd, GEN p0, int noinv)
+{
+  const long space = lgef(f) * (lgefint(pd) + lgefint(p0) - 2);
+  long av = avma;
+  GEN a2,b2,g,z,s,t;
+  GEN a = (GEN)V[j], b = (GEN)V[j+1];
+  GEN u = (GEN)W[j], v = (GEN)W[j+1];
+
+  (void)new_chunk(space);
+  g = gadd(f, gneg_i(gmul(a,b)));
+
+  g = gdivexact(g, p0); g = FpX_red(g, pd);
+  z = FpX_red(gmul(v,g), pd);
+  t = FpX_divres(z,a,pd, &s);
+  t = gadd(gmul(u,g), gmul(t,b));
+  t = FpX_red(t, pd);
+  t = gmul(t,p0);
+  s = gmul(s,p0);
+  avma = av;
+
+  /* already reduced mod p1 = pd p0 */
+  a2 = gadd(a, s); V[j]   = (long)a2;
+  b2 = gadd(b, t); V[j+1] = (long)b2;
+  if (noinv) return;
+
+  av = avma;
+  (void)new_chunk(space);
+  g = gadd(gun, gneg_i(gadd(gmul(u,a2),gmul(v,b2))));
+
+  g = gdivexact(g, p0); g = FpX_red(g, pd);
+  z = FpX_red(gmul(v,g), pd);
+  t = FpX_divres(z,a,pd, &s);
+  t = gadd(gmul(u,g), gmul(t,b));
+  t = FpX_red(t, pd);
+  t = gmul(t,p0);
+  s = gmul(s,p0);
+  avma = av;
+
+  u = gadd(u, t); W[j]   = (long)u;
+  v = gadd(v, s); W[j+1] = (long)v;
+}
+
+/* v list of factors, w list of inverses.
+ * Lift everybody mod p0 pd. */
+static void
+RecTreeLift(GEN link, GEN v, GEN w, GEN pd, GEN p0, GEN f, long j, int noinv)
+{
+   if (j < 0) return;
+
+   HenselLift(v, w, j, f, pd, p0, noinv);
+
+   RecTreeLift(link, v, w, pd, p0, (GEN)v[j]  , link[j  ], noinv);
+   RecTreeLift(link, v, w, pd, p0, (GEN)v[j+1], link[j+1], noinv);
+}
+
+#define swap(a,b) { long _x = a; a = b; b = _x; }
+#define deg(a) (lgef(a)-3)
+
+static void
+BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
+{
+  long k = lg(a)-1;
+  long i, j, s, minp, mind;
+
+  for (i=1; i<=k; i++) { V[i] = a[i]; link[i] = -i; }
+
+  for (j=1; j <= 2*k-4; j+=2,i++)
+  {
+    minp = j;
+    mind = deg(V[j]); /* degree V[j] */
+    for (s=j+1; s<i; s++)
+      if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
+
+    swap(V[j], V[minp]);
+    swap(link[j], link[minp]);
+
+    minp = j+1;
+    mind = deg(V[j+1]);
+    for (s=j+2; s<i; s++)
+      if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
+
+    swap(V[j+1], V[minp]);
+    swap(link[j+1], link[minp]);
+
+    V[i] = (long)FpX_mul((GEN)V[j], (GEN)V[j+1], p);
+    link[i] = j;
+  }
+
+  for (j=1; j <= 2*k-2; j+=2)
+  {
+    GEN d, u, v;
+    d = FpX_extgcd((GEN)V[j], (GEN)V[j+1], p, &u, &v);
+    if (deg(d) > 0) err(talker, "relatively prime polynomials expected");
+    d = (GEN)d[2];
+    if (!gcmp1(d))
+    {
+      d = mpinvmod(d, p);
+      u = FpX_Fp_mul(u, d, p);
+      v = FpX_Fp_mul(v, d, p);
+    }
+    W[j]   = (long)u;
+    W[j+1] = (long)v;
+  }
+}
+
+/* lift from p^{e0} to p^{e1} */
+static void
+TreeLift(GEN link, GEN v, GEN w, GEN p, long e0, long e1, GEN f, int noinv)
+{
+  GEN p0, pd;
+
+  p0 = gpowgs(p, e0);
+  pd = gpowgs(p, e1-e0);
+  RecTreeLift(link, v, w, pd, p0, f, lg(v)-2, noinv);
+} 
+
+/* a = modular factors of f mod p, lift to precision e */
+static GEN
+MultiLift(GEN f, GEN a, GEN p, long e)
+{
+  long l, i, k = lg(a) - 1;
+  GEN E, v, w, link;
+
+  if (k < 2 || e < 1) err(talker, "MultiLift: bad args");
+  if (e == 1) return a;
+
+  E = cgetg(BITS_IN_LONG, t_VECSMALL);
+  l = 0; E[++l] = e;
+  while (e > 1) { e = (e+1)/2; E[++l] = e; }
+
+  if (DEBUGLEVEL > 3) timer2();
+
+  if (k < 2) err(talker,"bad arguments to BuildTree");
+  v = cgetg(2*k - 2 + 1, t_VEC);
+  w = cgetg(2*k - 2 + 1, t_VEC);
+  link=cgetg(2*k - 2 + 1, t_VECSMALL);
+  BuildTree(link, v, w, a, p);
+
+  if (DEBUGLEVEL > 3) msgtimer("building tree"); 
+
+
+  for (i = l; i > 1; i--) {
+     TreeLift(link, v, w, p, E[i], E[i-1], f, i == 2);
+     if (DEBUGLEVEL > 3) msgtimer("lifting to prec %ld", E[i]);
+  }
+
+  E = cgetg(k+1, t_VEC);
+  for (i = 1; i <= 2*k-2; i++)
+  {
+    long t = link[i];
+    if (t < 0) E[-t] = v[i];
+  }
+  return E;
+}
+
+GEN   
+hensel_lift_fact(GEN pol, GEN Q, GEN p, GEN pev, long e)
+{
+  GEN d = leading_term(pol);
+  if (!gcmp1(d))
+  {
+    d = modii(d, pev);
+    pol = FpX_Fp_mul(pol, d, p);
+  }
+  return MultiLift(pol, Q, p, e);
+}
+#endif
 
 /* front-end for hensel_lift_factor:
    lift the factorization of pol mod p given by fct to p^exp (if possible) */
@@ -391,94 +574,6 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
   return gerepileupto(av, gcopy(hensel_lift_fact(pol, p1, p, 
 						 gpowgs(p, exp), exp)));
 }
-
-#if 0
-/* lift factorisation mod p: C = lc(C) \prod Q_k  to  mod p^e = pev */
-GEN
-hensel_lift_fact_linear(GEN pol, GEN Q, GEN p, GEN pev, long e)
-{
-  long i,j, nf = lg(Q);
-  GEN C = pol, res = cgetg(nf, t_VEC), listb = cgetg(nf, t_VEC);
-  GEN lc = leading_term(pol), q = p;
-
-  if (DEBUGLEVEL > 4) (void)timer2();
-  if (!is_bigint(p) && is_bigint(pev))
-  {
-    long c = 1; pp = itos(p);
-    for(;;)
-    {
-      GEN q2 = mulsi(pp,q);
-      if (2 * expi(q2) + 6 >= BITS_IN_LONG) break;
-      q = q2; c++;
-    }
-    e = (e/c) + 1;
-  }
-  listb[1] = lmodii(lc, p);
-  for (i=2; i < nf; i++)
-    listb[i] = (long)FpX_red(gmul((GEN)listb[i-1], (GEN)Q[i-1]), p);
-  for (i=nf-1; i>1; i--)
-  {
-    GEN a,b,u,v,a2,b2,s,t,pe,pe2,z,g, pem1;
-    long ltop = avma, lbot;
-
-    a = (GEN)Q[i];     /* lead coeff(a) = 1 */
-    b = (GEN)listb[i]; /* lc(C) \prod_{k<i} Q_k */
-    g = (GEN)FpX_extgcd(a,b,p,&u,&v)[2]; /* deg g = 0 */
-    if (!gcmp1(g))
-    {
-      g = mpinvmod(g, p);
-      u = gmul(u, g);
-      v = gmul(v, g);
-    }
-    for(pe=p,pem1=gun,j=0;;j++)
-    {
-      if (j != nb )
-      {
-	pem1 = (mask&(1<<j))?sqri(pem1):mulii(pem1, pe);
-	pe2  =  mulii(pem1, p);
-      }
-      else pe2=pev;
-      g = gadd(C, gneg_i(gmul(a,b)));
-
-      g = FpX_red(g, pe2); g = gdivexact(g, pe);
-      z = FpX_red(gmul(v,g), pe);
-      t = FpX_divres(z,a,pe, &s);
-      t = gadd(gmul(u,g), gmul(t,b));
-      t = FpX_red(t, pe);
-      t = gmul(t,pe);
-      s = gmul(s,pe);
-      lbot = avma;
-      b2 = gadd(b, t);
-      a2 = gadd(a, s); /* already reduced mod pe2 */
-      if (j == nb) break;
-
-      g = gadd(gun, gneg_i(gadd(gmul(u,a2),gmul(v,b2))));
-
-      g = FpX_red(g, pe2); g = gdivexact(g, pe);
-      z = FpX_red(gmul(v,g), pe);
-      t = FpX_divres(z,a,pe, &s);
-      t = gadd(gmul(u,g), gmul(t,b));
-      t = FpX_red(t, pe);
-      u = gadd(u, gmul(t,pe));
-      v = gadd(v, gmul(s,pe));
-      pe = pe2; a = a2; b = b2;
-    }
-    { GEN *gptr[2]; gptr[0]=&a2; gptr[1]=&b2;
-      gerepilemanysp(ltop, lbot, gptr, 2);
-    }
-    res[i] = (long)a2; C = b2;
-    if (DEBUGLEVEL > 4)
-      fprintferr("...lifting factor of degree %3ld. Time = %ld\n",
-                 lgef(a)-3,timer2());
-  }
-  if (!gcmp1(lc))
-  {
-    GEN g = mpinvmod(lc, pev);
-    C = FpX_red(gmul(C, g), pev);
-  }
-  res[1] = (long)C; return res;
-}
-#endif
 
 /* cf Beauzamy et al: upper bound for
  *      lc(x) * [2^(5/8) / pi^(3/8)] e^(1/4n) 2^(n/2) sqrt([x]_2)/ n^(3/8)
@@ -1056,7 +1151,8 @@ combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
 
   e = get_e(B, p, &pe);
 
-  if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z\n", B);
+  if (DEBUGLEVEL > 4)
+    fprintferr("Mignotte bound: %Z^%ld ~ %Z\n", p,e,gtodouble(B));
   famod = hensel_lift_fact(a,famod,p,pe,e);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
   else
@@ -2369,6 +2465,7 @@ content(GEN x)
 /*                         SOUS RESULTANT                          */
 /*                                                                 */
 /*******************************************************************/
+GEN diviiexact(GEN x, GEN y);
 /* for internal use */
 GEN
 gdivexact(GEN x, GEN y)
@@ -2379,7 +2476,7 @@ gdivexact(GEN x, GEN y)
   switch(typ(x))
   {
     case t_INT:
-      if (typ(y)==t_INT) return divii(x,y);
+      if (typ(y)==t_INT) return diviiexact(x,y);
       if (!signe(x)) return gzero;
       break;
     case t_INTMOD:
