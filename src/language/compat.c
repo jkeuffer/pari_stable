@@ -518,7 +518,7 @@ entree oldfonctions[]={
 {"srgcd",2,(void *)srgcd,7,"GG"},
 {"sturm",10,(void *)sturm0,7,"lG"},
 {"sturmpart",30,(void *)sturmpart,7,"lGGG"},
-{"subcyclo",2,(void *)subcyclo,6,"GGDn"},
+{"subcyclo",2,(void *)subcyclo,6,"LLDn"},
 {"subell",3,(void *)subell,5,"GGGp"},
 {"subst",26,(void *)gsubst,7,"GnG"},
 {"sum",48,(void *)sum0,9,"GV=GGI"},
