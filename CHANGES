@@ -303,6 +303,7 @@ BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now
    18- private header file pari-priv.h
    19- new function isperfectpower
    20- forvec iterator
+GH 21- new function zncoppersmith
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
