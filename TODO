@@ -163,7 +163,11 @@ Misc:
 4  nfsubfields [use known subfields to discard blocs right away] (current uses
    far too much memory)
 
-3  zetak is very inefficient and unable to handle most fields of degree > 8
+3  zetak is very inefficient, unable to handle most fields of degree > 8, and
+   gives mostly bogus results at high precision. E.g.
+   \p300
+   zetak(zetakinit(x^2-2),2) --> ~ 1e183
+   To be rewritten...
 
 3  have quadclassunit return bnf structure
 
