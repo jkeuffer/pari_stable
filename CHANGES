@@ -53,11 +53,13 @@ BA 16- result was not always complete in nfgaloisconj()
    22- Make sure result is a t_POL before doing a setvarn in caract2_i()
    23- precision problems in ClxModulus (bnrstark()) [check leading term!=0]
    24- elltors() could miss some points: determine needed precision first
+   25- clean up files after an error (not only under GP)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
     2- improved on-line help wrt to defaults and ambiguities
        (? default/some_default, ? some_default)
+    3- library functions gentimer, genmsgtimer, get_timer
 
 ===========================================================================
 Done for version 2.0.17.beta (released 24/09/99):

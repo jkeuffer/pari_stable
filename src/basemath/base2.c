@@ -3061,7 +3061,8 @@ rnfsteinitz(GEN nf, GEN order)
   if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-matrix in rnfsteinitz");
-  A=gcopy((GEN)order[1]); I=gcopy((GEN)order[2]); n=lg(A)-1;
+  A=dummycopy((GEN)order[1]);
+  I=dummycopy((GEN)order[2]); n=lg(A)-1;
   for (j=1; j<=n-1; j++)
   {
     a=(GEN)I[j];
@@ -3078,15 +3079,15 @@ rnfsteinitz(GEN nf, GEN order)
 	p2=nfidealdet1(nf,a,b);
 	p1=gadd(element_mulvec(nf,(GEN)p2[1],(GEN)A[j]),
 		element_mulvec(nf,(GEN)p2[2],(GEN)A[j+1]));
-	A[j+1]= (long) gadd(element_mulvec(nf,(GEN)p2[3],(GEN)A[j]),
-	                    element_mulvec(nf,(GEN)p2[4],(GEN)A[j+1]));
+	A[j+1]= ladd(element_mulvec(nf,(GEN)p2[3],(GEN)A[j]),
+	             element_mulvec(nf,(GEN)p2[4],(GEN)A[j+1]));
 	A[j]=(long)p1;
 	I[j]=(long)id; I[j+1]=(long)idealmul(nf,a,b);
 	p1=content((GEN)I[j+1]);
 	if (!gcmp1(p1))
 	{
-	  I[j+1] = (long) gdiv((GEN)I[j+1],p1);
-	  A[j+1]=lmul(p1,(GEN)A[j+1]);
+	  I[j+1] = ldiv((GEN)I[j+1],p1);
+	  A[j+1] = lmul(p1,(GEN)A[j+1]);
 	}
       }
     }

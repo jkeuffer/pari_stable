@@ -1674,6 +1674,19 @@ You can also use \kbd{void \teb{msgtimer}(char *format,...)},
 which prints prints \kbd{Time}, then the remaining arguments as specified by
 \kbd{format} (which is a PARI format), then the output of \kbd{timer2}.
 
+This mechanism is simple to use but not foolproof. If some other function
+uses these timers, and many PARI functions do when DEBUGLEVEL is high enough,
+the timings will be meaningless. The functions \kbd{\teb{gentimer}(long id)}
+or \kbd{\teb{genmsgtimer}(long id, char *format,...)} are equivalent to
+\kbd{timer} and \kbd{msgtimer} respectively, except they will use a unique
+timer denoted by \kbd{id}. To get a valid identifier, use
+\sidx{get\string\_timer}%
+\kbd{id = get\_timer(0)}.
+
+This timer has to be deleted when it's not needed anymore
+(i.e.~when the main function returns), with a call to \kbd{get\_timer(id)}.
+After such a call, the reserved identifier becomes available again.
+
 \section{A complete program}
 \label{se:prog}
 

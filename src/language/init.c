@@ -373,7 +373,8 @@ pari_init(long parisize, long maxprime)
 
   gp_history_fun = NULL;
   whatnow_fun = NULL;
-  manage_var(2,NULL); /* init nvar */
+  (void)manage_var(2,NULL); /* init nvar */
+  (void)get_timer(-1); /* init timers */
   var_not_changed = 1; fetch_named_var("x", 0);
   try_to_recover=1;
 }
@@ -722,6 +723,9 @@ err_recover(long numerr)
 {
   pari_outfile=stdout; errfile=stderr;
   disable_dbg(-1);
+  get_timer(-1);
+  killallfiles(0);
+
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
   fprintferr("\n"); flusherr();
   if (!environnement) exit(1);
@@ -1180,6 +1184,7 @@ checkmemory(GEN z)
 /*                                                                 */
 /*******************************************************************/
 #define MAX_TIMER 32
+#define MIN_TIMER 3
 
 #ifdef WINCE
   static long
@@ -1274,76 +1279,55 @@ long
 timer()   {return timer_proto(1);}
 long
 timer2()  {return timer_proto(2);}
+long
+gentimer(long i)
+{
+  if (i >= MAX_TIMER || i <= MIN_TIMER)
+    err(talker,"not an available timer (%ld)",i);
+  return timer_proto(i);
+}
 
 /* internal */
-typedef long (*gptimer_t)(void);
-static long __timer3() {return timer_proto(3); }
-static long __timer4() {return timer_proto(4); }
-static long __timer5() {return timer_proto(5); }
-static long __timer6() {return timer_proto(6); }
-static long __timer7() {return timer_proto(7); }
-static long __timer8() {return timer_proto(8); }
-static long __timer9() {return timer_proto(9); }
-static long __timer10(){return timer_proto(10); }
-static long __timer11(){return timer_proto(11); }
-static long __timer12(){return timer_proto(12); }
-static long __timer13(){return timer_proto(13); }
-static long __timer14(){return timer_proto(14); }
-static long __timer15(){return timer_proto(15); }
-static gptimer_t timer_list[] = { NULL,NULL,NULL,
-  &__timer3,
-  &__timer4,
-  &__timer5,
-  &__timer6,
-  &__timer7,
-  &__timer8,
-  &__timer9,
-  &__timer10,
-  &__timer11,
-  &__timer12,
-  &__timer13,
-  &__timer14,
-  &__timer15
-};
 
-gptimer_t
-get_timer(gptimer_t t)
+long
+get_timer(long t)
 {
   static int used[MAX_TIMER];
   int i;
   if (!t)
   { /* get new timer */
-    for (i=3; i < MAX_TIMER; i++)
-      if (!used[i]) { used[3] = 1; t = timer_list[i]; break; }
+    for (i=MIN_TIMER; i < MAX_TIMER; i++)
+      if (!used[i]) { used[i] = 1; t = i; break; }
     if (i == MAX_TIMER)
     {
       err(warner, "no timers left! Using timer2()");
-      t = &timer2;
+      t = 2;
     }
-    t();
+    timer_proto(t); /* init timer */
+  }
+  else if (t < 0)
+  { /* initialize */
+    for (i=MIN_TIMER; i < MAX_TIMER; i++) used[i] = 0;
   }
   else
-  { /* delete it */
-    for (i=3; i < MAX_TIMER; i++)
-      if (t == timer_list[i])
-      {
-        if (!used[i]) err(warner, "timer %ld wasn't in use", i);
-        used[i] = 0; break;
-      }
-    t = NULL;
+  { /* delete */
+    if (t <= MIN_TIMER && t >= MAX_TIMER && !used[t])
+      err(warner, "timer %ld wasn't in use", t);
+    else
+      used[t] = 0;
   }
   return t;
 }
 
 void
-msgtimer2(gptimer_t t, char *format, ...)
+genmsgtimer(long t, char *format, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
   pariputs("Time "); va_start(args, format);
   vpariputs(format,args); va_end(args);
-  pariputsf(": %ld\n",t()); pariflush();
+  pariputsf(": %ld\n", timer_proto(t)); pariflush();
   pariOut = out;
 }
 
@@ -1351,9 +1335,12 @@ void
 msgtimer(char *format, ...)
 {
   va_list args;
+  PariOUT *out = pariOut; pariOut = pariErr;
 
-  va_start(args,format); msgtimer2(&timer2, format, args);
-  va_end(args);
+  pariputs("Time "); va_start(args, format);
+  vpariputs(format,args); va_end(args);
+  pariputsf(": %ld\n", timer_proto(2)); pariflush();
+  pariOut = out;
 }
 
 /*******************************************************************/

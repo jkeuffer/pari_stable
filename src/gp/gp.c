@@ -1537,7 +1537,7 @@ static char *
 get_home(int *free_it)
 {
 #ifdef WINCE
-	return ".";
+  return ".";
 #else
 #ifndef macintosh /* getenv() for Mac ? */
   char *drv, *pth = getenv("HOME");
@@ -1990,7 +1990,6 @@ gp_main_loop()
 	}
         tglobal = tloc; prettyp = outtyp;
 	while (bufindex) free((void *)buflist[bufindex--]);
-	killallfiles(0);
       }
     }
     setjmp(local_environnement[bufindex]);
