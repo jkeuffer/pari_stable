@@ -2394,13 +2394,16 @@ prune_history(gp_hist *H, long loc)
   H->total = loc;
 }
 
+static int
+is_silent(char *s) { char c = s[strlen(s) - 1]; return separe(c); }
+
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
 gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
-  gpmem_t av;
+  gpmem_t av = avma;
   GEN z = gnil;
   Buffer *b = new_buffer();
   filtre_t F;
@@ -2412,7 +2415,7 @@ gp_main_loop(int ismain)
   }
   init_filtre(&F, (void*)b);
 
-  for (;; setjmp(b->env))
+  for (; ; setjmp(b->env), avma = av)
   {
     if (ismain)
     {
@@ -2445,13 +2448,12 @@ gp_main_loop(int ismain)
 
     if (ismain)
     {
-      char c = b->buf[strlen(b->buf) - 1];
-      gpsilent = separe(c);
+      gpsilent = is_silent(b->buf);
       TIMERstart(GP_DATA->T);
     }
-    av = avma;
     z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
+
     if (GP_DATA->flags & CHRONO)
       pariputs(do_time(ti_REGULAR));
     else
@@ -2460,7 +2462,6 @@ gp_main_loop(int ismain)
 
     if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
     z = set_hist_entry(H, z);
-    avma = av;
     if (!gpsilent) gp_output(z, GP_DATA);
   }
 }
@@ -2586,7 +2587,7 @@ break_loop(long numerr)
       }
       break;
     }
-    if (x == gnil) continue;
+    if (x == gnil || is_silent(b->buf)) continue;
 
     term_color(c_OUTPUT); gen_output(x, GP_DATA->fmt);
     term_color(c_NONE); pariputc('\n');
