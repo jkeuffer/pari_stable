@@ -862,7 +862,7 @@ transcode(GEN a, long warn)
       err(talker,"incorrect a or b in intnum");
     return gsigne(a2) < 0 ? f_SING : f_REG;
   }
-  if (lg(a1) != 2 || !insinC(a2)) err(talker,"incorrect a or b in intnum");
+  if (lg(a1) != 2 || !isinC(a2)) err(talker,"incorrect a or b in intnum");
   return gsigne((GEN)a1[1]) * code_aux(a2, warn);
 }
 
