@@ -285,7 +285,7 @@ gracine(GEN a)
 GEN
 racine_i(GEN a, int roundup)
 {
-  long av = avma, k,s, l = lgefint(a);
+  long av = avma, k,s,L, l = lgefint(a);
   ulong m;
   GEN x,y,z;
   if (l == 2) return gzero;
@@ -302,15 +302,15 @@ racine_i(GEN a, int roundup)
     s -= (s & 1); /* make it even */
     z = BITS_IN_LONG - s;
     m = (ulong)(a[2] << s) | (a[3] >> z);
-    l = ((l - 4) * BITS_IN_LONG + z)>>1;
+    L = ((l - 4) * BITS_IN_LONG + z)>>1;
   }
   else
   {
     m = (ulong)a[2];
-    l = (l - 3) * (BITS_IN_LONG/2);
+    L = (l - 3) * (BITS_IN_LONG/2);
   }
   k = (long) sqrt((double)m);
-  x = shifti(stoi(k+1), l);
+  x = shifti(stoi(k+1), L);
   do
   {
     z = shifti(addii(x,divii(a,x)), -1);
@@ -318,7 +318,17 @@ racine_i(GEN a, int roundup)
   }
   while ((k = cmpii(x,y)) < 0);
   avma = (long)y;
-  if (roundup && k) y = addis(y,1);
+  if (roundup)
+  {
+    if (!k)
+    {
+      m = (ulong)y[lgefint(y)-1];
+      if (m * m != (ulong)a[l-1]) k = 1; /* != mod 2^BIL */
+      else /* expensive but rare */
+        { k = cmpii(sqri(y), a); avma = (long)y; }
+    }
+    if (k) y = addis(y,1);
+  }
   return gerepileuptoint(av,y);
 }
 
