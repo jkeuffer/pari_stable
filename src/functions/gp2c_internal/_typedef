@@ -1,0 +1,73 @@
+Function: _declaration
+Class: gp2c_internal
+Description: 
+ (C!void)          void $1
+ (C!long)          long $1
+ (C!int)           int $1
+ (C!GEN)           GEN $1
+ (C!char*)         char *$1
+ (C!byteptr)       byteptr $1
+ (C!GEN*[])        GEN *$1[]
+ (C!pari_sp)       pari_sp $1
+ (C!func_GG)       GEN (*$1)(GEN, GEN)
+
+Function: _typedef
+Class: gp2c_internal
+Description:
+ (empty)        void
+ (void)         void
+ (negbool)      long
+ (bool)         long
+ (small_int)    int
+ (small)        long
+ (int)          GEN
+ (real)         GEN
+ (mp)           GEN
+ (lg)           long
+ (vecsmall)     GEN
+ (vec)          GEN
+ (list)         GEN
+ (var)          long
+ (pol)          GEN
+ (gen)          GEN
+ (genstr)       GEN
+ (str)          char*
+ (bptr)         byteptr
+ (func_GG)      func_GG
+ (gptr)         GEN*[]
+ (ulong)        pari_sp
+ (typ)          long
+ (nf)           GEN
+ (bnf)          GEN
+ (bnr)          GEN
+ (ell)          GEN
+ (bell)         GEN
+ (clgp)         GEN
+ (prid)         GEN
+ (gal)          GEN
+
+Function: _proto_ret
+Class: gp2c_internal
+Help: Code for return value of functions
+Description:
+ (C!void)       v
+ (C!int)        i
+ (C!long)       l
+ (C!GEN)
+
+Function: _proto_code
+Class: gp2c_internal
+Help: Code for argument of a function
+Description:
+ (C!long)       L
+ (C!GEN)        G
+ (C!char*)      s
+
+Function: _proto_default
+Class: gp2c_internal
+Help: Code for default value of GP function
+Description:
+ (C!long)       0
+ (C!GEN)        0
+ (C!char*)      \"\"
+
