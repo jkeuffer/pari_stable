@@ -166,8 +166,8 @@ numbpart(GEN n)
 
   if (typ(n) != t_INT) err(typeer, "partition function");
   if (signe(n) <= 0) return gzero;
-  if (log10(gtodouble(n)) > 15)
-    err(talker, "arg to partition function must be <10^15");
+  if (cmpii(n, u2toi(0x38d7e, 0xa4c68000)) >= 0)
+    err(talker, "arg to partition function must be < 10^15");
   est = estim(n);
   prec = (ulong)(DEFAULTPREC + ((gtodouble(est)/LOG2) + 25) / BITS_IN_LONG);
   pinit(n, &C,&D,&Pi, prec);
