@@ -500,6 +500,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 	if(DEBUGLEVEL>=4)
 	  fprintferr("MonomorphismLift: early solution %Z\n",tlift);
         test=poltopermtest(tlift, gl, frob);
+	if(DEBUGLEVEL>=4)
 	  fprintferr("MonomorphismLift: early solution %d\n",test);
 	if (test)
 	{
