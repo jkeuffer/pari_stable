@@ -1096,21 +1096,28 @@ rm -f $exe $exe$exe_suff
 
 if test "$fastread" != yes; then
 cat << EOT
-Determining sizeof(long) and endianness. If your hardware supports different
-size of longs (e.g SGI/MIPS), you can decide to use a particular word size
-by specifying endianness (e.g answer 4321 instead of the proposed 87654321).
-You'll probably have to specify some exotic compilation flag (e.g -o32,-n32)
+Determining sizeof(long) and `double endianness'. PARI assumes doubles are
+stored in IEEE754 format [ sign, exponent, mantissa high, mantissa ]; `double
+endianness' only matters on 32-bit architecture: assuming a union { double f;
+ulong i[2]; }, are the double exponent and sign stored on the first ulong
+component (4321, Big Endian) or the second one (1234, Little Endian) ? Beware
+that on some processors (e.g ARM) double and long endianness are different.
+
+If your hardware supports different size of longs (e.g SGI/MIPS), you can
+decide to use a particular word size by specifying endianness (e.g answer 4321
+instead of the proposed 12345678). You will probably have to specify some
+exotic compilation flag (e.g -o32,-n32).
 ============================================================================
 EOT
-  echo $n "What is the internal byte representation of long integer ? $c"
-  dflt=$endian; rep='12345678 87654321 1234 4321'; . ./myread
+  echo $n "What is the internal byte representation of a double ? $c"
+  dflt=$endian; rep='12345678 1234 4321'; . ./myread
   endian=$ans
 fi
-echo "The internal byte representation of your long integers is $endian."
+echo "The internal byte representation of a double is $endian."
 
 case $endian in
-  *8|8*) sizeof_long=8; pretty="$pretty 64-bit version";;
-  *)     sizeof_long=4; pretty="$pretty 32-bit version";;
+  *8) sizeof_long=8; pretty="$pretty 64-bit version";;
+  *)  sizeof_long=4; pretty="$pretty 32-bit version";;
 esac
 
 
