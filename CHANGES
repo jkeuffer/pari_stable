@@ -35,14 +35,16 @@ YU = Yoshiaki Uchikawa
 
 Done for version 2.2.5 (released ??/11/2002): [hopefully]
   Fixed
-    1- [bnfinit:] typo in be_honest() --> SEGV when cbach2 > cbach
+    1- [bnfinit:] typo in be_honest() --> SEGV when cbach2 > cbach [from 2.2.4]
     2- apprpadic() when p = 2 (could not work) + typos
-    3- typo in gphelp [detex mode]: ubiquitous "var" in translation!
+    3- typo in gphelp [detex mode]: ubiquitous "var" in translation [from 2.2.4]
     4- typo in var_make_safe() [ protecting user variables after trapped 
-       "stack overflow" ] --> possible SEGV
+       "stack overflow" ] --> possible SEGV  [from 2.2.4]
 BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
-    6- typo in gp_main_loop [avma not restored properly after allocatemem.
-       Introduced in 2.2.4]
+    6- typo in gp_main_loop: avma not restored properly after allocatemem.
+       [from 2.2.4]
+    7- typo in [imag|real]_be_honest: SEGV in quadclassunit(D,,[c,c2]), c2 > c
+       [from 2.2.4]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
