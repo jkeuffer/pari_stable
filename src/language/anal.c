@@ -582,7 +582,9 @@ new_val_cell(entree *ep, GEN x, char flag)
   v->prev   = (var_cell*) ep->args;
   v->flag   = flag;
 
-  ep->value = (flag == COPY_VAL)? gclone(x): x;
+  /* beware: f(p) = Nv = 0
+   *         Nv = p; f(Nv) --> this call would destroy p [ isclone ] */
+  ep->value = (flag == COPY_VAL || (x && isclone(x)))? gclone(x): x;
   /* Do this last. In case the clone is <C-C>'ed before completion ! */
   ep->args  = (void*) v;
 }
@@ -1284,7 +1286,7 @@ facteur(void)
       {
         matcomp c;
         x = matcell(x, &c);
-        if (isonstack(x)) x = gcopy(x);
+        if (isonstack(x)) x = forcecopy(x);
         break;
       }
       case '!':
@@ -1546,7 +1548,13 @@ matrix_block(GEN p)
       return change_compo(&c,res);
     }
   }
-  return isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
+#if 0
+  return isonstack(cpt)? forcecopy(cpt): cpt; /* no assignment */
+#else
+  /* too dangerous otherwise: e.g we return x[1] and have x = 0 immediately
+   * after, destroying x[1] in changevalue */
+  return forcecopy(cpt); /* no assignment */
+#endif
 }
 
 /* x = gzero: no default value, otherwise a t_STR, formal expression for
@@ -3179,7 +3187,7 @@ read_member(GEN x)
     else
     {
       GEN y = ((F1GEN)ep->value)(x);
-      if (isonstack(y)) y = gcopy(y);
+      if (isonstack(y)) y = forcecopy(y);
       return y;
     }
   }
