@@ -1063,7 +1063,10 @@ echo Looking in C lib for some symbols...
 extra_flags=
 list=exp2; . ./look
 list=strftime; . ./look
-list='getrusage times ftime'; . ./look
+case $arch in
+  alpha) list='times ftime';; # gp-dyn has problems with getrusage 
+  *) list='getrusage times ftime';;
+esac; . ./look
 list='sigrelse sigsetmask'; . ./look
 list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
