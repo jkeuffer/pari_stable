@@ -1894,12 +1894,12 @@ extern GEN hnflll_i(GEN A, GEN *ptB, int remove);
  * regulator (not a multiple this time). *ptkR = multiple of regulator */
 static int
 compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
-{ 
+{
   ulong av = avma;
   long r;
   GEN U,L,H,gc,den,R;
   double c;
-    
+
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   gc = gmul(*ptkR,z);
   lambda = bestappr(lambda,gc); den = denom(lambda);
@@ -1907,17 +1907,17 @@ compute_R(GEN lambda, GEN z, GEN *ptU, GEN *ptkR)
   {
     if (DEBUGLEVEL) fprintferr("c = %Z\nden = %Z\n",gc,den);
     return PRECI;
-  } 
+  }
   L = gmul(lambda,den);
   H = hnf(L); r = lg(H)-1;
   R = gdiv(dethnf_i(H), gpowgs(den, r));
   R = mpabs(gmul(*ptkR,R)); /* tentative regulator */
   c = gtodouble(gmul(R,z)); /* should be 2n (= 2 if we are done) */
   if (DEBUGLEVEL)
-  { 
+  {
     msgtimer("bestappr/regulator");
     fprintferr("\n ***** check = %f\n",c/2);
-  } 
+  }
   if (c < 1.5) return PRECI;
   if (c > 3.) { avma = av; return RELAT; }
   /* *pU = coords. of fundamental units on sublambda */
@@ -2959,7 +2959,7 @@ MORE:
       goto START;
     }
     if (DEBUGLEVEL > 2) dbg_outrel(phase,cglob,vperm,mat,matarch);
-    if (phase) 
+    if (phase)
       for (j=lg(extramat)-1; j>0; j--)
       {
 	GEN c = mat[cglob+j], *g = (GEN*) extramat[j];
