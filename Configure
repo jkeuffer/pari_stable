@@ -345,7 +345,7 @@ case "$asmarch" in
   *)             prettyk="$asmarch";;
 esac
 # 'i386 (running ix86 kernel)'  looks ugly
-if test "$arch" != "$asmarch" -a \( "$arch" != "i386" -o "$asmarch" != "x86" \)
+if test "$arch" != "$asmarch" -a \( "$arch" != "i386" -o "$asmarch" != "ix86" \)
 then
   pretty="$pretty ($prettyk kernel)"
 fi
