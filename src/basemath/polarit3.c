@@ -1731,9 +1731,8 @@ FpM_to_mod(GEN z, GEN p)
 GEN
 FpX_red(GEN z, GEN p)
 {
-  long i,l;
-  GEN x;
-  l = lg(z); x = cgetg(l,t_POL);
+  long i, l = lg(z); 
+  GEN x = cgetg(l, t_POL);
   for (i=2; i<l; i++) x[i] = lmodii((GEN)z[i],p);
   x[1] = z[1]; return FpX_renormalize(x,l);
 }
