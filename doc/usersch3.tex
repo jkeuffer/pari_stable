@@ -1777,11 +1777,12 @@ the current precision.
 \syn{primeform}{x,p,\var{prec}}
 
 \subsecidx{qfbred}$(x,\{\fl=0\},\{D\},\{\var{isqrtD}\},\{\var{sqrtD}\})$:
-reduces the binary quadratic form $x$. $\fl$ can be any of $0$:
-default behaviour, uses \idx{Shanks}' distance function $d$,
-$1$: uses $d$, but performs only a single \idx{reduction} step,
-$2$: does not compute the distance function $d$, or $3$:
-does not use $d$, single reduction step.
+reduces the binary quadratic form $x$ (updating Shanks's distance function
+if $x$ is indefinite). The binary digits of $\fl$ are toggles meaning
+
+\quad 1: perform a single \idx{reduction} step
+
+\quad 2: don't update \idx{Shanks}'s distance
 
   $D$, \var{isqrtD}, \var{sqrtD}, if present, supply the values of the
 discriminant, $\lfloor \sqrt{D}\rfloor$, and $\sqrt{D}$ respectively
