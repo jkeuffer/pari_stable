@@ -1243,6 +1243,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   if (!col && !gcmp0(ex))
   {
     p1 = isprincipalfact(bnf, gen, gneg(ex), x, flag);
+    if (typ(p1) != t_VEC) return p1;
     col = (GEN)p1[2];
     e = itos((GEN)p1[3]);
   }
