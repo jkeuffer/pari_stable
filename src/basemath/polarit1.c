@@ -2852,7 +2852,7 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
 
   anorm=fabs(a[1][1]);
   for (i=2; i<=n; i++) for (j=(i-1); j<=n; j++) anorm+=fabs(a[i][j]);
-  nn=n; t=0.0;
+  nn=n; t=0.;
   if (DEBUGLEVEL>3) { fprintferr("* Finding eigenvalues\n"); flusherr(); }
   while (nn>=1)
   {
@@ -2861,11 +2861,11 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
     {
       for (l=nn; l>=2; l--)
       {
-        s=fabs(a[l-1][l-1])+fabs(a[l][l]); if (s==0.0) s=anorm;
+        s=fabs(a[l-1][l-1])+fabs(a[l][l]); if (s==0.) s=anorm;
         if ((double)(fabs(a[l][l-1])+s)==s) break;
       }
       x=a[nn][nn];
-      if (l==nn){ wr[nn]=x+t; wi[nn--]=0.0; }
+      if (l==nn){ wr[nn]=x+t; wi[nn--]=0.; }
       else
       {
         y=a[nn-1][nn-1];
@@ -2873,18 +2873,18 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
         if (l == nn-1)
         {
           p=0.5*(y-x); q=p*p+w; z=sqrt(fabs(q)); x+=t;
-          if (q>=0.0 || fabs(q)<=eps)
+          if (q>=0. || fabs(q)<=eps)
           {
             z=p+SIGN(z,p); wr[nn-1]=wr[nn]=x+z;
             if (fabs(z)>eps) wr[nn]=x-w/z;
-            wi[nn-1]=wi[nn]=0.0;
+            wi[nn-1]=wi[nn]=0.;
           }
           else{ wr[nn-1]=wr[nn]=x+p; wi[nn-1]=-(wi[nn]=z); }
           nn-=2;
         }
         else
         {
-          p = q = r = 0.0; /* for lint */
+          p = q = r = 0.; /* for lint */
           if (its==30) err(talker,"too many iterations in hqr");
           if (its==10 || its==20)
           {
@@ -2904,18 +2904,18 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
             v=fabs(p)*(fabs(a[m-1][m-1])+fabs(z)+fabs(a[m+1][m+1]));
             if ((double)(u+v)==v) break;
           }
-          for (i=m+2; i<=nn; i++){ a[i][i-2]=0.0; if (i!=(m+2)) a[i][i-3]=0.0; }
+          for (i=m+2; i<=nn; i++){ a[i][i-2]=0.; if (i!=(m+2)) a[i][i-3]=0.; }
           for (k=m; k<=nn-1; k++)
           {
             if (k!=m)
             {
               p=a[k][k-1]; q=a[k+1][k-1];
-              r = (k != nn-1)? a[k+2][k-1]: 0.0;
+              r = (k != nn-1)? a[k+2][k-1]: 0.;
               x = fabs(p)+fabs(q)+fabs(r);
-              if (x != 0.0) { p/=x; q/=x; r/=x; }
+              if (x != 0.) { p/=x; q/=x; r/=x; }
             }
             s = SIGN(sqrt(p*p+q*q+r*r),p);
-            if (s == 0.0) continue;
+            if (s == 0.) continue;
 
             if (k==m)
               { if (l!=m) a[k][k-1] = -a[k][k-1]; }
@@ -2943,10 +2943,10 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
   }
   for (j=2; j<=n; j++) /* ordering the roots */
   {
-    x=wr[j]; y=wi[j]; if (y) flj=1; else flj=0;
+    x=wr[j]; y=wi[j]; if (y != 0.) flj=1; else flj=0;
     for (k=j-1; k>=1; k--)
     {
-      if (wi[k]) flk=1; else flk=0;
+      if (wi[k] != 0.) flk=1; else flk=0;
       if (flk<flj) break;
       if (!flk && !flj && wr[k]<=x) break;
       if (flk&&flj&& wr[k]<x) break;
@@ -2959,7 +2959,7 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
   for (i=1; i<=n; i++) free(a[i]); free(a); eig=cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
   {
-    if (wi[i])
+    if (wi[i] != 0.)
     {
       GEN p1 = cgetg(3,t_COMPLEX);
       eig[i]=(long)p1;
