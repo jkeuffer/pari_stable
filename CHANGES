@@ -185,6 +185,7 @@ JD 74- [Configure:] detection of times()
    87- writebin(file, 0) saved a "corrupted" object (0 couldn't be read back)
    88- wrong prototype used in rnfdet()  [ accepted 3 arguments instead of 2 ]
    89- typo in to_Kronecker [ when at least 3 variables involved ]
+   90- typo in x = sqrt(t_PADIC)  [ returned either x or -x ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

@@ -817,7 +817,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
     GEN inv2;
     zp <<= 1;
     if (zp < pp) mod = sqri(mod); else { zp = pp; mod = modx; }
-    inv2 = shifti(mod, -1); /* = (mod + 1)/2 = 1/2 */
+    inv2 = shifti(addis(mod,1), -1); /* = (mod + 1)/2 = 1/2 */
     z = addii(z, remii(mulii(x, Fp_inv(z,mod)), mod));
     z = mulii(z, inv2);
     z = modii(z, mod); /* (z + x/z) / 2 */
