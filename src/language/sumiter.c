@@ -124,7 +124,7 @@ update_p(entree *ep, byteptr *ptr, ulong prime[])
 }
 
 static byteptr
-prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong prime[])
+prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong *p)
 {
   byteptr d = diffptr;
 
@@ -141,8 +141,7 @@ prime_loop_init(GEN ga, GEN gb, ulong *a, ulong *b, ulong prime[])
   *a = itou(ga);
   *b = itou(gb); if (*a > *b) return NULL;
   maxprime_check(*b);
-  prime[2] = sinitp(*a, 0, &d);
-  return d;
+  *p = sinitp(*a, 0, &d); return d;
 }
 
 void
@@ -154,7 +153,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   pari_sp av = avma;
   byteptr d;
 
-  d = prime_loop_init(ga,gb, &a,&b, prime);
+  d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
   if (!d) { avma = av; return; }
 
   avma = av; push_val(ep, (GEN)prime);
@@ -630,18 +629,18 @@ GEN
 prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
 {
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong a,b, *prime = (ulong*)p;
+  ulong a, b;
   pari_sp av, av0 = avma, lim;
-  GEN x = realun(prec);
+  GEN prime = p, x = realun(prec);
   byteptr d;
 
   av = avma;
-  d = prime_loop_init(ga,gb, &a,&b, prime);
+  d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
   if (!d) { avma = av; return x; }
 
   av = avma;
   lim = stack_lim(avma,1);
-  while (prime[2] < b)
+  while ((ulong)prime[2] < b)
   {
     x = gmul(x, eval(prime, E));
     if (low_stack(lim, stack_lim(av,1)))
@@ -651,7 +650,7 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
     }
     NEXT_PRIME_VIADIFF(prime[2], d);
   }
-  if (prime[2] == b) x = gmul(x, eval(prime, E));
+  if ((ulong)prime[2] == b) x = gmul(x, eval(prime, E));
   return gerepilecopy(av0,x);
 }
 GEN
@@ -662,13 +661,13 @@ GEN
 direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
 {
   long pp[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong a, b, i, k, n, p, *prime = (ulong*)pp;
+  ulong a, b, i, k, n, p;
   pari_sp av0 = avma, av, lim = stack_lim(av0, 1);
   long j, tx, lx;
-  GEN x, y, s, polnum, polden;
+  GEN x, y, s, polnum, polden, prime = pp;
   byteptr d;
 
-  d = prime_loop_init(ga,gb, &a,&b, prime);
+  d = prime_loop_init(ga,gb, &a,&b, (ulong*)&prime[2]);
   n = c? itou(c): b;
   if (!d || b < 2 || (c && signe(c) < 0)) return mkvec(gun);
   if (n < b) b = n;
