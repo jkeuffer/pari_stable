@@ -1905,24 +1905,29 @@ static GEN
 all_roots(GEN p, long bitprec)
 {
   GEN q,roots_pol,m;
-  long bitprec2,n=lgef(p)-3,j,e,av;
+  long bitprec0, bitprec2,n=lgef(p)-3,i,e,av;
 
   roots_pol=cgetg(n+1,t_VEC); av=avma;
-  for (j=1; j<=10; j++)
+  e = 2*gexpo(cauchy_bound(p)); if (e<0) e=0;
+  bitprec0=bitprec + gexpo(p) - gexpo((GEN)p[2+n]) + (long)log2(n) + 1 + e;
+  for (i=1;; i++)
   {
     setlg(roots_pol,1); 
-    e = 2*gexpo(cauchy_bound(p)); if (e<0) e=0;
-    bitprec2=bitprec+(1<<j)*n+gexpo(p)-gexpo((GEN)p[2+n]) + (long)log2(n)+1+e;
-    q=gmul(myrealun(bitprec2), mygprec(p,bitprec2));
-    m=split_complete(q,bitprec2,roots_pol);
+    bitprec2 = bitprec0 + (1<<i)*n;
+    q = gmul(myrealun(bitprec2), mygprec(p,bitprec2));
+    m = split_complete(q,bitprec2,roots_pol);
     e = gexpo(gsub(mygprec_special(p,bitprec2),m))
       - gexpo((GEN)q[2+n])+(long) log2((double)n)+1;
     if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
-    if (e < 0 && a_posteriori_errors(q,roots_pol,e) < -bitprec) break;
+    if (e < 0)
+    {
+      e = a_posteriori_errors(q,roots_pol,e);
+      if (e < -bitprec) return roots_pol;
+    }
+    if (DEBUGLEVEL > 7)
+      fprintferr("all_roots: restarting, i = %ld, e = %ld\n", i,e);
     avma = av;
   }
-  if (j > 10) err(bugparier,"all_roots");
-  return roots_pol;
 }
 
 /* true if x is an exact scalar, that is integer or rational */
