@@ -2236,24 +2236,53 @@ RecCoeff2(GEN nf,  GEN beta,  GEN B,  long v,  long prec)
   return NULL;
 }
 
+GEN
+chk_reccoeff_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
+{
+  GEN data = chk->data;
+  data[6] = (long)mat;
+  chk->data = data;
+  return (GEN)data[7];
+}
+
+GEN 
+chk_reccoeff(GEN data, GEN x)
+{
+  GEN M = (GEN)data[0], beta = (GEN)data[1], B = (GEN)data[2];
+  long v = data[3], G = data[4], N = data[5], j;
+  GEN U = (GEN)data[6], p1 = gmul(U, x), sol, plg;  
+
+  if (!gcmp1((GEN)p1[1])) return NULL;
+  
+  sol = cgetg(N + 1, t_COL);
+  for (j = 1; j <= N; j++)
+    sol[j] = lmulii((GEN)p1[1], (GEN)p1[j + 1]);
+  plg = gmul(M, sol);
+  
+  if (TestOne(plg, beta, B, v, G, N)) return sol;
+  return NULL;
+}
+
+GEN
+chk_reccoeff_post(GEN data, GEN res)
+{
+  return res;
+}
+
 /* Using Cohen's method */
 static GEN
 RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
 {
-  GEN A, M, nB, cand, sol, p1, plg, B2, C2;
-  GEN beta2, eps, nf2, Bd, maxBd = gpowgs(stoi(10), 8);
-  long N, G, i, j, k, l, ct = 0, av = avma, prec2, nbs;
+  GEN A, M, nB, cand, p1, B2, C2, data, tB, beta2, eps, nf2, Bd;
+  long N, G, i, j, k, l, ct = 0, av = avma, prec2;
+  FP_chk_fun *chk;
 
   N   = degpol(nf[1]);
-  G   = min( - 20, - bit_accuracy(prec) >> 4);
+  G   = min(-10, -bit_accuracy(prec) >> 4);
+  eps = gpowgs(stoi(10), min(-8, (G >> 1)));
+  tB  = gpow(gmul2n(eps, N), gdivgs(gun, 1-N), DEFAULTPREC);
 
-  eps  = gpowgs(stoi(10), - max(8, (G >> 1)));
-
-  if (cmpii(B, maxBd) > 0)
-    Bd = maxBd;
-  else 
-    Bd = B;
-
+  Bd    = gmin(B, tB);
   p1    = gceil(gdiv(glog(Bd, DEFAULTPREC), dbltor(2.3026)));
   prec2 = max((prec << 1) - 2, (long)(itos(p1) * pariK1 + BIGDEFAULTPREC));
   nf2   = nfnewprec(nf, prec2);
@@ -2289,7 +2318,25 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
     }
 
   nB = mulsi(N+1, B2);
-  cand = fincke_pohst(A, nB, 10000, 3, prec2, NULL);
+
+  data = new_chunk(8);
+  data[0] = (long)M; 
+  data[1] = (long)beta;
+  data[2] = (long)B;
+  data[3] = v;
+  data[4] = G;
+  data[5] = N;
+  data[6] = (long)NULL;
+  data[7] = (long)nB;
+
+  chk = (FP_chk_fun*)new_chunk(sizeof(FP_chk_fun));
+  chk->f         = &chk_reccoeff;
+  chk->f_init    = &chk_reccoeff_init;
+  chk->f_post    = &chk_reccoeff_post;
+  chk->data      = data;
+  chk->skipfirst = 0;
+
+  cand = fincke_pohst(A, nB, 20000, 3, prec2, chk);
 
   if (!cand)
   {
@@ -2302,40 +2349,13 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
     goto LABrcf;
   }
 
-  cand = (GEN)cand[3];
+  cand = (GEN)cand[1];
   l = lg(cand) - 1;
 
+  if (l == 1) return gerepileupto(av, basistoalg(nf, (GEN)cand[1]));
+
   if (DEBUGLEVEL >= 2)
-    fprintferr("RecCoeff3: found %ld candidate(s)\n", l);
-
-  sol = cgetg(N + 1, t_COL);
-  nbs = 0;
-
-  for (i = 1; i <= l; i++)
-  {
-    p1 = (GEN)cand[i];
-    if (gcmp1(mpabs((GEN)p1[1])))
-    {
-      for (j = 1; j <= N; j++)
-	sol[j] = lmulii((GEN)p1[1], (GEN)p1[j + 1]);
-      plg = gmul(M, sol);
-
-      if (TestOne(plg, beta, B, v, G, N)) nbs++;
-      
-      /* there are more than one solution, more precision needed */
-      if (nbs > 1) break;
-    }
-  }
-  
-  if (nbs == 1) return gerepileupto(av, basistoalg(nf, sol));
- 
-  if (DEBUGLEVEL >= 2)
-  {
-    if (nbs)
-      fprintferr("RecCoeff3: too many solutions!\n");
-    else
-      fprintferr("RecCoeff3: no solution found!\n");
-  }
+    fprintferr("RecCoeff3: no solution found!\n");
 
   avma = av; return NULL;
 }
@@ -2346,7 +2366,7 @@ RecCoeff3(GEN nf, GEN beta, GEN B, long v, long prec)
 GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
-  long av = avma, j, G, cl = degpol(pol);
+  long av = avma, j, md, G, cl = degpol(pol);
   GEN p1, beta;
 
   /* if precision(pol) is too low, abort */
@@ -2357,24 +2377,31 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
     if (G < 34) { avma = av; return NULL; }
   }
 
+  md = cl/2;
   pol = dummycopy(pol);
-  for (j = 2; j <= cl+1; j++)
+
+  for (j = 1; j <= cl; j++)
   {
-    GEN bound = binome(stoi(cl), j - 2);
-    bound = shifti(bound, cl + 2 - j);
+    /* start with the coefficients in the middle,
+       since they are the harder to recognize! */
+    long cf = md + (j%2? j/2: -j/2);
+    GEN bound = binome(stoi(cl), cf);
 
-    if (DEBUGLEVEL > 1) fprintferr("In RecCoeff with B = %Z\n", bound);
+    bound = shifti(bound, cl - cf);
 
-    beta = greal((GEN)pol[j]);
+    if (DEBUGLEVEL > 1) fprintferr("In RecCoeff with cf = %ld and B = %Z\n", 
+				   cf, bound);
+
+    beta = greal((GEN)pol[cf+2]);
     p1 = RecCoeff2(nf, beta, bound, v, prec);
     if (!p1)
     {
       p1 = RecCoeff3(nf, beta, bound, v, prec);
       if (!p1) return NULL;
     }
-    pol[j] = (long)p1;
+    pol[cf+2] = (long)p1;
   }
-  pol[j] = un;
+  pol[cl+2] = un;
   return gerepilecopy(av, pol);
 }
 
