@@ -888,6 +888,7 @@ bernreal(long n, long prec)
   affrr(bern(n),B); return B;
 }
 
+#if 0
 /* k > 0 */
 static GEN
 bernfracspec(long k)
@@ -915,6 +916,8 @@ bernfracspec(long k)
     }
   }
 }
+#endif
+extern GEN bernfrac_using_zeta(long n);
 
 GEN
 bernfrac(long k)
@@ -922,7 +925,15 @@ bernfrac(long k)
   if (!k) return gun;
   if (k == 1) return gneg(ghalf);
   if (k < 0 || k & 1) return gzero;
-  return bernfracspec(k);
+  if (k == 2) { GEN z = cgetg(3, t_FRAC);
+    z[1] = un; z[2] = lutoi(6UL);
+    return z;
+  }
+  if (k == 4) { GEN z = cgetg(3, t_FRAC);
+    z[1] = lstoi(-1); z[2] = lutoi(30UL);
+    return z;
+  }
+  return bernfrac_using_zeta(k);
 }
 
 /* mpbern as exact fractions */

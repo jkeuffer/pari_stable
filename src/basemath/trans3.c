@@ -1222,6 +1222,78 @@ czeta(GEN s0, long prec)
 }
 #endif
 
+/* 1/zeta(n) using Euler product. lba = log(bit_accuracy) we _really_ require */
+GEN
+inv_szeta_euler(long n, double lba, long prec)
+{
+  GEN z, N, res = cgetr(prec);
+  pari_sp av0 = avma, av;
+  byteptr d =  diffptr + 2;
+  double A = n / pariC2, D;
+  long p, lim;
+
+  if (!lba) lba = (prec - 2) * pariC2;
+  D = exp((lba - log(n-1)) / (n-1));
+  lim = 1 + (long)ceil(D);
+  maxprime_check((ulong)lim);
+  N = stoi(n);
+
+  prec++;
+  z = gsub(gun, real2n(-n, prec));
+  av = avma;
+  for (p = 3; p <= lim;)
+  {
+    long l = prec + 1 - (long)floor(A * log(p));
+    GEN h;
+
+    if (l < 3)         l = 3;
+    else if (l > prec) l = prec;
+    h = divrr(z, rpowsi((ulong)p, N, l));
+    z = subrr(z, h);
+    NEXT_PRIME_VIADIFF(p,d);
+  }
+  affrr(z, res); avma = av0; return res;
+}
+
+/* assume n even > 0, if iz != NULL, assume iz = 1/zeta(n) */
+GEN
+bernreal_using_zeta(long n, GEN iz, long prec)
+{
+  long l = prec + 1;
+  GEN z;
+  
+  if (!iz) iz = inv_szeta_euler(n, 0., l);
+  z = divrr(mpfactr(n, l), mulrr(gpowgs(Pi2n(1, l), n), iz));
+  setexpo(z, expo(z) + 1); /* 2 * n! / ((2Pi)^n zeta(n)) */
+  if ((n & 3) == 0) setsigne(z, -1);
+  return z;
+}
+
+/* assume n even > 0. Faster than standard bernfrac for n >= 6 */
+GEN
+bernfrac_using_zeta(long n)
+{
+  pari_sp av = avma;
+  GEN iz, a, d, D = divisors(stoi( n/2 ));
+  long i, prec, l = lg(D);
+  double t, u;
+
+  d = stoi(6); /* 2 * 3 */
+  for (i = 2; i < l; i++) /* skip 1 */
+  { /* Clausen - von Staudt */
+    long p = 2*itos((GEN)D[i]) + 1;
+    if (isprime(stoi(p))) d = mulis(d, p);
+  }
+  /* 2.83787706 = 1 + log(2Pi). 1.712086 = ??? */
+  t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*2.83787706 + 1.712086;
+  u = t / pariC2; prec = (long)ceil(u);
+  if (prec - u < 0.1) prec++; /* don't take risks */
+  prec += 2;
+  iz = inv_szeta_euler(n, t, prec);
+  a = ground( mulir(d, bernreal_using_zeta(n, iz, prec)) );
+  return gerepileupto(av, gdiv(a, d));
+}
+
 /* y = binomial(n,k-2). Return binomial(n,k) */
 static GEN
 next_bin(GEN y, long n, long k)
@@ -1305,6 +1377,38 @@ szeta_odd(long k, long prec)
   return gerepileuptoleaf(av, y);
 }
 
+/* assume k != 1 */
+GEN
+szeta(long k, long prec)
+{
+  pari_sp av = avma;
+  GEN y;
+
+  /* treat trivial cases */
+  if (!k) { y = real2n(-1, prec); setsigne(y,-1); return y; }
+  if (k < 0)
+  {
+    GEN s;
+    if ((k&1) == 0) return gzero;
+    if (-k <= bit_accuracy(prec)+1)
+      return gerepileuptoleaf(av, divrs(bernreal(1-k,prec), k-1));
+    s = stoi(1 - k);
+    y = gdiv(ggamma(s, prec), powgi(Pi2n(1, prec), s));
+    if ((k&3) == 3) setsigne(y, -1);
+    return gerepileuptoleaf(av, gmul2n(y, 1));
+  }
+  if (k > bit_accuracy(prec)+1) return realun(prec);
+  if ((k&1) == 0)
+  {
+    GEN p1 = mulrr(gpowgs(Pi2n(1, prec), k), bernreal(k,prec));
+    y = divrr(p1, mpfactr(k,prec));
+    setexpo(y, expo(y)-1); setsigne(y, 1);
+    return gerepileuptoleaf(av, y);
+  }
+  /* k > 1 odd */
+  return szeta_odd(k, prec);
+}
+
 /* return x^n, assume n > 0 */
 static long
 pows(long x, long n)
@@ -1333,39 +1437,6 @@ n_s(ulong n, GEN *tab)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
   }
   return x;
-}
-
-GEN czeta(GEN s0, long prec);
-
-/* assume k != 1 */
-GEN
-szeta(long k, long prec)
-{
-  pari_sp av = avma;
-  GEN y, p1;
-
-  /* treat trivial cases */
-  if (!k) { y = real2n(-1, prec); setsigne(y,-1); return y; }
-  if (k < 0)
-  {
-    GEN s;
-    if ((k&1) == 0) return gzero;
-    if (-k <= bit_accuracy(prec)+1)
-      return gerepileuptoleaf(av, divrs(bernreal(1-k,prec), k-1));
-    s = stoi(1 - k);
-    y = gdiv(ggamma(s, prec), powgi(Pi2n(1, prec), s));
-    if ((k&3) == 3) setsigne(y, -1);
-    return gerepileuptoleaf(av, gmul2n(y, 1));
-  }
-  if (k > bit_accuracy(prec)+1) return realun(prec);
-  if ((k&1) == 0)
-  {
-    p1 = mulrr(gpowgs(Pi2n(1, prec), k),absr(bernreal(k,prec)));
-    y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
-    return gerepileuptoleaf(av, y);
-  }
-  /* k > 1 odd */
-  return szeta_odd(k, prec);
 }
 
 /* s0 a t_INT, t_REAL or t_COMPLEX.
