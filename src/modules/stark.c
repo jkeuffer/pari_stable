@@ -459,7 +459,10 @@ CplxModulus(GEN data, long *newprec, long prec)
       cpl   = mpabs(poldisc0(pol, 0));
       if (!gcmp0(cpl)) break;
     }
-    dprec += 2;
+    pr = gexpo(pol)>>(TWOPOTBITS_IN_LONG+1);
+    if (pr < 0) pr = 0;
+    dprec = max(dprec, pr) + EXTRA_PREC;
+
     if (DEBUGLEVEL >= 2) err(warnprec, "CplxModulus", dprec);
   }
 
@@ -1599,7 +1602,7 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long nmax, long dg)
 static int***
 ComputeCoeff(GEN dataCR, long nmax, long prec)
 {
-  long cl, i, j, av = avma, av2, np, q, limk, k, id, cpt = 10, dg;
+  long cl, i, j, av = avma, av2, np, q, q1, limk, k, id, cpt = 10, dg, Bq;
   int ***matan, ***reduc, ***matan2, *c2;
   GEN c, degs, tabprem, bnf, pr, cond, ray, ki, ki2, prime, npg, bnr, dataray;
   byteptr dp = diffptr;
@@ -1638,8 +1641,10 @@ ComputeCoeff(GEN dataCR, long nmax, long prec)
       ki  = chiideal(dataCR, ray, 1);
       ki2 = dummycopy(ki);
 
-      for (q = np; q <= nmax; q *= np)
+      Bq = nmax/np;
+      for (q1 = 1; q1 <= Bq; q1 *= np) 
       {
+	q = q1*np; 
         limk = nmax / q;
         for (id = 1; id <= cl; id++)
         {
