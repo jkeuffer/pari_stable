@@ -1145,6 +1145,30 @@ polsymmodpp(GEN g, GEN pp)
   return y;
 }
 
+/* no GC */
+static GEN
+manage_cache(GEN chi, GEN pp, GEN ns)
+{
+  long j, n = degree(chi);
+  GEN ns2, npp = (GEN)ns[n+1];
+
+  if (gcmp(pp, npp) > 0)
+  {
+    if (DEBUGLEVEL > 4)
+      fprintferr("newtonsums: result too large to fit in cache\n");
+    return polsymmodpp(chi, pp); 
+  }
+
+  if (!signe((GEN)ns[1]))
+  {
+    ns2 = polsymmodpp(chi, pp); 
+    for (j = 1; j <= n; j++) 
+      affii((GEN)ns2[j], (GEN)ns[j]);
+  }
+  
+  return ns;
+}
+
 /* compute the Newton sums modulo pp of the characteristic 
    polynomial of a(x) mod g(x) */
 static GEN
@@ -1153,13 +1177,7 @@ newtonsums(GEN a, GEN chi, GEN pp, GEN ns)
   GEN va, pa, s, ns2;
   long j, k, n = degree(chi), av2, lim;
 
-  if (signe((GEN)ns[1])) /* result is already cached */
-    ns2 = ns;
-  else
-  {
-    ns2 = polsymmodpp(chi, pp);
-    for (j = 1; j <= n; j++) affii((GEN)ns2[j], (GEN)ns[j]);
-  }
+  ns2 = manage_cache(chi, pp, ns);
 
   av2 = avma;
   lim = stack_lim(av2, 1);
@@ -1244,8 +1262,8 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
 static GEN 
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
-  GEN p1, p2, p3, chi, chi2, npp;
-  long j, v = varn(f), n = degree(f);
+  GEN p1, p2, chi, chi2, npp;
+  long j, a, v = varn(f), n = degree(f);
 
   if (gcmp0(beta)) return zeropol(v);
 
@@ -1257,15 +1275,11 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     chi = caractducos(f, beta, v);
   else
   {
-    p2 = gzero;
-    p3 = gdiv(stoi(n), p);
-    while (gcmpgs(p3, 1) >= 0)   /* compute the extra precision needed */
-    {
-      p2 = addii(p2, gfloor(p3));
-      p3 = gdiv(p3, p);		 
-    }
-    npp = mulii(pp, powgi(p, p2));
-    if (p1) npp = gmul(npp, denom(p1));
+    a = 0;
+    for (j = 1; j <= n; j++) /* compute the extra precision needed */
+      a += ggval(stoi(j), p);
+    npp = mulii(pp, gpowgs(p, a));
+    if (p1) npp = gmul(npp, gpowgs(denom(p1), n));
 
     chi = newtoncharpoly(beta, f, npp, ns);
   }
@@ -1287,8 +1301,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   if (!pp) return chi2;
 
   /* this can happen only if gamma is incorrect (not an integer) */
-  if (divise(denom(content(chi2)), p))
-    return NULL;
+  if (divise(denom(content(chi2)), p)) return NULL;
   
   return redelt(chi2, pp, pp);
 }
@@ -1354,7 +1367,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
   affii(gzero, (GEN)ns[1]); /* kill cache */
 
   if (!chi)
-    nchi = mycaract(fx, alph, p, sqri(pmf), ns);
+    nchi = mycaract(fx, alph, p, pmf, ns);
   else
   {
     nchi  = chi;
@@ -1441,12 +1454,12 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
   opa = NULL;
 
   /* used to cache the newton sums of chi */
-  ns = cgetg(N + 1, t_COL);
+  ns = cgetg(N + 2, t_COL);
   p1 = powgi(p, gceil(gdivsg(N, mulii(p, subis(p, 1))))); /* p^(N/(p(p-1))) */
-  p1 = mulii(p1, gpowgs(pmf, 3));
-  l  = lg(p1); /* probably too much, but safe */
-  for (i = 1; i <= N; i++)
-    ns[i] = lgeti(l);
+  p1 = mulii(p1, mulii(pmf, gpowgs(pmr, N)));
+  l  = lg(p1); /* enough in general... */
+  for (i = 1; i <= N + 1; i++) ns[i] = lgeti(l);
+  ns[N+1] = (long)p1;
   affii(gzero, (GEN)ns[1]); /* zero means: need to be computed */
 
   for(;;)
@@ -1516,7 +1529,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       }
       else  
       {
-	chib = mycaract(chi, beta, p, pmf, ns);
+	chib = mycaract(chi, beta, NULL, NULL, ns);
 	vb = vstar(p, chib);
 	eq = (long)(vb[0] / vb[1]);
 	er = (long)(vb[0]*Ea / vb[1] - eq*Ea);
@@ -1567,7 +1580,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	  gamm = gmod(gamm, chi);
 	  gamm = redelt(gamm, p, pmr);
 	}
-	chig = mycaract(chi, gamm, p, pmf, ns); 
+	if (eq || er) chig = mycaract(chi, gamm, p, pmf, ns); 
       }
 
       nug  = (GEN)factmod(chig, p)[1];
@@ -1715,7 +1728,7 @@ testb2(GEN p, GEN fa, long Fa, GEN theta, GEN pmf, long Ft, GEN ns)
   {
     h = m? stopoly(t, m, v): scalarpol(stoi(t), v);
     phi = gadd(theta, gmod(h, fa));
-    w = factcp(p, fa, phi, sqri(pmf), ns);
+    w = factcp(p, fa, phi, pmf, ns);
     h = (GEN)w[3];
     if (h[2] > 1) { b[1] = un; break; }
     if (lgef(w[2]) == Dat) { b[1] = deux; break; }
@@ -1750,7 +1763,7 @@ testc2(GEN p, GEN fa, GEN pmr, GEN pmf, GEN alph2, long Ea, GEN thet2,
   psi = redelt(c3, pmr, pmr);
   phi = gadd(polx[v], psi);
 
-  w = factcp(p, fa, phi, sqri(pmf), ns);
+  w = factcp(p, fa, phi, pmf, ns);
   h = (GEN)w[3];
   b[1] = (h[2] > 1)? un: deux;
   b[2] = (long)phi; 
