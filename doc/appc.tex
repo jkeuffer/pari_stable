@@ -55,16 +55,15 @@ predefined, and their list is in the file \kbd{paricom.h}.
 Finally, one has access to a table of (differences of) primes through the
 pointer \tet{diffptr}. This is used as follows: when
 
-\fun{void}{pari_init}{long size, ulong maxprime}
+\fun{void}{pari_init}{size\_t size, ulong maxprime}
 
 \noindent is called, this table is initialized with the successive
 differences of primes up to (just a little beyond) \kbd{maxprime}
 (see \secref{se:intro4}). The prime table will occupy roughly
 $\kbd{maxprime}/\log(\kbd{maxprime})$ bytes in memory, so be sensible when
 choosing \kbd{maxprime} (it is $500000$ by default under \kbd{gp}). In any case,
-the implementation requires that $\tet{maxprime} < 4294965248$
-(resp.~$18446744073709549568$) on 32-bit (resp.~64-bit) machines, whatever memory
-is available.
+the implementation requires that $\tet{maxprime} < 2^{\B} - 2048$, whatever
+memory is available.
 
 The largest prime computable using this table is available as the output of
 

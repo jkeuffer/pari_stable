@@ -4,12 +4,13 @@ cat > doc/Makefile << EOT
 #
 SHELL = $make_sh
 
-USERS_TEX= users.tex appa.tex appb.tex appc.tex paricfg.tex parimacro.tex\\
- usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex
+MACROS= paricfg.tex parimacro.tex
+USERS_TEX=\$(MACROS) users.tex usersch1.tex usersch2.tex usersch3.tex
+PARI_TEX=\$(MACROS) libpari.tex appa.tex appb.tex appc.tex usersch4.tex usersch5.tex
 
-doc all: users.dvi refcard.ps tutorial.dvi
-docps: refcard.ps tutorial.ps users.ps INSTALL.ps
-docpdf: users.pdf tutorial.pdf refcard.pdf INSTALL.pdf
+doc all: libpari.dvi users.dvi refcard.ps tutorial.dvi
+docps: libpari.ps refcard.ps tutorial.ps users.ps INSTALL.ps
+docpdf: libpari.pdf users.pdf tutorial.pdf refcard.pdf INSTALL.pdf
 
 .SUFFIXES: .tex .ipf .pod .inf .dumbpod .3 .html
 
@@ -19,11 +20,25 @@ paricfg.tex: paricfg.tex.in
 	    -e 's!@libdir@!$libdir!'\\
 	    -e 's!@datadir@!$datadir!' paricfg.tex.in > \$@
 
-%.pdf: %.tex paricfg.tex
+%.pdf: %.tex \$(MACROS)
 	pdftex \$<
 
-%.dvi: %.tex paricfg.tex
+%.dvi: %.tex \$(MACROS)
 	tex \$<
+
+libpari.pdf: \$(PARI_TEX) \$(MACROS)
+	rm -f libpari.std; pdftex libpari;
+	make libpari.std; pdftex libpari; rm -f libpari.std
+libpari.dvi: \$(PARI_TEX) \$(MACROS)
+	rm -f libpari.std; tex libpari;
+	make libpari.std; tex libpari; rm -f libpari.std
+
+tutorial.pdf: tutorial.tex \$(MACROS)
+	pdftex tutorial; touch tutorial.std
+	pdftex tutorial; rm -f tutorial.std
+tutorial.dvi: tutorial.tex \$(MACROS)
+	tex tutorial; touch tutorial.std
+	tex tutorial; rm -f tutorial.std
 
 %.ps: %.dvi
 	dvips \$< -o \$@
@@ -31,12 +46,12 @@ paricfg.tex: paricfg.tex.in
 refcard.ps: refcard.dvi
 	dvips -t landscape -t a4 refcard.dvi -o \$@
 
-users.std: users.idx
+%.std: %.idx
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
-	  users.idx | env LANG=C sort -f |\\
-	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
+	  \$< | env LANG=C sort -f |\\
+	sed -e 's/!00*\([0-9]*\)!/!\1!/' > \$@;
 
 users.dvi: \$(USERS_TEX)
 	rm -f users.std; tex users;
@@ -50,7 +65,7 @@ gpman: gp.1
 	nroff -man gp.1 | unix2dos -ascii > gp.man
 
 clean:	
-	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc users.std *.dumbpod *.3
+	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc *.std *.dumbpod *.3
 
 cleandoc: clean
 

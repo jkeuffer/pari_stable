@@ -35,8 +35,7 @@ more free software).
 
   $\bullet$ GNU \kbd{MP} library. This provides an alternative multiprecision
 kernel, which is faster than PARI's native one. To enable detection of GMP,
-use \kbd{Configure --with-gmp}. \emph{This is an experimental feature, use at
-your own risk!}
+use \kbd{Configure --with-gmp}.
 
   $\bullet$ GNU \kbd{readline} library. This provides line editing under GP,
 an automatic context-dependent completion, and an editable history of
@@ -183,10 +182,7 @@ In case the default \kbd{Configure} run fails miserably, try
 \noindent (interactive mode) and answer all the questions (there are not that
 many). Of course, \kbd{Configure} will still provide defaults for each answer
 but if you accept them all, it will fail just the same, so be wary. In any
-case, we would appreciate a bug report including the complete output from
-\kbd{Configure} and the file \kbd{O$xxx$/pari.cfg} that was produced in
-the process.
-
+case, we would appreciate a bug report (see the last section).
 
 \subsec{Problems related to readline:}
 \kbd{Configure} does not try very hard to find the \kbd{readline} library and
@@ -273,8 +269,7 @@ listed and you nevertheless have a working GP executable.)
 
 If a \kbd{[BUG]} message shows up, something went wrong. Probably with the
 installation procedure, but it may be a bug in the Pari system, in which
-case we would appreciate a report (including the relevant \kbd{*.dif} file
-in the \kbd{O$xxx$} directory and the file \kbd{pari.cfg}).
+case we would appreciate a report (see the last section)
 
 \misctitle{Known problems:}
 
@@ -330,8 +325,8 @@ Beware that, if you chose the same installation directory as before in the
 and below that might already be there. Libraries and executable files from
 newer versions (starting with version 1.900) are not removed since they are
 only links to files bearing the version number (beware of that as well: if
-you are an avid GP fan, do not forget to delete the old pari libraries once in
-a while).
+you are an avid \kbd{gp} fan, do not forget to delete the old pari libraries
+once in a while).
 
 This installs in the directories chosen at \kbd{Configure} time the default
 GP executable (probably \kbd{gp-dyn}) under the name \kbd{gp}, the default
@@ -393,12 +388,13 @@ its documentation. You can also type directly \kbd{make doc}. In any case,
 you need a working (plain) \TeX\ installation.
 
 After that, the \kbd{doc} directory contains various \kbd{dvi} files:
-\kbd{users.dvi} (manual with a table of contents and an index),
-\kbd{tutorial.dvi} (a short tutorial), and \kbd{refcard.dvi} (a reference
-card for GP). You can send these files to your favourite printer in the usual
-way, probably via \kbd{dvips}. The reference card is also provided as a
-\kbd{PostScript} document, which may be easier to print than its \kbd{dvi}
-equivalent (it is in Landscape orientation and assumes A4 paper size).
+\kbd{libpari.dvi} (manual for the PARI library), \kbd{users.dvi} (manual
+for the \kbd{gp} calculator), \kbd{tutorial.dvi} (a tutorial), and
+\kbd{refcard.dvi} (a reference card for GP). You can send these files to your
+favourite printer in the usual way, probably via \kbd{dvips}. The reference
+card is also provided as a \kbd{PostScript} document, which may be easier to
+print than its \kbd{dvi} equivalent (it is in Landscape orientation and
+assumes A4 paper size).
 
 \noindent If the \kbd{pdftex} package is part of your \TeX\ setup, you can
 produce these documents in PDF format, which may be more convenient for
@@ -406,11 +402,8 @@ online browsing (the manual is complete with hyperlinks); type
 
 \kbd{make docpdf}
 
-\noindent All these documents are available online from PARI home page and on
-
-\kbd{ftp://pari.math.u-bordeaux.fr/pub/pari}
-
-\noindent in any case.
+\noindent All these documents are available online from PARI home page
+(see the last section).
 
 \subsec{C programming:} Once all libraries and include files are installed,
 you can link your C programs to the PARI library. A sample makefile
@@ -430,52 +423,58 @@ algorithm (much worse than the built-in \kbd{bnfinit}!). See the file
 \kbd{emacs/pariemacs.txt}. If you are familiar with Emacs, we suggest that
 you do~so.
 
-\subsec{The PARI Community:} There are three mailing lists devoted to the
-PARI/GP package (run courtesy of Dan Bernstein), and most feedback should be
-directed to those. They are:
+\subsec{The PARI Community:} PARI's home page at the address
+\bprog
+  http://pari.math.u-bordeaux.fr/
+@eprog\noindent
+maintains an archive of mailing lists dedicated to PARI, documentation
+(including Frequently Asked Questions), a download area and our Bug Tracking
+System (BTS). Bug reports should be submitted online to the BTS, which may be
+accessed from the navigation bar on the home page or directly at
+\bprog
+  http://pari.math.u-bordeaux.fr/Bugs
+@eprog\noindent
+Further information can be found at that address but, to report a
+configuration problem, make sure to include the relevant \kbd{*.dif} files in
+the \kbd{O$xxx$} directory and the file \kbd{pari.cfg}.
+\smallskip
+
+There are three mailing lists devoted to PARI/GP (run courtesy of Dan
+Bernstein), and most feedback should be directed to those. They are:
 
 $\bullet$ \kbd{pari-announce}: to announce major version changes.
 You cannot write to this one, but you should probably subscribe.
 
 $\bullet$ \kbd{pari-dev}: for everything related to the development
 of PARI, including suggestions, technical questions, bug reports or patch
-submissions.
+submissions. (The BTS forwards the mail it receives to this list.)
 
  $\bullet$ \kbd{pari-users}: for everything else.
 
-\noindent To subscribe, send empty messages respectively to
-
-\centerline{\kbd{pari-announce-subscribe@list.cr.yp.to}}
-
-\centerline{\kbd{pari-users-subscribe@list.cr.yp.to}}
-
-\centerline{\kbd{pari-dev-subscribe@list.cr.yp.to}}
-
-\noindent The PARI home page at the address
-
-\centerline{\wwwsite}
-
-\noindent maintains an archive of all discussions, various documentation, as
-well as a download area and our Bug Tracking System. If you do not want to
-subscribe to those lists, you can write to us at the address
-
-\centerline{\kbd{pari@math.u-bordeaux.fr}}
-
-\noindent At the very least, we will forward you mail to the lists above and
-correct faulty behaviour, if necessary. But we cannot promise you will get an
-individual answer.
+\noindent You may send an email to the last two without being subscribed.
+(You will have to confirm that your message is not unsollicited bulk email,
+aka \emph{Spam}.) To subscribe, send empty messages respectively to
+\def\@{@}
+\bprog
+  pari-announce-subscribe@@list.cr.yp.to
+     pari-users-subscribe@@list.cr.yp.to
+       pari-dev-subscribe@@list.cr.yp.to
+@eprog\noindent You can also write to us at the address
+\bprog
+  pari@@math.u-bordeaux.fr
+@eprog\noindent but we cannot promise you will get an individual answer.
+\smallskip
 
 If you have used PARI in the preparation of a paper, please cite it in the
 following form (BibTeX format):
 
-\def\@{@}
 \bprog
 @@manual{PARI2,
     organization = "{The PARI~Group}",
     title        = "{PARI/GP, Version @vers}",
     year         = 2004,
     address      = "Bordeaux",
-    note         = "available from {\tt @wwwsite}"
+    note         = "available from {\tt http://pari.math.u-bordeaux.fr/}"
 }
 @eprog
 \smallskip

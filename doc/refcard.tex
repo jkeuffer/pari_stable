@@ -2,7 +2,7 @@
 % This file is intended to be processed by plain TeX (TeX82).
 % Reference Card for PARI-GP version 2.1
 
-% Copyright (c) 1997-2000 Karim Belabas.
+% Copyright (c) 1997-2004 Karim Belabas.
 % Permission is granted to copy, distribute and/or modify this document
 % under the terms of the GNU General Public License
 
@@ -16,11 +16,11 @@
 %% Thanks to Stephen Gildea for the multicolumn macro package
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\def\TITLE{Pari-GP reference card}
-\def\versionnumber{2.16}% Version of this reference card
-\def\PARIversion{2.2.5}% Version of PARI described on this reference card
-\def\year{2003}
-\def\month{October}
+\def\TITLE{Pari/GP reference card}
+\def\versionnumber{2.17}% Version of this reference card
+\def\PARIversion{2.2.8}% Version of PARI described on this reference card
+\def\year{2004}
+\def\month{August}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -371,7 +371,6 @@ Note: optional arguments are surrounded by braces $\{\}$.
 \li{\typ{RFRAC}. Rational Functions}{$f/g$}
 \li{\typ{VEC}/\typ{COL}. Row/Column Vectors}
   {[$x,y,z$]{\rm,} [$x,y,z$]\til}
-%\li{\typ{COL}. Column Vectors}{[$x,y,z$]\til}
 \li{\typ{MAT}. Matrices}{[$x,y$;$z,t$;$u,v$]}
 \li{\typ{LIST}. Lists}{List$($[$x,y,z$]$)$}
 \li{\typ{STR}. Strings}{"aaa"}
@@ -393,8 +392,8 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \section{Conversions}
 %
 \subsec{Change Objects}
-\li{make $x$ a vector, matrix, set, list, string}
-  {Vec{\rm,}Mat{\rm,}Set{\rm,}List{\rm,}Str}
+\li{to vector, matrix, set, list, string}
+  {Col{\rm/}Vec{\rm,}Mat{\rm,}Set{\rm,}List{\rm,}Str}
 \li{create PARI object $(x\mod y)$}{Mod$(x,y)$}
 \li{make $x$ a polynomial of $v$}{Pol$(x,\{v\})$}
 \li{as above, starting with constant term}{Polrev$(x,\{v\})$}

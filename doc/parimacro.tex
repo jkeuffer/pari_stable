@@ -44,7 +44,6 @@
   \def\vers{2.0.x}
   \def\includedir{/usr/local/include/pari}
   \def\libdir{/usr/local/lib}
-  \def\wwwsite{\kbd{http://pari.math.u-bordeaux.fr/}}
 \else
   \input\@stdfile
 \fi
@@ -56,6 +55,20 @@
 \scriptfont\ttfam=\seventt % we should really set the \hyphenchar etc first
 \parskip=6pt plus 3pt minus 1.5pt
 \overfullrule=0pt
+
+%%
+%% TABLE OF CONTENTS
+%%
+\def\tableofcontents{\begintitle
+\openin\std=\jobname.toc
+\ifeof\std
+\else
+  \centerline{\bf Table of Contents}\medskip
+  \parskip=0pt plus 1pt
+  \parindent=0pt
+  \obeylines\input\jobname.toc
+\fi
+\endtitle}
 
 %%
 %% CROSS REFERENCING & INDEX
@@ -76,7 +89,7 @@
   \def\newlabel#1#2{\@ifundef{r@#1}{}{\message{Label `#1' multiply
     defined}}\global\@namedef{r@#1}{#2}}
 
-  \openin\std=users.std
+  \openin\std=\jobname.std
   \ifeof\std
     \secondpassfalse
     \typeout{FIRST PASS}
@@ -105,7 +118,7 @@
       \immediate\condwrite\index{!#1!\f@nt!\the\pageno!}}
   \fi
 
-  \checkfile{users.aux}% don't use \jobname: may be used by tutorial.tex
+  \checkfile{\jobname.aux}
   \ifeof\std
     \message{No aux file.}
   \else
@@ -226,7 +239,8 @@
   \fi
   \centerline{\let\bf\chaptertitlebf \chaptertitlefont #2}\vskip1cm}
 \def\sectitle#1{%
-  \tocwrite{{\sevenrm\hskip0.5cm#1\string\dotfill\the\pageno}}%
+  \tocwrite{{%\sevenrm
+\hskip0.5cm#1\string\dotfill\the\pageno}}%
   \vskip 0pt plus 54pt\penalty-600% good break
   \vskip 24pt plus -45pt minus 9pt%
   \putchapdest%
@@ -320,17 +334,14 @@
   \centerline{\tt e-mail: pari@math.u-bordeaux.fr}
   \vskip 2.truecm
   \centerline{Home Page:}
-  \centerline{\wwwsite}
-  \vskip .5truecm
-  \centerline{Primary {\tt ftp} site:}
-  \centerline{\tt ftp://pari.math.u-bordeaux.fr/pub/pari/}
-  \vskip 1.truecm
+  \centerline{\kbd{http://pari.math.u-bordeaux.fr/}}
+  \vskip 2.truecm
 }
 
 \def\copyrightpage{
 \begintitle
 \vskip 14cm
-\noindent Copyright \copyright\ 2000--2003 The PARI Group
+\noindent Copyright \copyright\ 2000--2004 The PARI Group
 \medskip\par
 \noindent Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice are
@@ -341,7 +352,7 @@ translations, of this manual under the conditions for verbatim copying,
 provided also that the entire resulting derived work is distributed under the
 terms of a permission notice identical to this one.
 \bigskip\par
-\noindent PARI/GP is Copyright \copyright\ 2000--2003 The PARI Group
+\noindent PARI/GP is Copyright \copyright\ 2000--2004 The PARI Group
 \medskip\par
 \noindent PARI/GP is free software;  you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the Free

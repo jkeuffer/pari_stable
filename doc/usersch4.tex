@@ -7,6 +7,17 @@
 % under the terms of the GNU General Public License
 \chapter{Programming PARI in Library Mode}
 
+\noindent The \emph{User's Guide to Pari/GP} gives in three chapters a
+general presentation of the system, of the \kbd{gp} calculator, and detailed
+explanation of high level PARI routines available through the calculator. The
+present manual assumes general familiarity with the contents of these
+chapters and the basics of ANSI C programming, and focuses on the usage of
+the PARI library.
+
+To make the following descriptions valid both for 32-bit and 64-bit machines,
+we will set \B\ to be equal to 32 (resp.~64), an abbreviation of
+\kbd{BITS\_IN\_LONG}, which is what is actually used in the source code.
+
 \section{Introduction: initializations, universal objects}
 \label{se:intro4}
 
@@ -14,7 +25,8 @@
 To be able to use PARI in \idx{library mode}, you must write a C program and
 link it to the PARI library. See the installation guide (in Appendix~A)
 on how to create and install the library and include files. A sample Makefile
-is presented in Appendix~B.
+is presented in Appendix~B, and a more elaborate one in
+\kbd{examples/Makefile}.
 
 Probably the best way to understand how programming is done is to work
 through a complete example. We will write such a program in
@@ -46,28 +58,28 @@ statement of a main program should be to initialize the PARI system, and in
 particular the PARI stack which will be both a scratchboard and a repository
 for computed objects. This is done with a call to the function
 
-\fun{void}{pari_init}{long size, ulong maxprime)}
+\fun{void}{pari_init}{size\_t size, ulong maxprime)}
 
 \noindent The first argument is the number of bytes given to PARI to work
 with (it should not reasonably be taken below 500000), and the second is the
 upper limit on a precomputed prime number table. If you do not want prime
-numbers, just put $\tet{maxprime} = 2$. Be careful because lots a PARI
-functions need this table (certainly all the ones of interest to number
-theorists). If you wind up with the error message ``not enough precomputed
-primes'', try to increase this value.
+numbers, just put $\tet{maxprime} = 2$. Be careful: lots a PARI functions
+need this table, certainly all the ones of interest to number theorists. If
+you wind up with the error message ``not enough precomputed primes'', do
+increase this value.
 
 \noindent We have now at our disposal:
 
-$\bullet$ a large PARI \tev{stack} containing nothing. It is a big
-connected chunk of memory whose size you chose when invoking
-\tet{pari_init}. All your computations are going to take place here.
-When doing large computations, unwanted intermediate results clutter up
-memory very fast so some kind of garbage collecting is needed. Most large
-systems do garbage collecting when the memory is getting scarce, and this slows
-down the performance. In PARI we have taken a different approach: you must do
-your own cleaning up when the intermediate results are not needed anymore.
-Special purpose routines have been written to do this; we will see later how
-(and when, if at all) you should use them.
+$\bullet$ a PARI \tev{stack} containing nothing. It is a big
+connected chunk of \kbd{size} bytes of memory. All your computations are
+going to take place here. When doing large computations, unwanted
+intermediate results clutter up memory very fast so some kind of garbage
+collecting is needed. Most large systems do garbage collecting when the
+memory is getting scarce, and this slows down the performance. PARI 
+takes a different approach: you must do your own cleaning up when the
+intermediate results are not needed anymore. Special purpose routines have
+been written to do this; we will see later how (and when) you should use
+them.
 
 $\bullet$ the following \emph{universal objects} (by definition, objects
 which do not belong on the stack): the integers 0, 1 and 2 (respectively
@@ -452,7 +464,7 @@ returns the \typ{VEC} whose $n$ coefficients (\kbd{GEN}) follow.
 returns the \typ{COL} whose $n$ coefficients (\kbd{GEN}) follow.
 
 \misctitle{Warning} Contrary to the policy of general PARI functions, the
-latter three functions do \emph{not} copy of its arguments, nor do they produce
+latter three functions do \emph{not} copy their arguments, nor do they produce
 an object a priori suitable for \tet{gerepileupto}. For instance
 \bprog
   /* gerepile-safe: components are universal objects */
@@ -1251,13 +1263,13 @@ represented as \kbd{z[0]} (encoding $\kbd{type} = \typ{REAL}$, \kbd{lg(z)}),
 \kbd{z[1]} (encoding $\kbd{sign} = 1$, $\kbd{expo} = 1$), $\kbd{z[2]} =
 \kbd{0xe0000000}$, $\kbd{z[3]} =\dots = \kbd{z[lg(z)-1]} = \kbd{0x0}$.
 
-\subsec{Type \typ{INTMOD} (integermod):}\kbdsidx{t_INTMOD}\sidx{integermod}
+\subsec{Type \typ{INTMOD} (intmod):}\kbdsidx{t_INTMOD}\sidx{intmod}
 \kbd{z[1]} points to the modulus, and \kbd{z[2]} at the number representing
 the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be of
 type integer, satisfying the inequality $0 \le \kbd{z[2]} < \kbd{z[1]}$.
 
 It is good practice to keep the modulus object on the heap, so that new
-integermods resulting from operations can point at this common object,
+intmods resulting from operations can point at this common object,
 instead of carrying along their own copies of it on the stack. The library
 functions implement this practice almost by default.
 
@@ -1311,7 +1323,7 @@ implemented as quadratics, but \typ{COMPLEX} is in general more versatile
 (\typ{REAL} components are allowed) and more efficient.
 
 \subsec{Type \typ{POLMOD} (polmod):}\kbdsidx{t_POLMOD}\sidx{polmod} exactly as
-for integermods, \kbd{z[1]} points to the modulus, and \kbd{z[2]} to a
+for intmods, \kbd{z[1]} points to the modulus, and \kbd{z[2]} to a
 polynomial representing the class of~\kbd{z}. Both must be of type
 \typ{POL} in the same variable. However, \kbd{z[2]} is allowed to be a
 simplification of such a polynomial, e.g a scalar. This is quite tricky

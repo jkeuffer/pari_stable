@@ -8,7 +8,7 @@
 
 % Compile with plain TeX
 %
-\def\TITLE{User's Guide to Pari/GP}
+\def\TITLE{User's Guide to the PARI library}
 \input parimacro.tex
 \ifPDF % PDF output (from pdftex)
   \input pdfmacs.tex
@@ -21,22 +21,24 @@
 \vskip 1.truecm
 \centerline{\mine to}
 \vskip 1.truecm
-\centerline{\mine PARI / GP}
+\centerline{\mine the PARI library}
 \vskip 1.truecm
 \authors
-\centerline{last updated 8 January 2004}
+\centerline{last updated 8 August 2004}
 \centerline{for version \vers}
 \endtitle
 
 \copyrightpage
 \tableofcontents
-\openin\std=libpari.aux
+\openin\std=users.aux
 \ifeof\std
 \else
-  \input libpari.aux
+  \input users.aux
 \fi
-\chapno=0
-{ \input usersch1 }
-{ \input usersch2 }
-{ \input usersch3 }
+\chapno=3
+{ \input usersch4 }
+{ \input usersch5 }
+{ \input appa }
+{ \input appb }
+{ \input appc }
 \input index\end

@@ -7,28 +7,29 @@
 % under the terms of the GNU General Public License
 \chapter{Specific Use of the \kbd{gp} Calculator}
 
-Originally, \tet{gp} was designed as a debugging tool for the PARI system
+Originally, \tet{gp} was designed as a debugging device for the PARI system
 library, and hence not much thought had been given to making it
 user-friendly. The situation has now changed somewhat, and \kbd{gp} is very
 useful as a stand-alone tool. The operations and functions available in
 PARI and \kbd{gp} will be described in the next chapter. In the present one, we
 describe the specific use of the \kbd{gp} programmable calculator.
 
-For starting the calculator, the general command line syntax is:
+To start the calculator, the general command line syntax is:
 
 \kbd{gp [-s \var{stacksize}] [-p \var{primelimit}] [\var{files}]}
 
 \noindent
-where items within brackets are optional\footnote{*}{On the Macintosh, even
-after clicking on the gp icon, once in the MPW Shell, you still need to type
-explicitly a command of the above form.}. The [\var{files}] argument is a
-list of files written in the GP scripting language, which will be loaded on
-startup. The ones starting with a minus sign are \emph{flags}, setting some
-internal parameters of \kbd{gp}, or \var{defaults}. See \secref{se:defaults}
-below for a list and explanation of all defaults, there are many more than
-just those two. These defaults can be changed by adding parameters to the
-input line as above, or interactively during a \kbd{gp} session or in a
-preferences file (also known as \tet{gprc}).
+where items within brackets are optional\footnote{*}{On old Macintoshs
+(pre-Mac OS X era), even after clicking on the gp icon, once in the MPW
+Shell, you still need to type explicitly a command of the above form.}. The
+[\var{files}] argument is a list of files written in the GP scripting
+language, which will be loaded on startup. The ones starting with a minus
+sign are \emph{flags}, setting some internal parameters of \kbd{gp}, or
+\var{defaults}. See \secref{se:defaults} below for a list and explanation of
+all defaults, there are many more than just those two. These defaults can be
+changed by adding parameters to the input line as above, or interactively
+during a \kbd{gp} session or in a preferences file (also known as
+\tet{gprc}).
 
 \unix Some features were developed on UNIX platforms, and depend heavily on
 the operating system in use. It is \emph{possible} that some of these will be
@@ -812,7 +813,7 @@ You can also use scientific notation with the letter \kbd{E} or
 $N$, whereas \kbd{0.} returns a real 0 ``of default precision'' (of exponent
 $-\kbd{defaultprecision}$), see \secref{se:whatzero}.
 
-\subsec{Integermods}\sidx{integermod}
+\subsec{Intmods}\sidx{intmod}
 (type \tet{t_INTMOD}): to enter $n \mod m$, type
 \kbd{Mod(n,m)}, \emph{not} \kbd{n\%m} (see \secref{se:Mod}).
 
@@ -867,7 +868,7 @@ $d\equiv 1 \mod 4$, where $d$ is the discriminant), and to enter $x+yw$ you
 just type \kbd{x + y*w}.
 
 \subsec{Polmods}\sidx{polmod} (type \tet{t_POLMOD}): exactly as
-for integermods, to enter $x \mod y$ (where $x$ and $y$ are polynomials),
+for intmods, to enter $x \mod y$ (where $x$ and $y$ are polynomials),
 type \kbd{Mod(x,y)}, not \kbd{x\%y} (see \secref{se:Mod}). Note that when $y$
 is an irreducible polynomial in one variable, polmods whose modulus is $y$
 are simply algebraic numbers in the finite extension defined by the
@@ -2459,8 +2460,8 @@ possible customizations (colours, prompt). Read the file
 
   Thanks to the initial help of Ilya Zakharevich, there is a possibility of
 line editing and command name completion outside of an Emacs buffer \emph{if}
-you have compiled \kbd{gp} with the GNU \idx{readline} library. If you don't
-have Emacs available, or can't stand using it, we really advise you to make
+you have compiled \kbd{gp} with the GNU \idx{readline} library. If you do not
+have Emacs available, or cannot stand using it, we really advise you to make
 sure you get this very useful library before configuring or compiling
 \kbd{gp}. In fact, with \kbd{readline}, even line editing becomes \emph{more}
 powerful outside an Emacs buffer!
@@ -2518,13 +2519,13 @@ changes made to it during the current session.
 (default: off) will automatically insert the matching closure (respectively
 \kbd{)} and \kbd{]}). This behaviour can be toggled on and off by giving
 the numeric argument $-2$ to \kbd{(} (\kbd{M--2(}), which is useful if you
-want, e.g to copy-paste some text into the calculator. If you don't want a
+want, e.g to copy-paste some text into the calculator. If you do not want a
 toggle, you can use \kbd{M--0} / \kbd{M--1} to specifically switch it on or
 off).
 
-\misctitle{Note:} In recent versions of readline (2.1 for instance), the
+\misctitle{Note:} In some versions of readline (2.1 for instance), the
 \kbd{Alt} or \kbd{Meta} key can give funny results (output 8-bit accented
-characters for instance). If you don't want to fall back to the \kbd{Esc}
+characters for instance). If you do not want to fall back to the \kbd{Esc}
 combination, put the following two lines in your \kbd{.inputrc}:
 %
 \bprog
@@ -2551,16 +2552,16 @@ yours and GP's), and variables.
   If, at any time, only one completion is meaningful, \kbd{gp} will provide it
 together with
 
-$\bullet$ an ending comma if we're completing a default,
+$\bullet$ an ending comma if we are completing a default,
 
-$\bullet$ a pair of parentheses if we're completing a function name. In
+$\bullet$ a pair of parentheses if we are completing a function name. In
 that case hitting \kbd{<TAB>} again will provide the argument list as given
 by the online help\footnote{*}{recall that you can always undo the effect
 of the preceding keys by hitting \kbd{C-\_}}.
 
 Otherwise, hitting \kbd{<TAB>} once more will give you the list of possible
 completions. Just experiment with this mechanism as often as possible,
-you'll probably find it very convenient. For instance, you can obtain
+you will probably find it very convenient. For instance, you can obtain
 \kbd{default(seriesprecision,10)}, just by hitting \kbd{def<TAB>se<TAB>10},
 which saves 18 keystrokes (out of 27).
 

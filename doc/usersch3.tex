@@ -77,10 +77,10 @@ powers of~$2$.
 \misctitle{Mnemonics for flags}. Numeric flags as mentionned above are
 obscure, error-prone, and quite rigid: should the authors
 want to adopt a new flag numbering scheme (for instance when noticing
-flags with the same meaning but different numeric values), it would break
-backward compatibility. The only advantage of explicit numeric values is that
-they are fast to type, so their use is only advised when using the calculator
-\kbd{gp}.
+flags with the same meaning but different numeric values across a set of
+routines), it would break backward compatibility. The only advantage of
+explicit numeric values is that they are fast to type, so their use is only
+advised when using the calculator \kbd{gp}.
 
 As an alternative, one can replace a numeric flag by a character string
 containing symbolic identifiers. For a generic flag, the mnemonic
@@ -147,13 +147,13 @@ to monadic operators (the first does nothing, the second negates $x$).
 $x$ \kbd{-} $y$ is the \idx{difference} of $x$ and $y$. Among the prominent
 impossibilities are addition/subtraction between a scalar type and a vector
 or a matrix, between vector/matrices of incompatible sizes and between an
-integermod and a real number.
+intmod and a real number.
 
 \syn{gadd}{x,y} $x$ \kbd{+} $y$, $\teb{gsub}(x,y)$ for $x$ \kbd{-} $y$.
 
 \subseckbd{*}: The expression $x$ \kbd{*} $y$ is the \idx{product} of $x$
 and $y$. Among the prominent impossibilities are multiplication between
-vector/matrices of incompatible sizes, between an integermod and a real
+vector/matrices of incompatible sizes, between an intmod and a real
 number. Note that because of vector and matrix operations, \kbd{*} is not
 necessarily commutative. Note also that since multiplication between two
 column or two row vectors is not allowed, to obtain the \idx{scalar product}
@@ -406,6 +406,19 @@ Euclidean quotient of the numerator by the denominator, and if the argument
 is a vector or a matrix, the operation is done componentwise. This will not
 be restated for every function.
 
+\subsecidx{Col}$({x=[\,]})$: transforms the object $x$ into a column vector.
+The vector will be with one component only, except when $x$ is a
+vector or a quadratic form (in which case the resulting vector is simply the
+initial object considered as a column vector), a matrix (the column of row
+vectors comprising the matrix is returned), a character string (a column of
+individual characters is returned), but more importantly when $x$ is a
+polynomial or a power series. In the case of a polynomial, the coefficients
+of the vector start with the leading coefficient of the polynomial, while for
+power series only the significant coefficients are taken into account, but
+this time by increasing order of degree.
+
+\syn{gtocol}{x}.
+
 \subsecidx{List}$({x=[\,]})$: transforms a (row or column) vector $x$
 into a list. The only other way to create a \typ{LIST} is to use the
 function \kbd{listcreate}.
@@ -413,17 +426,39 @@ function \kbd{listcreate}.
 This is useless in library mode.
 
 \subsecidx{Mat}$({x=[\,]})$: transforms the object $x$ into a matrix.
+If $x$ is already a matrix, a copy of $x$ is created.
 If $x$ is not a vector or a matrix, this creates a $1\times 1$ matrix.
 If $x$ is a row (resp. column) vector, this creates a 1-row (resp.
-1-column) matrix. If $x$ is already a matrix, a copy of $x$ is created.
+1-column) matrix, \emph{unless} all elements are column (resp.~row) vectors
+of the same length, in which case the vectors are concatenated sideways
+and the associated big matrix is returned.
 
-This function can be useful in connection with the function \kbd{concat}
-(see there).
+\bprog
+  ? Mat(x + 1)
+  %1 =
+  [x + 1]
+  ? Vec( matid(3) )
+  %2 = [[1, 0, 0]~, [0, 1, 0]~, [0, 0, 1]~]
+  ? Mat(%)
+  %3 =
+  [1 0 0]
+
+  [0 1 0]
+
+  [0 0 1]
+  ? Col( [1,2; 3,4] )
+  %4 = [[1, 2], [3, 4]]~
+  ? Mat(%)
+  %5 = 
+  [1 2]
+
+  [3 4]
+@eprog
 
 \syn{gtomat}{x}.
 
 \subsecidx{Mod}$(x,y,\{\fl=0\})$:\label{se:Mod} creates the PARI object
-$(x \mod y)$, i.e.~an integermod or a polmod. $y$ must be an integer or a
+$(x \mod y)$, i.e.~an intmod or a polmod. $y$ must be an integer or a
 polynomial. If $y$ is an integer, $x$ must be an integer, a rational
 number, or a $p$-adic number compatible with the modulus $y$. If $y$ is a
 polynomial, $x$ must be a scalar (which is not a polmod), a polynomial, a
@@ -556,8 +591,9 @@ The individual arguments are read in string context, see \secref{se:strings}.
 
 \subsecidx{Vec}$({x=[\,]})$: transforms the object $x$ into a row vector.
 The vector will be with one component only, except when $x$ is a
-vector/matrix or a quadratic form (in which case the resulting vector is
-simply the initial object considered as a row vector), a character string
+vector or a quadratic form (in which case the resulting vector is
+simply the initial object considered as a row vector), a matrix
+(the vector of columns comprising the matrix is return), a character string
 (a vector of individual characters is returned), but more importantly when
 $x$ is a polynomial or a power series. In the case of a polynomial, the
 coefficients of the vector start with the leading coefficient of the
@@ -723,7 +759,7 @@ compiler's point of view. See the discussion on typecasts in Chapter 4.
 \subsecidx{conj}$(x)$: conjugate of $x$. The meaning of this
 is clear, except that for real quadratic numbers, it means conjugation in the
 real quadratic field. This function has no effect on integers, reals,
-integermods, fractions or $p$-adics. The only forbidden type is polmod
+intmods, fractions or $p$-adics. The only forbidden type is polmod
 (see \kbd{conjvec} for this).
 
 \syn{gconj}{x}.
@@ -732,7 +768,7 @@ integermods, fractions or $p$-adics. The only forbidden type is polmod
 polmod, equal to \kbd{Mod}$(a,q)$, this gives a vector of length
 $\text{degree}(q)$ containing the complex embeddings of the polmod if $q$ has
 integral or rational coefficients, and the conjugates of the polmod if $q$
-has some integermod coefficients. The order is the same as that of the
+has some intmod coefficients. The order is the same as that of the
 \kbd{polroots} functions. If $x$ is an integer or a rational number, the
 result is~$x$. If $x$ is a (row or column) vector, the result is a matrix
 whose columns are the conjugate vectors of the individual elements of $x$.
@@ -977,7 +1013,7 @@ by chopping away the $O(p^k)$.
 
 \subsecidx{valuation}$(x,p)$:\label{se:valuation} computes the highest
 exponent of $p$ dividing $x$. If $p$ is of type integer, $x$ must be an
-integer, an integermod whose modulus is divisible by $p$, a fraction, a
+integer, an intmod whose modulus is divisible by $p$, a fraction, a
 $q$-adic number with $q=p$, or a polynomial or power series in which case the
 valuation is the minimum of the valuation of the coefficients.
 
@@ -1034,7 +1070,7 @@ After possible conversion, the function is computed. Note that even if the
 argument is real, the result may be complex (e.g.~$\text{acos}(2.0)$ or
 $\text{acosh}(0.0)$). Note also that the principal branch is always chosen.
 
-$\bullet$ If the argument is an integermod or a $p$-adic, at present only a
+$\bullet$ If the argument is an intmod or a $p$-adic, at present only a
 few functions like \kbd{sqrt} (square root), \kbd{sqr} (square), \kbd{log},
 \kbd{exp}, powering, \kbd{teichmuller} (Teichm\"uller character) and
 \kbd{agm} (arithmetic-geometric mean) are implemented.
@@ -1049,7 +1085,7 @@ power $n$, where $v_p(n) > 0$.
 \misctitle{Remark:} note that if we wanted to be strictly consistent with
 the PARI philosophy, we should have $x*y = (4 \mod 8)$ and $\kbd{sqr}(x) =
 (4 \mod 32)$ when both $x$ and $y$ are congruent to $2$ modulo $4$.
-However, since integermod is an exact object, PARI assumes that the modulus
+However, since intmod is an exact object, PARI assumes that the modulus
 must not change, and the result is hence $(0\, \mod\, 4)$ in both cases. On
 the other hand, $p$-adics are not exact objects, hence are treated
 differently.
@@ -1413,16 +1449,16 @@ words such that $\Re(\text{sqrt}(x))>0$ or $\Re(\text{sqrt}(x))=0$ and
 $\Im(\text{sqrt}(x))\ge 0$. If $x\in \R$ and $x<0$, then the result is
 complex with positive imaginary part.
 
-Integermod a prime and $p$-adics are allowed as arguments. In that case,
+Intmod a prime and $p$-adics are allowed as arguments. In that case,
 the square root (if it exists) which is returned is the one whose
 first $p$-adic digit (or its unique $p$-adic digit in the case of
-integermods) is in the interval $[0,p/2]$. When the argument is an
-integermod a non-prime (or a non-prime-adic), the result is undefined.
+intmods) is in the interval $[0,p/2]$. When the argument is an
+intmod a non-prime (or a non-prime-adic), the result is undefined.
 
 \syn{gsqrt}{x,\var{prec}}.
 
 \subsecidx{sqrtn}$(x,n,\{\&z\})$: principal branch of the $n$th root of $x$,
-i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/n, \pi/n]$. Integermod
+i.e.~such that $\text{Arg}(\text{sqrt}(x))\in{} ]-\pi/n, \pi/n]$. Intmod
 a prime and $p$-adics are allowed as arguments.
 
 If $z$ is present, it is set to a suitable root of unity allowing to
@@ -1578,7 +1614,7 @@ Here $y$ must be an integer, but $x$ can be any PARI object.
 
 \syn{binome}{x,y}, where $y$ must be a \kbd{long}.
 
-\subsecidx{chinese}$(x,\{y\})$: if $x$ and $y$ are both integermods or both
+\subsecidx{chinese}$(x,\{y\})$: if $x$ and $y$ are both intmods or both
 polmods, creates (with the same type) a $z$ in the same residue class
 as $x$ and in the same residue class as $y$, if it is possible.
 
@@ -1924,7 +1960,7 @@ $\teb{modulargcd}(x,y)$.
 $p$. If $x$ and $y$ are of type integer or fraction, an explicit third
 parameter $p$ must be supplied, $p=0$ meaning the place at infinity.
 Otherwise, $p$ needs not be given, and $x$ and $y$ can be of compatible types
-integer, fraction, real, integermod a prime (result is undefined if the
+integer, fraction, real, intmod a prime (result is undefined if the
 modulus is not prime), or $p$-adic.
 
 \syn{hil}{x,y,p}.
@@ -2422,7 +2458,9 @@ only available for curves defined over $\Q_p$.\smallskip
 
 Some functions, in particular those relative to height computations (see
 \kbd{ellheight}) require also that the curve be in minimal Weierstrass
-form. This is achieved by the function \kbd{ellminimalmodel}.
+form, which is duly stressed in their description below. This is achieved by
+the function \kbd{ellminimalmodel}. \emph{Using a non-minimal model in such a
+routine will yield a wrong result!}
 
 All functions related to elliptic curves share the prefix \kbd{ell}, and the
 precise curve we are interested in is always the first argument, in either
@@ -4153,15 +4191,18 @@ unpredictable results.
 
 The result is a vector of 5-component vectors, each representing one of the
 prime ideals above $p$ in the number field $\var{nf}$. The representation
-$vp=[p,a,e,f,b]$ of a prime ideal means the following. The prime ideal is
+$P=[p,a,e,f,b]$ of a prime ideal means the following. The prime ideal is
 equal to $p\Z_K+\alpha\Z_K$ where $\Z_K$ is the ring of integers of the field
 and $\alpha=\sum_i a_i\omega_i$ where the $\omega_i$ form the integral basis
 \kbd{\var{nf}.zk}, $e$ is the ramification index, $f$ is the residual index,
-and $b$ is an $n$-component column vector representing a $\beta\in\Z_K$ such
-that $vp^{-1}=\Z_K+\beta/p\Z_K$ which will be useful for computing
-valuations, but which the user can ignore. The number $\alpha$ is guaranteed
-to have a valuation equal to 1 at the prime ideal (this is automatic if
-$e>1$).
+and $b$ represents a $\beta\in\Z_K$ such that $P^{-1}=\Z_K+\beta/p\Z_K$
+which will be useful for computing valuations, but which the user can ignore.
+The number $\alpha$ is guaranteed to have a valuation equal to 1 at the prime
+ideal (this is automatic if $e>1$). 
+
+The components of \kbd{P} may conveniently be accessed by member functions:
+\kbd{P.p}, \kbd{P.e}, \kbd{P.f}, and \kbd{P.gen} (returns the vector
+$[p,a]$).
 
 \syn{primedec}{\var{nf},p}.
 
@@ -4463,9 +4504,9 @@ coefficients of $x$ (as modulus of a \typ{POLMOD}), its main variable must be
 \subsecidx{nffactormod}$(\var{nf},x,\var{pr})$: factorization of the
 univariate polynomial $x$ modulo the prime ideal \var{pr} in the number
 field $\var{nf}$. $x$ can have coefficients in the number field (scalar,
-polmod, polynomial, column vector) or modulo the prime ideal (integermod
+polmod, polynomial, column vector) or modulo the prime ideal (intmod
 modulo the rational prime under \var{pr}, polmod or polynomial with
-integermod coefficients, column vector of integermod). The prime ideal
+intmod coefficients, column vector of intmod). The prime ideal
 \var{pr} \emph{must} be in the format output by \kbd{idealprimedec}. The
 main variable of $\var{nf}$ must be of lower priority than that of $x$
 (see \secref{se:priority}). However if the coefficients of the number
@@ -4593,7 +4634,7 @@ and complex places of $K$.
 
 $\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of $K$.
 
-$\var{nf}[4]$ contains the index of $\var{nf}[1]$,
+$\var{nf}[4]$ contains the index of $\var{nf}[1]$ (\kbd{\var{nf}.index}),
 i.e.~$[\Z_K : \Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
 
 $\var{nf}[5]$ is a vector containing 7 matrices $M$, $G$, $T2$, $T$,
@@ -5166,19 +5207,14 @@ ideal of $K$ in HNF.
 
 \subsecidx{rnfidealreltoabs}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
-relative ideal (which can be, as in the absolute case, of many different
-types, including of course elements), gives the ideal $x\Z_L$ as an absolute
-ideal of $L/\Q$, in the form of a
-$\Z$-basis, given by a vector of polynomials (modulo \kbd{rnf.pol}).
+relative ideal, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$, in
+the form of a $\Z$-basis, given by a vector of polynomials (modulo
+\kbd{rnf.pol}).
 The following routine might be useful:
 \bprog
     \\ return y = rnfidealreltoabs(rnf,...) as an ideal in HNF form 
     \\ associated to nf = nfinit( rnf.pol );
-    idealgentoHNF(nf, y) =
-    {
-      local(z); z = nfalgtobasis(nf, y);
-      z[1] = Mat(z[1]); mathnf( concat(z) );
-    }
+    idealgentoHNF(nf, y) = mathnf( Mat( nfalgtobasis(nf, y) ) );
 @eprog
 
 \syn{rnfidealreltoabs}{\var{rnf},x}.
@@ -5197,13 +5233,9 @@ $K$, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$, in the form of a
 $\Z$-basis, given by a vector of polynomials (modulo \kbd{rnf.pol}).
 The following routine might be useful:
 \bprog
-    \\ return y = rnfidealup(rnf,...) as an ideal in HNF form associated to
-    \\ nf = nfinit( rnf.pol );
-    idealgentoHNF(nf, y) =
-    {
-      local(z); z = nfalgtobasis(nf, y);
-      z[1] = Mat(z[1]); mathnf( concat(z) );
-    }
+    \\ return y = rnfidealup(rnf,...) as an ideal in HNF form
+    \\ associated to nf = nfinit( rnf.pol );
+    idealgentoHNF(nf, y) = mathnf( Mat( nfalgtobasis(nf, y) ) );
 @eprog
 
 \syn{rnfidealup}{\var{rnf},x}.
@@ -5909,13 +5941,13 @@ generating sets (such as \tet{mathnf}, \tet{qflll}, etc.) take matrices as
 arguments. As usual, the generating vectors are taken to be the
 \emph{columns} of the given matrix.
 
-\subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic dependence} $x$ being
-real, complex, or $p$-adic, finds a polynomial of degree at most $k$ with
-integer coefficients having $x$ as approximate root. Note that the polynomial
-which is obtained is not necessarily the ``correct'' one (it's not even
-guaranteed to be irreducible!). One can check the closeness either by a
-polynomial evaluation or substitution, or by computing the roots of the
-polynomial given by algdep.
+\subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic
+dependence}\label{se:algdep} $x$ being real, complex, or $p$-adic, finds a
+polynomial of degree at most $k$ with integer coefficients having $x$ as
+approximate root. Note that the polynomial which is obtained is not
+necessarily the ``correct'' one (it's not even guaranteed to be
+irreducible!). One can check the closeness either by a polynomial evaluation
+or substitution, or by computing the roots of the polynomial given by algdep.
 
 If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces the
 ``dual lattice'' corresponding to the powers of $x$.
@@ -5963,7 +5995,7 @@ adjoint matrix, i.e.~computing the traces of the powers of $A$.
 If $\fl=1$, uses Lagrange interpolation which is almost always slower.
 
 If $\fl=2$, uses the Hessenberg form. This is faster than the default when
-the coefficients are integermod a prime or real numbers, but is usually
+the coefficients are intmod a prime or real numbers, but is usually
 slower in other base rings.
 
 \syn{charpoly0}{A,v,\fl}, where $v$ is the variable number. Also available
@@ -5980,10 +6012,10 @@ that matrices are concatenated horizontally, i.e.~the number of rows stays
 the same. Using transpositions, it is easy to concatenate them vertically.
 
 To concatenate vectors sideways (i.e.~to obtain a two-row or two-column
-matrix), first transform the vector into a one-row or one-column matrix using
-the function \tet{Mat}. Concatenating a row vector to a matrix having the
-same number of columns will add the row to the matrix (top row if the vector
-is $x$, i.e.~comes first, and bottom row otherwise).
+matrix), use \tet{Mat} instead (see the example there). Concatenating a row
+vector to a matrix having the same number of columns will add the row to the
+matrix (top row if the vector is $x$, i.e.~comes first, and bottom row
+otherwise).
 
 The empty matrix \kbd{[;]} is considered to have a number of rows compatible
 with any operation, in particular concatenation. (Note that this is
@@ -5996,15 +6028,13 @@ elements are concatenated, from left to right, using the above rules.
 ? concat([1,2], [3,4])
 %1 = [1, 2, 3, 4]
 ? a = [[1,2]~, [3,4]~]; concat(a)
-%2 = [1, 2, 3, 4]~
-? a[1] = Mat(a[1]); concat(a)
-%3 =
+%2 =
 [1 3]
 
 [2 4]
 
 ? concat([1,2; 3,4], [5,6]~)
-%4 =
+%3 =
 [1 2 5]
 
 [3 4 6]
@@ -6039,7 +6069,7 @@ in general not integral.
 If $\fl>0$, uses the LLL algorithm. $|\fl|$ is a parameter which should be
 between 0.6 and 0.9 times the number of correct decimal digits in the input.
 This is in general faster than the other variants. See the example in
-\tet{lindep} section.
+\secref{se:algdep} (\kbd{algdep}).
 
 \syn{lindep0}{x,\fl,\var{prec}}. Also available is
 $\teb{lindep}(x,\var{prec})$ ($\fl=0$).
