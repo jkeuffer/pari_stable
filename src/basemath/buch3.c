@@ -1103,39 +1103,40 @@ lowerboundforregulator(GEN bnf)
 }
 
 /* Compute a square matrix of rank length(beta) associated to a family
- * (P_i), 1<=i<=length(beta), of primes s.t. N(P_i) = 1 mod pp, and
+ * (P_i), 1<=i<=length(beta), of primes s.t. N(P_i) = 1 mod p, and
  * (P_i,beta[j]) = 1 for all i,j */
 static void
-primecertify(GEN bnf,GEN beta,long pp,GEN bad)
+primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
 {
-  long i, j, qq, nbcol, lb, nbqq, ra;
-  GEN nf,mat,mat1,qgen,decqq,newcol,Q,g,ord,modpr;
+  long i, j, nbcol, lb, nbqq, ra;
+  GEN nf,mat,gq,LQ,newcol,g,ord,modpr;
+  ulong q;
 
   ord = NULL; /* gcc -Wall */
   nbcol = 0; nf = (GEN)bnf[7];
-  lb = lg(beta)-1; mat = cgetg(1,t_MAT); qq = 1;
+  lb = lg(beta)-1; mat = cgetg(1,t_MAT); q = 1UL;
   for(;;)
   {
-    qq += 2*pp; qgen = stoi(qq);
-    if (smodis(bad,qq)==0 || !isprime(qgen)) continue;
+    q += 2*p; gq = utoi(q);
+    if (!umodiu(bad,q) || !isprime(gq)) continue;
 
-    decqq = primedec(bnf,qgen); nbqq = lg(decqq)-1;
+    LQ = primedec(bnf,gq); nbqq = lg(LQ)-1;
     g = NULL;
     for (i=1; i<=nbqq; i++)
     {
-      Q = (GEN)decqq[i]; if (!gcmp1((GEN)Q[4])) break;
+      GEN mat1, Q = (GEN)LQ[i]; if (!gcmp1((GEN)Q[4])) break;
       /* Q has degree 1 */
       if (!g)
       {
-        g = lift_intern(gener(qgen)); /* primitive root */
-        ord = decomp(stoi(qq-1));
+        ord = decomp(utoi(q-1));
+        g = Fp_gener_mat(gq, ord); /* primitive root */
       }
       modpr = zkmodprinit(nf, Q);
       newcol = cgetg(lb+1,t_COL);
       for (j=1; j<=lb; j++)
       {
         GEN t = to_Fp_simple(nf, (GEN)beta[j], modpr);
-        newcol[j] = (long)Fp_PHlog(t,g,qgen,ord);
+        newcol[j] = (long)Fp_PHlog(t,g,gq,ord);
       }
       if (DEBUGLEVEL>3)
       {
@@ -1155,16 +1156,16 @@ primecertify(GEN bnf,GEN beta,long pp,GEN bad)
 }
 
 static void
-check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN bad)
+check_prime(ulong p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN bad)
 {
   pari_sp av = avma;
   long i,b, lc = lg(cyc), w = itos((GEN)mu[1]), lf = lg(fu);
   GEN beta = cgetg(lf+lc, t_VEC);
 
-  if (DEBUGLEVEL>1) fprintferr("  *** testing p = %ld\n",p);
+  if (DEBUGLEVEL>1) fprintferr("  *** testing p = %lu\n",p);
   for (b=1; b<lc; b++)
   {
-    if (smodis((GEN)cyc[b], p)) break; /* p \nmid cyc[b] */
+    if (umodiu((GEN)cyc[b], p)) break; /* p \nmid cyc[b] */
     if (b==1 && DEBUGLEVEL>2) fprintferr("     p divides h(K)\n");
     beta[b] = cycgen[b];
   }
@@ -1183,9 +1184,10 @@ long
 certifybuchall(GEN bnf)
 {
   pari_sp av = avma;
-  long nbgen, i, p, N, R1, R2, bound;
+  long nbgen, i, N, R1, R2;
   GEN bad, nf, reg, zu, funits, gen, cycgen, cyc;
   byteptr delta = diffptr;
+  ulong bound, p;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   N=degpol(nf[1]); if (N==1) return 1;
@@ -1195,13 +1197,13 @@ certifybuchall(GEN bnf)
   reg = gmael(bnf,8,2);
   cyc = gmael3(bnf,8,1,2); nbgen = lg(cyc)-1;
   gen = gmael3(bnf,8,1,3); zu = gmael(bnf,8,4);
-  bound = itos_or_0 ( ground(gdiv(reg, lowerboundforregulator(bnf))) );
+  bound = itou_or_0( ground(gdiv(reg, lowerboundforregulator(bnf))) );
   if (!bound) err(talker,"sorry, too many primes to check");
-  maxprime_check((ulong)bound);
+  maxprime_check(bound);
   if (DEBUGLEVEL>1)
   {
     fprintferr("\nPHASE 2: are all primes good ?\n\n");
-    fprintferr("  Testing primes <= B (= %ld)\n\n",bound); flusherr();
+    fprintferr("  Testing primes <= B (= %lu)\n\n",bound); flusherr();
   }
   cycgen = check_and_build_cycgen(bnf);
   for (bad=gun,i=1; i<=nbgen; i++)
@@ -1240,11 +1242,11 @@ certifybuchall(GEN bnf)
     if (DEBUGLEVEL>1) { fprintferr("  Testing primes | h(K)\n\n"); flusherr(); }
     for (i=1; i<nbf1; i++)
     {
-      p = itos((GEN)f1[i]);
+      p = itou((GEN)f1[i]);
       if (p > bound) check_prime(p,bnf,cyc,cycgen,funits,zu,bad);
     }
   }
-  avma=av; return 1;
+  avma = av; return 1;
 }
 
 /*******************************************************************/

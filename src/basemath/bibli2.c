@@ -167,7 +167,7 @@ cyclo(long n, long v)
   pari_sp av=avma, tetpil;
   GEN yn,yd;
 
-  if (n<=0) err(arither2);
+  if (n <= 0) err(talker, "degree <= in cyclo");
   if (v<0) v = 0;
   yn = yd = polun[0];
   for (d=1; d*d<=n; d++)

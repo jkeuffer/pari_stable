@@ -196,11 +196,46 @@ ggener(GEN m)
 }
 
 GEN
+Fp_gener_fact(GEN p, GEN m)
+{
+  pari_sp av0 = avma;
+  long k, i;
+  GEN x, q, V;
+  if (egalii(p, gdeux)) return gun;
+  q = subis(p, 1);
+  if (!m) /* */
+  {
+    m = V = (GEN)decomp(q)[1];
+  }
+  else
+  {
+    m = (GEN)m[1];
+    V = dummycopy(m);
+  }
+  k = lg(V)-1;
+  for (i=1; i<=k; i++) V[i] = (long)diviiexact(q, (GEN)m[i]);
+  x = utoi(2UL);
+  for (;; x[2]++)
+  {
+    GEN d = mppgcd(p,x);
+    if (is_pm1(d)) continue;
+    for (i = k; i; i--) {
+      GEN e = powmodulo(x, (GEN)V[i], p);
+      if (is_pm1(e)) break;
+    }
+    if (!i) { avma = av0; return utoi((ulong)x[2]); }
+  }
+}
+
+GEN 
+Fp_gener(GEN p) { return Fp_gener_fact(p, NULL); }
+
+GEN
 gener(GEN m)
 {
-  pari_sp av=avma,av1;
-  long k,i,e;
-  GEN x,t,q,p;
+  pari_sp av = avma;
+  long e;
+  GEN x, t, p;
 
   if (typ(m) != t_INT) err(arither1);
   e = signe(m);
@@ -210,39 +245,28 @@ gener(GEN m)
 
   e = mod4(m);
   if (e == 0) /* m = 0 mod 4 */
-  {
-    if (cmpis(m,4)) err(generer); /* m != 4, non cyclic */
-    return gmodulsg(3,m);
+  { /* m != 4, non cyclic */
+    if (cmpis(m,4)) err(talker,"primitive root mod %Z does not exist", m);
+    return gmodulsg(3, m);
   }
   if (e == 2) /* m = 0 mod 2 */
   {
-    q=shifti(m,-1); x = (GEN) gener(q)[2];
+    GEN q = shifti(m,-1); x = (GEN) gener(q)[2];
     if (!mod2(x)) x = addii(x,q);
-    av1=avma; return gerepile(av,av1,gmodulcp(x,m));
+    return gerepileupto(av, gmodulcp(x,m));
   }
 
-  t=decomp(m); if (lg(t[1]) != 2) err(generer);
-  p=gcoeff(t,1,1); e=itos(gcoeff(t,1,2)); q=subis(p,1);
+  t = decomp(m);
+  if (lg(t[1]) != 2) err(talker,"primitive root mod %Z does not exist", m);
+  p = gcoeff(t,1,1);
+  e = itos(gcoeff(t,1,2));
+  x = Fp_gener(p);
   if (e >= 2)
   {
-    x = (GEN)gener(p)[2];
-    if (gcmp1(powmodulo(x,q, sqri(p)))) x = addii(x,p);
-    av1=avma; return gerepile(av,av1,gmodulcp(x,m));
+    GEN M = (e == 2)? m: sqri(p); 
+    if (gcmp1(powmodulo(x, subis(p,1), M))) x = addii(x,p);
   }
-
-  p=(GEN)decomp(q)[1]; k=lg(p)-1; x=stoi(1);
-  for (i=1; i<=k; i++) p[i] = (long)diviiexact(q, (GEN)p[i]);
-  for(;;)
-  {
-    x[2]++;
-    if (gcmp1(mppgcd(m,x)))
-    {
-      for (i=k; i; i--)
-	if (gcmp1(powmodulo(x, (GEN)p[i], m))) break;
-      if (!i) break;
-    }
-  }
-  av1=avma; return gerepile(av,av1,gmodulcp(x,m));
+  return gerepileupto(av, gmodulcp(x,m));
 }
 
 /* assume p odd prime */

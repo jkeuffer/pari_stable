@@ -1438,7 +1438,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
   f = itos((GEN)pr[4]);
   p = (GEN)pr[1];
   if (f == 1)
-    v = gscalcol_i((GEN)gener(p)[2], degpol(nf[1]));
+    v = gscalcol_i(Fp_gener(p), degpol(nf[1]));
   else
   {
     GEN T, modpr = zk_to_ff_init(nf, &pr, &T, &p);

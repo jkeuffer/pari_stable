@@ -601,8 +601,8 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   switch(typ(N))
   {
     case t_INT:
-      n=itos(N);
-      if ( n<1 ) err(arither2);
+      n = itos(N);
+      if (n < 1) err(talker,"degree <= 0 in galoissubcyclo");
       break;
     case t_VEC:
       if (lg(N)==7)
