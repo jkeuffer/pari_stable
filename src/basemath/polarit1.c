@@ -2144,7 +2144,7 @@ cmp_pol(GEN x, GEN y)
   return 0;
 }
 
-/* assume n > 0, x a POLMOD over Fq */
+/* assume n > 1, X a POLMOD over Fq */
 /* return S = [ X^q, X^2q, ... X^(n-1)q ] mod T (in Fq[X]) in Kronecker form */
 static GEN
 init_pow_q_mod_pT(GEN Xmod, GEN q, GEN a, GEN T)
@@ -2241,7 +2241,7 @@ GEN
 factmod9(GEN f, GEN pp, GEN a)
 {
   long av = avma, tetpil,p,i,j,k,d,e,vf,va,nbfact,nbf,pk;
-  GEN ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,qqd,qq,unfp,unfq, *t;
+  GEN S,ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,qqd,qq,unfp,unfq, *t;
   GEN frobinv,X;
 
   if (typ(a)!=t_POL || typ(f)!=t_POL || gcmp0(a)) err(typeer,"factmod9");
@@ -2271,6 +2271,7 @@ factmod9(GEN f, GEN pp, GEN a)
   f = gmul(unfq,f); if (!signe(f)) err(zeropoler,"factmod9");
   d = lgef(f)-3; if (!d) { avma=av; gunclone(a); return trivfact(); }
 
+  S = df2  = NULL; /* gcc -Wall */
   pp = gmael(a,2,1); /* out of the stack */
   t = (GEN*)cgetg(d+1,t_VEC); ex = new_chunk(d+1);
 
@@ -2284,7 +2285,6 @@ factmod9(GEN f, GEN pp, GEN a)
   for(;;)
   {
     long du,dg;
-    GEN S;
     while (gcmp0(df1))
     { /* needs d >= pp: p = 0 can't happen  */
       pk *= p; e=pk;
@@ -2293,11 +2293,7 @@ factmod9(GEN f, GEN pp, GEN a)
       df1=derivpol(f); f3=NULL;
     }
     f2 = f3? f3: ggcd(f,df1);
-    if (lgef(f2)==3)
-    {
-      u = f;
-      df2 = NULL; /* for lint */
-    }
+    if (lgef(f2)==3) u = f;
     else
     {
       g1=gdeuc(f,f2); df2=derivpol(f2);
@@ -2312,9 +2308,9 @@ factmod9(GEN f, GEN pp, GEN a)
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
     qqd=gun; xmod[1]=(long)u;
-    S = init_pow_q_mod_pT(xmod, qq, a, u);
     
     du = lgef(u)-3; v = X;
+    if (du > 1) S = init_pow_q_mod_pT(xmod, qq, a, u);
     for (d=1; d <= du>>1; d++)
     {
       qqd=mulii(qqd,qq);
