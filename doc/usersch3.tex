@@ -3332,26 +3332,24 @@ the main variable of $t$. For example
 
 \syn{polfnf}{x,t}.
 
-\subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{fl=0\},\{v=y\}))$: \var{gal} 
-being be a Galois field as output by galoisinit and \var{perm} an
- element of $\var{gal}.group$ or a vector of such elements, computes the
- fixed field of \var{gal} by the automorphims defined by the
- permutations \var{perm} of the roots $\var{gal}.roots$.
+\subsecidx{galoisfixedfield}$(\var{gal},\var{perm},\{fl=0\},\{v=y\}))$:
+\var{gal} being be a Galois field as output by \tet{galoisinit} and
+\var{perm} an element of $\var{gal}.group$ or a vector of such elements,
+computes the fixed field of \var{gal} by the automorphism defined by the
+permutations \var{perm} of the roots $\var{gal}.roots$. $P$ is guaranteed to
+be squarefree modulo $\var{gal}.p$.
 
- If no flags or $\fl=0$, output format is the same that
- \kbd{nfsubfield}, return $[P,x]$ such that $P$ is a polynomial
- defining the fixed field of $\var{gal}.pol$ by the subgroup generated
- by \var{perm}, and $x$ is a root of $P$ in \var{gal} expressed as a
- polmod in $\var{gal}.pol$.
+If no flags or $\fl=0$, output format is the same as for \tet{nfsubfield},
+returning $[P,x]$ such that $P$ is a polynomial defining the fixed field, and
+$x$ is a root of $P$ expressed as a polmod in $\var{gal}.pol$.
 
- If $\fl=1$ return only the polynomial $P$.  If $\fl=2$ return
- $[P,x,F]$ where $P$ and $x$ are as above and $F$ is the factorization
- of $\var{gal}.pol$ over the field defined by $P$, where variable $v$ ($y$ by
- default) stands for a root of $P$. The priority of $v$ must be less
- than the priority of the variable of $\var{gal}.pol$.
+If $\fl=1$ return only the polynomial $P$.
 
- $P$ is garanteed to be squarefree modulo $\var{gal}.p$.
-	
+If $\fl=2$ return $[P,x,F]$ where $P$ and $x$ are as above and $F$ is the
+factorization of $\var{gal}.pol$ over the field defined by $P$, where
+variable $v$ ($y$ by default) stands for a root of $P$. The priority of $v$
+must be less than the priority of the variable of $\var{gal}.pol$.
+
 Example:
 
 \bprog
@@ -3359,24 +3357,21 @@ G = galoisinit(x^4+1);
 galoisfixedfield(G,G.group[2],2)
   [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
 @eprog
- compute the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
+computes the factorization  $x^4+1=(x^2-\sqrt{-2}x-1)(x^2+\sqrt{-2}x-1)$
 
 \syn{galoisfixedfield}{\var{gal},\var{perm},p}.
 
-\subsecidx{galoisinit}$(\var{pol},\{den\})$: Computes the Galois group
-and all neccessary informations for computing the fixed fields of the
+\subsecidx{galoisinit}$(\var{pol},\{den\})$: computes the Galois group
+and all neccessary information for computing the fixed fields of the
 Galois extension $K/\Q$ where $K$ is the number field defined by
-$\var{pol}$ which can be a monic irreducible polynomial in $\Z[X]$ or
-a number field as output by nfinit.
-
-The extension $K/\Q$ must be Galois with Galois group ``weakly''
-super-solvable (see \kbd{nfgaloisconj})
+$\var{pol}$ (monic irreducible polynomial in $\Z[X]$ or
+a number field as output by \tet{nfinit}). The extension $K/\Q$ must be
+Galois with Galois group ``weakly'' super-solvable (see \tet{nfgaloisconj})
 
 \misctitle{Warning:} The interface of this function is experimental,
 so the described output can be subject to important changes in the
-near future. However the function itself should works as described. For any
-remarks about improving this interface, please mail
-allomber@math.u-bordeaux.fr.
+near future. However the function itself should work as described. For any
+remarks about this interface, please mail \kbd{allomber@math.u-bordeaux.fr}.
 
 The output is an 8-component vector \var{gal}.
 
@@ -3407,8 +3402,8 @@ The output is an 8-component vector \var{gal}.
  $\var{gal}[8]$ contains the relative orders $[o_1,\ldots,o_g]$ of
  the generators of $S$ (\kbd{\var{gal}.orders}).
 
-Set $H$ the maximal normal supersolvable
-subgroup of $G$, we have the following properties:
+Let $H$ be the maximal normal supersolvable subgroup of $G$, we have the
+following properties:
 
 \quad$\bullet$ if $G/H\simeq A_4$ then $[o_1,\ldots,o_g]$ ends by
 $[2,2,3]$.
@@ -3426,7 +3421,7 @@ second case and of $i=g-3$ in the third.
 quotient group $G/\langle s_1,\ldots,s_{i-1}\rangle$, with the same
 exceptions.
 
-\quad$\bullet$ for any $x\in G$ there exists an unique family
+\quad$\bullet$ for any $x\in G$ there exists a unique family
 $[e_1,\ldots,e_g]$ such that (no exceptions):
 
 -- for $1\leq i \leq g$ we have $0\leq e_i<o_i$ 
@@ -3451,12 +3446,11 @@ Note that \kbd{G=galoisinit(pol);galoispermtopol(G,G[6])~} is equivalent to
 \syn{galoispermtopol}{\var{gal},\var{perm}}.
 
 \subsecidx{galoissubcyclo}$(n,H,\{Z\},\{v\})$: compute a polynomial
-defining the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H}
-of $\Z/n\Z$. The subgroup \var{H} can be given by a generator, a set
-of generators given by a vector or a HNF matrix. If present \kbd{Z}
-must be \kbd{znstar(n)}, currently it is used only when \var{H} is a
-HNF matrix. If \var{v} is given, the polynomial is given in the
-variable \var{v}.
+defining the subfield of $\Q(\zeta_n)$ fixed by the subgroup \var{H} of
+$\Z/n\Z$. The subgroup \var{H} can be given by a generator, a set of
+generators given by a vector or a HNF matrix. If present \kbd{Z} must be
+\kbd{znstar(n)}, and is currently only used when \var{H} is a HNF matrix. If
+\var{v} is given, the polynomial is given in the variable \var{v}.
 
 The following function can be used to compute all subfields of
 $\Q(\zeta_n)$ (of order less than \kbd{d}, if \kbd{d} is set):
