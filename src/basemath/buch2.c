@@ -1791,7 +1791,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,long MAXRELSUP,
   }
 }
 
-static long
+static int
 be_honest(FB_t *F, GEN nf, long PRECLLL)
 {
   long ex, i, j, J, k, iz, nbtest, ru, lgsub = lg(F->subFB);
@@ -1960,8 +1960,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     msgtimer("bestappr/regulator");
     fprintferr("\n ***** check = %f\n",c);
   }
-  if (c < 0.75) return PRECI;
-  if (c > 1.5 ) { avma = av; return RELAT; }
+  if (c < 0.75 || c > 1.5) { avma = av; return RELAT; }
   *ptkR = R; *ptL = L; return LARGE;
 }
 
