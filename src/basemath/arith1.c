@@ -954,15 +954,15 @@ krosi(long x, GEN y)
   xu = (ulong)x;
   if (lgefint(y) == 3)
     return krouu_s(xu, itou(y), s);
-  if (!x) return 0; /* y != 1 */
-  r = vals(x);
+  if (!xu) return 0; /* y != 1 */
+  r = vals(xu);
   if (r)
   {
     if (odd(r) && gome(y)) s = -s;
-    x >>= r;
+    xu >>= r;
   }
-  /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
-  if (x & modBIL(y) & 2) s = -s;
+  /* xu=3 mod 4 && y=3 mod 4 ? (both are odd here) */
+  if (xu & modBIL(y) & 2) s = -s;
   u = umodiu(y, xu);
   avma = av; return krouu_s(u, xu, s);
 }

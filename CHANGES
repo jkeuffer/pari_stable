@@ -119,8 +119,9 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    55- gcd([]) was 1 [ should be 0 ] + gcd([...]) used an inefficient algorithm
    56- [readline] completion in extended help context ?? didn't include GP
        defaults
-   57- [introduced in 2.2.9] nfsubfields(x) had become unable to exploit
+   57- [from 2.2.9] nfsubfields(x) had become unable to exploit
        the trivial case when x is irreducible modulo some prime
+   58- [from 2.2.9] typo in krosi -> wrong result [ affected aprcl only ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
