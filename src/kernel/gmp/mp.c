@@ -34,7 +34,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   how nice it would be if we could only get through into Looking-
  *   glass House!  I'm sure it's got, oh! such beautiful things in it!
  *                                                                             
- *  Though the Looking Glass,  Lewis Carrol
+ *  Through the Looking Glass,  Lewis Carrol
  *  
  *  (pityful attempt to beat GN code/comments rate)
  *  */
