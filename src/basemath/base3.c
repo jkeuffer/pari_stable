@@ -1575,37 +1575,45 @@ zarchstar(GEN nf, GEN x, GEN archp)
   }
 }
 
+/* a * g^n mod id */
+static GEN
+elt_mulpow_modideal(GEN nf, GEN a, GEN g, GEN n, GEN id)
+{
+  return element_mulmodideal(nf, a, element_powmodideal(nf,g,n,id), id);
+}
+
 static GEN
 zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
 {
-  GEN a = a0, L,e,p1,cyc,gen;
+  GEN a = a0, L, e, cyc, gen;
   long i,j, llist = lg(list)-1;
   
-  e = gzero; /* gcc -Wall */
-  for (j=1; j<=llist; j++)
+  e = NULL; /* gcc -Wall */
+  for (j = 1; j <= llist; j++)
   {
-    L = (GEN)list[j]; cyc=(GEN)L[1]; gen=(GEN)L[2];
-    if (j==1)
-      p1 = nf_PHlog(nf,a,(GEN)gen[1],pr);
+    L = (GEN)list[j];
+    cyc = (GEN)L[1];
+    gen = (GEN)L[2];
+    if (j == 1)
+      e = _col( nf_PHlog(nf, a, (GEN)gen[1], pr) );
     else
     {
-      p1 = (GEN)a[1]; a[1] = laddsi(-1,(GEN)a[1]);
-      e = gmul((GEN)L[5],a); a[1] = (long)p1;
-      /* here lg(e) == lg(cyc) */
-      p1 = (GEN)e[1];
+      GEN t = (GEN)a[1];
+      a[1] = laddsi(-1, (GEN)a[1]); /* a -= 1 */
+      e = gmul((GEN)L[5], a);
+      a[1] = (long)t; /* restore */
     }
-    for (i=1; i<lg(cyc); i++, p1 = (GEN)e[i])
+    /* here lg(e) == lg(cyc) */
+    for (i = 1; i < lg(cyc); i++)
     {
-      p1 = modii(negi(p1), (GEN)cyc[i]);
-      *++y = lnegi(p1);
-      if (!signe(p1)) continue;
+      GEN t = modii(negi((GEN)e[i]), (GEN)cyc[i]);
+      *++y = lnegi(t);
+      if (!signe(t)) continue;
 
-      if (psigne && mpodd(p1)) *psigne = gadd(*psigne,gmael(L,4,i));
-      if (j == llist) continue;
-
-      if (DEBUGLEVEL>5) fprintferr("do element_powmodideal\n");
-      p1 = element_powmodideal(nf,(GEN)gen[i],p1,prk);
-      a = element_mulmodideal(nf,a,p1,prk);
+      if (psigne && mpodd(t))
+        *psigne = *psigne? gadd(*psigne, gmael(L,4,i)): gmael(L,4,i);
+      if (j != llist)
+        a = elt_mulpow_modideal(nf, a, (GEN)gen[i], t, prk);
     }
   }
   return y;
@@ -1614,8 +1622,11 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
 static void
 zlog_add_sign(GEN y0, GEN sgn, GEN lists)
 {
-  GEN y = y0 + lg(y0), s = lift_intern(gmul(gmael(lists, lg(lists)-1, 3), sgn));
+  GEN y, s;
   long i;
+  if (!sgn) return;
+  y = y0 + lg(y0);
+  s = lift_intern(gmul(gmael(lists, lg(lists)-1, 3), sgn));
   for (i = lg(s)-1; i > 0; i--) *--y = s[i];
 }
 
@@ -1704,7 +1715,7 @@ zlog_ind(GEN nf, GEN a, zlog_S *S, long index)
     kmin = 1; kmax = lg(S->P)-1;
     y = y0;
   }
-  psigne = zsigne(nf,a, S->archp);
+  psigne = zsigne(nf, a, S->archp);
   for (k = kmin; k <= kmax; k++)
   {
     list= (GEN)S->lists[k];
@@ -1741,16 +1752,20 @@ log_gen_pr(zlog_S *S, long index, GEN nf, long e)
     GEN L2 = (GEN)S->lists[index], L, g;
     GEN pr = (GEN)S->P[index], prk;
     
-    if (e == 2) { L = (GEN)L2[2]; g = (GEN)L[2]; }
+    if (e == 2)
+      L = (GEN)L2[2];
     else
-      g = (GEN)zidealij(idealpows(nf,pr,e-1), idealpows(nf,pr,e), NULL)[2];
+      L = zidealij(idealpows(nf,pr,e-1), idealpows(nf,pr,e), NULL);
+    g = (GEN)L[2];
     l = lg(g);
     A = cgetg(l, t_MAT);
     prk = idealpow(nf, pr, (GEN)S->e[index]);
     for (i = 1; i < l; i++)
     {
+      GEN G = (GEN)g[i], sgn = NULL; /* positive at f_oo */
       y0 = zerocol(S->n); y = y0 + yind;
-      (void)zlog_pk(nf, (GEN)g[i], y, pr, prk, L2, NULL);
+      (void)zlog_pk(nf, G, y, pr, prk, L2, &sgn);
+      zlog_add_sign(y0, sgn, S->lists);
       A[i] = (long)y0;
     }
   }
