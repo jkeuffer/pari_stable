@@ -1161,7 +1161,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     double Nx;
 
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
+      fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
     Nx = bound_vS(tmax,&BL);
 
     C = (long)sqrt(s*n0*n0/4. / Nx);
@@ -1221,6 +1221,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       continue;
     }
 
+if (DEBUGLEVEL>2) genmsgtimer(3,"LLL reductions");
     n = r; r = i;
     if (r <= 1)
     {
@@ -1241,6 +1242,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 
     av2 = avma;
     list = check_factors(P, BL, bound, famod, pa);
+if (DEBUGLEVEL>2) genmsgtimer(3,"checking factors");
     if (list) return list;
     avma = av2;
   }
@@ -1336,7 +1338,9 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
+if (DEBUGLEVEL>2) genmsgtimer(3, "Hensel lift");
   L = cmbf(target, famod, p, a, b, maxK, klim, hint);
+if (DEBUGLEVEL>2) genmsgtimer(3, "Naive recombination");
 
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod)-1;
@@ -1367,6 +1371,7 @@ DDF(GEN a, long hint)
   byteptr pt=diffptr;
   const int MAXNP = max(5, (long)sqrt((double)da));
 
+if (DEBUGLEVEL>2) (void)gentimer(3);
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) (void)timer2();
   lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
@@ -1448,6 +1453,7 @@ DDF(GEN a, long hint)
     }
   }
   if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
+if (DEBUGLEVEL>2) genmsgtimer(3,"setup");
   res = combine_factors(a, famod, prime, da-1, hint);
   return gerepilecopy(av, res);
 }
