@@ -194,8 +194,6 @@ gred(GEN x)
 /*                  POLYNOMIAL EUCLIDEAN DIVISION                  */
 /*                                                                 */
 /*******************************************************************/
-GEN gdivexact(GEN x, GEN y);
-
 /* Polynomial division x / y:
  *   if z = ONLY_REM  return remainder, otherwise return quotient
  *   if z != NULL set *z to remainder

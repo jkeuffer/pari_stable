@@ -2543,7 +2543,7 @@ GEN
 subresall(GEN u, GEN v, GEN *sol)
 {
   long degq,av,av2,lim,tetpil,dx,dy,du,dv,dr,signh;
-  GEN g,h,r,p1,p2,p3,p4;
+  GEN g,h,r,p1,p2,cu,cv;
 
   if (sol) *sol=gzero;
   if ((r = init_resultant(u,v))) return r;
@@ -2557,8 +2557,8 @@ subresall(GEN u, GEN v, GEN *sol)
   }
   if (dy==3) return gpowgs((GEN)v[2],dx-3);
   av=avma;
-  p3=content(u); if (gcmp1(p3)) p3=NULL; else u=gdiv(u,p3);
-  p4=content(v); if (gcmp1(p4)) p4=NULL; else v=gdiv(v,p4);
+  cu=content(u); if (gcmp1(cu)) cu=NULL; else u=gdiv(u,cu);
+  cv=content(v); if (gcmp1(cv)) cv=NULL; else v=gdiv(v,cv);
   g=gun; h=gun; av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
@@ -2597,8 +2597,8 @@ subresall(GEN u, GEN v, GEN *sol)
     p1=gpuigs((GEN)v[2],dv-3); p2=gpuigs(h,dv-4);
     tetpil=avma; p2=gdiv(p1,p2);
   }
-  if (p3) { p1=gpuigs(p3,dy-3); tetpil=avma; p2=gmul(p2,p1); }
-  if (p4) { p1=gpuigs(p4,dx-3); tetpil=avma; p2=gmul(p2,p1); }
+  if (cu) { p1=gpuigs(cu,dy-3); tetpil=avma; p2=gmul(p2,p1); }
+  if (cv) { p1=gpuigs(cv,dx-3); tetpil=avma; p2=gmul(p2,p1); }
   if (signh<0) { tetpil=avma; p2=gneg(p2); }
   {
     GEN *gptr[2]; gptr[0]=&p2; if (sol) { *sol=gcopy(u); gptr[1]=sol; }
@@ -2848,14 +2848,19 @@ nextSousResultant(GEN P, GEN Q, GEN Z, GEN s)
 GEN
 resultantducos(GEN P, GEN Q)
 {
-  long delta, av=avma, tetpil, lim = stack_lim(av,1);
-  GEN Z, s;
+  ulong av = avma, lim = stack_lim(av,1);
+  long dP,dQ,delta;
+  GEN cP,cQ,Z,s;
 
   if ((Z = init_resultant(P,Q))) return Z;
-  delta = degree(P) - degree(Q);
+  dP = degree(P);
+  dQ = degree(Q);
+  cP = content(P); if (gcmp1(cP)) cP = NULL; else P = gdiv(P,cP);
+  cQ = content(Q); if (gcmp1(cQ)) cQ = NULL; else Q = gdiv(Q,cQ);
+  delta = dP - dQ;
   if (delta < 0)
   {
-    Z = ((degree(P)&1) && (degree(Q)&1)) ? gneg(Q) : Q;
+    Z = (dP & dQ & 1)? gneg(Q): Q;
     Q = P; P = Z; delta = -delta;
   }
   s = gun;
@@ -2883,7 +2888,9 @@ resultantducos(GEN P, GEN Q)
   if (!signe(Q)) { avma = av; return gzero; }
   if (!degree(P)){ avma = av; return gun; }
   s = Lazard(leading_term(Q), s, degree(P));
-  tetpil = avma; return gerepile(av,tetpil,gcopy(s));
+  if (cP) s = gmul(s, gpowgs(cP,dQ));
+  if (cQ) s = gmul(s, gpowgs(cQ,dP)); else if (!cP) s = gcopy(s);
+  return gerepileupto(av, s);
 }
 
 /*******************************************************************/
