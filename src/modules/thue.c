@@ -745,8 +745,9 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 
         if (! (Q = GuessQi(BS->delta, BS->lambda, &ep)) ) break;
 
-        denbound = addri(mulri(B0, absi((GEN)Q[2])), 
-			 mulii(BS->Ind, absi((GEN)Q[3])));
+        /* Beware Q[2]] = gen_0 */
+        denbound = gadd(mulri(B0, absi((GEN)Q[2])), 
+			mulii(BS->Ind, absi((GEN)Q[3])));
         q = denom( bestappr(BS->delta, denbound) );
         l0 = divri(subrr(errnum(BS->delta, q), ep), absi((GEN)Q[3])); 
         if (signe(l0) <= 0) break;

@@ -50,6 +50,7 @@ BA  1- gp2c description of == operator was broken.
     6- no typecheck for qfbhclassno input
     7- diviuexact destroyed input and made further assumptions [=> wrong results
        in ellglobalred]. Replaced it by a clean wrapper.
+GH  8- thue(thueinit(x^3 - 2), 2) --> SEGV
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
