@@ -903,7 +903,7 @@ ellfacteur(GEN n, int insist)
       540400UL,606000UL,679500UL,761800UL,854100UL,957500UL,1073500UL,
     };
   long nbc,nbc2,dsn,dsnmax,rep,spc,gse,gss,rcn,rcn0,bstp,bstp0;
-  long a,i,j,k, av,av1,lim, size = expi(n) + 1, tf = lgefint(n);
+  long a,i,j,k, av,av1,avtmp, size = expi(n) + 1, tf = lgefint(n);
   ulong B1,B2,B2_p,B2_rt,m,p,p0,p2,dp;
   GEN w,w0,x,*X,*XT,*XD,*XG,*YG,*XH,*XB,*XB2,*Xh,*Yh,*Xb, res = cgeti(tf);
   int rflag, use_clones = 0;
@@ -1277,7 +1277,8 @@ ellfacteur(GEN n, int insist)
       p = p0; d = d0; rcn = rcn0;
       gl = gun;
       av1 = avma;
-      lim=stack_lim(av1,1);
+      /* scratchspace for prod (x_i-x_j) */
+      avtmp = (long)new_chunk(8 * lgefint(n));
       /* the correct entry in XB to use depends on bstp and on where we are
 	 on the helix.  As we skip from prime to prime, bstp will be incre-
 	 mented by snextpr() each time we wrap around through residue class
@@ -1335,15 +1336,13 @@ ellfacteur(GEN n, int insist)
 	m = ((ulong)k - 1) << 2;
 	/* accumulate product of differences of X coordinates */
 	j = rcn<<2;
+        avma = avtmp; /* go to garbage zone */
 	gl = modii(mulii(gl, subii(XB[m],   Xh[j])), n);
 	gl = modii(mulii(gl, subii(XB[m+1], Xh[j+1])), n);
 	gl = modii(mulii(gl, subii(XB[m+2], Xh[j+2])), n);
-	gl = modii(mulii(gl, subii(XB[m+3], Xh[j+3])), n);
-	if (low_stack(lim, stack_lim(av1,1)))
-	{
-	  if(DEBUGMEM>1) err(warnmem,"ellfacteur");
-	  gl = gerepileupto(av1, gl);
-	}
+	gl = mulii(gl, subii(XB[m+3], Xh[j+3]));
+        avma = av1;
+        gl = modii(gl, n);
       }	/* loop over p */
       avma = av1;
     } /* for i (loop over sets of 4 curves) */
