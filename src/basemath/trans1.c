@@ -1220,22 +1220,40 @@ mpexp1(GEN x)
 /**                                                                **/
 /********************************************************************/
 
+static GEN
+mpexp_basecase(GEN x)
+{
+  pari_sp av = avma;;
+  GEN y = addsr(1, exp1r_abs(x));
+  if (signe(x) < 0) y = ginv(y);
+  return gerepileupto(av,y);
+}
+
 GEN
 mpexp(GEN x)
 {
-  long sx = signe(x);
-  pari_sp av;
-  GEN y;
+  const long s = 6; /*Initial steps using basecase*/
+  long i, n, mask, p, l, sx = signe(x);
+  GEN a, z;
 
   if (!sx) return realun(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
-  if (sx < 0)
+  if (sx < 0 && expo(x) >= EXMAX)
+    return realzero_bit(- (long) ((1L<<EXMAX) / LOG2));
+
+  l = lg(x);
+  if (l <= max(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
+  z = cgetr(l); /* room for result */
+  n = hensel_lift_accel(l-1,&mask);
+  for(i=0, p=1; i<s; i++) { p <<= 1; if (mask&(1<<i)) p--; }
+  a = mpexp_basecase(rtor(x, p+2));
+  x = addrs(x,1);
+  for(i=s; i<n; i++)
   {
-    long ex = expo(x);
-    if (ex >= EXMAX) return realzero_bit(- (long) ((1L<<EXMAX) / LOG2));
+    p <<= 1; if (mask&(1<<i)) p--;
+    setlg(x, p+2); a = rtor(a, p+2);
+    a = mulrr(a, subrr(x, logr_abs(a))); /* a := a (x - log(a)) */
   }
-  av = avma; y = addsr(1, exp1r_abs(x));
-  if (sx < 0) y = ginv(y);
-  return gerepileupto(av,y);
+  affrr(a,z); avma = (pari_sp)z; return z;
 }
 #undef EXMAX
 

@@ -77,7 +77,7 @@ rand_INT(long n)
 }
 /* real, n words */
 static GEN
-rand_REAL(long n) { return itor(rand_INT(n), n+2); }
+rand_REAL(long n) { return gmul2n(itor(rand_INT(n), n+2),-BITS_IN_LONG*n); }
 
 /* Flx, degree n */
 static GEN
@@ -137,6 +137,11 @@ static double speed_mulii(speed_param *s)
 { disable(s); TIME_FUN(mulii(s->x, s->y)); }
 static double speed_karamulii(speed_param *s)
 { enable(s); TIME_FUN(mulii(s->x, s->y)); }
+
+static double speed_exp(speed_param *s)
+{ disable(s); TIME_FUN(mpexp(s->x)); }
+static double speed_expnewton(speed_param *s)
+{ enable(s);  mplog2(lg(s->x)+2); TIME_FUN(mpexp(s->x)); }
 
 static double speed_log(speed_param *s)
 { disable(s); TIME_FUN(mplog(s->x)); }
@@ -238,6 +243,7 @@ static tune_param param[] = {
 {PARI,var(MONTGOMERY_LIMIT),       t_INT, 3,0, speed_redc,speed_modii},
 {0,   var(REMIIMUL_LIMIT),         t_INT, 3,0, speed_modii,speed_remiimul},
 {GMP, var(DIVRR_GMP_LIMIT),        t_REAL,4,0, speed_divrr,speed_divrrgmp},
+{0,   var(EXPNEWTON_LIMIT),        t_REAL,64,0, speed_exp,speed_expnewton},
 {0,   var(LOGAGM_LIMIT),           t_REAL,4,0, speed_log,speed_logagm},
 {0,   var(LOGAGMCX_LIMIT),         t_REAL,3,0, speed_logcx,speed_logcxagm,0.05},
 {0,   var(AGM_ATAN_LIMIT),         t_REAL,20,0, speed_atan,speed_atanagm,0.05},

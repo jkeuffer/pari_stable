@@ -8,6 +8,7 @@
 #define __KARATSUBA_MULI_LIMIT  -1 /* unused */
 #define __KARATSUBA_MULR_LIMIT   8
 #define __KARATSUBA_SQRI_LIMIT  -1 /* unused */
+#define __EXPNEWTON_LIMIT       77
 #define __LOGAGM_LIMIT          24
 #define __LOGAGMCX_LIMIT        54
 #define __AGM_ATAN_LIMIT        54
