@@ -1032,13 +1032,14 @@ QpX_mod(GEN e, GEN f, GEN pk)
 #endif
 
 static void
-update_den(GEN *e, GEN *de)
+update_den(GEN *e, GEN *de, GEN *pp)
 {
   GEN ce = Q_content(*e);
   if (ce != gun) {
     ce = gcdii(*de, ce);
     *de = diviiexact(*de, ce);
     *e  = gdivexact(*e, ce);
+    if (pp) *pp =diviiexact(*pp, ce);
   }
 }
 
@@ -1076,7 +1077,7 @@ Decomp(decomp_t *S, long flag)
   de = gpowgs(dt, degpol(a));
   pr = mulii(p, de);
   e = FpX_FpXQ_compo(FpX_rescale(a, dt, pr), th, S->f, pr);
-  update_den(&e, &de);
+  update_den(&e, &de, NULL);
 
   pk = p; k = 1;
   /* E, (1 - E) tend to orthogonal idempotents in Zp[X]/(f) */
@@ -1088,7 +1089,7 @@ Decomp(decomp_t *S, long flag)
     de= mulii(de, sqri(de));
     D = mulii(pk, de);
     e = FpX_rem(e, centermod(S->f, D), D); /* e/de defined mod pk */
-    update_den(&e, &de);
+    update_den(&e, &de, NULL);
   }
   pr = gpowgs(p, r); /* required precision of the factors */
   ph = mulii(de, pr);
@@ -1211,8 +1212,7 @@ manage_cache(GEN chi, GEN pp, GEN ns)
 
   if (gcmp(pp, npp) > 0)
   {
-    if (DEBUGLEVEL > 4)
-      fprintferr("newtonsums: result too large to fit in cache\n");
+    if (DEBUGLEVEL > 4) fprintferr("newtonsums: result doesn't fit in cache\n");
     return polsymmodpp(chi, pp);
   }
 
@@ -1227,63 +1227,62 @@ manage_cache(GEN chi, GEN pp, GEN ns)
 
 
 /* compute the c first Newton sums modulo pp of the
-   characteristic polynomial of a(x) mod g(x) */
+   characteristic polynomial of a/d mod chi, d > 0 power of p (NULL = gun),
+   a, chi in Zp[X]
+   ns = Newton sums of chi */
 static GEN
-newtonsums(GEN a, GEN chi, GEN pp, GEN ns, long c)
+newtonsums(GEN a, GEN da, GEN chi, GEN pp, GEN ns, long c)
 {
-  GEN va, pa, s, ns2;
+  GEN va, pa, dpa, s;
   long j, k, n = degpol(chi);
-  pari_sp av2, lim;
+  pari_sp av = avma, lim = stack_lim(av, 1);
 
-  ns2 = manage_cache(chi, pp, ns);
-
-  av2 = avma;
-  lim = stack_lim(av2, 1);
-
-  pa = polun[varn(a)];
+  pa = polun[varn(a)]; dpa = gun;
   va = zerovec(c);
-
   for (j = 1; j <= c; j++)
-  {
+  { /* pa/dpa = (a/d)^(j-1) mod (chi, pp) */
     pa = FpX_rem(FpX_mul(pa, a, pp), chi, pp);
     s  = gzero;
-    for (k = 0; k <= n-1; k++)
-      s = addii(s, mulii(polcoeff0(pa, k, -1), (GEN)ns2[k+1]));
+    for (k = 0; k < n; k++)
+      s = addii(s, mulii(polcoeff0(pa, k, -1), (GEN)ns[k+1]));
+    if (da) {
+      dpa = mulii(dpa, da);
+      s = gdiv(s, dpa);
+      if (typ(s) != t_INT) return NULL;
+      update_den(&pa, &dpa, &pp);
+    }
 
     va[j] = (long)centermod(s, pp);
 
-    if (low_stack(lim, stack_lim(av2, 1)))
+    if (low_stack(lim, stack_lim(av, 1)))
     {
       if(DEBUGMEM>1) err(warnmem, "newtonsums");
-      gerepileall(av2, 2, &pa, &va);
+      gerepileall(av, 4, &pa, &va, &pp, &dpa);
     }
   }
-
   return va;
 }
 
-/* compute the characteristic polynomial of a mod chi (a in Z[X])
-   to a precision of pp using Newton sums */
+/* compute the characteristic polynomial of a/da mod chi (a in Z[X]), given
+ * by its Newton sums to a precision of pp using Newton sums */
 static GEN
-newtoncharpoly(GEN a, GEN chi, GEN pp, GEN p, GEN ns)
+newtoncharpoly(GEN pp, GEN p, GEN NS)
 {
-  GEN NS, c;
-  long n = degpol(chi), j, k, vn = varn(chi);
-  pari_sp av = avma;
+  long n = lg(NS)-1, j, k;
+  GEN c = cgetg(n + 2, t_VEC);
 
-  NS = newtonsums(a, chi, pp, ns, n);
-  c = cgetg(n + 2, t_VEC);
+  if (!NS) return NULL;
   c[1] = lstoi((n % 2)? -1: 1);
   for (k = 2; k <= n+1; k++) c[k] = zero;
   for (k = 2; k <= n+1; k++)
   {
     pari_sp av2 = avma;
-    GEN z,  s = gzero, d = stoi(k - 1);
-    long v = pvaluation(d, p, &z);
+    GEN z,  s = gzero;
+    long v = pvaluation(stoi(k - 1), p, &z);
     for (j = 1; j < k; j++)
     {
       GEN t = mulii((GEN)NS[j], (GEN)c[k-j]);
-      if (!(j%2)) t = negi(t);
+      if (!odd(j)) t = negi(t);
       s = addii(s, t);
     }
     if (v) {
@@ -1293,10 +1292,8 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN p, GEN ns)
     s = mulii(s, mpinvmod(z, pp));
     c[k] = (long)gerepileuptoint(av2, centermod(s, pp));
   }
-  k = (n%2)? 1: 2;
-  for (  ; k <= n+1; k += 2) c[k] = lnegi((GEN)c[k]);
-
-  return gerepileupto(av, gtopoly(c, vn));
+  for (k = odd(n)? 1: 2; k <= n+1; k += 2) c[k] = lnegi((GEN)c[k]);
+  return gtopoly(c, 0);
 }
 
 /* guess if a mod chi has positive valuation
@@ -1304,19 +1301,19 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN p, GEN ns)
 static long
 fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
 {
-  GEN v, p1;
+  GEN v, d, pp;
   long m, n = degpol(chi), j, c;
 
-  if (egalii(p, gdeux))
-    c = 2*n/3;
-  else
-    c = (n > 2*E)? 2*E: n;
+  c = egalii(p, gdeux)? 2*n/3 : min(2*E, n);
   if (c < 2) c = 2;
-  a = Q_primitive_part(a,&p1);
-  m = ggval(p1, p); /* <= 0 */
-  v = newtonsums(a, chi, gpowgs(p, -(m-1)*c+1), ns, c);
+  a = Q_remove_denom(a, &d);
+  m = d? ggval(d, p): 0; /* >= 0 */
+  pp = gpowgs(p, (m+1)*c+1);
+  ns = manage_cache(chi, pp, ns);
+  v = newtonsums(a, d, chi, pp, ns, c);
+  if (!v) return 0;
   for (j = 1; j <= c; j++)
-    if (signe((GEN)v[j]) && E*ggval((GEN)v[j], p) + j*(E*m-1) < 0) return 0;
+    if (signe((GEN)v[j]) && E*ggval((GEN)v[j], p) - j*(E*m+1) < 0) return 0;
   return 1;
 }
 
@@ -1329,32 +1326,31 @@ val_fact(ulong n, ulong p)
   return (long)v;
 }
 
+/* return NULL if a mod f is not an integer
+ * if dr >= 0, a mod f is an integer and the denominator of any integer
+ * in Zp[X]/(f) divides p^dr */
 static GEN
-mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
+mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
 {
-  GEN d, chi, npp;
-  long v = varn(f), n = degpol(f);
+  pari_sp av = avma;
+  GEN d, chi, npp, NPP, nspp;
+  long n = degpol(f);
 
-  if (gcmp0(beta)) return zeropol(v);
+  if (gcmp0(a)) return zeropol(varn(f));
 
-  beta = Q_primitive_part(beta,&d);
-  if (!pp)
-    chi = ZX_caract(f, beta, v);
-  else
-  {
-    npp = pp;
-    if (lgefint(p) == 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
-    if (d) npp = mulii(npp, gpowgs(denom(d), n));
-
-    chi = newtoncharpoly(beta, f, npp, p, ns);
-    /* can happen only if gamma is incorrect (not an integer) */
-    if (!chi) return NULL;
+  a = Q_remove_denom(a, &d);
+  npp = pp;
+  if (lgefint(p) == 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
+  nspp = NPP = npp;
+  if (d) {
+    NPP = mulii(NPP, gpowgs(d, n));
+    nspp = (dr < 0)? NPP: mulii(nspp, gpowgs(p, dr));
   }
-  if (d) chi = rescale_pol(chi, d);
-  /* can happen only if gamma is incorrect (not an integer) */
-  if (!gcmp1(Q_denom(chi))) return NULL;
-  if (pp) chi = centermod(chi, pp);
-  return chi;
+  ns = manage_cache(f, nspp, ns);
+  chi = newtoncharpoly(npp, p, newtonsums(a, d, f, NPP, ns, n));
+  if (!chi) return NULL;
+  setvarn(chi, varn(f));
+  return gerepileupto(av, centermod(chi, pp));
 }
 
 static GEN
@@ -1369,7 +1365,7 @@ get_nu(GEN chi, GEN p, long *ptl)
 static long
 factcp(decomp_t *S, GEN f, GEN pp, GEN ns)
 {
-  GEN chi = mycaract(f, S->phi, S->p, pp, ns);
+  GEN chi = mycaract(f, S->phi, S->p, pp, -1, ns);
   long l;
   S->chi= chi;
   S->nu = get_nu(chi, S->p, &l); return l;
@@ -1485,13 +1481,14 @@ static void
 kill_cache(GEN ns) { setsigne(ns[1], 0); }
 
 static int 
-update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN pmf, GEN ns)
+update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN ns)
 {
   GEN pdr, pmr = *ptpmr, X = polx[ varn(S->f) ];
+  int first = 1;
 
   if (!S->chi) {
     kill_cache(ns);
-    S->chi = mycaract(S->f, S->phi, S->p, pmf, ns);
+    S->chi = mycaract(S->f, S->phi, S->p, pmr, S->df, ns);
   }
   kill_cache(ns);
   for (;;)
@@ -1500,9 +1497,17 @@ update_phi(decomp_t *S, GEN *ptpdr, GEN *ptpmr, GEN pmf, GEN ns)
     if (signe(pdr)) break;
 
     S->phi = gadd(S->phi, gmul(S->p, X));
+#if 0
     if (factcp(S, S->f, pmr, ns) > 1) return 0;
+#endif
+    S->chi = mycaract(S->f, S->phi, S->p, pmr, S->df, ns);
+    if (first) {
+      long l; S->nu = get_nu(S->chi, S->p, &l);
+      if (l > 1) return 0;
+      first = 0;
+    }
     kill_cache(ns);
-    pmr  = sqri(pmr); /* try a larger precision */
+    pmr = sqri(pmr); /* try a larger precision */
   }
 
   if (is_pm1(pdr))
@@ -1668,7 +1673,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
       if (er || !chib)
         /* reducing modulo pdr is too much in some cases.
            gamm might not be an integer, in this case, chig = NULL */
-        chig = mycaract(S->chi, gamm, S->p, pmr, ns);
+        chig = mycaract(S->chi, gamm, S->p, pmr, -1, ns);
       else
       {
         GEN h = gpowgs(S->p, eq);
@@ -1692,7 +1697,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
           gamm = redelt(gamm, S->p, S->p);
         }
         /* gamm is an integer */
-        chig = mycaract(S->chi, gamm, S->p, pmf, ns);
+        chig = mycaract(S->chi, gamm, S->p, pmf, -1, ns);
       }
       
       nug = get_nu(chig, S->p, &l);
@@ -1731,7 +1736,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
       else
       {
         if (!divise(ZX_QX_resultant(S->chi, eta), S->p)) continue;
-        chie = mycaract(S->chi, eta, S->p, pmr, ns);
+        chie = mycaract(S->chi, eta, S->p, pmr, -1, ns);
       }
       nue = get_nu(chie, S->p, &l);
       if (l > 1) { 
@@ -1745,7 +1750,7 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
         long Le, Ee;
         GEN pie;
         if (divise(constant_term(chie), pmr))
-          chie = mycaract(S->chi, eta, S->p, pmf, ns);
+          chie = mycaract(S->chi, eta, S->p, pmf, -1, ns);
         
         pie = getprime(S, eta, chie, nue, &Le, &Ee);
         if (Ea % Ee)
@@ -1811,7 +1816,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     {
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
-      if (!update_phi(S, &pdr, &pmr, pmf, ns)) break;
+      if (!update_phi(S, &pdr, &pmr, ns)) break;
       pia  = getprime(S, polx[v], S->chi, S->nu, &La, &Ea);
     }
     pia  = redelt(pia, pmr, p);
@@ -1820,7 +1825,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
     { /* change phi such that nu = pia */
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
-      if (!update_phi(S, &pdr, &pmr, pmf, ns)) break;
+      if (!update_phi(S, &pdr, &pmr, ns)) break;
     }
 
     if (DEBUGLEVEL>5) fprintferr("  (Fa, Ea) = (%ld,%ld)\n", Fa, Ea);
@@ -1830,7 +1835,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
       S->chi = NULL; l = 1; break;
     }
     if (loop(S, nv, pdr, pmr, pmf, Ea, Fa, ns)) break;
-    if (!update_phi(S, &pdr, &pmr, pmf, ns)) break;
+    if (!update_phi(S, &pdr, &pmr, ns)) break;
 
     if (is_pm1(pmr))
     { /* may happen if p does not divide the field discriminant */
