@@ -171,7 +171,7 @@ EltsOfGroup(long order, GEN cyc)
   return rep;
 }
 
-/* Let dataC as given by InitQuotient, compute a system of
+/* Let dataC as given by InitQuotient0, compute a system of
    representatives of the quotient */
 static GEN
 ComputeLift(GEN dataC)
@@ -290,19 +290,16 @@ static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
 static GEN
 InitQuotient0(GEN cyc, GEN C)
 {
-  GEN rep, D, MQ, MrC, H, U, DA = diagonal(cyc);
+  GEN z, D, H, U;
 
-  H = gcmp0(C)? DA: C;
-  MrC  = hnf_gauss(H, DA);
-  (void)smithall(hnf(MrC), &U, NULL);
-  MQ   = concatsp(gmul(H, U), DA);
-  D = smithall(hnf(MQ), &U, NULL);
+  H = gcmp0(C)? diagonal(cyc): hnf(C);
+  D = smithall(H, &U, NULL);
 
-  rep = cgetg(5, t_VEC);
-  rep[1] = (long)dethnf_i(D);
-  rep[2] = (long)mattodiagonal_i(D);
-  rep[3] = (long)U;
-  rep[4] = (long)C; return rep;
+  z = cgetg(5, t_VEC);
+  z[1] = (long)dethnf_i(D);
+  z[2] = (long)mattodiagonal_i(D);
+  z[3] = (long)U;
+  z[4] = (long)C; return z;
 }
 
 /* Let m be a modulus et C a subgroup of Clk(m), compute all the data
@@ -434,10 +431,9 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   }
 
   /* f = order of [pr] in bnrpr/subpr */
-  dtQ  = InitQuotient(bnrpr, subpr);
-  p1   = isprincipalray(bnrpr, pr);
-  p1   = gmul(gmael(dtQ, 2, 3), p1);
-  cycQ = gmael(dtQ, 2, 2);
+  dtQ  = InitQuotient0(bnrpr, subpr);
+  p1   = gmul((GEN)dtQ[3], isprincipalray(bnrpr, pr));
+  cycQ = (GEN)dtQ[2];
   f  = itos( Order(cycQ, p1) );
   avma = av;
   rep = cgetg(3, t_VECSMALL);
@@ -613,16 +609,10 @@ FindModulus(GEN dataC, long *newprec, long prec)
             if (oldcpl < rb) goto END; /* OK */
 
             if (DEBUGLEVEL>1) fprintferr("Trying to find another modulus...");
-            first--;
+            first = 0;
           }
 	}
-        if (first <= 0)
-	{
-	  if (DEBUGLEVEL>1)
-	    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",
-		       gmael3(rep, 1, 2, 1), rep[2]);
-          goto END; /* OK */
-	}
+        if (!first) goto END; /* OK */
       }
     }
     /* if necessary compute more ideals */
@@ -632,6 +622,9 @@ FindModulus(GEN dataC, long *newprec, long prec)
 
   }
 END:
+  if (DEBUGLEVEL>1)
+    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",
+               gmael3(rep, 1, 2, 1), rep[2]);
   rep[5] = (long)InitChar((GEN)rep[1], (GEN)rep[5], *newprec);
   return gerepilecopy(av, rep);
 }
