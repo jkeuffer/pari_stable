@@ -2185,7 +2185,7 @@ input0()
   while (! get_line_from_file(infile, b, DFT_INPROMPT))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
   x = lisseq(b->buf);
-  pop_buffer(b); return x;
+  pop_buffer(); return x;
 }
 
 void
