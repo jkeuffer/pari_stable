@@ -1761,7 +1761,9 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   {
     x=root_error(n,i,roots_pol,sigma,shatzle);
     e=gexpo(x); if (e>e_max) e_max=e;
-    roots_pol[i]=(long) mygprec_absolute((GEN)roots_pol[i],-e);
+    x = (GEN)roots_pol[i];
+    roots_pol[i]=(long) mygprec_absolute(x,-e);
+    gunclone(x);
   }
   return e_max;
 }
@@ -1771,46 +1773,45 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
 /**                           MAIN                                 **/
 /**                                                                **/
 /********************************************************************/
-
-/* compute roots in roots_pol so that |P-L_1...L_n|<2^(-bitprec)|P| , and
-returns prod (x-roots_pol[i]) for i=1..degree(p) */
 static GEN
-split_complete(GEN p, long bitprec, GEN *roots_pol, long *iroots)
+append_root(GEN roots_pol, GEN a)
 {
-  long n=lgef(p)-3,decprec,ltop,lbot;
-  GEN F,G,a,b,m1,m2,m;
-  GEN *gptr[2];
+  long l = lg(roots_pol);
+  setlg(roots_pol, l+1); return (GEN)(roots_pol[l] = lclone(a));
+}
+
+/* put roots in placeholder roots_pol so that |P-L_1...L_n|<2^(-bitprec)|P|
+ *  and returns  prod (x-roots_pol[i]) for i=1..degree(p) */
+static GEN
+split_complete(GEN p, long bitprec, GEN roots_pol)
+{
+  long n=lgef(p)-3,decprec,ltop;
+  GEN p1,F,G,a,b,m1,m2,m;
 
   if (n==1)
   {
     a=gneg_i(gdiv((GEN)p[2],(GEN)p[3]));
-    (*iroots)++; (*roots_pol)[*iroots]=(long) a;
-    return p;
+    append_root(roots_pol,a); return p;
   }
-  ltop=avma;
+  ltop = avma;
   if (n==2)
   {
     F=gsub(gsqr((GEN)p[3]),gmul2n(gmul((GEN)p[2],(GEN)p[4]),2));
     decprec=(long) ((double) bitprec * L2SL10)+1;
     F=gsqrt(F,decprec);
-    a=gneg_i(gdiv(gadd((GEN)p[3],F),gmul2n((GEN)p[4],1)));
-    b=gdiv(gsub(F,(GEN)p[3]),gmul2n((GEN)p[4],1));
-
-    gptr[0]=&a; gptr[1]=&b;
-    gerepilemany(ltop,gptr,2);
-    (*iroots)++; (*roots_pol)[*iroots]=(long) a;
-    (*iroots)++; (*roots_pol)[*iroots]=(long) b;
+    p1 = gmul2n((GEN)p[4],1);
+    a = gneg_i(gdiv(gadd(F,(GEN)p[3]), p1));
+    b =        gdiv(gsub(F,(GEN)p[3]), p1);
+    a = append_root(roots_pol,a);
+    b = append_root(roots_pol,b); avma = ltop;
     m=gmul(gsub(polx[varn(p)],mygprec(a,3*bitprec)),
 	   gsub(polx[varn(p)],mygprec(b,3*bitprec)));
     return gmul(m,(GEN)p[4]);
   }
   split_0(p,bitprec,&F,&G);
-  m1=split_complete(F,bitprec,roots_pol,iroots);
-  m2=split_complete(G,bitprec,roots_pol,iroots);
-  lbot=avma;
-  m=gmul(m1,m2); *roots_pol=gcopy(*roots_pol);
-  gptr[0]=roots_pol; gptr[1]=&m;
-  gerepilemanysp(ltop,lbot,gptr,2); return m;
+  m1 = split_complete(F,bitprec,roots_pol);
+  m2 = split_complete(G,bitprec,roots_pol);
+  return gerepileupto(ltop, gmul(m1,m2));
 }
 
 /* compute a bound on the maximum modulus of roots of p */
@@ -1879,27 +1880,23 @@ static GEN
 all_roots(GEN p, long bitprec)
 {
   GEN q,roots_pol,m;
-  long bitprec2,n=lgef(p)-3,iroots,i,j,e,av,tetpil;
+  long bitprec2,n=lgef(p)-3,iroots,j,e,av;
 
-  roots_pol=cgetg(n+1,t_VEC); av=avma;
-  for (i=1; i<=n; i++) roots_pol[i]=zero;
+  roots_pol=cgetg(n+1,t_VEC); setlg(roots_pol,1); av=avma;
   for (j=1; j<=10; j++)
   {
     iroots=0; e = 2*gexpo(cauchy_bound(p)); if (e<0) e=0;
-    bitprec2=bitprec+(1<<j)*n+gexpo(p)-gexpo((GEN)p[2+n])
-      +(long) log2(n)+1+e;
+    bitprec2=bitprec+(1<<j)*n+gexpo(p)-gexpo((GEN)p[2+n]) + (long)log2(n)+1+e;
     q=gmul(mygprec(gunr,bitprec2),mygprec(p,bitprec2));
-    m=split_complete(q,bitprec2,&roots_pol,&iroots);
+    m=split_complete(q,bitprec2,roots_pol);
     e = gexpo(gsub(mygprec_special(p,bitprec2),m))
       - gexpo((GEN)q[2+n])+(long) log2((double)n)+1;
     if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
-    if (e < 0 && a_posteriori_errors(q,roots_pol,e) < -bitprec)
-      return roots_pol;
-
-    tetpil=avma; roots_pol=gerepile(av,tetpil,gcopy(roots_pol));
+    if (e < 0 && a_posteriori_errors(q,roots_pol,e) < -bitprec) break;
+    avma = av;
   }
-  err(bugparier,"all_roots");
-  return NULL; /* not reached */
+  if (j > 10) err(bugparier,"all_roots");
+  return roots_pol;
 }
 
 /* true if x is an exact scalar, that is integer or rational */
@@ -2024,8 +2021,10 @@ isrealappr(GEN x, long e)
 static int
 isconj(GEN x, GEN y, long e)
 {
-  return (gexpo( gsub((GEN)x[1],(GEN)y[1]) ) < e
-       && gexpo( gadd((GEN)x[2],(GEN)y[2]) ) < e);
+  long av = avma;
+  long i= (gexpo( gsub((GEN)x[1],(GEN)y[1]) ) < e
+        && gexpo( gadd((GEN)x[2],(GEN)y[2]) ) < e);
+  avma = av; return i;
 }
 
 /* returns the vector of roots of p, with guaranteed absolute error
@@ -2034,49 +2033,49 @@ isconj(GEN x, GEN y, long e)
 GEN
 roots(GEN p, long l)
 {
-  long av,av1,tetpil,n,j,k,s;
-  GEN p1,p2,p3,p22,res;
+  long av,n,i,k,s,e;
+  GEN c,c2,r,p1,p2,res;
 
   if (gcmp0(p)) err(zeropoler,"roots");
-  av=avma; p1=roots_com(p,l); n=lg(p1);
-  if (n <= 1) return p1;
-  if (isreal(p))
+  av=avma; r=roots_com(p,l); n=lg(r);
+  if (n <= 1) return r;
+
+  if (!isreal(p))
   {
-    long e = 5 - bit_accuracy(l);
-    p3=cgetg(n,t_COL); s=0;
-    for (j=1; j<n; j++)
-    {
-      p2=(GEN)p1[j];
-      if (typ(p2) != t_COMPLEX) { p3[++s]=(long)p2; p1[j]=zero; }
-      else if (isrealappr(p2,e)) { p3[++s]=p2[1]; p1[j]=zero; }
-    }
-    setlg(p3,s+1); p2=sort(p3); setlg(p3,n);
-    tetpil=avma; res=cgetg(n,t_COL);
-    for (j=1; j<=s; j++) res[j]=(long)tocomplex((GEN)p2[j],l);
-    for (j=1; j<n; j++)
-    {
-      p2=(GEN)p1[j];
-      if (typ(p2) == t_COMPLEX)
-      {
-	res[++s]=(long)tocomplex(p2,l);
-        av1=avma;
-	for (k=j+1; k<n; k++)
-	{
-	  p22=(GEN)p1[k];
-	  if (typ(p22) == t_COMPLEX && isconj(p2,p22,e))
-          {
-            avma=av1; res[++s]=(long)tocomplex(p22,l);
-            p1[k]=zero; break;
-          }
-	}
-	if (k==n) err(bugparier,"roots (conjugates)");
-      }
-    }
-    return gerepile(av,tetpil,res);
+    res = cgetg(n,t_COL);
+    for (i=1; i<n; i++) res[i]=(long)tocomplex((GEN)r[i],l);
+    return gerepileupto(av,res);
   }
-  tetpil=avma; res=cgetg(n,t_COL);
-  for (j=1; j<n; j++) res[j]=(long)tocomplex((GEN)p1[j],l);
-  return gerepile(av,tetpil,res);
+  e = 5 - bit_accuracy(l);
+  p1=cgetg(n,t_COL); s=0;
+  for (i=1; i<n; i++)
+  {
+    p2=(GEN)r[i];
+    if (typ(p2) != t_COMPLEX) { p1[++s]=(long)p2; r[i]=zero; }
+    else if (isrealappr(p2,e)) { p1[++s]=p2[1]; r[i]=zero; }
+  }
+  setlg(p1,s+1); p2=sort(p1);
+  res = cgetg(n,t_COL);
+  for (i=1; i<=s; i++) res[i]=(long)tocomplex((GEN)p2[i],l);
+  for (i=1; i<n; i++)
+  {
+    c=(GEN)r[i];
+    if (typ(c) == t_COMPLEX)
+    {
+      res[++s]=(long)tocomplex(c,l);
+      for (k=i+1; k<n; k++)
+      {
+        c2=(GEN)r[k];
+        if (typ(c2) == t_COMPLEX && isconj(c,c2,e))
+        {
+          res[++s]=(long)tocomplex(c2,l);
+          r[k]=zero; break;
+        }
+      }
+      if (k==n) err(bugparier,"roots (conjugates)");
+    }
+  }
+  return gerepileupto(av,res);
 }
 
 GEN
