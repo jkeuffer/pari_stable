@@ -1432,7 +1432,7 @@ chinois(GEN x, GEN y)
       for (i=1; i<lx; i++) z[i]=(long)chinois((GEN)x[i],(GEN)y[i]);
       return z;
   }
-  err(talker,"incompatible arguments in chinois");
+  err(typeer,"chinese");
   return NULL; /* not reached */
 }
 
