@@ -880,7 +880,7 @@ FpXQ_inv(GEN x,GEN T,GEN p)
 }
 
 GEN
-FpXV_FpV_dotproduct(GEN V, GEN W, GEN p)
+FpXV_FpV_innerprod(GEN V, GEN W, GEN p)
 {
   long ltop=avma;
   long i;
@@ -946,7 +946,7 @@ long brent_kung_optpow(long d, long n)
   return (d+l-1)/l;
 }
 
-/*Close to FpXV_FpV_dotproduct*/
+/*Close to FpXV_FpV_innerprod*/
 
 static GEN
 spec_compo_powers(GEN P, GEN V, long a, long n)
@@ -1608,7 +1608,7 @@ matpolfrobenius(GEN V, GEN P, GEN T, GEN p)
     PV[i]=P[1+i];
   M=cgetg(l+1,t_VEC);
   M[1]=(long)scalarpol(poleval(P,gun),v);
-  M[2]=(long)FpXV_FpV_dotproduct(V,PV,p);
+  M[2]=(long)FpXV_FpV_innerprod(V,PV,p);
   W=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(W);i++)
      W[i]=V[i];
@@ -1617,7 +1617,7 @@ matpolfrobenius(GEN V, GEN P, GEN T, GEN p)
     long j;
     for(j=1;j<lg(W);j++)
       W[j]=(long)FpXQ_mul((GEN)W[j],(GEN)V[j],T,p);
-    M[i]=(long)FpXV_FpV_dotproduct(W,PV,p);
+    M[i]=(long)FpXV_FpV_innerprod(W,PV,p);
   }
   return vecpol_to_mat(M,l);
 }

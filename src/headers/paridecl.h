@@ -1185,7 +1185,7 @@ GEN     FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p);
 GEN     FpXQX_divres(GEN x, GEN y, GEN T, GEN p, GEN *pr);
 GEN     FpXQX_red(GEN z, GEN T, GEN p);
 GEN     FpXQX_normalize(GEN z, GEN T, GEN p);
-GEN     FpXV_FpV_dotproduct(GEN V, GEN W, GEN p);
+GEN     FpXV_FpV_innerprod(GEN V, GEN W, GEN p);
 GEN     FpXV_red(GEN z, GEN p);
 GEN     FpXX_red(GEN z, GEN p);
 GEN     Fp_factor_rel(GEN P, GEN l, GEN Q);
