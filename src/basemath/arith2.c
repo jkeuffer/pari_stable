@@ -132,7 +132,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
   fprintferr("initprimes0: called for maxnum = %lu\n", maxnum);
 #endif
   if (maxnum <= 1ul<<17)	/* Arbitrary. */
-    return initprimes1(maxnum>>1, lenp, lastp);
+    return initprimes1(maxnum>>1, lenp, (long*)lastp);
 
   maxnum |= 1;			/* make it odd. */
 
