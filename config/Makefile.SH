@@ -300,7 +300,7 @@ lib-dyn: \$(LIBPARI_DYN)
 	-\$(RM) \$@
 	\$(AR) r \$@ \$(OBJS)
 
-kerntest\$(_O): ../src/test/kerntest.c 
+kerntest\$(_O): ../src/test/kerntest.c
 	\$(CC) -c \$(CFLAGS) -I$src/language \$(CPPFLAGS) -o \$@ \$<
 
 kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
@@ -560,14 +560,14 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
 
   source="$src/$dir/$f.c"
   depend=
-  cflags=
+  cflags="\$(CFLAGS) \$(CPPFLAGS)"
   case "$f" in
   gp|gp_rl)
-    cflags="-I$src/language \$(RLINCLUDE)"
+    cflags="$cflags -I$src/language \$(RLINCLUDE)"
     depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h"
     ;;
   gp_init|plotport)
-    cflags="-I$src/graph"
+    cflags="$cflags -I$src/graph"
     depend="$src/graph/rect.h"
     ;;
   plot*-dyn)
@@ -575,17 +575,17 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     depend="$src/graph/rect.h \$(LIBPARI).dll libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   plot*)
-    cflags="\$(PLOTCFLAGS)"
+    cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
     ;;
   gp-dyn|gp_rl-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
-    cflags="\$(DYNFLAGS) -I$src/language \$(RLINCLUDE)"
+    cflags="$cflags \$(DYNFLAGS) -I$src/language \$(RLINCLUDE)"
     depend="$src/language/anal.h $src/gp/gp.h ./paricfg.h libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   gp_init-dyn|plotport-dyn)
     source=$src\/`echo $dir | sed -e "s/dyn//"`\/`echo $f | cut -f1 -d-`.c
-    cflags="\$(DYNFLAGS) -I$src/graph"
+    cflags="$cflags \$(DYNFLAGS) -I$src/graph"
     depend="$src/graph/rect.h libpari_dll.h libpari_globals.h \$(LIBPARI).dll"
     ;;
   init|es|sumiter)
@@ -598,10 +598,9 @@ for dir in basemath modules language gp graph gpdyn graphdyn systems; do
     depend="$src/headers/parinf.h"
     ;;
   esac
-
 HUGELINE="$HUGELINE
 $f\$(_O): .headers $depend $source
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) $cflags -o $f\$(_O) $source"
+	\$(CC) -c $cflags -o $f\$(_O) $source"
   done
 done
 #to avoid execing too many "cat".
