@@ -432,7 +432,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
 static GEN
 CplxModulus(GEN data, long *newprec, long prec)
 {
-  long av = avma, pr, dprec;
+  long av = avma, av2, pr, dprec;
   GEN nf, cpl, pol, p1;
 
   nf = gmael3(data, 1, 1, 7);
@@ -450,13 +450,15 @@ CplxModulus(GEN data, long *newprec, long prec)
 
   dprec = DEFAULTPREC;
 
+  av2 = avma;
   for (;;)
   {
     p1[5] = (long)InitChar0((GEN)data[3], dprec);
-    pol   = AllStark(p1, nf, -1, dprec);
+    pol   = gerepileupto(av2, AllStark(p1, nf, -1, dprec));
     if (!gcmp0(leading_term(pol)))
     {
-      cpl   = mpabs(poldisc0(pol, 0));
+      /* cpl   = mpabs(poldisc0(pol, 0)); */
+      cpl = gnorml2(gtovec(pol));
       if (!gcmp0(cpl)) break;
     }
     pr = gexpo(pol)>>(TWOPOTBITS_IN_LONG+1);
