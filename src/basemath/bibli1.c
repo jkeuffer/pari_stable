@@ -1016,25 +1016,6 @@ gram(GEN b)
   return g;
 }
 
-#if 0
-/* The columns of b for a lattice L = <b_i>; return u unimodular of an
- * LLL-reduced basis (c_i) in terms of the b_i. [ c = b * u ] */
-GEN
-lllintern(GEN x,long flag,long prec)
-{
-  gpmem_t av = avma;
-  GEN h, g = gram(x);
-  if (flag)
-  {
-    h = lllgramintern(g,LLLDFT,1,prec);
-    if (!h) { avma = av; return NULL; }
-  }
-  else
-    h = lllgram(g, prec);
-  return gerepileupto(av, h);
-}
-#endif
-
 GEN
 lll(GEN x,long prec) {
   gpmem_t av = avma;
@@ -3481,7 +3462,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     if (DEBUGLEVEL>2)
       fprintferr("final LLLs: prec = %ld, precision(rinvtrans) = %ld\n",
                   prec,gprecision(rinvtrans));
-    p1 = lllintern(rinvtrans,flag&1, (gprecision(rinvtrans)<<1)-2);
+    p1 = lllintern(rinvtrans, flag&1, 0);
     if (!p1) goto PRECPB;
     if (ishnfall(p1)) break; /* upper triangular */
     if (v) v = gmul(v,p1); else v = p1;
