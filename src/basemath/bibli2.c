@@ -556,6 +556,7 @@ binome(GEN n, long k)
 
   if (k <= 1)
   {
+    if (is_noncalc_t(typ(n))) err(typeer,"binomial");
     if (k < 0) return gzero;
     if (k == 0) return gun;
     return gcopy(n);
