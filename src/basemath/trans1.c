@@ -511,25 +511,26 @@ powgi(GEN x, GEN n)
     }
     case t_PADIC:
     {
-      GEN p, pe;
+      long e = itos(n)*valp(x);
+      GEN mod, p = (GEN)x[2];
+      
       if (!signe(x[4]))
       {
         if (sn < 0) err(talker, "division by 0 p-adic in powgi");
-        y=gcopy(x); setvalp(y, itos(n)*valp(x)); return y;
+        return padiczero(p, e);
       }
       y = cgetg(5,t_PADIC);
-      p = (GEN)x[2];
-      pe= (GEN)x[3]; i = ggval(n, p);
-      if (i == 0) pe = icopy(pe);
+      mod = (GEN)x[3]; i = ggval(n, p);
+      if (i == 0) mod = icopy(mod);
       else
       {
-        pe = mulii(pe, gpowgs(p,i));
-        pe = gerepileuptoint((long)y, pe);
+        mod = mulii(mod, gpowgs(p,i));
+        mod = gerepileuptoint((long)y, mod);
       }
-      y[1] = evalprecp(precp(x)+i) | evalvalp(itos(n) * valp(x));
+      y[1] = evalprecp(precp(x)+i) | evalvalp(e);
       icopyifstack(p, y[2]);
-      y[3] = (long)pe;
-      y[4] = (long)powmodulo((GEN)x[4], n, pe);
+      y[3] = (long)mod;
+      y[4] = (long)powmodulo((GEN)x[4], n, mod);
       return y;
     }
     case t_QFR:
@@ -1034,13 +1035,8 @@ GEN padic_sqrtn(GEN x, GEN n, GEN *zetan)
   GEN *gptr[2];
   if (gcmp0(x))
   {
-    GEN y;
     long m = itos(n);
-    e=valp(x); y=cgetg(5,t_PADIC); copyifstack(x[2],y[2]);
-    y[4] = zero; e = (e+m-1)/m;
-    y[3] = un;
-    y[1] = evalvalp(e) | evalprecp(precp(x));
-    return y;
+    return padiczero(p, (valp(x)+m-1)/m);
   }
   /*First treat the ramified part using logarithms*/
   e=pvaluation(n,p,&q);
