@@ -1795,7 +1795,7 @@ nfrootsQ(GEN x)
   val = polvaluation(x, &x);
   d = modulargcd(derivpol(x), x);
   z = DDF(gdeuc(x, d), 1, 1);
-  if (val) concatsp(z, gzero);
+  if (val) z = concatsp(z, gzero);
   return gerepilecopy(av, z);
 }
 
