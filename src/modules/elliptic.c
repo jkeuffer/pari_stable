@@ -1913,7 +1913,7 @@ apell0(GEN e, ulong p)
     while (!KRO || KRO == KROold)
     {
       ulong t;
-      if (++x >= p) err(talker, "%lu is not prime", p);
+      if (++x >= p) err(talker, "%lu is not prime, use ellak", p);
       t = Fl_add(c4, Fl_mul(x,x,p), p);
       u = Fl_add(c6, Fl_mul(x, t, p), p);
       KRO = kross(u,p);
@@ -1945,7 +1945,10 @@ apell0(GEN e, ulong p)
     s_powell(&fg, &F, s, cp4, p); ftest = fg;
     for (i=1; ; i++)
     {
-      if (ftest.isnull) err(bugparier,"apell (f^(i*s) = 1)");
+      if (ftest.isnull) {
+        if (!isprime(utoi(p))) err(talker,"%lu is not prime, use ellak", p);
+        err(bugparier,"apell (f^(i*s) = 1)");
+      }
       l=0; r=s;
       while (l<r)
       {
