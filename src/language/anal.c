@@ -265,6 +265,10 @@ install(void *f, char *name, char *code)
   if (ep) err(warner,"[install] '%s' already there. Not replaced", name);
   else
   {
+    char *s = name;
+    if (isalpha(*s))
+      while (is_keyword_char(*++s)) /* empty */;
+    if (*s) err(talker2,"not a valid identifier", s, name);
     ep = installep(f, name, strlen(name), EpINSTALL, 0, functions_hash + hash);
     ep->code = pari_strdup(code);
   }
@@ -1910,7 +1914,7 @@ constante()
 /**                   HASH TABLE MANIPULATIONS                     **/
 /**                                                                **/
 /********************************************************************/
-/* slighlty more efficient than is_keyword_char. Not worth a static array. */
+/* slightly more efficient than is_keyword_char. Not worth a static array. */
 #define is_key(c) (isalnum((int)(c)) || (c)=='_')
 
 long
