@@ -477,19 +477,23 @@ perm_to_GAP(GEN p)
   {
     long j;
     GEN z = (GEN)x[i];
-    s[c++] = '(';
-    for (j = 1; j < lg(z); ++j)
+    if (lg(z) > 2)
     {
-      if (j > 1)
+      s[c++] = '(';
+      for (j = 1; j < lg(z); ++j)
       {
-        s[c++] = ','; s[c++] = ' ';
+        if (j > 1)
+        {
+          s[c++] = ','; s[c++] = ' ';
+        }
+        sprintf(s+c,"%ld",z[j]);
+        while(s[c++]) /* empty */;
+        c--;
       }
-      sprintf(s+c,"%ld",z[j]);
-      while(s[c++]) /* empty */;
-      c--;
+      s[c++] = ')';
     }
-    s[c++] = ')';
   }
+  if (!c) { s[c++]='('; s[c++]=')'; }
   s[c++] = 0;
   return gerepileupto(ltop,gap);
 }
