@@ -2397,7 +2397,10 @@ static GEN
 get_polchar(CG_data *d, GEN x)
 {
   GEN g = gmul(d->ZKembed,x);
-  return ground(roots_to_pol_r1r2(g, d->r1, 0));
+  long e;
+  g = grndtoi(roots_to_pol_r1r2(g, d->r1, 0), &e);
+  if (e > -5) err(precer, "get_polchar");
+  return g;
 }
 
 /* return a defining polynomial for Q(x) */
@@ -2610,7 +2613,7 @@ polredabs0(GEN x, long flun, long prec)
   }
   nv = lg(a);
   for (i=1; i<nv; i++)
-    if (canon_pol((GEN)y[i]) < 0 && phimax) a[i] = (long)gneg_i((GEN)a[i]);
+    if (canon_pol((GEN)y[i]) < 0) a[i] = (long)gneg_i((GEN)a[i]);
   nv = remove_duplicates(y,a);
 
   if (DEBUGLEVEL)
