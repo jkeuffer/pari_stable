@@ -692,17 +692,15 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   {
     long lfa = 1;
     GEN W1, W2, D = *dK;
-
-    w = cgetg(3,t_MAT);
-    W1 = cgetg(lw, t_COL); w[1] = (long)W1;
-    W2 = cgetg(lw, t_COL); w[2] = (long)W2;
+    W1 = cgetg(lw, t_COL);
+    W2 = cgetg(lw, t_COL);
     for (j=1; j<lw; j++)
     {
       k = safe_Z_pvalrem(D, (GEN)w1[j], &D);
       if (k) { W1[lfa] = w1[j]; W2[lfa] = (long)utoipos(k); lfa++; }
     }
     setlg(W1, lfa);
-    setlg(W2, lfa); *ptw = w;
+    setlg(W2, lfa); *ptw = mkmat2(W1,W2);
   }
   return RgM_to_RgXV(a, varn(f));
 }
@@ -710,20 +708,19 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 static GEN
 update_fact(GEN x, GEN f)
 {
-  GEN e,q,d = ZX_disc(x), g = cgetg(3, t_MAT), p = (GEN)f[1];
-  long iq,i,k,l;
-  if (typ(f)!=t_MAT || lg(f)!=3)
-    err(talker,"not a factorisation in nfbasis");
+  GEN e, q, d = ZX_disc(x), p = (GEN)f[1];
+  long iq, i, k, l;
+  if (typ(f)!=t_MAT || lg(f)!=3) err(talker,"not a factorisation in nfbasis");
   l = lg(p);
-  q = cgetg(l,t_COL); g[1]=(long)q;
-  e = cgetg(l,t_COL); g[2]=(long)e; iq = 1;
+  q = cgetg(l,t_COL); 
+  e = cgetg(l,t_COL); iq = 1;
   for (i=1; i<l; i++)
   {
     k = safe_Z_pvalrem(d, (GEN)p[i], &d);
     if (k) { q[iq] = p[i]; e[iq] = (long)utoipos(k); iq++; }
   }
   setlg(q,iq); setlg(e,iq);
-  return merge_factor_i(decomp(d), g);
+  return merge_factor_i(decomp(d), mkmat2(q,e));
 }
 
 /* FIXME: have to deal with compatibility flags */
@@ -1059,9 +1056,7 @@ Decomp(decomp_t *S, long flag)
   if (flag)
   {
     b1 = factorpadic4(f1,p,flag);
-    b2 = factorpadic4(f2,p,flag); res = cgetg(3,t_MAT);
-    res[1] = (long)concatsp((GEN)b1[1],(GEN)b2[1]);
-    res[2] = (long)concatsp((GEN)b1[2],(GEN)b2[2]); return res;
+    b2 = factorpadic4(f2,p,flag); return concat_factor(b1,b2);
   }
   else
   {
@@ -2191,7 +2186,7 @@ _primedec(GEN nf, GEN p)
   else
     h[1] = (long)Ip;
 
-  UN = gscalcol(gen_1, N);
+  UN = vec_ei(N, 1);
   for (c=1; c; c--)
   { /* Let A:= (Z_K/p) / Ip; try to split A2 := A / Im H ~ Im M2
        H * ? + M2 * Mi2 = Id_N ==> M2 * Mi2 projector A --> A2 */

@@ -189,8 +189,8 @@ caradj(GEN x, long v, GEN *py)
     GEN c = gcoeff(x,2,1), d = gcoeff(x,2,2);
     if (py) {
       y = cgetg(3, t_MAT);
-      y[1] = (long)coefs_to_col(2, gcopy(d), gneg(c));
-      y[2] = (long)coefs_to_col(2, gneg(b), gcopy(a));
+      y[1] = (long)mkcol2(gcopy(d), gneg(c));
+      y[2] = (long)mkcol2(gneg(b), gcopy(a));
       *py = y;
     }
     av = avma;

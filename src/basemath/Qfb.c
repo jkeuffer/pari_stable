@@ -1107,23 +1107,17 @@ redrealsl2step(GEN A)
   GEN b = (GEN) V[2];
   GEN c = (GEN) V[3];
   GEN d = qf_disc0(a,b,c);
-  GEN rd = racine(d); 
+  GEN rd = sqrti(d); 
   GEN ac = mpabs(c);
   GEN r = addii(b, gmax(rd, ac));
-  GEN q = truedvmdii(r, mulsi(2, ac), NULL);
-  r = subii(mulii(mulis(q, 2), ac), b);
+  GEN q = truedvmdii(r, shifti(ac, 1), NULL);
+  r = subii(mulii(shifti(q, 1), ac), b);
   a = c; b = r;
-  c = truedvmdii(subii(sqri(r), d), mulsi(4, c), NULL);
-  q = mulis(q, signe(a));
-  N = cgetg(3, t_MAT);
-  N[1] = lgetg(3, t_COL);
-  coeff(N, 1, 1) =  coeff(M, 1, 2);
-  coeff(N, 2, 1) =  coeff(M, 2, 2);
-  N[2] = lgetg(3, t_COL);
-  coeff(N, 1, 2) = lsubii(mulii(q, (GEN) coeff(M, 1, 2)),
-                          (GEN) coeff(M, 1, 1));
-  coeff(N, 2, 2) = lsubii(mulii(q, (GEN) coeff(M, 2, 2)),  
-                          (GEN) coeff(M, 2, 1));
+  c = truedvmdii(subii(sqri(r), d), shifti(c,2), NULL);
+  if (signe(a) < 0) q = negi(q);
+  N = mkmat2(gel(M,2),
+             mkcol2(subii(mulii(q, gcoeff(M, 1, 2)), gcoeff(M, 1, 1)),
+                    subii(mulii(q, gcoeff(M, 2, 2)), gcoeff(M, 2, 1))));
   return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c),N));
 }
 
@@ -1160,14 +1154,8 @@ redrealsl2(GEN V)
       gerepilemany(ltop, bptr, 7);
     }
   }
-  M = cgetg(3, t_MAT);
-  M[1] = lgetg(3, t_COL);
-  coeff(M, 1, 1) = (long) u1;
-  coeff(M, 2, 1) = (long) u2;
-  M[2] = lgetg(3, t_COL);
-  coeff(M, 1, 2) = (long) v1;
-  coeff(M, 2, 2) = (long) v2;
-  return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c),M));
+  M = mkmat2(mkcol2(u1,u2), mkcol2(v1,v2));
+  return gerepilecopy(ltop, mkvec2(mkvec3(a,b,c), M));
 }
 
 GEN

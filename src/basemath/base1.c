@@ -676,6 +676,7 @@ galoisapply(GEN nf, GEN aut, GEN x)
 GEN pol_to_monic(GEN pol, GEN *lead);
 int cmp_pol(GEN x, GEN y);
 
+/* x = relative polynomial nf = absolute nf, bnf = absolute bnf */
 GEN
 get_bnfpol(GEN x, GEN *bnf, GEN *nf)
 {
@@ -1634,11 +1635,7 @@ polred0(GEN x, long flag, GEN fa)
   if (flag & red_PARTIAL) fl |= nf_PARTIALFACT;
   if (flag & red_ORIG)    fl |= nf_ORIG;
   y = allpolred(x, fl, fa, &a, NULL);
-  if (fl & nf_ORIG) {
-    GEN z = cgetg(3,t_MAT);
-    z[1] = (long)a;
-    z[2] = (long)y; y = z;
-  }
+  if (fl & nf_ORIG) y = mkmat2(a,y);
   return gerepilecopy(av, y);
 }
 
