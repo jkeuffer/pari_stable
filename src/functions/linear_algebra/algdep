@@ -2,9 +2,6 @@ Function: algdep
 Section: linear_algebra
 C-Name: algdep0
 Prototype: GLD0,L,p
-Help: algdep(x,n,{flag=0}): algebraic relations up to degree n of x. flag is
- optional, and can be 0: default, uses the algorithm of Hastad et al, or
- non-zero, and in that case is a number of decimal digits which should be
- between 0.5 and 1.0 times the number of decimal digits of accuracy of x, and
- uses a standard LLL
+Help: algdep(x,n,{flag=0}): algebraic relations up to degree n of x, using
+ lindep([1,x,...,x^(n-1)], flag).
 

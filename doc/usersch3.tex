@@ -5902,13 +5902,10 @@ polynomial given by algdep.
 If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces the
 ``dual lattice'' corresponding to the powers of $x$.
 
-Otherwise, if $\fl$ is zero, the algorithm used is a variant of the \idx{LLL}
-algorithm due to Hastad, Lagarias and Schnorr (STACS 1986). If the precision
-is too low, the routine may enter an infinite loop.
-
-If $\fl$ is non-zero, use a standard LLL. $\fl$ then indicates a precision,
-which should be between $0.5$ and $1.0$ times the number of decimal digits
-to which $x$ was computed.
+Otherwise, \tet{lindep}$([1,x,\ldots,x^{k-1}], \fl)$ is used. If
+\tet{lindep} is not able to find a relation and returns a lower bound for
+the sup norm of the smallest relation, \tet{algdep} returns that bound
+instead.
 
 \syn{algdep0}{x,k,\fl,\var{prec}}, where $k$ and $\fl$ are \kbd{long}s.
 Also available is $\teb{algdep}(x,k,\var{prec})$ ($\fl=0$).
@@ -5995,16 +5992,22 @@ elements are concatenated, from left to right, using the above rules.
 vector with real or complex coefficients, finds a small integral linear
 combination among these coefficients.
 
-If $\fl=0$, uses a variant of the \idx{LLL} algorithm due to Hastad, Lagarias
-and Schnorr (STACS 1986).
+If $\fl=0$, uses the PSLQ algorithm. This may return a real number $B$,
+indicating that the input accuracy was exhausted and that no relation exist
+whose sup norm is less than $B$.
 
-If $\fl>0$, uses the LLL algorithm. $\fl$ is a parameter which should be
-between one half the number of decimal digits of precision and that number
-(see \kbd{algdep}).
+If $\fl=-1$, uses a variant of the \idx{LLL} algorithm due to Hastad,
+Lagarias and Schnorr (STACS 1986). If the precision is too low, the routine
+may enter an infinite loop.
 
-If $\fl<0$, $x$ is allowed to be (and in any case interpreted as) a matrix.
+If $\fl=-2$, $x$ is allowed to be (and in any case interpreted as) a matrix.
 Returns a non trivial element of the kernel of $x$, or $0$ if $x$ has trivial
-kernel.
+kernel. The element is defined over the field of coefficients of $x$, and is
+in general not integral.
+
+If $\fl>0$, uses the LLL algorithm. $|\fl|$ is a parameter which should be
+between one half the number of decimal digits of precision and that number
+This is in general faster than the other variants.
 
 \syn{lindep0}{x,\fl,\var{prec}}. Also available is
 $\teb{lindep}(x,\var{prec})$ ($\fl=0$).
