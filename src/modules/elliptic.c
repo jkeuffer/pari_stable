@@ -2861,8 +2861,7 @@ torsbound(GEN e)
   long av = avma, m, b, c, d, prime = 2;
   byteptr p = diffptr;
   GEN D = (GEN)e[12];
-
-  n = lgefint(D); /* number of primes to try */
+  long n = lgefint(D); /* number of primes to try */
   b = c = m = 0; p++;
   while (m<n)
   {
