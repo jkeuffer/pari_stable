@@ -294,9 +294,11 @@ calcjac(GEN et)
     faq = decomp(stoi(q-1)); tabfaq[i] = (long)faq;
     faqpr = (GEN)faq[1];
     faqex = (GEN)faq[2]; lfaq = lg(faqpr);
-    ltabg = itos((GEN)faqex[1]) == 2? qm3s2: q-2;
+    k = itos((GEN)faqex[1]);
+    ltabg = k>=3? q-2: qm3s2;
     tabg = cgetg(ltabg+1,t_VECSMALL);
     for (x=1; x<=ltabg; x++) tabg[x] = tabf[x] + tabf[q-x-1];
+   
     T = cgetg(lfaq,t_VEC); tabj[i] = (long)T;
     for (j=1; j<lfaq; j++)
     {
