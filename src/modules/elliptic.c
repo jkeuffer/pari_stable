@@ -894,7 +894,8 @@ set_gamma(SL2_red *T)
   GEN t = T->tau,a,b,c,d,n,m,p1,run;
 
   run = gsub(realun(DEFAULTPREC), gpowgs(stoi(10),-8));
-  a=d=gun; b=c=gzero;
+  a = d = gun;
+  b = c = gzero;
   for(;;)
   {
     n = ground(greal(t));
@@ -1025,7 +1026,6 @@ elleta(GEN om, long prec)
 {
   gpmem_t av = avma;
   SL2_red T;
-
   if (!get_periods(om, &T)) err(typeer,"elleta");
   return gerepileupto(av, _elleta(&T,prec));
 }
@@ -1112,27 +1112,24 @@ ellzeta(GEN om, GEN z, long prec)
 {
   long toadd;
   gpmem_t av=avma, lim, av1;
-  GEN zinit,p1,pii2,q,u,y,u1,qn,et;
+  GEN Z,p1,pii2,q,u,y,u1,qn,et;
   SL2_red T;
 
   if (!get_periods(om, &T)) err(typeer,"ellzeta");
-  z = reduce_z(z, prec, &T);
+  Z = reduce_z(z, prec, &T);
 
   et = _elleta(&T,prec);
   et = gadd(gmul(T.x,(GEN)et[1]), gmul(T.y,(GEN)et[2]));
-  if (!z)
-  {
-    zinit = gzero; /* FIXME ??? */
-    p1=ginv(zinit); return gerepileupto(av, gadd(p1,et));
-  }
+  if (!Z) return gerepileupto(av, gadd(ginv(z),et)); /* FIXME ??? */
+
   pii2 = PiI2(prec);
   q=gexp(gmul(pii2,T.tau),prec);
-  u=gexp(gmul(pii2,z),prec);
+  u=gexp(gmul(pii2,Z),prec);
   u1=gsub(u,gun);
   y=gdiv(gmul(gsqr(T.W2),_elleisnum(&T,2,prec)),pii2);
-  y=gadd(ghalf,gdivgs(gmul(z,y),-12));
+  y=gadd(ghalf,gdivgs(gmul(Z,y),-12));
   y=gadd(y,ginv(u1));
-  toadd=(long)ceil(9.065*gtodouble(gimag(z)));
+  toadd=(long)ceil(9.065*gtodouble(gimag(Z)));
   av1=avma; lim=stack_lim(av1,1); qn=q;
   for(;;)
   {
@@ -1165,26 +1162,27 @@ ellsigma(GEN w, GEN z, long flag, long prec)
   SL2_red T;
 
   if (!get_periods(w, &T)) err(typeer,"ellsigma");
-  z = reduce_z(z, prec, &T);
+  Z = reduce_z(z, prec, &T);
 
-  zinit = z? gmul(z,T.W2): gzero;
   et = _elleta(&T, prec);
-  etnew=gadd(gmul(T.x,(GEN)et[1]), gmul(T.y,(GEN)et[2]));
-  etnew=gmul(etnew,gadd(gmul2n(gadd(gmul(T.x,T.W1),gmul(T.y,T.W2)),-1),zinit));
+  etnew = gadd(gmul(T.x,(GEN)et[1]), gmul(T.y,(GEN)et[2]));
+  zinit = Z? gmul(Z,T.W2): gzero;
+  p1 = gadd(zinit, gmul2n(gadd(gmul(T.x,T.W1),gmul(T.y,T.W2)),-1));
+  etnew = gmul(etnew, p1);
   pii2 = PiI2(prec);
-  if (mpodd(T.x) || mpodd(T.y)) etnew = gadd(etnew,gmul2n(pii2,-1));
-  if (!z)
-  {
-    if (dolog) z = gadd(etnew, glog(zinit,prec));
-    else       z = gmul(gexp(etnew,prec), zinit);
-    return gerepileupto(av, z);
+  if (mpodd(T.x) || mpodd(T.y)) etnew = gadd(etnew, gmul2n(pii2,-1));
+  if (!Z)
+  { /* FIXME ??? */
+    if (dolog) Z = gadd(etnew, glog(z,prec));
+    else       Z = gmul(gexp(etnew,prec), z);
+    return gerepileupto(av, Z);
   }
 
-  y1 = gadd(etnew,gmul2n(gmul(gmul(z,zinit),(GEN)et[2]),-1));
+  y1 = gadd(etnew,gmul2n(gmul(gmul(Z,zinit),(GEN)et[2]),-1));
 
   /* 9.065 = 2*Pi/log(2) */
-  toadd = (long)ceil(9.065*fabs(gtodouble(gimag(z))));
-  uhalf = gexp(gmul(gmul2n(pii2,-1),z),prec);
+  toadd = (long)ceil(9.065*fabs(gtodouble(gimag(Z))));
+  uhalf = gexp(gmul(gmul2n(pii2,-1),Z),prec);
   u = gsqr(uhalf);
   if (doprod)
   { /* use product */
