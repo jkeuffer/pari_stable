@@ -94,6 +94,8 @@ MW 39- torsion group of [0,0,0,-6648,208633] reported as C2 instead of C6
    42- bnrL1(bnr with conductor 1) --> SEGV
    43- "impossible inverse modulo ..." when using addprimes() + ROUND 2
 MSo44- [gp: \x] missing 'break' statement in escape()
+   45- wrong bound in nf_LLL_cmbf (nffactor) [no counter example to
+       the old bound, but proof was wrong anyway...]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -118,6 +120,9 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
    15- [library:] allow trapping invmoder and recovering the offending INTMOD
    16- improved factor over Z[X] for _huge_ degrees (factorizations mod p)
    17- minor change in ordering for primedec output [use cmp_prime_over_p]
+   18- [library:] moved (formerly) gp-specific write* and print* to libpari
+   19- nffactor: call factornf when deg(pol) << deg(nf) + remove a priori
+       overlift for d-1/d-2 test [major overkill]
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
