@@ -15,6 +15,12 @@ Priority classification (first column): [subjective and debatable!]
 ***************************   BUGS (general)     ****************************
 Unless specified otherwise, examples assume 32bit machine and default precision 
 
+-  ? O(y^5)/(1+x) + O(x^3)
+   %1 = O(x^3)
+
+   ? O(y^5)/(1+x+O(x^3))
+   %2 = O(y^5) + O(y^5)*x + O(y^5)*x^2 + O(x^3)
+
 5  bnfinit sometimes gives wrong answers because we cheat on the value of
 Bach's bound, using B := 0.3 log^2 D by default, where 0.3 should really be 12
 (under GRH), or some suitably optimized bound following Bach's article. If
@@ -36,6 +42,9 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 5  polgalois(x^8-1864259299553450972214799899167226732549697977945716*x^6+331143259018657601105207922631212331088735421305543663274125986698777318014979969*x^4-2225286541902342283500014249183311190477390*x^2+5);
   ***   degree too large in tschirn.
+
+5  setrand(1); bnfinit(x^4-9192452294206514*x^2+375140840302653653082195143217)
+   --> never finishes.
 
 5  intnum(x=0, Pi, sin(16*x)^2) --> 1e-54
    we evaluate at regularly spaced control points, interpolating the results
