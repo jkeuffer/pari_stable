@@ -42,21 +42,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *        Pi               ----   (n!)^3 (3n)! (-640320)^(3n)
  *                         n>=0
  */
-void
-constpiold(long prec)
+GEN
+piold(long prec)
 {
   const long k1 = 545140134, k2 = 13591409, k3 = 640320;
   const double alpha2 = 47.11041314/BITS_IN_LONG; /* 3log(k3/12) / log(2^BIL) */
   GEN p1,p2,p3,tmppi;
   long l, n, n1;
-  pari_sp av1, av2;
+  pari_sp av = avma, av2;
   double alpha;
 
-  if (gpi && lg(gpi) >= prec) return;
-
-  av1 = avma; tmppi = newbloc(prec);
-  *tmppi = evaltyp(t_REAL) | evallg(prec);
-
+  tmppi = cgetr(prec);
   prec++;
   n = (long)(1 + (prec-2)/alpha2);
   n1 = 6*n - 1;
@@ -88,9 +84,7 @@ constpiold(long prec)
     n--; n1-=6;
   }
   p1 = divsr(53360,p1);
-  mulrrz(p1,sqrtr_abs(stor(k3,prec)), tmppi);
-  if (gpi) gunclone(gpi);
-  avma = av1;  gpi = tmppi;
+  return gerepileuptoleaf(av, mulrr(p1,sqrtr_abs(stor(k3,prec))));
 }
 /* Gauss - Brent-Salamin AGM iteration */
 void
