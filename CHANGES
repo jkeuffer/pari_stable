@@ -30,7 +30,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 
-Done for version 2.2.1 (released ??/09/2001):
+Done for version 2.2.1 (released ??/10/2001):
 
   Fixed
     1- typo in factornf (factor of degree 3 --> error message)
@@ -142,6 +142,7 @@ XR 10- new error message "precer" (precision too low in...)
    11- allow minimal handling of t_VECSMALL under GP
 IZ 12- add error messages (as in err(shier2)) to emacs tag file
    13- add error messages (as in err(shier2)) to vi tag file
+IZ 14- add flag to shift() to enable consistency with 2-complement semantic
 
   Removed
     1- obsolete functions twototwo, threetotwo, threetotwo2
