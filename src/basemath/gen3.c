@@ -2506,7 +2506,6 @@ denom(GEN x)
       for (i=2; i<lx; i++)
       {
         t = denom((GEN)x[i]);
-        /* t != gen_1 est volontaire */
         if (t != gen_1) { tetpil=avma; s=glcm(s,t); }
       }
       return gerepile(av,tetpil,s);

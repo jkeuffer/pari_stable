@@ -1551,10 +1551,8 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   avma = oldavma;
 }
 
-/*
- * Plot a dblPointList. Complete with axes, bounding box, etc.
- * We use two drawing rectangles: (long)gen_1 for strings, another
- * for graphs.
+/* Plot a dblPointList. Complete with axes, bounding box, etc.
+ * We use two drawing rectangles: one for strings, another for graphs.
  *
  * data is an array of structs. Its meaning depends on flags :
  *
@@ -1571,9 +1569,7 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
  * + If there is no such flag, the first element is an array with
  *   x-coordinates and the following ones contain y-coordinates.
  *
- * Additional flags: PLOT_NO_AXE_X, PLOT_NO_AXE_Y, PLOT_NO_FRAME.
- */
-
+ * Additional flags: PLOT_NO_AXE_X, PLOT_NO_AXE_Y, PLOT_NO_FRAME. */
 static GEN
 rectplothrawin(long stringrect, long drawrect, dblPointList *data,
                long flags, PARI_plot *WW)

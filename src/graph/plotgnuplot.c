@@ -456,7 +456,7 @@ get_term_ftable_get(void) /* Establish runtime link with gnuplot engine */
     }
   end_find:
 #endif
-    if (!s)    /* The trailing \n is important: (long)gen_1 may put . to the command */
+    if (!s)    /* The trailing \n is important: one may put . to the command */
 	croak("Can't find Gnuplot drawing engine DLL,\n\t"
 	      "set GNUPLOT_DRAW_DLL environment variable"
 	      " to the name of the DLL,\n\t"
