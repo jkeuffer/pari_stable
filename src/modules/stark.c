@@ -361,7 +361,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   for (i = 1; i < l; i++)
     p1[i] = mael3(snf, 3, i, i);
 
-  subgrp  = subgrouplist(p1, 2);
+  subgrp  = subgrouplist(p1, gdeux);
   nb = lg(subgrp) - 1; CU = gmul(C,U);
 
   rep = cgetg(nb, t_VEC);

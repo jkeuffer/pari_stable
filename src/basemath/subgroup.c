@@ -29,9 +29,9 @@ void pop_val(entree *ep);
  */
 static long *powerlist, *mmu, *lam, *c, *maxc, *a, *maxa, **g, **maxg;
 static GEN **H, subq, subqpart, hnfgroup;
-static GEN BINMAT;
+static GEN BINMAT, indexbound;
 static long countsub, expoI;
-static long *available, indexbound, lsubq, lsubqpart;
+static long *available, lsubq, lsubqpart;
 static char *gpch;
 static entree *ep;
 static void(*treatsub_fun)(GEN);
@@ -228,7 +228,7 @@ weight(long *typ)
 }
 
 static long
-dopsub(long p, long *gtyp, long *indexsubq)
+dopsub(long p, long *gtyp, GEN indexsubq)
 {
   long w,i,j,k,n, wg = 0, wmin = 0, count = 0;
 
@@ -236,8 +236,8 @@ dopsub(long p, long *gtyp, long *indexsubq)
   if (indexbound)
   {
     wg = weight(gtyp);
-    wmin = (long) (wg - (log((double)indexbound) / log((double)p)));
-    if (cmpis(gpuigs(stoi(p), wg - wmin), indexbound) > 0) wmin++;
+    wmin = (long) (wg - (log(gtodouble(indexbound)) / log((double)p)));
+    if (cmpii(gpuigs(stoi(p), wg - wmin), indexbound) > 0) wmin++;
   }
   lam = gtyp; n = lam[0]; mmu = new_chunk(n+1);
   mmu[1] = -1; for (i=2; i<=n; i++) mmu[i]=0;
@@ -262,12 +262,13 @@ dopsub(long p, long *gtyp, long *indexsubq)
       {
         if (indexbound)
         {
-          long indexH = itos(gpuigs(stoi(p), wg - w));
-          long bound = indexbound / indexH;
+          GEN indexH = gpuigs(stoi(p), wg - w);
+          GEN bound = divii(indexbound, indexH);
           subqpart = cgetg(lsubq, t_VEC);
           lsubqpart = 1;
           for (i=1; i<lsubq; i++)
-            if (indexsubq[i] <= bound) subqpart[lsubqpart++] = subq[i];
+            if (cmpii((GEN)indexsubq[i], bound) <= 0)
+              subqpart[lsubqpart++] = subq[i];
         }
         else { subqpart = subq; lsubqpart = lsubq; }
       }
@@ -326,11 +327,11 @@ expand_sub(GEN x, long n)
 extern GEN matqpascal(long n, GEN q);
 
 static long
-subgroup_engine(GEN cyc, long bound)
+subgroup_engine(GEN cyc, GEN bound)
 {
   long av=avma,i,j,k,imax,nbprim,count, n = lg(cyc);
   GEN gtyp,fa,junk,primlist,p,listgtyp,indexsubq = NULL;
-  long oindexbound = indexbound;
+  GEN oindexbound = indexbound;
   long oexpoI      = expoI;
   long *opowerlist = powerlist;
   GEN osubq        = subq;
@@ -399,9 +400,9 @@ subgroup_engine(GEN cyc, long bound)
       subq[i] = (long)expand_sub((GEN)subq[i], n);
     if (indexbound)
     {
-      indexsubq = new_chunk(lsubq);
+      indexsubq = cgetg(lsubq,t_VEC);
       for (i=1; i<lsubq; i++)
-        indexsubq[i] = itos(dethnf((GEN)subq[i]));
+        indexsubq[i] = (long)dethnf_i((GEN)subq[i]);
     }
     /* lift subgroups of I to G */
     for (i=1; i<lsubq; i++) 
@@ -460,7 +461,7 @@ get_snf(GEN x, long *N)
 }
 
 void
-forsubgroup(entree *oep, GEN cyc, long bound, char *och)
+forsubgroup(entree *oep, GEN cyc, GEN bound, char *och)
 {
   entree *saveep = ep;
   char *savech = gpch;
@@ -481,7 +482,7 @@ forsubgroup(entree *oep, GEN cyc, long bound, char *och)
 }
 
 GEN
-subgrouplist(GEN cyc, long bound)
+subgrouplist(GEN cyc, GEN bound)
 {
   void(*savefun)(GEN) = treatsub_fun;
   slist *olist = sublist, *list; 

@@ -1330,7 +1330,7 @@ listsousgroupes(long m, long p)
   phi = itos((GEN) zns[1]);
   zn2 = gtovecsmall((GEN)zns[2]);
   zn3 = lift((GEN)zns[3]);
-  lss = subgrouplist((GEN) zns[2], 0);
+  lss = subgrouplist((GEN) zns[2], NULL);
   res = cgetg(lg(lss), t_VEC);
   for (k = 1, i = lg(lss) - 1; i >= 1; i--)
   {

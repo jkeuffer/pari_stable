@@ -660,7 +660,7 @@ GEN     rayclassnolist(GEN bnf,GEN listes);
 GEN     rnfconductor(GEN bnf, GEN polrel, long flag);
 GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 GEN     rnfnormgroup(GEN bnr, GEN polrel);
-GEN     subgrouplist0(GEN bnr, long indexbound, long all);
+GEN     subgrouplist0(GEN bnr, GEN indexbound, long all);
 
 /* buch4.c */
 
@@ -1241,8 +1241,8 @@ GEN     conjugates(GEN pol);
 
 /* subgroup.c */
 
-void    forsubgroup(entree *oep, GEN cyc, long bound, char *och);
-GEN     subgrouplist(GEN cyc, long bound);
+void    forsubgroup(entree *oep, GEN cyc, GEN bound, char *och);
+GEN     subgrouplist(GEN cyc, GEN bound);
 
 /* stark.c */
 

@@ -227,32 +227,7 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
   GEN y, p1;
   ulong j;
 
-  if (cmpis(n, 16) < 0)
-  {
-    if (gcmp1(n)) return x;
-    x = idealpow(nf,x,n);
-    x = idealmodidele(nf,x,ideal,sarch,arch);
-    return gerepileupto(av,x);
-  }
-
-#if 0
-  i = lgefint(n)-1; m=n[i]; j=HIGHBIT;
-  while ((m&j)==0) j>>=1;
-  y = x;
-  for (j>>=1; j; j>>=1)
-  {
-    y = idealmul(nf,y,y);
-    if (m&j) y = idealmul(nf,y,x);
-    y = idealmodidele(nf,y,ideal,sarch,arch);
-  }
-  for (i--; i>=2; i--)
-    for (m=n[i],j=HIGHBIT; j; j>>=1)
-    {
-      y = idealmul(nf,y,y);
-      if (m&j) y = idealmul(nf,y,x);
-      y = idealmodidele(nf,y,ideal,sarch,arch);
-    }
-#else
+  if (gcmp1(n)) return x;
   p1 = n+2; m = *p1;
   y=x; j=1+bfffo(m); m<<=j; j = BITS_IN_LONG-j;
   for (i=lgefint(n)-2;;)
@@ -266,7 +241,6 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
     if (--i == 0) break;
     m = *++p1; j = BITS_IN_LONG;
   }
-#endif
   return gerepileupto(av,y);
 }
 
@@ -2533,7 +2507,7 @@ hnflistdivise(GEN list,GEN h)
 }
 
 static GEN
-subgroupcond(GEN bnr, long indexbound)
+subgroupcond(GEN bnr, GEN indexbound)
 {
   ulong av = avma;
   long i,j,lgi,lp;
@@ -2570,7 +2544,7 @@ subgroupcond(GEN bnr, long indexbound)
 }
 
 GEN
-subgrouplist0(GEN bnr, long indexbound, long all)
+subgrouplist0(GEN bnr, GEN indexbound, long all)
 {
   if (typ(bnr)!=t_VEC) err(typeer,"subgrouplist");
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
