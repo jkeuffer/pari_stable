@@ -1971,8 +1971,7 @@ factorback_i(GEN fa, GEN e, GEN nf, int red)
       if (typ(e[k]) != t_INT) break;
     if (k == lx) t = t_MAT;
   }
-  if (t != t_MAT || lg(fa)!=3)
-    err(talker,"not a factorisation in factorback");
+  if (t != t_MAT) err(talker,"not a factorisation in factorback");
   if (lx == 1) return gun;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
