@@ -1283,12 +1283,13 @@ the quotient of $x$ by $y$, again as a vector.
 
 \syn{dirdiv}{x,y}.
 
-\subsecidx{direuler}$(p=a,b,\var{expr})$: computes the \idx{Dirichlet series}
-to $b$ terms of the \idx{Euler product} of expression \var{expr} as $p$ ranges
-through the primes from $a$ to $b$. \var{expr} must be a polynomial or
-rational function in
-another variable than $p$ (say $X$) and $\var{expr}(X)$ is understood as the
-Dirichlet series (or more precisely the local factor) $\var{expr}(p^{-s})$.
+\subsecidx{direuler}$(p=a,b,\var{expr},\{c\})$: computes the \idx{Dirichlet
+series} to $b$ terms of the \idx{Euler product} of expression \var{expr} as
+$p$ ranges through the primes from $a$ to $b$. \var{expr} must be a
+polynomial or rational function in another variable than $p$ (say $X$) and
+$\var{expr}(X)$ is understood as the Dirichlet series (or more precisely
+the local factor) $\var{expr}(p^{-s})$. If $c$ is present, output only the
+first $c$ coefficients in the series.
 
 \synt{direuler}{entree *ep, GEN a, GEN b, char *expr}
 (see the section on sums and products for explanations of this).
@@ -1760,7 +1761,8 @@ integer, and the result is a quadratic number.
 \syn{fundunit}{x}.
 
 \subsecidx{removeprimes}$(\{x=[\,]\})$: removes the primes listed in $x$ from
-the prime number table. $x$ can also be a single integer. List the current
+the prime number table. In particular \kbd{removeprimes(addprimes)} empties
+the extra prime table. $x$ can also be a single integer. List the current
 extra primes if $x$ is omitted.
 
 \syn{removeprimes}{x}.

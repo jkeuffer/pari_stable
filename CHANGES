@@ -71,17 +71,24 @@ XR 37- precision fixes in stark.c (inconsistencies 32/64 bit + early abort)
 XR 39- [stark.c]: bugs in RecCoeff3, reduced memory use in ComputeArtinNumber
    40- core dump on infinite recursion under GP
    41- use appropriate precision in torselldoud (could be much too large)
+   42- removeprimes(addprimes) didn't work
+   43- (at least part of) numerical instability of LLL over R
+   44- f() = bug(x, &y) ---> syntax error
+XR 45- inefficiencies in ComputeArtinNumber for large modulus
+HC 46- no GC in dirmul
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
     2- improved on-line help wrt to defaults and ambiguities
        (? default/some_default, ? some_default)
     3- library functions gentimer, genmsgtimer, get_timer
+HC  4- optional argument to direuler (length of result)
 
   Changed
     1- default binary produced by Configure -g is now static
     2- improved the heuristics in ellisoncurve
 HC  3- extend the range of direuler (maxp was 2^16)
+
 ===========================================================================
 Done for version 2.0.17.beta (released 24/09/99):
 
