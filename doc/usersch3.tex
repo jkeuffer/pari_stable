@@ -5216,11 +5216,12 @@ $\var{rnf}[10]$ is $\var{nf}$.
 
 $\var{rnf}[11]$ is the output of \kbd{rnfequation(nf, pol, 1)}. Namely, a
 vector \var{vabs} with 3 entries describing the \emph{absolute} extension
-$L/\Q$. $\var{vabs}[1]$ is an absolute equation. $\var{vabs}[2]$ expresses
-the generator $\alpha$ of the number field $\var{nf}$ as a polynomial modulo
-the absolute equation $\var{vabs}[1]$. $\var{vabs}[3]$ is a small integer $k$
-such that, if $\beta$ is an abstract root of \var{pol} and $\alpha$ the
-generator of $\var{nf}$, the generator whose root is \var{vabs} will be
+$L/\Q$. $\var{vabs}[1]$ is an absolute equation, more conveniently obtained
+as \kbd{rnf.pol}. $\var{vabs}[2]$ expresses the generator $\alpha$ of the
+number field $\var{nf}$ as a polynomial modulo the absolute equation
+$\var{vabs}[1]$. $\var{vabs}[3]$ is a small integer $k$ such that, if $\beta$
+is an abstract root of \var{pol} and $\alpha$ the generator of $\var{nf}$,
+the generator whose root is \var{vabs} will be
 $\beta + k \alpha$. Note that one must be very careful if $k\neq0$ when
 dealing simultaneously with absolute and relative quantities since the
 generator chosen for the absolute extension is not the same as for the
