@@ -56,7 +56,7 @@ InitRU(GEN den, long prec)
 {
   GEN c,s, z;
   if (egalii(den, gdeux)) return stoi(-1);
-  gsincos(divri(gmul2n(mppi(prec),1), den), &s, &c, prec);
+  gsincos(divri(Pi2n(1, prec), den), &s, &c, prec);
   z = cgetg(3, t_COMPLEX);
   z[1] = (long)c;
   z[2] = (long)s; return z;
@@ -1164,7 +1164,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
   N     =  degpol((GEN)nf[1]);
   prec2 = ((prec - 2)<<1) + EXTRA_PREC;
 
-  C = mpsqrt(gdiv(dk, gpowgs(mppi(prec2), N)));
+  C = mpsqrt(gdiv(absi(dk), gpowgs(mppi(prec2), N)));
 
   l = lg(dataCR);
   for (j = 1; j < l; j++)
@@ -1572,28 +1572,33 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
 {
   pari_sp av = avma;
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
-  long np,p,j, condZ = itos(gcoeff(cond,1,1));
+  long np,p,j,l, condZ = itos(gcoeff(cond,1,1));
   GEN Npr, tabpr, prime, pr, nf = checknf(bnf);
   byteptr d = diffptr + 1;
   GEN *gptr[7];
 
-  R->condZ = condZ;
-  R->L1 = cget1(nmax, t_VECSMALL);
-  R->L1ray = (GEN*)cget1(nmax, t_VEC);
+  R->condZ = condZ; l = PiBound(nmax) * (lg(cond)-1);
+  R->L1 = cget1(l, t_VECSMALL);
+  R->L1ray = (GEN*)cget1(l, t_VEC);
   prime = stoi(2);
   for (p = 2; p <= nmax; prime[2] = p)
   {
+    pari_sp av2 = avma;
+    if (DEBUGLEVEL > 1 && (p & 63) == 1) fprintferr("%ld ", p);
     tabpr = primedec(nf, prime);
     for (j = 1; j < lg(tabpr); j++)
     {
+      pari_sp av3 = avma;
       pr  = (GEN)tabpr[j];
       Npr = powgi((GEN)pr[1], (GEN)pr[4]);
+      avma = av3;
       if (is_bigint(Npr) || (np = Npr[2]) > nmax) break;
       if (condZ % p == 0 && idealval(nf, cond, pr)) continue;
 
       appendL(R->L1, (GEN)np);
       appendL((GEN)R->L1ray, isprincipalray(bnr, pr));
     }
+    if (j == 1) avma = av2;
     NEXT_PRIME_VIADIFF(p,d);
   }
   gptr[0] = &(R->L1);  gptr[1] = (GEN*)&(R->L1ray);
@@ -1603,14 +1608,14 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
 static GEN
 get_limx(long r1, long r2, long prec, GEN *pteps)
 {
-  GEN eps, p1, a, c0, A0, limx, Pi2 = gmul2n(mppi(DEFAULTPREC), 1);
+  GEN eps, p1, a, c0, A0, limx;
   long r, N;
 
   N = r1 + 2*r2; r = r1 + r2;
   a = gmulgs(gpow(gdeux, gdiv(stoi(-2*r2), stoi(N)), DEFAULTPREC), N);
 
   eps = real2n(-bit_accuracy(prec), DEFAULTPREC);
-  c0 = gpowgs(mpsqrt(Pi2), r-1);
+  c0 = gpowgs(mpsqrt(Pi2n(1, DEBUGLEVEL)), r-1);
   c0 = gdivgs(gmul2n(c0,1), N);
   c0 = gmul(c0, gpow(gdeux, gdiv(stoi(r1 * (r2-1)), stoi(2*N)),
 		     DEFAULTPREC));
@@ -1645,9 +1650,8 @@ GetBoundi0(long r1, long r2,  long prec)
   long imin, i0, itest;
   pari_sp av = avma;
   GEN ftest, borneps, eps, limx = get_limx(r1, r2, prec, &eps);
-  GEN sqrtPi = mpsqrt(mppi(DEFAULTPREC));
 
-  borneps = gmul(gmul2n(gun, r2), gpowgs(sqrtPi, r2-3));
+  borneps = gmul(gmul2n(gun, r2), gpowgs(mpsqrt(mppi(DEFAULTPREC)), r2-3));
   borneps = gdiv(gmul(borneps, gpowgs(stoi(5), r1)), eps);
   borneps = gdiv(borneps, gsqrt(limx, DEFAULTPREC));
 
@@ -2511,9 +2515,8 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
   if (DEBUGLEVEL>1) fprintferr("nmax = %ld\n", nmax);
   InitPrimesQuad(gmael(dataCR,1,4), nmax, &LIST);
 
-  cf  = gmul2n(mpsqrt(mppi(prec)), 1);
-  cfh = gmul2n(cf, -1);
-
+  cfh = mpsqrt(mppi(prec));
+  cf  = gmul2n(cfh, 1);
   av1 = avma;
   /* loop over conductors */
   for (j = 1; j <= ncond; j++)
@@ -2683,14 +2686,13 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   pari_sp av, av2;
   int **matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
-  GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
+  GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an;
   LISTray LIST;
 
   N     = degpol(nf[1]);
   r1    = nf_get_r1(nf);
   r2    = (N - r1)>>1;
   cond1 = gmael4(data, 1, 2, 1, 2);
-  Pi    = mppi(newprec);
   dataCR = (GEN)data[5];
 
   v = 1;
@@ -2746,7 +2748,7 @@ LABDOUB:
       FreeMat(matan, n);
     }
 
-    p1 = gmul2n(gpowgs(mpsqrt(Pi), N - 2), 1);
+    p1 = gmul2n(gpowgs(mpsqrt(mppi(newprec)), N - 2), 1);
 
     Lp = cgetg(cl+1, t_VEC);
     for (i = 1; i <= cl; i++)
