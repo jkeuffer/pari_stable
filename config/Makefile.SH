@@ -51,7 +51,6 @@ if test -s $src_dir/kernel/$dirlvl0/MakeVar.SH; then
   . $src_dir/kernel/$dirlvl0/MakeVar.SH
 fi
 
-kerntest=kernel
 hlist='pari paritype paricast paricom parierr parigen paristio parisys pariport'
 HEADERS=''
 for f in $khlist; do
@@ -338,7 +337,7 @@ kerntest: $KERNOBJS mp\$(_O) kerntest\$(_O)
 
 test-kernel:: kerntest
 	@./kerntest > gp.out;\
-	diff -c gp.out $src/test/$numbits/$kerntest > kern.dif;\
+	diff -c gp.out $src/test/$numbits/kernel > kern.dif;\
 	if test -s kern.dif; then echo "KERNEL BUG"; else echo OK; fi
 
 tune.o: $src/test/tune.c

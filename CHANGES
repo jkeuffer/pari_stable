@@ -239,6 +239,7 @@ IZ 12- allow an arbitrary polynomial as a 2nd argument to subst()
     1- macro definition BITS_IN_RANDOM (useless)
     2- appr_reduce() [static base4.c]: lllreducemodmatrix does the same. Faster.
     3- [useless,undocumented]: idealoplll, idealmullll, idealdivlll
+    4- 68k assembler kernel [ unmaintained, obsoleted by the GMP kernel ] 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.4 (released 12/09/2002):
