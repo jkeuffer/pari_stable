@@ -3411,7 +3411,7 @@ gsmithall(GEN x,long all)
       int c = 0;
       for (j=i-1; j>=1; j--)
       {
-	b = gcoeff(x,i,j); if (!signe(b)) continue;
+	b = gcoeff(x,i,j); if (gcmp0(b)) continue;
         a = gcoeff(x,i,i);
         d = gbezout_step(&b, &a, &v, &u);
         for (k = 1; k < i; k++)
@@ -3426,7 +3426,7 @@ gsmithall(GEN x,long all)
       }
       for (j=i-1; j>=1; j--)
       {
-	b = gcoeff(x,j,i); if (!signe(b)) continue;
+	b = gcoeff(x,j,i); if (gcmp0(b)) continue;
         a = gcoeff(x,i,i);
         d = gbezout_step(&b, &a, &v, &u);
         for (k = 1; k < i; k++)
@@ -3474,7 +3474,12 @@ gsmithall(GEN x,long all)
     if (typ(T) == t_POL && signe(T))
     {
       GEN d = leading_term(T);
-      if (gcmp0(d)) { T = RgX_renormalize(T); d = leading_term(T); }
+      while (gcmp0(d) || ( typ(d) == t_REAL && lg(d) == 3
+                           && gexpo(T) - expo(d) > BITS_IN_LONG)) {
+         T = normalizepol_i(T, lg(T)-1);
+         if (!signe(T)) { gcoeff(x,k,k) = T; continue; }
+         d = leading_term(T);
+      }
       if (!gcmp1(d))
       {
         gcoeff(x,k,k) = gdiv(T,d);
@@ -3563,7 +3568,6 @@ Frobeniusform(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    while (d >= 0 && gcmp0(gel(P, d+2))) d--;
     if (k+d-1 > n) err(talker, "accuracy lost in matfrobenius");
     for (j=0; j<d-1; j++, k++)
       gcoeff(M,k+1,k) = gen_1;
@@ -3587,7 +3591,6 @@ build_frobeniusbc(GEN V, long n)
   {
     GEN  P = gel(V,i);
     long d = degpol(P);
-    while (d >= 0 && gcmp0(gel(P, d+2))) d--;
     if (d <= 0) continue;
     if (l+d-2 > n) err(talker, "accuracy lost in matfrobenius");
     gcoeff(M,k,i) = gen_1;
