@@ -204,19 +204,21 @@ static GEN
 do_padic_agm(GEN *ptx1, GEN a1, GEN b1, GEN p)
 {
   GEN p1,r1,a,b,x,bmod1, bmod = modii((GEN)b1[4],p), x1 = *ptx1;
-
+  long mi;
+  
   if (!x1) x1 = gmul2n(gsub(a1,b1),-2);
+  mi = min(precp(a1),precp(b1));
   for(;;)
   {
     a=a1; b=b1; x=x1;
-    b1=gsqrt(gmul(a,b),0); bmod1=modii((GEN)b1[4],p);
+    b1=gprec(gsqrt(gmul(a,b),0),mi); bmod1=modii((GEN)b1[4],p);
     if (!egalii(bmod1,bmod)) b1 = gneg_i(b1);
-    a1=gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2);
+    a1=gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
     r1=gsub(a1,b1);
+    if (gcmp0(r1)) {x1=x; break;}
     p1=gsqrt(gdiv(gadd(x,r1),x),0);
     if (! gcmp1(modii((GEN)p1[4],p))) p1 = gneg_i(p1);
     x1=gmul(x,gsqr(gmul2n(gaddsg(1,p1),-1)));
-    if (gcmp0(r1)) break;
   }
   *ptx1 = x1; return ginv(gmul2n(a1,2));
 }
@@ -227,13 +229,17 @@ padic_initell(GEN y, GEN p, long prec)
   GEN b2,b4,c4,c6,p1,p2,w,pv,a1,b1,x1,u2,q,e0,e1;
   long i,alpha;
 
-  if (valp(y[13]) >= 0) /* p | j */
+  q=gadd(gun,ggrandocp(p,prec));
+  for (i=1; i<=13; i++) y[i]=lmul(q,(GEN)y[i]);
+  if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
   if (egalii(p,gdeux))
-    err(impl,"initell for 2-adic numbers"); /* pv=stoi(4); */
+  {
+    pv=stoi(4); 
+    err(impl,"initell for 2-adic numbers");
+  }
+  else pv=p;
 
-  pv=p; q=ggrandocp(p,prec);
-  for (i=1; i<=5; i++) y[i]=ladd(q,(GEN)y[i]);
   b2= (GEN)y[6];
   b4= (GEN)y[7];
   c4= (GEN)y[10];
@@ -275,6 +281,16 @@ padic_initell(GEN y, GEN p, long prec)
   y[19]=zero; return y;
 }
 
+/* mis pour debugger do_padic_agm. On peut enlever quand on veut */
+
+GEN
+dopad(GEN a, GEN b, GEN pv)
+{
+  GEN x1=NULL;
+
+  return ginv(gmul2n(do_padic_agm(&x1,a,b,pv),2));
+}
+  
 static int
 invcmp(GEN x, GEN y) { return -gcmp(x,y); }
 

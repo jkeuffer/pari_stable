@@ -277,8 +277,8 @@ addpadic(GEN x, GEN y)
 static GEN
 gaddpex(GEN x, GEN y)
 {
-  gpmem_t av;
-  long tx,d,r,e;
+  gpmem_t av;  
+  long tx,vy,py,d,r,e;
   GEN z,q,p,p1,p2,mod,u;
 
   if (gcmp0(x)) return gcopy(y);
@@ -287,8 +287,8 @@ gaddpex(GEN x, GEN y)
   e = (tx == t_INT)? pvaluation(x,p,&p1)
                     : pvaluation((GEN)x[1],p,&p1) -
                       pvaluation((GEN)x[2],p,&p2);
-  d = valp(y)-e; r = d+precp(y);
-  if (r<=0) { avma = av; return gcopy(y); }
+  vy = valp(y); d = vy - e; py = precp(y); r = d + py;
+  if (r <= 0) { avma = av; return gcopy(y); }
   mod = (GEN)y[3];
   u   = (GEN)y[4];
   (void)new_chunk(5 + lgefint(mod) + lgefint(p)*labs(d));
@@ -304,11 +304,10 @@ gaddpex(GEN x, GEN y)
   else if (d < 0)
   {
     q = gpowgs(p,-d);
-    mod = divii(mod, q);
-    u   = modii(u, mod);
     if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, mpinvmod(p2,mod));
     p1 = mulii(p1, q);
     u = addii(u, p1);
+    r = py; e = vy;
   }
   else
   {

@@ -557,7 +557,7 @@ powgi(GEN x, GEN n)
 static GEN
 ser_pui(GEN x, GEN n, long prec)
 {
-  long lx, i, j;
+  long lx, i, j, mi;
   gpmem_t av, tetpil;
   GEN p1,p2,y,alp;
 
@@ -570,10 +570,12 @@ ser_pui(GEN x, GEN n, long prec)
       y=cgetg(lx=lg(x),t_SER);
       y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
       y[2] = un;
+      mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
+      mi -= 2;
       for (i=3; i<lx; i++)
       {
 	av=avma; p1=gzero;
-	for (j=1; j<i-1; j++)
+	for (j=1; j<=min(i-2,mi); j++)
 	{
 	  p2 = gsubgs(gmulgs(alp,j),i-2);
 	  p1 = gadd(p1,gmul(gmul(p2,(GEN)x[j+2]),(GEN)y[i-j]));
@@ -604,6 +606,11 @@ gpow(GEN x, GEN n, long prec)
     lx=lg(x); y=cgetg(lx,tx);
     for (i=1; i<lx; i++) y[i]=lpui((GEN)x[i],n,prec);
     return y;
+  }
+  if (tx==t_POL)
+  {
+    av=avma; y=tayl(x,gvar(x),precdl); tetpil=avma;
+    return gerepile(av,tetpil,gpow(y,n,prec));
   }
   if (tx==t_SER)
   {
@@ -955,7 +962,8 @@ rootsof1padic(GEN n, GEN y)
 }
 static GEN paexp(GEN x);
 /*compute the p^e th root of x p-adic*/ 
-GEN padic_sqrtn_ram(GEN x, long e)
+GEN
+padic_sqrtn_ram(GEN x, long e)
 {
   gpmem_t ltop=avma;
   GEN n,a;
@@ -984,7 +992,8 @@ GEN padic_sqrtn_ram(GEN x, long e)
   return a;
 }
 /*compute the nth root of x p-adic p prime with n*/ 
-GEN padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
+GEN
+padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
   gpmem_t ltop=avma, tetpil;
   GEN a,r;
@@ -1024,7 +1033,9 @@ GEN padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   else
     return gerepile(ltop,tetpil,r);
 }
-GEN padic_sqrtn(GEN x, GEN n, GEN *zetan)
+
+GEN
+padic_sqrtn(GEN x, GEN n, GEN *zetan)
 {
   gpmem_t ltop=avma, tetpil;
   GEN p=(GEN)x[2];
@@ -1300,7 +1311,7 @@ static GEN
 serexp(GEN x, long prec)
 {
   gpmem_t av;
-  long i,j,lx,ly,ex;
+  long i,j,lx,ly,ex,mi;
   GEN p1,y,xd,yd;
  
   if (gcmp0(x)) return gaddsg(1,x);
@@ -1309,6 +1320,8 @@ serexp(GEN x, long prec)
   if (ex)
   {
     ly = lx+ex; y = cgetg(ly,t_SER);
+    mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
+    mi += ex-2;
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coeff of X^i in z */
     xd = x+2-ex; yd = y+2; ly -= 2;
@@ -1317,7 +1330,7 @@ serexp(GEN x, long prec)
     for (   ; i<ly; i++)
     {
       av = avma; p1 = gzero;
-      for (j=ex; j<=i; j++)
+      for (j=ex; j<=min(i,mi); j++)
         p1 = gadd(p1, gmulgs(gmul((GEN)xd[j],(GEN)yd[i-j]),j));
       yd[i] = lpileupto(av, gdivgs(p1,i));
     }
@@ -1926,7 +1939,7 @@ mpsincos(GEN x, GEN *s, GEN *c)
 void
 gsincos(GEN x, GEN *s, GEN *c, long prec)
 {
-  long ii, i, j, ex, ex2, lx, ly;
+  long ii, i, j, ex, ex2, lx, ly, mi;
   gpmem_t av, tetpil;
   GEN r,u,v,u1,v1,p1,p2,p3,p4,ps,pc;
   GEN *gptr[4];
@@ -1982,6 +1995,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
 
       ly=lx+2*ex;
+      mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
+      mi += ex-2;
       pc=cgetg(ly,t_SER); *c=pc;
       ps=cgetg(lx,t_SER); *s=ps;
       pc[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
@@ -1991,14 +2006,14 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       for (i=ex2; i<ly; i++)
       {
 	ii=i-ex; av=avma; p1=gzero;
-	for (j=ex; j<ii-1; j++)
+	for (j=ex; j<=min(ii-2,mi); j++)
 	  p1=gadd(p1,gmulgs(gmul((GEN)x[j-ex+2],(GEN)ps[ii-j]),j));
 	tetpil=avma;
 	pc[i]=lpile(av,tetpil,gdivgs(p1,2-i));
 	if (ii<lx)
 	{
 	  av=avma; p1=gzero;
-	  for (j=ex; j<=i-ex2; j++)
+	  for (j=ex; j<=min(i-ex2,mi); j++)
 	    p1=gadd(p1,gmulgs(gmul((GEN)x[j-ex+2],(GEN)pc[i-j]),j));
 	  p1=gdivgs(p1,i-2); tetpil=avma;
 	  ps[i-ex]=lpile(av,tetpil,gadd(p1,(GEN)x[i-ex]));
