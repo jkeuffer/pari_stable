@@ -138,6 +138,34 @@ list. In particular, there are sets of flags related to GNU MP
 (\kbd{--with-gmp*}) and GNU readline library (\kbd{--with-readline*}).
 Note that autodetection of GMP is \emph{disabled} by default.
 
+\misctitle{Technical note 4:} The multiprecision kernel can be fully
+specified via the \kbd{--kernel=\emph{fqkn}} switch. The PARI kernel is build
+from two kernels, called level 0 (L0, operation on words) and level 1 (L1,
+operation on multi-precision integer and real).
+
+\noindent Available kernels:
+
+L0: \kbd{auto}, \kbd{none} and
+\bprog
+alpha  hppa  ix86  ppc  sparcv7  sparcv8_micro  sparcv8_super
+@eprog
+
+L1: \kbd{auto}, \kbd{none} and \kbd{gmp}
+
+\noindent \kbd{auto} means to use the auto-detected value. L0=\kbd{none} means
+to use the portable C kernel (no assembler), L1=\kbd{none} means to use the
+PARI L1 kernel. 
+
+\noindent$\bullet$ A fully qualified kernel name \emph{fqkn} is of the form
+\kbd{$L_0$-$L_1$}.
+
+\noindent$\bullet$ A \emph{name} not containing a dash '\kbd{-}' is an alias.
+An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stand for
+\kbd{auto-gmp}.
+
+\noindent$\bullet$ The default kernel is \kbd{auto-none}.
+
+
 \subsec{Troubleshooting and fine tuning:} Decide whether you agree with what
 \kbd{Configure} printed on your screen (in particular the architecture,
 compiler and optimization flags). Look for messages prepended by
@@ -156,6 +184,7 @@ but if you accept them all, it will fail just the same, so be wary. In any
 case, we would appreciate a bug report including the complete output from
 \kbd{Configure} and the file \kbd{O$xxx$/dft.Config.in} that was produced in
 the process.
+
 
 \subsec{Problems related to readline:}
 \kbd{Configure} does not try very hard to find the \kbd{readline} library and
