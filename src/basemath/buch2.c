@@ -1474,7 +1474,8 @@ random_relation(long phase,long cmptglob,long lim,long LIMC,long N,long RU,
   nbmatt2 = lg(lmatt2)-1;
   lgsub = lg(subfb);
   cptzer = 0;
-  if (list_jideal) fprintferr("looking hard for %Z\n",list_jideal);
+  if (DEBUGLEVEL && list_jideal)
+    fprintferr("looking hard for %Z\n",list_jideal);
   for (av = avma;;)
   {
     if (list_jideal && jlist < lg(list_jideal) && jdir <= nbmatt2) 
@@ -2693,8 +2694,9 @@ INCREASEGEN:
   z = mulri(z,(GEN)zu[1]);
   /* z = Res (zeta_K, s = 1) * w D^(1/2) / [ 2^r1 (2pi)^r2 ] = h R */
   p1 = gmul2n(divir(clh,z), 1);
+  /* c1 should be close to 2, and not much smaller */
   c1 = compute_check(sublambda,p1,&parch,&reg);
-  if (!c1)
+  if (!c1 || gcmpgs(gcmpgs(gmul2n(c1,1),3) < 0))
   { /* precision problems */
     prec=(PRECREG<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"buchall (compute_check)",prec);
@@ -2702,23 +2704,18 @@ INCREASEGEN:
     av0 = avma; cbach /= 2;
     goto INCREASEGEN;
   }
-  /* c1 should be close to 2, and not much smaller */
-  if (c1 && gcmpgs(gmul2n(c1,1),3) < 0) { c1=NULL; nrelsup=MAXRELSUP; }
-  if (!c1 || gcmpgs(c1,3) > 0)
+  if (gcmpgs(c1,3) > 0)
   {
     if (++nrelsup <= MAXRELSUP)
     {
       if (DEBUGLEVEL)
       {
-        if (c1)
-          fprintferr("\n ***** check = %f\n",gtodouble(c1)/2);
-        else
-          fprintferr("\n ***** check = NULL\n");
+        fprintferr("\n ***** check = %f\n",gtodouble(c1)/2);
         flusherr();
       }
       nlze=MIN_EXTRA; goto LABELINT;
     }
-    if (!c1 || cbach<11.99) { sfb_increase=1; goto LABELINT; }
+    if (cbach<11.99) { sfb_increase=1; goto LABELINT; }
     err(warner,"suspicious check. Try to increase extra relations");
   }
 
