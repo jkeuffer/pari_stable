@@ -1355,24 +1355,6 @@ red_ideal(GEN *ideal,GEN T2vec,GEN prvec)
   return NULL;
 }
 
-static double
-get_minkovski(long N, long R1, GEN D, GEN gborne)
-{
-  const long prec = DEFAULTPREC;
-  GEN p1,p2, pi = mppi(prec);
-  double bound;
-
-  p1 = gsqrt(gmulsg(N,gmul2n(pi,1)),prec);
-  p1 = gdiv(p1, gexp(stoi(N),prec));
-  p1 = gmulsg(N, gpui(p1, dbltor(2./(double)N),prec));
-  p2 = gpui(gdivsg(4,pi), gdivgs(stoi(N-R1),N),prec);
-  p1 = gmul(p1,p2);
-  bound = gtodouble(gmul(p1, gpui(absi(D), dbltor(1./(double)N),prec)));
-  bound *= gtodouble(gborne);
-  if (DEBUGLEVEL) { fprintferr("Bound for norms = %.0f\n",bound); flusherr(); }
-  return bound;
-}
-
 static void
 wr_rel(long *col)
 {
@@ -1427,9 +1409,9 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
                        GEN nf,GEN gborne,long nbrelpid,GEN invp,GEN L,GEN LLLnf)
 {
   const int maxtry_DEP  = 20;
-  const int maxtry_FACT = 500;
+  const int maxtry_FACT = 50000;
   const double eps = 0.000001;
-  double *y,*z,**q,*v, MINKOVSKI_BOUND,BOUND;
+  double *y,*z,**q,*v, BOUND;
   gpmem_t av = avma, av1, av2, limpile;
   long j,k,noideal, nbrel = lg(mat)-1;
   long nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
@@ -1449,13 +1431,11 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   prvec[2] = PRECREG;          T2vec[2] = (long)T2;
   minim_alloc(N+1, &q, &x, &y, &z, &v);
   av1 = avma;
-  MINKOVSKI_BOUND = get_minkovski(N,R1,(GEN)nf[3],gborne);
   for (noideal=KC; noideal; noideal--)
   {
     gpmem_t av0 = avma;
     long nbrelideal=0, dependent = 0, try_factor = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)vectbase[noideal];
-    GEN normideal = idealnorm(nf,ideal);
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
     ideal = prime_to_ideal(nf,ideal);
@@ -1471,12 +1451,9 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
-#if 1
-    BOUND = MINKOVSKI_BOUND * pow(gtodouble(normideal),2./(double)N);
-#else
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
     if (BOUND < v[1]) BOUND = v[1];
-#endif
+    BOUND *= 1.3; /* at most 30% larger than smallest known vector */
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");
