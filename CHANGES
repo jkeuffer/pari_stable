@@ -118,6 +118,8 @@ IS 20- obscure compiler bug in rootpol.c:max_modulus() [don't modify tau]
    25- allow subst(t, x^n, x)
    26- ?user_fun: do not include function text if help available from addhelp
        [always include it for ??user_fun]
+   27- default values for used defined function arguments are evaluated when
+       the function is called [used to be "when it's defined"]
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]
