@@ -1,7 +1,7 @@
 PERL=perl
 all: ../language/init.h ../gp/gp_init.h ../gp/highlvl.h
 
-Def: 
+Def::
 	$(PERL) merge_822 ../functions/*/* > Def
 
 ../language/init.h: Def
