@@ -28,7 +28,7 @@ cat > $file << EOT
 #  matexp-sta (linked statically)
 #  libmatexp.so (to be used by "install" under GP)
 #
-# Under GP: install(matexp, Gp, mexp, libmatexp.so) enables you to
+# Under GP: install(matexp, Gp, mexp, "./libmatexp.so") enables you to
 # subsequently use mexp to call matexp (see the reference manual).
 #
 
