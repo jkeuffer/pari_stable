@@ -115,6 +115,8 @@ BA 52- Oxxx/Makefile was not compatible with BSD make.
 BA 58- [GP internals:] trap() had an invalid prototype [DI,DI]
    59-  M[,2][1]=1 --> error; M[1,][2]=1 --> no effect  [ now <==> M[1,2]= 2 ]
    60- [GP:] newline in multiline comments /* */ was not ignored
+   61- [GP:] when using default 'colors' for input at \gn>1, first debugging
+       msg could be colored
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
@@ -154,6 +156,7 @@ IZ  8- [library:] unified access to diffptr (NEXT_PRIME_VIADIFF macro)
     7- internal flag nf_GEN_IF_PRINCIPAL to bnfisprincipal [isprincipalall]
     8- routine rnfisnorminit()
  BA 9- [Makefile:] bzdist target
+   10- [library:] CATCH / TRY mechanism [ encapsulate err_catch ]
 
   Removed
     1- (useless, undocumented) macros buchgen*, buchinit*
