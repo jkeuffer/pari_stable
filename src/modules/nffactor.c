@@ -21,6 +21,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern void init_dalloc();
+extern double *dalloc(size_t n);
+extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 extern GEN RXQX_red(GEN P, GEN T);
@@ -365,7 +368,7 @@ vecbinome(long n)
   C[0] = gun;
   for (k=1; k <= d; k++)
   {
-    gpmem_t av = avma;  
+    gpmem_t av = avma;
     C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), stoi(k)));
   }
   for (   ; k <= n; k++) C[k] = C[n - k];
@@ -580,6 +583,90 @@ get_Blow(long BvS, long d)
   return t * t;
 }
 
+typedef struct {
+  GEN d;
+  GEN dPinvS;   /* d P^(-1) S   [ integral ] */
+  double **PinvSdbl; /* P^(-1) S as double */
+  GEN S1, P1;   /* S = S0 + S1 q, idem P */
+} trace_data;
+
+/* S1 * u - P1 * round(P^-1 S u). K non-zero coords in u given by ind */
+static GEN
+get_trace(GEN ind, trace_data *T)
+{
+  long i, j, l, K = lg(ind)-1;
+  GEN z, s, v;
+
+  s = (GEN)T->S1[ ind[1] ];
+  if (K == 1) return s;
+
+  /* compute s = S1 u */
+  for (j=2; j<=K; j++) s = gadd(s, (GEN)T->S1[ ind[j] ]);
+
+  /* compute v := - round(P^1 S u) */
+  l = lg(s);
+  v = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++)
+  {
+    double r, t = 0.;
+    /* quick approximate computation */
+    for (j=1; j<=K; j++) t += T->PinvSdbl[ ind[j] ][i];
+    r = floor(t + 0.5);
+    if (fabs(t + 0.5 - r) < 0.01)
+    { /* dubious, compute exactly */
+      z = gzero;
+      for (j=1; j<=K; j++) z = addii(z, ((GEN**)T->dPinvS)[ ind[j] ][i]);
+      v[i] = - itos( diviiround(z, T->d) );
+    }
+    else
+      v[i] = - (long)r;
+  }
+  return gadd(s, gmul_mati_smallvec(T->P1, v));
+}
+
+static trace_data *
+init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
+{
+  long e = gexpo((GEN)S), i,j, l,h;
+  GEN qgood, S1, invd;
+
+  if (e < 0) return NULL; /* S = 0 */
+
+  qgood = shifti(gun, e - 32); /* single precision check */
+  if (cmpii(qgood, q) > 0) q = qgood;
+
+  S1 = gdivround(S, q);
+  if (gcmp0(S1)) return NULL;
+
+  invd = ginv(itor(L->den, DEFAULTPREC));
+
+  T->dPinvS = gmul(L->iprk, S);
+  l = lg(S);
+  h = lg(T->dPinvS[1]);
+  T->PinvSdbl = (double**)cgetg(l, t_MAT);
+  init_dalloc();
+  for (j = 1; j < l; j++)
+  {
+    double *t = dalloc(h * sizeof(double));
+    GEN c = (GEN)T->dPinvS[j];
+    T->PinvSdbl[j] = t;
+    for (i=1; i < h; i++) t[i] = rtodbl(gmul(invd, (GEN)c[i]));
+  }
+
+  T->d  = L->den;
+  T->P1 = gdivround(L->prk, q);
+  T->S1 = S1; return T;
+}
+
+static void
+update_trace(trace_data *T, long k, long i)
+{
+  if (!T) return;
+  T->S1[k]       = T->S1[i];
+  T->dPinvS[k]   = T->dPinvS[i];
+  T->PinvSdbl[k] = T->PinvSdbl[i];
+}
+
 /* Naive recombination of modular factors: combine up to maxK modular
  * factors, degree <= klim and divisible by hint
  *
@@ -592,15 +679,12 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
 {
   long Sbound;
   GEN pol = T->pol, nf = T->nf, famod = T->fact;
-  GEN dn = T->dn, bound = T->bound;
-  GEN den = T->L->den, deno2 = shifti(den, -1);
+  GEN bound = T->bound;
   GEN nfpol = (GEN)nf[1];
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1, dnf = degpol(nfpol);
-  GEN lc, lcpol, h1 = NULL; /* gcc -Wall */
+  GEN lc, lcpol;
   GEN pa = gpowgs(p,a), pas2 = shifti(pa,-1);
 
-  GEN hS1    = cgetg(lfamod+1, t_VEC);
-  GEN hS2    = cgetg(lfamod+1, t_VEC);
   GEN trace1   = cgetg(lfamod+1, t_MAT);
   GEN trace2   = cgetg(lfamod+1, t_MAT);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
@@ -610,17 +694,16 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
   GEN fa       = cgetg(lfamod+1, t_COL);
   GEN res = cgetg(3, t_VEC);
   const double Blow = get_Blow(lfamod, dnf);
+  trace_data _T1, _T2, *T1, *T2;
 
   if (maxK < 0) maxK = lfamod-1;
-  (void)dn;
 
   lc = absi(leading_term(pol));
   if (gcmp1(lc)) lc = NULL;
   lcpol = lc? gmul(lc,pol): pol;
 
   {
-    GEN T1,T2, q, qgood, lc2 = lc? sqri(lc): NULL;
-    long e, e1, e2;
+    GEN t1,t2, q, lc2 = lc? sqri(lc): NULL;
 
     q = ceil_safe(mpsqrt(T->BS_2));
     for (i=1; i <= lfamod; i++)
@@ -629,34 +712,21 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
       long d = degpol(P);
 
       degpol[i] = d; P += 2;
-      T1 = (GEN)P[d-1];/* = - S_1 */
-      T2 = sqri(T1);
-      if (d > 1) T2 = subii(T2, shifti((GEN)P[d-2],1));
-      T2 = modii(T2, pa); /* = S_2 Newton sum */
+      t1 = (GEN)P[d-1];/* = - S_1 */
+      t2 = sqri(t1);
+      if (d > 1) t2 = subii(t2, shifti((GEN)P[d-2],1));
+      t2 = modii(t2, pa); /* = S_2 Newton sum */
       if (lc)
       {
-        T1 = modii(mulii(lc, T1), pa);
-        T2 = modii(mulii(lc2,T2), pa);
+        t1 = modii(mulii(lc, t1), pa);
+        t2 = modii(mulii(lc2,t2), pa);
       }
-      trace1[i] = (long)nf_bestlift(T1, NULL, T->L);
-      trace2[i] = (long)nf_bestlift(T2, NULL, T->L);
+      trace1[i] = (long)nf_bestlift(t1, NULL, T->L);
+      trace2[i] = (long)nf_bestlift(t2, NULL, T->L);
     }
-    e1 = gexpo((GEN)trace1);
-    e2 = gexpo((GEN)trace2); e = max(e1, e2);
-    if (e < 0) /* trace1 = trace2 = 0 */
-      trace1 = trace2 = NULL;
-    else
-    {
-      qgood = shifti(gun, e2 - 32); /* single precision check */
-      if (cmpii(qgood, q) > 0) q = qgood;
-      T1 = trace1;
-      T2 = trace2;
-      trace1 = gdivround(T1, q); if (gcmp0(trace1)) trace1 = NULL;
-      trace2 = gdivround(T2, q); if (gcmp0(trace2)) trace2 = NULL;
-      if (trace1) hS1 = gsub(T1, gmul(T->L->prk, trace1));
-      if (trace2) hS2 = gsub(T2, gmul(T->L->prk, trace2)); /* <= q/2 */
-      h1 = gdivround(T->L->prk, q);
-    }
+
+    T1 = init_trace(&_T1, trace1, T->L, q);
+    T2 = init_trace(&_T2, trace2, T->L, q);
   }
   degsofar[0] = 0; /* sentinel */
 
@@ -678,26 +748,14 @@ nextK:
     }
     if (curdeg <= klim && curdeg % T->hint == 0) /* trial divide */
     {
-      GEN s, t, y, q, list;
+      GEN t, y, q, list;
       gpmem_t av;
 
       av = avma;
       /* d - 1 test */
-      if (trace1)
+      if (T1)
       {
-        s = (GEN)hS1[ind[1]];
-        t = (GEN)trace1[ind[1]];
-        for (i=2; i<=K; i++)
-        {
-          t = gadd(t, (GEN)trace1[ind[i]]);
-          s = gadd(s, (GEN)hS1[ind[i]]);
-          for (j=1; j<=dnf; j++)
-            if (absi_cmp((GEN)s[j], deno2) > 0)
-            {
-              t = gsub(t, (GEN)h1[j]);
-              s[j] = lsubii((GEN)s[j], den);
-            }
-        }
+        t = get_trace(ind, T1);
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
         {
           if (DEBUGLEVEL>6) fprintferr(".");
@@ -705,21 +763,9 @@ nextK:
         }
       }
       /* d - 2 test */
-      if (trace2)
+      if (T2)
       {
-        s = (GEN)hS2[ind[1]];
-        t = (GEN)trace2[ind[1]];
-        for (i=2; i<=K; i++)
-        {
-          t = gadd(t, (GEN)trace2[ind[i]]);
-          s = gadd(s, (GEN)hS2[ind[i]]);
-          for (j=1; j<=dnf; j++)
-            if (absi_cmp((GEN)s[j], deno2) > 0)
-            {
-              t = gsub(t, (GEN)h1[j]);
-              s[j] = lsubii((GEN)s[j], den);
-            }
-        }
+        t = get_trace(ind, T2);
         if (rtodbl(QuickNormL2(t,DEFAULTPREC)) > Blow)
         {
           if (DEBUGLEVEL>3) fprintferr("|");
@@ -764,8 +810,8 @@ nextK:
         else
         {
           famod[k] = famod[i];
-          if (trace1) { trace1[k] = trace1[i]; hS1[k] = hS2[i]; }
-          if (trace2) { trace2[k] = trace2[i]; hS2[k] = hS2[i]; }
+          update_trace(T1, k, i);
+          update_trace(T2, k, i);
           degpol[k] = degpol[i]; k++;
         }
       }
@@ -1058,7 +1104,7 @@ AGAIN:
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti, &ti_LLL);
     if (!CM_L) { list = _col(P); break; }
     i = lg(CM_L) - 1;
-    if (b > bmin) 
+    if (b > bmin)
     {
       CM_L = gerepilecopy(av2, CM_L);
       goto AGAIN;
