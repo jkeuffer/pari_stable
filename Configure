@@ -1006,7 +1006,8 @@ if test "$optimization" = profiling; then DLLD=; else
         pari) sodest=$version.$patch;; # released versions
         *) sodest=$patch.0.0;; # unstable versions
       esac ;;
-    cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
+# FIXME: gp-dyn.exe crashes on startup
+#   cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
     hpux-*)  soname= ; sodest= ; DLSUFFIX=sl;;
     irix-*)  soname= ; sodest= ;;
     *) DLLD=;;
