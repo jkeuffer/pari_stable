@@ -1080,8 +1080,10 @@ GEN     unifpol(GEN nf,GEN pol,long flag);
 
 /* perm.c */
 
+GEN     abelian_group(GEN G);
 GEN     cyclicperm(long l, long d);
 GEN     cyc_powtoperm(GEN cyc, long exp);
+GEN     group_elts(GEN G, long n);
 long    group_isabelian(GEN G);
 GEN     group_subgroups(GEN G);
 GEN     perm_cycles(GEN v);

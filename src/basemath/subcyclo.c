@@ -300,20 +300,29 @@ GEN
 galoiscyclo(long n, long v)
 {
   ulong ltop=avma;
-  GEN grp;
-  GEN z, y, le;
+  GEN grp,G;
+  GEN z, le;
   long val,l;
   GEN L;
-  long i, card;
-  card=itos(phi(stoi(n)));
+  long i,j,k;
+  GEN zn=znstar(stoi(n));
+  long card=itos((GEN) zn[1]);
+  GEN gen=lift((GEN)zn[3]);
+  GEN ord=gtovecsmall((GEN)zn[2]);
+  GEN elts;
   z=subcyclo_start(n,card/2,2,&val,&l);
   le=(GEN) z[1];
   z=(GEN) z[2];
-  y=lift(gener(stoi(n)));
   L = cgetg(1+card,t_VEC);
   L[1] = (long) z;
-  for (i=2; i<=card; i++)
-    L[i] = (long) powmodulo((GEN)L[i-1],y,le);
+  for (j = 1, i = 1; j < lg(gen); j++)
+  {
+    int     c = i * (ord[j] - 1);
+    for (k = 1; k <= c; k++)	/* I like it */
+      L[++i] = (long) powmodulo((GEN)L[k],(GEN)gen[j],le);
+  }
+  G=abelian_group(ord);
+  elts = group_elts(G, card); /*not stack clean*/
   grp = cgetg(9, t_VEC);
   grp[1] = (long) cyclo(n,v);
   grp[2] = lgetg(4,t_VEC); 
@@ -323,14 +332,9 @@ galoiscyclo(long n, long v)
   grp[3] = lcopy(L);
   grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gun, le);
   grp[5] = un;
-    grp[7] = lgetg(2,t_VEC); 
-  mael(grp,7,1) = (long) cyclicperm(card,1);
-  grp[8] = lgetg(2,t_VECSMALL);
-  mael(grp,8,1) = card;
-  grp[6] = lgetg(card+1,t_VEC); 
-  mael(grp,6,1) = (long) perm_identity(card);
-  for(i=2; i<=card; i++)
-    mael(grp,6,i) = (long) perm_mul(gmael(grp,6,i-1),gmael(grp,7,1));
+  grp[6] = lcopy(elts);
+  grp[7] = lcopy((GEN)G[1]);
+  grp[8] = lcopy((GEN)G[2]);
   return gerepileupto(ltop,grp);
 }
 

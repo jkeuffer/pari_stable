@@ -412,6 +412,7 @@ GEN group_rightcoset(GEN G, GEN g)
 }
 
 /*Compute the elements of a group from the generators*/
+/*Not stack clean!*/
 
 GEN group_elts(GEN G, long n)
 {
@@ -743,4 +744,36 @@ GEN group_abelianHNF(GEN G)
       mael(M,i,k)=zero;
   }
   return M;
+}
+
+GEN
+abelian_group(GEN v)
+{
+  GEN G=cgetg(3,t_VEC);
+  long card;
+  long i;
+  long d=1;
+  G[1]=lgetg(lg(v),t_VEC);
+  G[2]=lcopy(v);
+  card=group_order(G);
+  for(i=1;i<lg(v);i++)
+  {
+    GEN p=cgetg(1+card,t_VECSMALL);
+    long o=v[i],u=d*(o-1);
+    long j,k,l;
+    mael(G,1,i) = (long) p;
+    /*The following loop is a bit over-optimised. Oh well.
+     *Remember that I wrote the loop in testpermutation. 
+     *Something have survived... BA*/
+    for(j=1;j<=card;)
+    {
+      for(k=1;k<o;k++)
+        for(l=1;l<=d;l++,j++)
+          p[j]=j+d;
+      for(l=1;l<=d;l++,j++)
+        p[j]=j-u;
+    }
+    d+=u;
+  }
+  return G;
 }
