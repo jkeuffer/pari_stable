@@ -566,8 +566,8 @@ pariinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > pariinl.h
 
 $src/funclist::
-	ls -l $src/functions/*/* > $src/funclist.tmp
-	sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
+	@ls -l $src/functions/*/* > $src/funclist.tmp
+	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
 
 $src/desc/Def: $src/funclist
 	cd $src/desc; make Def
