@@ -2651,9 +2651,9 @@ ellintegralmodel(GEN e)
     for (i = 1; i < 6; i++)
       if (!gcmp0((GEN)a[i]))
       {
-        if (i == 5) i = 6; /* a5 is missing */
-	m = i * n + ggval((GEN)a[i], p);
-	while (m < 0) { n++; m += i; }
+        int r = (i == 5)? 6: i; /* a5 is missing */
+	m = r * n + ggval((GEN)a[i], p);
+	while (m < 0) { n++; m += r; }
       }
     u = mulii(u, gpowgs(p, n));
   }
