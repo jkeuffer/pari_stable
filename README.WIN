@@ -2,13 +2,14 @@ This file describes the various ways you can run PARI/GP in a (relatively
 recent) Windows environment (95 or higher). For earlier versions of Windows,
 see README.DOS.
 
-The only way to have a fully functionnal GP is to install GNU/Linux. It's
-a one hour job to install a minimal Linux system from current Linux
-distributions, without any technical background. The LILO boot system
-enables you to have Windows and Linux coexisting peacefully on your hard drive.
+The only way to have a fully functionnal GP is to install GNU/Linux. It's a
+one hour job to install a minimal Linux system from current Linux
+distributions, without any technical background. The LILO boot system enables
+you to have Windows and Linux coexisting peacefully on your hard drive.
 
-The other solutions all stick to the Windows environment. It is advised, but
-not mandatory to get the Documentation and Examples archive
+The other solutions all stick to the Windows environment and suffer from
+various problems. It is advised, but not mandatory to get the Documentation
+and Examples archive
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/dos/GPDxxx.ZIP
 
@@ -21,6 +22,9 @@ which contains the following directories:
 
          ftp://megrez.math.u-bordeaux.fr/pub/pari/manuals/
 
+       (and so is the "readline" reference manual if you use one of the
+        solutions providing line editing)
+
      - the script GPHELP (translates Pari documentation to plain text and
        handles "apropos help"), which requires PERL (see www.CPAN.org for how
        to get it). You may have to fix paths in the first lines of the script.
@@ -32,7 +36,8 @@ which contains the following directories:
         adapt it to your needs
       - a sample alias file (GPALIAS).
 
-  + EXAMPLES, containing sample GP scripts
+  + EXAMPLES, containing sample GP scripts, and a sample INPUTRC file (for
+    readline, you can use it to customize GP line editing).
 
 NOTE: all .gz and .ZIP files are compressed files (or archives). You can
 process them with Winzip (see www.winzip.com) for instance.
@@ -40,8 +45,10 @@ process them with Winzip (see www.winzip.com) for instance.
 %%%%%%%%%%%%%  Solution 1: The CYGWIN library  %%%%%%%%%%%%%%%%%%%%%%%%
 
 Fetch the cygwin library (CYGWIN1.DLL) from Cygnus Solutions (now a
-subsidiary of Red Hat) from http://sources.redhat.com/cygwin/. Then fetch the
-GP binary
+subsidiary of Red Hat) from http://sources.redhat.com/cygwin/ [ the Download
+and Installation process is automated and quite simple, you should be home in
+a few mouse clicks. Be sure to install at least the "cygwin" package ].
+Then fetch the GP binary
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/cygwin/gp-xxx.exe.gz
 
@@ -56,8 +63,15 @@ PROBLEMS:
 %%%%%%%%%%%%%  Solution 2: The native (mingw) binary %%%%%%%%%%%%%%%%%
 
 Fetch the GP binary (cross-compiled using the gcc-mingw compiler):
+EITHER
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/gp-xxx.exe.gz
+(includes readline line-editing, history, keyword completion, facilities)
+
+OR
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari/windows/gp-norl-xxx.exe.gz
+(doesn't include readline).
 
 PROBLEMS:
   * no hi-res plots, most graphics commands disabled (you can still output to
@@ -66,12 +80,39 @@ PROBLEMS:
   * doesn't work well when started in a console from a MS-DOS shell:
       - on ^C gp quits
       - redirecting standard input as in 'gp < file' crashes gp
-    None of these things occur if you start gp by double-clicking on its
-    icon, as is customary for Windows application.
+
+    SOLUTION: None of these things occur if you start gp by double-clicking
+    on its icon, as is customary for Windows application. ^C still doesnt
+    always interrupt computations, but at least it doesn't kill gp.
 
   * colors don't work (escape sequences printed "as is").
  
   * no extended on-line help
+
+  * [readline binary only]: the AltGr key doesn't work. If you have a US
+    keyboard, you don't care. But if you have, e.g a French keyboard, you
+    won't be able to produce {}, [], \, ...
+
+    SOLUTION:
+      create an INPUTRC file for readline (cf user's manual or readline
+      manual). E.g add a line 
+
+      set INPUTRC=C:\INPUTRC.txt  (for instance).
+
+    to your AUTOEXEC.BAT. Then create this file, and add lines of the form
+
+    "\M-\\": "\\"   (\M stands for ALT or META, \C for CONTROL)
+    "\M-\[": "["
+
+    etc... This binds (for readline purposes only, doesn't affect regular
+    Windows operations) the key sequence on the LHS, to some "meaning" on the
+    RHS, here an ordinary character. E.g inserting a line
+
+    "a": "b"
+
+    will cause GP to insert a "b" when you type an "a". Depending on your
+    precise keyboard layout, you may have to fiddle a bit with the keyseq and
+    replacement text before getting something sensible.
 
 %%%%%%%%%%%%%  Solution 3: The RSX runtime package %%%%%%%%%%%%%%%%%%%
 
@@ -91,13 +132,13 @@ That is, the generic Unix sources
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/pari.tgz
 
-It is quite easy to build GP (and readline) from the unix sources using
-mingw, but if you have installed mingw you probably also have Cygwin, in
-which case, it's even easier to use the generic build process as under Unix,
-as mentioned in Solution 1.
+It is quite easy to build (or cross-build) GP and readline from the unix
+sources using mingw, but if you have installed mingw you probably also have
+Cygwin, in which case it's even easier to use the generic build process as
+under Unix, as mentioned in Solution 1.
 
 So I'm assuming from now on that you're stuck with something which is not
-gcc. If you have MSVC, then check Odos/README.MSVC in the main archive which
+gcc. If you have MSVC, then check Odos/README.MSVC in the archive which
 explains in detail all steps involved. If you have some other compiler, and
 succeed in compiling GP, we'd be quite happy to hear from you.
 
@@ -113,7 +154,9 @@ PROBLEMS:
 
 %%%%%%%%%%%%%  What about library programming ? %%%%%%%%%%%%%%%%%%%%%%
 
-Building a libpari.a library should be straightforward. It is possible but
-painful to build a LIBPARI.DLL and .def file using gcc-mingw + dlltool and
-some header magic.  For the time being, we won't provide prebuilt libraries,
-so for this one, you're on your own. Sorry.
+Building a static LIBPARI.A Library should be straightforward. It is possible
+but painful to build a LIBPARI.DLL and .def file using gcc-mingw (or
+gcc-cygwin) + dlltool and some header magic; but GP itself, when linked with
+such a library, crashes on startup.  No other decent compiler being available
+to us, we won't provide prebuilt libraries. For this one, you're on your own.
+Sorry.
