@@ -1100,7 +1100,7 @@ rm -f $exe $exe$exe_suff
 
 if test "$fastread" != yes; then
 cat << EOT
-Determining sizeof(long) and `double endianness'. PARI assumes doubles are
+Determining sizeof(long) and 'double endianness'. PARI assumes doubles are
 stored in IEEE754 format [ sign, exponent, mantissa high, mantissa ]; `double
 endianness' only matters on 32-bit architecture: assuming a union { double f;
 ulong i[2]; }, are the double exponent and sign stored on the first ulong
