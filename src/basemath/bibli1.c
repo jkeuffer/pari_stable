@@ -2553,14 +2553,16 @@ minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
 static GEN
 minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
-  GEN x,res,p1,u,r,liste,gnorme,gnorme_max,invp,V, *gptr[2];
+  GEN x,res,p1,u,r,liste,gnorme,invp,V, *gptr[2];
   long n = lg(a), av0 = avma, av1,av,tetpil,lim, i,j,k,s,maxrank;
-  double p,BOUND,*v,*y,*z,**q, eps = 0.000001;
+  double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
   {
-    case min_FIRST: res = cgetg(3,t_VEC); break;
+    case min_FIRST:
+      if (gcmp0(BORNE)) err(talker,"bound = 0 in minim2");
+      res = cgetg(3,t_VEC); break;
     case min_ALL: res = cgetg(4,t_VEC); break;
     case min_PERF: break;
     default: err(talker, "incorrect flag in minim00");
@@ -2602,13 +2604,13 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       { c=rtodbl(gcoeff(a,i,i)); if (c<b) b=c; }
     BOUND = b+eps;
     BORNE = ground(dbltor(BOUND));
-    gnorme_max = NULL;
+    maxnorm = -1.; /* don't update maxnorm */
   }
   else
   {
     BORNE = gfloor(BORNE);
     BOUND = gtodouble(BORNE)+eps;
-    gnorme_max = gzero;
+    maxnorm = 0.;
   }
 
   switch(flag)
@@ -2652,34 +2654,42 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     }
     while (k>1);
     if (! x[1] && y[1]<=eps) break;
-    p = x[1]+z[1]; gnorme = ground( dbltor(y[1] + p*p*v[1]) );
-    if (gnorme_max)
-      { if (gcmp(gnorme,gnorme_max) > 0) gnorme_max=gnorme; }
-    else if (gcmp(gnorme,BORNE) < 0)
+    p = x[1]+z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
+    if (maxnorm >= 0)
     {
-      BOUND=gtodouble(gnorme)+eps; s=0;
-      affii(gnorme,BORNE); avma=av1;
-      if (flag == min_PERF) invp = idmat(maxrank);
+      if (flag == min_FIRST)
+      {
+        gnorme = dbltor(p);
+        tetpil=avma; gnorme = ground(gnorme); r = gmul_mati_smallvec(u,x);
+        gptr[0]=&gnorme; gptr[1]=&r; gerepilemanysp(av,tetpil,gptr,2);
+        res[1]=(long)gnorme;
+        res[2]=(long)r; return res;
+      }
+      if (p > maxnorm) maxnorm = p;
     }
+    else
+    {
+      long av2 = avma;
+      gnorme = ground(dbltor(p));
+      if (gcmp(gnorme,BORNE) >= 0) avma = av2;
+      else
+      {
+        BOUND=gtodouble(gnorme)+eps; s=0;
+        affii(gnorme,BORNE); avma=av1;
+        if (flag == min_PERF) invp = idmat(maxrank);
+      }
+    }
+    s++;
 
     switch(flag)
     {
       case min_ALL:
-        s++;
         if (s<=maxrank)
         {
           p1 = new_chunk(n+1); liste[s] = (long) p1;
           for (i=1; i<=n; i++) p1[i] = x[i];
         }
         break;
-
-      case min_FIRST:
-        if (! gnorme_max || gcmp(gnorme,BORNE)>0) break;
-
-        tetpil=avma; gnorme = icopy(gnorme); r = gmul_mat_smallvec(r,x);
-        gptr[0]=&gnorme; gptr[1]=&r; gerepilemanysp(av,tetpil,gptr,2);
-        res[1]=(long)gnorme;
-        res[2]=(long)r; return res;
 
       case min_PERF:
       {
@@ -2690,11 +2700,11 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
         if (! addcolumntomatrix(V,invp,liste))
         {
           if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
-          avma=av2; continue;
+          s--; avma=av2; continue;
         }
 
         if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
-        if (++s == maxrank)
+        if (s == maxrank)
         {
           if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
           avma=av0; return stoi(s);
@@ -2702,13 +2712,8 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          if(DEBUGMEM>1) err(warnmem,"minim00");
-          if (DEBUGLEVEL>1)
-          { 	
-            fprintferr("\ngerepile in qfperfection. rank>=%ld\n",s);
-            flusherr();
-          }
-          tetpil=avma; invp = gerepile(av1,tetpil,gcopy(invp));
+          if(DEBUGMEM>1) err(warnmem,"minim00, rank>=%ld",s);
+          invp = gerepileupto(av1, gcopy(invp));
         }
       }
     }
@@ -2725,9 +2730,9 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   tetpil = avma; p1=cgetg(k+1,t_MAT);
   for (j=1; j<=k; j++)
-    p1[j] = (long) gmul_mat_smallvec(u,(GEN)liste[j]);
+    p1[j] = (long) gmul_mati_smallvec(u,(GEN)liste[j]);
   liste = p1;
-  r = gnorme_max? gnorme_max: BORNE;
+  r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
 
   r=icopy(r); gptr[0]=&r; gptr[1]=&liste;
   gerepilemanysp(av,tetpil,gptr,2);
