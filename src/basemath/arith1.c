@@ -2269,6 +2269,7 @@ classno2(GEN x)
     p3 = gsqrt(gdivsg(2,logd),DEFAULTPREC);
     if (gcmp(p2,p3)>=0) p1 = gmul(p2,p1);
   }
+  else reg = NULL; /* for gcc -Wall */
   p1 = gtrunc(p1); n=p1[2];
   if (lgefint(p1)!=3 || n<0)
     err(talker,"discriminant too large in classno");

@@ -522,7 +522,7 @@ GEN
 boundfact(GEN n, long lim)
 {
   GEN p1,p2,p3,p4,p5,y;
-  long av,tetpil;
+  long av = avma,tetpil;
 
   if (lim<=1) lim=0;
   switch(typ(n))
@@ -530,9 +530,8 @@ boundfact(GEN n, long lim)
     case t_INT:
       return auxdecomp(n,lim);
     case t_FRACN:
-      av=avma; n=gred(n); /* fall through */
+      n=gred(n); /* fall through */
     case t_FRAC:
-      if (typ(n)==t_FRAC) av=avma;
       p1=auxdecomp((GEN)n[1],lim);
       p2=auxdecomp((GEN)n[2],lim);
       p4=concatsp((GEN)p1[1],(GEN)p2[1]);
@@ -865,17 +864,17 @@ GEN
 sumdivk(GEN n, long k)
 {
   byteptr d=diffptr+1;
-  GEN p,p1,m,m1,pk;
-  long av=avma,tetpil,k1,lim1,v;
+  GEN n1,p,m,m1,pk;
+  long av=avma,k1,lim1,v;
 
   if (!k) return numbdiv(n);
   if (k==1) return sumdiv(n);
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
   if (is_pm1(n)) return gun;
-  k1=k;
-  if (k==-1) { p1=ginv(n); m=sumdiv(n); goto fin; }
-  if (k<0) { k= -k; p1=gpuigs(n,k1); }
+  k1 = k; n1 = n;
+  if (k==-1) { m=sumdiv(n); goto fin; }
+  if (k<0)  k = -k;
   v=vali(n);
   n=absi(shifti(n,-v));
   p = court_p; p[2]=2; m=stoi(1);
@@ -901,8 +900,8 @@ sumdivk(GEN n, long k)
   }
   m = mulii(m, ifac_sumdivk(n, k, decomp_default_hint));
  fin:
-  if (k1>=0) return gerepileupto(av,m);
-  tetpil=avma; return gerepile(av,tetpil,gmul(p1,m));
+  if (k1 < 0) m = gdiv(m, gpowgs(n1,k));
+  return gerepileupto(av,m);
 }
 
 /***********************************************************************/
@@ -1490,6 +1489,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
     case 2: use_d=0; step=0; break;
     case 3: use_d=0; step=1; break;
     default: err(flagerr,"qfbred");
+      return NULL; /* not reached */
   }
 
   if (!D) D = qf_disc(x,NULL,NULL);
@@ -1674,11 +1674,11 @@ binaire(GEN x)
       p1 = cgetg(max(ex,0)+2,t_VEC);
       p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
       y[1] = (long) p1; y[2] = (long) p2;
-      ly = -ex; ex++;
+      ly = -ex; ex++; m = HIGHBIT;
       if (ex<=0)
       {
 	p1[1]=zero; for (i=1; i <= -ex; i++) p2[i]=zero;
-	i=2; m=HIGHBIT;
+	i=2;
       }
       else
       {
@@ -1706,6 +1706,7 @@ binaire(GEN x)
       for (i=1; i<lx; i++) y[i]=(long)binaire((GEN)x[i]);
       break;
     default: err(typeer,"binaire");
+      return NULL; /* not reached */
   }
   return y;
 }
