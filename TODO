@@ -45,7 +45,7 @@ size of neighbouring intervals don't differ too much.
    way the computation is done.
    [ Tough to correct, even with a way to trap exceptions ]
 
-4  changing primelimit from within a forprime loop yields random results
+4  changing primelimit from within forprime loop yields unpredictable results
 
 3  after allocatemem() / default(parisize, ...), the rest of the command is
 discarded (ends by a longjmp).

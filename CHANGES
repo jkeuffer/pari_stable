@@ -82,6 +82,9 @@ HC 46- no GC in dirmul
    50- float overflow in polroots (e.g polroots(x^3 + 2^1024*x + 1))
    51- charpoly(Mod(1,x^2+1)) --> SEGV
    52- added GC in polsturm
+BA 53- bugs involving rarely used type combinations in generic operations
+   54- check x >= 0 in lllgramint(x)
+   55- in rnfdedekind: use rnfhermitemod, not rnfhermite (slooow)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -136,7 +139,7 @@ IS 27- C++ keywords (new, class) occurred as variable names
    32- memory (possibly) freed twice in buchall + unsafe allocation of matcopy 
    33- online help for matsnf not updated
    34- rnfequation() didn't check its arguments correctly
-   35- removed sprious special case in compute_class_number()
+   35- removed spurious special case in compute_class_number()
    36- typo in the compatibility macros mpabsz / mpnegz (missing ;)
    37- "lost pointers in gerepile" in bnfisprincipal(Q, ...)
    38- bnfisprincipal(..., Pol(0)) accepted

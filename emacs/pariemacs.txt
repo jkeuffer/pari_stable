@@ -1,4 +1,4 @@
-This file refers to pari.el version 2.32
+This file refers to pari.el version 2.33
 
 Users that are used to previous versions should read the part concerning hooks.
 Also, one key-binging has been changed: M-RET (meta-return) is not linked
@@ -6,7 +6,7 @@ anymore to 'gp-copy-input which copies the input at the end of the buffer
 but to 'gp-C-j which splits the line. The same effect can be obtained via
 C-j. The command 'gp-copy-input is available via M-c (meta-c).
 If your version of emacs is at least 20, then customization of most of the
-varaibles is now possible through the menu-bar.
+variables is now possible through the menu-bar.
 !! The variables 'gp-stack-size and 'gp-prime-limit are now *integers*.
 
                Some Notes on pari-mode
@@ -92,13 +92,11 @@ M-o      gp-restore-wind-conf  Strives to restore the previous window
          gp-get-TeX-man-entry  Display a description of a given function
                                in TeX. This function will start
                                a gp process if none is running.
-         gp-completion-file    Add a file to the completion list.
-                               (See gp-make-completion-file below)
-         gp-edit-completion-file
-                               Edit a completion file.
-                               (See gp-make-completion-file below)
-         gp-completion-file-info
-                               Some informations on completion files.
+         gp-cpl-file           Add a file to the completion list.
+                               (See gp-make-cpl-file below)
+         gp-edit-cpl-file      Edit a completion file.
+                               (See gp-make-cpl-file below)
+         gp-cpl-file-info      Some informations on completion files.
 C-l                            Update hilighting locally.
 C-u C-l                        Rehilight the whole buffer, however long.
          gp-set-simple-prompt  Set the prompt to "? "
@@ -108,6 +106,9 @@ C-u C-l                        Rehilight the whole buffer, however long.
                                Set a prompt with a separator
 M-s      gp-skip-to-error      Strives to locate the latest error detected
                                while executing a program.
+         gp-browser            Start a browser for gp commands. Only
+                               available with an x window system. See
+                               Help section.
 
 
 Functions that are not linked with a key can be accessed through the menu-bar
@@ -140,8 +141,8 @@ M-\ m    gp-meta-m        |
 M-\ k    gp-meta-k        |       
 M-\ q    gp-meta-q       /   
 M-\ \    gp-break-long-line    Break a long line at col. 100, inserting \.
-M-p      gp-next-command       Step to the next command.
-M-n      gp-previous-command   Step to the previous command.
+M-p      gp-next-cmd           Step to the next command.
+M-n      gp-previous-cmd       Step to the previous command.
 C-n      next-line             Step to the next line.
 C-p      previous-line         Step to the previous line.
          gp-toggle             Exchange behaviour of C-p/M-p and C-n/M-n.
@@ -158,8 +159,7 @@ KEY      LISP-NAME             DESCRIPTION
 ===      =========             ===========
 M-\ z    gp-run-in-region      Send the marked region to the gp process,
                                starting such a process if required.
-         gp-make-completion-file
-                               Allow use of the names of the functions
+         gp-make-cpl-file      Allow use of the names of the functions
                                and of the global variables of this
                                program for completion.
 M-x gp   gp-start-usual        Start a gp session with default parameters.
@@ -238,7 +238,7 @@ that gp expressions now start with <new string>. Expressions typed to the
 old prompt are still recognised. 
 
   Note that with this version, you can use a dynamic prompt (using %
-constructs, which then go through strftime).
+constructs, which then go through strftime). See note number 5 below.
 
 M-\ c
 =====
@@ -388,9 +388,27 @@ script (program) through the menu-bar item [Gp Completion-File Make/Update].
 To avoid the writing of too many files, it is *not* stored in a file
 unless you ask to edit it.
 
-A file stored in the variable gp-additional-completion-file is loaded while
+A file stored in the variable gp-additional-cpl-file is loaded while
 starting as an additional completion file. It can be set in a hook. Default
 value is the empty string.
+===========================================================================
+
+HELP:
+=====
+
+Help is available through two distinct forms, in text or in TeX, and
+essentially through the menu-bar. In TeX form you can see a TeX version
+of the manual (via xdvi or something similar), while in text form, a
+browser is available which starts on an independant frame. In TeX, you
+can see the tutorial file, and in text, you have access to a survey of
+the chapter headings of the manual.
+
+Furthermore, you can ask for specific help on a given function in both
+forms, and in text, you can ask for the list of all commands that contain
+a given string in their description. All these menu-bar items have fairly
+self-descriptive name, except maybe the last one which is called via
+[GP/Info on Subject...].
+
 ===========================================================================
 
 CUSTOMIZATION:
@@ -400,7 +418,7 @@ From version 2.31 onwards, some environment variables can be set via
 the menu-bar provided you use a version of emacs which is at least 20.
 Otherwise, you can use the classical way through a hook as explained
 in the note number 3 below. Assuming you do have custom.el,
-the item to be used is [Help Customize Specific-Group],
+the item to be used is [Help/Customize/Specific-Group],
 and the group to choose is gp. You can then modify the shown variables,
 and save them for future sessions: they will be stored in your .emacs
 file under the shape:
@@ -409,7 +427,7 @@ file under the shape:
     ; To select where the colors are stored:
     '(pari-colors "~/pari-colors.el")
     ; To select a file containing possible completions:
-    '(gp-additional-completion-file "")
+    '(gp-additional-cpl-file "")
     ; To set parameters of gp:
     '(gp-stack-size 10000000)
     '(gp-prime-limit 500000)
@@ -426,7 +444,9 @@ file under the shape:
     ; To keep the PARI buffer when quitting:
     '(gp-keep-PARI-buffer-when-quitting t)
     ; To have mistakes displayed on a separate window:
-    '(gp-no-separate-window-for-mistakes nil))
+    '(gp-no-separate-window-for-mistakes nil)
+    ; To define GP-browser style (1, 2 or 3):
+    '(gp-browser-style 3))
   (custom-set-faces)
 
 Within  the customization-window, you should save these values for them
@@ -442,10 +462,10 @@ LISP EXPRESSIONS IN GP-SCRIPTS:
 ===============================
 
 A new functionnality of version 2.21 is the possibility to introduce
-elisp-commands inside a gp-script. Elisp commands can be inserted anywhere
-and will be executed prior to sending the file to gp. The file should be
-edited for emacs to take care of these commands. They are to be surrounded by
-"/*@" and "*/", like in
+emacs-lisp-commands inside a gp-script. Emacs lisp commands can be inserted
+anywhere and will be executed prior to sending the file to gp. The file
+should be edited for emacs to take care of these commands. They are to be
+surrounded by "/*@" and "*/", like in
 
 /*@
 (setq gp-prompt-pattern (gp-make-gp-prompt-pattern "^NewOne: "))
@@ -548,7 +568,7 @@ Notes
            (define-key gp-map "\M-p" 'gp-set-prompt)
            (setq gp-stack-size 1000000)
            (setq gp-prime-limit 2000)
-           (gp-completion-file my-file)
+           (gp-cpl-file my-file)
        )))
 
   This: 
@@ -567,7 +587,7 @@ Notes
               ; To select where the colors are stored:
               (setq pari-colors "~/")
               ; To select a file containing possible completions:
-              (setq gp-additional-completion-file "")
+              (setq gp-additional-cpl-file "")
               ; To ask/remove tutorial help:
               (setq gp-tutorial-requiredp t)
               ; To set/remove hilighting:
@@ -587,6 +607,8 @@ Notes
               (setq gp-keep-PARI-buffer-when-quitting t)
               ; To have mistakes displayed on a separate window:
               (setq gp-no-separate-window-for-mistakes nil)
+              ; To define GP-browser style (1, 2 or 3):
+              (setq gp-browser-style 3)
               )))
 
    A change in prompt, which has not gone to the .gprc (see below), *has to*
@@ -607,12 +629,11 @@ Notes
    in their pari-mode-hook, or by using the C-u prefix to gp. In either case,
    the full path name need not be given if gp is in a directory specified
    in your PATH variable (or the equivalent in csh).
-   The variables gp-stack-size, gp-buffer-size and gp-prime-limit should be
-   set to strings specifying the arguments to gp. See the above example.
-
+   The variables gp-stack-size and gp-prime-limit should be set to integers
+   specifying the arguments to gp. See the above example.
 
    If these variables are  set to "", then the appropriate flags 
-      "-s", "-b" or "-p" are *not* sent to gp. 
+      "-s" or "-p" are *not* sent to gp. 
    If RET is typed in response to any of the prompts produced by C-u M-x gp
       then the default value, ie., the value of gp-file-name, gp-stack-size,
       or gp-prime-limit, is assumed. 
@@ -665,6 +686,7 @@ Notes
    colors are concerned, nothing that I know of.
 ===========================================================================
 
+  Modified: Olivier Ramare 29-October-1999 version 2.33 
   Modified: Olivier Ramare 4-September-1999 version 2.32.
   Modified: Olivier Ramare 23-June-1999 version 2.31.
   Modified: Olivier Ramare 15-Marsh-1999 version 2.28.
@@ -672,4 +694,4 @@ Notes
   Modified: Karim Belabas 13-January-1998 version 2.19.
   Modified from the original file pari.txt written by David Carlisle
 
-  4-September-1999 version 2.32 (This file refers to pari.el version 2.32)
+  29-October-1999 version 2.33 (This file refers to pari.el version 2.33)
