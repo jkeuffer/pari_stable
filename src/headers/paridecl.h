@@ -257,6 +257,8 @@ GEN     type0(GEN x);
 /* Qfb.c */
 
 void    check_quaddisc(GEN x, long *s, long *r, char *f);
+void    check_quaddisc_real(GEN x, long *r, char *f);
+void    check_quaddisc_imag(GEN x, long *r, char *f);
 GEN     compimag(GEN x, GEN y);
 GEN     compimagraw(GEN x, GEN y);
 GEN     compraw(GEN x, GEN y);
