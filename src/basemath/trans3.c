@@ -2051,13 +2051,13 @@ wf1(GEN x, long prec)
 GEN
 wf(GEN x, long prec)
 {
-  pari_sp av=avma, tetpil;
-  GEN p1,p2;
+  pari_sp av = avma, tetpil;
+  GEN p1, p2;
 
-  p1=gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
-  p2=cgetg(3,t_COMPLEX); p2[1]=zero; p2[2]=ldivrs(mppi(prec),-24);
-  p2=gexp(p2,prec); tetpil=avma;
-  return gerepile(av,tetpil,gmul(p1,p2));
+  p1 = gdiv(trueeta(gmul2n(gaddgs(x,1),-1),prec),trueeta(x,prec));
+  p2 = exp_Ir(divrs(mppi(prec),-24));
+  tetpil = avma;
+  return gerepile(av,tetpil, gmul(p1,p2));
 }
 
 GEN
