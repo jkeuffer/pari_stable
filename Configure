@@ -972,12 +972,17 @@ if test "$optimization" = profiling; then DLLD=; else
     hpux-*)  DLSUFFIX=sl ;;
     irix-*)  ;;
     sunos-*) somake=.$VersionMajor$VersionMinor.$patch ;;
-    *-alpha)
+    *-alpha|solaris-*|linux-*)
              somake=.$version
              sodest=.$patch ;;
-    solaris-*|linux-*|freebsd-*)
-             somake=.$VersionMajor
-             sodest=.$VersionMinor.$patch ;;
+    freebsd-*)
+             if test $FREEBSD_ELF = 1; then
+               somake=.$VersionMajor
+               sodest=.$VersionMinor.$patch
+             else
+               somake=.$version
+               sodest=.$patch
+             fi;;
     cygwin*) DLSUFFIX=dll; somake= ; sodest= ;;
     *) DLLD=;;
   esac
