@@ -717,20 +717,19 @@ void
 texmacs_completion(char *s, long pos)
 {
   char **matches, *text;
-  long i, l = strlen(s)-1;
 
   if (rl_line_buffer) free(rl_line_buffer);
   rl_line_buffer = pari_strdup(s);
   text = completion_word(pos);
   /* text = start of expression we complete */
-  rl_end = l;
+  rl_end = strlen(s)-1;
   rl_point = pos;
   matches = pari_completion(text, text - rl_line_buffer, pos);
   printf("%cscheme:(tuple",DATA_BEGIN);
   if (matches)
   {
-    long prelen = (rl_line_buffer+pos) - text;
-    char *t = gpmalloc(l+1);
+    long i, prelen = (rl_line_buffer+pos) - text;
+    char *t = gpmalloc(prelen+1);
     strncpy(t, text, prelen); t[prelen] = 0; /* prefix */
     printf(" ");
     print_escape_string(t); free(t);
