@@ -397,7 +397,9 @@ gcmp(GEN x, GEN y)
     if (tx==t_STR)
     {
       if (ty != t_STR) return 1;
-      return strcmp(GSTR(x),GSTR(y));
+      f = strcmp(GSTR(x),GSTR(y));
+      return f > 0? 1
+                  : f? 0: -1;
     }
     if (!is_frac_t(tx)) err(typeer,"comparison");
   }
