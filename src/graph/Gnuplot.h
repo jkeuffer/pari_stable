@@ -458,7 +458,7 @@ myterm_table_not_loaded_u()
   return 0;
 }
 
-void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax, 
+static void myterm_table_not_loaded_v4i4d(int term_xmin, int term_xmax, 
 			     int term_ymin, int term_ymax,
 			     double plot_xmin, double plot_xmax,
 			     double plot_ymin, double plot_ymax)
