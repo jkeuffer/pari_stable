@@ -2778,30 +2778,37 @@ rnfisfree(GEN bnf, GEN order)
 /**********************************************************************/
 #define nexta(a) (a>0 ? -a : 1-a)
 
+/* write 'alpha + a beta' */
+static void
+print_elt(long a)
+{
+  fprintferr("trying beta ");
+  if (a)
+  {
+    if (a>0) fprintferr("- "); else fprintferr("+ ");
+    if (labs(a)>1) fprintferr("%ld alpha\n",labs(a));
+    else fprintferr("alpha\n");
+  }
+  flusherr();
+}
+
 GEN
 polcompositum0(GEN pol1, GEN pol2, long flall)
 {
-  long av=avma,i,v,a,l;
-  GEN pro1,p1,p2,fa,rk,y;
+  long av=avma,i,v,k,l;
+  GEN pro1,p1,p2,fa,rk,y,a;
 
   if (typ(pol1)!=t_POL || typ(pol2)!=t_POL) err(typeer,"polcompositum0");
   if (lgef(pol1)<=3 || lgef(pol2)<=3) err(constpoler,"compositum");
   v = varn(pol1);
   if (varn(pol2)!=v) err(talker,"not the same variable in compositum");
   if (!issquarefree(pol1) || !issquarefree(pol2))
-    err(talker,"not a separable polynomial in compositum");
+    err(talker,"not k separable polynomial in compositum");
 
-  for (a=1; ; a=nexta(a))
+  for (k=1; ; k=nexta(k))
   {
-    avma = av;
-    if (DEBUGLEVEL>=2)
-    {
-      fprintferr("trying beta ");
-      if (a>0) fprintferr("- "); else fprintferr("+ ");
-      if (labs(a)>1) fprintferr("%ld ",labs(a));
-      fprintferr("alpha\n"); flusherr();
-    }
-    pro1 = gadd(polx[MAXVARN],gmulsg(a,polx[v]));
+    avma = av; if (DEBUGLEVEL>=2) print_elt(k);
+    pro1 = gadd(polx[MAXVARN],gmulsg(k,polx[v]));
     p1 = gsubst(pol2,v,pro1);
     p2 = subresall(pol1,p1,&rk);
     if (typ(rk)==t_POL && lgef(rk)==4 && issquarefree(p2)) break;
@@ -2816,12 +2823,12 @@ polcompositum0(GEN pol1, GEN pol2, long flall)
     {
       GEN w = cgetg(5,t_VEC); y[i] = (long)w;
       w[1] = fa[i]; 
-      p1=gmodulcp(polx[w],(GEN)fa[i]);
-      p2=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p1),
-                     gsubst((GEN)rk[3],MAXVARN,p1)));
-      w[2] = (long)p2;
-      w[3] = ladd(p1,gmulsg(a,p2));
-      w[4] = lstoi(-a);
+      p1 = gmodulcp(polx[v],(GEN)fa[i]);
+      a = gneg_i(gdiv(poleval((GEN)rk[2],p1),
+                      poleval((GEN)rk[3],p1)));
+      w[2] = (long)a;
+      w[3] = ladd(p1, gmulsg(k,a));
+      w[4] = lstoi(-k);
     }
   }
   return gerepileupto(av, gcopy(y));
@@ -2842,8 +2849,8 @@ compositum2(GEN pol1,GEN pol2)
 GEN
 rnfequation0(GEN nf, GEN pol2, long flall)
 {
-  long av=avma,av1,tetpil,v,vpol,a,l1,l2;
-  GEN pol1,pro1,p1,p2,p4,p5,rk,y;
+  long av=avma,av1,v,vpol,k,l1,l2;
+  GEN pol1,pro1,p1,p2,rk,y,a;
 
   if (typ(nf)==t_POL) pol1=nf; else { nf=checknf(nf); pol1=(GEN)nf[1]; }
   pol2 = fix_relative_pol(nf,pol2);
@@ -2853,50 +2860,36 @@ rnfequation0(GEN nf, GEN pol2, long flall)
   if (l1<=3 || l2<=3) err(constpoler,"rnfequation");
 
   p2=cgetg(l2,t_POL); p2[1]=pol2[1];
-  for (a=2; a<l2; a++)
-    p2[a] = (lgef(pol2[a]) < l1)? pol2[a]: lres((GEN)pol2[a],pol1);
+  for (k=2; k<l2; k++)
+    p2[k] = (lgef(pol2[k]) < l1)? pol2[k]: lres((GEN)pol2[k],pol1);
   pol2=p2;
   if (!issquarefree(pol2))
-    err(talker,"not a separable relative equation in rnfequation");
+    err(talker,"not k separable relative equation in rnfequation");
   pol2=lift_intern(pol2);
 
-  a=0; av1=avma;
-  for(;;)
+  av1 = avma;
+  for(k=0;; k=nexta(k))
   {
-    avma=av1;
-    if (DEBUGLEVEL>=2)
-    {
-      fprintferr("trying beta ");
-      if (a)
-      {
-	if (a>0) fprintferr("- "); else fprintferr("+ ");
-	if (labs(a)>1) fprintferr("%ld alpha\n",labs(a));
-	else fprintferr("alpha\n");
-      }
-      flusherr();
-    }
-    pro1=gadd(polx[MAXVARN],gmulsg(a,polx[v]));
-    p1=poleval(pol2,pro1);
-    p2=subresall(pol1,p1,&rk);
-    if (rk != gzero && lgef(rk)==4 && lgef(ggcd(p2,deriv(p2,MAXVARN)))==3)
-    {
-      p2=gsubst(p2,MAXVARN,polx[vpol]);
-      if (gsigne(leadingcoeff(p2))<0) p2=gneg_i(p2);
-      if (flall)
-      {
-        y=cgetg(4,t_VEC); y[1]=(long)p2;
-        p4=gmodulcp(polx[vpol],p2);
-        p5=gneg_i(gdiv(gsubst((GEN)rk[2],MAXVARN,p4),
-                       gsubst((GEN)rk[3],MAXVARN,p4)));
-        y[3]=(long)stoi(-a);
-        y[2]=lmul(gmodulcp(polun[vpol],p2),p5);
-      }
-      else y=p2;
-      if (DEBUGLEVEL>=2) fprintferr("ok! leaving rnfequation\n");
-      tetpil=avma; return gerepile(av,tetpil,gcopy(y));
-    }
-    a=nexta(a);
+    avma = av1; if (DEBUGLEVEL>=2) print_elt(k);
+    pro1 = gadd(polx[MAXVARN],gmulsg(k,polx[v]));
+    p1 = poleval(pol2,pro1);
+    p2 = subresall(pol1,p1,&rk);
+    if (typ(rk) == t_POL && lgef(rk)==4 && issquarefree(p2)) break;
   }
+  p2 = gsubst(p2,MAXVARN,polx[vpol]);
+  if (gsigne(leadingcoeff(p2)) < 0) p2 = gneg_i(p2);
+  y = p2;
+  if (flall)
+  {
+    y = cgetg(4,t_VEC);
+    y[1] = (long)p2;
+    p1 = gmodulcp(polx[vpol],p2);
+    a = gneg_i(gdiv(poleval((GEN)rk[2],p1),
+                    poleval((GEN)rk[3],p1)));
+    y[2] = (long)a;
+    y[3] = lstoi(-k);
+  }
+  return gerepileupto(av, gcopy(y));
 }
 
 GEN
