@@ -307,6 +307,8 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     lsubq = lg(T->subq);
     T->subqpart = T->bound? cgetg(lsubq, t_VEC): T->subq;
   }
+  else
+    lsubq = 0; /* -Wall */
   M[1] = -1; for (i=2; i<=n; i++) M[i]=0;
   for(;;) /* go through all vectors mu_{i+1} <= mu_i <= lam_i */
   {
