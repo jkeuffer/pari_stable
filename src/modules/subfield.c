@@ -989,7 +989,7 @@ subfields(GEN nf,GEN d)
     {
       GEN H = (GEN)L[i];
       if (group_order(H) == o)
-        F[k++] = (long) galoisfixedfield(G, (GEN)H[1], 0, v0);
+        F[k++] = (long) lift_intern(galoisfixedfield(G, (GEN)H[1], 0, v0));
     }
     setlg(F, k);
     return gerepilecopy(av, F);
@@ -1015,7 +1015,7 @@ subfieldsall(GEN nf)
   if (typ(G) != t_INT)
   {
     pol = get_nfpol(nf, &nf);
-    return gerepileupto(av, galoissubfields(G, 0, varn(pol)));
+    return gerepilecopy(av, lift_intern( galoissubfields(G, 0, varn(pol)) ));
   }
 
   subfields_poldata(nf, &PD);

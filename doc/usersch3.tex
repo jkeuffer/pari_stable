@@ -4541,33 +4541,9 @@ $d$ of the number field defined by the (monic, integral) polynomial
 \var{pol} (all subfields if $d$ is null or omitted). The result is a vector
 of subfields, each being given by $[g,h]$, where $g$ is an absolute equation
 and $h$ expresses one of the roots of $g$ in terms of the root $x$ of the
-polynomial defining $\var{nf}$. This routine uses J.~Kl\"uners's algorithm,
-our naïve implementation would be very slow when no sufficiently inert primes
-can be found, e.g.~when \var{nf} is a compositum of many quadratic fields. So
-it may abort with an error message (\kbd{too many block systems}) if it looks
-like the computation is hopeless. This shall eventually be
-corrected, using the ideas from \kbd{nfgaloisconj}.\sidx{Galois}\sidx{subfield}
-
-%If the field is abelian, you can circonvene the problem by using
-%\tet{galoisinit} and \tet{galoisfixedfield}, as in
-%\bprog
-%  subf(pol) = 
-%  { 
-%    local(gal,G,H,h,l,gen, L = []);
-%    gl = galoisinit(pol);
-%    G = matdiagonal(Vec(g.orders));
-%    l = length(G); gen = Mat(vectorv(l,i, g.gen[i]));
-%    forsubgroup(H = G,, 
-%      h = mathnf(concat(H,G));
-%      perm = vector(l,i, factorback(concat(gen, h[,i])));
-%      L = concat(L, [galoisfixedfield(g, perm)])
-%    ); L
-%  }
-%@eprog
-%which returns the same output as \kbd{nfsubfields(pol)}. For non-abelian
-%Galois fields, you can still use \tet{galoisinit} and \teb{galoisfixedfield},
-%but you will have to use another package than PARI to compute the subgroup
-%lattice, since \tet{forsubgroup} is restricted to the abelian case.
+polynomial defining $\var{nf}$. This routine uses J.~Kl\"uners's algorithm
+in the general case, and B.~Allombert's \tet{galoissubfields} when \var{nf}
+is Galois (with weakly supersolvable Galois group).\sidx{Galois}\sidx{subfield}
 
 \syn{subfields}{\var{nf},d}.
 

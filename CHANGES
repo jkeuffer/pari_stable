@@ -109,6 +109,7 @@ BA 50- [FreeBSD:] PORTOBJFORMAT undefined by the system --> Configure fails
 BA 52- Oxxx/Makefile was not compatible with BSD make.
    53- errors in files read from .gprc, containing trap() --> SEGV
    54- bezoutres(Pol(sin(x)+Pi),Pol(cos(x))) --> "bug in subresext"
+   55- nfsubfields had a different output format when using galoissubfieds
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
