@@ -445,12 +445,13 @@ auxdecomp0(GEN n, long all, long hint)
 
   /* pp = square of biggest p tried so far */
   av=avma; setlg(pp,4); affii(sqri(pp),pp); avma=av;
-  if (cmpii(pp,n) > 0 || pseudoprime(n))
+  if (cmpii(pp,n) > 0)
   {
     nb++;
     icopy(n); stoi(1); return aux_end(n,nb);
   }
 
+  /* trial divide by the "special primes" (usually huge composites...) */
   lp = lg(primetab); k=0;
   for (i=1; i<lp; i++)
     if (mpdivis(n,(GEN) primetab[i],n))
@@ -460,8 +461,8 @@ auxdecomp0(GEN n, long all, long hint)
       if (is_pm1(n)) return aux_end(n,nb);
     }
 
-  /* test primality again, _if_ primetab made a difference  */
-  if(k && (cmpii(pp,n) > 0 || pseudoprime(n)))
+  /* test primality */
+  if ((k && cmpii(pp,n) > 0) || pseudoprime(n))
   {
     nb++;
     icopy(n); stoi(1); return aux_end(n,nb);
