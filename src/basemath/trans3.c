@@ -115,12 +115,18 @@ kbessel(GEN nu, GEN gx, long prec)
 /**                                                                   **/
 /***********************************************************************/
 
-/* Assume gx > 0 and a,b real */
+/* Assume gx > 0 and a,b complex */
+/* This might one day be extended to handle complex gx */
+/* see Temme, N. M. "The numerical computation of the confluent        */
+/* hypergeometric function U(a,b,z)" in Numer. Math. 41 (1983),        */
+/* no. 1, 63--82.                                                      */
 GEN
 hyperu(GEN a, GEN b, GEN gx, long prec)
 {
   GEN x,y,p1,p2,p3,zf,zz,s,t,q,r,u,v,e,f,c,d,w,a1,gn;
   long l,lbin,av,av1,av2,k,l1,n,ex;
+
+  if(gsigne(gx) <= 0) err(talker,"hyperu's third argument must be positive");
 
   if (typ(gx)!=t_REAL)
     { l=prec; k=1; }

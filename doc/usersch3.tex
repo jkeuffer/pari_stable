@@ -1030,7 +1030,8 @@ $\kbd{gamma}(x+1/2)$.
 \syn{ggamma}{x,\var{prec}}.
 
 \subsecidx{hyperu}$(a,b,x)$: $U$-confluent hypergeometric function with
-parameters $a$ and $b$.
+parameters $a$ and $b$. The parameters $a$ and $b$ can be complex but 
+the present implementation requires $x$ to be positive.
 
 \syn{hyperu}{a,b,x,\var{prec}}.
 
@@ -5594,7 +5595,7 @@ quadratic form represented by the symmetric matrix $q$. The result is a
 matrix whose diagonal entries are the coefficients of the squares, and the
 non-diagonal entries represent the bilinear forms. More precisely, if
 $(a_{ij})$ denotes the output, one has
-$$ q(x) = \sum_i a_{ii} (x_i + \sum_j>i a_{ij} x_j)^2 $$
+$$ q(x) = \sum_i a_{ii} (x_i + \sum_{j>i} a_{ij} x_j)^2 $$
 
 \syn{sqred}{x}.
 
