@@ -1092,13 +1092,13 @@ cbezout(long a,long b,long *uu,long *vv)
 GEN
 bezout(GEN a, GEN b, GEN *ptu, GEN *ptv)
 {
-  GEN u,v,v1,d,d1,q,r, *tmp;
+  GEN u,v,t,x,y,q,r, *tmp;
   long av;
 
   if (typ(a) != t_INT || typ(b) != t_INT) err(arither1);
   if (absi_cmp(a,b) < 0)
   {
-    u=b; b=a; a=u;
+    t=b; b=a; a=t;
     tmp=ptu; ptu=ptv; ptv=tmp;
   }
   /* now |a| >= |b| */
@@ -1118,24 +1118,24 @@ bezout(GEN a, GEN b, GEN *ptu, GEN *ptv)
     *ptu = stoi(uu); *ptv = stoi(vv); return stoi(dd);
   }
   av = avma;
-  (void)new_chunk(lgefint(b) + (lgefint(a)<<1)); /* room for d, u and v */
-  d = a; d1 = b; v = gzero; v1 = gun;
-  for(;;)
+  (void)new_chunk(lgefint(b) + (lgefint(a)<<1)); /* room for x, u and v */
+  x = a; y = b; u = gun; v = gzero;
+  do
   {
-    q=dvmdii(d,d1,&r);
-    v=subii(v,mulii(q,v1));
-    u=v; v=v1; v1=u;
-    u=r; d=d1; d1=u; if (!signe(d1)) break;
-  }
-  u = divii(subii(d,mulii(b,v)),a);
-  avma = av; d = icopy(d); v = icopy(v); u = icopy(u);
-  if (signe(d) < 0)
+    q = dvmdii(x,y,&r);
+    v = subii(v, mulii(q,u));
+    t=v; v=u; u=t;
+    x=y; y=r;
+  } while (signe(y));
+  u = divii(subii(x, mulii(b,v)), a);
+  avma = av; x = icopy(x); v = icopy(v); u = icopy(u);
+  if (signe(x) < 0)
   {
-    setsigne(d,1);
+    setsigne(x,1);
     setsigne(u,-signe(u));
     setsigne(v,-signe(v));
   }
-  *ptu = u; *ptv = v; return d;
+  *ptu = u; *ptv = v; return x;
 }
 
 /*********************************************************************/
