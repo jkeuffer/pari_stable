@@ -1643,134 +1643,128 @@ glogz(GEN x, GEN y)
 
 /********************************************************************/
 /**                                                                **/
-/**                      FONCTION SINCOS-1                         **/
+/**                        SINE, COSINE                            **/
 /**                                                                **/
 /********************************************************************/
 
+/* Reduce x0 mod Pi/2 to x in [-Pi/4, Pi/4]. Return cos(x)-1 */
 static GEN
-mpsc1(GEN x, long *ptmod8)
+mpsc1(GEN x0, long *ptmod8)
 {
-  const long mmax = 23169;
+  const long mmax = 23169; /* largest m such that (2m+2)(2m+1) < 2^31 */
  /* on a 64-bit machine with true 128 bit/64 bit division, one could
-  * take mmax=1518500248; on the alpha it does not seem worthwhile
-  */
-  long l, l0, l1, l2, l4, ee, i, n, m, s, t;
+  * take mmax=1518500248; on the alpha it does not seem worthwhile */
+  long l, l0, l1, l2, l4, i, n, m, s, t;
   gpmem_t av;
   double alpha,beta,a,b,c,d;
-  GEN y,p1,p2,p3,p4,pitemp;
+  GEN y,p1,p2,p3,x2,pitemp, x = x0;
 
-  if (typ(x)!=t_REAL) err(typeer,"mpsc1");
-  if (!signe(x)) { *ptmod8=0; return realzero_bit((expo(x)<<1) - 1); }
-  l=lg(x); y=cgetr(l); av=avma;
+  if (typ(x) != t_REAL) err(typeer,"mpsc1");
+  l = lg(x); y = cgetr(l); av = avma;
 
-  l++; pitemp = mppi(l+1); setexpo(pitemp,-1);
-  p1 = addrr(x,pitemp); setexpo(pitemp,0);
+  l++; pitemp = mppi(l);
+  setexpo(pitemp,-1);
+  p1 = addrr(x,pitemp); /* = x + Pi/4 */
   l0 = min(l, lg(p1));
   if (expo(p1) >= bit_accuracy(l0) + 3) err(precer,"mpsc1");
 
-  p3 = divrr(p1,pitemp); p2 = mpent(p3);
-  if (signe(p2)) x = subrr(x, mulir(p2,pitemp));
-  p1 = cgetr(l+1); affrr(x, p1);
+  setexpo(pitemp, 0);
+  p1 = mpent( divrr(p1,pitemp) ); /* round ( x / (Pi/2) ) */
+  if (signe(p1)) x = subrr(x, mulir(p1,pitemp)); /* x mod Pi/2  */
+  p2 = cgetr(l); affrr(x, p2); x = p2;
 
-  *ptmod8 = (signe(p1) < 0)? 4: 0;
-  if (signe(p2))
+  *ptmod8 = (signe(x) < 0)? 4: 0;
+  if (signe(p1))
   {
-    long mod4 = mod4(p2);
-    if (signe(p2) < 0 && mod4) mod4 = 4-mod4;
-    *ptmod8 += mod4;
+    long k = mod4(p1);
+    if (signe(p1) < 0 && k) k = 4-k;
+    /* x = x0 - k*Pi/2  (mod 2Pi) */
+    *ptmod8 += k;
   }
-  if (gcmp0(p1)) alpha=1000000.0;
+
+  if (gcmp0(x)) alpha = 1000000.0;
   else
   {
-    m=expo(p1); alpha=(m<-1022)? -1-m*LOG2: -1-log(fabs(rtodbl(p1)));
+    long e = expo(x);
+    alpha = -1 - ((e<-1022)? e*LOG2: log(fabs(rtodbl(x))));
   }
   beta = 5 + bit_accuracy(l)*LOG2;
-  a=0.5/LOG2; b=0.5*a;
-  c = a+sqrt((beta+b)/LOG2);
-  d = ((beta/c)-alpha-log(c))/LOG2;
-  if (d>=0)
+  a = 0.5 / LOG2;
+  b = 0.5 * a;
+  c = a + sqrt((beta+b) / LOG2);
+  d = ((beta/c) - alpha - log(c)) / LOG2;
+  if (d >= 0)
   {
-    m=(long)(1+d);
-    n=(long)((1+c)/2.0);
-    setexpo(p1,expo(p1)-m);
+    m = (long)(1+d);
+    n = (long)((1+c) / 2.0);
+    setexpo(x, expo(x)-m);
   }
-  else { m=0; n=(long)((1+beta/alpha)/2.0); }
+  else { m = 0; n = (long)((2+beta/alpha) / 2.0); }
   l2=l+1+(m>>TWOPOTBITS_IN_LONG);
-  p2=realun(l2); setlg(p2,4);
-  p4=cgetr(l2); av = avma;
-  affrr(gsqr(p1),p4); setlg(p4,4);
-
-  if (n>mmax)
-    p3 = divrs(divrs(p4,2*n+2),2*n+1);
+  p2 = realun(l2);
+  x2 = cgetr(l2); av = avma;
+  affrr(gsqr(x), x2);
+  
+  setlg(x2, 3);
+  if (n > mmax)
+    p3 = divrs(divrs(x2, 2*n+2), 2*n+1);
   else
-    p3 = divrs(p4, (2*n+2)*(2*n+1));
-  ee = -expo(p3); s=0;
-  l4 = l1 = 3 + (ee>>TWOPOTBITS_IN_LONG);
-  if (l4<=l2) { setlg(p2,l4); setlg(p4,l4); }
-  for (i=n; i>mmax; i--)
+    p3 = divrs(x2, (2*n+2)*(2*n+1));
+  s = -expo(p3);
+  l4 = l1 = 3 + (s>>TWOPOTBITS_IN_LONG);
+  if (l4<=l2) { setlg(p2,l4); setlg(x2,l4); }
+  s = 0;
+  for (i=n; i>=2; i--)
   {
-    p3 = divrs(divrs(p4,2*i),2*i-1); s -= expo(p3);
-    t=s&(BITS_IN_LONG-1); l0=(s>>TWOPOTBITS_IN_LONG);
+    if (i > mmax)
+      p3 = divrs(divrs(x2, 2*i), 2*i-1);
+    else
+      p3 = divrs(x2, 2*i*(2*i-1));
+    s -= expo(p3);
+    t = s & (BITS_IN_LONG-1); l0 = (s>>TWOPOTBITS_IN_LONG);
     if (t) l0++;
     l1 += l0; if (l1>l2) { l0 += l2-l1; l1=l2; }
     l4 += l0;
     p3 = mulrr(p3,p2);
-    if (l4<=l2) { setlg(p2,l4); setlg(p4,l4); }
-    subsrz(1,p3,p2); avma=av;
+    if (l4<=l2) { setlg(p2,l4); setlg(x2,l4); }
+    subsrz(1,p3, p2); avma = av;
   }
-  for (  ; i>=2; i--)
-  {
-    p3 = divrs(p4, 2*i*(2*i-1)); s -= expo(p3);
-    t=s&(BITS_IN_LONG-1); l0=(s>>TWOPOTBITS_IN_LONG);
-    if (t) l0++;
-    l1 += l0; if (l1>l2) { l0 += l2-l1; l1=l2; }
-    l4 += l0;
-    p3 = mulrr(p3,p2);
-    if (l4<=l2) { setlg(p2,l4); setlg(p4,l4); }
-    subsrz(1,p3,p2); avma=av;
-  }
-  setlg(p2,l2); setlg(p4,l2);
-  setexpo(p4,expo(p4)-1); setsigne(p4, -signe(p4));
-  p2 = mulrr(p4,p2);
+  setlg(p2,l2); setlg(x2,l2);
+  setexpo(p2, expo(p2)-1); setsigne(p2, -signe(p2));
+  p2 = mulrr(x2,p2);
+  /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
   for (i=1; i<=m; i++)
-  {
-    p2 = mulrr(p2,addsr(2,p2)); setexpo(p2,expo(p2)+1);
+  { /* p2 = cos(x)-1 --> cos(2x)-1 */
+    p2 = mulrr(p2, addsr(2,p2)); setexpo(p2, expo(p2)+1);
   }
   affrr(p2,y); avma=av; return y;
 }
 
-/********************************************************************/
-/**                                                                **/
-/**                      FONCTION sqrt(-x*(x+2))                   **/
-/**                                                                **/
-/********************************************************************/
-
+/* sqrt (1 - (1+x)^2) = sqrt(-x*(x+2)). Sends cos(x)-1 to |sin(x)| */
 static GEN
 mpaut(GEN x)
 {
   gpmem_t av = avma;
-  GEN p1 = mulrr(x,addsr(2,x));
-  setsigne(p1,-signe(p1));
+  GEN p1 = mulrr(x, addsr(2,x));
+  setsigne(p1, -signe(p1));
   return gerepileuptoleaf(av, mpsqrt(p1));
 }
 
 /********************************************************************/
-/**                                                                **/
-/**                       FONCTION COSINUS                         **/
-/**                                                                **/
+/**                            COSINE                              **/
 /********************************************************************/
 
 static GEN
 mpcos(GEN x)
 {
   long mod8;
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN y,p1;
 
   if (typ(x)!=t_REAL) err(typeer,"mpcos");
   if (!signe(x)) return addsr(1,x);
 
-  av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
+  av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
   {
     case 0: case 4:
@@ -1782,7 +1776,7 @@ mpcos(GEN x)
     default: /* case 3: case 5: */
       y=mpaut(p1); break;
   }
-  return gerepile(av,tetpil,y);
+  return gerepileuptoleaf(av, y);
 }
 
 GEN
@@ -1831,22 +1825,20 @@ gcosz(GEN x, GEN y)
 }
 
 /********************************************************************/
-/**                                                                **/
-/**                       FONCTION SINUS                           **/
-/**                                                                **/
+/**                             SINE                               **/
 /********************************************************************/
 
 GEN
 mpsin(GEN x)
 {
   long mod8;
-  gpmem_t av, tetpil;
+  gpmem_t av;
   GEN y,p1;
 
   if (typ(x)!=t_REAL) err(typeer,"mpsin");
   if (!signe(x)) return realzero_bit(expo(x));
 
-  av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
+  av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
   {
     case 0: case 6:
@@ -1858,7 +1850,7 @@ mpsin(GEN x)
     default: /* case 3: case 7: */
       y=subsr(-1,p1); break;
   }
-  return gerepile(av,tetpil,y);
+  return gerepileuptoleaf(av, y);
 }
 
 GEN
@@ -1879,7 +1871,8 @@ gsin(GEN x, long prec)
       p1=gsub(p2,p1);
       gsincos((GEN)x[1],&u,&v,prec);
       tetpil=avma;
-      y[1]=lmul(p2,u); y[2]=lmul(p1,v);
+      y[1]=lmul(p2,u);
+      y[2]=lmul(p1,v);
       gerepilemanyvec(av,tetpil,y+1,2);
       return y;
 
@@ -1907,9 +1900,7 @@ gsinz(GEN x, GEN y)
 }
 
 /********************************************************************/
-/**                                                                **/
-/**                    PROCEDURE SINUS,COSINUS                     **/
-/**                                                                **/
+/**                       SINE, COSINE together                    **/
 /********************************************************************/
 
 void
@@ -1922,8 +1913,8 @@ mpsincos(GEN x, GEN *s, GEN *c)
   if (typ(x)!=t_REAL) err(typeer,"mpsincos");
   if (!signe(x))
   {
-    *s=realzero_bit(expo(x));
-    *c=addsr(1,x); return;
+    *s = realzero_bit(expo(x));
+    *c = addsr(1,x); return;
   }
 
   av=avma; p1=mpsc1(x,&mod8); tetpil=avma;
@@ -1973,7 +1964,8 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       p3=gmul(v1,v); p4=gmul(r,u);
       gptr[0]=&p1; gptr[1]=&p2; gptr[2]=&p3; gptr[3]=&p4;
       gerepilemanysp(av,tetpil,gptr,4);
-      ps[1]=(long)p1; ps[2]=(long)p2; pc[1]=(long)p3; pc[2]=(long)p4;
+      ps[1]=(long)p1; pc[1]=(long)p3;
+      ps[2]=(long)p2; pc[2]=(long)p4;
       return;
 
     case t_SER:
