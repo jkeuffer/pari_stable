@@ -37,7 +37,6 @@ static GEN    read_member(GEN x);
 static GEN    seq();
 static GEN    truc();
 static ulong  number(int *pn, char **ps);
-static void   doskipseq(char *s, int strict);
 static void   skipconstante();
 static void   skipexpr();
 static void   skipfacteur();
@@ -437,12 +436,36 @@ GEN flisexpr(char *s){ return flisseq0(s, expr);}
 GEN
 readseq(char *c, int strict)
 {
+  char *olds = analyseur, *olde = mark.start;
   GEN z;
-  check_new_fun = NULL;
-  skipping_fun_def = 0;
+
+  seq_init(c); skipseq(c);
+  if (*analyseur)
+  {
+    long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
+    char *s;
+    if (strict) err(talker2,"unused characters", analyseur, c);
+    if ((long)strlen(analyseur) > n)
+    {
+      s = gpmalloc(n + 1);
+      n -= 5;
+      (void)strncpy(s,analyseur, n);
+      strcpy(s + n, "[+++]");
+    }
+    else
+      s = pari_strdup(analyseur);
+    err(warner, "unused characters: %s", s);
+    free(s);
+  }
   added_newline = 1;
-  doskipseq(c, strict);
-  z = lisseq0(c, seq);
+  seq_init(c); z = seq();
+  analyseur = olds; mark.start = olde;
+  if (br_status)
+  {
+    if (!br_res) return gnil;
+    return br_res;
+  }
+  if (z == NULL) return polx[fetch_user_var("NULL")];
   if (!added_newline) pariputc('\n'); /* last output was print1() */
   return z;
 }
@@ -684,7 +707,8 @@ var_make_safe()
 void
 kill_from_hashlist(entree *ep)
 {
-  long hash = hashvalue(ep->name);
+  char *s = ep->name;
+  long hash = hashvalue(&s);
   entree *ep1;
 
   if (functions_hash[hash] == ep)
@@ -810,8 +834,7 @@ L3:
   aux = facteur(); if (br_status) return NULL;\
   e3 = fun(e3,aux); goto L
 
-  aux = facteur();
-  if (br_status) return NULL;
+  aux = facteur(); if (br_status) return NULL;
   e3 = F3? F3(e3,aux): aux;
 L:
   switch(*analyseur)
@@ -1824,7 +1847,7 @@ identifier(void)
         v = varn(initial_value(ep));
         len = analyseur - ch1;
         analyseur++; /* skip = */
-        ep = installep(NULL,ch1,len,EpMEMBER,0, members_hash + hashvalue(ch1));
+        ep = installep(NULL,ch1,len,EpMEMBER,0, members_hash + hashvalue(&ch1));
         ch1 = analyseur; skipseq(); len = analyseur-ch1;
 
         newfun=ptr= (GEN) newbloc(2 + nchar2nlong(len+1));
@@ -2170,11 +2193,11 @@ identifier(void)
           analyseur = ch1; ep = entry();
           if (*analyseur == '=')
           {
-            pari_sp av=avma; analyseur++;
+            pari_sp av = avma; analyseur++;
             ch1 = analyseur;
             res = expr();
             NO_BREAK("here (defining global var)", ch1);
-            changevalue(ep, res); avma=av;
+            changevalue(ep, res); avma = av;
           }
           ep->valence = EpGVAR;
         }
@@ -2432,16 +2455,14 @@ constante()
 long
 is_keyword_char(char c) { return is_key(c); }
 
-/* return hashing value for identifier s (analyseur is s = NULL) */
+/* return hashing value for identifier s */
 long
-hashvalue(char *s)
+hashvalue(char **str)
 {
-  long update, n = 0;
-
-  if (!s) { s = analyseur; update = 1; } else update = 0;
+  long n = 0;
+  char *s = *str;
   while (is_key(*s)) { n = (n<<1) ^ *s; s++; }
-  if (update) analyseur = s;
-  if (n < 0) n = -n;
+  *str = s; if (n < 0) n = -n;
   return n % functions_tblsz;
 }
 
@@ -2468,13 +2489,10 @@ is_entry(char *s)
 entree *
 is_entry_intern(char *s, entree **table, long *pthash)
 {
-  char *old = analyseur;
-  long hash, len;
-
-  analyseur = s; hash = hashvalue(NULL);
-  len = analyseur - s; analyseur = old;
+  char *t = s;
+  long hash = hashvalue(&t); 
   if (pthash) *pthash = hash;
-  return findentry(s,len,table[hash]);
+  return findentry(s, t - s, table[hash]);
 }
 
 int
@@ -2493,7 +2511,8 @@ installep(void *f, char *name, int len, int valence, int add, entree **table)
 
   ep->name    = u; strncpy(u, name,len); u[len]=0;
   ep->args    = INITIAL; /* necessary, see var_cell definition */
-  ep->help = NULL; ep->code = NULL;
+  ep->help = NULL;
+  ep->code = NULL;
   ep->value   = f? f: (void *) ep1;
   ep->next    = *table;
   ep->valence = valence;
@@ -2568,37 +2587,28 @@ fetch_var(void)
 }
 
 entree *
-fetch_named_var(char *s, int doerr)
+fetch_named_var(char *s)
 {
-  entree *ep = is_entry(s);
+  char *t = s;
+  entree **funhash = functions_hash + hashvalue(&t);
+  entree *ep = findentry(s, t - s, *funhash);
   if (ep)
   {
-    if (doerr) err(talker,"identifier already in use: %s", s);
+    switch (EpVALENCE(ep))
+    {
+      case EpVAR: case EpGVAR: break;
+      default: err(talker, "%s already exists with incompatible valence", s);
+    }
     return ep;
   }
-  ep = installep(NULL,s,strlen(s),EpVAR, SIZEOF_VAR_POLS,
-                 functions_hash + hashvalue(s));
+  ep = installep(NULL,s,strlen(s),EpVAR, SIZEOF_VAR_POLS, funhash);
   (void)manage_var(manage_var_create,ep); return ep;
 }
 
 long
 fetch_user_var(char *s)
 {
-  entree *ep = is_entry(s);
-  pari_sp av;
-  GEN p1;
-
-  if (ep)
-  {
-    switch (EpVALENCE(ep))
-    {
-      case EpVAR: case EpGVAR:
-        return varn(initial_value(ep));
-    }
-    err(talker, "%s already exists with incompatible valence", s);
-  }
-  av=avma; p1 = lisexpr(s); avma=av;
-  return varn(p1);
+  return varn( initial_value(fetch_named_var(s)) );
 }
 
 void
@@ -2629,7 +2639,7 @@ name_var(long n, char *s)
   u = (char *)initial_value(ep);
   ep->valence = EpVAR;
   ep->name = u; strcpy(u,s);
-  ep->value = gen_0; /* in case geval would be called */
+  ep->value = gen_0; /* in case geval is called */
   if (varentries[n]) free(varentries[n]);
   varentries[n] = ep;
 }
@@ -2639,7 +2649,7 @@ static entree *
 entry(void)
 {
   char *old = analyseur;
-  const long hash = hashvalue(NULL), len = analyseur - old;
+  const long hash = hashvalue(&analyseur), len = analyseur - old;
   entree *ep = findentry(old,len,functions_hash[hash]);
   long val,n;
 
@@ -2665,34 +2675,6 @@ entry(void)
 /**                          SKIP FUNCTIONS                        **/
 /**                                                                **/
 /********************************************************************/
-/* as skipseq without modifying analyseur && al */
-static void
-doskipseq(char *c, int strict)
-{
-  char *olds = analyseur;
-
-  mark.start = c; analyseur = c; skipseq();
-  if (*analyseur)
-  {
-    char *s;
-    long L,n;
-    if (strict) err(talker2,"unused characters", analyseur, c);
-    L = term_width();
-    n = 2 * L - (17+19+1); /* Warning + unused... + . */
-    if ((long)strlen(analyseur) > n)
-    {
-      s = gpmalloc(n + 1);
-      n -= 5;
-      (void)strncpy(s,analyseur, n);
-      s[n] = 0; strcat(s,"[+++]");
-    }
-    else s = pari_strdup(analyseur);
-    err(warner, "unused characters: %s", s);
-    free(s);
-  }
-  analyseur = olds;
-}
-
 /* analyseur points on the character following the starting " */
 /* skip any number of concatenated strings */
 static void
@@ -3154,7 +3136,7 @@ skipentry(void)
   static entree fakeEpNEW = { "",EpNEW };
   static entree fakeEpVAR = { "",EpVAR };
   char *old = analyseur;
-  const long hash = hashvalue(NULL), len = analyseur - old;
+  const long hash = hashvalue(&analyseur), len = analyseur - old;
   entree *ep = findentry(old,len,functions_hash[hash]);
 
   if (ep) return ep;
@@ -3176,7 +3158,7 @@ static entree*
 find_member()
 {
   char *old = analyseur;
-  const long hash = hashvalue(NULL), len = analyseur - old;
+  const long hash = hashvalue(&analyseur), len = analyseur - old;
   return findentry(old,len,members_hash[hash]);
 }
 

@@ -3169,7 +3169,7 @@ readobj(FILE *f, int *ptc)
       if (!s) err(talker,"malformed binary file (no name)");
       x = rdGEN(f);
       fprintferr("setting %s\n",s);
-      changevalue(fetch_named_var(s,0), x);
+      changevalue(fetch_named_var(s), x);
       break;
     }
     case EOF: break;

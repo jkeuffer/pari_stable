@@ -382,13 +382,12 @@ init_hashtable(entree **table, int tblsz)
 static void
 fill_hashtable(entree **table, entree *ep, char **helpmessage)
 {
-  long n;
-
   for ( ; ep->name; ep++)
   {
+    char *s = ep->name;
+    long n = hashvalue(&s);
     EpSETSTATIC(ep);
     ep->help = helpmessage? *helpmessage++: NULL;
-    n = hashvalue(ep->name);
     ep->next = table[n]; table[n] = ep;
     ep->args = NULL;
   }
@@ -665,7 +664,7 @@ pari_init(size_t parisize, ulong maxprime)
   default_exception_handler = NULL;
 
   (void)manage_var(manage_var_init,NULL); /* init nvar */
-  var_not_changed = 1; (void)fetch_named_var("x", 0);
+  var_not_changed = 1; (void)fetch_named_var("x");
   try_to_recover = 1;
 }
 
