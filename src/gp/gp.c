@@ -45,7 +45,6 @@ BEGINEXTERN
 #     include <readline/readline.h>
 #   endif
 #  endif
-  extern int isatty(int);
 ENDEXTERN
 #endif
 
