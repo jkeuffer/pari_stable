@@ -214,7 +214,7 @@ roundr_up_ip(GEN x, long l)
   long i = l;
   for(;;)
   {
-    if (x[--i]++) break;
+    if (++x[--i]) break;
     if (i == 2) { x[2] = HIGHBIT; setexpo(x, expo(x)+1); break; }
   }
 }
@@ -1416,12 +1416,13 @@ divrr(GEN x, GEN y)
     }
     x1[1]=qp; x1++;
   }
+  /* i = lz-1 */
   /* round correctly */
   if (x1[1] > si>>1)
   {
     j=i; do x[--j]++; while (j && !x[j]);
   }
-  x1 = x-1; for (j=lz-1; j>=2; j--) x[j]=x1[j];
+  x1 = x-1; for (j=i; j>=2; j--) x[j]=x1[j];
   if (*x) { shift_right(x,x, 2,lz, 1,1); } else e--;
   x[0] = evaltyp(t_REAL)|evallg(lz);
   x[1] = evalsigne(sx) | evalexpo(e);
