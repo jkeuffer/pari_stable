@@ -176,13 +176,15 @@ indexpartial(GEN P, GEN DP)
   gpmem_t av = avma;
   long i, nb;
   GEN fa, p1, res = gun, dP;
+  pari_timer T;
+
   dP = derivpol(P);
-  if(DEBUGLEVEL>=5) (void)gentimer(3);
+  if(DEBUGLEVEL>=5) (void)TIMER(&T);
   if(!DP) DP = ZX_disc(P);
   DP = mpabs(DP);
-  if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: discriminant");
+  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: discriminant");
   fa = auxdecomp(DP, 0);
-  if(DEBUGLEVEL>=5) genmsgtimer(3,"IndexPartial: factorization");
+  if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: factorization");
   nb = lg(fa[1]);
   for (i = 1; i < nb; i++)
   {
@@ -201,7 +203,7 @@ indexpartial(GEN P, GEN DP)
       if(DEBUGLEVEL>=5) 
       {
         fprintferr("--> %Z : ",p1);
-        genmsgtimer(3,"");
+        msgTIMER(&T,"");
       }
     }
     res=mulii(res,p1);
@@ -266,17 +268,18 @@ initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis)
 {
   int i, n = degpol(T);
   GEN L, z, prep, den;
+  pari_timer ti;
 
-  if (DEBUGLEVEL>=4) (void)gentimer(3);
+  if (DEBUGLEVEL>=4) (void)TIMER(&ti);
   L = roots(T, prec);
-  if (DEBUGLEVEL>=4) genmsgtimer(3,"roots");
+  if (DEBUGLEVEL>=4) msgTIMER(&ti,"roots");
   for (i = 1; i <= n; i++)
   {
     z = (GEN) L[i];
     if (signe(z[2])) break;
     L[i] = z[1];
   }
-  if (DEBUGLEVEL>=4) (void)gentimer(3);
+  if (DEBUGLEVEL>=4) (void)TIMER(&ti);
   prep = vandermondeinverseprep(L);
   if (!dn)
   {
@@ -335,12 +338,13 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   int     n;
   GEN     L, M, prep, den;
   long    prec;
+  pari_timer ti;
 
   prec = ZX_get_prec(T);
   den = initgaloisborne(T,dn,prec, &L,&prep,NULL);
   if (!dn) den = gclone(den);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
-  if (DEBUGLEVEL>=4) genmsgtimer(3,"vandermondeinverse");
+  if (DEBUGLEVEL>=4) msgTIMER(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
   borneroots = supnorm(L, prec);
   n = degpol(T);

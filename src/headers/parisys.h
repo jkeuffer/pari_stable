@@ -52,15 +52,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #    endif
 #  else
 #    define VOLATILE
-
 #  endif
 #endif
+
 #ifdef _WIN32
 /* ANSI C does not allow to longjmp() out of a signal handler, in particular,
  * the SIGINT handler. On Win32, the handler is executed in another thread, and
  * longjmp'ing into another thread's stack will utterly confuse the system.
- * Instead, we check whether win32ctrlc is set in new_chunk().
- */
+ * Instead, we check whether win32ctrlc is set in new_chunk(). */
   extern int win32ctrlc;
   void dowin32ctrlc();
 #endif

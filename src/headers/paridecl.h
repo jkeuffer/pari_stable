@@ -993,6 +993,7 @@ GEN     precprime(GEN n);
 
 /* init.c */
 
+long    TIMER(pari_timer *T);
 long    allocatemoremem(size_t newsize);
 GEN     changevar(GEN x, GEN y);
 void    checkmemory(GEN x);
@@ -1005,8 +1006,6 @@ GEN     forcecopy(GEN x);
 void    freeall(void);
 GEN     gcopy(GEN x);
 GEN     gcopy_i(GEN x, long lx);
-void    genmsgtimer(long t, char *format, ...);
-long    gentimer(long i);
 GEN     gerepile(gpmem_t ltop, gpmem_t lbot, GEN q);
 void    gerepileall(ulong av, int n, ...);
 GEN     gerepilecopy(gpmem_t av, GEN x);
@@ -1017,11 +1016,11 @@ void    gerepilemanyvec(gpmem_t av, gpmem_t tetpil, long *g, int n);
 GEN     gerepileupto(gpmem_t av, GEN q);
 GEN     gerepileuptoint(gpmem_t av, GEN q);
 GEN     gerepileuptoleaf(gpmem_t av, GEN q);
-long    get_timer(long t);
 char*   gpmalloc(size_t bytes);
 char*   gprealloc(void *pointer,size_t size);
 void    gunclone(GEN x);
 void    killbloc(GEN x);
+void    msgTIMER(pari_timer *T, char *format, ...);
 void    msgtimer(char *format, ...);
 GEN     newbloc(long n);
 void    pari_init(size_t parisize, long maxprime);

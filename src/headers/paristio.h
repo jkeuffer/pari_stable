@@ -15,6 +15,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* This file contains memory and I/O management definitions       */
 
+typedef struct {
+  long s, us;
+} pari_timer;
+
 typedef unsigned char *byteptr;
 typedef ulong gpmem_t;
 

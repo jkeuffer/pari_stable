@@ -540,7 +540,6 @@ pari_init(size_t parisize, long maxprime)
   default_exception_handler = NULL;
 
   (void)manage_var(2,NULL); /* init nvar */
-  (void)get_timer(-1); /* init timers */
   var_not_changed = 1; (void)fetch_named_var("x", 0);
   try_to_recover=1;
 }
@@ -1032,7 +1031,6 @@ err_recover(long numerr)
 {
   initout(0);
   disable_dbg(-1);
-  (void)get_timer(-1);
   killallfiles(0);
 
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
@@ -1706,149 +1704,99 @@ fill_stack(void)
 /*                               TIMER                             */
 /*                                                                 */
 /*******************************************************************/
-#define MAX_TIMER 32
-#define MIN_TIMER 3
+long
+_get_time(pari_timer *T, long Ticks, long TickPerSecond)
+{
+  long s  = Ticks / TickPerSecond;
+  long us = (long) (Ticks % TickPerSecond) * (1000. / TickPerSecond);
+  long delay = (s - T->s) + (us - T->us) / 1000;
+  T->us = us;
+  T->s  = s; return delay;
+}
 
 #ifdef WINCE
-  static long
-  timer_proto(int i)
-  {
-    static DWORD oldticks[MAX_TIMER];
-    DWORD ticks = GetTickCount();
-    DWORD delay = ticks - oldticks[i];
-    oldticks[i] = ticks;
-    return delay;
-  }
+long
+TIMER(pari_timer *T)
+{
+  return _get_time(T, GetTickCount(), 1000);
+}
 #elif defined(macintosh)
 # include <Events.h>
-  static long
-  timer_proto(int i)
-  {
-    static long oldticks[MAX_TIMER];
-    long ticks = TickCount(), delay = ticks - oldticks[i];
-
-    oldticks[i] = ticks;
-    return 50 * delay / 3;
-  }
+long
+TIMER(pari_timer *T)
+{
+  return _get_time(T, TickCount(), 60);
+}
 #elif USE_TIMES
 
 # include <sys/times.h>
 # include <sys/time.h>
 # include <time.h>
-  static long
-  timer_proto(int i)
-  {
-    static clock_t oldticks[MAX_TIMER];
-    struct tms t;
-    long delay;
-
-    times(&t);
-    delay = (long)((t.tms_utime - oldticks[i]) * (1000. / CLK_TCK));
-    oldticks[i] = t.tms_utime;
-    return delay;
-  }
+long
+TIMER(pari_timer *T)
+{
+  struct tms t; times(&t);
+  return _get_time(T, t.tms_utim, CLK_TCK);
+}
 #elif USE_GETRUSAGE
 
 # include <sys/time.h>
 # include <sys/resource.h>
-  static long
-  timer_proto(int i)
-  {
-    static long oldmusec[MAX_TIMER],oldsec[MAX_TIMER];
-    struct rusage r;
-    struct timeval t;
-    long delay;
+long
+TIMER(pari_timer *T)
+{
+  struct rusage r;
+  struct timeval t;
+  long delay;
 
-    getrusage(0,&r); t=r.ru_utime;
-    delay = 1000 * (t.tv_sec - oldsec[i]) + (t.tv_usec - oldmusec[i]) / 1000;
-    oldmusec[i] = t.tv_usec; oldsec[i] = t.tv_sec;
-    return delay;
-  }
+  getrusage(0,&r); t = r.ru_utime;
+  delay = 1000 * (t.tv_sec - T->s) + (t.tv_usec - T->us) / 1000;
+  T->us = t.tv_usec;
+  T->s  = t.tv_sec; return delay;
+}
 #elif USE_FTIME
 
 # include <sys/timeb.h>
-  static long
-  timer_proto(int i)
-  {
-    static long oldmsec[MAX_TIMER],oldsec[MAX_TIMER];
-    struct timeb t;
-    long delay;
+long
+TIMER(pari_timer *T)
+{
+  struct timeb t;
+  long delay;
 
-    ftime(&t);
-    delay = 1000 * (t.time - oldsec[i]) + (t.millitm - oldmsec[i]);
-    oldmsec[i] = t.millitm; oldsec[i] = t.time;
-    return delay;
-  }
+  ftime(&t);
+  delay = 1000 * (t.time - T->s) + (t.millitm - T->us / 1000);
+  T->us = t.millitm * 1000;
+  T->s  = t.time; return delay;
+}
 #else
 
 # include <time.h>
 # ifndef CLOCKS_PER_SEC
 #   define CLOCKS_PER_SEC 1000000 /* may be false on YOUR system */
 # endif
-  static long
-  timer_proto(int i)
-  {
-    static clock_t oldclocks[MAX_TIMER];
-    clock_t t = clock();
-    long delay = (long)((t-oldclocks[i]) * 1000. / CLOCKS_PER_SEC);
-
-    oldclocks[i] = t;
-    return delay;
-  }
+long
+TIMER(pari_timer *T)
+{
+  return _get_time(T, clock(), CLOCKS_PER_SEC);
+}
 #endif
 
-#define is_valid_timer(t) ((t) < MAX_TIMER || (t) >= MIN_TIMER)
 long
-gptimer(void) {return timer_proto(0);}
+gptimer(void) { static pari_timer T; return TIMER(&T);}
 long
-timer(void)   {return timer_proto(1);}
+timer(void)   { static pari_timer T; return TIMER(&T);}
 long
-timer2(void)  {return timer_proto(2);}
-long
-gentimer(long t)
-{
-  if (!is_valid_timer(t))
-    err(talker,"not an available timer (%ld)",t);
-  return timer_proto(t);
-}
-
-/* internal */
-
-long
-get_timer(long t)
-{
-  static int used[MAX_TIMER];
-  int i;
-  if (!t)
-  { /* get new timer */
-    for (i=MIN_TIMER; i < MAX_TIMER; i++)
-      if (!used[i]) { used[i] = 1; t = i; break; }
-    if (!t) { t = 2; err(warner, "no timers left! Using timer2()"); }
-    (void)timer_proto(t); /* init timer */
-  }
-  else if (t < 0)
-  { /* initialize */
-    for (i=MIN_TIMER; i < MAX_TIMER; i++) used[i] = 0;
-  }
-  else
-  { /* delete */
-    if (!is_valid_timer(t) || !used[t])
-      err(warner, "timer %ld wasn't in use", t);
-    else
-      used[t] = 0;
-  }
-  return t;
-}
+timer2(void)  { static pari_timer T; return TIMER(&T);}
 
 void
-genmsgtimer(long t, char *format, ...)
+msgTIMER(pari_timer *T, char *format, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
 
   pariputs("Time "); va_start(args, format);
   vpariputs(format,args); va_end(args);
-  pariputsf(": %ld\n", timer_proto(t)); pariflush();
+  pariputsf(": %ld\n", TIMER(T)); pariflush();
   pariOut = out;
 }
 
@@ -1860,7 +1808,7 @@ msgtimer(char *format, ...)
 
   pariputs("Time "); va_start(args, format);
   vpariputs(format,args); va_end(args);
-  pariputsf(": %ld\n", timer_proto(2)); pariflush();
+  pariputsf(": %ld\n", timer2()); pariflush();
   pariOut = out;
 }
 

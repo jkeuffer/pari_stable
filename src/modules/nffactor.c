@@ -40,7 +40,7 @@ extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 extern GEN vconcat(GEN A, GEN B);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern int isrational(GEN x);
-extern long LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF, long id, long *ti_LLL);
+extern long LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF, pari_timer *T, long *ti_LLL);
 extern void remake_GM(GEN nf, long prec, nffp_t *F);
 #define RXQX_div(x,y,T) RXQX_divrem((x),(y),(T),NULL)
 #define RXQX_rem(x,y,T) RXQX_divrem((x),(y),(T),ONLY_REM)
@@ -904,7 +904,10 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
   GEN Tra, T2, T2r, TT, ML, m, list;
   double BvS;
   gpmem_t av, av2, lim;
-  long id = get_timer(0), ti_LLL = 0, ti_CF = 0;
+  long ti_LLL = 0, ti_CF = 0;
+  pari_timer ti;
+
+  if (DEBUGLEVEL>2) (void)TIMER(&ti);
 
   lP = absi(leading_term(P));
   if (is_pm1(lP)) lP = NULL;
@@ -988,7 +991,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
      *     [ T2r    PRK]   T2r = Tra * ML  truncated
      */
     i = LLL_check_progress(Bnorm, m, C, &ML, &BvS, &BitPerFactor,
-                           /*dbg:*/ id, &ti_LLL);
+                           /*dbg:*/ &ti, &ti_LLL);
     if (i == 1) { list = _col(P); break; }
     if (i > r) { avma = av2; continue; } /* no progress */
 
@@ -1002,15 +1005,15 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long a, long rec)
     if (rec && i*rec >= n0) continue;
 
     av2 = avma;
-    if (DEBUGLEVEL>2) (void)gentimer(id);
+    if (DEBUGLEVEL>2) (void)TIMER(&ti);
     list = nf_check_factors(T, P, ML, famod, pa);
-    if (DEBUGLEVEL>2) ti_CF += gentimer(id);
+    if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
     if (list) break;
     avma = av2;
   }
   if (DEBUGLEVEL>2)
     fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
-  get_timer(id); return list;
+  return list;
 }
 
 static GEN

@@ -1073,15 +1073,15 @@ check_factors(GEN P, GEN ML, GEN bound, GEN famod, GEN pa)
 
 long
 LLL_check_progress(GEN Bnorm, GEN m, long C, GEN *ML, double *BvS, long *BPF,
-                   long id, long *ti_LLL)
+                   pari_timer *T, long *ti_LLL)
 {
   GEN B, norm, u, up;
   long i, R, r = lg(*ML)-1;
 
-  if (DEBUGLEVEL>2) (void)gentimer(id);
+  if (DEBUGLEVEL>2) (void)TIMER(T);
   m = lllint_ip(m, 4);
   u = lllint_i(m, 1000, 0, NULL, NULL, &B);
-  if (DEBUGLEVEL>2) *ti_LLL += gentimer(id);
+  if (DEBUGLEVEL>2) *ti_LLL += TIMER(T);
   norm = GS_norms(B, DEFAULTPREC);
   for (R=lg(m)-1; R > 0; R--)
     if (cmprr((GEN)norm[R], Bnorm) < 0) break;
@@ -1130,7 +1130,10 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   double b0 = log((double)dP*2) / logp, logBr, BvS;
   GEN lP, Br, Bnorm, T, T2, TT, ML, m, list;
   gpmem_t av, av2, lim;
-  long id = get_timer(0), ti_LLL = 0, ti_CF  = 0;
+  long ti_LLL = 0, ti_CF  = 0;
+  pari_timer ti;
+
+  if (DEBUGLEVEL>2) (void)TIMER(&ti);
 
   lP = absi(leading_term(P));
   if (is_pm1(lP)) lP = NULL;
@@ -1222,7 +1225,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
      *     [ T2   p^(a-b) I_s ]   T2 = T * ML  truncated
      */
     i = LLL_check_progress(Bnorm, m, C, &ML, &BvS, &BitPerFactor,
-                           /*dbg:*/ id, &ti_LLL);
+                           /*dbg:*/ &ti, &ti_LLL);
     if (i == 1) { list = _col(P); break; }
     if (i > r) { avma = av2; continue; } /* no progress */
 
@@ -1236,15 +1239,15 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (rec && i*rec >= n0) continue;
 
     av2 = avma;
-    if (DEBUGLEVEL>2) (void)gentimer(id);
+    if (DEBUGLEVEL>2) (void)TIMER(&ti);
     list = check_factors(P, ML, bound, famod, pa);
-    if (DEBUGLEVEL>2) ti_CF += gentimer(id);
+    if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
     if (list) break;
     avma = av2;
   }
   if (DEBUGLEVEL>2)
     fprintferr("* Time LLL: %ld\n* Time Check Factor: %ld\n",ti_LLL,ti_CF);
-  (void)get_timer(id); return list;
+  return list;
 }
 
 /* Return P(h * x) */
@@ -1326,7 +1329,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
   GEN la, B, A, res, L, pa, pb, listmod, N2;
   long a,b, l, maxK = 3, nft = lg(famod)-1, n = degpol(target);
-  long id = get_timer(0);
+  pari_timer T;
 
   N2 = mpsqrt(QuickNormL2(target,DEFAULTPREC));
   A = uniform_Mignotte_bound(target, N2);
@@ -1336,12 +1339,12 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 
   (void)cmbf_precs(p, A, B, &a, &b, &pa, &pb);
 
-  if (DEBUGLEVEL>2) (void)gentimer(id);
+  if (DEBUGLEVEL>2) (void)TIMER(&T);
   famod = hensel_lift_fact(target,famod,NULL,p,pa,a);
   if (nft < 11) maxK = -1; /* few modular factors: try all posibilities */
-  if (DEBUGLEVEL>2) genmsgtimer(id, "Hensel lift");
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Hensel lift");
   L = cmbf(target, famod, p, a, b, maxK, klim, hint);
-  if (DEBUGLEVEL>2) genmsgtimer(id, "Naive recombination");
+  if (DEBUGLEVEL>2) msgTIMER(&T, "Naive recombination");
 
   res     = (GEN)L[1];
   listmod = (GEN)L[2]; l = lg(listmod)-1;
@@ -1351,11 +1354,11 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
     if (l!=1) A = uniform_Mignotte_bound((GEN)res[l], NULL);
     if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
     L = LLL_cmbf((GEN)res[l], famod, p, pa, A, a, maxK);
-    if (DEBUGLEVEL>2) genmsgtimer(id,"Knapsack");
+    if (DEBUGLEVEL>2) msgTIMER(&T,"Knapsack");
     /* remove last elt, possibly unfactored. Add all new ones. */
     setlg(res, l); res = concatsp(res, L);
   }
-  (void)get_timer(id); return res;
+  return res;
 }
 
 #define u_FpX_div(x,y,p) u_FpX_divrem((x),(y),(p),(0),NULL)
@@ -1371,9 +1374,10 @@ DDF(GEN a, long hint)
   gpmem_t av = avma;
   byteptr pt=diffptr;
   const int MAXNP = max(5, (long)sqrt((double)da));
-  long id = get_timer(0), ti = 0;
+  long ti = 0;
+  pari_timer T;
 
-  if (DEBUGLEVEL>2) ti = gentimer(id);
+  if (DEBUGLEVEL>2) (void)TIMER(&T);
   if (hint <= 0) hint = 1;
   if (DEBUGLEVEL > 2) (void)timer2();
   lbit = (da>>4)+1; nmax = da+1; klim = da>>1;
@@ -1430,7 +1434,6 @@ DDF(GEN a, long hint)
       fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
                   p, nfacp, nfacp==1?"": "s", timer2());
     if (min_deg(lbit-1,tabbit) > klim) { 
-      (void)get_timer(id);
       avma = av; return _col(a);
     }
     if (nfacp < nmax)
@@ -1461,14 +1464,12 @@ DDF(GEN a, long hint)
   if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
   if (DEBUGLEVEL>2)
   {
-    long t = gentimer(id);
-    fprintferr("Time setup: %ld\n",t);
-    ti += t;
+    ti = TIMER(&T);
+    fprintferr("Time setup: %ld\n", ti);
   }
   res = combine_factors(a, famod, prime, da-1, hint);
   if (DEBUGLEVEL>2)
-    fprintferr("Total Time: %ld\n===========\n", ti + gentimer(id));
-  (void)get_timer(id);
+    fprintferr("Total Time: %ld\n===========\n", ti + TIMER(&T));
   return gerepilecopy(av, res);
 }
 
