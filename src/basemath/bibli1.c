@@ -2138,20 +2138,25 @@ get_Bnf(GEN nf)
   return T2_from_embed((GEN)nf[6], nf_get_r1(nf));
 }
 
+typedef struct {
+  long r1;
+  GEN ZKembed; /* embeddings of LLL-reduced Zk basis */
+  GEN ZKLLL; /* LLL reduced Zk basis (in M_n(Z)) */
+} CG_data;
+
 /* characteristic pol of x */
 static GEN
-get_polchar(GEN data, GEN x)
+get_polchar(CG_data *d, GEN x)
 {
-  GEN basis_embed = (GEN)data[1];
-  GEN g = gmul(basis_embed,x);
-  return ground(roots_to_pol_r1r2(g, data[0], 0));
+  GEN g = gmul(d->ZKembed,x);
+  return ground(roots_to_pol_r1r2(g, d->r1, 0));
 }
 
 /* return a defining polynomial for Q(x) */
 static GEN
-get_polmin(GEN data, GEN x)
+get_polmin(CG_data *d, GEN x)
 {
-  GEN g = get_polchar(data,x);
+  GEN g = get_polchar(d,x);
   GEN h = modulargcd(g,derivpol(g));
   if (lgef(h) > 3) g = gdivexact(g,h);
   return g;
@@ -2159,10 +2164,10 @@ get_polmin(GEN data, GEN x)
 
 /* does x generate the correct field ? */
 static GEN
-chk_gen(GEN data, GEN x)
+chk_gen(void *data, GEN x)
 {
   long av = avma;
-  GEN g = get_polchar(data,x);
+  GEN g = get_polchar((CG_data*)data,x);
   if (lgef(modulargcd(g,derivpol(g))) > 3) { avma=av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
   return g;
@@ -2172,18 +2177,15 @@ chk_gen(GEN data, GEN x)
 static GEN
 chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
 {
-  GEN P,bound,prev,x,B,data, M = gmael(nf,5,1);
+  GEN P,bound,prev,x,B, M = gmael(nf,5,1);
   long N = lg(nf[7]), n = N-1,i,prec,prec2;
   int skipfirst = 1; /* [1,0...0] --> x rational */
+  CG_data *d = (CG_data*)new_chunk(sizeof(CG_data));
 
-/* data[0] = r1
- * data[1] = embeddings of LLL-reduced Zk basis
- * data[2] = LLL reduced Zk basis (in M_n(Z)) */
-  data = new_chunk(3);
-  data[0] = itos(gmael(nf,2,1));
-  data[1] = lmul(M, mat);
-  data[2] = lmul((GEN)nf[7],mat);
-  chk->data = data;
+  d->r1 = itos(gmael(nf,2,1)); 
+  d->ZKembed = gmul(M, mat);
+  d->ZKLLL   = gmul((GEN)nf[7],mat);
+  chk->data = (void*)d;
 
   x = cgetg(N,t_COL);
   bound = get_Bnf(nf); prev = NULL;
@@ -2191,7 +2193,7 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
   for (i=2; i<N; i++)
   {
     x[i] = un;
-    P = get_polmin(data,x);
+    P = get_polmin(d,x);
     x[i] = zero;
     if (degpol(P) == n)
     {
@@ -2228,14 +2230,14 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
     fprintferr("chk_gen_init: estimated prec = %ld (initially %ld)\n",
                 prec, prec2);
   if (prec > prec2) return NULL;
-  if (prec < prec2) data[1] = (long)gprec_w((GEN)data[1], prec);
+  if (prec < prec2) d->ZKembed = gprec_w(d->ZKembed, prec);
   *ptprec = prec; return bound;
 }
 
 static GEN
-chk_gen_post(GEN data, GEN res)
+chk_gen_post(void *data, GEN res)
 {
-  GEN basis = (GEN)data[2];
+  GEN basis = ((CG_data*)data)->ZKLLL;
   GEN p1 = (GEN)res[2];
   long i, l = lg(p1);
   for (i=1; i<l; i++) p1[i] = lmul(basis, (GEN)p1[i]);
@@ -2796,7 +2798,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
 {
   long av,av1,lim,N,n,i,j,k,s,epsbit,prec, checkcnt = 1;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
-  GEN (*check)(GEN,GEN) = CHECK? CHECK->f: NULL;
+  GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   GEN data = CHECK? CHECK->data: NULL;
   int skipfirst = CHECK? CHECK->skipfirst: 0;
 

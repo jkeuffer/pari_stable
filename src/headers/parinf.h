@@ -59,10 +59,10 @@ GEN initalgall0(GEN x, long flag, long prec);
 
 /* for fincke_pohst() */
 typedef struct FP_chk_fun {
-  GEN (*f)(GEN,GEN);
+  GEN (*f)(void *,GEN);
   GEN (*f_init)(struct FP_chk_fun*,GEN,GEN,GEN,long*);
-  GEN (*f_post)(GEN,GEN);
-  GEN data;
+  GEN (*f_post)(void *,GEN);
+  void *data;
   int skipfirst;
 } FP_chk_fun;
 
