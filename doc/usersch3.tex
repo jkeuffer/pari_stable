@@ -5915,14 +5915,13 @@ Also available is $\teb{algdep}(x,k,\var{prec})$ ($\fl=0$).
 \subsecidx{charpoly}$(A,\{v=x\},\{\fl=0\})$: \idx{characteristic polynomial}
 of $A$ with respect to the variable $v$, i.e.~determinant of $v*I-A$ if $A$
 is a square matrix, determinant of the map ``multiplication by $A$'' if $A$
-is a scalar, in particular a polmod (e.g.~\kbd{charpoly(I,x)=x\pow2+1}).
+is a scalar, in particular a polmod (e.g.~\kbd{charpoly(I) = x\pow2+1}).
 Note that in the latter case, the \idx{minimal polynomial} can be obtained
 as
 \bprog
 minpoly(A)=
-{
-  local(y);
-  y = charpoly(A);
+{ local(y = charpoly(A));
+
   y / gcd(y,y')
 }
 @eprog
