@@ -1214,8 +1214,8 @@ padic_trivfact(GEN x, GEN p, long r)
 GEN
 apprgen(GEN f, GEN a)
 {
-  GEN fp,p1,p,pro,x,x2,u,ip;
-  long av=avma,tetpil,v,ps,i,j,k,lu,n,fl2;
+  GEN fp,p1,p,P,pro,x,x2,u,ip;
+  long av=avma,tetpil,v,Ps,i,j,k,lu,n,fl2;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen");
   if (gcmp0(f)) err(zeropoler,"apprgen");
@@ -1241,18 +1241,19 @@ apprgen(GEN f, GEN a)
   n=lgef(f)-3; pro=cgetg(n+1,t_VEC);
 
   if (is_bigint(p)) err(impl,"apprgen for p>=2^31");
-  x = ggrandocp(p, valp(a) | precp(a));
+  x = ggrandocp(p, valp(a) | precp(a)); 
   if (fl2)
   {
-    ps=4; x2=ggrandocp(p,2); p=stoi(4);
+    x2=ggrandocp(p,2); P = stoi(4);
   }
   else
   {
-    ps=itos(p); x2=ggrandocp(p,1);
+    x2=ggrandocp(p,1); P = p;
   }
-  f = poleval(f, gadd(a,gmul(p,polx[varn(f)])));
-  if (!gcmp0(f)) f = gdiv(f,gpuigs(p,ggval(f,p)));
-  for (j=0,i=0; i<ps; i++)
+  f = poleval(f, gadd(a,gmul(P,polx[varn(f)])));
+  if (!gcmp0(f)) f = gdiv(f,gpuigs(p,ggval(f, p)));
+  Ps = itos(P);
+  for (j=0,i=0; i<Ps; i++)
   {
     ip=stoi(i);
     if (gcmp0(poleval(f,gadd(ip,x2))))
@@ -1260,7 +1261,7 @@ apprgen(GEN f, GEN a)
       u=apprgen(f,gadd(x,ip)); lu=lg(u);
       for (k=1; k<lu; k++)
       {
-        j++; pro[j]=ladd(a,gmul(p,(GEN)u[k]));
+        j++; pro[j]=ladd(a,gmul(P,(GEN)u[k]));
       }
     }
   }
