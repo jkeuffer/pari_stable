@@ -201,11 +201,11 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
   if (!x) return NULL;
   if (flag)
   {
-    GEN r1 = gsub(a,b);
+    GEN d = gsub(a,b);
     p1 = gadd(x, gmul2n(gadd(gmul2n(e1,2), b2),-3));
     p1 = gmul2n(p1,-1);
-    p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,r1)), prec));
-    return gmul(p1, gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,r1),p1),prec)),-1)));
+    p1 = gadd(p1, gsqrt(gsub(gsqr(p1), gmul(a,d)), prec));
+    return gmul(p1, gsqr(gmul2n(gaddsg(1,gsqrt(gdiv(gadd(p1,d),p1),prec)),-1)));
   }
   x = gsub(x, e1);
   p1 = gadd(x, b);
@@ -214,47 +214,50 @@ new_coords(GEN e, GEN x, GEN *pta, GEN *ptb, int flag, long prec)
 
 /* a1, b1 are non-0 t_REALs */
 static GEN
-do_agm(GEN *ptx1, GEN a1, GEN b1)
+do_agm(GEN *ptx, GEN a1, GEN b1)
 {
   const long s = signe(b1), l = min(lg(a1), lg(b1)), G = 6 - bit_accuracy(l);
-  GEN p1, r1, a, b, x, x1;
+  GEN p1, a, b, x;
 
-  x1 = gmul2n(subrr(a1,b1),-2);
-  if (gcmp0(x1)) err(precer,"initell");
+  x = gmul2n(subrr(a1,b1),-2);
+  if (gcmp0(x)) err(precer,"initell");
   for(;;)
   {
-    a = a1; b = b1; x = x1;
+    GEN d;
+    a = a1; b = b1;
     b1 = sqrtr(mulrr(a,b)); setsigne(b1, s);
     a1 = gmul2n(addrr(addrr(a,b), gmul2n(b1,1)),-2);
-    r1 = subrr(a1,b1);
-    p1 = sqrtr( divrr(addrr(x,r1),x) );
-    x1 = mulrr(x, gsqr(gmul2n(addsr(1,p1),-1)));
-    if (!signe(r1) || expo(r1) <= G + expo(b1)) break;
+    d = subrr(a1,b1);
+    p1 = sqrtr( divrr(addrr(x,d),x) );
+    x = mulrr(x, gsqr(addsr(1,p1)));
+    setexpo(x, expo(x)-2);
+    if (!signe(d) || expo(d) <= G + expo(b1)) break;
   }
-  *ptx1 = x1; return ginv(gmul2n(a1,2));
+  *ptx = x; return ginv(gmul2n(a1,2));
 }
 /* a1, b1 are t_PADICs */
 static GEN
-do_padic_agm(GEN *ptx1, GEN a1, GEN b1, GEN p)
+do_padic_agm(GEN *ptx, GEN a1, GEN b1, GEN p)
 {
-  GEN p1, r1, a, b, x, bmod1, bmod = modii((GEN)b1[4],p), x1 = *ptx1;
+  GEN p1, a, b, bmod1, bmod = modii((GEN)b1[4],p), x = *ptx;
   long mi;
   
-  if (!x1) x1 = gmul2n(gsub(a1,b1),-2);
+  if (!x) x = gmul2n(gsub(a1,b1),-2);
   mi = min(precp(a1),precp(b1));
   for(;;)
   {
-    a = a1; b = b1; x = x1;
+    GEN d;
+    a = a1; b = b1;
     b1 = gprec(gsqrt(gmul(a,b),0),mi); bmod1 = modii((GEN)b1[4],p);
     if (!egalii(bmod1,bmod)) b1 = gneg_i(b1);
     a1 = gprec(gmul2n(gadd(gadd(a,b),gmul2n(b1,1)),-2),mi);
-    r1 = gsub(a1,b1);
-    if (gcmp0(r1)) {x1 = x; break;}
-    p1 = gsqrt(gdiv(gadd(x,r1),x),0);
+    d = gsub(a1,b1);
+    if (gcmp0(d)) break;
+    p1 = gsqrt(gdiv(gadd(x,d),x),0);
     if (! gcmp1(modii((GEN)p1[4],p))) p1 = gneg_i(p1);
-    x1 = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
+    x = gmul(x, gsqr(gmul2n(gaddsg(1,p1),-1)));
   }
-  *ptx1 = x1; return ginv(gmul2n(a1,2));
+  *ptx = x; return ginv(gmul2n(a1,2));
 }
 
 static GEN
@@ -324,9 +327,9 @@ invcmp(GEN x, GEN y) { return -gcmp(x,y); }
 static GEN
 initell0(GEN x, long prec)
 {
-  GEN D,p1,p2,p,w,a1,b1,x1,u2,q,pi,pi2,tau,w1,w2;
+  GEN D, p1, T, p, w, a1, b1, x1, u2, q, pi, pi2, tau, w1, w2;
   GEN y = cgetg(20,t_VEC);
-  long ty,i,e;
+  long ty, i, e;
 
   smallinitell0(x,y);
 
@@ -380,10 +383,10 @@ initell0(GEN x, long prec)
   }
   y[15] = (long)w1;
   y[16] = (long)w2;
-  p2 = thetanullk(q, 1, prec);
-  if (gcmp0(p2)) err(precer,"initell");
+  T = vecthetanullk(q, 2, prec);
+  if (gcmp0((GEN)T[1])) err(precer,"initell");
   /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
-  y[17] = ldiv(gmul(gsqr(pi),thetanullk(q,3,prec)), gmul(gmulsg(6,w1), p2));
+  y[17] = ldiv(gmul(gsqr(pi),(GEN)T[2]), gmul(gmulsg(6,w1), (GEN)T[1]));
   y[18] = ldiv(gsub(gmul((GEN)y[17],w2), gmul(gi,pi)), w1);
   return y;
 }
@@ -823,17 +826,17 @@ zell(GEN e, GEN z, long prec)
   sw = gsigne(real_i(b)); fl=0;
   for(;;) /* ~ agm */
   {
-    GEN a0=a, b0=b, x0=x1, r1;
+    GEN a0=a, b0=b, x0=x1, d;
 
     b = gsqrt(gmul(a0,b0),prec);
     if (gsigne(real_i(b)) != sw) b = gneg_i(b);
     a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
-    r1 = gsub(a,b);
-    if (gcmp0(r1) || gexpo(r1) < gexpo(a) - bit_accuracy(prec)) break;
-    p1 = gsqrt(gdiv(gadd(x0,r1),x0),prec);
+    d = gsub(a,b);
+    if (gcmp0(d) || gexpo(d) < gexpo(a) - bit_accuracy(prec)) break;
+    p1 = gsqrt(gdiv(gadd(x0,d),x0),prec);
     x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
-    r1 = gsub(x1,x0);
-    if (gcmp0(r1) || gexpo(r1) < gexpo(x1) - bit_accuracy(prec) + 5)
+    d = gsub(x1,x0);
+    if (gcmp0(d) || gexpo(d) < gexpo(x1) - bit_accuracy(prec) + 5)
     {
       if (fl) break;
       fl = 1;
