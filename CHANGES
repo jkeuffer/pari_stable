@@ -114,19 +114,17 @@ BA  7- support for real forms for qfbsolve.
        for chinese(x, NULL) ]
     8- add GC in integer valuation functions + use recursive algorithm when
        valuation looks large
-    9- don't accept [;] in factorback ( matrix(0,2) is the only valid form
-       of an empty matrix input, corresponding e.g to factor(1) )
-   10- no longer raise an exception when online help used on unknown id or
+    9- no longer raise an exception when online help used on unknown id or
        obsolete function [report 'unknown identifier' or 'obsolete function']
-   11- removed buggy support for narrow class group in quadclassunit
+   10- removed buggy support for narrow class group in quadclassunit
        + rewrite binary quadratic forms [ qfr3 / qfr5 ]. TODO: move from
        arith1.c to qfb.c
-   12- reinstate cornacchia + cornacchia2 with a different interface [ use
+   11- reinstate cornacchia + cornacchia2 with a different interface [ use
        cornacchia in qfbsolve ]
-   13- allow non-real arguments in incgamc, incgam
-MW 14- ellap: if E has CM by a principal order, use Cornacchia instead
+   12- allow non-real arguments in incgamc, incgam
+MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
        of Shanks/Mestre
-   15- more efficient algorithm for issquare(t_FRAC | t_RFRAC)
+   14- more efficient algorithm for issquare(t_FRAC | t_RFRAC)
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private
