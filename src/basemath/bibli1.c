@@ -2675,11 +2675,11 @@ kerint(GEN x)
 /**                              MINIM                             **/
 /**                                                                **/
 /********************************************************************/
-/* x is a non-empty matrix, y is a compatible VECSMALL (dimension > 0). */
-GEN
-gmul_mat_smallvec(GEN x, GEN y)
+/* x non-empty t_MAT, y a compatible zc (dimension > 0). */
+static GEN
+RM_zc_mul_i(GEN x, GEN y, long c, long l)
 {
-  long c = lg(x), l = lg(x[1]), i, j;
+  long i, j;
   pari_sp av;
   GEN z = cgetg(l,t_COL), s;
 
@@ -2692,12 +2692,14 @@ gmul_mat_smallvec(GEN x, GEN y)
   }
   return z;
 }
-
-/* same, x integral */
 GEN
-gmul_mati_smallvec(GEN x, GEN y)
+RM_zc_mul(GEN x, GEN y) { return RM_zc_mul_i(x,y, lg(x), lg(x[1])); }
+
+/* x non-empty ZM, y a compatible zc (dimension > 0). */
+static GEN
+ZM_zc_mul_i(GEN x, GEN y, long c, long l)
 {
-  long c = lg(x), l = lg(x[1]), i, j;
+  long i, j;
   pari_sp av;
   GEN z = cgetg(l,t_COL), s;
 
@@ -2708,6 +2710,48 @@ gmul_mati_smallvec(GEN x, GEN y)
       if (y[j]) s = addii(s, mulis(gcoeff(x,i,j),y[j]));
     z[i] = lpileuptoint(av,s);
   }
+  return z;
+}
+GEN
+ZM_zc_mul(GEN x, GEN y) { return ZM_zc_mul_i(x,y, lg(x), lg(x[1])); }
+
+/* x non-empty t_MAT, y a compatible zm (dimension > 0). */
+GEN 
+RM_zm_mul(GEN x, GEN y)
+{
+  long j, l = lg(x), c = lg(x[1]), ly = lg(y);
+  GEN z = cgetg(ly, t_MAT);
+  for (j = 1; j < ly; j++) z[j] = (long)RM_zc_mul_i(x, (GEN)y[j], l,c);
+  return z;
+}
+/* x non-empty ZM, y a compatible zm (dimension > 0). */
+GEN 
+ZM_zm_mul(GEN x, GEN y)
+{
+  long j, l = lg(x), c = lg(x[1]), ly = lg(y);
+  GEN z = cgetg(ly, t_MAT);
+  for (j = 1; j < ly; j++) z[j] = (long)ZM_zc_mul_i(x, (GEN)y[j], l,c);
+  return z;
+}
+
+static GEN
+RV_zc_mul_i(GEN x, GEN y, long l)
+{
+  long i;
+  GEN z = gzero;
+  pari_sp av = avma;
+  for (i = 1; i < l; i++) z = gadd(z, gmulgs((GEN)x[i], y[i]));
+  return gerepileupto(av, z);
+}
+GEN
+RV_zc_mul(GEN x, GEN y, long l) { return RV_zc_mul_i(x, y, lg(x)); }
+
+GEN 
+RV_zm_mul(GEN x, GEN y)
+{
+  long j, l = lg(x), ly = lg(y);
+  GEN z = cgetg(ly, t_VEC);
+  for (j = 1; j < ly; j++) z[j] = (long)RV_zc_mul_i(x, (GEN)y[j], l);
   return z;
 }
 
@@ -2854,7 +2898,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     {
       if (flag == min_FIRST)
       {
-        res[2] = lpileupto(av, gmul_mati_smallvec(u,x)); 
+        res[2] = lpileupto(av, ZM_zc_mul(u,x)); 
         av = avma;
         res[1] = lpileupto(av, ground(dbltor(p))); return res;
       }
@@ -2941,7 +2985,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
 
   L[0] = evaltyp(t_MAT) | evallg(k + 1);
-  for (j=1; j<=k; j++) L[j] = (long) gmul_mati_smallvec(u, (GEN)L[j]);
+  for (j=1; j<=k; j++) L[j] = (long)ZM_zc_mul(u, (GEN)L[j]);
 
   gerepileall(av, 2, &r, &L);
   res[1] = lstoi(s<<1);

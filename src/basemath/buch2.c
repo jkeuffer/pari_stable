@@ -69,7 +69,6 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 extern GEN lllint_fp_ip(GEN x, long D);
 extern GEN R_from_QR(GEN x, long prec);
 extern GEN hnf_invimage(GEN A, GEN b);
-extern GEN col_extract(GEN R, GEN perm);
 extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
@@ -80,8 +79,6 @@ extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
 extern GEN to_famat_all(GEN x, GEN y);
 extern int addcolumntomatrix(GEN V, GEN invp, GEN L);
 extern double check_bach(double cbach, double B);
-extern GEN gmul_mat_smallvec(GEN x, GEN y);
-extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN get_arch(GEN nf,GEN x,long prec);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN get_roots(GEN x,long r1,long prec);
@@ -1291,7 +1288,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
 
   /* x = g_W Wex + g_B Bex - [xar]
    *   = g_W A - [xar] + [C_B]Bex  since g_W B + g_B = [C_B] */
-  A = gsub(vecsmall_col(Wex), gmul_mati_smallvec(B,Bex));
+  A = gsub(vecsmall_col(Wex), ZM_zc_mul(B,Bex));
   Q = gmul(U, A);
   for (i=1; i<=c; i++)
     Q[i] = (long)truedvmdii((GEN)Q[i], (GEN)cyc[i], (GEN*)(ex+i));
@@ -1829,7 +1826,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
 	  if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
 	  if (ccontent(x)==1) /* primitive */
 	  {
-            gx = gmul_mati_smallvec(IDEAL,x);
+            gx = ZM_zc_mul(IDEAL,x);
             if (!isnfscalar(gx))
             {
               pari_sp av4 = avma;
@@ -2414,7 +2411,7 @@ compute_vecG(GEN nf)
 int
 addcolumntomatrix(GEN V, GEN invp, GEN L)
 {
-  GEN a = gmul_mat_smallvec(invp,V);
+  GEN a = RM_zc_mul(invp,V);
   long i,j,k, n = lg(invp);
 
   if (DEBUGLEVEL>6)
@@ -2998,7 +2995,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   long nlze, nreldep, sfb_change, sfb_trials, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
   GEN vecG, fu, zu, nf, D, A, W, R, Res, z, h, L_jideal, PERM;
-  GEN M, res, L, resc, B, C, lambda, pdep, liste, invp, clg1, clg2, Vbase;
+  GEN M, res, L, resc, B, C, lambda, dep, liste, invp, clg1, clg2, Vbase;
   char *precpb = NULL;
   const int RELSUP = 5, minsFB = 3;
   REL_t *rel, *oldrel;
@@ -3033,7 +3030,7 @@ START:
   cbach = check_bach(cbach,12.);
   LIMC = (long)(cbach*LOGD2);
   if (LIMC < 20) { LIMC = 20; cbach = (double)LIMC / LOGD2; }
-  LIMC2= max(3 * N, (long)(cbach2*LOGD2));
+  LIMC2 = max(3 * N, (long)(cbach2*LOGD2));
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (DEBUGLEVEL) { fprintferr("LIMC = %ld, LIMC2 = %ld\n",LIMC,LIMC2); }
 
@@ -3041,8 +3038,8 @@ START:
   if (!Res || !subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
   PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
   KCCO = F.KC+RU-1 + RELSUP; /* expected # of needed relations */
-  if (DEBUGLEVEL) fprintferr("relsup = %ld, KCZ = %ld, KC = %ld, KCCO = %ld\n",
-                             RELSUP, F.KCZ, F.KC, KCCO);
+  if (DEBUGLEVEL) fprintferr("KCZ = %ld, KC = %ld, KCCO = %ld\n",
+                             F.KCZ, F.KC, KCCO);
   MAXRELSUP = min(50, 4*F.KC);
   reallocate(&cache, 10*KCCO + MAXRELSUP); /* make room for lots of relations */
   oldrel = cache.last;
@@ -3138,32 +3135,24 @@ PRECPB:
   }
   M = gmael(nf, 5, 1); 
   if (F.pow && !F.pow->arc) powFB_fill(&cache, M);
-  /* Reduce relation matrices */
-  if (!W)
-  { /* never reduced before */
+
+  { /* Reduce relation matrices */
     long l = cache.last - oldrel, j;
-    GEN mat = cgetg(l+1, t_VEC);
-    C = cgetg(l+1, t_MAT);
+    GEN mat = cgetg(l+1, t_VEC), emb = cgetg(l+1, t_MAT);
     for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
     {
       mat[j] = (long)rel->R;
-      C[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
+      emb[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
     }
-    W = hnfspec_i((long**)mat, F.perm, &pdep, &B, &C, lg(F.subFB)-1);
-  }
-  else
-  { /* update */
-    long l = cache.last - oldrel, j;
-    GEN mat2 = cgetg(l+1,t_MAT), C2 = cgetg(l+1,t_MAT);
-    for (j=1,rel = oldrel + 1; rel <= cache.last; rel++,j++)
-    {
-      mat2[j] = (long)col_extract(rel->R, F.perm);
-      C2[j] = (long)get_log_embed(rel, M, RU, R1, PRECREG);
+    if (!W) { /* never reduced before */
+      C = emb;
+      W = hnfspec_i((long**)mat, F.perm, &dep, &B, &C, lg(F.subFB)-1);
     }
-    W = hnfadd_i(W, F.perm, &pdep, &B, &C, mat2, C2);
+    else /* update */
+      W = hnfadd_i(W, F.perm, &dep, &B, &C, mat, emb);
   }
-  gerepileall(av2, 4, &W,&C,&B,&pdep);
-  nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
+  gerepileall(av2, 4, &W,&C,&B,&dep);
+  nlze = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
   if (nlze)
   { /* dependent rows */
     if (nlze > 5)

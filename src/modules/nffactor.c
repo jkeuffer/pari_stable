@@ -32,7 +32,6 @@ extern GEN get_proj_modT(GEN basis, GEN T, GEN p);
 extern void init_dalloc();
 extern double *dalloc(size_t n);
 extern GEN sqred1_from_QR(GEN x, long prec);
-extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
 extern GEN RXQX_red(GEN P, GEN T);
@@ -672,7 +671,7 @@ get_trace(GEN ind, trace_data *T)
     else
       v[i] = - (long)r;
   }
-  return gadd(s, gmul_mati_smallvec(T->P1, v));
+  return gadd(s, ZM_zc_mul(T->P1, v));
 } 
 
 static trace_data *

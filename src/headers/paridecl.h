@@ -152,6 +152,7 @@ long    rank(GEN x);
 GEN     row(GEN A, long x1);
 GEN     row_i(GEN A, long x0, long x1, long x2);
 GEN     rowextract_i(GEN A, long x1, long x2);
+GEN     rowextract_ip(GEN A, GEN p, long x1, long x2);
 GEN     rowextract_p(GEN A, GEN p);
 GEN     sindexrank(GEN x);
 GEN     sum(GEN v, long a, long b);
@@ -159,6 +160,7 @@ GEN     suppl(GEN x);
 GEN     vconcat(GEN A, GEN B);
 GEN     vec_ei(long n, long i);
 GEN     vecextract_i(GEN A, long y1, long y2);
+GEN     vecextract_ip(GEN A, GEN p, long y1, long y2);
 GEN     vecextract_p(GEN A, GEN p);
 GEN     zerocol(long n);
 GEN     zeromat(long m, long n);
@@ -205,6 +207,12 @@ GEN     sqred(GEN a);
 GEN     sqred1(GEN a);
 GEN     sqred1intern(GEN a);
 GEN     sqred3(GEN a);
+GEN     ZC_zc(GEN z);
+GEN     ZM_zm(GEN z);
+GEN     zV_Zv(GEN z);
+GEN     zv_ZC(GEN z);
+GEN     zm_ZM(GEN z);
+GEN     zv_ZV(GEN z);
 
 /* anal.c */
 
@@ -615,6 +623,12 @@ GEN     rnfinitalg(GEN nf,GEN pol,long prec);
 
 /* bibli1.c */
 
+GEN     RM_zc_mul(GEN x, GEN y);
+GEN     RM_zm_mul(GEN x, GEN y);
+GEN     RV_zc_mul(GEN x, GEN y, long l);
+GEN     RV_zm_mul(GEN x, GEN y);
+GEN     ZM_zc_mul(GEN x, GEN y);
+GEN     ZM_zm_mul(GEN x, GEN y);
 GEN     T2_from_embed(GEN x, long r1);
 GEN     algdep(GEN x, long n, long prec);
 GEN     algdep0(GEN x, long n, long bit,long prec);

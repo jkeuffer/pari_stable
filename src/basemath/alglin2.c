@@ -1669,15 +1669,6 @@ col_dup(long l, GEN col)
   memcpy(c,col,l * sizeof(long)); return c;
 }
 
-GEN
-col_extract(GEN R, GEN perm)
-{
-  long i, l = lg(perm);
-  GEN c = cgetg(l, t_COL);
-  for (i = 1; i < l; i++) c[i] = lstoi( R[perm[i]] );
-  return c;
-}
-
 /* HNF reduce a relation matrix (column operations + row permutation)
 ** Input:
 **   mat = (li-1) x (co-1) matrix of long
@@ -1971,7 +1962,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
     mat = mat0 + co-1;
     for (j = 1 ; j < l; j++)
     {
-      extramat[j] = (long)col_extract((GEN)mat[j], perm);
+      extramat[j] = (long)vecextract_p((GEN)mat[j], perm);
       extraC[j] = (long)CC[j];
     }
     H = hnfadd_i(H, perm, ptdep, ptB, &C, extramat, extraC);
@@ -2035,6 +2026,48 @@ TOOLARGE:
   return rowextract_i(x, lx-ly+1, k); /* H */
 }
 
+/* same as Flv_ZV, Flv_ZC, Flm_ZM but do not assume positivity */
+GEN
+zv_ZV(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
+  return x;
+}
+GEN
+zv_ZC(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_COL);
+  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
+  return x;
+}
+GEN
+zm_ZM(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) x[i] = (long)zv_ZC((GEN)z[i]);
+  return x;
+}
+GEN
+ZC_zc(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itos((GEN)z[i]);
+  return x;
+}
+GEN
+ZM_zm(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_MAT);
+  for (i=1; i<l; i++) x[i] = (long)ZC_zc((GEN)z[i]);
+  return x;
+}
+
 /* add new relations to a matrix treated by hnfspec (extramat / extraC) */
 GEN
 hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
@@ -2060,13 +2093,13 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   *       [--------|-----] lig
   *       [   0    | Id  ]
   *       [        |     ] li */
-  extratop = rowextract_i(extramat, 1, lig);
+  extratop = zm_ZM( rowextract_ip(extramat, perm, 1, lig) );
   if (li != lig)
   { /* zero out bottom part, using the Id block */
     GEN A = vecextract_i(C, col+1, co);
-    GEN c = rowextract_i(extramat, lig+1, li);
-    extraC   = gsub(extraC,   gmul(A, c));
-    extratop = gsub(extratop, gmul(B, c));
+    GEN c = rowextract_ip(extramat, perm, lig+1, li);
+    extraC   = gsub(extraC,   typ(A)==t_MAT? RM_zm_mul(A, c): RV_zm_mul(A,c));
+    extratop = gsub(extratop, ZM_zm_mul(B, c));
   }
 
   extramat = concatsp(extratop, vconcat(dep, H));
@@ -2097,7 +2130,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
        GEN extramat,GEN extraC)
 {
   pari_sp av = avma;
-  H = hnfadd_i(H, perm, ptdep, ptB, ptC, extramat, extraC);
+  H = hnfadd_i(H, perm, ptdep, ptB, ptC, ZM_zm(extramat), extraC);
   gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
 }
 

@@ -463,6 +463,25 @@ vecextract_i(GEN A, long y1, long y2)
 }
 
 GEN
+vecextract_ip(GEN A, GEN p, long y1, long y2)
+{
+  long i,lB = y2 - y1 + 2;
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = A[p[y1-1+i]];
+  return B;
+}
+
+/* rowextract_i(rowextract_p(A,p), x1, x2) */
+GEN
+rowextract_ip(GEN A, GEN p, long x1, long x2)
+{
+  long i, lB = lg(A);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = (long)vecextract_ip((GEN)A[i],p,x1,x2);
+  return B;
+}
+
+GEN
 rowextract_i(GEN A, long x1, long x2)
 {
   long i, lB = lg(A);

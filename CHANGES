@@ -95,11 +95,14 @@ BA  5- Library .so link changed to libpari.so for all versions.
     unaffected. In particular, ellheightmatrix() is the polar form of 
     elleight(), and ellbil now satisfies the proper identity for B(P, Q) =
     (h(P+Q)-h(P)-h(Q)) / 2, and
-
+    7- renamed and declared gmul_mat_smallvec --> RM_zc_mul
+                            gmul_mati_smallvec--> ZM_zc_mul
 
   Added
     1- make test-all [ all test suite (SLOW !)]
 BA  2- Add support for GNU/Hurd.
+    3- conversion routines zv_ZC, zv_ZV, zm_ZM, and matrix multiplication:
+       RM_zm_mul, ZM_zm_mul
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but

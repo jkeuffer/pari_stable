@@ -1186,7 +1186,7 @@ get_clgp(GEN Disc, GEN W, GEN *ptmet, long prec)
 static GEN
 extra_relations(long LIMC, long nlze, GEN *ptextraC)
 {
-  long fpc, i, k, nlze2;
+  long fpc, i, nlze2;
   long s = 0, extrarel = nlze+2, lgsub = lg(subFB);
   pari_sp av;
   long MAXRELSUP = min(50,4*KC);
@@ -1239,14 +1239,6 @@ extra_relations(long LIMC, long nlze, GEN *ptextraC)
       if (fpc == 1) fprintferr(" %ld",s);
       else if (DEBUGLEVEL>1) fprintferr(".");
     }
-  }
-
-  for (i=1; i<=extrarel; i++)
-  {
-    GEN colg = cgetg(KC+1,t_COL);
-    col = (GEN)extramat[i];
-    extramat[i] = (long)colg;
-    for (k=1; k<=KC; k++) colg[k] = lstoi(col[vperm[k]]);
   }
   if (DEBUGLEVEL) { fprintferr("\n"); msgtimer("extra relations"); }
   *ptextraC = extraC; return extramat;
@@ -1759,10 +1751,13 @@ START: avma = av; cbach = check_bach(cbach,6.);
 
   if (nlze)
   {
+    pari_sp av2;
 MORE:
     extramat = extra_relations(LIMC,nlze, &extraC);
-    if (!extramat) { goto START; }
-    W = hnfadd(W,vperm,&dep,&B,&C, extramat,extraC);
+    if (!extramat) goto START;
+    av2 = avma;
+    W = hnfadd_i(W,vperm,&dep,&B,&C, extramat,extraC);
+    gerepileall(av2, 4, &W,&C,&B,&dep);
     nlze = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
     KCCO += lg(extramat)-1;
     if (nlze)

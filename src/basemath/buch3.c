@@ -37,7 +37,6 @@ extern GEN detcyc(GEN cyc);
 extern GEN famat_reduce(GEN fa);
 extern GEN famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
-extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN logunitmatrix(GEN nf, GEN U, GEN sgnU, GEN bid);
@@ -849,7 +848,7 @@ static int
 is_unit(GEN M, long r1, GEN x)
 {
   pari_sp av = avma;
-  GEN Nx = ground( norm_by_embed(r1, gmul_mat_smallvec(M,x)) );
+  GEN Nx = ground( norm_by_embed(r1, RM_zc_mul(M,x)) );
   int ok = is_pm1(Nx);
   avma = av; return ok;
 }
