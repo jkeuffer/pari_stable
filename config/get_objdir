@@ -4,8 +4,8 @@ cst_objdir=$pre$osname-$arch;
 objdir=$cst_objdir
 if test -n "$dfltobjdir"; then
   if test "$dfltobjdir"=auto; then
-    case "$asmarch" in
-      $kernlvl0);;
+    case "$kernlvl0" in
+      $asmarch);;
       sparcv8_micro)
          if test "$arch" != sparcv9; then objdir=$objdir-$kernlvl0; fi ;;
       *) objdir=$objdir-$kernlvl0 ;;
