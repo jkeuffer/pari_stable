@@ -85,13 +85,13 @@ eltreltoabs(GEN rnfeq, GEN x)
 
   rnfeq = checkrnfeq(rnfeq);
   polabs= (GEN)rnfeq[1];
-  alpha = (GEN)rnfeq[2];
+  alpha = lift_intern((GEN)rnfeq[2]);
   k     = itos((GEN)rnfeq[3]);
 
   va = varn(polabs);
   if (varncmp(gvar(x), va) > 0) x = scalarpol(x,va);
-  /* Mod(X + k alpha, polabs(X)), alpha root of the polynomial defining base */
-  teta = gmodulcp(gsub(polx[va], gmulsg(k,lift_intern(alpha))), polabs);
+  /* Mod(X - k alpha, polabs(X)), alpha root of the polynomial defining base */
+  teta = gadd(polx[va], gmulsg(-k,alpha));
   s = gen_0;
   for (i=lg(x)-1; i>1; i--)
   {
@@ -100,11 +100,11 @@ eltreltoabs(GEN rnfeq, GEN x)
     switch(tc)
     {
       case t_POLMOD: c = (GEN)c[2]; /* fall through */
-      case t_POL:    c = poleval(c, alpha); break;
+      case t_POL:    c = RgX_RgXQ_compo(c, alpha, polabs); break;
       default:
         if (!is_const_t(tc)) err(talker, "incorrect data in eltreltoabs");
     }
-    s = gadd(c, gmul(teta,s));
+    s = RgX_rem(gadd(c, gmul(teta,s)), polabs);
   }
   return gerepileupto(av, s);
 }
@@ -165,7 +165,7 @@ rnf_roots(GEN nf, GEN pol, long prec, GEN *pts)
   nf_get_sign(nf, &r1, &r2);
   s = cgetg(r1+r2+1,t_VEC);
   r = cgetg(r1+r2+1,t_VEC);
-  ro = (GEN)nf[6];
+  ro = (GEN)nf[6]; pol = lift(pol);
   for (j=1; j<=r1; j++)
   {
     long r1j = 0;
@@ -200,7 +200,7 @@ modulereltoabs(GEN rnf, GEN x)
   long i, j, k, n = lg(w)-1, m = degpol(T);
 
   M = cgetg(n*m+1, t_VEC);
-  basnf = gsubst((GEN)nf[7], varn(T), (GEN)rnfeq[2]);
+  basnf = lift_intern( gsubst((GEN)nf[7], varn(T), (GEN)rnfeq[2]) );
   basnf = Q_primitive_part(basnf, &cobasnf); /* remove denom. --> faster */
   for (k=i=1; i<=n; i++)
   {
@@ -211,7 +211,7 @@ modulereltoabs(GEN rnf, GEN x)
     for (j=1; j<=m; j++)
     {
       GEN c, z = Q_primitive_part(gmul(basnf,(GEN)id[j]), &c);
-      z = lift_intern(gmul(om, z));
+      z = RgX_rem(gmul(om, RgX_rem(z,T)), T);
       c = mul_content(c, c0); if (c) z = gmul(c, z);
       M[k++] = (long)z;
     }
@@ -258,7 +258,7 @@ makenfabs(GEN rnf)
   NF[1] = (long)pol;
   NF[3] = (long)mulii(gpowgs((GEN)nf[3], degpol(rnf[1])),
                       idealnorm(nf, (GEN)rnf[3]));
-  NF[7] = (long)lift_intern( RgM_to_RgXV(M,varn(pol)) );
+  NF[7] = (long)RgM_to_RgXV(M,varn(pol));
   NF[8] = (long)linvmat(M);
   NF[9] = (long)get_mul_table(pol, (GEN)NF[7], (GEN)NF[8]);
   /* possibly wrong, but correct prime divisors [for primedec] */
@@ -300,7 +300,7 @@ rnfinitalg(GEN nf, GEN pol, long prec)
   rnf[1] = (long)pol;
   rnf[3] = (long)delta;
   rnf[4] = (long)f;
-  rnf[6] = (long)rnf_roots(nf, lift(pol), prec, (GEN*)rnf+2);
+  rnf[6] = (long)rnf_roots(nf, pol, prec, (GEN*)rnf+2);
   rnf[7] = (long)bas;
   rnf[8] = (long)lift_if_rational( invmat(B) );
   rnf[9] = lgetg(1,t_VEC); /* dummy */
@@ -379,7 +379,6 @@ rnfalgtobasis(GEN rnf,GEN x)
   return gscalcol(x, degpol(rnf[1]));
 }
 
-/* x doit etre one polymod ou one polynome ou one vecteur de tels objets... */
 GEN
 rnfelementreltoabs(GEN rnf,GEN x)
 {
@@ -412,7 +411,7 @@ eltabstorel(GEN x, GEN T, GEN pol, GEN k)
 {
   return poleval(x, get_theta_abstorel(T,pol,k));
 }
-GEN
+static GEN
 rnf_get_theta_abstorel(GEN rnf)
 {
   GEN k, nf, T, pol, rnfeq;

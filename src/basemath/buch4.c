@@ -648,11 +648,16 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
 }
 
 static GEN
-pol_up(GEN rnfeq, GEN x)
+pol_up(GEN rnfeq, GEN x, long v)
 {
   long i, l = lg(x);
   GEN y = cgetg(l, t_POL); y[1] = x[1];
-  for (i=2; i<l; i++) y[i] = (long)rnfelementreltoabs(rnfeq, (GEN)x[i]);
+  for (i=2; i<l; i++) 
+  {
+    GEN t = eltreltoabs(rnfeq, gel(x,i));
+    if (typ(t) == t_POL) setvarn(t, v);
+    gel(y,i) = t;
+  }
   return y;
 }
 
@@ -660,17 +665,17 @@ GEN
 rnfisnorminit(GEN T, GEN relpol, int galois)
 {
   pari_sp av = avma;
-  long i, l, drel;
-  GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res, k, polabs;
+  long i, l, drel, vbas, v = varn(relpol);
+  GEN prod, S1, S2, gen, cyc, bnf, nf, nfabs, rnfeq, bnfabs, res, k, polabs;
   GEN y = cgetg(9, t_VEC);
 
-  T = get_bnfpol(T, &bnf, &nf);
+  T = get_bnfpol(T, &bnf, &nf); vbas = varn(T);
   if (!bnf) bnf = bnfinit0(nf? nf: T, 1, NULL, DEFAULTPREC);
   if (!nf) nf = checknf(bnf);
 
-  relpol = get_bnfpol(relpol, &rel, &nfrel);
+  relpol = get_bnfpol(relpol, &bnfabs, &nfabs);
   drel = degpol(relpol);
-  if (varncmp(varn(relpol), varn(T)) >= 0)
+  if (varncmp(v, vbas) >= 0)
     err(talker,"main variable must be of higher priority in rnfisnorminit");
 
   rnfeq = NULL; /* no reltoabs needed */
@@ -684,8 +689,9 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
     if (galois == 2 && drel > 2)
     { /* needs reltoabs */
       rnfeq = rnfequation2(bnf, relpol);
-      polabs = (GEN)rnfeq[1];
-      k =      (GEN)rnfeq[3];
+      polabs = gel(rnfeq,1);
+      gel(rnfeq,2) = lift_intern(gel(rnfeq,2));
+      k = gel(rnfeq,3);
     }
     else
     {
@@ -694,33 +700,33 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
       k = stoi(sk);
     }
   }
-  if (!rel || !gcmp0(k)) rel = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
-  if (!nfrel) nfrel = checknf(rel);
+  if (!bnfabs || !gcmp0(k)) bnfabs = bnfinit0(polabs, 1, NULL, nfgetprec(nf));
+  if (!nfabs) nfabs = checknf(bnfabs);
 
   if (galois < 0 || galois > 2) err(flagerr, "rnfisnorminit");
   if (galois == 2)
   {
-    GEN P = rnfeq? pol_up(rnfeq, relpol): relpol;
-    galois = nfisgalois(gsubst(nfrel, varn(P), polx[varn(T)]), P);
+    GEN P = rnfeq? pol_up(rnfeq, relpol, vbas): relpol;
+    galois = nfisgalois(gsubst(nfabs, v, polx[vbas]), P);
   }
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
-  res = gmael(rel,8,1);
+  res = gmael(bnfabs,8,1);
   cyc = (GEN)res[2];
   gen = (GEN)res[3]; l = lg(cyc);
   for(i=1; i<l; i++)
   {
-    if (cgcd(smodis((GEN)cyc[i], drel), drel) == 1) break;
-    fa_pr_append(nf,rel,gmael3(gen,i,1,1),&prod,&S1,&S2);
+    if (cgcd(umodiu((GEN)cyc[i], drel), drel) == 1) break;
+    fa_pr_append(nf,bnfabs,gmael3(gen,i,1,1),&prod,&S1,&S2);
   }
   if (!galois)
   {
-    GEN Ndiscrel = diviiexact((GEN)nfrel[3], gpowgs((GEN)nf[3], drel));
-    fa_pr_append(nf,rel,absi(Ndiscrel), &prod,&S1,&S2);
+    GEN Ndiscrel = diviiexact((GEN)nfabs[3], gpowgs((GEN)nf[3], drel));
+    fa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
   }
 
   y[1] = (long)bnf;
-  y[2] = (long)rel;
+  y[2] = (long)bnfabs;
   y[3] = (long)relpol;
   y[4] = (long)get_theta_abstorel(T, relpol, k);
   y[5] = (long)prod;

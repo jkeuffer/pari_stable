@@ -282,6 +282,7 @@ GEN    element_mulidid(GEN nf, long i, long j);
 GEN    element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
 GEN    eltabstorel(GEN x, GEN T, GEN pol, GEN k);
 GEN    eltmulid_get_table(GEN nf, long i);
+GEN    eltreltoabs(GEN rnfeq, GEN x);
 GEN    galoisbig(GEN x, long prec);
 GEN    get_arch(GEN nf,GEN x,long prec);
 GEN    get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
