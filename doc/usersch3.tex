@@ -2849,7 +2849,7 @@ is given by a row vector $\chi = [a_1,\ldots,a_n]$ such that
 $\chi(\prod g_i^{n_i}) = exp(2i\pi\sum a_i n_i / N_i)$.
 
 
-\misctitle{Warnings:}
+\misctitle{Warnings.}
 
 1) An element in $\var{nf}$ can be expressed either as a polmod or as a
 \emph{column} vector of components on the integral basis \kbd{\var{nf}.zk}.
@@ -3022,13 +3022,12 @@ $\Z[X]$, irreducible and, preferably, monic. In fact, if you supply a
 non-monic polynomial at this point, GP will issue a warning, then
 \emph{transform your polynomial} so that it becomes monic. Instead of the
 normal result, say \kbd{res}, you then get a vector \kbd{[res,Mod(a,Q)]},
-where \kbd{Mod(a,Q)=Mod(X,P)} gives the change of variables.
+where \kbd{Mod(a,Q) = Mod(X,P)} gives the change of variables.
 
 The numbers $c$ and $c2$ are positive real numbers which control the
 execution time and the stack size. To get maximum speed, set $c2=c$. To get a
 rigorous result (under \idx{GRH}) you must take $c2=12$ (or $c2=6$ in the
-quadratic case, but then you should use the much faster function
-\kbd{quadclassunit}). Reasonable values for $c$ are between $0.1$ and
+quadratic case). Reasonable values for $c$ are between $0.1$ and
 $2$. (The defaults are $c=c2 = 0.3$.)
 
 $\var{nrpid}$ is the maximal number of small norm relations associated to each
@@ -3036,14 +3035,27 @@ ideal in the factor base. Set it to $0$ to disable the search for small norm
 relations. Otherwise, reasonable values are between 4 and 20. (The default is
 4).
 
+\misctitle{Warning.}\label{se:GRHbnf} Make sure you understand the above! By
+default, most of the \kbd{bnf} routines depend on the correctness of a
+heuristic assumption which is stronger than the GRH. In particular, any of
+the class number, class group structure, class group generators, regulator
+and fundamental units may be wrong, independantly of each other. Any result
+computed from such a \kbd{bnf} may be wrong. The only guarantee is that the
+units given generate a subgroup of finite index in the full unit group. In
+practice, very few counter-examples are known, requiring unlucky random
+seeds. No counter-example has been reported for $c_2 = 0.5$ (which should be
+almost as fast as $c_2 = 0.3$, and shall very probably become the default).
+If you use $c_2 = 12$, then everything is correct assuming the GRH holds. You
+may use \kbd{bnfcertify} to certify the computations unconditionally.
+
 \misctitle{Remarks.}
 
-Apart from the polynomial $P$, you don't need to supply any of the technical
+Apart from the polynomial $P$, you do not need to supply the technical
 parameters (under the library you still need to send at least an empty
-vector, \kbd{cgetg(1,t\_VEC)}). However, should you choose to set some of
-them, they \emph{must} be given in the requested order. For example, if you
-want to specify a given value of $nrel$, you must give some values as well
-for $c$ and $c2$, and provide a vector $[c,c2,nrel]$.
+vector, coded as \kbd{NULL}). However, should you choose to set some of them,
+they \emph{must} be given in the requested order. For example, if you want to
+specify a given value of $nrpid$, you must give some values as well for $c$
+and $c2$, and provide a vector $[c,c2,nrpid]$.
 
 Note also that you can use an $\var{nf}$ instead of $P$, which avoids
 recomputing the integral basis and analogous quantities.
@@ -3100,12 +3112,12 @@ expressed as a polynomial.
 polynomials.
 
 If $\fl=1$, and the precision happens to be insufficient for obtaining the
-fundamental units exactly, the internal precision is doubled and the
-computation redone, until the exact results are obtained. The user should be
-warned that this can take a very long time when the coefficients of the
-fundamental units on the integral basis are very large, for example in the
-case of large real quadratic fields. In that case, there are alternate
-methods for representing algebraic numbers which are not implemented in PARI.
+fundamental units, the internal precision is doubled and the computation
+redone, until the exact results are obtained. The user should be warned that
+this can take a very long time when the coefficients of the fundamental units
+on the integral basis are very large, for example in the case of large real
+quadratic fields. In that case, there are alternate methods for representing
+algebraic numbers which are not implemented in PARI.
 
 If $\fl=2$, the fundamental units and roots of unity are not computed.
 Hence the result has only 7 components, the first seven ones.
@@ -3135,8 +3147,9 @@ true module.
 to \kbd{bnfclassunit} except that the output contains a lot of technical data,
 and should not be printed out explicitly in general. The result of
 \kbd{bnfinit} is used in programs such as \kbd{bnfisprincipal},
-\kbd{bnfisunit} or \kbd{bnfnarrow}. The result is a 10-component vector
-$\var{bnf}$.
+\kbd{bnfisunit} or \kbd{bnfnarrow}. By default, the results are conditional
+on a heuristic strengthening of the GRH, see \ref{se:GRHbnf}. The result is a
+10-component vector $\var{bnf}$.
 
 \noindent $\bullet$ The first 6 and last 2 components are technical and in
 principle are not used by the casual user. However, for the sake of
