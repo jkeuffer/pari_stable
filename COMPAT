@@ -1,0 +1,58 @@
+This file lists the incompatible changes between Version 1.39.15 and 2.0.x
+
+* The calculator GP:
+====================
+ - most function names have changed (see misc/new.dic or use whatnow under GP)
+ - lowercase / uppercase letters distinguished.
+ - the syntax \var = value is not recognized anymore. Use standard
+   metacommands instead.
+(setting the compatibility level "compatible" to 3, with "default" will give
+you those three back).
+
+ - strict parenthesis matching before executing the command
+(set strictmatch to 0 to get old behaviour)
+
+ - functions label / goto have been removed (use break/next/return instead).
+ - conjugation x_ has been removed. '_' can be freely used in identifiers.
+ - \k metacommand removed
+
+ - result history is now cyclic (older results are erased when the maximal
+   size "histsize" is reached).
+ - the Set() function turns objects into strings (so that set functions are
+   able to treat arbitrary objects). Use eval to turn them back to GENs.
+ - the type() function returns a string and not a number.
+ - sum(X=a,b,...,x) yields x if b<a. Analogous statement for prod.
+
+* The library PARI:
+===================
+ - use symbolic type names (t_INT, etc.). Don't use any explicit type number
+   in your programs since these are liable to change (they have not, but will).
+ - the codewords of GEN objects have a different internal structure. The
+   components should only be accessed through the documented macros. When
+   creating codeword x[1] for the GEN x, use the eval* macros (the set* ones
+   don't fill the codeword completely).
+ - the following constant names have changed ("pari" prepended): C1, C2, C3, K,
+   K1, K2, K4. The constant C31 has disappeared.
+ - prec and defaultpadicprecision are no longer global. The latter has
+   disapeared.
+ - char *pariversion not set anymore (use the macros PARIVERSION/PARIINFO)
+ - LONG_IS_32BIT is never defined (test whether LONG_IS_64BIT is defined
+   or not).
+ - gen2str() renamed to GENtostr().
+ - gitoascii() suppressed, use GENtostr().
+ - init() renamed to pari_init().
+ - the macro mant() has been suppressed.
+ - imprimer() suppressed. output() is now a function and can be used under
+   all debuggers.
+ - the prototypes and behaviour of gredsp() and normalize() have changed.
+   They are not documented anymore.
+ - the install() function has been modified (use codes instead of valence).
+ - gpuigs only has two arguments.
+ - integ now takes two arguments, like deriv.
+ - setrand, getrand, getstack, gettime, glength return a C long, and not a GEN.
+ - pari_randseed no longer global, use setrand/getrand
+ - gerepile(ltop,lbot,0) no longer returns ltop - lbot
+ - nf[5][7] stored in two element form (was Z-basis) for faster inversion
+ - t_POL and t_POLMOD can be freely mixed as long as main variables are the
+   same (result is the expected POLMOD)
+

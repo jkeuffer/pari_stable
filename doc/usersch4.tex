@@ -1,0 +1,2254 @@
+\chapter{Programming PARI in Library Mode}
+
+\section{Introduction: initializations, universal objects}
+\label{se:intro4}
+
+\noindent
+To be able to use PARI in \idx{library mode}, you must write a C program and
+link it to the PARI library. See the installation guide (in Appendix~A)
+on how to create and install the library and include files. A sample Makefile
+is presented in Appendix~B.
+
+Probably the best way to understand how programming is done is to work
+through a complete example. We will write such a program in
+\secref{se:prog}. Before doing this, a few explanations are in order.
+
+First, one must explain to the outside world what kind of objects and
+routines we are going to use. This is done simply with the statement
+
+\bprog%
+\#include <pari.h>
+\eprog
+\noindent
+This file \tet{pari.h} imports all the necessary constants,
+variables and functions, defines some important macros, and also defines the
+fundamental type for all PARI objects: the type \teb{GEN}, which is
+simply a pointer to \kbd{long}.
+
+\misctitle{Technical note}: we would have liked to define a type \kbd{GEN}
+to be a pointer to itself. This unfortunately is not possible in C, except by
+using structures, but then the names become unwieldy. The result of this is
+that when we use a component of a PARI object, it will be a \kbd{long},
+hence will need to be typecast to a \kbd{GEN} again if we want to avoid
+warnings from the compiler. This will sometimes be quite tedious, but of
+course is trivially done. See the discussion on typecasts in the next
+section.
+
+After declaring the use of the file \kbd{pari.h}, the first executable
+statement of a main program should be to initialize the PARI system, and in
+particular the PARI stack which will be both a scratchboard and a repository
+for computed objects. This is done with a call to the function%
+\sidx{pari\string\_init}
+
+\kbd{void \key{pari\_init}(long size, long maxprime)}.
+
+\noindent The first argument is the number of bytes given to PARI to work
+with (it should not reasonably be taken below 500000), and the second is the
+upper limit on a precomputed prime number table. If you don't want prime
+numbers, just put $\kbd{maxprime} = 2$. Be careful because lots a PARI
+functions need this table (certainly all the ones of interest to number
+theorists). If you wind up with the error message ``not enough precomputed
+primes'', try to increase this value.
+
+\noindent We have now at our disposal:
+
+$\bullet$ a large PARI {\it \idx{stack}\/} containing nothing. It's a big
+connected chunk of memory whose size you chose when invoking
+\kbd{pari\_init}. All your computations are going to take place here.
+When doing large computations, unwanted intermediate results clutter up
+memory very fast so some kind of garbage collecting is needed. Most large
+systems do garbage collecting when the memory is getting scarce, and this slows
+down the performance. In PARI we have taken a different approach: you must do
+your own cleaning up when the intermediate results are not needed anymore.
+Special purpose routines have been written to do this; we will see later how
+(and when, if at all) you should use them.
+
+$\bullet$ the following {\it universal objects\/} (by definition, objects
+which do not belong on the stack): the integers 0, 1 and 2 (respectively
+called \teb{gzero}, \teb{gun}, and \teb{gdeux}), the
+fraction $\dfrac{1}{2}$ (\teb{ghalf}), the complex number $i$
+(\teb{gi}). All of these are of type \kbd{GEN}.
+
+In addition, space is reserved for the polynomials $x_v$
+\sidx{variable}
+(\kbd{\teb{polx}[$v$]}), and the polynomials $1_v$ (\kbd{\teb{polun}[$v$]}).
+Here, $x_v$ is the name of variable number $v$, where $0\le v\le
+\kbd{\idx{MAXVARN}}$ (the exact value of which depends on your machine, at
+least 16383 in any case). Both \kbd{polun} and \kbd{polx} are arrays of
+\kbd{GEN}s, the index being the polynomial variable number.
+
+However, except for the ones corresponding to variables $0$ and \kbd{MAXVARN},
+these polynomials are {\it not\/} created upon initialization. It
+is the programmer's responsibility to fill them before use. We'll see how
+this is done in \secref{se:vars} ({\it never\/} through direct assignment).
+
+$\bullet$ a {\it \idx{heap}\/} which is just a linked list of permanent
+universal objects. For now, it contains exactly the ones listed above. You
+will probably very rarely use the heap yourself; and if so, only as a
+collection of individual copies of objects taken from the stack
+(called \idx{clone}s in the sequel). Thus you need not bother with its
+internal structure, which may change as PARI evolves. Some complex PARI
+functions may create clones for special garbage collecting purposes, usually
+destroying them when returning.
+
+$\bullet$ a table of primes (in fact of {\it differences\/} between
+consecutive primes), called \teb{diffptr}, of type \kbd{byteptr}
+(pointer to \kbd{unsigned char}). Its use is described in appendix~C.
+
+$\bullet$ access to all the built-in functions of the PARI library.
+These are declared to the outside world when you include \kbd{pari.h}, but
+need the above things to function properly. So if you forget the call to
+\kbd{pari\_init}, you will immediately get a fatal error when running your
+program (usually a segmentation fault).
+
+\section{Important technical notes}
+
+\subsec{Typecasts}.\label{se:typecast}\sidx{typecast}
+
+\noindent
+We have seen that, due to the non-recursiveness of the PARI types from the
+compiler's point of view, many typecasts will be necessary when programming
+in PARI. To take an example, a vector $V$ of dimension 2 (two components)
+will be represented by a chunk of memory pointed to by the \kbd{GEN}~\kbd{V}.
+\kbd{V[0]} contains coded information, in particular about the type of the
+object, its length, etc. \kbd{V[1]} and \kbd{V[2]} contain pointers to
+the two components of \kbd{V}. Those coefficients \kbd{V[i]} themselves are in
+chunks of memory whose complexity depends on their own types, and so on. This
+is where typecasting will be necessary: a priori, \kbd{V[i]} (for
+$\kbd{i}=1,2$) is a \kbd{long}, but we will want to use it as a \kbd{GEN}.
+The following two constructions will be exceedingly frequent (\kbd{x} and
+\kbd{V} are \kbd{GEN}s):
+%
+\bprog%
+  V[i] = (long) x;
+  x = (GEN) V[i];
+\eprog
+\noindent Note that a typecast is not a valid lvalue (cannot be put on the
+left side of an assignment), so \kbd{(GEN)V[i] = x} would be incorrect, though
+some compilers may accept it.
+
+Due to this annoyance, the PARI functions and variables that occur most
+frequently have analogues which are macros including the typecast. The complete
+list can be found in the file \kbd{paricast.h} (which is included by
+\kbd{pari.h} and can be found at the same place). For instance you can
+abbreviate:
+%
+\bprogtabs\+
+-----------------&--------&
+\cr\+
+(long) gzero  & -----> &\idx{zero}
+\cr\+
+(long) gun    & -----> &\idx{un}
+\cr\+
+(long) polx[v]& -----> &\idx{lpolx}[v]
+\cr\+
+(long) gadd(x,y)& -----> &\idx{ladd(x,y)}
+\cr\eprog
+\noindent
+In general, replacing a leading \kbd{g} by an \kbd{l} in the name of a PARI
+function will typecast the result to \kbd{long}. Note that \kbd{ldiv} is an
+ANSI C function which is is hidden in PARI by a macro of the same name
+representing \kbd{(long)gdiv}.
+
+The macro $\teb{coeff}(x,m,n)$ exists with exactly the meaning of \kbd{x[m,n]}
+under GP when \kbd{x} is a matrix. This is a purely syntactical trick
+to reduce the number of typecasts and thus does not create a copy of the
+coefficient (contrary to all the library {\it functions\/}). It can be put on
+the left side of an assignment statement, and its value, of type \kbd{long}
+integer, is a pointer to the desired coefficient object. The macro
+\kbd{gcoeff} is a synonym for \kbd{(GEN) coeff}, hence cannot be put on
+the left side of an assignment.
+
+To retrieve the values of elements of lists of \dots\ of
+lists of vectors, without getting infuriated by gigantic lists of typecasts,
+we have the \teb{mael} macros (for {\bf m}ultidimensional {\bf a}rray {\bf
+el}ement). The syntax is $\key{mael}n(x,a_1,\dots,a_n)$, where $x$ is a
+\kbd{GEN}, the $a_i$ are indexes, and $n$ is an integer between $2$ and $5$
+(with a standalone \kbd{mael} as a synonym for \kbd{mael2}). This stands
+for $x[a_1][a_2]\dots[a_n]$ (with all the necessary typecasts), and returns a
+\kbd{long} (i.e.~they are valid lvalues). The $\kbd{gmael}n$ macros are
+synonyms for $\kbd{(GEN) mael}n$. Note that due to the implementation of matrix
+types in PARI (i.e.~as horizontal lists of vertical vectors), \kbd{coeff(x,y)}
+is actually completely equivalent to \kbd{mael(y,x)}. It is suggested that
+you use \kbd{coeff} in matrix context, and \kbd{mael} otherwise.
+
+\subsec{Variations on basic functions}.\label{se:low_level} In the library
+syntax descriptions in Chapter~3, we have only given the basic names of the
+functions. For example \kbd{gadd}$(x,y)$ assumes that $x$ and $y$ are PARI
+objects (of type \kbd{GEN}), and {\it creates\/} the result $x+y$ on the PARI
+stack. For most of the basic operators and functions, many other variants
+are available. We give some examples for \kbd{gadd}, but the same is true for
+all the basic operators, as well as for some simple common functions (the
+complete list is given in Chapter~5):
+
+\kbd{GEN \teb{gaddgs}(GEN x, long y)}
+
+\kbd{GEN \teb{gaddsg}(long x, GEN y)}
+
+\noindent In the following three, \kbd{z} is a preexisting \kbd{GEN} and the
+result of the corresponding operation is put into~\kbd{z}. The size of the PARI
+stack does not change:
+
+\kbd{void \teb{gaddz}(GEN x, GEN y, GEN z)}
+
+\kbd{void \teb{gaddgsz}(GEN x, long y, GEN z)}
+
+\kbd{void \teb{gaddsgz}(GEN x, GEN y, GEN z)}
+
+\noindent There are also low level functions which are special cases of the
+above:
+
+\kbd{GEN \teb{addii}(GEN x, GEN y)}: here $x$ and $y$ are \kbd{GEN}s of type
+\typ{INT} (this is not checked).
+
+\kbd{GEN \teb{addrr}(GEN x, GEN y)}: here $x$ and $y$ are \kbd{GEN} reals
+(type \typ{REAL}).
+
+\noindent
+There also exist functions \teb{addir}, \teb{addri}, \teb{mpadd} (whose
+two arguments can be of type integer or real), \teb{addis} (to add a \typ{INT}
+and a \kbd{long}) and so on.
+
+All these functions can of course be called by the user but we feel that
+the few microseconds lost in calling more general functions (in this case
+\kbd{gadd}) are compensated by the fact that one needs to remember a much
+smaller number of functions, and also because there is a hidden danger here:
+the types of the objects that you use, if they are themselves results of a
+previous computation, are not completely predetermined. For instance the
+multiplication of a type real \typ{REAL} by a type integer \typ{INT}
+{\it usually\/} gives a result of type real, except when the integer is~0, in
+which case according to the PARI philosophy the result is the exact integer~0.
+Hence if afterwards you call a function which specifically needs a real
+type argument, you are going to be in trouble.
+
+If you really want to use these functions, their names are self-explanatory
+once you know that {\bf i} stands for a PARI integer, {\bf r} for a PARI
+real, {\bf mp} for i or r, {\bf s} for an ordinary signed long, whereas {\bf
+z} (as a suffix) means that the result is not created on the PARI
+stack but assigned to a preexisting GEN object passed as an extra argument.
+
+For completeness, Chapter 5 gives a description of all these
+low-level functions.
+
+Please note that in the present version \vers{} the names of the functions
+are not always consistent. This will be changed. Hence anyone programming in
+PARI must be aware that the names of almost all functions that he uses might
+be subject to change. If the need arises (i.e.~if there really are people out
+there who delve into the innards of PARI), updated versions with no name
+changes will be released.
+
+\subsec{Portability: 32-bit / 64-bit architectures}.
+
+\noindent
+PARI supports both 32-bit and 64-bit based machines, but not simultaneously!
+The library will have been compiled assuming a given architecture (a~priori
+following a guess by the \kbd{Configure} program, see Appendix~A), and some
+of the header files you include (through \kbd{pari.h}) will have been modified
+to match the library.
+
+Portable macros are defined to bypass most machine dependencies. If you
+want your programs to run identically on 32-bit and 64-bit machines, you will
+have to use these, and not the corresponding numeric values, whenever the
+precise size of your \kbd{long} integers might matter. Here are the most
+important ones:
+
+\bprogtabs\+
+------------------&----------&------------&\cr
+\+
+                & {\rm 64-bit} & {\rm 32-bit}
+\cr\+
+BITS\_IN\_LONG  & 64 & 32
+\cr\+
+LONG\_IS\_64BIT & {\rm defined} & {\rm undefined}
+\cr\+
+DEFAULTPREC     & 3 & 4 & {\rm ($\approx$ 19 decimal digits, %
+ see formula below)}
+\cr\+
+MEDDEFAULTPREC  & 4 & 6 & {\rm ($\approx$ 38 decimal digits)}
+\cr\+
+BIGDEFAULTPREC  & 5 & 8 & {\rm ($\approx$ 57 decimal digits)}
+\cr
+\eprog
+\sidx{DEFAULTPREC}
+\sidx{MEDDEFAULTPREC}
+\sidx{BIGDEFAULTPREC}
+\sidx{LONG\string\_IS\string\_64BIT}
+\sidx{BITS\string\_IN\string\_LONG}
+
+\noindent
+For instance, suppose you call a transcendental function, such as
+
+\kbd{GEN \key{gexp}(GEN x, long prec)}.
+
+\noindent The last argument \kbd{prec} is only used if \kbd{x} is an exact
+object (otherwise the relative precision is determined by the precision
+of~\kbd{x}). But since \kbd{prec} sets the size of the inexact result counted
+in (\kbd{long}) {\it words\/} (including codewords), the same value of
+\kbd{prec} will yield different results on 32-bit and 64-bit machines. Real
+numbers have two codewords (see~\secref{se:impl}), so the formula for
+computing the bit accuracy is\sidx{bit\string\_accuracy}
+$$ \kbd{bit\_accuracy}(\kbd{prec}) = (\kbd{prec} - 2) * \kbd{BITS\_IN\_LONG}$$
+(this is actually the definition of a macro). The corresponding accuracy
+expressed in decimal digits would be
+%
+$$ \kbd{bit\_accuracy(prec)} * \log(2) / \log(10).$$
+%
+For example if the value of \kbd{prec} is 5, the corresponding accuracy for
+32-bit machines is $(5-2)*\log(2^{32})/\log(10)\approx 28$ decimal digits,
+while for 64-bit machines it is $(5-2)*\log(2^{64})/\log(10)\approx 57$
+decimal digits.
+
+Thus, you must take care to change the \kbd{prec} parameter you are supplying
+according to the bit size, either using the default precisions given by the
+various \kbd{DEFAULTPREC}s, or by using conditional constructs of the form:
+%
+\bprog%
+\#ifndef LONG\_IS\_64BIT
+\q prec = 4;
+\#else
+\q prec = 6;
+\#endif
+\eprog
+\noindent which is in this case equivalent to the statement
+\kbd{prec = MEDDEFAULTPREC;}.
+
+Note that for parity reasons, half the accuracies available on 32-bit
+architectures (the odd ones) have no precise equivalents on 64-bit machines.
+
+\section{Creation of PARI objects, assignments, conversions}
+
+\subsec{Creation of PARI objects}.\sidx{creation}
+The basic function which creates a PARI object is the function
+\teb{cgetg} whose prototype is:
+
+\kbd{GEN \key{cgetg}(long length, long type)}.
+
+\noindent
+Here \kbd{length} specifies the number of longwords to be allocated to the
+object, and type is the type number of the object, preferably in symbolic
+form (see \secref{se:impl} for the list of these). The precise effect of
+this function is as follows: it first creates on the PARI {\it stack\/} a
+chunk of memory of size \kbd{length} longwords, and saves the address of the
+chunk which it will in the end return.  If the stack has been used up, a
+message to the effect that ``the PARI stack overflows'' will be printed,
+and an error raised. Otherwise, it sets the type and length of the PARI object.
+In effect, it fills correctly and completely its first codeword (\kbd{z[0]} or
+\kbd{*z}).  Many PARI objects also have a second codeword (types \typ{INT},
+\typ{REAL},  \typ{PADIC}, \typ{POL}, and \typ{SER}). In case you want to
+produce one of those from scratch (this should be exceedingly rare), {\it it
+is your responsibility to fill this second codeword}, either explicitly (using
+the macros described in \secref{se:impl}), or implicitly using an assignment
+statement (using \kbd{gaffect}).
+
+Note that the argument \kbd{length} is predetermined for a number of types:
+3 for types \typ{INTMOD}, \typ{FRAC}, \typ{FRACN}, \typ{COMPLEX},
+\typ{POLMOD}, \typ{RFRAC} and \typ{RFRACN}, 4 for type \typ{QUAD}
+and \typ{QFI}, and 5 for type \typ{PADIC} and \typ{QFR}. However for the sake
+of efficiency, no checking is done in the function \kbd{cgetg}, so
+disasters will occur if you give an incorrect length.
+
+\misctitle{Notes}:
+1)  The main use of this function is to prepare for later assigments
+(see \secref{se:assign}). Most of the time you will use \kbd{GEN} objects
+as they are created and returned by PARI functions. In this case you don't need
+to use \kbd{cgetg} to create space to hold them.
+
+\noindent 2) For the creation of leaves, i.e.~integers or reals, which is
+very common,
+
+\kbd{GEN \teb{cgeti}(long length)}
+
+\kbd{GEN \teb{cgetr}(long length)}
+
+\noindent should be used instead of \kbd{cgetg(length, t\_INT)} and
+\kbd{cgetg(length, t\_REAL)} respectively.
+
+\noindent 3) The macros \teb{lgetg}, \teb{lgeti}, \teb{lgetr} are
+predefined as \kbd{(long)cgetg}, \kbd{(long)cgeti}, \kbd{(long)cgetr},
+respectively.
+
+\misctitle{Examples}: 1) \kbd{z = cgeti(DEFAULTPREC)} and
+\kbd{cgetg(DEFAULTPREC, t\_INT)} create an integer object whose ``precision''
+is \kbd{bit\_accuracy(DEFAULTPREC)} = 64. This means \kbd{z} can hold rational
+integers of absolute value less than $2^{64}$. Note that in both cases, the
+second codeword will {\it not\/} be filled. Of course we could use numerical
+values, e.g.~\kbd{cgeti(4)}, but this would have different meanings on
+different machines as \kbd{bit\_accuracy(4)} equals 64 on 32-bit machines,
+but 128 on 64-bit machines.
+
+\noindent 2) The following creates a type ``complex'' object whose real and
+imaginary parts can hold real numbers of precision
+$\kbd{bit\_accuracy(MEDDEFAULTPREC)} = 96\hbox{ bits:}$
+%
+\bprog%
+  z = cgetg(3, t\_COMPLEX);
+  z[1] = lgetr(MEDDEFAULTPREC);
+  z[2] = lgetr(MEDDEFAULTPREC);
+\eprog
+
+\noindent 3) To create a matrix object for $4\times 3$ matrices:
+%
+\bprog%
+  z = cgetg(4, t\_MAT);
+  for(i=1; i<4; i++) z[i] = lgetg(5, t\_COL);
+\eprog
+%
+\noindent If one wishes to create space for the matrix elements themselves,
+one has to follow this with a double loop to fill each column vector.
+
+These last two examples illustrate the fact that since PARI types are
+recursive, all the branches of the tree must be created. The function
+\teb{cgetg} creates only the ``root'', and other calls to \kbd{cgetg} must be
+made to produce the whole tree.  For matrices, a common mistake is to think
+that \kbd{z = cgetg(4, t\_MAT)} (for example) will create the root of the
+matrix: one needs also to create the column vectors of the matrix (obviously,
+since we specified only one dimension in the first \kbd{cgetg}!). This is
+because a matrix is really just a row vector of column vectors (hence a
+priori not a basic type), but it has been given a special type number so that
+operations with matrices become possible.
+
+\subsec{Assignments}.
+Firstly, if \kbd{x} and \kbd{y} are both declared as \kbd{GEN} (i.e.~pointers
+to something), the ordinary C assignment \kbd{y = x} makes perfect sense: we
+are just moving a pointer around. However, physically modifying either
+\kbd{x} or \kbd{y} (for instance, \kbd{x[1] = 0}) will also change the other
+one, which is usually not desirable. \label{se:assign}
+
+\misctitle{Very important note}: Using the functions described in this
+paragraph is very inefficient and often awkward: one of the \tet{gerepile}
+functions (see~\secref{se:garbage}) should be preferred. See the paragraph
+end for some exceptions to this rule.
+
+\noindent
+The general PARI \idx{assignment} function is the function \teb{gaffect} with
+the following syntax:
+
+\kbd{void \key{gaffect}(GEN x, GEN y)}
+
+\noindent
+Its effect is to assign the PARI object \kbd{x} into the {\it preexisting\/}
+object \kbd{y}. This copies the whole structure of \kbd{x} into \kbd{y} so
+many conditions must be met for the assignment to be possible. For instance
+it is allowed to assign an integer into a real number, but the converse is
+forbidden.  For that, you must use the truncation or rounding function of
+your choice (see section 3.2). It can also happen that \kbd{y} is not large
+enough or does not have the proper tree structure to receive the object
+\kbd{x}. As an extreme example, assume \kbd{y} is the zero integer with length
+equal to 2. Then all assignments of a non-zero integer into \kbd{y} will
+result in an error message since \kbd{y} is not large enough to accommodate
+a non-zero integer.  In general common sense will tell you what is possible,
+keeping in mind the PARI philosophy which says that if it makes sense it is
+legal. For instance, the assignment of an imprecise object into a precise one
+does {\it not\/} make sense. However, a change in precision of imprecise
+objects is allowed.
+
+All functions ending in ``\kbd{z}'' such as \teb{gaddz}
+(see~\secref{se:low_level}) implicitly use this function. In fact what they
+exactly do is record {\teb{avma}} (see~\secref{se:garbage}), perform the
+required operation, \teb{gaffect} the result to the last operand, then
+restore the initial \kbd{avma}.
+
+You can assign ordinary C long integers into a PARI object (not necessarily
+of type \typ{INT}). Use the function \teb{gaffsg} with the following
+syntax:
+
+\kbd{void \key{gaffsg}(long s, GEN y)}
+
+\misctitle{Note}: due to the requirements mentionned above, it's usually
+a bad idea to use \tet{gaffect} statements. Two exceptions:
+
+$\bullet$ for simple objects (e.g.~leaves) whose size is controlled, they can
+be easier to use than gerepile, and about as efficient.
+
+$\bullet$ to coerce an inexact object to a given precision. For instance
+\bprog%
+gaffect(x, (tmp=cgetr(3))); x = tmp;
+\eprog
+\noindent at the beginning of a routine where precision can be kept to a
+minimum (otherwise the precision of \kbd{x} will be used in all subsequent
+computations, which will be a disaster if \kbd{x} is known to thousands of
+digits).
+
+\subsec{Copy}. It is also very useful to \idx{copy} a PARI object, not
+just by moving around a pointer as in the \kbd{y = x} example, but by
+creating a copy of the whole tree structure, without pre-allocating a
+possibly complicated \kbd{y} to use with \kbd{gaffect}. The function which
+does this is called \teb{gcopy}, with the predefined macro
+\teb{lcopy} as a synonym for \kbd{(long)gcopy}. Its syntax is:
+
+\kbd{GEN \key{gcopy}(GEN x)}
+
+\noindent and the effect is to create a new copy of x on the PARI stack.
+Beware that universal objects which occur in specific components of certain
+types (mainly moduli for types \typ{INTMOD} and \typ{PADIC}) are not copied,
+as they are assumed to be permanent. In this case, \kbd{gcopy} only copies
+the pointer. Use \kbd{GEN \teb{forcecopy}(GEN x)} if you want a
+complete copy.
+
+Please be sure at this point that you really understand the difference between
+\kbd{y = x}, \kbd{y = gcopy(x)}, and \kbd{gaffect(x,y)}: this will save you
+from many ``obvious'' mistakes later on.
+
+\subsec{Clones}.\sidx{clone}
+Sometimes, it may be more efficient to create a {\it permanent\/} copy of a
+PARI object. This will not be created on the stack but on the heap. The
+function which does this is called \teb{gclone}, with the predefined macro
+\teb{lclone} as a synonym for \kbd{(long)gclone}. Its syntax is:
+
+\kbd{GEN \key{gclone}(GEN x)}
+
+A clone can be removed from the heap (thus destroyed) using
+
+\kbd{void \key{gunclone}(GEN x)}
+
+\noindent No PARI object should keep references to a clone which has been
+destroyed. If you want to copy a clone back to the stack then delete it, use
+\tet{forcecopy} and not \tet{gcopy}, otherwise some components might not be
+copied (moduli of \typ{INTMOD}s and \typ{POLMOD}s for instance).
+
+\subsec{Conversions}.\sidx{conversions}
+The following functions convert C objects to PARI objects (creating them on
+the stack as usual):
+
+\kbd{GEN \teb{stoi}(long s)}: C \kbd{long} integer  (``small'') to
+PARI integer (\typ{INT})
+
+\kbd{GEN \teb{dbltor}(double s)}: C \kbd{double} to PARI real
+(\typ{REAL}). The accuracy of the result is 19 decimal digits, i.e.~a type
+\typ{REAL} of length \kbd{DEFAULTPREC}, although on 32-bit machines only 16
+of them will be significant.
+
+\noindent We also have the converse functions:
+
+\kbd{long \teb{itos}(GEN x)}: \kbd{x} must be of type \typ{INT},
+
+\kbd{double \teb{rtodbl}(GEN x)}: \kbd{x} must be of type \typ{REAL},
+
+\noindent as well as the more general ones:
+
+\kbd{long \teb{gtolong}(GEN x)},
+
+\kbd{double \teb{gtodouble}(GEN x)}.
+
+\section{Garbage collection}\label{se:garbage}\sidx{garbage collecting}
+
+\subsec{Why and how}.
+
+\noindent
+As we have seen, the \kbd{pari\_init} routine allocates a big range of
+addresses (the {\it stack\/}) that are going to be used throughout. Recall that
+all PARI objects are pointers. But for universal objects, they will all point
+at some part of the stack.
+
+The stack starts at the address \kbd{bot} and ends just before \kbd{top}. This
+means that the quantity
+%
+$$ (\kbd{top} - \kbd{bot})\,/\,\kbd{sizeof(long)} $$
+%
+is equal to the \kbd{size} argument of \kbd{pari\_init}. The PARI
+stack also has a ``current stack pointer'' called \teb{avma}, which
+stands for {\bf av}ailable {\bf m}emory {\bf a}ddress. These three variables
+are global (declared for you by \kbd{pari.h}). For historical reasons they
+are of type \kbd{long} and not of type \kbd{GEN} as would seem more natural.
+
+The stack is oriented upside-down: the more recent an object, the closer to
+\kbd{bot}. Accordingly, initially \kbd{avma} = \kbd{top}, and \kbd{avma} gets
+{\it decremented\/} as new objects are created. As its name indicates,
+\kbd{avma} always points just {\it after\/} the first free address on the
+stack, and \kbd{(GEN)avma} is always (a pointer to) the latest created object.
+When \kbd{avma} reaches \kbd{bot}, the stack overflows, aborting all
+computations, and an error message is issued. To avoid this {\it you\/} will
+need to clean up the stack from time to time, when some bunch of intermediate
+objects will not be needed anymore. This is called ``{\it garbage
+collecting}.''
+
+We are now going to describe briefly how this is done. We will see many
+concrete examples in the next subsection.
+
+\noindent$\bullet$
+First, PARI routines will do their own garbage collecting, which
+means that whenever a documented function from the library returns, only its
+result(s) will have been added to the stack (non-documented ones may not do
+this, for greater speed). In particular, a PARI function that does not return
+a \kbd{GEN} does not clutter the stack. Thus, if your computation is small
+enough (i.e.~you call few PARI routines, or most of them return \kbd{long}
+integers), then you don't need to do any garbage collecting. This will probably
+be the case in many of your subroutines. Of course the objects that were on
+the stack {\it before\/} the function call are left alone. Except for the ones
+listed below, PARI functions only collect their own garbage.
+
+\noindent$\bullet$
+It may happen that you need to preserve {\it some\/} but not
+{\it all\/} objects that were created after a certain point~--- for instance,
+if the final result you need is not a \kbd{GEN}, or if some search proved
+futile. Then, it is enough to record the value of \kbd{avma} just
+{\it before\/} the first garbage is created, and restore it upon exit:
+
+\bprog%
+long ltop = avma; /* record initial avma */
+\h
+garbage ...
+avma = ltop; /* restore it */
+\eprog
+\noindent All objects created in the \kbd{garbage} zone will eventually
+be overwritten: they should not be accessed anymore once \kbd{avma} has been
+restored.
+
+\noindent$\bullet$
+If you want to destroy (i.e.~give back the memory occupied by) the
+latest PARI object on the stack (e.g.~the latest one obtained from a function
+call), and the above method is not available (because the initial value of
+\kbd{avma} has been lost), just use the function\sidx{destruction}%
+\vadjust{\penalty500}%discourage page break
+
+\kbd{void \teb{cgiv}(GEN z)}
+
+\noindent where \kbd{z} is the object you want to give back.
+
+\noindent$\bullet$
+Unfortunately life is not so simple, and sometimes you will want
+to give back accumulated garbage {\it during\/} a computation without losing
+recent data. For this you need the \kbd{gerepile} function (or one of its
+variants described hereafter):
+
+\kbd{GEN \teb{gerepile}(long ltop, long lbot, GEN q)}
+
+\noindent
+This function cleans up the stack between \kbd{ltop} and \kbd{lbot}, where
+$\kbd{lbot} < \kbd{ltop}$, and returns the updated object \kbd{q}. This means:
+
+1) we translate (copy) all the objects in the interval
+$[\kbd{avma}, \kbd{lbot}[$, so that its right extremity abuts the address
+\kbd{ltop}. Graphically
+
+\vbox{
+\bprogtabs\+
+{\rm end of stack}  &|-&-----------&|++++++&|-/-/-/-/-/-/-&|++++++++&|
+\cr\+
+            &bot  &       &avma  &lbot         &ltop    &top
+\cr\+
+{\rm end of stack}  |------------[++++++[-/-/-/-/-/-/-|++++++++|\q
+{\rm beginning of stack}
+\cr\+
+             & &{\rm free memory}
+\cr\eprog
+}\noindent becomes:
+
+\vbox{
+\bprogtabs\+
+{\rm end of stack}  &|--------&------------------&|++++++&|++++++++&|
+\cr\+
+             &bot      &                  &avma   &ltop     &top
+\cr\+
+{\rm end of stack} |--------------------------[++++++[++++++++|\q
+{\rm beginning of stack}
+\cr\+
+                      &&{\rm free memory}
+\cr\eprog
+}
+\noindent where \kbd{++} denote significant objects, \kbd{--} the unused part
+of the stack, and \kbd{-/-} the garbage we remove.
+
+2) The function then inspects all the PARI objects between \kbd{avma} and
+\kbd{lbot} (i.e.~the ones that we want to keep and that have been translated)
+and looks at every component of such an object which is not a codeword. Each
+such component is a pointer to an object whose address is either
+
+--- between \kbd{avma} and \kbd{lbot}, in which case it will be suitably
+updated,
+
+--- larger than or equal to \kbd{ltop}, in which case it will not change, or
+
+--- between \kbd{lbot} and \kbd{ltop} in which case \kbd{gerepile} will
+scream an error message at you (``significant pointers lost in gerepile'').
+
+3) \key{avma} is updated (we add $\kbd{ltop} - \kbd{lbot}$ to the old value).
+
+4) We return the (possibly updated) object \kbd{q}: if \kbd{q} initially
+pointed between \kbd{avma} and \kbd{lbot}, we return the translated
+address, as in~2). If not, the original address is still valid (and we return
+it!).
+
+As stated above, no component of the remaining objects (in particular
+\kbd{q}) should belong to the erased segment [\kbd{lbot}, \kbd{ltop}[, and
+this is checked within \kbd{gerepile}. But beware as well that the addresses
+of all the objects in the translated zone will have changed after a call to
+\kbd{gerepile}: every pointer you may have kept around elsewhere, outside the
+stack objects, which previously pointed into the zone below \kbd{ltop}
+must be discarded. If you need to recover more than one object, use one of
+the \kbd{gerepilemany} functions below.
+
+As a consequence of the preceding explanation, we must now state the most
+important law about programming in PARI:
+
+{\bf If a given PARI object is to be relocated by \hbox{gerepile} then,
+apart from universal objects, the chunks of memory used by its components
+should be in consecutive memory locations}. All \kbd{GEN}s created by
+documented PARI function are guaranteed to satisfy this.
+
+This is because the \kbd{gerepile} function knows only about {\it two
+connected zones\/}: the garbage that will be erased (between \kbd{lbot} and
+\kbd{ltop}) and the  significant pointers that will be copied and updated.
+If there is garbage interspersed with your objects, disasters will occur when
+we try to update them and consider the corresponding ``pointers''. So be
+{\it very\/} wary when you allow objects to become disconnected. Have a look
+at the examples, it's not as complicated as it seems.
+
+\noindent In practice this is achieved by the following programming idiom:
+\bprog%
+  ltop=avma; garbage(); lbot=avma; q=anything();
+  return gerepile(ltop, lbot, q);  /* returns the updated q */
+\eprog
+
+\noindent Beware that
+\bprog%
+  ltop=avma; garbage();
+  return gerepile(ltop, avma, anything())
+\eprog
+
+\noindent might work, but should be frowned upon. We can't predict whether
+\kbd{avma} is going to be evaluated after or before the call to
+\kbd{anything()}: it depends on the compiler. If we are out of luck, it will
+be {\it after\/} the call, so the result will belong to the garbage zone and
+the \kbd{gerepile} statement becomes equivalent to \kbd{avma = ltop}. Thus we
+would return a pointer to random garbage.
+
+\noindent$\bullet$ A simple variant is
+
+\kbd{GEN \teb{gerepileupto}(long ltop, GEN q)}
+
+\noindent which cleans the stack between \kbd{ltop} and the {\it connected\/}
+object \kbd{q} and returns \kbd{q} updated. For this to work, \kbd{q} must
+have been created {\it before\/} all its components, otherwise they would
+belong to the garbage zone! Documented PARI functions guarantee this. If you
+stumble upon one that does not, consider it a bug worth reporting.
+
+\noindent$\bullet$
+To cope with complicated cases where many objects have to be
+preserved, you can use
+
+\kbd{void \teb{gerepilemany}(long ltop, GEN *gptr[],
+\kbd{long} n)}
+
+\noindent which cleans up the most recent part of the stack (between
+\kbd{ltop} and \kbd{avma}). All the \kbd{GEN}s pointed at by the elements of
+the array \kbd{gptr} (of length \kbd{n}) are updated. A copy is done just
+before the cleaning to preserve them, so they don't need to be connected
+before the call. This is the most robust of the gerepile functions (the less
+prone to user error), but also the slowest.
+
+\noindent$\bullet$ More efficient, but trickier to use is
+
+\kbd{void \teb{gerepilemanysp}(long ltop, long lbot, GEN *gptr[], long n)}
+
+\noindent which cleans the stack between \kbd{lbot} and \kbd{ltop} and
+updates the \kbd{GEN}s pointed at by the elements of \kbd{gptr} without doing
+any copying. This is subject to the same restrictions as \kbd{gerepile}, the
+only difference being that more than one address gets updated.
+
+\subsec{Examples}.
+
+\noindent
+Let \kbd{x} and \kbd{y} be two preexisting PARI objects and suppose that we
+want to compute $\kbd{x}^2+ \kbd{y}^2$. This can trivially be done using the
+following program (we skip the necessary declarations; everything in sight is
+a \kbd{GEN}):
+
+\kbd{p1 = gsqr(x); p2 = gsqr(y); z = gadd(p1,p2);}
+
+\noindent
+The \kbd{GEN} \kbd{z} indeed points at the desired quantity. However,
+consider the stack: it contains as unnecessary garbage \kbd{p1} and \kbd{p2}.
+More precisely it contains (in this order) \kbd{z}, \kbd{p2}, \kbd{p1}
+(recall that, since the stack grows downward from the top, the most recent
+object comes first). We need a way to get rid of this garbage (in this case
+it causes no harm except that it occupies memory space, but in other cases
+it could disconnect other PARI objects and this is dangerous).
+
+It would not have been possible to get rid of \kbd{p1}, \kbd{p2} before
+\kbd{z} is computed, since they are used in the final operation. We cannot
+record \kbd{avma} before \kbd{p1} is computed and restore it later, since
+this would destroy \kbd{z} as well. It is not possible either to use the
+function \kbd{cgiv} since \kbd{p1} and \kbd{p2} are not at the bottom of the
+stack and we don't want to give back~\kbd{z}.
+
+But using \kbd{gerepile}, we can give back the memory locations corresponding
+to \kbd{p1}, \kbd{p2}, and move the object \kbd{z} upwards so that no
+space is lost. Specifically:
+\bprog%
+  ltop = avma; /* remember the current address of the top of the stack */
+  p1 = gsqr(x); p2 = gsqr(y);
+  lbot = avma; /* keep the address of the bottom of the garbage pile */
+  z = gadd(p1, p2); /* z is now the last object on the stack */
+  z = gerepile(ltop, lbot, z); /* garbage collecting */
+\eprog
+\noindent Of course, the last two instructions could also have been
+written more simply:
+
+\kbd{z = gerepile(ltop, lbot, gadd(p1,p2));}
+
+\noindent In fact \kbd{gerepileupto} is even simpler to use, because the
+result of \kbd{gadd} will be the last object on the stack and \kbd{gadd} is
+guaranteed to return an object suitable for \kbd{gerepileupto}:
+\bprog%
+  ltop = avma;
+  z = gerepileupto(ltop, gadd(gsqr(x), gsqr(y)));
+\eprog
+\noindent
+As you can see, in simple conditions the use of \kbd{gerepile} is not really
+difficult. However make sure you understand exactly what has happened before
+you go on (use the figure from the preceding section).
+
+\misctitle{Important remark}: as we will see presently it is often
+necessary to do several \kbd{gerepile}s during a computation. However, the
+fewer the better.  The only condition for \kbd{gerepile} to work is that the
+garbage be connected. If the computation can be arranged so that there is a
+minimal number of connected pieces of garbage, then it should be done that
+way.
+
+For example suppose we want to write a function of two \kbd{GEN} variables
+\kbd{x} and \kbd{y} which creates the vector $\kbd{[x}^2+\kbd{y},
+\kbd{y}^2+\kbd{x]}$. Without garbage collecting, one would write:
+%
+\bprog%
+  p1 = gsqr(x); p2 = gadd(p1, y);
+  p3 = gsqr(y); p4 = gadd(p3, x);
+  z = cgetg(3,t\_VEC); z[1] = (long)p2; z[2] = (long)p4;
+\eprog
+\noindent
+This leaves a dirty stack containing (in this order) \kbd{z}, \kbd{p4},
+\kbd{p3}, \kbd{p2}, \kbd{p1}. The garbage here consists of \kbd{p1} and
+\kbd{p3}, which are separated by \kbd{p2}. But if we compute \kbd{p3}
+{\it before\/} \kbd{p2} then the garbage becomes connected, and we get the
+following program with garbage collecting:
+%
+\bprog%
+  ltop = avma; p1 = gsqr(x); p3 = gsqr(y); lbot = avma;
+  z = cgetg(3,t\_VEC); z[1] = ladd(p1,y); z[2] = ladd(p3,x);
+  z = gerepile(ltop,lbot,z);
+\eprog
+
+\noindent Finishing by \kbd{z = gerepileupto(ltop, z)} would be ok as well.
+But when you have the choice, it's usually clearer to brace the garbage
+between \kbd{ltop}~/ \kbd{lbot} pairs.
+
+\noindent Beware that
+\bprog%
+  ltop = avma; p1 = gadd(gsqr(x), y); p3 = gadd(gsqr(y), x);
+  z = cgetg(3,t\_VEC); z[1] = (long)p1; z[2] = (long)p3
+  z = gerepileupto(ltop,z); /* WRONG !!!~*/%
+\eprog
+\noindent would be a disaster since \kbd{p1} and \kbd{p3} would be created
+before \kbd{z}, so the call to \kbd{gerepileupto} would overwrite them,
+leaving \kbd{z[1]} and \kbd{z[2]} pointing at random data!
+
+We next want to write a program to compute the product of two complex numbers
+$x$ and $y$, using a method which takes only 3 multiplications instead of 4.
+Let $z = x*y$, and set $x = x_r + i*x_i$ and similarly for $y$ and $z$. The
+well-known trick is to compute $p_1 = x_r*y_r$, $p_2=x_i*y_i$,
+$p_3=(x_r+x_i)*(y_r+y_i)$, and then we have $z_r=p_1-p_2$,
+$z_i=p_3-(p_1+p_2)$. The program is essentially as follows:
+%
+\bprog%
+ltop = avma; p1 = gmul(x[1],y[1]); p2 = gmul(x[2],y[2]);
+p3 = gmul(gadd(x[1],x[2]), gadd(y[1],y[2]));
+p4 = gadd(p1,p2); lbot = avma;
+z = cgetg(3,t\_COMPLEX); z[1] = lsub(p1,p2); z[2] = lsub(p3,p4);
+z = gerepile(ltop,lbot,z);
+\eprog
+\noindent
+``Essentially,'' because for instance \kbd{x[1]} is a \kbd{long} and not a
+\kbd{GEN}, so we need to insert many annoying typecasts:
+\kbd{p1 = gmul((GEN)x[1], (GEN)y[1])} and so on.
+
+Let us now look at a less trivial example where more than one \kbd{gerepile}
+is needed in practice (at the expense of efficiency, one can always use only
+one using \kbd{gcopy}; see below). Suppose that we want to write a function
+which multiplies a line vector by a matrix (such a function is of course
+already part of \kbd{gmul}, but let's ignore this for a moment). Then the
+most natural way is to do a \kbd{cgetg} of the result immediately, and then a
+\kbd{gerepile} for each coefficient of the result vector to get rid of the
+garbage which has accumulated while this particular coefficient was computed.
+We leave the details to the reader, who can look at the answer in the file
+\kbd{basemath/gen1.c}, in the function \kbd{gmul}, case \typ{VEC} times case
+\typ{MAT}. It would theoretically be possible to have a single connected
+piece of garbage, but it would be a much less natural and unnecessarily
+complicated program.
+
+Let us now take an example which is probably the least trivial way of using
+\kbd{gerepile}, but is unfortunately sometimes necessary. Although it is not
+an infrequent occurrence, we will not give a specific example but a general
+one: suppose that we want to do a computation (usually inside a larger
+function) producing more than one PARI object as a result, say two for
+instance. Then even if we set up the work properly, before cleaning up we
+will have a stack which has the desired results \kbd{z1}, \kbd{z2} (say),
+and then connected garbage from lbot to ltop. If we write
+
+\kbd{z1 = gerepile(ltop,lbot,z1);}
+
+\noindent
+then the stack will be cleaned, the pointers fixed up, but we will have lost
+the address of \kbd{z2}. This is where we need one of the \idx{gerepilemany}
+functions: we declare
+\bprog%
+  GEN *gptr[2]; /* Array of pointers to GENs */
+  gptr[0] = \&z1; gptr[1] = \&z2;
+\eprog
+\noindent and now the call \kbd{gerepilemany(ltop, gptr, 2)} copies \kbd{z1}
+and \kbd{z2} to new locations, cleans the stack from \kbd{ltop} to the old
+\kbd{avma}, and updates the pointers \kbd{z1} and \kbd{z2}. Here we don't
+assume anything about the stack: the garbage can be disconnected and
+\kbd{z1}, \kbd{z2} need not be at the bottom of the stack. If all of these
+assumptions are in fact satisfied, then we can call \kbd{gerepilemanysp}
+instead, which will be faster since we don't need the initial copy.
+
+Another important usage is ``random'' garbage collection during loops
+whose size requirements we cannot control in advance:
+\bprog%
+\q  long ltop = avma, limit = (avma+bot)/2;
+\q  GEN x, y;
+\h
+\q  while (...)
+\q  $\{$
+\q\q  garbage(); x = anything();
+\q\q  garbage(); y = anything()
+\q\q  garbage();
+\q\q  if (avma < limit) /* memory is running low (half spent since entry) */
+\q\q  $\{$
+\q\q\q   GEN *gptr[2];
+\q\q\q   gptr[0] = \&x; gptr[1] = \&y;
+\q\q\q   gerepilemany(ltop, gptr, 2);
+\q\q  $\}$
+\q  $\}$
+\eprog
+\noindent Here we assume that only \kbd{x} and \kbd{y} are needed from one
+iteration to the next. As it would be too costly to call gerepile once for
+each iteration, we only do it when it seems to have become necessary. Of
+course, when the need arises, you can use bigger \kbd{gptr} arrays: in the
+PARI library source code, we once needed to preserve up to 10 objects at a
+time (in a variant of the LLL algorithm)!
+
+\misctitle{Technical note:} the statement \kbd{limit = (avma+bot)/2} is
+dangerous since the addition can overflow, which would result in
+\kbd{limit} being negative. This will prevent garbage collection in the
+loop. To avoid this problem, we provide a robust macro
+\kbd{stack\_lim(avma,$n$)}\sidx{stack\string\_lim}, which denotes an
+address where $2^{n-1} / (2^{n-1}+1)$ of the total stack space is
+exhausted ($1/2$ for $n=1$, $2/3$ for $n=2$). Hence, the above snippet should be written as
+
+\bprog%
+\q  long ltop = avma, limit = stack\_lim(avma,1);
+\q  \dots
+\eprog
+
+\subsec{Some hints and tricks}. Even for the authors, the use of
+\kbd{gerepile} was not evident at first. Hence we give some indications on
+how to avoid most problems connected with garbage collecting:
+
+First, although it looks complicated, \kbd{gerepile} has turned out to be a
+very flexible and fast garbage collector, which compares very favorably
+with much more sophisticated methods used in other systems. A few tests that
+we have done indicate that the price paid for using \kbd{gerepile}, when
+properly used, is usually around 1 or 2 percents of the total time, which is
+quite acceptable.
+
+Secondly, in many cases, in particular when the tree structure and the size of
+the PARI objects which will appear in a computation are under control, one
+can avoid \kbd{gerepile} altogether by creating sufficiently large objects at
+the beginning (using \teb{cgetg}), and then using assignment statements and
+operations ending with z (such as \teb{gaddz}). Coming back to our first
+example, note that if we know that x and y are of type real and of length
+less than or equal to 5, we can program without using \kbd{gerepile} at all:
+
+\bprog%
+  z = cgetr(5); ltop = avma;
+  p1 = gsqr(x); p2 = gsqr(y); gaddz(p1,p2,z);
+  avma = ltop;%
+\eprog
+\noindent This practice will usually be {\it slower\/} than a craftily used
+\kbd{gerepile} though, and is certainly more cumbersome to use. As a rule,
+assignment statements should generally be avoided.
+\smallskip
+
+Thirdly, the philosophy of \kbd{gerepile} is the following: keep the value of
+the stack pointer \kbd{avma} at the beginning, and just {\it before\/} the
+last operation.  Afterwards, it would be too late since the lower end address
+of the garbage zone would have been lost. Of course you can always use
+\kbd{gerepileupto}, but you will have to assume that the object was created
+{\it before\/} its components.
+
+Finally, if everything seems hopeless, at the expense of speed you can do the
+following: after saving the value of \kbd{avma} in \kbd{ltop}, perform your
+computation as you wish, in any order, leaving a messy stack. Let \kbd{z} be
+your result. Then write the following:
+
+\kbd{z = gerepileupto(ltop, gcopy(z));}
+
+\noindent
+The trick is to force a copy of \kbd{z} to be created at the bottom of the
+stack, hence all the rest including the initial \kbd{z} becomes connected
+garbage. If you need to keep more than one result, use \kbd{gerepilemany}
+(of which the above is just a special case).
+
+\smallskip If you followed us this far, congratulations, and rejoice: the
+rest is much easier.
+
+\section{Implementation of the PARI types}
+\label{se:impl}
+
+\noindent
+Although it is a little tedious, we now go through each type and explain its
+implementation. Let \kbd{z} be a \kbd{GEN}, pointing at a PARI object. In
+the following paragraphs, we will constantly mix two points of view: on the
+one hand, \kbd{z} will be treated as the C pointer it is (in the context of
+program fragments like \kbd{z[1]}), on the other, as PARI's handle on (the
+internal representation of) some mathematical entity, so we will shamelessly
+write $\kbd{z} \ne 0$ to indicate that the {\it value\/} thus represented
+is nonzero (in which case the {\it pointer\/}~\kbd{z} certainly will be
+non-\kbd{NULL}). We offer no apologies for this style. In fact, you had
+better feel comfortable juggling both views simultaneously in your mind if
+you want to write correct PARI programs.
+
+Common to all the types is the
+first codeword \kbd{z[0]}, which we don't have to worry about since this is
+taken care of by \kbd{cgetg}. Its precise structure will depend on the
+machine you are using, but it always contain the following data: the
+{\it internal \idx{type number}\/} associated to the symbolic type name, the
+{\it\idx{length}\/} of the root in longwords, and a technical bit which
+indicates whether the object is a clone (see below) or not. This last one is
+used by GP for internal garbage collecting, you won't have to worry about it.
+
+\noindent These data can be handled through the following {\it macros\/}:
+
+\kbd{long \teb{typ}(GEN z)} returns the type number of \kbd{z}.
+
+\kbd{void \teb{settyp}(GEN z, long n)} sets the type number of \kbd{z}
+to \kbd{n} (you should not have to use this function if you
+use \kbd{cgetg}).
+
+\kbd{long \teb{lg}(GEN z)} returns the length (in longwords) of the
+root of \kbd{z}.
+
+\kbd{long \teb{setlg}(GEN z, long l)} sets the length of \kbd{z}
+to \kbd{l} (you should not have to use this function if you use
+\kbd{cgetg}; however, see an advanced example in \secref{se:prog}).
+
+\noindent
+(If you know enough about PARI to need to access the ``clone'' bit, then you'll
+be able to find usage hints in the code (esp. \kbd{killbloc()} and
+\kbd{matrix\_block()}). It {\it is\/} technical after all.)
+
+These macros are written in such a way that you don't need to worry about
+type casts when using them: i.e.~if \kbd{z} is a \kbd{GEN}, \kbd{typ(z[2])}
+will be accepted by your compiler, without your having to explicitly type
+\kbd{typ((GEN)z[2])}. Note that for the sake of efficiency, none of the
+codeword-handling macros check the types of their arguments even when there
+are stringent restrictions on their use.
+
+The possible second codeword is used differently by the different types, and
+we will describe it as we now consider each of them in turn:
+
+\def\sectype#1#2{ \subsec{Type \typ{#1} (#2s):}\sidx{#2} }
+\def\sectypes#1#2#3{ \subsec{Types \typ{#1} and \typ{#2} (#3s):}\sidx{#3} }
+\def\sectypeindex#1#2#3{ \subsec{Type \typ{#1} (#2):}\sidx{#3} }
+
+\sectype{INT}{integer} this type has a second codeword \kbd{z[1]} which
+contains the following information:
+
+the sign of \kbd{z}: coded as $1$, $0$ or $-1$ if $\kbd{z} > 0$, $\kbd{z} = 0$,
+$\kbd{z} < 0$ respectively.
+
+the {\it effective length\/} of \kbd{z}, i.e.~the total number of significant
+longwords. This means the following: apart from the integer 0, every integer
+is ``normalized'', meaning that the first mantissa longword (i.e.~\kbd{z[2]})
+is non-zero. However, the integer may have been created with a longer length.
+Hence the ``length'' which is in \kbd{z[0]} can be larger than the
+``effective length'' which is in \kbd{z[1]}. Accessing \kbd{z[i]}
+for \kbd{i} larger than or equal to the effective length will yield random
+results.
+
+\noindent This information is handled using the following macros:
+
+\kbd{long \teb{signe}(GEN z)} returns the sign of \kbd{z}.
+
+\kbd{void \teb{setsigne}(GEN z, long s)} sets the sign of
+\kbd{z} to \kbd{s}.
+
+\kbd{long \teb{lgefint}(GEN z)} returns the \idx{effective length}
+of \kbd{z}.
+
+\kbd{void \teb{setlgefint}(GEN z, long l)} sets the effective length
+of \kbd{z} to \kbd{l}.
+
+The integer 0 can be recognized either by its sign being~0, or by its
+effective length being equal to~2. When $\kbd{z} \ne 0$, the word
+\kbd{z[2]} exists and is non-zero, and the absolute value of \kbd{z}
+is (\kbd{z[2]},\kbd{z[3]},\dots,\kbd{z[lgefint(z)-1]}) in base
+\kbd{2\pow BITS\_IN\_LONG}, where as usual in this notation \kbd{z[2]} is
+the highest order longword.
+
+\noindent The following further macros are available:
+
+\kbd{long \teb{mpodd}(GEN x)} which is 1 if \kbd{x} is odd, and 0
+otherwise.
+
+\kbd{long \teb{mod2}(GEN x)}, \kbd{\key{mod4}(x)}, and so on up
+to \kbd{\key{mod64}(x)}, which give the residue class of \kbd{x} modulo the
+corresponding power of 2, {\it for positive\/}~\kbd{x} (you will obtain weird
+results if you use these on the integer 0 or on negative numbers).
+
+These macros directly access the binary data and are thus much faster than
+the generic modulo functions. Besides, they return long integers instead of
+\kbd{GEN}s, so they don't clutter up the stack.
+
+\sectype{REAL}{real number} this type has a second codeword z[1] which
+also encodes its sign (obtained or set using the same functions as for the
+integers), and a biased binary exponent (i.e.~the actual exponent value plus
+some constant bias, actually a power of~2, whose value is given by
+\kbd{HIGHEXPOBIT}). This exponent can be handled using the following macros:
+
+\kbd{long \teb{expo}(GEN z)} returns the true (unbiased) exponent
+of \kbd{z}. This is defined even when \kbd{z} is equal to zero, see
+\secref{se:whatzero}.
+
+\kbd{void \teb{setexpo}(GEN z, long e)} sets the exponent of \kbd{z}
+to \kbd{e}, of course after adding the bias.
+
+\noindent Note the functions:
+
+\kbd{long \teb{gexpo}(GEN z)} which tries to return an exponent
+for \kbd{z}, even if \kbd{z} is not a real number.
+
+\kbd{long \teb{gsigne}(GEN z)} which returns a sign for \kbd{z},
+even when \kbd{z} is neither real nor integer (a rational number for
+instance).
+
+The real zero is characterized by having its sign equal to 0. However,
+usually the first mantissa word \kbd{z[2]} is defined and equal to~0. This
+fact must {\it never\/} be used to recognize a real~0. If \kbd{z} is not equal
+to~0, the first mantissa word \kbd{z[2]} is normalized, i.e.~its most
+significant bit is~1. The mantissa is (\kbd{z[2]},\kbd{z[3]},\dots,%
+\kbd{z[lg(z]-1]}) in base \kbd{2\pow BITS\_IN\_LONG}. Here, \kbd{z[2]} is
+the most significant longword, and the mantissa takes values between
+1 (included) and 2 (excluded). Thus, assume that \kbd{sizeof(long)} is 32 and
+the length is 4, the real number $3.5$ is represented as \kbd{z[0]} (encoding
+$\kbd{type} = \typ{REAL}$, $\kbd{lg} = 4$), \kbd{z[1]} (encoding $\kbd{sign} =
+1$, $\kbd{expo} = 1$), $\kbd{z[2]} = \kbd{0xe0000000}$,
+$\kbd{z[3]} = \kbd{0x0}$.
+
+\sectype{INTMOD}{integermod} \kbd{z[1]} points to the modulus, and \kbd{z[2]}
+at the number representing the class \kbd{z}. Both are separate \kbd{GEN}
+objects, and both must be of type integer.
+In principle \kbd{z[1]} $>$ 0 and 0 $\le$ \kbd{z[2]} $<$ \kbd{z[1]}, but this
+rule does not have to be strictly obeyed by the user. Any integermod obtained
+as the result of a PARI function call will satisfy these conditions.
+
+It is good practice to keep the modulus object on the heap, so that new
+integermods resulting from operations can point at this common object,
+instead of carrying along their own copies of it on the stack. The library
+functions implement this practice almost by default.
+
+\sectypes{FRAC}{FRACN}{rational number} \kbd{z[1]} points to the numerator,
+and \kbd{z[2]} to the denominator. Both must be of type integer. In principle
+$\kbd{z[2]} > 0$, but this rule does not have to be strictly obeyed. Note
+that a type \typ{FRACN} rational number can be converted to irreducible
+form using the function \kbd{GEN \teb{gred}(GEN x)}.
+
+\sectype{COMPLEX}{complex number} \kbd{z[1]} points to the real part, and
+\kbd{z[2]} to the imaginary part. A priori \kbd{z[1]} and \kbd{z[2]} can be
+of any type, but only certain types are useful and make sense.
+
+\sectypeindex{PADIC}{$p$-adic numbers}{p-adic number} this type has a second
+codeword \kbd{[1]} which contains the following information: the $p$-adic
+precision (the exponent of $p$ modulo which the $p$-adic unit corresponding
+to \kbd{z} is defined if \kbd{z} is not~0), i.e.~one less than the number
+of significant $p$-adic digits, and the biased exponent of \kbd{z} (the
+bias being equal to \kbd{HIGHVALPBIT} here). This information can be
+handled using the following functions:
+
+\kbd{long \teb{precp}(GEN z)} returns the $p$-adic precision of
+\kbd{z}.
+
+\kbd{void \teb{setprecp}(GEN z, long l)} sets the $p$-adic precision
+of \kbd{z} to \kbd{l}.
+
+\kbd{long \teb{valp}(GEN z)} returns the $p$-adic valuation of
+\kbd{z} (i.e. the unbiased exponent). This is defined even if \kbd{z} is
+equal to~0, see \secref{se:whatzero}.
+
+\kbd{void \teb{setvalp}(GEN z, long e)} sets the $p$-adic valuation
+of \kbd{z} to \kbd{e}.
+
+In addition to this codeword, \kbd{z[2]} points to the prime $p$, \kbd{z[3]}
+points to $p^{\text{precp(z)}}$, and \kbd{z[4]} points to an integer
+representing the $p$-adic unit associated to \kbd{z} modulo \kbd{z[3]} (or
+points to zero if \kbd{z} is zero). To summarize, we have the equality:
+$$ \kbd{z} = p^{\text{valp(z)}} * (\kbd{z[4]} + O(\kbd{z[3]})) =
+     p^{\text{valp(z)}} * (\kbd{z[4]} + O(p^{\text{precp(z)}})) $$
+
+\sectype{QUAD}{quadratic number} \kbd{z[1]} points to the polynomial defining
+the quadratic field, \kbd{z[2]} to the ``real part'' and \kbd{z[3]} to the
+``imaginary part'', which are to be taken as the coefficients of \kbd{z} with
+respect to the ``canonical'' basis $(1,w)$, see~\secref{se:compquad}. Complex
+numbers are a particular case of quadratics but deserve a separate type.
+
+\sectype{POLMOD}{polmod} exactly as for integermods, \kbd{z[1]} points to
+the modulus, and \kbd{z[2]} to a polynomial representing the class of~\kbd{z}.
+Both must be of type polynomial. However, one must obey the rules
+explained in Chapter 2 concerning the hierarchical structure of the variables
+of a polymod.
+
+\sectype{POL}{polynomial} this type has a second codeword which is analogous
+to the one for integers. It contains a ``{\it sign\/}'': 0 if the polynomial
+is equal to~0, and 1 if not (see however the important remark below), a {\it
+variable number\/} (e.g.~0 for $x$, 1 for $y$, etc\dots), and an {\it
+effective length}.
+
+\noindent These data can be handled with the following macros:
+
+\teb{signe} and \teb{setsigne} as for reals and integers.
+
+\kbd{long \teb{lgef}(GEN z)} returns the \idx{effective length} of \kbd{z}.
+
+\kbd{void \teb{setlgef}(GEN z, long l)} sets the effective length
+of \kbd{z} to \kbd{l}.
+
+\kbd{long \teb{varn}(GEN z)} returns the variable number of the object \kbd{z}.
+
+\kbd{void \teb{setvarn}(GEN z, long v)} sets the variable number
+of \kbd{z} to \kbd{v}.
+
+Note also the function \kbd{long \teb{gvar}(GEN z)} which tries
+to return a \idx{variable number} for \kbd{z}, even if \kbd{z} is not a
+polynomial or power series. The variable number of a scalar type is set by
+definition equal to \tet{BIGINT}.
+
+The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lgef(z)-1]} point to the
+coefficients of the polynomial {\it in ascending order}, with \kbd{z[2]}
+being the constant term and so on. Note that the {\it \idx{degree}\/} of the
+polynomial is equal to its effective length minus three. The function
+
+\kbd{long \teb{degree}(GEN x)} returns the degree of \kbd{x} with
+respect to its main variable even when \kbd{x} is not a polynomial (a
+rational function for instance). By convention, the degree of $0$ is~$-1$.
+
+\misctitle{Important remark}. A zero polynomial can be characterized by the
+fact that its sign is~0. However, its effective length may be equal to 2, or
+greater than 2. If it is greater than 2, this means that all the coefficients
+of the polynomial are equal to zero (as they should for a zero polynomial),
+but not all of these zeros are exact zeros, and more precisely the leading
+term \kbd{z[lgef(z)-1]} is not an exact zero.
+
+\sectypeindex{SER}{power series}{power series} This type also has a second
+codeword, which encodes a ``{\it sign\/}'', i.e.~0 if the power series is 0,
+and 1 if not, a {\it variable number\/} as for polynomials, and a {\it biased
+exponent\/} with a bias of \kbd{HIGHVALPBIT}. This information can be handled
+with the following functions: \teb{signe}, \teb{setsigne}, \teb{varn},
+\teb{setvarn} as for polynomials, and \teb{valp}, \teb{setvalp} for the
+exponent as for $p$-adic numbers. Beware: do {\it not\/} use \teb{expo} and
+\teb{setexpo} on power series.
+
+If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
+\kbd{z[lg(z)-1]} point to the coefficients of \kbd{z} in ascending order,
+\kbd{z[2]} being the first non-zero coefficient.  Note that the exponent of a
+power series can be negative, i.e.~we are then dealing with a Laurent series
+(with a finite number of negative terms).
+
+\sectypes{RFRAC}{RFRACN}{rational function} \kbd{z[1]} points to the
+numerator, and \kbd{z[2]} on the denominator. Both must be of type
+polynomial. Note that a type \typ{RFRACN} rational function can be
+converted to irreducible form using the function \teb{gred}.
+
+\sectype{QFR}{indefinite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
+\kbd{z[3]} point to the three coefficients of the form and should be of type
+integer. \kbd{z[4]} is Shanks's distance function, and should be of type
+real.
+
+\sectype{QFI}{definite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
+\kbd{z[3]} point to the three coefficients of the form. All three should be of
+type integer.
+
+\sectypes{VEC}{COL}{vector}\sidx{row vector}\sidx{column vector}
+\kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]}
+point to the components of the vector.
+
+\sectypeindex{MAT}{matrices}{matrix} \kbd{z[1]}, \kbd{z[2]},\dots
+\kbd{z[lg(z)-1]} point to the column vectors of \kbd{z}, i.e.~they must be of
+type \typ{COL} and of the same length.
+
+\noindent The last two were introduced for specific GP use, and you'll be
+much better off using the standard malloc'ed C constructs when programming
+in library mode. We quote them just for completeness (advising you not to
+use them):
+
+\sectype{LIST}{list} This one has a second codeword which contains an
+effective length (handled through \teb{lgef}~/ \teb{setlgef}).
+\kbd{z[2]},\dots, \kbd{z[lgef(z)-1]} contain the components of the list.
+
+\sectype{STR}{character string} \kbd{\teb{GSTR}(z)} (= \kbd{(z+1)}) points to
+the first character of the (\kbd{NULL}-terminated) string.
+
+\section{PARI variables}\label{se:vars}
+\subsec{Multivariate objects}
+
+\noindent
+We now consider variables and formal computations. As we have seen in
+\secref{se:impl}, the codewords for types \typ{POL} and \typ{SER}
+encode a ``variable number''. This is an integer, ranging from $0$ to
+\kbd{MAXVARN}. The lower it is, the higher the variable priority. PARI does
+not know anything about intelligent ``sparse'' representation of polynomials.
+So a multivariate polynomial in PARI is just a polynomial (in one variable),
+whose coefficients are themselves (arbitrary) polynomials. All computations
+are then just done formally on the coefficients as if the polynomial was
+univariate.
+
+In fact, the way an object will be considered in formal computations depends
+entirely on its ``principal variable number'' which is given by the function
+
+\kbd{long \teb{gvar}(GEN z)}
+
+\noindent which returns a \idx{variable number} for \kbd{z}, even if \kbd{z}
+is not a polynomial or power series. The variable number of a scalar type is
+set by definition equal to \tet{BIGINT} which is bigger than any legal
+variable number. The variable number of a recursive type which is not a
+polynomial or power series is the minimal variable number of its components.
+But for polynomials and power series only the ``outermost'' number counts:
+the representation is not symmetrical at all.
+
+Under GP, one need not worry too much since the interpreter will define
+the variables as it sees them and do the right thing with the polynomials
+produced (however, have a look at the remark in \secref{se:rempolmod}). But
+in library mode, they are tricky objects if you intend to build polynomials
+yourself (and not just let PARI functions produce them, which is usually less
+efficient). For instance, it does not make sense to have a variable number
+occur in the components of a polynomial whose main variable has a higher
+number (lower priority), even though there's nothing PARI can do to prevent
+you from doing it.
+
+\subsec{Creating variables}
+A basic difficulty is to ``create'' a variable. As we have seen in
+\secref{se:intro4}, a plethora of objects is associated to variable
+number~$v$. Here is the complete list: \teb{polun}$[v]$ and
+\teb{polx}$[v]$, which you can use in library mode and which represent,
+respectively, the monic monomials of degrees 0 and 1 in~$v$;
+\teb{varentries}$[v]$, and \teb{polvar}$[v]$. The latter two are only
+meaningful to GP, but they have to be set nevertheless. All of them must be
+properly defined before you can use a given integer as a variable number.
+
+Initially, this is done for $0$ (the variable \kbd{x} under GP), and
+\tet{MAXVARN}, which is there to address the need for a ``temporary'' new
+variable, which would not be used in regular objects (created by the
+library). We call the latter type a ``temporary variable''. The regular
+variables meant to be used in regular objects, are called ``user
+variables\sidx{variable (user)}''.
+
+\subsubsec{User variables}\sidx{variable (user)}:
+When the program starts, \kbd{x} is the only user variable (number~$0$). To
+define new ones, use
+
+\kbd{long \key{fetch\_user\_var}(char *$s$)}%
+\sidx{fetch\string\_user\string\_var}
+
+\noindent which inspects the user variable named $s$ (creating it if
+needed), and returns its variable number. 
+\bprog%
+long v = fetch\_user\_var("y");
+GEN gy = polx[v];
+\eprog
+This function raises an error if $s$ is already known as a function name to
+the interpreter.
+
+\misctitle{Caveat:} it is possible to use \teb{flissexpr}
+(see~\secref{se:flisexpr}) to execute a GP command and create GP variables
+on the fly as needed:
+
+\bprog%
+GEN gy = flissexpr("y"); /* supposedly returns polx[$v$], for some $v$ */
+long v = gvar(gy);
+\eprog
+
+\noindent This is dangerous, especially when programming functions that
+will be used under GP. The code above reads the value of \kbd{y}, as it is
+currently known by the GP interpreter (possibly creating it in the
+process). All is well and good if \kbd{y} hasn't been tampered with in
+previous GP commands. But if \kbd{y} has been modified (e.g \kbd {y = 1}),
+then the value of \kbd{gy} is not what you expected it to be and corresponds
+instead to the current value of the GP variable (e.g \kbd{gun}).
+
+\subsubsec{Temporary variables}\sidx{variable (temporary)}: 
+\kbd{MAXVARN} should be enough for most cases, but you can create more
+temporary variables using
+
+\kbd{long \key{fetch\_var}()}\sidx{fetch\string\_var}\label{se:fetch_var}
+
+\noindent
+This returns a variable number which is guaranteed to be unused by the
+library at the time you get it and as long as you do not delete it (we'll see
+how to do that shortly). This has {\it lower\/} number (i.e.~{\it higher\/}
+priority) than any temporary variable produced so far (\kbd{MAXVARN} is
+assumed to be the first such). This call updates all the aforementioned
+internal arrays. In particular, after the statement \kbd{v = fetch\_var()},
+you can use \kbd{polun[v]} and \kbd{polx[v]}. The variables created in this
+way have no identifier assigned to them though, and they will be printed as
+\kbd{\#<\text{number}>}, except for \kbd{MAXVARN} which will be printed
+as~\kbd{\#}. You can assign a name to a temporary variable, after creating
+it, by calling the function
+
+\kbd{void \key{name\_var}(long n, char *s)}\sidx{name\string\_var}
+
+\noindent after which the output machinery will use the name \kbd{s} to
+represent the variable number~\kbd{n}. The GP parser will {\it not\/}
+recognize it by that name, however, and calling this on a variable known
+to~GP will raise an error. Temporary variables are meant to be used as free
+variables, and you should never assign values or functions to them as you
+would do with variables under~GP. For that, you need a user variable.
+
+All objects created by \kbd{fetch\_var} are on the heap and not on the stack,
+thus they are not subject to standard garbage collecting (they won't be
+destroyed by a \kbd{gerepile} or \kbd{avma = ltop} statement). When you don't
+need a variable number anymore, you can delete it using
+
+\kbd{long \key{delete\_var}()}\sidx{delete\string\_var}
+
+\noindent which deletes the {\it latest\/} temporary variable created and
+returns the variable number of the previous one (or simply returns 0 if you
+try, in vain, to delete \kbd{MAXVARN}). Of course you should make sure that
+the deleted variable does not appear anywhere in the objects you use later
+on. Here is an example:
+
+\bprog\obr
+\q  long first = fetch\_var();
+\q  long n1 = fetch\_var();
+\q  long n2 = fetch\_var(); /* prepare three variables for internal use */
+\q  ...
+\q  /* delete all variables before leaving */
+\q  do \obr\ num = delete\_var(); \cbr\ while (num \&\& num <= first);
+\cbr\eprog
+
+\noindent
+The (dangerous) statement
+
+\bprog%
+while (delete\_var()) /* empty */;
+\eprog
+
+\noindent removes all temporary variables that were in use, except
+\kbd{MAXVARN} which cannot be deleted.
+
+\section{Input and output}
+
+\noindent
+Two important aspects have not yet been explained which are specific to
+library mode: input and output of PARI objects.
+
+\subsec{Input}.
+
+\noindent
+For \idx{input}, PARI provides you with two powerful high level functions
+which enables you to input your objects as if you were under GP. In fact,
+the second one {\it is\/} essentially the GP syntactical parser, hence you
+can use it not only for input but for (most) computations that you can do
+under GP. These functions are called \teb{flisexpr} and \teb{flisseq}. The
+first one has the following syntax:\label{se:flisexpr}
+
+\kbd{GEN \teb{flisexpr}(char *s)}
+
+\noindent
+Its effect is to analyze the input string s and to compute the result as in
+GP.  However it is limited to one expression. If you want to read and
+evaluate a sequence of expressions, use
+
+\kbd{GEN \teb{flisseq}(char *s)}
+
+\noindent\sidx{filter}
+In fact these two functions start by {\it filtering\/} out all spaces and
+comments in the input string (that's what the initial \kbd{f} stands for).
+They then call the underlying basic functions, the GP parser proper: \kbd{GEN
+\teb{lisexpr}(char *s)} and \kbd{GEN \teb{lisseq}(char *s)}, which are
+slightly faster but which you probably don't need.
+
+To read a \kbd{GEN} from a file, you can use the simpler interface
+
+\kbd{GEN \teb{lisGEN}(FILE *file)}
+
+which reads a character string of arbitrary length from the stream \kbd{file}
+(up to the first newline character), applies \kbd{flisexpr} to it, and
+returns the resulting \kbd{GEN}. This way, you won't have to worry about
+allocating buffers to hold the string. To interactively input an expression,
+use \kbd{lisGEN(stdin)}.
+
+Once in a while, it may be necessary to evaluate a GP expression sequence
+involving a call to a function you have defined in~C. This is easy using
+\teb{install} which allows you to manipulate quite an arbitrary function (GP
+knows about pointers!). The syntax is
+
+\kbd{void \teb{install}(void *f, char *name, char *code)}
+
+\noindent where \kbd{f} is the (address of) the function (cast to the C type
+\kbd{void*}), \kbd{name} is the name by which you want to access your
+function from within your GP expressions, and \kbd{code} is a character
+string describing the function call prototype (see~\secref{se:gp.interface}
+for the precise description of prototype strings). In case the function
+returns a \kbd{GEN}, it should satisfy \kbd{gerepileupto} assumptions (see
+\secref{se:garbage}).
+
+\subsec{Output}.
+
+\noindent
+For \idx{output}, there exist essentially three different functions (with
+variants), corresponding to the three main GP output formats (as described in
+\secref{se:output}), plus three extra ones, respectively devoted to
+\TeX\ output, string output, and (advanced) debugging.
+
+\noindent $\bullet$ ``raw'' format, obtained by using the function
+\teb{brute} with the following syntax:
+
+\kbd{void \teb{brute}(GEN obj, char x, long n);}
+
+\noindent
+This prints the PARI object \kbd{obj} in \idx{format} \kbd{x0.n}, using the
+notations from \secref{se:format}. Recall that here \kbd{x} is either
+\kbd{'e'}, \kbd{'f'} or \kbd{'g'} corresponding to the three numerical output
+formats, and \kbd{n} is the number of printed significant digits, and should
+be set to $-1$ if all of them are wanted (these arguments only affect the
+printing of real numbers). Usually you won't need that much flexibility, so
+most of the time you will get by with the function
+
+\kbd{void \teb{outbrute}(GEN obj)}, which is equivalent to
+\kbd{brute(x,'g',-1)},
+
+\noindent or even better, with
+
+\kbd{void \teb{output}(GEN obj)} which is equivalent to \kbd{outbrute(obj)}
+followed by a newline and a buffer flush. This is especially nice during
+debugging. For instance using \kbd{dbx} or \kbd{gdb}, if \kbd{obj} is a
+\kbd{GEN}, typing \kbd{print output(obj)} will enable you to see the content
+of \kbd{obj} (provided the optimizer has not put it into a register, but it's
+rarely a good idea to debug optimized code).
+
+\noindent $\bullet$ ``prettymatrix'' format: this format is identical to the
+preceding one except for matrices. The relevant functions are:
+
+\kbd{void \teb{matbrute}(GEN obj, char x, long n)}
+
+\kbd{void \teb{outmat}(GEN obj)}, which is followed by a newline
+and a buffer flush.
+
+\noindent $\bullet$ ``prettyprint'' format: the basic function has an
+additional parameter \kbd{m}, corresponding to the (minimum) field width
+used for printing integers:
+
+\kbd{void \teb{sor}(GEN obj, char x, long n, long m)}
+
+\noindent The simplified version is
+
+\kbd{void \teb{outbeaut}(GEN obj)} which is equivalent to
+\kbd{sor(obj,'g',-1,0)} followed by a newline and a buffer flush.
+
+\noindent $\bullet$ The first extra format corresponds to the \teb{texprint}
+function of GP, and gives a \TeX{} output of the result. It is obtained by
+using:
+
+\kbd{void \teb{texe}(GEN obj, char x, long n)}
+
+\noindent $\bullet$ The second one is the function \teb{GENtostr} which
+converts a PARI \kbd{GEN} to an ASCII string. The syntax is
+
+\kbd{char* \teb{GENtostr}(GEN obj)}, wich returns a
+\kbd{malloc}'ed character string (which you should \kbd{free} after use).
+
+\noindent $\bullet$ The third and final one outputs the \idx{hexadecimal tree}
+corresponding to the GP command \kbd{\b x} using the function
+
+\kbd{void \teb{voir}(GEN obj, long nb)}, which will only output the first
+\kbd{nb} words corresponding to leaves (very handy when you have a look at
+big recursive structures). If you set this parameter to $-1$ all significant
+words will be printed. Usually this last type of output would only be used for
+debugging purposes.
+
+\misctitle{Remark}. Apart from \teb{GENtostr}, all PARI output is done on
+the stream \teb{outfile}, which by default is initialized to \teb{stdout}. If
+you want that your output be directed to another file, you should use the
+function \kbd{void \teb{switchout}(char *name)} where \kbd{name} is a
+character string giving the name of the file you are going to use. The
+output will be {\it appended\/} at the end of the file. In order to close
+the file, simply call \kbd{switchout(NULL)}.
+
+Similarly, errors are sent to the stream \teb{errfile} (\teb{stderr}
+by default), and input is done on the stream \teb{infile}, which you can change
+using the function \teb{switchin} which is analogous to \teb{switchout}.
+
+\misctitle{(Advanced) Remark}. All output is done according to the values
+of the \teb{pariOut}~/ \teb{pariErr} global variables which are pointers to
+structs of pointer to functions. If you really intend to use these, this
+probably means you are rewriting GP. In that case, have a look at the code in
+\kbd{language/es.c} (\kbd{init80()} or \kbd{GENtostr()} for instance).
+
+\subsec{Errors}.\sidx{error}\sidx{talker}
+
+\noindent
+If you want your functions to issue error messages, you can use the general
+error handling routine \teb{err}. The basic syntax is
+%
+\bprog%
+  err(talker, "error message");
+\eprog
+
+\noindent
+This will print the corresponding error message and exit the program (in
+library mode; go back to the GP prompt otherwise).\label{se:err} You can
+also use it in the more versatile guise
+\bprog%
+  err(talker, format, ...);
+\eprog\noindent
+where \kbd{format} describes the format to use to write the remaining
+operands, as in the \teb{printf} function (however, see the next section).
+The simple syntax above is just a special case with a constant format and no
+remaining arguments.
+
+\noindent
+The general syntax is
+
+\kbd{void \teb{err}(numerr,...)}
+
+\noindent where \kbd{numerr} is a codeword which indicates what to do with
+the remaining arguments and what message to print. The list of valid keywords
+is in \kbd{language/errmessages.c} together with the basic corresponding
+message. For instance, \kbd{err(typeer,"matexp")} will print the message:
+
+\kbd{ ***   incorrect type in matexp.}
+
+\noindent
+Among the codewords are {\it warning\/} keywords (all those which start with
+the prefix \kbd{warn}). In that case, \teb{err} does {\it not\/} abort the
+computation, just print the requested message and go on. The basic example is
+
+\kbd{err(warner, "Strategy 1 failed. Trying strategy 2")}
+
+\noindent which is the exact equivalent of \kbd{err(talker,...)} except that
+you certainly don't want to stop the program at this point, just inform the
+user that something important has occured (in particular, this output would be
+suitably highlighted under GP, whereas a simple \kbd{printf} would not).
+
+\subsec{Debugging output}.\sidx{debugging}\sidx{format}\label{se:dbg_output}
+
+\noindent
+The global variables \teb{DEBUGLEVEL} and \teb{DEBUGMEM} (corresponding
+to the default \teb{debug} and \teb{debugmem}, see \secref{se:defaults})
+are used throughout the PARI code to govern the amount of diagnostic and
+debugging output, depending on their values. You can use them to debug your
+own functions, especially after having made them accessible under GP through
+the command \teb{install} (see \secref{se:install}).
+
+For debugging output, you can use \kbd{printf} and the standard output
+functions (\teb{brute} or \teb{output} mainly), but also some special purpose
+functions which embody both concepts, the main one being
+
+\kbd{void \teb{fprintferr}(char *pariformat, ...)}
+
+\noindent
+Now let's define what a PARI format is. It is a character string, similar
+to the one \kbd{printf} uses, where \kbd{\%} characters have a special
+meaning. It describes the format to use when printing the remaining operands.
+But, in addition to the standard format types, you can use \kbd{\%Z} to
+denote a \kbd{GEN} object (we would have liked to pick \kbd{\%G} but it was
+already in use!). For instance you could write:
+
+\kbd{err(talker, "x[\%d] = \%Z is not invertible!", i, x[i])},
+
+\noindent since the \teb{err} function accepts PARI formats. Here \kbd{i} is an
+\kbd{int}, \kbd{x} a \kbd{\idx{GEN}} which is not a leaf and this would
+insert in raw format the value of the \kbd{GEN} \kbd{x[i]}.
+
+\subsec{Timers and timing output}.
+
+\noindent
+To profile your functions, you can use the PARI timer. The functions
+\kbd{long \teb{timer}()} and \kbd{long \teb{timer2}()} return the
+elapsed time since the last call of the same function (in milliseconds). Two
+different functions (identical except for their independent time-of-last-call
+memories!) are provided so you can have both global timing and fine tuned
+profiling.
+
+You can also use \kbd{void \teb{msgtimer}(char *format,...)},
+which prints prints \kbd{Time}, then the remaining arguments as specified by
+\kbd{format} (which is a PARI format), then the output of \kbd{timer2}.
+
+\section{A complete program}
+\label{se:prog}
+
+\noindent
+Now that the preliminaries are out of the way, the best way to learn how to
+use the library mode is to work through a detailed non-trivial example of a
+main program. We will write a program which computes the exponential of a
+square matrix~$x$.  The complete listing is given in Appendix~B, but each
+part of the program will be produced and explained here. We will use an
+algorithm which is not optimal but is not far from the one used for the PARI
+function \teb{gexp} (in fact embodied in the function \kbd{mpexp1}). This
+consists in calculating the sum of the series:
+$$e^{x/(2^n)}=\sum_{k=0}^\infty \dfrac{(x/(2^n))^k}{k!}$$
+for a suitable positive integer $n$, and then computing $e^x$ by repeated
+squarings.  First, we will need to compute the $L^2$-norm of the matrix~$x$,
+i.e.~the quantity:
+$$z=\|x\|_2=\sqrt{\sum_{i,j}x_{i,j}^2}.$$
+We will then choose the integer $n$ such that the $L^2$-norm of $x/(2^n)$ is
+less than or equal to~1, i.e.
+$$ n = \left\lceil{\ln(z)}\big/{\ln(2)}\right\rceil $$
+if $z\ge1$, and~$n=0$ otherwise. Then the series will converge at least as
+fast as the usual one for $e^1$, and the cutoff error will be easy to
+estimate. In fact a larger value of $n$ would be preferable, but this is
+slightly machine dependent and more complicated, and will be left to the
+reader.
+
+Let us start writing our program. So as to be able to use it in other
+contexts, we will structure it in the following way: a main program which
+will do the input and output, and a function which we shall call \kbd{matexp}
+which does the real work. The main program is easy to write. It can be
+something like this:
+
+\bprog%
+\#include <pari.h>
+\h
+GEN matexp(GEN x, long prec);
+\h
+int
+main()
+\obr
+\q long d, prec = 3;
+\q GEN x;
+\h
+\q /* take a stack of a 10\pow 6 bytes, no prime table */
+\q pari\_init(1000000,2);
+\q printf("precision of the computation in decimal digits:\bs n");
+\q d = itos(lisGEN(stdin));
+\q if (d > 0) prec = (long) (d*pariK1+3);
+\h
+\q printf("input your matrix in GP format:\bs n");
+\q x = matexp(lisGEN(stdin), prec);
+\h
+\q sor(x,'g',d,0);
+\q exit(0);
+\cbr\eprog
+\noindent
+The variable \kbd{prec} represents the length in longwords of the real
+numbers used. \teb{pariK1} is a constant (defined in \kbd{paricom.h}) equal
+to $\ln(10) / (\ln(2) * \kbd{BITS\_IN\_LONG})$, which allows us to convert
+from a number of decimal digits to a number of longwords, independently of
+the actual bit size of your long integers. The function \teb{lisGEN} reads an
+expression (here from standard input) and converts it to a \kbd{GEN}, like
+the GP parser itself would. This means it takes care of whitespace etc.\ in
+the input, and can do computations (e.g.~\kbd{matid(2)} or \kbd{[1,0; 0,1]}
+are equally valid inputs).
+
+Finally, \kbd{sor} is the general output routine. We have chosen to give
+\kbd{d} significant digits since this is what was asked for. Note that there
+is a trick hidden here: if a negative \kbd{d} was input, then the computation
+will be done in precision 3 (i.e.~about 9.7 decimal digits for 32-bit
+machines and 19.4 for 64-bit machines) and in the function \kbd{sor}, giving
+a negative third argument outputs all the significant digits, which is entirely
+appropriate. Now let us attack the main course, the function \kbd{matexp}:
+%
+\bprog%
+GEN
+matexp(GEN x, long prec)
+\obr
+\q  long lx=lg(x),i,k,n,lbot, ltop = avma;
+\q  GEN y,r,s,p1,p2;
+\h
+\q /* check that x is a square matrix */
+\q if (typ(x) != t\_MAT) err(talker,"this expression is not a matrix");
+\q if (lx == 1) return cgetg(1, t\_MAT);
+\q if (lx != lg(x[1])) err(talker,"not a square matrix");
+\h
+\q /* compute the L2 norm of x */
+\q s = gzero;
+\q for (i=1; i<lx; i++)
+\q\q s = gadd(s, gnorml2((GEN)x[i]));
+\q if (typ(s) == t\_REAL) setlg(s,3);
+\q s = gsqrt(s,3); /* we do not need much precision on s */
+\h
+\q /* if s<1, we are happy */
+\q k = expo(s);
+\q if (k < 0) \obr\ n = 0; p1 = x; \cbr
+\q else \obr\ n = k+1; p1 = gmul2n(x,-n); setexpo(s,-1); \cbr\eprog
+\noindent
+Before continuing, several remarks are in order.
+
+First, before starting this computation which will produce garbage on the
+stack, we have carefully saved the value of the stack pointer \kbd{avma} in
+\kbd{ltop}. Note that we are going to assume throughout that the garbage does
+not overflow the currently available stack. If it ever did, we would
+have several options~--- allocate a larger stack in the main program (for
+instance change 1000000 into 2000000), do some \kbd{gerepile}ing along the
+way, or (if you know what you are doing) use \tet{allocatemoremem}.
+
+Secondly, the \teb{err} function is the general error handler for the
+PARI library. This will abort the program after printing the required
+message.
+
+Thirdly, notice how we handle the special case $\kbd{lx} = 1$ (empty matrix)
+{\it before\/} accessing \kbd{lx(x[1])}. Doing it the other way round could
+produce a fatal error (a segmentation fault or a bus error, most probably).
+Indeed, if \kbd{x} is of length 1, then \kbd{x[1]} is not a component of
+\kbd{x}. It is just the contents of the memory cell which happens to follow
+the one pointed to by \kbd{x}, and thus has no reason to be a valid \kbd{GEN}.
+Now recall that none of the codeword handling macros do any kind of type
+checking (see \secref{se:impl}), thus \teb{lg} would consider \kbd{x[1]}
+as a valid address, and try to access \kbd{*((GEN)x[1])} (the first codeword)
+which is unlikely to be a legal memory address.
+
+In the fourth place, to compute the square of the $L^2$-norm of \kbd{x} we
+just add the squares of the $L^2$-norms of the column vectors which we obtain
+using the library function \teb{gnorml2}. Had this function not existed, the
+norm computation would of course have been just as easy to write, but we would
+have needed a double loop.
+
+We then take the square root of \kbd{s}, in precision~3 (the smallest
+possible). The \kbd{prec} argument of transcendental functions (here~$3$) is
+only taken into account when the arguments are {\it exact\/} objects, and thus
+no a priori precision can be determined from the objects themselves. To cater
+for this possibility, if \kbd{s} is of type \typ{REAL}, we use the function
+\teb{setlg} which effectively sets the precision of \kbd{s} to the required
+value. Note that here, since we are using a numeric value for a \kbd{cget}
+function, the program will run slightly differently on 32-bit and 64-bit
+machines: we want to use the smallest possible bit accuracy, and this is equal
+to \kbd{BITS\_IN\_LONG}.
+
+Note that the matrix \kbd{x} is allowed to have complex entries, but the
+function \kbd{gnorml2} guarantees that \kbd{s} is a non-negative real number
+(not necessarily of type \typ{REAL} of course). If we had not known this fact,
+we would simply have added the instruction \kbd{s = greal(s);} just after the
+\kbd{for} loop.
+
+Note also that the function \kbd{gnorml2} works as desired on matrices, so we
+really did not need this loop at all (\kbd{s = gnorml2(x)} would have been
+enough), but we wanted to give examples of function usage. Similarly, it is of
+course not necessary to take the square root for testing whether the norm
+exceeds~$1$.
+
+In the fifth place, note that we initialized the sum \kbd{s} to \teb{gzero},
+which is an exact zero. This is logical, but has some disadvantages: if all
+the entries of the matrix are integers (or rational numbers), the computation
+will take rather long, about twice as long as with real numbers of the same
+length. It would be better to initialize \kbd{s} to a real zero, using for
+instance the instructions:
+
+\kbd{s = cgetr(prec+1); gaffsg(0,s);}
+
+\noindent
+This raises the question: which real zero does this produce (have a look
+at~\secref{se:whatzero})? In fact, the following choice has been made: it will
+give you the zero with exponent equal to $-\kbd{BITS\_IN\_LONG}$ times the
+number of longwords in the mantissa, i.e.~$-\kbd{bit\_accuracy(lg(s))}$.
+Instead of the above idiom, you can also use the function
+\kbd{GEN \teb{realzero}(long prec)}, which simply returns a real zero to
+accuracy \kbd{-bit\_accuracy(prec)}.
+
+The sixth remark here is about how to determine the approximate size
+of a real number. The fastest way to do this is to look at its binary
+exponent. Hence we need to have \kbd{s} actually represented as a real number,
+and not as an integer or a rational number. The result of transcendental
+functions is guaranteed to be of type \typ{REAL}, or complex with \typ{REAL}
+components, thus this is indeed the case after the call to \kbd{gsqrt} since
+its argument is a nonnegative (real) number.
+
+Finally, note the use of the function \teb{gmul2n}. It has the following
+syntax:
+
+\kbd{GEN \teb{gmul2n}(GEN x, long n);}
+
+\noindent and the effect is simply to multiply \kbd{x} by $2^{\text n}$,
+where \kbd{n} can be positive or negative. This is much faster than
+\kbd{gmul} or \kbd{gmulgs}.
+
+There is another function \teb{gshift} with exactly the same syntax.
+When \kbd{n} is non-negative, the effects of these two functions are the same.
+However, when \kbd{n} is negative, \kbd{gshift} acts like a right shift of
+\kbd{-n}, hence does not noramlly perform an exact division on integers. The
+function  \kbd{gshift} is the PARI analogue of the C or GP operators \kbd{<<}
+and~\kbd{>>}.
+
+We now come to the heart of the function. We have a \kbd{GEN} \kbd{p1} which
+points to a certain matrix of which we want to take the exponential. We will
+want to transform this matrix into a matrix with real (or complex of real)
+entries before starting the computation. To do this, we simply multiply by
+the real number 1 in precision $\kbd{prec}+1$ (to be on the side of safety).
+To sum the series, we will use three variables: a variable \kbd{p2} which at
+stage $k$ will contain $\kbd{p1}^k/k!$, a variable \kbd{y} which will contain
+$\sum_{i=0}^k \kbd{p1}^i/i!$, and a variable \kbd{r} which will contain the
+size estimate $\kbd{s}^k/k!$. Note that we do not use Horner's rule. This is
+simply because we are lazy and do not want to compute in advance the number
+of terms that we need. We leave this modification (and many other
+improvements!) to the reader. The program continues as follows:
+
+\bprog%
+\q /* initializations before the loop */
+\q r = cgetr(prec+1); gaffsg(1,r); p1 = gmul(r,p1);
+\q y = gscalmat(r,lx-1); /* creates scalar matrix with r on diagonal */
+\q p2 = p1; r = s; k = 1;
+\q y = gadd(y,p2);
+\h
+\q /* now the main loop */
+\q while (expo(r) >= -BITS\_IN\_LONG*(prec-1))
+\q \obr
+\q\q k++; p2 = gdivgs(gmul(p2,p1),k);
+\q\q r = gdivgs(gmul(s,r),k); y = gadd(y,p2);
+\q \cbr
+\h
+\q  /* now square back n times if necessary */
+\q if (!n) \obr\ lbot = avma; y = gcopy(y); \cbr
+\q else
+\q \obr
+\q\q for (i=0; i<n; i++) \obr\ lbot = avma; y = gsqr(y); \cbr
+\q \cbr
+\q return gerepile(ltop,lbot,y);
+\cbr\eprog
+\noindent
+A few remarks once again. First note the use of the function
+\teb{gscalmat} with the following syntax:
+
+\kbd{GEN \teb{gscalmat}(GEN x, long m);}
+
+\noindent
+The effect of this function is to create the $\kbd{m}\times\kbd{m}$ scalar
+matrix whose diagonal entries are~\kbd{x}. Hence the length of the matrix
+including the codeword will in fact be \kbd{m+1}.  There is a corresponding
+function \teb{gscalsmat} which takes a long as a first argument.
+
+If we refer to what has been said above, the main loop should be self-evident.
+
+When we do the final squarings, according to the fundamental dogma on the
+use of \teb{gerepile}, we keep the value of \kbd{avma} in \kbd{lbot} just {\it
+before\/} the squaring, so that if it is the last one, \kbd{lbot} will indeed
+be the bottom address of the garbage pile, and \kbd{gerepile} will work. Note
+that it takes a completely negligible time to do this in each loop compared
+to a matrix squaring.  However, when \kbd{n} is initially equal to 0, no
+squaring has to be done, and we have our final result ready but we lost the
+address of the bottom of the garbage pile. Hence we use the trick of copying
+\kbd{y} again to the top of the stack. This is inefficient, but does the trick.
+If we wanted to avoid this using only \kbd{gerepile}, the best thing to do
+would be to put the instruction \kbd{lbot=avma} just before both occurrences
+of the instruction \kbd{y=gadd(p2,y)}. Of course, we could also rewrite the
+last block as follows:
+
+\bprog%
+\q /* now square back n times */
+\q for (i=0; i<n; i++) y = gsqr(y);
+\q return gerepileupto(ltop,y);
+\cbr\eprog
+\noindent
+because it does not matter to \teb{gerepileupto} that we have lost the address
+just before the final result (note that the loop is not executed if \kbd{n}
+is~0). It is safe to use \kbd{gerepileupto} here as \kbd{y} will have been
+created by either \kbd{gsqr} or \kbd{gadd}, both of which are guaranteed to
+return suitable objects.
+
+\misctitle{Remarks}. As such, the program should work most of the time if
+\kbd{x} is a square matrix with real or complex entries. Indeed, since
+essentially the first thing that we do is to multiply by the real number~1,
+the program should work for integer, real, rational, complex or quadratic
+entries. This is in accordance with the behavior of transcendental functions.
+
+Furthermore, since this program is intended to be only an illustrative
+example, it has been written a little sloppily. In particular many error
+checks have been omitted, and the efficiency is far from optimal. An evident
+improvement would be the use of \kbd{gerepileupto} mentioned above. Another
+improvement is to multiply the matrix x by the real number 1 right at the
+beginning, speeding up the computation of the $L^2$-norm in many cases. These
+improvements are included in the version given in Appendix~B. Still another
+improvement would come from a better choice of~\kbd{n}. If the reader takes a
+look at the implementation of the function \kbd{mpexp1} in the file
+\kbd{basemath/trans1.c}, he can make the necessary changes himself. Finally,
+there exist other algorithms of a different nature to compute the exponential
+of a matrix.
+
+\section{Adding functions to PARI}
+\subsec{Nota Bene}.
+%
+As already mentioned, modified versions of the PARI package should NOT be
+spread without our prior approval. If you do modify PARI, however, it is
+certainly for a good reason, hence we would like to know about it, so that
+everyone can benefit from it. There is then a good chance that the
+modifications that you have made will be incorporated into the next release.
+
+(Recall the e-mail address: \kbd{pari@math.u-bordeaux.fr}, or use the mailing
+lists).
+
+Roughly four types of modifications can be made. The first type includes all
+improvements to the documentation, in a broad sense. This includes correcting
+typos or inacurracies of course, but also items which are not really covered
+in this document, e.g.~if you happen to write a tutorial, or pieces of code
+exemplifying some fine points that you think were unduly omitted.
+
+The second type is to expand or modify the configuration routines and skeleton
+files (the \kbd{Configure} script and anything in the \kbd{config/}
+subdirectory) so that compilation is possible (or easier, or more efficient)
+on an operating system previously not catered for. This includes discovering
+and removing idiosyncrasies in the code that would hinder its portability.
+
+The third type is to modify existing (mathematical) code, either to correct
+bugs, to add new functionalities to existing functions, or to improve their
+efficiency.
+
+Finally the last type is to add new functions to PARI. We explain here how
+to do this, so that in particular the new function can be called from GP.
+
+\subsec{The calling interface from GP, parser codes}.
+\label{se:gp.interface}
+A \idx{parser code} is a character string describing all the GP parser
+needs to know about the function prototype. It contains a sequence of the
+following atoms:
+
+\settabs\+\indent&\kbd{Dxxx}\quad&\cr
+\noindent $\bullet$ Syntax requirements, used by functions like
+ \kbd{for}, \kbd{sum}, etc.:
+%
+\+& \kbd{=} & separator \kbd{=} required at this point (between two
+arguments)\cr
+
+\noindent$\bullet$ Mandatory arguments, appearing in the same order as the
+input arguments they describe:
+%
+\+& \kbd{G} & \kbd{GEN}\cr
+\+& \kbd{\&}& \kbd{*GEN}\cr
+\+& \kbd{L} & long {\rm (we implicitly identify \kbd{int} with \kbd{long})}\cr
+\+& \kbd{S} & symbol (i.e.~GP identifier name). Function expects a
+\kbd{*entree}\cr
+\+& \kbd{V} & variable (as \kbd{S}, but rejects symbols associated to
+functions)\cr
+\+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
+\kbd{*entree})\cr
+\+& \kbd{I} & string containing GP code (useful for control statements, %
+ to be processed with \kbd{lisexpr}\cr
+\+&&\quad or \kbd{lisseq})\cr
+\+& \kbd{r} & raw input (treated as a string without quotes). Quoted %
+ args are copied as strings.\cr
+\+&&\quad Stops at first unquoted \kbd{')'} or \kbd{','}. Special chars can
+be quoted using '\kbd{\bs{}}'.\cr
+\+&&\quad Example: \kbd{aa"b\bs n)"c} yields the string \kbd{"aab\bs{n})c"}\cr
+\+& \kbd{s} & expanded string. Example: \kbd{Pi"x"2} yields \kbd{"3.142x2"}.\cr
+\+&& Unquoted components can be of any PARI type (converted following current
+output format)\cr
+
+\noindent$\bullet$ Optional arguments:
+%
+\+& \kbd{s*} & any number of strings, possibly 0 (see \kbd{s})\cr
+\+& \kbd{s*p} & idem, setting $\kbd{prettyp} = 1$ (i.e.~in beautified
+format)\cr
+\+& \kbd{s*t} & idem, in \TeX\ format\cr
+\+& \kbd{D\var{xxx}} &  argument has a default value.\cr
+
+The format to indicate a default value (atom starts with a \kbd{D}) is
+``\kbd{D\var{value},\var{type},}'', where \var{type} is the code for any
+mandatory atom (previous group), \var{value} is any valide GP expression
+which is converted according to \var{type}, and the ending comma is
+mandatory. For instance \kbd{D0,L,} stands for ``this optional argument will
+be converted to a \kbd{long}, and is \kbd{0} by default''. So if the
+user-given argument reads \kbd{1 + 3} at this point, \kbd{(long)4} is sent to
+the function (via \tet{itos}$()$); and \kbd{(long)0} if the argument is
+ommitted. The following special syntaxes are available:
+
+\begingroup
+\settabs\+\indent\indent&\kbd{Dxxx}\quad& optional \kbd{*GEN},&\cr
+\+&\kbd{DG}& optional \kbd{GEN}, & send {\tt NULL} if argument omitted.\cr
+
+\+&\kbd{D\&}& optional \kbd{*GEN}, send {\tt NULL} if argument omitted.\cr
+
+\+&\kbd{DV}& optional \kbd{*entree}, send {\tt NULL} if argument omitted.\cr
+
+\+&\kbd{DI}& optional \kbd{*char}, send {\tt NULL} if argument omitted.\cr
+
+\+&\kbd{Dn}& optional variable number, $-1$ if omitted.\cr
+\endgroup
+
+\noindent$\bullet$ Automatic arguments:
+%
+\+& \kbd{f} &  Fake \kbd{*long}. C function requires a pointer but we
+don't use the resulting \kbd{long}\cr
+\+& \kbd{p} &  real precision (default \kbd{realprecision})\cr
+\+& \kbd{P} &  series precision (default \kbd{seriesprecision},
+ global variable \kbd{precdl} for the library)\cr
+
+\noindent $\bullet$ Return type: \kbd{GEN} by default, otherwise the
+following can appear anywhere in the code string:
+%
+\+& \kbd{l} & return \kbd{long}\cr
+\+& \kbd{v} & return \kbd{void}\cr
+
+No more than 8 arguments can be given (syntax requirements and return types
+are not considered as arguments). This is currently hardcoded but can
+trivially be changed by modifying the definition of \kbd{argvec} in
+\kbd{anal.c:identifier()}. This limitation should disappear in future
+versions.
+
+When the function is called under GP, the prototype is scanned and each time
+an atom corresponding to a mandatory argument is met, a user-given argument
+is read (GP outputs an error message it the argument was missing). Each time
+an optional atom is met, a default value is inserted if the user omits the
+argument. The ``automatic'' atoms fill in the argument list transparently,
+supplying the current value of the corresponding variable (or a dummy
+pointer).
+
+For instance, here is how you would code the following prototypes (which
+don't involve default values):
+\bprogtabs\+\indent& void name(GEN x, GEN y, long prec)\quad& ---->\quad&\cr
+\+& GEN name(GEN x, GEN y, long prec)  & ----> & "GGp"\cr
+\+& void name(GEN x, long y, long prec) & ----> & "vGLp" {\rm (or %
+ \kbd{"GvLp"})}\cr
+\+& long name(GEN x) & ----> & "Gl"\cr
+\eprog
+
+If you want more examples, GP gives you easy access to the parser codes
+associated to all GP functions: just type \kbd{\b{h} \var{function}}. You
+can then compare with the C prototypes as they stand in the code.
+
+\misctitle{Remark}: If you need to implement complicated control statements
+(probably for some improved summation functions), you'll need to know about
+the \teb{entree} type, which is not documented. Check the comment before
+the function list at the end of \kbd{language/init.c} and the source code
+in \kbd{language/sumiter.c}. You should be able to make something of it.
+\smallskip
+
+\subsec{Coding guidelines}.
+\noindent
+Code your function in a file of its own, using as a guide other functions
+in the PARI sources. One important thing to remember is to clean the stack
+before exiting your main function (usually using \kbd{gerepile}), since
+otherwise successive calls to the function will clutter the stack with
+unnecessary garbage, and stack overflow will occur sooner. Also, if it
+returns a \kbd{GEN} and you want it to be accessible to GP, you have to
+make sure this \kbd{GEN} is suitable for \kbd{gerepileupto} (see
+\secref{se:garbage}).
+
+If error messages are to be generated in your function, use the general
+error handling routine \kbd{err} (see \secref{se:err}). Recall that, apart
+from the \kbd{warn} variants, this function does not return but ends with
+a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
+\kbd{fprintf} statements, use the following encapsulated variants:
+
+\kbd{void \teb{pariputs}(char *s)}: write \kbd{s} to the GP output stream.
+
+\kbd{void \teb{fprintferr}(char *s)}: write \kbd{s} to the GP error
+stream (this function is in fact much more versatile, see
+\secref{se:dbg_output}).
+
+Declare all public functions in \kbd{paridecl.h} (you want the outside
+world to know about them). The other ones should be declared \kbd{static} in
+your file.
+
+Your function is now ready to be used in library mode after compilation and
+creation of the library. If possible, compile it as a shared library (see
+the \kbd{Makefile} coming with the \kbd{matexp} example in the
+distribution). It is however still inaccessible from GP.\smallskip
+
+\subsec{Integration with GP as a shared module}
+
+To tell GP about your function, you must do the following. First, find a
+name for it. It does not have to match the one used in library mode, but
+consistency is nice. It has to be a valid GP identifier, i.e.~use only
+alphabetic characters, digits and the underscore character (\kbd{\_}), the
+first character being alphabetic.
+
+Then you have to figure out the correct \idx{parser code} corresponding to
+the function prototype. This has been explained above
+(\secref{se:gp.interface}).
+
+Now, assuming your Operating System is supported by \tet{install}, simply
+write a GP script like the following:
+
+\bprog%
+install(\var{name}, \var{code}, \var{gpname}, \var{library})
+addhelp(\var{gpname}, \var{some help text})
+\eprog
+\noindent(see \secref{se:addhelp} and~\ref{se:install}). The \idx{addhelp}
+part is not mandatory, but very useful if you want others to use your
+module.
+
+Read that file from your GP session (from your \idx{preferences file} for
+instance, see \secref{se:gprc}), and that's it, you can use the new
+function \var{gpname} under GP (and we would very much like to hear about
+it!).
+
+\subsec{Integration the hard way}
+
+If \tet{install} is not available for your Operating System, it's more
+complicated: you have to hardcode your function in the GP binary (or
+install \idx{Linux}). Here's what needs to be done: 
+
+In the definition of \kbd{functions\_basic} (file \kbd{language/init.c}),
+add your entry in exact alphabetical order by its GP name (note that digits
+come before letters), in a line of the form:
+
+\kbd{\obr"gpname",V,(void*)libname,secno,"code"\cbr,}
+
+\noindent where
+
+\kbd{libname} is the name of your function in library mode,
+
+\kbd{gpname} the name that you have chosen to call it under GP,
+
+\kbd{secno} is the section number of Chapter~3 in which this function would
+belong (type \kbd{?} in GP to see the list),
+
+\kbd{V} is a number between 0 and 99. Right now, there are only two
+significant values: zero means that it's possible to call the function
+without argument, and non-zero means it needs at least one argument.
+
+\kbd{code} is the parser code.
+
+Once this has been done, in the file \kbd{language/helpmessages.c} add in
+exact alphabetical order a short message describing the effect of your
+function:
+\kbd{"name(x,y,...)=short descriptive message",}
+
+The message must be a single line, of arbitrary length. Do not use
+\kbd{\bs{n}}; the necessary newlines will be inserted by GP's online help
+functions. Optional arguments should be shown between braces (see the other
+messages for comparison).\smallskip
+
+Now, you can recompile GP.
+
+\subsec{Example}.
+%
+A complete description could look like this:
+
+\bprog%
+\obr
+\q  install(bnfinit0, GD0,L,DGp, ClassGroupInit, "libpari.so")
+\q  addhelp(ClassGroupInit, "ClassGroupInit(P,\obr flag=0\cbr,\obr data=[]\cbr):
+\q\q    compute the necessary data for ...")
+\cbr
+\eprog
+which means we have a function \kbd{ClassGroupInit} under GP, which calls the
+library function \kbd{bnfinit0} . The function has one mandatory
+argument (\kbd{V} is non-zero), and possibly two more (two \kbd{'D'} in the
+code), plus the current real precision. More precisely, the first argument
+is a \kbd{GEN}, the second one is converted to a \kbd{long} using
+\kbd{itos} (\kbd{0} is passed if it is omitted), and the third one is also
+a \kbd{GEN}, but we pass \kbd{NULL} if no argument was supplied by the
+user. This matches the C prototype (from \kbd{paridecl.h}):
+%
+\bprog%
+  GEN bnfinit0(GEN P, long flag, GEN data, long prec)
+\eprog
+
+This function is in fact coded in \kbd{basemath/buch2.c}, and will in this
+case be completely identical to the GP function \kbd{bnfinit} but GP does
+not need to know about this, only that it can be found somewhere in the
+shared library \kbd{libpari.so}.
+
+\misctitle{Important note} You see in this example that it is the
+function's responsibility to correctly interpret its operands: \kbd{data =
+NULL} is interpreted {\it by the function\/} as an empty vector. Note that
+since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
+enables you to distinguish between a default value and actual input: the
+user could explicitly supply an empty vector!
+
+\misctitle{Note} If \kbd{install} were not available we would have to
+modify \kbd{language/helpmessages.c}, and \kbd{language/init.c} and
+recompile GP. The entry in \kbd{functions\_basic} corresponding to the
+function above is actually
+\bprog\obr
+"bnfinit", 91, (void*)bnfinit0, 6, "GD0,L,DGp"
+\cbr\eprog
+\vfill\eject

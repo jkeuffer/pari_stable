@@ -1,0 +1,9 @@
+This creates non relocatable object files.
+We cannot make "libpari.sl" with this asm kernel.
+
+This asm kernel does not compile :
+* GNU assembler version 940807 (hppa1.1-hp-hpux), using BFD version cygnus-2.3
+  Does not understand .shortdata
+  Dump a core if we comment it.
+* HP-UX A.09.05 /bin/as (as_800)
+  Does not understand $global$

@@ -1,0 +1,155 @@
+#!/bin/sh
+
+wrln () { echo "$1"; echo "$1" >> $file_bench; }
+
+wr () { echo $n "$1$c"; echo $n "$1$c" >> $file_bench; }
+
+confdir=../config
+testdir=../src/test
+execdir=.
+#Format: filename_weight (weight = 1000 if omitted)
+#  individual times are not modified whereas accumulated time is weighed
+#  by (weight / 1000)
+test -z "$testlist" && testlist="\
+  objets\
+  analyz\
+  number\
+  polyser\
+  linear\
+  elliptic\
+  sumiter\
+  graph\
+  program\
+  trans\
+  nfields_200\
+"
+if test -f /bin/rm ; then RM=/bin/rm; else RM=rm ; fi
+if sh -c 'test -x /bin/sh' 2>&-; then x=-x; else x=-r; fi
+(echo "hi there\c" ; echo " ") > echotmp
+if grep c echotmp >/dev/null 2>&1 ; then n=-n; c=; else n=; c='\c'; fi
+$RM echotmp
+
+case "$1" in
+  8) bitlen=64 ;;
+  *) bitlen=32 ;;
+esac
+case "$2" in
+  -c) testlist=compat;;
+  -g) testlist=ploth;;
+  -a) testlist=all;;
+esac
+
+. $confdir/version
+file_bench=Bench-$version.$patch
+if (touch $file_bench 2> /dev/null); then
+  SUF=
+else
+  if test ! $x $execdir/gp.exe; then
+    echo "build gp.exe first" >&2; exit 1
+  fi
+  if (echo | gp -test -q 2> /dev/null); then
+    gp=gp
+  else
+    gp="command /c gp"
+  fi
+  if (expr 2 \* 2 2> /dev/null); then exprbug=0; else exprbug=1; fi
+  SUF="exe"; file_bench=Bench.$patch
+fi
+$RM -f $file_bench
+
+dotestSUF=${dotestSUF:-"sta dyn"}
+for arg in $dotestSUF; do
+  case "$arg" in
+    sta|dyn) if test $x $execdir/gp-$arg; then SUF="$SUF $arg"; fi ;;
+  esac
+done
+file_test=gp.out
+for suf in $SUF; do eval time$suf=0 files$suf=; done
+for testdata in $testlist; do
+  O=$IFS;IFS=_;set $testdata;IFS=$O;testname=$1;testmul=$2
+  file_in=$testdir/in/$testname
+  file_out=$testdir/$bitlen/$testname
+  if test ! -r $file_in -o ! -r $file_out; then
+    wrln "Error! Missing file, can't test $testname"
+  else
+    testmul=${testmul:-1000}
+    wr "* Testing $testname $c"
+    for suf in $SUF; do
+      wr "	for gp-$suf..$c"
+      case "$suf" in
+        exe) file_diff=$testname.dif;;
+	*)   file_diff=$testname-$suf.dif
+	     gp=$execdir/gp-$suf;;
+      esac
+      $gp -q -test < $file_in > $file_test 2>&1
+      diff -c $file_out $file_test > $file_diff
+      pat=`grep "^[-+!] " $file_diff | grep -v "Total time"`
+      time=`tail -2 $file_test | sed -n 's,.*Total time spent: \(.*\),\1,p'`
+      if test -n "$time"; then
+        eval t='$'time$suf
+	if test -n "$exprbug"; then
+	  t=`expr $time \'\*\' $testmul / 1000 + $t`
+	else
+	  t=`expr $time '*' $testmul / 1000 + $t`
+	fi
+        eval time$suf=$t
+      fi
+      if test -z "$pat"; then
+        wr "TIME=$time";
+      else
+        eval BUG$suf=BUG
+        eval files$suf=\"'$'files$suf $file_diff\"
+        wr "BUG [${time:-0}]"
+      fi
+    done
+    wrln
+  fi
+done
+$RM $file_test
+BUG=
+for suf in $SUF; do
+  B=`eval echo '$'BUG$suf`; BUG="$BUG$B"
+  t=`eval echo '$'time$suf`
+  if test -n "$B"; then B=' [BUG]'; fi
+  wrln "+++$B Total bench for gp-$suf is $t"
+done
+if test -n "$BUG"; then
+  pwd=`pwd`
+  wrln
+  wrln "PROBLEMS WERE NOTED. The following files list them in diff format: "
+  wrln "Directory: $pwd"
+  lastnote=ok; bug=
+  for suf in $SUF; do
+    B=`eval echo '$'BUG$suf`; BUG="$BUG$B"
+    if test -n "$B"; then
+      flist=`eval echo '$'files$suf`
+      for f in $flist; do
+        case "$f" in
+          *program*) if test -n "$bug"; then bug=all; else bug=$suf; fi;;
+          *) lastnote="";;
+        esac
+        wrln "	$f"
+      done
+    fi
+  done
+  if test -n "$lastnote"; then
+    case "$bug" in
+      all) end=""
+           file_diff=program-sta.dif;;
+      sta|dyn)
+           end=" (gp-$bug only)"
+           file_diff=program-$bug.dif;;
+      exe)
+           end=" (gp-$bug)"
+	   file_diff=program.dif;;
+    esac
+    pat=`head -4 $file_diff|tail -1|grep "108,118"`
+    if test -n "$pat"; then
+cat << EOT
+NOTE: actually, the only problem noted is that install() does not work
+in your configuration$end, so you will not be able to use
+this feature. Otherwise you can safely ignore the above warning.
+EOT
+    fi
+  fi
+fi

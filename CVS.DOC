@@ -1,0 +1,65 @@
+This file documents access to the CVS server, which is intended for PARI
+developers or [alpha|beta]-testers who want the very latest bleeding edge
+release. The CVS sources are guaranteed to compile cleanly and to pass the
+bench suite on (one of) the administrator(s)'s machine(s), that's all. They
+may otherwise contain severe bugs. Stable releases will be made available
+on a regular basis using the customary method (a message to pari-announce).
+
+
+First connection to the anonymous CVS server:
+
+  cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot login
+  Hit return when asked for a password
+
+  cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot checkout pari
+
+This last command will create a local copy of the distribution from the
+repository (directory 'pari'). From now on, you can 'cd' to this pari
+directory and use any cvs command without the -d argument, as long as you
+remain there (or in a subdirectory). Password won't be required again. You
+can also build pari in the usual way (see INSTALL). You can update your
+local copy at any time using 'cvs update', which will put you in synch with
+the repository.
+
+If you modify your local copy, you won't be able to commit your changes
+using anonymous access. Use 
+
+  'cvs diff'     [with flag -c if your local diff supports it]
+
+Then send the output to the pari-dev mailing list with a short description
+of what you've done [or to pari@math.u-bordeaux.fr if you're not subscribed
+to pari-dev].
+
+If you plan to do that on a regular basis (which would be nice :-), send a
+note to pari-dev, telling what kind of development work you're interested in,
+and ask for the rights to modify the repository directly. Once this is
+granted, you'll be able to log in as 'cvsadmin' (the CVS administrator)
+instead of 'cvs' (CVS user) as described above and you'll be able to use 'cvs
+commit' directly.
+
+
+NOTES:
+1) you can speed up file transfers by using cvs -z9 (transfer files in
+compressed format), e.g 'cvs -z9 update' if you've missed a lot of patches,
+or 'cvs -z9 checkout' for the initial checkout. This requires that GNU gzip
+be in your path.
+
+2) once you've run Configure, some files/directory will be created in the
+local copy which are not under CVS control (only the master files are).
+These are
+
+  O<OS>-<arch>/
+  O<OS>-<arch>.dbg/
+  O<OS>-<arch>.prf/
+  Makefile.O<OS>-<arch>
+  Makefile.O<OS>-<arch>.dbg
+  Makefile.O<OS>-<arch>.prf
+  examples/Makefile.<OS>-<arch>
+  doc/Makefile
+  doc/gphelp
+  doc/paricfg.tex
+  doc/*.[aux | dvi | idx | log | ps | std | toc]
+  emacs/pari.el
+
+After a global 'cvs diff', or 'cvs status', you can safely ignore all
+messages pertaining to them (e.g "? doc/Makefile").

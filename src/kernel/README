@@ -1,0 +1,47 @@
+There is a different directory for each value of "$asmarch". In each of them,
+lies a file Makefile.SH that will be included in the general Makefile. It
+contains rules for creating headers and object files in the build directory.
+
+The list of
+  headers files is given by "$khlist" (default: "pariinl")
+  object  files is given by "$kernel" (default: "kernel mp mpinl")
+
+*******************************************************************
+The "level 0 kernel" symbols are :
+    overflow hiremainder
+    addll addllx subll subllx shiftl shiftlr mulll addmul
+    divll bfffo (& tabshi)
+For a generic architecture (no assembler kernel), they are defined in
+"none/level0.c" and, if inlining is possible (C++ or gcc), with
+"none/level0.h". Otherwise, in $asmarch/level0.s (except for 680x0: in
+m68k/mp.s) or $asmarch/level0.h respectively. The corresponding object file
+is "kernel.o".
+
+NB: for sparcv8, "divll" has to use hiremainder, thus differs if the other
+operations are inlined (and hiremainder stored into a specific register).
+
+*******************************************************************
+The "level 1 kernel" symbols are many. Some of them can be inlined, the
+others not.
+The "inline level 1" symbols are :
+    absi absr addsii addssz affii affsi affsr cgetg cgeti cgetr
+    cmpir cmpsr divise divisii divisz divrrz divsiz divss divssz
+    dvmdiiz dvmdis dvmdisz dvmdsi dvmdsiz dvmdss dvmdssz expi
+    icopy itos modis mpadd mpaff mpcmp mpdiv mpdivis mpmul mpsub
+    mulsii mulssz negi negr rcopy resiiz resis ressi shiftr stoi
+    subii subir subri subrr subsi subsr vali
+ (the following ones are not in mp.s)
+    gtodouble smodis addssmod subssmod mulssmod divssmod
+The "not-inline level 1" symbols are :
+    mpnegz mpabsz affir affrr shifti mptrunc mpent cmpsi cmpii cmprr
+    addss addsi addii addsr addir addrr mulss smulss mulsi mulsr mulrr
+    mulir convi confrac vals modss resss divsi modsi modss resss divsi
+    modsi divis divir divri diviiz mpdivz divsr modii modiiz divrs
+    dvmdii divrr
+    mulii mymulii
+ (the following ones are not in mp.s)
+    truedvmdii invrev diviirev diviiexactfullrev diviiexact2 smodsi
+    absi_equal absi_cmp absr_cmp muliispec addiispec quickmulii
+    sqrispec quicksqri sqri karamulrr1 karamulrr2 karamulrr karamulir
+    dbltor rtodbl
+    cgiv

@@ -1,0 +1,436 @@
+\chapter{Overview of the PARI system}
+
+\section{Introduction}
+
+\noindent
+The PARI system is a package which is capable of doing formal computations
+on recursive types at high speed; it is primarily aimed at number
+theorists, but can be used by anybody whose primary need is speed.
+
+Although quite an amount of symbolic manipulation is possible in PARI, this
+system does very badly compared to much more sophisticated systems like
+Axiom, Macsyma, Maple, Mathematica or Reduce on such manipulations
+(e.g.~multivariate polynomials, formal integration, etc\dots). On the other
+hand, the three main advantages of the system are its speed (which can be
+between 5 and 100 times better on many computations), the possibility of
+using directly data types which are familiar to mathematicians, and its
+extensive algebraic number theory module which has no equivalent in the
+above-mentioned systems.
+
+It is possible to use PARI in two different ways:
+
+\quad 1) as a library, which can be called from an upper-level language
+application (for instance written in C, C$++$, Pascal or Fortran);
+
+\quad 2) as a sophisticated programmable calculator, named {\bf GP}, which
+contains most of the control instructions of a standard language like C.
+
+The use of GP is explained in chapters 2 and 3, and the programming in library
+mode is explained in chapters 3, 4 and 5. In the present Chapter 1, we give
+an overview of the system.
+
+\subsectitle{Important note:} A tutorial for GP is provided in the standard
+distribution (\kbd{tutorial.dvi}) and you should read this first (at
+least the beginning of it, you can skip the specialized topics you're not
+interested in). You can then start over and read the more boring stuff which
+lies ahead. But you should do that eventually, at the very least the various
+Chapter headings. You can have a quick idea of what is available by looking
+at the GP reference card (\kbd{refcard.dvi} or \kbd{refcard.ps}). In case
+of need, you can then refer to the complete function description in Chapter 3.
+
+\subsectitle{How to get the latest version?}
+
+\noindent
+This package can be obtained by anonymous ftp from quite a number of sites
+(ask \kbd{archie} or your favourite Web search engine for the site nearest to
+you). But, if you want the very latest version (including development
+versions), you should use the anonymous ftp address
+
+\kbd{ftp://megrez.math.u-bordeaux.fr/pub/pari}
+
+\noindent
+where you will find all the different ports and possibly some
+binaries. A lot of version information, mailing list archives, and various
+tips can be found on PARI's (fledgling) home page:
+
+\kbd{\wwwsite}
+
+\subsectitle{Implementation notes:} (You can skip this section and switch to
+\secref{se:start} if you're not interested in hardware technicalities. You
+won't miss anything that would be mentioned here.)
+
+Version \vers{} of the PARI package contains essentially three versions. The
+first one is a specific implementation for 680x0 based computers which
+contains a kernel (for the elementary arithmetic operations on multiprecise
+integers and real numbers, and binary/decimal conversion routines) entirely
+written in MC68020 assembly language (around 6000 lines), the rest being at
+present entirely written in ANSI C with a C++-compatible syntax. The system
+runs on SUN-3/xx, Sony News, NeXT cubes and on 680x0 based Macs with
+x$\ge$2. It should be very easy to port on any other 680x0 based machine
+like for instance the Apollo Domain workstations.
+
+Note that the assembly language source code uses the SUN syntax, which for
+some strange reason differs from the Motorola standard used by most other
+680x0 machines in the world. In the Mac distribution, we have included a
+program which automatically converts from the SUN syntax into the standard
+one, at least for the needed PARI assembly file. On the Unix distribution,
+we have included other versions of the assembly file, using different
+syntaxes. {\bf This version is not really maintained anymore since we lack
+the hardware to update/test it.}
+
+The second version is a version where most of the kernel routines are written
+in C, but the time-critical parts are written in a few hundred lines
+of assembler at most. At present there exist three versions for the Sparc
+architecture: one for Sparc version 7 (e.g.~Sparcstation 1, 1+, IPC, IPX or 2),
+one for Sparc version 8 with supersparc processors (e.g.~Sparcstation 10
+and 20) and one for Sparc version 8 with microsparc I or II processors
+(e.g.~Sparcclassic or Sparcstation 4 and 5). No specific version is written
+for the Ultrasparc since it can use the microsparc II version. In addition,
+versions exist for the HP-PA architecture, for the PowerPC architecture
+(only for the 601), for the Intel family starting at the 386 (under Linux,
+OS/2, MSDOS, or Windows), and finally for the DEC Alpha 64-bit processors.
+
+Finally, a third version is written entirely in C, and should be portable
+without much trouble to any 32 or 64-bit computer having no real memory
+constraints. It is about 2 times slower than versions with a small assembly
+kernel. This version has been tested for example on MIPS based DECstations
+3100 and 5000 and SGI computers.
+
+In addition to Unix workstations and Macs, PARI has been ported to a
+considerable number of smaller and larger machines, for example the VAX,
+68000-based machines like the Atari, Mac Classic or Amiga 500, 68020 machines
+such as the Amiga 2500 or 3000, and even to MS-DOS 386 or better machines,
+using the \tet{EMX} port of the GNU C compiler and DOS-extender.
+
+\section{The PARI types}
+\label{se:start}\sidx{types}
+
+\noindent
+The crucial word in PARI is \idx{recursiveness}: most of the types it knows
+about are recursive. For example, the basic type {\bf Complex} exists (actually
+called \typ{COMPLEX}). However, the components (i.e.~the real and imaginary
+part) of such a ``complex number'' can be of any type. The only sensible ones
+are integers (we are then in $\Z[i]$), rational numbers ($\Q[i]$), real
+numbers ($\R[i]=\C$), or even elements of $\Z/n\Z$ ($(\Z/n\Z)[i]$ when this
+makes sense), or $p$-adic numbers when $p\equiv 3 \mod 4$ ($\Q_{p}[i]$).
+
+This feature must of course not be used too rashly: for example you are in
+principle allowed to create objects which are ``complex numbers of complex
+numbers'', but don't expect PARI to make sensible use of such objects: you
+will mainly get nonsense.
+
+On the other hand, one thing which {\it is\/} allowed is to have components
+of different, but compatible, types. For example, taking again complex
+numbers, the real part could be of type integer, and the imaginary part of
+type rational.
+
+By compatible, we mean types which can be freely mixed in operations like $+$
+or $\times$. For example if the real part is of type real, the imaginary part
+cannot be of type integermod (integers modulo a given number $n$).
+
+Let us now describe the types. As explained above, they are built recursively
+from basic types which are as follows. We use the letter $T$ to designate any
+type; the symbolic names correspond to the internal representations of the
+types.\medskip
+\settabs\+xxx&typexxxxxxxxxxxx&xxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\cr
+%
+\+&type \typ{INT} \idxtyp{INT}:& $\Z$& Integers (with
+arbitrary precision)\sidx{integer}\cr
+%
+\+&type \typ{REAL}\idxtyp{REAL}:& $\R$& Real numbers
+(with arbitrary precision)\sidx{real number}\cr
+%
+\+&type \typ{INTMOD}\idxtyp{INTMOD}:& $\Z/n\Z$&
+Integermods (integers modulo $n$)\sidx{integermod}\cr
+%
+\+&type \typ{FRAC}\idxtyp{FRAC}:& $\Q$& Rational numbers
+(in irreducible form)\sidx{rational number}\cr
+%
+\+&type \typ{FRACN}\idxtyp{FRACN}:& $\Q$& Rational numbers
+(not necessarily in irreducible form)\cr
+%
+\+&type \typ{COMPLEX}\idxtyp{COMPLEX}:& $T[i]$& Complex
+numbers\sidx{complex number}\cr
+%
+\+&type \typ{PADIC}\idxtyp{PADIC}:& $\Q_p$&
+$p$-adic\sidx{p-adic number} numbers\cr
+%
+\+&type \typ{QUAD}\idxtyp{QUAD}:& $\Q[w]$& Quadratic Numbers
+(where $[\Z[w]:\Z]=2$)\sidx{quadratic number}\cr
+%
+\+&type \typ{POLMOD}\idxtyp{POLMOD}:& $T[X]/P(X)T[X]$&
+Polmods (polynomials modulo $P$)\sidx{polmod}\cr
+%
+\+&type \typ{POL}\idxtyp{POL}:& $T[X]$& Polynomials
+\sidx{polynomial}\cr
+%
+\+&type \typ{SER}\idxtyp{SER}:& $T((X))$& Power series
+(finite Laurent series)\sidx{power series}\cr
+%
+\+&type \typ{RFRAC}\idxtyp{RFRAC}:& $T(X)$& Rational
+functions (in irreducible form) \sidx{rational function}\cr
+%
+\+&type \typ{RFRACN}\idxtyp{RFRACN}:& $T(X)$& Rational functions
+(not necessarily in irreducible form)\cr
+%
+\+&type \typ{VEC}\idxtyp{VEC}:& $T^n$& Row (i.e.~horizontal)
+vectors\sidx{row vector}\cr
+%
+\+&type \typ{COL}\idxtyp{COL}:& $T^n$& Column (i.e.~vertical)
+vectors\sidx{column vector}\cr
+%
+\+&type \typ{MAT}\idxtyp{MAT}:& ${\cal M}_{m,n}(T)$&
+Matrices\sidx{matrix}\cr
+%
+\+&type \typ{LIST}\idxtyp{LIST}:& $T^n$&
+Lists\sidx{list}\cr
+%
+\+&type \typ{STR}\idxtyp{STR}:&     &
+Character strings\sidx{string}\cr
+\noindent
+and where the types $T$ in recursive types can be different in each component.
+
+In addition, there exist types \typ{QFR}\idxtyp{QFR} and \typ{QFI}
+\idxtyp{QFI} for binary quadratic forms of respectively positive and
+negative discriminants,\sidx{binary quadratic form} which can be used in
+specific operations, but which may disappear in future versions.
+
+\sidx{GEN} Every PARI object (called \kbd{GEN} in the sequel) belongs
+to one of these basic types. Let us have a closer look.
+
+\subsec{Integers and reals}:\sidx{integer}\sidx{real number}
+they are of arbitrary and varying length (each number carrying in its
+internal representation its own length or precision)
+with the following mild restrictions (given for
+32-bit machines, the restrictions for 64-bit machines being so weak as to be
+considered inexistent): integers must be in absolute value less than
+$2^{268435456}$ (i.e.~roughly 80807124 digits).  The precision of real
+numbers is also at most 80807124 significant decimal digits, and the binary
+exponent must be in absolute value less than $2^{23}=8388608$.
+
+Note that PARI has been optimized so that it works as fast as possible on
+numbers with at most a few thousand decimal digits. In particular, not too
+much effort has been put into fancy multiplication techniques (only the
+Karatsuba algorithm is implemented). Hence, although it is possible to use
+PARI to do computations with 80000000 decimal digits, much better programs
+can be written for such huge numbers.
+
+Integers and real numbers are completely non-recursive types and are
+sometimes called the {\it\idx{leaves}}.
+
+\subsec{Integermods, rational numbers (irreducible or not),
+$p$-adic numbers, polmods, and
+rational functions}:\sidx{integermod}\sidx{rational number}\sidx{p-adic number}
+\sidx{polmod} these are recursive, but in a restricted way.
+
+For integermods or polmods, there are two components: the modulus, which
+must be of type integer (resp.\ polynomial), and the representative number
+(resp.\ polynomial).
+
+For rational numbers or rational functions, there are also only two
+components: the numerator and the denominator, which must both be of type
+integer (resp.\ polynomial).
+
+\def\limproj{{\displaystyle\lim_{\textstyle\longleftarrow}}}
+
+Finally, $p$-adic numbers have three components: the prime $p$, the
+``modulus'' $p^k$, and an approximation to the $p$-adic number. Here $\Z_p$
+is considered as $\limproj \Z/p^k\Z$, and $\Q_p$ as its field of
+fractions.  Like real numbers, the codewords contain an exponent (giving
+essentially the $p$-adic valuation of the number) and also the information on
+the precision of the number (which is in fact redundant with $p^k$, but is
+included for the sake of efficiency).
+
+\subsec{Complex numbers and quadratic numbers}:
+\sidx{complex number}\sidx{quadratic number}
+quadratic numbers are numbers of the form $a+bw$, where $w$ is such that
+$[\Z[w]:\Z]=2$, and more precisely $w=\sqrt d/2$ when $d\equiv 0 \mod 4$,
+and $w=(1+\sqrt d)/2$ when $d\equiv 1 \mod 4$, where $d$ is the discriminant
+of a quadratic order. Complex numbers correspond to the very important
+special case $w=\sqrt{-1}$.\label{se:compquad}
+
+Complex and quadratic numbers are partially recursive: the two components
+$a$ and $b$ can be of type integer, real, rational, integermod or $p$-adic,
+and can be mixed, subject to the limitations mentioned above. For example,
+$a+bi$ with $a$ and $b$ $p$-adic is in $\Q_p[i]$, but this is equal to
+$\Q_p$ when $p\equiv 1 \mod 4$, hence we must exclude these $p$ when one
+explicitly uses a complex $p$-adic type.
+
+\subsec{Polynomials, power series, vectors, matrices and lists}:
+\sidx{polynomial}\sidx{power series}\sidx{vector}\sidx{matrix}
+they are completely recursive: their components can be of any type, and types
+can be mixed (however beware when doing operations). Note in particular that
+a polynomial in two variables is simply a polynomial with polynomial
+coefficients.
+
+Note that in the present version \vers{} of PARI, there is a bug in the
+handling of power series of power series (i.e.~power series in several
+variables).  However power series of polynomials (which are power series in
+several variables of a special type) are OK. The reason for this bug is
+known, but it is difficult to correct because the mathematical problem itself
+contains some amount of imprecision.
+
+\subsec{Strings}: These contain objects just as they would be printed by the
+GP calculator.
+
+\subsec{Notes}:
+
+\subsubsec{Exact and imprecise objects}: \sidx{imprecise object}we have
+already said that integers and reals are called the \idx{leaves} because they
+are ultimately at the end of every branch of a tree representing a PARI
+object. Another important notion is that of an {\bf \idx{exact object}}: by
+definition, numbers of basic type real, $p$-adic or power series are
+imprecise, and we will say that a PARI object having one of these imprecise
+types anywhere in its tree is not exact. All other PARI objects will be
+called exact. This is a very important notion since no numerical analysis is
+involved when dealing with exact objects.
+
+\subsubsec{Scalar types}:\sidx{scalar type} the first nine basic types, from
+\typ{INT} to \typ{POLMOD}, will be called scalar types because they
+essentially occur as coefficients of other more complicated objects. Note
+that type \typ{POLMOD} is used to define algebraic extensions of a base ring,
+and as such is a scalar type.
+
+\subsubsec{What is zero?} This is a crucial question in all computer
+systems. The answer we give in PARI is the following. For exact types, all
+zeros are equivalent and are exact, and thus are usually represented as an
+integer \idx{zero}. The problem becomes non-trivial for imprecise types. For
+$p$-adics the answer is as follows: every $p$-adic number (including 0) has
+an exponent $e$ and a ``mantissa'' (a purist would say a ``significand'') $u$
+which is a $p$-adic unit, except when the number is zero (in which case $u$
+is zero), the significand having a certain ``precision'' $k$ (i.e.~being
+defined modulo $p^k$). Then this $p$-adic zero is understood to be equal to
+$O(p^e)$, i.e.~there are infinitely many distinct $p$-adic zeros. The number
+$k$ is thus irrelevant.
+
+For power series the situation is similar, with $p$ replaced by $X$, i.e.~a
+power series zero will be $O(X^e)$, the number $k$ (here the length of the
+power series) being also irrelevant.\label{se:whatzero}
+
+For real numbers, the precision $k$ is also irrelevant, and a real zero will
+in fact be $O(2^e)$ where $e$ is now usually a negative binary exponent. This
+of course will be printed as usual for a real number ($0.0000\cdots$ in
+\kbd{f} format or $0.Exx$ in \kbd{e} format) and not with a $O()$ symbol as
+with $p$-adics or power series.
+
+\section{Operations and functions}
+
+\subsec{The PARI philosophy}.
+The basic philosophy which governs PARI is that operations and functions
+should, firstly, give as exact a result as possible, and secondly, be
+permitted if they make any kind of sense.
+
+More specifically, if you do an operation (not a transcendental one) between
+exact objects, you will get an exact object. For example, dividing 1 by 3
+does not give $0.33333\cdots$ as you might expect, but simply the rational
+number $(1/3)$. If you really want the result in type real, evaluate $1./3$
+or add $0.$ to $(1/3)$.
+
+The result of operations between imprecise objects will be as precise as
+possible. Consider for example one of the most difficult cases, that is the
+addition of two real numbers $x$ and $y$. The \idx{accuracy} of the result is
+{\it a priori\/} unpredictable; it depends on the precisions of $x$ and $y$,
+on their sizes (i.e.~their exponents), and also on the size of $x+y$. PARI
+works out automatically the right precision for the result, even when it is
+working in calculator mode GP where there is a \idx{default precision}.
+
+In particular, this means that if an operation involves objects of
+different accuracies, some digits will be disregarded by PARI. It is a
+common source of errors to forget, for instance, that a real number is
+given as $r + 2^e \varepsilon$ where $r$ is a rational approximation, $e$ a
+binary exponent and $\varepsilon$ is a nondescript real number less than 1 in
+absolute value\footnote{*}{this is actually not quite true: internally, the
+format is $2^b (a + \varepsilon)$, where $a$ and $b$ are integers}. Hence,
+any number less than $2^e$ may be treated as an exact zero:
+
+\bprog%
+? 0.E-28 + 1.E-100
+\%1 = 0.E-28
+\eprog
+\noindent As an exercise, if \kbd{a = 2\pow -100}, why do \kbd{a + 0.} and
+\kbd{a * 1.} differ ?
+
+The second part of the PARI philosophy is that PARI operations are in general
+quite permissive. For instance taking the exponential of a vector should not
+make sense. However, it frequently happens that a computation comes out with a
+result which is a vector with many components, and one wants to get the
+exponential of each one. This could easily be done either under GP or in
+library mode, but in fact PARI assumes that this is exactly what you want to
+do when you take the exponential of a vector, so no work is necessary. Most
+transcendental functions work in the same way (see Chapter 3 for details).
+
+An ambiguity would arise with square matrices. PARI always considers that you
+want to do componentwise function evaluation, hence to get for example the
+exponential of a square matrix you would need to use a function with a
+different name, \kbd{matexp} for instance. In the present version \vers, this
+is not yet implemented. See however the program in Appendix C, which is a
+first attempt for this particular function.
+
+The available operations and functions in PARI are described in detail in
+Chapter 3. Here is a brief summary:
+
+\subsec{Standard operations}.
+
+\noindent
+Of course, the four standard operators \kbd{+}, \kbd{-}, \kbd{*}, \kbd{/}
+exist. It should once more be emphasized that division is, as far as possible,
+an exact operation: $4$ divided by $3$ gives \kbd{(4/3)}. In addition to
+this, operations on integers or polynomials, like \b{} (Euclidean
+division), \kbd{\%} (Euclidean remainder) exist (and for integers, {\b{/}}
+computes the quotient such that the remainder has smallest possible absolute
+value). There is also the exponentiation operator \kbd{\pow }, when the
+exponent is of type integer. Otherwise, it is considered as a transcendental
+function. Finally, the logical operators \kbd{!} (\kbd{not} prefix operator),
+\kbd{\&\&} (\kbd{and} operator), \kbd{||} (\kbd{or} operator) exist, giving
+as results \kbd{1} (true) or \kbd{0} (false). Note that \kbd{\&} and \kbd{|}
+are also accepted as synonyms respectively for \kbd{\&\&} and \kbd{||}.
+However, there is no bitwise \kbd{and} or \kbd{or}.
+
+\subsec{Conversions and similar functions}.
+
+\noindent
+Many conversion functions are available to convert between different types.
+For example floor, ceiling, rounding, truncation, etc\dots.  Other simple
+functions are included like real and imaginary part, conjugation, norm,
+absolute value, changing precision or creating an integermod or a polmod.
+
+\subsec{Transcendental functions}.
+
+\noindent
+They usually operate on any object in $\C$, and some also on $p$-adics.
+The list is everexpanding and of course contains all the elementary
+functions, plus already a number of others. Recall that by extension, PARI
+usually allows a transcendental function to operate componentwise on vectors
+or matrices.
+
+\subsec{Arithmetic functions}.
+
+\noindent
+Apart from a few like the factorial function or the Fibonacci numbers, these
+are functions which explicitly use the prime factor decomposition of
+integers. The standard functions are included.  In the present version \vers,
+a primitive, but useful version of Lenstra's Elliptic Curve Method (ECM) has
+been implemented.
+
+There is now a very large package which enables the number theorist to work
+with ease in algebraic number fields. All the usual operations on elements,
+ideals, prime ideals, etc\dots are available.
+
+More sophisticated functions are also implemented, like solving Thue
+equations, finding integral bases and discriminants of number fields,
+computing class groups and fundamental units, computing in relative number
+field extensions (including explicit class field theory), and also many
+functions dealing with elliptic curves over $\Q$ or over local fields.
+
+\subsec{Other functions}.
+
+\noindent
+Quite a number of other functions dealing with polynomials (e.g.~finding
+complex or $p$-adic roots, factoring, etc), power series (e.g.~substitution,
+reversion), linear algebra (e.g.~determinant, characteristic polynomial,
+linear systems), and different kinds of recursions are also included. In
+addition, standard numerical analysis routines like Romberg integration (open
+or closed, on a finite or infinite interval), real root finding (when the
+root is bracketed), polynomial interpolation, infinite series evaluation, and
+plotting are included.  See the last sections of Chapter~3 for details.
+\vfill\eject

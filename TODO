@@ -1,0 +1,173 @@
+For PARI/GP version 2.0.17
+
+This file lists the things that ought to be implemented / fixed. It is
+hopelessly incomplete right now, but it's a start. Most items require major
+work, and may not be that desireable after all. If you intend to work on
+any of these things, drop an email to pari-dev first.
+
+Priority classification (first column): [subjective and debatable!]
+5    as soon as possible
+4    should be done
+3    nice to have
+2    maybe not
+1    probably not
+-    unclassified
+
+***************************  DOCUMENTATION    ****************************
+
+5  complete/update the tutorial (esp. section 11 and 12)
+
+4  add examples for all functions in Chapter 3
+
+4  separate chapter 4 and 5 and document the innards of PARI (entree,
+pariFILE, bloc ...)
+
+3  clean up gphelp / TeX macros
+
+2  HTML version (pod ? SGML ? yodl ???)
+
+***************************   BUGS            ****************************
+
+-  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
+   The "negligible" terms should be neglegted, not overflow because of the
+   way the computation is done. Tough to correct, even with a way to trap
+   exceptions
+
+5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
+
+5  some doubles can overflow in rootpol.c, should use t_REAL everywhere
+  ?  polroots(x^3 + 2^1024*x + 1)
+    ***   underflow or overflow in a R->dbl conversion
+
+4  gcmp is not transitive: [] == 0, [0] == 0, but [0] != []
+
+4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
+Should use iterative methods.
+
+3  after allocatemem() / default(parisize, ...), the rest of the command is
+discarded (ends by a longjmp).
+
+3  recursive plot easily fooled. One could split intervals in 3 + make sure
+size of neighbouring intervals don't differ too much.
+
+***************************   DEVELOPMENT     ****************************
+
+5  write decent (specialized) benches
+
+3  switch to autoconf
+
+***************************   ALGORITHMS      ****************************
+
+Kernel:
+=======
+5  check NaN in dbltor and related routines
+
+4  benchmark / profile basic functions and see what needs to be done
+
+4  finish t_REAL Karatsuba and diviiexact
+
+4  inline level0 routines should operate on _limbs_, not on words.
+
+3  FFT for basic types and polynomials (say in A[X], for A = Z, F_q, ...)
+
+2  add support for different multiprecision kernels (a la LiDIA)
+
+Misc:
+=====
+5  (easy) modify invmod to get Jebelean extended gcd
+
+4  decent finite field package (remove all the nfxxxmodpr functions)
+
+4  round 4 (too slow, use modular techniques)
+
+4  rnfkummer (doesn't work)
+
+4  nfsubfields [use known subfields to discard blocs right away] (current use
+far too much memory)
+
+4  LLL over R (not stable). Clean up the file (remove duplicate code)
+
+4  rethink the element_mul type of functions: multiplication table is O(n^3),
+polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
+
+3  have quadclassunit return bnf structure
+
+3  have quadclassunit treat reliably non fundamental discriminants (at
+   least, make relevant checks before entering infinite loops)
+
+3  2-adic initell
+
+***************************   LIBRARY DESIGN   ****************************
+
+4  a way to trap PARI errors, esp. all kinds of overflows (exponent, degree,
+stack, ...). Something like:
+trap(errpile, &stack_overflow_handler)
+
+4  allow generic functions to process and produce t_SMALL's
+
+4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
+
+3  remove global variables gpi, geuler: their precision is unpredictable
+(at least as much as requested in last const[pi|euler](), possibly much more).
+Explicit call to mp[pi|euler] should be required. Will break existing code...
+
+3  rename library functions following GP names
+
+3  rewrite the generic functions (gadd/gmul/gdiv plus a couple of others) to
+use (two-dimensional) table lookups instead of switches
+
+3  introduce "special" types for objects which are really containers and
+should be defined by a secondary type (e.g number fields, finite fields,
+p-adic fields, elliptic curves, ...). Would keep list of types small (and fast)
+
+3  better representations for multivariate polynomials
+
+3  type "element in" ([number|finite] field...), "point" on elliptic curve
+
+3  find a way to deal (generically) with "integral object + its content"
+Application (e.g): fractional ideals much more efficient.
+
+2  "mute" variables for t_POLMOD. Should have Mod(x,x^2+1) == Mod(y,y^2+1).
+
+2  have some header magic (transparently) prepend some prefix (e.g "pari_")
+before all exported functions to prevent name conflicts. Build alias files
+for debuggers
+
+2  should use vsnprintf instead of vsprintf in pariputsf. Requires GNU libio.
+   [paripusf uses static buffer which should be ok for "most" purposes]
+
+***************************   GP DESIGN       ****************************
+
+5  remove limitation to 8 arguments for static functions (argvec[9])
+
+4  use divide & conquer approach in string / integer conversions
+
+4  a way to trap PARI errors (esp. stack overflow). Something like:
+trap(errpile, "GP_command_to_be_executed_when_stack_overflows")
+
+3  split matrix_block in 2 parts: exploration + assignment. Would allow
+Math::Pari to use complicated x[][][][] constructs
+
+3  changevar with explicit (incomplete) permutation. E.g
+changevar(p, [x,y], [a,b]) for x -> a, y -> b
+add a flag to substitute in succession or in parallel (e.g if a involves y)
+
+3  possibility to save and load a session (variables, functions, defaults)
+
+3  a type t_FILE [current: stream re-opened/flushed/closed after every single
+write(): disaster when one wants to write often to the same file]
+
+***************************   TOOLS           ****************************
+
+4  a script converting prototype to parser code (e.g GEN f(GEN,GEN) --> "GG")
+
+3  a script to translate "legacy" GP code into something using GP2 function
+names
+
+3  write a gp-to-C compiler (adding #defines in anal.c + modifying the
+table of functions in init.c, etc, to include the explicit function name).
+Should be easy: the code is mostly there.
+
+2  write a GP scripts debugger (cf above)
+
+2  write a GP scripts profiler (cf above)

@@ -1,0 +1,80 @@
+\appendix{Summary of Available Constants}
+
+In this appendix we give the list of predefined constants available in the
+PARI library. All of them are in the \idx{heap} and {\it not\/} on the PARI
+\idx{stack}. We start by recalling the \idx{universal object}s introduced in
+\secref{se:intro4}:
+%
+\bprog%
+t\_INT: gzero (zero), gun (un), gdeux (deux)
+t\_FRAC: ghalf (lhalf)
+t\_COMPLEX: gi
+t\_POL: polun[..] (lpolun[..]), polx[..] (lpolx[..])
+\eprog
+\noindent Only polynomials in the variables \kbd{0} and \kbd{MAXVARN} are
+defined initially. Use \kbd{fetch\_var()} (see \secref{se:fetch_var}) to
+create new ones.
+
+\noindent The other objects are not initialized by default:
+
+\tet{geuler}. This is Euler's constant. To initialize it, call
+{\tt\idx{consteuler}(prec)} (see \secref{se:euler}).
+
+\tet{gpi}. This is the number $\pi$. To initialize it, call
+{\tt\idx{constpi}(prec)} (see \secref{se:pi}).
+
+\tet{bern}(i). This is the $2i$-th Bernoulli number ($B_0=1$, $B_2=1/6$,
+$B_4=-1/30$, etc\dots). To initialize them, use the function:
+
+\kbd{void \idx{mpbern}(long n, long prec);}
+
+This creates the even numbered Bernoulli numbers up to $B_{2n-2}$ {\it as
+real numbers\/} of precision \kbd{prec}. They can then be used with the macro
+\kbd{bern(i)}. Note that this is not a function but simply an abbreviation,
+hence care must be taken that \kbd{i} is inside the right bounds (i.e. $0\le
+\kbd{i}\le n-1$) before using it, since no checking is done by PARI itself.
+
+Finally, one has access to a table of (differences of) primes through the
+pointer \tet{diffptr}. This is used as follows: when
+
+\kbd{void pari\_init(long size, long maxprime);}
+
+\noindent is called, this table is initialized with the successive
+differences of primes up to (just a little beyond) \kbd{maxprime}
+(see \secref{se:intro4}). \kbd{maxprime} has to be less than $436272744$,
+whatever memory is available. A
+difference of $0$ means we have reached the end of the table. The following
+example illustrates its use.
+%
+\bprog%
+byteptr d = diffptr;
+long p = 0;
+\h
+while (p <= p\_goal) /* {\rm run through all primes up to \kbd{p\_goal}} */
+\obr
+\q  p += *d;
+\q  if (*d == 0) err(primer1); /* {\rm not enough primes} */
+\q  d++;
+\q  ...
+\cbr
+\eprog\noindent
+Here, we use the general error handling function \kbd{err} (see
+\secref{se:err}), with the codeword \kbd{primer1}. This will just print
+the error message:
+
+\kbd{*** not enough precomputed primes}
+
+\noindent and then abort the computations.
+
+You can use the function \kbd{initprimes} from the file \kbd{arith2.c} to
+compute a new table on the fly and assign it to \kbd{diffptr} or to a
+similar variable of your own. Beware that before changing \kbd{diffptr},
+you should really free the (\kbd{malloc}ed) precomputed table first, and then
+all pointers into the old table will become invalid.
+
+PARI currently guarantees that the first 6547 primes, up to and including
+65557, will be present in the table, even if you set \kbd{maxnum} to zero.
+
+In addition, some single or double-precision real numbers are predefined,
+and their list is in the file \kbd{paricom.h}.
+\vfill\eject

@@ -1,0 +1,92 @@
+\appendix{A Sample program and Makefile}
+
+We assume that you have installed the PARI library and include files as
+explained in Appendix A or in the installation guide. If you chose
+differently any of the directory names, change them accordingly in the
+Makefiles.
+
+If the program example that we have given is in the file \kbd{matexp.c} (say
+as the first of several matrix transcendental functions), then a sample
+Makefile might look as follows. Note that the actual file
+{\tt examples/Makefile} is much more elaborate and you should have a look at
+it if you intend to use {\tt install()} on custom made functions, see
+\secref{se:install}.
+
+\bprog
+CC = cc
+INCDIR = \includedir
+LIBDIR = \libdir
+CFLAGS = -O -I\$(INCDIR) -L\$(LIBDIR)
+\h
+all:\qquad matexp
+\h
+matexp:\qquad	matexp.c
+\q\q \$(CC) \$(CFLAGS) -o matexp matexp.c -lpari -lm
+\eprog
+
+\noindent We then give the listing of the program \kbd{examples/matexp.c}
+seen in detail in \secref{se:prog}, with the slight modifications explained
+at the end of that section.
+%
+\bprog
+\#include <pari.h>
+\h
+GEN
+matexp(GEN x, long prec)
+\obr
+\q  long lx=lg(x),i,k,n, ltop = avma;
+\q  GEN y,r,s,p1,p2;
+\h
+\q /* {\rm check that x is a square matrix} */
+\q if (typ(x) != t\_MAT) err(typeer,"matexp");
+\q if (lx == 1) return cgetg(1, t\_MAT);
+\q if (lx != lg(x[1])) err(talker,"not a square matrix");
+\h
+\q /* {\rm convert x to real or complex of real and compute its L2 norm} */
+\q s = gzero; r = cgetr(prec+1); gaffsg(1,r); x = gmul(r,x);
+\q for (i=1; i<lx; i++)
+\q\q s = gadd(s, gnorml2((GEN)x[i]));
+\q if (typ(s) == t\_REAL) setlg(s,3);
+\q s = gsqrt(s,3); /* {\rm we do not need much precision on s} */
+\h
+\q /* {\rm if $\kbd{s}<1$ we are happy} */
+\q k = expo(s);
+\q if (k < 0) \obr\ n = 0; p1 = x; \cbr
+\q else \obr\ n = k+1; p1 = gmul2n(x,-n); setexpo(s,-1); \cbr
+\h
+\q /* {\rm initializations before the loop} */
+\q y = gscalmat(r,lx-1); /* {\rm creates scalar matrix with r on diagonal} */
+\q p2 = p1; r = s; k = 1;
+\q y = gadd(y,p2);
+\h
+\q /* {\rm now the main loop} */
+\q while (expo(r) >= -BITS\_IN\_LONG*(prec-1))
+\q\obr
+\q\q k++; p2 = gdivgs(gmul(p2,p1),k);
+\q\q r = gdivgs(gmul(s,r),k); y = gadd(y,p2);
+\q\cbr
+\h
+\q /* {\rm now square back \kbd{n} times if necessary} */
+\q for (i=0; i<n; i++) y = gsqr(y);
+\q return gerepileupto(ltop,y);
+\cbr
+\h
+int
+main()
+\obr
+\q long d, prec = 3;
+\q GEN x;
+\h
+\q /* {\rm take a stack of $10^6$ bytes, no prime table} */
+\q pari\_init(1000000,2);
+\q printf("precision of the computation in decimal digits:\bs n");
+\q d = itos(lisGEN(stdin));
+\q if (d > 0) prec = (long)(d*pariK1+3);
+\h
+\q printf("input your matrix in GP format:\bs n");
+\q x = matexp(lisGEN(stdin), prec);
+\h
+\q sor(x, 'g', d, 0);
+\q exit(0);
+\cbr
+\eprog\vfill\eject

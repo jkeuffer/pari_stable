@@ -1,0 +1,2031 @@
+\chapter{Specific Use of the GP Calculator}
+
+Originally, \idx{GP} was designed as a debugging tool for the PARI system
+library, and hence not much thought had been given to making it
+user-friendly. The situation has now changed somewhat, and GP is very
+useful as a stand-alone tool. The operations and functions available in
+PARI and GP will be described in the next chapter. In the present one, we
+describe the specific use of the GP programmable calculator.
+
+For starting the calculator, the general commandline syntax is:
+
+\kbd{gp [-s stacksize] [-p primelimit]}
+
+\noindent
+where items within brackets are optional\footnote{*}{On the Macintosh, even
+after clicking on the gp icon, once in the MPW Shell, you still need to type
+explicitly a command of the above form.}. These correspond to some internal
+parameters of GP, or {\it defaults}. See \secref{se:defaults} below for a
+list and explanation of all defaults, there are many more than just those
+two. These defaults can be changed by adding parameters to the input line
+as above, or interactively during a GP session or in a preferences file (also
+known as \kbd{gprc}).
+
+\unix Some new features were developed on UNIX platforms, and depend heavily
+on the operating system in use. It is {\it possible\/} that some of these
+will be ported to other operating systems (BeOS, MacOS, DOS, OS/2, Windows,
+etc.) in future versions (most of them should be easy tasks for anybody
+acquainted with those). As for now, most of them were not. So, whenever a
+specific feature of the UNIX version is discussed in a paragraph, a UNIX sign
+sticks out in the left margin, like here. Just skip these if you're stranded
+on a different operating system: the core GP functions (i.e.~at least
+everything which is even faintly mathematical in nature) will still be
+available to you. It may also be possible (and then definitely advisable) to
+install \idx{Linux} or \idx{FreeBSD} on your machine.
+
+\misctitle{Note (added in version 2.0.12):} All the UNIX goodies are now
+available for DOS, OS/2 and Windows 3.1, thanks to the \tet{EMX} runtime
+package (\kbd{install} excluded under DOS, since DLLs are not supported by
+the OS). They've been reported to be available under Windows 95/98 and NT
+using the Cygwin package (untested by us, but supposedly supported by
+\kbd{Configure}).
+
+\emacs If you have GNU Emacs, you can work in a special Emacs shell (see
+\secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as
+usual \kbd{M} is the \kbd{Meta} key) if you accept the default stack, prime
+and buffer sizes, or \kbd{C-u M-x gp} which will ask you for the name of the
+gp executable, the stack size, the prime limit and the buffer size. Specific
+features of this Emacs shell will be indicated by an EMACS sign.\smallskip
+
+If a \idx{preferences file} (or \kbd{gprc}, to be discussed in
+\secref{se:gprc}) can be found, GP will then read it and execute the commands
+it contains. This provides an easy way to customize GP without having to
+delve into the code to hardwire it to your likings.
+
+A copyright message then appears which includes the version number. Please
+note this number, so as to be sure to have the most recent version if you
+wish to have updates of PARI. The present manual is written for version
+\vers, and has undergone major changes since the 1.39.xx versions.
+
+After the copyright, the computer works for a few seconds (it is in fact
+computing and storing a table of primes), writes the top-level help
+information, some initial defaults, and then waits after printing its prompt
+(initially: \kbd{?}).
+
+Note that at any point the user can type \kbd{Ctrl-C} (that is press
+simultaneously the \kbd{Control} and \kbd{C} keys): the current
+computation will be interrupted and control given back to the user at the GP
+prompt.
+
+The top-level help information tells you that (as in many systems) to get
+help, you should type a \kbd{?}. When you do this and hit return, a menu
+appears, describing the eleven main categories of available functions and
+what to do to get more detailed help. If you now type \kbd{?$n$} with $1\le
+n\le11$, you will get the list of commands corresponding to category $n$
+and simultaneously to Section $3.n$ of this manual.
+
+If you type \kbd{?}\var{functionname} where \var{functionname} is the
+name of a PARI function, you will get a short explanation of this
+function.
+
+\unix If extended help (see \secref{se:exthelp}) is available on your
+system, you can double or triple the \kbd{?} sign to get much more:
+respectively the complete description of the function (e.g.~\kbd{??~sqrt}),
+or a list of GP functions relevant to your query (e.g.~ \kbd{???~"elliptic
+curve"} or \kbd{???~"quadratic field"}).
+
+If GP was compiled with the right options (see Appendix A), a line
+editor will be available to correct the command line, get automatic
+completions, and so on. See \secref{se:readline} for a short summary of
+available commands. This might not be available for all architectures.
+
+Whether extended on-line help and line editing are available or not is
+indicated in the GP banner, between the version number and the copyright
+message.
+
+If you type \kbd{?\bs} you will get a short description of the metacommands
+(keyboard shortcuts).
+
+Finally, typing \kbd{?.} will return the list of available (pre-defined)
+member functions. These are functions attached to specific kind of objects,
+used to retrieve easily some information from complicated structures (you
+can define your own but they won't be shown here). We will soon describe
+these commands in more detail.
+
+As a general rule, under GP, commands starting with \b\ or with some
+other symbols like \kbd{?} or \kbd{\#}, are not computing commands, but are
+metacommands which allow the user to exchange information with GP. The
+available metacommands can be divided into default setting commands
+(explained below) and simple commands (or keyboard shortcuts, to be dealt
+with in \secref{se:meta}).
+
+\section{Defaults and output formats}\sidx{defaults}\sidx{output formats}
+\label{se:defaults}
+
+\noindent
+There are many internal variables in GP, defining how the system will behave
+in certain situations, unless a specific override has been given. Most
+of them are a matter of basic customization (colors, prompt) and will be set
+once and for all in your \idx{preferences file} (see \secref{se:gprc}), but
+some of them are useful interactively (set timer on, increase precision,
+etc.).
+
+The function used to manipulate these values is called \kbd{default}, which
+is described in \secref{se:default}. The basic syntax is
+
+\kbd{default(\var{def}, \var{value})},
+
+\noindent
+which sets the default \var{def} to \var{value}. In interactive
+use, most of these can be abbreviated using historic GP metacommands (mostly,
+starting with \b), which we shall describe in the next section.
+
+Here we will only describe the available defaults and how they are used. Just
+be aware that typing \kbd{default} by itself will list all of them, as well
+as their current values (see \b{d}). Just after the default name, we give
+between parentheses the initial value when GP starts (assuming you did not
+tamper with it using command-line switches or a~\tet{gprc}).
+
+\misctitle{(somewhat technical) Note:} As we will see in \secref{se:strings},
+the second argument to default will be subject to string context expansion,
+which means you can use run-time values. In other words, something like
+\kbd{a = 3; default(logfile, "\var{some filename}" a ".log")} will work.
+
+For the user's convenience, some defaults will be expanded further when
+the values are used (after the above expansion has been performed):
+
+$\bullet$ \idx{time expansion}: the string is sent through the library
+function \tet{strftime}. This means that \kbd{\%}\var{char} combinations have
+a special meaning, usually related to the time and date. For instance,
+\kbd{\%H} = hour (24-hour clock) and \kbd{\%M} = minute [00,59] (on a Unix
+system, you can try \kbd{man strftime} at your shell prompt to get a complete
+list). This is applied to \kbd{prompt}, \kbd{psfile}, and \kbd{logfile}. For
+instance,
+
+\kbd{default(prompt,"(\%R) ? ")}
+
+\noindent
+will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
+to GP's usual prompt.
+
+\unix $\bullet$ \idx{environment expansion}: When the string contains a
+sequence of the form \kbd{\${\it SOMEVAR}} (e.g.~\kbd{\$HOME}) the
+environment is searched and if {\it SOMEVAR} is defined, the sequence is
+replaced by the corresponding value. Also the \kbd{\til} symbol has the
+same meaning as in the C and bash shells~--- \kbd{\til} by itself stands
+for your home directory, and \kbd{\til{}user} is expanded to \kbd{user}'s
+home directory. This is applied to all filenames\sidx{filename}.
+
+\subsecidx{buffersize} (default \kbd{30000}): GP input is buffered, which means
+only so many bytes of data can be read at a time before a command is
+executed. This used to be a very important variable, to allow for very
+large input files to be read into GP, for example large matrices, without it
+complaining about ``unused characters''. Currently, \kbd{buffersize} is
+automatically adjusted to the size of the data that are to be read. It will
+never go down by itself though. Thus this option may come in handy to decrease
+the buffer size after some unusually large \kbd{read}, when you don't need to
+keep gigantic buffers around anymore.
+
+\subsecidxunix{colors} (default \kbd{""}): this default is only usable if GP
+\label{se:colors}
+is running within certain color-capable terminals. For instance \kbd{rxvt},
+\kbd{color\_xterm} and modern versions of \kbd{xterm} under X Windows, or
+standard Linux/DOS text consoles. It causes GP to use a small palette of
+colors for its output. With xterms, the colormap used corresponds to the
+resources \kbd{Xterm*color$n$} where $n$ ranges from $0$ to $15$ (see the
+file \kbd{misc/color.dft} for an example). Legal values for this default are
+strings \kbd{"$a_1$,\dots,$a_k$"} where $k\le7$ and each $a_i$ is either
+
+\noindent $\bullet$ the keyword \kbd{no} (use the default color, usually
+black)
+
+\noindent $\bullet$ an integer between 0 and 15 corresponding to the
+aforementioned colormap
+
+\noindent $\bullet$ a triple $[c_0,c_1,c_2]$ where $c_0$ stands for foreground
+color, $c_1$ for background color, and $c_2$ for attributes (0 is default, 1 
+is bold, 4 is underline).
+
+The output objects thus affected are respectively error messages,
+history numbers, prompt, input line, output, help messages, timer (that's
+seven of them). If $k < 7$, the remaining $a_i$ are assumed to be $no$. For
+instance
+%
+\bprog%
+default(colors,"9, 5, no, no, 4")
+\eprog
+\noindent
+typesets error messages in color $9$, history numbers in color $5$, output in
+color $4$, and does not affect the rest.
+
+\emacs{In the present version, this default is incompatible with Emacs.
+Changing it will just fail silently (the alternative would be to display
+escape sequences as is, since Emacs will refuse to interpret them). On the
+other hand, you can customize highlighting in your \kbd{.emacs} so as to mimic
+exactly this behaviour. See \kbd{emacs/pariemacs.txt}.}
+
+If you use an old \kbd{readline} library (version number less than 2.0),
+you should do as in the example above and leave $a_3$ and $a_4$ (prompt
+and input line) strictly alone. Since old versions of \kbd{readline} did
+not handle escape characters correctly (or more accurately, treated them
+in the only sensible way since they did not care to check all your terminal
+capabilities: it just ignored them), changing them would result in many
+annoying display bugs.
+
+The hacker's way to check if this is the case would be to look in the
+\kbd{readline.h} include file (wherever your readline include files are) for
+the string \kbd{RL\_PROMPT\_START\_IGNORE}. If it's there, you are safe.
+
+A more sensible way is to make some experiments, and get a more recent
+\kbd{readline} if yours doesn't work the way you'd like it to. See the file
+\kbd{misc/gprc.dft} for some examples.
+
+\subsecidx{compatible} (default \kbd{0}): The GP function names and syntax have
+changed tremendously between versions 1.xx and 2.00. To help you cope with this
+we provide some kind of backward compatibility, depending on the value of
+this default:
+
+\quad \kbd{compatible} = 0: no backward compatibility. In this mode, a very
+handy function, to be described in \secref{se:whatnow}, is \kbd{whatnow},
+which tells you what has become of your favourite functions, which GP
+suddenly can't seem to remember.
+
+\quad \kbd{compatible} = 1: warn when using obsolete functions, but otherwise
+accept them. The output uses the new conventions though, and there may be
+subtle incompatibilities between the behaviour of former and current
+functions, even when they share the same name (the current function is used in
+such cases, of course!). We thought of this one as a transitory help for GP
+old-timers. Thus, to encourage switching to \kbd{compatible}=0, it is not
+possible to disable the warning.
+
+\quad \kbd{compatible} = 2: use only the old function naming scheme (as used up
+to version 1.39.15), but {\it taking case into account}. Thus \kbd{I}
+(${}=\sqrt{-1}$) is not the same as \kbd{i} (user variable, unbound by
+default), and you won't get an error message using \kbd{i} as a loop index
+as used to be the case.
+
+\quad \kbd{compatible} = 3: try to mimic exactly the former behaviour. This is
+not always possible when functions have changed in a fundamental way. But
+these differences are usually for the better (they were meant to, anyway), and
+will probably not be discovered by the casual user.
+
+One adverse side effect is that any user functions and aliases that have been
+defined {\it before\/} changing \kbd{compatible} will get erased if this
+change modifies the function list, i.e.~if you move between groups $\{0,1\}$
+and $\{2,3\}$ (variables are unaffected). We of course strongly encourage you
+to try and get used to the setting \kbd{compatible}=0.
+
+\subsecidx{debug} (default \kbd{0}): debugging level. If it is non-zero, some
+extra messages may be printed (some of it in French), according to what is
+going on (see~\b{g}).
+
+\subsecidx{debugfiles} (default \kbd{0}): file usage debugging level. If it is
+non-zero, GP will print information on file descriptors in use, from PARI's
+point of view (see~\b{gf}).
+
+\subsecidx{debugmem} (default \kbd{0}): memory debugging level. If it is
+non-zero, GP will regularly print information on memory usage. If it's
+greater than 2, it will indicate any important garbage collecting and the
+function it is taking place in (see~\b{gm}).
+
+\noindent {\bf Important Note:} As it noticeably slows down the performance
+(and triggers bugs in a popular compiler), the first functionality (memory
+usage) is disabled if you're not running a version compiled for debugging
+(see Appendix~A).
+
+\subsecidx{echo} (default \kbd{0}): this is a toggle, which can be either 1
+(on) or 0 (off). When \kbd{echo} mode is on, each command is reprinted before
+being executed. This can be useful when reading a file with the \b{r} or
+\kbd{read} commands. For example, it is turned on at the beginning of the test
+files used to check whether GP has been built correctly (see \b{e}).
+
+\subsecidx{format} (default \kbd{"g0.28"} and \kbd{"g0.38"} on 32-bit and
+64-bit machines, respectively): of the form x$m.n$, where x is a letter in
+$\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$, $m$ are integers. If x is \kbd{f},
+real numbers will be printed in \idx{fixed floating point format} with no
+explicit exponent (e.g.~\kbd{0.000033}); if the letter is \kbd{e}, they will be
+printed in \idx{scientific format}, always with an explicit exponent (e.g.
+\kbd{3.3e-5}). If the letter is \kbd{g}, real numbers will be printed in
+\kbd{f} format, except when their absolute value is less than $2^{-32}$,
+in which case they are printed in \kbd{e} format. \label{se:format}
+
+The number $n$ is the number of significant digits printed for real
+numbers, except if $n<0$ where all the significant digits will be printed
+(initial default 28, or 38 for 64-bit machines), and the number $m$ is the
+number of characters to be used for printing integers, but is ignored if
+equal to 0 (which is the default). This is a feeble attempt at formatting.
+
+\subsecidxunix{help} (default: the location of the \kbd{gphelp} script): the
+name of the external help program which will be used from within GP when
+extended help is invoked, usually through a \kbd{??} or \kbd{???} request
+(see \secref{se:exthelp}), or \kbd{M-H} under readline (see
+\secref{se:readline}).
+
+\subsecidx{histsize} (default \kbd{5000}): GP keeps a history of the last
+\kbd{histsize} results computed so far, which you can recover using the
+\kbd{\%} notation (see \secref{se:history}). When this number is exceeded,
+the oldest values are erased. Tampering with this default is the only way to
+get rid of the ones you don't need anymore.
+
+\subsecidx{lines} (default \kbd{0}): if set to a positive value, GP prints at
+most that many lines from each result, terminating the last line shown with
+\kbd{[+++]} if further material has been suppressed. The various \kbd{print}
+commands (see \secref{se:gp_program}) are unaffected, so you can always type
+\kbd{print(\%)}, \b{a}, or \b{b} to view the full result. If the actual
+screen width cannot be determined, a ``line'' is assumed to be 80 characters
+long.
+
+\subsecidx{log} (default \kbd{0}): this is a toggle, which can be either 1
+(on) or 0 (off). When logging mode is turned on, GP opens a log file, whose
+exact name is determined by the \kbd{logfile} default. Subsequently, all the
+commands and results will be written to that file (see \b{l}). In case a file
+with this precise name already existed, it will not be erased: your data will
+be {\it appended\/} at the end.
+
+\subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
+used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
+
+\subsecidx{output} (default \kbd{1}): this can take any of the following three
+values: 0  (=~{\it raw\/}), 1 (=~{\it prettymatrix\/}), or 2
+(=~{\it prettyprint\/}). This means that, independently of the default
+\kbd{format} for reals which we explained above, you can print results in
+three ways: either in {\it raw\/}\sidx{raw format} format, i.e.~a format
+which is equivalent to what you input, including explicit multiplication
+signs, and everything typed on a line instead of two dimensional boxes. This
+can have several advantages, for instance it allows you to pick the result
+with a mouse or an editor, and to put it somewhere else.\label{se:output}
+
+The second format is the {\it prettymatrix\/}\sidx{prettymatrix format} format.
+The only difference to raw format is that matrices are printed as boxes
+instead of horizontally. This is prettier, but takes more space and cannot be
+used for input. Column vectors are still printed horizontally.
+
+The third format is the {\it prettyprint\/}\sidx{prettyprint format} or
+beautified format. In the present version \vers, this is not beautiful at
+all.
+
+Independently of the setting of this default, an object can be printed
+in any of the three formats at any time using the commands \b{a}, \b{m}
+and~\b{b} respectively (see below).
+
+\subsecidx{parisize} (default, 1000000 bytes on the Mac, 4000000 otherwise):
+GP, and in fact any program using the PARI library, needs a stack in which to
+do its computations. \kbd{parisize} is the stack size, in bytes. It is
+strongly recommended you increase this default (using the \kbd{-s}
+command-line switch, or a \kbd{gprc}) if you can afford it. In case of
+emergency, you can use the \tet{allocatemem} function to increase
+\kbd{parisize}, once the session is started. GP will try to {\it double\/} the
+stack size by itself when memory runs low during a computation, but
+this very computation will then be lost, and you will have to type the
+command again.
+
+\subsecidx{path} (default \kbd{".:\til:\til/gp"} on UNIX systems,
+\kbd{".;C:\bs;C:\bs GP} on DOS, OS/2 and Windows, and \kbd{"."} otherwise):
+This is a list of directories, separated by colons ':' (semicolons ';' in the
+DOS world, since colons are pre-empted for drive names). When asked to read a
+file whose name does not contain \kbd{/} (i.e.~no explicit path was given),
+GP will look for it in these directories, in the order they were written in
+\kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
+immediate parent. Tilde expansion is performed.
+
+\subsecidx{primelimit} (default \kbd{200000} on the Mac, and \kbd{500000}
+otherwise): GP precomputes a list of all primes less than \kbd{primelimit} at
+initialization time. These are used by many arithmetical functions.
+If you don't plan to invoke any of them, you can just set this to 1.
+
+\subsecidx{prompt} (default \kbd{"? "}): a string that will be printed as
+prompt. Note that most usual escape sequences are available there: \b{e} for
+Esc, \b{n} for Newline, \dots, \kbd{\bs\bs} for \kbd{\bs}. Time expansion is
+performed.
+
+This string is sent through the library function \kbd{\idx{strftime}} (on a
+Unix system, you can try \kbd{man strftime} at your shell prompt). This means
+that \kbd{\%} constructs have a special meaning, usually related to the time
+and date. For instance, \kbd{\%H} = hour (24-hour clock) and \kbd{\%M} =
+minute [00,59] (use \kbd{\%\%} to get a real \kbd{\%}).
+
+If you use \kbd{readline}, escape sequences in your prompt will result in
+display bugs. If you have a relatively recent \kbd{readline} (see the comment
+at the end of \secref{se:colors}), you can brace them with special sequences
+(\kbd{\bs[} and \kbd{\bs]}), and you will be safe. If these just result in
+extra spaces in your prompt, then you'll have to get a more recent
+\kbd{readline}. See the file \kbd{misc/gprc.dft} for an example.
+
+\emacs {\bf Caution}: Emacs needs to know about the prompt pattern to
+separate your input from previous GP results, without ambiguity. It's not a
+trivial problem to adapt automatically this regular expression to an
+arbitrary prompt (which can be self-modifying!). Thus, in this version \vers,
+Emacs relies on the prompt being the default one. So, do not tamper with the
+\kbd{prompt} variable {\it unless\/} you modify it simultaneously in your
+\kbd{.emacs} file (see \kbd{emacs/pariemacs.txt} and \kbd{misc/gprc.dft} for
+examples).
+
+\subsecidx{psfile} (default \kbd{"pari.ps"}): name of the default file where
+GP is to dump its PostScript drawings (these will always be appended, so that
+no previous data are lost). Tilde and time expansion are performed.
+
+\subsecidx{realprecision} (default \kbd{28} and \kbd{38} on 32-bit and 64-bit
+machines respectively): the number of significant digits and, at the same
+time, the number of printed digits of real numbers (see~\b{p}). Note that
+PARI internal precision works on a word basis (32 or 64 bits), hence may not
+coincide with the number of decimal digits you input. For instance to get 2
+decimal digits you need one word of precision which, on a 32-bit machine,
+actually gives you 9 digits ($9 < \log_{10}(2^{32}) < 10$):
+
+\bprog%
+? default(realprecision, 2)
+\q    realprecision = 9 significant digits (2 digits displayed)
+\eprog
+
+\subsecidx{secure} (default \kbd{0}): this is a toggle which can be either 1
+(on) or 0 (off). If on, the \tet{system} and \tet{extern} command are
+disabled. These two commands are potentially dangerous when you execute
+foreign scripts since they let GP execute arbitrary UNIX commands. GP will
+ask for confirmation before letting you (or a script) unset this toggle.
+
+\subsecidx{seriesprecision} (default \kbd{16}): precision of power series
+(see~\b{ps}).
+
+\subsecidx{simplify} (default \kbd{1}): this is a toggle which can be either
+1 (on) or 0 (off). When the PARI library computes something, the type of the
+result is not always the simplest possible. The only type conversions which
+the PARI library does automatically are rational numbers to integers (when
+they are of type \typ{FRAC} and equal to integers), and similarly rational
+functions to polynomials (when they are of type \typ{RFRAC} and equal to
+polynomials). This feature is useful in many cases, and saves time, but can
+be annoying at times. Hence you can disable this and, whenever you feel like
+it, use the function \kbd{simplify} (see Chapter 3) which allows you to
+simplify objects to the simplest possible types recursively (see~\b{y}).
+\sidx{automatic simplification}
+
+\subsecidx{strictmatch} (default \kbd{1}): this is a toggle which can be
+either 1 (on) or 0 (off). If on, unused characters after a sequence has been
+processed will produce an error. Otherwise just a warning is printed. This
+can be useful when you're not sure how many parentheses you have to close after
+complicated nested loops.
+
+\subsecidx{timer} (default \kbd{0}): this is a toggle which can be either 1
+(on) or 0 (off). If on, every instruction sequence (anything ended by a
+newline in your input) is timed, to some accuracy depending on the hardware
+and operating system. The time measured is the user \idx{CPU time},
+{\it not\/} including the time for printing the results (see \kbd{\#} and
+\kbd{\#\#}).
+
+\subsec{Note on output formats.}
+
+\noindent
+A zero real number is printed in \kbd{e} format as $0.Exx$ where $xx$ is
+the (usually negative) {\it decimal\/} exponent of the number (cf.\ %
+\secref{se:whatzero}). This allows the user to check the accuracy of the zero
+in question (this could also be done using \b{x}, but that would be more
+technical).
+
+When the integer part of a real number $x$ is not known exactly because the
+exponent of $x$ is greater than the internal precision, the real number is
+printed in \kbd{e} format (note that in versions before 1.38.93, this was
+instead printed with a $*$ at the end).
+
+Note also that in beautified format, a number of type integer or real is
+written without enclosing parentheses, while most other types have them.
+Hence, if you see the expression $( 3.14 )$, it is not of type real, but
+probably of type complex with zero imaginary part (if you want to be sure, type
+\b{x} or use the function \kbd{type}).
+
+\section{Simple metacommands}\label{se:meta}
+
+\noindent
+Simple metacommands are meant as shortcuts and should not be used in GP
+scripts (see \secref{se:programming}). Beware that these, as all of GP input,
+are now {\it case sensitive}. For example, \b{Q} is no longer identical to
+\b{q}. In the following list, braces are used to denote optional arguments,
+with their default values when applicable, e.g.~$\{n=0\}$ means that if $n$
+is not there, it is assumed to be~$0$. Whitespace (or spaces) between the
+metacommand and its arguments and within arguments is optional. (This can
+cause problems only with \b{w}, when you insist on having a filename whose
+first character is a digit, and with \b{r} or \b{w}, if the filename itself
+contains a space. In such cases, just use the underlying \kbd{read} or
+\kbd{write} function; see~\secref{se:write}).
+
+\subseckbd{?} $\{{\it command}\}$: GP on-line help interface.
+As already mentioned, if you type \kbd{?$n$} where $n$ is a number from 1
+to 11, you will get the list of functions in Section $3.n$ of the manual
+(the list of sections being obtained by simply typing \kbd{?}).
+\label{se:exthelp}
+
+These names are in general not informative enough. More details can be
+obtained by typing \kbd{?{\it function}}, which gives a short explanation of
+the function's calling convention and effects. Of course, to have complete
+information, read Chapter 3 of this manual (the source code is at your
+disposal as well, though a trifle less readable!). Much better help can be
+obtained through the extended help system (see below).
+
+ You then get the function description exactly as it stands
+in Chapter 3. All operators (e.g.~\kbd{+}, \kbd{\&\&}, etc.) are accepted
+by this extended help, as well as a few other keywords describing key GP
+concepts, e.g.~\kbd{readline} (the line editor), \kbd{integer}, \kbd{nf}
+(``number field'' as used in most algebraic number theory computations),
+\kbd{ell} (elliptic curves), etc.
+
+\unix If the line before the copyright message indicates that extended help
+is available (this means \kbd{perl} is installed on your system, GP was
+told about it at compile time, and the whole PARI distribution was
+correctly installed), you can add more \kbd{?} signs for extended
+functionalities:
+
+\kbd{??~\var{keyword}} yields the functions description as it stands in this
+manual, usually in Chapter~2 or~3. If you're not satisfied with the default
+chapter chosen, you can impose a given chapter by ending the keyword with
+\kbd{@} followed by the chapter number, e.g.~\kbd{??~Hello@2} will look in
+Chapter~2 for section heading \kbd{Hello} (which doesn't exist, by the way).
+
+\kbd{???~\var{pattern}} produces a list of sections in Chapter~3 of the
+manual related to your query. As before, if \var{pattern} ends by \kbd{@}
+ifollowed by a chapter number, that chapter is searched instead; you also
+have the option to append a simple \kbd{@} (without a chapter number) to
+browse through the whole manual.
+
+If your query contains dangerous characters (e.g \kbd{?} or blanks) it is
+advisable to enclose it within double quotes, as for GP strings (e.g
+\kbd{???~"elliptic curve"}).
+
+Note that extended help is much more powerful than the short help, since
+it knows about operators as well: you can type \kbd{??~*} or
+\kbd{??~\&\&}, whereas a single \kbd{?} would just yield a not too helpful
+
+\kbd{*** unknown identifier.}
+
+\noindent message. Also, you can ask for extended help on section
+number~$n$ in Chapter~3, just by typing \kbd{??~$n$} (where \kbd{?$n$} would
+yield merely a list of functions). Finally, a few key concepts in GP are
+documented in this way: metacommands (e.g \kbd{??~"??"}), defaults (e.g
+\kbd{??~psfile}) and type names (e.g \typ{INT} or \kbd{integer}), as well as
+various miscellaneous keywords such as \kbd{edit} (short summary of line
+editor commands), \kbd{operator}, \kbd{member}, \kbd{"user defined"},
+\kbd{nf}, \kbd{ell}, \dots
+
+Last but not least~: \kbd{??} without argument will open a \kbd{dvi}
+previewer (\kbd{xdvi} by default, \kbd{\$GPXDVI} if it is defined in your
+environment) containing the full user's manual. \kbd{??tutorial} and
+\kbd{??refcard} do the same with the \idx{tutorial} and \idx{reference card}
+respectively.
+
+\misctitle{Technical note:} these functionalities are provided by an
+external \kbd{perl} script that you are free to use outside any GP session
+(and modify to your liking, if you are perl-knowledgeable). It is called
+\kbd{\idx{gphelp}}, lies in the \kbd{doc} subdirectory of your distribution
+(just make sure you run \kbd{Configure} first, see Appendix~A) and is
+really two programs in one. The one which is used from within GP is
+\kbd{gphelp} which runs \TeX\ on a selected part of this manual, then opens
+a previewer. \kbd{gphelp -detex} is a text mode equivalent, which looks
+often nicer especially on a colour-capable terminal (see
+\kbd{misc/gprc.dft} for examples). The default \kbd{help} selects which
+help program will be used from within GP. You are welcome to improve this
+help script, or write new ones (and we really would like to know about it
+so that we may include them in future distributions). By the way, outside
+of GP you can give more than one keyword as argument to \kbd{gphelp}.
+
+\subseckbd{/*...*/}: comment. Everything between the stars is ignored by
+GP. These comments can span any number of lines.
+
+\subseckbd{\bs\bs}: one-line comment. The rest of the line
+is ignored by GP.
+
+\subsec{\b{a}} $\{n\}$: prints the object number $n$ ($\%n$)
+in raw format. If the number $n$ is omitted, print the latest computed object
+($\%$). \label{se:history}
+
+\subsec{\b{b}} $\{n\}$: Same as \b{a}, in prettyprint (i.e.~beautified)
+format.
+
+\subsec{\b{c}}:\sidx{available commands} prints the list of all available
+hardcoded functions under GP, not including operators written as special
+symbols (see \secref{se:operators}). More information can be obtained using
+the \kbd{?} metacommand (see above). For user-defined functions / member
+functions, see \b{u} and \b{um}.
+
+\subsec{\b{d}}: prints the \idx{defaults} as described in the
+previous section (shortcut for \kbd{default()}, see \secref{se:default}).
+
+\subsec{\b{e}} $\{n\}$: switches the \kbd{echo} mode on (1) or off (0). If
+$n$ is explicitly given, set echo to $n$.
+
+\subsec{\b{g}} $\{n\}$: sets the debugging level \kbd{debug} to the
+non-negative integer $n$.
+
+\subsec{\b{gf}} $\{n\}$: sets the file usage debugging level \kbd{debufiles}
+to the non-negative integer $n$.
+
+\subsec{\b{gm}} $\{n\}$: sets the memory debugging level \kbd{debugmem}
+to the non-negative integer $n$.
+
+\subsec{\b{h}} $\{m$\kbd{-}$n\}$: outputs some debugging info about the
+hashtable. If the argument is a number $n$, outputs the contents of cell
+$n$. Ranges can be given in the form $m$\kbd{-}$n$ (from cell $m$ to cell
+$n$, \$ = last cell). If a function name is given instead of a number or
+range, outputs info on the internal structure of the hash cell this
+function occupies (a \kbd{struct entree} in C). If the range is reduced to
+a dash ('\kbd{-}'), outputs statistics about hash cell usage.
+
+\subsec{\b{l}} $\{${\it logfile/}$\}$: switches \kbd{log} mode on and off.
+If a {\it logfile} argument is given, change the default logfile name to 
+{\it logfile} and switch log mode on.
+
+\subsec{\b{m}}: as \b{a}, but using prettymatrix format.
+
+\subsec{\b{p}} $\{n\}$: sets \kbd{realprecision} to $n$ decimal
+digits. Prints its current value if $n$ is omitted.
+
+\subsec{\b{ps}} $\{n\}$: sets \kbd{seriesprecision} to $n$ significant terms.
+Prints its current value if $n$ is omitted.
+
+\subsec{\b{q}}: \idx{quit}s the GP session and returns to the system.
+Shortcut for the function \kbd{quit} (see \secref{se:quit}).
+
+\subsec{\b{r}} $\{${\it filename\/}$\}$: \idx{read}s into GP all the commands
+contained in the named file as if they had been typed from the keyboard, one
+line after the other. Can be used in combination with the \b{w} command (see
+below). Related but not equivalent to the function \kbd{read} (see
+\secref{se:read}); in particular, if the file contains more than one line of
+input, there will be one history entry for each of them, whereas \kbd{read}
+would only record the last one. If {\it filename\/} is omitted, re-read the
+previously used input file (fails if no file has ever been successfully read
+in the current session).
+
+\unix This command accepts compressed files in \idx{compress}ed (\kbd{.Z})
+or \idx{gzip}ped (\kbd{.gz} or \kbd{.z}) format. They will be uncompressed on
+the fly as GP reads them, without changing the files themselves.
+
+\subsec{\b{s}}: prints the state of the PARI \idx{stack} and \idx{heap}.
+This is used primarily as a debugging device for PARI, and is not intended
+for the casual user.
+
+\subsec{\b{t}}: prints the \idx{internal longword format} of all the PARI
+types. The detailed bit or byte format of the initial codeword(s) is
+explained in Chapter~4, but its knowledge is not necessary for a GP user.
+
+\subsec{\b{u}}: prints the definitions of all user-defined functions.
+
+\subsec{\b{um}}: prints the definitions of all user-defined member functions.
+
+\subsec{\b{v}}: prints the \idx{version number} and implementation architecture
+(680x0, Sparc, Alpha, other) of the GP executable you are using. In library
+mode, you can use instead the two character strings \kbd{PARIVERSION} and
+\kbd{PARIINFO}, which correspond to the first two lines printed by GP just
+before the Copyright message.
+
+\subsec{\b{w}} $\{n\}$ $\{${\it filename\/}$\}$: \idx{write}s the object number
+$n$ ( $\%n$ ) into the named file, in raw format. If the number $n$ is
+omitted, writes the latest computed object ( $\%$ ). If {\it filename\/} is
+omitted, appends to \kbd{logfile} (the GP function \kbd{write} is a trifle more
+powerful, as you can have filenames whose first character is a digit).
+
+\subsec{\b{x}}: prints the complete tree with addresses and contents (in
+hexadecimal) of the \idx{internal representation} of the latest computed
+object in GP. As for \b{s}, this is used primarily as a debugging device for
+PARI. However, used on a PARI integer, it can be used as a
+decimal$\rightarrow$hexadecimal converter.
+
+\subsec{\b{y}} $\{n\}$: switches \kbd{simplify} on (1) or off (0). If $n$
+is explicitly given, set simplify to $n$.
+
+\subseckbd{\#}: switches the \kbd{timer} on or off.
+
+\subseckbd{\#\#}: prints the time taken by the latest computation.
+Useful when you forgot to turn on the \kbd{timer}.
+
+\section{Input formats for the PARI types}
+
+\noindent
+Before describing more sophisticated functions in the next section, let us
+see here how to input values of the different data types known to PARI.
+Recall that blanks are ignored in any expression which is not a string (see
+below).
+
+\subsec{Integers} \sidx{integer}
+(type \typ{INT}\idxtyp{INT}): type the integer (with an initial
+\kbd{+} or \kbd{-}, if desired) with no decimal point.
+
+\subsec{Real numbers} \sidx{real number}
+(type \typ{REAL}\idxtyp{REAL}): type the number with a decimal
+point. The internal precision of the real number will be the supremum of the
+input precision and the default precision. For example, if the default
+precision is 28 digits, typing \kbd{2.} will give a number with internal
+precision 28, but typing a 45 significant digit real number will give a
+number with internal precision at least 45 (although less may be printed).
+
+You can also use scientific notation with the letter \kbd{E} or
+\kbd{e} (like \kbd{6.02 E 23} or \kbd{1e-5}).
+
+\subsec{Integermods}\sidx{integermod}
+(type \typ{INTMOD}\idxtyp{INTMOD}): to enter $n \mod m$, type
+\kbd{Mod(n,m)}, {\it not\/} \kbd{n\%m} (see Chapter~3).
+
+\subsec{Rational numbers}\sidx{rational number}
+(types \typ{FRAC}\idxtyp{FRAC} and
+\typ{FRACN}\idxtyp{FRACN}): under GP, all fractions are
+automatically reduced to lowest terms, so it is in principle impossible to
+work with reducible fractions (of type \typ{FRACN}), although of course in
+library mode this is easy. To enter $n/m$ just type it as written. As
+explained in \secref{se:gdiv}, division will {\it not\/} be performed, only
+reduction to lowest terms.\label{se:FRAC}
+
+If you really want a reducible fraction under GP, you must use the \kbd{type}
+function (see \secref{se:gptype}), by typing \kbd{type(x,FRACN)}. Be warned
+however that this function must be used with extreme care.
+
+\subsec{Complex numbers}\sidx{complex number}
+(type \typ{COMPLEX}\idxtyp{COMPLEX}): to enter $x+iy$, type \kbd{x + I*y}
+({\it not\/} \kbd{x+i*y}). The letter \kbd{\idx{I}} stands for
+$\sqrt{-1}$. Recall from Chapter 1 that $x$ and $y$ can be of type
+\typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}/\typ{FRACN}, or
+\typ{PADIC}.
+
+\subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic}
+(type \typ{PADIC}\idxtyp{PADIC}): to enter a $p$-adic number, simply write a
+rational or integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$
+and $k$ are integers. This last expression indicates three things to GP:
+first that it is dealing with a \typ{PADIC} type (the fact that $p$ is an
+integer, and not a polynomial, which would be used to enter a series, see
+\secref{se:series}), secondly the ``prime'' $p$ (note that it is not
+checked whether $p$ is indeed prime; you can work on 10-adics if you want, but
+beware of disasters as soon as you do something non-trivial like taking a
+square root), and finally the number of significant $p$-adic digits $k$.
+Note that \kbd{O(25)} is not the same as \kbd{O(5\pow 2)}; you probably
+want the latter!
+
+For example, you can type in the $7$-adic number
+
+\kbd{2*7\pow(-1) + 3 + 4*7 + 2*7\pow 2 + O(7\pow3)}
+
+\noindent
+exactly as shown, or equivalently as
+\kbd{905/7 + O(7\pow3)}.
+
+\subsec{Quadratic numbers}\sidx{quadratic number}
+(type \typ{QUAD}\idxtyp{QUAD}): first, you must define the
+default quadratic order or field in which you want to work. This is done
+using the \kbd{\idx{quadgen}} function, in the following way. Write something
+like
+
+\kbd{w = quadgen(d)}
+
+\noindent
+where \kbd{d} is the {\it discriminant\/} of the quadratic order in
+which you want to work (hence $d$ is congruent to $0$ or $1$ modulo $4$). The
+name \kbd{w} is of course just a suggestion, but corresponds to traditional
+usage. You can of course use any variable name that you like. However,
+quadratic numbers are always printed with a \kbd{w}, regardless of the
+discriminant. So beware, two numbers can be printed in the same way and not
+be equal. However GP will refuse to add or multiply them for example.
+
+Now $(1,w)$ will be the ``canonical'' integral basis of the quadratic order
+(i.e.~$w=\sqrt{d}/2$ if $d\equiv 0 \mod 4$, and $w=(1+\sqrt{d})/2$ if
+$d\equiv 1 \mod 4$, where $d$ is the discriminant), and to enter $x+yw$ you
+just type \kbd{x + y*w}.
+
+\subsec{Polmods}\sidx{polmod} (type \typ{POLMOD}\idxtyp{POLMOD}): exactly as
+for integermods, to enter $x \mod y$ (where $x$ and $y$ are polynomials),
+type \kbd{Mod(x,y)}, not \kbd{x\%y} (see \secref{se:Mod}). Note that when $y$
+is an irreducible polynomial in one variable, polmods whose modulus is $y$
+are simply algebraic numbers in the finite extension defined by the
+polynomial $y$. This allows us to work easily in \idx{number field}s, finite
+extensions of the $p$-adic field $\Q_p$, or \idx{finite field}s.
+
+\label{se:rempolmod}
+\misctitle{Important remark.} Since the variables\sidx{variable} occurring
+in a polmod are not free variables, it is essential in order to avoid
+inconsistencies that polmods use the same variable in internal operations
+(i.e.~between polmods) and variables of lower priority (which have been
+introduced later in the GP session) for external operations (typically
+between a polynomial and a polmod). For example, PARI will not recognize
+that \kbd{Mod(y, y\pow2 + 1)} is the same as \kbd{Mod(x, x\pow2 + 1)}.
+Hopefully, this problem will pass away when type ``element of a number
+field'' is eventually introduced.
+
+On the other hand, \kbd{Mod(x, x\pow2 + 1) + Mod(x, x\pow2 + 1)}
+(which gives \kbd{Mod(2*x, x\pow2 + 1)}) and \kbd{x + Mod(y, y\pow2 + 1)}
+(which gives a result mathematically equivalent to $\kbd{x} + i$ with
+$i^2=-1$) are completely correct, while \kbd{y + Mod(x, x\pow2 + 1)}
+gives \kbd{Mod(x + y, x\pow2 + 1)}, which may not be what you want (\kbd{y}
+is treated here as a numerical parameter, not as a polynomial variable).
+
+\misctitle{Note (added in version 2.0.16)} As long as the main variables
+are the same, it is allowed to mix \typ{POL} and \typ{POLMOD}s. The result
+will be the expected \typ{POLMOD}. For instance \kbd{x + Mod(x, x\pow2 +
+1)} is equal to \kbd{Mod(2*x, x\pow2 + 1)}. This wasn't the case prior to
+version 2.0.16: it returned a polynomial in \kbd{x} equivalent to $\kbd{x}
++ i$, which was in fact an invalid object (you couldn't \kbd{lift} it).
+
+\subsec{Polynomials}\sidx{polynomial}\label{se:pol}
+(type \typ{POL}\idxtyp{POL}): type the polynomial in a natural way, not
+forgetting to put a ``$*$'' between a coefficient and a formal variable
+(this $*$ does not appear in beautified output). Any \idx{variable} name
+can be used except for the reserved names \kbd{I} (used exclusively for the
+square root of $-1$), \kbd{Pi} ($3.14\dots$), \kbd{Euler} (Euler's
+constant), and all the function names: predefined functions, as described
+in Chapter~3 (use \b{c} to get the complete list of them) and user-defined
+functions, which you ought to know about (use \b{u} if you are subject to
+memory lapses). The total number of different variable names is limited to
+$16384$ and $65536$ on 32-bit and 64-bit machines respectively, which
+should be enough. If you ever need hundreds of variables, you should
+probably be using vectors instead.
+
+\subsec{Power series}\sidx{power series}\label{se:series}
+(type \typ{SER}\idxtyp{SER}): type a rational function or
+polynomial expression and add to it \hbox{\kbd{O({\it expr\/} \pow $k$)}},
+where {\it expr\/} is an expression which has non-zero valuation (it can be a
+polynomial, power series, or a rational function; the most common case being
+simply a variable name).
+This indicates to GP that it is dealing with a power series, and the desired
+precision is $k$ times the valuation of {\it expr\/} with respect to the
+main variable of {\it expr\/} (to check the ordering of the variables, or
+to modify it, use the function \kbd{reorder}; see~\secref{se:reorder}).
+
+\subsec{Rational functions}\sidx{rational function}
+(types \typ{RFRAC}\idxtyp{RFRAC} and
+\typ{RFRACN}\idxtyp{RFRACN}): as for fractions, all rational
+functions are automatically reduced to lowest terms under GP. All that was
+said about fractions in \secref{se:FRAC} remains valid here.
+
+\subsec{Binary quadratic forms of positive or negative discriminant}%
+\sidx{binary quadratic forms}
+(type \typ{QFR}\idxtyp{QFR} and \typ{QFI}\idxtyp{QFI}):
+these are input using the function \kbd{Qfb} (see Chapter~3). For example
+\kbd{Qfb(1,2,3)} will create the binary form $x^2+2xy+3y^2$. It will be
+imaginary (of internal type \typ{QFI}) since $2^2 - 4*3 = -8$ is negative.
+
+In the case of forms with positive discriminant (type \typ{QFR}), you
+may add an optional fourth component (related to the regulator, more
+precisely to Shanks and Lenstra's ``distance''), which must be a real number.
+See also the function \kbd{qfbprimeform} which directly creates a prime form
+of given discriminant (see Chapter~3).
+
+\subsec{Row and column vectors}\sidx{row vector}\sidx{column vector} (types
+\typ{VEC}\idxtyp{VEC} and \typ{COL}\idxtyp{COL}): to
+enter a row vector, type the components separated by commas ``\kbd{,}'', and
+enclosed between brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.~%
+\kbd{[1,2,3]}. To enter a column vector, type the vector horizontally, and
+add a tilde ``\til'' to transpose. \kbd{[ ]} yields the empty (row) vector.
+The function \tet{Vec} can be used to transform any object into a vector (see
+Chapter~3).
+
+\subsec{Matrices} (type \typ{MAT}\idxtyp{MAT}):\sidx{matrix} to
+enter a matrix, type the components line by line, the components being
+separated by commas ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and
+everything enclosed in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.
+\kbd{[x,y; z,t; u,v]}. \kbd{[ ; ]} yields the empty (0x0) matrix. The
+function \tet{Mat} can be used to transform any object into a matrix (see
+Chapter 3).
+
+Note that although the internal representation is essentially the same (only
+the type number is different), a row vector of column vectors is {\it not\/}
+a matrix; for example, multiplication will not work in the same way.
+
+Note also that it is possible to create matrices (by conversion of empty
+column vectors and concatenation, or using the \kbd{matrix} function) with a
+given positive number of columns, each of which has zero rows. It is not
+possible to create or represent matrices with zero columns and a nonzero
+number of rows.
+
+\subsec{Lists} (type \typ{LIST})\idxtyp{LIST}:\sidx{list}
+lists cannot be input directly; you have to use the function
+\kbd{listcreate} first, then \kbd{listput} each time you want to append a
+new element (but you can access the elements directly as with the
+vector types described above). The function \kbd{List} can be used to
+transform (row or column) vectors into lists (see Chapter~3).
+
+\subsec{Strings} (type \typ{STR})\idxtyp{STR}:\sidx{string}%
+\sidx{character string} to enter a string, just enclose it between double
+quotes \kbd{"}, like this: \kbd{"this is a string"}. The function \kbd{Str}
+can be used to transform any object into a string (see Chapter~3).
+
+\section{GP operators}\label{se:operators}
+
+\noindent
+Loosely speaking, an \idx{operator} is a function (usually associated to
+basic arithmetic operations) whose name contains only non-alphanumeric
+characters. In practice, most of these are simple functions, which take
+arguments, and return a value; assignment operators also have side effects.
+Each of these has some fixed and unchangeable priority, which means that,
+in a given expression, the operations with the highest priority will be
+performed first. Operations at the same priority level will always be
+performed in the order they were written, i.e.~from left to right. Anything
+enclosed between parenthesis is considered a complete subexpression, and
+will be resolved independently of the surrounding context. For instance,
+assuming that {\it op}$_1$, {\it op}$_2$, {\it op}$_3$ are standard binary
+operators with increasing priorities (think of \kbd{+}, \kbd{*}, \kbd{\pow}
+for instance),
+$$ x~\hbox{\it op}_1~y~\hbox{\it op}_2~z~\hbox{\it op}_2~x~\hbox{\it op}_3~y $$
+is equivalent to
+$$ x~\hbox{\it op}_1~((y~\hbox{\it op}_2~z)~\hbox{\it op}_2~
+ (x~\hbox{\it op}_3~y)).$$
+
+GP knows quite a lot of different operators, some of them unary (having
+only one argument), some binary. Unary operators are defined for either
+prefix (preceding their single argument: {\it op\/}~$x$) or postfix (following
+the argument: $x$~{\it op\/}) position, never both
+(some are syntactically correct in both positions, but with different
+meanings). Binary operators all use the syntax $x$~{\it op\/}~$y$. Most of
+them are well known, some are borrowed from C~syntax, and a few are specific
+to GP. Beware that some GP operators may differ slightly from their C
+counterparts. For instance, GP's postfix \kbd{++} returns the {\it new\/}
+value, like the prefix \kbd{++} of~C, and the binary shifts \kbd{<<},
+\kbd{>>} have a priority which is different from (higher than) that of
+their C counterparts.
+When in doubt, just surround everything by parentheses (besides, your code
+will probably be more legible).
+
+\noindent Here is the complete list (in order of decreasing priority, binary
+unless mentioned otherwise):
+
+\sidx{priority}
+\def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
+\point{Priority 9}
+%
+\kbd{++} and \kbd{--} (unary, postfix): \kbd{$x$++} assigns the value $x+1$ to
+$x$, then returns the new value of $x$. This corresponds to the C
+statement \kbd{++$x$} (there is no prefix \kbd{++} operator in GP).
+\kbd{$x$--} does the same with $x-1$.
+
+\point{Priority 8}
+%
+\kbd{{\it op\/}=}, where {\it op\/} is any simple binary operator
+(i.e.~a binary operator with no side effects, i.e.~one of those defined below)
+which is not a boolean operator (comparison or logical).
+\kbd{x~{\it op\/}=~$y$} assigns $(\kbd{x}~{\it op\/}~y)$ to~\kbd{x},
+and returns the new value of~\kbd{x}, {\it not\/} a reference to the
+\idx{variable}~\kbd{x}. (Thus an assignment cannot occur on the lefthand
+side of another assignment.)
+
+\point{Priority 7}
+%
+\kbd{=} is the assignment operator. The result of \kbd{x~=~$y$} is the value
+of the expression~$y$, which is also assigned to the variable~\kbd{x}. This
+is {\it not\/} the equality test operator. Beware that a statement like
+\kbd{x~=~1} is always true (i.e.~non-zero), and sets \kbd{x} to~1.
+
+\point{Priority 6}
+%
+\kbd{!} (unary, prefix): logical {\it not}. \kbd{!$x$} return $1$ if $x$ is
+equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
+
+\kbd{'} (unary, prefix): quote its argument without evaluating it.
+\bprog%
+? a = x + 1; x = 1;
+? subst(a,x,1)
+\ \ ***\ \ \ variable name expected: subst(a,x,1)
+\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \pow---
+? subst(a,'x,1)
+\%1 = 2
+\eprog
+
+\point{Priority 5}
+%
+\kbd{\pow}: powering.
+
+\kbd{'} (unary, postfix): derivative with respect to the main variable.
+
+\strut\kbd{\til} (unary, postfix): vector/matrix transpose.
+
+\kbd{!} (unary, postfix): factorial. $x\kbd{!}=x(x-1)\cdots 1$.
+
+\kbd{.}: \kbd{$x$.$b$} extracts member $b$ from structure $x$.
+
+\point{Priority 4}
+%
+\kbd{+}, \kbd{-} (unary, prefix): \kbd{-} toggles the sign of its argument,
+\kbd{+} has no effect whatsoever.
+
+\point{Priority 3}
+%
+\kbd{*}: multiplication.
+
+\kbd{/}: exact division (\kbd{3/2}=$3/2$, not $1.5$).
+
+\kbd{\bs}, \kbd{\%}: euclidean quotient and remainder, i.e.~if $x =
+qy + r$, with $0\le r < y$ (if $x$ and $y$ are polynomials, assume instead
+that $\deg r< \deg y$ and that the leading terms of $r$ and $x$ have the
+same sign), then $\kbd{x \b{ } y} = q$, $\kbd{x\%y} = r$.
+
+\kbd{\bs/}: rounded euclidean quotient for integers (rounded towards
+$+\infty$ when the exact quotient would be a half-integer).
+
+\kbd{<<}, \kbd{>>}: left and right binary shift: \kbd{x<<n}$~=~x * 2^n$
+if $n>0$, and $x \b{/} 2^{-n}$ otherwise; and
+\kbd{x>>n}$~=~$\kbd{x<<(-n)}.
+
+\point{Priority 2}
+%
+\kbd{+}, \kbd{-}: addition/subtraction.
+
+\point{Priority 1}
+%
+\kbd{<}, \kbd{>}, \kbd{<=}, \kbd{>=}: the usual comparison operators,
+returning 1 for \kbd{true} and 0 for \kbd{false}. For instance,
+\kbd{x<=1} returns $1$ if $x\le 1$ and $0$ otherwise.
+
+\kbd{<>}, \kbd{!=}: test for (exact) inequality.
+
+\kbd{==}: test for (exact) equality.
+
+\point{Priority 0}
+%
+\kbd{\&}, \kbd{\&\&}: logical {\it and}.
+
+\kbd{|}, \kbd{||}: logical (inclusive) {\it or}. Any sequence of logical
+{\it or\/} and {\it and\/} operations is evaluated from left to right,
+and aborted as soon as the final truth value is known. Thus, for instance,
+\kbd{(x \&\& 1/x)} or \kbd{(type(p) == "t\_INT" \&\& isprime(p))} will never
+produce an error since the second argument need not (and will not) be processed
+when the first is already zero (false).
+
+\misctitle{Remark:} For the sake of efficiency, you should use the
+\kbd{++}, \kbd{--} and {\it op\/}\kbd{=} operators whenever possible:
+
+\bprog%
+? a=200000;
+? i=0; while(i<a, i=i+1)
+time = 4,919 ms.
+? i=0; while(i<a, i+=1)
+time = 4,478 ms.
+? i=0; while(i<a, i++)
+time = 3,639 ms.
+\eprog
+
+\noindent The shift operators should be preferred to multiplication
+whenever possible:
+
+\bprog%
+? a=1<<20000;
+? i=1; while(i<a, i=i*2);
+time = 5,255 ms.
+? i=1; while(i<a, i<<=1);
+time = 988 ms.
+\eprog
+
+\section{The general GP input line}
+\subsec{Generalities}. User interaction with a GP session proceeds as
+follows: a sequence of characters is typed by the user at the GP prompt. This
+can be either a \b~command, a function definition, an expression, or a
+sequence of expressions (i.e.~a program). In the latter two cases, after the
+last expression has been computed its result is put into an internal
+(``history'') array, and printed. The successive elements of this array are
+called \kbd{\%1}, \kbd{\%2}, \dots As a shortcut, the latest computed
+expression can also be called \kbd{\%}, the previous one \kbd{\%`}, the one
+before that \kbd{\%``} and so on.
+
+If you want to suppress the printing of the result, for example because it
+is a long unimportant intermediate result, end the expression with a
+\kbd{;} sign. This same sign is used as an instruction separator when several
+instructions are written on the same line (note that for the pleasure of BASIC
+addicts, the \kbd{:} sign can also be used, but we will try to stick to
+C-style conventions in this manual). The final expression computed, even
+if not printed, will still be assigned to the history array, so you may have
+to pay close attention when you intend to refer back to it by number since
+this number does not appear explicitly. Of course, if you just want to use
+it on the next line, use \kbd{\%} as usual.
+
+Any legal expression can be typed in, and is evaluated using the
+conventions about operator priorities and left to right associativity (see
+the previous section), using the available operator symbols, function names
+(including user-defined functions and member functions see
+\secref{se:user_defined}), and special variables. Please note that, from
+version $1.900$ on, there\sidx{case distinction} {\it is\/} a distinction
+between lowercase and uppercase. Also, note that, outside of constant
+strings, blanks are completely ignored in the input to GP.
+
+The special variable\idx{variable (special)} names known to GP are
+\kbd{\idx{Euler}} (Euler's constant $\gamma=0.577\dots$), \kbd{\idx{I}}
+(the square root of $-1$), \kbd{\idx{Pi}} (3.14\dots)~--- which could be
+thought of as functions with no arguments, and which may therefore be
+invoked without parentheses~---, and \kbd{\idx{O}} which obeys the
+following syntax:
+
+\kbd{O({\it expr\/}\pow k)}
+
+\noindent
+When {\it expr\/} is an integer or a rational number, this creates an
+{\it expr}-adic number (zero in fact) of precision \kbd{k}. When {\it expr\/}
+is a polynomial, a power series or a rational function whose main variable is
+$X$, say, this creates a power series (also zero) of precision $v*\kbd{k}$
+where $v$ is the $X$-adic valuation of {\it expr\/} (see \ref{se:padic}
+and~\ref{se:pol}).
+
+\subsec{Special editing characters}.\sidx{editing characters} A GP program
+can of course have more than one line. Since GP executes your commands as
+soon as you have finished typing them, there must be a way to tell it to
+wait for the next line or lines of input before doing anything. There are
+three ways of doing this.
+
+The first one is simply to use the \idx{backslash character} \kbd{\bs} at the
+end of the line that you are typing, just before hitting \kbd{<Return>}. This
+tells GP that what you will write on the next line is the physical
+continuation of what you have just written. In other words, it makes GP
+forget your newline character. For example if you use this while defining a
+function, and if you ask for the definition of the function using
+\kbd{?name}, you will see that your backslash has disappeared and that
+everything is on the same line. You can type a \kbd{\bs} anywhere. It will be
+interpreted as above only if (apart from ignored whitespace characters) it is
+immediately followed by a newline. For example, you can type
+
+\bprog%
+? 3 + \bs
+4%
+\eprog
+
+\noindent instead of typing \kbd{3 + 4}.
+
+The second one is a slight variation on the first, and is mostly useful when
+defining a user function (see \secref{se:user_defined}): since an equal sign
+can never end a valid expression, GP will disregard a newline immediately
+following an \kbd{=}.
+
+\bprog%
+? a =
+123
+\%1 = 123
+\eprog
+
+The third one cannot be used everywhere, but is in general much more useful.
+It is the use of braces \kbd{\obr} and  \kbd{\cbr}.\sidx{brace characters}
+When GP sees an opening brace (\kbd{\obr}) {\it at the beginning of a line}
+(modulo spaces as usual), it understands that you are typing a multi-line
+command, and newlines will be ignored until you type a closing brace
+\kbd{\cbr}. However, there is an important (but easily obeyed) restriction:
+inside an open brace-close brace pair, all your input lines will be
+concatenated, suppressing any newlines. Thus, all newlines should occur after
+a semicolon (\kbd{;}), a comma (\kbd{,}) or an operator (for clarity's sake,
+we don't recommend splitting an identifier over two lines in this way). For
+instance, the following program
+
+\bprog
+\obr
+\q a = b
+\q b = c
+\cbr
+\eprog
+
+\noindent would silently produce garbage, since what GP will really see is
+\kbd{a=bb=c} which will assign the value of \kbd{c} to both \kbd{bb} and
+\kbd{a} (if this really is what you intended, you're a hopeless case).
+
+\section{The GP/PARI programming language}
+
+The GP calculator uses a purely interpreted language. The structure of this
+language is reminiscent of LISP with a functional notation, \kbd{f(x,y)}
+rather than \kbd{(f x y)}: all \idx{programming} constructs, such as
+\kbd{if}, \kbd{while,} etc... are functions \footnote{*}{Not exactly, since
+not all their arguments need be evaluated. For instance it would be stupid
+to evaluate both branches of an \kbd{if} statement: since only one will
+apply, GP only expands this one.} (see \secref{se:programming} for a
+complete list), and the main loop does not really execute, but rather
+evaluates (sequences of) expressions. Of course, it is by no means a true
+LISP.
+
+\subsec{Variables and symbolic expressions}.\sidx{variable}
+
+  In GP you can use up to 16383 variable names (up to 65535 on 64-bit
+machines). These names can be any standard identifier names, i.e.~they must
+start with a letter and contain only valid keyword characters: \kbd{\_} or
+alphanumeric characters ([\kbd{\_A-Za-z0-9}]). To avoid confusion with other
+symbols, you must not use other non-alphanumeric symbols like \kbd{\$}, or
+'\kbd{.}'. In addition to the function names which you must not use (see the
+list with \b{c}), there are exactly three special variable names which you
+are not allowed to use: \kbd{Pi} and \tet{Euler}, which represent well known
+constants, and $\kbd{I}=\sqrt{-1}$.
+
+Note that GP names are case sensitive since version 1.900. This means for
+instance that the symbol \kbd{i} is perfectly safe to use, and will not be
+mistaken for $\sqrt{-1}$, and that \kbd{o} is not synonymous anymore to
+\kbd{O}. If you grew addicted to the previous behaviour, you can have it back
+by setting the default \kbd{compatible} to $3$.
+
+  Now the main thing to understand is that PARI/GP is {\it not\/} a symbolic
+manipulation package, although it shares some of the functionalities. One of
+the main consequences of this fact is that all expressions are evaluated as
+soon as they are written, they never stay in a purely abstract form%
+\footnote{**}{An obvious but important exception are character strings which
+are evaluated\dots\ essentially to themselves (type \typ{STR}). Not exactly
+so though, since we do some work to treat the quoted characters correctly
+(those preceded by a \b{)}.}.
+%
+As an important example, consider what happens when you use a variable name
+{\it before\/} assigning a value into it. This is perfectly acceptable to GP,
+which considers this variable in fact as a polynomial of degree 1, with
+coefficients 1 in degree 1, 0 in degree 0, whose variable is the variable
+name you used.
+
+  If later you assign a value to that variable, the objects which you have
+created before will still be considered as polynomials. If you want to obtain
+their value, use the function \kbd{eval} (see \secref{se:eval}).
+
+  Finally, note that if the variable $x$ contains a vector or list, you can
+assign a result to $x[m]$ (i.e.~write something like $x[k]=\var{expr}$). If
+$x$ is a matrix, you can assign a result to $x[m,n]$, but {\it not\/} to
+$x[m]$. If you want to assign an expression to the $m$-th column of a matrix
+$x$, use $x[,m]=\var{expr}$ instead. Similarly, use $x[m,]=\var{expr}$ to
+assign an expression to the $m$-th row of $x$. This process is recursive, so
+if $x$ is a matrix of matrices of \dots, an expression such as
+$x[1,1][,3][4]=1$ would be perfectly valid (assuming of course that all
+matrices along the way have the correct dimensions).
+
+\misctitle{Note:} We'll see in \secref{se:user_defined} that it is possible
+to restrict the use of a given variable by declaring it to be \tet{global} or
+\tet{local}. This can be useful to enforce clean programming style, but is in
+no way mandatory.
+
+\misctitle{(Technical) Note:} Variables are numbered in the order that they
+appear since the beginning of the session, and the main variable of an
+expression is always the lowest numbered variable. Hence if you are working
+with expressions involving several variables and want to have them ordered in
+a specific manner {\it in the internal representation}, the simplest is just
+to write down the variables one after the other under GP before starting any
+real computations. If you already have started working and want to change the
+names of the variables in an object, use the function \tet{changevar}. If you
+only want to have them ordered when the result is printed, you can also use
+the function \tet{reorder}, but this won't change anything to the internal
+representation.
+
+\misctitle{(Very technical) Note:}
+Each variable has a stack of values, implemented as a linked list. When a new
+scope is entered (during a function call which uses it as a parameter, or if
+the variable is used as a loop index, see \secref{se:user_defined} and
+\secref{se:programming}), the value of the actual parameter is pushed on the
+stack. If the parameter is not supplied, a special $0$ value called
+\teb{gnil} is pushed on the stack (this value is not printed if it is
+returned as the result of a GP expression sequence). Upon exit, the stack
+decreases. You can \kbd{kill} a variable, decreasing the stack yourself. This
+should be used only at the top level of GP, to undo the effect of an
+assignment, not from a function. However, the stack has a bottom: the value
+of a variable is the monomial of degree 1 in this variable, as is natural for
+a mathematician.
+
+\subsec{Expressions and expression sequences}.
+
+  An \idx{expression}\sidx{expression sequence} is formed by combining the
+GP operators, functions (including user-defined functions, see below) and
+control statements. It may be preceded by an assignment statement '$=$'
+into a variable. It always has a value, which can be any PARI object.
+
+  Several expressions can be combined on a single line by separating them
+with semicolons (';') and also with colons (':') for those who are used to
+BASIC. Such an expression sequence will be called simply a \var{seq}. A
+\var{seq} also has a value, which is the value of the last non-empty
+expression in the sequence. Under GP, the value of the \var{seq}, and only
+this last value, is always put on the stack (i.e. it will become the next
+object $\%n$). The values of the other expressions in the \var{seq} are
+discarded after the execution of the \var{seq} is complete, except of
+course if they were assigned into variables. In addition, the value of
+the \var{seq} (or of course of an expression if there is only one) is
+printed if the line does not end with a semicolon (';').
+
+\subsec{User defined functions}.\sidx{user defined functions}
+\label{se:user_defined}
+
+It is very easy to define a new function under GP, which can then be used
+like any other function. The syntax is as follows:
+
+\kbd{name(list of formal variables) = local(list of local variables); \var{seq}}
+
+\noindent which looks better written on consecutive lines:
+\bprog% name($x_0$, $x_1$, \dots) = 
+\obr
+\q local($t_0$, $t_1$, \dots);
+\q local(\dots);
+\q
+\q \dots
+\cbr
+\eprog
+\noindent (note that the first newline is disregarded due to the preceding
+\kbd{=} sign, and the others because of the enclosing braces). Both lists
+of variables are comma-separated and allowed to be empty. The \tet{local}
+statements can be omitted; as usual \var{seq} is any expression sequence.
+
+\kbd{name} is the name given to the function and is subject to the same
+restrictions as variable names. In addition, variable names are not valid
+function names, you have to \kbd{kill} the variable first (the converse is
+true: function names can't be used as variables, see \secref{se:kill}).
+Previously used function names can be recycled: you are just redefining the
+function (the previous definition is lost of course).
+
+\kbd{list of formal variables} is the list of variables corresponding to
+those which you will actually use when calling your function. The number of
+actual parameters supplied when calling the function has to be less than the
+number of formal variables.
+
+Uninitialized formal variables will be given a default value. An equal
+(\kbd{=}) sign following a variable name in the function definition,
+followed by any expression, gives the variable a default value. The
+expression gets evaluated the moment the function is defined, and is fixed
+afterward. A variable for which you supply no default value will be
+initialized to zero.
+
+\kbd{list of local variables} is the list of the additional local variables
+which are used in the function body. Note that if you omit some or all of
+these local variable declarations, the non-declared variables will become
+global, hence known outside of the function, and this may have undesirable
+side-effects. On the other hand, in some cases it may also be what you want.
+Local variables can be given a default value as the formal variables.
+
+\misctitle{Example:} For instance \kbd{foo(x=1,y=2,z=3) = print(x ":" y ":"
+z)}, defines a function which prints its arguments (at most three of them),
+separated by colons. This then follows the rules of default arguments
+generation as explained at the beginning of \secref{se:functions}.
+
+\bprog%
+? foo(6,7)
+6:7:3
+? foo(,5)
+1:5:3
+? foo
+1:2:3
+\eprog
+
+  Once the function is defined using the above syntax, you can use it like
+any other function. In addition, you can also recall its definition exactly
+as you do for predefined functions, that is by writing \kbd{?\var{name}}.
+This will print the list of arguments, as well as their default values,
+the text of \var{seq}, and a short help text if one was provided using
+the \kbd{addhelp} function (see \secref{se:addhelp}). One small difference
+to predefined functions is that you can never redefine the built-in
+functions, while you can redefine a user-defined function as many times
+as you want.
+
+Typing \b{u} will output the list of user-defined functions.
+
+An amusing example of a user-defined function is the following. It is
+intended to illustrate both the use of user-defined functions and the power
+of the \kbd{sumalt} function. Although the \idx{Riemann zeta-function} is
+included in the standard functions, let us assume that this is not the case
+(or that we want another implementation). One way to define it, which is
+probably the simplest (but certainly not the most efficient), is as
+follows:
+
+\sidx{zeta function}
+\bprog%
+zet(s) =
+\obr
+\q  local(j); /* not needed, and possibly confusing (see below) */
+\q  sumalt(j=1, (-1)\pow(j-1)*j\pow(-s)) / (1 - 2\pow(1-s))
+\cbr
+\eprog
+
+\noindent This gives reasonably good accuracy and speed as long as you are
+not too far from the domain of convergence. Try it for $s$ integral between
+$-5$ and $5$, say, or for $s=0.5+i*t$ where $t=14.134\dots$
+
+The iterative constructs which use a variable name (\kbd{for$xxx$},
+\kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix}, \kbd{plot},
+etc.) also consider the given variable to be local to the construct. A value
+is pushed on entry and pulled on exit. So, it is not necessary for a function
+using such a construct to declare the variable as a dummy formal parameter.
+
+In particular, since loop variables are not visible outside their loops,
+the variable \kbd{j} need not be declared in the protoype of our \kbd{zet}
+function above.
+
+\kbd{zet(s) = sumalt(j=1, (-1)\pow(j-1)*j\pow(-s)) / (1 - 2\pow(1-s))}
+
+\noindent would be a perfectly sensible (and in fact better) definition.
+Since local/global scope is a very tricky point, here's one more example.
+What's wrong with the following definition?
+\bprog%
+? first\_prime\_div(x) = 
+\obr
+\q local(p);
+\q forprime(p=2, x, if (x\%p == 0, break));
+\q p
+\cbr
+? first\_prime\_div(10)
+\%1 = 0
+\eprog
+
+\misctitle{Answer:} the index $p$ in the \kbd{forprime} loop is local to
+the loop and is not visible to the outside world. Hence, it doesn't survive
+the \kbd{break} statement. More precisely, at this point the loop index is
+restored to its preceding value, which is 0 (local variables are
+initialized to 0 by default). To sum up, the routine returns the $p$
+declared local to it, not the one which was local to \kbd{forprime} and ran
+through consecutive prime numbers. Here's a corrected version:
+
+\bprog%
+? first\_prime\_div(x) = forprime(p=2, x, if (x\%p == 0, return(p)))
+\eprog
+
+Again, it is strongly recommended to declare all other local variables that
+are used inside a function: if a function accesses a variable which is not
+one of its formal parameters, the value used will be the one which happens to
+be on top of the stack at the time of the call. This could be a ``global''
+value, or a local value belonging to any function higher in the call chain.
+So, be warned.
+
+There's no problem with recursive functions as long as one pays proper
+attention to variable scope. Here's a last example, used to retrieve the
+coefficient array of a multivariate polynomial (a non-trivial task due to
+PARI's unsophisticated representation for those objects)~:
+\sidx{multivariate polynomial}
+
+\bprog%
+coeffs(P, nbvar) =
+\obr
+\q local(v);
+\h
+\q if (type(P) != "t\_POL",
+\q\q   for (i=0, nbvar-1, P = [P]);
+\q\q   return (P)
+\q );
+\q v = vector(poldegree(P)+1, i, polcoeff(P,i-1));
+\q vector(length(v), i, coeffs(v[i], nbvar-1))
+\cbr
+\eprog
+
+\noindent If $P$ is a polynomial in $k$ variables, show that after the
+assignment {\tt v = coeffs(P,k)}, the coefficient of $x_1^{n_1}\dots
+x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}. What would
+happen if the declaration {\tt local(v)} had been omitted ?
+
+\misctitle{Function which take functions as parameters ?} This is easy
+in GP using the following trick (neat example due to Bill Daly):
+
+\bprog%
+calc(f, x) = eval(Str( f "(x)"))
+\eprog
+
+\noindent If you call this with \kbd{calc("sin", 1)}, it will
+return $\sin(1)$ (evaluated!).
+
+\misctitle{Restrictions on variable use:} it is not allowed to use the same
+variable name for different parameters of your function. Or to use a given
+variable both as a formal parameter and a local variable in a given function.
+Hence
+\bprog%
+? f(x,x) = 1
+\q ***   user function f: variable x declared twice.
+\eprog
+
+Also, the statement \kbd{\idx{global}(x, y, z, t)} (see \secref{se:global})
+declares the corresponding variables to be global. It is then forbidden to
+use them as formal parameters or loop indexes as described above, since the
+parameter would ``shadow'' the variable.
+
+\misctitle{Implementation note.} For the curious reader, here is how these
+stacks are handled: a \idx{hashing function} is computed from the identifier,
+and used as an index in \tet{hashtable}, a table of pointers. Each of
+these pointers begins a linked list of structures (type \tet{entree}).
+The linked list is searched linearly for the identifier (each list will
+typically have less than 7 components or so). When the correct \kbd{entree}
+is found, it points to the top of the stack of values for that identifier if
+it is a variable, to the function itself if it is a predefined function, and
+to a copy of the text of the function if it is a user-defined function. When
+an error occurs, all of this maze (rather a tree, in fact) is searched and
+(hopefully) restored to the state preceding the last call of the main
+evaluator.
+
+\misctitle{Note:} The above syntax (using the \tet{local} keyword) was
+introduced in version 2.0.13. The old syntax
+
+\kbd{name(list of true formal variables, list of local variables) = \var{seq}}
+
+\noindent is still recognized but is deprecated since genuine arguments and
+local variables become undistinguishable.
+
+\subsec{Member functions}.\sidx{member functions}
+
+Member functions use the `dot' notation to retrieve information from
+complicated structures (by default: types \tet{ell}, \tet{nf}, \tet{bnf},
+\tet{bnr} and prime ideals). The syntax \kbd{structure.member} is taken to
+mean: retrieve \kbd{member} from \kbd{structure}, e.g.~\kbd{ell.j} returns
+the $j$-invariant of the elliptic curve \kbd{ell} (or outputs an error
+message if \kbd{ell} doesn't have the correct type).
+
+You can define your own member functions using the syntax:
+
+\bprog%
+  structure.member = {\it function text}
+\eprog
+\noindent where {\it function text\/} is written as the {\it seq\/} in a
+standard user function (without local variables), whose only argument would
+be \kbd{structure}. For instance, the current implementation of the \kbd{ell}
+type is simply an horizontal vector, the $j$-invariant being the thirteenth
+component. This could be implemented as
+
+\bprog
+x.j =
+\obr
+\q if (type(x) != "t\_VEC" || length(x) < 14,
+\q\q error("this is not a proper elliptic curve: " x)
+\q );
+\q x[13]
+\cbr
+\eprog
+
+You can redefine one of your own member functions simply by typing a new
+definition for it. On the other hand, as a safety measure, you can't redefine
+the built-in member functions, so typing the above text would in fact produce
+an error (you'd have to call it e.g.~\kbd{x.j2} in order for GP to accept it).
+
+Typing \b{um} will output the list of user-defined member functions.
+
+\misctitle{Note:} Member functions were not meant to be too complicated or to
+depend on any data that wouldn't be global. Hence they do no have parameters
+(besides the implicit \kbd{structure}) or local variables. Of course, if you
+need some preprocessing work in there, there's nothing to prevent you from
+calling your own functions (using freely their local variables) from a member
+function. For instance, one could implement (a dreadful idea as far as
+efficiency goes):
+
+\bprog
+correct\_ell\_if\_needed(x) = 
+\obr
+\q local(tmp);
+\q if (type(x) != "t\_VEC", tmp = ellinit(x))
+\q \bs\bs {\it some further checks}
+\q tmp
+\cbr
+x.j = correct\_ell\_if\_needed(x)[13];
+\eprog
+
+\subsec{Strings and Keywords}\sidx{string}\sidx{keyword}
+\label{se:strings}
+
+\noindent
+GP variables can now hold values of type character string
+(internal type \typ{STR}).
+This section describes how they are actually used, as well as some convenient
+tricks (automatic concatenation and expansion, keywords) valid in string
+context.
+
+As explained above, the general way to input a string is to enclose characters
+between quotes~\kbd{"}. This is the only input construct where whitespace
+characters are significant: the string will contain the exact number
+of spaces you typed in. Besides, you can ``escape'' characters by putting a
+\kbd{\bs} just before them; this has the following effects:
+
+{
+\def\q{\quad}
+\obeylines
+\q \b{e}: the \kbd{<Escape>} character.
+\q \b{n}: the \kbd{<Newline>} character.
+\q \b{t}: the \kbd{<Tab>} character.
+\q \b{any-other-char}: the \kbd{any-other-char} character.
+}
+In particular, the only way to put a \kbd{"} into a string is to escape it.
+Thus, for instance, \kbd{"\bs"a\bs""} would produce the
+string whose content is ``a''. This is definitely {\it not\/} the same thing as
+typing \kbd{"a"}, whose content is merely the one-letter string a.
+
+You can concatenate two strings using the \tet{concat} function. If either
+argument is a string, the other is automatically converted to a string if
+necessary (it will be evaluated first).
+
+\bprog%
+? concat("ex", 1+1)
+\%1 = "ex2"
+? a = 2; b = "ex"; concat(b, a)
+\%2 = "ex2"
+? concat(a, b)
+\%3 = "2ex"
+\eprog
+
+Some functions expect strings for some of their arguments: \tet{print} would
+be an obvious example, \tet{Str} is a less obvious but very useful one (see
+the end of this section for a complete list). While typing in such an
+argument, you will be said to be in {\it \idx{string context}}. The rest of
+this section is devoted to special syntactical tricks which can be used with
+such arguments (and only here; you will get an error message if you try these
+outside of string context):
+
+$\bullet$ Writing two strings alongside one another will just concatenate
+them, producing a longer string. Thus it is equivalent to type in
+\kbd{"a " "b"} or \kbd{"a b"}. A little tricky point in the first expression:
+the first whitespace is enclosed between quotes, and so is part of a string;
+while the second (before the \kbd{"b"}) is completely optional and GP
+actually suppresses it, as it would with any number of whitespace characters
+at this point (i.e.~outside of any string).
+
+$\bullet$ If you insert an expression without quotes when GP expects a
+string, it gets ``expanded'': it is evaluated as a standard GP expression,
+and the final result (as would have been printed if you had typed it by
+itself) is then converted to a string, as if you had typed it directly. For
+instance \kbd{"a" 1+1 "b"} is equivalent to \kbd{"a2b"}: three strings get
+created, the middle one being the expansion of \kbd{1+1}, and these are then
+concatenated according to the rule described above. Another tricky point
+here: assume you did not assign a value to \kbd{aaa} in a GP expression
+before. Then typing \kbd{aaa} by itself in a string context will actually
+produce the correct output (i.e.~the string whose content is aaa), but in a
+fortuitous way. This \kbd{aaa} gets expanded to the monomial of degree one in
+the variable \kbd{aaa}, which is of course printed as \kbd{aaa}, and thus
+will expand to the three letters you were expecting. But you will have
+defined a variable as a side effect.
+
+$\bullet$ Since there are cases where expansion is not really desirable, we
+now distinguish between ``Keywords'' and ``Strings''. String is what has been
+described so far. Keywords are special relatives of Strings which are
+automatically assumed to be quoted, whether you actually type in the quotes
+or not. Thus expansion is never performed on them. They get concatenated,
+though. The analyzer supplies automatically the quotes you have ``forgotten''
+and treats Keywords just as normal strings otherwise. For instance, if you
+type \kbd{"a"b+b} in Keyword context, you will get the string whose contents
+are ab+b. In String context, on the other hand, you would get a2\kbd{*}b
+(and you would have created the variable \kbd{b} in the process if it didn't
+exist before, but not the variable~\kbd{a}).
+
+All GP functions have prototypes (described in Chapter~3 below) which specify
+the types of arguments they expect: either generic PARI objects (GEN),
+or strings, or keywords, or unevaluated expression sequences.
+In the keyword case, only a very small set of words
+will actually be meaningful (the \kbd{default} function is a prominent
+example).
+
+Let's now try some not-so-stupid exercises to get the hang of it. Try to
+guess the results of the following commands without actually typing them,
+assuming that the \kbd{print} command evaluates and prints its (string)
+arguments in left-to-right order, ending with a newline (and returns 0
+as an unprinted result):
+
+\bprog%
+\q print()
+\q print(1+3"a,3" ,4)
+\q print(a=3, (1 + ((a-3)==print())) (a = (a == 5\bs/2)))
+\eprog
+
+\noindent To round this up, here is a less artificial example, used to create
+generic matrices\sidx{generic matrix}:
+
+\bprog%
+? genmat(u,v,s="x") = \idx{matrix}(u,v,i,j, eval(Str(s "" i "" j)))
+? genmat(2,3) + genmat(2,3,m)
+\%1 =
+[x11 + m11 x12 + m12 x13 + m13]
+[x21 + m21 x22 + m22 x23 + m23]
+\eprog
+
+\noindent
+Note that the argument of \kbd{Str} is evaluated in string context, and
+really consists of 5 pieces (exercise: why are the empty strings necessary?).
+This part could also have been written as \kbd{concat(concat(Str(s), i), j)}
+(but {\it not\/} as \kbd{concat(Str(s), concat(i,j))}!). In practice,
+\kbd{Str} will often be easier to use than \kbd{concat}, if slightly more
+cryptic.
+
+\noindent The arguments of the following functions are processed in string
+context:
+\bprog%
+\idx{Str}
+\idx{addhelp} {\rm (second argument)}
+\idx{default} {\rm (second argument)}
+\idx{error}
+\idx{extern}
+\idx{plotstring} {\rm (second argument)}
+\idx{plotterm} {\rm (first argument)}
+{\rm all the \kbd{\idx{print}{\it xxx\/}} functions}
+\idx{read}
+\idx{system}
+{\rm all the \kbd{\idx{write}{\it xxx\/}} functions}
+\eprog
+
+\noindent The arguments of the following functions are processed as keywords:
+\bprog%
+\idx{alias}
+\idx{default} {\rm (first argument)}
+\idx{install} {\rm (all arguments but the last)}
+\idx{type} {\rm (second argument)}
+\idx{whatnow}
+\eprog
+
+\section{Interfacing GP with other languages}
+\noindent
+The PARI library was meant to be interfaced with C programs. This specific
+use will be dealt with extensively in Chapter~4. GP itself provides a
+convenient, if simple-minded, interpreter, which enables you to execute
+rather intricate scripts (see \secref{se:programming}).
+
+Scripts, when properly written, tend to be shorter and much clearer than C
+programs, and are certainly easier to write, maintain or debug. You don't
+need to deal with memory management, garbage collection, pointers,
+declarations, and so on. Because of their intrinsic simplicity, they are more
+robust as well. They are unfortunately somewhat slower. Thus their use will
+remain complementary: it is suggested that you test and debug your algorithms
+using scripts, before actually coding them in C for the sake of speed.
+
+\unix{Note that the \kbd{install} command enables you to concentrate on
+critical parts of your programs only (which can of course be written with the
+help of other mathematical libraries than PARI!), and to easily and
+efficiently import foreign functions for use under GP
+(see~\secref{se:install}).}
+
+We are aware of three PARI-related public domain libraries. {\it We neither
+endorse nor support any of them}. You might want to give them a try if you
+are familiar with the languages they are based on. First, there are
+\tet{PariPerl}%
+\footnote{*}{
+see \kbd{%
+ http://nswt.tuwien.ac.at:8000/htdocs/internet/unix/perl/math-pari.html}},
+%
+written by Ilya Zakharevich (\kbd{ilya@math.ohio-state.edu}),
+and \tet{PariPython}%
+\footnote{**}{
+see \kbd{http://www.math.jussieu.fr/\til{}fermigie/PariPython/readme.html}},
+%
+by St\'efane Fermigier (\kbd{fermigie@math.jussieu.fr}). Finaly, Michael Stoll
+(\kbd{Michael\_Stoll@math.uni-bonn.de}) has integrated PARI into \tet{CLISP},
+which is a Common Lisp implementation by Bruno Haible, Marcus Daniels and
+others. These provide interfaces to GP functions for use in \kbd{perl},
+\kbd{python} or \kbd{Lisp} programs.\sidx{Perl}\sidx{Python}\sidx{Lisp}
+To our knowledge, only the \kbd{python} and \kbd{perl} interfaces have been
+upgraded to version 2.0 of PARI, the \kbd{CLISP} one being still based on
+version 1.39.$xx$.
+
+\section{The preferences file}\sidx{startup}\sidx{gprc}\sidx{preferences file}
+\label{se:gprc}
+
+\noindent
+When GP is started, it looks for a customization file, or \kbd{gprc} in the
+following places (in this order, only the first one found will be read):
+
+\noindent$\bullet$ On the Macintosh (only), GP looks in the directory which
+contains the GP executable itself for a file called \kbd{gprc}. No other places
+are examined.
+
+\noindent$\bullet$ If the operating system supports environment variables
+(essentially, anything but MacOS), GP checks whether the environment variable
+\tet{GPRC} is set. Under DOS, you can set it in \kbd{AUTOEXEC.BAT}.
+On Unix, this can be done with something like:
+\smallskip
+
+\settabs\+\indent&\kbd{GPRC=/my/dir/anyname; export GPRC}\quad&\cr
+
+\+&\kbd{GPRC=/my/dir/anyname; export GPRC}\quad&in \kbd{sh} syntax
+(for instance in your \kbd{.profile}),\cr
+
+\+&\kbd{setenv GPRC /my/dir/anyname} &in \kbd{csh} syntax
+(in your \kbd{.login} or \kbd{.cshrc} file).\cr
+
+\noindent If so, the file named by \kbd{\$GPRC} is the \kbd{gprc}.
+
+\noindent$\bullet$ If \kbd{GPRC} is not set, and if the environment variable
+\kbd{HOME} is defined, GP then tries
+
+\kbd{\$HOME/.gprc} on a Unix system
+
+\kbd{\$HOME\bs\_$\,$gprc} on a DOS, OS/2, or Windows system.
+
+\noindent$\bullet$ If \kbd{HOME} also leaves us clueless, we try
+
+\strut\kbd{\til/.gprc} on a Unix system (where as usual \kbd{\til} stands for
+your home directory), or
+
+\kbd{\b{\_}$\,$gprc} on a DOS, OS/2, or Windows system.
+
+\noindent$\bullet$ Finally, if no gprc was found among the user files
+mentioned above we look for \kbd{/etc/gprc} (\kbd{\bs etc\bs gprc})
+for a system-wide gprc file (you'll need root privileges to set up such a
+file yourself).
+
+Note that on Unix systems, the \kbd{gprc}'s default name starts with a '.' and
+thus is hidden to regular \kbd{ls} commands; you need to type \kbd{ls -a} to
+see whether it's already there without your knowing about it.
+
+In any case, GP will open the corresponding file and process the commands in
+there, {\it before\/} doing anything else, e.g.~creating the PARI stack. If
+the file doesn't exist or cannot be read, GP will proceed to the
+initialization phase at once, eventually emitting a prompt. If any explicit
+commandline switches are given, they will override the values read from the
+\kbd{gprc} file.
+
+The syntax in this file (and valid in this file only, at this very precise
+moment!) is simple-minded, but should be sufficient for most purposes. It
+is read line by line, white space being optional as usual (unless surrounded
+by quotes). Two types of lines are first dealt with by a preprocessor:
+
+$\bullet$ comments are removed. This applies to all text surrounded by
+\kbd{/*~\dots~*/} as well as everything following \kbd{\bs\bs} on a given
+line.
+
+$\bullet$ lines starting with \kbd{\#if} \var{keyword} are treated as
+comments if \var{keyword} is not defined, and read normally otherwise. The
+condition can be negated using either \kbd{\#if not} (or \kbd{\#if !}). Only
+two keywords are recognized:
+
+\kbd{EMACS}: defined if GP is running in an Emacs shell (see
+\secref{se:emacs}).
+
+\kbd{READL}: defined if GP is compiled with \kbd{readline} support (see
+\secref{se:readline}).
+
+\noindent For instance you could set your prompt in the following portable
+way:
+\bprog%
+\b{\bs} self modifying prompt looking like \hbox{{\rm (18:03) \key{gp}} >}
+prompt   = "(\%R) \b{e}[1mgp\b{e}[m > "
+\h
+\b{\bs}  readline wants non-printing characters to be braced between \pow A/\pow B pairs
+\#if READL  prompt = "(\%R) \pow A\b{e}[1m\pow Bgp\pow A\b{e}[m\pow B > "
+\h
+\b{\bs} escape sequences not supported under emacs
+\#if EMACS  prompt = "(\%R) gp > "
+\eprog
+
+\noindent After the preprocessing there remain two types of lines:
+
+$\bullet$ lines of the form \var{default} \kbd{=} \var{value}, where
+\var{default} is one of the available defaults (see \secref{se:defaults}),
+which will be set to \var{value} on actual startup. Don't forget the
+quotes around strings (e.g.~for \kbd{prompt} or \kbd{help}).
+
+$\bullet$ lines of the form \kbd{read "\var{some\_GP\_file}"} where
+\kbd{\var{some\_GP\_file}} is a regular GP script this time, which will
+be read just before GP prompts you for commands, but after initializing the
+defaults. This is the right place to input files containing \kbd{alias}
+commands, or your favorite macros.
+
+A sample \kbd{gprc} file called \kbd{gprc.dft} is provided in the
+standard distribution (in directory \kbd{lib}). It's a good idea to have a
+look at it and customize it to your needs.
+
+\section{Using GP under GNU Emacs}
+\label{se:emacs}
+
+Thanks to the initial help of Annette Hoffman from the University of
+Saarbr\"ucken, and David Carlisle from the University of Manchester, it is
+possible to use GP as a subprocess of GNU \idx{Emacs}. (Of course, you need
+GNU Emacs to be installed on your machine!). To use this, you should
+include in your \kbd{.emacs} file the following lines:
+\bprog%
+(autoload 'gp-mode "\miscdir/pari" nil t)
+(autoload 'gp-script-mode "\miscdir/pari" nil t)
+(autoload 'gp "\miscdir/pari" nil t)
+(autoload 'gpman "\miscdir/pari" nil t)
+(setq auto-mode-alist
+\q (cons '("\bs\bs.gp\$" . gp-script-mode) auto-mode-alist))
+\eprog
+
+where \kbd{pari.el} is the name of the file that will have to be loaded by
+GNU Emacs (if you have changed the name, or if you have the file in a
+different directory, you must of course supply the correct name). This file
+is included in the PARI distribution and probably has been installed at the
+same time as GP.
+
+Once this is done, under GNU Emacs if you type \kbd{M-x gp} (where as usual
+\kbd{M} is the \kbd{Meta} key, i.e.~Escape, or on SUN keyboards, the Left
+key), a special shell will be started, which in particular launches GP with
+the default stack size, prime limit and input buffer size. If you type
+instead \kbd{C-u M-x gp}, you will be asked for the name of the GP
+executable, the stack size, the prime limit and the input buffer size before
+the execution of GP begins. If for any of these you simply type return, the
+default value will be used. On UNIX machines it will be the place you told
+\kbd{Configure} (usually \kbd{/usr/local/bin/gp}) for the executable, 4000000
+for the stack, 500000 for the prime limit and 30000 for the buffer size.
+
+\smallskip
+  You can then work as usual under GP, but with two notable advantages (which
+don't really matter if readline is available to you, see below). First and
+foremost, you have at your disposal all the facilities of a text editor like
+Emacs, in particular for correcting or copying blocks. Second, you can have
+an on-line help which is much more complete than what you obtain by typing
+\kbd{?name}. This is done by typing \kbd{M-?}. In the minibuffer, Emacs asks
+what function you want to describe, and after your reply you obtain the
+description which is in the users manual, including the description of
+functions (such as \kbd{\bs}, \kbd{\%}) which use special symbols.
+
+  This help system can also be menu-driven, by using the command
+\kbd{M-\char`\\ c} which opens a help menu window which enables you to choose
+the category of commands for which you want an explanation.
+
+  Nevertheless, if extended help is available on your system (see
+\secref{se:exthelp}), you should use it instead of the above, since it's
+nicer (it ran through \TeX) and understands many more keywords.
+
+  Finally you can use command completion in the following way. After the
+prompt, type the first few letters of the command, then \kbd{<TAB>} where
+\kbd{<TAB>} is the TAB key. If there exists a unique command starting with
+the letters you have typed, the command name will be completed. If not,
+either the list of commands starting with the letters you typed will be
+displayed in a separate window (which you can then kill by typing as usual
+\kbd{C-x 1} or by typing in more letters), or ``no match found'' will be
+displayed in the Emacs command line. If your GP was linked with the readline
+library, read the section on completion in the section below (the paragraph
+on online help is not relevant).
+
+Note that if for some reason the session crashes (due to a bug in your
+program or in the PARI system), you will usually stay under Emacs, but the GP
+buffer will be killed. To recover it, simply type again \kbd{M-x gp} (or
+\kbd{C-u M-x gp}), and a new session of GP will be started after the old one,
+so you can recover what you have typed. Note that this will of course
+{\it not} work if for some reason you exited Emacs before coming back (except
+for the \kbd{C-z} temporary stopping command).
+
+\smallskip
+You also have at your disposal a few other commands and many possible
+customizations (colours, prompt). Read the file \kbd{emacs/pariemacs.txt} in
+standard distribution for details.
+
+
+\section{Using GP with readline}
+\sidx{line editor}\sidx{completion}
+
+  Thanks to the initial help of Ilya Zakharevich, there is a possibility of
+line editing and command name completion outside of an Emacs buffer {\it
+if} you have compiled GP with the GNU \idx{readline} library. If you don't
+have Emacs available, or can't stand using it, we really advise you to make
+sure you get this very useful library before configuring or compiling GP.
+In fact, with \kbd{readline}, even line editing becomes {\it more} powerful
+outside an Emacs buffer!
+
+\subsec{A (too) short introduction to readline}:
+\label{se:readline}
+  The basics are as follows (read the readline user manual~!), assume that
+\kbd{C-} stands for ``the \kbd{Control} key combined with another'' and the
+same for \kbd{M-} with the \kbd{Meta} key (generally \kbd{C-} combinations
+act on characters, while the \kbd{M-} ones operate on words). The \kbd{Meta}
+key might be called \kbd{Alt} on some keyboards, will display a black diamond
+on most others, and can safely be replaced by \kbd{Esc} in any case. Typing
+any ordinary key inserts text where the cursor stands, the arrow keys
+enabling you to move in the line. There are many more movement commands,
+which will be familiar to the Emacs user, for instance \kbd{C-a}/\kbd{C-e}
+will take you to the start/end of the line, \kbd{M-b}/\kbd{M-f} move the
+cursor backward/forward by a word, etc. Just press the \kbd{Return} key at
+any point to send your command to GP.
+
+  All the commands you type in are stored in a history (with multiline
+commands being saved as single concatenated lines). The Up and Down arrows (or
+\kbd{C-p}/\kbd{C-n}) will move you through it, \kbd{M-<}/\kbd{M->} sending
+you to the start/end of the history. \kbd{C-r}/\kbd{C-s} will start an
+incremental backward/forward search. You can kill text (\kbd{C-k} kills till
+the end of line, \kbd{M-d} to the end of current word) which you can then
+yank back using the \kbd{C-y} key (\kbd{M-y} will rotate the kill-ring).
+\kbd{C-\_} will undo your last changes incrementally (\kbd{M-r} undoes all
+changes made to the current line). \kbd{C-t} and \kbd{M-t} will transpose
+the character (word) preceding the cursor and the one under the cursor.
+
+  Keeping the \kbd{M-} key down while you enter an integer (a minus sign
+meaning reverse behaviour) gives an argument to your next readline command
+(for instance \kbd{M-- C-k} will kill text back to the start of line). If you
+prefer \idx{Vi}--style editing, \kbd{M-C-j} will toggle you to Vi mode.
+
+  Of course you can change all these default bindings. For that you need to
+create a file named \kbd{.inputrc} in your home directory. For instance
+(notice the embedding conditional in case you would want specific bindings
+for GP):
+%
+\bprog%
+\$if Pari-GP
+\q set show-all-if-ambiguous
+\q "\b{C}-h": backward-delete-char
+\q "\b{e}\b{C}-h": backward-kill-word
+\q "\b{C}-xd": dump-functions
+\q (: "\b{C}-v()\b{C}-b" \qquad \# can be annoying when copy-pasting~!
+\q [: "\b{C}-v[]\b{C}-b"
+\$endif%
+\eprog
+%
+\noindent\kbd{C-x C-r} will re-read this init file, incorporating any
+changes made to it during the current session.
+
+\misctitle{Note:} By default, \kbd{(} and \kbd{[} are bound to the function
+\kbd{pari-matched-insert} which, if ``electric parentheses'' are enabled
+(default: off) will automatically insert the matching closure (respectively
+\kbd{)} and \kbd{]}). This behaviour can be toggled on and off by giving
+the numeric argument $-2$ to \kbd{(} (\kbd{M--2(}), which is useful if you
+want, e.g to copy-paste some text into the calculator. If you don't want a
+toggle, you can use \kbd{M--0} / \kbd{M--1} to specifically switch it on or
+off).
+
+\misctitle{Note:} In recent versions of readline (2.1 for instance), the
+\kbd{Alt} or \kbd{Meta} key can give funny results (output 8-bit accented
+characters for instance). If you don't want to fall back to the \kbd{Esc}
+combination, put the following two lines in your \kbd{.inputrc}:
+%
+\bprog%
+  set convert-meta on
+  set output-meta off%
+\eprog
+
+% don't remove this leading space (needed by gphelp)
+ \subsec{Command completion and online help}
+
+  As in the Emacs shell, \kbd{<TAB>} will complete words for you. But, under
+readline, this mechanism will be context-dependent: GP will strive to only
+give you meaningful completions in a given context (it will fail sometimes,
+but only under rare and restricted conditions).
+
+  For instance, shortly after a \kbd{\til}, we expect a user name, then a
+path to some file. Directly after \kbd{default(} has been typed, we would
+expect one of the \kbd{default} keywords. After \kbd{whatnow(} , we expect
+the name of an old function, which may well have disappeared from this
+version. After a '.', we expect a member keyword. And generally of course, we
+expect any GP symbol which may be found in the hashing lists: functions (both
+yours and GP's), and variables.
+
+  If, at any time, only one completion is meaningful, GP will provide it
+together with
+
+$\bullet$ an ending comma if we're completing a default,
+
+$\bullet$ a pair of parentheses if we're completing a function name. In
+that case hitting \kbd{<TAB>} again will provide the argument list as given
+by the online help\footnote{*}{recall that you can always undo the effect
+of the preceding keys by hitting \kbd{C-\_}}.
+
+Otherwise, hitting \kbd{<TAB>} once more will give you the list of possible
+completions. Just experiment with this mechanism as often as possible,
+you'll probably find it very convenient. For instance, you can obtain
+\kbd{default(seriesprecision,10)}, just by hitting \kbd{def<TAB>se<TAB>10},
+which saves 18 keystrokes (out of 27).
+
+  Hitting \kbd{M-h} will give you the usual short online help concerning the
+word directly beneath the cursor, \kbd{M-H} will yield the extended help
+corresponding to the \kbd{help} default program (usually opens a \idx{dvi}
+previewer, or runs a primitive tex-to-ASCII program). None of these disturb
+the line you were editing.
+\vfill\eject

@@ -1,0 +1,222 @@
+This file gives information about architectures/operating systems GP has been
+compiled on. If your configuration is not listed, it means that nobody sent us
+information about it, definitely not that building won't work a priori.
+If indeed GP builds successfuly, we'd be grateful if you could notify us
+(including a line analogous to the ones below), so that we can accordingly
+expand the list.
+
+General notes:
+- Arch
+ a star (*) in the first column means GP was built using portable kernel.
+
+- Configure
+ dl2 = install() available in gp-dyn / gp-sta (no [BUG] message in benches)
+ dl  = install() available in gp-dyn only ([BUG] in gp-sta `program' bench)
+ not available at all otherwise           ([BUG] in both `program' benches)
+ Note that symbols from C++ modules will have a mangled name. Use
+ extern "C" {...} declarations if you want to import them with install()
+
+- Bench, as output by `make bench'
+ can vary with load, available memory, compiler version ...
+ is not the actual time spent: bench "nfields" is weighted by 1/5.
+ If dyn is empty, shared library libpari.so couldn't be built.
+
+NOTE: bench timings in version 2.0.11 and 2.0.12 were not correct (given
+between parentheses). Add about 25% to running times for comparison with
+other versions.
+
+Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
+==============================================================================
+DEC/Alpha
+alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3169    3434  2.0.16(20)JC
+alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
+alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
+alpha21164   500Mhz  Linux-2.0.35    gcc X11 dl2    5327    5493  2.0.17(13)
+alpha21064   172Mhz  OSF1-3.0        cc  X11 dl2   38598   39823  2.0.13
+------------------------------------------------------------------------------
+Sun/SPARC
+UltraSPARC60 360MHz  Solaris-2.6     gcc X11 dl2    5034    5209  2.0.16    IS
+UltraSPARC60 360MHz  Solaris-2.6      cc X11 dl2    6329    6453  2.0.16    IS
+UltraSPARC2i 360MHz  Solaris-2.7    egcs X11 dl2    5816    6286  2.0.16(18)HS
+UltraSPARC2i 333MHz  Solaris-2.7    egcs X11 dl2    5558    5646  2.0.16(19)HS
+UltraSPARC10 300MHz  Solaris-2.6     gcc X11 dl2   (5932)  (6102) 2.0.12    GN
+UltraSPARC   300MHz  Solaris-2.5     gcc X11 dl2    7643    7566  2.0.9     IS
+UltraSPARC2  296MHz  Solaris-2.5.1   gcc X11 dl2    6098    6277  2.0.16    IS
+UltraSPARC2  296MHz  Solaris-2.5.1    cc X11 dl2    7676    7869  2.0.16    IS
+UltraSPARC2i 270MHz  Solaris-2.7     gcc X11 dl2    9008    7860  2.0.16    IZ
+UltraSPARC2i 270MHz  Solaris-2.6      cc X11 dl2    9200    9970  2.0.10    LG
+UltraSPARC2  248MHz  Solaris-2.7     cc5 X11 dl2    9420    9788  2.0.15(14)GN
+UltraSPARC2  248MHz  Solaris-2.7    egcs X11 dl2    7218    7262  2.0.16    HS
+UltraSPARC   200MHz  Solaris-2.5.1   gcc X11 dl2    9226    9268  2.0.16    IS
+UltraSPARC   200MHz  Solaris-2.5.1    cc X11 dl2   11226   11755  2.0.16    IS
+UltraSPARC   167MHz  Solaris-2.6     gcc X11 dl2   10767   11218  2.0.16    IS
+UltraSPARC   167MHz  Solaris-2.6      cc X11 dl2   13677   13967  2.0.16    IS
+UltraSPARC   167MHz  Solaris-2.5     gcc X11 dl2   11100   11370  2.0.17
+UltraSPARC   167MHz  Solaris-2.5     g++ X11 dl2   13474   13418  2.0.9 (7) LG
+UltraSPARC   167MHz  Solaris-2.5     CC  X11 -     15778   16400  2.0.9     LG
+UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl2   16241   17048  2.0.9     LG
+UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   12880   13256  2.0.16
+
+SuperSPARC2   75MHz  Solaris-2.5     gcc X11 dl2   16969   17013  2.0.10    LG
+SuperSPARC    40MHz  SunOS-4.1.3     gcc X11 dl2   31906   31386  2.0.17
+SuperSPARC    40Mhz  Solaris-2.5     gcc X11 dl2   31528   31576  2.0.16
+TurboSPARC   170MHz  Solaris-2.5     gcc X11 dl2   15907   16529  2.0.9     LG
+MicroSPARC2  110MHz  NextStep-v3     cc    -   -   37794       -  2.0.9     LG
+MicroSPARC2  110MHz  SunOS-4.1.4     gcc X11 dl2   31476   32123  2.0.9     LG
+MicroSPARC2  110MHz  Solaris-2.5     gcc X11 dl2   26048   26727  2.0.17
+SPARCv7(SS2)  40MHz  SunOS-4.1.3     gcc X11 dl   115212  115364  2.0.9     LG
+SPARCv7(ELC)  33MHz  SunOS-4.1.1     gcc X11   -  139406       -  2.0.8     GN
+SPARCv7(SS400)  ???  SunOS-4.1.4     gcc   - dl2  107988  108016  2.0.14    DE
+SPARCv7(HWS210) ???  Linux-2.2.5     gcc   -   -   98488       -  2.0.16(15)DE
+------------------------------------------------------------------------------
+Intel/x86
+AMD K6-2     350Mhz  Linux-2.0.34   egcs X11 dl2   (4856)  (4756) 2.0.11    SH
+AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17 
+AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
+AMD K6       233Mhz  Linux-2.0.35    gcc X11 dl2   (6898)  (7152) 2.0.11    QL
+IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl2   13190   13729  2.0.15    AP
+PentiumII    350MHz  Linux-2.2.5     gcc X11 dl2    4312    4488  2.0.16    HS
+PentiumII    350Mhz  Linux 2.0.36   pgcc X11 dl2   (3310)  (3340) 2.0.12(11)PE
+PentiumII    350Mhz  Linux 2.0.36   egcs X11 dl2   (3352)  (3402) 2.0.12(11)PE
+PentiumII    350Mhz  Linux 2.0.36    gcc X11 dl2   (3600)  (3610) 2.0.12    PE
+PentiumII    333Mhz  Linux-2.0.32    gcc X11 dl2   (3842)  (4164) 2.0.12    JC
+PentiumII    300MHz  NextStep-3.3    cc    -   -    5325       -  2.0.10
+PentiumII    233MHz  FreeBSD-2.2.5   gcc X11 dl2   (6251)  (6114) 2.0.11
+PentiumII    233MHz  Linux-2.0.35    gcc X11 dl2   (7460)  (7586) 2.0.12    HG
+PentiumPro   200MHz  Linux-2.0.29    gcc X11 dl2    6886    6592  2.0.17
+Pentium      266Mhz  Linux-2.0.29    gcc X11 dl2   (7256)  (7044) 2.0.11
+Pentium      200Mhz  NextStep-3.3    cc    -   -   16035       -  2.0.06    MS
+Pentium      166MHz  FreeBSD-2.2.5   gcc X11 dl2  (15159) (14481) 2.0.11
+Pentium      166MHz  Solaris-2.6     gcc X11 dl2  (13550) (13746) 2.0.12    GN
+Pentium      133MHz  Linux-1.2.8     gcc X11   -  (15448)      -  2.0.12(5) GN
+Pentium      133MHz  FreeBSD-2.2.5   gcc X11 dl2   15231   17259  2.0.10    KK
+486dx2        50MHz  Linux-2.0.33    gcc X11 dl2  213710  216224  2.0.9     LG
+486dx         50MHz  DOS-5.0         gcc   -   -   78520       -  2.0.14
+*i860         40MHz  Concentrix      cc  X11   -  147989       -  2.0.9     LG
+------------------------------------------------------------------------------
+Motorola
+*MC68040      25MHz  NextStep-v2     cc    -   -  250542       -  2.0.9     LG
+MC68030       25MHz  SunOS-4.0.3     gcc X11   -  683736  685248  2.0.9 (4)
+*MC68030      25MHz  SunOS-4.0.3     gcc X11   - 1034136 1038368  2.0.9
+------------------------------------------------------------------------------
+IBM/POWER,PowerPC
+*PPC604e     233MHz  AIX-4.2         cc  X11   -   (8616)      -  2.0.12(3) GN
+*PPC604      133MHz  AIX-4.2         cc  X11   -   21528       -  2.0.4 (3) GN
+*PPC601      100MHz  AIX-4.1         cc  X11   -   21692       -  2.0.4 (3) GN
+*PPC601       75MHz  Linux-2.1.24    gcc   - dl2   51810   52702  2.0.9     EK
+*PPC601       66MHz  AIX-3.2.5       cc  X11   -   66280       -  2.0.4 (3) GN
+*POWER2       66MHz  AIX-4.2         cc  X11   -   37592       -  2.0.4 (3) GN
+------------------------------------------------------------------------------
+SGI/MIPS
+*R4000     50/70MHz  IRIX-5.2        gcc X11 dl2   70764   70114  2.0.9 (1) TP
+*R4000     50/70MHz  IRIX-5.2        cc  X11 dl2   81467   80176  2.0.9 (2) TP
+*R10000      196Mhz  IRIX-6.2        cc  X11 dl2   15719   15581  2.0.13(12)BN
+*R10000      196MHz  IRIX-6.4        cc  X11 dl2    8461    9856  2.0.10(8) TP
+------------------------------------------------------------------------------
+HP/PA-RISC
+HPPA9000/778  134MHz HPUX-10.20      cc  X11   -  (16276) (29212) 2.0.12(9)
+*HPPA9000/778 134MHz HPUX-10.20      cc  X11   -  (23666)      -  2.0.12(10)
+HPPA9000/735  100MHz HPUX-10.20      cc  X11   -  (25106) (38898) 2.0.12(9)
+HPPA9000/735  100MHz HPUX-09-07      cc    -   -   25714       -  2.0.16(16)IS
+HPPA9000/720     ??? HPUX-10.20      cc  X11   -   66138       -  2.0.9
+*HPPA9000/720    ??? HPUX-10.20      cc  X11   -  101114  119626  2.0.9
+HPPA9000/712   90MHz HPUX-10.20      cc  X11   -  (26756) (45196) 2.0.12(9)
+*HPPA9000/712    ??? HPUX-10.10      gcc X11   -   66328   71250  2.0.5 (6)
+*HPPA7100LC    60MHz NextStep-v3     cc    -   -   62866       -  2.0.10    LG
+*HPPA7000      50MHz HPUX-09.05      cc  X11   -  113406  152778  2.0.9     LG
+------------------------------------------------------------------------------
+
+Notes:
+======
+(1) uncomment the last PLOTLIBS= in Makefile
+(2) same as above, compiled with cc -O2
+(3) AIX/POWER versions built with cc options including
+      -qarch=com -qtune=601 (any other tuning makes them slower GN)
+Addendum (IK): gcc 2.8.1 -O2 -DGCC_INLINE -mtune=604e produces a faster binary
+
+(4) Slightly different results in make bench (last decimal different in
+    3 tests, due to a different mulsr())
+(5) built with gcc 2.7.2p
+(6) gcc -fPIC (otherwise /usr/bin/ld will not link the shared library)
+(7) the `program' bench fails on "install(addii)". But if the symbol addii
+    is declared within extern "C" {} in paridecl.h, it works.
+
+(8) use
+CC         = cc -64 -DLONG_IS_64BIT
+CFLAGS     = -O -OPT:Olimit=2170
+LD         = cc -64
+LDFLAGS    = -O -L/usr/lib64
+DLLD       = cc -64
+DLLDFLAGS  = -shared -elf -no_unresolved -all -L/usr/lib64
+CPP        = cc -64 -E -I.
+
+(9) * for gp-dyn: in o-hpux.hppa/Makefile, move kernel.o from OBJS to OBJSGP.
+I couldn't find a way to have HP as (needed since gas doesn't understand our
+syntax) to produce PIC code, hence kernel.o has to be linked explicitly with
+all programs compiled with libpari.sl
+
+    * for gp-sta: remove +z from CFLAGS, final link only worked with the
+following command line (there has to be a better way...):
+
+cc dummy.c -c
+cc -o gp-sta -Wl,-a,archive -O dummy.o [... rest as produced by Configure]
+
+where dummy.c defines three dummy symbols (referenced in static libc):
+
+shl_findsym(){}
+ shl_unload(){}
+   shl_load(){}
+
+Whatever else I tried, linking failed:
+
+/usr/ccs/bin/ld: Data address is out of range for short load or store
+   Reference from:  kernel.o(0x8) [for all symbols defined in level0.s]
+
+(10) compiled without +z flags
+
+(11) egcs (http://www.cygnus.com/egcs) and pgcc (http://www.gcc.ml.org):
+egcs=experimental gnu c
+pgcc=pentium gcc (relevant only for ix86 family, including cyrix, amd...)
+
+Relevant data:
+CFLAGS (for egcs)= -O9 -malign-double -fschedule-insns2  -mpentium\
+-march=pentium -fomit-frame-pointer -fno-strength-reduce\
+-fno-inline-functions -fexpensive-optimizations
+CFLAGS (for pgcc)= -O9 -malign-double -mk6   -fomit-frame-pointer\
+-fno-strength-reduce -fno-inline-functions
+
+Libc: 5.4.46. egcs/pgcc version 2.92.21, compiled with Haifa scheduler
+Binutils: 2.9.1.0.4 or 2.9.1.0.15
+
+(12) used LD = cc -Wl,-rpath,my_exotic_DLL_path
+
+(13) with gcc-2.8.1; egcs-1.0.2 produced a broken binary
+
+(14) use /opt/SUNWspro/bin/fpversion to get explicit recommended CFLAGS.
+
+(15) use asmarch=sparcv7
+(16) Configure defaults to hpux-none. Use Configure -a and specify the
+hppa kernel. Remove +z from compiler flags
+(17) CFLAGS = -mk6 -march=i586 -O6
+(18) 256kb L2 Cache - Ultra U5
+(19) 2  MB L2 Cache - Ultra U10
+(20) gcc-2.8.1 also works and produces a faster binary [sta=3097, dyn=3387]
+
+=============================================================================
+Contributors:
+  AW = Aleksander Wittlin
+  AP = Andreas Piotrowski
+  BN = Balasubramanian Narasimhan
+  DE = Denis Excoffier
+  EK = Emmanuel Kowalski
+  GN = Gerhard Niklasch
+  HG = Herbert Gangl
+  IS = Igor Schein
+  JC = John Cremona
+  KK = Kimitoshi Kono
+  LG = Louis Granboulan
+  MS = Michael Stoll
+  QL = Qing Liu
+  SH = Steve Harding
+  TP = Thomas Papanikolaou
+  PE = Philippe Elbaz-Vincent

@@ -1,0 +1,86 @@
+This is PARI/GP, version 2.0.x.beta (*).
+
+The `beta' status means that a substantial amount of testing has been done,
+but bugs might still be lurking in the code and the documentation might not
+be absolutely accurate. Apart from this word of caution, we believe this
+version is stable enough to be released for public use and for site-wide
+installations.
+
+It is important for you and for us that you try this new version and send us
+feedback, so than we can incorporate fixes and improvements into the
+forthcoming `release' version. As usual for bug reports, try to make them
+easily reproducible (using e.g. setrand(1)). Always include the GP header
+and, if relevant, the Configure log.
+
+Some binaries can be found at the address
+
+  ftp://megrez.math.u-bordeaux.fr/pub/pari
+
+(*) Version numbers have the shape: MAJOR.MINOR.patchlevel.status. The status
+increases through {alpha, beta, release}. New features are introduced during
+the `alpha' phase, tested during `beta', and declared stable when `release'
+is reached. The MAJOR version number (currently 2) won't change for a while,
+the MINOR version number (0) increases when a new status cycle starts (as
+soon as a `release' version is out), and the patchlevel goes up each time we
+feel an upgrade is necessary (improvement, bugfix, ...). `Release' versions
+may be updated with further patchlevels if sufficiently important bugs need
+to be fixed before the next cycle reaches completion.
+==========================================================================
+
+To get started, run TeX on the file INSTALL.tex and have a look at the dvi
+(extracted verbatim from Appendix A of the user manual). If you are in a
+hurry, look at INSTALL.DOC (ascii file). But a lot of information is missing
+there.
+
+Typing 'make doc' should typeset the PARI/GP user's manual, a tutorial and
+reference card in directory doc.
+
+See the files NEW and COMPAT for new features and incompatible changes
+respectively between 2.0 and older versions. See Changelog for (a terse
+description of) subsequent patches.
+
+The file README.DOS is specific to DOS, OS/2 and Windows users.
+
+For the adventurous:
+* If you want to check up-to-date, but possibly unstable, development
+versions of PARI/GP or do development work yourself, see the file CVS.DOC.
+
+* Directory Odos/ contains information to compile binaries on DOS-based
+systems (DOS, OS/2, Win3.1, Win95/98/NT/CE).
+
+Afterwards, you're on your own...
+
+==========================================================================
+
+There are three mailing lists devoted to the PARI/GP package (run courtesy of
+Dan Bernstein), and most feedback should be directed to those. They are:
+
+- pari-announce: to announce major version changes. You can't write to this
+one, but you should probably subscribe.
+
+- pari-dev: for everything related to the development of PARI, including
+suggestions, technical questions, bug reports or patch submissions.
+
+- pari-users: for everything else.
+
+To subscribe, send empty messages respectively to
+
+   pari-announce-subscribe@list.cr.yp.to
+   pari-users-subscribe@list.cr.yp.to
+   pari-dev-subscribe@list.cr.yp.to
+
+If you are not a member of any of those lists and don't want to become
+one, you can write to us at
+
+  pari@math.u-bordeaux.fr
+
+At the very least, we will forward your mail to the lists above and correct
+faulty behaviour, if necessary. But we cannot promise you will get an
+individual answer.
+
+Last but not least, PARI home page (courtesy of Gerhard Niklasch) can be
+found at
+
+  http://hasse.mathematik.tu-muenchen.de/ntsw/pari/
+
+  Thanks for your support, and have fun !

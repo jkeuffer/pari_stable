@@ -1,0 +1,141 @@
+This file lists some of the novelties in PARI/GP 2.0. Incompatible changes are
+described in COMPAT.
+
+==========================================================================
+The GP/PARI structure has been cleaned up.
+
+   * The whole configuration process has been automated, and a Configure
+     file is provided. Just typing `./Configure' should see you home in most
+     cases.
+
+   * PARI is now available as a dynamic library, thanks to Louis Granboulan.
+     (you can link GP with it, if you wish to). This saves a tremendous
+     amount of disk space, and is generally more convenient as you don't need
+     to re-link your files when updating the library (or when debugging.
+     or profiling, or...).
+
+   * types now have a symbolic mnemonic name (e.g t_INT for an integer,
+     t_VEC for a vector, and so on).
+
+   * General speed-up (depends on your applications, about 40% for our
+     generic testing file).
+
+   * Experimental module loading structure (the actual function tree
+     has not yet been cut into modules, but for the GP specific functions).
+
+==========================================================================
+Many new or improved functions in the PARI library.
+
+   * MANY class-field related functions. In particular:
+     - is it now possible to try and remove the GRH assumption on class group
+     computations.
+     - ray class groups computations (including discrete log).
+     - explicit defining equations in simple cases (Kummer extensions of prime
+       degree, quadratic base field).
+
+   * roots is now entirely reliable, thanks to Xavier Gourdon.
+
+   * much faster integer factorisation (including an MPQS implementation),
+     due to Gerhard Niklasch, Thomas Papanikolaou and Xavier Roblot.
+
+   * some core routines have been optimized: Karatsuba fast multiplication,
+     a specific function gsqr() for squarings,...
+
+   * input/output is much more flexible now:
+     - a function GENtostring has been added, generalizing gitoascii to any
+     PARI object (with a simpler syntax: GENtostring(g) returns a malloc'ed
+     string containing g as gp would print it).
+
+     - lisexpr has a relative flisexpr (for filtered lisexpr), which enables
+     you to use input containing whitespaces.
+
+     - you can use GENs in formatted output, a la printf.
+
+   * improved garbage collecting.
+
+   * private variables can be created without an explicit lisexpr(), using
+     fetch_var() and delete_var().
+
+==========================================================================
+GP has been completely re-written:
+
+   * lowercase/uppercase are now significant. All predefined constants
+     (Euler, I, Pi) have been renamed (as well, the o() notation for series
+     and padics has been superseded by O()).
+
+     for (i=1,10, print(i)) will not yield an error anymore.
+
+   * human-readable error messages, including a caret to indicate where
+     a GP syntax error occurred.
+
+   * function names were renamed according to a more logical scheme. The
+     file new.dico provides a translation (available under GP using "whatnow")
+
+   * You can retrieve basic information from complicated objects using member
+     functions (you cannot define your own). For instance x.disc will yield the
+     discriminant of x, whether it was created by nfinit (aka initalg), bnfinit
+     (aka buchinit), ellinit (aka initell).
+
+   * A `gprc' file is available to set "permanent" defaults (such as
+     global variables, aliases, custom user functions, etc...).  For instance,
+     you can put all your scripts in some special directories, and
+     point them out to GP using "path". See misc/gprc.dft for examples.
+
+     The function "default" enables to change most defaults under gp.
+     For instance: default(compatible, 2) will give you back the former gp
+     function names and helpmessages. [default(compatible, 3) undoes the
+     lowercaps/uppercaps changes as well]. Try "default".
+
+   * basic C idiosyncrasies such as for instance i++ (for i=i+1), i<<1
+     (for left shift) or i+=j (for i=i+j) are now allowed within GP scripts.
+     /* */ multi-line comments are understood.
+
+   * lists and (primitive) string support have been added. Characters can be
+     quoted with the usual meaning. As a result, set functions can now be
+     used with arbitrary elements.
+
+   * if your terminal supports color (variants of color_xterm for instance),
+     you can tell GP to highlight its output in different (user configurable)
+     colors. This is done by fiddling with the default "colors".
+
+   * The familiar functions "break", "next" and "return" are now available.
+     These should supersede the buggy label/goto provided in older versions.
+
+   * somewhat enhanced on-line help. Even more: if you have perl on your
+     system, try ?? function-name (?? bnfinit for instance). This is provided
+     by external scripts which can be used independently, outside of the GP
+     session.
+
+   * If readline is installed on your system, a context-dependent completion
+     (not yet user-programmable) is now available (try hitting <TAB> here and
+     there). Try ?? readline.
+
+   * many functions now have default arguments (shown between braces {} in
+     the on-line description). gp first reads user-supplied arguments, and
+     then fills in the arg list with these default values. Optional args can
+     be entirely omitted, comma included (for a function with no mandatory
+     arguments, even parentheses are optional !). For instance:
+
+       Mat = Mat()
+       bnfclassunit(x^2+1,0) = bnfclassunit(x^2+1)
+       bnfclassunit(x^2+1,,[0.2,0.2]) = bnfclassunit(x^2+1,0,[0.2,0.2])
+
+       The "else" part of the "if" function can be entirely omitted.
+       if (a,1) is now correct; of course, the former syntax if (a,1,) is
+       still valid.
+
+   * functions "extern" and "system" have been added to interface with
+     external programs (UNIX only). You can do for instance
+     extern("myprog"), or system("ls -l *.gp").
+
+   * even better, "install" enables you to load any function provided by
+     a dynamically linked library, and have the GP interpreter use it. This
+     makes it easy to have your own customized version of GP with your own set
+     of functions on startup (you can document them using "addhelp").
+
+   * On 32-bit machines, maximum number of variables has been increased from
+     254 to 16382. Arrays can have up to 16777215 elements (instead of 65535).
+     In addition vector/matrix operations in GP now perform orders of
+     magnitudes faster than in version 1.39
+
+=============================================================================

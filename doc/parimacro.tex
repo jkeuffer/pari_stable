@@ -1,0 +1,280 @@
+\catcode`\@=11
+\newif\ifgphelp
+\long\def\@ifundef#1#2#3{\expandafter\ifx\csname
+  #1\endcsname\relax#2\else#3\fi}
+\@ifundef{fromgphelp}{\gphelpfalse}{\gphelptrue}
+
+\ifgphelp
+  \magnification=\magstep1
+  \baselineskip=13pt
+\else
+  \magnification=\magstephalf
+\fi
+
+\newread\std
+\openin\std=paricfg.tex
+\ifeof\std
+  \openin\std=doc/paricfg.tex
+  \ifeof\std
+    \message{paricfg.tex not found. You should run Configure.}
+% use default values
+    \def\vers{2.0.x}
+    \def\miscdir{/usr/local/lib/pari}
+    \def\includedir{/usr/local/include/pari}
+    \def\libdir{/usr/local/lib}
+    \def\wwwsite{\kbd{http://hasse.mathematik.tu-muenchen.de/ntsw/pari/}}
+  \else
+    \input doc/paricfg.tex
+  \fi
+\else
+  \input paricfg.tex
+\fi
+
+\font\chaptertitlefont=cmr12 scaled \magstep1
+\font\captertitlebf=cmbx10 scaled \magstep2
+\font\sectiontitlebf=cmbx12
+\font\seventt=cmtt8 scaled 875
+\scriptfont\ttfam=\seventt % we should really set the \hyphenchar etc first
+\parskip=6pt plus 3pt minus 1.5pt
+\overfullrule=0pt
+
+%
+% CROSS REFERENCING & INDEX
+%
+\newif\ifsecondpass
+\newwrite\out
+\newwrite\aux
+
+\ifgphelp % disable most of it
+  \def\sidx#1{}
+  \def\tocwrite#1{}
+  \def\label#1{}
+  \def\ref#1{[{\bf ??}]}
+\else
+\def\typeout#1{\immediate\write\out{#1}}
+\def\@namedef#1{\expandafter\def\csname #1\endcsname}
+\def\newlabel#1#2{\@ifundef{r@#1}{}{\message{Label `#1' multiply
+  defined}}\global\@namedef{r@#1}{#2}}
+
+\openin\std=users.std
+\ifeof\std
+  \secondpassfalse
+  \typeout{FIRST PASS}
+  \csname newwrite\endcsname\toc
+  \csname newwrite\endcsname\index
+  \openout\toc=\jobname.toc
+  \openout\index=\jobname.idx
+  \let\condwrite=\write
+\else
+  \secondpasstrue
+  \typeout{SECOND PASS}
+  \let\immediate\relax
+  \def\condwrite#1#2{}
+\fi
+% index
+\def\sidx#1{{\condwrite\index{!#1!\the\pageno!}}}
+%cf TeXBook Exercice 21.10
+\def\tocwrite#1{{\let\the=0\edef\next{\condwrite\toc{#1}}\next}}
+% don't use \jobname here, macros may be used by tutorial.tex
+\openin\std=users.aux
+\ifeof\std
+  \message{No aux file.}
+\else
+  \input users.aux
+\fi
+\openin\std=users.std
+
+% \ref, \label
+\openout\aux=\jobname.aux
+
+\ifx\inputlineno\undefined
+  \let\on@line\empty
+\else
+  \def\on@line{ on input line \the\inputlineno}
+\fi
+\def\@errundef#1{\typeout{Reference `#1' on page \the\pageno \space
+undefined\on@line}}
+
+\def\@car#1#2\@nil{#1}
+\def\@cdr#1#2\@nil{#2}
+
+\def\@ref{\expandafter\@cdr\@temp \@nil\null}
+\def\@cref{\expandafter\@car\@temp \@nil\null}
+
+\def\label#1{\immediate\write\aux{\string
+  \newlabel{#1}{{\the\chapno}{\currentlabel}}}}
+\def\ref#1{\@ifundef{r@#1}
+  {{\bf ??}\@errundef{#1}}
+  {\edef\@temp{\csname r@#1\endcsname}%
+    \def\lbl{\@ref}\def\chp{\@cref}%
+    \ifx\chp{\the\chapno}\lbl\else\chp.\lbl\fi}}
+\fi
+
+\def\idx#1{\sidx{#1}#1}
+\def\secref#1{Section~\ref{#1}}
+
+%
+% SECTIONS
+%
+\newcount\appno
+\newcount\chapno
+\newcount\secno
+\newcount\subsecno
+\newcount\subsubsecno
+
+\def\newpage{\hbox{}\vfill\eject}
+
+\def\myhook{}
+\def\title#1#2{%
+  \ifodd\pageno\else\newpage\fi
+  \tocwrite{#1 #2\string\dotfill\the\pageno}
+  \ifgphelp\else
+     \centerline{\chaptertitlefont #1}\medskip
+  \fi
+  \centerline{\let\bf\chaptertitlebf \chaptertitlefont #2}\vskip1cm}
+\def\sectitle#1{%
+  \tocwrite{{\sevenrm\hskip0.5cm#1\string\dotfill\the\pageno}}
+  \vskip 0pt plus 54pt\penalty-600 % good break
+  \vskip 24pt plus -45pt minus 9pt
+  \leftline{\myhook{\sectiontitlebf #1}.}\def\myhook{}
+  \penalty10000 % impossible break
+  \smallskip}% whatever follows will add a \parskip
+
+\def\subsectitle#1{%
+  \vskip 0pt plus 45pt\penalty-300
+  \vskip 6pt plus -42pt minus 3pt
+  \noindent\myhook{\bf{#1}}\def\myhook{}}
+
+\def\subsubsectitle#1{% a \parskip is being added anyway by \noindent
+  \par\vskip 0pt plus 39pt\penalty-200
+  \vskip 0pt plus -37pt minus 1.5pt
+  \noindent\myhook{\bf{#1}}\def\myhook{}}
+
+\ifgphelp
+  \def\maketitle#1{#1}
+\else
+  \def\maketitle#1{
+  \ifnum\chapno=0
+    \currentlabel. #1%
+  \else
+    \number\chapno.\currentlabel\ #1%
+  \fi}
+\fi
+
+\def\misctitle#1{\par\vskip 0pt plus 66pt\penalty-400
+  \vskip 3pt plus -64pt minus 1.5pt\noindent{\bf #1}}
+
+% Chapter headings now occupy two lines in the manual (still only one in
+% INSTALL.tex and gphelp-extracted bits).  Syntax requirement: After calling
+% \chapter{...} and possibly \label{...}  etc, an empty line _must_ follow
+% before the first paragraph of text or section heading begins. [GN]
+\def\chapter#1#2\par{
+  \secno=0\global\advance\chapno by 1
+  \title{Chapter \number\chapno:}{#1}#2\noindent\ignorespaces}
+\def\appendix#1\par{
+  \chapno=0
+  \secno=0\global\advance\appno by 1
+  \title{Appendix %
+  \ifcase\appno\or A\or B\or C\or D\or E\or F\or G\or H\or I\or J\or K\fi:}%
+  {#1}\noindent\ignorespaces}
+\def\section#1{
+  \subsecno=0\advance\secno by 1
+  \gdef\currentlabel{\number\secno}
+  \sectitle{\maketitle{#1}}}
+\def\subsec#1{
+  \subsubsecno=0\advance\subsecno by 1
+  \gdef\currentlabel{\number\secno.\number\subsecno}
+  \subsectitle{\maketitle{#1}}}
+\def\subsubsec#1{
+  \advance\subsubsecno by 1
+  \gdef\currentlabel{\number\secno.\number\subsecno.\number\subsubsecno}
+  \subsubsectitle{\maketitle{#1}}}
+
+\def\unix{\strut\hbox to 0pt{\hss {UNIX: }\indent}}
+\def\unixx{\noindent\strut\hbox to 0pt{\hss {UNIX: }}}
+\def\emacs{\strut\hbox to 0pt{\hss {EMACS: }\indent}}
+
+\def\sectionunix#1{\def\myhook{\unixx{}}\section{#1}}
+\def\unixsubsecunix#1{\def\myhook{\unix{}}\subsec{#1}}
+\def\subsecidxunix#1{\def\myhook{\unix{}}\subsecidx{#1}}
+\def\subsubsecunix#1{\def\myhook{\unix{}}\subsubsec{#1}}
+\def\subsubsecidxunix#1{\def\myhook{\unix{}}\subsubsecidx{#1}}
+
+\def\subseckbd#1{\subsec{\kbd{#1}}}
+\def\subsecidx#1{\subsec{#1}\sidx{#1}}
+\def\subsubsecidx#1{\subsubsec{#1}\sidx{#1}}
+%
+% General purpose
+%
+\def\begintitle{
+  \begingroup\nopagenumbers
+  \font\mine=cmb10 scaled 1893
+  \hbox{}
+}
+\def\authors{
+  \centerline{C. Batut, K. Belabas, D. Bernardi, H. Cohen, M. Olivier}
+  \vskip 1.truecm
+  \centerline{Laboratoire A2X, U.M.R. 9936 du C.N.R.S.}
+  \centerline{Universit\'e Bordeaux I, 351 Cours de la Lib\'eration}
+  \centerline{33405 TALENCE Cedex, FRANCE}
+  \centerline{\tt e-mail: pari@math.u-bordeaux.fr}
+  \vskip 2.truecm
+  \centerline{Home Page:}
+  \centerline{\wwwsite}
+  \vskip .5truecm
+  \centerline{Primary {\tt ftp} site:}
+  \centerline{\tt ftp://megrez.math.u-bordeaux.fr/pub/pari/}
+  \vskip 1.truecm
+}
+\def\endtitle{\newpage\endgroup}
+
+\newfam\euffam
+\font\teneuf=eufm10
+\textfont\euffam=\teneuf
+\def\goth#1{{\fam\euffam#1}}
+\def\d{\goth d}
+\def\f{\goth f}
+\def\p{{\bf p}}
+\def\kbd#1{{\tt #1}}
+\def\key#1{{\bf #1}}
+\def\var#1{\hbox{\it #1\/}}
+\def\fl{\var{f\kern0pt lag}}
+\def\synx#1#2#3{\sidx{#3}The library syntax is $\key{#1}({#2})$}
+\def\syn#1#2{\synx{#1}{#2}{#1}}
+\def\synt#1#2{\syn{#1}{\hbox{\tt #2}}}
+
+\def\bs{{\char'134}}
+\def\obr{{\char'173}}
+\def\cbr{{\char'175}}
+\def\pow{\^{}\hskip0pt}
+\def\til{\raise-0.3em\hbox{\~{}}}
+\def\b#1{{\tt \bs#1}}
+\def\mod{\,{\rm mod}\,}
+\def\text#1{{\rm#1}}
+\def\teb#1{{\bf\idx{#1}}}
+\def\tet#1{{\tt\idx{#1}}}
+\def\dfrac#1#2{{{#1}\over{#2}}}
+\def\binom#1#2{\pmatrix{{#1}\cr{#2}}}
+\def\Bbb#1{{\bf #1}}
+\def\typ#1{\kbd{t\_\kern1pt#1}}
+\def\idxtyp#1{\sidx{t\string\_#1}}
+\def\Z{\Bbb Z}
+\def\Q{\Bbb Q}
+\def\F{\Bbb F}
+\def\R{\Bbb R}
+\def\C{\Bbb C}
+\def\dotfill{\leaders\hbox to 3truemm{\hfil.\hfil}\hfill}
+
+\def\bprog{\par\begingroup%
+  \def\q{\quad}\def\h{\hbox{}}%
+  \tt\obeylines\leavevmode\parskip=0pt plus 1pt%
+  \interlinepenalty2000\clubpenalty9000\widowpenalty9000%
+  \h}
+% variant of same, for use with tabbing.  Tabbing doesn't build paragraphs,
+% the lines go directly into the vlist -- so we must add our own \parskip. [GN]
+\def\bprogtabs{\par\vskip\parskip\begingroup%
+  \def\q{\quad}\def\h{\hbox{}}%
+  \tt\settabs}
+% both to be ended with:
+\def\eprog{\endgroup\par}
+\catcode`\@=12

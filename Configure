@@ -1,0 +1,1214 @@
+#! /bin/sh
+#
+#   Configuration file for GP/PARI. (c) K.B & Ptitboul.
+#
+#   Run Configure -help for Usage.
+#
+# The Configure included in Perl distribution (written by Larry Wall), as
+# well as the autoconfig package (from the GNU team) were of much help in
+# writing these config files. Thanks to all of them!
+#
+TOP=`pwd`
+dflt_conf_file=dft.Config.in
+
+# Directories
+config_dir=config
+src_dir=src
+emacs_dir=emacs
+doc_dir=doc
+data_dir=data
+
+extract_dir_list="$doc_dir $emacs_dir"
+
+#
+# Version number and patch level.
+#
+. $config_dir/version
+rcsrevision="$version"
+if test "0$patch" != 0; then rcsrevision="$version.$patch"; fi
+
+cd $config_dir
+
+####################### CONFIGURE - OPTIONS #################################
+#
+# Processing Options
+#
+fastread=yes
+config_file=
+optimization=full
+prefix=/usr/local
+which_graphic_lib=none
+test -n "$GP_INSTALL_PREFIX" && prefix=$GP_INSTALL_PREFIX
+while test $# -gt 0; do
+  case "$1" in
+  -l|-load) shift; initfile=$1;
+     cd $TOP
+     PATH=.:$PATH; export PATH
+     if test -z "$1";then initfile=$dflt_conf_file; fi
+     if test -r "$initfile"; then
+       . $initfile
+       if test ! -d $objdir; then mkdir $objdir; fi
+       . $config_dir/extract_files
+       exit 0
+     else
+       echo "Cannot read config file \"$initfile\"." >&2
+       exit 1
+     fi;;
+  -p|-prefix)   shift; prefix=$1;;
+  --prefix=*|--prefi=*|--pref=*|--pre=*|--pr=*|--p=*)
+               prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --disable-kernel) kernel=no;;
+  -a|-ask)     fastread=no;;
+  -g)          optimization=debugging;;
+  -pg)         optimization=profiling;;
+  -rdll)       DYNRELOC=yes;;
+  -h|-help|-\?)error=true;;
+  -v|-verbhelp)error=verb;;
+  -s|--static) DLLD=;;
+  -graphic)   shift; which_graphic_lib=$1; graph_cmd=yes ;;
+  --graphic=*|--graphi=*|--graph=*|--grap=*|--gra=*|--gr=*|--g=*)
+	       graph_cmd=yes
+	       which_graphic_lib=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  *) echo "*** Unrecognized option $1." >&2; error=true;;
+  esac
+  shift
+done
+
+case "$error" in
+true) cat >&2 <<EOT
+Usage: Configure [-ask|-help|-g|-pg] [ -load <filename> ] [ --prefix=<dir> ]
+Options: names can be abbreviated to one character (e.g -h = -help)
+ -ask            interactively ask for answers (defaults are still computed)
+ -help           this message
+ -verbhelp       a longer help message
+ -load           specify a default config file (default $dflt_conf_file)
+ --static        build static GP binary only
+ --prefix=<dir>  install files in <dir>/... (default $prefix)
+ --graphic=<gr>  which graphic library to use (default X11)
+                 (none X11 sunview gnuplot)
+
+Additional developer options:
+ -g              creates debugging version
+ -pg             creates profiling version
+ -rdll           creates relocatable DLL (Cygwin32 only)
+EOT
+exit 1
+;;
+verb) cat >&2 <<EOT
+Architecture, operating system and asm kernel.
+  Configure tries to detect what is the architecture of the machine (CPU type)
+  and what operating system it is running. Then, it decides whether an asm
+  kernel exists and should be used. You can override this with Configure -ask.
+Which compiler will be used ?
+  Depending on the machine (architecture and operating system) and on what is
+  found in the path, a compiler is automatically chosen. If you set the
+  environment variable CC before typing Configure, it will be used instead.
+EOT
+exit 1
+;;
+esac
+
+test "$fastread" = yes || cat <<EOT
+==========================================================================
+             Beginning configuration questions for GP/PARI.
+
+You will be asked some questions about your system. Most of the time, a list
+of acceptable answers will be supplied as well as a default between brackets.
+Type carriage return to accept these defaults.
+
+Though the present script strives to prevent any fatal mistake on your part,
+there's currently no easy way out if you make one. Your best bet is to press
+Ctrl-C, then start again.  Another possibility is to wait till the questions
+end, edit the file "$dflt_conf_file", then run
+
+      Configure -load $dflt_conf_file
+
+(which can be abbreviated to simply "Configure -l")
+==========================================================================
+EOT
+
+####################### CONFIGURE - SHELL ###################################
+if test -z "$OS2_SHELL"; then dir_sep=':' ; else dir_sep=';' ; fi
+
+#
+# Proper PATH setting
+#
+pth="\
+  /bin\
+  /usr/bin\
+  /usr/locateal/bin\
+  /usr/ucb\
+  /usr/locateal\
+  /usr/lbin\
+  /usr/5bin\
+  /etc\
+  /usr/etc\
+  /usr/gnu/bin\
+  /usr/new\
+  /usr/new/bin\
+  /usr/nbin\
+  /sys5.3/bin\
+  /sys5.3/usr/bin\
+  /bsd4.3/bin\
+  /bsd4.3/usr/ucb\
+  /bsd4.3/usr/bin\
+  /usr/bsd\
+  /bsd43/bin\
+  /opt/ansic/bin\
+  /usr/ccs/bin\
+  /usr/lib\
+  /usr/ucblib\
+  /lib\
+  /usr/ccs/lib\
+  /sbin\
+  /usr/sbin\
+  /usr/libexec\
+"
+
+for p in $pth
+do
+  case "$dir_sep$PATH$dir_sep" in
+    *$dir_sep$p$dir_sep*) ;;
+    *) test -d $p && PATH=$PATH$dir_sep$p ;;
+  esac
+done
+PATH=.$dir_sep$PATH; export PATH
+
+echo "Checking echo to see how to suppress newlines..."
+
+if (echo "hi\c"; echo " ") | grep c >/dev/null 2>&1 ; then
+  echo "...using -n."; n=-n; c=
+else
+  cat <<EOM
+...using \c
+EOM
+  n=; c='\c'
+fi
+if test "$fastread" != yes; then
+  echo $n ..."The star should be here-->$c"; echo '*'
+fi
+
+#
+#  We might need the following :
+#
+echo Looking for some tools first ...
+list='ld zcat gzip ranlib perl emacs'
+pathspace=`echo $PATH | sed -e "s/$dir_sep/ /g" | sed -e 's,\\\\,/,g'`
+
+for file in $list; do
+  x=`./locate $file '' $pathspace`
+  eval $file=$x
+  case $x in
+# support also DOS filesystems (hard drive prepended)
+   ?:/*|/*) echo ..."$file is $x";;
+      *) echo ..."I could not find $file." >&2;;
+  esac
+done
+if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
+
+####################### CONFIGURE - ARCHITECTURE ############################
+#
+# Testing Architectures. Try uname to provide a default, then ask user.
+#
+arch=none; osname=unknown
+myuname=`(uname -a) 2>/dev/null || arch 2>&1`
+if test -d /NextApps; then myuname=nextstep; fi
+if test -n "$myuname"; then
+  myuname=`echo $myuname | sed -e 's/^[^=]*=//' -e 's,/,,g' | \
+	  tr '[A-Z]' '[a-z]' | tr '\012' ' '`
+  set X $myuname; shift; osname=$1
+  case "$osname" in
+  irix*)    osname=irix;;
+  fx2800)   arch=fx2800; osname=concentrix;;
+  hp*)      arch=hppa; osname=hpux;;
+  freebsd|os2)  arch=ix86;;
+  ultrix)   arch=mips;;
+  nextstep) arch=`file /bin/sh | sed 's/.*(for architecture \(.*\))/\1/'`;;
+  osf1)     case "$5" in alpha) arch=alpha;; esac;;
+  cygwin*)  arch=$HOSTTYPE;;
+  linux)    arch=`uname -m`
+	    case "`cat /proc/cpuinfo`" in
+	    *TMS390Z5[05]*) arch=sparcv8_super;; # SuperSparc I or II
+	    *TMS390S1[05]*) arch=sparcv8_micro;; # MicroSparc I
+	    *MB86904*)      arch=sparcv8_micro;; # MicroSparc II
+	    *MB86907*)      arch=sparcv8_micro;; # TurboSparc
+	    *MB86934*)      arch=sparcv8_super;; # SparcLite
+	    *RT625*)        arch=sparcv8_super;; # HyperSparc
+	    *CY605*)        arch=sparcv8_super;;
+	    esac;;
+  sunos)    case "$3" in 5*) osname=solaris;; esac
+	    case "$5" in
+	    sun3*)    arch=m68k;;
+	    sun4|sun4[ce]) arch=sparcv7;;
+	    sun4[dm]) cpu="TI,|FMI,|Cypress,|Ross,"
+	      case "`(prtconf||devinfo)2>&- |egrep $cpu`" in
+	      *TI,TMS390Z5[05]*) arch=sparcv8_super;; # SuperSparc I or II
+	      *TI,TMS390S1[05]*) arch=sparcv8_micro;; # MicroSparc I
+	      *FMI,MB86904*)     arch=sparcv8_micro;; # MicroSparc II
+	      *FMI,MB86907*)     arch=sparcv8_micro;; # TurboSparc
+	      *FMI,MB86934*)     arch=sparcv8_super;; # SparcLite
+	      *Ross,RT625*)      arch=sparcv8_super;; # HyperSparc
+	      *Cypress,CY605*)   arch=sparcv8_super;;
+	      *)                 arch=sparcv8;;
+	      esac;;
+	    sun4u)    arch=sparcv9;;
+            i*pc) arch=ix86;;
+            *) case "$4" in sun)  arch=m68k;; esac;;
+	    esac;;
+  esac
+fi
+
+if test "$fastread" != yes; then
+  cat << EOM
+==========================================================================
+Currently supported architectures:
+EOM
+  rep='none sparcv7 sparcv8_super sparcv8_micro sparcv9
+       m68k ix86 i386 i486 i586 i686 hppa alpha mips fx2800'
+  . ./display
+  echo $n ..."Which of these apply, if any ? $c"
+  dflt=$arch; . ./myread; arch=$ans
+fi
+
+#
+#   Test OS, using the info uname provided.
+#
+if test "$fastread" != yes; then
+  cat << EOM
+==========================================================================
+I know of the following Operating Systems
+EOM
+  rep='os2 freebsd cygwin linux hpux aix osf1 solaris sunos nextstep concentrix irix';
+  . ./display
+  echo $n ..."Any of these apply ? $c"
+  dflt=$osname; . ./myread
+  osname=$ans
+fi
+
+#
+#   A pretty name for the architecture
+#   The asm file used (if any)
+#
+case "$arch" in
+  sparc)         asmarch=sparcv8_micro; pretty=Sparc ;;
+  sparcv7)       asmarch=$arch;         pretty=SparcV7 ;;
+  sparcv8_micro) asmarch=$arch;         pretty=MicroSparc ;;
+  sparcv8_super) asmarch=$arch;         pretty=SuperSparc ;;
+  sparcv9)       asmarch=sparcv8_micro; pretty=UltraSparc ;;
+  m68k)          asmarch=$arch;         pretty="MC680x0, x>=2" ;;
+  i?86)          asmarch=ix86 ;         pretty=$arch ;;
+  hppa)          asmarch=none ;         pretty=HP
+        case "$osname-`uname -r`" in
+        hpux-?.09.*)  asmarch=none  ;;
+        hpux-?.10.*)  asmarch=$arch ;;
+        esac ;;
+  alpha)         asmarch=$arch;         pretty=Alpha ;;
+  mips)          asmarch=none;          pretty=Mips ;;
+  fx2800)        asmarch=none;          pretty="Alliant FX/2800" ;;
+  none)          asmarch=none;          pretty="unknown" ;;
+  *)             asmarch=none;          pretty=$arch
+                 echo "        Warning ! architecture $arch not tested";;
+esac
+
+#
+#   Modifications for pretty name and asm file
+#
+case "$osname" in
+  cygwin*|linux|freebsd|os2) pretty="$pretty running $osname";;
+  nextstep) pretty="$pretty running $osname";
+            if test "$arch" = m68k; then asmarch=none; fi ;;
+esac
+
+if test "$kernel" = no; then
+  asmarch=none;
+  echo "assembler micro kernel disabled"
+else
+  if test "$fastread" != yes; then
+  cat << EOM
+==========================================================================
+An optimized Pari kernel is available for these architectures
+("none" means that we will use the portable C version of GP/PARI)
+EOM
+  rep='none sparcv7 sparcv8_super sparcv8_micro m68k ix86 alpha hppa'
+  . ./display
+  echo $n ..."Which of these apply, if any ? $c"
+  dflt=$asmarch; . ./myread; asmarch=$ans
+  cat << EOM
+==========================================================================
+EOM
+  fi
+fi
+case "$asmarch" in
+  none)          prettyk="C portable";;
+  sparcv7)       prettyk=SparcV7;;
+  sparcv8_super) prettyk=SuperSparc;;
+  sparcv8_micro) prettyk=MicroSparc;;
+  m68k)          prettyk="MC680x0, x>=2";;
+  ix86)          prettyk=ix86;;
+  hppa)          prettyk=HPPA;;
+  alpha)         prettyk=Alpha;;
+  ppc)           prettyk=PPC;;
+  *)             prettyk="$asmarch";;
+esac
+if test "$arch" != "$asmarch"; then
+  pretty="$pretty ($prettyk kernel)"
+fi
+echo "Building for architecture: $pretty"
+
+case "$asmarch" in
+  sparc*) kern=$TOP/$src_dir/kernel
+    rm -f $kern/sparcv8_micro $kern/sparcv8_super
+    ln -s $kern/sparcv8 $kern/sparcv8_micro
+    ln -s $kern/sparcv8 $kern/sparcv8_super;;
+esac
+
+#
+# Which copy, SHELL ?
+#
+case "$osname-$arch" in
+  os2-*)  ln_s=cp; make_sh=sh; exe_suff=.exe; extraflag="-Zexe" ;;
+  cygwin*) ln_s="ln -s"; make_sh="/bin/sh"; exe_suff=.exe; extraflag="" ;;
+  *)       ln_s="ln -s"; make_sh="/bin/sh"; exe_suff=; extraflag="" ;;
+esac
+
+####################### CONFIGURE - LIBRARIES ###############################
+#
+# Looking for libraries now
+#
+case "$osname" in 
+  cygwin*) ver=`uname -r | cut -d. -f1`
+    cygtop=/Cygnus/cygwin/B$ver
+    if test ! -d $cygtop; then
+      cygtop=/Cygnus/cygwin-B$ver
+      if test ! -d $cygtop; then
+        echo ..."I could not find Cygwin top directory" >&2
+      fi
+    fi;;
+esac
+readline_enabledp="nil"
+if test "$optimization" != profiling; then
+# First, construct the PATHs
+ case "$osname" in
+   cygwin*) libpth="
+ 	$cygtop/H-${arch}-cygwin32/lib\
+ 	$cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
+     ";;
+      os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
+ 	*) libpth="\
+ 	/usr/local/lib\
+ 	/lib\
+ 	/usr/lib\
+ 	/opt/lib\
+ 	/opt/local/lib\
+ 	/opt/gnu/lib\
+ 	/lib/pa1.1\
+ 	/usr/lib/large\
+ 	/lib/large\
+ 	/usr/lib/small\
+ 	/lib/small\
+ 	/usr/ccs/lib\
+ 	/usc/ucblib\
+ 	/usr/shlib\
+ 	.\
+     ";;
+     esac
+
+  if (xmkmf) >/dev/null 2>&1 && test -f Makefile; then
+    eval `make gp-X11 2> /dev/null | grep -v make`
+    rm -f Makefile Makefile.bak
+    x11pth="$usrlibdir $libdir";
+  fi
+
+# We want these libraries:
+#
+  echo Checking for optional libraries and headers...
+#   LIB: X11
+  pth=$x11pth
+  lib=X11; . ./locatelib
+  if test -f $Xincroot/X11/Xos.h -a -z "$graph_cmd"; then
+    which_graphic_lib=X11
+    test -n "$extralib" && echo ..."Extra Libraries are $extralib"
+    echo ..."Found X11 header files in $Xincroot/X11"
+  fi
+
+  pth=$libpth
+#   LIB: gnuplot
+  opth="$pth"
+  pth="$TOP/gnuplot-$osname-$arch $TOP/gnuplot $pth"
+  gpth="$pth"
+  lib=gnuplot; . ./locatelib
+  pth="$opth"
+  gnuplot_libs=
+  case $gnuplot in
+    /*|[c-z]:/*)
+        addgnuplot=gnuplot
+	for lib in vga vesa jmgraph linuxvga gd png z
+	do
+	    . ./locatelib
+	    eval "elib=\$$lib"
+	    case $elib in
+	      /*|[c-z]:/*) gnuplot_libs="$gnuplot_libs -l$lib";;
+	    esac
+	done
+	if test "$which_graphic_lib" = gnuplot; then
+	    if test -z "$gnuplot_libs"; then
+		echo "...I expect that no libraries are needed for gnuplot"
+	    else
+		echo "...I expect that libraries $gnuplot_libs are needed for gnuplot"
+	    fi
+	fi
+	;;
+    *)
+	if test "$which_graphic_lib" = gnuplot; then
+	    echo "###"
+	    echo "### Could not find gnuplot library in:"
+	    echo "###   ./gnuplot-$osname-$arch ./gnuplot"
+	    echo "###   $pth"
+	    echo "###"
+	    case "$osname" in
+		os2) tlib=gnuplot.a ;;
+		*)   tlib=libgnuplot.a ;;
+	    esac
+	    echo "### You may need to execute"
+	    echo "###   ar cr $tlib version.o util.o term.o bitmap.o stdfn.o"
+	    echo "### In the build directory of gnuplot-3.7, and move"
+	    echo "### $tlib to ./gnuplot-$osname-$arch or ./gnuplot subdirs"
+	    echo "###"
+	fi
+	;;
+  esac
+
+#   LIB: GNU ReadLine
+  readline_add="$GP_READLINE $TOP/readline-$osname-$arch $TOP/readline"
+  pth="$readline_add $pth"
+  lib=readline; . ./locatelib
+  rl_fullname=$try
+
+  addsunview=sunview
+  if test -n "$readline"; then
+# Readline -- TermCap
+    if test -n "`(nm $rl_fullname | grep tgetent)2>/dev/null`"; then
+      lib=ncurses; . ./locatelib
+      if test -n "$try" -a -n "`(nm $try | grep tgetent)2>/dev/null`"; then
+        rl_ncurses=$ncurses
+      else
+        lib=termcap; . ./locatelib
+        rl_termcap=$termcap
+      fi
+    fi
+# Readline -- Allocation
+    rl_liberty=`(nm $rl_fullname | grep alloca)2>/dev/null`
+    if test -n "$rl_liberty"; then
+      lib=iberty; . ./locatelib
+      if test -z "$try"; then rl_liberty=; fi
+    fi
+# Readline -- Version
+    if (nm $rl_fullname | grep "\<_rl_copy\>")2>/dev/null; then addsunview=; fi
+# Readline -- Headers
+    case "$osname" in
+      os2) incpth=`echo $C_INCLUDE_PATH | sed -e 's/\([^;]\)$/\1;/g' -e 's%;%/readline %g' -e 's,\\\\,/,g'` ;;
+      cygwin*) incpth="\
+       $cygtop/include/readline\
+       $cygtop/include\
+       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
+     ";;
+      *) incpth="\
+      /usr/local/include/readline\
+      /usr/include/readline\
+      /opt/include/readline\
+      /opt/local/include/readline\
+      /opt/gnu/include/readline\
+      /usr/unsupported/include/readline\
+      /usr/local/include\
+      /usr/include\
+      /opt/include\
+      /opt/local/include\
+      /opt/gnu/include\
+    ";;
+    esac
+    pth="$readline_add $incpth"
+    x=`./locate 'readline.h' '' $pth`
+    CPPF_defined=
+    case $x in
+     ?:/*|/*) rl_include=`echo $x | sed 's,/readline.h,,'`
+         if (grep CPPFunction $x > /dev/null 2>&1); then CPPF_defined=yes; fi
+         if (grep rl_message  $x > /dev/null 2>&1); then rl_message=yes; fi
+         if (grep rl_completion_append_character $x > /dev/null 2>&1); then
+           rl_appendchar=yes
+         fi
+         if (grep rl_save_prompt $x > /dev/null 2>&1); then
+           rl_save_prompt=yes;
+         else
+          _rl_save_prompt=`(nm $rl_fullname | grep rl_save_prompt)2>/dev/null`
+         fi;;
+      *) echo ..."But no header file has been found"
+         readline=;;
+    esac
+  fi
+
+  if test -n "$readline"; then
+    echo ..."Found GNU readline header in $rl_include"
+    if (echo $rl_include | grep "readline$" > /dev/null); then
+      rl_include=`echo $rl_include | sed 's,/readline$,,'`
+      RLINCLUDE="-I$rl_include"
+    else
+# in case headers are not installed correctly
+      RLINCLUDE="-I$rl_include -DREADLINE_LIBRARY"
+    fi
+    RLLIBS="-L$readline -lreadline"
+    if test -n "$rl_ncurses"; then
+      echo ..."Library ncurses needed by readline"
+      RLLIBS="$RLLIBS -lncurses"
+    fi
+    if test -n "$rl_termcap"; then
+      echo ..."Library termcap needed by readline"
+      RLLIBS="$RLLIBS -ltermcap"
+    fi
+    if test -n "$rl_liberty"; then
+      echo ..."Library liberty needed by readline"
+      RLLIBS="$RLLIBS -liberty"
+    fi
+    if test -z "$rl_appendchar"; then
+      echo ..."Library readline does not have completion_append_char"
+    fi
+    if test -z "$rl_save_prompt"; then
+      echo ..."Library readline does not have rl_save_prompt"
+      if test -n "$_rl_save_prompt"; then
+        echo ......"but it has _rl_save_prompt"
+      fi
+    fi
+
+    if test "$fastread" != yes; then
+      cat << EOM
+==========================================================================
+EOM
+     test -z "$addsunview" && cat <<EOT
+Your readline library won't compile with sunview. You have four choices :
+1) Avoid choosing sunview as your graphic lib (by the way, I won't let you).
+2) Fetch a new readline (version number at least 2.0)
+3) Recompile your GNU readline library, replacing rl_copy in the file
+   readline.c by some weird name (GNU chose rl_copy_text in later versions).
+4) Answer "n" to the following question (not recommended).
+EOT
+      echo $n "Do you want to use GNU readline library within GP ? $c"
+      rep='y n'; dflt=y; . ./myread
+      case $ans in
+        n) addsunview=sunview; readline=;;
+      esac
+    fi
+  fi
+
+  if test -n "$readline"; then readline_enabledp="t"; fi
+
+#  Graphic libs now.
+#
+  if test "$fastread" != yes; then
+    if test -n "$X11"; then addX11=X11; fi
+    cat << EOT
+==========================================================================
+GP contains high resolution plotting functions. Choose among
+       none       $addX11         $addsunview        $addgnuplot
+EOT
+    echo $n ..."Use which graphic library (\"none\" means no hi-res plot) ? $c"
+    rep="none $addX11 $addsunview $addgnuplot";
+    dflt=$which_graphic_lib; . ./myread
+    which_graphic_lib=$ans
+
+  case "$which_graphic_lib" in
+    X11)
+      gnuplot=;
+      # If xmkmf did not give the right answer
+      # X11 -- Headers
+      if test ! -f $Xincroot/X11/Xos.h; then
+        x11pth="\
+          /usr/openwin/share/lib\
+          /usr/openwin/lib\
+          /usr/X11R6/lib\
+          /usr/X11R5/lib\
+          /usr/X11R4/lib\
+          /usr/lib/X11R6\
+          /usr/lib/X11R5\
+          /usr/lib/X11R4\
+          /usr/local/X11R6/lib\
+          /usr/local/X11R5/lib\
+          /usr/local/X11R4/lib\
+          /usr/local/lib/X11R6\
+          /usr/local/lib/X11R5\
+          /usr/local/lib/X11R4\
+          /usr/X11/lib\
+          /usr/lib/X11\
+          /usr/local/X11/lib\
+          /usr/local/lib/X11\
+          /usr/X386/lib\
+          /usr/x386/lib\
+          /usr/XFree86/lib/X11\
+          /usr/lib\
+          /usr/local/lib\
+          /usr/unsupported/lib\
+          /usr/athena/lib\
+          /usr/local/x11r5/lib\
+          /usr/lpp/Xamples/lib\
+        ";
+        pth=`echo $x11pth | s,/lib,/include,g`
+        x=`./locate X11/Xos.h '' $pth`
+        case $x in
+         /*) Xincroot=`echo $x | sed 's,/X11/Xos.h,,'`;;
+         *)  Xincroot=;;
+        esac
+        if test -n "$Xincroot"; then
+          echo ..."Found X11 header files in $Xincroot/X11"
+        fi
+      fi
+      # X11 -- Lib
+      if test -f $Xincroot/X11/Xos.h -a -z "$X11"; then
+        pth=$x11pth;
+        lib=X11; . ./locatelib
+      fi ;;
+    gnuplot);;
+    *)gnuplot=;;
+  esac
+  else # fastread = yes
+    if test "$which_graphic_lib" = none -a -z "$graph_cmd" -a -n "$gnuplot"; then
+      which_graphic_lib=gnuplot
+    fi
+    if test -z "$X11" -a -z "$gnuplot" -a -z "$readline"; then
+      echo ...none
+    fi
+  fi
+fi
+
+####################### CONFIGURE - COMPILATION #############################
+#
+# Which optimization ?
+#
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+The default is to fully optimize the compilation. You may choose to build
+  an executable for debugging or profiling instead. Choose among :
+       full       debugging       profiling
+EOT
+  echo $n ..."Which optimization do you prefer ? $c"
+  dflt=$optimization; rep='full debugging profiling'; . ./myread
+  optimization=$ans
+fi
+
+#
+# Which Compiler ?
+#
+if test -z "$CC"; then
+  echo Looking for the compilers ...
+  # Native Compilers
+  cc=`./locate cc '' $pathspace`
+  case "$osname" in
+    hpux) if test "$cc" = /usr/ccs/bin/cc -a -f /opt/ansic/bin/cc; then
+            cc=/opt/ansic/bin/cc; fi ;;  # This is a better compiler
+  esac
+  case "$cc" in ?:/*|/*) echo ..."cc is $cc";;
+      *) echo ..."I could not find cc.";; esac
+  # GNU Compilers
+  gcc=`./locate gcc '' $pathspace`
+  if test -z "$gcc"; then
+    exe=$osname-$arch-gnu$$
+    $cc $extraflag -o $exe gnu.c
+    if $exe; then gcc=$cc; fi; rm -f $exe
+  fi
+  case "$gcc" in
+?:/*|/*) echo ..."gcc is $gcc";;
+      *) echo ..."I could not find gcc."; gcc=;;
+  esac
+  if test -n "$gcc"; then
+    __gnuc__=`$gcc -v 2>&1 | sed -n 's/.*version //p'`
+    if test -z "$__gnuc__"; then __gnuc__=unknown; fi
+    echo GNU compiler version $__gnuc__
+  fi
+  case "$osname" in
+    osf1|aix) __gnuc__=;; # Native compilers are faster
+    hpux)     __gnuc__=;; # versions older than 2.7 cannot build PIC code
+                            # gp built with recent versions has bugs
+    concentrix) case "$__gnuc__" in 2.[78].*);; *)
+              __gnuc__=;; esac;;
+  esac
+  # Choosing the compiler
+  if test -n "$__gnuc__"; then CC=$gcc; else CC=$cc; fi
+fi
+
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+Only ANSI C and C++ compilers are supported. Choosing the GNU compiler
+gcc/g++ enables the inlining of kernel routines (about 20% speedup; if you
+use a recent g++, it's a good idea to include the -fpermissive flag).
+If you choose not to use gcc, the C++ version of Pari will be a little
+faster because of general inlining, but can be used in library mode only
+with C++ programs (we really recommand using gcc all the way through).
+EOT
+  echo $n ..."Which C compiler shall I use ? $c"
+  dflt=$CC; rep=; . ./myread
+  CC=$ans
+fi
+
+#
+# Which Flags for Compiler ?
+#
+if test "$CC" != "$gcc"; then __gnuc__=; fi
+if test -z "$__gnuc__"; then
+  exe=$osname-$arch-gnu$$
+  $CC $extraflag -o $exe gnu.c
+  if $exe; then __gnuc__=yes; fi
+  rm -f $exe
+fi
+
+if test -n "$__gnuc__"; then
+  __GNUC__="-D__GNUC__"
+  OPTFLAGS="-O2 -DGCC_INLINE"
+  DBGFLAGS="-g -Wall -Wno-implicit"
+  PRFFLAGS="-pg"
+  # Some architectures need -fPIC for building dynamic lib
+  case "$osname-$arch" in hpux-*) DLCFLAGS=-fPIC;; esac
+  # Specific optimisations for some architectures
+  case "$osname-$arch" in
+    linux-i?86|cygwin*) OPTFLAGS="-O3 -DGCC_INLINE -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
+  esac
+  case "$osname-$asmarch" in *-sparcv8*) CFLAGS="$CFLAGS -mv8" ;; esac
+else
+  CFLAGS=
+  DBGFLAGS="-g"
+  PRFFLAGS="-pg"
+  case "$osname-$arch" in
+    hpux-*) # -Aa is for ANSI C, +z for PIC code (for commercial HPUX compilers)
+                  OPTFLAGS=-O; CFLAGS=-Aa; DLCFLAGS=+z;;
+    # best tuning option, even for PPC604:
+    aix-*)        OPTFLAGS=-O2; CFLAGS='-qlanglvl=ansi -qtune=601';;
+    cygwin*|linux-i?86|freebsd-i?86)
+                  OPTFLAGS=-O2; CFLAGS=-m486;;
+    osf1-*)       OPTFLAGS='-O4 -migrate -ifo -Olimit 9999';;
+    sunos-*)      OPTFLAGS=-fast; PRFFLAGS='-pg -Bstatic';;
+    solaris-*)    OPTFLAGS=-fast; PRFFLAGS=-xpg;;
+    concentrix-*) OPTFLAGS=-Ogi;;
+    *)            OPTFLAGS=-O;;
+  esac
+fi
+CFLAGS="$CFLAGS $DLCFLAGS"
+
+case "$osname" in
+  nextstep)  CFLAGS="-traditional-cpp $CFLAGS";;
+esac
+
+case "$optimization" in
+  full)      suffix=; cflags="$OPTFLAGS $CFLAGS";;
+  profiling) suffix=.prf; cflags="$OPTFLAGS $CFLAGS $PRFFLAGS";;
+  debugging) suffix=.dbg; cflags="-DMEMSTEP=1048576 $DBGFLAGS $CFLAGS";;
+esac
+
+if test "$fastread" != yes; then
+  echo $n ..."With which flags ? $c"
+  dflt=$cflags; rep=; . ./myread
+  cflags=$ans
+fi
+
+# Here we should check it is an ANSI compiler...
+echo "C compiler is          $CC  $cflags"
+
+#
+# Which Assembler ?
+#
+if test -z "$AS"; then
+  echo Looking for an assembler ...
+  if test "$osname" = hpux
+  then AS=`./locate as '' /usr/ccs/bin /bin`   # We don't want GNU as
+  else AS=`./locate as '' $pathspace`
+  fi
+  case "$AS" in ?:/*|/*) echo ..."as is $AS";;
+      *) echo ..."I could not find as." ;; esac
+fi
+gnuas=no
+if (echo | $AS --version 2>&1 | grep GNU > /dev/null); then
+  gnuas=yes
+else
+  if (echo | $AS -v 2>&1 | grep GNU > /dev/null); then
+    gnuas=yes
+  fi
+fi
+if test "$gnuas" = yes; then
+  echo "...Hum, this looks like GNU as"
+  case "$osname-$asmarch" in
+    solaris-sparc*) KERNELCPPFLAGS="-DNO_UNDERSCORE $__GNUC__";;
+  esac
+else
+  case "$osname-$asmarch" in
+    osf1-alpha)     ASFLAGS="-O1";;
+    sunos-sparc*)   ASFLAGS="-P -I. $__GNUC__";;
+    solaris-sparc*) ASFLAGS="-P -I. $__GNUC__ -T";;
+    hpux-hppa)      ASFLAGS="+DA1.1";;
+    *)              ASFLAGS=;;
+  esac
+fi
+echo "Assembler is           $AS  $ASFLAGS"
+
+#
+# Which C PreProcessor ?
+#
+case "$osname" in
+  nextstep) cppfl="-traditional-cpp" ;;
+  freebsd)
+    if test $PORTOBJFORMAT = "elf"; then
+            cppfl="-DUSE_ELF"    
+    fi ;;
+esac
+CPP="$cc $cppfl -E -I."
+
+echo "C PreProcessor is      $CPP"
+
+#
+# Which Executable Linker ?
+#
+LIBS=
+case "$osname-$arch" in
+  linux-*|cygwin*)
+      LD=$CC; LDFLAGS="$cflags -Xlinker -export-dynamic"
+      runpathprefix='-Xlinker -rpath -Xlinker ';;
+  osf1-alpha)
+      LD=$ld; LIBS='-lots -lc';runpathprefix='-rpath '
+      case "$optimization" in
+	full|profiling)
+	  LDFLAGS='-g0 -O4 -std0 -call_shared /usr/lib/cmplrs/cc/crt0.o';;
+	debugging)
+	  LDFLAGS='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o';;
+      esac;;
+  solaris-*) LD=$CC; LDFLAGS=$cflags; runpathprefix=-R ;;
+  os2-*)     LD=$CC; LDFLAGS="$cflags -Zexe" ;;
+  *)         LD=$CC; LDFLAGS=$cflags ;;
+esac
+
+if test "$fastread" != yes; then
+  echo $n ..."Which linker for building executables ? $c"
+  dflt=$LD; rep=; . ./myread
+  LD=$ans
+fi
+
+#
+# Which Flags for Executable Linker?
+#
+if test "$fastread" != yes; then
+  echo $n ..."With which flags ? $c"
+  dflt=$LDFLAGS; rep=; . ./myread
+  LDFLAGS=$ans
+fi
+
+echo "Executable linker is   $LD  $LDFLAGS"
+
+if test "$optimization" = profiling; then DLLD=; else
+  DLLD=${DLLD-ld}
+# Which suffix for Dynamic Lib?
+# Some linkers (SunOS 4) need minor and major lib version numbers.
+# Some others (SunOS 5) need a link from a .so
+# Some others (HPUX 09) do not want version numbers.
+#
+  case "$osname-$arch" in
+#    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
+    hpux-*)  DLSUFFIX=sl ;;
+    irix-*)  DLSUFFIX=so ;;
+    sunos-*) DLSUFFIX=so; somake=.`echo $version| sed 's/\.//g'`.$patch ;;
+    linux-*|solaris-*|*-alpha)
+               DLSUFFIX=so; somake=.$version; sodest=.$patch ;;
+    freebsd-*)
+               if test $PORTOBJFORMAT = "elf"; then
+                       somake=.`echo $version | sed 's/\..*//g'`
+                       DLSUFFIX=so; sodest=.`echo $version | sed 's/.*\.//'`.$patch
+                       FREEBSD_ELF=1
+               else
+                       DLSUFFIX=so; somake=.$version; sodest=.$patch 
+                       FREEBSD_ELF=0
+
+               fi ;;
+    cygwin*) DLSUFFIX=dll; somake= ; sodest= ;;
+    *) DLLD=;;
+  esac
+  somake=$DLSUFFIX$somake
+  sodest=$somake$sodest
+fi
+
+if test -n "$DLLD"; then
+# Which Dynamic Lib Linker?
+#
+  if test $DLLD = ld -a -n "$ld"; then
+    DLLD=$ld;
+  fi
+  if test "$fastread" != yes; then
+    echo $n ..."Which linker for building dynamic libs? $c"
+    dflt=$DLLD; rep=; . ./myread
+    DLLD=$ans
+  fi
+
+# Which Flags for Dynamic Lib Linker ?
+#
+  if ($DLLD -v 2>&1 | grep GNU > /dev/null); then
+    echo "...Hum, this looks like GNU ld"
+    DLLDFLAGS="-shared -soname \$@"
+  else
+    # not GNU ld
+    case "$osname-$arch" in
+      aix-*)      DLLDFLAGS="-r" ;;
+      hpux-*)     DLLDFLAGS="-b -E" ;;
+      freebsd-*)  DLLDFLAGS="-Bshareable -x" ;;
+      linux-*)    DLLDFLAGS="-shared -soname \$@" ;;
+      irix-*)     DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
+      *-alpha)    DLLDFLAGS="-shared"; EXTRADLLDFLAGS='${LIBS}'
+         case "$optimization" in
+           full) DLLDFLAGS="$DLLDFLAGS -O3" ;;
+         esac;;
+      sunos-*)    DLLDFLAGS="-assert nodefinitions" ;;
+      solaris-*)  DLLDFLAGS="-G -h \$@" ;;
+      *)          DLLD=;;
+    esac
+  fi
+
+  if test "$fastread" != yes; then
+    echo $n ..."Which flags for linker? $c"
+    dflt=$DLLDFLAGS; rep=; . ./myread
+    DLLDFLAGS=$ans
+  fi
+fi
+
+if test -z "$DLLD"; then
+  echo "No Dynamic Lib"
+  static=y
+else
+  echo "Dynamic Lib linker is  $DLLD  $DLLDFLAGS"
+  static=n
+fi
+
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+Should you change your mind, you only need to modify the lines
+    CC="$CC"
+    CFLAGS="$cflags"
+    LD="$LD"
+    LDFLAGS="$LDFLAGS"
+    DLLD="$DLLD"
+    DLLDFLAGS="$DLLDFLAGS"
+in the Makefile
+==========================================================================
+EOT
+fi
+
+####################### CONFIGURE - READLINE VERSION ########################
+if test -n "$readline"; then
+  exe=$osname-$arch-rlv$$
+  $CC $extraflag $RLINCLUDE -o $exe rl_version.c $RLLIBS 2>/dev/null
+  if test -r $exe; then readline=`$exe`; else readline=1.0; fi
+  rm -f $exe
+fi
+
+####################### CONFIGURE - LIBC ####################################
+#
+#  Long integer ?
+#
+endian=4321;
+exe=$osname-$arch-endian$$
+if ($CC $extraflag endian.c -o $exe 2>/dev/null); then
+  endian=`$exe`;
+fi
+rm -f $exe
+
+if test "$fastread" != yes; then
+cat << EOT
+Determining sizeof(long) and endianness. If your hardware supports different
+size of longs (e.g SGI/MIPS), you can decide to use a particular word size
+by specifying endianness (e.g answer 4321 instead of the proposed 87654321).
+You'll probably have to specify some exotic compilation flag (e.g -o32,-n32)
+============================================================================
+EOT
+  echo $n "What is the internal byte representation of long integer ? $c"
+  dflt=$endian; rep='12345678 87654321 1234 4321'; . ./myread
+  endian=$ans
+fi
+echo "The internal byte representation of your long integers is $endian."
+
+case $endian in
+  *8|8*) sizeof_long=8; pretty="$pretty 64-bit version";;
+  *)     sizeof_long=4; pretty="$pretty 32-bit version";;
+esac
+
+
+#
+# Looking in C lib for some functions.
+#
+exe=$osname-$arch-tmp$$
+echo Checking some common types...
+list=ulong; . ./look
+echo Looking in C lib for some symbols...
+extra_flags=
+list=exp2; . ./look
+list=strftime; . ./look
+list='getrusage times ftime'; . ./look
+list='sigrelse sigsetmask'; . ./look
+list=TIOCGWINSZ; . ./look
+
+# For install(). Do we need libdl.so?
+# on irix and osf1 -ldl not needed
+extra_flags=
+list=dlopen; . ./look
+if test "$has_dlopen" = no; then
+  echo "Try again, with -ldl this time..."
+  extra_flags=-ldl; . ./look
+  if test "$has_dlopen" = yes; then
+    LIBS="-ldl $LIBS"
+  fi
+fi
+
+####################### CONFIGURE - MAKE ####################################
+
+dflt=$prefix; rep=
+test "$fastread" = yes || cat <<EOT
+==========================================================================
+By default, gp will be installed in $dflt/bin, manual pages under
+  $dflt/man, etc..., with $dflt as prefix for all installation directories.
+  If you wish to have binaries under /bin but manual pages under
+  /usr/local/man, that's ok: you will be prompted separately for each of the
+  installation directories, the prefix being only used to set the defaults.
+  (You will be prompted before the actual installation is done.)
+The names of executables and libraries contain their version number $version.
+  A symbolic link to gp or libpari.[a/so] will point to the most recent
+  installation of GP/PARI.
+EOT
+echo $n "Installation prefix ? $c"
+. ./myread; prefix=$ans
+
+echo $n ..."\"gp\" executable ? $c"
+dflt=$prefix/bin; . ./myread; bindir=$ans
+
+echo $n ..."\"pari\" library ? $c"
+dflt=$prefix/lib; . ./myread; libdir=$ans
+
+echo $n ..."include files ? $c"
+dflt=$prefix/include/pari; . ./myread; includedir=$ans
+
+echo $n ..."manual pages ? $c"
+dflt=$prefix/man/man1; . ./myread; mandir=$ans
+
+echo $n ..."documentation, help scripts, and emacs macros ? $c"
+dflt=$prefix/lib/pari; . ./myread; miscdir=$ans
+
+echo $n ..."miscellaneous data (galois resolvents) ? $c"
+dflt=$miscdir/data; . ./myread; datadir=$ans
+
+if test "$fastread" != yes; then
+  if test -z "$DLLD"; then
+    cat <<EOT
+==========================================================================
+We cannot build a dynamic executable. We will build the static version.
+EOT
+  else
+    cat <<EOT
+==========================================================================
+By default, we will try to build the shared library and gp will be an
+  executable dynamically linked with it. Do you prefer to have the static
+  archive libpari.a and a statically linked executable (which is a bit
+  faster, but takes more disk place) ?
+You can always type "make all" in case you want both later.
+EOT
+  echo $n "Do you want static executable and library ? $c"
+  dflt=$static; rep='y n'; . ./myread; static=$ans
+  fi
+fi
+case "$static" in
+  y) echo "Default is static executable and archive library, graphic=$which_graphic_lib" ;;
+  n) echo "Default is dynamic executable and shared library, graphic=$which_graphic_lib" ;;
+esac
+
+#
+# Target directory
+#
+pre=O
+case "$optimization" in
+  full)      objdir=$pre$osname-$arch ;;
+  debugging) objdir=$pre$osname-$arch.dbg ;;
+  profiling) objdir=$pre$osname-$arch.prf ;;
+esac
+if test "$fastread" != yes; then
+  cat << EOT
+==========================================================================
+This is the name of the directory where all the object files will be :
+EOT
+  echo $n ..."Enter dir name : $c"
+  dflt=$objdir; rep=; . ./myread
+  objdir=$ans
+fi
+
+#
+# For dynamic linking, before and after installing
+#
+case "$osname" in
+  *cygwin*) LDDYN="-L$libdir -lpari_dll" ; runpath="$libdir" ;
+	    DYNLIBS=-lpari_dll ; DYNFLAGS=-Dlibpari_USE_DLL ;;
+  *)        LDDYN="-L$libdir -lpari" ; runpath="$libdir" ;;
+esac
+
+cat << EOT
+==========================================================================
+EOT
+
+####################### CONFIGURE - SPIT ####################################
+#
+#  Now spit out the results
+#
+cd $TOP
+if test ! -d $objdir; then mkdir -p $objdir; fi
+dflt_conf_file=$objdir/$dflt_conf_file
+
+cat > $dflt_conf_file << EOT
+# Config file for Pari $release -- $pretty
+
+EOT
+case "$osname" in
+  os2) shell_q='"'; echo "shell_q='\"'" >> $dflt_conf_file;;
+    *) shell_q="'"; echo "shell_q=\"'\"" >> $dflt_conf_file;;
+esac
+
+for variable in\
+  version TOP config_dir src_dir emacs_dir doc_dir\
+  bindir includedir mandir miscdir libdir datadir\
+  optimization objdir static suffix\
+  arch asmarch osname pretty\
+  __gnuc__ gnuas CPP AS ASFLAGS CC cflags DBGFLAGS OPTFLAGS LD LDFLAGS\
+  DLLD DLSUFFIX somake sodest KERNELCPPFLAGS DLLDFLAGS EXTRADLLDFLAGS\
+  runpath runpathprefix LDDYN LIBS DYNLIBS DYNFLAGS DYNRELOC\
+  ranlib gzip zcat emacs perl ln_s make_sh exe_suff\
+  readline readline_enabledp CPPF_defined\
+  rl_appendchar rl_save_prompt _rl_save_prompt rl_message\
+  RLINCLUDE RLLIBS\
+  sizeof_long endian has_exp2\
+  has_getrusage has_times has_ulong has_ftime has_strftime\
+  has_sigrelse has_sigsetmask has_dlopen has_TIOCGWINSZ\
+  gnuplot extralib X11 Xincroot which_graphic_lib gnuplot_libs\
+  ; do
+  eval "echo $variable=\'"'$'"$variable\'" \>\> $dflt_conf_file
+done
+
+. $config_dir/extract_files
+
+#
+#  Building...
+#
+cat << EOT
+==========================================================================
+EOT
+
+echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
+dflt=n; rep='y n'; . $config_dir/myread
+
+case $ans in
+y) if (make gp); then
+     echo $n "Shall we install the files where they belong (y/n)? $c"
+     dflt=n; rep='y n'; . $config_dir/myread
+     case $ans in
+       y) make install;;
+       n) echo "Ok. Type \"make install\" when you are ready";;
+     esac
+   fi;;
+n) echo "Ok. Type \"make install\" when you are ready";;
+esac
+echo 'Bye !'

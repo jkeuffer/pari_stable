@@ -1,0 +1,119 @@
+% This should be compiled with plain TeX
+\input parimacro.tex
+%
+% START TYPESET
+%
+\begintitle
+\vskip 2.5truecm
+\centerline{\mine User's Guide}
+\vskip 1.truecm
+\centerline{\mine to}
+\vskip 1.truecm
+\centerline{\mine PARI-GP}
+\vskip 1.truecm
+\authors
+\centerline{last updated 20 June 1999}
+\centerline{for version \vers}
+\endtitle
+
+\begintitle
+\centerline{Table of Contents}\medskip
+\ifsecondpass
+  \parskip=0pt plus 1pt
+  \parindent=0pt
+  \obeylines\input\jobname.toc
+\else
+% toc is 2 pages long
+  \newpage
+\fi
+\endtitle
+
+\chapno=0
+{ \input usersch1 }
+{ \input usersch2 }
+{ \input usersch3 }
+{ \input usersch4 }
+{ \input usersch5 }
+{ \input appa }
+{ \input appb }
+{ \input appc }
+%
+%  INDEX
+%
+
+\ifsecondpass\else
+  \condwrite\index{The End}
+  \immediate\condwrite\toc{Index\string\dotfill\the\pageno}
+  \expandafter\end
+\fi
+\newpage
+
+\newdimen\fullhsize
+\fullhsize=\hsize
+\advance\hsize by -20pt
+\divide\hsize by 2
+
+\def\fullline{\hbox to\fullhsize}
+\let\lr=L\newbox\leftcolumn
+
+\headline={\hfil Index\hfil\global\headline={\hfil}}
+
+\def\makeheadline{\vbox to 0pt{\vskip-22.5pt
+    \fullline{\vbox to8.5pt{}\the\headline}\vss}
+    \nointerlineskip}
+
+\def\makefootline{\baselineskip=24pt\fullline{\the\footline}}
+
+\output={\if L\lr   %pique dans le TeXbook, p257
+    \global\setbox\leftcolumn=\columnbox\global\let\lr=R
+    \else\doubleformat\global\let\lr=L\fi
+    \ifnum\outputpenalty>-20000\else\dosupereject\fi}
+\def\doubleformat{\shipout\vbox
+    {\makeheadline
+    \fullline{\box\leftcolumn\hfil\columnbox}
+    \makefootline}
+    \advancepageno}
+\def\columnbox{\leftline{\pagebody}}
+\def\parse !#1#2!#3! {%
+     \uppercase{\def\theletter{#1}}\def\theword{#1#2}\def\thepage{#3}}
+\def\theoldword{}
+\def\theend{The End }
+\newif\ifencore
+
+\parskip=0pt plus 1pt
+\parindent=0pt
+\parfillskip=0pt
+
+\newbox\dbox \setbox\dbox=\hbox to 3truemm{\hss.\hss}
+\newskip\dfillskip \dfillskip=.5em plus .98\hsize
+\def\dotfill{\leaders\copy\dbox\hskip\dfillskip\relax}
+
+%more efficient to parse the glue specs once and keep them in registers
+%for later use.  These govern index lines with too many page numbers to
+%fit in one line  (currently only `Hermite normal form'.)
+% b: indentation for 2nd and further lines / a: compensation for same,
+% and shrinkability for the normal word space
+\newskip\interskipa \interskipa=-.4\hsize plus -1.5\hsize minus .11em
+\newskip\interskipb \interskipb= .4\hsize plus  1.5\hsize
+
+%cf. The TeXBook, App. D, p393 [GN]:
+\def\interpage{,\penalty100\kern0.33em%normal space
+  \hskip\interskipa\vadjust{}\penalty10000 \hskip\interskipb\relax}
+
+\loop
+  \read\std to\theline
+  \ifx\theline\theend\encorefalse\else\encoretrue\fi
+\ifencore
+  \expandafter\parse\theline
+  \ifx\theletter\theoldletter\else
+    \endgraf\vskip 10pt plus 10pt\centerline
+      {\theletter}\vskip 10pt plus 10pt\fi
+  \let\theoldletter\theletter
+  \ifx\theword\theoldword
+    \ifx\thepage\theoldpage\else\interpage\thepage\fi
+  \else
+    \relax\endgraf\theword\dotfill\thepage\let\theoldword=\theword
+  \fi
+  \let\theoldpage=\thepage
+\repeat
+\end

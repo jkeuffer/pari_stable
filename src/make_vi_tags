@@ -1,0 +1,40 @@
+#!/usr/local/bin/perl
+# Build a (sorted) VI(M) tags file including GP functions
+#
+$src=$ARGV[0] || "$ENV{HOME}/PARI/src";
+$tmptags="$src/tags.tmp";
+$tags="$src/tags";
+
+# assume ctags outputs sorted tags (e.g Exuberant Ctags)
+system("ctags -f $tmptags `find $src -name \*.[chs] -type f -print`");
+getnames("$src/gp/gp_init.c");
+getnames("$src/language/init.c");
+open(T,"$tmptags");
+for (sort(@gp))
+{
+  ($a, $b) = split(/#/);
+  if ($a eq $old) { push(@tags,"$b$rest\n"); next; }
+  $old = $a;
+  while(<T>)
+  {
+    push(@tags,$_);
+    if (/^$a(.*)/) { $rest="$1"; push(@tags,"$b$rest\n"); last; }
+  }
+}
+while(<T>) { push(@tags,$_); }
+open(OUT,">$tags");
+print OUT sort(@tags);
+unlink $tmptags;
+
+sub getnames
+{
+  open(A,$_[0]);
+  while (<A>)
+  {
+    if (/^entree functions_/../^$/)
+    {
+      push(@gp,"$2#$1") if (/[^"]*"([^"]*)".*\(void\*\) *([^,]*)/);
+    }
+  }
+  close(A);
+}

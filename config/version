@@ -1,0 +1,8 @@
+# Major Version number
+version='2.0'
+
+# Patch level
+patch='17'
+
+# Status: alpha, beta, released, development
+status='beta'

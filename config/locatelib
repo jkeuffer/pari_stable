@@ -1,0 +1,24 @@
+for dir in $pth; do
+  case "$osname" in
+    os2)
+      try=`ls $dir/$lib.a 2> /dev/null`;;
+    *)
+      ok=`(ls $dir/lib$lib.* | head -1) 2> /dev/null`
+      if test -n "$ok"; then
+        # for .so and .sl
+        try=`ls $dir/lib$lib.s? 2> /dev/null` 
+        if test -z "$try"; then
+          try=`ls $dir/lib$lib.a 2> /dev/null`
+        else 
+          try=$ok
+        fi
+      else
+        try=
+      fi;;
+  esac
+  if test -n "$try"; then
+    echo ..."Found lib$lib in $dir";
+    eval $lib=$dir;
+    break
+  fi
+done

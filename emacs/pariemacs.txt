@@ -1,0 +1,578 @@
+This file refers to pari.el version 2.30
+
+Users that are used to previous versions should read the part concerning hooks.
+Also, one key-binging has been changed: M-RET (meta-return) is not linked
+anymore to 'gp-copy-input which copies the input at the end of the buffer
+but to 'gp-C-j which splits the line. The same effect can be obtained via
+C-j. The command 'gp-copy-input is available via M-c (meta-c).
+
+               Some Notes on pari-mode
+               =======================
+
+pari-mode runs pari-gp as a sub process of (gnu-)emacs. Note that pari-mode
+is *not* a mode in itself but the collection of two modes, namely
+gp-mode and gp-script-mode described below.
+
+INSTALLATION.
+=============
+
+pari-mode consists of four files: pariemacs.txt (this file, for information
+only), pari.el and two files aimed at writing extensions of pari.el:
+gp-translator.el and with-syntax.el which is an example of how to write
+such an extension. When GP is installed, those four files are
+placed in a convenient directory (/usr/local/lib/pari by default) and pari.el
+is byte-compiled, producing a file pari.elc. (If this directory is not in
+your EMACSLOADPATH, read a full path and not only "pari" in the line below.)
+
+To use pari-mode, users should add the following line to their .emacs:
+
+(autoload 'gp-mode "pari" nil t)
+(autoload 'gp-script-mode "pari" nil t)
+(autoload 'gp "pari" nil t)
+(autoload 'gpman "pari" nil t)
+
+Some specific highlighting is then enabled when editing *.gp files
+(gp-scripts) and three main new commands are made available:
+
+M-x gp      starts up the pari-gp process in a new buffer,  *PARI*.
+C-u M-x gp  same as M-x gp, but prompts for the command line arguments.
+M-x gpman   starts up a dvi previewer with the PARI-GP manual. 
+
+To use gpman, you must copy (or link) the file doc/users.dvi (from the
+standard distribution) to the directory pari.el was installed in.
+
+We recommend the use of emacs 20.3 or higher since the installation of
+the menu-bar item may be quite slow with earlier versions.
+===========================================================================
+
+GP-MODE/GP-SCRIPT-MODE:
+=======================
+
+The file pari.el introduces two modes. The first one, called gp-mode, is
+patterned for executing commands under gp. You can then use gp as if you
+had typed "gp" on your terminal, except that some more features are available,
+in particular a full page editor (namely emacs !). The second mode is
+gp-script-mode which helps the user to write gp-scripts (programs). Some
+further commands are available and described below. Most of these commands
+are available through the menu-bar item GP. Starting a gp process
+under emacs will automatically trigger gp-mode. To use gp-script-mode, you
+have two possibilities: either to add the following lines to your .emacs:
+
+(setq auto-mode-alist (cons '("\\.gp$" . gp-script-mode)
+                              auto-mode-alist))
+
+so that any file with the suffix ".gp" will be understood as a gp-script
+and its edition will trigger gp-script-mode, either to simply make the first
+line of your program be
+
+\\  -*-gp-script-*-
+
+(In fact you can put anything on this first line, provided you include
+the string "-*-gp-script-*-").
+
+Common commands:
+
+KEY      LISP-NAME             DESCRIPTION
+===      =========             ===========
+TAB      gp-complete           Complete the partly typed gp input line.
+                               If your .gprc has been built with readline,
+                               then the lisp-name is gp-complete2.
+M-?      gp-get-man-entry      Display the manual entry for a gp command.
+M-H      gp-get-apropos        Find all entries in the manual which contain
+                               the string you give.
+M-\ c    gp-help-menu          Some general help.
+M-\ v    gp-meta-v             Display the version number of the gp file.
+M-o      gp-restore-wind-conf  Strives to restore the previous window
+                               configuration and to remove help windows.
+         run-gp                Make gp read a file. Start a gp process
+                               if required.
+         gp-get-TeX-man-entry  Display a description of a given function
+                               in TeX. This function will start
+                               a gp process if none is running.
+         gp-completion-file    Add a file to the completion list.
+                               (See gp-make-completion-file below)
+         gp-edit-completion-file
+                               Edit a completion file.
+                               (See gp-make-completion-file below)
+         gp-completion-file-info
+                               Some informations on completion files.
+C-l                            Update hilighting locally.
+C-u C-l                        Rehilight the whole buffer, however long.
+         gp-set-simple-prompt  Set the prompt to "? "
+         gp-set-time-prompt    Set a prompt giving the time.
+         gp-set-date-prompt    Set a prompt that gives the date.
+         gp-set-separator-prompt
+                               Set a prompt with a separator
+
+
+Functions that are not linked with a key can be accessed through the menu-bar
+or through M-x lisp-name.
+
+Commands common to gp-mode and to gp-script-mode may behave differently
+whether a gp process is being run or not. More information is available
+if a gp process is being run.
+
+The buffer *PARI* is set in gp-mode and the following extra commands are
+available:
+
+KEY      LISP-NAME             DESCRIPTION
+===      =========             ===========
+RET      gp-send-input         Copy current expression to the end,
+                                  and send to gp.
+M-c      gp-copy-input         Copy current expression to the end.
+M-RET    gp-C-j                Split the line.
+C-j      gp-C-j                Split the line.
+M-\ p    gp-set-prompt         Set the gp prompt.
+M-\ t    gp-meta-t       \
+M-\ d    gp-meta-d        |                                 
+M-\ r    gp-meta-r        |        
+M-\ w    gp-meta-w        |
+M-\ x    gp-meta-x         \  Versions of the gp meta-commands, which    
+M-\ s    gp-meta-s         /  prompt for arguments in the mini-buffer  
+M-\ a    gp-meta-a        |   and display output in the help buffer.     
+M-\ b    gp-meta-b        |        
+M-\ m    gp-meta-m        |        
+M-\ k    gp-meta-k        |       
+M-\ q    gp-meta-q       /   
+M-\ \    gp-break-long-line    Break a long line at col. 100, inserting \.
+M-p      gp-next-command       Step to the next command.
+M-n      gp-previous-command   Step to the previous command.
+C-n      next-line             Step to the next line.
+C-p      previous-line         Step to the previous line.
+         gp-toggle             Exchange behaviour of C-p/M-p and C-n/M-n.
+
+Within a gp-script set in gp-script-mode, the following extra commands
+are available:
+
+KEY      LISP-NAME             DESCRIPTION
+===      =========             ===========
+M-\ z    gp-run-in-region      Send the marked region to the gp process,
+                               starting such a process if required.
+         gp-make-completion-file
+                               Allow use of the names of the functions
+                               and of the global variables of this
+                               program for completion.
+M-x gp   gp-start-usual        Start a gp session with default parameters.
+C-u M-x gp gp-start-with-parameters
+                               Ask for parameters before starting a gp
+                               session.
+C-u M-o                        Quit editing a completion file.
+
+Note that most of these commands use the emacs meta key.
+This may be marked `left' `right' `extended character'  `<>'
+or various other markings. If your keyboard has not got a meta key. You
+can use the escape key as a prefix.
+
+Thus M-\ corresponds to pressing meta and \ together, or pressing 
+ESC followed by \ .
+===========================================================================
+
+RET
+===
+If point is after the last gp prompt,  pressing RET sends current gp
+expression to the gp process. If point is at some previous expression, this
+expression (which may be several lines long) is copied to the end of the
+buffer and then executed. If the expression is incomplete, it is *not* sent
+to gp, and a `virtual' newline is inserted like via C-j. Since emacs does
+not produce a syntactical analysis of your input, the definition of a
+complete expression is fairly simple-minded : parenthesis `(' `{' and `['
+should be properly closed, the last character should not be "\" and not be
+within a string. If none of these criteria applies, the input is declared
+complete, whether you were in the middle of a comment or not...
+
+M-RET / C-j
+===========
+Introduce a `virtual' newline, so that you can have a input of gp taking
+several lines. The same behaviour is obtained if you type \ followed by RET.
+
+M-c
+===
+M-c, acts like RET, except that the expression is not sent to the gp
+process. It is just copied to the end, so that it may be edited, and then
+RET pressed, to send the new expression to gp.
+
+TAB
+===
+TAB Tries to complete the partly typed gp command in the *PARI* buffer.
+Note that you can use C-i instead of TAB. If GP was compiled with the
+readline library, it knows about all symbols meaningful tp GP, plus some
+extra keywords (bnf, nf, ell, etc.)
+
+Otherwise, it originally `knows' about all the standart commands of GP.
+User-defined commands will be known to the completion system if they are
+given as arguments to M-?. Commands to teach the system large numbers of new
+command names will be described in the part COMPLETION FILES below and later
+on.
+
+M-?
+===
+M-? prompts for the name of a gp command (which may include symbolic names
+like +). It then finds the appropriate paragraphs of section 3 of the
+manual, strips off some of the TeX commands, and displays the result in a
+new window. If the command is not found in the manual, sends ?command to
+gp, and displays the output in the help window. Thus M-? also works with
+user-defined commands. You may use space and tab to complete the
+command name, in the mini-buffer. M-? tries to guess which command you
+may want help for. If this is incorrect, simply delete that command,
+and type in the command required.
+
+M-\ p
+=====
+M-\ p prompts for a new string in the mini-buffer. The command
+
+default(prompt,"<new string>")
+
+is then sent to gp, so that gp will now prompt for input with <new string>.
+The variable gp-prompt-pattern is also reset so that RET and M-RET know
+that gp expressions now start with <new string>. Expressions typed to the
+old prompt are still recognised. 
+
+  Note that with this version, you can use a dynamic prompt (using %
+constructs, which then go through strftime).
+
+M-\ c
+=====
+This shows a menu of subject headings taken from the manual, plus some
+keywords that may lead to some interesting information. Pressing RET displays
+the beginning of the chapter, or the list of the functions whose description
+contains the keyword, as if the M-H command had been typed.
+
+M-\ \
+=====
+If the line is longer than 100, a \<newline> is inserted every 100
+characters. This is necessary if the line is longer than 256 characters as gp
+does not accept line longer than this. M-\ \ moves point to the end of the
+current line.
+
+M-\ 
+===
+The other comands on the M-\ prefix send the appropriate meta command to
+gp. However they use the mini-buffer to read arguments (eg so that you can
+use filename completion) and display any output in the *gp-help* buffer.
+
+===========================================================================
+
+HILIGHTING:
+===========
+
+If you're using X Windows on a color monitor, Emacs will use different
+colors to display various parts when in gp-mode (when GP is running)
+or in gp-script-mode (while editing a file with suffix .gp or after typing
+M-x gp-script-mode). The colors chosen for hilighting can be modified and
+customised through the menu-bar; They are then stored in a "pari-colors"
+file. By default, this file is stored as "pari-colors.el" in the directory
+where the help files are located (gp-gphelp-dir, chosen at Configure time).
+If this directory is not writable (in most cases, it shouldn't be), the
+filename defaults to ~/pari-colors.el. In the other direction, when pari.el
+is loaded, emacs will look for "gp-gphelp-dir/pari-colors.el" if this
+directory is writable and otherwise for "~/pari-colors.el".
+
+It is possible to override these default by setting the variable
+'pari-colors which can be set in 'pari-mode-hook (see below). Colors
+will then be read from and written to this file.
+
+
+NOTE: in order to set the colours, emacs has to be in charge from the
+moment you send a command until GP outputs an answer. Thus it will appear
+to hang if you input a command which takes a long time for GP to process.
+You can hit C-g at any time, which will not affect GP (like C-c would),
+but will let you back in control of emacs. The output of this specific
+command will then not be highlighted, but you can rehilight the buffer
+by C-l.
+
+  You can customize the setting through the menu-bar (easiest way) or by
+modifying your .emacs, AFTER "pari"  has been loaded (if you use autoload
+then set these variables in a pari-mode-hook):
+
+   to disable all highlighting.
+     (setq gp-no-hilit t)
+
+   if you run emacs with a dark background (e.g. in reverse video mode)
+     (setq hilit-background-mode 'dark)
+
+   The default colors can be quite painful to look at. In any case they
+   are easily configurable using the function hilit-translate. Emacs knows
+   about the following symbolic hilight groups:
+
+    in gp-mode (corresponding to what default(colors,...) would do):  
+      gp-error   gp-history   gp-prompt   gp-output  
+      gp-input   gp-timer     gp-help
+
+    in gp-script-mode:
+      gp-control-statement   gp-default-keywords   gp-default-set
+      gp-input-cmd           gp-string             gp-function-proto
+      gp-function-args       gp-comment            gp-global-var
+
+    An actual face (font shape + color) is associated to all patterns belonging
+    to a group using hilit-translate. For instance
+
+      (hilit-translate
+         gp-string   'magenta3    ; all strings will be set in magenta3
+         gp-comment  'italic-red  ; all comments in italic + red
+         gp-timer    'hex-ffff60  ; timer output set in RGB color (ff ff 60)
+         gp-prompt   'default     ; don't highlight the prompt
+      )
+    See the documentation of hilit-lookup-face-create for valid face names.
+
+    In practice, you could include the following code in your .emacs:
+
+      (setq pari-mode-hook
+        (function (lambda ()
+           ... ; as above for instance
+          (if gp-can-hilit
+            (progn
+              (hilit-translate gp-prompt 'tomato4)
+              (hilit-translate gp-timer  'default)
+              (hilit-translate gp-string  'tomato4)
+              (hilit-translate gp-comment 'default))))))
+
+  There is no need to separate gp-mode from gp-script-mode.
+
+
+===========================================================================
+
+COMPLETION / COMPLETION FILES:
+==============================
+
+See also the description of the TAB key above.
+
+Initially, emacs "knows" all the symbols can are listed by the command
+gphelp -k "", i.e. essentially all the standard function/variable names.
+If gp has been built with readline, it knows also some extra symbols.
+In this case and while editing gp-scripts, emacs will try to start
+a gp-session in the background and ask readline. Note that it is
+compulsory for gphelp to be available and that the behaviour will
+be better if a gp-process can be started.
+
+A "completion file", also denoted by "a file in gp-menu format", is a file
+which contains the string "###" at the beginning of a line. Anything
+before the first occurence of this string is ignored. Lines starting by
+this string are considered as commented. Then each non commented line below
+the first "###" contains a string which will be fed to the completion
+system. For instance if a file containing:
+
+### Function names:
+my_function
+facilitate
+
+is send to the completion system through the menu-bar item
+[GP/Complete/Use Also File...], then the two strings "my_function" and
+"facilitate" will be known for completion and the completions of "fa"
+will be "factor" or "facilitate".
+
+Completion files relative to a gp-script "program-name" will be called
+"program-name.cpl" and automatically loaded when editting "program-name".
+
+You can tell emacs to also use the function/global-variable names of your
+script (program) through the menu-bar item [Gp Completion-File Make/Update].
+To avoid the writing of too many files, it is *not* stored in a file
+unless you ask to edit it.
+
+A file stored in the variable gp-additional-completion-file is loaded while
+starting as an additional completion file. It can be set in a hook. Default
+value is the empty string.
+===========================================================================
+
+LISP EXPRESSIONS IN GP-SCRIPTS:
+===============================
+
+A new functionnality of version 2.21 is the possibility to introduce
+elisp-commands inside a gp-script. Elisp commands can be inserted anywhere
+and will be executed prior to sending the file to gp. The file should be
+edited for emacs to take care of these commands. They are to be surrounded by
+"/*@" and "*/", like in
+
+/*@
+(setq gp-prompt-pattern (gp-make-gp-prompt-pattern "^NewOne: "))
+*/
+
+An additional cookie is the string "\\@" which, when located in a program at
+the beginning of a line and followed by a newline is understood as
+emacs-should-not-wait-for-output-of-the-program, which is convenient
+while working with lengthy programs that give partial answers.
+In fact, the effect of "\\@" can be obtained by writing
+
+/*@ (setq gp-should-wait-for-outpup nil) */
+
+This variable is automatically reset to t after the output.
+Concerning this functionnality, a hook gp-input-filter-hook is run whenever
+an input is sent to gp. It can be set in the .emacs and can be modified in
+the file itself. For instance, if the file "with-syntax.el" contains the
+function 'translate, we can use
+
+/*@
+(load-file "with-syntax.el")
+(setq gp-input-filter-hook (list 'translate))
+*/
+
+By "translation" we mean applying some transformations to a gp-script before
+sending it to gp. There is a general file "pari-translator.el" which contains
+functions handy for writing such a translator. An exemple is provided by the
+file "with-syntax.el" which enables one to use the syntax "with(foo,to_do)"
+in a gp-program. Details can be found in this file. It is possible to write
+a file translating gp-syntax-old-version into gp-syntax-new-version. More
+complicated and a project is to write a file translating simple MuPAD-syntax
+into gp-syntax.
+
+===========================================================================
+Notes
+=====
+
+1) You may edit previous expressions, and then type RET to send them to gp.
+   However if you want the *PARI* buffer to contain a script of a valid gp
+   session, you may prefer to use M-RET to copy the expression to the end
+   of the buffer, before editing it.
+
+2) M-\ c is supposed to be a version of the gp meta command \c, although
+   it does not send \c to gp.
+   M-\ p does not correspond to the gp meta command \p but rather to the
+   command default(prompt,...). If this disturbs you it is easy enough to bind
+   M-\ p to a command that inserts \p into the *PARI* buffer. The command
+   gp-set-prompt can then be bound to any key sequence that you wish. 
+   All the other commands on the M-\ prefix do work by sending a gp meta
+   command to the *PARI* buffer.
+
+3) pari-mode-hook/gp-mode-hook/gp-script-mode-hook:
+   Individual users can customise gp-mode without having to make copies of
+   the file pari.el. There are *three* hooks, namely gp-mode-hook,
+   gp-script-mode-hook and an additional hook 'pari-mode-hook common to both
+   modes. You should mostly use pari-mode-hook but can use also the two more
+   specialised gp-mode-hook which will be run by the gp command and
+   gp-script-mode-hook which will be run while starting a gp-script, both
+   in addition to pari-mode-hook. Essentially the only example where
+   gp-mode-hook *has to* be used rather than pari-mode-hook is when
+   setting the prompt via gp-set-prompt (see end of this note and next one).
+   The format is:
+
+       (setq pari-mode-hook 
+         (function (lambda ()
+          ... commands to run when starting up gp ...
+        )))
+
+   An example is:
+
+       (setq pari-mode-hook 
+         (function (lambda ()
+           (define-key gp-map "\M-\\p" 'gp-meta-p)
+           (define-key gp-map "\M-p" 'gp-set-prompt)
+           (setq gp-stack-size "1000000")
+           (setq gp-prime-limit "2000")
+           (gp-completion-file my-file)
+       )))
+
+  This: 
+        Binds a function which sends \p to gp (which would need to be defined
+             somewhere else), to M-\ p.
+        Binds gp-set-prompt to M-p.
+        Defines the default stack size and prime limit as 10000 and 2000.
+
+        Let the completion system use all the commands listed in the
+        file my-file.
+
+   Here is a generic way to set pari-mode-hook:
+      (setq pari-mode-hook
+       (function (lambda ()
+              ; To select where the colors are stored:
+              (setq pari-colors "~/")
+              ; To select a file containing possible completions:
+              (setq gp-additional-completion-file "")
+              ; To ask/remove tutorial help:
+              (setq gp-tutorial-requiredp t)
+              ; To set/remove hilighting:
+              (setq gp-no-hilit nil)
+              ; To set/remove the menu-bar item [GP/Colors]:
+              (setq gp-no-color-item nil)
+              ; To set/remove both menu-bars:
+              (setq gp-no-menu-bar nil)
+              ; To set parameters of gp:
+              (setq gp-stack-size "10000000")
+              (setq gp-buffer-size "200000")
+              (setq gp-prime-limit "500000")
+              ; To ask gp to not/always ask for arguments:
+              (setq gp-prompt-for-args nil)
+              ; To ensure a proper default for completion:
+              (setq gp-complete-choice 'gp-complete)
+              ; To keep the PARI buffer when quitting:
+              (setq gp-keep-PARI-buffer-when-quitting t)
+              )))
+
+   A change in prompt, which has not gone to the .gprc (see below), *has to*
+   use the gp-mode-hook. It reads
+
+   (setq gp-mode-hook
+      (function (lambda ()
+         ; Select a new prompt:
+         ; (gp-set-prompt "...")
+       )))
+   
+   And for instance '...(get-set-prompt "(%R) gp > "))))' will set the
+   prompt to "(%R) gp > " as soon as you enter gp.
+
+4) Command line arguments.
+   The gp executable file is specified in the variable gp-file-name. This
+   is set in the file pari.el, but users can override this setting, either
+   in their pari-mode-hook, or by using the C-u prefix to gp. In either case,
+   the full path name need not be given if gp is in a directory specified
+   in your PATH variable (or the equivalent in csh).
+   The variables gp-stack-size, gp-buffer-size and gp-prime-limit should be
+   set to strings specifying the arguments to gp. See the above example.
+
+
+   If these variables are  set to "", then the appropriate flags 
+      "-s", "-b" or "-p" are *not* sent to gp. 
+   If RET is typed in response to any of the prompts produced by C-u M-x gp
+      then the default value, ie., the value of gp-file-name, gp-stack-size,
+       gp-buffer-size or gp-prime-limit, is assumed. 
+   If a space is sent to the prompt (ie SPC RET) then the appropriate argument
+       is not  sent to gp, even if the default is non-empty.
+
+   People who often use different settings for these arguments, may like to
+   add the line
+
+   (setq gp-prompt-for-args t)
+   to their gp-mode-hook. This makes M-x gp act like C-u M-x gp.
+
+5) Prompt.
+   Emacs needs to know at all time what your prompt looks like: it's stored
+   at all times in gp-prompt-pattern. If you must change your prompt
+   (e.g. with default(prompt,...)) without telling emacs,  emacs
+   will try to understand what you mean, and else tell you it has not
+   succeeded. What you *cannot* use is the command "default(prompt,fn())"
+   where "fn" is a gp-function which evaluates to a string. Emacs
+   will accept it though, but won't modify the prompt-pattern, so it
+   may lead to errors.
+
+   If you intend to change your prompt in your .gprc and not in an
+   emacs session, you have to modify the gp-prompt-pattern regular
+   expression yourself (AFTER loading pari.el in your .emacs). For instance:
+
+   (setq gp-prompt-pattern
+     (concat "^> [\C-j\t ]*\\|" gp-prompt-pattern))
+
+   caters for a 'prompt = "> "' in .gprc. If you use autoload, put this
+   command in 'pari-mode-hook and *not* in 'gp-mode-hook (see the note 3
+   for the way to proceed). Don't forget to anchor your prompt
+   at the beginning of the line (the '^' at the beginning). And don't forget
+   to concatenate the old pattern as well. A more complicated one is to deal
+   with 'prompt = "(%R) gp > "':
+
+   (setq gp-prompt-pattern
+    (concat "^([0-9][0-9]:[0-9][0-9]) gp > [\C-j\t ]*\\|" gp-prompt-pattern))
+
+6) Emacs Version.
+   pari.el till version 2.23 has been written for emacs 19.34. There is
+   a small problem with emacs 20.3 and pari.el 2.24 onward takes care of
+   that, while still being usable with emacs 19.34. However, if you use
+   a version of emacs below 20.3, the installation of the menu-bar item
+   may be quite slow (some 20s on fast machines), while it is instantaneous
+   with emacs 20.3 or higher. There may be troubles with XEmacs as far as
+   colors are concerned, nothing that I know of.
+===========================================================================
+
+  Modified: Olivier Ramare 14-June-1999 version 2.30.
+  Modified: Olivier Ramare 15-Marsh-1999 version 2.28.
+  Modified: Olivier Ramare 28-January-1999 version 2.24.
+  Modified: Karim Belabas 13-January-1998 version 2.19.
+  Modified from the original file pari.txt written by David Carlisle
+
+        15-Marsh-1999  (This file refers to pari.el version 2.28)

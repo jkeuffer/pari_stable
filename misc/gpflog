@@ -1,0 +1,10 @@
+#!/usr/local/bin/perl
+#
+# Strip escape sequences from PARI log file.
+#
+while(<>)
+{
+  s/[^]*//og;
+  s/\[[0-9;]*m//og;
+  print;
+}

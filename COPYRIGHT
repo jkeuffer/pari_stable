@@ -1,0 +1,24 @@
+The PARI/GP package is Copyright 1989-1999 by
+C. Batut, K. Belabas, D. Bernardi, H. Cohen and M. Olivier.
+e-mail: pari@math.u-bordeaux.fr
+
+This software is intended as a service to the scientific community, but the
+authors cannot be held responsible for any consequences, either direct or
+indirect, which the use of this package may have. It can be freely copied
+and spread for non commercial purposes, as long as no files are modified,
+and that the whole package (source and manual), including this COPYRIGHT
+file is included.
+
+
+The following code module(s) contributed to PARI-GP come with their own
+copyright and licence conditions.  They may be distributed and used
+non-commercially as part of the full PARI-GP distribution under the
+conditions stated above.  Please consult the copyright and licence
+statements at the beginning of each of these source files, and direct any
+queries about licencing beyond the general PARI-GP distribution policy to
+each of the contacts mentioned there, in addition to asking the PARI team.
+
+  Name    Authors                                       File(s)
+  ----    -------                                       -------
+  MPQS    Thomas Papanikolaou and Xavier Roblot         src/modules/mpqs.c
+          papanik,roblot@math.u-bordeaux.fr
