@@ -727,6 +727,10 @@ or a polynomial, the result is equal to $1$. When $x$ is a vector or a matrix,
 the lowest common denominator of the components of $x$ is computed. All other
 types are forbidden.
 
+\misctitle{Warning:} multivariate objects are created according to variable
+priorities, with possibly surprising side effects ($x/y$ is a polynomial, but
+$y/x$ is a rational function). See \secref{se:priority}.
+
 \syn{denom}{x}.
 
 \subsecidx{floor}$(x)$: floor of $x$. When $x$ is in $\R$, the result is the
@@ -812,7 +816,11 @@ components.
 or function, the meaning is clear. When $x$ is an integer or a polynomial,
 the result is $x$ itself. When $x$ is a vector or a matrix, then
 \kbd{numerator(x)} is defined to be \kbd{denominator(x)*x}. All other types
-are forbidden.
+are forbidden. 
+
+\misctitle{Warning:} multivariate objects are created according to variable
+priorities, with possibly surprising side effects ($x/y$ is a polynomial, but
+$y/x$ is a rational function). See \secref{se:priority}.
 
 \syn{numer}{x}.
 
