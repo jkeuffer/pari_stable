@@ -2932,7 +2932,7 @@ MORE:
     {
       if (DEBUGLEVEL) fprintferr("*** Increasing sub factor base\n");
       sfb_increase = 0;
-      if (++sfb_trials >= SFB_MAX) goto START;
+      if (++sfb_trials > SFB_MAX) goto START;
       subFB = subFBgen(N,min(lim,LIMC2), lg(subFB)-1+SFB_STEP,NULL,&ss);
       if (!subFB) goto START;
       nreldep = nrelsup = 0;
