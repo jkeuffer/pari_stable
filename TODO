@@ -19,8 +19,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
-4  mateigen([1,1;1,2]) won't succeed \\ works if precision is increased
-
 4  rnfpolred is numerically unstable:
    ? rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
      ***   division by zero in gdiv, gdivgs or ginv
