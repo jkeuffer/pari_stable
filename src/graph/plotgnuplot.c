@@ -56,31 +56,22 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   for(i=0;i<lw;i++) {
       e=rectgraph[w[i]];
       if (RHasGraph(e)) {
-	  double t;
-
-	  xleft = x[i]; xright = xleft + RXsize(e) - 1;
-	  ytop = w_height - 1 - y[i]; ybot = ytop - (RYsize(e) - 1);
-	  t = (0 - RXshift(e))/RXscale(e);
-	  min_array[FIRST_X_AXIS] = min_array[SECOND_X_AXIS] = t;
-	  t = (RXsize(e) - 1 - RXshift(e))/RXscale(e);
-	  max_array[FIRST_X_AXIS] = max_array[SECOND_X_AXIS] = t;
-	  t = (RYsize(e) - 1 - RYshift(e))/RYscale(e);
-	  min_array[FIRST_Y_AXIS] = min_array[SECOND_Y_AXIS] = t;
-	  t = (0 - RYshift(e))/RYscale(e);
-	  max_array[FIRST_Y_AXIS] = max_array[SECOND_Y_AXIS] = t;
+	  set_mouse_feedback_rectangle(
+		x[i], x[i] + RXsize(e) - 1,
+		w_height - 1 - y[i] - (RYsize(e) - 1), w_height - 1 - y[i],
+		(0 - RXshift(e))/RXscale(e),
+		(RXsize(e) - 1 - RXshift(e))/RXscale(e),
+		(RYsize(e) - 1 - RYshift(e))/RYscale(e),
+		(0 - RYshift(e))/RYscale(e)
+	  );
 	  seen_graph = 1;
 	  break;
       }
   }
-  if (!seen_graph) {			/* Put some reasonable values */
-      xleft = 0; xright = w_width - 1;
-      ybot  = 0; ytop   = w_height - 1;
-      min_array[FIRST_X_AXIS] = min_array[SECOND_X_AXIS] = 0;
-      max_array[FIRST_X_AXIS] = max_array[SECOND_X_AXIS] = 0;
-      min_array[FIRST_Y_AXIS] = min_array[SECOND_Y_AXIS] = 0;
-      max_array[FIRST_Y_AXIS] = max_array[SECOND_Y_AXIS] = 0;
-  }
-  
+  if (!seen_graph)			/* Put some reasonable values */
+	  set_mouse_feedback_rectangle(	0, w_width - 1,	0, w_height - 1,
+					0, 0, 0, 0);
+
 #if 0
   graphics();				/* Switch on terminal. */
 #else
@@ -209,7 +200,6 @@ PARI_get_plot(long fatal)
   if (pari_plot.init) {
     return;
   }
-  setup_gpshim();
   term_set( DEF_TERM );
 }
 
@@ -219,6 +209,7 @@ term_set(char *s)
 {
   char *t, *size = NULL;
   double x, y;
+  static int had_error;
 
   setup_gpshim();
   if (*s == 0)
@@ -231,16 +222,18 @@ term_set(char *s)
   while (*t && !(*t == ' ' || *t == '\t' || *t == '\n' || *t == '='))
 	t++;
   if ((t-s) > PLOT_NAME_LEN)
-      err(talker,"too long name \"%s\"for terminal", s);
-  if (*pari_plot.name
-      && (strlen(pari_plot.name) != t - s	/* Why this? */
+      err(talker,"name \"%s\" for terminal too long", s);
+  if (*pari_plot.name && !had_error
+      && (strlen(pari_plot.name) != t - s /* As strcmp() without \0 at end */
 	  || (strncmp(pari_plot.name, s, t-s) != 0)) )
 	reset();
   strncpy(pari_plot.name,s,t-s);
   pari_plot.name[t-s] = '\0';
 
+  had_error = 1;
   if (!termset( pari_plot.name ))
       err(talker,"error setting terminal \"%s\"", pari_plot.name);
+  had_error = 0;
 
   if (*t == '=') {
     size = ++t;
@@ -306,3 +299,34 @@ set_pointsize(double d)
     if (pari_plot.init)
 	setpointsize(d);
 }
+
+#ifdef DYNAMIC_PLOTTING_RUNTIME_LINK
+#include <dlfcn.h>
+
+get_term_ftable_t *
+get_term_ftable_get(void) /* Establish runtime link with gnuplot engine */
+{
+    char *s = getenv("GNUPLOT_DRAW_DLL"), buf[4096];
+    void *h, *f;
+    int mode = RTLD_LAZY;
+
+#ifdef RTLD_GLOBAL
+	mode |= RTLD_GLOBAL;
+#endif
+
+    if (!s)
+	s = DYNAMIC_PLOTTING_RUNTIME_LINK;
+    h = dlopen(s, mode);
+    if (!h) {
+	sprintf(buf,"Can't load Gnuplot drawing engine from '%s': %s", s, dlerror());
+	croak(buf);
+	return 0;
+    }
+    f = dlsym(h, "get_term_ftable");
+    if (f)
+	return (get_term_ftable_t *)f;
+    sprintf(buf, "Can't resolve 'get_term_ftable' function from Gnuplot drawing engine '%s': %s", s, dlerror());
+    croak(buf);
+    return 0;
+}
+#endif
