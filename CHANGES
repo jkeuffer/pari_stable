@@ -80,6 +80,9 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    29- allow qfbprimeform(d > 0, p < 0)
    30- Since exp(-1e100) --> 0. [ tolerable: alternative being underflow
        error ], we shouldn't have exp(-1e100) --> truncation error. Fixed.
+   31- rnfkummer(bnrinit(bnfinit(y),nextprime(10^20),1),Mat(3)) --> module
+       too large in Fp_shanks [ conductor() was computing unnecessarily
+       tough discrete logs ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

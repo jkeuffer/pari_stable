@@ -1229,7 +1229,7 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
 {
   GEN H2, Delta = diagonal(gmael(bnr2,5,2)); /* SNF structure of Cl_n */
 
-  if (!H || gcmp0(H)) return Delta;
+  if (!H) return Delta;
   H2 = gmul(bnrGetSurj(bnr, bnr2), H);
   return hnf( concatsp(H2, Delta) ); /* s(H) in Cl_n */
 }
@@ -1356,8 +1356,8 @@ conductor(GEN bnr, GEN H0, long all)
 {
   pari_sp av = avma;
   long j, k, l;
-  GEN bnf, nf, bid, ideal, archp, p1, clhray, bnr2;
-  GEN e2, e, mod, H;
+  GEN bnf, nf, bid, ideal, archp, clhray, bnr2, e2, e, mod, H;
+  int iscond = 1;
   zlog_S S;
 
   if (all > 0) checkbnrgen(bnr); else checkbnr(bnr);
@@ -1376,6 +1376,7 @@ conductor(GEN bnr, GEN H0, long all)
     {
       if (!contains(H, bnr_log_gen_pr(bnr, &S, nf, j, k))) break;
       if (all < 0) { avma = av; return gen_0; }
+      iscond = 0;
     }
     e2[k] = lstoi(j);
   }
@@ -1385,20 +1386,23 @@ conductor(GEN bnr, GEN H0, long all)
     if (!contains(H, bnr_log_gen_arch(bnr, &S, k))) continue;
     if (all < 0) { avma = av; return gen_0; }
     archp[k] = 0;
+    iscond = 0;
   }
   if (all < 0) { avma = av; return gen_1; }
-  ideal = gequal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   for (j = k = 1; k < l; k++)
     if (archp[k]) archp[j++] = archp[k];
   setlg(archp, j);
+  ideal = gequal(e2, e)? gmael(bid,1,1): factorbackprime(nf, S.P, e2);
   mod = mkvec2(ideal, perm_to_arch(nf, archp));
   if (!all) return gerepilecopy(av, mod);
 
-  bnr2 = buchrayall(bnf, mod, nf_INIT | nf_GEN);
-  p1 = cgetg(4,t_VEC);
-  p1[3] = (long)imageofgroup(bnr, bnr2, H);
-  p1[2] = (all == 1)? bnr2[5]: (long)bnr2;
-  p1[1] = (long)mod; return gerepilecopy(av, p1);
+  if (iscond) bnr2 = bnr;
+  else
+  {
+    bnr2 = buchrayall(bnf, mod, nf_INIT | nf_GEN);
+    H = imageofgroup(bnr, bnr2, H);
+  }
+  return gerepilecopy(av, mkvec3(mod, (all == 1)? (GEN)bnr2[5]: bnr2, H));
 }
 
 /* return the norm group corresponding to the relative extension given by
