@@ -53,6 +53,7 @@ XR 14- typo in nilord4 --> SEGV, e.g.
    15- some messages didn't distinguish between MBytes and milllions of Bytes
    16- typo in BuildTree [hensel lift]: SEGV
    17- (rare) oo loop in polroots, e.g. x^5-2*x^4-32*x^3+72*x^2+218*x-491
+   18- oo loop in ellpointtoz on certain rare inputs
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
