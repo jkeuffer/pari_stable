@@ -317,7 +317,7 @@ good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
       /* DO NOTHING */;                 /* Keep both candidates */
   else if (V <= 0 && (Xmax*Xmax + 2*C1*Xmax + C2) <= 0) /* slowdown decreasing */
       Xmin = cut_off;                   /* Only one candidate */
-  else /* Now we know: (long)gen_2 root, the largest is in CUT_OFF..Xmax */
+  else /* Now we know: 2 roots, the largest is in CUT_OFF..Xmax */
       Xmax = sqrt(D) - C1;
   if (Xmax != Xmin) {   /* Xmin == CUT_OFF; Check which one is better */
       double v1 = (cut_off + A)/(cut_off + B);
