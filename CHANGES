@@ -78,8 +78,9 @@ IZ 39- TeX quasi-parsing in gphelp
    41- factor(P in Z[X]): wrong bound used in LLL_cmbf --> "no factor"
    42- one extra blank line printed with some error messages [errcontext]
    43- no typechecks in subgrouplist and forsubgroup
-   44- round4 [nfdisc]: make sure polmodi gets a polynomial, not an int (SEGV)
+   44- round4 [dbasis]: make sure polmodi gets a polynomial, not an int (SEGV)
    45- various typos in rnfkummer (SEGV or 'non-maximal rank in nfhermite')
+   46- Configure -l (no argument) didn't work anymore
 
   Changed
     1- DOS distribution archives (GPM removed)
