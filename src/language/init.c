@@ -1768,6 +1768,7 @@ switch_stack(stackzone *z, long n)
 void
 checkmemory(GEN z)
 {
+#ifdef MEMSTEP
   if (DEBUGMEM && memused != (size_t)-1 &&
        ((GEN)memused > z + MEMSTEP || z > (GEN)memused + MEMSTEP))
   {
@@ -1778,6 +1779,7 @@ checkmemory(GEN z)
     fprintferr("...%5.1lf Mbytes used\n",(top-memused)/1048576.);
 #endif
   }
+#endif
 }
 
 void
