@@ -364,11 +364,14 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
       {
         fprintferr("  countsub = %ld\n", T->countsub);
         msgtimer("for this type");
-        if (T->subq) p1 = mulis(p1,lg(T->subqpart)-1);
-        if (cmpis(p1,T->countsub))
+        if (T->fun != list_fun || !((sublist_t*)(T->fundata))->listKer)
         {
-          fprintferr("  alpha = %Z\n",p1);
-          err(bugparier,"forsubgroup (alpha != countsub)");
+          if (T->subq) p1 = mulis(p1,lg(T->subqpart)-1);
+          if (cmpis(p1,T->countsub))
+          {
+            fprintferr("  alpha = %Z\n",p1);
+            err(bugparier,"forsubgroup (alpha != countsub)");
+          }
         }
       }
     }
