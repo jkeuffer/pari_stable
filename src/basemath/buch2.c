@@ -1820,7 +1820,7 @@ static void
 small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
            long nbrelpid, double LIMC2)
 {
-  const ulong mod_p = 27449;
+  const ulong mod_p = 27449UL;
   const int BMULT = 8, maxtry_DEP  = 20, maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
@@ -1855,7 +1855,11 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
     pari_sp av2;
 
     if (DEBUGLEVEL>1) fprintferr("\n*** Ideal no %ld: %Z\n", noideal, ideal);
+#if 1 /* slower but seems to find more relations this way... */
+    IDEAL = lllint_ip(prime_to_ideal(nf,ideal), 4);
+#else
     IDEAL = prime_to_ideal(nf,ideal);
+#endif
     r = red_ideal(&IDEAL, F->G0, G, prec);
     if (!r) err(bugparier, "small_norm (precision too low)");
 
@@ -1866,16 +1870,17 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
-#if 0
-    BOUND = 2 * ( v[2] + v[1] * q[1][2] * q[1][2] );
-    if (BOUND < 2*v[1]) BOUND = 2*v[1];
+#if 1 /* larger BOUND than alternative, but finds more intersting vectors */
+    BOUND = v[2] + v[1] * q[1][2] * q[1][2];
+    if (BOUND < v[1]) BOUND = v[1];
+    BOUND *= 2;
     if (BOUND > v[1] * BMULT) BOUND = v[1] * BMULT;
-    /* BOUND at most BMULT x smallest known vector */
 #else
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
     if (BOUND > v[1]) BOUND = v[1];
-    BOUND *= BMULT; /* at most BMULT x smallest known vector */
+    BOUND *= BMULT;
 #endif
+    /* BOUND at most BMULT x smallest known vector */
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");
@@ -1963,9 +1968,9 @@ END:
 static GEN
 pseudomin(GEN I, GEN G)
 {
-  GEN m, GI = lllint_fp_ip(gmul(G, I), 100);
-  m = gauss(G, (GEN)GI[1]);
-  if (isnfscalar(m)) m = gauss(G, (GEN)GI[2]);
+  GEN m, u = lll(gmul(G, I), DEFAULTPREC);
+  m = gmul(I, (GEN)u[1]);
+  if (isnfscalar(m) && lg(u) > 2) m = gmul(I, (GEN)u[2]);
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
@@ -2965,12 +2970,12 @@ compute_vecG(GEN nf, FB_t *F, long n)
   GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
   long e, i, j, ind, r1 = nf_get_r1(nf), r = lg(G)-1;
   if (n == 1) { F->G0 = G0 = ground(G); F->vecG = _vec( G0 ); return; }
-  for (e = 4; ; e <<= 1)
+  for (e = 32;;)
   {
-    G0 = ground(G); Gtw0 = ground(gmul2n(G, 10));
-    if (rank(G0) == r && rank(Gtw0) == r) break; /* maximal rank ? */
     G = gmul2n(G, e);
+    G0 = ground(G); if (rank(G0) == r) break; /* maximal rank ? */
   }
+  Gtw0 = ground(gmul2n(G, 10));
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);
   for (ind=j=1; j<=n; j++)
     for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G0,Gtw0,i,j,r1);
