@@ -328,18 +328,12 @@ pariputsf(const char *format, ...)
 
 /* start printing in "color" c */
 /* terminal has to support ANSI color escape sequences */
-#ifdef ESC
-#  undef ESC
-#endif
-#define ESC  (0x1f & '[') /* C-[ = escape */
-
 void
 term_color(int c)
 {
   FILE *o_logfile = logfile;
 
-  if (logstyle != logstyle_color)
-      logfile = 0;				/* Ugly hack... */
+  if (logstyle != logstyle_color) logfile = 0; /* Ugly hack */
   pariputs(term_get_color(c));
   logfile = o_logfile;
 }
@@ -351,6 +345,11 @@ decode_color(int n, int *c)
   c[2] = n & 0xf; n >>= 4; /* background */
   c[0] = n & 0xf; /* attribute */
 }
+
+#ifdef ESC
+#  undef ESC
+#endif
+#define ESC  (0x1f & '[') /* C-[ = escape */
 
 char *
 term_get_color(int n)
