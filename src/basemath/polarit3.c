@@ -1535,17 +1535,21 @@ Fq_neg(GEN x, GEN T/*unused*/, GEN p)
 }
 static GEN modulo,Tmodulo;
 static GEN fgmul(GEN a,GEN b){return FqX_mul(a,b,Tmodulo,modulo);}
+GEN 
+FqXV_mul(GEN V, GEN Tp, GEN p)
+{
+  modulo = p; Tmodulo = Tp;
+  return divide_conquer_prod(V, &fgmul);
+}
 GEN
 FqV_roots_to_pol(GEN V, GEN Tp, GEN p, long v)
 {
-  pari_sp ltop=avma;
+  pari_sp ltop = avma;
   long k;
-  GEN W=cgetg(lg(V),t_VEC);
-  for(k=1;k<lg(V);k++)
-    W[k]=(long)deg1pol(gun,Fq_neg((GEN)V[k],Tp,p),v);
-  modulo=p;Tmodulo=Tp;
-  W=divide_conquer_prod(W,&fgmul);
-  return gerepileupto(ltop,W);
+  GEN W = cgetg(lg(V),t_VEC);
+  for(k=1; k < lg(V); k++)
+    W[k] = (long)deg1pol(gun,Fq_neg((GEN)V[k],Tp,p),v);
+  return gerepileupto(ltop, FqXV_mul(W, Tp, p));
 }
 
 /*******************************************************************/
