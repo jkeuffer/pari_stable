@@ -480,8 +480,10 @@ static long
 gp_get_color(char **st)
 {
   char *s, *v = *st;
-  int c, trans = 1;
-  if (!isdigit((int)*v)) 
+  int c, trans;
+  if (isdigit((int)*v))
+    { c = atol(v); trans = 1; } /* color on transparent background */
+  else
   {
     if (*v == '[')
     {
@@ -498,8 +500,7 @@ gp_get_color(char **st)
     } 
     else { c = c_NONE; trans = 0; }
   }
-  else c = atol(v); /* color on transparent background */
-  if (trans) c = -c;
+  if (trans) c = c | (1<<12);
   while (*v && *v++ != ',') /* empty */;
   if (c != c_NONE) disable_color=0;
   *st = v; return c;
@@ -534,8 +535,8 @@ sd_colors(char *v, int flag)
         sprintf(s,"no");
       else
       {
-        decode_color(abs(n),col);
-        if (n < 0)
+        decode_color(n,col);
+        if (n & (1<<12))
         {
           if (col[0])
             sprintf(s,"[%d,,%d]",col[1],col[0]);
@@ -2018,9 +2019,9 @@ gp_sighandler(int sig)
 }
 
 static void
-brace_color(char *s, int c)
+brace_color(char *s, int c, int force)
 {
-  if (gp_colors[c] == c_NONE) return;
+  if (gp_colors[c] == c_NONE && !force) return;
 #ifdef RL_PROMPT_START_IGNORE
   *s++ = RL_PROMPT_START_IGNORE;
 #endif
@@ -2040,14 +2041,14 @@ do_prompt()
   if (test_mode) return prompt;
   s = buf; *s = 0;
   /* escape sequences bug readline, so use special bracing (if available) */
-  brace_color(s, c_PROMPT);
+  brace_color(s, c_PROMPT, 0);
   s += strlen(s);
   if (filtre(s, f_COMMENT)) 
     strcpy(s, COMMENTPROMPT);
   else
     do_strftime(prompt,s);
   s += strlen(s);
-  brace_color(s, c_INPUT); return buf;
+  brace_color(s, c_INPUT, 1); return buf;
 }
 
 static int

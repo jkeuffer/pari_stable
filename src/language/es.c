@@ -258,7 +258,6 @@ term_color(int c)
 void
 decode_color(int n, int *c)
 {
-  if (n < 0) n = -n;
   c[1] = n & 0xf; n >>= 4; /* foreground */
   c[2] = n & 0xf; n >>= 4; /* background */
   c[0] = n & 0xf; /* attribute */
@@ -276,7 +275,7 @@ term_get_color(int n)
 
   decode_color(a,c);
   if (c[1]<8) c[1] += 30; else c[1] += 82;
-  if (a < 0)
+  if (a & (1<<12)) /* transparent background */
     sprintf(s, "\033[%d;%dm", c[0], c[1]);
   else
   {
