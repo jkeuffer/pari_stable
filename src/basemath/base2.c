@@ -3053,48 +3053,51 @@ rnfdet0(GEN nf, GEN x, GEN y)
 GEN
 rnfsteinitz(GEN nf, GEN order)
 {
-  long av=avma,tetpil,N,j,n;
-  GEN id,A,I,p1,p2,a,b;
+  long av=avma,tetpil,i,n;
+  GEN Id,A,I,p1,a,b;
 
-  nf=checknf(nf);
-  N=lgef(nf[1])-3; id=idmat(N);
+  nf = checknf(nf);
+  Id = idmat(lgef(nf[1])-3);
   if (typ(order)==t_POL) order=rnfpseudobasis(nf,order);
   if (typ(order)!=t_VEC || lg(order)<3)
     err(talker,"not a pseudo-matrix in rnfsteinitz");
   A=dummycopy((GEN)order[1]);
   I=dummycopy((GEN)order[2]); n=lg(A)-1;
-  for (j=1; j<=n-1; j++)
+  for (i=1; i<n; i++)
   {
-    a=(GEN)I[j];
-    if (!gegal(a,id))
+    a = (GEN)I[i];
+    if (!gegal(a,Id))
     {
-      b=(GEN)I[j+1];
-      if (gegal(b,id))
+      GEN c1 = (GEN)A[i];
+      GEN c2 = (GEN)A[i+1];
+      b = (GEN)I[i+1];
+      if (gegal(b,Id))
       {
-	p1=(GEN)A[j]; A[j]=A[j+1]; A[j+1]=lneg(p1);
-	I[j]=(long)b; I[j+1]=(long)a;
+        A[i]  = (long)c2;
+        A[i+1]= lneg(c1);
+	I[i]  = (long)b;
+        I[i+1]= (long)a;
       }
       else
       {
-	p2=nfidealdet1(nf,a,b);
-	p1=gadd(element_mulvec(nf,(GEN)p2[1],(GEN)A[j]),
-		element_mulvec(nf,(GEN)p2[2],(GEN)A[j+1]));
-	A[j+1]= ladd(element_mulvec(nf,(GEN)p2[3],(GEN)A[j]),
-	             element_mulvec(nf,(GEN)p2[4],(GEN)A[j+1]));
-	A[j]=(long)p1;
-	I[j]=(long)id; I[j+1]=(long)idealmul(nf,a,b);
-	p1=content((GEN)I[j+1]);
+	p1 = nfidealdet1(nf,a,b);
+	A[i]  = ladd(element_mulvec(nf,(GEN)p1[1], c1),
+		     element_mulvec(nf,(GEN)p1[2], c2));
+	A[i+1]= ladd(element_mulvec(nf,(GEN)p1[3], c1),
+	             element_mulvec(nf,(GEN)p1[4], c2));
+	I[i]  =(long)Id;
+        I[i+1]=(long)idealmul(nf,a,b); p1 = content((GEN)I[i+1]);
 	if (!gcmp1(p1))
 	{
-	  I[j+1] = ldiv((GEN)I[j+1],p1);
-	  A[j+1] = lmul(p1,(GEN)A[j+1]);
+	  I[i+1] = ldiv((GEN)I[i+1],p1);
+	  A[i+1] = lmul(p1,(GEN)A[i+1]);
 	}
       }
     }
   }
   tetpil=avma; p1=cgetg(lg(order),t_VEC);
   p1[1]=lcopy(A); p1[2]=lcopy(I);
-  for (j=3; j<lg(order); j++) p1[j]=lcopy((GEN)order[j]);
+  for (i=3; i<lg(order); i++) p1[i]=lcopy((GEN)order[i]);
   return gerepile(av,tetpil,p1);
 }
 

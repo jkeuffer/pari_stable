@@ -2292,10 +2292,19 @@ GEN
 element_mulvec(GEN nf, GEN x, GEN v)
 {
   long lv=lg(v),i;
-  GEN mul = elt_mul_get_table(nf,x), y=cgetg(lv,t_COL);
-  
-  for (i=1; i<lv; i++) 
-    y[i] = (long)elt_mul_table(mul,(GEN)v[i]);
+  GEN y = cgetg(lv,t_COL);
+
+  if (typ(x) == t_COL)
+  {
+    GEN mul = elt_mul_get_table(nf,x);
+    for (i=1; i<lv; i++) 
+      y[i] = (long)elt_mul_table(mul,(GEN)v[i]);
+  }
+  else
+  { /* scalar */
+    for (i=1; i<lv; i++) 
+      y[i] = lmul(x, (GEN)v[i]);
+  }
   return y;
 }
 
@@ -2778,24 +2787,24 @@ nfsuppl(GEN nf, GEN x, long n, GEN prhall)
 GEN
 nfidealdet1(GEN nf, GEN a, GEN b)
 {
-  long av=avma,tetpil;
-  GEN x,p1,p2,res,z,da,db;
+  long av=avma;
+  GEN x,p1,res,da,db;
 
-  da=denom(a); if (gcmp1(da)) da = NULL; else a=gmul(da,a);
-  db=denom(b); if (gcmp1(db)) db = NULL; else b=gmul(db,b);
-  a = idealinv(nf,a); x=idealcoprime(nf,a,b);
-  p1=idealmul(nf,x,a); p2=idealaddtoone(nf,p1,b);
+  a = idealinv(nf,a);
+  da = denom(a); if (!gcmp1(da)) a = gmul(da,a);
+  db = denom(b); if (!gcmp1(db)) b = gmul(db,b);
+  x = idealcoprime(nf,a,b);
+  p1 = idealaddtoone(nf, idealmul(nf,x,a), b);
 
-  tetpil=avma; res=cgetg(5,t_VEC);
-  res[1] = da? ldiv(x,da): lcopy(x);
-  res[2] = db? ldiv((GEN)p2[2],db): lcopy((GEN)p2[2]);
-  z = db? gneg_i(db): negi(gun);
-  res[3] = (long) gscalcol_i(z, lgef(nf[1])-3);
-  res[4] = (long) element_div(nf,(GEN)p2[1],(GEN)res[1]);
-  return gerepile(av,tetpil,res);
+  res = cgetg(5,t_VEC);
+  res[1] = lmul(x,da);
+  res[2] = ldiv((GEN)p1[2],db);
+  res[3] = lnegi(db);
+  res[4] = (long) element_div(nf,(GEN)p1[1],(GEN)res[1]);
+  return gerepileupto(av,res);
 }
 
-/* Given a pseudo basis pseudo, outputs a multiple of its ideal determinant */
+/* Given a pseudo-basis pseudo, outputs a multiple of its ideal determinant */
 GEN
 nfdetint(GEN nf,GEN pseudo)
 {
@@ -2895,27 +2904,24 @@ nfcleanmod(GEN nf, GEN x, long lim, GEN detmat)
 }
 
 static GEN
-zero_nfbezout(GEN nf,GEN b, GEN ida,GEN idb,GEN *u,GEN *v,GEN *w,GEN *di)
+zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 {
   long av, tetpil, j, N=lgef(nf[1])-3;
   GEN pab,d;
 
-  d=idealmulelt(nf,b,idb); *di=idealinv(nf,d);
-  av=avma; pab=idealmul(nf,ida,idb); tetpil=avma;
+  d=idealmulelt(nf,b,B); *di=idealinv(nf,d);
+  av=avma; pab=idealmul(nf,A,B); tetpil=avma;
   *w=gerepile(av,tetpil, idealmul(nf,pab,*di));
-
-  *u=cgetg(N+1,t_COL); for (j=1; j<=N; j++) (*u)[j]=zero;
-  *v=element_inv(nf,b); return d;
+  *v=element_inv(nf,b);
+  *u=gzero; return d;
 }
 
-/* a usage interne
- * Given elements a,b, ideals ida, idb, outputs d=a.ida+b.idb and gives
- * di=d^-1, w=ida.idb.di, u, v such that au+bv=1 and u in ida.di, v in
- * idb.di. We assume ida, idb non-zero, but a and b can be zero. Error if a
- * and b are both zero.
+/* Given elements a,b and ideals A, B, outputs d = a.A+b.B and gives
+ * di=d^-1, w=A.B.di, u, v such that au+bv=1 and u in A.di, v in
+ * B.di. Assume A, B non-zero, but a or b can be zero (not both)
  */
 static GEN
-nfbezout(GEN nf,GEN a,GEN b, GEN ida,GEN idb, GEN *u,GEN *v,GEN *w,GEN *di)
+nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *u,GEN *v,GEN *w,GEN *di)
 {
   GEN pab,pu,pv,pw,uv,d,dinv,pa,pb,pa1,pb1, *gptr[5];
   long av,tetpil;
@@ -2923,20 +2929,20 @@ nfbezout(GEN nf,GEN a,GEN b, GEN ida,GEN idb, GEN *u,GEN *v,GEN *w,GEN *di)
   if (gcmp0(a))
   {
     if (gcmp0(b)) err(talker,"both elements zero in nfbezout");
-    return zero_nfbezout(nf,b,ida,idb,u,v,w,di);
+    return zero_nfbezout(nf,b,A,B,u,v,w,di);
   }
   if (gcmp0(b))
-    return zero_nfbezout(nf,a,idb,ida,v,u,w,di);
+    return zero_nfbezout(nf,a,B,A,v,u,w,di);
 
   av = avma;
-  pa=idealmulelt(nf,a,ida);
-  pb=idealmulelt(nf,b,idb);
+  pa=idealmulelt(nf,a,A);
+  pb=idealmulelt(nf,b,B);
 
   d=idealadd(nf,pa,pb); dinv=idealinv(nf,d);
   pa1=idealmullll(nf,pa,dinv);
   pb1=idealmullll(nf,pb,dinv);
   uv=idealaddtoone(nf,pa1,pb1);
-  pab=idealmul(nf,ida,idb); tetpil=avma;
+  pab=idealmul(nf,A,B); tetpil=avma;
 
   pu=element_div(nf,(GEN)uv[1],a);
   pv=element_div(nf,(GEN)uv[2],b);
@@ -2964,10 +2970,12 @@ idealoplll(GEN op(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
 GEN
 idealmulelt(GEN nf, GEN elt, GEN x)
 {
-  long lx=lg(x),j;
-  GEN z=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++) z[j]=(long)element_mul(nf,elt,(GEN)x[j]);
-  return z;
+  long t = typ(elt), lx = lg(x);
+  GEN z;
+  if (t == t_POL || t == t_POLMOD) elt = algtobasis(nf,elt);
+  if (isnfscalar(elt)) elt = (GEN)elt[1];
+  z = element_mulvec(nf, elt, x);
+  settyp(z, t_MAT); return z;
 }
 
 GEN
@@ -3004,12 +3012,13 @@ nfhermitemod(GEN nf, GEN pseudo, GEN detmat)
       jm1=j-1; if (!jm1) jm1=def;
       d=nfbezout(nf,gcoeff(x,i,j),gcoeff(x,i,jm1),(GEN)I[j],(GEN)I[jm1],
                  &u,&v,&w,&dinv);
-      if (!gcmp0(u))
+      if (gcmp0(u))
+        p1 = element_mulvec(nf,v,(GEN)x[jm1]);
+      else
       {
-	p1=element_mulvec(nf,u,(GEN)x[j]);
+	p1 = element_mulvec(nf,u,(GEN)x[j]);
 	if (!gcmp0(v)) p1=gadd(p1, element_mulvec(nf,v,(GEN)x[jm1]));
       }
-      else p1=element_mulvec(nf,v,(GEN)x[jm1]);
       x[j]=lsub(element_mulvec(nf,gcoeff(x,i,j),(GEN)x[jm1]),
                 element_mulvec(nf,gcoeff(x,i,jm1),(GEN)x[j]));
       nfcleanmod(nf,(GEN)x[j],i,idealdivlll(nf,detmat,w));

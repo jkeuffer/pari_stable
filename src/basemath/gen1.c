@@ -1418,6 +1418,7 @@ gdiv(GEN x, GEN y)
   long tx = typ(x), ty = typ(y), lx,ly,vx,vy,i,j,k,l,av,tetpil;
   GEN z,p1,p2,p3;
 
+  if (y == gun) return gcopy(x);
   if (tx==t_INT && is_const_t(ty))
   {
     switch (signe(x))

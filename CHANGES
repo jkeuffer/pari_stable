@@ -57,6 +57,7 @@ BA 16- result was not always complete in nfgaloisconj()
    26-  divisors(highly composite integer) --> "cryptic" error message
    27- 'make clean' wasn't thorough
    28- ellpointtoz(e, [0,0]) could correspond to the inverse point
+   29- "ideals not coprime" in rnfsteinitz
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
