@@ -51,7 +51,7 @@ lgcx(GEN z)
 
   switch(tz)
   {
-    case t_INT: case t_FRAC: case t_RFRAC: case t_QUAD: return BIGINT;
+    case t_INT: case t_FRAC: case t_QUAD: return BIGINT;
     case t_REAL: return lg(z);
     case t_COMPLEX: return min(lgcx((GEN)z[1]),lgcx((GEN)z[2]));
     default: err(typeer,"lgcx");
@@ -67,7 +67,7 @@ setlgcx(GEN z, long l)
 
   switch(tz)
   {
-    case t_INT: case t_FRAC: case t_RFRAC: case t_QUAD: return z;
+    case t_INT: case t_FRAC: case t_QUAD: return z;
     case t_REAL: p1 = cgetr(l); affrr(z,p1); return p1;
     case t_COMPLEX: p1 = cgetc(l); gaffect(z,p1); return p1;
     default: err(typeer,"setlgcx");  return gzero; /* not reached */
@@ -84,9 +84,10 @@ setlgcx2(GEN z, long l)
 
   switch(tz)
   {
-    case t_INT: case t_FRAC: case t_RFRAC: case t_QUAD: case t_REAL:
+    case t_INT: case t_FRAC: case t_REAL:
       p1 = cgetr(l); gaffect(z,p1); return p1;
     case t_COMPLEX: p1 = cgetc(l); gaffect(z,p1); return p1;
+    case t_QUAD: return quadtoc(z, l);
     default: err(typeer,"setlgcx"); return gzero; /* not reached */
   }
 }

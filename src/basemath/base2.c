@@ -438,7 +438,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     m = mulmati(matinv(Tn,index), m);
     hh = delta = mulii(index,delta);
     for (i=1; i<=n; i++)
-      for (j=1; j<=n; j++) hh = mppgcd(gcoeff(m,i,j),hh);
+      for (j=1; j<=n; j++) hh = gcdii(gcoeff(m,i,j),hh);
     if (!is_pm1(hh))
     {
       m = gdiv(m,hh);
@@ -596,7 +596,7 @@ get_coprimes(GEN a, GEN b)
     for (i=1; i<=k; i++)
     {
       if (is_pm1(u[i])) continue;
-      d = mppgcd(c, (GEN)u[i]);
+      d = gcdii(c, (GEN)u[i]);
       if (d == gun) continue;
       c = diviiexact(c, d);
       u[i] = (long)diviiexact((GEN)u[i], d);
@@ -635,7 +635,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
-      GEN p = mppgcd((GEN)x[1], (GEN)x[2]);
+      GEN p = gcdii((GEN)x[1], (GEN)x[2]);
       GEN N, u;
       if (DEBUGLEVEL) err(warner,"impossible inverse: %Z", x);
 
@@ -683,7 +683,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for (j=1; j<=k; j++)
       {
         p1[j] = a[j];
-        coeff(p1,j,j) = lmppgcd(gcoeff(a,j,j),gcoeff(b,j,j));
+        coeff(p1,j,j) = (long)gcdii(gcoeff(a,j,j),gcoeff(b,j,j));
       }
       for (  ; j<=n;     j++) p1[j] = a[j];
       for (  ; j<=2*n-k; j++) p1[j] = b[j+k-n];

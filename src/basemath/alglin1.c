@@ -1717,7 +1717,7 @@ detint(GEN x)
     if (t)
     {
       if (rg == m-1)
-        { det1=mppgcd((GEN)v[t],det1); c[t]=0; }
+        { det1=gcdii((GEN)v[t],det1); c[t]=0; }
       else
       {
         rg++; pivprec = piv; piv=(GEN)v[t]; c[t]=k;

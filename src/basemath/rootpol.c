@@ -857,7 +857,7 @@ RUgen(long N, long bitprec)
   if (N == 2) return mpneg(realun(bitprec));
   if (N == 4) return gi;
   pi2 = gmul2n(mppi(bitprec/BITS_IN_LONG+3), 1);
-  return exp_Ir(gdivgs(pi2,N));
+  return exp_Ir(divrs(pi2,N));
 }
 
 /* N=2^k. returns a vector RU which contains exp(2*i*k*Pi/N), k=0..N-1 */

@@ -888,8 +888,6 @@ FpXX_red(GEN z, GEN p)
 /*                             (Fp[X]/(Q))[Y]                      */
 /*                                                                 */
 /*******************************************************************/
-extern GEN to_Kronecker(GEN P, GEN Q);
-
 /*Not malloc nor warn-clean.*/
 GEN
 FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
@@ -2097,6 +2095,28 @@ from_Kronecker(GEN z, GEN T)
   return normalizepol_i(x, i+1);
 }
 
+GEN
+to_Kronecker(GEN P, GEN Q)
+{
+  /* P(X) = sum Mod(.,Q(Y)) * X^i, lift then set X := Y^(2n-1) */
+  long i,j,k,l, lx = lg(P), N = (degpol(Q)<<1) + 1, vQ = varn(Q);
+  GEN p1, y = cgetg((N-2)*(lx-2) + 2, t_POL);
+  for (k=i=2; i<lx; i++)
+  {
+    p1 = (GEN)P[i];
+    if ((l=typ(p1)) == t_POLMOD) { p1 = (GEN)p1[2]; l = typ(p1); }
+    if (is_scalar_t(l) || varn(p1)<vQ) { y[k++] = (long)p1; j = 3; }
+    else
+    {
+      l = lg(p1);
+      for (j=2; j < l; j++) y[k++] = p1[j];
+    }
+    if (i == lx-1) break;
+    for (   ; j < N; j++) y[k++] = zero;
+  }
+  y[1] = Q[1]; setlg(y, k); return y;
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                          MODULAR GCD                            */
@@ -2499,7 +2519,7 @@ FpX_gcd_check(GEN x, GEN y, GEN p)
   while (signe(b))
   {
     GEN lead = leading_term(b);
-    GEN g = mppgcd(lead,p);
+    GEN g = gcdii(lead,p);
     if (!is_pm1(g)) return gerepileupto(av,g);
     c = FpX_rem(a,b,p); a=b; b=c;
   }
@@ -3665,7 +3685,7 @@ modulargcd(GEN A0, GEN B0)
   if (varn(A) != varn(B)) err(talker,"different variables in modulargcd");
  
   /* A, B in Z[X] */
-  g = mppgcd(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
+  g = gcdii(leading_term(A), leading_term(B)); /* multiple of lead(gcd) */
   if (degpol(A) < degpol(B)) swap(A, B);
   n = 1 + degpol(B); /* > degree(gcd) */
 

@@ -789,9 +789,8 @@ changevar(GEN x, GEN y)
     }
     if (tx==t_SER)
     {
-      p2 = gadd(p2, ggrando(p1,lx-2));
-      if (valp(x))
-        p2 = gmul(gpuigs(p1,valp(x)), p2);
+      p2 = gadd(p2, ggrandocp(p1,lx-2));
+      if (valp(x)) p2 = gmul(gpuigs(p1,valp(x)), p2);
     }
     return gerepileupto(av,p2);
   }

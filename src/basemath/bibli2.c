@@ -389,9 +389,8 @@ gprec(GEN x, long l)
       pr = (long) (l*pariK1+3); y=cgetr(pr); affrr(x,y); break;
 
     case t_PADIC:
-      if (!signe(x[4]))
-        return padiczero((GEN)x[2], l+precp(x));
-      y=cgetg(lx,tx); copyifstack(x[2], y[2]);
+      if (!signe(x[4])) return padiczero((GEN)x[2], l+precp(x));
+      y=cgetg(lx,t_PADIC); copyifstack(x[2], y[2]);
       y[1]=x[1]; setprecp(y,l);
       y[3]=lpuigs((GEN)x[2],l);
       y[4]=lmodii((GEN)x[4],(GEN)y[3]);
@@ -406,7 +405,7 @@ gprec(GEN x, long l)
       break;
 
     case t_POL:
-      y=cgetg(lx,tx); y[1]=x[1];
+      y=cgetg(lx,t_POL); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=lprec((GEN)x[i],l);
       break;
 
@@ -433,7 +432,7 @@ gprec_w(GEN x, long pr)
       y=cgetr(pr); affrr(x,y); break;
 
     case t_POL:
-      lx=lg(x); y=cgetg(lx,tx); y[1]=x[1];
+      lx=lg(x); y=cgetg(lx,t_POL); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long)gprec_w((GEN)x[i],pr);
       break;
 

@@ -216,12 +216,12 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 
   switch(typ(x))
   {
-    case t_INT: case t_FRAC:
-      p1=cgetr(prec); gaffect(x,p1); tetpil=avma;
+    case t_INT:
+      p1 = itor(x, prec); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
-
-    case t_COMPLEX:
-      p1 = gmul(x,realun(prec)); tetpil=avma;
+    
+    case t_FRAC:
+      p1 = rdivii((GEN)x[1], (GEN)x[2], prec); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_QUAD:
@@ -948,51 +948,44 @@ gsqrt(GEN x, long prec)
     }
 
     case t_INTMOD:
-      y=cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
       p1 = mpsqrtmod((GEN)x[2],(GEN)y[1]);
       if (!p1) err(sqrter5);
       y[2] = (long)p1; return y;
 
     case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX); av=avma;
-      if (gcmp0((GEN)x[2]))
+      y = cgetg(3,t_COMPLEX); av = avma;
+      if (isexactzero((GEN)x[2]))
       {
-	long tx=typ(x[1]);
-
-	if ((is_intreal_t(tx) || tx == t_FRAC) && gsigne((GEN)x[1]) < 0)
+        long tx;
+        x = (GEN)x[1]; tx = typ(x);
+	if ((is_intreal_t(tx) || tx == t_FRAC) && gsigne(x) < 0)
 	{
-	  y[1]=zero; p1=gneg_i((GEN)x[1]); tetpil=avma;
-	  y[2]=lpile(av,tetpil,gsqrt(p1,prec));
+	  y[1] = zero; tetpil = avma;
+	  y[2] = lpileupto(av, gsqrt(gneg_i(x), prec));
 	  return y;
 	}
-	y[1]=lsqrt((GEN)x[1],prec);
-	y[2]=zero; return y;
+        avma = (pari_sp)(y+3); return gsqrt(x, prec);
       }
 
       p1 = gsqr((GEN)x[1]);
-      p2 = gsqr((GEN)x[2]);
-      p1 = gsqrt(gadd(p1,p2),prec);
+      p2 = gsqr((GEN)x[2]); p1 = gsqrt(gadd(p1,p2), prec);
       if (gcmp0(p1))
       {
-	y[1]=lsqrt(p1,prec);
-	y[2]=lcopy((GEN)y[1]);
-	return y;
+	y[1] = lmpsqrt(p1);
+	y[2] = lcopy((GEN)y[1]); return y;
       }
-
       if (gsigne((GEN)x[1]) < 0)
       {
-	p1 = gmul2n(gsub(p1,(GEN)x[1]), -1);
-	y[2] = lsqrt(p1,prec);
-        y[1] = ldiv((GEN)x[2],gmul2n((GEN)y[2],1));
-	tetpil=avma;
-        y = (gsigne((GEN)x[2]) > 0)? gcopy(y): gneg(y);
-	return gerepile(av,tetpil,y);
+        p1 = mpsqrt( gmul2n(gsub(p1,(GEN)x[1]), -1) );
+        if (gsigne((GEN)x[2]) < 0) setsigne(p1, -signe(p1));
+        y[2] = (long)gerepileuptoleaf(av, p1); av = avma;
+        y[1] = (long)gerepileuptoleaf(av, gdiv((GEN)x[2], gmul2n(p1,1)));
+      } else {
+        p1 = mpsqrt( gmul2n(gadd(p1,(GEN)x[1]), -1) );
+        y[1] = (long)gerepileuptoleaf(av, p1); av = avma;
+        y[2] = (long)gerepileuptoleaf(av, gdiv((GEN)x[2], gmul2n(p1,1)));
       }
-
-      p1 = gmul2n(gadd(p1,(GEN)x[1]), -1); tetpil=avma;
-      y[1] = lpile(av,tetpil,gsqrt(p1,prec));
-      av=avma; p1=gmul2n((GEN)y[1],1); tetpil=avma;
-      y[2] = lpile(av,tetpil,gdiv((GEN)x[2],p1));
       return y;
 
     case t_PADIC:
@@ -1019,158 +1012,121 @@ gsqrtz(GEN x, GEN y)
 /**                    FONCTION RACINE N-IEME                      **/
 /**                                                                **/
 /********************************************************************/
+/* exp(2Ipi/n), assume n positive t_INT */
 GEN
 rootsof1complex(GEN n, long prec)
 {
-  pari_sp ltop = avma;
-  GEN z;
+  pari_sp av = avma;
   if (is_pm1(n)) return realun(prec);
   if (lgefint(n)==3 && n[2]==2) return stor(-1, prec);
-
-  z = exp_Ir( divri(Pi2n(1, prec), n) ); /* exp(2Ipi/n) */
-  return gerepileupto(ltop,z);  
+  return gerepileupto(av, exp_Ir( divri(Pi2n(1, prec), n) ));  
 }
+
 /*Only the O() of y is used*/
 GEN
 rootsof1padic(GEN n, GEN y)
 {
-  pari_sp ltop=avma;
-  GEN z,r;
-  (void)mpsqrtnmod(gun,n,(GEN)y[2],&z);
-  if (z==gzero){avma=ltop;return gzero;}/*should not happen*/
-  r=cgetg(5,t_PADIC);
-  r[1]=y[1];setvalp(r,0);/*rootsofunity are unramified*/
-  r[2]=licopy((GEN)y[2]);
-  r[3]=licopy((GEN)y[3]);
-  r[4]=(long)padicsqrtnlift(gun,n,z,(GEN)y[2],precp(y));
-  return gerepileupto(ltop,r);  
+  pari_sp av0 = avma, av;
+  GEN z, r = cgetp(y);
+
+  av = avma; (void)mpsqrtnmod(gun,n,(GEN)y[2],&z);
+  if (z==gzero) { avma = av0; return gzero; }/*should not happen*/
+  z = padicsqrtnlift(gun, n, z, (GEN)y[2], precp(y));
+  affii(z, (GEN)r[4]); avma = av; return r;
 }
+
 static GEN paexp(GEN x);
 /*compute the p^e th root of x p-adic*/ 
 GEN
 padic_sqrtn_ram(GEN x, long e)
 {
   pari_sp ltop=avma;
-  GEN n,a;
-  GEN p=(GEN)x[2];
-  long v=0;
-  n=gpowgs((GEN) x[2],e);
-  if (valp(x))
+  GEN a, p = (GEN)x[2], n = gpowgs(p,e);
+  long v = valp(x);
+  if (v)
   {
     long z;
-    GEN p1 = divsi_rem(valp(x), n, &z);
+    v = sdivsi_rem(v, n, &z);
     if (z) err(talker,"nth-root does not exist in gsqrtn");
-    v=itos(p1);
-    x=gcopy(x);setvalp(x,0);
+    x = gcopy(x); setvalp(x,0);
   }
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
   if (lgefint(p)==3 && p[2]==2 && mod8((GEN)x[4])!=signe((GEN)x[4]))
     err(talker,"nth-root does not exist in gsqrtn");
-  /*Other "nth-root does not exist" are caught by paexp...*/
-  a=paexp(gdiv(palog(x),n));
-  /*Here n=p^e and a^n=z*x where z is a root of unity. note that
-      z^p=z, so z^n=z. and if b=a/z then b^n=x. We say b=x/(a^(n-1))*/
-  a=gdiv(x,powgi(a,addis(n,-1)));
-  if (v)  {  a=gcopy(a);setvalp(a,v);  }
-  a=gerepileupto(ltop,a);
-  return a;
+  /*Other "nth-root does not exist" are caught by paexp*/
+  a = paexp(gdiv(palog(x), n));
+  /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of unity. Note that
+      z^p=z; hence for b = a/z, then b^n=x. We say b=x/a^(n-1)*/
+  a = gdiv(x, powgi(a,addis(n,-1))); if (v) setvalp(a,v);
+  return gerepileupto(ltop,a);
 }
+
 /*compute the nth root of x p-adic p prime with n*/ 
 GEN
 padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
-  pari_sp ltop=avma, tetpil;
-  GEN a,r;
-  GEN p=(GEN)x[2];
-  long v=0;
-  /*check valuation*/
-  if (valp(x))
+  pari_sp av;
+  GEN Z, a, r, p = (GEN)x[2];
+  long v = valp(x);
+  if (v)
   {
     long z;
-    GEN p1 = divsi_rem(valp(x),n,&z);
+    v = sdivsi_rem(v,n,&z);
     if (z) err(talker,"nth-root does not exist in gsqrtn");
-    v=itos(p1);
   }
-  a=mpsqrtnmod((GEN)x[4],n,p,zetan);
-  if (!a)
-    err(talker,"nth-root does not exist in gsqrtn");
-  tetpil=avma;
-  r=cgetg(5,t_PADIC);
-  r[1]=x[1];setvalp(r,v);
-  r[2]=licopy(p);
-  r[3]=licopy((GEN)x[3]);
-  r[4]=(long)padicsqrtnlift((GEN)x[4],n,a,p,precp(x));
+  r = cgetp(x); setvalp(r,v);
+  Z = NULL; /* -Wall */
+  if (zetan) Z = cgetp(x);
+  av = avma; a = mpsqrtnmod((GEN)x[4], n, p, zetan);
+  if (!a) err(talker,"nth-root does not exist in gsqrtn");
+  affii(padicsqrtnlift((GEN)x[4], n, a, p, precp(x)), (GEN)r[4]);
   if (zetan)
   {
-    GEN z,*gptr[2];
-    z=cgetg(5,t_PADIC);
-    z[1]=x[1];setvalp(z,0);
-    z[2]=licopy(p);
-    z[3]=licopy((GEN)x[3]);
-    z[4]=(long)padicsqrtnlift(gun,n,*zetan,p,precp(x));
-    gptr[0]=&r;gptr[1]=&z;
-    gerepilemanysp(ltop,tetpil,gptr,2);
-    *zetan=z;
-    return r;
+    affii(padicsqrtnlift(gun, n, *zetan, p, precp(x)), (GEN)Z[4]);
+    *zetan = Z;
   }
-  else
-    return gerepile(ltop,tetpil,r);
+  avma = av; return r;
 }
 
 GEN
 padic_sqrtn(GEN x, GEN n, GEN *zetan)
 {
-  pari_sp ltop=avma, tetpil;
-  GEN p=(GEN)x[2];
-  GEN q;
+  pari_sp av = avma, tetpil;
+  GEN q, p = (GEN)x[2];
   long e;
-  GEN *gptr[2];
   if (gcmp0(x))
   {
     long m = itos(n);
     return padiczero(p, (valp(x)+m-1)/m);
   }
   /*First treat the ramified part using logarithms*/
-  e=pvaluation(n,p,&q);
-  tetpil=avma;
-  if (e)
-  {
-    x=padic_sqrtn_ram(x,e);
-  }
+  e = pvaluation(n, p, &q);
+  if (e) x = padic_sqrtn_ram(x,e);
   /*finished ?*/
   if (is_pm1(q))
   {
-    if (signe(q)<0)
-    {
-      tetpil=avma;
-      x=ginv(x);
-    }
-    if (zetan && e && lgefint(p)==3 && p[2]==2)/*-1 in Q_2*/
-    {
-      *zetan=negi(gun);
-      gptr[0]=&x;gptr[1]=zetan;
-      gerepilemanysp(ltop,tetpil,gptr,2);
-      return x;
-    }
-    if (zetan) *zetan=gun;
-    return gerepile(ltop,tetpil,x);
-  }
-  /*Now we use hensel lift for unramified case. 4x faster.*/
-  tetpil=avma;
-  x=padic_sqrtn_unram(x,q,zetan);
-  if (zetan)
-  {
-    if (e && lgefint(p)==3 && p[2]==2)/*-1 in Q_2*/
-    {
-      tetpil=avma;
-      x=gcopy(x);
-      *zetan=gneg(*zetan);
-    }
-    gptr[0]=&x;gptr[1]=zetan;
-    gerepilemanysp(ltop,tetpil,gptr,2);
+    if (signe(q) < 0) x = ginv(x);
+    x = gerepileupto(av, x);
+    if (zetan)
+      *zetan = (e && lgefint(p)==3 && p[2]==2)? negi(gun) /*-1 in Q_2*/
+                                              : gun;
     return x;
   }
-  return gerepile(ltop,tetpil,x);
+  /*Now we use hensel lift for unramified case. 4x faster.*/
+  tetpil = avma;
+  x = padic_sqrtn_unram(x,q,zetan);
+  if (zetan)
+  {
+    GEN *gptr[2];
+    if (e && lgefint(p)==3 && p[2]==2)/*-1 in Q_2*/
+    {
+      tetpil = avma; x = gcopy(x); *zetan = gneg(*zetan);
+    }
+    gptr[0] = &x; gptr[1] = zetan;
+    gerepilemanysp(av,tetpil,gptr,2);
+    return x;
+  }
+  return gerepile(av,tetpil,x);
 }
 
 /* x^(1/n) */
@@ -1192,16 +1148,14 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   if (!signe(n)) err(talker,"1/0 exponent in gsqrtn");
   if (is_pm1(n))
   {
-    if (zetan) *zetan=gun;
-    if (signe(n)>0)
-      return gcopy(x);
-    return ginv(x);
+    if (zetan) *zetan = gun;
+    return (signe(n) > 0)? gcopy(x): ginv(x);
   }
   tx = typ(x);
   if (is_matvec_t(tx))
   {
-    lx=lg(x); y=cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i]=(long)gsqrtn((GEN)x[i],n,NULL,prec);
+    lx = lg(x); y = cgetg(lx,tx);
+    for (i=1; i<lx; i++) y[i] = (long)gsqrtn((GEN)x[i],n,NULL,prec);
     return y;
   }
   av = avma;
@@ -1209,21 +1163,13 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   {
   case t_INTMOD:
     z = gzero;
-    /*This is not great, but else it will generate too much trouble*/
+    /*not great, but too much trouble*/
     if (!BSW_psp((GEN)x[1])) err(talker,"modulus must be prime in gsqrtn");
-    if (zetan) 
-    {
-      z = cgetg(3,tx); copyifstack(x[1],z[1]);
-      z[2] = lgeti(lgefint(z[1]));
-    }
-    y = cgetg(3,tx); copyifstack(x[1],y[1]);
+    if (zetan) { z = cgetg(3,t_INTMOD); copyifstack(x[1],z[1]); }
+    y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
     y[2] = (long)mpsqrtnmod((GEN)x[2],n,(GEN)x[1],zetan);
     if (!y[2]) err(talker,"nth-root does not exist in gsqrtn");
-    if (zetan)
-    {
-      affii(*zetan, (GEN)z[2]);
-      cgiv(*zetan); *zetan = z;
-    }
+    if (zetan) { z[2] = (long)*zetan; *zetan = z; }
     return y;
 
   case t_PADIC: return padic_sqrtn(x,n,zetan);
@@ -1231,8 +1177,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   case t_INT: case t_FRAC: case t_REAL: case t_COMPLEX:
     i = (long) precision(n); if (i) prec=i;
     if (tx==t_INT && is_pm1(x) && signe(x)>0)
-     /*speed-up since there is no way to call rootsof1complex
-       directly from gp*/
+     /*speed-up since there is no way to call rootsof1complex from gp*/
       y = realun(prec);
     else if (gcmp0(x))
     {
@@ -1243,12 +1188,12 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
         y = realzero(prec);
     }
     else
-    {
-      y = gmul(ginv(n),glog(x,prec));
-      y = gerepileupto(av, gexp(y,prec));
-    }
+      y = gerepileupto(av, gexp(gdiv(glog(x,prec), n), prec));
     if (zetan) *zetan = rootsof1complex(n,prec);
     return y;
+
+  case t_QUAD: 
+    return gsqrtn(quadtoc(x, prec), n, zetan, prec);
 
   default:
     av = avma; if (!(y = _toser(x))) break;
@@ -1896,8 +1841,9 @@ mpcos(GEN x)
 GEN
 gcos(GEN x, long prec)
 {
-  pari_sp av, tetpil;
-  GEN r,u,v,y,p1,p2;
+  pari_sp av;
+  GEN r, u, v, y, u1, v1;
+  long i;
 
   switch(typ(x))
   {
@@ -1905,21 +1851,18 @@ gcos(GEN x, long prec)
       return mpcos(x);
 
     case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX); av=avma;
-      r=gexp((GEN)x[2],prec); p1=ginv(r);
-      p2=gmul2n(gadd(p1,r),-1);
-      p1=gsub(p2,r);
+      i = precision(x); if (!i) i = prec;
+      y = cgetc(i); av = avma;
+      r = gexp((GEN)x[2],prec);
+      v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
+      u1 = subrr(v1, r); /* = - I*sin(I*Im(x)) */
       gsincos((GEN)x[1],&u,&v,prec);
-      tetpil=avma;
-      y[1]=lmul(p2,v); y[2]=lmul(p1,u);
-      gerepilemanyvec(av,tetpil,y+1,2);
-      return y;
+      affrr(gmul(v1,v), (GEN)y[1]);
+      affrr(gmul(u1,u), (GEN)y[2]); return y;
 
     case t_INT: case t_FRAC:
-      p1=cgetr(prec); av=avma;
-      p2=gadd(x,realzero(prec)); 
-      affrr(mpcos(p2),p1); avma=av;
-      return p1;
+      y = cgetr(prec); gaffect(x, y); av = avma; 
+      affrr(mpcos(y), y); avma = av; return y;
     
     case t_INTMOD: case t_PADIC: err(typeer,"gcos");
 
@@ -1975,8 +1918,9 @@ mpsin(GEN x)
 GEN
 gsin(GEN x, long prec)
 {
-  pari_sp av, tetpil;
-  GEN r,u,v,y,p1,p2;
+  pari_sp av;
+  GEN r, u, v, y, v1, u1;
+  long i;
 
   switch(typ(x))
   {
@@ -1984,22 +1928,18 @@ gsin(GEN x, long prec)
       return mpsin(x);
 
     case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX); av=avma;
-      r=gexp((GEN)x[2],prec); p1=ginv(r);
-      p2=gmul2n(gadd(p1,r),-1);
-      p1=gsub(p2,p1);
+      i = precision(x); if (!i) i = prec;
+      y = cgetc(i); av = avma;
+      r = gexp((GEN)x[2],prec);
+      v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
+      u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
       gsincos((GEN)x[1],&u,&v,prec);
-      tetpil=avma;
-      y[1]=lmul(p2,u);
-      y[2]=lmul(p1,v);
-      gerepilemanyvec(av,tetpil,y+1,2);
-      return y;
+      affrr(gmul(v1,u), (GEN)y[1]);
+      affrr(gmul(u1,v), (GEN)y[2]); return y;
     
     case t_INT: case t_FRAC:
-      p1=cgetr(prec); av=avma;
-      p2=gadd(x,realzero(prec)); 
-      affrr(mpsin(p2),p1); avma=av;
-      return p1;
+      y = cgetr(prec); gaffect(x, y); av = avma; 
+      affrr(mpsin(y), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gsin");
 
@@ -2079,38 +2019,31 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
   switch(typ(x))
   {
     case t_INT: case t_FRAC:
-      *s=cgetr(prec); *c=cgetr(prec); av=avma; 
-      p1=gadd(x,realzero(prec)); 
-      mpsincos(p1,&ps,&pc); 
-      affrr(ps,*s); affrr(pc,*c);
-      avma=av;
-      return;
+      *s = cgetr(prec);
+      *c = cgetr(prec); av = avma; gaffect(x, *s);
+      mpsincos(*s, &ps, &pc); 
+      affrr(ps,*s);
+      affrr(pc,*c); avma = av; return;
 
     case t_REAL:
       mpsincos(x,s,c); return;
 
     case t_COMPLEX:
-      ps=cgetg(3,t_COMPLEX); pc=cgetg(3,t_COMPLEX);
-      *s=ps; *c=pc; av=avma;
-      r=gexp((GEN)x[2],prec); p1=ginv(r);
-      v1=gmul2n(gadd(p1,r),-1);
-      u1=gsub(v1,p1); r=gsub(v1,r);/*u1=I*sin(I*Im(x));v1=cos(I*Im(x));r=-u1*/
-      gsincos((GEN)x[1],&u,&v,prec);
-      tetpil=avma;
-      p1=gmul(v1,u); p2=gmul(u1,v);
-      p3=gmul(v1,v); p4=gmul(r,u);
-      gptr[0]=&p1; gptr[1]=&p2; gptr[2]=&p3; gptr[3]=&p4;
-      gerepilemanysp(av,tetpil,gptr,4);
-      ps[1]=(long)p1; pc[1]=(long)p3;
-      ps[2]=(long)p2; pc[2]=(long)p4;
-      return;
+      i = precision(x); if (!i) i = prec;
+      ps = cgetc(i); *s = ps; 
+      pc = cgetc(i); *c = pc; av = avma;
+      r = gexp((GEN)x[2],prec);
+      v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
+      u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
+      gsincos((GEN)x[1], &u,&v, prec);
+      affrr(mulrr(v1,u),         (GEN)ps[1]);
+      affrr(mulrr(u1,v),         (GEN)ps[2]);
+      affrr(mulrr(v1,v),         (GEN)pc[1]);
+      affrr(mulrr(mpneg(u1),u),  (GEN)pc[2]); return;
 
     case t_QUAD:
-      av = avma; p1=gmul(x,realun(prec)); tetpil = avma;
-      gsincos(p1,s,c,prec);
-      gptr[0]=s; gptr[1]=c;
-      gerepilemanysp(av,tetpil,gptr,2);
-      return;
+      av = avma; gsincos(quadtoc(x, prec), s, c, prec);
+      gerepileall(av, 2, s, c); return;
 
     default:
       av = avma; if (!(y = _toser(x))) break;
@@ -2201,10 +2134,8 @@ gtan(GEN x, long prec)
       return gerepileupto(av, gdiv(s,c));
 
     case t_INT: case t_FRAC:
-      s=cgetr(prec); av=avma; 
-      c=gadd(x,realzero(prec)); 
-      affrr(mptan(c),s); avma=av;
-      return s;
+      y = cgetr(prec); gaffect(x, y); av = avma; 
+      affrr(mptan(y), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gtan");
     
@@ -2254,10 +2185,8 @@ gcotan(GEN x, long prec)
       return gerepileupto(av, gdiv(c,s));
 
     case t_INT: case t_FRAC:
-      s=cgetr(prec); av=avma; 
-      c=gadd(x,realzero(prec)); 
-      affrr(mpcotan(c),s); avma=av;
-      return s;
+      y = cgetr(prec); gaffect(x, y); av = avma; 
+      affrr(mpcotan(y), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcotan");
 

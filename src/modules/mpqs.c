@@ -1234,7 +1234,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
       /* inv_A4 is a factor > 1 of kN.  This cannot actually happen.
          Catch it anyway, it doesn't cost more than two comparisons
 	 against 0 / NULL */
-      p1 = mppgcd(p1, N);
+      p1 = gcdii(p1, N);
       *f = gerepileupto(av, p1);
       return;			/* we certainly can't use the current poly */
     }
@@ -1613,7 +1613,7 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
     {
       long ks;
       pari_sp av1 = avma;
-      GEN g = mppgcd(Qx, kN);
+      GEN g = gcdii(Qx, kN);
       if (is_pm1(g))
       {
 	if ((ks = kronecker(Qx, kN)) != 1)
@@ -1876,7 +1876,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
 
   while (!invmod(stoi(old_q), kN, &inv_q)) /* can happen --GN */
   {
-    inv_q = mppgcd(inv_q, N);
+    inv_q = gcdii(inv_q, N);
     if (is_pm1(inv_q) || egalii(inv_q, N)) /* pity */
     {
 #ifdef MPQS_DEBUG
@@ -1918,7 +1918,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       avma = av;		/* discard old inv_q and Y1 */
       if (!invmod(stoi(old_q), kN, &inv_q)) /* can happen --GN */
       {
-	inv_q = mppgcd(inv_q, N);
+	inv_q = gcdii(inv_q, N);
 	if (is_pm1(inv_q) || egalii(inv_q, N)) /* pity */
 	{
 #ifdef MPQS_DEBUG
@@ -2486,12 +2486,12 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 				   handle any further) */
     if (res_next < 3)
     {
-      D1 = mppgcd(addii(X,Y_prod),N);
+      D1 = gcdii(addii(X,Y_prod),N);
       if (!is_pm1(D1))
       {
 	if ((flag = egalii(D1, N))) /* assignment */
 				/* this one's useless, try the other one */
-	  D1 = mppgcd(subii(X,Y_prod),N);
+	  D1 = gcdii(subii(X,Y_prod),N);
 	if (!flag || (!is_pm1(D1) && !egalii(D1,N)))
 	{			/* got something that works */
           if (DEBUGLEVEL >= 5)
@@ -2562,14 +2562,14 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
 	   necessarily a lot smaller than the original N, and should
 	   be easy to deal with later) */
 	av3 = avma;
-	D1 = mppgcd(X_plus_Y, (GEN)(res[j]));
+	D1 = gcdii(X_plus_Y, (GEN)(res[j]));
 	if (is_pm1(D1)) continue; /* this one doesn't help us */
 	if ((flag = egalii(D1, (GEN)(res[j]))))
 	{			/* bad one, try the other */
           avma = av3;
 	  if (!X_minus_Y) X_minus_Y = subii(X, Y_prod);
           av3 = avma;
-	  D1 = mppgcd(X_minus_Y, (GEN)(res[j]));
+	  D1 = gcdii(X_minus_Y, (GEN)(res[j]));
 	}
 	if (!flag || (!is_pm1(D1) && !egalii(D1, (GEN)(res[j]))))
 	{			/* got one which splits this factor */

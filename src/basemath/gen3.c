@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 extern GEN ishiftr_spec(GEN x, long lx, long n);
+extern GEN ptolift(GEN x, GEN Y);
 
 /********************************************************************/
 /**                                                                **/
@@ -49,7 +50,6 @@ _varPOLMOD(GEN x)
   long v = gvar2((GEN)x[1]);
   long w = gvar2((GEN)x[2]); if (w<v) v=w;
   return v;
-
 }
 
 int
@@ -382,221 +382,6 @@ ismonome(GEN x)
   return 1;
 }
 
-/********************************************************************/
-/**                                                                **/
-/**                     MULTIPLICATION SIMPLE                      **/
-/**                                                                **/
-/********************************************************************/
-#define fix_frac(z) if (signe(z[2])<0)\
-{\
-  setsigne(z[1],-signe(z[1]));\
-  setsigne(z[2],1);\
-}
-
-/* assume z[1] was created last */
-#define fix_frac_if_int(z) if (is_pm1(z[2]))\
-  z = gerepileuptoint((pari_sp)(z+3), (GEN)z[1]);
-
-GEN
-gmulsg(long s, GEN y)
-{
-  long ty=typ(y), ly=lg(y), i;
-  pari_sp av, tetpil;
-  GEN z,p1,p2;
-
-  switch(ty)
-  {
-    case t_INT:
-      return mulsi(s,y);
-
-    case t_REAL:
-      return mulsr(s,y);
-
-    case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
-      (void)new_chunk(lgefint(p2)<<2); /* HACK */
-      p1=mulsi(s,(GEN)y[2]); avma=(pari_sp)z;
-      z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
-
-    case t_FRAC:
-      if (!s) return gzero;
-      z = cgetg(3,t_FRAC);
-      i = cgcd(s, smodis((GEN)y[2], s));
-      if (i == 1)
-      {
-        z[2] = licopy((GEN)y[2]);
-        z[1] = lmulis((GEN)y[1], s);
-      }
-      else
-      {
-        z[2] = ldivis((GEN)y[2], i);
-        z[1] = lmulis((GEN)y[1], s/i);
-        fix_frac_if_int(z);
-      }
-      return z;
-
-    case t_COMPLEX: z=cgetg(ly,ty);
-      z[1]=lmulsg(s,(GEN)y[1]);
-      z[2]=lmulsg(s,(GEN)y[2]); return z;
-
-    case t_PADIC:
-      if (!s) return gzero;
-      av=avma; p1=cgetp(y); gaffsg(s,p1); tetpil=avma;
-      return gerepile(av,tetpil,gmul(p1,y));
-
-    case t_QUAD: z=cgetg(ly,ty);
-      copyifstack(y[1],z[1]);
-      z[2]=lmulsg(s,(GEN)y[2]);
-      z[3]=lmulsg(s,(GEN)y[3]); return z;
-
-    case t_POLMOD: z=cgetg(ly,ty);
-      z[2]=lmulsg(s,(GEN)y[2]);
-      copyifstack(y[1],z[1]); return z;
-
-    case t_POL:
-      if (!s || !signe(y)) return zeropol(varn(y));
-      z = cgetg(ly,t_POL); z[1]=y[1];
-      for (i=2; i<ly; i++) z[i]=lmulsg(s,(GEN)y[i]);
-      return normalizepol_i(z, ly);
-
-    case t_SER:
-      if (!s) return zeropol(varn(y));
-      if (gcmp0(y)) return gcopy(y);
-      z = cgetg(ly,t_SER); z[1]=y[1];
-      for (i=2; i<ly; i++) z[i]=lmulsg(s,(GEN)y[i]);
-      return normalize(z);
-
-    case t_RFRAC:
-      if (!s) return zeropol(gvar(y));
-      z = cgetg(3, t_RFRAC);
-      i = ggcd(stoi(s),(GEN)y[2])[2];
-      avma = (pari_sp)z;
-      if (i == 1)
-      {
-        z[1]=lmulgs((GEN)y[1], s);
-        z[2]= lcopy((GEN)y[2]);
-      }
-      else
-      {
-        z[1] = lmulgs((GEN)y[1], s/i);
-        z[2] = ldivgs((GEN)y[2], i);
-      }
-      return z;
-
-    case t_VEC: case t_COL: case t_MAT:
-      z=cgetg(ly,ty);
-      for (i=1; i<ly; i++) z[i]=lmulsg(s,(GEN)y[i]);
-      return z;
-  }
-  err(typeer,"gmulsg");
-  return NULL; /* not reached */
-}
-
-/********************************************************************/
-/**                                                                **/
-/**                       DIVISION SIMPLE                          **/
-/**                                                                **/
-/********************************************************************/
-
-GEN
-gdivgs(GEN x, long s)
-{
-  static long court[] = { evaltyp(t_INT) | _evallg(3),0,0 };
-  long tx=typ(x), lx=lg(x), i;
-  pari_sp av;
-  GEN z,p1;
-
-  if (!s) err(gdiver);
-  switch(tx)
-  {
-    case t_INT:
-      av = avma; z = divis_rem(x,s,&i);
-      if (!i) return z;
-
-      i = cgcd(s, i);
-      avma=av; z=cgetg(3,t_FRAC);
-      if (i == 1)
-        x = icopy(x);
-      else
-      {
-        s /= i;
-        x = divis(x, i); /* not diviuexact, we may have x < 0 */
-      }
-      z[1] = (long)x;
-      z[2] = lstoi(s); fix_frac(z); return z;
-
-    case t_REAL:
-      return divrs(x,s);
-
-    case t_FRAC: z=cgetg(3,tx);
-      i = cgcd(s, smodis((GEN)x[1], s));
-      if (i == 1)
-      {
-        z[2] = lmulsi(s, (GEN)x[2]);
-        z[1] = licopy((GEN)x[1]);
-      }
-      else
-      {
-        z[2] = lmulsi(s/i, (GEN)x[2]);
-        z[1] = ldivis((GEN)x[1], i);
-      }
-      fix_frac(z);
-      fix_frac_if_int(z); return z;
-
-    case t_COMPLEX: z=cgetg(lx,tx);
-      z[1]=ldivgs((GEN)x[1],s);
-      z[2]=ldivgs((GEN)x[2],s);
-      return z;
-
-    case t_QUAD: z=cgetg(lx,tx);
-      copyifstack(x[1],z[1]);
-      for (i=2; i<4; i++) z[i]=ldivgs((GEN)x[i],s);
-      return z;
-
-    case t_POLMOD: z=cgetg(lx,tx);
-      copyifstack(x[1],z[1]);
-      z[2]=ldivgs((GEN)x[2],s);
-      return z;
-
-    case t_POL: case t_SER:
-      z = cgetg(lx,tx); z[1] = x[1];
-      for (i=2; i<lx; i++) z[i]=ldivgs((GEN)x[i],s);
-      return z;
-
-    case t_RFRAC:
-      av = avma;
-      p1 = ggcd(stoi(s),(GEN)x[1]);
-      if (typ(p1) == t_INT)
-      {
-        avma = av;
-        z = cgetg(3, t_RFRAC);
-        i = p1[2];
-        if (i == 1)
-        {
-          z[1] = lcopy((GEN)x[1]);
-          z[2] = lmulsg(s,(GEN)x[2]);
-        }
-        else
-        {
-          z[1] = ldivgs((GEN)x[1], i);
-          z[2] = lmulgs((GEN)x[2], s/i);
-        }
-      }
-      else /* t_FRAC */
-      {
-        z = cgetg(3, t_RFRAC);
-        z[1] = ldiv((GEN)x[1], p1);
-        z[2] = lmul((GEN)x[2], gdivsg(s,p1));
-        z = gerepilecopy(av, z);
-      }
-      return z;
-
-    case t_VEC: case t_COL: case t_MAT: z=cgetg(lx,tx);
-      for (i=1; i<lx; i++) z[i]=ldivgs((GEN)x[i],s);
-      return z;
-  }
-  affsi(s,court); return gdiv(x,court);
-}
-
 /*******************************************************************/
 /*                                                                 */
 /*                    GENERIC REMAINDER                            */
@@ -640,7 +425,7 @@ gmod(GEN x, GEN y)
 	  return modii(x,y);
 
 	case t_INTMOD: z=cgetg(3,tx);
-          z[1]=lmppgcd((GEN)x[1],y);
+          z[1]=(long)gcdii((GEN)x[1],y);
 	  z[2]=lmodii((GEN)x[2],(GEN)z[1]); return z;
 
 	case t_FRAC:
@@ -653,13 +438,7 @@ gmod(GEN x, GEN y)
 	  z[2]=lmod((GEN)x[2],y);
           z[3]=lmod((GEN)x[3],y); return z;
 
-	case t_PADIC:
-        {
-          long p1[] = {evaltyp(t_INTMOD)|_evallg(3),0,0};
-          p1[1] = (long)y;
-          p1[2] = lgeti(lgefint(y));
-          gaffect(x,p1); return (GEN)p1[2];
-        }
+	case t_PADIC: return ptolift(x, y);
 	case t_POLMOD: case t_POL:
 	  return gzero;
       /* case t_REAL could be defined as below, but conlicting semantic
@@ -1064,85 +843,6 @@ gshift(GEN x, long n)
   return gmul2n(x,n);
 }
 
-extern GEN mulscalrfrac(GEN x, GEN y);
-
-/* Shift vrai (multiplication exacte par 2^n) */
-GEN
-gmul2n(GEN x, long n)
-{
-  long tx, lx, i, k, l;
-  pari_sp av, tetpil;
-  GEN p2,p1,y;
-
-  tx=typ(x);
-  switch(tx)
-  {
-    case t_INT:
-      if (n>=0) return shifti(x,n);
-      if (!signe(x)) return gzero;
-      l = vali(x); n = -n;
-      if (n<=l) return shifti(x,-n);
-      y=cgetg(3,t_FRAC);
-      y[1]=lshifti(x,-l);
-      y[2]=lshifti(gun,n-l); return y;
-	
-    case t_REAL:
-      return shiftr(x,n);
-
-    case t_INTMOD:
-      if (n > 0)
-      {
-        y=cgetg(3,t_INTMOD); p2=(GEN)x[1];
-        av=avma; (void)new_chunk(2 * lgefint(p2) + n); /* HACK */
-        p1 = shifti((GEN)x[2],n); avma=av;
-        y[2]=lmodii(p1,p2); icopyifstack(p2,y[1]); return y;
-      }
-      av=avma; y=gmul2n(gun,n); tetpil=avma;
-      return gerepile(av,tetpil,gmul(y,x));
-
-    case t_FRAC:
-      l = vali((GEN)x[1]);
-      k = vali((GEN)x[2]);
-      if (n+l-k>=0)
-      {
-        if (expi((GEN)x[2]) == k) /* x[2] power of 2 */
-          return shifti((GEN)x[1],n-k);
-        l = n-k; k = -k;
-      }
-      else
-      {
-        k = -l-n; l = -l;
-      }
-      y=cgetg(3,t_FRAC);
-      y[1]=lshifti((GEN)x[1],l);
-      y[2]=lshifti((GEN)x[2],k); return y;
-
-    case t_QUAD: y=cgetg(4,t_QUAD);
-      copyifstack(x[1],y[1]);
-      for (i=2; i<4; i++) y[i]=lmul2n((GEN)x[i],n);
-      return y;
-
-    case t_POLMOD: y=cgetg(3,t_POLMOD);
-      copyifstack(x[1],y[1]);
-      y[2]=lmul2n((GEN)x[2],n); return y;
-
-    case t_COMPLEX: case t_POL: case t_SER:
-    case t_VEC: case t_COL: case t_MAT:
-      y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) y[i]=lmul2n((GEN)x[i],n);
-      return y;
-
-    case t_RFRAC: av=avma; p1 = gmul2n(gun,n); tetpil = avma;
-      return gerepile(av,tetpil, mulscalrfrac(p1,x));
-
-    case t_PADIC:
-      av=avma; y=gmul2n(gun,n); tetpil=avma;
-      return gerepile(av,tetpil,gmul(y,x));
-  }
-  err(typeer,"gmul2n");
-  return NULL; /* not reached */
-}
-
 GEN
 real2n(long n, long prec) { GEN z = realun(prec); setexpo(z, n); return z; }
 
@@ -1152,22 +852,24 @@ real2n(long n, long prec) { GEN z = realun(prec); setexpo(z, n); return z; }
 /*                                                                 */
 /*******************************************************************/
 extern GEN fix_rfrac_if_pol(GEN x, GEN y);
+extern GEN quad_polmod_norm(GEN x, GEN y);
+extern GEN quad_polmod_conj(GEN x, GEN y);
 
 GEN
 ginv(GEN x)
 {
-  long tx=typ(x), s;
+  long s;
   pari_sp av, tetpil;
-  GEN z,y,p1,p2;
+  GEN X, z, y, p1, p2;
 
-  switch(tx)
+  switch(typ(x))
   {
     case t_INT:
       if (is_pm1(x)) return icopy(x);
-      if (!signe(x)) err(gdiver);
-      z=cgetg(3,t_FRAC);
-      z[1] = (signe(x)<0)? lnegi(gun): un;
-      z[2]=labsi(x); return z;
+      s = signe(x); if (!s) err(gdiver);
+      z = cgetg(3,t_FRAC);
+      z[1] = s<0? lnegi(gun): un;
+      z[2] = labsi(x); return z;
 
     case t_REAL:
       return divsr(1,x);
@@ -1201,9 +903,16 @@ ginv(GEN x)
       z[3] = licopy((GEN)x[3]);
       z[4] = lmpinvmod((GEN)x[4],(GEN)z[3]); return z;
 
-    case t_POLMOD: z=cgetg(3,t_POLMOD);
-      copyifstack(x[1],z[1]);
-      z[2]=linvmod((GEN)x[2],(GEN)x[1]); return z;
+    case t_POLMOD: z = cgetg(3,t_POLMOD);
+      X = (GEN)x[1];
+      copyifstack(X, z[1]);
+      if (degpol(X) == 2) { /* optimized for speed */
+        av = avma;
+        z[2] = lpileupto(av, gdiv(quad_polmod_conj((GEN)x[2], X),
+                                  quad_polmod_norm((GEN)x[2], X)) );
+      }
+      else z[2] = linvmod((GEN)x[2], X);
+      return z;
 
     case t_POL: case t_SER:
       return gdiv(gun,x);
@@ -1628,10 +1337,10 @@ deriv(GEN x, long v)
           if (!gcmp0(deriv((GEN)x[i],v))) break;
           avma=av;
         }
-	if (i==lx) return ggrando(polx[vx],e+lx-2);
-	y=cgetg(lx-i+2,t_SER);
+	if (i==lx) return zeroser(vx, e+lx-2);
+	y = cgetg(lx-i+2,t_SER);
         y[1] = evalsigne(1) | evalvalp(e+i-2) | evalvarn(vx);
-	for (j=2; i<lx; j++,i++) y[j]=lderiv((GEN)x[i],v);
+	for (j=2; i<lx; j++,i++) y[j] = lderiv((GEN)x[i],v);
         return y;
       }
       return derivser(x);

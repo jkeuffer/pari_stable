@@ -166,7 +166,7 @@ order(GEN x)
   long i,e;
   GEN o,m,p;
 
-  if (typ(x) != t_INTMOD || !gcmp1(mppgcd((GEN) x[1],(GEN) x[2])))
+  if (typ(x) != t_INTMOD || !gcmp1(gcdii((GEN) x[1],(GEN) x[2])))
     err(talker,"not an element of (Z/nZ)* in order");
   o=phi((GEN) x[1]); m=decomp(o);
   for (i = lg(m[1])-1; i; i--)
@@ -239,7 +239,7 @@ Fp_gener_fact(GEN p, GEN fa)
   x = utoi(2UL);
   for (;; x[2]++)
   {
-    GEN d = mppgcd(p,x);
+    GEN d = gcdii(p,x);
     if (!is_pm1(d)) continue;
     for (i = k; i; i--) {
       GEN e = powmodulo(x, (GEN)V[i], p);
@@ -601,7 +601,7 @@ gcarreparfait(GEN x)
       if (i < 0) { avma = av; return gzero; }
       if (i==0)
       {
-        GEN d = mppgcd(a,q);
+        GEN d = gcdii(a,q);
         p = (GEN)factor(d)[1]; l = lg(p);
         for (i=1; i<l; i++)
         {
@@ -2085,7 +2085,7 @@ bestappr_mod(GEN x, GEN A, GEN B)
       GEN a,b,d, t = cgetg(3, t_FRAC);
       if (! ratlift((GEN)x[2], (GEN)x[1], &a,&b,A,B)) return NULL;
       if (is_pm1(b)) return icopy_av(a, (GEN)av);
-      d = mppgcd(a,b);
+      d = gcdii(a,b);
       if (!is_pm1(d)) { avma = av; return NULL; }
       cgiv(d);
       t[1] = (long)a;
@@ -2806,7 +2806,7 @@ sq_gen(GEN z, GEN x)
   else
   {
     v1 = diviiexact((GEN)x[1],d1);
-    v2 = mulii(v1,mppgcd(d1,(GEN)x[3]));
+    v2 = mulii(v1,gcdii(d1,(GEN)x[3]));
   }
   m = mulii((GEN)x[3],x2);
   setsigne(m,-signe(m));
@@ -2836,7 +2836,7 @@ comp_gen(GEN z,GEN x,GEN y)
   {
     v1 = diviiexact((GEN)x[1],d1);
     v2 = diviiexact((GEN)y[1],d1);
-    v1 = mulii(v1, mppgcd(d1,mppgcd((GEN)x[3],mppgcd((GEN)y[3],n))));
+    v1 = mulii(v1, gcdii(d1,gcdii((GEN)x[3],gcdii((GEN)y[3],n))));
   }
   m = addii(mulii(mulii(y1,y2),n), mulii((GEN)y[3],x2));
   setsigne(m,-signe(m));

@@ -547,6 +547,21 @@ integer~\kbd{x}, assigns the quotient to the integer~\kbd{z} and returns 1
 
 \fun{void}{addumului}{ulong a, ulong b, GEN x} return $a + b|X|$.
 
+\fun{void}{rdivii}{GEN x, GEN y, long prec}, assuming \kbd{x} and \kbd{y}
+are both of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
+precision \kbd{prec}.
+
+\fun{void}{rdivis}{GEN x, long y, long prec}, assuming \kbd{x}
+is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
+precision \kbd{prec}.
+
+\fun{void}{rdivsi}{long x, GEN y, long prec}, assuming \kbd{y}
+is of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
+precision \kbd{prec}.
+
+\fun{void}{rdivss}{long x, long y, long prec}, return the quotient x/y as a
+\typ{REAL} of precision \kbd{prec}.
+
 \section{Level 2 kernel (operations on general PARI objects)}
 
 \noindent The functions available to handle subunits are the following.

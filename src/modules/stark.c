@@ -411,7 +411,7 @@ Order(GEN cyc, GEN x)
   for (i = 1; i < l; i++)
   {
     o = (GEN)cyc[i];
-    c = mppgcd(o, (GEN)x[i]);
+    c = gcdii(o, (GEN)x[i]);
     if (!is_pm1(c)) o = diviiexact(o,c);
     f = mpppcm(f, o);
   }

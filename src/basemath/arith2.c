@@ -608,7 +608,7 @@ addprimes(GEN p)
   L = cgetg(2*lp,t_VEC); k = 1;
   for (i=1; i < lp; i++)
   {
-    GEN n = (GEN)primetab[i], d = mppgcd(n, p);
+    GEN n = (GEN)primetab[i], d = gcdii(n, p);
     if (! is_pm1(d))
     {
       if (!egalii(p,d)) L[k++] = (long)d;
@@ -805,19 +805,19 @@ static long
 ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 {
   pari_sp ltop = avma;
+  GEN N;
   int res;
   (void)pairs;
   if (!here) /* initial call */
-   /* Small prime have been removed since start, n is the new unfactored part.
-    * Result is affect()ed to state[1] to preserve stack. */
-    affii(n, (GEN)state[1]);
+   /*Small primes have been removed, n is the new unfactored part.*/
+    N = n;
   else
   {
     GEN q = powgi((GEN)here[0],(GEN)here[1]); /* primary factor found.*/
     if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Z\n",q);
-    /* divide unfactored part by q and assign the result to state[1] */
-    diviiz((GEN)state[1],q, (GEN)state[1]);
+    N = divii((GEN)state[1],q); /* divide unfactored part by q */
   }
+  affii(N, (GEN)state[1]); /* affect()ed to state[1] to preserve stack. */
   if (DEBUGLEVEL>=3) fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
   /* check the stopping criterion, then restore stack */
   res = cmpii((GEN)state[1],(GEN)state[2]) <= 0;

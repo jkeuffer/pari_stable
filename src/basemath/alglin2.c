@@ -322,8 +322,8 @@ GEN
 gnorm(GEN x)
 {
   pari_sp av;
-  long lx,i, tx=typ(x);
-  GEN p1,p2,y;
+  long lx, i, tx=typ(x);
+  GEN p1, y;
 
   switch(tx)
   {
@@ -340,11 +340,12 @@ gnorm(GEN x)
       return gerepileupto(av, gadd(gsqr((GEN)x[1]), gsqr((GEN)x[2])));
 
     case t_QUAD: av = avma;
-      p1 = (GEN)x[1];
-      p2 = gmul((GEN)p1[2], gsqr((GEN)x[3]));
-      p1 = gcmp0((GEN)p1[3])? gsqr((GEN)x[2])
-                            : gmul((GEN)x[2], gadd((GEN)x[2],(GEN)x[3]));
-      return gerepileupto(av, gadd(p1,p2));
+    {
+      GEN u = (GEN)x[3], v = (GEN)x[2];
+      GEN X = (GEN)x[1], b = (GEN)X[3], c = (GEN)X[2];
+      p1 = gcmp0(b)? gsqr(v): gmul(v, gadd(u,v));
+      return gerepileupto(av, gadd(p1, gmul(c, gsqr(u))));
+    }
 
     case t_POL: case t_SER: case t_RFRAC: av = avma;
       return gerepileupto(av, greal(gmul(gconj(x),x)));
@@ -470,6 +471,36 @@ QuickNormL1(GEN x,long prec)
 /*                                                                 */
 /*******************************************************************/
 
+/* lift( conj(Mod(x, y)) ), assuming degpol(y) = 2, degpol(x) < 2 */
+GEN 
+quad_polmod_conj(GEN x, GEN y)
+{
+  GEN z, u, v, a, b;
+  pari_sp av;
+  long d;
+  if (typ(x) != t_POL || !(d = degpol(x))) return gcopy(x);
+  a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/ 
+  b = (GEN)y[3]; v = (GEN)x[2];
+  z = cgetg(4, t_POL); z[1] = x[1]; av = avma;
+  z[2] = lpileupto(av, gadd(v, gdiv(gmul(u,gneg(b)), a)));
+  z[3] = lneg(u);
+  return z;
+}
+GEN
+quad_polmod_norm(GEN x, GEN y)
+{
+  GEN z, u, v, a, b, c;
+  pari_sp av;
+  long d;
+  if (typ(x) != t_POL || !(d = degpol(x))) return gsqr(x);
+  a = (GEN)y[4]; u = (GEN)x[3]; /*Mod(ux + v, ax^2 + bx + c)*/
+  b = (GEN)y[3]; v = (GEN)x[2];  
+  c = (GEN)y[2]; av = avma;
+  z = gmul(u, gadd( gmul(c, u), gmul(gneg(b), v)));
+  if (!gcmp1(a)) z = gdiv(z, a);
+  return gerepileupto(av, gadd(z, gsqr(v)));
+}
+
 GEN
 gconj(GEN x)
 {
@@ -506,12 +537,12 @@ gconj(GEN x)
 
     case t_POLMOD:
     {
-      long d = degpol(x[1]);
+      GEN z, X = (GEN)x[1];
+      long d = degpol(X);
       if (d < 2) return gcopy(x);
-      if (d == 2)
-      {
-        pari_sp av = avma;
-        return gerepileupto(av, gadd(gtrace(x), gneg(x)));
+      if (d == 2) {
+        z = cgetg(3, t_POLMOD); copyifstack(X, z[1]);
+        z[2] = (long)quad_polmod_conj((GEN)x[2], X); return z;
       }
     }
     default:
@@ -845,6 +876,13 @@ sqred(GEN a) { return sqred2(a,0); }
 GEN
 signat(GEN a) { return sqred2(a,1); }
 
+static void
+rot(GEN x, GEN y, GEN s, GEN u) {
+  GEN x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
+  GEN y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
+  affrr(x1,x); affrr(y1,y);
+}
+
 /* Diagonalization of a REAL symetric matrix. Return a vector [L, r]:
  * L = vector of eigenvalues
  * r = matrix of eigenvectors */
@@ -853,7 +891,7 @@ jacobi(GEN a, long prec)
 {
   pari_sp av1;
   long de, e, e1, e2, i, j, p, q, l = lg(a);
-  GEN c, s, t, u, ja, L, r, unr, x, y, x1, y1;
+  GEN c, s, t, u, ja, L, r, unr, x, y;
 
   if (typ(a) != t_MAT) err(mattype1,"jacobi");
   ja = cgetg(3,t_VEC);
@@ -899,45 +937,20 @@ jacobi(GEN a, long prec)
     x = divrr(subrr((GEN)L[q],(GEN)L[p]), shiftr(gcoeff(a,p,q),1));
     y = mpsqrt(addrr(unr, mulrr(x,x)));
     t = divrr(unr, (signe(x)>0)? addrr(x,y): subrr(x,y));
-    c = divrr(unr, mpsqrt(addrr(unr,mulrr(t,t))));
-    s = mulrr(t,c);
-    u = divrr(s,addrr(unr,c));
+    c = mpsqrt(addrr(unr,mulrr(t,t)));
+    s = divrr(t,c);
+    u = divrr(t,addrr(unr,c));
 
     /* compute successive transforms of a and the matrix of accumulated
      * rotations (r) */
-    for (i=1; i<p; i++)
-    {
-      x = gcoeff(a,i,p); y = gcoeff(a,i,q);
-      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,x); affrr(y1,y);
-    }
-    for (i=p+1; i<q; i++)
-    {
-      x = gcoeff(a,p,i); y = gcoeff(a,i,q);
-      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,x); affrr(y1,y);
-    }
-    for (i=q+1; i<l; i++)
-    {
-      x = gcoeff(a,p,i); y = gcoeff(a,q,i);
-      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,x); affrr(y1,y);
-    }
+    for (i=1; i<p; i++)   rot(gcoeff(a,i,p), gcoeff(a,i,q), s,u);
+    for (i=p+1; i<q; i++) rot(gcoeff(a,p,i), gcoeff(a,i,q), s,u);
+    for (i=q+1; i<l; i++) rot(gcoeff(a,p,i), gcoeff(a,q,i), s,u);
     y = gcoeff(a,p,q);
     t = mulrr(t, y); setexpo(y, expo(y)-de-1);
     x = (GEN)L[p]; subrrz(x,t, x);
     y = (GEN)L[q]; addrrz(y,t, y);
-
-    for (i=1; i<l; i++)
-    {
-      x = gcoeff(r,i,p); y = gcoeff(r,i,q);
-      x1 = subrr(x,mulrr(s,addrr(y,mulrr(u,x))));
-      y1 = addrr(y,mulrr(s,subrr(x,mulrr(u,y))));
-      affrr(x1,x); affrr(y1,y);
-    }
+    for (i=1; i<l; i++) rot(gcoeff(r,i,p), gcoeff(r,i,q), s,u);
 
     e2 = expo(gcoeff(a,1,2)); p = 1; q = 2;
     for (j=1; j<l; j++)

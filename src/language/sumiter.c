@@ -823,7 +823,7 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
 {
   long k, kk, N, G;
   pari_sp av = avma, tetpil;
-  GEN p1,r,q1,reel,s,az,c,x,e1,d, *stock;
+  GEN r, reel, s, az, c, x, e1, d, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos");
 
@@ -845,19 +845,21 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
       for(kk=0;;kk++)
       {
         long ex;
-	q1 = addii(r,a); ep->value = (void*) q1;
-        p1 = lisexpr_nobreak(ch);
-        gaffect(p1,reel); ex = expo(reel)+kk; setexpo(reel,ex);
+	ep->value = (void*)addii(r,a);
+        
+        gaffect(lisexpr_nobreak(ch), reel);
+        ex = expo(reel)+kk; setexpo(reel,ex);
 	x = gadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       if (2*k < N) stock[2*k+1] = x;
-      q1 = addsi(k+1,a); ep->value = (void*) q1;
-      p1 = lisexpr_nobreak(ch);
-      gaffect(p1,reel); x = gadd(reel, gmul2n(x,1));
+      ep->value = (void*)addsi(k+1,a);
+      
+      gaffect(lisexpr_nobreak(ch), reel);
+      x = gadd(reel, gmul2n(x,1));
     }
-    c = gadd(az,c); p1 = k&1? gneg_i(c): c;
-    s = gadd(s,gmul(x,p1));
+    c = gadd(az,c); 
+    s = gadd(s, gmul(x, k&1? gneg_i(c): c));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
   }
   tetpil=avma; pop_val(ep);
@@ -869,7 +871,7 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
 {
   long k, kk, N, G;
   pari_sp av = avma, tetpil;
-  GEN p1,r,q1,reel,s,pol,dn,x, *stock;
+  GEN r, reel, s, pol, dn, x, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos2");
 
@@ -880,25 +882,24 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
   G = -bit_accuracy(prec) - 5;
   stock = (GEN*)new_chunk(N+1); for (k=1; k<=N; k++) stock[k] = NULL;
   for (k=1; k<=N; k++)
-  {
     if (odd(k) || !stock[k])
     {
       x = gzero; r = stoi(2*k);
       for(kk=0;;kk++)
       {
         long ex;
-	q1 = addii(r,a); ep->value = (void*) q1;
-        p1 = lisexpr_nobreak(ch);
-        gaffect(p1,reel); ex = expo(reel)+kk; setexpo(reel,ex);
-	x=gadd(x,reel); if (kk && ex < G) break;
+	ep->value = (void*)addii(r,a);
+        
+        gaffect(lisexpr_nobreak(ch), reel);
+        ex = expo(reel)+kk; setexpo(reel,ex);
+	x = gadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       if (2*k-1 < N) stock[2*k] = x;
-      q1 = addsi(k,a); ep->value = (void*) q1;
-      p1 = lisexpr_nobreak(ch);
-      gaffect(p1,reel); stock[k] = gadd(reel, gmul2n(x,1));
+      ep->value = (void*)addsi(k,a);
+      gaffect(lisexpr_nobreak(ch), reel);
+      stock[k] = gadd(reel, gmul2n(x,1));
     }
-  }
   pop_val(ep); s = gzero;
   pol = polzagreel(N,N>>1,prec+1);
   dn = poleval(pol,gun);
@@ -906,7 +907,7 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
   pol = gdiv(pol, gsub(gun,polx[0]));
   for (k=1; k<=lg(pol)-2; k++)
   {
-    p1 = gmul((GEN)pol[k+1],stock[k]);
+    GEN p1 = gmul((GEN)pol[k+1],stock[k]);
     if (odd(k)) p1 = gneg_i(p1);
     s = gadd(s,p1);
   }
@@ -1173,7 +1174,8 @@ polzag(long n, long m)
 GEN
 polzagreel(long n, long m, long prec)
 {
-  long r, j, k, k2, d = n - m, d2 = d<<1;
+  const long d = n - m, d2 = d<<1, r = (m+1)>>1;
+  long j, k, k2;
   pari_sp av = avma;
   GEN Bx, g, h, v, b, s;
 
@@ -1194,7 +1196,6 @@ polzagreel(long n, long m, long prec)
       g[d-k+j] = lmpadd((GEN)g[d-k+j], mulri(b,(GEN)v[d-k+j]));
     g[d-k] = (long)b;
   }
-  r = (m+1)>>1;
   g = gmul(vec_to_pol(g,0), gpowgs(Bx,r));
   for (j=0; j<=r; j++)
   {
@@ -1210,7 +1211,7 @@ polzagreel(long n, long m, long prec)
       g = h;
     }
   }
-  g = m? gmul2n(g,(m-1)>>1): gmul2n(g,-1);
+  g = gmul2n(g, r-1);
   s = mulsi(d, mpfact(m+1));
   return gerepileupto(av, gdiv(g,s));
 }
@@ -1241,7 +1242,7 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
   if (gsigne(fa)*gsigne(fb) > 0) err(talker,"roots must be bracketed in solve");
   itmax = (prec<<(TWOPOTBITS_IN_LONG+1)) + 1;
   tol = real2n(5-bit_accuracy(prec), 3);
-  fc=fb;
+  fc = fb;
   e = d = NULL; /* gcc -Wall */
   for (iter=1; iter<=itmax; iter++)
   {

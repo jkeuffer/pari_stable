@@ -878,12 +878,12 @@ idealadd(GEN nf, GEN x, GEN y)
   }
   if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
   {
-    p1 = mppgcd(gcoeff(x,1,1), gcoeff(y,1,1));
+    p1 = gcdii(gcoeff(x,1,1), gcoeff(y,1,1));
     modid = 1;
   }
   else
   {
-    p1 = mppgcd(detint(x), detint(y));
+    p1 = gcdii(detint(x), detint(y));
     modid = 0;
   }
   if (gcmp1(p1))
@@ -1048,7 +1048,7 @@ idealmulspec(GEN nf, GEN x, GEN y)
   GEN m, mod, a = (GEN)y[1], alpha = (GEN)y[2];
 
   if (isnfscalar(alpha))
-    return gmul(mppgcd(a, (GEN)alpha[1]),x);
+    return gmul(gcdii(a, (GEN)alpha[1]),x);
   m = cgetg((N<<1)+1,t_MAT);
   if (typ(alpha) == t_MAT)
   {
@@ -1993,7 +1993,7 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
   /* Find a norm Nz | Ny such that gcd(Nx/Nz, Nz) = 1 */
   for (Nz = Ny;;)
   {
-    GEN p1 = mppgcd(Nz, diviiexact(Nx,Nz));
+    GEN p1 = gcdii(Nz, diviiexact(Nx,Nz));
     if (is_pm1(p1)) break;
     Nz = diviiexact(Nz,p1);
   }
@@ -2225,7 +2225,7 @@ coprime_part(GEN x, GEN f)
 {
   for (;;)
   {
-    f = mppgcd(x, f); if (is_pm1(f)) break;
+    f = gcdii(x, f); if (is_pm1(f)) break;
     x = diviiexact(x, f);
   }
   return x;

@@ -1404,9 +1404,8 @@ glngamma(GEN x, long prec)
       p1 = gsubsg(1,y);
       if (!valp(p1)) err(impl,"lngamma around a!=1");
       n = (lg(y)-3) / valp(p1);
-      a = ggrando(polx[varn(y)], lg(y)-2);
-      for (i=n; i>=2; i--)
-	a = gmul(p1, gadd(a, gdivgs(szeta(i, prec),i)));
+      a = zeroser(varn(y), lg(y)-2);
+      for (i=n; i>=2; i--) a = gmul(p1, gadd(a, gdivgs(szeta(i, prec),i)));
       a = gadd(a, mpeuler(prec));
       return gerepileupto(av, gmul(a, p1));
 

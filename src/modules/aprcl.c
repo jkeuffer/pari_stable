@@ -570,7 +570,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
       b = powmodulo(a, ph, N);
     }
     /* checking b^p = 1 mod N done economically in caller */
-    b = mppgcd(addis(b,-1), N);
+    b = gcdii(addis(b,-1), N);
     if (!gcmp1(b)) err(invmoder,"%Z",gmodulcp(b,N)); /* trap this! */
     
     if (Cp) {
@@ -971,7 +971,7 @@ aprcl(GEN N)
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
   et = e(t);
   if (cmpii(sqri(et),N) < 0) err(bugparier,"aprcl: e(t) too small");
-  if (!gcmp1(mppgcd(N,mulsi(t,et)))) return _res(1,0);
+  if (!gcmp1(gcdii(N,mulsi(t,et)))) return _res(1,0);
 
   R.N = N;
   R.N2= shifti(N, -1);

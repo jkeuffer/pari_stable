@@ -145,6 +145,9 @@ BA 59- quoted strings were not displayed properly quoted.
    61- rare bugs in copying routines [ clone bit sometimes not unset ]
    62- SEGV in qfminim when integer entries and precision error occured
 BA 63- galoisidentify() could fail on WSS group with S4 residue.
+   64- t_POLMOD + t_MAT was incorrect. E.g Mat(1) + Mod(1,x) --> Mod(Mat(1),x)
+       instead of Mat(Mod(1,x)) as for other scalars.
+   65- Mod(1,8) + O(2^2) --> Mod(1,8) [ should be error ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
@@ -198,6 +201,13 @@ BA 21- type() does not allow to change object types anymore.
    28- split the User's manual in two: PARI/GP and libpari.
    29- updated and completed the tutorial
    30- faster basic transcendental functions on small inputs (sqrt, log, exp)
+   31- rewrote basic generic kernel (add,mul,div) [ faster, less obfuscated ]
+   32- macroified gop1z, gop2z, gops2gsz, gops2sgz, gops2ssz
+   33- diviiz(x,y,z), divisz, divsiz and divssz always assign the euclidean
+       quotient [ used to  depend on the type of z: if t_REAL computed exact
+       quotient ]. Use rdivii, rdivis, rdivsi, rdivss for analogous
+       functionality (no "z" variant);
+   34- ensure proper rounding in divrs
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -215,6 +225,7 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
        --stacksize.
    11- new internal library routine itos_or_0
    12- new member function .index
+   13- rdivii, rdivis, rdivsi, rdivss for analogous
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
@@ -227,6 +238,10 @@ BA  4- cornacchia, in favour of qfbsolve.
        gred --> gcopy for backward compatibility
     7- many obsolete error codes [ for err(...) ]
     8- smodsi()  [ useless, not well defined ]
+    9- buggy macros mppiz, mpeulerz [ undocumented, useless, broke
+       compilation to use them ]
+   10- inconsistently named macros mpinv[sir]r [ were "z" functions ].
+       Undocumented
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):

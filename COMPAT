@@ -83,6 +83,11 @@ Incompatible changes:
     outside libpari.           
   - Macro BITS_IN_RANDOM has been removed. Used to be 32.
   - mymyrand() has been removed, use pari_rand31() or pari_rand() instead
+  - diviiz(x,y,z), divisz, divsiz and divssz always assign the euclidean
+    quotient [ used to  depend on the type of z: if t_REAL computed exact
+    quotien ]. Use rdivii, rdivis, rdivsi, rdivss for analogous
+    functionality (no "z" variant);
+  - removed inconsistently named macros mpinv[sir]r [ were "z" functions ]
 
 Partially compatible changes:
 -----------------------------

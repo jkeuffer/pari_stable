@@ -1833,7 +1833,7 @@ PB_RETRY:
 
     if ((--c & 0x1f)==0)	/* one round complete */
     {
-      g = mppgcd(n, P);
+      g = gcdii(n, P);
       if (!is_pm1(g)) goto fin;	/* caught something */
       if (c <= 0)
       {				/* getting bored */
@@ -1854,7 +1854,7 @@ PB_RETRY:
 
     if (c & 0x1f) /* otherwise, we already checked */
     {
-      g = mppgcd(n, P);
+      g = gcdii(n, P);
       if (!is_pm1(g)) goto fin;
       P = gun;
     }
@@ -1928,7 +1928,7 @@ fin:
   {
     avma = GGG; y = resii(sqri(y), g1);
     avma = avx; y = addsi(delta,y);
-    g = mppgcd(subii(x1, y), g1);
+    g = gcdii(subii(x1, y), g1);
     if (!is_pm1(g)) break;
 
     if (DEBUGLEVEL >= 4 && (--c & 0x1f) == 0) rho_dbg(c0-(c>>5), msg_mask);

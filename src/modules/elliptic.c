@@ -262,8 +262,8 @@ padic_initell(GEN y, GEN p, long prec)
  GEN b2, b4, c4, c6, p1, w, pv, a1, b1, x1, u2, q, e0, e1;
   long i, alpha;
 
-  q=gadd(gun,ggrandocp(p,prec));
-  for (i=1; i<=13; i++) y[i]=lmul(q,(GEN)y[i]);
+  q = gadd(gun, padiczero(p,prec));
+  for (i=1; i<=13; i++) y[i] = lmul(q,(GEN)y[i]);
   if (gcmp0((GEN)y[13]) || valp((GEN)y[13]) >= 0) /* p | j */
     err(talker,"valuation of j must be negative in p-adic ellinit");
   if (egalii(p,gdeux))
@@ -2289,7 +2289,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
   phi2 = numer( /* a4 + 2a2 x + 3x^2 - y a1*/
     gsub(gadd((GEN)e[4],gmul(x,gadd(shifti((GEN)e[2],1),gmulsg(3,x)))),
          gmul((GEN)e[1],y)) );
-  Lp = (GEN)factor(mppgcd(psi2,phi2))[1];
+  Lp = (GEN)factor(gcdii(psi2,phi2))[1];
   lx = lg(Lp);
   for (i=1; i<lx; i++)
   {
@@ -2789,7 +2789,7 @@ ellminimalmodel(GEN E, GEN *ptv)
   if (v) e = coordch(e, v); else v = init_ch();
   c4 = (GEN)e[10];
   c6 = (GEN)e[11];
-  P = (GEN)decomp(mppgcd(c4,c6))[1];
+  P = (GEN)decomp(gcdii(c4,c6))[1];
   l = lg(P);
   for (k = 1; k < l; k++)
   {
@@ -2826,7 +2826,7 @@ globalreduction(GEN E)
   c4 = (GEN)e[10];
   c6 = (GEN)e[11];
   D  = (GEN)e[12];
-  P = (GEN)decomp(mppgcd(c4,c6))[1];
+  P = (GEN)decomp(gcdii(c4,c6))[1];
   l = lg(P);
   for (k = 1; k < l; k++) (long)pvaluation(D, (GEN)P[k], &D);
   if (!is_pm1(D)) P = concatsp(P, (GEN)decomp(absi(D))[1]);

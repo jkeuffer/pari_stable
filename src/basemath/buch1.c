@@ -1601,7 +1601,7 @@ gcdreal(GEN a,GEN b)
 
   if (typ(a)==t_INT)
   {
-    if (typ(b)==t_INT) return mppgcd(a,b);
+    if (typ(b)==t_INT) return gcdii(a,b);
     a = itor(a, lg(b));
   }
   else if (typ(b)==t_INT)
