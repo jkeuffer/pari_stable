@@ -729,8 +729,12 @@ Strexpand(GEN g) {
 GEN
 GENtoGENstr(GEN x)
 {
-  char *s = GENtostr(x);
-  GEN z = STRtoGENstr(s); free(s); return z;
+  pariout_t T = DFLT_OUTPUT;
+  char *s;
+  GEN z;
+  T.prettyp = f_RAW;
+  s = GENtostr0(x, &T, &gen_output);
+  z = STRtoGENstr(s); free(s); return z;
 }
 /********************************************************************/
 /**                                                                **/

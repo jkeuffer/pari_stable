@@ -81,6 +81,8 @@ MSo27- ?0 with _many_ user functions defined --> SEGV [ typo in commands() ]
        introduced in 2.2.6 ]
    29- valuation(x^3, x^2) --> 3  [ valuation at a monomial assumed it
        had degree 1, introduced in 2.2.2 ]
+   30- Set(matid(2)) --> [ "[1, 0;\n0, 1]" ]. Ensure "raw" format is used,
+       not "prettymat".
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
