@@ -3116,7 +3116,7 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
     if (pf) *pf = idealinv(nf, D);
     D = idealpow(nf,D,gdeux);
   }
-  p1 = core2partial(Q_content(d));
+  p1 = core2partial(Q_content(d), 0);
   *pd = gdiv(d, sqri((GEN)p1[2]));
   *pD = idealmul(nf,D,d); return z;
 }
