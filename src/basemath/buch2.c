@@ -44,7 +44,7 @@ get_extra_obj(GEN S, long K)
   if (typ(v) == t_VEC)
   {
     GEN O = (GEN)v[K];
-    if (typ(O) != t_INT) return O;
+    if (typ(O) != t_INT || signe(O)) return O;
   }
   return NULL;
 }

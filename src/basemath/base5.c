@@ -266,13 +266,19 @@ makenfabs(GEN rnf)
   return NF;
 }
 
+static GEN
+makenorms(GEN rnf)
+{
+  GEN f = (GEN)rnf[4];
+  return typ(f) == t_INT? gen_1: dethnf(f);
+}
+
 #define NFABS 1
 #define NORMS 2
 GEN
 check_and_build_nfabs(GEN rnf) {
   return check_and_build_obj(rnf, NFABS, &makenfabs);
 }
-static GEN makenorms(GEN rnf);
 GEN
 check_and_build_norms(GEN rnf) {
   return check_and_build_obj(rnf, NORMS, &makenorms);
@@ -566,13 +572,6 @@ prodidnorm(GEN I)
   z = dethnf((GEN)I[1]);
   for (i=2; i<l; i++) z = gmul(z, dethnf((GEN)I[i]));
   return z;
-}
-
-static GEN
-makenorms(GEN rnf)
-{
-  GEN f = (GEN)rnf[4];
-  return typ(f) == t_INT? gen_1: dethnf(f);
 }
 
 GEN
