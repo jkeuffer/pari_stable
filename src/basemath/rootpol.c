@@ -1928,13 +1928,13 @@ fix_roots(GEN r, GEN *m, long h, long bitprec)
 static GEN
 all_roots(GEN p, long bitprec)
 {
-  GEN pd,q,roots_pol,m;
+  GEN lc,pd,q,roots_pol,m;
   long bitprec0, bitprec2,n=degpol(p),i,e,h;
   ulong av;
 
-  pd = poldeflate(p, &h);
+  pd = poldeflate(p, &h); lc = leading_term(pd);
   e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
-  bitprec0=bitprec + gexpo(pd) - gexpo(leading_term(pd)) + (long)log2(n/h)+1+e;
+  bitprec0=bitprec + gexpo(pd) - gexpo(lc) + (long)log2(n/h)+1+e;
   for (av=avma,i=1;; i++,avma=av)
   {
     roots_pol = cgetg(n+1,t_VEC); setlg(roots_pol,1); 
@@ -1942,9 +1942,10 @@ all_roots(GEN p, long bitprec)
     q = gmul(myrealun(bitprec2), mygprec(pd,bitprec2));
     m = split_complete(q,bitprec2,roots_pol);
     roots_pol = fix_roots(roots_pol, &m, h, bitprec2);
+    q = mygprec_special(p,bitprec2); lc = leading_term(q);
+    if (h > 1) m = gmul(m,lc);
 
-    e = gexpo(gsub(mygprec_special(p,bitprec2), m))
-      - gexpo(leading_term(q)) + (long)log2((double)n) + 1;
+    e = gexpo(gsub(q, m)) - gexpo(lc) + (long)log2((double)n) + 1;
     if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
     if (e < 0)
     {
