@@ -387,7 +387,7 @@ gnorml1(GEN x,long prec)
       return gabs(x,prec);
 
     case t_POL:
-      lx = lg(x); s = gzero;
+      lx = lgef(x); s = gzero;
       for (i=2; i<lx; i++) s = gadd(s, gabs((GEN)x[i],prec));
       break;
 
