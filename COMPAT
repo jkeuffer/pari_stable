@@ -108,6 +108,12 @@ Incompatible changes:
        sumalt2, sumpos, sumpos2, prodinf, prodinf1  [ use GEN
        (*eval)(GEN,void*) everywhere instead of entree * ]
   - changed the prototype of bnrdisclist0
+  - removed ideallistarch0, ideallistarchgen, ideallistunitarch,
+    ideallistunitarchgen. Just use ideallistarch.
+  - Change the output of ideallist with technical (flag 2,3) [ with units ]:
+    instead of two vectors, output a vector of 2-component vectors.
+    Change the input of all list routines (bnrclassnolist, bnrdisclist)
+    accordingly.
 
 Partially compatible changes:
 -----------------------------
@@ -149,7 +155,8 @@ advise you to update soon ]
   - rename divise --> dvdii, gdivise --> gdvd, mpdivis --> dvdiiz, mpdivisis
     --> dvdisz
   - rename mpent --> mpfloor
-  - rename isprincipalrayall -> bnrisprincipal
+  - rename isprincipalrayall -> bnrisprincipal, rayclassno -> bnrclassno
+    rayclassnolist -> bnrclassnolist
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

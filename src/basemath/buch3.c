@@ -502,7 +502,7 @@ bnrinit0(GEN bnf, GEN ideal, long flag)
 }
 
 GEN
-rayclassno(GEN bnf,GEN ideal)
+bnrclassno(GEN bnf,GEN ideal)
 {
   GEN nf, h, D, bigres, bid, cycbid;
   pari_sp av = avma;
@@ -1670,43 +1670,43 @@ bnrconductorofchar(GEN bnr, GEN chi)
   return gerepileupto(av, conductor(bnr, KerChar(chi, gmael(bnr,5,2)), 0));
 }
 
+/* t = [bid,U], h = #Cl(K) */
+static GEN
+get_classno(GEN t, GEN h)
+{
+  GEN bid = gel(t,1), cyc = gmael(bid,2,2);
+  GEN m = concatsp(gel(t,2), diagonal_i(cyc));
+  return mulii(h, dethnf_i(hnf(m)));
+}
+
 /* Given lists of [zidealstarinit, unit ideallogs], return lists of ray class
  * numbers */
 GEN
-rayclassnolist(GEN bnf,GEN lists)
+bnrclassnolist(GEN bnf,GEN L)
 {
   pari_sp av = avma;
-  long i, j, lx, ly;
-  GEN B, U, L, h, b, u, l, m;
+  long i, j, lx, lz;
+  GEN v, z, V, h;
 
   bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
-  B = gel(lists,1);
-  U = gel(lists,2);
-  if (typ(lists)!=t_VEC || lg(lists)!=3 || typ(B)!=t_VEC || typ(U)!=t_VEC)
-    err(typeer,"rayclassnolist");
-  lx = lg(B); L = cgetg(lx,t_VEC);
+  if (typ(L) != t_VEC) err(typeer,"bnrclassnolist");
+  lx = lg(L); V = cgetg(lx,t_VEC);
   for (i = 1; i < lx; i++)
   {
-    b = gel(B,i); /* bid's */
-    u = gel(U,i); /* units logs wrt bid */
-    ly = lg(b); gel(L,i) = l = cgetg(ly,t_VEC);
-    for (j=1; j<ly; j++)
-    {
-      GEN bid = gel(b,j), cyc = gmael(bid,2,2);
-      m = concatsp(gel(u,j), diagonal_i(cyc));
-      gel(l,j) = mulii(h, dethnf_i(hnf(m)));
-    }
+    z = gel(L,i); lz = lg(z);
+    gel(V,i) = v = cgetg(lz,t_VEC);
+    for (j=1; j<lz; j++) gel(v,j) = get_classno(gel(z,j), h);
   }
-  return gerepilecopy(av, L);
+  return gerepilecopy(av, V);
 }
 
 static GEN
-Lrayclassno(GEN L, GEN fac)
+Lbnrclassno(GEN L, GEN fac)
 {
   long i, l = lg(L);
   for (i=1; i<l; i++)
     if (gequal(gmael(L,i,1),fac)) return gmael(L,i,2);
-  err(bugparier,"Lrayclassno");
+  err(bugparier,"Lbnrclassno");
   return NULL; /* not reached */
 }
 
@@ -1799,7 +1799,7 @@ get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
   { /* FIXME: this is wasteful. Use the same algorithm as conductor */
     if (signe(arch[k]))
     {
-      arch2[k] = (long)gen_0; clhss = itos(rayclassno(bnf,mod));
+      arch2[k] = (long)gen_0; clhss = itos(bnrclassno(bnf,mod));
       arch2[k] = (long)gen_1;
       if (clhss == clhray) return -1;
     }
@@ -1824,76 +1824,80 @@ get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel)
                 factormul(dlk,factorpow(fadkabs,clhray)));
 }
 
-/* Given a list of bids and associated unit embedding matrices, return the
+/* t = [bid,U], h = #Cl(K) */
+static GEN
+get_discdata(GEN t, GEN h)
+{
+  GEN bid = gel(t,1), fa = gel(bid,3);
+  return mkvec3(mkmat2(gel(fa,1), vec_to_vecsmall(gel(fa,2))),
+                (GEN)itou(get_classno(t, h)),
+                gel(bid,1));
+}
+typedef struct _disc_data {
+  long degk;
+  GEN bnf, fadk, idealrelinit, V;
+} disc_data;
+
+static GEN
+get_discray(disc_data *D, GEN V, GEN x, GEN z, long N)
+{
+  GEN idealrel = D->idealrelinit; 
+  GEN mod = gel(z,3), Fa = gel(z,1);
+  GEN P = gel(Fa,1), E = gel(Fa,2);
+  long k, nz, clhray = z[2], lP = lg(P);
+  for (k=1; k<lP; k++)
+  {
+    GEN pr = gel(P,k), p = gel(pr,1);
+    long e, ep = E[k], f = itos(gel(pr,4));
+    long S = 0, norm = N, Npr, clhss;
+    Npr = itos(gpowgs(p,f));
+    for (e=1; e<=ep; e++)
+    {
+      GEN fad;
+      if (e < ep) { E[k] = ep-e; fad = Fa; }
+      else fad = factorsplice(Fa, k);
+      norm /= Npr;
+      clhss = (long)Lbnrclassno(gel(V,norm), fad);
+      if (e==1 && clhss==clhray) { E[k] = ep; return cgetg(1, t_VEC); }
+      if (clhss == 1) { S += ep-e+1; break; }
+      S += clhss;
+    }
+    E[k] = ep;
+    idealrel = factormul(idealrel, to_famat_all(p, utoi(f * S)));
+  }
+  nz = get_nz(D->bnf, gel(mod,1), gel(mod,2), clhray);
+  return get_NR1D(N, clhray, D->degk, nz, D->fadk, idealrel);
+}
+
+/* Given a list of bids and associated unit log matrices, return the
  * list of discrayabs. Only keep moduli which are conductors. */
 GEN
-discrayabslist(GEN bnf, GEN lists)
+discrayabslist(GEN bnf, GEN L)
 {
   pari_sp av = avma;
-  long i, j, k, lx, ly, degk;
-  GEN res, H, B, D, nf, fadkabs, b, h, d, EMPTY = cgetg(1, t_VEC);
-  GEN idealrel, idealrelinit, Z;
+  long i, j, lz, l = lg(L);
+  GEN nf, v, z, V, D, d, h;
+  disc_data ID;
 
-  bnf = checkbnf(bnf);
-  H = rayclassnolist(bnf,lists);
-  B = (GEN)lists[1];
-  lx = lg(H); D = cgetg(lx,t_VEC);
+  ID.bnf = bnf = checkbnf(bnf);
   nf = (GEN)bnf[7];
-  degk = degpol(nf[1]);
-  fadkabs = factor(absi((GEN)nf[3]));
-  idealrelinit = trivfact();
-  Z = cgetg(lx, t_VEC);
-  for (i=1; i<lx; i++) { /* change format */
-    GEN z;
-    b = gel(B,i); /* zidealstarinits */
-    h = gel(H,i); /* class numbers */
-    ly = lg(b); gel(Z,i) = z = cgetg(ly,t_VEC);
-    for (j=1; j<ly; j++)
-    {
-      GEN bid = gel(b,j), fa = gel(bid,3);
-      gel(z,j) = mkvec3(mkmat2(gel(fa,1), vec_to_vecsmall(gel(fa,2))),
-                        (GEN)itou(gel(h,j)),
-                        gel(bid,1));
-    }
-  }
-  for (i=1; i<lx; i++)
+  h = gmael3(bnf,8,1,1);
+  ID.degk = degpol(nf[1]);
+  ID.fadk = factor(absi((GEN)nf[3]));
+  ID.idealrelinit = trivfact();
+  V = cgetg(l, t_VEC);
+  D = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
   {
-    GEN Y = gel(Z,i);
-    ly = lg(Y); gel(D,i) = d = cgetg(ly,t_VEC); /* discriminants */
-    for (j=1; j<ly; j++)
-    {
-      GEN z = gel(Y,j), mod = gel(z,3), Fa = gel(z,1);
-      GEN P = gel(Fa,1), E = gel(Fa,2);
-      long nz, clhray = z[2], lP = lg(P);
-
-      idealrel = idealrelinit; 
-      for (k=1; k<lP; k++)
-      {
-        GEN pr = gel(P,k), p = gel(pr,1);
-        long e, ep = E[k], f = itos(gel(pr,4));
-        long S = 0, normi = i, Npr, clhss;
-        Npr = itos(gpowgs(p,f));
-	for (e=1; e<=ep; e++)
-	{
-          GEN fad;
-          if (e < ep) { E[k] = ep-e; fad = Fa; }
-          else fad = factorsplice(Fa, k);
-          normi /= Npr;
-          clhss = (long)Lrayclassno(gel(Z,normi), fad);
-          if (e==1 && clhss==clhray) { E[k] = ep; res = EMPTY; goto STORE; }
-          if (clhss == 1) { S += ep-e+1; break; }
-          S += clhss;
-	}
-	E[k] = ep;
-	idealrel = factormul(idealrel, to_famat_all(p, utoi(f * S)));
-      }
-      nz = get_nz(bnf, gel(mod,1), gel(mod,2), clhray);
-      res = get_NR1D(i, clhray, degk, nz, fadkabs, idealrel);
-STORE:
-      gel(d,j) = res;
+    z = gel(L,i); lz = lg(z);
+    gel(V,i) = v = cgetg(lz,t_VEC);
+    gel(D,i) = d = cgetg(lz,t_VEC);
+    for (j=1; j<lz; j++) {
+      gel(d,j) = get_discdata(gel(z,j), h);
+      gel(v,j) = get_discray(&ID, D, gel(z,j), gel(d,j), i);
     }
   }
-  return gerepilecopy(av, D);
+  return gerepilecopy(av, V);
 }
 
 /* BIG VECTOR:
@@ -1966,7 +1970,7 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
 }
 
 static GEN
-rayclassnointern(GEN B, GEN h)
+bnrclassnointern(GEN B, GEN h)
 {
   long lx = lg(B), j;
   GEN b, m, qm, L = cgetg(lx,t_VEC);
@@ -1981,12 +1985,12 @@ rayclassnointern(GEN B, GEN h)
 }
 
 static GEN
-rayclassnointernarch(GEN B, GEN h, GEN matU)
+bnrclassnointernarch(GEN B, GEN h, GEN matU)
 {
   long lx, nc, k, kk, j, r1, jj, nba, nbarch;
   GEN _2, b, qm, L, cyc, m, H, mm, rowsel;
 
-  if (!matU) return rayclassnointern(B,h);
+  if (!matU) return bnrclassnointern(B,h);
   lx = lg(B); if (lx == 1) return B;
 
   r1 = lg(matU[1])-1; _2 = vec_const(r1, gen_2);
@@ -2062,8 +2066,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   long degk, i, j, k, sqbou, l, nba, nbarch, ii, r1, c;
   pari_sp av0 = avma,  av,  av1,  lim;
   GEN nf, p, Z, fa, ideal, bidp, matarchunit, Disc, U, sgnU, EMPTY;
-  GEN res, embunit, clh, Ray;
-  GEN discall, idealrel, idealrelinit, fadkabs;
+  GEN res, embunit, h, Ray, discall, idealrel, idealrelinit, fadkabs;
 
   if (bound <= 0) err(talker,"non-positive bound in Discrayabslist");
   res = discall = NULL; /* -Wall */
@@ -2072,7 +2075,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
   degk = degpol(nf[1]);
   fadkabs = factor(absi((GEN)nf[3]));
-  clh = gmael3(bnf,8,1,1);
+  h = gmael3(bnf,8,1,1);
   U = init_units(bnf);
   sgnU = zsignunits(bnf, NULL, 1);
 
@@ -2098,8 +2101,8 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   bigel(Z,1) = mkvec(zsimp(bidp,embunit)); 
   if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
   maxprime_check((ulong)bound);
-  /* The goal is to compute Ray (lists of rayclassno). Z contains "zsimps",
-   * simplified zidealstarinit, from which rayclassno is easy to compute.
+  /* The goal is to compute Ray (lists of bnrclassno). Z contains "zsimps",
+   * simplified zidealstarinit, from which bnrclassno is easy to compute.
    * Once p > sqbou, delete Z[i] for i > sqbou and compute directly Ray */
   Ray = Z;
   while (p[2] <= bound)
@@ -2108,11 +2111,11 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     {
       GEN z;
       flbou = 1;
-      if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
+      if (DEBUGLEVEL>1) fprintferr("\nStarting bnrclassno computations\n");
       Z = gerepilecopy(av,Z); av1 = avma;
       Ray = bigcgetvec(bound);
       for (i=1; i<=bound; i++)
-	bigel(Ray,i) = rayclassnointernarch(bigel(Z,i),clh,matarchunit);
+	bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
       Ray = gerepilecopy(av1,Ray);
       z = bigcgetvec(sqbou);
       for (i=1; i<=sqbou; i++) bigel(z,i) = bigel(Z,i);
@@ -2150,7 +2153,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
 
           setlg(p2, c+1);
           pz = bigel(Ray,i);
-          if (flbou) p2 = rayclassnointernarch(p2,clh,matarchunit);
+          if (flbou) p2 = bnrclassnointernarch(p2,h,matarchunit);
           if (lg(pz) > 1) p2 = concatsp(pz,p2);
           bigel(Ray,i) = p2;
         }
@@ -2169,16 +2172,14 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   }
   if (!flbou) /* occurs iff bound = 1,2,4 */
   {
-    if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
+    if (DEBUGLEVEL>1) fprintferr("\nStarting bnrclassno computations\n");
     Ray = bigcgetvec(bound);
     for (i=1; i<=bound; i++)
-      bigel(Ray,i) = rayclassnointernarch(bigel(Z,i),clh,matarchunit);
+      bigel(Ray,i) = bnrclassnointernarch(bigel(Z,i),h,matarchunit);
   }
   Ray = gerepilecopy(av, Ray);
   
-  /* following discrayabslist */
   if (DEBUGLEVEL>1) fprintferr("Starting discrayabs computations\n");
-
   if (allarch) nbarch = 1<<r1;
   else
   {
@@ -2218,7 +2219,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
               { res = EMPTY; goto STORE; }
         }
         idealrel = idealrelinit;
-        for (k=1; k<lP; k++)
+        for (k=1; k<lP; k++) /* cf get_discray */
         {
           long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1;
           long S = 0, normi = i, Npr, clhss;
@@ -2230,7 +2231,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
             if (e < ep) { E[k] = ep-e; fad = Fa; }
             else fad = factorsplice(Fa, k);
             normi /= Npr;
-            clhss = Lrayclassno(bigel(Ray,normi),fad)[karch+1];
+            clhss = Lbnrclassno(bigel(Ray,normi),fad)[karch+1];
             if (e==1 && clhss==clhray) { E[k] = ep; res = EMPTY; goto STORE; }
             if (clhss == 1) { S += ep-e+1; break; }
             S += clhss;

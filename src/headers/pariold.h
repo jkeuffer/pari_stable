@@ -30,6 +30,8 @@
 #define pvaluation Z_pvalrem
 #define svaluation u_lvalrem
 #define isprincipalrayall bnrisprincipal
+#define rayclassno bnrclassno
+#define rayclassnolist bnrclassnolist
 
 #define apprgen padicappr
 #define apprgen9 padicappr

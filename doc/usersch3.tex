@@ -3648,17 +3648,36 @@ finite abelian group.
 \kbd{bnfinit} (units are mandatory unless the ideal is trivial), and $I$
 being a modulus, computes the ray class number of the number field for the
 modulus $I$. This is faster than \kbd{bnrinit} and should be used if only the
-ray class number is desired.
+ray class number is desired. See \tet{bnrclassnolist} if you need ray class
+numbers for all moduli less than some bound.
 
-\syn{rayclassno}{\var{bnf},I}.
+\syn{bnrclassno}{\var{bnf},I}.
 
 \subsecidx{bnrclassnolist}$(\var{bnf},\var{list})$: $\var{bnf}$ being as
-output by \kbd{bnfinit} (units are mandatory unless the ideal is trivial),
-and \var{list} being a list of modules as output by \kbd{ideallist} or
-\kbd{ideallistarch}, outputs the list of the class numbers of the
-corresponding ray class groups.
+output by \kbd{bnfinit}, and \var{list} being a list of modules with units as
+output by \kbd{ideallist} or \kbd{ideallistarch}, outputs the list of the
+class numbers of the corresponding ray class groups.
 
-\syn{rayclassnolist}{\var{bnf},\var{list}}.
+\bprog
+? bnf = bnfinit(x^2 - 2);
+? L = ideallist(bnf, 100, 2);
+? H = bnrclassnolist(bnf, L);
+? H[98]
+%4 = [1, 3, 1]
+? l = L[1][98]; ids = vector(#l, i, l[i].mod[1])
+%5 = [[98, 88; 0, 1], [14, 0; 0, 7], [98, 10; 0, 1]]
+@eprog
+The weird \kbd{l[i].mod[1]}, is the first component of \kbd{l[i].mod}, i.e.
+the finite part of the conductor. (This is cosmetic, since by construction
+the archimedean part is trivial, I do not want to see it). This tells us that
+the ray class groups modulo the ideals of norm 98 (printed as \kbd{\%5}) have
+respectively order $1$, $3$ and $1$. Indeed, we may check directly :
+\bprog
+? bnrclassno(bnf, ids[2])
+%6 = 3
+@eprog
+
+\syn{bnrclassnolist}{\var{bnf},\var{list}}.
 
 \subsecidx{bnrconductor}$(a_1,\{a_2\},\{a_3\}, \{\fl=0\})$: conductor $f$ of
 the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
@@ -3742,9 +3761,9 @@ where $n$ is the degree of the base field and $j$ is such that
 
 \kbd{pr = idealprimedec(\var{nf},p)[j]}.
 
-\noindent $m$ can be decoded using \kbd{bnfdecodemodule}.
+\noindent $m$ can be decoded using \tet{bnfdecodemodule}.
 
-\syn{bnrdisclist0}{a1,a2,a3,\var{bound},\var{arch},\fl}.
+\syn{bnrdisclist0}{bnf,\var{bound},\var{arch}}.
 
 \subsecidx{bnrinit}$(\var{bnf},\var{ideal},\{\fl=0\})$: $\var{bnf}$ is as
 output by \kbd{bnfinit}, \var{ideal} is a modulus, initializes data linked to
@@ -3784,7 +3803,7 @@ that $x=\alpha\prod_ig_i^{x_i}$.
 If $\fl=0$, outputs only $v_1$. In that case, \var{bnr} need not contain the
 ray class group generators, i.e.~it may be created with \kbd{bnrinit}$(,,0)$
 
-\syn{isprincipalrayall}{\var{bnr},x,\fl}.
+\syn{bnrisprincipal}{\var{bnr},x,\fl}.
 
 \subsecidx{bnrrootnumber}$(\var{bnr},\var{chi},\{\fl=0\})$:
 if $\chi=\var{chi}$ is a (not necessarily primitive)
@@ -4229,10 +4248,12 @@ The possible values of $\fl$ are:
 
 \quad 1: as 0, but include the generators in the \var{bid}.
 
-\quad 2: in this case, \var{nf} must be a \var{bnf} with units. Output
-$[L,U]$, where $L$ is as case 0 and $U$ is a vector of discrete logarithms of
-the units. More precisely, $U[i]$ gives the \kbd{ideallog}s of
-\kbd{bnf.tufu} with respect to the generators of $L[i]$.
+\quad 2: in this case, \var{nf} must be a \var{bnf} with units. Each
+component is of the form $[\var{bid},U]$, where \var{bid} is as case 0
+and $U$ is a vector of discrete logarithms of the units. More precisely, it
+gives the \kbd{ideallog}s with respect to \var{bid} of \kbd{bnf.tufu}.
+This structure is technical, and only meant to be used in conjunction with
+\tet{bnrclassnolist} or \tet{bnrdisclist}.
 
 \quad 3: as 2, but include the generators in the \var{bid}.
 
@@ -4267,16 +4288,16 @@ $25$ and trivial archimedean part, as the last 3 commands show. See
 be a C long integer. Also available is \funs{ideallist}{\var{nf},\var{bound}},
 corresponding to the case $\fl=4$.
 
-\subsecidx{ideallistarch}$(\var{nf},\var{list},\{\var{arch}\},\{\fl=0\})$:
-vector of vectors of all \var{bid} (see \tet{idealstar}) of all
-modules in \var{list}, with Archimedean part \var{arch} added (void if
-omitted). \var{list} is a vector of big ideals, as output by
-\kbd{ideallist}$(\ldots, \fl)$ for instance. $\fl$ is optional; its binary
-digits are toggles meaning: 1: give generators as well, 2: list format is
-$[L,U]$ (see \kbd{ideallist}).
+\subsecidx{ideallistarch}$(\var{nf},\var{list},\var{arch})$:
+\var{list} is a vector of bids, as output by \tet{ideallist} with flag
+$0$ to $3$. Return a vector of vectors with the same number of components as
+the original \var{list}. The leaves give information about moduli whose
+finite part is as in original list, in the same order, and archimedean part
+is now \var{arch} (it was originally trivial). The information contained is
+of the same kind as was present in the input; see \tet{ideallist}, in
+particular the meaning of \fl.
 
-\syn{ideallistarch0}{\var{nf},\var{list},\var{arch},\fl}, where an omitted
-\var{arch} is coded as \kbd{NULL}.
+\syn{ideallistarch}{\var{nf},\var{list},\var{arch}}.
 
 \subsecidx{ideallog}$(\var{nf},x,\var{bid})$: $\var{nf}$ being a number field,
 \var{bid} being a ``big ideal'' as output by \kbd{idealstar} and $x$ being a
