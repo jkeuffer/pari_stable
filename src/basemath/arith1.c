@@ -2086,12 +2086,17 @@ to_form(GEN x, long f)
 static long
 two_rank(GEN x)
 {
-  GEN p = (GEN)decomp(negi(x))[1];
-  long i,l = lg(p)-1;
-  for (i=1; i<=l; i++)
-    if (mod4((GEN)p[i]) == 3) break;
-  if (i>l) l--; else l -= 2;
-  return l;
+  GEN p = (GEN)decomp(absi(x))[1];
+  long l = lg(p)-1;
+#if 0 /* positive disc not needed */
+  if (signe(x) > 0)
+  {
+    long i;
+    for (i=1; i<=l; i++)
+      if (mod4((GEN)p[i]) == 3) { l--; break; }
+  }
+#endif
+  return l-1;
 }
 
 #define MAXFORM 11
