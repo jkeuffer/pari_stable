@@ -111,7 +111,8 @@ init_CHI(CHI_t *c, GEN CHI, GEN z)
 /* as t_COMPLEX */
 static void
 init_CHI_alg(CHI_t *c, GEN CHI) {
-  init_CHI(c,CHI, (GEN)CHI[4]);
+  GEN z = gmodulcp(polx[0], cyclo(itos((GEN)CHI[3]), 0));
+  init_CHI(c,CHI,z);
 }
 /* as t_POLMOD */
 static void
@@ -201,17 +202,22 @@ ComputeLift(GEN dataC)
 /* A character is given by a vector [(c_i), z, d, pm] such that
    chi(id) = z ^ sum(c_i * a_i) where
      a_i= log(id) on the generators of bnr
-     z  = exp(2i * Pi / d)
-     pm = z as a polmod */
+     z  = exp(2i * Pi / d) */
 static GEN
-get_Char(GEN chi, long prec)
+get_Char(GEN chi, GEN cyc, long prec)
 {
-  GEN C = cgetg(5, t_VEC);
-  GEN d = denom(chi);
-  C[1] = lmul(d, chi);
+  GEN d, C, chic;
+  long i, l = lg(chi);
+
+  chic = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+    chic[i] = ldiv((GEN)chi[i], (GEN)cyc[i]);
+
+  C = cgetg(4, t_VEC);
+  d = denom(chic);
+  C[1] = lmul(d, chic);
   C[2] = (long)InitRU(d, prec);
   C[3] = (long)d;
-  C[4] = lmodulcp(polx[0], cyclo(itos(d), 0));
   return C;
 }
 
@@ -221,39 +227,27 @@ get_Char(GEN chi, long prec)
 static GEN
 GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
-  long nbg, i, j, l, av = avma, nd;
-  GEN gen, cyc, U, chic, M, s, p1, cond, condc, p2, nf;
+  long i, l, av = avma, nd;
+  GEN cyc, U, M, p1, cond, condc, p2, nf;
   GEN prdiff, Mrc;
 
   cond  = gmael(bnr, 2, 1);
   condc = gmael(bnrc, 2, 1);
   if (gegal(cond, condc)) return NULL;
 
-  gen   = gmael(bnr, 5, 3);
-  nbg   = lg(gen) - 1;
   cyc   = gmael(bnr, 5, 2);
   Mrc   = diagonal(gmael(bnrc, 5, 2));
   nf    = gmael(bnr, 1, 7);
 
-  cond  = (GEN)cond[1];
-  condc = (GEN)condc[1];
-
   M = bnrGetSurj(bnr, bnrc);
   U = (GEN)hnfall(concatsp(M, Mrc))[2];
+  l = lg(chi);
+  U = vecextract_i(U, l, lg(U)-1);
+  U = rowextract_i(U, 1, l-1); /* upper right = projector to image */
+  chi = gmul(chi, U);
 
-  l = lg((GEN)M[1]);
-  chic = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++)
-  {
-    s  = gzero; p1 = (GEN)U[i + nbg];
-    for (j = 1; j <= nbg; j++)
-    {
-      p2 = gdiv((GEN)p1[j], (GEN)cyc[j]);
-      s  = gadd(s, gmul(p2,(GEN)chi[j]));
-    }
-    chic[i] = (long)s;
-  }
-
+  cond  = (GEN)cond[1];
+  condc = (GEN)condc[1];
   p2 = (GEN)idealfactor(nf, cond)[1];
   l  = lg(p2);
 
@@ -263,7 +257,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   setlg(prdiff, nd);
 
   p1  = cgetg(3, t_VEC);
-  p1[1] = (long)get_Char(chic,prec);
+  p1[1] = (long)get_Char(chi,cyc,prec);
   p1[2] = lcopy(prdiff);
 
   return gerepileupto(av,p1);
@@ -276,7 +270,7 @@ GetDeg(GEN dataCR)
   GEN degs = cgetg(l, t_VECSMALL);
 
   for (i = 1; i < l; i++)
-    degs[i] = degpol(gmael4(dataCR, i, 5, 4, 1));
+    degs[i] = itos(phi(gmael3(dataCR, i, 5, 3)));
   return degs;
 }
 
@@ -629,10 +623,10 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
             if (j <= nbp) continue;
 
             p2 = cgetg(6, t_VEC);
-            p2[1] = lcopy(bnrm);
-            p2[2] = lcopy(D);
-            p2[3] = (long)InitQuotient((GEN)p2[1], (GEN)p2[2]);
-            p2[4] = (long)InitQuotient((GEN)p2[1], ImC);
+            p2[1] = (long)bnrm;
+            p2[2] = (long)D;
+            p2[3] = (long)InitQuotient(bnrm, D);
+            p2[4] = (long)InitQuotient(bnrm, ImC);
 
             p1 = CplxModulus(p2, &pr, prec);
 
@@ -812,8 +806,8 @@ ComputeArtinNumber(GEN dtcr, long flag, long prec)
 GEN
 bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 {
-  long av = avma, l, i;
-  GEN cond, condc, bnrc, chic, cyc, d, p1, p2, dtcr;
+  long av = avma, l;
+  GEN cond, condc, bnrc, cyc, p1, p2, dtcr;
 
   if (flag < 0 || flag > 1) err(flagerr,"bnrrootnumber");
 
@@ -837,16 +831,8 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   else
     bnrc = buchrayinitgen((GEN)bnr[1], condc);
 
-  chic = cgetg(l, t_VEC);
   cyc  = gmael(bnr, 5, 2);
-  for (i = 1; i < l; i++)
-    chic[i] = ldiv((GEN)chi[i], (GEN)cyc[i]);
-  d = denom(chic); /* order of chi */
-
-  p2 = cgetg(4, t_VEC);
-  p2[1] = lmul(d, chic);
-  p2[2] = (long)InitRU(d, prec);
-  p2[3] = (long)d;
+  p2 = get_Char(chi,cyc, prec);
 
   dtcr = cgetg(9, t_VEC);
   dtcr[1] = (long)chi;
@@ -970,12 +956,11 @@ static GEN
 InitChar(GEN bnr, GEN listCR, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
-  GEN modul, dk, C, dataCR, chi, cond, Mr, chic, z1, p1;
-  long N, r1, r2, prec2, h, i, j, nbg, av = avma;
+  GEN modul, dk, C, dataCR, chi, cond, Mr, z1, p1;
+  long N, r1, r2, prec2, h, i, j, av = avma;
 
   modul = gmael(bnr, 2, 1);
   Mr    = gmael(bnr, 5, 2);
-  nbg   = lg(Mr) - 1;
   dk    = (GEN)nf[3];
   N     = degpol(nf[1]);
   nf_get_sign(nf, &r1,&r2);
@@ -1028,11 +1013,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
       data[3] = olddata[3]; /* bnr(cond(chi)) */
     }
     data[4] = (long)bnr; /* bnr(m) */
-
-    chic = cgetg(nbg + 1, t_VEC);
-    for (j = 1; j <= nbg; j++)
-      chic[j] = ldiv((GEN)chi[j], (GEN)Mr[j]);
-    data[5] = (long)get_Char(chic,prec); /* char associated to bnr(m) */
+    data[5] = (long)get_Char(chi,Mr,prec); /* char associated to bnr(m) */
 
     /* compute diff(chi) and the corresponding primitive character */
     data[7] = cond[1];
@@ -1060,7 +1041,7 @@ static GEN
 InitChar0(GEN dataD, long prec)
 {
   GEN MrD, listCR, p1, chi, lchi, Surj, cond, bnr, p2, Mr, d, allCR;
-  long hD, h, nc, i, j, lD, nbg, tnc, av = avma;
+  long hD, h, nc, i, j, lD, tnc, av = avma;
 
   Surj = gmael(dataD, 2, 3);
   MrD  = gmael(dataD, 2, 2);
@@ -1069,7 +1050,6 @@ InitChar0(GEN dataD, long prec)
   hD   = itos(gmael(dataD, 2, 1));
   h    = hD >> 1;
   lD   = lg(MrD)-1;
-  nbg  = lg(Mr) - 1;
 
   disable_dbg(0);
 
@@ -2647,13 +2627,13 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   v = 1;
   while(gcmp1((GEN)cond1[v])) v++;
 
-LABDOUB:
-
-  av = avma;
-
   cl = lg(dataCR)-1;
   degs = GetDeg(dataCR);
   h  = itos(gmul2n(det((GEN)data[2]), -1));
+
+LABDOUB:
+
+  av = avma;
 
   if (flag >= 0)
   {
@@ -2883,8 +2863,15 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   return gerepileupto(av, makescind(bnf, pol, cl, prec));
 }
 
+static GEN
+get_subgroup(GEN subgp, GEN cyc)
+{
+  if (gcmp0(subgp)) return cyc;
+  return gcmp1(denom(gauss(subgp, cyc)))? subgp: NULL;
+}
+
 GEN
-bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
+bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
 {
   long cl, N, newprec, av = avma, bnd = 0;
   GEN bnf, dataS, p1, Mcyc, nf, data;
@@ -2914,32 +2901,26 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
   if (nf_get_r2(nf))
     err(talker, "not a totally real ground base field in bnrstark");
 
-  /* check the subgroup */
-  if (gcmp0(subgroup))
-    subgroup = Mcyc;
-  else
-  {
-    p1 = gauss(subgroup, Mcyc);
-    if (!gcmp1(denom(p1)))
-      err(talker, "incorrect subgroup in bnrstark");
-  }
+  /* check the subgrp */
+  if (! (subgrp = get_subgroup(subgrp,Mcyc)) )
+    err(talker, "incorrect subgrp in bnrstark");
 
   /* compute bnr(conductor) */
-  p1       = conductor(bnr, subgroup, 2);
+  p1       = conductor(bnr, subgrp, 2);
   bnr      = (GEN)p1[2];
-  subgroup = (GEN)p1[3];
+  subgrp = (GEN)p1[3];
 
   /* check the class field */
   if (nf_get_r2(checknf(bnr)))
     err(talker, "not a totally real class field in bnrstark");
 
-  cl = itos(det(subgroup));
+  cl = itos(det(subgrp));
   if (cl == 1) return polx[0];
 
   timer2();
 
   /* find a suitable extension N */
-  dataS = InitQuotient(bnr, subgroup);
+  dataS = InitQuotient(bnr, subgrp);
   data  = FindModulus(dataS, 1, &newprec, prec, bnd);
 
   if (newprec > prec)
@@ -2951,7 +2932,7 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
   return gerepileupto(av, AllStark(data, nf, flag, newprec));
 }
 
-/* For each character of Cl(bnr)/sbgrp, compute L(1, chi) (or equivalently
+/* For each character of Cl(bnr)/subgp, compute L(1, chi) (or equivalently
    the first non-zero term c(chi) of the expansion at s = 0). The binary
    digits of flag mean 1: if 0 then compute the term c(chi) and return
    [r(chi), c(chi)] where r(chi) is the order of L(s, chi) at s = 0,
@@ -2962,7 +2943,7 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
    the modulus of bnr (and the infinite places), 3: return also the
    character */
 GEN
-bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
+bnrL1(GEN bnr, GEN subgp, long flag, long prec)
 {
   GEN bnf, nf, cyc, Mcyc, p1, L1, chi, lchi, clchi, allCR, listCR, dataCR;
   GEN S, T, rep, indCR, invCR, Qt;
@@ -2995,19 +2976,11 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   }
 
   /* check the subgroup */
-  if (gcmp0(sbgrp))
-    sbgrp = Mcyc;
-  else
-  {
-    if (lg(sbgrp) != ncc+1)
-      err(talker, "incorrect subgroup in bnrL1");
-    p1 = gauss(sbgrp, Mcyc);
-    if (!gcmp1(denom(p1)))
-      err(talker, "incorrect subgroup in bnrL1");
-  }
+  if (! (subgp = get_subgroup(subgp,Mcyc)) )
+    err(talker, "incorrect subgroup in bnrL1");
 
-  cl = labs(itos(det(sbgrp)));
-  Qt = InitQuotient0(Mcyc, sbgrp);
+  cl = labs(itos(det(subgp)));
+  Qt = InitQuotient0(Mcyc, subgp);
   lq = lg((GEN)Qt[2]) - 1;
 
   /* compute all the characters */
