@@ -1068,7 +1068,11 @@ VC_mul(GEN x, GEN y, long l)
   pari_sp av = avma;
   GEN z = gzero;
   long i;
-  for (i=1; i<l; i++) z = gadd(z, gmul((GEN)x[i], (GEN)y[i]));
+  for (i=1; i<l; i++)   
+  {
+    GEN c = (GEN)y[i];
+    if (!isexactzero(c)) z = gadd(z, gmul((GEN)x[i], c));
+  }
   return gerepileupto(av,z);
 }
 /* compatible t_MAT * t_COL, l = lg(x) = lg(y), lz = l>1? lg(x[1]): 1 */
@@ -1081,7 +1085,11 @@ MC_mul(GEN x, GEN y, long l, long lz)
   {
     pari_sp av = avma;
     GEN t = gzero;
-    for (j=1; j<l; j++) t = gadd(t, gmul(gcoeff(x,i,j),(GEN)y[j]));
+    for (j=1; j<l; j++)
+    {
+      GEN c = (GEN)y[j];
+      if (!isexactzero(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
+    }
     z[i] = lpileupto(av,t);
   }
   return z;

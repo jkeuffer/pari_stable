@@ -120,6 +120,7 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    53- ZX_QX_resultant (modular resultant with integer result): possible
        infinite loop when the result is 0, and non trivial denominator.
    54- elleta(E.omega) gave incorrect results [ conflicting normalizations ]
+   55- typo in charpoly(t_MAT) [ stack overflow after garbage collection ]
 
   Changed
     1- rnf structure (removed useless components)
@@ -166,6 +167,8 @@ IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
        \o3 
        \p240
        [Pi, Pi]~
+   25- faster multiplication [t_VEC | t_MAT] * t_COL for sparse t_COL
+       [ induces faster charpoly for sparse t_MAT ]
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

@@ -211,7 +211,7 @@ caradj(GEN x, long v, GEN *py)
   for (k = 2; k < l-1; k++)
   {
     GEN y0 = y;
-    y = gmul(x, y);
+    y = gmul(y, x);
     t = gdivgs(mattrace(y), -k);
     for (i = 1; i < l; i++) coeff(y,i,i) = ladd(gcoeff(y,i,i), t);
     y = gclone(y); if (k > 2) gunclone(y0);
