@@ -104,47 +104,46 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define _evallg(x)    (x)
 #define _evallgef(x)  (x)
 
-#define typ(x)        ((((ulong)(x))&1)? (long)t_SMALL: (long)(((ulong) ((GEN) (x))[0]) >> TYPSHIFT))
-#define settyp(x,s)   (((GEN)(x))[0]=\
-                        (((GEN)(x))[0]&(~TYPBITS)) | evaltyp(s))
+#define typ(x)        ((((ulong)(x))&1)? (long)t_SMALL: (long)((((ulong*)(x))[0]) >> TYPSHIFT))
+#define settyp(x,s)   (((ulong*)(x))[0]=\
+                        (((ulong*)(x))[0]&(~TYPBITS)) | evaltyp(s))
 #define smalltos(x)   (((long)(x))>>1)
 
-#define isclone(x)    (((GEN) (x))[0] & CLONEBIT)
-#define setisclone(x) (((GEN) (x))[0] |= CLONEBIT)
-#define unsetisclone(x) (((GEN) (x))[0] &= (~CLONEBIT))
+#define isclone(x)    (((ulong*) (x))[0] & CLONEBIT)
+#define setisclone(x) (((ulong*) (x))[0] |= CLONEBIT)
+#define unsetisclone(x) (((ulong*) (x))[0] &= (~CLONEBIT))
 
-#define lg(x)         ((((ulong)(x))&1UL)?1L: ((long) (((GEN) (x))[0] & LGBITS)))
-#define setlg(x,s)    (((GEN)(x))[0]=\
-                        (((GEN)(x))[0]&(~LGBITS)) | evallg(s))
+#define lg(x)         ((((ulong)(x))&1UL)?1L: ((long)(((ulong*)(x))[0] & LGBITS)))
+#define setlg(x,s)    (((ulong*)(x))[0]=\
+                        (((ulong*)(x))[0]&(~LGBITS)) | evallg(s))
 
-#define signe(x)      (((long) ((GEN) (x))[1]) >> SIGNSHIFT)
-#define setsigne(x,s) (((GEN)(x))[1]=\
-                        (((GEN)(x))[1]&(~SIGNBITS)) | evalsigne(s))
+#define signe(x)      ((((long*)(x))[1]) >> SIGNSHIFT)
+#define setsigne(x,s) (((ulong*)(x))[1]=\
+                        (((ulong*)(x))[1]&(~SIGNBITS)) | (ulong)evalsigne(s))
 
-#define lgef(x)       ((long)(((GEN) (x))[1] & LGEFBITS))
-#define setlgef(x,s)  (((GEN)(x))[1]=\
-                        (((GEN)(x))[1]&(~LGEFBITS)) | evallgef(s))
+#define lgef(x)       ((long)(((ulong*)(x))[1] & LGEFBITS))
+#define setlgef(x,s)  (((ulong*)(x))[1]=\
+                        (((ulong*)(x))[1]&(~LGEFBITS)) | evallgef(s))
 
-#define lgeflist(x)      ((long)(((GEN) (x))[1]))
-#define setlgeflist(x,l) (((GEN) (x))[1]=(l))
+#define lgeflist(x)      (((long*)(x))[1])
+#define setlgeflist(x,l) (((ulong*)(x))[1]=(ulong)(l))
 
-#define lgefint(x)      ((long)(((GEN) (x))[1] & LGEFINTBITS))
-#define setlgefint(x,s) (((GEN)(x))[1]=\
-                          (((GEN)(x))[1]&(~LGEFINTBITS)) | evallgefint(s))
+#define lgefint(x)      ((long)(((ulong*)(x))[1] & LGEFINTBITS))
+#define setlgefint(x,s) (((ulong*)(x))[1]=\
+                          (((ulong*)(x))[1]&(~LGEFINTBITS)) | (ulong)evallgefint(s))
 
-#define expo(x)       ((long) ((((GEN) (x))[1] & EXPOBITS) - HIGHEXPOBIT))
-#define setexpo(x,s)  (((GEN)(x))[1]=\
-		       (((GEN)(x))[1]&(~EXPOBITS)) | evalexpo(s))
+#define expo(x)       ((long) ((((ulong*)(x))[1] & EXPOBITS) - HIGHEXPOBIT))
+#define setexpo(x,s)  (((ulong*)(x))[1]=\
+		       (((ulong*)(x))[1]&(~EXPOBITS)) | (ulong)evalexpo(s))
 
-#define valp(x)       ((long) ((((GEN)(x))[1] & VALPBITS) - HIGHVALPBIT))
-#define setvalp(x,s)  (((GEN)(x))[1]=\
-		       (((GEN)(x))[1]&(~VALPBITS)) | evalvalp(s))
+#define valp(x)       ((long) ((((ulong*)(x))[1] & VALPBITS) - HIGHVALPBIT))
+#define setvalp(x,s)  (((ulong*)(x))[1]=\
+		       (((ulong*)(x))[1]&(~VALPBITS)) | (ulong)evalvalp(s))
 
-#define precp(x)      ((long) (((ulong) ((GEN) (x))[1]) >> PRECPSHIFT))
-#define setprecp(x,s) (((GEN)(x))[1]=\
-		       (((GEN)(x))[1]&(~PRECPBITS)) | evalprecp(s))
+#define precp(x)      ((long) (((ulong*)(x))[1] >> PRECPSHIFT))
+#define setprecp(x,s) (((ulong*)(x))[1]=\
+		       (((ulong*)(x))[1]&(~PRECPBITS)) | (ulong)evalprecp(s))
 
-#define varn(x)       ((long)((((GEN) (x))[1]&VARNBITS) >> VARNSHIFT))
-#define setvarn(x,s)  (((GEN)(x))[1]=\
-		       (((GEN)(x))[1]&(~VARNBITS)) | evalvarn(s))
-
+#define varn(x)       ((long)((((ulong*)(x))[1]&VARNBITS) >> VARNSHIFT))
+#define setvarn(x,s)  (((ulong*)(x))[1]=\
+		       (((ulong*)(x))[1]&(~VARNBITS)) | (ulong)evalvarn(s))
