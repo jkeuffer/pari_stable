@@ -319,6 +319,7 @@ char *helpmessages_basic[]={
   "nfsubfields(nf,{d=0}): find all subfields of degree d of number field nf (all subfields if d is null or omitted). Result is a vector of subfields, each being given by [g,h], where g is an absolute equation and h expresses one of the roots of g in terms of the root x of the polynomial defining nf",
   "norm(x): norm of x",
   "norml2(x): square of the L2-norm of the vector x",
+  "numbpart(x): number of partitions of x",
   "numdiv(x): number of divisors of x",
   "numerator(x): numerator of x",
   "numtoperm(n,k): permutation number k (mod n!) of n letters (n C-integer)",

@@ -1134,6 +1134,9 @@ GEN     rnfcharpoly(GEN nf,GEN T,GEN alpha,int n);
 GEN     rnfdedekind(GEN nf,GEN T,GEN pr);
 GEN     unifpol(GEN nf,GEN pol,long flag);
 
+/* part.c */
+GEN     numbpart(GEN x);
+
 /* perm.c */
 
 GEN     abelian_group(GEN G);

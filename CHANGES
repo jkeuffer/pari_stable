@@ -28,6 +28,7 @@ OR = Olivier Ramare
 OV = Oliver Voigt
 PM = Peter Montgomery
 PW = Paul van Wamelen
+RS = Ralf Stefan
 TH = Teluhiko Hilano
 TP = Thomas Papanikolaou
 XR = Xavier Roblot
@@ -185,6 +186,7 @@ IZ  5- File README.os2
     6- Allow nfroots(, P) [ roots in Q ]
     7- routines Strexpand(), Strtex()
 IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
+RS  9- routine numbpart()
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

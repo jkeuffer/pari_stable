@@ -2265,6 +2265,7 @@ entree functions_basic[]={
 {"nfsubfields",99,(void*)subfields0,6,"GDG"},
 {"norm",18,(void*)gnorm,2,"G"},
 {"norml2",18,(void*)gnorml2,2,"G"},
+{"numbpart",18,(void*)numbpart,4,"G"},
 {"numdiv",18,(void*)gnumbdiv,4,"G"},
 {"numerator",18,(void*)numer,2,"G"},
 {"numtoperm",24,(void*)numtoperm,2,"LG"},
