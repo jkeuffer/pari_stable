@@ -39,6 +39,9 @@ Done for version 2.2.2 (released ??/??/2001):
     6- paddicappr was very slow (esp. when p was large)
     7- Configure: check for 'double endianness' [used for double --> t_REAL
        conversion]. Previous check was failing on ARM architecture.
+    8- forsubgroup state not properly restored after ^C
+    9- libpari.so included symbols from libc without linking it explicitly
+       (Debian requirement, and cleaner anyway)
 
   Changes
     1- allow compressing *.dvi files for the online help system

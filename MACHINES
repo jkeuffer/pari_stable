@@ -91,6 +91,7 @@ IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 PentiumIII  1000MHz  Linux-2.2.15    gcc-2.96       1068    1164  2.2.0     XR
 PentiumIII   933MHz  Linux-2.2.15   egcs            1450    1485  2.0.20    IS
 PentiumIII   800MHz  Linux-2.2.14   egcs            1900    1882  2.0.20    CL
+PentiumIII   800MHz  Linux-2.2.19    gcc-2.96       1638    1624  2.1.2     OT
 PentiumIII   733MHz  Linux-2.2.14   egcs            2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc            2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs            3154    3176  2.0.18    HC
@@ -276,6 +277,7 @@ Contributors:
   MS = Michael Stoll
   NI = Nathaniel Irons
   PE = Philippe Elbaz-Vincent
+  OT = Olivier Thibault
   QL = Qing Liu
   SH = Steve Harding
   TP = Thomas Papanikolaou
