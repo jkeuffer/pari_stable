@@ -120,7 +120,7 @@ enum manage_var_t {
     manage_var_init,			/* 2 */
     manage_var_next,			/* 3 */
     manage_var_max_avail,		/* 4 */
-    manage_var_pop,			/* 5 */
+    manage_var_pop 			/* 5 */
 };
 
 
