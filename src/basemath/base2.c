@@ -595,6 +595,35 @@ fnz(GEN x,long j)
   return 1;
 }
 
+/* return list u[i], 2 by 2 coprime with the same prime divisors as ab */
+static GEN
+get_coprimes(GEN a, GEN b)
+{
+  long i, k = 1;
+  GEN u = cgetg(3, t_VEC);
+  u[1] = (long)a;
+  u[2] = (long)b;
+  /* u1,..., uk 2 by 2 coprime */
+  while (k+1 < lg(u))
+  {
+    GEN d, c = (GEN)u[k+1];
+    if (is_pm1(c)) { k++; continue; }
+    for (i=1; i<=k; i++)
+    {
+      if (is_pm1(u[i])) continue;
+      d = mppgcd(c, (GEN)u[i]);
+      if (d == gun) continue;
+      c = diviiexact(c, d);
+      u[i] = (long)diviiexact((GEN)u[i], d);
+      u = concatsp(u, d);
+    }
+    u[++k] = (long)c;
+  }
+  for (i = k = 1; i < lg(u); i++)
+    if (!is_pm1(u[i])) u[k++] = u[i];
+  setlg(u, k); return u;
+}
+
 /* return integer basis. Set dK = disc(K), dx = disc(f), w (possibly partial)
  * factorization of dK. *ptw can be set by the caller, in which case it is
  * taken to be the factorization of disc(f), then overwritten
@@ -612,19 +641,30 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   w2 = (GEN)w[2];
   n = degpol(f); lw = lg(w1);
   ordmax = cgetg(1, t_VEC);
+  /* "complete" factorization first */
   for (i=1; i<lw; i++)
   {
     long mf = itos((GEN)w2[i]);
     if (mf == 1) { ordmax = concatsp(ordmax, gun); continue; }
 
-    CATCH(invmoder) { /* caught a false prime, update factorization */
+    CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
       GEN p = mppgcd((GEN)x[1], (GEN)x[2]);
+      GEN N, u;
       if (DEBUGLEVEL) err(warner,"impossible inverse: %Z", x);
-      w1[i] = (long)p;
-      w1 = concatsp(w1, diviiexact((GEN)x[1], p));
-      w2 = concatsp(w2, (GEN)w2[i]);
-      lw++;
+
+      u = get_coprimes(p, diviiexact((GEN)x[1],p));
+      l = lg(u);
+      /* no small factors, but often a prime power */
+      for (k = 1; k < l; k++) u[k] = coeff(auxdecomp((GEN)u[k], 2),1,1);
+
+      w1[i] = u[1];
+      w1 = concatsp(w1, vecextract_i(u, 2, l-1));
+      N = *dx;
+      w2[i] = lstoi(pvaluation(N, (GEN)w1[i], &N));
+      k  = lw;
+      lw = lg(w1);
+      for ( ; k < lw; k++) w2[k] = lstoi(pvaluation(N, (GEN)w1[k], &N));
     } RETRY {
       if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],mf);
       ordmax = concatsp(ordmax, _vec( maxord((GEN)w1[i],f,mf) ));
