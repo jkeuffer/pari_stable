@@ -439,5 +439,5 @@ x^17 - 1
 ? getheap
 [67, 6756]
 ? print("Total time spent: ",gettime);
-Total time spent: 240
+Total time spent: 220
 ? \q

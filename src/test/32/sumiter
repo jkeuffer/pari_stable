@@ -7,7 +7,7 @@
 ? 4*intnum(x=1,10^20,1/(1+x^2),2)
 3.141592653589793208
 ? intnum(x=-0.5,0.5,1/sqrt(1-x^2))
-1.047197551196597747
+1.047197551196597745
 ? 2*intnum(x=0,100,sin(x)/x,3)
 3.124450933778112629
 ? \p38
@@ -41,5 +41,5 @@
 ? getheap
 [19, 189]
 ? print("Total time spent: ",gettime);
-Total time spent: 180
+Total time spent: 190
 ? \q

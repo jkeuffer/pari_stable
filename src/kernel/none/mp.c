@@ -586,8 +586,10 @@ addir(GEN x, GEN y)
 GEN
 addrr(GEN x, GEN y)
 {
-  long sx=signe(x),sy=signe(y),ex=expo(x),ey=expo(y);
-  long e,m,flag,i,j,f2,lx,ly,lz;
+  long lx, sx = signe(x), ex = expo(x);
+  long ly, sy = signe(y), ey = expo(y);
+  long e, i, j, lz;
+  int flag, f2;
   GEN z;
   LOCAL_OVERFLOW;
 
@@ -619,28 +621,30 @@ addrr(GEN x, GEN y)
   lx=lg(x); ly=lg(y);
   if (e)
   {
-    long d = e >> TWOPOTBITS_IN_LONG, l = ly-d;
+    long m, d = e >> TWOPOTBITS_IN_LONG, l = ly-d;
     if (l > lx)     { flag=0; lz=lx+d+1; }
     else if (l > 2) { flag=1; lz=ly; lx=l; }
     else return rcopy(y);
+    z = cgetr(lz);
     m = e & (BITS_IN_LONG-1);
+    if (m)
+    { /* shift right x m bits */
+      const ulong sh = BITS_IN_LONG-m;
+      GEN p1 = x; x = new_chunk(lx+1);
+      shift_right2(x,p1,2,lx, 0,m,sh);
+      if (flag==0)
+      {
+        x[lx] = p1[lx-1] << sh;
+        if (x[lx]) { flag = 2; lx++; }
+      }
+    }
   }
   else
   {
+    flag = 1;
     if (lx > ly) lx = ly;
-    flag=2; lz=lx; m=0;
-  }
-  z = cgetr(lz);
-  if (m)
-  { /* shift right x m bits */
-    const ulong sh = BITS_IN_LONG-m;
-    GEN p1 = x; x = new_chunk(lx+1);
-    shift_right2(x,p1,2,lx, 0,m,sh);
-    if (flag==0)
-    {
-      x[lx] = p1[lx-1] << sh;
-      if (x[lx]) { flag = 3; lx++; }
-    }
+    lz = lx;
+    z = cgetr(lz);
   }
 
   if (sx==sy)
@@ -696,9 +700,24 @@ addrr(GEN x, GEN y)
   }
 
   x = z+2; i=0; while (!x[i]) i++;
-  lz -= i; z += i; m = bfffo(z[2]);
-  if (m) shift_left(z,z,2,lz-1, 0,m);
-  z[1] = evalsigne(sx) | evalexpo(ey - (m | (i<<TWOPOTBITS_IN_LONG)));
+  lz -= i; z += i;
+  j = bfffo(z[2]);
+  if (j)
+  {
+    x = z;
+    if (flag != 1)
+    { /* z was extended by d+1 words (in fact e bits = d words + m bits) */
+      long m = e & (BITS_IN_LONG-1);
+      /* setting the first j bits to 0, are the leading m-1 bits = 0? */
+      if (j >= m
+           || ((z[lz-1] >> (BITS_IN_LONG-m+1)) << (BITS_IN_LONG-m+1+j)) == 0)
+      { /* final shift cancels the m bits extension: shorten z */
+        lz--; z++;
+      }
+    }
+    shift_left(z,x,2,lz-1, 0,j);
+  }
+  z[1] = evalsigne(sx) | evalexpo(ey - (j | (i<<TWOPOTBITS_IN_LONG)));
   z[0] = evaltyp(t_REAL) | evallg(lz);
   avma = (gpmem_t)z; return z;
 }
