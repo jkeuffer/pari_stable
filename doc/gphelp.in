@@ -351,7 +351,7 @@ sub apropos_check {
   $line =~ s/\n/ /g;
   return if ($line !~ /$help/i);
 
-  $_ = $current;
+  local($_) = $current;
   s/\\b{(.)}/\\$1/;
   s/\{\}//g;
   s/\\pow/^/;
