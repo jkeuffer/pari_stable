@@ -3058,8 +3058,10 @@ polcompositum0(GEN A, GEN B, long flall)
   if (varn(B) != v) err(talker,"not the same variable in compositum");
   C = content(A); if (!gcmp1(C)) A = gdiv(A, C);
   C = content(B); if (!gcmp1(C)) B = gdiv(B, C);
-  if (!issquarefree(A)) err(talker,"compositum: %Z not separable", A);
-  if (!issquarefree(B)) err(talker,"compositum: %Z not separable", B);
+  check_pol_int(A);
+  check_pol_int(B);
+  if (!ZX_issquarefree(A)) err(talker,"compositum: %Z not separable", A);
+  if (!ZX_issquarefree(B)) err(talker,"compositum: %Z not separable", B);
 
   k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   C = squff2(C,0,0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
@@ -3068,7 +3070,7 @@ polcompositum0(GEN A, GEN B, long flall)
     long i,l = lg(C);
     GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
-    {
+    { /* first line possibly very costly */
       a = gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)C[i]));
       a = gneg_i(gmod(a, (GEN)C[i]));
       b = gadd(polx[v], gmulsg(k,a));
