@@ -3703,10 +3703,9 @@ entries are expressed as a column vector on the integral basis
 \syn{algtobasis}{\var{nf},x}.
 
 \subsecidx{nfbasis}$(x,\{\fl=0\},\{p\})$: \idx{integral basis} of the number
-field defined by the irreducible, preferably monic, polynomial $x$, using the
-\idx{round 4} algorithm by default. (This program is the translation into C by
-Pascal Letard of a program written by David \idx{Ford} in Maple.) The binary
-digits of $\fl$ have the following meaning:
+field defined by the irreducible, preferably monic, polynomial $x$,
+using a modified version of the \idx{round 4} algorithm by
+default. The binary digits of $\fl$ have the following meaning:
 
 1: assume that no square of a prime greater than the default \kbd{primelimit}
 divides the discriminant of $x$, i.e.~that the index of $x$ has only small
@@ -4819,11 +4818,11 @@ is respectively assumed to be a polynomial, a quadratic form (a symmetric
 matrix), or an Hermitian form (an Hermitian complex matrix).
 
 \subsecidx{factorpadic}$(\var{pol},p,r,\{\fl=0\})$: $p$-adic factorization
-of the polynomial \var{pol} to precision $r$, the result being a two-column
-matrix as in \kbd{factor}. $r$ must be strictly larger than the $p$-adic
-valuation of the discriminant of \var{pol} for the result to make any sense.
-The method used is \idx{Ford}-Letard's implementation of the \idx{round 4}
-algorithm of \idx{Zassenhaus}.
+of the polynomial \var{pol} to precision $r$, the result being a
+two-column matrix as in \kbd{factor}. $r$ must be strictly larger than
+the $p$-adic valuation of the discriminant of \var{pol} for the result
+to make any sense.  The method used is a modified version of the
+\idx{round 4} algorithm of \idx{Zassenhaus}.
 
 If $\fl=1$, use an algorithm due to \idx{Buchmann} and \idx{Lenstra}, which is
 usually less efficient.
