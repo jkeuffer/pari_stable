@@ -683,7 +683,7 @@ GEN     smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long
 /* buch3.c */
 
 GEN     bnrclass0(GEN bignf, GEN ideal, long flag);
-GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,long all);
+GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,GEN flag);
 GEN     bnrconductorofchar(GEN bnr,GEN chi);
 GEN     bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag);
 GEN     bnrdisclist0(GEN bnf,GEN borne, GEN arch, long all);

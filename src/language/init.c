@@ -2020,7 +2020,7 @@ entree functions_basic[]={
 {"bnrclass",99,(void*)bnrclass0,6,"GGD0,L,"},
 {"bnrclassno",2,(void*)rayclassno,6,"GG"},
 {"bnrclassnolist",2,(void*)rayclassnolist,6,"GG"},
-{"bnrconductor",99,(void*)bnrconductor,6,"GDGDGD0,L,"},
+{"bnrconductor",99,(void*)bnrconductor,6,"GDGDGDG"},
 {"bnrconductorofchar",2,(void*)bnrconductorofchar,6,"GG"},
 {"bnrdisc",99,(void*)bnrdisc0,6,"GDGDGD0,L,"},
 {"bnrdisclist",99,(void*)bnrdisclist0,6,"GGDGD0,L,"},

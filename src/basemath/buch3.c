@@ -1346,7 +1346,7 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
 }
 
 static GEN
-args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long flag)
+args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, int gen)
 {
   GEN bnr,bnf;
 
@@ -1363,7 +1363,7 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long flag)
 
     case 11: /* bnf */
       bnf = checkbnf(arg0);
-      bnr = buchrayall(bnf,arg1, nf_INIT | flag);
+      bnr = buchrayall(bnf,arg1, gen? nf_INIT | nf_GEN: nf_INIT);
       *subgroup = arg2; break;
 
     default: err(talker,"neither bnf nor bnr in conductor or discray");
@@ -1379,10 +1379,11 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long flag)
 }
 
 GEN
-bnrconductor(GEN arg0,GEN arg1,GEN arg2,long all)
+bnrconductor(GEN arg0,GEN arg1,GEN arg2,GEN all)
 {
-  GEN sub = arg1, bnr = args_to_bnr(arg0,arg1,arg2,&sub, (all > 0)? nf_GEN: 0);
-  return conductor(bnr,sub,all);
+  long flag = all? itos(all): 0;
+  GEN sub = arg1, bnr = args_to_bnr(arg0,arg1,arg2,&sub, flag > 0);
+  return conductor(bnr,sub, flag);
 }
 
 long

@@ -3457,12 +3457,22 @@ outputs the list of the class numbers of the corresponding ray class groups.
 
 \syn{rayclassnolist}{\var{bnf},\var{list}}.
 
-\subsecidx{bnrconductor}$(a_1,\{a_2\},\{a_3\}, \{\fl=0\})$: conductor of the
-subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see \kbd{bnr}
-at the beginning of this section).
+\subsecidx{bnrconductor}$(a_1,\{a_2\},\{a_3\}, \{\fl=0\})$: conductor $f$ of
+the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
+\kbd{bnr} at the beginning of this section).
 
-\syn{bnrconductor}{a_1,a_2,a_3,\fl}, where an omitted argument
-among the $a_i$ is input as \kbd{gzero}, and $\fl$ is a C long.
+  If $\fl = 0$, returns $f$.
+
+  If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group 
+modulo $f$, as output by $\tet{bnrclass}(,f,1)$, and $H$ is the 
+subgroup of $Cl_f$ defining the extension.
+
+  If $\fl = 2$, returns $[f, \var{bnr}(f), H]$, as above except $Cl_f$ is
+replaced by a \kbd{bnr} structure, as output by $\tet{bnrinit}(,f,1)$.
+
+\syn{conductor}{\var{bnr}, \var{subgroup}, \fl}, where an omitted subgroup
+(trivial subgroup, i.e.~ray class field) is input as \kbd{NULL}, and $\fl$ is
+a C long.
 
 \subsecidx{bnrconductorofchar}$(\var{bnr},\var{chi})$: \var{bnr} being a
 big ray number field

@@ -141,7 +141,10 @@ DS 21- improvements in elltors() [ faster torsion bound, check bound > 1
    26- improved idealval()
    27- simplified element_reduce, idealmodidele (redideal), compute_raygen
        (create bnr.gen): faster, smaller elements
-   28- new algorithm for conductor() [much faster, does not need bnr.gen]
+   28- new algorithm for conductor() and bnrdisc() [much faster, does not
+       need bnr.gen]: find minimal f such that P_{1,f}(K) \subset H,
+       computations are done for a fixed modulus F instead of computing the
+       image of H in Cl_f(K) for many f | F.
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
