@@ -73,9 +73,6 @@ distrib: tar setdir
 	gzip $tarfile
 	mv $tarfile.gz $ztarfile
 
-uu: distrib
-	uuencode $tarfile.gz $tarfile.gz > pari.uu
-
 dosdistrib: docps gpman
 	-zip -kr GPB${dosversion}.ZIP GP.EXE README README.DOS examples ../EMX/README.DOC ../RSX/README.TXT
 	-zip -k GPD${dosversion}.ZIP doc/users.ps doc/refcard.ps doc/tutorial.ps
