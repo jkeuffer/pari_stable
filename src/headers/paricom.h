@@ -242,7 +242,7 @@ extern void* global_err_data;
 
 #define leading_term(x) ((GEN)(((GEN)(x))[lgef(x)-1]))
 #define constant_term(x) (signe(x)? ((GEN)(((GEN)(x))[2])): gzero)
-#define degpol(a) (lgef(a)-3)
+#define degpol(a) ((long)lgef(a)-3)
 #define evaldeg(d) (evallgef(d+3))
 
 #define odd(x) ((x) & 1)
