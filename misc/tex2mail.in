@@ -1,5 +1,4 @@
 #!@perl@
-
 # $Id$
 #
 # Features:
@@ -10,7 +9,7 @@
 #
 # Options:
 #	linelength=75		# Cut at this line
-#	maxdef=400		# definition loops: croak if many substitutions 
+#	maxdef=400		# definition loops: croak if many substitutions
 #	debug=0
 #	by_par=0		# Expect each paragraph to be terminated
 #				# by *exactly* 2 "\n", and do not print
@@ -18,10 +17,11 @@
 #	TeX			# Assume it is not LaTeX
 #	ragged			# leave right ragged
 #	noindent		# assume \noindent everywhere
+#	ignorefonts		# make math fonts (\mathfrak etc) into NOPs
 
 eval 'require "newgetopt.pl";
   &NGetOpt("linelength=i","maxdef=i","debug=i","by_par", "TeX",
-	   "ragged", "noindent")'
+	   "ragged", "noindent", "ignorefonts")'
     || warn "Errors during parsing command line options" .
 	($@ ? ": $@" : '') . ".\n";
 $linelength= $opt_linelength || 75;
@@ -132,7 +132,7 @@ sub join {
 
 # The current line is contained in the array @out of records and, possibly,
 # one additional record $last. If $last exists, $islast is set to 1.
-# The output channel length is contained in $linelength, the accumulated 
+# The output channel length is contained in $linelength, the accumulated
 # length of @out and $last is contained in $curlength.
 # We guaranty that if $curlength>$linelength, then @out is empty.
 
@@ -142,7 +142,7 @@ sub length {
   (warn "Wrong format of a record `$_[0]'", return 0)
       unless $_[0] =~ /^\d+,(\d+)/;
   $1;
-} 
+}
 
 # Gets a height of a record
 
@@ -430,6 +430,7 @@ sub finish {
   }
   warn "Got finishing event `$event' in the outermost block, rest=$par" 
       unless $#level;
+  return unless $#level;
   if ($#out<$chunks[$level[$#level]]) {push(@out,&empty);}
   # Make anything after $level[$#level] one chunk if there is anything
   warn "B:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
@@ -478,15 +479,19 @@ sub finish_ignore {
 # Special events: If number, wait this number of chunks
 
 sub start {
-  warn "Beginning with $_[0], $_[1]\n" if $debug & $debug_flow; 
+  warn "Beginning with $_[0], $_[1]\n" if $debug & $debug_flow;
   warn "B:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
-  if ($chunks[$level[$#level]]<=$#out && $chunks[$#chunks]<=$#out) {
+  warn "#out=$#out, chunks[first of last level]=$chunks[$level[$#level]], chunk
+s[-1]=$chunks[$#chunks]" if $debug & $debug_flow;
+
+  # !@chunks: may be true in \noindent{1\over2}
+  if (!@chunks || ($chunks[$level[$#level]]<=$#out && $chunks[$#chunks]<=$#out)) {
     # the last level is non empty
-    push(@chunks,$#out+1); 
-  } 
-  push(@level,$#chunks); 
-  push(@tokenByToken,0); 
-  $wait[$#level]=shift; 
+    push(@chunks,$#out+1);
+  }
+  push(@level,$#chunks);
+  push(@tokenByToken,0);
+  $wait[$#level]=shift;
   if ($#_<0) {$action[$#level]="";} else {$action[$#level]=shift;}
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
 } 
@@ -532,7 +537,7 @@ sub collapseOne {
   local($n)=(shift);
   local($out,$last,$_)=($out[$chunks[$n]]);
   if ($n==$#chunks) {$last=$#out;} else {$last=$chunks[$n+1]-1;}
-        warn "Collapsing_one $n, records $chunks[$n]..$last\n"
+  warn "Collapsing_one $n (last=$#chunks), records $chunks[$n]..$last\n"
                 if $debug & $debug_flow;
   return unless $last>$chunks[$n];
   warn "Collapsing chunk $n beginning at $chunks[$n], ending at $last\n" if $debug & $debug_flow; 
@@ -713,9 +718,55 @@ sub f_end {
   } else {&puts("\\end{$arg}");}
 } 
 
+sub f_newtheorem {
+  warn "Entering f_newtheorem...\n" if $debug & $debug_flow;  
+  &trim(2);
+  &collapse(2);
+  &assertHave(2) || &finish("",1);
+  warn "Name `$out[$#out-1]'\nExpansion `$out[$#out]'\n__END__\n" if $debug & $debug_record;
+
+  local($name, $expand) = ($out[$#out-1], $out[$#out]);
+  $#out -= 2;
+  $#chunks -= 2;
+  return unless $name =~ s/^\d+,\d+.\d+,\d+,//;
+  return unless $expand =~ s/^\d+,\d+.\d+,\d+,//;
+  $environment{$name}="par:unindent:puts;$expand. ,par";
+  &finish(2,1);
+} 
+
+sub f_newtheorem1 {
+  warn "Entering f_newtheorem1...\n" if $debug & $debug_flow;  
+  &trim(1);
+  &collapse(1);
+  &assertHave(1) || &finish("",1);
+  warn "Name `$out[$#out]'\n__END__\n" if $debug & $debug_record;
+
+  local($name) = ($out[$#out]);
+  $#out -= 1;
+  $#chunks -= 1;
+  $par =~ s/^\[[^\]]*\]//;	# Optional argument 2
+  return unless $name =~ s/^\d+,\d+.\d+,\d+,//;
+  $last_newtheorem = $name;
+  &finish(1,1);
+} 
+
+sub f_newtheorem2 {
+  warn "Entering f_newtheorem2...\n" if $debug & $debug_flow;  
+  &trim(2);
+  &collapse(2);
+  warn "Expansion `$out[$#out]'\n__END__\n" if $debug & $debug_record;
+
+  local($expand) = ($out[$#out]);
+  $#out -= 2;
+  $#chunks -= 2;
+  $par =~ s/^\[[^\]]*\]//;	# Optional argument 4
+  return unless $expand =~ s/^\d+,\d+.\d+,\d+,//;
+  $environment{$last_newtheorem} = "par:unindent:puts;$expand. ,par";
+  &finish(2,1);
+}
 
 sub f_literal_no_length {
-  warn "Entering f_literal_with_length...\n" if $debug & $debug_flow;
+  warn "Entering f_literal_no_length...\n" if $debug & $debug_flow;
   # &trim(1);
   &collapse(1);
   &assertHave(1) || &finish("",1);
@@ -781,19 +832,67 @@ sub f_radical {
 # Takes the last two records, returns a record that contains them and forms 
 # fraction block
 
-sub f_fraction {
-  warn "Entering f_fraction...\n" if $debug & $debug_flow;  
+sub arrow_fraction {
+  local($minlength, $l, $r, $flip) = @_;
+  warn "Entering arrow_fraction, minlength=$minlength, left=$l, right=$r...\n" if $debug & $debug_flow;  
   &trim(2);
   &collapse(2);
   &assertHave(2) || &finish("",1);
   warn "Numer `$out[$#out-1]'\nDenom `$out[$#out]'\n__END__\n" if $debug & $debug_record;
+
   local($l1,$l2)=(&length($out[$#out-1]),&length($out[$#out]));
   local($len)=(($l1>$l2 ? $l1: $l2));
-  $out[$#out-1]=&vStack(&vStack(&center($len,$out[$#out-1]),                 
-                         &string2record("-" x $len)),           
-                 &center($len,$out[$#out]));                          
+  $len = $minlength if $len < $minlength;
+  local $line = $len <= 1? "-" : ($l . ("-" x ($len - 2)) . $r);
+
+  if ($flip) {
+    $out[$#out-1]=&vStack(&vStack(&center($len,$out[$#out]),
+                           &string2record($line)),
+                   &center($len,$out[$#out-1]));
+  } else {
+    $out[$#out-1]=&vStack(&vStack(&center($len,$out[$#out-1]),
+                           &string2record($line)),
+                   &center($len,$out[$#out]));
+  }
   $#chunks--;
   $#out--;
+  warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
+  &finish(2,1);
+} 
+
+sub f_fraction {
+  arrow_fraction(1,"-","-");
+} 
+
+sub f_right_arrow {
+  arrow_fraction(3,"-",">",1);
+} 
+
+sub f_left_arrow {
+  arrow_fraction(3,"<","-",1);
+} 
+
+# Takes the last two records, returns a record that contains them and forms 
+# fraction block
+
+sub f_overset {
+  warn "Entering f_overset...\n" if $debug & $debug_flow;  
+  &trim(2);
+  &collapse(2);
+  &assertHave(2) || &finish("",1);
+  warn "Over `$out[$#out-1]'\nBase `$out[$#out]'\n__END__\n" if $debug & $debug_record;
+  local($l1,$l2)=(&length($out[$#out-1]),&length($out[$#out]));
+  local($len)=(($l1>$l2 ? $l1: $l2));
+
+  local($b, $b1)=($out[$#out] =~ /^\d+,\d+,(\d+)/);
+  ($b1)=($out[$#out-1] =~ /^(\d+)/);
+  $b1 ||= 1;				# height=0 means 1!
+  $b += $b1;
+  $out[$#out-1]=&vStack(&center($len,$out[$#out-1]),           
+	                &center($len,$out[$#out]));                          
+  $#chunks--;
+  $#out--;
+  &setbaseline($out[$#out],$b);
   warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
   &finish(2,1);
 } 
@@ -880,27 +979,41 @@ sub paragraph {
       &puts($piece);
     } else {
       # macro or delimiter
-      ($pure = $piece) =~ s/\s+$//;
+      ($pure = $piece);
+      if ($pure =~ /^\\\s+$/) {
+        $pure =~ s/(\\\s)\s+$/$1/;
+      } else {
+        $pure =~ s/\s+$//;
+      }
       if (defined ($type=$type{$pure})) {
         if ($type eq "def") {
-    warn "To many def expansions in a paragraph" if $defcount++==$maxdef;
-    last if $defcount>$maxdef;
-    @t=(0);
-    for (1..$args{$pure}) {
-      push(@t,&get_balanced());
-    }
-    warn "Defined token `$pure' found with $args{$pure} arguments @t[1..$#t]\n"
-    if $debug & $debug_parsing;
-    $sub=$def{$pure};
-    $sub =~ s/(^|[^\\#])#(\d)/$1 . $t[$2]/ge if $args{$pure};
-    $par=$sub . $par;
+          warn "To many def expansions in a paragraph" if $defcount++==$maxdef;
+          last if $defcount>$maxdef;
+          @t=(0);
+          for (1..$args{$pure}) {
+            push(@t,&get_balanced());
+          }
+          warn "Defined token `$pure' found with $args{$pure} arguments @t[1..$#t]\n"
+          if $debug & $debug_parsing;
+          $sub=$def{$pure};
+          $sub =~ s/(^|[^\\#])#(\d)/$1 . $t[$2]/ge if $args{$pure};
+          $par=$sub . $par;
         } elsif ($type eq "sub") {
-	  $sub=$contents{$pure};
-	  index($sub,";")>=0?
-	    (($sub,$arg)=split(";",$sub,2), &$sub($pure,$arg)):
-	      &$sub($pure);
+          $sub=$contents{$pure};
+          index($sub,";")>=0?
+            (($sub,$arg)=split(";",$sub,2), &$sub($pure,$arg)):
+              &$sub($pure);
         } elsif ($type =~ /^sub(\d+)$/) {
-          &start($1,"f_$contents{$pure}");
+	  local($n) = $1;
+          $sub=$contents{$pure};	  
+	  if ($sub =~ s/^\[\]//) {
+            if ($par =~ /^\[/) {
+              $par =~ s/^\[([^\]]*)\]/{$1}/;
+            } else {
+              substr($par, 0, 0) = "{}";
+            }
+          }
+          &start($n,"f_$sub");
           $tokenByToken[$#level]=1;
         } elsif ($type =~ /^get(\d+)$/) {
           &start($1+1);
@@ -914,14 +1027,14 @@ sub paragraph {
         } elsif ($type eq "self") {
           &puts(substr($pure,1) . ($pure =~ /^\\[a-zA-Z]/ ? " ": ""));
         } elsif ($type eq "par_self") {
-	  &finishBuffer;
-	  &commit("1,5,0,0,     ");
-          &puts($pure . ($pure =~ /^\\[a-zA-Z]/ ? " ": ""));
+          &finishBuffer;
+          &commit("1,5,0,0,     ");
+                &puts($pure . ($pure =~ /^\\[a-zA-Z]/ ? " ": ""));
         } elsif ($type eq "self_par") {
           &puts($pure . ($pure =~ /^\\[a-zA-Z]/ ? " ": ""));
-	  &finishBuffer;
-	  &commit("1,5,0,0,     ")
-	    unless $par =~ s/^\s*\\noindent(\s+|([^a-zA-Z\s])|$)/\2/;
+          &finishBuffer;
+          &commit("1,5,0,0,     ")
+            unless $par =~ s/^\s*\\noindent(\s+|([^a-zA-Z\s])|$)/\2/;
         } elsif ($type eq "string") {
           &puts($contents{$pure},1);
         } elsif ($type eq "nothing") {
@@ -1038,7 +1151,8 @@ sub f_putover {
         local($l2)=(&length($_[0]));
         local($len)=(($l1>$l2 ? $l1: $l2));
   ($b1)=($_[0] =~ /^(\d+)/);
-  $b+=$b1+1;
+  $b1 ||= 1;				# height=0 means 1!
+  $b+=$b1;
   $out[$#out]=&vStack(&center($len,shift),&center($len,$out[$#out]));
   #$out[$#out] =~ s/^(\d+,\d+,)(\d+)/\1$b/;
   &setbaseline($out[$#out],$b);
@@ -1062,6 +1176,10 @@ sub f_putover_string {
   &f_putover(&string2record);
 } 
 
+sub f_putunder_string {
+  &f_putunder(&string2record);
+} 
+
 sub f_widehat {
         &trim(1);
   &collapse(1);
@@ -1071,13 +1189,80 @@ sub f_widehat {
 }
 
 sub f_widetilde {
-        &trim(1);
+  &trim(1);
   &collapse(1);
   local($l,$l1)=(&length($out[$#out]));
   if ($l<=1) {&f_putover(&string2record("~"));}
-        elsif ($l<=3) {&f_putover(&string2record("/\\/"));}
-        else {&f_putover(&string2record("/" . "~" x ($l1=int($l/2-1)) .
+  elsif ($l<=3) {&f_putover(&string2record("/\\/"));}
+  else {&f_putover(&string2record("/" . "~" x ($l1=int($l/2-1)) .
      "\\" . "_" x ($l-3-$l1) . "/"));}
+}
+
+sub f_underbrace {
+  &trim(1);
+  &collapse(1);
+  local($l,$l1)=(&length($out[$#out]));
+  if ($l < 5) { $l = 5 }
+  &f_putunder(vStack(&string2record("\\" . "_" x ($l1=int($l/2-1)) . " "
+				    . "_" x ($l-3-$l1) . "/"),
+		     &string2record(" " x ($l1=int($l/2)) . "v"
+				    . " " x ($l-2-$l1))));
+}
+
+sub f_underbrace2 {
+  &trim(2);
+  &collapse(2);
+  local($l,$l1)=(&length($out[$#out - 1]));
+  if ($l < 5) { $l = 5 }
+  local($b)=($out[$#out - 1] =~ /^\d+,\d+,(\d+)/);
+  $out[$#out-1]
+    = &vStack(&center($l,$out[$#out-1]),
+	      vStack(vStack(&string2record("\\" . "_" x ($l1=int($l/2-1)) . " "
+					   . "_" x ($l-3-$l1) . "/"),
+			    &string2record(" " x ($l1=int($l/2)) . "v"
+					   . " " x ($l-2-$l1))),
+		     &center($l,$out[$#out])));
+  $#chunks--;
+  $#out--;
+  &setbaseline($out[$#out],$b);
+  warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
+  &finish(2,1);
+}
+
+sub f_overbrace {
+  &trim(1);
+  &collapse(1);
+  local($l)=(&length($out[$#out]));
+  if ($l < 6) { $l = 6 }
+  local($l1) = int($l/2);
+  &f_putover(vStack(&string2record(" " . "_" x ($l1 - 2) . "/\\"
+				    . "_" x ($l-2-$l1) . " "),
+		    &string2record("/" . " " x ($l1 - 2) . "  "
+				    . " " x ($l-2-$l1) . "\\"),
+		    ));
+}
+
+sub f_overbrace2 {
+  &trim(2);
+  &collapse(2);
+  local($l)=(&length($out[$#out - 1]));
+  if ($l < 5) { $l = 5 }
+  local($h,$b)=($out[$#out - 1] =~ /^(\d+),\d+,(\d+)/);
+  $h ||= 1;
+  local($l1) = int($l/2);
+  $out[$#out-1]
+    = &vStack(vStack(&center($l,$out[$#out]),
+		     vStack(&string2record(" " . "_" x ($l1 - 2) . "/\\"
+					   . "_" x ($l-2-$l1) . " "),
+			    &string2record("/" . " " x ($l1 - 2) . "  "
+					   . " " x ($l-2-$l1) . "\\"))),
+	      &center($l,$out[$#out-1]));
+  $#chunks--;
+  $#out--;
+  local($h1) = ($out[$#out] =~ /^(\d+),/);
+  &setbaseline($out[$#out], $h1 - ($h - $b));
+  warn "a:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
+  &finish(2,1);
 }
 
 sub f_superscript {
@@ -1087,7 +1272,7 @@ sub f_superscript {
       ($par !~ s:^\s*\\begin\s*\{Sb\}:\\begin\{matrix\}:)) {
     &commit(&empty);
   }   
-} 
+}
 
 sub let {
         $par =~ s/^($tokenpattern)(= ?)?($tokenpattern)//o;
@@ -1114,6 +1299,17 @@ sub def {
 
 sub def_exp {
   return unless $par =~ s:^(([^\\{]|\\.)*)\{:\{:;
+  local($arg)=($1);
+  local($def,$act)=(&get_balanced());
+  return unless defined $def;
+  return if index("$arg$def",'@')>=0;
+  return if $def =~ /\\([egx]?def|fi)([^a-zA-Z]|$)/;
+  $def .= " "  if $def =~ /($macro)$/o;
+  &define($arg,$def);
+}
+
+sub def_exp_block {
+  return unless $par =~ s:\{(\\([a-zA-Z]+|.))\}\{:\{:;
   local($arg)=($1);
   local($def,$act)=(&get_balanced());
   return unless defined $def;
@@ -1504,11 +1700,14 @@ sub over {
     local($prevw)=($wait[$#level-1]);
     $wait[$#level-1]="junk";
     &finish("}", 1);
-          &collapse(1);
-          &assertHave(1) || &finish("",1);
+    &collapse(1);
+    warn "X:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
+    &assertHave(1) || &finish("",1);
+    warn "Y:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
     local($rec)=$out[$#out];
     $#out--;
     $#chunks--;
+    warn "Z:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
     &start(2,"f_fraction");
     $wait[$#level-1]=$prevw;
     &start("}");
@@ -1612,6 +1811,34 @@ sub f_leftright {
   &finish(3);
 }
 
+sub today {
+  &puts(scalar localtime);
+}
+
+sub unindent {
+# a:Last chunk number 0, last record 0, the first chunk
+#  on the last level=0 is 0, waiting for
+#    warn "B:Last $#chunks, the first on the last level=$#level is $level[$#level]" if $debug & $debug_flow;
+   # Silently ignore failures (XXXX sometimes $#chunks is 0, sometimes 1?!)
+   unless ($#chunks <= 1 && $#level == 0 && $level[$#level] == 0
+           && $#out == 0 && $out[0] eq "1,5,0,0,     " && $curlength == 5) {
+     return;
+   }
+   $out[0] = "1,0,0,0,";
+   $curlength = 0;
+}
+
+sub puts_unindent {
+  unindent();
+  puts($_[1]);
+}
+
+sub par_puts_unindent {
+  par();
+  unindent();
+  puts($_[1]);
+}
+
 # Arguments: Ascent, descent, base string, oneside expander, real expander
 #            0       1        2            3                 4
 #            Top tip, Bottom tip, Mid
@@ -1682,6 +1909,12 @@ $contents{"\\Delta"}="2,2,0,0," . <<'EOF';
 ~~
 EOF
 
+$type{"\\nabla"}="record";
+$contents{"\\nable"}="2,2,1,0," . <<'EOF';
+__
+\/
+EOF
+
 $type{"\\oplus"}="record";
 $contents{"\\oplus"}="3,5,1,0," . <<'EOF';
   _ 
@@ -1703,26 +1936,39 @@ $contents{"\\ominus"}="3,5,1,0," . <<'EOF';
   ~
 EOF
 
+$type{"\\odot"}="record";
+$contents{"\\odot"}="3,5,1,0," . <<'EOF';
+  _ 
+ (.)
+  ~
+EOF
+
 $type{"\\leq"}="record";
-$contents{"\\leq"}="2,4,1,0," . <<'EOF';
+$contents{"\\leq"}="2,3,1,0," . <<'EOF';
  _
  <
 EOF
 
 $type{"\\equiv"}="record";
-$contents{"\\equiv"}="2,4,1,0," . <<'EOF';
+$contents{"\\equiv"}="2,3,1,0," . <<'EOF';
  _
  =
 EOF
 
+$type{"\\not"}="record";
+$contents{"\\not"}="2,4,1,0," . <<'EOF';
+ _
+  |
+EOF
+
 $type{"\\geq"}="record";
-$contents{"\\geq"}="2,4,1,0," . <<'EOF';
+$contents{"\\geq"}="2,3,1,0," . <<'EOF';
  _
  >
 EOF
 
 $type{"\\partial"}="record";
-$contents{"\\partial"}="2,2,1,0," . <<'EOF';
+$contents{"\\partial"}="2,1,1,0," . <<'EOF';
 \
 d
 EOF
@@ -1772,6 +2018,19 @@ $type{"\\qed"}="record";
 $contents{"\\qed"}="2,6,1,0," . <<'EOF';
     _
    |_| 
+EOF
+
+$type{"\\Box"}="record";
+$contents{"\\Box"}="2,5,1,0," . <<'EOF';
+  _
+ |_| 
+EOF
+
+$type{"\\boxtimes"}="record";
+$contents{"\\boxtimes"}="3,5,1,0," . <<'EOF';
+  _
+ |X| 
+  ~
 EOF
 
 $type{"\\pm"}="record";
@@ -1839,19 +2098,39 @@ $contents{"\\buildrel"}="buildrel";
 $type{"\\frac"}="sub2";
 $contents{"\\frac"}="fraction";
   
+$type{"\\xrightarrow"}="sub2";
+$contents{"\\xrightarrow"}="[]right_arrow";
+  
+$type{"\\xleftarrow"}="sub2";
+$contents{"\\xleftarrow"}="[]left_arrow";
+  
+$type{"\\overset"}="sub2";
+$contents{"\\overset"}="overset";
+
 $type{"\\LITERALnoLENGTH"}="sub1";
 $contents{"\\LITERALnoLENGTH"}="literal_no_length";
 
 for ("text","operatorname","operatornamewithlimits","relax","-",
      "notag","!","/","protect","mathcal","Bbb","bf","it","em","boldsymbol",
      "cal","Cal","goth","ref","maketitle","expandafter","csname","endcsname",
-     "makeatletter","makeatother","topmatter","endtopmatter","rm",
+     "makeatletter","makeatother","topmatter","endtopmatter","rm", "tt",
      "NoBlackBoxes","document","TagsOnRight","bold","dsize","roster",
      "endroster","endkey","endRefs","enddocument","displaystyle",
-     "twelverm","tenrm","twelvefm","tenfm","hbox","mbox") {
+     "twelverm","tenrm","twelvefm","tenfm","hbox","mbox", "url",
+     "tableofcontents", "bigl", "bigr", "biggl", "biggr", "footnotesize",
+     "nonumber", "tiny", "sc", "huge",
+    ) {
   $type{"\\$_"}="nothing";
 }
-for ("par","endtitle","endauthor","endaffil","endaddress","endemail",
+
+if ($opt_ignorefonts) {
+  for ("mathbb", "mathit", "mathbit", "mathfrak", "frak", "mathbf",
+      ) {
+    $type{"\\$_"}="nothing";
+  }
+}
+
+for ("par","endtitle","endauthor","endaffil","endaddress","endemail","enddate",
      "endhead","key","medskip","smallskip","bigskip","newpage",
      "vfill","eject","endgraph") {
   $type{"\\$_"}="sub";
@@ -1866,6 +2145,9 @@ for ("endproclaim","enddemo",) {
   $type{"\\$_"}="self_par";
 }
 
+$type{"\\today"}="sub";
+$contents{"\\today"}="today";
+
 #$type{"&"}="nothing";
 
 $type{"\\let"}="sub";
@@ -1873,6 +2155,9 @@ $contents{"\\let"}="let_exp";
 
 $type{"\\def"}="sub";
 $contents{"\\def"}="def_exp";
+
+$type{"\\newcommand"}="sub";
+$contents{"\\newcommand"}="def_exp_block";
 
 $type{"\\item"}="sub";
 $contents{"\\item"}="item";
@@ -1936,6 +2221,12 @@ $contents{"\\v"}="putover_string;v";
 $type{"\\widetilde"}="sub1";
 $contents{"\\widetilde"}="widetilde";
 
+$type{"\\underbrace"}="sub2";
+$contents{"\\underbrace"}="underbrace2";
+
+$type{"\\overbrace"}="sub2";
+$contents{"\\overbrace"}="overbrace2";
+
 $type{"\\~"}="sub1";
 $contents{"\\~"}="putover_string;~";
 
@@ -1982,21 +2273,46 @@ for ('@',"_","\$","{","}","#","&","arccos","arcsin","arctan","arg","cos",
   $type{"\\$_"}="self";
 }
 
-for ("bibliography","myLabel","theoremstyle","theorembodyfont",
+for ("bibliography","myLabel","theoremstyle","theorembodyfont", "usepackage",
      "bibliographystyle","hphantom","vphantom","phantom","hspace") {
   $type{"\\$_"}="discard1";
 }
 
-for ("numberwithin","newtheorem","renewcommand","setcounter"
+for ("numberwithin","renewcommand","setcounter"
     ) {
   $type{"\\$_"}="discard2";
 }
+
+$type{"\\newenvironment"}="discard3";
+$type{"\\DeclareMathAccent"}="discard4";
+$type{"\\DeclareMathAlphabet"}="discard5";
+
+#$type{"\\newtheorem"}="sub2";
+#$contents{"\\newtheorem"}="newtheorem";
+
+$type{"\\NEWTHEOREMone"}="sub1";
+$contents{"\\NEWTHEOREMone"}="newtheorem1";
+
+$type{"\\NEWTHEOREMtwo"}="sub2";
+$contents{"\\NEWTHEOREMtwo"}="[]newtheorem2";
 
 for ("equation","gather","align"
      ) {$environment{"$_"}="ddollar,ddollar";} 
 
 for ("matrix","CD","smallmatrix"
      ) {$environment{"$_"}="matrix,endmatrix;1;c";} 
+
+# XXXX Noindent is needed somewhere...
+for ("remark", "example", "theorem", "definition", "proof", "abstract",
+     "proposition", "amplification", "lemma", "corollary",
+     ) {$environment{"$_"}="par:unindent:puts;\U$_\E. ,par";} 
+
+# \thanks inside \author confuse things a lot
+for ("title", "author", "affil", "address", "email", "date", # "thanks",
+     "section", "subsection", "subsubsection") {
+  $type{"\\$_"}="sub";
+  $contents{"\\$_"}="par_puts_unindent;\U$_: ";
+}
 
 for ("document","split","enumerate"
      ) {$environment_none{"$_"}++;} 
@@ -2006,6 +2322,7 @@ $environment{"Sb"}="subscript:matrix,endmatrix;1;l";
 $environment{"Sp"}="superscript:matrix,endmatrix;1;l";
 
 $environment{"eqnarray"}="ddollar:matrix,endmatrix;0;r;c;l:ddollar";
+$environment{"eqnarray*"}="ddollar:matrix,endmatrix;0;r;c;l:ddollar";
 $environment{"split"}="ddollar:matrix,endmatrix;0;r;l:ddollar";
 $environment{"multiline"}="ddollar:matrix,endmatrix;0;r;l:ddollar";
 $environment{"align"}="ddollar:matrix,endmatrix;0;r;l:ddollar";
@@ -2026,6 +2343,9 @@ $contents{"\\,"}=" ";
 
 $type{"\\dots"}="string";
 $contents{"\\dots"}="...";
+
+$type{"\\and"}="string";
+$contents{"\\and"}=" & ";
 
 $type{"\\ldots"}="string";
 $contents{"\\ldots"}="...";
@@ -2048,6 +2368,9 @@ $contents{"\\setminus"}=" \\ ";
 $type{"\\backslash"}="string";
 $contents{"\\backslash"}="\\";
 
+$type{"\\iff"}="string";
+$contents{"\\iff"}=" <==> ";
+
 $type{"\\approx"}="string";
 $contents{"\\approx"}=" ~ ";
 
@@ -2068,6 +2391,9 @@ $contents{"\\from"}=" <-- ";
 
 $type{"\\wedge"}="string";
 $contents{"\\wedge"}="/\\";
+
+$type{"\\vee"}="string";
+$contents{"\\vee"}="\\/";
 
 $type{"\\Lambda"}="string";
 $contents{"\\Lambda"}="/\\";
@@ -2102,6 +2428,12 @@ $contents{"\\rtimes"}=" ><| ";
 $type{"\\times"}="string";
 $contents{"\\times"}=" >< ";
 
+$type{"\\gg"}="string";
+$contents{"\\gg"}=" >> ";
+
+$type{"\\ll"}="string";
+$contents{"\\ll"}=" << ";
+
 $type{"\\hookrightarrow"}="string";
 $contents{"\\hookrightarrow"}=" c--> ";
 
@@ -2135,41 +2467,71 @@ $contents{"\\cap"}=" /~\\ ";
 $type{"\\cup"}="string";
 $contents{"\\cup"}=" \\_/ ";
 
-$type{"\\section"}="string";
-$contents{"\\section"}="Section ";
-
-$type{"\\subsection"}="string";
-$contents{"\\subsection"}="Subsection ";
-
 $type{"\|"}="string";
 $contents{"\|"}="||";
 
 $type{'\;'}="string";
 $contents{'\;'}=" ";
 
+$type{'\ '}="string";
+$contents{'\ '}=" ";
+
 $type{'\noindent'}="string";
 $contents{'\noindent'}="";
 
+$type{'\footnote'}="string";
+$contents{'\footnote'}=" FOOTNOTE: ";
+
+$type{'\enspace'}="string";
+$contents{'\enspace'}="  ";
+
+$type{"\\thanks"}="string";
+$contents{"\\thanks"}=" THANKS: ";
+
+$type{"\\vert"}="string";
+$contents{"\\vert"}=" | ";
+
+$type{"\\Vert"}="string";
+$contents{"\\Vert"}=" || ";
+
+$type{"\\ast"}="string";
+$contents{"\\ast"}=" * ";
+
+$type{"\\prime"}="string";
+$contents{"\\prime"}="'";
 
 &define('\\define','\\def');
-&define('\\ge','\\geq');
-&define('\\le','\\leq');
-&define('\\ne','\\neq');
+&define('\\ge','\\geq ');
+&define('\\le','\\leq ');
+&define('\\ne','\\neq ');
 &define('\\langle','<');
 &define('\\rangle','>');
-&define('\\subheading','\\par\\underline');
+&define('\\subheading','\\par\\underline ');
 &define('\\(','$');
 &define('\\)','$');
 &define('\\[','$$');
 &define('\\]','$$');
 &define('\\centerline#1','$$#1$$');
-&define('\\eqalign#1','\\aligned #1 \\endaligned');
+&define('\\eqalign#1','\\aligned #1 \\endaligned ');
+&define('\\eqalignno#1','\\aligned #1 \\endaligned ');
 &define('\\cr','\\\\');
 &define('\\sb','_');
 &define('\\sp','^');
+&define('\\iint','\int\int ');
+&define('\\iiint','\int\int\int ');
 &define('\\proclaim','\\noindent ');
+&define('\\mathring','\\overset{\circ}');
+&define('\\binom#1#2','{#1\choose{}#2}');
+&define('\\bibitem#1','[#1]');
+&define('\\newline','\par ');
+&define('\\newtheorem#1','\\NEWTHEOREMone{#1}\\NEWTHEOREMtwo ');
 &defb("matrix","vmatrix","Vmatrix","smallmatrix","bmatrix","Sp","Sb",
       "CD","align","aligned","split","multiline","gather","gathered");
+
+for ("documentclass", "documentstyle") {
+  $type{"\\$_"}="sub2";
+  $contents{"\\$_"}="[]discard";
+}
 
 if ($opt_TeX) {
   &define('\pmatrix#1','\left(\begin{matrix}#1\end{matrix}\right)');
@@ -2236,3 +2598,9 @@ __END__
 	   in fact the previous version did not work even there...
 	  If the added record is longer than line length, do not try to
 	  break the line before it...
+# Apr 03: new option ignorefonts
+	  Hanging `}' (e.g., caused by translation of \\ to \par) would break
+	    processing of the rest of the file.
+	  Could not treat fraction as the first thing on the line (\noindent
+	    required).
+	  Support many more macros.
