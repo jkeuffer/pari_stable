@@ -81,27 +81,6 @@ allbase_check_args(GEN f, long code, GEN *y, GEN *ptw1, GEN *ptw2)
 /*                            ROUND 2                              */
 /*                                                                 */
 /*******************************************************************/
-/* Normalized remainder ( -1/2 |y| < r = x-q*y <= 1/2 |y| ) */
-/* space needed lx + 2*ly */
-static GEN
-rrmdr(GEN x, GEN y)
-{
-  gpmem_t av = avma, tetpil;
-  long k;
-  GEN r,ys2;
-
-  if (!signe(x)) return gzero;
-  r = resii(x,y); tetpil = avma;
-  ys2 = shifti(y,-1);
-  k = absi_cmp(r, ys2);
-  if (k>0 || (k==0 && signe(r)>0))
-  {
-    if (signe(y) == signe(r)) r = subii(r,y); else r = addii(r,y);
-    return gerepileuptoint(av, r);
-  }
-  avma = tetpil; return r;
-}
-
 /* companion matrix of unitary polynomial x */
 static GEN
 companion(GEN x) /* cf assmat */
@@ -179,21 +158,19 @@ rtran(GEN v, GEN w, GEN q)
 /* return (v - qw) mod m (only compute entries k0,..,n)
  * v and w are expected to have entries smaller than m */
 static GEN
-mtran(GEN v, GEN w, GEN q, GEN m, long k0)
+mtran(GEN v, GEN w, GEN q, GEN m, GEN mo2, long k0)
 {
-  long k,l;
+  long k;
   GEN p1;
 
   if (signe(q))
-  {
-    l = lgefint(m) << 2;
-    for (k=lg(v)-1; k>= k0; k--)
+    for (k=lg(v)-1; k >= k0; k--)
     {
-      gpmem_t av = avma; (void)new_chunk(l);
+      gpmem_t av = avma;
       p1 = subii((GEN)v[k], mulii(q,(GEN)w[k]));
-      avma = av; v[k]=(long)rrmdr(p1, m);
+      p1 = centermodii(p1, m, mo2);
+      v[k] = (long)gerepileuptoint(av, p1);
     }
-  }
   return v;
 }
 
@@ -247,7 +224,7 @@ rowred(GEN a, GEN rmod)
 {
   long j,k,pro, c = lg(a), r = lg(a[1]);
   gpmem_t av=avma, lim=stack_lim(av,1);
-  GEN q;
+  GEN q, rmodo2 = shifti(rmod,-1);
 
   for (j=1; j<r; j++)
   {
@@ -255,7 +232,7 @@ rowred(GEN a, GEN rmod)
       while (signe(gcoeff(a,j,k)))
       {
 	q=diviiround(gcoeff(a,j,j),gcoeff(a,j,k));
-	pro=(long)mtran((GEN)a[j],(GEN)a[k],q,rmod, j);
+	pro=(long)mtran((GEN)a[j],(GEN)a[k],q,rmod,rmodo2, j);
 	a[j]=a[k]; a[k]=pro;
       }
     if (signe(gcoeff(a,j,j)) < 0)
@@ -263,7 +240,7 @@ rowred(GEN a, GEN rmod)
     for (k=1; k<j; k++)
     {
       q=diviiround(gcoeff(a,j,k),gcoeff(a,j,j));
-      a[k]=(long)mtran((GEN)a[k],(GEN)a[j],q,rmod, k);
+      a[k]=(long)mtran((GEN)a[k],(GEN)a[j],q,rmod,rmodo2, k);
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -278,20 +255,19 @@ rowred(GEN a, GEN rmod)
 }
 
 /* Calcule d/x  ou  d est entier et x matrice triangulaire inferieure
- * entiere dont les coeff diagonaux divisent d (resultat entier).
- */
+ * entiere dont les coeff diagonaux divisent d (resultat entier). */
 static GEN
-matinv(GEN x, GEN d, long n)
+matinv(GEN x, GEN d)
 {
   gpmem_t av,av1;
-  long i,j,k;
+  long i,j,k, n = lg(x[1]); /* Warning: lg(x) from ordmax is bogus */
   GEN y,h;
 
-  y=idmat(n);
-  for (i=1; i<=n; i++)
-    coeff(y,i,i)=ldivii(d,gcoeff(x,i,i));
+  y = idmat(n-1);
+  for (i=1; i<n; i++)
+    coeff(y,i,i) = (long)diviiexact(d,gcoeff(x,i,i));
   av=avma;
-  for (i=2; i<=n; i++)
+  for (i=2; i<n; i++)
     for (j=i-1; j; j--)
     {
       for (h=gzero,k=j+1; k<=i; k++)
@@ -313,6 +289,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   gpmem_t av=avma, av2,limit;
   GEN T,T2,Tn,m,v,delta,hard_case_exponent, *w;
   const GEN pp = sqri(p);
+  const GEN ppo2 = shifti(pp,-1);
   const long pps = (2*expi(pp)+2<BITS_IN_LONG)? pp[2]: 0;
 
   if (cmpis(p,n) > 0)
@@ -331,7 +308,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   T2=cgetg(2*n+1,t_MAT); for (i=1; i<=2*n; i++) T2[i]=lgetg(n+1,t_COL);
   Tn=cgetg(n*n+1,t_MAT); for (i=1; i<=n*n; i++) Tn[i]=lgetg(n+1,t_COL);
   v = new_chunk(n+1);
-  w =  (GEN*)new_chunk(n+1);
+  w = (GEN*)new_chunk(n+1);
 
   av2 = avma; limit = stack_lim(av2,1);
   delta=gun; m=idmat(n);
@@ -341,11 +318,12 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     long j, k, h;
     gpmem_t av0 = avma;
     GEN t,b,jp,hh,index,p1, dd = sqri(delta), ppdd = mulii(dd,pp);
+    GEN ppddo2 = shifti(ppdd,-1);
 
     if (DEBUGLEVEL > 3)
       fprintferr("ROUND2: epsilon = %ld\tavma = %ld\n",epsilon,avma);
 
-    b=matinv(m,delta,n);
+    b=matinv(m,delta);
     for (i=1; i<=n; i++)
     {
       for (j=1; j<=n; j++)
@@ -357,12 +335,12 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
 	    GEN p2 = mulii(gcoeff(m,i,h),gcoeff(cf[h],j,k));
             if (p2!=gzero) p1 = addii(p1,p2);
           }
-          coeff(T,j,k) = (long)rrmdr(p1, ppdd);
+          coeff(T,j,k) = (long)centermodii(p1, ppdd, ppddo2);
         }
       p1 = mulmati(m, mulmati(T,b));
       for (j=1; j<=n; j++)
 	for (k=1; k<=n; k++)
-	  coeff(p1,j,k)=(long)rrmdr(divii(gcoeff(p1,j,k),dd),pp);
+	  coeff(p1,j,k)=(long)centermodii(divii(gcoeff(p1,j,k),dd),pp,ppo2);
       w[i] = p1;
     }
 
@@ -430,7 +408,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
         }
       rowred(T2,pp);
     }
-    jp=matinv(T2,p,n);
+    jp=matinv(T2,p);
     if (pps)
     {
       for (k=1; k<=n; k++)
@@ -460,7 +438,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
       index = mulii(index,gcoeff(Tn,i,i));
     if (gcmp1(index)) break;
 
-    m = mulmati(matinv(Tn,index,n), m);
+    m = mulmati(matinv(Tn,index), m);
     hh = delta = mulii(index,delta);
     for (i=1; i<=n; i++)
       for (j=1; j<=n; j++)
@@ -917,11 +895,8 @@ maxord(GEN p,GEN f,long mf)
 static GEN
 polmodiaux(GEN x, GEN y, GEN ys2)
 {
-  if (typ(x)!=t_INT)
-    x = mulii((GEN)x[1], mpinvmod((GEN)x[2],y));
-  x = modii(x,y);
-  if (cmpii(x,ys2) > 0) x = subii(x,y);
-  return x;
+  if (typ(x)!=t_INT) x = mulii((GEN)x[1], mpinvmod((GEN)x[2],y));
+  return centermodii(x,y,ys2);
 }
 
 /* x polynomial with integer or rational coeff. Reduce them mod y IN PLACE */

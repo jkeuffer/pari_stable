@@ -149,57 +149,44 @@ sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
   avma = av; return y;
 }
 
+GEN
+centermodii(GEN x, GEN p, GEN po2)
+{
+  GEN y = modii(x,p);
+  if (cmpii(y,po2) > 0) return subii(y,p);
+  return y;
+}
+
 /* for internal use */
 GEN
 centermod_i(GEN x, GEN p, GEN ps2)
 {
-  long i, j, lx, hx;
+  long i, lx;
   gpmem_t av;
-  GEN y,p1;
+  GEN y;
 
   if (!ps2) ps2 = shifti(p,-1);
   switch(typ(x))
   {
-    case t_INT:
-      y=modii(x,p);
-      if (cmpii(y,ps2)>0) return subii(y,p);
-      return y;
+    case t_INT: return centermodii(x,p,ps2);
 
-    case t_POL: lx=lgef(x);
-      y=cgetg(lx,t_POL); y[1]=x[1];
+    case t_POL: lx = lgef(x);
+      y = cgetg(lx,t_POL); y[1] = x[1];
       for (i=2; i<lx; i++)
       {
-	av=avma; p1=modii((GEN)x[i],p);
-	if (cmpii(p1,ps2)>0) p1=subii(p1,p);
-	y[i]=lpileupto(av,p1);
+	av = avma;
+	y[i] = (long)gerepileuptoint(av, centermodii((GEN)x[i],p,ps2));
       }
       return normalizepol_i(y, lx);
 
-    case t_COL: lx=lg(x);
-      y=cgetg(lx,t_COL);
-      for (i=1; i<lx; i++)
-      {
-	p1=modii((GEN)x[i],p);
-	if (cmpii(p1,ps2)>0) p1=subii(p1,p);
-	y[i]=(long)p1;
-      }
+    case t_COL: lx = lg(x);
+      y = cgetg(lx,t_COL);
+      for (i=1; i<lx; i++) y[i] = (long)centermodii((GEN)x[i],p,ps2);
       return y;
 
-    case t_MAT: lx=lg(x);
-      y=cgetg(lx,t_MAT);
-      if (lx == 1) return y;
-      hx = lg(x[1]);
-      for (j=1; j<lx; j++)
-      {
-        GEN cx = (GEN)x[j], cy = cgetg(hx,t_COL);
-        y[j] = (long)cy;
-        for (i=1; i<hx; i++)
-        {
-          p1=modii((GEN)cx[i], p);
-          if (cmpii(p1,ps2)>0) p1=subii(p1,p);
-          cy[i]=(long)p1;
-        }
-      }
+    case t_MAT: lx = lg(x);
+      y = cgetg(lx,t_MAT);
+      for (i=1; i<lx; i++) y[i] = (long)centermod_i((GEN)x[i],p,ps2);
       return y;
   }
   return x;
