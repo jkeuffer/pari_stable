@@ -2099,9 +2099,9 @@ rayclassnointernarch(GEN blist, GEN h, GEN matU)
 GEN
 decodemodule(GEN nf, GEN fa)
 {
-  long n, k, j, fauxpr;
-  pari_sp av=avma;
-  GEN g,e,id,pr;
+  long n, k;
+  pari_sp av = avma;
+  GEN g, e, id, pr;
 
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
@@ -2111,9 +2111,10 @@ decodemodule(GEN nf, GEN fa)
   e = (GEN)fa[2];
   for (k=1; k<lg(g); k++)
   {
-    fauxpr = itos((GEN)g[k]);
-    j = (fauxpr%n)+1; fauxpr /= n*n;
-    pr = (GEN)primedec(nf,stoi(fauxpr))[j];
+    long code = itos((GEN)g[k]), p = code / (n*n), j = (code%n)+1;
+    GEN P = primedec(nf, stoi(p));
+    if (lg(P) <= j) err(talker, "incorrect hash code");
+    pr = (GEN)P[j];
     id = idealmulpowprime(nf,id, pr,(GEN)e[k]);
   }
   return gerepileupto(av,id);
