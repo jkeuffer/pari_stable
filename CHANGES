@@ -54,6 +54,7 @@ Done for version 2.2.2 (released ??/??/2001):
    19- not enough GC when writing a t_PADIC
    20- user member functions were very slow (unnecessary copy)
    21- cd Oxxx; make -j4 bench ran things in the wrong order
+   22- poltchebi, pollegendre gave bogus output for negative degrees
 
   Changes
     1- allow compressing *.dvi files for the online help system
