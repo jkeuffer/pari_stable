@@ -3,6 +3,7 @@ BA = Bill Allombert
 BD = Bill Dally
 BH = Bruno Haible
 CB = Cliff Bergman
+CW = Carl Witty
 DB = Dominique Bernardi
 DC = Dan Christensen
 DE = Denis Excoffier
@@ -22,6 +23,7 @@ OR = Olivier Ramare
 OV = Oliver Voigt
 PM = Peter Montgomery
 PW = Paul van Wamelen
+TH = Teluhiko Hilano
 TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
@@ -53,6 +55,9 @@ IZ 19- tex2mail had difficulties with rational functions
    22- } as last char of an input file (missing a final \n) caused problems
    23- ??keyword@ didn't work properly (pattern modified between chapters)
 BA 24- bug in galconj.c:corediscpartial (could return half integer)
+   25- factorff and ffinit "not random enough"
+TH 26- Configure doesn't handle cygwin new directory structure
+CW 27- polsturm(x,0,1) = 1 (should be 0)
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)
@@ -62,7 +67,9 @@ IZ  4- output of \x (a bit more verbose)
 
   Added
 BA  1- Pocklington-Lehmer primality prover
-BA  2- Fp-isom (library)
+BA  2- Fp_isom (library)
+BA  3- Mod(a,b)^(c/d) fo a,b,c,d integers
+    4- flag to vecsort (decreasing order)
 
 ===========================================================================
 Done for version 2.0.19.beta (released 17/03/2000):

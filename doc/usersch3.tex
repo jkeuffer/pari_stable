@@ -5865,6 +5865,8 @@ For example, \kbd{vecextract(x, vecsort(x,,1))} is equivalent to
 $\bullet$ 2: sorts $x$ by ascending lexicographic order (as per the
 \kbd{lex} comparison function).
 
+$\bullet$ 4: use decreasing instead of ascending order.
+
 \syn{vecsort0}{x,k,flag}. To omit $k$, use \kbd{NULL} instead. You can also
 use the simpler functions
 
@@ -5875,9 +5877,10 @@ $\teb{indexsort}(x)$ (= $\kbd{vecsort0}(x,\text{NULL},1)$).
 $\teb{lexsort}(x)$ (= $\kbd{vecsort0}(x,\text{NULL},2)$).
 
 Also available are \teb{sindexsort} and \teb{sindexlexsort} which return a
-vector (type \typ{VEC}) of C-long integers $v$, where $v[1]\dots v[n]$
-contain the indices. Note that the resulting $v$ is \var{not} a valid PARI
-object, but is in general easier to use in C programs!
+vector of C-long integers (private type \typ{VECSMALL}) $v$, where
+$v[1]\dots v[n]$ contain the indices. Note that the resulting $v$ is
+\var{not} a generic PARI object, but is in general easier to use in C
+programs!
 
 \section{Sums, products, integrals and similar functions}
 

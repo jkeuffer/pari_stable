@@ -1648,8 +1648,8 @@ as an unprinted result):
   print(a=3, (1 + ((a-3)==print())) (a = (a == 5\/2)))
 @eprog
 
-\noindent To round this up, here is a less artificial example, used to create
-generic matrices\sidx{generic matrix}\sidx{matrix}:
+\noindent Here is a less artificial example, used to create generic
+matrices\sidx{generic matrix}\sidx{matrix}:
 
 \bprog
 ? genmat(u,v,s="x") = matrix(u,v,i,j, eval(Str(s "" i "" j)))
@@ -1668,6 +1668,12 @@ concat(i,j))}!). More simply, we could have written \kbd{concat([Str(s),
 i,j])}, or even \kbd{concat([s,i,j])}, silently assuming that \kbd{s} will
 indeed be a string. In practice \kbd{Str} is much more efficient, if
 slightly more cryptic.
+
+\noindent And here's a final one: the function \kbd{hist} returns all history
+entries from \kbd{\%$a$} to \kbd{\%$b$} neatly packed into a single vector
+\bprog
+?  hist(a,b) = vector(b-a+1, i, eval(Str("%" a-1+i)))
+@eprog
 
 \noindent The arguments of the following functions are processed in string
 context:
