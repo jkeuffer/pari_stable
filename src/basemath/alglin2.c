@@ -997,7 +997,7 @@ matrixqz(GEN x, GEN p)
   for (j=1; j<=n; j++)
   {
     x[j] = (long)primpart((GEN)p1[j]);
-    if (!ZV_isin((GEN)p1[j])) err(talker, "not a rational matrix in matrixqz");
+    if (!ZV_isin((GEN)x[j])) err(talker, "not a rational matrix in matrixqz");
   }
   /* x integral */
 
