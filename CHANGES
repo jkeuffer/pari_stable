@@ -156,6 +156,11 @@ MSo21- allow poltchebi(n < 0) [ := poltchebi(-n), still satisfies the 3-term
 IZ 22- prime sieve optimization [ primelimit ]
    23- try to reduce the likelihood of an artefact relation in PSLQ [ use
        "confidence level" 2^(-20) ]
+IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
+       linelength:
+       \o3 
+       \p240
+       [Pi, Pi]~
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)

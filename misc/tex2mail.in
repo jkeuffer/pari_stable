@@ -19,15 +19,17 @@
 #	ragged			# leave right ragged
 #	noindent		# assume \noindent everywhere
 #	ignorefonts		# make math fonts (\mathfrak etc) into NOPs
+#	scissors		# Symbol to emit when a long line is cut
 
 eval 'require "newgetopt.pl";
   &NGetOpt("linelength=i","maxdef=i","debug=i","by_par", "TeX",
-	   "ragged", "noindent", "ignorefonts")'
+	   "ragged", "noindent", "ignorefonts", "scissors=s", "noflush")'
     || warn "Errors during parsing command line options" .
 	($@ ? ": $@" : '') . ".\n";
 $linelength= $opt_linelength || 75;
-$maxdef= $opt_maxdef || 400;
+$maxdef= $opt_maxdef || 10000;
 $debug=$opt_debug;
+$opt_scissors = "---8<---8<---" unless defined $opt_scissors;
 
 $notusualtoks="\\\\" . '\${}^_~&@';
 $notusualtokenclass="[$notusualtoks]";
@@ -37,6 +39,7 @@ $active="$macro|\\\$\\\$|$notusualtokenclass";
 $tokenpattern="$usualtokenclass|$active";
 $multitokenpattern="$usualtokenclass+|$active";
 
+$| = 1 unless $opt_noflush;
 
 # Format of the record: height,length,baseline,expandable-spaces,string
 # The string is not terminated by \n, but separated into rows by \n.
@@ -345,10 +348,12 @@ warn "\@p is !", join('!', @p), "!\n\@out is !", join('!', @out), "!\n"
   warn "No cut found!\n" if $debug & $debug_flow; 
   # If anything else fails use force
   &print();
+  print "$opt_scissors\n" if length($opt_scissors) && $h > 1;
   while (&length($rec)>$linelength) {
     @p=&cut($linelength,$rec);
     @out=($p[0]);
     &print();
+    print "$opt_scissors\n" if length($opt_scissors) && $h > 1;
     $rec=$p[1];
   } 
   $curlength=0;
@@ -1345,7 +1350,7 @@ sub define {
 
 sub defb {
   for (@_) {
-    &define("\\$_","\\begin{$_}");&define("\\end$_","\\end{$_}");
+    &define("\\$_","\\begin{$_}");&define("\\end$_","\\endTeXtoMail{$_}");
   }
 }
 
@@ -2554,8 +2559,12 @@ for ("documentclass", "documentstyle") {
   $contents{"\\$_"}="[]discard";
 }
 
+# works as \end in LaTeX
+$type{"\\endTeXtoMail"}="sub1";
+$contents{"\\endTeXtoMail"}="end";
+
 if ($opt_TeX) {
-  &define('\pmatrix#1','\left(\begin{matrix}#1\end{matrix}\right)');
+  &define('\pmatrix#1','\left(\begin{matrix}#1\endTeXtoMail{matrix}\right)');
   $type{"\\end"}="sub";
   $contents{"\\end"}="end_TeX";
 } else {
@@ -2633,4 +2642,9 @@ __END__
 	  Allow \over and other infix macros inside \left(\right).
 	  \label would not update $curlength.
 	  Whitespace edits.
-
+	  Update the limit of expansion of definitions to 10000 per paragraph
+	  (a recursion guard - used, e.g., per TeX's \pmatrix).
+	  New option scissors to emit a line when a high line is cut into
+	    pieces (disabled when "").
+	  New option noflush (rarily useful optimization).
+	  Flush the output by default.
