@@ -1360,7 +1360,7 @@ In any case, if you are working with expressions involving several variables
 and want to have them ordered in a specific manner in the internal
 representation just described, the simplest is just to write down the
 variables one after the other under \kbd{gp} before starting any real computations.
-You could also define variables from your GPRC to have a consistant
+You could also define variables from your GPRC to have a consistent
 ordering of common variable names in all your \kbd{gp} sessions, e.g read in a file
 \kbd{variables.gp} containing
 \bprog
@@ -1389,7 +1389,7 @@ $y$:
 ? Mod(x,y)
 %4 = 0
 @eprog
-\noindent In the last exemple, the division by $y$ takes place in
+\noindent In the last example, the division by $y$ takes place in
 $\Q(y)[x]$,
 hence the \kbd{Mod} object is a coset in $(\Q(y)[x]) / (y\Q(y)[x])$, which
 is the null ring since $y$ is invertible! So be very wary of variable
@@ -1419,7 +1419,7 @@ the price to pay to allow \kbd{\%} and \kbd{/} operators on polynomials
 instead of requiring a more cumbersome \kbd{divrem($x$, $y$, \var{var})}
 (which also exists). Unfortunately, in some functions like \tet{content} and
 \tet{denominator}, there is no way to set explicitly a main variable like in
-\tet{divrem} and remove the dependance on implicit orderings. This will
+\tet{divrem} and remove the dependence on implicit orderings. This will
 hopefully be corrected in future versions.
 
 \subsec{Expressions and expression sequences}.
@@ -1975,18 +1975,14 @@ to let functions define other functions. Anyway, it is allowed by the
 language definition.)  So \kbd{gp} tells you in good faith that to correctly define
 a function, you need an equal sign between its name and its body.
 
-Error messages from the library will usually be much clearer since, by
+Error messages from the library will usually be clearer since, by
 definition, they answer a correctly worded query (otherwise \kbd{gp} would have
 protested first). Also they have more mathematical content, which should be
 easier to grasp than a parser's logic. For instance:
 \bprog
 ? 1/0
-  ***   division by zero in gdiv, gdivgs or ginv
+  ***   division by zero
 @eprog
-The first half of the sentence is crystal clear, and the second one only
-gives more context as to where exactly the problem occured in the library.
-Unfortunately library errors do not give context, so it can be hard to track
-down exactly where in your program the error occured.
 
 \subsec{Error recovery}\sidx{error recovery}\label{se:errorrec}
 
@@ -2198,19 +2194,15 @@ are familiar with the languages they are based on. First, there are
 see \kbd{%
  http://nswt.tuwien.ac.at:8000/htdocs/internet/unix/perl/math-pari.html}},
 %
-written by Ilya Zakharevich (\kbd{ilya@math.ohio-state.edu}),
+written by Ilya Zakharevich,
 and \tet{PariPython}%
-\footnote{**}{
-see \kbd{http://www.math.jussieu.fr/\til{}fermigie/PariPython/readme.html}},
+\footnote{**}{see \kbd{http://www.fermigier.com/fermigier/PariPython/}},
 %
-by St\'efane Fermigier (\kbd{fermigie@math.jussieu.fr}). Finaly, Michael Stoll
-(\kbd{Michael\_Stoll@math.uni-bonn.de}) has integrated PARI into \tet{CLISP},
-which is a Common Lisp implementation by Bruno Haible, Marcus Daniels and
-others. These provide interfaces to \kbd{gp} functions for use in \kbd{perl},
-\kbd{python} or \kbd{Lisp} programs.\sidx{Perl}\sidx{Python}\sidx{Lisp}
-To our knowledge, only the \kbd{python} and \kbd{perl} interfaces have been
-upgraded to version 2.0 of PARI, the \kbd{CLISP} one being still based on
-version 1.39.$xx$.
+by St\'efane Fermigier. Finaly, Michael Stoll has integrated PARI into
+\tet{CLISP}, which is a Common Lisp implementation by Bruno Haible, Marcus
+Daniels and others. These provide interfaces to \kbd{gp} functions for use in
+\kbd{perl}, \kbd{python} or \kbd{Lisp}\sidx{Perl}\sidx{Python}\sidx{Lisp}
+programs. Only the \kbd{perl} interface is being actively maintained.
 
 \section{The preferences file}\sidx{startup}\sidx{preferences file}
 \label{se:gprc}

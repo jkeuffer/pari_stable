@@ -24,11 +24,10 @@ To use PARI in \idx{library mode}, you must write a C program and link it to
 the PARI library. See the installation guide or the Appendix to the
 \emph{User's Guide to Pari/GP} on how to create and install the library and
 include files. A sample Makefile is presented in Appendix~A, and a more
-elaborate one in \kbd{examples/Makefile}.
-
-The best way to understand how programming is done is to work through a
-complete example. We will write such a program in \secref{se:prog}. Before
-doing this, a few explanations are in order.
+elaborate one in \kbd{examples/Makefile}. The best way to understand how
+programming is done is to work through a complete example. We will write such
+a program in \secref{se:prog}. Before doing this, a few explanations are in
+order.
 
 First, one must explain to the outside world what kind of objects and
 routines we are going to use. This is done with the directive
@@ -47,10 +46,10 @@ computed objects. This is done with a call to the function
 \fun{void}{pari_init}{size\_t size, ulong maxprime}
 
 \noindent The first argument is the number of bytes given to PARI to work
-with (it should not reasonably be taken below 500000), and the second is the
-upper limit on a precomputed prime number table. If you do not want prime
-numbers, just put $\tet{maxprime} = 2$, but note that the system still needs
-to precompute all primes up to about $2^{16}$.
+with, and the second is the upper limit on a precomputed prime number table;
+\kbd{size} should not reasonably be taken below $500000$ but you may set
+$\tet{maxprime} = 0$, although the system still needs to precompute all
+primes up to about $2^{16}$.
 
 \noindent We have now at our disposal:
 
@@ -140,12 +139,11 @@ between $1$ and $5$. This stands for $x[a_1][a_2]\dots[a_n]$, and returns a
 \kbd{GEN}. The macros \tet{gel} (resp.~\tet{gmael}) are synonyms for
 \tet{gmael1} (resp.~\kbd{gmael2}).
 
-
 Finally, the macro $\tet{gcoeff}(M, i, j)$ has exactly the meaning of
 \kbd{M[i,j]} in GP when \kbd{M} is a matrix. Note that due to the
-implementation of matrix types in PARI (i.e.~as horizontal lists of vertical
-vectors), \kbd{gcoeff(x,y)} is actually equivalent to \kbd{gmael(y,x)}. One
-should use \kbd{gcoeff} in matrix context, and \kbd{gmael} otherwise.
+implementation of \typ{MAT}s as horizontal lists of vertical vectors,
+\kbd{gcoeff(x,y)} is actually equivalent to \kbd{gmael(y,x)}. One should use
+\kbd{gcoeff} in matrix context, and \kbd{gmael} otherwise.
 
 \subsec{Variations on basic functions}.\label{se:low_level} In the library
 syntax descriptions in Chapter~3, we have only given the basic names of the
@@ -185,17 +183,17 @@ two arguments can be of type \typ{INT} or \typ{REAL}), \teb{addis} (to add a
 \typ{INT} and a \kbd{long}) and so on.
 
 All these specialized functions are of course more efficient than the general
-putpose one, but note there is a hidden danger here: the types of the objects
-that you use, if they are themselves results of a previous computation, are
-not completely predetermined. For instance the multiplication of a
-\typ{REAL} by a \typ{INT} \emph{usually} gives a \typ{REAL} result, except
-when the integer is~0, in which case according to the PARI philosophy the
-result is the exact integer~0. Hence if afterwards you call a function which
-specifically needs a \typ{REAL} argument, you are in trouble.
+purpose ones, but note the hidden danger here: the types of the objects
+involved, if they are themselves results of a previous computation, are not
+completely predetermined. For instance the multiplication of a \typ{REAL} by
+a \typ{INT} \emph{usually} gives a \typ{REAL} result, except when the integer
+is~0, in which case according to the PARI philosophy the result is the exact
+integer~0. Hence if afterwards you call a function which specifically needs a
+\typ{REAL} argument, you are in trouble.
 
 The names are self-explanatory once you know that {\bf i} stands for a
 \typ{INT}, {\bf r} for a \typ{REAL}, {\bf mp} for i or r, {\bf s} for a
-signed C long integer, {\bf u} for an unsigned C long inger; finally the
+signed C long integer, {\bf u} for an unsigned C long integer; finally the
 suffix {\bf z} means that the result is not created on the PARI stack but
 assigned to a preexisting GEN object passed as an extra argument. For
 completeness, Chapter 5 gives a description of these low-level functions.
@@ -437,7 +435,7 @@ below, where $n=1$) is
 
 \fun{GEN}{gerepilecopy}{pari\_sp ltop, GEN x)}
 
-\noindent which is functionnally equivalent to \kbd{gerepileupto(ltop,
+\noindent which is functionally equivalent to \kbd{gerepileupto(ltop,
 gcopy(x))} but more efficient. In this case, the \kbd{GEN} parameter \kbd{x}
 need not satisfy any property before the garbage collection (it may be
 disconnected, components created before the root and so on). Of course, this
@@ -673,7 +671,7 @@ that the price paid for using \kbd{gerepile} and \kbd{gerepile}-related
 copies, when properly used, is usually less than 1 percent of the total
 running time, which is quite acceptable!
 
-Second, it is of course harder on the prorammer, and quite error-prone
+Second, it is of course harder on the programmer, and quite error-prone
 if you do not stick to a consistent PARI programming style. If all seems
 lost, just use \tet{gerepilecopy} (or \tet{gerepileall}) to fix up the stack
 for you. You can always optimize later when you have sorted out exactly which
@@ -1255,7 +1253,7 @@ For an object of type \typ{POL}, \tet{leading_term}, \tet{constant_term},
 \tet{degpol} return a pointer to the leading term (with respect to the main
 variable of course), constant term, and degree of the polynomial (with the
 convention $\deg(0) = -1$). Applied to any other type, the result is
-unspecificied. Note that no copy is made on the pari stack so the returned
+unspecified. Note that no copy is made on the pari stack so the returned
 value is not safe for a basic \kbd{gerepile} call. Note that $\kbd{degpol(z)}
 = \kbd{lg(z)} - 3$.
 
@@ -1320,7 +1318,7 @@ i.e.~they must be of type \typ{COL} and of the same length.
 \kbd{z[1]}, \kbd{z[2]},\dots \kbd{z[lg(z)-1]} are ordinary signed long
 integers. This type is used instead of a \typ{VEC} of \typ{INT}s for
 efficiency reasons, for instance to implement efficiently permutations,
-polynomial arithmetic and linear alebra over small finite fields, etc.
+polynomial arithmetic and linear algebra over small finite fields, etc.
 
 \noindent The next two types were introduced for specific \kbd{gp} use, and
 you are better off using the standard malloc'ed C constructs when programming
@@ -1738,7 +1736,7 @@ prints \kbd{Time}, then the remaining arguments as specified by
 This mechanism is simple to use but not foolproof. If some other function
 uses these timers, and many PARI functions do use \kbd{timer2} when
 \tet{DEBUGLEVEL} is high enough, the timings will be meaningless. To handle
-timing in a reentrant way, PARI defines a dedicated datatype,
+timing in a reentrant way, PARI defines a dedicated data type,
 \tet{pari_timer}. The functions
 
 \fun{void}{TIMERstart}{pari\_timer *T}
@@ -1814,7 +1812,7 @@ release.
 
 Roughly four types of modifications can be made. The first type includes all
 improvements to the documentation, in a broad sense. This includes correcting
-typos or inaccurracies of course, but also items which are not really covered
+typos or inacurracies of course, but also items which are not really covered
 in this document, e.g.~if you happen to write a tutorial, or pieces of code
 exemplifying some fine points that you think were unduly omitted.
 
