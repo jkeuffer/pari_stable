@@ -612,7 +612,7 @@ zimmertbound(long N,long R2,GEN DK)
 {/*20*/28.1285704, 27.4021674, 26.6807314, 25.9645140, 25.2537867, 24.5488420,
        23.8499943, 23.1575823, 22.4719720, 21.7935548, 21.1227537}
     };
-    w = gmul(dbltor(exp(-c[N][R2])), gsqrt(DK,MEDDEFAULTPREC));
+    w = gmul(dbltor(exp(-c[N-2][R2])), gsqrt(DK,MEDDEFAULTPREC));
   }
   else
   {
