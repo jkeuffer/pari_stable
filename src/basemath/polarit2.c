@@ -2082,8 +2082,8 @@ issimplefield(GEN x)
     case t_POL:
       lx=lgef(x);
       for (i=2; i<lx; i++)
-	if (!issimplefield((GEN)x[i])) return 0;
-      return 1;
+	if (issimplefield((GEN)x[i])) return 1;
+      return 0;
     case t_COMPLEX: case t_POLMOD:
       return issimplefield((GEN)x[1]) || issimplefield((GEN)x[2]);
   }

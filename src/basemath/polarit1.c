@@ -141,7 +141,7 @@ gred_rfrac(GEN x)
   xx2=content(x2); if (!gcmp1(xx2)) x2=gdiv(x2,xx2);
   x3=gdiv(xx1,xx2);
   y = poldivres(x1,x2,&p1);
-  if (!signe(p1)) { cgiv(p1); return gmul(x3,y); }
+  if (!signe(p1)) return gmul(x3,y);
 
   p1 = ggcd(x2,p1);
   if (!isscalar(p1)) { x1=gdeuc(x1,p1); x2=gdeuc(x2,p1); }
