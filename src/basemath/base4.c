@@ -156,6 +156,19 @@ ishnfall(GEN x)
   }
   return (gsigne(gcoeff(x,1,1)) > 0);
 }
+/* same x is known to be integral */
+int
+Z_ishnfall(GEN x)
+{
+  long i,j, lx = lg(x);
+  for (i=2; i<lx; i++)
+  {
+    if (signe(gcoeff(x,i,i)) <= 0) return 0;
+    for (j=1; j<i; j++)
+      if (signe(gcoeff(x,i,j))) return 0;
+  }
+  return (signe(gcoeff(x,1,1)) > 0);
+}
 
 GEN
 idealhermite_aux(GEN nf, GEN x)
@@ -1096,31 +1109,32 @@ static GEN
 idealmat_mul(GEN nf, GEN x, GEN y)
 {
   long i,j, rx=lg(x)-1, ry=lg(y)-1;
-  GEN dx,dy,m;
+  GEN cx,cy,m;
 
-  dx=denom(x); if (!gcmp1(dx)) x=gmul(dx,x);
-  dy=denom(y); if (!gcmp1(dy)) y=gmul(dy,y);
-  dx = mulii(dx,dy);
+  cx = content(x); if (!gcmp1(cx)) x = Q_div_to_int(x,cx);
+  cy = content(y); if (!gcmp1(cy)) y = Q_div_to_int(y,cy);
+  cx = gmul(cx,cy);
   if (rx<=2 || ry<=2)
   {
     m=cgetg(rx*ry+1,t_MAT);
     for (i=1; i<=rx; i++)
       for (j=1; j<=ry; j++)
-        m[(i-1)*ry+j]=(long)element_muli(nf,(GEN)x[i],(GEN)y[j]);
+        m[(i-1)*ry+j] = (long)element_muli(nf,(GEN)x[i],(GEN)y[j]);
     if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
     {
       GEN p1 = mulii(gcoeff(x,1,1),gcoeff(y,1,1));
       y = hnfmodid(m, p1);
     }
     else
-      y=hnfmod(m, detint(m));
+      y = hnfmod(m, detint(m));
   }
   else
   {
-    x=idealmat_to_hnf(nf,x);
-    y=idealmat_to_hnf(nf,y); y=idealmulh(nf,x,y);
+    if (!Z_ishnfall(x)) x = idealmat_to_hnf(nf,x);
+    if (!Z_ishnfall(y)) y = idealmat_to_hnf(nf,y);
+    y = idealmulh(nf,x,y);
   }
-  return gcmp1(dx)? y: gdiv(y,dx);
+  return gcmp1(cx)? y: gmul(y,cx);
 }
 
 #if 0
@@ -2413,6 +2427,19 @@ element_reduce(GEN nf, GEN x, GEN ideal)
  * such that if A_j is the j-th column of A then M=\a_1A_1+...\a_kA_k. We say
  * that [A,I] is a pseudo-basis if k=n
  */
+
+#if 0
+static GEN
+idealmul(GEN nf, GEN x, GEN y)
+{
+  GEN cx, cy;
+  if (typ(x) != t_MAT || typ(y) != t_MAT || lg(x) != lg(y))
+    return idealmul(nf,x,y);
+  cx = content(x); if (!gcmp1(cx)) x = Q_div_to_int(x,cx);
+  cy = content(y); if (!gcmp1(cy)) y = Q_div_to_int(y,cy);
+  return gmul(idealmulh(nf,x,y), gmul(cx,cy));
+}
+#endif
 
 #define swap(x,y) { long _t=x; x=y; y=_t; }
 
