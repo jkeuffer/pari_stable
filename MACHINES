@@ -151,7 +151,7 @@ MC68030       25MHz  SunOS-4.0.3     gcc          683736! 685248  2.0.9 (4)
 *MC68030      25MHz  SunOS-4.0.3     gcc         1034136!1038368  2.0.9
 ------------------------------------------------------------------------------
 IBM/POWER,PowerPC
-PPC G4       400MHz  MacOS X 10.2    gcc-3.1        5174!         2.1.4     MB
+*PPC G4      400MHz  MacOS X 10.2    gcc-3.1        5174!         2.1.4     MB
 *PowerMac3,3 500MHz  Linux-2.4.2     gcc            3742    3732  2.1.1     BA
 *PPC800(G3)  400MHz  Linux-2.4.3     gcc            4640    4624  2.2.0     GH
 *PPC???(G3)  350MHz  MacOS X 10.1    gcc-2.95.2     5722!         2.1.2     NI
