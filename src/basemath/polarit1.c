@@ -742,12 +742,13 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
   splitgen(m,t,  d,p,q,r);
 }
 
-/* return S = [ x^p, x^2p, ... x^(n-1)p ] mod (p, T) */
+/* return S = [ x^p, x^2p, ... x^(n-1)p ] mod (p, T), n = degree(T) > 0 */
 static GEN
 init_pow_p_mod_pT(GEN p, GEN T)
 {
   long i, n = lgef(T)-3, v = varn(T);
   GEN p1, S = cgetg(n, t_VEC);
+  if (n == 1) return S;
   S[1] = (long)Fp_pow_mod_pol(polx[v], p, T, p);
 #if 1 /* use as many squarings as possible */
   for (i=2; i < n; i+=2)
@@ -799,7 +800,7 @@ static GEN
 factcantor0(GEN f, GEN pp, long flag)
 {
   long i,j,k,d,e,vf,p,nbfact,tetpil,av = avma;
-  GEN ex,y,p1,f2,g,g1,u,v,pd,q;
+  GEN ex,y,f2,g,g1,u,v,pd,q;
   GEN *t;
 
   if (!(d = factmod_init(&f, pp, &p))) { avma=av; return trivfact(); }
@@ -818,11 +819,11 @@ factcantor0(GEN f, GEN pp, long flag)
       long du,dg;
       GEN S;
       k++; if (p && !(k%p)) { k++; f2 = Fp_deuc(f2,g1,pp); }
-      p1 = Fp_pol_gcd(f2,g1, pp); u = g1; g1 = p1;
-      if (!gcmp1(p1))
+      u = g1; g1 = Fp_pol_gcd(f2,g1, pp);
+      if (lgef(g1)>3)
       {
-        u = Fp_deuc( u,p1,pp);
-        f2= Fp_deuc(f2,p1,pp);
+        u = Fp_deuc( u,g1,pp);
+        f2= Fp_deuc(f2,g1,pp);
       }
       du = lgef(u)-3;
       if (du <= 0) continue;
