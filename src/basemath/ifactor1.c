@@ -1006,7 +1006,7 @@ ellfacteur(GEN n, int insist)
       3849600UL,4667500UL,5659200UL,6861600UL,8319500UL,10087100UL,
       12230300UL,14828900UL,17979600UL,21799700UL,26431500UL,
       32047300UL,38856400UL,	/* 110 times that still fits into 32bits */
-#ifdef LONG_IS_64BITS
+#ifdef LONG_IS_64BIT
       47112200UL,57122100UL,69258800UL,83974200UL,101816200UL,
       123449000UL,149678200UL,181480300UL,220039400UL,266791100UL,
       323476100UL,392204900UL,475536500UL,576573500UL,699077800UL,
@@ -1054,7 +1054,7 @@ ellfacteur(GEN n, int insist)
   {
     dsnmax = (size >> 2) - 10;
     if (dsnmax < 0) dsnmax = 0;
-#ifdef LONG_IS_64BITS
+#ifdef LONG_IS_64BIT
     else if (dsnmax > 90) dsnmax = 90;
 #else
     else if (dsnmax > 65) dsnmax = 65;
@@ -1845,7 +1845,7 @@ squfof(GEN n, long quiet)
 
   if (cmpis(n,5) <= 0) return NULL; /* input n <= 5 */
 
-#ifdef LONG_IS_64BITS
+#ifdef LONG_IS_64BIT
   if (tf > 3 || (tf == 3 && bfffo(n[2]) < 5)) /* n too large */
     return NULL;
 #else  /* 32 bits */
