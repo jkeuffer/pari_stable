@@ -1762,7 +1762,57 @@ image_mod_p(GEN x, GEN p)
     if (d[k]) y[j++] = lcopy((GEN)x[k]);
   free(d); return y;
 }
+static GEN
+sinverseimage_mod_p(GEN mat, GEN y, GEN p)
+{
+  long av=avma,i, nbcol = lg(mat);
+  GEN col,p1 = cgetg(nbcol+1,t_MAT),res;
 
+  if (nbcol==1) return NULL;
+  if (lg(y) != lg(mat[1])) err(consister,"inverseimage_mod_p");
+
+  p1[nbcol] = (long)y;
+  for (i=1; i<nbcol; i++) p1[i]=mat[i];
+  p1 = ker_mod_p(p1,p); i=lg(p1)-1;
+  if (!i) return NULL;
+
+  col = (GEN)p1[i]; p1 = (GEN) col[nbcol];
+  if (gcmp0(p1)) return NULL;
+
+  p1 = mpinvmod(negi(p1),p);
+  setlg(col,nbcol);
+  for(i=1;i<nbcol;i++)
+    col[i]=lmulii((GEN)col[i],p1);
+  res=cgetg(nbcol,t_COL);
+  for(i=1;i<nbcol;i++)
+    res[i]=lmodii((GEN)col[i],p);
+  return gerepileupto(av,res);
+}
+/* Calcule l'image reciproque de v par m */
+GEN
+inverseimage_mod_p(GEN m, GEN v, GEN p)
+{
+  long av=avma,j,lv,tv=typ(v);
+  GEN y,p1;
+
+  if (typ(m)!=t_MAT) err(typeer,"inverseimage");
+  if (tv==t_COL)
+  {
+    p1 = sinverseimage_mod_p(m,v,p);
+    if (p1) return p1;
+    avma = av; return cgetg(1,t_MAT);
+  }
+  if (tv!=t_MAT) err(typeer,"inverseimage");
+
+  lv=lg(v)-1; y=cgetg(lv+1,t_MAT);
+  for (j=1; j<=lv; j++)
+  {
+    p1 = sinverseimage_mod_p(m,(GEN)v[j],p);
+    if (!p1) { avma = av; return cgetg(1,t_MAT); }
+    y[j] = (long)p1;
+  }
+  return y;
+}
 /*******************************************************************/
 /*                                                                 */
 /*                        EIGENVECTORS                             */

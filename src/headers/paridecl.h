@@ -44,6 +44,7 @@ GEN     imagecompl(GEN x);
 GEN     imagereel(GEN x, long prec);
 GEN     indexrank(GEN x);
 GEN     inverseimage(GEN mat, GEN y);
+GEN     inverseimage_mod_p(GEN m, GEN v, GEN p);
 long    isdiagonal(GEN x);
 GEN     ker(GEN x);
 GEN     ker_mod_p(GEN x, GEN p);
