@@ -1454,8 +1454,7 @@ static const unsigned char approx_tab[192] = {
 static void
 p_sqrtu1(ulong *N, ulong *ps, ulong *pr)
 {
-  ulong r, s, q, u, n0 = N[0];
-  int prec;
+  ulong prec, r, s, q, u, n0 = N[0];
 
   q = n0 >> (BITS_IN_LONG - 8);
   /* 2^6 = 64 <= q < 256 = 2^8 */

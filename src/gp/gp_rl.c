@@ -605,7 +605,7 @@ pari_completion(char *text, int START, int END)
     /* If we are in empty parens, insert the default arguments */
     if ((readline_state & DO_ARGS_COMPLETE) && k == j
          && (rl_line_buffer[j] == ')' || !rl_line_buffer[j])
-	 && (iend - i < sizeof(buf))
+	 && (iend - i < (long)sizeof(buf))
 	 && ( strncpy(buf, rl_line_buffer + i, iend - i),
 	      buf[iend - i] = 0, 1)
 	 && (ep = is_entry(buf)) && ep->help)
