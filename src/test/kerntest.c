@@ -1,9 +1,9 @@
 #include <pari.h>
 #include <anal.h>
 
-GEN     gzero, gun, gdeux;
-ulong   top, bot, avma, memused = 0;
-long    DEBUGLEVEL,DEBUGMEM = 0;
+GEN   gzero, gun, gdeux;
+ulong top, bot, avma, memused = 0;
+long  DEBUGLEVEL,DEBUGMEM = 0;
 
 void specinit()
 {
@@ -69,5 +69,6 @@ int main()
   printf("-:"); _voir(subrr(xr,yr));
   printf("*:"); _voir(mulrr(xr,yr));
   printf("/:"); _voir(divrr(xr,yr));
+  printf("gcc bug?:"); _voir(divrs(dbltor(3.),2));
   return 0;
 }
