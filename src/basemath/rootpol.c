@@ -1696,19 +1696,18 @@ static long
 a_posteriori_errors(GEN p, GEN roots_pol, long err)
 {
   GEN sigma,overn,shatzle,x;
-  long i,n=degpol(p),e,e_max;
+  long i, e, n = degpol(p), e_max = -EXPOBITS;
 
-  sigma = realun(3);
-  setexpo(sigma, err + (long)log2((double)n) + 1);
-  overn=dbltor(1./n);
+  sigma = real2n(err + (long)log2((double)n) + 1, 3);
+  overn = dbltor(1./n);
   shatzle=gdiv(gpui(sigma,overn,0),
 	       gsub(gpui(gsub(realun(DEFAULTPREC),sigma),overn,0),
 		    gpui(sigma,overn,0)));
-  shatzle=gmul2n(shatzle,1); e_max=-pariINFINITY;
+  shatzle=gmul2n(shatzle,1);
   for (i=1; i<=n; i++)
   {
     x=root_error(n,i,roots_pol,sigma,shatzle);
-    e=gexpo(x); if (e>e_max) e_max=e;
+    e=gexpo(x); if (e > e_max) e_max = e;
     roots_pol[i] = (long)mygprec_absolute((GEN)roots_pol[i],-e);
   }
   return e_max;
@@ -1864,7 +1863,7 @@ all_roots(GEN p, long bitprec)
     if (h > 1) m = gmul(m,lc);
 
     e = gexpo(gsub(q, m)) - gexpo(lc) + (long)log2((double)n) + 1;
-    if (e<-2*bitprec2) e=-2*bitprec2; /* to avoid e=-pariINFINITY */
+    if (e < -2*bitprec2) e = -2*bitprec2; /* to avoid e=-pariINFINITY */
     if (e < 0)
     {
       e = bitprec + a_posteriori_errors(p,roots_pol,e);
