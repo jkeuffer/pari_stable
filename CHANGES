@@ -70,6 +70,7 @@ HC 24- Corrected p-adic initell.
    33- dbltor(0) returned 2^-308, instead of 10^-308
    34- precision problems in thue/thueinit
        setrand(5);tnf=thueinit(x^3 + x^2 - 43690*x - 3529208) --> error in mplog
+   35- typo in bnfnarrow ("impossible inverse")
 
   Changed
 BA  1- improved Fp_isom
@@ -91,6 +92,7 @@ HC 12- gamma function for integral/rational arguments
    16- 'subgroup' argument made optional in bnrL1, bnrstark, rnfkummer
    17- use relative van Hoeij algorithm in nffactor [not optimized yet]
    18- rewrote factorff() to use new modular functions
+   19- rewrote primedec() to use new modular functions
 
   Added
     1- mplog2() function --> faster mplog()
@@ -102,6 +104,7 @@ BA  6- New functions galoissubgroups, galoisubfields.
 HC  7- Implemented all Bessel functions J, I, N, K, H1, H2, and Bessel functions
        for power series and polynomials.
 HC  8- Implemented PSLQ [preliminary]
+    9- library functions FpM_ker, FpM_deplin
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
