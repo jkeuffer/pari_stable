@@ -2570,8 +2570,8 @@ pari_tmp_dir()
   s = env_ok("TEMP"); if (s) return s;
 #endif
 #if defined(UNIX) || defined(__EMX__)
-  if (pari_is_rwx("/var/tmp")) return "/var/tmp";
   if (pari_is_rwx("/tmp")) return "/tmp";
+  if (pari_is_rwx("/var/tmp")) return "/var/tmp";
 #endif
   return ".";
 }
