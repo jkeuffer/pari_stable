@@ -1375,7 +1375,7 @@ which case no reduction mod \kbd{T} is performed on the result.
 For efficiency, the routines in this section may leave small unused objects
 behind on the stack (their output is still suitable for \kbd{gerepileupto}).
 Besides \kbd{T} and \kbd{p}, arguments are either \kbd{FpXQ} or \kbd{Fq}
-depending on the function name. (All \kbd{Fq} routines accept \kbd{FqXQ}s by
+depending on the function name. (All \kbd{Fq} routines accept \kbd{FpXQ}s by
 definition, not the other way round.)
 
 \fun{GEN}{Fq_red}{GEN x, GEN T, GEN p}, \kbd{x} a \kbd{ZX} or \typ{INT},
@@ -1388,15 +1388,15 @@ $\kbd{T} = \kbd{NULL}$, as \kbd{FpXX\_red(x, p)}.)
 
 \fun{GEN}{FqV_red}{GEN x, GEN T, GEN p}, \kbd{x} a vector of \kbd{ZX}s or
 \typ{INT}s, reduce them to \kbd{Fq}s. (If $\kbd{T} = \kbd{NULL}$, only
-reduce compoents mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
+reduce components mod \kbd{p} to \kbd{FpX}s or \kbd{Fp}s.)
 
-\fun{GEN}{FpXQ_mul}{GEN y,GEN x,GEN T,GEN p}
+\fun{GEN}{FpXQ_mul}{GEN y, GEN x, GEN T,GEN p}
 
 \fun{GEN}{FpXQ_sqr}{GEN y, GEN T, GEN p}
 
-\fun{GEN}{FpXQ_div}{GEN x,GEN y,GEN T,GEN p}
+\fun{GEN}{FpXQ_div}{GEN x, GEN y, GEN T,GEN p}
 
-\fun{GEN}{FpXQ_inv}{GEN x,GEN T,GEN p} computes the inverse of \kbd{x}
+\fun{GEN}{FpXQ_inv}{GEN x, GEN T, GEN p} computes the inverse of \kbd{x}
 
 \fun{GEN}{FpXQ_invsafe}{GEN x,GEN T,GEN p}, as \kbd{FpXQ\_inv}, returning
 \kbd{NULL} if \kbd{x} is not invertible.
@@ -1440,7 +1440,7 @@ $\kbd{FpXQ\_powers}(\kbd{x}, n, \kbd{T}, \kbd{p})$ for some $n > \sqrt{\deg
 
 \subsec{\kbd{FpXQX}, \kbd{FqX}}.
 Contrary to what the name implies, an \kbd{FpXQX} is a \typ{POL} whose
-coefficients are \kbd{FqX}s. So the only difference between \kbd{FqX} and
+coefficients are \kbd{Fq}s. So the only difference between \kbd{FqX} and
 \kbd{FpXQX} routines is that $\kbd{T} = \kbd{NULL}$ is not allowed in the
 latter. (It was thought more useful to allow \typ{INT} components than to
 enforce strict consistency, which would not imply any efficiency gain.)
@@ -1575,7 +1575,8 @@ or \kbd{NULL} if none exist.
 
 \fun{long}{FpM_rank}{GEN x, GEN p} as \kbd{rank}
 
-\fun{GEN}{FpM_indexrank}{GEN x, GEN p} as \kbd{indexrank}
+\fun{GEN}{FpM_indexrank}{GEN x, GEN p} as \kbd{indexrank} but returns a 
+\typ{VECSMALL} 
 
 \fun{GEN}{FpM_suppl}{GEN x, GEN p} as \kbd{suppl}
 
