@@ -1,5 +1,9 @@
 # Version number and patch level.
 . ./version
+if test -d CVS -a $status = development; then
+ status="$status CHANGES-"`grep CHANGES $TOP/CVS/Entries | awk -F/ '{print $3}'`
+fi
+
 version=$VersionMajor.$VersionMinor
 pari_release="$version.$patch"
 if test `expr $VersionMinor % 2` = 1; then
