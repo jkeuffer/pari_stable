@@ -63,6 +63,7 @@ UltraSPARC   167MHz  Solaris-2.5     cc  X11 dl2   16241   17048  2.0.9     LG
 UltraSPARC   143MHz  Solaris-2.5     gcc X11 dl2   12717   12899  2.0.19
 
 SuperSPARC2   75MHz  Solaris-2.5     gcc X11 dl2   16969   17013  2.0.10    LG
+SuperSPARC    50Mhz  Linux-2.2.14    gcc X11 dl2   41126   40854  2.0.18(22)BA
 SuperSPARC    40MHz  SunOS-4.1.3     gcc X11 dl2   31178   30456  2.0.19
 SuperSPARC    40Mhz  Solaris-2.5     gcc X11 dl2   31528   31576  2.0.16
 TurboSPARC   170MHz  Solaris-2.5     gcc X11 dl2   15907   16529  2.0.9     LG
@@ -81,6 +82,7 @@ AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc X11 dl2    6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl2   13190   13729  2.0.15    AP
+PentiumIII   733MHz  Linux-2.2.14   egcs X11 dl2    2080    2090  2.0.19    IS
 PentiumIII   533MHz  Linux-2.2.14    gcc X11 dl2    2710    2730  2.0.19    IS
 PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
 PentiumII    350MHz  Linux-2.2.5     gcc X11 dl2    4312    4488  2.0.16    HS
@@ -217,11 +219,13 @@ hppa kernel. Remove +z from compiler flags
 (19) 2  MB L2 Cache - Ultra U10
 (20) gcc-2.8.1 also works and produces a faster binary [sta=3032, dyn=3293]
 (21) replace err by pari_err in src/kernel/sparcv7/level0.S [in 2.0.16 or 17]
+(22) asmarch incorrectly defaulted to MicroSPARC (bypassed using Configure -a)
 
 =============================================================================
 Contributors:
   AW = Aleksander Wittlin
   AP = Andreas Piotrowski
+  BA = Bill Allombert
   BN = Balasubramanian Narasimhan
   DE = Denis Excoffier
   EK = Emmanuel Kowalski
