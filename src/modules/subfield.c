@@ -828,35 +828,24 @@ subfields0(GEN nf,GEN d)
   return d? subfields(nf,d): subfieldsall(nf);
 }
 
+GEN FpX_rand(long d1, long v, GEN p);
+
 /* irreducible (unitary) polynomial of degree n over Fp[v] */
 GEN
 ffinit(GEN p,long n,long v)
 {
-  long av,av1,tetpil,i,*a,j,l,pp;
+  long av = avma;
   GEN pol;
 
   if (n<=0) err(talker,"non positive degree in ffinit");
   if (typ(p) != t_INT) err(typeer,"ffinit");
-  if (is_bigint(p)) err(talker,"prime field too big in ffinit");
   if (v<0) v = 0;
-  av=avma; pp=itos(p); pol = cgetg(n+3,t_POL);
-  pol[1] = evalsigne(1)|evalvarn(v)|evallgef(n+3);
-  a=new_chunk(n+2);
-  a[1]=1; for (i=2; i<=n+1; i++) a[i]=0;
-  pol[n+2]=un; av1=avma;
-  for(;;)
+  for(;; avma = av)
   {
-    a[n+1]++;
-    if (a[n+1]>=pp)
-    {
-      j=n; while (j>=2 && a[j]==pp-1) j--;
-      if (j>=2) { a[j]++; for (l=j+1; l<=n+1; l++) a[l]=0; }
-    }
-    for (i=2; i<=n+1; i++) pol[i]=lstoi(a[n+3-i]);
+    pol = gadd(gpowgs(polx[v],n), FpX_rand(n-1,v, p));
     if (is_irred_mod_p(pol, p)) break;
-    avma=av1;
   }
-  tetpil=avma; return gerepile(av,tetpil,Fp_pol(pol,p));
+  return gerepileupto(av, Fp_pol(pol,p));
 }
 
 static GEN

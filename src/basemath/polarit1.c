@@ -1896,7 +1896,7 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
     p1 = (GEN)pol[i];
     if (typ(p1) == t_INTMOD) { p = (GEN)p1[1] ; break; }
   }
-  if (!p) err(talker,"need POLMOD coeffs in Kronecker_powmod");
+  if (!p) err(talker,"need Fq coeffs in Kronecker_powmod");
   x = lift_intern(to_Kronecker(x,pol));
 
   /* adapted from powgi */
@@ -1935,113 +1935,72 @@ Kronecker_powmod(GEN x, GEN mod, GEN n)
   setvarn(y, v); return gerepileupto(av0, y);
 }
 
-/* pol. in v whose coeff are the digits of m in base qq */
-static GEN
-stopoly9(GEN pp, GEN mm, GEN qq, long v, GEN a)
+GEN
+FpX_rand(long d1, long v, GEN p)
 {
-  long q,l,m,l1,i,va, smll = !is_bigint(mm), p = pp[2];
-  GEN y,p1,r;
-
-  y = cgetg(bit_accuracy(lgefint(mm)) + 2, t_POL);
-  va = varn(a);
-  p1 = cgetg(bit_accuracy(lgefint(qq)) + 2,t_POL);
-  p1[1] = evalsigne(1) | evalvarn(va);
-  l = 2;
-  if (smll)
-  {
-    q = itos(qq); m = itos(mm);
-    do { y[l++] = m % q; m /= q; } while (m);
-  }
-  else
-    do { mm=dvmdii(mm,qq,&r); y[l++]=(long)r; } while (signe(mm));
-  if (smll)
-    for (i=2; i<l; i++)
-    {
-      m=y[i]; l1=2;
-      do { p1[l1++] = lstoi(m % p); m /= p; } while (m);
-      setlgef(p1,l1); y[i]=(long)to_fq(p1,a,pp);
-    }
-  else
-    for (i=2; i<l; i++)
-    {
-      mm=(GEN)y[i]; l1=2;
-      do { mm=dvmdis(mm,p,&r); p1[l1++]=(long)r; } while (signe(mm));
-      setlgef(p1,l1); y[i]=(long)to_fq(p1,a,pp);
-    }
-  y[1] = evalsigne(1) | evalvarn(v) | evallgef(l);
-  return y;
+  long i, d = d1+2;
+  GEN y;
+  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  for (i=2; i<d; i++) y[i] = (long)genrand(p);
+  normalizepol_i(y,d); return y;
 }
 
-/* return a random polynomial in F_q[v], degree < 2*d1 */
+/* return a random polynomial in F_q[v], degree < d1 */
 static GEN
-stopoly92(GEN pg, long d1, long v, GEN a)
+FqX_rand(long d1, long v, GEN p, GEN a)
 {
-  GEN y,p1;
-  long m,l1,i,d2,l,va=varn(a),k=lgef(a)-3,nsh;
+  long i,j, d = d1+2, k = lgef(a)-1;
+  GEN y,t;
 
-  d2=2*d1+1; y=cgetg(d2+1,t_POL); y[1]=1;
-  nsh=BITS_IN_RANDOM-1-k; if (nsh<=0) nsh=1;
-  do
+  y = cgetg(d,t_POL); y[1] = evalsigne(1) | evalvarn(v);
+  t = cgetg(k,t_POL); t[1] = a[1];
+  for (i=2; i<d; i++)
   {
-    for (l=2; l<=d2; l++) y[l] = mymyrand() >> nsh;
-    l=d2; while (!y[l]) l--;
+    for (j=2; j<k; j++) t[j] = (long)genrand(p);
+    normalizepol_i(t,k); y[i]=(long)to_fq(t,a,p);
   }
-  while (l<=2);
-  l++;
-  p1 = cgetg(BITS_IN_LONG+2,t_POL);
-  p1[1] = evalsigne(1) | evalvarn(va);
-  for (i=2; i<l; i++)
-  {
-    m=y[i]; l1=2;
-    while (m) { p1[l1++] = m&1? un: zero; m>>=1; }
-    setlgef(p1,l1); y[i]=(long)to_fq(p1,a,pg);
-  }
-  y[1] = evalsigne(1) | evalvarn(v) | evallgef(l);
-  return y;
+  normalizepol_i(y,d); return y;
 }
 
 /* split into r factors of degree d */
 static void
-split9(GEN m, GEN *t, long d, GEN p, GEN q, GEN a, GEN S)
+split9(GEN *t, long d, GEN p, GEN q, GEN a, GEN S)
 {
-  long l,v,av0,av,ps, dv = lgef(*t)-3;
+  long l,v,av,is2,cnt, dt = lgef(*t)-3, da = lgef(a)-3;
   GEN w,w0;
 
-  if (dv == d) return;
-  v = varn(*t); m = setloop(m);
-  av0 = avma; ps = p[2];
-  for(av=avma;;avma=av) /* each loop splits *t with probability >= 1/2 */
-  {
-    if (ps==2)
+  if (dt == d) return;
+  v = varn(*t);
+  if (DEBUGLEVEL > 6) timer2();
+  av = avma; is2 = egalii(p, gdeux);
+  for(cnt = 1;;cnt++)
+  { /* splits *t with probability ~ 1 - 2^(1-r) */
+    w = w0 = FqX_rand(dt,v, p,a);
+    for (l=1; l<d; l++) /* sum_{0<i<d} w^(q^i), result in (F_q)^r */
+      w = gadd(w0, spec_Fq_pow_mod_pol(w, p, a, S));
+    if (is2)
     {
-      long k = lgef(a)-3;
-      w = w0 = gres(stopoly92(p,d,v,a), *t);
-      /* \sum_{0<i<d} w^(q^i) */
-      for (l=1; l<d; l++)
-        w = gadd(w0, spec_Fq_pow_mod_pol(w, p, a, S));
-      w0 = w; /* in (F_q)^r */
-      /* \sum_{0<i<k} w^(2^i), result in (F_2)^r */
-      for (l=1; l<k; l++)
+      w0 = w;
+      for (l=1; l<da; l++) /* sum_{0<i<k} w^(2^i), result in (F_2)^r */
         w = gadd(w0, gres(gsqr(w), *t));
     }
     else
     {
-      w = w0 = gres(stopoly9(p,m,q,v,a), *t);
-      m = incpos(m);
-      for (l=1; l<d; l++)
-        w = gadd(w0, spec_Fq_pow_mod_pol(w, p, a, S));
       w = Kronecker_powmod(w, *t, shifti(q,-1));
-      /* now w in {-1,0,1}^r */
+      /* w in {-1,0,1}^r */
       if (lgef(w) == 3) continue;
       w[2] = ladd((GEN)w[2], gun);
     }
-    w = ggcd(*t,w);
-    l = lgef(w)-3; if (l && l != dv) break;
+    w = ggcd(*t,w); l = lgef(w)-3;
+    if (l && l != dt) break;
+    avma = av;
   }
-  w = gerepileupto(av0,w);
+  w = gerepileupto(av,w);
+  if (DEBUGLEVEL > 6) 
+    fprintferr("[split9] time for splitting: %ld (%ld trials)\n",timer2(),cnt);
   l /= d; t[l]=gdeuc(*t,w); *t=w;
-  split9(m,t+l,d,p,q,a,S);
-  split9(m,t  ,d,p,q,a,S);
+  split9(t+l,d,p,q,a,S);
+  split9(t  ,d,p,q,a,S);
 }
 
 /* to "compare" (real) scalars and t_INTMODs */
@@ -2132,8 +2091,8 @@ GEN
 factmod9(GEN f, GEN pp, GEN a)
 {
   long av = avma, tetpil,p,i,j,k,d,e,vf,va,nbfact,nbf,pk;
-  GEN ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,pd,qq,unfp,unfq, *t;
-  GEN frobinv,X,m;
+  GEN ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,qqd,qq,unfp,unfq, *t;
+  GEN frobinv,X;
 
   if (typ(a)!=t_POL || typ(f)!=t_POL || gcmp0(a)) err(typeer,"factmod9");
   vf=varn(f); va=varn(a);
@@ -2151,7 +2110,6 @@ factmod9(GEN f, GEN pp, GEN a)
   X = gmul(polx[vf],unfq);
   xmod[2] = (long)X;
   qq=gpuigs(pp,lgef(a)-3);
-  m = addii(qq,pp);
   e = nbfact = 1;
   pk=1; df1=derivpol(f); f3=NULL;
   for(;;)
@@ -2184,13 +2142,13 @@ factmod9(GEN f, GEN pp, GEN a)
       }
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
-    pd=gun; xmod[1]=(long)u;
+    qqd=gun; xmod[1]=(long)u;
     S = init_pow_q_mod_pT(xmod, qq, a, u);
     
     du = lgef(u)-3; v = X;
     for (d=1; d <= du>>1; d++)
     {
-      pd=mulii(pd,qq);
+      qqd=mulii(qqd,qq);
       v = spec_Fq_pow_mod_pol(v, pp, a, S);
       g = ggcd(gsub(v,X),u);
       dg = lgef(g)-3;
@@ -2200,7 +2158,7 @@ factmod9(GEN f, GEN pp, GEN a)
       j = nbfact+dg/d;
 
       t[nbfact] = g;
-      split9(m,t+nbfact,d,pp,qq,a,S);
+      split9(t+nbfact,d,pp,qq,a,S);
       for (; nbfact<j; nbfact++) ex[nbfact]=e;
       du -= dg;
       u = gdeuc(u,g);
