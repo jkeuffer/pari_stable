@@ -497,7 +497,7 @@ binome(GEN n, long k)
     if (k == 0) return gun;
     return gcopy(n);
   }
-  av = avma; y = n;
+  av = avma;
   if (typ(n) == t_INT)
   {
     if (signe(n) > 0)
@@ -509,16 +509,28 @@ binome(GEN n, long k)
       {
         if (k < 0) return gzero;
         if (k == 0) return gun;
-        return gcopy(n);
+        return icopy(n);
       }
     }
-    for (i=2; i<=k; i++)
-      y = gdivgs(gmul(y,addis(n,i-1-k)), i);
+    if (lgefint(n) == 3)
+    {
+      ulong N = itou(n);
+      y = seq_umul(N-(ulong)k+1, N);
+    }
+    else
+    {
+      y = cgetg(k+1,t_VEC);
+      for (i=1; i<=k; i++) y[i] = lsubis(n,i-1);
+      y = divide_conquer_prod(y,mulii);
+    }
+    y = diviiexact(y, mpfact(k));
   }
   else
   {
-    for (i=2; i<=k; i++)
-      y = gdivgs(gmul(y,gaddgs(n,i-1-k)), i);
+    y = cgetg(k+1,t_VEC);
+    for (i=1; i<=k; i++) y[i] = lsubgs(n,i-1);
+    y = divide_conquer_prod(y,gmul);
+    y = gdiv(y, mpfact(k));
   }
   return gerepileupto(av, y);
 }

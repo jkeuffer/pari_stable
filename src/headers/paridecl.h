@@ -303,6 +303,7 @@ GEN     qfbclassno0(GEN x,long flag);
 GEN     quaddisc(GEN x);
 GEN     racine(GEN a);
 GEN     regula(GEN x, long prec);
+GEN     seq_umul(ulong a, ulong b);
 ulong   u_gener(ulong p);
 GEN     znstar(GEN x);
 
