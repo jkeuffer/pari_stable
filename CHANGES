@@ -41,6 +41,7 @@ Done for version 2.2.1 (released ??/??/2001):
     6- \r directory was silently accepted
     7- check arguments in polcompositum()
 TH  8- [Cygwin:] fixed paths for readline on cygwin 1.*
+XR  9- possible overflow in ComputeCoeff [ bnrstark() ]
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
