@@ -1484,6 +1484,7 @@ checkmemory(GEN z)
   }
 #endif
 
+#define is_valid_timer(t) ((t) >= MAX_TIMER || (t) < MIN_TIMER)
 long
 gptimer() {return timer_proto(0);}
 long
@@ -1491,11 +1492,11 @@ timer()   {return timer_proto(1);}
 long
 timer2()  {return timer_proto(2);}
 long
-gentimer(long i)
+gentimer(long t)
 {
-  if (i >= MAX_TIMER || i <= MIN_TIMER)
-    err(talker,"not an available timer (%ld)",i);
-  return timer_proto(i);
+  if (!is_valid_timer(t))
+    err(talker,"not an available timer (%ld)",t);
+  return timer_proto(t);
 }
 
 /* internal */
@@ -1509,11 +1510,7 @@ get_timer(long t)
   { /* get new timer */
     for (i=MIN_TIMER; i < MAX_TIMER; i++)
       if (!used[i]) { used[i] = 1; t = i; break; }
-    if (i == MAX_TIMER)
-    {
-      err(warner, "no timers left! Using timer2()");
-      t = 2;
-    }
+    if (!t) { t = 2; err(warner, "no timers left! Using timer2()"); }
     timer_proto(t); /* init timer */
   }
   else if (t < 0)
@@ -1522,7 +1519,7 @@ get_timer(long t)
   }
   else
   { /* delete */
-    if (t <= MIN_TIMER && t >= MAX_TIMER && !used[t])
+    if (!is_valid_timer(t) || !used[t])
       err(warner, "timer %ld wasn't in use", t);
     else
       used[t] = 0;
@@ -1576,7 +1573,7 @@ geni(void) { return gi; }
  *                   For USER FUNCTIONS: pointer to defining data (bloc) =
  *                    entree*: NULL, list of entree (arguments), NULL
  *                    char*  : function text
- *   long menu     : which help section do we belong (See below).
+ *   long menu     : which help section do we belong to (See below).
  *   char *code    : argument list (See below).
  *   entree *next  : next entree (init to NULL, used in hashing code).
  *   char *help    : short help text (init to NULL).
@@ -1655,7 +1652,6 @@ geni(void) { return gi; }
  * Any other valence (what to do with 0?) should correspond to exactly
  *  one code.
  */
-
 entree functions_basic[]={
 {"Euler",0,(void*)mpeuler,3,"p"},
 {"I",0,(void*)geni,2,""},
