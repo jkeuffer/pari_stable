@@ -21,48 +21,48 @@ For starting the calculator, the general command line syntax is:
 \noindent
 where items within brackets are optional\footnote{*}{On the Macintosh, even
 after clicking on the gp icon, once in the MPW Shell, you still need to type
-explicitly a command of the above form.}. The [\var{files}] argument is
-a list of files written in the GP scripting language, which will be loaded on
+explicitly a command of the above form.}. The [\var{files}] argument is a
+list of files written in the GP scripting language, which will be loaded on
 startup. The ones starting with a minus sign are \emph{flags}, setting some
-internal parameters of \kbd{gp}, or \var{defaults}. See \secref{se:defaults} below
-for a list and explanation of all defaults, there are many more than just
-those two. These defaults can be changed by adding parameters to the input
-line as above, or interactively during a \kbd{gp} session or in a preferences file
-(also known as \tet{gprc}).
+internal parameters of \kbd{gp}, or \var{defaults}. See \secref{se:defaults}
+below for a list and explanation of all defaults, there are many more than
+just those two. These defaults can be changed by adding parameters to the
+input line as above, or interactively during a \kbd{gp} session or in a
+preferences file (also known as \tet{gprc}).
 
-\unix Some features were developed on UNIX platforms, and depend heavily
-on the operating system in use. It is \emph{possible} that some of these
-will be ported to other operating systems (BeOS, MacOS, DOS, OS/2, Windows,
-etc.) in future versions (most of them should be relatively easy tasks). As
-for now, most of them were not. So, whenever a specific feature of the UNIX
-version is discussed in a paragraph, a UNIX sign sticks out in the left
-margin, like here. Just skip these if you're stranded on a different
-operating system: the core GP functions (i.e.~at least everything which is
-even faintly mathematical in nature) will still be available to you. It
-should also be possible (and then definitely advisable) to install
-\idx{Linux} or \idx{FreeBSD} on your machine.
+\unix Some features were developed on UNIX platforms, and depend heavily on
+the operating system in use. It is \emph{possible} that some of these will be
+ported to other operating systems (BeOS, MacOS, DOS, OS/2, Windows, etc.) in
+future versions (most of them should be relatively easy tasks). As for now,
+most of them were not. So, whenever a specific feature of the UNIX version is
+discussed in a paragraph, a UNIX sign sticks out in the left margin, like
+here. Just skip these if you're stranded on a different operating system: the
+core GP functions (i.e.~at least everything which is even faintly
+mathematical in nature) will still be available to you. It should also be
+possible (and then definitely advisable) to install \idx{Linux} or
+\idx{FreeBSD} on your machine.
 
 \misctitle{Note (added in version 2.0.12):} Most UNIX goodies are now
 available for DOS, OS/2 and Windows, thanks to the \tet{EMX}/\tet{RSX}
 runtime package (\kbd{install} excluded under DOS, since DLLs are not
 supported by the OS). For Windows 95 and higher, you can also use the
-\tet{Cygwin} compatibility library to run \kbd{gp} almost as if running a genuine
-Unix system. Note that a native \key{Linux} binary will be faster than one
-using any of these compatibility packages (see the \tet{MACHINES} benchmark
-file, included in the distribution).
+\tet{Cygwin} compatibility library to run \kbd{gp} almost as if running a
+genuine Unix system. Note that a native \key{Linux} binary will be faster
+than one using any of these compatibility packages (see the \tet{MACHINES}
+benchmark file, included in the distribution).
 
 \emacs If you have GNU Emacs, you can work in a special Emacs shell (see
-\secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as
-usual \kbd{M} is the \kbd{Meta} key) if you accept the default stack, prime
-and buffer sizes, or \kbd{C-u M-x gp} which will ask you for the name of the
-gp executable, the stack size, the prime limit and the buffer size. Specific
+\secref{se:emacs}), which is started by typing \kbd{M-x gp} (where as usual
+\kbd{M} is the \kbd{Meta} key) if you accept the default stack, prime and
+buffer sizes, or \kbd{C-u M-x gp} which will ask you for the name of the gp
+executable, the stack size, the prime limit and the buffer size. Specific
 features of this Emacs shell will be indicated by an EMACS sign.\smallskip
 
 If a \idx{preferences file} (or \kbd{gprc}, to be discussed in
-\secref{se:gprc}) can be found, \kbd{gp} will then read it and execute the commands
-it contains. This provides an easy way to customize \kbd{gp} without having to
-delve into the code to hardwire it to your likings. The \var{files} argument
-is processed right after the \kbd{gprc}.
+\secref{se:gprc}) can be found, \kbd{gp} will then read it and execute the
+commands it contains. This provides an easy way to customize \kbd{gp} without
+having to delve into the code to hardwire it to your likings. The \var{files}
+argument is processed right after the \kbd{gprc}.
 
 A copyright message then appears which includes the version number, and a lot
 of useful technical information. The present manual is written for version
@@ -74,27 +74,25 @@ information, some initial defaults, and then waits after printing its prompt
 (by default: \kbd{?}).
 
 Note that at any point the user can type \kbd{Ctrl-C} (that is press
-simultaneously the \kbd{Control} and \kbd{C} keys): the current
-computation will be interrupted and control given back to the user at the
-\kbd{gp}
+simultaneously the \kbd{Control} and \kbd{C} keys): the current computation
+will be interrupted and control given back to the user at the \kbd{gp}
 prompt.
 
 The top-level help information tells you that (as in many systems) to get
 help, you should type a \kbd{?}. When you do this and hit return, a menu
 appears, describing the eleven main categories of available functions and
 what to do to get more detailed help. If you now type \kbd{?$n$} with $1\le
-n\le11$, you will get the list of commands corresponding to category $n$
-and simultaneously to Section $3.n$ of this manual.
+n\le11$, you will get the list of commands corresponding to category $n$ and
+simultaneously to Section $3.n$ of this manual.
 
-If you type \kbd{?}\var{functionname} where \var{functionname} is the
-name of a PARI function, you will get a short explanation of this
-function.
+If you type \kbd{?}\var{functionname} where \var{functionname} is the name of
+a PARI function, you will get a short explanation of this function.
 
-\unix If extended help (see \secref{se:exthelp}) is available on your
-system, you can double or triple the \kbd{?} sign to get much more:
-respectively the complete description of the function (e.g.~\kbd{??~sqrt}),
-or a list of \kbd{gp} functions relevant to your query (e.g.~ \kbd{???~"elliptic
-curve"} or \kbd{???~"quadratic field"}).
+\unix If extended help (see \secref{se:exthelp}) is available on your system,
+you can double or triple the \kbd{?} sign to get much more: respectively the
+complete description of the function (e.g.~\kbd{??~sqrt}), or a list of
+\kbd{gp} functions relevant to your query (e.g.~ \kbd{???~"elliptic curve"}
+or \kbd{???~"quadratic field"}).
 
 If \kbd{gp} was compiled with the right options (see Appendix A), a line
 editor will be available to correct the command line, get automatic
@@ -102,17 +100,17 @@ completions, and so on. See \secref{se:readline} for a short summary of
 available commands. This might not be available for all architectures.
 
 Whether extended on-line help and line editing are available or not is
-indicated in the \kbd{gp} banner, between the version number and the copyright
-message.
+indicated in the \kbd{gp} banner, between the version number and the
+copyright message.
 
 If you type \kbd{?\bs} you will get a short description of the metacommands
 (keyboard shortcuts).
 
 Finally, typing \kbd{?.} will return the list of available (pre-defined)
 member functions. These are functions attached to specific kind of objects,
-used to retrieve easily some information from complicated structures (you
-can define your own but they won't be shown here). We will soon describe
-these commands in more detail.
+used to retrieve easily some information from complicated structures (you can
+define your own but they won't be shown here). We will soon describe these
+commands in more detail.
 
 As a general rule, under \kbd{gp}, commands starting with \b\ or with some
 other symbols like \kbd{?} or \kbd{\#}, are not computing commands, but are
@@ -124,29 +122,27 @@ with in \secref{se:meta}).
 \section{Defaults and output formats}\sidx{defaults}\sidx{output formats}
 \label{se:defaults}
 
-\noindent
-There are many internal variables in \kbd{gp}, defining how the system will behave
-in certain situations, unless a specific override has been given. Most
-of them are a matter of basic customization (colors, prompt) and will be set
-once and for all in your \idx{preferences file} (see \secref{se:gprc}), but
-some of them are useful interactively (set timer on, increase precision,
-etc.).
+\noindent There are many internal variables in \kbd{gp}, defining how the
+system will behave in certain situations, unless a specific override has been
+given. Most of them are a matter of basic customization (colors, prompt) and
+will be set once and for all in your \idx{preferences file} (see
+\secref{se:gprc}), but some of them are useful interactively (set timer on,
+increase precision, etc.).
 
 The function used to manipulate these values is called \kbd{default}, which
 is described in \secref{se:default}. The basic syntax is
 
 \kbd{default(\var{def}, \var{value})},
 
-\noindent
-which sets the default \var{def} to \var{value}. In interactive use, most
-of these can be abbreviated using historic \kbd{gp} metacommands (mostly,
-starting with \b), which we shall describe in the next section.
+\noindent which sets the default \var{def} to \var{value}. In interactive
+use, most of these can be abbreviated using historic \kbd{gp} metacommands
+(mostly, starting with \b), which we shall describe in the next section.
 
 Here we will only describe the available defaults and how they are used. Just
 be aware that typing \kbd{default} by itself will list all of them, as well
 as their current values (see \b{d}). Just after the default name, we give
-between parentheses the initial value when \kbd{gp} starts (assuming you did not
-tamper with it using command-line switches or a~\tet{gprc}).
+between parentheses the initial value when \kbd{gp} starts (assuming you did
+not tamper with it using command-line switches or a~\tet{gprc}).
 
 \misctitle{Note:} the suffixes \kbd{k}, \kbd{M} or \kbd{G} can be appended to
 a \var{value} which is a numeric argument, with the effect of multiplying it
@@ -155,10 +151,10 @@ there, so for instance \kbd{30k} and \kbd{30K} both stand for $30000$. This
 is mostly useful to modify or set the defaults \kbd{primelimit} or
 \kbd{stacksize} which typically involve a lot of trailing zeroes.
 
-\misctitle{(somewhat technical) Note:} As we will see in
-\secref{se:strings}, the second argument to \kbd{default} will be subject
-to string context expansion, which means you can use run-time values. In
-other words, something like 
+\misctitle{(somewhat technical) Note:} As we will see in \secref{se:strings},
+the second argument to \kbd{default} will be subject to string context
+expansion, which means you can use run-time values. In other words, something
+like 
 \bprog
   a = 3;
   default(logfile, "\var{some filename}" a ".log")
@@ -1474,8 +1470,8 @@ printed if the line does not end with a semicolon (';').
 \subsec{User defined functions}.\sidx{user defined functions}
 \label{se:user_defined}
 
-It is very easy to define a new function in GP, which can then be used
-like any other function. The syntax is as follows:
+It is easy to define a new function in GP, which can then be used like any
+other function. The syntax is as follows:
 
 \kbd{name(}\var{list of formal variables}\kbd{) = %
 local(}\var{list of local variables}\kbd{);} \var{seq}
@@ -1490,9 +1486,9 @@ name($x_0$, $x_1$, @dots) =
   @dots
 }
 @eprog
-\noindent (note that the first newline is disregarded due to the preceding
-\kbd{=} sign, and the others because of the enclosing braces). Both lists
-of variables are comma-separated and allowed to be empty. The \tet{local}
+\noindent (the first newline is disregarded due to the preceding \kbd{=}
+sign, and the others because of the enclosing braces). Both lists of
+variables are comma-separated and allowed to be empty. The \tet{local}
 statements can be omitted; as usual \var{seq} is any expression sequence.
 
 \kbd{name} is the name given to the function and is subject to the same
@@ -1505,21 +1501,44 @@ function. The previous definition is lost of course.
 \kbd{list of formal variables} is the list of variables corresponding to
 those which you will actually use when calling your function. The number of
 actual parameters supplied when calling the function has to be less than the
-number of formal variables.
+number of formal variables. Arguments are passed by value, not as variables :
+modifying a function's argument in the function body is allowed, but will not
+modify its value in the calling frame. In fact, a \emph{copy} of the
+actual parameter is assigned to the formal parameter when the function is
+called.
 
-Uninitialized formal variables will be given a default value. An equal
-(\kbd{=}) sign following a variable name in the function definition,
-followed by any expression, gives the variable a default value. The
-said expression gets evaluated the moment the function is called, hence may
-involve the function parameters. A variable for which you supply no default
-value will be initialized to zero.
+Uninitialized formal variables are given a default value. An equal (\kbd{=})
+sign following a variable name in the function definition, followed by any
+expression, gives the variable a default value. The said expression gets
+evaluated the moment the function is called, hence may involve the preceding
+function parameters (a default value for $x_i$ may involve $x_j$ for $j <
+i$). A variable for which you supply no default value is initialized to zero.
 
-\kbd{list of local variables} is the list of the additional local variables
-which are used in the function body. Note that if you omit some or all of
-these local variable declarations, the non-declared variables will become
-global, hence known outside of the function, and this may have undesirable
-side-effects. On the other hand, in some cases it may also be what you want.
-Local variables can be given a default value as the formal variables.
+\kbd{list of local variables} is the list of additional temporary variables
+used in the function body. Note that if you omit some or all of these local
+variable declarations, the non-declared variables will become global, hence
+known outside of the function, and this may have undesirable side-effects. On
+the other hand, in some cases it may also be what you want. See
+\secref{se:varscope} for details. Local variables can be given a default
+value as the formal variables.
+
+\misctitle{Restrictions on variable use:} it is not allowed to use the same
+variable name for different parameters of your function. Or to use a given
+variable both as a formal parameter and a local variable in a given function.
+Hence
+\bprog
+? f(x,x) = 1
+  ***   user function f: variable x declared twice.
+@eprog
+
+\misctitle{Note:} The above syntax (using the \tet{local} keyword) was
+introduced in version 2.0.13. The old syntax
+
+\kbd{name(}\var{list of true formal variables, list of local variables}%
+\kbd{) = }{\var{seq}}
+
+\noindent is still recognized but is deprecated since genuine arguments and
+local variables become undistinguishable.
 
 \misctitle{Example:} For instance
 \bprog
@@ -1534,7 +1553,7 @@ arguments generation as explained at the beginning of
 6:7:3
 ? foo(,5)
 1:5:3
-? foo
+? foo()
 1:2:3
 @eprog
 
@@ -1559,60 +1578,16 @@ probably the simplest (but certainly not the most efficient), is as
 follows:\sidx{zeta function}
 \bprog
 zet(s) =
-{
-  local(n); /* not needed, and possibly confusing (see below) */
+{ local(n); /* not needed, and possibly confusing (see below) */
+
   sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 }
 @eprog
-
 \noindent This gives reasonably good accuracy and speed as long as you are
 not too far from the domain of convergence. Try it for $s$ integral between
 $-5$ and $5$, say, or for $s=0.5+i*t$ where $t=14.134\dots$
 
-The iterative constructs which use a variable name (\kbd{for$xxx$},
-\kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix}, \kbd{plot},
-etc.) also consider the given variable to be local to the construct. A value
-is pushed on entry and pulled on exit. So, it is not necessary for a function
-using such a construct to declare the variable as a dummy formal parameter.
-
-In particular, since loop variables are not visible outside their loops,
-the variable \kbd{n} need not be declared in the protoype of our \kbd{zet}
-function above.
-\bprog
-zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
-@eprog
-
-\noindent would be a perfectly sensible (and in fact better) definition.
-Since local/global scope is a very tricky point, here's one more example.
-What's wrong with the following definition?
-\bprog
-? first_prime_div(x) = 
-{
-  local(p);
-  forprime(p=2, x, if (x%p == 0, break));
-  p
-}
-? first_prime_div(10)
-%1 = 0
-@eprog
-
-\misctitle{Answer:} the index $p$ in the \kbd{forprime} loop is local to
-the loop and is not visible to the outside world. Hence, it doesn't survive
-the \kbd{break} statement. More precisely, at this point the loop index is
-restored to its preceding value, which is 0 (local variables are
-initialized to 0 by default). To sum up, the routine returns the $p$
-declared local to it, not the one which was local to \kbd{forprime} and ran
-through consecutive prime numbers. Here's a corrected version:
-\bprog
-? first_prime_div(x) = forprime(p=2, x, if (x%p == 0, return(p)))
-@eprog
-
-Again, it is strongly recommended to declare all other local variables that
-are used inside a function: if a function accesses a variable which is not
-one of its formal parameters, the value used will be the one which happens to
-be on top of the stack at the time of the call. This could be a ``global''
-value, or a local value belonging to any function higher in the call chain.
-So, be warned.
+\misctitle{Recursive functions ?}
 
 Recursive functions\sidx{recursion} can easily be written as long as one
 pays proper attention to variable scope. Here's a last example, used to
@@ -1622,37 +1597,32 @@ task due to PARI's unsophisticated representation for those objects):
 \bprog
 coeffs(P, nbvar) =
 {
-  local(v);
-
   if (type(P) != "t_POL",
-    for (i=0, nbvar-1, P = [P]);
+    for (i=1, nbvar, P = [P]);
     return (P)
   );
-  v = vector(poldegree(P)+1, i, polcoeff(P,i-1));
-  vector(length(v), i, coeffs(v[i], nbvar-1))
+  vector(poldegree(P)+1, i, coeffs(polcoeff(P, i-1), nbvar-1))
 }
 @eprog
 
 \noindent If $P$ is a polynomial in $k$ variables, show that after the
 assignment {\tt v = coeffs(P,k)}, the coefficient of $x_1^{n_1}\dots
-x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}. What would
-happen if the declaration {\tt local(v)} had been omitted ?
+x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}.
 
-The operating system will automatically limit the \idx{recursion depth}:
+The operating system automatically limits the \idx{recursion depth}:
 \bprog
 ? dive(n) = if (n, dive(n-1))
 ? dive(5000);
   ***   deep recursion: if(n,dive(n-1))
                         ^---------------
 @eprog
-There's no way to increase the recursion limit (which may be different on
-your machine) from within, since it would simply crash the \kbd{gp} process. To
-increase it before launching \kbd{gp}, you can use \tet{ulimit} or \tet{limit},
-depending on your shell, to raise the process available stack space
-(increase \tet{stacksize}).
+There is no way to increase the recursion limit (which may be different on
+your machine) from within \kbd{gp}. To increase it before launching \kbd{gp},
+you can use \tet{ulimit} or \tet{limit}, depending on your shell, and raise
+the process available stack space (increase \tet{stacksize}).
 
-\misctitle{Function which take functions as parameters ?} This is easy
-in GP using the following trick (neat example due to Bill Daly):
+\misctitle{Function which take functions as parameters ?} 
+Use the following trick (neat example due to Bill Daly):
 
 \bprog
 calc(f, x) = eval( Str(f, "(x)") )
@@ -1661,44 +1631,113 @@ calc(f, x) = eval( Str(f, "(x)") )
 \noindent If you call this with \kbd{calc("sin", 1)}, it will
 return $\sin(1)$ (evaluated!).
 
-\misctitle{Restrictions on variable use:} it is not allowed to use the same
-variable name for different parameters of your function. Or to use a given
-variable both as a formal parameter and a local variable in a given function.
-Hence
+\misctitle{Defining functions within a function ?}
+The first idea
 \bprog
-? f(x,x) = 1
-  ***   user function f: variable x declared twice.
+  init(x) = add(y) = x+y; mul(y) = x*y;
+@eprog
+\noindent does not work since in the construction \kbd{f() = }\var{seq}, the
+function body contains everything until the end of the expression. Hence
+executing \kbd{init} defines the wrong function \kbd{add}. The way out is to
+use parentheses for grouping, to that enclosed subexpressions be
+evaluated independently:
+\bprog
+  init(x) = ( add(y) = x+y ); ( mul(y) = x*y );
 @eprog
 
-Also, the statement \sidx{global}\kbd{global(x, y, z, t)} (see
-\secref{se:global}) declares the corresponding variables to be global. It
-is then forbidden to use them as formal parameters or loop indexes as
-described above, since the parameter would ``shadow'' the variable.
+\misctitle{Implementation note:} For the curious reader, here is how values
+of variables are handled: a \idx{hashing function} is computed from the
+variable name, and used as an index in \tet{hashtable}, a table of linked
+list of structures (type \tet{entree}). The linked list is searched linearly
+for the identifier (each list typically has less than 10 components). When
+the correct \kbd{entree} is found, it points to the top of the stack of
+values for that identifier if it is a variable, to the function itself if it
+is a predefined function, and to a copy of the text of the function if it is
+a user-defined function. When an error occurs, all of this maze (rather a
+tree, in fact) is searched and restored to the state preceding the last call
+of the main evaluator.
 
-\misctitle{Implementation note.} For the curious reader, here is how these
-stacks are handled: a \idx{hashing function} is computed from the identifier,
-and used as an index in \tet{hashtable}, a table of pointers. Each of
-these pointers begins a linked list of structures (type \tet{entree}).
-The linked list is searched linearly for the identifier (each list will
-typically have less than 7 components or so). When the correct \kbd{entree}
-is found, it points to the top of the stack of values for that identifier if
-it is a variable, to the function itself if it is a predefined function, and
-to a copy of the text of the function if it is a user-defined function. When
-an error occurs, all of this maze (rather a tree, in fact) is searched and
-(hopefully) restored to the state preceding the last call of the main
-evaluator.
+\subsec{Variable scope}\label{se:varscope} 
 
-\misctitle{Note:} The above syntax (using the \tet{local} keyword) was
-introduced in version 2.0.13. The old syntax
+Local variables should more appropriately be called \emph{temporary values}
+since they are in fact local to the function declaring them \emph{and} any
+subroutine called from within. In the following example
+\bprog
+  f() = local(y); ... ; g()
+  g() = y + 1
+@eprog
+\noindent \kbd{g()} ``sees'' the $y$ introduced in \kbd{f()}. True lexical
+scoping does not exist in GP. (See e.g.~the difference between \kbd{local}
+and \kbd{my} in Perl.)
 
-\kbd{name(}\var{list of true formal variables, list of local variables}%
-\kbd{) = }{\var{seq}}
+In an iterative constructs which use a variable name (\kbd{for$xxx$},
+\kbd{prod$xxx$}, \kbd{sum$xxx$}, \kbd{vector}, \kbd{matrix}, \kbd{plot},
+etc.) the given variable is also local to the construct. A value is pushed on
+entry and poped on exit. So, it is not necessary for a function using such an
+iterator to declare the variable as \kbd{local}. On the other hand, if you
+exit the loop prematurely, e.g.~using the \kbd{break} statement, you must
+save the loop index in another variable since its value prior the loop will
+be restored upon exit: for instance
+\bprog
+  for(i = 1, n,
+    if (ok(i), break);
+  );
+  if (i > n, return(failure));
+@eprog
+\noindent is incorrect, since the value of $i$ tested by the $(i > n)$ is quite
+unrelated to the loop index.
 
-\noindent is still recognized but is deprecated since genuine arguments and
-local variables become undistinguishable.
+Finally, the statement \sidx{global}\kbd{global(x, y, z, t)} (see
+\secref{se:global}) declares the corresponding variables to be global. It is
+then forbidden to use them as formal parameters or loop indexes as above,
+since the parameter would ``shadow'' the variable. If speed is of the essence
+and an object is large (e.g.~a \var{bnf}, a huge matrix), it should be
+declared \kbd{global}, not passed as a parameter, since this saves an
+expensive copy. It is possible to declare it local and use it as a global
+variables from relevant subroutines, but \tet{global} is safer.
 
-\subsec{Member functions}.\sidx{member functions}
-\label{se:member}
+It is strongly recommended to explicitly declare all \tet{global} variables
+at the beginning of your program and all \tet{local} variable used inside a
+given function, with the possible exception of loop indexes which are local
+to their loop. If a function accesses a variable which is not one of its
+formal parameters, the value used will be the one which happens to be on top
+of the stack at the time of the call. This could be a ``global'' value, or a
+local value belonging to any function higher in the call chain, and is in
+general \emph{not} what you want to do. So, be warned.
+
+
+Coming back to our previous example \kbd{zet}, since loop variables are not
+visible outside their loops, the variable \kbd{n} need not be declared in the
+function protoype.
+\bprog
+zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
+@eprog
+
+\noindent would be a better definition. One last example: what is
+wrong with the following definition?
+\bprog
+FirstPrimeDiv(x) = 
+{
+  local(p);
+  forprime(p=2, x, if (x%p == 0, break));
+  p
+}
+? FirstPrimeDiv(10)
+%1 = 0
+@eprog
+\noindent Well, the index $p$ in the \kbd{forprime} loop is local to
+the loop and is not visible to the outside world. Hence, it does not survive
+the \kbd{break} statement. More precisely, at this point the loop index is
+restored to its preceding value, which is 0 (local variables are
+initialized to 0 by default). To sum up, the routine returns the $p$
+declared local to it, not the one which was local to \kbd{forprime} and ran
+through consecutive prime numbers. Here is a corrected version:
+\bprog
+? FirstPrimeDiv(x) = forprime(p=2, x, if (x%p == 0, return(p)))
+@eprog
+
+
+\subsec{Member functions}.\sidx{member functions} \label{se:member}
 
 Member functions use the `dot' notation to retrieve information from
 complicated structures (by default: types \tet{ell}, \tet{nf}, \tet{bnf},
@@ -1710,9 +1749,9 @@ message if \kbd{ell} doesn't have the correct type).
 To define your own member functions, use the syntax \var{structure.member =
 function text}, where \var{function text} is written as the \var{seq} in a
 standard user function (without local variables), whose only argument would
-be \kbd{structure}. For instance, the current implementation of the
-\kbd{ell} type is simply an horizontal vector, the $j$-invariant being the
-thirteenth component. This could be implemented as
+be \kbd{structure}. For instance, the current implementation of the \kbd{ell}
+type is simply an horizontal vector, the $j$-invariant being the thirteenth
+component. This could be implemented as
 
 \bprog
 x.j =
@@ -1727,7 +1766,7 @@ x.j =
 You can redefine one of your own member functions simply by typing a new
 definition for it. On the other hand, as a safety measure, you can't redefine
 the built-in member functions, so typing the above text would in fact produce
-an error (you'd have to call it e.g.~\kbd{x.j2} in order for \kbd{gp} to
+an error (you'd have to call it e.g.~\kbd{x.myj} in order for \kbd{gp} to
 accept it).
 
 \misctitle{Warning:} contrary to user functions arguments, the structure
@@ -1758,7 +1797,7 @@ Typing \b{um} will output the list of user-defined member functions.
 \label{se:strings}
 
 \noindent
-GP variables can now hold values of type character string (internal type
+GP variables can hold values of type character string (internal type
 \typ{STR}). This section describes how they are actually used, as well as
 some convenient tricks (automatic concatenation and expansion, keywords)
 valid in string context.
@@ -1871,7 +1910,7 @@ indeed be a string.
 
 In version 2.2.5, the prototype of \kbd{Str} was extended to allow more than
 one argument, which are concatenated into a single string. So, finally,
-\kbd{Str(s, i, j)} should now be preferred to the above solution, since it is
+\kbd{Str(s, i, j)} should be preferred to the above solution, since it is
 less cryptic and more efficient.
 
 \noindent A last example: the function \kbd{hist} returns all
