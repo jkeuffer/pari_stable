@@ -68,6 +68,8 @@ BA 31- isprime(n < 2, 2 or 3) gave wrong result
 IZ 32- \r C:\a.gp wouldn't work     [ : and \ forbidden... ]
 BA 33- bad PARI prototypes in init.c [were confusing GP2C]
 XR 34- nfdisc: fixed cache system in nilord (esp. precision handling)
+BA 35- nfgaloisconj(polcyclo(40)): accuracy lost
+       nfgaloisconj(polcyclo(11)+1): oo loop
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -85,7 +87,6 @@ IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
    13- algorithm for zeta(), gamma() [initial GP code by HC]
    14- improved rnfnormgroup() [reduce number of calls to isprincipal]
 IZ 15- flags for OS/2 build + use generic [pre|suf]fix for object files
-BA 16- nfgaloisconj(polcyclo(40)): accuracy lost
 
   Added
     1- file README.WIN
