@@ -1727,7 +1727,7 @@ FpM_to_mod(GEN z, GEN p)
   }
   return x;
 }
-/* z in Z[X] or Z, return lift(z * Mod(1,p)), normalized*/
+/* z in Z[X], return lift(z * Mod(1,p)), normalized*/
 GEN
 FpX_red(GEN z, GEN p)
 {

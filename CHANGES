@@ -23,6 +23,7 @@ IZ = Ilya Zakharevich
 JD = Jeroen Demeyer
 KO = Kiyoshi Ohgishi
 LG = Louis Granboulan
+LGr= Loic Grenie
 MD = Mark Dickinson
 MS = Michael Stoll
 MSo= Michael Somos
@@ -91,6 +92,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    36- nffactormod() returned a factorization which was not a proper t_MAT 
    37- rnfequation(y^2+1, x + Mod(z*y - 1, y^2+1)) --> SEGV [ BIB ]
    38- many problems in matfrobenius for _inexact_ matrices
+LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
+       on a t_INT, which is no longer valid ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

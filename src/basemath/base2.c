@@ -1999,7 +1999,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
       w = dummycopy(w);
       Dp = q;
     }
-    for (i=1; i<=N; i++) w[i] = (long)FpX_red((GEN)w[i], Dp);
+    for (i=2; i<=N; i++) w[i] = (long)FpX_red((GEN)w[i], Dp);
     S->D = D;
     S->w = w;
     S->T = T;
