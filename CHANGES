@@ -52,6 +52,8 @@ IS  9- typo in part.c [ // comments ] --> compilation failure
    10- y/(x/y) --> error [ wrong assumption that y is a genuine GEN in
        mulscalrfrac ]
    11- example/Makefile wasn't up to date [ link with -lpari ]
+   12- zetak(zetakinit(y), 3-1e-28) --> -7.2e28 [ catastrophic precision
+       loss: anything non-integral but very close to an integer would do ]
 
   Changed
     1- rnf structure (removed useless components)

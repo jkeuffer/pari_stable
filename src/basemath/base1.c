@@ -2523,7 +2523,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   }
   else
   {
-    GEN Pi = mppi(prec);
+    GEN Pi = mppi(bigprec);
     if (is_frac_t(ts))
       s = gmul(s, realun(bigprec));
     else
@@ -2536,8 +2536,8 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     gar = gmul(gpowgs(gammas,r2),gpowgs(gammas2,r1));
     cs = gexp(gmul(cstlog,s),prec);
     var1 = gmul(Pi,s);
-    gammaunmoins = gdiv(Pi,gmul(gsin(var1,prec),gammas));
-    gammaunmoins2= gdiv(gmul(gmul(gsqrt(Pi,prec),gpui(gdeux,gsub(s,gun),prec)),
+    gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
+    gammaunmoins2= gdiv(gmul(gmul(mpsqrt(Pi),gpui(gdeux,gsub(s,gun),prec)),
                              gammas2),
                         gmul(gcos(gmul2n(var1,-1),prec),gammas));
     var1 = var2 = gun;
