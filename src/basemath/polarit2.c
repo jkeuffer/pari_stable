@@ -3518,8 +3518,6 @@ GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom)
   long l2, l3;
   long i, j;
   if (typ(M)!=t_MAT) err(typeer,"matratlift");
-  if(DEBUGLEVEL>=8)
-    fprintferr("%Z, %Z\n",M);
   l2 = lg(M)-1; l3 = lg((GEN)M[1])-1;
   N = cgetg(l2 + 1, t_MAT);
   for (j = 1; j <= l2; ++j)
@@ -3564,11 +3562,15 @@ GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
   return Q;
 }
 
-/* P,Q in Z[X,Y], nf in Z[Y] , monic irreducible. compute GCD in Q[Y]/(nf)[X]
+/* P,Q in Z[X,Y], nf in Z[Y] irreducible. compute GCD in Q[Y]/(nf)[X].
  * 
- * We procede as follows
+ * We essentially follows the paper of M. Encarnacion
+ * "On a modular Algorithm for computing GCDs of polynomials over
+ * number fields" in the proceeding of ISSAC'94.
+ * 
+ * We procede as follows :
  * We compute the gcd modulo primes discarding bad primes as they are detected.
- * We try reconstruct the result with matratlift, stopping as soon as we get
+ * We try reconstruct the result with matratlift, stoping as soon as we get
  * weird denominators.
  *
  * If matratlift succeed, we then try the full division.
@@ -3577,10 +3579,10 @@ GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
  * polynomial we get has reasonnable coefficients, so the full division will
  * not be too costly.
  *
- * FIXME: Handle rational coefficient for P and Q, and non-monic nf.
- * Add optional disc argument.
+ * FIXME: Handle rational coefficient for P and Q.
  * If not NULL, den must a a multiple of the denominator of the gcd,
  * for example the discriminant of nf.
+ * Use resultantducos for now.(ref: polresultant0)
  * 
  * NOTE: if nf is not irreducible, nfgcd may loop forever, especially if the
  * gcd divides nf !
@@ -3588,35 +3590,47 @@ GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom)
 GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
 {
   ulong ltop = avma;
-  GEN R, ax, bo;
-  GEN mod = NULL;
-  GEN M, sol, dsol, dens;
-  long dM=0, dR;
+  GEN sol, mod = NULL;
   long x = varn(P);
   long y = varn(nf);
   long d = deg(nf);
+  GEN lP, lQ;
+  if (!signe(P) || !signe(Q))
+    return zeropol(x);
+  /*Compute denominators*/
   if (!den)
   	den = discsr(nf);
+  lP = (GEN) P[lgef(P)-1];
+  lQ = (GEN) Q[lgef(Q)-1];
+  if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
+    den = mulii(den, mppgcd(resultantducos(lP, nf), resultantducos(lQ, nf)));
+  /*Modular GCD*/
   {
     ulong btop = avma;
     ulong st_lim = stack_lim(btop, 1);
     long p;
+    long dM=0, dR;
+    GEN M, dsol, dens;
+    GEN R, ax, bo;
     byteptr primepointer;
     GEN *bptr[] = { &M, &mod };
     for (p = 27449, primepointer = diffptr + 3000; ; p += *(primepointer++))
     {
       if (!*primepointer) err(primer1);
       if (gcmp0(modis(den, p)))
-        continue;/*Prime divide the discriminant*/
+        continue;/*Discard primes dividing the discriminant*/
       if (DEBUGLEVEL>=5) fprintferr("p=%d\n",p);
       if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
-        continue;/*Bad prime first type*/
+        continue;/*Discard primes when modular gcd does not exist*/
       dR = deg(R);
       if (mod && dR < dM)
-        continue;/* Bad primes second type*/
+        continue;/*Discard primes dividing leading coef of the true GCD.*/
       R = polpol_to_mat(R, d);
       if ( !mod || dM < dR)
-	/*The opposite : this one is good, but the previous ones were bad.*/
+      /*The opposite case: 
+       * All previous primes divided the leading coef of the true GCD.
+       * Discard them.
+       */
       {
         M = R;
         mod = stoi(p);
@@ -3627,7 +3641,8 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       M = gadd(R, gmul(ax, gsub(M, R)));
       mod = mulis(mod, p);
       M = lift(FpM(M, mod));
-      bo = racine(shifti(mod, -1)); /*I have no better ideas*/
+      /* I suspect it must be better to take amax > bmax*/
+      bo = racine(shifti(mod, -1)); 
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL)
         continue;
       dens = denom(sol);
