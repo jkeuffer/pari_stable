@@ -786,7 +786,7 @@ type0(GEN x)
 /*                                                                 */
 /*******************************************************************/
 static void
-allocate_loop_err() {
+allocate_loop_err(void) {
   err(talker2,"can't allow allocatemem() in loops", analyseur, mark.start);
 }
 
