@@ -1002,7 +1002,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       /* step 3 */
       /* on peut factoriser disc(R) avec th. 2.1.6. */
   if (DEBUGLEVEL>=3) { fprintferr("Step 3\n"); flusherr(); }
-  bnfz=bnfinit0(R,0,NULL,prec); nfz=(GEN)bnfz[7];
+  bnfz=bnfinit0(R,1,NULL,prec); nfz=(GEN)bnfz[7];
   clgp=gmael(bnfz,8,1);
   cyc=(GEN)clgp[2]; gc=lg(cyc)-1; gencyc=(GEN)clgp[3];
   for (j=1; j<=gc && divise((GEN)cyc[j],gell); j++);
