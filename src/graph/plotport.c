@@ -1562,7 +1562,6 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   if (WW)
   {
     char c1[16],c2[16],c3[16],c4[16];
-    int gap = rm + 2;
 
     sprintf(c1,"%5.3f",ybig); sprintf(c2,"%5.3f",ysml);
     sprintf(c3,"%5.3f",xsml); sprintf(c4,"%5.3f",xbig);
@@ -1836,15 +1835,15 @@ postdraw00(long *w, long *x, long *y, long lw, long scale)
   SRectangle *rect, SRec;
 
   if (scale) {
-    double termxsize, termysize, postxsize, postysize;
+    double postxsize, postysize;
 
     PARI_get_psplot(); 
     postxsize = pari_psplot.width;
     postysize = pari_psplot.height;
     PARI_get_plot(0);
-    xscale *= pari_psplot.width  * 1.0/w_width;
-    fontsize = fontsize/(pari_psplot.width  * 1.0/w_width);
-    yscale *= pari_psplot.height * 1.0/w_height;
+    xscale *= postxsize * 1.0/w_width;
+    fontsize = fontsize/(postxsize * 1.0/w_width);
+    yscale *= postysize * 1.0/w_height;
     xtick = h_unit;  ytick = v_unit;
   }
   psfile = fopen(current_psfile, "a");
