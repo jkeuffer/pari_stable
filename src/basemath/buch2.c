@@ -1567,11 +1567,11 @@ END:
 
 /* I assumed to be integral HNF, T2 a weighted T2 matrix */
 static GEN
-ideallllredpart1(GEN I, GEN T2, long prec)
+ideallllredpart1(GEN I, GEN T2)
 {
   GEN y,m,idealpro;
 
-  y = lllgramintern(qf_base_change(T2,I,1),100,1,prec+1);
+  y = lllgramintern(qf_base_change(T2,I,1),100,1, 0);
   if (!y) return NULL;
 
   /* I, m, y integral */
@@ -1680,7 +1680,7 @@ remove_content(GEN I)
 
 /* if phase != 1 re-initialize static variables. If <0 return immediately */
 static long
-random_relation(long phase,long cglob,long LIMC,long PRECLLL,long PRECREG,
+random_relation(long phase,long cglob,long LIMC,long PRECREG,
                 GEN nf,GEN subFB,GEN vecT2,GEN *mat,GEN matarch,GEN list_jideal)
 {
   static long jideal, jdir;
@@ -1723,7 +1723,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECLLL,long PRECREG,
       if (DEBUGLEVEL>2)
         fprintferr("phase=%ld,jideal=%ld,jdir=%ld,rand=%ld\n",
                    phase,jideal,jdir,getrand());
-      idealpro = ideallllredpart1(ideal,(GEN)vecT2[jdir],PRECLLL);
+      idealpro = ideallllredpart1(ideal,(GEN)vecT2[jdir]);
       if (!idealpro) return -2;
       if (!factorgen(nf,idealpro,KCZ,LIMC))
       {
@@ -1796,6 +1796,8 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
     flusherr();
   }
   av = avma;
+  M = gprec_w(M,  PRECLLL);
+  MC= gprec_w(MC, PRECLLL);
   for (iz=KCZ+1; iz<=KCZ2; iz++, avma = av)
   {
     if (DEBUGLEVEL>1) fprintferr("%ld ", FB[iz]);
@@ -1826,7 +1828,7 @@ be_honest(GEN nf,GEN subFB,long PRECLLL)
 	  }
           for (i=1; i<ru; i++)
             MCtw[i] = exu[i]? lmul2n((GEN)MC[i],exu[i]<<1): MC[i];
-          idealpro = ideallllredpart1(ideal, mulmat_real(MCtw,M), PRECLLL);
+          idealpro = ideallllredpart1(ideal, mulmat_real(MCtw,M));
           if (idealpro && factorgen(nf,idealpro,iz-1,FB[iz-1])) break;
 	  nbtest++; if (nbtest==200) return 0;
 	}
@@ -2094,13 +2096,19 @@ shift_t2(GEN T2, GEN M, GEN MC, long a, long b)
 }
 
 static GEN
-compute_vecT2(long RU,GEN nf)
+compute_vecT2(GEN nf,long RU,long prec)
 {
   GEN vecT2, M = gmael(nf,5,1), MC = gmael(nf,5,2), T2 = gmael(nf,5,3);
-  long i,j,n = min(RU,9), ind = 1;
+  long i,j,ind, n = min(RU,9);
 
   vecT2=cgetg(1 + n*(n+1)/2,t_VEC);
-  for (j=1; j<=n; j++)
+  if (nfgetprec(nf) > prec)
+  {
+    M = gprec_w(M,prec);
+    MC= gprec_w(MC,prec);
+    T2= gprec_w(T2,prec);
+  }
+  for (ind=j=1; j<=n; j++)
     for (i=1; i<=j; i++) vecT2[ind++] = (long)shift_t2(T2,M,MC,i,j);
   if (DEBUGLEVEL) msgtimer("weighted T2 matrices");
   return vecT2;
@@ -2781,9 +2789,9 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
         long minsFB,long flun,long prec)
 {
   ulong av = avma,av0,av1,limpile;
-  long N,R1,R2,RU,PRECREG,PRECLLL,KCCO,RELSUP,LIMC,LIMC2,lim;
+  long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,ss,cglob;
-  long first=1, sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
+  long sfb_increase=0, sfb_trials=0, precdouble=0, precadd=0;
   double cbach,cbach2,drc,LOGD2;
   GEN p1,vecT2,fu,zu,nf,LLLnf,D,xarch,W,R,Res,z,h,vperm,subFB;
   GEN resc,B,C,c1,lambda,pdep,parch,liste,invp,clg1,clg2, *mat;
@@ -2799,7 +2807,9 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
 
   /* Initializations */
   fu = NULL; /* gcc -Wall */
-  N = degpol(P); PRECREG = max(BIGDEFAULTPREC,prec);
+  N = degpol(P);
+  PRECREG = max(BIGDEFAULTPREC,prec);
+  PRECLLLadd = MEDDEFAULTPREC;
   if (!nf)
   {
     nf = initalgall0(P, nf_REGULAR, PRECREG);
@@ -2811,7 +2821,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   zu[2] = lmul((GEN)nf[7],(GEN)zu[2]);
   if (DEBUGLEVEL) msgtimer("initalg & rootsof1");
 
-  R1 = itos(gmael(nf,2,1)); R2 = (N-R1)>>1; RU = R1+R2;
+  R1 = nf_get_r1(nf); R2 = (N-R1)>>1; RU = R1+R2;
   D = (GEN)nf[3]; drc = fabs(gtodouble(D));
   LOGD2 = log(drc); LOGD2 = LOGD2*LOGD2;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
@@ -2830,8 +2840,7 @@ buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
   av0 = avma; mat = NULL; FB = NULL;
 
 START:
-  avma = av0;
-  if (first) first = 0; else desallocate(&mat);
+  avma = av0; desallocate(&mat);
   if (precpb)
   {
     precdouble++;
@@ -2871,10 +2880,14 @@ START:
 
   /* PRECLLL = prec for LLL-reductions (idealred)
    * PRECREG = prec for archimedean components */
-  PRECLLL = DEFAULTPREC
-          + ((expi(D)*(lg(subFB)-2)+((N*N)>>2))>>TWOPOTBITS_IN_LONG);
+  PRECLLL = PRECLLLadd
+          + (expi(D)*(lg(subFB)-2) + ((N*N)>>2)) / sizeof(long);
   if (!precdouble) PRECREG = prec+1;
-  if (PRECREG < PRECLLL) PRECREG = PRECLLL;
+  if (PRECREG < PRECLLL)
+  { /* very rare */
+    PRECREG = PRECLLL;
+    nf = nfnewprec(nf,PRECREG); av0 = avma;
+  }
   KCCO = KC+RU-1 + max(ss,RELSUP); /* expected number of needed relations */
   if (DEBUGLEVEL)
     fprintferr("relsup = %ld, ss = %ld, KCZ = %ld, KC = %ld, KCCO = %ld\n",
@@ -2960,7 +2973,7 @@ MORE:
     }
     if (!vecT2)
     {
-      vecT2 = compute_vecT2(RU,nf);
+      vecT2 = compute_vecT2(nf,RU,PRECLLL);
       av1 = avma;
     }
     if (!powsubFB)
@@ -2968,11 +2981,15 @@ MORE:
       powsubFBgen(nf,subFB,CBUCHG+1,PRECREG);
       av1 = avma;
     }
-    ss = random_relation(phase,cglob,(long)LIMC,PRECLLL,PRECREG,
+    ss = random_relation(phase,cglob,(long)LIMC,PRECREG,
                          nf,subFB,vecT2,mat,matarch,list_jideal);
     if (ss < 0)
     { /* could not find relations */
-      if (ss != -1) precpb = "random_relation"; /* precision pb */
+      if (ss != -1)
+      {
+        precpb = "random_relation"; /* precision pb */
+        PRECLLLadd = (PRECLLLadd<<1) - 2;
+      }
       goto START;
     }
     if (DEBUGLEVEL > 2) dbg_outrel(phase,cglob,vperm,mat,matarch);
