@@ -1370,30 +1370,29 @@ static GEN
 fastnu(GEN p, GEN f, GEN beta, GEN pdr)
 {
   long j, k, l, n = degpol(f), v = varn(f), N = 2*n+1, av = avma;
-  GEN p1, p2, c, d, G, V, nu, h;
+  GEN p1, p2, c, d, B, G, V, nu, h;
 
   G   = cgetg(N+1, t_MAT);
   c  = gzero;
   d  = mulii(pdr, sqri(p));
 
   beta = gmul(pdr, beta);
-  p1   = beta;
+  B    = beta;
   for (k = 1; k <= n; k++)
   {
     V = zerocol(N); G[N-k] = (long)V;
     V[n+1-k] = un;
     for (j = n+1; j <= N; j++)
     {
-      p2 = polcoeff0(p1, N-j, -1);
-      if (signe(p2)) c = ggcd(c, p2);
+      p2 = polcoeff0(B, N-j, -1);
+      if (signe(p2)) c = gcdii(c, p2);
       V[j] = (long)p2;
     }
     if (k < n)
     {
-      p1 = gdiv(gmul(p1, beta), pdr);
-      p1 = gmod(p1, f);
-      if (!gcmp1(Q_denom(p1))) { avma = av; return NULL; }
-      p1 = centermod(p1, d);
+      B = gdiv(gres(gmul(B, beta), f), pdr);
+      if (!gcmp1(Q_denom(B))) { avma = av; return NULL; }
+      B = centermod(B, d);
     }
   }
 
@@ -1437,15 +1436,6 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   if (l > 1) { avma = av; return NULL; }
   return gerepilecopy(av, nu);
 }
-
-#if 0
-/* r >= 0, s >= 0, return p^-r (nu/Dnu)^s mod(T, N) */
-static GEN
-pr_nus(GEN p, GEN nu, GEN Dnu, long r, long s, GEN T, GEN N)
-{
-
-}
-#endif
 
 /* return the prime element in Zp[phi], nup, chip in Z[X]
  * if *Ep < oE or Ep divides Ediv (!=0) return NULL (not interesting)
