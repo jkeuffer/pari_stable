@@ -184,7 +184,7 @@ IZ 36- cache optimization in initprimes() [ default(primelimit,.) ]
        Strexpand()
    38- prototype of strtoGENstr() [remove flag]
    39- remove -Wno-implicit from CFLAGS
-   40- prototype code 's*' now produces a t_VEC of GENs [caller's business
+   40- prototype code 's*' now produces a t_VEC of GENs [callee's business
        to call GENtostr] (used to be a NULL-terminated list)
    41- [gphelp:] if perl not available, don't pretend extended help is.
    42- try harder to detect precision problems in floating point lllgram
