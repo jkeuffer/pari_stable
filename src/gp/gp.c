@@ -95,7 +95,8 @@ usage(char *s)
   printf("\t[-p primelimit]\tPrecalculate primes up to the limit\n");
   printf("\t[-s stacksize]\tStart with the PARI stack of given size (in bytes)\n");
   printf("\t[-test]\t\tTest mode.  As -q, plus wrap long lines\n");
-  printf("\t[--version]\tOutput version info and exit\n\n");
+  printf("\t[--version]\tOutput version info and exit\n");
+  printf("\t[--version-short]\tOutput version number and exit\n\n");
   exit(0);
 }
 
@@ -1626,6 +1627,18 @@ what_readline(void)
 }
 
 static void
+print_shortversion(void)
+{
+  const ulong mask = (1<<PARI_VERSION_SHIFT) - 1;
+  ulong n = PARI_VERSION_CODE, major, minor, patch;
+
+  patch = n & mask; n >>= PARI_VERSION_SHIFT;
+  minor = n & mask; n >>= PARI_VERSION_SHIFT;
+  major = n;
+  pariputsf("%lu.%lu.%lu\n", major,minor,patch); exit(0);
+}
+
+static void
 print_version(void)
 {
   char buf[64];
@@ -2747,6 +2760,7 @@ read_opt(long argc, char **argv)
       case 'f':
 	initrc = 0; break;
       case '-':
+        if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
         if (strcmp(t, "version") == 0) { print_version(); exit(0); }
         if (strcmp(t, "texmacs") == 0) { GP_DATA->flags |= TEXMACS; break; }
        /* fall through */
