@@ -1809,7 +1809,7 @@ hnflll(GEN A)
     {
       GEN a = (GEN)lambda, b = (GEN)(D-1); /* gcc -Wall */
       GEN *gptr[4]; gptr[0]=&A; gptr[1]=&B; gptr[2]=&a; gptr[3]=&b;
-      if (DEBUGMEM) err(warnmem,"hnflll");
+      if (DEBUGMEM) err(warnmem,"hnflll, k = %ld / %ld",k,n);
       gerepilemany(av,gptr,4); lambda = (GEN**)a; D = (GEN*)(b+1);
     }
   }
