@@ -2287,9 +2287,10 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       GEN t = ZX_Flx(T, pp);
       z = FlxqX_divrem(a,b,t,pp,pr);
       tetpil=avma;
+      z = FlxX_ZXX(z); 
       if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
         *pr = FlxX_ZXX(*pr);
-      else return gerepile(av0,tetpil,FlxX_ZXX(z));
+      else return gerepile(av0,tetpil,z);
       gptr[0]=pr; gptr[1]=&z;
       gerepilemanysp(av0,tetpil,gptr,2);
       return z;
