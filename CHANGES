@@ -36,7 +36,7 @@ Done for version 2.1.0 (released ??/??/2000):
     2- ^C while prettyprinter in action --> gp crash
     3- polresultant(a,b,x,2) --> b
     4- exp(log(1.+x+y)) --> division by 0
-    5- support cygwin version 1
+TH  5- support cygwin version 1
     6- TeXmacs interface
     7- GP parser codes (sqrtint, idealprimedec)
     8- trap (break loop) + NO readline + ^C at input time --> exit.
