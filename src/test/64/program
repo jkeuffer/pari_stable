@@ -42,7 +42,7 @@
 [1, -2] [1, -1] [1, 0] [1, 1] [1, 2] [2, -2] [2, -1] [2, 0] [2, 1] [2, 2] [3
 , -2] [3, -1] [3, 0] [3, 1] [3, 2]  
 ? getheap
-[3, 24]
+[4, 32]
 ? getrand
 1
 ? getstack
@@ -111,7 +111,7 @@ og(p)/log(q))));
 3
 ? kill(addii)
 ? getheap
-[21, 1569]
+[22, 1578]
 ? print("Total time spent: ",gettime);
-Total time spent: 247
+Total time spent: 204
 ? \q
