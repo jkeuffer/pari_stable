@@ -1971,7 +1971,7 @@ det(GEN a)
     if (DEBUGLEVEL > 7) msgtimer("det, col %ld / %ld",i,nbco-1);
   }
   p = gcoeff(a,nbco,nbco);
-  if (s < 0) p = gneg(p); else if (nbco==1) p = gcopy(p);
+  if (s < 0) p = gneg(p); else p = gcopy(p);
   return gerepileupto(av, p);
 }
 
