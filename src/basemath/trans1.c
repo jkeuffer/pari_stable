@@ -1494,7 +1494,7 @@ mpsc1(GEN x, long *ptmod8)
   if (gcmp0(p1)) alpha=1000000.0;
   else
   {
-    m=expo(p1); alpha=(m<-1023)? -1-m*LOG2: -1-log(fabs(rtodbl(p1)));
+    m=expo(p1); alpha=(m<-1022)? -1-m*LOG2: -1-log(fabs(rtodbl(p1)));
   }
   beta = 5 + bit_accuracy(l)*LOG2;
   a=0.5/LOG2; b=0.5*a;
