@@ -36,7 +36,7 @@ if test $do_dll=yes -a -z "$DLLD"; then
 fi
 
 GNUdlld=
-DLLDneedsWl=
+DLLDisGCC=
 if test -n "$DLLD"; then
 # Which Dynamic Lib Linker?
   if test "$fastread" != yes; then
@@ -45,16 +45,14 @@ if test -n "$DLLD"; then
     DLLD=$ans
   fi
 
-  if test "$DLLD"="$CC"; then
-    if test -n "$__gnuc__"; then
-      DLLDneedsWl=yes;
-      GNUdlld=$GNULDused
-    fi 
+  if test "$DLLD"="$CC" -a -n "$__gnuc__"; then
+    DLLDisGCC=yes;
+    GNUdlld=$GNULDused
+  else
+    case "$DLLD" in
+      *ld) if ($DLLD -v 2>&1 | grep GNU > /dev/null); then GNUdlld=yes; fi;;
+    esac
   fi
-
-  case "$DLLD" in
-    *ld) if ($DLLD -v 2>&1 | grep GNU > /dev/null); then GNUdlld=yes; fi;;
-  esac
 
 # Which Flags for Dynamic Lib Linker ?
   if test -n "$GNUdlld"; then
@@ -64,28 +62,23 @@ if test -n "$DLLD"; then
       aix)     DLLDFLAGS="-r" ;;
       hpux)    DLLDFLAGS="-b -E" ;;
       freebsd) DLLDFLAGS="-Bshareable -x" ;;
-      linux)   DLLDFLAGS="-shared -soname=\$(LIBPARI_SONAME)" ;;
       irix)    DLLDFLAGS="-shared -elf -no_unresolved -all" ;;
-      osf1)    case "$optimization" in
-                   full) DLLDFLAGS="-shared -O3" ;;
-                   *)    DLLDFLAGS="-shared" ;;
-                 esac;;
+      osf1)    DLLDFLAGS="-shared" ;;
       sunos)   DLLDFLAGS="-assert nodefinitions" ;;
       solaris) DLLDFLAGS="-G -h \$(LIBPARI_SONAME)" ;;
       os2)     ;; # see below
       *)         DLLD=;;
     esac
   fi
+  DLLDFLAGS=`./ldflags "$DLLDisGCC" "$DLLDFLAGS"`
+  case "$osname" in
+    os2) DLLDFLAGS="$CFLAGS -Zdll" ;; # assume DLLD = gcc
+  esac
+  if test -n "$DLLDisGCC"; then
+    DLLDFLAGS="-shared $DLLDFLAGS"
+  fi
   case "$osname" in
     osf1|freebsd|linux|sunos|solaris) EXTRADLLDFLAGS='-lc ${LIBS}';;
-  esac
-  DLLDFLAGS=`./ldflags "$DLLDneedsWl" "$DLLDFLAGS"`
-  # assume DLLD = djgpp
-  case "$osname" in
-    os2) case "$optimization" in
-           full) DLLDFLAGS="$CFLAGS -Zdll -s" ;;
-           *)    DLLDFLAGS="$CFLAGS -Zdll" ;;
-         esac;;
   esac
 
   if test "$fastread" != yes; then
@@ -99,7 +92,4 @@ if test -z "$DLLD"; then
   echo "No Dynamic Lib"
 else
   echo "Dynamic Lib linker is  $DLLD  $DLLDFLAGS"
-  if test -n "$GNUdlld"; then
-    echo "...Hum, this looks like GNU ld"
-  fi
 fi
