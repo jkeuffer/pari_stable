@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern void init_dalloc();
 extern double *dalloc(size_t n);
+extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN RXQX_divrem(GEN x, GEN y, GEN T, GEN *pr);
@@ -1012,46 +1013,45 @@ ZpX(GEN P, GEN pk, GEN ffproj)
   return normalizepol(z);
 }
 
-/* We want to be able to reconstruct x, |x|^2 < C, from x mod pr^k
- * We want B := min B_i >= C. Let alpha the LLL parameter,
- * y = 1/(alpha-1/4) > 4/3, the theoretical guaranteed bound follows from
- *    (Npr)^(2k/n) = det(L)^(2/n) <= 1/n sum B_i
- *                                <= 1/n B sum y^i
- *                                <= 1/n B y^(n-1) / (y-1)
- *
- *  Hence log(B/n) >= 2k/n log(Npr) - (n-1)log(y) + log(y-1)
- *                 >= log(C/n), provided
- *   k >= [ log(C/n) + (n-1)log(y) - log(y-1) ] * n/(2log(Npr))
- */
+/* We want to be able to reconstruct x, |x|^2 < C, from x mod pr^k */
 static double
-bestlift_bound(GEN C, long n, double alpha, GEN Npr)
+bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 {
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
   if (typ(C) != t_REAL) C = gmul(C, realun(DEFAULTPREC));
   setlg(C, DEFAULTPREC);
-  t = rtodbl(mplog(divrs(C,n))) + (n-1) * log(y) - log(y-1);
-  return ceil((t * n) / (2.* log(gtodouble(Npr))));
+  t = rtodbl(mplog(gmul2n(divrs(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
+  return ceil((t * d) / log(gtodouble(Npr)));
+}
+
+static GEN
+get_R(GEN M)
+{ 
+  GEN R = sqred1_from_QR(M, DEFAULTPREC + (gexpo(M) >> TWOPOTBITS_IN_LONG));
+  long i, l = lg(R);
+  for (i=1; i<l; i++) gcoeff(R,i,i) = un;
+  return R;
 }
 
 static void
 bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
 {
-  const int D = 4;
+  const int D = 100;
   const double alpha = ((double)D-1) / D; /* LLL parameter */
+  const long d = degpol(nf[1]);
   pari_sp av = avma;
   GEN prk, PRK, B, GSmin, pk;
   pari_timer ti;
 
   TIMERstart(&ti);
-  if (!a) a = (long)bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
+  if (!a) a = (long)bestlift_bound(C, d, alpha, idealnorm(nf,pr));
 
   for (;; avma = av, a<<=1)
   {
     if (DEBUGLEVEL>2) fprintferr("exponent: %ld\n",a);
-    prk = idealpows(nf, pr, a);
+    PRK = prk = idealpows(nf, pr, a);
     pk = gcoeff(prk,1,1);
-    PRK = hnfmodid(prk, pk);
 
     if (expi(pk) > 1000)
     { /* reduce size first, "scramble" the matrix */
@@ -1062,7 +1062,19 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
     if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
     else
-      GSmin = vecmin(GS_norms(B, DEFAULTPREC));
+    {
+      GEN R = get_R(PRK), S = invmat(R), BB = GS_norms(B, DEFAULTPREC);
+      GEN smax = gzero;
+      long i, j;
+      for (i=1; i<=d; i++)
+      {
+        GEN s = gzero;
+        for (j=1; j<=d; j++)
+          s = gadd(s, gdiv( gsqr(gcoeff(S,i,j)), (GEN)BB[j]));
+        if (gcmp(s, smax) > 0) smax = s;
+      }
+      GSmin = ginv( gmul2n(smax, 2) );
+    }
     if (gcmp(GSmin, C) >= 0) break;
   }
   if (DEBUGLEVEL>2)
