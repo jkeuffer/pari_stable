@@ -1284,8 +1284,8 @@ GEN     vecsmall_vec(GEN z);
 
 /* polarit1.c */
 
-long    Flx_nbfact(GEN z, long p);
-long    Flx_nbroots(GEN f, long p);
+long    Flx_nbfact(GEN z, ulong p);
+long    Flx_nbroots(GEN f, ulong p);
 long    FpX_is_irred(GEN f, GEN p);
 long    FpX_is_squarefree(GEN f, GEN p);
 long    FpX_is_totally_split(GEN f, GEN p);
