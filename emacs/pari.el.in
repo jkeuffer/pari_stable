@@ -1414,6 +1414,7 @@ The answer is t if success, and nil otherwise."
     (set-buffer (get-buffer-create "*PARI*"))
     (erase-buffer)
 ;; Form the command line string.
+    (run-hooks 'pari-mode-hook 'gp-mode-hook)
     (let*((process-connection-type t) ; use PTY.
           (flag (or (, flag) gp-prompt-for-args))
           (gp-cmd
