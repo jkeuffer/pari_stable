@@ -352,7 +352,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       REL_t *rel = cache->last + 1;
       rel->R = col_0(F->KC); rel->nz = F->subFB[i];
       rel->R[ rel->nz ] = j;
-      for (k = 2; k < j; j++) m = element_mul(nf, m, (GEN)alg[k]);
+      for (k = 2; k < j; k++) m = element_mul(nf, m, (GEN)alg[k]);
       rel->m = gclone(m);
       rel->ex= NULL; cache->last = rel;
     }
