@@ -842,7 +842,7 @@ if test -n "$__gnuc__"; then
     ;;
   esac
   OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn"
-  DBGFLAGS="-g $warn"
+  DBGFLAGS=${DBGFLAGS:-"-g $warn"}
   # Some architectures need -fPIC for building dynamic lib
   case "$osname-$arch" in hpux-*) DLCFLAGS=-fPIC;; esac
   # Specific optimisations for some architectures
@@ -859,8 +859,8 @@ if test -n "$__gnuc__"; then
   esac
 else
   cflags=
-  DBGFLAGS="-g"
-  PRFFLAGS="-pg"
+  DBGFLAGS=${DBGFLAGS:-'-g'}
+  PRFFLAGS='-pg'
   case "$osname-$arch" in
     hpux-*) # -Aa is for ANSI C, +z for PIC code (for commercial HPUX compilers)
                   OPTFLAGS=-O; cflags=-Aa; DLCFLAGS=+z;;

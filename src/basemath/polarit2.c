@@ -1987,7 +1987,10 @@ factorback_i(GEN fa, GEN e, GEN nf, int red)
   else /* genuine factorization */
   {
     if (t != t_MAT)
+    {
+      if (!is_vec_t(t)) err(talker,"not a factorisation in factorback");
       return gerepileupto(av, divide_conquer_prod(fa, _mul));
+    }
     p = (GEN)fa[1];
     e = (GEN)fa[2];
   }
