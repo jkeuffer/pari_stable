@@ -550,7 +550,7 @@ static void
 init_primedata(primedata *S)
 {
   long i, j, l, lff = lg(S->ff), v = fetch_var(), N = degpol(S->pol);
-  GEN T = FqX_init(S->p, S->lcm, v), p = S->p;
+  GEN T = init_Fq(S->p, S->lcm, v), p = S->p;
 
   name_var(v,"y");
   S->T = T;

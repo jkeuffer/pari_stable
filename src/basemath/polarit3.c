@@ -3486,7 +3486,7 @@ ffinit_nofact(GEN p, long n)
 }
 
 static GEN
-FqX_init_i(GEN p, long n, long v)
+init_Fq_i(GEN p, long n, long v)
 {
   GEN P;
   if (n <= 0) err(talker,"non positive degree in ffinit");
@@ -3502,14 +3502,14 @@ FqX_init_i(GEN p, long n, long v)
   setvarn(P, v); return P;
 }
 GEN
-FqX_init(GEN p, long n, long v)
+init_Fq(GEN p, long n, long v)
 {
   pari_sp av = avma;
-  return gerepileupto(av, FqX_init_i(p, n, v));
+  return gerepileupto(av, init_Fq_i(p, n, v));
 }
 GEN
 ffinit(GEN p, long n, long v)
 {
   pari_sp av = avma;
-  return gerepileupto(av, FpX_to_mod(FqX_init_i(p, n, v), p));
+  return gerepileupto(av, FpX_to_mod(init_Fq_i(p, n, v), p));
 }
