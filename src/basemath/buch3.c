@@ -2039,7 +2039,7 @@ decodemodule(GEN nf, GEN fa)
 
   nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
-    err(talker,"incorrect factorisation in decodemodule");
+    err(talker,"not a factorisation in decodemodule");
   n = degpol(nf[1]); nn = n*n; id = NULL;
   G = gel(fa,1);
   E = gel(fa,2);
