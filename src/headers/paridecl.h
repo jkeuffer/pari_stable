@@ -464,6 +464,7 @@ GEN     zsigns(GEN nf,GEN alpha);
 
 /* base4.c */
 
+int     Z_ishnfall(GEN x);
 GEN     element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     element_invmodpr(GEN nf, GEN y, GEN modpr);
 GEN     element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr);

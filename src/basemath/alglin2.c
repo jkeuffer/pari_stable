@@ -2980,47 +2980,85 @@ GEN
 smithall(GEN x, GEN *ptU, GEN *ptV)
 {
   pari_sp av0 = avma, av, lim = stack_lim(av0,1);
-  long i, j, k, n;
-  GEN p1,p2, u, v, U, V, mun, mdet, ys;
+  long i, j, k, m, n0, n;
+  GEN p1,p2, u, v, U, V, V0, mun, mdet, ys;
 
   if (typ(x)!=t_MAT) err(typeer,"smithall");
-  if (DEBUGLEVEL>8) outerr(x);
-  n = lg(x)-1;
+  n0 = n = lg(x)-1;
   if (!n) {
     if (ptU) *ptU = cgetg(1,t_MAT);
     if (ptV) *ptV = cgetg(1,t_MAT);
     return cgetg(1,t_MAT);
   }
   mun = negi(gun); av = avma;
-  if (lg(x[1]) != n+1) err(mattype1,"smithall");
-  for (i=1; i<=n; i++)
-    for (j=1; j<=n; j++)
+  m = lg(x[1])-1;
+  for (j=1; j<=n; j++)
+    for (i=1; i<=m; i++)
       if (typ(coeff(x,i,j)) != t_INT)
         err(talker,"non integral matrix in smithall");
 
-  U = ptU? gun: NULL;
+  U = ptU? gun: NULL; /* TRANSPOSE of row transform matrix [so act on columns]*/
   V = ptV? gun: NULL;
+  V0 = NULL;
   x = dummycopy(x);
-  if (ishnfall(x))
+  if (m == n && Z_ishnfall(x))
   {
     mdet = dethnf_i(x);
-    if (V) V = idmat(n);
+    if (V) *ptV = idmat(n);
   }
   else
   {
     mdet = detint(x);
     if (signe(mdet))
     {
-      p1 = hnfmod(x,mdet);
-      if (V) V = gauss(x,p1);
+      if (!V)
+        p1 = hnfmod(x,mdet);
+      else
+      {
+        if (m == n)
+        {
+          p1 = hnfmod(x,mdet);
+          *ptV = gauss(x,p1);
+        }
+        else
+          p1 = hnfall_i(x, ptV, 1);
+      }
     }
     else
-    {
-      p1 = hnfall_i(x, ptV, 0);
-      if (ptV) V = *ptV;
-    }
+      p1 = hnfall_i(x, ptV, 1);
     x = p1;
   }
+  n = lg(x)-1;
+  if (V)
+  {
+    V = *ptV;
+    if (n != n0)
+    {
+      V0 = vecextract_i(V, 1, n0 - n); /* kernel */
+      V  = vecextract_i(V, n0-n+1, n0);
+      av = avma;
+    }
+  }
+  /* independant columns */
+  if (!signe(mdet))
+  {
+    if (n)
+    {
+      x = smithall(gtrans_i(x), ptV, ptU); /* ptV, ptU swapped! */
+      if (typ(x) == t_MAT && n != m) x = gtrans_i(x);
+      if (V) V = gmul(V, gtrans_i(*ptV));
+      if (U) U = *ptU; /* TRANSPOSE */
+    }
+    else /* 0 matrix */
+    {
+      x = cgetg(1,t_MAT);
+      if (V) V = cgetg(1, t_MAT);
+      if (U) U = idmat(m);
+    }
+    goto THEEND;
+  }
+
+  /* square, maximal rank n */
   if (U) U = idmat(n);
  
   p1 = cgetg(n+1,t_VEC); for (i=1; i<=n; i++) p1[i] = lnegi(gcoeff(x,i,i));
@@ -3114,9 +3152,19 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       if (V) V[k]=lneg((GEN)V[k]);
       coeff(x,k,k) = lnegi(gcoeff(x,k,k));
     }
+THEEND:
   if (!U && !V)
-    return gerepileupto(av, mattodiagonal(x));
-   
+  {
+    if (typ(x) == t_MAT) x = mattodiagonal_i(x);
+    if (n0 != n) x = concatsp(zerovec(n0-n), x);
+    return gerepilecopy(av0, x);
+  }
+
+  if (V0)
+  {
+    x = concatsp(zeromat(m,n0-n), x);
+    if (V) V = concatsp(V0, V);
+  }
   if (U) U = gtrans_i(U);
   snf_pile(av0, &x,&U,&V);
   if (ptU) *ptU = U;

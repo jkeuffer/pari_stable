@@ -177,6 +177,7 @@ IZ 24- [tex2mail:] add a "cut here" sign when expression does not fit in the
        [Pi, Pi]~
    25- faster multiplication [t_VEC | t_MAT] * t_COL for sparse t_COL
        [ induces faster charpoly for sparse t_MAT ]
+   26- matsnf: allow rectangular matrices + improvements for singular matrices
 
   Added
     1- member function rnf.pol (polynomial generating absolute extension)
