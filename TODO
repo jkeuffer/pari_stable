@@ -15,9 +15,6 @@ Priority classification (first column): [subjective and debatable!]
 
 ***************************   BUGS (general)     ****************************
 
-5  gegal should return 0, not raise an error when its arguments can't be
-   subtracted
-
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
 4  mateigen([1,1;1,2]) won't succeed at default precision (28 digits).
@@ -41,7 +38,7 @@ size of neighbouring intervals don't differ too much.
 -  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
    The "negligible" terms should be neglegted, not overflow because of the
    way the computation is done.
-   [ Tough to correct, even with a way to trap exceptions ]
+   [ Tough to correct! ]
 
 4  changing primelimit from within forprime loop yields unpredictable results
 
@@ -118,10 +115,6 @@ polynomial multiplication + remainder is O(n^2) [+ can use Karatsuba/FFT]
 4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
 easily define new ones)
 
-4  a way to trap PARI errors, esp. all kinds of overflows (exponent, degree,
-stack, ...). Something like:
-trap(errpile, &stack_overflow_handler)
-
 4  allow generic functions to process and produce t_SMALL's
 
 4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
@@ -163,9 +156,6 @@ for debuggers
 5  remove limitation to 8 arguments for static functions (argvec[9])
 
 4  use divide & conquer approach in string / integer conversions
-
-4  a way to trap PARI errors (esp. stack overflow). Something like:
-trap(errpile, "GP_command_to_be_executed_when_stack_overflows")
 
 3  split matrix_block in 2 parts: exploration + assignment. Would allow
 Math::Pari to use complicated x[][][][] constructs

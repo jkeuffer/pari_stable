@@ -92,6 +92,10 @@ BA 57- nfgaloisconj: discrepancies between 32/64 bits architectures
    60- silent codeword overflows (e.g. O(x^100000))
 IZ 61- updated gnuplot support
    62- x="a"; eval(x) --> error
+   63- general flakiness with buffer handling under GP
+       (Ex: input() + allocatemem --> SEGV)
+   64- [1] == 2 --> error (instead of 0)
+   65- lngamma(-0.106) --> SEGV
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files
@@ -100,11 +104,14 @@ IZ  1- [gnuplot] look up directory tree for gnuplot related files
     3- library functions gentimer, genmsgtimer, get_timer
 HC  4- optional argument to direuler (length of result)
     5- low-level kernel function for integer squarings (twice faster)
+    6- error trapping in library mode and under GP
+    7- break loop to investigate errors under GP
 
   Changed
     1- default binary produced by Configure -g is now static
     2- improved the heuristics in ellisoncurve
 HC  3- extend the range of direuler (maxp was 2^16)
+    4- trial divide by the "private primes" before the primality tests
 
   Removed
     1- sunview "support" (didn't work, hard to test, X11 is a better standard)
