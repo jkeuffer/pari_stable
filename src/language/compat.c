@@ -42,6 +42,9 @@ rounderror(GEN x)
   grndtoi(x,&e); avma=av; return (long)(e*L2SL10);
 }
 
+static GEN
+_factpol(GEN x, long unused, long hint) { return factpol(x,hint); }
+
 static void
 suppressed(ANYARG) {err(talker,"this function has been suppressed");}
 
@@ -118,8 +121,8 @@ entree oldfonctions[]={
 {"compositum2",2,(void *)compositum2,6,"GG"},
 {"comprealraw",2,(void *)comprealraw,4,"GG"},
 {"concat",2,(void *)concat,8,"GG"},
-{"conductor",62,(void *)bnrconductor,6,"GD0,G,D0,G,D1,L,p"},
-{"conductorofchar",2,(void *)bnrconductorofchar,6,"GGp"},
+{"conductor",62,(void *)bnrconductor,6,"GD0,G,D0,G,D1,L,"},
+{"conductorofchar",2,(void *)bnrconductorofchar,6,"GG"},
 {"conj",1,(void *)gconj,2,"G"},
 {"conjvec",1,(void *)conjvec,2,"Gp"},
 {"content",1,(void *)content,4,"G"},
@@ -181,7 +184,7 @@ entree oldfonctions[]={
 {"factornf",2,(void *)polfnf,6,"GG"},
 {"factorpadic",32,(void *)factorpadic4,7,"GGL"},
 {"factorpadic2",32,(void *)factorpadic2,7,"GGL"},
-{"factpol",33,(void *)factpol,7,"GLL"},
+{"factpol",33,(void *)_factpol,7,"GLL"},
 {"factpol2",1,(void *)suppressed,6,"G"},
 {"fibo",11,(void *)fibo,4,"L"},
 {"floor",1,(void *)gfloor,2,"G"},

@@ -617,36 +617,36 @@ GEN     smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long
 
 /* buch3.c */
 
-GEN     bnrclass0(GEN bignf, GEN ideal, long flag, long prec);
-GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,long all,long prec);
-GEN     bnrconductorofchar(GEN bnr,GEN chi,long prec);
-GEN     bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag,long prec);
+GEN     bnrclass0(GEN bignf, GEN ideal, long flag);
+GEN     bnrconductor(GEN arg0,GEN arg1,GEN arg2,long all);
+GEN     bnrconductorofchar(GEN bnr,GEN chi);
+GEN     bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag);
 GEN     bnrdisclist0(GEN bnf,GEN borne, GEN arch, long all);
-GEN     bnrinit0(GEN bignf,GEN ideal,long flag, long prec);
-long    bnrisconductor(GEN arg0,GEN arg1,GEN arg2,long prec);
+GEN     bnrinit0(GEN bignf,GEN ideal,long flag);
+long    bnrisconductor(GEN arg0,GEN arg1,GEN arg2);
 GEN     buchnarrow(GEN bignf);
-GEN     buchray(GEN bignf,GEN ideal,long prec);
-GEN     buchrayinit(GEN bignf,GEN ideal,long prec);
-GEN     buchrayinitgen(GEN bignf,GEN ideal,long prec);
+GEN     buchray(GEN bignf,GEN ideal);
+GEN     buchrayinit(GEN bignf,GEN ideal);
+GEN     buchrayinitgen(GEN bignf,GEN ideal);
 long    certifybuchall(GEN bnf);
-GEN     conductor(GEN bnr,GEN subgroup,long all,long prec);
+GEN     conductor(GEN bnr,GEN subgroup,long all);
 GEN     decodemodule(GEN nf, GEN fa);
-GEN     discrayabs(GEN bnr,GEN subgroup,long prec);
-GEN     discrayabscond(GEN bnr,GEN subgroup,long prec);
+GEN     discrayabs(GEN bnr,GEN subgroup);
+GEN     discrayabscond(GEN bnr,GEN subgroup);
 GEN     discrayabslist(GEN bnf,GEN listes);
 GEN     discrayabslistarch(GEN bnf, GEN arch, long bound);
 GEN     discrayabslistlong(GEN bnf, long bound);
-GEN     discrayrel(GEN bnr,GEN subgroup,long prec);
-GEN     discrayrelcond(GEN bnr,GEN subgroup,long prec);
+GEN     discrayrel(GEN bnr,GEN subgroup);
+GEN     discrayrelcond(GEN bnr,GEN subgroup);
 GEN     isprincipalray(GEN bignf, GEN x);
 GEN     isprincipalrayall(GEN bignf, GEN x,long flall);
 GEN     isprincipalraygen(GEN bignf, GEN x);
 GEN     rayclassno(GEN bignf,GEN ideal);
 GEN     rayclassnolist(GEN bnf,GEN listes);
-GEN     rnfconductor(GEN bnf, GEN polrel, long flag, long prec);
+GEN     rnfconductor(GEN bnf, GEN polrel, long flag);
 GEN     rnfkummer(GEN bnr, GEN subgroup, long all, long prec);
 GEN     rnfnormgroup(GEN bnr, GEN polrel);
-GEN     subgrouplist0(GEN bnr, long indexbound, long all, long prec);
+GEN     subgrouplist0(GEN bnr, long indexbound, long all);
 
 /* buch4.c */
 
@@ -1081,7 +1081,7 @@ GEN     divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN));
 GEN     factor(GEN x);
 GEN     factor0(GEN x,long flag);
 GEN     factorback(GEN fa,GEN nf);
-GEN     factpol(GEN x, long klim, long hint);
+GEN     factpol(GEN x, long hint);
 GEN     gbezout(GEN x, GEN y, GEN *u, GEN *v);
 GEN     gcd0(GEN x, GEN y,long flag);
 GEN     gdivexact(GEN x, GEN y);

@@ -151,7 +151,7 @@ reducealpha(GEN nf,GEN x,GEN gell)
 /* si all!=0, donne toutes les equations correspondant a un sousgroupe
    de determinant all (i.e. de degre all) */
 static GEN
-rnfkummersimple(GEN bnr, GEN subgroup, long all, long prec)
+rnfkummersimple(GEN bnr, GEN subgroup, long all)
 {
   long r1,degnf,ell,j,i;
   long nbgenclK,lprm,lprl,lSml2,lSl,lSp,lastindex,nbvunit,nbvunit0;
@@ -168,7 +168,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, long all, long prec)
   nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
   polnf=(GEN)nf[1]; vnf=varn(polnf);
   if (vnf==0) err(talker,"main variable in kummer must not be x");
-  p1=conductor(bnr,all ? gzero : subgroup,2,prec);
+  p1=conductor(bnr,all ? gzero : subgroup,2);
   bnr=(GEN)p1[2]; if(!all) subgroup=(GEN)p1[3];
   classgroup=(GEN)bnr[5];
   cyclic=(GEN)classgroup[2];
@@ -602,12 +602,12 @@ normrelz(GEN id)
 }
 
 static GEN
-invimsubgroup(GEN bnr, GEN subgroup, GEN idealz, long prec)
+invimsubgroup(GEN bnr, GEN subgroup, GEN idealz)
 {
   long lraycycz,i,j;
   GEN Plog,rayclgpz,genraycycz,utemp,p1,p2;
 
-  bnrz=buchrayinitgen(bnfz,idealz,prec);
+  bnrz=buchrayinitgen(bnfz,idealz);
   rayclgpz=(GEN)bnrz[5];
   genraycycz=(GEN)rayclgpz[3]; lraycycz=lg(genraycycz)-1;
   Plog=cgetg(lraycycz+lraycyc+1,t_MAT);
@@ -894,7 +894,7 @@ reducebeta(GEN be)
 }
 
 static GEN
-testx(GEN subgroup, GEN X, long prec)
+testx(GEN subgroup, GEN X)
 {
   long i,v;
   GEN be,polrelbe,p1;
@@ -917,7 +917,7 @@ testx(GEN subgroup, GEN X, long prec)
   polrelbe=gsubst(polrelbe,v,gdiv(polx[v],p1));
   polrelbe=gmul(polrelbe,gpuigs(p1,degree(polrelbe)));
   if (DEBUGLEVEL>=2) { fprintferr("polrelbe = "); outerr(polrelbe); }
-  p1=rnfconductor(bnf,polrelbe,0,prec);
+  p1=rnfconductor(bnf,polrelbe,0);
   if (!gegal((GEN)p1[1],module)) return gzero;
   if (!gegal((GEN)p1[3],subgroup)) return gzero;
   return polrelbe;
@@ -944,7 +944,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (gcmp1(gell)) { avma = av; return polx[varn(gmael3(bnr,1,7,1))]; }
   if (!isprime(gell)) err(impl,"kummer for composite relative degree");
   if (divise(wk,gell))
-    return gerepileupto(av,rnfkummersimple(bnr,subgroup,all,prec));
+    return gerepileupto(av,rnfkummersimple(bnr,subgroup,all));
   if (all && gcmp0(subgroup))
     err(talker,"kummer when zeta not in K requires a specific subgroup");
   bnf=(GEN)bnr[1];
@@ -952,7 +952,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   polnf=(GEN)nf[1]; vnf=varn(polnf); degK=degree(polnf);
   if (!vnf) err(talker,"main variable in kummer must not be x");
       /* step 7 */
-  p1=conductor(bnr,subgroup,2,prec);
+  p1=conductor(bnr,subgroup,2);
       /* fin step 7 */
   bnr=(GEN)p1[2]; 
   subgroup=(GEN)p1[3]; /* don't forget to update subgroup! (K.B) */
@@ -1083,8 +1083,8 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 
     polrel=computepolrel();
     steinitzZk=steinitzaux(idmat(degKz));
-    subgroupz=invimsubgroup(bnr,subgroup,idealz,prec);
-    gothf=conductor(bnrz,subgroupz,0,prec);
+    subgroupz=invimsubgroup(bnr,subgroup,idealz);
+    gothf=conductor(bnrz,subgroupz,0);
   }
       /* step 9 */
   if (DEBUGLEVEL>=3) { fprintferr("Step 9\n"); flusherr(); }
@@ -1238,7 +1238,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     LAB19:
     X=(GEN)K[dK];
     for (j=1; j<dK; j++) X=gadd(X,gmul((GEN)y[j],(GEN)K[j]));
-    finalresult=testx(subgroup,X,prec);
+    finalresult=testx(subgroup,X);
     if (!gcmp0(finalresult))
     {
       tetpil=avma; return gerepile(av,tetpil,gcopy(finalresult));

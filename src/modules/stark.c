@@ -375,7 +375,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
 /* Let pr be a prime (pr may divide mod(bnr)), compute the indexes
    e,f of the splitting of pr in the class field nf(bnr/subgroup) */
 static GEN
-GetIndex(GEN pr, GEN bnr, GEN subgroup, long prec)
+GetIndex(GEN pr, GEN bnr, GEN subgroup)
 {
   long av = avma, v, lg, i;
   GEN bnf, mod, mod0, mpr0, mpr, bnrpr, subpr, M, e, f, dtQ, p1;
@@ -399,7 +399,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup, long prec)
   }
   else
   {
-    bnrpr = buchrayinitgen(bnf, mpr, prec);
+    bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
     M = GetSurjMat(bnr, bnrpr);
     M = gmul(M, subgroup);
@@ -507,7 +507,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
   indpr = cgetg(nbp + 1,t_VEC);
   for (i = 1; i <= nbp; i++)
   {
-    p1 = GetIndex((GEN)bpr[i], bnr, sgp, prec);
+    p1 = GetIndex((GEN)bpr[i], bnr, sgp);
     indpr[i] = lmulii((GEN)p1[1], (GEN)p1[2]);
   }
 
@@ -560,8 +560,8 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 
           /* compute Clk(m), check if m is a conductor */
 	  disable_dbg(0);
-	  bnrm = buchrayinitgen(bnf, m, prec);
-	  p1   = conductor(bnrm, gzero, -1, prec);
+	  bnrm = buchrayinitgen(bnf, m);
+	  p1   = conductor(bnrm, gzero, -1);
 	  disable_dbg(-1);
 	  if (signe(p1))
 	  {
@@ -576,14 +576,14 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 	      /* check if m is the conductor */
 	      D  = (GEN)candD[c];
 	      disable_dbg(0);
-	      p1 = conductor(bnrm, D, -1, prec);
+	      p1 = conductor(bnrm, D, -1);
 	      disable_dbg(-1);
 	      if (signe(p1))
 	      {
 		/* check the splitting of primes */
 		for (j = 1; j <= nbp; j++)
 		{
-		  p1 = GetIndex((GEN)bpr[j], bnrm, D, prec);
+		  p1 = GetIndex((GEN)bpr[j], bnrm, D);
 		  p1 = mulii((GEN)p1[1], (GEN)p1[2]);
 		  if (egalii(p1, (GEN)indpr[j])) break; /* no good */
 		}
@@ -857,7 +857,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 
   if (!flag)
   {
-    condc = bnrconductorofchar(bnr, chi, prec);
+    condc = bnrconductorofchar(bnr, chi);
     if (gegal(cond, condc)) flag = 1;
   }
   else condc = cond;
@@ -865,7 +865,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
   if (flag)
     bnrc = bnr;
   else
-    bnrc = buchrayinitgen((GEN)bnr[1], condc, prec);
+    bnrc = buchrayinitgen((GEN)bnr[1], condc);
 
   chic = cgetg(l, t_VEC);
   cyc  = gmael(bnr, 5, 2);
@@ -1046,7 +1046,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
     if (!olddata)
     {
       data[2] = lmul(C, gsqrt(det((GEN)cond[1]), prec2));
-      data[3] = (long)buchrayinitgen(bnf, cond, prec);
+      data[3] = (long)buchrayinitgen(bnf, cond);
     }
     else
     {
@@ -1130,7 +1130,7 @@ InitChar0(GEN dataD, long prec)
       if (gegal(lchi, (GEN)allCR[j])) break;
     if (j != tnc) continue;
 
-    cond = bnrconductorofchar(bnr, lchi, prec);
+    cond = bnrconductorofchar(bnr, lchi);
     if (gcmp0((GEN)cond[2])) continue;
 
     /* the infinite part of chi is non trivial */
@@ -3116,7 +3116,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
 
   /* find the modulus defining N */
 
-  bnr   = buchrayinitgen(bnf, gun, prec);
+  bnr   = buchrayinitgen(bnf, gun);
   dataC = InitQuotient(bnr, gzero);
   if (gcmp0(flag)) 
     bnrh  = FindModulus(dataC, 1, &newprec, prec, 0);
@@ -3179,7 +3179,7 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
   }
 
   /* compute bnr(conductor) */
-  p1       = conductor(bnr, subgroup, 2, prec);
+  p1       = conductor(bnr, subgroup, 2);
   bnr      = (GEN)p1[2];
   subgroup = (GEN)p1[3];
 
@@ -3242,7 +3242,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
   /* compute bnr(conductor) */
   if (!(flag & 2))
   {
-    p1   = conductor(bnr, gzero, 2, prec);
+    p1   = conductor(bnr, gzero, 2);
     bnr  = (GEN)p1[2];
     cyc  = gmael(bnr, 5, 2);
     Mcyc = diagonal(cyc);
@@ -3300,7 +3300,7 @@ bnrL1(GEN bnr, GEN sbgrp, long flag, long prec)
       nc++;
       listCR[nc] = lgetg(3, t_VEC);
       mael(listCR, nc, 1) = (long)lchi;
-      mael(listCR, nc, 2) = (long)bnrconductorofchar(bnr, lchi, prec);
+      mael(listCR, nc, 2) = (long)bnrconductorofchar(bnr, lchi);
 
       indCR[i]  = nc;
       invCR[nc] = i;

@@ -668,7 +668,7 @@ quadrayimagsigma(GEN bnr, int raw, long prec)
   GEN allf,bnf,nf,pol,w,f,la,P,labas,gfi,Ci,Cj,Cj2,D,nfun;
   long a,b,f2;
 
-  allf = conductor(bnr,gzero,2,prec); bnr = (GEN)allf[2];
+  allf = conductor(bnr,gzero,2); bnr = (GEN)allf[2];
   f = gmael(allf,1,1);
   bnf= (GEN)bnr[1];
   nf = (GEN)bnf[7];
@@ -763,7 +763,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     bnf = bnfinit0(pol,signe(D)>0?1:0,NULL,prec);
   }
   raw = (mpodd(flag) && signe(D) < 0);
-  bnr = bnrinit0(bnf,f,1,prec);
+  bnr = bnrinit0(bnf,f,1);
   if (gcmp1(gmael(bnr,5,1)))
   {
     avma = av; if (!raw) return polx[0];

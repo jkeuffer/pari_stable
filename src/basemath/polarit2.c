@@ -1382,7 +1382,7 @@ squff2(GEN x, long hint)
  * de degre <= klim
  */
 GEN
-factpol(GEN x, long klim, long hint)
+factpol(GEN x, long hint)
 {
   GEN fa,p1,d,t,v,w, y = cgetg(3,t_MAT);
   long av=avma,av2,lx,vx,i,j,k,ex,nbfac,zval;
@@ -1652,7 +1652,7 @@ factor(GEN x)
       switch(tx)
       {
         case 0: err(impl,"factor for general polynomials");
-	case t_INT: return factpol(x,0,1);
+	case t_INT: return factpol(x,1);
 	case t_INTMOD: return factmod(x,p);
 
 	case t_COMPLEX: y=cgetg(3,t_MAT); lx=lgef(x)-2; v=varn(x);

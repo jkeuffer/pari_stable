@@ -159,7 +159,7 @@ extern GEN ideallllred_elt(GEN nf, GEN I);
  * alpha = 1 mod (id), with x/alpha nearly reduced.
  */
 static GEN
-findalpha(GEN nf,GEN x,GEN id,long prec)
+findalpha(GEN nf,GEN x,GEN id)
 {
   GEN p1,idprod,y;
   GEN alp = idealaddtoone_i(nf,x,id);
@@ -186,14 +186,14 @@ too_big(GEN nf, GEN bet)
 }
 
 static GEN
-idealmodidele(GEN nf, GEN x, GEN ideal, GEN sarch, GEN arch, long prec)
+idealmodidele(GEN nf, GEN x, GEN ideal, GEN sarch, GEN arch)
 {
   long av = avma,i,l;
   GEN p1,p2,alp,bet,b;
 
-  nf=checknf(nf); alp=findalpha(nf,x,ideal,prec);
+  nf=checknf(nf); alp=findalpha(nf,x,ideal);
   p1=idealdiv(nf,alp,x);
-  bet = element_div(nf,findalpha(nf,p1,ideal,prec),alp);
+  bet = element_div(nf,findalpha(nf,p1,ideal),alp);
   if (too_big(nf,bet) > 0) { avma=av; return x; }
   p1=(GEN)sarch[2]; l=lg(p1);
   if (l > 1)
@@ -207,14 +207,14 @@ idealmodidele(GEN nf, GEN x, GEN ideal, GEN sarch, GEN arch, long prec)
 }
 
 static GEN
-idealmulmodidele(GEN nf,GEN x,GEN y, GEN ideal,GEN sarch,GEN arch,long prec)
+idealmulmodidele(GEN nf,GEN x,GEN y, GEN ideal,GEN sarch,GEN arch)
 {
-  return idealmodidele(nf,idealmul(nf,x,y),ideal,sarch,arch,prec);
+  return idealmodidele(nf,idealmul(nf,x,y),ideal,sarch,arch);
 }
 
 /* assume n > 0 */
 static GEN
-idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch,long prec)
+idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
 {
   long i,m,av=avma;
   GEN y;
@@ -224,7 +224,7 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch,long prec)
   {
     if (gcmp1(n)) return x;
     x = idealpow(nf,x,n);
-    x = idealmodidele(nf,x,ideal,sarch,arch,prec);
+    x = idealmodidele(nf,x,ideal,sarch,arch);
     return gerepileupto(av,x);
   }
 
@@ -235,20 +235,20 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch,long prec)
   {
     y = idealmul(nf,y,y);
     if (m&j) y = idealmul(nf,y,x);
-    y = idealmodidele(nf,y,ideal,sarch,arch,prec);
+    y = idealmodidele(nf,y,ideal,sarch,arch);
   }
   for (i--; i>=2; i--)
     for (m=n[i],j=HIGHBIT; j; j>>=1)
     {
       y = idealmul(nf,y,y);
       if (m&j) y = idealmul(nf,y,x);
-      y = idealmodidele(nf,y,ideal,sarch,arch,prec);
+      y = idealmodidele(nf,y,ideal,sarch,arch);
     }
   return gerepileupto(av,y);
 }
 
 static GEN
-buchrayall(GEN bnf,GEN module,long flag,long prec)
+buchrayall(GEN bnf,GEN module,long flag)
 {
   GEN nf,cyc,gen,genplus,fa2,sarch,hmatu,u,clg;
   GEN dataunit,p1,p2,h,clh,basecl,met,u1,u2,u1old,cycgen;
@@ -357,16 +357,16 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
         if (!(s = signe(p1))) continue;
 
         if (s > 0) op = &plus; else { op = &minus; p1 = negi(p1); }
-        p1 = idealpowmodidele(nf,(GEN)genplus[i],p1,x,sarch,arch,prec);
+        p1 = idealpowmodidele(nf,(GEN)genplus[i],p1,x,sarch,arch);
         *op = *op==Id? p1
-                     : idealmulmodidele(nf,*op,p1,x,sarch,arch,prec);
+                     : idealmulmodidele(nf,*op,p1,x,sarch,arch);
       }
       if (minus == Id) p1 = plus;
       else
       {
         p2 = ideleaddone_aux(nf,minus,module);
         p1 = idealdivexact(nf,idealmul(nf,p2,plus),minus);
-        p1 = idealmodidele(nf,p1,x,sarch,arch,prec);
+        p1 = idealmodidele(nf,p1,x,sarch,arch);
       }
       basecl[j]=lpileupto(av1,p1);
     }
@@ -395,25 +395,25 @@ buchrayall(GEN bnf,GEN module,long flag,long prec)
 }
 
 GEN
-buchrayinitgen(GEN bignf, GEN ideal,long prec)
+buchrayinitgen(GEN bignf, GEN ideal)
 {
-  return buchrayall(bignf,ideal, nf_INIT | nf_GEN,prec);
+  return buchrayall(bignf,ideal, nf_INIT | nf_GEN);
 }
 
 GEN
-buchrayinit(GEN bignf, GEN ideal,long prec)
+buchrayinit(GEN bignf, GEN ideal)
 {
-  return buchrayall(bignf,ideal, nf_INIT,prec);
+  return buchrayall(bignf,ideal, nf_INIT);
 }
 
 GEN
-buchray(GEN bignf, GEN ideal,long prec)
+buchray(GEN bignf, GEN ideal)
 {
-  return buchrayall(bignf,ideal, nf_GEN,prec);
+  return buchrayall(bignf,ideal, nf_GEN);
 }
 
 GEN
-bnrclass0(GEN bignf, GEN ideal, long flag, long prec)
+bnrclass0(GEN bignf, GEN ideal, long flag)
 {
   switch(flag)
   {
@@ -422,11 +422,11 @@ bnrclass0(GEN bignf, GEN ideal, long flag, long prec)
     case 2: flag = nf_INIT | nf_GEN; break;
     default: err(flagerr,"bnrclass");
   }
-  return buchrayall(bignf,ideal,flag,prec);
+  return buchrayall(bignf,ideal,flag);
 }
 
 GEN
-bnrinit0(GEN bignf, GEN ideal, long flag, long prec)
+bnrinit0(GEN bignf, GEN ideal, long flag)
 {
   switch(flag)
   {
@@ -434,7 +434,7 @@ bnrinit0(GEN bignf, GEN ideal, long flag, long prec)
     case 1: flag = nf_INIT | nf_GEN; break;
     default: err(flagerr,"bnrinit");
   }
-  return buchrayall(bignf,ideal,flag,prec);
+  return buchrayall(bignf,ideal,flag);
 }
 
 GEN
@@ -1277,7 +1277,7 @@ cardofimagofquotientgroup(GEN H,GEN bnr,GEN subgroup)
 }
 
 static GEN
-args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long prec)
+args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup)
 {
   GEN bnr,bnf;
 
@@ -1294,7 +1294,7 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long prec)
 
     case 11: /* bnf */
       bnf = checkbnf(arg0);
-      bnr=buchrayall(bnf,arg1,nf_INIT | nf_GEN,prec);
+      bnr=buchrayall(bnf,arg1,nf_INIT | nf_GEN);
       *subgroup=arg2; break;
 
     default: err(talker,"neither bnf nor bnr in conductor or discray");
@@ -1310,17 +1310,17 @@ args_to_bnr(GEN arg0, GEN arg1, GEN arg2, GEN *subgroup, long prec)
 }
 
 GEN
-bnrconductor(GEN arg0,GEN arg1,GEN arg2,long all,long prec)
+bnrconductor(GEN arg0,GEN arg1,GEN arg2,long all)
 {
-  GEN sub=arg1, bnr=args_to_bnr(arg0,arg1,arg2,&sub,prec);
-  return conductor(bnr,sub,all,prec);
+  GEN sub=arg1, bnr=args_to_bnr(arg0,arg1,arg2,&sub);
+  return conductor(bnr,sub,all);
 }
 
 long
-bnrisconductor(GEN arg0,GEN arg1,GEN arg2,long prec)
+bnrisconductor(GEN arg0,GEN arg1,GEN arg2)
 {
-  GEN sub=arg1, bnr=args_to_bnr(arg0,arg1,arg2,&sub,prec);
-  return itos(conductor(bnr,sub,-1,prec));
+  GEN sub=arg1, bnr=args_to_bnr(arg0,arg1,arg2,&sub);
+  return itos(conductor(bnr,sub,-1));
 }
 
 /* special for isprincipalrayall */
@@ -1347,7 +1347,7 @@ getH(GEN bnf, GEN gen)
  *   module is the conductor, 0 otherwise.
  */
 GEN
-conductor(GEN bnr,GEN subgroup,long all,long prec)
+conductor(GEN bnr,GEN subgroup,long all)
 {
   long r1,j,av=avma,tetpil,k,ep,trivial=0;
   GEN bnf,nf,cl,cyc,gen,bid,ideal,arch,p1,p2,clhray,clhss;
@@ -1379,7 +1379,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
       if (trivial) clhss=rayclassno(bnf,p2);
       else
       {
-	bnr2=buchrayall(bnf,p2,nf_INIT,prec);
+	bnr2=buchrayall(bnf,p2,nf_INIT);
 	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       if (!egalii(clhss,clhray)) break;
@@ -1395,7 +1395,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
       if (trivial) clhss=rayclassno(bnf,p2);
       else
       {
-	bnr2=buchrayall(bnf,p2,nf_INIT,prec);
+	bnr2=buchrayall(bnf,p2,nf_INIT);
 	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       if (!egalii(clhss,clhray)) arch2[k]=un;
@@ -1404,7 +1404,7 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
   if (all<0) {avma=av; return gun;}
   if (!all) { tetpil=avma; return gerepile(av,tetpil,gcopy(p2)); }
 
-  bnr2=buchrayall(bnf,p2,nf_INIT | nf_GEN,prec);
+  bnr2=buchrayall(bnf,p2,nf_INIT | nf_GEN);
   tetpil=avma; p1=cgetg(4,t_VEC);
   p1[3]=(long)imageofgroup(H,bnr2,subgroup);
   if (all==1) bnr2=(GEN)bnr2[5];
@@ -1564,7 +1564,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
    [hm,cyc,gen] est le groupe de classes de rayon correspondant. Verifie 
    (sous GRH) que polrel definit bien une extension abelienne si flag != 0 */
 GEN
-rnfconductor(GEN bnf, GEN polrel, long flag, long prec)
+rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   long av=avma,tetpil,R1,i,v;
   GEN nf,module,rnf,arch,bnr,group,p1,pol2;
@@ -1589,11 +1589,11 @@ rnfconductor(GEN bnf, GEN polrel, long flag, long prec)
   }
   arch=cgetg(R1+1,t_VEC);
   module[2]=(long)arch; for (i=1; i<=R1; i++) arch[i]=un;
-  bnr=buchrayall(bnf,module,nf_INIT | nf_GEN,prec);
+  bnr=buchrayall(bnf,module,nf_INIT | nf_GEN);
   group=rnfnormgroup0(bnr,pol2,rnf); 
   if (!group) { avma = av; return gzero; }
   tetpil=avma;
-  return gerepile(av,tetpil,conductor(bnr,group,1,prec));
+  return gerepile(av,tetpil,conductor(bnr,group,1));
 }
 
 /*   Etant donnes un corps de nombres bnf=bnr[1], un groupe de classes de rayon
@@ -1604,7 +1604,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag, long prec)
  * flrel=0, seul la norme de l'ideal dk est calculee au lieu de dk lui-meme
  */
 static GEN
-discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
+discrayrelall(GEN bnr,GEN subgroup,long flag)
 {
   long r1,degk,j,av=avma,tetpil,k,ep,nbdezero;
   long trivial=0, flrel = flag & nf_REL, flcond = flag & nf_COND;
@@ -1644,7 +1644,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
       if (trivial) clhss=rayclassno(bnf,p2);
       else
       {
-        bnr2=buchrayall(bnf,p2,nf_INIT,prec);
+        bnr2=buchrayall(bnf,p2,nf_INIT);
         clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       if (j==1 && egalii(clhss,clhray) && flcond) { avma=av; return gzero; }
@@ -1668,7 +1668,7 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
       if (trivial) clhss=rayclassno(bnf,p2);
       else
       {
-	bnr2=buchrayall(bnf,p2,nf_INIT,prec);
+	bnr2=buchrayall(bnf,p2,nf_INIT);
 	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
       }
       arch2[k]=un;
@@ -1687,12 +1687,12 @@ discrayrelall(GEN bnr,GEN subgroup,long flag,long prec)
 }
 
 static GEN
-discrayabsall(GEN bnr, GEN subgroup,long flag,long prec)
+discrayabsall(GEN bnr, GEN subgroup,long flag)
 {
   long av=avma,tetpil,degk,clhray,n,R1;
   GEN p1,p2,p3,p4,nf,dkabs,bnf;
 
-  p1=discrayrelall(bnr,subgroup,flag,prec);
+  p1=discrayrelall(bnr,subgroup,flag);
   if (flag & nf_REL) return p1;
   if (p1==gzero) { avma=av; return gzero; }
 
@@ -1708,34 +1708,34 @@ discrayabsall(GEN bnr, GEN subgroup,long flag,long prec)
 }
 
 GEN
-bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag, long prec)
+bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag)
 {
-  GEN subgroup, bnr = args_to_bnr(arg0,arg1,arg2,&subgroup,prec);
-  return discrayabsall(bnr,subgroup,flag,prec);
+  GEN subgroup, bnr = args_to_bnr(arg0,arg1,arg2,&subgroup);
+  return discrayabsall(bnr,subgroup,flag);
 }
 
 GEN
-discrayrel(GEN bnr, GEN subgroup,long prec)
+discrayrel(GEN bnr, GEN subgroup)
 {
-  return discrayrelall(bnr,subgroup,nf_REL,prec);
+  return discrayrelall(bnr,subgroup,nf_REL);
 }
 
 GEN
-discrayrelcond(GEN bnr, GEN subgroup,long prec)
+discrayrelcond(GEN bnr, GEN subgroup)
 {
-  return discrayrelall(bnr,subgroup,nf_REL | nf_COND,prec);
+  return discrayrelall(bnr,subgroup,nf_REL | nf_COND);
 }
 
 GEN
-discrayabs(GEN bnr, GEN subgroup,long prec)
+discrayabs(GEN bnr, GEN subgroup)
 {
-  return discrayabsall(bnr,subgroup,nf_REGULAR,prec);
+  return discrayabsall(bnr,subgroup,nf_REGULAR);
 }
 
 GEN
-discrayabscond(GEN bnr, GEN subgroup,long prec)
+discrayabscond(GEN bnr, GEN subgroup)
 {
-  return discrayabsall(bnr,subgroup,nf_COND,prec);
+  return discrayabsall(bnr,subgroup,nf_COND);
 }
 
 /* Etant donnes un corps de nombres bnf=bnr[1], un groupe de classes de rayon
@@ -1743,7 +1743,7 @@ discrayabscond(GEN bnr, GEN subgroup,long prec)
  * sur les generateurs bnr[2][3], calcule le conducteur de ce caractere.
  */
 GEN
-bnrconductorofchar(GEN bnr,GEN chi,long prec)
+bnrconductorofchar(GEN bnr,GEN chi)
 {
   long nbgen,i,av=avma,tetpil;
   GEN p1,m,u,d1,cl,cyclic;
@@ -1752,7 +1752,7 @@ bnrconductorofchar(GEN bnr,GEN chi,long prec)
   cyclic=(GEN)cl[2]; nbgen=lg(cyclic)-1;
   if (lg(chi)-1 != nbgen)
     err(talker,"incorrect character length in conductorofchar");
-  if (!nbgen) return conductor(bnr,gzero,0,prec);
+  if (!nbgen) return conductor(bnr,gzero,0);
 
   d1=(GEN)cyclic[1]; m=cgetg(nbgen+2,t_MAT);
   for (i=1; i<=nbgen; i++)
@@ -1765,7 +1765,7 @@ bnrconductorofchar(GEN bnr,GEN chi,long prec)
   p1[1]=(long)d1; u=(GEN)hnfall(m)[2];
   tetpil=avma; setlg(u,nbgen+1);
   for (i=1; i<=nbgen; i++) setlg(u[i],nbgen+1);
-  return gerepile(av,tetpil,conductor(bnr,u,0,prec));
+  return gerepile(av,tetpil,conductor(bnr,u,0));
 }
 
 /* Etant donne la liste des zidealstarinit et des matrices d'unites
@@ -2538,7 +2538,7 @@ discrayabslistarchsquare(GEN bnf, GEN arch, long bound)
 { return discrayabslistarchintern(bnf,arch,bound, -1); }
 
 static GEN
-computehuv(GEN bnr,GEN id, GEN arch,long prec)
+computehuv(GEN bnr,GEN id, GEN arch)
 {
   long i,nbgen, av = avma;
   GEN bnf,bnrnew,listgen,P,U,DC;
@@ -2547,7 +2547,7 @@ computehuv(GEN bnr,GEN id, GEN arch,long prec)
   newmod[2]=(long)arch;
 
   bnf=(GEN)bnr[1];
-  bnrnew=buchrayall(bnf,newmod,nf_INIT,prec);
+  bnrnew=buchrayall(bnf,newmod,nf_INIT);
   listgen=gmael(bnr,5,3); nbgen=lg(listgen);
   P=cgetg(nbgen,t_MAT);
   for (i=1; i<nbgen; i++)
@@ -2571,7 +2571,7 @@ hnflistdivise(GEN list,GEN h)
 }
 
 static GEN
-subgroupcond(GEN bnr, long indexbound, long prec)
+subgroupcond(GEN bnr, long indexbound)
 {
   long av=avma,tetpil,i,j,lgi,lp;
   GEN li,p1,lidet,perm,nf,bid,ideal,arch,primelist,listkernels;
@@ -2584,13 +2584,13 @@ subgroupcond(GEN bnr, long indexbound, long prec)
   for (i=1; i<=lp; )
   {
     p1=idealdiv(nf,ideal,(GEN)primelist[i]);
-    listkernels[i++]=(long)computehuv(bnr,p1,arch,prec);
+    listkernels[i++]=(long)computehuv(bnr,p1,arch);
   }
   for (j=1; j<lg(arch); j++)
     if (signe((GEN)arch[j]))
     {
       p1=dummycopy(arch); p1[j]=zero;
-      listkernels[i++]=(long)computehuv(bnr,ideal,p1,prec);
+      listkernels[i++]=(long)computehuv(bnr,ideal,p1);
     }
   setlg(listkernels,i);
 
@@ -2607,12 +2607,12 @@ subgroupcond(GEN bnr, long indexbound, long prec)
 }
 
 GEN
-subgrouplist0(GEN bnr, long indexbound, long all, long prec)
+subgrouplist0(GEN bnr, long indexbound, long all)
 {
   if (typ(bnr)!=t_VEC) err(typeer,"subgrouplist");
   if (lg(bnr)!=1 && typ(bnr[1])!=t_INT)
   {
-    if (!all) return subgroupcond(bnr,indexbound,prec);
+    if (!all) return subgroupcond(bnr,indexbound);
     checkbnr(bnr); bnr = gmael(bnr,5,2);
   }
   return subgrouplist(bnr,indexbound);
