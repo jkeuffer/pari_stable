@@ -1665,8 +1665,6 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   }
 
 #define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
-
-#if 1
   /* Get rid of all lines containing only 0 and ± 1, keeping track of column
    * operations in T. Leave the rows 1..lk0 alone [up to k0, coeff
    * explosion, between k0+1 and lk0, row is 0] */
@@ -1710,7 +1708,6 @@ hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       T = gerepilecopy(av2, T);
     }
   }
-#endif
   /* As above with lines containing a ±1 (no other assumption).
    * Stop when single precision becomes dangerous */
   for (j=1; j<=col; j++)
