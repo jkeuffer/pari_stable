@@ -49,6 +49,8 @@ BA  1- gpflog could print some lines twice
        cases)
    16- Vec(VECSMALL) --> incorrect object
    17- galoispermtopol didn't check permutation length (--> SEGV on bad input)
+XR 18- rnfinit(nf, T) -> bug in multiplication if nf = Q
+   19- Pol(cotan(x)) -> SEGV
 
   Changed
     1- DOS distribution archives (GPM removed)
