@@ -1637,7 +1637,7 @@ invrev(ulong b)
 GEN
 diviiexact(GEN x, GEN y)
 {
-  long av,lx,ly,lz,vy,i,j,ii,sx = signe(x), sy = signe(y);
+  long av,lx,ly,lz,vy,i,ii,sx = signe(x), sy = signe(y);
   ulong y0inv,q;
   GEN z;
 
