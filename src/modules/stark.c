@@ -771,6 +771,8 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   for (i = 1; i <= nz; i++)
   {
+    if (is_bigint(cyc[i]))
+      err(talker,"conductor too large in ComputeArtinNumber");
     gen[i] = set_sign_mod_idele(nf, NULL,gen[i], cond,sarch);
     classe = isprincipalray(bnr, gen[i]);
     for (ic = 1; ic <= nChar; ic++)
