@@ -341,31 +341,16 @@ nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
   return gerepileupto(av,p1);
 }
 
-static long
-isdivbyprime(GEN nf, GEN x, GEN pr)
-{
-  GEN elt, p = (GEN)pr[1], tau = (GEN)pr[5];
-
-  elt = element_mul(nf, x, tau);
-  if (divise(content(elt), p)) return 1;
-
-  return 0; 
-}
-
 /* return the factor of nf.pol modulo p corresponding to pr */
 static GEN
 localpol(GEN nf, GEN pr)
 {
-  long i, l;
-  GEN fct, pol = (GEN)nf[1], p = (GEN)pr[1];
+  GEN g, pol = (GEN)nf[1], p = (GEN)pr[1];
+  if (degpol(pol) == itos((GEN)pr[4])) return pol; /* pr inert */
 
-  fct = lift((GEN)factmod(pol, p)[1]);
-  l = lg(fct) - 1;
-  for (i = 1; i <= l; i++)
-    if (isdivbyprime(nf, (GEN)fct[i], pr)) return (GEN)fct[i];
-
-  err(talker, "cannot find a suitable factor in localpol");
-  return NULL; /* not reached */
+  g = gmul((GEN)nf[7], (GEN)pr[2]); /* uniformizer */
+  g = primitive_part(g, NULL);
+  return FpX_gcd(g,pol,p);
 }
 
 /* factorization of x modulo pr */
@@ -373,7 +358,7 @@ static GEN
 nffactormod0(GEN nf, GEN x, GEN pr)
 {
   long av = avma, j, l, vx = varn(x), vn;
-  GEN rep, pol, xrd, prh, p1;
+  GEN rep, xrd, prh, p1;
 
   nf=checknf(nf);
   vn = varn((GEN)nf[1]);
@@ -389,7 +374,6 @@ nffactormod0(GEN nf, GEN x, GEN pr)
   xrd = nfmod_pol_reduce(nf, prh, x);
   if (gcmp1((GEN)pr[4]))
   {
-    pol = gun; /* dummy */
     for (j = 2; j < lg(xrd); j++)
       xrd[j] = mael(xrd, j, 1);
     rep = factmod(xrd, (GEN)pr[1]);
@@ -397,7 +381,7 @@ nffactormod0(GEN nf, GEN x, GEN pr)
   }
   else
   {
-    pol = localpol(nf, pr);
+    GEN pol = localpol(nf, pr);
     xrd = lift(unifpol(nf, xrd, 1));
     p1  = gun;
     for (j = 2; j < lg(xrd); j++)
