@@ -1399,45 +1399,55 @@ quaddisc(GEN x)
 GEN
 mpfact(long n)
 {
-  long av,tetpil,lim,k;
-  GEN f;
+  long lx, av = avma;
+  ulong k,l;
+  GEN x;
 
   if (n<2)
   {
     if (n<0) err(facter);
     return gun;
   }
-  av = avma; lim = stack_lim(av,1); f = gun;
-  for (k=2; k<n; k++)
-    if (low_stack(lim, stack_lim(av,1)))
-    {
-      if(DEBUGMEM>1) err(warnmem,"mpfact k=%ld",k);
-      tetpil = avma; f = gerepile(av,tetpil,mulsi(k,f));
-    }
-    else f = mulsi(k,f);
-  tetpil = avma; return gerepile(av,tetpil,mulsi(k,f));
+  if (n < 60)
+  {
+    x = gdeux;
+    for (k=3; k<=n; k++) x = mulsi(k,x);
+    return gerepileuptoint(av,x);
+  }
+  lx = 1; x = cgetg(1 + n/2, t_VEC);
+  for (k=2;; k++)
+  {
+    l = n+2-k; if (l <= k) break;
+    x[lx++] = (long)muluu(k,l);
+  }
+  if (l == k) x[lx++] = lstoi(k);
+  setlg(x, lx);
+  return gerepileuptoint(av, divide_conquer_prod(x, mulii));
 }
 
 GEN
 mpfactr(long n, long prec)
 {
-  long av,tetpil,lim,k;
-  GEN f = realun(prec);
+  long av = avma, tetpil,lim,k;
+  GEN f = cgetr(prec);
 
+  affsr(1,f);
   if (n<2)
   {
     if (n<0) err(facter);
     return f;
   }
-  av = avma; lim = stack_lim(av,1);
-  for (k=2; k<n; k++)
+  lim = stack_lim(av,1);
+  for (k=2; k<=n; k++)
+  {
+    f = mulsr(k,f);
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"mpfactr k=%ld",k);
-      tetpil = avma; f = gerepile(av,tetpil,mulsr(k,f));
+      f = gerepileuptoleaf(av,f);
     }
-    else f = mulsr(k,f);
-  tetpil = avma; return gerepile(av,tetpil,mulsr(k,f));
+  }
+  return gerepileuptoleaf(av,f);
 }
 
 /*******************************************************************/
