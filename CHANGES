@@ -48,6 +48,7 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
        in characteristic 0
    11- [library:] typo in vpariputs: pariputsf("%Z%Z",x,y) did not work
        (prints x and address of y)
+IZ 12- [gnuplot + dynamic link]: allow building even when dlopen() not available
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
