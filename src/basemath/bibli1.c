@@ -1689,7 +1689,7 @@ lindep(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
-  x = gmul(x, realun(prec));
+  x = gmul(x, realun(prec)); if (tx != t_COL) settyp(x,t_COL);
   re = greal(x);
   im = gimag(x);
   /* independant over R ? */
@@ -1727,7 +1727,6 @@ lindep(GEN x, long prec)
       p7 = gdiv(gsub(gmul(px,p5),gmul(pxy,p2)), p1);
       p2 = gadd(gmul(p6,re), gmul(p7,im));
     }
-    if (tx != t_COL) p2 = gtrans(p2);
     p2 = gsub(b[i],p2);
     for (j=1; j<i; j++)
       if (qzer[j]) affrr(bn[j], m[i][j]);
@@ -1799,9 +1798,7 @@ lindep(GEN x, long prec)
     }
   }
   p1 = cgetg(lx,t_COL); p1[n] = un; for (i=1; i<n; i++) p1[i] = zero;
-  p2 = (GEN)b; p2[0] = evaltyp(t_MAT) | evallg(lx);
-  p2 = gauss(gtrans_i(p2),p1);
-  return gerepileupto(av, gtrans(p2));
+  return gerepileupto(av, gauss(gtrans_i((GEN)b),p1));
 }
 
 /* PSLQ Programs */
@@ -2484,40 +2481,32 @@ plindep(GEN x)
 GEN
 algdep0(GEN x, long n, long bit, long prec)
 {
-  long tx=typ(x), i, k;
+  long tx = typ(x), i, k;
   pari_sp av;
   GEN y,p1;
 
   if (! is_scalar_t(tx)) err(typeer,"algdep0");
   if (tx==t_POLMOD) { y=forcecopy((GEN)x[1]); setvarn(y,0); return y; }
   if (gcmp0(x)) return gzero;
-  if (!n) return gun;
+  if (n <= 0)
+  {
+    if (!n) return gun;
+    err(talker,"negative polynomial degree in algdep");
+  }
 
-  av=avma; p1=cgetg(n+2,t_COL);
+  av = avma; p1 = cgetg(n+2,t_COL);
   p1[1] = un;
   p1[2] = (long)x; /* n >= 1 */
-  for (i=3; i<=n+1; i++) p1[i]=lmul((GEN)p1[i-1],x);
+  for (i=3; i<=n+1; i++) p1[i] = lmul((GEN)p1[i-1],x);
   if (typ(x) == t_PADIC)
     p1 = plindep(p1);
   else
-  {
-    switch(bit)
-    {
-      case 0: p1 = pslq(p1,prec); break;
-      case -1: p1 = lindep(p1,prec); break;
-      case -2: p1 = deplin(p1); break;
-      default: p1 = lindep2(p1,bit);
-    }
-  }
-  if ((!bit) && (typ(p1) == t_REAL))
-  {
-    y = gcopy(p1); return gerepileupto(av,y);
-  }
-  if (lg(p1) < 2)
-    err(talker,"higher degree than expected in algdep");
-  y=cgetg(n+3,t_POL);
+    p1 = lindep0(p1, bit, prec);
+  if (typ(p1) == t_REAL) return gerepileupto(av, p1);
+  if (lg(p1) < 2) err(talker,"higher degree than expected in algdep");
+  y = cgetg(n+3,t_POL);
   y[1] = evalsigne(1) | evalvarn(0);
-  k=1; while (gcmp0((GEN)p1[k])) k++;
+  k = 1; while (k < n && gcmp0((GEN)p1[k])) k++;
   for (i=0; i<=n+1-k; i++) y[i+2] = p1[k+i];
   (void)normalizepol_i(y, n+4-k);
   y = (gsigne(leading_term(y)) > 0)? gcopy(y): gneg(y);

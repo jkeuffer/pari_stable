@@ -81,6 +81,7 @@ IS 33- [HPUX:] should compile with cc -Ae, not -Aa
        [output error message for now]
 IZ 36- [OS/2:] rename static functions _core[2] (conflict with stdlib.h)
 IZ 37- [OS/2:] ^C would only work once
+   38- algdep(.1^5,1,10) --> 1
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
