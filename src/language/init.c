@@ -2292,7 +2292,7 @@ entree functions_basic[]={
 {"setrand",99,(void*)setrand,11,"lL"},
 {"setsearch",99,(void*)setsearch,8,"lGGD0,L,"},
 {"setunion",2,(void*)setunion,8,"GG"},
-{"shift",99,(void*)gshift,1,"GL"},
+{"shift",99,(void*)gshift3,1,"GLD0,L,"},
 {"shiftmul",99,(void*)gmul2n,1,"GL"},
 {"sigma",99,(void*)gsumdivk,4,"GD1,L,"},
 {"sign",10,(void*)gsigne,1,"lG"},

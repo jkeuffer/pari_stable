@@ -909,13 +909,19 @@ gdivround(GEN x, GEN y)
 GEN
 gshift(GEN x, long n)
 {
+  return gshift3(x, n, 0);
+}
+
+GEN
+gshift3(GEN x, long n, long flag)
+{
   long i,l,lx, tx = typ(x);
   GEN y;
 
   switch(tx)
   {
     case t_INT:
-      return shifti(x,n);
+      return shifti3(x,n,flag);
     case t_REAL:
       return shiftr(x,n);
 

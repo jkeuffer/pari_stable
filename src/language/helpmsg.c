@@ -423,7 +423,7 @@ char *helpmessages_basic[]={
   "setrand(n): reset the seed of the random number generator to n",
   "setsearch(x,y,{flag=0}): looks if y belongs to the set x. If flag is 0 or omitted, returns 0 if it is not, otherwise returns the index j such that y==x[j]. If flag is non-zero, return 0 if y belongs to x, otherwise the index j where it should be inserted",
   "setunion(x,y): union of the sets x and y",
-  "shift(x,n): shift x left n bits if n>=0, right -n bits if n<0",
+  "shift(x,n,{flag=0}): shift x left n bits if n>=0, right -n bits if n<0. If flag is true and n is negative, will treat negative integer x as if modulo big power of 2, otherwise sign of x is ignored but preserved",
   "shiftmul(x,n): multiply x by 2^n (n>=0 or n<0)",
   "sigma(x,{k=1}): sum of the k-th powers of the divisors of x. k is optional and if omitted is assumed to be equal to 1",
   "sign(x): sign of x, of type integer, real or fraction",

@@ -259,6 +259,12 @@ affrr(GEN x, GEN y)
 GEN
 shifti(GEN x, long n)
 {
+    return shifti3(x, n, 0);
+}
+
+GEN
+shifti3(GEN x, long n, long flag)
+{
   const long s=signe(x);
   long lx,ly,i,m;
   GEN y;
@@ -285,19 +291,43 @@ shifti(GEN x, long n)
   }
   else
   {
+    long lyorig;
+
     n = -n;
-    ly = lx - (n>>TWOPOTBITS_IN_LONG);
-    if (ly<3) return gzero;
+    ly = lyorig = lx - (n>>TWOPOTBITS_IN_LONG);
+    if (ly<3)
+	return flag ? stoi(-1) : gzero;
     y = new_chunk(ly);
     m = n & (BITS_IN_LONG-1);
-    if (!m) for (i=2; i<ly; i++) y[i]=x[i];
-    else
-    {
+    if (m) {
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-        if (ly==3) { avma = (long)(y+3); return gzero; }
-        ly--; avma = (long)(++y);
+        if (ly==3) { avma = (ulong)(y+3); return flag ? stoi(-1) : gzero; }
+        ly--; avma = (ulong)(++y);
+      }
+    } else {
+      for (i=2; i<ly; i++) y[i]=x[i]; 
+    }
+    /* With FLAG: round up instead of rounding down */
+    if (flag) {				/* Check low bits of x */
+      i = lx; flag = 0;
+      while (--i >= lyorig)
+	if (x[i]) { flag = 1; break; }  /* Need to increment y by 1 */
+      if (!flag && m)
+	flag = x[lyorig - 1] & ((1<<m) - 1);
+    }
+    if (flag) {				/* Increment y */
+      for (i = ly;;)
+      {
+	if (--i < 2)
+        {			/* Need to extend y on the left */
+	  if (avma <= bot) err(errpile);
+	  avma = (ulong)(--y); ly++;
+	  y[2] = 1; break;
+	}
+	if (++y[i]) break;
+	/* Now we need to propagate the bit into the next longword... */
       }
     }
   }
