@@ -1401,7 +1401,7 @@ u_FpM_Frobenius(GEN u, ulong p)
   Q = cgetg(N+1,t_MAT); 
   Q[1] = (long)vecsmall_const(N, 0);
   coeff(Q,1,1) = 1;
-  w = v = u_FpXQ_pow(u_Fp_FpX(polx[varn(u)], p), utoi(p), u, p);
+  w = v = u_FpXQ_pow(pol_to_small(polx[varn(u)]), utoi(p), u, p);
   for (j=2; j<=N; j++)
   {
     Q[j] = (long)u_pol_to_vec(w, N);
@@ -1448,10 +1448,10 @@ u_FpX_nbfact(GEN z, long p)
 long
 u_FpX_nbroots(GEN f, long p)
 {
-  long n=lgef(f);
+  long n = degpol(f);
   pari_sp av = avma;
   GEN z, X;
-  if (n <= 4) return n-3;
+  if (n <= 1) return n;
   X = pol_to_small(polx[varn(f)]);
   z = u_FpXQ_pow(X, utoi(p), f, p);
   z = u_FpX_sub(z, X, p);
