@@ -1862,8 +1862,8 @@ isideal(GEN nf,GEN x)
   if (lx-1 != N) x = idealmat_to_hnf(nf,x);
   x = primpart(x);
 
-  for (i=1; i<N; i++)
-    for (j=1; j<N; j++)
+  for (i=1; i<=N; i++)
+    for (j=2; j<=N; j++)
       if (! hnf_invimage(x, element_mulid(nf,(GEN)x[i],j)))
       {
         avma = av; return 0;
