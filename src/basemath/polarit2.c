@@ -1030,49 +1030,54 @@ GS_norms(GEN B, long prec)
   return v;
 }
 
-static GEN
-check_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
+GEN
+chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N)
 {
-  long i, j, r, n0;
-  GEN pol = P, lcpol, lc, list, piv, y, pas2;
+  long i = 1, j, l = lg(famod);
+  GEN V = cgetg(l, t_VEC);
+  if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
+
+  if (lt) V[i++] = (long)lt;
+  for (j = 1; j < l; j++)
+    if (signe(c[j])) V[i++] = famod[j];
+  setlg(V, i); return FqXV_mul(V, T, N);
+}
+
+static GEN
+chk_factors(GEN P, GEN M_L, GEN bound, GEN famod, GEN pa)
+{
+  long i, r;
+  GEN pol = P, list, piv, y, ltpol, lt;
 
   piv = special_pivot(M_L);
   if (!piv) return NULL;
   if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
 
-  pas2 = shifti(pa,-1);
   r  = lg(piv)-1;
-  n0 = lg(piv[1])-1;
   list = cgetg(r+1, t_COL);
-  lc = absi(leading_term(pol));
-  if (is_pm1(lc)) lc = NULL;
-  lcpol = lc? gmul(lc, pol): pol;
-  for (i=1; i<r; i++)
+  lt = absi(leading_term(pol));
+  if (is_pm1(lt)) lt = NULL;
+  ltpol = lt? gmul(lt, pol): pol;
+  for (i = 1;;)
   {
-    GEN c = (GEN)piv[i];
     if (DEBUGLEVEL) fprintferr("LLL_cmbf: checking factor %ld\n",i);
+    y = chk_factors_get(lt, famod, (GEN)piv[i], NULL, pa);
+    y = FpX_center(y, pa);
+    if (! (pol = polidivis(ltpol,y,bound)) ) return NULL;
+    if (lt) y = Q_primpart(y);
+    list[i] = (long)y;
+    if (++i >= r) break;
 
-    y = lc;
-    for (j=1; j<=n0; j++)
-      if (signe(c[j]))
-      {
-        GEN q = (GEN)famod[j];
-        if (y) q = gmul(y, q);
-        y = centermod_i(q, pa, pas2);
-      }
-
-    /* y is the candidate factor */
-    if (! (pol = polidivis(lcpol,y,bound)) ) return NULL;
-    y = primpart(y);
-    if (lc)
+    if (lt)
     {
       pol = gdivexact(pol, leading_term(y));
-      lc = absi(leading_term(pol));
+      lt = absi(leading_term(pol));
+      ltpol = gmul(lt, pol);
     }
-    lcpol = lc? gmul(lc, pol): pol;
-    list[i] = (long)y;
+    else
+      ltpol = pol;
   }
-  y = primpart(pol);
+  y = Q_primpart(pol);
   list[i] = (long)y; return list;
 }
 
@@ -1252,10 +1257,10 @@ AGAIN:
     {
       pari_timer ti;
       if (DEBUGLEVEL>2) TIMERstart(&ti);
-      list = check_factors(P, Q_div_to_int(CM_L,stoi(C)), bound, famod, pa);
+      list = chk_factors(P, Q_div_to_int(CM_L,stoi(C)), bound, famod, pa);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
-      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: check_factors failed");
+      if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: chk_factors failed");
       CM_L = gerepilecopy(av2, CM_L);
     }
     if (low_stack(lim, stack_lim(av,1)))

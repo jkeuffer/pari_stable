@@ -1347,6 +1347,7 @@ void    Fp_intersect(long n,GEN P,GEN Q,GEN l,GEN *SP,GEN *SQ,GEN MA,GEN MB);
 GEN     Fp_inv_isom(GEN S,GEN Tp, GEN p);
 GEN     Fp_isom(GEN P,GEN Q,GEN l);
 GEN     FqV_roots_to_pol(GEN V, GEN p, GEN Tp, long v);
+GEN     FqXV_mul(GEN V, GEN Tp, GEN p);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
 GEN     QX_invmod(GEN A, GEN B);

@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN chk_factors_get(GEN lt, GEN famod, GEN c, GEN T, GEN N);
 extern GEN lllint_fp_ip(GEN x, long D);
 extern long FqX_split_deg1(GEN *pz, GEN u, GEN q, GEN T, GEN p);
 extern GEN FqX_split_roots(GEN z, GEN T, GEN p, GEN pol);
@@ -44,11 +45,9 @@ extern GEN max_modulus(GEN p, double tau);
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
-extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
 extern GEN special_pivot(GEN x);
 extern GEN trivfact(void);
 extern GEN vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
-extern GEN vconcat(GEN A, GEN B);
 extern int cmbf_precs(GEN q, GEN A, GEN B, long *a, long *b, GEN *qa, GEN *qb);
 extern int isrational(GEN x);
 extern GEN LLL_check_progress(GEN Bnorm, long n0, GEN m, int final, long *ti_LLL);
@@ -958,12 +957,12 @@ END:
 }
 
 static GEN
-nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
+nf_chk_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
 {
   GEN nf = T->nf, bound = T->bound;
   GEN nfT = (GEN)nf[1];
-  long i, j, r, n0;
-  GEN pol = P, list, piv, y, pks2;
+  long i, r;
+  GEN pol = P, list, piv, y;
   GEN C2ltpol, C = T->L->topowden, Tpk = T->L->Tpk;
   GEN lc = absi(leading_term(pol)), lt = is_pm1(lc)? NULL: lc;
   GEN Clt  = mul_content(C, lt);
@@ -973,38 +972,20 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   if (!piv) return NULL;
   if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
 
-  pks2 = shifti(pk,-1);
   r  = lg(piv)-1;
-  n0 = lg(piv[1])-1;
   list = cgetg(r+1, t_COL);
   C2ltpol = C2lt? gmul(C2lt,pol): pol;
   for (i = 1;;)
   {
-    GEN c = (GEN)piv[i];
-    pari_sp av = avma, lim = stack_lim(av, 2);
+    pari_sp av = avma;
     if (DEBUGLEVEL)
       fprintferr("nf_LLL_cmbf: checking factor %ld (avma - bot = %lu)\n",
                  i, avma - bot);
-
-    y = lt;
-    for (j=1; j<=n0; j++)
-      if (signe(c[j]))
-      {
-        GEN q = (GEN)famod[j];
-        if (y) q = gmul(y, q);
-        y = FqX_centermod(q, Tpk, pk, pks2);
-        if (low_stack(lim, stack_lim(av,2)))
-        {
-          if(DEBUGMEM>1) err(warnmem,"nf_check_factors");
-          y = gerepilecopy(av, y);
-        }
-      }
-    if (DEBUGLEVEL>2) 
-      fprintferr("modular factor computed (avma - bot = %lu)\n", avma-bot);
-    y = nf_pol_lift(y, bound, T);
-    if (DEBUGLEVEL>2) 
-      fprintferr("factor lifted (avma - bot = %lu)\n", avma-bot);
-    if (!y) return NULL;
+    y = chk_factors_get(lt, famod, (GEN)piv[i], Tpk, pk);
+    if (DEBUGLEVEL>2) fprintferr("... mod p^k (avma - bot = %lu)\n", avma-bot);
+    
+    if (! (y = nf_pol_lift(y, bound, T)) ) return NULL;
+    if (DEBUGLEVEL>2) fprintferr("... lifted (avma - bot = %lu)\n", avma-bot);
 
     y = gerepilecopy(av, y);
     /* y is the candidate factor */
@@ -1012,8 +993,8 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
     if (!pol) return NULL;
 
     y = Q_primpart(y);
-    list[i++] = (long)QXQ_normalize(y, nfT);
-    if (i >= r) break;
+    list[i] = (long)QXQ_normalize(y, nfT);
+    if (++i >= r) break;
 
     if (C2lt) pol = Q_primpart(pol);
     if (lt) lt = absi(leading_term(pol));
@@ -1298,7 +1279,7 @@ AGAIN:
     {
       pari_timer ti;
       if (DEBUGLEVEL>2) TIMERstart(&ti);
-      list = nf_check_factors(T, P, Q_div_to_int(CM_L,stoi(C)), famod, pk);
+      list = nf_chk_factors(T, P, Q_div_to_int(CM_L,stoi(C)), famod, pk);
       if (DEBUGLEVEL>2) ti_CF += TIMER(&ti);
       if (list) break;
       CM_L = gerepilecopy(av2, CM_L);
