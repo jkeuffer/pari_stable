@@ -64,39 +64,54 @@ grando0(GEN x, long n, long do_clone)
 /**                      SPECIAL POLYNOMIALS                      **/
 /**                                                               **/
 /*******************************************************************/
-GEN addshiftw(GEN x, GEN y, long d);
+#ifdef LONG_IS_64BIT
+# define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(VERYBIGINT)) */
+#else
+# define SQRTVERYBIGINT 46341
+#endif
 
-/* Tchebichev polynomial */
-/* T0=1; T1=X; T(n)=2*X*T(n-1)-T(n-2) */
+/* Tchebichev polynomial: T0=1; T1=X; T(n)=2*X*T(n-1)-T(n-2)
+ * T(n) = (n/2) sum_{k=0}^{n/2} a_k x^(n-2k)
+ *   where a_k = (-1)^k 2^(n-2k) (n-k-1)! / k!(n-2k)! is an integer
+ *   and a_0 = 2^(n-1), a_k / a_{k-1} = - (n-2k+2)(n-2k+1) / 4k(n-k) */
 GEN
-tchebi(long n, long v)
+tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 {
-  long av,tetpil,lim,m;
-  GEN p0,p1,p2,q,z;
+  long av,k,l;
+  GEN q,a,r;
 
   if (v<0) v = 0;
   if (n==0) return polun[v];
   if (n==1) return polx[v];
 
-  p0=gneg(polun[v]); p1=polx[v]; z = zeropol(v);
-  av=avma; lim=stack_lim(av,2);
-  for (m=2; m<n; m++)
-  {
-    q = addshiftw(gmul2n(p1,1), z, 1); tetpil=avma;
-    setvarn(q,v);
-    p2 = gadd(q, p0); p0=gneg(p1); p1=p2;
-    if (low_stack(lim, stack_lim(av,2)))
+  q = cgetg(n+3, t_POL); r = q + n+2;
+  a = shifti(gun, n-1);
+  *r-- = (long)a;
+  *r-- = zero;
+  if (n < SQRTVERYBIGINT)
+    for (k=1,l=n; l>1; k++,l-=2)
     {
-      GEN *gptr[2]; gptr[0]=&p0; gptr[1]=&p1;
-      if(DEBUGMEM>1) err(warnmem,"tchebi");
-      gerepilemanysp(av,tetpil,gptr,2);
+      av = avma;
+      a = divis(mulis(a, l*(l-1)), 4*k*(n-k));
+      a = gerepileuptoint(av, negi(a));
+      *r-- = (long)a;
+      *r-- = zero;
     }
-  }
-  q = addshiftw(gmul2n(p1,1), z, 1); tetpil=avma;
-  setvarn(q,v);
-  return gerepile(av,tetpil,gadd(q,p0));
+  else
+    for (k=1,l=n; l>1; k++,l-=2)
+    {
+      av = avma;
+      a = mulis(mulis(a, l), l-1);
+      a = divis(divis(a, 4*k), n-k);
+      a = gerepileuptoint(av, negi(a));
+      *r-- = (long)a;
+      *r-- = zero;
+    }
+  q[1] = evalsigne(1) | evalvarn(v) | evallgef(n+3);
+  return q;
 }
 
+GEN addshiftw(GEN x, GEN y, long d);
 /* Legendre polynomial */
 /* L0=1; L1=X; (n+1)*L(n+1)=(2*n+1)*X*L(n)-n*L(n-1) */
 GEN

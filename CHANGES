@@ -66,6 +66,7 @@ BA  1- more efficient quadratic Hensel lift
     2- made ya optional in polinterpolate
 BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
     4- catch SIGPIPE / SIGFPE
+    5- made poltchebi efficient
 
   Added
     1- new library function zerovec
