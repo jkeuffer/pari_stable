@@ -1068,6 +1068,7 @@ GEN     vecbezout(GEN x, GEN y);
 GEN     vecbezoutres(GEN x, GEN y);
 
 /* polarit3.c */
+
 GEN     Fp_add(GEN x,GEN y,GEN p);
 GEN     Fp_add_pol_scal(GEN y,GEN x,GEN p);
 GEN     Fp_centermod(GEN T,GEN mod);
@@ -1091,6 +1092,7 @@ GEN     Fp_sqr_mod_pol(GEN y,GEN pol,GEN p);
 GEN     Fp_sub(GEN x,GEN y,GEN p);
 GEN     Fp_vec(GEN z, GEN p);
 GEN     Fp_vec_red(GEN z, GEN p);
+GEN     ffsqrtnmod(GEN a, GEN n, GEN T, GEN p, GEN *zetan);
 GEN     modulargcd(GEN a,GEN b);
 GEN     normalize_mod_p(GEN z, GEN p);
 GEN     quickmul(GEN a, GEN b, long na, long nb);
