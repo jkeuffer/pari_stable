@@ -1862,13 +1862,10 @@ apell(GEN e, GEN p)
   if (gdivise((GEN)e[12],p)) /* e[12] may be an intmod */
   {
     long av = avma,s;
-    GEN c6 = gmul((GEN)e[11],gmodulsg(1,p));
-    s = kronecker((GEN)c6[2],p); avma=av;
-    switch(mod4(p))
-    {
-      case 0:
-      case 3: s = -s;
-    }
+    GEN p0 = egalii(p,gdeux)? stoi(8): p;
+    GEN c6 = gmul((GEN)e[11],gmodulsg(1,p0));
+    s = kronecker(lift_intern(c6),p); avma=av;
+    if (mod4(p) == 3) s = -s;
     return stoi(s);
   }
   if (cmpis(p, 0x3fffffff) > 0) return apell1(e, p);
