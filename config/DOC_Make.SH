@@ -16,9 +16,9 @@ refcard: refcard.ps
 
 paricfg.tex: paricfg.tex.in
 	sed -e 's/@version@/$version.$patch/'\\
-	    -e 's!@includedir@!/usr/local/include/pari!'\\
-	    -e 's!@libdir@!/usr/local/lib!'\\
-	    -e 's!@miscdir@!/usr/local/lib/pari!' paricfg.tex.in > \$@
+	    -e 's!@includedir@!$includedir!'\\
+	    -e 's!@libdir@!$libdir!'\\
+	    -e 's!@miscdir@!$miscdir!' paricfg.tex.in > \$@
 
 tutorial.pdf: tutorial.tex paricfg.tex
 	-touch $pdf

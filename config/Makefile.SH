@@ -178,6 +178,7 @@ BINDIR = \$(DESTDIR)$bindir
 DATADIR= \$(DESTDIR)$datadir
 MANDIR = \$(DESTDIR)$mandir
 ALLDIR = \$(DESTDIR)$miscdir
+READMEDIR = \$(ALLDIR)
 DOCDIR  = \$(ALLDIR)/doc
 EMACSDIR= \$(ALLDIR)/emacs
 EXDIR   = \$(ALLDIR)/examples
@@ -326,27 +327,27 @@ install-misc: $install_emacs_files install-top
 	\$(INSTALL_DATA) $misc/README    \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/color.dft \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/gpalias   \$(MISCDIR)
-	\$(INSTALL_DATA) $misc/gpflog    \$(MISCDIR)
+	\$(INSTALL_PROGRAM) $misc/gpflog \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/gprc.dft  \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/new.dic   \$(MISCDIR)
 	\$(INSTALL_DATA) $misc/pari.xpm  \$(MISCDIR)
-	\$(INSTALL_DATA) $misc/xgp       \$(MISCDIR)
+	\$(INSTALL_PROGRAM) $misc/xgp    \$(MISCDIR)
 
 install-top::
-	-mkdir -p \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/AUTHORS      \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/Announce.2.1 \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/CHANGES      \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/COMPAT       \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/COPYING      \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/CVS.txt      \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/MACHINES     \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/NEW          \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/README       \$(ALLDIR)
-	\$(INSTALL_DATA) $TOP/TODO         \$(ALLDIR)
+	-mkdir -p \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/AUTHORS      \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/Announce.2.1 \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/CHANGES      \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/COMPAT       \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/COPYING      \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/CVS.txt      \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/MACHINES     \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/NEW          \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/README       \$(READMEDIR)
+	\$(INSTALL_DATA) $TOP/TODO         \$(READMEDIR)
 
 install-doc::
-	-mkdir -p \$(ALLDIR) \$(BINDIR) \$(DOCDIR)
+	-mkdir -p \$(BINDIR) \$(DOCDIR)
 	-cd $doc; \$(MAKE) all
 	-\$(INSTALL_PROGRAM) $doc/gphelp    \$(BINDIR)
 	-\$(INSTALL_DATA) $doc/Makefile     \$(DOCDIR)
@@ -365,6 +366,7 @@ install-doc::
 	-\$(INSTALL_DATA) $doc/usersch3.tex \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/usersch4.tex \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/usersch5.tex \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/paricfg.tex  \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/users.dvi    \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/tutorial.dvi \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/refcard.dvi  \$(DOCDIR)
@@ -398,7 +400,7 @@ install-lib-sta: \$(LIBPARI_STA)
 install-lib-dyn: \$(LIBPARI_DYN)
 	-mkdir -p \$(LIBDIR)
 	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN)
-	\$(INSTALL_DATA) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_DYN)
+	\$(INSTALL_PROGRAM) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_DYN)
 EOT
 if test "$soname" != "$sodest"; then
   cat >> $file << EOT

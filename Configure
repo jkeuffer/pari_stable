@@ -84,6 +84,12 @@ while test $# -gt 0; do
                prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --share-prefix=*)
                share_prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --bindir=*) dfltbindir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --libdir=*) dfltlibdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --mandir=*) dfltmandir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --miscdir=*) dfltmiscdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --datadir=*) dfltdatadir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --includedir=*) dfltincludedir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --host=*)
                target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --disable-kernel) kernel=no;;
@@ -106,22 +112,30 @@ done
 case "$error" in
 true) cat >&2 <<EOT
 Usage: Configure [-ask|-help|-g|-pg] [ -load <filename> ] [ --prefix=<dir> ]
+
 Options: some names can be abbreviated to one character (e.g -h = -help)
 -a, --ask        interactive configuration
 -h, --help       this message
 -l, --load       skip Configure and specify a default config file
 -s, --static     build static GP binary only
 -v, --verbhelp   a longer help message
---prefix=<dir>        install files in <dir> (default $prefix)
---share-prefix=<dir>  as 'prefix', for architecture independant files
---host=<arch-osname>  target achitecture
---graphic=<gr>        which graphic library to use (default X11)
-                      (none X11 gnuplot)
-
+Build Options:
+  --host=<arch-osname>  target achitecture
+  --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot)
 Additional developer options:
- -g              creates debugging version
- -pg             creates profiling version
- -rdll           creates relocatable DLL (Cygwin32 only)
+  -g              creates debugging version (in Oxxx.dbg)
+  -pg             creates profiling version (in Oxxx.prf)
+  -rdll           creates relocatable DLL (Cygwin32 only)
+
+Installation directories:
+  --prefix=<dir>        install files in <dir> (default $prefix)
+  --share-prefix=<dir>  as 'prefix', for architecture independant files
+  --bindir=<dir>        for binaries
+  --libdir=<dir>        for libraries
+  --mandir=<dir>        for manual pages
+  --miscdir=<dir>       for documentation, examples and emacs macros
+  --datadir=<dir>       for precomputed data (Galois resolvents for polgalois)
+  --includedir=<dir>    for C header files
 EOT
 exit 1
 ;;
@@ -1146,19 +1160,19 @@ else
 fi
 
 echo $n ..."\"gp\" executable ? $c"
-dflt=$prefix/bin; . ./myread; bindir=$ans
+dflt=${dfltbindir:-$prefix/bin}; . ./myread; bindir=$ans
 
 echo $n ..."\"pari\" library ? $c"
-dflt=$prefix/lib; . ./myread; libdir=$ans
+dflt=${dfltlibdir:-$prefix/lib}; . ./myread; libdir=$ans
 
 echo $n ..."include files ? $c"
-dflt=$prefix/include/pari; . ./myread; includedir=$ans
+dflt=${dlftincludedir:-$prefix/include/pari}; . ./myread; includedir=$ans
 
 echo $n ..."manual pages ? $c"
-dflt=$dfltman; . ./myread; mandir=$ans
+dflt=${dfltmandir:-$dfltman}; . ./myread; mandir=$ans
 
 echo $n ..."documentation, examples, and emacs macros ? $c"
-dflt=$dfltall; . ./myread; miscdir=$ans
+dflt=${dfltmiscdir:-$dfltall}; . ./myread; miscdir=$ans
 
 if test -z "$share_prefix"; then
   dfltdat=$miscdir/galdata
@@ -1167,7 +1181,7 @@ else
 fi
 
 echo $n ..."miscellaneous data (galois resolvents) ? $c"
-dflt=$dfltdat; . ./myread; datadir=$ans
+dflt=${dfltdatadir:-dfltdat}; . ./myread; datadir=$ans
 
 if test "$optimization" = debugging; then static=y; fi
 if test "$fastread" != yes; then
