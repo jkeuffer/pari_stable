@@ -63,7 +63,7 @@ qt)
   graph="$graph plotQt"
   ;;
 fltk)
-  PLOTCFLAGS="-I\$(FLTKDIR)/include -I$Xincroot"
+  PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $X11_LIBS"
   graph="$graph plotfltk"
   ;;
@@ -86,7 +86,7 @@ gnuplot-dynamic)
   ;;
 builtin.X11-gnuplot)
   CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
-  PLOTCFLAGS=-I$Xincroot
+  PLOTCFLAGS=$X11_INC
   GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
   PLOTLIBS="$gnuplot_libs $X11_LIBS"
   plotrunpath=$X11
@@ -98,13 +98,13 @@ builtin.X11-gnuplot)
   ;;
 builtin.X11-gnuplot-dynamic)
   CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11"
-  PLOTCFLAGS="-I$Xincroot -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
+  PLOTCFLAGS="$X11_INC -DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$_graphic_lib_dll"
   PLOTLIBS=$X11_LIBS
   plotrunpath=$X11
   graph="$graph plotgnuplot plotX"
   ;;
 X11)
-  PLOTCFLAGS=-I$Xincroot
+  PLOTCFLAGS=$X11_INC
   PLOTLIBS=$X11_LIBS
   plotrunpath=$X11
   graph="$graph plotX"
