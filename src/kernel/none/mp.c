@@ -296,7 +296,7 @@ mptrunc(GEN x)
     for (i=2; i<d; i++) y[i]=x[i];
   else
   {
-    const register ulong sh = BITS_IN_LONG - m;
+    register const ulong sh = BITS_IN_LONG - m;
     shift_right2(y,x, 2,d,0, sh,m);
   }
   return y;
@@ -324,7 +324,7 @@ mpent(GEN x)
   }
   else
   {
-    const register ulong sh = BITS_IN_LONG - m;
+    register const ulong sh = BITS_IN_LONG - m;
     shift_right2(y,x, 2,d,0, sh,m);
     if (x[d-1]<<m == 0)
     {
