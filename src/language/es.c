@@ -113,6 +113,7 @@ filtre0(filtre_t *F)
           if (!F->more_input) F->more_input = 1;
           goto END;
         }
+        if (*s == '\r') s++; /* DOS */
         if (*s == '\n') {
           if (t[-2] == '?') break; /* '?\' */
           t--; s++;

@@ -106,6 +106,7 @@ BA 33- qfbprimeform(-3, 1) --> data corruption [ gzero's signe set to 1 ]
    43- in certain situations (when using Allombert's algo.), subfields did
        not output subfields sorted by degree
    44- [Windows installer:] online help did not work on most installations
+   45- lines continuation with \ did not work with DOS fileformat
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.
