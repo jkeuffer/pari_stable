@@ -545,7 +545,8 @@ is equal to the \kbd{size} argument of \kbd{pari\_init}. The PARI
 stack also has a ``current stack pointer'' called \teb{avma}, which
 stands for {\bf av}ailable {\bf m}emory {\bf a}ddress. These three variables
 are global (declared for you by \kbd{pari.h}). For historical reasons they
-are of type \kbd{ulong} and not of type \kbd{GEN} as would seem more natural.
+are of type \tet{ulong} (unsigned long) and not of type \kbd{GEN} as would
+seem more natural.
 
 The stack is oriented upside-down: the more recent an object, the closer to
 \kbd{bot}. Accordingly, initially \kbd{avma} = \kbd{top}, and \kbd{avma} gets
