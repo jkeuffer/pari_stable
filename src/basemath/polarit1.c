@@ -2047,8 +2047,8 @@ GEN
 factorpadic4(GEN f,GEN p,long prec)
 {
   gpmem_t av = avma;
-  GEN w,g,poly,y,p1,p2,ex,pols,exps,ppow,lead;
-  long v=varn(f),n=degpol(f),mfx,i,k,j,r,pr;
+  GEN w,g,poly,y,p1,p2,ex,pols,exps,ppow,lead,lead_orig;
+  long v=varn(f),n=degpol(f),mfx,i,k,j,r,pr,d;
   int reverse = 0;
 
   if (typ(f)!=t_POL) err(notpoler,"factorpadic");
@@ -2058,6 +2058,7 @@ factorpadic4(GEN f,GEN p,long prec)
 
   if (n==0) return trivfact();
   if (n==1) return padic_trivfact(f,p,prec);
+  lead_orig = pollead(f, -1);
   f = padic_pol_to_int(f);
   f = pnormalize(f, p, prec, n-1, &lead, &pr, &reverse);
 
@@ -2114,6 +2115,9 @@ factorpadic4(GEN f,GEN p,long prec)
     if (reverse) polreverse((GEN)pols[i]);
     p1[i] = (long)pol_to_padic((GEN)pols[i],ppow,p,prec);
   }
+  d = ggval(lead_orig, p);
+  lead_orig = gmul(lead_orig, gpowgs(p, -d));
+  p1[1] = lmul((GEN)p1[1], lead_orig);
   y[1] = (long)p1; setlg(exps,j);
   y[2] = lcopy(exps);
   return gerepileupto(av, sort_factor(y, cmp_padic));
