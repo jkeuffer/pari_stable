@@ -2771,6 +2771,7 @@ GEN
 fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
              GEN (*check)(GEN))
 {
+  int reset_err = 0;
   long pr,av=avma,i,j,n;
   GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,basis,gram;
 
@@ -2831,6 +2832,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
     jmp_buf env;
     if (setjmp(env)) goto PRECPB;
     err_catch(truer2, env, NULL);
+    reset_err = 1;
   }
 
   if (nf) basis = init_chk(nf,uperm,NULL);
@@ -2873,7 +2875,7 @@ fincke_pohst(GEN a,GEN bound,GEN stockmax,long flag, long prec,
   z[2]=pr? lcopy((GEN)res[2]) : lround((GEN)res[2]);
   z[3]=lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
 PRECPB:
-  (void)err_leave(truer2);
+  if (reset_err) (void)err_leave(truer2);
   if (!(flag & 1))
     err(talker,"not a positive definite form in fincke_pohst");
   avma = av; return NULL;
