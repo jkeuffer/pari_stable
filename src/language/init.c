@@ -1454,29 +1454,43 @@ gerepilecopy(gpmem_t av, GEN x)
  * objects to contiguous locations and cleans up the stack between
  * av and avma. */
 void
-gerepilemany(gpmem_t av, GEN* gptr[], long n)
+gerepilemany(gpmem_t av, GEN* gptr[], int n)
 {
   GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
-  long i;
+  int i;
   for (i=0; i<n; i++) l[i] = copy_bin(*(gptr[i]));
   avma = av;
   for (i=0; i<n; i++) *(gptr[i]) = bin_copy(l[i]);
   free(l);
 }
 
-void
-gerepilemanycoeffs(gpmem_t av, GEN x, long n)
+void 
+gerepileall(ulong av, int n, ...)
 {
-  long i;
+  GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
+  GEN **gptr  = (GEN**)  gpmalloc(n*sizeof(GEN*));
+  int i;
+  va_list a; va_start(a, n);
+
+  for (i=0; i<n; i++) { gptr[i] = va_arg(a,GEN*); l[i] = copy_bin(*(gptr[i])); }
+  avma = av;
+  for (--i; i>=0; i--) *(gptr[i]) = bin_copy(l[i]);
+  free(l); free(gptr);
+}
+
+void
+gerepilemanycoeffs(gpmem_t av, GEN x, int n)
+{
+  int i;
   for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
   avma = av;
   for (i=0; i<n; i++) x[i] = (long)bin_copy((GENbin*)x[i]);
 }
 
 void
-gerepilemanycoeffs2(gpmem_t av, GEN x, long n, GEN y, long o)
+gerepilemanycoeffs2(gpmem_t av, GEN x, int n, GEN y, int o)
 {
-  long i;
+  int i;
   for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
   for (i=0; i<o; i++) y[i] = (long)copy_bin((GEN)y[i]);
   avma = av;
@@ -1487,11 +1501,11 @@ gerepilemanycoeffs2(gpmem_t av, GEN x, long n, GEN y, long o)
 /* Takes an array of pointers to GENs, of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
-gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], long n)
+gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], int n)
 {
   const gpmem_t av2 = avma;
   const size_t dec = av-tetpil;
-  long i;
+  int i;
 
   (void)gerepile(av,tetpil,NULL);
   for (i=0; i<n; i++)
@@ -1508,11 +1522,11 @@ gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], long n)
 /* Takes an array of GENs (cast to longs), of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
-gerepilemanyvec(gpmem_t av, gpmem_t tetpil, long *g, long n)
+gerepilemanyvec(gpmem_t av, gpmem_t tetpil, long *g, int n)
 {
   const gpmem_t av2 = avma;
   const size_t dec = av-tetpil;
-  long i;
+  int i;
 
   (void)gerepile(av,tetpil,NULL);
   for (i=0; i<n; i++,g++)

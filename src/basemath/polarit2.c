@@ -2902,7 +2902,7 @@ pseudorem_i(GEN x, GEN y, GEN mod)
 GEN
 pseudorem(GEN x, GEN y) { return pseudorem_i(x,y, NULL); }
 
-extern void gerepilemanycoeffs2(gpmem_t av, GEN x, long n, GEN y, long o);
+extern void gerepilemanycoeffs2(gpmem_t av, GEN x, int n, GEN y, int o);
 
 /* assume dx >= dy, y non constant
  * Compute z,r s.t lc(y)^(dx-dy+1) x = z y + r */

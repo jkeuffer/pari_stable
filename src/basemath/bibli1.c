@@ -598,7 +598,7 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
 {
   long lx=lg(x), i, j, k, l, n, s, kmax;
   gpmem_t av, lim;
-  GEN u,B,L,h,fl, *gptr[4];
+  GEN u,B,L,h,fl;
 
   if (typ(x) != t_MAT) err(typeer,"lllgramint");
   n = lx-1; if (n<=1) return NULL;
@@ -663,8 +663,7 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
         if (low_stack(lim, stack_lim(av,1)))
         {
           if(DEBUGMEM>1) err(warnmem,"lllgramint[1]");
-          gptr[0]=&B; gptr[1]=&L; gptr[2]=&h; gptr[3]=&x;
-          gerepilemany(av,gptr,4);
+          gerepileall(av,4,&B,&L,&h,&x);
         }
       }
       if (++k > n) break;
@@ -672,8 +671,7 @@ lllgramint_i(GEN x, long alpha, GEN *ptfl, GEN *ptB)
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"lllgramint[2]");
-      gptr[0]=&B; gptr[1]=&L; gptr[2]=&h; gptr[3]=&x;
-      gerepilemany(av,gptr,4);
+      gerepileall(av,4,&B,&L,&h,&x);
     }
   }
   if (DEBUGLEVEL>3) fprintferr("\n");
