@@ -597,6 +597,29 @@ boundfact(GEN n, long lim)
 /**                                                                   **/
 /***********************************************************************/
 
+/*Factorize n and output [fp,fe] where
+ * fp and fe are vecsmall and n=prod{fp[i]^fe[i]}
+ */
+
+GEN
+decomp_small(long n)
+{
+  gpmem_t ltop=avma;
+  GEN F = factor(stoi(n));
+  long i, l=lg(F[1]);
+  GEN f=cgetg(3,t_VEC);
+  GEN fp=cgetg(l,t_VECSMALL);
+  GEN fe=cgetg(l,t_VECSMALL);
+  f[1] = (long) fp;
+  f[2] = (long) fe;
+  for(i = 1; i < l; i++)
+  {
+    fp[i]=itos(gcoeff(F,i,1));
+    fe[i]=itos(gcoeff(F,i,2));
+  }
+  return gerepileupto(ltop,f);
+}
+
 /*Return the primary factors of a small integer as a vecsmall*/
 GEN
 decomp_primary_small(long n)
@@ -611,6 +634,7 @@ decomp_primary_small(long n)
   avma=av;
   return gerepileupto(ltop,fc);
 }
+
 
 /***********************************************************************/
 /**                                                                   **/
