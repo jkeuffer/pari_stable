@@ -3091,7 +3091,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   aut = galoisgrouptopol(res,L,M,den,gb.ladicsol, varn(T));
   if (DEBUGLEVEL >= 1)
     msgtimer("Calcul polynomes");
-  return gerepileupto(ltop, aut);
+  return gerepileupto(ltop, gen_sort(aut, 0, cmp_pol));
 }
 
 /* Calcule le nombre d'automorphisme de T avec forte probabilité */
