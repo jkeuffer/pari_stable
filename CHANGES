@@ -50,10 +50,12 @@ IS 13- function prototypes (missing 'extern')
        rnfidealmul(2*x-1,0), galoisfixedfield(2*x-1), qfbnupow(2*x-1, 0),
        polred([x,x]), bezout(Mod(x,x^2+1),0) : SEGV
    16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
+   17- often printer more digits than were significant
 
   Changed
 BA  1- more efficient quadratic Hensel lift
     2- made ya optional in polinterpolate
+BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
 
   Added
     1- new library function zerovec
