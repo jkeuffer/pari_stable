@@ -67,6 +67,7 @@ BA 25- pbs in Fp_factor_irred (factoring over Fq a pol. defined over Fp)
 BA 31- isprime(n < 2, 2 or 3) gave wrong result
 IZ 32- \r C:\a.gp wouldn't work     [ : and \ forbidden... ]
 BA 33- bad PARI prototypes in init.c [were confusing GP2C]
+XR 34- nfdisc: fixed cache system in nilord (esp. precision handling)
 
   Changed
     1- DOS distribution archives (GPM removed)
@@ -83,11 +84,15 @@ XR 11- bnrstark: check if N0 is too large (=> computation impossible)
 IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
    13- algorithm for zeta(), gamma() [initial GP code by HC]
    14- improved rnfnormgroup() [reduce number of calls to isprincipal]
+IZ 15- flags for OS/2 build + use generic [pre|suf]fix for object files
 
   Added
     1- file README.WIN
 GN  2- Jebelean extended gcd
 XR  3- new flag to rnfconductor (check extension is abelian)
+
+  Removed
+    1- obsolete undocumented functions oldidealinv, idealinv0
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.1.0 (released 17/11/2000):
