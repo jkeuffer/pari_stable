@@ -975,19 +975,19 @@ elldouble(long nbc, GEN *X1, GEN *X2)
 static int
 ellmult(long nbc, ulong k, GEN *X1, GEN *X2) /* k>2 prime, not checked */
 {
-  long i, d, e, e1, r;
+  ulong r, d, e, e1;
+  long i;
   int res;
-  GEN *A=X2, *B=XAUX, *S, *T=XAUX+2*nbc;
+  GEN *A = X2, *B = XAUX, *S, *T = XAUX + 2*nbc;
 
-  for (i = 2*nbc; i--; ) { affii(X1[i],XAUX[i]); }
+  for (i = 2*nbc; i--; ) affii(X1[i], XAUX[i]);
 
   /* first doubling picks up X1;  after this we'll be working in XAUX and
-   * X2 only, mostly via A and B and T
-   */
+   * X2 only, mostly via A and B and T */
   if ((res = elldouble(nbc, X1, X2)) != 0) return res;
 
   /* split the work at the golden ratio */
-  r = (long)(k*0.61803398875 + .5);
+  r = (ulong)(k*0.61803398875 + .5);
   d = k - r; e = r - d;		/* NB d+e == r, so no danger of ofl below */
 
   while (d != e)
@@ -2223,15 +2223,12 @@ squfof(GEN n, long quiet)
     }
     if (act1)
     {
-      if ((a = ucarrecomplet(a1)) != 0) /* square form? */
+      if ((a = (long)ucarrecomplet((ulong)a1)) != 0) /* square form? */
       {
 	if (mydebug >= 4)
-	{
 	  fprintferr("SQUFOF: square form (%ld^2, %ld, %ld) on first cycle\n"
 		     "\tafter %ld iterations, time = %ld ms\n",
 		     a, b1, -c1, cnt, timer2());
-	  /* flusherr delayed until we've dealt with it */
-	}
 	/* blacklisted? */
 	if (a <= L1)
 	{
@@ -2300,8 +2297,7 @@ squfof(GEN n, long quiet)
 	  }
 	  else if (mydebug >= 4) /* nothing found */
 	  {
-	    fprintferr("SQUFOF: ...found nothing useful on the ambiguous "
-		       "cycle\n"
+	    fprintferr("SQUFOF: ...found nothing on the ambiguous cycle\n"
 		       "\tafter %ld steps there, time = %ld ms\n",
 		       cntamb, timer2());
 	    flusherr();
@@ -2331,7 +2327,7 @@ squfof(GEN n, long quiet)
     }
     if (act2)
     {
-      if ((a = ucarrecomplet(a2)) != 0) /* square form? */
+      if ((a = (long)ucarrecomplet((ulong)a2)) != 0) /* square form? */
       {
 	if (mydebug >= 4)
 	{
