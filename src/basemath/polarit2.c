@@ -740,7 +740,8 @@ nextK:
       for (i=1; i<=K; i++)
       {
         GEN q = constant_term((GEN)famod[ind[i]]);
-        y = y? centermod_i(mulii(y, q), pa, pas2): q;
+        if (y) q = mulii(y, q);
+        y = centermod_i(q, pa, pas2);
       }
       if (!signe(y) || resii((GEN)lcpol[2], y) != gzero)
       {
@@ -751,7 +752,8 @@ nextK:
       for (i=1; i<=K; i++)
       {
         GEN q = (GEN)famod[ind[i]];
-        y = y? centermod_i(gmul(y, q), pa, pas2): q;
+        if (y) q = gmul(y, q);
+        y = centermod_i(q, pa, pas2);
       }
 
       /* y is the candidate factor */
@@ -1077,7 +1079,8 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
       if (signe(c[j]))
       {
         GEN q = (GEN)famod[j];
-        y = y? centermod_i(gmul(y, q), pa, pas2): q;
+        if (y) q = gmul(y, q);
+        y = centermod_i(q, pa, pas2);
       }
 
     /* y is the candidate factor */
