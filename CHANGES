@@ -40,12 +40,14 @@ BA  1- gpflog could print some lines twice
     7- internal requests for precision of bnfinit(x) [ = Q ] could yield SEGV
     8- compatible = 3 not taken into account when reading a file
     9- cbezout(0,0) = 1 (should be 0)
+   10- default(lines, > 0) + GP error (e.g 1/0) --> I/O broken
 
   Changed
     1- DOS distribution archives (GPM removed)
 XR  2- round 4 algorithm: compute characteristic polynomials via Newton sums
 XR  3- nffactormod now calls factmod / factmod9 when possible
 XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
+    5- default(lines,) doesn't apply anymore on user output (e.g print).
 
   Added
     1- file README.WIN
