@@ -1404,7 +1404,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
     pdr  = respm(nchi, derivpol(nchi), pmf);
     if (signe(pdr)) break;
     if (DEBUGLEVEL >= 6)
-      fprintferr("  non separable polynomial in update_alpha!\n");
+      fprintferr("  inseparable polynomial in update_alpha!\n");
     /* at this point, we assume that chi is not square-free */
     nalph = gadd(nalph, gmul(p, polx[v]));
     w = factcp(p, fx, nalph, NULL, ns);
@@ -3319,8 +3319,8 @@ polcompositum0(GEN A, GEN B, long flall)
   C = content(B); if (!gcmp1(C)) B = gdiv(B, C);
   check_pol_int(A,"compositum");
   check_pol_int(B,"compositum");
-  if (!ZX_is_squarefree(A)) err(talker,"compositum: %Z not separable", A);
-  if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z not separable", B);
+  if (!ZX_is_squarefree(A)) err(talker,"compositum: %Z inseparable", A);
+  if (!ZX_is_squarefree(B)) err(talker,"compositum: %Z inseparable", B);
 
   k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
   C = DDF2(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
@@ -3386,7 +3386,7 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
     if (lgef(B[k]) >= lA) B[k] = lres((GEN)B[k],A);
 
   if (!nfissquarefree(A,B))
-    err(talker,"not k separable relative equation in rnfequation");
+    err(talker,"inseparable relative equation in rnfequation");
 
   *pk = 0; C = ZY_ZXY_resultant_all(A, B, pk, pLPRS);
   if (gsigne(leadingcoeff(C)) < 0) C = gneg_i(C);
