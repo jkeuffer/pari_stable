@@ -50,8 +50,6 @@ extern void dbg_rel(long s, GEN col);
 
 #define RANDOM_BITS 4
 static const int CBUCHG = (1<<RANDOM_BITS) - 1;
-static const int randshift = BITS_IN_RANDOM-1 - RANDOM_BITS;
-#undef RANDOM_BITS
 
 /* used by factor[elt|gen|gensimple] to return factorizations of smooth elts
  * HACK: MAX_FACTOR_LEN never checked, we assume default value is enough
@@ -835,7 +833,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
     id = x0;
     for (i=1; i<lgsub; i++)
     {
-      ex[i] = pari_rand30() >> randshift;
+      ex[i] = random_bits(RANDOM_BITS);
       if (ex[i])
       { /* avoid prec pb: don't let id become too large as lgsub increases */
         if (id != x0) id = ideallllred(nf,id,NULL,0);
@@ -845,7 +843,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
     }
     if (id == x0) continue;
 
-    for (i=1; i<ru; i++) vdir[i] = pari_rand30() >> randshift;
+    for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
     for (bou=1; bou<ru; bou++)
     {
       y = ideallllred_elt(nf, (GEN)id[1], vdir);
@@ -1817,7 +1815,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,long MAXRELSUP,
     do {
       for (i=1; i<lgsub; i++)
       {
-        ex[i] = pari_rand30()>>randshift;
+        ex[i] = random_bits(RANDOM_BITS);
         if (ex[i]) ideal = idealmulh(nf,ideal, gmael3(F->powsubFB,i,ex[i],1));
       }
     }
@@ -1927,11 +1925,11 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
 	ideal = ideal0;
 	for (i=1; i<lgsub; i++)
 	{
-	  ex = pari_rand30()>>randshift;
+	  ex = random_bits(RANDOM_BITS);
 	  if (ex) ideal = idealmulh(nf,ideal,gmael3(F->powsubFB,i,ex,1));
 	}
         ideal = remove_content(ideal);
-        for (i=1; i<ru; i++) vdir[i] = pari_rand30()>>randshift;
+        for (i=1; i<ru; i++) vdir[i] = random_bits(RANDOM_BITS);
 	for (k=1; k<ru; k++)
 	{
           m = pseudomin(ideal, computeGtwist(nf, vdir));

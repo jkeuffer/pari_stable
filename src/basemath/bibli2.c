@@ -867,7 +867,7 @@ dirdiv(GEN x, GEN y)
 GEN
 genrand(GEN N)
 {
-  if (!N) return stoi(pari_rand30());
+  if (!N) return stoi( pari_rand31() );
   if (typ(N)!=t_INT || signe(N)<=0) err(talker,"invalid bound in random");
   return randomi(N);
 }

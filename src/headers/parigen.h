@@ -45,8 +45,6 @@ typedef int (*QSCOMP)(const void *, const void *);
 #define LOWMASK  (MAXHALFULONG)
 #define HIGHMASK (~LOWMASK)
 #define SMALL_MASK (HIGHBIT>>1)
-/* You may want to change the following 32 to BITS_IN_LONG */
-#define BITS_IN_RANDOM 32
 
 /* Order of bits in codewords:
  *  x[0]         TYPBITS, CLONEBIT, LGBITS

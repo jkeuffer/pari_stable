@@ -97,7 +97,7 @@ millerrabin(GEN n, long k)
   n = init_miller(n); av2=avma;
   for (i=1; i<=k; i++)
   {
-    do r = smodsi(pari_rand30(),n); while (!r);
+    do r = smodsi(pari_rand31(), n); while (!r);
     if (DEBUGLEVEL > 4)
       fprintferr("Miller-Rabin: testing base %ld\n",
 		 r);

@@ -82,6 +82,7 @@ void   mulsii(long x, GEN y, GEN z);
 long   mulssmod(ulong a, ulong b, ulong c);
 void   mulssz(long x, long y, GEN z);
 GEN    new_chunk(long x);
+long   random_bits(long k);
 GEN    realun(long prec);
 GEN    realzero(long prec);
 GEN    realzero_bit(long bitprec);
@@ -684,6 +685,10 @@ mpdivis(GEN x, GEN y, GEN z)
 
 /* THE FOLLOWING ONES ARE NOT IN mp.s */
 #  endif /* !defined(__M68K__) */
+
+/* assume 0 <= k < 32. Return random 0 <= x < (1<<k) */
+INLINE long
+random_bits(k) { return pari_rand31() >> (31 - k); }
 
 INLINE ulong
 itou(GEN x)

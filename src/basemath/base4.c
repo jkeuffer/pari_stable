@@ -546,7 +546,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
       }
       for (a=NULL,i=1; i<lm; i++)
       {
-        long t = (pari_rand30() >> (BITS_IN_RANDOM-5)) - 7; /* in [-7,8] */
+        long t = random_bits(4) - 7; /* in [-7,8] */
         z[i] = t;
         a = addmul_mat(a, t, (GEN)mul[i]);
       }

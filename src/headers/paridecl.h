@@ -1106,7 +1106,7 @@ GEN     mulsr(long x, GEN y);
 GEN     mulss(long x, long y);
 GEN     mului(ulong x, GEN y);
 GEN     muluu(ulong x, ulong y);
-long    pari_rand30(void);
+long    pari_rand31(void);
 ulong   pari_rand(void);
 GEN     randomi(GEN x);
 int     ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax);

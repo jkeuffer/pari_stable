@@ -4668,15 +4668,11 @@ shift_r(ulong *target, ulong *source, ulong *source_end, ulong prepend, ulong sh
 static long pari_randseed = 1;
 
 /* BSD rand gives this: seed = 1103515245*seed + 12345 */
-/*Return 30 ``random'' bits.*/
+/*Return 31 ``random'' bits.*/
 long
-pari_rand30(void)
+pari_rand31(void)
 {
-#if BITS_IN_RANDOM == 64
-  pari_randseed = (1000000000000654397*pari_randseed + 12347) & ~HIGHBIT;
-#else
   pari_randseed = (1000276549*pari_randseed + 12347) & 0x7fffffff;
-#endif
   return pari_randseed;
 }
 
@@ -4690,16 +4686,16 @@ ulong
 pari_rand(void)
 {
 #define GLUE2(hi, lo) (((hi) << BITS_IN_HALFULONG) | (lo))
-#if !defined(LONG_IS_64BIT) || BITS_IN_RANDOM == 64
-  return GLUE2((pari_rand30()>>12)&LOWMASK,
-               (pari_rand30()>>12)&LOWMASK);
+#if !defined(LONG_IS_64BIT)
+  return GLUE2((pari_rand31()>>12)&LOWMASK,
+               (pari_rand31()>>12)&LOWMASK);
 #else
 #define GLUE4(hi1,hi2, lo1,lo2) GLUE2(((hi1)<<16)|(hi2), ((lo1)<<16)|(lo2))
 #  define LOWMASK2 0xffffUL
-  return GLUE4((pari_rand30()>>12)&LOWMASK2,
-               (pari_rand30()>>12)&LOWMASK2,
-               (pari_rand30()>>12)&LOWMASK2,
-               (pari_rand30()>>12)&LOWMASK2);
+  return GLUE4((pari_rand31()>>12)&LOWMASK2,
+               (pari_rand31()>>12)&LOWMASK2,
+               (pari_rand31()>>12)&LOWMASK2,
+               (pari_rand31()>>12)&LOWMASK2);
 #endif
 }
 

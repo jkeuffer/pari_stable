@@ -263,8 +263,6 @@ transroot(GEN x, int i, int j)
   k=x[i]; x[i]=x[j]; x[j]=k; return x;
 }
 
-#define randshift (BITS_IN_RANDOM - 3)
-
 GEN
 tschirnhaus(GEN x)
 {
@@ -278,17 +276,16 @@ tschirnhaus(GEN x)
   p1[1] = evalsigne(1)|evalvarn(0)|evallgef(5);
   do
   {
-    a = pari_rand30() >> randshift; if (a==0) a =1; p1[4]=lstoi(a);
-    a = pari_rand30() >> (randshift-1); if (a>=4) a-=8; p1[3]=lstoi(a);
-    a = pari_rand30() >> (randshift-1); if (a>=4) a-=8; p1[2]=lstoi(a);
-    u = caract2(x,p1,v); av2=avma;
+    a = random_bits(2); if (a==0) a  = 1; p1[4] = lstoi(a);
+    a = random_bits(3); if (a>=4) a -= 8; p1[3] = lstoi(a);
+    a = random_bits(3); if (a>=4) a -= 8; p1[2] = lstoi(a);
+    u = caract2(x,p1,v); av2 = avma;
   }
   while (lgef(srgcd(u,derivpol(u))) > 3); /* while u not separable */
   if (DEBUGLEVEL>1)
     fprintferr("Tschirnhaus transform. New pol: %Z",u);
   avma=av2; return gerepileupto(av,u);
 }
-#undef randshift
 
 int
 gpolcomp(GEN p1, GEN p2)

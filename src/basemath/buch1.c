@@ -43,9 +43,7 @@ hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
  */
 
 #define RANDOM_BITS 4
-static const long CBUCH = (1<<RANDOM_BITS)-1;
-static const long randshift=BITS_IN_RANDOM-1 - RANDOM_BITS;
-#undef RANDOM_BITS
+static const int CBUCH = (1<<RANDOM_BITS)-1;
 
 static long KC,KC2,limhash,RELSUP,PRECREG;
 static long *primfact,*exprimfact,*badprim;
@@ -892,7 +890,7 @@ random_form(GEN ex, GEN (*comp)(GEN,GEN))
   GEN F;
   for(;;)
   {
-    for (i=1; i<l; i++) ex[i] = pari_rand30()>>randshift;
+    for (i=1; i<l; i++) ex[i] = random_bits(RANDOM_BITS);
     if ((F = init_form(ex, comp))) return F;
     avma = av;
   }
@@ -1198,7 +1196,7 @@ extra_relations(long LIMC, long nlze, GEN *ptextraC)
     form = NULL;
     for (i=1; i<=nlze2; i++)
     {
-      ex[i] = pari_rand30()>>randshift;
+      ex[i] = random_bits(RANDOM_BITS);
       if (ex[i])
       {
         p1 = primeform(Disc,stoi(FB[vperm[i]]),PRECREG);
