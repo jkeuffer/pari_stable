@@ -1,2 +1,4 @@
 #include <stdio.h>
-main(){ extern int times(); printf("%d",times());}
+#include <sys/times.h>
+main(){ struct tms t; printf("%d", times(&t)); }
+
