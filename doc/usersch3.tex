@@ -4322,16 +4322,18 @@ is more typical:
 ? H = bnrclassnolist(bnf, La);
 ? H[98];
 %6 = [2, 12, 2]
+@eprog
 
 \syn{ideallistarch}{\var{nf},\var{list},\var{arch}}.
 
-\subsecidx{ideallog}$(\var{nf},x,\var{bid})$: $\var{nf}$ being a number field,
-\var{bid} being a ``big ideal'' as output by \kbd{idealstar} and $x$ being a
+\subsecidx{ideallog}$(\var{nf},x,\var{bid})$: $\var{nf}$ is a number field,
+\var{bid} a ``big ideal'' as output by \kbd{idealstar} and $x$ a
 non-necessarily integral element of \var{nf} which must have valuation
-equal to 0 at all prime ideals dividing $I=\var{bid}[1]$, computes the
-``discrete logarithm'' of $x$ on the generators given in $\var{bid}[2]$.
-In other words, if $g_i$ are these generators, of orders $d_i$ respectively,
-the result is a column vector of integers $(x_i)$ such that $0\le x_i<d_i$ and
+equal to 0 at all prime ideals dividing $I=\var{bid}[1]$. This function
+computes the ``discrete logarithm'' of $x$ on the generators given in
+$\var{bid}[2]$. In other words, if $g_i$ are these generators, of orders
+$d_i$ respectively, the result is a column vector of integers $(x_i)$ such
+that $0\le x_i<d_i$ and
 $$x\equiv\prod_ig_i^{x_i}\pmod{\ ^*I}\enspace.$$
 Note that when $I$ is a module, this implies also sign conditions on the
 embeddings.
@@ -4561,10 +4563,10 @@ especially useful if only a local integral basis for some small set of places
 is desired: only factors with exponents greater or equal to 2 will be
 considered.
 
-\syn{nfbasis0}{x,\fl,fa}. An extended version
-is \funs{nfbasis}{x,\&d,\fl,fa}, where $d$ will receive the discriminant of
-the number field (\emph{not} of the polynomial $x$), and an omitted $fa$ should
-be input as \kbd{NULL}. Also available are \funs{base}{x,\&d} ($\fl=0$),
+\syn{nfbasis0}{x,\fl,fa}. An extended version is
+\funs{nfbasis}{x,\&d,\fl,fa}, where $d$ receives the discriminant of the
+number field (\emph{not} of the polynomial $x$), and an omitted $fa$ is input
+as \kbd{NULL}. Also available are \funs{base}{x,\&d} ($\fl=0$),
 \funs{base2}{x,\&d} ($\fl=2$) and \funs{factoredbase}{x,fa,\&d}.
 
 \subsecidx{nfbasistoalg}$(\var{nf},x)$: this is the inverse function of
@@ -4593,7 +4595,7 @@ divides the discriminant.
 should be slower except maybe for polynomials of small degree and
 coefficients.
 
-\syn{nfdiscf0}{x,\fl,fa} where, to omit $fa$, you should input \kbd{NULL}. You
+\syn{nfdiscf0}{x,\fl,fa} where an omitted $fa$ is input as \kbd{NULL}. You
 can also use \funs{discf}{x} ($\fl=0$).
 
 \subsecidx{nfeltdiv}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
