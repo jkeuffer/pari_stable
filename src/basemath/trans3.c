@@ -1088,7 +1088,8 @@ get_xinf(double beta)
 static void
 optim_zeta(GEN S, long prec, long *pp, long *pn)
 {
-  double s, t, sn, alpha, beta, p, n;
+  double s, t, sn, alpha, beta, n;
+  long p;
   if (typ(S) == t_REAL) {
     s = rtodbl(S); 
     t = 0.;
@@ -1096,7 +1097,25 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     s = rtodbl((GEN)S[1]);
     t = fabs( rtodbl((GEN)S[2]) );
   }
-  if (t)
+
+  if (s <= 0) /* may occur if S ~ 0, and we don't use the func. eq. */
+  { /* TODO: the crude bounds below are generally valid. Optimize ? */
+    double l,l2, la = 1.; /* heuristic */
+    if (dnorm(s-1,t) < 0.1) /* |S - 1|^2 < 0.1 */
+      l2 = -(s - 0.5);
+    else
+    {
+      double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
+      l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
+    }
+    l = (pariC2*(prec-2) - l2 + s*2*pariC1) / (2. * (1.+ log((double)la)));
+    l2 = dabs(s, t)/2;
+    if (l < l2) l = l2;
+    p = (long) ceil(l); if (p < 2) p = 2;
+    l2 = (p + s/2. - .25);
+    n = 1 + dabs(l2, t/2) * la / PI;
+  }
+  else if (t)
   {
     sn = dabs(s, t);
     alpha = pariC2*(prec-2) - 0.39 + log(sn/s) + s*(2*pariC1 - log(sn));
@@ -1105,12 +1124,12 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     {
       if (s >= 1.0)
       {
-	p = 0.;
+	p = 0;
 	n = exp(pariC2*(prec-2)/s) * pow(sn/(2*s),1.0/s);
       }
       else
       {
-	p = 1.;
+	p = 1;
         n = dabs(s + 1, t) / (2*PI);
       }
     }
@@ -1119,12 +1138,12 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       beta = 1.0 - s + t * get_xinf(beta);
       if (beta > 0)
       {
-	p = beta / 2.0;
+	p = (long)ceil(beta / 2.0);
 	n = dabs(s + 2*p-1, t) / (2*PI);
       }
       else
       {
-	p = 0.;
+	p = 0;
 	n = exp(pariC2*(prec-2)/s)*pow(sn/(2*s),1.0/s);
       }
     }
@@ -1135,16 +1154,16 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     beta = pariC2*(prec-2) + 0.61 + s*(2*pariC1 - log(s));
     if (beta > 0)
     {
-      p = beta / 2.0;
+      p = (long)ceil(beta / 2.0);
       n = fabs(s + 2*p-1)/(2*PI);
     }
     else
     {
-      p = 0.;
+      p = 0;
       n = exp(pariC2*(prec-2)/s)*pow(sn/(2*s),1.0/s);
     }
   }
-  *pp = (long)ceil(p);
+  *pp = p;
   *pn = (long)ceil(n);
   if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n", *pp, *pn);
 }
@@ -1376,43 +1395,7 @@ czeta(GEN s0, long prec)
     funeq = 1; s = gsub(gun, s); sig = greal(s);
   }
   if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
-
-#if 0
-  { /* find "optimal" parameters [lim, nn] */
-    double ssig = rtodbl(sig);
-    double st = rtodbl(gimag(s));
-    double ns = dnorm(ssig,st), l,l2;
-    double la = 1.; /* FIXME */
-
-    if (typ(s0) == t_INT)
-    {
-      long ss = itos(s0);
-      switch(ss)
-      { /* should depend on prec */
-        case 3:  la = 6.; break;
-        default: la = 3.; break;
-      }
-    }
-
-    if (dnorm(ssig-1,st) < 0.1) /* |s - 1|^2 < 0.1 */
-      l2 = -(ssig - 0.5);
-    else
-    { /* l2 = Re( (s - 1/2) log (s-1) ) */
-      double rlog, ilog; /* log(s-1) */
-      dcxlog(ssig-1,st, &rlog,&ilog);
-      l2 = (ssig - 0.5)*rlog - st*ilog;
-    }
-    l = (pariC2*(prec-2) - l2 + ssig*2*pariC1) / (2. * (1.+ log((double)la)));
-    l2 = sqrt(ns)/2;
-    if (l < l2) l = l2;
-    lim = (long) ceil(l); if (lim < 2) lim = 2;
-    l2 = (lim+ssig/2.-.25);
-    nn = 1 + (long)ceil( sqrt(l2*l2 + st*st/4) * la / PI );
-    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
-  }
-#else
   optim_zeta(s, prec, &lim, &nn);
-#endif
   maxprime_check((ulong)nn);
   prec++; unr = realun(prec); /* one extra word of precision */
 
