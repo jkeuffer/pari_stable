@@ -1819,8 +1819,7 @@ escape0(char *tch)
       {
 	GEN (*f)(const char*, int) = NULL;
 	int len = (s-tch) - 1;
-	
-	if (!strncmp(tch,"precision",len))         f = sd_realprecision;
+	if      (!strncmp(tch,"precision",len))    f = sd_realprecision;
 	else if (!strncmp(tch,"serieslength",len)) f = sd_seriesprecision;
 	else if (!strncmp(tch,"format",len))       f = sd_format;
 	else if (!strncmp(tch,"prompt",len))       f = sd_prompt;
@@ -1928,7 +1927,7 @@ escape0(char *tch)
       s = get_sep(s);
       if (!*s) s = (GP_DATA->flags & SIMPLIFY)? "0": "1";
       sd_simplify(s,d_ACKNOWLEDGE); break;
-    default: err(caracer1,tch-1,tch-2);
+    default: err(caracer1,tch,tch-1);
   }
 }
 
