@@ -30,14 +30,14 @@ RM = /bin/rm -f
 
 dft target::
 	@echo "Possible targets are:"
+	@echo "	all             	 Compilation + Documentation"
 	@echo "	gp			 Compilation"
-	@echo "	bench, test-compat       Compilation and test"
+	@echo "	bench, test-compat       Compilation + test"
 	@echo "	dobench                	 Test only"
 	@echo "	doc			 Documentation"
 	@echo "	install			 Installation"
-	@echo "	clean, cleantest         Cleaning up"
+	@echo "	clean, cleantest         Clean up"
 	@echo "For pari maintainers..."
-	@echo "	all			Compile gp-[sta|dyn] and lib-[sta|dyn]"
 	@echo "	dbg	                Compile gp binary suitable for debugging"
 	@echo "	prf	                Compile gp binary suitable for profiling"
 	@echo "	distrib			Create a new distribution"
@@ -46,13 +46,11 @@ dft target::
 	@echo "	etags			Generate Emacs  tags file in ./src"
 	@echo "	tune	                Generate tuning utility"
 
-gp all::
+all::
 	@-cd doc && \$(MAKE) doc
-	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
-	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
-	cd \$\$dir && \$(MAKE) \$@
+	@\$(MAKE) gp
 
-bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
+gp bench test-kernel test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench tune::
 	@dir=\`config/objdir\`; echo "Making \$@ in \$\$dir";\\
 	 if test ! -d \$\$dir; then echo "Please run Configure first!"; exit 1; fi;\\
 	cd \$\$dir && \$(MAKE) \$@

@@ -65,7 +65,7 @@ Then, type
 
 \kbd{./Configure}
 
-\noindent in the toplevel directory. This will attempt to configure GP/PARI
+\noindent in the toplevel directory. This attempts to configure GP/PARI
 without outside help. Note that if you want to install the end product in
 some nonstandard place, you can use the \kbd{--prefix} option, as in
 
@@ -90,12 +90,15 @@ architecture independant files go to different directories than in the above
 scheme: \kbd{\$share/pari} (galdata package), \kbd{\$share/man} (man pages)
 and \kbd{\$share/doc/pari/} (everything else: sample GP scripts and C code,
 documentation, emacs macros). For instance, to build a package for a Linux
-distribution, you will want to use
+distribution, you may want to use
 
 \kbd{./Configure --prefix=/usr --share-prefix=/usr/share}
 
-\noindent \kbd{Configure} will let the following environment variable
-override the defaults if set:
+\noindent You can also set directly \kbd{--bindir}, \kbd{--libdir},
+\kbd{--mandir}, \kbd{--miscdir}, \kbd{--datadir}, \kbd{--includedir}.
+
+\misctitle{Technical note 2:} \kbd{Configure} lets the following
+environment variable override the defaults if set:
 
 \kbd{AS}: Assembler.
 
@@ -175,15 +178,20 @@ profile GP or the library (using \kbd{gprof} for instance),
 \noindent will create an \kbd{O$xxx$.prf} directory where a suitable version
 of PARI can be built.
 
-\subsec{Compilation and tests:} To compile the GP binary, simply type
+\subsec{Compilation and tests:} To compile the GP binary and build the
+documentation, type
+
+\kbd{make all}
+
+\noindent To only compile the GP binary, type
 
 \kbd{make gp}
 
-\noindent in the distribution directory (this also builds the documentation,
-see below). If your \kbd{make} program supports parallel make, you can speed
-up the process by going to the \kbd{O$xxx$} directory that \kbd{Configure}
-created and doing a parallel make here (for instance \kbd{make -j4} with GNU
-make). It may even work from the toplevel directory.
+\noindent in the distribution directory. If your \kbd{make} program supports
+parallel make, you can speed up the process by going to the \kbd{O$xxx$}
+directory that \kbd{Configure} created and doing a parallel make here (for
+instance \kbd{make -j4} with GNU make). It may even work from the toplevel
+directory.
 
 The GP binary built above is optimized. If you have run \kbd{Configure -g} or
 \kbd{-pg} and want to build a special purpose binary, you can \kbd{cd} to the
@@ -244,13 +252,16 @@ printer. The output should bear some similarity to the screen images.
 
 \noindent You may have to do this with superuser privileges, depending on
 the target directories. (Tip for MacOS X beginners: use
-\kbd{sudo make install}.) Beware that, if you chose the same installation
-directory as before in the \kbd{Configure} process, this will wipe out any
-files from version 1.39.15 and below that might already be there. Libraries
-and executable files from newer versions (starting with version 1.900) are
-not removed since they are only links to files bearing the version number
-(beware of that as well: if you're an avid GP fan, don't forget to delete the
-old pari libraries once in a while).
+\kbd{sudo make install}.) In this case, it is advised to type \kbd{make all}
+first to avoid running unnecessary commands as \kbd{root}.
+
+Beware that, if you chose the same installation directory as before in the
+\kbd{Configure} process, this will wipe out any files from version 1.39.15
+and below that might already be there. Libraries and executable files from
+newer versions (starting with version 1.900) are not removed since they are
+only links to files bearing the version number (beware of that as well: if
+you're an avid GP fan, don't forget to delete the old pari libraries once in
+a while).
 
 This installs in the directories chosen at \kbd{Configure} time the default
 GP executable (probably \kbd{gp-dyn}) under the name \kbd{gp}, the default
@@ -288,30 +299,31 @@ it to your liking. For instance, if you're not using an ANSI terminal,
 remove control characters from the \kbd{prompt} variable. You can also
 enable colors. 
 
-If desired, also copy/modify \kbd{misc/gpalias} somewhere and call it from
-the \kbd{gprc} file (this provides some common shortcuts to lengthy names).
-Finally, if you have superuser privileges and want to provide system-wide
-defaults, you can copy your customized \kbd{.gprc} file to \kbd{/etc/gprc}.
+If desired, read \kbd{\$miscdir/gpalias} (unless you tampered with this via
+Configure, \kbd{miscdir} is \kbd{\$prefix/lib/pari/misc}) from the \kbd{gprc}
+file, which provides some common shortcuts to lengthy names; fix the path in
+gprc first. If you have superuser privileges and want to provide system-wide
+defaults, copy your customized \kbd{.gprc} file to \kbd{/etc/gprc}.
 
-In older versions, \kbd{gphelp} was hidden in pari lib directory and wasn't
+In older versions, \kbd{gphelp} was hidden in pari lib directory and was not
 meant to be used from the shell prompt, but not anymore. If gp complains it
-can't find \kbd{gphelp}, check whether your \kbd{.gprc} (or the system-wide
+cannot find \kbd{gphelp}, check whether your \kbd{.gprc} (or the system-wide
 \kbd{gprc}) does contain explicit paths. If so, correct them according to the
 current \kbd{misc/gprc.dft}.
 
 \section{Getting Started}
 
-\subsec{Printable Documentation:} Building gp as explained above also builds
-its documentation in directory \kbd{doc}. For this to work, you need a
-working (plain) \TeX\ installation.
+\subsec{Printable Documentation:} Building gp with \kbd{make all} also builds
+its documentation. You can also type directly \kbd{make doc}. In any case,
+you need a working (plain) \TeX\ installation.
 
-This directory contains various \kbd{dvi} files: \kbd{users.dvi} (manual with
-a table of contents and an index), \kbd{tutorial.dvi} (a short tutorial), and
-\kbd{refcard.dvi} (a reference card for GP). You can send these files to your
-favourite printer in the usual way, probably via \kbd{dvips}. The reference
-card is also provided as a \kbd{PostScript} document, which may be easier to
-print than its \kbd{dvi} equivalent (it is in Landscape orientation and
-assumes A4 paper size).
+After that, the \kbd{doc} directory contains various \kbd{dvi} files:
+\kbd{users.dvi} (manual with a table of contents and an index),
+\kbd{tutorial.dvi} (a short tutorial), and \kbd{refcard.dvi} (a reference
+card for GP). You can send these files to your favourite printer in the usual
+way, probably via \kbd{dvips}. The reference card is also provided as a
+\kbd{PostScript} document, which may be easier to print than its \kbd{dvi}
+equivalent (it is in Landscape orientation and assumes A4 paper size).
 
 \noindent If the \kbd{pdftex} package is part of your \TeX\ setup, you can
 produce these documents in PDF format, which may be more convenient for
