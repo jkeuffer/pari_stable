@@ -1223,7 +1223,7 @@ mpexp1(GEN x)
 static GEN
 mpexp_basecase(GEN x)
 {
-  pari_sp av = avma;;
+  pari_sp av = avma;
   GEN y = addsr(1, exp1r_abs(x));
   if (signe(x) < 0) y = ginv(y);
   return gerepileupto(av,y);
