@@ -1064,6 +1064,23 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
   return gerepileupto(ltop,z);
 }
+/*U must be a t_POL in the variable of T (and never a t_INT)*/
+GEN
+FpXQX_FpXQ_mul(GEN P, GEN U, GEN T, GEN p)
+{
+  GEN res;
+  int i;
+  res=cgetg(lgef(P),t_POL);
+  res[1] = evalsigne(1) | evalvarn(varn(P)) | evallgef(lgef(P));
+  for(i=2;i<lgef(res);i++)
+    if (typ(P[i])!=t_INT)
+      res[i]=(long)FpXQ_mul(U,(GEN)P[i],T,p);
+    else
+      res[i]=(long)FpX_Fp_mul(U,(GEN)P[i],p);
+  return normalizepol_i(res,lgef(res));
+}
+
+
 /* safe mean that if T is not irreducible and some
  * division fail it return NULL*/
 GEN
@@ -1071,7 +1088,7 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
 {
   ulong ltop = avma;
   GEN U, V, z;
-  long dg, vx=varn(P);
+  long dg, vx=varn(P), vy=varn(T);
   GEN x = polx[vx];
   GEN lQ, lP;
   T = FpX_red(T, p);
@@ -1099,13 +1116,13 @@ FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
         z = mpinvmod((GEN)z[2], p);
         U = FpX_Fp_mul(U, z, p);
       }
-      else U = mpinvmod(lQ, p);
-      Q = FpXQX_mul(Q, scalarpol(U,vx), T, p);
+      else U = scalarpol(mpinvmod(lQ, p),vy);
+      Q = FpXQX_FpXQ_mul(Q, U, T, p);
       P = gsub(P, FpXQX_mul(gmul(lP, gpowgs(x, dg)), Q, T, p));
       P = FpXQX_red(P, T, p);
       if (low_stack(st_lim, stack_lim(btop, 1)))
         gerepilemany(btop, bptr, 2);
-    }while(lgef(P)>2);
+    }while(signe(P));
   }
   return gerepileupto(ltop, Q);
 }
@@ -1365,10 +1382,10 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   e=pvaluation(stoi(n),l,&q);
   pg=itos(q);
   avma=ltop; 
-  if (DEBUGLEVEL>=2) timer2();
+  if (DEBUGLEVEL>=4) timer2();
   if(!MA) MA=matrixpow(np,np,FpXQ_pow(polx[vp],l,P,l),P,l);
   if(!MB) MB=matrixpow(nq,nq,FpXQ_pow(polx[vq],l,Q,l),Q,l);
-  if (DEBUGLEVEL>=2) msgtimer("matrixpow");
+  if (DEBUGLEVEL>=4) msgtimer("matrixpow");
   A=Ap=zeropol(vp);
   B=Bp=zeropol(vq);
   if (pg>1)
@@ -1489,9 +1506,9 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
 }
 /* Let l be a prime number P, Q in ZZ[X].  P and Q are both
  * irreducible modulo l and degree(P) divide (or is equal to)
- * degree(Q).  Output an morphism between FF_l[X]/(P) and FF_l[X]/(Q)
+ * degree(Q).  Output an monomorphism between FF_l[X]/(P) and FF_l[X]/(Q)
  * as a polynomial R such that Q|P(R) mod l.  If P and Q have the same
- * degree, it is of couse an isomorphism.  */
+ * degree, it is of course an isomorphism.  */
 
 GEN Fp_isom(GEN P,GEN Q,GEN l)
 {
@@ -1551,7 +1568,7 @@ GEN Fp_factor_irred(GEN P,GEN l, GEN Q)
   E=Fp_factorgalois(P,l,d,vq);
   E=polpol_to_mat(E,np);
   MP = matrixpow(np,d,SP,P,l);
-  M = gmul(MP,gmodulcp(gun,l));
+  M = FpM(MP,l);
   IR = (GEN)sindexrank(M)[1];
   E = rowextract_p(E, IR);
   M = rowextract_p(M, IR);
