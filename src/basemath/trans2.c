@@ -1808,14 +1808,13 @@ psinew(GEN s0, long prec)
   GEN sum,z,a,res,tes,in2,sig,s,unr;
   long lim,nn,k;
   const long la = 3;
- 
 
   if (DEBUGLEVEL>2) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
   if (signe(sig) <= 0)
   {
     GEN pi = mppi(prec);
-    z = gsub(psinew(gsubsg(1,s), prec), gmul(pi, gcotan(gmul(pi,s), prec)));
+    z = gsub(psinew(gsub(gun,s), prec), gmul(pi, gcotan(gmul(pi,s), prec)));
     gaffect(z, res); avma = av; return res;
   }
  
@@ -1824,8 +1823,8 @@ psinew(GEN s0, long prec)
     double st = rtodbl(gimag(s));
     double l;
     {
-      double rlog, ilog; /* log (s-gamma) */
-      dcxlog(ssig - rtodbl(mpeuler(3)), st, &rlog,&ilog);
+      double rlog, ilog; /* log (s - Euler) */
+      dcxlog(ssig - 0.57721566, st, &rlog,&ilog);
       l = dnorm(rlog,ilog);
     }
     if (l < 0.000001) l = 0.000001;
