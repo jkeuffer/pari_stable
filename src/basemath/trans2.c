@@ -1343,15 +1343,54 @@ gammanew(GEN s0, long la, long prec)
 GEN
 ggamma(GEN x, long prec)
 {
+  gpmem_t av=avma, tetpil;
+  long m, ma;
+  GEN p1,p2,p3;
+  
   switch(typ(x))
   {
     case t_INT:
       if (signe(x)<=0) err(gamer2);
-      return transc(ggamma,x,prec);
+      p2 = cgetr(prec); av = avma;
+      if (cmpis(x,481177) > 0) err(talker,"argument too large in ggamma");
+/* heuristic */
+      if (cmpis(x,350 + 70*(prec-2)) > 0)
+	return transc(ggamma,x,prec);
+      p1 = mpfact(itos(x) - 1);
+      affir(p1,p2); avma = av;
+      return p2;
 
     case t_REAL:
       return mpgamma(x);
 
+    case t_FRAC:
+      if (cmpis((GEN)x[2],2) == 0)
+      {
+	p2 = cgetr(prec); av = avma;
+	if (cmpis(mpabs((GEN)x[1]),962354) > 0)
+	  err(talker,"argument too large in ggamma");
+/* heuristic */
+	if (cmpis((GEN)x[1],200 + 50*(prec-2)) > 0)
+	  return transc(ggamma,x,prec);
+	p1 = gsqrt(mppi(prec),prec);
+	m = itos((GEN)x[1]) - 1; ma = labs(m);
+	p3 = gmul2n(divii(mpfact(ma),mpfact(ma/2)),-ma);
+	if (m >= 0) affrr(gmul(p3,p1),p2);
+	else
+	{
+	  affrr(gdiv(p1,p3),p2);
+	  if ((m&3) == 2) setsigne(p2,-1);
+	}
+	avma = av;
+	return p2;
+      }
+      else return transc(ggamma,x,prec);
+
+    case t_FRACN:
+      p1 = gred(x);
+      tetpil = avma;
+      return gerepile(av,tetpil,ggamma(p1,prec));
+      
     case t_COMPLEX:
       return cxgamma(x,prec);
 
@@ -1591,13 +1630,19 @@ glngamma(GEN x, long prec)
 {
   long i, n;
   gpmem_t av;
-  GEN y,p1;
+  GEN y,p1,p2;
 
   switch(typ(x))
   {
     case t_INT:
       if (signe(x)<=0) err(gamer2);
-      return transc(glngamma,x,prec);
+      p2 = cgetr(prec); av = avma;
+/* heuristic */
+      if (cmpis(x,200 + 50*(prec-2)) > 0)
+	return transc(glngamma,x,prec);
+      p1 = glog(mpfact(itos(x) - 1),prec);
+      affrr(p1,p2); avma = av;
+      return p2;
 
     case t_REAL:
       return mplngamma(x);

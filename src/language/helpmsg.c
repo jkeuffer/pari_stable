@@ -220,7 +220,7 @@ char *helpmessages_basic[]={
   "intformal(x,{y}): formal integration of x with respect to the main variable of y, or to the main variable of x if y is omitted",
   "intnum(X=a,b,s,{flag=0}): numerical integration of s (smooth in ]a,b[) from a to b with respect to X. flag is optional and mean 0: default. s can be evaluated exactly on [a,b]; 1: general function; 2: a or b can be plus or minus infinity (chosen suitably), but of same sign; 3: s has only limits at a or b",
   "isfundamental(x): true(1) if x is a fundamental discriminant (including 1), false(0) if not",
-  "isprime(x,{flag=0}): if flag is omitted or 0 true(1) if x is a strong pseudoprime for 10 random bases, false(0) if not. If flag is 1 the primality is certified by Pocklington-Lehmer Test. If flag is 2 a primality certificate is output(see manual)",
+  "isprime(x,{flag=0}): if flag is omitted or 0, true(1) if x is a strong pseudoprime for 10 random bases, false(0) if not. If flag is 1, the primality is certified by the Pocklington-Lehmer Test. If flag is 2, the primality is certified using the APRCL test.",
   "ispseudoprime(x): true(1) if x is a strong pseudoprime, false(0) if not",
   "issquare(x,{&n}): true(1) if x is a square, false(0) if not. If n is given puts the exact square root there if it was computed",
   "issquarefree(x): true(1) if x is squarefree, false(0) if not",
