@@ -1990,7 +1990,7 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
       c *= F->pow->ord[i];
       if (c >= 64) break;
     }
-    if (c < 64) return 2;
+    if (c < 6) return 2;
   }
   else
     lgsub = lg(F->subFB);
