@@ -4,8 +4,9 @@ C-Name: gceil
 Prototype: G
 Help: ceil(x): ceiling of x=smallest integer>=x
 Description: 
- (small):small	($1)
- (int):int	icopy($1)
- (mp):int	gceil($1)
- (gen):gen	gceil($1)
+ (small):small:parens   $1
+ (int):int:copy:parens  $1
+ (real):int             ceilr($1)
+ (mp):int               mpceil($1)
+ (gen):gen              gceil($1)
 
