@@ -1956,15 +1956,8 @@ static GEN
 pseudomin(GEN I, GEN G)
 {
   GEN m, GI = lllint_fp_ip(gmul(G, I), 100);
-#if 0
-  long n = lg(G)-1;
-  GEN p = gcoeff(G,n,n);
-  m = gauss_get_col(G, (GEN)GI[1], p, n);
-  if (isnfscalar(m)) m = gauss_get_col(G, (GEN)GI[2], p, n);
-#else
-  m = hnf_invimage(G, (GEN)GI[1]);
-  if (isnfscalar(m)) m = hnf_invimage(G, (GEN)GI[2]);
-#endif
+  m = gauss(G, (GEN)GI[1]);
+  if (isnfscalar(m)) m = gauss(G, (GEN)GI[2]);
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
@@ -1989,14 +1982,6 @@ dbg_cancelrel(long jid, long jdir, GEN col)
   fprintferr("relation cancelled: ");
   if (DEBUGLEVEL>3) fprintferr("(jid=%ld,jdir=%ld)",jid,jdir);
   wr_rel(col); flusherr();
-}
-
-static void
-dbg_outrel(RELCACHE_t *cache)
-{
-  REL_t *rel; fprintferr("relations = \n");
-  for (rel = cache->base + 1; rel <= cache->last; rel++) wr_rel(rel->R);
-  flusherr();
 }
 
 /* Check if we already have a column mat[i] equal to mat[s]
@@ -2040,7 +2025,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
   long nbG = lg(vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
-  GEN ideal, IDEAL, m, ex = cgetg(lgsub, t_VECSMALL);
+  GEN ideal, m, ex = cgetg(lgsub, t_VECSMALL);
  
   if (DEBUGLEVEL && L_jid) fprintferr("looking hard for %Z\n",L_jid);
   for (av = avma;;)
@@ -2067,12 +2052,11 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
     } while (ideal == P); /* If ex  = 0, try another */
     ideal = remove_content(ideal);
     if (gcmp1(gcoeff(ideal,1,1))) continue;
-    IDEAL = lllint_fp_ip(ideal, 4);
 
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
-      m = pseudomin(IDEAL, (GEN)vecG[j]);
+      m = pseudomin(ideal, (GEN)vecG[j]);
       if (!factorgen(F,nf,ideal,m))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
@@ -2423,25 +2407,21 @@ shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 static GEN
 compute_vecG(GEN nf)
 {
-  GEN vecG, R, Rtw, M = gmael(nf,5,1), G = gmael(nf,5,2);
-  long emin, e, r1, i, j, ind, n = min(lg(M[1])-1, 9), prec = nfgetprec(nf);
+  GEN vecG, G0, Gtw, M = gmael(nf,5,1), G = gmael(nf,5,2);
+  long e, r1, i, j, ind, n = min(lg(M[1])-1, 9);
 
   r1 = nf_get_r1(nf);
-  R = R_from_QR(G, prec);
-  emin = gexpo(gcoeff(R,1,1));
-  for (i = 2; i < lg(R); i++) 
+  for (e = 4; ; e <<= 1)
   {
-    e = gexpo(gcoeff(R,i,i));
-    if (e < emin) emin = e;
+    G0 = ground(G);
+    if (lg(hnf(G0)) == lg(G)) break;
+    G = gmul2n(G, e);
   }
-  emin -= 4;
-  if (emin) R = gmul2n(R, -emin);
-  R = ground(R);
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);
-  if (n == 1) { vecG[1] = (long)R; return vecG; }
-  Rtw = gmul2n(R, 10);
+  if (n == 1) { vecG[1] = (long)G0; return vecG; }
+  Gtw = ground(gmul2n(G, 10));
   for (ind=j=1; j<=n; j++)
-    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(R,Rtw,i,j,r1);
+    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G0,Gtw,i,j,r1);
   if (DEBUGLEVEL) msgtimer("weighted G matrices");
   return vecG;
 }
@@ -3133,7 +3113,8 @@ PRECPB:
     if (nlze > 5)
     {
       L_jid = vecextract_i(F.perm, 1, nlze);
-      vecsmall_sort(L_jid); jid = 0; sfb_change = 1;
+      vecsmall_sort(L_jid); jid = 0; 
+      if (nlze > 20) sfb_change = 1;
     }
     goto MORE;
   }
