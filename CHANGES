@@ -50,6 +50,9 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
        (prints x and address of y)
 IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    13- [CVS:] warnings about unknown files (added .cvsignore files)
+   14- f()=return \\ return "void"
+       g()=return(f()) \\ return eval("void") = 0
+       now g() returns "void" also 
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
