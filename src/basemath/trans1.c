@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 
 #ifdef LONG_IS_64BIT
 # define SQRTVERYBIGINT 3037000500   /* ceil(sqrt(VERYBIGINT)) */

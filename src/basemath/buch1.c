@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 #include "parinf.h"
 
 const int narrow = 0; /* should set narrow = flag in buchquad, but buggy */

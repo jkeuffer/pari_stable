@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 extern int OK_bern(long nb, long prec);
 extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrsns(GEN x, long i);

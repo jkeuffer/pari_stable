@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 #include "parinf.h"
 extern GEN to_famat(GEN g, GEN e);
 extern GEN famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX);

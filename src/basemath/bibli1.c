@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 #include "parinf.h"
 extern GEN extendedgcd(GEN A);
 extern GEN ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);

@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * (http://www.informatik.tu-darmstadt.de/TI/LiDIA/Welcome.html)
  */
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 
 #ifndef SEEK_SET
 #  define SEEK_SET 0

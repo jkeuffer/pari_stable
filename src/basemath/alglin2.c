@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 extern GEN quicktrace(GEN x, GEN sym);
 extern GEN imagecomplspec(GEN x, long *nlze);
 extern void ZV_neg_ip(GEN M);

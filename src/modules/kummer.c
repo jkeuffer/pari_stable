@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 #include "parinf.h"
 extern GEN F2V_red_ip(GEN v);
 extern GEN check_and_build_cycgen(GEN bnf);

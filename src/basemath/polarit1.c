@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 
 extern GEN get_bas_den(GEN bas);
 extern GEN get_mul_table(GEN x,GEN bas,GEN invbas);

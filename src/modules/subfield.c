@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 extern GEN hensel_lift_fact(GEN pol, GEN Q, GEN T, GEN p, GEN pe, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern long ZX_get_prec(GEN x);

@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN centermod_i(GEN x, GEN p, GEN ps2);
 

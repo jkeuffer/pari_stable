@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 extern GEN decomp_limit(GEN n, GEN limit);
 extern ulong ugcd(ulong x, ulong y);
 extern int BSW_isprime(GEN x);

@@ -14,7 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
-#include "pari-priv.h"
+#include "paripriv.h"
 extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 extern GEN respm(GEN x,GEN y,GEN pm);
 extern GEN ZX_disc_all(GEN,ulong);
