@@ -435,7 +435,7 @@ void error(char **argv) {
   printf("usage: %s [-t] [-t] [-u unittime] [-variable index]\n", argv[0]);
   printf("Tunable variables: (omitting index tunes everybody)\n");
   for (i = 0; i < numberof(param); i++)
-    printf("  %2ld: %-25s (default %3ld)\n", i, param[i].name, *(param[i].var));
+    printf("  %2ld: %-25s (default %4ld)\n", i, param[i].name, *(param[i].var));
   exit(1);
 }
 
