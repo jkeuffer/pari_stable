@@ -837,7 +837,6 @@ FpV_roots_to_pol(GEN V, GEN p, long v)
   GEN g=cgetg(lg(V),t_VEC);
   for(i=1;i<lg(V);i++)
     g[i]=(long)deg1pol(gun,modii(negi((GEN)V[i]),p),v);
-  FpXV_mul(g,p);
   return gerepileupto(ltop,FpXV_mul(g,p));
 }
 
