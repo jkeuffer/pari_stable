@@ -2879,7 +2879,6 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
   ulong inv;
   for (i=1; i<n; i++)
   {
-    if (!ya[i] && !C0[i] && !C1[i]) continue;
     T = u_FpX_div_by_X_x(Q, xa[i], p);
     inv = u_invmod(u_FpX_eval(T,xa[i], p), p);
 
@@ -2897,13 +2896,22 @@ u_FpV_polint_all(GEN xa, GEN ya, GEN C0, GEN C1, ulong p)
     else
 #endif
     {
-      if (ya[i]) dP = u_FpX_Fp_mul(T, mulssmod(ya[i],inv,p), p, 0);
-      if (C0[i]) dP0= u_FpX_Fp_mul(T, mulssmod(C0[i],inv,p), p, 0);
-      if (C1[i]) dP1= u_FpX_Fp_mul(T, mulssmod(C1[i],inv,p), p, 0);
+      if (ya[i])
+      {
+        dP = u_FpX_Fp_mul(T, mulssmod(ya[i],inv,p), p, 0);
+        P = P ? u_FpX_add(P , dP , p): dP;
+      }
+      if (C0[i])
+      {
+        dP0= u_FpX_Fp_mul(T, mulssmod(C0[i],inv,p), p, 0);
+        P0= P0? u_FpX_add(P0, dP0, p): dP0;
+      }
+      if (C1[i])
+      {
+        dP1= u_FpX_Fp_mul(T, mulssmod(C1[i],inv,p), p, 0);
+        P1= P1? u_FpX_add(P1, dP1, p): dP1;
+      }
     }
-    P = P ? u_FpX_add(P , dP , p): dP;
-    P0= P0? u_FpX_add(P0, dP0, p): dP0;
-    P1= P1? u_FpX_add(P1, dP1, p): dP1;
   }
   ya[1] = (long) (P ? P : u_zeropol(0));
   C0[1] = (long) (P0? P0: u_zeropol(0));
