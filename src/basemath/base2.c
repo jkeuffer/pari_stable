@@ -2070,6 +2070,7 @@ _primedec(GEN nf, GEN p)
   if (DEBUGLEVEL>5) msgtimer("factmod");
 
   k = lg(F);
+  if (k == 1) err(talker,"primedec: %Z is not a prime", p);
   if (signe(modii((GEN)nf[4],p))) /* p doesn't divide index */
   {
     L = cgetg(k,t_VEC);
