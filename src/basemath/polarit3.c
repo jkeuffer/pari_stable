@@ -616,6 +616,7 @@ quicksqr(GEN a, long na)
 This functions supposes polynomials already reduced.
 There are clean and memory efficient.
 **********************************************************************/
+
 GEN
 FpX_redc(GEN T,GEN mod)
 {/*OK centermod exists, but is not so clean*/
@@ -632,6 +633,7 @@ FpX_redc(GEN T,GEN mod)
   gunclone(mod2);/*unclone*/
   return P;
 }
+
 GEN
 FpX_neg(GEN x,GEN p)
 {
@@ -958,16 +960,48 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
     }
   return gerepileupto(ltop,y);
 }
+
 /*******************************************************************/
 /*                                                                 */
-/*                             Fq[X]                               */
+/*                             Fp[X][Y]                            */
+/*                                                                 */
+/*******************************************************************/
+/*Polynomials whose coefficients are either polynomials or integers*/
+
+GEN
+FpXX_red(GEN z, GEN p)
+{
+    GEN res;
+    int i;
+    res=cgetg(lgef(z),t_POL);
+    res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
+    for(i=2;i<lgef(res);i++)
+      if (typ(z[i])!=t_INT)
+      {
+	int av=avma;
+        res[i]=(long)FpX_red((GEN)z[i],p);
+	if (lgef(res[i])<=3)
+	{
+	  if (lgef(res[i])==2) {avma=av;res[i]=zero;}
+	  else res[i]=lpileupto(avma,gcopy(gmael(res,i,2)));
+	}
+      }
+      else
+        res[i]=lmodii((GEN)z[i],p);
+    res=normalizepol_i(res,lgef(res));
+    return res;
+}
+
+/*******************************************************************/
+/*                                                                 */
+/*                             (Fp[X]/(Q))[Y]                      */
 /*                                                                 */
 /*******************************************************************/
 
 extern GEN to_Kronecker(GEN P, GEN Q);
 GEN /*Somewhat copy-pasted...*/
 /*Not malloc nor warn-clean.*/
-Fq_from_Kronecker(GEN z, GEN pol, GEN p)
+FpXQX_from_Kronecker(GEN z, GEN pol, GEN p)
 {
   long i,j,lx,l = lgef(z), N = (deg(pol)<<1) + 1;
   GEN x, t = cgetg(N,t_POL);
@@ -987,7 +1021,7 @@ Fq_from_Kronecker(GEN z, GEN pol, GEN p)
 }
 /*Unused/untested*/
 GEN
-FqX_red(GEN z, GEN T, GEN p)
+FpXQX_red(GEN z, GEN T, GEN p)
 {
   GEN res;
   int i;
@@ -1002,7 +1036,7 @@ FqX_red(GEN z, GEN T, GEN p)
   return res;
 }
 GEN
-FqX_mul(GEN x, GEN y, GEN T, GEN p)
+FpXQX_mul(GEN x, GEN y, GEN T, GEN p)
 {
   ulong ltop=avma;
   GEN z,kx,ky;
@@ -1011,12 +1045,12 @@ FqX_mul(GEN x, GEN y, GEN T, GEN p)
   ky= to_Kronecker(y,T);
   z = quickmul(ky+2, kx+2, lgef(ky)-2, lgef(kx)-2);
   z = FpX_red(z,p);
-  z = Fq_from_Kronecker(z,T,p);
+  z = FpXQX_from_Kronecker(z,T,p);
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are not varn-clean*/
   return gerepileupto(ltop,z);
 }
 GEN/*Unused/untested*/
-FqX_sqr(GEN x, GEN T, GEN p)
+FpXQX_sqr(GEN x, GEN T, GEN p)
 {
   ulong ltop=avma;
   GEN z,kx;
@@ -1024,10 +1058,69 @@ FqX_sqr(GEN x, GEN T, GEN p)
   kx= to_Kronecker(x,T);
   z = quicksqr(kx+2, lgef(kx)-2);
   z = FpX_red(z,p);
-  z = Fq_from_Kronecker(z,T,p);
+  z = FpXQX_from_Kronecker(z,T,p);
   setvarn(z,vx);/*quickmul and Fq_from_Kronecker are nor varn-clean*/
   return gerepileupto(ltop,z);
 }
+/* safe mean that if T is not irreducible and some
+ * division fail it return NULL*/
+GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p)
+{
+  ulong ltop = avma;
+  GEN R, U, V, z;
+  long dg, vx=varn(P);
+  GEN x = polx[vx];
+  GEN lQ, lP;
+  T = FpX_red(T, p);
+  P = FpXX_red(P, p);
+  Q = FpXX_red(Q, p);
+  if (!signe(P) || !signe(Q)) {avma=ltop; return zeropol(vx);}
+  {
+    ulong btop = avma;
+    ulong st_lim = stack_lim(btop, 1);
+    GEN *bptr[] = {&P, &Q};
+    do
+    {
+      dg = lgef(P)-lgef(Q);
+      if (dg < 0)
+      {
+        R = P;
+        P = Q;
+        Q = R;
+        dg = -dg;
+      }
+      lQ=(GEN)Q[lgef(Q)-1];
+      lP=(GEN)P[lgef(P)-1];
+      if (typ(lQ)==t_POL)
+      {
+      	z = FpX_extgcd(lQ, T, p, &U, &V);
+      	if (lgef(z) != 3) { avma = ltop; return gzero; }
+        z = mpinvmod((GEN)z[2], p);
+        U = FpX_Fp_mul(U, z, p);
+      }
+      else U=mpinvmod(lQ, p);
+      Q = FpXQX_mul(Q, scalarpol(U,vx), T, p);
+      P = gsub(P, FpXQX_mul(gmul(lP, gpowgs(x, dg)), Q, T, p));
+      P = FpXQX_red(P, T, p);
+      if (low_stack(st_lim, stack_lim(btop, 1)))
+        gerepilemany(btop, bptr, 2);
+    }while(lgef(P)>2);
+  }
+  return gerepileupto(ltop, Q);
+}
+
+
+/*******************************************************************/
+/*                                                                 */
+/*                             Fq[X]                               */
+/*                                                                 */
+/*******************************************************************/
+
+/*Well nothing, for now. So we reuse FpXQX*/
+#define FqX_mul FpXQX_mul
+#define FqX_sqr FpXQX_sqr
+#define FqX_red FpXQX_red
+
 /*******************************************************************/
 /*                                                                 */
 /*                       n-th ROOT in Fq                           */
