@@ -141,6 +141,7 @@ BA 60- add "const" keyword to allow building with g++
    80- improper rounding when printing floats: 1.2 --> 1.199999999
    81- [default:] realprecision was allowed to be 0, and then treated as 9.
    82- Precision loss in inputs of large exponent: 1e100000 -->9.99999824 E99999
+   83- quadgen / quadpoly accepted square inputs --> weird bugs later.
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

@@ -4147,6 +4147,7 @@ quadpoly0(GEN x, long v)
   if (v < 0) v = 0;
   sx = signe(x);
   if (!sx) err(talker,"zero discriminant in quadpoly");
+  if (carreparfait(x)) err(talker,"square discriminant in quadpoly");
   res = mod4(x); if (sx < 0 && res) res = 4-res;
   if (res > 1) err(funder2,"quadpoly");
 
