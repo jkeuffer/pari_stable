@@ -632,7 +632,7 @@ Fp_pol_nbfact(GEN u, GEN pp)
   return lg(vker)-1;
 }
 /************************************************************/
-static GEN
+GEN
 trivfact(void)
 {
   GEN y=cgetg(3,t_MAT);

@@ -755,11 +755,9 @@ check_b(GEN b, long nbli)
 {
   GEN col;
   if (!b) return idmat(nbli);
-  b = dummycopy(b);
   col = (typ(b) == t_MAT)? (GEN)b[1]: b;
-  if (nbli == lg(col)-1) return b;
-  err(talker,"incompatible matrix dimensions in gauss");
-  return NULL; /* not reached */
+  if (nbli != lg(col)-1) err(talker,"incompatible matrix dimensions in gauss");
+  return dummycopy(b);
 }
 
 /* C = A^(-1)B where A, B, C are integral and A is upper triangular */
@@ -805,6 +803,13 @@ gauss_get_col(GEN a, GEN b, GEN p, long nbli)
   return u;
 }
 
+/* bk += m * bi */
+static void
+_addmul(GEN b, long k, long i, GEN m)
+{
+  b[k] = ladd((GEN)b[k], gmul(m, (GEN)b[i]));
+}
+
 /* Gauss pivot.
  * Compute a^(-1)*b, where nblig(a) = nbcol(a) = nblig(b).
  * b is a matrix or column vector, NULL meaning: take the identity matrix
@@ -813,7 +818,7 @@ gauss_get_col(GEN a, GEN b, GEN p, long nbli)
 GEN
 gauss(GEN a, GEN b)
 {
-  long inexact,ismat,nbli,nbco,i,j,k,av,tetpil,lim;
+  long inexact,iscol,nbli,nbco,i,j,k,av,tetpil,lim;
   GEN p,m,u;
   /* nbli: nb lines of b = nb columns of a */
   /* nbco: nb columns of b (if matrix) */
@@ -823,19 +828,17 @@ gauss(GEN a, GEN b)
   if (lg(a) == 1)
   {
     if (b && lg(b)!=1) err(consister,"gauss");
-    if (DEBUGLEVEL)
-      err(warner,"in Gauss lg(a)=%ld lg(b)=%ld",lg(a),b?lg(b):-1);
+    if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
     return cgetg(1,t_MAT);
   }
   av=avma; lim=stack_lim(av,1);
   nbli = lg(a)-1; if (nbli!=lg(a[1])-1) err(mattype1,"gauss");
   a = dummycopy(a);
-  b = check_b(b,nbli);
-  nbco = lg(b)-1;
+  b = check_b(b,nbli); nbco = lg(b)-1;
   inexact = use_maximal_pivot(a);
-  ismat   = (typ(b)==t_MAT);
+  iscol   = (typ(b)==t_COL);
   if(DEBUGLEVEL>4)
-    fprintferr("Entering gauss with inexact=%ld ismat=%ld\n",inexact,ismat);
+    fprintferr("Entering gauss with inexact=%ld iscol=%ld\n",inexact,iscol);
 
   for (i=1; i<nbli; i++)
   {
@@ -861,12 +864,9 @@ gauss(GEN a, GEN b)
     if (k != i)
     {
       for (j=i; j<=nbli; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      if (ismat)
-      {
-        for (j=1; j<=nbco; j++) swap(coeff(b,i,j), coeff(b,k,j));
-      }
+      if (iscol) { swap(b[i],b[k]); }
       else
-        swap(b[i],b[k]);
+        for (j=1; j<=nbco; j++) swap(coeff(b,i,j), coeff(b,k,j));
       p = gcoeff(a,i,i);
     }
 
@@ -876,28 +876,16 @@ gauss(GEN a, GEN b)
       if (!gcmp0(m))
       {
 	m = gneg_i(gdiv(m,p));
-	for (j=i+1; j<=nbli; j++)
-	{
-	  u = gmul(m,gcoeff(a,i,j));
-	  coeff(a,k,j) = ladd(gcoeff(a,k,j),u);
-	}
-	if (ismat) for (j=1; j<=nbco; j++)
-	{
-	  u = gmul(m,gcoeff(b,i,j));
-	  coeff(b,k,j) = ladd(gcoeff(b,k,j),u);
-	}
-	else
-	{
-	  u = gmul(m,(GEN) b[i]);
-	  b[k] = ladd((GEN) b[k],u);
-	}
+	for (j=i+1; j<=nbli; j++) _addmul((GEN)a[j],k,i,m);
+	if (iscol) _addmul(b,k,i,m);
+        else 
+          for (j=1; j<=nbco; j++) _addmul((GEN)b[j],k,i,m); 
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2];
+      GEN *gptr[2]; gptr[0]=&a; gptr[1]=&b;
       if(DEBUGMEM>1) err(warnmem,"gauss. i=%ld",i);
-      gptr[0]=&a; gptr[1]=&b;
       gerepilemany(av,gptr,2);
     }
   }
@@ -905,7 +893,7 @@ gauss(GEN a, GEN b)
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   p=gcoeff(a,nbli,nbli);
   if (!inexact && gcmp0(p)) err(matinv1);
-  if (!ismat) u = gauss_get_col(a,b,p,nbli);
+  if (iscol) u = gauss_get_col(a,b,p,nbli);
   else
   {
     long av1 = avma;
@@ -1263,7 +1251,7 @@ approx_0(GEN x, GEN y)
 static long
 gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
 {
-  long i,e, k = 1, ex = -HIGHEXPOBIT, lx = lg(x);
+  long i,e, k = i0, ex = -HIGHEXPOBIT, lx = lg(x);
   GEN p;
   if (c)
     for (i=i0; i<lx; i++)
@@ -1317,14 +1305,15 @@ gauss_pivot_ker(GEN x0, GEN a, long prec, GEN *dd, long *rr)
         if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
     }
     else
-    {
+    { /* pivot for column k on row j */
       c[j]=k; d[k]=j; p = gdiv(mun,gcoeff(x,j,k));
       coeff(x,j,k) = (long)mun;
+      /* x[j,] /= - x[j,k] */
       for (i=k+1; i<=n; i++)
 	coeff(x,j,i) = lmul(p,gcoeff(x,j,i));
       for (t=1; t<=m; t++)
 	if (t!=j)
-	{
+	{ /* x[t,] -= 1 / x[j,k] x[j,] */
 	  p=gcoeff(x,t,k); coeff(x,t,k)=zero;
 	  for (i=k+1; i<=n; i++)
 	    coeff(x,t,i) = ladd(gcoeff(x,t,i),gmul(p,gcoeff(x,j,i)));
