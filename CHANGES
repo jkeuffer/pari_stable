@@ -86,6 +86,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    32- [Configure:] add /lib64 and /usr/lib64 to library search path
    33- SEGV in nfeltpowmodpr() for primes of degree 1 [see 2.2.7-F21]
        + inputs containing t_INTMODs yield unpredictable [wrong] results
+   34- znlog(x,g): first check whether x == g [ quite frequent ]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

@@ -1154,6 +1154,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
   GEN fa, ex;
   long e,i,j,l;
 
+  if (equalii(g, a)) return gen_1; /* frequent special case */
   if (!ord) ord = subis(p,1);
   if (typ(ord) == t_MAT)
   {
@@ -1162,7 +1163,6 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
   }
   else
     fa = decomp(ord);
-  if (typ(g) == t_INTMOD) g = lift_intern(g);
   ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
