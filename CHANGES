@@ -94,7 +94,7 @@ IZ 37- [OS/2:] ^C would only work once
        basemath/galconj.c
    45- '\r a' where file 'a' is empty --> "a is not a GP binary file".
    46- make sure qflll[gram](x) never fails when x has exact entries [ much
-       faster than qflll(x,1) when the dimension is large ]
+       faster than qflll(x,1) when the entries are large ]
    47- increase subFB sooner in buchall() + add GC in Q_denom { bnfinit(x^8 -
 4*x^7 + 462*x^6 - 1372*x^5 + 85789*x^4 - 169296*x^3 + 7540560*x^2 - 7456140*x
 + 263038707) } took a long time, then overflowed the stack
