@@ -201,8 +201,10 @@ INLINE GEN
 icopy_av(GEN x, GEN y)
 {
   register long lx = lgefint(x);
-
-  y -= lx; while (--lx >= 0) y[lx]=x[lx];
+  register long ly = lx;
+  y -= lx; 
+  while (--lx > 0) y[lx]=x[lx];
+  y[0] = evaltyp(t_INT)|evallg(ly);
   return y;
 }
 
