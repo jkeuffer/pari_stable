@@ -52,6 +52,7 @@ IZ 11- shift(x > 0,, flag!=0) didn't act as the docs said [flag now ignored]
    17- factorpadic(x*(x+1),3,10) would corrupt polx --> SEGV later
    18- delayed carry treated improperly in red_montgomery
    19- F() = 0; local(x)  ==> confusing error message
+IZ 20- OS/2: make bench didn't work [env wouldn't start shell scripts]
 
   Changed
 BA  1- improved Fp_isom
