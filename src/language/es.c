@@ -744,7 +744,7 @@ convi(GEN x, long *l)
   av = avma; lim = stack_lim(av,1);
   for(;;)
   {
-    x = diviu_rem(x, 1000000000, (ulong*)zd); zd++;
+    x = diviu_rem(x, 1000000000UL, (ulong*)zd); zd++;
     if (!signe(x)) { if (l) *l = zd - z; return zd; }
     if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint(av, x);
   }
