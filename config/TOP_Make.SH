@@ -48,14 +48,13 @@ dft target::
 	@echo "	ctags			Generate VI/VIM tags file in ./src"
 	@echo "	etags			Generate Emacs  tags file in ./src"
 
-gp all bench test-compat test-graphic install clean cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
+gp all bench test-compat test-graphic install cleanobj cleantest install-bin install-doc install-lib-sta install-bin-sta dobench::
 	cd $objdir; \$(MAKE) \$@
 
-doc docps gpman::
+doc docps docpdf gpman cleandoc::
 	cd doc; \$(MAKE) \$@
 
-RCS::
-	ci -f -l -r\$\${REVISION:-$rcsrevision} -m"." \`find src -name \\*.[chs] -type f -print\`
+clean:: cleandoc cleanobj
 
 setdir::
 	@dir=pari-$version.$patch$suf_status; if test -d \$\$dir; then \\

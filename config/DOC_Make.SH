@@ -6,10 +6,11 @@ cat > doc/Makefile << EOT
 SHELL = $make_sh
 
 doc all: manual refcard tutorial
-docps: refcard.ps tutorial.ps users.ps
-docpdf: users.pdf tutorial.pdf refcard.pdf
+docps: refcard.ps tutorial.ps users.ps ../INSTALL.ps
+docpdf: users.pdf tutorial.pdf refcard.pdf ../INSTALL.pdf
 manual: users.dvi
 tutorial: tutorial.dvi
+refcard: refcard.ps
 
 .SUFFIXES: .tex .ipf .pod .inf
 
@@ -19,25 +20,29 @@ paricfg.tex: paricfg.tex.in
 	    -e 's!@libdir@!/usr/local/lib!'\\
 	    -e 's!@miscdir@!/usr/local/lib/pari!' paricfg.tex.in > \$@
 
-tutorial.dvi: tutorial.tex paricfg.tex
-	-rm -f $pdf
-	tex tutorial.tex
-
 tutorial.pdf: tutorial.tex paricfg.tex
 	-touch $pdf
 	pdftex tutorial.tex
 	-rm -f $pdf
-
-refcard: refcard.ps
 
 refcard.pdf: refcard.tex paricfg.tex
 	-touch $pdf
 	pdftex refcard.tex
 	-rm -f $pdf
 
+../INSTALL.pdf: ../INSTALL.tex
+	-cd ..; touch $pdf; pdftex INSTALL.tex; rm -f $pdf
+
+tutorial.dvi: tutorial.tex paricfg.tex
+	-rm -f $pdf
+	tex tutorial.tex
+
 refcard.dvi: refcard.tex paricfg.tex
 	-rm -f $pdf
 	tex refcard.tex
+
+../INSTALL.dvi: ../INSTALL.tex
+	-cd ..; rm -f $pdf; tex INSTALL.tex
 
 refcard.ps: refcard.dvi
 	dvips -t landscape -t a4 refcard.dvi -o \$@
@@ -47,6 +52,9 @@ users.ps: users.dvi
 
 tutorial.ps: tutorial.dvi
 	dvips tutorial.dvi -o \$@
+
+../INSTALL.ps: ../INSTALL.dvi
+	dvips ../INSTALL.dvi -o \$@
 
 users.dvi: users.tex appa.tex appb.tex appc.tex\\
  usersch1.tex usersch2.tex usersch3.tex usersch4.tex usersch5.tex\\
@@ -74,11 +82,12 @@ users.pdf: users.tex appa.tex appb.tex appc.tex\\
 gpman: gp.1
 	nroff -man gp.1 | unix2dos -ascii > gp.man
 
-halfclean:	
-	rm -f *.log *.dvi *.idx *.ps *.pdf tutorial.aux $pdf
+clean:	
+	rm -f *.log *.dvi *.idx *.ps *.pdf *.aux *.toc users.std $pdf\\
+	../INSTALL.log ../INSTALL.dvi ../INSTALL.idx ../INSTALL.pdf\\
+	../INSTALL.aux ../INSTALL.toc ../INSTALL.ps ../$pdf
 
-clean: halfclean	
-	rm -f users.aux users.std users.toc
+cleandoc: clean
 
 veryclean: clean
 	rm -f paricfg.tex gp.man

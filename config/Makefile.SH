@@ -240,8 +240,10 @@ dotest-compat::
 dotest-graphic::
 	@$doexec -g
 
-clean: cleantest
+cleanobj: cleantest
 	-\$(RM) *.o *.s pariinl.h libpari.* $exec
+
+clean: cleanobj
 
 .headers: $HEADERS
 	@touch \$@
