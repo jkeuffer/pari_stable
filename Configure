@@ -117,7 +117,7 @@ esac
 
 mydlldflags=`echo "$DLLDFLAGS" | \
    sed -e "s/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//" \
-       -e "s/\\$(CFLAGS)/$CFLAGS/"`
+       -e "s!\\$(CFLAGS)!$CFLAGS!"`
 
 __LIBS=$LIBS
 if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
