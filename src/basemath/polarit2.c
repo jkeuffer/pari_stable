@@ -3424,8 +3424,10 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 GEN
 polfnf(GEN a, GEN t)
 {
+  ulong av = avma;
   GEN x0,y,p1,p2,u,fa,n,unt,dent,alift;
-  long av=avma,tetpil,lx,i,k;
+  long lx,i,k,e;
+  int sqfree;
 
   if (typ(a)!=t_POL || typ(t)!=t_POL) err(typeer,"polfnf");
   if (gcmp0(a)) return gcopy(a);
@@ -3435,7 +3437,9 @@ polfnf(GEN a, GEN t)
   p1 = content(t); if (!gcmp1(t)) t = gdiv(t, p1);
 
   dent = ZX_disc(t); unt = gmodulsg(1,t);
-  u = lift(gdiv(a, gmul(unt,nfgcd(alift,derivpol(alift), t, dent))));
+  u = nfgcd(alift,derivpol(alift), t, dent);
+  sqfree = gcmp1(u);
+  u = sqfree? alift: lift_intern(gdiv(a, gmul(unt,u)));
   n = ZY_ZXY_resultant(t, u, &k);
   if (DEBUGLEVEL > 4) fprintferr("polfnf: choosing k = %ld\n",k);
 
@@ -3445,18 +3449,31 @@ polfnf(GEN a, GEN t)
   p1=cgetg(lx,t_COL); y[1]=(long)p1;
   p2=cgetg(lx,t_COL); y[2]=(long)p2;
   x0 = gadd(polx[varn(a)], gmulsg(k,polx[varn(t)]));
-  for (i=1; i<lx; i++)
+  for (i=lx-1; i>1; i--)
   {
-    GEN b, pro = nfgcd(u, poleval((GEN)fa[i], x0), t, dent);
-    long e;
-    pro = gmul(unt,pro);
-    p1[i] = (typ(pro)==t_POL)? ldiv(pro,leading_term(pro)): (long)pro;
-    if (gcmp1((GEN)p1[i])) err(talker,"reducible modulus in factornf");
-    e=0; while (poldivis(a,(GEN)p1[i], &b)) { a = b; e++; }
+    GEN b, F = nfgcd(u, poleval((GEN)fa[i], x0), t, dent);
+    if (typ(F) != t_POL || deg(F) == 3)
+      err(talker,"reducible modulus in factornf");
+    F = gmul(unt, F);
+    F = gdiv(F, leading_term(F));
+    u = lift_intern(gdeuc(u, F));
+    u = gdiv(u, content(u));
+    if (sqfree) e = 1;
+    else
+    {
+      e = 0; while (poldivis(a,F, &b)) { a = b; e++; }
+      if (deg(a) == deg(u)) sqfree = 1;
+    }
+    p1[i] = (long)F;
     p2[i] = lstoi(e);
   }
+  u = gmul(unt, u);
+  u = gdiv(u, leading_term(u));
+  p1[1] = (long)u;
+  e = sqfree? 1: deg(a)/deg(u);
+  p2[1] = lstoi(e);
   (void)sort_factor(y, cmp_pol);
-  tetpil=avma; return gerepile(av,tetpil,gcopy(y));
+  return gerepileupto(av, gcopy(y));
 }
 
 GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
@@ -3561,10 +3578,9 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   if (!signe(P) || !signe(Q))
     return zeropol(x);
   /*Compute denominators*/
-  if (!den)
-  	den = discsr(nf);
-  lP = (GEN) P[lgef(P)-1];
-  lQ = (GEN) Q[lgef(Q)-1];
+  if (!den) den = discsr(nf);
+  lP = leading_term(P);
+  lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
     den = mulii(den, mppgcd(resultantducos(lP, nf), resultantducos(lQ, nf)));
   /*Modular GCD*/
@@ -3579,26 +3595,18 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
     for (p = 27449, primepointer = diffptr + 3000; ; p += *(primepointer++))
     {
       if (!*primepointer) err(primer1);
-      if (gcmp0(modis(den, p)))
-        continue;/*Discard primes dividing the discriminant*/
+      if (!smodis(den, p))
+        continue;/*Discard primes dividing the disc(T) or leadingcoeff(PQ) */
       if (DEBUGLEVEL>=5) fprintferr("p=%d\n",p);
       if ((R = FpXQX_safegcd(P, Q, nf, stoi(p))) == NULL)
         continue;/*Discard primes when modular gcd does not exist*/
       dR = deg(R);
-      if (mod && dR < dM)
-        continue;/*Discard primes dividing leading coef of the true GCD.*/
+      if (dR == 0) return scalarpol(gun, x);
+
       R = polpol_to_mat(R, d);
-      if ( !mod || dM < dR)
-      /*The opposite case: 
-       * All previous primes divided the leading coef of the true GCD.
-       * Discard them.
-       */
-      {
-        M = R;
-        mod = stoi(p);
-        dM = dR;
-        continue;
-      }
+      /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
+      if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
+
       ax = gmulgs(mpinvmod(stoi(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
       mod = mulis(mod, p);
@@ -3614,10 +3622,8 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
         break;
       if (low_stack(st_lim, stack_lim(btop, 1)))
       {
-	GEN *bptr[2];
-	bptr[0]=&M; bptr[1]=&mod;
-	if (DEBUGMEM>1)
-	  err(warnmem,"nfgcd");
+	GEN *bptr[2]; bptr[0]=&M; bptr[1]=&mod;
+	if (DEBUGMEM>1) err(warnmem,"nfgcd");
 	gerepilemany(btop, bptr, 2);
       }
     }
