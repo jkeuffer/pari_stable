@@ -56,6 +56,7 @@ GN  6- [ix86 + Sun cc] build fails [ unsatisfied symbol reference to 'mulll' ]
    10- [hi-res plot: fltk] fix compilation with g++-3.4
 BA 11- [hi-res plot: fltk] line plotting was broken
    12- oo loops in prodinf [ e.g prodinf(x=2, zeta(x)) ]
+   13- [compatible=3] wrong proto. for isoncurve, lex, sign on 64bit machines
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length
