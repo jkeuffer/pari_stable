@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari-GP reference card}
-\def\versionnumber{2.13}% Version of this reference card
+\def\versionnumber{2.14}% Version of this reference card
 \def\PARIversion{2.2.5}% Version of PARI described on this reference card
 \def\year{2002}
-\def\month{August}
+\def\month{October}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -292,16 +292,16 @@ Send comments and corrections to \<Karim.BELABAS@math.u-psud.fr>
 
 \title{PARI-GP Reference Card}
 \centerline{(PARI-GP version \PARIversion)}
-Note: optional arguments are surrounded by braces {\tt \{\}}.
+Note: optional arguments are surrounded by braces $\{\}$.
 
 \section{Starting \& Stopping GP}
 \key{to enter GP, just type its name:}{gp}
 \key{to exit GP, type}{\\q {\rm or }quit}
 
 \section{Help}
-\li{describe function}{?{\rm function}}
-\li{extended description}{??{\rm keyword}}
-\li{list of relevant help topics}{???{\rm pattern}}
+\li{describe function}{?{\it function}}
+\li{extended description}{??{\it keyword}}
+\li{list of relevant help topics}{???{\it pattern}}
 
 \section{Input/Output \& Defaults}
 \li{output previous line, the lines before}
@@ -309,8 +309,8 @@ Note: optional arguments are surrounded by braces {\tt \{\}}.
 \key{output from line $n$}{\%$n$}
 \key{separate multiple statements on line}{;}
 \key{extend statement on additional lines}{\\}
-\key{extend statements on several lines}{\{\seq1; \seq2;\}}
-\key{comment}{/* \dots */}
+\key{extend statements on several lines}{\{$\seq_1$; $\seq_2$;\}}
+\key{comment}{/* $\dots$ */}
 \key{one-line comment, rest of line ignored}{\\\\ \dots}
 \li{set default $d$ to \var{val}} {default$(\{d\},\{\var{val}\},\fl)$}
 \li{mimic behaviour of GP 1.39} {default(compatible,3)}
@@ -323,7 +323,7 @@ Note: optional arguments are surrounded by braces {\tt \{\}}.
 \key{print defaults}{\\d}
 \key{set debug level to $n$}{\\g $n$}
 \key{set memory debug level to $n$}{\\gm $n$}
-\key{enable/disable logfile}{\\l \{filename\}}
+\key{enable/disable logfile}{\\l $\{${\it filename}$\}$}
 \key{print \%$n$ in pretty matrix format}{\\m}
 \key{set output mode (raw, default, prettyprint)}{\\o $n$}
 \key{set $n$ significant digits}{\\p $n$}
@@ -331,12 +331,12 @@ Note: optional arguments are surrounded by braces {\tt \{\}}.
 \key{quit GP}{\\q}
 \key{print the list of PARI types}{\\t}
 \key{print the list of user-defined functions}{\\u}
-\li{read file into GP}{\\r {\rm filename}}
-\li{write \%$n$ to file}{\\w $n$ {\rm filename}}
+\li{read file into GP}{\\r {\it filename}}
+\li{write \%$n$ to file}{\\w $n$ {\it filename}}
 
 \section{GP Within Emacs}
 \li{to enter GP from within Emacs:}{M-x gp{\rm,} C-u M-x gp}
-\li{word completion}{<TAB>}
+\li{word completion}{{\rm \<TAB>}}
 \li{help menu window}{M-\\c}
 \li{describe function}{M-?}
 \li{display \TeX'd PARI manual}{M-x gpman}
@@ -360,20 +360,20 @@ Note: optional arguments are surrounded by braces {\tt \{\}}.
 \li{\typ{REAL}. Real Numbers}{$\pm n.ddd$}
 \li{\typ{INTMOD}. Integers modulo $m$}{Mod$(n,m)$}
 \li{\typ{FRAC}. Rational Numbers}{$n/m$}
-\li{\typ{COMPLEX}. Complex Numbers}{$x+\kbd{I}*y$}
-\li{\typ{PADIC}. $p$-adic Numbers}{$x+O(p$\pow$k)$}
+\li{\typ{COMPLEX}. Complex Numbers}{$x +y\,*\;$I}
+\li{\typ{PADIC}. $p$-adic Numbers}{$x\;+\;$O$(p$\pow$k)$}
 \li{\typ{QUAD}. Quadratic Numbers}{$x + y\,*\;$quadgen$(D)$}
 \li{\typ{POLMOD}. Polynomials modulo $g$}{Mod$(f,g)$}
 \li{\typ{POL}. Polynomials}{$a*x$\pow$n+\cdots+b$}
-\li{\typ{SER}. Power Series}{$f+O(x$\pow$k)$}
+\li{\typ{SER}. Power Series}{$f\;+\;$O$(x$\pow$k)$}
 \li{\typ{QFI}/\typ{QFR}. Imag/Real bin.\ quad.\ forms}
   {Qfb$(a,b,c,\{d\})$}
 \li{\typ{RFRAC}. Rational Functions}{$f/g$}
 \li{\typ{VEC}/\typ{COL}. Row/Column Vectors}
-  {$[x,y,z]${\rm,} $[x,y,z]$\til}
-%\li{\typ{COL}. Column Vectors}{$[x,y,z]$\til}
-\li{\typ{MAT}. Matrices}{$[x,y;z,t;u,v]$}
-\li{\typ{LIST}. Lists}{List$([x,y,z])$}
+  {[$x,y,z$]{\rm,} [$x,y,z$]\til}
+%\li{\typ{COL}. Column Vectors}{[$x,y,z$]\til}
+\li{\typ{MAT}. Matrices}{[$x,y$;$z,t$;$u,v$]}
+\li{\typ{LIST}. Lists}{List$($[$x,y,z$]$)$}
 \li{\typ{STR}. Strings}{"aaa"}
 
 \section{Standard Operators}
@@ -389,7 +389,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{sign of $x=-1,0,1$}{sign$(x)$}
 \li{maximum/minimum of $x$ and $y$}{max{\rm,} min$(x,y)$}
 \li{integer or real factorial of $x$}{$x$!~{\rm or} fact$(x)$}
-
+\li{derivative of $f$ w.r.t. $x$}{$f$'}
 \section{Conversions}
 %
 \subsec{Change Objects}
@@ -404,11 +404,11 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{evaluate $f$ replacing vars by their value}{eval$(f)$}
 %
 \subsec{Select Pieces of an Object}
-\li{length of $x$}{length$(x)$}
+\li{length of $x$}{\#$x$ {\rm or} length$(x)$}
 \li{$n$-th component of $x$}{component$(x,n)$}
-\li{$n$-th component of vector/list $x$}{$x$[n]}
-\li{$(m,n)$-th component of matrix $x$}{$x$[m,n]}
-\li{row $m$ or column $n$ of matrix $x$}{$x$[m,]{\rm,} $x$[,n]}
+\li{$n$-th component of vector/list $x$}{$x$[$n$]}
+\li{$(m,n)$-th component of matrix $x$}{$x$[$m,n$]}
+\li{row $m$ or column $n$ of matrix $x$}{$x$[$m,$]{\rm,} $x$[$,n$]}
 \li{numerator of $x$}{numerator$(x)$}
 \li{lowest denominator of $x$}{denominator$(x)$}
 %
@@ -432,7 +432,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 }
 
 \section{Lists, Sets \& Sorting}
-\li{sort $x$ by $k$th component}{vecsort$(x,\{k\},\{\fl=0\})$}
+\li{sort $x$ by $k$th component}{vecsort$(x,\{k\},\{fl=0\})$}
   {\bf Sets} (= row vector of strings with strictly increasing entries)\hfill\break
 %
 \li{intersection of sets $x$ and $y$}{setintersect$(x,y)$}
@@ -449,27 +449,27 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 
 \section{Programming \& User Functions}
 \subsec{Control Statements {\rm ($X$: formal parameter in expression \seq)}}
-\li{eval.\ \seq\ for $a\le X\le b$}{for$(X=a,b,\seq)$}
+\li{eval.\ \seq\ for $a\le X\le b$}{for$(X\,$=$\;a,b,\seq)$}
 \li{eval.\ \seq\ for $X$ dividing $n$}{fordiv$(n,X,\seq)$}
-\li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X=a,b,\seq)$}
-\li{eval.\ \seq\ for $a\le X\le b$ stepping $s$}{forstep$(X=a,b,s,\seq)$}
-\li{multivariable {\tt for}}{forvec$(X=v,\seq)$}
-\li{if $a\ne0$, evaluate \seq1, else \seq2}{if$(a,\{\seq1\},\{\seq2\})$}
+\li{eval.\ \seq\ for primes $a\le X\le b$}{forprime$(X\,$=$\;a,b,\seq)$}
+\li{eval.\ \seq\ for $a\le X\le b$ stepping $s$}{forstep$(X\,$=$\;a,b,s,\seq)$}
+\li{multivariable {\tt for}}{forvec$(X\,$=$\;v,\seq)$}
+\li{if $a\ne0$, evaluate $\seq_1$, else $\seq_2$}{if$(a,\{\seq_1\},\{\seq_2\})$}
 \li{evaluate \seq\ until $a\ne0$}{until$(a,\seq)$}
 \li{while $a\ne0$, evaluate \seq}{while$(a,\seq)$}
 \li{exit $n$ innermost enclosing loops}{break$(\{n\})$}
 \li{start new iteration of $n$th enclosing loop}{next$(\{n\})$}
 \li{return $x$ from current subroutine}{return$(x)$}
-\li{error recovery (try \seq1)}{trap$(\{err\},\{\seq2\},\{\seq1\})$}
+\li{error recovery (try $\seq_1$)}{trap$(\{err\},\{\seq_2\},\{\seq_1\})$}
 %
 \subsec{Input/Output}
-\li{prettyprint args with/without newline}{printp(){\rm,} printp1()}
-\li{print args with/without newline}{print(){\rm,} print1()}
+\li{prettyprint args with/without newline}{printp$(),$ printp1$()$}
+\li{print args with/without newline}{print$(),$ print1$()$}
 \li{read a string from keyboard}{input$()$}
-\li{reorder priority of variables $[x,y,z]$}{reorder$(\{[x,y,z]\})$}
+\li{reorder priority of variables $x,y,z$}{reorder$(\{$[$x,y,z$]$\})$}
 \li{output \args\ in \TeX\ format}{printtex$(\args)$}
 \li{write \args\ to file}{write{\rm,} write1{\rm,} writetex$(\file,\args)$}
-\li{read file into GP}{read(\{\file\})}
+\li{read file into GP}{read($\{\file\}$)}
 %
 \subsec{Interface with User and System}
 \li{allocates a new stack of $s$ bytes}{allocatemem$(\{s\})$}
@@ -487,15 +487,15 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{declare global variables}{global$(x,...)$}
 
 \section{Iterations, Sums \& Products}
-\li{numerical integration}{intnum$(X=a,b,\expr,\fl)$}
+\li{numerical integration}{intnum$(X\,$=$\;a,b,\expr,\fl)$}
 \li{sum \expr\ over divisors of $n$}{sumdiv$(n,X,\expr)$}
-\li{sum $X=a$ to $X=b$, initialized at $x$}{sum$(X=a,b,\expr,\{x\})$}
-\li{sum of series \expr}{suminf$(X=a,\expr)$}
+\li{sum $X=a$ to $X=b$, initialized at $x$}{sum$(X\,$=$\;a,b,\expr,\{x\})$}
+\li{sum of series \expr}{suminf$(X\,$=$\;a,\expr)$}
 \li{sum of alternating/positive series}{sumalt{\rm,} sumpos}
-\li{product $a\le X\le b$, initialized at $x$}{prod$(X=a,b,\expr,\{x\})$}
-\li{product over primes $a\le X\le b$}{prodeuler$(X=a,b,\expr)$}
-\li{infinite product $a\le X\le\infty$}{prodinf$(X=a,\expr)$}
-\li{real root of \expr\ between $a$ and $b$}{solve$(X=a,b,\expr)$}
+\li{product $a\le X\le b$, initialized at $x$}{prod$(X\,$=$\;a,b,\expr,\{x\})$}
+\li{product over primes $a\le X\le b$}{prodeuler$(X\,$=$\;a,b,\expr)$}
+\li{infinite product $a\le X\le\infty$}{prodinf$(X\,$=$\;a,\expr)$}
+\li{real root of \expr\ between $a$ and $b$}{solve$(X\,$=$\;a,b,\expr)$}
 \endgroup
 
 % This goes at the top of page 4 (=1st column on back of reference card)
@@ -560,7 +560,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{$f=\sum a_k*t^k$ from $\sum (a_k/k!)*t^k$}{serlaplace$(f)$}
 \li{reverse power series $F$ so $F(f(x))=x$}{serreverse$(f)$}
 \li{Dirichlet series multiplication / division}{dirmul{\rm,} dirdiv$(x,y)$}
-\li{Dirichlet Euler product ($b$ terms)}{direuler$(p=a,b,\expr)$}
+\li{Dirichlet Euler product ($b$ terms)}{direuler$(p\,$=$\;a,b,\expr)$}
 \subsec{$p$-adic Functions}
 \li{square of $x$, good for $2$-adics}{sqr$(x)$}
 \li{Teichmuller character of $x$}{teichmuller$(x)$}
@@ -574,7 +574,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 %
 \li{degree of $f$}{poldegree$(f)$}
 \li{coefficient of degree $n$ of $f$}{polcoeff$(f,n)$}
-\li{round coeffs of $f$ to nearest integer}{round$(f,\{\&e\})$}
+\li{round coeffs of $f$ to nearest integer}{round$(f,\{$\&$e\})$}
 \li{gcd of coefficients of $f$}{content$(f)$}
 \li{replace $x$ by $y$ in $f$}{subst$(f,x,y)$}
 \li{discriminant of polynomial $f$}{poldisc$(f)$}
@@ -584,8 +584,8 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{derivative of $f$ w.r.t. $x$}{deriv$(f,x)$}
 \li{formal integral of $f$ w.r.t. $x$}{intformal$(f,x)$}
 \li{reciprocal poly $x^{\deg f}f(1/x)$}{polrecip$(f)$}
-\li{interpolating poly evaluated at $a$}{polinterpolate$(X,\{Y\},\{a\},\{\&e\})$}
-\li{initialize $t$ for Thue equation solver}{thueinit(f)}
+\li{interpolating poly at $a$}{polinterpolate$(X,\{Y\},\{a\},\{$\&$e\})$}
+\li{initialize $t$ for Thue equation solver}{thueinit$(f)$}
 \li{solve Thue equation $f(x,y)=a$}{thue$(t,a,\{sol\})$}
 %
 \subsec{Roots and Factorization}
@@ -611,7 +611,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \section{Transcendental Functions}
 \li{real, imaginary part of $x$}{real$(x)$, imag$(x)$}
 \li{absolute value, argument of $x$}{abs$(x)$, arg$(x)$}
-\li{square/nth root of $x$}{sqrt$(x)$, sqrtn$(x,n,\&z)$}
+\li{square/nth root of $x$}{sqrt$(x)$, sqrtn$(x,n,$\&$z)$}
 \li{trig functions}{sin, cos, tan, cotan}
 \li{inverse trig functions}{asin, acos, atan}
 \li{hyperbolic functions}{sinh, cosh, tanh}
@@ -638,8 +638,8 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{ceiling of $x$}{ceil$(x)$}
 \li{floor of $x$}{floor$(x)$}
 \li{fractional part of $x$}{frac$(x)$}
-\li{round $x$ to nearest integer}{round$(x,\{\&e\})$}
-\li{truncate $x$}{truncate$(x,\{\&e\})$}
+\li{round $x$ to nearest integer}{round$(x,\{$\&$e\})$}
+\li{truncate $x$}{truncate$(x,\{$\&$e\})$}
 \li{gcd of $x$ and $y$}{gcd$(x,y)$}
 \li{LCM of $x$ and $y$}{lcm$(x,y)$}
 \li{gcd of entries of a vector/matrix}{content$(x)$}
@@ -687,7 +687,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{is $x$ a prime?}{isprime$(x)$}
 \li{is $x$ a strong pseudo-prime?}{ispseudoprime$(x)$}
 \li{is $x$ square-free?}{issquarefree$(x)$}
-\li{is $x$ a square?}{issquare$(x,\{\&n\})$}
+\li{is $x$ a square?}{issquare$(x,\{$\&$n\})$}
 \li{is \var{pol}\ irreducible?}{polisirreducible$(\var{pol})$}
 
 % This goes at the bottom of the second page (column 6)
@@ -702,7 +702,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 
 \section{Elliptic Curves}
 %
-Elliptic curve initially given by $5$-tuple $E=$\kbd{[a1,a2,a3,a4,a6]}.
+Elliptic curve initially given by $5$-tuple $E=$\kbd{[$a_1,a_2,a_3,a_4,a_6$]}.
 Points are \kbd{[x,y]}, the origin is \kbd{[0]}.
 \hfill\break
 \li{Initialize elliptic struct. $\var{ell}$, i.e create}{ellinit$(E,\fl)$}
@@ -725,18 +725,18 @@ If $\var{fl}$ omitted, also
 \key{Tate's $[u^2, u, q]$}{\var{ell}.tate}
 \key{Mestre's $w$}{\var{ell}.w}
 \endindentedkeys
-\li{change curve $E$ using $v=[u,r,s,t]$}{ellchangecurve$(ell,v)$}
-\li{change point $z$ using $v=[u,r,s,t]$}{ellchangepoint$(z,v)$}
-\li{cond, min mod, Tamagawa nmbr $[N,v,c]$}{ellglobalred$(ell)$}
+\li{change curve $E$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangecurve$(ell,v)$}
+\li{change point $z$ using $v=$\kbd{[}$u,r,s,t$\kbd{]}}{ellchangepoint$(z,v)$}
+\li{cond, min mod, Tamagawa num \kbd{[}$N,v,c$\kbd{]}}{ellglobalred$(ell)$}
 \li{Kodaira type of $p$ fiber of $E$}{elllocalred$(ell,p)$}
-\li{add points $z1+z2$}{elladd$(ell,z1,z2)$}
-\li{subtract points $z1-z2$}{ellsub$(ell,z1,z2)$}
+\li{add points $z_1+z_2$}{elladd$(ell,z_1,z_2)$}
+\li{subtract points $z_1-z_2$}{ellsub$(ell,z_1,z_2)$}
 \li{compute $n\cdot z$}{ellpow$(ell,z,n)$}
 \li{check if $z$ is on $E$}{ellisoncurve$(ell,z)$}
 \li{order of torsion point $z$}{ellorder$(ell,z)$}
 \li{torsion subgroup with generators}{elltors$(ell)$}
 \li{$y$-coordinates of point(s) for $x$}{ellordinate$(ell,x)$}
-\li{canonical bilinear form taken at $z1$, $z2$}{ellbil$(ell,z1,z2)$}
+\li{canonical bilinear form taken at $z_1$, $z_2$}{ellbil$(ell,z_1,z_2)$}
 \li{canonical height of $z$}{ellheight$(ell,z,\fl)$}
 \li{height regulator matrix for pts in $x$}{ellheightmatrix$(ell,x)$}
 \li{$p$th coeff $a_p$ of $L$-function, $p$ prime}{ellap$(ell,p)$}
@@ -765,20 +765,20 @@ If $\var{fl}$ omitted, also
 \newcolumn
 
 \section{Graphic Functions}
-\li{crude graph of \expr\ between $a$ and $b$}{plot$(X=a,b,expr)$}
+\li{crude graph of \expr\ between $a$ and $b$}{plot$(X\,$=$\;a,b,expr)$}
 \subsec{High-resolution plot {\rm (immediate plot)}}
-\li{plot \expr\ between $a$ and $b$}{ploth$(X=a,b,expr,\fl,\{n\})$}
+\li{plot \expr\ between $a$ and $b$}{ploth$(X\,$=$\;a,b,expr,\fl,\{n\})$}
 \li{plot points given by lists $lx$, $ly$}{plothraw$(lx,ly,\fl)$}
 \li{terminal dimensions}{plothsizes$()$}
 %
 \subsec{Rectwindow functions}
 \li{init window $w$, with size $x$,$y$}{plotinit$(w,x,y)$}
 \li{erase window $w$}{plotkill$(w)$}
-\li{copy $w$ to $w2$ with offset $(dx,dy)$}{plotcopy$(w,w2,dx,dy)$}
+\li{copy $w$ to $w_2$ with offset $(dx,dy)$}{plotcopy$(w,w_2,dx,dy)$}
 \li{scale coordinates in $w$}{plotscale$(w,x_1,x_2,y_1,y_2)$}
-\li{\kbd{ploth} in $w$}{plotrecth$(w,X=a,b,expr,\fl,\{n\})$}
+\li{\kbd{ploth} in $w$}{plotrecth$(w,X\,$=$\;a,b,expr,\fl,\{n\})$}
 \li{\kbd{plothraw} in $w$}{plotrecthraw$(w,data,\fl)$}
-\li{draw window $w_1$ at $(x_1,y_1)$, \dots} {plotdraw$([[w_1,x_1,y_1],\dots])$}
+\li{draw window $w_1$ at $(x_1,y_1)$, \dots} {plotdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
 %
 \subsec{Low-level Rectwindow Functions}
 %\li{}{plotlinetype$(w,)$}
@@ -798,9 +798,9 @@ If $\var{fl}$ omitted, also
 \li{draw point $(x+dx,y+dy)$}{plotrpoint$(w,dx,dy)$}
 %
 \subsec{Postscript Functions}
-\li{as {\tt ploth}}{psploth$(X=a,b,expr,\fl,\{n\})$}
+\li{as {\tt ploth}}{psploth$(X\,$=$\;a,b,expr,\fl,\{n\})$}
 \li{as {\tt plothraw}}{psplothraw$(lx,ly,\fl)$}
-\li{as {\tt plotdraw}}{psdraw$([[w_1,x_1,y_1],\dots])$}
+\li{as {\tt plotdraw}}{psdraw$($[[$w_1,x_1,y_1$]$,\dots$]$)$}
 \newcolumn
 
 \section{Binary Quadratic Forms}
@@ -808,7 +808,7 @@ If $\var{fl}$ omitted, also
 \li{create $ax^2+bxy+cy^2$ (distance $d$) }{Qfb$(a,b,c,\{d\})$}
 \li{reduce $x$ ($s =\sqrt{D}$, $l=\lfloor s\rfloor$)}
   {qfbred$(x,\fl,\{D\},\{l\},\{s\})$}
-\li{composition of forms}{$x*y$ {\rm or }qfbnucomp$(x,y,l)$}
+\li{composition of forms}{$x$*$y$ {\rm or }qfbnucomp$(x,y,l)$}
 \li{$n$-th power of form}{$x$\pow$n$ {\rm or }qfbnupow$(x,n)$}
 \li{composition without reduction}{qfbcompraw$(x,y)$}
 \li{$n$-th power without reduction}{qfbpowraw$(x,n)$}
@@ -856,7 +856,7 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \endindentedkeys
 \li{compute a \var{bnf}\ from small \var{bnf}}{bnfmake$(\var{sbnf})$}
 %
-\li{add $S$-class group and units, yield \var{bnfs}}{bnfsunit$(\var{nf},S)$}
+\li{add $S$-class group and units, yield \var{bnf} s}{bnfsunit$(\var{nf},S)$}
 \li{init class field structure \var{bnr}}{bnrinit$(\var{bnf},m,\fl)$}
 %
 \subsec{bnr members: {\rm same as \var{bnf}, plus}}
@@ -890,13 +890,13 @@ $($\kbd{nfelt}$)$\kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
 \li{express $x$ on integer basis}{nfalgtobasis$(\var{nf},x)$}
 \li{express element\ $x$ as a polmod}{nfbasistoalg$(\var{nf},x)$}
 \li{quadratic Hilbert symbol (at $p$)}{nfhilbert$(\var{nf},a,b,\{p\})$}
-\li{roots of $g$ belonging to {\tt nf}}{nfroots$(\var{nf},g)$}
-\li{factor $g$ in {\tt nf}}{nffactor$(\var{nf},g)$}
-\li{factor $g$ mod prime $pr$ in {\tt nf}}{nffactormod$(\var{nf},g,pr)$}
-\li{number of roots of $1$ in {\tt nf}}{nfrootsof1$(nf)$}
-\li{conjugates of a root $\theta$ of {\tt nf}}{nfgaloisconj$(\var{nf},\fl)$}
+\li{roots of $g$ belonging to \var{nf}}{nfroots$(\var{nf},g)$}
+\li{factor $g$ in \var{nf}}{nffactor$(\var{nf},g)$}
+\li{factor $g$ mod prime $pr$ in \var{nf}}{nffactormod$(\var{nf},g,pr)$}
+\li{number of roots of unity in \var{nf}}{nfrootsof1$(\var{nf}\,)$}
+\li{conjugates of a root $\theta$ of \var{nf}}{nfgaloisconj$(\var{nf},\fl)$}
 \li{apply Galois automorphism $s$ to $x$}{nfgaloisapply$(\var{nf},s,x)$}
-\li{subfields (of degree $d$) of {\tt nf}}{nfsubfields$(\var{nf},\{d\})$}
+\li{subfields (of degree $d$) of \var{nf}}{nfsubfields$(\var{nf},\{d\})$}
 %
 \subsec{Dedekind Zeta Function $\zeta_K$}
 \li{$\zeta_K$ as Dirichlet series, $N(I)<b$}{dirzetak$(\var{nf},b)$}
@@ -904,9 +904,9 @@ $($\kbd{nfelt}$)$\kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
 \li{compute $\zeta_K(s)$}{zetak$(\var{nfz},s,\fl)$}
 \li{Artin root number of $K$}{bnrrootnumber$(\var{bnr},\var{chi},\fl)$}
 
-\section{Class Groups \& Units (\var{bnf}, bnr)}
+\section{Class Groups \& Units (bnf, bnr)}
 \leavevmode
-$a1,\{a2\},\{a3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
+$a_1,\{a_2\},\{a_3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \hfill\break
 %
 \li{remove GRH assumption from \var{bnf}}{bnfcertify$(\var{bnf})$}
@@ -920,16 +920,16 @@ $a1,\{a2\},\{a3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 \subsec{Class Field Theory}
 \li{ray class group structure for mod.~$m$}{bnrclass$(\var{bnf},m,\fl)$}
 \li{ray class number for mod.~$m$}{bnrclassno$(\var{bnf},m)$}
-\li{discriminant of class field ext}{bnrdisc$(a1,\{a2\},\{a3\})$}
+\li{discriminant of class field ext}{bnrdisc$(a_1,\{a_2\},\{a_3\})$}
 \li{ray class numbers, $l$ list of mods}{bnrclassnolist$(\var{bnf},l)$}
 \li{discriminants of class fields}{bnrdisclist$(\var{bnf},l,\{arch\},\fl)$}
 \li{decode output from \kbd{bnrdisclist}}{bnfdecodemodule$(\var{nf},fa)$}
-\li{is modulus the conductor?}{bnrisconductor$(a1,\{a2\},\{a3\})$}
+\li{is modulus the conductor?}{bnrisconductor$(a_1,\{a_2\},\{a_3\})$}
 \li{conductor of character $chi$}{bnrconductorofchar$(\var{bnr},chi)$}
-\li{conductor of extension}{bnrconductor$(a1,\{a2\},\{a3\},\fl)$}
+\li{conductor of extension}{bnrconductor$(a_1,\{a_2\},\{a_3\},\fl)$}
 \li{conductor of extension def.\ by $g$}{rnfconductor$(\var{bnf},g)$}
 \li{Artin group of ext.\ def'd by $g$}{rnfnormgroup$(\var{bnr},g)$}
-\li{subgroups of {\tt bnr}, index $<=b$}{subgrouplist$(\var{bnr},b,\fl)$}
+\li{subgroups of \var{bnr}, index $<=b$}{subgrouplist$(\var{bnr},b,\fl)$}
 \li{rel.\ eq.\ for class field def'd by $sub$}{rnfkummer$(\var{bnr},sub,\{d\})$}
 \li{same, using Stark units (real field)}{bnrstark$(\var{bnr},sub,\fl)$}
 
@@ -939,11 +939,11 @@ $a1,\{a2\},\{a3\}$ usually $bnr,subgp$ or $\var{bnf},module,\{subgp\}$
 
 \section{Ideals}
 Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
-\li{is $id$ an ideal in {\tt nf}?}{nfisideal$(\var{nf},id)$}
-\li{is $x$ principal in {\tt bnf}?}{bnfisprincipal$(\var{bnf},x)$}
+\li{is $id$ an ideal in \var{nf} ?}{nfisideal$(\var{nf},id)$}
+\li{is $x$ principal in \var{bnf} ?}{bnfisprincipal$(\var{bnf},x)$}
 \li{principal ideal generated by $x$}{idealprincipal$(\var{nf},x)$}
 \li{principal idele generated by $x$}{ideleprincipal$(\var{nf},x)$}
-\li{give $[a,b]$, s.t.~ $a\ZZ_K+b\ZZ_K = x$}{idealtwoelt$(\var{nf},x,\{a\})$}
+\li{give {\tt [}$a,b${\tt ]}, s.t.~ $a\ZZ_K+b\ZZ_K = x$}{idealtwoelt$(\var{nf},x,\{a\})$}
 \li{put ideal $a$ ($a\ZZ_K+b\ZZ_K$) in HNF form}{idealhnf$(\var{nf},a,\{b\})$}
 \li{norm of ideal $x$}{idealnorm$(\var{nf},x)$}
 \li{minimum of ideal $x$ (direction $v$)}{idealmin$(\var{nf},x,v)$}
@@ -956,14 +956,14 @@ Ideals are elements, primes, or matrix of generators in HNF.\hfill\break
 \li{$n$-th power of ideal $x$}{idealpow$(\var{nf},x,n,\fl)$}
 \li{inverse of ideal $x$}{idealinv$(\var{nf},x)$}
 \li{divide ideal $x$ by $y$}{idealdiv$(\var{nf},x,y,\fl)$}
-\li{Find $[a,b]\in x\times y$, $a+b=1$}{idealaddtoone$(\var{nf},x,\{y\})$}
+\li{Find $(a,b)\in x\times y$, $a+b=1$}{idealaddtoone$(\var{nf},x,\{y\})$}
 %
 \subsec{Primes and Multiplicative Structure}
-\li{factor ideal $x$ in {\tt nf}}{idealfactor$(\var{nf},x)$}
-\li{recover $x$ from its factorization in {\tt nf}}{factorback$(x,nf)$}
-\li{decomposition of prime $p$ in {\tt nf}}{idealprimedec$(\var{nf},p)$}
+\li{factor ideal $x$ in \var{nf}}{idealfactor$(\var{nf},x)$}
+\li{recover $x$ from its factorization in \var{nf}}{factorback$(x,nf)$}
+\li{decomposition of prime $p$ in \var{nf}}{idealprimedec$(\var{nf},p)$}
 \li{valuation of $x$ at prime ideal $pr$}{idealval$(\var{nf},x,pr)$}
-\li{weak approximation theorem in {\tt nf}}{idealchinese$(\var{nf},x,y)$}
+\li{weak approximation theorem in \var{nf}}{idealchinese$(\var{nf},x,y)$}
 \li{give $bid=$structure of $(\ZZ_K/id)^*$}{idealstar$(\var{nf},id,\fl)$}
 \li{discrete log of $x$ in $(\ZZ_K/bid)^*$}{ideallog$(\var{nf},x,bid)$}
 \li{\kbd{idealstar} of all ideals of norm $\le b$}{ideallist$(\var{nf},b,\fl)$}
