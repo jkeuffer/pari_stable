@@ -3488,7 +3488,7 @@ nf_all_roots(GEN nf, GEN x, long prec)
   x = unifpol(nf, x, 0);
   y[1] = x[1];
   for (i=2; i<l; i++) y[i] = (long) nftocomplex(nf, (GEN)x[i]);
-  if (gprecision(y) <= 3) return NULL;
+  i = gprecision(y); if (i && i <= 3) return NULL;
 
   v = cgetg(ru, t_VEC);
   z = cgetg(l, t_POL); z[1] = x[1];
