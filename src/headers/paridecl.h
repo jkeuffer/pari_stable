@@ -781,6 +781,7 @@ GEN     zell(GEN e, GEN z, long prec);
 
 /* es.c */
 
+GEN     GENtocanonicalstr(GEN x);
 GEN     GENtoGENstr(GEN x);
 char*   GENtoTeXstr(GEN x);
 char*   GENtostr(GEN x);

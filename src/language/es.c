@@ -734,6 +734,17 @@ GENtoGENstr(GEN x)
   char *s;
   GEN z;
   T.prettyp = f_RAW;
+  s = GENtostr0(x, &T, &gen_output);
+  z = STRtoGENstr(s); free(s); return z;
+}
+
+GEN
+GENtocanonicalstr(GEN x)
+{
+  pariout_t T = DFLT_OUTPUT;
+  char *s;
+  GEN z;
+  T.prettyp = f_RAW;
   T.sp = 0;
   s = GENtostr0(x, &T, &gen_output);
   z = STRtoGENstr(s); free(s); return z;
