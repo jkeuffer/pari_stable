@@ -1767,7 +1767,7 @@ approx_0(GEN x, GEN y)
 static long
 gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
 {
-  long i,e, k = i0, ex = -HIGHEXPOBIT, lx = lg(x);
+  long i,e, k = i0, ex = - (long)HIGHEXPOBIT, lx = lg(x);
   GEN p,r;
   if (c)
     for (i=i0; i<lx; i++)

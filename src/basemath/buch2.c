@@ -482,7 +482,7 @@ not_given(gpmem_t av, long flun, long reason)
 static long
 expgexpo(GEN x)
 {
-  long i,j,e, E = -HIGHEXPOBIT;
+  long i,j,e, E = - (long)HIGHEXPOBIT;
   GEN p1;
 
   for (i=1; i<lg(x); i++)
