@@ -1032,31 +1032,12 @@ extern GEN gauss_intern(GEN a, GEN b);
 
 /* bound for q(vS) := || vS ||_2^2 */
 double
-bound_vS(long tmax, GEN *ptB)
+bound_vS(GEN ML)
 {
   gpmem_t av = avma;
-  double Nx;
-  GEN z, B = *ptB;
-  if (tmax > 0)
-  { /* bound small vector in terms of a modified L2 norm of a
-     * left inverse of BL */
-    z = gauss_intern(B,NULL); /* 1/BL */
-    if (!z) /* not maximal rank */
-    {
-      avma = av;
-      B = hnfall_i(B,NULL,1);
-      av = avma;
-      z = invmat(B);
-    }
-    Nx = gtodouble(norml2_spec(z, DEFAULTPREC));
-    avma = av;
-  }
-  else
-  {
-    long n0 = lg(B)-1;
-    Nx = (double)n0; /* first time: BL = id */
-  }
-  *ptB = B; return Nx;
+  GEN MLinv = gauss_intern(ML,NULL); /* left inverse */
+  double Nx = gtodouble(norml2_spec(MLinv, DEFAULTPREC));
+  avma = av; return Nx;
 }
 
 /* B from lllint_i: return [ |b_i^*|^2, i ] */
@@ -1072,12 +1053,12 @@ GS_norms(GEN B, long prec)
 }
 
 static GEN
-check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
+check_factors(GEN P, GEN ML, GEN bound, GEN famod, GEN pa)
 {
   long i, j, r, n0;
   GEN pol = P, lcpol, lc, list, piv, y, pas2;
 
-  piv = special_pivot(BL);
+  piv = special_pivot(ML);
   if (!piv) return NULL;
   if (DEBUGLEVEL>3) fprintferr("special_pivot output:\n%Z\n",piv);
 
@@ -1117,6 +1098,37 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
   list[i] = (long)y; return list;
 }
 
+long
+LLL_check_progress(GEN Bnorm, GEN m, long r, long C, GEN *ML,
+                   long id, long *ti_LLL)
+{
+  GEN B, norm, u;
+  long i, s, R;
+
+  if (DEBUGLEVEL>2) (void)gentimer(id);
+  m = lllint_ip(m, 4);
+  u = lllint_i(m, 1000, 0, NULL, NULL, &B);
+  if (DEBUGLEVEL>2) *ti_LLL += gentimer(id);
+  norm = GS_norms(B, DEFAULTPREC);
+  for (R=lg(m)-1; R > 0; R--)
+    if (cmprr((GEN)norm[R], Bnorm) < 0) break;
+  if (R > r) return R; /* no progress */
+  if (R <= 1)
+  {
+    if (R == 0) err(bugparier,"LLL_cmbf [no factor]");
+    return R;
+  }
+
+  setlg(u, R+1);
+  for (i=1; i<=R; i++) setlg(u[i], r+1);
+  if (C != 1) u = gdivexact(u, stoi(C));
+
+  s = R; u = image(u); R = lg(u)-1;
+  if (DEBUGLEVEL>2 && R < s)
+    fprintferr("LLL_cmbf: free rank decrease = %ld\n", R - s);
+  *ML = gmul(*ML, u); return R;
+}
+
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
  * van Hoeij's knapsack
  *
@@ -1127,12 +1139,12 @@ check_factors(GEN P, GEN BL, GEN bound, GEN famod, GEN pa)
 static GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
-  const long s = 2; /* # of traces added at each step */
+  const long N = 2; /* # of traces added at each step */
   long BitPerFactor = 3; /* nb bits in p^(a-b) / modular factor */
-  long i,j,C,r,S,tmax,n0,n,dP = degpol(P);
+  long i,j,C,r,tmax,n0,dP = degpol(P);
   double logp = log((double)itos(p)), LOGp2 = LOG2/logp;
-  double b0 = log((double)dP*2) / logp, logBr;
-  GEN lP, Br, B, Bnorm, T, T2, TT, BL, m, u, norm, list;
+  double b0 = log((double)dP*2) / logp, logBr, BvS;
+  GEN lP, Br, Bnorm, T, T2, TT, ML, m, list;
   gpmem_t av, av2, lim;
   long id = get_timer(0), ti_LLL = 0, ti_CF  = 0;
 
@@ -1142,7 +1154,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   if (lP) Br = gmul(lP, Br);
   logBr = gtodouble(glog(Br, DEFAULTPREC)) / logp;
 
-  n0 = n = r = lg(famod) - 1;
+  n0 = r = lg(famod) - 1;
   list = cgetg(n0+1, t_COL);
 
   av = avma; lim = stack_lim(av, 1);
@@ -1151,29 +1163,25 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   for (i=1; i<=n0; i++)
   {
     TT[i] = 0;
-    T [i] = lgetg(s+1, t_COL);
+    T [i] = lgetg(N+1, t_COL);
   }
-  BL = idmat(n0);
-  /* tmax = current number of traces used (and computed so far)
-   * S = number of traces used at the round's end = tmax + s */
-  for (tmax = 0;; tmax = S)
+  ML = idmat(n0);
+  BvS = (double)n0;
+  /* tmax = current number of traces used (and computed so far) */
+  for (tmax = 0;; tmax += N)
   {
-    long b, goodb;
-    double Nx;
+    long b, goodb, S = tmax + N;
 
     if (DEBUGLEVEL>2)
       fprintferr("\nLLL_cmbf: %ld potential factors (tmax = %ld)\n", r, tmax);
-    Nx = bound_vS(tmax,&BL);
 
-    C = (long)sqrt(s*n0*n0/4. / Nx);
-    if (C == 0) C = 1; /* frequent after a few iterations */
-    Bnorm = dbltor((Nx * C*C + s*n0*n0/4.) * 1.00001);
+    C = (long)ceil(sqrt(N*n0*n0/4. / BvS));
+    Bnorm = dbltor((BvS * C*C + N*n0*n0/4.) * 1.00001);
 
-    S = tmax + s;
     b = (long)ceil(b0 + S*logBr);
     if (a <= b)
     {
-      a = (long)ceil(b + 3*s*logBr) + 1; /* enough for 3 more rounds */
+      a = (long)ceil(b + 3*N*logBr) + 1; /* enough for 3 more rounds */
       pa = gpowgs(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
       for (i=1; i<=n0; i++) TT[i] = 0;
@@ -1185,11 +1193,11 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       GEN p2 = polsym_gen((GEN)famod[i], (GEN)TT[i], S, NULL, pa);
       TT[i] = (long)p2;
       p2 += 1+tmax; /* ignore traces number 0...tmax */
-      for (j=1; j<=s; j++) p1[j] = p2[j];
+      for (j=1; j<=N; j++) p1[j] = p2[j];
       if (lP)
       { /* make Newton sums integral */
         GEN lPpow = gpowgs(lP, tmax);
-        for (j=1; j<=s; j++)
+        for (j=1; j<=N; j++)
         {
           lPpow = mulii(lPpow,lP);
           p1[j] = lmulii((GEN)p1[j], lPpow);
@@ -1198,24 +1206,19 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     }
 
     av2 = avma;
-    T2 = gmod( gmul(T, BL), pa );
+    T2 = gmod( gmul(T, ML), pa );
     r = lg(T2)-1;
     goodb = init_padic_prec(gexpo(T2), BitPerFactor, r, LOGp2);
     if (goodb > b) b = goodb;
     if (DEBUGLEVEL>2) fprintferr("LLL_cmbf: (a, b) = (%ld, %ld)\n", a,b);
 
     m = concatsp( vconcat( gscalsmat(C, r), gdivround(T2, gpowgs(p,b)) ),
-                  vconcat( zeromat(r, s),   gscalmat(gpowgs(p,a-b), s) ) );
+                  vconcat( zeromat(r, N),   gscalmat(gpowgs(p,a-b), N) ) );
     /*     [  C        0      ]
      * m = [                  ]   square matrix
-     *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
+     *     [ T2   p^(a-b) I_s ]   T2 = T * ML  truncated
      */
-    if (DEBUGLEVEL>2) (void)gentimer(id);
-    u = lllint_i(m, 4, 0, NULL, NULL, &B);
-    if (DEBUGLEVEL>2) ti_LLL += gentimer(id);
-    norm = GS_norms(B, DEFAULTPREC);
-    for (i=r+s; i>0; i--)
-      if (cmprr((GEN)norm[i], Bnorm) < 0) break;
+    i = LLL_check_progress(Bnorm, m, r, C, &ML,/*dbg:*/ id, &ti_LLL);
     if (i > r)
     { /* no progress. Note: even if i == r we may have made some progress */
       avma = av2; BitPerFactor += 2;
@@ -1223,29 +1226,21 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
         fprintferr("LLL_cmbf: increasing BitPerFactor = %ld\n", BitPerFactor);
       continue;
     }
-    if (i < r) BitPerFactor = 3;
+    r = i;
+    if (r == 1) { list = _col(P); break; }
 
-    n = r; r = i;
-    if (r <= 1)
-    {
-      if (r == 0) err(bugparier,"LLL_cmbf [no factor]");
-      list = _col(P); break;
-    }
-
-    setlg(u, r+1);
-    for (i=1; i<=r; i++) setlg(u[i], n+1);
-    u = gdivexact(u, stoi(C));
-    BL = gerepileupto(av2, gmul(BL, u));
     if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"LLL_cmbf");
-      gerepileall(av, 4, &BL, &TT, &T, &famod);
+      gerepileall(av, 4, &ML, &TT, &T, &famod);
     }
-    if (r*rec >= n0) continue;
+    else ML = gerepileupto(av2, ML);
+    BvS = bound_vS(ML);
+    if (rec && r*rec >= n0) continue;
 
     av2 = avma;
     if (DEBUGLEVEL>2) (void)gentimer(id);
-    list = check_factors(P, BL, bound, famod, pa);
+    list = check_factors(P, ML, bound, famod, pa);
     if (DEBUGLEVEL>2) ti_CF += gentimer(id);
     if (list) break;
     avma = av2;
