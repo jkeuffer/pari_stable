@@ -24,15 +24,15 @@ something like:
 
 \noindent
 This means that the GP function \kbd{foo} has one mandatory argument $x$, and
-an optional one, $\fl$, whose default value is 0 (the $\{\}$ should never be
+an optional one, $\fl$, whose default value is 0. (The $\{\}$ should not be
 typed, it is just a convenient notation we will use throughout to denote
-optional arguments). That is, you can type \kbd{foo(x,2)}, or \kbd{foo(x)},
+optional arguments.) That is, you can type \kbd{foo(x,2)}, or \kbd{foo(x)},
 which is then understood to mean \kbd{foo(x,0)}. As well, a comma or closing
 parenthesis, where an optional argument should have been, signals to GP it
 should use the default. Thus, the syntax \kbd{foo(x,)} is also accepted as a
 synonym for our last expression. When a function has more than one optional
 argument, the argument list is filled with user supplied values, in order.
-And when none are left, the defaults are used instead. Thus, assuming that
+When none are left, the defaults are used instead. Thus, assuming that
 \kbd{foo}'s prototype had been
 $$\hbox{%
 \key{foo}$(\{x=1\},\{y=2\},\{z=3\})$,%
@@ -42,13 +42,19 @@ you \kbd{foo(6,4,3)}. In the rare case when you want to set some far away
 argument, and leave the defaults in between as they stand, you can use the
 ``empty arg'' trick alluded to above: \kbd{foo(6,,1)} would yield
 \kbd{foo(6,2,1)}. By the way, \kbd{foo()} by itself yields
-\kbd{foo(1,2,3)} as was to be expected. In this rather special case of a
-function having no mandatory argument, you can even omit the $()$: a
-standalone \kbd{foo} would be enough (though we don't really recommend it for
-your scripts, for the sake of clarity). In defining GP syntax, we strove
-to put optional arguments at the end of the argument list (of course, since
-they would not make sense otherwise), and in order of decreasing usefulness
-so that, most of the time, you will be able to ignore them.
+\kbd{foo(1,2,3)} as was to be expected.
+
+In this rather special case of a function having no mandatory argument, you
+can even omit the $()$: a standalone \kbd{foo} would be enough (though we
+don't really recommend it for your scripts, for the sake of clarity). In
+defining GP syntax, we strove to put optional arguments at the end of the
+argument list (of course, since they would not make sense otherwise), and in
+order of decreasing usefulness so that, most of the time, you will be able to
+ignore them.
+
+Finally, an optional argument (between braces) followed by a star, like
+$\{\var{x}\}*$, means that any number of such arguments (possibly none) can
+be given. This is in particular used by the various \kbd{print} routines.
 
 \misctitle{Flags}. A \tev{flag} is an argument which, rather than conveying
 actual information to the routine, intructs it to change its default
@@ -60,12 +66,12 @@ $\bullet$ generic: all valid values for the flag are individually
 described (``If \fl\ is equal to $1$, then\dots'').
 
 $\bullet$ binary:\sidx{binary flag} use customary binary notation as a
-compact way to represent many toggles with just one number. Letting
+compact way to represent many toggles with just one integer. Let
 $(p_0,\dots,p_n)$ be a list of switches (i.e.~of properties which take either
 the value $0$ or~$1$), the number $2^3 + 2^5 = 40$ means that $p_3$ and $p_5$
-have been set (that is, set to $1$), and none of the others were (that is,
-they were set to $0$). This is announced as ``The binary digits of $\fl$ mean
-1: $p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the available consecutive
+are set (that is, set to $1$), and none of the others are (that is, they
+are set to $0$). This is announced as ``The binary digits of $\fl$ mean 1:
+$p_0$, 2: $p_1$, 4: $p_2$'', and so on, using the available consecutive
 powers of~$2$.
 
 \misctitle{Mnemonics for flags}. Numeric flags as mentionned above are
@@ -105,11 +111,11 @@ prototype is prefixed with a \& sign, as in
 
 \key{foo}$(x,\&e)$
 
-\noindent it means that, besides the normal return value, the variable named
-$e$ may be set as a side effect. When passing the argument, the \& sign has
-to be typed in explicitly. As of version \vers, this \tet{pointer} argument
-is optional for all documented functions, hence the \& will always appear
-between brackets as in \kbd{issquare}$(x,\{\&e\})$.
+\noindent it means that, besides the normal return value, the function may
+assign a value to $e$ as a side effect. When passing the argument, the \&
+sign has to be typed in explicitly. As of version \vers, this \tet{pointer}
+argument is optional for all documented functions, hence the \& will always
+appear between brackets as in \kbd{issquare}$(x,\{\&e\})$.
 
 \misctitle{About library programming}.
 the \var{library} function \kbd{foo}, as defined
@@ -500,26 +506,39 @@ from such an element, you can apply \tet{eval} to it.
 
 \syn{gtoset}{x}.
 
-\subsecidx{Str}$(\{x=\hbox{\kbd{""}}\},\{\fl=0\})$: converts $x$ into a
-character string (type \typ{STR}, the empty string if $x$ is omitted). To
-recover an ordinary \kbd{GEN} from a string, apply \kbd{eval} to it. The
-arguments of \kbd{Str} are evaluated in string context (see
-\secref{se:strings}). If \fl\ is set, treat $x$ as a filename and perform
-\idx{environment expansion} on the string. This feature can be used to read
-\idx{environment variable} values.
+\subsecidx{Str}$(\{x\}*)$: converts its argument list into a
+single character string (type \typ{STR}, the empty string if $x$ is omitted).
+To recover an ordinary \kbd{GEN} from a string, apply \kbd{eval} to it. The
+arguments of \kbd{Str} are evaluated in string context, see \secref{se:strings}.
 
 \bprog
-? i = 1; Str("x" i)
-%1 = "x1"
+? x2 = 0; i = 2; Str(x, i)
+%1 = "x2"
 ? eval(%)
-%2 = x1;
-? Str("$HOME", 1)
-%3 = "/home/pari"
+%2 = 0
 @eprog
 
-\syn{strtoGENstr}{x,\fl}. This function is mostly useless in library mode. Use
-the pair \tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{char*} and
-\kbd{GEN}.
+\noindent This function is mostly useless in library mode. Use the pair
+\tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{GEN} and \kbd{char*}.
+The latter returns a malloced string, which should be freed after usage.
+
+\subsecidx{Strexpand}$(\{x\}*)$: converts its argument list into a
+single character string (type \typ{STR}, the empty string if $x$ is omitted).
+Then performe \idx{environment expansion}, see \secref{se:envir}.
+This feature can be used to read \idx{environment variable} values.
+
+\bprog
+? Strexpand("$HOME/doc")
+%1 = "/home/pari/doc"
+@eprog
+
+The individual arguments are read in string context, see \secref{se:strings}.
+
+\subsecidx{Strtex}$(\{x\}*)$: translates its arguments to TeX
+format, and concatenates the results into a single character string (type
+\typ{STR}, the empty string if $x$ is omitted).
+
+The individual arguments are read in string context, see \secref{se:strings}.
 
 \subsecidx{Vec}$({x=[\,]})$: transforms the object $x$ into a row vector.
 The vector will be with one component only, except when $x$ is a
@@ -7241,10 +7260,6 @@ the difference between \emph{strings} and \emph{keywords} (see
 \secref{se:strings}): the latter don't get expanded at all, and you can type
 them without any enclosing quotes. The former are dynamic objects, where
 everything outside quotes gets immediately expanded.
-
-We need an additional notation for this chapter. An argument between braces,
-followed by a star, like $\{\var{str}\}*$, means that any number of such
-arguments (possibly none) can be given.
 
 \subsubsecidx{addhelp}$(S,\var{str})$:\label{se:addhelp} changes the help
 message for the symbol $S$. The string \var{str} is expanded on the spot

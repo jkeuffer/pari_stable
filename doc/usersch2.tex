@@ -155,12 +155,15 @@ is mostly useful to modify or set the defaults \kbd{primelimit} or
 \misctitle{(somewhat technical) Note:} As we will see in
 \secref{se:strings}, the second argument to \kbd{default} will be subject
 to string context expansion, which means you can use run-time values. In
-other words, something like \kbd{a = 3; default(logfile, "\var{some
-filename}" a ".log")} will work (and log the output in
-\var{some filename}3.log).
+other words, something like 
+\bprog
+  a = 3;
+  default(logfile, "\var{some filename}" a ".log")
+@eprog
+logs the output in \kbd{\var{some filename}3.log}.
 
-Some defaults will be expanded further when the values are used (after the
-above expansion has been performed):
+Some defaults will be expanded further when the values are used, after the
+above expansion has been performed:
 
 $\bullet$ \teb{time expansion}: the string is sent through the library
 function \tet{strftime}. This means that \kbd{\%}\var{char} combinations have
@@ -176,13 +179,13 @@ instance,
 will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
 to GP's usual prompt.
 
-\unix \indent $\bullet$ \teb{environment expansion}: When the string contains a
-sequence of the form \kbd{\$\var{SOMEVAR}} (e.g.~\kbd{\$HOME}) the
-environment is searched and if \var{SOMEVAR} is defined, the sequence is
-replaced by the corresponding value. Also the \kbd{\til} symbol has the
-same meaning as in the C and bash shells~--- \kbd{\til} by itself stands
-for your home directory, and \kbd{\til{}user} is expanded to \kbd{user}'s
-home directory. This is applied to all filenames\sidx{filename}.
+$\bullet$ \teb{environment expansion}: When the string contains a sequence of
+the form \kbd{\$\var{SOMEVAR}} (e.g.~\kbd{\$HOME}) the environment is
+searched and if \var{SOMEVAR} is defined, the sequence is replaced by the
+corresponding value. Also the \kbd{\til} symbol has the same meaning as in
+the C and bash shells~--- \kbd{\til} by itself stands for your home
+directory, and \kbd{\til{}user} is expanded to \kbd{user}'s home directory.
+This is applied to all filenames\sidx{filename}. \label{se:envir}
 
 \subsecidx{buffersize} (default \kbd{30k}): GP input is buffered, which means
 only so many bytes of data can be read at a time before a command is
@@ -372,7 +375,8 @@ The specific positive values of \kbd{log} have the following meaning
 \tet{TeXstyle}).
 
 \subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
-used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
+used when the \kbd{log} toggle is on. Environment and time expansion are
+performed.
 
 \subsecidx{new_galois_format} (default \kbd{0}): if this is set, the
 \tet{polgalois} command will use a different, more consistent, naming scheme
@@ -427,7 +431,7 @@ DOS world, since colons are pre-empted for drive names). When asked to read a
 file whose name does not contain \kbd{/} (i.e.~no explicit path was given),
 GP will look for it in these directories, in the order they were written in
 \kbd{path}. Here, as usual, '.' means the current directory, and '$.\,.$' its
-immediate parent. Tilde expansion is performed.
+immediate parent. Environment expansion is performed.
 
 \subsecidxunix{prettyprinter} (default \kbd{"tex2mail -TeX -noindent
 -ragged -by\_par"}) the name of an external prettyprinter to use when
@@ -474,7 +478,7 @@ applies to \kbd{prompt\_cont} as well.
 
 \subsecidx{psfile} (default \kbd{"pari.ps"}): name of the default file where
 GP is to dump its PostScript drawings (these will always be appended, so that
-no previous data are lost). Tilde and time expansion are performed.
+no previous data are lost). Environment and time expansion are performed.
 
 \subsecidx{readline} (default \kbd{1}): switches readline line-editing
 facilities on and off. This may be useful if you are running GP in a Sun
@@ -1643,7 +1647,7 @@ depending on your shell, to raise the process available stack space
 in GP using the following trick (neat example due to Bill Daly):
 
 \bprog
-calc(f, x) = eval(Str( f "(x)"))
+calc(f, x) = eval( Str(f, "(x)") )
 @eprog
 
 \noindent If you call this with \kbd{calc("sin", 1)}, it will
@@ -1780,12 +1784,12 @@ necessary (it will be evaluated first).
 @eprog
 
 Some functions expect strings for some of their arguments: \tet{print} would
-be an obvious example, \tet{Str} is a less obvious but very useful one (see
-the end of this section for a complete list). While typing in such an
-argument, you will be said to be in \tev{string context}. The rest of
-this section is devoted to special syntactical tricks which can be used with
-such arguments (and only here; you will get an error message if you try these
-outside of string context):
+be an obvious example, \tet{Str} is a less obvious but useful one (see the
+end of this section for a complete list). While typing in such an argument,
+you will be said to be in \tev{string context}. The rest of this section is
+devoted to special syntactical tricks which can be used with such arguments
+(and only here; you will get an error message if you try these outside of
+string context):
 
 $\bullet$ Writing two strings alongside one another will just concatenate
 them, producing a longer string. Thus it is equivalent to type in
@@ -1836,19 +1840,7 @@ specify the types of arguments they expect: either generic PARI objects
 keyword case, only a very small set of words will actually be meaningful
 (the \kbd{default} function is a prominent example).
 
-Let's now try some not-so-stupid exercises to get the hang of it. Try to
-guess the results of the following commands without actually typing them,
-assuming that the \kbd{print} command evaluates and prints its (string)
-arguments in left-to-right order, ending with a newline (and returns 0
-as an unprinted result):
-
-\bprog
-  print()
-  print(1+3"a,3" ,4)
-  print(a=3, (1 + ((a-3)==print())) (a = (a == 5\/2)))
-@eprog
-
-\noindent Here is a less artificial example, used to create generic
+\noindent Here is a useful example, used to create generic
 matrices\sidx{generic matrix}\sidx{matrix}:
 
 \bprog
@@ -1861,22 +1853,27 @@ matrices\sidx{generic matrix}\sidx{matrix}:
 
 \noindent
 Note that the argument of \kbd{Str} is evaluated in string context, and
-really consists of 5 pieces (exercise: why are the empty strings
+really consists of 5 pieces. (Exercise: why are the empty strings
 necessary?). This part could also have been written as
 \kbd{concat(concat(Str(s), i), j)} (but \emph{not} as \kbd{concat(Str(s),
 concat(i,j))}!). More simply, we could have written \kbd{concat([Str(s),
 i,j])}, or even \kbd{concat([s,i,j])}, silently assuming that \kbd{s} will
-indeed be a string. In practice \kbd{Str} is much more efficient, if
-slightly more cryptic.
+indeed be a string. 
 
-\noindent And here's a final one: the function \kbd{hist} returns all history
-entries from \kbd{\%$a$} to \kbd{\%$b$} neatly packed into a single vector
+In version 2.2.5, the prototype of \kbd{Str} was extended to allow more than
+one argument, which are concatenated into a single string. So, finally,
+\kbd{Str(s, i, j)} should now be preferred to the above solution, since it is
+less cryptic and more efficient.
+
+\noindent A last example: the function \kbd{hist} returns all
+history entries from \kbd{\%$a$} to \kbd{\%$b$} neatly packed into a single
+vector
 \bprog
-?  hist(a,b) = vector(b-a+1, i, eval(Str("%" a-1+i)))
+?  hist(a,b) = vector(b-a+1, i, eval(Str("%", a-1+i)))
 @eprog
 
-\noindent The arguments of the following functions are processed in string
-context:
+\misctitle{Reference:} The arguments of the following functions are processed
+in string context:
 
 \settabs\+\indent&\cr
 \+&\tet{Str}\cr
