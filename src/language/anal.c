@@ -1481,12 +1481,11 @@ matrix_block(GEN p)
 {
   matcomp c;
   char *ini = analyseur;
-  GEN res, cpt = matcell(p, &c);
+  GEN cpt = matcell(p, &c);
 
-  if (*analyseur == ',' || *analyseur == ')') /* fast special case */
-    res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
-  else
+  if (*analyseur != ',' && *analyseur != ')') /* fast shortcut */
   {
+    GEN res;
     F2GEN fun = affect_block(&res);
     if (res)
     {
@@ -1495,12 +1494,10 @@ matrix_block(GEN p)
       cpt = matcell(p, &c); /* recompute in case affect_block modified lvalue */
       analyseur = end;
       if (fun) res = fun(cpt, res);
-      res = change_compo(&c,res);
+      return change_compo(&c,res);
     }
-    else
-      res = isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
   }
-  return res;
+  return isonstack(cpt)? gcopy(cpt): cpt; /* no assignment */
 }
 
 /* x = gzero: no default value, otherwise a t_STR, formal expression for
