@@ -21,7 +21,7 @@ for dir in $pth; do
     break
   fi
 done
-# not found? detect missing lib*.so (missing *-devel package) on RH systems
+# not found? detect missing lib*.so (missing *-devel package)
 if test -z "$try"; then
   if test "$osname" = linux; then
     try=`ls -l /usr/lib/lib$lib.* 2> /dev/null`
