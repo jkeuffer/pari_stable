@@ -2114,7 +2114,8 @@ hnfmerge_get_1(GEN A, GEN B)
     {
       GEN u,v;
       t = bezout(b, gcoeff(C,1,1), &u, &v); /* >= 0 */
-      if (signe(v)) U[1] = (long)ZV_Z_mul((GEN)U[1], v);
+      if (signe(v) && !gcmp1(v)) U[1] = (long)ZV_Z_mul((GEN)U[1], v);
+      coeff(C,1,1) = (long)t;
     }
     if (signe(t) && is_pm1(t)) break;
   }
