@@ -1617,10 +1617,9 @@ ZM_inv(GEN M, GEN dM)
 GEN
 QM_inv(GEN M, GEN dM)
 {
-  gpmem_t av = avma;
-  GEN cM = content(M);
-  if (is_pm1(cM)) { avma = av; return ZM_inv(M,dM); }
-  return gerepileupto(av, ZM_inv(gdiv(M,cM), gdiv(dM,cM)));
+  GEN cM, pM = Q_primitive_part(M, &cM);
+  if (!cM) return ZM_inv(pM,dM);
+  return gerepileupto(av, ZM_inv(pM, gdiv(dM,cM)));
 }
 
 /* x a matrix with integer coefficients. Return a multiple of the determinant

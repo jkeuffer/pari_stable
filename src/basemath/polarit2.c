@@ -2834,8 +2834,10 @@ content(GEN x)
 GEN
 primitive_part(GEN x, GEN *ptc)
 {
+  gpmem_t av = avma;
   GEN c = content(x);
-  if (gcmp1(c)) c = NULL; else if (!gcmp0(c)) x = gdiv(x,c);
+  if (gcmp1(c)) { avma = av; c = NULL; }
+  else if (!gcmp0(c)) x = gdiv(x,c);
   if (ptc) *ptc = c;
   return x;
 }
@@ -2843,8 +2845,10 @@ primitive_part(GEN x, GEN *ptc)
 GEN
 Q_primitive_part(GEN x, GEN *ptc)
 {
+  gpmem_t av = avma;
   GEN c = content(x);
-  if (gcmp1(c)) c = NULL; else if (!gcmp0(c)) x = Q_div_to_int(x,c);
+  if (gcmp1(c)) { avma = av; c = NULL; }
+  else if (!gcmp0(c)) x = Q_div_to_int(x,c);
   if (ptc) *ptc = c;
   return x;
 }
