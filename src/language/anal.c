@@ -3220,7 +3220,11 @@ read_member(GEN x)
     if (EpVALENCE(ep) == EpMEMBER)
       return call_fun((GEN)ep->value, NULL, &x, 0, 1);
     else
-      return ((GEN (*)(ANYARG))ep->value)(x);
+    {
+      GEN y = ((F1GEN)ep->value)(x);
+      if (isonstack(y)) y = gcopy(y);
+      return y;
+    }
   }
   if (*analyseur != '=' || analyseur[1] == '=')
     err(talker2,"unknown member function",mark.member,mark.start);
