@@ -1230,6 +1230,8 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     if (*b && lg(*b) != 1) err(consister,"gauss");
     return 0;
   }
+  *li = lg(a[1])-1;
+  if (*li < *aco) err(mattype1,"gauss");
   *iscol = 0;
   if (*b)
   {
@@ -1242,15 +1244,13 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
         break;
       case t_COL: *iscol = 1;
         if (lg(*b)-1 != *aco) err(consister,"gauss");
-        *b = dummycopy(_mat(*b));
+        *b = _mat( dummycopy(*b) );
         break;
       default: err(typeer,"gauss");
     }
   }
   else
-    *b = idmat(*aco);
-  *li = lg(a[1])-1;
-  if (*li < *aco) err(mattype1,"gauss");
+    *b = idmat(*li);
   return 1;
 }
 
