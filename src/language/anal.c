@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 #include "parinf.h"
 
+/* slightly more efficient than is_keyword_char. Not worth a static array. */
+#define is_key(c) (isalnum((int)(c)) || (c)=='_')
+
 #define separe(c) ((c)==';' || (c)==':')
 typedef GEN (*PFGEN)(ANYARG);
 typedef GEN (*F2GEN)(GEN,GEN);
@@ -50,6 +53,9 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
 extern void killbloc0(GEN x, int inspect);
+extern void err_leave_default(long n);
+extern int term_width(void);
+extern GEN addsmulsi(long a, long b, GEN Y);
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -1934,8 +1940,6 @@ number(long *nb)
   return m;
 }
 
-extern GEN addsmulsi(long a, long b, GEN Y);
-
 static GEN
 constante()
 {
@@ -1956,6 +1960,7 @@ constante()
   {
     default: return y; /* integer */
     case '.':
+      if (is_key(analyseur[1])) return y; /* member function */
       analyseur++; i = 0;
       while (isdigit((int)*analyseur))
       {
@@ -2005,9 +2010,6 @@ constante()
 /**                   HASH TABLE MANIPULATIONS                     **/
 /**                                                                **/
 /********************************************************************/
-/* slightly more efficient than is_keyword_char. Not worth a static array. */
-#define is_key(c) (isalnum((int)(c)) || (c)=='_')
-
 long
 is_keyword_char(char c) { return is_key(c); }
 
@@ -2245,8 +2247,6 @@ entry(void)
 /**                          SKIP FUNCTIONS                        **/
 /**                                                                **/
 /********************************************************************/
-extern int term_width(void);
-
 /* as skipseq without modifying analyseur && al */
 static void
 doskipseq(char *c, int strict)
@@ -2694,7 +2694,11 @@ skipconstante(void)
 {
   while (isdigit((int)*analyseur)) analyseur++;
   if ( *analyseur!='.' && *analyseur!='e' && *analyseur!='E' ) return;
-  if (*analyseur=='.') analyseur++;
+  if (*analyseur=='.')
+  {
+    if (is_key(analyseur[1])) return; /* member function */
+    analyseur++;
+  }
   while (isdigit((int)*analyseur)) analyseur++;
   if ( *analyseur=='e'  ||  *analyseur=='E' )
   {
@@ -3421,8 +3425,6 @@ alias0(char *s, char *old)
   x[1] = (long)ep;
   (void)installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
 }
-
-extern void err_leave_default(long n);
 
 /* Try f (trapping error e), recover using r (break_loop, if NULL) */
 GEN
