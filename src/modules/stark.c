@@ -782,10 +782,8 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   s = (GEN*)cgetg(nChar+1, t_VEC);
   for (ic = 1; ic <= nChar; ic++) s[ic] = s0;
 
-  for (;;)
+  while ( (i = NextElt(&G)) )
   {
-    if (! (i = NextElt(&G)) ) break;
-
     vB[i] = FpV_red(element_mul(nf, vB[i], gen[i]), condZ);
     for (j=1; j<i; j++) vB[j] = vB[i];
 
@@ -1082,7 +1080,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
 static GEN
 get_listCR(GEN dataD)
 {
-  GEN MrD, listCR, p1, chi, lchi, Surj, cond, bnr, p2, Mr, d, allCR;
+  GEN MrD, listCR, vecchi, chi, lchi, Surj, cond, bnr, p2, Mr, d, allCR;
   long hD, h, nc, i, j, lD, tnc;
 
   Surj = gmael(dataD, 2, 3);
@@ -1100,12 +1098,12 @@ get_listCR(GEN dataD)
   allCR  = cgetg(h + 1, t_VEC); /* all characters, including conjugates */
   tnc = 1;
 
-  p1 = EltsOfGroup(hD, MrD);
+  vecchi = EltsOfGroup(hD, MrD);
 
   for (i = 1; tnc <= h; i++)
   {
     /* lift a character of D in Clk(m) */
-    chi = (GEN)p1[i];
+    chi = (GEN)vecchi[i];
     for (j = 1; j <= lD; j++) chi[j] = ldiv((GEN)chi[j], (GEN)MrD[j]);
     lchi = LiftChar(Mr, Surj, chi);
 
