@@ -417,6 +417,8 @@ cmp_re(GEN x, GEN y)
   return gcmp((GEN)x[1], (GEN)y[1]);
 }
 
+#define swap(x,y) { long _t=x; x=y; y=_t; }
+
 /* multiply the r o bb. Sort first to detect pairs of conjugate */
 static GEN
 monomial(GEN r, PERM bb, long nbv)
@@ -430,7 +432,12 @@ monomial(GEN r, PERM bb, long nbv)
     if (typ(t) == t_COMPLEX && signe(t[1]) < 0) { s = -s; t = gneg(t); }
     R[i] = (long)t;
   }
-  if (nbv > 2) R = gen_sort(R, 0, &cmp_re);
+  if (nbv > 2)
+    R = gen_sort(R, 0, &cmp_re);
+  else if (nbv == 2)
+  {
+    if (typ(R[2]) != t_COMPLEX) swap(R[1], R[2]);
+  }
   t = NULL;
   for (i=1; i<=nbv; i++)
   {
