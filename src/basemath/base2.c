@@ -1250,7 +1250,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   {
     p2 = gzero;
     p3 = gdiv(stoi(n), p);
-    while (cmpis(p3, 1) >= 0)   /* compute the extra precision needed */
+    while (gcmpgs(p3, 1) >= 0)   /* compute the extra precision needed */
     {
       p2 = addii(p2, gfloor(p3));
       p3 = gdiv(p3, p);		 
