@@ -95,6 +95,7 @@ while test $# -gt 0; do
   --host=*)
                target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --disable-kernel) kernel=no;;
+  --builddir=*) dfltobjdir=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   -a|-ask|--ask)     fastread=no;;
   -g)          optimization=debugging;;
   -pg)         optimization=profiling;;
@@ -125,6 +126,7 @@ Build Options:
   --host=<arch-osname>  target achitecture
   --graphic=<gr>        graphic library used (default X11) (none X11 gnuplot 
 	gnuplot-dynamic builtin.X11-gnuplot builtin.X11-gnuplot-dynamic)
+  --builddir=<dir>      directory where the object files will be 
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)
   -pg             creates profiling version (in Oxxx.prf)
@@ -1304,11 +1306,16 @@ esac
 # Target directory
 #
 pre=O
+cst_objdir=$pre$osname-$arch;
 case "$optimization" in
   full)      objdir=$pre$osname-$arch ;;
   debugging) objdir=$pre$osname-$arch.dbg ;;
   profiling) objdir=$pre$osname-$arch.prf ;;
 esac
+if test -n "$dfltobjdir"; then
+  objdir="$dfltobjdir"
+fi
+
 if test "$fastread" != yes; then
   cat << EOT
 ==========================================================================
@@ -1381,15 +1388,20 @@ EOT
 echo $n "Shall we try to build pari $version.$patch ($status) now (y/n)? $c"
 dflt=n; rep='y n'; . $config_dir/myread
 
+cdobjdir=
+if test "$objdir" != "$cst_objdir"; then 
+  cdobjdir="cd $objdir; "
+fi
+
 case $ans in
-y) if (make gp); then
+y) if (cd $objdir; make gp); then
      echo $n "Shall we install the files where they belong (y/n)? $c"
      dflt=n; rep='y n'; . $config_dir/myread
      case $ans in
        y) make install;;
-       n) echo "Ok. Type \"make install\" when you are ready";;
+       n) echo "Ok. Type \"${cdobjdir}make install\" when you are ready";;
      esac
    fi;;
-n) echo "Ok. Type \"make install\" when you are ready";;
+n) echo "Ok. Type \"${cdobjdir}make install\" when you are ready";;
 esac
 echo 'Bye !'
