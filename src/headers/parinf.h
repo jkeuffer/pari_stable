@@ -13,6 +13,31 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+typedef struct {
+  GEN x; /* defining polynomial (monic, integral) */
+  GEN dK; /* disc(K) */
+  GEN index; /* [O_K : Z[X]/(x)] */
+  GEN bas;  /* Z-basis of O_K (t_VEC of t_POL) */
+  long r1; /* number of real places of K */
+/* possibly NULL = irrelevant or not computed */
+  GEN lead; /* leading coeff of initial polynomial defining K if non monic */
+  GEN dx;   /* disc(x) */
+  GEN basden; /* [nums(bas), dens(bas)] */
+} nfbasic_t;
+
+typedef struct {
+  GEN x;
+  GEN ro;   /* roots of x */
+  long r1;
+  GEN basden;
+  long prec;
+/* possibly -1 = irrelevant or not computed */
+  long extraprec;
+/* possibly NULL = irrelevant or not computed */
+  GEN M;
+  GEN G;
+} nffp_t;
+
 #define id_PRINCIPAL 0
 #define id_PRIME     1
 #define id_MAT       2
@@ -22,12 +47,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nf_NOROOTS     32
 #define nf_PARTIALFACT 16 /* and allbase */
 #define nf_RED          8
-#define nf_SMALL        4
 #define nf_PARTRED      2
 #define nf_ORIG         1
 
 /* for rnfpolredabs */
-#define nf_ABSOLUTE   128
+#define nf_ABSOLUTE     2
 #define nf_ADDZK      256
 
 /* for isprincipal */
@@ -62,7 +86,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 typedef struct FP_chk_fun {
   GEN (*f)(void *,GEN);
   GEN (*f_init)(struct FP_chk_fun*,GEN,GEN);
-  GEN (*f_post)(void *,GEN);
   void *data;
   int skipfirst;
 } FP_chk_fun;

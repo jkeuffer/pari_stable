@@ -382,7 +382,7 @@ GEN     rnfhermitebasis(GEN bnf, GEN order);
 long    rnfisfree(GEN bnf, GEN order);
 GEN     rnflllgram(GEN nf, GEN pol, GEN order,long prec);
 GEN     rnfpolred(GEN nf, GEN pol, long prec);
-GEN     rnfpolredabs(GEN nf, GEN pol, long flag, long prec);
+GEN     rnfpolredabs(GEN nf, GEN pol, long flag);
 GEN     rnfpseudobasis(GEN nf, GEN pol);
 GEN     rnfsimplifybasis(GEN bnf, GEN order);
 GEN     rnfsteinitz(GEN nf, GEN order);
@@ -535,8 +535,8 @@ GEN     T2_from_embed(GEN x, long r1);
 GEN     algdep(GEN x, long n, long prec);
 GEN     algdep0(GEN x, long n, long bit,long prec);
 GEN     algdep2(GEN x, long n, long bit);
-GEN     factoredpolred(GEN x, GEN p, long prec);
-GEN     factoredpolred2(GEN x, GEN p, long prec);
+GEN     factoredpolred(GEN x, GEN p);
+GEN     factoredpolred2(GEN x, GEN p);
 GEN     kerint(GEN x);
 GEN     kerint1(GEN x);
 GEN     lindep(GEN x, long prec);
@@ -563,19 +563,19 @@ GEN     minim(GEN a, GEN borne, GEN stockmax);
 GEN     nf_get_LLL(GEN nf);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
-GEN     ordred(GEN x, long prec);
+GEN     ordred(GEN x);
 GEN     perf(GEN a);
-GEN     polred(GEN x, long prec);
-GEN     polred0(GEN x, long flag, GEN p, long prec);
-GEN     polred2(GEN x, long prec);
-GEN     polredabs(GEN x, long prec);
-GEN     polredabs0(GEN x, long flag, long prec);
-GEN     polredabs2(GEN x, long prec);
-GEN     polredabsall(GEN x, long flun, long prec);
+GEN     polred(GEN x);
+GEN     polred0(GEN x, long flag, GEN p);
+GEN     polred2(GEN x);
+GEN     polredabs(GEN x);
+GEN     polredabs0(GEN x, long flag);
+GEN     polredabs2(GEN x);
+GEN     polredabsall(GEN x, long flun);
 GEN     qflll0(GEN x, long flag, long prec);
 GEN     qflllgram0(GEN x, long flag, long prec);
-GEN     smallpolred(GEN x, long prec);
-GEN     smallpolred2(GEN x, long prec);
+GEN     smallpolred(GEN x);
+GEN     smallpolred2(GEN x);
 
 /* bibli2.c */
 
@@ -610,6 +610,7 @@ GEN     legendre(long n, long v);
 GEN     lexsort(GEN x);
 GEN     mathilbert(long n);
 GEN     matqpascal(long n, GEN q);
+GEN     modreverse_i(GEN a, GEN T);
 long    mymyrand(void);
 GEN     numtoperm(long n, GEN x);
 int     pari_compare_int(int *a,int *b);
@@ -1168,7 +1169,7 @@ GEN     vecpol_to_mat(GEN v, long n);
 
 /* polarit2.c */
 
-GEN     QX_denom(GEN x);
+GEN     Q_denom(GEN x);
 GEN     Q_div_to_int(GEN x, GEN c);
 GEN     Q_muli_to_int(GEN x, GEN d);
 GEN     Q_primitive_part(GEN x, GEN *ptc);
