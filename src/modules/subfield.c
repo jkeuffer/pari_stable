@@ -946,7 +946,7 @@ subfields_poldata(GEN T, struct poldata *PD)
   PD->pol = dummycopy(T); /* may change variable number later */
   if (nf)
   {
-    PD->den = (GEN)nf[4];
+    PD->den = denom(content((GEN)nf[7]));
     PD->roo = (GEN)nf[6];
     PD->dis = mulii(absi((GEN)nf[3]), sqri((GEN)nf[4]));
   }
