@@ -72,8 +72,8 @@ NextEltofGroup(GEN cyc, long l, long adec)
 static GEN
 FindEltofGroup(long order, GEN cyc)
 {
-  long l, i, adec, j, dj;
-  GEN rep, p1;
+  long l, i;
+  GEN rep;
 
   l = lg(cyc)-1;
 
@@ -640,9 +640,9 @@ static GEN
 ComputeArtinNumber(GEN datachi, long flag, long prec)
 {
   long av = avma, av2, G, ms, j, i, nz, zcard, q, l, N, lim;
-  GEN chi, nc, dc, p1, cond0, cond1, elts, Msign, umod2, lambda, nf, gptr;
+  GEN chi, nc, dc, p1, cond0, cond1, elts, Msign, umod2, lambda, nf;
   GEN sg, p2, chib, diff, vt, z, idg, mu, idh, zid, zstruc, zgen, zchi;
-  GEN allclass, classe, bnr, beta, s, tr, p3, den, muslambda, Pi, lp1, beta2;
+  GEN classe, bnr, beta, s, tr, p3, den, muslambda, Pi, lp1, beta2;
 
   chi   = (GEN)datachi[8];
   /* trivial case */
