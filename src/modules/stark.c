@@ -899,7 +899,7 @@ LiftChar(GEN cyc, GEN Mat, GEN chi)
   lm = lg(cyc) - 1;
   l  = lg(chi) - 1;
 
-  lchi = cgetg(lm + 1, t_COL);
+  lchi = cgetg(lm + 1, t_VEC);
   for (i = 1; i <= lm; i++)
   {
     av = avma;
