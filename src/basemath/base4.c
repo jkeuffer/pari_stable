@@ -2527,10 +2527,10 @@ idealcoprime(GEN nf, GEN x, GEN y)
 /*                  LINEAR ALGEBRA OVER Z_K  (HNF,SNF)             */
 /*                                                                 */
 /*******************************************************************/
-static void
-check_module(GEN x, char *s)
+void
+check_ZKmodule(GEN x, char *s)
 {
-  if (typ(x) != t_VEC || lg(x) != 3) err(talker,"not a module in %s", s);
+  if (typ(x) != t_VEC || lg(x) < 3) err(talker,"not a module in %s", s);
   if (typ(x[1]) != t_MAT) err(talker,"not a matrix in %s", s);
   if (typ(x[2]) != t_VEC || lg(x[2]) != lg(x[1]))
     err(talker,"not a correct ideal list in %s", s);
@@ -2726,7 +2726,7 @@ nfhermite(GEN nf, GEN x)
   GEN y, A, I, J;
 
   nf = checknf(nf);
-  check_module(x, "nfhermite");
+  check_ZKmodule(x, "nfhermite");
   A = (GEN)x[1];
   I = (GEN)x[2]; k = lg(A)-1;
   if (!k) err(talker,"not a matrix of maximal rank in nfhermite");
@@ -2985,7 +2985,7 @@ nfdetint(GEN nf, GEN x)
   pari_sp av = avma, av1, lim;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  check_module(x, "nfdetint");
+  check_ZKmodule(x, "nfdetint");
   A = (GEN)x[1];
   I = (GEN)x[2];
   n = lg(A)-1; if (!n) return gun;
@@ -3078,7 +3078,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   GEN d0, w, p1, d, u, v, A, I, J, di, unnf;
 
   nf = checknf(nf); N = degpol(nf[1]);
-  check_module(x, "nfhermitemod");
+  check_ZKmodule(x, "nfhermitemod");
   A = (GEN)x[1];
   I = (GEN)x[2];
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
