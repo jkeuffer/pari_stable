@@ -2573,7 +2573,11 @@ break_loop(long numerr)
   for(;;)
   {
     GEN x;
-    if (! read_line(&F, BREAK_LOOP_PROMPT)) break;
+    if (! read_line(&F, BREAK_LOOP_PROMPT))
+    {
+      if (popinfile()) break;
+      continue;
+    }
     if (check_meta(b->buf))
     { /* break loop initiated by ^C? Empty input --> continue computation */
       if (numerr == siginter && *(b->buf) == 0) { handle_C_C=go_on=1; break; }
