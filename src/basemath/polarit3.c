@@ -2091,11 +2091,24 @@ FpXQX_normalize(GEN z, GEN T, GEN p)
 }
 
 GEN
+small_to_vec(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l,t_VEC);
+  for (i=1; i<l; i++) x[i] = lstoi(z[i]);
+  return x;
+}
+
+GEN
 small_to_mat(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) { x[i] = (long)gtovec((GEN)z[i]); settyp(x[i], t_COL); }
+  for (i=1; i<l; i++)
+  {
+    x[i] = (long)small_to_vec((GEN)z[i]);
+    settyp(x[i], t_COL);
+  }
   return x;
 }
 

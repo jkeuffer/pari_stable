@@ -1222,6 +1222,7 @@ GEN     quickmul(GEN a, GEN b, long na, long nb);
 GEN     quicksqr(GEN a, long na);
 GEN     small_to_mat(GEN z);
 GEN     small_to_pol(GEN z, long v);
+GEN     small_to_vec(GEN z);
 GEN     pol_to_small(GEN x);
 GEN     rescale_pol(GEN P, GEN h);
 GEN     stopoly(long m, long p, long v);
