@@ -85,7 +85,7 @@ precision(GEN x)
   if (tx==t_COMPLEX)
   {
     k=precision((GEN)x[1]);
-    l=precision((GEN)x[2]); if (l && l<k) k=l;
+    l=precision((GEN)x[2]); if (l && (!k || l<k)) k=l;
     return k;
   }
   return 0;
