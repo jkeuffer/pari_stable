@@ -234,46 +234,6 @@ FpX_Fp_mul(GEN y,GEN x,GEN p)
  *                 End of unclean functions.                     *
  *****************************************************************/
 
-/* modular power */
-ulong
-Fl_pow(ulong x, ulong n0, ulong p)
-{
-  ulong y, z, n;
-  if (n0 <= 2)
-  { /* frequent special cases */
-    if (n0 == 2) return Fl_mul(x,x,p);
-    if (n0 == 1) return x;
-    if (n0 == 0) return 1;
-  }
-  y = 1; z = x; n = n0;
-  for(;;)
-  {
-    if (n&1) y = Fl_mul(y,z,p);
-    n>>=1; if (!n) return y;
-    z = Fl_mul(z,z,p);
-  }
-}
-
-GEN
-Fp_powu(GEN x, ulong n0, GEN p)
-{
-  GEN y, z;
-  ulong n;
-  if (n0 <= 2)
-  { /* frequent special cases */
-    if (n0 == 2) return remii(sqri(x),p);
-    if (n0 == 1) return x;
-    if (n0 == 0) return gun;
-  }
-  y = gun; z = x; n = n0;
-  for(;;)
-  {
-    if (n&1) y = remii(mulii(y,z),p);
-    n>>=1; if (!n) return y;
-    z = remii(sqri(z),p);
-  }
-}
-
 /*****************************************************************
  Clean and with no reduced hypothesis.  Beware that some operations
  will be much slower with big unreduced coefficient

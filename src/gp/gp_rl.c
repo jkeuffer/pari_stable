@@ -853,9 +853,6 @@ gp_add_history(char *s)
   if (history_is_new(s)) add_history(s);
 }
 
-extern void fix_buffer(Buffer *b, long newlbuf);
-extern int input_loop(filtre_t *F, input_method *IM);
-
 /* Read line; returns a malloc()ed string of the user input or NULL on EOF.
    Increments the buffer size appropriately if needed; fix *endp if so. */
 static char *

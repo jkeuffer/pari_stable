@@ -116,41 +116,6 @@ icopy_ef(GEN x, long l)
  * Use speci(a,na) to visualize the corresponding GEN.
  */
 
-/* z2 := z1[imin..imax].f shifted left sh bits (feeding f from the right) */
-/* These macros work only for sh != 0 !!! */
-#define shift_left2(z2,z1,imin,imax,f, sh,m) {\
-  register ulong _l,_k = ((ulong)f)>>m;\
-  GEN t1 = z1 + imax, t2 = z2 + imax, T = z1 + imin;\
-  while (t1 > T) {\
-    _l = *t1--;\
-    *t2-- = (_l<<(ulong)sh) | _k;\
-    _k = _l>>(ulong)m;\
-  }\
-  *t2 = (*t1<<(ulong)sh) | _k;\
-}
-#define shift_left(z2,z1,imin,imax,f, sh) {\
-  register const ulong _m = BITS_IN_LONG - sh;\
-  shift_left2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
-}
-
-#define shift_words_r(target,source,source_end,prepend, sh, sh_complement) {\
-  register ulong _k,_l = *source++;\
-  *target++ = (_l>>(ulong)sh) | ((ulong)prepend<<(ulong)sh_complement);\
-  while (source < source_end) {\
-    _k = _l<<(ulong)sh_complement; _l = *source++;\
-    *target++ = (_l>>(ulong)sh) | _k;\
-  }\
-}
-#define shift_right2(z2,z1,imin,imax,f, sh,m) {\
-  register GEN s = (z1) + (imin), ta = (z2) + (imin), se = (z1) + (imax);\
-  shift_words_r(ta,s,se,(f),(sh),(m));				\
-}
-/* z2 := f.z1[imin..imax-1] shifted right sh bits (feeding f from the left) */
-#define shift_right(z2,z1,imin,imax,f, sh) {\
-  register const ulong _m = BITS_IN_LONG - (sh);\
-  shift_right2((z2),(z1),(imin),(imax),(f),(sh),(_m));\
-}
-
 /***********************************************************************/
 /**								      **/
 /**		         ADDITION / SUBTRACTION          	      **/
@@ -589,7 +554,7 @@ muluu(ulong x, ulong y)
 
 /* assume ny > 0 */
 INLINE GEN
-mulsispec(long x, GEN y, long ny)
+muluispec(ulong x, GEN y, long ny)
 {
   long lz = ny+3;
   GEN z=cgeti(lz);
@@ -1107,8 +1072,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
 
   if (nx < ny) swapspec(x,y, nx,ny);
   if (!ny) return gzero;
-  if (ny == 1)
-    return mulsispec(*y, x, nx);
+  if (ny == 1) return muluispec((ulong)*y, x, nx);
     
   lz = nx+ny+2;
   zd = cgeti(lz);

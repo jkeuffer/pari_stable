@@ -66,7 +66,7 @@ mului(ulong x, GEN y)
   GEN z;
 
   if (!s || !x) return gzero;
-  z = mulsispec(x, y+2, lgefint(y)-2);
+  z = muluispec(x, y+2, lgefint(y)-2);
   setsigne(z,s); return z;
 }
 
@@ -78,36 +78,63 @@ mulsi(long x, GEN y)
 
   if (!s || !x) return gzero;
   if (x<0) { s = -s; x = -x; }
-  z = mulsispec(x, y+2, lgefint(y)-2);
+  z = muluispec((ulong)x, y+2, lgefint(y)-2);
   setsigne(z,s); return z;
+}
+
+/* assume x > 1, y != 0. Return u * y with sign s */
+static GEN
+mulur_2(ulong x, GEN y, long s)
+{
+  long m, sh, i, lx = lg(y), e = expo(y);
+  GEN z = cgetr(lx);
+  ulong garde;
+  LOCAL_HIREMAINDER;
+
+  y--; garde = mulll(x,y[lx]);
+  for (i=lx-1; i>=3; i--) z[i]=addmul(x,y[i]);
+  z[2]=hiremainder; /* != 0 since y normalized and |x| > 1 */
+
+  sh = bfffo(hiremainder); m = BITS_IN_LONG-sh;
+  if (sh) shift_left2(z,z, 2,lx-1, garde,sh,m);
+  z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
 GEN
 mulsr(long x, GEN y)
 {
-  long lx,i,s,garde,e,sh,m;
-  GEN z;
-  LOCAL_HIREMAINDER;
+  long s, e;
 
   if (!x) return gzero;
   s = signe(y);
   if (!s)
   {
-    if (x<0) x = -x;
+    if (x < 0) x = -x;
     e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
     return realzero_bit(e);
   }
-  if (x<0) { s = -s; x = -x; }
-  if (x==1) { z=rcopy(y); setsigne(z,s); return z; }
+  if (x==1)  return rcopy(y);
+  if (x==-1) return negr(y);
+  if (x < 0)
+    return mulur_2((ulong)-x, y, -s);
+  else
+    return mulur_2((ulong)x, y, s);
+}
 
-  lx = lg(y); e = expo(y);
-  z=cgetr(lx); y--; garde=mulll(x,y[lx]);
-  for (i=lx-1; i>=3; i--) z[i]=addmul(x,y[i]);
-  z[2]=hiremainder;
+GEN
+mulur(ulong x, GEN y)
+{
+  long s, e;
 
-  sh = bfffo(hiremainder); m = BITS_IN_LONG-sh;
-  if (sh) shift_left2(z,z, 2,lx-1, garde,sh,m);
-  z[1] = evalsigne(s) | evalexpo(m+e); return z;
+  if (!x) return gzero;
+  s = signe(y);
+  if (!s)
+  {
+    e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
+    return realzero_bit(e);
+  }
+  if (x==1) return rcopy(y);
+  return mulur_2(x, y, s);
 }
 
 #ifdef KARAMULR_VARIANT

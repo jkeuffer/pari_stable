@@ -53,14 +53,8 @@ static long *FB,*numFB, **hashtab;
 static GEN  powsubFB,vperm,subFB,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
-extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
 extern GEN quadhilbertreal(GEN D, GEN flag, long prec);
-extern void comp_gen(GEN z,GEN x,GEN y);
-extern GEN codeform5(GEN x, long prec);
-extern GEN comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD);
-extern GEN redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
-extern GEN rhoreal_aux(GEN x, GEN D, GEN sqrtD, GEN isqrtD);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)
@@ -800,8 +794,8 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 /*  Routines related to binary quadratic forms (for internal use)  */
 /*                                                                 */
 /*******************************************************************/
-#define rhorealform(x) rhoreal_aux(x,Disc,sqrtD,isqrtD)
-#define redrealform(x) gcopy(fix_signs(redrealform5(x,Disc,sqrtD,isqrtD)))
+#define rhorealform(x) qfr_rho(x,Disc,sqrtD,isqrtD)
+#define redrealform(x) fix_signs(qfr5_red(x,Disc,sqrtD,isqrtD))
 
 static GEN
 fix_signs(GEN x)
@@ -817,8 +811,8 @@ fix_signs(GEN x)
 }
 
 static GEN
-comprealform(GEN x,GEN y) {
-  return fix_signs( comprealform5(x,y,Disc,sqrtD,isqrtD) );
+qfr_comp(GEN x,GEN y) {
+  return fix_signs( qfr5_comp(x,y,Disc,sqrtD,isqrtD) );
 }
 
 /* compute rho^n(x) */
@@ -840,31 +834,31 @@ rhoreal_pow(GEN x, long n)
 }
 
 static GEN
-realpf5(GEN D, long p)
+qfr_pf5(GEN D, long p)
 {
   pari_sp av = avma;
   GEN y = primeform(D,stoi(p),PRECREG);
-  y = codeform5(y,PRECREG);
-  return gerepileupto(av, redrealform(y));
+  y = qfr5_init(y,PRECREG);
+  return gerepilecopy(av, redrealform(y));
 }
 
 static GEN
-realpf(GEN D, long p)
+qfr_pf(GEN D, long p)
 {
   pari_sp av = avma;
   GEN y = primeform(D,stoi(p),PRECREG);
-  return gerepileupto(av, redrealform(y));
+  return gerepilecopy(av, redrealform(y));
 }
 
 static GEN
-imagpf(GEN D, long p) { return primeform(D,stoi(p),0); }
+qfi_pf(GEN D, long p) { return primeform(D,stoi(p),0); }
 
 static GEN
-comprealform3(GEN x, GEN y)
+qfr_comp3(GEN x, GEN y)
 {
   pari_sp av = avma;
-  GEN z = cgetg(4,t_VEC); comp_gen(z,x,y);
-  return gerepileupto(av, redrealform(z));
+  GEN z = cgetg(4,t_VEC); qfb_comp(z,x,y);
+  return gerepilecopy(av, redrealform(z));
 }
 
 /* Warning: ex[0] not set */
@@ -882,9 +876,9 @@ init_form(long *ex, GEN (*comp)(GEN,GEN))
   return F;
 }
 static GEN
-initrealform5(long *ex) { return init_form(ex, &comprealform); }
+qfr5_factorback(long *ex) { return init_form(ex, &qfr_comp); }
 static GEN
-initimagform(long *ex) { return init_form(ex, &compimag); }
+qfi_factorback(long *ex) { return init_form(ex, &compimag); }
 
 static GEN
 random_form(GEN ex, GEN (*comp)(GEN,GEN))
@@ -901,9 +895,9 @@ random_form(GEN ex, GEN (*comp)(GEN,GEN))
 }
 
 static GEN
-real_random_form(GEN ex) { return random_form(ex, &comprealform3); }
+qfr_random(GEN ex) { return random_form(ex, &qfr_comp3); }
 static GEN
-imag_random_form(GEN ex) { return random_form(ex, &compimag); }
+qfi_random(GEN ex) { return random_form(ex, &compimag); }
 
 /*******************************************************************/
 /*                                                                 */
@@ -1107,17 +1101,17 @@ powsubFBquad(long n)
   {
     for (i=1; i<l; i++)
     {
-      F = realpf5(Disc, FB[subFB[i]]);
+      F = qfr_pf5(Disc, FB[subFB[i]]);
       y = cgetg(n+1, t_VEC); x[i] = (long)y;
       y[1] = (long)F;
-      for (j=2; j<=n; j++) y[j] = (long)comprealform((GEN)y[j-1], F);
+      for (j=2; j<=n; j++) y[j] = (long)qfr_comp((GEN)y[j-1], F);
     }
   }
   else /* imaginary */
   {
     for (i=1; i<l; i++)
     {
-      F = imagpf(Disc, FB[subFB[i]]);
+      F = qfi_pf(Disc, FB[subFB[i]]);
       y = cgetg(n+1, t_VEC); x[i] = (long)y;
       y[1] = (long)F;
       for (j=2; j<=n; j++) y[j] = (long)compimag((GEN)y[j-1], F);
@@ -1316,8 +1310,8 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
       if (DEBUGLEVEL) dbg_all(0, s, nbtest);
     }
     avma = av; current = first? 1+(s%KC): 1+s-RELSUP;
-    form = imagpf(Disc, FB[current]);
-    form = compimag(form, imag_random_form(ex));
+    form = qfi_pf(Disc, FB[current]);
+    form = compimag(form, qfi_random(ex));
     nbtest++; fpc = factorquad(form,KC,LIMC);
     if (!fpc)
     {
@@ -1334,8 +1328,8 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
         if (DEBUGLEVEL>1) fprintferr(".");
         continue;
       }
-      form2 = initimagform(fpd);
-      form2 = compimag(form2, imagpf(Disc, FB[fpd[-2]]));
+      form2 = qfi_factorback(fpd);
+      form2 = compimag(form2, qfi_pf(Disc, FB[fpd[-2]]));
       p = fpc << 1;
       b1 = smodis((GEN)form2[2], p);
       b2 = smodis((GEN)form[2],  p);
@@ -1382,7 +1376,7 @@ imag_be_honest()
   while (s<KC2)
   {
     p = FB[s+1]; if (DEBUGLEVEL) fprintferr(" %ld",p);
-    F = compimag(imagpf(Disc, p), imag_random_form(ex));
+    F = compimag(qfi_pf(Disc, p), qfi_random(ex));
     fpc = factorquad(F,s,p-1);
     if (fpc == 1) { nbtest=0; s++; }
     else
@@ -1397,16 +1391,6 @@ imag_be_honest()
 /*                      Real Quadratic fields                      */
 /*                                                                 */
 /*******************************************************************/
-
-/* (1/2) log (d * 2^{e * EXP220}) */
-GEN
-get_dist(GEN e, GEN d, long prec)
-{
-  GEN t = mplog(absr(d));
-  if (signe(e)) t = addrr(t, mulir(mulsi(EXP220,e), mplog2(prec)));
-  return shiftr(t, -1);
-}
-
 static GEN
 real_relations(long LIM, long lim, long LIMC, long **mat)
 {
@@ -1431,11 +1415,11 @@ NEW:
       if (DEBUGLEVEL) dbg_all(0, s, nbtest);
     }
     avma = av;
-    form = real_random_form(ex);
+    form = qfr_random(ex);
     if (!first)
     {
       current = 1+s-RELSUP;
-      form = comprealform3(form, realpf(Disc, FB[current]));
+      form = qfr_comp3(form, qfr_pf(Disc, FB[current]));
     }
     av1 = avma;
     form0 = form; form1 = NULL;
@@ -1492,14 +1476,14 @@ CYCLE:
       }
       if (!form1)
       {
-        form1 = initrealform5(ex);
-        if (!first) form1 = comprealform(form1, realpf5(Disc, FB[current]));
+        form1 = qfr5_factorback(ex);
+        if (!first) form1 = qfr_comp(form1, qfr_pf5(Disc, FB[current]));
       }
       form1 = rhoreal_pow(form1, rho);
       rho = 0;
 
-      form2 = initrealform5(fpd);
-      if (fpd[-2]) form2 = comprealform(form2, realpf5(Disc, FB[fpd[-2]]));
+      form2 = qfr5_factorback(fpd);
+      if (fpd[-2]) form2 = qfr_comp(form2, qfr_pf5(Disc, FB[fpd[-2]]));
       form2 = rhoreal_pow(form2, fpd[-3]);
       if (!narrow && !absi_equal((GEN)form2[1],(GEN)form2[3]))
       {
@@ -1519,7 +1503,7 @@ CYCLE:
         for (i=1; i<lgsub; i++) col[subFB[i]] += fpd[i]-ex[i];
         sub_fact(col, form2);
         if (fpd[-2]) col[fpd[-2]]++; /* implies !first */
-        d = get_dist(subii((GEN)form1[4],(GEN)form2[4]),
+        d = qfr5_dist(subii((GEN)form1[4],(GEN)form2[4]),
                      divrr((GEN)form1[5],(GEN)form2[5]), PRECREG);
       }
       else
@@ -1527,7 +1511,7 @@ CYCLE:
         for (i=1; i<lgsub; i++) col[subFB[i]] += -fpd[i]-ex[i];
         add_fact(col, form2);
         if (fpd[-2]) col[fpd[-2]]--;
-        d = get_dist(addii((GEN)form1[4],(GEN)form2[4]),
+        d = qfr5_dist(addii((GEN)form1[4],(GEN)form2[4]),
                      mulrr((GEN)form1[5],(GEN)form2[5]), PRECREG);
       }
     }
@@ -1535,8 +1519,8 @@ CYCLE:
     { /* standard relation */
       if (!form1)
       {
-        form1 = initrealform5(ex);
-        if (!first) form1 = comprealform(form1, realpf5(Disc, FB[current]));
+        form1 = qfr5_factorback(ex);
+        if (!first) form1 = qfr_comp(form1, qfr_pf5(Disc, FB[current]));
       }
       form1 = rhoreal_pow(form1,rho);
       rho = 0;
@@ -1544,7 +1528,7 @@ CYCLE:
       col = mat[++s];
       for (i=1; i<lgsub; i++) col[subFB[i]] = -ex[i];
       add_fact(col, form1);
-      d = get_dist((GEN)form1[4], (GEN)form1[5], PRECREG);
+      d = qfr5_dist((GEN)form1[4], (GEN)form1[5], PRECREG);
     }
     if (DEBUGLEVEL) fprintferr(" %ld",s);
     affrr(d, (GEN)C[s]);
@@ -1576,7 +1560,7 @@ real_be_honest()
   while (s<KC2)
   {
     p = FB[s+1]; if (DEBUGLEVEL) fprintferr(" %ld",p);
-    F = comprealform3(realpf(Disc, p), real_random_form(ex));
+    F = qfr_comp3(qfr_pf(Disc, p), qfr_random(ex));
     for (F0 = F;;)
     {
       fpc = factorquad(F,s,p-1);

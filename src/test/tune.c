@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  * 
  * (GMU MP Library is Copyright Free Software Foundation, Inc.) */
 #include <pari.h>
+#include <paripriv.h>
 
 /* you might wish to tweak the Makefile so as to use GMP cycle counting
  * functions (look for GMP in Oxxx/Makefile) */
@@ -108,9 +109,6 @@ rand_g(long n, long type)
   return speed_endtime();                      \
 }
 
-extern void setsqri(long a);
-extern void setmuli(long a);
-extern void setmulr(long a);
 #define disable_Karatsuba_r(s) (setmulr(lg(s->x)))
 #define  enable_Karatsuba_r(s) (setmulr(lg(s->x)-2))
 #define disable_Karatsuba_i(s) (setmuli(lg(s->x)), setsqri(lg(s->x)))
@@ -146,11 +144,6 @@ static double speed_karamulrr(speed_param *s) { KARAMULFUN_r(mulrr, s); }
 static double speed_karamulii(speed_param *s) { KARAMULFUN_i(mulii, s); }
 static double speed_karasqri (speed_param *s) { KARASQRFUN_i( sqri, s); }
  
-extern  GEN init_remainder(GEN M);
-extern ulong invrev(ulong b);
-extern GEN red_montgomery(GEN T, GEN N, ulong inv);
-extern GEN remiimul(GEN x, GEN sy);
-
 #define INIT_RED(s, op)                                 \
   long i, lx = lg(s->x);                                \
   op = cgeti(2*lx - 2);                                 \
@@ -174,7 +167,7 @@ static double speed_modii(speed_param *s) {
 static double speed_remiimul(speed_param *s) {
   GEN op, sM;
   INIT_RED(s, op);
-  sM = init_remainder(s->y);
+  sM = init_remiimul(s->y);
   TIME_FUN( remiimul(op, sM) );
 }
 

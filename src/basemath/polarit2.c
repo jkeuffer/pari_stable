@@ -24,15 +24,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define addshift(x,y) addshiftpol((x),(y),1)
 
-extern GEN ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 extern GEN addshiftpol(GEN x, GEN y, long d);
-extern GEN cauchy_bound(GEN p);
 extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
-extern GEN gauss_intern(GEN a, GEN b);
 extern GEN qf_disc(GEN x, GEN y, GEN z);
-extern GEN to_polmod(GEN x, GEN mod);
 extern int approx_0(GEN x, GEN y);
-extern long FpX_split_Berlekamp(GEN *t, GEN pp);
 extern void gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 
 GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
@@ -2318,28 +2313,33 @@ GEN
 leftright_pow(GEN x, GEN n, void *data, GEN (*sqr)(void*,GEN),
                                         GEN (*mul)(void*,GEN,GEN))
 {
-  GEN nd = int_MSW(n), y = x;
-  long i, m = *nd, j = 1+bfffo((ulong)m);
-  pari_sp av = avma, lim = stack_lim(av, 1);
-
-  /* normalize, i.e set highest bit to 1 (we know m != 0) */
-  m<<=j; j = BITS_IN_LONG-j;
-  /* first bit is now implicit */
-  for (i=lgefint(n)-2;;)
+  long ln = lgefint(n);
+  if (ln == 3) return leftright_pow_u(x, n[2], data, sqr, mul);
+  else
   {
-    for (; j; m<<=1,j--)
+    GEN nd = int_MSW(n), y = x;
+    long i, m = *nd, j = 1+bfffo((ulong)m);
+    pari_sp av = avma, lim = stack_lim(av, 1);
+
+    /* normalize, i.e set highest bit to 1 (we know m != 0) */
+    m<<=j; j = BITS_IN_LONG-j;
+    /* first bit is now implicit */
+    for (i=ln-2;;)
     {
-      y = sqr(data,y);
-      if (m < 0) y = mul(data,y,x); /* first bit set: multiply by base */
-      if (low_stack(lim, stack_lim(av,1)))
+      for (; j; m<<=1,j--)
       {
-        if (DEBUGMEM>1) err(warnmem,"leftright_pow");
-        y = gerepilecopy(av, y);
+        y = sqr(data,y);
+        if (m < 0) y = mul(data,y,x); /* first bit set: multiply by base */
+        if (low_stack(lim, stack_lim(av,1)))
+        {
+          if (DEBUGMEM>1) err(warnmem,"leftright_pow");
+          y = gerepilecopy(av, y);
+        }
       }
+      if (--i == 0) return y;
+      nd=int_precW(nd);
+      m = *nd; j = BITS_IN_LONG;
     }
-    if (--i == 0) return avma==av? gcopy(y): y;
-    nd=int_precW(nd);
-    m = *nd; j = BITS_IN_LONG;
   }
 }
 /* assume n > 0. Compute x^n using left-right binary powering */

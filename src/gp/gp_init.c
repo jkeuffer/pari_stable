@@ -24,17 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "../language/anal.h"
 #include "gp.h"
 
-extern void  allocatemem0(size_t newsize);
-extern GEN   default0(char *a, char *b, long flag);
-extern GEN   extern0(char *cmd);
-extern void  gp_quit(void);
-extern GEN   input0(void);
-extern void  kill0(entree *ep);
-extern GEN   read0(char *s);
-extern void  system0(char *cmd);
-extern GEN   trap0(char *e, char *f, char *r);
-extern int   whatnow(char *s, int silent);
-
 static void whatnow0(char *s) { whatnow(s,0); }
 
 #include "gp_init.h"

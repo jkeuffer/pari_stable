@@ -25,10 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define EXTRA_PREC (DEFAULTPREC-1)
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
-extern GEN zeta_get_limx(long r1, long r2, long bit);
-extern long zeta_get_i0(long r1, long r2, long bit, GEN limx);
-extern long zeta_get_N0(GEN C,  GEN limx);
-extern GEN roots_to_pol_intern(GEN L, GEN a, long v, int plus);
 extern GEN bnrGetSurj(GEN bnr1, GEN bnr2);
 
 /* ComputeCoeff */
@@ -1584,26 +1580,6 @@ InitPrimes(GEN bnr, long nmax, LISTray *R)
     }
     NEXT_PRIME_VIADIFF(p,d);
   }
-}
-
-/* x^(s/2), assume x t_REAL */
-GEN
-powrshalf(GEN x, long s)
-{
-  if (s & 1) return sqrtr(gpowgs(x, s));
-  return gpowgs(x, s>>1);
-}
-/* x^(n/d), assume x t_REAL, return t_REAL */
-GEN
-powrfrac(GEN x, long n, long d)
-{
-  long z;
-  if (!n) return realun(lg(x));
-  z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
-  if (d == 1) return gpowgs(x, n);
-  x = gpowgs(x, n);
-  if (d == 2) return sqrtr(x);
-  return sqrtnr(x, d);
 }
 
 static GEN /* cf polcoeff */

@@ -183,12 +183,10 @@ enum manage_var_t {
 
 #ifdef LONG_IS_64BIT
 #  define VERYBIGINT (9223372036854775807L) /* 2^63-1 */
-#  define EXP220 (1099511627776L)          /* 2^40   */
 #  define BIGINT (2147483647)              /* 2^31-1 */
 #  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
 #  define VERYBIGINT (2147483647L) /* 2^31-1 */
-#  define EXP220 (1048576L)       /* 2^20   */
 #  define BIGINT (32767)          /* 2^15-1 */
 #  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
 #endif
@@ -235,6 +233,7 @@ enum manage_var_t {
 #define addri(x,s)  (addir((s),(x)))
 #define mulis(x,s)  (mulsi((s),(x)))
 #define muliu(x,s)  (mului((s),(x)))
+#define mulru(x,s)  (mulur((s),(x)))
 #define mulri(x,s)  (mulir((s),(x)))
 #define mulrs(x,s)  (mulsr((s),(x)))
 

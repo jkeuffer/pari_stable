@@ -220,7 +220,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
     case t_INT:
       p1 = itor(x, prec); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
-    
+
     case t_FRAC:
       p1 = rdivii((GEN)x[1], (GEN)x[2], prec); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
@@ -254,134 +254,87 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 /*                            POWERING                             */
 /*                                                                 */
 /*******************************************************************/
-extern GEN real_unit_form(GEN x);
-extern GEN imag_unit_form(GEN x);
-
 static GEN
 puiss0(GEN x)
 {
-  long lx,i;
+  long lx, i;
   GEN y;
 
   switch(typ(x))
   {
-    case t_INT: case t_REAL: case t_FRAC: case t_PADIC:
+    case t_INT: case t_REAL: case t_FRAC: case t_COMPLEX:
+    case t_PADIC: case t_QUAD:
       return gun;
 
     case t_INTMOD:
-      y=cgetg(3,t_INTMOD); copyifstack(x[1],y[1]); y[2]=un; break;
-
-    case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX); y[1]=un; y[2]=zero; break;
-
-    case t_QUAD:
-      y=cgetg(4,t_QUAD); copyifstack(x[1],y[1]);
-      y[2]=un; y[3]=zero; break;
+      y = cgetg(3,t_INTMOD); copyifstack(x[1], y[1]);
+      y[2] = un; return y;
 
     case t_POLMOD:
-      y=cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
-      y[2]=lpolun[varn(x[1])]; break;
+      y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
+      y[2] = lpolun[varn(x[1])]; return y;
 
     case t_POL: case t_SER: case t_RFRAC:
       return polun[gvar(x)];
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
-      if (lx != (lg(x[1]))) err(mattype1,"gpowgs");
+      if (lx != lg(x[1])) err(mattype1,"gpow");
       y = idmat(lx-1);
       for (i=1; i<lx; i++) coeff(y,i,i) = (long)puiss0(gcoeff(x,i,i));
-      break;
-    case t_QFR: return real_unit_form(x);
-    case t_QFI: return imag_unit_form(x);
-    case t_VECSMALL:
-      lx = lg(x);
-      y = cgetg(lx, t_VECSMALL);
-      for (i=1; i<lx; i++) y[i] = i;
       return y;
-    default: err(typeer,"gpowgs");
-      return NULL; /* not reached */
+    case t_QFR: return qfr_unit(x);
+    case t_QFI: return qfi_unit(x);
+    case t_VECSMALL: return perm_identity(lg(x) - 1);
   }
-  return y;
+  err(typeer,"gpow");
+  return NULL; /* not reached */
 }
 
 static GEN
-_sqr(void *data /* ignored */, GEN x) {
-  (void)data; return gsqr(x);
-}
+_sqr(void *data /* ignored */, GEN x) { (void)data; return gsqr(x); }
 static GEN
-_mul(void *data /* ignored */, GEN x, GEN y) {
-  (void)data; return gmul(x,y);
-}
+_mul(void *data /* ignored */, GEN x, GEN y) { (void)data; return gmul(x,y); }
 static GEN
-_sqri(void *data /* ignored */, GEN x) {
-  (void)data; return sqri(x);
-}
+_sqri(void *data /* ignored */, GEN x) { (void)data; return sqri(x); }
 static GEN
-_muli(void *data /* ignored */, GEN x, GEN y) {
-  (void)data; return mulii(x,y);
-}
+_muli(void *data /* ignored */, GEN x, GEN y) { (void)data; return mulii(x,y); }
 
-/* INTEGER POWERING (a^|n| for integer a and integer n != 0)
+/* INTEGER POWERING (a^|n| for integer a != 0 and integer n != 0)
  *
  * Use left shift binary algorithm (RS is wasteful: multiplies big numbers,
- * with LS one of them is the base, hence small). If result is nonzero, its
- * sign is set to s (= +-1) regardless of what it would have been. Makes
- * life easier for caller, which otherwise might do a setsigne(gun,-1) */
-static GEN
-powii(GEN a, GEN n, long s)
-{
-  pari_sp av;
-  GEN y;
-  ulong N;
-
-  if (!signe(a)) return gzero; /* a==0 */
-  if (lgefint(a)==3)
-  { /* easy if |a| < 3 */
-    if (a[2] == 1) return (s>0)? gun: negi(gun);
-    if (a[2] == 2) { a = shifti(gun, labs(itos(n))); setsigne(a,s); return a; }
-  }
-  if (lgefint(n) > 3) err(errlg);
-  
-  N = n[2];
-  if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
-  if (N == 2) return sqri(a);
-  av = avma;
-  y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
-  setsigne(y,s); return gerepileuptoint(av,y);
-}
+ * with LS one of them is the base, hence small). Sign of result is set
+ * to s (= +-1) regardless of what it would have been. Makes life easier for
+ * caller, which otherwise might do a setsigne(gun,-1) */
 static GEN
 powiu(GEN a, ulong N, long s)
 {
   pari_sp av;
   GEN y;
 
-  if (!signe(a)) return gzero; /* a==0 */
-  if (lgefint(a)==3)
+  if (lgefint(a) == 3)
   { /* easy if |a| < 3 */
     if (a[2] == 1) return (s>0)? gun: negi(gun);
-    if (a[2] == 2) {
-      if (N & HIGHBIT) err(errlg);
-      a = shifti(gun, N); setsigne(a,s); return a;
-    }
+    if (a[2] == 2) { a = int2n(N); setsigne(a,s); return a; }
   }
   if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
   if (N == 2) return sqri(a);
   av = avma;
   y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
-  setsigne(y,s); return gerepileuptoint(av,y);
+  setsigne(y,s); return gerepileuptoint(av, y);
 }
 
 typedef struct {
   long prec, a;
   GEN (*sqr)(GEN);
-  GEN (*mulsg)(long,GEN);
+  GEN (*mulug)(ulong,GEN);
 } sr_muldata;
 
 static GEN
 _rpowuu_mul(void *data, GEN x, GEN y/*unused*/)
 {
   sr_muldata *D = (sr_muldata *)data;
-  (void)y; return D->mulsg(D->a, x);
+  (void)y; return D->mulug(D->a, x);
 }
 
 static GEN
@@ -391,8 +344,7 @@ _rpowuu_sqr(void *data, GEN x)
   if (typ(x) == t_INT && lgefint(x) >= D->prec)
   { /* switch to t_REAL */
     D->sqr   = &gsqr;
-    D->mulsg = &mulsr;
-    x = itor(x, D->prec);
+    D->mulug = &mulur; x = itor(x, D->prec);
   }
   return D->sqr(x);
 }
@@ -409,8 +361,8 @@ rpowuu(ulong a, ulong n, long prec)
   if (a == 2) return real2n(n, prec);
   if (n == 1) return stor(a, prec);
   av = avma;
-  D.sqr   = &sqri; 
-  D.mulsg = &mulsi;
+  D.sqr   = &sqri;
+  D.mulug = &mului;
   D.prec = prec;
   D.a = (long)a;
   y = leftright_pow_u(utoi(a), n, (void*)&D, &_rpowuu_sqr, &_rpowuu_mul);
@@ -418,16 +370,35 @@ rpowuu(ulong a, ulong n, long prec)
   return gerepileuptoleaf(av, y);
 }
 
+/* x^(s/2), assume x t_REAL */
+GEN
+powrshalf(GEN x, long s)
+{
+  if (s & 1) return sqrtr(gpowgs(x, s));
+  return gpowgs(x, s>>1);
+}
+/* x^(n/d), assume x t_REAL, return t_REAL */
+GEN
+powrfrac(GEN x, long n, long d)
+{
+  long z;
+  if (!n) return realun(lg(x));
+  z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
+  if (d == 1) return gpowgs(x, n);
+  x = gpowgs(x, n);
+  if (d == 2) return sqrtr(x);
+  return sqrtnr(x, d);
+}
+
 /* assume x != 0 */
 static GEN
 pow_monome(GEN x, long n)
 {
-  long i, dx, d;
+  long i, d, dx = degpol(x);
   GEN A, b, y;
 
   if (n < 0) { n = -n; y = cgetg(3, t_RFRAC); } else y = NULL;
-  
-  dx = degpol(x);
+
   if (HIGHWORD(dx) || HIGHWORD(n))
   {
     LOCAL_HIREMAINDER;
@@ -435,19 +406,89 @@ pow_monome(GEN x, long n)
     if (hiremainder || (d &~ LGBITS)) d = LGBITS; /* overflow */
     d += 2;
   }
-  else 
+  else
     d = dx*n + 2;
   if ((d + 1) & ~LGBITS) err(talker,"degree overflow in pow_monome");
   A = cgetg(d+1, t_POL); A[1] = x[1];
   for (i=2; i < d; i++) A[i] = zero;
   b = gpowgs((GEN)x[dx+2], n); /* not memory clean if (n < 0) */
   if (!y) y = A;
-  else { 
+  else {
     GEN c = denom(b);
-    if (c != gun) b = gmul(b,c);
-    y[1] = (long)c; y[2] = (long)A;
+    y[1] = (long)c; if (c != gun) b = gmul(b,c);
+    y[2] = (long)A;
   }
   A[d] = (long)b; return y;
+}
+
+static long
+z_Z_val(long n, GEN p)
+{
+  ulong junk;
+  if (lgefint(p) > 3) return 0;
+  return svaluation((ulong)labs(n), (ulong)p[2], &junk);
+}
+static long
+Z_val(GEN n, GEN p) { return pvaluation(n, p, NULL); }
+
+static GEN
+powps(GEN x, long n)
+{
+  long e = n*valp(x), v;
+  GEN t, y, mod, p = (GEN)x[2];
+  pari_sp av;
+
+  if (!signe(x[4])) {
+    if (n < 0) err(gdiver);
+    return zeropadic(p, e);
+  }
+  v = z_Z_val(n, p);
+
+  y = cgetg(5,t_PADIC);
+  mod = (GEN)x[3];
+  if (v == 0) mod = icopy(mod);
+  else
+  {
+    mod = mulii(mod, gpowgs(p,v));
+    mod = gerepileuptoint((pari_sp)y, mod);
+  }
+  y[1] = evalprecp(precp(x) + v) | evalvalp(e);
+  icopyifstack(p, y[2]);
+  y[3] = (long)mod;
+
+  av = avma; t = (GEN)x[4];
+  if (n < 0) { t = Fp_inv(t, mod); n = -n; }
+  t = Fp_powu(t, n, mod);
+  y[4] = lpileuptoint(av, t);
+  return y;
+}
+static GEN
+powp(GEN x, GEN n)
+{
+  long v;
+  GEN y, mod, p = (GEN)x[2];
+
+  if (valp(x)) err(errlg);
+
+  if (!signe(x[4])) {
+    if (signe(n) < 0) err(gdiver);
+    return zeropadic(p, 0);
+  }
+  v = Z_val(n, p);
+
+  y = cgetg(5,t_PADIC);
+  mod = (GEN)x[3];
+  if (v == 0) mod = icopy(mod);
+  else
+  {
+    mod = mulii(mod, gpowgs(p,v));
+    mod = gerepileuptoint((pari_sp)y, mod);
+  }
+  y[1] = evalprecp(precp(x) + v) | evalvalp(0);
+  icopyifstack(p, y[2]);
+  y[3] = (long)mod;
+  y[4] = (long)Fp_pow((GEN)x[4], n, mod);
+  return y;
 }
 
 GEN
@@ -464,43 +505,46 @@ gpowgs(GEN x, long n)
   {
     case t_INT:
     {
-      long sx = signe(x), sr = (sx<0 && (n&1))? -1: 1;
+      long sx = signe(x), s;
       GEN t;
-      if (n>0) return powiu(x, n, sr);
-      if (!sx) err(gdiver);
-      t = (sr > 0)? gun: negi(gun);
+      if (!sx) {
+        if (n < 0) err(gdiver);
+        return gzero;
+      }
+      s = (sx < 0 && odd(n))? -1: 1;
+      if (n > 0) return powiu(x, n, s);
+      t = (s > 0)? gun: negi(gun);
       if (is_pm1(x)) return t;
-      /* n<0, |x|>1 */
+      /* n < 0, |x| > 1 */
       y = cgetg(3,t_FRAC);
       y[1] = (long)t;
       y[2] = (long)powiu(x, -n, 1); /* force denominator > 0 */
       return y;
     }
+    case t_INTMOD:
+      y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
+      y[2] = (long)Fp_pows((GEN)x[2], n, (GEN)x[1]);
+      return y;
     case t_FRAC:
     {
       GEN a = (GEN)x[1], b = (GEN)x[2];
-      long sr = (n&1 && (signe(a)!=signe(b))) ? -1 : 1;
-      if (n > 0) { if (!signe(a)) return gzero; }
-      else
-      { /* n < 0 */
-        if (!signe(a)) err(gdiver);
-        /* +-1/x[2] inverts to an integer */
+      long sx = signe(a), s;
+      if (!sx) {
+        if (n < 0) err(gdiver);
+        return gzero;
+      }
+      s = (sx < 0 && odd(n))? -1: 1;
+      if (n < 0) {
         n = -n;
-        if (is_pm1(a)) return powiu(b, n, sr);
-        y = b; b = a; a = y;
+        if (is_pm1(a)) return powiu(b, n, s); /* +-1/x[2] inverts to t_INT */
+        swap(a, b);
       }
       y = cgetg(3, t_FRAC);
-      y[1] = (long)powiu(a, n, sr);
+      y[1] = (long)powiu(a, n, s);
       y[2] = (long)powiu(b, n, 1);
       return y;
     }
-    case t_PADIC: case t_POLMOD: case t_INTMOD:
-    {
-      static long gn[3] = {evaltyp(t_INT)|_evallg(3), 0, 0};
-      if (n>0) { gn[1] = evalsigne( 1) | evallgefint(3); gn[2]= n; }
-      else     { gn[1] = evalsigne(-1) | evallgefint(3); gn[2]=-n; }
-      return powgi(x,gn);
-    }
+    case t_PADIC: return powps(x, n);
     case t_RFRAC:
     {
       av = avma; y = cgetg(3, t_RFRAC); m = labs(n);
@@ -511,97 +555,51 @@ gpowgs(GEN x, long n)
     }
     case t_POL:
       if (ismonome(x)) return pow_monome(x, n);
-    default:
-    {
+    default: {
       pari_sp av = avma;
       y = leftright_pow_u(x, (ulong)labs(n), NULL, &_sqr, &_mul);
       if (n < 0) y = ginv(y);
-      return av==avma? gcopy(y): gerepileupto(av,y);
+      return gerepileupto(av,y);
     }
   }
 }
 
-extern GEN powrealform(GEN x, GEN n);
-
-/* n is assumed to be an integer */
+/* n a t_INT */
 GEN
 powgi(GEN x, GEN n)
 {
-  long sn = signe(n);
   GEN y;
 
-  if (!sn) return puiss0(x);
+  if (!is_bigint(n)) return gpowgs(x, itos(n));
+  /* overflow for non-modular types */
   switch(typ(x))
   {
-    case t_INT:
-    {
-      long sx = signe(x), sr = (sx<0 && mod2(n))? -1: 1;
-      GEN t;
-      if (sn>0) return powii(x,n,sr);
-      if (!sx) err(gdiver);
-      t = (sr > 0)? gun: negi(gun);
-      if (is_pm1(x)) return t;
-      /* n<0, |x|>1 */
-      y = cgetg(3,t_FRAC);
-      y[1] = (long)t;
-      y[2] = (long)powii(x,n,1);
-      return y;
-    }
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      y[2] = (long)Fp_pow((GEN)x[2],n,(GEN)x[1]);
+      y[2] = (long)Fp_pow((GEN)x[2], n, (GEN)x[1]);
       return y;
+    case t_PADIC: return powp(x, n);
+
+    case t_INT:
+      if (lgefint(x)==3 && x[2] == 1)
+        return (!signe(n) || signe(x) > 0)? gun: negi(gun);
+      if (signe(x)) err(errlg);
+      if (signe(n) < 0) err(gdiver);
+      return gzero;
     case t_FRAC:
-    {
-      GEN a = (GEN)x[1], b = (GEN)x[2];
-      long sr = (mod2(n) && (signe(a)!=signe(b))) ? -1 : 1;
-      if (sn > 0) { if (!signe(a)) return gzero; }
-      else
-      { /* n < 0 */
-        if (!signe(a)) err(gdiver);
-        /* +-1/b inverts to an integer */
-        if (is_pm1(a)) return powii(b,n,sr);
-        y = b; b = a; a = y;
-      }
-      y = cgetg(3,t_FRAC);
-      y[1] = (long)powii(a,n,sr);
-      y[2] = (long)powii(b,n,1);
-      return y;
-    }
-    case t_PADIC:
-    {
-      long e = itos(n)*valp(x), v;
-      GEN mod, p = (GEN)x[2];
-      
-      if (!signe(x[4]))
-      {
-        if (sn < 0) err(gdiver);
-        return zeropadic(p, e);
-      }
-      y = cgetg(5,t_PADIC);
-      mod = (GEN)x[3]; v = ggval(n, p);
-      if (v == 0) mod = icopy(mod);
-      else
-      {
-        mod = mulii(mod, gpowgs(p,v));
-        mod = gerepileuptoint((pari_sp)y, mod);
-      }
-      y[1] = evalprecp(precp(x)+v) | evalvalp(e);
-      icopyifstack(p, y[2]);
-      y[3] = (long)mod;
-      y[4] = (long)Fp_pow((GEN)x[4], n, mod);
-      return y;
-    }
+      if (signe(x[1])) err(errlg);
+      if (signe(n) < 0) err(gdiver);
+      return gzero;
+    case t_POL: err(errlg);
+
     case t_QFR:
-      if (signe(x[4])) return powrealform(x,n);
-    case t_POL:
-      return gpowgs(x, itos(n));
-    default:
-    {
+      if (signe(x[4])) return qfr_pow(x,n);
+      /* fall through */
+    default: {
       pari_sp av = avma;
       y = leftright_pow(x, n, NULL, &_sqr, &_mul);
-      if (sn < 0) y = ginv(y);
-      return av==avma? gcopy(y): gerepileupto(av,y);
+      if (signe(n) < 0) y = ginv(y);
+      return gerepileupto(av,y);
     }
   }
 }
@@ -803,7 +801,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
   pari_sp av, lim;
 
   if (!z) err(sqrter5);
-  if (pp <= zp) return z; 
+  if (pp <= zp) return z;
 
   av = avma; lim = stack_lim(av,2);
   mod = p;
@@ -949,7 +947,7 @@ rootsof1complex(GEN n, long prec)
   pari_sp av = avma;
   if (is_pm1(n)) return realun(prec);
   if (lgefint(n)==3 && n[2]==2) return stor(-1, prec);
-  return gerepileupto(av, exp_Ir( divri(Pi2n(1, prec), n) ));  
+  return gerepileupto(av, exp_Ir( divri(Pi2n(1, prec), n) ));
 }
 
 /*Only the O() of y is used*/
@@ -966,7 +964,7 @@ rootsof1padic(GEN n, GEN y)
 }
 
 static GEN paexp(GEN x);
-/*compute the p^e th root of x p-adic*/ 
+/*compute the p^e th root of x p-adic*/
 GEN
 padic_sqrtn_ram(GEN x, long e)
 {
@@ -991,7 +989,7 @@ padic_sqrtn_ram(GEN x, long e)
   return gerepileupto(ltop,a);
 }
 
-/*compute the nth root of x p-adic p prime with n*/ 
+/*compute the nth root of x p-adic p prime with n*/
 GEN
 padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
@@ -1122,7 +1120,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     if (zetan) *zetan = rootsof1complex(n,prec);
     return y;
 
-  case t_QUAD: 
+  case t_QUAD:
     return gsqrtn(quadtoc(x, prec), n, zetan, prec);
 
   default:
@@ -1168,17 +1166,17 @@ exp1r_abs(GEN x)
     m = 0;
   }
   unr=realun(l2);
-  p2 =realun(l2); setlg(p2,4);
+  p2 =realun(l2); setlg(p2,3);
   p4 = cgetr(l2); affrr(x, p4); setsigne(p4, 1);
   if (m) setexpo(p4, ex-m);
 
-  s = 0; l1 = 4; av2 = avma;
+  s = 0; l1 = 3; av2 = avma;
   for (i=n; i>=2; i--)
   {
     setlg(p4,l1); p3 = divrs(p4,i);
     s -= expo(p3); p1 = mulrr(p3,p2); setlg(p1,l1);
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
-    s %= BITS_IN_LONG;
+    s &= (BITS_IN_LONG-1);
     setlg(unr,l1); p1 = addrr(unr,p1);
     setlg(p2,l1); affrr(p1,p2); avma = av2;
   }
@@ -1221,7 +1219,7 @@ mpexp(GEN x)
   GEN y;
 
   if (!sx) return addsr(1,x);
-  if (sx < 0) 
+  if (sx < 0)
   {
     long ex = expo(x);
     if (ex >= EXMAX) return realzero_bit(- (long) ((1L<<EXMAX) / LOG2));
@@ -1279,7 +1277,7 @@ serexp(GEN x, long prec)
   pari_sp av;
   long i,j,lx,ly,ex,mi;
   GEN p1,y,xd,yd;
- 
+
   ex = valp(x);
   if (ex < 0) err(negexper,"gexp");
   if (gcmp0(x)) return gaddsg(1,x);
@@ -1336,7 +1334,7 @@ gexp(GEN x, long prec)
 /**                                                                **/
 /********************************************************************/
 
-long LOGAGM_LIMIT  = 40 ;
+long LOGAGM_LIMIT  = 24 ;
 
 /* 2 * atanh(1/3) */
 GEN
@@ -1372,84 +1370,76 @@ constlog2(long prec)
   setexpo(s, -1); affrr(s, tmplog2);
   if (glog2) gunclone(glog2);
   glog2 = tmplog2; avma = av0; return glog2;
-} 
+}
 
 GEN
 mplog2(long prec)
 {
   GEN x = cgetr(prec);
   affrr(constlog2(prec), x); return x;
-} 
+}
 
 /*return log(|x|), assuming x != 0 */
 GEN
-logr_abs(GEN x)
+logr_abs(GEN X)
 {
   pari_sp ltop, av;
-  long EX,l1,l2,m,n,k,ex,s;
+  long EX, l1, l2, m, n, k, e, s, l = lg(X);
   double a, b;
-  GEN z,p1,y,y2,p4,p5,unr;
-  ulong u;
-  long l = lg(x);
+  GEN z, x, y, y2, S, unr;
+  ulong u, v;
 
-  if (l > LOGAGM_LIMIT) return logagmr_abs(x);
-  EX = expo(x);
-  if (absrnz_egal2n(x)) return EX? mulsr(EX, mplog2(l)): realzero(l);
+  if (l > LOGAGM_LIMIT) return logagmr_abs(X);
+  EX = expo(X);
+  if (absrnz_egal2n(X)) return EX? mulsr(EX, mplog2(l)): realzero(l);
 
   av = avma; z = cgetr(l); ltop = avma;
-  l2 = l+1; p1 = cgetr(l2); affrr(x,p1);
-  p1[1] = evalsigne(1) | evalexpo(0);
-  /* 1 < p1 < 2 */
+  l2 = l+1; x = cgetr(l2); affrr(X,x);
+  x[1] = evalsigne(1) | evalexpo(0);
+  /* X = x 2^EX, 1 < x < 2 */
   av = avma; l -= 2;
-  u = ((ulong)p1[2]) & (~HIGHBIT); /* p1[2] - HIGHBIT, assuming HIGHBIT set */
-  if (u) a = (double)(BITS_IN_LONG-1) - log2((double)u); /* ~ -log2(p1 - 1) */
-  else   a = (double)(BITS_IN_LONG-1);
+  k = 2;
+  u = ((ulong)x[k]) & (~HIGHBIT); /* x[2] - HIGHBIT, assuming HIGHBIT set */
+  v = BITS_IN_LONG-1;
+  while (!u) { v += BITS_IN_LONG; u = (ulong)x[++k]; } /* terminates: x>1 */
+  a = (double)v - log2((double)u); /* ~ -log2(x - 1) */
   b = sqrt((BITS_IN_HALFULONG/3.0) * l);
   if (a <= b)
   {
     n = 1 + (long)(3*b);
     m = 1 + (long)(b-a);
-    l2 += m>>TWOPOTBITS_IN_LONG;
-    p4 = cgetr(l2); affrr(p1,p4);
-    p1 = p4; av = avma;
-    for (k=1; k<=m; k++) p1 = sqrtr_abs(p1);
-    affrr(p1,p4); avma = av;
+    if (m >= BITS_IN_LONG) { GEN t;
+      l2 += m>>TWOPOTBITS_IN_LONG;
+      t = cgetr(l2); affrr(x,t); x = t;
+    }
+    for (k=1; k<=m; k++) x = sqrtr_abs(x);
   }
   else
   {
     n = 1 + (long)(BITS_IN_HALFULONG*l / a);
-    m = 0; p4 = p1;
+    m = 0;
   }
-  unr = realun(l2);
-  y  = cgetr(l2);
-  y2 = cgetr(l2); av = avma;
-
-  /* want to compute log(X), X ~ 1  (X = p4) */
-  /* y = (X-1)/(X+1). log(X) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / * k */
-
-  /* affrr needed here instead of setlg since prec may DECREASE */
-  p1 = cgetr(l2); affrr(subrr(p4,unr), p1);
-
-  p5 = addrr(p4,unr); setlg(p5,l2);
-  affrr(divrr(p1,p5), y); /* = (X-1) / (X+1) ~ 0 */
-  affrr(gsqr(y), y2); /* = y^2 */
+  y = divrr(subrex01(x), addrex01(x)); /* = (x-1) / (x+1) ~ 0 */
+  y2 = gsqr(y);
+  /* log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k */
   k = 2*n + 1;
-  affrr(divrs(unr,k), p4); setlg(p4,4); avma = av;
+  unr = realun(l2); S = x; av = avma;
+  setlg(S,  3);
+  setlg(unr,3); affrr(divrs(unr,k), S); /* destroy x, not needed anymore */
 
-  s = 0; ex = expo(y2); l1 = 4;
-  for (k -= 2; k > 0; k -= 2)
-  { /* compute sum_i=0^n  y^2i / (2i + 1), k = 2i+1 */
-    setlg(y2, l1); p5 = mulrr(p4,y2);
-    setlg(unr,l1); p1 = divrs(unr, k);
-    s -= ex;
+  s = 0; e = expo(y2); l1 = 3;
+  for (k -= 2; k > 0; k -= 2) /* k = 2n+1, ..., 1 */
+  {
+    GEN T; /* S = y^(2n+1-k)/(2n+1) + ... + 1 / k */
+    setlg(y2, l1); T = mulrr(S,y2);
+    setlg(unr,l1);
+    s -= e; /* >= 0 */
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1);
-    setlg(p1, l1);
-    setlg(p4, l1);
-    setlg(p5, l1); affrr(addrr(p1,p5), p4); avma=av;
+    setlg(S, l1);
+    affrr(addrr(divrs(unr, k), T), S); avma = av;
   }
-  setlg(p4, l2);
-  y = mulrr(y,p4); /* = log(X)/2 */
+  setlg(S, l2); y = mulrr(y,S); /* = log(X)/2 */
   setexpo(y, expo(y)+m+1);
   if (EX) y = addrr(y, mulsr(EX, mplog2(l2)));
   affrr(y, z); avma = ltop; return z;
@@ -1636,7 +1626,7 @@ mpsc1(GEN x0, long *ptmod8)
     avma = av; y = cgetr(l1); avma = av1;
     l = l1;
   }
-  l++; 
+  l++;
 
   if (gcmp0(x)) alpha = 1000000.0;
   else
@@ -1660,7 +1650,7 @@ mpsc1(GEN x0, long *ptmod8)
   p1 = realun(l2);
   x2 = cgetr(l2); av = avma;
   affrr(gsqr(x), x2);
-  
+
   setlg(x2, 3);
   if (n > mmax)
     p2 = divrs(divrs(x2, 2*n+2), 2*n+1);
@@ -1755,11 +1745,11 @@ gcos(GEN x, long prec)
       affrr(gmul(u1,u), (GEN)y[2]); return y;
 
     case t_INT: case t_FRAC:
-      y = cgetr(prec); av = avma; 
+      y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
       affrr(mpcos(x), y); avma = av; return y;
-    
+
     case t_INTMOD: case t_PADIC: err(typeer,"gcos");
 
     default:
@@ -1817,9 +1807,9 @@ gsin(GEN x, long prec)
       gsincos((GEN)x[1],&u,&v,prec);
       affrr(gmul(v1,u), (GEN)y[1]);
       affrr(gmul(u1,v), (GEN)y[2]); return y;
-    
+
     case t_INT: case t_FRAC:
-      y = cgetr(prec); av = avma; 
+      y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
       affrr(mpsin(x), y); avma = av; return y;
@@ -1893,7 +1883,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
     case t_INT: case t_FRAC:
       *s = cgetr(prec);
       *c = cgetr(prec); av = avma; gaffect(x, *s);
-      mpsincos(*s, &ps, &pc); 
+      mpsincos(*s, &ps, &pc);
       affrr(ps,*s);
       affrr(pc,*c); avma = av; return;
 
@@ -1902,7 +1892,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 
     case t_COMPLEX:
       i = precision(x); if (!i) i = prec;
-      ps = cgetc(i); *s = ps; 
+      ps = cgetc(i); *s = ps;
       pc = cgetc(i); *c = pc; av = avma;
       r = gexp((GEN)x[2],prec);
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
@@ -2006,13 +1996,13 @@ gtan(GEN x, long prec)
       return gerepileupto(av, gdiv(s,c));
 
     case t_INT: case t_FRAC:
-      y = cgetr(prec); av = avma; 
+      y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
       affrr(mptan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gtan");
-    
+
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (gcmp0(y)) return gcopy(y);
@@ -2049,7 +2039,7 @@ gcotan(GEN x, long prec)
       return gerepileupto(av, gdiv(c,s));
 
     case t_INT: case t_FRAC:
-      y = cgetr(prec); av = avma; 
+      y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
       x = gadd(x, realzero(prec));
       affrr(mpcotan(x), y); avma = av; return y;

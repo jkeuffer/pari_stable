@@ -117,6 +117,8 @@ GEN    remss(long x, long y);
 GEN    rtor(GEN x, long prec);
 long   sdivsi_rem(long x, GEN y, long *rem);
 long   sdivss_rem(long x, long y, long *rem);
+void shift_left2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
+void shift_right2(GEN z2, GEN z1, long min, long M, ulong f, ulong sh, ulong m);
 GEN    shiftr(GEN x, long n);
 long   smodis(GEN x, long y);
 long   smodss(long x, long y);
@@ -861,5 +863,34 @@ expi(GEN x)
 {
   const long lx=lgefint(x);
   return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-(long)bfffo(*int_MSW(x))-1;
+}
+
+/* z2[imin..imax] := z1[imin..imax].f shifted left sh bits
+ * (feeding f from the right). Assume sh > 0 */
+INLINE void
+shift_left2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
+{
+  GEN sb = z1 + imin, se = z1 + imax, te = z2 + imax;
+  ulong l, k = f >> m;
+  while (se > sb) {
+    l     = *se--;
+    *te-- = (l << sh) | k;
+    k     = l >> m;
+  }
+  *te = (*se << sh) | k;
+}
+/* z2[imin..imax] := f.z1[imin..imax-1] shifted right sh bits
+ * (feeding f from the left). Assume sh > 0 */
+INLINE void
+shift_right2(GEN z2, GEN z1, long imin, long imax, ulong f, ulong sh, ulong m)
+{
+  GEN sb = z1 + imin, se = z1 + imax, tb = z2 + imin;
+  ulong k, l = *sb++;
+  *tb++ = (l >> sh) | (f << m);
+  while (sb < se) {
+    k     = l << m;
+    l     = *sb++;
+    *tb++ = (l >> sh) | k;
+  }
 }
 #endif

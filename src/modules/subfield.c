@@ -21,17 +21,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern long ZX_get_prec(GEN x);
 
-typedef struct _poldata
-{
+typedef struct _poldata {
   GEN pol;
   GEN dis; /* |disc(pol)| */
   GEN roo; /* roots(pol) */
   GEN den; /* multiple of index(pol) */
 } poldata;
-typedef struct _primedata
-{
+typedef struct _primedata {
   GEN p;  /* prime */
   GEN pol; /* pol mod p, squarefree */
   GEN ff; /* factorization of pol mod p */
@@ -46,8 +43,7 @@ typedef struct _primedata
   GEN bezoutC; /* Bezout coefficients associated to the ff[i] */
   GEN Trk;     /* used to compute traces (cf poltrace) */
 } primedata;
-typedef struct _blockdata
-{
+typedef struct _blockdata {
   poldata *PD; /* data depending from pol */
   primedata *S;/* data depending from pol, p */
   GEN DATA; /* data depending from pol, p, degree, # translations [updated] */
