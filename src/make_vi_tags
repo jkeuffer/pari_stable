@@ -7,7 +7,7 @@ $tmptags="$src/tags.tmp";
 $tags="$src/tags";
 
 # assume ctags outputs sorted tags (e.g Exuberant Ctags)
-system("ctags -f $tmptags `find $src -name \*.[chs] -type f -print`");
+system("ctags -f $tmptags `find $src -name '*.[chs]' -type f -print`");
 getnames("$src/gp/gp_init.c");
 getnames("$src/language/init.c");
 open(T,"$tmptags");
