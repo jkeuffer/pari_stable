@@ -2158,9 +2158,7 @@ to_Fq(GEN x, GEN T, GEN p)
     lx = lgef(x);
     y = cgetg(lx,t_POL);
     y[1] = x[1];
-    if (lx == 2) setsigne(y, 0);
-    else
-      for (i=2; i<lx; i++) y[i] = (long)mod((GEN)x[i], p);
+    for (i=2; i<lx; i++) y[i] = (long)mod((GEN)x[i], p);
   }
   /* assume deg(y) < deg(T) */
   z[1] = (long)T;
