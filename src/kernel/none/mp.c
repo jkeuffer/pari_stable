@@ -1671,7 +1671,7 @@ static GEN
 sqrtispec2_sh(GEN n, GEN *pr)
 {
   GEN S;
-  ulong *U, r, s, u0 = (ulong)n[0], u1 = (ulong)n[1];
+  ulong U[2], r, s, u0 = (ulong)n[0], u1 = (ulong)n[1];
   int hi, sh = bfffo(u0) & ~1UL;
   if (sh) {
     u0 = (u0 << sh) | (u1 >> (BITS_IN_LONG-sh));
