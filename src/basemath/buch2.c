@@ -1339,15 +1339,16 @@ red_ideal(GEN *ideal,GEN T2vec,GEN prvec)
   long i;
   for (i=1; i<lg(T2vec); i++)
   {
-    GEN p1,base, T2 = (GEN)T2vec[i];
+    GEN p1,u, T2 = (GEN)T2vec[i];
     long prec = prvec[i];
 
     p1 = qf_base_change(T2, *ideal, 1);
-    base = lllgramintern(p1,100,1,prec);
-    if (base)
+    u = lllgramintern(p1,100,1,prec);
+    if (u)
     {
-      p1 = sqred1intern(qf_base_change(p1,base,1),1);
-      if (p1) { *ideal = gmul(*ideal,base); return p1; }
+      p1 = qf_base_change(p1,u,1);
+      p1 = sqred1intern(p1,1);
+      if (p1) { *ideal = gmul(*ideal,u); return p1; }
     }
     if (DEBUGLEVEL) err(warner, "prec too low in red_ideal[%ld]: %ld",i,prec);
   }
@@ -1420,13 +1421,13 @@ small_to_mat_i(GEN z, long d)
   return x;
 }
 
-#define MAXTRY 20
-
 /* return -1 in case of precision problems. t = current number of relations */
 static long
 small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
                        GEN nf,GEN gborne,long nbrelpid,GEN invp,GEN L,GEN LLLnf)
 {
+  const int maxtry_DEP  = 20;
+  const int maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, MINKOVSKI_BOUND,BOUND;
   gpmem_t av = avma, av1, av2, limpile;
@@ -1457,7 +1458,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   for (noideal=KC; noideal; noideal--)
   {
     gpmem_t av0 = avma;
-    long nbrelideal=0, dependent = 0, oldcglob = cglob;
+    long nbrelideal=0, dependent = 0, try_factor = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)vectbase[noideal];
     GEN normideal = idealnorm(nf,ideal);
 
@@ -1477,13 +1478,18 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
+#if 1
     BOUND = MINKOVSKI_BOUND * pow(gtodouble(normideal),2./(double)N);
+#else
+    BOUND = v[2] + v[1] * q[1][2] * q[1][2];
+    if (BOUND < v[1]) BOUND = v[1];
+#endif
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");
       fprintferr("BOUND = %.4g\n",BOUND); flusherr();
     }
-    BOUND += eps; av2=avma; limpile = stack_lim(av2,1);
+    BOUND *= 1 + eps; av2=avma; limpile = stack_lim(av2,1);
     k = N; y[N]=z[N]=0; x[N]= (long) sqrt(BOUND/v[N]);
     for(;; x[1]--)
     {
@@ -1519,6 +1525,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
             if (!isnfscalar(gx))
             {
               xembed = gmul(M,gx); av4 = avma; nbsmallnorm++;
+              if (++try_factor > maxtry_FACT) goto ENDIDEAL;
               Nx = ground(norm_by_embed(R1,xembed)); setsigne(Nx, 1);
               if (factorelt(nf,cbase,gx,Nx,KCZ,LIMC)) { avma = av4; break; }
               if (DEBUGLEVEL > 1) { fprintferr("."); flusherr(); }
@@ -1535,7 +1542,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       { /* Q-dependent from previous ones: forget it */
         cglob--; unset_fact(col);
         if (DEBUGLEVEL>1) { fprintferr("*"); flusherr(); }
-        if (++dependent > MAXTRY) { alldep++; break; }
+        if (++dependent > maxtry_DEP) { alldep++; break; }
         avma = av3; continue;
       }
       /* record archimedean part */
@@ -1573,7 +1580,6 @@ END:
   }
   avma = av; return cglob;
 }
-#undef MAXTRY
 
 /* I assumed to be integral HNF, T2 a weighted T2 matrix. Return an
  * irrational m in I with T2(m) small */
