@@ -2850,6 +2850,20 @@ FpM_image(GEN x, GEN p)
   free(d); return y;
 }
 
+long
+FpM_rank(GEN x, GEN p)
+{
+  pari_sp av = avma;
+  long r;
+  GEN d;
+
+  FpM_gauss_pivot(x,p,&d,&r);
+  /* yield r = dim ker(x) */
+
+  avma=av; if (d) free(d);
+  return lg(x)-1 - r;
+}
+
 static GEN
 sFpM_invimage(GEN mat, GEN y, GEN p)
 {

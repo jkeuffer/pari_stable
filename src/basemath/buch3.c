@@ -55,7 +55,7 @@ extern GEN perm_to_arch(GEN nf, GEN archp);
 
 /* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
 static GEN
-get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
+get_full_rank(GEN nf, GEN v, GEN gen, long ngen, long rankmax)
 {
   GEN vecsign,v1,p1,alpha, bas=(GEN)nf[7], rac=(GEN)nf[6];
   long rankinit = lg(v)-1, N = degpol(nf[1]), va = varn(nf[1]);
@@ -73,18 +73,17 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
       for (kk=k,i=1; i<=N; i++,kk/=rr)
       {
         long lambda = (kk+r)%rr - r;
-        if (lambda)
-          alpha = gadd(alpha,gmulsg(lambda,(GEN)bas[i]));
+        if (lambda) alpha = gadd(alpha,gmulsg(lambda,(GEN)bas[i]));
       }
       for (i=1; i<=rankmax; i++)
-	vecsign[i] = (gsigne(gsubst(alpha,va,(GEN)rac[i])) > 0)? (long)_0
-                                                               : (long)_1;
+	vecsign[i] = (gsigne(gsubst(alpha,va,(GEN)rac[i])) > 0)? zero
+                                                               : un;
       v1 = concatsp(v, vecsign);
-      if (rank(v1) == rankinit) { avma = av1; continue; }
+      if (FpM_rank(v1, gdeux) == rankinit) { avma = av1; continue; }
 
       v=v1; rankinit++; ngen++;
       gen[ngen] = (long) alpha;
-      if (rankinit == rankmax) return ginv(v); /* full rank */
+      if (rankinit == rankmax) return FpM_inv(v, gdeux); /* full rank */
       vecsign = cgetg(rankmax+1,t_COL);
     }
   }
@@ -94,7 +93,7 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
 GEN
 buchnarrow(GEN bnf)
 {
-  GEN nf,_0,_1,cyc,gen,v,matsign,arch,cycgen,logs;
+  GEN nf,cyc,gen,v,matsign,arch,cycgen,logs;
   GEN dataunit,p1,p2,h,basecl,met,u1;
   long r1,R,i,j,ngen,sizeh,t,lo,c;
   pari_sp av = avma;
@@ -103,8 +102,6 @@ buchnarrow(GEN bnf)
   nf = checknf(bnf); r1 = nf_get_r1(nf);
   if (!r1) return gcopy(gmael(bnf,8,1));
 
-  _1 = gmodulss(1,2);
-  _0 = gmodulss(0,2);
   cyc = gmael3(bnf,8,1,2);
   gen = gmael3(bnf,8,1,3); ngen = lg(gen)-1;
   matsign = signunits(bnf); R = lg(matsign);
@@ -113,16 +110,16 @@ buchnarrow(GEN bnf)
   {
     p1=cgetg(r1+1,t_COL); dataunit[j]=(long)p1;
     for (i=1; i<=r1; i++)
-      p1[i] = (signe(gcoeff(matsign,i,j)) > 0)? (long)_0: (long)_1;
+      p1[i] = (signe(gcoeff(matsign,i,j)) > 0)? zero: un;
   }
-  v = cgetg(r1+1,t_COL); for (i=1; i<=r1; i++) v[i] = (long)_1;
-  dataunit[R] = (long)v; v = image(dataunit); t = lg(v)-1;
+  v = cgetg(r1+1,t_COL); for (i=1; i<=r1; i++) v[i] = un;
+  dataunit[R] = (long)v; v = FpM_image(dataunit, gdeux); t = lg(v)-1;
   if (t == r1) { avma = av; return gcopy(gmael(bnf,8,1)); }
 
   sizeh = ngen+r1-t; p1 = cgetg(sizeh+1,t_COL);
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
-  v = get_full_rank(nf,v,_0,_1,gen,ngen,r1);
+  v = get_full_rank(nf,v,gen,ngen,r1);
 
   arch = cgetg(r1+1,t_VEC); for (i=1; i<=r1; i++) arch[i]=un;
   cycgen = check_and_build_cycgen(bnf);
