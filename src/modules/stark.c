@@ -200,26 +200,29 @@ ComputeLift(GEN dataC)
   return gerepileupto(av, elt);
 }
 
+static GEN
+get_chic(GEN chi, GEN cyc)
+{
+  long i, l = lg(chi);
+  GEN chic = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+    chic[i] = ldiv((GEN)chi[i], (GEN)cyc[i]);
+  return chic;
+}
+
 /* A character is given by a vector [(c_i), z, d, pm] such that
    chi(id) = z ^ sum(c_i * a_i) where
      a_i= log(id) on the generators of bnr
      z  = exp(2i * Pi / d) */
 static GEN
-get_Char(GEN chi, GEN cyc, long prec)
+get_Char(GEN chic, long prec)
 {
-  GEN d, C, chic;
-  long i, l = lg(chi);
-
-  chic = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++)
-    chic[i] = ldiv((GEN)chi[i], (GEN)cyc[i]);
-
+  GEN d, C;
   C = cgetg(4, t_VEC);
   d = denom(chic);
   C[1] = lmul(d, chic);
   C[2] = (long)InitRU(d, prec);
-  C[3] = (long)d;
-  return C;
+  C[3] = (long)d; return C;
 }
 
 /* Let chi a character defined over bnr and primitive over bnrc,
@@ -228,24 +231,32 @@ get_Char(GEN chi, GEN cyc, long prec)
 static GEN
 GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
-  long i, l, av = avma, nd;
-  GEN cyc, U, M, p1, cond, condc, p2, nf;
+  long nbg, i, j, l, av = avma, nd;
+  GEN s, chic, cyc, U, M, p1, cond, condc, p2, nf;
   GEN prdiff, Mrc;
 
   cond  = gmael(bnr, 2, 1);
   condc = gmael(bnrc, 2, 1);
   if (gegal(cond, condc)) return NULL;
 
-  cyc   = gmael(bnr, 5, 2);
+  cyc   = gmael(bnr, 5, 2); nbg = lg(cyc)-1;
   Mrc   = diagonal(gmael(bnrc, 5, 2));
   nf    = gmael(bnr, 1, 7);
 
   M = bnrGetSurj(bnr, bnrc);
   U = (GEN)hnfall(concatsp(M, Mrc))[2];
-  l = lg(chi);
-  U = vecextract_i(U, l, lg(U)-1);
-  U = rowextract_i(U, 1, l-1); /* upper right = projector to image */
-  chi = gmul(chi, U);
+  l = lg((GEN)M[1]);
+  chic = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++)
+  {
+    s  = gzero; p1 = (GEN)U[i + nbg];
+    for (j = 1; j <= nbg; j++)
+    {
+      p2 = gdiv((GEN)p1[j], (GEN)cyc[j]);
+      s  = gadd(s, gmul(p2,(GEN)chi[j]));
+    }
+    chic[i] = (long)s;
+  }
 
   cond  = (GEN)cond[1];
   condc = (GEN)condc[1];
@@ -258,7 +269,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   setlg(prdiff, nd);
 
   p1  = cgetg(3, t_VEC);
-  p1[1] = (long)get_Char(chi,cyc,prec);
+  p1[1] = (long)get_Char(chic,prec);
   p1[2] = lcopy(prdiff);
 
   return gerepileupto(av,p1);
@@ -833,7 +844,7 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
     bnrc = buchrayinitgen((GEN)bnr[1], condc);
 
   cyc  = gmael(bnr, 5, 2);
-  p2 = get_Char(chi,cyc, prec);
+  p2 = get_Char(get_chic(chi,cyc), prec);
 
   dtcr = cgetg(9, t_VEC);
   dtcr[1] = (long)chi;
@@ -1014,7 +1025,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
       data[3] = olddata[3]; /* bnr(cond(chi)) */
     }
     data[4] = (long)bnr; /* bnr(m) */
-    data[5] = (long)get_Char(chi,Mr,prec); /* char associated to bnr(m) */
+    data[5] = (long)get_Char(get_chic(chi,Mr),prec); /* associated to bnr(m) */
 
     /* compute diff(chi) and the corresponding primitive character */
     data[7] = cond[1];
