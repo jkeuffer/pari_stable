@@ -21,7 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "parinf.h"
-extern GEN R_from_QR(GEN x, long prec);
+extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN computeGtwist(GEN nf, GEN vdir);
 extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
 extern GEN to_famat_all(GEN x, GEN y);
@@ -1349,11 +1349,7 @@ red_ideal(GEN *ideal,GEN Gvec,GEN prvec)
     if (u)
     {
       p1 = gmul(p1, u);
-#if 0
-      p1 = R_from_QR(p1, prec);
-#else /* FIXME */
-      p1 = sqred1intern(gram_matrix(p1), 1);
-#endif
+      p1 = sqred1_from_QR(p1, prec);
       if (p1) { *ideal = gmul(*ideal,u); return p1; }
     }
     if (DEBUGLEVEL) err(warner, "prec too low in red_ideal[%ld]: %ld",i,prec);

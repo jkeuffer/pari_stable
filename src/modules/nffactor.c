@@ -32,7 +32,7 @@ extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
-extern GEN make_T2(GEN base, GEN polr, long r1);
+extern GEN make_G(GEN x, GEN bas, long r1, long prec);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
@@ -359,10 +359,10 @@ nffactor(GEN nf,GEN pol)
 static GEN
 nf_factor_bound(GEN nf, GEN polbase)
 {
-  GEN lt,C,run,p1,p2, T2 = gmael(nf,5,3);
+  GEN lt,C,run,p1,p2, G = gmael(nf,5,2);
   long i,prec,precnf, d = lgef(polbase), n = degpol(nf[1]), r1 = nf_get_r1(nf);
 
-  precnf = gprecision(T2);
+  precnf = gprecision(G);
   prec   = DEFAULTPREC;
   for (;;)
   {
@@ -371,7 +371,9 @@ nf_factor_bound(GEN nf, GEN polbase)
     for (i=2; i<d; i++)
     {
       p2 = gmul(run, (GEN)polbase[i]);
-      p2 = qfeval(T2, p2); if (signe(p2) < 0) break;
+      p2 = gnorml2(gmul(G, p2));
+      if (!signe(p2)) continue;
+      if (lg(p2) == 3 && expo(p2) > 20) break;
       p1 = addrr(p1, gdiv(p2, binome(stoi(d), i-2)));
     }
     if (i == d) break;
@@ -380,7 +382,7 @@ nf_factor_bound(GEN nf, GEN polbase)
     if (prec > precnf)
     {
       if (DEBUGLEVEL>1) err(warnprec, "nfsqff", prec);
-      T2 = make_T2((GEN)nf[7], roots((GEN)nf[1], prec), r1);
+      G = make_G((GEN)nf[1], (GEN)nf[7], r1, prec);
     }
   }
   lt = (GEN)leading_term(polbase)[1];

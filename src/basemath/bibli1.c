@@ -807,7 +807,7 @@ ApplyH(GEN P, GEN r)
 /* compute B[k] = | x[k] |^2, update mu(k, 1..k-1) using Householder matrices
  * (P = Householder(x[1..k-1]) in factored form) */
 static int
-incrementalH(GEN x, GEN L, GEN B, long k, GEN P, long prec)
+incrementalH(GEN x, GEN L, GEN B, GEN P, long k, long prec)
 {
   gpmem_t av = avma;
   GEN r = dummycopy((GEN)x[k]);
@@ -823,7 +823,7 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, long prec)
   GEN Nx, invNx, m, P = cgetg(k+1, t_VEC);
   long i, j;
   for (j=1; j<=k; j++)
-    if (! incrementalH(x,L,B,j,P,prec)) return 0;
+    if (! incrementalH(x, L, B, P, j, prec)) return 0;
   for (j=1; j<=k; j++)
   {
     m = (GEN)L[j]; Nx = (GEN)m[j]; m[j] = un;
@@ -835,6 +835,18 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, long prec)
 }
 
 GEN
+sqred1_from_QR(GEN x, long prec)
+{
+  long j, k = lg(x)-1;
+  GEN L, B = zerovec(k);
+  L = cgetg(k+1, t_MAT);
+  for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
+  if (!Householder_get_mu(x, L, B, k, prec)) return NULL;
+  for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
+  return gtrans_i(L);
+}
+
+GEN
 R_from_QR(GEN x, long prec)
 {
   long j, k = lg(x)-1;
@@ -842,8 +854,8 @@ R_from_QR(GEN x, long prec)
   L = cgetg(k+1, t_MAT);
   for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
   for (j=1; j<=k; j++)
-    if (! incrementalH(x,L,B,j,P,prec)) return NULL;
-  return L;
+    if (!incrementalH(x, L, B, P, j, prec)) return NULL;
+  return gtrans_i(L);
 }
 
 /* compute B[k] = | x[k] |^2, update mu(k, 1..k-1).
@@ -2600,6 +2612,7 @@ get_Bnf(GEN nf)
 }
 
 typedef struct {
+  GEN nf;
   long r1;
   GEN ZKembed; /* embeddings of LLL-reduced Zk basis */
   GEN ZKLLL; /* LLL reduced Zk basis (in M_n(Z)) */
@@ -2640,28 +2653,28 @@ chk_gen(void *data, GEN x)
 
 /* mat = base change matrix, gram = LLL-reduced T2 matrix */
 static GEN
-chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
+chk_gen_init(FP_chk_fun *chk, GEN gram, GEN mat, long *ptprec)
 {
-  GEN P,bound,prev,x,B, M = gmael(nf,5,1);
-  long N = lg(nf[7]), n = N-1,i,prec,prec2;
+  CG_data *d = (CG_data*)chk->data;
+  GEN P,bound,prev,x,B,M, nf = d->nf;
+  long l = lg(gram), N = l-1,i,prec,prec2;
   int skipfirst = 0;
-  CG_data *d = (CG_data*)new_chunk(sizeof(CG_data));
 
-  d->r1 = itos(gmael(nf,2,1));
+  M = gmael(nf,5,1);
+  d->r1 = nf_get_r1(nf);
   d->ZKembed = gmul(M, mat);
-  d->ZKLLL   = gmul((GEN)nf[7],mat);
-  chk->data = (void*)d;
+  d->ZKLLL   = gmul((GEN)nf[7], mat);
 
   bound = get_Bnf(nf); prev = NULL;
-  x = zerocol(N-1);
-  for (i=1; i<N; i++)
+  x = zerocol(N);
+  for (i=1; i<l; i++)
   {
     B = gcoeff(gram,i,i);
     if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
 
     x[i] = un; P = get_polmin(d,x);
     x[i] = zero;
-    if (degpol(P) == n)
+    if (degpol(P) == N)
     {
       if (gcmp(B,bound) < 0) bound = B ;
       continue;
@@ -2674,25 +2687,24 @@ chk_gen_init(FP_chk_fun *chk, GEN nf, GEN gram, GEN mat, long *ptprec)
       {
         if (degpol(prev) * degpol(P) > 32) continue; /* too expensive */
         P = (GEN)compositum(prev,P)[1];
-        if (degpol(P) == n) continue;
+        if (degpol(P) == N) continue;
         if (DEBUGLEVEL>2 && lgef(P)>lgef(prev))
           fprintferr("chk_gen_init: subfield %Z\n",P);
       }
       skipfirst++; prev = P;
     }
   }
-  /* x_1,...,x_skipfirst generate a strict subfield [unless n=skipfirst=1] */
+  /* x_1,...,x_skipfirst generate a strict subfield [unless N=skipfirst=1] */
   chk->skipfirst = skipfirst;
   if (DEBUGLEVEL>2) fprintferr("chk_gen_init: skipfirst = %ld\n",skipfirst);
 
   /* should be gexpo( [max_k C^n_k (bound/k) ^ k] ^ (1/2) ) */
-  prec2 = (1 + (((gexpo(bound)*n)/2) >> TWOPOTBITS_IN_LONG));
+  prec2 = (1 + (((gexpo(bound)*N)/2) >> TWOPOTBITS_IN_LONG));
   if (prec2 < 0) prec2 = 0;
   prec = 3 + prec2;
   prec2= nfgetprec(nf);
   if (DEBUGLEVEL)
-    fprintferr("chk_gen_init: estimated prec = %ld (initially %ld)\n",
-                prec, prec2);
+    fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, prec2);
   if (prec > prec2) return NULL;
   if (prec < prec2) d->ZKembed = gprec_w(d->ZKembed, prec);
   *ptprec = prec; return bound;
@@ -2787,12 +2799,13 @@ polredabs0(GEN x, long flun, long prec)
   gpmem_t av = avma;
   GEN nf,v,y,a,phimax;
   GEN (*storepols)(GEN, GEN, GEN, GEN, long);
-  FP_chk_fun *chk;
+  FP_chk_fun chk;
+  CG_data d;
 
-  chk = (FP_chk_fun*)new_chunk(sizeof(FP_chk_fun));
-  chk->f         = &chk_gen;
-  chk->f_init    = &chk_gen_init;
-  chk->f_post    = &chk_gen_post;
+  chk.f      = &chk_gen;
+  chk.f_init = &chk_gen_init;
+  chk.f_post = &chk_gen_post;
+  chk.data   = (void*)&d;
 
   if ((ulong)flun >= 16) err(flagerr,"polredabs");
   nf = initalgall0(x,nf_SMALL|nf_REGULAR,prec);
@@ -2813,9 +2826,10 @@ polredabs0(GEN x, long flun, long prec)
   }
   else
   {
+    d.nf = nf;
     for (i=1; ; i++)
     {
-      v = fincke_pohst(nf,NULL,5000,3,prec, chk);
+      v = fincke_pohst(nf,NULL,5000,3,prec, &chk);
       if (v) break;
       if (i==MAXITERPOL) err(accurer,"polredabs0");
       prec = (prec<<1)-2; nf = nfnewprec(nf,prec);
@@ -3432,43 +3446,43 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   long prec = PREC;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
-  if (typ(a) == t_VEC) { nf = checknf(a); a = gmael(nf,5,3); } else nf = NULL;
-  pr = gprecision(a);
-  if (pr) prec = pr; else a = gmul(a,realun(prec));
-  n = lg(a);
+  if (typ(a) == t_VEC) { nf = checknf(a); n = degpol(nf[1])+1; }
+  else { nf = NULL; n = lg(a); }
   if (n == 1)
   {
     if (CHECK) err(talker, "dimension 0 in fincke_pohst");
-    avma = av; z=cgetg(4,t_VEC);
-    z[1]=z[2]=zero;
-    z[3]=lgetg(1,t_MAT); return z;
+    avma = av; z = cgetg(4,t_VEC);
+    z[1] = z[2] = zero;
+    z[3] = lgetg(1,t_MAT); return z;
   }
   if (nf)
-  { /* T2 already LLL-reduced */
+  { /* nf[5][2] = Cholesky for T2 is already LLL-reduced */
     u = idmat(n-1);
-    r = a;
+    r = R_from_QR(gmael(nf,5,2), prec);
+    if (!r) goto PRECPB;
   }
   else
   {
+    pr = gprecision(a);
+    if (pr) prec = pr; else a = gmul(a,realun(prec));
     if (DEBUGLEVEL>2) fprintferr("first LLL: prec = %ld\n", prec);
     u = lllgramintern(a,4,flag&1, (prec<<1)-2);
     if (!u) goto PRECPB;
     r = qf_base_change(a,u,1);
+    r = sqred1intern(r,flag&1);
+    if (!r) goto PRECPB;
+    for (i=1; i<n; i++)
+    {
+      GEN p1 = gsqrt(gcoeff(r,i,i), prec);
+      coeff(r,i,i)=(long)p1;
+      for (j=i+1; j<n; j++)
+        coeff(r,i,j) = lmul(p1, gcoeff(r,i,j));
+    }
   }
-  r = sqred1intern(r,flag&1);
-  if (!r) goto PRECPB;
-  for (i=1; i<n; i++)
-  {
-    GEN p1 = gsqrt(gcoeff(r,i,i), prec);
-    coeff(r,i,i)=(long)p1;
-    for (j=i+1; j<n; j++)
-      coeff(r,i,j) = lmul(p1, gcoeff(r,i,j));
-  }
-  /* now r~ * r = a in approximate LLL basis */
+  /* now r~ * r = a in LLL basis */
   rinvtrans = gtrans(invmat(r));
-
   v = NULL;
-  for (i=1; i<6; i++) /* try to get close to a genuine LLL basis */
+  for (i=1; i<6; i++) /* try to get an LLL basis for r~^(-1) */
   {
     GEN p1;
     if (DEBUGLEVEL>2)
@@ -3485,7 +3499,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   if (v)
   {
     GEN u2 = ZM_inv(gtrans(v),gun);
-    r = gmul(r,u2); /* r = LLL basis now */
+    r = gmul(r,u2);
     u = gmul(u,u2);
   }
 
@@ -3506,7 +3520,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   }
   if (CHECK && CHECK->f_init)
   {
-    bound = CHECK->f_init(CHECK,nf,gram,uperm, &prec);
+    bound = CHECK->f_init(CHECK,gram,uperm, &prec);
     if (!bound) goto PRECPB;
   }
   if (!bound)
@@ -3539,10 +3553,10 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   }
 
   if (DEBUGLEVEL>2) {fprintferr("leaving fincke_pohst\n"); flusherr();}
-  z=cgetg(4,t_VEC);
-  z[1]=lcopy((GEN)res[1]);
-  z[2]=pr? lcopy((GEN)res[2]) : lround((GEN)res[2]);
-  z[3]=lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
+  z = cgetg(4,t_VEC);
+  z[1] = lcopy((GEN)res[1]);
+  z[2] = pr? lcopy((GEN)res[2]) : lround((GEN)res[2]);
+  z[3] = lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
 PRECPB:
   if (catcherr) err_leave(&catcherr);
   if (!(flag & 1))

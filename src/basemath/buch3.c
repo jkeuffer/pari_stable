@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
 extern GEN idealprodprime(GEN nf, GEN L);
 extern GEN anti_unif_mod_f(GEN nf, GEN pr, GEN sqf);
@@ -918,13 +919,11 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BOUND);
     flusherr();
   }
-  r1 = nf_get_r1(nf);
-  a = gmael(nf,5,3); n = lg(a);
-  minim_alloc(n, &q, &x, &y, &z, &v);
-  n--;
+  r1 = nf_get_r1(nf); n = degpol(nf[1]);
+  minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(gmael(nf,5,1), prec);
-  a = gmul(a, realun(prec));
-  r = sqred1(a);
+  a = gmul(gmael(nf,5,2), realun(prec));
+  r = sqred1_from_QR(a, prec);
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));
@@ -1129,15 +1128,10 @@ compute_M0(GEN M_star,long N)
 }
 
 static GEN
-_T2(GEN M, GEN x, long r1) { 
-  return gprec_w(T2_from_embed(gmul(M,x), r1), DEFAULTPREC);
-}
-
-static GEN
 lowerboundforregulator_i(GEN bnf)
 {
   long N,R1,R2,RU,i;
-  GEN nf,M0,M,bound,minunit,newminunit;
+  GEN nf,M0,M,G,bound,minunit,newminunit;
   GEN vecminim,p1,pol,y;
   GEN units = check_units(bnf,"bnfcertify");
 
@@ -1145,12 +1139,12 @@ lowerboundforregulator_i(GEN bnf)
   nf_get_sign(nf, &R1, &R2); RU = R1+R2-1;
   if (!RU) return gun;
 
-  M = gmael(nf,5,1);
+  G = gmael(nf,5,2);
   units = algtobasis(bnf,units);
-  minunit = _T2(M, (GEN)units[1], R1);
+  minunit = gnorml2(gmul(G, (GEN)units[1])); /* T2(units[1]) */
   for (i=2; i<=RU; i++)
   {
-    newminunit = _T2(M, (GEN)units[i], R1);
+    newminunit = gnorml2(gmul(G, (GEN)units[i]));
     if (gcmp(newminunit,minunit) < 0) minunit = newminunit;
   }
   if (gexpo(minunit) > 30) return NULL;

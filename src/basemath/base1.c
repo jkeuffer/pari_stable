@@ -999,14 +999,6 @@ get_mul_table(GEN x,GEN basden,GEN invbas,GEN *T)
   return mul;
 }
 
-GEN
-make_T2(GEN bas, GEN ro, long r1)
-{
-  GEN M, basden = get_bas_den(bas);
-  M = make_M(basden,ro);
-  return mulmat_real(make_MC(r1,M), M); /* FIXME: useless */
-}
-
 /* as get_T, mul_table not precomputed */
 static GEN
 make_T(GEN x, GEN w)
@@ -1073,6 +1065,14 @@ make_Cholevsky_T2(GEN M, GEN ro, long r1, long prec)
   return G;
 }
 
+GEN
+make_G(GEN x, GEN bas, long r1, long prec)
+{
+  GEN M, basden = get_bas_den(bas), ro = roots(x, prec);
+  M = make_M(basden,ro);
+  return make_Cholevsky_T2(M, ro, r1, prec);
+}
+
 /* fill mat = nf[5], as well as nf[8] and nf[9]
  * If (small) only compute a subset (use dummy 0s for the rest) */
 void
@@ -1082,15 +1082,15 @@ get_nf_matrices(GEN nf, long prec, long small)
   GEN G,basden,mul,invbas,M,T,MDI,D,TI,A,dA,mat;
   long r1 = nf_get_r1(nf), n = lg(bas)-1;
 
-  mat = cgetg(small? 4: 8,t_VEC); nf[5] = (long)mat;
+  mat = cgetg(small? 3: 8,t_VEC); nf[5] = (long)mat;
   basden = get_bas_den(bas);
   M = make_M(basden,ro);
   if (gprecision(M) > prec) M = gprec_w(M, prec);
   G = make_Cholevsky_T2(M, ro, r1, prec);
   mat[1]=(long)M;
   mat[2]=(long)G;
-  mat[3]=(long)gram_matrix(G); /* FIXME: useless */
-  if (small) { nf[8]=nf[9]=mat[2]=zero; return; }
+  if (small) { nf[8]=nf[9]=zero; return; }
+  mat[3]=zero; /* FIXME: was gram_matrix(G). Useless */
 
   invbas = QM_inv(vecpol_to_mat(bas,n), gun);
   mul = get_mul_table(x,basden,invbas,&T);
