@@ -48,7 +48,7 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
  * If T != NULL, compute mod (T,N) [assume integer coeffs if N != NULL]
  * If y0!= NULL, precomputed i-th powers, i=1..m, m = length(y0).
- * Not memory clena in the latter case */
+ * Not memory clean in the latter case */
 GEN
 polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
 {
@@ -86,8 +86,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
       s = gadd(s, gmul((GEN)y[k-i+1],(GEN)P[dP-i]));
     if (N)
     {
-      if (T) s = FpX_rem(FpX_red(s,N), T, N);
-      else   s = modii(s, N);
+      s = Fq_red(s, T, N);
       if (P_lead) s = Fq_mul(s, P_lead, T, N);
     }
     else if (T)
