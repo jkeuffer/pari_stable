@@ -1795,12 +1795,12 @@ cxpsi(GEN z, long prec) /* version p=2 */
 
   if (gcmp0((GEN)z[2])) return gpsi((GEN)z[1],prec);
   l = precision(z); if (!l) l = prec; av=avma;
-  x=(long)(1 + (bit_accuracy(l)>>1)*LOG2 + 1.58*rtodbl(gabs(z,DEFAULTPREC)));
+  x=(long)(1 + (bit_accuracy(l)>>1)*LOG2 + 1.58*gtodouble(gabs(z,DEFAULTPREC)));
   xx=x*x; n=(long)(1+3.591*x);
-  a=cgetg(3,t_COMPLEX); a[1]=lgetr(l); a[2]=lgetr(l); gaffsg(x,a);
-  b=cgetg(3,t_COMPLEX); b[1]=lgetr(l); b[2]=lgetr(l); gaffsg(1,b);
-  u=cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
-  v=cgetg(3,t_COMPLEX); v[1]=lgetr(l); v[2]=lgetr(l); gaffsg(1,v);
+  a=cgetc(l); gaffsg(x,a);
+  b=cgetc(l); gaffsg(1,b);
+  u=cgetc(l);
+  v=cgetc(l); gaffsg(1,v);
   p1=glog(a,l); gaffect(p1,a); gaffect(p1,u); av1=avma;
   for (k=1; k<=n; k++)
   {
@@ -1835,14 +1835,8 @@ cxpsi(GEN z, long prec) /* by Manfred Radimersky */
     gerepile(head, tail, gsub(s, a));
   }
 
-  a = cgetg(3, t_COMPLEX);
-  a[1] = (long) cgetr(prec);
-  a[2] = (long) cgetr(prec);
-  gaffsg(0, a);
-  w = cgetg(3, t_COMPLEX);
-  w[1] = (long) cgetr(prec);
-  w[2] = (long) cgetr(prec);
-  gaffect(z, w);
+  a = cgetc(prec); gaffsg(0, a);
+  w = cgetc(prec); gaffect(z, w);
   wn = gnorm(w);
   tail = avma;
   while(cmprs(wn, bord) < 0) {
