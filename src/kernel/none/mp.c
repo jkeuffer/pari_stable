@@ -3114,8 +3114,6 @@ lgcdii(ulong* d, ulong* d1,
  * v value before returning (and doing so even when the gcd isn't 1)
  */
 
-#define mysetsigne(d,s) { fprintferr("%ld %ld\n",s,signe(d)); if (signe(d)==-(s)) setsigne(d,s); }
-
 int
 invmod(GEN a, GEN b, GEN *res)
 {
