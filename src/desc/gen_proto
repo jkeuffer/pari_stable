@@ -23,40 +23,6 @@ print <<EOF;
 /* Do not edit*/
 EOF
 print "entree functions_${class}[]={\n";
-%valence=(
-"Gp" => 1,
-"GG" => 2,
-"GGG" => 3,
-"GGGG" => 4,
-"lG" => 10,
-"L" => 11,
-"GnP" => 12,
-"GDn" => 14,
-"G" => 18,
-"lGG" => 20,
-"GL" => 21,
-"GVE" => 22,
-#"GL" => 23,
-"LG" => 24,
-"GGD0,L," => 25,
-"GnG" => 26,
-"V=GEp" => 27,
-"GDVDI" => 28,
-"GGp" => 29,
-"lGGG" => 30,
-"GDGDGD&" => 31,
-"GGL" => 32,
-"GGGD0,L,p" =>33,
-"V=GGEp" => 37,
-"V=GGEDG" => 47,
-"GGDVDVDI" => 49,
-"GDGDGD0,L,p" => 62,
-"vV=GGI" => 83,
-"vGVI" => 84,
-"vV=GGGI" => 86,
-"vV=GID0,L," => 87,
-"GD0,L,DGp" => 91
-);
 %spec_valence=(
 "O" => 50,
 "if" => 80,
@@ -80,19 +46,12 @@ foreach my $name (sort keys %funcs)
       {
         my $fproto=$proto;
         $proto =~ s/^[vl]//;
-        if ($proto eq "" || $proto =~ /^(s\*)|[DpP]/)
-        {
-          $valence=0;
-        }
-        else
-        {
-          $valence=defined($valence{$fproto})?$valence{$fproto}:99;
-        }
+        $valence=($proto eq "" || $proto =~ /^(s\*)|[DpP]/)?0:1;
         print "{\"$gpname\",$valence,(void*)$cname,$sec,\"$fproto\"},\n";
       }
       else
       {
-        $valence=defined($spec_valence{$gpname})?$spec_valence{$gpname}:0;
+        $valence=defined($spec_valence{$gpname})?$spec_valence{$gpname}:1;
         print "{\"$gpname\",$valence,NULL,$sec,NULL},\n";
       }
 }
