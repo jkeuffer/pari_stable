@@ -150,8 +150,6 @@ char *errmessage[]=
   "forbidden",
 /* gdiver */
   "division by zero",
-/* inter2 */
-  "a log/atan appears in the integration, PARI cannot handle that",
 /* overwriter */
   "trying to overwrite a universal object",
 

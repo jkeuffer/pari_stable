@@ -1673,7 +1673,7 @@ triv_integ(GEN x, long v, long tx, long lx)
 GEN
 integ(GEN x, long v)
 {
-  long lx, tx, e, i, j, vx, n;
+  long lx, tx, e, i, vx, n;
   pari_sp av=avma, tetpil;
   GEN y,p1;
 
@@ -1722,21 +1722,22 @@ integ(GEN x, long v)
       {
         y = cgetg(4,t_POL);
         y[1] = evalvarn(v) | evalsigne(1);
-        y[2]=zero; y[3]=lcopy(x); return y;
+        y[2] = zero;
+        y[3] = lcopy(x); return y;
       }
       if (varncmp(vx, v) < 0) return triv_integ(x,v,tx,lx);
-      y=cgetg(lx,tx);
+      y = cgetg(lx,tx);
       for (i=2; i<lx; i++)
       {
-	j=i+e-1;
+	long j = i+e-1;
         if (!j)
 	{
-	  if (!gcmp0((GEN)x[i])) err(inter2);
-	  y[i]=zero;
+	  if (gcmp0((GEN)x[i])) { y[i] = zero; continue; }
+          err(talker, "a log appears in intformal");
 	}
 	else y[i] = ldivgs((GEN)x[i],j);
       }
-      y[1]=x[1]+1; return y;
+      y[1] = x[1]+1; return y;
 
     case t_RFRAC:
       vx = gvar(x);
@@ -1758,10 +1759,10 @@ integ(GEN x, long v)
       }
 
       tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(x[1]);
-      tx = typ(x[2]); j = is_scalar_t(tx)? 0: degpol(x[2]);
-      n = i+j + 2;
+      tx = typ(x[2]); n = is_scalar_t(tx)? 0: degpol(x[2]);
+      n = i+n + 2;
       y = gdiv(gtrunc(gmul((GEN)x[2], integ(tayl(x,v,n),v))), (GEN)x[2]);
-      if (!gegal(deriv(y,v),x)) err(inter2);
+      if (!gegal(deriv(y,v),x)) err(talker,"a log/atan appears in intformal");
       if (typ(y)==t_RFRAC && lg(y[1]) == lg(y[2]))
       {
         GEN p2;

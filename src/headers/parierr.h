@@ -60,7 +60,7 @@ enum {
   elliper1,
 
 /* gen.c */
-  operi, operf, gdiver, inter2, overwriter,
+  operi, operf, gdiver, overwriter,
 
 /* init.c */
 
