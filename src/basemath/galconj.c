@@ -499,7 +499,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 	tlift=lift(gmul(tlift,gmodulcp(gl->den,gl->gb->ladicsol)));
 	if (poltopermtest(tlift, gl, frob))
 	{
-	  //	  if(DEBUGLEVEL>=4)
+	  if(DEBUGLEVEL>=4)
 	    fprintferr("MonomorphismLift: true early solution.\n");
 	  avma=ltop;
 	  return NULL;
