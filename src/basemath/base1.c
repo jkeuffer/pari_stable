@@ -1923,6 +1923,7 @@ polredabs0(GEN x, long flag)
 
   if (degpol(x) == 1)
   {
+    u = NULL;
     y = _vec(polx[vx]);
     a = _vec(gsub((GEN)y[1], (GEN)x[2]));
   }
@@ -1945,13 +1946,13 @@ polredabs0(GEN x, long flag)
   if (DEBUGLEVEL) fprintferr("%ld minimal vectors found.\n",l-1);
   if (flag & nf_ALL)
   {
-    for (i=1; i<l; i++) a[i] = lmul(T.bas, gmul(u, (GEN)a[i]));
+    if (u) for (i=1; i<l; i++) a[i] = lmul(T.bas, gmul(u, (GEN)a[i]));
     y = storeallpol(x,y,a,T.lead,flag);
   }
   else
   {
     findmindisc(&y, &a);
-    a = gmul(T.bas, gmul(u, a));
+    if (u) a = gmul(T.bas, gmul(u, a));
     y = storepol(x,y,a,T.lead,flag);
   }
   return gerepileupto(av, y);
