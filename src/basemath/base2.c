@@ -576,6 +576,14 @@ get_coprimes(GEN a, GEN b)
   setlg(u, k); return u;
 }
 
+/* allow p = -1 from factorizations */
+static long
+safe_Z_pvalrem(GEN x, GEN p, GEN *z)
+{
+  if (signe(p) < 0) { *z = absi(x); return 1; }
+  return Z_pvalrem(x, p, z);
+}
+
 /* return integer basis. Set dK = disc(K), dx = disc(f), w (possibly partial)
  * factorization of dK. *ptw can be set by the caller, in which case it is
  * taken to be the factorization of disc(f), then overwritten
@@ -691,7 +699,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
     W2 = cgetg(lw, t_COL); w[2] = (long)W2;
     for (j=1; j<lw; j++)
     {
-      k = Z_pvalrem(D, (GEN)w1[j], &D);
+      k = safe_Z_pvalrem(D, (GEN)w1[j], &D);
       if (k) { W1[lfa] = w1[j]; W2[lfa] = lstoi(k); lfa++; }
     }
     setlg(W1, lfa);
@@ -712,7 +720,7 @@ update_fact(GEN x, GEN f)
   e = cgetg(l,t_COL); g[2]=(long)e; iq = 1;
   for (i=1; i<l; i++)
   {
-    k = Z_pvalrem(d, (GEN)p[i], &d);
+    k = safe_Z_pvalrem(d, (GEN)p[i], &d);
     if (k) { q[iq] = p[i]; e[iq] = lstoi(k); iq++; }
   }
   setlg(q,iq); setlg(e,iq);

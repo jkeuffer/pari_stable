@@ -746,7 +746,7 @@ u_lval(ulong x, ulong p)
   }
 }
 
-/* assume p != 0 */
+/* assume |p| > 1 */
 long
 z_pval(long n, GEN p)
 {
