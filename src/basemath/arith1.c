@@ -222,21 +222,22 @@ gener(GEN m)
 
   t=decomp(m); if (lg(t[1]) != 2) err(generer);
   p=gcoeff(t,1,1); e=itos(gcoeff(t,1,2)); q=subis(p,1);
-  if (e>=2)
+  if (e >= 2)
   {
-    x = (GEN) gener(p)[2];
+    x = (GEN)gener(p)[2];
     if (gcmp1(powmodulo(x,q, sqri(p)))) x = addii(x,p);
     av1=avma; return gerepile(av,av1,gmodulcp(x,m));
   }
 
   p=(GEN)decomp(q)[1]; k=lg(p)-1; x=stoi(1);
+  for (i=1; i<=k; i++) p[i] = (long)diviiexact(q, (GEN)p[i]);
   for(;;)
   {
     x[2]++;
     if (gcmp1(mppgcd(m,x)))
     {
       for (i=k; i; i--)
-	if (gcmp1(powmodulo(x, divii(q,(GEN)p[i]), m))) break;
+	if (gcmp1(powmodulo(x, (GEN)p[i], m))) break;
       if (!i) break;
     }
   }

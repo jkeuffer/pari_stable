@@ -26,6 +26,7 @@ extern GEN famat_ideallog(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN famat_to_nf_modidele(GEN nf, GEN g, GEN e, GEN bid);
 extern GEN hnfall_i(GEN A, GEN *ptB, long remove);
 extern GEN vconcat(GEN A, GEN B);
+extern GEN ff_to_nf(GEN x, GEN modpr);
 
 /*******************************************************************/
 /*                                                                 */
@@ -1122,19 +1123,19 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
  * q = order of g0  (Npr - 1 if q = NULL)
  * TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
 static GEN
-nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall,GEN q)
+nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN modpr,GEN q)
 {
   gpmem_t av=avma,av1,lim;
   long lbaby,i,k, f = itos((GEN)pr[4]);
-  GEN p1,smalltable,giant,perm,v,g0inv,prh = (GEN)prhall[1];
+  GEN p1,smalltable,giant,perm,v,g0inv,prh = (GEN)modpr[1];
   GEN multab, p = (GEN)pr[1];
 
-  x = lift_intern(nfreducemodpr(nf,x,prhall));
+  x = lift_intern(nfreducemodpr(nf,x,modpr));
   p1 = q? q: addsi(-1, gpowgs(p,f));
   p1 = racine(p1);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in nfshanks");
   lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
-  g0inv = lift_intern(element_invmodpr(nf,g0,prhall));
+  g0inv = lift_intern(element_invmodpr(nf,g0,modpr));
   p1 = x;
 
   multab = eltmul_get_table(nf, g0inv);
@@ -1148,7 +1149,7 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall,GEN q)
     smalltable[i]=(long)p1; if (i==lbaby) break;
     p1 = mul_matvec_mod_pr(multab,p1,prh);
   }
-  giant=lift_intern(element_divmodpr(nf,x,p1,prhall));
+  giant=lift_intern(element_divmodpr(nf,x,p1,modpr));
   p1=cgetg(lbaby+1,t_VEC);
   perm = gen_sort(smalltable, cmp_IND | cmp_C, cmp_vecint);
   for (i=1; i<=lbaby; i++) p1[i]=smalltable[perm[i]];
@@ -1180,13 +1181,13 @@ nfshanks(GEN nf,GEN x,GEN g0,GEN pr,GEN prhall,GEN q)
 /* same in nf.zk / pr
  * TODO: should be done in F_(p^f), not in Z_k mod pr (done for f=1) */
 GEN
-nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
+nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN modpr)
 {
   gpmem_t av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,ord,fa,ex;
   long e,i,j,l;
 
-  a = lift_intern(nfreducemodpr(nf,a,prhall));
+  a = lift_intern(nfreducemodpr(nf,a,modpr));
   if (isnfscalar(a))
   { /* can be done in Fp^* */
     GEN p = (GEN)pr[1], ordp = subis(p, 1);
@@ -1201,7 +1202,7 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
     else /* we want < g > = Fp^* */
     {
       q = divii(ord,ordp);
-      g = element_powmodpr(nf,g,q,prhall);
+      g = element_powmodpr(nf,g,q,modpr);
     }
     g = lift_intern((GEN)g[1]);
     n_q = Fp_PHlog(a,g,p,NULL);
@@ -1209,30 +1210,30 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
     return gerepileuptoint(av, n_q);
   }
   ord = subis(idealnorm(nf,pr),1);
-  fa = factor(ord); ex = (GEN)fa[2];
+  fa = factor(ord);
+  ex = (GEN)fa[2];
   fa = (GEN)fa[1];
   l = lg(fa);
-  ginv = lift_intern(element_invmodpr(nf, g, prhall));
+  ginv = lift_intern(element_invmodpr(nf, g, modpr));
   v = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
     q = (GEN)fa[i];
     e = itos((GEN)ex[i]);
-    if (DEBUGLEVEL>5) 
-      fprintferr("nf_Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
+    if (DEBUGLEVEL>5) fprintferr("nf_Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
     t0 = divii(ord, (GEN)qj[e]);
-    a0 = element_powmodpr(nf, a, t0, prhall); 
-    ginv0 = element_powmodpr(nf, ginv, t0, prhall); /* order q^e */
-    g_q = element_powmodpr(nf, g, divii(ord,q), prhall); /* order q */
+    a0 = element_powmodpr(nf, a, t0, modpr); 
+    ginv0 = element_powmodpr(nf, ginv, t0, modpr); /* order q^e */
+    g_q = element_powmodpr(nf, g, divii(ord,q), modpr); /* order q */
     n_q = gzero;
     for (j=0; j<e; j++)
     {
       b = element_mulmodpr(nf,a0,
-                              element_powmodpr(nf, ginv0, n_q, prhall), prhall);
-      b = element_powmodpr(nf, b, (GEN)qj[e-1-j], prhall);
-      b = nfshanks(nf,b, g_q, pr,prhall, q);
+                              element_powmodpr(nf, ginv0, n_q, modpr), modpr);
+      b = element_powmodpr(nf, b, (GEN)qj[e-1-j], modpr);
+      b = nfshanks(nf,b, g_q, pr,modpr, q);
       n_q = addii(n_q, mulii(b, (GEN)qj[j]));
     }
     v[i] = lmodulcp(n_q, (GEN)qj[e]);
@@ -1327,52 +1328,52 @@ makeprimetoidealvec(GEN nf,GEN UV,GEN uv,GEN gen)
 static GEN
 zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
 {
-  gpmem_t av=avma,av1,tetpil;
-  long N, f, nbp, j, n, m, i, e, a, b;
+  gpmem_t av = avma, av1, tetpil;
+  long N, f, j, i, e, a, b;
   GEN prh,p,pf_1,list,v,p1,p3,p4,prk,uv,g0,newgen,pra,prb;
   GEN *gptr[2];
 
   if(DEBUGLEVEL>3) { fprintferr("treating pr = %Z ^ %Z\n",pr,ep); flusherr(); }
-  prh=prime_to_ideal(nf,pr); N=lg(prh)-1;
-  f=itos((GEN)pr[4]); p=(GEN)pr[1];
+  prh = prime_to_ideal(nf,pr); N = degpol(nf[1]);
+  f = itos((GEN)pr[4]);
+  p = (GEN)pr[1];
 
   pf_1 = addis(gpowgs(p,f), -1);
-  v = zerocol(N);
-  if (f==1) v[1]=gener(p)[2];
+  if (f==1)
+  {
+    v = zerocol(N);
+    v[1] = gener(p)[2];
+  }
   else
   {
-    GEN prhall = cgetg(5, t_COL);
-    long psim;
-    if (is_bigint(p)) err(talker,"prime too big in zprimestar");
-    psim = itos(p);
-    list = (GEN)factor(pf_1)[1]; nbp=lg(list)-1;
-    prhall[1]=(long)prh; prhall[2]=prhall[3]=prhall[4]=zero;
-    for (n=psim; n>=0; n++)
+    GEN T, modpr = nf_to_ff_init(nf, &pr, &T, &p);
+    long k, vT = varn(T);
+
+    list = (GEN)factor(pf_1)[1];
+    k = lg(list)-1;
+    for (i=1; i<=k; i++) list[i] = (long)diviiexact(pf_1, (GEN)list[i]);
+    for (av1 = avma;; avma = av1)
     {
-      m=n;
-      for (i=1; i<=N; i++)
-	if (!gcmp1(gcoeff(prh,i,i))) { v[i]=lstoi(m%psim); m/=psim; }
-      for (j=1; j<=nbp; j++)
-      {
-        p1 = divii(pf_1,(GEN)list[j]);
-	p1 = lift_intern(element_powmodpr(nf,v,p1,prhall));
-        if (isnfscalar(p1) && gcmp1((GEN)p1[1])) break;
-      }
-      if (j>nbp) break;
+      p1 = FpX_rand(f, vT, p);
+      if (degpol(p1) < 1) continue;
+      for (j=1; j<=k; j++)
+	if (gcmp1(FpXQ_pow(p1, (GEN)list[j], T, p))) break;
+      if (j > k) break;
     }
-    if (n < 0) err(talker,"prime too big in zprimestar");
+    v = ff_to_nf(p1, modpr);
+    v = algtobasis(nf, v);
   }
   /* v generates  (Z_K / pr)^* */
-  if(DEBUGLEVEL>3) {fprintferr("v computed\n");flusherr();}
+  if(DEBUGLEVEL>3) fprintferr("v computed\n");
   e = itos(ep); prk=(e==1)? pr: idealpow(nf,pr,ep);
-  if(DEBUGLEVEL>3) {fprintferr("prk computed\n");flusherr();}
+  if(DEBUGLEVEL>3) fprintferr("prk computed\n");
   g0 = v;
   uv = NULL; /* gcc -Wall */
   if (x)
   {
     uv = idealaddtoone(nf,prk, idealdivexact(nf,x,prk));
     g0 = makeprimetoideal(nf,x,uv,v);
-    if(DEBUGLEVEL>3) {fprintferr("g0 computed\n");flusherr();}
+    if(DEBUGLEVEL>3) fprintferr("g0 computed\n");
   }
 
   p1 = cgetg(6,t_VEC); list = _vec(p1);
@@ -1387,12 +1388,11 @@ zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
   pra = prh; prb = (e==2)? prk: idealpow(nf,pr,gdeux);
   for(;;)
   {
-    if(DEBUGLEVEL>3)
-      {fprintferr("  treating a = %ld, b = %ld\n",a,b); flusherr();}
+    if(DEBUGLEVEL>3) fprintferr("  treating a = %ld, b = %ld\n",a,b);
     p1 = zidealij(pra,prb);
     newgen = dummycopy((GEN)p1[2]);
     p3 = cgetg(lg(newgen),t_VEC);
-    if(DEBUGLEVEL>3) {fprintferr("zidealij done\n"); flusherr();}
+    if(DEBUGLEVEL>3) fprintferr("zidealij done\n");
     for (i=1; i<lg(newgen); i++)
     {
       if (x) newgen[i]=(long)makeprimetoideal(nf,x,uv,(GEN)newgen[i]);

@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 extern GEN FqX_gcd(GEN P, GEN Q, GEN T, GEN p);
 extern GEN ff_to_nf(GEN x, GEN prinit);
-extern GEN nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p);
 extern GEN nf_to_ff(GEN nf, GEN x, GEN prinit);
 extern long init_padic_prec(long e, int BitPerFactor, long r, double LOGp2);
 extern double bound_vS(long tmax, GEN *BL);
