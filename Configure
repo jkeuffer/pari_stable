@@ -602,7 +602,7 @@ echo "Assembler is           $AS  $ASFLAGS"
 case "$osname" in
   nextstep) cppfl="-traditional-cpp" ;;
   freebsd)
-    if test $PORTOBJFORMAT = "elf"; then
+    if test "$PORTOBJFORMAT" = "elf"; then
       cppfl="-DUSE_ELF"    
       FREEBSD_ELF=1
     else

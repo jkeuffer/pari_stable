@@ -104,6 +104,7 @@ MSo44- [gp: \x] missing 'break' statement in escape()
          hilbert(Mod(1,2), y) --> SEGV,
          hilbert(-1+O(2^3), 12 + O(2^3)) accepted wheras 2-adic precision too
          low to decide 
+BA 50- [FreeBSD:] PORTOBJFORMAT undefined by the system --> Configure fails
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
