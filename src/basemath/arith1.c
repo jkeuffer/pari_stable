@@ -758,11 +758,35 @@ krogs(GEN x, long y)
 }
 
 long
-krosg(long s, GEN x)
+krosg(long x, GEN y)
 {
-  pari_sp av = avma;
-  long y = kronecker(stoi(s),x);
-  avma = av; return y;
+  const pari_sp av = avma;
+  long s = 1, r;
+  ulong u;
+
+  switch (signe(y))
+  {
+    case -1: y = negi(y); if (x < 0) s = -1; break;
+    case 0: return (x==1 || x==-1);
+  }
+  r = vali(y);
+  if (r)
+  {
+    if (!odd(x)) { avma = av; return 0; }
+    if (odd(r) && ome(x)) s = -s;
+    y = shifti(y,-r);
+  }
+  (void)sdivsi_rem(x,y, &x);
+  r = vals(x);
+  if (r)
+  {
+    if (odd(r) && gome(y)) s = -s;
+    x >>= r;
+  }
+  /* x=3 mod 4 && y=3 mod 4 ? (both are odd here) */
+  if (x & modBIL(y) & 2) s = -s;
+  u = umodiu(y, (ulong)x);
+  avma = av; return krouu(u, (ulong)x, s);
 }
 
 long
