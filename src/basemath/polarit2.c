@@ -1432,7 +1432,10 @@ DDF(GEN a, long hint)
     if (DEBUGLEVEL > 4)
       fprintferr("...tried prime %3ld (%-3ld factor%s). Time = %ld\n",
                   p, nfacp, nfacp==1?"": "s", timer2());
-    if (min_deg(lbit-1,tabbit) > klim) { avma = av; return _col(a); }
+    if (min_deg(lbit-1,tabbit) > klim) { 
+      get_timer(id);
+      avma = av; return _col(a);
+    }
     if (nfacp < nmax)
     {
       nmax = nfacp; tabd = tabdnew; chosenp = p;
