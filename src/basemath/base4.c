@@ -100,7 +100,7 @@ prime_to_ideal_aux(GEN nf, GEN vp)
 GEN
 prime_to_ideal(GEN nf, GEN vp)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   if (typ(vp) == t_INT) return gscalmat(vp, degpol(nf[1]));
   return gerepileupto(av, prime_to_ideal_aux(nf,vp));
 }
@@ -180,7 +180,7 @@ idealhermite_aux(GEN nf, GEN x)
 GEN
 idealhermite(GEN nf, GEN x)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p1;
   nf = checknf(nf); p1 = idealhermite_aux(nf,x);
   if (p1==x || p1==(GEN)x[1]) return gcopy(p1);
@@ -386,7 +386,7 @@ GEN
 principalidele(GEN nf, GEN x, long prec)
 {
   GEN p1, y = cgetg(3,t_VEC);
-  gpmem_t av;
+  pari_sp av;
 
   p1 = principalideal(nf,x);
   y[1] = (long)p1;
@@ -439,7 +439,7 @@ idealaddtoone0(GEN nf, GEN arg1, GEN arg2)
 GEN
 idealhnf0(GEN nf, GEN a, GEN b)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN x;
   if (!b) return idealhermite(nf,a);
 
@@ -458,7 +458,7 @@ idealhermite2(GEN nf, GEN a, GEN b)
 static int
 ok_elt(GEN x, GEN xZ, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   int r = gegal(x, hnfmodid(y, xZ));
   avma = av; return r;
 }
@@ -494,7 +494,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
 {
   GEN y,a,beta,cx,xZ,mul;
   long i,lm, N = degpol(nf[1]);
-  gpmem_t av0,av,tetpil;
+  pari_sp av0,av,tetpil;
 
   y = cgetg(3,t_VEC); av = avma;
   if (lg(x[1]) != N+1) err(typeer,"ideal_two_elt");
@@ -520,7 +520,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   /* look for a in x such that a O/xZ = x O/xZ */
   for (i=2; i<=N; i++)
   {
-    gpmem_t av1 = avma;
+    pari_sp av1 = avma;
     GEN t, y = eltmul_get_table(nf, (GEN)x[i]);
     t = FpM_red(y, xZ);
     if (gcmp0(t)) { avma = av1; continue; }
@@ -532,7 +532,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
   if (i > N)
   {
     GEN z = cgetg(lm, t_VECSMALL);
-    gpmem_t av1;
+    pari_sp av1;
     ulong c = 0;
 
     setlg(mul, lm);
@@ -633,7 +633,7 @@ factor_norm(GEN x)
 GEN
 idealfactor(GEN nf, GEN x)
 {
-  gpmem_t av,tetpil;
+  pari_sp av,tetpil;
   long tx,i,j,k,lf,lc,N,l,v,vc,e;
   GEN f,f1,f2,c1,c2,y1,y2,y,p1,p2,cx,P;
 
@@ -717,7 +717,7 @@ idealfactor(GEN nf, GEN x)
 long
 idealval(GEN nf, GEN ix, GEN P)
 {
-  gpmem_t av=avma,av1,lim;
+  pari_sp av=avma,av1,lim;
   long N,v,vd,w,e,f,i,j,k, tx = typ(ix);
   GEN mul,mat,a,x,y,r,bp,p,pk,cx;
 
@@ -795,7 +795,7 @@ idealval(GEN nf, GEN ix, GEN P)
 GEN
 idealadd(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long N,tx,ty;
   GEN z,p1,dx,dy,dz;
   int modid;
@@ -828,7 +828,7 @@ idealadd(GEN nf, GEN x, GEN y)
   {
     long i,j;
     if (!dz) { avma=av; return idmat(N); }
-    avma = (gpmem_t)dz; dz = gerepileupto((gpmem_t)z, ginv(dz));
+    avma = (pari_sp)dz; dz = gerepileupto((pari_sp)z, ginv(dz));
     for (i=1; i<=N; i++)
     {
       z[i]=lgetg(N+1,t_COL);
@@ -964,7 +964,7 @@ static GEN
 addone(GEN f(GEN,GEN,GEN), GEN nf, GEN x, GEN y)
 {
   GEN z = cgetg(3,t_VEC), a;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   nf = checknf(nf);
   a = gerepileupto(av, f(nf,x,y));
   z[1]=(long)a;
@@ -976,7 +976,7 @@ static GEN
 addone_nored(GEN x, GEN y)
 {
   GEN z = cgetg(3,t_VEC), a;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   a = gerepileupto(av, addone_aux(x,y));
   z[1] = (long)a;
   z[2] = (long)unnf_minus_x(a); return z;
@@ -999,7 +999,7 @@ ideleaddone(GEN nf,GEN x,GEN idele)
 GEN
 element_invmodideal(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long N,i, fl = 1;
   GEN v,p1,xh,yh;
 
@@ -1026,7 +1026,7 @@ element_invmodideal(GEN nf, GEN x, GEN y)
 GEN
 idealaddmultoone(GEN nf, GEN list)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   long N,i,i1,j,k;
   GEN z,v,v1,v2,v3,p1;
 
@@ -1454,7 +1454,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
 GEN
 famat_ideallog(GEN nf, GEN g, GEN e, GEN bid)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN vp = gmael(bid, 3,1), ep = gmael(bid, 3,2), arch = gmael(bid,1,2);
   GEN cyc = gmael(bid,2,2), list_set = (GEN)bid[4], U = (GEN)bid[5];
   GEN p1,y0,x,y, psigne;
@@ -1598,7 +1598,7 @@ arch_pow(GEN x, GEN n) {
 GEN
 idealmul(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av;
+  pari_sp av;
   long tx,ty,f;
   GEN res,ax,ay,p1;
 
@@ -1653,7 +1653,7 @@ idealmul(GEN nf, GEN x, GEN y)
 GEN
 idealnorm(GEN nf, GEN x)
 {
-  gpmem_t av = avma,tetpil;
+  pari_sp av = avma,tetpil;
   GEN y;
 
   nf = checknf(nf);
@@ -1710,7 +1710,7 @@ GEN
 idealinv(GEN nf, GEN x)
 {
   GEN res,ax;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long tx = idealtyp(&x,&ax);
 
   res = ax? cgetg(3,t_VEC): NULL;
@@ -1832,7 +1832,7 @@ idealdivpowprime(GEN nf, GEN x, GEN vp, GEN n)
 GEN
 idealpow(GEN nf, GEN x, GEN n)
 {
-  gpmem_t av;
+  pari_sp av;
   long tx,N,s;
   GEN res,ax,m,cx,n1,a,alpha;
 
@@ -1910,7 +1910,7 @@ _sqr(void *data, GEN x)
 GEN
 idealpowred(GEN nf, GEN x, GEN n, long prec)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long s = signe(n);
   idealred_muldata D;
   GEN y;
@@ -1929,14 +1929,14 @@ idealpowred(GEN nf, GEN x, GEN n, long prec)
 GEN
 idealmulred(GEN nf, GEN x, GEN y, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, _idealmulred(nf,x,y,prec));
 }
 
 long
 isideal(GEN nf,GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   long N,i,j,tx=typ(x),lx;
 
   nf=checknf(nf); lx=lg(x);
@@ -1965,7 +1965,7 @@ isideal(GEN nf,GEN x)
 GEN
 idealdiv(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   GEN z=idealinv(nf,y);
 
   tetpil=avma; return gerepile(av,tetpil,idealmul(nf,x,z));
@@ -1993,7 +1993,7 @@ idealdiv(GEN nf, GEN x, GEN y)
 GEN
 idealdivexact(GEN nf, GEN x0, GEN y0)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN x,y,Nx,Ny,Nz, cy = content(y0);
 
   nf = checknf(nf);
@@ -2027,7 +2027,7 @@ idealdivexact(GEN nf, GEN x0, GEN y0)
 GEN
 idealintersect(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long lz,i,N;
   GEN z,dx,dy;
 
@@ -2135,7 +2135,7 @@ idealred_elt(GEN nf, GEN I)
 GEN
 ideallllred(GEN nf, GEN I, GEN vdir, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long N,i,nfprec;
   GEN J,I0,Ired,res,aI,y,x,Nx,b,c1,c,pol;
 
@@ -2222,7 +2222,7 @@ END:
 GEN
 minideal(GEN nf, GEN x, GEN vdir, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long N, tx;
   GEN y;
 
@@ -2433,7 +2433,7 @@ check_listpr(GEN x)
 GEN
 idealapprfact_i(GEN nf, GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN tau, pi, z, d, sqf, sqfsafe, list, e, e2;
   long s, flag, i, r, N;
 
@@ -2487,13 +2487,13 @@ idealapprfact_i(GEN nf, GEN x)
 
 GEN
 idealapprfact(GEN nf, GEN x) {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, idealapprfact_i(nf, x));
 }
 
 GEN
 idealappr(GEN nf, GEN x) {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, idealapprfact_i(nf, idealfactor(nf, x)));
 }
 
@@ -2539,7 +2539,7 @@ merge_factor(GEN *pa, GEN *pe, GEN b, GEN f)
 GEN
 idealchinese(GEN nf, GEN x, GEN w)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long ty = typ(w), i,N,r;
   GEN L,e,z,t,y,v,s,den;
 
@@ -2606,7 +2606,7 @@ mat_ideal_two_elt2(GEN nf, GEN x, GEN a)
 GEN
 ideal_two_elt2(GEN nf, GEN x, GEN a)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN cx, b;
 
   nf = checknf(nf);
@@ -2632,7 +2632,7 @@ ideal_two_elt2(GEN nf, GEN x, GEN a)
 GEN
 idealcoprime(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i, r;
   GEN list, ep, fact = idealfactor(nf,y);
 
@@ -2694,7 +2694,7 @@ GEN
 element_reduce(GEN nf, GEN x, GEN ideal)
 {
   long tx = typ(x), N, i;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN u,d;
 
   if (is_extscalar_t(tx))
@@ -2722,7 +2722,7 @@ GEN
 nfhermite(GEN nf, GEN x)
 {
   long i, j, def, k, m;
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   GEN p1,p2,y,A,I,J;
 
   nf = checknf(nf);
@@ -2813,7 +2813,7 @@ idealmulelt(GEN nf, GEN elt, GEN x)
 static GEN
 zero_nfbezout(GEN nf,GEN b, GEN A,GEN B,GEN *u,GEN *v,GEN *w,GEN *di)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN pab,d;
 
   d=idealmulelt(nf,b,B); *di=idealinv(nf,idealmat_to_hnf(nf,d));
@@ -2831,7 +2831,7 @@ static GEN
 nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *u,GEN *v,GEN *w,GEN *di)
 {
   GEN pab,pu,pv,pw,uv,d,dinv,pa,pb,pa1,pb1, *gptr[5];
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   if (gcmp0(a))
   {
@@ -2877,7 +2877,7 @@ GEN
 nfsmith(GEN nf, GEN x)
 {
   long i, j, k, l, c, n, m, N;
-  gpmem_t av, tetpil, lim;
+  pari_sp av, tetpil, lim;
   GEN p1,p2,p3,p4,z,b,u,v,w,d,dinv,unnf,A,I,J;
 
   nf=checknf(nf); N=degpol(nf[1]);
@@ -2991,7 +2991,7 @@ nfsmith(GEN nf, GEN x)
 GEN
 element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p1;
 
   nf=checknf(nf); checkmodpr(modpr);
@@ -3002,7 +3002,7 @@ element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 GEN
 element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p1;
 
   nf=checknf(nf); checkmodpr(modpr);
@@ -3015,7 +3015,7 @@ element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr)
 GEN
 element_invmodpr(GEN nf, GEN y, GEN modpr)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p1;
 
   p1=QX_invmod(gmul((GEN)nf[7],trivlift(y)), (GEN)nf[1]);
@@ -3026,7 +3026,7 @@ element_invmodpr(GEN nf, GEN y, GEN modpr)
 GEN
 element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN z,T,p,modpr;
 
   nf = checknf(nf);
@@ -3040,7 +3040,7 @@ element_powmodpr(GEN nf,GEN x,GEN k,GEN pr)
 GEN
 nfkermodpr(GEN nf, GEN x, GEN pr)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN T,p,modpr;
 
   nf = checknf(nf);
@@ -3054,7 +3054,7 @@ nfkermodpr(GEN nf, GEN x, GEN pr)
 GEN
 nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN T,p,modpr;
 
   nf = checknf(nf);
@@ -3069,7 +3069,7 @@ nfsolvemodpr(GEN nf, GEN a, GEN b, GEN pr)
 GEN
 nfsuppl(GEN nf, GEN x, GEN pr)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN T,p,modpr;
 
   nf = checknf(nf);
@@ -3086,7 +3086,7 @@ nfdetint(GEN nf,GEN pseudo)
 {
   GEN pass,c,v,det1,piv,pivprec,vi,p1,x,I,unnf,zeronf,id,idprod;
   long i, j, k, rg, n, n1, m, m1, cm=0, N;
-  gpmem_t av=avma, av1, tetpil, lim;
+  pari_sp av=avma, av1, tetpil, lim;
 
   nf=checknf(nf); N=degpol(nf[1]);
   if (typ(pseudo)!=t_VEC || lg(pseudo)!=3)
@@ -3195,7 +3195,7 @@ GEN
 nfhermitemod(GEN nf, GEN pseudo, GEN detmat)
 {
   long li, co, i, j, jm1, def, ldef, N;
-  gpmem_t av0=avma, av, lim;
+  pari_sp av0=avma, av, lim;
   GEN b,q,w,p1,d,u,v,den,x,I,J,dinv,wh,unnf;
 
   nf=checknf(nf); N=degpol(nf[1]);

@@ -32,7 +32,7 @@ GEN
 sqscal(GEN x)
 {
   long i, lx;
-  gpmem_t av;
+  pari_sp av;
   GEN z;
   lx = lg(x);
   if (lx == 1) return gzero;
@@ -48,7 +48,7 @@ GEN
 gscal(GEN x,GEN y)
 {
   long i, lx;
-  gpmem_t av;
+  pari_sp av;
   GEN z;
   if (x == y) return sqscal(x);
   lx = lg(x);
@@ -64,7 +64,7 @@ static GEN
 sqscali(GEN x)
 {
   long i, lx;
-  gpmem_t av;
+  pari_sp av;
   GEN z;
   lx = lg(x);
   if (lx == 1) return gzero;
@@ -79,7 +79,7 @@ static GEN
 gscali(GEN x,GEN y)
 {
   long i, lx;
-  gpmem_t av;
+  pari_sp av;
   GEN z;
   if (x == y) return sqscali(x);
   lx = lg(x);
@@ -153,7 +153,7 @@ ApplyQ(GEN Q, GEN r)
 static GEN
 ApplyAllQ(GEN Q, GEN r0, long k)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN r = dummycopy(r0);
   long j;
   for (j=1; j<k; j++) ApplyQ((GEN)Q[j], r);
@@ -227,7 +227,7 @@ incrementalGS(GEN x, GEN mu, GEN B, long k)
 {
   GEN s,A = cgetg(k+1, t_COL); /* scratch space */
   long i, j;
-  gpmem_t av;
+  pari_sp av;
   A[1] = coeff(x,k,1);
   for(j=1;j<k;)
   {
@@ -256,7 +256,7 @@ gram_schmidt(GEN e, GEN *ptB)
   for (i=1;i<lx;i++)
   {
     GEN p1 = NULL;
-    gpmem_t av;
+    pari_sp av;
     B[i] = (long)sqscal((GEN)f[i]);
     iB[i]= linv((GEN)B[i]); av = avma;
     for (j=1; j<i; j++)
@@ -516,7 +516,7 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
 {
   GEN la,la2,p1,Bk;
   long i, j, lx;
-  gpmem_t av;
+  pari_sp av;
 
   if (!fl[k-1]) return 0;
   av = avma;
@@ -535,7 +535,7 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
   /* ZSWAP(k-1,k) */
   if (DEBUGLEVEL>3 && k==kmax)
   { /* output diagnostics associated to re-normalized rational quantities */
-    gpmem_t av1 = avma;
+    pari_sp av1 = avma;
     GEN d = mulii((GEN)B[k-1],(GEN)B[k+1]);
     p1 = subii(mulsi(D-1, sqri(Bk)), mulsi(D, la2));
     fprintferr(" (%ld)", expi(p1) - expi(mulsi(D, d)));
@@ -555,12 +555,12 @@ do_ZSWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, long D, GEN fl,
       p1 = subii(mulii((GEN)B[k+1],gcoeff(L,i,k-1)), mulii(la,t));
       p1 = diviiexact(p1, Bk);
       coeff(L,i,k) = (long)icopy_av(p1,(GEN)av);
-      av = avma = (gpmem_t)coeff(L,i,k);
+      av = avma = (pari_sp)coeff(L,i,k);
 
       p1 = addii(mulii(la,gcoeff(L,i,k-1)), mulii((GEN)B[k-1],t));
       p1 = diviiexact(p1, Bk);
       coeff(L,i,k-1) = (long)icopy_av(p1,(GEN)av);
-      av = avma = (gpmem_t)coeff(L,i,k-1);
+      av = avma = (pari_sp)coeff(L,i,k-1);
     }
   }
   else if (signe(la))
@@ -591,7 +591,7 @@ do_SWAP(GEN x, GEN h, GEN L, GEN B, long kmax, long k, GEN delta, int gram)
 {
   GEN la,la2, BK,BB,q;
   long i, j, lx;
-  gpmem_t av;
+  pari_sp av;
 
   av = avma;
   la = gcoeff(L,k,k-1); la2 = gsqr(la);
@@ -631,7 +631,7 @@ ZincrementalGS(GEN x, GEN L, GEN B, long k, GEN fl, int gram)
   for (j=1; j<=k; j++)
     if (j==k || fl[j])
     {
-      gpmem_t av = avma;
+      pari_sp av = avma;
       u = gram? gcoeff(x,k,j): gscali((GEN)x[k], (GEN)x[j]);
       for (i=1; i<j; i++)
         if (fl[i])
@@ -656,7 +656,7 @@ lllint_marked(long MARKED, GEN x, long D, int gram,
               GEN *pth, GEN *ptfl, GEN *ptB)
 {
   long lx = lg(x), hx, i, j, k, l, n, kmax;
-  gpmem_t av, lim;
+  pari_sp av, lim;
   GEN B,L,h,fl;
 
   if (typ(x) != t_MAT) err(typeer,"lllint");
@@ -748,7 +748,7 @@ lllint_ip(GEN x, long D)
 GEN
 lllall(GEN x, long D, int gram, long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN fl, junk, h = lllint_i(x, D, gram, &junk, &fl, NULL);
   if (!h) return lll_trivial(x,flag);
   return gerepilecopy(av, lll_finish(h,fl,flag));
@@ -917,7 +917,7 @@ static GEN
 lllgramallgen(GEN x, long flag)
 {
   long lx = lg(x), i, j, k, l, n;
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   GEN B, L, h, fl;
   int flc;
 
@@ -986,7 +986,7 @@ UP:
   { /* size seduction of Xs[k] */
     GEN q2, mu, muint;
     long ex;
-    gpmem_t av = avma;
+    pari_sp av = avma;
 
     mu = mpdiv((GEN)rk[i], gcoeff(R,i,i));
     if (!signe(mu)) { avma = av; continue; }
@@ -1059,7 +1059,7 @@ lll_scaled(int MARKED, GEN X0, long D)
 {
   GEN delta, X, Xs, h, R, Q, E, F;
   long j, kmax = 1, k, N = lg(X0);
-  gpmem_t lim, av, av0 = avma;
+  pari_sp lim, av, av0 = avma;
   int retry = 0;
 
   delta = stor(D-1, DEFAULTPREC);
@@ -1081,7 +1081,7 @@ PRECPB:
 
   while (k < N)
   {
-    gpmem_t av1;
+    pari_sp av1;
     if (k == 1) {
       HRS(MARKED, 1, 0, kmax, X, Xs, h, R, Q, E, F);
       k = 2;
@@ -1133,7 +1133,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
 {
   GEN xinit,L,h,B,L1,delta, Q;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1349,13 +1349,13 @@ gram_matrix(GEN b)
 
 GEN
 lllgen(GEN x) {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, lllgramgen(gram_matrix(x)));
 }
 
 GEN
 lllkerimgen(GEN x) {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, lllgramallgen(gram_matrix(x),lll_ALL));
 }
 
@@ -1394,7 +1394,7 @@ GEN
 lllintpartialall(GEN m, long flag)
 {
   const long ncol = lg(m)-1;
-  const gpmem_t ltop1 = avma;
+  const pari_sp ltop1 = avma;
   long ncolnz;
   GEN tm1, tm2, mid;
 
@@ -1502,8 +1502,8 @@ lllintpartialall(GEN m, long flag)
     * try to replace (v, w) by (v, v - q*w) for some q.
     * We compute all inner products and check them repeatedly.
     */
-    const gpmem_t ltop3 = avma; /* Excludes region with tm1 and mid */
-    const gpmem_t lim = stack_lim(ltop3,1);
+    const pari_sp ltop3 = avma; /* Excludes region with tm1 and mid */
+    const pari_sp lim = stack_lim(ltop3,1);
     long icol, reductions, npass = 0;
     GEN dotprd = cgetg(ncol+1, t_MAT);
 
@@ -1527,7 +1527,7 @@ lllintpartialall(GEN m, long flag)
 
         for (ijdif=1; ijdif < ncol; ijdif++)
 	{
-          const gpmem_t previous_avma = avma;
+          const pari_sp previous_avma = avma;
 
           jcol = (icol + ijdif - 1) % ncol; jcol++; /* Hack for NeXTgcc 2.5.8 */
           k1 = (cmpii(gcoeff(dotprd,icol,icol),
@@ -1651,7 +1651,7 @@ GEN
 lindep2(GEN x, long bit)
 {
   long tx=typ(x), lx=lg(x), ly, i, j, e;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN re,im,p1,p2;
 
   if (! is_vec_t(tx)) err(typeer,"lindep2");
@@ -1684,7 +1684,7 @@ lindep(GEN x, long prec)
   GEN *b,*be,*bn,**m,qzer;
   GEN c1,c2,c3,px,py,pxy,re,im,p1,p2,r,f,em;
   long i,j,fl,k, lx = lg(x), tx = typ(x), n = lx-1;
-  gpmem_t av = avma, lim = stack_lim(av,1), av0, av1;
+  pari_sp av = avma, lim = stack_lim(av,1), av0, av1;
   const long EXP = - bit_accuracy(prec) + 2*n;
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
@@ -2100,7 +2100,7 @@ pslq(GEN x, long prec)
 {
   GEN tabga, p1;
   long tx = typ(x);
-  gpmem_t av0 = avma, lim = stack_lim(av0,1), av;
+  pari_sp av0 = avma, lim = stack_lim(av0,1), av;
   pslq_M M;
   pslq_timer T;
 
@@ -2219,7 +2219,7 @@ initializedoubles(pslqL2_M *Mbar, pslq_M *M, long prec)
 {
   long i, j, n = Mbar->n;
   GEN ypro;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   ypro = gdiv(M->y, vecmax(gabs(M->y,prec)));
   for (i=1; i<=n; i++)
@@ -2326,7 +2326,7 @@ pslqL2(GEN x, long prec)
 {
   GEN Abargen, Bbargen, tabga, p1;
   long lx = lg(x), tx = typ(x), n = lx-1, i, m, ctpro, flreal, flit;
-  gpmem_t av0 = avma, lim = stack_lim(av0,1), av;
+  pari_sp av0 = avma, lim = stack_lim(av0,1), av;
   double *tabgabar, gabar, tinvbar, t1bar, t2bar, t3bar, t4bar;
   double **Pbar, **Abar, **Bbar, **Hbar, *ybar;
   pslqL2_M Mbar, Mbarst;
@@ -2444,7 +2444,7 @@ GEN
 plindep(GEN x)
 {
   long i, j, prec = VERYBIGINT, lx = lg(x)-1, ly, v;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p = NULL, pn,p1,m,a;
 
   if (lx < 2) return cgetg(1,t_VEC);
@@ -2485,7 +2485,7 @@ GEN
 algdep0(GEN x, long n, long bit, long prec)
 {
   long tx=typ(x), i, k;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   if (! is_scalar_t(tx)) err(typeer,"algdep0");
@@ -2557,14 +2557,14 @@ matkerint0(GEN x, long flag)
 GEN
 kerint1(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepilecopy(av, lllint_ip(matrixqz3(ker(x)), 100));
 }
 
 GEN
 kerint(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN fl, junk, h = lllint_i(x, 0, 0, &junk, &fl, NULL);
   if (h) h = lll_finish(h,fl, lll_KER);
   else   h = lll_trivial(x, lll_KER);
@@ -2582,7 +2582,7 @@ GEN
 gmul_mat_smallvec(GEN x, GEN y)
 {
   long c = lg(x), l = lg(x[1]), i, j;
-  gpmem_t av;
+  pari_sp av;
   GEN z=cgetg(l,t_COL), s;
 
   for (i=1; i<l; i++)
@@ -2600,7 +2600,7 @@ GEN
 gmul_mati_smallvec(GEN x, GEN y)
 {
   long c = lg(x), l = lg(x[1]), i, j;
-  gpmem_t av;
+  pari_sp av;
   GEN z=cgetg(l,t_COL), s;
 
   for (i=1; i<l; i++)
@@ -2644,7 +2644,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
   GEN x,res,p1,u,r,liste,gnorme,invp,V, *gptr[2];
   long n = lg(a), i, j, k, s, maxrank;
-  gpmem_t av0 = avma, av1, av, tetpil, lim;
+  pari_sp av0 = avma, av1, av, tetpil, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
@@ -2759,7 +2759,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     }
     else
     {
-      gpmem_t av2 = avma;
+      pari_sp av2 = avma;
       gnorme = ground(dbltor(p));
       if (gcmp(gnorme,BORNE) >= 0) avma = av2;
       else
@@ -2784,7 +2784,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       case min_PERF:
       {
         long I=1;
-        gpmem_t av2=avma;
+        pari_sp av2=avma;
 
         for (i=1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
@@ -2872,7 +2872,7 @@ static GEN
 smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
 {
   long N, n, i, j, k, s, epsbit, prec, checkcnt = 1;
-  gpmem_t av, av1, lim;
+  pari_sp av, av1, lim;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
@@ -2999,7 +2999,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long noer, FP_chk_fun *CHECK)
       S[s] = (long)dummycopy(x);
       if (s == stockmax)
       {
-        gpmem_t av2 = avma;
+        pari_sp av2 = avma;
         GEN per;
 
         if (!check) goto END;
@@ -3066,7 +3066,7 @@ END:
 static GEN
 _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   VOLATILE long i,j,l, round = 0;
   VOLATILE GEN B,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram, bound = B0;
 
@@ -3156,7 +3156,7 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
 GEN
 fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z = _fincke_pohst(a,B0,stockmax,flag & 1,PREC,CHECK);
   if (!z)
   {

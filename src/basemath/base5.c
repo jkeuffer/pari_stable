@@ -84,7 +84,7 @@ GEN
 eltreltoabs(GEN rnfeq, GEN x)
 {
   long i, k, va;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN polabs, teta, alpha, s;
 
   rnfeq = checkrnfeq(rnfeq);
@@ -196,7 +196,7 @@ modulereltoabs(GEN nf, GEN rnfeq, GEN x)
 GEN
 rnfinitalg(GEN nf,GEN pol,long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long m,n,r1,r2,vnf,i,j,k,vpol,degabs;
   GEN RES,sig,rac,liftpol,delta,RAC,ro,bas,f2,rnfeq,M, p1,p2,p3;
 
@@ -282,7 +282,7 @@ GEN
 rnfbasistoalg(GEN rnf,GEN x)
 {
   long tx=typ(x), lx=lg(x), i;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN p1,z,nf;
 
   checkrnf(rnf); nf=(GEN)rnf[10];
@@ -321,7 +321,7 @@ GEN
 rnfalgtobasis(GEN rnf,GEN x)
 {
   long tx=typ(x), i, lx;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN z;
 
   checkrnf(rnf);
@@ -385,7 +385,7 @@ GEN
 rnfelementabstorel(GEN rnf,GEN x)
 {
   long tx, i, lx;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN z,k,nf,T;
 
   checkrnf(rnf); tx=typ(x); lx=lg(x);
@@ -435,7 +435,7 @@ rnfelementup(GEN rnf,GEN x)
 GEN
 rnfelementdown(GEN rnf,GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,lx,tx;
   GEN p1,z;
 
@@ -466,7 +466,7 @@ rnfelementdown(GEN rnf,GEN x)
 static GEN
 rnfprincipaltohermite(GEN rnf,GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN nf,bas,bas1,p1,z;
 
   x = rnfbasistoalg(rnf,x); nf = (GEN)rnf[10];
@@ -490,7 +490,7 @@ GEN
 rnfidealhermite(GEN rnf,GEN x)
 {
   long tx=typ(x), lx=lg(x), i, j, n, m;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN z,p1,p2,x1,x2,x1j,nf,bas;
 
   checkrnf(rnf);
@@ -587,7 +587,7 @@ prodidnorm(GEN I)
 GEN
 rnfidealnormrel(GEN rnf,GEN id)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z, t, nf;
   long n;
 
@@ -604,7 +604,7 @@ rnfidealnormrel(GEN rnf,GEN id)
 GEN
 rnfidealnormabs(GEN rnf,GEN id)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z, t;
   long n;
 
@@ -622,7 +622,7 @@ GEN
 rnfidealreltoabs(GEN rnf,GEN x)
 {
   long i, l;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN nf,basinv,oms,M,p1,d;
 
   nf = (GEN)rnf[10];
@@ -642,7 +642,7 @@ GEN
 rnfidealabstorel(GEN rnf,GEN x)
 {
   long n, m, j;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN nf,basabs,M,xj,p1,p2,id;
 
   checkrnf(rnf); nf = (GEN)rnf[10];
@@ -670,7 +670,7 @@ rnfidealabstorel(GEN rnf,GEN x)
 GEN
 rnfidealdown(GEN rnf,GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   x = rnfidealhermite(rnf,x);
   return gerepilecopy(av,gmael(x,2,1));
 }
@@ -679,7 +679,7 @@ rnfidealdown(GEN rnf,GEN x)
 GEN
 rnfidealup(GEN rnf,GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i, n, m;
   GEN nf,bas,bas2,p1,p2;
 
@@ -699,7 +699,7 @@ rnfidealup(GEN rnf,GEN x)
 GEN
 rnfidealtwoelement(GEN rnf,GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long j;
   GEN p1,p2,p3,res,polabs,nfabs,z;
 
@@ -723,7 +723,7 @@ GEN
 rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
 {
   long i, j, n;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z,nf,x1,x2,p1,p2,p3,p4,res;
 
   z = rnfidealtwoelement(rnf,y);

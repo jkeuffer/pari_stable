@@ -56,6 +56,8 @@ BA  5- [Configure:] add -lm -lc to EXTRADLLDFLAGS, not DLLDFLAGS
     1- "not enough precomputed primes": output largest needed p if available
 XR  2- factorpadic so that factorback gives back the original polynomial, up
        to a power of p
+    3- type of avma, bot, top to 'pari_sp' (pari stack pointer) [does not
+       break existing code]
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)

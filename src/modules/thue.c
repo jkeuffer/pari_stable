@@ -414,7 +414,7 @@ GuessQi(GEN b, GEN c, GEN *eps)
 static GEN
 SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
 {
-  gpmem_t av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, lim = stack_lim(av, 1);
   const long prec = DEFAULTPREC;
   GEN Hpoly, interm, X, Xn, Xnm1, Y, sqrtnRHS;
   int x, y, j, By, n = degpol(poly);
@@ -480,7 +480,7 @@ GEN
 thueinit(GEN poly, long flag, long prec)
 {
   GEN tnf, bnf = NULL;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long k, s;
 
   if (checktnf(poly)) { bnf = checkbnf((GEN)poly[2]); poly = (GEN)poly[1]; }
@@ -606,7 +606,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
   int iroot, ine, n, i, r;
   long upb, bi1, Prec, prec, s,t;
   baker_s BS;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   bnf  = (GEN)tnf[2];
   if (!ne) ne = bnfisintnorm(bnf, rhs);
@@ -766,7 +766,7 @@ PRECPB:
 GEN
 thue(GEN tnf, GEN rhs, GEN ne)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN P, ro, x3, S;
 
   if (!checktnf(tnf)) err(talker,"not a tnf in thue");
@@ -812,7 +812,7 @@ test_sol(long i)
 
   if (Partial)
   {
-    gpmem_t av=avma;
+    pari_sp av=avma;
     for (k=1; k<lg(Partial[1]); k++)
       if ( signe(modii( (GEN)Partial[i][k], gen_ord[k] )) )
         { avma=av; return; }
@@ -842,7 +842,7 @@ static void
 fix_Partial(long i)
 {
   long k;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   for (k=1; k<lg(Partial[1]); k++)
     addiiz(
       (GEN) Partial[i-1][k],
@@ -1022,7 +1022,7 @@ bnfisintnorm(GEN bnf, GEN a)
 {
   GEN nf,pol,res,unit,x,id, *Primes;
   long sa,i,j,norm_1;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7]; pol = (GEN)nf[1];
   if (typ(a)!=t_INT)

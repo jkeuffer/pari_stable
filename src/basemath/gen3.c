@@ -241,7 +241,7 @@ GEN
 pollead(GEN x, long v)
 {
   long l, tx = typ(x), w;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN xinit;
 
   if (is_scalar_t(tx)) return gcopy(x);
@@ -379,13 +379,13 @@ ismonome(GEN x)
 
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (is_pm1(z[2]))\
-  z = gerepileuptoint((gpmem_t)(z+3), (GEN)z[1]);
+  z = gerepileuptoint((pari_sp)(z+3), (GEN)z[1]);
 
 GEN
 gmulsg(long s, GEN y)
 {
   long ty=typ(y), ly=lg(y), i;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN z,p1,p2;
 
   switch(ty)
@@ -398,7 +398,7 @@ gmulsg(long s, GEN y)
 
     case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
       (void)new_chunk(lgefint(p2)<<2); /* HACK */
-      p1=mulsi(s,(GEN)y[2]); avma=(gpmem_t)z;
+      p1=mulsi(s,(GEN)y[2]); avma=(pari_sp)z;
       z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
     case t_FRAC:
@@ -458,7 +458,7 @@ gmulsg(long s, GEN y)
       if (!s) return zeropol(gvar(y));
       z = cgetg(3, t_RFRAC);
       i = ggcd(stoi(s),(GEN)y[2])[2];
-      avma = (gpmem_t)z;
+      avma = (pari_sp)z;
       if (i == 1)
       {
         z[1]=lmulgs((GEN)y[1], s);
@@ -497,7 +497,7 @@ gdivgs(GEN x, long s)
 {
   static long court[] = { evaltyp(t_INT) | _evallg(3),0,0 };
   long tx=typ(x), lx=lg(x), i;
-  gpmem_t av;
+  pari_sp av;
   GEN z,p1;
 
   if (!s) err(gdiver);
@@ -620,14 +620,14 @@ _quot(GEN x, GEN y)
 static GEN
 quot(GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, _quot(x, y));
 }
 
 GEN
 gmod(GEN x, GEN y)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   long i,lx,ty, tx = typ(x);
   GEN z,p1;
 
@@ -885,7 +885,7 @@ gdivent(GEN x, GEN y)
 static GEN
 quotrem(GEN x, GEN y, GEN *r)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN q = quot(x,y);
   av = avma;
   *r = gerepileupto(av, gsub(x, gmul(q,y)));
@@ -960,7 +960,7 @@ extern GEN swap_vars(GEN b0, long v);
 GEN
 divrem(GEN x, GEN y, long v)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long vx,vy;
   GEN z,q,r;
   if (v < 0 || typ(y) != t_POL || typ(x) != t_POL) return gdiventres(x,y);
@@ -983,7 +983,7 @@ is_scal(long t) { return t==t_INT || t==t_FRAC || t==t_FRACN; }
 GEN
 diviiround(GEN x, GEN y)
 {
-  gpmem_t av1, av = avma;
+  pari_sp av1, av = avma;
   GEN q,r;
   int fl;
 
@@ -1006,7 +1006,7 @@ diviiround(GEN x, GEN y)
 GEN
 gdivround(GEN x, GEN y)
 {
-  gpmem_t av1, av;
+  pari_sp av1, av;
   long tx=typ(x),ty=typ(y);
   GEN q,r;
   int fl;
@@ -1094,7 +1094,7 @@ GEN
 gmul2n(GEN x, long n)
 {
   long tx, lx, i, k, l;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN p2,p1,y;
 
   tx=typ(x);
@@ -1193,7 +1193,7 @@ GEN
 ginv(GEN x)
 {
   long tx=typ(x), s;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN z,y,p1,p2;
 
   switch(tx)
@@ -1295,7 +1295,7 @@ static GEN
 gconvsp(GEN x, int flpile)
 {
   long v = varn(x), i;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN p1,y;
 
   if (gcmp0(x)) return zeropol(v);
@@ -1310,7 +1310,7 @@ gconvsp(GEN x, int flpile)
 GEN
 gsubst0(GEN x, GEN T, GEN y)
 {
-  gpmem_t av;
+  pari_sp av;
   long d, v;
   if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
     err(talker,"variable number expected in subst");
@@ -1325,7 +1325,7 @@ gsubst(GEN x, long v, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);
   long l, vx, vy, e, ex, ey, i, j, k, jb;
-  gpmem_t tetpil, av, limite;
+  pari_sp tetpil, av, limite;
   GEN t,p1,p2,z;
 
   if (ty==t_MAT)
@@ -1495,7 +1495,7 @@ GEN
 recip(GEN x)
 {
   long v=varn(x), lx = lg(x);
-  gpmem_t tetpil, av=avma;
+  pari_sp tetpil, av=avma;
   GEN p1,p2,a,y,u;
 
   if (typ(x)!=t_SER) err(talker,"not a series in serreverse");
@@ -1506,7 +1506,7 @@ recip(GEN x)
   if (gcmp1(a))
   {
     long i, j, k, mi;
-    gpmem_t lim=stack_lim(av, 2);
+    pari_sp lim=stack_lim(av, 2);
 
     mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
     u = cgetg(lx,t_SER);
@@ -1593,7 +1593,7 @@ GEN
 deriv(GEN x, long v)
 {
   long lx, vx, tx, e, i, j;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1,p2;
 
   tx=typ(x); if (is_const_t(tx)) return gzero;
@@ -1674,7 +1674,7 @@ GEN
 integ(GEN x, long v)
 {
   long lx, tx, e, i, j, vx, n;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN y,p1;
 
   tx = typ(x);
@@ -1819,7 +1819,7 @@ gfloor(GEN x)
 GEN
 gfrac(GEN x)
 {
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   GEN p1 = gneg_i(gfloor(x));
 
   tetpil=avma; return gerepile(av,tetpil,gadd(x,p1));
@@ -1830,7 +1830,7 @@ gceil(GEN x)
 {
   GEN y,p1;
   long i, lx, tx=typ(x);
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   switch(tx)
   {
@@ -1878,7 +1878,7 @@ ground(GEN x)
 {
   GEN y,p1;
   long i, lx, tx=typ(x);
-  gpmem_t av;
+  pari_sp av;
 
   switch(tx)
   {
@@ -1922,7 +1922,7 @@ grndtoi(GEN x, long *e)
 {
   GEN y,p1;
   long i, tx=typ(x), lx, ex, e1;
-  gpmem_t av;
+  pari_sp av;
 
   *e = -HIGHEXPOBIT;
   switch(tx)
@@ -2005,7 +2005,7 @@ gcvtoi(GEN x, long *e)
     ex = expo(x); if (ex < 0) { *e = ex; return gzero; }
     lx = lg(x); e1 = ex - bit_accuracy(lx) + 1;
     y = mpshift_special(x, lx, e1);
-    if (e1 <= 0) { gpmem_t av = avma; e1 = expo(subri(x,y)); avma = av; }
+    if (e1 <= 0) { pari_sp av = avma; e1 = expo(subri(x,y)); avma = av; }
     *e = e1; return y;
   }
   *e = -HIGHEXPOBIT;
@@ -2027,7 +2027,7 @@ gcvtoi(GEN x, long *e)
 GEN
 ceil_safe(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long e;
   GEN y = gcvtoi(x,&e);
   if (e < 0) e = 0;
@@ -2039,7 +2039,7 @@ GEN
 gtrunc(GEN x)
 {
   long tx=typ(x), i, v;
-  gpmem_t av;
+  pari_sp av;
   GEN y;
 
   switch(tx)
@@ -2266,7 +2266,7 @@ GEN
 gtoser(GEN x, long v)
 {
   long tx=typ(x), lx, i, j, l;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1,p2;
 
   if (v<0) v = 0;
@@ -2466,7 +2466,7 @@ GEN
 polcoeff0(GEN x, long n, long v)
 {
   long tx=typ(x);
-  gpmem_t av;
+  pari_sp av;
 
   if (is_scalar_t(tx)) return n? gzero: gcopy(x);
 
@@ -2499,7 +2499,7 @@ GEN
 denom(GEN x)
 {
   long lx, i;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN s,t;
 
   switch(typ(x))
@@ -2545,7 +2545,7 @@ denom(GEN x)
 GEN
 numer(GEN x)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN s;
 
   switch(typ(x))
@@ -2668,7 +2668,7 @@ GEN
 centerlift0(GEN x, long v)
 {
   long lx, tx=typ(x), i;
-  gpmem_t av;
+  pari_sp av;
   GEN y;
 
   switch(tx)
@@ -2725,7 +2725,7 @@ static GEN
 op_ReIm(GEN f(GEN), GEN x)
 {
   long lx, i, j, tx = typ(x);
-  gpmem_t av;
+  pari_sp av;
   GEN z;
 
   switch(tx)
@@ -2811,7 +2811,7 @@ gimag(GEN x)
 static long
 _egal(GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long r = gegal(simplify_i(x), simplify_i(y));
   avma = av; return r;
 }
@@ -2853,7 +2853,7 @@ GEN
 geval(GEN x)
 {
   long lx, i, tx = typ(x);
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,z;
 
   if (is_const_t(tx)) return gcopy(x);
@@ -2973,7 +2973,7 @@ simplify_i(GEN x)
 GEN
 simplify(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepilecopy(av, simplify_i(x));
 }
 
@@ -2986,7 +2986,7 @@ static GEN
 qfeval0_i(GEN q, GEN x, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res=gzero;
 
   for (i=2;i<n;i++)
@@ -3003,7 +3003,7 @@ static GEN
 qfeval0(GEN q, GEN x, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res=gzero;
 
   for (i=2;i<n;i++)
@@ -3019,7 +3019,7 @@ static GEN
 qfeval0(GEN q, GEN x, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res = gmul(gcoeff(q,1,1), gsqr((GEN)x[1]));
 
   for (i=2; i<n; i++)
@@ -3063,7 +3063,7 @@ static GEN
 qfbeval0_i(GEN q, GEN x, GEN y, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res = gmul(gcoeff(q,1,1), mulii((GEN)x[1],(GEN)y[1]));
 
   for (i=2;i<n;i++)
@@ -3083,7 +3083,7 @@ static GEN
 qfbeval0(GEN q, GEN x, GEN y, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res = gmul(gcoeff(q,1,1), gmul((GEN)x[1],(GEN)y[1]));
 
   for (i=2;i<n;i++)
@@ -3102,7 +3102,7 @@ static GEN
 qfbeval0(GEN q, GEN x, GEN y, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res = gmul(gcoeff(q,1,1), gmul((GEN)x[1], (GEN)y[1]));
 
   for (i=2; i<n; i++)
@@ -3185,7 +3185,7 @@ mul_real(GEN x, GEN y)
   {
     if (typ(y) == t_COMPLEX)
     {
-      gpmem_t av=avma, tetpil;
+      pari_sp av=avma, tetpil;
       GEN p1 = gmul((GEN)x[1], (GEN) y[1]);
       GEN p2 = gneg(gmul((GEN)x[2], (GEN) y[2]));
       tetpil=avma; return gerepile(av,tetpil,gadd(p1,p2));
@@ -3202,7 +3202,7 @@ GEN
 mulmat_real(GEN x, GEN y)
 {
   long i, j, k, lx = lg(x), ly = lg(y), l = lg(x[1]);
-  gpmem_t av;
+  pari_sp av;
   GEN p1, z = cgetg(ly,t_MAT);
 
   for (j=1; j<ly; j++)
@@ -3223,7 +3223,7 @@ static GEN
 hqfeval0(GEN q, GEN x, long n)
 {
   long i, j;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN res=gzero;
 
   for (i=2;i<n;i++)
@@ -3262,7 +3262,7 @@ GEN
 poleval(GEN x, GEN y)
 {
   long i, j, imin, tx = typ(x);
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   GEN p1, p2, r, s;
 
   if (is_scalar_t(tx)) return gcopy(x);

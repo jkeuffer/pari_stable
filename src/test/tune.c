@@ -71,7 +71,7 @@ static double speed_endtime() { return (double)TIMER(&__T)/1000.; }
 static GEN
 rand_INT(long n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN x, N = shifti(gun, n*BITS_IN_LONG);
   if (n <= 0) err(talker,"n too small in rand_INT (%ld)", n);
   do
@@ -84,7 +84,7 @@ static GEN
 rand_REAL(long n)
 {
   GEN r = cgetr(n+2);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN x = rand_INT(n);
   affir(x,r); avma = av; return r;
 }
@@ -99,7 +99,7 @@ rand_g(long n, long type)
 
 #define TIME_FUN(call) {\
   {                                            \
-    gpmem_t av = avma;                         \
+    pari_sp av = avma;                         \
     int i;                                     \
     speed_starttime();                         \
     i = (s)->reps;                             \
@@ -174,7 +174,7 @@ double
 time_fun(speed_function_t fun, speed_param *s)
 {
 #define TOLERANCE 1.005 /* 0.5% */
-  gpmem_t av = avma;
+  pari_sp av = avma;
   double t[30];
   long i,j,e;
 

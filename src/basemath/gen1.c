@@ -30,13 +30,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (is_pm1(z[2]))\
-  z = gerepileupto((gpmem_t)(z+3), (GEN)z[1]);
+  z = gerepileupto((pari_sp)(z+3), (GEN)z[1]);
 
 /* assume z[1] was created last */
 #define fix_frac_if_int_GC(z,tetpil) { if (is_pm1(z[2]))\
-  z = gerepileupto((gpmem_t)(z+3), (GEN)z[1]);\
+  z = gerepileupto((pari_sp)(z+3), (GEN)z[1]);\
 else\
-  gerepilemanyvec((gpmem_t)z, tetpil, z+1, 2); }
+  gerepilemanyvec((pari_sp)z, tetpil, z+1, 2); }
 
 GEN quickmul(GEN a, GEN b, long na, long nb);
 
@@ -46,7 +46,7 @@ static GEN
 op_polmod(GEN f(GEN,GEN), GEN x, GEN y, long tx)
 {
   GEN mod,k,l, z=cgetg(3,t_POLMOD);
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   l=(GEN)y[1];
   if (tx==t_POLMOD)
@@ -165,7 +165,7 @@ gred_rfrac_i(GEN x)
 GEN 
 gred_rfrac2(GEN x1, GEN x2)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av, gred_rfrac2_i(x1, x2));
 }
 
@@ -180,7 +180,7 @@ GEN
 gred_frac2(GEN x1, GEN x2)
 {
   GEN p1, y = dvmdii(x1,x2,&p1);
-  gpmem_t av;
+  pari_sp av;
 
   if (p1 == gzero) return y; /* gzero intended */
   av = avma;
@@ -221,7 +221,7 @@ gred(GEN x)
 GEN
 gsub(GEN x, GEN y)
 {
-  gpmem_t tetpil, av = avma;
+  pari_sp tetpil, av = avma;
   y=gneg_i(y); tetpil=avma;
   return gerepile(av,tetpil,gadd(x,y));
 }
@@ -235,7 +235,7 @@ gsub(GEN x, GEN y)
 static GEN
 addpadic(GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long c,d,e,r,rx,ry;
   GEN u,z,p,mod;
 
@@ -277,7 +277,7 @@ addpadic(GEN x, GEN y)
 static GEN
 gaddpex(GEN x, GEN y)
 {
-  gpmem_t av;  
+  pari_sp av;  
   long tx,vy,py,d,r,e;
   GEN z,q,p,p1,p2,mod,u;
 
@@ -337,7 +337,7 @@ static long
 kro_quad(GEN x, GEN y)
 {
   long k;
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   x = subii(sqri((GEN)x[3]), shifti((GEN)x[2],2));
   k = kronecker(x,y); avma=av; return k;
@@ -356,20 +356,20 @@ addfrac(GEN x, GEN y)
   if (is_pm1(delta))
   {
     p1 = mulii(x1,y2);
-    p2 = mulii(y1,x2); avma = (gpmem_t)z;
+    p2 = mulii(y1,x2); avma = (pari_sp)z;
     z[1] = laddii(p1,p2);
     z[2] = lmulii(x2,y2); return z;
   }
   x2 = divii(x2,delta);
   y2 = divii(y2,delta);
   n = addii(mulii(x1,y2), mulii(y1,x2));
-  if (!signe(n)) { avma = (gpmem_t)(z+3); return gzero; }
+  if (!signe(n)) { avma = (pari_sp)(z+3); return gzero; }
   d = mulii(x2, y2);
   p1 = dvmdii(n, delta, &p2);
   if (p2 == gzero)
   {
-    if (is_pm1(d)) { avma = (gpmem_t)(z+3); return icopy(p1); }
-    avma = (gpmem_t)z;
+    if (is_pm1(d)) { avma = (pari_sp)(z+3); return icopy(p1); }
+    avma = (pari_sp)z;
     z[1] = licopy(p1);
     z[2] = licopy(d); return z;
   }
@@ -380,7 +380,7 @@ addfrac(GEN x, GEN y)
     n = divii(n, p1);
   }
   d = mulii(d,delta);
-  avma = (gpmem_t)z;
+  avma = (pari_sp)z;
   z[1] = licopy(n);
   z[2] = licopy(d); return z;
 }
@@ -391,7 +391,7 @@ addrfrac(GEN x, GEN y)
   GEN z = cgetg(3,t_RFRAC);
   GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
   GEN y1 = (GEN)y[1], y2 = (GEN)y[2], p1,p2,n,d,delta;
-  gpmem_t tetpil;
+  pari_sp tetpil;
 
   delta = ggcd(x2,y2);
   if (gcmp1(delta))
@@ -399,13 +399,13 @@ addrfrac(GEN x, GEN y)
     p1 = gmul(x1,y2);
     p2 = gmul(y1,x2);
     tetpil = avma; /* numerator is non-zero */
-    z[1] = lpile((gpmem_t)z,tetpil, gadd(p1,p2));
+    z[1] = lpile((pari_sp)z,tetpil, gadd(p1,p2));
     z[2] = lmul(x2, y2); return z;
   }
   x2 = gdeuc(x2,delta);
   y2 = gdeuc(y2,delta);
   n = gadd(gmul(x1,y2), gmul(y1,x2));
-  if (gcmp0(n)) return gerepileupto((gpmem_t)(z+3), n);
+  if (gcmp0(n)) return gerepileupto((pari_sp)(z+3), n);
   tetpil = avma; d = gmul(x2, y2);
   p1 = poldivres(n, delta, &p2); /* we want gcd(n,delta) */
   if (gcmp0(p2))
@@ -415,10 +415,10 @@ addrfrac(GEN x, GEN y)
       d = (GEN)d[2];
            if (gcmp_1(d)) p1 = gneg(p1);
       else if (!gcmp1(d)) p1 = gdiv(p1, d);
-      return gerepileupto((gpmem_t)(z+3), p1);
+      return gerepileupto((pari_sp)(z+3), p1);
     }
     z[1]=(long)p1; z[2]=(long)d;
-    gerepilemanyvec((gpmem_t)z,tetpil,z+1,2); return z;
+    gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
   }
   p1 = ggcd(delta, p2);
   if (gcmp1(p1))
@@ -433,14 +433,14 @@ addrfrac(GEN x, GEN y)
     z[1] = ldeuc(n,p1);
   }
   z[2] = lmul(d,delta);
-  gerepilemanyvec((gpmem_t)z,tetpil,z+1,2); return z;
+  gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
 }
 
 static GEN
 addscalrfrac(GEN x, GEN y)
 {
   GEN p1,num, z = cgetg(3,t_RFRAC);
-  gpmem_t tetpil, av;
+  pari_sp tetpil, av;
 
   p1 = gmul(x,(GEN)y[2]); tetpil = avma;
   num = gadd(p1,(GEN)y[1]);
@@ -454,11 +454,11 @@ addscalrfrac(GEN x, GEN y)
       tetpil = avma;
       z[1] = ldiv(num, p1);
       z[2] = ldiv((GEN)y[2], p1);
-      gerepilemanyvec((gpmem_t)z,tetpil,z+1,2); return z;
+      gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
     }
   }
   avma = av;
-  z[1]=lpile((gpmem_t)z,tetpil, num);
+  z[1]=lpile((pari_sp)z,tetpil, num);
   z[2]=lcopy((GEN)y[2]); return z;
 }
 
@@ -480,7 +480,7 @@ GEN
 gadd(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y), vx, vy, lx, ly, i, j, k, l;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN z,p1,p2;
 
   if (is_const_t(tx) && is_const_t(ty))
@@ -496,13 +496,13 @@ gadd(GEN x, GEN y)
 	
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
 	    (void)new_chunk(lgefint(p2)+1); /* HACK */
-            p1 = addii(modii(x,p2),(GEN)y[2]); avma = (gpmem_t)z;
+            p1 = addii(modii(x,p2),(GEN)y[2]); avma = (pari_sp)z;
             z[2] = (cmpii(p1,p2) >=0)? lsubii(p1,p2): licopy(p1);
 	    icopyifstack(p2,z[1]); return z;
 
 	  case t_FRAC: case t_FRACN: z=cgetg(3,ty);
             (void)new_chunk(lgefint(x)+lgefint(y[1])+lgefint(y[2])+1); /*HACK*/
-            p1 = mulii((GEN)y[2],x); avma = (gpmem_t)z;
+            p1 = mulii((GEN)y[2],x); avma = (pari_sp)z;
 	    z[1] = laddii((GEN)y[1], p1);
 	    z[2] = licopy((GEN)y[2]); return z;
 
@@ -574,7 +574,7 @@ gadd(GEN x, GEN y)
 	  case t_FRAC: case t_FRACN: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
 	    (void)new_chunk(lgefint(p2)<<2); /* HACK */
             p1 = mulii((GEN)y[1], mpinvmod((GEN)y[2],p2));
-            p1 = addii(modii(p1,p2), (GEN)x[2]); avma=(gpmem_t)z;
+            p1 = addii(modii(p1,p2), (GEN)x[2]); avma=(pari_sp)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 	
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
@@ -771,7 +771,7 @@ gadd(GEN x, GEN y)
           for (i=2; i<ly; i++) z[i]=ladd((GEN)x[i],(GEN)y[i]);
           for (   ; i<lx; i++) z[i]=lcopy((GEN)x[i]);
           (void)normalizepol_i(z, lx);
-          if (lgef(z) == 2) { avma = (gpmem_t)(z + lx); z = zeropol(vx); }
+          if (lgef(z) == 2) { avma = (pari_sp)(z + lx); z = zeropol(vx); }
           return z;
 
 	case t_SER:
@@ -881,7 +881,7 @@ gadd(GEN x, GEN y)
 GEN
 fix_rfrac_if_pol(GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   y = simplify(y);
   if (gcmp1(y)) { avma = av; return x; }
   if (typ(y) != t_POL)
@@ -918,7 +918,7 @@ mulscalrfrac(GEN x, GEN y)
 {
   GEN p1,z,y1,y2,cx,cy1,cy2;
   long tx;
-  gpmem_t tetpil;
+  pari_sp tetpil;
 
   if (gcmp0(x)) return gcopy(x);
 
@@ -949,8 +949,8 @@ mulscalrfrac(GEN x, GEN y)
   z[2] = lmul(y2, cy2);
   z[1] = lmul(y1, cy1);
   p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
-  if (p1) return gerepileupto((gpmem_t)(z+3), p1);
-  gerepilemanyvec((gpmem_t)z,tetpil,z+1,2); return z;
+  if (p1) return gerepileupto((pari_sp)(z+3), p1);
+  gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
 }
 
 static GEN
@@ -959,7 +959,7 @@ mulrfrac(GEN x, GEN y)
   GEN z = cgetg(3,t_RFRAC), p1;
   GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
   GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
-  gpmem_t tetpil;
+  pari_sp tetpil;
 
   p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdiv(x1,p1); y2 = gdiv(y2,p1); }
   p1 = ggcd(x2, y1); if (!gcmp1(p1)) { x2 = gdiv(x2,p1); y1 = gdiv(y1,p1); }
@@ -967,8 +967,8 @@ mulrfrac(GEN x, GEN y)
   z[2] = lmul(x2,y2);
   z[1] = lmul(x1,y1);
   p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
-  if (p1) return gerepileupto((gpmem_t)(z+3), p1);
-  gerepilemanyvec((gpmem_t)z,tetpil,z+1,2); return z;
+  if (p1) return gerepileupto((pari_sp)(z+3), p1);
+  gerepilemanyvec((pari_sp)z,tetpil,z+1,2); return z;
 }
 
 GEN
@@ -1080,7 +1080,7 @@ GEN
 gmul(GEN x, GEN y)
 {
   long tx, ty, lx, ly, vx, vy, i, j, k, l;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN z,p1,p2,p3,p4;
 
   if (x == y) return gsqr(x);
@@ -1100,7 +1100,7 @@ gmul(GEN x, GEN y)
 
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
 	    (void)new_chunk(lgefint(p2)<<2); /* HACK */
-            p1=mulii(modii(x,p2),(GEN)y[2]); avma=(gpmem_t)z;
+            p1=mulii(modii(x,p2),(GEN)y[2]); avma=(pari_sp)z;
 	    z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_FRAC:
@@ -1109,7 +1109,7 @@ gmul(GEN x, GEN y)
             p1 = mppgcd(x,(GEN)y[2]);
             if (is_pm1(p1))
             {
-              avma = (gpmem_t)z;
+              avma = (pari_sp)z;
               z[2] = licopy((GEN)y[2]);
               z[1] = lmulii((GEN)y[1], x);
             }
@@ -1184,7 +1184,7 @@ gmul(GEN x, GEN y)
 	  case t_FRAC: case t_FRACN: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
             p1 = mulii((GEN)y[1], mpinvmod((GEN)y[2],p2));
-            p1 = mulii(modii(p1,p2),(GEN)x[2]); avma=(gpmem_t)z;
+            p1 = mulii(modii(p1,p2),(GEN)x[2]); avma=(pari_sp)z;
             z[2] = lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 	
 	  case t_COMPLEX: z=cgetg(3,t_COMPLEX);
@@ -1519,7 +1519,7 @@ gmul(GEN x, GEN y)
  */
           GEN a = x,b = y
           GEN p = NULL, pol = NULL;
-          gpmem_t av = avma;
+          pari_sp av = avma;
           if (ff_poltype(&x,&p,&pol) && ff_poltype(&y,&p,&pol))
           {
             /* fprintferr("HUM"); */
@@ -1607,7 +1607,7 @@ GEN
 gsqr(GEN x)
 {
   long tx=typ(x), lx, i, j, k, l;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN z,p1,p2,p3,p4;
 
   if (is_scalar_t(tx))
@@ -1621,7 +1621,7 @@ gsqr(GEN x)
 	
       case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
         (void)new_chunk(lgefint(p2)<<2); /* HACK */
-        p1=sqri((GEN)x[2]); avma=(gpmem_t)z;
+        p1=sqri((GEN)x[2]); avma=(pari_sp)z;
         z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
       case t_FRAC: case t_FRACN:
@@ -1781,7 +1781,7 @@ GEN
 gdiv(GEN x, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx, ly, vx, vy, i, j, k, l;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN z,p1,p2,p3;
 
   if (y == gun) return gcopy(x);
@@ -1810,7 +1810,7 @@ gdiv(GEN x, GEN y)
       case t_INTMOD:
         z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
         (void)new_chunk(lgefint(p2)<<2); /* HACK */
-        p1=mulii(modii(x,p2), mpinvmod((GEN)y[2],p2)); avma=(gpmem_t)z;
+        p1=mulii(modii(x,p2), mpinvmod((GEN)y[2],p2)); avma=(pari_sp)z;
         z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
       case t_FRAC:
@@ -1818,7 +1818,7 @@ gdiv(GEN x, GEN y)
         p1 = mppgcd(x,(GEN)y[1]);
         if (is_pm1(p1))
         {
-          avma = (gpmem_t)z; tetpil = 0;
+          avma = (pari_sp)z; tetpil = 0;
           z[2] = licopy((GEN)y[1]);
         }
         else
@@ -1890,7 +1890,7 @@ gdiv(GEN x, GEN y)
 	{
 	  case t_INT: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
 	    (void)new_chunk(lgefint(p2)<<2); /* HACK */
-	    p1=mulii((GEN)x[2], mpinvmod(y,p2)); avma=(gpmem_t)z;
+	    p1=mulii((GEN)x[2], mpinvmod(y,p2)); avma=(pari_sp)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1]; p1=(GEN)y[1];
@@ -1905,7 +1905,7 @@ gdiv(GEN x, GEN y)
 	  case t_FRAC: z=cgetg(3,t_INTMOD); p2=(GEN)x[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
             p1=mulii((GEN)y[2], mpinvmod((GEN)y[1],p2));
-            p1=mulii(modii(p1,p2),(GEN)x[2]); avma=(gpmem_t)z;
+            p1=mulii(modii(p1,p2),(GEN)x[2]); avma=(pari_sp)z;
             z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_FRACN:
@@ -1933,7 +1933,7 @@ gdiv(GEN x, GEN y)
             p1 = mppgcd(y,(GEN)x[1]);
             if (is_pm1(p1))
             {
-              avma = (gpmem_t)z; tetpil = 0;
+              avma = (pari_sp)z; tetpil = 0;
               z[1] = licopy((GEN)x[1]);
             }
             else
@@ -1959,7 +1959,7 @@ gdiv(GEN x, GEN y)
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)y[1];
             (void)new_chunk(lgefint(p2)<<2); /* HACK */
 	    p1=mulii((GEN)y[2],(GEN)x[2]);
-	    p1=mulii(mpinvmod(p1,p2), modii((GEN)x[1],p2)); avma=(gpmem_t)z;
+	    p1=mulii(mpinvmod(p1,p2), modii((GEN)x[1],p2)); avma=(pari_sp)z;
 	    z[2]=lmodii(p1,p2); icopyifstack(p2,z[1]); return z;
 
 	  case t_FRAC: if (tx == t_FRACN) ty=t_FRACN;

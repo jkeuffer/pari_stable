@@ -47,7 +47,7 @@ isnfscalar(GEN x)
 static GEN
 scal_mul(GEN nf, GEN x, GEN y, long ty)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN p1;
 
   if (!is_extscalar_t(ty))
@@ -89,7 +89,7 @@ mul_by_tabi(GEN tab, GEN x, GEN y)
 
   for (k=1; k<=N; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (k == 1)
       s = gmul((GEN)x[1],(GEN)y[1]);
     else
@@ -144,7 +144,7 @@ element_mul(GEN nf, GEN x, GEN y)
 GEN
 element_inv(GEN nf, GEN x)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long i,N,tx=typ(x);
   GEN p1,p;
 
@@ -180,7 +180,7 @@ element_inv(GEN nf, GEN x)
 GEN
 element_div(GEN nf, GEN x, GEN y)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long i,N,tx=typ(x),ty=typ(y);
   GEN p1,p;
 
@@ -250,7 +250,7 @@ element_muli(GEN nf, GEN x, GEN y)
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (k == 1)
       s = mulii((GEN)x[1],(GEN)y[1]);
     else
@@ -288,7 +288,7 @@ element_sqri(GEN nf, GEN x)
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (k == 1)
       s = sqri((GEN)x[1]);
     else
@@ -325,7 +325,7 @@ sqr_by_tabi(GEN tab, GEN x)
 
   for (k=1; k<=N; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (k == 1)
       s = gsqr((GEN)x[1]);
     else
@@ -362,7 +362,7 @@ sqr_by_tab(GEN tab, GEN x)
 
   for (k=1; k<=N; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (k == 1)
       s = gsqr((GEN)x[1]);
     else
@@ -401,7 +401,7 @@ element_sqr(GEN nf, GEN x)
   if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
   if (is_extscalar_t(tx))
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     return gerepileupto(av, algtobasis(nf, gsqr(x)));
   }
   if (tx != t_COL) err(typeer,"element_sqr");
@@ -419,7 +419,7 @@ _sqr(void *data, GEN x) { return element_sqr((GEN)data,x); }
 GEN
 element_pow(GEN nf, GEN x, GEN n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long s,N;
   GEN y, cx;
 
@@ -467,7 +467,7 @@ _sqrmod(void *data, GEN x)
 GEN
 element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   eltmod_muldata D;
   long s,N;
   GEN y;
@@ -507,7 +507,7 @@ element_mulid(GEN nf, GEN x, long i)
   v = cgetg(N+1,t_COL);
   for (k=1; k<=N; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     GEN s = gzero;
     for (j=1; j<=N; j++)
     {
@@ -577,7 +577,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 long
 element_val(GEN nf, GEN x, GEN vp)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long N,w,vcx,e;
   GEN cx,p;
 
@@ -708,7 +708,7 @@ GEN
 algtobasis(GEN nf, GEN x)
 {
   long tx=typ(x),lx=lg(x),i,N;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN z;
 
   nf=checknf(nf);
@@ -735,7 +735,7 @@ algtobasis(GEN nf, GEN x)
 GEN
 nfdiveuc(GEN nf, GEN a, GEN b)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   a = element_div(nf,a,b); tetpil=avma;
   return gerepile(av,tetpil,ground(a));
 }
@@ -746,7 +746,7 @@ nfdiveuc(GEN nf, GEN a, GEN b)
 GEN
 nfmod(GEN nf, GEN a, GEN b)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   GEN p1=gneg_i(element_mul(nf,b,ground(element_div(nf,a,b))));
   tetpil=avma; return gerepile(av,tetpil,gadd(a,p1));
 }
@@ -757,7 +757,7 @@ nfmod(GEN nf, GEN a, GEN b)
 GEN
 nfdivres(GEN nf, GEN a, GEN b)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   GEN p1,z, y = ground(element_div(nf,a,b));
 
   p1=gneg_i(element_mul(nf,b,y)); tetpil=avma;
@@ -798,7 +798,7 @@ zsigne(GEN nf,GEN x,GEN arch)
 {
   GEN _0, _1, M, vecsign;
   long i,j,l,s;
-  gpmem_t av0, av;
+  pari_sp av0, av;
 
   if (!arch) return cgetg(1,t_COL);
   av0 = avma;
@@ -856,7 +856,7 @@ zsigns(GEN nf, GEN x)
 GEN
 lllreducemodmatrix(GEN x,GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z = lllint_ip(y,4);
   return gerepileupto(av, reducemodinvertible(x, z));
 }
@@ -907,7 +907,7 @@ reducemodHNF(GEN x, GEN y, GEN *Q)
   else
     for (i=1; i<lx; i++)
     {
-      gpmem_t av = avma;
+      pari_sp av = avma;
       R[i] = lpileupto(av, colreducemodHNF((GEN)x[i],y,NULL));
     }
   return R;
@@ -1039,7 +1039,7 @@ zidealij(GEN x, GEN y)
 GEN
 Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 {
-  gpmem_t av=avma,av1,lim;
+  pari_sp av=avma,av1,lim;
   long lbaby,i,k,c;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
@@ -1090,7 +1090,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 GEN
 Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv;
   GEN fa, ex;
   long e,i,j,l;
@@ -1138,7 +1138,7 @@ Fp_PHlog(GEN a, GEN g, GEN p, GEN ord)
 static GEN
 ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN q,n_q,ord,ordp;
 
   if (gcmp1(a) || egalii(p, gdeux)) { avma = av; return gzero; }
@@ -1165,7 +1165,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 static GEN
 ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
 {
-  gpmem_t av = avma, av1, lim;
+  pari_sp av = avma, av1, lim;
   long lbaby,i,k;
   GEN p1,smalltable,giant,perm,v,g0inv;
 
@@ -1219,7 +1219,7 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
 GEN
 ff_PHlog(GEN a, GEN g, GEN T, GEN p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN v,t0,a0,b,q,g_q,n_q,ginv0,qj,ginv,ord,fa,ex;
   long e,i,j,l;
 
@@ -1262,7 +1262,7 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
 GEN
 nf_PHlog(GEN nf, GEN a, GEN g, GEN pr)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN T,p, modpr = nf_to_ff_init(nf, &pr, &T, &p);
   GEN A = nf_to_ff(nf,a,modpr);
   GEN G = nf_to_ff(nf,g,modpr);
@@ -1272,7 +1272,7 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr)
 GEN
 znlog(GEN x, GEN g0)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p = (GEN)g0[1];
   if (typ(g0) != t_INTMOD)
     err(talker,"not an element of (Z/pZ)* in znlog");
@@ -1291,7 +1291,7 @@ GEN
 dethnf(GEN mat)
 {
   long i,l = lg(mat);
-  gpmem_t av;
+  pari_sp av;
   GEN s;
 
   if (l<3) return l<2? gun: icopy(gcoeff(mat,1,1));
@@ -1303,7 +1303,7 @@ dethnf(GEN mat)
 GEN
 dethnf_i(GEN mat)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,l = lg(mat);
   GEN s;
 
@@ -1317,7 +1317,7 @@ dethnf_i(GEN mat)
 GEN
 detcyc(GEN cyc)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,l = lg(cyc);
   GEN s;
 
@@ -1350,7 +1350,7 @@ FpXQ_gener(GEN T, GEN p)
 {
   long i,j, k, vT = varn(T), f = degpol(T);
   GEN g, list, pf_1 = subis(gpowgs(p, f), 1);
-  gpmem_t av0 = avma, av;
+  pari_sp av0 = avma, av;
 
   list = (GEN)factor(pf_1)[1];
   k = lg(list)-1;
@@ -1377,7 +1377,7 @@ FpXQ_gener(GEN T, GEN p)
 static GEN
 zprimestar(GEN nf,GEN pr,GEN ep,GEN x,GEN arch)
 {
-  gpmem_t av = avma, av1, tetpil;
+  pari_sp av = avma, av1, tetpil;
   long N, f, i, e, a, b;
   GEN prh,p,pf_1,list,v,p1,p3,p4,prk,uv,g0,newgen,pra,prb;
   GEN *gptr[2];
@@ -1457,7 +1457,7 @@ GEN
 zarchstar(GEN nf,GEN x,GEN arch,long nba)
 {
   long limr, N, i, j, k, r, rr, zk, lgmat;
-  gpmem_t av;
+  pari_sp av;
   GEN p1,y,bas,genarch,mat,lambda,nfun,vun;
 
   if (nba < 0)
@@ -1515,7 +1515,7 @@ zarchstar(GEN nf,GEN x,GEN arch,long nba)
     k = zk? rr: 1; /* to avoid 0 */
     for ( ; k<=limr; k++)
     {
-      gpmem_t av1=avma;
+      pari_sp av1=avma;
       long kk = k;
       GEN alpha = vun;
       for (i=1; i<=N; i++)
@@ -1596,7 +1596,7 @@ static GEN
 zinternallog(GEN nf,GEN a,GEN list_set,long nbgen,GEN arch,GEN fa,long index)
 {
   GEN prlist,ep,y0,y,ainit,list,pr,prk,cyc,psigne,p1,p2;
-  gpmem_t av;
+  pari_sp av;
   long nbp,i,j,k;
 
   y0 = y = cgetg(nbgen+1,t_COL); av=avma;
@@ -1647,7 +1647,7 @@ compute_gen(GEN nf, GEN u1, GEN gen, GEN bid)
 GEN
 zidealstarinitall(GEN nf, GEN ideal,long add_gen)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,j,k,nba,nbp,R1,nbgen,cp;
   GEN p1,y,h,cyc,U,u1,fa,fa2,ep,x,arch,list,sarch,gen;
 
@@ -1737,7 +1737,7 @@ zidealstarinit(GEN nf, GEN ideal)
 GEN
 zidealstar(GEN nf, GEN ideal)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = zidealstarinitall(nf,ideal,1);
   return gerepilecopy(av,(GEN)y[2]);
 }
@@ -1782,7 +1782,7 @@ check_nfelt(GEN x, GEN *den)
 GEN
 zideallog(GEN nf, GEN x, GEN bid)
 {
-  gpmem_t av;
+  pari_sp av;
   long l,i,N,c;
   GEN fa,fa2,ideal,arch,den,p1,cyc,y;
 
@@ -1838,7 +1838,7 @@ zideallog(GEN nf, GEN x, GEN bid)
 GEN
 zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2, long add_gen)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long i,nbp,nbgen,lx1,lx2,l1,l2,lx;
   GEN module1,module2,struct1,struct2,fact1,fact2,liste1,liste2;
   GEN module,liste,fact,U,U1,U2,cyc,cyc1,cyc2,uv;
@@ -1915,7 +1915,7 @@ zidealstarinitjoin(GEN nf, GEN bid1, GEN bid2, long add_gen)
 GEN
 zidealstarinitjoinarch(GEN nf, GEN bid1, GEN arch, long nba, long add_gen)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long i,nbp,lx1;
   GEN module1,struct1,fact1,liste1,U1,U;
   GEN module,liste,cyc,p1,y,u1,x,sarch, gen = add_gen? gun: NULL;
@@ -2013,7 +2013,7 @@ static GEN
 ideallistzstarall(GEN bnf,long bound,long flag)
 {
   byteptr ptdif=diffptr;
-  gpmem_t lim,av0=avma,av;
+  pari_sp lim,av0=avma,av;
   long i,j,k,l,q2,lp1,q;
   long do_gen = flag & 1, do_units = flag & 2, big_id = !(flag & 4);
   GEN y,nf,p,z,z2,p1,p2,p3,fa,pr,ideal,lu,lu2,funits,racunit,embunit;
@@ -2159,7 +2159,7 @@ ideallist_arch(GEN nf,GEN list,GEN arch,long flun)
 static GEN
 ideallistarchall(GEN bnf,GEN list,GEN arch,long flag)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,j,lp1, do_units = flag & 2;
   GEN nf = checknf(bnf), p1,p2,p3,racunit,funits,lu2,lu,embunit,z,y;
 

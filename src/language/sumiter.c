@@ -32,7 +32,7 @@ extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 void
 forpari(entree *ep, GEN a, GEN b, char *ch)
 {
-  gpmem_t av, av0 = avma, lim;
+  pari_sp av, av0 = avma, lim;
 
   b = gcopy(b); av=avma; lim = stack_lim(av,1);
  /* gcopy nedeed in case b gets overwritten in ch, as in
@@ -41,7 +41,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    gpmem_t av1=avma; (void)lisseq(ch); avma=av1;
+    pari_sp av1=avma; (void)lisseq(ch); avma=av1;
     if (loop_break()) break;
     a = (GEN) ep->value; a = gadd(a,gun);
     if (low_stack(lim, stack_lim(av,1)))
@@ -60,7 +60,7 @@ void
 forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
 {
   long ss, i;
-  gpmem_t av, av0 = avma, lim;
+  pari_sp av, av0 = avma, lim;
   GEN v = NULL;
   int (*cmp)(GEN,GEN);
 
@@ -77,7 +77,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    gpmem_t av1=avma; (void)lisseq(ch); avma=av1;
+    pari_sp av1=avma; (void)lisseq(ch); avma=av1;
     if (loop_break()) break;
     if (v)
     {
@@ -156,7 +156,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
 {
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   long a, b;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   byteptr d;
 
   d = prime_loop_init(ga,gb, &a,&b, prime);
@@ -182,7 +182,7 @@ void
 fordiv(GEN a, entree *ep, char *ch)
 {
   long i, l;
-  gpmem_t av2, av = avma;
+  pari_sp av2, av = avma;
   GEN t = divisors(a);
 
   push_val(ep, NULL); l=lg(t); av2 = avma;
@@ -223,14 +223,14 @@ fvloop(long i, fvdat *d)
   if (i+1 == d->n)
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      gpmem_t av = avma; (void)lisseq(d->ch); avma = av;
+      pari_sp av = avma; (void)lisseq(d->ch); avma = av;
       if (loop_break()) { d->n = 0; return; }
       d->a[i] = gadd(d->a[i], gun);
     }
   else
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      gpmem_t av = avma; fvloop(i+1, d); avma = av;
+      pari_sp av = avma; fvloop(i+1, d); avma = av;
       if (!d->n) return;
       d->a[i] = gadd(d->a[i], gun);
     }
@@ -255,14 +255,14 @@ fvloop_i(long i, fvdat *d)
   if (i+1 == d->n)
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      gpmem_t av = avma; (void)lisseq(d->ch); avma = av;
+      pari_sp av = avma; (void)lisseq(d->ch); avma = av;
       if (loop_break()) { d->n = 0; return; }
       d->a[i] = incloop(d->a[i]);
     }
   else
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      gpmem_t av = avma; fvloop_i(i+1, d); avma = av;
+      pari_sp av = avma; fvloop_i(i+1, d); avma = av;
       if (!d->n) return;
       d->a[i] = incloop(d->a[i]);
     }
@@ -271,7 +271,7 @@ fvloop_i(long i, fvdat *d)
 void
 forvec(entree *ep, GEN x, char *c, long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long tx = typ(x);
   fvdat D, *d = &D;
 
@@ -313,7 +313,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
 GEN
 somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
 {
-  gpmem_t av, av0 = avma, lim;
+  pari_sp av, av0 = avma, lim;
   GEN p1;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sum");
@@ -343,7 +343,7 @@ GEN
 suminf(entree *ep, GEN a, char *ch, long prec)
 {
   long fl, G;
-  gpmem_t tetpil, av0 = avma, av, lim;
+  pari_sp tetpil, av0 = avma, av, lim;
   GEN p1,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in suminf");
@@ -373,7 +373,7 @@ suminf(entree *ep, GEN a, char *ch, long prec)
 GEN
 divsum(GEN num, entree *ep, char *ch)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z, y = gzero, t = divisors(num);
   long i, l = lg(t);
 
@@ -397,7 +397,7 @@ divsum(GEN num, entree *ep, char *ch)
 GEN
 produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
 {
-  gpmem_t av, av0 = avma, lim;
+  pari_sp av, av0 = avma, lim;
   GEN p1;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sum");
@@ -438,7 +438,7 @@ prodinf0(entree *ep, GEN a, char *ch, long flag, long prec)
 GEN
 prodinf(entree *ep, GEN a, char *ch, long prec)
 {
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   long fl,G;
   GEN p1,x = realun(prec);
 
@@ -465,7 +465,7 @@ prodinf(entree *ep, GEN a, char *ch, long prec)
 GEN
 prodinf1(entree *ep, GEN a, char *ch, long prec)
 {
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   long fl,G;
   GEN p1,p2,x = realun(prec);
 
@@ -494,7 +494,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   long a,b;
-  gpmem_t av, av0 = avma, lim;
+  pari_sp av, av0 = avma, lim;
   GEN p1,x = realun(prec);
   byteptr d;
 
@@ -531,7 +531,7 @@ GEN
 direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  gpmem_t av0 = avma, av, lim = stack_lim(av0, 1);
+  pari_sp av0 = avma, av, lim = stack_lim(av0, 1);
   long p,n,i,j,k,tx,lx,a,b;
   GEN x,y,s,polnum,polden;
   byteptr d;
@@ -770,7 +770,7 @@ GEN
 sumalt(entree *ep, GEN a, char *ch, long prec)
 {
   long k, N;
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   GEN s,az,c,x,e1,d;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
@@ -798,7 +798,7 @@ GEN
 sumalt2(entree *ep, GEN a, char *ch, long prec)
 {
   long k, N;
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   GEN x,s,dn,pol;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
@@ -826,7 +826,7 @@ GEN
 sumpos(entree *ep, GEN a, char *ch, long prec)
 {
   long k, kk, N, G;
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   GEN p1,r,q1,reel,s,az,c,x,e1,d, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos");
@@ -872,7 +872,7 @@ GEN
 sumpos2(entree *ep, GEN a, char *ch, long prec)
 {
   long k, kk, N, G;
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   GEN p1,r,q1,reel,s,pol,dn,x, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos2");
@@ -944,7 +944,7 @@ fix(GEN a, long prec)
 GEN
 int_loop(entree *ep, char *ch)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   intstruct T;
 
   T.in = NULL;
@@ -979,7 +979,7 @@ _invf(void *dat, GEN x)
 static GEN
 interp(GEN h, GEN s, long j, long lim, long KLOC)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long e1,e2;
   GEN dss, ss = polint_i(h+j-KLOC,s+j-KLOC,gzero,KLOC+1,&dss);
 
@@ -996,7 +996,7 @@ qrom3(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   const long JMAX = 25, KLOC = 4;
   GEN ss,s,h,p1,p2,qlint,del,x,sum;
   long j, j1, it, sig;
-  gpmem_t av;
+  pari_sp av;
 
   a = fix(a,prec);
   b = fix(b,prec);
@@ -1033,7 +1033,7 @@ qrom2(void *dat, GEN (*eval)(void *, GEN), GEN a, GEN b, long prec)
   const long JMAX = 16, KLOC = 4;
   GEN ss,s,h,p1,qlint,del,ddel,x,sum;
   long j, j1, it, sig;
-  gpmem_t av;
+  pari_sp av;
 
   a = fix(a, prec);
   b = fix(b, prec);
@@ -1115,7 +1115,7 @@ rombint(void *E, GEN (*eval)(void*, GEN), GEN a, GEN b, long prec)
 GEN
 intnum(void *E, GEN (*eval)(void*,GEN), GEN a, GEN b, long flag, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z;
   switch(flag)
   {
@@ -1149,7 +1149,7 @@ intnum0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec)
 GEN
 polzag(long n, long m)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long d1, d, r, k;
   GEN A, B, Bx, g, s;
 
@@ -1185,7 +1185,7 @@ GEN
 polzagreel(long n, long m, long prec)
 {
   long d1, d, r, j, k, k2;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN Bx,B,g,h,v,b,s;
 
   if (m >= n || m < 0)
@@ -1241,7 +1241,7 @@ GEN
 zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
   long sig, iter, itmax;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN c,d,e,tol,tol1,min1,min2,fa,fb,fc,p,q,r,s,xm;
 
   a = fix(a,prec);

@@ -99,7 +99,7 @@ addsispec(long s, GEN x, long nx)
   while (xd > x) *--zd = *--xd;
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)zd; return zd;
+  avma=(pari_sp)zd; return zd;
 }
 
 #define swapspec(x,y, nx,ny) {long _a=nx;GEN _z=x; nx=ny; ny=_a; x=y; y=_z;}
@@ -133,7 +133,7 @@ addiispec(GEN x, GEN y, long nx, long ny)
   while (xd > x) *--zd = *--xd;
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)zd; return zd;
+  avma=(pari_sp)zd; return zd;
 }
 
 /* assume x >= y */
@@ -162,7 +162,7 @@ subisspec(GEN x, long s, long nx)
     do  *--zd = *--xd; while (xd > x);
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)zd; return zd;
+  avma=(pari_sp)zd; return zd;
 }
 
 /* assume x > y */
@@ -195,7 +195,7 @@ subiispec(GEN x, GEN y, long nx, long ny)
     do  *--zd = *--xd; while (xd > x);
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)zd; return zd;
+  avma=(pari_sp)zd; return zd;
 }
 
 #ifndef __M68K__
@@ -301,8 +301,8 @@ mpshift_special(GEN x, long lx, long n)
       shift_right(y,x, 2,ly, 0,m);
       if (y[2] == 0)
       {
-        if (ly==3) { avma = (gpmem_t)(y+3); return gzero; }
-        ly--; avma = (gpmem_t)(++y);
+        if (ly==3) { avma = (pari_sp)(y+3); return gzero; }
+        ly--; avma = (pari_sp)(++y);
       }
     } else {
       for (i=2; i<ly; i++) y[i]=x[i];
@@ -581,7 +581,7 @@ addir(GEN x, GEN y)
   z = (GEN)avma;
   y = addrr(itor(x,l), y);
   ly = lg(y); while (ly--) *--z = y[ly];
-  avma = (gpmem_t)z; return z;
+  avma = (pari_sp)z; return z;
 }
 
 GEN
@@ -650,7 +650,7 @@ addrr(GEN x, GEN y)
 
   if (sx==sy)
   { /* addition */
-    i=lz-1; avma = (gpmem_t)z;
+    i=lz-1; avma = (pari_sp)z;
     if (flag==0) { z[i] = y[i]; i--; }
     overflow=0;
     for (j=lx-1; j>=2; i--,j--) z[i] = addllx(x[j],y[i]);
@@ -676,7 +676,7 @@ addrr(GEN x, GEN y)
     i=2; while (i<lx && x[i]==y[i]) i++;
     if (i==lx)
     {
-      avma = (gpmem_t)(z+lz);
+      avma = (pari_sp)(z+lz);
       return realzero_bit(ey - bit_accuracy(lx));
     }
     f2 = ((ulong)y[i] > (ulong)x[i]);
@@ -733,7 +733,7 @@ addrr(GEN x, GEN y)
   else if (j) shift_left(z,z,2,lz-1, 0,j);
   z[1] = evalsigne(sx) | evalexpo(ez);
   z[0] = evaltyp(t_REAL) | evallg(lz);
-  avma = (gpmem_t)z; return z;
+  avma = (pari_sp)z; return z;
 }
 
 GEN
@@ -792,7 +792,7 @@ mulsispec(long x, GEN y, long ny)
   if (hiremainder) *--z = hiremainder; else lz--;
   *--z = evalsigne(1) | evallgefint(lz);
   *--z = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)z; return z;
+  avma=(pari_sp)z; return z;
 }
 
 GEN
@@ -828,7 +828,7 @@ addsmulsi(long a, long b, GEN Y)
   if (hiremainder) *--z = hiremainder; else lz--;
   *--z = evalsigne(1) | evallgefint(lz);
   *--z = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)z; return z;
+  avma=(pari_sp)z; return z;
 }
 
 #ifndef __M68K__
@@ -967,7 +967,7 @@ mulir(GEN x, GEN y)
     if ((long)hiremainder < 0) { z[2]=hiremainder; e++; }
     else z[2]=(hiremainder<<1) | (garde>>(BITS_IN_LONG-1));
     z[1] = evalsigne(sx) | evalexpo(e);
-    avma=(gpmem_t)z; return z;
+    avma=(pari_sp)z; return z;
   }
 
   (void)mulll(x[2],y[lz]); garde=hiremainder;
@@ -1007,7 +1007,7 @@ mulir(GEN x, GEN y)
   else
     shift_left(z,z,2,lzz,garde, 1);
   z[1] = evalsigne(sx) | evalexpo(e);
-  avma=(gpmem_t)z; return z;
+  avma=(pari_sp)z; return z;
 }
 
 /* written by Bruno Haible following an idea of Robert Harley */
@@ -1188,7 +1188,7 @@ divir(GEN x, GEN y)
 {
   GEN z;
   long ly;
-  gpmem_t av;
+  pari_sp av;
 
   if (!signe(y)) err(diver5);
   if (!signe(x)) return gzero;
@@ -1201,7 +1201,7 @@ GEN
 divri(GEN x, GEN y)
 {
   long lx, s = signe(y);
-  gpmem_t av;
+  pari_sp av;
   GEN z;
 
   if (!s) err(diver8);
@@ -1216,7 +1216,7 @@ divri(GEN x, GEN y)
 void
 diviiz(GEN x, GEN y, GEN z)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   if (typ(z) == t_INT) affii(divii(x,y), z);
   else {
     long lz = lg(z);
@@ -1228,7 +1228,7 @@ diviiz(GEN x, GEN y, GEN z)
 void
 mpdivz(GEN x, GEN y, GEN z)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN r;
 
   if (typ(z)==t_INT)
@@ -1258,7 +1258,7 @@ mpdivz(GEN x, GEN y, GEN z)
 GEN
 divsr(long x, GEN y)
 {
-  gpmem_t av;
+  pari_sp av;
   long ly;
   GEN z;
 
@@ -1278,7 +1278,7 @@ modii(GEN x, GEN y)
     case 1: return resii(x,y);
     default:
     {
-      gpmem_t av = avma;
+      pari_sp av = avma;
       (void)new_chunk(lgefint(y));
       x = resii(x,y); avma=av;
       if (x==gzero) return x;
@@ -1290,7 +1290,7 @@ modii(GEN x, GEN y)
 void
 modiiz(GEN x, GEN y, GEN z)
 {
-  const gpmem_t av = avma;
+  const pari_sp av = avma;
   affii(modii(x,y),z); avma=av;
 }
 
@@ -1424,7 +1424,7 @@ dvmdii(GEN x, GEN y, GEN *z)
 {
   long sx=signe(x),sy=signe(y);
   long lx, ly, lz, i, j, sh, k, lq, lr;
-  gpmem_t av;
+  pari_sp av;
   ulong si,qp,saux, *xd,*rd,*qd;
   GEN r,q,x1;
 
@@ -1540,7 +1540,7 @@ DIVIDE: /* quotient is non-zero */
     while (lz--) *--qd = *--xd;
     *--qd = evalsigne(sy) | evallgefint(lq);
     *--qd = evaltyp(t_INT) | evallg(lq);
-    avma = (gpmem_t)qd; return (GEN)qd;
+    avma = (pari_sp)qd; return (GEN)qd;
   }
 
   j=lq; while (j<lx && !x[j]) j++;
@@ -1566,7 +1566,7 @@ DIVIDE: /* quotient is non-zero */
     }
     *--rd = evalsigne(sx) | evallgefint(lr);
     *--rd = evaltyp(t_INT) | evallg(lr);
-    avma = (gpmem_t)rd; return (GEN)rd;
+    avma = (pari_sp)rd; return (GEN)rd;
   }
 
   lr = lz+2;
@@ -1610,7 +1610,7 @@ DIVIDE: /* quotient is non-zero */
     while (lr--) *--qd = *--rd;
     *z = (GEN)qd;
   }
-  avma = (gpmem_t)qd; return q;
+  avma = (pari_sp)qd; return q;
 }
 
 /* assume y > x > 0. return y mod x */
@@ -1629,7 +1629,7 @@ mppgcd_resiu(GEN y, ulong x)
 void
 mppgcd_plus_minus(GEN x, GEN y, GEN res)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long lx = lgefint(x)-1;
   long ly = lgefint(y)-1, lt,m,i;
   GEN t;
@@ -1676,7 +1676,7 @@ smulss(ulong x, ulong y, ulong *rem)
 GEN
 convi(GEN x)
 {
-  gpmem_t av = avma, lim;
+  pari_sp av = avma, lim;
   long lz;
   GEN z,p1;
 
@@ -1687,7 +1687,7 @@ convi(GEN x)
   {
     x = diviu(x,1000000000); *p1++ = hiremainder;
     if (!signe(x)) { avma = av; return p1; }
-    if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint((gpmem_t)z,x);
+    if (low_stack(lim, stack_lim(av,1))) x = gerepileuptoint((pari_sp)z,x);
   }
 }
 #undef DIVCONVI
@@ -1734,7 +1734,7 @@ confrac(GEN x)
 GEN
 truedvmdii(GEN x, GEN y, GEN *z)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN r, q = dvmdii(x,y,&r); /* assume that r is last on stack */
   GEN *gptr[2];
 
@@ -1754,7 +1754,7 @@ truedvmdii(GEN x, GEN y, GEN *z)
   if (!z) return gerepileuptoint(av, q);
 
   *z = subiispec(y+2,r+2, lgefint(y)-2,lgefint(r)-2);
-  gptr[0]=&q; gptr[1]=z; gerepilemanysp(av,(gpmem_t)r,gptr,2);
+  gptr[0]=&q; gptr[1]=z; gerepilemanysp(av,(pari_sp)r,gptr,2);
   return q;
 }
 
@@ -1765,7 +1765,7 @@ truedvmdii(GEN x, GEN y, GEN *z)
 GEN
 red_montgomery(GEN T, GEN N, ulong inv)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN Te,Td,Ne,Nd, scratch;
   ulong m,t,d,k = lgefint(N)-2;
   int carry;
@@ -1848,7 +1848,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
     || cmpii(Td, addii(shifti(T, -s), N)) >= 0) err(bugparier,"red_montgomery");
 }
 #endif
-  avma = (gpmem_t)Td; return Td;
+  avma = (pari_sp)Td; return Td;
 }
 
 /* EXACT INTEGER DIVISION */
@@ -1915,7 +1915,7 @@ diviuexact(GEN x, ulong y)
   z += i-2; lz -= i-2;
   z[0] = evaltyp(t_INT)|evallg(lz);
   z[1] = evalsigne(1)|evallg(lz);
-  avma = (gpmem_t)z; return z;
+  avma = (pari_sp)z; return z;
 }
 
 /* Find z such that x=y*z, knowing that y | x (unchecked)
@@ -1925,7 +1925,7 @@ GEN
 diviiexact(GEN x, GEN y)
 {
   long lx, ly, lz, vy, i, ii, sx = signe(x), sy = signe(y);
-  gpmem_t av;
+  pari_sp av;
   ulong y0inv,q;
   GEN z;
 
@@ -1997,7 +1997,7 @@ diviiexact(GEN x, GEN y)
   z += i-2; lz -= (i-2);
   z[0] = evaltyp(t_INT)|evallg(lz);
   z[1] = evalsigne(sx*sy)|evallg(lz);
-  avma = (gpmem_t)z; return z;
+  avma = (pari_sp)z; return z;
 }
 
 long
@@ -2132,7 +2132,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
   if (*zd == 0) { zd++; lz--; } /* normalize */
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)zd; return zd;
+  avma=(pari_sp)zd; return zd;
 }
 
 #ifdef INLINE
@@ -2196,7 +2196,7 @@ END:
   if (*zd == 0) { zd++; lz--; } /* normalize */
   *--zd = evalsigne(1) | evallgefint(lz);
   *--zd = evaltyp(t_INT) | evallg(lz);
-  avma=(gpmem_t)zd; return zd;
+  avma=(pari_sp)zd; return zd;
 }
 
 /* return (x shifted left d words) + y. Assume d > 0, x > 0 and y >= 0 */
@@ -2236,7 +2236,7 @@ quickmulii(GEN a, GEN b, long na, long nb)
 {
   GEN a0,c,c0;
   long n0, n0a, i;
-  gpmem_t av;
+  pari_sp av;
 
   if (na < nb) swapspec(a,b, na,nb);
   if (nb == 1) return mulsispec(*b, a, na);
@@ -2300,7 +2300,7 @@ resiimul(GEN x, GEN sy)
 {
   GEN r, q, y = (GEN)sy[1], invy;
   long k;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   k = cmpii(x, y);
   if (k <= 0) return k? icopy(x): gzero;
@@ -2362,7 +2362,7 @@ quicksqri(GEN a, long na)
 {
   GEN a0,c;
   long n0, n0a, i;
-  gpmem_t av;
+  pari_sp av;
 
   if (na < KARATSUBA_SQRI_LIMIT) return sqrispec(a,na);
   i=(na>>1); n0=na-i; na=i;
@@ -2441,7 +2441,7 @@ karamulrr1(GEN x, GEN y)
     i=lx+2; do z[--i]++; while (z[i]==0);
     if (i==1) z[2]=HIGHBIT;
   }
-  avma=(gpmem_t)z; return z;
+  avma=(pari_sp)z; return z;
 }
 
 GEN
@@ -2474,7 +2474,7 @@ karamulrr2(GEN x, GEN y)
     i=lx; do z[--i]++; while (z[i]==0);
     if (i==1) z[2]=HIGHBIT;
   }
-  avma=(gpmem_t)z; return z;
+  avma=(pari_sp)z; return z;
 }
 
 GEN
@@ -2499,7 +2499,7 @@ karamulir(GEN x, GEN y, long flag)
   lz = lg(y); z = cgetr(lz);
   z1 = karamulrr(itor(x, lz+1), y, flag);
   for (i=1; i<lz; i++) z[i]=z1[i];
-  avma=(gpmem_t)z; return z;
+  avma=(pari_sp)z; return z;
 }
 #endif
 
@@ -2649,7 +2649,7 @@ void
 cgiv(GEN x)
 {
   if (x == (GEN) avma)
-    avma = (gpmem_t) (x+lg(x));
+    avma = (pari_sp) (x+lg(x));
 }
 
 /********************************************************************/
@@ -3521,7 +3521,7 @@ int
 invmod(GEN a, GEN b, GEN *res)
 {
   GEN v,v1,d,d1,q,r;
-  gpmem_t av, av1, lim;
+  pari_sp av, av1, lim;
   long s;
   ulong g;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
@@ -3689,7 +3689,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 {
   GEN t,u,u1,v,v1,d,d1,q,r;
   GEN *pt;
-  gpmem_t av, av1, lim;
+  pari_sp av, av1, lim;
   long s;
   int sa, sb;
   ulong g;
@@ -4025,7 +4025,7 @@ int
 ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 {
   GEN d,d1,v,v1,q,r;
-  gpmem_t av = avma, av1, lim;
+  pari_sp av = avma, av1, lim;
   long lb,lr,lbb,lbr,s,s0;
   ulong vmax;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */

@@ -60,7 +60,7 @@ do_par(long k, long n, long m)
 static GEN
 partitions(long n)
 {
-  gpmem_t av, av1;
+  pari_sp av, av1;
   long i, j, lT;
   GEN T, P;
 
@@ -288,7 +288,7 @@ static void
 new_pol(GEN *r, long *a, long d)
 {
   long i, j;
-  gpmem_t av;
+  pari_sp av;
   GEN x, p1;
   for (i=1; i<=N; i++)
   {
@@ -302,7 +302,7 @@ static void
 rangeroots(GEN newr, GEN oldr)
 {
   long i, j, k, z[NMAX+1], t[NMAX+1];
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN diff,diff0;
 
   k = 0; /* gcc -Wall */
@@ -808,7 +808,7 @@ static GEN
 is_int(GEN g)
 {
   GEN gint,p1;
-  gpmem_t av;
+  pari_sp av;
 
   if (typ(g) == t_COMPLEX)
   {
@@ -822,7 +822,7 @@ is_int(GEN g)
 }
 
 static PERM
-isin_end(PERM S, PERM uu, PERM s0, GEN gpol, gpmem_t av1)
+isin_end(PERM S, PERM uu, PERM s0, GEN gpol, pari_sp av1)
 {
   PERM vv = permmul(S,uu), ww = permmul(vv,s0);
 
@@ -840,7 +840,7 @@ static PERM
 check_isin(GEN po,GEN *r,long nbm,long nbv, POBJ a, POBJ tau, POBJ ss, PERM s0)
 {
   long pr = PREC, nogr, nocos, init, i, j, k, l, d, nrm, nri, sp;
-  gpmem_t av1 = avma, av2;
+  pari_sp av1 = avma, av2;
   long nbgr,nbcos,nbracint,nbrac,lastnbri,lastnbrm;
   static long numi[M],numj[M],lastnum[M],multi[M],norac[M],lastnor[M];
   GEN rr,ro,roint,racint[M];
@@ -1484,7 +1484,7 @@ static long
 galoismodulo8(GEN pol, GEN dpol)
 {
   long res, gr[51];
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long **GR = (long**)cgeti(49);
   GEN TYP = partitions(8);
 
@@ -1772,7 +1772,7 @@ static long
 galoismodulo9(GEN pol, GEN dpol)
 {
   long res, gr[35];
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long **GR = (long**) cgeti(33);
   GEN TYP = partitions(9);
 
@@ -2224,7 +2224,7 @@ static long
 galoismodulo10(GEN pol, GEN dpol)
 {
   long res, gr[46];
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long **GR = (long**) cgeti(45);
   GEN TYP = partitions(10);
 
@@ -2333,7 +2333,7 @@ static long
 galoismodulo11(GEN pol, GEN dpol)
 {
   long res, gr[6] = {0, 1, 1, 1, 1, 1};
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN *TYP = (GEN*)cgetg(EVEN? 9: 6, t_VEC);
 
   TYP[1] = _typ(1, 11);
@@ -2458,7 +2458,7 @@ galoisbig(GEN pol, long prec)
 {
   GEN dpol, res = cgetg(4,t_VEC);
   long *tab, t;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long tab8[]={0,
     8,8,8,8,8,16,16,16,16,16, 16,24,24,24,32,32,32,32,32,32,
     32,32,48,48,56,64,64,64,64,64, 64,96,96,96,128,168,168,192,192,192,

@@ -544,9 +544,8 @@ $$ (\kbd{top} - \kbd{bot})\,/\,\kbd{sizeof(long)} $$
 is equal to the \kbd{size} argument of \kbd{pari\_init}. The PARI
 stack also has a ``current stack pointer'' called \teb{avma}, which
 stands for {\bf av}ailable {\bf m}emory {\bf a}ddress. These three variables
-are global (declared for you by \kbd{pari.h}). For historical reasons they
-are of type \tet{ulong} (unsigned long) and not of type \kbd{GEN} as would
-seem more natural.
+are global (declared by \kbd{pari.h}). They are of type \tet{pari\_sp} (pari
+stack pointer).
 
 The stack is oriented upside-down: the more recent an object, the closer to
 \kbd{bot}. Accordingly, initially \kbd{avma} = \kbd{top}, and \kbd{avma} gets
@@ -566,7 +565,7 @@ concrete examples in the next subsection.
 First, PARI routines will do their own garbage collecting, which
 means that whenever a documented function from the library returns, only its
 result(s) will have been added to the stack (non-documented ones may not do
-this, for greater speed). In particular, a PARI function that does not return
+this). In particular, a PARI function that does not return
 a \kbd{GEN} does not clutter the stack. Thus, if your computation is small
 enough (i.e.~you call few PARI routines, or most of them return \kbd{long}
 integers), then you don't need to do any garbage collecting. This will probably
@@ -582,10 +581,10 @@ the value of \kbd{avma} just \emph{before} the first garbage is created,
 and restore it upon exit:
 
 \bprog
-ulong ltop = avma; /*@Ccom record initial avma */
+pari_sp av = avma; /*@Ccom record initial avma */
 
 garbage ...
-avma = ltop; /*@Ccom restore it */
+avma = av; /*@Ccom restore it */
 @eprog
 \noindent All objects created in the \kbd{garbage} zone will eventually
 be overwritten: they should not be accessed anymore once \kbd{avma} has been
@@ -593,9 +592,8 @@ restored.
 
 \noindent$\bullet$
 If you want to destroy (i.e.~give back the memory occupied by) the
-latest PARI object on the stack (e.g.~the latest one obtained from a function
-call), and the above method is not available (because the initial value of
-\kbd{avma} has been lost), just use the function\sidx{destruction}%
+\emph{latest} PARI object on the stack (e.g.~the latest one obtained from a
+function call), you can use the function\sidx{destruction}%
 \vadjust{\penalty500}%discourage page break
 
 \fun{void}{cgiv}{GEN z}
@@ -608,7 +606,7 @@ to give back accumulated garbage \emph{during} a computation without losing
 recent data. For this you need the \kbd{gerepile} function (or one of its
 variants described hereafter):
 
-\fun{GEN}{gerepile}{ulong ltop, ulong lbot, GEN q}
+\fun{GEN}{gerepile}{pari\_sp ltop, pari\_sp lbot, GEN q}
 
 \noindent
 This function cleans up the stack between \kbd{ltop} and \kbd{lbot}, where
@@ -699,7 +697,7 @@ would return a pointer to random garbage.
 
 \noindent$\bullet$ A simple variant is
 
-\fun{GEN}{gerepileupto}{ulong ltop, GEN q}
+\fun{GEN}{gerepileupto}{pari\_sp ltop, GEN q}
 
 \noindent which cleans the stack between \kbd{ltop} and the \emph{connected}
 object \kbd{q} and returns \kbd{q} updated. For this to work, \kbd{q} must
@@ -710,7 +708,7 @@ stumble upon one that does not, consider it a bug worth reporting.
 \noindent$\bullet$ Another variant (a special case of \tet{gerepilemany}
 below, where $n=1$) is
 
-\fun{GEN}{gerepilecopy}{ulong ltop, GEN x)}
+\fun{GEN}{gerepilecopy}{pari\_sp ltop, GEN x)}
 
 \noindent which is functionnally equivalent to \kbd{gerepileupto(ltop,
 gcopy(x))} but more efficient. In this case, the \kbd{GEN} parameter \kbd{x}
@@ -723,7 +721,7 @@ is less efficient than either \tet{gerepileupto} or \tet{gerepile}, because
 To cope with complicated cases where many objects have to be
 preserved, you can use
 
-\fun{void}{gerepileall}{ulong ltop, int n, ...}
+\fun{void}{gerepileall}{pari\_sp ltop, int n, ...}
 
 \noindent where the routine expects $n$ further arguments, which are the 
 \emph{addresses} of the \kbd{GEN}s you want to preserve. It cleans up the most
@@ -735,7 +733,7 @@ functions (the less prone to user error), but also the slowest.
 
 An alternative, unnecessarily complicated, syntax is given by
 
-\fun{void}{gerepilemany}{ulong ltop, GEN *gptr[], int n}
+\fun{void}{gerepilemany}{pari\_sp ltop, GEN *gptr[], int n}
 
 \noindent which works exactly as above, except that the preserved \kbd{GEN}s
 are the elements of the array \kbd{gptr} (of length $n$): \kbd{gptr[0]},
@@ -743,7 +741,7 @@ are the elements of the array \kbd{gptr} (of length $n$): \kbd{gptr[0]},
 
 \noindent$\bullet$ More efficient, but tricky to use is
 
-\fun{void}{gerepilemanysp}{ulong ltop, ulong lbot, GEN *gptr[], int n}
+\fun{void}{gerepilemanysp}{pari\_sp ltop, pari\_sp lbot, GEN *gptr[], int n}
 
 \noindent which cleans the stack between \kbd{lbot} and \kbd{ltop} and
 updates the \kbd{GEN}s pointed at by the elements of \kbd{gptr} without doing
@@ -752,9 +750,10 @@ only difference being that more than one address gets updated.
 
 \subsec{Examples}.
 
-\noindent
+\subsubsec{gerepile}
+
 Let \kbd{x} and \kbd{y} be two preexisting PARI objects and suppose that we
-want to compute $\kbd{x}^2+ \kbd{y}^2$. This can trivially be done using the
+want to compute $\kbd{x}^2 + \kbd{y}^2$. This can trivially be done using the
 following program (we skip the necessary declarations; everything in sight is
 a \kbd{GEN}):
 \bprog
@@ -763,9 +762,9 @@ p2 = gsqr(y); z = gadd(p1,p2);
 @eprog\noindent
 The \kbd{GEN} \kbd{z} indeed points at the desired quantity. However,
 consider the stack: it contains as unnecessary garbage \kbd{p1} and \kbd{p2}.
-More precisely it contains (in this order) \kbd{z}, \kbd{p2}, \kbd{p1}
-(recall that, since the stack grows downward from the top, the most recent
-object comes first). We need a way to get rid of this garbage (in this case
+More precisely it contains (in this order) \kbd{z}, \kbd{p2}, \kbd{p1}.
+(Recall that, since the stack grows downward from the top, the most recent
+object comes first.) We need a way to get rid of this garbage (in this case
 it causes no harm except that it occupies memory space, but in other cases
 it could disconnect other PARI objects and this is dangerous).
 
@@ -805,7 +804,7 @@ you go on (use the figure from the preceding section).
 
 \misctitle{Important remark}: as we will see presently it is often
 necessary to do several \kbd{gerepile}s during a computation. However, the
-fewer the better.  The only condition for \kbd{gerepile} to work is that the
+fewer the better. The only condition for \kbd{gerepile} to work is that the
 garbage be connected. If the computation can be arranged so that there is a
 minimal number of connected pieces of garbage, then it should be done that
 way.
@@ -837,7 +836,7 @@ following program with garbage collecting:
 @eprog
 
 \noindent Finishing by \kbd{z = gerepileupto(ltop, z)} would be ok as well.
-But when you have the choice, it's usually clearer to brace the garbage
+But when you have the choice, it is usually clearer to brace the garbage
 between \kbd{ltop}~/ \kbd{lbot} pairs.
 
 \noindent Beware that
@@ -853,9 +852,9 @@ before \kbd{z}, so the call to \kbd{gerepileupto} would overwrite them,
 leaving \kbd{z[1]} and \kbd{z[2]} pointing at random data!
 
 We next want to write a program to compute the product of two complex numbers
-$x$ and $y$, using a method which takes only 3 multiplications instead of 4.
-Let $z = x*y$, and set $x = x_r + i*x_i$ and similarly for $y$ and $z$. The
-well-known trick is to compute $p_1 = x_r*y_r$, $p_2=x_i*y_i$,
+$x$ and $y$, using the $3M$ method (which takes only 3 multiplications
+instead of 4). Let $z = x*y$, and set $x = x_r + i*x_i$ and similarly for $y$
+and $z$. We compute $p_1 = x_r*y_r$, $p_2=x_i*y_i$,
 $p_3=(x_r+x_i)*(y_r+y_i)$, and then we have $z_r=p_1-p_2$,
 $z_i=p_3-(p_1+p_2)$. The program is essentially as follows:
 %
@@ -876,10 +875,10 @@ z = gerepile(ltop,lbot,z);
 \kbd{p1 = gmul((GEN)x[1], (GEN)y[1])} and so on.
 
 Let us now look at a less trivial example where more than one \kbd{gerepile}
-is needed in practice (at the expense of efficiency, one can always use only
-one using \kbd{gerepilecopy}). Suppose that we want to write a function
-which multiplies a line vector by a matrix (such a function is of course
-already part of \kbd{gmul}, but let's ignore this for a moment). Then the
+is needed in practice. (At the expense of efficiency, one can always use only
+one using \kbd{gerepilecopy}.) Suppose that we want to write a function
+which multiplies a line vector by a matrix. Such a function is of course
+already part of \kbd{gmul}, but let us ignore this for a moment. Then the
 most natural way is to do a \kbd{cgetg} of the result immediately, and then a
 \kbd{gerepile} for each coefficient of the result vector to get rid of the
 garbage which has accumulated while this particular coefficient was computed.
@@ -889,16 +888,17 @@ We leave the details to the reader, who can look at the answer in the file
 piece of garbage, but it would be a much less natural and unnecessarily
 complicated program, which would in fact be slower.
 
-Let us now take an example which is probably the least trivial way of using
-\kbd{gerepile}, but is unfortunately sometimes necessary. Although it is not
-an infrequent occurrence, we will not give a specific example but a general
-one: suppose that we want to do a computation (usually inside a larger
-function) producing more than one PARI object as a result, say two for
-instance. Then even if we set up the work properly, before cleaning up we
-will have a stack which has the desired results \kbd{z1}, \kbd{z2} (say),
-and then connected garbage from lbot to ltop. If we write
+\subsubec{gerepilemany}
 
-\kbd{z1 = gerepile(ltop,lbot,z1);}
+Let us now see why we may need the \kbd{gerepilemany} variants. Although it
+is not an infrequent occurrence, we will not give a specific example but a
+general one: suppose that we want to do a computation (usually inside a
+larger function) producing more than one PARI object as a result, say two for
+instance. Then even if we set up the work properly, before cleaning up we
+will have a stack which has the desired results \kbd{z1}, \kbd{z2} (say), and
+then connected garbage from lbot to ltop. If we write
+
+\kbd{z1 = gerepile(ltop, lbot, z1);}
 
 \noindent
 then the stack will be cleaned, the pointers fixed up, but we will have lost
@@ -910,22 +910,24 @@ functions: we declare
 @eprog
 \noindent and now the call \kbd{gerepilemany(ltop, gptr, 2)} copies \kbd{z1}
 and \kbd{z2} to new locations, cleans the stack from \kbd{ltop} to the old
-\kbd{avma}, and updates the pointers \kbd{z1} and \kbd{z2}. Here we don't
-assume anything about the stack: the garbage can be disconnected and
-\kbd{z1}, \kbd{z2} need not be at the bottom of the stack. If all of these
-assumptions are in fact satisfied, then we can call \kbd{gerepilemanysp}
-instead, which will usually be faster since we don't need the initial copy
-(on the other hand, it is less cache friendly). The whole thing could (and
-should) be abbreviated as
+\kbd{avma}, and updates the pointers \kbd{z1} and \kbd{z2}.
+
+An equivalent, slighly slower, formulation is to simply write
 \bprog
   gerepileall(ltop, 2, &z1, &z2)
 @eprog
-so that the array \kbd{gptr} is not needed anymore.
+so that the array \kbd{gptr} is in fact not needed.
+
+Here we don't assume anything about the stack: the garbage can be
+disconnected and \kbd{z1}, \kbd{z2} need not be at the bottom of the stack.
+If all of these assumptions are in fact satisfied, then we can call
+\kbd{gerepilemanysp} instead, which will usually be faster since we don't
+need the initial copy (on the other hand, it is less cache friendly).
 
 Another important usage is ``random'' garbage collection during loops
 whose size requirements we cannot (or don't bother to) control in advance:
 \bprog
-  ulong ltop = avma, limit = (avma+bot)/2;
+  pari_sp ltop = avma, limit = stack_lim(avma, 1);
   GEN x, y;
 
   while (...)
@@ -934,38 +936,26 @@ whose size requirements we cannot (or don't bother to) control in advance:
     garbage(); y = anything()
     garbage();
     if (avma < limit) /*@Ccom memory is running low (half spent since entry) */
-       gerepileall(ltop, 2, &x, &y);
+      gerepileall(ltop, 2, &x, &y);
   } 
 @eprog
 \noindent Here we assume that only \kbd{x} and \kbd{y} are needed from one
 iteration to the next. As it would be too costly to call gerepile once for
-each iteration, we only do it when it seems to have become necessary. Of
-course, when the need arises, you can use bigger \kbd{gptr} arrays: in the
-PARI library source code, we once needed to preserve up to 10 objects at a
-time (in a variant of the LLL algorithm)!
+each iteration, we only do it when it seems to have become necessary.
 
-\misctitle{Technical note:} the statement \kbd{limit = (avma+bot)/2} is
-dangerous since the addition can overflow, which would result in \kbd{limit}
-being always smaller than \kbd{avma}. This will prevent garbage collection in
-the loop. To avoid this problem, we provide a robust macro
-\tet{stack_lim}\kbd{(avma,$n$)}, which denotes an address where $2^{n-1} /
-(2^{n-1}+1)$ of the total stack space is exhausted ($1/2$ for $n=1$, $2/3$
-for $n=2$). Hence, the above snippet should be written as
-
-\bprog
-  ulong ltop = avma, limit = stack_lim(avma,1);
-  @dots
-@eprog
+The macro \tet{stack_lim}\kbd{(avma,$n$)} denotes an address where $2^{n-1} /
+(2^{n-1}+1)$ of the remaining stack space is exhausted ($1/2$ for $n=1$,
+$2/3$ for $n=2$).
 
 \subsec{Some hints and tricks}. In this section, we give some indications
 on how to avoid most problems connected with garbage collecting:
 
 First, although it looks complicated, \kbd{gerepile} has turned out to be a
 very flexible and fast garbage collector, which compares very favorably
-with much more sophisticated methods used in other systems. A few tests that
-we have done indicate that the price paid for using \kbd{gerepile}, when
-properly used, is usually around 1 or 2 percents of the total running time,
-which is quite acceptable.
+with much more sophisticated methods used in other systems. Our benchmarks
+indicate that the price paid for using \kbd{gerepile}, when properly used, is
+usually around 1 or 2 percents of the total running time, which is quite
+acceptable!
 
 Secondly, in many cases, in particular when the tree structure and the size of
 the PARI objects which will appear in a computation are under control, one
@@ -992,8 +982,8 @@ of the garbage zone would have been lost. Of course you can always use
 \kbd{gerepileupto}, but you will have to assume that the object was created
 \emph{before} its components.
 
-Lastly, if all seems lost, just use \tet{gerepilecopy} (or
-\tet{gerepilemany}) to fix up the stack for you.
+Lastly, if all seems lost, just use \tet{gerepilecopy} (or \tet{gerepileall})
+to fix up the stack for you.
 
 \smallskip If you followed us this far, congratulations, and rejoice: the
 rest is much easier.
@@ -1816,7 +1806,8 @@ appropriate. Now let us attack the main course, the function \kbd{matexp}:
 GEN
 matexp(GEN x, long prec)
 {
-  long lx=lg(x),i,k,n,lbot, ltop = avma;
+  pari_sp lbot, ltop = avma;
+  long lx=lg(x),i,k,n;
   GEN y,r,s,p1,p2;
 
   /*@Ccom check that x is a square matrix */
@@ -1852,14 +1843,13 @@ message.
 
 Thirdly, notice how we handle the special case $\kbd{lx} = 1$ (empty matrix)
 \emph{before} accessing \kbd{lx(x[1])}. Doing it the other way round could
-produce a fatal error (a segmentation fault or a bus error, most probably).
-Indeed, if \kbd{x} is of length 1, then \kbd{x[1]} is not a component of
-\kbd{x}. It is just the contents of the memory cell which happens to follow
-the one pointed to by \kbd{x}, and thus has no reason to be a valid \kbd{GEN}.
-Now recall that none of the codeword handling macros do any kind of type
-checking (see \secref{se:impl}), thus \teb{lg} would consider \kbd{x[1]}
-as a valid address, and try to access \kbd{*((GEN)x[1])} (the first codeword)
-which is unlikely to be a legal memory address.
+produce a fatal error. Indeed, if \kbd{x} is of length 1, then \kbd{x[1]} is
+not a component of \kbd{x}. It is just the contents of the memory cell which
+happens to follow the one pointed to by \kbd{x}, and thus has no reason to be
+a valid \kbd{GEN}. Now recall that none of the codeword handling macros do
+any kind of type checking (see \secref{se:impl}), thus \teb{lg} would
+consider \kbd{x[1]} as a valid address, and try to access \kbd{*((GEN)x[1])}
+(the first codeword) which is unlikely to be a legal memory address.
 
 In the fourth place, to compute the square of the $L^2$-norm of \kbd{x} we
 just add the squares of the $L^2$-norms of the column vectors which we obtain

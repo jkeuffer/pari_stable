@@ -233,7 +233,7 @@ _powpolmod(int pk, GEN jac, red_t *R, GEN (*_sqr)(GEN, red_t *))
   const int efin = lg(taba)-1;
   GEN res,pol2, *vz;
   int lv,tf,f,i;
-  gpmem_t av;
+  pari_sp av;
 
   lv = 1 << (kglob-1);
   vz = (GEN*)cgetg(lv+1,t_VEC);
@@ -328,7 +328,7 @@ e(ulong t)
 static ulong
 compt(GEN N)
 {
-  gpmem_t av0 = avma;
+  pari_sp av0 = avma;
   ulong Bint,t;
   GEN B;
 
@@ -400,7 +400,7 @@ compt(GEN N)
   B = racine(N);
   for (t = 8648640+840;; t+=840)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (cmpii(e(t),B) > 0) break;
     avma = av;
   }
@@ -501,7 +501,7 @@ get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
 static void
 calcjac(GEN et)
 {
-  gpmem_t av;
+  pari_sp av;
   ulong q, l;
   int lfaq,p,k,i,j;
   GEN J,tabf,tabg,faq,faqpr,faqex;
@@ -598,7 +598,7 @@ static void
 filltabs(GEN N, int p, int k, ulong ltab)
 {
   const ulong mask = (1<<kglob)-1;
-  gpmem_t av;
+  pari_sp av;
   int pk,pk2,i,j,LE=0;
   ulong s,e;
   GEN tabt,taba,m,E=gzero,p1,a=gzero,a2=gzero;
@@ -908,7 +908,7 @@ static int
 step5(GEN N, int p, GEN et)
 {
   ulong ct = 0, q;
-  gpmem_t av;
+  pari_sp av;
   int k, fl = -1;
   byteptr d = diffptr+2;
   const ulong ltab = (NBITSN/kglob)+2;
@@ -942,7 +942,7 @@ step6(GEN N, ulong t, GEN et)
 {
   GEN N1,r,p1;
   ulong i;
-  gpmem_t av;
+  pari_sp av;
 
   if (dotime) (void)timer2();
   N1 = resii(N, et);
@@ -993,7 +993,7 @@ aprcl(GEN N)
   GEN et,fat,flaglp,faq,faqpr,faqex,res;
   long fl;
   ulong lfat,p,q,lfaq,k,t,i,j,l;
-  gpmem_t av,av2,avinit = avma;
+  pari_sp av,av2,avinit = avma;
 
   if (cmpis(N,12) <= 0)
     switch(itos(N))
@@ -1088,7 +1088,7 @@ aprcl(GEN N)
 long
 isprimeAPRCL(GEN N)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN res = aprcl(N);
   avma = av; return (typ(res) == t_INT);
 }

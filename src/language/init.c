@@ -47,7 +47,7 @@ long    *ordvar;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, compatible;
 ulong   prec, precdl;
 ulong   init_opts = INIT_JMPm | INIT_SIGm;
-gpmem_t bot = 0, top = 0, avma;
+pari_sp bot = 0, top = 0, avma;
 size_t memused;
 
 gp_data *GP_DATA = NULL;
@@ -476,13 +476,13 @@ init_stack(size_t size)
     free((void*)bot);
   }
   /* NOT gpmalloc, memer would be deadly */
-  bot = (gpmem_t)__gpmalloc(s);
+  bot = (pari_sp)__gpmalloc(s);
   if (!bot)
     for (s = old;; s>>=1)
     {
       if (!s) err(memer); /* no way out. Die */
       err(warner,"not enough memory, new stack %lu",s);
-      bot = (gpmem_t)__gpmalloc(s);
+      bot = (pari_sp)__gpmalloc(s);
       if (bot) break;
     }
   avma = top = bot+s;
@@ -716,7 +716,7 @@ GEN
 changevar(GEN x, GEN y)
 {
   long tx, ty, lx, vx, vy, i;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN  p1,p2,z;
 
   if (var_not_changed && y==polvar) return x;
@@ -1190,7 +1190,7 @@ trap0(char *e, char *r, char *f)
   if (f && r)
   { /* explicit recovery text */
     char *a = get_analyseur();
-    gpmem_t av = avma;
+    pari_sp av = avma;
     VOLATILE GEN x;
 
     CATCH(numerr) { x = NULL; }
@@ -1479,7 +1479,7 @@ stackdummy(GEN z, long l) { z[0] = evaltyp(t_VECSMALL) | evallg(l); }
 
 /* gerepileupto(av, forcecopy(x)) */
 GEN
-gerepilecopy(gpmem_t av, GEN x)
+gerepilecopy(pari_sp av, GEN x)
 {
   GENbin *p = copy_bin(x);
   avma = av; return bin_copy(p);
@@ -1489,7 +1489,7 @@ gerepilecopy(gpmem_t av, GEN x)
  * objects to contiguous locations and cleans up the stack between
  * av and avma. */
 void
-gerepilemany(gpmem_t av, GEN* gptr[], int n)
+gerepilemany(pari_sp av, GEN* gptr[], int n)
 {
   GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
   int i;
@@ -1500,7 +1500,7 @@ gerepilemany(gpmem_t av, GEN* gptr[], int n)
 }
 
 void
-gerepileall(gpmem_t av, int n, ...)
+gerepileall(pari_sp av, int n, ...)
 {
   GENbin **l = (GENbin**)gpmalloc(n*sizeof(GENbin*));
   GEN **gptr  = (GEN**)  gpmalloc(n*sizeof(GEN*));
@@ -1514,7 +1514,7 @@ gerepileall(gpmem_t av, int n, ...)
 }
 
 void
-gerepilemanycoeffs(gpmem_t av, GEN x, int n)
+gerepilemanycoeffs(pari_sp av, GEN x, int n)
 {
   int i;
   for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
@@ -1523,7 +1523,7 @@ gerepilemanycoeffs(gpmem_t av, GEN x, int n)
 }
 
 void
-gerepilemanycoeffs2(gpmem_t av, GEN x, int n, GEN y, int o)
+gerepilemanycoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
 {
   int i;
   for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
@@ -1536,16 +1536,16 @@ gerepilemanycoeffs2(gpmem_t av, GEN x, int n, GEN y, int o)
 /* Takes an array of pointers to GENs, of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
-gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], int n)
+gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], int n)
 {
-  const gpmem_t av2 = avma;
+  const pari_sp av2 = avma;
   const size_t dec = av-tetpil;
   int i;
 
   (void)gerepile(av,tetpil,NULL);
   for (i=0; i<n; i++)
   {
-    gpmem_t *g1 = (gpmem_t*) gptr[i];
+    pari_sp *g1 = (pari_sp*) gptr[i];
     if (*g1 < tetpil)
     {
       if (*g1 >= av2) *g1 += dec; /* Update address if in stack */
@@ -1557,27 +1557,27 @@ gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], int n)
 /* Takes an array of GENs (cast to longs), of length n.
  * Cleans up the stack between av and tetpil, updating those GENs. */
 void
-gerepilemanyvec(gpmem_t av, gpmem_t tetpil, long *g, int n)
+gerepilemanyvec(pari_sp av, pari_sp tetpil, long *g, int n)
 {
-  const gpmem_t av2 = avma;
+  const pari_sp av2 = avma;
   const size_t dec = av-tetpil;
   int i;
 
   (void)gerepile(av,tetpil,NULL);
   for (i=0; i<n; i++,g++)
-    if ((gpmem_t)*g < tetpil)
+    if ((pari_sp)*g < tetpil)
     {
-      if ((gpmem_t)*g >= av2) *g += dec;/* Update addresses if in stack */
-      else if ((gpmem_t)*g >= av) err(gerper);
+      if ((pari_sp)*g >= av2) *g += dec;/* Update addresses if in stack */
+      else if ((pari_sp)*g >= av) err(gerper);
     }
 }
 
 GEN
-gerepileupto(gpmem_t av, GEN q)
+gerepileupto(pari_sp av, GEN q)
 {
   if (!isonstack(q)) { avma = av; return q; } /* universal object */
   /* empty garbage */
-  if (av <= (gpmem_t)q) return q;
+  if (av <= (pari_sp)q) return q;
   /* The garbage is only empty when av==q. It's probably a mistake if
    * av < q. But "temporary variables" from sumiter are a problem since
    * ep->values are returned as-is by identifier() and they can be in the
@@ -1586,27 +1586,27 @@ gerepileupto(gpmem_t av, GEN q)
    */
 
   /* Beware: (long)(q+i) --> ((long)q)+i*sizeof(long) */
-  return gerepile(av, (gpmem_t) (q+lg(q)), q);
+  return gerepile(av, (pari_sp) (q+lg(q)), q);
 }
 
 /* internal */
 GEN
-gerepileuptoleaf(gpmem_t av, GEN q)
+gerepileuptoleaf(pari_sp av, GEN q)
 {
   long i;
   GEN q0;
 
-  if (!isonstack(q) || av==(gpmem_t)q) { avma = av; return q; }
-  i=lg(q); avma = (gpmem_t)(((GEN)av) -  i);
+  if (!isonstack(q) || av==(pari_sp)q) { avma = av; return q; }
+  i=lg(q); avma = (pari_sp)(((GEN)av) -  i);
   q0 = (GEN)avma; while (--i >= 0) q0[i]=q[i];
   return q0;
 }
 /* internal */
 GEN
-gerepileuptoint(gpmem_t av, GEN q)
+gerepileuptoint(pari_sp av, GEN q)
 {
   if (!isonstack(q) || (GEN)av==q) { avma = av; return q; }
-  avma = (gpmem_t)icopy_av(q, (GEN)av);
+  avma = (pari_sp)icopy_av(q, (GEN)av);
   return (GEN)avma;
 }
 
@@ -1638,20 +1638,20 @@ int
 ok_gerepileupto(GEN x) { return _ok_gerepileupto(x, x); }
 
 GEN
-gerepile(gpmem_t av, gpmem_t tetpil, GEN q)
+gerepile(pari_sp av, pari_sp tetpil, GEN q)
 {
-  gpmem_t avmb;
+  pari_sp avmb;
   size_t dec = av - tetpil;
   GEN ll,a,b;
 
   if (dec==0) return q;
   if ((long)dec<0) err(talker,"lbot>ltop in gerepile");
 
-  if ((gpmem_t)q >= avma && (gpmem_t)q < tetpil)
-    q = (GEN) (((gpmem_t)q) + dec);
+  if ((pari_sp)q >= avma && (pari_sp)q < tetpil)
+    q = (GEN) (((pari_sp)q) + dec);
 
   for (ll=(GEN)av, a=(GEN)tetpil; a > (GEN)avma; ) *--ll= *--a;
-  avmb = (gpmem_t)ll;
+  avmb = (pari_sp)ll;
   while (ll < (GEN)av)
   {
     const long tl=typ(ll);
@@ -1660,9 +1660,9 @@ gerepile(gpmem_t av, gpmem_t tetpil, GEN q)
     a = ll+lontyp[tl];
     if (tl==t_POL) { b=ll+lgef(ll); ll+=lg(ll); } else { ll+=lg(ll); b=ll; }
     for (  ; a<b; a++)
-      if ((gpmem_t)*a < av && (gpmem_t)*a >= avma)
+      if ((pari_sp)*a < av && (pari_sp)*a >= avma)
       {
-	if ((gpmem_t)*a < tetpil) *a += dec; else err(gerper);
+	if ((pari_sp)*a < tetpil) *a += dec; else err(gerper);
       }
   }
   avma = avmb; return q;
@@ -1688,7 +1688,7 @@ switch_stack(stackzone *z, long n)
   { /* create parallel stack */
     size_t size = n*sizeof(long) + sizeof(stackzone);
     z = (stackzone*) gpmalloc(size);
-    z->zonetop = ((gpmem_t)z) + size;
+    z->zonetop = ((pari_sp)z) + size;
     return z;
   }
 
@@ -1698,7 +1698,7 @@ switch_stack(stackzone *z, long n)
     z->top     = top;
     z->avma    = avma;
     z->memused = memused;
-    bot     = (gpmem_t) (z+1);
+    bot     = (pari_sp) (z+1);
     top     = z->zonetop;
     avma    = top;
     memused = (size_t)-1;

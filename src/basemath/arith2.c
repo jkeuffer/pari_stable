@@ -289,7 +289,7 @@ cleanprimetab(void)
 GEN
 addprimes(GEN p)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,k,tx,lp;
   GEN L;
 
@@ -428,7 +428,7 @@ GEN
 auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 		  GEN state, long all, long hint)
 {
-  gpmem_t av;
+  pari_sp av;
   long pp[] = { evaltyp(t_INT)|_evallg(4), 0,0,0 };
   long nb = 0,i,k,lp,p,lim1;
   byteptr d=diffptr+1;
@@ -506,7 +506,7 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
 static long
 ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
 {
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
   int res;
   if (!here) /* initial call */
    /* Small prime have been removed since start, n is the new unfactored part.
@@ -579,7 +579,7 @@ GEN
 boundfact(GEN n, long lim)
 {
   GEN p1,p2,p3,p4,p5,y;
-  gpmem_t av = avma,tetpil;
+  pari_sp av = avma,tetpil;
 
   if (lim<=1) lim=0;
   switch(typ(n))
@@ -619,7 +619,7 @@ boundfact(GEN n, long lim)
 GEN
 decomp_small(long n)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN F = factor(stoi(n));
   long i, l=lg(F[1]);
   GEN f=cgetg(3,t_VEC);
@@ -639,10 +639,10 @@ decomp_small(long n)
 GEN
 decomp_primary_small(long n)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN F = factor(stoi(n));
   GEN fc = cgetg(lg(F[1]), t_VECSMALL);
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long i;
   for (i = 1; i < lg(fc); i++)
     fc[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
@@ -692,7 +692,7 @@ long
 mu(GEN n)
 {
   byteptr d = diffptr+1;	/* point at 3 - 2 */
-  gpmem_t av = avma;
+  pari_sp av = avma;
   ulong p;
   long s, v, lim1;
 
@@ -735,7 +735,7 @@ long
 issquarefree(GEN x)
 {
   ulong p;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long tx, lim1;
   GEN d;
 
@@ -780,7 +780,7 @@ long
 omega(GEN n)
 {
   byteptr d=diffptr+1;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long p,nb,v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -818,7 +818,7 @@ bigomega(GEN n)
 {
   byteptr d=diffptr+1;
   ulong p;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long nb,v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -855,7 +855,7 @@ phi(GEN n)
   byteptr d = diffptr+1;
   GEN m;
   ulong p;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -899,7 +899,7 @@ numbdiv(GEN n)
   GEN m;
   long l, v, lim1;
   ulong p;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (typ(n) != t_INT) err(arither1);
   if (!signe(n)) err(arither2);
@@ -937,7 +937,7 @@ sumdiv(GEN n)
   byteptr d=diffptr+1;
   GEN m,m1;
   ulong p;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long v, lim1;
 
   if (typ(n) != t_INT) err(arither1);
@@ -980,7 +980,7 @@ sumdivk(GEN n, long k)
   byteptr d=diffptr+1;
   GEN n1,m,m1,pk;
   ulong p;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long k1,v, lim1;
 
   if (!k) return numbdiv(n);
@@ -1030,7 +1030,7 @@ sumdivk(GEN n, long k)
 GEN
 divisors(GEN n)
 {
-  gpmem_t tetpil,av=avma;
+  pari_sp tetpil,av=avma;
   long i,j,l;
   GEN *d,*t,*t1,*t2,*t3, nbdiv,e;
   
@@ -1058,7 +1058,7 @@ divisors(GEN n)
 static GEN
 _core(GEN n, int all)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i;
   GEN fa,p1,p2,c = gun;
 
@@ -1073,7 +1073,7 @@ _core(GEN n, int all)
 static GEN
 _core2(GEN n, int all)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i;
   GEN fa,p1,p2,e,c=gun,f=gun,y;
 
@@ -1105,7 +1105,7 @@ _mod4(GEN c) { long r = mod4(c); if (signe(c) < 0) r = 4-r; return r; }
 GEN
 coredisc(GEN n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN c = core(n);
   long r = _mod4(c);
   if (r==1 || r==4) return c;
@@ -1115,7 +1115,7 @@ coredisc(GEN n)
 GEN
 coredisc2(GEN n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = core2(n);
   GEN c = (GEN)y[1], f = (GEN)y[2];
   long r = _mod4(c);
@@ -1148,7 +1148,7 @@ qf_create(GEN x, GEN y, GEN z, long s)
   if (typ(x)!=t_INT || typ(y)!=t_INT || typ(z)!=t_INT) err(typeer,"Qfb");
   if (!s)
   {
-    gpmem_t av=avma; s = signe(qf_disc(x,y,z)); avma=av;
+    pari_sp av=avma; s = signe(qf_disc(x,y,z)); avma=av;
     if (!s) err(talker,"zero discriminant in Qfb");
   }
   t = (s>0)? cgetg(5,t_QFR): cgetg(4,t_QFI);
@@ -1238,7 +1238,7 @@ comp_gen(GEN z,GEN x,GEN y)
 static GEN
 compimag0(GEN x, GEN y, int raw)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long tx = typ(x);
   GEN z;
 
@@ -1252,7 +1252,7 @@ compimag0(GEN x, GEN y, int raw)
 static GEN
 compreal0(GEN x, GEN y, int raw)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long tx = typ(x);
   GEN z;
 
@@ -1284,7 +1284,7 @@ compraw(GEN x, GEN y)
 GEN
 sqcompimag0(GEN x, long raw)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z = cgetg(4,t_QFI);
 
   if (typ(x)!=t_QFI) err(typeer,"composition");
@@ -1296,7 +1296,7 @@ sqcompimag0(GEN x, long raw)
 static GEN
 sqcompreal0(GEN x, long raw)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z = cgetg(5,t_QFR);
 
   if (typ(x)!=t_QFR) err(typeer,"composition");
@@ -1321,7 +1321,7 @@ static GEN
 real_unit_form_by_disc(GEN D, long prec)
 {
   GEN y = cgetg(5,t_QFR), isqrtD;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (typ(D) != t_INT || signe(D) <= 0) err(typeer,"real_unit_form_by_disc");
   switch(mod4(D))
@@ -1341,7 +1341,7 @@ real_unit_form_by_disc(GEN D, long prec)
 GEN
 real_unit_form(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long prec;
   GEN D;
   if (typ(x) != t_QFR) err(typeer,"real_unit_form");
@@ -1369,7 +1369,7 @@ imag_unit_form_by_disc(GEN D)
   y[3] = lshifti(D,-2); setsigne(y[3],1);
   if (isodd)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     y[3] = lpileuptoint(av, addis((GEN)y[3],1));
   }
   return y;
@@ -1379,7 +1379,7 @@ GEN
 imag_unit_form(GEN x)
 {
   GEN p1,p2, y = cgetg(4,t_QFI);
-  gpmem_t av;
+  pari_sp av;
   if (typ(x) != t_QFI) err(typeer,"imag_unit_form");
   y[1] = un;
   y[2] = mpodd((GEN)x[2])? un: zero;
@@ -1392,7 +1392,7 @@ imag_unit_form(GEN x)
 GEN
 powrealraw(GEN x, long n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long m;
   GEN y;
 
@@ -1416,7 +1416,7 @@ powrealraw(GEN x, long n)
 GEN
 powimagraw(GEN x, long n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long m;
   GEN y;
 
@@ -1448,7 +1448,7 @@ powraw(GEN x, long n)
 GEN
 nucomp(GEN x, GEN y, GEN l)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   long cz;
   GEN a,a1,a2,b,b2,d,d1,e,g,n,p1,p2,p3,q1,q2,q3,q4,s,t2,t3,u,u1,v,v1,v2,v3,z;
 
@@ -1513,7 +1513,7 @@ nucomp(GEN x, GEN y, GEN l)
 GEN
 nudupl(GEN x, GEN l)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   long cz;
   GEN u,v,d,d1,p1,a,b,c,b2,z,v2,v3,t2,t3,e,g;
 
@@ -1554,7 +1554,7 @@ nudupl(GEN x, GEN l)
 GEN
 nupow(GEN x, GEN n)
 {
-  gpmem_t av,tetpil;
+  pari_sp av,tetpil;
   long i,j;
   unsigned long m;
   GEN y,l;
@@ -1755,7 +1755,7 @@ redrealform5(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
 static GEN
 redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long prec;
   GEN d0;
 
@@ -1794,7 +1794,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 GEN
 comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z = cgetg(6,t_VEC); comp_gen(z,x,y);
   if (x == y)
   {
@@ -1814,7 +1814,7 @@ comprealform5(GEN x, GEN y, GEN D, GEN sqrtD, GEN isqrtD)
 GEN
 powrealform(GEN x, GEN n)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,m;
   GEN y,D,sqrtD,isqrtD,d0;
 
@@ -1847,7 +1847,7 @@ powrealform(GEN x, GEN n)
 GEN
 redimag(GEN x)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long fl;
   do x = rhoimag0(x, &fl); while (fl == 0);
   x = gerepilecopy(av,x);
@@ -1883,7 +1883,7 @@ GEN
 qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 {
   long tx=typ(x),fl;
-  gpmem_t av;
+  pari_sp av;
 
   if (!is_qf_t(tx)) err(talker,"not a quadratic form in qfbred");
   if (!D) D = qf_disc(x,NULL,NULL);
@@ -1908,7 +1908,7 @@ qfbred0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
 GEN
 primeform(GEN x, GEN p, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   long s, sx = signe(x);
   GEN y, b, c;
 
@@ -2071,7 +2071,7 @@ bittest_many(GEN x, GEN gn, long c)
 	  two_adic = 1;			/* treat x 2-adically... */
   }
   if (n < 0) {
-      gpmem_t oa, na;
+      pari_sp oa, na;
 
       if (n + c <= 0)
 	  return gzero;
@@ -2136,7 +2136,7 @@ bittest_many(GEN x, GEN gn, long c)
   pnew = p;
   while ((pnew < p + l_res - 2) && !*pnew) /* Skip 0 words */
       pnew++;
-  avma = (gpmem_t)(pnew - 2);
+  avma = (pari_sp)(pnew - 2);
   if (pnew >= p - 2 + l_res)
       return gzero;
   l_res -= (pnew - p);
@@ -2423,7 +2423,7 @@ ibitnegimply(GEN x, GEN y)
 }
 
 static GEN
-inegate_inplace(GEN z, gpmem_t ltop)
+inegate_inplace(GEN z, pari_sp ltop)
 {
   long o;
 
@@ -2441,7 +2441,7 @@ inegate_inplace(GEN z, gpmem_t ltop)
 GEN
 gbitor(GEN x, GEN y)
 {
-  gpmem_t ltop;
+  pari_sp ltop;
   long sx,sy;
   GEN z;
 
@@ -2473,7 +2473,7 @@ gbitor(GEN x, GEN y)
 GEN
 gbitand(GEN x, GEN y)
 {
-  gpmem_t ltop;
+  pari_sp ltop;
   long sx,sy;
   GEN z;
 
@@ -2507,7 +2507,7 @@ gbitand(GEN x, GEN y)
 GEN
 gbitxor(GEN x, GEN y)
 {
-  gpmem_t ltop;
+  pari_sp ltop;
   long sx,sy;
   GEN z;
 
@@ -2540,7 +2540,7 @@ gbitxor(GEN x, GEN y)
 GEN
 gbitnegimply(GEN x, GEN y)		/* x & ~y */
 {
-  gpmem_t ltop;
+  pari_sp ltop;
   long sx,sy;
   GEN z;
 

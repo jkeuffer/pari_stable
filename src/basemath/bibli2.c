@@ -32,7 +32,7 @@ GEN
 tayl(GEN x, long v, long precS)
 {
   long i, vx = gvar9(x);
-  gpmem_t tetpil, av=avma;
+  pari_sp tetpil, av=avma;
   GEN p1,y;
 
   if (v <= vx)
@@ -92,7 +92,7 @@ GEN
 tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 {
   long k, l;
-  gpmem_t av;
+  pari_sp av;
   GEN q,a,r;
 
   if (v<0) v = 0;
@@ -134,7 +134,7 @@ GEN
 legendre(long n, long v)
 {
   long m;
-  gpmem_t av, tetpil, lim;
+  pari_sp av, tetpil, lim;
   GEN p0,p1,p2;
 
   if (v<0) v = 0;
@@ -165,7 +165,7 @@ GEN
 cyclo(long n, long v)
 {
   long d, q, m;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN yn,yd;
 
   if (n<=0) err(arither2);
@@ -285,7 +285,7 @@ GEN
 matqpascal(long n, GEN q)
 {
   long i, j, I;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN m, *qpow = NULL; /* gcc -Wall */
 
   if (n<0) n = -1;
@@ -325,7 +325,7 @@ matqpascal(long n, GEN q)
 GEN
 laplace(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,l,ec;
   GEN y,p1;
 
@@ -492,7 +492,7 @@ GEN
 binome(GEN n, long k)
 {
   long i;
-  gpmem_t av;
+  pari_sp av;
   GEN y;
 
   if (k <= 1)
@@ -538,7 +538,7 @@ vecbinome(long n)
   C[0] = gun;
   for (k=1; k <= d; k++)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     C[k] = gerepileuptoint(av, diviiexact(mulsi(n-k+1, C[k-1]), stoi(k)));
   }
   for (   ; k <= n; k++) C[k] = C[n - k];
@@ -555,7 +555,7 @@ GEN
 polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
 {
   long i, m, ns=0, tx=typ(x);
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   GEN den,ho,hp,w,y,c,d,dy;
 
   if (!xa)
@@ -638,7 +638,7 @@ gtostr(GEN x)
 GEN
 gtoset(GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,c,tx,lx;
   GEN y;
 
@@ -701,7 +701,7 @@ gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN))
 long
 setsearch(GEN x, GEN y, long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long res;
   if (typ(y) != t_STR) y = gtostr(y);
   res=gen_search(x,y,flag,gcmp);
@@ -721,7 +721,7 @@ gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN))
 GEN
 setunion(GEN x, GEN y)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN z;
 
   if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
@@ -732,7 +732,7 @@ GEN
 setintersect(GEN x, GEN y)
 {
   long i, lx, c;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN z;
 
   if (!setisset(x) || !setisset(y)) err(talker,"not a set in setintersect");
@@ -745,7 +745,7 @@ setintersect(GEN x, GEN y)
 GEN
 gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN))
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   long find;
   long i,j,k;
   GEN  diff=cgetg(lg(set1),t_VEC);
@@ -792,7 +792,7 @@ dirval(GEN x)
 GEN
 dirmul(GEN x, GEN y)
 {
-  gpmem_t av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, lim = stack_lim(av, 1);
   long lx,ly,lz,dx,dy,i,j,k;
   GEN z,p1;
 
@@ -828,7 +828,7 @@ dirmul(GEN x, GEN y)
 GEN
 dirdiv(GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long lx,ly,lz,dx,dy,i,j;
   GEN z,p1;
 
@@ -913,7 +913,7 @@ genrand(GEN N)
     if (n == 0) r = 0;
     else
     {
-      gpmem_t av = avma;
+      pari_sp av = avma;
       if (i < nz) n++; /* allow for equality if we can go down later */
       p1 = muluu(n, gp_rand()); /* < n * 2^32, so 0 <= first word < n */
       r = (lgefint(p1)<=3)? 0: p1[2]; avma = av;
@@ -926,7 +926,7 @@ genrand(GEN N)
   i -= 2; x += i; lx -= i;
   x[1] = evalsigne(lx>2) | evallgefint(lx);
   x[0] = evaltyp(t_INT) | evallg(lx);
-  avma = (gpmem_t)x; return x;
+  avma = (pari_sp)x; return x;
 }
 
 long
@@ -950,7 +950,7 @@ gettime(void) { return timer(); }
 GEN
 numtoperm(long n, GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,a,r;
   GEN v,w;
 
@@ -974,7 +974,7 @@ GEN
 permtonum(GEN x)
 {
   long lx=lg(x)-1, n=lx, last, ind, tx = typ(x);
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN ary,res;
 
   if (!is_vec_t(tx)) err(talker,"not a vector in permtonum");
@@ -1006,7 +1006,7 @@ permtonum(GEN x)
 GEN
 RX_RXQ_compo(GEN f, GEN x, GEN T)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long l;
   GEN y;
 
@@ -1039,7 +1039,7 @@ RXQ_powers(GEN a, GEN T, long l)
 GEN
 modreverse_i(GEN a, GEN T)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long n = degpol(T);
   GEN y;
 

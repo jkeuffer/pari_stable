@@ -5,7 +5,8 @@
 GEN
 matexp(GEN x,long prec)
 {
-  long lx=lg(x),i,k,n, ltop = avma;
+  pari_sp ltop = avma;
+  long lx=lg(x),i,k,n;
   GEN y,r,s,p1,p2;
 
   /*@Ccom check that x is a square matrix */

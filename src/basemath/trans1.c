@@ -42,7 +42,7 @@ constpi(long prec)
 {
   GEN p1,p2,p3,tmppi;
   long l, n, n1;
-  gpmem_t av1, av2;
+  pari_sp av1, av2;
   double alpha;
 
 #define k1  545140134
@@ -129,7 +129,7 @@ consteuler(long prec)
 {
   GEN u,v,a,b,tmpeuler;
   long l, n, k, x;
-  gpmem_t av1, av2;
+  pari_sp av1, av2;
 
   if (geuler && lg(geuler) >= prec) return;
 
@@ -186,7 +186,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 {
   GEN p1,p2,y;
   long lx, i;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   av=avma;
   switch(typ(x))
@@ -310,7 +310,7 @@ _muli(void *data /* ignored */, GEN x, GEN y) {
 static GEN
 puissii(GEN a, GEN n, long s)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN y;
 
   if (!signe(a)) return gzero; /* a==0 */
@@ -360,7 +360,7 @@ _rpowsi_sqr(void *data, GEN x)
 GEN
 rpowsi(ulong a, GEN n, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN y;
   sr_muldata D;
 
@@ -381,7 +381,7 @@ GEN
 gpowgs(GEN x, long n)
 {
   long m, tx;
-  gpmem_t lim, av;
+  pari_sp lim, av;
   static long gn[3] = {evaltyp(t_INT)|_evallg(3), 0, 0};
   GEN y;
 
@@ -467,7 +467,7 @@ GEN
 pow_monome(GEN x, GEN nn)
 {
   long n, m, i, j, dd;
-  gpmem_t tetpil, av = avma;
+  pari_sp tetpil, av = avma;
   GEN p1,y;
   if (is_bigint(nn)) err(talker,"power overflow in pow_monome");
   n = itos(nn); m = labs(n);
@@ -551,7 +551,7 @@ powgi(GEN x, GEN n)
       else
       {
         mod = mulii(mod, gpowgs(p,v));
-        mod = gerepileuptoint((gpmem_t)y, mod);
+        mod = gerepileuptoint((pari_sp)y, mod);
       }
       y[1] = evalprecp(precp(x)+v) | evalvalp(e);
       icopyifstack(p, y[2]);
@@ -565,7 +565,7 @@ powgi(GEN x, GEN n)
       if (ismonome(x)) return pow_monome(x,n);
     default:
     {
-      gpmem_t av = avma;
+      pari_sp av = avma;
       y = leftright_pow(x, n, NULL, &_sqr, &_mul);
       if (sn < 0) y = ginv(y);
       return av==avma? gcopy(y): gerepileupto(av,y);
@@ -577,7 +577,7 @@ powgi(GEN x, GEN n)
 static GEN
 ser_pui(GEN x, GEN n, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y, p1, p2, lead;
 
   if (gvar9(n) <= varn(x)) return gexp(gmul(n, glog(x,prec)), prec);
@@ -617,7 +617,7 @@ GEN
 gpow(GEN x, GEN n, long prec)
 {
   long i, lx, tx;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y;
 
   if (typ(n)==t_INT) return powgi(x,n);
@@ -683,7 +683,7 @@ gpow(GEN x, GEN n, long prec)
 GEN
 mpsqrt(GEN x)
 {
-  gpmem_t av, av0;
+  pari_sp av, av0;
   long l,l0,l1,l2,s,eps,n,i,ex;
   double beta;
   GEN y,p1,p2,p3;
@@ -744,7 +744,7 @@ sqrt_2adic(GEN x, long pp)
 {
   GEN z = mod16(x)==1? gun: stoi(3);
   long zp;
-  gpmem_t av, lim;
+  pari_sp av, lim;
 
   if (pp == 4) return z;
   zp = 3; /* number of correct bits in z (compared to sqrt(x)) */
@@ -776,7 +776,7 @@ sqrt_padic(GEN x, GEN modx, long pp, GEN p)
 {
   GEN mod, z = mpsqrtmod(x, p);
   long zp = 1;
-  gpmem_t av, lim;
+  pari_sp av, lim;
 
   if (!z) err(sqrter5);
   if (pp <= zp) return z; 
@@ -808,7 +808,7 @@ padic_sqrt(GEN x)
 {
   long pp, e = valp(x);
   GEN z,y,mod, p = (GEN)x[2];
-  gpmem_t av;
+  pari_sp av;
 
   if (gcmp0(x)) return padiczero(p, (e+1) >> 1);
   if (e & 1) err(sqrter6);
@@ -857,7 +857,7 @@ GEN
 gsqrt(GEN x, long prec)
 {
   long e;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1,p2;
 
   switch(typ(x))
@@ -939,7 +939,7 @@ void
 gsqrtz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gsqrtz");
   gaffect(gsqrt(x,prec),y); avma=av;
@@ -952,7 +952,7 @@ gsqrtz(GEN x, GEN y)
 GEN
 rootsof1complex(GEN n, long prec)
 {
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
   GEN z;
   if (is_pm1(n)) return realun(prec);
   if (lgefint(n)==3 && n[2]==2) return stor(-1, prec);
@@ -964,7 +964,7 @@ rootsof1complex(GEN n, long prec)
 GEN
 rootsof1padic(GEN n, GEN y)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN z,r;
   (void)mpsqrtnmod(gun,n,(GEN)y[2],&z);
   if (z==gzero){avma=ltop;return gzero;}/*should not happen*/
@@ -980,7 +980,7 @@ static GEN paexp(GEN x);
 GEN
 padic_sqrtn_ram(GEN x, long e)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN n,a;
   GEN p=(GEN)x[2];
   long v=0;
@@ -1010,7 +1010,7 @@ padic_sqrtn_ram(GEN x, long e)
 GEN
 padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
-  gpmem_t ltop=avma, tetpil;
+  pari_sp ltop=avma, tetpil;
   GEN a,r;
   GEN p=(GEN)x[2];
   long v=0;
@@ -1052,7 +1052,7 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 GEN
 padic_sqrtn(GEN x, GEN n, GEN *zetan)
 {
-  gpmem_t ltop=avma, tetpil;
+  pari_sp ltop=avma, tetpil;
   GEN p=(GEN)x[2];
   GEN q;
   long e;
@@ -1109,7 +1109,7 @@ GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
   long i, lx, tx;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   long e,m;
   GEN y,z;
   if (zetan) *zetan=gzero;
@@ -1212,7 +1212,7 @@ GEN
 mpexp1(GEN x)
 {
   long l, l1, l2, i, n, m, ex, s, sx = signe(x);
-  gpmem_t av, av2;
+  pari_sp av, av2;
   double a,b,alpha,beta, gama = 2.0 /* optimized for SUN3 */;
                                     /* KB: 3.0 is better for UltraSparc */
   GEN y,p1,p2,p3,p4,unr;
@@ -1280,7 +1280,7 @@ GEN
 mpexp(GEN x)
 {
   long sx = signe(x);
-  gpmem_t av;
+  pari_sp av;
   GEN y;
 
   if (!sx) return addsr(1,x);
@@ -1294,7 +1294,7 @@ static GEN
 paexp(GEN x)
 {
   long k, e = valp(x), pp = precp(x), n = e + pp;
-  gpmem_t av;
+  pari_sp av;
   GEN y,r,p1;
 
   if (gcmp0(x)) return gaddgs(x,1);
@@ -1320,7 +1320,7 @@ static GEN
 cxexp(GEN x, long prec)
 {
   GEN r,p1,p2, y = cgetg(3,t_COMPLEX);
-  gpmem_t av = avma, tetpil;
+  pari_sp av = avma, tetpil;
   r=gexp((GEN)x[1],prec);
   gsincos((GEN)x[2],&p2,&p1,prec);
   tetpil = avma;
@@ -1333,7 +1333,7 @@ cxexp(GEN x, long prec)
 static GEN
 serexp(GEN x, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,j,lx,ly,ex,mi;
   GEN p1,y,xd,yd;
  
@@ -1386,7 +1386,7 @@ void
 gexpz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gexpz");
   gaffect(gexp(x,prec),y); avma=av;
@@ -1403,7 +1403,7 @@ constlog2(long prec)
 {
   static GEN glog2 = NULL;
   const long _3 = 3, _9 = _3*_3;
-  gpmem_t av0, av;
+  pari_sp av0, av;
   long k, l, G;
   GEN s, u, S, U, tmplog2;
 
@@ -1443,7 +1443,7 @@ mplog2(long prec)
 GEN
 mplog(GEN x)
 {
-  gpmem_t ltop, av;
+  pari_sp ltop, av;
   long EX,l,l1,l2,m,n,k,ex,s;
   double alpha,a,b;
   GEN z,p1,y,y2,p4,p5,unr;
@@ -1522,7 +1522,7 @@ teich(GEN x)
 {
   GEN p,q,y,z,aux,p1;
   long n, k;
-  gpmem_t av;
+  pari_sp av;
 
   if (typ(x)!=t_PADIC) err(talker,"not a p-adic argument in teichmuller");
   if (!signe(x[4])) return gcopy(x);
@@ -1579,7 +1579,7 @@ palogaux(GEN x)
 GEN
 palog(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y, p = (GEN)x[2];
 
   if (!signe(x[4])) err(talker,"zero argument in palog");
@@ -1614,7 +1614,7 @@ log0(GEN x, long flag,long prec)
 GEN
 glog(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1,p2;
 
   switch(typ(x))
@@ -1654,7 +1654,7 @@ void
 glogz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"glogz");
   gaffect(glog(x,prec),y); avma=av;
@@ -1674,7 +1674,7 @@ mpsc1(GEN x0, long *ptmod8)
  /* on a 64-bit machine with true 128 bit/64 bit division, one could
   * take mmax=1518500248; on the alpha it does not seem worthwhile */
   long l, l0, l1, l2, l4, i, n, m, s, t;
-  gpmem_t av;
+  pari_sp av;
   double alpha,beta,a,b,c,d;
   GEN y,p1,p2,p3,x2,pitemp, x = x0;
 
@@ -1763,7 +1763,7 @@ mpsc1(GEN x0, long *ptmod8)
 static GEN
 mpaut(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1 = mulrr(x, addsr(2,x));
   setsigne(p1, -signe(p1));
   return gerepileuptoleaf(av, mpsqrt(p1));
@@ -1777,7 +1777,7 @@ static GEN
 mpcos(GEN x)
 {
   long mod8;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   if (typ(x)!=t_REAL) err(typeer,"mpcos");
@@ -1801,7 +1801,7 @@ mpcos(GEN x)
 GEN
 gcos(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN r,u,v,y,p1,p2;
 
   switch(typ(x))
@@ -1837,7 +1837,7 @@ void
 gcosz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (!prec) err(infprecer,"gcosz");
   gaffect(gcos(x,prec),y); avma=av;
@@ -1851,7 +1851,7 @@ GEN
 mpsin(GEN x)
 {
   long mod8;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   if (typ(x)!=t_REAL) err(typeer,"mpsin");
@@ -1875,7 +1875,7 @@ mpsin(GEN x)
 GEN
 gsin(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN r,u,v,y,p1,p2;
 
   switch(typ(x))
@@ -1912,7 +1912,7 @@ void
 gsinz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gsinz");
   gaffect(gsin(x,prec),y); avma=av;
@@ -1926,7 +1926,7 @@ void
 mpsincos(GEN x, GEN *s, GEN *c)
 {
   long mod8;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN p1, *gptr[2];
 
   if (typ(x)!=t_REAL) err(typeer,"mpsincos");
@@ -1956,7 +1956,7 @@ mpsincos(GEN x, GEN *s, GEN *c)
 GEN
 exp_Ir(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN v = cgetg(3,t_COMPLEX);
   mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
   if (!signe(x)) return gerepilecopy(av, (GEN)v[1]);
@@ -1967,7 +1967,7 @@ void
 gsincos(GEN x, GEN *s, GEN *c, long prec)
 {
   long ii, i, j, ex, ex2, lx, ly, mi;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN r,u,v,u1,v1,p1,p2,p3,p4,ps,pc;
   GEN *gptr[4];
 
@@ -2075,7 +2075,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 static GEN
 mptan(GEN x)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN s,c;
 
   mpsincos(x,&s,&c); tetpil=avma;
@@ -2085,7 +2085,7 @@ mptan(GEN x)
 GEN
 gtan(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN s,c;
 
   switch(typ(x))
@@ -2110,7 +2110,7 @@ void
 gtanz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gtanz");
   gaffect(gtan(x,prec),y); avma=av;
@@ -2119,7 +2119,7 @@ gtanz(GEN x, GEN y)
 static GEN
 mpcotan(GEN x)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN s,c;
 
   mpsincos(x,&s,&c); tetpil=avma;
@@ -2129,7 +2129,7 @@ mpcotan(GEN x)
 GEN
 gcotan(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN s,c;
 
   switch(typ(x))
@@ -2154,7 +2154,7 @@ void
 gcotanz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gcotanz");
   gaffect(gcotan(x,prec),y); avma=av;

@@ -84,7 +84,7 @@ unifpol0(GEN nf,GEN pol,long flag)
   static GEN vun = NULL;
   GEN f = (GEN) nf[1];
   long i = degpol(f);
-  gpmem_t av;
+  pari_sp av;
 
   if (i != n)
   {
@@ -155,7 +155,7 @@ GEN
 nffactormod(GEN nf, GEN x, GEN pr)
 {
   long j, l, vx = varn(x), vn;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z, rep, xrd, modpr, T, p;
 
   nf = checknf(nf);
@@ -179,7 +179,7 @@ choose_prime(GEN nf, GEN bad, GEN *p, byteptr *PT)
   GEN  q = icopy(gun), r, x = (GEN)nf[1];
   ulong pp = *p? itou(*p): 0;
   byteptr pt = *PT;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   for (;;)
   {
     NEXT_PRIME_VIADIFF_CHECK(pp, pt);
@@ -211,7 +211,7 @@ QXQ_normalize(GEN P, GEN T)
 GEN
 nfroots(GEN nf,GEN pol)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   int d = degpol(pol);
   GEN A,g, T;
 
@@ -244,7 +244,7 @@ nfroots(GEN nf,GEN pol)
 int
 nfissplit(GEN nf, GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long l = lg(nfsqff(checknf(nf), x, 2));
   avma = av; return l != 1;
 }
@@ -310,7 +310,7 @@ nffactor(GEN nf,GEN pol)
 {
   GEN A,g,y,p1,rep,T;
   long l, j, d = degpol(pol);
-  gpmem_t av;
+  pari_sp av;
   if (DEBUGLEVEL>3) (void)timer2();
 
   nf = checknf(nf); T = (GEN)nf[1];
@@ -340,7 +340,7 @@ nffactor(GEN nf,GEN pol)
 
   if (degpol(g))
   { /* not squarefree */
-    gpmem_t av1;
+    pari_sp av1;
     GEN ex;
     g = QXQ_normalize(g, T);
     A = RXQX_div(A,g, T);
@@ -489,7 +489,7 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
 static GEN
 nf_factor_bound(GEN nf, GEN polbase)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN a = nf_Mignotte_bound(nf, polbase);
   GEN b = nf_Beauzamy_bound(nf, polbase);
   if (DEBUGLEVEL>2)
@@ -819,7 +819,7 @@ nextK:
     if (curdeg <= klim && curdeg % T->hint == 0) /* trial divide */
     {
       GEN t, y, q, list;
-      gpmem_t av;
+      pari_sp av;
 
       av = avma;
       /* d - 1 test */
@@ -1024,7 +1024,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
 {
   const int D = 4;
   const double alpha = ((double)D-1) / D; /* LLL parameter */
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN prk, PRK, B, GSmin, pk;
 
   if (!a) a = (long)bestlift_bound(C, degpol(nf[1]), alpha, idealnorm(nf,pr));
@@ -1066,7 +1066,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   long i, C, tmax, n0;
   GEN lP, Bnorm, Tra, T2, TT, CM_L, m, list, ZERO;
   double Blow;
-  gpmem_t av, av2, lim;
+  pari_sp av, av2, lim;
   long ti_LLL = 0, ti_CF = 0;
   pari_timer ti, ti2, TI;
 
@@ -1258,7 +1258,7 @@ static GEN
 nfsqff(GEN nf, GEN pol, long fl)
 {
   long i, m, n, nbf, ct, dpol = degpol(pol);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN pr, C0, C, dk, bad, polbase, pk;
   GEN N2, rep, p, ap, polmod, polred, lt, nfpol;
   byteptr pt=diffptr;
@@ -1394,7 +1394,7 @@ GEN
 rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 {
   long vnf, vT, lT;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1;
 
   nf=checknf(nf); vnf = varn(nf[1]);

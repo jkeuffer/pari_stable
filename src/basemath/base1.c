@@ -268,7 +268,7 @@ transroot(GEN x, int i, int j)
 GEN
 tschirnhaus(GEN x)
 {
-  gpmem_t av = avma, av2;
+  pari_sp av = avma, av2;
   long a, v = varn(x);
   GEN u, p1 = cgetg(5,t_POL);
 
@@ -387,7 +387,7 @@ _res(long n, long s, long k)
 GEN
 galois(GEN x, long prec)
 {
-  gpmem_t av = avma, av1;
+  pari_sp av = avma, av1;
   long i,j,k,n,f,l,l2,e,e1,pr,ind;
   GEN x1,p1,p2,p3,p4,p5,w,z,ee;
   static int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
@@ -634,7 +634,7 @@ galois(GEN x, long prec)
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
 {
-  gpmem_t av=avma,tetpil;
+  pari_sp av=avma,tetpil;
   long lx,j,N;
   GEN p,p1,y,pol;
 
@@ -718,7 +718,7 @@ get_nfpol(GEN x, GEN *nf)
 static GEN
 nfiso0(GEN a, GEN b, long fliso)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long n,m,i,vb,lx;
   GEN nfa,nfb,p1,y,la,lb;
 
@@ -838,7 +838,7 @@ quicktrace(GEN x, GEN sym)
 static GEN
 trace_col(GEN x, GEN T)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN t = gzero;
   long i, l = lg(x);
 
@@ -969,7 +969,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
   for (i=1; i<=n; i++)
     for (j=i; j<=n; j++)
     {
-      gpmem_t av = avma;
+      pari_sp av = avma;
       z = gres(gmul((GEN)bas[j],(GEN)bas[i]), x);
       z = mulmat_pol(invbas, z); /* integral column */
       if (den)
@@ -991,7 +991,7 @@ make_Tr(GEN x, GEN w)
   GEN sym = cgetg(n+2,t_VEC);
   GEN den = cgetg(n+1,t_VEC);
   GEN T = cgetg(n+1,t_MAT);
-  gpmem_t av;
+  pari_sp av;
 
   sym = polsym(x, n-1);
   p1 = get_bas_den(w);
@@ -1230,7 +1230,7 @@ GEN
 nffromhnfbasis(GEN nf, GEN x)
 {
   long tx = typ(x);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN u;
   if (!is_vec_t(tx)) return gcopy(x);
   nf = checknf(nf);
@@ -1242,7 +1242,7 @@ GEN
 nftohnfbasis(GEN nf, GEN x)
 {
   long tx = typ(x);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN u;
   if (!is_vec_t(tx)) return gcopy(x);
   nf = checknf(nf);
@@ -1254,7 +1254,7 @@ static GEN
 get_red_G(nfbasic_t *T, GEN *pro)
 {
   GEN G, u, u0 = NULL;
-  gpmem_t av;
+  pari_sp av;
   long i, prec, extraprec, n = degpol(T->x);
   nffp_t F;
 
@@ -1406,7 +1406,7 @@ nfpolred(int part, nfbasic_t *T)
 GEN
 get_nfindex(GEN bas)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long n = lg(bas)-1;
   GEN d, mat = vecpol_to_mat(Q_remove_denom(bas, &d), n);
   if (!d) { avma = av; return gun; }
@@ -1471,7 +1471,7 @@ nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T)
 GEN
 _initalg(GEN x, long flag, long prec)
 {
-  const gpmem_t av = avma;
+  const pari_sp av = avma;
   GEN nf, rev = NULL, ro = NULL;
   nfbasic_t T;
 
@@ -1543,7 +1543,7 @@ nfgetprec(GEN x)
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN NF;
   nffp_t F;
 
@@ -1570,7 +1570,7 @@ static void
 remove_duplicates(GEN y, GEN a)
 {
   long k, i, l = lg(y);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z;
 
   if (l < 2) return;
@@ -1636,7 +1636,7 @@ allpolred(GEN x, long flag, GEN fa, GEN *pta, FP_chk_fun *CHECK)
 GEN
 polred0(GEN x, long flag, GEN fa)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y, a;
   int fl = 0;
 
@@ -1655,7 +1655,7 @@ polred0(GEN x, long flag, GEN fa)
 GEN
 ordred(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y;
 
   if (typ(x) != t_POL) err(typeer,"ordred");
@@ -1743,7 +1743,7 @@ get_polmin(CG_data *d, GEN x)
 static GEN
 chk_gen(void *data, GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN g = get_polchar((CG_data*)data,x);
   GEN h = modulargcd(g,derivpol(g));
   if (degpol(h)) { avma = av; return NULL; }
@@ -1937,7 +1937,7 @@ GEN
 polredabs0(GEN x, long flag)
 {
   long i, l, vx;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y, a, u;
   nfbasic_t T;
 
@@ -2032,7 +2032,7 @@ trivroots(GEN nf)
 GEN
 rootsof1(GEN nf)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long N,k,i,ws,prec;
   GEN p1,y,d,list,w;
 
@@ -2079,7 +2079,7 @@ static GEN
 dirzetak0(GEN nf, long N0)
 {
   GEN vect,p1,pol,disc,c,c2;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   long i,j,k,limk,lx;
   ulong q,p,rem;
   byteptr d=diffptr;
@@ -2150,7 +2150,7 @@ initzeta(GEN pol, long prec)
   GEN limx,bnf,resi,zet,C,coeflog,racpi,aij,tabj,colzero, *tabcstn, *tabcstni;
   GEN c_even,ck_even,c_odd,ck_odd,serie_even,serie_odd,serie_exp,Pi;
   long N0,imin,imax,r1,r2,ru,R,N,i,j,k,n;
-  gpmem_t av,av2,tetpil;
+  pari_sp av,av2,tetpil;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
   stackzone *zone, *zone0, *zone1;
 
@@ -2312,7 +2312,7 @@ initzeta(GEN pol, long prec)
       t[1] = lstoi(coef[i]); t[2] = lmul((GEN)t[1],p1);
       for (j=2; j<=ru; j++)
       {
-        gpmem_t av2 = avma;
+        pari_sp av2 = avma;
         p2 = gmul((GEN)t[j], p1);
         t[j+1] = (long)gerepileuptoleaf(av2, divrs(p2,j));
       }
@@ -2382,7 +2382,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   GEN lambd,gammas,gammaunmoins,gammas2,gammaunmoins2,var1,var2;
   GEN p1,unmoins,gexpro,gar,val,valm,valk,valkm;
   long ts = typ(s), r1,r2,ru,imax,i,j,k,N0,sl,prec,bigprec;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (typ(nfz)!=t_VEC || lg(nfz)!=10 || typ(nfz[1]) != t_VEC)
     err(talker,"not a zeta number field in zetakall");

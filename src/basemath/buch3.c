@@ -66,7 +66,7 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
     limr = (limr-1)>>1;
     for (k=rr;  k<=limr; k++)
     {
-      gpmem_t av1=avma;
+      pari_sp av1=avma;
       alpha = gzero;
       for (kk=k,i=1; i<=N; i++,kk/=rr)
       {
@@ -95,7 +95,7 @@ buchnarrow(GEN bnf)
   GEN nf,_0,_1,cyc,gen,v,matsign,arch,cycgen,logs;
   GEN dataunit,p1,p2,h,basecl,met,u1;
   long r1,R,i,j,ngen,sizeh,t,lo,c;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   bnf = checkbnf(bnf);
   nf = checknf(bnf); r1 = nf_get_r1(nf);
@@ -245,7 +245,7 @@ too_big(GEN nf, GEN bet)
 static GEN
 _idealmodidele(GEN nf, GEN x, GEN idele, GEN sarch)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN a,A,D,G, f = (GEN)idele[1];
 
   G = redideal(nf, x, f);
@@ -422,7 +422,7 @@ buchrayall(GEN bnf,GEN module,long flag)
   long RU, Ri, j, ngen, lh;
   const int add_gen = flag & nf_GEN;
   const int do_init = flag & nf_INIT;
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   bnf = checkbnf(bnf); nf = checknf(bnf);
   funits = check_units(bnf, "buchrayall"); RU = lg(funits);
@@ -573,7 +573,7 @@ rayclassno(GEN bnf,GEN ideal)
 {
   GEN nf,h,dataunit,racunit,bigres,bid,cycbid,funits,H;
   long RU,i;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   bigres = (GEN)bnf[8]; h = gmael(bigres,1,1); /* class number */
@@ -607,7 +607,7 @@ GEN
 isprincipalrayall(GEN bnr, GEN x, long flag)
 {
   long i, j, c;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN bnf,nf,bid,matu,vecel,ep,p1,beta,idep,ex,rayclass;
   GEN divray,genray,alpha,alphaall,racunit,res,funit;
 
@@ -685,7 +685,7 @@ isprincipalraygen(GEN bnr, GEN x)
 GEN
 minkowski_bound(GEN D, long N, long r2, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1;
   p1 = gdiv(mpfactr(N,prec), gpowgs(stoi(N),N));
   p1 = gmul(p1, gpowgs(gdivsg(4,mppi(prec)), r2));
@@ -697,7 +697,7 @@ minkowski_bound(GEN D, long N, long r2, long prec)
 static long
 zimmertbound(long N,long R2,GEN DK)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN w;
 
   if (N < 2) return 1;
@@ -755,7 +755,7 @@ static GEN
 hermiteconstant(long n)
 {
   GEN h,h1;
-  gpmem_t av;
+  pari_sp av;
 
   switch(n)
   {
@@ -853,7 +853,7 @@ norm_by_embed(long r1, GEN x)
 static int
 is_unit(GEN M, long r1, GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN Nx = ground( norm_by_embed(r1, gmul_mat_smallvec(M,x)) );
   int ok = is_pm1(Nx);
   avma = av; return ok;
@@ -865,7 +865,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
 {
   const long prec = MEDDEFAULTPREC;
   long n, i, j, k, s, *x, r1, cnt = 0;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN u,r,a,M;
   double p, norme, normin, normax;
   double **q,*v,*y,*z;
@@ -965,7 +965,7 @@ compute_M0(GEN M_star,long N)
     m2 = (N-n1)>>1;
     for (n2=n1; n2<=m2; n2++)
     {
-      gpmem_t av = avma; n3=N-n1-n2; prec=PREC;
+      pari_sp av = avma; n3=N-n1-n2; prec=PREC;
       if (n1==n2 && n1==n3) /* n1 = n2 = n3 = m1 = N/3 */
       {
 	p1=gdivgs(M_star,m1);
@@ -1138,7 +1138,7 @@ lowerboundforregulator_i(GEN bnf)
 static GEN
 lowerboundforregulator(GEN bnf)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN x = lowerboundforregulator_i(bnf);
   if (!x) { avma = av; x = regulatorbound(bnf); }
   return x;
@@ -1199,7 +1199,7 @@ primecertify(GEN bnf,GEN beta,long pp,GEN big)
 static void
 check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN big)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,b, lc = lg(cyc), w = itos((GEN)mu[1]), lf = lg(fu);
   GEN beta = cgetg(lf+lc, t_VEC);
 
@@ -1224,7 +1224,7 @@ check_prime(long p, GEN bnf, GEN cyc, GEN cycgen, GEN fu, GEN mu, GEN big)
 long
 certifybuchall(GEN bnf)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long nbgen,i,j,p,N,R1,R2,R,bound;
   GEN big,nf,reg,rootsofone,funits,gen,p1,gbound,cycgen,cyc;
   byteptr delta = diffptr;
@@ -1315,7 +1315,7 @@ imageofgroup0(GEN gen,GEN bnr,GEN H)
 static GEN
 imageofgroup(GEN gen,GEN bnr,GEN H)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepileupto(av,imageofgroup0(gen,bnr,H));
 }
 
@@ -1405,7 +1405,7 @@ getgen(GEN bnf, GEN gen)
 GEN
 conductor(GEN bnr, GEN H, long all)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long r1,j,k,ep;
   GEN bnf,nf,gen,bid,ideal,arch,p1,clhray,clhss,fa,arch2,bnr2,P,ex,mod;
 
@@ -1472,7 +1472,7 @@ GEN
 rnfnormgroup(GEN bnr, GEN polrel)
 {
   long i, j, reldeg, sizemat, p, nfac, k;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnf,index,discnf,nf,raycl,group,detgroup,fa,greldeg;
   GEN famo,ep,fac,col;
   byteptr d = diffptr;
@@ -1591,7 +1591,7 @@ GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   long R1, i;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN nf,module,arch,bnr,group,p1,pol2;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1619,7 +1619,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
 static GEN
 discrayrelall(GEN bnr, GEN H, long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long r1,j,k,ep, nz, flrel = flag & nf_REL, flcond = flag & nf_COND;
   GEN bnf,nf,gen,bid,ideal,arch,p1,clhray,clhss,fa,arch2,idealrel,P,ex,mod,dlk;
 
@@ -1688,7 +1688,7 @@ discrayrelall(GEN bnr, GEN H, long flag)
 static GEN
 discrayabsall(GEN bnr, GEN subgroup,long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long degk,clhray,n,R1;
   GEN z,p1,D,dk,nf,dkabs,bnf;
 
@@ -1747,7 +1747,7 @@ discrayabscond(GEN bnr, GEN H)
 GEN
 bnrconductorofchar(GEN bnr, GEN chi)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long nbgen,i;
   GEN m,U,d1,cyc;
 
@@ -1775,7 +1775,7 @@ bnrconductorofchar(GEN bnr, GEN chi)
 GEN
 rayclassnolist(GEN bnf,GEN lists)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,j,lx,ly;
   GEN blist,ulist,Llist,h,b,u,L,m;
 
@@ -1889,7 +1889,7 @@ factorpow(GEN fa,long n)
 GEN
 discrayabslist(GEN bnf,GEN lists)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long ii,jj,i,j,k,clhss,ep,clhray,lx,ly,r1,degk,nz;
   long n,R1,lP;
   GEN hlist,blist,dlist,nf,dkabs,b,h,d;
@@ -2031,7 +2031,7 @@ static GEN
 zsimpjoin(GEN bidsimp, GEN bidp, GEN dummyfa, GEN matunit)
 {
   long i, l1, l2, nbgen, c;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN U,U1,U2,cyc1,cyc2,cyc,u1u2,met, y = cgetg(5,t_VEC);
 
   y[1] = (long)vconcat((GEN)bidsimp[1],dummyfa);
@@ -2127,7 +2127,7 @@ GEN
 decodemodule(GEN nf, GEN fa)
 {
   long n, k, j, fauxpr;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN g,e,id,pr;
 
   nf = checknf(nf);
@@ -2172,7 +2172,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
   long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
   ulong q;
-  gpmem_t av0 = avma, av, av1, lim;
+  pari_sp av0 = avma, av, av1, lim;
   GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
   GEN funits,racunit,embunit,sous,clh,sousray,raylist;
   GEN clhrayall,discall,faall,Id,idealrel,idealrelinit;
@@ -2523,7 +2523,7 @@ static GEN
 bnrGetKer(GEN bnr, GEN mod2)
 {
   long i, n;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN P,U, bnr2 = buchrayall(bnr,mod2,nf_INIT);
 
   P = bnrGetSurj(bnr, bnr2); n = lg(P);
@@ -2537,7 +2537,7 @@ bnrGetKer(GEN bnr, GEN mod2)
 static GEN
 subgroupcond(GEN bnr, GEN indexbound)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,j,lgi,lp;
   GEN li,p1,lidet,perm,nf,bid,ideal,arch,arch2,primelist,listKer;
   GEN mod = cgetg(3, t_VEC);

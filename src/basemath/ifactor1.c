@@ -54,7 +54,7 @@ static int
 bad_for_base(GEN n, GEN a)
 {
   long r;
-  gpmem_t av=avma, lim=stack_lim(av, 1);
+  pari_sp av=avma, lim=stack_lim(av, 1);
   GEN c2, c = powmodulo(a,t1,n);
 
   if (!is_pm1(c) && !egalii(t,c)) /* go fishing for -1, not for 1 */
@@ -87,7 +87,7 @@ long
 millerrabin(GEN n, long k)
 {
   long r, i;
-  gpmem_t av2, av = avma;
+  pari_sp av2, av = avma;
 
   if (!signe(n)) return 0;
   /* If |n| <= 3, check if n = +- 1 */
@@ -144,7 +144,7 @@ int				/* no longer static -- needed in mpqs.c */
 miller(GEN n, long k)
 {
   long r, i;
-  gpmem_t av2, av = avma;
+  pari_sp av2, av = avma;
   static long pr[] =
     { 0, 2,3,5,7,11,13,17,19,23,29, 31,73, 2,13,23,1662803UL, };
   long *p;
@@ -179,7 +179,7 @@ miller(GEN n, long k)
 static GEN
 LucasMod(GEN n, long P, GEN N)
 {
-  gpmem_t av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, lim = stack_lim(av, 1);
   GEN nd = n+2;
   long i, m = *nd, j = 1+bfffo((ulong)m);
   GEN v = stoi(P), v1 = stoi(P*P - 2);
@@ -245,7 +245,7 @@ IsLucasPsP0(GEN N)
 long
 BSW_psp(GEN N)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   int k;
   GEN T;
 
@@ -277,7 +277,7 @@ BSW_psp(GEN N)
 /*assume n>=2*/
 static long pl831(GEN N, GEN p)
 {
-  gpmem_t ltop=avma, av;
+  pari_sp ltop=avma, av;
   long a;
   GEN Nmun,Nmunp;
   Nmun=addis(N,-1);
@@ -311,7 +311,7 @@ static long pl831(GEN N, GEN p)
 GEN
 plisprime(GEN N, long flag)
 {
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
   long i, l, t = typ(N);
   int eps;
   GEN C, F = NULL;
@@ -412,7 +412,7 @@ GEN
 nextprime(GEN n)
 {
   long rc, rc0, rcd, rcn;
-  gpmem_t av1, av2, av = avma;
+  pari_sp av1, av2, av = avma;
 
   if (typ(n) != t_INT) n=gceil(n); /* accept arguments in R --GN */
   if (typ(n) != t_INT) err(arither1);
@@ -454,7 +454,7 @@ GEN
 precprime(GEN n)
 {
   long rc, rc0, rcd, rcn;
-  gpmem_t av1, av2, av = avma;
+  pari_sp av1, av2, av = avma;
 
   if (typ(n) != t_INT) n=gfloor(n); /* accept arguments in R --GN */
   if (typ(n) != t_INT) err(arither1);
@@ -650,7 +650,7 @@ elladd0(long nbc, long nbc1,
   GEN lambda;
   GEN W[2*nbcmax], *A=W+nbc;	/* W[0],A[0] never used */
   long i;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   ulong mask = ~0UL;
 
   /* actually, this is only ever called with nbc1==nbc or nbc1==4, so: */
@@ -722,7 +722,7 @@ elladd2(long nbc, GEN *X1, GEN *X2, GEN *X3, GEN *X4, GEN *X5, GEN *X6)
   GEN *Y4 = X4+nbc, *Y5 = X5+nbc, *Y6 = X6+nbc;
   GEN W[4*nbcmax], *A=W+2*nbc;	/* W[0],A[0] never used */
   long i, j;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   /* W[0] = gun; */
   W[1] = /* A[0] =*/ subii(X1[0], X2[0]);
   for (i=1; i<nbc; i++)
@@ -795,7 +795,7 @@ elldouble(long nbc, GEN *X1, GEN *X2)
   GEN lambda,v, *Y1 = X1+nbc, *Y2 = X2+nbc;
   GEN W[nbcmax+1];		/* W[0] never used */
   long i;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   /*W[0] = gun;*/ W[1] = Y1[0];
   for (i=1; i<nbc; i++)
     W[i+1] = modii(mulii(Y1[i], W[i]), N);
@@ -847,7 +847,7 @@ static int
 ellmult(long nbc, ulong k, GEN *X1, GEN *X2) /* k>2 prime, not checked */
 {
   long i, d, e, e1, r;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   int res;
   GEN *A=X2, *B=XAUX, *S, *T=XAUX+2*nbc;
 
@@ -1151,7 +1151,7 @@ ellfacteur(GEN n, int insist)
     };
   long nbc,nbc2,dsn,dsnmax,rep,spc,gse,gss,rcn,rcn0,bstp,bstp0;
   long a, i, j, k, size = expi(n) + 1, tf = lgefint(n);
-  gpmem_t av, av1, avtmp;
+  pari_sp av, av1, avtmp;
   ulong B1,B2,B2_p,B2_rt,m,p,p0,p2,dp;
   GEN w,w0,x,*X,*XT,*XD,*XG,*YG,*XH,*XB,*XB2,*Xh,*Yh,*Xb, res = cgeti(tf);
   int rflag, use_clones = 0;
@@ -1538,7 +1538,7 @@ ellfacteur(GEN n, int insist)
       gl = gun;
       av1 = avma;
       /* scratchspace for prod (x_i-x_j) */
-      avtmp = (gpmem_t)new_chunk(8 * lgefint(n));
+      avtmp = (pari_sp)new_chunk(8 * lgefint(n));
       /* the correct entry in XB to use depends on bstp and on where we are
        * on the helix.  As we skip from prime to prime, bstp will be incre-
        * mented by snextpr() each time we wrap around through residue class
@@ -1688,7 +1688,7 @@ pollardbrent(GEN n)
 {
   long tf = lgefint(n), size = 0, delta, retries = 0, msg_mask;
   long c0, c, k, k1, l;
-  gpmem_t GGG, avP, avx, av = avma;
+  pari_sp GGG, avP, avx, av = avma;
   GEN x, x1, y, P, g, g1, res;
 
   if (DEBUGLEVEL >= 4) (void)timer2(); /* clear timer */
@@ -1760,8 +1760,8 @@ PB_RETRY:
   y = cgeti(tf); affsi(2, y);
   x1= cgeti(tf); affsi(2, x1);
   avx = avma;
-  avP = (gpmem_t)new_chunk(2 * tf); /* enough for x = addsi(tf+1) */
-  GGG = (gpmem_t)new_chunk(4 * tf); /* enough for P = modii(2tf+1, tf) */
+  avP = (pari_sp)new_chunk(2 * tf); /* enough for x = addsi(tf+1) */
+  GGG = (pari_sp)new_chunk(4 * tf); /* enough for P = modii(2tf+1, tf) */
 
   for (;;)			/* terminated under the control of c */
   {
@@ -1950,7 +1950,7 @@ squfof(GEN n, long quiet)
   long tf = lgefint(n), nm4, cnt = 0, cntamb;
   long a1, b1, c1, d1, dd1, L1, a2, b2, c2, d2, dd2, L2, a, q, c, qc, qcb;
   GEN D1, D2, Q, res;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   static long blacklist1[SQUFOF_BLACKLIST_SZ], blacklist2[SQUFOF_BLACKLIST_SZ];
   long blp1 = 0, blp2 = 0;
   long mydebug = DEBUGLEVEL - quiet;
@@ -2402,7 +2402,7 @@ long
 squfof_ambig(long a, long B, long dd, GEN D, long *cntamb)
 {
   long b, c, q, qc, qcb;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long a0, b0, b1, c0;
 
   q = (dd + (B>>1)) / a; qc = q*a; qcb = qc - B;
@@ -2605,7 +2605,7 @@ long				/* no longer static -- used in mpqs.c */
 is_odd_power(GEN x, GEN *pt, long *mask)
 {
   long lgx=lgefint(x), exponent=0, residue, resbyte;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN y;
 
   *mask &= 7;			/* paranoia */
@@ -3551,7 +3551,7 @@ static long
 ifac_crack(GEN *partial, GEN *where)
 {
   long hint, cmp_res, exp1 = 1, exp2 = 1;
-  gpmem_t av;
+  pari_sp av;
   GEN factor = NULL, exponent;
 
   if (DEBUGLEVEL >= 5)		/* none of these should ever happen */
@@ -4080,11 +4080,11 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
 		  GEN state, long hint)
 {
   long tf=lgefint(n);
-  gpmem_t av=avma, lim=stack_lim(av, 1);
+  pari_sp av=avma, lim=stack_lim(av, 1);
   long nb=0;
   GEN part, here, workspc = new_chunk(tf + ifac_overshoot), pairs = (GEN)av;
   /* workspc will be doled out by us in pairs of smaller t_INTs */
-  gpmem_t tetpil = avma;		/* remember head of workspc zone */;
+  pari_sp tetpil = avma;		/* remember head of workspc zone */;
 
   if (!n || typ(n) != t_INT) err(typeer, "ifac_decomp");
   if (!signe(n) || tf < 3) err(talker, "factoring 0 in ifac_decomp");
@@ -4108,7 +4108,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
       workspc = new_chunk(lf + 3 + ifac_overshoot);
       ifac_realloc(&part, &here, 0);
       here = ifac_find(&part, &part);
-      tetpil = (gpmem_t)workspc;
+      tetpil = (pari_sp)workspc;
     }
     /* room enough now */
     nb++;
@@ -4133,7 +4133,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
       part = gerepileupto(tetpil, part);
     }
   }
-  avma = (gpmem_t)pairs;
+  avma = (pari_sp)pairs;
   if (DEBUGLEVEL >= 3)
   {
     fprintferr("IFAC: found %ld large prime (power) factor%s.\n",
@@ -4153,7 +4153,7 @@ long
 ifac_moebius(GEN n, long hint)
 {
   long mu=1;
-  gpmem_t av=avma, lim=stack_lim(av, 1);
+  pari_sp av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 1, hint);
   GEN here = ifac_main(&part);
 
@@ -4178,7 +4178,7 @@ ifac_moebius(GEN n, long hint)
 long
 ifac_issquarefree(GEN n, long hint)
 {
-  gpmem_t av=avma, lim=stack_lim(av, 1);
+  pari_sp av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 1, hint);
   GEN here = ifac_main(&part);
 
@@ -4203,7 +4203,7 @@ long
 ifac_omega(GEN n, long hint)
 {
   long omega=0;
-  gpmem_t av=avma, lim=stack_lim(av, 1);
+  pari_sp av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
@@ -4227,7 +4227,7 @@ long
 ifac_bigomega(GEN n, long hint)
 {
   long Omega=0;
-  gpmem_t av=avma, lim=stack_lim(av, 1);
+  pari_sp av=avma, lim=stack_lim(av, 1);
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
 
@@ -4252,7 +4252,7 @@ ifac_totient(GEN n, long hint)
 {
   GEN res = cgeti(lgefint(n));
   long exponent;
-  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
+  pari_sp av=avma, tetpil, lim=stack_lim(av, 1);
   GEN phi = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
@@ -4302,7 +4302,7 @@ ifac_numdiv(GEN n, long hint)
    * size here
    */
   GEN res;
-  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
+  pari_sp av=avma, tetpil, lim=stack_lim(av, 1);
   GEN exponent, tau = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
@@ -4337,7 +4337,7 @@ ifac_sumdiv(GEN n, long hint)
   /* don't preallocate */
   GEN res;
   long exponent;
-  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
+  pari_sp av=avma, tetpil, lim=stack_lim(av, 1);
   GEN contrib, sigma = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);
@@ -4378,7 +4378,7 @@ ifac_sumdivk(GEN n, long k, long hint)
   /* don't preallocate */
   GEN res;
   long exponent;
-  gpmem_t av=avma, tetpil, lim=stack_lim(av, 1);
+  pari_sp av=avma, tetpil, lim=stack_lim(av, 1);
   GEN contrib, q, sigma = gun;
   GEN part = ifac_start(n, 0, hint);
   GEN here = ifac_main(&part);

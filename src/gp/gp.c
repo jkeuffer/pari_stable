@@ -167,8 +167,8 @@ gp_preinit(void)
   bufstack = NULL;
 
   primelimit = 500000;
-  bot = (gpmem_t)0;
-  top = (gpmem_t)(1000000*sizeof(long));
+  bot = (pari_sp)0;
+  top = (pari_sp)(1000000*sizeof(long));
   strcpy(prompt,      DFT_PROMPT);
   strcpy(prompt_cont, CONTPROMPT);
 
@@ -754,7 +754,7 @@ sd_parisize(char *v, int flag)
   GEN r = sd_ulong(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
   if (n != (ulong)top-bot)
   {
-    if (!bot) top = (gpmem_t)n; /* no stack allocated yet */
+    if (!bot) top = (pari_sp)n; /* no stack allocated yet */
     if (flag != d_INITRC) allocatemem0(n);
   }
   return r;
@@ -2499,7 +2499,7 @@ gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
   VOLATILE GEN z = gnil;
-  VOLATILE gpmem_t av = avma;
+  VOLATILE pari_sp av = avma;
   Buffer *b = new_buffer();
   filtre_t F;
 

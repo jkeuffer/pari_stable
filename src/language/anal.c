@@ -362,7 +362,7 @@ set_analyseur(char *s)
 static GEN
 lisseq0(char *t, GEN (*f)(void))
 {
-  const gpmem_t av = avma;
+  const pari_sp av = avma;
   char *olds = analyseur, *olde = mark.start;
   GEN res;
 
@@ -641,7 +641,7 @@ kill0(entree *ep)
 static GEN
 seq(void)
 {
-  const gpmem_t av = avma, lim = stack_lim(av,1);
+  const pari_sp av = avma, lim = stack_lim(av,1);
   GEN res = gnil;
 
   for(;;)
@@ -671,7 +671,7 @@ gshift_r(GEN x, GEN n) { return gshift(x,-itos(n)); }
 static GEN
 expr(void)
 {
-  gpmem_t av = avma, lim = stack_lim(av, 2);
+  pari_sp av = avma, lim = stack_lim(av, 2);
   GEN aux,e,e1,e2,e3;
   F2GEN F1,F2,F3;
   int F0 = 0;
@@ -813,7 +813,7 @@ err_match(char *s, char c)
 static long
 readlong()
 {
-  const gpmem_t av = avma;
+  const pari_sp av = avma;
   const char *old = analyseur;
   long m;
   GEN arg = expr();
@@ -1303,7 +1303,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
 
   if (alloc)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     GEN p1 = expr();
     if (br_status) err(breaker,"here (expanding string)");
     tmp = GENtostr0(p1, &DFLT_OUTPUT, &gen_output);
@@ -1572,7 +1572,7 @@ check_args()
     if (*analyseur == '=')
     {
       char *old = ++analyseur;
-      gpmem_t av = avma;
+      pari_sp av = avma;
       skipexpr();
       cell[1] = lclone(_strtoGENstr(old, analyseur-old));
       avma = av;
@@ -1618,7 +1618,7 @@ num_deriv(void *call, GEN argvec[])
 {
   GEN eps,a,b, y, x = argvec[0];
   long fpr, pr, l, e, ex;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   if (!is_const_t(typ(x)))
   {
     a = do_call(call, x, argvec);
@@ -1645,7 +1645,7 @@ num_derivU(GEN p, GEN *arg, gp_args *f)
 {
   GEN eps,a,b, x = *arg;
   long fpr, pr, l, e, ex;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (!is_const_t(typ(x)))
   {
@@ -1676,7 +1676,7 @@ static GEN
 identifier(void)
 {
   long m, i, matchcomma, deriv;
-  gpmem_t av;
+  pari_sp av;
   char *ch1;
   entree *ep;
   GEN res, newfun, ptr;
@@ -2040,7 +2040,7 @@ identifier(void)
           analyseur=ch1; ep = entry();
           if (*analyseur == '=')
           {
-            gpmem_t av=avma; analyseur++;
+            pari_sp av=avma; analyseur++;
             res = expr();
             if (br_status) err(breaker,"here (defining global var)");
             changevalue(ep, res); avma=av;
@@ -2184,7 +2184,7 @@ identifier(void)
       ep->value = (void *)ptr;
       ep->valence = EpUSER;
       check_new_fun=NULL;
-      avma = (gpmem_t)tmpargs; return gnil;
+      avma = (pari_sp)tmpargs; return gnil;
     }
   }
   err(valencer1); return NULL; /* not reached */
@@ -2205,7 +2205,7 @@ constante()
   static long pw10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
                         10000000, 100000000, 1000000000 };
   long i, l, m, n = 0, nb;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z,y;
 
   y = stoi(number(&nb)); i = 0;
@@ -2428,7 +2428,7 @@ long
 fetch_user_var(char *s)
 {
   entree *ep = is_entry(s);
-  gpmem_t av;
+  pari_sp av;
   GEN p1;
 
   if (ep)

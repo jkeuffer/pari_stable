@@ -50,7 +50,7 @@ static long
 lemma6(GEN pol,GEN p,long nu,GEN x)
 {
   long i, lambda, mu;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN gx,gpx;
 
   for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
@@ -73,7 +73,7 @@ static long
 lemma7(GEN pol,long nu,GEN x)
 {
   long i,odd4,lambda,mu,mnl;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN gx,gpx,oddgx;
 
   for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
@@ -105,7 +105,7 @@ static long
 zpsol(GEN pol,GEN p,long nu,GEN pnu,GEN x0)
 {
   long i, result;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN x,pnup;
 
   result = (cmpis(p,2)) ? lemma6(pol,p,nu,x0) : lemma7(pol,nu,x0);
@@ -146,7 +146,7 @@ qpsoluble(GEN pol,GEN p)
 static long
 psquarenf(GEN nf,GEN a,GEN pr)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long v;
   GEN norm;
 
@@ -179,7 +179,7 @@ static long
 psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 {
   long v;
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
@@ -193,7 +193,7 @@ static long
 psquare2qnf(GEN nf,GEN a,GEN p,long q)
 {
   long v;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN zinit = zidealstarinit(nf,idealpows(nf,p,q));
 
   v = check2(nf,a,zinit); avma = ltop; return v;
@@ -203,7 +203,7 @@ static long
 lemma6nf(GEN nf,GEN pol,GEN p,long nu,GEN x)
 {
   long i, lambda, mu;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN gx,gpx;
 
   for (i=lgef(pol)-2,gx=(GEN) pol[i+1]; i>1; i--)
@@ -225,7 +225,7 @@ static long
 lemma7nf(GEN nf,GEN pol,GEN p,long nu,GEN x,GEN zinit)
 {
   long res, i, lambda, mu, q;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN gx,gpx,p1;
 
   for (i=lgef(pol)-2, gx=(GEN) pol[i+1]; i>1; i--)
@@ -259,7 +259,7 @@ static long
 zpsolnf(GEN nf,GEN pol,GEN p,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
 {
   long i, result;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN pnup;
 
   nf=checknf(nf);
@@ -311,7 +311,7 @@ long
 qpsolublenf(GEN nf,GEN pol,GEN pr)
 {
   GEN repr,zinit,p1;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
 
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"qpsolublenf");
@@ -347,7 +347,7 @@ long
 zpsolublenf(GEN nf,GEN pol,GEN p)
 {
   GEN repr,zinit;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
 
   if (gcmp0(pol)) return 1;
   if (typ(pol)!=t_POL) err(notpoler,"zpsolublenf");
@@ -373,7 +373,7 @@ zpsolublenf(GEN nf,GEN pol,GEN p)
 static long
 hilb2nf(GEN nf,GEN a,GEN b,GEN p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long rep;
   GEN pol;
 
@@ -393,7 +393,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 {
   GEN ord, ordp, T,p, modpr,t;
   long va, vb, rep;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbertp");
   checkprimeid(pr); nf = checknf(nf);
@@ -432,7 +432,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 long
 nfhilbert(GEN nf,GEN a,GEN b)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long r1, i;
   GEN S, al, bl, ro;
 
@@ -493,7 +493,7 @@ extern GEN detcyc(GEN cyc);
 GEN
 bnfsunit(GEN bnf,GEN S,long prec)
 {
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
   long i,j,ls;
   GEN p1,nf,classgp,gen,M,U,H;
   GEN sunit,card,sreg,res,pow;
@@ -657,7 +657,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
 GEN
 bnfissunit(GEN bnf,GEN suni,GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN v, w;
 
   bnf = checkbnf(bnf);
@@ -708,7 +708,7 @@ pol_up(GEN rnfeq, GEN x)
 GEN
 rnfisnorminit(GEN T, GEN relpol, int galois)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i, l, drel;
   GEN prod, S1, S2, gen, cyc, bnf, nf, nfrel, rnfeq, rel, res, k, polabs;
   GEN y = cgetg(9, t_VEC);
@@ -786,7 +786,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 GEN
 rnfisnorm(GEN T, GEN x, long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnf = (GEN)T[1], rel = (GEN)T[2], relpol = (GEN)T[3], theta = (GEN)T[4];
   GEN nf, aux, H, Y, M, A, suni, sunitrel, futu, tu, w;
   GEN prod, S1, S2;
@@ -876,7 +876,7 @@ rnfisnorm(GEN T, GEN x, long flag)
 GEN
 bnfisnorm(GEN bnf,GEN x,long flag,long PREC)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN T = rnfisnorminit(polx[MAXVARN], bnf, flag == 0? 1: 2);
   return gerepileupto(av, rnfisnorm(T, x, flag));
 }

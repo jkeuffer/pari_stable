@@ -226,7 +226,7 @@ static GEN
 quadhilbertimag(GEN D, GEN flag)
 {
   long h, i, e, prec;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN z,L,P,p,q,qfp,qfq,up,uq,u;
   int raw = ((typ(flag)==t_INT && signe(flag)));
 
@@ -254,7 +254,7 @@ quadhilbertimag(GEN D, GEN flag)
   for(;;)
   {
     long ex, exmax = 0;
-    gpmem_t av0 = avma;
+    pari_sp av0 = avma;
     GEN lead, sqd = gsqrt(negi(D),prec);
     P = cgetg(h+1,t_VEC);
     for (i=1; i<=h; i++)
@@ -489,7 +489,7 @@ static GEN
 computeP2(GEN bnr, GEN la, int raw, long prec)
 {
   long clrayno, i, first = 1;
-  gpmem_t av=avma, av2;
+  pari_sp av=avma, av2;
   GEN listray,P0,P,f,lanum, nf = checknf(bnr);
 
   f = gmael3(bnr,2,1,1);
@@ -558,7 +558,7 @@ static GEN
 findquad(GEN a, GEN x, GEN p)
 {
   long tu, tv;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN u,v;
   if (typ(x) == t_POLMOD) x = (GEN)x[2];
   if (typ(a) == t_POLMOD) a = (GEN)a[2];
@@ -748,7 +748,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
 {
   GEN bnr,y,p1,pol,bnf,lambda;
   long raw;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (!flag) flag = gzero;
   if (typ(flag)==t_INT) lambda = NULL;
@@ -824,7 +824,7 @@ static GEN
 rhoreal_pow(GEN x, long n)
 {
   long i;
-  gpmem_t av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, lim = stack_lim(av, 1);
   for (i=1; i<=n; i++)
   {
     x = rhorealform(x);
@@ -840,7 +840,7 @@ rhoreal_pow(GEN x, long n)
 static GEN
 realpf5(GEN D, long p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = primeform(D,stoi(p),PRECREG);
   y = codeform5(y,PRECREG);
   return gerepileupto(av, redrealform(y));
@@ -849,7 +849,7 @@ realpf5(GEN D, long p)
 static GEN
 realpf(GEN D, long p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = primeform(D,stoi(p),PRECREG);
   return gerepileupto(av, redrealform(y));
 }
@@ -860,7 +860,7 @@ imagpf(GEN D, long p) { return primeform(D,stoi(p),0); }
 static GEN
 comprealform3(GEN x, GEN y)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z = cgetg(4,t_VEC); comp_gen(z,x,y);
   return gerepileupto(av, redrealform(z));
 }
@@ -888,7 +888,7 @@ static GEN
 random_form(GEN ex, GEN (*comp)(GEN,GEN))
 {
   long i, l = lg(ex);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN F;
   for(;;)
   {
@@ -932,7 +932,7 @@ static long
 factorquad(GEN f, long kcz, long limp)
 {
   long i, p, k, lo;
-  gpmem_t av;
+  pari_sp av;
   GEN q,r, x = (GEN)f[1];
 
   if (is_pm1(x)) { primfact[0]=0; return 1; }
@@ -992,7 +992,7 @@ largeprime(long q, long *ex, long np, long nrho)
 static int
 is_bad(GEN D, ulong p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   int r;
   if (p == 2)
   {
@@ -1010,7 +1010,7 @@ FBquad(GEN Disc, long n2, long n)
 {
   GEN Res = realun(DEFAULTPREC);
   long i, p, bad, s;
-  gpmem_t av;
+  pari_sp av;
   byteptr d = diffptr;
 
   numFB = cgetg(n2+1, t_VECSMALL);
@@ -1058,7 +1058,7 @@ subFBquad(GEN D, double PROD, long KC)
 {
   long i, j, lgsub, ino, lv = KC+1;
   double prod = 1.;
-  gpmem_t av;
+  pari_sp av;
   GEN no;
 
   vperm = cgetg(lv, t_VECSMALL);
@@ -1178,7 +1178,7 @@ extra_relations(long LIMC, long nlze, GEN *ptextraC)
 {
   long fpc, i, k, nlze2;
   long s = 0, extrarel = nlze+2, lgsub = lg(subFB);
-  gpmem_t av;
+  pari_sp av;
   long MAXRELSUP = min(50,4*KC);
   GEN p1, form, ex, extramat, extraC, col;
 
@@ -1295,7 +1295,7 @@ imag_relations(long LIM, long lim, long LIMC, long **mat)
 {
   long lgsub = lg(subFB), i, s, fpc, current, nbtest = 0;
   int first = 1;
-  gpmem_t av;
+  pari_sp av;
   GEN C, col, form, ex = cgetg(lgsub, t_VECSMALL);
   GEN dummy = cgetg(1,t_COL);
 
@@ -1373,7 +1373,7 @@ imag_be_honest()
 {
   long p, fpc, s = KC, nbtest = 0;
   GEN F, ex = cgetg(lg(subFB), t_VECSMALL);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   while (s<KC2)
   {
@@ -1408,7 +1408,7 @@ real_relations(long LIM, long lim, long LIMC, long **mat)
 {
   long lgsub = lg(subFB), i, s, fpc, current, nbtest = 0, endcycle, rhoacc, rho;
   int first = 1;
-  gpmem_t av, av1, limstack;
+  pari_sp av, av1, limstack;
   GEN C, d, col, form, form0, form1, ex = cgetg(lgsub, t_VECSMALL);
 
   C = cgetg(LIM+1, t_VEC);
@@ -1561,7 +1561,7 @@ real_be_honest()
 {
   long p, fpc, s = KC, nbtest = 0;
   GEN F,F0, ex = cgetg(lg(subFB), t_VECSMALL);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   while (s<KC2)
   {
@@ -1659,7 +1659,7 @@ quad_be_honest()
 GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP0, long flag, long prec)
 {
-  gpmem_t av0 = avma, av;
+  pari_sp av0 = avma, av;
   long KCCO, i, j, s, **mat;
   long nrelsup, nreldep, LIMC, LIMC2, cp, nlze;
   GEN h, W, cyc, res, gen, dep, C, B, extramat, extraC;

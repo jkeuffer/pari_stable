@@ -2,14 +2,14 @@
 #include <anal.h>
 
 GEN   gzero, gun, gdeux;
-gpmem_t top, bot, avma;
+pari_sp top, bot, avma;
 size_t memused = 0;
 long  DEBUGLEVEL,DEBUGMEM = 0;
 
 void specinit()
 {
   long size = 100000L;
-  bot = (gpmem_t)malloc(size);
+  bot = (pari_sp)malloc(size);
   top = avma = bot + size;
   gzero = malloc(2);
   gzero[0] = evaltyp(t_INT)|evallg(2);
@@ -19,9 +19,9 @@ void specinit()
 }
 
 void pari_err(long x, ...) { exit (0); }
-GEN gerepileuptoint(gpmem_t av, GEN q){ return q; }
-void gerepilemanysp(gpmem_t av, gpmem_t tetpil, GEN* gptr[], long n){}
-void gerepilemany(gpmem_t av, GEN* gptr[], long n){}
+GEN gerepileuptoint(pari_sp av, GEN q){ return q; }
+void gerepilemanysp(pari_sp av, pari_sp tetpil, GEN* gptr[], long n){}
+void gerepilemany(pari_sp av, GEN* gptr[], long n){}
 
 void sorstring(char* b, long x)
 {

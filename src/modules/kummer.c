@@ -1080,6 +1080,6 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 GEN
 rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepilecopy(av, _rnfkummer(bnr, subgroup, all, prec));
 }

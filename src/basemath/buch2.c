@@ -135,7 +135,7 @@ subFBgen(FB_t *F, GEN nf, double PROD, long minsFB)
   long i, j, k, iyes, ino, lv = F->KC + 1;
   double prod;
   const int init = (F->perm == NULL);
-  gpmem_t av;
+  pari_sp av;
 
   if (init)
   {
@@ -207,7 +207,7 @@ subFBgen_increase(FB_t *F, GEN nf, long step)
 static GEN
 mulred(GEN nf,GEN x, GEN I, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = cgetg(3,t_VEC);
 
   y[1] = (long)idealmulh(nf,I,(GEN)x[1]);
@@ -272,7 +272,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
   F->KC = F->KCZ = 0;
   for (p = 0;;) /* p <= n2 */
   {
-    gpmem_t av = avma, av1;
+    pari_sp av = avma, av1;
     long k, l;
     GEN P, a, b;
 
@@ -497,7 +497,7 @@ cleanarch(GEN x, long N, long prec)
 enum { RELAT, LARGE, PRECI };
 
 static GEN
-not_given(gpmem_t av, long fl, long reason)
+not_given(pari_sp av, long fl, long reason)
 {
   if (! (fl & nf_FORCE))
   {
@@ -567,7 +567,7 @@ GEN
 getfu(GEN nf,GEN *ptA,GEN reg,long fl,long *pte,long prec)
 {
   long e, i, j, R1, RU, N=degpol(nf[1]);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1,p2,u,y,matep,s,A,vec;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing fundamental units\n");
@@ -629,7 +629,7 @@ GEN
 buchfu(GEN bnf)
 {
   long c;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN nf,A,reg,res, y = cgetg(3,t_VEC);
 
   bnf = checkbnf(bnf); A = (GEN)bnf[3]; nf = (GEN)bnf[7];
@@ -830,7 +830,7 @@ SPLIT(FB_t *F, GEN nf, GEN x, GEN Vbase)
   nbtest = 1; nbtest_lim = 4;
   for(;;)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (DEBUGLEVEL>2) fprintferr("# ideals tried = %ld\n",nbtest);
     id = x0;
     for (i=1; i<lgsub; i++)
@@ -916,7 +916,7 @@ get_Vbase(GEN bnf)
 void
 testprimes(GEN bnf, long bound)
 {
-  gpmem_t av0 = avma, av;
+  pari_sp av0 = avma, av;
   long p,i,nbideal,k,pmax;
   GEN f, dK, p1, Vbase, vP, fb, nf=checknf(bnf);
   byteptr d = diffptr;
@@ -1119,7 +1119,7 @@ isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe)
 static int
 fact_ok(GEN nf, GEN y, GEN C, GEN g, GEN e)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i, c = lg(e);
   GEN z = C? C: gun;
   for (i=1; i<c; i++)
@@ -1241,7 +1241,7 @@ GEN
 isprincipalall(GEN bnf,GEN x,long flag)
 {
   long c, pr, tx = typ(x);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN nf;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1265,7 +1265,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
   c = getrand();
   for (;;)
   {
-    gpmem_t av1 = avma;
+    pari_sp av1 = avma;
     GEN y = _isprincipal(bnf,x,&pr,flag);
     if (y) return gerepileupto(av,y);
 
@@ -1279,7 +1279,7 @@ GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 {
   long l = lg(e), i, prec, c;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
   int gen = flag & (nf_GEN|nf_GENMAT);
 
@@ -1306,7 +1306,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   c = getrand();
   for (;;)
   {
-    gpmem_t av1 = avma;
+    pari_sp av1 = avma;
     GEN y = _isprincipal(bnf, gen? (GEN)id[1]: id,&prec,flag);
     if (y)
     {
@@ -1373,7 +1373,7 @@ GEN
 isunit(GEN bnf,GEN x)
 {
   long tx = typ(x), i, R1, RU, n, prec;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1, v, rlog, logunit, ex, nf, z, pi2_sur_w, gn, emb;
 
   bnf = checkbnf(bnf); nf=(GEN)bnf[7];
@@ -1465,7 +1465,7 @@ GEN
 signunits(GEN bnf)
 {
   long i, j, R1, RU, mun;
-  gpmem_t av;
+  pari_sp av;
   GEN matunit,y,p1,p2,nf,pi;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
@@ -1556,7 +1556,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
   const int maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
-  gpmem_t av = avma, av1, av2, limpile;
+  pari_sp av = avma, av1, av2, limpile;
   long j,k,noideal, nbrel = lg(mat)-1;
   long nbsmallnorm,nbfact,R1, N = degpol(nf[1]);
   GEN x,xembed,M,G,r,Gvec,prvec;
@@ -1576,7 +1576,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
   av1 = avma;
   for (noideal=F->KC; noideal; noideal--)
   {
-    gpmem_t av0 = avma;
+    pari_sp av0 = avma;
     long nbrelideal=0, dependent = 0, try_factor = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)F->LP[noideal];
 
@@ -1605,7 +1605,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
     k = N; y[N]=z[N]=0; x[N]= (long) sqrt(BOUND/v[N]);
     for(;; x[1]--)
     {
-      gpmem_t av3 = avma;
+      pari_sp av3 = avma;
       double p;
       GEN col;
 
@@ -1633,7 +1633,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN first_nz, GEN matarch,
 	  if (ccontent(x)==1) /* primitive */
 	  {
             GEN Nx, gx = gmul_mati_smallvec(IDEAL,x);
-            gpmem_t av4;
+            pari_sp av4;
             if (!isnfscalar(gx))
             {
               xembed = gmul(M,gx); av4 = avma; nbsmallnorm++;
@@ -1728,7 +1728,7 @@ dbg_cancelrel(long jideal,long jdir,long phase, long *col)
 static void
 dbg_outrel(long cglob, GEN *mat,GEN maarch)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1;
   long j;
 
@@ -1785,7 +1785,7 @@ random_relation(long phase,long cglob,long LIMC,long PRECREG,long MAXRELSUP,
 {
   static long jideal, jdir;
   long i, maxcglob, cptlist, cptzer, nbG, lgsub, r1, jlist = 1;
-  gpmem_t av, av1;
+  pari_sp av, av1;
   GEN arch,col,colarch,ideal,m,P,ex;
 
   if (phase != 1) { jideal=jdir=1; if (phase<0) return 0; }
@@ -1895,7 +1895,7 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
 {
   long ex, i, j, J, k, iz, nbtest, ru, lgsub = lg(F->subFB), KCZ0 = F->KCZ;
   GEN G, M, P, ideal, m, vdir;
-  gpmem_t av;
+  pari_sp av;
 
   if (F->KCZ2 <= F->KCZ) return 1;
   if (DEBUGLEVEL)
@@ -1921,7 +1921,7 @@ be_honest(FB_t *F, GEN nf, long PRECLLL)
     for (j=1; j<J; j++)
     {
       GEN ideal0 = prime_to_ideal(nf,(GEN)P[j]);
-      gpmem_t av2 = avma;
+      pari_sp av2 = avma;
       for(nbtest=0;;)
       {
 	ideal = ideal0;
@@ -1971,7 +1971,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
 {
   GEN T,v,mdet,mdet_t,Im_mdet,kR,xreal,lambda;
   long i, zc = lg(A)-1, R1 = 2*RU - N;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (DEBUGLEVEL) fprintferr("\n#### Computing regulator multiple\n");
   xreal = greal(A); /* = (log |sigma_i(u_j)|) */
@@ -2024,7 +2024,7 @@ bestappr_noer(GEN x, GEN k)
 static int
 compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long r;
   GEN L,H,D,den,R;
   double c;
@@ -2271,7 +2271,7 @@ static GEN
 relationrank(GEN *A, long r, GEN L)
 {
   long i, n = lg(L)-1;
-  gpmem_t av = avma, lim = stack_lim(av, 1);
+  pari_sp av = avma, lim = stack_lim(av, 1);
   GEN invp = idmat(n);
 
   if (!r) return invp;
@@ -2463,7 +2463,7 @@ check_and_build_cycgen(GEN bnf)
   GEN cycgen = get_cycgen((GEN)bnf[10]);
   if (!cycgen)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (DEBUGLEVEL) err(warner,"completing bnf (building cycgen)");
     bnfinsert(bnf, makecycgen(bnf), 2); avma = av;
     cycgen = get_cycgen((GEN)bnf[10]);
@@ -2477,7 +2477,7 @@ check_and_build_matal(GEN bnf)
   GEN matal = get_matal((GEN)bnf[10]);
   if (!matal)
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     if (DEBUGLEVEL) err(warner,"completing bnf (building matal)");
     bnfinsert(bnf, makematal(bnf), 1); avma = av;
     matal = get_matal((GEN)bnf[10]);
@@ -2489,7 +2489,7 @@ GEN
 smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,long minsFB,long prec)
 {
   GEN y, bnf, nf, res, p1;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (typ(pol)==t_VEC) bnf = checkbnf(pol);
   else
@@ -2525,7 +2525,7 @@ smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpi
 static GEN
 get_regulator(GEN mun)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN A;
 
   if (lg(mun)==1) return gun;
@@ -2564,7 +2564,7 @@ GEN
 bnfnewprec(GEN bnf, long prec)
 {
   GEN nf0 = (GEN)bnf[7], nf, res, funits, mun, matal, clgp, clgp2, y;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long r1, r2, prec1;
 
   bnf = checkbnf(bnf);
@@ -2629,7 +2629,7 @@ GEN
 bnfmake(GEN sbnf, long prec)
 {
   long j, k, l, n;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1, bas, ro, nf, mun, fu, L;
   GEN pfc, mc, clgp, clgp2, res, y, W, zu, reg, matal, Vbase;
   nfbasic_t T;
@@ -2679,7 +2679,7 @@ classgroupall(GEN P, GEN data, long flag, long prec)
 {
   long court[3],doubl[4];
   long fl, lx, minsFB=3, nbrelpid=4;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN bach=doubl,bach2=doubl,RELSUP=court,borne=gun;
 
   if (!data) lx=1;
@@ -2742,7 +2742,7 @@ bnfinit0(GEN P, long flag, GEN data, long prec)
 GEN
 classgrouponly(GEN P, GEN data, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z;
 
   if (typ(P)==t_INT)
@@ -2757,7 +2757,7 @@ classgrouponly(GEN P, GEN data, long prec)
 GEN
 regulator(GEN P, GEN data, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN z;
 
   if (typ(P)==t_INT)
@@ -2831,7 +2831,7 @@ buchall_end(GEN nf,GEN CHANGE,long fl,GEN res, GEN clg2, GEN W, GEN B,
 static GEN
 buchall_for_degree_one_pol(GEN nf, GEN CHANGE, long flun)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN W,B,A,matarch,Vbase,res;
   GEN fu=cgetg(1,t_VEC), R=gun, c1=gun, zu=cgetg(3,t_VEC);
   GEN clg1=cgetg(4,t_VEC), clg2=cgetg(4,t_VEC);
@@ -2864,7 +2864,7 @@ extract_full_lattice(GEN x)
   dj = 1;
   for (j = 1; j < l; )
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     long lv = lg(v);
 
     for (k = 0; k < dj; k++) v[lv+k] = j+k;
@@ -2896,7 +2896,7 @@ GEN
 buchall(GEN P,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpid,
         long minsFB,long flun,long prec)
 {
-  gpmem_t av = avma, av0, av1, limpile;
+  pari_sp av = avma, av0, av1, limpile;
   long N,R1,R2,RU,PRECREG,PRECLLL,PRECLLLadd,KCCO,RELSUP,LIMC,LIMC2,lim;
   long nlze,zc,nrelsup,nreldep,phase,matmax,i,j,k,seed,MAXRELSUP;
   long sfb_increase, sfb_trials, precdouble=0, precadd=0;

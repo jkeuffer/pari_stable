@@ -141,7 +141,7 @@ smallinitell0(GEN x, GEN y)
 GEN
 smallinitell(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = cgetg(14,t_VEC);
   smallinitell0(x,y); return gerepilecopy(av,y);
 }
@@ -161,7 +161,7 @@ ellinit0(GEN x, long flag,long prec)
 void
 ellprint(GEN e)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long vx = fetch_var();
   long vy = fetch_var();
   GEN z = cgetg(3,t_VEC);
@@ -370,7 +370,7 @@ initell0(GEN x, long prec)
 GEN
 initell(GEN x, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   return gerepilecopy(av, initell0(x,prec));
 }
 
@@ -379,7 +379,7 @@ _coordch(GEN e, GEN u, GEN r, GEN s, GEN t)
 {
   GEN y, p1, p2, v, v2, v3, v4, v6;
   long i, lx = lg(e);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   y = cgetg(lx,t_VEC);
   v = ginv(u); v2 = gsqr(v); v3 = gmul(v,v2);v4 = gsqr(v2); v6 = gsqr(v3);
@@ -457,7 +457,7 @@ pointch(GEN x, GEN ch)
 {
   GEN y,v,v2,v3,mor,r,s,t,u;
   long tx, i, lx = lg(x);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   checkpt(x); checkch(ch);
   if (lx < 2) return gcopy(x);
@@ -488,7 +488,7 @@ oncurve(GEN e, GEN z)
 {
   GEN p1,p2,x;
   long p, q;
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   checksell(e); checkpt(z); if (lg(z)<3) return 1; /* oo */
   p1 = ellLHS(e,z);
@@ -506,7 +506,7 @@ GEN
 addell(GEN e, GEN z1, GEN z2)
 {
   GEN p1,p2,x,y,x1,x2,y1,y2;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
 
   checksell(e); checkpt(z1); checkpt(z2);
   if (lg(z1)<3) return gcopy(z2);
@@ -552,7 +552,7 @@ invell(GEN e, GEN z)
 GEN
 subell(GEN e, GEN z1, GEN z2)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
 
   checksell(e); checkpt(z2);
   z2=invell(e,z2); tetpil=avma;
@@ -563,7 +563,7 @@ GEN
 ordell(GEN e, GEN x, long prec)
 {
   long td, i, lx, tx=typ(x);
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN D,a,b,d,pd,p1,y;
 
   checksell(e);
@@ -623,7 +623,7 @@ CM_powell(GEN e, GEN z, GEN n)
 {
   GEN x,y,p0,p1,q0,q1,p2,q2,z1,z2,pol,grdx;
   long ln, ep, vn;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
 
   if (lg(z)<3) return gcopy(z);
   pol=(GEN)n[1];
@@ -670,7 +670,7 @@ powell(GEN e, GEN z, GEN n)
 {
   GEN y;
   long i, j, s;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   ulong m;
 
   checksell(e); checkpt(z);
@@ -703,7 +703,7 @@ mathell(GEN e, GEN x, long prec)
 {
   GEN y,p1,p2, *pdiag;
   long lx=lg(x),i,j,tx=typ(x);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   if (!is_vec_t(tx)) err(elliper1);
   lx=lg(x); y=cgetg(lx,t_MAT); pdiag=(GEN*) new_chunk(lx);
@@ -729,7 +729,7 @@ static GEN
 bilhells(GEN e, GEN z1, GEN z2, GEN h2, long prec)
 {
   long lz1=lg(z1), tx, i;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN y,p1,p2;
 
   if (lz1==1) return cgetg(1,typ(z1));
@@ -752,7 +752,7 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
 {
   GEN p1,h2;
   long tz1=typ(z1), tz2=typ(z2);
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
 
   if (!is_matvec_t(tz1) || !is_matvec_t(tz2)) err(elliper1);
   if (lg(z1)==1) return cgetg(1,tz1);
@@ -802,7 +802,7 @@ GEN
 zell(GEN e, GEN z, long prec)
 {
   long ty, sw, fl;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN t,u,p1,p2,a,b,x1,u2,D = (GEN)e[12];
 
   checkbell(e);
@@ -960,7 +960,7 @@ check_real(GEN q)
 GEN
 _elleisnum(SL2_red *T, long k, long prec)
 {
-  gpmem_t lim, av;
+  pari_sp lim, av;
   GEN p1,pii2,q,y,qn,n;
 
   pii2 = PiI2(prec);
@@ -993,7 +993,7 @@ _elleisnum(SL2_red *T, long k, long prec)
 GEN
 elleisnum(GEN om, long k, long flag, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1, y;
   SL2_red T;
 
@@ -1027,7 +1027,7 @@ _elleta(SL2_red *T, long prec)
 GEN
 elleta(GEN om, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   SL2_red T;
   if (!get_periods(om, &T)) err(typeer,"elleta");
   return gerepileupto(av, _elleta(&T,prec));
@@ -1055,7 +1055,7 @@ static GEN
 weipellnumall(SL2_red *T, GEN z, long flall, long prec)
 {
   long toadd;
-  gpmem_t av=avma, lim, av1;
+  pari_sp av=avma, lim, av1;
   GEN p1,pii2,q,u,y,yp,u1,u2,qn,v;
 
   z = reduce_z(z,prec, T);
@@ -1118,7 +1118,7 @@ GEN
 ellzeta(GEN om, GEN z, long prec)
 {
   long toadd;
-  gpmem_t av=avma, lim, av1;
+  pari_sp av=avma, lim, av1;
   GEN Z,p1,pii2,q,u,y,u1,qn,et;
   SL2_red T;
 
@@ -1162,7 +1162,7 @@ GEN
 ellsigma(GEN w, GEN z, long flag, long prec)
 {
   long toadd;
-  gpmem_t av=avma, lim, av1;
+  pari_sp av=avma, lim, av1;
   GEN Z,zinit,p1,pii2,q,u,y,y1,u1,qn,negu,uinv,et,etnew,uhalf;
   int doprod = (flag >= 2);
   int dolog = (flag & 1);
@@ -1252,7 +1252,7 @@ ellsigma(GEN w, GEN z, long flag, long prec)
 GEN
 pointell(GEN e, GEN z, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN v;
   SL2_red T;
 
@@ -1268,7 +1268,7 @@ static GEN
 _weipell(GEN c4, GEN c6, long PREC)
 {
   long i, k, l, precres = 2*PREC;
-  gpmem_t av1, tetpil;
+  pari_sp av1, tetpil;
   GEN P,p1,s,t, res = cgetg(precres+2,t_SER);
 
   res[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
@@ -1337,7 +1337,7 @@ GEN
 ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
 {
   GEN v;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   SL2_red T;
 
   if (!z) return weipell0(w,prec,PREC);
@@ -1357,7 +1357,7 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
       if (!v)
       {
         GEN p1 = gmul2n(gpowgs(z,3),1);
-        gpmem_t tetpil = avma;
+        pari_sp tetpil = avma;
         v = cgetg(3,t_VEC);
 	v[1] = lpuigs(z,-2);
 	v[2] = lneg(p1); return gerepile(av,tetpil,v);
@@ -1372,7 +1372,7 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
 static GEN
 _a_2(GEN e)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN unmodp = gmodulss(1,8);
   ulong e6 = itos((GEN)gmul(unmodp,(GEN)e[6])[2]);
   ulong e8 = itos((GEN)gmul(unmodp,(GEN)e[8])[2]);
@@ -1389,7 +1389,7 @@ apell2_intern(GEN e, ulong p)
   else
   {
     ulong i;
-    gpmem_t av = avma;
+    pari_sp av = avma;
     GEN unmodp = gmodulss(1,p);
     ulong e6 = itos((GEN)gmul(unmodp,(GEN)e[6])[2]);
     ulong e8 = itos((GEN)gmul(unmodp,(GEN)e[8])[2]);
@@ -1445,7 +1445,7 @@ static GEN
 addsell(GEN e, GEN z1, GEN z2, GEN p)
 {
   GEN z,p1,p2,x,x1,x2,y,y1,y2;
-  gpmem_t av;
+  pari_sp av;
 
   if (!z1) return z2;
   if (!z2) return z1;
@@ -1566,7 +1566,7 @@ GEN
 apell1(GEN e, GEN p)
 {
   long *tx, *ty, *ti, pfinal, i, j, s, k, k1, x, nb;
-  gpmem_t av = avma, av2;
+  pari_sp av = avma, av2;
   GEN p1,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
   tx = ty = ti = NULL; /* gcc -Wall */
 
@@ -1853,7 +1853,7 @@ apell0(GEN e, long p)
   sellpt f,fh,fg,ftest,f2;
   long pordmin,u,p1p,p2p,A,B,c4,c6,cp4;
   long i, s, k, k1, x, q, h, l, r, m;
-  gpmem_t av;
+  pari_sp av;
   multiple *table;
 
   if (p < 99) return apell2_intern(e,(ulong)p);
@@ -1947,7 +1947,7 @@ apell(GEN e, GEN p)
   if (gdivise((GEN)e[12],p)) /* e[12] may be an intmod */
   {
     long s;
-    gpmem_t av = avma;
+    pari_sp av = avma;
     GEN p0 = egalii(p,gdeux)? stoi(8): p;
     GEN c6 = gmul((GEN)e[11],gmodulsg(1,p0));
     s = kronecker(lift_intern(c6),p); avma=av;
@@ -1972,7 +1972,7 @@ anell(GEN e, long n)
 {
   long tab[4]={0,1,1,-1}; /* p prime; (-1/p) = tab[p&3]. tab[0] is not used */
   long p, i, m;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN p1,p2,an;
 
   checkell(e);
@@ -2037,7 +2037,7 @@ GEN
 akell(GEN e, GEN n)
 {
   long i, j, ex;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p1,p2,ap,u,v,w,y,pl;
 
   checkell(e);
@@ -2073,7 +2073,7 @@ GEN
 hell(GEN e, GEN a, long prec)
 {
   long n;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN p1,p2,y,z,q,pi2surw,pi2isurw,qn,ps;
 
   checkbell(e);
@@ -2128,7 +2128,7 @@ hell2(GEN e, GEN x, long prec)
 {
   GEN ep,e3,ro,p1,p2,mu,d,xp;
   long lx, lc, i, j, tx;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
 
   if (!oncurve(e,x)) err(heller1);
   d=(GEN)e[12]; ro=(GEN)e[14]; e3=(gsigne(d) < 0)?(GEN)ro[1]:(GEN)ro[3];
@@ -2191,7 +2191,7 @@ static GEN
 ghell0(GEN e, GEN a, long flag, long prec)
 {
   long lx, i, n, n2, grandn, tx=typ(a);
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p,p1,p2,x,y,z,phi2,psi2,psi3,logdep;
 
   checkbell(e); if (!is_matvec_t(tx)) err(elliper1);
@@ -2282,7 +2282,7 @@ GEN
 lseriesell(GEN e, GEN s, GEN A, long prec)
 {
   long l, n, eps, flun;
-  gpmem_t av=avma, av1, tetpil, lim;
+  pari_sp av=avma, av1, tetpil, lim;
   GEN z,p1,p2,cg,cg1,v,cga,cgb,s2,ns,gs,N;
 
   if (!A) A = gun;
@@ -2469,7 +2469,7 @@ localred_carac_p(GEN e, GEN p, int minim)
 static int
 aux(GEN ak, int p, int l)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long res = smodis(divis(ak, u_pow(p, l)), p);
   avma = av; return res;
 }
@@ -2477,7 +2477,7 @@ aux(GEN ak, int p, int l)
 static int
 aux2(GEN ak, int p, GEN pl)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long res = smodis(divii(ak, pl), p);
   avma = av; return res;
 }
@@ -2659,7 +2659,7 @@ localred(GEN e, GEN p, int minim)
 GEN
 localreduction(GEN e, GEN p)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   checkell(e);
   if (typ(e[12]) != t_INT)
     err(talker,"not an integral curve in localreduction");
@@ -2728,7 +2728,7 @@ standard_model(GEN e, GEN *pv)
 GEN
 ellminimalmodel(GEN E, GEN *ptv)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN c4, c6, e, v, prims;
   long l, k;
 
@@ -2764,7 +2764,7 @@ GEN
 globalreduction(GEN E)
 {
   long k, l;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN c, prims, result, N, v, e;
 
   v = ellintegralmodel(E);
@@ -2796,7 +2796,7 @@ static void
 cumulev(GEN *vtotal, GEN u, GEN r, GEN s, GEN t)
 {
   GEN U,R,S,T,UU,RR,SS,TT, v = *vtotal, w = cgetg(5, t_VEC);
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   U = (GEN)v[1];
   R = (GEN)v[2];
@@ -2849,7 +2849,7 @@ taniyama(GEN e)
 {
   GEN v,w,c,d,s1,s2,s3;
   long n, m;
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
 
   checkell(e); v = cgetg(precdl+3,t_SER);
   v[1] = evalsigne(1) | evalvalp(-2) | evalvarn(0);
@@ -2903,7 +2903,7 @@ orderell(GEN e, GEN p)
 {
   GEN p1;
   long k;
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   checkell(e); checkpt(p);
   k=typ(e[13]);
@@ -2973,7 +2973,7 @@ torsellnagelllutz(GEN e)
 {
   GEN d,ld,pol,p1,lr,r,v,w,w2,w3;
   long i, j, nlr, t, t2, k, k2;
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   v = ellintegralmodel(e);
   if (v) e = coordch(e,v);
@@ -3060,7 +3060,7 @@ static long
 torsbound(GEN e)
 {
   long m, b, c, prime = 2;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   byteptr p = diffptr;
   GEN D = (GEN)e[12];
   long n = bit_accuracy(lgefint(D)) >> 3;
@@ -3178,7 +3178,7 @@ GEN
 torselldoud(GEN e)
 {
   long b, i, ord, prec, k = 1;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN v,w,w1,w22,w1j,w12,p,tor1,tor2;
 
   checkbell(e);
@@ -3304,7 +3304,7 @@ static long
 neron(GEN e, GEN p, long* ptkod)
 {
   long kod, v4, v6, vd;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN c4, c6, d, nv;
 
   nv=localreduction(e,p);
@@ -3406,7 +3406,7 @@ static long
 ellrootno_2(GEN e)
 {
   long n2, kod, u, v, x1, y1, d1, v4, v6, w2;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p=gdeux,c4,c6,tmp,p6;
 
   n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p6=stoi(64);
@@ -3494,7 +3494,7 @@ static long
 ellrootno_3(GEN e)
 {
   long n2, kod, u, v, d1, r6, K4, K6, v4;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN p=stoi(3),c4,c6,tmp,p4;
 
   n2=neron(e,p,&kod); c4=(GEN)e[10]; c6=(GEN)e[11]; p4=stoi(81);
@@ -3606,7 +3606,7 @@ long
 ellrootno(GEN e, GEN p)
 {
   long s;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   if (!p) p = gun;
   s=ellrootno_all(e, p, NULL);
   avma=av; return s;

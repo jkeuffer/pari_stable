@@ -64,7 +64,7 @@ quickmulcc(GEN x, GEN y)
     }
     if (ty==t_COMPLEX)
     {
-      gpmem_t av, tetpil;
+      pari_sp av, tetpil;
       GEN p1,p2;
 
       z=cgetg(3,t_COMPLEX); av=avma;
@@ -97,7 +97,7 @@ mysquare(GEN p)
 {
   GEN s,aux1,aux2;
   long i, j, n=degpol(p), nn;
-  gpmem_t ltop, lbot;
+  pari_sp ltop, lbot;
 
   if (n==-1) return gcopy(p);
   nn=n<<1; s=cgetg(nn+3,t_POL);
@@ -142,7 +142,7 @@ karasquare(GEN p)
 {
   GEN p1,s0,s1,s2,aux;
   long n=degpol(p),n0,n1,i,var,nn0;
-  gpmem_t ltop;
+  pari_sp ltop;
 
   if (n<=KARASQUARE_LIMIT) return mysquare(p);
   ltop=avma;
@@ -174,7 +174,7 @@ cook_square(GEN p)
 {
   GEN p0,p1,p2,p3,q,aux0,aux1,r,aux,plus,moins;
   long n=degpol(p),n0,n3,i,j,var;
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
 
   if (n<=COOK_SQUARE_LIMIT) return karasquare(p);
 
@@ -559,7 +559,7 @@ static double
 lower_bound(GEN p, long *k, double eps)
 {
   long n=degpol(p), i, j;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN a,s,S,icd;
   double r,*rho;
 
@@ -595,7 +595,7 @@ GEN
 max_modulus(GEN p, double tau)
 {
   GEN r,q,aux,gunr;
-  gpmem_t av, ltop = avma;
+  pari_sp av, ltop = avma;
   long i,k,n=degpol(p),nn,bitprec,M,e;
   double rho,eps, tau2 = (tau > 3.0)? 0.5: tau/6.;
 
@@ -645,7 +645,7 @@ modulus(GEN p, long k, double tau)
 {
   GEN q,gunr;
   long i, kk=k, imax, n=degpol(p), nn, bitprec, e;
-  gpmem_t av, ltop=avma;
+  pari_sp av, ltop=avma;
   double tau2,r;
 
   tau2 = tau/6;
@@ -685,7 +685,7 @@ pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
 {
   GEN R, q, aux;
   long n=degpol(p), i, imax, imax2, bitprec;
-  gpmem_t ltop=avma, av;
+  pari_sp ltop=avma, av;
   double tau2, aux2;
 
   tau2=tau/6.;
@@ -720,7 +720,7 @@ pre_modulus(GEN p, long k, double tau, GEN rmin, GEN rmax)
 static GEN
 min_modulus(GEN p, double tau)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN r;
 
   if (isexactzero((GEN)p[2])) return realzero(3);
@@ -735,7 +735,7 @@ dual_modulus(GEN p, GEN R, double tau, long l)
 {
   GEN q;
   long i, imax, k, delta_k=0, n=degpol(p), nn, nnn, valuat, bitprec, ll=l;
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   double logmax,aux,tau2;
 
   tau2=7.*tau/8.;
@@ -796,7 +796,7 @@ gmulbyi(GEN z)
 static void
 fft(GEN Omega, GEN p, GEN f, long Step, long l)
 {
-  gpmem_t ltop;
+  pari_sp ltop;
   long i,l1,l2,l3,rap=Lmax/l,rapi,Step4;
   GEN f1,f2,f3,f02,f13,g02,g13,ff;
 
@@ -913,7 +913,7 @@ parameters(GEN p, double *mu, double *gamma,
 {
   GEN q,pc,Omega,coef,RU,prim,aux,aux0,ggamma,gx,mygpi;
   long n=degpol(p), bitprec, NN, K, i, j;
-  gpmem_t av2, av=avma, limite=stack_lim(av, 1);
+  pari_sp av2, av=avma, limite=stack_lim(av, 1);
   double lx;
 
   bitprec=gexpo(p)+(long)param2+8;
@@ -976,7 +976,7 @@ dft(GEN p, long k, long NN, long bitprec, GEN F, GEN H, long polreal)
 {
   GEN Omega,q,qd,pc,pdc,alpha,beta,gamma,RU,aux,U,W,mygpi,prim,prim2;
   long n=degpol(p),i,j,K;
-  gpmem_t ltop;
+  pari_sp ltop;
 
   mygpi=mppi(bitprec/BITS_IN_LONG+3);
   aux = gdivgs(mygpi,NN/2); /* 2 Pi/NN */
@@ -1072,7 +1072,7 @@ static GEN
 refine_H(GEN F, GEN G, GEN HH, long bitprec, long shiftbitprec)
 {
   GEN H=HH,D,aux;
-  gpmem_t ltop=avma, limite=stack_lim(ltop, 1);
+  pari_sp ltop=avma, limite=stack_lim(ltop, 1);
   long error=0,i,bitprec1,bitprec2;
 
   D=gsub(gun,gres(gmul(HH,G),F)); error=gexpo(D);
@@ -1107,7 +1107,7 @@ refine_F(GEN p, GEN *F, GEN *G, GEN H, long bitprec, double gamma)
   GEN pp,FF,GG,r,HH,f0;
   long error, i, bitprec1=0, bitprec2, shiftbitprec;
   long shiftbitprec2, n=degpol(p), enh, normF, normG;
-  gpmem_t ltop=avma, limite=stack_lim(ltop, 1);
+  pari_sp ltop=avma, limite=stack_lim(ltop, 1);
 
   FF=*F; HH=H;
   GG=poldivres(p,*F,&r);
@@ -1164,7 +1164,7 @@ split_fromU(GEN p, long k, double delta, long bitprec,
   GEN pp,FF,GG,H;
   long n=degpol(p),NN,bitprec2;
   int polreal=isreal(p);
-  gpmem_t ltop;
+  pari_sp ltop;
   double mu,gamma;
 
   pp=gdiv(p,(GEN)p[2+n]);
@@ -1239,7 +1239,7 @@ conformal_pol(GEN p, GEN a, long bitprec)
 {
   GEN r,pui,num,aux, unr = myrealun(bitprec);
   long n=degpol(p), i;
-  gpmem_t av, limit;
+  pari_sp av, limit;
 
   aux = pui = cgetg(4,t_POL);
   pui[1] = evalsigne(1) | evalvarn(varn(p)) | evallgef(4);
@@ -1330,7 +1330,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
                   double aux, GEN *F,GEN *G)
 {
   long bitprec2, n=degpol(p), i;
-  gpmem_t ltop = avma, av;
+  pari_sp ltop = avma, av;
   GEN q,FF,GG,a,R;
   GEN rho,invrho;
   double delta,param,param2;
@@ -1345,7 +1345,7 @@ conformal_mapping(GEN *radii, GEN ctr, GEN p, long k, long bitprec,
   for (i=1; i<=n; i++)
     if (signe(radii[i])) /* updating array radii */
     {
-      gpmem_t a = avma;
+      pari_sp a = avma;
       GEN p1 = gsqr(radii[i]);
       /* 2(r^2 - 1) / (r^2 - 3(r-1)) */
       p1 = divrr(gmul2n((subrs(p1,1)),1),
@@ -1727,7 +1727,7 @@ static GEN
 split_complete(GEN p, long bitprec, GEN roots_pol)
 {
   long n = degpol(p);
-  gpmem_t ltop;
+  pari_sp ltop;
   GEN p1,F,G,a,b,m1,m2,m;
 
   if (n==1)
@@ -1846,7 +1846,7 @@ all_roots(GEN p, long bitprec)
 {
   GEN lc,pd,q,roots_pol,m;
   long bitprec0, bitprec2,n=degpol(p),i,e,h;
-  gpmem_t av;
+  pari_sp av;
 
   pd = poldeflate(p, &h); lc = leading_term(pd);
   e = 2*gexpo(cauchy_bound(pd)); if (e<0) e=0;
@@ -1996,7 +1996,7 @@ isrealappr(GEN x, long e)
 static int
 isconj(GEN x, GEN y, long e)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i= (gexpo( gsub((GEN)x[1],(GEN)y[1]) ) < e
         && gexpo( gadd((GEN)x[2],(GEN)y[2]) ) < e);
   avma = av; return i;
@@ -2008,7 +2008,7 @@ isconj(GEN x, GEN y, long e)
 GEN
 roots(GEN p, long l)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long n,i,k,s,t,e;
   GEN c,L,p1,res,rea,com;
 

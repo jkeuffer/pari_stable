@@ -32,31 +32,31 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 void
 gop1z(GEN (*f)(GEN), GEN x, GEN y)
 {
-  gpmem_t av=avma; gaffect(f(x), y); avma=av;
+  pari_sp av=avma; gaffect(f(x), y); avma=av;
 }
 
 void
 gop2z(GEN (*f)(GEN, GEN), GEN x, GEN y, GEN z)
 {
-  gpmem_t av=avma; gaffect(f(x, y), z); avma=av;
+  pari_sp av=avma; gaffect(f(x, y), z); avma=av;
 }
 
 void
 gops2gsz(GEN (*f)(GEN, long), GEN x, long s, GEN z)
 {
-  gpmem_t av=avma; gaffect(f(x, s), z); avma=av;
+  pari_sp av=avma; gaffect(f(x, s), z); avma=av;
 }
 
 void
 gops2sgz(GEN (*f)(long, GEN), long s, GEN y, GEN z)
 {
-  gpmem_t av=avma; gaffect(f(s, y), z); avma=av;
+  pari_sp av=avma; gaffect(f(s, y), z); avma=av;
 }
 
 void
 gops2ssz(GEN (*f)(long, long), long s, long y, GEN z)
 {
-  gpmem_t av=avma; gaffect(f(s, y), z); avma=av;
+  pari_sp av=avma; gaffect(f(s, y), z); avma=av;
 }
 
 /*******************************************************************/
@@ -89,14 +89,14 @@ opgs2(int (*f)(GEN, GEN), GEN y, long s)
 void
 gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   affsi(s,court_p); gaffect(f(court_p,y),z); avma=av;
 }
 
 void
 gopgs2z(GEN (*f)(GEN, GEN), GEN y, long s, GEN z)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   affsi(s,court_p); gaffect(f(y,court_p),z); avma=av;
 }
 
@@ -215,7 +215,7 @@ long
 gtolong(GEN x)
 {
   long y, tx=typ(x);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   switch(tx)
   {
@@ -337,7 +337,7 @@ gcmp1(GEN x)
 int
 gcmp_1(GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   long l,y;
   GEN p1;
 
@@ -387,7 +387,7 @@ int
 gcmp(GEN x, GEN y)
 {
   long tx, ty, f;
-  gpmem_t av;
+  pari_sp av;
 
   tx=typ(x); ty=typ(y);
   if (is_intreal_t(tx))
@@ -517,7 +517,7 @@ int
 gegal(GEN x, GEN y)
 {
   ulong tx;
-  gpmem_t av;
+  pari_sp av;
   long i;
   
   if (x == y) return 1;
@@ -618,7 +618,7 @@ long
 ggval(GEN x, GEN p)
 {
   long tx=typ(x), tp=typ(p), vx, v, i, val;
-  gpmem_t av, limit;
+  pari_sp av, limit;
   GEN p1,p2;
 
   if (isexactzero(x)) return VERYBIGINT;
@@ -711,7 +711,7 @@ long
 pvaluation(GEN x, GEN p, GEN *py)
 {
   long v;
-  gpmem_t av, av2;
+  pari_sp av, av2;
   GEN p1,p2;
 
   if (egalii(p,gdeux))
@@ -883,7 +883,7 @@ GEN
 gabs(GEN x, long prec)
 {
   long tx=typ(x), lx, i;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1;
 
   switch(tx)
@@ -1110,7 +1110,7 @@ void
 gaffect(GEN x, GEN y)
 {
   long i, j, k, l, v, vy, lx, ly, tx, ty;
-  gpmem_t av;
+  pari_sp av;
   GEN p1,num,den;
 
 
@@ -1541,7 +1541,7 @@ gaffect(GEN x, GEN y)
 GEN
 co8(GEN x, long prec)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   GEN p1, p = (GEN) x[1];
 
   p1 = subii(sqri((GEN)p[3]), shifti((GEN)p[2],2));
@@ -1565,7 +1565,7 @@ cvtop(GEN x, GEN p, long l)
 {
   GEN p1,p2,p3;
   long n;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   if (typ(p)!=t_INT)
     err(talker,"not an integer modulus in cvtop or gcvtop");
@@ -1654,7 +1654,7 @@ long
 gexpo(GEN x)
 {
   long tx=typ(x), lx, e, i, y;
-  gpmem_t av;
+  pari_sp av;
 
   switch(tx)
   {
@@ -1702,19 +1702,19 @@ normalize(GEN x)
   long i,j, lx = lg(x);
 
   if (typ(x)!=t_SER) err(typeer,"normalize");
-  if (lx==2) { setsigne(x,0); avma = (gpmem_t) x; return x; }
+  if (lx==2) { setsigne(x,0); avma = (pari_sp) x; return x; }
   if (! isexactzero((GEN)x[2])) { setsigne(x,1); return x; }
 
   for (i=3; i<lx; i++)
     if (! isexactzero((GEN)x[i]))
     {
-      gpmem_t tetpil = avma;
+      pari_sp tetpil = avma;
       GEN p1 = cgetg(lx-i+2,t_SER);
       p1[1] = evalsigne(1) | evalvalp(valp(x)+i-2) | evalvarn(varn(x));
       j=i; i=2; while (j<lx) p1[i++] = lcopy((GEN)x[j++]);
-      return gerepile((gpmem_t) (x+lx),tetpil,p1);
+      return gerepile((pari_sp) (x+lx),tetpil,p1);
     }
-  avma = (gpmem_t) (x+lx); return zeroser(varn(x),lx-2);
+  avma = (pari_sp) (x+lx); return zeroser(varn(x),lx-2);
 }
 #else
 
@@ -1888,7 +1888,7 @@ GEN
 listsort(GEN list, long flag)
 {
   long i, c=list[1], lx = lgef(list)-1;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN perm,vec,l;
 
   if (typ(list) != t_LIST) err(typeer,"listsort");

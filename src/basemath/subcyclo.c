@@ -66,7 +66,7 @@ znstar_coset_func(long n, GEN H, void (*func)(void *data,long c)
 void
 znstar_partial_coset_bits_inplace(long n, GEN H, GEN bits, long d, long c)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   znstar_partial_coset_func(n,H, (void (*)(void *,long)) &bitvec_set,
       (void *) bits, d, c);
   avma=ltop;
@@ -119,7 +119,7 @@ znstar_bits(long n, GEN H)
 GEN
 znstar_generate(long n, GEN V)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN res=cgetg(4,t_VEC);
   GEN gen=cgetg(lg(V),t_VECSMALL);
   GEN ord=cgetg(lg(V),t_VECSMALL);
@@ -181,7 +181,7 @@ znstar_elts(long n, GEN H)
 GEN
 znstar_reduce_modulus(GEN H, long n)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN gen=cgetg(lg(H[1]),t_VECSMALL);
   long i;
   for(i=1; i < lg(gen); i++)
@@ -192,7 +192,7 @@ znstar_reduce_modulus(GEN H, long n)
 
 long znstar_conductor(long n, GEN H)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   int i,j;
   GEN F;
   long cnd=n;
@@ -242,7 +242,7 @@ znstar_cosets(long n, long phi_n, GEN H)
   long    card   = group_order(H);
   long    index  = phi_n/card;
   GEN     cosets = cgetg(index+1,t_VECSMALL);
-  gpmem_t ltop = avma;
+  pari_sp ltop = avma;
   GEN     bits   = bitvec_alloc(n);
   for (k = 1; k <= index; k++)
   {
@@ -282,7 +282,7 @@ znstar_hnf_generators(GEN Z, GEN M)
 {
   long l = lg(M);
   GEN gen=cgetg(l, t_VECSMALL);
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN zgen= (GEN) Z[3];
   long n = itos((GEN) Z[1]);
   GEN m = stoi(n);
@@ -307,7 +307,7 @@ znstar_hnf(GEN Z, GEN M)
 GEN
 znstar_hnf_elts(GEN Z, GEN H)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN G=znstar_hnf(Z,H);
   long n=itos((GEN)Z[1]);
   GEN list=znstar_elts(n,G);
@@ -353,7 +353,7 @@ lift_check_modulus(GEN H, long n)
   return 0;/*not reached*/
 }
 
-GEN subcyclo_complex_bound(gpmem_t ltop, GEN V, long prec)
+GEN subcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
 {
   GEN pol = roots_to_pol(V,0);
   GEN vec = gtovec(greal(pol));
@@ -368,7 +368,7 @@ GEN subcyclo_complex_cyclic(long n, long d, long m ,long z, long g, GEN powz, lo
   long i,k;
   for (i=1;i<=d;i++,base=mulssmod(base,z,n))
   {
-    gpmem_t ltop=avma;
+    pari_sp ltop=avma;
     long ex=base;
     GEN s=gzero;
     (void)new_chunk(2*prec + 3);
@@ -390,7 +390,7 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
   long lle=le?lg(le)*2+1:2*lg(powz[1])+3;/*Assume dvmdii use lx+ly space*/
   for (i=1;i<=d;i++,base=mulssmod(base,z,n))
   {
-    gpmem_t ltop=avma;
+    pari_sp ltop=avma;
     long ex=base;
     GEN s=gzero;
     (void)new_chunk(lle); /* HACK */
@@ -407,7 +407,7 @@ struct _subcyclo_orbits_s
   GEN powz;
   GEN *s;
   ulong count;
-  gpmem_t ltop;
+  pari_sp ltop;
 };
 
 void
@@ -435,7 +435,7 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
   for(i=1; i<d; i++)
   {
     GEN s = gzero;
-    gpmem_t av = avma;
+    pari_sp av = avma;
     (void)new_chunk(lle);
     data.count = 0;
     data.s     = &s;
@@ -450,7 +450,7 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
 GEN 
 subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN l,le,z;
   long i;
   long e,val;
@@ -518,7 +518,7 @@ subcyclo_roots(long n, GEN zl)
   powz[1] = (long) z;
   for (i=2; i<n; i++)
   {
-    gpmem_t av=avma;
+    pari_sp av=avma;
     GEN p1;
     (void)new_chunk(lle); /* HACK */
     p1 = mulii(z,(GEN)powz[i-1]);
@@ -611,7 +611,7 @@ GEN bnrtozn(GEN bnr, long *complex)
 GEN 
 galoissubcyclo(GEN N, GEN sg, long flag, long v)
 {
-  gpmem_t ltop=avma,av;
+  pari_sp ltop=avma,av;
   GEN H, V;
   long i;
   GEN O;
@@ -747,7 +747,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
 GEN
 subcyclo(long n, long d, long v)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   long o,p,al,r,g,gd;
   GEN fa,G;
   GEN zl,L,T,le;
@@ -799,7 +799,7 @@ subcyclo(long n, long d, long v)
 
 GEN polsubcyclo(long n, long d, long v)
 {
-  gpmem_t ltop=avma;
+  pari_sp ltop=avma;
   GEN L, Z=znstar(stoi(n));
   /*subcyclo is twice faster but Z must be cyclic*/
   if (lg(Z[2]) == 2 && divise((GEN)Z[1],stoi(d)))

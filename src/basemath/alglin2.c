@@ -43,7 +43,7 @@ charpoly0(GEN x, int v, long flag)
 static GEN
 caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long d;
   GEN p1, p2 = leading_term(p);
 
@@ -76,7 +76,7 @@ caractducos(GEN p, GEN x, int v)
 static GEN
 easychar(GEN x, int v, GEN *py)
 {
-  gpmem_t av;
+  pari_sp av;
   long lx;
   GEN p1,p2;
 
@@ -126,7 +126,7 @@ GEN
 caract(GEN x, int v)
 {
   long k, n;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN  p1,p2,p3,p4,x_k;
 
   if ((p1 = easychar(x,v,NULL))) return p1;
@@ -159,7 +159,7 @@ caradj0(GEN x, long v)
 GEN
 caradj(GEN x, long v, GEN *py)
 {
-  gpmem_t av,tetpil;
+  pari_sp av,tetpil;
   long i,j,k,l;
   GEN p,y,t,*gptr[2];
 
@@ -236,7 +236,7 @@ adj(GEN x)
 GEN
 hess(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long lx=lg(x),m,i,j;
   GEN p,p1,p2;
 
@@ -273,7 +273,7 @@ hess(GEN x)
 GEN
 carhess(GEN x, long v)
 {
-  gpmem_t av,tetpil;
+  pari_sp av,tetpil;
   long lx,r,i;
   GEN *y,p1,p2,p3,p4;
 
@@ -305,7 +305,7 @@ carhess(GEN x, long v)
 GEN
 gnorm(GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   long lx,i, tx=typ(x);
   GEN p1,p2,y;
 
@@ -356,7 +356,7 @@ gnorm(GEN x)
 GEN
 gnorml2(GEN x)
 {
-  gpmem_t av,lim;
+  pari_sp av,lim;
   GEN y;
   long i,tx=typ(x),lx;
 
@@ -379,7 +379,7 @@ gnorml2(GEN x)
 GEN
 QuickNormL2(GEN x, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = gmul(x, realun(prec));
   if (typ(x) == t_POL)
     *++y = evaltyp(t_VEC) | evallg(lgef(x)-1);
@@ -389,7 +389,7 @@ QuickNormL2(GEN x, long prec)
 GEN
 gnorml1(GEN x,long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long lx,i;
   GEN s;
   switch(typ(x))
@@ -417,7 +417,7 @@ gnorml1(GEN x,long prec)
 GEN
 QuickNormL1(GEN x,long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long lx,i;
   GEN p1,p2,s;
   switch(typ(x))
@@ -508,7 +508,7 @@ gconj(GEN x)
 GEN
 conjvec(GEN x,long prec)
 {
-  gpmem_t av,tetpil;
+  pari_sp av,tetpil;
   long lx,s,i,tx=typ(x);
   GEN z,y,p1,p2,p;
 
@@ -591,7 +591,7 @@ assmat(GEN x)
       p1[j] = lneg((GEN)x[j+1]);
   else
   {
-    gpmem_t av = avma;
+    pari_sp av = avma;
     p2 = gclone(gneg((GEN)x[lx+1]));
     avma = av;
     for (j=1; j<lx; j++)
@@ -604,7 +604,7 @@ assmat(GEN x)
 GEN
 gtrace(GEN x)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   long i,n,tx=typ(x),lx;
   GEN y,p1,p2;
 
@@ -670,7 +670,7 @@ gtrace(GEN x)
 GEN
 sqred1intern(GEN a,long flag)
 {
-  gpmem_t av = avma, lim=stack_lim(av,1);
+  pari_sp av = avma, lim=stack_lim(av,1);
   GEN b,p;
   long i,j,k, n = lg(a);
 
@@ -719,7 +719,7 @@ sqred1(GEN a)
 GEN
 sqred3(GEN a)
 {
-  gpmem_t av = avma, lim = stack_lim(av,1);
+  pari_sp av = avma, lim = stack_lim(av,1);
   long i,j,k,l, n = lg(a);
   GEN p1,b;
 
@@ -761,7 +761,7 @@ static GEN
 sqred2(GEN a, long no_signature)
 {
   GEN r,p,mun;
-  gpmem_t av,av1,lim;
+  pari_sp av,av1,lim;
   long n,i,j,k,l,sp,sn,t;
 
   if (typ(a)!=t_MAT) err(typeer,"sqred2");
@@ -841,7 +841,7 @@ signat(GEN a) { return sqred2(a,0); }
 GEN
 jacobi(GEN a, long prec)
 {
-  gpmem_t av1, av2;
+  pari_sp av1, av2;
   long de,e,e1,e2,l,n,i,j,p,q;
   GEN c,s,t,u,ja,lambda,r,unr,x,y,x1,y1;
 
@@ -969,7 +969,7 @@ ZV_isin(GEN x)
 GEN
 matrixqz(GEN x, GEN p)
 {
-  gpmem_t av = avma, av1, lim;
+  pari_sp av = avma, av1, lim;
   long i,j,j1,m,n,nfact;
   GEN p1,p2,p3;
 
@@ -1082,7 +1082,7 @@ QV_elem(GEN aj, GEN ak, GEN A, long j, long k)
 static GEN
 matrixqz_aux(GEN A)
 {
-  gpmem_t av = avma, lim = stack_lim(av,1);
+  pari_sp av = avma, lim = stack_lim(av,1);
   long i,j,k,n,m;
   GEN a;
 
@@ -1117,7 +1117,7 @@ matrixqz_aux(GEN A)
 GEN
 matrixqz2(GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   if (typ(x)!=t_MAT) err(typeer,"matrixqz2");
   x = dummycopy(x);
   return gerepileupto(av, matrixqz_aux(x));
@@ -1126,7 +1126,7 @@ matrixqz2(GEN x)
 GEN
 matrixqz3(GEN x)
 {
-  gpmem_t av = avma, av1, lim;
+  pari_sp av = avma, av1, lim;
   long j,j1,k,m,n;
   GEN c;
 
@@ -1160,7 +1160,7 @@ matrixqz3(GEN x)
 GEN
 intersect(GEN x, GEN y)
 {
-  gpmem_t av,tetpil;
+  pari_sp av,tetpil;
   long j, lx = lg(x);
   GEN z;
 
@@ -1193,7 +1193,7 @@ mathnf0(GEN x, long flag)
 }
 
 static GEN
-init_hnf(GEN x, GEN *denx, long *co, long *li, gpmem_t *av)
+init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
 {
   if (typ(x) != t_MAT) err(typeer,"mathnf");
   *co=lg(x); if (*co==1) return NULL; /* empty matrix */
@@ -1247,7 +1247,7 @@ ZV_Z_mul(GEN c, GEN X)
 GEN
 ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
 {
-  gpmem_t av;
+  pari_sp av;
   long i,lx,m;
   GEN p1,p2,A;
 
@@ -1309,7 +1309,7 @@ ZV_lincomb(GEN u, GEN v, GEN X, GEN Y)
 GEN
 hnf_special(GEN x, long remove)
 {
-  gpmem_t av0,av,tetpil,lim;
+  pari_sp av0,av,tetpil,lim;
   long s,li,co,i,j,k,def,ldef;
   GEN p1,u,v,d,denx,a,b, x2,res;
 
@@ -1434,7 +1434,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
 {
   GEN p1,p2,U,H,Hnew,Bnew,Cnew,diagH1;
   GEN B = *ptB, C = *ptC, dep = *ptdep, depnew;
-  gpmem_t av, lim;
+  pari_sp av, lim;
   long i,j,k,s,i1,j1,zc;
   long co = lg(C);
   long col = lg(matgen)-1;
@@ -1562,7 +1562,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
 static void
 p_mat(long **mat, GEN perm, long k)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   perm = vecextract_i(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
@@ -1596,7 +1596,7 @@ col_dup(long n, GEN col)
 GEN
 hnfspec(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
-  gpmem_t av=avma,av2,lim;
+  pari_sp av=avma,av2,lim;
   long *p,i,j,k,lk0,col,lig,*matj, **mat;
   long n,s,t,nlze,lnz,nr;
   GEN p1,p2,matb,matbnew,vmax,matt,T,extramat;
@@ -1945,7 +1945,7 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
        GEN extramat,GEN extraC)
 {
   GEN matb, extratop, Cnew, permpro, B = *ptB, C = *ptC, dep = *ptdep;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i;
   long lH = lg(H)-1;
   long lB = lg(B)-1;
@@ -2076,7 +2076,7 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
 GEN
 hnf0(GEN A, int remove)
 {
-  gpmem_t av0 = avma, av, lim;
+  pari_sp av0 = avma, av, lim;
   long s,li,co,i,j,k,def,ldef;
   GEN denx,a,p1;
 
@@ -2136,7 +2136,7 @@ hnf(GEN x) { return hnf0(x,1); }
 static GEN
 allhnfmod(GEN x,GEN dm,int flag)
 {
-  gpmem_t av, lim;
+  pari_sp av, lim;
   long li,co,i,j,k,def,ldef,ldm;
   GEN a,b,w,p1,p2,d,u,v;
 
@@ -2396,7 +2396,7 @@ fix_rows(GEN A)
 GEN
 hnflll_i(GEN A, GEN *ptB, int remove)
 {
-  gpmem_t av = avma, lim = stack_lim(av,3);
+  pari_sp av = avma, lim = stack_lim(av,3);
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
   long row[2], do_swap,i,n,k;
   GEN z,B, **lambda, *D;
@@ -2417,7 +2417,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
       do_swap = (!row[1] || row[0] <= row[1]);
     else if (!row[1])
     { /* row[0] == row[1] == 0 */
-      gpmem_t av1 = avma;
+      pari_sp av1 = avma;
       z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
       do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
       avma = av1;
@@ -2506,7 +2506,7 @@ GEN
 extendedgcd(GEN A)
 {
   long m1 = 1, n1 = 1; /* alpha = m1/n1. Maybe 3/4 here ? */
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long do_swap,i,n,k;
   GEN z,B, **lambda, *D;
 
@@ -2523,7 +2523,7 @@ extendedgcd(GEN A)
     if (signe(A[k-1])) do_swap = 1;
     else if (!signe(A[k]))
     {
-      gpmem_t av1 = avma;
+      pari_sp av1 = avma;
       z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
       do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
       avma = av1;
@@ -2557,7 +2557,7 @@ GEN
 hnfperm(GEN A)
 {
   GEN U,c,l,perm,d,u,p,q,y,b;
-  gpmem_t av=avma,av1,tetpil,lim;
+  pari_sp av=avma,av1,tetpil,lim;
   long r,t,i,j,j1,k,m,n;
 
   if (typ(A) != t_MAT) err(typeer,"hnfperm");
@@ -2669,7 +2669,7 @@ GEN
 hnfall_i(GEN A, GEN *ptB, long remove)
 {
   GEN B,c,h,x,p,a;
-  gpmem_t av = avma, av1, lim;
+  pari_sp av = avma, av1, lim;
   long m,n,r,i,j,k,li;
 
   if (typ(A)!=t_MAT) err(typeer,"hnfall");
@@ -2823,7 +2823,7 @@ trivsmith(long all)
 }
 
 static void
-snf_pile(gpmem_t av, GEN *x, GEN *U, GEN *V)
+snf_pile(pari_sp av, GEN *x, GEN *U, GEN *V)
 {
   GEN *gptr[3];
   int c = 1; gptr[0]=x;
@@ -2837,7 +2837,7 @@ snf_pile(gpmem_t av, GEN *x, GEN *U, GEN *V)
 GEN
 smithall(GEN x, GEN *ptU, GEN *ptV)
 {
-  gpmem_t av = avma, lim = stack_lim(av,1);
+  pari_sp av = avma, lim = stack_lim(av,1);
   long i,j,k,l,c,n,s1,s2;
   GEN p1,p2,p3,p4,b,u,v,d,U,V,mun,mdet,ys;
 
@@ -3074,7 +3074,7 @@ smithclean(GEN z)
 static GEN
 gsmithall(GEN x,long all)
 {
-  gpmem_t av,tetpil,lim;
+  pari_sp av,tetpil,lim;
   long i,j,k,l,c,n;
   GEN p1,p2,p3,p4,z,b,u,v,d,ml,mr;
 
@@ -3193,7 +3193,7 @@ gsmithall(GEN x,long all)
 GEN
 matsnf0(GEN x,long flag)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   if (flag > 7) err(flagerr,"matsnf");
   if (typ(x) == t_VEC && flag & 4) return smithclean(x);
   if (flag & 2) x = flag&1 ? gsmith2(x): gsmith(x);

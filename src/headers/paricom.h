@@ -78,9 +78,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define negi  mpneg
 #define negr  mpneg
 #define mpnegz(x,y) \
-  STMT_START {gpmem_t av=avma;mpaff(mpneg(x),y);avma=av;} STMT_END
+  STMT_START {pari_sp av=avma;mpaff(mpneg(x),y);avma=av;} STMT_END
 #define mpabsz(x,y) \
-  STMT_START {gpmem_t av=avma;mpaff(mpabs(x),y);avma=av;} STMT_END
+  STMT_START {pari_sp av=avma;mpaff(mpabs(x),y);avma=av;} STMT_END
 #define absrz(x,z)  mpabsz((x),(z))
 #define negrz(x,z)  mpnegz((x),(z))
 

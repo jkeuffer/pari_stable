@@ -862,7 +862,7 @@ wr_exp(pariout_t *T, GEN x)
 static void
 wr_real(pariout_t *T, GEN x, int nosign)
 {
-  gpmem_t ltop;
+  pari_sp ltop;
   long sx = signe(x), ex = expo(x);
 
   if (!sx) /* real 0 */
@@ -1144,7 +1144,7 @@ void
 etatpile(unsigned int n)
 {
   long nu, i, l, m;
-  gpmem_t av=avma;
+  pari_sp av=avma;
   GEN adr,adr1;
   double r;
 
@@ -1478,7 +1478,7 @@ bruti(GEN g, pariout_t *T, int nosign)
     case t_PADIC:
     {
       GEN p = (GEN)g[2];
-      gpmem_t av = avma;
+      pari_sp av = avma;
       i = valp(g); l = precp(g)+i;
       g = (GEN)g[4]; v = GENtostr(p);
       for (; i<l; i++)
@@ -2080,7 +2080,7 @@ gp_output(GEN z, gp_data *G)
 void
 gen_output(GEN x, pariout_t *T)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN y = changevar(x, polvar);
   if (!T) T = &DFLT_OUTPUT;
   T->initial = 1;
@@ -2970,7 +2970,7 @@ writebin(char *name, GEN x)
 GEN
 readbin(char *name, FILE *f)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN x,y,z;
   int cx,cy;
   check_magic(name,f); x = y = z = NULL;

@@ -164,7 +164,7 @@ dogroup(subgp_iter *T)
   long  *a = T->a,  *maxa = T->maxa;
   long **g = T->g, **maxg = T->maxg;
   GEN **H = T->H;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long e,i,j,k,r,n,t2,ind, t = len(M), l = len(L);
 
   t2 = (l==t)? t-1: t;
@@ -234,7 +234,7 @@ loop(subgp_iter *T, long r)
 static void
 dopsubtyp(subgp_iter *T)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i,r, l = len(T->L), t = len(T->M);
 
   if (!t)
@@ -442,7 +442,7 @@ init_powlist(long k, long p)
 static void
 subgroup_engine(subgp_iter *T)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN B,L,fa,junk,primlist,p,listL,indexsubq = NULL;
   GEN cyc = T->cyc;
   long i,j,k,imax,nbprim, n = lg(cyc);
@@ -585,7 +585,7 @@ forsubgroup(entree *ep, GEN cyc, GEN bound, char *ch)
 static GEN
 subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN listKer)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   subgp_iter T;
   sublist_t S;
   slist *list, *sublist;

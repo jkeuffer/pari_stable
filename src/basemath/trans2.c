@@ -34,7 +34,7 @@ static GEN
 mpatan(GEN x)
 {
   long l, l1, l2, n, m, u, i, lp, e, sx, s;
-  gpmem_t av0, av;
+  pari_sp av0, av;
   double alpha,beta,gama=1.0,delta,fi;
   GEN y,p1,p2,p3,p4,p5,unr;
 
@@ -124,7 +124,7 @@ mpatan(GEN x)
 GEN
 gatan(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1;
 
   switch(typ(x))
@@ -160,7 +160,7 @@ void
 gatanz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gatanz");
   gaffect(gatan(x,prec),y); avma=av;
@@ -177,7 +177,7 @@ static GEN
 mpasin(GEN x)
 {
   long l, u, v;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   u=cmprs(x,1); v=cmpsr(-1,x);
@@ -200,7 +200,7 @@ GEN
 gasin(GEN x, long prec)
 {
   long l, sx;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1;
 
   switch(typ(x))
@@ -250,7 +250,7 @@ void
 gasinz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gasinz");
   gaffect(gasin(x,prec),y); avma=av;
@@ -267,7 +267,7 @@ static GEN
 mpacos(GEN x)
 {
   long l, u, v, sx;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1,p2;
 
   u=cmprs(x,1); v=cmpsr(-1,x); sx = signe(x);
@@ -308,7 +308,7 @@ GEN
 gacos(GEN x, long prec)
 {
   long l, sx;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1;
 
   switch(typ(x))
@@ -355,7 +355,7 @@ void
 gacosz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gacosz");
   gaffect(gacos(x,prec),y); avma=av;
@@ -419,7 +419,7 @@ rfix(GEN x,long prec)
 static GEN
 sarg(GEN x, GEN y, long prec)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
   x = rfix(x,prec); y = rfix(y,prec);
   return gerepileupto(av,mparg(x,y));
 }
@@ -429,7 +429,7 @@ garg(GEN x, long prec)
 {
   GEN p1;
   long tx=typ(x);
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   if (gcmp0(x)) err(talker,"zero argument in garg");
   switch(tx)
@@ -462,7 +462,7 @@ garg(GEN x, long prec)
 static GEN
 mpch(GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   if (gcmp0(x)) return gaddsg(1,x);
@@ -476,7 +476,7 @@ mpch(GEN x)
 GEN
 gch(GEN x, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN p1;
 
   switch(typ(x))
@@ -500,7 +500,7 @@ void
 gchz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gchz");
   gaffect(gch(x,prec),y); avma=av;
@@ -515,7 +515,7 @@ gchz(GEN x, GEN y)
 static GEN
 mpsh(GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   if (!signe(x)) return realzero_bit(expo(x));
@@ -528,7 +528,7 @@ mpsh(GEN x)
 GEN
 gsh(GEN x, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN p1;
 
   switch(typ(x))
@@ -552,7 +552,7 @@ void
 gshz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gshz");
   gaffect(gsh(x,prec),y); avma=av;
@@ -568,7 +568,7 @@ static GEN
 mpth(GEN x)
 {
   long l;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1,p2;
 
   if (!signe(x)) return realzero_bit(expo(x));
@@ -585,7 +585,7 @@ mpth(GEN x)
 GEN
 gth(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN p1,p2,p3;
 
   switch(typ(x))
@@ -615,7 +615,7 @@ void
 gthz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gthz");
   gaffect(gth(x,prec),y); avma=av;
@@ -632,7 +632,7 @@ static GEN
 mpash(GEN x)
 {
   long s=signe(x);
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   y=cgetr(lg(x)); av=avma;
@@ -646,7 +646,7 @@ GEN
 gash(GEN x, long prec)
 {
   long sx, sy, sz;
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1;
 
   if (gcmp0(x)) return gcopy(x);
@@ -688,7 +688,7 @@ void
 gashz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gashz");
   gaffect(gash(x,prec),y); avma=av;
@@ -704,7 +704,7 @@ static GEN
 mpach(GEN x)
 {
   long l;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   l=lg(x); y=cgetr(l); av=avma;
@@ -720,7 +720,7 @@ mpach(GEN x)
 GEN
 gach(GEN x, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
   long v;
 
@@ -776,7 +776,7 @@ void
 gachz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gachz");
   gaffect(gach(x,prec),y); avma=av;
@@ -792,7 +792,7 @@ gachz(GEN x, GEN y)
 static GEN
 mpath(GEN x)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1;
 
   if (!signe(x)) return realzero_bit(expo(x));
@@ -805,7 +805,7 @@ mpath(GEN x)
 GEN
 gath(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
   GEN y,p1;
 
   switch(typ(x))
@@ -843,7 +843,7 @@ void
 gathz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gathz");
   gaffect(gath(x,prec),y); avma=av;
@@ -860,7 +860,7 @@ void
 mpbern(long nb, long prec)
 {
   long n, m, i, j, d, d1, d2, l, code0;
-  gpmem_t av, av2;
+  pari_sp av, av2;
   GEN p1,p2, B;
 
   if (nb < 0) nb = 0;
@@ -934,7 +934,7 @@ static GEN
 bernfracspec(long k)
 {
   ulong n, K = k+1;
-  gpmem_t av, lim;
+  pari_sp av, lim;
   GEN s, c, N, b;
 
   c = N = utoi(K); s = gun; b = gzero;
@@ -978,7 +978,7 @@ bernvec(long nb)
   y[1] = un;
   for (n = 1; n <= nb; n++)
   { /* compute y[n+1] = B_{2n} */
-    gpmem_t av = avma;
+    pari_sp av = avma;
     GEN b = gmul2n(stoi(1-2*n), -1); /* 1 + (2n+1)B_1 = (1-2n) /2 */
     GEN c = gun;
     ulong u1 = 2*n + 1, u2 = n, d1 = 1, d2 = 1;
@@ -1005,7 +1005,7 @@ mpgamma(GEN x)
 {
   GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
   long l, l1, l2, u, i, k, e, s, sx, n, p;
-  gpmem_t av, av1;
+  pari_sp av, av1;
   double alpha,beta,dk;
 
   sx=signe(x); if (!sx) err(gamer2);
@@ -1080,7 +1080,7 @@ cxgamma(GEN x, long prec)
 {
   GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
   long l, l1, l2, u, i, k, e, s, n, p;
-  gpmem_t av, av1;
+  pari_sp av, av1;
   double alpha,beta,dk;
 
   if (gcmp0((GEN)x[2])) return ggamma((GEN)x[1],prec);
@@ -1193,7 +1193,7 @@ double
 dnorm(double s, double t) { return s*s + t*t; }
 
 GEN 
-trans_fix_arg(long *prec, GEN *s0, GEN *sig, gpmem_t *av, GEN *res)
+trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
 {
   GEN s, p1;
   long l;
@@ -1226,7 +1226,7 @@ gammanew(GEN s0, long la, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, unr, nnx, pitemp;
   long i, lim, nn;
-  gpmem_t av, av2, avlim;
+  pari_sp av, av2, avlim;
   int funeq = 0;
 
   if (DEBUGLEVEL) (void)timer2();
@@ -1331,7 +1331,7 @@ gammanew(GEN s0, long la, long prec)
 GEN
 ggamma(GEN x, long prec)
 {
-  gpmem_t av=avma, tetpil;
+  pari_sp av=avma, tetpil;
   long m, ma;
   GEN p1,p2,p3;
   
@@ -1396,7 +1396,7 @@ void
 ggammaz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"ggammaz");
   gaffect(ggamma(x,prec),y); avma=av;
@@ -1407,7 +1407,7 @@ mplngamma(GEN x)
 {
   GEN z,y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
   long l, l1, l2, u, i, k, e, f, s, sx, n, p;
-  gpmem_t av, av1;
+  pari_sp av, av1;
   double alpha,beta,dk;
 
   sx=signe(x); if (!sx) err(talker,"zero argument in mplngamma");
@@ -1499,7 +1499,7 @@ mplngamma(GEN x)
   }
   /* t_REAL result */
   y[3] = y[0]; y += 3;
-  affrr(p4,y); avma = (gpmem_t)y; return y;
+  affrr(p4,y); avma = (pari_sp)y; return y;
 }
 
 static GEN
@@ -1507,7 +1507,7 @@ cxlngamma(GEN x, long prec)
 {
   GEN y,p1,p2,p3,p4,p5,p6,p7,p71,pitemp;
   long l, l1, l2, flag, i, k, e, s, n, p;
-  gpmem_t av, av1;
+  pari_sp av, av1;
   double alpha,beta,dk;
 
   if (gcmp0((GEN)x[2])) return glngamma((GEN)x[1],prec);
@@ -1616,7 +1616,7 @@ GEN
 glngamma(GEN x, long prec)
 {
   long i, n;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1,p2;
 
   switch(typ(x))
@@ -1660,7 +1660,7 @@ void
 glngammaz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"glngammaz");
   gaffect(glngamma(x,prec),y); avma=av;
@@ -1676,7 +1676,7 @@ static GEN
 mpgamd(long x, long prec)
 {
   long i, j, a, l;
-  gpmem_t av;
+  pari_sp av;
   GEN y,p1,p2;
 
   a = labs(x);
@@ -1703,7 +1703,7 @@ mpgamd(long x, long prec)
 void
 mpgamdz(long s, GEN y)
 {
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   affrr(mpgamd(s,lg(y)),y); avma=av;
 }
@@ -1711,7 +1711,7 @@ mpgamdz(long s, GEN y)
 GEN
 ggamd(GEN x, long prec)
 {
-  gpmem_t av, tetpil;
+  pari_sp av, tetpil;
 
   switch(typ(x))
   {
@@ -1734,7 +1734,7 @@ void
 ggamdz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"ggamdz");
   gaffect(ggamd(x,prec),y); avma=av;
@@ -1749,7 +1749,7 @@ ggamdz(GEN x, GEN y)
 GEN
 psinew(GEN s0, long prec)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN sum,z,a,res,tes,in2,sig,s,unr;
   long lim,nn,k;
   const long la = 3;
@@ -1810,7 +1810,7 @@ static GEN
 mppsi(GEN z)  /* version p=2 */
 {
   long l, n, k, x, xx;
-  gpmem_t av, av1, tetpil;
+  pari_sp av, av1, tetpil;
   GEN zk,u,v,a,b;
 
   av=avma; l=lg(z);
@@ -1889,7 +1889,7 @@ static GEN
 cxpsi(GEN z, long prec) /* version p=2 */
 {
   long l, n, k, x, xx;
-  gpmem_t av, av1, tetpil;
+  pari_sp av, av1, tetpil;
   GEN zk,u,v,a,b,p1;
 
   if (gcmp0((GEN)z[2])) return gpsi((GEN)z[1],prec);
@@ -1991,7 +1991,7 @@ void
 gpsiz(GEN x, GEN y)
 {
   long prec = precision(y);
-  gpmem_t av=avma;
+  pari_sp av=avma;
 
   if (!prec) err(infprecer,"gpsiz");
   gaffect(gpsi(x,prec),y); avma=av;

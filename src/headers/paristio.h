@@ -20,11 +20,11 @@ typedef struct {
 } pari_timer;
 
 typedef unsigned char *byteptr;
-typedef ulong gpmem_t;
+typedef ulong pari_sp;
 
 typedef struct stackzone
 {
-  gpmem_t zonetop, bot, top, avma;
+  pari_sp zonetop, bot, top, avma;
   size_t memused;
 } stackzone;
 
@@ -59,7 +59,7 @@ typedef struct pariFILE {
 extern PariOUT *pariOut, *pariErr;
 extern FILE    *pari_outfile, *logfile, *infile, *errfile;
 
-extern gpmem_t avma,bot,top;
+extern pari_sp avma,bot,top;
 extern size_t memused;
 extern byteptr diffptr;
 extern entree  **varentries;
@@ -67,19 +67,19 @@ extern char    *errmessage[], *current_psfile;
 
 #define is_universal_constant(x) ((GEN)(x) >= gzero && (GEN)(x) <= gi)
 
-#define copyifstack(x,y)  STMT_START {gpmem_t _t=(gpmem_t)(x); \
+#define copyifstack(x,y)  STMT_START {pari_sp _t=(pari_sp)(x); \
   (y)=(_t>=bot &&_t<top)? lcopy((GEN)_t): (long)_t;} STMT_END
-#define icopyifstack(x,y) STMT_START {gpmem_t _t=(gpmem_t)(x); \
+#define icopyifstack(x,y) STMT_START {pari_sp _t=(pari_sp)(x); \
   (y)=(_t>=bot &&_t<top)? licopy((GEN)_t): (long)_t;} STMT_END
-#define isonstack(x) ((gpmem_t)(x)>=bot && (gpmem_t)(x)<top)
+#define isonstack(x) ((pari_sp)(x)>=bot && (pari_sp)(x)<top)
 
 /* Define this to (1) locally (in a given file, NOT here) to check
  * "random" garbage collecting
  */
 #ifdef DYNAMIC_STACK
-#  define low_stack(x,l) (avma < (gpmem_t)(l))
+#  define low_stack(x,l) (avma < (pari_sp)(l))
 #else
-#  define low_stack(x,l) (avma < (gpmem_t)(x))
+#  define low_stack(x,l) (avma < (pari_sp)(x))
 #endif
 
 #define stack_lim(av,n) (bot + (((av)-bot)>>(n)))

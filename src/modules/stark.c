@@ -181,7 +181,7 @@ static GEN
 ComputeLift(GEN dataC)
 {
   long order, i;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN cyc, surj, eltq, elt;
 
   order = itos((GEN)dataC[1]);
@@ -230,7 +230,7 @@ static GEN
 GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
   long nbg, i, j, l, nd;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN s, chic, cyc, U, M, p1, cond, condc, p2, nf;
   GEN prdiff, Mrc;
 
@@ -327,7 +327,7 @@ static GEN
 InitQuotient(GEN bnr, GEN C)
 {
   GEN Mrm, dataquo = cgetg(3, t_VEC);
-  gpmem_t av;
+  pari_sp av;
 
   dataquo[1] = lcopy(bnr);
   av = avma;  Mrm = diagonal(gmael(bnr, 5, 2));
@@ -341,7 +341,7 @@ InitQuotient(GEN bnr, GEN C)
 static GEN
 ComputeKernel0(GEN P, GEN DA, GEN DB)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long nbA = lg(DA)-1, rk;
   GEN herm, U;
 
@@ -362,7 +362,7 @@ static GEN
 ComputeKernel(GEN bnrm, GEN dataC)
 {
   long i, nbm;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnrn, Mrm, genm, Mrq, mgq, P;
 
   bnrn = (GEN)dataC[1];
@@ -384,7 +384,7 @@ ComputeKernel(GEN bnrm, GEN dataC)
 static GEN
 ComputeIndex2Subgroup(GEN bnr, GEN C)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long nb, i;
   GEN D, Mr, U, T, subgrp;
 
@@ -406,7 +406,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
 GEN
 Order(GEN cyc, GEN x)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long i, l = lg(cyc);
   GEN c,o,f = gun;
   for (i = 1; i < l; i++)
@@ -425,7 +425,7 @@ static GEN
 GetIndex(GEN pr, GEN bnr, GEN subgroup)
 {
   long v, e, f;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnf, mod, mod0, bnrpr, subpr, M, dtQ, p1;
   GEN rep, cycpr, cycQ;
 
@@ -476,7 +476,7 @@ static GEN
 CplxModulus(GEN data, long *newprec, long prec)
 {
   long pr, dprec;
-  gpmem_t av = avma, av2;
+  pari_sp av = avma, av2;
   GEN nf, cpl, pol, p1;
 
   nf = gmael3(data, 1, 1, 7);
@@ -533,7 +533,7 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 {
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
   long limnorm, first = 1, pr;
-  gpmem_t av = avma, av1, av0;
+  pari_sp av = avma, av1, av0;
   GEN bnr, rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
   GEN candD, D, bpr, indpr, sgp, p1, p2, rb;
 
@@ -691,7 +691,7 @@ static GEN
 ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 {
   long ic, i, j, nz, q, N, nChar = lg(LCHI)-1;
-  gpmem_t av = avma, av2, lim;
+  pari_sp av = avma, av2, lim;
   GEN sqrtnc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
   GEN cyc, *vN, *vB, diff, vt, idg, mu, idh, zid, *gen, z, *nchi;
   GEN indW, W, CHI, classe, s0, *s, tr, den, muslambda, beta2, sarch;
@@ -879,7 +879,7 @@ GEN
 bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 {
   long l;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN cond, condc, bnrc, CHI;
 
   if (flag < 0 || flag > 1) err(flagerr,"bnrrootnumber");
@@ -920,7 +920,7 @@ static GEN
 LiftChar(GEN cyc, GEN Mat, GEN chi)
 {
   long lm, l, i, j;
-  gpmem_t av;
+  pari_sp av;
   GEN lchi, s;
 
   lm = lg(cyc) - 1;
@@ -1017,7 +1017,7 @@ InitChar(GEN bnr, GEN listCR, long prec)
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
   GEN modul, dk, C, dataCR, chi, cond, Mr, z1, p1;
   long N, r1, r2, prec2, h, i, j;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   modul = gmael(bnr, 2, 1);
   Mr    = gmael(bnr, 5, 2);
@@ -1102,7 +1102,7 @@ InitChar0(GEN dataD, long prec)
 {
   GEN MrD, listCR, p1, chi, lchi, Surj, cond, bnr, p2, Mr, d, allCR;
   long hD, h, nc, i, j, lD, tnc;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   Surj = gmael(dataD, 2, 3);
   MrD  = gmael(dataD, 2, 2);
@@ -1237,7 +1237,7 @@ static int**
 InitReduction(GEN CHI, long deg)
 {
   long j;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   int **A;
   GEN d,polmod,pol, x = polx[0];
 
@@ -1308,7 +1308,7 @@ static void
 AddMulCoeff(int *c0, int *c1, int* c2, int** reduc, long deg)
 {
   long i, j;
-  gpmem_t av;
+  pari_sp av;
   int c, *t;
 
   if (IsZero(c2,deg)) return;
@@ -1417,9 +1417,9 @@ an_AddMul(int **an,int **an2, long np, long n, long deg, GEN chi, int **reduc)
 static void
 CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long lg, j, np;
-  gpmem_t av1;
+  pari_sp av1;
   int **an2;
   GEN bnrc, diff, ray, chi, CHI, pr;
   CHI_t C;
@@ -1453,7 +1453,7 @@ CorrectCoeff(GEN dtcr, int** an, int** reduc, long n, long deg)
 static int**
 ComputeCoeff(GEN dtcr, LISTray *R, long n, long deg)
 {
-  gpmem_t av = avma, av2;
+  pari_sp av = avma, av2;
   long i, l, np;
   int **an, **reduc, **an2;
   GEN L, CHI, ray, chi;
@@ -1515,7 +1515,7 @@ PiBound(long x)
 static void
 InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
   long p,i,l, condZ = itos(gcoeff(cond,1,1)), contZ = itos(content(cond));
   GEN prime, pr, nf = checknf(bnf), dk = (GEN)nf[3];
@@ -1570,7 +1570,7 @@ InitPrimesQuad(GEN bnr, long nmax, LISTray *R)
 static void
 InitPrimes(GEN bnr, long nmax, LISTray *R)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnf = (GEN)bnr[1], cond = gmael3(bnr,2,1,1);
   long np,p,j, condZ = itos(gcoeff(cond,1,1));
   GEN Npr, tabpr, prime, pr, nf = checknf(bnf);
@@ -1629,7 +1629,7 @@ get_limx(long r1, long r2, long prec, GEN *pteps)
 static long
 GetBoundN0(GEN C,  long r1, long r2,  long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN limx = get_limx(r1, r2, prec, NULL);
 
   limx = gfloor(gdiv(C, limx));
@@ -1643,7 +1643,7 @@ static long
 GetBoundi0(long r1, long r2,  long prec)
 {
   long imin, i0, itest;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN ftest, borneps, eps, limx = get_limx(r1, r2, prec, &eps);
   GEN sqrtPi = mpsqrt(mppi(DEFAULTPREC));
 
@@ -1702,7 +1702,7 @@ ppgamma(ST_t *T, long prec)
   long b = T->b;
   long c = T->c, r = T->r, i0 = T->i0;
   long i,j, s,t;
-  gpmem_t av;
+  pari_sp av;
 
   aij = (GEN*)cgetg(i0+1, t_VEC);
   bij = (GEN*)cgetg(i0+1, t_VEC);
@@ -1849,7 +1849,7 @@ sortChars(GEN dataCR, int quad)
 static void
 get_cS_cT(ST_t *T, long n)
 {
-  gpmem_t av;
+  pari_sp av;
   GEN csurn, nsurc, lncsurn;
   GEN A,B,s,t,Z,*aij,*bij;
   long i,j,r,i0;
@@ -1931,7 +1931,7 @@ static GEN
 GetST(GEN dataCR, GEN vChar, long prec)
 {
   const long cl = lg(dataCR) - 1;
-  gpmem_t av, av1, av2;
+  pari_sp av, av1, av2;
   long ncond, n, j, k, jc, nmax, prec2, i0, r1, r2;
   GEN bnr, nf, racpi, *powracpi;
   GEN rep, N0, C, T, S, an, degs;
@@ -2042,7 +2042,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
 static GEN
 GetValue(GEN dtcr, GEN W, GEN S, GEN T, long fl, long fl2, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN A, cf, VL, rep, racpi, p1;
   long q, b, c;
   int isreal;
@@ -2104,7 +2104,7 @@ GetValue1(GEN bnr, long flag, long prec)
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
   GEN hk, Rk, wk, c, rep, mod0, diff;
   long i, l, r, r1, r2;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   r1 = nf_get_r1(nf);
   r2 = nf_get_r2(nf);
@@ -2185,7 +2185,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   GEN beta = d->beta, B = d->B;
   long N = d->N, v = d->v;
   long i, j, k, l, ct = 0, prec2;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, 0 };
   chk.data = (void*)d;
 
@@ -2260,7 +2260,7 @@ static GEN
 RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {
   long i, bacmin, bacmax;
-  gpmem_t av = avma, av2;
+  pari_sp av = avma, av2;
   GEN vec, velt, p1, cand, M, plg, pol, cand2;
   GEN beta = d->beta;
 
@@ -2308,7 +2308,7 @@ GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
   long j, md, G, cl = degpol(pol);
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN p1, beta;
   RC_data d;
 
@@ -2357,7 +2357,7 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 static void
 an_mul(int **an, long p, long q, long n, long deg, GEN chi, int **reduc)
 {
-  gpmem_t av;
+  pari_sp av;
   long c,i;
   int *T;
 
@@ -2388,7 +2388,7 @@ an_set0(int **an, long p, long n, long deg)
 static int**
 computean(GEN dtcr, LISTray *R, long n, long deg)
 {
-  gpmem_t av = avma, av2;
+  pari_sp av = avma, av2;
   long i, p, q, condZ, l;
   int **an, **reduc;
   GEN L, CHI, chi, chi1, ray;
@@ -2478,7 +2478,7 @@ static GEN
 QuadGetST(GEN dataCR, GEN vChar, long prec)
 {
   const long cl  = lg(dataCR) - 1;
-  gpmem_t av, av1, av2;
+  pari_sp av, av1, av2;
   long ncond, n, j, k, nmax;
   GEN rep, N0, C, T, S, cf, cfh, an, degs;
   LISTray LIST;
@@ -2588,7 +2588,7 @@ static GEN
 makescind(GEN nf, GEN polrel, long cl)
 {
   long i, l;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN pol, polabs, L, BAS, nf2, dabs, dk, bas;
   DH_t T;
   FP_chk_fun CHECK;
@@ -2642,7 +2642,7 @@ static GEN
 GenusField(GEN bnf, long prec)
 {
   long hk, c, l;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN disc, x2, pol, div, d;
 
   hk   = itos(gmael3(bnf, 8, 1, 1));
@@ -2680,7 +2680,7 @@ static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
   long cl, i, j, cpt = 0, N, h, v, n, bnd = 300, sq = 1, r1, r2;
-  gpmem_t av, av2;
+  pari_sp av, av2;
   int **matan;
   GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
   GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an, Pi;
@@ -2864,7 +2864,7 @@ LABDOUB:
 GEN
 quadhilbertreal(GEN D, GEN flag, long prec)
 {
-  gpmem_t av = avma;
+  pari_sp av = avma;
   long newprec;
   VOLATILE long cl;
   VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
@@ -2933,7 +2933,7 @@ GEN
 bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
 {
   long cl, N, newprec, bnd = 0;
-  gpmem_t av = avma;
+  pari_sp av = avma;
   GEN bnf, dataS, p1, Mcyc, nf, data;
 
   if (flag >= 4)
@@ -3007,7 +3007,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   GEN bnf, nf, cyc, Mcyc, p1, L1, chi, lchi, clchi, allCR, listCR, dataCR;
   GEN S, T, rep, indCR, invCR, Qt, vChar;
   long N, cl, i, j, k, nc, lq, a, ncc;
-  gpmem_t av = avma;
+  pari_sp av = avma;
 
   checkbnrgen(bnr);
   bnf  = (GEN)bnr[1];
