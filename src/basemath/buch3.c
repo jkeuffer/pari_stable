@@ -1420,17 +1420,22 @@ conductor(GEN bnr,GEN subgroup,long all,long prec)
 static GEN
 rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 {
-  long av=avma,i,j,reldeg,sizemat,prime,nfac,k;
-  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,pr;
-  GEN reldisc,famo,ep,fac,col,p1,bd,upnf;
-  byteptr d = diffptr;
+  long av=avma,i,j,reldeg,sizemat,p,pmax,nfac,k;
+  GEN bnf,polreldisc,nf,raycl,group,detgroup,fa,greldeg;
+  GEN contreld,primreld,reldisc,famo,ep,fac,col,p1,bd,upnf;
+  byteptr d = diffptr + 1; /* start at p = 2 */
 
   checkbnr(bnr); bnf=(GEN)bnr[1]; raycl=(GEN)bnr[5];
   nf=(GEN)bnf[7];
   polrel = fix_relative_pol(nf,polrel);
   if (typ(polrel)!=t_POL) err(typeer,"rnfnormgroup");
   reldeg=lgef(polrel)-3; detgroup=(GEN)raycl[1];
-  group = diagonal((GEN)raycl[2]);
+  /* reldeg-th powers are in norm group */
+  greldeg = stoi(reldeg);
+  group = diagonal(gmod((GEN)raycl[2], greldeg));
+  for (i=1; i<lg(group); i++)
+    if (!signe(gcoeff(group,i,i))) coeff(group,i,i) = (long)greldeg;
+
   k = cmpis(detgroup,reldeg);
   if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
   if (!rnf && !k) return group;
@@ -1449,6 +1454,8 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
   }
 
   reldisc = idealmul(nf, reldisc, gmael3(bnr,2,1,1));
+  contreld= content(reldisc);
+  primreld= gcmp1(contreld)? reldisc: gdiv(reldisc, contreld);
 
   k=degree(gmael3(bnr,1,7,1));
   bd=gmulsg(k,glog(mpabs(gmael3(bnr,1,7,3)),DEFAULTPREC));
@@ -1458,71 +1465,77 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
 
   if (rnf && DEBUGLEVEL) 
     fprintferr("rnfnormgroup: bound for primes = %Z\n", bd);
-
-  sizemat=lg(group)-1; prime = 0;
-  for(;;)
+  pmax = is_bigint(bd)? 0: itos(bd);
+  sizemat=lg(group)-1;
+  for (p=2; p < pmax; p += *d++)
   {
-    prime += *d++; if (!*d) err(primer1);
-    if (cmpis(bd,prime) <= 0) break;
-    fa=primedec(nf,stoi(prime));
-    for (i=1; i<lg(fa); i++)
+    long oldf = -1, lfa;
+    /* If all pr are unramified and have the same residue degree, p =prod pr
+     * and including last pr^f or p^f is the same, but the last isprincipal
+     * is much easier! oldf is used to track this */
+
+    if (!*d) err(primer1);
+    if (!smodis(contreld,p)) continue; /* all pr|p ramified */
+
+    fa = primedec(nf,stoi(p)); lfa = lg(fa)-1;
+    for (i=1; i<=lfa; i++)
     {
-      pr = (GEN)fa[i];
-      if (idealval(nf,reldisc,pr)==0)
+      GEN pr = (GEN)fa[i];
+      long f;
+      /* check decomposition of pr has Galois type */
+      if (element_val(nf,polreldisc,pr) != 0)
       {
-	if (element_val(nf,polreldisc,pr) == 0)
-	{
-	  famo=nffactormod(nf,polrel,pr);
-	  ep=(GEN)famo[2]; 
-	  fac=(GEN)famo[1];
-	  nfac=lg(ep)-1; 
-	  k=lgef((GEN)fac[1])-3;
-	  for (j=1; j<=nfac; j++)
-	  {
-	    if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-	    if (lgef(fac[j])-3 != k)
-	    {
-	      if (rnf) 
-		return NULL;
-	      else
-		err(talker,"non Galois extension in rnfnormgroup");
-	    }
-	  }
-	}
-	else
-	{
-	  famo=idealfactor(upnf,rnfidealup(rnf,pr));	
-	  ep=(GEN)famo[2]; 
-	  fac=(GEN)famo[1];
-	  nfac=lg(ep)-1; 
-	  k=itos(gmael(fac,1,4));
-	  for (j=1; j<=nfac; j++)
-	  {
-	    if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
-	    if (cmpis(gmael(fac,j,4),k))
-	    {
-	      if(rnf) 
-		return NULL;
-	      else
-		err(talker,"non Galois extension in rnfnormgroup");
-	    }
-	  }
-	}
-	col=gmulsg(k,isprincipalrayall(bnr,pr,nf_REGULAR));
-	p1=cgetg(sizemat+2,t_MAT);
-	for (j=1; j<=sizemat; j++) p1[j]=group[j];
-	p1[sizemat+1]=(long)col;
-	group=hnf(p1); detgroup=dethnf(group);
-        k=cmpis(detgroup,reldeg);
-        if (k<0) 
-	{
-	  if (rnf) 
-	    return NULL;
-	  else
-	    err(talker,"not an Abelian extension in rnfnormgroup");
-	}
-	if (!rnf && !k) { cgiv(detgroup); return gerepileupto(av,group); }
+        /* if pr ramified, we will have to use all (non-ram) P | pr */
+        if (idealval(nf,primreld,pr)!=0) { oldf = 0; continue; }
+
+        famo=idealfactor(upnf,rnfidealup(rnf,pr));	
+        ep=(GEN)famo[2]; 
+        fac=(GEN)famo[1];
+        nfac=lg(ep)-1; 
+        f = itos(gmael(fac,1,4));
+        for (j=1; j<=nfac; j++)
+        {
+          if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
+          if (itos(gmael(fac,j,4)) != f)
+          {
+            if (rnf) return NULL;
+            err(talker,"non Galois extension in rnfnormgroup");
+          }
+        }
       }
+      else
+      {
+        famo=nffactormod(nf,polrel,pr);
+        ep=(GEN)famo[2]; 
+        fac=(GEN)famo[1];
+        nfac=lg(ep)-1; 
+        f = lgef((GEN)fac[1])-3;
+        for (j=1; j<=nfac; j++)
+        {
+          if (!gcmp1((GEN)ep[j])) err(bugparier,"rnfnormgroup");
+          if (lgef(fac[j])-3 != f)
+          {
+            if (rnf) return NULL;
+            err(talker,"non Galois extension in rnfnormgroup");
+          }
+        }
+      }
+      if (f == reldeg) continue; /* reldeg-th powers already included */
+
+      if (oldf < 0) oldf = f; else if (oldf != f) oldf = 0;
+      if (oldf && i == lfa) pr = stoi(p); 
+
+      /* pr^f = N P, P | pr, hence is in norm group */
+      col = gmulsg(f, isprincipalrayall(bnr,pr,nf_REGULAR));
+      group = hnf(concatsp(group, col));
+      detgroup = dethnf_i(group);
+      k = cmpis(detgroup,reldeg);
+      if (k < 0) 
+      {
+        if (rnf) return NULL;
+        err(talker,"not an Abelian extension in rnfnormgroup");
+      }
+      if (!rnf && !k) { cgiv(detgroup); return gerepileupto(av,group); }
     }
   }
   if (k>0) err(bugparier,"rnfnormgroup");
