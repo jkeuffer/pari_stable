@@ -45,16 +45,13 @@ extern byteptr diffptr;
 extern entree  **varentries;
 extern char    *errmessage[], *current_psfile;
 
+#define is_universal_constant(x) ((GEN)(x) >= gzero && (GEN)(x) <= gi)
 
-/* This may not be exact on all machines [Ptitboul] */
-#define is_universal_constant(x) \
-  ((long)(x) >= (long)gzero && (long)(x)<=(long)gi)
-
-#define copyifstack(x,y) {long t=(long)(x); \
+#define copyifstack(x,y) {ulong t=(ulong)(x); \
 			  (y)=(t>=bot &&t<top)? lcopy((GEN)t): t;}
-#define icopyifstack(x,y) {long t=(long)(x); \
+#define icopyifstack(x,y) {ulong t=(ulong)(x); \
 			  (y)=(t>=bot &&t<top)? licopy((GEN)t): t;}
-#define isonstack(x) ((GEN)(x)>=(GEN)bot && (GEN)(x)<(GEN)top)
+#define isonstack(x) ((ulong)(x)>=bot && (ulong)(x)<top)
 
 /* Define this to (1) locally (in a given file, NOT here) to check
  * "random" garbage collecting
