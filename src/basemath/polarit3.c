@@ -807,7 +807,7 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
 
   if (typ(x) != t_POL) return mpinvmod(x, p);
   z = FpX_extgcd(x, T, p, &U, &V);
-  if (lgef(z) != 3) return NULL;
+  if (degpol(z)) return NULL;
   z = mpinvmod((GEN)z[2], p);
   return FpX_Fp_mul(U, z, p);
 }
