@@ -983,13 +983,11 @@ mat_to_polpol(GEN x, long v,long w)
   for (j=1; j<lx; j++)
   {
     GEN p1, col = (GEN)x[j];
-    long k = lcol;
-
-    while (k-- && gcmp0((GEN)col[k]));
-    i=k+2; p1=cgetg(i,t_POL);
+    long k;
+    i=lcol+1; p1=cgetg(i,t_POL);
     p1[1] = evalsigne(1) | evallgef(i) | evalvarn(w);
     col--; for (k=2; k<i; k++) p1[k] = col[k];
-    y[j] = (long)p1;
+    y[j] = (long)normalizepol_i(p1,i);
   }
   return normalizepol_i(--y,lx+1);
 }
