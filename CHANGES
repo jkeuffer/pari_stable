@@ -40,7 +40,10 @@ Done for version 2.2.2 (released ??/??/2001):
     1- allow compressing *.dvi files for the online help system
     2- index bound was restricted to MAXLONG in subgrouplist. Made it a GEN
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Added
+BA  1- New function 'vectorsmall'.
+ 
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.1 (released 18/10/2001):
 
   Fixed
