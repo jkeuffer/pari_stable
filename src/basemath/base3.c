@@ -289,9 +289,10 @@ element_sqri(GEN nf, GEN x)
 GEN
 element_sqr(GEN nf, GEN x)
 {
-  long av = avma,i,j,k,N=lgef(nf[1])-3, tx = typ(x);
-  GEN p1,s,v,c, tab = (GEN)nf[9];
+  long av = avma,i,j,k,N, tx = typ(x);
+  GEN p1,s,v,c,tab;
 
+  nf=checknf(nf); tab = (GEN)nf[9]; N=lgef(nf[1])-3;
   if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
   if (is_extscalar_t(tx))
     return gerepileupto(av, algtobasis(nf, gsqr(x)));
