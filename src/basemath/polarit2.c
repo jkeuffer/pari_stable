@@ -2184,7 +2184,7 @@ padic_gcd(GEN x, GEN y)
 {
   long v = ggval(x,(GEN)y[2]), w = valp(y);
   if (w < v) v = w;
-  return gpuigs((GEN)y[2], v);
+  return gpowgs((GEN)y[2], v);
 }
 
 /* x,y in Z[i], at least one of which is t_COMPLEX */
@@ -2257,9 +2257,10 @@ zero_gcd(GEN x, GEN y)
   if (typ(y) == t_PADIC)
   {
     GEN p = (GEN)y[2];
-    long v = ggval(x, p), w = valp(y);
-    if (w < v) v = w;
-    return padiczero(p, v);
+    long v = ggval(x,p), w = valp(y);
+    if (w < v) return padiczero(p, w);
+    if (gcmp0(x)) return padiczero(p, v);
+    return gpowgs(p, v);
   }
   switch(typ(x))
   {
@@ -2337,7 +2338,7 @@ ggcd(GEN x, GEN y)
       case t_PADIC:
         if (!egalii((GEN)x[2],(GEN)y[2])) return gun;
         vx = valp(x);
-        vy = valp(y); return gpuigs((GEN)y[2], min(vy,vx));
+        vy = valp(y); return gpowgs((GEN)y[2], min(vy,vx));
 
       case t_QUAD:
         av=avma; p1=gdiv(x,y);
@@ -2469,7 +2470,7 @@ ggcd(GEN x, GEN y)
 	  return srgcd(x,y);
 
 	case t_SER:
-	  return gpuigs(polx[vx],min(valp(y),gval(x,vx)));
+	  return gpowgs(polx[vx],min(valp(y),gval(x,vx)));
 
 	case t_RFRAC: case t_RFRACN: av=avma; z=cgetg(3,ty);
           z[1]=lgcd(x,(GEN)y[1]);
@@ -2481,10 +2482,10 @@ ggcd(GEN x, GEN y)
       switch(ty)
       {
 	case t_SER:
-	  return gpuigs(polx[vx],min(valp(x),valp(y)));
+	  return gpowgs(polx[vx],min(valp(x),valp(y)));
 
 	case t_RFRAC: case t_RFRACN:
-	  return gpuigs(polx[vx],min(valp(x),gval(y,vx)));
+	  return gpowgs(polx[vx],min(valp(x),gval(y,vx)));
       }
       break;
 
@@ -2667,7 +2668,7 @@ gcdmonome(GEN x, GEN y)
   GEN p1,p2;
 
   if (dx < e) e = dx;
-  p1=ggcd(leading_term(x),content(y)); p2=gpuigs(polx[v],e);
+  p1=ggcd(leading_term(x),content(y)); p2=gpowgs(polx[v],e);
   tetpil=avma; return gerepile(av,tetpil,gmul(p1,p2));
 }
 
@@ -3053,13 +3054,13 @@ init_resultant(GEN x, GEN y)
   tx = typ(x); ty = typ(y);
   if (is_scalar_t(tx) || is_scalar_t(ty))
   {
-    if (tx==t_POL) return gpuigs(y,degpol(x));
-    if (ty==t_POL) return gpuigs(x,degpol(y));
+    if (tx==t_POL) return gpowgs(y,degpol(x));
+    if (ty==t_POL) return gpowgs(x,degpol(y));
     return gun;
   }
   if (tx!=t_POL || ty!=t_POL) err(typeer,"subresall");
   if (varn(x)==varn(y)) return NULL;
-  return (varn(x)<varn(y))? gpuigs(y,degpol(x)): gpuigs(x,degpol(y));
+  return (varn(x)<varn(y))? gpowgs(y,degpol(x)): gpowgs(x,degpol(y));
 }
 
 /* return coefficients s.t x = x_0 X^n + ... + x_n */
@@ -3264,7 +3265,7 @@ subresall(GEN u, GEN v, GEN *sol)
 static GEN
 scalar_res(GEN x, GEN y, GEN *U, GEN *V)
 {
-  *V=gpuigs(y,degpol(x)-1); *U=gzero; return gmul(y,*V);
+  *V=gpowgs(y,degpol(x)-1); *U=gzero; return gmul(y,*V);
 }
 
 /* compute U, V s.t Ux + Vy = resultant(x,y) */
@@ -3539,7 +3540,7 @@ resultantducos(GEN P, GEN Q)
   if (degpol(Q) > 0)
   {
     av2 = avma; lim = stack_lim(av2,1);
-    s = gpuigs(leading_term(Q),delta);
+    s = gpowgs(leading_term(Q),delta);
     Z = Q;
     Q = pseudorem(P, gneg(Q));
     P = Z;
@@ -3750,9 +3751,9 @@ srgcd(GEN x, GEN y)
           h = g = leading_term(u);
           break;
         default:
-          v = gdiv(r,gmul(gpuigs(h,degq),g));
+          v = gdiv(r,gmul(gpowgs(h,degq),g));
           g = leading_term(u);
-          h = gdiv(gpuigs(g,degq), gpuigs(h,degq-1));
+          h = gdiv(gpowgs(g,degq), gpowgs(h,degq-1));
       }
       if (low_stack(lim, stack_lim(av1,1)))
       {
@@ -3916,8 +3917,8 @@ sturmpart(GEN x, GEN a, GEN b)
       case 1:
         p1 = gmul(h,p1); h = g; break;
       default:
-        p1 = gmul(gpuigs(h,degq),p1);
-        h = gdivexact(gpuigs(g,degq), gpuigs(h,degq-1));
+        p1 = gmul(gpowgs(h,degq),p1);
+        h = gdivexact(gpowgs(g,degq), gpowgs(h,degq-1));
     }
     v = gdivexact(r,p1);
     if (low_stack(lim,stack_lim(av,1)))
