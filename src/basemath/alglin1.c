@@ -1453,8 +1453,8 @@ FpM_gauss(GEN a, GEN b, GEN p)
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    a = ZM_Flm(a, pp);
-    b = ZM_Flm(b, pp);
+    a = ZM_to_Flm(a, pp);
+    b = ZM_to_Flm(b, pp);
     u = Flm_gauss_sp(a,b, pp);
     u = iscol? zv_ZC((GEN)u[1]): zm_ZM(u);
     return gerepileupto(av, u);
@@ -1612,7 +1612,7 @@ ZM_inv(GEN M, GEN dM)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     dMp = umodiu(dM,p);
     if (!dMp) continue;
-    Hp = Flm_inv_sp(ZM_Flm(M,p), p);
+    Hp = Flm_inv_sp(ZM_to_Flm(M,p), p);
     if (dMp != 1) Hp = Flm_Fl_mul_inplace(Hp, dMp, p);
 
     if (!H)
@@ -2699,7 +2699,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
-    y = ZM_Flm(x, pp);
+    y = ZM_to_Flm(x, pp);
     y = Flm_ker_sp(y, pp, deplin);
     if (!y) return y;
     y = deplin? zv_ZC(y): zm_ZM(y);

@@ -813,9 +813,9 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   if (!is_bigint(p))
   {
     ulong pp = p[2];
-    pol = ZX_Flx(pol, pp);
-    x   = ZX_Flx(x,   pp);
-    y = Flx_ZX( Flxq_pow(x, n, pol, pp) );
+    pol = ZX_to_Flx(pol, pp);
+    x   = ZX_to_Flx(x,   pp);
+    y = Flx_to_ZX( Flxq_pow(x, n, pol, pp) );
   }
   else
   {
@@ -1055,10 +1055,10 @@ FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   if (OK_ULONG(p))
   {
     ulong pp = p[2];
-    x = ZXX_FlxX(x, pp, varn(T));
-    S = ZX_Flx(S, pp);
-    T = ZX_Flx(T, pp);
-    y = FlxX_ZXX( FlxYqQ_pow(x, n, S, T, pp) );
+    x = ZXX_to_FlxX(x, pp, varn(T));
+    S = ZX_to_Flx(S, pp);
+    T = ZX_to_Flx(T, pp);
+    y = FlxX_to_ZXX( FlxYqQ_pow(x, n, S, T, pp) );
   }
   else
   {
@@ -1105,11 +1105,11 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
     ulong pp = p[2];
     GEN z;
     long v = varn(T);
-    T = ZX_Flx(T, pp);
-    x = ZXX_FlxX(x, pp, v);
-    S = ZXX_FlxX(S, pp, v);
+    T = ZX_to_Flx(T, pp);
+    x = ZXX_to_FlxX(x, pp, v);
+    S = ZXX_to_FlxX(S, pp, v);
     z = FlxqXQ_pow(x, n, S, T, pp);
-    y = FlxX_ZXX(z);
+    y = FlxX_to_ZXX(z);
   }
   else
   {
@@ -1445,7 +1445,7 @@ FpXQ_matrix_pow(long n, long m, GEN y, GEN P, GEN l)
 GEN
 Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l)
 {
-  return FlxV_Flm(Flxq_powers(y,m-1,P,l),n);
+  return FlxV_to_Flm(Flxq_powers(y,m-1,P,l),n);
 }
 /* compute the reciprocical isomorphism of S mod T,p, i.e. V such that
    V(S)=X  mod T,p*/
@@ -1485,12 +1485,12 @@ Flm_Frobenius(GEN M, long r, ulong p, long v)
   GEN W, V = cgetg(r+2,t_VEC);
   long i;
   V[1] = (long) polx_Flx(v); if (!r) return V;
-  V[2] = (long) Flv_Flx((GEN)M[2],v);
+  V[2] = (long) Flv_to_Flx((GEN)M[2],v);
   W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
   {
     W = Flm_Flv_mul(M,W,p);
-    V[i] = (long) Flv_Flx(W,v);
+    V[i] = (long) Flv_to_Flx(W,v);
   }
   return V;
 }
@@ -1544,11 +1544,11 @@ FlxqV_Flx_Frobenius(GEN V, GEN P, GEN T, ulong p)
   long l=degpol(T);
   long v=varn(T);
   GEN M,W,Mi;
-  GEN PV=Flx_Flv_lg(P, lgpol(P));
+  GEN PV=Flx_to_Flv(P, lgpol(P));
   GEN *gptr[2];
   long lV=lg(V);
   M=cgetg(l+1,t_VEC);
-  M[1]=(long)Fl_Flx(Flx_eval(P,1,p),v);
+  M[1]=(long)Fl_to_Flx(Flx_eval(P,1,p),v);
   M[2]=(long)FlxV_Flv_innerprod(V,PV,p);
   btop=avma;
   gptr[0]=&Mi;
@@ -1568,7 +1568,7 @@ FlxqV_Flx_Frobenius(GEN V, GEN P, GEN T, ulong p)
     btop=(pari_sp)W;
     M[i]=(long)Mi;
   }
-  return FlxV_Flm(M,l);
+  return FlxV_to_Flm(M,l);
 }
 
 /* Let M the matrix of the Frobenius automorphism of Fp[X]/(T).
@@ -1604,10 +1604,10 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   if (OK_ULONG(l))
   {
     ulong p=l[2];
-    GEN M, V=Flm_Frobenius(ZM_Flm(MA, p), r, p, evalvarn(vu));
+    GEN M, V=Flm_Frobenius(ZM_to_Flm(MA, p), r, p, evalvarn(vu));
     if (DEBUGLEVEL>=4) msgtimer("pol[Frobenius]");
-    M=FlxqV_Flx_Frobenius(V, ZX_Flx(U, p), ZX_Flx(P, p), p);
-    A=Flm_ZM(Flm_ker(M,p));
+    M=FlxqV_Flx_Frobenius(V, ZX_to_Flx(U, p), ZX_to_Flx(P, p), p);
+    A=Flm_to_ZM(Flm_ker(M,p));
   }
   else
   {
@@ -1842,25 +1842,25 @@ Fp_factor_irred(GEN P, GEN Q, GEN l)
   if (OK_ULONG(l))
   {
     ulong p = l[2];
-    E = FlxX_Flm(ZXX_FlxX(E,p,vp),np);
-    MP= Flxq_matrix_pow(ZX_Flx(SP,p),np,d,ZX_Flx(P,p),p);
+    E = FlxX_to_Flm(ZXX_to_FlxX(E,p,vp),np);
+    MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,ZX_to_Flx(P,p),p);
     IR= (GEN)Flm_indexrank(MP,p)[1];
     E = rowextract_p(E, IR);
     M = rowextract_p(MP,IR);
     M = Flm_inv(M,p);
-    MQ= Flxq_matrix_pow(ZX_Flx(SQ,p),nq,d,ZX_Flx(Q,p),p);
+    MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,ZX_to_Flx(Q,p),p);
     M = Flm_mul(MQ,M,p);
     M = Flm_mul(M,E,p);
     if (DEBUGLEVEL>=4) msgtimer("factor_irred_mat");
     M = gerepileupto(av,M);
-    FQ= ZM_Flm(FQ,p);
+    FQ= ZM_to_Flm(FQ,p);
     V = cgetg(d+1,t_VEC);
     V[1] = (long) M;
     for(i=2;i<=d;i++)
       V[i]=(long)Flm_mul(FQ,(GEN)V[i-1],p);
     res=cgetg(d+1,t_COL);
     for(i=1;i<=d;i++)
-      res[i]=(long)FlxX_ZXX(Flm_FlxX((GEN)V[i],evalvarn(vp),evalvarn(vq)));
+      res[i]=(long)FlxX_to_ZXX(Flm_to_FlxX((GEN)V[i],evalvarn(vp),evalvarn(vq)));
   }
   else
   {
@@ -2120,17 +2120,17 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   if (OK_ULONG(p))
   { /* assume ab != 0 mod p */
     ulong pp = (ulong)p[2];
-    GEN a = ZX_Flx(x, pp);
-    GEN b = ZX_Flx(y, pp);
+    GEN a = ZX_to_Flx(x, pp);
+    GEN b = ZX_to_Flx(y, pp);
     z = Flx_divrem(a,b,pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
     z = dummycopy(z);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
       *pr = dummycopy(*pr);
-      *pr = Flx_ZX_inplace(*pr);
+      *pr = Flx_to_ZX_inplace(*pr);
     }
-    return Flx_ZX_inplace(z);
+    return Flx_to_ZX_inplace(z);
   }
   lead = gcmp1(lead)? NULL: gclone(Fp_inv(lead,p));
   avma = av0;
@@ -2224,14 +2224,14 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
       GEN *gptr[2];
       ulong pp = (ulong)p[2];
       long v = varn(T);
-      GEN a = ZXX_FlxX(x, pp, v);
-      GEN b = ZXX_FlxX(y, pp, v);
-      GEN t = ZX_Flx(T, pp);
+      GEN a = ZXX_to_FlxX(x, pp, v);
+      GEN b = ZXX_to_FlxX(y, pp, v);
+      GEN t = ZX_to_Flx(T, pp);
       z = FlxqX_divrem(a,b,t,pp,pr);
       tetpil=avma;
-      z = FlxX_ZXX(z); 
+      z = FlxX_to_ZXX(z); 
       if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
-        *pr = FlxX_ZXX(*pr);
+        *pr = FlxX_to_ZXX(*pr);
       else return gerepile(av0,tetpil,z);
       gptr[0]=pr; gptr[1]=&z;
       gerepilemanysp(av0,tetpil,gptr,2);
@@ -2411,10 +2411,10 @@ FpX_gcd(GEN x, GEN y, GEN p)
     ulong pp=p[2];
     av = avma;
     (void)new_chunk((lg(x) + lg(y)) << 2); /* scratch space */
-    a = ZX_Flx(x, pp);
-    b = ZX_Flx(y, pp);
+    a = ZX_to_Flx(x, pp);
+    b = ZX_to_Flx(y, pp);
     a = Flx_gcd_i(a,b, pp);
-    avma = av; return Flx_ZX(a);
+    avma = av; return Flx_to_ZX(a);
   }
   av0=avma;
   a = FpX_red(x, p); av = avma;
@@ -2459,13 +2459,13 @@ FpX_extgcd(GEN x, GEN y, GEN p, GEN *ptu, GEN *ptv)
   if (OK_ULONG(p))
   {
     ulong pp=p[2];
-    a = ZX_Flx(x, pp);
-    b = ZX_Flx(y, pp);
+    a = ZX_to_Flx(x, pp);
+    b = ZX_to_Flx(y, pp);
     d = Flx_extgcd(a,b, pp, &u,&v);
     lbot=avma;
-    d=Flx_ZX(d);
-    u=Flx_ZX(u);
-    v=Flx_ZX(v);
+    d=Flx_to_ZX(d);
+    u=Flx_to_ZX(u);
+    v=Flx_to_ZX(v);
   }
   else
   {
@@ -3122,7 +3122,7 @@ Flyx_subres(GEN u, GEN v, ulong p)
   if (dy < 0) return gzero;
   if (dy==0) return gerepileupto(av, Flx_pow((GEN)v[2],dx,p));
 
-  g = h = Fl_Flx(1,0); av2 = avma; lim = stack_lim(av2,1);
+  g = h = Fl_to_Flx(1,0); av2 = avma; lim = stack_lim(av2,1);
   for(;;)
   {
     r = u_FpXX_pseudorem(u,v,p); dr = lg(r);
@@ -3180,19 +3180,19 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   if (OK_ULONG(p))
   {
     ulong pp = (ulong)p[2];
-    b = ZXX_FlxX(b, pp, vX);
+    b = ZXX_to_FlxX(b, pp, vX);
     if ((ulong)dres >= pp)
     {
-      a = ZXX_FlxX(a, pp, vX);
+      a = ZXX_to_FlxX(a, pp, vX);
       x = Flyx_subres(a, b, pp);
     }
     else
     {
-      a = ZX_Flx(a, pp);
+      a = ZX_to_Flx(a, pp);
       x = Fly_Flxy_resultant_polint(a, b, pp, (ulong)dres);
       setvarn(x, vX);
     }
-    return Flx_ZX(x);
+    return Flx_to_ZX(x);
   }
  
   la = leading_term(a);
@@ -3307,8 +3307,8 @@ INIT:
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
-    a = ZX_Flx(A, p);
-    b = ZXX_FlxX(B, p, varn(A));
+    a = ZX_to_Flx(A, p);
+    b = ZXX_to_FlxX(B, p, varn(A));
     if (LERS)
     {
       if (!b[lb-1] || degpol(a) < degA) continue; /* p | lc(A)lc(B) */
@@ -3504,8 +3504,8 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (dB) { dp = smodis(dB, p); if (!dp) continue; }
 
-    a = ZX_Flx(A, p);
-    b = ZX_Flx(B, p);
+    a = ZX_to_Flx(A, p);
+    b = ZX_to_Flx(B, p);
     Hp= Flx_resultant(a, b, p);
     if (dp != 1) Hp = Fl_mul(Hp, Fl_pow(Fl_inv(dp,p), degA, p), p);
     if (!H)
@@ -3607,8 +3607,8 @@ modulargcd(GEN A0, GEN B0)
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!umodiu(g,p)) continue;
 
-    a = ZX_Flx(A, p);
-    b = ZX_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
+    a = ZX_to_Flx(A, p);
+    b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
     if (m == 0) { H = polun[varn(A0)]; break; } /* coprime. DONE */
     if (m > n) continue; /* p | Res(A/G, B/G). Discard */
@@ -3670,8 +3670,8 @@ QX_invmod(GEN A0, GEN B0)
   for(;;)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,d);
-    a = ZX_Flx(A, p);
-    b = ZX_Flx(B, p);
+    a = ZX_to_Flx(A, p);
+    b = ZX_to_Flx(B, p);
     /* if p | Res(A/G, B/G), discard */
     if (!Flx_extresultant(b,a,p, &Vp,&Up)) continue;
 

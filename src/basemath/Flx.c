@@ -53,64 +53,67 @@ long Flx_POW_MONTGOMERY_LIMIT = 1000;
 /***********************************************************************/
 
 GEN
-Flx_ZX(GEN z)
+Flx_to_ZX(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_POL);
   for (i=2; i<l; i++) x[i] = lutoi((ulong)z[i]);
   x[1] = evalsigne(l-2!=0)| z[1]; return x;
 }
+
 GEN
-Flv_ZV(GEN z)
+Flv_to_ZV(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l, t_VEC);
   for (i=1; i<l; i++) x[i] = lutoi((ulong)z[i]);
   return x;
 }
+
 GEN
-Flv_ZC(GEN z)
+Flv_to_ZC(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_COL);
   for (i=1; i<l; i++) x[i] = lutoi((ulong)z[i]);
   return x;
 }
+
 GEN
-Flm_ZM(GEN z)
+Flm_to_ZM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)Flv_ZC((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)Flv_to_ZC((GEN)z[i]);
   return x;
 }
 
-/* Flx_ZX_inplace=zx_ZX_inplace*/
+/* Flx_to_ZX_inplace=zx_to_ZX_inplace*/
 /* same. In place */
 GEN
-Flx_ZX_inplace(GEN z)
+Flx_to_ZX_inplace(GEN z)
 {
   long i, l = lg(z);
   for (i=2; i<l; i++) z[i] = lutoi((ulong)z[i]);
   settyp(z, t_POL); z[1]=evalsigne(l-2!=0)|z[1]; return z;
 }
 
-/*FIXME: should be zx_zv_lg*/
+/*Flx_to_Flv=zx_to_zv*/
 GEN
-Flx_Flv_lg(GEN x, long N)
+Flx_to_Flv(GEN x, long N)
 {
   long i, l;
   GEN z = cgetg(N+1,t_VECSMALL);
-  if (typ(x) != t_VECSMALL) err(typeer,"Flx_Flv_lg");
+  if (typ(x) != t_VECSMALL) err(typeer,"Flx_to_Flv");
   l = lg(x)-1; x++;
   for (i=1; i<l ; i++) z[i]=x[i];
   for (   ; i<=N; i++) z[i]=0;
   return z;
 }
 
-/*FIXME: should be zv_zx*/
+/*Flv_to_Flx=zv_to_zx*/
 GEN
-Flv_Flx(GEN x, long vs)
+Flv_to_Flx(GEN x, long vs)
 {
   long i, l=lg(x)+1;
   GEN z = cgetg(l,t_VECSMALL); z[1]=vs;
@@ -119,13 +122,13 @@ Flv_Flx(GEN x, long vs)
   return Flx_renormalize(z,l);
 }
 
-/*FIXME: should be zm_zxV*/
+/*Flm_to_FlxV=zm_to_zxV*/
 GEN
-Flm_FlxV(GEN x, long sv)
+Flm_to_FlxV(GEN x, long sv)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx, t_VEC);
-  for (j=1; j<lx; j++) y[j] = (long)Flv_Flx((GEN)x[j], sv);
+  for (j=1; j<lx; j++) y[j] = (long)Flv_to_Flx((GEN)x[j], sv);
   return y;
 }
 
@@ -159,9 +162,9 @@ polx_Flx(long sv)
 /* Take an integer and return a scalar polynomial mod p,
  * with evalvarn=vs */
 
-/*FIXME: Should be z_zx since modular reduction is not performed*/
+/*Fl_to_Flx=z_to_zx*/
 GEN
-Fl_Flx(ulong x, long sv)
+Fl_to_Flx(ulong x, long sv)
 {
   GEN z;
   if (!x) return zero_Flx(sv);
@@ -172,7 +175,7 @@ Fl_Flx(ulong x, long sv)
 
 /* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL*/
 GEN
-ZX_Flx(GEN x, ulong p)
+ZX_to_Flx(GEN x, ulong p)
 {
   long i;
   long lx = lg(x); 
@@ -183,7 +186,7 @@ ZX_Flx(GEN x, ulong p)
 }
 
 GEN
-ZV_Flv(GEN x, ulong p)
+ZV_to_Flv(GEN x, ulong p)
 {
   long i, n = lg(x);
   GEN y = cgetg(n,t_VECSMALL);
@@ -192,12 +195,12 @@ ZV_Flv(GEN x, ulong p)
 }
 
 GEN
-ZM_Flm(GEN x, ulong p)
+ZM_to_Flm(GEN x, ulong p)
 {
   long j,n = lg(x);
   GEN y = cgetg(n,t_MAT);
   if (n == 1) return y;
-  for (j=1; j<n; j++) y[j] = (long)ZV_Flv((GEN)x[j], p);
+  for (j=1; j<n; j++) y[j] = (long)ZV_to_Flv((GEN)x[j], p);
   return y;
 }
 
@@ -664,7 +667,7 @@ Flx_sqr(GEN x, ulong p)
 GEN
 Flx_pow(GEN x, long n, ulong p)
 {
-  GEN y = Fl_Flx(1,x[1]), z;
+  GEN y = Fl_to_Flx(1,x[1]), z;
   long m;
   if (n == 0) return y;
   m = n; z = x;
@@ -1018,7 +1021,7 @@ Flx_extgcd(GEN a, GEN b, ulong p, GEN *ptu, GEN *ptv)
   GEN q,z,u,v, x = a, y = b;
 
   u = zero_Flx(a[1]);
-  v = Fl_Flx(1,a[1]); /* v = 1 */
+  v = Fl_to_Flx(1,a[1]); /* v = 1 */
   while (lgpol(y))
   {
     q = Flx_divrem(x,y,p,&z);
@@ -1088,7 +1091,7 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   if (dx < 0) return 0;
 
   u = zero_Flx(vs);
-  v = Fl_Flx(1,vs); /* v = 1 */
+  v = Fl_to_Flx(1,vs); /* v = 1 */
   while (dy)
   { /* b u = x (a), b v = y (a) */
     lb = y[dy+2];
@@ -1107,7 +1110,7 @@ Flx_extresultant(GEN a, GEN b, ulong p, GEN *ptU, GEN *ptV)
   lb = Fl_mul(res, Fl_inv(y[2],p), p);
   v = gerepileuptoleaf(av, Flx_Fl_mul(v, lb, p));
   av = avma;
-  u = Flx_sub(Fl_Flx(res,vs), Flx_mul(b,v,p), p);
+  u = Flx_sub(Fl_to_Flx(res,vs), Flx_mul(b,v,p), p);
   u = gerepileuptoleaf(av, Flx_div(u,a,p)); /* = (res - b v) / a */
   *ptU = u;
   *ptV = v; return res;
@@ -1166,7 +1169,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
 {
   long i,k,lx = lg(a);
   GEN p1,p2;
-  if (lx == 1) return Fl_Flx(1,vs);
+  if (lx == 1) return Fl_to_Flx(1,vs);
   p1 = cgetg(lx, t_VEC); global_pp = p;
   for (k=1,i=1; i<lx-1; i+=2)
   {
@@ -1325,7 +1328,7 @@ Flxq_pow(GEN x, GEN n, GEN pol, ulong p)
   pari_sp av = avma;
   Flxq_muldata D;
   GEN y;
-  if (!signe(n)) return Fl_Flx(1,varn(pol));
+  if (!signe(n)) return Fl_to_Flx(1,varn(pol));
   if (signe(n) < 0)
     x=Flxq_inv(x,pol,p);
   else
@@ -1376,7 +1379,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
   GEN V=cgetg(l+2,t_VEC);
   long i;
   long v=T[1];
-  V[1] = (long) Fl_Flx(1, v);
+  V[1] = (long) Fl_to_Flx(1, v);
   if (l==0) return V;
   V[2] = (long) Flx_copy(x);
   if (l==1) return V;
@@ -1404,20 +1407,20 @@ FlxV_Flv_innerprod(GEN V, GEN W, ulong p)
 }
 
 GEN
-ZXV_FlxV(GEN v, ulong p)
+ZXV_to_FlxV(GEN v, ulong p)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_VEC);
-  for (j=1; j<N; j++) y[j] = (long)ZX_Flx((GEN)v[j], p);
+  for (j=1; j<N; j++) y[j] = (long)ZX_to_Flx((GEN)v[j], p);
   return y;
 }
 
 GEN
-FlxV_Flm(GEN v, long n)
+FlxV_to_Flm(GEN v, long n)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_MAT);
-  for (j=1; j<N; j++) y[j] = (long)Flx_Flv_lg((GEN)v[j], n);
+  for (j=1; j<N; j++) y[j] = (long)Flx_to_Flv((GEN)v[j], n);
   return y;
 }
 
@@ -1431,14 +1434,14 @@ FlxV_Flm(GEN v, long n)
  * Normally the variable ordering should be respected.*/
 
 GEN 
-FlxX_ZXX(GEN B)
+FlxX_to_ZXX(GEN B)
 {
   long lb=lg(B);
   long i;
   GEN b=cgetg(lb,t_POL);
   for (i=2; i<lb; i++) 
     if (lgpol(B[i]))
-      b[i] = (long) Flx_ZX((GEN)B[i]);
+      b[i] = (long) Flx_to_ZX((GEN)B[i]);
     else
       b[i] = zero;
   b[1] = B[1]; return b;
@@ -1449,7 +1452,7 @@ FlxX_ZXX(GEN B)
  */
 
 GEN 
-ZXX_FlxX(GEN B, ulong p, long v)
+ZXX_to_FlxX(GEN B, ulong p, long v)
 {
   long lb=lg(B);
   long i;
@@ -1460,17 +1463,17 @@ ZXX_FlxX(GEN B, ulong p, long v)
     switch (typ(B[i]))
     {
     case t_INT:  
-      b[i] = (long)Fl_Flx(umodiu((GEN)B[i], p), vs);
+      b[i] = (long)Fl_to_Flx(umodiu((GEN)B[i], p), vs);
       break;
     case t_POL:
-      b[i] = (long)ZX_Flx((GEN)B[i], p);
+      b[i] = (long)ZX_to_Flx((GEN)B[i], p);
       break;
     }
   return b;
 }
 
 /*Similar to normalizepol, in place*/
-/*FIXME: should be zxX_renormalize*/
+/*FlxX_renormalize=zxX_renormalize */
 GEN
 FlxX_renormalize(GEN /*in place*/ x, long lx)
 {
@@ -1484,23 +1487,23 @@ FlxX_renormalize(GEN /*in place*/ x, long lx)
 /* matrix whose entries are given by the coeffs of the polynomial v in
  * two variables (considered as degree n polynomials) */
 GEN
-FlxX_Flm(GEN v, long n)
+FlxX_to_Flm(GEN v, long n)
 {
   long j, N = lg(v)-1;
   GEN y = cgetg(N, t_MAT);
   v++;
-  for (j=1; j<N; j++) y[j] = (long)Flx_Flv_lg((GEN)v[j], n);
+  for (j=1; j<N; j++) y[j] = (long)Flx_to_Flv((GEN)v[j], n);
   return y;
 }
 
 GEN
-Flm_FlxX(GEN x, long v,long w)
+Flm_to_FlxX(GEN x, long v,long w)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx+1, t_POL);
   y[1]=evalsigne(1) | v;
   y++;
-  for (j=1; j<lx; j++) y[j] = (long)Flv_Flx((GEN)x[j], w);
+  for (j=1; j<lx; j++) y[j] = (long)Flv_to_Flx((GEN)x[j], w);
   return FlxX_renormalize(--y, lx+1);
 }
 

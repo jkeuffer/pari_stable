@@ -77,7 +77,7 @@ buchnarrow(GEN bnf)
   p1 = cgetg(ngen+r1-t + 1,t_COL);
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
-  v = archstar_full_rk(NULL, gmael(nf,5,1), ZM_Flm(v, 2), gen + (ngen - t));
+  v = archstar_full_rk(NULL, gmael(nf,5,1), ZM_to_Flm(v, 2), gen + (ngen - t));
   v = rowextract_i(v, t+1, r1);
 
   logs = cgetg(ngen+1,t_MAT);

@@ -363,7 +363,7 @@ rootmod2(GEN f, GEN pp)
   if (!factmod_init(&f, pp)) { avma = av; return cgetg(1,t_COL); }
   p = init_p(pp); if (!p) err(talker,"prime too big in rootmod2");
   if (p & 1) 
-    y = Flv_ZV(Flx_roots_naive(ZX_Flx(f,p), p));
+    y = Flv_to_ZV(Flx_roots_naive(ZX_to_Flx(f,p), p));
   else 
     y = root_mod_even(f,p);
   return gerepileupto(av, FpV(y, pp));
@@ -561,7 +561,7 @@ Flx_Berlekamp_ker(GEN u, ulong p)
   w = v = Flxq_pow(polx_Flx(u[1]),stoi(p),u,p);
   for (j=2; j<=N; j++)
   {
-    p1 = Flx_Flv_lg(w, N);
+    p1 = Flx_to_Flv(w, N);
     p1[j] = Fl_sub((ulong)p1[j], 1, p);
     Q[j] = (long)p1;
     if (j < N)
@@ -712,7 +712,7 @@ Flx_Frobenius(GEN u, ulong p)
   w = v = Flxq_pow(polx_Flx(u[1]), utoi(p), u, p);
   for (j=2; j<=N; j++)
   {
-    Q[j] = (long)Flx_Flv_lg(w, N);
+    Q[j] = (long)Flx_to_Flv(w, N);
     if (j < N)
     {
       pari_sp av = avma;
@@ -1237,8 +1237,8 @@ FpX_split_Berlekamp(GEN *t, GEN p)
   ulong ps = itos_or_0(p);
   if (ps)
   {
-    vker = Flx_Berlekamp_ker(ZX_Flx(u,ps),ps);
-    vker = Flm_FlxV(vker, u[1]);
+    vker = Flx_Berlekamp_ker(ZX_to_Flx(u,ps),ps);
+    vker = Flm_to_FlxV(vker, u[1]);
   }
   else
   {
@@ -1261,7 +1261,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
         Flx_addmul_inplace(pol, (GEN) vker[i], (ulong)small_rand(ps), ps);
       (void)Flx_renormalize((GEN)pol,l-1);
       
-      polt = Flx_ZX(pol);
+      polt = Flx_to_ZX(pol);
     }
     else
     {

@@ -733,7 +733,7 @@ tschirn(buildroot *BR)
   {
     a[1]=0;
     for (i=2; i < l+2; i++) a[i] = random_bits(3) + 1;
-    h = Flx_ZX(Flx_renormalize(a,l+2));
+    h = Flx_to_ZX(Flx_renormalize(a,l+2));
   } while (degpol(h) <= 0 || !ZX_is_squarefree(h));
   setvarn(h, v); k = 0;
   (void)ZX_caract_sqf(h, BR->p, &k, v);

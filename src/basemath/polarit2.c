@@ -1524,7 +1524,7 @@ DDF(GEN a, long hint, int fl)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,pt);
     if (lead && !smodis(lead,p)) continue;
-    z = ZX_Flx(a, p);
+    z = ZX_to_Flx(a, p);
     if (!Flx_is_squarefree(z, p)) continue;
 
     nfacp = fl? Flx_nbroots(z, p): Flx_nbfact(z, p);

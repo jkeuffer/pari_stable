@@ -1473,7 +1473,7 @@ nfsqff(GEN nf, GEN pol, long fl)
     red = modprX(polbase, nf, modpr);
     if (!aT)
     { /* degree 1 */
-      red = ZX_Flx(red, pp);
+      red = ZX_to_Flx(red, pp);
       if (!Flx_is_squarefree(red, pp)) { avma = av2; continue; }
       anbf = fl? Flx_nbroots(red, pp): Flx_nbfact(red, pp);
     }

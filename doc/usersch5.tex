@@ -1728,19 +1728,19 @@ place (destroys~\kbd{x}).
 
 \subsubsec{To single precision}
 
-\fun{GEN}{ZX_Flx}{GEN x, ulong p} reduce \kbd{ZX}~\kbd{x} modulo \kbd{p}
+\fun{GEN}{ZX_to_Flx}{GEN x, ulong p} reduce \kbd{ZX}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flx}).
 
-\fun{GEN}{ZV_Flv}{GEN x, ulong p} reduce \kbd{ZV}~\kbd{x} modulo \kbd{p}
+\fun{GEN}{ZV_to_Flv}{GEN x, ulong p} reduce \kbd{ZV}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flv}).
 
-\fun{GEN}{ZXV_FlxV}{GEN v, ulong p}, as \kbd{ZX\_Flx}, repeatedly called on
+\fun{GEN}{ZXV_to_FlxV}{GEN v, ulong p}, as \kbd{ZX\_to\_Flx}, repeatedly called on
 the vector's coefficients.
 
-\fun{GEN}{ZXX_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_Flx}, repeatedly
+\fun{GEN}{ZXX_to_FlxX}{GEN B, ulong p, long v}, as \kbd{ZX\_to\_Flx}, repeatedly
 called on the polynomial's coefficients.
 
-\fun{GEN}{ZM_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
+\fun{GEN}{ZM_to_Flm}{GEN x, ulong p} reduce \kbd{ZM}~\kbd{x} modulo \kbd{p}
 (yielding an \kbd{Flm}).
 
 \fun{GEN}{ZV_zv}{GEN z}, converts coefficients using \kbd{itos}
@@ -1749,34 +1749,34 @@ called on the polynomial's coefficients.
 
 \subsubsec{From single precision}
 
-\fun{GEN}{Flx_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of non-negative
+\fun{GEN}{Flx_to_ZX}{GEN z}, converts to \kbd{ZX} (\typ{POL} of non-negative
 \typ{INT}s in this case)
 
-\fun{GEN}{Flx_ZX_inplace}{GEN z}, same as \kbd{Flx\_ZX}, in place (\kbd{z} is
+\fun{GEN}{Flx_to_ZX_inplace}{GEN z}, same as \kbd{Flx\_to\_ZX}, in place (\kbd{z} is
 destroyed).
 
-\fun{GEN}{FlxX_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
-\kbd{ZX} or \kbd{gzero} coefficients (repeated calls to \kbd{Flx\_ZX}).
+\fun{GEN}{FlxX_to_ZXX}{GEN B}, converts an \kbd{FlxX} to a polynomial with
+\kbd{ZX} or \typ{INT} coefficients (repeated calls to \kbd{Flx\_to\_ZX}).
 
-\fun{GEN}{zx_ZX}{GEN z}, as \kbd{Flx\_ZX}, without assuming coefficients are
+\fun{GEN}{zx_ZX}{GEN z}, as \kbd{Flx\_to\_ZX}, without assuming coefficients are
 non-negative.
 
-\fun{GEN}{Flv_ZC}{GEN z}, converts to \kbd{ZC} (\typ{COL} of non-negative
+\fun{GEN}{Flv_to_ZC}{GEN z}, converts to \kbd{ZC} (\typ{COL} of non-negative
 \typ{INT}s in this case)
 
-\fun{GEN}{Flv_ZV}{GEN z}, converts to \kbd{ZV} (\typ{VEC} of non-negative
+\fun{GEN}{Flv_to_ZV}{GEN z}, converts to \kbd{ZV} (\typ{VEC} of non-negative
 \typ{INT}s in this case)
 
-\fun{GEN}{Flm_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with non-negative
+\fun{GEN}{Flm_to_ZM}{GEN z}, converts to \kbd{ZM} (\typ{MAT} with non-negative
 \typ{INT}s coefficients in this case)
 
-\fun{GEN}{zv_ZC}{GEN z} as \kbd{Flv\_ZC}, without assuming coefficients are
+\fun{GEN}{zv_ZC}{GEN z} as \kbd{Flv\_to\_ZC}, without assuming coefficients are
 non-negative.
 
-\fun{GEN}{zv_ZV}{GEN z} as \kbd{Flv\_ZV}, without assuming coefficients are
+\fun{GEN}{zv_ZV}{GEN z} as \kbd{Flv\_to\_ZV}, without assuming coefficients are
 non-negative.
 
-\fun{GEN}{zm_ZM}{GEN z} as \kbd{Flm\_ZM}, without assuming coefficients are
+\fun{GEN}{zm_ZM}{GEN z} as \kbd{Flm\_to\_ZM}, without assuming coefficients are
 non-negative.
 
 \subsubsec{Mixed precision linear algebra} Assumes dimensions are compatible.
@@ -1800,28 +1800,28 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{polx_Flx}{long sv} returns the variable $v$ as degree~1~\kbd{Flx}.
 
-\fun{GEN}{Fl_Flx}{ulong x, long sv} converts from scalar to degree~$1$
+\fun{GEN}{Fl_to_Flx}{ulong x, long sv} converts from scalar to degree~$1$
 polynomial in variable $v$.
 
-\fun{GEN}{Flx_Flv_lg}{GEN x, long n} converts from \kbd{Flx} to \kbd{Flv}
+\fun{GEN}{Flx_to_Flv}{GEN x, long n} converts from \kbd{Flx} to \kbd{Flv}
 with \kbd{n} components (assumed larger than the number of coefficients of
 \kbd{x}).
 
-\fun{GEN}{Flv_Flx}{GEN x, long sv} converts from vector (coefficient array)
+\fun{GEN}{Flv_to_Flx}{GEN x, long sv} converts from vector (coefficient array)
 to (normalized) polynomial in variable $v$.
 
-\fun{GEN}{Flm_FlxV}{GEN x, long sv} converts the colums of \kbd{Flm}~\kbd{x}
-to an array of \kbd{Flx} (repeated calls to \kbd{Flv\_Flx}).
+\fun{GEN}{Flm_to_FlxV}{GEN x, long sv} converts the colums of \kbd{Flm}~\kbd{x}
+to an array of \kbd{Flx} (repeated calls to \kbd{Flv\_to\_Flx}).
 
-\fun{GEN}{Flm_FlxX}{GEN x, long sv,long w} converts the colums of
+\fun{GEN}{Flm_to_FlxX}{GEN x, long sv,long w} converts the colums of
 \kbd{Flm}~\kbd{x} to the coefficient of an \kbd{FlxX}, and normalize the
 result.
 
-\fun{GEN}{FlxV_Flm}{GEN v, long n} reverse \kbd{Flm\_FlxV}, to obtain
-an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_Flv\_lg}).
+\fun{GEN}{FlxV_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxV}, to obtain
+an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
 
-\fun{GEN}{FlxX_Flm}{GEN v, long n} reverse \kbd{Flm\_FlxX}, to obtain
-an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_Flv\_lg}).
+\fun{GEN}{FlxX_to_Flm}{GEN v, long n} reverse \kbd{Flm\_to\_FlxX}, to obtain
+an \kbd{Flm} with \kbd{n} rows (repeated calls to \kbd{Flx\_to\_Flv}).
 
 \section{Operations on general PARI objects}
 
