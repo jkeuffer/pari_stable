@@ -122,6 +122,8 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    54- elleta(E.omega) gave incorrect results [ conflicting normalizations ]
    55- typo in charpoly(t_MAT) [ stack overflow after garbage collection ]
    56- subst(y,x+y-x,y) --> 0  [ missing simplification ]
+   57- typo in nfroots [ returned inverse of roots when polynomial had small
+       degree (using Trager's method) ]
 
   Changed
     1- rnf structure (removed useless components)

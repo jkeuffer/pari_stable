@@ -1422,7 +1422,7 @@ nfsqff(GEN nf, GEN pol, long fl)
       for (i = 1; i < l; i++)
       {
         t = (GEN)z[i]; if (degpol(t) > 1) break;
-        z[i] = lneg(gdiv((GEN)t[3], (GEN)t[2]));
+        z[i] = lneg(gdiv((GEN)t[2], (GEN)t[3]));
       }
       setlg(z, i);
     }
