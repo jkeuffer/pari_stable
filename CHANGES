@@ -90,6 +90,8 @@ IZ 37- [OS/2:] ^C would only work once
    42- made PSLQ (algdep/lindep) insensitive to 'realprecision' [use
        precision of the input]
    43- nfinit(x^2-4*3,4) --> SEGV
+   44- Compilation failure on ORIGIN + Irix: rename 'sgi' --> 'SG' in
+       basemath/galconj.c
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available

@@ -661,7 +661,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   long    d, z, m, c, n, ord;
   int     i, j, k;
   GEN     pf, u, v;
-  GEN     C, Cd, sgi, cache;
+  GEN     C, Cd, SG, cache;
   long    Z, c_idx=gt->g-1;
   long    stop=0,hop=0;
   GEN     NN,NQ,NR;
@@ -698,9 +698,9 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   Cd=gt->Cd;
   v = FpX_Fp_mul(FpXQ_mul((GEN)gt->pauto[1+el%ord], (GEN)
 	gt->bezoutcoeff[m],gl->TQ,gl->Q),gl->den,gl->Q);
-  sgi=cgetg(lg(sg),t_VECSMALL);
-  for(i=1;i<lg(sgi);i++)
-    sgi[i]=(el*sg[i])%ord + 1;
+  SG=cgetg(lg(sg),t_VECSMALL);
+  for(i=1;i<lg(SG);i++)
+    SG[i]=(el*sg[i])%ord + 1;
   cache=cgetg(m+1,t_VECSMALL);
   cache[m]=polheadlong(v,1,gl->Q);
   Z=polheadlong(v,2,gl->Q);
@@ -712,7 +712,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
     for (j = c_idx ; j > 0; j--)
     {
       long h;
-      h=sgi[pf[j]];
+      h=SG[pf[j]];
       if (!mael(C,h,j))
       {
 	pari_sp av3=avma;
@@ -729,12 +729,12 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
     {
       long ZZ=Z;
       for (j = 1; j < m; j++)
-	ZZ += polheadlong(gmael(C,sgi[pf[j]],j),2,gl->Q);
+	ZZ += polheadlong(gmael(C,SG[pf[j]],j),2,gl->Q);
       if (labs(ZZ)<=n )
       {
 	u = v;
 	for (j = 1; j < m; j++)
-	  u = FpX_add(u, gmael(C,sgi[pf[j]],j),NULL);
+	  u = FpX_add(u, gmael(C,SG[pf[j]],j),NULL);
 	u = FpX_center(FpX_red(u, gl->Q), gl->Q);
 	if (poltopermtest(u, gl, frob))
 	{
