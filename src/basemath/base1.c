@@ -1265,7 +1265,7 @@ initalg(GEN x, long prec)
 GEN
 nfnewprec(GEN nf, long prec)
 {
-  long av=avma,i,r1,r2,ru,n,nf_small;
+  long av=avma,r1,r2,ru,n;
   GEN y,pol,ro,basden,MC,mat,M;
 
   if (typ(nf) != t_VEC) err(talker,"incorrect nf in nfnewprec");
@@ -1279,26 +1279,19 @@ nfnewprec(GEN nf, long prec)
     return (GEN)prec;
   }
 
-  y=cgetg(10,t_VEC);
-  for (i=1; i<=4; i++) y[i]=nf[i];
-  for (i=6; i<=9; i++) y[i]=nf[i];
-  nf_small = gcmp0((GEN)nf[8]);
+  y = dummycopy(nf);
   pol=(GEN)nf[1]; n=degree(pol);
-  r1=itos(gmael(nf,2,1)); r2=itos(gmael(nf,2,2)); ru=r1+r2;
-  mat=cgetg(8,t_VEC); y[5]=(long)mat;
+  r1=itos(gmael(nf,2,1));
+  r2=itos(gmael(nf,2,2)); ru=r1+r2;
+  mat=dummycopy((GEN)nf[5]);
   ro=get_roots(pol,r1,ru,prec);
+  y[5]=(long)mat;
+  y[6]=(long)ro;
   basden = get_bas_den((GEN)nf[7]);
   M = make_M(basden,ro);
   MC = make_MC(r1,M);
-  if (nf_small) mat[2]=mat[4]=mat[5]=mat[6]=mat[7]=zero;
-  else
-  {
-    GEN matrices=(GEN)nf[5];
-    y[6]=(long)ro;
-    mat[2]=(long)MC;
-    for (i=4; i<=7; i++) mat[i]=matrices[i];
-  }
   mat[1]=(long)M;
+  if (typ(nf[8]) != t_INT) mat[2]=(long)MC; /* not a small nf */
   mat[3]=(long)mulmat_real(MC,M);
   return gerepileupto(av, gcopy(y));
 }
