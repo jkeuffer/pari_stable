@@ -279,32 +279,27 @@ INLINE GEN
 utoi(ulong x)
 {
   GEN y;
-
   if (!x) return gzero;
-  y=cgeti(3); y[1] = evalsigne(1) | evallgefint(3); y[2] = x;
+  y = cgeti(3); y[1] = evalsigne(1) | evallgefint(3); y[2] = x;
   return y;
-}
-
-INLINE GEN stoi(long);
-INLINE GEN realzero(long);
-
-INLINE GEN
-stosmall(long x)
-{
-  if (labs(x) & SMALL_MASK) return stoi(x);
-  return (GEN) (1 | (x<<1));
 }
 
 INLINE GEN
 stoi(long x)
 {
   GEN y;
-
   if (!x) return gzero;
-  y=cgeti(3);
+  y = cgeti(3);
   if (x>0) { y[1] = evalsigne(1) | evallgefint(3); y[2] = x; }
-  else { y[1] = evalsigne(-1) | evallgefint(3); y[2] = -x; }
+  else     { y[1] = evalsigne(-1)| evallgefint(3); y[2] = -x; }
   return y;
+}
+
+INLINE GEN
+stosmall(long x)
+{
+  if (labs(x) & SMALL_MASK) return stoi(x);
+  return (GEN) (1 | (x<<1));
 }
 
 INLINE long
