@@ -40,7 +40,7 @@ GEN
 gtrans_i(GEN x)
 {
   long i,j,lx,dx, tx=typ(x);
-  GEN y,p1;
+  GEN y;
 
   if (! is_matvec_t(tx)) err(typeer,"gtrans_i");
   switch(tx)
@@ -56,8 +56,8 @@ gtrans_i(GEN x)
       dx=lg(x[1]); y=cgetg(dx,tx);
       for (i=1; i<dx; i++)
       {
-	p1=cgetg(lx,t_COL); gel(y, i) = p1;
-	for (j=1; j<lx; j++) gel(p1, j) = gcoeff(x,i,j);
+	GEN c = cgetg(lx,t_COL); gel(y, i) = c;
+	for (j=1; j<lx; j++) gel(c, j) = gcoeff(x,i,j);
       }
       break;
 
@@ -70,7 +70,7 @@ GEN
 gtrans(GEN x)
 {
   long i,j,lx,dx, tx=typ(x);
-  GEN y,p1;
+  GEN y;
 
   if (! is_matvec_t(tx)) err(typeer,"gtrans");
   switch(tx)
@@ -86,8 +86,8 @@ gtrans(GEN x)
       dx=lg(x[1]); y=cgetg(dx,tx);
       for (i=1; i<dx; i++)
       {
-	p1=cgetg(lx,t_COL); y[i]=(long)p1;
-	for (j=1; j<lx; j++) p1[j]=lcopy(gcoeff(x,i,j));
+	GEN c = cgetg(lx,t_COL); gel(y, i) = c;
+	for (j=1; j<lx; j++) gel(c, j) = gcopy(gcoeff(x,i,j));
       }
       break;
 
@@ -147,7 +147,9 @@ vconcat(GEN A, GEN B)
   hb = lg(B[1]); hc = ha+hb-1;
   for (j=1; j<la; j++)
   {
-    c = cgetg(hc,t_COL); M[j] = (long)c; a = (GEN)A[j]; b = (GEN)B[j];
+    c = cgetg(hc,t_COL); gel(M, j) = c;
+    a = gel(A,j);
+    b = gel(B,j);
     for (i=1; i<ha; i++) *++c = *++a;
     for (i=1; i<hb; i++) *++c = *++b;
   }
@@ -164,7 +166,7 @@ cget1(long l, long t)
 void
 appendL(GEN x, GEN t)
 {
-  long l = lg(x); x[l] = (long)t; setlg(x, l+1);
+  long l = lg(x); gel(x,l) = t; setlg(x, l+1);
 }
 
 static void
@@ -204,8 +206,8 @@ concatsp(GEN x, GEN y)
       if (lg(y[1])!=2) err_cat(x,y);
       p1 = mkcol(x);
     }
-    for (i=2; i<=ly; i++) z[i]=y[i-1];
-    z[1]=(long)p1; return z;
+    for (i=2; i<=ly; i++) z[i] = y[i-1];
+    gel(z, 1) = p1; return z;
   }
   if (! is_matvec_t(ty))
   {
@@ -217,7 +219,7 @@ concatsp(GEN x, GEN y)
       p1 = mkcol(y);
     }
     for (i=1; i<lx; i++) z[i]=x[i];
-    z[lx]=(long)p1; return z;
+    gel(z, lx) = p1; return z;
   }
 
   if (tx == ty)
@@ -235,12 +237,12 @@ concatsp(GEN x, GEN y)
       switch(ty)
       {
 	case t_COL:
-	  if (lx<=2) return (lx==1)? y: concatsp((GEN) x[1],y);
+	  if (lx<=2) return (lx==1)? y: concatsp(gel(x,1),y);
           if (ly>=3) break;
-          return (ly==1)? x: concatsp(x,(GEN) y[1]);
+          return (ly==1)? x: concatsp(x,gel(y,1));
 	case t_MAT:
 	  z=cgetg(ly,ty); if (lx != ly) break;
-	  for (i=1; i<ly; i++) z[i]=(long)concatsp((GEN) x[i],(GEN) y[i]);
+	  for (i=1; i<ly; i++) gel(z,i) = concatsp(gel(x,i),gel(y,i));
           return z;
       }
       break;
@@ -249,12 +251,12 @@ concatsp(GEN x, GEN y)
       switch(ty)
       {
 	case t_VEC:
-	  if (lx<=2) return (lx==1)? y: concatsp((GEN) x[1],y);
+	  if (lx<=2) return (lx==1)? y: concatsp(gel(x,1), y);
 	  if (ly>=3) break;
-	  return (ly==1)? x: concatsp(x,(GEN) y[1]);
+	  return (ly==1)? x: concatsp(x, gel(y,1));
 	case t_MAT:
 	  if (lx != lg(y[1])) break;
-	  z=cgetg(ly+1,ty); z[1]=(long)x;
+	  z=cgetg(ly+1,ty); gel(z,1) = x;
 	  for (i=2; i<=ly; i++) z[i]=y[i-1];
           return z;
       }
@@ -265,11 +267,11 @@ concatsp(GEN x, GEN y)
       {
 	case t_VEC:
 	  z=cgetg(lx,tx); if (ly != lx) break;
-	  for (i=1; i<lx; i++) z[i]=(long)concatsp((GEN) x[i],(GEN) y[i]);
+	  for (i=1; i<lx; i++) gel(z,i) = concatsp(gel(x,i), gel(y,i));
           return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
-	  z=cgetg(lx+1,tx); z[lx]=(long)y;
+	  z=cgetg(lx+1,tx); gel(z,lx) = y;
 	  for (i=1; i<lx; i++) z[i]=x[i];
           return z;
       }
@@ -329,7 +331,7 @@ concat(GEN x, GEN y)
       p1 = mkcolcopy(x);
     }
     for (i=2; i<=ly; i++) z[i]=lcopy((GEN) y[i-1]);
-    z[1]=(long)p1; return z;
+    gel(z,1) = p1; return z;
   }
   if (! is_matvec_t(ty))
   {
@@ -341,7 +343,7 @@ concat(GEN x, GEN y)
       p1 = mkcolcopy(y);
     }
     for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
-    z[lx]=(long)p1; return z;
+    gel(z,lx) = p1; return z;
   }
 
   if (tx == ty)
@@ -467,7 +469,7 @@ rowextract_ip(GEN A, GEN p, long x1, long x2)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) B[i] = (long)vecextract_ip((GEN)A[i],p,x1,x2);
+  for (i=1; i<lB; i++) gel(B,i) = vecextract_ip(gel(A,i),p,x1,x2);
   return B;
 }
 
@@ -476,7 +478,7 @@ rowextract_i(GEN A, long x1, long x2)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) B[i] = (long)vecextract_i((GEN)A[i],x1,x2);
+  for (i=1; i<lB; i++) gel(B,i) = vecextract_i(gel(A,i),x1,x2);
   return B;
 }
 
@@ -658,58 +660,58 @@ sum(GEN v, long a, long b)
 /*                                                                 */
 /*******************************************************************/
 
-/* create the square nxn matrix equal to z*Id */
-static GEN
-gscalmat_proto(GEN z, GEN myzero, long n, int flag)
+/* fill the square nxn matrix equal to t*Id */
+static void
+fill_scalmat(GEN y, GEN t, GEN _0, long n)
 {
-  long i,j;
-  GEN y = cgetg(n+1,t_MAT);
-  if (n < 0) err(talker,"negative size in gscalmat_proto");
-  if (flag) z = (flag==1)? stoi((long)z): gcopy(z);
-  for (i=1; i<=n; i++)
+  long i, j;
+  if (n < 0) err(talker,"negative size in fill_scalmat");
+  for (i = 1; i <= n; i++)
   {
-    y[i] = lgetg(n+1,t_COL);
-    for (j=1; j<=n; j++) gcoeff(y,j,i) = (i==j)? z: myzero;
+    GEN c = cgetg(n+1,t_COL); gel(y,i) = c;
+    for (j=1; j<=n; j++) gel(c,j) = _0;
+    gel(c,i) = t;
   }
-  return y;
 }
 
 GEN
-gscalmat(GEN x, long n) { return gscalmat_proto(x,gzero,n,2); }
-
+gscalmat(GEN x, long n) {
+  GEN y = cgetg(n+1, t_MAT);
+  fill_scalmat(y, gcopy(x), gzero, n); return y;
+}
 GEN
-gscalsmat(long x, long n) { return gscalmat_proto((GEN)x,gzero,n,1); }
-
+gscalsmat(long x, long n) { 
+  GEN y = cgetg(n+1, t_MAT);
+  fill_scalmat(y, stoi(x), gzero, n); return y;
+}
 GEN
-idmat(long n) { return gscalmat_proto(gone,gzero,n,0); }
-
+idmat_intern(long n, GEN _1, GEN _0) {
+  GEN y = cgetg(n+1, t_MAT);
+  fill_scalmat(y, _1, _0, n); return y;
+}
 GEN
-idmat_intern(long n,GEN myun,GEN z) { return gscalmat_proto(myun,z,n,0); }
+idmat(long n) { return idmat_intern(n, gone, gzero); }
 
-GEN
-gscalcol_proto(GEN z, GEN myzero, long n)
+static void
+fill_scalcol(GEN y, GEN t, GEN _0, long n)
 {
-  GEN y = cgetg(n+1,t_COL);
   long i;
-  if (n < 0) err(talker,"negative size in gscalcol_proto");
-  if (n)
-  {
-    y[1]=(long)z;
-    for (i=2; i<=n; i++) y[i]=(long)myzero;
+  if (n < 0) err(talker,"negative size in fill_scalcol");
+  if (n) {
+    gel(y,1) = t;
+    for (i=2; i<=n; i++) gel(y,i) = _0;
   }
-  return y;
 }
-
 GEN
-gscalcol(GEN x, long n)
-{
-  GEN y=gscalcol_proto(gzero,gzero,n);
-  if (n) y[1]=lcopy(x);
-  return y;
+gscalcol(GEN x, long n) {
+  GEN y = cgetg(n+1,t_COL);
+  fill_scalcol(y, gcopy(x), gzero, n); return y;
 }
-
 GEN
-gscalcol_i(GEN x, long n) { return gscalcol_proto(x,gzero,n); }
+gscalcol_i(GEN x, long n) {
+  GEN y = cgetg(n+1,t_COL);
+  fill_scalcol(y, x, gzero, n); return y;
+}
 
 GEN
 gtomat(GEN x)
@@ -721,7 +723,7 @@ gtomat(GEN x)
   tx = typ(x);
   if (! is_matvec_t(tx))
   {
-    y=cgetg(2,t_MAT); y[1]=(long)mkcolcopy(x);
+    y = cgetg(2,t_MAT); gel(y,1) = mkcolcopy(x);
     return y;
   }
   switch(tx)
@@ -736,11 +738,11 @@ gtomat(GEN x)
         }
         if (i == lx) { /* matrix with h-1 rows */
           y = cgetg(lx, t_MAT);
-          for (i=1 ; i<lx; i++) y[i] = lcopy((GEN)x[i]);
+          for (i=1 ; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
           return y;
         }
       }
-      for (i=1; i<lx; i++) y[i] = (long)mkcolcopy((GEN)x[i]);
+      for (i=1; i<lx; i++) gel(y,i) = mkcolcopy(gel(x,i));
       break;
     }
     case t_COL: 
@@ -811,8 +813,8 @@ isdiagonal(GEN x)
 GEN
 diagonal(GEN x)
 {
-  long i,j,lx,tx=typ(x);
-  GEN y,p1;
+  long j, lx, tx = typ(x);
+  GEN y;
 
   if (! is_matvec_t(tx)) return gscalmat(x,1);
   if (tx==t_MAT)
@@ -823,9 +825,8 @@ diagonal(GEN x)
   lx=lg(x); y=cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
-    p1=cgetg(lx,t_COL); y[j]=(long)p1;
-    for (i=1; i<lx; i++)
-      p1[i] = (i==j)? lcopy((GEN) x[i]): zero;
+    gel(y,j) = zerocol(lx-1);
+    gcoeff(y,j,j) = gcopy(gel(x,j));
   }
   return y;
 }
