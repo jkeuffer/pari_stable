@@ -1225,7 +1225,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   while (dK)
   {
     for (i=1; i<dK; i++) y[i] = 0;
-    y[i] = 1; /* y = [0,...,0,1] */
+    y[i] = 1; /* y = [0,...,0,1,0,...,0], 1 at dK'th position */
     do
     { /* cf. algo 5.3.18 */
       GEN be, res, X = FpV_red(gmul_mati_smallvec(K, y), gell);
@@ -1238,7 +1238,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
           return gerepilecopy(av, res); /* DONE */
       }
     } while (increment_y(y, dK, ell));
-    dK--;
+    y[dK--] = 0;
   }
   avma = av; return gzero; /* FAIL */
 }
