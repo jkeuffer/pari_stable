@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
+#define is_inf(z) (lg(z) < 3)
+
 void
 checkpt(GEN z)
 { if (typ(z)!=t_VEC) err(elliper1); }
@@ -558,7 +560,7 @@ pointch0(GEN x, GEN v2, GEN v3, GEN mor, GEN s, GEN t)
 {
   GEN p1,z;
 
-  if (lg(x) < 3) return x;
+  if (is_inf(x)) return x;
 
   z = cgetg(3,t_VEC); p1 = gadd((GEN)x[1],mor);
   z[1] = lmul(v2, p1);
@@ -616,7 +618,7 @@ oncurve(GEN e, GEN z)
   long pl, pr, ex, expx;
   pari_sp av;
 
-  checksell(e); checkpt(z); if (lg(z) < 3) return 1; /* oo */
+  checksell(e); checkpt(z); if (is_inf(z)) return 1; /* oo */
   av = avma;
   LHS = ellLHS(e,z);
   RHS = ellRHS(e,(GEN)z[1]); x = gsub(LHS,RHS);
@@ -640,8 +642,8 @@ addell(GEN e, GEN z1, GEN z2)
   pari_sp av = avma, tetpil;
 
   checksell(e); checkpt(z1); checkpt(z2);
-  if (lg(z1)<3) return gcopy(z2);
-  if (lg(z2)<3) return gcopy(z1);
+  if (is_inf(z1)) return gcopy(z2);
+  if (is_inf(z2)) return gcopy(z1);
 
   x1 = (GEN)z1[1]; y1 = (GEN)z1[2];
   x2 = (GEN)z2[1]; y2 = (GEN)z2[2];
@@ -677,7 +679,7 @@ static GEN
 invell(GEN e, GEN z)
 {
   GEN t;
-  if (lg(z) < 3) return z;
+  if (is_inf(z)) return z;
   t = cgetg(3,t_VEC);
   t[1] = z[1];
   t[2] = (long)gneg_i(gadd((GEN)z[2], ellLHS0(e,(GEN)z[1])));
@@ -760,7 +762,7 @@ CM_ellpow(GEN e, GEN z, GEN n)
   long ln, ep, vn;
   pari_sp av = avma;
 
-  if (lg(z) < 3) return gcopy(z);
+  if (is_inf(z)) return gcopy(z);
   pol = (GEN)n[1];
   if (signe(pol[2]) < 0) err(typeer,"CM_ellpow");
   if (typ(n[2]) != t_INT || typ(n[3]) != t_INT)
@@ -817,7 +819,7 @@ powell(GEN e, GEN z, GEN n)
   if (typ(n)==t_QUAD) return CM_ellpow(e,z,n);
   if (typ(n) != t_INT) err(impl,"powell for non integral, non CM, exponents");
   s = signe(n);
-  if (!s || lg(z) == 2) return mkvec(gen_0);
+  if (!s || is_inf(z)) return mkvec(gen_0);
   if (s < 0) z = invell(e,z);
   if (is_pm1(n)) return s < 0? gerepilecopy(av, z): gcopy(z);
   return gerepileupto(av, leftright_pow(z, n, (void*)e, &_sqr, &_mul));
@@ -842,10 +844,9 @@ zell(GEN e, GEN z, long prec)
   pari_sp av = avma;
   GEN t, u, p1, p2, a, b, x1, u2, D = (GEN)e[12];
 
-  checkbell(e);
-  ty = typ(D);
-  if (ty==t_INTMOD) err(typeer,"zell");
-  if (lg(z)<3) return (ty==t_PADIC)? gen_1: gen_0;
+  checkbell(e); checkpt(z);
+  ty = typ(D); if (ty == t_INTMOD) err(typeer,"zell");
+  if (is_inf(z)) return (ty==t_PADIC)? gen_1: gen_0;
 
   x1 = new_coords(e,(GEN)z[1],&a,&b,1, prec);
   if (ty==t_PADIC)
@@ -3163,7 +3164,7 @@ hell2(GEN e, GEN x, long prec)
   GEN e3, ro, v, D;
   pari_sp av = avma;
 
-  if (lg(x) < 3) return gen_0;
+  if (is_inf(x)) return gen_0;
   D = (GEN)e[12];
   ro= (GEN)e[14];
   e3 = (gsigne(D) < 0)? (GEN)ro[1]: (GEN)ro[3];
@@ -3243,7 +3244,7 @@ ellheight0(GEN e, GEN a, long flag, long prec)
     for (i=1; i<lx; i++) z[i] = (long)ellheight0(e,(GEN)a[i],flag,prec);
     return z;
   }
-  if (lg(a) < 3) return gen_0;
+  if (is_inf(a)) return gen_0;
   if (!oncurve(e,a)) err(talker, "point not on elliptic curve");
 
   psi2 = numer(d_ellLHS(e,a));
@@ -3524,7 +3525,7 @@ _orderell(GEN e, GEN p)
   long k;
   for (k = 1; k < 16; k++)
   {
-    if (lg(p1) < 3) { avma = av; return k; }
+    if (is_inf(p1)) { avma = av; return k; }
     p1 = addell(e, p1, p);
   }
   avma = av; return 0;
@@ -3571,7 +3572,7 @@ is_new_torsion(GEN e, GEN v, GEN p, long t2) {
   for (k=2; k<=6; k++)
   {
     pk = addell(e,pk,p); /* = [k] p */
-    if (lg(pk)==2) return 1;
+    if (is_inf(pk)) return 1;
 
     for (l=2; l<=t2; l++)
       if (gequal((GEN)pk[1],gmael(v,l,1))) return 1;
@@ -3641,7 +3642,7 @@ nagelllutz(GEN e)
     if (k>t) err(bugparier,"torsell (bug3)");
 
     p1 = powell(e,(GEN)r[k],utoipos(t>>2));
-    k2 = (lg(p1)==3 && gequal((GEN)r[2],p1))? 3: 2;
+    k2 = (!is_inf(p1) && gequal((GEN)r[2],p1))? 3: 2;
     w3 = mkvec2((GEN)r[k], (GEN)r[k2]);
   }
   if (v)
@@ -3701,7 +3702,7 @@ torspnt(GEN E, GEN w, long n, long prec)
   p[2] = lmul2n(_round(gmul2n((GEN)q[2],3), &e),-3);
   if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
   return (oncurve(E,p)
-      && lg(powell(E,p,utoipos(n))) == 2
+      && is_inf(powell(E,p,utoipos(n)))
       && _orderell(E,p) == n)? p: NULL;
 }
 
