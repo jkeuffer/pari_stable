@@ -63,3 +63,7 @@ These are
 
 After a global 'cvs diff', or 'cvs status', you can safely ignore all
 messages pertaining to them (e.g "? doc/Makefile").
+
+3) 'cvs diff' gives you the difference between your local copy and the
+sources they were based on, not with the current state of the repository.
+Use 'cvs diff -D now'
