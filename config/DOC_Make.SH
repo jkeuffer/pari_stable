@@ -64,7 +64,7 @@ users.dvi: users.tex appa.tex appb.tex appc.tex\\
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
-	  users.idx | sort -f |\\
+	  users.idx | env LANG=C sort -f |\\
 	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
 	tex users; rm -f users.idx
 
@@ -75,7 +75,7 @@ users.pdf: users.tex appa.tex appb.tex appc.tex\\
 	sed -e 's/!\([1-9]\)!/!00\1!/'\\
 	    -e 's/!\([1-9][0-9]\)!/!0\1!/'\\
 	    -e 's/\\\\EFF {}/f/g'\\
-	  users.idx | sort -f |\\
+	  users.idx | env LANG=C sort -f |\\
 	sed -e 's/!00*\([0-9]*\)!/!\1!/' > users.std;
 	pdftex users; rm -f users.idx $pdf
 
