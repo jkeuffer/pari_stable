@@ -49,12 +49,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
-4  rnfpolred is numerically unstable:
-   ? rnfpolred(nfinit(quadpoly(904,y)),quadray(904,1))
-     ***   division by zero in gdiv, gdivgs or ginv
-
-4  qfbclassno(x < 0) may give a wrong result [e.g x = -2878367]
-
 3  many functions assume MAXVARN is a free variable, yielding bogus
    results if the input involves it (only affects library programming).
 
