@@ -66,6 +66,9 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
+extern GEN lllint_fp_ip(GEN x, long D);
+extern GEN R_from_QR(GEN x, long prec);
+extern GEN gauss_get_col(GEN a, GEN b, GEN p, long li);
 extern GEN col_extract(GEN R, GEN perm);
 extern GEN vecconst(GEN v, GEN x);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
@@ -345,7 +348,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       alg[j] = (long)m;
       if (DEBUGLEVEL>1) fprintferr(" %ld",j);
     }
-
+#if 0 /* Something wrong here. */
     if (cache && j <= a)
     { /* vp^j principal */
       long k;
@@ -356,6 +359,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf, long a)
       rel->m = gclone(m);
       rel->ex= NULL; cache->last = rel;
     }
+#endif
     setlg(id2, j);
     setlg(alg, j); Ord[i] = j;
     if (DEBUGLEVEL>1) fprintferr("\n");
@@ -1874,11 +1878,11 @@ END:
 static GEN
 pseudomin(GEN I, GEN G)
 {
-  GEN m, y = lllintern(gmul(G, I), 100,1, 0);
-  if (!y) return NULL;
+  long n = lg(G)-1;
+  GEN m, GI = lllint_fp_ip(gmul(G, I), 100), p = gcoeff(G,n,n);
 
-  m = gmul(I,(GEN)y[1]);
-  if (isnfscalar(m)) m = gmul(I,(GEN)y[2]);
+  m = gauss_get_col(G, (GEN)GI[1], p, n);
+  if (isnfscalar(m)) m = gauss_get_col(G, (GEN)GI[1], p, n);
   if (DEBUGLEVEL>5) fprintferr("\nm = %Z\n",m);
   return m;
 }
@@ -1958,9 +1962,19 @@ random_rel(long phase, RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf,
   GEN ideal, IDEAL, m, P, ex;
 
   if (phase != 1) { jideal=0; jdir=1; if (phase < 0) return 0; }
-  if (!F->pow) powFBgen(F, cache, nf, CBUCHG+1);
+  if (!F->pow)
+  {
+    long c = 0;
+    powFBgen(F, cache, nf, CBUCHG+1);
+    lgsub = lg(F->subFB);
+    for (i = 1; i <= lgsub; i++) 
+      if (F->pow->ord[1] > 1 && ++c > 1) break;
+    if (i > lgsub) return 2;
+  }
+  else
+    lgsub = lg(F->subFB);
   nbG = lg(vecG)-1;
-  lgsub = lg(F->subFB); ex = cgetg(lgsub, t_VECSMALL);
+  ex = cgetg(lgsub, t_VECSMALL);
   cptzer = cptlist = 0;
   if (DEBUGLEVEL && L_jideal) fprintferr("looking hard for %Z\n",L_jideal);
   P = NULL; /* gcc -Wall */
@@ -2357,18 +2371,27 @@ shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 }
 
 static GEN
-compute_vecG(GEN nf,long prec)
+compute_vecG(GEN nf)
 {
-  GEN vecG, Gtw, M = gmael(nf,5,1), G = gmael(nf,5,2);
-  long r1, i, j, ind, n = min(lg(M[1])-1, 9);
+  GEN vecG, R, Rtw, M = gmael(nf,5,1), G = gmael(nf,5,2);
+  long emin, e, r1, i, j, ind, n = min(lg(M[1])-1, 9), prec = nfgetprec(nf);
 
   r1 = nf_get_r1(nf);
+  R = R_from_QR(G, prec);
+  emin = gexpo(gcoeff(R,1,1));
+  for (i = 2; i < lg(R); i++) 
+  {
+    e = gexpo(gcoeff(R,i,i));
+    if (e < emin) emin = e;
+  }
+  emin -= 4;
+  if (emin) R = gmul2n(R, -emin);
+  R = ground(R);
   vecG = cgetg(1 + n*(n+1)/2,t_VEC);
-  /* copy necessary: migh come from an nf clone which is later destroyed */
-  if (nfgetprec(nf) > prec) G = gprec_w(G,prec); else G = gcopy(G);
-  Gtw = gmul2n(G, 10);
+  if (n == 1) { vecG[1] = (long)R; return vecG; }
+  Rtw = gmul2n(R, 10);
   for (ind=j=1; j<=n; j++)
-    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(G,Gtw,i,j,r1);
+    for (i=1; i<=j; i++) vecG[ind++] = (long)shift_G(R,Rtw,i,j,r1);
   if (DEBUGLEVEL) msgtimer("weighted G matrices");
   return vecG;
 }
@@ -2963,7 +2986,7 @@ GEN
 buchall(GEN P, double cbach, double cbach2, long nbrelpid, long flun, long prec)
 {
   pari_sp av = avma, av0, av2;
-  long PRECREG, PRECLLL, N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
+  long PRECREG, N, R1, R2, RU, KCCO, LIMC, LIMC2, lim;
   long nlze, zc, nreldep, phase, i, j, k, MAXRELSUP;
   long sfb_change, sfb_trials, precdouble = 0, precadd = 0;
   double drc, LOGD, LOGD2;
@@ -3053,15 +3076,6 @@ START:
   cache.end = cache.base + KCCO;
   sfb_trials = sfb_change = nreldep = 0;
 
-  /* PRECLLL = prec for LLL-reductions (idealred)
-   * PRECREG = prec for archimedean components */
-  PRECLLL = DEFAULTPREC
-          + ((expi(D)*(lg(F.subFB)-2) + ((N*N)>>2)) >> TWOPOTBITS_IN_LONG);
-  if (PRECREG < PRECLLL)
-  { /* very rare */
-    PRECREG = PRECLLL;
-    nf = nf_cloneprec(nf, PRECREG, &nfclone);
-  }
   M = gmael(nf, 5, 1);
   av2 = avma; liste = vecsmall_const(F.KC, 0);
   invp = relationrank(&cache, liste);
@@ -3103,10 +3117,14 @@ MORE:
     }
     if (!vecG)
     {
-      vecG = compute_vecG(nf,PRECLLL);
+      vecG = compute_vecG(nf);
       av2 = avma;
     }
-    if (!random_rel(phase, &cache,&F, MAXRELSUP,nf,vecG,L_jideal)) goto START;
+    switch(random_rel(phase, &cache,&F, MAXRELSUP,nf,vecG,L_jideal))
+    {
+      case 0: goto START;
+      case 2: sfb_change = 1;
+    }
     L_jideal = NULL;
   }
 
