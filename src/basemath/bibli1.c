@@ -1981,6 +1981,11 @@ allpolred0(GEN x, GEN *pta, long code, long prec,
     { /* polynomial + integer basis */
       base=(GEN)x[2]; x=(GEN)x[1];
     }
+    else
+    {
+      x = checknf(x);
+      base=(GEN)x[7]; x=(GEN)x[1];
+    }
   }
   p1 = LLL_nfbasis(&x,polr,base,prec);
   y = pols_for_polred(x,base,p1,pta,check,arg);
