@@ -50,17 +50,14 @@ GEN
 grando0(GEN x, long n, long do_clone)
 {
   long m, v, tx=typ(x);
-  GEN y;
 
   if (gcmp0(x)) err(talker,"zero argument in O()");
   if (tx == t_INT)
   {
     if (!gcmp1(x)) /* bug 3 + O(1). We suppose x is a truc() */
     {
-      y=cgetg(5,t_PADIC);
-      y[1] = evalvalp(n) | evalprecp(0);
-      y[2] = do_clone? lclone(x): licopy(x);
-      y[3] = un; y[4] = zero; return y;
+      if (do_clone) x = gclone(x);
+      return padiczero(x,n);
     }
     v=0; m=0; /* 1 = x^0 */
   }
@@ -480,12 +477,9 @@ gprec(GEN x, long l)
       pr = (long) (l*pariK1+3); y=cgetr(pr); affrr(x,y); break;
 
     case t_PADIC:
-      y=cgetg(lx,tx); copyifstack(x[2], y[2]);
       if (!signe(x[4]))
-      {
-	y[1]=evalvalp(l+precp(x)) | evalprecp(0);
-	y[3]=un; y[4]=zero; return y;
-      }
+        return padiczero((GEN)x[2], l+precp(x));
+      y=cgetg(lx,tx); copyifstack(x[2], y[2]);
       y[1]=x[1]; setprecp(y,l);
       y[3]=lpuigs((GEN)x[2],l);
       y[4]=lmodii((GEN)x[4],(GEN)y[3]);
