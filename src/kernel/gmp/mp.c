@@ -164,6 +164,13 @@ setloop(GEN a)
   return icopy_av(a, z0 - 2); /* two cells of extra space after a */
 }
 
+/* we had a = setloop(b), then some incloops. Reset a to b */
+GEN
+resetloop(GEN a, GEN b) { affii(b, a); return a; }
+/* we had a = setloop(b), then some incloops. Set a to c */
+GEN
+resetloop2(GEN a, GEN b, GEN c) { affii(c, a); return a; }
+
 /* assume a > 0, initialized by setloop. Do a++ */
 GEN
 incpos(GEN a)

@@ -26,5 +26,11 @@ GEN arith_proto2gs(long f(GEN,long), GEN x, long y);
 GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 
+GEN incloop(GEN a);
+GEN incpos(GEN a);
+GEN resetloop(GEN a, GEN b);
+GEN resetloop2(GEN a, GEN b, GEN c);
+GEN setloop(GEN a);
+
 #define both_odd(x,y) ((x)&(y)&1)
 

@@ -207,103 +207,233 @@ fordiv(GEN a, entree *ep, char *ch)
  */
 typedef struct {
   GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
-  long n, fl;
-  char *ch;
+  long n; /* length */
 } fvdat;
 
-/* general case */
-static void
-fvloop(long i, fvdat *d)
+static GEN
+forvec_dummy(fvdat *d) { return NULL; } /* used for empty vector, n = 0 */
+
+/* increment and return d->a [over integers]*/
+static GEN
+forvec_next_i(fvdat *d)
 {
-  d->a[i] = d->m[i];
-  if (d->fl && i > 1)
-  {
-    GEN p1 = gsub(d->a[i], d->a[i-1]);
-    if (gsigne(p1) < 0)
-      d->a[i] = gadd(d->a[i], gceil(gneg_i(p1)));
-    if (d->fl == 2 && gegal(d->a[i], d->a[i-1]))
-      d->a[i] = gadd(d->a[i], gun);
+  long i = d->n;
+  for (;;) {
+    d->a[i] = incloop(d->a[i]);
+    if (cmpii(d->a[i], d->M[i]) <= 0) return (GEN)d->a;
+    d->a[i] = resetloop(d->a[i], d->m[i]);
+    if (--i <= 0) return NULL;
   }
-  if (i+1 == d->n)
-    while (gcmp(d->a[i], d->M[i]) <= 0)
-    {
-      pari_sp av = avma; lisseq_void(d->ch); avma = av;
-      if (loop_break()) { d->n = 0; return; }
-      d->a[i] = gadd(d->a[i], gun);
-    }
-  else
-    while (gcmp(d->a[i], d->M[i]) <= 0)
-    {
-      pari_sp av = avma; fvloop(i+1, d); avma = av;
-      if (!d->n) return;
-      d->a[i] = gadd(d->a[i], gun);
-    }
+  return (GEN)d->a;
+}
+/* increment and return d->a [generic]*/
+static GEN
+forvec_next(fvdat *d)
+{
+  long i = d->n;
+  for (;;) {
+    d->a[i] = gaddgs(d->a[i], 1);
+    if (gcmp(d->a[i], d->M[i]) <= 0) return (GEN)d->a;
+    d->a[i] = d->m[i];
+    if (--i <= 0) return NULL;
+  }
+  return (GEN)d->a;
 }
 
-/* we run through integers */
-static void
-fvloop_i(long i, fvdat *d)
+/* non-decreasing order [over integers] */
+static GEN
+forvec_next_le_i(fvdat *d)
 {
-  d->a[i] = setloop(d->m[i]);
-  if (d->fl && i > 1)
-  {
-    int c = cmpii(d->a[i], d->a[i-1]);
-    if (c < 0)
+  long i = d->n, imin = d->n;
+  for (;;) {
+    d->a[i] = incloop(d->a[i]);
+    if (cmpii(d->a[i], d->M[i]) <= 0)
     {
-      d->a[i] = setloop(d->a[i-1]);
-      c = 0;
+      while (i < d->n)
+      {
+        i++;
+        if (cmpii(d->a[i-1], d->a[i]) <= 0) continue;
+        while (cmpii(d->a[i-1], d->M[i]) > 0)
+        {
+          i = imin - 1; if (!i) return NULL;
+          imin = i;
+          d->a[i] = incloop(d->a[i]);
+          if (cmpii(d->a[i], d->M[i]) <= 0) break;
+        } 
+        if (i > 1) {
+          GEN t = d->a[i-1]; if (cmpii(t, d->m[i]) < 0) t = d->m[i];
+          d->a[i] = resetloop2(d->a[i], d->m[i], t);/*a[i]:=min(a[i-1],m[i])*/
+        }
+      }
+      return (GEN)d->a;
     }
-    if (c == 0 && d->fl == 2)
-      d->a[i] = incloop(d->a[i]);
+    d->a[i] = resetloop(d->a[i], d->m[i]);
+    if (--i <= 0) return NULL;
+    if (i < imin) imin = i;
   }
-  if (i+1 == d->n)
-    while (gcmp(d->a[i], d->M[i]) <= 0)
+  return (GEN)d->a;
+}
+/* non-decreasing order [generic] */
+static GEN
+forvec_next_le(fvdat *d)
+{
+  long i = d->n, imin = d->n;
+  for (;;) {
+    d->a[i] = gaddgs(d->a[i], 1);
+    if (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      pari_sp av = avma; lisseq_void(d->ch); avma = av;
-      if (loop_break()) { d->n = 0; return; }
-      d->a[i] = incloop(d->a[i]);
+      while (i < d->n)
+      {
+        i++;
+        if (gcmp(d->a[i-1], d->a[i]) <= 0) continue;
+        while (gcmp(d->a[i-1], d->M[i]) > 0)
+        {
+          i = imin - 1; if (!i) return NULL;
+          imin = i;
+          d->a[i] = gaddgs(d->a[i], 1);
+          if (gcmp(d->a[i], d->M[i]) <= 0) break;
+        } 
+        if (i > 1) { /* a >= a[i-1] - a[i] */
+          GEN a = gceil(gsub(d->a[i-1], d->a[i]));
+          d->a[i] = gadd(d->a[i], a);
+        }
+      }
+      return (GEN)d->a;
     }
-  else
-    while (gcmp(d->a[i], d->M[i]) <= 0)
+    d->a[i] = d->m[i];
+    if (--i <= 0) return NULL;
+    if (i < imin) imin = i;
+  }
+  return (GEN)d->a;
+}
+/* strictly increasing order [over integers] */
+static GEN
+forvec_next_lt_i(fvdat *d)
+{
+  long i = d->n, imin = d->n;
+  for (;;) {
+    d->a[i] = incloop(d->a[i]);
+    if (cmpii(d->a[i], d->M[i]) <= 0)
     {
-      pari_sp av = avma; fvloop_i(i+1, d); avma = av;
-      if (!d->n) return;
-      d->a[i] = incloop(d->a[i]);
+      while (i < d->n)
+      {
+        i++;
+        if (cmpii(d->a[i-1], d->a[i]) < 0) continue;
+        while (cmpii(d->a[i-1], d->M[i]) > 0)
+        {
+          i = imin - 1; if (!i) return NULL;
+          imin = i;
+          d->a[i] = incloop(d->a[i]);
+          if (cmpii(d->a[i], d->M[i]) <= 0) break;
+        } 
+        if (i > 1) {
+          GEN t = addis(d->a[i-1],1); if (cmpii(t, d->m[i]) < 0) t = d->m[i];
+          d->a[i] = resetloop2(d->a[i], d->m[i], t);/*a[i]:=min(a[i-1],m[i])*/
+        }
+      }
+      return (GEN)d->a;
     }
+    d->a[i] = resetloop(d->a[i], d->m[i]);
+    if (--i <= 0) return NULL;
+    if (i < imin) imin = i;
+  }
+  return (GEN)d->a;
+}
+/* strictly increasing order [generic] */
+static GEN
+forvec_next_lt(fvdat *d)
+{
+  long i = d->n, imin = d->n;
+  for (;;) {
+    d->a[i] = gaddgs(d->a[i], 1);
+    if (gcmp(d->a[i], d->M[i]) <= 0)
+    {
+      while (i < d->n)
+      {
+        i++;
+        if (gcmp(d->a[i-1], d->a[i]) < 0) continue;
+        while (gcmp(d->a[i-1], d->M[i]) > 0)
+        {
+          i = imin - 1; if (!i) return NULL;
+          imin = i;
+          d->a[i] = gaddgs(d->a[i], 1);
+          if (gcmp(d->a[i], d->M[i]) <= 0) break;
+        } 
+        if (i > 1) { /* a > a[i-1] - a[i] */
+          GEN a = addis(gfloor(gsub(d->a[i-1], d->a[i])), 1);
+          d->a[i] = gadd(d->a[i], a);
+        }
+      }
+      return (GEN)d->a;
+    }
+    d->a[i] = d->m[i];
+    if (--i <= 0) return NULL;
+    if (i < imin) imin = i;
+  }
+  return (GEN)d->a;
+}
+
+GEN
+forvec_start(fvdat *d, GEN x, long flag, GEN (**next)(fvdat*))
+{
+  long i, tx = typ(x), l = lg(x), t = t_INT;
+
+  if (!is_vec_t(tx)) err(talker,"not a vector in forvec");
+  if (l == 1) { *next = &forvec_dummy; return cgetg(1, t_VEC); }
+  d->n = l - 1;
+  d->a = (GEN*)cgetg(l, t_VEC);
+  d->m = (GEN*)cgetg(l,t_VEC);
+  d->M = (GEN*)cgetg(l,t_VEC);
+  for (i = 1; i < l; i++)
+  {
+    GEN a, e = (GEN)x[i], m = (GEN)e[1], M = (GEN)e[2];
+    tx = typ(e);
+    if (! is_vec_t(tx) || lg(e)!=3)
+      err(talker,"not a vector of two-component vectors in forvec");
+    if (typ(m) != t_INT) t = t_REAL;
+    /* in case x is an ep->value and lisexpr() kills it, have to copy */
+    if (i > 1) switch(flag)
+    {
+      case 1: /* a >= m[i-1] - m */
+        a = gceil(gsub(d->m[i-1], m));
+        m = gadd(m, a); break;
+      case 2: /* a > m[i-1] - m */
+        a = addis(gfloor(gsub(d->m[i-1], m)), 1);
+        m = gadd(m, a); break;
+    }
+    if (gcmp(m,M) > 0) return (GEN)NULL;
+    d->m[i] = gcopy(m);
+    d->M[i] = gcopy(M);
+  }
+  if (t == t_INT) {
+    for (i = 1; i < l; i++) {
+      d->a[i] = setloop(d->m[i]);
+      if (typ(d->M[i]) != t_INT) d->M[i] = gfloor(d->M[i]);
+    }
+  } else {
+    for (i = 1; i < l; i++) d->a[i] = d->m[i];
+  }
+  switch(flag)
+  {
+    case 0: *next = t==t_INT? &forvec_next_i:    &forvec_next; break;
+    case 1: *next = t==t_INT? &forvec_next_le_i: &forvec_next_le; break;
+    case 2: *next = t==t_INT? &forvec_next_lt_i: &forvec_next_lt; break;
+    default: err(flagerr,"forvec");
+  }
+  return (GEN)d->a;
 }
 
 void
 forvec(entree *ep, GEN x, char *c, long flag)
 {
   pari_sp av = avma;
-  long tx = typ(x);
-  fvdat D, *d = &D;
-
-  if (!is_vec_t(tx)) err(talker,"not a vector in forvec");
-  if (flag<0 || flag>2) err(flagerr);
-  d->n = lg(x);
-  d->ch = c;
-  d->a = (GEN*)cgetg(d->n,t_VEC); push_val(ep, (GEN)d->a);
-  if (d->n == 1) lisseq_void(d->ch);
-  else
-  {
-    long i, t = t_INT;
-    d->fl = flag;
-    d->m = (GEN*)cgetg(d->n,t_VEC);
-    d->M = (GEN*)cgetg(d->n,t_VEC);
-    for (i=1; i<d->n; i++)
-    {
-      GEN *e = (GEN*) x[i];
-      tx = typ(e);
-      if (! is_vec_t(tx) || lg(e)!=3)
-	err(talker,"not a vector of two-component vectors in forvec");
-      if (gcmp(e[1],e[2]) > 0) d->n = 0;
-      if (typ(e[1]) != t_INT) t = t_REAL;
-      /* in case x is an ep->value and lisexpr(d->ch) kills it, have to copy */
-      d->m[i] = gcopy(e[1]);
-      d->M[i] = gcopy(e[2]);
-    }
-    if (t == t_INT) fvloop_i(1, d); else fvloop(1, d);
+  fvdat D;
+  GEN (*next)(fvdat *);
+  GEN v = forvec_start(&D, x, flag, &next);
+  push_val(ep, v);
+  while (v) {
+    pari_sp av2 = avma; lisseq_void(c); avma = av2;
+    v = next(&D);
   }
   pop_val(ep); avma = av;
 }
@@ -847,7 +977,7 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
       {
         long ex;
 	ep->value = (void*)addii(r,a);
-        
+
         gaffect(lisexpr_nobreak(ch), reel);
         ex = expo(reel)+kk; setexpo(reel,ex);
 	x = gadd(x,reel); if (kk && ex < G) break;
@@ -855,11 +985,11 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
       }
       if (2*k < N) stock[2*k+1] = x;
       ep->value = (void*)addsi(k+1,a);
-      
+
       gaffect(lisexpr_nobreak(ch), reel);
       x = gadd(reel, gmul2n(x,1));
     }
-    c = gadd(az,c); 
+    c = gadd(az,c);
     s = gadd(s, gmul(x, k&1? gneg_i(c): c));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
   }
@@ -890,7 +1020,7 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
       {
         long ex;
 	ep->value = (void*)addii(r,a);
-        
+
         gaffect(lisexpr_nobreak(ch), reel);
         ex = expo(reel)+kk; setexpo(reel,ex);
 	x = gadd(x,reel); if (kk && ex < G) break;
@@ -1166,7 +1296,7 @@ polzag(long n, long m)
     g = (k&1)? derivpol(g): gadd(gmul(A,g), gmul(Bx,derivpol(g)));
   s = mulsi(d, mulsi(d, mpfact(m+1)));
   return gerepileupto(av, gdiv(g,s));
-} 
+}
 
 #ifdef _MSC_VER /* Bill Daly: work around a MSVC bug */
 #pragma optimize("g",off)

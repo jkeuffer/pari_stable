@@ -300,6 +300,7 @@ BA 15- galoisisabelian, galoisexport, galoisidentify and galoissubgroups now
    17- new routines FpX_factor, FqX_factor, FpX_degfact, FqX_red
    18- private header file pari-priv.h
    19- new function isperfectpower
+   20- forvec iterator
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
