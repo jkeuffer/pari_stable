@@ -13,24 +13,7 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
-/* This file defines some "level 0" kernel functions for SPARC V8, optimised
- * for SuperSparc. The following symbols are defined in this file:
- * bfffo (& tabshi) */
-
-#if defined(sun) || defined(NeXT)
-#  ifdef __STDC__
-#  define C(entrypoint) _##entrypoint
-#  else
-#  define C(entrypoint) _/**/entrypoint
-#  endif
-#elif defined(linux) || defined(__NetBSD__)
-#  define C(entrypoint) entrypoint
-#endif
-#if defined(sun) || defined(linux) || defined(__NetBSD__)
-#  define GLOBL .global
-#elif defined(NeXT)
-#  define GLOBL .globl
-#endif
+/* The following symbols are defined in this file: bfffo (& tabshi) */
 
 #if   defined(sun) || defined(linux)
 	.seg	"data"
