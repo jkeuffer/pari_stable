@@ -662,7 +662,7 @@ idealfactor(GEN nf, GEN x)
     tx = typ(x);
     if (tx == t_INT || tx == t_FRAC)
     {
-      f = factor(x);
+      f = factor(gabs(x,0));
       c1 = (GEN)f[1]; f1 = cgetg(1, t_VEC);
       c2 = (GEN)f[2]; f2 = cgetg(1, t_COL);
       for (i = 1; i < lg(c1); i++)
