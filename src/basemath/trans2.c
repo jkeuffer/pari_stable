@@ -960,7 +960,7 @@ cxgamma(GEN s0, int dolog, long prec)
   pari_sp av, av2, avlim;
   int funeq = 0;
 
-  if (DEBUGLEVEL) (void)timer2();
+  if (DEBUGLEVEL>5) (void)timer2();
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
   if (signe(sig) <= 0 || expo(sig) < -1)
@@ -1036,7 +1036,7 @@ cxgamma(GEN s0, int dolog, long prec)
       nn++;
     }
 #endif
-    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
+    if (DEBUGLEVEL>5) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
   }
   prec++;
 
@@ -1100,17 +1100,17 @@ cxgamma(GEN s0, int dolog, long prec)
     }
 
   nnx = gaddgs(s, nn);
-  if (DEBUGLEVEL) msgtimer("product from 0 to N-1");
+  if (DEBUGLEVEL>5) msgtimer("product from 0 to N-1");
 
   a = ginv(nnx); invn2 = gsqr(a);
   tes = divrsns(bernreal(2*lim,prec), 2*lim-1); /* B2l / (2l-1) 2l*/
-  if (DEBUGLEVEL) msgtimer("Bernoullis");
+  if (DEBUGLEVEL>5) msgtimer("Bernoullis");
   for (i = 2*lim-2; i > 1; i -= 2)
   {
     u = divrsns(bernreal(i,prec), i-1); /* Bi / i(i-1) */
     tes = gadd(u, gmul(invn2,tes));
   }
-  if (DEBUGLEVEL) msgtimer("Bernoulli sum");
+  if (DEBUGLEVEL>5) msgtimer("Bernoulli sum");
 
   p1 = gsub(gmul(gsub(nnx, ghalf), glog(nnx,prec)), nnx);
   p1 = gadd(p1, gmul(tes, a));

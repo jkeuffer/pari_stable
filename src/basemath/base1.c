@@ -2202,7 +2202,6 @@ dirzetak(GEN nf, GEN b)
   z = vecsmall_to_vec(c); free(c); return z;
 }
 
-/* N_0 = floor( C_K / limx ) */
 GEN
 zeta_get_limx(long r1, long r2, long bit)
 {
@@ -2221,7 +2220,7 @@ zeta_get_limx(long r1, long r2, long bit)
   p1 = divrr(mulsr(N*(r+1), mplog(p2)), addsr(2*(r+1), gmul2n(A0,2)));
   return gerepileuptoleaf(av, divrr(addrs(p1, 1), powrshalf(p2, N)));
 }
-
+/* N_0 = floor( C_K / limx ) */
 long
 zeta_get_N0(GEN C,  GEN limx)
 {
