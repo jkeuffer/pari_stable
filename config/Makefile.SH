@@ -168,7 +168,7 @@ if test -z "$emacs"; then
   pari_elc=
 else
   install_emacs_files=install_emacs_files
-  pari_elc=$emx/pari.elc
+  pari_elc=elc
 fi
 case "$static" in
   n) dft=dyn; libdft=lib-dyn;;
@@ -355,10 +355,6 @@ test-compat: $exec
 	@$doexec -c
 test-graphic: $exec
 	@$doexec -g
-
-cleantest:
-	\$(RM) *.dif gp.out pari.ps
-
 dobench::
 	@$doexec
 dotest-compat::
@@ -366,10 +362,14 @@ dotest-compat::
 dotest-graphic::
 	@$doexec -g
 
-cleanobj: cleantest
+cleanemacs:
+	\$(RM) $emx/*.elc
+cleantest:
+	\$(RM) *.dif gp.out pari.ps
+cleanobj:
 	-\$(RM) *\$(_O) mp.c *.s pariinl.h parilvl0.h parilvl1.h libpari* tune* $exec
 
-clean: cleanobj
+clean: cleanobj cleantest cleanemacs
 
 .headers: $HEADERS
 	@touch \$@
@@ -571,18 +571,17 @@ fi
 
 if test -n "$emacs"; then
   cat >> $file << EOT
-$pari_elc: $emx/pari.el
-	@echo "Byte-Compiling pari.el..."
-	-cd $emx; $emacs -batch --eval '(byte-compile-file "pari.el")'
+elc:
+	@echo "Byte-Compiling elisp files..."
+	-cd $emx; $emacs -batch \
+	   --eval '(setq load-path (append (list ".") load-path))' \
+	   -f batch-byte-compile *.el
 
-
-$install_emacs_files: $pari_elc
+$install_emacs_files: elc
 	-mkdir -p \$(EMACSDIR)
-	-\$(INSTALL_DATA)   $pari_elc           \$(EMACSDIR)
-	\$(INSTALL_DATA)    $emx/pari.el        \$(EMACSDIR)
-	\$(INSTALL_DATA)    $emx/pariemacs.txt  \$(EMACSDIR)
-	\$(INSTALL_DATA)    $emx/with-syntax.el     \$(EMACSDIR)
-	\$(INSTALL_DATA)    $emx/pari-translator.el \$(EMACSDIR)
+	-cd $emx; for f in *.elc *.el pariemacs.txt; do \
+	  \$(INSTALL_DATA) \$\$f \$(EMACSDIR); \
+	done
 	
 EOT
 fi
