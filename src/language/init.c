@@ -1035,10 +1035,10 @@ err_recover(long numerr)
   initout(0);
   disable_dbg(-1);
   killallfiles(0);
+  err_clean();
 
   if (pariErr->die) pariErr->die();    /* Caller wants to catch exceptions? */
   global_err_data = NULL;
-  err_clean();
   fprintferr("\n"); flusherr();
   if (!environnement) exit(1);
 

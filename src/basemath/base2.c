@@ -631,8 +631,9 @@ get_coprimes(GEN a, GEN b)
 GEN
 allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
-  GEN w, w1, w2, a, da, p1, ordmax;
-  long n, lw, i, j, k, l;
+  VOLATILE GEN w1, w2, a, da, p1, ordmax;
+  VOLATILE long n, lw, i, j, k, l;
+  GEN w;
 
   if (flag & nf_ROUND2) return allbase2(f,flag,dx,dK,ptw);
   w = ptw? *ptw: NULL;
@@ -644,7 +645,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   /* "complete" factorization first */
   for (i=1; i<lw; i++)
   {
-    long mf = itos((GEN)w2[i]);
+    VOLATILE long mf = itos((GEN)w2[i]);
     if (mf == 1) { ordmax = concatsp(ordmax, gun); continue; }
 
     CATCH(invmoder) { /* caught false prime, update factorization */

@@ -2404,7 +2404,7 @@ gp_main_loop(int ismain)
 {
   gp_hist *H  = GP_DATA->hist;
   gpmem_t av = avma;
-  GEN z = gnil;
+  VOLATILE GEN z = gnil;
   Buffer *b = new_buffer();
   filtre_t F;
 
@@ -2535,7 +2535,7 @@ break_loop(long numerr)
   static FILE *oldinfile = NULL;
   static char *old = NULL;
   static Buffer *b = NULL;
-  int go_on = 0;
+  VOLATILE int go_on = 0;
   char *s, *t, *msg;
   filtre_t F;
 

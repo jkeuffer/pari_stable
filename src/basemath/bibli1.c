@@ -3067,8 +3067,8 @@ static GEN
 _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK)
 {
   gpmem_t av = avma;
-  long i,j,l, round = 0;
-  GEN B,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram, bound = B0;
+  VOLATILE long i,j,l, round = 0;
+  VOLATILE GEN B,r,rinvtrans,u,v,res,z,vnorm,sperm,perm,uperm,gram, bound = B0;
 
   if (DEBUGLEVEL>2) fprintferr("entering fincke_pohst\n");
   if (typ(a) == t_VEC)

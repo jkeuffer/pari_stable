@@ -2865,8 +2865,9 @@ GEN
 quadhilbertreal(GEN D, GEN flag, long prec)
 {
   gpmem_t av = avma;
-  long cl, newprec;
-  GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
+  long newprec;
+  VOLATILE long cl;
+  VOLATILE GEN pol, bnf, bnr, dataC, bnrh, nf, exp;
 
   (void)&prec; /* prevent longjmp clobbering it */
   if (DEBUGLEVEL) (void)timer2();
