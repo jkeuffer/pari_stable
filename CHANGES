@@ -147,6 +147,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
    19- removed obsolete components ("checks", "bits of accuracy left in
        computation") from quadclassunit / bnfinit / bnfisprincipal /
        bnrisprincipal outputs.
+   20- 'make test-graphic' is gone. Use 'make test-ploth'
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
