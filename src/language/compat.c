@@ -181,7 +181,7 @@ entree oldfonctions[]={
 {"galois",1,(void *)galois,6,"Gp"},
 {"galoisapply",3,(void *)galoisapply,6,"GGG"},
 {"galoisconj",1,(void *)galoisconj,6,"G"},
-{"galoisconj1",1,(void *)galoisconj1,6,"Gp"},
+{"galoisconj1",1,(void *)suppressed,6,"G"},
 {"galoisconjforce",1,(void *)suppressed,6,"G"},
 {"gamh",1,(void *)ggamd,3,"Gp"},
 {"gamma",1,(void *)ggamma,3,"Gp"},

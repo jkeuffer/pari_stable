@@ -715,8 +715,10 @@ void    vpariputs(char* format, va_list args);
 GEN     galoisconj(GEN nf);
 GEN     galoisconj0(GEN nf,long flag, GEN d, long prec);
 GEN     galoisconj2(GEN x, long nbmax, long prec);
-GEN     galoisconj4(GEN T, GEN den);
-GEN     galoisgroup(GEN x);
+GEN     galoisconj4(GEN T, GEN den, long flag);
+GEN     galoisfixedfield(GEN gal, GEN v, GEN p);
+GEN     galoisinit(GEN nf, GEN den);
+GEN     galoispermtopol(GEN gal,GEN perm);
 long    numberofconjugates(GEN T, long pdepart);
 /* gen1.c */
 
