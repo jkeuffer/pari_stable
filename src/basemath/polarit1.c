@@ -1435,10 +1435,10 @@ static GEN
 int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
 {
   GEN p1,y;
-  long v, sx;
+  long v, sx, tx = typ(x);
   gpmem_t av = avma;
 
-  if (typ(x) == t_PADIC)
+  if (tx == t_PADIC)
   {
     v = valp(x);
     if (r >= precp(x) + v) return invlead? gmul(x, invlead): gcopy(x);
@@ -1447,6 +1447,7 @@ int_to_padic(GEN x, GEN p, GEN pr, long r, GEN invlead)
   }
   else
   {
+    if (tx != t_INT) err(typeer, "int_to_padic");
     sx = signe(x);
     if (!sx) return gzero;
     v = pvaluation(x,p,&p1);
