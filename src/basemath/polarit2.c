@@ -527,8 +527,9 @@ all_factor_bound(GEN x)
  * rigorous bound [for efficiency])
  */
 static GEN
-cmbf(GEN target, GEN famod, GEN pe, long maxK, long kinit, long klim,long hint) {
-  long K = kinit, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
+cmbf(GEN target, GEN famod, GEN pe, long maxK, long klim,long hint)
+{
+  long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   GEN lc, lctarget, pes2 = shifti(pe,-1);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN deg      = cgetg(lfamod+1, t_VECSMALL);
@@ -699,7 +700,7 @@ refine_factors(GEN LL, GEN prime, long klim, long hint, long e, GEN res,
       {
         if (e2 != e) famod = hensel_lift_fact(x,famod,prime,pe,e2);
 
-        L2 = cmbf(x, famod, pe, 0, 1,klim2, hint);
+        L2 = cmbf(x, famod, pe, 0, klim2, hint);
         if (DEBUGLEVEL > 4 && lg(L2[1]) > 2)
           fprintferr("split in %ld\n",lg(L2[1])-1);
         refine_factors(L2, prime, klim, hint, e2, res, &cnt, 0);
@@ -1013,14 +1014,109 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
   }
 }
 
-extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
 extern GEN primitive_pol_to_monic(GEN pol, GEN *ptlead);
+
+/* P(hx), in place. Assume P in Z[X], h in Z */
+void
+rescale_pol_i(GEN P, GEN h)
+{
+  GEN hi = gun;
+  long i, l = lgef(P);
+  for (i=3; i<l; i++)
+  {
+    hi = mulii(hi,h); P[i] = lmulii((GEN)P[i], hi);
+  }
+}
+
+/* use van Hoeij's knapsack algorithm */
+static GEN
+combine_factors(GEN a, GEN famod, GEN p, long klim, long hint)
+{
+  GEN B = uniform_Mignotte_bound(a), res,y,lt,L,pe,listmod,p1;
+  long i,e,l, maxK = 3, nft = lg(famod)-1;
+
+  e = get_e(B, p, &pe);
+
+  if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z\n", B);
+  famod = hensel_lift_fact(a,famod,p,pe,e);
+  if (nft < 11) maxK = 0;
+  else
+  {
+    lt = leading_term(a);
+    if (!is_pm1(lt) && nft < 13) maxK = 0;
+  }
+  L = cmbf(a, famod, pe, maxK, klim, hint);
+
+  res     = (GEN)L[1];
+  listmod = (GEN)L[2]; l = lg(listmod);
+  famod = (GEN)listmod[l-1];
+  if (maxK && lg(famod)-1 > maxK)
+  {
+    a = (GEN)res[l-1];
+    lt = leading_term(a);
+    if (signe(lt) < 0) { a = gneg_i(a); lt = leading_term(a); }
+    if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
+    if (gcmp1(lt))
+      lt = NULL;
+    else
+    {
+      if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
+      a = primitive_pol_to_monic(a, &lt);
+      B = uniform_Mignotte_bound(a);
+      e = get_e(B, p, &pe);
+      famod = hensel_lift_fact(a,famod,p,pe,e);
+    }
+    setlg(res, l-1); /* remove last elt (possibly unfactored) */
+    L = LLL_cmbf(a, famod, p, pe, B, e, maxK);
+    if (lt)
+    {
+      for (i=1; i<lg(L); i++)
+      {
+        y = (GEN)L[i]; rescale_pol_i(y, lt);
+        p1 = content(y); if (!is_pm1(p1)) y = gdiv(y, p1);
+        L[i] = (long)y;
+      }
+    }
+    res = concatsp(res, L);
+  }
+  return res;
+}
+
+#if 0
+/* naive recombination */
+static GEN
+combine_factors_old(GEN a, GEN famod, GEN p, long klim, long hint)
+{
+  GEN B = stoi(EXP220), L,pe,res;
+  long e, nft = lg(famod)-1, cnt = 1, maxK = nft / 6, check_last = 0;
+
+  res = cgetg(nft+1, t_VEC);
+  e = get_e(B, p, &pe);
+  if (maxK > 8) maxK = 8;
+  if (maxK < 4) maxK = 0;
+
+  if (DEBUGLEVEL > 4) fprintferr("(first) bound: %Z\n", B);
+  famod = hensel_lift_fact(a,famod,p,pe,e);
+  L = cmbf(a, famod, pe, maxK, klim, hint);
+  if (maxK)
+  {
+    GEN listmod = (GEN)L[2];
+    long l = lg(listmod);
+    if (lg(listmod[l-1])-1 > maxK) check_last = 1;
+    if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
+  }
+  refine_factors(L, p, klim, hint, e, res, &cnt, check_last);
+  setlg(res, cnt); return res;
+}
+#endif
+
+extern long split_berlekamp(GEN Q, GEN *t, GEN pp, GEN pps2);
 
 /* assume degree(a) > 0, a(0) != 0, and a squarefree */
 static GEN
 squff(GEN a, long klim, long hint)
 {
-  GEN Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
+  GEN res,Q,prime,primes2,famod,p1,y,g,z,w,*tabd,*tabdnew;
   long av=avma,va=varn(a),da=lgef(a)-3;
   long chosenp,p,nfacp,lbit,i,j,d,e,np,nmax,lgg,nf,nft;
   ulong *tabbit, *tabkbit, *tmp;
@@ -1113,84 +1209,12 @@ squff(GEN a, long klim, long hint)
     }
   }
   if (DEBUGLEVEL > 4) msgtimer("splitting mod p = %ld",chosenp);
-
 #if 0
-{
-  GEN B = stoi(EXP220), res = cgetg(nft+1, t_VEC);
-  GEN L, pe;
-  long cnt = 1, maxK = nft / 6, check_last = 0;
-
-  e = get_e(B, prime, &pe);
-  if (maxK > 8) maxK = 8;
-  if (maxK < 4) maxK = 0;
-
-  if (DEBUGLEVEL > 4) fprintferr("(first) bound: %Z\n", B);
-  famod = hensel_lift_fact(a,famod,prime,pe,e);
-  L = cmbf(a, famod, pe, maxK, 1,klim, hint);
-  if (maxK)
-  {
-    GEN listmod = (GEN)L[2];
-    long l = lg(listmod);
-    if (lg(listmod[l-1])-1 > maxK) check_last = 1;
-    if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
-  }
-  refine_factors(L, prime, klim, hint, e, res, &cnt, check_last);
-
-  setlg(res, cnt); return gerepileupto(av, gcopy(res));
-}
+  res = combine_factors_old(a, famod, prime, klim, hint);
 #else
-{
-  GEN B = uniform_Mignotte_bound(a), res;
-  GEN L, pe, listmod;
-  long l, maxK = 3;
-
-  e = get_e(B, prime, &pe);
-
-  if (DEBUGLEVEL > 4) fprintferr("Mignotte bound: %Z\n", B);
-  famod = hensel_lift_fact(a,famod,prime,pe,e);
-  if (nft < 11) maxK = 0;
-  L = cmbf(a, famod, pe, maxK, 1,klim, hint);
-
-  res = (GEN)L[1];
-  listmod = (GEN)L[2];
-  l = lg(listmod);
-  famod = (GEN)listmod[l-1];
-  if (maxK && lg(famod)-1 > maxK)
-  {
-    GEN lt;
-    a = (GEN)res[l-1];
-    lt = leading_term(a);
-    if (signe(lt) < 0) { a = gneg_i(a); lt = leading_term(a); }
-    if (DEBUGLEVEL > 4) fprintferr("last factor still to be checked\n");
-    if (gcmp1(lt))
-      lt = NULL;
-    else
-    {
-      if (DEBUGLEVEL > 4) fprintferr("making it monic\n");
-      a = primitive_pol_to_monic(a, &lt);
-      #if 0
-      B = uniform_Mignotte_bound(a);
-      e = get_e(B, prime, &pe);
-
-      double logp = log((long)chosenp);
-      double b0 = log((double)da*2) / logp;
-      double k = gtodouble(glog(root_bound(a), DEFAULTPREC)) / logp;
-      if (e > )ceil(b0 + 20 * k);
-      famod = hensel_lift_fact(a,famod,prime,pe,e);
-      #endif
-    }
-    setlg(res, l-1); /* remove last elt (possibly unfactored) */
-    L = LLL_cmbf(a, famod, prime, pe, B, e, maxK);
-    if (lt)
-    {
-      for (i=1; i<lg(L); i++)
-        L[i] = (long)poleval((GEN)L[i], gmul(polx[va], lt));
-    }
-    res = concatsp(res, L);
-  }
-  return gerepileupto(av, gcopy(res));
-}
+  res = combine_factors(a, famod, prime, klim, hint);
 #endif
+  return gerepileupto(av, gcopy(res));
 }
 
 GEN

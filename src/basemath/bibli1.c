@@ -1877,12 +1877,22 @@ canon_pol(GEN z)
 }
 
 extern GEN caractducos(GEN p, GEN x, int v);
+static void
+rescale_pol(GEN P, GEN h)
+{
+  GEN hi = gun;
+  long i;
+  for (i=lgef(P)-2; i>=2; i--)
+  {
+    hi = gmul(hi,h); P[i] = lmul((GEN)P[i], hi);
+  }
+}
 
 static GEN
 pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta, 
 		int (*check)(GEN, GEN), GEN arg)
 {
-  long i,j, v = varn(x), n = lg(base);
+  long i, v = varn(x), n = lg(base);
   GEN p1,p2,p3,y, a = cgetg(n,t_VEC);
 
   for (i=1; i<n; i++) a[i] = lmul(base,(GEN)LLLbase[i]);
@@ -1893,11 +1903,7 @@ pols_for_polred(GEN x, GEN base, GEN LLLbase, GEN *pta,
     p1=(GEN)a[i]; p3=content(p1);
     if (gcmp1(p3)) p3 = NULL; else p1 = gdiv(p1,p3);
     p1 = caractducos(x,p1,v);
-    if (p3)
-      for (p2=gun, j=lgef(p1)-2; j>=2; j--)
-      {
-        p2 = gmul(p2,p3); p1[j] = lmul((GEN)p1[j], p2);
-      }
+    if (p3) rescale_pol(p1,p3);
     p2 = modulargcd(derivpol(p1),p1);
     p3 = leading_term(p2); if (!gcmp1(p3)) p2=gdiv(p2,p3);
     p1 = gdiv(p1,p2);
