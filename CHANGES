@@ -50,7 +50,7 @@ IS 13- function prototypes (missing 'extern')
        rnfidealmul(2*x-1,0), galoisfixedfield(2*x-1), qfbnupow(2*x-1, 0),
        polred([x,x]), bezout(Mod(x,x^2+1),0) : SEGV
    16- check variable numbers in algtobasis: nfalgtobasis(nfinit(P(y), x))
-   17- often printer more digits than were significant
+   17- often printed more digits than were significant [ precision(Pi,20) ]
 
   Changed
 BA  1- more efficient quadratic Hensel lift
