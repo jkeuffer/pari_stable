@@ -58,8 +58,12 @@ GEN     matsolvemod0(GEN M, GEN D, GEN Y,long flag);
 GEN     mattodiagonal(GEN m);
 long    rank(GEN x);
 long    rank_mod_p(GEN x, GEN p);
+GEN     rowextract_i(GEN A, long x1, long x2);
+GEN     rowextract_p(GEN A, GEN p);
 GEN     suppl(GEN x);
 GEN     suppl_intern(GEN x, GEN myid);
+GEN     vecextract_i(GEN A, long y1, long y2);
+GEN     vecextract_p(GEN A, GEN p);
 GEN     zerocol(long n);
 GEN     zerovec(long n);
 

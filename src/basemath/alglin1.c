@@ -345,6 +345,42 @@ get_range(char *s, long *a, long *b, long *cmpl, long lx)
 }
 
 GEN
+vecextract_i(GEN A, long y1, long y2)
+{
+  long i,lB = y2 - y1 + 2;
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = A[y1-1+i];
+  return B;
+}
+
+GEN
+rowextract_i(GEN A, long x1, long x2)
+{
+  long i, lB = lg(A);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = (long)vecextract_i((GEN)A[i],x1,x2);
+  return B;
+}
+
+GEN
+vecextract_p(GEN A, GEN p)
+{
+  long i,lB = lg(p);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = A[p[i]];
+  return B;
+}
+
+GEN
+rowextract_p(GEN A, GEN p)
+{
+  long i, lB = lg(A);
+  GEN B = cgetg(lB, typ(A));
+  for (i=1; i<lB; i++) B[i] = (long)vecextract_p((GEN)A[i],p);
+  return B;
+}
+
+GEN
 extract(GEN x, GEN l)
 {
   long av,i,j, tl = typ(l), tx = typ(x), lx = lg(x);
@@ -2821,7 +2857,7 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
 GEN
 mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
 {
-  long i,j,ly,lx = lg(x);
+  long i,j,k,ly,lx = lg(x);
   GEN p1,p2,z,perm;
   if (lx == 1) return gcopy(x);
   ly = lg(x[1]);
@@ -2832,7 +2868,11 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
   {
     p1 = cgetg(ly,t_COL); z[i] = (long)p1;
     p2 = (GEN)x[i];
-    for (j=1; j<ly; j++) p1[j] = itos((GEN)p2[j]);
+    for (j=1; j<ly; j++) 
+    {
+      if (is_bigint(p2[j])) goto TOOLARGE;
+      p1[j] = itos((GEN)p2[j]);
+    }
   }
   /*  [ dep |     ]
    *  [-----|  B  ]
@@ -2840,6 +2880,25 @@ mathnfspec(GEN x, GEN *ptperm, GEN *ptdep, GEN *ptB, GEN *ptC)
    *  [-----|-----]
    *  [  0  | Id  ] */
   return hnfspec((long**)z,perm, ptdep, ptB, ptC, 0);
+
+TOOLARGE:
+  if (lg(*ptC) > 1 && lg((*ptC)[1]) > 1)
+    err(impl,"mathnfspec with large entries");
+  x = hnf(x); lx = lg(x); j = ly; k = 0;
+  for (i=1; i<ly; i++)
+  {
+    if (gcmp1(gcoeff(x,i,i + lx-ly)))
+      perm[--j] = i;
+    else
+      perm[++k] = i;
+  }
+  setlg(perm,k+1);
+  x = rowextract_p(x, perm); /* upper part */
+  setlg(perm,ly);
+  *ptB = vecextract_i(x, j+lx-ly, lx-1);
+  setlg(x, j);
+  *ptdep = rowextract_i(x, 1, lx-ly);
+  return rowextract_i(x, lx-ly+1, k); /* H */
 }
 
 /* add new relations to a matrix treated by hnfspec (extramat / extraC) */
