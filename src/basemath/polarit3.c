@@ -2640,6 +2640,12 @@ ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p)
     for (   ; i<lp; i++) x[i] = zero;
     *ptH = H = x;
     stable = 0;
+  } else if (l > lp)
+  { /* degree decreases */
+    GEN x = cgetg(l, t_VECSMALL);
+    for (i=1; i<lp; i++)  x[i] = Hp[i];
+    for (   ; i<l; i++) x[i] = 0;
+    Hp = x; lp = l;
   }
   for (i=2; i<lp; i++)
   {
