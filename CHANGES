@@ -38,11 +38,18 @@ Done for version 2.2.4 (released 10/07/2002) [hopefully]:
        old format will be used, preserving compatibility)
  BA 2- FreeBSD: DL_DFLT_NAME value was incorrect
     3- Configure: TIOCGWINSZ not detected on Linux
+ BA 4- FpV_roots_to_pol not reduced when applied to a singleton
+    5- (a.x = [a]); "a".x ---> [a]  \\ should be ["a"]
+    6- (a.x = [a]); print("a".x) ---> a0.E-28x  \\ should be ["a"]
+    7- (a.x = [a]); 1.x ---> error \\ should be [1]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
     2- use better bounds for size of factors in nffactor()
     3- tuning for van Hoeij's factorizer (factor + nffactor)
+    4- automatic concatenation for strings: use longest match for expression.
+       print("a"[1]) is not valid since "a" is not a vector
+       print("a", [1])  prints  'a[1]'
 
   Added
  BA 1- Add PARI_VERSION and PARI_VERSION_CODE to paricfg.h
