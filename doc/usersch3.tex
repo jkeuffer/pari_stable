@@ -5600,9 +5600,19 @@ formula.
 \syn{tchebi}{n,v}, where $n$ and $v$ are \kbd{long}
 integers ($v$ is a variable number).
 
-\subsecidx{polzagier}$(n,m)$: creates Zagier's polynomial $P_{n,m}$ used in
-the functions \kbd{sumalt} and \kbd{sumpos} (with $\fl=1$). The exact
-definition can be found in a forthcoming paper. One must have $m\le n$.
+\subsecidx{polzagier}$(n,m)$: creates Zagier's polynomial $P_n^{(m)}$ used in
+the functions \kbd{sumalt} and \kbd{sumpos} (with $\fl=1$). One must have $m\le
+n$. The exact definition can be found in ``Convergence acceleration of
+alternating series'', Cohen et al., Experiment.~Math., vol.~9, 2000, pp.~3--12.
+
+%@article {MR2001m:11222,
+%    AUTHOR = {Cohen, Henri and Rodriguez Villegas, Fernando and Zagier, Don},
+%     TITLE = {Convergence acceleration of alternating series},
+%   JOURNAL = {Experiment. Math.},
+%    VOLUME = {9},
+%      YEAR = {2000},
+%    NUMBER = {1},
+%     PAGES = {3--12},
 
 \syn{polzagreel}{n,m,\var{prec}} if the result is only wanted as a polynomial
 with real coefficients to the precision $\var{prec}$, or $\teb{polzag}(n,m)$
