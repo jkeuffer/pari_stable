@@ -1070,7 +1070,7 @@ gerfc(GEN x, long prec)
 static GEN
 czeta(GEN s, long prec)
 {
-  long n, p, n1, flag1, flag2, i, i2;
+  long n, p, n1, funeq, i, i2;
   pari_sp av;
   double st,sp,sn,ssig,ns,alpha,beta,maxbeta,xinf;
   GEN y,z,res,sig,ms,p1,p2,p3,p31,pitemp;
@@ -1088,7 +1088,7 @@ czeta(GEN s, long prec)
     p1 = cgetr(prec+1); affrr(s,p1); sig = s = p1;
   }
 
-  if (signe(sig)>0 && expo(sig)>-2) flag1 = 0;
+  if (signe(sig)>0 && expo(sig)>-2) funeq = 0;
   else
   {
     if (gcmp0(gimag(s)) && gcmp0(gfrac(gmul2n(sig,-1))))
@@ -1096,7 +1096,7 @@ czeta(GEN s, long prec)
       if (gcmp0(sig)) gaffect(gneg_i(ghalf),res); else gaffsg(0,res);
       avma=av; return res;
     }
-    flag1 = 1; s = gsub(gun,s); sig = greal(s);
+    funeq = 1; s = gsub(gun,s); sig = greal(s);
   }
   ssig=rtodbl(sig); st=fabs(rtodbl(gimag(s))); maxbeta = pow(3.0,-2.5);
   if (st)
@@ -1164,14 +1164,13 @@ czeta(GEN s, long prec)
     affsr(i,p1); p2 = gexp(gmul(ms,mplog(p1)), prec+1);
     y = gadd(y,p2);
   }
-  flag2 = (2*p < 46340);
   mpbern(p,prec); p31=cgetr(prec+1); z=gzero;
   for (i=p; i>=1; i--)
   {
     i2=i<<1;
     p1=gmul(gaddsg(i2-1,s),gaddsg(i2,s));
-    p1=flag2? gdivgs(p1,i2*(i2+1)): gdivgs(gdivgs(p1,i2),i2+1);
-    p1=n1? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
+    p1= divgs2_safe(p1, i2);
+    p1= n1? gdivgs(p1,n1): gdivgs(gdivgs(p1,n),n);
     p3 = bern(i);
     if (bernzone[2]>prec+1) { affrr(p3,p31); p3=p31; }
     z=gadd(divrs(p3,i),gmul(p1,z));
@@ -1179,7 +1178,7 @@ czeta(GEN s, long prec)
   p1=gsub(gdivsg(n,gsubgs(s,1)),ghalf);
   z=gmul(gadd(p1,gmul(s,gdivgs(z,n<<1))),p2);
   y = gadd(y,z);
-  if (flag1)
+  if (funeq)
   {
     pitemp=mppi(prec+1); setexpo(pitemp,2);
     y=gmul(gmul(y,ggamma(s,prec+1)),gpow(pitemp,ms,prec+1));
@@ -1386,17 +1385,18 @@ czeta(GEN s0, long prec)
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
     double ns = dnorm(ssig,st), l,l2;
-    long la = 1;
+    double la = 1.; /* FIXME */
 
     if (typ(s0) == t_INT)
     {
       long ss = itos(s0);
       switch(ss)
-      { /* should depend on prec ? */
-        case 3:  la = 6; break;
-        default: la = 3; break;
+      { /* should depend on prec */
+        case 3:  la = 6.; break;
+        default: la = 3.; break;
       }
     }
+
     if (dnorm(ssig-1,st) < 0.1) /* |s - 1|^2 < 0.1 */
       l2 = -(ssig - 0.5);
     else

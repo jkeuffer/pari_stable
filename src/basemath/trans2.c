@@ -1132,6 +1132,15 @@ divrs2_safe(GEN x, long i)
   else
     return divrs(divrs(x, i), i+1);
 }
+/* x / (i*(i+1)) */
+GEN
+divgs2_safe(GEN x, long i)
+{
+  if (i < 46341) /* i(i+1) < 2^31 */
+    return gdivgs(x, i*(i+1));
+  else
+    return gdivgs(gdivgs(x, i), i+1);
+}
 
 /* arg(s+it) */
 double
@@ -1213,10 +1222,9 @@ gammanew(GEN s0, int dolog, long prec)
   if (funeq) { s = gsub(gun, s); sig = greal(s); }
 
   { /* find "optimal" parameters [lim, nn] */
-    const long la = 3; /* random... FIXME !*/
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
-    double l,l2,u,v, rlogs, ilogs;
+    double la, l,l2,u,v, rlogs, ilogs;
 
     dcxlog(ssig,st, &rlogs,&ilogs);
     /* Re (s - 1/2) log(s) */
@@ -1228,10 +1236,19 @@ gammanew(GEN s0, int dolog, long prec)
     v = v - st;
     l2 = u*u + v*v;
     if (l2 < 0.000001) l2 = 0.000001;
-
-    l = (pariC2*(prec-2) - log(l2)/2) / (2. * (1.+ log((double)la)));
+    l = (pariC2*(prec-2) - log(l2)/2) / 2.;
     if (l < 0) l = 0.;
-    lim = 1 + (long)ceil(l);
+    
+    if (l > 0)
+    {
+      double t = st * PI / l;
+      la = t * log(t);
+      if (la < 3) la = 3.; /* FIXME: heuristic... */
+    }
+    else la = 3.; /* FIXME: heuristic... */
+
+    lim = (long)ceil(l / (1.+ log(la)));
+    if (lim == 0) lim = 1;
 
     u = (lim-0.5) * la / PI;
     l2 = u*u - st*st;
@@ -1242,9 +1259,10 @@ gammanew(GEN s0, int dolog, long prec)
     }
     else 
       nn = 1;
-    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+    if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld], la = %lf\n",lim,nn,la);
 
-    {
+#if 0
+    {/* same: old method */
       long e = gexpo(s);
       double beta;
       if (e > 1000)
@@ -1271,6 +1289,7 @@ gammanew(GEN s0, int dolog, long prec)
       nn++;
     }
     if (DEBUGLEVEL) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
+#endif
   }
   prec++;
 
