@@ -2238,7 +2238,9 @@ gp_main_loop(int ismain)
 
     for(;;)
     {
-      if (! read_line(do_prompt(), b))
+      int r = read_line(do_prompt(), b);
+      term_color(c_NONE);
+      if (!r)
       {
 #ifdef _WIN32
 	Sleep(10); if (win32ctrlc) dowin32ctrlc();
