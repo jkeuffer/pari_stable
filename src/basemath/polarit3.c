@@ -2591,12 +2591,12 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
   ulong p = 27449; /* p = prime(3000) */
   long vX = varn(B);
   long vY = varn(A); /* assume vX < vY */
-  int checksqfree = lambda? 1: 0;
+  int checksqfree = lambda? 1: 0, delete = 0;
 
   q = H = NULL;
   if (vY == MAXVARN)
   {
-    vY = fetch_var();
+    vY = fetch_var(); delete = 1;
     B0 = gsubst(B0, MAXVARN, polx[vY]);
     A = dummycopy(A); setvarn(A, vY);
   }
@@ -2666,7 +2666,7 @@ ZY_ZXY_resultant(GEN A, GEN B0, long *lambda)
       gerepilemany(av2,gptr,lambda? 4: 2); b = u_allocpol(deg(B), 0);
     }
   }
-  setvarn(H, vX); delete_var();
+  setvarn(H, vX); if (delete) delete_var();
   return gerepileupto(av, gcopy(H));
 }
 
