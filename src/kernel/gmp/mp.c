@@ -791,8 +791,7 @@ mulsr(long x, GEN y)
   z[1] = evalsigne(s) | evalexpo(m+e); return z;
 }
 
-INLINE GEN
-muliispec(GEN x, GEN y, long nx, long ny);
+GEN muliispec(GEN x, GEN y, long nx, long ny);
 
 /* We must have nx>=ny. This lets garbage on the stack.
    This handle squares correctly (mpn_mul is optimized
@@ -800,7 +799,7 @@ muliispec(GEN x, GEN y, long nx, long ny);
 */
 
 INLINE GEN
-quickmulii(GEN x, GEN y, long nx, long ny)
+muliispec_mirror(GEN x, GEN y, long nx, long ny)
 {
   GEN cx=new_chunk(nx),cy;
   GEN z;
@@ -826,11 +825,11 @@ karamulrr1(GEN y, GEN x, long ly, long lz)
   long i, l, lz2 = (lz+2)>>1, lz3 = lz-lz2;
   GEN lo1, lo2, hi;
 
-  hi = quickmulii(x,y, lz2,lz2);
+  hi = muliispec_mirror(x,y, lz2,lz2);
   i = lz2; while (i<lz && !x[i]) i++;
-  lo1 = quickmulii(y,x+i, lz2,lz-i);
+  lo1 = muliispec_mirror(y,x+i, lz2,lz-i);
   i = lz2; while (i<ly && !y[i]) i++;
-  lo2 = quickmulii(x,y+i, lz2,ly-i);
+  lo2 = muliispec_mirror(x,y+i, lz2,ly-i);
   if (signe(lo1))
   {
     if (ly!=lz) { lo2 = addshiftw(lo1,lo2,1); lz3++; }
@@ -861,7 +860,7 @@ mulrrz_i(GEN z, GEN x, GEN y, long lz, long ly, long sz)
 #ifdef KARAMULR_VARIANT
     GEN hi = karamulrr1(y+2, x+2, lz+flag-2, lz-2); 
 #else
-    GEN hi = quickmulii(y+2, x+2, lz+flag-2, lz-2);
+    GEN hi = muliispec_mirror(y+2, x+2, lz+flag-2, lz-2);
 #endif
     long i, garde = hi[lz];
     if (hi[2] < 0)
@@ -1753,7 +1752,7 @@ absr_cmp(GEN x, GEN y)
 /********************************************************************/
 
 /* nx >= ny = num. of digits of x, y (not GEN, see mulii) */
-INLINE GEN
+GEN
 muliispec(GEN x, GEN y, long nx, long ny)
 {
   GEN zd;
@@ -1775,7 +1774,7 @@ muliispec(GEN x, GEN y, long nx, long ny)
   return zd;
 }
 
-INLINE GEN
+GEN
 sqrispec(GEN x, long nx)
 {
   GEN zd;
