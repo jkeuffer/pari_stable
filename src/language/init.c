@@ -832,25 +832,6 @@ errcontext(char *msg, char *s, char *entry)
   print_prefixed_text(buf, prefix, str); free(buf);
 }
 
-#if 0
-static void
-reset_exception(long numer)
-{
-  stack *s;
-  cell *v;
-
-  if (!err_catch_stack) return;
-  s = err_catch_stack[numer];
-  if (!s) return;
-  while ( (v = (cell*) pop_stack(&s)) )
-{
-    if (v->data) free(v->data);
-    free((void*)v);
-}
-  err_catch_stack[numer] = NULL;
-}
-#endif
-
 void
 err_catch(long errnum, jmp_buf env, void *data)
 {
