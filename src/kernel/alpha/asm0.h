@@ -38,64 +38,64 @@ ENDEXTERN
 
 #define addll(a, b)\
 ({ register ulong __value, __arg1 = (a), __arg2 = (b); \
-  __asm__ volatile ("addq %2,%3,%0\n\tcmpult %4,%2,%1" \
-   : "=r" (__value), "=r" (overflow) \
+  __asm__ ("addq %2,%3,%0\n\tcmpult %4,%2,%1" \
+   : "=&r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong) 0)); \
   __value; \
 })
 
 #define addllx(a, b)\
 ({ register ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ volatile ("addq %3,%4,%0\n\tcmpult %5,%3,%2\n\taddq %5,%6,%0\n\tcmpult %5,%6,%1\n\taddq %6,%7,%1\n\t" \
-   : "=r" (__value), "=r" (overflow), "=r" (__temp) \
+ __asm__ ("addq %3,%4,%0\n\tcmpult %5,%3,%2\n\taddq %5,%6,%0\n\tcmpult %5,%6,%1\n\taddq %6,%7,%1\n\t" \
+   : "=&r" (__value), "=r" (overflow), "=r" (__temp) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong) 0), "1" (overflow), "2" ((ulong) 0)); \
 __value; \
 })
 
 #define subll(a, b)\
 ({ register ulong __value, __arg1 = (a), __arg2 = (b); \
-  __asm__ volatile ("subq %2,%3,%0\n\tcmpult %2,%4,%1" \
-   : "=r" (__value), "=r" (overflow) \
+  __asm__ ("subq %2,%3,%0\n\tcmpult %2,%4,%1" \
+   : "=&r" (__value), "=r" (overflow) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong)0)); \
   __value; \
 })
 
 #define subllx(a, b)\
 ({ register ulong __value, __arg1 = (a), __arg2 = (b), __temp1, __temp2; \
-__asm__ volatile ("subq %4,%5,%2\n\tcmpult %4,%8,%3\n\tsubq %8,%7,%0\n\tcmpult %8,%6,%1\n\taddq %7,%9,%1\n\t" \
-   : "=r" (__value), "=r" (overflow), "=r" (__temp1), "=r" (__temp2)  \
+__asm__ ("subq %4,%5,%2\n\tcmpult %4,%8,%3\n\tsubq %8,%7,%0\n\tcmpult %8,%6,%1\n\taddq %7,%9,%1\n\t" \
+   : "=r" (__value), "=r" (overflow), "=&r" (__temp1), "=r" (__temp2)  \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong)0), "1" (overflow), "2" ((ulong)0), "3" ((ulong)0)); \
  __value; \
 })
 
 #define shiftl(a, b) \
 ({ register ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ volatile ("subq %5,%4,%2\n\tsll %3,%4,%0\n\tsrl %3,%6,%1\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=r" (__temp) \
+ __asm__ ("subq %5,%4,%2\n\tsll %3,%4,%0\n\tsrl %3,%6,%1\n\t" \
+   : "=r" (__value), "=r" (hiremainder), "=&r" (__temp) \
    : "r" (__arg1), "r" (__arg2), "n" ((ulong) 64), "2" ((ulong)0)); \
  __value; \
 })
 
 #define shiftlr(a, b) \
 ({ register ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ volatile ("subq %5,%4,%2\n\tsrl %3,%4,%0\n\tsll %3,%6,%1\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=r" (__temp) \
+ __asm__ ("subq %5,%4,%2\n\tsrl %3,%4,%0\n\tsll %3,%6,%1\n\t" \
+   : "=r" (__value), "=r" (hiremainder), "=&r" (__temp) \
    : "r" (__arg1), "r" (__arg2), "n" ((ulong) 64), "2" ((ulong)0)); \
  __value; \
 })
 
 #define mulll(a, b) \
 ({ register ulong __value, __arg1 = (a), __arg2 = (b); \
- __asm__ volatile ("umulh %2,%3,%1\n\tmulq %2,%3,%0\n\t" \
-   : "=r" (__value), "=r" (hiremainder) \
+ __asm__ ("umulh %2,%3,%1\n\tmulq %2,%3,%0\n\t" \
+   : "=r" (__value), "=&r" (hiremainder) \
    : "r" (__arg1), "r" (__arg2)); \
  __value; \
 })
 
 #define addmul(a, b) \
 ({ register ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
- __asm__ volatile ("mulq %3,%4,%0\n\tumulh %3,%4,%2\n\taddq %5,%6,%0\n\tcmpult %5,%6,%1\n\taddq %7,%6,%1\n\t" \
-   : "=r" (__value), "=r" (hiremainder), "=r" (__temp) \
+ __asm__ ("mulq %3,%4,%0\n\tumulh %3,%4,%2\n\taddq %5,%6,%0\n\tcmpult %5,%6,%1\n\taddq %7,%6,%1\n\t" \
+   : "=&r" (__value), "=r" (hiremainder), "=r" (__temp) \
    : "r" (__arg1), "r" (__arg2), "0" ((ulong) 0), "1" (hiremainder), "2" ((ulong) 0)); \
  __value; \
 })
