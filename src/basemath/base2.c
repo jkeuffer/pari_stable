@@ -3867,11 +3867,8 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   n = degpol(nf[1]); m = n*N;
 
   plg0= Q_remove_denom(plg, &den); /* plg = plg0/den */
-  vbs = cgetg(n+1,t_VEC);
   /* nf = K = Q(a), vbs[i+1] = a^i as an elt of L = Q[X] / polabs */
-  vbs[1] = un;
-  vbs[2] = (long)plg0;
-  for (i=3; i<=n; i++) vbs[i] = lres(gmul((GEN)vbs[i-1], plg0), polabs);
+  vbs = RXQ_powers(plg0, polabs, n-1);
   if (den)
   { /* restore denominators */
     vbs[2] = (long)plg; d = den;
