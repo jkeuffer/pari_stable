@@ -122,7 +122,7 @@ compiler and run into trouble with a recent \kbd{g++}, try to use
 \subsec{Troubleshooting and fine tuning:} Decide whether you agree with what
 \kbd{Configure} printed on your screen (in particular the architecture,
 compiler and optimization flags). Look for messages prepended by
-\kbd{\#\#\#}, which probably report genuine problems . If anything should have
+\kbd{\#\#\#}, which probably report genuine problems. If anything should have
 been found and was not, consider that \kbd{Configure} failed and follow the
 instructions below. Look especially for the \kbd{readline} and \kbd{X11}
 libraries, and the \kbd{perl} and \kbd{gunzip} (or \kbd{zcat}) binaries.
@@ -253,8 +253,9 @@ printer. The output should bear some similarity to the screen images.
 
 \kbd{make install}
 
-\noindent (You may have to do this with superuser privileges, depending on
-the target directories.) Beware that, if you chose the same installation
+\noindent You may have to do this with superuser privileges, depending on
+the target directories. (Tip for MacOS X beginners: use
+\kbd{sudo make install}.) Beware that, if you chose the same installation
 directory as before in the \kbd{Configure} process, this will wipe out any
 files from version 1.39.15 and below that might already be there. Libraries
 and executable files from newer versions (starting with version 1.900) are
@@ -312,7 +313,7 @@ current \kbd{misc/gprc.dft}.
 \section{Getting Started}
 
 \subsec{Printable Documentation:} To print the user's guide, for which you'll
-need a working (plain) \TeX\ installation; type
+need a working (plain) \TeX\ installation, type
 
 \kbd{make doc}
 
@@ -392,7 +393,7 @@ following form (BibTeX format):
 @@manual{PARI2,
     organization = "{The PARI~Group}",
     title        = "{PARI/GP, Version @vers}",
-    year         = 2000,
+    year         = 2002,
     address      = "Bordeaux",
     note         = "available from {\tt @wwwsite}"
 }
