@@ -185,6 +185,7 @@ src/kernel/alpha/asm0.h
 src/kernel/alpha/asm1.h
 src/kernel/alpha/level0.s
 src/kernel/gmp/MakeLVL1.SH
+src/kernel/gmp/gcd.c
 src/kernel/gmp/int.h
 src/kernel/gmp/mp.c
 src/kernel/hppa/MakeLVL0.SH
@@ -199,6 +200,9 @@ src/kernel/m68k/mp.s
 src/kernel/none/MakeLVL0.SH
 src/kernel/none/MakeLVL1.SH
 src/kernel/none/asm0.h
+src/kernel/none/gcd.c
+src/kernel/none/gcdll.c
+src/kernel/none/ratlift.c
 src/kernel/none/int.h
 src/kernel/none/level0.c
 src/kernel/none/level0.h

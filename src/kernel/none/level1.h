@@ -101,6 +101,7 @@ GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
 GEN    subsr(long x, GEN y);
 long   subssmod(long a, long b, long p);
+ulong  umuluu(ulong x, ulong y, ulong *rem);
 GEN    utoi(ulong x);
 long   vali(GEN x);
 
@@ -450,6 +451,14 @@ mulssz(long x, long y, GEN z)
     affsr(x,p1); mpaff(mulsr(y,p1),z); avma=av;
   }
 }
+
+INLINE ulong
+umuluu(ulong x, ulong y, ulong *rem)
+{
+  LOCAL_HIREMAINDER;
+  x=mulll(x,y); *rem=hiremainder; return x;
+}
+
 
 INLINE void
 mulsii(long x, GEN y, GEN z)

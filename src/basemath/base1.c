@@ -2130,7 +2130,7 @@ dirzetak0(GEN nf, long N0)
         while (q<=(ulong)N0)
         {
           for (k=1; k<=limk; k++) c2[k*q] += c[k];
-          q = smulss(q,p,&rem);
+          q = umuluu(q,p,&rem);
           if (rem) break;
           limk /= p;
         }
