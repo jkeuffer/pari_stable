@@ -2179,6 +2179,13 @@ $\teb{redrealnod}(x,sq)$ (= $\teb{qfbred}(x,2,,isqrtD)$),
 
 $\teb{rhorealnod}(x,sq)$ (= $\teb{qfbred}(x,3,,isqrtD)$).
 
+\subsecidx{qfbsolve}$(Q,p)$: Solve the equation $Q(x,y)=p$ over the integers, where $Q$ is a imaginary binary quadratic form and $p$ a prime number.
+
+Return $[x,y]$ as a two-components vector, or zero if there is no solution.
+Note that this functions return only one solution and not all the solutions.
+
+\syn{qfbsolve}{Q,n}.
+
 \subsecidx{quadclassunit}$(D,\{\fl=0\},\{\var{tech}=[]\})$:
 \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the class
 group of a quadratic order of discriminant $D$.
