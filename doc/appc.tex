@@ -46,16 +46,16 @@ is required).
 Finally, one has access to a table of (differences of) primes through the
 pointer \tet{diffptr}. This is used as follows: when
 
-\kbd{void pari\_init(long size, long maxprime);}
+\fun{void}{pari_init}{long size, long maxprime}
 
 \noindent is called, this table is initialized with the successive
 differences of primes up to (just a little beyond) \kbd{maxprime}
-(see \secref{se:intro4}). \kbd{maxprime} has to be less than $436272744$,
+(see \secref{se:intro4}). \tet{maxprime} has to be less than $436272744$,
 whatever memory is available. A difference of $0$ means we have reached the
 end of the table. The largest prime computable using this table is
 available as the output of
 
-\kbd{ulong maxprime()}
+\fun{ulong}{maxprime}{}
 
 \noindent Here's a small example:
 %
