@@ -471,7 +471,7 @@ gshift_r(GEN x, GEN n) { return gshift(x,-itos(n)); }
 static GEN
 expr(void)
 {
-  ulong av = avma, lim = stack_lim(av,2);
+  gpmem_t av = avma, lim = stack_lim(av, 2);
   GEN aux,e,e1,e2,e3;
   F2GEN F1,F2,F3;
   int F0 = 0;
@@ -1066,7 +1066,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
   }
   else
   {
-    long av = avma;
+    gpmem_t av = avma;
     GEN p1 = expr();
     if (br_status) err(breaker,"here (expanding string)");
     tmp = GENtostr0(p1, output_fun);
@@ -1313,7 +1313,7 @@ check_args()
     if (*analyseur == '=')
     {
       char *old = ++analyseur;
-      ulong av = avma;
+      gpmem_t av = avma;
       skipexpr();
       cell[1] = lclone(_strtoGENstr(old, analyseur-old));
       avma = av;
@@ -1358,7 +1358,8 @@ static GEN
 num_deriv(void *call, GEN argvec[])
 {
   GEN eps,a,b, y, x = argvec[0];
-  long fpr,pr,l,e,ex, av = avma;
+  long fpr, pr, l, e, ex;
+  gpmem_t av = avma;
   if (!is_const_t(typ(x)))
   {
     a = do_call(call, x, argvec);
@@ -1384,7 +1385,8 @@ static GEN
 num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
 {
   GEN eps,a,b, x = *arg;
-  long fpr,pr,l,e,ex, av = avma;
+  long fpr, pr, l, e, ex;
+  gpmem_t av = avma;
 
   if (!is_const_t(typ(x)))
   {
@@ -1414,7 +1416,8 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
 static GEN
 identifier(void)
 {
-  long m,i,av,matchcomma, deriv;
+  long m, i, matchcomma, deriv;
+  gpmem_t av;
   char *ch1;
   entree *ep;
   GEN res, newfun, ptr;
@@ -1763,7 +1766,7 @@ identifier(void)
           analyseur=ch1; ep = entry();
           if (*analyseur == '=')
           {
-            long av=avma; analyseur++;
+            gpmem_t av=avma; analyseur++;
             res = expr();
             if (br_status) err(breaker,"here (defining global var)");
             changevalue(ep, res); avma=av;
@@ -1933,7 +1936,8 @@ constante()
 {
   static long pw10[] = { 1, 10, 100, 1000, 10000, 100000, 1000000,
                         10000000, 100000000, 1000000000 };
-  long i,l,m,n = 0,nb, av = avma;
+  long i, l, m, n = 0, nb;
+  gpmem_t av = avma;
   GEN z,y;
 
   y = stoi(number(&nb)); i = 0;
@@ -2156,7 +2160,7 @@ long
 fetch_user_var(char *s)
 {
   entree *ep = is_entry(s);
-  long av;
+  gpmem_t av;
   GEN p1;
 
   if (ep)

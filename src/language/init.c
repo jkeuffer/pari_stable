@@ -699,7 +699,8 @@ gunclone(GEN x) { killbloc0(x,0); }
 GEN
 changevar(GEN x, GEN y)
 {
-  long tx,ty,lx,vx,vy,i,av,tetpil;
+  long tx, ty, lx, vx, vy, i;
+  gpmem_t av, tetpil;
   GEN  p1,p2,z;
 
   if (var_not_changed && y==polvar) return x;

@@ -53,7 +53,8 @@ unifpol0(GEN nf,GEN pol,long flag)
   static long n = 0;
   static GEN vun = NULL;
   GEN f = (GEN) nf[1];
-  long i = degpol(f), av;
+  long i = degpol(f);
+  gpmem_t av;
 
   if (i != n)
   {
@@ -127,7 +128,7 @@ random_pol(GEN nf,long d)
 static GEN
 nf_pol_mul(GEN nf,GEN x,GEN y)
 {
-  long tetpil,av=avma;
+  gpmem_t tetpil, av=avma;
   GEN res = gmul(unifpol(nf,x,1), unifpol(nf,y,1));
 
   tetpil = avma;
@@ -138,7 +139,7 @@ nf_pol_mul(GEN nf,GEN x,GEN y)
 static GEN
 nf_pol_sqr(GEN nf,GEN x)
 {
-  long tetpil,av=avma;
+  gpmem_t tetpil, av=avma;
   GEN res = gsqr(unifpol(nf,x,1));
 
   tetpil = avma;
@@ -149,7 +150,8 @@ nf_pol_sqr(GEN nf,GEN x)
 static GEN
 nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol)
 {
-  long av=avma,tetpil,i;
+  long i;
+  gpmem_t av=avma, tetpil;
   GEN p1;
 
   if (typ(pol)!=t_POL) return nfreducemodpr(nf,pol,prhall);
@@ -166,7 +168,7 @@ nfmod_pol_reduce(GEN nf,GEN prhall,GEN pol)
 static GEN
 nfmod_pol_sqr(GEN nf,GEN prhall,GEN x)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN px;
 
   px = nfmod_pol_reduce(nf,prhall,x);
@@ -180,7 +182,7 @@ nfmod_pol_sqr(GEN nf,GEN prhall,GEN x)
 static GEN
 nfmod_pol_mul(GEN nf,GEN prhall,GEN x,GEN y)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN px,py;
 
   px = nfmod_pol_reduce(nf,prhall,x); px = unifpol(nf,lift(px),1);
@@ -194,7 +196,7 @@ nfmod_pol_mul(GEN nf,GEN prhall,GEN x,GEN y)
 static GEN
 nf_pol_divres(GEN nf,GEN x,GEN y,GEN *pr)
 {
-  long av = avma,tetpil;
+  gpmem_t av = avma, tetpil;
   GEN nq = poldivres(unifpol(nf,x,1),unifpol(nf,y,1),pr);
   GEN *gptr[2];
 
@@ -209,7 +211,8 @@ nf_pol_divres(GEN nf,GEN x,GEN y,GEN *pr)
 static GEN
 nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
 {
-  long av=avma,dx,dy,dz,i,j,k,l,n,tetpil;
+  long dx, dy, dz, i, j, k, l, n;
+  gpmem_t av=avma, tetpil;
   GEN z,p1,p3,px,py;
 
   py = nfmod_pol_reduce(nf,prhall,y);
@@ -287,7 +290,7 @@ nfmod_pol_divres(GEN nf,GEN prhall,GEN x,GEN y, GEN *pr)
 static GEN
 nf_pol_subres(GEN nf,GEN x,GEN y)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN s = srgcd(unifpol(nf,x,1), unifpol(nf,y,1));
 
   tetpil=avma; return gerepile(av,tetpil,unifpol(nf,s,1));
@@ -297,7 +300,7 @@ nf_pol_subres(GEN nf,GEN x,GEN y)
 static GEN
 nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
 {
-  long av=avma;
+  gpmem_t av=avma;
   GEN p1,p2;
 
   if (lgef(x)<lgef(y)) { p1=y; y=x; x=p1; }
@@ -317,7 +320,8 @@ nfmod_pol_gcd(GEN nf,GEN prhall,GEN x,GEN y)
 static GEN
 nfmod_pol_pow(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN e)
 {
-  long i, av = avma, n = degpol(nf[1]);
+  long i, n = degpol(nf[1]);
+  gpmem_t av = avma;
   GEN p1,p2,vun;
 
   vun=cgetg(n+1,t_COL); vun[1]=un; for (i=2; i<=n; i++) vun[i]=zero;
@@ -356,7 +360,8 @@ localpol(GEN nf, GEN pr)
 static GEN
 nffactormod0(GEN nf, GEN x, GEN pr)
 {
-  long av = avma, j, l, vx = varn(x), vn;
+  long j, l, vx = varn(x), vn;
+  gpmem_t av = avma;
   GEN rep, xrd, prh, p1;
 
   nf=checknf(nf);
@@ -411,7 +416,8 @@ extern GEN trivfact(void);
 GEN
 nffactormod2(GEN nf,GEN pol,GEN pr)
 {
-  long av = avma, tetpil,lb,nbfact,psim,N,n,i,j,k,d,e,vf,r,kk;
+  long lb, nbfact, psim, N, n, i, j, k, d, e, vf, r, kk;
+  gpmem_t av = avma, tetpil;
   GEN y,ex,*t,f1,f2,f3,df1,g1,polb,pold,polu,vker;
   GEN Q,f,x,u,v,v2,v3,vz,q,vun,vzero,prhall;
 
@@ -557,7 +563,7 @@ nffactormod2(GEN nf,GEN pol,GEN pr)
 static GEN
 nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN p1,p2,q;
 
   if (cmpis(exp,2)<=0) return pol;
@@ -577,7 +583,8 @@ nfmod_split2(GEN nf,GEN prhall,GEN pmod,GEN pol,GEN exp)
 static GEN
 p_ok(GEN nf, GEN p, GEN a)
 {
-  long av,m,i;
+  long m, i;
+  gpmem_t av;
   GEN dec;
 
   if (divise(a,p)) return NULL;
@@ -664,7 +671,8 @@ nf_pol_to_int(GEN p, GEN *den)
 GEN
 nfroots(GEN nf,GEN pol)
 {
-  long av=avma,tetpil,d=lgef(pol),fl;
+  long d=lgef(pol), fl;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2,polbase,polmod,den;
 
   p2=NULL; /* gcc -Wall */
@@ -752,7 +760,8 @@ nf_pol_lift(GEN id,GEN idinv,GEN den,GEN pol)
 static GEN
 nf_pol_eval(GEN nf,GEN pol,GEN elt)
 {
-  long av=avma,tetpil,i;
+  long i;
+  gpmem_t av=avma, tetpil;
   GEN p1;
 
   i=lgef(pol)-1; if (i==2) return gcopy((GEN)pol[2]);
@@ -769,7 +778,8 @@ GEN
 nffactor(GEN nf,GEN pol)
 { 
   GEN y,p1,p2,den,p3,p4,quot,rep=cgetg(3,t_MAT);
-  long av = avma,tetpil,i,j,d,fl;
+  long i, j, d, fl;
+  gpmem_t av = avma, tetpil;
 
   if (DEBUGLEVEL >= 4) timer2();
 
@@ -862,7 +872,8 @@ nffactor(GEN nf,GEN pol)
 static long
 test_mat(GEN M, GEN p, GEN C2, long k)
 {
-  long av = avma, i, N = lg(M);
+  long i, N = lg(M);
+  gpmem_t av = avma;
   GEN min, prod, L2, R;
 
   min = prod = gcoeff(M,1,1);
@@ -880,7 +891,8 @@ test_mat(GEN M, GEN p, GEN C2, long k)
 static GEN
 T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 {
-  long av=avma,av1,lim, k = *kmax, N = degpol((GEN)nf[1]);
+  long k = *kmax, N = degpol((GEN)nf[1]);
+  gpmem_t av=avma, av1, lim;
   int tot_real = !signe(gmael(nf,2,2));
   GEN p1,p2,p3,u,C2,T2, x = (GEN)nf[1];
 
@@ -939,7 +951,8 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 static GEN
 nfsqff(GEN nf,GEN pol, long fl)
 {
-  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec,nbf=BIGINT,anbf,ct=5;
+  long d=lgef(pol), i, k, m, n, newprec, prec, nbf=BIGINT, anbf, ct=5;
+  gpmem_t av=avma, tetpil;
   GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk,ap,apr;
   GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run,aprh;
 
@@ -1147,7 +1160,8 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
 {
   int val = 0; /* assume failure */
   GEN newf, newpsf = NULL;
-  long av,newd,ltop,i;
+  long newd, ltop, i;
+  gpmem_t av;
 
   /* Assertion: fxn <= nfcmbf.nfactmod && dlim > 0 */
 
@@ -1208,7 +1222,8 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
 GEN
 rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 {
-  long av = avma, vnf, vT, lT;
+  long vnf, vT, lT;
+  gpmem_t av = avma;
   GEN p1;
 
   nf=checknf(nf); vnf = varn(nf[1]);
@@ -1234,7 +1249,7 @@ rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
 GEN
 rnfminpoly(GEN nf,GEN T,GEN alpha,int n)
 {
-  long av=avma,tetpil;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2;
 
   nf=checknf(nf); p1=rnfcharpoly(nf,T,alpha,n);
@@ -1256,7 +1271,8 @@ rnfminpoly(GEN nf,GEN T,GEN alpha,int n)
 GEN
 rnfdedekind(GEN nf,GEN T,GEN pr)
 {
-  long av=avma,vt,r,d,da,n,m,i,j;
+  long vt, r, d, da, n, m, i, j;
+  gpmem_t av=avma;
   GEN p1,p2,p,tau,g,vecun,veczero,matid;
   GEN prhall,res,h,k,base,Ca;
 

@@ -31,7 +31,7 @@ extern void changevalue_p(entree *ep, GEN x);
 void
 forpari(entree *ep, GEN a, GEN b, char *ch)
 {
-  ulong av,av0 = avma, lim;
+  gpmem_t av, av0 = avma, lim;
 
   b = gcopy(b); av=avma; lim = stack_lim(av,1);
  /* gcopy nedeed in case b gets overwritten in ch, as in
@@ -40,7 +40,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    ulong av1=avma; (void)lisseq(ch); avma=av1;
+    gpmem_t av1=avma; (void)lisseq(ch); avma=av1;
     if (loop_break()) break;
     a = (GEN) ep->value; a = gadd(a,gun);
     if (low_stack(lim, stack_lim(av,1)))
@@ -58,7 +58,8 @@ static int negcmp(GEN x, GEN y) { return gcmp(y,x); }
 void
 forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
 {
-  long ss, av,av0 = avma, lim, i;
+  long ss, i;
+  gpmem_t av, av0 = avma, lim;
   GEN v = NULL;
   int (*cmp)(GEN,GEN);
 
@@ -75,7 +76,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    long av1=avma; (void)lisseq(ch); avma=av1;
+    gpmem_t av1=avma; (void)lisseq(ch); avma=av1;
     if (loop_break()) break;
     if (v)
     {
@@ -154,7 +155,8 @@ void
 forprime(entree *ep, GEN ga, GEN gb, char *ch)
 {
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  long av = avma, a,b;
+  long a, b;
+  gpmem_t av = avma;
   byteptr p;
 
   p = prime_loop_init(ga,gb, &a,&b, prime);
@@ -179,7 +181,8 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
 void
 fordiv(GEN a, entree *ep, char *ch)
 {
-  long i,av2,l, av = avma;
+  long i, l;
+  gpmem_t av2, av = avma;
   GEN t = divisors(a);
 
   push_val(ep, NULL); l=lg(t); av2 = avma;
@@ -220,14 +223,14 @@ fvloop(long i, fvdat *d)
   if (i+1 == d->n)
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      ulong av = avma; (void)lisseq(d->ch); avma = av;
+      gpmem_t av = avma; (void)lisseq(d->ch); avma = av;
       if (loop_break()) { d->n = 0; return; }
       d->a[i] = gadd(d->a[i], gun);
     }
   else
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      ulong av = avma; fvloop(i+1, d); avma = av;
+      gpmem_t av = avma; fvloop(i+1, d); avma = av;
       if (!d->n) return;
       d->a[i] = gadd(d->a[i], gun);
     }
@@ -252,14 +255,14 @@ fvloop_i(long i, fvdat *d)
   if (i+1 == d->n)
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      ulong av = avma; (void)lisseq(d->ch); avma = av;
+      gpmem_t av = avma; (void)lisseq(d->ch); avma = av;
       if (loop_break()) { d->n = 0; return; }
       d->a[i] = incloop(d->a[i]);
     }
   else
     while (gcmp(d->a[i], d->M[i]) <= 0)
     {
-      ulong av = avma; fvloop_i(i+1, d); avma = av;
+      gpmem_t av = avma; fvloop_i(i+1, d); avma = av;
       if (!d->n) return;
       d->a[i] = incloop(d->a[i]);
     }
@@ -268,7 +271,7 @@ fvloop_i(long i, fvdat *d)
 void
 forvec(entree *ep, GEN x, char *c, long flag)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long tx = typ(x);
   fvdat D, *d = &D;
 
@@ -310,7 +313,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
 GEN
 somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
 {
-  long av,av0 = avma, lim;
+  gpmem_t av, av0 = avma, lim;
   GEN p1;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sum");
@@ -339,7 +342,8 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
 GEN
 suminf(entree *ep, GEN a, char *ch, long prec)
 {
-  long fl,G,tetpil, av0 = avma, av,lim;
+  long fl, G;
+  gpmem_t tetpil, av0 = avma, av, lim;
   GEN p1,x = realun(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in suminf");
@@ -369,7 +373,7 @@ suminf(entree *ep, GEN a, char *ch, long prec)
 GEN
 divsum(GEN num, entree *ep, char *ch)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN z, y = gzero, t = divisors(num);
   long i, l = lg(t);
 
@@ -393,7 +397,7 @@ divsum(GEN num, entree *ep, char *ch)
 GEN
 produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
 {
-  long av,av0 = avma, lim;
+  gpmem_t av, av0 = avma, lim;
   GEN p1;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sum");
@@ -434,7 +438,7 @@ prodinf0(entree *ep, GEN a, char *ch, long flag, long prec)
 GEN
 prodinf(entree *ep, GEN a, char *ch, long prec)
 {
-  ulong av0 = avma, av,lim;
+  gpmem_t av0 = avma, av, lim;
   long fl,G;
   GEN p1,x = realun(prec);
 
@@ -461,7 +465,7 @@ prodinf(entree *ep, GEN a, char *ch, long prec)
 GEN
 prodinf1(entree *ep, GEN a, char *ch, long prec)
 {
-  ulong av0 = avma, av,lim;
+  gpmem_t av0 = avma, av, lim;
   long fl,G;
   GEN p1,p2,x = realun(prec);
 
@@ -490,7 +494,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
 {
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   long a,b;
-  ulong av,av0 = avma, lim;
+  gpmem_t av, av0 = avma, lim;
   GEN p1,x = realun(prec);
   byteptr p;
   
@@ -527,7 +531,7 @@ GEN
 direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
 {
   long prime[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
-  ulong av0 = avma,av, lim = (av0+bot)>>1;
+  gpmem_t av0 = avma, av, lim = stack_lim(av0, 1);
   long p,n,i,j,k,tx,lx,a,b;
   GEN x,y,s,polnum,polden;
   byteptr d;
@@ -765,7 +769,8 @@ sumpos0(entree *ep, GEN a, char *ch, long flag, long prec)
 GEN
 sumalt(entree *ep, GEN a, char *ch, long prec)
 {
-  long av = avma, tetpil,k,N;
+  long k, N;
+  gpmem_t av = avma, tetpil;
   GEN s,az,c,x,e1,d;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
@@ -790,7 +795,8 @@ sumalt(entree *ep, GEN a, char *ch, long prec)
 GEN
 sumalt2(entree *ep, GEN a, char *ch, long prec)
 {
-  long av = avma, tetpil,k,N;
+  long k, N;
+  gpmem_t av = avma, tetpil;
   GEN x,s,dn,pol;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumalt");
@@ -814,7 +820,8 @@ sumalt2(entree *ep, GEN a, char *ch, long prec)
 GEN
 sumpos(entree *ep, GEN a, char *ch, long prec)
 {
-  long av = avma,tetpil,k,kk,N,G;
+  long k, kk, N, G;
+  gpmem_t av = avma, tetpil;
   GEN p1,r,q1,reel,s,az,c,x,e1,d, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos");
@@ -858,7 +865,8 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
 GEN
 sumpos2(entree *ep, GEN a, char *ch, long prec)
 {
-  long av = avma,tetpil,k,kk,N,G;
+  long k, kk, N, G;
+  gpmem_t av = avma, tetpil;
   GEN p1,r,q1,reel,s,pol,dn,x, *stock;
 
   if (typ(a) != t_INT) err(talker,"non integral index in sumpos2");
@@ -937,7 +945,8 @@ GEN
 qromb(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
   GEN ss,dss,s,h,p1,p2,qlint,del,x,sum;
-  long av = avma, av1, tetpil,j,j1,j2,lim,it,sig;
+  long j, j1, j2, it, sig, lim;
+  gpmem_t av = avma, av1, tetpil;
 
   a = fix(a,prec);
   b = fix(b,prec);
@@ -985,7 +994,8 @@ GEN
 qromo(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
   GEN ss,dss,s,h,p1,qlint,del,ddel,x,sum;
-  long av = avma,av1,tetpil,j,j1,j2,lim,it,sig;
+  long j, j1, j2, it, sig, lim;
+  gpmem_t av = avma, av1, tetpil;
 
   a = fix(a, prec);
   b = fix(b, prec);
@@ -1037,7 +1047,8 @@ GEN
 qromi(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
   GEN ss,dss,s,h,q1,p1,qlint,del,ddel,x,sum;
-  long av = avma, av1,tetpil,j,j1,j2,lim,it,sig;
+  long j, j1, j2, it, sig, lim;
+  gpmem_t av = avma, av1, tetpil;
 
   a = fix(ginv(a), prec);
   b = fix(ginv(b), prec);
@@ -1089,7 +1100,8 @@ GEN
 rombint(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
   GEN aa,bb,mun,p1,p2,p3;
-  long l,av,tetpil;
+  long l;
+  gpmem_t av, tetpil;
 
   l=gcmp(b,a); if (!l) return gzero;
   if (l<0) { bb=a; aa=b; } else { bb=b; aa=a; }
@@ -1124,7 +1136,8 @@ rombint(entree *ep, GEN a, GEN b, char *ch, long prec)
 GEN
 polzag(long n, long m)
 {
-  long d1,d,r,k,av=avma,tetpil;
+  long d1, d, r, k;
+  gpmem_t av=avma, tetpil;
   GEN p1,p2,pol1,g,s;
 
   if (m>=n || m<0)
@@ -1154,7 +1167,8 @@ polzag(long n, long m)
 GEN
 polzagreel(long n, long m, long prec)
 {
-  long d1,d,r,j,k,k2,av=avma,tetpil;
+  long d1, d, r, j, k, k2;
+  gpmem_t av=avma, tetpil;
   GEN p2,pol1,g,h,v,b,gend,s;
 
   if (m>=n || m<0)
@@ -1205,7 +1219,8 @@ polzagreel(long n, long m, long prec)
 GEN
 zbrent(entree *ep, GEN a, GEN b, char *ch, long prec)
 {
-  long av = avma,sig,iter,itmax;
+  long sig, iter, itmax;
+  gpmem_t av = avma;
   GEN c,d,e,tol,tol1,min1,min2,fa,fb,fc,p,q,r,s,xm;
 
   a = fix(a,prec);

@@ -119,7 +119,8 @@ calc_block(long N,GEN Z,long d,GEN Y,GEN vbs,ulong maxl)
 static GEN
 potential_block_systems(long N, long d, GEN n, ulong maxl)
 {
-  long av=avma,r,i,j,k;
+  long r, i, j, k;
+  gpmem_t av=avma;
   GEN p1,vbs,Z;
 
   r=lg(n); Z=cgetg(r,t_VEC);
@@ -136,7 +137,8 @@ potential_block_systems(long N, long d, GEN n, ulong maxl)
 static void
 perm_mul_i(GEN perm1,GEN perm2)
 {
-  long av = avma,i, N = lg(perm1);
+  long i, N = lg(perm1);
+  gpmem_t av = avma;
   GEN perm=new_chunk(N);
   for (i=1; i<N; i++) perm[i]=perm1[perm2[i]];
   for (i=1; i<N; i++) perm1[i]=perm[i];
@@ -153,7 +155,7 @@ cycle_power_to_perm(GEN perm,GEN cy,long l)
   for (i=1; i<N; i++) perm[i] = i;
   if (lp)
   {
-    long av = avma;
+    gpmem_t av = avma;
     GEN p1 = new_chunk(N);
     b = cy[1];
     for (i=1; i<lcy; i++) b = (perm[b] = cy[i+1]);
@@ -298,7 +300,7 @@ print_block_system(long N,GEN Y,long d,GEN vbs,long maxl)
   perm = cgetg(N+1,t_VEC); i=ns;
   do
   {
-    long av = avma;
+    gpmem_t av = avma;
     if (DEBUGLEVEL>5)
     {
       for (l=1; l<=ns; l++)
@@ -535,7 +537,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
 {
   GEN TR,w0_Q,w0,w1_Q,w1,wpow,h0,gp,T,q2,q,p,ind,maxp,a;
   long rt;
-  ulong av;
+  gpmem_t av;
 
   T = (GEN)DATA[1]; rt = brent_kung_optpow(degpol(T), 2);
   p = (GEN)DATA[2];
@@ -596,7 +598,7 @@ embedding_of_potential_subfields(GEN g,GEN DATA,GEN listdelta)
 static GEN
 choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
 {
-  ulong av;
+  gpmem_t av;
   byteptr di=diffptr;
   long j,k,oldllist,llist,r,lcm,oldlcm,pp,minp, N = degpol(pol), m = N/d;
   GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
@@ -881,7 +883,7 @@ _subfield(GEN g, GEN h)
 static GEN
 subfields_of_given_degree(struct poldata PD,long d)
 {
-  ulong av,av2;
+  gpmem_t av, av2;
   long llist,i,nn,v;
   GEN listpotbl,ff,A,CSF,ESF,LSB,p,T,DATA,listdelta;
   GEN pol = PD.pol, dpol = PD.dis;
@@ -967,7 +969,7 @@ subfields_poldata(GEN T, struct poldata *PD)
 GEN
 subfields(GEN nf,GEN d)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long di,N,v0;
   GEN LSB,pol;
   struct poldata PD;
@@ -988,7 +990,7 @@ subfields(GEN nf,GEN d)
 static GEN
 subfieldsall(GEN nf)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   long N,ld,i,v0;
   GEN pol,dg,LSB,NLSB;
   struct poldata PD;
@@ -1006,7 +1008,7 @@ subfieldsall(GEN nf)
     setvarn(pol, 0);
     for (i=2; i<ld; i++)
     {
-      ulong av1 = avma;
+      gpmem_t av1 = avma;
       NLSB = subfields_of_given_degree(PD, N / itos((GEN)dg[i]));
       if (lg(NLSB) > 1) LSB = concatsp(LSB,NLSB); else avma = av1;
     }

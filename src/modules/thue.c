@@ -521,7 +521,7 @@ static void
 Check_Small(int bound, GEN poly, GEN rhs)
 {
   GEN interm, xx, zz, u, maxr, tmp, ypot, xxn, xxnm1, yy;
-  long av = avma, lim = stack_lim(av,1);
+  gpmem_t av = avma, lim = stack_lim(av, 1);
   int x, j, bsupy, y;
   double bndyx;
 
@@ -617,7 +617,7 @@ GEN
 thueinit(GEN poly, long flag, long prec)
 {
   GEN thueres,ALH,csts,c0;
-  ulong av = avma;
+  gpmem_t av = avma;
   long k,st;
   double d,dr;
 
@@ -684,7 +684,7 @@ thue(GEN thueres, GEN rhs, GEN ne)
   GEN Kstart,Old_B0,ALH,errdelta,Hmu,c0,poly,csts,bd;
   GEN xmay1,xmay2,b,zp1,tmp,q1,q2,q3,ep;
   long Nb_It=0,upb,bi1,i1,i2,i, flag,cf,fs;
-  ulong av = avma;
+  gpmem_t av = avma;
 
   if (!checktnf(thueres)) err(talker,"not a tnf in thue");
 
@@ -853,7 +853,7 @@ test_sol(long i)
 
   if (Partial)
   {
-    long av=avma;
+    gpmem_t av=avma;
     for (k=1; k<lg(Partial[1]); k++)
       if ( signe(modii( (GEN)Partial[i][k], gen_ord[k] )) )
         { avma=av; return; }
@@ -882,7 +882,8 @@ test_sol(long i)
 static void
 fix_Partial(long i)
 {
-  long k, av = avma;
+  long k;
+  gpmem_t av = avma;
   for (k=1; k<lg(Partial[1]); k++)
     addiiz(
       (GEN) Partial[i-1][k],
@@ -1062,7 +1063,7 @@ bnfisintnorm(GEN bnf, GEN a)
 {
   GEN nf,pol,res,unit,x,id, *Primes;
   long sa,i,j,norm_1;
-  ulong av = avma;
+  gpmem_t av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7]; pol = (GEN)nf[1];
   if (typ(a)!=t_INT)

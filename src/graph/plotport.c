@@ -108,7 +108,8 @@ static GEN quark_gen;
 void
 plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
 {
-  long av = avma, av2,limite,jz,j,i,sig;
+  long jz, j, i, sig;
+  gpmem_t av = avma, av2, limite;
   int jnew, jpre = 0; /* for lint */
   GEN p1,p2,ysml,ybig,x,diff,dyj,dx,y[ISCR+1];
   screen scr;
@@ -137,7 +138,7 @@ plot(entree *ep, GEN a, GEN b, char *ch,GEN ysmlu,GEN ybigu, long prec)
     x = addrr(x,dx);
     if (low_stack(limite, stack_lim(av2,1)))
     {
-      long tetpil=avma;
+      gpmem_t tetpil=avma;
       if (DEBUGMEM>1) err(warnmem,"plot");
       x = gerepile(av2,tetpil,rcopy(x));
     }
@@ -1275,7 +1276,7 @@ single_recursion(dblPointList *pl,char *ch,entree *ep,GEN xleft,GEN yleft,
   GEN xright,GEN yright,long depth)
 {
   GEN xx,yy;
-  long av=avma;
+  gpmem_t av=avma;
   double dy=pl[0].ybig - pl[0].ysml;
 
   if (depth==RECUR_MAXDEPTH) return;
@@ -1303,7 +1304,7 @@ param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,GEN xleft,
   GEN yleft, GEN tright,GEN xright,GEN yright, long depth)
 {
   GEN tt,xx,yy, p1;
-  long av=avma;
+  gpmem_t av=avma;
   double dy=pl[0].ybig - pl[0].ysml;
   double dx=pl[0].xbig - pl[0].xsml;
 
@@ -1342,7 +1343,8 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
   long recur=flags & PLOT_RECURSIVE;
   GEN p1,dx,x,xleft,xright,yleft,yright,tleft,tright;
   dblPointList *pl;
-  long tx,av = avma,av2,i,j,sig,nc,nl,nbpoints;
+  long tx, i, j, sig, nc, nl, nbpoints;
+  gpmem_t av = avma, av2;
   double xsml,xbig,ysml,ybig,fx,fy;
 
   if (!testpoints)
@@ -1510,7 +1512,8 @@ extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
 static void
 rectsplines(long ne, double *x, double *y, long lx, long flag)
 {
-  long i, j, oldavma = avma;
+  long i, j;
+  gpmem_t oldavma = avma;
   GEN tas, xa = cgetg(lx+1, t_VEC), ya = cgetg(lx+1, t_VEC);
   entree *var0 = varentries[ordvar[0]];
 
@@ -1527,7 +1530,7 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
   }
   else tas = NULL; /* for lint */
   for (i = 0; i <= lx - 4; i++) {
-      long oavma = avma;
+      gpmem_t oavma = avma;
 
       xa++; ya++;
       if (flag & PLOT_PARAMETRIC) {
@@ -1584,7 +1587,8 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   GEN res;
   dblPointList y,x;
   double xsml,xbig,ysml,ybig,tmp;
-  long ltype, ltop=avma;
+  long ltype;
+  gpmem_t ltop=avma;
   long i,nc,nbpoints, w[2], wx[2], wy[2];
 
   w[0]=stringrect; w[1]=drawrect;

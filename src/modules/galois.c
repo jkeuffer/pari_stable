@@ -60,7 +60,8 @@ do_par(long k, long n, long m)
 static long **
 partitions(long n)
 {
-  long av,av1,i, j = 1, l = n+1;
+  long i, j = 1, l = n+1;
+  gpmem_t av, av1;
   GEN T;
 
   par_vec = new_chunk(l); par_N = n;
@@ -315,7 +316,8 @@ getpreci(GEN *r)
 static void
 new_pol(GEN *r, long *a, long d)
 {
-  long av,i,j;
+  long i, j;
+  gpmem_t av;
   GEN x, p1;
   for (i=1; i<=N; i++)
   {
@@ -328,7 +330,8 @@ new_pol(GEN *r, long *a, long d)
 static void
 rangeroots(GEN newr, GEN oldr)
 {
-  long av = avma,i,j,k,z[NMAX+1],t[NMAX+1];
+  long i, j, k, z[NMAX+1], t[NMAX+1];
+  gpmem_t av = avma;
   GEN diff,diff0;
 
   k = 0; /* gcc -Wall */
@@ -833,7 +836,7 @@ static GEN
 is_int(GEN g)
 {
   GEN gint,p1;
-  long av;
+  gpmem_t av;
 
   if (typ(g) == t_COMPLEX)
   {
@@ -864,7 +867,8 @@ isin_end(PERM S, PERM uu, PERM s0, GEN gpol, long av1)
 static PERM
 check_isin(GEN po,GEN *r,long nbm,long nbv, POBJ a, POBJ tau, POBJ ss, PERM s0)
 {
-  long pr = PREC, av1 = avma, av2,nogr,nocos,init,i,j,k,l,d,nrm,nri,sp;
+  long pr = PREC, nogr, nocos, init, i, j, k, l, d, nrm, nri, sp;
+  gpmem_t av1 = avma, av2;
   long nbgr,nbcos,nbracint,nbrac,lastnbri,lastnbrm;
   static long numi[M],numj[M],lastnum[M],multi[M],norac[M],lastnor[M];
   GEN rr,ro,roint,racint[M];
@@ -1507,7 +1511,8 @@ data8(long n1, long n2, GROUP *t)
 static long
 galoismodulo8(GEN pol, GEN dpol)
 {
-  long av = avma, res, gr[51];
+  long res, gr[51];
+  gpmem_t av = avma;
   long **TYP = partitions(8), **GR = (long**)cgeti(49);
 
 /* List of possible types in group j: GR[j][0] = #GR[j] if
@@ -1793,7 +1798,8 @@ data9(long n1, long n2, GROUP *t)
 static long
 galoismodulo9(GEN pol, GEN dpol)
 {
-  long av = avma, res, gr[35];
+  long res, gr[35];
+  gpmem_t av = avma;
   long **TYP = partitions(9), **GR = (long**) cgeti(33);
 
   /* 42 TYPES ORDONNES CROISSANT (T[1],...,T[30])*/
@@ -2243,7 +2249,8 @@ data10(long n1,long n2,GROUP *t)
 static long
 galoismodulo10(GEN pol, GEN dpol)
 {
-  long av = avma, res, gr[46];
+  long res, gr[46];
+  gpmem_t av = avma;
   long **TYP = partitions(10), **GR = (long**) cgeti(45);
 
   GR[ 1]= _gr(  4, 1,6,30,42);
@@ -2350,7 +2357,8 @@ data11(long n1, GROUP *t)
 static long
 galoismodulo11(GEN pol, GEN dpol)
 {
-  long av = avma, res, gr[6] = {0, 1,1,1,1,1};
+  long res, gr[6] = {0, 1, 1, 1, 1, 1};
+  gpmem_t av = avma;
   long **TYP = (long**) cgeti(9);
 
   TYP[0] = new_chunk(1);
@@ -2477,7 +2485,8 @@ GEN
 galoisbig(GEN pol, long prec)
 {
   GEN dpol, res = cgetg(4,t_VEC);
-  long *tab,t, av = avma;
+  long *tab, t;
+  gpmem_t av = avma;
   long tab8[]={0,
     8,8,8,8,8,16,16,16,16,16, 16,24,24,24,32,32,32,32,32,32,
     32,32,48,48,56,64,64,64,64,64, 64,96,96,96,128,168,168,192,192,192,

@@ -859,7 +859,8 @@ logall(long dv, GEN mod, GEN vecWA, long mginv, GEN pr, GEN unif)
 GEN
 rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
 {
-  long i,j,l,av=avma,e,vp,vd,dK,lSl,lSp,lSl2,lSml2,dc,ru,rv,nbcol,g,mginv;
+  long i, j, l, e, vp, vd, dK, lSl, lSp, lSl2, lSml2, dc, ru, rv, nbcol, g, mginv;
+  gpmem_t av=avma;
   GEN p1,p2,p3,p4,wk,pr,U,R;
   GEN polnf,nf,bnf,bnfz,rayclgp,bid,ideal,cycgen,vselmer;
   GEN kk,clgp,fununits,torsunit,vecB,vecC,Tc,Tv,P;

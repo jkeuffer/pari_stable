@@ -327,7 +327,7 @@ shiftr(GEN x, long n)
 INLINE int
 cmpir(GEN x, GEN y)
 {
-  ulong av;
+  gpmem_t av;
   GEN z;
 
   if (!signe(x)) return -signe(y);
@@ -339,7 +339,7 @@ cmpir(GEN x, GEN y)
 INLINE int
 cmpsr(long x, GEN y)
 {
-  ulong av;
+  gpmem_t av;
   GEN z;
 
   if (!x) return -signe(y);

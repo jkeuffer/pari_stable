@@ -1140,7 +1140,8 @@ texnome(char *v, long deg)
 void
 etatpile(unsigned int n)
 {
-  long av=avma,nu,i,l,m;
+  long nu, i, l, m;
+  gpmem_t av=avma;
   GEN adr,adr1;
   double r;
 
@@ -1472,7 +1473,7 @@ bruti(GEN g, long nosign)
     case t_PADIC:
     {
       GEN p = (GEN)g[2];
-      ulong av = avma;
+      gpmem_t av = avma;
       i = valp(g); l = precp(g)+i;
       g = (GEN)g[4]; v = GENtostr(p);
       for (; i<l; i++)
@@ -1937,7 +1938,7 @@ texi(GEN g, long nosign)
 void
 bruteall(GEN g, char f, long d, long flag)
 {
-  long av = avma;
+  gpmem_t av = avma;
   void (*oldsp)(void) = sp;
 
   sp = flag? &wr_space: &no_space;
@@ -1949,7 +1950,7 @@ bruteall(GEN g, char f, long d, long flag)
 void
 matbrute(GEN g, char f, long d)
 {
-  long av=avma; sp = &wr_space;
+  gpmem_t av=avma; sp = &wr_space;
   format = f; decimals = d;
   matbruti(changevar(g,polvar),0); avma=av;
 }
@@ -1957,7 +1958,7 @@ matbrute(GEN g, char f, long d)
 void
 sor(GEN g, char f, long d, long c)
 {
-  long av=avma; sp = &wr_space;
+  gpmem_t av=avma; sp = &wr_space;
   format = f; decimals = d; chmp = c; initial = 1;
   sori(changevar(g,polvar)); avma = av;
 }
@@ -1965,7 +1966,7 @@ sor(GEN g, char f, long d, long c)
 void
 texe(GEN g, char f, long d)
 {
-  long av=avma; sp = &no_space;
+  gpmem_t av=avma; sp = &no_space;
   format = f; decimals = d;
   texi(changevar(g,polvar),0); avma=av;
 }
@@ -2786,7 +2787,7 @@ writebin(char *name, GEN x)
 GEN
 readbin(char *name, FILE *f)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN x,y,z;
   int cx,cy;
   check_magic(name,f); x = y = z = NULL;

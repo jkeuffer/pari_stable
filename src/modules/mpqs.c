@@ -132,7 +132,8 @@ mpqs_sort_lp_file(char *filename)
   char *old_s, **sort_table = (char**)avma, *buf, *cur_line;
   static char **buflist_head = NULL;
   char **buflist, **next_buflist;
-  long i, j, bufspace, length, count, av=avma;
+  long i, j, bufspace, length, count;
+  gpmem_t av=avma;
 
   if (!buflist_head)
   {
@@ -656,7 +657,7 @@ mpqs_iterate_primes(long *p, byteptr primes_ptr)
     prime += *primes_ptr++;
   else
   {
-    long av = avma;
+    gpmem_t av = avma;
     prime = itos(nextprime(stoi(prime + 1)));
     avma = av;
   }
@@ -677,7 +678,7 @@ mpqs_find_k(GEN N, long tries)
                                55,57,59,61,65,67,69,71,73,79,83,
                                85,89,91,93,95,97,101,103,105,107,
                                109,113,127,131,137,139};
-  long av = avma;
+  gpmem_t av = avma;
   long best_k = 1, k, p, N_mod_4 = smodis(N, 4), x;
   GEN kN;
   double best_value = 1, value, dp;
@@ -1126,7 +1127,7 @@ mpqs_self_init(GEN A, GEN B, GEN N, GEN kN, long *FB, long *sqrt_mod_p_kN,
                long start_index_FB_for_A, long *inv_A2, GEN inv_A4,
                ulong *bin_index, GEN *f)
 {
-  long av;
+  gpmem_t av;
   GEN p1, p2;
   ulong size_of_FB, nu_2;
   long i, j, p, M_mod_p, tmp, tmp1, tmp2;
@@ -1593,7 +1594,8 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
 {
   GEN Qx, A_2x_plus_B, Y, Qx_div_p;
   double a, b, inv_2_a;
-  long av, powers_of_2, p, tmp_p, remd_p, bi;
+  long powers_of_2, p, tmp_p, remd_p, bi;
+  gpmem_t av;
   long z1, z2, x, number_of_relations, x_minus_M;
   char *relations;
   ulong i, pi, ei, size_of_FB;
@@ -1665,7 +1667,8 @@ mpqs_eval_candidates(GEN A, GEN inv_A4, GEN B, GEN kN, long k,
        debugging... --GN */
 #ifdef MPQS_DEBUG
     {
-      long av1 = avma, ks;
+      long ks;
+      gpmem_t av1 = avma;
       GEN g = mppgcd(Qx, kN);
 /*      if ((ks = kronecker(divii(Qx, g), divii(kN, g))) != 1) */
       if (is_pm1(g))
@@ -1983,7 +1986,7 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
   long old_q;
   GEN inv_q, Y1, Y2, new_Y, new_Y1;
   long i, l, c = 0;
-  long av = avma, av2;
+  gpmem_t av = avma, av2;
 
   *f = NULL;
   if (fgets(buf, MPQS_STRING_LENGTH, COMB) == NULL)
@@ -2101,7 +2104,8 @@ mpqs_combine_large_primes(FILE *COMB, FILE *FNEW, long size_of_FB,
       char ejk [MPQS_STRING_LENGTH];
       GEN Qx_2, prod_pi_ei, pi_ei;
       char *s;
-      long pi, exi, av1 = avma;
+      long pi, exi;
+      gpmem_t av1 = avma;
       Qx_2 = modii(sqri(new_Y), kN);
 
       strcpy(ejk, new_relation);
@@ -2426,7 +2430,8 @@ mpqs_add_relation(GEN Y_prod, GEN N_or_kN, long *ei, char *r1)
   GEN Y, res;
   char relation [MPQS_STRING_LENGTH];
   char *s;
-  long av = avma, e, p;
+  long e, p;
+  gpmem_t av = avma;
 
   strcpy(relation, r1);
   s = strchr(relation, ':') - 1;
@@ -2472,7 +2477,7 @@ mpqs_solve_linear_system(GEN kN, GEN N, long rel, long *FB, long size_of_FB)
   pariFILE *pFREL;
   FILE *FREL;
   GEN X, Y_prod, N_or_kN, D1, base, res, new_res;
-  long av=avma, av2, av3, lim, lim3, tetpil;
+  gpmem_t av=avma, av2, av3, lim, lim3, tetpil;
   long *fpos, *ei;
   long i, j, H_cols, H_rows;
   long res_last, res_next, res_size, res_max;
@@ -2954,7 +2959,7 @@ mpqs(GEN N)
   long vain_iterations = 0;
   long good_iterations = 0;
   long iterations = 0;
-  long av = avma;
+  gpmem_t av = avma;
 
   /* state flags for cleanup if we get interrupted --GN */
   static char all_clean = 1;	/* set to 0 while mpqs() is busy */
@@ -3093,7 +3098,7 @@ mpqs(GEN N)
 
   for (i = 2; (ulong)i < size_of_FB + 2; i++)
   {
-    long av1 = avma;
+    gpmem_t av1 = avma;
     p = FB[i];
 
     /* compute the approximations of the logarithms of p_i */

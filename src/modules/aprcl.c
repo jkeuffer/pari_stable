@@ -225,7 +225,7 @@ _powpolmod(int pk, GEN jac, red_t *R, GEN (*_sqr)(GEN, red_t *))
   const int efin = lg(taba)-1;
   GEN res,pol2, *vz;
   int lv,tf,f,i;
-  ulong av;
+  gpmem_t av;
 
   lv = 1 << (kglob-1);
   vz = (GEN*)cgetg(lv+1,t_VEC);
@@ -823,7 +823,8 @@ step4d(GEN N, ulong q)
 static int
 step5(GEN N, int p, GEN et)
 {
-  ulong q,av;
+  ulong q;
+  gpmem_t av;
   int k, fl = -1;
   byteptr d = diffptr+2;
 
@@ -851,7 +852,8 @@ static GEN
 step6(GEN N, ulong t, GEN et)
 {
   GEN N1,r,p1;
-  ulong i,av;
+  ulong i;
+  gpmem_t av;
 
   N1 = resii(N, et);
   r = gun; av = avma;
@@ -884,7 +886,7 @@ aprcl(GEN N)
   GEN et,fat,flaglp,faq,faqpr,faqex;
   long fl;
   ulong lfat,p,q,lfaq,k,t,i,j,l;
-  ulong av;
+  gpmem_t av;
 
   if (cmpis(N,12) <= 0)
     switch(itos(N))
@@ -948,7 +950,7 @@ aprcl(GEN N)
 long
 isprimeAPRCL(GEN N)
 {
-  ulong av = avma;
+  gpmem_t av = avma;
   GEN res = aprcl(N);
   avma = av; return (typ(res) == t_INT);
 }

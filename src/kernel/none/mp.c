@@ -1125,7 +1125,8 @@ GEN
 divir(GEN x, GEN y)
 {
   GEN xr,z;
-  long av,ly;
+  long ly;
+  gpmem_t av;
 
   if (!signe(y)) err(diver5);
   if (!signe(x)) return gzero;
@@ -1137,7 +1138,8 @@ GEN
 divri(GEN x, GEN y)
 {
   GEN yr,z;
-  long av,lx,s=signe(y);
+  long lx, s=signe(y);
+  gpmem_t av;
 
   if (!s) err(diver8);
   if (!signe(x)) return realzero_bit(expo(x) - expi(y));
@@ -1151,7 +1153,8 @@ divri(GEN x, GEN y)
 void
 diviiz(GEN x, GEN y, GEN z)
 {
-  long av=avma,lz;
+  long lz;
+  gpmem_t av=avma;
   GEN xr,yr;
 
   if (typ(z)==t_INT) { affii(divii(x,y),z); avma=av; return; }
@@ -1162,7 +1165,7 @@ diviiz(GEN x, GEN y, GEN z)
 void
 mpdivz(GEN x, GEN y, GEN z)
 {
-  long av=avma;
+  gpmem_t av=avma;
 
   if (typ(z)==t_INT)
   {
@@ -1185,7 +1188,8 @@ mpdivz(GEN x, GEN y, GEN z)
 GEN
 divsr(long x, GEN y)
 {
-  long av,ly;
+  long ly;
+  gpmem_t av;
   GEN p1,z;
 
   if (!signe(y)) err(diver3);
@@ -1204,7 +1208,7 @@ modii(GEN x, GEN y)
     case 1: return resii(x,y);
     default:
     {
-      long av = avma;
+      gpmem_t av = avma;
       (void)new_chunk(lgefint(y));
       x = resii(x,y); avma=av;
       if (x==gzero) return x;
@@ -1349,7 +1353,8 @@ GEN
 dvmdii(GEN x, GEN y, GEN *z)
 {
   long sx=signe(x),sy=signe(y);
-  long av,lx,ly,lz,i,j,sh,k,lq,lr;
+  long lx, ly, lz, i, j, sh, k, lq, lr;
+  gpmem_t av;
   ulong si,qp,saux, *xd,*rd,*qd;
   GEN r,q,x1;
 
@@ -1554,7 +1559,7 @@ mppgcd_resiu(GEN y, ulong x)
 void
 mppgcd_plus_minus(GEN x, GEN y, GEN res)
 {
-  long av = avma;
+  gpmem_t av = avma;
   long lx = lgefint(x)-1;
   long ly = lgefint(y)-1, lt,m,i;
   GEN t;
@@ -1601,7 +1606,7 @@ smulss(ulong x, ulong y, ulong *rem)
 GEN
 convi(GEN x)
 {
-  ulong av=avma, lim;
+  gpmem_t av=avma, lim;
   long lz;
   GEN z,p1;
 
@@ -1659,7 +1664,7 @@ confrac(GEN x)
 GEN
 truedvmdii(GEN x, GEN y, GEN *z)
 {
-  long av = avma;
+  gpmem_t av = avma;
   GEN r, q = dvmdii(x,y,&r); /* assume that r is last on stack */
   GEN *gptr[2];
 
@@ -1690,7 +1695,7 @@ truedvmdii(GEN x, GEN y, GEN *z)
 GEN
 red_montgomery(GEN T, GEN N, ulong inv)
 {
-  ulong av;
+  gpmem_t av;
   GEN Te,Td,Ne,Nd, scratch;
   ulong m,t,d,k = lgefint(N)-2;
   int carry;
@@ -1849,7 +1854,8 @@ diviuexact(GEN x, ulong y)
 GEN
 diviiexact(GEN x, GEN y)
 {
-  long av,lx,ly,lz,vy,i,ii,sx = signe(x), sy = signe(y);
+  long lx, ly, lz, vy, i, ii, sx = signe(x), sy = signe(y);
+  gpmem_t av;
   ulong y0inv,q;
   GEN z;
 
@@ -2159,7 +2165,8 @@ static GEN
 quickmulii(GEN a, GEN b, long na, long nb)
 {
   GEN a0,c,c0;
-  long av,n0,n0a,i;
+  long n0, n0a, i;
+  gpmem_t av;
 
   if (na < nb) swapspec(a,b, na,nb);
   if (nb == 1) return mulsispec(*b, a, na);
@@ -2222,7 +2229,8 @@ GEN
 resiimul(GEN x, GEN sy)
 {
   GEN r, q, y = (GEN)sy[1], invy;
-  long av = avma, k;
+  long k;
+  gpmem_t av = avma;
 
   k = cmpii(x, y);
   if (k <= 0) return k? icopy(x): gzero;
@@ -2283,7 +2291,8 @@ static GEN
 quicksqri(GEN a, long na)
 {
   GEN a0,c;
-  long av,n0,n0a,i;
+  long n0, n0a, i;
+  gpmem_t av;
 
   if (na < KARATSUBA_SQRI_LIMIT) return sqrispec(a,na);
   i=(na>>1); n0=na-i; na=i;
@@ -3415,7 +3424,7 @@ int
 invmod(GEN a, GEN b, GEN *res)
 {
   GEN v,v1,d,d1,q,r;
-  long av,av1,lim;
+  gpmem_t av, av1, lim;
   long s;
   ulong g;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
@@ -3583,7 +3592,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 {
   GEN t,u,u1,v,v1,d,d1,q,r;
   GEN *pt;
-  long av,av1,lim;
+  gpmem_t av, av1, lim;
   long s;
   int sa, sb;
   ulong g;
@@ -3919,7 +3928,7 @@ int
 ratlift(GEN x, GEN m, GEN *a, GEN *b, GEN amax, GEN bmax)
 {
   GEN d,d1,v,v1,q,r;
-  ulong av = avma, av1, lim;
+  gpmem_t av = avma, av1, lim;
   long lb,lr,lbb,lbr,s,s0;
   ulong vmax;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */

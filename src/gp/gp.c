@@ -2500,7 +2500,8 @@ check_meta(char *buf)
 static GEN
 gp_main_loop(int ismain)
 {
-  long av, i,j;
+  long i, j;
+  gpmem_t av;
   VOLATILE GEN z = gnil;
   Buffer *b = new_buffer();
   filtre_t F;
