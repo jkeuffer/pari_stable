@@ -446,7 +446,8 @@ static long monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN fro
   avma=ltop;
   return 0;
 }
-  GEN
+
+GEN
 monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 {
   pari_sp ltop, lbot;
@@ -878,9 +879,9 @@ verifietest(GEN pf, struct galois_test *td)
     PW = (GEN) td->PV[ord];
     if (PW)
     {
-      V = ((GEN **) PW)[1][pf[1]];
+      V = gmael(PW,1,pf[1]);
       for (j = 2; j <= n; j++)
-	V = addii(V, ((GEN **) PW)[j][pf[j]]);
+	V = addii(V, gmael(PW,j,pf[j]));
     }
     else
       V = centermod(gmul((GEN) td->TM[ord], P),td->ladic);
@@ -1363,7 +1364,7 @@ fixedfieldinclusion(GEN O, GEN PL)
   S = cgetg((lg(O) - 1) * (lg(O[1]) - 1) + 1, t_COL);
   for (i = 1; i < lg(O); i++)
     for (j = 1; j < lg(O[i]); j++)
-      S[((GEN *) O)[i][j]] = PL[i];
+      S[mael(O,i,j)] = PL[i];
   return S;
 }
 
@@ -1669,7 +1670,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   }
   /* This is to avoid looping on non-wss group. 
      To be checked for large groups.  */
-  /*Would it be better to disable this check if we are in a good case ?
+  /* Would it be better to disable this check if we are in a good case ?
    * (ga_all_normal and !(ga_ext_2) (e.g. 60)) ?*/
   if (plift == 0 || ((group&ga_non_wss) && order == Fp[np]))
   {
@@ -2355,10 +2356,10 @@ suites4_2:
   }
   for (i = 1; i < lg(gl->L); i++)
   {
-    ((GEN **) res)[1][1][i] = sigma[tau[i]];
-    ((GEN **) res)[1][2][i] = phi[sigma[tau[phi[i]]]];
-    ((GEN **) res)[1][3][i] = phi[sigma[i]];
-    ((GEN **) res)[1][4][i] = sigma[i];
+    mael3(res,1,1,i) = sigma[tau[i]];
+    mael3(res,1,2,i) = phi[sigma[tau[phi[i]]]];
+    mael3(res,1,3,i) = phi[sigma[i]];
+    mael3(res,1,4,i) = sigma[i];
   }
   avma = ltop2;
   return res;
@@ -2796,11 +2797,11 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   res[2] = lgetg(lg(PG[1]) + lg(split[1]) - 1, t_VECSMALL);
   for (i = 1; i < lg(split[1]); i++)
   {
-    ((GEN **) res)[1][i] = gcopy(((GEN **) split)[1][i]);
-    ((GEN *) res)[2][i] = ((GEN *) split)[2][i];
+    mael(res,1,i) = lcopy(gmael(split,1,i));
+    mael(res,2,i) = mael(split,2,i);
   }
   for (i = lg(split[1]); i < lg(res[1]); i++)
-    ((GEN **) res)[1][i] = cgetg(n + 1, t_VECSMALL);
+    mael(res,1,i) = lgetg(n + 1, t_VECSMALL);
   ltop2 = avma;
   for (j = 1; j < lg(PG[1]); j++)
   {
@@ -2808,11 +2809,11 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     long    t;
     long    w, sr, dss;
     if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisConj:G[%d]=%Z  d'ordre relatif %d\n", j,
-	  ((GEN **) PG)[1][j], ((long **) PG)[2][j]);
+      fprintferr("GaloisConj: G[%d]=%Z of relative order %d\n", j,
+	  gmael(PG,1,j), mael(PG,2,j));
     B = perm_cycles(gmael(PG,1,j));
     if (DEBUGLEVEL >= 6)
-      fprintferr("GaloisConj:B=%Z\n", B);
+      fprintferr("GaloisConj: B=%Z\n", B);
     w = gf.psi[Pg[j]];
     dss = deg / cgcd(deg, w - 1);
     sr = 1;
@@ -2837,8 +2838,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     {
       int     i;
       for (i = 1; i <= n; i++)
-	((GEN **) res)[1][lg(split[1]) + j - 1][i] = pf[i];
-      ((GEN *) res)[2][lg(split[1]) + j - 1] = ((GEN *) PG)[2][j];
+	mael3(res,1,lg(split[1]) + j - 1,i) = pf[i];
+      mael(res,2,lg(split[1]) + j - 1) = mael(PG,2,j);
     }
     avma = ltop2;
   }
@@ -2947,7 +2948,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   {
     int     c = k * (((long **) G)[2][i] - 1);
     for (j = 1; j <= c; j++)	/* I like it */
-      res[++k] = (long) perm_mul((GEN) res[j], ((GEN **) G)[1][i]);
+      res[++k] = (long) perm_mul((GEN) res[j], gmael(G,1,i));
   }
   if (flag)
   {
@@ -2990,14 +2991,14 @@ numberofconjugates(GEN T, long pdepart)
     S = (GEN) simplefactmod(T, stoi(p));
     isram = 0;
     for (i = 1; i < lg(S[2]) && !isram; i++)
-      if (!gcmp1(((GEN **) S)[2][i]))
-	isram = 1;
+      if (!gcmp1(gmael(S,2,i)))
+        isram = 1;
     if (isram == 0)
     {
       for (i = 1; i <= n; i++)
-	L[i] = 0;
+        L[i] = 0;
       for (i = 1; i < lg(S[1]) && !isram; i++)
-	L[itos(((GEN **) S)[1][i])]++;
+        L[itos(gmael(S,1,i))]++;
       s = L[1];
       for (i = 2; i <= n; i++)
 	s = cgcd(s, L[i] * i);
