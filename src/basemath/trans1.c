@@ -735,7 +735,7 @@ gpow(GEN x, GEN n, long prec)
       y = cgetg(3,tx); copyifstack(x[1],y[1]);
       av = avma;
       z = mpsqrtnmod((GEN)x[2], d, (GEN)x[1], NULL);
-      if (!z) err(talker,"gpow: n-root does not exists");
+      if (!z) err(talker,"gpow: nth-root does not exist");
       y[2] = lpileuptoint(av, powmodulo(z, a, (GEN)x[1]));
       return y;
     }
@@ -1065,14 +1065,14 @@ padic_sqrtn_ram(GEN x, long e)
   {
     long z;
     GEN p1 = divsi_rem(valp(x), n, &z);
-    if (z) err(talker,"n-root does not exists in gsqrtn");
+    if (z) err(talker,"nth-root does not exist in gsqrtn");
     v=itos(p1);
     x=gcopy(x);setvalp(x,0);
   }
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
   if (lgefint(p)==3 && p[2]==2 && mod8((GEN)x[4])!=signe((GEN)x[4]))
-    err(talker,"n-root does not exists in gsqrtn");
-  /*Other "n-root does not exists in gsqrtn" are caught by paexp...*/
+    err(talker,"nth-root does not exist in gsqrtn");
+  /*Other "nth-root does not exist" are caught by paexp...*/
   a=paexp(gdiv(palog(x),n));
   /*Here n=p^e and a^n=z*x where z is a root of unity. note that
       z^p=z, so z^n=z. and if b=a/z then b^n=x. We say b=x/(a^(n-1))*/
@@ -1094,12 +1094,12 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   {
     long z;
     GEN p1 = divsi_rem(valp(x),n,&z);
-    if (z) err(talker,"n-root does not exists in gsqrtn");
+    if (z) err(talker,"nth-root does not exist in gsqrtn");
     v=itos(p1);
   }
   a=mpsqrtnmod((GEN)x[4],n,p,zetan);
   if (!a)
-    err(talker,"n-root does not exists in gsqrtn");
+    err(talker,"nth-root does not exist in gsqrtn");
   tetpil=avma;
   r=cgetg(5,t_PADIC);
   r[1]=x[1];setvalp(r,v);
@@ -1224,7 +1224,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     }
     y = cgetg(3,tx); copyifstack(x[1],y[1]);
     y[2] = (long)mpsqrtnmod((GEN)x[2],n,(GEN)x[1],zetan);
-    if (!y[2]) err(talker,"n-root does not exists in gsqrtn");
+    if (!y[2]) err(talker,"nth-root does not exist in gsqrtn");
     if (zetan)
     {
       affii(*zetan, (GEN)z[2]);
