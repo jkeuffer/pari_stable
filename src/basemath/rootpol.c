@@ -1471,7 +1471,7 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
     if (LOG3 > lrmin + lthick)
     {
       double lquo = logmax_modulus(qq,0.05) - lrmin;
-      if (lquo > lthick > 0) { lthick = lquo; newq = qq; ctr = (GEN)v[i]; }
+      if (lquo > lthick) { lthick = lquo; newq = qq; ctr = (GEN)v[i]; }
     }
     if (lthick > LOG2) break;
     if (polreal && i==2 && lthick > LOG3 - LOG2) break;
