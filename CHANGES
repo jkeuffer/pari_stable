@@ -150,6 +150,8 @@ BA 63- galoisidentify() could fail on WSS group with S4 residue.
    65- Mod(1,8) + O(2^2) --> Mod(1,8) [ should be error ]
    66- lngamma(1.) returned a t_REAL of length 'realprecision' (instead of 3)
 BA 67- matsnf(Mat([])) was returning a matrix instead of a vector.
+   68- ellap(ellinit([0,1,0,1,0]), 100) --> FPE  [ BIB: 100 is not prime, but
+       make the routine more robust ]
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

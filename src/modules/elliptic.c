@@ -1912,8 +1912,10 @@ apell0(GEN e, ulong p)
   {
     while (!KRO || KRO == KROold)
     {
-      x++;
-      u = adduumod(c6, muluumod(x, c4 + muluumod(x,x,p), p), p);
+      ulong t;
+      if (++x >= p) err(talker, "%lu is not prime", p);
+      t = adduumod(c4, muluumod(x,x,p), p);
+      u = adduumod(c6, muluumod(x, t, p), p);
       KRO = kross(u,p);
     }
     KROold = KRO;
