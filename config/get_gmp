@@ -40,7 +40,11 @@ else
   if test "$fastread" = yes; then
     exe=$osname-$arch-rlv$$
     $CC $extraflag $GMPINCLUDE -o $exe gmp_version.c $GMPLIBS 2> /dev/null
-    if test -r $exe; then gmp=`$exe`; else gmp="?.?"; fi
+    if test -r $exe; then
+      gmp=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$gmp" $exe`;
+    else
+      gmp="?.?";
+    fi
     rm -f $exe $exe$exe_suff
     echo "Using GNU MP, version $gmp"
   fi

@@ -161,7 +161,11 @@ else
   if test "$fastread" = yes; then
     exe=$osname-$arch-rlv$$
     $CC $extraflag $rl_extra_flags $RLINCLUDE -o $exe rl_version.c $RLLIBS 2> /dev/null
-    if test -r $exe; then readline=`$exe`; else readline="?.?"; fi
+    if test -r $exe; then
+      readline=`env LD_LIBRARY_PATH="$LD_LIBRARY_PATH$dir_sep$readline" $exe`;
+    else
+      readline="?.?";
+    fi
     if test -z "$rl_library_version" -a "X$readline" != "X?.?"; then
       echo "!!! Possible mismatch between readline headers and library:"
       echo "!!!  header is apparently for v1.0, library reports $readline!"

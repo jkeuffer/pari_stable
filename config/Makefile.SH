@@ -151,6 +151,9 @@ tmp=$runpath
 if test -n "$plotrunpath"; then
   tmp="$tmp$dir_sep$plotrunpath"
 fi
+if test -n "$gmp"; then
+  tmp="$tmp$dir_sep$gmp"
+fi
 if test -n "$runpathprefix"; then
  RUNPTH_FINAL=`$config_dir/ldflags "$LDisGCC" "$runpathprefix $tmp"`
  RUNPTH=`$config_dir/ldflags "$LDisGCC" "$runpathprefix $TOP/$objdir$dir_sep$tmp"`
