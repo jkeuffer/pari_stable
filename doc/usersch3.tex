@@ -6247,8 +6247,8 @@ the second the number of columns (1 for a column vector).
 \syn{matsize}{x}.
 
 \subsecidx{matsnf}$(X,\{\fl=0\})$: if $X$ is a (singular or non-singular)
-square matrix outputs the vector of elementary divisors of $X$ (i.e.~the
-diagonal of the \idx{Smith normal form} of $X$).
+matrix outputs the vector of elementary divisors of $X$ (i.e.~the diagonal of
+the \idx{Smith normal form} of $X$).
 
 The binary digits of \fl\ mean:
 
@@ -6256,8 +6256,9 @@ The binary digits of \fl\ mean:
 unimodular matrices such that $UXV$ is the diagonal matrix $D$. Otherwise
 output only the diagonal of $D$.
 
-2 (generic input): if set, allows polynomial entries. Otherwise, assume
-that $X$ has integer coefficients.
+2 (generic input): if set, allows polynomial entries, in which case the
+input matrix must be square. Otherwise, assume that $X$ has integer
+coefficients with arbitrary shape.
 
 4 (cleanup): if set, cleans up the output. This means that elementary
 divisors equal to $1$ will be deleted, i.e.~outputs a shortened vector $D'$
