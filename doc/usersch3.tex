@@ -4737,7 +4737,7 @@ $P(x)$ and $P(-x)$, only one is given).
 16: possibly use a suborder of the maximal order. The primes dividing the
 index of the order chosen are larger than \tet{primelimit} or divide integers
 stored in the \tet{addprimes} table. In that case it may happen that the
-output polynomial does not have minimal $T_2$ norm.
+output polynomial does not have minimal $T_2$ norm.\label{se:polredabs}
 
 \syn{polredabs0}{x,\fl}.
 
@@ -5170,20 +5170,26 @@ is checked. The result is undefined if the assumption is not correct.
 Given a monic polynomial \var{pol} with coefficients in $\var{nf}$, finds a
 list of relative polynomials defining some subfields, hopefully simpler and
 containing the original field. In the present version \vers, this is slower
-than \kbd{rnfpolredabs}.
+and less efficient than \kbd{rnfpolredabs}.
 
 \syn{rnfpolred}{\var{nf},\var{pol},\var{prec}}.
 
 \subsecidx{rnfpolredabs}$(\var{nf},\var{pol},\{\fl=0\})$: relative version of
 \kbd{polredabs}. Given a monic polynomial \var{pol} with coefficients in
-$\var{nf}$, finds a simpler relative polynomial defining the same field. If
-$\fl=1$, returns $[P,a]$ where $P$ is the default output and $a$ is an
+$\var{nf}$, finds a simpler relative polynomial defining the same field. The
+binary digits of $\fl$ mean
+
+1: returns $[P,a]$ where $P$ is the default output and $a$ is an
 element expressed on a root of $P$ whose characteristic polynomial is
-\var{pol}, if $\fl=2$, returns an absolute polynomial (same as
+\var{pol}
 
+2: returns an absolute polynomial (same as
 {\tt rnfequation(\var{nf},rnfpolredabs(\var{nf},\var{pol}))}
+but faster).
 
-\noindent but faster).
+16: possibly use a suborder of the maximal order. This is slower than the
+default when the relative discriminant is smooth, and much faster otherwise.
+See \secref{se:polredabs}.
 
 \misctitle{Remark.} In the present implementation, this is both faster and
 much more efficient than \kbd{rnfpolred}, the difference being more

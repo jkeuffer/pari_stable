@@ -3916,7 +3916,7 @@ GEN
 rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   GEN red, bas, eq, z, elt, POL, pol, T, a;
-  long v;
+  long v, fl;
   gpmem_t av = avma;
 
   if (typ(relpol)!=t_POL) err(typeer,"rnfpolredabs");
@@ -3929,17 +3929,25 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (signe(a))
     relpol = poleval(relpol, gsub(polx[v],
                              gmul(a, gmodulcp(polx[varn(T)],T))));
-  bas = makebasis(nf, relpol, eq);
-  POL = (GEN)bas[1];
-  if (DEBUGLEVEL>1)
-  {
-    msgtimer("absolute basis");
-    fprintferr("original absolute generator: %Z\n", POL);
-  }
   if ((flag & nf_ADDZK) && (flag != (nf_ADDZK|nf_ABSOLUTE)))
     err(impl,"this combination of flags in rnfpolredabs");
-
-  red = polredabs0(bas, (flag & nf_ADDZK)? nf_ORIG: nf_RAW);
+  fl = (flag & nf_ADDZK)? nf_ORIG: nf_RAW;
+  POL = (GEN)eq[1];
+  if (flag & nf_PARTIALFACT)
+  {
+    fl |= nf_PARTIALFACT;
+    red = polredabs0(POL, fl);
+  }
+  else
+  {
+    bas = makebasis(nf, relpol, eq);
+    if (DEBUGLEVEL>1)
+    {
+      msgtimer("absolute basis");
+      fprintferr("original absolute generator: %Z\n", POL);
+    }
+    red = polredabs0(bas, fl);
+  }
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag & nf_ABSOLUTE)
