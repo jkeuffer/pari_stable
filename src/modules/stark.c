@@ -794,7 +794,8 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
     for (ic = 1; ic <= nChar; ic++)
     {
-      vN[ic][i] = addssmod(vN[ic][i], nchi[ic][i], lC[ic]->ord);
+      vN[ic][i] = (long)adduumod((ulong)vN[ic][i], (ulong)nchi[ic][i],
+                                 (ulong)lC[ic]->ord);
       for (j=1; j<i; j++) vN[ic][j] = vN[ic][i];
     }
     

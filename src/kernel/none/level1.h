@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
 void   addsii(long x, GEN y, GEN z);
-long   addssmod(long a, long b, long p);
 ulong  adduumod(ulong a, ulong b, ulong p);
 void   addssz(long x, long y, GEN z);
 void   affii(GEN x, GEN y);
@@ -102,7 +101,7 @@ GEN    subri(GEN x, GEN y);
 GEN    subrr(GEN x, GEN y);
 GEN    subsi(long x, GEN y);
 GEN    subsr(long x, GEN y);
-long   subssmod(long a, long b, long p);
+ulong  subuumod(ulong a, ulong b, ulong p);
 ulong  umodui(ulong x, GEN y);
 ulong  umuluu(ulong x, ulong y, ulong *rem);
 GEN    utoi(ulong x);
@@ -776,11 +775,11 @@ adduumod(ulong a, ulong b, ulong p)
   return (res >= p || res < a) ? res - p : res;
 }
 
-INLINE long
-subssmod(long a, long b, long p)
+INLINE ulong
+subuumod(ulong a, ulong b, ulong p)
 {
-  long res = a - b;
-  return (res >= 0) ? res : res + p;
+  long res = (long)(a - b);
+  return (res >= 0) ? res : (ulong)res + p;
 }
 
 INLINE ulong

@@ -559,10 +559,10 @@ gadd(GEN x, GEN y)
 	  case t_INTMOD: z=cgetg(3,t_INTMOD); p2=(GEN)x[1]; p1=(GEN)y[1];
 	    if (p1==p2 || egalii(p1,p2))
             {
-              icopyifstack(p2,z[1]);
-              if (!is_bigint(p2))
+              icopyifstack(p2, z[1]);
+              if (lgefint(p2) == 3)
               {
-                z[2] = lstoi(addssmod(itos((GEN)x[2]),itos((GEN)y[2]), p2[2]));
+                z[2] = lutoi(adduumod(itou((GEN)x[2]),itou((GEN)y[2]), p2[2]));
                 return z;
               }
             }

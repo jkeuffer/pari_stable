@@ -134,14 +134,14 @@ u_FpX_is_squarefree(GEN z, ulong p)
 }
 
 static GEN
-u_FpX_addspec(GEN x, GEN y, long p, long lx, long ly)
+u_FpX_addspec(GEN x, GEN y, ulong p, long lx, long ly)
 {
   long i,lz;
   GEN z;
 
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx+2; z = cgetg(lz,t_VECSMALL) + 2;
-  for (i=0; i<ly; i++) z[i] = addssmod(x[i], y[i], p);
+  for (i=0; i<ly; i++) z[i] = (long)adduumod((ulong)x[i], (ulong)y[i], p);
   for (   ; i<lx; i++) z[i] = x[i];
   z -= 2; z[1]=0; return u_normalizepol(z, lz);
 }
@@ -389,7 +389,7 @@ u_Fp_gmul2_1(GEN x, ulong p)
 {
   long i, l = lgef(x);
   GEN z = cgetg(l, t_VECSMALL);
-  for (i=2; i<l; i++) z[i] = addssmod(x[i], x[i], p);
+  for (i=2; i<l; i++) z[i] = (long)adduumod(x[i], x[i], p);
   z[1] = x[1]; return z;
 }
 
@@ -2534,7 +2534,7 @@ u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr)
         p1 += (ulong)z[j]*y[i-j];
         if (p1 & HIGHBIT) p1 %= p;
       }
-      c[i] = subssmod(x[i], p1%p, p);
+      c[i] = (long)subuumod((ulong)x[i], p1%p, p);
     }
   }
   else
@@ -2544,7 +2544,7 @@ u_FpX_divrem(GEN x, GEN y, ulong p, GEN *pr)
       p1 = muluumod(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
         p1 = adduumod(p1, muluumod(z[j],y[i-j],p), p);
-      c[i] = subssmod(x[i], (long)p1, (long)p);
+      c[i] = (long)subuumod((ulong)x[i], p1, p);
     }
   }
   i=dy-1; while (i>=0 && !c[i]) i--;
@@ -2927,13 +2927,13 @@ u_FpX_sub(GEN x, GEN y, ulong p)
   if (ly <= lx)
   {
     lz = lx; z = cgetg(lz,t_VECSMALL);
-    for (i=2; i<ly; i++) z[i] = subssmod(x[i],y[i],p);
+    for (i=2; i<ly; i++) z[i] = (long)subuumod((ulong)x[i],(ulong)y[i],p);
     for (   ; i<lx; i++) z[i] = x[i];
   }
   else
   {
     lz = ly; z = cgetg(lz,t_VECSMALL);
-    for (i=2; i<lx; i++) z[i] = subssmod(x[i],y[i],p);
+    for (i=2; i<lx; i++) z[i] = (long)subuumod((ulong)x[i],(ulong)y[i],p);
     for (   ; i<ly; i++) z[i] = y[i]? (long)(p - y[i]): y[i];
   }
   z[1]=0; return u_normalizepol(z, lz);
@@ -3281,7 +3281,7 @@ u_FpX_rem(GEN x, GEN y, ulong p)
         p1 += z[j]*y[i-j];
         if (p1 & HIGHBIT) p1 %= p;
       }
-      c[i] = subssmod(x[i], p1%p, p);
+      c[i] = (long)subuumod((ulong)x[i], p1%p, p);
     }
   }
   else
@@ -3299,7 +3299,7 @@ u_FpX_rem(GEN x, GEN y, ulong p)
       p1 = muluumod(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
         p1 = adduumod(p1, muluumod(z[j],y[i-j],p), p);
-      c[i] = subssmod(x[i], p1, p);
+      c[i] = (long)subuumod((ulong)x[i], p1, p);
     }
   }
   i = dy-1; while (i>=0 && !c[i]) i--;

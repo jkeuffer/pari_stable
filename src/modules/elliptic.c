@@ -1820,24 +1820,24 @@ typedef struct
 static void
 s_addell(sellpt *P, sellpt *Q, long c4, long p)
 {
-  long num, den, lambda;
+  ulong num, den, lambda;
 
   if (P->isnull) { *P = *Q; return; }
   if (Q->isnull) return;
   if (P->x == Q->x)
   {
     if (! P->y || P->y != Q->y) { P->isnull = 1; return; }
-    num = addssmod(c4, muluumod(3, muluumod(P->x, P->x, p), p), p);
-    den = addssmod(P->y, P->y, p);
+    num = adduumod(c4, muluumod(3, muluumod(P->x, P->x, p), p), p);
+    den = adduumod(P->y, P->y, p);
   }
   else
   {
-    num = subssmod(P->y, Q->y, p);
-    den = subssmod(P->x, Q->x, p);
+    num = subuumod(P->y, Q->y, p);
+    den = subuumod(P->x, Q->x, p);
   }
   lambda = divuumod(num, den, p);
-  num = subssmod(muluumod(lambda, lambda, p), addssmod(P->x, Q->x, p), p);
-  P->y = subssmod(muluumod(lambda, subssmod(Q->x, num, p), p), Q->y, p);
+  num = subuumod(muluumod(lambda, lambda, p), adduumod(P->x, Q->x, p), p);
+  P->y = subuumod(muluumod(lambda, subuumod(Q->x, num, p), p), Q->y, p);
   P->x = num; /* necessary in case P = Q: we need Q->x above */
 }
 
@@ -1895,11 +1895,12 @@ compare_multiples(multiple *a, multiple *b)
 /* assume e has good reduction at p. Should use Montgomery.
  * See apell1() */
 static GEN
-apell0(GEN e, long p)
+apell0(GEN e, ulong p)
 {
   sellpt f, fh, fg, ftest, F;
-  long pordmin,u,p1p,p2p,A,B,c4,c6,cp4;
-  long i, s, KRO, KROold, x, h, l, r, m;
+  ulong u, c4, c6, cp4, p1p, p2p, h;
+  long pordmin,A,B;
+  long i, s, KRO, KROold, x, l, r, m;
   pari_sp av;
   multiple *table;
 
@@ -1907,8 +1908,8 @@ apell0(GEN e, long p)
   table = NULL;
 
   av = avma;
-  c4 = itos( gmodgs(gdivgs((GEN)e[10],  -48), p) );
-  c6 = itos( gmodgs(gdivgs((GEN)e[11], -864), p) );
+  c4 = itou( gmodgs(gdivgs((GEN)e[10],  -48), (long)p) );
+  c6 = itou( gmodgs(gdivgs((GEN)e[11], -864), (long)p) );
   pordmin = (long)(1 + 4*sqrt((float)p));
   p1p = p+1;
   p2p = p1p << 1;
@@ -1919,7 +1920,7 @@ apell0(GEN e, long p)
     while (!KRO || KRO == KROold)
     {
       x++;
-      u = addssmod(c6, muluumod(x, c4+muluumod(x,x,p), p), p);
+      u = adduumod(c6, muluumod(x, c4 + muluumod(x,x,p), p), p);
       KRO = kross(u,p);
     }
     KROold = KRO;
@@ -2004,7 +2005,7 @@ apell(GEN e, GEN p)
     return stoi(s);
   }
   if (cmpis(p, 0x3fffffff) > 0) return apell1(e, p);
-  return apell0(e, itos(p));
+  return apell0(e, itou(p));
 }
 
 /* TEMPC is the largest prime whose square is less than HIGHBIT */
@@ -2052,7 +2053,7 @@ anell(GEN e, long n)
       }
     else /* good reduction */
     {
-      GEN ap = apell0(e,p);
+      GEN ap = apell0(e, (ulong)p);
 
       if (p < TEMPC)
       {
@@ -3141,7 +3142,7 @@ torsbound(GEN e)
     NEXT_PRIME_VIADIFF_CHECK(prime,p);
     if (smodis(D, prime))
     {
-      b = cgcd(b, prime+1 - itos(apell0(e,prime)));
+      b = cgcd(b, prime+1 - itos(apell0(e, (ulong)prime)));
       avma = av;
       if (b == 1) break;
       if (b == bold) m++; else { bold = b; m = 0; }

@@ -698,6 +698,8 @@ all_factor_bound(GEN x)
 }
 #endif
 
+typedef ulong *uGEN;
+
 /* Naive recombination of modular factors: combine up to maxK modular
  * factors, degree <= klim and divisible by hint
  *
@@ -710,10 +712,10 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
      long maxK, long klim,long hint)
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
-  long spa_b, spa_bs2, Sbound;
+  ulong spa_b, spa_bs2, Sbound;
   GEN lc, lcpol, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
-  GEN trace1   = cgetg(lfamod+1, t_VECSMALL);
-  GEN trace2   = cgetg(lfamod+1, t_VECSMALL);
+  uGEN trace1   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
+  uGEN trace2   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
   GEN degpol   = cgetg(lfamod+1, t_VECSMALL);
   GEN degsofar = cgetg(lfamod+1, t_VECSMALL);
@@ -748,11 +750,11 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
         T1 = modii(mulii(lc, T1), pa);
         T2 = modii(mulii(lc2,T2), pa);
       }
-      trace1[i] = itos(diviiround(T1, pb));
-      trace2[i] = itos(diviiround(T2, pb));
+      trace1[i] = itou(diviiround(T1, pb));
+      trace2[i] = itou(diviiround(T2, pb));
     }
-    spa_b   =   pa_b[2]; /* < 2^31 */
-    spa_bs2 = pa_bs2[2]; /* < 2^31 */
+    spa_b   = (ulong)  pa_b[2]; /* < 2^31 */
+    spa_bs2 = (ulong)pa_bs2[2]; /* < 2^31 */
   }
   degsofar[0] = 0; /* sentinel */
 
@@ -763,7 +765,7 @@ nextK:
   if (DEBUGLEVEL > 3)
     fprintferr("\n### K = %d, %Z combinations\n", K,binome(stoi(lfamod), K));
   setlg(ind, K+1); ind[1] = 1;
-  Sbound = ((K+1)>>1);
+  Sbound = (ulong) ((K+1)>>1);
   i = 1; curdeg = degpol[ind[1]];
   for(;;)
   { /* try all combinations of K factors */
@@ -776,22 +778,22 @@ nextK:
     {
       GEN y, q, list;
       pari_sp av;
-      long t;
+      ulong t;
 
       /* d - 1 test */
       for (t=trace1[ind[1]],i=2; i<=K; i++)
-        t = addssmod(t, trace1[ind[i]], spa_b);
-      if (t > spa_bs2) t -= spa_b;
-      if (labs(t) > Sbound)
+        t = adduumod(t, trace1[ind[i]], spa_b);
+      if (t > spa_bs2) t = spa_b - t;
+      if (t > Sbound)
       {
         if (DEBUGLEVEL>6) fprintferr(".");
         goto NEXT;
       }
       /* d - 2 test */
       for (t=trace2[ind[1]],i=2; i<=K; i++)
-        t = addssmod(t, trace2[ind[i]], spa_b);
-      if (t > spa_bs2) t -= spa_b;
-      if (labs(t) > Sbound)
+        t = adduumod(t, trace2[ind[i]], spa_b);
+      if (t > spa_bs2) t = spa_b - t;
+      if (t > Sbound)
       {
         if (DEBUGLEVEL>6) fprintferr("|");
         goto NEXT;
