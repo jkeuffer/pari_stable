@@ -112,6 +112,7 @@ BA 52- Oxxx/Makefile was not compatible with BSD make.
    55- nfsubfields had a different output format when using galoissubfieds
    56- polcoeff(1/x, -3) --> SEGV
    57- (-2/x)/(-1/x) --> -2/-1
+BA 58- [GP internals:] trap() had an invalid prototype [DI,DI]
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).

@@ -53,7 +53,7 @@ entree functions_gp[]={
 {"quit",0,(void*)gp_quit,11,"v"},
 {"read",0,(void*)read0,11,"D\"\",s,"},
 {"system",70,(void*)system0,11,"vs"},
-{"trap",0,(void*)trap0,11,"D\"\",r,DI,DI"},
+{"trap",0,(void*)trap0,11,"D\"\",r,DIDI"},
 {"whatnow",1,(void*)whatnow0,11,"vr"},
 {"write",99,(void*)write0,11,"vss*"},
 {"write1",99,(void*)write1,11,"vss*"},
