@@ -188,10 +188,9 @@ Householder_get_mu(GEN x, GEN L, GEN B, long k, GEN Q, long prec)
   j0 = j;
   for (   ; j<=k; j++)
     if (! incrementalQ(x, L, B, Q, j, prec)) return 0;
-  for (j=1; j<=k; j++)
+  for (j=1; j<k; j++)
   {
     m = (GEN)L[j]; Nx = (GEN)m[j]; /* should set m[j] = un; but need it later */
-    if (j == k) break;
     invNx = ginv(Nx);
     for (i=max(j0, j+1); i<=k; i++) m[i] = lmpmul(invNx, (GEN)m[i]);
   }
