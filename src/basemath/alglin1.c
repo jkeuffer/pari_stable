@@ -2531,7 +2531,7 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
         if (!piv) continue;
 
         if (piv == 1)
-          for (i=k+1; i<=n; i++) _u_Fp_add((GEN)x[i],t,j,p);
+          for (i=k+1; i<=n; i++) _u_Fp_add((ulong*)x[i],t,j,p);
         else if (OK_ulong)
           for (i=k+1; i<=n; i++) _u_Fp_addmul_OK((ulong*)x[i],t,j,piv,p);
         else
