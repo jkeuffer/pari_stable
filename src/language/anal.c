@@ -199,7 +199,9 @@ lisseq0(char *t, GEN (*f)(void))
   if (foreignExprHandler && *t == foreignExprSwitch)
     return (*foreignExprHandler)(t);
 
-  check_new_fun=NULL; skipping_fun_def=0;
+  redefine_fun = NULL;
+  check_new_fun = NULL;
+  skipping_fun_def = 0;
   mark.start = analyseur = t;
 
   br_status = br_NONE;
