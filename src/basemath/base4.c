@@ -1007,10 +1007,18 @@ idealmulspec(GEN nf, GEN x, GEN y)
 
   if (isnfscalar(alpha))
     return gmul(mppgcd(a, (GEN)alpha[1]),x);
+  if (typ(alpha) == t_MAT)
+  {
+    m = cgetg((N<<1)+1,t_MAT);
+    for (i=1; i<=N; i++) m[i] = lmul(alpha,(GEN)x[i]);
+  }
+  else
+  {
+    m = cgetg((N<<1)+1,t_MAT);
+    for (i=1; i<=N; i++) m[i] = (long)element_muli(nf,alpha,(GEN)x[i]);
+  }
   mod = mulii(a, gcoeff(x,1,1));
-  m = cgetg((N<<1)+1,t_MAT);
-  for (i=1; i<=N; i++) m[i]=(long)element_muli(nf,alpha,(GEN)x[i]);
-  for (i=1; i<=N; i++) m[i+N]=lmul(a,(GEN)x[i]);
+  for (i=1; i<=N; i++) m[i+N] = lmul(a,(GEN)x[i]);
   return hnfmodid(m,mod);
 }
 
@@ -1612,7 +1620,7 @@ idealnorm(GEN nf, GEN x)
  *
  * I^(-1) = { x \in K, Tr(x D^(-1) I) \in Z }, D different of K/Q
  *
- * nf[5][6] = d_K * D^(-1) is integral = d_K T^(-1), T = (Tr(wi wj))
+ * nf[5][6] = pp( D^(-1) ) = pp( HNF( T^(-1) ) ), T = (Tr(wi wj))
  * nf[5][7] = same in 2-elt form */
 static GEN
 hnfideal_inv(GEN nf, GEN I)
@@ -1625,8 +1633,8 @@ hnfideal_inv(GEN nf, GEN I)
   if (!signe(IZ)) err(talker, "cannot invert zero ideal");
   J = idealmulh(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
-  * d_K cancels while solving the linear equations. */
-  dual = gtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
+  * missing content cancels while solving the linear equation */
+  dual = gtrans_i( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
   dual = hnfmodid(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
   return gdiv(dual,IZ);

@@ -853,20 +853,6 @@ pol_to_monic(GEN pol, GEN *lead)
   return primitive_pol_to_monic(primpart(pol), lead);
 }
 
-/* Let T = (Tr(wi wj)), then T^(-1) Z^n = codifferent = coD/dcoD
- * NB: det(T) = dK, TI = dK T^(-1) integral */
-static GEN
-make_MDI(GEN nf, GEN TI, GEN *coD, GEN *dcoD)
-{
-  GEN c, MDI, dK = (GEN)nf[3];
-
-  TI = Q_primitive_part(TI, &c);
-  *dcoD = c? diviiexact(dK, c): dK;
-  *coD = hnfmodid(TI, *dcoD);
-  MDI = ideal_two_elt(nf, *coD);
-  return c? gmul(c, MDI): MDI;
-}
-
 /* assume lg(nf) > 3 && typ(nf) = container [hopefully a genuine nf] */
 long
 nf_get_r1(GEN nf)
@@ -1148,7 +1134,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 {
   GEN nf = cgetg(10,t_VEC);
   GEN x = T->x;
-  GEN invbas,Tr,D,TI,A,dA, mat = cgetg(8,t_VEC);
+  GEN invbas, Tr, D, TI, A, dA, MDI, mat = cgetg(8,t_VEC);
   nffp_t F;
   get_nf_fp_compo(T, &F, ro, prec);
 
@@ -1170,8 +1156,13 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
 
   Tr = get_Tr((GEN)nf[9], x, F.basden);
   TI = ZM_inv(Tr, T->dK); /* dK T^-1 */
-  mat[6] = (long)TI;
-  mat[7] = (long)make_MDI(nf,TI, &A, &dA); /* needed in idealinv below */
+  A = Q_primitive_part(TI, &dA);
+  mat[6] = (long)A; /* primitive part of codifferent, dA its denominator */
+  dA = dA? diviiexact(T->dK, dA): T->dK;
+  A = hnfmodid(A, dA);
+  MDI = ideal_two_elt(nf, A);
+  MDI[2] = (long)eltmul_get_table(nf, (GEN)MDI[2]);
+  mat[7] = (long)MDI;
   if (is_pm1(T->index))
     D = idealhermite_aux(nf, derivpol(x));
   else
