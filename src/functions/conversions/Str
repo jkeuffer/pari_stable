@@ -4,7 +4,5 @@ C-Name: Str
 Prototype: s*
 Help: Str({str}*): concatenates its (string) argument into a single string
 Description: 
- (gen, ?0):genstr:copy:parens	$genstr:1
- (gen, 1):genstr	strtoGENstr($str:1, 1)
- (gen, small):genstr	strtoGENstr($str:1, $2)
+ (gen):genstr:copy:parens	$genstr:1
 
