@@ -398,8 +398,8 @@ esac
 readline_enabledp="nil"
 if test "$optimization" != profiling; then
 # First, construct the PATHs
- case "$osname" in
-   cygwin*) if test "$cygtop" = /cygdrive/c; then
+  case "$osname" in
+    cygwin*) if test "$cygtop" = /cygdrive/c; then
 # cygnus for version 1.*
 	libpth="
 	    /usr/local/lib\
@@ -413,8 +413,8 @@ if test "$optimization" != profiling; then
  	    $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/lib\
         "
 	fi;;
-      os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
- 	*) libpth="\
+    os2) libpth=`echo $LIBRARY_PATH | sed 's/;/ /g' | sed 's,\\\\,/,g'`;;
+    *) libpth="\
  	/usr/local/lib\
  	/lib\
  	/usr/lib\
@@ -431,7 +431,7 @@ if test "$optimization" != profiling; then
  	/usr/shlib\
  	.\
      ";;
-     esac
+  esac
 
   tdir=$osname-$arch-X11$$
   mkdir $tdir; cp Imakefile $tdir; cd $tdir
