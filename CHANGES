@@ -54,6 +54,8 @@ IZ  2- remove all dependance on __OPTIMIZE__ for inlining [cf 2.0.14 F-24]
 
   Added
     1- mplog2() function --> faster mplog()
+    2- gcd for Gaussian integers
+    3- APRCL primality test [not yet available under GP]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.2 (released 10/01/2002):
