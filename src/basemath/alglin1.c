@@ -1448,7 +1448,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
   b = check_b(b,li, &iscol); av = avma;
   if (OK_ULONG(p))
   {
-    ulong pp=p[2];
+    ulong pp = (ulong)p[2];
     a = u_Fp_FpM(a, pp);
     b = u_Fp_FpM(b, pp);
     u = u_FpM_gauss_sp(a,b, pp);
@@ -1585,7 +1585,7 @@ FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
 static GEN
 u_FpM_Fp_mul_ip(GEN y, ulong x, ulong p)
 {
-  int i,j, m = lg(y[1]), l = lg(y);
+  long i, j, m = lg(y[1]), l = lg(y);
   if (HIGHWORD(x | p))
     for(j=1; j<l; j++)
       for(i=1; i<m; i++)
@@ -2400,14 +2400,14 @@ indexrank0(GEN x, GEN p, int vecsmall)
   n = lg(x)-1; r = n - r;
 
   avma=av; res=cgetg(3,t_VEC);
-  p1=cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[1]=(long)p1;
-  p2=cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[2]=(long)p2;
+  p1 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[1] = (long)p1;
+  p2 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[2] = (long)p2;
   if (d)
   {
     for (i=0,j=1; j<=n; j++)
-      if (d[j]) { i++; p1[i]=d[j]; p2[i]=j; }
+      if (d[j]) { i++; p1[i] = d[j]; p2[i] = j; }
     free(d);
-    qsort(p1+1,r,sizeof(long),(QSCOMP)pari_compare_long);
+    qsort(p1+1, (size_t)r, sizeof(long), (QSCOMP)pari_compare_long);
   }
   if (!vecsmall)
     for (i=1;i<=r;i++) { p1[i]=lstoi(p1[i]); p2[i]=lstoi(p2[i]); }
@@ -2535,7 +2535,7 @@ u_FpM_ker_sp(GEN x, ulong p, long deplin)
     {
       if (deplin) {
         c = cgetg(n+1, t_VECSMALL);
-        for (i=1; i<k; i++) c[i] = ucoeff(x,d[i],k) % p;
+        for (i=1; i<k; i++) c[i] = coeff(x,d[i],k) % p;
         c[k] = 1; for (i=k+1; i<=n; i++) c[i] = 0;
         return c;
       }
@@ -2594,7 +2594,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   n=lg(x)-1; if (!n) return cgetg(1,t_MAT);
   if (OK_ULONG(p))
   {
-    ulong pp = p[2];
+    ulong pp = (ulong)p[2];
     y = u_Fp_FpM(x, pp);
     y = u_FpM_ker_sp(y, pp, deplin);
     if (!y) return y;

@@ -83,7 +83,7 @@ caractducos(GEN p, GEN x, int v)
 
 /* characteristic pol. Easy cases. Return NULL in case it's not so easy. */
 static GEN
-easychar(GEN x, int v, GEN *py)
+easychar(GEN x, long v, GEN *py)
 {
   pari_sp av;
   long lx;
@@ -867,7 +867,7 @@ jacobi(GEN a, long prec)
   }
   av1 = avma;
 
-  e2 = -HIGHEXPOBIT; p = q = 1;
+  e2 = -(long)HIGHEXPOBIT; p = q = 1;
   c = cgetg(l,t_MAT);
   for (j=1; j<l; j++)
   {
@@ -1471,7 +1471,7 @@ hnf_special(GEN x, long remove)
 static int
 count(long **mat, long row, long len, long *firstnonzero)
 {
-  int j, n=0;
+  long j, n = 0;
 
   for (j=1; j<=len; j++)
   {
