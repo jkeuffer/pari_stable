@@ -30,7 +30,6 @@ Arch / proc:         OS:             Configure:     sta:    dyn:  GP version:
 DEC/Alpha
 alpha21264   ???MHz  OSF1-V4.0       cc  X11 dl2    3169    3434  2.0.16(20)JC
 alpha21164a  600MHz  Linux-2.2.12   gcc  X11 dl2    4440    ????  2.0.17(22)IS
-
 alpha21164   600MHz  OSF1-V4.0D      cc  X11 dl2    3996    4384  2.0.10    LG
 alpha21164   533Mhz  Linux 2.0.34    gcc X11 dl2   (4294)  (4385) 2.0.12    JC
 alpha21164   500Mhz  Linux-2.0.35    gcc X11 dl2    5327    5493  2.0.17(13)
@@ -77,6 +76,7 @@ AMD K6-2     350Mhz  Linux-2.0.36    gcc X11 dl2    5154    4850  2.0.17
 AMD K6       266MHz  Linux-2.2.5    pgcc X11 dl2    5861    6001  2.0.16(17)IS
 AMD K6       233Mhz  Linux-2.0.35    gcc X11 dl2   (6898)  (7152) 2.0.11    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc X11 dl2   13190   13729  2.0.15    AP
+PentiumIII   500MHz  Linux-2.2.12   egcs X11 dl2    3154    3176  2.0.18    HC
 PentiumII    350MHz  Linux-2.2.5     gcc X11 dl2    4312    4488  2.0.16    HS
 PentiumII    350Mhz  Linux 2.0.36   pgcc X11 dl2   (3310)  (3340) 2.0.12(11)PE
 PentiumII    350Mhz  Linux 2.0.36   egcs X11 dl2   (3352)  (3402) 2.0.12(11)PE
@@ -214,7 +214,9 @@ Contributors:
   DE = Denis Excoffier
   EK = Emmanuel Kowalski
   GN = Gerhard Niklasch
+  HC = Henri Cohen
   HG = Herbert Gangl
+  HS = Hans Schaechl
   IS = Igor Schein
   JC = John Cremona
   KK = Kimitoshi Kono
