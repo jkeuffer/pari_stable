@@ -71,6 +71,8 @@ MD 31- oo loop in ellap [uninitialized array length in apell1]
    33- resmod2n [called from powmodulo] could return unnormalized integers
    34- not enough GC in nfinit for huge degrees [get_mul_table]
    35- intformal(1/2/t^2) --> apparent oo loop
+   36- polredabs(degree 1 polynomial) --> x  [could be very slow]
+   37- polredabs() could use a basis which was not LLL reduced
 
   Changed
     1- removed useless parameter prec in many bnr* and rnf* functions
@@ -84,6 +86,9 @@ BA  8- factorback, chinese, lcm and gcd now accept a single vector
     9- Use I \cap Z instead of NI in hnfideal_inv
    10- improved issquare(t_INTMOD)
    11- improved subresultant routines (new function pseudodiv)
+   12- command-line options to Configure (installation directories)
+   13- rnfequation: use modular (bivariate) resultant
+   14- polynomial gcd (srgcd): uses modular algo (modulargcd,nfgcd) if possible
 
   Added
 BA  1- function pith() [= pi(x), naïve implementation]

@@ -115,8 +115,9 @@ Pentium      166MHz  FreeBSD-2.2.5   gcc X11 dl2  (15159) (14481) 2.0.11
 Pentium      166MHz  Solaris-2.6     gcc X11 dl2  (13550) (13746) 2.0.12    GN
 Pentium      133MHz  Linux-1.2.8     gcc X11   -  (15448)      -  2.0.12(5) GN
 Pentium      133MHz  FreeBSD-2.2.5   gcc X11 dl2   15231   17259  2.0.10    KK
-486dx2        50MHz  Linux-2.0.33    gcc X11 dl2  213710  216224  2.0.9     LG
-486dx         50MHz  DOS-5 + EMX     gcc   -   -   77126       -  2.0.20
+486DX (Cyrix) 66MHz  Linux 2.2.18    gcc   - dl2   59078   60600  2.1.1     CC
+486DX2        50MHz  Linux-2.0.33    gcc X11 dl2  213710  216224  2.0.9     LG
+486DX         50MHz  DOS-5 + EMX     gcc   -   -   77126       -  2.0.20
 *i860         40MHz  Concentrix      cc  X11   -  147989       -  2.0.9     LG
 ------------------------------------------------------------------------------
 Motorola
@@ -261,6 +262,7 @@ Contributors:
   AP = Andreas Piotrowski
   BA = Bill Allombert
   BN = Balasubramanian Narasimhan
+  CC = Christian Cornelssen
   CL = Christian Labesse
   DE = Denis Excoffier
   DP = David Purdy
