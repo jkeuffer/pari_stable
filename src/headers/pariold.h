@@ -1,4 +1,6 @@
 /* For compatibility with 1.x.x */
+#define un   one
+#define deux two
 #define gun   gone
 #define gdeux gtwo
 #define err pari_err /* move to e.g paritr.h ? */
