@@ -15,7 +15,6 @@ case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
 # File lists
 kernel="kernel mp"
 inline="mpinl"
-khlist="pariinl"
 
 graph="plotport"
 gp="gp gp_init gp_rl highlvl whatnow"
@@ -40,10 +39,7 @@ case "$osname" in
 esac
 
 hlist='pari paritype paricast paricom parierr parigen paristio parisys pariport'
-HEADERS=''
-for f in $khlist; do
-  HEADERS="$HEADERS $f.h";
-done
+HEADERS=pariinl.h
 for f in $hlist; do
   HEADERS="$HEADERS $src/headers/$f.h";
 done
@@ -378,11 +374,10 @@ install: install-lib-$dft install-include install-bin install-man install-misc i
 
 install-include:
 	-mkdir -p \$(INCLUDEDIR)
-	\$(INSTALL_DATA) paricfg.h                 \$(INCLUDEDIR)
-	-for i in $khlist; do \\
-	   \$(INSTALL_DATA) \$\$i.h                \$(INCLUDEDIR); done
+	\$(INSTALL_DATA) paricfg.h                \$(INCLUDEDIR)
+        \$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)
 	-for i in $hlist; do \\
-	   \$(INSTALL_DATA) $src/headers/\$\$i.h   \$(INCLUDEDIR); done
+	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR); done
 	-\$(RM) \$(INCLUDEDIR)/genpari.h
 	-\$(LN) pari.h \$(INCLUDEDIR)/genpari.h
 

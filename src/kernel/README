@@ -2,9 +2,7 @@ There is a different directory for each value of "$asmarch". In each of them,
 lies a file Makefile.SH that will be included in the general Makefile. It
 contains rules for creating headers and object files in the build directory.
 
-The list of
-  headers files is given by "$khlist" (default: "pariinl")
-  object  files is given by "$kernel" (default: "kernel mp mpinl")
+The list of object files is given by "$kernel" (default: "kernel mp mpinl")
 
 *******************************************************************
 The "level 0 kernel" symbols are :
