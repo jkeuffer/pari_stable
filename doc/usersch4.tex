@@ -1478,7 +1478,8 @@ which reads a character string of arbitrary length from the stream \kbd{file}
 (up to the first newline character), applies \kbd{flisexpr} to it, and
 returns the resulting \kbd{GEN}. This way, you won't have to worry about
 allocating buffers to hold the string. To interactively input an expression,
-use \kbd{lisGEN(stdin)}.
+use \kbd{lisGEN(stdin)}. This function returns \kbd{NULL} if \kbd{EOF} is
+encountered before a complete expression could be read.
 
 Once in a while, it may be necessary to evaluate a GP expression sequence
 involving a call to a function you have defined in~C. This is easy using
