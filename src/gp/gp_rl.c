@@ -103,7 +103,7 @@ change_state(char *msg, int *opt, int count)
   }
   *opt = c;
   SAVE_PROMPT();
-  rl_message("%s: %s.", (long)msg, (long)(c? "on": "off"));
+  rl_message("%s: %s.", msg, c? "on": "off");
   c = rl_read_key();
   RESTORE_PROMPT();
   rl_clear_message();
@@ -460,7 +460,7 @@ rl_print_aide(char *s, int flag)
 
   rl_point = 0; rl_end = 0; pari_outfile = rl_outstream;
   SAVE_PROMPT();
-  rl_message("",0,0);
+  rl_message("");
   aide(s, flag);
   RESTORE_PROMPT();
   rl_point = p; rl_end = e; pari_outfile = save;
