@@ -2923,7 +2923,8 @@ issimplefield(GEN x)
     case t_COMPLEX:
       return issimplefield((GEN)x[1]) || issimplefield((GEN)x[2]);
     case t_POLMOD: 
-      return issimplepol((GEN)x[1]) || issimplepol((GEN)x[2]);
+      return (typ(x[2]) == t_POL && issimplepol((GEN)x[2]))
+           || issimplefield((GEN)x[2]) || issimplepol((GEN)x[1]);
   }
   return 0;
 }
