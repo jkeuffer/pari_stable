@@ -2219,168 +2219,45 @@ weber0(GEN x, long flag,long prec)
   return NULL; /* not reached */
 }
 
-/* assume x > 0 */
-static GEN
-agm1r_abs(GEN x)
-{
-  long l = lg(x), L = 5-bit_accuracy(l);
-  GEN a1, b1, y = cgetr(l);
-  pari_sp av = avma;
-
-  a1 = addrr(realun(l), x); setexpo(a1, expo(a1)-1);
-  b1 = sqrtr_abs(x);
-  while (expo(subrr(b1,a1)) - expo(b1) >= L)
-  {
-    GEN a = a1;
-    a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
-    b1 = sqrtr_abs(mulrr(a,b1));
-  }
-  affrr(a1,y); avma = av; return y;
-}
-
-static GEN
-agm1cx(GEN x, long prec)
-{
-  GEN a1, b1;
-  pari_sp av = avma;
-  long l = precision(x); if (!l) l = prec;
-
-  a1 = x; b1 = gun; l = 5-bit_accuracy(l);
-  do
-  {
-    GEN a = a1;
-    a1 = gmul2n(gadd(a,b1),-1);
-    b1 = gsqrt(gmul(a,b1), prec);
-  }
-  while (gexpo(gsub(b1,a1)) - gexpo(b1) >= l);
-  return gerepilecopy(av,a1);
-}
-
-static GEN
-sagm(GEN x, long prec)
-{
-  GEN p1, a, a1, b1, y;
-  long l, l2, ep;
-  pari_sp av;
-
-  if (gcmp0(x)) return gcopy(x);
-  switch(typ(x))
-  {
-    case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
-
-    case t_COMPLEX:
-      if (gcmp0((GEN)x[2]) && gsigne((GEN)x[1]) > 0)
-        return transc(sagm, (GEN)x[1], prec);
-      return agm1cx(x, prec);
-
-    case t_PADIC:
-      av = avma;
-      a1 = x; b1 = gun; l = precp(x);
-      do
-      {
-	a = a1;
-	a1 = gmul2n(gadd(a,b1),-1);
-        b1 = gsqrt(gmul(a,b1),0);
-	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
-	if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep = valp(p1)-valp(b1); }
-      }
-      while (ep<l && !gcmp0(p1));
-      return gerepilecopy(av,a1);
-
-    default:
-      av = avma; if (!(y = _toser(x))) break;
-      a1 = y; b1 = gun; l = lg(y)-2;
-      l2 = 5-bit_accuracy(prec);
-      do
-      {
-	a = a1;
-	a1 = gmul2n(gadd(a,b1),-1);
-        b1 = gsqrt(gmul(a,b1),prec);
-	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
-      }
-      while (ep<l && !gcmp0(p1)
-                  && (!isinexactreal(p1) || gexpo(p1) - gexpo(b1) >= l2));
-      return gerepilecopy(av,a1);
-  }
-  return transc(sagm,x,prec);
-}
-
-GEN
-agm(GEN x, GEN y, long prec)
-{
-  long ty = typ(y);
-  pari_sp av;
-
-  if (is_matvec_t(ty))
-  {
-    ty = typ(x);
-    if (is_matvec_t(ty)) err(talker,"agm of two vector/matrices");
-    swap(x, y);
-  }
-  if (gcmp0(y)) return gcopy(y);
-  av = avma; 
-  return gerepileupto(av, gmul(y, sagm(gdiv(x,y), prec)));
-}
-
-GEN
-logagmr_abs(GEN q)
-{
-  long prec = lg(q), lim, e = expo(q);
-  GEN z, y, Q;
-  pari_sp av;
-
-  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): realzero(prec);
-  z = cgetr(prec); av = avma; prec++;
-  lim = bit_accuracy(prec) >> 1;
-  Q = cgetr(prec); affrr(q, Q);
-  Q[1] = evalsigne(1) | evalexpo(lim);
-
-  /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
-  y = divrr(mppi(prec), agm1r_abs( divsr(4, Q) ));
-  setexpo(y, expo(y)-1);
-  y = addrr(y, mulsr(e - lim, mplog2(prec)));
-  affrr(y, z); return z;
-}
-
 GEN
 theta(GEN q, GEN z, long prec)
 {
   long l, n;
-  pari_sp av=avma, tetpil;
-  GEN ps,qn,qnold,y,zy,lq,ps2,p1,k,zold;
+  pari_sp av = avma;
+  GEN ps, qn, y, zy, ps2, k, zold;
 
-  if (!is_scalar_t(typ(q)) || !is_scalar_t(typ(z)))
-    err(impl,"theta for non-scalar types");
-
-  l=precision(q); if (l) prec=l;
-  p1=realun(prec); z=gmul(p1,z);
-  if (!l) q=gmul(p1,q);
-  if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
-  zy = imag_i(z);
+  l = precision(q);
+  n = precision(z); if (n && n < l) l = n;
+  if (l) prec = l;
+  z = gtofp(z, prec);
+  q = gtofp(q, prec); if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
   zold = NULL; /* gcc -Wall */
-  if (gcmp0(zy)) k=gzero;
+  zy = imag_i(z);
+  if (gcmp0(zy)) k = gzero;
   else
   {
-    lq=glog(q,prec); k = ground(gdiv(zy, real_i(lq)));
-    if (!gcmp0(k)) { zold=z; z=gadd(z,gdiv(gmul(lq,k),gi)); }
+    GEN lq = glog(q,prec); k = roundr(divrr(zy, real_i(lq)));
+    if (signe(k)) { zold = z; z = gsub(z, gmulbyi(gmul(lq,k))); }
   }
-  y=gsin(z,prec); n=0; qn=gun;
-  ps2=gsqr(q); ps=gneg_i(ps2);
-  do
+  qn = gun;
+  ps2 = gsqr(q);
+  ps = gneg_i(ps2);
+  y = gsin(z,prec);
+  for (n = 1;; n++)
   {
-    n++; p1=gsin(gmulsg(2*n+1,z),prec);
-    qnold=qn; qn=gmul(qn,ps);
-    ps=gmul(ps,ps2); p1=gmul(p1,qn); y=gadd(y,p1);
+    GEN t;
+    qn = gmul(qn,ps);
+    ps = gmul(ps,ps2);
+    t = gmul(qn, gsin(gmulsg(2*n+1,z),prec)); y = gadd(y, t);
+    if (gexpo(t) < -bit_accuracy(prec)) break;
   }
-  while (gexpo(qnold) >= -bit_accuracy(prec));
   if (signe(k))
   {
-    y=gmul(y,gmul(gpow(q,gsqr(k),prec),
-                  gexp(gmul2n(gmul(gmul(gi,zold),k),1),prec)));
-    if (mod2(k)) y=gneg_i(y);
+    y = gmul(y, gmul(powgi(q,sqri(k)),
+                     gexp(gmul(gmulbyi(zold),shifti(k,1)), prec)));
+    if (mod2(k)) y = gneg_i(y);
   }
-  p1=gmul2n(gsqrt(gsqrt(q,prec),prec),1); tetpil=avma;
-  return gerepile(av,tetpil,gmul(p1,y));
+  return gerepileupto(av, gmul(y, gmul2n(gsqrt(gsqrt(q,prec),prec),1)));
 }
 
 GEN
@@ -2388,23 +2265,60 @@ thetanullk(GEN q, long k, long prec)
 {
   long l, n;
   pari_sp av = avma;
-  GEN p1,ps,qn,y,ps2;
+  GEN p1, ps, qn, y, ps2;
 
   l = precision(q);
-  if (!l) { l = prec; q = gmul(q,realun(l)); }
-  if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
+  if (!l) prec = l;
+  q = gtofp(q, prec); if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
 
   if (!(k&1)) { avma = av; return gzero; }
-  ps2 = gsqr(q); ps = gneg_i(ps2);
-  qn = gun; y = gun; n = 0;
-  do
+  qn = gun;
+  ps2 = gsqr(q);
+  ps = gneg_i(ps2);
+  y = gun;
+  for (n = 1;; n++)
   {
-    n++; p1 = gpowgs(stoi(n+n+1), k);
+    GEN t;
     qn = gmul(qn,ps);
-    ps = gmul(ps,ps2); p1 = gmul(p1,qn); y = gadd(y,p1);
+    ps = gmul(ps,ps2);
+    t = gmul(qn, gpowgs(stoi(2*n+1), k)); y = gadd(y, t);
+    if (gexpo(t) < -bit_accuracy(prec)) break;
   }
-  while (gexpo(p1) >= -bit_accuracy(l));
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
-  if (k&2) p1 = gneg_i(p1);
-  return gerepileupto(av, gmul(p1,y));
+  if (k&2) y = gneg_i(y);
+  return gerepileupto(av, gmul(p1, y));
+}
+
+/* [d^i theta/dz^i(q, 0), i = 1, 3, .., 2*k - 1] */
+GEN
+vecthetanullk(GEN q, long k, long prec)
+{
+  long i, l, n;
+  pari_sp av = avma;
+  GEN p1, ps, qn, y, ps2;
+
+  l = precision(q);
+  if (!l) prec = l;
+  q = gtofp(q, prec); if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
+
+  qn = gun;
+  ps2 = gsqr(q);
+  ps = gneg_i(ps2);
+  y = cgetg(k+1, t_VEC); for (i = 1; i <= k; i++) y[i] = un;
+  for (n = 1;; n++)
+  {
+    ulong N = 2*n + 1;
+    GEN t = NULL/*-Wall*/, P = utoi(N), N2 = sqru(N);
+    qn = gmul(qn,ps);
+    ps = gmul(ps,ps2);
+    for (i = 1; i <= k; i++)
+    {
+      t = gmul(qn, P); y[i] = ladd((GEN)y[i], t);
+      P = mulii(P, N2);
+    }
+    if (gexpo(t) < -bit_accuracy(prec)) break;
+  }
+  p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);
+  for (i = 2; i <= k; i+=2) y[i] = (long)gneg_i((GEN)y[i]);
+  return gerepileupto(av, gmul(p1, y));
 }

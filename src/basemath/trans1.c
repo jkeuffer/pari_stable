@@ -15,7 +15,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /********************************************************************/
 /**                                                                **/
-/**                   TRANSCENDENTAL FONCTIONS                     **/
+/**                   TRANSCENDENTAL FUNCTIONS                     **/
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
@@ -32,10 +32,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /********************************************************************/
 /**                                                                **/
-/**                        FONCTION PI                             **/
+/**                               PI                               **/
 /**                                                                **/
 /********************************************************************/
-
 /* Ramanujan's formula:
  *                         ----
  *  53360 (640320)^(1/2)   \    (6n)! (545140134 n + 13591409)
@@ -44,17 +43,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *                         n>=0
  */
 void
-constpi(long prec)
+constpiold(long prec)
 {
+  const long k1 = 545140134, k2 = 13591409, k3 = 640320;
+  const double alpha2 = 47.11041314/BITS_IN_LONG; /* 3log(k3/12) / log(2^BIL) */
   GEN p1,p2,p3,tmppi;
   long l, n, n1;
   pari_sp av1, av2;
   double alpha;
-
-#define k1  545140134
-#define k2  13591409
-#define k3  640320
-#define alpha2 (1.4722004/(BYTES_IN_LONG/4))  /* 3*log(k3/12) / log(2^BIL) */
 
   if (gpi && lg(gpi) >= prec) return;
 
@@ -62,7 +58,6 @@ constpi(long prec)
   *tmppi = evaltyp(t_REAL) | evallg(prec);
 
   prec++;
-
   n = (long)(1 + (prec-2)/alpha2);
   n1 = 6*n - 1;
   p2 = addsi(k2, mulss(n,k1));
@@ -97,6 +92,42 @@ constpi(long prec)
   if (gpi) gunclone(gpi);
   avma = av1;  gpi = tmppi;
 }
+/* Gauss - Brent-Salamin AGM iteration */
+void
+constpi(long prec)
+{
+  GEN A, B, C, tmppi;
+  long i, n;
+  pari_sp av, av2;
+
+  if (gpi && lg(gpi) >= prec) return;
+
+  av = avma; tmppi = newbloc(prec);
+  *tmppi = evaltyp(t_REAL) | evallg(prec);
+
+  /* 0.10... ~ log(2) / log( (2*Pi^4) / (Pi - (1+1/sqrt(2))^2) ) */
+  n = ceil( log2( bit_accuracy_mul(prec, 0.10263977) ) );
+  if (n < 1) n = 1;
+  prec++;
+
+  A = realun(prec);
+  B = sqrtr_abs(real2n(1,prec)); setexpo(B, -1); /* = 1/sqrt(2) */
+  C = real2n(-2, prec); av2 = avma;
+  for (i = 0; i < n; i++)
+  {
+    GEN y = A, a,b;
+    a = addrr(A,B); setexpo(a, expo(a)-1);
+    b = sqrtr_abs( mulrr(y, B) );
+    y = gsqr(subrr(a,y)); setexpo(y, expo(y) + i);
+    affrr(subrr(C, y), C);
+    affrr(a, A);
+    affrr(b, B); avma = av2;
+  }
+  setexpo(C, expo(C)+2);
+  affrr(divrr(gsqr(addrr(A,B)), C), tmppi);
+  if (gpi) gunclone(gpi);
+  avma = av;  gpi = tmppi;
+}
 
 GEN
 mppi(long prec)
@@ -128,7 +159,7 @@ PiI2(long prec) { return PiI2n(1, prec); }
 
 /********************************************************************/
 /**                                                                **/
-/**                      FONCTION EULER                            **/
+/**                       EULER CONSTANT                           **/
 /**                                                                **/
 /********************************************************************/
 
@@ -929,7 +960,7 @@ gsqrt(GEN x, long prec)
 }
 /********************************************************************/
 /**                                                                **/
-/**                    FONCTION RACINE N-IEME                      **/
+/**                          N-th ROOT                             **/
 /**                                                                **/
 /********************************************************************/
 /* exp(2Ipi/n), assume n positive t_INT */
@@ -1136,7 +1167,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 
 /********************************************************************/
 /**                                                                **/
-/**                    FONCTION EXPONENTIELLE-1                    **/
+/**                             EXP(X) - 1                         **/
 /**                                                                **/
 /********************************************************************/
 #ifdef LONG_IS_64BIT
@@ -1211,7 +1242,7 @@ mpexp1(GEN x)
 
 /********************************************************************/
 /**                                                                **/
-/**                   FONCTION EXPONENTIELLE                       **/
+/**                             EXP(X)                             **/
 /**                                                                **/
 /********************************************************************/
 
@@ -1333,31 +1364,132 @@ gexp(GEN x, long prec)
   }
   return transc(gexp,x,prec);
 }
+
 /********************************************************************/
 /**                                                                **/
-/**                      FONCTION LOGARITHME                       **/
+/**                           AGM(X, Y)                            **/
 /**                                                                **/
 /********************************************************************/
-/* 2 * atanh(1/3) */
-GEN
-constlog2(long prec)
+/* assume x > 0 */
+static GEN
+agm1r_abs(GEN x)
 {
-  static GEN glog2 = NULL;
+  long l = lg(x), L = 5-bit_accuracy(l);
+  GEN a1, b1, y = cgetr(l);
+  pari_sp av = avma;
+
+  a1 = addrr(realun(l), x); setexpo(a1, expo(a1)-1);
+  b1 = sqrtr_abs(x);
+  while (expo(subrr(b1,a1)) - expo(b1) >= L)
+  {
+    GEN a = a1;
+    a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
+    b1 = sqrtr_abs(mulrr(a,b1));
+  }
+  affrr(a1,y); avma = av; return y;
+}
+
+static GEN
+agm1cx(GEN x, long prec)
+{
+  GEN a1, b1;
+  pari_sp av = avma;
+  long l = precision(x); if (!l) l = prec;
+
+  a1 = x; b1 = gun; l = 5-bit_accuracy(l);
+  do
+  {
+    GEN a = a1;
+    a1 = gmul2n(gadd(a,b1),-1);
+    b1 = gsqrt(gmul(a,b1), prec);
+  }
+  while (gexpo(gsub(b1,a1)) - gexpo(b1) >= l);
+  return gerepilecopy(av,a1);
+}
+
+/* agm(1,x) */
+static GEN
+agm1(GEN x, long prec)
+{
+  GEN p1, a, a1, b1, y;
+  long l, l2, ep;
+  pari_sp av;
+
+  if (gcmp0(x)) return gcopy(x);
+  switch(typ(x))
+  {
+    case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
+
+    case t_COMPLEX:
+      if (gcmp0((GEN)x[2]) && gsigne((GEN)x[1]) > 0)
+        return agm1((GEN)x[1], prec);
+      return agm1cx(x, prec);
+
+    case t_PADIC:
+      av = avma;
+      a1 = x; b1 = gun; l = precp(x);
+      do
+      {
+	a = a1;
+	a1 = gmul2n(gadd(a,b1),-1);
+        b1 = padic_sqrt(gmul(a,b1));
+	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
+	if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep=valp(p1)-valp(b1); }
+      }
+      while (ep<l && !gcmp0(p1));
+      return gerepilecopy(av,a1);
+
+    default:
+      av = avma; if (!(y = _toser(x))) break;
+      a1 = y; b1 = gun; l = lg(y)-2;
+      l2 = 5-bit_accuracy(prec);
+      do
+      {
+	a = a1;
+	a1 = gmul2n(gadd(a,b1),-1);
+        b1 = ser_powfrac(gmul(a,b1), ghalf, prec);
+	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
+      }
+      while (ep<l && !gcmp0(p1)
+                  && (!isinexactreal(p1) || gexpo(p1) - gexpo(b1) >= l2));
+      return gerepilecopy(av,a1);
+  }
+  return transc(agm1,x,prec);
+}
+
+GEN
+agm(GEN x, GEN y, long prec)
+{
+  long ty = typ(y);
+  pari_sp av;
+
+  if (is_matvec_t(ty))
+  {
+    ty = typ(x);
+    if (is_matvec_t(ty)) err(talker,"agm of two vector/matrices");
+    swap(x, y);
+  }
+  if (gcmp0(y)) return gcopy(y);
+  av = avma;
+  return gerepileupto(av, gmul(y, agm1(gdiv(x,y), prec)));
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                             LOG(X)                             **/
+/**                                                                **/
+/********************************************************************/
+/* 2 * atanh(1/3), slower than AGM, even at 1 word */
+GEN
+log2old(long prec)
+{
   const long _3 = 3, _9 = _3*_3;
-  pari_sp av0, av;
-  long k, l, G;
-  GEN s, u, S, U, tmplog2;
-
-  if (glog2 && lg(glog2) >= prec) return glog2;
-
-  tmplog2 = newbloc(prec);
-  *tmplog2 = evaltyp(t_REAL) | evallg(prec);
-  av0 = avma;
-  l = prec+1; G = bit_accuracy(l+1);
+  pari_sp av, av0 = avma;
+  long k, l = prec+1, G = bit_accuracy(l+1);
+  GEN s, u, S, U, z = cgetr(prec);
 
   s = S = divrs(realun(l), _3);
-  u = U = mpcopy(s);
-  av = avma;
+  u = U = mpcopy(s); av = avma;
   for (k = 3; ; k += 2)
   {
     u = divrs(u, _9);
@@ -1369,9 +1501,29 @@ constlog2(long prec)
     }
     s = addrr(s, divrs(u,k));
   }
-  setexpo(s, -1); affrr(s, tmplog2);
+  setexpo(s, -1); affrr(s, z);
+  avma = av0; return z;
+}
+/* cf logagmr_abs(). Compute Pi/2agm(1, 4/2^n) ~ log(2^n) = n log(2) */
+GEN
+constlog2(long prec)
+{
+  static GEN glog2 = NULL;
+  pari_sp av;
+  long l, n;
+  GEN y, tmplog2;
+
+  if (glog2 && lg(glog2) >= prec) return glog2;
+
+  tmplog2 = newbloc(prec);
+  *tmplog2 = evaltyp(t_REAL) | evallg(prec);
+  av = avma;
+  n = bit_accuracy(prec) >> 1;
+  l = prec+1;
+  y = divrr(Pi2n(-1, l), agm1r_abs( real2n(2 - n, l) ));
+  affrr(divrs(y,n), tmplog2);
   if (glog2) gunclone(glog2);
-  glog2 = tmplog2; avma = av0; return glog2;
+  glog2 = tmplog2; avma = av; return glog2;
 }
 
 GEN
@@ -1448,6 +1600,25 @@ logr_abs(GEN X)
 }
 
 GEN
+logagmr_abs(GEN q)
+{
+  long prec = lg(q), lim, e = expo(q);
+  GEN z, y, Q;
+  pari_sp av;
+
+  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): realzero(prec);
+  z = cgetr(prec); av = avma; prec++;
+  lim = bit_accuracy(prec) >> 1;
+  Q = cgetr(prec); affrr(q, Q);
+  Q[1] = evalsigne(1) | evalexpo(lim);
+
+  /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^(e-lim) */
+  y = divrr(Pi2n(-1, prec), agm1r_abs( divsr(4, Q) ));
+  y = addrr(y, mulsr(e - lim, mplog2(prec)));
+  affrr(y, z); return z;
+}
+
+GEN
 mplog(GEN x)
 {
   if (signe(x)<=0) err(talker,"non positive argument in mplog");
@@ -1465,8 +1636,7 @@ teich(GEN x)
   if (!signe(x[4])) return gcopy(x);
   p = (GEN)x[2];
   q = (GEN)x[3];
-  z = (GEN)x[4];
-  y = cgetp(x); av = avma;
+  z = (GEN)x[4]; y = cgetp(x); av = avma;
   if (egalii(p, gdeux))
     z = (mod4(z) & 2)? addsi(-1,q): gun;
   else
@@ -1944,10 +2114,9 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 
 /********************************************************************/
 /**                                                                **/
-/**                FONCTIONS TANGENTE ET COTANGENTE                **/
+/**                     TANGENT and COTANGENT                      **/
 /**                                                                **/
 /********************************************************************/
-
 static GEN
 mptan(GEN x)
 {

@@ -1805,6 +1805,7 @@ GEN     theta(GEN q, GEN z, long prec);
 GEN     thetanullk(GEN q, long k, long prec);
 GEN     trueeta(GEN x, long prec);
 GEN     veceint1(GEN nmax, GEN C, long prec);
+GEN     vecthetanullk(GEN q, long k, long prec);
 GEN     weber0(GEN x, long flag,long prec);
 GEN     wf(GEN x, long prec);
 GEN     wf2(GEN x, long prec);
