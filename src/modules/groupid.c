@@ -404,3 +404,45 @@ group_ident(GEN G, GEN S)
   if (!idx) err(impl,"galoisindex for groups of order >95");
   return idx;
 }
+
+long
+group_ident_trans(GEN G, GEN S)
+{
+  int tab[]={
+        4, 1, 2, -1, 
+        6, 2, 1, -1, 
+        8, 1, 2, 4, 5, 3, -1, 
+        9, 1, 2, -1, 
+        10, 2, 1, -1,
+        12, 5, 1, 4, 3, 2, -1, 
+        14, 2, 1, -1, 
+        15, 1, -1, 
+        16, 1, 4, 10, 8, 5, 6, 13, 12, 14, 2, 9, 7, 11, 3, -1, 
+        18, 5, 1, 3, 4, 2, -1, 
+        20, 2, 1, 5, 4, 3, -1,
+        21, 2, 1, -1, 
+        22, 2, 1, -1, 
+        24, 8, 1, 7, 5, 12, 13, 6, 14, 2, 15, 4, 10, 9, 11, 3, -1, 
+        25, 1, 2, -1, 
+        26, 2, 1, -1, 
+        27, 1, 2, 3, 5, 4, -1, 
+        28, 3, 1, 4, 2, -1, 
+        30, 2, 4, 3, 1, -1,
+        -1};
+  long n=group_order(G);
+  long s;
+  int *t;
+  if ( n == 1 ) return 1;
+  if ( n > 30 ) 
+    err(talker,
+        "Classification of transitive groups of order > 30 is not known");
+  if (isprime(stoi(n))) return 1;
+  s=group_ident(G,S);
+  for(t=tab;*t>=0;t++)
+  {
+    if (t[0]==n)
+      return t[s];
+    while (*t>=0) t++;
+  }
+  return 0; /*NOT REACHED*/
+}
