@@ -227,13 +227,15 @@ pariflush(void) { pariOut->flush(); }
 void
 flusherr(void) { pariErr->flush(); }
 
-/* format is standard printf format, except %Z is a GEN (cast to long) */
+/* format is standard printf format, except %Z is a GEN */
 void
 vpariputs(char* format, va_list args)
 {
-  char buf[1024], str[1024], *f = format, *s = str;
-  long nb = 0;
-
+  long nb = 0, bufsize = 1023;
+  char *buf, *str, *s, *f = format;
+  
+  /* replace each %Z (2 chars) by braced address format (8 chars) */
+  s = str = gpmalloc(strlen(format)*4 + 1);
   while (*f)
   {
     if (*f != '%') *s++ = *f++;
@@ -247,7 +249,21 @@ vpariputs(char* format, va_list args)
       }
     }
   }
-  *s = 0; vsprintf(buf,str,args); s = buf;
+  *s = 0;
+#ifdef HAS_VSNPRINTF
+  for(;;)
+  {
+    int l;
+    s = buf = gpmalloc(bufsize);
+    l = vsnprintf(buf,bufsize,str,args);
+    if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
+    free(buf); bufsize++;
+  }
+  buf[bufsize] = 0; /* just in case */
+#else
+  s = buf = gpmalloc(bufsize);
+  (void)vsprintf(buf,str,args); /* pray it does fit */
+#endif
   if (nb)
     for (f=s; *f; f++)
       if (*f == '\003' && f[21] == '\003')
@@ -255,9 +271,9 @@ vpariputs(char* format, va_list args)
         *f = 0; f[21] = 0; /* remove the bracing chars */
         pariOut->puts(s); bruteall((GEN)atol(f+1),'g',-1,1);
         f += 22; s = f;
-        nb--; if (!nb) break;
+        if (!--nb) break;
       }
-  pariOut->puts(s);
+  pariOut->puts(s); free(buf); free(str);
 }
 
 void
