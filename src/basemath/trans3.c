@@ -372,7 +372,7 @@ eint1(GEN x, long prec)
     if (expo(x) >= 4)
       return gerepileupto(av, incgam2_0(x));
 
-    l = lg(x); consteuler(l);
+    l = lg(x);
     n = -bit_accuracy(l)-1;
     
     run = realun(l);
@@ -385,7 +385,7 @@ eint1(GEN x, long prec)
       p3 = addrr(p2,p3);
     }
     p3 = mulrr(x,mulrr(mpexp(negr(x)),p3));
-    p1 = addrr(mplog(x),geuler);
+    p1 = addrr(mplog(x), mpeuler(l-1));
     return gerepileupto(av, subrr(p3,p1));
   }
   else
@@ -406,8 +406,7 @@ eint1(GEN x, long prec)
         p3 = gadd(p3, p2);
         i++;
       }
-      consteuler(l);
-      p1 = gadd(mplog(y), geuler);
+      p1 = gadd(mplog(y), mpeuler(l-1));
       y  = gadd(p3, p1);
     } else {
       p1 = gdivsg(1, y);

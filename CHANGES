@@ -36,12 +36,18 @@ HC  6- nfnewprec(bnf) could contain objects of low accuracy
 XR  7- check subgroup argument in bnrL1
     8- typo in ideal_two_elt (oo loop)
     9- pb with GNU as + preprocessor on Sparc
-   10- incorrect result in matdet (Gauss-Bareiss) [gdivexact]
+   10- incorrect result in matdet over Z[1/n] (Gauss-Bareiss) [gdivexact]
+   11- solve(x=0,1,deriv(x)) --> SEGV
 
   Changed
 XR  1- bnrL1 now takes a congruence subgroup as second argument
     2- allow some functions to modify bnf/bnr structures (matal + cycgen)
 CB  3- modified TeX macros for pdftex
+    4- have abs(t_COMPLEX) give an exact result if possible [abs(0*I) was 0.0]
+
+  Added
+BA  1- function galoissubcyclo()
+    2- optional arguments (vertical range) to plot()
 
 ===========================================================================
 Done for version 2.0.18.beta (released 20/12/1999):

@@ -1158,14 +1158,8 @@ gerepile(long av, long tetpil, GEN q)
   if ((ulong)q>=(ulong)avma && (ulong)q<(ulong)tetpil)
     q = (GEN) (((long)q) + dec);
 
-#if 1
   for (ll=(GEN)av, a=(GEN)tetpil; a > (GEN)avma; ) *--ll= *--a;
   avmb = (long)ll;
-#else /* slower */
-  ll = (GEN)(avmb=avma+dec); a = (GEN)avma;
-  for (i=((tetpil-avma)>>TWOPOTBYTES_IN_LONG)-1; i>=0; i--) ll[i] = a[i];
-#endif
-
   while (ll < (GEN)av)
   {
     const long tl=typ(ll);
