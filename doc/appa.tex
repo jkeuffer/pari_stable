@@ -256,6 +256,11 @@ GP executable (probably \kbd{gp-dyn}) under the name \kbd{gp}, the default
 PARI library (probably \kbd{libpari.so}), the necessary include files, the
 manual pages, the documentation and help scripts and emacs macros.
 
+To save on disk space, you can manually \kbd{gzip} some of the documentation
+files if you wish~: \kbd{usersch*.tex} and all \kbd{dvi} files (assuming your
+\kbd{xdvi} knows how to deal with compressed files); the online-help system
+will handle it.
+
 By default, if a dynamic library \kbd{libpari.so} could be built, the static
 library \kbd{libpari.a} will not be created. If you want it as well, you can
 use the target \kbd{make install-lib-sta}. You can install a statically
