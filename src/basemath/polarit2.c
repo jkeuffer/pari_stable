@@ -430,8 +430,10 @@ TreeLift(GEN link, GEN v, GEN w, GEN T, GEN p, long e0, long e1, GEN f, int noin
   RecTreeLift(link, v, w, T, pd, p0, f, lgpol(v), noinv);
 }
 
+/* Successive accuracies for a quadratic lift.
+ * Eg 9 --> 9,5,3,2,1 instead of 9,8,4,2,1 */
 GEN
-Hensel_exponents(long e)
+Newton_exponents(long e)
 {
   GEN E = cgetg(BITS_IN_LONG, t_VECSMALL);
   long l = 1; E[l++] = e;
@@ -455,7 +457,7 @@ MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
   if (typ(a[1]) == t_INT) flag = 2;
   else if (flag == 2) flag = 1;
 
-  E = Hensel_exponents(e);
+  E = Newton_exponents(e);
   e = 1;
   l = lg(E)-1;
 

@@ -911,7 +911,7 @@ inv_ser(GEN b)
   for (j = 3; j < l; j++) x[j] = zero;
   x[2] = linv((GEN)b[2]);
   a[1] = x[1] = evalvalp(0) | evalvarn(v) | evalsigne(1);
-  E = Hensel_exponents(l - 2);
+  E = Newton_exponents(l - 2);
   av2 = avma; lim = stack_lim(av2, 2);
   le = lg(E)-1;
   for (i = le; i > 1; i--) {
