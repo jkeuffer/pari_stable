@@ -39,6 +39,7 @@ isnfscalar(GEN x)
 {
   long lx=lg(x),i;
 
+  if (typ(x) != t_COL) return 0;
   for (i=2; i<lx; i++)
     if (!gcmp0((GEN)x[i])) return 0;
   return 1;
@@ -81,6 +82,7 @@ element_mul(GEN nf, GEN x, GEN y)
   if (ty==t_POLMOD) y=checknfelt_mod(nf,y,"element_mul");
   if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
   if (is_extscalar_t(ty)) return scal_mul(nf,y,x,tx);
+  if (tx != t_COL || ty != t_COL) err(typeer,"element_mul");
   if (isnfscalar(x)) return gmul((GEN)x[1],y);
   if (isnfscalar(y)) return gmul((GEN)y[1],x);
 
@@ -138,6 +140,7 @@ element_inv(GEN nf, GEN x)
     for (i=2; i<=N; i++) p1[i]=lcopy((GEN)x[i]);
     return p1;
   }
+  if (tx != t_COL) err(typeer,"element_inv");
   p = NULL;
   for (i=1; i<=N; i++)
     if (typ(x[i])==t_INTMOD)
@@ -182,6 +185,7 @@ element_div(GEN nf, GEN x, GEN y)
     p1=gdiv(gmodulcp(gmul((GEN)nf[7],x),(GEN)nf[1]),y);
     return gerepileupto(av, algtobasis(nf,p1));
   }
+  if (tx != t_COL || ty != t_COL) err(typeer,"element_div");
 
   if (isnfscalar(y)) return gdiv(x,(GEN)y[1]);
   if (isnfscalar(x))
@@ -307,6 +311,7 @@ element_sqr(GEN nf, GEN x)
   if (tx==t_POLMOD) x=checknfelt_mod(nf,x,"element_sqr");
   if (is_extscalar_t(tx))
     return gerepileupto(av, algtobasis(nf, gsqr(x)));
+  if (tx != t_COL) err(typeer,"element_sqr");
   if (isnfscalar(x))
   {
     s=cgetg(N+1,t_COL); s[1]=lsqr((GEN)x[1]);
@@ -356,7 +361,11 @@ element_pow(GEN nf, GEN x, GEN n)
   if (typ(n)!=t_INT) err(talker,"not an integer exponent in nfpow");
   nf=checknf(nf); N=degpol(nf[1]);
   s=signe(n); if (!s) return gscalcol_i(gun,N);
-  if (typ(x)!=t_COL) x=algtobasis(nf,x);
+  if (typ(x) != t_COL)
+  {
+    x = algtobasis(nf,x);
+    if (typ(x) != t_COL) err(typeer,"element_pow");
+  }
 
   if (isnfscalar(x))
   {
@@ -759,6 +768,8 @@ zsigne(GEN nf,GEN x,GEN arch)
     if (signe(arch[i]))
     {
       GEN y = poleval(x,(GEN)rac[i]);
+      if (lg(y) == 3 && typ(y) == t_REAL)
+        err(warner,"dubious value in zsigne. Increase nf precision?");
       if (e + gexpo((GEN)rac[i]) - gexpo(y) > B)
         err(precer, "zsigne");
       vecsign[j++] = (gsigne(y) > 0)? (long)_0: (long)_1;
