@@ -110,8 +110,9 @@ extern entree * (*foreignAutoload)(char*, long);
 extern void (*foreignFuncFree)(entree *);
 extern int (*default_exception_handler)(long);
 
+extern const int    functions_tblsz;     /* hashcodes table size */
+
 /* Variables containing the list of PARI functions */
-extern int    functions_tblsz;     /* hashcodes table size */
 extern module *pari_modules;       /* list of functions modules */
 extern entree **functions_hash;    /* functions hashtable */
 extern entree **members_hash;      /* members hashtable */
