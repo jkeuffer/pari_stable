@@ -3087,12 +3087,10 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
       S[s] = (long)dummycopy(x);
       if (s == stockmax)
       { /* overflow */
-        GEN per, Sold = S;
-        pari_sp av2;
+        pari_sp av2 = avma;
+        GEN per;
 
         if (!check) goto END;
-        if (stockall) { stockmax *= 2; S = cgetg(stockmax+1, t_VEC); }
-        av2 = avma;
         per = sindexsort(norms);
         if (DEBUGLEVEL) fprintferr("sorting...\n");
         for (j=0,i=1; i<=s; i++)
@@ -3101,19 +3099,26 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
           long k = per[i];
           norme1 = (GEN)norms[k];
           if (j  && mpcmp(norme1, borne1) > 0) break;
-          if (j  || check(data,(GEN)Sold[k]))
+          if (j  || check(data,(GEN)S[k]))
           {
             if (!j) borne1 = mpadd(norme1,eps);
-            S[++j] = Sold[k];
+            S[++j] = S[k];
           }
         }
         s = j; avma = av2;
+        if (s)  norme1 = (GEN)norms[ per[i-1] ];
+        if (stockall && stockmax < 100000L) 
+        {
+          GEN Sold = S;
+          stockmax <<= 1;
+          S = cgetg(stockmax+1, t_VEC);
+          norms = cgetg(stockmax+1, t_VEC);
+          for (i = 1; i <= s; i++) { S[i] = Sold[i]; norms[i] = (long)norme1; }
+          S = clonefill(S, s, stockmax);
+          if (isclone(Sold)) gunclone(Sold);
+        }
         if (s)
         {
-          norme1 = (GEN)norms[ per[i-1] ];
-          if (isclone(Sold)) { S = clonefill(S, s, stockmax); gunclone(Sold); }
-          norms = cgetg(stockmax+1, t_VEC);
-          for (i=1; i<=s; i++) norms[i] = (long)norme1;
           borne1 = mpadd(norme1, eps);
           borne2 = mpmul(borne1, alpha);
           checkcnt = 0;
