@@ -2156,6 +2156,7 @@ file_input(Buffer *b, char *s0, FILE *file, int TeXmacs)
   }
 }
 
+#ifdef READLINE
 static char *
 gprl_input(Buffer *b, char *s0, char *prompt)
 {
@@ -2167,6 +2168,7 @@ gprl_input(Buffer *b, char *s0, char *prompt)
   if (left < strlen(s)) fix_buffer(b, b->len << 1);
   return s;
 }
+#endif
 
 #define skip_space(s) while (isspace((int)*s)) s++
 #define ask_filtre(t) filtre("",NULL,t)
@@ -2213,10 +2215,11 @@ input_loop(Buffer *b, char *buf0, FILE *file, char *prompt)
       }
     }
     /* read continuation line */
-    if (file)
-      buf = file_input(b,s,file,TeXmacs);
+#ifdef READLINE
+    if (!file) { free(buf); buf = gprl_input(b,s,""); }
     else
-    { free(buf); buf = gprl_input(b,s,""); }
+#endif
+      buf = file_input(b,s,file,TeXmacs);
     if (!buf) break;
   }
   if (!file && buf) free(buf);
