@@ -20,7 +20,7 @@ This file lists the incompatible changes between Version 2.x and older versions
     has 3rd component giving numbering among all transitive subgroups of S_n
     [ was ad hoc up to 7, as described above for n >= 8 ]. Old format is
     still the default, but will eventually change. Use
-    default(newgaloisformat, 1) or, in library mode, set global variable
+    default(new_galois_format, 1) or, in library mode, set global variable
     new_galois_format to 1 to enable the new format.
   - The nf structure output by nfinit has changed: 
     *) nf.zk is now T2-LLL-reduced, not in HNF wrt the power basis
