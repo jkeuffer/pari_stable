@@ -944,8 +944,6 @@ prec_arch(GEN bnf)
 
   for (i=1; ; i++)
     if ( (prec = gprecision((GEN)a[i])) ) return prec;
-  err(bugparier,"prec_arch");
-  return 0; /* not reached */
 }
 
 /* col = archimedian components of x, Nx its norm, dx a bound for its

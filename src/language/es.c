@@ -203,7 +203,7 @@ void
 pariflush(void) { pariOut->flush(); }
 
 void
-flusherr() { pariErr->flush(); }
+flusherr(void) { pariErr->flush(); }
 
 /* format is standard printf format, except %Z is a GEN (cast to long) */
 void

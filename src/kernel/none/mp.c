@@ -2833,7 +2833,7 @@ lgcdii(ulong* d, ulong* d1,
 
   if (!skip)
   {
-    while (1)
+    for(;;)
     {
       /* First half of loop divides dd into dd1, and leaves the recurrence
        * matrix xu,...,xv1 groomed the wrong way round (xu,xv will be the newer
@@ -3075,16 +3075,14 @@ lgcdii(ulong* d, ulong* d1,
     {
       /* The recurrence matrix has not yet been warped... */
       *u = xu; *u1 = xu1; *v = xv; *v1 = xv1;
-      return res;
+      break;
     }
-    else
-    {				/* commit dd1, xu, xv */
-      res++;
-      dd1 = tmpd; xu = tmpu; xv = tmpv;
+    /* commit dd1, xu, xv */
+    res++;
+    dd1 = tmpd; xu = tmpu; xv = tmpv;
 #ifdef DEBUG_LEHMER
-      fprintferr("  q = %ld, %lx, %lx\n", q, dd, dd1);
+    fprintferr("  q = %ld, %lx, %lx\n", q, dd, dd1);
 #endif
-    }
 
     /* Second half of loop divides dd1 into dd, and the matrix returns to its
      * normal arrangement. */
@@ -3115,20 +3113,17 @@ lgcdii(ulong* d, ulong* d1,
       /* The recurrence matrix has not yet been unwarped, so it is
        * the wrong way round;  fix this. */
       *u = xu1; *u1 = xu; *v = xv1; *v1 = xv;
-      return res;
+      break;
     }
-    else
-    {				/* commit dd, xu1, xv1 */
-      res++;
-      dd = tmpd; xu1 = tmpu; xv1 = tmpv;
+  
+    res++; /* commit dd, xu1, xv1 */
+    dd = tmpd; xu1 = tmpu; xv1 = tmpv;
 #ifdef DEBUG_LEHMER
-      fprintferr("  q = %ld, %lx, %lx\n", q, dd1, dd);
+    fprintferr("  q = %ld, %lx, %lx\n", q, dd1, dd);
 #endif
-    }
-
   } /* end of second loop */
 
-  return(0);			/* never reached */
+  return res;
 }
 
 /*==================================

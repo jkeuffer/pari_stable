@@ -1450,7 +1450,7 @@ powmodulo(GEN A, GEN N, GEN M)
     case 1: /* y = 1 */
       avma=av; return gun;
     case 2: /* y = 2, use shifti not mulii */
-    mul = (GEN (*)(GEN,GEN))shifti; A = (GEN)1;
+    mul = (GEN (*)(GEN,GEN))shifti; A = (GEN)1L;
   }
 
   /* TODO: Move this out of here and use for general modular computations */

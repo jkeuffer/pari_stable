@@ -3030,8 +3030,8 @@ GEN galoiscoset(GEN perm, GEN O)
   return coset;
 }
 GEN
-fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod
-		 , long x,long y)
+fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod,
+                 long x,long y)
 {
   ulong   ltop=avma, av;
   GEN     g;

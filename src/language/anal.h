@@ -113,7 +113,7 @@ extern void *PARI_stack_limit;
 #define EpNEW     101
 #define EpUSER    100
 
-#define NOT_CREATED_YET (entree *)1 /* for check_new_fun */
+#define NOT_CREATED_YET ((entree *)0x1L) /* for check_new_fun */
 #define initial_value(ep) ((ep)+1)
 
 #define is_entry(s) (is_entry_intern(s,functions_hash,NULL))

@@ -888,7 +888,7 @@ static long pari_randseed = 1;
 
 /* BSD rand gives this: seed = 1103515245*seed + 12345 */
 long
-mymyrand()
+mymyrand(void)
 {
 #if BITS_IN_RANDOM == 64
   pari_randseed = (1000000000000654397*pari_randseed + 12347) & ~HIGHBIT;
@@ -954,13 +954,13 @@ long
 setrand(long seed) { return (pari_randseed = seed); }
 
 long
-getrand() { return pari_randseed; }
+getrand(void) { return pari_randseed; }
 
 long
-getstack() { return top-avma; }
+getstack(void) { return top-avma; }
 
 long
-gettime() { return timer(); }
+gettime(void) { return timer(); }
 
 /***********************************************************************/
 /**							              **/

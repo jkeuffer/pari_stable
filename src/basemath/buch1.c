@@ -7,7 +7,7 @@
 /* $Id$ */
 #include "pari.h"
 
-#define narrow 0 /* should set narrow = flag in buchquad, but result buggy */
+const int narrow = 0; /* should set narrow = flag in buchquad, but buggy */
 
 /* See buch2.c:
  * precision en digits decimaux=2*(#digits decimaux de Disc)+50

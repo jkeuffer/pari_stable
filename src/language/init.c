@@ -479,7 +479,7 @@ pari_init(long parisize, long maxprime)
 }
 
 void
-freeall()
+freeall(void)
 {
   long i;
   entree *ep,*ep1;
@@ -514,7 +514,7 @@ freeall()
 }
 
 GEN
-getheap()
+getheap(void)
 {
   long m=0,l=0;
   GEN x;
@@ -1512,9 +1512,9 @@ checkmemory(GEN z)
 long
 gptimer() {return timer_proto(0);}
 long
-timer()   {return timer_proto(1);}
+timer(void)   {return timer_proto(1);}
 long
-timer2()  {return timer_proto(2);}
+timer2(void)  {return timer_proto(2);}
 long
 gentimer(long t)
 {
