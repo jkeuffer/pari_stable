@@ -1189,7 +1189,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
      * m = [                  ]   square matrix
      *     [ T2   p^(a-b) I_s ]   T2 = T * BL  truncated
      */
-    u = lllint_i(m, 4, 1, NULL, &B);
+    u = lllint_i(m, 4, 0, NULL, &B);
     norm = GS_norms(B, DEFAULTPREC);
     for (i=r+s; i>0; i--)
       if (cmprr((GEN)norm[i], Bnorm) < 0) break;
