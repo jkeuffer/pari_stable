@@ -55,6 +55,7 @@ config_file=
 optimization=full
 prefix=/usr/local
 share_prefix=
+target_host=
 which_graphic_lib=none
 test -n "$GP_INSTALL_PREFIX" && prefix=$GP_INSTALL_PREFIX
 while test $# -gt 0; do
@@ -83,6 +84,8 @@ while test $# -gt 0; do
                prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --share-prefix=*)
                share_prefix=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
+  --host=*)
+               target_host=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
   --disable-kernel) kernel=no;;
   -a|-ask|--ask)     fastread=no;;
   -g)          optimization=debugging;;
@@ -111,6 +114,7 @@ Options: some names can be abbreviated to one character (e.g -h = -help)
 -v, --verbhelp   a longer help message
 --prefix=<dir>        install files in <dir> (default $prefix)
 --share-prefix=<dir>  as 'prefix', for architecture independant files
+--host=<arch-osname>  target achitecture
 --graphic=<gr>        which graphic library to use (default X11)
                       (none X11 gnuplot)
 
@@ -242,9 +246,11 @@ if test -z "$zcat" -a -n "$gzip"; then zcat="$gzip -dc"; fi
 #
 # Testing Architectures. Try uname to provide a default, then ask user.
 #
-tmp_host=`./arch-osname`
-arch=`echo "$tmp_host" | sed -e 's/\(.*\)-.*/\1/'`
-osname=`echo "$tmp_host" | sed -e 's/.*-\(.*\)/\1/'`
+if test -z "$target_host"; then 
+	target_host=`./arch-osname`
+fi
+arch=`echo "$target_host" | sed -e 's/\(.*\)-.*/\1/'`
+osname=`echo "$target_host" | sed -e 's/.*-\(.*\)/\1/'`
 
 if test "$fastread" != yes; then
   cat << EOM
