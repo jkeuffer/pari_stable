@@ -1,4 +1,4 @@
-For PARI/GP version 2.0.17
+For PARI/GP version 2.0.18
 
 This file lists the things that ought to be implemented / fixed. It is
 hopelessly incomplete right now, but it's a start. Most items require major
@@ -16,10 +16,6 @@ Priority classification (first column): [subjective and debatable!]
 ***************************   BUGS (general)     ****************************
 
 5  silent overflows in codeword-handling macros: O(2^50000) --> O(2^-15535)
-
-5  some doubles can overflow in rootpol.c, should use t_REAL everywhere
-  ?  polroots(x^3 + 2^1024*x + 1)
-    ***   underflow or overflow in a R->dbl conversion
 
 4  gcmp/gegal not transitive: [] == 0, [0] == 0, but [0] != []
 
