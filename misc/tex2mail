@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/home/belabas/bin/solaris/perl
 
 # $Id$
 #
@@ -12,7 +12,7 @@
 #	linelength=75		# Cut at this line
 #	maxdef=400		# definition loops: croak if many substitutions 
 #	debug=0
-#	by_par=0			# Expect each paragraph to be terminated
+#	by_par=0		# Expect each paragraph to be terminated
 #				# by *exactly* 2 "\n", and do not print
 #				# an extra "\n" between paragraphs
 #	TeX			# Assume it is not LaTeX

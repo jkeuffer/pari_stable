@@ -93,7 +93,7 @@ misc/gprc.dft
 misc/gprc.dos
 misc/new.dic
 misc/pari.xpm
-misc/tex2mail
+misc/tex2mail.in
 misc/xgp
 src/basemath/alglin1.c
 src/basemath/alglin2.c

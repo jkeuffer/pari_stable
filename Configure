@@ -19,7 +19,7 @@ emacs_dir=emacs
 doc_dir=doc
 data_dir=data
 
-extract_dir_list="$doc_dir $emacs_dir"
+extract_dir_list="$doc_dir $emacs_dir $misc_dir"
 
 #
 # Version number and patch level.
