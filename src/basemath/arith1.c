@@ -2316,7 +2316,7 @@ gboundcf(GEN x, long k)
 GEN
 contfrac0(GEN x, GEN b, long flag)
 {
-  long lb,tb,i;
+  long lb, tb, i;
   GEN y;
 
   if (!b || gcmp0(b)) return sfcont(x,flag);
@@ -2324,55 +2324,51 @@ contfrac0(GEN x, GEN b, long flag)
   if (tb == t_INT) return sfcont(x,itos(b));
   if (! is_matvec_t(tb)) err(typeer,"contfrac0");
 
-  lb=lg(b); if (lb==1) return cgetg(1,t_VEC);
+  lb = lg(b); if (lb==1) return cgetg(1,t_VEC);
   if (tb != t_MAT) return sfcont2(b,x,flag);
   if (lg(b[1])==1) return sfcont(x,flag);
-  y = (GEN) gpmalloc(lb*sizeof(long));
-  for (i=1; i<lb; i++) y[i]=coeff(b,1,i);
-  x = sfcont2(y,x,flag); free(y); return x;
+  y = cgetg(lb, t_VEC); for (i=1; i<lb; i++) y[i] = mael(b,i,1);
+  x = sfcont2(y,x,flag); return x;
 }
 
 GEN
 pnqn(GEN x)
 {
-  pari_sp av=avma,tetpil;
-  long lx,ly,tx=typ(x),i;
-  GEN y,p0,p1,q0,q1,a,b,p2,q2;
+  pari_sp av = avma;
+  long i, lx, ly, tx = typ(x);
+  GEN p0, p1, q0, q1, a, b, p2, q2;
 
   if (! is_matvec_t(tx)) err(typeer,"pnqn");
   lx=lg(x); if (lx==1) return idmat(2);
   p0=gen_1; q0=gen_0;
   if (tx != t_MAT)
   {
-    p1=(GEN)x[1]; q1=gen_1;
+    p1 = (GEN)x[1]; q1 = gen_1;
     for (i=2; i<lx; i++)
     {
-      a=(GEN)x[i];
-      p2=gadd(gmul(a,p1),p0); p0=p1; p1=p2;
-      q2=gadd(gmul(a,q1),q0); q0=q1; q1=q2;
+      a = (GEN)x[i];
+      p2 = gadd(gmul(a,p1),p0); p0=p1; p1=p2;
+      q2 = gadd(gmul(a,q1),q0); q0=q1; q1=q2;
     }
   }
   else
   {
-    ly=lg(x[1]);
+    ly = lg(x[1]);
     if (ly==2)
     {
-      p1=cgetg(lx,t_VEC); for (i=1; i<lx; i++) p1[i]=mael(x,i,1);
-      tetpil=avma; return gerepile(av,tetpil,pnqn(p1));
+      p1 = cgetg(lx,t_VEC); for (i=1; i<lx; i++) p1[i] = mael(x,i,1);
+      return pnqn(p1);
     }
     if (ly!=3) err(talker,"incorrect size in pnqn");
     p1=gcoeff(x,2,1); q1=gcoeff(x,1,1);
     for (i=2; i<lx; i++)
     {
-      a=gcoeff(x,2,i); b=gcoeff(x,1,i);
-      p2=gadd(gmul(a,p1),gmul(b,p0)); p0=p1; p1=p2;
-      q2=gadd(gmul(a,q1),gmul(b,q0)); q0=q1; q1=q2;
+      a = gcoeff(x,2,i); b = gcoeff(x,1,i);
+      p2 = gadd(gmul(a,p1),gmul(b,p0)); p0=p1; p1=p2;
+      q2 = gadd(gmul(a,q1),gmul(b,q0)); q0=q1; q1=q2;
     }
   }
-  tetpil=avma; y=cgetg(3,t_MAT);
-  p2=cgetg(3,t_COL); y[1]=(long)p2; p2[1]=lcopy(p1); p2[2]=lcopy(q1);
-  p2=cgetg(3,t_COL); y[2]=(long)p2; p2[1]=lcopy(p0); p2[2]=lcopy(q0);
-  return gerepile(av,tetpil,y);
+  return gerepilecopy(av, mkmat2(mkcol2(p1,q1), mkcol2(p0,q0)));
 }
 
 /* x t_INTMOD. Look for coprime integers a<=A and b<=B, such that a/b = x */
@@ -2556,9 +2552,7 @@ fundunit(GEN x)
   check_quaddisc_real(x, &r, "fundunit");
   sqd = sqrti(x); av2 = avma; lim = stack_lim(av2,2);
   a = shifti(addsi(r,sqd),-1);
-  f = cgetg(3,t_MAT);
-  f[1] = (long)mkcol2(a, gen_1);
-  f[2] = (long)mkcol2(gen_1, gen_0);
+  f = mkmat2(mkcol2(a, gen_1), mkcol2(gen_1, gen_0));
   u = stoi(r); v = gen_2;
   for(;;)
   {
