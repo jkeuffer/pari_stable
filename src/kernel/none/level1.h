@@ -91,7 +91,7 @@ GEN    mpsub(GEN x, GEN y);
 void   mulsii(long x, GEN y, GEN z);
 ulong  muluumod(ulong a, ulong b, ulong c);
 void   mulssz(long x, long y, GEN z);
-GEN    new_chunk(long x);
+GEN    new_chunk(size_t x);
 long   random_bits(long k);
 GEN    realun(long prec);
 GEN    realzero(long prec);
@@ -145,23 +145,32 @@ evalexpo(long x)
 }
 
 INLINE GEN
-new_chunk(long x)
+new_chunk(size_t x) /* x is a number of bytes */
 {
   const GEN z = ((GEN) avma) - x;
-  if ((ulong)x > (ulong)((GEN)avma-(GEN)bot)) err(errpile);
-#ifdef MEMSTEP
-  checkmemory(z);
-#endif
+  if (x > ((avma-bot)>>TWOPOTBYTES_IN_LONG)) err(errpile);
 #ifdef _WIN32
   if (win32ctrlc) dowin32ctrlc();
 #endif
-  avma = (pari_sp)z; return z;
+  avma = (pari_sp)z;
+
+#ifdef MEMSTEP
+  if (DEBUGMEM && memused != DISABLE_MEMUSED) {
+    long d = (long)memused - (long)z;
+    if (d > 4*MEMSTEP || d < -4*MEMSTEP)
+    {
+      memused = (pari_sp)z;
+      fprintferr("...%4.0lf Mbytes used\n",(top-memused)/1048576.);
+    }
+  }
+#endif
+  return z;
 }
 
 INLINE GEN
 cgetg(long x, long y)
 {
-  const GEN z = new_chunk(x);
+  const GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(y) | evallg(x);
   return z;
 }
@@ -169,7 +178,7 @@ cgetg(long x, long y)
 INLINE GEN
 cgeti(long x)
 {
-  const GEN z = new_chunk(x);
+  const GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(t_INT) | evallg(x);
   return z;
 }
@@ -177,7 +186,7 @@ cgeti(long x)
 INLINE GEN
 cgetr(long x)
 {
-  const GEN z = new_chunk(x);
+  const GEN z = new_chunk((size_t)x);
   z[0] = evaltyp(t_REAL) | evallg(x);
   return z;
 }
@@ -187,7 +196,7 @@ INLINE GEN
 mpcopy(GEN x)
 {
   register long lx = lg(x);
-  const GEN y = new_chunk(lx);
+  const GEN y = new_chunk((size_t)lx);
 
   while (--lx >= 0) y[lx]=x[lx];
   return y;

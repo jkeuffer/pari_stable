@@ -1867,7 +1867,7 @@ switch_stack(stackzone *z, long n)
     bot     = (pari_sp) (z+1);
     top     = z->zonetop;
     avma    = top;
-    memused = (size_t)-1;
+    memused = DISABLE_MEMUSED;
   }
   else
   { /* back to normalcy */
@@ -1877,23 +1877,6 @@ switch_stack(stackzone *z, long n)
     memused = z->memused;
   }
   return NULL;
-}
-
-void
-checkmemory(GEN z)
-{
-#ifdef MEMSTEP
-  if (DEBUGMEM && memused != (size_t)-1 &&
-       ((GEN)memused > z + MEMSTEP || z > (GEN)memused + MEMSTEP))
-  {
-    memused=(size_t)z;
-#if MEMSTEP >= 1048576
-    fprintferr("...%4.0lf Mbytes used\n",(top-memused)/1048576.);
-#else
-    fprintferr("...%5.1lf Mbytes used\n",(top-memused)/1048576.);
-#endif
-  }
-#endif
 }
 
 void

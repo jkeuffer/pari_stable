@@ -1147,7 +1147,6 @@ long    TIMER(pari_timer *T);
 void    TIMERstart(pari_timer *T);
 long    allocatemoremem(size_t newsize);
 GEN     changevar(GEN x, GEN y);
-void    checkmemory(GEN x);
 void    disable_dbg(long val);
 GEN     dummycopy(GEN x);
 void    err(long numerr, ...);
