@@ -1287,7 +1287,7 @@ fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
   long l=lg(Tmod);
   GEN F=cgetg(l,t_VEC);
   for(i=1;i<l;i++)
-    F[i]=(long)FpXQ_minpoly(Sp, (GEN) Tmod[i],p);
+    F[i]=(long)FpXQ_minpoly(FpX_res(Sp,(GEN) Tmod[i],p), (GEN) Tmod[i],p);
   return F;
 }
 
@@ -1645,11 +1645,13 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   /*TODO: complete the table to at least 200*/
   const int prim_nonss_orders[]={36,48,56,60,72,75,80,96,108,120,132,0};
   GEN F,Fp,Fe,Fpe,O;
-  long np;
+  long min_prime,np;
   long order,phi_order;
   long plift,nbmax,nbtest,deg;
   byteptr primepointer,pp;
 
+  if (!issquarefree(T))
+    err(talker, "Polynomial not squarefree in galoisinit");
   if (DEBUGLEVEL >= 1) (void)timer2();
   n = degpol(T);
   if (!karma_type) karma_type=n;
@@ -1699,6 +1701,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       break;
   }
   /*Now, we study the orders of the Frobenius elements*/
+  min_prime=n*max(BITS_IN_LONG-bfffo(n)-4,2);
   plift = 0;
   nbmax = 8+(n>>1);
   nbtest = 0; karma = k_amoeba;
@@ -1719,7 +1722,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       err(primer1);
     p += prime_incr;
     /*discard small primes*/
-    if (p <= (n << 1))
+    if (p <= min_prime)
       continue;
     ip=stoi(p);
     if (!FpX_is_squarefree(T,ip))
