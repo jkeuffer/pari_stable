@@ -216,7 +216,7 @@ principalideal(GEN nf, GEN x)
 static GEN
 mylog(GEN x, long prec)
 {
-  if (!signe(x))
+  if (gcmp0(x))
     err(talker,"precision too low in get_arch");
   return glog(x,prec);
 }
