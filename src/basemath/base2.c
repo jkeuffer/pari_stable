@@ -1877,8 +1877,8 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   return Decomp(S, flag);
 }
 
-/* Assume respm(f,g) stricly divides p^M. Return respm(f, g) mod p^M, using
- * dynamic precision (until result is non-zero). */
+/* Assume respm(f,g) divides p^M. Return respm(f, g), using dynamic p-adic
+ * precision (until result is non-zero or p^M). */
 GEN
 fast_respm(GEN f, GEN g, GEN p, long M)
 {
@@ -1886,10 +1886,12 @@ fast_respm(GEN f, GEN g, GEN p, long M)
   GEN R, q = NULL;
   if (!m) m = 1;
   for(;; m <<= 1) {
-    if (M < 2*m) return respm(f,g, gpowgs(p, M));
+    if (M < 2*m) break;
     q = q? sqri(q): gpowgs(p, m); /* p^m */
     R = respm(f,g, q); if (signe(R)) return R;
   }
+  q = gpowgs(p, M);
+  R = respm(f,g, q); return signe(R)? R: q;
 }
 
 GEN
@@ -1897,7 +1899,7 @@ maxord_i(GEN p, GEN f, long mf, GEN w, long flag)
 {
   long l = lg(w)-1;
   GEN h = (GEN)w[l]; /* largest factor */
-  GEN D = fast_respm(f, derivpol(f), p, mf + 1);
+  GEN D = fast_respm(f, derivpol(f), p, mf);
   decomp_t S;
 
   S.f = f;
@@ -1937,7 +1939,7 @@ indexpartial(GEN P, GEN DP)
     else if (e >= 2)
     {
       if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z ",p1);
-      q = fast_respm(P, dP, p, e+1);
+      q = fast_respm(P, dP, p, e);
       if(DEBUGLEVEL>=5) { fprintferr("--> %Z : ",q); msgTIMER(&T,""); }
     }
     res = mulii(res, q);
