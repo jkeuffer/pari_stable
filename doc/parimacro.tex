@@ -184,8 +184,9 @@
 \def\tev{\gdef\f@nt{it}\let\do=\@kbdvar\doverb}
 
 \def\@syn#1#2{\gdef\f@nt{tt}\toindex{#1}The library syntax is $\key{#1}(#2)$}
+\def\@synT#1#2{\gdef\f@nt{tt}\toindex{#1}The library syntax is \key{#1}(#2)}
 \def\syn{\let\do=\@syn\doverb}
-\def\@synt#1#2{\@syn{#1}{\hbox{\tt#2}}}
+\def\@synt#1#2{\@synT{#1}{{\tt#2}}}
 \def\synt{\let\do=\@synt\doverb}
 
 % function prototypes

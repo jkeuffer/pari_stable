@@ -101,12 +101,13 @@ pages go into \kbd{\$share\_prefix/man}, Emacs files into
 to various subdirectories of \kbd{\$share\_prefix/pari}: documentation,
 sample GP scripts and C code, extra packages like \kbd{galdata}.
 
-\noindent You can also set directly \kbd{--bindir}, \kbd{--libdir},
-\kbd{--includedir}, \kbd{--mandir}, \kbd{--datadir}, and finally
-\kbd{--sysdatadir}.
+\noindent You can also set directly \kbd{--bindir} (executables),
+\kbd{--libdir} (library), \kbd{--includedir} (include files), \kbd{--mandir}
+(manual pages), \kbd{--datadir} (other architecture-independent data), and
+finally \kbd{--sysdatadir} (other architecture-dependent data).
 
-\misctitle{Technical note 2:} \kbd{Configure} lets the following
-environment variable override the defaults if set:
+\misctitle{Technical note 2:} \kbd{Configure} lets the following environment
+variable override the defaults if set:
 
 \kbd{AS}: Assembler.
 
@@ -370,11 +371,12 @@ it to your liking. For instance, if you're not using an ANSI terminal,
 remove control characters from the \kbd{prompt} variable. You can also
 enable colors. 
 
-If desired, read \kbd{\$datadir/misc/gpalias} (unless you tampered with this via
-Configure, \kbd{datadir} is \kbd{\$prefix/share/pari}) from the \kbd{gprc}
+If desired, read \kbd{\$datadir/misc/gpalias}  from the \kbd{gprc}
 file, which provides some common shortcuts to lengthy names; fix the path in
-gprc first. If you have superuser privileges and want to provide system-wide
-defaults, copy your customized \kbd{.gprc} file to \kbd{/etc/gprc}.
+gprc first. (Unless you tampered with this via Configure, \kbd{datadir} is
+\kbd{\$prefix/share/pari}.) If you have superuser privileges and want to
+provide system-wide defaults, copy your customized \kbd{.gprc} file to
+\kbd{/etc/gprc}.
 
 In older versions, \kbd{gphelp} was hidden in pari lib directory and was not
 meant to be used from the shell prompt, but not anymore. If gp complains it

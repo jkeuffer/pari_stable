@@ -766,12 +766,14 @@ $x-\text{floor}(x)$. If $x$ is real, the result is in $[0,1[$.
 $x$ is a quadratic number, this is the coefficient of $\omega$ in
 the ``canonical'' integral basis $(1,\omega)$.
 
-\syn{gimag}{x}.
+\syn{gimag}{x}. This returns a copy of the imaginary part. The internal
+routine \tet{imag_i} is faster, since it returns the pointer and skips the
+copy.
 
-\subsecidx{length}$(x)$: number of non-code words in $x$ really used (i.e.~the
-effective length minus 2 for integers and polynomials). In particular,
-the degree of a polynomial is equal to its length minus 1. If $x$ has type
-\typ{STR}, output number of letters.
+\subsecidx{length}$(x)$: number of non-code words in $x$ really used
+(i.e.~the effective length minus 2 for integers and polynomials). In
+particular, the degree of a polynomial is equal to its length minus 1. If $x$
+has type \typ{STR}, output number of letters.
 
 \syn{glength}{x} and the result is a C long.
 
@@ -897,7 +899,8 @@ distributed in arithmetic progressions.
 number, this is the coefficient of $1$ in the ``canonical'' integral basis
 $(1,\omega)$.
 
-\syn{greal}{x}.
+\syn{greal}{x}. This returns a copy of the real part. The internal routine
+\tet{real_i} is faster, since it returns the pointer and skips the copy.
 
 \subsecidx{round}$(x,\{\&e\})$: If $x$ is in $\R$, rounds $x$ to the nearest
 integer and sets $e$ to the number of error bits, that is the binary exponent
@@ -910,10 +913,9 @@ was not given.
 functions, this function operates on every coefficient at every level of a
 PARI object. For example
 $$\text{truncate}\left(\dfrac{2.4*X^2-1.7}{X}\right)=2.4*X,$$ whereas
-$$\text{round}\left(\dfrac{2.4*X^2-1.7}{X}\right)=\dfrac{2*X^2-2}{X}.$$
-An important use of \kbd{round} is to get exact results after a long
-approximate computation, when theory tells you that the coefficients
-must be integers.
+$$\text{round}\left(\dfrac{2.4*X^2-1.7}{X}\right)=\dfrac{2*X^2-2}{X}.$$ An
+important use of \kbd{round} is to get exact results after a long approximate
+computation, when theory tells you that the coefficients must be integers.
 
 \syn{grndtoi}{x,\&e}, where $e$ is a \kbd{long} integer. Also available is
 $\teb{ground}(x)$.
@@ -2594,8 +2596,8 @@ $E[18]$ (\kbd{$E$.w}) is the value of Mestre's $w$ (this is technical), and
 $E[19]$ is arbitrarily set equal to zero.
 \smallskip
 For all other base fields or rings, the last six components are arbitrarily
-set equal to zero (see also the description of member functions related to
-elliptic curves at the beginning of this section).
+set equal to zero. See also the description of member functions related to
+elliptic curves at the beginning of this section.
 
 \syn{ellinit0}{E,\fl,\var{prec}}. Also available are
 $\teb{initell}(E,\var{prec})$ ($\fl=0$) and
@@ -6683,17 +6685,19 @@ If $\fl=3$, the function is allowed to be undefined (but continuous) at $a$
 or $b$, for example the function $\sin(x)/x$ at $x=0$.
 
 \synt{intnum}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long
-prec}
+prec}. Where $\kbd{eval}(x, E)$ returns the value of the function at $x$. You
+may store any additional information required by \kbd{eval} in $E$, or set it
+to \kbd{NULL}.
 
-\subsecidx{prod}$(X=a,b,\var{expr},\{x=1\})$: product of expression \var{expr},
-initialized at $x$, the formal parameter $X$ going from $a$ to $b$. As for
-\kbd{sum}, the main purpose of the initialization parameter $x$ is to force
-the type of the operations being performed. For example if it is set equal to
-the integer 1, operations will start being done exactly. If it is set equal
-to the real $1.$, they will be done using real numbers having the default
-precision. If it is set equal to the power series $1+O(X^k)$ for a certain
-$k$, they will be done using power series of precision at most $k$. These
-are the three most common initializations.
+\subsecidx{prod}$(X=a,b,\var{expr},\{x=1\})$: product of expression
+\var{expr}, initialized at $x$, the formal parameter $X$ going from $a$ to
+$b$. As for \kbd{sum}, the main purpose of the initialization parameter $x$
+is to force the type of the operations being performed. For example if it is
+set equal to the integer 1, operations will start being done exactly. If it
+is set equal to the real $1.$, they will be done using real numbers having
+the default precision. If it is set equal to the power series $1+O(X^k)$ for
+a certain $k$, they will be done using power series of precision at most $k$.
+These are the three most common initializations.
 
 \noindent As an extreme example, compare
 
@@ -6732,7 +6736,10 @@ $\var{expr}(X=a) * \var{expr}(X=b) \le 0$.
 This routine uses Brent's method and can fail miserably if \var{expr} is
 not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
 
-\synt{zbrent}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec}
+\synt{zbrent}{void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec}.
+Where $\kbd{eval}(x, E)$ returns the value of the function at $x$. You
+may store any additional information required by \kbd{eval} in $E$, or set it
+to \kbd{NULL}.
 
 \subsecidx{sum}$(X=a,b,\var{expr},\{x=0\})$: sum of expression \var{expr},
 initialized at $x$, the formal parameter going from $a$ to $b$. As for
