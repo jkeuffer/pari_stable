@@ -3936,6 +3936,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag)
   if (flag & nf_PARTIALFACT)
   {
     fl |= nf_PARTIALFACT;
+    bas = NULL; /* -Wall */
     red = polredabs0(POL, fl);
   }
   else
