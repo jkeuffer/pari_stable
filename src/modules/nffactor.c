@@ -1037,7 +1037,9 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     PRK = hnfmodid(prk, pk);
 
     PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
-    GSmin = vecmin(GS_norms(B, DEFAULTPREC));
+    if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
+    else
+      GSmin = vecmin(GS_norms(B, DEFAULTPREC));
     if (gcmp(GSmin, C) >= 0) break;
   }
   if (DEBUGLEVEL>2) fprintferr("for this exponent, GSmin = %Z\n",GSmin);
