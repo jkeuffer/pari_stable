@@ -1076,9 +1076,12 @@ echo Looking in C lib for some symbols...
 extra_flags=
 list=exp2; . ./look
 list=strftime; . ./look
-case $arch in
+case "$arch" in
   alpha) list='times ftime';; # gp-dyn has problems with getrusage 
-  *) list='getrusage times ftime';;
+  *) case "$osname" in
+    *cygwin*) list='times ftime';; # getrusage based timer always returns 0
+    *) list='getrusage times ftime';;
+    esac;;
 esac; . ./look
 list='sigrelse sigsetmask'; . ./look
 list=TIOCGWINSZ; . ./look
