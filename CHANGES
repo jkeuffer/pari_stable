@@ -113,6 +113,7 @@ BA  5- Library .so link changed to libpari.so for all versions.
     (h(P+Q)-h(P)-h(Q)) / 2, and
     7- renamed and declared gmul_mat_smallvec --> RM_zc_mul
                             gmul_mati_smallvec--> ZM_zc_mul
+    8- moved highlvl.o and plot*.o from the gp binary to libpari
 
   Added
     1- make test-all [ all test suite (SLOW !)]

@@ -18,7 +18,8 @@ kernel="kernel mp"
 inline="mpinl"
 
 graph="plotport"
-gp="gp gp_init gp_rl highlvl whatnow"
+gp="gp gp_init gp_rl whatnow"
+gplib="highlvl"
 
 language=`ls $src_dir/language/*.c | sed 's,.*/\(.*\)\.c,\1,'`
 basemath=`ls $src_dir/basemath/*.c | sed 's,.*/\(.*\)\.c,\1,'`
@@ -116,13 +117,11 @@ for f in $kernel; do
   KERNOBJS="$KERNOBJS $f\$(_O)"
 done
 OBJS=$KERNOBJS
-for f in $basemath $modules $language $systems; do
+for f in $basemath $gplib $graph $language $modules $systems; do
   OBJS="$OBJS $f\$(_O)"
 done
 OBJSGP=''
-OBJSDGP=''
-
-for f in $gp $graph; do
+for f in $gp; do
   OBJSGP="$OBJSGP $f\$(_O)"
 done
 for f in $inline; do
@@ -290,7 +289,6 @@ DOTEST=$dotest
 
 OBJS   = $OBJS
 OBJSGP = $OBJSGP
-OBJSDGP = $OBJSDGP
 
 gp: gp-$dft ../gp$suffix$exe_suff $libdft
 
