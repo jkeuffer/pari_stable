@@ -343,6 +343,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   prec = ZX_get_prec(T);
   den = initgaloisborne(T,dn,prec, &L,&prep,NULL);
   if (!dn) den = gclone(den);
+  if (DEBUGLEVEL>=4) TIMERstart(&ti);
   M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
   if (DEBUGLEVEL>=4) msgTIMER(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
