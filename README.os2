@@ -27,12 +27,16 @@ a convenience, but also statically linked readline library are often broken;
 sigh...
 
 To use the gnuplot-engine DLL gnpltdrw.DLL, one can give Configure the option
---graphic=gnuplot-dynamic,gnpltdrw.  Thus the build process looks like this:
+--graphic=gnuplot-dynamic,gnpltdrw (requires linking with -Zcrtdll for graphics
+to work).  Add -DOLD_SET_FEEDBACK_RECTANGLE gcc option if gnpltdrw.DLL supports
+mousing, but is an old build, so it won't report this capability.
+
+Thus the build process may look like this:
 
   sh Configure --graphic=gnuplot-dynamic,gnpltdrw
   make gp
   cd Oos2-ix86
-  make _O=.obj _A=.lib CC_FLAVOR="-Zomf -Zcrtdll -Zstack 8192" RLLIBS=-lreadline_import DLLD_IGNORE= AR=emxomfar bench
+  make _O=.obj _A=.lib CC_FLAVOR="-Zomf -Zcrtdll -Zstack 8192 -DOLD_SET_FEEDBACK_RECTANGLE" RLLIBS=-lreadline_import DLLD_IGNORE= AR=emxomfar bench
   cd ..
 
 The statically build PARI library is in a file named similar to libpari-2_2.a,

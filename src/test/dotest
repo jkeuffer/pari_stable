@@ -171,7 +171,11 @@ esac
 if test -n "$file_diff"; then
 len=`wc -l $file_diff | sed -e 's/ *\([0-9]*\).*/\1/'`
 pat=`head -4 $file_diff|tail -1|grep "108,118"`
+sys0190=`grep "^+ SYS0190\>" $file_diff`
 
+if test $len -eq 31  -a  -n "$sys0190"; then
+  len=29			# more verbose error message on OS/2
+fi
 if test $len -eq 29  -a  -n "$pat"; then
 cat << EOT
 NOTE: the problem noted in 'program' is that install() does not work in your
