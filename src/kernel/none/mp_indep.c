@@ -381,22 +381,6 @@ divir(GEN x, GEN y)
   avma = av; return z;
 }
 
-GEN
-divri(GEN x, GEN y)
-{
-  long lx, s = signe(y);
-  pari_sp av;
-  GEN z;
-
-  if (!s) err(gdiver);
-  if (!signe(x)) return realzero_bit(expo(x) - expi(y));
-  if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
-
-  lx = lg(x); z = cgetr(lx); av = avma;
-  affrr(divrr(x, itor(y, lx+1)), z);
-  avma = av; return z;
-}
-
 void
 mpdivz(GEN x, GEN y, GEN z)
 {

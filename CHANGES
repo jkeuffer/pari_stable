@@ -86,6 +86,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        RgXV_unscale
     4- file Qfb.c [ stuff related to binary quad. forms moved out of arith1.c ]
     5- routines truedivii, truedvmdis, truedivis
+BA  6- [GMP] faster divri routine.
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,

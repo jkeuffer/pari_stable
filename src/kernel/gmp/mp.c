@@ -688,6 +688,55 @@ divrr_with_gmp(GEN x, GEN y)
   return w;
 }
 
+/* We keep llx bits of x and lly bits of y*/
+GEN
+divri_with_gmp(GEN x, GEN y)
+{
+  long llx=RNLIMBS(x),ly=NLIMBS(y);
+  long lly=min(llx+1,ly);
+  GEN  w=cgetr(llx+2);
+  long lu=llx+lly, ld=ly-lly;
+  mp_limb_t *u=(mp_limb_t *)new_chunk(lu);
+  mp_limb_t *z=(mp_limb_t *)new_chunk(lly);
+  mp_limb_t *q,*r;
+  long sh=bfffo(y[ly+1]);
+  long e=expo(x)-expi(y);
+  long sx=signe(x),sy=signe(y);
+  if (sh) mpn_lshift(z,LIMBS(y)+ld,lly,sh);
+  else xmpn_copy(z,LIMBS(y)+ld,lly);
+  xmpn_mirrorcopy(u+lu-llx,RLIMBS(x),llx);
+  xmpn_zero(u,lu-llx);
+  q = (mp_limb_t *)new_chunk(llx+1);
+  r = (mp_limb_t *)new_chunk(lly);
+
+  mpn_tdiv_qr(q,r,0,u,lu,z,lly);
+  
+  /*Round up: This is not exactly correct we should test 2*r>z*/
+  if ((ulong)r[lly-1] > ((ulong)z[lly-1]>>1))
+    mpn_add_1(q,q,llx+1,1);
+  
+  xmpn_mirrorcopy(RLIMBS(w),q,llx);
+
+  if (q[llx] == 0) e--;
+  else if (q[llx] == 1) { shift_right(w,w, 2,llx+2, 1,1); }
+  else { w[2] = HIGHBIT; e++; }
+  if (sy < 0) sx = -sx;
+  w[1] = evalsigne(sx) | evalexpo(e);
+  avma=(pari_sp) w;
+  return w;
+}
+
+GEN
+divri(GEN x, GEN y)
+{
+  long  s = signe(y);
+
+  if (!s) err(gdiver);
+  if (!signe(x)) return realzero_bit(expo(x) - expi(y));
+  if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
+  return divri_with_gmp(x,y);
+}
+
 GEN
 divrr(GEN x, GEN y)
 {

@@ -715,6 +715,22 @@ divrr(GEN x, GEN y)
   return r;
 }
 
+GEN
+divri(GEN x, GEN y)
+{
+  long lx, s = signe(y);
+  pari_sp av;
+  GEN z;
+
+  if (!s) err(gdiver);
+  if (!signe(x)) return realzero_bit(expo(x) - expi(y));
+  if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
+
+  lx = lg(x); z = cgetr(lx); av = avma;
+  affrr(divrr(x, itor(y, lx+1)), z);
+  avma = av; return z;
+}
+
 /* Integer division x / y: such that sign(r) = sign(x)
  *   if z = ONLY_REM return remainder, otherwise return quotient
  *   if z != NULL set *z to remainder
