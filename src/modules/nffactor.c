@@ -1424,6 +1424,7 @@ nfsqff(GEN nf, GEN pol, long fl)
         t = (GEN)z[i]; if (degpol(t) > 1) break;
         z[i] = lneg(gdiv((GEN)t[2], (GEN)t[3]));
       }
+      if (fl == 2 && i != l) { avma = av; return cgetg(1,t_VEC); }
       setlg(z, i);
     }
     return gerepilecopy(av, z);
