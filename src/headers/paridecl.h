@@ -781,7 +781,7 @@ void    etatpile(unsigned int n);
 char*   expand_tilde(char *s);
 int     file_is_binary(FILE *f);
 void    flusherr(void);
-void    fprintferr(char* pat, ...);
+void    fprintferr(const char* pat, ...);
 void    killallfiles(int check);
 int     killfile(pariFILE *f);
 GEN     lisGEN(FILE *f);
@@ -808,8 +808,8 @@ char*   pari_unique_filename(char *s);
 void    pari_unlink(char *s);
 void    pariflush(void);
 void    pariputc(char c);
-void    pariputs(char *s);
-void    pariputsf(char *format, ...);
+void    pariputs(const char *s);
+void    pariputsf(const char *format, ...);
 int     popinfile(void);
 GEN     readbin(char *name, FILE *f);
 void    sor(GEN g, char fo, long dd, long chmp);
@@ -819,7 +819,7 @@ void    texe(GEN g, char format, long dec);
 pariFILE* try_pipe(char *cmd, int flag);
 char*   type_name(long t);
 void    voir(GEN x, long nb);
-void    vpariputs(char* format, va_list args);
+void    vpariputs(const char* format, va_list args);
 void    writebin(char *name, GEN x);
 
 /* galconj.c */

@@ -191,7 +191,7 @@ normalOutC(char c)
   if (logfile) putc(c, logfile);
 }
 static void
-normalOutS(char *s)
+normalOutS(const char *s)
 {
   fputs(s, pari_outfile);
   if (logfile) { fputs(s, logfile); }
@@ -211,7 +211,7 @@ normalErrC(char c)
   if (logfile) putc(c, logfile);
 }
 static void
-normalErrS(char *s)
+normalErrS(const char *s)
 {
   fputs(s, errfile);
   if (logfile) fputs(s, logfile);
@@ -237,7 +237,7 @@ void
 pariputc(char c) { pariOut->putch(c); }
 
 void
-pariputs(char *s) { pariOut->puts(s); }
+pariputs(const char *s) { pariOut->puts(s); }
 
 void
 pariflush(void) { pariOut->flush(); }
@@ -247,10 +247,11 @@ flusherr(void) { pariErr->flush(); }
 
 /* format is standard printf format, except %Z is a GEN */
 void
-vpariputs(char* format, va_list args)
+vpariputs(const char* format, va_list args)
 {
   long nb = 0, bufsize = 1023;
-  char *buf, *str, *s, *f = format;
+  const char *f = format;
+  char *buf, *str, *s, *t;
   
   /* replace each %Z (2 chars) by braced address format (8 chars) */
   s = str = gpmalloc(strlen(format)*4 + 1);
@@ -282,25 +283,25 @@ vpariputs(char* format, va_list args)
   buf = gpmalloc(bufsize);
   (void)vsprintf(buf,str,args); /* pray it does fit */
 #endif
-  f = s = buf;
+  t = s = buf;
   if (nb)
-    while ( *f )
+    while (*t)
     {
-      if (*f == '\003' && f[21] == '\003')
+      if (*t == '\003' && t[21] == '\003')
       {
-        *f = 0; f[21] = 0; /* remove the bracing chars */
-        pariOut->puts(s); bruteall((GEN)atol(f+1),'g',-1,1);
-        f += 22; s = f;
+        *t = 0; t[21] = 0; /* remove the bracing chars */
+        pariOut->puts(s); bruteall((GEN)atol(t+1),'g',-1,1);
+        t += 22; s = t;
         if (!--nb) break; 
       }
       else
-        f++;
+        t++;
     }
   pariOut->puts(s); free(buf); free(str);
 }
 
 void
-pariputsf(char *format, ...)
+pariputsf(const char *format, ...)
 {
   va_list args;
 
@@ -443,7 +444,7 @@ putc80(char c)
 }
 #undef MAX_WIDTH
 static void
-puts80(char *s)
+puts80(const char *s)
 {
   while (*s) putc80(*s++);
 }
@@ -477,7 +478,7 @@ putc_lim_lines(char c)
   col_index++; normalOutC(c);
 }
 static void
-puts_lim_lines(char *s)
+puts_lim_lines(const char *s)
 {
   long i,len;
   if (lin_index > max_lin) return;
@@ -628,9 +629,9 @@ errstr_putc(char c) { str_putc(ErrStr, c); }
   str->len += len; \
 }
 static void
-outstr_puts(char *s) { str_puts(OutStr, s); }
+outstr_puts(const char *s) { str_puts(OutStr, s); }
 static void
-errstr_puts(char *s) { str_puts(ErrStr, s); }
+errstr_puts(const char *s) { str_puts(ErrStr, s); }
 
 static void
 outstr_flush(void) { /* empty */ }
@@ -2198,7 +2199,7 @@ bruterr(GEN x,char format,long sigd)
 }
 
 void
-fprintferr(char* format, ...)
+fprintferr(const char* format, ...)
 {
   va_list args;
   PariOUT *out = pariOut; pariOut = pariErr;
