@@ -454,10 +454,10 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
     for (k=1; k<l; k++)
     {
       GEN NormP = powgi(prim, gmael(P,k,4));
-      long nor = itos_or_0(NormP); if (nor > n2) break;
+      long nor = itos_or_0(NormP); if (!nor || nor > n2) break;
 
-      if (a) { a = mului(nor, a); b = mului(nor-1, b); }
-      else   { a = utoi(nor / p); b = utoi((nor-1) / (p-1)); }
+      if (a) { a = mulsi(nor, a); b = mulsi(nor-1, b); }
+      else   { a = stoi(nor / p); b = stoi((nor-1) / (p-1)); }
     }
     if (a) affrr(divri(mulir(a,Res),b),   Res);
     else   affrr(divrs(mulsr(p-1,Res),p), Res);
