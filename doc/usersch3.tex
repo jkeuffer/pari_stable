@@ -69,7 +69,7 @@ with a \& sign, as in
 
 \noindent it means that, besides the normal return value, the variable named
 $e$ may be set as a side effect. When passing the argument, the \& sign has
-to be typed in explicitly. As of version \vers{}, this \tet{pointer} argument
+to be typed in explicitly. As of version \vers, this \tet{pointer} argument
 is optional for all documented functions, hence the \& will always appear
 between brackets as in \kbd{issquare}$(x,\{\&e\})$.
 
@@ -120,7 +120,7 @@ integers, add \kbd{O(p\pow k)} to the result; finally, to obtain the
 \kbd{O(X\pow k)} to the result or use the \kbd{taylor} function
 (see \secref{se:taylor}). \label{se:gdiv}
 
-\syn{gdiv}{x,y}for $x$ \kbd{/} $y$.
+\syn{gdiv}{x,y} for $x$ \kbd{/} $y$.
 
 \subseckbd{\bs}: The expression $x$ \kbd{\bs} $y$ is the
 % keep "Euclidean" and "quotient" on same line for gphelp
@@ -213,8 +213,8 @@ $x-y$, where $x$ and $y$ must be in $\R$, and $\teb{gegal}(x,y)$ which
 can be applied to any two PARI objects $x$ and $y$ and gives 1 (i.e.~true) if
 they are equal (but not necessarily identical), 0 (i.e.~false) otherwise.
 Particular cases of \teb{gegal} which should be used are $\teb{gcmp0}(x)$
-($x==0$ ?), $\teb{gcmp1}(x)$ ($x==1$ ?), and\sidx{gcmp\string\_1}
-\key{gcmp\_1}$(x)$ ($x==-1$ ?).
+($x==0$ ?), $\teb{gcmp1}(x)$ ($x==1$ ?), and
+$\teb{gcmp_1}(x)$ ($x==-1$ ?).
 
 Note that $\teb{gcmp0}(x)$ tests whether $x$ is equal to zero, even if $x$ is
 not an exact object. To test whether $x$ is an exact object which is equal to
@@ -365,14 +365,14 @@ arguments of \kbd{Str} are evaluated in string context (see
 \idx{environment expansion} on the string. This feature can be used to read 
 \idx{environment variable} values.
 
-\bprog%
+\bprog
 ? i = 1; Str("x" i)
-\%1 = "x1"
-? eval(\%)
-\%2 = x1;
-? Str("\$HOME", 1)
-\%2 = "/home/pari"
-\eprog
+%1 = "x1"
+? eval(%)
+%2 = x1;
+? Str("$HOME", 1)
+%3 = "/home/pari"
+@eprog
 
 \syn{strtoGENstr}{x,\fl}. This function is mostly useless in library mode. Use
 the pair \tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{char*} and
@@ -453,7 +453,7 @@ types, which can be recalled by typing \b{t} under GP.
 \syn{compo}{x,n}, where $n$ is a \kbd{long}.
 
 The two other methods are more natural but more restricted. First, the
-function $\teb{polcoeff}(x,n)$ gives the coefficient of degree $n$ of the
+function \funs{polcoeff}{x,n} gives the coefficient of degree $n$ of the
 polynomial or power series $x$, with respect to the main variable of $x$ (to
 see the order of the variables or to change it, use the function
 \tet{reorder}, see \secref{se:reorder}). In particular if $n$ is less than
@@ -779,7 +779,7 @@ of terms of the argument and the function being computed.
 $\bullet$ If the argument is a vector or a matrix, the result is the
 componentwise evaluation of the function. In particular, transcendental
 functions on square matrices, which are not implemented in the present
-version \vers{} (see Appendix~B however), will have a slightly different name
+version \vers\ (see Appendix~B however), will have a slightly different name
 if they are implemented some day.
 
 \subseckbd{\pow}: If $y$ is not of type integer, \kbd{x\pow y} has the same
@@ -881,19 +881,18 @@ $B_x$, as \kbd{bernfrac}, but $B_x$ is returned as a real number
 the \idx{Bernoulli numbers} $B_0$, $B_2$,\dots, $B_{2x}$. These Bernoulli
 numbers can then be used as follows. Assume that this vector has been put
 into a variable, say \kbd{bernint}. Then you can define under GP:
-\bprog%
+\bprog
 bern(x) =
-\obr
-  if (x==1, return(-1/2));
-  if ((x<0) || (x\%2), return(0));
+{
+  if (x == 1, return(-1/2));
+  if (x < 0 || x % 2, return(0));
   bernint[x/2+1]
-\cbr
-\eprog
+}
+@eprog
 \noindent and then \kbd{bern(k)} gives the Bernoulli number of index $k$ as a
 rational number, exactly as \kbd{bernreal(k)} gives it as a real number. If
 you need only a few values, calling \kbd{bernfrac(k)} each time will be much
 more efficient than computing the huge vector above.
-
 
 \syn{bernvec}{x}.
 
@@ -969,7 +968,7 @@ $\kbd{gamma}(x+1/2)$.
 \syn{ggamd}{x,\var{prec}}.
 
 \subsecidx{gamma}$(x)$: gamma function of $x$. In the present version
-\vers{} the $p$-adic gamma function is not implemented.
+\vers\ the $p$-adic gamma function is not implemented.
 
 \syn{ggamma}{x,\var{prec}}.
 
@@ -1070,21 +1069,21 @@ straightforward, i.e.~identical to $x * x$, since it can usually be
 computed more efficiently (roughly one-half of the elementary
 multiplications can be saved). Also, squaring a $2$-adic number increases
 its precision. For example,
-\bprog%
+\bprog
 ? (1 + O(2^4))^2
-\%1 = 1 + O(2^5)
+%1 = 1 + O(2^5)
 ? (1 + O(2^4)) * (1 + O(2^4))
-\%2 = 1 + O(2^4)
-\eprog\noindent
+%2 = 1 + O(2^4)
+@eprog\noindent
 Note that this function is also called whenever one multiplies two objects
 which are known to be {\it identical}, e.g.~they are the value of the same
 variable, or we are computing a power.
-\bprog%
+\bprog
 ? x = (1 + O(2^4)); x * x
-\%3 = 1 + O(2^5)
+%3 = 1 + O(2^5)
 ? (1 + O(2^4))^4
-\%4 = 1 + O(2^6)
-\eprog
+%4 = 1 + O(2^6)
+@eprog
 \noindent(note the difference between \kbd{\%2} and \kbd{\%3} above). No
 higher powers receive a special treatment. Raising a $3$-adic to the third
 power does not increase its precision for instance.
@@ -1148,7 +1147,7 @@ $\teb{wf2}(x,\var{prec})$.
 \subsecidx{zeta}$(s)$: Riemann's zeta function\sidx{Riemann zeta-function}
 $\zeta(s)=\sum_{n\ge1}n^{-s}$, computed using the \idx{Euler-Maclaurin}
 summation formula, except when $s$ is of type integer, in which case it
-is computed using \idx{Bernoulli numbers} for
+is computed using Bernoulli numbers\sidx{Bernoulli numbers} for
 $s\le0$ or $s>0$ and even, and using modular forms for $s>0$ and odd.
 
 \syn{gzeta}{s,\var{prec}}.
@@ -1163,13 +1162,13 @@ completely different from transcendental functions: in general only the types
 integer and polynomial are accepted as arguments. If a vector or matrix type
 is given, the function will be applied on each coefficient independently.
 
-In the present version \vers{}, all arithmetic functions in the narrow
-sense of the word~--- Euler's totient\sidx{Euler totient function}
-function, the M\"obius\sidx{moebius} function, the sums over divisors or
-powers of divisors etc.--- call, after trial division by small primes, the
-same versatile factoring machinery described under \kbd{factorint}. It
-includes \idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and has an
-early exit option for the functions \teb{moebius} and (the integer function
+In the present version \vers, all arithmetic functions in the narrow sense
+of the word~--- Euler's totient\sidx{Euler totient function} function, the
+\idx{Moebius} function, the sums over divisors or powers of divisors
+etc.--- call, after trial division by small primes, the same versatile
+factoring machinery described under \kbd{factorint}. It includes
+\idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and has an early exit
+option for the functions \teb{moebius} and (the integer function
 underlying) \teb{issquarefree}. Note that it relies on a (fairly strong)
 probabilistic primality test: numbers found to be strong pseudo-primes
 after 10 successful trials of the \idx{Rabin-Miller} test are declared
@@ -1204,7 +1203,7 @@ you have just stumbled over a non-trivial factor. Note that the arithmetic
 functions in the narrow sense, like \teb{eulerphi}, do \var{not} use this
 extra table.
 
-The present PARI version \vers{} allows up to 100 user-specified
+The present PARI version \vers\ allows up to 100 user-specified
 primes to be appended to the table. This limit may be changed
 by altering \kbd{NUMPRTBELT} in file \kbd{init.c}. To remove primes from the
 list use \kbd{removeprimes}.
@@ -1376,16 +1375,16 @@ polynomials will have integer coefficients, and the content of a polynomial
 or rational function is discarded and not included in the factorization. If
 you need it, you can always ask for the content explicitly:
 
-\bprog%
+\bprog
 ? factor(t^2 + 5/2*t + 1)
-\%1 =
+%1 =
 [2*t + 1 1]
-\smallskip%
+
 [t + 2 1]
-\smallskip%
+
 ? content(t^2 + 5/2*t + 1)
-\%2 = 1/2%
-\eprog
+%2 = 1/2
+@eprog
 
 \noindent See also \teb{factornf}.
 
@@ -1537,7 +1536,7 @@ Here $x$ can be an integer or a polynomial.
 \syn{gissquarefree}{x}, but the simpler function $\teb{issquarefree}(x)$
 which returns a \kbd{long} should be used if $x$ is known to be of type
 integer. This \teb{issquarefree} is just the square of the
-M\"obius\sidx{moebius} function, and is computed as a multiplicative
+\idx{Moebius} function, and is computed as a multiplicative
 arithmetic function much like the latter.
 
 \subsecidx{kronecker}$(x,y)$:
@@ -1552,8 +1551,8 @@ that $\text{lcm}(x,y)*\text{gcd}(x,y)=\text{abs}(x*y)$.
 
 \syn{glcm}{x,y}.
 
-\subsecidx{moebius}$(x)$: M\"obius $\mu$-function of $|x|$. $x$ must be of
-type integer.
+\subsecidx{moebius}$(x)$: \idx{Moebius} $\mu$-function of $|x|$. $x$ must
+be of type integer.
 
 \syn{mu}{x}, the result ($0$ or $\pm 1$) is a \kbd{long}.
 
@@ -1777,16 +1776,17 @@ for Schertz's method using $\sigma$. In that case, returns 0 if $\lambda$
 is not suitable.
 
 If $D>0$, the function may fail with the following message
-\bprog%
+\bprog
 "Cannot find a suitable modulus in FindModulus"
-\eprog
+@eprog
 See the comments in \tet{bnrstark} about this problem.
 
 \syn{quadray}{D,f,\fl}.
 
-\subsecidx{quadregulator}$(x)$: regulator of the quadratic field of positive
-discriminant $x$. Returns an error if $x$ is not a discriminant (fundamental or not) or
-if $x$ is a square. See also \kbd{quadclassunit} if $x$ is large.
+\subsecidx{quadregulator}$(x)$: regulator of the quadratic field of
+positive discriminant $x$. Returns an error if $x$ is not a discriminant
+(fundamental or not) or if $x$ is a square. See also \kbd{quadclassunit} if
+$x$ is large.
 
 \syn{regula}{x,\var{prec}}.
 
@@ -2139,7 +2139,7 @@ omitted $A$ is coded as \kbd{NULL}.
 
 \subsecidx{ellorder}$(E,z)$: gives the order of the point $z$ on the elliptic
 curve $E$ if it is a torsion point, zero otherwise. In the present version
-\vers{}, this is implemented only for elliptic curves defined over $\Q$.
+\vers, this is implemented only for elliptic curves defined over $\Q$.
 
 \syn{orderell}{E,z}.
 
@@ -2217,11 +2217,11 @@ gives the structure of the torsion group as a product of cyclic groups
 (sorted by decreasing order), and \kbd{v2} gives generators for these cyclic
 groups. $E$ must be a long vector as output by \kbd{ellinit}.
 
-\bprog%
+\bprog
 ?  E = ellinit([0,0,0,-1,0]);
 ?  elltors(E)
-\%1 = [4, [2, 2], [[0, 0], [1, 0]]]
-\eprog
+%1 = [4, [2, 2], [[0, 0], [1, 0]]]
+@eprog
 Here, the torsion subgroup is isomorphic to $\Z/2\Z \times \Z/2\Z$, with
 generators $[0,0]$ and $[1,0]$.
 
@@ -2278,31 +2278,31 @@ functions).
 
 \noindent We shall use the following conventions:
 
-$\bullet$ $\var{\idx{nf}}$ denotes a number field, i.e.~a 9-component vector
+$\bullet$ $\tev{nf}$ denotes a number field, i.e.~a 9-component vector
 in the format output by \tet{nfinit}. This contains the basic arithmetic data
 associated to the number field: signature, maximal order, discriminant, etc.
 
-$\bullet$ $\var{\idx{bnf}}$ denotes a big number field, i.e.~a 10-component
+$\bullet$ $\tev{bnf}$ denotes a big number field, i.e.~a 10-component
 vector in the format output by \tet{bnfinit}. This contains $\var{nf}$ and
 the deeper invariants of the field: units, class groups, as well as a lot of
 technical data necessary for some complex fonctions like \kbd{bnfisprincipal}.
 
-$\bullet$ $\var{\idx{bnr}}$ denotes a big ``ray number field'', i.e.~some data
+$\bullet$ $\tev{bnr}$ denotes a big ``ray number field'', i.e.~some data
 structure output by \kbd{bnrinit}, even more complicated than $\var{bnf}$,
 corresponding to the ray class group structure of the field, for some
 modulus.
 
-$\bullet$ $\var{\idx{rnf}}$ denotes a relative number field (see below).
+$\bullet$ $\tev{rnf}$ denotes a relative number field (see below).
 \smallskip
 
-$\bullet$ $\var{\idx{ideal}}$ can mean any of the following:
+$\bullet$ $\tev{ideal}$ can mean any of the following:
 
 \quad -- a $\Z$-basis, in \idx{Hermite normal form}
 (HNF) or not. In this case $x$ is a square matrix.
 
-\quad -- an \var{\idx{idele}}, i.e.~a 2-component vector, the first
-being an ideal given as a $\Z$--basis, the second being a $r_1+r_2$-component
-row vector giving the complex logarithmic Archimedean information.
+\quad -- an \tev{idele}, i.e.~a 2-component vector, the first being an
+ideal given as a $\Z$--basis, the second being a $r_1+r_2$-component row
+vector giving the complex logarithmic Archimedean information.
 
 \quad -- a $\Z_K$-generating system for an ideal.
 
@@ -2348,18 +2348,18 @@ elements of a (given) number field $\var{nf}$, always expressed as column
 vectors on the integral basis \kbd{\var{nf}.zk}. Hence it is a matrix of
 vectors.
 
-$\bullet$ An \var{\idx{ideal list}} will be a row vector of (fractional)
+$\bullet$ An \tev{ideal list} will be a row vector of (fractional)
 ideals of the number field $\var{nf}$.
 
-$\bullet$ A \var{\idx{pseudo-matrix}} will be a pair $(A,I)$ where $A$ is a
+$\bullet$ A \tev{pseudo-matrix} will be a pair $(A,I)$ where $A$ is a
 relative matrix and $I$ an ideal list whose length is the same as the number
 of columns of $A$. This pair will be represented by a 2-component row vector.
 
-$\bullet$ The \var{\idx{module}} generated by a pseudo-matrix $(A,I)$ is
+$\bullet$ The \tev{module} generated by a pseudo-matrix $(A,I)$ is
 the sum $\sum_i{\Bbb a}_jA_j$ where the ${\Bbb a}_j$ are the ideals of $I$
 and $A_j$ is the $j$-th column of $A$.
 
-$\bullet$ A pseudo-matrix $(A,I)$ is a \var{\idx{pseudo-basis}} of the module
+$\bullet$ A pseudo-matrix $(A,I)$ is a \tev{pseudo-basis} of the module
 it generates if $A$ is a square matrix with non-zero determinant and all the
 ideals of $I$ are non-zero. We say that it is in Hermite Normal
 Form\sidx{Hermite normal form} (HNF) if it is upper triangular and all the
@@ -2639,7 +2639,7 @@ true module.
 
 \syn{decodemodule}{\var{nf},m}.
 
-\subsecidx{bnf{}init}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: essentially identical
+\subsecidx{bnfinit}$(P,\{\fl=0\},\{\var{tech}=[\,]\})$: essentially identical
 to \kbd{bnfclassunit} except that the output contains a lot of technical data,
 and should not be printed out explicitly in general. The result of
 \kbd{bnfinit} is used in programs such as \kbd{bnfisprincipal},
@@ -2661,43 +2661,41 @@ $\var{bnf}[2]$ contains the matrix $B$, i.e.~the matrix containing the
 expressions of the prime ideal factorbase in terms of the $\p_i$. It is an
 $r\times c$ matrix.
 
- $\var{bnf}[3]$ contains the complex logarithmic embeddings of the system of
+$\var{bnf}[3]$ contains the complex logarithmic embeddings of the system of
 fundamental units which has been found. It is an $(r_1+r_2)\times(r_1+r_2-1)$
 matrix.
 
- $\var{bnf}[4]$ contains the matrix $M''_C$ of Archimedean components of the
+$\var{bnf}[4]$ contains the matrix $M''_C$ of Archimedean components of the
 relations of the matrix $M''$, except that the first $r_1+r_2-1$ columns are
 suppressed since they are already in $\var{bnf}[3]$.
 
- $\var{bnf}[5]$ contains the prime factor base, i.e.~the list of $k$ prime
+$\var{bnf}[5]$ contains the prime factor base, i.e.~the list of $k$ prime
 ideals used in finding the relations.
 
- $\var{bnf}[6]$ contains the permutation of the prime factor base which was
-necessary
-to reduce the relation matrix to the form explained in subsection 6.5.5
-of GTM~138 (i.e.~with a
-big $c\times c$ identity matrix on the lower right). Note that in the above
-mentioned book, the need to permute the rows of the relation matrices which
-occur was not emphasized.
+$\var{bnf}[6]$ contains the permutation of the prime factor base which was
+necessary to reduce the relation matrix to the form explained in subsection
+6.5.5 of GTM~138 (i.e.~with a big $c\times c$ identity matrix on the lower
+right). Note that in the above mentioned book, the need to permute the rows
+of the relation matrices which occur was not emphasized.
 
- $\var{bnf}[9]$ is a 3-element row vector obtained as follows.  Let
+$\var{bnf}[9]$ is a 3-element row vector obtained as follows.  Let
 $b=u_1^{-1}\var{bnf}[1]u_2$ obtained by applying the \idx{Smith normal form}
 algorithm to the matrix $W$ (= $\var{bnf}[1]$). Then
 $\var{bnf}[9]=[u_1,u_2,b]$. Note that the final class group generators
 given by \kbd{bnfinit} or \kbd{bnfclassunit} are obtained by
 \idx{LLL}-reducing the generators whose list is $b$.
 
- Finally, $\var{bnf}[10]$ is unused and set equal to 0, but it is essential
+Finally, $\var{bnf}[10]$ is unused and set equal to 0, but it is essential
 that this component be present, because PARI distinguishes a number field
 \var{nf} from a big number field \var{bnf} by the number of its
 components. \smallskip
 
 \noindent$\bullet$ The less technical components are as follows:
 
- $\var{bnf}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
+$\var{bnf}[7]$ or \kbd{\var{bnf}.nf} is equal to the number field data
 $\var{nf}$ as would be given by \kbd{nfinit}.
 
- $\var{bnf}[8]$ is a vector containing the last 6 components of
+$\var{bnf}[8]$ is a vector containing the last 6 components of
 \kbd{bnfclassunit[,1]}, i.e.~the classgroup \kbd{\var{bnf}.clgp}, the
 regulator \kbd{\var{bnf}.reg}, the general ``check'' number which should be
 close to 1, the number of roots of unity and a generator \kbd{\var{bnf}.tu},
@@ -2740,17 +2738,17 @@ is allowed to modify, by recomputing the roots to a higher accuracy if
 desired. Note also that the member functions will \var{not} work on
 \var{sbnf}, you have to use \kbd{bnfmake} explicitly first.
 
-\syn{bnf{}init0}{P,\fl,\var{tech},\var{prec}}.
+\syn{bnfinit0}{P,\fl,\var{tech},\var{prec}}.
 
-\subsecidx{bnf{}isintnorm}$(\var{bnf},x)$: computes a complete system of
+\subsecidx{bnfisintnorm}$(\var{bnf},x)$: computes a complete system of
 solutions (modulo units of positive norm) of the absolute norm equation
 $\text{Norm}(a)=x$,
 where $a$ is an integer in $\var{bnf}$. If $\var{bnf}$ has not been certified,
 the correctness of the result depends on the validity of \idx{GRH}.
 
-\syn{bnf{}isintnorm}{\var{bnf},x}.
+\syn{bnfisintnorm}{\var{bnf},x}.
 
-\subsecidx{bnf{}isnorm}$(\var{bnf},x,\{\fl=1\})$: tries to tell whether the
+\subsecidx{bnfisnorm}$(\var{bnf},x,\{\fl=1\})$: tries to tell whether the
 rational number $x$ is the norm of some element y in $\var{bnf}$. Returns a
 vector $[a,b]$ where $x=Norm(a)*b$. Looks for a solution which is an $S$-unit,
 with $S$ a certain set of prime ideals containing (among others) all primes
@@ -2765,17 +2763,17 @@ ideals of norm less than $\fl$. And if $\fl<0$ the ideals dividing $\fl$.
 $12\log(\var{disc}(\var{Bnf}))^2$,
 where $\var{Bnf}$ is the Galois closure of $\var{bnf}$.
 
-\syn{bnf{}isnorm}{\var{bnf},x,\fl,\var{prec}}, where $\fl$ and
+\syn{bnfisnorm}{\var{bnf},x,\fl,\var{prec}}, where $\fl$ and
 $\var{prec}$ are \kbd{long}s.
 
-\subsecidx{bnf{}issunit}$(\var{bnf},\var{sfu},x)$: $\var{bnf}$ being output by
+\subsecidx{bnfissunit}$(\var{bnf},\var{sfu},x)$: $\var{bnf}$ being output by
 \kbd{bnfinit}, \var{sfu} by \kbd{bnfsunit}, gives the column vector of
 exponents of $x$ on the fundamental $S$-units and the roots of unity.
 If $x$ is not a unit, outputs an empty vector.
 
-\syn{bnf{}issunit}{\var{bnf},\var{sfu},x}.
+\syn{bnfissunit}{\var{bnf},\var{sfu},x}.
 
-\subsecidx{bnf{}isprincipal}$(\var{bnf},x,\{\fl=1\})$: $\var{bnf}$ being the
+\subsecidx{bnfisprincipal}$(\var{bnf},x,\{\fl=1\})$: $\var{bnf}$ being the
 number field data output by \kbd{bnfinit}, and $x$ being either a $\Z$-basis
 of an ideal in the number field (not necessarily in HNF) or a prime ideal in
 the format output by the function \kbd{idealprimedec}, this function tests
@@ -2814,7 +2812,7 @@ computations.
 
 \syn{isprincipalall}{\var{bnf},x,\fl}.
 
-\subsecidx{bnf{}isunit}$(\var{bnf},x)$: $\var{bnf}$ being the number field data
+\subsecidx{bnfisunit}$(\var{bnf},x)$: $\var{bnf}$ being the number field data
 output by
 \kbd{bnfinit} and $x$ being an algebraic number (type integer, rational or
 polmod), this outputs the decomposition of $x$ on the fundamental units and
@@ -2828,14 +2826,13 @@ $i\le r$ and is an integer modulo the order of $\zeta$ for $i=r+1$.
 \syn{isunit}{\var{bnf},x}.
 
 \subsecidx{bnfmake}$(\var{sbnf})$: \var{sbnf} being a ``small $\var{bnf}$''
-as output
-by \kbd{bnfinit}$(x,3)$, computes the complete \kbd{bnfinit} information. The
-result is \var{not} identical to what \kbd{bnfinit} would yield, but is
-functionally identical. The execution time is very small compared to a
-complete \kbd{bnfinit}. Note that if the default precision in GP (or
-$\var{prec}$ in library mode) is greater than the precision of the roots
-$\var{sbnf}[5]$, these are recomputed so as to get a result with greater
-accuracy.
+as output by \kbd{bnfinit}$(x,3)$, computes the complete \kbd{bnfinit}
+information. The result is \var{not} identical to what \kbd{bnfinit} would
+yield, but is functionally identical. The execution time is very small
+compared to a complete \kbd{bnfinit}. Note that if the default precision in
+GP (or $\var{prec}$ in library mode) is greater than the precision of the
+roots $\var{sbnf}[5]$, these are recomputed so as to get a result with
+greater accuracy.
 
 Note that the member functions are \var{not} available for \var{sbnf}, you
 have to use \kbd{bnfmake} explicitly first.
@@ -2927,19 +2924,18 @@ together with the finite prime ideals dividing the modulus of \var{bnr},
 see the example below), 3: returns also the character.
 
 Example:
-
-\bprog%
+\bprog
 bnf = bnfinit(x^2 - 229);
 bnr = bnrinit(bnf,1,1);
-bnrL1(bnr)%
-\eprog\noindent
+bnrL1(bnr)
+@eprog\noindent
 returns the order and the first non-zero term of the abelian
 $L$-functions $L(s, \chi)$ at $s = 0$ where $\chi$ runs through the
 characters of the class group of $\Q(\sqrt{229})$. Then
-\bprog%
+\bprog
 bnr2 = bnrinit(bnf,2,1);
-bnrL1(bnr2,2)%
-\eprog\noindent
+bnrL1(bnr2,2)
+@eprog\noindent
 returns the order and the first non-zero terms of the abelian
 $L$-functions $L_S(s, \chi)$ at $s = 0$ where $\chi$ runs through the
 characters of the class group of $\Q(\sqrt{229})$ and $S$ is the set
@@ -3058,7 +3054,7 @@ absolute discriminant. Each prime ideal $pr=[p,\alpha,e,f,\beta]$ in the
 prime factorization $m$ is coded as $p\cdot n^2+(f-1)\cdot n+(j-1)$, where
 $n$ is the degree of the base field and $j$ is such that
 
-\kbd{pr=idealprimedec(\var{nf},p)[j]}.
+\kbd{pr = idealprimedec(\var{nf},p)[j]}.
 
 $m$ can be decoded using \kbd{bnfdecodemodule}.
 
@@ -3112,11 +3108,11 @@ the enlarged L-function associated to $L$.
 The generators of the ray class group are needed, and you can set $\fl=1$ if
 the character is known to be primitive. Example:
 
-\bprog%
+\bprog
 bnf = bnfinit(x^2 - 145);
 bnr = bnrinit(bnf,7,1);
-bnrrootnumber(bnr, [5])%
-\eprog\noindent
+bnrrootnumber(bnr, [5])
+@eprog\noindent
 returns the root number of the character $\chi$ of $Cl_7(\Q(\sqrt{145}))$
 such that $\chi(g) = \zeta^5$, where $g$ is the generator of the ray-class
 field and $\zeta = e^{2i\pi/N}$ where $N$ is the order of $g$ ($N=12$ as
@@ -3136,11 +3132,11 @@ polynomial, 2 to obtain an absolute polynomial and 3 to obtain the
 irreducible relative polynomial of the Stark unit, 0 being default.
 Example:
 
-\bprog%
+\bprog
 bnf = bnfinit(y^2 - 3);
-bnr = bnrinit(bnf,5,1);
-bnrstark(bnr,0)%
-\eprog\noindent
+bnr = bnrinit(bnf, 5, 1);
+bnrstark(bnr, 0)
+@eprog\noindent
 returns the ray class field of $\Q(\sqrt{3})$ modulo $5$.
 
 \misctitle{Remark.} The function may fail, returning the error message
@@ -3167,12 +3163,12 @@ variable number of $t$ must be \var{greater} than that of $x$). However if
 the coefficients of the number field occur explicitly (as polmods) as
 coefficients of $x$, the variable of these polmods \var{must} be the same as
 the main variable of $t$. For example
-\bprog%
+\bprog
 ? factornf(x^2 + Mod(y, y^2+1), y^2+1);
-? factornf(x^2 + 1, y^2+1); \bs\bs\text{ these two are OK}
+? factornf(x^2 + 1, y^2+1); \\@com these two are OK
 ? factornf(x^2 + Mod(z,z^2+1), y^2+1)
   ***   incorrect type in gmulsg
-\eprog
+@eprog
 
 \syn{polfnf}{x,t}.
 
@@ -3561,8 +3557,8 @@ $x\cap\Z$.
 Note that when an explicit $a$ is given, we use an asymptotically faster
 method, however in practice it is usually slower.
 
-\synx{ideal\_two\_elt0}{\var{nf},x,a}{ideal\string\_two\string\_elt0}, where
-an omitted $a$ is entered as \kbd{NULL}.
+\syn{ideal_two_elt0}{\var{nf},x,a}, where an omitted $a$ is entered as
+\kbd{NULL}.
 
 \subsecidx{idealval}$(\var{nf},x,\var{vp})$: gives the valuation of the
 ideal $x$ at the prime ideal \var{vp} in the number field $\var{nf}$,
@@ -3690,7 +3686,7 @@ can also use $\teb{discf}(x)$ ($\fl=0$).
 \subsecidx{nfeltdiv}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
 \var{nf}, computes their quotient $x/y$ in the number field $\var{nf}$.
 
-\synx{element\_div}{\var{nf},x,y}{element\string\_div}.
+\syn{element_div}{\var{nf},x,y}.
 
 \subsecidx{nfeltdiveuc}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
 \var{nf}, computes an algebraic integer $q$ in the number field $\var{nf}$
@@ -3704,7 +3700,7 @@ and $y$ in \var{nf} and \var{pr} a prime ideal in \kbd{modpr} format (see
 \tet{nfmodprinit}), computes their quotient $x / y$ modulo the prime ideal
 \var{pr}.
 
-\synx{element\_divmodpr}{\var{nf},x,y,\var{pr}}{element\string\_divmodpr}.
+\syn{element_divmodpr}{\var{nf},x,y,\var{pr}}.
 
 \subsecidx{nfeltdivrem}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
 \var{nf}, gives a two-element row vector $[q,r]$ such that $x=qy+r$, $q$ is
@@ -3724,33 +3720,33 @@ $$\kbd{x - nfeltmul(\var{nf},round(nfeltdiv(\var{nf},x,y)),y)}.$$
 \subsecidx{nfeltmul}$(\var{nf},x,y)$: given two elements $x$ and $y$ in
 \var{nf}, computes their product $x*y$ in the number field $\var{nf}$.
 
-\synx{element\_mul}{\var{nf},x,y}{element\string\_mul}.
+\syn{element_mul}{\var{nf},x,y}.
 
 \subsecidx{nfeltmulmodpr}$(\var{nf},x,y,\var{pr})$: given two elements $x$ and
 $y$ in \var{nf} and \var{pr} a prime ideal in \kbd{modpr} format (see
 \tet{nfmodprinit}), computes their product $x*y$ modulo the prime ideal
 \var{pr}.
 
-\synx{element\_mulmodpr}{\var{nf},x,y,\var{pr}}{element\string\_mulmodpr}.
+\syn{element_mulmodpr}{\var{nf},x,y,\var{pr}}.
 
 \subsecidx{nfeltpow}$(\var{nf},x,k)$: given an element $x$ in \var{nf},
 and a positive or negative integer $k$, computes $x^k$ in the number field
 $\var{nf}$.
 
-\synx{element\_pow}{\var{nf},x,k}{element\string\_pow}.
+\syn{element_pow}{\var{nf},x,k}.
 
 \subsecidx{nfeltpowmodpr}$(\var{nf},x,k,\var{pr})$: given an element $x$ in
 \var{nf}, an integer $k$ and a prime ideal \var{pr} in \kbd{modpr} format
 (see \tet{nfmodprinit}), computes $x^k$ modulo the prime ideal \var{pr}.
 
-\synx{element\_powmodpr}{\var{nf},x,k,\var{pr}}{element\string\_powmodpr}.
+\syn{element_powmodpr}{\var{nf},x,k,\var{pr}}.
 
 \subsecidx{nfeltreduce}$(\var{nf},x,\var{ideal})$: given an ideal in
 Hermite normal form and an element $x$ of the number field $\var{nf}$,
 finds an element $r$ in $\var{nf}$ such that $x-r$ belongs to the ideal
 and $r$ is small.
 
-\synx{element\_reduce}{\var{nf},x,\var{ideal}}{element\string\_reduce}.
+\syn{element_reduce}{\var{nf},x,\var{ideal}}.
 
 \subsecidx{nfeltreducemodpr}$(\var{nf},x,\var{pr})$: given
 an element $x$ of the number field $\var{nf}$ and a prime ideal \var{pr} in
@@ -3766,10 +3762,9 @@ element $x$. The same result could be obtained using
 \kbd{idealval(\var{nf},x,\var{pr})} (since $x$ would then be converted to a
 principal ideal), but it would be less efficient.
 
-\synx{element\_val}{\var{nf},x,\var{pr}}{element\string\_val},
-and the result is a \kbd{long}.
+\syn{element_val}{\var{nf},x,\var{pr}}, and the result is a \kbd{long}.
 
-\subsecidx{nf{}factor}$(\var{nf},x)$: factorization of the univariate
+\subsecidx{nffactor}$(\var{nf},x)$: factorization of the univariate
 polynomial $x$ over the number field $\var{nf}$ given by \kbd{nfinit}. $x$
 has coefficients in $\var{nf}$ (i.e.~either scalar, polmod, polynomial or
 column vector). The main variable of $\var{nf}$ must be of \var{lower}
@@ -3780,14 +3775,14 @@ a \typ{POLMOD}), its main variable must be \var{the same} as the main
 variable of $x$. For example,
 \bprog
 ? nf = nfinit(y^2 + 1);
-? nffactor(nf, x^2 + y); \bs\bs\text{ OK}
-? nffactor(nf, x^2 + Mod(y, y^2+1)); \bs\bs\text{ OK}
-? nffactor(nf, x^2 + Mod(z, z^2+1)); \bs\bs\text{ illegal}
-\eprog
+? nffactor(nf, x^2 + y); \\@com OK
+? nffactor(nf, x^2 + Mod(y, y^2+1)); \\ @com OK
+? nffactor(nf, x^2 + Mod(z, z^2+1)); \\ @com WRONG
+@eprog
 
-\syn{nf{}factor}{\var{nf},x}.
+\syn{nffactor}{\var{nf},x}.
 
-\subsecidx{nf{}factormod}$(\var{nf},x,\var{pr})$: factorization of the
+\subsecidx{nffactormod}$(\var{nf},x,\var{pr})$: factorization of the
 univariate polynomial $x$ modulo the prime ideal \var{pr} in the number
 field $\var{nf}$. $x$ can have coefficients in the number field (scalar,
 polmod, polynomial, column vector) or modulo the prime ideal (integermod
@@ -3800,7 +3795,7 @@ $x$). However if the coefficients of the number field occur explicitly (as
 polmods) as coefficients of $x$, the variable of these polmods \var{must}
 be the same as the main variable of $t$ (see \kbd{nffactor}).
 
-\syn{nf{}factormod}{\var{nf},x,\var{pr}}.
+\syn{nffactormod}{\var{nf},x,\var{pr}}.
 
 \subsecidx{nfgaloisapply}$(\var{nf},\var{aut},x)$: $\var{nf}$ being a
 number field as output by \kbd{nfinit}, and \var{aut} being a \idx{Galois}
@@ -3886,23 +3881,27 @@ of the module generated by $(A,I)$. This avoids coefficient explosion.
 
 \syn{nfhermitemod}{\var{nf},x,\var{detx}}.
 
-\subsecidx{nf{}init}$(\var{pol},\{\fl=0\})$: \var{pol} being a non-constant,
-preferably monic, irreducible polynomial in $\Z[X]$, computes a 9-component
-vector \var{nf} useful in working in the number field $K$ defined by
-\var{pol}.
+\subsecidx{nfinit}$(\var{pol},\{\fl=0\})$: \var{pol} being a non-constant,
+preferably monic, irreducible polynomial in $\Z[X]$, initializes a
+\var{number field} structure (\kbd{nf}) associated to the field $K$ defined
+by \var{pol}. As such, it's a technical object passed as the first argument
+to most \kbd{nf}\var{xxx} functions, but it contains some information which
+may be directly useful. Access to this information via
+\var{member functions} is prefered since the specific data organization
+specified below may change in the future. Currently, \kbd{nf} is a row
+vector with 9 components:
 
- $\var{nf}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
+$\var{nf}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
 
- $\var{nf}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}), the number of real
+$\var{nf}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}), the number of real
 and complex places of $K$.
 
- $\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of
-the number field $K$.
+$\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of $K$.
 
- $\var{nf}[4]$ contains the index of $\var{nf}[1]$,
-i.e.~$[\Z_K:\Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
+$\var{nf}[4]$ contains the index of $\var{nf}[1]$,
+i.e.~$[\Z_K : \Z[\theta]]$, where $\theta$ is any root of $\var{nf}[1]$.
 
- $\var{nf}[5]$ is a vector containing 7 matrices $M$, $MC$, $T2$, $T$,
+$\var{nf}[5]$ is a vector containing 7 matrices $M$, $MC$, $T2$, $T$,
 $MD$, $TI$, $MDI$ useful for certain computations in the number field $K$.
 
 \quad$\bullet$ $M$ is the $(r1+r2)\times n$ matrix whose columns represent
@@ -3935,18 +3934,18 @@ ideal product) of $d(K)$ times the codifferent ideal
 (\kbd{\var{nf}.disc$*$\var{nf}.codiff}, which is an integral ideal). $MDI$
 is only used in \tet{idealinv}.
 
- $\var{nf}[6]$ is the vector containing the $r1+r2$ roots
+$\var{nf}[6]$ is the vector containing the $r1+r2$ roots
 (\kbd{\var{nf}.roots}) of $\var{nf}[1]$ corresponding to the $r1+r2$
 embeddings of the number field into $\C$ (the first $r1$ components are real,
 the next $r2$ have positive imaginary part).
 
- $\var{nf}[7]$ is an integral basis in Hermite normal form for $\Z_K$
+$\var{nf}[7]$ is an integral basis in Hermite normal form for $\Z_K$
 (\kbd{\var{nf}.zk}) expressed on the powers of~$\theta$.
 
- $\var{nf}[8]$ is the $n\times n$ integral matrix expressing the power
+$\var{nf}[8]$ is the $n\times n$ integral matrix expressing the power
 basis in terms of the integral basis, and finally
 
- $\var{nf}[9]$ is the $n\times n^2$ matrix giving the multiplication table
+$\var{nf}[9]$ is the $n\times n^2$ matrix giving the multiplication table
 of the integral basis.
 
 If a non monic polynomial is input, \kbd{nfinit} will transform it into a
@@ -3977,14 +3976,14 @@ If $\fl=4$, as $2$ but uses a partial \kbd{polred}.
 
 If $\fl=5$, as $3$ using a partial \kbd{polred}.
 
-\syn{nf{}init0}{x,\fl,\var{prec}}.
+\syn{nfinit0}{x,\fl,\var{prec}}.
 
-\subsecidx{nf{}isideal}$(\var{nf},x)$: returns 1 if $x$ is an ideal in
+\subsecidx{nfisideal}$(\var{nf},x)$: returns 1 if $x$ is an ideal in
 the number field $\var{nf}$, 0 otherwise.
 
 \syn{isideal}{x}.
 
-\subsecidx{nf{}isincl}$(x,y)$: tests whether the number field $K$ defined
+\subsecidx{nfisincl}$(x,y)$: tests whether the number field $K$ defined
 by the polynomial $x$ is conjugate to a subfield of the field $L$ defined
 by $y$ (where $x$ and $y$ must be in $\Q[X]$). If they are not, the output
 is the number 0. If they are, the output is a vector of polynomials, each
@@ -3996,13 +3995,13 @@ If $y$ is a number field (\var{nf}), a much faster algorithm is used
 wasn't guaranteed to return all the embeddings, hence was triggered by a
 special flag. This is no more the case.
 
-\syn{nf{}isincl}{x,y,\fl}.
+\syn{nfisincl}{x,y,\fl}.
 
-\subsecidx{nf{}isisom}$(x,y)$: as \tet{nfisincl}, but tests
+\subsecidx{nfisisom}$(x,y)$: as \tet{nfisincl}, but tests
 for isomorphism. If either $x$ or $y$ is a number field, a much faster
 algorithm will be used.
 
-\syn{nf{}isisom}{x,y,\fl}.
+\syn{nfisisom}{x,y,\fl}.
 
 \subsecidx{nfnewprec}$(\var{nf})$: transforms the number field $\var{nf}$
 into the corresponding data using current (usually larger) precision. This
@@ -4098,21 +4097,21 @@ $z$.
 The compositum will quite often be defined by a complicated polynomial,
 which it is advisable to reduce before further work. Here is a simple
 example involving the field $\Q(\zeta_5, 5^{1/5})$:
-\bprog%
+\bprog
 ? z = polcompositum(x^5 - 5, polcyclo(5), 1)[1];
-? pol = z[1]                 \bs\bs\text{ \kbd{pol} defines the compositum}
-\%2 = x^20 + 5*x^19 + 15*x^18 + 35*x^17 + 70*x^16 + 141*x^15 + 260*x^14 \bs
-  + 355*x^13 + 95*x^12 - 1460*x^11 - 3279*x^10 - 3660*x^9 - 2005*x^8 \bs
-  + 705*x^7 + 9210*x^6 + 13506*x^5 + 7145*x^4 - 2740*x^3 + 1040*x^2 \bs
+? pol = z[1]                 \\@com \kbd{pol} defines the compositum
+\%2 = x^20 + 5*x^19 + 15*x^18 + 35*x^17 + 70*x^16 + 141*x^15 + 260*x^14 \
+  + 355*x^13 + 95*x^12 - 1460*x^11 - 3279*x^10 - 3660*x^9 - 2005*x^8    \
+  + 705*x^7 + 9210*x^6 + 13506*x^5 + 7145*x^4 - 2740*x^3 + 1040*x^2     \
   - 320*x + 256
-? a = z[2]; a^5 - 5          \bs\bs\text{ \kbd{a} is a fifth root of $5$.}
+? a = z[2]; a^5 - 5          \\@com \kbd{a} is a fifth root of $5$
 \%3 = 0
-? z = polredabs(pol, 1);     \bs\bs\text{ look for a simpler polynomial}
+? z = polredabs(pol, 1);     \\@com look for a simpler polynomial
 ? pol = z[1]
 \%5 = x^20 + 25*x^10 + 5
-? a = subst(a.pol, x, z[2])  \bs\bs\text{ \kbd{a} in the new coordinates}
+? a = subst(a.pol, x, z[2])  \\@com \kbd{a} in the new coordinates
 \%6 = Mod(-5/22*x^19 + 1/22*x^14 - 123/22*x^9 + 9/11*x^4, x^20 + 25*x^10 + 5)
-\eprog
+@eprog
 
 \syn{polcompositum0}{x,y,\fl}.
 
@@ -4359,16 +4358,16 @@ zero otherwise.
 
 \syn{rnfhermitebasis}{\var{nf},x}.
 
-\subsecidx{rnf{}idealabstorel}$(\var{rnf},x)$: $\var{rnf}$ being a relative
+\subsecidx{rnfidealabstorel}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an
 ideal of the absolute extension $L/\Q$ given in HNF\sidx{Hermite normal form}
 (if it is not, apply \kbd{idealhnf} first), computes the relative pseudomatrix
 in HNF giving the ideal $x$ considered as an ideal of the relative extension
 $L/K$.
 
-\syn{rnf{}idealabstorel}{\var{rnf},x}.
+\syn{rnfidealabstorel}{\var{rnf},x}.
 
-\subsecidx{rnf{}idealdown}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
+\subsecidx{rnfidealdown}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
 field extension $L/K$ as output by \kbd{rnfinit} and $x$ being an ideal of
 the absolute extension $L/\Q$ given in HNF (if it is not, apply
 \kbd{idealhnf} first), gives the ideal of $K$ below $x$, i.e.~the
@@ -4377,70 +4376,70 @@ intersection of $x$ with $K$. Note that, if $x$ is given as a relative ideal
 since the result is simply the first ideal of the ideal list of the
 pseudomatrix.
 
-\syn{rnf{}idealdown}{\var{rnf},x}.
+\syn{rnfidealdown}{\var{rnf},x}.
 
-\subsecidx{rnf{}idealhnf}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
+\subsecidx{rnfidealhnf}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
 field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a relative
 ideal (which can be, as in the absolute case, of many different types,
 including of course elements), computes as a 2-component row vector the
 relative Hermite normal form of $x$, the first component being the HNF matrix
 (with entries on the integral basis), and the second component the ideals.
 
-\syn{rnf{}idealhermite}{\var{rnf},x}.
+\syn{rnfidealhermite}{\var{rnf},x}.
 
 \subsecidx{rnfidealmul}$(\var{rnf},x,y)$: $\var{rnf}$ being a relative number
 field extension $L/K$ as output by \kbd{rnfinit} and $x$ and $y$ being ideals
 of the relative extension $L/K$ given by pseudo-matrices, outputs the ideal
 product, again as a relative ideal.
 
-\syn{rnf{}idealmul}{\var{rnf},x,y}.
+\syn{rnfidealmul}{\var{rnf},x,y}.
 
-\subsecidx{rnf{}idealnormabs}$(\var{rnf},x)$: $\var{rnf}$ being a relative
+\subsecidx{rnfidealnormabs}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field extension $L/K$ as output by \kbd{rnfinit} and $x$ being a
 relative ideal (which can be, as in the absolute case, of many different
 types, including of course elements), computes the norm of the ideal $x$
 considered as an ideal of the absolute extension $L/\Q$. This is identical to
 \kbd{idealnorm(rnfidealnormrel(\var{rnf},x))}, only faster.
 
-\syn{rnf{}idealnormabs}{\var{rnf},x}.
+\syn{rnfidealnormabs}{\var{rnf},x}.
 
-\subsecidx{rnf{}idealnormrel}$(\var{rnf},x)$: $\var{rnf}$ being a relative
+\subsecidx{rnfidealnormrel}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field
 extension $L/K$ as output by \kbd{rnfinit} and $x$ being a relative ideal
 (which can be, as in the absolute case, of many different types, including
 of course elements), computes the relative norm of $x$ as a ideal of $K$
 in HNF.
 
-\syn{rnf{}idealnormrel}{\var{rnf},x}.
+\syn{rnfidealnormrel}{\var{rnf},x}.
 
-\subsecidx{rnf{}idealreltoabs}$(\var{rnf},x)$: $\var{rnf}$ being a relative
+\subsecidx{rnfidealreltoabs}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field
 extension $L/K$ as output by \kbd{rnfinit} and $x$ being a relative ideal
 (which can be, as in the absolute case, of many different types, including
 of course elements), computes the HNF matrix of the ideal $x$ considered
 as an ideal of the absolute extension $L/\Q$.
 
-\syn{rnf{}idealreltoabs}{\var{rnf},x}.
+\syn{rnfidealreltoabs}{\var{rnf},x}.
 
-\subsecidx{rnf{}idealtwoelt}$(\var{rnf},x)$: $\var{rnf}$ being a relative
+\subsecidx{rnfidealtwoelt}$(\var{rnf},x)$: $\var{rnf}$ being a relative
 number field
 extension $L/K$ as output by \kbd{rnfinit} and $x$ being an ideal of the
 relative extension $L/K$ given by a pseudo-matrix, gives a vector of
 two generators of $x$ over $\Z_L$ expressed as polmods with polmod
 coefficients.
 
-\syn{rnf{}idealtwoelement}{\var{rnf},x}.
+\syn{rnfidealtwoelement}{\var{rnf},x}.
 
-\subsecidx{rnf{}idealup}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
+\subsecidx{rnfidealup}$(\var{rnf},x)$: $\var{rnf}$ being a relative number
 field
 extension $L/K$ as output by \kbd{rnfinit} and $x$ being an ideal of
 $K$, gives the ideal $x\Z_L$ as an absolute ideal of $L/\Q$ (the relative
 ideal representation is trivial: the matrix is the identity matrix, and
 the ideal list starts with $x$, all the other ideals being $\Z_K$).
 
-\syn{rnf{}idealup}{\var{rnf},x}.
+\syn{rnfidealup}{\var{rnf},x}.
 
-\subsecidx{rnf{}init}$(\var{nf},\var{pol})$: $\var{nf}$ being a number field in
+\subsecidx{rnfinit}$(\var{nf},\var{pol})$: $\var{nf}$ being a number field in
 \kbd{nfinit}
 format considered as base field, and \var{pol} a polynomial defining a relative
 extension over $\var{nf}$, this computes all the necessary data to work in the
@@ -4532,17 +4531,17 @@ Finally, $\var{vabs}[4]$ is the absolute integral basis of $L$ expressed in HNF
 inverse matrix of the integral basis, allowing to go from polmod to integral
 basis representation.
 
-\syn{rnf{}initalg}{\var{nf},\var{pol},\var{prec}}.
+\syn{rnfinitalg}{\var{nf},\var{pol},\var{prec}}.
 
-\subsecidx{rnf{}isfree}$(\var{bnf},x)$: given a big number field $\var{bnf}$ as
+\subsecidx{rnfisfree}$(\var{bnf},x)$: given a big number field $\var{bnf}$ as
 output by \kbd{bnfinit}, and either a polynomial $x$ with coefficients in
 $\var{bnf}$ defining a relative extension $L$ of $\var{bnf}$, or a
 pseudo-basis $x$ of such an extension, returns true (1) if $L/\var{bnf}$ is
 free, false (0) if not.
 
-\syn{rnf{}isfree}{\var{bnf},x}, and the result is a \kbd{long}.
+\syn{rnfisfree}{\var{bnf},x}, and the result is a \kbd{long}.
 
-\subsecidx{rnf{}isnorm}$(\var{bnf},\var{ext},\var{el},\{\fl=1\})$: similar to
+\subsecidx{rnfisnorm}$(\var{bnf},\var{ext},\var{el},\{\fl=1\})$: similar to
 \kbd{bnfisnorm} but in the relative case. This tries to decide whether the
 element \var{el} in \var{bnf} is the norm of some $y$ in \var{ext}.
 $\var{bnf}$ is as output by \kbd{bnfinit}.
@@ -4572,7 +4571,7 @@ iff $b=1$) under \idx{GRH}, if $S$ contains all primes less than
 $12\log^2\left|\text{disc}(\var{Ext})\right|$, where \var{Ext} is the normal
 closure of $\var{ext} / \var{bnf}$.
 
-\syn{rnf{}isnorm}{\var{bnf},ext,x,\fl,\var{prec}}.
+\syn{rnfisnorm}{\var{bnf},ext,x,\fl,\var{prec}}.
 
 \subsecidx{rnfkummer}$(\var{bnr},\var{subgroup},\{deg=0\})$: \var{bnr}
 being as output by \kbd{bnrinit}, finds a relative equation for the
@@ -4586,13 +4585,13 @@ defined by \var{bnr}.
 \syn{rnfkummer}{\var{bnr},\var{subgroup},\var{deg},\var{prec}},
 where \var{deg} is a \kbd{long}.
 
-\subsecidx{rnf{}lllgram}$(\var{nf},\var{pol},\var{order})$: given a polynomial
+\subsecidx{rnflllgram}$(\var{nf},\var{pol},\var{order})$: given a polynomial
 \var{pol} with coefficients in \var{nf} and an order \var{order} as output
 by \kbd{rnfpseudobasis} or similar, gives $[[\var{neworder}],U]$, where
 \var{neworder} is a reduced order and $U$ is the unimodular transformation
 matrix.
 
-\syn{rnf{}lllgram}{\var{nf},\var{pol},\var{order},\var{prec}}.
+\syn{rnflllgram}{\var{nf},\var{pol},\var{order},\var{prec}}.
 
 \subsecidx{rnfnormgroup}$(\var{bnr},\var{pol})$: \var{bnr} being a big ray
 class field as output by \kbd{bnrinit} and \var{pol} a relative polynomial
@@ -4657,7 +4656,7 @@ the ideals of $I$ except perhaps the last one are equal to the ring of
 integers of $\var{nf}$, and outputs the four-component row vector $[A,I,D,d]$
 as in \kbd{rnfpseudobasis}. The name of this function comes from the fact
 that the ideal class of the last ideal of $I$ (which is well defined) is
-called the \var{\idx{Steinitz class}} of the module $\Z_L$.
+called the \tev{Steinitz class} of the module $\Z_L$.
 
 Note: $\var{nf}$ can be a $\var{bnf}$ as output by \kbd{bnfinit}.
 
@@ -4906,9 +4905,8 @@ polynomial \var{pol} in the interval $]a,b]$, using Sturm's algorithm. $a$
 (resp.~$b$) is taken to be $-\infty$ (resp.~$+\infty$) if omitted.
 
 \syn{sturmpart}{\var{pol},a,b}. Use \kbd{NULL} to omit an argument.
-\kbd{\teb{sturm}(\var{pol})} is equivalent to
-\kbd{\key{sturmpart}(\var{pol},NULL,NULL)}.
-The result is a \kbd{long}.
+\teb{sturm}\kbd{(\var{pol})} is equivalent to
+\key{sturmpart}\kbd{(\var{pol},NULL,NULL)}. The result is a \kbd{long}.
 
 \subsecidx{polsubcyclo}$(n,d,\{v=x\})$: gives a polynomial (in variable
 $v$) defining the sub-Abelian extension of degree $d$ of the cyclotomic
@@ -4970,16 +4968,16 @@ polynomial (or power series, or rational function), the substitution will be
 done as if the scalar components were polynomials of degree one. In
 particular, beware that:
 
-\bprog%
+\bprog
 ? subst(1, x, [1,2; 3,4])
-\%1 =
+%1 =
 [1 0]
-\smallskip%
+
 [0 1]
-\smallskip%
+\smallskip
 ? subst(1, x, Mat([0,1]))
-  ***   forbidden substitution by a non square matrix%
-\eprog
+  ***   forbidden substitution by a non square matrix
+@eprog
 
 If $x$ is a power series, $z$ must be either a polynomial, a power series, or
 a rational function. $y$ must be a simple variable name.
@@ -5048,12 +5046,12 @@ Note that in the latter case, the \idx{minimal polynomial} can be obtained
 as
 \bprog
 minpoly(A)=
-\obr
+{
   local(y);
   y = charpoly(A);
   y / gcd(y,y')
-\cbr
-\eprog
+}
+@eprog
 \noindent The value of $\fl$ is only significant for matrices.
 
 If $\fl=0$, the method used is essentially the same as for computing the
@@ -5091,25 +5089,24 @@ definitely \var{not} the case for empty vectors \kbd{[~]} or \kbd{[~]\til}.)
 If $y$ is omitted, $x$ has to be a row vector or a list, in which case its
 elements are concatenated, from left to right, using the above rules.
 
-\bprog%
+\bprog
 ? concat([1,2], [3,4])
-\%1 = [1, 2, 3, 4]
-? concat([1,2]\til, [3,4]\til)
-\%2 = [1, 2, 3, 4]\til
-? concat([1,2; 3,4], [5,6]\til)
-\%3 =
-[1, 2, 5]
-\smallskip%
-[3, 4, 6]
-\smallskip%
-? concat([\%, [7,8]\til, [1,2,3,4]])
-\%4 =
+%1 = [1, 2, 3, 4]
+? concat([1,2]~, [3,4]~)
+%2 = [1, 2, 3, 4]~
+? concat([1,2; 3,4], [5,6]~)
+%3 =
+[1 2 5]
+
+[3 4 6]
+? concat([%, [7,8]~, [1,2,3,4]])
+%4 =
 [1 2 5 7]
-\smallskip%
+
 [3 4 6 8]
-\smallskip%
+
 [1 2 3 4]
-\eprog
+@eprog
 
 \syn{concat}{x,y}.
 
@@ -5330,11 +5327,10 @@ any type.
 
 If $x$ is known to have integral entries, set $\fl=1$.
 
-\noindent Note: The library function\sidx{ker\string\_mod\string\_p}
-$\kbd{ker\_mod\_p}(x, p)$, where $x$ has integer entries and $p$ is prime,
-which is equivalent to but many orders of magnitude faster than
-\kbd{matker(x*Mod(1,p))} and needs much less stack space. To use it under GP,
-type \kbd{install(ker\_mod\_p, GG)} first.
+\noindent Note: The library function $\tet{ker_mod_p}(x, p)$, where $x$ has
+integer entries and $p$ is prime, which is equivalent to but many orders of
+magnitude faster than \kbd{matker(x*Mod(1,p))} and needs much less stack
+space. To use it under GP, type \kbd{install(ker\_mod\_p, GG)} first.
 
 \syn{matker0}{x,\fl}. Also available are $\teb{ker}(x)$ ($\fl=0$),
 $\teb{keri}(x)$ ($\fl=1$) and $\kbd{ker\_mod\_p}(x,p)$.
@@ -5367,7 +5363,7 @@ that case.
 \syn{matmultodiagonal}{x,y}.
 
 \subsecidx{matpascal}$(x,\{q\})$: creates as a matrix the lower triangular
-\idx{pascal triangle} of order $x+1$ (i.e.~with binomial coefficients
+\idx{Pascal triangle} of order $x+1$ (i.e.~with binomial coefficients
 up to $x$). If $q$ is given, compute the $q$-Pascal triangle (i.e.~using
 $q$-binomial coefficients).
 
@@ -5480,7 +5476,7 @@ $x$. The method used is Jacobi's method for symmetric matrices.
 
 \syn{jacobi}{x}.
 
-\subsecidx{qf{}lll}$(x,\{\fl=0\})$: \idx{LLL} algorithm applied to the
+\subsecidx{qflll}$(x,\{\fl=0\})$: \idx{LLL} algorithm applied to the
 \var{columns} of the (not necessarily square) matrix $x$. The columns of $x$
 must however be of maximal rank (unless specified otherwise below). The
 result is a square transformation matrix $T$ such that $x\cdot T$ is an
@@ -5521,11 +5517,11 @@ If $\fl=8$, same as case $0$, where $x$ may have polynomial coefficients.
 
 If $\fl=9$, variation on case $1$, using content.
 
-\syn{qf{}lll0}{x,\fl,\var{prec}}. Also available are
+\syn{qflll0}{x,\fl,\var{prec}}. Also available are
 $\teb{lll}(x,\var{prec})$ ($\fl=0$), $\teb{lllint}(x)$ ($\fl=1$), and
 $\teb{lllkerim}(x)$ ($\fl=4$).
 
-\subsecidx{qf{}lllgram}$(x,\{\fl=0\})$: same as \kbd{qflll} except that the
+\subsecidx{qflllgram}$(x,\{\fl=0\})$: same as \kbd{qflll} except that the
 matrix $x$ which must now be a square symmetric real matrix is the Gram
 matrix of the lattice vectors, and not the coordinates of the vectors
 themselves. The result is again the transformation matrix $T$ which gives (as
@@ -5542,7 +5538,7 @@ $\fl=5$: same as $4$ for generic $x$.
 
 $\fl=7$: an older version of case $0$.
 
-\syn{qf{}lllgram0}{x,\fl,\var{prec}}. Also available are
+\syn{qflllgram0}{x,\fl,\var{prec}}. Also available are
 $\teb{lllgram}(x,\var{prec})$ ($\fl=0$), $\teb{lllgramint}(x)$ ($\fl=1$), and
 $\teb{lllgramkerim}(x)$ ($\fl=4$).
 
@@ -5566,9 +5562,9 @@ function searches for the minimal non-zero vectors whenever $b=0$.
 If $\fl=2$, $x$ can have non integral real entries, but $b=0$ is now
 meaningless (uses Fincke-Pohst algorithm).
 
-\syn{minim}{x,b,m} ($\fl=0$), $\teb{minim2}(x,b,m)$
-($\fl=1$), or finally $\key{fincke\_pohst}(x,b,m,\var{prec})$
-($\fl=2$).\sidx{fincke\string\_pohst}
+\syn{qfminim0}{x,b,m,\fl}, also available are \funs{minim}{x,b,m}
+($\fl=0$), \funs{minim2}{x,b,m} ($\fl=1$), and finally
+\funs{fincke_pohst}{x,b,m,\var{prec}} ($\fl=2$).
 
 \subsecidx{qfperfection}$(x)$: $x$ being a square and symmetric matrix with
 integer entries representing a positive definite quadratic form, outputs the
@@ -5659,24 +5655,24 @@ If $z$ is not omitted, $x$ must be a matrix. $y$ is then the \var{line}
 specifier, and $z$ the \var{column} specifier, where the component specifier
 is as explained above.
 
-\bprog%
+\bprog
 ? v = [a, b, c, d, e];
-? vecextract(v, 5)         \bs\bs~mask
-\%1 = [a, c]
-? vecextract(v, [4, 2, 1]) \bs\bs~component list
-\%2 = [d, b, a]
-? vecextract(v, "2..4")    \bs\bs~interval
-\%3 = [b, c, d]
-? vecextract(v, "-1..-3")  \bs\bs~interval + reverse order
-\%4 = [e, d, c]
-? vecextract([1,2,3], "^2") \bs\bs~complement
-\%5 = [1, 3]
+? vecextract(v, 5)          \\@com mask
+%1 = [a, c]
+? vecextract(v, [4, 2, 1])  \\@com component list
+%2 = [d, b, a]
+? vecextract(v, "2..4")     \\@com interval
+%3 = [b, c, d]
+? vecextract(v, "-1..-3")   \\@com interval + reverse order
+%4 = [e, d, c]
+? vecextract([1,2,3], "^2") \\@com complement
+%5 = [1, 3]
 ? vecextract(matid(3), "2..", "..")
-\%6 =
+%6 =
 [0 1 0]
-\smallskip%
+
 [0 0 1]
-\eprog
+@eprog
 
 \syn{extract}{x,y} or $\teb{matextract}(x,y,z)$.
 
@@ -5799,18 +5795,14 @@ are the three most common initializations.
 
 \noindent As an extreme example, compare
 
-\bprog%
-? prod(i=1, 100, 1 - X^i);  \bs\bs\ this has degree $5050$~!!
-\smallskip%
+\bprog
+? prod(i=1, 100, 1 - X^i);  \\@com this has degree $5050$ !!
 time = 3,335 ms.
-\smallskip%
 ? prod(i=1, 100, 1 - X^i, 1 + O(X^101))
-\smallskip%
 time = 43 ms.
-\smallskip%
-\%2 = 1 - X - X^2 + X^5 + X^7 - X^12 - X^15 + X^22 + X^26 - X^35 - X^40 + X^51
-+ X^57 - X^70 - X^77 + X^92 + X^100 + O(X^101)%
-\eprog
+%2 = 1 - X - X^2 + X^5 + X^7 - X^12 - X^15 + X^22 + X^26 - X^35 - X^40 + \
+  X^51 + X^57 - X^70 - X^77 + X^92 + X^100 + O(X^101)
+@eprog
 
 \synt{produit}{entree *ep, GEN a, GEN b, char *expr, GEN x}.
 
@@ -5833,10 +5825,10 @@ If $\fl=1$, do the product of the ($1+\var{expr}$) instead.
 \teb{prodinf1} with the same arguments ($\fl=1$).
 
 \subsecidx{solve}$(X=a,b,\var{expr})$: find a real root of expression
-\var{expr} between $a$ and $b$, under the condition
-$\var{expr}(X=a)*\var{expr}(X=b)\le0$. This
-routine uses Brent's method. This can fail miserably if \var{expr} is not
-defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
+\var{expr} between $a$ and $b$, under the condition 
+$\var{expr}(X=a) * \var{expr}(X=b) \le 0$.
+This routine uses Brent's method and can fail miserably if \var{expr} is
+not defined in the whole of $[a,b]$ (try \kbd{solve(x=1, 2, tan(x)}).
 
 \synt{zbrent}{entree *ep, GEN a, GEN b, char *expr, long prec}.
 
@@ -5847,30 +5839,26 @@ of the operations being performed.
 
 \noindent As an extreme example, compare
 
-\bprog%
-? sum(i=1, 5000, 1/i); \bs\bs rational number: denominator has $2166$ digits.
-\smallskip%
+\bprog
+? sum(i=1, 5000, 1/i); \\@com rational number: denominator has $2166$ digits.
 time = 1,241 ms.
-\smallskip%
 ? sum(i=1, 5000, 1/i, 0.)
-\smallskip%
 time = 158 ms.
-\smallskip%
-\%2 = 9.094508852984436967261245533%
-\eprog
+%2 = 9.094508852984436967261245533
+@eprog
 
 \synt{somme}{entree *ep, GEN a, GEN b, char *expr, GEN x}. This is to be
 used as follows: \kbd{ep} represents the dummy variable used in the
 expression \kbd{expr}
-\bprog%
-/* compute a^2 + \dots + b^2 */
-\obr
+\bprog
+/* compute a^2 + @dots + b^2 */
+{
   /* define the dummy variable "i" */
-  entree *ep = is\_entry("i");
+  entree *ep = is_entry("i");
   /* sum for a <= i <= b */
   return somme(ep, a, b, "i^2", gzero);
-\cbr
-\eprog
+}
+@eprog
 
 \subsecidx{sumalt}$(X=a,\var{expr},\{\fl=0\})$: numerical summation of the
 series \var{expr}, which should be an \idx{alternating series}, the formal
@@ -5900,7 +5888,7 @@ the positive divisors of $n$.
 
 Arithmetic functions like \teb{sigma} use the multiplicativity of the
 underlying expression to speed up the computation. In the present version
-\vers{}, there is no way to indicate that \var{expr} is multiplicative in
+\vers, there is no way to indicate that \var{expr} is multiplicative in
 $n$, hence specialized functions should be prefered whenever possible.
 
 \synt{divsum}{entree *ep, GEN num, char *expr}.
@@ -5990,11 +5978,11 @@ window to avoid unnecessary conversions. For this, use the function
 simply the number of pixels, the origin being at the upper left and the
 $y$-coordinates going downwards.
 
-   Note that in the present version \vers{} all these plotting functions
-(both low and high level) have been written for the X11-window system (hence
-also for GUI's based on X11 such as Openwindows and Motif), and for
-Sunview/Suntools only, though very little code remains which is actually
-platform-dependent. A Macintosh, and an Atari/Gem port were provided for
+   Note that in the present version \vers\ all these plotting functions
+(both low and high level) have been written for the X11-window system
+(hence also for GUI's based on X11 such as Openwindows and Motif) only,
+though very little code remains which is actually platform-dependent. A
+Suntools/Sunview, Macintosh, and an Atari/Gem port were provided for
 previous versions. These \var{may} be adapted in future releases.
 
    Under X11/Suntools, the physical window (opened by \kbd{plotdraw} or any
@@ -6006,7 +5994,7 @@ be closed, enlarged or reduced using the standard window manager functions.
 No zooming procedure is implemented though (yet).
 
 $\bullet$ Finally, note that in the same way that \kbd{printtex} allows you
-to have a \TeX{} output corresponding to printed results, the functions
+to have a \TeX\ output corresponding to printed results, the functions
 starting with \kbd{ps} allow you to have \tet{PostScript} output of the
 plots. This will not be absolutely identical with the screen output, but will
 be sufficiently close. Note that you can use PostScript output even if you do
@@ -6091,7 +6079,7 @@ the same window.
 
 \noindent The binary digits of $\fl$ mean:
 
-$\bullet$ 1: \var{\idx{parametric plot}}. Here \var{expr} must be a vector with
+$\bullet$ 1: \tev{parametric plot}. Here \var{expr} must be a vector with
 an even number of components. Successive pairs are then understood as the
 parametric coordinates of a plane curve. Each of these are then drawn.
 
@@ -6106,7 +6094,7 @@ curves.
 $y=x$.
 
 
-$\bullet$ 2: \var{\idx{recursive plot}}. If this flag is set, only \var{one}
+$\bullet$ 2: \tev{recursive plot}. If this flag is set, only \var{one}
 curve can be drawn at time, i.e.~\var{expr} must be either a two-component
 vector (for a single parametric curve, and the parametric flag \var{has} to
 be set), or a scalar function. The idea is to choose pairs of successive
@@ -6120,9 +6108,9 @@ for instance. But beware that if you are extremely unlucky, or choose too few
 reference points, you may draw some nice polygon bearing little resemblance
 to the original curve. For instance you should \var{never} plot recursively 
 an odd function in a symmetric interval around 0. Try
-\bprog%
+\bprog
   ploth(x = -20, 20, sin(x), 2)
-\eprog
+@eprog
 \noindent to see why. Hence, it's usually a good idea to try and plot the same
 curve with slightly different parameters.
 
@@ -6155,11 +6143,11 @@ number of pixels for screen output. These bounds are available through the
 (i.e independant of the output device) a window of maximal size, accessed through
 coordinates in the $[0,1000] \times [0,1000]$ range~:
 
-\bprog%
+\bprog
 s = plothsizes();
 plotinit(0, s[1]-1, s[2]-1);
 plotscale(0, 0,1000, 0,1000);
-\eprog
+@eprog
 
 \subsecidx{plotkill}$(w)$: erase rectwindow $w$ and free the corresponding
 memory. Note that if you want to use the rectwindow $w$ again, you have to
@@ -6300,7 +6288,7 @@ Nothing is done if $s>0$ and $a>b$ or if $s<0$ and $a<b$. $s$ must be in
 $\R^*$ or a vector of steps $[s_1,\dots,s_n]$. In the latter case, the
 successive steps are used in the order they appear in $s$.
 
-\bprog%
+\bprog
 ? forstep(x=5, 20, [2,4], print(x))
 5
 7
@@ -6308,7 +6296,7 @@ successive steps are used in the order they appear in $s$.
 13
 17
 19
-\eprog
+@eprog
 
 \subsubsecidx{forsubgroup}$(H=G,\{B\},\var{seq})$: executes \var{seq} for
 each subgroup $H$ of the \var{abelian} group $G$ (given in 
@@ -6320,13 +6308,13 @@ whose columns give its generators on the implicit generators of $G$. For
 example, the following prints all subgroups of index less than 2 in $G =
 \Z/2\Z g_1 \times \Z/2\Z g_2$~:
 
-\bprog%
+\bprog
 ? G = [2,2]; forsubgroup(H=G, 2, print(H))
 [1; 1]
 [1; 2]
 [2; 1]
 [1, 0; 1, 1]
-\eprog
+@eprog
 The last one, for instance is generated by $(g_1, g_1 + g_2)$. This
 routine is intended to treat huge groups, when \teb{subgrouplist} is not an
 option due to the sheer size of the output. 
@@ -6334,13 +6322,13 @@ option due to the sheer size of the output.
 For maximal speed the subgroups have been left as produced by the algorithm.
 To print them in canonical form (as left divisors of $G$ in
 HNF\sidx{Hermite normal form} form), one can for instance use
-\bprog%
+\bprog
 ? G = matdiagonal([2,2]); forsubgroup(H=G, 2, print(mathnf(concat(G,H))))
 [2, 1; 0, 1]
 [1, 0; 0, 2]
 [2, 0; 0, 1]
 [1, 0; 0, 1]
-\eprog
+@eprog
 Note that in this last representation, the index $[G:H]$ is given by the
 determinant.
 
@@ -6365,9 +6353,9 @@ the \kbd{!} (\kbd{not}) operator: \kbd{if (!$a$,\var{seq})}.
 according to operator precedence as explained in \secref{se:operators}, but
 that, contrary to other operators, the evaluation of the arguments is
 stopped as soon as the final truth value has been determined. For instance
-\bprog%
-if (reallydoit \&\& longcomplicatedfunction(), $\dots$)%
-\eprog
+\bprog
+if (reallydoit && longcomplicatedfunction(), ...)%
+@eprog
 \noindent is a perfectly safe statement.
 
   Recall that functions such as \kbd{break} and \kbd{next} operate on
@@ -6501,12 +6489,12 @@ loop indexes. This is especially useful when patching together various
 scripts, possibly written with different naming conventions. For instance the
 following situation is dangerous:
 %
-\bprog%
-p = 3 \bs\bs~fix characteristic
+\bprog
+p = 3   \\@com fix characteristic
 ...
 forprime(p = 2, N, ...)
 f(p) = ...
-\eprog
+@eprog
 since within the loop or within the function's body, the true global value of
 \kbd{p} will be hidden. If the statement \kbd{global(p = 3)} appears at the
 beginning of the script, then both expressions will trigger syntax errors.
@@ -6538,11 +6526,11 @@ PARI library. For instance, the function \kbd{GEN addii(GEN x, GEN y)} adds
 two PARI integers, and is not directly accessible under GP (it's eventually
 called by the \kbd{+} operator of course):
 
-\bprog%
+\bprog
 ? install("addii", "GG")
 ? addii(1, 2)
-\%1 = 3%
-\eprog
+%1 = 3
+@eprog
 
 \misctitle{Caution:} This function may not work on all systems, especially
 when GP has been compiled statically. In that case, the first use of an
@@ -6562,30 +6550,30 @@ object (variable or function). This is the only way to replace a variable by
 a function having the same name (or the other way round), as in the following
 example:
 
-\bprog%
+\bprog
 ? f = 1
-\%1 = 1
+%1 = 1
 ? f(x) = 0
   ***   unused characters: f(x)=0
                             ^----
 ? kill(f)
 ? f(x) = 0
 ? f()
-\%2 = 0%
-\eprog
+%2 = 0
+@eprog
 
   When you kill a variable, all objects that used it become invalid. You
 can still display them, even though the killed variable will be printed in a
 funny way (following the same convention as used by the library function
 \kbd{fetch\_var}, see~\secref{se:vars}). For example:
 
-\bprog%
+\bprog
 ? a^2 + 1
-\%1 = a^2 + 1
+%1 = a^2 + 1
 ? kill(a)
-? \%1
-\%2 = \#<1>^2 + 1%
-\eprog
+? %1
+%2 = #<1>^2 + 1
+@eprog
 
 If you simply want to restore a variable to its original value (monomial of
 degree one), use the \idx{quote} operator: \kbd{x = 'x}.
@@ -6604,7 +6592,7 @@ prettyprint (beautified) format, ending with a newline.
 prettyprint (beautified) format, without ending with a newline.
 
 \subsubsecidx{printtex}$(\{\var{str}\}*)$: outputs its (string) arguments in
-\TeX{} format. This output can then be used in a \TeX{} manuscript.
+\TeX\ format. This output can then be used in a \TeX\ manuscript.
 The printing is done on the standard output. If you want to print it to a
 file you should use \kbd{writetex} (see there).
 
@@ -6612,11 +6600,11 @@ Another possibility is to enable the \tet{log} default
 (see~\secref{se:defaults}).
 You could for instance do:\sidx{logfile}
 %
-\bprog%
+\bprog
 default(logfile, "new.tex");
 default(log, 1);
-printtex(result);%
-\eprog
+printtex(result);
+@eprog
 \noindent
 (You can use the automatic string expansion/concatenation process to have
 dynamic file names if you wish).
@@ -6649,22 +6637,22 @@ a system command. This command is executed, its output written to the
 standard output (this won't get into your logfile), and control returns
 to the PARI system. This simply calls the C \kbd{system} command.
 
-\subsubsecidx{trap}$(\{e\}, \{\var{sec}\}, \{\var{rec}\})$: tries to execute
-\var{seq}, trapping error $e$,
-that is effectively preventing it from aborting computations in the usual
-way; the recovery sequence \var{rec} is executed if the error occurs and the
-evaluation of \var{rec} becomes the result of the command. If $e$ is omitted,
-all exceptions are trapped. Note in particular that hitting \kbd{\pow C}
-(Control-C) raises an exception.
+\subsubsecidx{trap}$(\{e\}, \{\var{sec}\}, \{\var{rec}\})$: tries to
+execute \var{seq}, trapping error $e$, that is effectively preventing it
+from aborting computations in the usual way; the recovery sequence
+\var{rec} is executed if the error occurs and the evaluation of \var{rec}
+becomes the result of the command. If $e$ is omitted, all exceptions are
+trapped. Note in particular that hitting \kbd{\pow C} (Control-C) raises an
+exception.
 
-\bprog%
-? \bs\bs {\rm trap division by 0}
+\bprog
+? \\@com trap division by 0
 ? inv(x) = trap (gdiver2, INFINITY, 1/x)
 ? inv(2)
-\%1 = 1/2
+%1 = 1/2
 ? inv(0)
-\%2 = INFINITY
-\eprog
+%2 = INFINITY
+@eprog
 
 If \var{seq} is omitted, defines \var{rec} as a default action when
 encountering exception $e$. The error message is printed, as well as the
@@ -6673,14 +6661,14 @@ GP prompt. In particular, current computation is then lost.
 
 The following error handler prints the list of all user variables, then
 stores in a file their name and their values:
-\bprog%
-? \obr
+\bprog
+? {
   trap( ,
     print(reorder);
     write("crash", reorder);
     write("crash", eval(reorder))
-) \cbr
-\eprog
+) }
+@eprog
 
 If no recovery code is given (\var{rec} is omitted) a so-called {\it
 \idx{break loop}} will be started. During a break loop, all commands are read
@@ -6706,9 +6694,9 @@ out, and replaced by the previous one for that error.
 
 \misctitle{Note:} The interface is currently not adequate for trapping
 individual exceptions. In the current version \vers, the following keywords
-are recognized, but this will be expanded and names changed in the future
-(all library mode errors can be trapped: it's a matter of defining the
-keywords to GP, and there are currently far too many useless ones):
+are recognized, but the name list will be expanded and changed in the
+future (all library mode errors can be trapped: it's a matter of defining
+the keywords to GP, and there are currently far too many useless ones):
 
 \kbd{accurer}: accuracy problem
 
@@ -6719,7 +6707,6 @@ keywords to GP, and there are currently far too many useless ones):
 \kbd{typeer}: wrong type
 
 \kbd{errpile}: the PARI stack overflows
-
 
 \subsubsecidx{type}$(x,\{t\})$: this is useful only under GP. If $t$ is
 not present, returns the internal type number of the PARI object $x$.

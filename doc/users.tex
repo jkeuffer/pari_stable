@@ -23,8 +23,8 @@
   \parindent=0pt
   \obeylines\input\jobname.toc
 \else
-% toc is 2 pages long
-  \newpage
+% toc is 1 page long, uncomment below if it gets longer
+%  \newpage
 \fi
 \endtitle
 
@@ -47,6 +47,8 @@
   \expandafter\end
 \fi
 \newpage
+
+\catcode`\_=11
 
 \newdimen\fullhsize
 \fullhsize=\hsize
@@ -74,8 +76,11 @@
     \makefootline}
     \advancepageno}
 \def\columnbox{\leftline{\pagebody}}
-\def\parse !#1#2!#3! {%
-     \uppercase{\def\theletter{#1}}\def\theword{#1#2}\def\thepage{#3}}
+\def\parse !#1#2!#3!#4 {%
+     \uppercase{\def\theletter{#1}}%
+     \def\theword{#1#2}%
+     \def\thefont{#3}%
+     \def\thepage{#4}}
 \def\theoldword{}
 \def\theend{The End }
 \newif\ifencore
@@ -106,13 +111,19 @@
 \ifencore
   \expandafter\parse\theline
   \ifx\theletter\theoldletter\else
-    \endgraf\vskip 10pt plus 10pt\centerline
-      {\theletter}\vskip 10pt plus 10pt\fi
+    \endgraf\vskip 10pt plus 10pt
+    \centerline{\bf\theletter}
+    \vskip 6pt plus 7pt
+  \fi
   \let\theoldletter\theletter
   \ifx\theword\theoldword
-    \ifx\thepage\theoldpage\else\interpage\thepage\fi
+    \ifx\thepage\theoldpage
+    \else
+      \interpage\thepage
+    \fi
   \else
-    \relax\endgraf\theword\dotfill\thepage\let\theoldword=\theword
+    \relax\endgraf{\csname\thefont\endcsname\theword}\dotfill\thepage
+    \let\theoldword=\theword
   \fi
   \let\theoldpage=\thepage
 \repeat

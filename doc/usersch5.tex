@@ -1,7 +1,6 @@
 \chapter{Technical Reference Guide for Low-Level Functions}
 \def\B{\kbd{BIL}}
 \def\op{{\it op\/}}
-\def\fun#1#2#3{\noindent{\tt #1 \key{#2}(#3)}:}
 
 In this chapter, we give a description all public low-level functions of the
 PARI system. These essentially include functions for handling all the PARI
@@ -59,8 +58,7 @@ by \kbd{y} bits, returns the higher \B\ bits and stores the low-order
 \B\ bits into \kbd{hiremainder}. We must have $1\le\kbd{y}\le\B$. In
 particular, \kbd{y} must be non-zero.
 
-% break ugly ff ligatures in bfffo
-\fun{int}{b{}f{}f{}fo}{ulong x} returns the number of leading zero bits in the
+\fun{int}{bfffo}{ulong x} returns the number of leading zero bits in the
 ulong \kbd{x} (i.e. the number of bit positions by which it would have to be
 shifted left until its leftmost bit first becomes equal to~1, which can be
 between 0 and $\B-1$ for nonzero \kbd{x}). When \kbd{x} is~0, \B\ is returned.
@@ -282,18 +280,18 @@ integer and shifts the value by~\kbd{n}.
 Let ``\op'' be some unary operation of type \kbd{GEN (*)(GEN)}. The names and
 prototypes of the low-level functions corresponding to \op\ will be as follows.
 
-\fun{GEN}{mp\op}{GEN x} creates the result of \op\ applied to the integer
+\funno{GEN}{mp\op}{GEN x} creates the result of \op\ applied to the integer
 or real~\kbd{x}.
 
-\fun{GEN}{\op s}{long s} creates the result of \op\ applied to the
+\funno{GEN}{\op s}{long s} creates the result of \op\ applied to the
 long~\kbd{s}.
 
-\fun{GEN}{\op i}{GEN x} creates the result of \op\ applied to the
+\funno{GEN}{\op i}{GEN x} creates the result of \op\ applied to the
 integer~\kbd{x}.
 
-\fun{GEN}{\op r}{GEN x} creates the result of \op\ applied to the real~\kbd{x}.
+\funno{GEN}{\op r}{GEN x} creates the result of \op\ applied to the real~\kbd{x}.
 
-\fun{GEN}{mp\op z}{GEN x, GEN z} assigns the result of applying \op\ to the
+\funno{GEN}{mp\op z}{GEN x, GEN z} assigns the result of applying \op\ to the
 integer or real~\kbd{x} into the integer or real \kbd{z}.
 
 \misctitle{Remark:} it has not been considered useful to include the
@@ -362,34 +360,34 @@ prototypes of the low-level functions corresponding to \op\ will be as follows.
 In this section, the \kbd{z} argument in the \kbd{z}-functions must be of type
 \typ{INT} or~\typ{REAL}.
 
-\fun{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
+\funno{GEN}{mp\op[z]}{GEN x, GEN y[, GEN z]} applies \op\ to
 the integer-or-reals \kbd{x} and~\kbd{y}.
 
-\fun{GEN}{\op ss[z]}{long s, long t[, GEN z]} applies \op\ to the longs
+\funno{GEN}{\op ss[z]}{long s, long t[, GEN z]} applies \op\ to the longs
 \kbd{s} and~\kbd{t}.
 
-\fun{GEN}{\op si[z]}{long s, GEN x[, GEN z]} applies \op\ to the long \kbd{s}
+\funno{GEN}{\op si[z]}{long s, GEN x[, GEN z]} applies \op\ to the long \kbd{s}
 and the integer~\kbd{x}.
 
-\fun{GEN}{\op sr[z]}{long s, GEN x[, GEN z]} applies \op\ to the long \kbd{s}
+\funno{GEN}{\op sr[z]}{long s, GEN x[, GEN z]} applies \op\ to the long \kbd{s}
 and the real~\kbd{x}.
 
-\fun{GEN}{\op is[z]}{GEN x, long s[, GEN z]} applies \op\ to the
+\funno{GEN}{\op is[z]}{GEN x, long s[, GEN z]} applies \op\ to the
 integer \kbd{x} and the long~\kbd{s}.
 
-\fun{GEN}{\op ii[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
+\funno{GEN}{\op ii[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
 integers \kbd{x} and~\kbd{y}.
 
-\fun{GEN}{\op ir[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
+\funno{GEN}{\op ir[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the
 integer \kbd{x} and the real~\kbd{y}.
 
-\fun{GEN}{\op rs[z]}{GEN x, long s[, GEN z]} applies \op\ to the real \kbd{x}
+\funno{GEN}{\op rs[z]}{GEN x, long s[, GEN z]} applies \op\ to the real \kbd{x}
 and the long~\kbd{s}.
 
-\fun{GEN}{\op ri[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the real \kbd{x}
+\funno{GEN}{\op ri[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the real \kbd{x}
 and the integer~\kbd{y}.
 
-\fun{GEN}{\op rr[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the reals \kbd{x}
+\funno{GEN}{\op rr[z]}{GEN x, GEN y[, GEN z]} applies \op\ to the reals \kbd{x}
 and~\kbd{y}.
 \smallskip
 \noindent Each of the above can be used with the following operators.
@@ -685,9 +683,9 @@ object~\kbd{y}.
 
 \subsec{Unary operators}
 
-\fun{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
+\funno{GEN}{gneg[\key{z}]}{GEN x[, GEN z]} yields $-\kbd{x}$.
 
-\fun{GEN}{gabs[\key{z}]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
+\funno{GEN}{gabs[\key{z}]}{GEN x[, GEN z]} yields $|\kbd{x}|$.
 
 \fun{GEN}{gsqr}{GEN x} creates the square of~\kbd{x}.
 
@@ -872,7 +870,7 @@ into~\kbd{x} for the variable number~\kbd{v}.
 \fun{int}{gdivise}{GEN x, GEN y}  returns 1 (true) if \kbd{y} divides~\kbd{x},
 0~otherwise.
 
-\fun{GEN}{gbezout}{GEN x, GEN y, GEN *u, GEN *v} creates the GCD of \kbd{x}
+\fun{GEN}{gbezout}{GEN x,GEN y, GEN *u,GEN *v} creates the GCD of \kbd{x}
 and~\kbd{y}, and puts (the adresses of) objects $u$ and~$v$ such that
 $u\kbd{x}+v\kbd{y}=\gcd(\kbd{x},\kbd{y})$ into \kbd{*u} and~\kbd{*v}.
 \vfill\eject

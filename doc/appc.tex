@@ -5,12 +5,12 @@ PARI library. All of them are in the \idx{heap} and {\it not\/} on the PARI
 \idx{stack}. We start by recalling the \idx{universal object}s introduced in
 \secref{se:intro4}:
 %
-\bprog%
-t\_INT: gzero (zero), gun (un), gdeux (deux)
-t\_FRAC: ghalf (lhalf)
-t\_COMPLEX: gi
-t\_POL: polun[..] (lpolun[..]), polx[..] (lpolx[..])
-\eprog
+\bprog
+t_INT: gzero (zero), gun (un), gdeux (deux)
+t_FRAC: ghalf (lhalf)
+t_COMPLEX: gi
+t_POL: polun[..] (lpolun[..]), polx[..] (lpolx[..])
+@eprog
 \noindent Only polynomials in the variables \kbd{0} and \kbd{MAXVARN} are
 defined initially. Use \kbd{fetch\_var()} (see \secref{se:fetch_var}) to
 create new ones.
@@ -26,7 +26,7 @@ create new ones.
 \tet{bern}(i). This is the $2i$-th Bernoulli number ($B_0=1$, $B_2=1/6$,
 $B_4=-1/30$, etc\dots). To initialize them, use the function:
 
-\kbd{void \idx{mpbern}(long n, long prec);}
+\fun{void}{mpbern}{long n, long prec}
 
 This creates the even numbered Bernoulli numbers up to $B_{2n-2}$ {\it as
 real numbers\/} of precision \kbd{prec}. They can then be used with the macro
@@ -46,18 +46,18 @@ whatever memory is available. A
 difference of $0$ means we have reached the end of the table. The following
 example illustrates its use.
 %
-\bprog%
+\bprog
 byteptr d = diffptr;
 long p = 0;
-\h
-while (p <= p\_goal) /* {\rm run through all primes up to \kbd{p\_goal}} */
-\obr
+
+while (p <= goal) /* @Ccom run through all primes up to \kbd{goal} */
+{
   p += *d;
   if (*d == 0) err(primer1); /* {\rm not enough primes} */
   d++;
   ...
-\cbr
-\eprog\noindent
+}
+@eprog\noindent
 Here, we use the general error handling function \kbd{err} (see
 \secref{se:err}), with the codeword \kbd{primer1}. This will just print
 the error message:

@@ -2,13 +2,13 @@
 \input parimacro.tex
 \def\maketitle#1{\currentlabel.\ #1}
 \begintitle
-\vskip 2.5truecm
+\vskip2.5truecm
 \centerline{\mine A Tutorial}
-\vskip 1.truecm
+\vskip1.truecm
 \centerline{\mine for}
-\vskip 1.truecm
+\vskip1.truecm
 \centerline{\mine PARI-GP}
-\vskip 1.truecm
+\vskip1.truecm
 \authors
 \centerline{last updated March 5, 1999}
 \centerline{(this document distributed with version \vers)}
@@ -73,14 +73,12 @@ exactly, that's what it gives you.
 
 OK, but I still want the decimal expansion of $1/7$. No problem. Type one of
 the following:
-%
 \bprog
 1./ 7
 1 / 7.
 1./ 7.
-1 / 7 + 0. \dots
-\eprog
-%
+1 / 7 + 0.@com etc \dots
+@eprog
 Immediately a number of decimals of this fraction appear (28 on most systems,
 38 on the others), and the repeating pattern is $142857$. The reason is that
 you have included in the operations numbers like \kbd{0.}, \kbd{1.} or \kbd{7.}
@@ -291,13 +289,13 @@ able to do anything with \kbd{log(x)} which is not defined at 0. But if we
 try \kbd{log(1+x)}, then it works. But what if we wanted the expansion
 around a point different from 0? Well, you're able to change $x$ into
 $x-a$, aren't you? So for instance you can type \kbd{log(x+2)} to
-have the expansion of \kbd{log} around $\kbd{x}=2$.
-
-\begingroup\def\h{\hskip 0em plus 1ex}
-As exercises, try \kbd{cos(x)}, \h\kbd{cos(x)\pow 2 + sin(x)\pow 2}, \h
-\kbd{exp(cos(x))}, \h\kbd{exp(exp(x) - 1)},\break
-\kbd{gamma(1 + x)}, with different values of \kbd{serieslength} if you like.
-\endgroup
+have the expansion of \kbd{log} around $\kbd{x}=2$. As exercises you can
+try
+\bprog
+cos(x)           cos(x)^2 + sin(x)^2           exp(cos(x))
+gamma(1 + x)     exp(exp(x) - 1)               1 / tan(x)
+@eprog
+for different values of \kbd{serieslength}.
 
 Let's try something else: type \kbd{(1 + x)\pow 3}. No \kbd{O(x)} here, since
 the result is a polynomial.  Haha, but I have learnt that if you do not take
@@ -309,14 +307,19 @@ get a power series but a rational function. Again this is for the same reason
 that \kbd{1 / 7} just gave you $1/7$: the result being exact, PARI doesn't see
 any reason to make it non-exact.
 
-But I still want that power series. To obtain it, just do as in the $1/7$
-example: type
-%
+But I still want that power series. To obtain it, you can do as in the $1/7$
+example and type
 \bprog
-(1 + x)\pow (-3) + O(x\pow{16})
-(1 + O(x\pow {16})) * (1 + x)\pow (-3)
-(1 + x + O(x\pow {16}))\pow (-3) {\rm, etc\dots}
-\eprog
+(1 + x)^(-3) + O(x^16)
+(1 + O(x^16)) * (1 + x)^(-3)
+(1 + x + O(x^16))^(-3)@com, etc \dots
+@eprog
+You can also use the series constructor which transforms any object into a
+power series, using the current \kbd{seriesprecision}, and simply type
+\bprog
+Ser( (1 + x)^(-3) )
+@eprog
+
 Now try \kbd{(1 + x)\pow (1/2)}: we obtain a power series, since the
 result is an object which PARI does not know how to represent exactly (we
 could teach PARI about algebraic functions, but then take \kbd{(1 + x)\pow Pi}
@@ -409,7 +412,7 @@ difficult.)
 Of course PARI knows about vectors (rows and columns are distinguished, even
 though mathematically there is no difference) and matrices. Type for example
 \kbd{[1,2,3,4]}. This gives the row vector whose coordinates are 1, 2, 3 and
-4.  If you want a column vector, type \kbd{[1,2,3,4]\~{}}, the tilde meaning
+4.  If you want a column vector, type \kbd{[1,2,3,4]\til}, the tilde meaning
 of course transpose. You don't see much difference in the output, except for
 the tilde at the end. However, now type \b{b}: lo and behold, the vector does
 become a column. The \b{b} command is used mainly for this purpose.
@@ -432,7 +435,7 @@ several instructions on the same line. The final result will be the output of
 the last statement on the line). Now type \kbd{m[1,] = [15,-17,8]}. No
 problem. Finally type \kbd{m[,2] = [j,k]}. You have an error message since you
 have typed a row vector, while \kbd{m[,2]} is a column vector. If you type
-instead \kbd{m[,2] = [j,k]\~{}} it works. \smallskip
+instead \kbd{m[,2] = [j,k]\til} it works. \smallskip
 %
 Type now \kbd{h = mathilbert(20)}. You get the so-called ``Hilbert matrix''
 whose coefficient of row $i$ and column $j$ is equal to $(i+j-1)^{-1}$.
@@ -509,13 +512,15 @@ operators and the \kbd{if()} statement (see the section on programming for
 details on using this statement). Indeed, an \kbd{if} expression has a value,
 which is of course equal to the evaluated part of the \kbd{if}. So for
 example you can type
-
-\centerline{\kbd{matrix(8,8,i,j, if((i-j)\%2, x, 0))} }
+\bprog
+matrix(8,8, i,j, if ((i-j)%2, x, 0))
+@eprog
 \noindent to get a checkerboard matrix of \kbd{x} and \kbd{0}. Note however
 that a vector or matrix must be {\it created} first before being used. For
 example, it is forbidden to write
-
-\centerline{\kbd{for(i=1,5, v[i]=1/i)}}
+\bprog
+for (i = 1, 5, v[i] = 1/i)
+@eprog
 \noindent if the vector \kbd{v} has not been created beforehand (for example
 by a \kbd{v = vector(5,j,0)} command).
 
@@ -703,18 +708,16 @@ shorthand for \kbd{p = p * d}.
 
 If we want to know the list of primes $p$ less than 1000 such that 2 is a
 primitive root modulo $p$, one way would be to write:
-%
 \bprog
   forprime(p=3,1000, if (znprimroot(p) == 2, print(p)))
-\eprog\noindent
+@eprog\noindent
 %
 Note that this assumes that \kbd{znprimroot} returns the smallest primitive
 root, and this is indeed the case. Had we not known about this, we could
 have written
-%
 \bprog
   forprime(p=3,1000, if (znorder(Mod(2,p)) == p-1, print(p)))
-\eprog\noindent
+@eprog\noindent
 %
 (which is actually faster since we only compute the order of $2$ in $\Z/p\Z$,
 instead of looking for a generator by trying successive elements whose orders
@@ -841,20 +844,21 @@ of the form $1/2 + i*t$ with $t$ between 14 and 15. Thus, we can use the
 following series of instructions. But instead of typing them directly, write
 them into a file, say \kbd{zeta.gp}, then type \kbd{\b{r} zeta.gp} under GP to
 read it in:
-
-\bprog\obr
-\q t1 = 1/2 + 14*I;
-\q t2 = 1/2 + 15*I; eps = 10\pow-50;
-\q z1 = zeta(t1);
-\q until (norm(z2) < eps,
-\q\q  z2 = zeta(t2);
-\q\q  if (norm(z2) < norm(z1),
-\q\q\q  t3 = t1; t1 = t2; t2 = t3; z1 = z2
-\q\q  );
-\q\q  t2 = (t1+t2) / 2.;
-\q\q  print(t1 ": " z1)
-\q )
-\cbr\eprog
+\bprog
+{
+  t1 = 1/2 + 14*I;
+  t2 = 1/2 + 15*I; eps = 10^(-50);
+  z1 = zeta(t1);
+  until (norm(z2) < eps,
+    z2 = zeta(t2);
+    if (norm(z2) < norm(z1),
+      t3 = t1; t1 = t2; t2 = t3; z1 = z2
+    );
+    t2 = (t1+t2) / 2.;
+    print(t1 ": " z1)
+  )
+}
+@eprog
 
 Don't forget the braces: they tell GP that a sequence of instructions is going
 to span many lines (another, less convenient, way would be to type \b{} at the
@@ -966,15 +970,15 @@ equal to
 $$\dfrac{1}{2i\pi}\int_{C_r}\dfrac{h'(z)}{h(z)}\,dz\enspace,$$
 where $C_r$ is the circle of radius $r$ centered at the origin.
 Hence type
-
-\bprog fun(z) =
-\obr
-\q local(u);
-\q u = exp(z);
-\q (u-1) / (u-z)
-\cbr
+\bprog
+fun(z) =
+{
+  local(u);
+  u = exp(z);
+  (u-1) / (u-z)
+}
 zero(r) = r/(2*Pi) * intnum(t=0, 2*Pi, fun(r*exp(I*t)) * exp(I*t))
-\eprog
+@eprog
 \noindent (Here \kbd{u} is a local variable to the function \kbd{f}: whenever
 a function is called, GP fills its argument list with the actual arguments
 given, and initializes the other declared parameters and local variables to
@@ -996,13 +1000,14 @@ a zero, and write $z=x+iy$ with $x$ and $y$ real. Then the equation $e^z-z=0$
 implies, after elementary transformations, that $e^{2x}=x^2+y^2$ and that
 $e^x\cos(y)=x$. Hence $y=\pm\sqrt{e^{2x}-x^2}$ and hence
 $e^x\cos(\sqrt{e^{2x}-x^2})=x$. Therefore, type
-
-\bprog fun(x) =
-\obr
-\q local(u);
-\q u = exp(x);
-\q u*cos(sqrt(u\pow2 - x\pow2)) - x
-\cbr\eprog
+\bprog
+fun(x) =
+{
+  local(u);
+  u = exp(x);
+  u*cos(sqrt(u^2 - x^2)) - x
+}
+@eprog
 
 Then \kbd{fun(0)} is positive while \kbd{fun(1)} is negative. Come back to
 precision 28 and type
@@ -1107,10 +1112,10 @@ Similarly, we can type \kbd{lf(p)= lift(factormod(pol,p))}, and
 different factorizations, this time over $\F_p$. In fact, even better: type
 successively
 \bprog
-pol2 = x\pow 3 + x\pow 2 + x - 1
-fq = factorff(pol2, 3, t\pow 3 + t\pow 2 + t - 1)
+pol2 = x^3 + x^2 + x - 1
+fq = factorff(pol2, 3, t^3 + t^2 + t - 1)
 centerlift(lift(fq))
-\eprog
+@eprog
 %
 This factors the polynomial \kbd{pol2} over the finite field $\F_3(\theta)$
 where $\theta$ is a root of the polynomial \kbd{t\pow 3 + t\pow 2 + t - 1}.
@@ -1240,7 +1245,7 @@ may be a torsion point. Type \kbd{ellheight(e, q)}, which computes the
 canonical Neron-Tate height of \kbd{q}. This is non-zero, hence \kbd{q} is
 not torsion. To see this even better, type
 
-\kbd{for(k=1,20, print(ellpow(e, q,k)))}
+\kbd{for(k = 1, 20, print(ellpow(e, q,k)))}
 
 \noindent and we see the characteristic parabolic explosion of the size of
 the points. As a further check, type
@@ -1280,16 +1285,17 @@ smallest root, i.e.~$x\ge-3$. Finally, if $(x,y)$ is on the curve, its
 opposite is clearly $(x,-y-1)$. So we are going to use the \kbd{ellordinate}
 function and type (for instance in \kbd{points.gp} which you can read in with
 \kbd{\b{r} points} as we saw before)
-
-\bprog\obr
-\q v=[];
-\q for (x = -3, 1000,
-\q\q  s = ellordinate(e,x);
-\q\q  if (length(s), \q\q{\rm \b{}\b{} we could use \kbd{if (!s,} instead}
-\q\q\q  v = concat(v, [[x,s[1]]])
-\q\q  )
-\q ); v
-\cbr\eprog
+\bprog
+{
+  v=[];
+  for (x = -3, 1000,
+    s = ellordinate(e,x);
+    if (length(s),            \\ @com we could use \kbd{if (!s,)} instead
+      v = concat(v, [[x,s[1]]])
+    )
+  ); v
+}
+@eprog
 
 \noindent By the way, this is how you insert a comment in a script:
 everything following a double backslash (up to the first newline character)
@@ -1297,14 +1303,13 @@ is ignored. If you want comments which span many lines, you can brace them
 between \kbd{/* ... */} pairs. Everything in between will be ignored as well.
 For instance as a header for the file \kbd{points.gp} you could insert the
 following:
-%
 \bprog
-/*\q Finds rational points on the elliptic curve e, using the naivest
-\q\q algorithm I could think of right now (TO BE IMPROVED).
-\q\q e should have rational coefficients.
-\q\q TODO: Make that into a usable function.
-\ */
-\eprog
+/* Finds rational points on the elliptic curve e, using the naivest
+ * algorithm I could think of right now (TO BE IMPROVED).
+ * e should have rational coefficients.
+ * TODO: Make that into a usable function.
+ */
+@eprog
 
 (I hope you did not waste your time copying this nonsense, did you?)
 
@@ -1366,7 +1371,7 @@ our curve \kbd{e} of rank 3, and type
 v1 = [1,0]; v2 = [2,0];
 z1 = ellpointtoz(e, v1)
 z2 = ellpointtoz(e, v2)
-\eprog
+@eprog
 
 We thus get the complex parametrization of the curve. To add the points
 \kbd{v1} and \kbd{v2}, we should of course type \kbd{elladd(e, v1,v2)},
@@ -1454,10 +1459,8 @@ In addition to elements of a quadratic order, we also want to be able to
 handle ideals of such orders. In the quadratic case, it is equivalent to
 handling binary quadratic forms, and this has been chosen in PARI. For
 negative discriminants, quadratic forms are triples $(a,b,c)$ representing
-the form $ax^2+bxy+cy^2$. Such a form will be printed as (and can be created
-by)
-
-\centerline{\tt Qfb($a$,$b$,$c$)}
+the form $ax^2+bxy+cy^2$. Such a form will be printed as, and can be created
+by, \kbd{Qfb($a$,$b$,$c$)}.
 
 Such forms can be multiplied, divided, powered as many PARI objects using
 the usual operations, and they can also be reduced using the function
@@ -1495,10 +1498,9 @@ We get a form starting with 1, i.e.~the identity, so this test is OK. Raising
 that the order of \kbd{f} is exactly 77, hence the class number is a multiple
 of 77. But how can we be sure that it is exactly 77 and not a proper multiple?
 Well, type
-%
 \bprog
   sqrt(10007)/Pi * prodeuler(p=2,500, 1./(1 - kronecker(-10007,p)/p))
-\eprog
+@eprog
 %
 This is nothing else than an approximation to the Dirichlet class number
 formula. The function \kbd{kronecker} is the Kronecker symbol, in this case
@@ -1547,8 +1549,8 @@ for a complete description of this function).
 general number fields and gives much more complicated results), we could
 {\it certify\/} this result (remove the GRH assumption). Let's do it, type
 \bprog
-bnf = bnfinit(x\pow 2 + 3299); bnfcertify(bnf)
-\eprog
+bnf = bnfinit(x^2 + 3299); bnfcertify(bnf)
+@eprog
 
   A non-zero result (here 1) means that everything is ok. Good, but what did
 we certify after all? Let's have a look at this \kbd{bnf} (just type it!).
@@ -1629,7 +1631,7 @@ not the most efficient but will suffice for now, is to look at the complete
 cycle of reduced forms equivalent to \kbd{f}. Type
 \bprog
  g = f; for(i=1,20, g = qfbred(g, 3); print(g))
-\eprog\noindent
+@eprog\noindent
 (this time the 3 means to do a single reduction step, still not using
 Shanks's distance). We see that we come back to the form \kbd{f} without
 having the principal form (starting with $\pm1$) in the cycle, so the ideal
@@ -1754,9 +1756,9 @@ more serious than \kbd{quadgen}). For example assume that we want to work in
 the number field $K$ defined by one of the roots of the equation
 $x^4+24x^2+585x+1791=0$. This is done by typing
 \bprog
-T = x\pow 4 + 24*x\pow 2 + 585*x + 1791
+T = x^4 + 24*x^2 + 585*x + 1791
 nf = nfinit(T)
-\eprog
+@eprog
 
 We get quite a complicated object but, thanks to member functions, we don't
 need to know anything about its internal structure (which is dutifully
@@ -1887,20 +1889,21 @@ you don't have the opportunity to supply \kbd{nf}! But we could use
 which would work whatever representation was chosen. There is no
 \kbd{nfeltnorm} function (\kbd{nfelttrace} does not exist either), but we can
 easily write one:
-
-\bprog nfeltnorm(nf,u)=
-\obr
-\q local(t);
-\q t = type(u);
-\q if (t != "t\_POLMOD",
-\q\q if (t == "t\_COL",
-\q\q\q  u = nfbasistoalg(nf, u)
-\q\q ,
-\q\q\q  u = Mod(u, nf.pol)
-\q\q )
-\q );
-\q norm(u)
-\cbr\eprog
+\bprog
+nfeltnorm(nf,u) =
+{
+  local(t);
+  t = type(u);
+  if (t != "t_POLMOD",
+    if (t == "t_COL",
+      u = nfbasistoalg(nf, u)
+    ,
+      u = Mod(u, nf.pol)
+    )
+  );
+  norm(u)
+}
+@eprog
 
 Notice that this is certainly not foolproof (try it with complex or quadratic
 arguments!), but we could refine it if the need arose. In fact there was no
@@ -1942,13 +1945,14 @@ there's a quadratic subfield, but it's given by \kbd{Q = x\pow 2 + 22*x + 133
 indeed the field generated by a cube root of unity. Let's check that \kbd{s}
 is of order 2: \kbd{subst(lift(s), x, s)}. Yup, it is. Let's express it as a
 matrix:
-
-\bprog\obr
-\q v = [;]; b = nf.zk;
-\q for (i=1, 4,
-\q\q v = concat(v, nfalgtobasis(nf, nfgaloisapply(nf, s, b[i])))
-\q )
-\cbr\eprog
+\bprog
+{
+  v = [;]; b = nf.zk;
+  for (i=1, 4,
+    v = concat(v, nfalgtobasis(nf, nfgaloisapply(nf, s, b[i])))
+  )
+}
+@eprog
 
 \kbd{v} gives the action of \kbd{s} on the integral basis. Let's check
 \kbd{v\pow2}. That's the identity all right. \kbd{k = matker(v-1)} is indeed
@@ -2118,20 +2122,21 @@ four complex embeddings of the unit. Since the matrix \kbd{nf[5][1]}
 contains the values of the $r_1+r_2$ embeddings of the elements of the
 integral basis, we can obtain the representation of the unit on the
 integral basis by typing
-
-\bprog\obr
-\q m1 = nf[5][1];
-\q m = matrix(4,4,j,k,
-\q\q  if (j<=2,
-\q\q\q  m1[j,k]
-\q\q ,
-\q\q\q  conj(m1[j-2, k])
-\q\q)
-\q );
-\q v = exp(v1);
-\q au = matsolve(m,v);
-\q vu = round(real(au))
-\cbr\eprog
+\bprog
+{
+  m1 = nf[5][1];
+  m = matrix(4,4,j,k,
+    if (j<=2,
+      m1[j,k]
+    ,
+      conj(m1[j-2, k])
+    )
+  );
+  v = exp(v1);
+  au = matsolve(m,v);
+  vu = round(real(au))
+}
+@eprog
 
 Then \kbd{vu} is the representation of the unit on the integral basis.
 The closeness of the approximation of \kbd{au} to \kbd{vu} gives us
@@ -2267,12 +2272,11 @@ To find the relation (without trial and error, because in this case it is
 quite easy to see it directly!), let us use the logarithmic embeddings. Type
 \kbd{uf = m.fu[1]}, \kbd{uu= m.tu[2]} to get the generators of the unit
 group, then
-
 \bprog
 cu2 = log(conjvec(u2));
 cuf = log(conjvec(Mod(uf,A)));
 cuu = log(conjvec(Mod(uu,A)));
-\eprog\noindent
+@eprog\noindent
 to get the (complex) logarithmic embeddings. Then type
 
 \kbd{lindep(real([cu2[1], cuf[1], cuu[1]]))}
@@ -2311,7 +2315,7 @@ Thus you will usually not use this function, but its \kbd{init} variant:
 \kbd{bnfinit}.
 \smallskip
 
-So type: \kbd{setrand(1); bnf = bnfinit(A);}.
+So type: \kbd{setrand(1); bnf = bnfinit(A);}
 
 This performs exactly the same computations as \kbd{bnfclassunit}, but keeps
 much more information. In particular, you don't {\it want} to see the result,
@@ -2451,6 +2455,490 @@ function) and \kbd{ideallog}.
 
 \section{GP Programming}
 
------ TO BE COMPLETED -----
+----- TO BE WRITTEN -----
 
+\section{Plotting}
+
+PARI supports a multitude of high and low-level graphing functions, on a
+variety of output devices~: a special purpose window under the \kbd{X
+Windows} system, a \kbd{PostScript} file ready for the printer, or a
+\kbd{gnuplot} output device (only the first two are available by default).
+These functions use a multitude of flags, which are mostly power-of-2. To
+simplify understanding we first give these flags symbolic names.
+\bprog
+/* Generic flags: */
+parametric = 1;  no_x_axis =  8;  points       = 64;
+recursive  = 2;  no_y_axis = 16;  points_lines = 128;
+norescale  = 4;  no_frame  = 32;  splines      = 256; 
+
+/* Relative positioning of graphic objects: */
+nw       = 0;  se       = 4;  relative = 1;
+sw       = 2;  ne       = 6;
+
+/* String positioning: */
+/* V */ bottom  =  0;   /* H */  left   = 0;   /* Fine tuning */ hgap = 16;
+        vcenter =  4;            center = 1;                     vgap = 32;
+        top     =  8;            right  = 2;
+@eprog
+We also decrease drastically the default precision.
+\bprog
+\p 9
+@eprog
+This is very important, since plotting involves calculation of functions at
+a huge number of points, and a relative precision of 28 significant digits
+is an obvious overkill: the output device resolution certainly won't reach
+$10^{28} \times 10^{28}$ pixels!
+
+Start with something really simple:
+\bprog
+ploth(X = -2, 2, sin(X^7))
+@eprog
+
+You can see the limitations of the ``straightforward'' mode of plotting:
+while the first several cycles of \kbd{sin} reach $-1$ and $1$, the cycles
+which are closer to the left and right border do not. This is understandable,
+since PARI is calculating $\sin(X^7)$ at many (evenly spaced) points, but
+these points have no direct relationship to the ``interesting'' points on
+the graph of this function.  No value close enough to the maxima and minima
+are calculated, which leads to wrong turning points of the graph.
+
+There is a way to fix this: one can ask PARI to use variable step which
+smaller at the points where the graph of the function is more curved:
+\bprog
+  ploth(X = -2, 2, sin(X^7),recursive)
+@eprog
+
+\noindent The precision near the edges of the graph is much better now.
+However, the recursive plotting (named so since PARI subdivides intervals
+until the graph becomes almost straight) has its own pitfalls.  Try
+\bprog
+  ploth(X = -2, 2, sin(X*7), recursive)
+@eprog
+
+\noindent Note that the graph looks correct far away, but it has a straight
+interval near the origin, and some sharp corners as well.  This happens
+because the graph is symmetric with respect to the origin, thus the middle 3
+points calculated during the initial subdivision of $[-2,2]$ are exactly on
+the same line.  To PARI this indicates that no further subdivision is needed,
+and it plots the graph on this subinterval as a straight line.
+
+There are many ways to circumvent this.  Say, one can make the right limit
+2.1.  Or one can ask PARI for an initial subdivision into 16 points instead
+of default 15:
+\bprog
+  ploth(X = -2, 2, sin(X*7), recursive, 16)
+@eprog
+
+All these arrangements break the symmetry of the initial subdivision, thus
+make the problem go away.  Eventually PARI will be able to better detect such
+pathological cases, but currently some manual intervention may be required.
+
+Function \kbd{ploth} has some additional enhancements which allow graphing
+in situations when the calculation of the function takes a lot of time.  Let
+us plot $\zeta({1\over 2} + it)$:
+\bprog
+  ploth(t = 100, 110, real(zeta(0.5+I*t)), /*empty*/, 1000)
+@eprog
+
+\noindent This can take quite some time.  (1000 is close to the default for
+many plotting devices, we want to specify it explicitely so that the result
+do not depend on the output device.)  Try the recursive plot:
+\bprog
+  ploth(t = 100, 110, real(zeta(0.5+I*t)), recursive)
+@eprog
+
+It takes approximately the same time.  Now try specifying fewer points,
+but make PARI approximate the data by a smooth curve:
+\bprog
+ploth(t = 100, 110, real(zeta(0.5+I*t)), splines, 100)
+@eprog
+
+This takes much less time, and the output is practically the same.  How to
+compare these two outputs?  We will see it shortly.  Right now let us
+plot both real and complex parts of $\zeta$ on the same graph:
+\bprog
+  f(t) = z=zeta(0.5+I*t); [real(z),imag(z)]
+  ploth(t = 100, 110, f(t), , 1000)
+@eprog
+
+Note how one half of the roots of the real and imaginary parts coincide.
+Why did we define a function \kbd{f(t)}?  To avoid calculation of
+$\zeta({1\over2} + it)$ twice for the same value of t.  Similarly, we can
+plot parametric graphs:
+\bprog
+  ploth(t = 100, 110, f(t), parametric, 1000)
+@eprog
+
+Again, one can speed up the calculation with
+\bprog
+  ploth(t = 100, 110, f(t), parametric+splines, 100)
+@eprog
+
+If your plotting device supports it, you may ask PARI to show the points
+in which it calculated your function:
+\bprog
+  ploth(t = 100, 110, f(t), parametric+splines+points_lines, 100)
+@eprog
+
+As you can see, the points are very dense on the graph.  To see some crude
+graph, one can even decrease the number of points to 30.  However, if you
+decrease the number of points to 20, you can see that the approximation to
+the graph now misses zero.  Using splines, one can create reasonable graphs
+for larger values of t, say with
+\bprog
+  ploth(t = 10000, 10004, f(t), parametric+splines+points_lines, 50)
+@eprog
+
+How can we compare two graphs of the same function plotted by different
+methods?  Documentation shows that \kbd{ploth} does not provide any direct
+method to do so.  However, it is possible, and even not very complicated.
+
+The solution comes from the other direction.  PARI has a power mix of high
+level plotting function with low level plotting functions, and these functions
+can be combined together to obtain many different effects.  Return back
+to the graph of $\sin(X^7)$.  Suppose we want to create an additional 
+rectangular frame around our graph.  No problem!
+
+First, all low-level graphing work takes place in some virtual drawing
+boards (numbered from 0 to 15), called ``rectangles'' (or ``rectwindows'').
+So we create an empty ``rectangle'' and name it rectangle 2 (any
+number between 0 and 15 would do):
+\bprog
+plotinit(2)
+plotscale(2, 0,1, 0,1)
+@eprog
+This creates a rectwindow whose size exactly fits the size of the output
+device, and makes the coordinate system inside it go from 0 to 1 (for both
+$x$ and $y$). Create a rectangular frame along the boundary of this rectangle:
+\bprog
+plotmove(2, 0,0)
+plotbox(2, 1,1)
+@eprog
+Suppose we want to draw the graph inside a subrectangle of this with upper
+and left margins of $0.10$ (so 10\% of the full rectwindow width), and
+lower and top margins of $0.02$, just to make it more interesting. That
+makes it an $0.88 \times 0.88$ subrectangle; so we create another rectangle
+(call it 3) of linear size 0.88 of the size of the initial rectangle and
+graph the function in there:
+\bprog
+plotinit(3, 0.88, 0.88, relative)
+plotrecth(3, X = -2, 2, sin(X^7), recursive)
+@eprog
+(nothing is output yet, these commands only fills the virtual drawing
+boards with PARI graphic objects). Finally, output rectangles 2 and 3 on
+the same plot, with the required offets (counted from upper-left corner):
+\bprog
+plotdraw([2, 0,0,  3, 0.1,0.02], relative)
+@eprog
+\noindent The output misses something comparing to the output of
+\kbd{ploth}: there are no coordinates of the corners of the internal
+rectangle.  If your output device supports mouse operations (only
+\kbd{gnuplot} does), you can find coordinates of particular points of the
+graph, but it is nice to have something printed on a hardcopy too.
+
+However, it is easy to put $x$- and $y$-limits on the graph.  In the
+coordinate system of the rectangle 2 the corners are $(0.1,0.1)$,
+$(0.1,0.98)$, $(0.98,0.1)$, $(0.98,0.98)$.  We can mark lower $x$-limit by
+doing
+\bprog
+plotmove(2, 0.1,0.1)
+plotstring(2, "-2.000", left+top+vgap)
+@eprog\noindent
+Computing the minimal and maximal $y$-coordinates might be trickier, since
+in principle we do not know the range in advance (though for $\sin X^7$ it
+is quite easy to guess!). Fortunately, \kbd{plotrecth} returns the $x$- and
+$y$-limits.
+
+Here is the complete program:
+\bprog
+plotinit(3, 0.88, 0.88, relative)
+lims = plotrecth(3, X = -2, 2, sin(X^7), recursive)
+\p 3          \\ @com $3$ significant digits for the bounding box are enough
+limits = vector(4,i, Str(lims[i]))
+plotinit(2);      plotscale(2, 0,1, 0,1)
+plotmove(2, 0,0); plotbox(2, 1,1)
+plotmove(2, 0.1,0.1);
+plotstring(2, limits[1], left+top+vgap)
+plotstring(2, limits[3], bottom+vgap+right+hgap)
+plotmove(2, 0.98,0.1); plotstring(2, limits[2], right+top+vgap)
+plotmove(2, 0.1,0.98); plotstring(2, limits[4], right+hgap+top)
+plotdraw([2, 0,0,  3, 0.1,0.02], relative)
+@eprog
+
+We started with a trivial requirement: have an additional frame around
+the graph, and it took some effort to do so.  But at least it was possible,
+and PARI did the hardest part: creating the actual graph.
+Now do a different thing: plot together the ``exact'' graph of 
+$\zeta({1/2}+it)$ together with one obtained from splines approximation.
+We can emit these graphs into two rectangles, say 0 and 1, then put these
+two rectangles together on one plot.  Or we can emit these graphs into one
+rectangle 0.
+
+However, a problem arises: note how we
+introduced a coordinate system in rectangle 2 of the above example, but we
+did not introduce a coordinate system in rectangle 3.  Plotting a
+graph into rectangle 3 automatically created a coordinate system
+inside this rectangle (you could see this coordinate system in action
+if your output device supports mouse operations).  If we use two different
+methods of graphing, the bounding boxes of the graphs will not be exactly
+the same, thus outputting the rectangles may be tricky.  Thus during
+the second plotting we ask \kbd{plotrecth} to use the coordinate system of
+the first plotting.  Let us add another plotting with fewer
+points too:
+\bprog
+plotinit(0, 0.9,0.9, relative)
+plotrecth(0, t=100,110, f(t), parametric, 300)
+plotrecth(0, t=100,110, f(t), parametric+splines+points_lines+norescale, 30);
+plotrecth(0, t=100,110, f(t), parametric+splines+points_lines+norescale, 20);
+plotdraw([0, 0.05,0.05], relative)
+@eprog
+
+This achieves what we wanted: we may compare different ways to plot a graph,
+but the picture is confusing: which graph is what, and why there are multiple
+boxes around the graph?  At least with some output devices one can control
+how the output curves look like, so we can use this to distinguish different
+graphs.  And the mystery of multiple boxes is also not that hard to solve:
+they are bounding boxes for calculated points on each graph.  We can disable
+output of bounding boxes with appropriate options for \kbd{plotrect}.
+With these frills the script becomes:
+\bprog
+plotinit(0, 0.9,0.9, relative)
+plotpointtype(-1, 0)                \\@com set color of graph points
+plotpointsize(0, 0.4)               \\@com use tiny markers (if available)
+plotrecth(0, t=100,110, f(t), parametric+points, 300)
+plotpointsize(0, 1)                 \\@com normal-size markers
+plotlinetype(-1, 1)                 \\@com set color of graph lines
+plotpointtype(-1, 1)                \\@com set color of graph points
+curve_only = norescale + no_frame + no_x_axis + no_y_axis
+plotrecth(0, t=100,110,f(t), parametric+splines+points_lines+curve_only, 30);
+plotlinetype(-1, 2)                 \\@com set color of graph lines
+plotpointtype(-1, 2)                \\@com set color of graph points
+plotrecth(0, t=100,110,f(t), parametric+splines+points_lines+curve_only, 20);
+plotdraw([0, 0.05,0.05], relative)
+@eprog
+
+\noindent Plotting axes on the second and third graph would not hurt, but
+is not needed either, so we omit them.  One can see that the discrepancies
+between the exact graph and one based on 30 points exist, but are pretty
+small.  On the other hand, decreasing the number of points to 20 makes
+quite a noticable difference.
+
+Keep in mind that \kbd{plotlinetype}, \kbd{plotpointtype},
+\kbd{plotpointsize} may do nothing on some terminals.  
+
+What if we
+want to create a high-resolution hardcopy of the plot?  There may be several
+possible solutions.  First, the display output device may allow a
+high-resolution hardcopy itself.  Say, PM display (with gnuplot output on
+OS/2) pretends that its resolution is $19500\times 12500$, thus the data
+PARI sends to it are already high-resolution, and printing is available
+through the menubar.  Alternatively, with gnuplot output one can switch
+the output plotting device to many different hardcopy devices:
+\kbd{plotfile("plot.tex")}, \kbd{plotterm("texdraw")}.
+After this all the plotting will go into file {\tt plot.tex} with whatever
+output conventions gnuplot format {\tt texdraw} provides.  To switch output
+back to normal, one needs to restore the initial plotting terminal, and
+restore the initial output file by doing \kbd{plotfile("-")}.
+
+One can combine PARI programming capabilities to produce multiple plots:
+\bprog
+plotfile("manypl1.gif")       \\@com Avoid switching STDOUT to binary mode
+plotterm("gif=300,200")
+wpoints = plothsizes()[1]     \\@com $300 \times 200$ is advice only
+{
+  for( k=1,6,
+    plotfile("manypl" k ".gif");
+    ploth(x = -1, 3, sin(x^k), , wpoints)
+  )
+}
+@eprog
+
+\noindent This plots 6 graphs of $\sin x^k$, $k=1\dots 6$ into 
+$300\times 200$ GIF files {\tt manypl1.gif}\dots {\tt manypl6.gif}.
+
+Additionally, one can ask PARI to output a plot into a PS file: just
+use the command \kbd{psdraw} instead of \kbd{plotdraw} in the above examples
+(or \kbd{psploth} instead of \kbd{ploth}).  See \kbd{psfile} argument
+to \kbd{default} for how to change the output file for this operation.  Keep
+in mind that the precision of PARI PS output will be the same as for the
+current output device.
+
+Now suppose we want to join many different small graphs into one picture.
+We cannot use one rectangle for all the output as we did in the example
+with $\zeta({1/2}+it)$, since the graphs should go into different places.
+Rectangles are a scarce commodity in PARI, since only 16 of them are
+user-accessible.  Does it mean that we cannot have more than 16 graphs on
+one picture?  Thanks to an additional operation of PARI plotting engine,
+there is no such restrictions.  This operation is \kbd{plotcopy}.
+
+The following script puts 4 different graphs on one plot using 2 rectangles
+only, \kbd{A} and \kbd{T}:
+\bprog
+A = 2;   \\@com accumulator
+T = 3;   \\@com temporary target
+plotinit(A);         plotscale(A, 0, 1, 0, 1)
+
+plotinit(T, 0.42, 0.42, relative);
+plotrecth(T, x= -5, 5, sin(x), recursive)
+plotcopy(T, 2, 0.05, 0.05, relative + nw)
+
+plotmove(A, 0.05 + 0.42/2, 1 - 0.05/2)
+plotstring(A,"Graph", center + vcenter)
+
+plotinit(T, 0.42, 0.42, relative);
+plotrecth(T, x= -5, 5, [sin(x),cos(2*x)], 0)
+plotcopy(T, 2, 0.05, 0.05, relative + ne)
+
+plotmove(A, 1 - 0.05 - 0.42/2, 1 - 0.05/2)
+plotstring(A,"Multigraph", center + vcenter)
+
+plotinit(T, 0.42, 0.42, relative);
+plotrecth(T, x= -5, 5, [sin(3*x), cos(2*x)], parametric)
+plotcopy(T, 2, 0.05, 0.05, relative + sw)
+
+plotmove(A, 0.05 + 0.42/2, 0.5)
+plotstring(A,"Parametric", center + vcenter)
+
+plotinit(T, 0.42, 0.42, relative);
+plotrecth(T, x= -5, 5, [sin(x), cos(x), sin(3*x),cos(2*x)], parametric)
+plotcopy(T, 2, 0.05, 0.05, relative + se)
+
+plotmove(A, 1 - 0.05 - 0.42/2, 0.5)
+plotstring(A,"Multiparametric", center + vcenter)
+
+plotlinetype(A, 3)
+plotmove(A, 0, 0)
+plotbox(A, 1, 1)
+
+plotdraw([A, 0, 0])
+\\ psdraw([A, 0, 0], relative)          \\ @com if hardcopy is needed
+@eprog
+
+The rectangle \kbd{A} plays the role of accumulator, rectangle \kbd{T} is
+used as a target to \kbd{plotrecth} only.  Immediately after plotting into 
+rectangle \kbd{T} the contents is copied to accumulator.  Let us explain
+numbers which appear in this example: we want to create 4 internal rectangles
+with a gap 0.06 between them, and the outside gap 0.05 (of the size of the
+plot).  This leads to the size 0.42 for each rectangle.  We also
+put captions above each graph, centered in the middle of each gap.  There
+is no need to have a special rectangle for captions: they go into the
+accumulator too.
+
+To simplify positioning of the rectangles, the above example uses relative
+``geographic'' notation: the last argument of \kbd{plotcopy} specifies the
+corner of the graph (say, northwest) one counts offset from. (Positive
+offsets go into the rectangle.)
+
+To demonstrate yet another useful plotting function, design a program to
+plot Taylor polynomials for a $\sin x$ about 0.  For simplicity, make the
+program good for any function, but assume that a function is odd, so only
+odd-numbered Taylor series about 0 should be plotted.  Start with defining
+some useful shortcuts
+\bprog
+xlim = 13;  ordlim = 25;  f(x) = sin(x);
+default(seriesprecision,ordlim)
+farray(t) = vector((ordlim+1)/2, k, truncate( f(1.*t + O(t^(2*k+1)) )))
+FARRAY = farray('t);  \\@com\kbd{'t} to make sure \kbd{t} is a free variable
+@eprog
+
+\noindent \kbd{farray(x)} returns a vector of Taylor polynomials for
+$f(x)$, which we store in \kbd{FARRAY}.  We want to plot $f(x)$ into a
+rectangle, then make the rectangle which is 1.2 times higher, and plot
+Taylor polynomials into the larger rectangle.  Assume that the larger
+rectangle takes 0.9 of the final plot.
+
+First of all, we need to measure the height of the smaller rectangle:
+\bprog
+plotinit(3, 0.9, 0.9/1.2, 1);
+curve_only = no_x_axis+no_y_axis+no_frame;
+lims = plotrecth(3, x= -xlim, xlim, f(x), recursive+curve_only,16);
+h = lims[4] - lims[3];
+@eprog
+
+\noindent Next step is to create a larger rectangle, and plot the Taylor
+polynomials into the larger rectangle:
+\bprog
+plotinit(4, 0.9,0.9, relative);
+plotscale(4, lims[1], lims[2], lims[3] - h/10, lims[4] + h/10)
+plotrecth(4, x = -xlim, xlim, subst(FARRAY,t,x), norescale);
+@eprog
+
+Here comes the central command of this example:
+
+\kbd{plotclip(4)}
+
+\noindent What does it do?  The command \kbd{plotrecth(\dots, norescale)}
+scales the graphs according to coordinate system in the 
+rectangle, but it does not pay any other attension to the size of
+the rectangle.  Since \kbd{xlim} is 13, the Taylor polynomials take 
+very large values in the interval \kbd{-xlim...xlim}.  In particular,
+significant part of the graphs is going to be {\it outside} of the rectangle.
+\kbd{plotclip} removes the parts of the plottings which fall off the
+rectangle boundary
+\bprog
+plotinit(2)
+plotscale(2, 0.0, 1.0, 0.0, 1.0)
+plotmove(2,0.5,0.975)
+plotstring(2,"Multiple Taylor Approximations",center+vcenter)
+plotdraw([2, 0, 0,  3, 0.05, 0.05 + 0.9/12,  4, 0.05, 0.05], relative)
+@eprog
+
+These commands draw a caption, and combine 3 rectangles (one with the
+caption, one with the graph of the function, and one with graph of Taylor
+polynomials) together.
+
+This finishes our short survey of PARI plotting functions, but let us add
+some remarks.  First of all, for a typical output device the picture is
+composed of small colored squares (pixels) (as a very large checkerboard).
+Each output rectangle is in fact a union of such squares.  Each drop
+of paint in the rectangle will color a whole square it is in.  Since the
+rectangle has a coordinate system, sometimes it is important to know how
+this coordinate system is positioned with respect to the boundaries of
+these squares.
+
+The command \kbd{plotscale} describes a range of $x$ and $y$ in the
+rectangle.  The limit values of $x$ and $y$ in the coordinate system are
+coordinates {\it of the centers} of corner squares.  In particular,
+if ranges of $x$ and $y$ are $[0,1]$, then the segment which connects (0,0)
+with (0,1) goes along the {\it middle} of the left column of the rectangle.
+In particular, if we made tiny errors in calculation of endpoints of this
+segment, this will not change which squares the segment intersects, thus
+the resulting picture will be the same.  (It is important to know such details
+since many calculations in PARI are approximate.)
+
+Another consideration is that all examples we did in this section were
+using relative sizes and positions for the rectangles.  This is nice, since
+different output devices will have very similar pictures, while we
+did not need to care about particular resolution of the output device.
+On the other hand,
+using relative positions does not guarantie that the pictures will be
+similar.  Why?  Even if two output devices have the same resolution,
+the picture may be different.  The devices may use fonts of different
+size, or may have a different ``unit of length''.
+
+The information about the device in PARI is encoded in 6 numbers: resolution,
+size of a character cell of the font, and unit of length, all separately
+for horizontal and vertical direction.  These sizes are expressed as
+numbers of pixels.  To inspect these numbers one may use the function
+\kbd{plothsizes}.  The ``units of length'' are currently used to calculate
+right and top gaps near graph rectangle of \kbd{ploth}, and gaps for
+\kbd{plotstring}.  Left and bottom gaps near graph rectangle are calculate
+using both units of length, and sizes of character boxes (so that there
+is enough place to print limits of the graphs).
+
+What does it show?  Using relative sizes during plotting produces
+\var{approximately} the same plotting on different devices, but does not
+ensure that the plottings ``look the same''.  Moreover, ``looking the
+same'' is not a desirable target, ``looking tuned for the environment''
+will be much better.  If you want to produce such fine-tuned plottings,
+you need to abandone a relative-size model, and do your plottings in
+pixel units.  To do this one removes flag \kbd{relative} from the above
+examples, which will make size and offset arguments interpreted this way.
+After querying sizes with \kbd{plothsizes} one can fine-tune sizes and
+locations of subrectangles to the details of an arbitrary plotting
+device.
+
+To check how good your fine-tuning is, you may test your graphs with a
+medium-resolution plotting (as many display output devices are), and
+with a low-resolution plotting (say, with \kbd{plotterm("dumb")} of gnuplot).
 \vfill\eject\bye

@@ -1,5 +1,6 @@
 \appendix{Installation Guide for the UNIX Versions}
 
+\def\tocwrite#1{}
 \section{Required tools}
 
 We assume that you have either an \kbd{ANSI C} or a \kbd{C++} compiler
@@ -137,9 +138,10 @@ e.g \kbd{readline-linux-i686}.
 \kbd{Configure -g}
 
 \noindent will create a directory \kbd{O$xxx$.dbg} containing a special
-\kbd{Makefile} ensuring that suitably non-optimized GP and PARI library will
-be built there. If you want to profile GP or the library (using \kbd{gprof}
-for instance), 
+\kbd{Makefile} ensuring that the GP and PARI library built there will be
+suitable for debugging (if your compiler doesn't use standard flags,
+e.g.~\kbd{-g} you may have to tweak that \kbd{Makefile}). If you want to
+profile GP or the library (using \kbd{gprof} for instance), 
 
 \kbd{Configure -pg}
 
@@ -238,10 +240,11 @@ directory which was chosen at \kbd{Configure} time (it's one of the last
 messages on the screen if you did not run \kbd{Configure -a}). You can then
 test the \kbd{polgalois} function with your favourite polynomials.
 
-\subsec{The \kbd{GPRC} file:} Copy \kbd{misc/gprc.dft} (or \kbd{gprc.dos} if
-you're using \kbd{GP.EXE}) to \kbd{\$HOME/.gprc}. Modify it to your liking.
-For instance, if you're not using an ANSI terminal, remove control characters
-from the \kbd{prompt} variable. You can also enable colors. 
+\subsec{The \kbd{GPRC} file:} Copy the file \kbd{misc/gprc.dft} (or
+\kbd{gprc.dos} if you're using \kbd{GP.EXE}) to \kbd{\$HOME/.gprc}. Modify
+it to your liking. For instance, if you're not using an ANSI terminal,
+remove control characters from the \kbd{prompt} variable. You can also
+enable colors. 
 
 If desired, also copy/modify \kbd{misc/gpalias} somewhere and call it from
 the \kbd{gprc} file (this provides some common shortcuts to lengthy names).

@@ -150,10 +150,10 @@ other words, something like \kbd{a = 3; default(logfile, "\var{some
 filename}" a ".log")} will work (and log the output in
 \var{some filename}3.log).
 
-For the user's convenience, some defaults will be expanded further when
-the values are used (after the above expansion has been performed):
+Some defaults will be expanded further when the values are used (after the
+above expansion has been performed):
 
-$\bullet$ \idx{time expansion}: the string is sent through the library
+$\bullet$ \teb{time expansion}: the string is sent through the library
 function \tet{strftime}. This means that \kbd{\%}\var{char} combinations have
 a special meaning, usually related to the time and date. For instance,
 \kbd{\%H} = hour (24-hour clock) and \kbd{\%M} = minute [00,59] (on a Unix
@@ -167,7 +167,7 @@ instance,
 will prepend the time of day, in the form \kbd{(\var{hh}:\var{mm})}
 to GP's usual prompt.
 
-\unix $\bullet$ \idx{environment expansion}: When the string contains a
+\unix $\bullet$ \teb{environment expansion}: When the string contains a
 sequence of the form \kbd{\$\var{SOMEVAR}} (e.g.~\kbd{\$HOME}) the
 environment is searched and if \var{SOMEVAR} is defined, the sequence is
 replaced by the corresponding value. Also the \kbd{\til} symbol has the
@@ -210,9 +210,9 @@ history numbers, prompt, input line, output, help messages, timer (that's
 seven of them). If $k < 7$, the remaining $a_i$ are assumed to be $no$. For
 instance
 %
-\bprog%
-default(colors,"9, 5, no, no, 4")
-\eprog
+\bprog
+default(colors, "9, 5, no, no, 4")
+@eprog
 \noindent
 typesets error messages in color $9$, history numbers in color $5$, output in
 color $4$, and does not affect the rest.
@@ -302,10 +302,10 @@ files used to check whether GP has been built correctly (see \b{e}).
 64-bit machines, respectively): of the form x$m.n$, where x is a letter in
 $\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$, $m$ are integers. If x is \kbd{f},
 real numbers will be printed in \idx{fixed floating point format} with no
-explicit exponent (e.g.~\kbd{0.000033}); if the letter is \kbd{e}, they will be
-printed in \idx{scientific format}, always with an explicit exponent (e.g.
-\kbd{3.3e-5}). If the letter is \kbd{g}, real numbers will be printed in
-\kbd{f} format, except when their absolute value is less than $2^{-32}$,
+explicit exponent (e.g.~\kbd{0.000033}); if the letter is \kbd{e}, they will
+be printed in \idx{scientific format}, always with an explicit exponent
+(e.g.~\kbd{3.3e-5}). If the letter is \kbd{g}, real numbers will be printed
+in \kbd{f} format, except when their absolute value is less than $2^{-32}$,
 in which case they are printed in \kbd{e} format. \label{se:format}
 
 The number $n$ is the number of significant digits printed for real
@@ -348,20 +348,19 @@ used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
 values: 0  (=~\var{raw}), 1 (=~\var{prettymatrix}), or 2
 (=~\var{prettyprint}). This means that, independently of the default
 \kbd{format} for reals which we explained above, you can print results in
-three ways: either in \var{raw}\sidx{raw format} format, i.e.~a format
-which is equivalent to what you input, including explicit multiplication
-signs, and everything typed on a line instead of two dimensional boxes. This
-can have several advantages, for instance it allows you to pick the result
-with a mouse or an editor, and to put it somewhere else.\label{se:output}
+three ways: either in \tev{raw format}, i.e.~a format which is equivalent
+to what you input, including explicit multiplication signs, and everything
+typed on a line instead of two dimensional boxes. This can have several
+advantages, for instance it allows you to pick the result with a mouse or
+an editor, and to put it somewhere else.\label{se:output}
 
-The second format is the \var{prettymatrix}\sidx{prettymatrix format} format.
-The only difference to raw format is that matrices are printed as boxes
-instead of horizontally. This is prettier, but takes more space and cannot be
-used for input. Column vectors are still printed horizontally.
+The second format is the \tev{prettymatrix format}. The only difference to
+raw format is that matrices are printed as boxes instead of horizontally.
+This is prettier, but takes more space and cannot be used for input. Column
+vectors are still printed horizontally.
 
-The third format is the \var{prettyprint}\sidx{prettyprint format} or
-beautified format. In the present version \vers, this is not beautiful at
-all.
+The third format is the \tev{prettyprint format}, or beautified format. In
+the present version \vers, this is not beautiful at all.
 
 Independently of the setting of this default, an object can be printed
 in any of the three formats at any time using the commands \b{a}, \b{m}
@@ -400,7 +399,7 @@ prompt. Note that most usual escape sequences are available there: \b{e} for
 Esc, \b{n} for Newline, \dots, \kbd{\bs\bs} for \kbd{\bs}. Time expansion is
 performed.
 
-This string is sent through the library function \kbd{\idx{strftime}} (on a
+This string is sent through the library function \tet{strftime} (on a
 Unix system, you can try \kbd{man strftime} at your shell prompt). This means
 that \kbd{\%} constructs have a special meaning, usually related to the time
 and date. For instance, \kbd{\%H} = hour (24-hour clock) and \kbd{\%M} =
@@ -434,10 +433,10 @@ coincide with the number of decimal digits you input. For instance to get 2
 decimal digits you need one word of precision which, on a 32-bit machine,
 actually gives you 9 digits ($9 < \log_{10}(2^{32}) < 10$):
 
-\bprog%
+\bprog
 ? default(realprecision, 2)
       realprecision = 9 significant digits (2 digits displayed)
-\eprog
+@eprog
 
 \subsecidx{secure} (default \kbd{0}): this is a toggle which can be either 1
 (on) or 0 (off). If on, the \tet{system} and \tet{extern} command are
@@ -577,7 +576,7 @@ respectively.
 \misctitle{Technical note:} these functionalities are provided by an
 external \kbd{perl} script that you are free to use outside any GP session
 (and modify to your liking, if you are perl-knowledgeable). It is called
-\kbd{\idx{gphelp}}, lies in the \kbd{doc} subdirectory of your distribution
+\tet{gphelp}, lies in the \kbd{doc} subdirectory of your distribution
 (just make sure you run \kbd{Configure} first, see Appendix~A) and is
 really two programs in one. The one which is used from within GP is
 \kbd{gphelp} which runs \TeX\ on a selected part of this manual, then opens
@@ -611,16 +610,16 @@ functions, see \b{u} and \b{um}.
 \subsec{\b{d}}: prints the \idx{defaults} as described in the
 previous section (shortcut for \kbd{default()}, see \secref{se:default}).
 
-\subsec{\b{e}} $\{n\}$: switches the \kbd{echo} mode on (1) or off (0). If
+\subsec{\b{e}} $\{n\}$: switches the \tet{echo} mode on (1) or off (0). If
 $n$ is explicitly given, set echo to $n$.
 
-\subsec{\b{g}} $\{n\}$: sets the debugging level \kbd{debug} to the
+\subsec{\b{g}} $\{n\}$: sets the debugging level \tet{debug} to the
 non-negative integer $n$.
 
-\subsec{\b{gf}} $\{n\}$: sets the file usage debugging level \kbd{debufiles}
+\subsec{\b{gf}} $\{n\}$: sets the file usage debugging level \tet{debugfiles}
 to the non-negative integer $n$.
 
-\subsec{\b{gm}} $\{n\}$: sets the memory debugging level \kbd{debugmem}
+\subsec{\b{gm}} $\{n\}$: sets the memory debugging level \tet{debugmem}
 to the non-negative integer $n$.
 
 \subsec{\b{h}} $\{m$\kbd{-}$n\}$: outputs some debugging info about the
@@ -631,20 +630,20 @@ range, outputs info on the internal structure of the hash cell this
 function occupies (a \kbd{struct entree} in C). If the range is reduced to
 a dash ('\kbd{-}'), outputs statistics about hash cell usage.
 
-\subsec{\b{l}} $\{$\var{logfile}$\}$: switches \kbd{log} mode on and off.
+\subsec{\b{l}} $\{$\var{logfile}$\}$: switches \tet{log} mode on and off.
 If a \var{logfile} argument is given, change the default logfile name to 
 \var{logfile} and switch log mode on.
 
 \subsec{\b{m}}: as \b{a}, but using prettymatrix format.
 
-\subsec{\b{p}} $\{n\}$: sets \kbd{realprecision} to $n$ decimal
+\subsec{\b{p}} $\{n\}$: sets \tet{realprecision} to $n$ decimal
 digits. Prints its current value if $n$ is omitted.
 
-\subsec{\b{ps}} $\{n\}$: sets \kbd{seriesprecision} to $n$ significant terms.
+\subsec{\b{ps}} $\{n\}$: sets \tet{seriesprecision} to $n$ significant terms.
 Prints its current value if $n$ is omitted.
 
-\subsec{\b{q}}: \idx{quit}s the GP session and returns to the system.
-Shortcut for the function \kbd{quit} (see \secref{se:quit}).
+\subsec{\b{q}}: quits the GP session and returns to the system.
+Shortcut for the function \tet{quit} (see \secref{se:quit}).
 
 \subsec{\b{r}} $\{$\var{filename}$\}$: \idx{read}s into GP all the commands
 contained in the named file as if they had been typed from the keyboard, one
@@ -707,11 +706,11 @@ Recall that blanks are ignored in any expression which is not a string (see
 below).
 
 \subsec{Integers} \sidx{integer}
-(type \typ{INT}\idxtyp{INT}): type the integer (with an initial
+(type \tet{t_INT}): type the integer (with an initial
 \kbd{+} or \kbd{-}, if desired) with no decimal point.
 
 \subsec{Real numbers} \sidx{real number}
-(type \typ{REAL}\idxtyp{REAL}): type the number with a decimal
+(type \tet{t_REAL}): type the number with a decimal
 point. The internal precision of the real number will be the supremum of the
 input precision and the default precision. For example, if the default
 precision is 28 digits, typing \kbd{2.} will give a number with internal
@@ -722,12 +721,11 @@ You can also use scientific notation with the letter \kbd{E} or
 \kbd{e} (like \kbd{6.02 E 23} or \kbd{1e-5}).
 
 \subsec{Integermods}\sidx{integermod}
-(type \typ{INTMOD}\idxtyp{INTMOD}): to enter $n \mod m$, type
+(type \tet{t_INTMOD}): to enter $n \mod m$, type
 \kbd{Mod(n,m)}, \var{not} \kbd{n\%m} (see Chapter~3).
 
 \subsec{Rational numbers}\sidx{rational number}
-(types \typ{FRAC}\idxtyp{FRAC} and
-\typ{FRACN}\idxtyp{FRACN}): under GP, all fractions are
+(types \tet{t_FRAC} and \tet{t_FRACN}): under GP, all fractions are
 automatically reduced to lowest terms, so it is in principle impossible to
 work with reducible fractions (of type \typ{FRACN}), although of course in
 library mode this is easy. To enter $n/m$ just type it as written. As
@@ -739,14 +737,13 @@ function (see \secref{se:gptype}), by typing \kbd{type(x,FRACN)}. Be warned
 however that this function must be used with extreme care.
 
 \subsec{Complex numbers}\sidx{complex number}
-(type \typ{COMPLEX}\idxtyp{COMPLEX}): to enter $x+iy$, type \kbd{x + I*y}
-(\var{not} \kbd{x+i*y}). The letter \kbd{\idx{I}} stands for
-$\sqrt{-1}$. Recall from Chapter 1 that $x$ and $y$ can be of type
-\typ{INT}, \typ{REAL}, \typ{INTMOD}, \typ{FRAC}/\typ{FRACN}, or
-\typ{PADIC}.
+(type \tet{t_COMPLEX}): to enter $x+iy$, type \kbd{x + I*y} (\var{not}
+\kbd{x+i*y}). The letter \tet{I} stands for $\sqrt{-1}$. Recall from
+Chapter 1 that $x$ and $y$ can be of type \typ{INT}, \typ{REAL},
+\typ{INTMOD}, \typ{FRAC}/\typ{FRACN}, or \typ{PADIC}.
 
 \subsec{$p$-adic numbers}\sidx{p-adic number}\label{se:padic}
-(type \typ{PADIC}\idxtyp{PADIC}): to enter a $p$-adic number, simply write a
+(type \tet{t_PADIC}): to enter a $p$-adic number, simply write a
 rational or integer expression and add to it \kbd{O($p$\pow $k$)}, where $p$
 and $k$ are integers. This last expression indicates three things to GP:
 first that it is dealing with a \typ{PADIC} type (the fact that $p$ is an
@@ -767,14 +764,12 @@ exactly as shown, or equivalently as
 \kbd{905/7 + O(7\pow3)}.
 
 \subsec{Quadratic numbers}\sidx{quadratic number}
-(type \typ{QUAD}\idxtyp{QUAD}): first, you must define the
-default quadratic order or field in which you want to work. This is done
-using the \kbd{\idx{quadgen}} function, in the following way. Write something
-like
-
-\kbd{w = quadgen(d)}
-
-\noindent
+(type \tet{t_QUAD}): first, you must define the default quadratic order or
+field in which you want to work. This is done using the \tet{quadgen}
+function, in the following way. Write something like
+\bprog
+w = quadgen(d)
+@eprog\noindent
 where \kbd{d} is the \var{discriminant} of the quadratic order in
 which you want to work (hence $d$ is congruent to $0$ or $1$ modulo $4$). The
 name \kbd{w} is of course just a suggestion, but corresponds to traditional
@@ -788,7 +783,7 @@ Now $(1,w)$ will be the ``canonical'' integral basis of the quadratic order
 $d\equiv 1 \mod 4$, where $d$ is the discriminant), and to enter $x+yw$ you
 just type \kbd{x + y*w}.
 
-\subsec{Polmods}\sidx{polmod} (type \typ{POLMOD}\idxtyp{POLMOD}): exactly as
+\subsec{Polmods}\sidx{polmod} (type \tet{t_POLMOD}): exactly as
 for integermods, to enter $x \mod y$ (where $x$ and $y$ are polynomials),
 type \kbd{Mod(x,y)}, not \kbd{x\%y} (see \secref{se:Mod}). Note that when $y$
 is an irreducible polynomial in one variable, polmods whose modulus is $y$
@@ -822,7 +817,7 @@ version 2.0.16: it returned a polynomial in \kbd{x} equivalent to $\kbd{x}
 + i$, which was in fact an invalid object (you couldn't \kbd{lift} it).
 
 \subsec{Polynomials}\sidx{polynomial}\label{se:pol}
-(type \typ{POL}\idxtyp{POL}): type the polynomial in a natural way, not
+(type \tet{t_POL}): type the polynomial in a natural way, not
 forgetting to put a ``$*$'' between a coefficient and a formal variable
 (this $*$ does not appear in beautified output). Any \idx{variable} name
 can be used except for the reserved names \kbd{I} (used exclusively for the
@@ -836,7 +831,7 @@ should be enough. If you ever need hundreds of variables, you should
 probably be using vectors instead.
 
 \subsec{Power series}\sidx{power series}\label{se:series}
-(type \typ{SER}\idxtyp{SER}): type a rational function or
+(type \tet{t_SER}): type a rational function or
 polynomial expression and add to it \hbox{\kbd{O(\var{expr} \pow $k$)}},
 where \var{expr} is an expression which has non-zero valuation (it can be a
 polynomial, power series, or a rational function; the most common case being
@@ -847,14 +842,13 @@ main variable of \var{expr} (to check the ordering of the variables, or
 to modify it, use the function \kbd{reorder}; see~\secref{se:reorder}).
 
 \subsec{Rational functions}\sidx{rational function}
-(types \typ{RFRAC}\idxtyp{RFRAC} and
-\typ{RFRACN}\idxtyp{RFRACN}): as for fractions, all rational
+(types \tet{t_RFRAC} and \tet{t_RFRACN}): as for fractions, all rational
 functions are automatically reduced to lowest terms under GP. All that was
 said about fractions in \secref{se:FRAC} remains valid here.
 
 \subsec{Binary quadratic forms of positive or negative discriminant}%
 \sidx{binary quadratic forms}
-(type \typ{QFR}\idxtyp{QFR} and \typ{QFI}\idxtyp{QFI}):
+(type \tet{t_QFR} and \tet{t_QFI}):
 these are input using the function \kbd{Qfb} (see Chapter~3). For example
 \kbd{Qfb(1,2,3)} will create the binary form $x^2+2xy+3y^2$. It will be
 imaginary (of internal type \typ{QFI}) since $2^2 - 4*3 = -8$ is negative.
@@ -866,21 +860,19 @@ See also the function \kbd{qfbprimeform} which directly creates a prime form
 of given discriminant (see Chapter~3).
 
 \subsec{Row and column vectors}\sidx{row vector}\sidx{column vector} (types
-\typ{VEC}\idxtyp{VEC} and \typ{COL}\idxtyp{COL}): to
-enter a row vector, type the components separated by commas ``\kbd{,}'', and
-enclosed between brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.~%
-\kbd{[1,2,3]}. To enter a column vector, type the vector horizontally, and
-add a tilde ``\til'' to transpose. \kbd{[ ]} yields the empty (row) vector.
-The function \tet{Vec} can be used to transform any object into a vector (see
-Chapter~3).
+\tet{t_VEC} and \tet{t_COL}): to enter a row vector, type the components
+separated by commas ``\kbd{,}'', and enclosed between brackets
+``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.~\kbd{[1,2,3]}. To enter a column
+vector, type the vector horizontally, and add a tilde ``\til'' to
+transpose. \kbd{[ ]} yields the empty (row) vector. The function \tet{Vec}
+can be used to transform any object into a vector (see Chapter~3).
 
-\subsec{Matrices} (type \typ{MAT}\idxtyp{MAT}):\sidx{matrix} to
-enter a matrix, type the components line by line, the components being
-separated by commas ``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and
-everything enclosed in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g.
-\kbd{[x,y; z,t; u,v]}. \kbd{[ ; ]} yields the empty (0x0) matrix. The
-function \tet{Mat} can be used to transform any object into a matrix (see
-Chapter 3).
+\subsec{Matrices} (type \tet{t_MAT}):\sidx{matrix} to enter a matrix, type
+the components line by line, the components being separated by commas
+``\kbd{,}'', the lines by semicolons ``\kbd{;}'', and everything enclosed
+in brackets ``\kbd{[}$\,$'' and ``$\,$\kbd{]}'', e.g. \kbd{[x,y; z,t;
+u,v]}. \kbd{[ ; ]} yields the empty (0x0) matrix. The function \tet{Mat}
+can be used to transform any object into a matrix (see Chapter 3).
 
 Note that although the internal representation is essentially the same (only
 the type number is different), a row vector of column vectors is \var{not}
@@ -892,17 +884,17 @@ given positive number of columns, each of which has zero rows. It is not
 possible to create or represent matrices with zero columns and a nonzero
 number of rows.
 
-\subsec{Lists} (type \typ{LIST})\idxtyp{LIST}:\sidx{list}
-lists cannot be input directly; you have to use the function
-\kbd{listcreate} first, then \kbd{listput} each time you want to append a
-new element (but you can access the elements directly as with the
-vector types described above). The function \kbd{List} can be used to
-transform (row or column) vectors into lists (see Chapter~3).
+\subsec{Lists} (type \tet{t_LIST}):\sidx{list} lists cannot be input
+directly; you have to use the function \kbd{listcreate} first, then
+\kbd{listput} each time you want to append a new element (but you can
+access the elements directly as with the vector types described above). The
+function \kbd{List} can be used to transform (row or column) vectors into
+lists (see Chapter~3).
 
-\subsec{Strings} (type \typ{STR})\idxtyp{STR}:\sidx{string}%
-\sidx{character string} to enter a string, just enclose it between double
-quotes \kbd{"}, like this: \kbd{"this is a string"}. The function \kbd{Str}
-can be used to transform any object into a string (see Chapter~3).
+\subsec{Strings} (type \tet{t_STR}):\sidx{string}\sidx{character string}
+to enter a string, just enclose it between double quotes \kbd{"}, like
+this: \kbd{"this is a string"}. The function \kbd{Str} can be used to
+transform any object into a string (see Chapter~3).
 
 \section{GP operators}\label{se:operators}
 
@@ -939,10 +931,9 @@ their C counterparts.
 When in doubt, just surround everything by parentheses (besides, your code
 will probably be more legible).
 
-\noindent Here is the complete list (in order of decreasing priority, binary
-unless mentioned otherwise):
+\noindent Here is the complete list (in order of decreasing \idx{priority},
+binary unless mentioned otherwise):
 
-\sidx{priority}
 \def\point#1{\noindent $\bullet$ #1\hfill\break\indent\strut}
 \point{Priority 9}
 %
@@ -974,14 +965,14 @@ is \var{not} the equality test operator. Beware that a statement like
 equal to $0$ (specifically, if \kbd{gcmp0($x$)==1}), and $0$ otherwise.
 
 \kbd{'} (unary, prefix): quote its argument without evaluating it.
-\bprog%
+\bprog
 ? a = x + 1; x = 1;
 ? subst(a,x,1)
   ***   variable name expected: subst(a,x,1)
                                         ^---
 ? subst(a,'x,1)
-\%1 = 2
-\eprog
+%1 = 2
+@eprog
 
 \point{Priority 5}
 %
@@ -1043,29 +1034,26 @@ and aborted as soon as the final truth value is known. Thus, for instance,
 produce an error since the second argument need not (and will not) be processed
 when the first is already zero (false).
 
-\misctitle{Remark:} For the sake of efficiency, you should use the
+\misctitle{Remark:} For the optimal efficiency, you should use the
 \kbd{++}, \kbd{--} and \var{op}\kbd{=} operators whenever possible:
-
-\bprog%
-? a=200000;
-? i=0; while(i<a, i=i+1)
+\bprog
+? a = 200000;
+? i = 0; while(i<a, i=i+1)
 time = 4,919 ms.
-? i=0; while(i<a, i+=1)
+? i = 0; while(i<a, i+=1)
 time = 4,478 ms.
-? i=0; while(i<a, i++)
+? i = 0; while(i<a, i++)
 time = 3,639 ms.
-\eprog
-
-\noindent The shift operators should be preferred to multiplication
-whenever possible:
-
-\bprog%
-? a=1<<20000;
-? i=1; while(i<a, i=i*2);
+@eprog
+\noindent For the same reason, the shift operators should be preferred to
+multiplication:
+\bprog
+? a = 1<<20000;
+? i = 1; while(i<a, i=i*2);
 time = 5,255 ms.
-? i=1; while(i<a, i<<=1);
+? i = 1; while(i<a, i<<=1);
 time = 988 ms.
-\eprog
+@eprog
 
 \section{The general GP input line}
 \subsec{Generalities}. User interaction with a GP session proceeds as
@@ -1099,11 +1087,10 @@ between lowercase and uppercase. Also, note that, outside of constant
 strings, blanks are completely ignored in the input to GP.
 
 The special variable\sidx{variable (special)} names known to GP are
-\kbd{\idx{Euler}} (Euler's constant $\gamma=0.577\dots$), \kbd{\idx{I}}
-(the square root of $-1$), \kbd{\idx{Pi}} (3.14\dots)~--- which could be
-thought of as functions with no arguments, and which may therefore be
-invoked without parentheses~---, and \kbd{\idx{O}} which obeys the
-following syntax:
+\tet{Euler} (Euler's constant $\gamma=0.577\dots$), \tet{I} (the
+square root of $-1$), \tet{Pi} (3.14\dots)~--- which could be thought of as
+functions with no arguments, and which may therefore be invoked without
+parentheses~---, and \tet{O} which obeys the following syntax:
 
 \kbd{O(\var{expr}\pow k)}
 
@@ -1131,24 +1118,21 @@ function, and if you ask for the definition of the function using
 everything is on the same line. You can type a \kbd{\bs} anywhere. It will be
 interpreted as above only if (apart from ignored whitespace characters) it is
 immediately followed by a newline. For example, you can type
-
-\bprog%
-? 3 + \bs
-4%
-\eprog
-
+\bprog
+? 3 + \
+4
+@eprog
 \noindent instead of typing \kbd{3 + 4}.
 
 The second one is a slight variation on the first, and is mostly useful when
 defining a user function (see \secref{se:user_defined}): since an equal sign
 can never end a valid expression, GP will disregard a newline immediately
 following an \kbd{=}.
-
-\bprog%
+\bprog
 ? a =
 123
-\%1 = 123
-\eprog
+%1 = 123
+@eprog
 
 The third one cannot be used everywhere, but is in general much more useful.
 It is the use of braces \kbd{\obr} and  \kbd{\cbr}.\sidx{brace characters}
@@ -1161,13 +1145,12 @@ concatenated, suppressing any newlines. Thus, all newlines should occur after
 a semicolon (\kbd{;}), a comma (\kbd{,}) or an operator (for clarity's sake,
 we don't recommend splitting an identifier over two lines in this way). For
 instance, the following program
-
-\bprog%
-\obr
+\bprog
+{
   a = b
   b = c
-\cbr
-\eprog
+}
+@eprog
 
 \noindent would silently produce garbage, since what GP will really see is
 \kbd{a=bb=c} which will assign the value of \kbd{c} to both \kbd{bb} and
@@ -1289,17 +1272,19 @@ printed if the line does not end with a semicolon (';').
 It is very easy to define a new function under GP, which can then be used
 like any other function. The syntax is as follows:
 
-\kbd{name(list of formal variables) = local(list of local variables); \var{seq}}
+\kbd{name(}\var{list of formal variables}\kbd{) = %
+local(}\var{list of local variables}\kbd{);} \var{seq}
 
 \noindent which looks better written on consecutive lines:
-\bprog% name($x_0$, $x_1$, \dots) = 
-\obr
-  local($t_0$, $t_1$, \dots);
-  local(\dots);
-\h 
-  \dots
-\cbr
-\eprog
+\bprogpart
+name($x_0$, $x_1$, @dots) = 
+{
+  local($t_0$, $t_1$, @dots);
+  local(@dots);
+
+  @dots
+}
+@eprog
 \noindent (note that the first newline is disregarded due to the preceding
 \kbd{=} sign, and the others because of the enclosing braces). Both lists
 of variables are comma-separated and allowed to be empty. The \tet{local}
@@ -1331,19 +1316,22 @@ global, hence known outside of the function, and this may have undesirable
 side-effects. On the other hand, in some cases it may also be what you want.
 Local variables can be given a default value as the formal variables.
 
-\misctitle{Example:} For instance \kbd{foo(x=1,y=2,z=3) = print(x ":" y ":"
-z)}, defines a function which prints its arguments (at most three of them),
-separated by colons. This then follows the rules of default arguments
-generation as explained at the beginning of \secref{se:functions}.
-
-\bprog%
+\misctitle{Example:} For instance
+\bprog
+  foo(x=1, y=2, z=3) = print(x ":" y ":" z)
+@eprog
+\noindent defines a function which prints its arguments (at most three of
+them), separated by colons. This then follows the rules of default
+arguments generation as explained at the beginning of
+\secref{se:functions}.
+\bprog
 ? foo(6,7)
 6:7:3
 ? foo(,5)
 1:5:3
 ? foo
 1:2:3
-\eprog
+@eprog
 
   Once the function is defined using the above syntax, you can use it like
 any other function. In addition, you can also recall its definition exactly
@@ -1363,16 +1351,14 @@ of the \kbd{sumalt} function. Although the \idx{Riemann zeta-function} is
 included in the standard functions, let us assume that this is not the case
 (or that we want another implementation). One way to define it, which is
 probably the simplest (but certainly not the most efficient), is as
-follows:
-
-\sidx{zeta function}
-\bprog%
+follows:\sidx{zeta function}
+\bprog
 zet(s) =
-\obr
+{
   local(j); /* not needed, and possibly confusing (see below) */
   sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
-\cbr
-\eprog
+}
+@eprog
 
 \noindent This gives reasonably good accuracy and speed as long as you are
 not too far from the domain of convergence. Try it for $s$ integral between
@@ -1387,22 +1373,23 @@ using such a construct to declare the variable as a dummy formal parameter.
 In particular, since loop variables are not visible outside their loops,
 the variable \kbd{j} need not be declared in the protoype of our \kbd{zet}
 function above.
-
-\kbd{zet(s) = sumalt(j=1, (-1)\pow(j-1)*j\pow(-s)) / (1 - 2\pow(1-s))}
+\bprog
+zet(s) = sumalt(j=1, (-1)^(j-1)*j^(-s)) / (1 - 2^(1-s))
+@eprog
 
 \noindent would be a perfectly sensible (and in fact better) definition.
 Since local/global scope is a very tricky point, here's one more example.
 What's wrong with the following definition?
-\bprog%
-? first\_prime\_div(x) = 
-\obr
+\bprog
+? first_prime_div(x) = 
+{
   local(p);
-  forprime(p=2, x, if (x\%p == 0, break));
+  forprime(p=2, x, if (x%p == 0, break));
   p
-\cbr
-? first\_prime\_div(10)
-\%1 = 0
-\eprog
+}
+? first_prime_div(10)
+%1 = 0
+@eprog
 
 \misctitle{Answer:} the index $p$ in the \kbd{forprime} loop is local to
 the loop and is not visible to the outside world. Hence, it doesn't survive
@@ -1411,10 +1398,9 @@ restored to its preceding value, which is 0 (local variables are
 initialized to 0 by default). To sum up, the routine returns the $p$
 declared local to it, not the one which was local to \kbd{forprime} and ran
 through consecutive prime numbers. Here's a corrected version:
-
-\bprog%
-? first\_prime\_div(x) = forprime(p=2, x, if (x\%p == 0, return(p)))
-\eprog
+\bprog
+? first_prime_div(x) = forprime(p=2, x, if (x%p == 0, return(p)))
+@eprog
 
 Again, it is strongly recommended to declare all other local variables that
 are used inside a function: if a function accesses a variable which is not
@@ -1426,22 +1412,21 @@ So, be warned.
 Recursive functions\sidx{recursion} can easily be written as long as one
 pays proper attention to variable scope. Here's a last example, used to
 retrieve the coefficient array of a multivariate polynomial (a non-trivial
-task due to PARI's unsophisticated representation for those objects)~:
+task due to PARI's unsophisticated representation for those objects):
 \sidx{multivariate polynomial}
-
-\bprog%
+\bprog
 coeffs(P, nbvar) =
-\obr
+{
   local(v);
-\h
-  if (type(P) != "t\_POL",
+
+  if (type(P) != "t_POL",
     for (i=0, nbvar-1, P = [P]);
     return (P)
   );
   v = vector(poldegree(P)+1, i, polcoeff(P,i-1));
   vector(length(v), i, coeffs(v[i], nbvar-1))
-\cbr
-\eprog
+}
+@eprog
 
 \noindent If $P$ is a polynomial in $k$ variables, show that after the
 assignment {\tt v = coeffs(P,k)}, the coefficient of $x_1^{n_1}\dots
@@ -1449,21 +1434,21 @@ x_k^{n_k}$ in P is given by {\tt v[$n_1$+1][\dots][$n_k$+1]}. What would
 happen if the declaration {\tt local(v)} had been omitted ?
 
 The operating system will automatically limit the \idx{recursion depth}:
-\bprog%
+\bprog
 ? dive(n) = if (n, dive(n-1))
 ? dive(5000);
   ***   deep recursion: if(n,dive(n-1))
                         ^---------------
-\eprog
+@eprog
 There's no way to increase the recursion limit (which may be different on
 your machine), since it would simply crash the GP process.
 
 \misctitle{Function which take functions as parameters ?} This is easy
 in GP using the following trick (neat example due to Bill Daly):
 
-\bprog%
+\bprog
 calc(f, x) = eval(Str( f "(x)"))
-\eprog
+@eprog
 
 \noindent If you call this with \kbd{calc("sin", 1)}, it will
 return $\sin(1)$ (evaluated!).
@@ -1472,15 +1457,15 @@ return $\sin(1)$ (evaluated!).
 variable name for different parameters of your function. Or to use a given
 variable both as a formal parameter and a local variable in a given function.
 Hence
-\bprog%
+\bprog
 ? f(x,x) = 1
   ***   user function f: variable x declared twice.
-\eprog
+@eprog
 
-Also, the statement \kbd{\idx{global}(x, y, z, t)} (see \secref{se:global})
-declares the corresponding variables to be global. It is then forbidden to
-use them as formal parameters or loop indexes as described above, since the
-parameter would ``shadow'' the variable.
+Also, the statement \sidx{global}\kbd{global(x, y, z, t)} (see
+\secref{se:global}) declares the corresponding variables to be global. It
+is then forbidden to use them as formal parameters or loop indexes as
+described above, since the parameter would ``shadow'' the variable.
 
 \misctitle{Implementation note.} For the curious reader, here is how these
 stacks are handled: a \idx{hashing function} is computed from the identifier,
@@ -1498,7 +1483,8 @@ evaluator.
 \misctitle{Note:} The above syntax (using the \tet{local} keyword) was
 introduced in version 2.0.13. The old syntax
 
-\kbd{name(list of true formal variables, list of local variables) = \var{seq}}
+\kbd{name(}\var{list of true formal variables, list of local variables}%
+\kbd{) = }{\var{seq}}
 
 \noindent is still recognized but is deprecated since genuine arguments and
 local variables become undistinguishable.
@@ -1512,26 +1498,22 @@ mean: retrieve \kbd{member} from \kbd{structure}, e.g.~\kbd{ell.j} returns
 the $j$-invariant of the elliptic curve \kbd{ell} (or outputs an error
 message if \kbd{ell} doesn't have the correct type).
 
-You can define your own member functions using the syntax:
-
-\bprog%
-  structure.member = \var{function text}
-\eprog
-\noindent where \var{function text} is written as the \var{seq} in a
+To define your own member functions, use the syntax \var{structure.member =
+function text}, where \var{function text} is written as the \var{seq} in a
 standard user function (without local variables), whose only argument would
-be \kbd{structure}. For instance, the current implementation of the \kbd{ell}
-type is simply an horizontal vector, the $j$-invariant being the thirteenth
-component. This could be implemented as
+be \kbd{structure}. For instance, the current implementation of the
+\kbd{ell} type is simply an horizontal vector, the $j$-invariant being the
+thirteenth component. This could be implemented as
 
 \bprog
 x.j =
-\obr
-  if (type(x) != "t\_VEC" || length(x) < 14,
+{
+  if (type(x) != "t_VEC" || length(x) < 14,
     error("this is not a proper elliptic curve: " x)
   );
   x[13]
-\cbr
-\eprog
+}
+@eprog
 
 You can redefine one of your own member functions simply by typing a new
 definition for it. On the other hand, as a safety measure, you can't redefine
@@ -1549,15 +1531,15 @@ function. For instance, one could implement (a dreadful idea as far as
 efficiency goes):
 
 \bprog
-correct\_ell\_if\_needed(x) = 
-\obr
+correct_ell_if_needed(x) = 
+{
   local(tmp);
-  if (type(x) != "t\_VEC", tmp = ellinit(x))
-   \bs\bs \var{some further checks}
+  if (type(x) != "t_VEC", tmp = ellinit(x))
+    \\ @com some further checks
   tmp
-\cbr
-x.j = correct\_ell\_if\_needed(x)[13];
-\eprog
+}
+x.j = correct_ell_if_needed(x)[13];
+@eprog
 
 \subsec{Strings and Keywords}\sidx{string}\sidx{keyword}
 \label{se:strings}
@@ -1572,38 +1554,35 @@ As explained above, the general way to input a string is to enclose
 characters between quotes~\kbd{"}. This is the only input construct where
 whitespace characters are significant: the string will contain the exact
 number of spaces you typed in. Besides, you can ``escape'' characters by
-putting a \kbd{\bs} just before them; this has the following effects:
-
-{
-\def\q{\quad}
-\obeylines
-\q \b{e}: the \kbd{<Escape>} character.
-\q \b{n}: the \kbd{<Newline>} character.
-\q \b{t}: the \kbd{<Tab>} character.
-\q \b{any-other-char}: the \kbd{any-other-char} character.
-}
-In particular, the only way to put a \kbd{"} into a string is to escape it.
-Thus, for instance, \kbd{"\bs"a\bs""} would produce the
-string whose content is ``a''. This is definitely \var{not} the same thing as
-typing \kbd{"a"}, whose content is merely the one-letter string a.
+putting a \kbd{\bs} just before them; the translation is as follows
+\bprog
+   \e: <Escape>
+   \n: <Newline>
+   \t: <Tab>
+@eprog
+For any other character $x$, \b{$x$} is expanded to $x$. In particular, the
+only way to put a \kbd{"} into a string is to escape it. Thus, for
+instance, \kbd{"\bs"a\bs""} would produce the string whose content is
+``a''. This is definitely \var{not} the same thing as typing \kbd{"a"},
+whose content is merely the one-letter string a.
 
 You can concatenate two strings using the \tet{concat} function. If either
 argument is a string, the other is automatically converted to a string if
 necessary (it will be evaluated first).
 
-\bprog%
+\bprog
 ? concat("ex", 1+1)
-\%1 = "ex2"
+%1 = "ex2"
 ? a = 2; b = "ex"; concat(b, a)
-\%2 = "ex2"
+%2 = "ex2"
 ? concat(a, b)
-\%3 = "2ex"
-\eprog
+%3 = "2ex"
+@eprog
 
 Some functions expect strings for some of their arguments: \tet{print} would
 be an obvious example, \tet{Str} is a less obvious but very useful one (see
 the end of this section for a complete list). While typing in such an
-argument, you will be said to be in \var{\idx{string context}}. The rest of
+argument, you will be said to be in \tev{string context}. The rest of
 this section is devoted to special syntactical tricks which can be used with
 such arguments (and only here; you will get an error message if you try these
 outside of string context):
@@ -1652,22 +1631,22 @@ assuming that the \kbd{print} command evaluates and prints its (string)
 arguments in left-to-right order, ending with a newline (and returns 0
 as an unprinted result):
 
-\bprog%
+\bprog
   print()
   print(1+3"a,3" ,4)
-  print(a=3, (1 + ((a-3)==print())) (a = (a == 5\bs/2)))
-\eprog
+  print(a=3, (1 + ((a-3)==print())) (a = (a == 5\/2)))
+@eprog
 
 \noindent To round this up, here is a less artificial example, used to create
-generic matrices\sidx{generic matrix}:
+generic matrices\sidx{generic matrix}\sidx{matrix}:
 
-\bprog%
-? genmat(u,v,s="x") = \idx{matrix}(u,v,i,j, eval(Str(s "" i "" j)))
+\bprog
+? genmat(u,v,s="x") = matrix(u,v,i,j, eval(Str(s "" i "" j)))
 ? genmat(2,3) + genmat(2,3,"m")
-\%1 =
+%1 =
 [x11 + m11 x12 + m12 x13 + m13]
 [x21 + m21 x22 + m22 x23 + m23]
-\eprog
+@eprog
 
 \noindent
 Note that the argument of \kbd{Str} is evaluated in string context, and
@@ -1681,28 +1660,28 @@ slightly more cryptic.
 
 \noindent The arguments of the following functions are processed in string
 context:
-\bprog%
-\idx{Str}
-\idx{addhelp} {\rm (second argument)}
-\idx{default} {\rm (second argument)}
-\idx{error}
-\idx{extern}
-\idx{plotstring} {\rm (second argument)}
-\idx{plotterm} {\rm (first argument)}
-\idx{read}
-\idx{system}
-{\rm all the \kbd{\idx{print}\var{xxx}} functions}
-{\rm all the \kbd{\idx{write}\var{xxx}} functions}
-\eprog
+
+\settabs\+\indent&\cr
+\+&\tet{Str}\cr
+\+&\tet{addhelp} (second argument)\cr
+\+&\tet{default} (second argument)\cr
+\+&\tet{error}\cr
+\+&\tet{extern}\cr
+\+&\tet{plotstring} (second argument)\cr
+\+&\tet{plotterm} (first argument)\cr
+\+&\tet{read}\cr
+\+&\tet{system}\cr
+\+&all the \tet{print}\var{xxx} functions\cr
+\+&all the \tet{write}\var{xxx} functions\cr
 
 \noindent The arguments of the following functions are processed as keywords:
-\bprog%
-\idx{alias}
-\idx{default} {\rm (first argument)}
-\idx{install} {\rm (all arguments but the last)}
-\idx{type} {\rm (second argument)}
-\idx{whatnow}
-\eprog
+
+\+&\tet{alias}\cr
+\+&\tet{default} (first argument)\cr
+\+&\tet{install} (all arguments but the last)\cr
+\+&\tet{trap} (first argument)\cr
+\+&\tet{type} (second argument)\cr
+\+&\tet{whatnow}\cr
 
 \section{Interfacing GP with other languages}
 \noindent
@@ -1826,16 +1805,16 @@ two keywords are recognized:
 
 \noindent For instance you could set your prompt in the following portable
 way:
-\bprog%
-\b{\bs} self modifying prompt looking like \hbox{{\rm (18:03) \key{gp}} >}
-prompt   = "(\%R) \b{e}[1mgp\b{e}[m > "
-\h
-\b{\bs}  readline wants non-printing characters to be braced between ^A/^B pairs
-\#if READL  prompt = "(\%R) ^A\b{e}[1m^Bgp^A\b{e}[m^B > "
-\h
-\b{\bs} escape sequences not supported under emacs
-\#if EMACS  prompt = "(\%R) gp > "
-\eprog
+\bprog
+\\ self modifying prompt looking like @com\hbox{\rm(18:03) \key{gp}\kbd{ >}}
+prompt   = "(\%R) \e[1mgp\e[m > "
+
+\\ readline wants non-printing characters to be braced between ^A/^B pairs
+#if READL  prompt = "(%R) ^A\e[1m^Bgp^A\e[m^B > "
+
+\\ escape sequences not supported under emacs
+#if EMACS  prompt = "(%R) gp > "
+@eprog
 
 \noindent After the preprocessing there remain two types of lines:
 
@@ -1862,14 +1841,14 @@ Saarbr\"ucken, and David Carlisle from the University of Manchester, it is
 possible to use GP as a subprocess of GNU \idx{Emacs}. (Of course, you need
 GNU Emacs to be installed on your machine!). To use this, you should
 include in your \kbd{.emacs} file the following lines:
-\bprog%
-(autoload 'gp-mode "\miscdir/pari" nil t)
-(autoload 'gp-script-mode "\miscdir/pari" nil t)
-(autoload 'gp "\miscdir/pari" nil t)
-(autoload 'gpman "\miscdir/pari" nil t)
+\bprog
+(autoload 'gp-mode "@miscdir/pari" nil t)
+(autoload 'gp-script-mode "@miscdir/pari" nil t)
+(autoload 'gp "@miscdir/pari" nil t)
+(autoload 'gpman "@miscdir/pari" nil t)
 (setq auto-mode-alist
-  (cons '("\bs\bs.gp\$" . gp-script-mode) auto-mode-alist))
-\eprog
+  (cons '("\\.gp$" . gp-script-mode) auto-mode-alist))
+@eprog
 
 where \kbd{pari.el} is the name of the file that will have to be loaded by
 GNU Emacs (if you have changed the name, or if you have the file in a
@@ -1979,17 +1958,16 @@ create a file named \kbd{.inputrc} in your home directory. For instance
 (notice the embedding conditional in case you would want specific bindings
 for GP):
 %
-\bprog%
-\$if Pari-GP
+\bprog
+$if Pari-GP
   set show-all-if-ambiguous
-  "\b{C}-h": backward-delete-char
-  "\b{e}\b{C}-h": backward-kill-word
-  "\b{C}-xd": dump-functions
-  (: "\b{C}-v()\b{C}-b"        \# can be annoying when copy-pasting~!
-  [: "\b{C}-v[]\b{C}-b"
-\$endif%
-\eprog
-%
+  "\C-h": backward-delete-char
+  "\e\C-h": backward-kill-word
+  "\C-xd": dump-functions
+  (: "\C-v()\C-b"       #@com can be annoying when copy-pasting !
+  [: "\C-v[]\C-b"
+$endif
+@eprog
 \noindent\kbd{C-x C-r} will re-read this init file, incorporating any
 changes made to it during the current session.
 
@@ -2007,10 +1985,10 @@ off).
 characters for instance). If you don't want to fall back to the \kbd{Esc}
 combination, put the following two lines in your \kbd{.inputrc}:
 %
-\bprog%
+\bprog
   set convert-meta on
-  set output-meta off%
-\eprog
+  set output-meta off
+@eprog
 
 % don't remove this leading space (needed by gphelp)
  \subsec{Command completion and online help}

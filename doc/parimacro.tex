@@ -11,27 +11,27 @@
   \magnification=\magstephalf
 \fi
 
+% if paricfg.tex is there (Configure succeeded), input it, otherwise use
+% default values
 \newread\std
-\openin\std=paricfg.tex
+\def\checkfile#1{\def\@stdfile{#1}\openin\std=#1}
+\checkfile{paricfg.tex}
 \ifeof\std
-  \openin\std=doc/paricfg.tex
-  \ifeof\std
-    \message{paricfg.tex not found. You should run Configure.}
-% use default values
-    \def\vers{2.0.x}
-    \def\miscdir{/usr/local/lib/pari}
-    \def\includedir{/usr/local/include/pari}
-    \def\libdir{/usr/local/lib}
-    \def\wwwsite{\kbd{http://hasse.mathematik.tu-muenchen.de/ntsw/pari/}}
-  \else
-    \input doc/paricfg.tex
-  \fi
+  \checkfile{doc/paricfg.tex}
+\fi
+\ifeof\std
+  \message{paricfg.tex not found. You should run Configure.}
+  \def\vers{2.0.x}
+  \def\miscdir{/usr/local/lib/pari}
+  \def\includedir{/usr/local/include/pari}
+  \def\libdir{/usr/local/lib}
+  \def\wwwsite{\kbd{http://hasse.mathematik.tu-muenchen.de/ntsw/pari/}}
 \else
-  \input paricfg.tex
+  \input\@stdfile
 \fi
 
 \font\chaptertitlefont=cmr12 scaled \magstep1
-\font\captertitlebf=cmbx10 scaled \magstep2
+\font\chaptertitlebf=cmbx10 scaled \magstep2
 \font\sectiontitlebf=cmbx12
 \font\seventt=cmtt8 scaled 875
 \scriptfont\ttfam=\seventt % we should really set the \hyphenchar etc first
@@ -45,12 +45,13 @@
 \newwrite\out
 \newwrite\aux
 
-\ifgphelp % disable most of it
-  \def\sidx#1{}
+\ifgphelp % disable crossreferences
+  \def\idx#1{#1}
+  \def\toindex#1{}
   \def\tocwrite#1{}
   \def\label#1{}
   \def\ref#1{[{\bf ??}]}
-\else
+\else % start of non-gphelp section
 \def\typeout#1{\immediate\write\out{#1}}
 \def\@namedef#1{\expandafter\def\csname #1\endcsname}
 \def\newlabel#1#2{\@ifundef{r@#1}{}{\message{Label `#1' multiply
@@ -71,16 +72,17 @@
   \let\immediate\relax
   \def\condwrite#1#2{}
 \fi
-% index
-\def\sidx#1{{\condwrite\index{!#1!\the\pageno!}}}
+% put #1 in index
+\def\f@nt{rm}
+\def\toindex#1{\immediate\condwrite\index{!#1!\f@nt!\the\pageno}}
 %cf TeXBook Exercice 21.10
 \def\tocwrite#1{{\let\the=0\edef\next{\condwrite\toc{#1}}\next}}
 % don't use \jobname here, macros may be used by tutorial.tex
-\openin\std=users.aux
+\checkfile{users.aux}
 \ifeof\std
   \message{No aux file.}
 \else
-  \input users.aux
+  \input\@stdfile
 \fi
 \openin\std=users.std
 
@@ -98,7 +100,7 @@ undefined\on@line}}
 \def\@car#1#2\@nil{#1}
 \def\@cdr#1#2\@nil{#2}
 
-\def\@ref{\expandafter\@cdr\@temp \@nil\null}
+\def\@ref {\expandafter\@cdr\@temp \@nil\null}
 \def\@cref{\expandafter\@car\@temp \@nil\null}
 
 \def\label#1{\immediate\write\aux{\string
@@ -108,9 +110,67 @@ undefined\on@line}}
   {\edef\@temp{\csname r@#1\endcsname}%
     \def\lbl{\@ref}\def\chp{\@cref}%
     \ifx\chp{\the\chapno}\lbl\else\chp.\lbl\fi}}
-\fi
 
-\def\idx#1{\sidx{#1}#1}
+\fi % end of non-gphelp section
+
+% \doverb: setup verbatim mode for the first argument, and execute \do{\arg}
+\def\setupverb{\def\do##1{\catcode`##1=12}\dospecials
+  \catcode`\ =10 % standard space
+  \catcode`\f=13 % to break ugly ligatures as in nf{}init, use \EFF instead
+}
+{ \let\g=\gdef \global\let\EFF=f \catcode`\f=13
+  \gf{\EFF{}} % f won't produce any ligature in verbatim mode
+}
+
+\begingroup
+\catcode`<=1\catcode`\{=12
+\catcode`>=2\catcode`\}=12
+\gdef\d@verb#1<% gobble #1 = {
+  \def\next##1}<\gdef\@verb<##1>\endgroup%
+  \do<\@verb>>% \@verb is the (verbatim) argument
+  \next>
+\gdef\d@verbb#1<% gobble #1 = {
+  \def\next##1}{##2}<\gdef\@verba<##1>\gdef\@verbb<##2>\endgroup%
+  \do<\@verba><\@verbb>>% \@verba, \@verbb are the two (verbatim) argument
+  \next>
+%
+\endgroup
+\def\doverb {\begingroup\setupverb\d@verb}
+\def\doverbb{\begingroup\setupverb\d@verbb}
+
+% argument goes to index (silent)
+\def\sidx{\gdef\f@nt{rm}\let\do=\toindex\doverb}
+\def\kbdsidx{\gdef\f@nt{tt}\let\do=\toindex\doverb}
+
+% argument to index + set up as plain text
+\def\@idx#1{#1\toindex{#1}}
+\def\idx{\gdef\f@nt{rm}\let\do=\@idx\doverb}
+
+% to index + set up as key (keyword)
+\def\@keyidx#1{{\bf\@idx{#1}}}
+\def\teb{\gdef\f@nt{tt}\let\do=\@keyidx\doverb}
+
+% to index + set up as kbd (verbatim)
+\def\@kbdidx#1{{\tt\@idx{#1}}}
+\def\tet{\gdef\f@nt{tt}\let\do=\@kbdidx\doverb}
+
+% to index + set up as var (variable)
+\def\@kbdvar#1{{\it\@idx{#1}\/}}
+\def\tev{\gdef\f@nt{it}\let\do=\@kbdvar\doverb}
+
+\def\@syn#1#2{\gdef\f@nt{tt}\toindex{#1}The library syntax is $\key{#1}(#2)$}
+\def\syn{\let\do=\@syn\doverb}
+\def\@synt#1#2{\@syn{#1}{\hbox{\tt#2}}}
+\def\synt{\let\do=\@synt\doverb}
+
+% function prototypes
+% types omitted in funs (for chap 3)
+\def\funno#1#2#3{\noindent{\tt#1 $\key{#2}$(#3)}} % no index
+\def\@funs#1#2{\gdef\f@nt{tt}\noindent\toindex{#1}$\key{#1}(#2)$}
+\def\@fun#1#2#3{\gdef\f@nt{tt}\toindex{#2}\funno{#1}{#2}{#3}}
+\def\fun{\let\do=\@fun\doverbb}
+\def\funs{\let\do=\@funs\doverb}  % simple fun (omit return type)
+
 \def\secref#1{Section~\ref{#1}}
 
 %
@@ -123,8 +183,8 @@ undefined\on@line}}
 \newcount\subsubsecno
 
 \def\newpage{\hbox{}\vfill\eject}
+\let\sectionhook=
 
-\def\myhook{}
 \def\title#1#2{%
   \ifodd\pageno\else\newpage\fi
   \tocwrite{#1 #2\string\dotfill\the\pageno}
@@ -136,28 +196,28 @@ undefined\on@line}}
   \tocwrite{{\sevenrm\hskip0.5cm#1\string\dotfill\the\pageno}}
   \vskip 0pt plus 54pt\penalty-600 % good break
   \vskip 24pt plus -45pt minus 9pt
-  \leftline{\myhook{\sectiontitlebf #1}.}\def\myhook{}
+  \leftline{\sectionhook{\sectiontitlebf #1}.}
   \penalty10000 % impossible break
   \smallskip}% whatever follows will add a \parskip
 
 \def\subsectitle#1{%
   \vskip 0pt plus 45pt\penalty-300
   \vskip 6pt plus -42pt minus 3pt
-  \noindent\myhook{\bf{#1}}\def\myhook{}}
+  \noindent\sectionhook{\bf{#1}}}
 
 \def\subsubsectitle#1{% a \parskip is being added anyway by \noindent
   \par\vskip 0pt plus 39pt\penalty-200
   \vskip 0pt plus -37pt minus 1.5pt
-  \noindent\myhook{\bf{#1}}\def\myhook{}}
+  \noindent\sectionhook{\bf{#1}}}
 
 \ifgphelp
-  \def\maketitle#1{#1}
+  \def\maketitle{}
 \else
-  \def\maketitle#1{
+  \def\maketitle{
   \ifnum\chapno=0
-    \currentlabel. #1%
+    \currentlabel. %
   \else
-    \number\chapno.\currentlabel\ #1%
+    \number\chapno.\currentlabel\ %
   \fi}
 \fi
 
@@ -180,29 +240,36 @@ undefined\on@line}}
 \def\section#1{
   \subsecno=0\advance\secno by 1
   \gdef\currentlabel{\number\secno}
-  \sectitle{\maketitle{#1}}}
+  \sectitle{\maketitle#1}}
 \def\subsec#1{
   \subsubsecno=0\advance\subsecno by 1
   \gdef\currentlabel{\number\secno.\number\subsecno}
-  \subsectitle{\maketitle{#1}}}
+  \subsectitle{\maketitle#1}}
 \def\subsubsec#1{
   \advance\subsubsecno by 1
   \gdef\currentlabel{\number\secno.\number\subsecno.\number\subsubsecno}
-  \subsubsectitle{\maketitle{#1}}}
+  \subsubsectitle{\maketitle#1}}
 
 \def\unix{\strut\hbox to 0pt{\hss {UNIX: }\indent}}
 \def\unixx{\noindent\strut\hbox to 0pt{\hss {UNIX: }}}
 \def\emacs{\strut\hbox to 0pt{\hss {EMACS: }\indent}}
 
-\def\sectionunix#1{\def\myhook{\unixx{}}\section{#1}}
-\def\unixsubsecunix#1{\def\myhook{\unix{}}\subsec{#1}}
-\def\subsecidxunix#1{\def\myhook{\unix{}}\subsecidx{#1}}
-\def\subsubsecunix#1{\def\myhook{\unix{}}\subsubsec{#1}}
-\def\subsubsecidxunix#1{\def\myhook{\unix{}}\subsubsecidx{#1}}
+\def\@secunix#1{\begingroup\def\sectionhook{\unix{}}\do{#1}\endgroup}
+\def\sectionunix#1{{\let\do=\section\@secunix{#1}}}
+\def\unixsubsecunix#1{{\let\do=\subsec\@secunix{#1}}}
+\def\subsubsecunix#1{{\let\do=\subsubsec\@secunix{#1}}}
+\def\@subsecidxunix#1{{\let\do=\@subsecidx\@secunix{#1}}}
+\def\@subsubsecidxunix#1{{\let\do=\@subsubsecidx\@secunix{#1}}}
 
 \def\subseckbd#1{\subsec{\kbd{#1}}}
-\def\subsecidx#1{\subsec{#1}\sidx{#1}}
-\def\subsubsecidx#1{\subsubsec{#1}\sidx{#1}}
+\def\@subsecidx#1{\subsec{#1}\toindex{#1}}
+\def\subsecidx{\gdef\f@nt{tt}\let\do=\@subsecidx\doverb}
+\def\@subsubsecidx#1{\subsubsec{#1}\toindex{#1}}
+\def\subsubsecidx{\gdef\f@nt{tt}\let\do=\@subsecidx\doverb}
+
+\def\subsecidxunix{\gdef\f@nt{tt}\let\do=\@subsecidxunix\doverb}
+\def\subsubsecidxunix{\gdef\f@nt{tt}\let\do=\@subsubsecidxunix\doverb}
+
 %
 % General purpose
 %
@@ -239,9 +306,6 @@ undefined\on@line}}
 \def\key#1{{\bf #1}}
 \def\var#1{\hbox{\it #1\/}}
 \def\fl{\var{f\kern0pt lag}}
-\def\synx#1#2#3{\sidx{#3}The library syntax is $\key{#1}({#2})$}
-\def\syn#1#2{\synx{#1}{#2}{#1}}
-\def\synt#1#2{\syn{#1}{\hbox{\tt #2}}}
 
 \def\bs{{\char'134}}
 \def\obr{{\char'173}}
@@ -251,13 +315,11 @@ undefined\on@line}}
 \def\b#1{{\tt \bs#1}}
 \def\mod{\,{\rm mod}\,}
 \def\text#1{{\rm#1}}
-\def\teb#1{{\bf\idx{#1}}}
-\def\tet#1{{\tt\idx{#1}}}
 \def\dfrac#1#2{{{#1}\over{#2}}}
 \def\binom#1#2{\pmatrix{{#1}\cr{#2}}}
 \def\Bbb#1{{\bf #1}}
-\def\typ#1{\kbd{t\_\kern1pt#1}}
-\def\idxtyp#1{\sidx{t\string\_#1}}
+{\catcode`\_=11
+\gdef\typ#1{\kbd{t_#1}}}
 \def\Z{\Bbb Z}
 \def\Q{\Bbb Q}
 \def\F{\Bbb F}
@@ -265,19 +327,63 @@ undefined\on@line}}
 \def\C{\Bbb C}
 \def\dotfill{\leaders\hbox to 3truemm{\hfil.\hfil}\hfill}
 
-{\catcode`\^=13\obeyspaces
-\gdef\bprog{\par\begingroup%
-\catcode`\^=13\def^{{\pow}}%
-\tt\obeylines\leavevmode\parskip=0pt plus 1pt%
-\obeyspaces\def {\ }\def\h{\hbox{}}%
-\interlinepenalty2000\clubpenalty9000\widowpenalty9000%
-\h}
+% verbatim mode, leave alone $ and _
+% @ made active: assume verbatim text doesn't contain it
+\newif\ifnopar
+{\catcode`\^=13\global\let^=\pow\obeyspaces\global\let \ }
+\def\ttverb{%
+  \nopartrue
+  \catcode`\\=12%
+  \catcode`\{=12%
+  \catcode`\}=12%
+  \catcode`\&=12%
+  \catcode`\#=12%
+  \catcode`\%=12%
+  \catcode`\^=13%
+  \catcode`\~=13\def~{{\til}}%
+  \catcode`\@=0%
+  \def\par{\futurelet\next\dopars}%
+  \def\dopars{%
+    \ifnopar \noparfalse%
+    \else% treat two consecutive \par specialy
+      \ifx\next\par \vskip4pt plus 1pt\nopartrue%
+      \else \leavevmode\endgraf\fi\fi}%
+  \obeyspaces\obeylines\tt}
+
+% back to normalcy
+\def\unverb{%
+  \catcode`\\=0%
+  \catcode`\{=1%
+  \catcode`\}=2%
+  \catcode`\$=3%
+  \catcode`\&=4%
+  \catcode`\#=6%
+  \catcode`\^=7%
+  \catcode`\_=8%
+  \catcode`\^^I=10}
+
+\def\bprogpart{\begingroup%
+  \vskip 0pt plus 1pt%
+  \leavevmode\parskip=0pt plus 1pt%
+  \interlinepenalty2000\clubpenalty9000\widowpenalty9000%
+  \ttverb}
+
+% complete verbatim (including _ and $)
+\def\bprog{\bprogpart\catcode`\_=12\catcode`\$=12}
+\def\eprog{\endgroup\par}
+{\obeylines
+  \gdef\com{\begingroup\unverb\comstart}
+  \gdef\comstart#1^^M{\it#1\endgroup
+} % newline after @endgroup is important
+}
+% comments
+\def\Ccom{\begingroup\unverb\Ccomstart}
+\def\Ccomstart#1*/{\rm#1\endgroup*/}
+
 % variant of same, for use with tabbing.  Tabbing doesn't build paragraphs,
 % the lines go directly into the vlist -- so we must add our own \parskip. [GN]
-\gdef\bprogtabs{\par\vskip\parskip\begingroup%
-\catcode`\^=13\def^{{\pow}}
-\obeyspaces\def {\ }\def\h{\hbox{}}%
-\tt\settabs}}
-% both to be ended with:
-\def\eprog{\endgroup\par}
+
+\def\bprogtabs{\par\vskip\parskip\begingroup%
+  \tt\settabs}
+
 \catcode`\@=12

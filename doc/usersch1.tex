@@ -59,15 +59,15 @@ tips can be found on PARI's (fledgling) home page:
 \secref{se:start} if you're not interested in hardware technicalities. You
 won't miss anything that would be mentioned here.)
 
-Version \vers{} of the PARI package contains essentially three versions. The
-first one is a specific implementation for 680x0 based computers which
-contains a kernel (for the elementary arithmetic operations on multiprecise
-integers and real numbers, and binary/decimal conversion routines) entirely
-written in MC68020 assembly language (around 6000 lines), the rest being at
-present entirely written in ANSI C with a C++-compatible syntax. The system
-runs on SUN-3/xx, Sony News, NeXT cubes and on 680x0 based Macs with
-x$\ge$2. It should be very easy to port on any other 680x0 based machine
-like for instance the Apollo Domain workstations.
+The PARI package contains essentially three versions. The first one is a
+specific implementation for 680x0 based computers which contains a kernel
+(for the elementary arithmetic operations on multiprecise integers and real
+numbers, and binary/decimal conversion routines) entirely written in
+MC68020 assembly language (around 6000 lines), the rest being at present
+entirely written in ANSI C with a C++-compatible syntax. The system runs on
+SUN-3/xx, Sony News, NeXT cubes and on 680x0 based Macs with x$\ge$2. It
+should be very easy to port on any other 680x0 based machine like for
+instance the Apollo Domain workstations.
 
 Note that the assembly language source code uses the SUN syntax, which for
 some strange reason differs from the Motorola standard used by most other
@@ -134,69 +134,69 @@ type; the symbolic names correspond to the internal representations of the
 types.\medskip
 \settabs\+xxx&typexxxxxxxxxxxx&xxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\cr
 %
-\+&type \typ{INT} \idxtyp{INT}:& $\Z$& Integers (with
+\+&type \tet{t_INT}& $\Z$& Integers (with
 arbitrary precision)\sidx{integer}\cr
 %
-\+&type \typ{REAL}\idxtyp{REAL}:& $\R$& Real numbers
+\+&type \tet{t_REAL}& $\R$& Real numbers
 (with arbitrary precision)\sidx{real number}\cr
 %
-\+&type \typ{INTMOD}\idxtyp{INTMOD}:& $\Z/n\Z$&
+\+&type \tet{t_INTMOD}& $\Z/n\Z$&
 Integermods (integers modulo $n$)\sidx{integermod}\cr
 %
-\+&type \typ{FRAC}\idxtyp{FRAC}:& $\Q$& Rational numbers
+\+&type \tet{t_FRAC}& $\Q$& Rational numbers
 (in irreducible form)\sidx{rational number}\cr
 %
-\+&type \typ{FRACN}\idxtyp{FRACN}:& $\Q$& Rational numbers
+\+&type \tet{t_FRACN}& $\Q$& Rational numbers
 (not necessarily in irreducible form)\cr
 %
-\+&type \typ{COMPLEX}\idxtyp{COMPLEX}:& $T[i]$& Complex
+\+&type \tet{t_COMPLEX}& $T[i]$& Complex
 numbers\sidx{complex number}\cr
 %
-\+&type \typ{PADIC}\idxtyp{PADIC}:& $\Q_p$&
+\+&type \tet{t_PADIC}& $\Q_p$&
 $p$-adic\sidx{p-adic number} numbers\cr
 %
-\+&type \typ{QUAD}\idxtyp{QUAD}:& $\Q[w]$& Quadratic Numbers
+\+&type \tet{t_QUAD}& $\Q[w]$& Quadratic Numbers
 (where $[\Z[w]:\Z]=2$)\sidx{quadratic number}\cr
 %
-\+&type \typ{POLMOD}\idxtyp{POLMOD}:& $T[X]/P(X)T[X]$&
+\+&type \tet{t_POLMOD}& $T[X]/P(X)T[X]$&
 Polmods (polynomials modulo $P$)\sidx{polmod}\cr
 %
-\+&type \typ{POL}\idxtyp{POL}:& $T[X]$& Polynomials
+\+&type \tet{t_POL}& $T[X]$& Polynomials
 \sidx{polynomial}\cr
 %
-\+&type \typ{SER}\idxtyp{SER}:& $T((X))$& Power series
+\+&type \tet{t_SER}& $T((X))$& Power series
 (finite Laurent series)\sidx{power series}\cr
 %
-\+&type \typ{RFRAC}\idxtyp{RFRAC}:& $T(X)$& Rational
-functions (in irreducible form) \sidx{rational function}\cr
+\+&type \tet{t_RFRAC}& $T(X)$& Rational
+functions (in irreducible form)\sidx{rational function}\cr
 %
-\+&type \typ{RFRACN}\idxtyp{RFRACN}:& $T(X)$& Rational functions
+\+&type \tet{t_RFRACN}& $T(X)$& Rational functions
 (not necessarily in irreducible form)\cr
 %
-\+&type \typ{VEC}\idxtyp{VEC}:& $T^n$& Row (i.e.~horizontal)
+\+&type \tet{t_VEC}& $T^n$& Row (i.e.~horizontal)
 vectors\sidx{row vector}\cr
 %
-\+&type \typ{COL}\idxtyp{COL}:& $T^n$& Column (i.e.~vertical)
+\+&type \tet{t_COL}& $T^n$& Column (i.e.~vertical)
 vectors\sidx{column vector}\cr
 %
-\+&type \typ{MAT}\idxtyp{MAT}:& ${\cal M}_{m,n}(T)$&
+\+&type \tet{t_MAT}& ${\cal M}_{m,n}(T)$&
 Matrices\sidx{matrix}\cr
 %
-\+&type \typ{LIST}\idxtyp{LIST}:& $T^n$&
+\+&type \tet{t_LIST}& $T^n$&
 Lists\sidx{list}\cr
 %
-\+&type \typ{STR}\idxtyp{STR}:&     &
+\+&type \tet{t_STR}&     &
 Character strings\sidx{string}\cr
 \noindent
 and where the types $T$ in recursive types can be different in each component.
 
-In addition, there exist types \typ{QFR}\idxtyp{QFR} and \typ{QFI}
-\idxtyp{QFI} for binary quadratic forms of respectively positive and
-negative discriminants,\sidx{binary quadratic form} which can be used in
-specific operations, but which may disappear in future versions.
+In addition, there exist types \tet{t_QFR} and \tet{t_QFI} for binary
+quadratic forms of respectively positive and negative
+discriminants,\sidx{binary quadratic form} which can be used in specific
+operations, but which may disappear in future versions.
 
-\sidx{GEN} Every PARI object (called \kbd{GEN} in the sequel) belongs
-to one of these basic types. Let us have a closer look.
+Every PARI object (called \tet{GEN} in the sequel) belongs to one of these
+basic types. Let us have a closer look.
 
 \subsec{Integers and reals}:\sidx{integer}\sidx{real number}
 they are of arbitrary and varying length (each number carrying in its
@@ -204,19 +204,19 @@ internal representation its own length or precision)
 with the following mild restrictions (given for
 32-bit machines, the restrictions for 64-bit machines being so weak as to be
 considered inexistent): integers must be in absolute value less than
-$2^{268435456}$ (i.e.~roughly 80807124 digits).  The precision of real
-numbers is also at most 80807124 significant decimal digits, and the binary
+$2^{268435454}$ (i.e.~roughly 80807123 digits).  The precision of real
+numbers is also at most 80807123 significant decimal digits, and the binary
 exponent must be in absolute value less than $2^{23}=8388608$.
 
 Note that PARI has been optimized so that it works as fast as possible on
 numbers with at most a few thousand decimal digits. In particular, not too
 much effort has been put into fancy multiplication techniques (only the
 Karatsuba algorithm is implemented). Hence, although it is possible to use
-PARI to do computations with 80000000 decimal digits, much better programs
+PARI to do computations with $10^7$ decimal digits, much better programs
 can be written for such huge numbers.
 
 Integers and real numbers are completely non-recursive types and are
-sometimes called the {\it\idx{leaves}}.
+sometimes called the \tet{leaves}.
 
 \subsec{Integermods, rational numbers (irreducible or not),
 $p$-adic numbers, polmods, and
@@ -343,11 +343,11 @@ absolute value\footnote{*}{this is actually not quite true: internally, the
 format is $2^b (a + \varepsilon)$, where $a$ and $b$ are integers}. Hence,
 any number less than $2^e$ may be treated as an exact zero:
 
-\bprog%
+\bprog
 ? 0.E-28 + 1.E-100
-\%1 = 0.E-28
-\eprog
-\noindent As an exercise, if \kbd{a = 2\pow -100}, why do \kbd{a + 0.} and
+%1 = 0.E-28
+@eprog
+\noindent As an exercise, if \kbd{a = 2\pow (-100)}, why do \kbd{a + 0.} and
 \kbd{a * 1.} differ ?
 
 The second part of the PARI philosophy is that PARI operations are in general

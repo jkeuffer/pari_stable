@@ -101,29 +101,3 @@ nf              @Functions related to general number fields
 bnf             @Functions related to general number fields
 bnr             @Functions related to general number fields
 component       @components of a PARI object
-bnfinit         @bnf{}init
-bnfisintnorm    @bnf{}isintnorm
-bnfisnorm       @bnf{}isnorm
-bnfissunit      @bnf{}issunit
-bnfisprincipal  @bnf{}isprincipal
-bnfisunit       @bnf{}isunit
-nffactor        @nf{}factor
-nffactormod     @nf{}factormod
-nfinit          @nf{}init
-nfisideal       @nf{}isideal
-nfisincl        @nf{}isincl
-nfisisom        @nf{}isisom
-rnfidealabstorel@rnf{}idealabstorel
-rnfidealdown    @rnf{}idealdown
-rnfidealhnf     @rnf{}idealhnf
-rnfidealnormabs @rnf{}idealnormabs
-rnfidealnormrel @rnf{}idealnormrel
-rnfidealreltoabs@rnf{}idealreltoabs
-rnfidealtwoelt  @rnf{}idealtwoelt
-rnfidealup      @rnf{}idealup
-rnfinit         @rnf{}init
-rnfisfree       @rnf{}isfree
-rnfisnorm       @rnf{}isnorm
-rnflllgram      @rnf{}lllgram
-qflll           @qf{}lll
-qflllgram       @qf{}lllgram
