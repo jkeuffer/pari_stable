@@ -73,7 +73,7 @@ Fl_Color rgb_color(int R, int G, int B)
 
 Plotter::Plotter( long *w, long *x, long *y, long lw,
 	     const char* name) 
-        : Fl_Window(pari_plot.width,pari_plot.height,"PARI/GP")
+        : Fl_Window(pari_plot.width, pari_plot.height, "PARI/GP")
 
 {
 
@@ -227,6 +227,9 @@ void Plotter::draw()
         p1=RoNext(p1);
       }
     }
+    fl_font(FL_COURIER, int(pari_plot.fheight * xs));
+    fl_color(FL_WHITE); // transparent window on Windows otherwise
+    fl_rectf(0, 0, this->w(), this->h());
     for(col=1; col<MAX_COLORS; col++)
     {
       c = rcolcnt[col];
