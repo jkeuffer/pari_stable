@@ -3898,21 +3898,22 @@ u_FpY_FpXY_resultant(GEN a, GEN b, ulong p, long dres)
 }
 
 /* x^n mod p */
-ulong
-u_powmod(ulong x, long n, ulong p)
+ulong 
+u_upowmod(ulong x, ulong n, ulong p)
 {
-  ulong y = 1, z;
-  long m;
-
-  if (n < 0) { n = -n; x = u_invmod(x, p); }
-  m = n;
-  z = x;
+  ulong z = x, y = 1, m = n;
   for (;;)
   {
     if (m&1) y = mulssmod(y,z, p);
     m >>= 1; if (!m) return y;
     z = mulssmod(z,z, p);
   }
+}
+ulong
+u_powmod(ulong x, long n, ulong p)
+{
+  if (n < 0) return u_upowmod(u_invmod(x, p), (ulong)(-n), p);
+  else return u_upowmod(x, (ulong)n, p);
 }
 
 /* x^n mod p, assume n > 0 */

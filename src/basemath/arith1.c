@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 extern GEN ishiftr_spec(GEN x, long lx, long n);
+extern ulong u_upowmod(ulong x, ulong n, ulong p);
 
 /*********************************************************************/
 /**                                                                 **/
@@ -1481,6 +1482,11 @@ powmodulo(GEN A, GEN k, GEN N)
   {
     y = modii(A,N);
     if (!signe(y)) { avma = av; return gzero; }
+  }
+  if (lgefint(N) == 3 && lgefint(k) == 3)
+  {
+    ulong a = u_upowmod(itou(y), itou(k), itou(N));
+    avma = av; return utoi(a);
   }
 
   base_is_2 = 0;

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 extern GEN decomp_limit(GEN n, GEN limit);
+extern ulong ugcd(ulong x, ulong y);
 extern int BSW_isprime(GEN x);
 extern int BSW_isprime_small(GEN x);
 extern ulong ucarrecomplet(ulong A);
@@ -65,9 +66,8 @@ bad_for_base(GEN n, GEN a)
       if (egalii(t,c)) break;
       if (low_stack(lim, stack_lim(av,1)))
       {
-	GEN *gsav[2]; gsav[0]=&c; gsav[1]=&c2;
 	if(DEBUGMEM>1) err(warnmem,"miller(rabin)");
-	gerepilemany(av, gsav, 2);
+	gerepileall(av, 2, &c,&c2);
       }
     }
     if (!r) return 1;
@@ -214,7 +214,52 @@ LucasMod(GEN n, long P, GEN N)
     m = *nd;
   }
 }
+/* compute n-th term of Lucas sequence modulo N.
+ * v_{k+2} = P v_{k+1} - v_k, v_0 = 2, v_1 = P.
+ * Assume n > 0 */
+static ulong
+u_LucasMod(ulong n, ulong P, ulong N)
+{
+  long j = 1 + bfffo(n);
+  ulong v = P, v1 = P*P - 2, mP = N - P, m2 = N - 2, m = n << j;
 
+  j = BITS_IN_LONG - j;
+  for (; j; m<<=1,j--)
+  { /* v = v_k, v1 = v_{k+1} */
+    if ((long)m < 0)
+    { /* set v = v_{2k+1}, v1 = v_{2k+2} */
+      v = adduumod(mulssmod(v,v1,N), mP, N);
+      v1= adduumod(mulssmod(v1,v1,N),m2, N);
+    }
+    else
+    {/* set v = v_{2k}, v1 = v_{2k+1} */
+      v1= adduumod(mulssmod(v,v1,N),mP, N);
+      v = adduumod(mulssmod(v,v,N), m2, N);
+    }
+  }
+  return v;
+}
+
+static int
+u_IsLucasPsP(ulong n, ulong P)
+{
+  long i, v;
+  ulong m2, m, z;
+
+  m = n + 1; if (!m) return 0; /* neither 2^32-1 nor 2^64-1 are Lucas-pp */
+  v = vals(m); m >>= v;
+  z = u_LucasMod(m, P, n);
+  if (z == 2) return 1;
+  m2 = n - 2;
+  if (z == m2) return 1;
+  for (i=1; i<v; i++)
+  {
+    if (!z) return 1;
+    z = addssmod(mulssmod(z,z, n), m2, n);
+    if (z == 2) return 0;
+  }
+  return 0;
+}
 /* check that N not a square first (taken care of here, but inefficient)
  * assume N > 3 */
 static int
@@ -225,9 +270,11 @@ IsLucasPsP0(GEN N)
 
   for (b=3, i=0;; b+=2, i++)
   {
+    long c = b*b - 4; /* = 1 mod 4 */
     if (i == 64 && carreparfait(N)) return 0; /* avoid oo loop if N = m^2 */
-    if (krosg(b*b - 4, N) < 0) break;
+    if (kross(smodis(N,c), c) < 0) break;
   }
+  if (lgefint(N) == 3) return u_IsLucasPsP(itou(N), b);
 
   m = addis(N,1); v = vali(m); m = shifti(m,-v);
   z = LucasMod(m, b, N);
@@ -243,26 +290,75 @@ IsLucasPsP0(GEN N)
   return 0;
 }
 
+/* assume u odd, u > 1 */
+static int
+iu_coprime(GEN N, ulong u)
+{
+  const ulong n = umodiu(N, u);
+  return (n == 1 || ugcd(n, u) == 1);
+}
+
 long
 BSW_psp(GEN N)
 {
   pari_sp av = avma;
+  long n;
   int k;
-  GEN T;
 
   if (typ(N) != t_INT) err(arither1);
   if (signe(N) <= 0) return 0;
-  if (!is_bigint(N))
-    switch(itos(N))
+  n = is_bigint(N)? 0: itos(N);
+  if (n && n < 103)
+    switch(n)
     {
-      case 1: return 0;
       case 2:
-      case 3: return 1;
+      case 3:
+      case 5:
+      case 7:
+      case 11:
+      case 13:
+      case 17:
+      case 19:
+      case 23:
+      case 29:
+      case 31:
+      case 37:
+      case 41:
+      case 43:
+      case 47:
+      case 53:
+      case 59:
+      case 61:
+      case 67:
+      case 71:
+      case 73:
+      case 79:
+      case 83:
+      case 89:
+      case 97:
+      case 101: return 1;
+      default: return 0;
     }
   if (!mod2(N)) return 0;
+#ifdef LONG_IS_64BIT
+  /* 16294579238595022365 = 3*5*7*11*13*17*19*23*29*31*37*41*43*47*53 
+   *  7145393598349078859 = 59*61*67*71*73*79*83*89*97*101 */
+  if (!iu_coprime(N, 16294579238595022365UL) || 
+      !iu_coprime(N,  7145393598349078859UL)) return 0;
+#else
+  /* 4127218095 = 3*5*7*11*13*17*19*23*37
+   * 3948078067 = 29*31*41*43*47*53
+   * 4269855901 = 59*83*89*97*101
+   * 1673450759 = 61*67*71*73*79 */
+  if (!iu_coprime(N, 4127218095UL) || 
+      !iu_coprime(N, 3948078067UL) || 
+      !iu_coprime(N, 1673450759UL) || 
+      !iu_coprime(N, 4269855901UL)) return 0;
+#endif
 
-  T = init_miller(N);
-  k = bad_for_base(T,gdeux);
+  /* no prime divisor < 103 */
+  if (n && n < 10427) return 1;
+  k = bad_for_base(init_miller(N), gdeux);
   avma = av;
   k = (!k && IsLucasPsP0(N));
   avma = av; return k;

@@ -47,6 +47,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #ifndef INLINE
 void   addsii(long x, GEN y, GEN z);
 long   addssmod(long a, long b, long p);
+ulong  adduumod(ulong a, ulong b, ulong p);
 void   addssz(long x, long y, GEN z);
 void   affii(GEN x, GEN y);
 void   affsi(long s, GEN x);
@@ -772,6 +773,12 @@ addssmod(long a, long b, long p)
 {
   ulong res = a + b;
   return (res >= (ulong)p) ? res - p : res;
+}
+INLINE ulong
+adduumod(ulong a, ulong b, ulong p)
+{
+  ulong res = a + b;
+  return (res >= p) ? res - p : res;
 }
 
 INLINE long

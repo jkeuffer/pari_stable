@@ -205,6 +205,7 @@ BA 46- --disable-kernel Configure option replaced by --kernel=none
        Newton sums directly)
    48- simplified fincke_pohst() [don't recompute gram_matrix]
    49- faster trueeta(), faster quadhilbert(D < 0)
+   50- faster isprime (trial divide by small primes, recognize 1-word moduli)
 
   Added:
     1- [TeXmacs:] contextual completion (<TAB>)
