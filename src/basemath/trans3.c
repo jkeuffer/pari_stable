@@ -2162,21 +2162,22 @@ agm(GEN x, GEN y, long prec)
 GEN
 logagm(GEN q)
 {
-  long prec=lg(q), s, n, lim;
-  pari_sp av=avma, tetpil;
-  GEN y,q4,q1;
+  long prec = lg(q), s, n, lim;
+  pari_sp av = avma;
+  GEN y, q1;
 
   if (typ(q)!=t_REAL) err(typeer,"logagm");
-  if (signe(q)<=0) err(talker,"non positive argument in logagm");
-  if (expo(q)<0) s=1; else { q=ginv(q); s=0; }
+  if (signe(q) <= 0) err(talker,"non positive argument in logagm");
+  if (gcmp1(q)) return realzero(prec);
+  if (expo(q) < 0) s = 1; else { q = ginv(q); s = 0; }
   lim = - (bit_accuracy(prec) >> 1);
   q1 = NULL; /* gcc -Wall */
-  for (n=0; expo(q)>=lim; n++) { q1=q; q=gsqr(q); }
-  q4=gmul2n(q,2);
-  if (!n) q1=gsqrt(q,prec);
-  y=divrr(mppi(prec), agm(addsr(1,q4),gmul2n(q1,2),prec));
-  tetpil=avma; y=gmul2n(y,-n); if (s) setsigne(y,-1);
-  return gerepile(av,tetpil,y);
+  for (n=0; expo(q) >= lim; n++) { q1 = q; q = gsqr(q); }
+  
+  if (!n) q1 = mpsqrt(q);
+  y = divrr(mppi(prec), agm(addsr(1,gmul2n(q,2)), gmul2n(q1,2),prec));
+  y = gmul2n(y,-n); if (s) setsigne(y,-1);
+  return gerepileuptoleaf(av, y);
 }
 
 GEN

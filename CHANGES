@@ -136,7 +136,7 @@ BA 60- add "const" keyword to allow building with g++
        forms [ignore flag].
    76- lex(x,"y") --> error [ should be -1 ]
    77- algdep(0,1) --> 0 [ should be x ]
-
+   78- log(1, AGM) --> oo loop
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
