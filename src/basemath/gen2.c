@@ -1527,23 +1527,20 @@ gaffect(GEN x, GEN y)
 GEN
 quadtoc(GEN x, long prec)
 {
-  pari_sp av=avma, tetpil;
-  GEN p1, p = (GEN) x[1];
+  pari_sp av = avma;
+  GEN z, Q = (GEN) x[1];
 
-  p1 = subii(sqri((GEN)p[3]), shifti((GEN)p[2],2));
-  if (signe(p1) > 0)
-  {
-    p1 = subri(gsqrt(p1,prec), (GEN)p[3]);
-    setexpo(p1, expo(p1)-1);
-  }
+  /* should be sqri(Q[3]), but is 0,1 ! see quaddisc */
+  z = itor(subii((GEN)Q[3], shifti((GEN)Q[2],2)), prec);
+  z = gsub(gsqrt(z,prec), (GEN)Q[3]);
+  if (signe((GEN)Q[2]) < 0) /* Q[2] = -D/4 or (1-D)/4 */
+    setexpo(z, expo(z)-1);
   else
   {
-    p1 = gsub(gsqrt(p1,prec), (GEN)p[3]);
-    p1[1] = lmul2n((GEN)p1[1],-1);
-    setexpo(p1[2], expo(p1[2])-1);
-  }/* p1 = (-b + sqrt(D)) / 2 */
-  p1 = gmul((GEN)x[3],p1); tetpil=avma;
-  return gerepile(av,tetpil,gadd((GEN)x[2],p1));
+    z[1] = lmul2n((GEN)z[1],-1);
+    setexpo(z[2], expo(z[2])-1);
+  }/* z = (-b + sqrt(D)) / 2 */
+  return gerepileupto(av, gadd((GEN)x[2], gmul((GEN)x[3],z)));
 }
 
 GEN
@@ -1627,8 +1624,7 @@ gcvtop(GEN x, GEN p, long r)
 long
 gexpo(GEN x)
 {
-  long tx=typ(x), lx, e, i, y;
-  pari_sp av;
+  long tx = typ(x), lx, e, f, i;
 
   switch(tx)
   {
@@ -1644,15 +1640,18 @@ gexpo(GEN x)
 
     case t_COMPLEX:
       e = gexpo((GEN)x[1]);
-      y = gexpo((GEN)x[2]); return max(e,y);
+      f = gexpo((GEN)x[2]); return max(e,f);
 
-    case t_QUAD:
-      av=avma; e = gexpo(quadtoc(x,3)); avma=av; return e;
-
+    case t_QUAD: {
+      GEN p = (GEN)x[1]; /* mod = X^2 + {0,1}* X - {D/4, (1-D)/4})*/
+      long d = 1 + expi((GEN)p[2])/2; /* ~ expo(sqrt(D)) */
+      e = gexpo((GEN)x[2]);
+      f = gexpo((GEN)x[3]) + d; return max(e, f);
+    }
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); y = -(long)HIGHEXPOBIT;
-      for (i=lontyp[tx]; i<lx; i++) { e=gexpo((GEN)x[i]); if (e>y) y=e; }
-      return y;
+      lx = lg(x); f = -(long)HIGHEXPOBIT;
+      for (i=lontyp[tx]; i<lx; i++) { e=gexpo((GEN)x[i]); if (e>f) f=e; }
+      return f;
   }
   err(typeer,"gexpo");
   return 0; /* not reached */
