@@ -1637,6 +1637,8 @@ splitorbite(GEN O)
     ((GEN **) res)[1][lg(fc) - i] = permcyclepow(O, n / fc[i]);
     ((GEN *) res)[2][lg(fc) - i] = fc[i];
   }
+  if ( DEBUGLEVEL>=4 )
+    fprintferr("GaloisConj:splitorbite: %Z\n",res);
   return gerepile(ltop, lbot, res);
 }
 
@@ -2487,76 +2489,30 @@ suites4_2:
   avma = ltop2;
   return res;
 }
-
-GEN
-galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
-	  const struct galois_analysis *ga)
+static GEN galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, GEN *psi, long *p,
+			       GEN *lo, long *sg,
+			       struct galois_borne *gb, 
+			       const struct galois_analysis *ga)
 {
-  struct galois_analysis Pga;
-  struct galois_borne Pgb;
-  struct galois_test td;
+  ulong ltop=avma;
+  long ex = ga->exception;
+  long deg = ga->deg;
+  long n = degree(T);
   struct galois_testlift gt;
   struct galois_lift gl;
-  ulong   ltop = avma, lbot, ltop2;
-  long    n, p, deg, ex;
-  byteptr primepointer;
-  long    sg, Pm = 0, fp;
-  long    x;
-  int     i, j;
-  GEN     Lden;
-  GEN     Tmod, res, pf = gzero, split, psi, ip, ppsi;
-  GEN     frob;
-  GEN     O;
-  GEN     P, PG, PL, Pden, PM, Pmod, Pp;
-  GEN    *lo;			/* tired of casting */
-  n = degree(T);
-  if (!ga->deg)
-    return gzero;
-  p = ga->p;
-  ex = ga->exception;
-  deg = ga->deg;
-  x = varn(T);
-  primepointer = ga->primepointer;
-  if (DEBUGLEVEL >= 9)
-    fprintferr("GaloisConj:denominator:%Z\n", den);
-  if (n == 12 && ga->ord == 3)	/* A4 is very probable,so test it first */
-  {
-    long    av = avma;
-    if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:Testing A4 first\n");
-    inittest(L, M, gb->bornesol, gb->ladicsol, &td);
-    lbot = avma;
-    PG = a4galoisgen(T, &td);
-    freetest(&td);
-    if (PG != gzero)
-    {
-      return gerepile(ltop, lbot, PG);
-    }
-    avma = av;
-  }
-  if (n == 24 && ga->ord == 3)	/* S4 is very probable,so test it first */
-  {
-    long    av = avma;
-    if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:Testing S4 first\n");
-    lbot = avma;
-    Lden=makeLden(L,den,gb);
-    initlift(T, den, stoi(ga->p4), L, Lden, gb, &gl);
-    PG = s4galoisgen(&gl);
-    if (PG != gzero)
-    {
-      return gerepile(ltop, lbot, PG);
-    }
-    avma = av;
-  }
+  byteptr primepointer = ga->primepointer;
+  GEN frob, Lden;
   frob = cgetg(lg(L), t_VECSMALL);
   Lden=makeLden(L,den,gb);
+  *p=ga->p;
   for (;;)
   {
     ulong   av = avma;
     long    isram;
-    long    c;
-    ip = stoi(p);
+    long    i,c;
+    long    fp;
+    GEN     ip, Tmod;
+    ip = stoi(*p);
     Tmod = lift((GEN) factmod(T, ip));
     isram = 0;
     for (i = 1; i < lg(Tmod[2]) && !isram; i++)
@@ -2569,16 +2525,16 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 	if (degree(((GEN **) Tmod)[1][i]) != fp)
 	{
 	  avma = ltop;
-	  return gzero;		/* Not Galois polynomial */
+	  return NULL;		/* Not Galois polynomial */
 	}
       if (fp % deg == 0)
       {
 	if (DEBUGLEVEL >= 4)
-	  fprintferr("Galoisconj:p=%ld deg=%ld fp=%ld\n", p, deg, fp);
-	lo = (GEN *) listsousgroupes(deg, n / fp);
+	  fprintferr("GaloisConj:p=%ld deg=%ld fp=%ld\n", *p, deg, fp);
+	*lo = listsousgroupes(deg, n / fp);
 	initlift(T, den, ip, L, Lden, gb, &gl);
 	if (inittestlift
-	    ((GEN) Tmod[1], fp / deg, &gl, &gt, frob, lg(lo) == 2))
+	    ((GEN) Tmod[1], fp / deg, &gl, &gt, frob, lg(*lo) == 2))
 	{
 	  GEN frob2;
 	  struct galois_testlift gt2;
@@ -2593,32 +2549,32 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 	    frob=frob2;
 	    gt=gt2;
 	  }
-	  sg = lg(lo) - 1;
-	  psi = cgetg(gt.g + 1, t_VECSMALL);
+	  *sg = lg(*lo) - 1;
+	  *psi = cgetg(gt.g + 1, t_VECSMALL);
 	  for (k = 1; k <= gt.g; k++)
-	    psi[k] = 1;
-	  goto suite;
+	    (*psi)[k] = 1;
+	  return frob;
 	}
 	if (DEBUGLEVEL >= 4)
-	  fprintferr("Galoisconj:Subgroups list:%Z\n", (GEN) lo);
+	  fprintferr("Galoisconj:Subgroups list:%Z\n", *lo);
 	if (deg == fp && cgcd(deg, n / deg) == 1)	/* Pretty sure it's the
 							 * biggest ? */
 	{
-	  for (sg = 1; sg < lg(lo) - 1; sg++)
-	    if (frobeniusliftall(lo[sg], &psi, &gl, &gt, frob))
-	      goto suite;
+	  for (*sg = 1; *sg < lg(*lo) - 1; (*sg)++)
+	    if (frobeniusliftall(((GEN *)*lo)[*sg], psi, &gl, &gt, frob))
+	      return frob;
 	}
 	else
 	{
-	  for (sg = lg(lo) - 2; sg >= 1; sg--)	/* else start with the
+	  for (*sg = lg(*lo) - 2; *sg >= 1; (*sg)--)	/* else start with the
 						 * fastest! */
-	    if (frobeniusliftall(lo[sg], &psi, &gl, &gt, frob))
-	      goto suite;
+	    if (frobeniusliftall(((GEN *)*lo)[*sg], psi, &gl, &gt, frob))
+	      return frob;
 	}
 	if (ex == 1 && (n == 12 || n % 12 != 0))
 	{
 	  avma = ltop;
-	  return gzero;
+	  return NULL;
 	}
 	else
 	{
@@ -2638,28 +2594,94 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     c = *primepointer++;
     if (!c)
       err(primer1);
-    p += c;
+    *p += c;
     if (DEBUGLEVEL >= 4)
-      fprintferr("GaloisConj:next p=%ld\n", p);
+      fprintferr("GaloisConj:next p=%ld\n", *p);
     avma = av;
   }
-suite:				/* Dijkstra probably hates me. (Linus
-				 * Torvalds linux/kernel/sched.c) */
+}
+
+
+GEN
+galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
+	  const struct galois_analysis *ga)
+{
+  struct galois_analysis Pga;
+  struct galois_borne Pgb;
+  struct galois_test td;
+  ulong   ltop = avma, lbot, ltop2;
+  long    n, p, deg;
+  long    sg, Pm = 0, fp;
+  long    x;
+  int     i, j;
+  GEN     Lden;
+  GEN     Tmod, res, pf = gzero, split, psi, ip, ppsi;
+  GEN     frob;
+  GEN     O;
+  GEN     P, PG, PL, Pden, PM, Pmod, Pp;
+  GEN    lo;			/* tired of casting */
+  n = degree(T);
+  if (!ga->deg)
+    return gzero;
+  x = varn(T);
+  if (DEBUGLEVEL >= 9)
+    fprintferr("GaloisConj:denominator:%Z\n", den);
+  if (n == 12 && ga->ord == 3)	/* A4 is very probable,so test it first */
+  {
+    long    av = avma;
+    if (DEBUGLEVEL >= 4)
+      fprintferr("GaloisConj:Testing A4 first\n");
+    inittest(L, M, gb->bornesol, gb->ladicsol, &td);
+    lbot = avma;
+    PG = a4galoisgen(T, &td);
+    freetest(&td);
+    if (PG != gzero)
+      return gerepile(ltop, lbot, PG);
+    avma = av;
+  }
+  if (n == 24 && ga->ord == 3)	/* S4 is very probable,so test it first */
+  {
+    long    av = avma;
+    struct galois_lift gl;
+    if (DEBUGLEVEL >= 4)
+      fprintferr("GaloisConj:Testing S4 first\n");
+    lbot = avma;
+    Lden=makeLden(L,den,gb);
+    initlift(T, den, stoi(ga->p4), L, Lden, gb, &gl);
+    PG = s4galoisgen(&gl);
+    if (PG != gzero)
+      return gerepile(ltop, lbot, PG);
+    avma = av;
+  }
+  frob=galoisfindfrobenius(T, L, M, den, &psi, &p, &lo, &sg, gb, ga);
+  if (!frob)
+  {
+    ltop=avma;
+    return gzero;
+  }
+  ip=stoi(p);
+  Tmod=lift((GEN)factmod(T,ip)[1]);
+  fp=degree((GEN)Tmod[1]);
+  O = permorbite(frob);
+  split = splitorbite(O);
+  deg=lg(O[1])-1;
+  if (DEBUGLEVEL >= 9)
+    fprintferr("GaloisConj:Orbite:%Z\n", O);
   if (deg == n)			/* Cyclique */
   {
     lbot = avma;
     res = cgetg(3, t_VEC);
-    res[1] = lgetg(2, t_VEC);
-    ((GEN **) res)[1][1] = gcopy(frob);
-    res[2] = lgetg(2, t_VECSMALL);
-    ((GEN *) res)[2][1] = deg;
+    res[1] = lgetg(lg(split[1]), t_VEC);
+    res[2] = lgetg(lg(split[2]), t_VECSMALL);
+    for (i = 1; i < lg(split[1]); i++)
+    {
+      ((GEN **) res)[1][i] = gcopy(((GEN **) split)[1][i]);
+      ((GEN *) res)[2][i] = ((GEN *) split)[2][i];
+    }
     return gerepile(ltop, lbot, res);
   }
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj:Frobenius:%Z\n", frob);
-  O = permorbite(frob);
-  if (DEBUGLEVEL >= 9)
-    fprintferr("GaloisConj:Orbite:%Z\n", O);
   {
     GEN     S, Tp, Fi, Sp;
     long    gp = n / fp;
@@ -2689,7 +2711,7 @@ suite:				/* Dijkstra probably hates me. (Linus
       if (DEBUGLEVEL >= 6)
 	fprintferr("GaloisConj:Fi=%Z  %d", Fi, i);
       for (j = 1; j <= gp; j++)
-	if (gegal(Fi, ((GEN **) Tmod)[1][j]))
+	if (gegal(Fi, ((GEN *) Tmod)[j]))
 	  break;
       if (DEBUGLEVEL >= 6)
 	fprintferr("-->%d\n", j);
@@ -2735,7 +2757,6 @@ suite:				/* Dijkstra probably hates me. (Linus
     return gzero;
   }
   inittest(L, M, gb->bornesol, gb->ladicsol, &td);
-  split = splitorbite(O);
   lbot = avma;
   res = cgetg(3, t_VEC);
   res[1] = lgetg(lg(PG[1]) + lg(split[1]) - 1, t_VEC);
