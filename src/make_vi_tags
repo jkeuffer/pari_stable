@@ -19,8 +19,8 @@ find \&filter_c, $src;
 # assume ctags outputs sorted tags (e.g Exuberant Ctags)
 system('ctags', '-f', $tmptags,  @files);
 
-getnames("$src/gp/gp_init.c");
-getnames("$src/language/init.c");
+getnames("$src/gp/gp_init.h");
+getnames("$src/language/init.h");
 geterrs("$src/language/errmsg.c");
 open(T,"$tmptags");
 for (sort(@gp))

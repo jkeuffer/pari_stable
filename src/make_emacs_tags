@@ -16,9 +16,9 @@ fi
 # Skip language/init.c, gp/gp_init.c and language/helpmessages.c:
 
 errors='language/errmsg.c'
-messages='language/helpmsg.c'
-gp_init='gp/gp_init.c'
-init_c='language/init.c'
+messages='language/init.h'
+gp_init='gp/gp_init.h'
+init_c='language/init.h'
 
 excluded=`perl -e 'print join "\n",
                       grep { $_ ne "'$init_c'"
