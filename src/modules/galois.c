@@ -694,7 +694,7 @@ tschirn(buildroot *BR)
   long i,k, v = varn(BR->p), l = lg(BR->r);
   GEN a,h,u;
 
-  if (l >= N) err(bugparier,"degree too large in tschirn");
+  if (l >= N) err(bugparier,"tschirn");
   if (DEBUGLEVEL)
     fprintferr("\n$$$$$ Tschirnhaus transformation of degree %ld: $$$$$\n",l-1);
 
@@ -767,7 +767,9 @@ moreprec(buildroot *BR)
 }
 
 static int
-is_zero(GEN g) { return !signe(g) || (lg(g) <= DEFAULTPREC && expo(g) < -100); }
+is_zero(GEN g) {
+  return !signe(g) || (lg(g) <= MEDDEFAULTPREC && expo(g) < -100);
+}
 
 static GEN
 is_int(GEN g)
@@ -822,15 +824,10 @@ static void
 dbg_rac(long nri,long nbracint,long numi[],GEN racint[],long multi[])
 {
   long k;
-  if (nbracint>nri+1)
-    fprintferr("        there are %ld rational integer roots:\n",nbracint-nri);
-  else if (nbracint==nri+1)
-    fprintferr("        there is 1 rational integer root:\n");
-  else
-    fprintferr("        there is no rational integer root.\n");
-  for (k=nri+1; k<=nbracint; k++)
-    fprintferr("          number%3ld: %Z, order %ld\n",
-               numi[k], racint[k], multi[k]);
+  fprintferr("\t# rational integer roots = %ld:",nbracint-nri);
+  for (k = nri+1; k <= nbracint; k++) fprintferr(" %ld^%ld", numi[k], multi[k]);
+  fprintferr("\n");
+  for (k = nri+1; k <= nbracint; k++) fprintferr("\t%2ld: %Z\n", numi[k], racint[k]);
   flusherr();
 }
 
@@ -2471,7 +2468,7 @@ galoisbig(GEN pol, long prec)
     for (i = 1; i <= N; i++) z[i] = (long)u_getpol(i-1);
     BR.coef = z;
     BR.p = pol;
-    BR.pr = (gexpo( cauchy_bound(pol) ) >> TWOPOTBITS_IN_LONG) + BIGDEFAULTPREC;
+    BR.pr = (gexpo( cauchy_bound(pol) ) >> TWOPOTBITS_IN_LONG) + prec;
     BR.prmax = BR.pr + BIGDEFAULTPREC-2; 
     BR.r = cget1(N+1, t_VEC);
     appendL(BR.r, gclone ( cleanroots(BR.p, BR.prmax) ));
