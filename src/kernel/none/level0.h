@@ -21,20 +21,19 @@
 #define SAVE_HIREMAINDER
 
 #ifndef INLINE
-    BEGINEXTERN
-    extern  ulong overflow;
-    extern  ulong hiremainder;
-    extern long addll(ulong x, ulong y);
-    extern long addllx(ulong x, ulong y);
-    extern long subll(ulong x, ulong y);
-    extern long subllx(ulong x, ulong y);
-    extern long shiftl(ulong x, ulong y);
-    extern long shiftlr(ulong x, ulong y);
-    extern long mulll(ulong x, ulong y);
-    extern long addmul(ulong x, ulong y);
-    extern long divll(ulong x, ulong y);
-    extern int  bfffo(ulong x);
-    ENDEXTERN
+BEGINEXTERN
+  extern ulong overflow, hiremainder;
+  extern long addll(ulong x, ulong y);
+  extern long addllx(ulong x, ulong y);
+  extern long subll(ulong x, ulong y);
+  extern long subllx(ulong x, ulong y);
+  extern long shiftl(ulong x, ulong y);
+  extern long shiftlr(ulong x, ulong y);
+  extern long mulll(ulong x, ulong y);
+  extern long addmul(ulong x, ulong y);
+  extern long divll(ulong x, ulong y);
+  extern int  bfffo(ulong x);
+ENDEXTERN
 
 #else
 

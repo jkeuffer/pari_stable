@@ -61,8 +61,7 @@
         GLOBL(C(hiremainder))
 
 #ifdef _MSC_VER
-unsigned long overflow;
-unsigned long hiremainder;
+ulong overflow, hiremainder;
 #else
 #ifdef BSD_SYNTAX
 #  if defined(__EMX__) && defined(__NO_AOUT) /* Otherwise IBM linker will

@@ -23,30 +23,30 @@
 #define SAVE_HIREMAINDER
 
 BEGINEXTERN
-extern long divll(unsigned long x, unsigned long y);
-extern int  bfffo(unsigned long x);
+extern long divll(ulong x, ulong y);
+extern int  bfffo(ulong x);
 ENDEXTERN
 
 #ifndef ASMINLINE
 BEGINEXTERN
-extern unsigned long hiremainder, overflow;
-extern long addll(unsigned long a, unsigned long b);
-extern long addllx(unsigned long a, unsigned long b);
-extern long subll(unsigned long a, unsigned long b);
-extern long subllx(unsigned long a, unsigned long b);
-extern long shiftl(unsigned long x, unsigned long y);
-extern long shiftlr(unsigned long x, unsigned long y);
-extern long mulll(unsigned long x, unsigned long y);
-extern long addmul(unsigned long x, unsigned long y);
+  extern ulong hiremainder, overflow;
+  extern long addll(ulong a, ulong b);
+  extern long addllx(ulong a, ulong b);
+  extern long subll(ulong a, ulong b);
+  extern long subllx(ulong a, ulong b);
+  extern long shiftl(ulong x, ulong y);
+  extern long shiftlr(ulong x, ulong y);
+  extern long mulll(ulong x, ulong y);
+  extern long addmul(ulong x, ulong y);
 ENDEXTERN
 
 #else /* ASMINLINE */
 
-register unsigned long hiremainder __asm__("%g5");
-register unsigned long overflow __asm__("%g6");
+register ulong hiremainder __asm__("%g5");
+register ulong overflow __asm__("%g6");
 
 #define addll(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "addcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
 	 : "=r" (__value), "=r" (overflow) \
@@ -55,7 +55,7 @@ register unsigned long overflow __asm__("%g6");
 __value; })								
 
 #define addllx(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %%g0,%%g6,%%g0; \
           addxcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
@@ -65,7 +65,7 @@ __value; })
 __value; })								
 
 #define subll(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
 	 : "=r" (__value), "=r" (overflow) \
@@ -74,7 +74,7 @@ __value; })
 __value; })								
 
 #define subllx(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "subcc %%g0,%%g6,%%g0; \
           subxcc %2,%3,%0; \
           addx  %%g0,%%g0,%1" \
@@ -84,7 +84,7 @@ __value; })
 __value; })								
 
 #define shiftl(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "neg %3,%%o4; \
           srl %2,%%o4,%1; \
           sll %2,%3,%0" \
@@ -94,7 +94,7 @@ __value; })
 __value; })								
 
 #define shiftl2(a,b,c) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b), __arg3 = (c); \
+({ ulong __value, __arg1 = (a), __arg2 = (b), __arg3 = (c); \
    __asm__ ( "srl %2,%4,%1; \
           sll %2,%3,%0" \
 	 : "=r" (__value), "=r" (hiremainder) \
@@ -103,7 +103,7 @@ __value; })
 __value; }) 			
 
 #define shiftlr(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "neg %3,%%o4; \
           sll %2,%%o4,%1; \
           srl %2,%3,%0" \
@@ -113,7 +113,7 @@ __value; })
 __value; }) 			
 
 #define shiftlr1(a) \
-({ unsigned long __value, __arg1 = (a); \
+({ ulong __value, __arg1 = (a); \
    __asm__ ( "sll %2,31,%1; \
           srl %2,1,%0" \
 	 : "=r" (__value), "=r" (hiremainder) \
@@ -122,7 +122,7 @@ __value; })
 __value; }) 			
 
 #define shiftlr2(a,b,c) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b), __arg3 = (c); \
+({ ulong __value, __arg1 = (a), __arg2 = (b), __arg3 = (c); \
    __asm__ ( "sll %2,%4,%1; \
           srl %2,%3,%0" \
 	 : "=r" (__value), "=r" (hiremainder) \
@@ -131,7 +131,7 @@ __value; })
 __value; }) 			
 
 #define mulll(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "umul %2,%3,%0; \
           rd  %%y,%1" \
 	 : "=r" (__value), "=r" (hiremainder) \
@@ -140,7 +140,7 @@ __value; })
 __value;})								
 
 #define addmul(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ( "umul %2,%3,%0; \
           rd  %%y,%%o4; \
           addcc %0,%%g5,%0; \
@@ -151,7 +151,7 @@ __value;})
 __value;})								
 
 #define divllasm(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__( "wr      %%g5,%%g0,%%y;\
          mov     %2,%%o4;\
 	 udivcc  %2,%3,%0;\

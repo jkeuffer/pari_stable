@@ -34,15 +34,15 @@ ENDEXTERN
 
 
 /* Use local variables whenever possible. */
-#define LOCAL_HIREMAINDER  register unsigned long hiremainder
+#define LOCAL_HIREMAINDER  register ulong hiremainder
 #define SAVE_OVERFLOW \
-     { unsigned long _temp_overf = overflow; \
-       extern unsigned long overflow; \
+     { ulong _temp_overf = overflow; \
+       extern ulong overflow; \
        overflow = _temp_overf; }
-#define LOCAL_OVERFLOW  unsigned long overflow
+#define LOCAL_OVERFLOW  ulong overflow
 #define SAVE_HIREMAINDER \
-     { unsigned long _temp_hirem = hiremainder; \
-       extern unsigned long hiremainder; \
+     { ulong _temp_hirem = hiremainder; \
+       extern ulong hiremainder; \
        hiremainder = _temp_hirem; }
 /* The global variable `hiremainder' is still necessary for the 2nd value of
    divss, divis, divsi. The global variable `overflow' is not necessary. */
@@ -60,38 +60,38 @@ extern ulong hiremainder;
 
 
 #define addll(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("addl %3,%0 ; adcl %1,%1" \
         : "=r" (__value), "=r" (overflow) \
-        : "0" (__arg1), "g" (__arg2), "1" ((unsigned long)0) \
+        : "0" (__arg1), "g" (__arg2), "1" ((ulong)0) \
         : "cc"); \
   __value; \
 })
 
 #define addllx(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b), __temp; \
+({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("subl %5,%2 ; adcl %4,%0 ; adcl %1,%1" \
         : "=r" (__value), "=r" (overflow), "=r" (__temp) \
-        : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((unsigned long)0), "2" ((unsigned long)0) \
+        : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
         : "cc"); \
   __value; \
 })
 
 
 #define subll(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("subl %3,%0 ; adcl %1,%1" \
         : "=r" (__value), "=r" (overflow) \
-        : "0" (__arg1), "g" (__arg2), "1" ((unsigned long)0) \
+        : "0" (__arg1), "g" (__arg2), "1" ((ulong)0) \
         : "cc"); \
   __value; \
 })
 
 #define subllx(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b), __temp; \
+({ ulong __value, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("subl %5,%2 ; sbbl %4,%0 ; adcl %1,%1" \
         : "=r" (__value), "=r" (overflow), "=r" (__temp) \
-        : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((unsigned long)0), "2" ((unsigned long)0) \
+        : "0" (__arg1), "g" (__arg2), "g" (overflow), "1" ((ulong)0), "2" ((ulong)0) \
         : "cc"); \
   __value; \
 })
@@ -99,41 +99,41 @@ extern ulong hiremainder;
 
 #if 1
 #define shiftl(a,c) \
-({ unsigned long __valuelo = (a), __count = (c), __valuehi; \
+({ ulong __valuelo = (a), __count = (c), __valuehi; \
    __asm__ ("shldl "SHCL"%2,%0" /* shift %0 left by %cl bits, feeding in %2 from the right */ \
         : "=q" (__valuehi) \
-        : "0" ((unsigned long)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
+        : "0" ((ulong)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
    hiremainder = __valuehi; \
    __valuelo << __count; \
 })
 #define shiftlr(a,c) \
-({ unsigned long __valuehi = (a), __count = (c), __valuelo; \
+({ ulong __valuehi = (a), __count = (c), __valuelo; \
    __asm__ ("shrdl "SHCL"%2,%0" /* shift %0 right by %cl bits, feeding in %2 from the left */ \
         : "=q" (__valuelo) \
-        : "0" ((unsigned long)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
+        : "0" ((ulong)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
    hiremainder = __valuelo; \
    __valuehi >> __count; \
 })
 #else
 #define shiftl(a,c) \
-({ unsigned long __valuelo = (a), __count = (c), __valuehi; \
+({ ulong __valuelo = (a), __count = (c), __valuehi; \
    __asm__ ("shldl "SHCL"%2,%0" /* shift %0 left by %cl bits, feeding in %2 from the right */ \
         : "=d" (hiremainder) \
-        : "0" ((unsigned long)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
+        : "0" ((ulong)0), "q" (__valuelo), "c" /* %ecx */ (__count)); \
    __valuelo << __count; \
 })
 #define shiftlr(a,c) \
-({ unsigned long __valuehi = (a), __count = (c), __valuelo; \
+({ ulong __valuehi = (a), __count = (c), __valuelo; \
    __asm__ ("shrdl "SHCL"%2,%0" /* shift %0 right by %cl bits, feeding in %2 from the left */ \
         : "=d" (hiremainder) \
-        : "0" ((unsigned long)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
+        : "0" ((ulong)0), "q" (__valuehi), "c" /* %ecx */ (__count)); \
    __valuehi >> __count; \
 })
 #endif
 
 
 #define mulll(a,b) \
-({ unsigned long __valuelo, __arg1 = (a), __arg2 = (b); \
+({ ulong __valuelo, __arg1 = (a), __arg2 = (b); \
    __asm__ ("mull %3" \
         : "=a" /* %eax */ (__valuelo), "=d" /* %edx */ (hiremainder) \
         : "0" (__arg1), "rm" (__arg2)); \
@@ -141,15 +141,15 @@ extern ulong hiremainder;
 })
 
 #define addmul(a,b) \
-({ unsigned long __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
+({ ulong __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("mull %4 ; addl %5,%0 ; adcl %6,%1" \
         : "=a" /* %eax */ (__valuelo), "=&d" /* %edx */ (hiremainder), "=r" (__temp) \
-        : "0" (__arg1), "rm" (__arg2), "g" (hiremainder), "2" ((unsigned long)0)); \
+        : "0" (__arg1), "rm" (__arg2), "g" (hiremainder), "2" ((ulong)0)); \
    __valuelo; \
 })
 
 #define addmullow(a,b) \
-({ unsigned long __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
+({ ulong __valuelo, __arg1 = (a), __arg2 = (b), __temp; \
    __asm__ ("mull %3 ; addl %4,%0" \
         : "=a" /* %eax */ (__valuelo), "=&d" /* %edx */ (__temp) \
         : "0" (__arg1), "rm" (__arg2), "g" (hiremainder)); \
@@ -157,7 +157,7 @@ extern ulong hiremainder;
 })
 
 #define divll(a,b) \
-({ unsigned long __value, __arg1 = (a), __arg2 = (b); \
+({ ulong __value, __arg1 = (a), __arg2 = (b); \
    __asm__ ("divl %4" \
         : "=a" /* %eax */ (__value), "=d" /* %edx */ (hiremainder) \
         : "0" /* %eax */ (__arg1), "1" /* %edx */ (hiremainder), "g" (__arg2)); \
@@ -168,7 +168,7 @@ extern ulong hiremainder;
 #  define _ASMI386INLINE_H_
 #  ifdef INLINE
 static inline int
-bfffo(unsigned long x)
+bfffo(ulong x)
 {
   int leading_one_position;
   __asm__ ("bsrl %1,%0" : "=r" (leading_one_position) : "rm" (x));
