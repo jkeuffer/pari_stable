@@ -94,7 +94,7 @@ constpi(long prec)
     n--; n1-=6;
   }
   p1 = divsr(53360,p1);
-  mulrrz(p1,mpsqrt(stor(k3,prec)), tmppi);
+  mulrrz(p1,mpsqrt_sign(stor(k3,prec), 1), tmppi);
   if (gpi) gunclone(gpi);
   avma = av1;  gpi = tmppi;
 }
@@ -758,24 +758,21 @@ gpow(GEN x, GEN n, long prec)
 /**                        RACINE CARREE                           **/
 /**                                                                **/
 /********************************************************************/
-
+/* sqrt(|x|), assume x t_REAL */
 GEN
-mpsqrt(GEN x)
+mpsqrt_sign(GEN x, long s)
 {
   pari_sp av, av0;
-  long l,l0,l1,l2,s,eps,n,i,ex;
+  long l, l0, l1, l2, eps, n, i, ex;
   double beta;
-  GEN y,p1,p2,p3;
+  GEN y, p1, p2, p3;
 
-  if (typ(x) != t_REAL) err(typeer,"mpsqrt");
-  s = signe(x); if (s < 0) err(talker,"negative argument in mpsqrt");
   if (!s) return realzero_bit(expo(x) >> 1);
- 
   l = lg(x); y = cgetr(l); av0 = avma;
 
   p1 = cgetr(l+1); affrr(x,p1);
   ex = expo(x); eps = ex & 1; ex >>= 1;
-  setexpo(p1,eps); /* x = 2^(2 ex) p1 */
+  p1[1] = evalsigne(1) | evalexpo(eps); /* |x| = 2^(2 ex) p1 */
 
   n = (long)(2 + log((double) (l-2))/LOG2);
   beta = sqrt((eps+1) * (2 + p1[2]/C31));
@@ -803,6 +800,14 @@ mpsqrt(GEN x)
   }
   affrr(p2,y); setexpo(y, expo(y)+ex);
   avma = av0; return y;
+}
+
+GEN
+mpsqrt(GEN x) {
+  long s = signe(x);
+  if (typ(x) != t_REAL) err(typeer,"mpsqrt");
+  if (s < 0) err(talker,"negative argument in mpsqrt");
+  return mpsqrt_sign(x, s);
 }
 
 /* O(p^e) */
@@ -936,15 +941,17 @@ GEN
 gsqrt(GEN x, long prec)
 {
   pari_sp av, tetpil;
-  GEN y,p1,p2;
+  GEN y, p1, p2;
 
   switch(typ(x))
   {
-    case t_REAL:
-      if (signe(x)>=0) return mpsqrt(x);
-      y=cgetg(3,t_COMPLEX); y[1]=zero;
-      setsigne(x,1); y[2]=lmpsqrt(x); setsigne(x,-1);
-      return y;
+    case t_REAL: {
+      long s = signe(x);
+      if (s >= 0) return mpsqrt_sign(x, s);
+      y = cgetg(3,t_COMPLEX);
+      y[2] = (long)mpsqrt_sign(x, s);
+      y[1] = zero; return y;
+    }
 
     case t_INTMOD:
       y=cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
@@ -1546,7 +1553,7 @@ mplog(GEN x)
     l2 += m>>TWOPOTBITS_IN_LONG;
     p4 = cgetr(l2); affrr(p1,p4);
     p1 = p4; av = avma;
-    for (k=1; k<=m; k++) p1 = mpsqrt(p1);
+    for (k=1; k<=m; k++) p1 = mpsqrt_sign(p1, 1);
     affrr(p1,p4); avma = av;
   }
   else
@@ -1840,8 +1847,7 @@ mpaut(GEN x)
 {
   pari_sp av = avma;
   GEN p1 = mulrr(x, addsr(2,x));
-  setsigne(p1, -signe(p1));
-  return gerepileuptoleaf(av, mpsqrt(p1));
+  return gerepileuptoleaf(av, mpsqrt_sign(p1, signe(p1)));
 }
 
 /********************************************************************/
