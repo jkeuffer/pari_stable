@@ -2083,45 +2083,30 @@ mpfact(long n)
 /**                      LUCAS & FIBONACCI                        **/
 /**                                                               **/
 /*******************************************************************/
-
-void
-lucas(long n, GEN *ln, GEN *ln1)
+static void
+lucas(ulong n, GEN *a, GEN *b)
 {
-  pari_sp av;
-  long taille;
-  GEN z, t;
-
-  if (!n) { *ln = stoi(2); *ln1 = stoi(1); return; }
-
-  taille = 3 + (long)(pariC3 * (1+labs(n)));
-  *ln = cgeti(taille);
-  *ln1= cgeti(taille);
-  av = avma; lucas(n/2, &z, &t);
-  switch(n % 4)
-  {
-    case -3:
-      addsiz(2,sqri(z), *ln1);
-      subiiz(addsi(1,mulii(z,t)),*ln1, *ln); break;
-    case -1:
-      addsiz(-2,sqri(z), *ln1);
-      subiiz(addsi(-1, mulii(z,t)),*ln1, *ln); break;
-    case  0: addsiz(-2,sqri(z),    *ln); addsiz(-1,mulii(z,t), *ln1); break;
-    case  1: addsiz(-1,mulii(z,t), *ln); addsiz(2,sqri(t),    *ln1); break;
-    case -2:
-    case  2: addsiz(2,sqri(z),    *ln); addsiz(1,mulii(z,t), *ln1); break;
-    case  3: addsiz(1,mulii(z,t), *ln); addsiz(-2,sqri(t),   *ln1);
+  GEN z, t, zt;
+  if (!n) { *a = gdeux; *b = gun; return; }
+  lucas(n >> 1, &z, &t); zt = mulii(z, t);
+  switch(n & 3) {
+    case  0: *a = addsi(-2,sqri(z)); *b = addsi(-1,zt); break;
+    case  1: *a = addsi(-1,zt);      *b = addsi(2,sqri(t)); break;
+    case  2: *a = addsi(2,sqri(z));  *b = addsi(1,zt); break;
+    case  3: *a = addsi(1,zt);       *b = addsi(-2,sqri(t));
   }
-  avma = av;
 }
 
 GEN
 fibo(long n)
 {
   pari_sp av = avma;
-  GEN ln,ln1;
-
-  lucas(n-1,&ln,&ln1);
-  return gerepileupto(av, divis(addii(shifti(ln,1),ln1), 5));
+  GEN a, b; 
+  if (!n) return gzero;
+  lucas((ulong)(labs(n)-1), &a, &b);
+  a = divis(addii(shifti(a,1),b), 5);
+  if (n < 0 && !odd(n)) setsigne(a, -1);
+  return gerepileuptoint(av, a);
 }
 
 /*******************************************************************/
@@ -2143,16 +2128,16 @@ icopy_lg(GEN x, long l)
 static GEN
 Qsfcont(GEN x, GEN y, long k)
 {
-  GEN  z, p1, p2, p3;
-  long i, l, ly;
+  GEN  z, a, b, c;
+  long i, l, ly = lgefint(x[2]);
 
-  ly = lgefint(x[2]);
-  l = 3 + (long) ((ly-2) / pariC3);
+  /* / log2( (1+sqrt(5)) / 2 )  */
+  l = (long)(3 + bit_accuracy_mul(ly, 1.44042009041256));
   if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
   if ((ulong)l > LGBITS) l = LGBITS;
 
-  p1 = (GEN)x[1];
-  p2 = (GEN)x[2];
+  a = (GEN)x[1];
+  b = (GEN)x[2];
   z = cgetg(l,t_VEC);
   l--;
   if (y) {
@@ -2161,32 +2146,32 @@ Qsfcont(GEN x, GEN y, long k)
     for (i = 1; i <= l; i++)
     {
       z[i] = y[i];
-      p3 = p2; if (!gcmp1((GEN)z[i])) p3 = mulii((GEN)z[i], p2);
-      p3 = subii(p1, p3);
-      if (signe(p3) < 0)
+      c = b; if (!gcmp1((GEN)z[i])) c = mulii((GEN)z[i], b);
+      c = subii(a, c);
+      if (signe(c) < 0)
       { /* partial quotient too large */
-        p3 = addii(p3, p2);
-        if (signe(p3) >= 0) i++; /* by 1 */
+        c = addii(c, b);
+        if (signe(c) >= 0) i++; /* by 1 */
         break;
       }
-      if (cmpii(p3, p2) >= 0)
+      if (cmpii(c, b) >= 0)
       { /* partial quotient too small */
-        p3 = subii(p3, p2);
-        if (cmpii(p3, p2) < 0) i++; /* by 1 */
+        c = subii(c, b);
+        if (cmpii(c, b) < 0) i++; /* by 1 */
         break;
       }
-      if ((i & 0xff) == 0) gerepileall(av, 2, &p2, &p3);
-      p1 = p2; p2 = p3;
+      if ((i & 0xff) == 0) gerepileall(av, 2, &b, &c);
+      a = b; b = c;
     }
   } else {
-    p1 = icopy_lg(p1, ly);
-    p2 = icopy(p2);
+    a = icopy_lg(a, ly);
+    b = icopy(b);
     for (i = 1; i <= l; i++)
     {
-      z[i] = (long)truedvmdii(p1,p2,&p3);
-      if (p3 == gzero) { i++; break; }
-      affii(p3, p1); cgiv(p3); p3 = p1;
-      p1 = p2; p2 = p3;
+      z[i] = (long)truedvmdii(a,b,&c);
+      if (c == gzero) { i++; break; }
+      affii(c, a); cgiv(c); c = a;
+      a = b; b = c;
     }
   }
   i--;
@@ -2205,8 +2190,8 @@ static GEN
 sfcont(GEN x, long k)
 {
   pari_sp av;
-  long lx,tx=typ(x),e,i,l;
-  GEN  y,p1,p2,p3;
+  long lx, tx = typ(x), e, i, l;
+  GEN y, a, b, c;
 
   if (is_scalar_t(tx))
   {
@@ -2218,16 +2203,16 @@ sfcont(GEN x, long k)
         av = avma; lx = lg(x);
         e = bit_accuracy(lx)-1-expo(x);
         if (e < 0) err(talker,"integral part not significant in sfcont");
-        p2=ishiftr_spec(x,lx,0);
-        p1 = cgetg(3, t_FRAC);
-	p1[1] = (long)p2;
-	p1[2] = lshifti(gun, e);
+        c = ishiftr_spec(x,lx,0);
+        a = cgetg(3, t_FRAC);
+	a[1] = (long)c;
+	a[2] = lshifti(gun, e);
 
-        p3 = cgetg(3, t_FRAC);
-	p3[1] = laddsi(signe(x), p2);
-	p3[2] = p1[2];
-	p1 = Qsfcont(p1,NULL,k);
-	return gerepilecopy(av, Qsfcont(p3,p1,k));
+        b = cgetg(3, t_FRAC);
+	b[1] = laddsi(signe(x), c);
+	b[2] = a[2];
+	a = Qsfcont(a,NULL,k);
+	return gerepilecopy(av, Qsfcont(b,a,k));
 
       case t_FRAC:
         av = avma;
@@ -2240,21 +2225,21 @@ sfcont(GEN x, long k)
   {
     case t_POL: return _veccopy(x);
     case t_SER:
-      av = avma; p1 = gtrunc(x);
-      return gerepileupto(av,sfcont(p1,k));
+      av = avma;
+      return gerepileupto(av, sfcont(gtrunc(x), k));
     case t_RFRAC:
       av = avma;
       l = typ(x[1]) == t_POL? lg(x[1]): 3;
       if (lg(x[2]) > l) l = lg(x[2]);
       if (k > 0 && l > k+1) l = k+1;
       y = cgetg(l,t_VEC);
-      p1 = (GEN)x[1];
-      p2 = (GEN)x[2];
+      a = (GEN)x[1];
+      b = (GEN)x[2];
       for (i=1; i<l; i++)
       {
-	y[i] = (long)poldivrem(p1,p2,&p3);
-        if (gcmp0(p3)) { i++; break; }
-	p1 = p2; p2 = p3;
+	y[i] = (long)poldivrem(a,b,&c);
+        if (gcmp0(c)) { i++; break; }
+	a = b; b = c;
       }
       setlg(y, i); return gerepilecopy(av, y);
   }
