@@ -1469,24 +1469,26 @@ it gives the gcd of all the entries.
 
 \syn{content}{x}.
 
-\subsecidx{contfrac}$(x,\{b\},\{lmax\})$: creates the row vector whose
+\subsecidx{contfrac}$(x,\{b\},\{nmax\})$: creates the row vector whose
 components are the partial quotients of the \idx{continued fraction}
-expansion of $x$, the number of partial quotients being limited to $lmax$.
-If $x$ is a real number, the expansion stops at the last significant partial
-quotient if $lmax$ is omitted. $x$ can also be a rational function or a power
-series.
+expansion of $x$. That is a result $[a_0,\dots,a_n]$ means that
+$x \approx a_0+1/(a_1+\dots+1/a_n)\dots)$.
+
+The number of partial quotients $n$ is limited to $nmax$. If $x$ is a real
+number, the expansion stops at the last significant partial quotient if $nmax$
+is omitted. $x$ can also be a rational function or a power series.
 
 If a vector $b$ is supplied, the numerators will be equal to the coefficients
-of $b$. The length of the result is then equal to the length of $b$, unless a
-partial remainder is encountered which is equal to zero. In which case the
-expansion stops. In the case of real numbers, the stopping criterion is thus
-different from the one mentioned above since, if $b$ is too long, some partial
-quotients may not be significant.
+of $b$ (instead of all equal to $1$ as above). The length of the result is
+then equal to the length of $b$, unless a partial remainder is encountered
+which is equal to zero, in which case the expansion stops. In the case of real
+numbers, the stopping criterion is thus different from the one mentioned above
+since, if $b$ is too long, some partial quotients may not be significant.
 
-If $b$ is an integer, the command is understood as \kbd{contfrac($x,lmax$)}.
+If $b$ is an integer, the command is understood as \kbd{contfrac($x,nmax$)}.
 
-\syn{contfrac0}{x,b,lmax}. Also available are
-$\teb{gboundcf}(x,lmax)$, $\teb{gcf}(x)$, or $\teb{gcf2}(b,x)$, where $lmax$
+\syn{contfrac0}{x,b,nmax}. Also available are
+$\teb{gboundcf}(x,nmax)$, $\teb{gcf}(x)$, or $\teb{gcf2}(b,x)$, where $nmax$
 is a C integer.
 
 \subsecidx{contfracpnqn}$(x)$: when $x$ is a vector or a one-row matrix, $x$
