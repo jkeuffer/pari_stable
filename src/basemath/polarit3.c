@@ -3698,7 +3698,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
 GEN
 ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
 {
-  int checksqfree = lambda? 1: 0, delete = 0, first = 1, stable;
+  int checksqfree = lambda? 1: 0, delvar = 0, first = 1, stable;
   ulong bound;
   gpmem_t av = avma, av2, lim;
   long i,n, lb, dres = degpol(A)*degpol(B0), nmax = (dres+1)>>1;
@@ -3719,7 +3719,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   y = cgetg(dres+2, t_VECSMALL);
   if (vY == MAXVARN)
   {
-    vY = fetch_var(); delete = 1;
+    vY = fetch_var(); delvar = 1;
     B0 = gsubst(B0, MAXVARN, polx[vY]);
     A = dummycopy(A); setvarn(A, vY);
   }
@@ -3868,7 +3868,7 @@ INIT:
     }
   }
 END:
-  setvarn(H, vX); if (delete) delete_var();
+  setvarn(H, vX); if (delvar) delete_var();
   if (cB) H = gmul(H, gpowgs(cB, degpol(A)));
   if (LERS)
   {
@@ -3899,7 +3899,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   gpmem_t av = avma;
   GEN B0, R, a;
   long dB;
-  int delete;
+  int delvar;
 
   if (v < 0) v = 0;
   switch (typ(B))
@@ -3910,10 +3910,10 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
       if (lambda) { B = scalarpol(B,varn(A)); dB = 0; break;}
       return gerepileupto(av, gpowgs(gsub(polx[v], B), degpol(A)));
   }
-  delete = 0;
+  delvar = 0;
   if (varn(A) == 0)
   {
-    long v0 = fetch_var(); delete = 1;
+    long v0 = fetch_var(); delvar = 1;
     A = dummycopy(A); setvarn(A,v0);
     B = dummycopy(B); setvarn(B,v0);
   }
@@ -3921,7 +3921,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   B0[2] = (long)gneg_i(B);
   B0[3] = un;
   R = ZY_ZXY_resultant(A, B0, lambda);
-  if (delete) delete_var();
+  if (delvar) delete_var();
   setvarn(R, v); a = leading_term(A);
   if (!gcmp1(a)) R = gdiv(R, gpowgs(a, dB));
   return gerepileupto(av, R);
