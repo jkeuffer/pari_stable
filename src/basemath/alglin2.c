@@ -2473,26 +2473,24 @@ hnflll_i(GEN A, GEN *ptB)
   n = lg(A);
   A = ZM_copy(fix_rows(A));
   B = ptB? idmat(n-1): NULL;
-  D = (GEN*) cgetg(n+1, t_VEC); D++; /* hack: need a "sentinel" D[0] */
-  lambda = (GEN**) cgetg(n,t_MAT);
-  for (i=1; i<n; i++) { D[i] = gun; lambda[i] = (GEN*)zerocol(n-1); }
-  /* handle trivial case: return negative diag coeff otherwise */
-  if (n == 2) (void)findi_normalize((GEN)A[1], B,1,lambda);
-  D[0] = gun; k = 2;
+  D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
+  for (i=0; i<n; i++) D[i] = gun;
+  for (i=1; i<n; i++) lambda[i] = (GEN*)zerocol(n-1);
+  k = 2;
   while (k < n)
   {
     reduce2(A,B,k,k-1,row,lambda,D);
     if (row[0])
       do_swap = (!row[1] || row[0] <= row[1]);
-    else if (row[1])
-      do_swap = 0;
-    else
+    else if (!row[1])
     { /* row[0] == row[1] == 0 */
       ulong av1 = avma;
       z = addii(mulii(D[k-2],D[k]), sqri(lambda[k][k-1]));
       do_swap = (cmpii(mulsi(n1,z), mulsi(m1,sqri(D[k-1]))) < 0);
       avma = av1;
     }
+    else
+      do_swap = 0;
     if (do_swap)
     {
       hnfswap(A,B,k,lambda,D);
@@ -2521,6 +2519,8 @@ hnflll_i(GEN A, GEN *ptB)
       gerepilemany(av,gptr,B? 4: 3); lambda = (GEN**)a; D = (GEN*)(b+1);
     }
   }
+  /* handle trivial case: return negative diag coeff otherwise */
+  if (n == 2) (void)findi_normalize((GEN)A[1], B,1,lambda);
   A = fix_rows(A);
   gptr[0] = &A; gptr[1] = &B;
   gerepilemany(av, gptr, B? 2: 1);
@@ -2570,14 +2570,12 @@ extendedgcd(GEN A)
   long av = avma, do_swap,i,j,n,k;
   GEN z,B, **lambda, *D;
 
-  n = lg(A); B = idmat(n-1); A = ZM_copy(A);
-  D = (GEN*) cgeti(n); lambda = (GEN**) cgetg(n,t_MAT);
+  n = lg(A);
+  A = dummycopy(A);
+  B = idmat(n-1);
+  D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
   for (i=0; i<n; i++) D[i] = gun;
-  for (i=1; i<n; i++)
-  {
-    lambda[i] = (GEN*) cgetg(n,t_COL);
-    for(j=1;j<n;j++) lambda[i][j] = gzero;
-  }
+  for (i=1; i<n; i++) lambda[i] = (GEN*)zerocol(n-1);
   k = 2;
   while (k < n)
   {
@@ -2595,7 +2593,7 @@ extendedgcd(GEN A)
     if (do_swap)
     {
       hnfswap(A,B,k,lambda,D);
-      if (k>2) k--;
+      if (k > 2) k--;
     }
     else
     {
