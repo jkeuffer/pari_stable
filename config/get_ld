@@ -15,22 +15,21 @@ if test -z "$LD"; then
 fi
 
 # FIXME: user had better know what she's doing, when setting LD/LDFLAGS !
-if test -z "$LDFLAGS"; then
-  case "$osname-$arch" in
-    osf1-*) # only case where $LD != $CC
-        LDFLAGS='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
-        case "$optimization" in
-          full|profiling) LDFLAGS="-g0 -O4 $LDFLAGS";;
-        esac ;;
-    linux-*|cygwin*|freebsd-*) LDFLAGS="$cflags -Wl,-export-dynamic" ;;
-    solaris-*) LDFLAGS=$cflags ;;
-    os2-*)     LDFLAGS="$cflags -Zexe"
-               case "$optimization" in
-                 full) LDFLAGS="$LDFLAGS -s";;
-               esac;;
-    *)         LDFLAGS=$cflags ;;
-  esac
-fi
+case "$osname-$arch" in
+  osf1-*) # only case where $LD != $CC
+      ldflags='-std0 -call_shared /usr/lib/cmplrs/cc/crt0.o'
+      case "$optimization" in
+        full|profiling) ldflags="-g0 -O4 $ldflags";;
+      esac ;;
+  linux-*|cygwin*|freebsd-*) ldflags="$cflags -Wl,-export-dynamic" ;;
+  solaris-*) ldflags=$cflags ;;
+  os2-*)     ldflags="$cflags -Zexe"
+             case "$optimization" in
+               full) ldflags="$ldflags -s";;
+             esac;;
+  *)         ldflags=$cflags ;;
+esac
+LDFLAGS="$LDFLAGS $ldflags"
 
 if test "$fastread" != yes; then
   echo $n ..."Which linker for building executables ? $c"
