@@ -1404,12 +1404,44 @@ cxgamma(GEN s0, int dolog, long prec)
   gaffect(y, res); avma = av; return res;
 }
 
+/* Gamma((m+1) / 2) */
+static GEN
+gammahs(long m, long prec)
+{
+  GEN y = cgetr(prec), z;
+  pari_sp av = avma;
+  long ma = labs(m);
+
+  if (ma > 962353) err(talker, "argument too large in ggamma");
+  if (ma > 200 + 50*(prec-2)) /* heuristic */
+  {
+    z = stor(m + 1, prec); setexpo(z, expo(z)-1);
+    affrr(cxgamma(z,0,prec), y);
+    avma = av; return y;
+  }
+  z = mpsqrt( mppi(prec) );
+  if (m)
+  {
+    GEN p1 = seq_umul(ma/2 + 1, ma);
+    long v = vali(p1);
+    p1 = shifti(p1, -v); v -= ma;
+    if (m >= 0) z = mulri(z,p1);
+    else
+    {
+      z = divri(z,p1); v = -v;
+      if ((m&3) == 2) setsigne(z,-1);
+    }
+    setexpo(z, expo(z) + v);
+  }
+  affrr(z, y); avma = av; return y;
+}
+
 GEN
 ggamma(GEN x, long prec)
 {
   pari_sp av;
   long m;
-  GEN y, z, p1;
+  GEN y, z;
 
   switch(typ(x))
   {
@@ -1424,25 +1456,12 @@ ggamma(GEN x, long prec)
     case t_FRAC:
       if (!egalii((GEN)x[2], gdeux)) break;
       z = (GEN)x[1]; /* true argument is z/2 */
-/* heuristic */
-      if (cmpis(z, 200 + 50*(prec-2)) > 0) break;
-
-      y = cgetr(prec); av = avma;
-      if (is_bigint(z) || labs(m = itos(z)-1) > 962353)
-        err(talker, "argument too large in ggamma");
-      p1 = mpsqrt( mppi(prec) );
-      if (m)
+      if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
-        long ma = labs(m);
-        GEN p2 = gmul2n(seq_umul(ma/2 + 1, ma), -ma);
-        if (m >= 0) p1 = gmul(p1,p2);
-        else
-        {
-          p1 = gdiv(p1,p2);
-          if ((m&3) == 2) setsigne(p1,-1);
-        }
+        err(talker, "argument too large in ggamma");
+        return NULL; /* not reached */
       }
-      affrr(p1, y); avma = av; return y;
+      return gammahs(m-1, prec);
 
     case t_FRACN:
       av = avma;
@@ -1540,37 +1559,15 @@ glngammaz(GEN x, GEN y)
 static GEN
 mpgamd(long x, long prec)
 {
-  long i, j, a, l;
-  pari_sp av;
-  GEN y,p1,p2;
-
-  a = labs(x);
-  l = prec+1+(a>>TWOPOTBITS_IN_LONG);
-  if ((ulong)l > LGBITS>>1) err(talker,"argument too large in ggamd");
-  y=cgetr(prec); av=avma;
-
-  p1 = mpsqrt(mppi(l));
-  j = 1; p2 = realun(l);
-  for (i=1; i<a; i++)
-  {
-    j += 2;
-    p2 = mulsr(j,p2); setlg(p2,l);
-  }
-  if (x>=0) p1 = mulrr(p1,p2);
-  else
-  {
-    p1 = divrr(p1,p2); if (a&1) setsigne(p1,-1);
-  }
-  setexpo(p1, expo(p1)-x);
-  affrr(p1,y); avma=av; return y;
+  if (labs(x) > 962353) x = 962353; /* too large. Raise error in gammahs */
+  return gammahs(x<<1, prec);
 }
 
 void
 mpgamdz(long s, GEN y)
 {
-  pari_sp av=avma;
-
-  affrr(mpgamd(s,lg(y)),y); avma=av;
+  pari_sp av = avma;
+  affrr(mpgamd(s,lg(y)),y); avma = av;
 }
 
 GEN
