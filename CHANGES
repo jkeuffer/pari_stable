@@ -63,13 +63,16 @@ IS 13- function prototypes (missing 'extern')
    25- inconsistenty t_POLMOD specification: Mod(x,y)+16 --> invalid object
    26- bnfsunit error (impossible I-->S) when large class group
    27- qfminim([;],...) / qfperfection([;]) --> SEGV
+   28- idealpow(,,,1) only reduced at the end, not after each multiplication
 
   Changed
 BA  1- more efficient quadratic Hensel lift
     2- made ya optional in polinterpolate
 BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
-    4- catch SIGPIPE / SIGFPE
+    4- catch SIGFPE
     5- made poltchebi efficient
+    6- write all real zeroes in exponential format (0e28) in format 'g'
+    7- bnfsunit: try to compute S-units even when the class group is large
 
   Added
     1- new library function zerovec
