@@ -764,8 +764,9 @@ point is chopped away, $e$ is the binary exponent of the difference between
 the original and the truncated value (the ``fractional part''). If the
 exponent of $x$ is too large compared to its precision (i.e.~$e>0$), the
 result is undefined and an error occurs if $e$ was not given. The function
-applies componentwise on rational functions and vector / matrices; $e$ is
-then the maximal number of error bits.
+applies componentwise on vector / matrices; $e$ is then the maximal number of
+error bits. If $x$ is a rational function, the result is the ``integer part''
+(Euclidean quotient of numerator by denominator) and $e$ is not set.
 
 Note a very special use of \kbd{truncate}: when applied to a power series, it
 transforms it into a polynomial or a rational function with denominator
