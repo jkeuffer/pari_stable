@@ -556,6 +556,8 @@ sd_colors(char *v, int flag)
       v = "1, 5, 3, 7, 6, 2, 3";	/* Assume recent ReadLine. */
     if (l <= 7 && strncmp(v, "lightbg", l) == 0)
       v = "1, 6, 3, 4, 5, 2, 3";	/* Assume recent ReadLine. */
+    if (l <= 6 && strncmp(v, "boldfg", l) == 0)	/* Good for darkbg consoles */
+      v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], [2,,1], [3,,1]";
     v = filtre(v,NULL, f_INIT|f_REG);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
@@ -1374,6 +1376,7 @@ aide0(char *s, int flag)
 {
   long n, long_help = flag & h_LONG;
   entree *ep,*ep1;
+  char *s1;
 
   s = get_sep(s);
   if (isdigit((int)*s))
@@ -1384,6 +1387,12 @@ aide0(char *s, int flag)
       err(talker2,"no such section in help: ?",s,s);
     if (long_help) external_help(s,3); else commands(n);
     return;
+  }
+  if (*s == '\\') {
+    s1 = s+1;
+    while (isalpha((int)*s1))
+      s1++;
+    *s1 = '\0';			/* Get meaningful entry on \ps 5 */
   }
   if (flag & h_APROPOS) { external_help(s,-1); return; }
   if (long_help && (n = ok_external_help(s))) { external_help(s,n); return; }
@@ -1399,11 +1408,22 @@ aide0(char *s, int flag)
   {
     if (!strcmp(ep->name, "default"))
     {
-      char *t = s+7;
-      if (*t == '/' && is_default(t+1))
-      {
-        external_help(t+1, 2);
-        return;
+      char *t = s+7, *e;
+
+      while (*t == ' ' || *t == '\t')
+	t++;
+      if (*t == '/' || *t == '(') {
+	t++;
+	while (*t == ' ' || *t == '\t')
+	  t++;
+	e = t;
+	while (isalpha((int)*e))
+	  e++;
+	*e = '\0';			/* get_sep() made it a copy... */
+	if (is_default(t)) {
+	  external_help(t, 2);
+          return;
+	}
       }
     }
   }

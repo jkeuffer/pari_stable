@@ -553,6 +553,23 @@ rl_short_help(int count, int key)
   long flag = h_RL;
 
   while (off && is_keyword_char(rl_line_buffer[off-1])) off--;
+
+  /* Check for \c type situation.  Could check for leading whitespace too... */
+  if (off == 1 && rl_line_buffer[off-1] == '\\') off--;
+  if (off >= 8) {		/* Check for default(whatever) */
+    int t = off - 1;
+
+    while (t >= 7 && (rl_line_buffer[t] == ' ' || rl_line_buffer[t] == '\t'))
+      t--;
+    if (rl_line_buffer[t--] == '(') {
+      while (t >= 6 && (rl_line_buffer[t] == ' ' || rl_line_buffer[t] == '\t'))
+	t--;
+      if (t >= 6 && rl_line_buffer[t] == 't'
+	  && strncmp(rl_line_buffer + t - 6, "default", 7) == 0
+	  && (t == 6 || !is_keyword_char(rl_line_buffer[t-7])))
+	off = t - 6;		/* All this for that assignment */
+    }
+  }
   rl_point = 0; rl_end = 0; pari_outfile = rl_outstream;
   if (count < 0) flag |= h_LONG; /* long help */
   SAVE_PROMPT();
