@@ -513,10 +513,10 @@ divide_p_quo(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
     P = (GEN)LP[j];
     v = int_elt_val(nf, m, (GEN)P[1], (GEN)P[5], NULL); /* v_P(m) */
     if (!v) continue;
-    v = idealval(nf,I, P) - v;
+    v -= idealval(nf,I, P);
     if (!v) continue;
-    store(ip + j, v); /* v = v_P(I / m) < 0 */
-    k += v * itos((GEN)P[4]);
+    store(ip + j, v); /* v = v_P(m / I) > 0 */
+    k -= v * itos((GEN)P[4]);
     if (!k) return 1;
   }
   return 0;
@@ -554,9 +554,8 @@ divide_p(FB_t *F, long p, long k, GEN nf, GEN I, GEN m)
 
 /* Let x = m if I == NULL,
  *         I if m == NULL,
- *         I/m otherwise. [ FIXME: should be m / I. More natural, and
- *                          simplifies get_log_embed ]
- * Can we factor x ? N = Norm x > 0 */
+ *         m/I otherwise.
+ * Can we factor the integral ideal x ? N = Norm x > 0 */
 static long
 can_factor(FB_t *F, GEN nf, GEN I, GEN m, GEN N)
 {
@@ -1675,9 +1674,8 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
   GEN arch, C;
   long i;
   if (!rel->m) return zerocol(RU);
-  if (!rel->ex) 
-    arch = glog( gmul(M, rel->m), prec );
-  else
+  arch = gmul(M, rel->m);
+  if (rel->ex) 
   {
     GEN t, ex = rel->ex, x = NULL;
     long l = lg(ex);
@@ -1687,9 +1685,9 @@ get_log_embed(REL_t *rel, GEN M, long RU, long R1, long prec)
         t = gmael(rel->pow->arc, i, ex[i]);
         x = x? vecmul(x, t): t; /* arch components in MULTIPLICATIVE form */
       }
-    arch = gneg( glog(vecmul(x, gmul(M, rel->m)), prec) );
+    arch = vecmul(x, arch);
   }
-  C = cgetg(RU+1, t_COL);
+  C = cgetg(RU+1, t_COL); arch = glog(arch, prec);
   for (i=1; i<=R1; i++) C[i] = arch[i];
   for (   ; i<=RU; i++) C[i] = lmul2n((GEN)arch[i], 1);
   return C;
@@ -2042,13 +2040,13 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
   long nbG = lg(vecG)-1, lgsub = lg(F->subFB), jlist = 1, jid = *pjid;
   long i, j, cptlist = 0, cptzer = 0;
   pari_sp av, av1;
-  GEN ideal, IDEAL, m, P, ex = cgetg(lgsub, t_VECSMALL);
+  GEN ideal, IDEAL, m, ex = cgetg(lgsub, t_VECSMALL);
  
   if (DEBUGLEVEL && L_jid) fprintferr("looking hard for %Z\n",L_jid);
-  P = NULL; /* gcc -Wall */
   for (av = avma;;)
   {
     REL_t *rel = cache->last;
+    GEN P;
     if (L_jid && jlist < lg(L_jid))
     {
       if (++cptlist > 3) { jid = L_jid[jlist++]; cptlist = 0; }
@@ -2059,8 +2057,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
       if (jid == F->KC) jid = 1; else jid++;
     }
     avma = av;
-    P = prime_to_ideal(nf, (GEN)F->LP[jid]);
-    ideal = P;
+    ideal = P = prime_to_ideal(nf, (GEN)F->LP[jid]);
     do {
       for (i=1; i<lgsub; i++)
       { /* reduce mod apparent order */
@@ -2083,9 +2080,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
         continue;
       }
       /* can factor ideal, record relation */
-      set_fact(++rel, F);
-      rel->R[jid]--;
-      for (i=1; i<lgsub; i++) rel->R[ F->subFB[i] ] -= ex[i];
+      set_fact(++rel, F); rel->R[jid]++;
+      for (i=1; i<lgsub; i++) rel->R[ F->subFB[i] ] += ex[i];
       if (already_known(cache, rel))
       { /* forget it */
         if (DEBUGLEVEL>1) dbg_cancelrel(jid,j,rel->R);
@@ -2101,11 +2097,9 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, long MAXRELSUP, GEN nf, GEN vecG,
       rel->ex = gclone(ex);
       rel->pow = F->pow; cache->last = rel;
       if (DEBUGLEVEL) dbg_newrel(cache, jid, j);
-      /* Need more, try next P */
+      /* Need more, try next prime ideal */
       if (rel < cache->end) { cptzer = 0; break; }
-
       /* We have found enough. Return */
-      if (DEBUGLEVEL>2) fprintferr("Upon exit: jid=%ld\n",jid);
       avma = av; *pjid = jid; return 1;
     }
   }
@@ -3004,7 +2998,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   if (cbach > 12.) cbach = 12.;
   
   cbach /= 2;
-  if (cbach == 0.) err(talker,"Bach constant = 0 in bnfxxx");
+  if (cbach <= 0.) err(talker,"Bach constant <= 0 in buch");
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
   resc = gdiv(mulri(gsqrt(absi(D),DEFAULTPREC), (GEN)zu[1]),
