@@ -39,7 +39,6 @@ extern GEN mulmat_pol(GEN A, GEN x);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN pidealprimeinv(GEN nf, GEN x);
 extern GEN pol_to_monic(GEN pol, GEN *lead);
-extern GEN quicktrace(GEN x, GEN sym);
 extern GEN sqr_by_tab(GEN tab, GEN x);
 extern GEN to_polmod(GEN x, GEN mod);
 extern GEN unnf_minus_x(GEN x);

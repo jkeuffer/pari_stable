@@ -1585,6 +1585,8 @@ END:
   gaffect(y,res); avma = av; return res;
 }
 
+extern GEN addmulXn(GEN x, GEN y, long d);
+
 /* return 0 if p divides x, w(x) otherwise */
 static GEN
 quickteich(GEN vz, GEN p, GEN x)
@@ -1613,7 +1615,7 @@ phi_ms(GEN vz, GEN p, long m, GEN s, GEN x)
    to the twisted partial zeta function Z_f(a, c, s) for a 
    in va; skip the constant coefficient which is zero */
 static GEN 
-twistpartialpowser(GEN p, long pp, long N, long f, long c, GEN va)
+twistpartialpowser(GEN p, GEN q, long N, long f, long c, GEN va)
 {
   long j, k, lva = lg(va)-1, a;
   pari_sp av, lim;
@@ -1621,30 +1623,52 @@ twistpartialpowser(GEN p, long pp, long N, long f, long c, GEN va)
   GEN cyc, psm, invden, rep, ser;
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
-  eta = gmodulcp(y, cyc);
   psm = polsym(cyc, degpol(cyc) - 1); 
-  one = gmodulsg(1, gpowgs(p, pp)); /* gaddsg(1, zeropadic(p, pp)); */
-  eta = gmul(eta, one);
-  mon = gmul(one, gadd(gaddsg(1, x), zeroser(0, N + 5)));
-  den = gsubsg(1, gmul(gpowgs(eta, f), gpowgs(mon, f)));
-  mon = gmul(eta, mon);
-  invden = ginv(den);
+  eta = gmodulcp(y, cyc);
+  one = gmodulsg(1, q); /* Mod(1, q); */
+  mon = gaddsg(1, x);
+  den = gsubsg(1, gmul(gpowgs(gmul(one,eta), f), gpowgs(gmul(one,mon), f)));
+  den = gadd(den, zeroser(0, N + 5));
   av = avma; lim = stack_lim(av, 1);
+  invden = ginv(den);
   rep = zerovec(lva);
-  ser = gmul(mon, invden); /* a = 1 is always the first element of va */
+  /* a = 1 is always the first element of va */
+  ser = gmul(gmul(eta, mon), invden);
+  ser = lift_intern(lift_intern(ser)); /* t_SER of ZY */
+  /* ser is a unit, convert to POL */
+  ser[0] = evaltyp(t_POL)| evallg(lg(ser));
+  ser[1] = evalsigne(1)| evalvarn(0);
   a   = 1;
   for (j = 1; j <= lva; j++)
   {
-    GEN p2 = zerovec(N);
+    GEN p2 = cgetg(N+1, t_VEC);
     for (k = 1; k <= N; k++)
     {
-      GEN p3 = polcoeff0(ser, k, 0);
-      p2[k] = (long)lift(quicktrace((GEN)p3[2], psm));
+      pari_sp av2 = avma;
+      p2[k] = lpileupto(av2, quicktrace(polcoeff_i(ser,k,0), psm));
     }
     rep[j] = (long)p2;    
     if (j < lva) 
     {
-      ser = gmul(ser, gpowgs(mon, va[j+1] - a));
+      long e = va[j+1] - a, i;
+      GEN z = eta;
+      for (i = 1; i <= e; i++) /* assume e small */
+      {
+        ser = addmulXn(ser, ser, 1); /* ser *= 1+x */
+        setlg(ser, lg(ser)-1); /* truncate highest degree term */
+      }
+      if (e > 1) z = gpowgs(z, e);
+      z = lift_intern(z);
+      if (!degpol(z)) {
+        z = (GEN)z[2]; /* +/- 1 */
+        if (signe(z) < 0) ser = gneg(ser);
+        ser = FpXX_red(ser, q);
+      } else {
+        ser = gmul(z, ser);
+        for (i=2; i<lg(ser); i++)
+          ser[i] = (long)FpX_rem((GEN)ser[i], cyc, q);
+      }
+
       a   = va[j+1];
     }
     if (low_stack(lim, stack_lim(av, 1)))
@@ -1659,9 +1683,9 @@ twistpartialpowser(GEN p, long pp, long N, long f, long c, GEN va)
 static GEN
 gzetap(GEN s)
 {
-  long pp, j, k, N, f, c, xp;
+  long pp, j, k, N, f, c, xp, l;
   pari_sp av = avma;
-  GEN p, q, vz, is, cff, vtz, val, va, cft;
+  GEN p, q, vz, is, cff, vtz, val, va, cft, bn;
 
   if (valp(s) < 0)
     err(talker, "argument must be a p-adic integer");
@@ -1698,28 +1722,33 @@ gzetap(GEN s)
   /* compute the first N coefficients of the Malher expansion 
      of phi^(-1)_s skipping the first one (which is zero) */
   cff = cgetg(N+1, t_VEC);
+  bn = new_chunk(N+2); /* bn[i] = binom(k, i), i <= k */
+  l = lg(q);
+  for (k = 0; k <= N; k++) { GEN t = cgeti(l); affsi(1, t); bn[k] = (long)t; }
   for (k = 1; k <= N; k++)
   {
     pari_sp av2 = avma;
-    GEN p1, A = phi_ms(vz, p, -1, is, gaddsg(k, zeropadic(p, pp+xp))), bn;
-    bn = stoi(k);
+    GEN p1, A = phi_ms(vz, p, -1, is, gaddsg(k, zeropadic(p, pp+xp)));
     A  = gtrunc(A);
     p1 = gzero;
-    for (j = 1; j < k; j++)
+    for (j = k - 1; j > 0; j--)
     {
-      p1 = addii(p1, mulii(bn, (GEN)cff[j]));
-      bn = diviuexact(mulis(bn, k-j), j+1); /* bn = binom(k, j+1) */
+      GEN b = addii((GEN)bn[j], (GEN)bn[j-1]);
+      if (cmpii(b, q) >= 0) b = subii(b, q);
+      affii(b, (GEN)bn[j]); /* = binom(k, j+1) */
     }
-    cff[k] = (long)gerepileupto(av2, modii(subii(A, p1), q));
+    for (j = 1; j < k; j++)
+      p1 = addii(p1, mulii((GEN)bn[j], (GEN)cff[j]));
+    cff[k] = (long)gerepileuptoint(av2, modii(subii(A, p1), q));
   }
 
   /* compute the coefficients of the power series corresponding 
      to the twisted partial zeta function Z_f(a, c, s) for a in va */
-  va = cgetg(f, t_VECSMALL);
+
   /* The line below looks a bit stupid but it is to keep the 
      possibility of later adding p-adic Dirichlet L-functions */
-  for (j = 1; j < f; j++) va[j] = j;
-  vtz = twistpartialpowser(p, pp+xp, N, f, c, va);
+  va = perm_identity(f - 1);
+  vtz = twistpartialpowser(p, q, N, f, c, va);
   
   /* sum over all a's the coefficients of the twisted 
      partial zeta functions and integrate */

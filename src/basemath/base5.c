@@ -117,7 +117,6 @@ eltreltoabs(GEN rnfeq, GEN x)
 
 #if 0
 extern GEN get_roots(GEN x,long r1,long prec);
-extern GEN quicktrace(GEN x, GEN sym);
 static GEN
 rnfmakematrices(GEN rnf)
 {
