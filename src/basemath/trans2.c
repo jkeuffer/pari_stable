@@ -1214,7 +1214,6 @@ gammanew(GEN s0, long la, long prec)
     double ssig = rtodbl(sig);
     double st = rtodbl(gimag(s));
     double l,l2,u,v;
-    long la = 1;
   
     p1 = gmul(gsub(sapprox,ghalf), glog(sapprox, 3));
     /* l2 = | (s - 1/2) log(s) - s + log(2Pi)/2 |^2 */
