@@ -46,7 +46,7 @@ words. Returns the smallest word count containing $x$ bits, i.e $
 \kbd{ceil}(x / \B)$.
 
 \fun{long}{nbits2prec}{long x} converts a number of bits to a number of
-codewords, i.e 2 + \kbd{nbits2nlong(x)}.
+codewords. This is equal to 2 + \kbd{nbits2nlong(x)}.
 
 \fun{long}{nchar2nlong}{long x} converts a number of bytes to number of
 words. Returns the smallest word count containing $x$ bytes, i.e
@@ -2027,7 +2027,7 @@ a complex whose real and imaginary parts are \typ{REAL} of length \kbd{prec},
 using \kbd{gtofp};
 
 \fun{GEN}{gtofp}{GEN x, long prec} converts the complex number~\kbd{x}
-(\typ{INT}, \typ{REAL}, \typ{FRAC}, \typ{COMPLEX} or \typ{QUAD}) to either
+(\typ{INT}, \typ{REAL}, \typ{FRAC}, \typ{QUAD} or \typ{COMPLEX}) to either
 a \typ{REAL} or \typ{COMPLEX} whose components are \typ{REAL} of length
 \kbd{prec}.
 
