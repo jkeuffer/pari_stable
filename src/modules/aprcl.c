@@ -945,15 +945,10 @@ aprcl(GEN N)
   return step6(N,t,et);
 }
 
-/* si flag=0 retourne une reponse vrai/faux, sinon retourne des details
-quand N non premier */
-
-GEN
-istrueprime(GEN N, int flag)
+long
+isprimeAPRCL(GEN N)
 {
   ulong av = avma;
   GEN res = aprcl(N);
-  if (typ(res) == t_INT) { avma = av; return gun; }
-  if (flag) return gerepilecopy(av, res);
-  avma = av; return gzero;
+  avma = av; return (typ(res) == t_INT);
 }

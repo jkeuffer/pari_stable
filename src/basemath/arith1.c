@@ -1406,7 +1406,9 @@ mpinvmod(GEN a, GEN m)
 /**                    MODULAR EXPONENTIATION                       **/
 /**                                                                 **/
 /*********************************************************************/
-GEN resiimul(GEN x, GEN y);
+extern ulong invrev(ulong b);
+extern GEN resiimul(GEN x, GEN y);
+
 static GEN _resii(GEN x, GEN y) { return resii(x,y); }
 
 /* Montgomery reduction */
@@ -1415,8 +1417,6 @@ typedef struct {
   GEN N;
   ulong inv; /* inv = -N^(-1) mod B, */
 } montdata;
-
-extern ulong invrev(ulong b);
 
 void
 init_montdata(GEN N, montdata *s)
@@ -1573,72 +1573,66 @@ powmodulo(GEN A, GEN k, GEN N)
 /**                                                                 **/
 /*********************************************************************/
 GEN
-gnextprime(GEN n)
-{
-  return garith_proto(nextprime,n,0);
-}
+gnextprime(GEN n) { return garith_proto(nextprime,n,0); }
 
 GEN
-gprecprime(GEN n)
-{
-  return garith_proto(precprime,n,0);
-}
+gprecprime(GEN n) { return garith_proto(precprime,n,0); }
 
 GEN
 gisprime(GEN x, long flag)
 {
   switch (flag)
   {
-  case 0:
-    return arith_proto(isprime,x,1);
-  case 1:
-    return garith_proto2gs(plisprime,x,0);
-  case 2:
-    return garith_proto2gs(plisprime,x,1);
+    case 0: return arith_proto(isprime,x,1);
+    case 1: return garith_proto2gs(plisprime,x,1);
+    case 2: return arith_proto(isprimeAPRCL,x,1);
   }
   err(flagerr,"gisprime");
   return 0;
 }
 
+extern long IsLucasPsP(GEN N);
+
+long
+isprimeSelfridge(GEN x) { return (plisprime(x,0)==gun); }
+
 long
 isprime(GEN x)
 {
-  return millerrabin(x,10);
+  if (!IsLucasPsP(x)) return 0;
+  return (expi(x) < 110)? isprimeSelfridge(x): isprimeAPRCL(x);
 }
 
 GEN
-gispsp(GEN x)
+gispseudoprime(GEN x, long flag)
 {
-  return arith_proto(ispsp,x,1);
+  if (flag == 0) return arith_proto(IsLucasPsP,x,1);
+  return gmillerrabin(x, flag);
 }
 
 long
-ispsp(GEN x)
+ispseudoprime(GEN x, long flag)
 {
-  return millerrabin(x,1);
+  if (flag == 0) return IsLucasPsP(x);
+  return millerrabin(x, flag);
 }
 
 GEN
-gmillerrabin(GEN n, long k)
-{
-  return arith_proto2gs(millerrabin,n,k);
-}
+gispsp(GEN x) { return arith_proto(ispsp,x,1); }
+
+long
+ispsp(GEN x) { return millerrabin(x,1); }
+
+GEN
+gmillerrabin(GEN n, long k) { return arith_proto2gs(millerrabin,n,k); }
 
 /*********************************************************************/
 /**                                                                 **/
 /**                    FUNDAMENTAL DISCRIMINANTS                    **/
 /**                                                                 **/
 /*********************************************************************/
-
-/* gissquarefree, issquarefree moved into arith2.c with the other
-   basic arithmetic functions (issquarefree is the square of the
-   Moebius mu function, after all...) --GN */
-
 GEN
-gisfundamental(GEN x)
-{
-  return arith_proto(isfundamental,x,1);
-}
+gisfundamental(GEN x) { return arith_proto(isfundamental,x,1); }
 
 long
 isfundamental(GEN x)
@@ -1681,8 +1675,6 @@ quaddisc(GEN x)
 /**                              FACTORIAL                          **/
 /**                                                                 **/
 /*********************************************************************/
-GEN muluu(ulong x, ulong y);
-
 GEN
 mpfact(long n)
 {

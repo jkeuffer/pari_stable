@@ -163,6 +163,101 @@ miller(GEN n, long k)
   }
   avma=av; return 1;
 }
+
+/* compute n-th term of Lucas sequence modulo N.
+ * v_{k+2} = P v_{k+1} - v_k, v_0 = 2, v_1 = P.
+ * Assume n > 0 */
+static GEN
+LucasMod(GEN n, long P, GEN N)
+{
+  ulong av = avma, lim = stack_lim(av,1);
+  GEN nd = n+2;
+  long i, m = *nd, j = 1+bfffo((ulong)m);
+  GEN v = stoi(P), v1 = stoi(P*P - 2);
+
+  m <<= j; j = BITS_IN_LONG - j;
+  for (i=lgefint(n)-2;;) /* cf. leftright_pow */
+  {
+    for (; j; m<<=1,j--)
+    { /* v = v_k, v1 = v_{k+1} */
+      if (m < 0)
+      { /* set v = v_{2k+1}, v1 = v_{2k+2} */
+        v = subis(mulii(v,v1), P);
+        v1= subis(sqri(v1), 2);
+      }
+      else
+      {/* set v = v_{2k}, v1 = v_{2k+1} */
+        v1= subis(mulii(v,v1), P);
+        v = subis(sqri(v), 2);
+      }
+      v = modii(v, N);
+      v1= modii(v1,N);
+      if (low_stack(lim,stack_lim(av,1)))
+      {
+        GEN *gptr[2]; gptr[0]=&v; gptr[1]=&v1;
+        if(DEBUGMEM>1) err(warnmem,"LucasMod");
+        gerepilemany(av,gptr,2);
+      }
+    }
+    if (--i == 0) return v;
+    j = BITS_IN_LONG;
+    m = *++nd;
+  }
+}
+
+/* check that N not a square first (taken care of here, but inefficient)
+ * assume N > 3 */
+static int
+IsLucasPsP0(GEN N)
+{
+  long b, i, v;
+  GEN N_2, m, z;
+
+  for (b=3, i=0;; b+=2, i++)
+  {
+    if (i == 64 && carreparfait(N)) return 0; /* avoid oo loop if N = m^2 */
+    if (krosg(b*b - 4, N) < 0) break;
+  }
+
+  m = addis(N,1); v = vali(m); m = shifti(m,-v);
+  z = LucasMod(m, b, N);
+  if (egalii(z, gdeux)) return 1;
+  N_2 = subis(N,2);
+  if (egalii(z, N_2)) return 1;
+  for (i=1; i<v; i++)
+  {
+    if (!signe(z)) return 1;
+    z = modii(subis(sqri(z), 2), N);
+    if (egalii(z, gdeux)) return 0;
+  }
+  return 0;
+}
+
+long
+IsLucasPsP(GEN N)
+{
+  ulong av = avma;
+  int k;
+  GEN T;
+
+  if (typ(N) != t_INT) err(arither1);
+  if (signe(N) <= 0) return 0;
+  if (!is_bigint(N))
+    switch(itos(N))
+    {
+      case 1: return 0;
+      case 2:
+      case 3: return 1;
+    }
+  if (!mod2(N)) return 0;
+
+  T = init_miller(N);
+  k = bad_for_base(T,gdeux);
+  avma = av;
+  k = (!k && IsLucasPsP0(N));
+  avma = av; return k;
+}
+
 /***********************************************************************/
 /**                                                                   **/
 /**                       Pocklington-Lehmer                          **/
@@ -233,18 +328,14 @@ plisprime(GEN N, long flag)
     GEN p;
     p=(GEN)F[i];
     witness=pl831(N,p);
-    if (!witness)
-    {
-      avma=ltop;
-      return gzero;
-    }
+    if (!witness) { avma=ltop; return gzero; }
     mael(C,1,i)=lcopy(p);
     mael(C,2,i)=lstoi(witness);
     mael(C,3,i)=(long)plisprime(p,flag);
     if (gmael(C,3,i)==gzero)
       err(talker,"Sorry false prime number %Z in plisprime",p);
   }
-  if (!flag)   { avma=ltop; return gun; }
+  if (!flag) { avma=ltop; return gun; }
   return gerepileupto(ltop,C);
 }
 

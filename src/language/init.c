@@ -2148,7 +2148,7 @@ entree functions_basic[]={
 {"intnum",99,(void*)intnum0,9,"V=GGED0,L,p"},
 {"isfundamental",18,(void*)gisfundamental,4,"G"},
 {"isprime",99,(void*)gisprime,4,"GD0,L,"},
-{"ispseudoprime",18,(void*)gispsp,4,"G"},
+{"ispseudoprime",18,(void*)gispseudoprime,4,"GD0,L,"},
 {"issquare",99,(void*)gcarrecomplet,4,"GD&"},
 {"issquarefree",18,(void*)gissquarefree,4,"G"},
 {"kronecker",2,(void*)gkronecker,4,"GG"},
