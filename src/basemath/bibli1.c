@@ -2338,8 +2338,6 @@ pslqL2(GEN x, long prec)
   M.T = &T; init_pslq(&M, x, prec);
   if (!M.flreal) return lindep(x, prec);
 
-  init_pslq(&M, x, prec); M.T = &T;
-
   flreal = M.flreal;
   tabga = get_tabga(flreal, n, prec);
   Abargen = idmat(n);
@@ -2372,7 +2370,7 @@ pslqL2(GEN x, long prec)
 
   av = avma;
   if (DEBUGLEVEL>=3) printf("Initialization time = %ld\n",timer());
-startagain:
+RESTART:
   flit = initializedoubles(&Mbar, &M, prec);
   storeprecdoubles(&Mbarst, &Mbar);
   if (flit) dLQdec(&Mbar, Pbar);
@@ -2420,21 +2418,21 @@ startagain:
 	if (applybar(&M, &Mbar, Abargen,Bbargen))
 	{
 	  if ( (p1 = checkend(&M,prec)) ) return gerepilecopy(av0, p1);
-	  goto startagain;
+	  goto RESTART;
 	}
 	else
         {
-          if (ctpro == 1) goto dogen;
+          if (ctpro == 1) goto DOGEN;
           storeprecdoubles(&Mbar, &Mbarst); /* restore */
           if (! applybar(&M, &Mbar, Abargen,Bbargen)) err(bugparier,"pslqL2");
 	  if ( (p1 = checkend(&M, prec)) ) return gerepilecopy(av0, p1);
-          goto startagain;
+          goto RESTART;
         }
       }
     }
     else
     {
-dogen:
+DOGEN:
       if ((p1 = one_step_gen(&M, tabga, prec)))
         return gerepilecopy(av, p1);
     }
