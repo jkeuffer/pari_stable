@@ -17,13 +17,14 @@
 
 /* z2 := z1[imin..imax].f shifted left sh bits (feeding f from the right) */
 #define shift_left2(z2,z1,imin,imax,f, sh,m) {\
-  register ulong _i,_l,_k = ((ulong)f)>>m;\
-  for (_i=imax; _i>imin; _i--) {\
-    _l = z1[_i];\
-    z2[_i] = (_l<<(ulong)sh) | _k;\
+  register ulong _l,_k = ((ulong)f)>>m;\
+  GEN t1 = z1 + imax, t2 = z2 + imax, T = z1 + imin;\
+  while (t1 > T) {\
+    _l = *t1--;\
+    *t2-- = (_l<<(ulong)sh) | _k;\
     _k = _l>>(ulong)m;\
   }\
-  z2[imin]=(z1[imin]<<(ulong)sh) | _k;\
+  *t2 = (*t1<<(ulong)sh) | _k;\
 }
 #define shift_left(z2,z1,imin,imax,f, sh) {\
   register const ulong _m = BITS_IN_LONG - sh;\
@@ -32,11 +33,12 @@
 
 /* z2 := f.z1[imin..imax-1] shifted right sh bits (feeding f from the left) */
 #define shift_right2(z2,z1,imin,imax,f, sh,m) {\
-  register ulong _i,_k,_l = z1[2];\
-  z2[imin] = (_l>>(ulong)sh) | ((ulong)f<<(ulong)m);\
-  for (_i=imin+1; _i<imax; _i++) {\
-    _k = _l<<(ulong)m; _l = z1[_i];\
-    z2[_i] = (_l>>(ulong)sh) | _k;\
+  register GEN t1 = z1 + imin, t2 = z2 + imin, T = z1 + imax;\
+  register ulong _k,_l = *t1++;\
+  *t2++ = (_l>>(ulong)sh) | ((ulong)f<<(ulong)m);\
+  while (t1 < T) {\
+    _k = _l<<(ulong)m; _l = *t1++;\
+    *t2++ = (_l>>(ulong)sh) | _k;\
   }\
 }
 #define shift_right(z2,z1,imin,imax,f, sh) {\
