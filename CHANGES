@@ -120,6 +120,7 @@ GH 36- lngamma was not even continuous : its argument was reduced mod 2Pi
    43- Configure was missing log2/exp2 on systems that had it
    44- typo in base2.c:init_norm() [ wrong result in idealprimedec for huge 
        fields ]
+   45- matsnf([x,1; 0,x],6) --> incorrect type
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

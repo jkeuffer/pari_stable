@@ -3349,7 +3349,6 @@ smithclean(GEN z)
   u=(GEN)z[1];
   if (l != 4 || typ(u) != t_MAT)
   {
-    if (typ(u) != t_INT) err(typeer,"smithclean");
     for (c=1; c<l; c++)
       if (gcmp1((GEN)z[c])) break;
     return gcopy_i(z, c);
