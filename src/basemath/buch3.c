@@ -1437,7 +1437,11 @@ rnfnormgroup0(GEN bnr, GEN polrel, GEN rnf)
     if (!signe(gcoeff(group,i,i))) coeff(group,i,i) = (long)greldeg;
   detgroup = dethnf_i(group);
   k = cmpis(detgroup,reldeg);
-  if (k<0) err(talker,"not an Abelian extension in rnfnormgroup?");
+  if (k<0)
+  {
+    if (rnf) return NULL;
+    err(talker,"not an Abelian extension in rnfnormgroup?");
+  }
   if (!rnf && !k) return gerepileupto(av, gcopy(group));
 
   polreldisc=discsr(polrel);
