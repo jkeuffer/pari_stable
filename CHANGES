@@ -73,7 +73,7 @@ IZ  1- [gnuplot] look up directory tree for gnuplot related files
   Changed
     1- default binary produced by Configure -g is now static
     2- improved the heuristics in ellisoncurve
-
+HC  3- extend the range of direuler (maxp was 2^16)
 ===========================================================================
 Done for version 2.0.17.beta (released 24/09/99):
 

@@ -478,7 +478,7 @@ GEN
 direuler(entree *ep, GEN a, GEN b, char *ch)
 {
   GEN p1,x,x1,s,polnum,polden,c0;
-  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,q,n,i,j,k,k1,tx,lx;
+  long av0 = avma,av,tetpil,lim = (av0+bot)>>1, prime = 0,n,i,j,k,tx,lx;
   byteptr p = diffptr;
 
   if (typ(a) != t_INT) err(talker,"non integral index in direuler");
@@ -505,17 +505,20 @@ direuler(entree *ep, GEN a, GEN b, char *ch)
     }
     else
     {
+      ulong k1,q, qlim;
       if (tx != t_POL) err(typeer,"direuler");
       c0 = truecoeff(polnum,0);
       if (!gcmp1(c0)) err(talker,"constant term not equal to 1 in direuler");
       for (i=1; i<=n; i++) x1[i]=x[i];
-      prime=itos(a); q=prime; j=1; lx=lgef(polnum)-3;
+      prime=itos(a); lx=lgef(polnum)-3;
+      q=prime; qlim = n/prime; j=1;
       while (q<=n && j<=lx)
       {
 	c0=(GEN)polnum[j+2];
 	if (!gcmp0(c0))
 	  for (k=1,k1=q; k1<=n; k1+=q,k++)
 	    x[k1] = ladd((GEN)x[k1], gmul(c0,(GEN)x1[k]));
+        if (q > qlim) break;
 	q*=prime; j++;
       }
     }
@@ -538,7 +541,7 @@ direuler(entree *ep, GEN a, GEN b, char *ch)
 	{
 	  c0=(GEN)polden[j+2]; k/=prime; j++;
 	  if (!gcmp0(c0)) s=gadd(s,gmul(c0,(GEN)x[k]));
-	 }
+	}
 	x[i]=lsub((GEN)x[i],s);
       }
     }
