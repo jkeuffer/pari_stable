@@ -121,6 +121,7 @@ BA 60- add "const" keyword to allow building with g++
    62- lindep([1,0]) --> error [ problem with trivial cases in PSLQ ]
    63- wrong reconstruction bounds in nffactor
    64- short help message for isprime/ispseudoprime
+   65- issquare(t_FRAC or t_RFRAC, &x) did not work [ worked without &x ]
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
