@@ -90,6 +90,7 @@ XR 49- cleaned up bnrL1 character computations
 XR 50- round 4: possible problems when increasing p-adic precision
    51- stack corruption in mppgcd(huge t_FRAC, huge t_FRAC)
 BA 52- abs(t_SER) not allowed
+   53- nfdisc(non monic polynomial,, disc factorization) returned wrong answer
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -111,6 +112,7 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
    15- cleaned up isprincipal + bnfinit (small_norm, getfu, class_group_gen)
 XR 16- added flag for D>0 in quadhilbert: if non-zero, try more modulii
    17- idealred: reduce huge ideals as Z-module first (using lllintpartial)
+   18- TeXmacs interface
 
   Added
     1- library function zerovec
