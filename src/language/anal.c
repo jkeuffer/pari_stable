@@ -85,12 +85,11 @@ static GEN br_res = NULL;
  *
  *  Definitions: The sequence
  *  { a }* means any number (possibly 0) of object a.
- *  { x|y } means an optional x or y.
  *
- *  seq : only this one can be empty.
- *     sequence of { expr{ :|; } }*
+ *  seq: only this one can be empty.
+ *    expr { [:;] expr }* { [:;] }
  *
- *  expr :
+ *  expr:
  *     expression = sequence of "facteurs" separated by binary operators
  *     whose priority are:
  *      1: *, /, \, \/, %, >>, <<                (highest)
@@ -99,43 +98,53 @@ static GEN br_res = NULL;
  *      4: &, &&, |, ||                  (lowest)
  *     read from left to right.
  *
- *  facteur :
+ *  facteur:
  *      Optional leading sign (meaningfull only when "facteur" is enclosed
  *      in parentheses), followed by a "truc", then by any succession of the
  *      following:
  *
  *        ~, ', !
  *  or    ^ facteur
- *  or    matrix_block
+ *  or    matrix_block(no_assign=1)
  *  or    .member      (see gp_member_list)
  *
  *  truc:
  *      identifier
  *  or  constante
+ *  or  string {string}*
  *  or  ! truc
  *  or  ' identifier
- *  or  matrix_block (no_affect=1)
+ *  or  matrix
  *  or  (expr)
  *  or  %{ ` }*  or %number
  *
  *  identifier:
- *      entry {'} ( { expr | &entry } { ,expr | &entry }* )
- *      The () are optional when arg list is void.
- *      Note: the &entry form (pointer) is not implemented for user functions
- *            yet.
+ *      entry {'} { ( { expr or &entry } { , expr or &entry }* ) }
+ *        Note: &entry form (pointer) not yet implemented for user functions
+ *   or entry { matrix_block(no_assign=0) }*
  *
- *  matrix_block :
- *      [ A { { ; }A }*] where A = { expr } { { , }{ expr } }*
+ *  matrix
+ *      [ A { ; A}* ] where A = { expr } { , { expr } }*
  *      All A must share the same length.
- *      If (no_affect=0 || ep !=NULL): follows an optional "= expr"
- *   or ++, --, op= where op is one of the operators in expr 1: and 2:
  *
- *  entry :
+ *  matrix_block:
+ *      [ number {,} ]
+ *   or [ { number } , number ]
+ *
+ *   optionally followed by 
+ *      { = expr }
+ *   or { ++ } or { -- }
+ *   or { op=} where op is one of the operators in expr 1: and 2:
+ *
+ *  entry:
  *      any succesion of alphanumeric characters, the first of which is not
  *      a digit.
  *
+ *  string:
+ *      " any succession of characters [^\]"
+ *     
  *  constante:
- *      number { . } { number } { e|E } { +|- } { number }.
+ *      number { . } { number } { [eE] } {[+-]} { number }.
  *
  *  number:
  *      any non-negative integer.
