@@ -4467,7 +4467,9 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       if (!smodis(den, p)) continue;
       if (DEBUGLEVEL>5) fprintferr("nfgcd: p=%d\n",p);
       /*Discard primes when modular gcd does not exist*/
-      if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,y), ZXX_to_FlxX(Q,p,y),ZX_to_Flx(nf,p), p)) == NULL) continue;
+      if ((R = FlxqX_safegcd(ZXX_to_FlxX(P,p,y),
+                             ZXX_to_FlxX(Q,p,y),
+                             ZX_to_Flx(nf,p), p)) == NULL) continue;
       dR = degpol(R);
       if (dR == 0) return scalarpol(gun, x);
       if (mod && dR > dM) continue; /* p divides Res(P/gcd, Q/gcd). Discard. */
