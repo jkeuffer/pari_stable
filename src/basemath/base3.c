@@ -996,7 +996,7 @@ Fp_PHlog(GEN a, GEN g, GEN p)
   {
     q = (GEN)fa[i];
     e = itos((GEN)ex[i]);
-    if (DEBUGLEVEL) 
+    if (DEBUGLEVEL>5) 
       fprintferr("Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);
@@ -1106,7 +1106,7 @@ nf_PHlog(GEN nf, GEN a, GEN g, GEN pr, GEN prhall)
   {
     q = (GEN)fa[i];
     e = itos((GEN)ex[i]);
-    if (DEBUGLEVEL) 
+    if (DEBUGLEVEL>5) 
       fprintferr("nf_Pohlig-Hellman: DL mod %Z^%ld\n",q,e);
     qj = new_chunk(e+1); qj[0] = un;
     for (j=1; j<=e; j++) qj[j] = lmulii((GEN)qj[j-1], q);

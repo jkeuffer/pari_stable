@@ -2418,10 +2418,10 @@ u_FpX_rem2(GEN x, GEN y, ulong p)
   long dx,dy,dz,i,j;
   ulong p1,inv;
 
-  dy = deg(y); if (!dy) { setsigne(x,0); return; }
+  dy = deg(y); if (!dy) { setsigne(x,0); return x; }
   dx = deg(x);
   x += 2;
-  y += 2; dz = dx-dy; if (dz < 0) return;
+  y += 2; dz = dx-dy; if (dz < 0) return x;
   z = u_allocpol(dz, 1) + 2;
   inv = y[dy];
   if (inv != 1UL) inv = u_invmod(inv,p);
