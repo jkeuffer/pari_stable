@@ -147,6 +147,7 @@ BA  2- support for FLTK graphical library [ hi-res plot ]
 BA  3- galoisidentify for order 96 to 127.
     4- default 'datadir' [ to allow relocating 'galdata' for polgalois ]
     5- hi-res plotting under Windows
+GTo 6- routine qfrep()
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]

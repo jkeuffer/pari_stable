@@ -537,17 +537,17 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \section{Lattices \& Quadratic Forms}
 \li{upper triangular Hermite Normal Form}{mathnf$(x)$}
 \li{HNF of $x$ where $d$ is a multiple of det$(x)$}{mathnfmod$(x,d)$}
-\li{vector of elementary divisors of $x$}{matsnf$(x)$}
+\li{elementary divisors of $x$}{matsnf$(x)$}
 \li{LLL-algorithm applied to columns of $x$}{qflll$(x,\fl)$}
 \li{like \kbd{qflll}, $x$ is Gram matrix of lattice}
   {qflllgram$(x,\fl)$}
 \li{LLL-reduced basis for kernel of $x$}{matkerint$(x)$}
 \li{$\ZZ$-lattice $\longleftrightarrow$ $\QQ$-vector space}{matrixqz$(x,p)$}
 %
-\subsec{Quadratic Forms}
 \li{signature of quad form $^ty*x*y$}{qfsign$(x)$}
 \li{decomp into squares of $^ty*x*y$}{qfgaussred$(x)$}
 \li{find up to $m$ sols of $^ty*x*y\le b$}{qfminim$(x,b,m)$}
+\li{$v$, $v[i]:=$number of sols of $^ty*x*y = i$}{qfrep$(x,B,\fl)$}
 %\li{perfection rank of $x$}{qfperfection$(x)$}
 \li{eigenvals/eigenvecs for real symmetric $x$}{qfjacobi$(x)$}
 

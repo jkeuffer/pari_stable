@@ -584,6 +584,7 @@ GEN     lllkerimgen(GEN x);
 GEN     matkerint0(GEN x,long flag);
 GEN     minim(GEN a, GEN borne, GEN stockmax);
 GEN     nf_get_LLL(GEN nf);
+GEN     qfrep0(GEN a, GEN borne, long flag);
 GEN     qfminim0(GEN a, GEN borne, GEN stockmax,long flag, long prec);
 GEN     minim2(GEN a, GEN borne, GEN stockmax);
 GEN     ordred(GEN x);

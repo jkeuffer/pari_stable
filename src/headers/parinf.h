@@ -87,6 +87,8 @@ enum { fupb_NONE, fupb_RELAT, fupb_LARGE, fupb_PRECI };
 #define min_ALL   0
 #define min_FIRST 1
 #define min_PERF  2
+#define min_VECSMALL 3
+#define min_VECSMALL2 4
 
 /* for fincke_pohst() */
 typedef struct FP_chk_fun {

@@ -6447,6 +6447,21 @@ lengthy when $x$ has many minimal vectors.
 
 \syn{perf}{x}.
 
+\subsecidx{qfrep}$(q, B, \{\fl = 0\})$: $q$ being a square and symmetric
+matrix with integer entries representing a positive definite quadratic form,
+outputs the vector whose $i$-th entry, $1 \leq i \leq B$ is half the number
+of vectors $v$ such that $q(v) = i$. This routine uses a naive algorithm
+based on \tet{qfminim}, and will fail if any entry becomes larger than
+$2^{31}$.
+
+\noindent The binary digits of \fl\ mean:
+
+$\bullet$ 1: count vectors of even norm from $1$ to $2B$.
+
+$\bullet$ 2: return a \typ{VECSMALL} instead of a \typ{GEN}
+
+\syn{qfrep0}{q, B, \fl}.
+
 \subsecidx{qfsign}$(x)$: signature of the quadratic form represented by the
 symmetric matrix $x$. The result is a two-component vector.
 

@@ -2728,13 +2728,15 @@ minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v)
  *  flag = min_ALL,   as above
  *  flag = min_FIRST, exits when first suitable vector is found.
  *  flag = min_PERF,  only compute rank of the family of v.v~ (v min.)
+ *  flag = min_VECSMALL, return a t_VECSMALL of (half) the number of vectors for each norm
+ *  flag = min_VECSMALL2, same but count only vectors with even norm, and shift the answer
  */
 static GEN
 minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
-  GEN x,res,p1,u,r,liste,gnorme,invp,V, *gptr[2];
+  GEN x,res,p1,u,r,L,gnorme,invp,V;
   long n = lg(a), i, j, k, s, maxrank;
-  pari_sp av0 = avma, av1, av, tetpil, lim;
+  pari_sp av0 = avma, av1, av, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
@@ -2745,6 +2747,13 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       res = cgetg(3,t_VEC); break;
     case min_ALL: res = cgetg(4,t_VEC); break;
     case min_PERF: break;
+    case min_VECSMALL:
+    case min_VECSMALL2:
+      maxrank = itos(BORNE);
+      res = vecsmall_const(maxrank, 0);
+      if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
+      if (gcmp0(BORNE)) return res;
+      break;
     default: err(talker, "incorrect flag in minim00");
   }
   if (n == 1)
@@ -2752,6 +2761,8 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     switch(flag)
     {
       case min_FIRST: avma=av0; return cgetg(1,t_VEC);
+      case min_VECSMALL:
+      case min_VECSMALL2: return res;
       case min_PERF:  avma=av0; return gzero;
     }
     res[1]=res[2]=zero;
@@ -2763,13 +2774,11 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   av1 = avma;
 
   u = lllgramint(a);
-  if (lg(u) != n)
-    err(talker,"not a definite form in minim00");
+  if (lg(u) != n) err(talker,"not a definite form in minim00");
   a = qf_base_change(a,u,1);
 
   n--;
   a = mat_to_MP(a, DEFAULTPREC); r = sqred1(a);
-  if (DEBUGLEVEL>4) { fprintferr("minim: r = "); outerr(r); }
   for (j=1; j<=n; j++)
   {
     v[j] = rtodbl(gcoeff(r,j,j));
@@ -2780,8 +2789,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     double c, b = rtodbl(gcoeff(a,1,1));
 
-    for (i=2; i<=n; i++)
-      { c=rtodbl(gcoeff(a,i,i)); if (c<b) b=c; }
+    for (i=2; i<=n; i++) { c = rtodbl(gcoeff(a,i,i)); if (c < b) b = c; }
     BOUND = b+eps;
     BORNE = ground(dbltor(BOUND));
     maxnorm = -1.; /* don't update maxnorm */
@@ -2796,18 +2804,17 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   switch(flag)
   {
     case min_ALL:
-      maxrank=itos(STOCKMAX);
-      liste = new_chunk(1+maxrank);
+      maxrank = itos(STOCKMAX);
+      L = new_chunk(1+maxrank);
       break;
     case min_PERF:
       BORNE = gerepileupto(av1,BORNE);
-      maxrank = (n*(n+1))>>1;
-      liste = cgetg(1+maxrank, t_VECSMALL);
-      V     = cgetg(1+maxrank, t_VECSMALL);
-      for (i=1; i<=maxrank; i++) liste[i]=0;
+      maxrank = (n*(n+1)) >> 1;
+      L = vecsmall_const(maxrank, 0);
+      V = cgetg(1+maxrank, t_VECSMALL);
   }
 
-  s=0; av1=avma; lim = stack_lim(av1,1);
+  s = 0; av1 = avma; lim = stack_lim(av1,1);
   k = n; y[n] = z[n] = 0;
   x[n] = (long) sqrt(BOUND/v[n]);
   if (flag == min_PERF) invp = idmat(maxrank);
@@ -2818,7 +2825,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (k>1)
       {
         long l = k-1;
-	z[l]=0;
+	z[l] = 0;
 	for (j=k; j<=n; j++) z[l] += q[l][j]*x[j];
 	p = (double)x[k] + z[k];
 	y[l] = y[k] + p*p*v[k];
@@ -2832,18 +2839,16 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 	k++; x[k]--;
       }
     }
-    while (k>1);
+    while (k > 1);
     if (! x[1] && y[1]<=eps) break;
     p = (double)x[1] + z[1]; p = y[1] + p*p*v[1]; /* norm(x) */
     if (maxnorm >= 0)
     {
       if (flag == min_FIRST)
       {
-        gnorme = dbltor(p);
-        tetpil=avma; gnorme = ground(gnorme); r = gmul_mati_smallvec(u,x);
-        gptr[0]=&gnorme; gptr[1]=&r; gerepilemanysp(av,tetpil,gptr,2);
-        res[1]=(long)gnorme;
-        res[2]=(long)r; return res;
+        res[2] = lpileupto(av, gmul_mati_smallvec(u,x)); 
+        av = avma;
+        res[1] = lpileupto(av, ground(dbltor(p))); return res;
       }
       if (p > maxnorm) maxnorm = p;
     }
@@ -2855,7 +2860,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       else
       {
         BOUND=gtodouble(gnorme)+eps; s=0;
-        affii(gnorme,BORNE); avma=av1;
+        affii(gnorme,BORNE); avma = av1;
         if (flag == min_PERF) invp = idmat(maxrank);
       }
     }
@@ -2866,10 +2871,24 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       case min_ALL:
         if (s<=maxrank)
         {
-          p1 = new_chunk(n+1); liste[s] = (long) p1;
+          p1 = new_chunk(n+1); L[s] = (long) p1;
           for (i=1; i<=n; i++) p1[i] = x[i];
         }
         break;
+
+      case min_VECSMALL:
+	{
+	  ulong norm = (ulong)rint(p);
+	  res[norm]++;
+	}
+	break;
+
+      case min_VECSMALL2:
+	{
+	  ulong norm = (ulong)rint(p);
+	  if ((norm&1) == 0) res[norm>>1]++;
+	}
+	break;
 
       case min_PERF:
       {
@@ -2878,7 +2897,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
         for (i=1; i<=n; i++)
           for (j=i; j<=n; j++,I++) V[I] = x[i]*x[j];
-        if (! addcolumntomatrix(V,invp,liste))
+        if (! addcolumntomatrix(V,invp,L))
         {
           if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
           s--; avma=av2; continue;
@@ -2903,6 +2922,9 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     case min_FIRST:
       avma=av0; return cgetg(1,t_VEC);
+    case min_VECSMALL:
+    case min_VECSMALL2:
+      avma=av; return res;
     case min_PERF:
       if (DEBUGLEVEL>1) { fprintferr("\n"); flusherr(); }
       avma=av0; return stoi(s);
@@ -2910,16 +2932,22 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   k = min(s,maxrank);
   r = (maxnorm >= 0) ? ground(dbltor(maxnorm)): BORNE;
 
-  tetpil = avma; p1=cgetg(k+1,t_MAT);
-  for (j=1; j<=k; j++)
-    p1[j] = (long) gmul_mati_smallvec(u,(GEN)liste[j]);
-  liste = p1;
+  L[0] = evaltyp(t_MAT) | evallg(k + 1);
+  for (j=1; j<=k; j++) L[j] = (long) gmul_mati_smallvec(u, (GEN)L[j]);
 
-  r=icopy(r); gptr[0]=&r; gptr[1]=&liste;
-  gerepilemanysp(av,tetpil,gptr,2);
-  res[1]=lstoi(s<<1);
-  res[2]=(long)r;
-  res[3]=(long)liste; return res;
+  gerepileall(av, 2, &r, &L);
+  res[1] = lstoi(s<<1);
+  res[2] = (long)r;
+  res[3] = (long)L; return res;
+}
+
+GEN
+qfrep0(GEN a, GEN borne, long flag)
+{
+  pari_sp av = avma;
+  GEN g = minim00(a, borne, gzero, (flag & 1)? min_VECSMALL: min_VECSMALL2);
+  if ((flag & 2) == 0) g = gerepileupto(av, gtovec(g));
+  return g;
 }
 
 GEN
