@@ -2889,7 +2889,7 @@ u_FpV_polint(GEN xa, GEN ya, ulong p)
     }
     else
       dP = u_FpX_Fp_mul(T, mulssmod(ya[i],inv,p), p, 0);
-    avma = av;
+    if (P) avma = av;
     P = P? u_FpX_add(P, dP, p): dP;
   }
   return P? P: u_zeropol(0);
