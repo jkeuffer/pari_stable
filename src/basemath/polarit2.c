@@ -1705,16 +1705,14 @@ DDF2(GEN x, long hint)
 GEN
 ZX_squff(GEN f, GEN *ex)
 {
-  GEN T,V,W,P,e,cf;
-  long i,k,dW,n,val;
+  GEN T, V, W, P, e;
+  long i, k, dW, n, val;
 
+  if (signe(leading_term(f)) < 0) f = gneg_i(f);
   val = ZX_valuation(f, &f);
   n = 1 + degpol(f); if (val) n++;
   e = cgetg(n,t_VECSMALL);
   P = cgetg(n,t_COL);
-
-  cf = content(f); if (gsigne(leading_term(f)) < 0) cf = gneg_i(cf);
-  if (!gcmp1(cf)) f = gdiv(f,cf);
 
   T = modulargcd(derivpol(f), f);
   V = gdeuc(f,T);
@@ -1728,7 +1726,7 @@ ZX_squff(GEN f, GEN *ex)
   }
   if (val) { P[i] = lpolx[varn(f)]; e[i] = val; i++;}
   setlg(P,i);
-  setlg(e,i); *ex=e; return P;
+  setlg(e,i); *ex = e; return P;
 }
 
 GEN
@@ -1763,7 +1761,7 @@ factpol(GEN x, long hint)
   if (typ(x)!=t_POL) err(notpoler,"factpol");
   if (!signe(x)) err(zeropoler,"factpol");
 
-  fa = ZX_squff(x, &ex);
+  fa = ZX_squff(Q_primpart(x), &ex);
   l = lg(fa); n = 0;
   for (i=1; i<l; i++)
   {
