@@ -936,7 +936,7 @@ has_ext_help()
     FILE *file;
 
     while (*s && *s != ' ') s++;
-    *s = 0; file = (FILE *) fopen(buf,"r");
+    *s = 0; file = fopen(buf,"r");
     if (file) { fclose(file); return 1; }
     free(buf);
   }
