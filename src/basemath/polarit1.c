@@ -1090,7 +1090,7 @@ long
 FqX_is_squarefree(GEN P, GEN T, GEN p)
 {
   pari_sp av = avma;
-  GEN z = FqX_gcd(P, derivpol(P), T, p);
+  GEN z = FqX_gcd(P, FqX_deriv(P, T, p), T, p);
   avma = av;
   return degpol(z)==0;
 }
