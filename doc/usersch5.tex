@@ -36,6 +36,24 @@ are specific to a set of types, although no consistency checks are made:
 e.g.~one may access the \kbd{sign} of a \typ{PADIC}, but the result is
 meaningless.
 
+\subsec{Conversions}
+
+\fun{long}{ndec2nlong}{long x} convert a number of decimal digits to a number
+of words. Returns
+$$ 1 + \kbd{floor}(x \times \B \log_2 10). $$
+
+\fun{long}{nbits2nlong}{long x} converts a number of bits to a number of
+words. Returns
+$$ \kbd{floor}((x+\B-1) / \B). $$
+
+\fun{long}{nchar2nlong}{long x} converts a number of chars to a number of
+words. Returns 
+$$ \kbd{floor}((x+\kbd{sizeof(long)}-1) / \kbd{sizeof(long)}). $$
+
+\fun{long}{bit_accuracy}{long x} converts a \typ{REAL} length into a number
+of significant bits. Returns $(x - 2)\B$. The macro \tet{bit_accuracy_mul(x,y)}
+computes the same thing multiplied by $y$.
+
 \subsec{Read type-dependent information}
 
 \fun{long}{typ}{GEN x} returns the type number of~\kbd{x}. The header files

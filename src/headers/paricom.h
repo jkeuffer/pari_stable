@@ -74,7 +74,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   }}
 /*=====================================================================*/
 
-#define ndec2nlong(x) ((x)*(3.321928094887362/BITS_IN_LONG)) /*3.32~log_2(10)*/
+/*3.32~log_2(10)*/
+#define ndec2nlong(x) (1 + (long)((x)*(3.321928094887362/BITS_IN_LONG)))
 #define nbits2nlong(x) (((x)+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
 #define nchar2nlong(x) (((x)+BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG)
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
