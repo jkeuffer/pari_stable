@@ -60,46 +60,19 @@ void *PARI_stack_limit = NULL;
 
 /* Set PARI_stack_limit to (a little above) the lowest safe address that can
  * be used on the stack. Leave PARI_stack_limit at its initial value (NULL)
- * to show no check should be made [pari_init_stackcheck failed].
+ * to show no check should be made [init failed].
  */
 static void
 pari_init_stackcheck(void *stack_base)
 {
   struct rlimit rip;
 
-  if (getrlimit(RLIMIT_STACK, &rip))
-     return;
-
-  PARI_stack_limit = stack_base - (long)((rip.rlim_cur/16)*15);
+  if (getrlimit(RLIMIT_STACK, &rip)) return;
+/* DEC cc doesn't like this line:
+ * PARI_stack_limit = stack_base - ((rip.rlim_cur/16)*15); */
+  PARI_stack_limit = (void*)((long)stack_base - (rip.rlim_cur/16)*15);
   return;
 }
-
-/* Attempt to grow the main (or only) stack allocation to 3/2 times its
- * present size, adjusting PARI_stack_limit accordingly.
- */
-int
-pari_stackgrow(void)
-{
-#if 0
-  struct rlimit rip1, rip2;  /* Two copies, so we don't have to */
-                             /* care about member size. */
-  if (getrlimit(RLIMIT_STACK, &rip1) ||
-     (rip1.rlim_max != RLIM_INFINITY && rip1.rlim_cur >= rip1.rlim_max))
-    return 0;
-
-  rip2.rlim_cur = (rip1.rlim_cur/2)*3;
-  rip2.rlim_max = rip1.rlim_max;
-  if (rip2.rlim_max != RLIM_INFINITY && rip2.rlim_cur > rip2.rlim_max)
-    rip2.rlim_cur = rip2.rlim_max;
-  if (setrlimit(RLIMIT_STACK, &rip2)) return 0;
-
-  PARI_stack_limit -= rip2.rlim_cur - rip1.rlim_cur;
-  return 1;
-#else
-  return 0;
-#endif
-}
-
 #endif /* STACK_CHECK */
 
 /*********************************************************************/
