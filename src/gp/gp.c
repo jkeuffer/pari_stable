@@ -407,14 +407,14 @@ do_strftime(char *s, char *buf)
 }
 
 static GEN
-sd_numeric(char *v, int flag, char *s, long *ptn, ulong Min, ulong Max,
+sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
            char **msg)
 {
-  long n;
+  ulong n;
   if (*v == 0) n = *ptn;
   else
   {
-    n = get_int(v,0);
+    n = (ulong)get_int(v,0);
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
@@ -426,7 +426,7 @@ sd_numeric(char *v, int flag, char *s, long *ptn, ulong Min, ulong Max,
   }
   switch(flag)
   {
-    case d_RETURN: return stoi(n);
+    case d_RETURN: return utoi(n);
     case d_ACKNOWLEDGE:
       if (msg)
       {
@@ -476,7 +476,7 @@ static GEN
 sd_seriesprecision(char *v, int flag)
 {
   char *msg[] = {NULL, "significant terms"};
-  return sd_numeric(v,flag,"seriesprecision",&precdl, 0,LGBITS,msg);
+  return sd_ulong(v,flag,"seriesprecision",(ulong*)&precdl, 0,LGBITS,msg);
 }
 
 static GEN
@@ -601,7 +601,7 @@ sd_compatible(char *v, int flag)
     "(use old functions, ignore case)", NULL
   };
   ulong old = compatible;
-  GEN r = sd_numeric(v,flag,"compatible",&compatible, 0,3,msg);
+  GEN r = sd_ulong(v,flag,"compatible",&compatible, 0,3,msg);
 
   if (old != compatible && flag != d_INITRC)
   {
@@ -620,16 +620,16 @@ sd_secure(char *v, int flag)
     fprintferr("[secure mode]: Do you want to modify the 'secure' flag? (^C if not)\n");
     hit_return();
   }
-  return sd_numeric(v,flag,"secure",&secure, 0,1,NULL);
+  return sd_ulong(v,flag,"secure",&secure, 0,1,NULL);
 }
 
 static GEN
 sd_buffersize(char *v, int flag)
-{ return sd_numeric(v,flag,"buffersize",&paribufsize, 1,
+{ return sd_ulong(v,flag,"buffersize",&paribufsize, 1,
                     (VERYBIGINT / sizeof(long)) - 1,NULL); }
 static GEN
 sd_debug(char *v, int flag)
-{ return sd_numeric(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
+{ return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
 static GEN
 sd_rl(char *v, int flag)
@@ -639,34 +639,34 @@ sd_rl(char *v, int flag)
       init_readline();
       readline_init = 1;
     }
-    return sd_numeric(v,flag,"readline",&use_readline, 0,20,NULL);
+    return sd_ulong(v,flag,"readline",(ulong*)&use_readline, 0,20,NULL);
 #else	/* !( defined READLINE ) */
-    long dummy;
-    return sd_numeric(v,flag,"readline",&dummy, 0,20,NULL);
+    ulong dummy;
+    return sd_ulong(v,flag,"readline",&dummy, 0,20,NULL);
 #endif
 }
 
 static GEN
 sd_debugfiles(char *v, int flag)
-{ return sd_numeric(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
+{ return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
 
 static GEN
 sd_debugmem(char *v, int flag)
-{ return sd_numeric(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
+{ return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 
 static GEN
 sd_echo(char *v, int flag)
-{ return sd_numeric(v,flag,"echo",&pariecho, 0,1,NULL); }
+{ return sd_ulong(v,flag,"echo",&pariecho, 0,1,NULL); }
 
 static GEN
 sd_lines(char *v, int flag)
-{ return sd_numeric(v,flag,"lines",&lim_lines, 0,VERYBIGINT,NULL); }
+{ return sd_ulong(v,flag,"lines",&lim_lines, 0,VERYBIGINT,NULL); }
 
 static GEN
 sd_histsize(char *v, int flag)
 {
-  long n = histsize;
-  GEN r = sd_numeric(v,flag,"histsize",&n, 1,
+  ulong n = histsize;
+  GEN r = sd_ulong(v,flag,"histsize",&n, 1,
                      (VERYBIGINT / sizeof(long)) - 1,NULL);
   if (n != histsize)
   {
@@ -702,8 +702,8 @@ sd_histsize(char *v, int flag)
 static GEN
 sd_log(char *v, int flag)
 {
-  long vlog = logfile? 1: 0, old = vlog;
-  GEN r = sd_numeric(v,flag,"log",&vlog, 0,1,NULL);
+  ulong vlog = logfile? 1: 0, old = vlog;
+  GEN r = sd_ulong(v,flag,"log",&vlog, 0,1,NULL);
   if (vlog != old)
   {
     if (vlog)
@@ -728,7 +728,7 @@ static GEN
 sd_output(char *v, int flag)
 {
   char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)", "(external prettyprint)", NULL};
-  return sd_numeric(v,flag,"output",&prettyp, 0,3,msg);
+  return sd_ulong(v,flag,"output",&prettyp, 0,3,msg);
 }
 
 extern void err_clean(void);
@@ -744,9 +744,9 @@ allocatemem0(size_t newsize)
 static GEN
 sd_parisize(char *v, int flag)
 {
-  size_t n = top-bot;
-  GEN r = sd_numeric(v,flag,"parisize",(ulong*)&n, 10000,VERYBIGINT,NULL);
-  if (n != top-bot)
+  ulong n = top-bot;
+  GEN r = sd_ulong(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
+  if (n != (ulong)top-bot)
   {
     if (!bot) top = (gpmem_t)n; /* no stack allocated yet */
     if (flag != d_INITRC) allocatemem0(n);
@@ -757,8 +757,8 @@ sd_parisize(char *v, int flag)
 static GEN
 sd_primelimit(char *v, int flag)
 {
-  long n = primelimit;
-  GEN r = sd_numeric(v,flag,"primelimit",&n, 0,VERYBIGINT,NULL);
+  ulong n = primelimit;
+  GEN r = sd_ulong(v,flag,"primelimit",&n, 0,VERYBIGINT,NULL);
   if (n != primelimit)
   {
     if (flag != d_INITRC)
@@ -773,15 +773,15 @@ sd_primelimit(char *v, int flag)
 
 static GEN
 sd_simplify(char *v, int flag)
-{ return sd_numeric(v,flag,"simplify",&simplifyflag, 0,1,NULL); }
+{ return sd_ulong(v,flag,"simplify",&simplifyflag, 0,1,NULL); }
 
 static GEN
 sd_strictmatch(char *v, int flag)
-{ return sd_numeric(v,flag,"strictmatch",&strictmatch, 0,1,NULL); }
+{ return sd_ulong(v,flag,"strictmatch",&strictmatch, 0,1,NULL); }
 
 static GEN
 sd_timer(char *v, int flag)
-{ return sd_numeric(v,flag,"timer",&chrono, 0,1,NULL); }
+{ return sd_ulong(v,flag,"timer",&chrono, 0,1,NULL); }
 
 static GEN
 sd_filename(char *v, int flag, char *s, char **f)
@@ -1663,7 +1663,7 @@ gp_history(long p, long flag, char *old, char *entrypoint)
     p = tglobal - p;
     if (p <= 0) er1 = 1;
   }
-  else if (p > tglobal)
+  else if ((ulong)p > tglobal)
     err(talker2,"I can't see into the future",old,entrypoint);
   if (!p) p = tglobal;
   if (tglobal - p >= histsize) er1 = 1;
@@ -2708,8 +2708,8 @@ read_opt(long argc, char **argv)
   pre = initrc? gp_initrc(): NULL;
 
   /* override the values from gprc */
-  testint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
-  testint(p, &primelimit);
+  testint(b, (long*)&paribufsize); if (paribufsize < 10) paribufsize = 10;
+  testint(p, (long*)&primelimit);
   testint(s, (long*)&top);
   if (under_emacs || under_texmacs) disable_color=1;
   pari_outfile=stdout; return pre;

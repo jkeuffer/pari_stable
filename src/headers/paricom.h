@@ -49,7 +49,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern PariOUT *pariOut, *pariErr;
 extern FILE    *pari_outfile, *logfile, *infile, *errfile;
 
-extern long  DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
+extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern long  *ordvar;
 extern GEN   bernzone,gpi,geuler;
 extern GEN   polvar,*polun,*polx,primetab;

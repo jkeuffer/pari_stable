@@ -45,7 +45,7 @@ entree  **varentries;
 void    *global_err_data;
 jmp_buf environnement;
 long    *ordvar;
-long    DEBUGFILES,DEBUGLEVEL,DEBUGMEM,compatible;
+ulong   DEBUGFILES,DEBUGLEVEL,DEBUGMEM,compatible;
 long    prec,precdl;
 ulong   init_opts = INIT_JMPm | INIT_SIGm;
 gpmem_t bot = 0, top = 0, avma;

@@ -111,7 +111,7 @@ extern char   *oldhelpmessage[], *helpmessages_oldgp[];
 extern entree  oldfonctions[], functions_oldgp[];
 
 /* backward compatibility */
-extern long compatible;
+extern ulong compatible;
 enum { NONE, WARN, OLDFUN, OLDALL };
 #define new_fun_set (compatible == NONE || compatible == WARN)
 
@@ -210,7 +210,7 @@ extern void check_filtre(filtre_t *F);
 
 typedef struct Buffer {
   char *buf;
-  long len;
+  ulong len;
   jmp_buf env;
   int flenv;
 } Buffer;
