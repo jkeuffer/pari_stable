@@ -4,35 +4,42 @@ users it provides a very convenient way to obtain patched versions in between
 releases. CVS clients are available for most major platforms: Unix, MacOS,
 Windows (see http://www.wincvs.org/).
 
-This file documents access to the PARI CVS server, which is intended for PARI
-lovers who want the very latest bleeding edge release. The CVS sources
+This file documents access to the PARI CVS server, which is intended for
+PARI lovers who want the very latest bleeding edge release. The CVS sources
 compile cleanly and pass the bench suite on (one of) the administrator(s)'s
-machine(s), they may otherwise contain severe bugs. Stable releases are made
-available on a regular basis using the customary method: a message to
+machine(s), they may otherwise contain severe bugs. Stable releases are
+made available on a regular basis using the customary method: a message to
 pari-announce.
 
 1) First connection to the anonymous CVS server:
+================================================
+Type the following commands from the shell
 
   cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot login
-  Hit return when asked for a password (there's no password)
 
-  cvs -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot checkout pari
+Hit return when asked for a password (there's no password); then back to
+the shell prompt
+
+  cvs -z3 -d :pserver:cvs@megrez.math.u-bordeaux.fr:/home/megrez/cvsroot checkout pari
 
 This last command creates a local copy of the distribution from the
-repository (directory 'pari').
+distant repository (in local directory 'pari'), using GNU gzip to compress
+the files during the transfer [ if gzip is not installed on your machine,
+remove the -z3 flag ].
 
 From now on, you can go to this pari directory and use any cvs command
 directly (without the cryptic -d argument), as long as you remain there
 (or in a subdirectory). Password won't be required again.
 
 2) What can I do now ?
+======================
 
 * You can build pari in the usual way (see INSTALL) as if this 'pari'
 directory had been created by fetching then extracting an archive on an FTP
 server.
 
-* You can update your local copy at any time using 'cvs update',
-which will put you in synch with the repository.
+* You can update your local copy at any time using 'cvs update', which will
+put you in synch with the repository.
 
 * You can check exact differences between successive versions of a given file
 by using 'cvs diff'. If you modify some files on your local copy, this also
@@ -42,30 +49,31 @@ diff' [with flag -c if your local diff supports it] to the pari-dev mailing
 list with a short description of what you've done, or to
 pari@math.u-bordeaux.fr if you're not subscribed to pari-dev.
 
-If you plan to do that on a regular basis (which would be nice :-), send a
-note to pari-dev, telling what kind of development work you're interested in,
-and ask for the rights to modify the repository directly. Once this is
-granted, you'll be able to log in as 'cvsadmin' (the CVS administrator)
-instead of 'cvs' (CVS user) as described above and you'll be able to use 'cvs
-commit'.
+If you plan to do that on a regular basis (which would be very nice :-),
+send a note to pari-dev, telling what kind of development work you're
+interested in, and ask for the rights to modify the repository directly.
+Once this is granted, you'll be able to log in as 'cvsadmin' (the CVS
+administrator) instead of 'cvs' (CVS user) as described above and you'll be
+able to use 'cvs commit'.
 
 
-NOTES:
-1) you can speed up file transfers by using cvs -z3 (transfer files in
+NOTES and CAVEATS:
+==================
+* you can speed up file transfers by using cvs -z3 (transfer files in
 compressed format), e.g 'cvs -z3 update' if you've missed a lot of patches,
 or 'cvs -z3 checkout' for the initial checkout. This requires that GNU gzip
-be in your path.
+be in your path. You can create a .cvsrc file in your home directory
+containing lines of the form:
 
-2) once you've run Configure, some files/directory will be created in the
+    cvs -z3          [ use gzip -3 for all transfers ]
+    diff -c          [ use diff -c (context diff) by default in 'cvs diff' ]
+
+* once you've run Configure, some files/directory will be created in the
 local copy which are not under CVS control (only the master files are).
 These are
 
-  O<OS>-<arch>/
-  O<OS>-<arch>.dbg/
-  O<OS>-<arch>.prf/
-  Makefile.O<OS>-<arch>
-  Makefile.O<OS>-<arch>.dbg
-  Makefile.O<OS>-<arch>.prf
+  O<OS>-<arch>*
+  Makefile.O<OS>-<arch>*
   examples/Makefile.<OS>-<arch>
   doc/Makefile
   doc/gphelp
@@ -76,15 +84,16 @@ These are
 After a global 'cvs diff', or 'cvs status', you can safely ignore all
 messages pertaining to them (e.g "? doc/Makefile").
 
-3) 'cvs diff' gives you the difference between your local copy and the
-sources they were based on, not with the current state of the repository. Use
-'cvs diff -D now'
+* 'cvs diff' gives you the difference between your local copy and the
+sources they were based on, not with the current state of the repository.
+Use 'cvs diff -D now' for that.
 
-4) All project files have an individual version number, independant of the
-release numbering scheme. Official releases are 'tagged' so that all files
-pertaining to a given release can be simultaneously accessed without tracking
-version numbers. Tag names are 'release-VERSION', e.g 'release-2-0-20'.
+* All project files have an individual version number, independant of the
+release numbering scheme. Official releases (starting from version 2.0.17)
+are 'tagged' so that all files pertaining to a given release can be
+simultaneously accessed without tracking version numbers. Tag names are
+'release-VERSION', e.g 'release-2-0-20'.
 
-5) On Windows 95/98 + Cygwin, you may have to explicitly set HOME (e.g in
-your .bashrc) to some existing directory otherwise CVS will abort on
+* On Windows 95/98/2000 + Cygwin, you may have to explicitly set HOME (e.g
+in your .bashrc) to some existing directory otherwise CVS will abort on
 startup (when trying to create a .cvspass file).
