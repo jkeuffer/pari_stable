@@ -3022,7 +3022,6 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
     do
     {
       int fl = 0;
-      if (check && inc[1] == 101) fl = 1; /* heuristic */
       if (k > 1)
       {
         k--;
@@ -3089,6 +3088,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
       if (checkcnt < 5 && mpcmp(norme1, borne2) < 0)
       {
         if (!check(data,x)) { checkcnt++ ; continue; /* main */}
+        if (DEBUGLEVEL>4) fprintferr("New bound: %Z", norme1);
         borne1 = mpadd(norme1, eps);
         borne2 = mpmul(borne1, alpha);
         s = 0; checkcnt = 0;
@@ -3227,7 +3227,7 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
   /* now r~ * r = a in LLL basis */
   rinvtrans = gtrans_i( invmat(r) );
   if (DEBUGLEVEL>2)
-      fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
+    fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lllintern(rinvtrans, 100, noer, 0);
   if (!v) return NULL;
 
@@ -3242,7 +3242,6 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
   rperm = cgetg(l,t_MAT);
   uperm = cgetg(l,t_MAT); perm = sindexsort(vnorm);
   for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; rperm[l-i] = r[perm[i]]; }
-
   r = sqred1_from_QR(rperm, gprecision(rperm));
   if (!r) return NULL;
 
@@ -3254,7 +3253,7 @@ _fincke_pohst(GEN a,GEN B0,long stockmax,long noer, long PREC, FP_chk_fun *CHECK
       bound = CHECK->f_init(CHECK, r, uperm);
       if (!bound) err(precer,"fincke_pohst");
     }
-    if (!bound) bound = QuickNormL2((GEN)r[1], DEFAULTPREC);
+    if (!bound) bound = gsqr(gcoeff(r,1,1));
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");

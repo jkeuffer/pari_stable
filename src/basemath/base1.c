@@ -1803,7 +1803,7 @@ chk_gen_init(FP_chk_fun *chk, GEN r, GEN mat)
   d->ZKembed = gmul(d->M, mat);
 
   av = avma;
-  inv = ginv( split_realimag(d->ZKembed, r1, (N - r1)>>1) ); /*TODO: use QR?*/
+  inv = ginv( split_realimag(d->ZKembed, r1, r2) ); /*TODO: use QR?*/
   V = cgetg(N+1, t_VEC);
 
   v = varn(T->x);
