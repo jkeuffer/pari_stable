@@ -2029,8 +2029,8 @@ zsimpjoin(GEN bidsimp, GEN bidp, GEN dummyfa, GEN matunit)
     U = (GEN)u1u2[1];
     met=(GEN)u1u2[3];
     y[3] = (long)concatsp(
-      gmul(vecextract_i(U, 1,   l1-1), U1) ,
-      gmul(vecextract_i(U, l1, nbgen), U2)
+      l1==1   ? zeromat(nbgen, lg(U1)-1): gmul(vecextract_i(U, 1,   l1-1), U1) ,
+      l1>nbgen? zeromat(nbgen, lg(U2)-1): gmul(vecextract_i(U, l1, nbgen), U2)
     );
   }
   else
