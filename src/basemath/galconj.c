@@ -18,6 +18,7 @@ extern GEN bezout_lift_fact(GEN T, GEN Tmod, GEN p, long e);
 extern GEN respm(GEN x,GEN y,GEN pm);
 extern GEN ZX_disc_all(GEN,long);
 extern GEN polratlift(GEN P, GEN mod, GEN amax, GEN bmax, GEN denom);
+extern GEN znstar_hnf_elts(GEN Z, GEN H);
 
 /*************************************************************************/
 /**									**/

@@ -1009,7 +1009,7 @@ get_roots_for_M(nffp_t *F)
 }
 
 /* [bas[i]/den[i]]= integer basis. roo = real part of the roots */
-static GEN
+static void
 make_M(nffp_t *F, int trunc)
 {
   GEN bas = (GEN)F->basden[1], den = (GEN)F->basden[2], ro = F->ro;
@@ -1040,11 +1040,11 @@ make_M(nffp_t *F, int trunc)
     F->ro = gprec_w(ro,F->prec);
   }
   if (DEBUGLEVEL>4) msgtimer("matrix M");
-  return F->M = M;
+  F->M = M;
 }
 
 /* return G real such that G~ * G = T_2 */
-static GEN
+static void
 make_G(nffp_t *F)
 {
   GEN G, m, g, r, M = F->M, sqrt2 = gsqrt(gdeux, F->prec + F->extraprec);
@@ -1071,7 +1071,7 @@ make_G(nffp_t *F)
       }
     }
   }
-  return F->G = G;
+  F->G = G;
 }
 
 static void

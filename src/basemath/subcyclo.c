@@ -16,7 +16,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 
 extern GEN vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod);
-GEN supnorm(GEN L, long prec);
+extern GEN supnorm(GEN L, long prec);
 
 /*************************************************************************/
 /**                                                                     **/
