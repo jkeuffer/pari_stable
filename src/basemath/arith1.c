@@ -1443,12 +1443,10 @@ gprecprime(GEN n)
 GEN
 gisprime(GEN x, long flag)
 {
-  if (gcmp0(arith_proto(isprime,x,1)))
-    return gzero;
   switch (flag)
   {
   case 0:
-    return gun;
+    return arith_proto(isprime,x,1);
   case 1:
     return garith_proto2gs(plisprime,x,0);
   case 2:

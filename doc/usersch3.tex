@@ -1571,15 +1571,18 @@ If $\fl=1$, use Pocklington-Lehmer ``P-1'' test. true (1) if $x$ is
 prime, false (0) otherwise.
 
 If $\fl=2$, use Pocklington-Lehmer ``P-1'' test. return 0 if $x$ is
-composite, 1 if $x$ is a small prime (currently less than $10^12$),
+composite, 1 if $x$ is a small prime (currently less than $10^{12}$),
 and a matrix if $x$ is a large prime.  The matrix has three
-columns. The first contains the prime factors $p$, the second a
-witness of primality relatively to $p$ as in Proposition~8.3.1 in
-GTM~138, and the third is isprime(p,2).
+columns. The first contains the prime factors $p$, the second the
+corresponding elements $a_p$ as in Proposition~8.3.1 in GTM~138, and
+the third the output of isprime(p,2).
 
-\syn{gisprime}{x,\fl}, but the
-simpler function $\teb{isprime}(x)$ which returns a \kbd{long}
-should be used if $x$ is known to be of type integer.
+\syn{gisprime}{x,\fl}, but the simpler function $\teb{isprime}(x)$
+which returns a \kbd{long} should be used if $x$ is known to be of
+type integer. Also available is $\teb{plisprime}(N,\fl)$,
+corresponding to $\teb{gisprime}(x,\fl+1)$ if $x$ is known to be of
+type integer.
+
 
 \subsecidx{ispseudoprime}$(x)$: true (1) if $x$ is a strong
 pseudo-prime for a randomly chosen base, false (0) otherwise.

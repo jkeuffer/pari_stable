@@ -206,14 +206,14 @@ GEN  plisprime(GEN N, long flag)
   ulong ltop=avma;
   long i;
   GEN C,F;
-  if (gcmp(N,gpowgs(stoi(10),12))<=0)
+  if ( typ(N) != t_INT ) err(arither1);
+  N=absi(N);
+  if ( gegal(N,gdeux) ) { avma=ltop; return gun; }
+  if (miller(N,16)) /*miller return 0 for 2 !*/
   {
-    avma=ltop;
-    if (gegal(N,gdeux) || miller(N,16))
-      return gun;
-    else
-      return gzero;
+    if (gcmp(N,gpowgs(stoi(10),12))<=0) { avma=ltop; return gun; }
   }
+  else { avma=ltop; return gzero; }
   F=(GEN)factor(addis(N,-1))[1];
   C=cgetg(4,t_MAT);
   C[1]=lgetg(lg(F),t_COL); 
@@ -236,11 +236,7 @@ GEN  plisprime(GEN N, long flag)
     if (gmael(C,3,i)==gzero)
       err(talker,"Sorry false prime number %Z in plisprime",p);
   }
-  if (!flag)
-  {
-    avma=ltop;
-    return gun;
-  }
+  if (!flag)   { avma=ltop; return gun; }
   return gerepileupto(ltop,C);
 }
 /***********************************************************************/
