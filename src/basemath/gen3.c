@@ -112,7 +112,7 @@ precrealexact(GEN t, GEN s) {
   if (e == -(long)HIGHEXPOBIT) return precreal(t);
   if (e < 0) e = 0;
   e -= expo(t);
-  if (!signe(t)) return prec0(e);
+  if (!signe(t)) return prec0(-e);
   l = lg(t);
   return (e > 0)? l + (e >> TWOPOTBITS_IN_LONG): l;
 }
