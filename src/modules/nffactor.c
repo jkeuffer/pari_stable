@@ -372,10 +372,11 @@ localpol(GEN nf, GEN pr)
 static GEN
 nffactormod0(GEN nf, GEN x, GEN pr)
 {
-  long av = avma, j, l, vx = varn(x), vn = varn((GEN)nf[1]);
+  long av = avma, j, l, vx = varn(x), vn;
   GEN rep, pol, xrd, prh, p1;
 
   nf=checknf(nf);
+  vn = varn((GEN)nf[1]);
   if (typ(x)!=t_POL) err(typeer,"nffactormod");
   if (vx >= vn)
     err(talker,"polynomial variable must have highest priority in nffactormod");
