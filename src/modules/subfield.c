@@ -959,12 +959,21 @@ subfields_poldata(GEN T, struct poldata *PD)
   }
 }
 
+static long
+grouporder(GEN G)
+{
+  GEN Go = (GEN)G[2];
+  long i, l = lg(Go), o = 1;
+  for (i=1; i<l; i++) o *= Go[i];
+  return o;
+}
+
 GEN
 subfields(GEN nf,GEN d)
 {
   gpmem_t av = avma;
-  long di,N,v0;
-  GEN LSB,pol;
+  long di, N, v0;
+  GEN LSB, pol, G;
   struct poldata PD;
 
   pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
@@ -972,6 +981,24 @@ subfields(GEN nf,GEN d)
   if (di==N) return gerepilecopy(av, _subfield(pol, polx[v0]));
   if (di==1) return gerepilecopy(av, _subfield(polx[v0], pol));
   if (di < 1 || di > N || N % di) return cgetg(1,t_VEC);
+
+  /* much easier if nf is Galois (WSS) */
+  G = galoisconj4(nf? nf: pol, NULL, 1, 0);
+  if (typ(G) != t_INT)
+  { /* Bingo */
+    GEN L = galoissubgroups(G), F;
+    long k,i, l = lg(L), o = N/di;
+    F = cgetg(l, t_VEC);
+    k = 1;
+    for (i=1; i<l; i++)
+    {
+      GEN H = (GEN)L[i];
+      if (grouporder(H) == o)
+        F[k++] = (long) galoisfixedfield(G, (GEN)H[1], 0, v0);
+    }
+    setlg(F, k);
+    return gerepilecopy(av, F);
+  }
 
   subfields_poldata(nf? nf:pol, &PD);
   pol = PD.pol;
@@ -984,9 +1011,17 @@ static GEN
 subfieldsall(GEN nf)
 {
   gpmem_t av = avma;
-  long N,ld,i,v0;
-  GEN pol,dg,LSB,NLSB;
+  long N, ld, i, v0;
+  GEN G, pol, dg, LSB, NLSB;
   struct poldata PD;
+
+  /* much easier if nf is Galois (WSS) */
+  G = galoisconj4(nf, NULL, 1, 0);
+  if (typ(G) != t_INT)
+  {
+    pol = get_nfpol(nf, &nf);
+    return gerepileupto(av, galoissubfields(G, 0, varn(pol)));
+  }
 
   subfields_poldata(nf, &PD);
   pol = PD.pol;
