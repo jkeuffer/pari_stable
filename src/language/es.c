@@ -951,14 +951,13 @@ wr_float(pariout_t *T, GEN x, int f_format)
   ulong *res, *resd;
   char *s, *t;
   
-  dif =  bit_accuracy(lx) - expo(x);
-  if (dif <= 0) f_format = 0; /* write in E format */
   if (dec > 0)
   { /* reduce precision if possible */
-    l = (long)(3 + (dec * pariK1));
+    l = (long)(DEFAULTPREC + (dec * pariK1));
     if (lx > l) { x = rtor(x, l); lx = l; }
   }
-  
+  dif =  bit_accuracy(lx) - expo(x);
+  if (dif <= 0) f_format = 0; /* write in E format */
   beta = ex10(dif);
   if (beta)
   {
