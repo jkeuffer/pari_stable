@@ -2357,4 +2357,72 @@ binary powering.
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
 into~\kbd{x} for the variable number~\kbd{v}.
 
+\subsec{Function to handle  \typ{VECSMALL}}
+Theses functions handle \typ{VECSMALL} as an abstract container type
+of small signed integers.  No specific meaning is attached to the content. 
+
+\fun{GEN}{vec_to_vecsmall}{GEN z} identical to \kbd{ZV\_to\_zv(z)}.
+
+\fun{GEN}{vecsmall_to_vec}{GEN z} identical to \kbd{zv\_to\_ZV(z)}.
+
+\fun{GEN}{vecsmall_to_col}{GEN z} identical to \kbd{zv\_to\_ZC(z)}.
+
+\fun{GEN}{vecsmall_copy}{GEN x} makes a copy of \kbd{x} on the stack.
+
+\fun{GEN}{vecsmall_const}{long n, long c} returns a \typ{VECSMALL} 
+of \kbd{n} components equal to \kbd{c}.
+
+\fun{GEN}{vecsmall_shorten}{GEN v, long n} shortens the \typ{VECSMALL} \kbd{v}
+to \kbd{n} components.
+
+\fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
+
+\fun{GEN}{vecsmall_uniq}{GEN v} given a sorted \typ{VECSMALL} \kbd{v}, return
+the vector of unique occurences.
+
+\fun{int}{vecsmall_lexcmp}{GEN x, GEN y} compares two \typ{VECSMALL} lexically
+
+\fun{int}{vecsmall_prefixcmp}{GEN x, GEN y} truncate the longest \typ{VECSMALL}
+to the length of the shortest and compares them lexicographically.
+
+\fun{GEN}{vecsmall_prepend}{GEN V, long s} prepend \kbd{s} to the \typ{VECSMALL} \kbd{V}.
+
+\fun{GEN}{vecsmall_append}{GEN V, long s} append \kbd{s} to the \typ{VECSMALL} \kbd{V}.
+
+\fun{GEN}{vecsmall_concat}{GEN u, GEN v} concat the \typ{VECSMALL} \kbd{u} and \kbd{v}.
+
+\fun{long}{vecsmall_coincidence}{GEN u, GEN v} returns the numbers of indices where \kbd{u} and \kbd{v} agree.
+
+\fun{long}{vecsmall_pack}{GEN v, long base, long mod} handles the
+\typ{VECSMALL} \kbd{v} as the digit of a number in base \kbd{base} and return
+this number modulo \kbd{mod}. This can be used as an hash function.
+
+\subsec{Functions to handle bit-vectors}
+Theses functions manipulate vectors of bits (stored in \typ{VECSMALL}). 
+Bits are numbered from 0. 
+
+\fun{GEN}{bitvec_alloc}{long n} allocates a bits-vector suitable for \kbd{n}
+bits.
+
+\fun{GEN}{bitvec_shorten}{GEN bitvec, long n} shortens a bits-vector
+\kbd{bitvec} to \kbd{n} bits.
+
+\fun{long}{bitvec_test}{GEN bitvec, long b} returns the bit of index \kbd{b} of
+\kbd{bitvec}.
+
+\fun{void}{bitvec_set}{GEN bitvec, long b} (in place) sets the bit of index
+\kbd{b} of \kbd{bitvec}.  
+
+\fun{void}{bitvec_clear}{GEN bitvec, long b} (in place) clears the bit of index \kbd{b} of \kbd{bitvec}.
+\subsec{Functions to handle vectors of \typ{VECSMALL}}
+Theses functions manipulate vectors of \typ{VECSMALL} (vecvecsmall). 
+
+\fun{GEN}{vecvecsmall_sort}{GEN x} sorts lexicographically the components of
+the vector \kbd{x}.
+
+\fun{GEN}{vecvecsmall_indexsort}{GEN x} performs an indirect lexicographic sorting of the components of the vector \kbd{x} and return a permutation stored in a \typ{VECSMALL}.
+
+\fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted 
+vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
+
 \vfill\eject
