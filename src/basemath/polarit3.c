@@ -4411,10 +4411,14 @@ ZX_resultant_all(GEN A, GEN B, GEN dB, ulong bound)
     bound = ZY_ZXY_ResBound(A, B);
     if (bound > 50000)
     {
-      GEN run = realun(MEDDEFAULTPREC);
-      GEN Ar = gmul(A, run), Br = gmul(B, run);
-      GEN R = subres(Ar,Br);
-      bound = gexpo(R) + 1;
+      long prec = MEDDEFAULTPREC;
+      for(;; prec = (prec-1)<<1)
+      {
+        GEN run = realun(prec);
+        GEN R = subres(gmul(A, run), gmul(B, run));
+        bound = gexpo(R) + 1;
+        if (!gcmp0(R) || bound <= 0) break;
+      }
     }
     if (dB) bound -= (long)(mylog2(dB)*degA);
   }
