@@ -40,7 +40,7 @@ case "$2" in
 esac
 
 . $confdir/version
-file_bench=Bench-$version.$patch
+file_bench=Bench-$VersionMajor.$VersionMinor.$patch
 if (touch $file_bench 2> /dev/null); then
   SUF=
 else
