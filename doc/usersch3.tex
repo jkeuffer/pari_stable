@@ -2509,9 +2509,11 @@ The other six components are only present if $\fl$ is $0$ (or omitted!).
 Their content depends on whether the curve is defined over $\R$ or not:
 \smallskip
 $\bullet$ When $E$ is defined over $\R$, $E[14]$ (\kbd{$E$.roots}) is a
-vector whose three components contain the roots of the associated Weierstrass
-equation. If the roots are all real, then they are ordered by decreasing
-value. If only one is real, it is the first component of $E[14]$.
+vector whose three components contain the roots of the right hand side of the
+associated Weierstrass equation.
+$$ (y + a_1x/2 + a_3/2)^2 = g(x) $$
+If the roots are all real, then they are ordered by decreasing value. If only
+one is real, it is the first component of $E[14]$.
 
 $E[15]$ (\kbd{$E$.omega[1]}) is the real period of $E$ (integral of
 $dx/(2y+a_1x+a_3)$ over the connected component of the identity element of
