@@ -30,8 +30,6 @@ static GEN *tabaall,*tabtall,tabefin,*tabcyc,tabE,tabTH,tabeta;
 static ulong vet[61][2] =
 {{6,540},{12,963},{24,1023},{48,1330},{36,1628},{60,1967},{120,2349},{180,3083},{240,3132},{504,3270},{360,3838},{420,4115},{720,4621},{840,4987},{1440,5079},{1260,6212},{1680,6686},{2520,8137},{3360,8415},{5040,10437},{13860,11643},{10080,12826},{13860,11643},{10080,12826},{16380,13369},{21840,13540},{18480,15060},{27720,15934},{32760,17695},{36960,18816},{55440,21338},{65520,23179},{98280,23484},{110880,27465},{131040,30380},{131040,30380},{166320,31369},{196560,33866},{262080,34530},{277200,36195},{360360,37095},{480480,38179},{332640,41396},{554400,43301},{720720,47483},{665280,47742},{831600,50202},{1113840,52502},{1441440,60245},{1663200,63112},{2227680,65395},{2162160,69895},{2827440,71567},{3326400,75708},{3603600,79377},{6126120,82703},{4324320,91180},{6683040,93978},{7207200,98840},{11138400,99282},{8648640,105811}};
 
-static int tabfaux[12]={0,1,1,0,1,0,1,0,0,0,1,0};
-
 typedef struct red_t {
   long n;
   GEN C; /* polcyclo(n) */
@@ -58,20 +56,27 @@ makepoldeg1(GEN c, GEN d)
   return res;
 }
 
-/* T mod (x^n - 1), assume deg(T) < 2n */
+/* T mod polcyclo(p), assume deg(T) < 2p */
 static GEN
-red_mod_xn_1(GEN T, long n)
+red_mod_cyclo(GEN T, long p)
 {
-  long i, d = degpol(T);
-  GEN y = dummycopy(T), z = y+2;
-  for (i = n; i<=d; i++)
-    z[i-n] = laddii((GEN)z[i-n], (GEN)z[i]);
-  return normalizepol_i(y, n+2);
+  long i, d;
+  GEN y = dummycopy(T), *z = (GEN*)(y+2);
+  /* reduce mod (x^p - 1) */
+  d = degpol(T) - p; /* < p */
+  for (i = 0; i<=d; i++) z[i] = addii(z[i], z[i+p]);
+
+  /* reduce mod x^(p-1) + ... + 1 */
+  d = p-1;
+  if (signe(z[d]))
+    for (i=0; i<d; i++) z[i] = subii(z[i], z[d]);
+  return normalizepol_i(y, d+2);
 }
 
+/* special case R->C = pocyclo(p) */
 static GEN
 _red2(GEN x, red_t *R) {
-  return FpX_red(gmod(red_mod_xn_1(x, R->n), R->C), R->N);
+  return FpX_red(red_mod_cyclo(x, R->n), R->N);
 }
 static GEN
 _red(GEN x, red_t *R) {
@@ -630,11 +635,12 @@ step4d(GEN N, ulong q)
   return -1;
 }
 
+/* return 1 [OK so far],0 [APRCL fails] or < 0 [not a prime] */
 static int
 step5(GEN N, int p, GEN et)
 {
   ulong qm3s2,ltabg,q,qp,x,av;
-  int k,pk,fl=-1,i,qf;
+  int k,pk,fl=-1,i;
   GEN ze8,tabf,tabg,ze,jpq=gun,j3q,j2q,vpk,v8;
   byteptr d=diffptr+1;
 
@@ -684,7 +690,7 @@ step5(GEN N, int p, GEN et)
       }
       else fl = (k==2)? step4c(N,q,jpq): step4d(N,q);
     }
-    if (fl == -1) { qf = (int)(-q); return qf; }
+    if (fl == -1) return (int)(-q);
     if (fl == 1) return 1;
   }
   return 0;
@@ -722,14 +728,15 @@ aprcl(GEN N)
   ulong lfat,p,q,lfaq,k,t,i,j,l;
   ulong av, av0 = avma;
 
-  if (cmpis(N,12)<=0)
+  if (cmpis(N,12) <= 0)
   {
-    if (tabfaux[itos(N)]) return gun;
-    else
+    switch(itos(N))
     {
-      p1 = cgetg(3,t_VEC);
-      p1[1] = zero;
-      p1[2] = zero; return p1;
+      case 2: case 3: case 5: case 7: case 11: return gun;
+      default:
+        p1 = cgetg(3,t_VEC);
+        p1[1] = zero;
+        p1[2] = zero; return p1;
     }
   }
   if (DEBUGLEVEL) timer();
@@ -801,7 +808,6 @@ aprcl(GEN N)
        p1[2] = lstoi(p);
        p1[3] = zero; return p1;
      }
-     if (fl==1) continue;
      if (fl==0) err(talker,"aprcl test fails! this is highly improbable");
    }
  }
