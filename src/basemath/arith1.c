@@ -1192,7 +1192,7 @@ mpppcm(GEN x, GEN y)
   p1 = mppgcd(x,y); if (!is_pm1(p1)) y = divii(y,p1);
   p2 = mulii(x,y);
   if (signe(p2) < 0) setsigne(p2,1);
-  return gerepileupto(av, p2);
+  return gerepileuptoint(av, p2);
 }
 /* Extended bezout. Return d=pgcd(a,b) and &u,&v */
 long

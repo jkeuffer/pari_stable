@@ -1852,12 +1852,9 @@ ggcd(GEN x, GEN y)
         return z;
 
       case t_FRAC: z=cgetg(3,t_FRAC);
-        (void)new_chunk(lgefint(x[2])+lgefint(y[2]));
-        p1 = divii((GEN)y[2], mppgcd((GEN)x[2], (GEN)y[2]));
-        avma = (long)z;
-        z[2] = lmulii(p1, (GEN)x[2]);
         z[1] = (long)mppgcd((GEN)x[1], (GEN)y[1]);
-        fix_frac(z); return z;
+        z[2] = (long)mpppcm((GEN)x[2], (GEN)y[2]);
+        return z;
 
       case t_COMPLEX:
         av=avma; p1=gdiv(x,y);
