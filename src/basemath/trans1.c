@@ -612,7 +612,7 @@ powgi(GEN x, GEN n)
   }
 }
 
-/* we suppose n != 0, and valp(x) = 0 */
+/* we suppose n != 0, and valp(x) = 0. Not stack clean */
 static GEN
 ser_pow(GEN x, GEN n, long prec)
 {
@@ -623,10 +623,9 @@ ser_pow(GEN x, GEN n, long prec)
   lead = (GEN)x[2];
   if (gcmp1(lead))
   {
-    GEN X, Y, alp;
+    GEN X, Y, alp = gadd(n,gun); /* will be left on the stack */
     long lx, mi, i, j, d;
 
-    av = avma; alp = gclone(gadd(n,gun)); avma = av;
     lx = lg(x);
     y = cgetg(lx,t_SER);
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
@@ -645,7 +644,7 @@ ser_pow(GEN x, GEN n, long prec)
       }
       tetpil = avma; Y[i] = lpile(av,tetpil, gdivgs(p1,i));
     }
-    gunclone(alp); return y;
+    return y;
   }
   p1 = gdiv(x,lead); p1[2] = un; /* in case it's inexact */
   p1 = gpow(p1,  n, prec);

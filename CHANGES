@@ -170,7 +170,8 @@ JD 74- [Configure:] detection of times()
        [ e.g content(x*[;]) --> [;], primitive_part(x*[;]) --> [;] ]
    77- incorrect behaviour in scalarpol() for exact 0 argument
    78- typo in ellap: e defined over Fp didn't work any more
-
+   79- t_SER ^ t_QUAD --> SEGV
+ 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
        As a result maximal degree jumps to ~ 2^24 on 32bit machines
