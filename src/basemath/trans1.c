@@ -137,7 +137,7 @@ void
 consteuler(long prec)
 {
   GEN u,v,a,b,tmpeuler;
-  long l, n, k, x;
+  long l, n1, n, k, x;
   pari_sp av1, av2;
 
   if (geuler && lg(geuler) >= prec) return;
@@ -151,12 +151,13 @@ consteuler(long prec)
   a = stor(x,l); u=mplog(a); setsigne(u,-1); affrr(u,a);
   b = realun(l);
   v = realun(l);
-  n=(long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
+  n = (long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
+  n1 = min(n, SQRTVERYBIGINT);
   av2 = avma;
   if (x < SQRTVERYBIGINT)
   {
     long xx = x*x;
-    for (k=1; k<SQRTVERYBIGINT; k++)
+    for (k=1; k<n1; k++)
     {
       divrsz(mulsr(xx,b),k*k, b);
       divrsz(addrr(divrs(mulsr(xx,a),k),b),k, a);
@@ -174,7 +175,7 @@ consteuler(long prec)
   else
   {
     GEN xx = mulss(x,x);
-    for (k=1; k<SQRTVERYBIGINT; k++)
+    for (k=1; k<n1; k++)
     {
       divrsz(mulir(xx,b),k*k, b);
       divrsz(addrr(divrs(mulir(xx,a),k),b),k, a);
