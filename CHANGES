@@ -34,6 +34,9 @@ Done for version ??? (released ??/??/2000):
     4- make sure mpinl.o is linked (binaries may fail to build otherwise)
     5- make sure sqrt(Mod(a,b)) terminates
     6- memory leak with PARI pointers (issquare(4,&x))
+    7- 'make clean' didn't affect doc
+    8- Configure didn't detect some SuperSparc + Linux combination
+    9- forprime (and friends) could crash when loop index was tampered with
   
   Changed
     1- renamed .DOC files to .txt (explorer getting confused...)

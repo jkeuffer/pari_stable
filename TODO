@@ -15,8 +15,7 @@ Priority classification (first column): [subjective and debatable!]
 
 
 ***************************   BUGS (general)     ****************************
-Unless specified otherwise, examples assume default precisions (on a 32
-bit machine)
+Unless specified otherwise, examples assume 32bit machine and default precision 
 
 5  setrand(5);thueinit(polsubcyclo(precprime(2^17),3))
    ***   non positive argument in mplog. \\ precision problem
@@ -52,8 +51,7 @@ bit machine)
 
 -  sum(i=1,3000, exp(-i^2)) --> overflow in R*R
    The "negligible" terms should be neglegted, not overflow because of the
-   way the computation is done.
-   [ Tough to correct! ]
+   way the computation is done. [ Tough to correct! ]
 
 4  changing primelimit from within forprime loop yields unpredictable results
 
