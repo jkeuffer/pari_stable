@@ -232,6 +232,7 @@ if test -n "$myuname"; then
   cygwin*)  arch=$HOSTTYPE;;
   linux)    arch=`uname -m`
 	    case "`cat /proc/cpuinfo`" in
+	    *SuperSparc*)   arch=sparcv8_super;;
 	    *TMS390Z5[05]*) arch=sparcv8_super;; # SuperSparc I or II
 	    *TMS390S1[05]*) arch=sparcv8_micro;; # MicroSparc I
 	    *MB86904*)      arch=sparcv8_micro;; # MicroSparc II
