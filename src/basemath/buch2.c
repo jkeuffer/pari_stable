@@ -12,15 +12,60 @@ ANY WARRANTY WHATSOEVER.
 Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+#include "pari.h"
+#include "parinf.h"
+/********************************************************************/
+/**                                                                **/
+/**              INSERT PERMANENT OBJECT IN STRUCTURE              **/
+/**                                                                **/
+/********************************************************************/
+static const int OBJMAX = 2; /* maximum number of insertable objects */
 
+/* insert O in S [last position] */
+static void
+obj_insert(GEN S, GEN O, long K)
+{
+  long l = lg(S)-1;
+  GEN v = (GEN)S[l];
+  if (typ(v) != t_VEC)
+  {
+    GEN w = zerovec(OBJMAX); w[K] = (long)O;
+    S[l] = lclone(w);
+  }
+  else
+    v[K] = lclone(O);
+}
+
+static GEN
+get_extra_obj(GEN S, long K)
+{
+  GEN v = (GEN)S[lg(S)-1];
+  if (typ(v) == t_VEC)
+  {
+    GEN O = (GEN)v[K];
+    if (typ(O) != t_INT) return O;
+  }
+  return NULL;
+}
+
+GEN
+check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
+{
+  GEN O = get_extra_obj(S, tag);
+  if (!O)
+  {
+    pari_sp av = avma;
+    obj_insert(S, build(S), tag); avma = av;
+    O = get_extra_obj(S, tag);
+  }
+  return O;
+}
 /*******************************************************************/
 /*                                                                 */
 /*         CLASS GROUP AND REGULATOR (McCURLEY, BUCHMANN)          */
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
-#include "pari.h"
-#include "parinf.h"
 extern GEN gscal(GEN x,GEN y);
 extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
 extern GEN get_nfindex(GEN bas);
@@ -2334,29 +2379,6 @@ codeprimes(GEN Vbase, long N)
   return v;
 }
 
-/* v = bnf[10] */
-GEN
-get_matal(GEN v)
-{
-  if (typ(v) == t_VEC)
-  {
-    GEN ma = (GEN)v[1];
-    if (typ(ma) != t_INT) return ma;
-  }
-  return NULL;
-}
-
-GEN
-get_cycgen(GEN v)
-{
-  if (typ(v) == t_VEC)
-  {
-    GEN h = (GEN)v[2];
-    if (typ(h) == t_VEC) return h;
-  }
-  return NULL;
-}
-
 /* compute principal ideals corresponding to (gen[i]^cyc[i]) */
 static GEN
 makecycgen(GEN bnf)
@@ -2364,9 +2386,7 @@ makecycgen(GEN bnf)
   GEN cyc,gen,h,nf,y,GD,D;
   long e,i,l;
 
-  h = get_cycgen((GEN)bnf[10]);
-  if (h) return h;
-
+  if (DEBUGLEVEL) err(warner,"completing bnf (building cycgen)");
   nf = checknf(bnf);
   cyc = gmael3(bnf,8,1,2); D = diagonal(cyc);
   gen = gmael3(bnf,8,1,3); GD = gmael(bnf,9,3);
@@ -2393,9 +2413,7 @@ makematal(GEN bnf)
   GEN W,B,pFB,nf,ma, WB_C;
   long lW,lma,j,prec;
 
-  ma = get_matal((GEN)bnf[10]);
-  if (ma) return ma;
-
+  if (DEBUGLEVEL) err(warner,"completing bnf (building matal)");
   W   = (GEN)bnf[1];
   B   = (GEN)bnf[2];
   WB_C= (GEN)bnf[4];
@@ -2435,52 +2453,15 @@ makematal(GEN bnf)
   return ma;
 }
 
-/* insert O in bnf at index K
- * K = 1: matal
- * K = 2: cycgen */
-static void
-bnfinsert(GEN bnf, GEN O, long K)
-{
-  GEN v = (GEN)bnf[10];
-  if (typ(v) != t_VEC)
-  {
-    GEN w = cgetg(3, t_VEC);
-    long i;
-    for (i = 1; i < 3; i++)
-      w[i] = (i==K)? (long)O: zero;
-    w = gclone(w);
-    bnf[10] = (long)w;
-  }
-  else
-    v[K] = lclone(O);
-}
-
+#define MATAL  1
+#define CYCGEN 2
 GEN
-check_and_build_cycgen(GEN bnf)
-{
-  GEN cycgen = get_cycgen((GEN)bnf[10]);
-  if (!cycgen)
-  {
-    pari_sp av = avma;
-    if (DEBUGLEVEL) err(warner,"completing bnf (building cycgen)");
-    bnfinsert(bnf, makecycgen(bnf), 2); avma = av;
-    cycgen = get_cycgen((GEN)bnf[10]);
-  }
-  return cycgen;
+check_and_build_cycgen(GEN bnf) {
+  return check_and_build_obj(bnf, CYCGEN, &makecycgen);
 }
-
 GEN
-check_and_build_matal(GEN bnf)
-{
-  GEN matal = get_matal((GEN)bnf[10]);
-  if (!matal)
-  {
-    pari_sp av = avma;
-    if (DEBUGLEVEL) err(warner,"completing bnf (building matal)");
-    bnfinsert(bnf, makematal(bnf), 1); avma = av;
-    matal = get_matal((GEN)bnf[10]);
-  }
-  return matal;
+check_and_build_matal(GEN bnf) {
+  return check_and_build_obj(bnf, MATAL, &makematal);
 }
 
 GEN
@@ -2516,8 +2497,8 @@ smallbuchinit(GEN pol,GEN gcbach,GEN gcbach2,GEN gRELSUP,GEN gborne,long nbrelpi
   y[10] = (long)p1;
 
   y[11] = (long)algtobasis(bnf, (GEN)res[5]);
-  y[12] = gcmp0((GEN)bnf[10])? (long)makematal(bnf): bnf[10];
-  return gerepilecopy(av, y);
+  (void)check_and_build_matal(bnf);
+  y[12] = bnf[10]; return gerepilecopy(av, y);
 }
 
 static GEN
@@ -2646,8 +2627,7 @@ bnfmake(GEN sbnf, long prec)
   mun = get_archclean(nf,fu,prec,1);
 
   prec = gprecision(ro);
-  matal = get_matal((GEN)sbnf[12]);
-  if (!matal) matal = (GEN)sbnf[12];
+  matal = check_and_build_matal(sbnf);
   mc = get_archclean(nf,matal,prec,0);
 
   pfc = (GEN)sbnf[9];

@@ -669,6 +669,7 @@ GEN     bnfinit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfmake(GEN sbnf,long prec);
 GEN     buchall(GEN P, GEN gcbach, GEN gcbach2, GEN gRELSUP, GEN gborne, long nbrelpid, long minsfb, long flun, long prec);
 GEN     buchfu(GEN bignf);
+GEN     check_and_build_obj(GEN S, int tag, GEN (*build)(GEN));
 GEN     classgrouponly(GEN P,GEN data,long prec);
 GEN     isprincipal(GEN bignf, GEN x);
 GEN     isprincipalall(GEN bignf, GEN x,long flall);
