@@ -1530,6 +1530,25 @@ powsell(GEN e, GEN z, GEN n, GEN p)
   return addsell(e,y,z,p);
 }
 
+/* assume H.f = 0, return exact order of f */
+static GEN
+exact_order(GEN H, GEN f, GEN cp4, GEN p)
+{
+  GEN P, e, g, h = H, fa = decomp(H);
+  long i, j, l;
+
+  P = (GEN)fa[1]; l = lg(P);
+  e = (GEN)fa[2];
+  for (i=1; i<l; i++)
+    for (j=itos((GEN)e[i]); j; j--)
+    {
+      g = diviiexact(h,(GEN)P[i]);
+      if (powsell(cp4,f,g,p)) break;
+      h = g;
+    }
+  return h;
+}
+
 /* make sure *x has lgefint >= k */
 static void
 _fix(GEN x, long k)
@@ -1542,9 +1561,9 @@ _fix(GEN x, long k)
 GEN
 apell1(GEN e, GEN p)
 {
-  long *tx, *ty, *ti, pfinal, i, j, j2, s, k, k1, x, nb;
+  long *tx, *ty, *ti, pfinal, i, j, s, k, k1, x, nb;
   gpmem_t av = avma, av2;
-  GEN p1,p2,p3,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
+  GEN p1,h,mfh,f,fh,fg,pordmin,u,v,p1p,p2p,A,B,c4,c6,cp4,pts;
   tx = ty = ti = NULL; /* gcc -Wall */
 
   if (DEBUGLEVEL) (void)timer2();
@@ -1668,7 +1687,7 @@ apell1(GEN e, GEN p)
     {
       GEN ftest = (GEN)pts[j];
       ulong m, l = 1, r = s+1;
-      long k, k2;
+      long k, k2, j2;
 
       avma = av2;
       k = modBIL((GEN)ftest[1]);
@@ -1684,8 +1703,8 @@ apell1(GEN e, GEN p)
         for (r++; tx[r] == k && r <= (ulong)s; r++)
           if (ty[r] == k2 || ty[r] == pfinal - k2)
           { /* [h+j2] f == ± ftest (= [i.s] f)? */
-            if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
             j2 = ti[r] - 1;
+            if (DEBUGLEVEL) msgtimer("[apell1] giant steps, i = %ld",i);
             p1 = addsell(cp4, powsell(cp4,f,stoi(j2),p),fh,p);
             if (egalii((GEN)p1[1], (GEN)ftest[1]))
             {
@@ -1717,14 +1736,7 @@ apell1(GEN e, GEN p)
     }
 
 FOUND: /* found a point of exponent h */
-    p2 = decomp(h); p1=(GEN)p2[1]; p2=(GEN)p2[2];
-    for (i=1; i<lg(p1); i++)
-      for (j=itos((GEN)p2[i]); j; j--)
-      {
-        p3 = divii(h,(GEN)p1[i]);
-        if (powsell(cp4,f,p3,p)) break;
-	h = p3;
-      }
+    h = exact_order(h, f,cp4,p);
     /* now h is the exact order, and divides E(Fp) = A (mod B) */
     if (B == gun) B = h;
     else
@@ -1794,6 +1806,31 @@ powssell1(long e, long p, long n, sellpt *p1, sellpt *p2)
   }
 }
 
+/* assume H.f = 0, return exact order of f, cf. exact_order */
+static long
+sexact_order(long H, sellpt *f, long cp4, long p)
+{
+  GEN P, e, fa = decomp(stoi(H));
+  long h = H, g, pp;
+  long i, j, l;
+  sellpt fh;
+
+  P = (GEN)fa[1]; l = lg(P);
+  e = (GEN)fa[2];
+  for (i=1; i<l; i++)
+  {
+    pp = itos((GEN)P[i]);
+    for (j=itos((GEN)e[i]); j; j--)
+    {
+      g = h / pp;
+      powssell1(cp4, p, g, f, &fh);
+      if (!fh.isnull) break;
+      h = g;
+    }
+  }
+  return h;
+}
+
 typedef struct
 {
   long x,y,i;
@@ -1809,10 +1846,9 @@ compare_multiples(multiple *a, multiple *b)
 static GEN
 apell0(GEN e, long p)
 {
-  GEN p1,p2;
   sellpt f,fh,fg,ftest,f2;
   long pordmin,u,p1p,p2p,A,B,c4,c6,cp4;
-  long i, j, s, k, k1, x, q, h, p3, l, r, m;
+  long i, s, k, k1, x, q, h, l, r, m;
   gpmem_t av;
   multiple *table;
 
@@ -1876,19 +1912,11 @@ apell0(GEN e, long p)
     h += s * i * B;
 
 FOUND:
-    p2=decomp(stoi(h)); p1=(GEN)p2[1]; p2=(GEN)p2[2];
-    for (i=1; i < lg(p1); i++)
-      for (j = mael(p2,i,2); j; j--)
-      {
-	p3 = h / mael(p1,i,2);
-	powssell1(cp4, p, p3, &f, &fh);
-	if (!fh.isnull) break;
-	h = p3;
-      }
+    h = sexact_order(h, &f, cp4, p);
     if (B == 1) B = h;
     else
     {
-      p1 = chinois(gmodulss(A,B), gmodulss(0,h));
+      GEN p1 = chinois(gmodulss(A,B), gmodulss(0,h));
       A = itos((GEN)p1[2]);
       if (is_bigint(p1[1])) { h = A; break; }
       B = itos((GEN)p1[1]);
