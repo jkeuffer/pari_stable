@@ -27,16 +27,16 @@ cat > $file << EOT
 #  lost when Configure is run.
 #
 # make all will create
-#  matexp-dyn (linked dynamically with libpari)
-#  matexp-sta (linked statically)
-#  libmatexp.so (to be used by "install" under GP)
+#  extgcd-dyn (linked dynamically with libpari)
+#  extgcd-sta (linked statically)
+#  libextgcd.so (to be used by "install" under GP)
 #
-# Under GP: install(matexp, Gp, mexp, "./libmatexp.so") enables you to
-# subsequently use mexp to call matexp (see the reference manual).
+# Under GP: install(extgcd, Gp, gcdex, "./libextgcd.so") enables you to
+# subsequently use gcdex to call extgcd (see the reference manual).
 #
 
 # change this TARGET to compile your own programs
-TARGET = matexp
+TARGET = extgcd
 SHELL  = $make_sh
 
 DBGFLAGS   = $DBGFLAGS $CFLAGS
@@ -101,4 +101,3 @@ clean:
 EOT
 
 ( cd $dir ; $ln_s $name $lnfile )
-

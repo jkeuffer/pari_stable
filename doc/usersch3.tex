@@ -762,9 +762,9 @@ row \kbd{m} and column \kbd{n} of the matrix, \tet{x[m,]} represents
 the $m^{\text{th}}$ \emph{row} of $x$, and \tet{x[,n]} represents
 the $n^{\text{th}}$ \emph{column} of $x$.
 
-Finally note that in library mode, the macros \teb{coeff} and \teb{mael}
-are available to deal with the non-recursivity of the \kbd{GEN} type from the
-compiler's point of view. See the discussion on typecasts in Chapter 4.
+Finally note that in library mode, the macros \teb{gcoeff} and \teb{gmael}
+are available as direct accessors to a \kbd{GEN component}. See Chapter 4 for
+details.
 
 \subsecidx{conj}$(x)$: conjugate of $x$. The meaning of this
 is clear, except that for real quadratic numbers, it means conjugation in the

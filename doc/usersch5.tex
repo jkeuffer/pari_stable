@@ -23,12 +23,12 @@ don't waste time looking for the most specialized one available unless you
 identify a genuine bottleneck. The PARI source code is part of the
 documentation; look for inspiration there.\smallskip
 
-As in the previous chapter, we let \B\ abbreviate \tet{BITS_IN_LONG}. The
-type \kbd{long} denotes a \B-bit signed long integer. The type \tet{ulong} is
-defined as \kbd{unsigned long}. The word \emph{stack} always refer to the
-PARI stack, allocated through an initial \kbd{pari\_init} call.
-Refer to Chapters 1--2 and~4 for general background.
-\kbdsidx{BIL}
+We let \B\ abbreviate \tet{BITS_IN_LONG}. The type \kbd{long} denotes a
+\B-bit signed long integer. The type \tet{ulong} is defined as \kbd{unsigned
+long}. The word \emph{stack} always refer to the PARI stack, allocated
+through an initial \kbd{pari\_init} call. Refer to Chapters 1--2 and~4 for
+general background. \kbdsidx{BIL}
+
 \section{Handling \kbd{GEN}s}
 \noindent Almost all these functions are either macros or inlined. Unless
 mentioned otherwise, they do not evaluate their arguments twice. Most of them
