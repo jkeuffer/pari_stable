@@ -263,7 +263,7 @@ affrr(GEN x, GEN y)
 GEN
 shifti(GEN x, long n)
 {
-    return shifti3(x, n, 0);
+  return shifti3(x, n, 0);
 }
 
 GEN
