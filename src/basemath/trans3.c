@@ -51,7 +51,7 @@ lgcx(GEN z)
     case t_INT: case t_FRAC: case t_RFRAC: case t_QUAD: return BIGINT;
     case t_REAL: return lg(z);
     case t_COMPLEX: return min(lgcx((GEN)z[1]),lgcx((GEN)z[2]));
-    default: err(typeer,"lgcx"); 
+    default: err(typeer,"lgcx");
   }
   return 0;
 }
@@ -61,7 +61,7 @@ setlgcx(GEN z, long l)
 {
   long tz = typ(z);
   GEN p1;
-  
+
   switch(tz)
   {
     case t_INT: case t_FRAC: case t_RFRAC: case t_QUAD: return z;
@@ -78,7 +78,7 @@ setlgcx2(GEN z, long l)
 {
   long tz = typ(z);
   GEN p1;
-  
+
   switch(tz)
   {
     case t_INT: case t_FRAC: case t_RFRAC: case t_QUAD: case t_REAL:
@@ -95,7 +95,7 @@ isint(GEN n, long *ptk)
 {
   long tn=typ(n);
   GEN p1,p2;
-  
+
   switch(tn)
   {
     case t_INT:
@@ -104,7 +104,7 @@ isint(GEN n, long *ptk)
       p1 = gfloor(n); if (!gegal(p1,n)) return 0;
       *ptk = itos(p1); return 1;
     case t_FRAC: return 0;
-    case t_FRACN: 
+    case t_FRACN:
       p1 = dvmdii((GEN)n[1],(GEN)n[2],&p2);
       if (signe(p2)) return 0;
       *ptk = itos(p1); return 1;
@@ -135,7 +135,7 @@ norml1(GEN n, long prec)
     default: err(typeer,"norml1"); return 0.; /* not reached */
   }
 }
-  
+
 /***********************************************************************/
 /**                                                                   **/
 /**                       BESSEL FUNCTIONS                            **/
@@ -181,7 +181,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
   pari_sp av=avma, tetpil;
   double B,N,L,x;
   GEN p1,p2,y,znew,nnew;
-  
+
   switch(typ(z))
   {
     case t_REAL: case t_COMPLEX:
@@ -191,7 +191,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 	k = labs(ki);
 	p2 = gdiv(gpowgs(gmul2n(z,-1),k), mpfact(k));
 	if ((flag&k&1) && ki < 0) p2 = gneg(p2);
-      }  
+      }
       else
         p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
       if (gcmp0(z)) return gerepilecopy(av, p2);
@@ -258,13 +258,13 @@ ibessel(GEN n, GEN z, long prec)
 {
   return jbesselintern(n,z,0,prec);
 }
-  
+
 GEN
 _jbesselh(long k, GEN z, long prec)
 {
   GEN zinv,s,c,p0,p1,p2;
   long i;
-  
+
   zinv=ginv(z);
   gsincos(z,&s,&c,prec);
   p1=gmul(zinv,s);
@@ -279,7 +279,7 @@ _jbesselh(long k, GEN z, long prec)
   }
   return p1;
 }
-  
+
 GEN
 jbesselh(GEN n, GEN z, long prec)
 {
@@ -765,7 +765,7 @@ kbessel2(GEN nu, GEN x, long prec)
   GEN p1, x2, a;
 
   if (typ(x)==t_REAL) prec = lg(x);
-  x2 = gshift(x,1); 
+  x2 = gshift(x,1);
   a = gcmp0(gimag(nu))? cgetr(prec): cgetc(prec);
   gaddz(gun,gshift(nu,1), a);
   p1 = hyperu(gshift(a,-1),a,x2,prec);
@@ -934,7 +934,7 @@ eint1(GEN x, long prec)
 
     l = lg(x);
     n = -bit_accuracy(l)-1;
-    
+
     run = realun(l);
     p4 = p3 = p2 = p1 = run;
     for (i=2; expo(p2)>=n; i++)
@@ -1427,7 +1427,7 @@ czeta(GEN s0, long prec)
     maxprime_check((ulong)nn);
   }
   prec++; unr = realun(prec); /* one extra word of precision */
-  
+
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
   d = diffptr + 1;
   if (typ(s0) == t_INT)
@@ -1435,7 +1435,7 @@ czeta(GEN s0, long prec)
     for (p=2; p < nn;) {
       tab[p] = divrr(unr, rpowsi(p, s0, prec));
       NEXT_PRIME_VIADIFF(p,d);
-    }    
+    }
     a = divrr(unr, rpowsi(nn, s0, prec));
   }
   else
@@ -1459,7 +1459,7 @@ czeta(GEN s0, long prec)
     while (q<(ulong)nn) { tab[q] = gmul(tab[p], tab[oldq]); oldq = q; q *= p; }
     NEXT_PRIME_VIADIFF(p,d);
   }
-  if (DEBUGLEVEL>2) msgtimer("tab[q^-s] from 1 to N-1"); 
+  if (DEBUGLEVEL>2) msgtimer("tab[q^-s] from 1 to N-1");
 
   tabn = cgetg(nn, t_VECSMALL); ct = 0;
   for (i = nn-1; i; i>>=1) tabn[++ct] = (i-1)>>1;
@@ -1785,7 +1785,7 @@ gpolylog(long m, GEN x, long prec)
 
   if (m <= 0)
   {
-    GEN t = coefs_to_pol(2, negi(gun), gun); /* 1 - X */ 
+    GEN t = coefs_to_pol(2, negi(gun), gun); /* 1 - X */
     p1 = polx[0];
     for (i=2; i <= -m; i++)
       p1 = gmul(polx[0], gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));
@@ -1979,7 +1979,7 @@ jell(GEN x, long prec)
     p1 = gmul2n(gsqr(p1),1);
     p1 = gmul(q,gpowgs(p1,12));
     p2 = gaddsg(768,gadd(gsqr(p1),gdivsg(4096,p1)));
-    p1 = gmulsg(48,p1); 
+    p1 = gmulsg(48,p1);
     return gerepileupto(av, gadd(p2,p1));
   }
   p1 = gdiv(trueeta(gmul2n(x,1),prec), trueeta(x,prec));
@@ -2039,8 +2039,8 @@ weber0(GEN x, long flag,long prec)
 static GEN
 sagm(GEN x, long prec)
 {
-  GEN p1,a,b,a1,b1,y;
-  long l,ep;
+  GEN p1, a, b, a1, b1, y;
+  long l, l2, ep;
   pari_sp av;
 
   if (gcmp0(x)) return gcopy(x);
@@ -2073,7 +2073,8 @@ sagm(GEN x, long prec)
       return gerepilecopy(av,a1);
 
     case t_PADIC:
-      av=avma; a1=x; b1=gun; l=precp(x);
+      av = avma;
+      a1 = x; b1 = gun; l = precp(x);
       do
       {
 	a = a1; b = b1;
@@ -2088,7 +2089,8 @@ sagm(GEN x, long prec)
     case t_INTMOD: err(impl,"agm of mod");
     default:
       av = avma; if (!(y = _toser(x))) break;
-      a1 = y; b1 = gun; l= lg(y)-2;
+      a1 = y; b1 = gun; l = lg(y)-2;
+      l2 = 5-bit_accuracy(prec);
       do
       {
 	a = a1; b = b1;
@@ -2096,7 +2098,7 @@ sagm(GEN x, long prec)
         b1 = gsqrt(gmul(a,b),prec);
 	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
       }
-      while (ep<l && !gcmp0(p1));
+      while (ep<l && !gcmp0(p1) && gexpo(p1) - gexpo(b1) >= l2);
       return gerepilecopy(av,a1);
   }
   return transc(sagm,x,prec);

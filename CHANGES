@@ -117,6 +117,7 @@ IZ 59- [readline:] support old versions (1.0), try to recover from
        mismatched headers wrt. library, report version of loaded library in
        gp header [as opposed to library version at Configure time]
 BA 60- add "const" keyword to allow building with g++
+   61- agm(1+x,2+x) --> oo loop
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
