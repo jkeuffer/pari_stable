@@ -2513,7 +2513,8 @@ element_reduce(GEN nf, GEN x, GEN ideal)
     x = algtobasis_i(checknf(nf), x);
   N = lg(x);
   if (typ(ideal) != t_MAT || lg(ideal) != N) err(typeer,"element_reduce");
-  u = deplin( concatsp(ideal,x) );
+  u = ker( concatsp(ideal,x) ); /* do NOT use deplin. Much, much slower -- KB */
+  u = (GEN)u[1];
   d = (GEN)u[N]; setlg(u,N);
   for (i=1; i<N; i++) u[i] = (long)gdivround((GEN)u[i],d);
   return gerepileupto(av, gadd(x, gmul(ideal,u)));

@@ -2197,7 +2197,8 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   long N = d->N, v = d->v;
   long i, j, k, l, ct = 0, prec2;
   gpmem_t av = avma;
-  FP_chk_fun *chk;
+  FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, 0 };
+  chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
   eps = gpowgs(stoi(10), min(-8, (d->G >> 1)));
@@ -2241,15 +2242,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 
   nB = mulsi(N+1, B2);
   d->nB = nB;
-
-  chk = (FP_chk_fun*)new_chunk(sizeof(FP_chk_fun));
-  chk->f         = &chk_reccoeff;
-  chk->f_init    = &chk_reccoeff_init;
-  chk->f_post    = NULL;
-  chk->data      = (void*)d;
-  chk->skipfirst = 0;
-
-  cand = fincke_pohst(A, nB, 20000, 3, prec2, chk);
+  cand = fincke_pohst(A, nB, 20000, 1, prec2, &chk);
 
   if (!cand)
   {
@@ -2596,7 +2589,7 @@ define_hilbert(void *S, GEN pol)
 /* let polrel define Hk/k,  find L/Q such that Hk=Lk and L and k are
    disjoint */
 static GEN
-makescind(GEN nf, GEN polrel, long cl, long prec)
+makescind(GEN nf, GEN polrel, long cl)
 {
   long i, l;
   gpmem_t av = avma;
@@ -2604,7 +2597,7 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
   DH_t T;
   FP_chk_fun CHECK;
 
-  BAS = rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_ADDZK, prec);
+  BAS = rnfpolredabs(nf, polrel, nf_ABSOLUTE|nf_ADDZK);
   polabs = (GEN)BAS[1];
   bas    = (GEN)BAS[2];
   dabs = gmul(ZX_disc(polabs), gsqr(det2(vecpol_to_mat(bas, 2*cl))));
@@ -2624,7 +2617,7 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
 
   if (!pol)
   {
-    nf2 = nfinit0(BAS, 0, prec);
+    nf2 = nfinit0(BAS, 0, DEFAULTPREC);
     L  = subfields(nf2, stoi(cl));
     l = lg(L);
     if (DEBUGLEVEL) msgtimer("subfields");
@@ -2643,7 +2636,7 @@ makescind(GEN nf, GEN polrel, long cl, long prec)
     if (i == l)
       err(bugparier, "makescind (no polynomial found)");
   }
-  pol = polredabs0(pol, nf_PARTIALFACT, prec);
+  pol = polredabs0(pol, nf_PARTIALFACT);
   return gerepileupto(av, pol);
 }
 
@@ -2680,7 +2673,7 @@ GenusField(GEN bnf, long prec)
     }
   }
 
-  return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT, prec));
+  return gerepileupto(av, polredabs0(pol, nf_PARTIALFACT));
 }
 
 /* if flag = 0 returns the reduced polynomial,  flag = 1 returns the
@@ -2857,13 +2850,13 @@ LABDOUB:
   if (DEBUGLEVEL) msgtimer("Recpolnum");
 
   /* we want a reduced relative polynomial */
-  if (!flag) return gerepileupto(av, rnfpolredabs(nf, polrel, 0, newprec));
+  if (!flag) return gerepileupto(av, rnfpolredabs(nf, polrel, 0));
 
   /* we just want the polynomial computed */
   if (flag!=2) return gerepilecopy(av, polrel);
 
   /* we want a reduced absolute polynomial */
-  return gerepileupto(av, rnfpolredabs(nf, polrel, 2, newprec));
+  return gerepileupto(av, rnfpolredabs(nf, polrel, nf_ABSOLUTE));
 }
 
 /********************************************************************/
@@ -2937,7 +2930,7 @@ quadhilbertreal(GEN D, GEN flag, long prec)
   /* use the generic function AllStark */
   pol = AllStark(bnrh, nf, 1, newprec);
   err_leave(&catcherr);
-  pol = makescind(nf, pol, cl, prec);
+  pol = makescind(nf, pol, cl);
   (void)delete_var();
   return gerepileupto(av, pol);
 }

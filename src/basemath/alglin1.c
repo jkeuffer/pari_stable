@@ -37,7 +37,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 extern GEN ZM_init_CRT(GEN Hp, ulong p);
 extern int ZM_incremental_CRT(GEN H, GEN Hp, GEN q, GEN qp, ulong p);
-extern ulong u_invmod(ulong x, ulong p);
 
 /*******************************************************************/
 /*                                                                 */
@@ -916,13 +915,22 @@ use_maximal_pivot(GEN x)
 }
 
 static GEN
-check_b(GEN b, long nbli)
+col_to_mat(GEN b)
+{
+  GEN B = cgetg(2, t_MAT);
+  B[1] = (long)b; return B;
+}
+
+static GEN
+check_b(GEN b, long nbli, int *iscol)
 {
   GEN col;
+  *iscol = (b && typ(b) == t_COL);
   if (!b) return idmat(nbli);
-  col = (typ(b) == t_MAT)? (GEN)b[1]: b;
+  b = dummycopy(b);
+  if (*iscol) { col = b; b = col_to_mat(b); } else col = (GEN)b[1];
   if (nbli != lg(col)-1) err(talker,"incompatible matrix dimensions in gauss");
-  return dummycopy(b);
+  return b;
 }
 
 /* C = A^(-1)(tB) where A, B, C are integral, A is upper triangular, t t_INT */
@@ -1015,10 +1023,11 @@ gauss_get_col(GEN a, GEN b, GEN p, long li)
   u[li] = ldiv((GEN)b[li], p);
   for (i=li-1; i>0; i--)
   {
+    gpmem_t av = avma;
     m = gneg_i((GEN)b[i]);
     for (j=i+1; j<=li; j++)
       m = gadd(m, gmul(gcoeff(a,i,j), (GEN)u[j]));
-    u[i] = ldiv(gneg_i(m), gcoeff(a,i,i));
+    u[i] = lpileupto(av, gdiv(gneg_i(m), gcoeff(a,i,i)));
   }
   return u;
 }
@@ -1032,11 +1041,12 @@ Fp_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN p)
   u[li] = lresii(mulii((GEN)b[li], mpinvmod(piv,p)), p);
   for (i=li-1; i>0; i--)
   {
+    gpmem_t av = avma;
     m = (GEN)b[i];
     for (j=i+1; j<=li; j++)
       m = subii(m, mulii(gcoeff(a,i,j), (GEN)u[j]));
     m = resii(m, p);
-    u[i] = lresii(mulii(m, mpinvmod(gcoeff(a,i,i), p)), p);
+    u[i] = lpileuptoint(av, resii(mulii(m, mpinvmod(gcoeff(a,i,i), p)), p));
   }
   return u;
 }
@@ -1049,11 +1059,12 @@ Fq_gauss_get_col(GEN a, GEN b, GEN piv, long li, GEN T, GEN p)
   u[li] = (long)FpXQ_mul((GEN)b[li], FpXQ_inv(piv,T,p), T,p);
   for (i=li-1; i>0; i--)
   {
+    gpmem_t av = avma;
     m = (GEN)b[i];
     for (j=i+1; j<=li; j++)
       m = gsub(m, gmul(gcoeff(a,i,j), (GEN)u[j]));
     m = FpX_res(m, T,p);
-    u[i] = (long)FpXQ_mul(m, FpXQ_inv(gcoeff(a,i,i), T,p), T,p);
+    u[i] = lpileupto(av, FpXQ_mul(m, FpXQ_inv(gcoeff(a,i,i), T,p), T,p));
   }
   return u;
 }
@@ -1173,15 +1184,13 @@ gauss_intern(GEN a, GEN b)
     if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
     return cgetg(1,t_MAT);
   }
-  av=avma; lim=stack_lim(av,1);
+  av = avma; lim = stack_lim(av,1);
   li = lg(a[1])-1;
   if (li != aco && (li < aco || b)) err(mattype1,"gauss");
   a = dummycopy(a);
-  b = check_b(b,li); bco = lg(b)-1;
+  b = check_b(b,li, &iscol); bco = lg(b)-1;
   inexact = use_maximal_pivot(a);
-  iscol   = (typ(b)==t_COL);
-  if(DEBUGLEVEL>4)
-    fprintferr("Entering gauss with inexact=%ld iscol=%ld\n",inexact,iscol);
+  if(DEBUGLEVEL>4) fprintferr("Entering gauss with inexact=%ld\n",inexact);
 
   p = NULL; /* gcc -Wall */
   for (i=1; i<=aco; i++)
@@ -1208,51 +1217,32 @@ gauss_intern(GEN a, GEN b)
     if (k != i)
     {
       for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      if (iscol) { swap(b[i],b[k]); }
-      else
-        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
       p = gcoeff(a,i,i);
     }
     if (i == aco) break;
 
     for (k=i+1; k<=li; k++)
     {
-      m=gcoeff(a,k,i);
+      m = gcoeff(a,k,i);
       if (!gcmp0(m))
       {
 	m = gneg_i(gdiv(m,p));
 	for (j=i+1; j<=aco; j++) _addmul((GEN)a[j],k,i,m);
-	if (iscol) _addmul(b,k,i,m);
-        else
-          for (j=1; j<=bco; j++) _addmul((GEN)b[j],k,i,m);
+        for (j=1;   j<=bco; j++) _addmul((GEN)b[j],k,i,m);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&a; gptr[1]=&b;
       if(DEBUGMEM>1) err(warnmem,"gauss. i=%ld",i);
-      gerepilemany(av,gptr,2);
+      gerepileall(av,2, &a,&b);
     }
   }
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
-  if (iscol) u = gauss_get_col(a,b,p,aco);
-  else
-  {
-    gpmem_t av1 = avma;
-    lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
-    for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
-    for (j=1; j<=bco; j++)
-    {
-      u[j] = (long)gauss_get_col(a,(GEN)b[j],p,aco);
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
-        u = gerepilecopy(av1, u);
-      }
-    }
-  }
-  return gerepilecopy(av, u);
+  u = cgetg(bco+1,t_MAT);
+  for (j=1; j<=bco; j++) u[j] = (long)gauss_get_col(a,(GEN)b[j],p,aco);
+  return gerepilecopy(av, iscol? (GEN)u[1]: u);
 }
 
 GEN
@@ -1275,6 +1265,7 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
   li = lg(a[1])-1;
   bco = lg(b)-1;
   iscol = (typ(b)!=t_MAT);
+  if (iscol) b = col_to_mat(b);
   piv = 0; /* gcc -Wall */
   for (i=1; i<=aco; i++)
   {
@@ -1295,9 +1286,7 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
     if (k != i)
     {
       for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      if (iscol) { swap(b[i],b[k]); }
-      else
-        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
       piv = coeff(a,i,i);
     }
     if (i == aco) break;
@@ -1307,40 +1296,47 @@ u_FpM_gauss_sp(GEN a, GEN b, ulong p)
       m = coeff(a,k,i) % p; coeff(a,k,i) = 0;
       if (m)
       {
-	m = (m * u_invmod(piv,p)) % p;
+	m = mulssmod(m, u_invmod(piv,p), p);
         m = p - m;
 	for (j=i+1; j<=aco; j++) _u_Fp_addmul((GEN)a[j],k,i,m, p);
-	if (iscol) _u_Fp_addmul(b,k,i,m, p);
-        else
-          for (j=1; j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p);
+        for (j=1;   j<=bco; j++) _u_Fp_addmul((GEN)b[j],k,i,m, p);
       }
     }
   }
-  if (iscol) u = u_Fp_gauss_get_col(a,b,piv,aco,p);
-  else
-  {
-    u=cgetg(bco+1,t_MAT);
-    for (j=1; j<=bco; j++)
-      u[j] = (long)u_Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
-  }
-  return u;
+  u = cgetg(bco+1,t_MAT);
+  for (j=1; j<=bco; j++) u[j] = (long)u_Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
+  return iscol? (GEN)u[1]: u;
+}
+
+static GEN
+u_idmat(long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i;
+  if (n < 0) err(talker,"negative size in u_idmat");
+  for (i=1; i<=n; i++) { y[i] = (long)vecsmall_const(n, 0); coeff(y, i,i) = 1; }
+  return y;
 }
 
 GEN
 u_FpM_gauss(GEN a, GEN b, ulong p) {
   return u_FpM_gauss_sp(dummycopy(a), dummycopy(b), p);
 }
+static GEN
+u_FpM_inv_sp(GEN a, ulong p) {
+  return u_FpM_gauss_sp(a, u_idmat(lg(a)-1), p);
+}
 GEN
 u_FpM_inv(GEN a, ulong p) {
-  GEN b = idmat_intern(lg(a)-1,(GEN)1,(GEN)0);
-  return u_FpM_gauss_sp(dummycopy(a), b, p);
+  return u_FpM_inv_sp(dummycopy(a), p);
 }
 
 GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
   gpmem_t av,lim;
-  long iscol,i,j,k,li,bco, aco = lg(a)-1;
+  long i,j,k,li,bco, aco = lg(a)-1;
+  int iscol;
   GEN piv,m,u;
 
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
@@ -1353,15 +1349,14 @@ FpM_gauss(GEN a, GEN b, GEN p)
   }
   li = lg(a[1])-1;
   if (li != aco && (li < aco || b)) err(mattype1,"gauss");
-  b = check_b(b,li); av = avma;
-  iscol = (typ(b)==t_COL);
+  b = check_b(b,li, &iscol); av = avma;
   if (OK_ULONG(p))
   {
     ulong pp=p[2];
     a = u_Fp_FpM(a, pp);
-    b = iscol? u_Fp_FpV(b, pp): u_Fp_FpM(b, pp);
+    b = u_Fp_FpM(b, pp);
     u = u_FpM_gauss_sp(a,b, pp);
-    u = iscol? small_to_col(u): small_to_mat(u);
+    u = iscol? small_to_col((GEN)u[1]): small_to_mat(u);
     return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
@@ -1387,9 +1382,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     if (k != i)
     {
       for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      if (iscol) { swap(b[i],b[k]); }
-      else
-        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
       piv = gcoeff(a,i,i);
     }
     if (i == aco) break;
@@ -1403,9 +1396,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
 	m = mulii(m, mpinvmod(piv,p));
         m = resii(negi(m), p);
 	for (j=i+1; j<=aco; j++) _Fp_addmul((GEN)a[j],k,i,m, p);
-	if (iscol) _Fp_addmul(b,k,i,m, p);
-        else
-          for (j=1; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p);
+        for (j=1  ; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1417,29 +1408,16 @@ FpM_gauss(GEN a, GEN b, GEN p)
   }
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
-  if (iscol) u = Fp_gauss_get_col(a,b,piv,aco,p);
-  else
-  {
-    gpmem_t av1 = avma;
-    lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
-    for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
-    for (j=1; j<=bco; j++)
-    {
-      u[j] = (long)Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
-        u = gerepilecopy(av1, u);
-      }
-    }
-  }
-  return gerepilecopy(av, u);
+  u = cgetg(bco+1,t_MAT);
+  for (j=1; j<=bco; j++) u[j] = (long)Fp_gauss_get_col(a,(GEN)b[j],piv,aco,p);
+  return gerepilecopy(av, iscol? (GEN)u[1]: u);
 }
 GEN
 FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 {
   gpmem_t av,lim;
-  long iscol,i,j,k,li,bco, aco = lg(a)-1;
+  long i,j,k,li,bco, aco = lg(a)-1;
+  int iscol;
   GEN piv,m,u;
 
   if (!T) return FpM_gauss(a,b,p);
@@ -1454,8 +1432,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   }
   li = lg(a[1])-1;
   if (li != aco && (li < aco || b)) err(mattype1,"gauss");
-  b = check_b(b,li); av = avma;
-  iscol = (typ(b)==t_COL);
+  b = check_b(b,li,&iscol); av = avma;
   lim = stack_lim(av,1);
   a = dummycopy(a);
   bco = lg(b)-1;
@@ -1479,9 +1456,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     if (k != i)
     {
       for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
-      if (iscol) { swap(b[i],b[k]); }
-      else
-        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+      for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
       piv = gcoeff(a,i,i);
     }
     if (i == aco) break;
@@ -1495,9 +1470,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 	m = FpXQ_mul(m, FpXQ_inv(piv,T,p),T,p);
         m = resii(negi(m), p);
 	for (j=i+1; j<=aco; j++) _Fq_addmul((GEN)a[j],k,i,m, T,p);
-	if (iscol) _Fq_addmul(b,k,i,m, T,p);
-        else
-          for (j=1; j<=bco; j++) _Fq_addmul((GEN)b[j],k,i,m, T,p);
+        for (j=1;   j<=bco; j++) _Fq_addmul((GEN)b[j],k,i,m, T,p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1509,42 +1482,14 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   }
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
-  if (iscol) u = Fq_gauss_get_col(a,b,piv,aco,T,p);
-  else
-  {
-    gpmem_t av1 = avma;
-    lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
-    for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
-    for (j=1; j<=bco; j++)
-    {
-      u[j] = (long)Fq_gauss_get_col(a,(GEN)b[j],piv,aco,T,p);
-      if (low_stack(lim, stack_lim(av1,1)))
-      {
-        if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
-        u = gerepilecopy(av1, u);
-      }
-    }
-  }
-  return gerepilecopy(av, u);
+  u = cgetg(bco+1,t_MAT);
+  for (j=1; j<=bco; j++) u[j] = (long)Fq_gauss_get_col(a,(GEN)b[j],piv,aco,T,p);
+  return gerepilecopy(av, iscol? (GEN)u[1]: u);
 }
 
 
 GEN
 FpM_inv(GEN x, GEN p) { return FpM_gauss(x, NULL, p); }
-
-static GEN
-u_idmat(long n)
-{
-  GEN y = cgetg(n+1,t_MAT);
-  long i,j;
-  if (n < 0) err(talker,"negative size in u_idmat");
-  for (i=1; i<=n; i++)
-  {
-    y[i]=lgetg(n+1,t_VECSMALL);
-    for (j=1; j<=n; j++) coeff(y,j,i) = (i==j)? 1: 0;
-  }
-  return y;
-}
 
 /* set y = x * y */
 #define HIGHWORD(a) ((a) >> BITS_IN_HALFULONG)
@@ -1568,7 +1513,7 @@ GEN
 ZM_inv(GEN M, GEN dM)
 {
   gpmem_t av2, av = avma, lim = stack_lim(av,1);
-  GEN  ID,Hp,q,H;
+  GEN Hp,q,H;
   ulong p,dMp;
   byteptr d = diffptr;
   long lM = lg(M), stable = 0;
@@ -1584,8 +1529,7 @@ ZM_inv(GEN M, GEN dM)
     if (!*d) err(primer1);
     dMp = umodiu(dM,p);
     if (!dMp) continue;
-    ID = u_idmat(lM-1);
-    Hp = u_FpM_gauss(u_Fp_FpM(M,p), ID, p);
+    Hp = u_FpM_inv_sp(u_Fp_FpM(M,p), p);
     if (dMp != 1) Hp = u_FpM_Fp_mul_ip(Hp, dMp, p);
 
     if (!H)

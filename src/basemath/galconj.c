@@ -2995,7 +2995,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
   if (typ(T) != t_POL)
   {
     T = checknf(T);
-    if (!den) den = denom(content((GEN)T[7]));
+    if (!den) den = Q_denom((GEN)T[7]);
     T = (GEN) T[1];
   }
   n = degpol(T);

@@ -125,7 +125,8 @@ FindApplyH(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
   else
     coeff(mu,k,k) = x[k];
   for (i=1; i<k; i++) coeff(mu,k,i) = x[i];
-  B[k] = (long)x2; return 1;
+  B[k] = (long)x2;
+  return (typ(x2) != t_REAL || lg(x2) >  3 || expo(x2) < 10);
 }
 
 static void
@@ -2732,7 +2733,6 @@ perf(GEN a)
 
 /* general program for positive definit quadratic forms (real coeffs).
  * One needs BORNE != 0; LLL reduction done in fincke_pohst().
- * If (flag & 2) stop as soon as stockmax is reached.
  * If (flag & 1) return NULL on precision problems (no error).
  * If (check != NULL consider only vectors passing the check [ assumes
  *   stockmax > 0 and we only want the smallest possible vectors ] */
@@ -2865,17 +2865,20 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
     {
       if (check) norms[s] = (long)norme1;
       S[s] = (long)dummycopy(x);
-      if (s == stockmax && (flag&2) && check)
+      if (s == stockmax)
       {
-        gpmem_t av1 = avma;
-        GEN per = sindexsort(norms);
+        gpmem_t av2 = avma;
+        GEN per;
+
+        if (!check) goto END;
+        per = sindexsort(norms);
         if (DEBUGLEVEL) fprintferr("sorting...\n");
         for (i=1; i<=s; i++)
         {
           long k = per[i];
           if (check(data,(GEN)S[k]))
           {
-            S[1] = S[k]; avma = av1;
+            S[1] = S[k]; avma = av2;
             borne1 = mpadd(norme1,eps);
             borne2 = mpmul(borne1,alpha);
             s = 1; checkcnt = 0; break;
@@ -2928,7 +2931,6 @@ END:
  * If check is non-NULL keep x only if check(x).
  * flag & 1, return NULL in case of precision problems (sqred1 or lllgram)
  *   raise an error otherwise.
- * flag & 2, return as soon as stockmax vectors found.
  * If a is a vector, assume a[1] is the LLL-reduced Cholesky form of q */
 GEN
 fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
@@ -3026,11 +3028,7 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
   }
   err_leave(&catcherr); catcherr = NULL;
-  if (CHECK)
-  {
-    if (CHECK->f_post) res = CHECK->f_post(CHECK->data, res);
-    return res;
-  }
+  if (CHECK) return res;
 
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
   z = cgetg(4,t_VEC);
@@ -3039,7 +3037,6 @@ fincke_pohst(GEN a,GEN B0,long stockmax,long flag, long PREC, FP_chk_fun *CHECK)
   z[3] = lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
 PRECPB:
   if (catcherr) err_leave(&catcherr);
-  if (!(flag & 1))
-    err(talker,"not a positive definite form in fincke_pohst");
+  if (!(flag & 1)) err(precer,"fincke_pohst");
   avma = av; return NULL;
 }

@@ -623,7 +623,7 @@ bnfissunit(GEN bnf,GEN suni,GEN x)
   HB = (GEN)p1[2]; den = (GEN)p1[3];
   cH = lg(HB[1]) - 1;
   lB = lg(HB) - cH;
-  xb = algtobasis(bnf,x); p1 = denom(content(xb));
+  xb = algtobasis(bnf,x); p1 = Q_denom(xb);
   N = mulii(gnorm(gmul(x,p1)), p1); /* relevant primes divide N */
   v = cgetg(ls, t_VECSMALL);
   for (i=1; i<ls; i++)

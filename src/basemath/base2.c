@@ -1094,7 +1094,7 @@ redelt(GEN elt, GEN rd, GEN pd)
 {
   GEN den, nelt, nrd, relt;
 
-  den  = ggcd(QX_denom(elt), pd);
+  den  = ggcd(Q_denom(elt), pd);
   nelt = gmul(den, elt);
   nrd  = gmul(den, rd);
 
@@ -1238,11 +1238,22 @@ newtoncharpoly(GEN a, GEN chi, GEN pp, GEN ns)
   return gerepileupto(av, gtopoly(c, vn));
 }
 
+/* return v_p(n!) */
+static long
+val_fact(long n, GEN pp)
+{
+  long p, q, v;
+  if (is_bigint(pp)) return 0;
+  q = p = itos(pp); v = 0;
+  do { v += n/q; q *= p; } while (n >= q);
+  return v;
+}
+
 static GEN
 mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
 {
   GEN p1, chi, npp;
-  long j, a, v = varn(f), n = degpol(f);
+  long v = varn(f), n = degpol(f);
 
   if (gcmp0(beta)) return zeropol(v);
 
@@ -1251,11 +1262,8 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
     chi = ZX_caract(f, beta, v);
   else
   {
-    a = 0;
-    for (j = 1; j <= n; j++) /* compute the extra precision needed */
-      a += ggval(stoi(j), p);
-    npp = mulii(pp, gpowgs(p, a));
-    if (p1) npp = gmul(npp, gpowgs(denom(p1), n));
+    npp = mulii(pp, gpowgs(p, val_fact(n, p)));
+    if (p1) npp = mulii(npp, gpowgs(denom(p1), n));
 
     chi = newtoncharpoly(beta, f, npp, ns);
   }
@@ -1265,7 +1273,7 @@ mycaract(GEN f, GEN beta, GEN p, GEN pp, GEN ns)
   if (!pp) return chi;
 
   /* this can happen only if gamma is incorrect (not an integer) */
-  if (divise(QX_denom(chi), p)) return NULL;
+  if (divise(Q_denom(chi), p)) return NULL;
 
   return redelt(chi, pp, pp);
 }
@@ -1516,7 +1524,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	chig = polmodi(chig, pmf);
       }
 
-      if (!chig || !gcmp1(QX_denom(chig)))
+      if (!chig || !gcmp1(Q_denom(chig)))
       {
 	/* Valuation of beta was wrong. This means that
 	   gamma fails the v*-test */
@@ -1994,12 +2002,10 @@ uniformizer(GEN nf, GEN P, GEN p)
       return random_unif_loop_vec(nf, P, p, q);
   }
 
-  w = (GEN)nf[7];
-  D = denom(content(w)); if (is_pm1(D)) D = NULL;
+  w = Q_remove_denom((GEN)nf[7], &D);
   if (D)
   {
     long v = pvaluation(D, p, &a);
-    w = gmul(w, D);
     D = gpowgs(p, v);
     Dp = mulii(D, p);
   } else {
@@ -3154,7 +3160,7 @@ rnfsimplifybasis(GEN bnf, GEN order)
     if (gegal((GEN)I[j],id)) { Iz[j]=(long)id; Az[j]=A[j]; }
     else
     {
-      p1=content((GEN)I[j]);
+      p1 = content((GEN)I[j]);
       if (!gcmp1(p1))
       {
 	Iz[j]=(long)gdiv((GEN)I[j],p1); Az[j]=lmul((GEN)A[j],p1);
@@ -3906,13 +3912,12 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   p1[2] = (long)B; return gerepilecopy(av, p1);
 }
 
-/* relative polredabs. Returns
- * Default (flag = 0): relative polynomial
+/* relative polredabs. Returns relative polynomial by default (flag = 0)
  * flag & nf_ORIG: + element (base change)
  * flag & nf_ADDZK: + integer basis
  * flag & nf_ABSOLUTE: absolute polynomial */
 GEN
-rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
+rnfpolredabs(GEN nf, GEN relpol, long flag)
 {
   GEN red, bas, eq, z, elt, POL, pol, T, a;
   long v;
@@ -3938,7 +3943,7 @@ rnfpolredabs(GEN nf, GEN relpol, long flag, long prec)
   if ((flag & nf_ADDZK) && (flag != (nf_ADDZK|nf_ABSOLUTE)))
     err(impl,"this combination of flags in rnfpolredabs");
 
-  red = polredabs0(bas, (flag & nf_ADDZK)? nf_ORIG: nf_RAW, prec);
+  red = polredabs0(bas, (flag & nf_ADDZK)? nf_ORIG: nf_RAW);
   pol = (GEN)red[1];
   if (DEBUGLEVEL>1) fprintferr("reduced absolute generator: %Z\n",pol);
   if (flag & nf_ABSOLUTE)

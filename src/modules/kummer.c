@@ -866,7 +866,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   GEN kk,clgp,fununits,torsunit,vecB,vecC,Tc,Tv,P;
   GEN Q,idealz,gothf,factgothf,factell,p;
   GEN listprSp,listpr,listex,vecw,vecWA,vecWB;
-  GEN M,K,X,finalresult,y,module,A1,A2,vecMsup;
+  GEN M,K,X,finalresult,y,module,A1,A2,A3,A3rev,vecMsup;
   GEN uu,gencyc,cyc,vecalpha,vecalphap,vecbetap,matP,ESml2,Sp,Sm,Sml1,Sml2,Sl;
 
   checkbnrgen(bnr);
@@ -916,21 +916,15 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   g = powuumod(itos(lift(gener(gell))), d, ell);
   if (powuumod(g, m, ell*ell) == 1) g += ell; /* ord(g)=m in all (Z/ell^k)^* */
       /* step reduction of R */
-  if (degKz <= 20)
-  {
-    GEN A3,A3rev;
-
-    if (DEBUGLEVEL>2) fprintferr("Step reduction\n");
-    p1 = polredabs0(R, nf_ORIG|nf_PARTIALFACT, prec);
-    R = (GEN)p1[1]; if (DEBUGLEVEL>2) fprintferr("polredabs = %Z",R);
-    A3= (GEN)p1[2];
-    A1 = poleval(lift(A1), A3);
-    A2 = poleval(lift(A2), A3);
-    A3rev= polymodrecip(A3);
-    U = gadd(gpowgs(A2,g), gmul(kk,A1));
-    U = poleval(lift(A3rev), U);
-  }
-  else U = gadd(gpowgs(A2,g), gmul(kk,A1));
+  if (DEBUGLEVEL>2) fprintferr("Step reduction\n");
+  p1 = polredabs0(R, nf_ORIG|nf_PARTIALFACT);
+  R = (GEN)p1[1]; if (DEBUGLEVEL>2) fprintferr("polredabs = %Z",R);
+  A3= (GEN)p1[2];
+  A1 = poleval(lift(A1), A3);
+  A2 = poleval(lift(A2), A3);
+  A3rev= modreverse_i((GEN)A3[2], (GEN)A3[1]);
+  U = gadd(gpowgs(A2,g), gmul(kk,A1));
+  U = poleval(A3rev, U);
       /* step 3 */
       /* one could factor disc(R) using th. 2.1.6. */
   if (DEBUGLEVEL>2) fprintferr("Step 3\n");

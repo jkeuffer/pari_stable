@@ -2854,160 +2854,144 @@ Q_primitive_part(GEN x, GEN *ptc)
 }
 
 GEN
-QX_denom(GEN x)
-{
-  long i, l = lgef(x);
-  GEN r, d = gun;
-  for (i=2; i<l; i++)
-  {
-    r = (GEN)x[i];
-    if (typ(r) == t_FRAC) d = mpppcm(d, (GEN)r[2]);
-  }
-  return d;
-}
-
-GEN
-Q_remove_denom(GEN x, GEN *ptd)
-{
-  GEN d = typ(x) == t_POL? QX_denom(x): denom(x);
-  if (gcmp1(d)) d = NULL; else x = Q_muli_to_int(x,d);
-  if (ptd) *ptd = d;
-  return x;
-}
-
-GEN
 primpart(GEN x) { return primitive_part(x, NULL); }
 
 GEN
 Q_primpart(GEN x) { return Q_primitive_part(x, NULL); }
 
-static GEN
-_rd(GEN a, GEN d)
+/* NOT MEMORY CLEAN (because of t_FRAC).
+ * As denom(), but over Q. Treats polynomial as elts of Q[x1,...xn], instead
+ * of Q(x2,...,xn)[x1] */
+GEN
+Q_denom(GEN x)
 {
-  long t = typ(a);
-  if (t == t_INT) a = mulii(a,d);
-  else
-  { /* t_FRAC: x/y */
-    GEN x = (GEN)a[1], y = (GEN)a[2];
-    gpmem_t av = avma;
-    if (t != t_FRAC) err(typeer,"remove_denom");
-    a = mulii(x, diviiexact(d, y));
-    a = gerepileuptoint(av, a);
+  long i, l = lgef(x);
+  GEN d, D;
+  gpmem_t av;
+
+  switch(typ(x))
+  {
+    case t_INT: return gun;
+    case t_FRAC: return (GEN)x[2];
+
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x); if (l == 1) return gun;
+      av = avma; d = Q_denom((GEN)x[1]);
+      for (i=2; i<l; i++)
+      {
+        D = Q_denom((GEN)x[i]);
+        if (D != gun) d = mpppcm(d, D);
+      }
+      return gerepileuptoint(av, d);
+
+    case t_POL:
+      l = lgef(x); if (l == 2) return gun;
+      av = avma; d = Q_denom((GEN)x[2]);
+      for (i=3; i<l; i++)
+      {
+        D = Q_denom((GEN)x[i]);
+        if (D != gun) d = mpppcm(d, D);
+      }
+      return gerepileuptoint(av, d);
   }
-  return a;
+  err(typeer,"Q_denom");
+  return NULL; /* not reached */
 }
 
-/* return a * d/n. a: rational; d,n,result: integral. NULL represents 1 */
-static GEN
-_rc(GEN a, GEN n, GEN d)
+GEN
+Q_remove_denom(GEN x, GEN *ptd)
 {
-  long t = typ(a);
-  gpmem_t av = avma;
-  if (t == t_INT)
-  {
-    a = diviiexact(a,n);
-    if (d) a = gerepileuptoint(av, mulii(a,d));
-  }
-  else
-  { /* t_FRAC: x/y --> d != NULL */
-    GEN x = (GEN)a[1], y = (GEN)a[2];
-    if (t != t_FRAC) err(typeer,"Q_div_to_int");
-    a = mulii(diviiexact(x, n), diviiexact(d, y));
-    a = gerepileuptoint(av, a);
-  }
-  return a;
+  GEN d = Q_denom(x);
+  if (gcmp1(d)) d = NULL; else x = Q_muli_to_int(x,d);
+  if (ptd) *ptd = d;
+  return x;
 }
 
 /* return y = x * d, assuming x rational, and d,y integral */
 GEN
 Q_muli_to_int(GEN x, GEN d)
 {
-  long i, j, h, l;
-  GEN y;
+  long i, l, t = typ(x);
+  GEN y, xn, xd;
+  gpmem_t av;
 
   if (typ(d) != t_INT) err(typeer,"Q_muli_to_int");
-
-  switch (typ(x))
+  switch (t)
   {
-    case t_VEC: case t_COL: l = lg(x);
-      y = cgetg(l, typ(x));
-      for (i=1; i<l; i++)
-        y[i] = (long)_rd((GEN)x[i], d);
-      break;
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x); y = cgetg(l, t);
+      for (i=1; i<l; i++) y[i] = (long)Q_muli_to_int((GEN)x[i], d);
+      return y;
 
     case t_POL: l = lgef(x);
-      y = cgetg(l, typ(x)); y[1] = x[1];
-      for (i=2; i<l; i++)
-        y[i] = (long)_rd((GEN)x[i], d);
-      break;
+      y = cgetg(l, t_POL); y[1] = x[1];
+      for (i=2; i<l; i++) y[i] = (long)Q_muli_to_int((GEN)x[i], d);
+      return y;
 
-    case t_MAT: l = lg(x);
-      y = cgetg(l, t_MAT);
-      if (l == 1) break;
-      h = lg(x[1]);
-      for (j=1; j<l; j++)
-      {
-        GEN c = (GEN)x[j], C = cgetg(h,t_COL);
-        for (i=1; i<h; i++) C[i] = (long)_rd((GEN)c[i], d);
-        y[j] = (long)C;
-      }
-      break;
+    case t_INT:
+      return mulii(x,d);
 
-    default: err(typeer,"Q_div_to_int");
-      y = NULL; /* not reached */
+    case t_FRAC:
+      xn = (GEN)x[1];
+      xd = (GEN)x[2]; av = avma;
+      y = mulii(xn, diviiexact(d, xd));
+      return gerepileuptoint(av, y);
   }
-  return y;
+  err(typeer,"Q_muli_to_int");
+  return NULL; /* not reached */
 }
 
-/* return y = x / c, assuming x,c rationnal, and y integral */
+/* return x * n/d. x: rational; d,n,result: integral. n = NULL represents 1 */
+GEN
+Q_divmuli_to_int(GEN x, GEN d, GEN n)
+{
+  long i, l, t = typ(x);
+  GEN y, xn, xd;
+  gpmem_t av;
+  
+  switch(t)
+  {
+    case t_VEC: case t_COL: case t_MAT:
+      l = lg(x); y = cgetg(l, t);
+      for (i=1; i<l; i++) y[i] = (long)Q_divmuli_to_int((GEN)x[i], d,n);
+      return y;
+
+    case t_POL: l = lgef(x);
+      y = cgetg(l, t_POL); y[1] = x[1];
+      for (i=2; i<l; i++) y[i] = (long)Q_divmuli_to_int((GEN)x[i], d,n);
+      return y;
+
+    case t_INT:
+      av = avma; y = diviiexact(x,d);
+      if (n) y = gerepileuptoint(av, mulii(y,n));
+      return y;
+
+    case t_FRAC:
+      xn = (GEN)x[1];
+      xd = (GEN)x[2]; av = avma;
+      y = mulii(diviiexact(xn, d), diviiexact(n, xd));
+      return gerepileuptoint(av, y);
+  }
+  err(typeer,"Q_divmuli_to_int");
+  return NULL; /* not reached */
+}
+
+/* return y = x / c, assuming x,c rational, and y integral */
 GEN
 Q_div_to_int(GEN x, GEN c)
 {
-  long i, j, h, l, t = typ(c);
-  GEN d, n, y;
-
-  if (t == t_INT)
+  GEN d, n;
+  switch(typ(c))
   {
-    n = c;
-    d = NULL;
+    case t_INT:
+      return Q_divmuli_to_int(x, c, NULL);
+    case t_FRAC:
+      n = (GEN)c[1];
+      d = (GEN)c[2]; if (gcmp1(n)) return Q_muli_to_int(x,d);
+      return Q_divmuli_to_int(x, n,d);
   }
-  else
-  {
-    if (t != t_FRAC) err(typeer,"Q_div_to_int");
-    n = (GEN)c[1];
-    d = (GEN)c[2]; if (gcmp1(n)) return Q_muli_to_int(x,d);
-  }
-
-  switch(typ(x))
-  {
-    case t_VEC: case t_COL: l = lg(x);
-      y = cgetg(l, typ(x));
-      for (i=1; i<l; i++)
-        y[i] = (long)_rc((GEN)x[i], n,d);
-      break;
-
-    case t_POL: l = lgef(x);
-      y = cgetg(l, typ(x)); y[1] = x[1];
-      for (i=2; i<l; i++)
-        y[i] = (long)_rc((GEN)x[i], n,d);
-      break;
-
-    case t_MAT: l = lg(x);
-      y = cgetg(l, t_MAT);
-      if (l == 1) break;
-      h = lg(x[1]);
-      for (j=1; j<l; j++)
-      {
-        GEN c = (GEN)x[j], C = cgetg(h,t_COL);
-        for (i=1; i<h; i++) C[i] = (long)_rc((GEN)c[i], n,d);
-        y[j] = (long)C;
-      }
-      break;
-
-    default: err(typeer,"Q_div_to_int");
-      y = NULL; /* not reached */
-  }
-  return y;
+  err(typeer,"Q_div_to_int");
+  return NULL; /* not reached */
 }
 
 /*******************************************************************/

@@ -21,6 +21,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "parinf.h"
+extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
+extern GEN get_nfindex(GEN bas);
 extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN computeGtwist(GEN nf, GEN vdir);
 extern GEN famat_to_arch(GEN nf, GEN fa, long prec);
@@ -31,16 +33,13 @@ extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN gmul_mati_smallvec(GEN x, GEN y);
 extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
 extern GEN get_roots(GEN x,long r1,long prec);
-extern void get_nf_matrices(GEN nf, long prec, long small);
 extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t);
 extern GEN init_idele(GEN nf);
 extern GEN norm_by_embed(long r1, GEN x);
 extern void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
-extern GEN idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n);
 extern GEN arch_mul(GEN x, GEN y);
 extern GEN vecdiv(GEN x, GEN y);
 extern GEN vecmul(GEN x, GEN y);
-extern GEN mul_real(GEN x, GEN y);
 
 #define SFB_MAX 2
 #define SFB_STEP 2
@@ -2530,57 +2529,62 @@ bnrnewprec(GEN bnr, long prec)
   return y;
 }
 
+static void
+nfbasic_from_sbnf(GEN sbnf, nfbasic_t *T)
+{
+  T->x    = (GEN)sbnf[1];
+  T->dK   = (GEN)sbnf[3];
+  T->bas  = (GEN)sbnf[4];
+  T->index= get_nfindex(T->bas);
+  T->r1   = itos((GEN)sbnf[2]);
+  T->dx   = NULL;
+  T->lead = NULL;
+  T->basden = NULL;
+}
+
 GEN
 bnfmake(GEN sbnf, long prec)
 {
-  long j, k, n, r1, r2, ru, lpf;
+  long j, k, l;
   gpmem_t av = avma;
-  GEN p1,x,bas,ro,nf,mun,funits,index;
+  GEN p1,bas,ro,nf,mun,funits;
   GEN pfc,vp,mc,clgp,clgp2,res,y,W,racu,reg,matal,vectbase,Vbase;
+  nfbasic_t T;
 
-  if (typ(sbnf)!=t_VEC || lg(sbnf)!=13)
-    err(talker,"incorrect sbnf in bnfmake");
-  x=(GEN)sbnf[1]; bas=(GEN)sbnf[4]; n=lg(bas)-1;
-  r1=itos((GEN)sbnf[2]); r2=(n-r1)>>1; ru=r1+r2;
-  ro=(GEN)sbnf[5];
-  if (prec > gprecision(ro)) ro=get_roots(x,r1,prec);
-  index = gun;
-  for (j=2; j<=n; j++) index = mulii(index, denom(leading_term(bas[j])));
+  if (typ(sbnf) != t_VEC || lg(sbnf) != 13) err(typeer,"bnfmake");
+  if (prec < DEFAULTPREC) prec = DEFAULTPREC;
 
-  nf=cgetg(10,t_VEC);
-  nf[1]=sbnf[1]; p1=cgetg(3,t_VEC); p1[1]=lstoi(r1); p1[2]=lstoi(r2);
-  nf[2]=(long)p1;
-  nf[3]=sbnf[3];
-  nf[4]=(long)index;
-  nf[6]=(long)ro;
-  nf[7]=(long)bas;
-  get_nf_matrices(nf, prec, 0);
+  nfbasic_from_sbnf(sbnf, &T);
+  ro = (GEN)sbnf[5];
+  if (prec > gprecision(ro)) ro = get_roots(T.x,T.r1,prec);
+  nf = nfbasic_to_nf(&T, ro, prec);
+  bas = (GEN)nf[7];
 
-  funits=cgetg(ru,t_VEC); p1 = (GEN)sbnf[11];
-  for (k=1; k < lg(p1); k++)
-    funits[k] = lmul(bas,(GEN)p1[k]);
+  p1 = (GEN)sbnf[11]; l = lg(p1); funits = cgetg(l, t_VEC);
+  for (k=1; k < l; k++) funits[k] = lmul(bas, (GEN)p1[k]);
   mun = get_arch2_i(nf,funits,prec,1);
 
-  prec=gprecision(ro); if (prec<DEFAULTPREC) prec=DEFAULTPREC;
+  prec = gprecision(ro);
   matal = get_matal((GEN)sbnf[12]);
   if (!matal) matal = (GEN)sbnf[12];
   mc = get_arch2_i(nf,matal,prec,0);
 
-  pfc=(GEN)sbnf[9]; lpf=lg(pfc);
-  vectbase=cgetg(lpf,t_COL); vp=cgetg(lpf,t_COL);
-  for (j=1; j<lpf; j++)
+  pfc = (GEN)sbnf[9]; l = lg(pfc);
+  vectbase = cgetg(l,t_COL);
+  vp       = cgetg(l,t_COL);
+  for (j=1; j<l; j++)
   {
-    vp[j]=lstoi(j);
-    vectbase[j]=(long)decodeprime(nf,(GEN)pfc[j]);
+    vectbase[j] = (long)decodeprime(nf,(GEN)pfc[j]);
+    vp[j]       = lstoi(j);
   }
   W = (GEN)sbnf[7];
   Vbase = get_Vbase(W,vectbase,vp);
   class_group_gen(nf,W,mc,Vbase,prec,NULL, &clgp,&clgp2);
 
   reg = get_regulator(mun,prec);
-  p1=cgetg(3,t_VEC); racu=(GEN)sbnf[10];
-  p1[1]=racu[1]; p1[2]=lmul(bas,(GEN)racu[2]);
-  racu=p1;
+  p1 = cgetg(3,t_VEC); racu = (GEN)sbnf[10];
+  p1[1] = racu[1];
+  p1[2] = lmul(bas,(GEN)racu[2]); racu = p1;
 
   res=cgetg(7,t_VEC);
   res[1]=(long)clgp; res[2]=(long)reg;    res[3]=(long)dbltor(1.0);

@@ -32,7 +32,7 @@ extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
 extern GEN hensel_lift_fact(GEN pol, GEN fact, GEN T, GEN p, GEN pev, long e);
 extern GEN initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec);
-extern void remake_GM(GEN nf, long prec, GEN *G, GEN *M);
+extern void remake_GM(GEN nf, long prec, nffp_t *F);
 extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 extern GEN polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N);
 extern GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
@@ -381,7 +381,7 @@ nf_factor_bound(GEN nf, GEN polbase)
     prec = (prec<<1)-2;
     if (prec > precnf)
     {
-      GEN M; remake_GM(nf, prec, &G, &M);
+      nffp_t F; remake_GM(nf, prec, &F); G = F.G;
       if (DEBUGLEVEL>1) err(warnprec, "nf_factor_bound", prec);
     }
   }
