@@ -61,9 +61,13 @@ static GEN
 red_mod_cyclo(GEN T, long p)
 {
   long i, d;
-  GEN y = dummycopy(T), *z = (GEN*)(y+2);
-  /* reduce mod (x^p - 1) */
+  GEN y, *z;
+ 
   d = degpol(T) - p; /* < p */
+  if (d <= -2) return T;
+ 
+  /* reduce mod (x^p - 1) */
+  y = dummycopy(T); *z = (GEN*)(y+2);
   for (i = 0; i<=d; i++) z[i] = addii(z[i], z[i+p]);
 
   /* reduce mod x^(p-1) + ... + 1 */
@@ -73,7 +77,7 @@ red_mod_cyclo(GEN T, long p)
   return normalizepol_i(y, d+2);
 }
 
-/* special case R->C = pocyclo(p) */
+/* special case R->C = polcyclo(p) */
 static GEN
 _red2(GEN x, red_t *R) {
   return FpX_red(red_mod_cyclo(x, R->n), R->N);
@@ -777,15 +781,10 @@ aprcl(GEN N)
     {
       p = itos((GEN)faqpr[j]);
       k = itos((GEN)faqex[j]);
-      if (p >= 3) fl = step4a(N,p,k,gmael(tabj,i,j));
-      else
-      {
-	if (k >= 3) fl = step4b(N,q,k,(GEN)tabj2[i],(GEN)tabj3[i]);
-	else
-	{
-	  if (k == 2) fl = step4c(N,q,gmael(tabj,i,1)); else fl = step4d(N,q);
-	}
-      }
+      if (p >= 3)      fl = step4a(N,p,k,gmael(tabj,i,j));
+      else if (k >= 3) fl = step4b(N,q,k,(GEN)tabj2[i],(GEN)tabj3[i]);
+      else if (k == 2) fl = step4c(N,q,gmael(tabj,i,1));
+      else             fl = step4d(N,q);
       if (fl == -1)
       {
         avma = av0; p1 = cgetg(4,t_VEC);
@@ -796,25 +795,25 @@ aprcl(GEN N)
       if (fl == 1) flaglp[p] = 1;
     }
   }
- if (DEBUGLEVEL>=3) fprintferr("\nnormal test done; testing conditions lp\n");
- for (i=1; i<lfat; i++)
- {
-   p = itos((GEN)fat[i]);
-   if (flaglp[p] == 0)
-   {
-     fl = step5(N,p,et);
-     if (fl < 0)
-     {
-       avma = av0; p1=cgetg(4,t_VEC);
-       p1[1] = lstoi(fl);
-       p1[2] = lstoi(p);
-       p1[3] = zero; return p1;
-     }
-     if (fl==0) err(talker,"aprcl test fails! this is highly improbable");
-   }
- }
- if (DEBUGLEVEL>=3) fprintferr("conditions lp done, doing step6\n");
- return gerepilecopy(av0, step6(N,t,et));
+  if (DEBUGLEVEL>=3) fprintferr("\nnormal test done; testing conditions lp\n");
+  for (i=1; i<lfat; i++)
+  {
+    p = itos((GEN)fat[i]);
+    if (flaglp[p] == 0)
+    {
+      fl = step5(N,p,et);
+      if (fl < 0)
+      {
+        avma = av0; p1=cgetg(4,t_VEC);
+        p1[1] = lstoi(fl);
+        p1[2] = lstoi(p);
+        p1[3] = zero; return p1;
+      }
+      if (fl==0) err(talker,"aprcl test fails! this is highly improbable");
+    }
+  }
+  if (DEBUGLEVEL>=3) fprintferr("conditions lp done, doing step6\n");
+  return gerepilecopy(av0, step6(N,t,et));
 }
 
 /* si flag=0 retourne une reponse vrai/faux, sinon retourne des details
