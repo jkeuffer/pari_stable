@@ -81,38 +81,32 @@ primes(long n)
   return y;
 }
 
-/* Building/Rebuilding the diffptr table. Incorporates Ilya Zakharevich's
- * block sweep algorithm  (see pari-dev-111, 25 April 1998).  The actual work
- * is done by the following two subroutines;  the user entry point is the
- * function initprimes() below.  initprimes1() is the old algorithm, called
- * when maxnum (size) is moderate.
- */
+/* Building/Rebuilding the diffptr table. The actual work is done by the
+ * following two subroutines;  the user entry point is the function
+ * initprimes() below.  initprimes1() is the old algorithm, called when
+ * maxnum (size) is moderate. */
 static byteptr
 initprimes1(ulong size, long *lenp, long *lastp)
 {
   long k;
-  byteptr q,r,s,fin, p = (byteptr) gpmalloc(size+2);
+  byteptr q, r, s, fin, p = (byteptr) gpmalloc(size+2);
 
   memset(p, 0, size + 2); fin = p + size;
   for (r=q=p,k=1; r<=fin; )
   {
     do { r+=k; k+=2; r+=k; } while (*++q);
-    for (s=r; s<=fin; s+=k) *s=1;
+    for (s=r; s<=fin; s+=k) *s = 1;
   }
-  r=p; *r++=2; *r++=1; /* 2 and 3 */
+  r = p; *r++ = 2; *r++ = 1; /* 2 and 3 */
   for (s=q=r-1; ; s=q)
   {
     do q++; while (*q);
-    if (q>fin) break;
-    *r++ = (q-s) << 1;
+    if (q > fin) break;
+    *r++ = (unsigned char) ((q-s) << 1);
   }
-  *r++=0;
+  *r++ = 0;
   *lenp = r - p;
   *lastp = ((s - p) << 1) + 1;
-#if 0
-  fprintferr("initprimes1: q = %ld, len = %ld, last = %ld\n",
-             q, *lenp, *lastp);
-#endif
   return (byteptr) gprealloc(p,r-p);
 }
 
@@ -251,7 +245,7 @@ static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
    cache.  Assume that arenas of size slow2_in_roots slows down the
    calculation 2x (comparing to very big arenas; when cache hits do
    not matter).  Since cache performance varies wildly with
-   architecture, load, and whether (especially with cache coloring
+   architecture, load, and wheather (especially with cache coloring
    enabled), use an idealized cache model based on benchmarks above.
 
    Assume that an independent region of FIXED_TO_CACHE bytes is accessed
@@ -394,21 +388,13 @@ set_optimize(long what, GEN g)
     break;
   }
   if (g != NULL) {
-    long val = itos(g);
+    ulong val = itou(g);
 
     switch (what) {
-    case 1:
-      cache_model.arena = (ulong)val;
-      break;
-    case 2:
-      slow2_in_roots = val / 1000.;
-      break;
-    case 3:
-      cache_model.power = val / 1000.;
-      break;
-    case 4:
-      cache_model.cutoff = val / 1000.;
-      break;
+    case 1: cache_model.arena = val; break;
+    case 2: slow2_in_roots     = (double)val / 1000.; break;
+    case 3: cache_model.power  = (double)val / 1000.; break;
+    case 4: cache_model.cutoff = (double)val / 1000.; break;
     }
   }
   return ret;
@@ -537,7 +523,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
       d = (q - plast) << 1;
       while (d >= DIFFPTR_SKIP)
         *curdiff++ = DIFFPTR_SKIP, d -= DIFFPTR_SKIP;
-      *curdiff++ = d;
+      *curdiff++ = (unsigned char)d;
     }
     plast -= asize;
     remains -= asize;

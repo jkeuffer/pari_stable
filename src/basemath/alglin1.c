@@ -114,7 +114,8 @@ gtrans(GEN x)
 static GEN
 strconcat(GEN x, GEN y)
 {
-  long flx=0,fly=0,l;
+  int flx = 0, fly = 0;
+  size_t l;
   char *sx,*sy,*str;
 
   if (typ(x)==t_STR) sx = GSTR(x); else { flx=1; sx = GENtostr(x); }
@@ -175,7 +176,7 @@ GEN
 cget1(long l, long t)
 {
   GEN z = new_chunk(l);
-  z[0] = evaltyp(t) | evallg(1); return z;
+  z[0] = evaltyp(t) | _evallg(1); return z;
 }
 void
 appendL(GEN x, GEN t)

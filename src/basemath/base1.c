@@ -2133,7 +2133,7 @@ dirzetak0(GEN nf, long N0)
       p1=powgi(court, (GEN)vect[j]); /* p1 = court^f */
       if (cmpis(p1,N0) <= 0)
       {
-        q=p=p1[2]; limk=N0/q;
+        q = p = (ulong)p1[2]; limk=N0/q;
         for (k=2; k<=N0; k++) c2[k]=c[k];
         while (q<=(ulong)N0)
         {
