@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "anal.h"
 extern void changevalue_p(entree *ep, GEN x);
 extern GEN polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy);
-extern void lisseq_void(char *t);
 
 /********************************************************************/
 /**                                                                **/
@@ -330,7 +329,7 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"sum");
+    p1 = lisexpr_nobreak(ch);
     x=gadd(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -357,7 +356,7 @@ suminf(entree *ep, GEN a, char *ch, long prec)
   fl=0; G = bit_accuracy(prec) + 5;
   for(;;)
   {
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"suminf");
+    p1 = lisexpr_nobreak(ch);
     x = gadd(x,p1); a = incloop(a);
     if (gcmp0(p1) || gexpo(p1) <= gexpo(x)-G)
       { if (++fl==3) break; }
@@ -385,8 +384,7 @@ divsum(GEN num, entree *ep, char *ch)
   for (i=1; i<l; i++)
   {
     ep->value = (void*) t[i];
-    z = lisseq(ch);
-    if (did_break()) err(breaker,"divsum");
+    z = lisseq_nobreak(ch);
     y = gadd(y, z);
   }
   pop_val(ep); return gerepileupto(av,y);
@@ -414,7 +412,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"prod");
+    p1 = lisexpr_nobreak(ch);
     x = gmul(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -453,7 +451,7 @@ prodinf(entree *ep, GEN a, char *ch, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"prodinf");
+    p1 = lisexpr_nobreak(ch);
     x=gmul(x,p1); a = incloop(a);
     if (gexpo(gsubgs(p1,1)) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
@@ -480,7 +478,7 @@ prodinf1(entree *ep, GEN a, char *ch, long prec)
   fl=0; G = -bit_accuracy(prec)-5;
   for(;;)
   {
-    p2 = lisexpr(ch); if (did_break()) err(breaker,"prodinf1");
+    p2 = lisexpr_nobreak(ch);
     p1 = gadd(p2,gun); x=gmul(x,p1); a = incloop(a);
     if (gcmp0(p1) || gexpo(p2) <= G) { if (++fl==3) break; } else fl=0;
     if (low_stack(lim, stack_lim(av,1)))
@@ -510,7 +508,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
   lim = stack_lim(avma,1);
   while (prime[2] < b)
   {
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"prodeuler");
+    p1 = lisexpr_nobreak(ch);
     x = gmul(x,p1);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -525,7 +523,7 @@ prodeuler(entree *ep, GEN ga, GEN gb, char *ch, long prec)
   /* cf forprime */
   if (prime[2] == b)
   {
-    p1 = lisexpr(ch); if (did_break()) err(breaker,"prodeuler");
+    p1 = lisexpr_nobreak(ch);
     x = gmul(x,p1);
   }
   pop_val(ep); return gerepilecopy(av0,x);
@@ -552,7 +550,7 @@ direulerall(entree *ep, GEN ga, GEN gb, char *ch, GEN c)
   p = prime[2];
   while (p <= b)
   {
-    s = lisexpr(ch); if (did_break()) err(breaker,"direuler");
+    s = lisexpr_nobreak(ch);
     polnum = numer(s);
     polden = denom(s);
     tx = typ(polnum);
@@ -654,8 +652,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
   push_val(ep, c);
   for (i=1; i<=m; i++)
   {
-    c[2]=i; p1 = lisseq(ch);
-    if (did_break()) err(breaker,"vector");
+    c[2]=i; p1 = lisseq_nobreak(ch);
     y[i] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
   }
   pop_val(ep); return y;
@@ -664,7 +661,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
 GEN
 vecteursmall(GEN nmax, entree *ep, char *ch)
 {
-  GEN y,p1;
+  GEN y;
   long i,m;
   long c[]={evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
 
@@ -677,12 +674,7 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
     return y;
   }
   push_val(ep, c);
-  for (i=1; i<=m; i++)
-  {
-    c[2]=i; p1 = lisseq(ch);
-    if (did_break()) err(breaker,"vector");
-    y[i] = itos(p1);
-  }
+  for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(lisseq_nobreak(ch)); }
   pop_val(ep); return y;
 }
 
@@ -732,8 +724,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
     c2[2]=i; z=cgetg(n,t_COL); y[i]=(long)z;
     for (j=1; j<n; j++)
     {
-      c1[2]=j; p1=lisseq(ch);
-      if (did_break()) err(breaker,"matrix");
+      c1[2] = j; p1 = lisseq_nobreak(ch);
       z[j] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
     }
   }
@@ -789,7 +780,7 @@ sumalt(entree *ep, GEN a, char *ch, long prec)
   s = gzero;
   for (k=0; ; k++)
   {
-    x = lisexpr(ch); if (did_break()) err(breaker,"sumalt");
+    x = lisexpr_nobreak(ch);
     c = gadd(az,c); s = gadd(s,gmul(x,c));
     az = diviiexact(mulii(mulss(N-k,N+k),shifti(az,1)),mulss(k+1,k+k+1));
     if (k==N-1) break;
@@ -818,7 +809,7 @@ sumalt2(entree *ep, GEN a, char *ch, long prec)
   s = gzero;
   for (k=0; k<=N; k++)
   {
-    x = lisexpr(ch); if (did_break()) err(breaker,"sumalt2");
+    x = lisexpr_nobreak(ch);
     s = gadd(s, gmul(x,(GEN)pol[k+2]));
     if (k == N) break;
     a = addsi(1,a); ep->value = (void*) a;
@@ -855,14 +846,14 @@ sumpos(entree *ep, GEN a, char *ch, long prec)
       {
         long ex;
 	q1 = addii(r,a); ep->value = (void*) q1;
-        p1 = lisexpr(ch); if (did_break()) err(breaker,"sumpos");
+        p1 = lisexpr_nobreak(ch);
         gaffect(p1,reel); ex = expo(reel)+kk; setexpo(reel,ex);
 	x = gadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       if (2*k < N) stock[2*k+1] = x;
       q1 = addsi(k+1,a); ep->value = (void*) q1;
-      p1 = lisexpr(ch); if (did_break()) err(breaker,"sumpos");
+      p1 = lisexpr_nobreak(ch);
       gaffect(p1,reel); x = gadd(reel, gmul2n(x,1));
     }
     c = gadd(az,c); p1 = k&1? gneg_i(c): c;
@@ -897,14 +888,14 @@ sumpos2(entree *ep, GEN a, char *ch, long prec)
       {
         long ex;
 	q1 = addii(r,a); ep->value = (void*) q1;
-        p1 = lisexpr(ch); if (did_break()) err(breaker,"sumpos2");
+        p1 = lisexpr_nobreak(ch);
         gaffect(p1,reel); ex = expo(reel)+kk; setexpo(reel,ex);
 	x=gadd(x,reel); if (kk && ex < G) break;
         r = shifti(r,1);
       }
       if (2*k-1 < N) stock[2*k] = x;
       q1 = addsi(k,a); ep->value = (void*) q1;
-      p1 = lisexpr(ch); if (did_break()) err(breaker,"sumpos2");
+      p1 = lisexpr_nobreak(ch);
       gaffect(p1,reel); stock[k] = gadd(reel, gmul2n(x,1));
     }
   }
@@ -969,7 +960,7 @@ _gp_eval(GEN x, void *dat)
 {
   exprdat *E = (exprdat*)dat;
   E->ep->value = x;
-  return lisexpr(E->ch);
+  return lisexpr_nobreak(E->ch);
 }
 /* 1/x^2 f(1/x) */
 static GEN

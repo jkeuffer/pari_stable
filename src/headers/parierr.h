@@ -40,7 +40,7 @@ enum {
 
 /* anal.c   */
 
-  valencer1, breaker,
+  valencer1,
 
 /* arith.c  */
 

@@ -87,6 +87,9 @@ long   did_break(void);
 void   print_prefixed_text(char *s, char *prefix, char *str);
 GEN    gp_history(gp_hist *H, long p, char *old, char *entry);
 GEN    set_hist_entry(gp_hist *H, GEN x);
+void   lisseq_void(char *t);
+GEN    lisseq_nobreak(char *t);
+GEN    lisexpr_nobreak(char *t);
 
 char*  get_analyseur(void);
 void   set_analyseur(char *s);
@@ -183,8 +186,8 @@ extern void *PARI_stack_limit;
 #define bl_prev(x) (((GEN)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
 
-/* break */
-enum { br_NONE, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN }; /* break status */
+/* break status */
+enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN };
 
 /* formatted printing */
 #ifndef LONG_IS_64BIT

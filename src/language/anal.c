@@ -352,15 +352,19 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
  *      [0-9]+
  */
 char*
-get_analyseur(void)
-{
-  return analyseur;
-}
+get_analyseur(void) { return analyseur; }
 
 void
-set_analyseur(char *s)
+set_analyseur(char *s) { analyseur = s; }
+
+INLINE void
+seq_init(char *t)
 {
-  analyseur = s;
+  check_new_fun = NULL;
+  skipping_fun_def = 0;
+  mark.start = analyseur = t;
+  br_status = br_NONE;
+  if (br_res) { killbloc(br_res); br_res = NULL; }
 }
 
 /* Do not modify (analyseur,mark.start) */
@@ -374,19 +378,32 @@ lisseq0(char *t, GEN (*f)(void))
   if (foreignExprHandler && *t == foreignExprSwitch)
     return (*foreignExprHandler)(t);
 
-  check_new_fun = NULL;
-  skipping_fun_def = 0;
-  mark.start = analyseur = t;
-
-  br_status = br_NONE;
-  if (br_res) { killbloc(br_res); br_res = NULL; }
-  res = f();
+  seq_init(t); res = f();
   analyseur = olds; mark.start = olde;
-  if (br_status != br_NONE)
+  if (br_status)
   {
     if (!br_res) { avma = av; return gnil; }
     return gerepilecopy(av, br_res);
   }
+  if (res == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
+  /* ep->value, beware: it may be killed anytime.  */
+  if (isclone(res)) { avma = av; return forcecopy(res); }
+  return gerepileupto(av, res);
+}
+static GEN
+lisseq0_nobreak(char *t, GEN (*f)(void))
+{
+  const pari_sp av = avma;
+  char *olds = analyseur, *olde = mark.start;
+  GEN res;
+
+  if (foreignExprHandler && *t == foreignExprSwitch)
+    return (*foreignExprHandler)(t);
+
+  seq_init(t); res = f();
+  analyseur = olds; mark.start = olde;
+  if (br_status) err(talker,"break not allowed");
+
   if (res == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
   /* ep->value, beware: it may be killed anytime.  */
   if (isclone(res)) { avma = av; return forcecopy(res); }
@@ -401,17 +418,9 @@ lisseq_void(char *t)
   char *olds = analyseur, *olde = mark.start;
 
   if (foreignExprHandler && *t == foreignExprSwitch)
-  {
-    (void)(*foreignExprHandler)(t); return; 
-  }
+  { (void)(*foreignExprHandler)(t); return; }
 
-  check_new_fun = NULL;
-  skipping_fun_def = 0;
-  mark.start = analyseur = t;
-
-  br_status = br_NONE;
-  if (br_res) { killbloc(br_res); br_res = NULL; }
-  (void)seq();
+  seq_init(t); (void)seq();
   analyseur = olds; mark.start = olde;
   avma = av;
 }
@@ -425,6 +434,8 @@ flisseq0(char *s, GEN (*f)(void))
   free(t); return x;
 }
 
+GEN lisseq_nobreak(char *t)  { return lisseq0_nobreak(t, seq);  }
+GEN lisexpr_nobreak(char *t) { return lisseq0_nobreak(t, expr); }
 GEN lisseq(char *t)  { return lisseq0(t, seq);  }
 GEN lisexpr(char *t) { return lisseq0(t, expr); }
 GEN flisseq(char *s) { return flisseq0(s, seq); }
@@ -900,6 +911,8 @@ err_match(char *s, char c)
 #define match2(s,c) if (*s != c) err_match(s,c);
 #define match(c) \
   STMT_START { match2(analyseur, c); analyseur++; } STMT_END
+#define NO_BREAK(s, old)\
+  if (br_status) err(talker2, "break not allowed "/**/s, (old), mark.start)
 
 static long
 readlong()
@@ -909,7 +922,7 @@ readlong()
   long m;
   GEN arg = expr();
 
-  if (br_status) err(breaker,"here (reading long)");
+  NO_BREAK("here (reading long)", old);
   if (typ(arg) != t_INT) err(talker2,"this should be an integer",
                                      old,mark.start);
   m = itos(arg); avma=av; return m;
@@ -1008,9 +1021,10 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
   if (alloc)
   {
     pari_sp av = avma;
-    GEN p1 = expr();
-    if (br_status) err(breaker,"here (expanding string)");
-    tmp = GENtostr0(p1, &DFLT_OUTPUT, &gen_output);
+    char *old = analyseur;
+    GEN z = expr();
+    NO_BREAK("here (expanding string)", old);
+    tmp = GENtostr0(z, &DFLT_OUTPUT, &gen_output);
     len = strlen(tmp); avma = av;
   }
   if (ptlimit && bp + len > *ptlimit)
@@ -1069,8 +1083,9 @@ any_string()
       analyseur++;
     else
     {
+      char *old = analyseur;
       res[n++] = (long)expr();
-      if (br_status) err(breaker,"here (print)");
+      NO_BREAK("in print()", old);
     }
     if (n == len)
     {
@@ -1243,7 +1258,7 @@ facteur(void)
         break;
       case '^':
 	analyseur++; p1 = facteur();
-        if (br_status) err(breaker,"here (after ^)");
+        NO_BREAK("after ^", old);
         x = gpow(x,p1,prec); break;
       case '\'':
 	analyseur++; x = deriv(x,gvar9(x)); break;
@@ -1273,13 +1288,14 @@ facteur(void)
 static void
 _append(GEN **table, long *n, long *N)
 {
+  char *old = analyseur;
   if (++(*n) == *N)
   {
     *N <<= 1;
     *table = (GEN*)gprealloc((void*)*table,(*N + 1)*sizeof(GEN));
   }
   (*table)[*n] = expr();
-  if (br_status) err(breaker,"array context");
+  NO_BREAK("in array context", old);
 }
 
 #define check_var_name() \
@@ -1298,8 +1314,8 @@ truc(void)
   switch(*analyseur)
   {
     case '!': /* NOT */
-      analyseur++; z = facteur();
-      if (br_status) err(breaker,"here (after !)");
+      analyseur++; old = analyseur;
+      z = facteur(); NO_BREAK("after !", old);
       return gcmp0(z)? gun: gzero;
 
     case ('\''): { /* QUOTE */
@@ -1314,8 +1330,8 @@ truc(void)
       }
     }
     case '#': /* cardinal */
-      analyseur++; z = facteur();
-      if (br_status) err(breaker,"here (after #)");
+      analyseur++; old = analyseur;
+      z = facteur(); NO_BREAK("after #", old);
       return stoi(glength(z));
 
     case '"': /* string */
@@ -1439,8 +1455,9 @@ get_op_fun()
 static GEN
 expr_ass()
 {
+  char *old = analyseur;
   GEN res = expr();
-  if (br_status) err(breaker,"assignment");
+  NO_BREAK("in assignment", old);
   return res;
 }
 
@@ -1524,7 +1541,7 @@ static GEN
 fun_seq(char *p)
 {
   GEN res = lisseq(p);
-  if (br_status != br_NONE)
+  if (br_status)
     br_status = br_NONE;
   else
     if (! is_universal_constant(res)) /* important for gnil */
@@ -1863,9 +1880,10 @@ identifier(void)
     matchcomma = 0;
     while (*s == 'G')
     {
-      match_comma(); s++;
+      s++;
+      match_comma(); ch1 = analyseur;
       argvec[i++] = expr();
-      if (br_status) err(breaker,"here (argument reading)");
+      NO_BREAK("here (reading arguments)", ch1);
     }
     if (*s == 'p') { argvec[i++] = (GEN) prec; s++; }
 
@@ -1873,8 +1891,9 @@ identifier(void)
       switch (*s++)
       {
 	case 'G': /* GEN */
-	  match_comma(); argvec[i++] = expr();
-          if (br_status) err(breaker,"here (argument reading)");
+	  match_comma(); ch1 = analyseur;
+          argvec[i++] = expr();
+          NO_BREAK("here (reading arguments)", ch1);
           break;
 
 	case 'L': /* long */
@@ -1940,20 +1959,20 @@ identifier(void)
 	  break;
 
 	case 'M': /* Mnemonic flag */
-	  match_comma(); argvec[i] = expr();
-          if (br_status) err(breaker,"here (argument reading)");
+	  match_comma(); ch1 = analyseur;
+          argvec[i] = expr();
+          NO_BREAK("here (reading arguments)", ch1);
 	  if (typ(argvec[i]) == t_STR) {
-	      if (!flags)
-		  flags = ep->code;
-	      flags = strchr(flags, '\n'); /* Skip to the following '\n' */
-	      if (!flags)
-		  err(talker, "not enough flags in string function signature");
-	      flags++;
-	      argvec[i] = (GEN) parse_option_string((char*)(argvec[i] + 1),
-			  flags, PARSEMNU_ARG_WHITESP | PARSEMNU_TEMPL_TERM_NL,
-			  NULL, NULL);
+	    if (!flags) flags = ep->code;
+	    flags = strchr(flags, '\n'); /* Skip to the following '\n' */
+	    if (!flags)
+	        err(talker, "not enough flags in string function signature");
+	    flags++;
+	    argvec[i] = (GEN) parse_option_string((char*)(argvec[i] + 1),
+			flags, PARSEMNU_ARG_WHITESP | PARSEMNU_TEMPL_TERM_NL,
+			NULL, NULL);
 	  } else
-	      argvec[i] = (GEN)itos(argvec[i]);
+            argvec[i] = (GEN)itos(argvec[i]);
 	  i++;
           break;
 
@@ -2025,10 +2044,12 @@ identifier(void)
 	   break;
 	 default: err(bugparier,"identifier (unknown code)");
       }
-#if 0 /* uncomment if using purify: unitialized read otherwise */
+#if 0 /* uncomment if using purify: UMR otherwise */
     for ( ; i<9; i++) argvec[i]=NULL;
 #endif
-    gp_function_name=ep->name;
+{
+    char *oldname = gp_function_name;
+    gp_function_name = ep->name;
     if (deriv)
     {
       if (!i || (ep->code)[0] != 'G')
@@ -2053,7 +2074,8 @@ identifier(void)
 	((void (*)(ANYARG))call)(_ARGS_);
 	res = gnil; break;
       }
-    gp_function_name=NULL;
+    gp_function_name = oldname;
+}
     if (has_pointer) check_pointers(has_pointer,init);
     if (!noparen) match(')');
     return res;
@@ -2066,18 +2088,18 @@ identifier(void)
       if (EpVALENCE(ep) == 88) return global0();
       match('('); /* error */
     }
-    analyseur++;
+    analyseur++; ch1 = analyseur;
     switch(EpVALENCE(ep))
     {
       case 50: /* O */
         res = truc();
-        if (br_status) err(breaker,"here (in O()))");
+        NO_BREAK("in O()", ch1);
 	if (*analyseur=='^') { analyseur++; m = readlong(); } else m = 1;
 	res = ggrando(res,m); break;
 
       case 80: /* if then else */
         av = avma; res = expr();
-        if (br_status) err(breaker,"test expressions");
+        NO_BREAK("in test expression", ch1);
         m = gcmp0(res); avma = av; match(',');
 	if (m) /* false */
 	{
@@ -2097,11 +2119,11 @@ identifier(void)
 	break;
 
       case 81: /* while do */
-        av = avma; ch1 = analyseur;
+        av = avma;
 	for(;;)
 	{
           res = expr();
-          if (br_status) err(breaker,"test expressions");
+          NO_BREAK("in test expression", ch1);
 	  if (gcmp0(res)) { match(','); break; }
 
 	  avma = av; match(','); (void)seq();
@@ -2111,14 +2133,14 @@ identifier(void)
 	avma = av; skipseq(); res = gnil; break;
 
       case 82: /* repeat until */
-        av = avma; ch1 = analyseur; skipexpr();
+        av = avma; skipexpr();
 	for(;;)
 	{
 	  avma = av; match(','); (void)seq();
 	  if (loop_break()) break;
 	  analyseur = ch1;
           res = expr();
-          if (br_status) err(breaker,"test expressions");
+          NO_BREAK("in test expression", ch1);
 	  if (!gcmp0(res)) { match(','); break; }
 	}
 	avma = av; skipseq(); res = gnil; break;
@@ -2128,7 +2150,7 @@ identifier(void)
         matchcomma = 0;
         while (*analyseur != ')')
         {
-          match_comma(); ch1=analyseur;
+          match_comma(); ch1 = analyseur;
           check_var_name();
           ep = skipentry();
           switch(EpVALENCE(ep))
@@ -2137,12 +2159,13 @@ identifier(void)
             case EpVAR: break;
             default: err(talker2,"symbol already in use",ch1,mark.start);
           }
-          analyseur=ch1; ep = entry();
+          analyseur = ch1; ep = entry();
           if (*analyseur == '=')
           {
             pari_sp av=avma; analyseur++;
+            ch1 = analyseur;
             res = expr();
-            if (br_status) err(breaker,"here (defining global var)");
+            NO_BREAK("here (defining global var)", ch1);
             changevalue(ep, res); avma=av;
           }
           ep->valence = EpGVAR;
@@ -2191,9 +2214,10 @@ identifier(void)
           }
           else
           { /* user supplied */
-            match_comma();
+            char *old;
+            match_comma(); old = analyseur;
             arglist[i] = expr();
-            if (br_status) err(breaker,"here (reading function args)");
+            NO_BREAK("here (reading function args)", old);
           }
         }
         analyseur++; /* skip ')' */

@@ -77,11 +77,11 @@ char *errmessage[]=
 /* errpile */
   "the PARI stack overflows !",
 /* errlg */
-  "object too big, length can't fit in a codeword",
+  "length (lg) overflow",
 /* errexpo */
-  "exponent overflow",
+  "exponent (expo) overflow",
 /* errvalp */
-  "valuation overflow",
+  "valuation (valp) overflow",
 /* rtodber */
   "underflow or overflow in a R->dbl conversion",
 
@@ -96,8 +96,6 @@ char *errmessage[]=
 
 /* valencer1 */
   "unknown identifier valence, please report",
-/* breaker */
-  "break not allowed",
 
   /*  ARITH.C  */
 

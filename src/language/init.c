@@ -1140,7 +1140,7 @@ err(long numerr, ...)
         ch1=va_arg(ap, char*);
         pariputsf(" %s is not yet implemented.",ch1); break;
 
-      case breaker: case typeer: case mattype1: case overwriter:
+      case typeer: case mattype1: case overwriter:
       case accurer: case infprecer: case negexper:
       case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
