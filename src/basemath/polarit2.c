@@ -310,7 +310,7 @@ BuildTree(GEN link, GEN V, GEN W, GEN a, GEN p)
   for (j=1; j <= 2*k-4; j+=2,i++)
   {
     minp = j;
-    mind = deg(V[j]); /* degree V[j] */
+    mind = deg(V[j]);
     for (s=j+1; s<i; s++)
       if (deg(V[s]) < mind) { minp = s; mind = deg(V[s]); }
 
@@ -3445,7 +3445,7 @@ polfnf(GEN a, GEN t)
 
   /* n guaranteed to be squarefree */
   fa = squff2(n,0,0); lx = lg(fa);
-  y=cgetg(3,t_MAT);
+  y = cgetg(3,t_MAT);
   p1 = cgetg(lx,t_COL); y[1] = (long)p1;
   p2 = cgetg(lx,t_COL); y[2] = (long)p2;
   x0 = gadd(polx[varn(a)], gmulsg(-k, gmodulcp(polx[varn(t)], t)));
@@ -3579,7 +3579,7 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
   if (!signe(P) || !signe(Q))
     return zeropol(x);
   /*Compute denominators*/
-  if (!den) den = discsr(nf);
+  if (!den) den = ZX_disc(nf);
   lP = leading_term(P);
   lQ = leading_term(Q);
   if ( !((typ(lP)==t_INT && is_pm1(lP)) || (typ(lQ)==t_INT && is_pm1(lQ))) )
@@ -3608,6 +3608,12 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       R = polpol_to_mat(R, d);
       /* previous primes divided Res(P/gcd, Q/gcd)? Discard them. */
       if (!mod || dR < dM) { M = R; mod = stoi(p); dM = dR; continue; }
+      if (low_stack(st_lim, stack_lim(btop, 1)))
+      {
+	GEN *bptr[2]; bptr[0]=&M; bptr[1]=&mod;
+	if (DEBUGMEM>1) err(warnmem,"nfgcd");
+	gerepilemany(btop, bptr, 2);
+      }
 
       ax = gmulgs(mpinvmod(stoi(p), mod), p);
       M = gadd(R, gmul(ax, gsub(M, R)));
@@ -3622,12 +3628,6 @@ GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       dsol = gmul(sol, gmodulcp(dens, nf));
       if (gdivise(P, dsol) && gdivise(Q, dsol))
         break;
-      if (low_stack(st_lim, stack_lim(btop, 1)))
-      {
-	GEN *bptr[2]; bptr[0]=&M; bptr[1]=&mod;
-	if (DEBUGMEM>1) err(warnmem,"nfgcd");
-	gerepilemany(btop, bptr, 2);
-      }
     }
   }
   return gerepileupto(ltop, gcopy(sol));
