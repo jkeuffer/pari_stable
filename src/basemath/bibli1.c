@@ -1418,6 +1418,14 @@ lindep0(GEN x,long bit,long prec)
   return deplin(x);
 }
 
+static int
+real_indep(GEN re, GEN im, long bitprec)
+{
+  GEN p1 = gsub(gmul((GEN)re[1],(GEN)im[2]),
+                gmul((GEN)re[2],(GEN)im[1]));
+  return (!gcmp0(p1) && gexpo(p1) > - bitprec);
+}
+
 GEN
 lindep2(GEN x, long bit)
 {
@@ -1426,13 +1434,12 @@ lindep2(GEN x, long bit)
 
   if (! is_vec_t(tx)) err(typeer,"lindep2");
   if (lx<=2) return cgetg(1,t_VEC);
-  re=greal(x); im=gimag(x); flag = !gcmp0(im);
-  if (lx == 3)
-  { /* independant over R ? */
-    p1 = gsub(gmul((GEN)re[1],(GEN)im[2]),
-              gmul((GEN)re[2],(GEN)im[1]));
-    if (!gcmp0(p1) && gexpo(p1) > - bit) { avma = av; return cgetg(1, t_VEC); }
-  }
+  re=greal(x); im=gimag(x);
+  /* independant over R ? */
+  if (lx == 3 && real_indep(re,im,bit))
+    { avma = av; return cgetg(1, t_VEC); }
+
+  flag = !gcmp0(im);
   ly = flag? lx+2: lx+1;
   p2=cgetg(lx,t_MAT); bit = (long) (bit/L2SL10);
   for (i=1; i<lx; i++)
@@ -1461,15 +1468,10 @@ lindep(GEN x, long prec)
   if (lx<=2) return cgetg(1,t_VEC);
   x = gmul(x, realun(prec));
   re=greal(x); im=gimag(x);
-  if (lx == 3)
-  { /* independant over R ? */
-    p1 = gsub(gmul((GEN)re[1],(GEN)im[2]),
-              gmul((GEN)re[2],(GEN)im[1]));
-    if (!gcmp0(p1) && gexpo(p1) > - bit_accuracy(prec))
-    {
-      avma = av; return cgetg(1, t_VEC);
-    }
-  }
+  /* independant over R ? */
+  if (lx == 3 && real_indep(re,im,bit_accuracy(prec)))
+    { avma = av; return cgetg(1, t_VEC); }
+
   qzer = new_chunk(lx);
   b = (GEN*)idmat(n);
   be= (GEN*)new_chunk(lx);
