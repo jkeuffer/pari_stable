@@ -1807,17 +1807,20 @@ congruent to 0 or 1 modulo 4.
 
 \subsecidx{quadray}$(D,f,\{\fl=0\})$: relative equation for the ray class
 field of conductor $f$ for the quadratic field of discriminant $D$ (which
-can also be a \kbd{bnf}). \fl\ is only meaningful when $D<0$. If it's an odd
-integer, outputs instead the vector of $[\var{ideal},
-\var{corresponding root}]$.
+can also be a \kbd{bnf}). 
 
-If $\fl=0$ or 1, uses the $\sigma$ function, while if $\fl>1$, uses the
-Weierstrass $\wp$ function, which is less efficient and may disappear in
-future versions (not all special cases have been implemented in this case).
-Finally, \fl\ can also be a two-component vector $[\lambda,\fl]$, where
-\fl\ is as above and $\lambda$ is the technical element of bnf necessary
-for Schertz's method using $\sigma$. In that case, returns 0 if $\lambda$
-is not suitable.
+For $D<0$, $\fl$ has the following meaning: if it's an odd integer,
+outputs instead the vector of $[\var{ideal}, \var{corresponding
+root}]$. If $\fl=0$ or 1, uses the $\sigma$ function, while if
+$\fl>1$, uses the Weierstrass $\wp$ function, which is less efficient
+and may disappear in future versions (not all special cases have been
+implemented in this case). Finally, \fl\ can also be a two-component
+vector $[\lambda,\fl]$, where \fl\ is as above and $\lambda$ is the
+technical element of bnf necessary for Schertz's method using
+$\sigma$. In that case, returns 0 if $\lambda$ is not suitable.
+
+For $D>0$, if $\fl$ is non-zero, try hard to get the simplest
+modulus. See \tet{bnrstark} for more details.
 
 If $D>0$, the function may fail with the following message
 \bprog
@@ -3174,8 +3177,13 @@ $x$, and the ground field and the class field must be totally real and not
 isomorphic to $\Q$. \fl\ is optional and may be set to 0 to obtain a
 reduced relative polynomial, 1 to be satisfied with any relative
 polynomial, 2 to obtain an absolute polynomial and 3 to obtain the
-irreducible relative polynomial of the Stark unit, 0 being default.
-Example:
+irreducible relative polynomial of the Stark unit, 0 being
+default. The result of the computation depends on the choice of a
+modulus verifying special conditions. By default the function will try
+few moduli, choosing the one giving the smallest result. In
+some extreme cases where the result is however very large, you can
+tell the function to try more moduli by adding $4$ to the value of
+flag. Example: 
 
 \bprog
 bnf = bnfinit(y^2 - 3);

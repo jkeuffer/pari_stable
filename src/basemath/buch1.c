@@ -909,10 +909,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   }
   tetpil=avma;
   if (signe(D)>0)
-  {
-    if (flag && !gcmp0(flag)) err(warner,"ignoring flag in quadray");
-    y=bnrstark(bnr,gzero,1,prec);
-  }
+    y=bnrstark(bnr,gzero,flag?5:1,prec);
   else
   {
     if (!flag) flag = gzero;

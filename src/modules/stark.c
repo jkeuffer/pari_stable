@@ -462,9 +462,9 @@ CplxModulus(GEN data, long *newprec, long prec)
    index 2 of Im(C) in Clk(m), no prime dividing f splits in the
    corresponding quadratic extension and m is of minimal norm. Return
    bnr(m), D, quotient Ck(m) / D and Clk(m) / C */
-/* If fl != 0, try a second modulus is the first one seems too "bad" */
+/* If fl != 0, try bnd extra moduli */
 static GEN
-FindModulus(GEN dataC, long fl, long *newprec, long prec)
+FindModulus(GEN dataC, long fl, long *newprec, long prec, long bnd)
 {
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
   long av = avma, av1, av0, limnorm, tetpil, first = 1, pr;
@@ -602,14 +602,14 @@ FindModulus(GEN dataC, long fl, long *newprec, long prec)
 		  }
 		  if (DEBUGLEVEL >= 2)
 		    fprintferr("Trying to find another modulus...");
-		  first = 0;
+		  first--;
                 }
 	      }
 	    }
 	  }
           arch[N+1-s] = un;
 	}
-	if (!first)
+        if (first <= bnd)
 	{
 	  if (DEBUGLEVEL >= 2)
 	    fprintferr("No, we're done!\nModulus = %Z and subgroup = %Z\n",  
@@ -3096,7 +3096,7 @@ quadhilbertreal(GEN D,  long prec)
 
   bnr   = buchrayinitgen(bnf, gun, prec);
   dataC = InitQuotient(bnr, gzero);
-  bnrh  = FindModulus(dataC, 1, &newprec, prec);
+  bnrh  = FindModulus(dataC, 1, &newprec, prec, 0);
 
   if (DEBUGLEVEL) msgtimer("FindModulus");
 
@@ -3115,8 +3115,14 @@ quadhilbertreal(GEN D,  long prec)
 GEN
 bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
 {
-  long cl, N, newprec, av = avma;
+  long cl, N, newprec, av = avma, bnd = 0;
   GEN bnf, dataS, p1, Mcyc, nf, data;
+
+  if (flag >= 4) 
+  {
+    bnd = -10;
+    flag -= 4;
+  }
 
   if (flag < 0 || flag > 3) err(flagerr,"bnrstark");
 
@@ -3163,7 +3169,7 @@ bnrstark(GEN bnr,  GEN subgroup,  long flag,  long prec)
 
   /* find a suitable extension N */
   dataS = InitQuotient(bnr, subgroup);
-  data  = FindModulus(dataS, 1, &newprec, prec);
+  data  = FindModulus(dataS, 1, &newprec, prec, bnd);
 
   if (newprec > prec)
   {
