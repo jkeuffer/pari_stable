@@ -17,7 +17,7 @@ if test -z "$without_readline"; then
 fi
 if test -n "$with_readline"; then
   with_readline_lib="$with_readline_lib $with_readline/lib"
-  with_readline_includes="$with_readline_includes $with_readline/includes"
+  with_readline_include="$with_readline_include $with_readline/include"
 fi
 
 if test -n "$readline"; then
@@ -45,7 +45,7 @@ if test -n "$readline"; then
       /opt/gnu/include\
       ";;
   esac
-  pth="$with_readline_includes $readline_add $incpth"
+  pth="$with_readline_include $readline_add $incpth"
   x=`./locate 'readline.h' '' $pth`
   CPPF_defined=
   case $x in

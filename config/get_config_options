@@ -79,15 +79,15 @@ while test $# -gt 0; do
       with_readline=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --with-readline-lib=*)
       with_readline_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
-  --with-readline-includes=*)
-      with_readline_includes=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --with-readline-include=*)
+      with_readline_include=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --without-gmp) without_gmp=yes ;;
   --with-gmp=*)
       with_gmp=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   --with-gmp-lib=*)
       with_gmp_lib=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
-  --with-gmp-includes=*)
-      with_gmp_includes=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
+  --with-gmp-include=*)
+      with_gmp_include=`echo "$1" | sed -e 's/[-a-z]*=//'` ;;
   *) echo "*** Unrecognized option $1." >&2; error=true;;
   esac
   shift
@@ -125,15 +125,15 @@ Installation directories:
   --includedir=<dir>    for C header files
 
 Optional libraries:
-  --without-readline           do not link with GNU readline
-  --with-readline=DIR          specify prefix for readline files
-  --with-readline-includes=DIR specify location of readline headers
-  --with-readline-lib=DIR      specify location of readline libs
+  --without-readline          do not link with GNU readline
+  --with-readline=DIR         specify prefix for readline files
+  --with-readline-include=DIR specify location of readline headers
+  --with-readline-lib=DIR     specify location of readline libs
 
-  --without-gmp                use the native kernel instead of GNU MP
-  --with-gmp=DIR               specify prefix for gmp files
-  --with-gmp-includes=DIR      specify location of gmp headers
-  --with-gmp-lib=DIR           specify location of gmp libs
+  --without-gmp               use the native kernel instead of GNU MP
+  --with-gmp=DIR              specify prefix for gmp files
+  --with-gmp-include=DIR      specify location of gmp headers
+  --with-gmp-lib=DIR          specify location of gmp libs
 
 EOT
 exit 1

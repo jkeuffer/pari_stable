@@ -2,7 +2,7 @@ _gmp_list="gmp GMPLIBS GMPINCLUDE"
 gmp=
 if test -n "$with_gmp"; then
   with_gmp_lib="$with_gmp_lib $with_gmp/lib"
-  with_gmp_includes="$with_gmp_includes $with_gmp/include"
+  with_gmp_include="$with_gmp_include $with_gmp/include"
 fi
 if test -z "$without_gmp"; then
   gmp_add="$TOP/gmp-$osname-$arch $TOP/gmp"
@@ -11,7 +11,7 @@ if test -z "$without_gmp"; then
 fi
 
 if test -n "$gmp"; then
-  pth="$with_gmp_includes\
+  pth="$with_gmp_include\
       /usr/local/include\
       /usr/include\
       /opt/include\
