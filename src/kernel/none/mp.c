@@ -1615,8 +1615,13 @@ truedvmdii(GEN x, GEN y, GEN *z)
 static ulong
 invrev(ulong b)
 {
-  static ulong tab[] = { 0,1,0,11,0,13,0,7,0,9,0,3,0,5,0,15 };
-  ulong x = tab[b & 15]; /* b^(-1) mod 2^4 */
+  ulong x;
+  switch(b & 7)
+  {
+    case 3:
+    case 5:  x = b+8; break;
+    default: x = b; break;
+  } /* x = b^(-1) mod 2^4 */
   x = x*(2-b*x);
   x = x*(2-b*x);
   x = x*(2-b*x); /* b^(-1) mod 2^32 (Newton applied to 1/x - b = 0) */
@@ -1628,7 +1633,7 @@ invrev(ulong b)
 
 /* Find z such that x=y*z, knowing that y | x (unchecked)
  * Method: y0 z0 = x0 mod B = 2^BITS_IN_LONG ==> z0 = 1/y0 mod B.
- *         Set x := (x - z0 y) / B and repeat */
+ *    Set x := (x - z0 y) / B, updating only relevant words, and repeat */
 GEN
 diviiexact(GEN x, GEN y)
 {
@@ -1700,86 +1705,6 @@ diviiexact(GEN x, GEN y)
   y[1] = evalsigne(sx*sy)|evallg(lz);
   avma = (ulong)y; return y;
 }
-
-#if 0
-/* Find z such that x=y*z assuming y | x (unchecked)
- * Method: find Y = 1 / y mod 2^n, 2^n > z, and set z := x Y mod 2^n 
- * NOT FINISHED !!! */
-GEN
-diviiexact2(GEN x, GEN y)
-{
-  long sx=signe(x),sy=signe(y),av=avma,lyinv,lpr,a,lx,ly,lz,lzs,lp1;
-  long i,j,vy;
-  GEN yinv,p1,z,xinit,yinit;
-
-  if (!sy) err(dvmer1);
-  if (!sx) return gzero;
-  xinit=x; yinit=y;
-  setsigne(y,1);setsigne(x,1);
-/* make y odd */
-  vy=vali(y);
-  if (vy)
-  {
-    if (vali(x)<vy) err(talker,"impossible division in diviirev");
-    y = shifti(y,-vy);
-    x = shifti(x,-vy);
-  }
-/* now y is odd */
-  lx = lgefint(x);
-  ly = lgefint(y);
-  if (lx<ly) err(talker,"not an exact division in diviiexact");
-  a = lx-ly+1; lz = a+2;
-  yinv = cgeti(3);
-  yinv[1] = evalsigne(1)|evallgefint(3);
-  yinv[2] = invrev(y[ly-1]); /* inverse of y mod 2^32 (or 2^64) */
-  lpr = 1; /* current accuracy */
-  while(lpr<a)
-  {
-    long lycut;
-    GEN ycut;
-
-    lyinv = lgefint(yinv);
-    lycut = min(2*lpr+2,ly);
-    ycut = cgeti(lycut); ycut[1] = evalsigne(1) | evallgefint(lycut);
-    for(i=2; i<lycut; i++) ycut[i]=y[ly+i-lycut];
-    p1 = mulii(yinv,ycut);
-    lp1 = lgefint(p1);
-    if (lp1 > lpr+2)
-    {
-      long lp1cut,lynew,lp2;
-      GEN p1cut,p2,ynew;
-      LOCAL_OVERFLOW;
-
-      lp1cut = min(lp1-lpr,lpr+2);
-      p1cut = cgeti(lp1cut); p1cut[1] = evalsigne(1) | evallgefint(lp1cut);
-      overflow = 0;
-      for (i=lp1cut-1; i>=2; i--) p1cut[i]=subllx(0,p1[i+lp1-lpr-lp1cut]);
-      p2 = mulii(yinv,p1cut);
-      lp2 = lgefint(p2);
-      lynew=(lp2<=lpr+2) ? lpr+lp2 : 2*lpr+2;
-      ynew = cgeti(lynew); ynew[1]= evalsigne(1) | evallgefint(lynew);
-      for (i=lynew-1; i>=lynew-lpr; i--) ynew[i]=yinv[i+lyinv-lynew];
-      for (         ; i>=2;         i--) ynew[i]=p2[i+lp2+lpr-lynew];
-      yinv = ynew;
-    }
-    lpr <<= 1;
-  }
-  lyinv=lgefint(yinv); lzs=min(lz,lyinv);
-  z=cgeti(lzs); z[1]=evalsigne(1) | evallgefint(lzs);
-  for(i=2; i<lzs; i++) z[i]=yinv[i+lyinv-lzs];
-  p1=mulii(z,x); lp1=lgefint(p1); lzs=min(lz,lp1);
-  z=cgeti(lzs);
-  for (i=2; i<lzs; i++) z[i]=p1[i+lp1-lzs];
-  i=2; while (i<lzs && !z[i]) i++;
-  if (i==lzs) err(talker,"bug in diviiexact2");
-  p1=cgeti(lzs-i+2);
-  p1[1]=evalsigne(sx*sy) | evallgefint(lzs-i+2);
-  for (j=2; j<=lzs-i+1; j++) p1[j]=z[j+i-2];
-  setsigne(xinit,sx);
-  setsigne(yinit,sy);
-  return gerepileuptoint(av,p1);
-}
-#endif
 
 long
 smodsi(long x, GEN y)
