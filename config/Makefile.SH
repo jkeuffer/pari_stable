@@ -273,6 +273,7 @@ tune.o: $src/test/tune.c
 tune: tune-sta
 	-\$(RM) tune
 	-\$(LN) tune-sta tune
+	-\$(LN) $ln_objdir/tune ../tune
 
 tune-dyn: tune.o lib-dyn
 	\$(CC) \$(LDFLAGS) \$(RUNPTH) -o \$@ \$< \$(GMPOBJS) -L. \$(LDDYN) \$(LIBS)
