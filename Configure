@@ -351,13 +351,6 @@ then
 fi
 echo "Building for architecture: $pretty"
 
-case "$asmarch" in
-  sparc*) kern=$TOP/$src_dir/kernel
-    rm -f $kern/sparcv8_micro $kern/sparcv8_super
-    ln -s $kern/sparcv8 $kern/sparcv8_micro
-    ln -s $kern/sparcv8 $kern/sparcv8_super;;
-esac
-
 #
 # Which copy, SHELL ?
 #

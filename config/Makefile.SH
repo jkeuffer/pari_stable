@@ -1,5 +1,9 @@
 file=$objdir/Makefile
 
+case "$asmarch" in
+  sparcv8*) asmarch=sparcv8;;
+esac
+
 if test ! -s $src_dir/kernel/$asmarch/Makefile.SH; then
   echo "No Makefile for asmarch $asmarch !" >&2; fi
 
@@ -447,12 +451,6 @@ $install_emacs_files: $pari_elc
 	\$(INSTALL_DATA)    $emx/with-syntax.el     \$(EMACSDIR)
 	\$(INSTALL_DATA)    $emx/pari-translator.el \$(EMACSDIR)
 EOT
-fi
-
-if test -s $src_dir/kernel/$asmarch/Makefile.SH; then
-  . $src_dir/kernel/$asmarch/Makefile.SH rules
-else
-  echo "No Makefile for asmarch $asmarch !" >&2
 fi
 
 HUGELINE=
