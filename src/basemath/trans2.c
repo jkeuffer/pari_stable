@@ -124,10 +124,8 @@ gatan(GEN x, long prec)
       return mpatan(x);
 
     case t_COMPLEX:
-      av = avma; p1 = cgetg(3,t_COMPLEX);
-      p1[1] = lneg((GEN)x[2]);
-      p1[2] = x[1]; 
-      y = gerepileupto(av, gath(p1,prec));
+      av = avma;
+      y = gerepileupto(av, gath(mulcxI(x),prec));
       p1 = (GEN)y[1]; y[1] = y[2]; y[2] = (long)p1;
       setsigne(p1,-signe(p1)); return y;
 
