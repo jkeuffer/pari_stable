@@ -602,6 +602,7 @@ GEN     qflll0(GEN x, long flag, long prec);
 GEN     qflllgram0(GEN x, long flag, long prec);
 GEN     smallpolred(GEN x);
 GEN     smallpolred2(GEN x);
+void    *stackmalloc(size_t N);
 
 /* bibli2.c */
 

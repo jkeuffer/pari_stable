@@ -406,9 +406,9 @@ sd_toggle(const char *v, int flag, char *s, int *ptn)
     if (n == state) return gnil;
     if (n != !state)
     {
-      char s[SIZE];
-      (void)snprintf(s, SIZE, "default: incorrect value for %s [0:off / 1:on]", s);
-      err(talker2, s, v,v);
+      char *t = stackmalloc(64 + strlen(s));
+      (void)sprintf(t, "default: incorrect value for %s [0:off / 1:on]", s);
+      err(talker2, t, v,v);
     }
     state = *ptn = n;
   }
@@ -448,9 +448,9 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     if (*ptn == n) return gnil;
     if (n > Max || n < Min)
     {
-      char buf[SIZE];
-      (void)snprintf(buf, SIZE, "default: incorrect value for %s [%lu-%lu]",
-               s, Min, Max);
+      char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
+      (void)sprintf(buf, "default: incorrect value for %s [%lu-%lu]",
+                    s, Min, Max);
       err(talker2, buf, v,v);
     }
     *ptn = n;
@@ -527,8 +527,8 @@ sd_format(const char *v, int flag)
   }
   if (flag == d_RETURN)
   {
-    char s[SIZE];
-    (void)snprintf(s, SIZE, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
+    char *s = stackmalloc(64);
+    (void)sprintf(s, "%c%ld.%ld", fmt->format, fmt->fieldw, fmt->sigd);
     return STRtoGENstr(s);
   }
   if (flag == d_ACKNOWLEDGE)
@@ -1279,16 +1279,16 @@ center(char *s)
 static void
 community(void)
 {
-  long len = strlen(GPMISCDIR) + 1024;
-  char *s = (char*)gpmalloc(len);
+  pari_sp av = avma;
+  char *s = stackmalloc(strlen(GPMISCDIR) + 1024);
 
-  (void)snprintf(s, len, "The standard distribution of GP/PARI includes a \
+  (void)sprintf(s, "The standard distribution of GP/PARI includes a \
 reference manual, a tutorial, a reference card and quite a few examples. They \
 should have been installed in the directory '%s'. If not, ask the person \
 who installed PARI on your system where they can be found. You can also \
 download them from the PARI WWW site 'http://pari.math.u-bordeaux.fr/'",
 GPMISCDIR);
-  print_text(s); free(s);
+  print_text(s); avma = av;
 
   pariputs("\nThree mailing lists are devoted to PARI:\n\
   - pari-announce (moderated) to announce major version changes.\n\
@@ -1711,10 +1711,11 @@ print_hash_list(const char *s)
 }
 
 static void
-what_readline(char *buf)
+what_readline(char **buf)
 {
+  char *s;
 #ifdef READLINE
-  char *ver, extra[64];
+  char *ver, *extra = stackmalloc(strlen(READLINE) + 32);
 #  if defined(HAS_RL_LIBRARY_VERSION) || defined(FAKE_RL_LIBRARY_VERSION)
 #    ifdef FAKE_RL_LIBRARY_VERSION
   extern char *rl_library_version;
@@ -1723,7 +1724,7 @@ what_readline(char *buf)
   if (strcmp(READLINE, rl_library_version))
   {
     ver = (char*)rl_library_version;
-    (void)snprintf(extra, SIZE, " [was v%s in Configure]", READLINE);
+    (void)sprintf(extra, " [was v%s in Configure]", READLINE);
   }
   else
 #  endif
@@ -1731,12 +1732,15 @@ what_readline(char *buf)
     ver = READLINE;
     extra[0] = 0;
   }
-  (void)snprintf(buf, SIZE, "v%s %s%s", ver,
+  s = stackmalloc(3 + strlen(ver) + 8 + strlen(extra));
+  (void)sprintf(s, "v%s %s%s", ver,
             (GP_DATA->flags & USE_READLINE)? "enabled": "disabled",
             extra);
 #else
-  (void)snprintf(buf, SIZE, "not compiled in");
+  s = stackmalloc(32);
+  (void)sprintf(s, SIZE, "not compiled in");
 #endif
+  *buf = s;
 }
 
 static void
@@ -1752,35 +1756,44 @@ print_shortversion(void)
 }
 
 static void
-what_cc(char *buf)
+what_cc(char **buf)
 {
+  char *s;
 #ifdef GCC_VERSION
+  s = stackmalloc(4 + strlen(GCC_VERSION) + 1);
 #  ifdef __cplusplus
-  (void)snprintf(buf, SIZE, "g++-%s", GCC_VERSION); return;
+  (void)sprintf(s, "g++-%s", GCC_VERSION);
 #  else
-  (void)snprintf(buf, SIZE, "gcc-%s", GCC_VERSION); return;
+  (void)sprintf(s, "gcc-%s", GCC_VERSION);
+#  endif
+#else
+#  ifdef _MSC_VER
+  s = stackmalloc(32);
+  (void)sprintf(buf, "MSVC-%i", _MSC_VER);
+#  else
+  s = stackmalloc(1); *s = 0;
 #  endif
 #endif
-#ifdef _MSC_VER
-  (void)snprintf(buf, SIZE, "MSVC-%i", _MSC_VER); return;
-#endif
-  *buf = 0;
+  *buf = s;
 }
 
 static void
 print_version(void)
 {
-  char buf[SIZE2], ver[SIZE];
+  pari_sp av = avma;
+  char *buf, *ver;
 
   center(PARIVERSION); center(PARIINFO);
-  what_cc(ver);
-  if (*ver) (void)snprintf(buf, SIZE2, "compiled: %s, %s", __DATE__, ver);
-  else      (void)snprintf(buf, SIZE2, "compiled: %s", __DATE__);
+  what_cc(&ver);
+  buf = stackmalloc(strlen(__DATE__) + strlen(ver) + 32);
+  if (*ver) (void)sprintf(buf, "compiled: %s, %s", __DATE__, ver);
+  else      (void)sprintf(buf, "compiled: %s", __DATE__);
   center(buf);
-  what_readline(ver);
-  (void)snprintf(buf, SIZE2, "(readline %s, extended help%s available)", ver,
-          has_ext_help()? "": " not");
-  center(buf);
+  what_readline(&ver);
+  buf = stackmalloc(strlen(ver) + 64);
+  (void)sprintf(buf, "(readline %s, extended help%s available)", ver,
+                has_ext_help()? "": " not");
+  center(buf); avma = av;
 }
 #undef SIZE
 #undef SIZE2

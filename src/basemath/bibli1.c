@@ -1906,6 +1906,14 @@ dalloc(size_t n)
   avma -= n; return (double*)avma;
 }
 
+void *
+stackmalloc(size_t N)
+{
+  size_t n = (N >> TWOPOTBITS_IN_LONG) + 1;
+  if (avma - bot < n) err(errpile);
+  avma -= n; return (double*)avma;
+}
+
 static double
 conjd(double x) { return x; }
 
