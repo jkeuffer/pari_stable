@@ -3016,6 +3016,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         av1=avma; p1 = gsqr(mpadd((GEN)x[k+1],(GEN)z[k+1]));
         p1 = mpadd((GEN)y[k+1], mpmul(p1,(GEN)v[k+1]));
 	y[k] = (long)gerepileuptoleaf(av1, p1);
+        /* reject the [x_1,...,x_skipfirst,0,...,0] */
+        if (k <= skipfirst && !signe(y[skipfirst])) goto END;
 
         av1=avma; p1 = mpsub(borne1, (GEN)y[k]);
 	if (signe(p1) < 0) { avma=av1; fl = 1; }
@@ -3024,8 +3026,6 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
           p1 = mpadd(eps,mpsub(mpsqrt(gdiv(p1,(GEN)v[k])), (GEN)z[k]));
           x[k] = (long)gerepileuptoleaf(av1,mpent(p1));
         }
-        /* reject the [x_1,...,x_skipfirst,0,...,0] */
-        if (k <= skipfirst && !signe(y[skipfirst])) goto END;
       }
       for(;; x[k] = laddis((GEN)x[k],-1))
       {
