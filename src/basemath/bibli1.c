@@ -1133,8 +1133,22 @@ PRECPB:
   return gerepilecopy(av0, h);
 }
 
-/* x = Gram(b_i). If precision problems return NULL if flag=1, error otherwise.
- * Quality ratio = delta = (D-1)/D. Suggested value: D = 100
+static long
+good_prec(GEN x, long kmax)
+{
+  long prec = ((kmax<<2) + gexpo((GEN)x[kmax])) >> TWOPOTBITS_IN_LONG;
+  if (prec < DEFAULTPREC) prec = DEFAULTPREC;
+  return prec;
+}
+
+/* If gram = 1, x = Gram(b_i), x = (b_i) otherwise
+ * Quality ratio = delta = (D-1)/D. Suggested values: D = 4 or D = 100
+ *
+ * If precision problems:
+ *   if (flag = 1): return NULL
+ *   if (flag = 2): return _vec ( h )  [ partial transformation matrix ],
+ *     unless we could not even start; return NULL in this case.
+ *   Error otherwise
  *
  * If MARKED != 0 make sure e[MARKED] is the first vector of the output basis
  * (which may then not be LLL-reduced) */
@@ -1144,7 +1158,7 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX;
   pari_sp av0 = avma, av, lim;
-  int isexact, gram_can_leave = 1;
+  int isexact, exact_can_leave = 1, count = 0, count_max = 8;
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
   n = lx-1; if (n <= 1) return idmat(n);
@@ -1190,19 +1204,21 @@ lllfp_marked(int MARKED, GEN x, long D, long flag, long prec, int gram)
   kmax = KMAX = 1;
   h = idmat(n);
 
-PRECPB:
 #ifdef LONG_IS_64BIT
 #  define PREC_THRESHOLD 32
+#  define PREC_DEC_THRESHOLD 7
 #else
 #  define PREC_THRESHOLD 62
+#  define PREC_DEC_THRESHOLD 12
 #endif
+PRECPB:
   switch(retry--)
   {
     case 2: break; /* entry */
     case 1:
       if (DEBUGLEVEL > 3) fprintferr("\n");
       if (flag == 2) return _vec(h);
-      gram_can_leave = 0;
+      exact_can_leave = count = 0;
       if (isexact || (gram && kmax > 2))
       { /* some progress but precision loss, try again */
         if (prec < PREC_THRESHOLD)
@@ -1210,13 +1226,23 @@ PRECPB:
         else
           prec = (long)((prec-2) * 1.25 + 2);
         if (DEBUGLEVEL) err(warnprec,"lllfp",prec);
-        x = isexact? xinit: gprec_w(xinit,prec);
-        if (gram) x = qf_base_change(x,h,1); else x = gmul(x,h);
-        if (isexact) {
-          x = mat_to_MP(x, prec); 
+        if (isexact)
+        {
+          H = H? gmul(H, h): h;
+          xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+          gerepileall(av, 2, &xinit, &H);
+          x = mat_to_MP(xinit, prec); 
+          h = idmat(n);
           retry = 1; /* never abort if x is exact */
+          count_max = min(count_max << 1, 512);
+          if (DEBUGLEVEL) fprintferr("count_max = %ld\n", count_max);
         }
-        gerepileall(av,H? 4: 2,&h,&x,&H,&xinit);
+        else
+        {
+          x = gprec_w(xinit,prec);
+          x = gram? qf_base_change(x, h, 1): gmul(x, h);
+          gerepileall(av, 2, &h, &x);
+        }
         kmax = 1; break;
       } /* fall through */
     case 0: /* give up */
@@ -1239,19 +1265,33 @@ PRECPB:
   {
     if (k > kmax)
     {
-      kmax = k; if (KMAX < kmax) KMAX = kmax;
+      kmax = k;
+      if (KMAX < kmax) { KMAX = kmax; count_max = 8; }
       if (DEBUGLEVEL>3) {fprintferr(" K%ld",k);flusherr();}
       if (gram) j = incrementalGS(x, L, B, k);
       else      j = Householder_get_mu(x, L, B, k, Q, prec);
       if (!j) goto PRECPB;
+      count = 0;
+    }
+    else if (isexact && prec > PREC_DEC_THRESHOLD && k == kmax-1
+                                                  && ++count > count_max)
+    { /* try to reduce precision */
+      count = 0;
+      prec = (prec+2) >> 1;
+      if (DEBUGLEVEL) fprintferr("\n...reducing precision to %ld\n",prec);
+      H = H? gmul(H, h): h;
+      xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+      gerepileall(av, 5,&B,&L,&Q,&H,&xinit);
+      x = mat_to_MP(xinit, prec); 
+      h = idmat(n);
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
     L1 = gcoeff(L,k,k-1);
     if (typ(L1) == t_REAL && expo(L1) + 20 > bit_accuracy(lg(L1)))
     {
+      if (!gram) goto PRECPB;
       if (DEBUGLEVEL>3)
 	fprintferr("\nRecomputing Gram-Schmidt, kmax = %ld\n", kmax);
-      if (!gram) goto PRECPB;
       for (k1=1; k1<=kmax; k1++)
         if (!incrementalGS(x, L, B, k1)) goto PRECPB;
     }
@@ -1267,7 +1307,7 @@ PRECPB:
       else if (MARKED == k-1) MARKED = k;
       if (!B[k]) goto PRECPB;
       Q[k] = Q[k-1] = zero;
-      gram_can_leave = 0;
+      exact_can_leave = 0;
       if (k>2) k--;
     }
     else
@@ -1286,27 +1326,27 @@ PRECPB:
         }
       if (++k > n)
       {
-        if (!gram && Q[n-1] == zero)
+        if (isexact)
+        {
+          if (exact_can_leave) { if (H) h = H; break; }
+
+          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
+          H = H? gmul(H, h): h;
+          xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
+
+          prec = good_prec(xinit, kmax);
+          if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
+          x = mat_to_MP(xinit, prec);
+          h = idmat(n);
+          exact_can_leave = 1;
+          k = 2; kmax = 1; continue;
+        }
+        else if (!gram && Q[n-1] == zero)
         {
           if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis\n");
           j = Householder_get_mu(gmul(xinit,h), L, B, n, Q, prec);
           if (!j) goto PRECPB;
           k = 2; continue;
-        }
-        if (gram && isexact)
-        {
-          if (gram_can_leave) { if (H) h = H; break; }
-
-          if (DEBUGLEVEL>3) fprintferr("\nChecking LLL basis...");
-          H = H? gmul(H, h): h;
-          xinit = qf_base_change(xinit, h, 1);
-          x = xinit; h = idmat(n);
-          prec = ((n<<2) + gexpo(x)) >> TWOPOTBITS_IN_LONG;
-          if (prec < DEFAULTPREC) prec = DEFAULTPREC;
-          if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
-          x = mat_to_MP(x, prec);
-          gram_can_leave = 1;
-          k = 2; kmax = 1; continue;
         }
         break;
       }
@@ -1459,7 +1499,7 @@ lllintpartialall(GEN m, long flag)
  */
     while (npass2 < 2 || progress)
     {
-      GEN dot12new,q = diviiround(dot12, dot22);
+      GEN dot12new, q = diviiround(dot12, dot22);
 
       npass2++; progress = signe(q);
       if (progress)
@@ -1522,10 +1562,10 @@ lllintpartialall(GEN m, long flag)
 
         q1neg = diviiround(q1neg, det12);
         q2neg = diviiround(q2neg, det12);
-        coeff(tm1, 1, icol) = ladd(gmul(q1neg, gcoeff(tm,1,1)),
-				   gmul(q2neg, gcoeff(tm,1,2)));
-        coeff(tm1, 2, icol) = ladd(gmul(q1neg, gcoeff(tm,2,1)),
-				   gmul(q2neg, gcoeff(tm,2,2)));
+        coeff(tm1, 1, icol) = ladd(mulii(q1neg, gcoeff(tm,1,1)),
+				   mulii(q2neg, gcoeff(tm,1,2)));
+        coeff(tm1, 2, icol) = ladd(mulii(q1neg, gcoeff(tm,2,1)),
+				   mulii(q2neg, gcoeff(tm,2,2)));
         mid[icol] = ladd(curcol,
           ZV_lincomb(q1neg,q2neg, (GEN)mid[1],(GEN)mid[2]));
       } /* for icol */
@@ -1562,37 +1602,32 @@ lllintpartialall(GEN m, long flag)
       reductions = 0;
       for (icol=1; icol <= ncol; icol++)
       {
-	long ijdif, jcol, k1, k2;
-	GEN codi, q;
-
+	long ijdif;
         for (ijdif=1; ijdif < ncol; ijdif++)
 	{
-          const pari_sp previous_avma = avma;
+          long dcol, jcol, k1, k2;
+          GEN codi, q;
 
-          jcol = (icol + ijdif - 1) % ncol; jcol++; /* Hack for NeXTgcc 2.5.8 */
-          k1 = (cmpii(gcoeff(dotprd,icol,icol),
-		      gcoeff(dotprd,jcol,jcol) ) > 0)
-		? icol : jcol; 	/* index of larger column */
-	  k2 = icol + jcol - k1; 	/* index of smaller column */
+          jcol = icol + ijdif;
+          if (jcol > ncol) jcol -= ncol;
+          if (cmpii(gcoeff(dotprd,icol,icol),
+		    gcoeff(dotprd,jcol,jcol) ) > 0)
+          { k1 = icol; k2 = jcol; }
+          else
+          { k2 = icol; k1 = jcol; }
+	  /* k1, resp. k2,  index of larger, resp. smaller, column */
 	  codi = gcoeff(dotprd,k2,k2);
-	  q = gcmp0(codi)? gzero: diviiround(gcoeff(dotprd,k1,k2), codi);
+          q = signe(codi)? diviiround(gcoeff(dotprd,k1,k2), codi): gzero;
+          if (!signe(q)) continue;
 
 	  /* Try to subtract a multiple of column k2 from column k1.  */
-	  if (gcmp0(q)) avma = previous_avma;
-          else
-	  {
-	    long dcol;
-
-	    reductions++; q = negi(q);
-	    tm2[k1]=(long)
-              ZV_lincomb(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
-	    dotprd[k1]=(long)
-              ZV_lincomb(gun,q, (GEN)dotprd[k1], (GEN)dotprd[k2]);
-	    coeff(dotprd, k1, k1) = laddii(gcoeff(dotprd,k1,k1),
-				           mulii(q, gcoeff(dotprd,k2,k1)));
-	    for (dcol = 1; dcol <= ncol; dcol++)
-	      coeff(dotprd,k1,dcol) = coeff(dotprd,dcol,k1);
-	  } /* if q != 0 */
+          reductions++; q = negi(q);
+          tm2[k1]   = (long)ZV_lincomb(gun,q, (GEN)tm2[k1], (GEN)tm2[k2]);
+          dotprd[k1]= (long)ZV_lincomb(gun,q, (GEN)dotprd[k1], (GEN)dotprd[k2]);
+          coeff(dotprd, k1, k1) = laddii(gcoeff(dotprd,k1,k1),
+                                         mulii(q, gcoeff(dotprd,k2,k1)));
+          for (dcol = 1; dcol <= ncol; dcol++)
+            coeff(dotprd,k1,dcol) = coeff(dotprd,dcol,k1);
         } /* for ijdif */
         if (low_stack(lim, stack_lim(ltop3,1)))
 	{
@@ -1605,7 +1640,7 @@ lllintpartialall(GEN m, long flag)
       {
 	GEN diag_prod = dbltor(1.0);
 	for (icol = 1; icol <= ncol; icol++)
-	  diag_prod = gmul(diag_prod, gcoeff(dotprd,icol,icol));
+	  diag_prod = mpmul(diag_prod, gcoeff(dotprd,icol,icol));
         npass++;
 	fprintferr("npass = %ld, red. last time = %ld, diag_prod = %Z\n\n",
 	            npass, reductions, diag_prod);
@@ -1628,7 +1663,7 @@ lllintpartialall(GEN m, long flag)
         swap(coeff(dotprd,icol,icol), coeff(dotprd,s,s));
       }
     } /* for icol */
-    icol=1;
+    icol = 1;
     while (icol <= ncol && !signe(gcoeff(dotprd,icol,icol))) icol++;
     ncolnz = ncol - icol + 1;
   } /* local block */

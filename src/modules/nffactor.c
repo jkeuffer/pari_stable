@@ -62,6 +62,7 @@ typedef struct {
   GEN ZpProj;/* projector to Zp / \wp^k = Z/p^k  (\wp unramified, degree 1) */
   GEN tozk;
   GEN topow;
+  GEN topowden; /* topow x / topowden = basistoalg(x) */
 } nflift_t;
 
 typedef struct /* for use in nfsqff */
@@ -283,7 +284,9 @@ static GEN
 nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *T)
 {
   GEN u = nf_bestlift(elt,bound,T);
-  if (u) u = gmul(T->topow, u);
+  if (!u) return NULL;
+  u = gmul(T->topow, u);
+  if (T->topowden) u = gdiv(u, T->topowden);
   return u;
 }
 
@@ -951,6 +954,7 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
   for (i=1; i<r; i++)
   {
     GEN c = (GEN)piv[i];
+    pari_sp av = avma, lim = stack_lim(av, 2);
     if (DEBUGLEVEL) fprintferr("nf_LLL_cmbf: checking factor %ld\n",i);
 
     y = lc;
@@ -960,10 +964,12 @@ nf_check_factors(nfcmbf_t *T, GEN P, GEN M_L, GEN famod, GEN pk)
         GEN q = (GEN)famod[j];
         if (y) q = gmul(y, q);
         y = centermod_i(q, pk, pas2);
+        if (low_stack(lim, stack_lim(av,2))) y = gerepilecopy(av, y);
       }
     y = nf_pol_lift(y, bound, T);
     if (!y) return NULL;
 
+    if (low_stack(lim, stack_lim(av,2))) y = gerepilecopy(av, y);
     /* y is the candidate factor */
     pol = RXQX_divrem(lcpol,y,nfT, ONLY_DIVIDES);
     if (!pol) return NULL;
@@ -1042,6 +1048,12 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *T)
     pk = gcoeff(prk,1,1);
     PRK = hnfmodid(prk, pk);
 
+    if (expi(pk) > 1000)
+    { /* reduce size first, "scramble" the matrix */
+      PRK = gmul(PRK, lllintpartial(PRK));
+      /* now floating point reduction is fast */
+      PRK = gmul(PRK, lll(PRK, DEFAULTPREC));
+    }
     PRK = lllint_i(PRK, D, 0, NULL, NULL, &B);
     if (!PRK) { PRK = prk; GSmin = pk; } /* nf = Q */
     else
@@ -1339,7 +1351,7 @@ nfsqff(GEN nf, GEN pol, long fl)
   }
 
   L.tozk = (GEN)nf[8];
-  L.topow= (GEN)nf[7];
+  L.topow= Q_remove_denom((GEN)nf[7], &L.topowden);
   T.ZC = L2_bound(nf, L.tozk, &(T.dn));
   T.Br = gmul(lt, nf_root_bounds(pol, nf));
 
