@@ -592,7 +592,7 @@ nil
              ;; In the next one, we avoid `log(10)' and `"pari.log"':
              ("[\\<\\.]\\(log\\)[^\\w\\.(\"]" 1 gp-default-keywords)
              ("^ *\\\\[a-z].*$"  nil gp-default-set)
-             ("\\<\\(default\\)(" 2 gp-default-set)
+             ("\\<\\(default\\)(" 1 gp-default-set)
 
              ("^ *%[0-9]* = \\(.*$\\)"  1   gp-output))))))
 
