@@ -902,7 +902,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
   bnr=bnrinit0(bnf,f,1,prec);
   if (gcmp1(gmael(bnr,5,1)))
   {
-    avma=av; if (!flag || gcmp0(flag)) return polx[0];
+    avma=av; if (!flag || gcmp0(flag) || (signe(D)>0)) return polx[0];
     y=cgetg(2,t_VEC); p1=cgetg(3,t_VEC); y[1]=(long)p1;
     p1[1]=(long)idmat(2); p1[2]=(long)polx[0];
     return y;
