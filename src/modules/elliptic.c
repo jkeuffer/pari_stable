@@ -2863,13 +2863,14 @@ torsbound(GEN e)
   long av = avma, m, b, c, d, prime = 2;
   byteptr p = diffptr;
   GEN D = (GEN)e[12];
-  long n = lgefint(D); /* number of primes to try */
+  long n = bit_accuracy(lgefint(D)) >> 3;
+  /* n = number of primes to try ~ 1 prime every 8 bits in D */
   b = c = m = 0; p++;
   while (m<n)
   {
     d = *p++; if (!d) err(primer1);
     prime += d;
-    if (ggval(D,stoi(prime)) == 0)
+    if (smodis(D, prime))
     {
       b = cgcd(b, prime+1 - itos(apell0(e,prime)));
       if (b==c) m++; else {c = b; m = 0;}
