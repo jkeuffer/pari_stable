@@ -1100,7 +1100,7 @@ cxgamma(GEN s0, int dolog, long prec)
       GEN z = mulri(pi2, ceilr(shiftr(subrs(shiftr(sig,1), 3), -2)));
       /* y --> y + log Pi - log sqrt(2Pi) - log sin(Pi s)
        *     = y - log( sin(Pi s) / (sqrt(2Pi)/2) ) */
-      y = gsub(y, glog(gdiv(gsin(gmul(pi, s),prec), shiftr(sqrtpi2,-1)), prec));
+      y = gsub(y, glog(gdiv(gsin(gmul(pi,s0),prec), shiftr(sqrtpi2,-1)), prec));
       if (signe(z)) {
         if (gsigne(imag_i(s)) < 0) setsigne(z, -signe(z));
         if (typ(y) == t_COMPLEX)
@@ -1118,7 +1118,9 @@ cxgamma(GEN s0, int dolog, long prec)
   {
     if (funeq)
     { /* y --> y Pi/(sin(Pi s) * sqrt(2Pi)) = y sqrt(Pi/2)/sin(Pi s) */
-      y = gdiv(gmul(shiftr(sqrtpi2,-1),y), gsin(gmul(pi, s), prec));
+      y = gdiv(gmul(shiftr(sqrtpi2,-1),y), gsin(gmul(pi,s0), prec));
+      /* don't use s above: sin(pi s0) = sin(pi s) and the former is
+       * more accurate, esp. if s0 ~ 0 */
       p1 = gneg(p1);
     }
     else /* y --> sqrt(2Pi) / y */
