@@ -996,9 +996,8 @@ extern GEN gauss_intern(GEN a, GEN b);
  *
  * P = monic squarefree in Z[X].
  * famod = array of (lifted) modular factors mod p^a
- * bound = Mignotte bound for the size of divisors of P (sor the sup norm)
- * previously recombined all set of factors with less than rec elts
- */
+ * bound = Mignotte bound for the size of divisors of P (for the sup norm)
+ * previously recombined all set of factors with less than rec elts */
 GEN
 LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
 {
