@@ -36,6 +36,10 @@ This file lists the incompatible changes between Version 2.x and older versions
   - the "technical parameter" to bnfinit() has been shortened to 3 components
     (the others were deprecated / useless): [c, c2, nrpid].
 
+  - poldegree(0) now returns -VERYBIGINT, not -1. Before using d = poldegree(x),
+    always check for 0 first: either (x == 0) or (d >= 0) as you prefer. Never
+    check for  d == -1 or -2^31-1 which is not portable.
+
 
 * The library PARI:
 ===================
