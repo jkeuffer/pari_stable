@@ -1452,7 +1452,7 @@ static GEN
 update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 	     GEN ns)
 {
-  long l, v = varn(fx);
+  long l, v = varn(fx), first = 1;
   GEN nalph = alph, nchi = chi, w, nnu, pdr, npmr, rep;
 
   affii(gzero, (GEN)ns[1]); /* kill cache */
@@ -1463,16 +1463,20 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
     pdr = respm(nchi, derivpol(nchi), pmr);
     if (signe(pdr)) break;
     nalph = gadd(nalph, gmul(p, polx[v]));
+    if (first) 
+    {
+      /* check whether we can get a decomposition */
+      first = 0;
+      w = factcp(p, fx, nalph, NULL, ns);
+      nchi = (GEN)w[1];
+      nnu  = (GEN)w[2];
+      l    = itos((GEN)w[3]);
+      if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
+    }
     /* nchi was too reduced at this point; try a larger precision */
     pmr  = sqri(pmr);
-    /* check whether we can get a decomposition */
-    w = factcp(p, fx, nalph, NULL, ns);
-    nchi = (GEN)w[1];
-    nnu  = (GEN)w[2];
-    l    = itos((GEN)w[3]);
-    if (l > 1) return Decomp(p, fx, mf, nalph, nchi, nnu, 0);
   }
-
+  
   if (is_pm1(pdr))
     npmr = gun;
   else
@@ -1770,9 +1774,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	{
 	  p1 = modii(ZX_QX_resultant(chi, eta), p);
 	  if (signe(p1)) continue; 
-	  if (fm) break;
 	  
-	  p1   = factcp(p, chi, eta, pmf, ns);
+	  p1   = factcp(p, chi, eta, pmr, ns);
 	  chie = (GEN)p1[1];
 	  nue  = (GEN)p1[2];
 	  l    = itos((GEN)p1[3]);
