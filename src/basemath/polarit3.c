@@ -930,6 +930,13 @@ FpXQ_inv(GEN x,GEN T,GEN p)
 }
 
 GEN
+FpXQ_div(GEN x,GEN y,GEN T,GEN p)
+{
+  gpmem_t av = avma;
+  return gerepileupto(av, FpXQ_mul(x,FpXQ_inv(y,T,p),T,p));
+}
+
+GEN
 FpXV_FpV_innerprod(GEN V, GEN W, GEN p)
 {
   gpmem_t ltop=avma;
@@ -1263,14 +1270,32 @@ FpXQX_from_Kronecker(GEN Z, GEN T, GEN p)
 }
 
 GEN
+FpVQX_red(GEN z, GEN T, GEN p)
+{
+  GEN res;
+  int i, l = lg(z);
+  res=cgetg(l,typ(z));
+  for(i=1;i<l;i++)
+    if (typ(z[i]) != t_INT)
+    {
+      if (T)
+        res[i]=(long)FpX_res((GEN)z[i],T,p);
+      else
+        res[i]=(long)FpX_red((GEN)z[i],p);
+    }
+    else
+      res[i] = lmodii((GEN)z[i],p);
+  return res;
+}
+GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
   GEN res;
-  int i;
-  res=cgetg(lgef(z),t_POL);
+  int i, l = lgef(z);
+  res=cgetg(l,t_POL);
   res[1] = evalsigne(1) | evalvarn(varn(z)) | evallgef(lgef(z));
-  for(i=2;i<lgef(res);i++)
-    if (typ(z[i])!=t_INT)
+  for(i=2;i<l;i++)
+    if (typ(z[i]) != t_INT)
     {
       if (T)
         res[i]=(long)FpX_res((GEN)z[i],T,p);
