@@ -1276,8 +1276,8 @@ check_args()
 static GEN
 do_call(void *call, GEN x, GEN argvec[])
 {
-  return ((PFGEN)call)(x, argvec[1], argvec[2], argvec[3],
-	          argvec[4], argvec[5], argvec[6], argvec[7], argvec[8]);
+  return ((PFGEN)call)(x, argvec[1], argvec[2], argvec[3], argvec[4],
+                          argvec[5], argvec[6], argvec[7], argvec[8]);
 }
 
 static GEN
@@ -1286,9 +1286,9 @@ fix(GEN x, long l)
   GEN y;
   if (typ(x) == t_COMPLEX)
   {
-    y = gcopy(x);
-    y[1] = (long)fix((GEN)y[1],l);
-    y[2] = (long)fix((GEN)y[2],l);
+    y = cgetg(3,t_COMPLEX);
+    y[1] = (long)fix((GEN)x[1],l);
+    y[2] = (long)fix((GEN)x[2],l);
   }
   else 
   {
@@ -1297,52 +1297,62 @@ fix(GEN x, long l)
   return y;
 }
 
+/* Rationale: (f(2^-e) - f(-2^-e) + O(2^-pr)) / (2 * 2^-e) = f'(0) + O(2^-2e)
+ * since 2nd derivatives cancel. 
+ *   prec(LHS) = pr - e
+ *   prec(RHS) = 2e, equal when  pr = 3e = 3/2 fpr (fpr = required final prec)
+ *
+ * For f'(x), x far from 0: prec(LHS) = pr - e - expo(x)
+ * --> pr = 3/2 fpr + expo(x) */
 static GEN
 num_deriv(void *call, GEN argvec[])
 {
-  GEN eps,a,b, x = argvec[0];
-  long pr,pr2,l,e,ex, av = avma;
+  GEN eps,a,b, y, x = argvec[0];
+  long fpr,pr,l,e,ex, av = avma;
   if (!is_const_t(typ(x))) 
   {
     a = do_call(call, x, argvec);
     return gerepileupto(av, deriv(a,gvar9(a)));
   }
-  pr = precision(x); ex = gexpo(x);
-  if (!pr) pr = prec;
-  pr2 = (long)ceil(pr * 1.5);
-  l = 2+pr2;
-  e = pr2 * BITS_IN_HALFULONG;
-  if (ex == -HIGHEXPOBIT) ex = 0;
+  fpr = precision(x)-2; /* required final prec (in sig. words) */
+  if (fpr == -2) fpr = prec-2;
+  ex = gexpo(x);
+  if (ex < 0) ex = 0; /* at 0 */
+  pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
+  l = 2+pr;
+  e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
-  eps = realun(l); setexpo(eps, ex-e);
-  x = fix(x, l);           a = do_call(call, x, argvec);
-  x = fix(gadd(x, eps),l); b = do_call(call, x, argvec);
-  setexpo(eps, e-ex);
+  eps = realun(l); setexpo(eps, -e);
+  y = fix(gsub(x, eps), l); a = do_call(call, y, argvec);
+  y = fix(gadd(x, eps), l); b = do_call(call, y, argvec);
+  setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }
 
+/* as above, for user functions */
 static GEN
 num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
 {
   GEN eps,a,b, x = *arg;
-  long pr,pr2,l,e,ex, av = avma;
+  long fpr,pr,l,e,ex, av = avma;
 
   if (!is_const_t(typ(x))) 
   {
     a = call_fun(p,arg,loc,narg,nloc);
     return gerepileupto(av, deriv(a,gvar9(a)));
   }
-  pr = precision(x); ex = gexpo(x);
-  if (!pr) pr = prec;
-  pr2 = (long)ceil(pr * 1.5);
-  l = 2+pr2;
-  e = pr2 * BITS_IN_HALFULONG;
-  if (ex == -HIGHEXPOBIT) ex = 0;
+  fpr = precision(x)-2; /* required final prec (in sig. words) */
+  if (fpr == -2) fpr = prec-2;
+  ex = gexpo(x);
+  if (ex < 0) ex = 0; /* at 0 */
+  pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
+  l = 2+pr;
+  e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
-  eps = realun(l); setexpo(eps, ex-e);
-  *arg = x = fix(x,l);       a = call_fun(p,arg,loc,narg,nloc);
-  *arg = fix(gadd(x,eps),l); b = call_fun(p,arg,loc,narg,nloc);
-  setexpo(eps, e-ex);
+  eps = realun(l); setexpo(eps, -e);
+  *arg = fix(gsub(x, eps), l); a = call_fun(p,arg,loc,narg,nloc);
+  *arg = fix(gadd(x, eps), l); b = call_fun(p,arg,loc,narg,nloc);
+  setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }
 
