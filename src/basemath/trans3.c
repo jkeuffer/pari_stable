@@ -181,7 +181,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
       if (gcmp0(z)) return gerepilecopy(av, p2);
       x = gtodouble(gabs(z,prec));
       L = x*1.3591409;
-      B = bit_accuracy(prec)*LOG2/(2*L);
+      B = bit_accuracy_mul(prec, LOG2/2)/L;
       N = 1 + B;
 /* 3 Newton iterations are enough except in pathological cases */
       N = (N + B)/(log(N)+1);
@@ -355,7 +355,7 @@ kbessel(GEN nu, GEN gx, long prec)
   u=cgetr(l1); v=cgetr(l1); c=cgetr(l1); d=cgetr(l1);
   e=cgetr(l1); f=cgetr(l1);
   nu2=gmulgs(gsqr(nu),-4);
-  n = (long) (bit_accuracy(l)*LOG2 + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
+  n = (long) (bit_accuracy_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
   n2=(n<<1); pitemp=mppi(l1);
   /* this 10 should really be a 5, but then kbessel(15.99) enters oo loop */
   lbin = 10 - bit_accuracy(l); av1=avma;
@@ -515,7 +515,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       {
 	k = labs(ki);
 	L = x*1.3591409;
-	B = (bit_accuracy(prec)*LOG2)/(2*L);
+	B = bit_accuracy_mul(prec,LOG2/2)/L;
 	if (fl) B += 0.367879;
 	N = 1 + B;
 /* 3 Newton iterations are enough except in pathological cases */
@@ -688,7 +688,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     u=cgetr(l1); v=cgetr(l1); c=cgetr(l1);
     d=cgetr(l1); e=cgetr(l1); f=cgetr(l1);
   }
-  n=(long)(bit_accuracy(l)*LOG2 + PI*sqrt(gtodouble(gabs(gmul(a,a1),l1))));
+  n=(long)(bit_accuracy_mul(l, LOG2) + PI*sqrt(gtodouble(gabs(gmul(a,a1),l1))));
   lbin = 10-bit_accuracy(l); av1=avma;
   if (cmprs(x,n)<0)
   {
@@ -766,7 +766,7 @@ incgam2_0(GEN x)
   double m,mx;
 
   l = lg(x); mx = rtodbl(x);
-  m = (bit_accuracy(l)*LOG2 + mx)/4; n=(long)(1+m*m/mx);
+  m = (bit_accuracy_mul(l,LOG2) + mx)/4; n=(long)(1+m*m/mx);
   p1 = divsr(-n, addsr(n<<1,x));
   for (i=n-1; i >= 1; i--)
     p1 = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,p1)));
@@ -783,7 +783,7 @@ incgam1(GEN a, GEN x, long prec)
 
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
   l=lg(x); mx=rtodbl(x);
-  m=(long) bit_accuracy(l)*LOG2; n=(long)(m/(log(m)-(1+log(mx))));
+  m=(long) bit_accuracy_mul(l,LOG2); n=(long)(m/(log(m)-(1+log(mx))));
   p2 = cgetr(l); affrr(addir(gun,gsub(x,a)), p2);
   p3 = subrs(p2, n+1); av1 = avma;
   for (i=n; i>=1; i--)
@@ -808,7 +808,7 @@ incgam2(GEN a, GEN x, long prec)
   if (typ(x) != t_REAL) { gaffect(x,z); x=z; }
   if (gcmp0(a)) { affrr(incgam2_0(x), z); avma = av; return z; }
   l=lg(x); mx=rtodbl(x);
-  m = (bit_accuracy(l)*LOG2 + mx)/4; n=(long)(1+m*m/mx);
+  m = (bit_accuracy_mul(l,LOG2) + mx)/4; n=(long)(1+m*m/mx);
   i = typ(a);
   if (i == t_REAL) b = addsr(-1,a);
   else
@@ -1074,7 +1074,7 @@ get_xinf(double beta)
 static void
 optim_zeta(GEN S, long prec, long *pp, long *pn)
 {
-  double s, t, sn, alpha, beta, n;
+  double s, t, alpha, beta, n, B;
   long p;
   if (typ(S) == t_REAL) {
     s = rtodbl(S);
@@ -1084,6 +1084,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     t = fabs( rtodbl((GEN)S[2]) );
   }
 
+  B = bit_accuracy_mul(prec, LOG2);
   if (s <= 0) /* may occur if S ~ 0, and we don't use the func. eq. */
   { /* TODO: the crude bounds below are generally valid. Optimize ? */
     double l,l2, la = 1.; /* heuristic */
@@ -1094,7 +1095,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       double rlog, ilog; dcxlog(s-1,t, &rlog,&ilog);
       l2 = (s - 0.5)*rlog - t*ilog; /* = Re( (S - 1/2) log (S-1) ) */
     }
-    l = (pariC2*(prec-2) - l2 + s*log2PI) / (2. * (1.+ log((double)la)));
+    l = (B - l2 + s*log2PI) / (2. * (1.+ log((double)la)));
     l2 = dabs(s, t)/2;
     if (l < l2) l = l2;
     p = (long) ceil(l); if (p < 2) p = 2;
@@ -1103,15 +1104,15 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
   }
   else if (t)
   {
-    sn = dabs(s, t);
-    alpha = pariC2*(prec-2) - 0.39 + log(sn/s) + s*(log2PI - log(sn));
+    double sn = dabs(s, t), L = log(sn/s);
+    alpha = B - 0.39 + L + s*(log2PI - log(sn));
     beta = (alpha+s)/t - atan(s/t);
     if (beta <= 0)
     {
       if (s >= 1.0)
       {
 	p = 0;
-	n = exp(pariC2*(prec-2)/s) * pow(sn/(2*s),1.0/s);
+	n = exp((B - LOG2 + L) / s);
       }
       else
       {
@@ -1130,14 +1131,14 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
       else
       {
 	p = 0;
-	n = exp(pariC2*(prec-2)/s)*pow(sn/(2*s),1.0/s);
+	n = exp((B - LOG2 + L) / s);
       }
     }
   }
   else
   {
-    sn = fabs(s);
-    beta = pariC2*(prec-2) + 0.61 + s*(log2PI - log(s));
+    double sn = fabs(s);
+    beta = B + 0.61 + s*(log2PI - log(s));
     if (beta > 0)
     {
       p = (long)ceil(beta / 2.0);
@@ -1146,7 +1147,7 @@ optim_zeta(GEN S, long prec, long *pp, long *pn)
     else
     {
       p = 0;
-      n = exp(pariC2*(prec-2)/s)*pow(sn/(2*s),1.0/s);
+      n = exp((B - LOG2 + log(sn/s)) / s);
     }
   }
   *pp = p;
@@ -1216,10 +1217,10 @@ inv_szeta_euler(long n, double lba, long prec)
   GEN z, res = cgetr(prec);
   pari_sp av0 = avma;
   byteptr d =  diffptr + 2;
-  double A = n / pariC2, D;
+  double A = n / (LOG2*BITS_IN_LONG), D;
   long p, lim;
 
-  if (!lba) lba = (prec - 2) * pariC2;
+  if (!lba) lba = bit_accuracy_mul(prec, LOG2);
   D = exp((lba - log(n-1)) / (n-1));
   lim = 1 + (long)ceil(D);
   maxprime_check((ulong)lim);
@@ -1269,9 +1270,9 @@ bernfrac_using_zeta(long n)
     long p = 2*itos((GEN)D[i]) + 1;
     if (isprime(stoi(p))) d = mulis(d, p);
   }
-  /* 2.83787706 = 1 + log(2Pi). 1.712086 = ??? */
-  t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*2.83787706 + 1.712086;
-  u = t / pariC2; prec = (long)ceil(u);
+  /* 1.712086 = ??? */
+  t = log( gtodouble(d) ) + (n + 0.5) * log(n) - n*(1+log2PI) + 1.712086;
+  u = t / (LOG2*BITS_IN_LONG); prec = (long)ceil(u);
   if (prec - u < 0.1) prec++; /* don't take risks */
   prec += 2;
   iz = inv_szeta_euler(n, t, prec);
@@ -1369,7 +1370,7 @@ single_bern(long k, long prec)
   pari_sp av;
   GEN B;
   if (OK_bern(k >> 1, prec)) B = bernreal(k, prec);
-  else if (k * (log(k) - 2.83) > (prec-2) * pariC2)
+  else if (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2))
     B = bernreal_using_zeta(k, NULL, prec);
   else
   {
@@ -1397,7 +1398,8 @@ szeta(long k, long prec)
   if (k > bit_accuracy(prec)+1) return realun(prec);
   if ((k&1) == 0)
   {
-    if (!OK_bern(k >> 1, prec) && (k * (log(k) - 2.83) > (prec-2) * pariC2))
+    if (!OK_bern(k >> 1, prec)
+        && (k * (log(k) - 2.83) > bit_accuracy_mul(prec, LOG2)))
       y = ginv( inv_szeta_euler(k, 0, prec) ); /* would use zeta above */
     else
     {
@@ -1408,7 +1410,7 @@ szeta(long k, long prec)
     return gerepileuptoleaf(av, y);
   }
   /* k > 1 odd */
-  if (k * log(k) > (prec-2) * pariC2) /* heuristic */
+  if (k * log(k) > bit_accuracy_mul(prec, LOG2)) /* heuristic */
     gerepileuptoleaf(av, ginv( inv_szeta_euler(k, 0, prec) ));
   return szeta_odd(k, prec);
 }

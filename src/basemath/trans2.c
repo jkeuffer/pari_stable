@@ -985,7 +985,7 @@ cxgamma(GEN s0, int dolog, long prec)
     v = v - st;
     l2 = u*u + v*v;
     if (l2 < 0.000001) l2 = 0.000001;
-    l = (pariC2*(prec-2) - log(l2)/2) / 2.;
+    l = (bit_accuracy_mul(prec, LOG2) - log(l2)/2) / 2.;
     if (l < 0) l = 0.;
 
     la = 3.; /* FIXME: heuristic... */
@@ -1024,7 +1024,7 @@ cxgamma(GEN s0, int dolog, long prec)
       else
       {
         double alpha = sqrt( dnorm(ssig, st) );
-        beta = ((bit_accuracy(prec)>>1) * LOG2 / PI) - alpha;
+        beta = bit_accuracy_mul(prec,LOG2/(2*PI)) - alpha;
         if (beta >= 0) nn = (long)(1+pariK2*beta); else nn = 0;
         if (nn)
           lim = (long)(1+PI*(alpha+nn));
@@ -1356,7 +1356,7 @@ cxpsi(GEN s0, long prec)
     }
     if (l < 0.000001) l = 0.000001;
     l = log(l) / 2.;
-    lim = 2 + (long)ceil((pariC2*(prec-2) - l) / (2*(1+log((double)la))));
+    lim = 2 + (long)ceil((bit_accuracy_mul(prec, LOG2) - l) / (2*(1+log((double)la))));
     if (lim < 2) lim = 2;
 
     l = (2*lim-1)*la / (2.*PI);

@@ -64,7 +64,7 @@ galoisconj2pol(GEN x, long nbmax, long prec)
   polr = roots(x, prec);
   p1 = (GEN) polr[1];
   nbauto = 1;
-  prec = (long) (bit_accuracy(prec) * L2SL10 * 0.75);
+  prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);
   w = cgetg(n + 2, t_VEC);
   w[1] = un;
   for (i = 2; i <= n; i++)
@@ -109,7 +109,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
   p1 = (GEN) nf[6];
   prec = precision((GEN) p1[1]);
   /* accuracy in decimal digits */
-  prec = (long) (bit_accuracy(prec) * L2SL10 * 0.75);
+  prec = (long)bit_accuracy_mul(prec, L2SL10 * 0.75);
   ru = (n + r1) >> 1;
   nbauto = 1;
   polr = cgetg(n + 1, t_VEC);

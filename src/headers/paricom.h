@@ -72,8 +72,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ENDCATCH_ERR	    \
     CATCH_RELEASE();	    \
   }}
-
 /*=====================================================================*/
+
+#define ndec2nlong(x) ((x)*(3.321928094887362/BITS_IN_LONG)) /*3.32~log_2(10)*/
 #define nbits2nlong(x) (((x)+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
 #define nchar2nlong(x) (((x)+BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG)
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
@@ -103,11 +104,8 @@ enum manage_var_t {
   manage_var_pop
 };
 
-/* let BIL = bits in long */
-#define pariK1 (0.103810253/(BYTES_IN_LONG/4))  /* log(10)/(BIL*log(2))   */
-#define LOG2   (0.69314718055994531)            /* log(2)                 */
-#define L2SL10 (0.301029995663981)              /* log(2)/log(10)         */
-#define pariC2 (22.18070978*(BYTES_IN_LONG/4))  /* BIL*log(2)             */
+#define LOG2   (0.6931471805599453) /* log(2) */
+#define L2SL10 (0.3010299956639812) /* log_10(2) */
 
 #ifndef  PI
 #  define PI (3.141592653589)
@@ -115,11 +113,11 @@ enum manage_var_t {
 
 #ifdef LONG_IS_64BIT
 #  define VERYBIGINT (9223372036854775807L) /* 2^63-1 */
-#  define BIGINT (2147483647)              /* 2^31-1 */
+#  define BIGINT (2147483647)               /* 2^31-1 */
 #  define u_OK_ULONG(p) ((ulong)p <= 3037000493UL)
 #else
 #  define VERYBIGINT (2147483647L) /* 2^31-1 */
-#  define BIGINT (32767)          /* 2^15-1 */
+#  define BIGINT (32767)           /* 2^15-1 */
 #  define u_OK_ULONG(p) ((ulong)p <= 46337UL)
 #endif
 

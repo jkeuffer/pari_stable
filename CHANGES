@@ -354,6 +354,8 @@ BA  4- cornacchia, in favour of qfbsolve.
    12- undocumented, inconsistently named, useless, mulsii, addsii, divisii
    13- useless routine umuluu [ use mulll ]
 BA 14- HPPA 32bit and 64bit level0 inline assembly kernel
+   15- undocumented [macro] constants pariC1, pariC2, pariC3, pariK,
+       pariK2, pariK4
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):

@@ -146,7 +146,7 @@ consteuler(long prec)
 
   prec++;
 
-  l = prec+1; x = (long) (1 + (bit_accuracy(l) >> 2) * LOG2);
+  l = prec+1; x = (long) (1 + bit_accuracy_mul(l, LOG2/4));
   a = stor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
   b = realun(l);
   v = realun(l);
@@ -1155,7 +1155,7 @@ exp1r_abs(GEN x)
   double a, b, beta, gama = 2.0 /* optimized for SUN3 */;
                                 /* KB: 3.0 is better for UltraSparc */
   if (ex >= EXMAX) err(talker,"exponent too large in exp");
-  beta = 5. + bit_accuracy(l)*LOG2;
+  beta = 5. + bit_accuracy_mul(l, LOG2);
   a = sqrt(beta/(gama*LOG2));
   b = (BITS_IN_LONG-1-ex)
       + log2(a * (gama/2.718281828459045) / (double)(ulong)x[2]);
@@ -1623,7 +1623,7 @@ mpsc1(GEN x, long *ptmod8)
   if (!s) return realzero_bit(-bit_accuracy(l)<<1);
 
   l = lg(x); l2 = l+1; y = cgetr(l);
-  beta = 5. + bit_accuracy(l2)*LOG2;
+  beta = 5. + bit_accuracy_mul(l2,LOG2);
   a = sqrt(beta / LOG2);
   d = a + 1/LOG2 - log2(a / (double)(ulong)x[2]) - (BITS_IN_LONG-1-e);
   if (d >= 0)

@@ -2358,7 +2358,8 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
   cga = gmul(cg, A);
   cgb = gdiv(cg, A);
-  l = (long)((pariC2*(prec-2) + fabs(gtodouble(greal(s))-1.) * log(rtodbl(cga)))
+  l = (long)((bit_accuracy_mul(prec, LOG2) +
+              fabs(gtodouble(real_i(s))-1.) * log(rtodbl(cga)))
             / rtodbl(cgb) + 1);
   if (l < 1) l = 1;
   v = anell(e, min((ulong)l,LGBITS-1));

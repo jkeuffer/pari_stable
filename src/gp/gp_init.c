@@ -54,7 +54,7 @@ static long
 setprecr(long n)
 {
   long m = GP_DATA->fmt->sigd;
-  if (n > 0) { GP_DATA->fmt->sigd = n; prec = (long)(n*pariK1 + 3); }
+  if (n > 0) { GP_DATA->fmt->sigd = n; prec = (long)(ndec2nlong(n) + 3); }
   return m;
 }
 

@@ -2178,8 +2178,8 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   p1[1] = zero;
   velt = concat(p1, velt);
 
-  bacmin = (long)(.225 * bit_accuracy(prec));
-  bacmax = (long)(.315 * bit_accuracy(prec));
+  bacmin = (long)bit_accuracy_mul(prec, .225);
+  bacmax = (long)bit_accuracy_mul(prec, .315);
 
   av2 = avma;
   for (i = bacmax; i >= bacmin; i-=16, avma = av2)
@@ -2400,7 +2400,7 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
   for (j = 1; j <= ncond; j++)
   {
     C[j]  = mael(dataCR, mael(vChar,j,1), 2);
-    N0[j] = (long)(bit_accuracy(prec) * gtodouble((GEN)C[j]) * 0.35);
+    N0[j] = (long)bit_accuracy_mul(prec, 0.35 * gtodouble((GEN)C[j]));
     if (n0 < N0[j]) n0 = N0[j];
   }
   if ((ulong)n0 > maxprime())
