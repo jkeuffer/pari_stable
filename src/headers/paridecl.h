@@ -99,6 +99,7 @@ GEN     Flm_inv(GEN x, ulong p);
 GEN     Flm_ker(GEN x, ulong p);
 GEN     Flm_ker_sp(GEN x, ulong p, long deplin);
 GEN     Flm_mul(GEN x, GEN y, ulong p);
+GEN     FlxqM_ker(GEN x, GEN T, ulong p);
 GEN     FpC_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
