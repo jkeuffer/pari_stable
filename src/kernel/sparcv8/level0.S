@@ -41,7 +41,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 	.align 2
 #endif
 	GLOBL	C(addll),C(subll),C(addllx),C(subllx)
-	GLOBL	C(shiftl),C(shiftlr),C(shiftl2),C(shiftlr1),C(shiftlr2)
+	GLOBL	C(shiftl),C(shiftlr)
 	GLOBL	C(mulll),C(overflow),C(hiremainder),C(addmul)
 	
 C(addll): sethi	%hi(C(overflow)),%o3
@@ -74,25 +74,10 @@ C(shiftl): sethi	%hi(C(hiremainder)),%o3
 	st	%o2,[%o3+%lo(C(hiremainder))]
 	retl
 	sll	%o0,%o1,%o0
-C(shiftl2): sethi	%hi(C(hiremainder)),%o3
-	srl	%o0,%o2,%o4
-	st	%o4,[%o3+%lo(C(hiremainder))]
-	retl
-	sll	%o0,%o1,%o0
 C(shiftlr): sethi %hi(C(hiremainder)),%o3
 	neg	%o1,%o4
 	sll	%o0,%o4,%o2
 	st	%o2,[%o3+%lo(C(hiremainder))]
-	retl
-	srl	%o0,%o1,%o0
-C(shiftlr1): sethi %hi(C(hiremainder)),%o3
-	sll	%o0,31,%o2
-	st	%o2,[%o3+%lo(C(hiremainder))]
-	retl
-	srl	%o0,1,%o0
-C(shiftlr2): sethi %hi(C(hiremainder)),%o3
-	sll	%o0,%o2,%o4
-	st	%o4,[%o3+%lo(C(hiremainder))]
 	retl
 	srl	%o0,%o1,%o0
 	
