@@ -1198,7 +1198,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {
-    long eT2, a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
+    long a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
     GEN oldCM_L, M_L, q, S1, P1, VV;
     int first = 1;
 
@@ -1245,17 +1245,16 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     b = delta = 0; /* -Wall */
 AGAIN:
     M_L = Q_div_to_int(CM_L, stoi(C));
-    VV = get_V(Tra, M_L, PRK, PRKinv, pk, &eT2);
+    VV = get_V(Tra, M_L, PRK, PRKinv, pk, &a);
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
-      a = eT2;
       bgood = (long)(a - max(32, BitPerFactor * r));
       b = max(bmin, bgood);
       delta = a - b;
     }
     else
     { /* add more p-adic digits and continue reduction */
-      if (eT2 < b) b = eT2;
+      if (a < b) b = a;
       b = max(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
     }
