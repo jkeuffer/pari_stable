@@ -162,6 +162,8 @@ GEN
 _vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 GEN
 _col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+GEN
+_mat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
 
 /* routines for naive growarrays */
 GEN
@@ -969,30 +971,6 @@ use_maximal_pivot(GEN x)
   return res;
 }
 
-static GEN
-col_to_mat(GEN b)
-{
-  GEN B = cgetg(2, t_MAT);
-  B[1] = (long)b; return B;
-}
-
-static GEN
-check_b(GEN b, long nbli, int *iscol)
-{
-  GEN col;
-  *iscol = (b && typ(b) == t_COL);
-  if (!b) return idmat(nbli);
-  b = dummycopy(b);
-  if (*iscol) { col = b; b = col_to_mat(b); }
-  else
-  {
-    if (lg(b) == 1) err(consister,"gauss");
-    col = (GEN)b[1];
-  }
-  if (nbli != lg(col)-1) err(talker,"incompatible matrix dimensions in gauss");
-  return b;
-}
-
 /* C = A^(-1)(tB) where A, B, C are integral, A is upper triangular, t t_INT */
 GEN
 gauss_triangle_i(GEN A, GEN B, GEN t)
@@ -1242,6 +1220,40 @@ _u_Fp_add(uGEN b, long k, long i, ulong p)
   if (b[k] & MASK) b[k] %= p;
 }
 
+static int
+init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
+{
+  if (typ(a)!=t_MAT) err(mattype1,"gauss");
+  *aco = lg(a) - 1;
+  if (!aco) /* a empty */
+  {
+    if (*b && lg(*b) != 1) err(consister,"gauss");
+    return 0;
+  }
+  *iscol = 0;
+  if (*b)
+  {
+    switch(typ(*b))
+    {
+      case t_MAT:
+        if (lg(*b) == 1) return 0;
+        *b = dummycopy(*b);
+        if (lg((*b)[1])-1 != *aco) err(consister,"gauss");
+        break;
+      case t_COL: *iscol = 1;
+        if (lg(*b)-1 != *aco) err(consister,"gauss");
+        *b = dummycopy(_mat(*b));
+        break;
+      default: err(typeer,"gauss");
+    }
+  }
+  else
+    *b = idmat(*aco);
+  *li = lg(a[1])-1;
+  if (*li < *aco) err(mattype1,"gauss");
+  return 1;
+}
+
 /* Gaussan Elimination. Compute a^(-1)*b
  * b is a matrix or column vector, NULL meaning: take the identity matrix
  * If a and b are empty, the result is the empty matrix.
@@ -1254,24 +1266,14 @@ _u_Fp_add(uGEN b, long k, long i, ulong p)
 GEN
 gauss_intern(GEN a, GEN b)
 {
-  pari_sp av, lim;
-  long i,j,k,li,bco, aco = lg(a)-1;
+  pari_sp av = avma, lim = stack_lim(av,1);
+  long i, j, k, li, bco, aco;
   int inexact, iscol;
   GEN p,m,u;
 
-  if (typ(a)!=t_MAT) err(mattype1,"gauss");
-  if (b && typ(b)!=t_COL && typ(b)!=t_MAT) err(typeer,"gauss");
-  if (!aco)
-  {
-    if (b && lg(b)!=1) err(consister,"gauss");
-    if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
-    return cgetg(1,t_MAT);
-  }
-  av = avma; lim = stack_lim(av,1);
-  li = lg(a[1])-1;
-  if (li != aco && (li < aco || b)) err(mattype1,"gauss");
+  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
   a = dummycopy(a);
-  b = check_b(b,li, &iscol); bco = lg(b)-1;
+  bco = lg(b)-1;
   inexact = use_maximal_pivot(a);
   if(DEBUGLEVEL>4) fprintferr("Entering gauss with inexact=%ld\n",inexact);
 
@@ -1349,7 +1351,7 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   li = lg(a[1])-1;
   bco = lg(b)-1;
   iscol = (typ(b)!=t_MAT);
-  if (iscol) b = col_to_mat(b);
+  if (iscol) b = _mat(b);
   piv = invpiv = 0; /* -Wall */
   for (i=1; i<=aco; i++)
   {
@@ -1431,22 +1433,12 @@ Flm_inv(GEN a, ulong p) {
 GEN
 FpM_gauss(GEN a, GEN b, GEN p)
 {
-  pari_sp av,lim;
-  long i,j,k,li,bco, aco = lg(a)-1;
+  pari_sp av = avma, lim;
+  long i, j, k, li, bco, aco;
   int iscol;
   GEN piv, invpiv, m, u;
 
-  if (typ(a)!=t_MAT) err(mattype1,"gauss");
-  if (b && typ(b)!=t_COL && typ(b)!=t_MAT) err(typeer,"gauss");
-  if (!aco)
-  {
-    if (b && lg(b)!=1) err(consister,"gauss");
-    if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
-    return cgetg(1,t_MAT);
-  }
-  li = lg(a[1])-1;
-  if (li != aco && (li < aco || b)) err(mattype1,"gauss");
-  b = check_b(b,li, &iscol); av = avma;
+  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
   if (lgefint(p) == 3)
   {
     ulong pp = (ulong)p[2];
@@ -1510,24 +1502,14 @@ FpM_gauss(GEN a, GEN b, GEN p)
 GEN
 FqM_gauss(GEN a, GEN b, GEN T, GEN p)
 {
-  pari_sp av,lim;
+  pari_sp  av = avma, lim;
   long i,j,k,li,bco, aco = lg(a)-1;
   int iscol;
   GEN piv, invpiv, m, u;
 
   if (!T) return FpM_gauss(a,b,p);
-
-  if (typ(a)!=t_MAT) err(mattype1,"gauss");
-  if (b && typ(b)!=t_COL && typ(b)!=t_MAT) err(typeer,"gauss");
-  if (!aco)
-  {
-    if (b && lg(b)!=1) err(consister,"gauss");
-    if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
-    return cgetg(1,t_MAT);
-  }
-  li = lg(a[1])-1;
-  if (li != aco && (li < aco || b)) err(mattype1,"gauss");
-  b = check_b(b,li,&iscol); av = avma;
+  if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
+ 
   lim = stack_lim(av,1);
   a = dummycopy(a);
   bco = lg(b)-1;
