@@ -75,6 +75,7 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
        fundamental discriminants (infinite loop [e.g quadclassunit(-352)],
        wrong result).   [ fix: increase factor base ]
    26- sign of elleisnum(E, 6, 1) was wrong
+BA 27- [GMP kernel] factor(18295370635792208009) --> error
 
   Changed
     1- rnf structure (removed useless components)
@@ -108,6 +109,7 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
        pari-help.el pari-messages.el sli-tools.el
     4- Configure --builddir : find a decent name for build directory
        depending on kernel options (with/without gmp, exotic assembler kernel)
+ GH 5- PowerPC level0 inline assembly kernel.
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]
