@@ -663,15 +663,15 @@ if test "$optimization" = profiling; then DLLD=; else
 # Some others (SunOS 5) need a link from a .so
 # Some others (HPUX 09) do not want version numbers.
 #
-  soname=$soname_num
+  soname=.$soname_num
   case "$osname-$arch" in
 #    aix-*)  DLSUFFIX=a  ;; dynamic linking does not work!
-    sunos-*) sodest=$VersionMajor$VersionMinor.$patch
+    sunos-*) sodest=.$VersionMajor$VersionMinor.$patch
              soname=$sodest;;
     *-alpha|solaris-*|linux-*|freebsd-*)
       case $libpari_base in
-        pari) sodest=$version.$patch;; # released versions
-        *) sodest=$patch.0.0;; # unstable versions
+        pari) sodest=.$version.$patch;; # released versions
+        *) sodest=.$patch.0.0;; # unstable versions
       esac ;;
 # FIXME: gp-dyn.exe crashes on startup
 #   cygwin*) soname= ; sodest= ; DLSUFFIX=dll;;
