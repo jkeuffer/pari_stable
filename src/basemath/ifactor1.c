@@ -187,22 +187,10 @@ static long pl831(GEN N, GEN p)
     {
       GEN g;
       g=mppgcd(addis(b,-1),N);
-      if (gcmp1(g))
-      {
-	avma=ltop;
-	return a;
-      }
-      if (!gegal(g,N))
-      {
-	avma=ltop;
-	return 0;
-      }
+      if (gcmp1(g)) { avma=ltop; return a; }
+      if (!gegal(g,N)) { avma=ltop; return 0; }
     }
-    else
-    {
-      avma=ltop;
-      return 0;
-    }
+    else { avma=ltop; return 0; }
     avma=av;
   }
 }
