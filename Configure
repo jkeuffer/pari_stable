@@ -788,7 +788,11 @@ fi
 
 if test -n "$__gnuc__"; then
   __GNUC__="-D__GNUC__"
-  OPTFLAGS="-O3 -DGCC_INLINE -fomit-frame-pointer"
+  OPTFLAGS="-O3 -DGCC_INLINE"
+  # omit-frame-pointer incompatible with -pg
+  case "$optimization" in
+    full) OPTFLAGS="$OPTFLAGS -fomit-frame-pointer";;
+  esac
   DBGFLAGS="-g -Wall -Wno-implicit"
   PRFFLAGS="-pg"
   # Some architectures need -fPIC for building dynamic lib
