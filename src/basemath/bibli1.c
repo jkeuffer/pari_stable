@@ -1729,7 +1729,7 @@ lindep(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
-  x = mat_to_MP(x, prec); if (tx != t_COL) settyp(x,t_COL);
+  x = gmul(x, realun(prec)); if (tx != t_COL) settyp(x,t_COL);
   re = greal(x);
   im = gimag(x);
   /* independant over R ? */
