@@ -640,7 +640,7 @@ PariOUT pariErr2Str = {errstr_putc, errstr_puts, outstr_flush, NULL};
 #undef STEPSIZE
 
 char *
-pari_strdup(char *s)
+pari_strdup(const char *s)
 {
   int n = strlen(s)+1;
   char *t = gpmalloc(n);
@@ -1043,7 +1043,7 @@ voir2(GEN x, long nb, long bl)
   {
     case t_INTMOD: case t_POLMOD:
     {
-      char *s = (tx==t_INTMOD)? "int = ": "pol = ";
+      const char *s = (tx==t_INTMOD)? "int = ": "pol = ";
       if (isonstack(x[1])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
       pariputs("mod = "); voir2((GEN)x[1],nb,bl);
       blancs(bl); pariputs(s);        voir2((GEN)x[2],nb,bl);
@@ -1215,7 +1215,7 @@ get_texvar(long v, char *buf, int len)
 }
 
 static void
-monome(char *v, long deg)
+monome(const char *v, long deg)
 {
   if (deg)
   {
@@ -1226,7 +1226,7 @@ monome(char *v, long deg)
 }
 
 static void
-texnome(char *v, long deg)
+texnome(const char *v, long deg)
 {
   if (deg)
   {
@@ -1414,7 +1414,7 @@ isdenom(GEN g)
 
 /* write a * v^d */
 static void
-wr_monome(pariout_t *T, GEN a, char *v, long d)
+wr_monome(pariout_t *T, GEN a, const char *v, long d)
 {
   long sig = isone(a);
 
@@ -1432,7 +1432,7 @@ wr_monome(pariout_t *T, GEN a, char *v, long d)
 }
 
 static void
-wr_texnome(pariout_t *T, GEN a, char *v, long d)
+wr_texnome(pariout_t *T, GEN a, const char *v, long d)
 {
   long sig = isone(a);
 
@@ -1454,7 +1454,7 @@ wr_texnome(pariout_t *T, GEN a, char *v, long d)
 }
 
 static void
-wr_lead_monome(pariout_t *T, GEN a, char *v, long d, int nosign)
+wr_lead_monome(pariout_t *T, GEN a,const char *v, long d, int nosign)
 {
   long sig = isone(a);
   if (sig)
@@ -1474,7 +1474,7 @@ wr_lead_monome(pariout_t *T, GEN a, char *v, long d, int nosign)
 }
 
 static void
-wr_lead_texnome(pariout_t *T, GEN a, char *v, long d, int nosign)
+wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int nosign)
 {
   long sig = isone(a);
   if (sig)
@@ -1502,7 +1502,8 @@ bruti(GEN g, pariout_t *T, int nosign)
 {
   long tg,l,i,j,r;
   GEN a,b;
-  char *v, buf[32];
+  const char *v;
+  char buf[32];
 
   if (!g) { pariputs("NULL"); return; }
   if (isnull(g)) { pariputc('0'); return; }
@@ -1578,8 +1579,9 @@ bruti(GEN g, pariout_t *T, int nosign)
     {
       GEN p = (GEN)g[2];
       pari_sp av = avma;
+      char *ev;
       i = valp(g); l = precp(g)+i;
-      g = (GEN)g[4]; v = GENtostr(p);
+      g = (GEN)g[4]; ev = GENtostr(p);
       for (; i<l; i++)
       {
 	g = dvmdii(g,p,&a);
@@ -1589,13 +1591,13 @@ bruti(GEN g, pariout_t *T, int nosign)
 	  {
 	    wr_intpos(a); if (i) pariputc('*');
 	  }
-	  if (i) padic_nome(v,i);
+	  if (i) padic_nome(ev,i);
           sp_sign_sp(T,1);
 	}
         if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
-      pariputs("O("); padic_nome(v,i); pariputc(')');
-      free(v); break;
+      pariputs("O("); padic_nome(ev,i); pariputc(')');
+      free(ev); break;
     }
 
     case t_QFR: case t_QFI: r = (tg == t_QFR);
@@ -1681,7 +1683,7 @@ matbruti(GEN g, pariout_t *T)
 }
 
 static void
-sor_monome(pariout_t *T, GEN a, char *v, long d)
+sor_monome(pariout_t *T, GEN a, const char *v, long d)
 {
   long sig = isone(a);
   if (sig) { putsigne(sig); monome(v,d); }
@@ -1695,7 +1697,7 @@ sor_monome(pariout_t *T, GEN a, char *v, long d)
 }
 
 static void
-sor_lead_monome(pariout_t *T, GEN a, char *v, long d)
+sor_lead_monome(pariout_t *T, GEN a, const char *v, long d)
 {
   long sig = isone(a);
   if (sig)
@@ -1715,7 +1717,8 @@ sori(GEN g, pariout_t *T)
 {
   long tg=typ(g), i,j,r,l,close_paren;
   GEN a,b;
-  char *v, buf[32];
+  const char *v;
+  char buf[32];
 
   if (tg == t_INT) { wr_int(T,g,0); return; }
   if (tg != t_MAT && tg != t_COL) T->fieldw = 0;
@@ -1759,8 +1762,9 @@ sori(GEN g, pariout_t *T)
     case t_PADIC:
     {
       GEN p = (GEN)g[2];
+      char *ev;
       i = valp(g); l = precp(g)+i;
-      g = (GEN)g[4]; v = GENtostr(p);
+      g = (GEN)g[4]; ev = GENtostr(p);
       for (; i<l; i++)
       {
 	g = dvmdii(g,p,&a);
@@ -1770,13 +1774,13 @@ sori(GEN g, pariout_t *T)
 	  {
 	    wr_int(T,a,1); pariputc(i? '*': ' ');
 	  }
-	  if (i) { padic_nome(v,i); pariputc(' '); }
+	  if (i) { padic_nome(ev,i); pariputc(' '); }
           pariputs("+ ");
 	}
       }
       pariputs("O(");
       if (!i) pariputs(" 1)"); else padic_nome(v,i);
-      pariputc(')'); free(v); break;
+      pariputc(')'); free(ev); break;
     }
 
     case t_POL:
@@ -1895,7 +1899,8 @@ texi(GEN g, pariout_t *T, int nosign)
 {
   long tg,i,j,l,r;
   GEN a,b;
-  char *v, buf[67];
+  const char *v;
+  char buf[67];
 
   if (isnull(g)) { pariputs("{0}"); return; }
   r = isone(g); pariputc('{');
@@ -1962,8 +1967,9 @@ texi(GEN g, pariout_t *T, int nosign)
     case t_PADIC:
     {
       GEN p = (GEN)g[2];
+      char *ev;
       i = valp(g); l = precp(g)+i;
-      g = (GEN)g[4]; v = GENtostr(p);
+      g = (GEN)g[4]; ev = GENtostr(p);
       for (; i<l; i++)
       {
 	g = dvmdii(g,p,&a);
@@ -1973,12 +1979,12 @@ texi(GEN g, pariout_t *T, int nosign)
 	  {
 	    wr_intpos(a); if (i) pariputs("\\cdot");
 	  }
-	  if (i) padic_texnome(v,i);
+	  if (i) padic_texnome(ev,i);
 	  pariputc('+');
 	}
       }
-      pariputs("O("); padic_texnome(v,i); pariputc(')');
-      free(v); break;
+      pariputs("O("); padic_texnome(ev,i); pariputc(')');
+      free(ev); break;
     }
     case t_QFR: case t_QFI: r = (tg == t_QFR);
       if (new_fun_set) pariputs("Qfb("); else pariputs(r? "qfr(": "qfi(");
@@ -2628,13 +2634,14 @@ pari_is_dir(char *name)
 
 /* expand tildes in filenames, return a malloc'ed buffer */
 static char *
-_expand_tilde(char *s)
+_expand_tilde(const char *s)
 {
 #if !defined(UNIX) && !defined(__EMX__)
   return pari_strdup(s);
 #else
   struct passwd *p;
-  char *u;
+  const char *u;
+  char *ret;
   int len;
 
   if (*s != '~') return pari_strdup(s);
@@ -2659,8 +2666,8 @@ _expand_tilde(char *s)
     p = getpwnam(tmp); free(tmp);
   }
   if (!p) err(talker2,"unknown user ",s,s-1);
-  s = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
-  sprintf(s,"%s%s",p->pw_dir,u); return s;
+  ret = gpmalloc(strlen(p->pw_dir) + strlen(u) + 1);
+  sprintf(ret,"%s%s",p->pw_dir,u); return ret;
 #endif
 }
 
@@ -2723,7 +2730,7 @@ _expand_env(char *str)
 }
 
 char *
-expand_tilde(char *s)
+expand_tilde(const char *s)
 {
   return _expand_env(_expand_tilde(s));
 }
@@ -2827,7 +2834,7 @@ try_name(char *name)
 
 /* If name = "", re-read last file */
 void
-switchin(char *name0)
+switchin(const char *name0)
 {
   char *s, *name;
 
@@ -3032,7 +3039,7 @@ is_long_ok(FILE *f, long L)
 }
 
 static void
-check_magic(char *name, FILE *f)
+check_magic(const char *name, FILE *f)
 {
   if (!is_magic_ok(f))
     err(talker, "%s is not a GP binary file",name);
@@ -3090,7 +3097,7 @@ writebin(char *name, GEN x)
  * [i.e f contains more than one objet, not all of them 'named GENs'], return
  * them all in a vector with clone bit set (special marker). */
 GEN
-readbin(char *name, FILE *f)
+readbin(const char *name, FILE *f)
 {
   pari_sp av = avma;
   GEN x,y,z;
@@ -3144,7 +3151,7 @@ void printp1 (GEN g) { print0(g, f_PRETTYOLD); PR_NO(); }
 void error0(GEN g) { err(user, g); }
 
 static char *
-wr_check(char *s) {
+wr_check(const char *s) {
   char *t = expand_tilde(s);
   if (GP_DATA && GP_DATA->flags & SECURE)
   {
@@ -3154,14 +3161,14 @@ wr_check(char *s) {
   return t;
 }
 
-static void wr_init(char *s)    { char *t=wr_check(s); switchout(t);   free(t);}
+static void wr_init(const char *s) { char *t=wr_check(s); switchout(t); free(t);}
 void gpwritebin(char *s, GEN x) { char *t=wr_check(s); writebin(t, x); free(t);}
 
 #define WR_NL() {pariputc('\n'); pariflush(); switchout(NULL); }
 #define WR_NO() {pariflush(); switchout(NULL); }
-void write0  (char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
-void writetex(char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
-void write1  (char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
+void write0  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NL(); }
+void writetex(const char *s, GEN g) { wr_init(s); print0(g, f_TEX); WR_NL(); }
+void write1  (const char *s, GEN g) { wr_init(s); print0(g, f_RAW); WR_NO(); }
 
 /*******************************************************************/
 /**                                                               **/

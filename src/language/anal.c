@@ -1050,7 +1050,7 @@ readstring(char *src, char *s)
 
 /* return the first n0 chars of s as a GEN [s may not be 0-terminated] */
 static GEN
-_strtoGENstr(char *s, long n0)
+_strtoGENstr(const char *s, long n0)
 {
   long n = (n0+1+BYTES_IN_LONG) >> TWOPOTBYTES_IN_LONG;
   GEN x = cgetg(n+1, t_STR);
@@ -1059,7 +1059,7 @@ _strtoGENstr(char *s, long n0)
 }
 
 GEN
-strtoGENstr(char *s) { return _strtoGENstr(s, strlen(s)); }
+strtoGENstr(const char *s) { return _strtoGENstr(s, strlen(s)); }
 /********************************************************************/
 /**                                                                **/
 /**                          READ FUNCTIONS                        **/

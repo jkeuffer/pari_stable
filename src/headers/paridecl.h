@@ -166,7 +166,7 @@ GEN     lisseq(char *t);
 long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
 GEN     readseq(char *c, int strict);
-GEN     strtoGENstr(char *s);
+GEN     strtoGENstr(const char *s);
 
 /* arith1.c */
 
@@ -779,7 +779,7 @@ void    bruteall(GEN g, char format, long dec, long flbl);
 void    bruterr(GEN x,char format,long dec);
 const char* eng_ord(long i);
 void    etatpile(unsigned int n);
-char*   expand_tilde(char *s);
+char*   expand_tilde(const char *s);
 int     file_is_binary(FILE *f);
 void    flusherr(void);
 void    fprintferr(const char* pat, ...);
@@ -804,7 +804,7 @@ void    outtex(GEN x);
 void    pari_fclose(pariFILE *f);
 pariFILE*   pari_fopen(char *s, char *mode);
 pariFILE*   pari_safefopen(char *s, char *mode);
-char*   pari_strdup(char *s);
+char*   pari_strdup(const char *s);
 char*   pari_unique_filename(char *s);
 void    pari_unlink(char *s);
 void    pariflush(void);
@@ -813,9 +813,9 @@ void    pariputs(const char *s);
 void    pariputsf(const char *format, ...);
 char*   pGENtostr(GEN g, long flag);
 int     popinfile(void);
-GEN     readbin(char *name, FILE *f);
+GEN     readbin(const char *name, FILE *f);
 void    sor(GEN g, char fo, long dd, long chmp);
-void    switchin(char *name);
+void    switchin(const char *name);
 void    switchout(char *name);
 void    texe(GEN g, char format, long dec);
 pariFILE* try_pipe(char *cmd, int flag);

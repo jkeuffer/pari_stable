@@ -206,7 +206,7 @@ gp_preinit(void)
  * [as strtok but must handle verbatim character string]
  * If 'colon' is set, allow ';' and ':' as separator, only ';' otherwise */
 static char*
-get_sep0(char *t, int colon)
+get_sep0(const char *t, int colon)
 {
   static char buf[GET_SEP_SIZE], *lim = buf + (GET_SEP_SIZE-1);
   char *s = buf;
@@ -231,13 +231,13 @@ get_sep0(char *t, int colon)
 }
 
 static char*
-get_sep(char *t)
+get_sep(const char *t)
 {
   return get_sep0(t,1);
 }
 
 static char*
-get_sep_colon_ok(char *t)
+get_sep_colon_ok(const char *t)
 {
   return get_sep0(t,0);
 }
@@ -260,7 +260,7 @@ my_int(char *s)
 }
 
 static long
-get_int(char *s, long dflt)
+get_int(const char *s, long dflt)
 {
   char *p = get_sep(s);
   long n;
@@ -275,7 +275,7 @@ get_int(char *s, long dflt)
 }
 
 static ulong
-get_uint(char *s)
+get_uint(const char *s)
 {
   char *p = get_sep(s);
   if (*p == '-') err(talker2,"arguments must be positive integers",s,s);
@@ -365,7 +365,7 @@ jump_to_given_buffer(Buffer *buf)
 /*                                                                  */
 /********************************************************************/
 static void
-do_strftime(char *s, char *buf, long max)
+do_strftime(const char *s, char *buf, long max)
 {
 #ifdef HAS_STRFTIME
   time_t t = time(NULL);
@@ -376,7 +376,7 @@ do_strftime(char *s, char *buf, long max)
 }
 
 static GEN
-sd_toggle(char *v, int flag, char *s, int *ptn)
+sd_toggle(const char *v, int flag, char *s, int *ptn)
 {
   int state = *ptn;
   if (*v)
@@ -403,7 +403,7 @@ sd_toggle(char *v, int flag, char *s, int *ptn)
 }
 
 static GEN
-sd_gptoggle(char *v, int flag, char *s, ulong FLAG)
+sd_gptoggle(const char *v, int flag, char *s, ulong FLAG)
 {
   int n = (GP_DATA->flags & FLAG)? 1: 0, old = n;
   GEN z = sd_toggle(v, flag, s, &n);
@@ -416,7 +416,7 @@ sd_gptoggle(char *v, int flag, char *s, ulong FLAG)
 }
 
 static GEN
-sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
+sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
            char **msg)
 {
   ulong n;
@@ -451,13 +451,13 @@ sd_ulong(char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
 
 #define PRECDIGIT (long)((prec-2.)*pariK)
 static GEN
-sd_realprecision(char *v, int flag)
+sd_realprecision(const char *v, int flag)
 {
   pariout_t *fmt = GP_DATA->fmt;
   if (*v)
   {
     long newnb = get_int(v, fmt->sigd);
-    long newprec = (long) (newnb*pariK1 + 3);
+    ulong newprec = (ulong) (newnb*pariK1 + 3);
 
     if (fmt->sigd == newnb && prec == newprec) return gnil;
     if (newnb < 0) err(talker,"default: negative real precision");
@@ -477,7 +477,7 @@ sd_realprecision(char *v, int flag)
 #undef PRECDIGIT
 
 static GEN
-sd_seriesprecision(char *v, int flag)
+sd_seriesprecision(const char *v, int flag)
 {
   char *msg[] = {NULL, "significant terms"};
   return sd_ulong(v,flag,"seriesprecision",&precdl, 0,LGBITS,msg);
@@ -598,7 +598,7 @@ sd_colors(char *v, int flag)
 }
 
 static GEN
-sd_compatible(char *v, int flag)
+sd_compatible(const char *v, int flag)
 {
   char *msg[] = {
     "(no backward compatibility)",
@@ -619,7 +619,7 @@ sd_compatible(char *v, int flag)
 }
 
 static GEN
-sd_secure(char *v, int flag)
+sd_secure(const char *v, int flag)
 {
   if (*v && (GP_DATA->flags & SECURE))
   {
@@ -630,17 +630,17 @@ sd_secure(char *v, int flag)
 }
 
 static GEN
-sd_buffersize(char *v, int flag)
+sd_buffersize(const char *v, int flag)
 { return sd_ulong(v,flag,"buffersize",&paribufsize, 1,
                     (VERYBIGINT / sizeof(long)) - 1,NULL); }
 static GEN
-sd_debug(char *v, int flag)
+sd_debug(const char *v, int flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
 ulong readline_state = DO_ARGS_COMPLETE;
 
 static GEN
-sd_rl(char *v, int flag)
+sd_rl(const char *v, int flag)
 {
   static const char * const msg[] = {NULL,
 	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
@@ -660,23 +660,23 @@ sd_rl(char *v, int flag)
 }
 
 static GEN
-sd_debugfiles(char *v, int flag)
+sd_debugfiles(const char *v, int flag)
 { return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
 
 static GEN
-sd_debugmem(char *v, int flag)
+sd_debugmem(const char *v, int flag)
 { return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 
 static GEN
-sd_echo(char *v, int flag)
+sd_echo(const char *v, int flag)
 { return sd_gptoggle(v,flag,"echo", ECHO); }
 
 static GEN
-sd_lines(char *v, int flag)
+sd_lines(const char *v, int flag)
 { return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,VERYBIGINT,NULL); }
 
 static GEN
-sd_histsize(char *v, int flag)
+sd_histsize(const char *v, int flag)
 {
   gp_hist *H = GP_DATA->hist;
   ulong n = H->size;
@@ -717,9 +717,9 @@ sd_histsize(char *v, int flag)
 }
 
 static GEN
-sd_log(char *v, int flag)
+sd_log(const char *v, int flag)
 {
-  int old = GP_DATA->flags;
+  ulong old = GP_DATA->flags;
   GEN r = sd_gptoggle(v,flag,"log",LOG);
   if (GP_DATA->flags != old)
   { /* toggled LOG */
@@ -742,7 +742,7 @@ sd_log(char *v, int flag)
 }
 
 static GEN
-sd_output(char *v, int flag)
+sd_output(const char *v, int flag)
 {
   char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
                  "(external prettyprint)", NULL};
@@ -760,7 +760,7 @@ allocatemem0(size_t newsize)
 }
 
 static GEN
-sd_parisize(char *v, int flag)
+sd_parisize(const char *v, int flag)
 {
   ulong n = top-bot;
   GEN r = sd_ulong(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
@@ -773,7 +773,7 @@ sd_parisize(char *v, int flag)
 }
 
 static GEN
-sd_primelimit(char *v, int flag)
+sd_primelimit(const char *v, int flag)
 {
   ulong n = primelimit;
   GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)VERYBIGINT,NULL);
@@ -790,28 +790,28 @@ sd_primelimit(char *v, int flag)
 }
 
 static GEN
-sd_simplify(char *v, int flag)
+sd_simplify(const char *v, int flag)
 { return sd_gptoggle(v,flag,"simplify", SIMPLIFY); }
 
 static GEN
-sd_strictmatch(char *v, int flag)
+sd_strictmatch(const char *v, int flag)
 { return sd_gptoggle(v,flag,"strictmatch", STRICTMATCH); }
 
 static GEN
-sd_timer(char *v, int flag)
+sd_timer(const char *v, int flag)
 { return sd_gptoggle(v,flag,"timer", CHRONO); }
 
 static GEN
-sd_filename(char *v, int flag, char *s, char **f)
+sd_filename(const char *v, int flag, char *s, char **f)
 {
   if (*v)
   {
     char *s, *old = *f;
     long l;
-    v = expand_tilde(v);
-    l = strlen(v) + 256;
-    s = malloc(l);
-    do_strftime(v,s, l-1); free(v);
+    char *ev = expand_tilde(v);
+    l = strlen(ev) + 256;
+    s = (char *) malloc(l);
+    do_strftime(ev,s, l-1); free(ev);
     *f = pari_strdup(s); free(s); free(old);
   }
   if (flag == d_RETURN) return strtoGENstr(*f);
@@ -820,7 +820,7 @@ sd_filename(char *v, int flag, char *s, char **f)
 }
 
 static GEN
-sd_logfile(char *v, int flag)
+sd_logfile(const char *v, int flag)
 {
   GEN r = sd_filename(v, flag, "logfile", &current_logfile);
   if (*v && logfile)
@@ -850,7 +850,7 @@ err_secure(char *d, char *v)
 static GEN
 sd_help(char *v, int flag)
 {
-  char *str;
+  const char *str;
   if (*v)
   {
     if (GP_DATA->flags & SECURE) err_secure("help",v);
@@ -912,7 +912,10 @@ sd_prettyprinter(char *v, int flag)
     if (old) free(old);
     if (flag == d_INITRC) return gnil;
   }
-  if (flag == d_RETURN) return strtoGEN(pp->cmd? pp->cmd: "");
+  if (flag == d_RETURN)
+	  /*FIXME: The cast is needed by g++ but is a kludge but changing
+	   * flisexpr to accept a const char * is non-trivial.*/
+    return flisexpr(pp->cmd? pp->cmd:(char *) "");
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
@@ -1577,14 +1580,16 @@ print_entree(entree *ep, long hash)
 }
 
 static void
-print_hash_list(char *s)
+print_hash_list(const char *s)
 {
   long m,n;
   entree *ep;
 
   if (isalpha((int)*s))
   {
-    ep = is_entry_intern(s,functions_hash,&n);
+    /*FIXME: the cast below is a C++ kludge because
+     * it is difficult to change is_entry_intern to tqke a const*/
+    ep = is_entry_intern((char *)s,functions_hash,&n);
     if (!ep) err(talker,"no such function");
     print_entree(ep,n); return;
   }
@@ -1626,7 +1631,7 @@ print_hash_list(char *s)
       print_entree(ep,n);
 }
 
-static char *
+static char const *
 what_readline(void)
 {
 #ifdef READLINE
@@ -1721,7 +1726,7 @@ gp_quit(void)
 }
 
 static GEN
-gpreadbin(char *s)
+gpreadbin(const char *s)
 {
   GEN x = readbin(s,infile);
   popinfile(); return x;
@@ -1730,7 +1735,8 @@ gpreadbin(char *s)
 static void
 escape0(char *tch)
 {
-  char *s, c;
+  const char *s;
+  char c;
 
   if (compatible != NONE)
   {

@@ -493,7 +493,7 @@ my_change_term(char*s,int l)
     SET_OUTFILE;
     if (!my_term_ftablep->change_term_p)
 	UNKNOWN_null();
-    return term = (struct termentry *)(*my_term_ftablep->change_term_p)(s,l);
+    return term = (*((struct termentry *(*)(char *s,int l))(my_term_ftablep->change_term_p)))(s,l);
 }
 
 #if 0

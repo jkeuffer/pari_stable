@@ -31,7 +31,6 @@ extern void kill0(entree *ep);
 
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>
-extern char *expand_tilde(char *s);
 
 void 
 install0(char *name, char *code, char *gpname, char *lib)

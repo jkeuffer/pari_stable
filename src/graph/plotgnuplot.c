@@ -43,6 +43,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #    define DEFAULT_IS_BUILTIN 1
 #  endif	/* defined GNUPLOT_AND_X11_PREFER_GNUPLOT */ 
 #endif
+#ifdef BOTH_GNUPLOT_AND_X11             /* The switch support in plotgnuplot */
+#  define X11_rectdraw0             rectdraw0
+#  define X11_term_set              term_set
+#  define X11_PARI_get_plot         PARI_get_plot
+#  define X11_plot_outfile_set      plot_outfile_set
+#  define X11_set_pointsize         set_pointsize
+#  define pari_X11plot              pari_plot
+#endif
 
 #  ifdef BOTH_GNUPLOT_AND_X11
 int is_builtin = DEFAULT_IS_BUILTIN;
@@ -241,7 +249,7 @@ PARI_get_plot(long fatal)
 #endif	/* defined BOTH_GNUPLOT_AND_X11 */ 
   if (pari_plot.init)
     return;
-  term_set( DEF_TERM );
+  term_set( (char *) DEF_TERM );
   (void)fatal;
 }
 
