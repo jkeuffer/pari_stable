@@ -556,7 +556,7 @@ entree oldfonctions[]={
 {"tchebi",11,(void *)tchebi,7,"LDn"},
 {"teich",1,(void *)teich,3,"Gp"},
 {"theta",2,(void *)theta,3,"GGp"},
-{"thetanullk",21,(void *)thetanullk,3,"GL"},
+{"thetanullk",21,(void *)thetanullk,3,"GLp"},
 {"threetotwo",0,(void *)suppressed,6,"GGGG"},
 {"threetotwo2",0,(void *)suppressed,6,"GGGG"},
 {"torsell",1,(void *)torsell,5,"Gp"},
