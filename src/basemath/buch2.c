@@ -597,7 +597,7 @@ split_realimag(GEN x, long r1, long r2)
  * r1 first lines of x,y are real. Solve the system obtained by splitting
  * real and imaginary parts. If x is of nf type, use M instead.
  */
-static GEN
+GEN
 gauss_realimag(GEN x, GEN y)
 {
   GEN M = (typ(x)==t_VEC)? gmael(checknf(x),5,1): x;
