@@ -204,13 +204,19 @@ fordiv(GEN a, entree *ep, char *ch)
  *   fl = 2:        a1 <  ... <  an
  */
 
+typedef struct {
+  GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
+  long n; /* length */
+} forvec_data;
+
 static GEN /* used for empty vector, n = 0 */
-forvec_dummy(forvec_data *d, GEN a) { (void)d; (void)a; return NULL; }
+forvec_dummy(GEN d, GEN a) { (void)d; (void)a; return NULL; }
 
 /* increment and return d->a [over integers]*/
 static GEN
-forvec_next_i(forvec_data *d, GEN ignored)
+forvec_next_i(GEN gd, GEN ignored)
 {
+  forvec_data *d=(forvec_data *) gd;
   long i = d->n;
   (void)ignored;
   for (;;) {
@@ -225,8 +231,9 @@ forvec_next_i(forvec_data *d, GEN ignored)
 }
 /* increment and return d->a [generic]*/
 static GEN
-forvec_next(forvec_data *d, GEN v0)
+forvec_next(GEN gd, GEN v0)
 {
+  forvec_data *d=(forvec_data *) gd;
   long i = d->n;
   GEN *v = (GEN*)v0;
   for (;;) {
@@ -240,8 +247,9 @@ forvec_next(forvec_data *d, GEN v0)
 
 /* non-decreasing order [over integers] */
 static GEN
-forvec_next_le_i(forvec_data *d, GEN ignored)
+forvec_next_le_i(GEN gd, GEN ignored)
 {
+  forvec_data *d=(forvec_data *) gd;
   long i = d->n, imin = d->n;
   (void)ignored;
   for (;;) {
@@ -276,8 +284,9 @@ forvec_next_le_i(forvec_data *d, GEN ignored)
 }
 /* non-decreasing order [generic] */
 static GEN
-forvec_next_le(forvec_data *d, GEN v0)
+forvec_next_le(GEN gd, GEN v0)
 {
+  forvec_data *d=(forvec_data *) gd;
   long i = d->n, imin = d->n;
   GEN *v = (GEN*)v0;
   for (;;) {
@@ -310,8 +319,9 @@ forvec_next_le(forvec_data *d, GEN v0)
 }
 /* strictly increasing order [over integers] */
 static GEN
-forvec_next_lt_i(forvec_data *d, GEN ignored)
+forvec_next_lt_i(GEN gd, GEN ignored)
 {
+  forvec_data *d=(forvec_data *) gd;
   long i = d->n, imin = d->n;
   (void)ignored;
   for (;;) {
@@ -346,8 +356,9 @@ forvec_next_lt_i(forvec_data *d, GEN ignored)
 }
 /* strictly increasing order [generic] */
 static GEN
-forvec_next_lt(forvec_data *d, GEN v0)
+forvec_next_lt(GEN gd, GEN v0)
 {
+  forvec_data *d=(forvec_data *) gd;
   long i = d->n, imin = d->n;
   GEN *v = (GEN*)v0;
   for (;;) {
@@ -380,14 +391,16 @@ forvec_next_lt(forvec_data *d, GEN v0)
 }
 
 GEN
-forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*,GEN))
+forvec_start(GEN *gd, GEN x, long flag, GEN (**next)(GEN,GEN))
 {
   long i, tx = typ(x), l = lg(x), t = t_INT;
-
+  forvec_data *d;
   if (!is_vec_t(tx)) err(talker,"not a vector in forvec");
   if (l == 1) { *next = &forvec_dummy; return cgetg(1, t_VEC); }
+  *gd = new_chunk(sizeof(forvec_data)/sizeof(long));
+  d = (forvec_data*) *gd;
   d->n = l - 1;
-  d->a = (GEN*)cgetg(l, t_VEC);
+  d->a = (GEN*)cgetg(l,t_VEC);
   d->m = (GEN*)cgetg(l,t_VEC);
   d->M = (GEN*)cgetg(l,t_VEC);
   for (i = 1; i < l; i++)
@@ -433,13 +446,13 @@ void
 forvec(entree *ep, GEN x, char *c, long flag)
 {
   pari_sp av = avma;
-  forvec_data D;
-  GEN (*next)(forvec_data *,GEN);
+  GEN D;
+  GEN (*next)(GEN,GEN);
   GEN v = forvec_start(&D, x, flag, &next);
   push_val(ep, v);
   while (v) {
     pari_sp av2 = avma; lisseq_void(c); avma = av2;
-    v = next(&D, v);
+    v = next(D, v);
   }
   pop_val(ep); avma = av;
 }

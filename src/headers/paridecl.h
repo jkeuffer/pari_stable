@@ -1665,11 +1665,6 @@ GEN     bnrrootnumber(GEN bnr, GEN chi, long flag, long prec);
 GEN     bnrstark(GEN bnr, GEN subgroup, long flag, long prec);
 
 /* sumiter.c */
-typedef struct {
-  GEN *a, *m, *M; /* current n-uplet, minima, Maxima */
-  long n; /* length */
-} forvec_data;
-GEN forvec_start(forvec_data *d, GEN x, long flag, GEN (**next)(forvec_data*,GEN));
 
 GEN     direulerall(entree *ep, GEN a, GEN b, char *ch, GEN c);
 GEN     direuler(entree *ep, GEN a, GEN b, char *ch);
@@ -1679,6 +1674,7 @@ void    forpari(entree *ep, GEN a, GEN b, char *ch);
 void    forprime(entree *ep, GEN a, GEN b, char *ch);
 void    forstep(entree *ep, GEN a, GEN b, GEN s, char *ch);
 void    forvec(entree *ep, GEN x, char *ch, long flag);
+GEN     forvec_start(GEN *d, GEN x, long flag, GEN (**next)(GEN,GEN));
 GEN     intnum0(entree *ep, GEN a, GEN b, char *ch,long flag,long prec);
 GEN     matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch);
 GEN     polzag(long n, long m);
