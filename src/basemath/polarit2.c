@@ -3454,21 +3454,20 @@ GEN
 subresext(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long degq,tx,ty,dx,dy,du,dv,dr,signh;
-  GEN q,z,g,h,r,p1,p2,cu,cv,u,v,um1,uze,vze,xprim,yprim, *gptr[3];
+  long dx, dy, signh, tx = typ(x), ty = typ(y);
+  GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze;
+  GEN *gptr[3];
 
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) err(typeer,"subresext");
   if (gcmp0(x) || gcmp0(y)) { *U = *V = gen_0; return gen_0; }
-  tx=typ(x); ty=typ(y);
-  if (is_scalar_t(tx) || is_scalar_t(ty))
-  {
-    if (tx==t_POL) return scalar_res(x,y,U,V);
-    if (ty==t_POL) return scalar_res(y,x,V,U);
-    *U = ginv(x); *V = gen_0; return gen_1;
+  if (tx != t_POL) {
+    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return gen_1; }
+    return scalar_res(y,x,V,U);
   }
-  if (tx!=t_POL || ty!=t_POL) err(typeer,"subresext");
+  if (ty != t_POL) return scalar_res(x,y,U,V);
   if (varn(x) != varn(y))
-    return (varn(x)<varn(y))? scalar_res(x,y,U,V)
-                            : scalar_res(y,x,V,U);
+    return varncmp(varn(x), varn(y)) < 0? scalar_res(x,y,U,V)
+                                        : scalar_res(y,x,V,U);
   dx = degpol(x); dy = degpol(y); signh = 1;
   if (dx < dy)
   {
@@ -3481,13 +3480,14 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     *U = gen_0; return gmul(*V,(GEN)y[2]);
   }
   av = avma;
-  u = primitive_part(x, &cu); xprim = u;
-  v = primitive_part(y, &cv); yprim = v;
+  u = x = primitive_part(x, &cu);
+  v = y = primitive_part(y, &cv);
   g = h = gen_1; av2 = avma; lim = stack_lim(av2,1);
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    q = pseudodiv(u,v, &r); dr = lg(r);
+    GEN r, q = pseudodiv(u,v, &r);
+    long du, dv, degq, dr = lg(r);
     if (dr == 2) { *U = *V = gen_0; avma = av; return gen_0; }
 
     du = degpol(u); dv = degpol(v); degq = du-dv;
@@ -3506,39 +3506,39 @@ subresext(GEN x, GEN y, GEN *U, GEN *V)
     if (both_odd(du, dv)) signh = -signh;
     v  = gdivexact(r,p1);
     uze= gdivexact(uze,p1);
-    if (dr==3) break;
+    if (dr == 3) {
+      z = (GEN)v[2];
+      if (dv > 1)
+      { /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
+        p1 = gpowgs(gdiv(z,h),dv-1);
+        z = gmul(z,p1); uze = gmul(uze,p1);
+      }
+      break;
+    }
     if (low_stack(lim,stack_lim(av2,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"subresext, dr = %ld",dr);
       gerepileall(av2,6, &u,&v,&g,&h,&uze,&um1);
     }
   }
-  z = (GEN)v[2];
-  if (dv > 1)
-  {
-    /* z = gdivexact(gpowgs(z,dv), gpowgs(h,dv-1)); */
-    p1 = gpowgs(gdiv(z,h),dv-1);
-    z = gmul(z,p1); uze = gmul(uze,p1);
-  }
   if (signh < 0) { z = gneg_i(z); uze = gneg_i(uze); }
-  p1 = gadd(z, gneg(gmul(uze,xprim)));
-  vze = poldivrem(p1, yprim, &r);
-  if (!gcmp0(r)) err(warner,"inexact computation in subresext");
+  p1 = gadd(z, gneg(gmul(uze,x)));
+  vze = RgX_divrem(p1, y, &p1);
+  if (!gcmp0(p1)) err(warner,"inexact computation in subresext");
   /* uze ppart(x) + vze ppart(y) = z = resultant(ppart(x), ppart(y)), */
-  p2 = gen_1;
-  if (cu) p2 = gmul(p2, gpowgs(cu,dy));
-  if (cv) p2 = gmul(p2, gpowgs(cv,dx));
-  cu = cu? gdiv(p2,cu): p2;
-  cv = cv? gdiv(p2,cv): p2;
+  p1 = gen_1;
+  if (cu) p1 = gmul(p1, gpowgs(cu,dy));
+  if (cv) p1 = gmul(p1, gpowgs(cv,dx));
+  cu = cu? gdiv(p1,cu): p1;
+  cv = cv? gdiv(p1,cv): p1;
 
   tetpil = avma;
-  z = gmul(z,p2);
-  uze = gmul(uze,cu);
-  vze = gmul(vze,cv);
-  gptr[0]=&z; gptr[1]=&uze; gptr[2]=&vze;
+  z = gmul(z,p1);
+  *U = gmul(uze,cu);
+  *V = gmul(vze,cv);
+  gptr[0]=&z; gptr[1]=U; gptr[2]=V;
   gerepilemanysp(av,tetpil,gptr,3);
-  *U = uze;
-  *V = vze; return z;
+  return z;
 }
 
 static GEN
@@ -3559,25 +3559,23 @@ GEN
 RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
 {
   pari_sp av, av2, tetpil, lim;
-  long degq,tx,ty,dx,dy,du,dv,dr;
-  GEN q,z,g,h,r,p1,cu,cv,u,v,um1,uze,vze,xprim,yprim, *gptr[3];
+  long dx, dy, tx = typ(x), ty = typ(y);
+  GEN z, g, h, p1, cu, cv, u, v, um1, uze, vze, *gptr[3];
 
+  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) err(typeer,"subresext");
   if (gcmp0(x)) {
     if (gcmp0(y)) { *U = *V = gen_0; return gen_0; }
     return zero_bezout(y,U,V);
   }
   if (gcmp0(y)) return zero_bezout(x,V,U);
-  tx=typ(x); ty=typ(y); av=avma;
-  if (is_scalar_t(tx) || is_scalar_t(ty))
-  {
-    if (tx==t_POL) return scalar_bezout(x,y,U,V);
-    if (ty==t_POL) return scalar_bezout(y,x,V,U);
-    *U = ginv(x); *V = gen_0; return polun[0];
+  if (tx != t_POL) {
+    if (ty != t_POL) { *U = ginv(x); *V = gen_0; return polun[0]; }
+    return scalar_bezout(y,x,V,U);
   }
-  if (tx!=t_POL || ty!=t_POL) err(typeer,"RgX_extgcd");
-  if (varn(x)!=varn(y))
-    return (varn(x)<varn(y))? scalar_bezout(x,y,U,V)
-                            : scalar_bezout(y,x,V,U);
+  if (ty != t_POL) return scalar_bezout(x,y,U,V);
+  if (varn(x) != varn(y))
+    return varncmp(varn(x), varn(y)) < 0? scalar_bezout(x,y,U,V)
+                                        : scalar_bezout(y,x,V,U);
   dx = degpol(x); dy = degpol(y);
   if (dx < dy)
   {
@@ -3585,13 +3583,15 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
   }
   if (dy==0) return scalar_bezout(x,y,U,V);
 
-  u = primitive_part(x, &cu); xprim = u;
-  v = primitive_part(y, &cv); yprim = v;
+  av = avma;
+  u = x = primitive_part(x, &cu);
+  v = y = primitive_part(y, &cv);
   g = h = gen_1; av2 = avma; lim = stack_lim(av2,1);
   um1 = gen_1; uze = gen_0;
   for(;;)
   {
-    q = pseudodiv(u,v, &r); dr = lg(r);
+    GEN r, q = pseudodiv(u,v, &r);
+    long du, dv, degq, dr = lg(r);
     if (dr == 2) break;
 
     du = degpol(u); dv = degpol(v); degq = du-dv;
@@ -3616,21 +3616,19 @@ RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V)
       gerepileall(av2,6,&u,&v,&g,&h,&uze,&um1);
     }
   }
-  p1 = gsub(v,gmul(uze,xprim));
-  vze = poldivrem(p1, yprim, &r);
-  if (!gcmp0(r)) err(warner,"inexact computation in RgX_extgcd");
+  p1 = gadd(v, gneg(gmul(uze,x)));
+  vze = RgX_divrem(p1, y, &p1);
+  if (!gcmp0(p1)) err(warner,"inexact computation in RgX_extgcd");
   if (cu) uze = gdiv(uze,cu);
   if (cv) vze = gdiv(vze,cv);
   p1 = ginv(content(v));
   
   tetpil = avma;
-  uze = gmul(uze,p1);
-  vze = gmul(vze,p1);
+  *U = gmul(uze,p1);
+  *V = gmul(vze,p1);
   z = gmul(v,p1);
-  gptr[0]=&uze; gptr[1]=&vze; gptr[2]=&z;
-  gerepilemanysp(av,tetpil,gptr,3);
-  *U = uze;
-  *V = vze; return z;
+  gptr[0]=U; gptr[1]=V; gptr[2]=&z;
+  gerepilemanysp(av,tetpil,gptr,3); return z;
 }
 
 /*******************************************************************/
@@ -4106,23 +4104,21 @@ sturmpart(GEN x, GEN a, GEN b)
 /***********************************************************************/
 
 static GEN
-polinvinexact(GEN x, GEN y)
+RgXQ_inv_inexact(GEN x, GEN y)
 {
   pari_sp av = avma;
-  long i,dx=degpol(x),dy=degpol(y),lz=dx+dy;
-  GEN v,z;
+  long i, dx = degpol(x), dy = degpol(y), dz = dx+dy;
+  GEN v, z;
 
-  if (dx < 0 || dy < 0) err(talker,"non-invertible polynomial in polinvmod");
+  if (dx < 0 || dy < 0) err(talker,"non-invertible polynomial in RgXQ_inv");
+  v = gauss(sylvestermatrix(y,x), vec_ei(dz, dz));
   z = cgetg(dy+2,t_POL); z[1] = y[1];
-  v = cgetg(lz+1,t_COL);
-  for (i=1; i<lz; i++) v[i] = (long)gen_0;
-  v[lz] = (long)gen_1; v = gauss(sylvestermatrix(y,x),v);
-  for (i=2; i<dy+2; i++) z[i] = v[lz-i+2];
+  for (i=2; i<dy+2; i++) z[i] = v[dz-i+2];
   return gerepilecopy(av, normalizepol_i(z, dy+2));
 }
 /* assume typ(x) = t_POL */
 static GEN
-polinvmod(GEN x, GEN y)
+RgXQ_inv(GEN x, GEN y)
 {
   long vx=varn(x), vy=varn(y);
   pari_sp av, av1;
@@ -4136,16 +4132,16 @@ polinvmod(GEN x, GEN y)
       d[1] = (long)polun[vx];
       d[2] = lcopy(x); return d;
     }
-    if (lg(x)!=3) err(talker,"non-invertible polynomial in polinvmod");
+    if (lg(x)!=3) err(talker,"non-invertible polynomial in RgXQ_inv");
     x = (GEN)x[2]; vx = gvar(x);
   }
-  if (isinexactfield(x) || isinexactfield(y)) return polinvinexact(x,y);
+  if (isinexactfield(x) || isinexactfield(y)) return RgXQ_inv_inexact(x,y);
 
   av = avma; d = subresext(x,y,&u,&v);
-  if (gcmp0(d)) err(talker,"non-invertible polynomial in polinvmod");
+  if (gcmp0(d)) err(talker,"non-invertible polynomial in RgXQ_inv");
   if (typ(d) == t_POL && varn(d) == vx)
   {
-    if (lg(d) > 3) err(talker,"non-invertible polynomial in polinvmod");
+    if (lg(d) > 3) err(talker,"non-invertible polynomial in RgXQ_inv");
     d = (GEN)d[2];
   }
   av1 = avma; return gerepile(av,av1, gdiv(u,d));
@@ -4154,10 +4150,7 @@ polinvmod(GEN x, GEN y)
 GEN
 gbezout(GEN x, GEN y, GEN *u, GEN *v)
 {
-  long tx=typ(x),ty=typ(y);
-
-  if (tx==t_INT && ty==t_INT) return bezout(x,y,u,v);
-  if (!is_extscalar_t(tx) || !is_extscalar_t(ty)) err(typeer,"gbezout");
+  if (typ(x) == t_INT && typ(y) == t_INT) return bezout(x,y,u,v);
   return RgX_extgcd(x,y,u,v);
 }
 
@@ -4192,7 +4185,7 @@ ginvmod(GEN x, GEN y)
   switch(typ(y))
   {
     case t_POL:
-      if (tx==t_POL) return polinvmod(x,y);
+      if (tx==t_POL) return RgXQ_inv(x,y);
       if (is_scalar_t(tx)) return ginv(x);
       break;
     case t_INT:
