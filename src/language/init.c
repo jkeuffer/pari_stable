@@ -1484,6 +1484,7 @@ checkmemory(GEN z)
 
 # include <sys/times.h>
 # include <sys/time.h>
+# include <time.h>
   static long
   timer_proto(int i)
   {
