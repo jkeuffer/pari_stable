@@ -1239,6 +1239,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   *prec = l; return s;
 }
 
+#if 0
 /* x, z t_REAL. Compute unique x in ]-z,z] congruent to x mod 2z */
 static GEN
 red_mod_2z(GEN x, GEN z)
@@ -1249,6 +1250,7 @@ red_mod_2z(GEN x, GEN z)
   setlg(d, 3 + ((expo(d) - expo(Z)) >> TWOPOTBITS_IN_LONG));
   return addrr(mulir(mpent(divrr(d, Z)), Z), x);
 }
+#endif
 
 static GEN
 cxgamma(GEN s0, int dolog, long prec)
