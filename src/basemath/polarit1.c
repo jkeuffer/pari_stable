@@ -531,8 +531,11 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   pari_sp ltop=avma;
   long j,N = degpol(u);
   GEN v,w,Q,p1;
+  pari_timer Ti;
+  if (DEBUGLEVEL>=4) TIMER(&Ti);
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
   w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
+  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "FpXQYQ_pow");
   for (j=2; j<=N; j++)
   {
     p1 = RgX_to_RgV(w, N);
@@ -544,7 +547,10 @@ FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
       w = gerepileupto(av, FpXQX_divrem(FpXQX_mul(w,v, T,p), u,T,p,ONLY_REM));
     }
   }
-  return gerepileupto(ltop,FqM_ker(Q,T,p));
+  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "Berlekamp_matrix");
+  p1 = FqM_ker(Q,T,p);
+  if (DEBUGLEVEL>=4) msgTIMER(&Ti, "Berlekamp_ker");
+  return gerepileupto(ltop,p1);
 }
 
 GEN
