@@ -67,6 +67,8 @@ BA 15- polsubcyclo() used too much memory for large conductors.
 RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        [ pre-4.2 ]. Typecast parameters, not functions and dump
        (approximate) support for g++ + old readlines in gp_rl.c
+   22- \p 8000
+       E=ellinit([0,0,0,0,1296]); P=[-8,28]; ellpointtoz(E,P) --> oo loop
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -89,7 +91,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        small degrees ].
     5- improved zetakinit() [save some multiplications, about half of them
        for quadratic fields. Less so as the degree increases. ]
-    6- renamed RgX_RgX_compo -> RgX_RgXQ_compo 
+    6- renamed RgX_RgX_compo -> RgX_RgXQ_compo
     7- renamed binome -> binomial, chinois -> chinese [ added chinese1(x)
        for chinese(x, NULL) ]
     8- add GC in integer valuation functions + use recursive algorithm when

@@ -220,7 +220,7 @@ do_agm(GEN *ptx, GEN a1, GEN b1)
   GEN p1, a, b, x;
 
   x = gmul2n(subrr(a1,b1),-2);
-  if (gcmp0(x)) err(precer,"initell");
+  if (!signe(x)) err(precer,"initell");
   for(;;)
   {
     GEN d;
@@ -828,13 +828,13 @@ zell(GEN e, GEN z, long prec)
   sw = gsigne(real_i(b)); fl=0;
   for(;;) /* ~ agm */
   {
-    GEN a0=a, b0=b, x0=x1, d;
+    GEN a0 = a, b0 = b, x0 = x1, d;
 
     b = gsqrt(gmul(a0,b0),prec);
     if (gsigne(real_i(b)) != sw) b = gneg_i(b);
     a = gmul2n(gadd(gadd(a0,b0),gmul2n(b,1)),-2);
     d = gsub(a,b);
-    if (gcmp0(d) || gexpo(d) < gexpo(a) - bit_accuracy(prec)) break;
+    if (gcmp0(d) || gexpo(d) < gexpo(a) - bit_accuracy(prec) + 5) break;
     p1 = gsqrt(gdiv(gadd(x0,d),x0),prec);
     x1 = gmul(x0,gsqr(gmul2n(gaddsg(1,p1),-1)));
     d = gsub(x1,x0);
