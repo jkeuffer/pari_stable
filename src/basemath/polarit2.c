@@ -2322,7 +2322,9 @@ polgcdnun(GEN x, GEN y)
     if (gcmp0(p1))
     {
       avma = av1;
+#if 0 /* incorrect if ground field has non-zero characteristic ! */
       if (lgef(y) == 3) { avma = av; return gun; }
+#endif
       return (y==yorig)? gcopy(y): gerepileupto(av,y);
     }
     x = y; y = p1;
