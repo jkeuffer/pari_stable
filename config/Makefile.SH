@@ -359,7 +359,7 @@ dotest-graphic::
 	@$doexec -g
 
 cleanobj: cleantest
-	-\$(RM) *\$(_O) *.s pariinl.h \$(LIBPARI_STA) libpari* $exec
+	-\$(RM) *\$(_O) *.s pariinl.h libpari* tune* $exec
 
 clean: cleanobj
 
