@@ -23,6 +23,6 @@ parilvl0.h: $level0
 	cat $level0 > parilvl0.h
 
 kernel\$(_O): kernel0.s
-	\$(AS) \$(ASFLAGS) -o \$@ \$<
+	\$(AS) \$(ASFLAGS) -o \$@ kernel0.s
 
 EOT
