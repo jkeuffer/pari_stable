@@ -1654,8 +1654,8 @@ diviuexact(GEN x, ulong y)
     if (!q) continue;
     /* x := x - q * y */
     { /* update neither lowest word (could set it to 0) nor highest ones */
-      LOCAL_HIREMAINDER;
       register GEN x1 = x0 - 1;
+      LOCAL_HIREMAINDER;
       (void)mulll(q,y);
       if (hiremainder)
       {
