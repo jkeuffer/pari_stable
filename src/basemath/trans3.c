@@ -1568,7 +1568,7 @@ czeta(GEN s0, long prec)
     {
       s5 = gsub(s5, s4);
       s4 = gsub(s4, s3);
-      tes = gadd(bernreal(i,prec), gdivgs(gmul(s5,tes), (i+1)*(i+2)));
+      tes = gadd(bernreal(i,prec), divgsns(gmul(s5,tes), i+1));
       if (low_stack(avlim,stack_lim(av2,3)))
       {
         if(DEBUGMEM>1) err(warnmem,"czeta");
