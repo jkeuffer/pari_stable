@@ -601,6 +601,12 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
   long av = avma,tetpil,i,m, ns=0, tx=typ(x);
   GEN den,ho,hp,w,y,c,d,dy;
 
+  if (!xa)
+  {
+    xa = cgetg(n+1, t_VEC);
+    for (i=1; i<=n; i++) xa[i] = lstoi(i);
+    xa++;
+  }
   if (is_scalar_t(tx) && tx != t_INTMOD && tx != t_PADIC && tx != t_POLMOD)
   {
     GEN dif = NULL, dift;
@@ -641,7 +647,9 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
 GEN
 polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
 {
-  long tx=typ(xa), ty=typ(ya), lx=lg(xa);
+  long tx=typ(xa), ty, lx=lg(xa);
+  
+  if (!ya) { ya = xa; ty = tx; xa = NULL; }
 
   if (! is_vec_t(tx) || ! is_vec_t(ty))
     err(talker,"not vectors in polinterpolate");
@@ -654,7 +662,7 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
     return ya;
   }
   if (!x) x = polx[0];
-  return polint_i(xa+1,ya+1,x,lx-1,ptdy);
+  return polint_i(xa? xa+1: xa,ya+1,x,lx-1,ptdy);
 }
 
 /***********************************************************************/

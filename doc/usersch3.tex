@@ -5003,11 +5003,13 @@ product is equal to the absolute value of the discriminant of~$f$.
 
 \syn{reduceddiscsmith}{x}.
 
-\subsecidx{polinterpolate}$(xa,ya,\{v=x\},\{\&e\})$: given the data vectors
+\subsecidx{polinterpolate}$(xa,\{ya\},\{v=x\},\{\&e\})$: given the data vectors
 $xa$ and $ya$ of the same length $n$ ($xa$ containing the $x$-coordinates,
 and $ya$ the corresponding $y$-coordinates), this function finds the
 \idx{interpolating polynomial} passing through these points and evaluates it
-at~$v$. If present, $e$ will contain an error estimate on the returned value.
+at~$v$. If $ya$ is omitted, return the polynomial interpolating the
+$(i,xa[i])$. If present, $e$ will contain an error estimate on the returned
+value.
 
 \syn{polint}{xa,ya,v,\&e}, where $e$ will contain an error estimate on the
 returned value.

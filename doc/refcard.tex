@@ -79,13 +79,14 @@
 %   rounderror
 % Version 2.8 - April 1999, removed \k, added \l filename
 % Version 2.9 - April 2000, added \o¸ updated control statements
+% Version 2.10 - June 2000, updated polinterpolate
 %% Thanks to Bill Allombert, Henri Cohen, Gerhard Niklasch, and Joe
 %% Silverman for many comments and corrections.
 
-\def\versionnumber{2.9}% Version of this reference card
-\def\PARIversion{2.0.19}% Version of PARI described on this reference card
+\def\versionnumber{2.10}% Version of this reference card
+\def\PARIversion{2.0.20}% Version of PARI described on this reference card
 \def\year{2000}
-\def\month{April}
+\def\month{June}
 \def\version{\month\ \year\ v\versionnumber}
 
 \def\shortcopyrightnotice{\vskip .5ex plus 2 fill
@@ -573,7 +574,7 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{derivative of $f$ w.r.t. $x$}{deriv$(f,x)$}
 \li{formal integral of $f$ w.r.t. $x$}{intformal$(f,x)$}
 \li{reciprocal poly $x^{\deg f}f(1/x)$}{polrecip$(f)$}
-\li{interpolating poly evaluated at $a$}{polinterpolate$(X,Y,\{a\},\{\&e\})$}
+\li{interpolating poly evaluated at $a$}{polinterpolate$(X,\{Y\},\{a\},\{\&e\})$}
 \li{initialize $t$ for Thue equation solver}{thueinit(f)}
 \li{solve Thue equation $f(x,y)=a$}{thue$(t,a,\{sol\})$}
 %

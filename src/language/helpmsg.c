@@ -308,7 +308,7 @@ char *helpmessages_basic[]={
   "poldisc(x,{v}): discriminant of the polynomial x, with respect to main variable if v is omitted, with respect to v otherwise",
   "poldiscreduced(f): vector of elementary divisors of Z[a]/f'(a)Z[a], where a is a root of the polynomial f",
   "polgalois(x): Galois group of the polynomial x (see manual for group coding)",
-  "polinterpolate(xa,ya,{x},{&e}): polynomial interpolation at x according to data vectors xa, ya. If present, e will contain an error estimate on the returned value",
+  "polinterpolate(xa,{ya},{x},{&e}): polynomial interpolation at x according to data vectors xa, ya (ie return P such that P(xa[i]) = ya[i] for all i). If ya is omitter, return P such that P(i) = xa[i]. If present, e will contain an error estimate on the returned value",
   "polisirreducible(x): true(1) if x is an irreducible non-constant polynomial, false(0) if x is reducible or constant",
   "pollead(x,{v}): leading coefficient of polynomial or series x, or x itself if x is a scalar. Error otherwise. With respect to the main variable of x if v is omitted, with respect to the variable v otherwise",
   "pollegendre(n,{v=x}): legendre polynomial of degree n (n C-integer), in variable v",
