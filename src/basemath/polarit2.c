@@ -2968,6 +2968,7 @@ Q_denom(GEN x)
       {
         D = Q_denom((GEN)x[i]);
         if (D != gun) d = mpppcm(d, D);
+        if ((i & 255) == 0) d = gerepileuptoint(av, d);
       }
       return gerepileuptoint(av, d);
 

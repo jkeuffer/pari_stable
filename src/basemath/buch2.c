@@ -2035,7 +2035,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     if (DEBUGLEVEL) fprintferr("truncation error in bestappr\n");
     return PRECI;
   }
-  den = denom(lambda);
+  den = Q_denom(lambda);
   if (gcmp(den,D) > 0)
   {
     if (DEBUGLEVEL) fprintferr("D = %Z\nden = %Z\n",D,den);
@@ -3150,7 +3150,9 @@ MORE:
     list_jideal = NULL;
     W = hnfadd(W,F.perm,&pdep,&B,&C, extramat,extraC);
     nlze = lg(pdep)>1? lg(pdep[1])-1: lg(B[1])-1;
-    if (nlze && ++nreldep > MAXRELSUP) { sfb_increase=1; goto MORE; }
+    if (nlze && (++nreldep > MAXRELSUP || nlze > 40)) {
+      sfb_increase=1; goto MORE;
+    }
   }
   if (nlze) goto MORE; /* dependent rows */
 
