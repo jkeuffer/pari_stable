@@ -9,6 +9,10 @@ for dir in $pth; do
         _pb="$ok"
         # for .so and .sl
         try=`ls $dir/lib$lib.s? 2> /dev/null` 
+        # for .dylib
+        if test -z "$try"; then
+          try=`ls $dir/lib$lib.dylib 2> /dev/null`
+        fi
         # for .a
         if test -z "$try"; then
           try=`ls $dir/lib$lib.a 2> /dev/null`
