@@ -61,10 +61,10 @@ extern FILE    *pari_outfile, *logfile, *infile, *errfile;
 extern ulong    logstyle;
 
 enum logstyles {
-    logstyle_none,			/* 0 */
-    logstyle_plain,			/* 1 */
-    logstyle_color,			/* 2 */
-    logstyle_TeX,			/* 3 */
+    logstyle_none,	/* 0 */
+    logstyle_plain,	/* 1 */
+    logstyle_color,	/* 2 */
+    logstyle_TeX 	/* 3 */
 };
 
 #define TEXSTYLE_FRAC	1
