@@ -53,6 +53,7 @@ IZ 12- [gnuplot + dynamic link:] allow building even when dlopen() not available
    14- f()=return \\ return "void"
        g()=return(f()) \\ return eval("void") = 0
        now g() returns "void" also 
+   15- f(x=11,y=x)=local(t=ff(),u=t);1 --> parse error
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
