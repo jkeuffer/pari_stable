@@ -1063,8 +1063,10 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   if (typ(d) != t_INT || typ(p) != t_INT) err(typeer, "cornacchia");
   if (signe(d) <= 0) err(talker, "d must be positive");
   *px = *py = gen_0;
-  if (cmpii(p, d) < 0) return 0;
-  b = Fp_sqrt(negi(d), p);
+  b = subii(p, d);
+  if (signe(b) < 0) return 0;
+  if (signe(b) == 0) { avma = av; *py = gen_1; return 1; }
+  b = Fp_sqrt(b, p); /* sqrt(-d) */
   if (!b) { avma = av; return 0; }
   if (absi_cmp(shifti(b,1), p) > 0) b = subii(b,p);
   a = p; L = sqrti(p);
@@ -1101,23 +1103,20 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   if (absi_cmp(px4, d) < 0) { avma = av; return 0; }
   if (equaliu(p, 2))
   {
-    if (!carrecomplet(subsi(8,d),&c)) { avma = av; return 0; }
     avma = av;
-    *px = gen_1;
-    *py = icopy(c); return 1;
+    switch (itou_or_0(d)) {
+      case 4: *px = gen_2; break;
+      case 7: *px = gen_1; break;
+      default: return 0;
+    }
+    *py = gen_1; return 1;
   } 
   b = Fp_sqrt(negi(d), p);
   if (!b) { avma = av; return 0; }
   if (!signe(b)) { /* d = p,2p,3p,4p */
     avma = av;
-    if (absi_equal(d, px4)) {
-      *px = gen_0;
-      *py = gen_1; return 1;
-    }
-    else if (absi_equal(d, p)) {
-      *px = gen_0;
-      *py = gen_2; return 1;
-    }
+    if (absi_equal(d, px4)){ *py = gen_1; return 1; }
+    if (absi_equal(d, p))  { *py = gen_2; return 1; }
     return 0;
   }
   if (mod2(b) != (k & 1)) b = subii(p,b);
