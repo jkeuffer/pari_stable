@@ -244,13 +244,13 @@ gener(GEN m)
   av1=avma; return gerepile(av,av1,gmodulcp(x,m));
 }
 
-/* assume p odd SMALL prime */
+/* assume p odd prime */
 ulong
 u_gener(ulong p)
 {
   const gpmem_t av = avma;
   const long q = p - 1;
-  const GEN L = (GEN)decomp(stoi(q))[1];
+  const GEN L = (GEN)decomp(utoi(q))[1];
   const int k = lg(L) - 1;
   int i,x;
 

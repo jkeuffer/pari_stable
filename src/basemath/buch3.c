@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 extern GEN FqX_factor(GEN x, GEN T, GEN p);
 extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
 extern GEN sqred1_from_QR(GEN x, long prec);
+extern GEN famat_reduce(GEN fa);
+extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
 extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1);
 extern GEN idealprodprime(GEN nf, GEN L);
 extern GEN anti_unif_mod_f(GEN nf, GEN pr, GEN sqf);

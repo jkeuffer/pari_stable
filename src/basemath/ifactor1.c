@@ -19,6 +19,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                **/
 /********************************************************************/
 #include "pari.h"
+extern GEN decomp_limit(GEN n, GEN limit);
+extern int BSW_isprime(GEN x);
+extern ulong ucarrecomplet(ulong A);
+extern GEN mpqs(GEN N);/* in src/modules/mpqs.c,
+		        * returns a factor, a vector of factors, or NULL */
 
 /*********************************************************************/
 /**                                                                 **/
@@ -302,7 +307,6 @@ static long pl831(GEN N, GEN p)
  * b[i] witness for a[i] as in pl831
  * c[i] plisprime(a[i])
  */
-extern GEN decomp_limit(GEN n, GEN limit);
 GEN
 plisprime(GEN N, long flag)
 {
@@ -1929,7 +1933,6 @@ fin:
 /**                 (Cf. Algorithm 8.7.2 in ACiCNT)                   **/
 /**                                                                   **/
 /***********************************************************************/
-extern ulong ucarrecomplet(ulong A);
 static long squfof_ambig(long a, long B, long dd, GEN D, long *cntamb);
 
 #define SQUFOF_BLACKLIST_SZ 64
@@ -3519,9 +3522,6 @@ ifac_divide(GEN *partial, GEN *where)
   return res;
 }
 
-
-extern GEN mpqs(GEN N);/* in src/modules/mpqs.c, maybe a dummy,
-		        * returns a factor, a vector of factors, or NULL */
 
 /* The following takes the place of 2.0.9.alpha's find_factor(). */
 

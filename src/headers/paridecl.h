@@ -224,6 +224,7 @@ GEN     qfbclassno0(GEN x,long flag);
 GEN     quaddisc(GEN x);
 GEN     racine(GEN a);
 GEN     regula(GEN x, long prec);
+ulong   u_gener(ulong p);
 GEN     znstar(GEN x);
 
 /* arith2.c */
@@ -1307,6 +1308,7 @@ GEN     small_to_pol(GEN z, long v);
 GEN     small_to_vec(GEN z);
 GEN     pol_to_small(GEN x);
 ulong   powuumod(ulong x, ulong n0, ulong p);
+GEN     powgumod(GEN x, ulong n0, GEN p);
 GEN     rescale_pol(GEN P, GEN h);
 GEN     unscale_pol(GEN P, GEN h);
 GEN     stopoly(long m, long p, long v);
