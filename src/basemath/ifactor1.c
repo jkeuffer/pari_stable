@@ -2087,10 +2087,10 @@ squfof(GEN n, long quiet)
   if (cmpis(n,5) <= 0) return NULL; /* input n <= 5 */
 
 #ifdef LONG_IS_64BIT
-  if (tf > 3 || (tf == 3 && bfffo(int_MSW(n)) < 5)) /* n too large */
+  if (tf > 3 || (tf == 3 && bfffo(*int_MSW(n)) < 5)) /* n too large */
     return NULL;
 #else  /* 32 bits */
-  if (tf > 4 || (tf == 4 && bfffo(int_MSW(n)) < 5)) /* n too large */
+  if (tf > 4 || (tf == 4 && bfffo(*int_MSW(n)) < 5)) /* n too large */
     return NULL;
 #endif
   /* now we have 5 < n < 2^59 */
