@@ -1509,11 +1509,7 @@ ok_external_help(char *s)
 
 /* don't mess readline display */
 static void
-aide_print(char *s1, char *s2, int flag)
-{
-  if ((flag & h_RL) == 0) err(talker, "%s: %s", s1, s2);
-  pariputsf("%s: %s\n", s1, s2);
-}
+aide_print(char *s1, char *s2) { pariputsf("%s: %s\n", s1, s2); }
 
 static void
 aide0(char *s, int flag)
@@ -1565,10 +1561,11 @@ aide0(char *s, int flag)
       external_help(s,n);
     else
     {
-      if (n == 2) { aide_print(s,"default",h_RL); return; }
+      if (n == 2) { aide_print(s,"default"); return; }
       n = whatnow(s,1);
-      if (n) err(obsoler,s,s, s,n);
-      aide_print(s,"unknown identifier",flag);
+      if (!n) { aide_print(s,"unknown identifier"); return; }
+      aide_print(s, "obsolete function");
+      whatnow_new_syntax(s, n);
     }
     return;
   }
@@ -1586,11 +1583,11 @@ aide0(char *s, int flag)
 
     case EpGVAR:
     case EpVAR:
-      if (!ep->help) { aide_print(s, "user defined variable",h_RL); return; }
+      if (!ep->help) { aide_print(s, "user defined variable"); return; }
       long_help=0; break;
 
     case EpINSTALL:
-      if (!ep->help) { aide_print(s, "installed function",h_RL); return; }
+      if (!ep->help) { aide_print(s, "installed function"); return; }
       long_help=0; break;
   }
   if (long_help) { external_help(ep->name,3); return; }

@@ -62,6 +62,7 @@ BA 15- polsubcyclo() used too much memory for large conductors.
    16- typo in quadtoc() --> quadgen(odd t_INT)*1. was wrong
    17- subgrouplist([], [2]) --> [[;]]  (instead of [])
    18- typo in FqX_split [  (!degpol(x))  --> degpol(x) <= 0 ] -> very rare SEGV
+   19- after alias(a, b); kill(b), invoking 'a' would access corrupted data
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -91,6 +92,8 @@ BA 15- polsubcyclo() used too much memory for large conductors.
        valuation looks large
     9- don't accept [;] in factorback ( matrix(0,2) is the only valid form
        of an empty matrix input, corresponding e.g to factor(1) )
+   10- no longer raise an exception when online help used on unknown id or
+       obsolete function [report 'unknown identifier' or 'obsolete function']
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):

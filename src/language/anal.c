@@ -700,10 +700,24 @@ kill_from_hashlist(entree *ep)
     }
 }
 
+/* kill aliases pointing to EP */
+static void 
+kill_alias(entree *EP)
+{
+  entree *ep, *epnext;
+  long n;
+  for (n = 0; n < functions_tblsz; n++)
+    for (ep = functions_hash[n]; ep; ep = epnext)
+    {
+      epnext = ep->next;
+      if (EpVALENCE(ep) == EpALIAS &&
+          EP == (entree *) ((GEN)ep->value)[1]) kill0(ep);
+    }
+}
+
 /* Kill entree ep, i.e free all memory it occupies, remove it from hashtable.
  * If it's a variable set a "black hole" in polx[v], etc. x = 0-th variable
- * can NOT be killed (only the value), because we often use explicitly polx[0]
- */
+ * can NOT be killed (only the value): we often use explicitly polx[0] */
 void
 kill0(entree *ep)
 {
@@ -717,10 +731,10 @@ kill0(entree *ep)
     case EpGVAR:
       v = varn(initial_value(ep)); killvalue(v);
       if (!v) return; /* never kill x */
-      polx[v] = polun[v] = gnil;
-      polvar[v+1] = (long)gnil;
+      gel(polvar,v+1) = polx[v] = polun[v] = gnil;
       varentries[v] = NULL; break;
-    case EpUSER:
+    case EpUSER: kill_alias(ep); /* fall through */
+    case EpALIAS:
       gunclone((GEN)ep->value); break;
   }
   kill_from_hashlist(ep);
@@ -918,11 +932,8 @@ err_new_fun()
   if (check_new_fun) { kill0(check_new_fun); check_new_fun = NULL ; }
   if (compatible != NONE) return;
 
-  if (whatnow_fun)
-    n = whatnow_fun(s,1);
-  else
-    n = is_entry_intern(s,funct_old_hash,NULL)? 1: 0;
-  if (n) err(obsoler,mark.identifier,mark.start, s,n);
+  if (whatnow_fun && (n = whatnow_fun(s,1)))
+    err(obsoler,mark.identifier,mark.start, s,n);
 }
 #undef LEN
 

@@ -1093,8 +1093,8 @@ err(long numerr, ...)
 
   if (numerr <= cant_deflate)
   {
-    pariputsf("  ***   Bug in PARI, please report.  Uncatched error: %s",
-	      errmessage[numerr]);
+    sprintf(s, "uncatched error: %ld", numerr);
+    err(bugparier, s);
   }
   else if (numerr < talker)
   {
@@ -1104,14 +1104,8 @@ err(long numerr, ...)
       case obsoler:
         ch1 = va_arg(ap,char *);
         errcontext(s,ch1,va_arg(ap,char *));
-        if (whatnow_fun)
-        {
-          term_color(c_NONE);
-          print_text("\nFor full compatibility with GP 1.39, type \"default(compatible,3)\" (you can also set \"compatible = 3\" in your GPRC file)");
-          pariputc('\n');
-          ch1 = va_arg(ap,char *);
-          (void)whatnow_fun(ch1, - va_arg(ap,int));
-        }
+        ch1 = va_arg(ap,char *);
+        whatnow_new_syntax(ch1, va_arg(ap,int));
         break;
 
       case openfiler:
@@ -1210,6 +1204,15 @@ err(long numerr, ...)
     if (default_exception_handler(numerr)) { flusherr(); return; }
   }
   err_recover(numerr);
+}
+
+void
+whatnow_new_syntax(char *f, long n)
+{
+  term_color(c_NONE);
+  print_text("\nFor full compatibility with GP 1.39.15, type \"default(compatible,3)\", or set \"compatible = 3\" in your GPRC file");
+  pariputc('\n');
+  (void)whatnow_fun(f, -n);
 }
 
 static char *BREAK_LOOP = "";
