@@ -229,16 +229,7 @@ append_vbs(GEN vbs, GEN D)
   vbs[l] = (long)Dn; setlg(vbs, l+1); return vbs;
 }
 
-GEN
-myconcat(GEN D, long a)
-{
-  long i,l = lg(D);
-  GEN x = cgetg(l+1,t_VECSMALL);
-  for (i=1; i<l; i++) x[i]=D[i];
-  x[l] = a; return x;
-}
-
-void
+static void
 myconcat2(GEN D, GEN a)
 {
   long i,l = lg(D), m = lg(a);
@@ -274,7 +265,7 @@ print_block_system(long N,GEN Y,long d,GEN vbs,long maxl)
       {
         lp++; if (lp>ki) lp = 1;
         a = im_by_cy(a, cy);
-        De[lp] = (long)myconcat((GEN)De[lp], a);
+        De[lp] = (long)vecsmall_append((GEN)De[lp], a);
       }
     }
     if (si>1 && ki>1)
