@@ -375,7 +375,7 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
 {
   long N,m,i,j,d,lf;
   GEN M,T,pe,p,pol,fhk,g;
-  GEN _d_1_term,delta,listdelta,whichdelta,firstroot;
+  GEN d_1_term,delta,listdelta,whichdelta,firstroot;
 
   pol=(GEN)DATA[1];
   p = (GEN)DATA[2];
@@ -389,7 +389,7 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
   lf = lg(firstroot);
   listdelta = cgetg(lf, t_VEC);
   whichdelta = cgetg(N+1, t_VECSMALL);
-  _d_1_term = gzero;
+  d_1_term = gzero;
   for (i=1; i<=m; i++)
   {
     GEN Ai = (GEN)A[i], p1 = gun;
@@ -402,10 +402,10 @@ cand_for_subfields(GEN A,GEN DATA,GEN *ptlistdelta)
     /* fk[k] belongs to block number whichdelta[k] */
     for (j=1; j<=d; j++) whichdelta[Ai[j]] = i;
     if (typ(p1) == t_POL) p1 = constant_term(p1);
-    _d_1_term = addii(_d_1_term, p1);
+    d_1_term = addii(d_1_term, p1);
   }
-  _d_1_term = centermod(_d_1_term, pe); /* Tr(g) */
-  if (absi_cmp(_d_1_term, (GEN)M[3]) > 0) return gdeux; /* d-1 test */
+  d_1_term = centermod(d_1_term, pe); /* Tr(g) */
+  if (absi_cmp(d_1_term, (GEN)M[3]) > 0) return gdeux; /* d-1 test */
   g = FqV_roots_to_pol(delta, T, pe, 0);
   g = centermod(polsimplify(g), pe); /* assume g in Z[X] */
   if (DEBUGLEVEL>2) fprintferr("pol. found = %Z\n",g);
@@ -597,13 +597,13 @@ static GEN
 choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
 {
   ulong av;
-  long j,k,oldllist,llist,r,lcm,oldlcm,N,pp;
+  long j,k,oldllist,llist,r,lcm,oldlcm,N,pp,minp = N*(d-1);
   GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
   byteptr di=diffptr;
 
   if (DEBUGLEVEL) timer2();
   di++; p = stoi(2); N = degpol(pol);
-  while (p[2]<=N) p[2] += *di++;
+  while (p[2]<=minp) p[2] += *di++;
   oldllist = 100000;
   oldlcm = 0;
   oldlistpotbl = oldff = oldn = NULL; pp = 0; /* gcc -Wall */
