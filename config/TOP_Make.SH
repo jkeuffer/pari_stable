@@ -81,7 +81,7 @@ setdir::
 
 tar:
 	\$(RM) $ztarfile
-	tar cf $tarfile \`$config_dir/tar_distrib\` $config_dir/MANIFEST
+	$config_dir/get_MANIFEST | tar cf $tarfile \`$config_dir/tar_distrib\` -
 
 distrib: tar setdir
 	gzip $tarfile

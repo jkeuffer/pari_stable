@@ -1,0 +1,4 @@
+root=/home/megrez/cvsroot/pari/
+cvs status 2>/dev/null | grep Repository | grep -v cvsignore \
+  | sed "s|.*$root\(.*\),v|\1|"
+echo Odos/paricfg.h
