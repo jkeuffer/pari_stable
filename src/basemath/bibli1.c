@@ -3097,15 +3097,18 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
           if (j  && mpcmp(norme1, borne1) > 0) break;
           if (j  || check(data,(GEN)S[k]))
           {
-            if (!j) borne1 = mpadd(norme1,eps);
+            if (!j) borne1 = gclone( mpadd(norme1,eps) );
             S[++j] = S[k];
           }
         }
-        avma = av2; s = j;
-        if (j)
+        s = j;
+        if (!j) avma = av2;
+        else
         {
+          GEN t = borne1;
           checkcnt = 0; norme1 = mpsub(borne1,eps);
           for (i=1; i<=s; i++) norms[i] = (long)norme1;
+          borne1 = gcopy(borne1); gunclone(t);
           borne2 = mpmul(borne1,alpha);
         }
       }
