@@ -2042,7 +2042,12 @@ sfcont(GEN x, GEN x1, long k)
             if (is_pm1(p1))
             {
               if (i == lx1 || !gcmp1((GEN)x1[i+1]))
-                affii((GEN)x1[i],(GEN)y[i]);
+              {
+                if ((GEN)y[i] == gzero)
+                  y[i] = licopy((GEN)x1[i]);
+                else
+                  affii((GEN)x1[i],(GEN)y[i]);
+              }
             }
             else i--;
             avma = av1; break;
