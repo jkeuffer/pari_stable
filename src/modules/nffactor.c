@@ -824,9 +824,9 @@ T2_matrix_pow(GEN nf, GEN pre, GEN p, GEN C, long *kmax, long prec)
 static GEN
 nfsqff(GEN nf,GEN pol, long fl)
 {
-  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec;
+  long d=lgef(pol),i,k,m,n,av=avma,tetpil,newprec,prec;
   GEN p1,pr,p2,rep,k2,C,h,dk,dki,p,prh,p3,T2,polbase,fact,pk;
-  GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32);
+  GEN polmod,polred,hinv,lt,minp,den,maxp=shifti(gun,32),run;
 
   dk=absi((GEN)nf[3]);
   dki=mulii(dk,(GEN)nf[4]);
@@ -836,10 +836,28 @@ nfsqff(GEN nf,GEN pol, long fl)
   polmod  = unifpol(nf,pol,1);
   dki=mulii(dki,gnorm((GEN)polmod[d-1]));
 
-  T2 = gprec_w(gmael(nf,5,3), DEFAULTPREC);
-  p1=gzero;
-  for (i=2; i<d; i++)
-    p1=mpadd(p1,qfeval(T2,(GEN)polbase[i]));
+  prec = DEFAULTPREC;
+  for (;;)
+  {
+    if (prec <= gprecision(nf))
+      T2 = gprec_w(gmael(nf,5,3), prec);
+    else
+      T2 = nf_get_T2((GEN)nf[7], roots((GEN)nf[1], prec));
+
+    run=realun(prec);
+    p1=realzero(prec);
+    for (i=2; i<d; i++)
+    { 
+      p2 = gmul(run, (GEN)polbase[i]);
+      p1 = addrr(p1, qfeval(T2, p2));
+      if (signe(p1) <= 0) break;
+    }
+
+    if (signe(p1) > 0) break;
+
+    prec = (prec<<1)-2;
+    if (DEBUGLEVEL > 1) err(warnprec, "nfsqff", prec);
+  }
 
   if (DEBUGLEVEL>=4)
     fprintferr("La norme de ce polynome est : %Z\n", p1);
@@ -847,23 +865,22 @@ nfsqff(GEN nf,GEN pol, long fl)
   lt=(GEN)leading_term(polbase)[1];
   p2=mulis(sqri(lt),n);
   C=mpadd(p1,p2);
-  C=mpadd(C,gsqrt(gmul(p1,p2),DEFAULTPREC));
-
+  C=mpadd(C,gsqrt(gmul(p1,p2),prec));
+	    
   if (!fl)
     C=mpmul(C,sqri(binome(shifti(stoi(n-1),-1),(n-1)>>2)));
-
+    
   C=gmul(C,sqri(lt));
-
+  
   if (DEBUGLEVEL>=4)
     fprintferr("La borne de la norme des coeff du diviseur est : %Z\n", C);
-
+  
   k2=gmul2n(gmulgs(glog(gdivgs(gmul2n(C,2),n),DEFAULTPREC),n),-1);
   if (!fl) k2=mulrr(k2,dbltor(1.1));
-  if (gcmp(k2, gun)<0) k2=gun;
-
+ 
   minp=gmin(gexp(gmul2n(k2,-6),BIGDEFAULTPREC), maxp);
   minp=gceil(minp);
-
+  
   if (DEBUGLEVEL>=4)
   {
     fprintferr("borne inf. sur les nombres premiers : %Z\n", minp);
