@@ -2965,7 +2965,7 @@ compute_vecG(GEN nf, GEN *pG0, long n)
 {
   GEN G0, Gtw0, vecG, G = gmael(nf,5,2);
   long e, i, j, ind, r1 = nf_get_r1(nf), r = lg(G)-1;
-  if (n == 1) return _vec( ground(G) );
+  if (n == 1) { *pG0 = G0 = ground(G); return _vec( G0 ); }
   for (e = 4; ; e <<= 1)
   {
     G0 = ground(G); Gtw0 = ground(gmul2n(G, 10));
