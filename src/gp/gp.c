@@ -64,6 +64,7 @@ static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
 #define MAX_PROMPT_LEN 128
 #define DFT_PROMPT "? "
+#define FILE_PROMPT "From file: "
 #define BREAK_LOOP_PROMPT "break> "
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
@@ -2526,7 +2527,7 @@ read_line(filtre_t *F, char *PROMPT)
     if (!disable_color) { term_color(c_NONE); pariflush(); }
   }
   else
-    res = get_line_from_file(DFT_PROMPT,F,infile);
+    res = get_line_from_file(FILE_PROMPT,F,infile);
   return res;
 }
 
