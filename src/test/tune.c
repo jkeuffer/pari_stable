@@ -62,7 +62,11 @@ static double speed_endtime() { return (double)TIMER(&__T)/1000.; }
 #endif
 
 /* ========================================================== */
+#if 1
 const ulong DFLT_l = 46337UL; /* default modulus for Flx */
+#else
+const ulong DFLT_l = 0xeffffffUL; /* default modulus for Flx */
+#endif
 
 /* int, n words */
 static GEN
@@ -452,7 +456,8 @@ main(int argc, char **argv)
       v[n++] = r;
     }
   }
-  if (n) { for (i = 0; i < n; i++) one(&param[ v[i] ]); }
-  else   { for (i = 0; i < n; i++) one(&param[i]); }
+  if (n) { for (i = 0; i < n; i++) one(&param[ v[i] ]); return 0; }
+  n = numberof(param);
+  for (i = 0; i < n; i++) one(&param[i]);
   return 0;
 }
