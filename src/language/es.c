@@ -726,6 +726,12 @@ Strexpand(GEN g) {
   free(t); free(s); return z;
 }
 
+GEN
+GENtoGENstr(GEN x)
+{
+  char *s = GENtostr(x);
+  GEN z = STRtoGENstr(s); free(s); return z;
+}
 /********************************************************************/
 /**                                                                **/
 /**                         WRITE AN INTEGER                       **/

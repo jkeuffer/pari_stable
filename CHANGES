@@ -173,6 +173,7 @@ IZ  8- logstyle and TeXstyle defaults
        read statements have been processed ]
 GH 11- IA64 level0 inline assembly kernel
 BA 12- GP function galoisidentify and groups identification facility
+   13- public function GENtoGENstr [ for GP2C ]. (was private: gtostr())
 
   Remove
     1- remove emacs/compile [ integrated in Makefile ]

@@ -626,14 +626,6 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
 /*                          SET OPERATIONS                             */
 /*                                                                     */
 /***********************************************************************/
-
-static GEN
-gtostr(GEN x)
-{
-  char *s=GENtostr(x);
-  x = STRtoGENstr(s); free(s); return x;
-}
-
 GEN
 gtoset(GEN x)
 {
@@ -646,12 +638,12 @@ gtoset(GEN x)
   if (!is_vec_t(tx))
   {
     if (tx != t_LIST)
-      { y=cgetg(2,t_VEC); y[1]=(long)gtostr(x); return y; }
+      { y=cgetg(2,t_VEC); y[1]=(long)GENtoGENstr(x); return y; }
     lx = lgeflist(x)-1; x++;
   }
   if (lx==1) return cgetg(1,t_VEC);
   av=avma; y=cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) y[i]=(long)gtostr((GEN)x[i]);
+  for (i=1; i<lx; i++) y[i]=(long)GENtoGENstr((GEN)x[i]);
   y = sort(y);
   c=1;
   for (i=2; i<lx; i++)
@@ -702,7 +694,7 @@ setsearch(GEN x, GEN y, long flag)
 {
   pari_sp av = avma;
   long res;
-  if (typ(y) != t_STR) y = gtostr(y);
+  if (typ(y) != t_STR) y = GENtoGENstr(y);
   res=gen_search(x,y,flag,gcmp);
   avma=av;
   return res;
