@@ -153,10 +153,10 @@ consteuler(long prec)
   v = realun(l);
   n = (long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
   n1 = min(n, SQRTVERYBIGINT);
-  av2 = avma;
   if (x < SQRTVERYBIGINT)
   {
     long xx = x*x;
+    av2 = avma;
     for (k=1; k<n1; k++)
     {
       divrsz(mulsr(xx,b),k*k, b);
@@ -175,6 +175,7 @@ consteuler(long prec)
   else
   {
     GEN xx = mulss(x,x);
+    av2 = avma;
     for (k=1; k<n1; k++)
     {
       divrsz(mulir(xx,b),k*k, b);
