@@ -42,7 +42,7 @@ typedef struct Cache { /* data associated to p^k */
   GEN eta;
   GEN matvite, matinvvite;
   GEN avite, pkvite;
-  long ctsgt; /* DEBUG */
+  ulong ctsgt; /* DEBUG */
 } Cache;
 
 static GEN
@@ -606,7 +606,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
 
 /* return 0: N not a prime, 1: no problem so far */
 static int
-filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, ulong ltab)
+filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
 {
   pari_sp av;
   int i, j;
@@ -693,11 +693,11 @@ alloc_cache()
 }
 
 static Cache **
-calcglobs(Red *R, ulong t, ulong *pltab, GEN *pP)
+calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
 {
   GEN fat, P, E;
   int lv, lfa, pk, p, e, i, k;
-  ulong ltab, b;
+  long ltab, b;
   Cache **pC;
 
   b = bit_accuracy(lgefint(R->N)) - 1;
@@ -978,8 +978,8 @@ GEN
 aprcl(GEN N)
 {
   GEN et, fat, flaglp, tabfaq, tabj, res, globfa;
-  long fl, ctglob = 0;
-  ulong ltab, lfat, p, q, lfaq, k, t, i, j, l;
+  long ltab, lfat, lfaq, fl, ctglob = 0;
+  ulong p, q, k, t, i, j, l;
   pari_sp av, av2;
   Red R;
   Cache **pC;
