@@ -2179,12 +2179,12 @@ u2toi(ulong a, ulong b)
 #ifdef LONG_IS_64BIT
   x = cgetg(3, t_INT);
   x[1] = evallgefint(3)|evalsigne(1);
-  x[2] = (a << 32) | b;
+  x[2] = (long) ((a << 32) | b);
 #else
   x = cgetg(4, t_INT);
   x[1] = evallgefint(4)|evalsigne(1);
-  *(int_MSW(x)) = a;
-  *(int_LSW(x)) = b;
+  *(int_MSW(x)) = (long)a;
+  *(int_LSW(x)) = (long)b;
 #endif
   return x;
 }
