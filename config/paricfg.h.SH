@@ -134,6 +134,10 @@ EOT
 ;;
 esac
 
+case $has_getrlimit in
+yes) echo '#define STACK_CHECK' >> $file;;
+esac
+
 case $has_TIOCGWINSZ in
 yes) echo '#define HAS_TIOCGWINSZ' >> $file;;
 esac

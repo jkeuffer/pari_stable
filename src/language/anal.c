@@ -45,6 +45,7 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
 
 void killbloc0(GEN x, int inspect);
+int pari_stackgrow(void);
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -1255,6 +1256,12 @@ identifier(void)
     return matrix_block((GEN) ep->value,ep);
   }
   ep = do_alias(ep); matchcomma = 0;
+#ifdef STACK_CHECK
+  if (PARI_stack_limit
+    && (void*) &ptr <= PARI_stack_limit
+    && !pari_stackgrow())
+      err(talker2, "deep recursion", mark.identifier, mark.start);
+#endif
   if (ep->code)
   {
     char *s = ep->code, *oldanalyseur = NULL, *buf, *limit, *bp;

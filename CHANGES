@@ -68,6 +68,9 @@ XR 36- ensure that fundamental unit is computed in quadray (if D > 0)
 XR 37- precision fixes in stark.c (inconsistencies 32/64 bit + early abort)
    38- bug in P*Q for polynomials over (non prime) finite fields if Q is
        defined over the prime field
+XR 39- [stark.c]: bugs in RecCoeff3, reduced memory use in ComputeArtinNumber
+   40- core dump on infinite recursion under GP
+   41- use appropriate precision in torselldoud (could be much too large)
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

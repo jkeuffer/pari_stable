@@ -1050,6 +1050,7 @@ list=strftime; . ./look
 list='getrusage times ftime'; . ./look
 list='sigrelse sigsetmask'; . ./look
 list=TIOCGWINSZ; . ./look
+list=getrlimit; . ./look
 
 # For install(). Do we need libdl.so?
 # on irix and osf1 -ldl not needed

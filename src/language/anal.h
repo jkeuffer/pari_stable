@@ -81,6 +81,10 @@ enum { RET_GEN, RET_INT, RET_VOID };
 /* are we under emacs ? (might change output) */
 extern int under_emacs;
 
+#ifdef STACK_CHECK
+extern void *PARI_stack_limit;
+#endif
+
 /* entrees */
 #define Epstatic 0x100
 #define EpVALENCE(ep) ((ep)->valence & 0xFF)
