@@ -64,6 +64,7 @@ HC 24- Corrected p-adic initell.
    27- various problems with C++ compilers
    28- polredabs could fail to reduce "obvious" input, e.g x^2 + n*x + n^2
    29- nfgcd(x,y,1) didn't check its arguments
+   30- typo in elltors: could forget a point of order 2
 
   Changed
 BA  1- improved Fp_isom
