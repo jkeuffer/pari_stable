@@ -1646,8 +1646,9 @@ mpsc1(GEN x, long *ptmod8)
 
   l++; pitemp = mppi(l+1); setexpo(pitemp,-1);
   p1 = addrr(x,pitemp); setexpo(pitemp,0);
-  if (expo(p1) >= bit_accuracy(min(l,lg(p1))) + 3)
-    err(precer,"mpsc1");
+  l0 = min(l, lg(p1));
+  if (expo(p1) >= bit_accuracy(l0) + 3) err(precer,"mpsc1");
+
   p3 = divrr(p1,pitemp); p2 = mpent(p3);
   if (signe(p2)) x = subrr(x, mulir(p2,pitemp));
   p1 = cgetr(l+1); affrr(x, p1);
