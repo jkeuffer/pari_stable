@@ -1740,21 +1740,20 @@ choose_params(GEN P, GEN N, GEN X, GEN B, int *pdelta, int *pt)
 static GEN 
 do_exhaustive(GEN P, GEN N, int x, GEN B) 
 {
-  GEN z, tst, sol = cgetg(1, t_VEC);
-  int j, l; 
+  GEN tst, sol = cget1(2*x + 2, t_VECSMALL);
+  int j, l;
 
   for (j = -x; j <= x; j++)
   {
-    z = stoi(j); 
-    tst = gcdii(FpX_eval(P, z, N), N);
+    tst = gcdii(FpX_eval(P, stoi(j), N), N);
     
     if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
     {
-      for (l = 1; l < lg(sol) && !egalii(z, (GEN)sol[l]); l++) /*empty*/;
-      if (l == lg(sol)) sol = concatsp(sol, z);
+      for (l = 1; l < lg(sol) && j != sol[l]; l++) /*empty*/;
+      if (l == lg(sol)) appendL(sol, (GEN)j);
     }
   }
-  return sol; 
+  return zv_to_ZV(sol); 
 }
 
 #define X_SMALL 1000
@@ -1764,7 +1763,8 @@ GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 {
   GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst, Z;
-  int delta, ltop = avma, i, j, row, d, l, dim, t, bnd = 10;
+  int delta, i, j, row, d, l, dim, t, bnd = 10;
+  pari_sp av = avma;
 
   if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "Coppersmith");
   if (typ(X) != t_INT) X = gfloor(X);
@@ -1772,7 +1772,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (typ(B) != t_INT) B = gceil(B);
 
   if (cmpis(X, X_SMALL) <= 0) 
-    return do_exhaustive(P0, N, itos(X), B); 
+    return gerepileupto(av, do_exhaustive(P0, N, itos(X), B)); 
 
   /* bnd-hack is only for the case B = N */
   if (!egalii(B,N)) bnd = 1;
@@ -1890,7 +1890,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     }
     if (i < bnd) R[2] = (long)addii((GEN)R[2], Z);
   }
-  return gerepilecopy(ltop, sol);
+  return gerepilecopy(av, sol);
 }
 
 /********************************************************************/
