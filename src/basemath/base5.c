@@ -208,25 +208,24 @@ rnf_roots(GEN nf, GEN pol, long prec, GEN *pts) {
 static GEN
 modulereltoabs(GEN rnf, GEN x)
 {
-  GEN oms = (GEN)x[1], ids = (GEN)x[2], nf = (GEN)rnf[10], rnfeq = (GEN)rnf[11];
+  GEN w = (GEN)x[1], I = (GEN)x[2], nf = (GEN)rnf[10], rnfeq = (GEN)rnf[11];
   GEN M, basnf, cobasnf, T = (GEN)nf[1];
-  long i, j, k, n = lg(oms)-1, m = degpol(T);
+  long i, j, k, n = lg(w)-1, m = degpol(T);
 
   M = cgetg(n*m+1, t_VEC);
   basnf = gsubst((GEN)nf[7], varn(T), (GEN)rnfeq[2]);
-  /* removing denominators speeds up multiplication */
-  basnf = Q_primitive_part(basnf, &cobasnf);
+  basnf = Q_primitive_part(basnf, &cobasnf); /* remove denom. --> faster */
   for (k=i=1; i<=n; i++)
   {
-    GEN c,c0,c1, om = (GEN)oms[i], id = (GEN)ids[i];
+    GEN c0, om = (GEN)w[i], id = (GEN)I[i];
 
     om = Q_primitive_part(eltreltoabs(rnfeq, om), &c0);
     c0 = mul_content(c0, cobasnf);
     for (j=1; j<=m; j++)
     {
-      GEN z = Q_primitive_part(gmul(basnf,(GEN)id[j]), &c1);
+      GEN c, z = Q_primitive_part(gmul(basnf,(GEN)id[j]), &c);
       z = lift_intern(gmul(om, z));
-      c = mul_content(c1, c0); if (c) z = gmul(c, z);
+      c = mul_content(c, c0); if (c) z = gmul(c, z);
       M[k++] = (long)z;
     }
   }
@@ -572,10 +571,9 @@ rnfidealnormrel(GEN rnf,GEN id)
 
   checkrnf(rnf); nf = (GEN)rnf[10];
   if (degpol(rnf[1]) == 1) return idmat(degpol(nf[1]));
-
-  id = rnfidealhermite(rnf,id);
+  
   t = prodid(nf, gmael(rnf,7,2));
-  z = prodid(nf, (GEN)id[2]);
+  z = prodid(nf, (GEN)rnfidealhermite(rnf,id)[2]);
   return gerepileupto(av, idealdiv(nf,z,t));
 }
 
@@ -599,40 +597,36 @@ rnfidealreltoabs(GEN rnf,GEN x)
 {
   pari_sp av = avma;
   long i, l;
-  GEN oms;
+  GEN w;
 
   x = rnfidealhermite(rnf,x);
-  oms = (GEN)x[1]; l = lg(oms); settyp(oms, t_VEC);
-  for (i=1; i<l; i++)
-    oms[i] = (long)lift( rnfbasistoalg(rnf, (GEN)oms[i]) );
+  w = (GEN)x[1]; l = lg(w); settyp(w, t_VEC);
+  for (i=1; i<l; i++) w[i] = (long)lift( rnfbasistoalg(rnf, (GEN)w[i]) );
   return gerepilecopy(av, modulereltoabs(rnf, x));
 }
 
 GEN
 rnfidealabstorel(GEN rnf, GEN x)
 {
-  long N, n, m, j;
+  long N, m, j;
   pari_sp av = avma;
-  GEN nf, M, p1, p2, id, invbas;
+  GEN nf, A, I, z, id, invbas;
 
   checkrnf(rnf); nf = (GEN)rnf[10]; invbas = (GEN)rnf[8];
-  n = degpol(rnf[1]);
   m = degpol(nf[1]);
-  N = n*m;
+  N = m * degpol(rnf[1]);
   if (lg(x)-1 != N) err(typeer, "rnfidealabstorel");
   if (typ(x) != t_VEC) err(typeer,"rnfidealabstorel");
-  M = cgetg(N+1,t_MAT);
+  z = cgetg(3,t_VEC);
+  A = cgetg(N+1,t_MAT); z[1] = (long)A;
+  I = cgetg(N+1,t_VEC); z[2] = (long)I; id = idmat(m);
   for (j=1; j<=N; j++)
   {
     GEN t = lift_intern( rnfelementabstorel(rnf, (GEN)x[j]) );
-    M[j] = (long)mulmat_pol(invbas, t);
+    A[j] = (long)mulmat_pol(invbas, t);
+    I[j] = (long)id;
   }
-  p1 = cgetg(N+1,t_VEC); id = idmat(m);
-  for (j=1; j<=N; j++) p1[j] = (long)id;
-  p2 = cgetg(3,t_VEC);
-  p2[1] = (long)M;
-  p2[2] = (long)p1;
-  return gerepileupto(av, nfhermite(nf,p2));
+  return gerepileupto(av, nfhermite(nf,z));
 }
 
 GEN
@@ -648,17 +642,17 @@ rnfidealup(GEN rnf,GEN x)
 {
   pari_sp av = avma;
   long i, n;
-  GEN nf, bas, bas2, p1, p2;
+  GEN nf, bas, bas2, I, z;
 
   checkrnf(rnf); nf = (GEN)rnf[10];
   n = degpol(rnf[1]);
   bas = (GEN)rnf[7]; bas2 = (GEN)bas[2];
 
-  p2 = cgetg(3,t_VEC); p1 = cgetg(n+1,t_VEC);
-  p2[1] = (long)idmat(n);
-  p2[2] = (long)p1;
-  for (i=1; i<=n; i++) p1[i] = (long)idealmul(nf,x,(GEN)bas2[i]);
-  return gerepilecopy(av, modulereltoabs(rnf, p2));
+  z = cgetg(3,t_VEC); I = cgetg(n+1,t_VEC);
+  z[1] = bas[1];
+  z[2] = (long)I;
+  for (i=1; i<=n; i++) I[i] = (long)idealmul(nf,x,(GEN)bas2[i]);
+  return gerepilecopy(av, modulereltoabs(rnf, z));
 }
 
 extern GEN get_mul_table(GEN x,GEN basden,GEN invbas);
