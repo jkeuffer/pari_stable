@@ -81,12 +81,14 @@ static int did_init_matched = 0;
 #endif
 
 #ifdef HAS_RL_COMPLETION_MATCHES
-#  define COMPLETION_MATCHES ((CF)rl_completion_matches)
-#  define FILE_COMPLETION ((GF)rl_filename_completion_function)
-#  define USER_COMPLETION ((GF)rl_username_completion_function)
+#  define COMPLETION_MATCHES(a,b) \
+      rl_completion_matches((a),(b))
+#  define FILE_COMPLETION rl_filename_completion_function
+#  define USER_COMPLETION rl_username_completion_function
 #  define DING rl_ding
 #else
-#  define COMPLETION_MATCHES ((CF)completion_matches)
+#  define COMPLETION_MATCHES(a,b) \
+      ((CF)completion_matches)((a),(char *(*)(void))(b))
 #  define FILE_COMPLETION ((GF)filename_completion_function)
 #  define USER_COMPLETION ((GF)username_completion_function)
 #  define DING ding
@@ -305,7 +307,7 @@ match_concat(char **matches, char *s)
 }
 
 static char **
-matches_for_emacs(char *text, char **matches)
+matches_for_emacs(const char *text, char **matches)
 {
   if (!matches) printf("@");
   else
@@ -329,10 +331,9 @@ matches_for_emacs(char *text, char **matches)
 #define add_comma(x) (x==-2) /* from default_generator */
 
 /* Attempt to complete on the contents of TEXT. END points to the end of the
- * word to complete. Return the array of matches, or NULL if there aren't any.
- */
+ * word to complete. Return the array of matches, NULL if there are none. */
 static char **
-get_matches(int end, char *text, char* f(char*,int))
+get_matches(int end, const char *text, char* f(const char*,int))
 {
   char **matches;
 
@@ -340,7 +341,7 @@ get_matches(int end, char *text, char* f(char*,int))
   rl_completion_append_character = ' ';
 #endif
   current_ep = NULL;
-  matches = COMPLETION_MATCHES(text, (char *(*)(void))f);
+  matches = COMPLETION_MATCHES(text, f);
   if (matches && !matches[1]) /* a single match */
   {
     if (add_paren(end))
@@ -363,7 +364,7 @@ get_matches(int end, char *text, char* f(char*,int))
 #undef add_comma
 
 static char *
-add_junk(char *name, char *text, long junk)
+add_junk(char *name, const char *text, long junk)
 {
   char *s = strncpy((char*) gpmalloc(strlen(name)+1+junk),text,junk);
   strcpy(s+junk,name); return s;
@@ -374,7 +375,7 @@ add_junk(char *name, char *text, long junk)
  * start at the top of the list.
  */
 static char *
-hashtable_generator (char *text, int state, entree **hash)
+hashtable_generator (const char *text, int state, entree **hash)
 {
   static int hashpos, len, junk, n;
   static entree* ep;
@@ -391,7 +392,7 @@ hashtable_generator (char *text, int state, entree **hash)
     n = hashpos = 0; ep=hash[hashpos];
     len=strlen(text); junk=len-1;
     while (junk >= 0 && is_keyword_char(text[junk])) junk--;
-    junk++; len -= junk; TEXT = text + junk;
+    junk++; len -= junk; TEXT = (char*)text + junk;
   }
 
   /* First check the keywords list */
@@ -399,10 +400,7 @@ hashtable_generator (char *text, int state, entree **hash)
   {
     for ( ; keyword_list[n]; n++)
       if (!strncmp(keyword_list[n],TEXT,len))
-      {
-        text = add_junk(keyword_list[n],text,junk);
-        n++; return text;
-      }
+        return add_junk(keyword_list[n++], text, junk);
   }
 
   /* Return the next name which partially matches from the command list. */
@@ -416,18 +414,17 @@ hashtable_generator (char *text, int state, entree **hash)
       ep = ep->next;
     else
       break;
-  current_ep = ep;
-  text = add_junk(ep->name,text,junk);
-  ep=ep->next; return text;
+  current_ep = ep; ep = ep->next;
+  return add_junk(current_ep->name,text,junk);
 }
 
 static char *
-command_generator (char *text, int  state)
+command_generator(const char *text, int  state)
 {
   return hashtable_generator(text,state, functions_hash);
 }
 static char *
-member_generator (char *text, int  state)
+member_generator(const char *text, int  state)
 {
   return hashtable_generator(text,state, members_hash);
 }
@@ -436,7 +433,7 @@ member_generator (char *text, int  state)
 #define ENTREE 1
 
 static char *
-generator(void *list, char *text, int *nn, int len, int typ)
+generator(void *list, const char *text, int *nn, int len, int typ)
 {
   char *def = NULL, *name;
   int n = *nn;
@@ -466,7 +463,7 @@ generator(void *list, char *text, int *nn, int len, int typ)
 }
 
 static char *
-old_generator(char *text,int state)
+old_generator(const char *text,int state)
 {
   static int n,len;
   static char *res;
@@ -482,7 +479,7 @@ old_generator(char *text,int state)
 }
 
 static char *
-default_generator(char *text,int state)
+default_generator(const char *text,int state)
 {
   static int n,len;
 
@@ -691,8 +688,12 @@ init_readline(void)
 #  define Bind(a,b,c)
 #endif
 
-#define Defun(a,b,c) (((void(*)(const char*,Function*,int)) rl_add_defun)\
-  ((a), (Function*)(b), (c)))
+#ifdef _RL_FUNCTION_TYPEDEF
+#  define Defun(a,b,c) (rl_add_defun((a), (b), (c)))
+#else
+#  define Defun(a,b,c) (((void(*)(const char*,Function*,int)) rl_add_defun)\
+     ((a), (Function*)(b), (c)))
+#endif
 
   Defun("short-help", rl_short_help, -1);
   Defun("long-help", rl_long_help, -1);
