@@ -47,12 +47,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 
 ***************************   BUGS (GP specific) ****************************
 
-5  life of GP variables too short in pathological cases:
-   v = [0,0]; v + [v=0,v=0] --> SEGV
-
-   u = Mod(x*Mod(1,2), polcyclo(25)*Mod(1,2));
-   sum(i=1,4,u=u^32) --> SEGV
-
 5  readline: assume a file 'foo' exists, \rf<TAB> --> \foo [\r f<TAB> is OK]
 
 4  changing primelimit from within forprime loop yields unpredictable results
@@ -122,7 +116,7 @@ Misc:
 3  p-adic ellztopoint
 
 0  graphics: allow FIG output (besides PostScript) [easier to edit!]
-   [ use pstoedit ]
+   [ No: use pstoedit ]
 
 ***************************   LIBRARY DESIGN   ****************************
 
@@ -133,9 +127,6 @@ Misc:
 
 4  remove all dependences on types ordering [if (typ(x) < t_POL) ...]
 
-3  integrate Ilya's code for yet bigger prime tables (pari-dev-435). Unify
-   functions using diffptr (if possible correcting the forprime bug above)
-  
 3  remove global variables gpi, geuler: their precision is unpredictable
    (at least as much as requested in last const[pi|euler](), possibly much
    more). Explicit call to mp[pi|euler] should be required. Will break
@@ -164,9 +155,6 @@ Misc:
    before all exported functions to prevent name conflicts. Build alias
    files for debuggers
 
-2  should use vsnprintf instead of vsprintf in pariputsf. Requires GNU libio.
-   [paripusf uses static buffer which should be ok for "most" purposes]
-
 ***************************   GP DESIGN       ****************************
 
 5  remove limitation to 8 arguments for static functions (argvec[9])
@@ -176,9 +164,6 @@ Misc:
 4  extend forprime(n=a,b,...) so that b can go over primelimit [cut [a,b]
    in large intervals, sieve out multiple of small primes there, then use
    isprime() on the rest]
-
-3  split matrix_block in 2 parts: exploration + assignment. Would allow
-   Math::Pari to use complicated x[][][][] constructs
 
 3  changevar with explicit (incomplete) permutation. E.g
    changevar(p, [x,y], [a,b]) for x -> a, y -> b
