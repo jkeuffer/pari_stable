@@ -1977,8 +1977,9 @@ myidealpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
 GEN
 factorback_i(GEN fa, GEN nf, int red)
 {
-  long av=avma,k,l,lx,t=typ(fa);
-  GEN ex, x;
+  ulong av = avma;
+  long k,l,lx,t = typ(fa);
+  GEN p,e,x;
   GEN (*_mul)(GEN,GEN);
   GEN (*_pow)(GEN,GEN);
   if (nf)
@@ -2000,16 +2001,31 @@ factorback_i(GEN fa, GEN nf, int red)
     _mul = &gmul;
     _pow = &powgi;
   }
-  if ( t == t_VEC || t == t_COL)
-    return gerepileupto(av, divide_conquer_prod(fa, _mul));
+  p = (GEN)fa[1];
+  e = (GEN)fa[2];
+  if (is_vec_t(t))
+  {
+    t = typ(e);
+    if (lg(fa) == 3 && is_vec_t(t))
+    { /* check whether e is an integral vector of correct length */
+      lx = lg(e);
+      if (lx == lg(p))
+      {
+        for (k=1; k<lx; k++)
+          if (typ(e[k]) != t_INT) break;
+        if (k == lx) t = t_MAT;
+      }
+    }
+    if (t != t_MAT)
+      return gerepileupto(av, divide_conquer_prod(fa, _mul));
+  }
   if (t!=t_MAT || lg(fa)!=3)
     err(talker,"not a factorisation in factorback");
-  ex=(GEN)fa[2]; fa=(GEN)fa[1];
-  lx = lg(fa); if (lx == 1) return gun;
+  lx = lg(p); if (lx == 1) return gun;
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
-    if (signe(ex[k]))
-      x[l++] = (long)_pow((GEN)fa[k],(GEN)ex[k]);
+    if (signe(e[k]))
+      x[l++] = (long)_pow((GEN)p[k],(GEN)e[k]);
   setlg(x,l);
   return gerepileupto(av, divide_conquer_prod(x, _mul));
 }
