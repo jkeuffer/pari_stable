@@ -461,17 +461,17 @@ The second parameter in mygprec is the precision in base 2 */
 static GEN
 mygprec(GEN x, long bitprec)
 {
-  long tx=typ(x),lx,i,e;
+  long tx=typ(x),lx,i,e = gexpo(x);
   GEN y;
 
   switch(tx)
   {
     case t_POL:
-      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1]; e=gexpo(x);
+      lx=lgef(x); y=cgetg(lx,tx); y[1]=x[1];
       for (i=2; i<lx; i++) y[i]=(long) mygprecrc((GEN)x[i],bitprec,e);
       break;
 
-    default: y=mygprecrc(x,bitprec,0);
+    default: y=mygprecrc(x,bitprec,e);
   }
   return y;
 }
