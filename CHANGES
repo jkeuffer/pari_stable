@@ -49,6 +49,7 @@ BA  1- gpflog could print some lines twice
 XR  2- round 4 algorithm: compute characteristic polynomials via Newton sums
 XR  3- nffactormod now calls factmod / factmod9 when possible
 XR  4- don't compute discriminant in nffactor/nfroots + better bounds in nfsqff
+    5- input loops rewritten (filtre more flexible + unified common code)
 
   Added
     1- file README.WIN
