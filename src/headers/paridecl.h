@@ -718,6 +718,7 @@ GEN     lisGEN(FILE *f);
 void    matbrute(GEN g, char format, long dec);
 pariFILE* newfile(FILE *f, char *name, int type);
 void    os_close(long fd);
+char*   os_getenv(char *s);
 long    os_open(char *s, int mode);
 void    os_read(long fd, char ch[], long s);
 void    (*os_signal(int sig, void (*f)(int)))(int);

@@ -2243,6 +2243,16 @@ os_open(char *s, int mode)
   return fd;
 }
 
+char *
+os_getenv(char *s)
+{
+#if defined(WINCE) || defined(macintosh)
+  return NULL;
+#else
+  return getenv(s);
+#endif
+}
+
 /*******************************************************************/
 /**                                                               **/
 /**                   GP STANDARD INPUT AND OUTPUT                **/
@@ -2497,8 +2507,8 @@ switchout(char *name)
 static int
 unix_shell()
 {
-  char *base, *sh = getenv ("EMXSHELL");
-  if (sh == NULL) sh = getenv ("COMSPEC");
+  char *base, *sh = getenv("EMXSHELL");
+  if (sh == NULL) sh = getenv("COMSPEC");
   if (sh == NULL) return 0;
   base = _getname (sh);
   if (stricmp (base, "cmd.exe") == 0 || stricmp (base, "4os2.exe") == 0
@@ -2533,17 +2543,13 @@ pari_file_exists(char *s)
 char *
 env_ok(char *s)
 {
-#if defined(WINCE) || defined(macintosh)
-  return NULL;
-#else
-  char *t = getenv(s);
+  char *t = os_getenv(s);
   if (t && pari_is_rwx(t) == 0)
   {
     err(warner,"%s is set (%s), but is not writeable", s,t);
     t = NULL;
   }
   return t;
-#endif
 }
 
 static char*

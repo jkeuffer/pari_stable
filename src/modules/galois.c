@@ -32,8 +32,7 @@ static long isin_G_H(GEN po, GEN *r, long n1, long n2);
 
 static long N,CAR,PREC,PRMAX,TSCHMAX,coeff[9][10];
 static char SID[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
-static char* str_coset  = GPDATADIR"/COS";
-static char* str_resolv = GPDATADIR"/RES";
+static char* str_base = GPDATADIR;
 
 static long par_N, *par_vec;
 
@@ -412,9 +411,15 @@ static char *
 name(char *pre, long n, long n1, long n2, long no)
 {
   static char chn[128];
+  static char *base = NULL;
   char ch[6];
 
-  sprintf(chn, "%s%ld_%ld_%ld", pre,n,n1,n2);
+  if (!base) {
+    base = os_getenv("GP_DATA_DIR");
+    if (!base)
+      base = str_base;
+  }
+  sprintf(chn, "%s/%s%ld_%ld_%ld", base, pre, n, n1, n2);
   if (no) { sprintf(ch,"_%ld",no); strcat(chn, ch); }
   return chn;
 }
@@ -475,7 +480,7 @@ lirecoset(long n1, long n2, long n)
 
   if (n<11 || n1<8)
   {
-    fd = galopen(name(str_coset, n, n1, n2, 0));
+    fd = galopen(name("COS", n, n1, n2, 0));
     os_read(fd,&c,1); m=bin(c); os_read(fd,&c,1);
     os_read(fd,ch,6); cardgr=atol(ch); gr=allocgroup(m,cardgr);
     read_obj(gr, fd,cardgr,m); return gr;
@@ -484,7 +489,7 @@ lirecoset(long n1, long n2, long n)
   gr = grptr = allocgroup(n, 8 * cardgr);
   for (no=1; no<=8; no++)
   {
-    fd = galopen(name(str_coset, n, n1, n2, no)); os_read(fd,ch,8);
+    fd = galopen(name("COS", n, n1, n2, no)); os_read(fd,ch,8);
     read_obj(grptr, fd,cardgr,m); grptr += cardgr;
   }
   return gr;
@@ -497,7 +502,7 @@ lireresolv(long n1, long n2, long n, long *nv, long *nm)
   char ch[5];
   long fd;
 
-  fd = galopen(name(str_resolv, n, n1, n2, 0));
+  fd = galopen(name("RES", n, n1, n2, 0));
   os_read(fd,ch,5); *nm=atol(ch);
   os_read(fd,ch,3); *nv=atol(ch);
   b = allocresolv(*nm,*nv);

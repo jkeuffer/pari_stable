@@ -1852,21 +1852,15 @@ get_preproc_value(char *s)
 static char *
 get_home(int *free_it)
 {
-#ifdef WINCE
-  return ".";
-#else
-#ifndef macintosh /* getenv() for Mac ? */
-  char *drv, *pth = getenv("HOME");
+  char *drv, *pth = os_getenv("HOME");
   if (pth) return pth;
-  if ((drv = getenv("HOMEDRIVE"))
-   && (pth = getenv("HOMEPATH")))
+  if ((drv = os_getenv("HOMEDRIVE"))
+   && (pth = os_getenv("HOMEPATH")))
   { /* looks like WinNT */
     char *buf = gpmalloc(strlen(pth) + strlen(drv) + 1);
     sprintf(buf, "%s%s",drv,pth);
     *free_it = 1; return buf;
   }
-#endif
-#endif
 #if defined(__EMX__) || defined(UNIX)
   {
     struct passwd *p = getpwuid(geteuid());
@@ -1898,11 +1892,7 @@ gprc_get()
 #ifdef macintosh
   f = gprc_chk("gprc");
 #else
-#ifdef WINCE
-  s = NULL;
-#else
-  s = getenv("GPRC");
-#endif
+  s = os_getenv("GPRC");
   if (s) f = gprc_chk(s);
   if (!f)
   {
