@@ -1068,24 +1068,6 @@ fix(GEN a, long prec)
   gaffect(a,p); return p;
 }
 
-#if 0
-GEN
-int_loop(entree *ep, char *ch)
-{
-  pari_sp av = avma;
-  intstruct T;
-
-  T.in = NULL;
-  for(;;)
-  {
-    GEN x = Next(&T);
-    if (!x) return gerepileupto(av, T.out);
-    ep->value = (void*)x;
-    T.in = lisexpr(ch);
-  }
-}
-#endif
-
 /* f(x) */
 static GEN
 _gp_eval(GEN x, void *dat)
@@ -1363,8 +1345,8 @@ zbrent(void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long prec)
   GEN c,d,e,tol,tol1,min1,min2,fa,fb,fc,p,q,r,s,xm;
 
   a = fix(a,prec);
-  b = fix(b,prec); sig=cmprr(b,a);
-  if (!sig) { avma = av; return gzero; }
+  b = fix(b,prec); sig = cmprr(b,a);
+  if (!sig) return gerepileupto(av, a);
   if (sig < 0) { c=a; a=b; b=c; } else c = b;
 
   fa = eval(a, E);
@@ -1432,3 +1414,9 @@ zbrent0(entree *ep, GEN a, GEN b, char *ch, long prec)
   z = zbrent(&E, &_gp_eval, a,b, prec);
   pop_val(ep); return z;
 }
+/* x = solve_start(&D, a, b, prec)
+ * while (x) {
+ *   y = ...(x);
+ *   x = solve_next(&D, y);
+ * }
+ * return D.res; */
