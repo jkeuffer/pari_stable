@@ -936,7 +936,7 @@ factor(GEN x)
   if (gcmp0(x))
   {
     y=cgetg(3,t_MAT);
-    p1=cgetg(2,t_COL); y[1]=(long)p1; p1[1]=zero;
+    p1=cgetg(2,t_COL); y[1]=(long)p1; p1[1]=lcopy(x);
     p2=cgetg(2,t_COL); y[2]=(long)p2; p2[1]=un;
     return y;
   }
@@ -1067,7 +1067,7 @@ factor(GEN x)
       y[2]=lconcat((GEN)p1[2],p3);
       return gerepile(av,tetpil,y);
   }
-  err(impl,"general factorization");
+  err(talker,"can't factor %Z",x);
   return NULL; /* not reached */
 }
 #undef typ1
@@ -1112,7 +1112,7 @@ factorback(GEN fa, GEN nf)
   GEN (*_pow)(GEN,GEN);
 
   if (typ(fa)!=t_MAT || lg(fa)!=3)
-    err(talker,"incorrect factorisation in factorback");
+    err(talker,"not a factorisation in factorback");
   ex=(GEN)fa[2]; fa=(GEN)fa[1];
   lx = lg(fa); if (lx == 1) return gun;
   x = cgetg(lx,t_VEC);
@@ -1219,6 +1219,7 @@ ggcd(GEN x, GEN y)
     for (i=1; i<l; i++) z[i]=lgcd(x,(GEN)y[i]);
     return z;
   }
+  if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"g",tx,ty);
   if (gcmp0(x)) return gcopy(y);
   if (gcmp0(y)) return gcopy(x);
   if (is_const_t(tx))
@@ -1335,8 +1336,7 @@ ggcd(GEN x, GEN y)
         {
           case t_FRAC:
             av=avma; p1=mppgcd((GEN)x[1],(GEN)y[2]); tetpil=avma;
-            if (!gcmp1(p1))
-              err(talker,"non invertible fraction in a gcd with INTMOD");
+            if (!gcmp1(p1)) err(operi,"g",tx,ty);
             return gerepile(av,tetpil, ggcd((GEN)y[1],x));
 
           case t_COMPLEX: case t_QUAD:
@@ -1403,8 +1403,7 @@ ggcd(GEN x, GEN y)
 
 	case t_RFRAC:
 	  av=avma; p1=ggcd((GEN)x[1],(GEN)y[2]); tetpil=avma;
-          if (!gcmp1(p1))
-            err(talker,"non invertible fraction in a gcd with POLMOD");
+          if (!gcmp1(p1)) err(operi,"g",tx,ty);
 	  return gerepile(av,tetpil,ggcd((GEN)y[1],x));
 
 	case t_RFRACN:
@@ -1440,14 +1439,13 @@ ggcd(GEN x, GEN y)
       break;
 
     case t_RFRAC: case t_RFRACN: z=cgetg(3,ty);
-      if (!is_rfrac_t(ty))
-        err(talker,"forbidden gcd rational function with vector/matrix");
+      if (!is_rfrac_t(ty)) err(operf,"g",tx,ty);
       p1 = gdiv((GEN)y[2], ggcd((GEN)x[2], (GEN)y[2]));
       tetpil = avma;
       z[2] = lpile((long)z,tetpil,gmul(p1, (GEN)x[2]));
       z[1] = lgcd((GEN)x[1], (GEN)y[1]); return z;
   }
-  err(talker,"gcd vector/matrix with a forbidden type");
+  err(operf,"g",tx,ty);
   return NULL; /* not reached */
 }
 
@@ -1753,6 +1751,10 @@ gdivexact(GEN x, GEN y)
       lx = lgef(x); z = cgetg(lx,t_POL);
       for (i=2; i<lx; i++) z[i]=(long)gdivexact((GEN)x[i],y);
       z[1]=x[1]; return z;
+    case t_VEC: case t_COL: case t_MAT:
+      lx = lg(x); z = cgetg(lx, typ(x));
+      for (i=1; i<lx; i++) z[i]=(long)gdivexact((GEN)x[i],y);
+      return z;
   }
   if (DEBUGLEVEL) err(warner,"missing case in gdivexact");
   return gdiv(x,y);
