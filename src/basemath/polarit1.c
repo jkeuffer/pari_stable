@@ -560,6 +560,7 @@ rootmod0(GEN f, GEN p, long flag)
 /*                     FACTORISATION MODULO p                      */
 /*                                                                 */
 /*******************************************************************/
+static GEN spec_Fp_pow_mod_pol(GEN x, GEN p, GEN S);
 /*
  *Functions giving information on the factorisation.
  */
@@ -681,41 +682,37 @@ try_pow(GEN w0, GEN pol, GEN p, GEN q, long r)
  *  t[0],t[1]...t[k-1] the k factors, normalized
  */
 static void
-split(long m, GEN *t, long d, GEN pg, GEN q, long r)
+split(long m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
 {
-  long p,l,v,dv,av0,av;
+  long ps,l,v,dv,av0,av;
   GEN w,w0;
 
   dv=lgef(*t)-3; if (dv==d) return;
-  v=varn(*t); av0=avma; p = pg[2];
+  v=varn(*t); av0=avma; ps = p[2];
   for(av=avma;;avma=av)
   {
-    if (p==2)
+    if (ps==2)
     {
       w0=w=gpuigs(polx[v],m-1); m+=2;
       for (l=1; l<d; l++)
-      {
-        w = gadd(w0, gsqr(w));
-        w = Fp_pol_red(w, pg);
-        w = Fp_res(w, *t, pg);
-      }
+        w = gadd(w0, spec_Fp_pow_mod_pol(w, p, S));
     }
     else
     {
-      w = Fp_res(stopoly(m,p,v),*t, pg);
-      m++; w = try_pow(w,*t,pg,q,r);
+      w = Fp_res(stopoly(m,ps,v),*t, p);
+      m++; w = try_pow(w,*t,p,q,r);
       if (!w) continue;
       /* set w = w - 1 */
       w[2] = laddis((GEN)w[2], -1); /* w != 1 or -1 */
     }
-    w = Fp_pol_gcd(*t,w, pg);
+    w = Fp_pol_gcd(*t,w, p);
     l = lgef(w)-3; if (l && l!=dv) break;
   }
-  w = normalize_mod_p(w, pg);
+  w = normalize_mod_p(w, p);
   w = gerepileupto(av0, w);
-  l /= d; t[l]=Fp_deuc(*t,w,pg); *t=w;
-  split(m,t+l,d,pg,q,r);
-  split(m,t,  d,pg,q,r);
+  l /= d; t[l]=Fp_deuc(*t,w,p); *t=w;
+  split(m,t+l,d,p,q,r,S);
+  split(m,t,  d,p,q,r,S);
 }
 
 static void
@@ -861,7 +858,7 @@ factcantor0(GEN f, GEN pp, long flag)
           * w^(p^d-1)/2 jusqu'a casser. p = 2 is treated separately.
           */
           if (p)
-            split(p,t+nbfact,d,pp,q,r);
+            split(p,t+nbfact,d,pp,q,r,S);
           else
             splitgen(pp,t+nbfact,d,pp,q,r);
           for (; nbfact<j; nbfact++) ex[nbfact]=e*k;
@@ -1892,56 +1889,46 @@ stopoly92(GEN pg, long d1, long v, GEN a)
 
 /* split into r factors of degree d */
 static void
-split9(GEN m, GEN *t, long d, GEN pp, GEN q, GEN munfq, GEN qq, GEN a, GEN S)
+split9(GEN m, GEN *t, long d, GEN p, GEN q, GEN a, GEN S)
 {
-  long l,dv,v,av0,av,tetpil,p;
-  GEN w,res,pol;
+  long l,v,av0,av,ps, dv = lgef(*t)-3;
+  GEN w,w0;
 
-  dv=lgef(*t)-3; if (dv==d) return;
-  v=varn(*t); m=setloop(m);
-  av0=avma; p = pp[2];
-  for(av=avma;;avma=av)
+  if (dv == d) return;
+  v = varn(*t); m = setloop(m);
+  av0 = avma; ps = p[2];
+  for(av=avma;;avma=av) /* each loop splits *t with probability >= 1/2 */
   {
-    if (p==2)
+    if (ps==2)
     {
-      long e = lgef(a)-3;
-      pol = gres(stopoly92(pp,d,v,a), *t);
-      w = pol;
+      long k = lgef(a)-3;
+      w = w0 = gres(stopoly92(p,d,v,a), *t);
+      /* \sum_{0<i<d} w^(q^i) */
       for (l=1; l<d; l++)
-      {
-        GEN p1 = spec_Fq_pow_mod_pol(w, pp, a, S);
-        w = gadd(pol, p1); /* += w^q */
-      }
-      pol = w; /* w in (F_q)^r */
-      for (l=1; l<e; l++)
-        w = gadd(pol, gres(gsqr(w), *t));
-      /* w in (F_2)^r */
+        w = gadd(w0, spec_Fq_pow_mod_pol(w, p, a, S));
+      w0 = w; /* in (F_q)^r */
+      /* \sum_{0<i<k} w^(2^i), result in (F_2)^r */
+      for (l=1; l<k; l++)
+        w = gadd(w0, gres(gsqr(w), *t));
     }
     else
     {
-      pol = gres(stopoly9(pp,m,qq,v,a), *t);
+      w = w0 = gres(stopoly9(p,m,q,v,a), *t);
       m = incpos(m);
-#if 0 /* doesn't work, have to check out why... */
-      w = pol;
       for (l=1; l<d; l++)
-      {
-        GEN p1 = spec_Fq_pow_mod_pol(w, pp, a, S);
-        w = gadd(pol, p1); /* += w^q */
-      }
-      w = Kronecker_powmod(pol, *t, shifti(qq,-1));
-#else
-      w = Kronecker_powmod(pol, *t, q);
-#endif
+        w = gadd(w0, spec_Fq_pow_mod_pol(w, p, a, S));
+      w = Kronecker_powmod(w, *t, shifti(q,-1));
+      /* now w in {-1,0,1}^r */
       if (lgef(w) == 3) continue;
-      w[2] = ladd((GEN)w[2], munfq);
+      w[2] = ladd((GEN)w[2], gun);
     }
-    tetpil=avma; w=ggcd(*t,w); l=lgef(w)-3;
-    if (l && l!=dv) break;
+    w = ggcd(*t,w);
+    l = lgef(w)-3; if (l && l != dv) break;
   }
-  w = gerepile(av0,tetpil,w);
+  w = gerepileupto(av0,w);
   l /= d; t[l]=gdeuc(*t,w); *t=w;
-  split9(m,t+l,d,pp,q,munfq,qq,a,S);
-  split9(m,t  ,d,pp,q,munfq,qq,a,S);
+  split9(m,t+l,d,p,q,a,S);
+  split9(m,t  ,d,p,q,a,S);
 }
 
 /* to "compare" (real) scalars and t_INTMODs */
@@ -2032,7 +2019,7 @@ GEN
 factmod9(GEN f, GEN pp, GEN a)
 {
   long av = avma, tetpil,p,i,j,k,d,e,vf,va,nbfact,nbf,pk;
-  GEN ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,pd,q,qq,unfp,unfq,munfq, *t;
+  GEN ex,y,f2,f3,df1,df2,g,g1,xmod,u,v,pd,qq,unfp,unfq, *t;
   GEN frobinv,X,m;
 
   if (typ(a)!=t_POL || typ(f)!=t_POL || gcmp0(a)) err(typeer,"factmod9");
@@ -2050,7 +2037,6 @@ factmod9(GEN f, GEN pp, GEN a)
   xmod = cgetg(3,t_POLMOD);
   X = gmul(polx[vf],unfq);
   xmod[2] = (long)X;
-  munfq = gneg(unfq);
   qq=gpuigs(pp,lgef(a)-3);
   m = addii(qq,pp);
   e = nbfact = 1;
@@ -2097,8 +2083,7 @@ factmod9(GEN f, GEN pp, GEN a)
       j = nbfact+dg/d;
 
       t[nbfact] = g;
-      q = shifti(subis(pd,1),-1);
-      split9(m,t+nbfact,d,pp,q,munfq,qq,a,S);
+      split9(m,t+nbfact,d,pp,qq,a,S);
       for (; nbfact<j; nbfact++) ex[nbfact]=e;
       du -= dg;
       u = gdeuc(u,g);
