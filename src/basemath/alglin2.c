@@ -586,15 +586,17 @@ assmat(GEN x)
       p1[j] = (j==(i+1))? un: zero;
   }
   p1=cgetg(lx,t_COL); y[i]=(long)p1;
-  if (gcmp1((GEN) x[lx+1]))
+  if (gcmp1((GEN)x[lx+1]))
     for (j=1; j<lx; j++)
       p1[j] = lneg((GEN)x[j+1]);
   else
   {
-    p2 = (GEN)x[lx+1]; gnegz(p2,p2);
+    gpmem_t av = avma;
+    p2 = gclone(gneg((GEN)x[lx+1]));
+    avma = av;
     for (j=1; j<lx; j++)
       p1[j] = ldiv((GEN)x[j+1],p2);
-    gnegz(p2,p2);
+    gunclone(p2);
   }
   return y;
 }

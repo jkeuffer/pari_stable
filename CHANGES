@@ -99,6 +99,7 @@ MSo44- [gp: \x] missing 'break' statement in escape()
    46- [gp:] memory leak when assigning to multidimensional arrays (x[i][j]=1)
    47- added user-friendly error message if Configure not run properly + fix
        INSTALL.tex about make gp.dbg / gp.prf
+   48- matcompanion(x*y) --> weird error
 
   Changed
     1- remove most global variables from gp.c (put them in struct gp_data).
