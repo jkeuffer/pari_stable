@@ -32,7 +32,6 @@ extern GEN galoisbig(GEN x, long prec);
 extern GEN lllfp_marked(int M, GEN x, long D, long flag, long prec, int gram);
 extern GEN lllint_marked(long M, GEN x, long D, int g, GEN *h, GEN *fl, GEN *B);
 extern GEN mulmat_pol(GEN A, GEN x);
-extern ulong smulss(ulong x, ulong y, ulong *rem);
 
 void
 checkrnf(GEN rnf)
@@ -1617,7 +1616,7 @@ _polred(GEN x, GEN a, GEN *pta, FP_chk_fun *CHECK)
   for (i=1; i<l; i++)
   {
     if (DEBUGLEVEL>2) { fprintferr("i = %ld\n",i); flusherr(); }
-    ch = QX_caract(x, (GEN)a[i], v);
+    ch = ZX_caract(x, (GEN)a[i], v);
     if (CHECK)
     {
       ch = CHECK->f(CHECK->data, ch);
@@ -1689,23 +1688,17 @@ GEN
 polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK)
 { return allpolred(x,flag,NULL,NULL,CHECK); }
 GEN
-polred(GEN x)
-{ return polred0(x, 0, NULL); }
+polred(GEN x) { return polred0(x, 0, NULL); }
 GEN
-smallpolred(GEN x)
-{ return polred0(x, red_PARTIAL, NULL); }
+smallpolred(GEN x) { return polred0(x, red_PARTIAL, NULL); }
 GEN
-factoredpolred(GEN x, GEN fa)
-{ return polred0(x, 0, fa); }
+factoredpolred(GEN x, GEN fa) { return polred0(x, 0, fa); }
 GEN
-polred2(GEN x)
-{ return polred0(x, red_ORIG, NULL); }
+polred2(GEN x) { return polred0(x, red_ORIG, NULL); }
 GEN
-smallpolred2(GEN x)
-{ return polred0(x, red_PARTIAL|red_ORIG, NULL); }
+smallpolred2(GEN x) { return polred0(x, red_PARTIAL|red_ORIG, NULL); }
 GEN
-factoredpolred2(GEN x, GEN fa)
-{ return polred0(x, red_PARTIAL, fa); }
+factoredpolred2(GEN x, GEN fa) { return polred0(x, red_PARTIAL, fa); }
 
 /********************************************************************/
 /**                                                                **/
