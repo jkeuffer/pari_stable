@@ -2157,7 +2157,7 @@ file_input(Buffer *b, char **s0, FILE *file, int TeXmacs)
     s = b->buf + used;
     if (! fgets(s, left, file)) return first? NULL: *s0; /* EOF */
     ls = strlen(s); first = 0;
-    if (ls < left || s[ls-1] == '\n') return *s0; /* \n */
+    if (ls+1 < left || s[ls-1] == '\n') return *s0; /* \n */
     used += ls;
   }
 }
