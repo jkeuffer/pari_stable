@@ -62,6 +62,7 @@ BA 11- [hi-res plot: fltk] line plotting was broken
    15- typo in resmod2n [ missing (ulong) typecast ] -> issquare((2^64+1)^2)=0
 BA 16- galoisinit() could fail to find a polynomial defining the fixed field.
    17- elllseries had an apparent singularity at s = 2 [ loss of accuracy ]
+   18- gcoeff, gmael & their variants were not lvalues.
 
   Changed
     1- increased maximum binary exponent for t_REAL, and maximum GEN length

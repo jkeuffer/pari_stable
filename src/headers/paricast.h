@@ -24,14 +24,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define mael5(ma,x1,x2,x3,x4,x5) (\
   ((GEN) mael4((ma),(x1),(x2),(x3),(x4))) [x5] \
 )
-#define gmael (GEN) mael
-#define gmael2 (GEN) mael
-#define gmael3 (GEN) mael3
-#define gmael4 (GEN) mael4
-#define gmael5 (GEN) mael5
+#define gmael1(m,x1)             (((GEN*)    (m))[x1])
+#define gmael2(m,x1,x2)          (((GEN**)   (m))[x1][x2])
+#define gmael3(m,x1,x2,x3)       (((GEN***)  (m))[x1][x2][x3])
+#define gmael4(m,x1,x2,x3,x4)    (((GEN****) (m))[x1][x2][x3][x4])
+#define gmael5(m,x1,x2,x3,x4,x5) (((GEN*****)(m))[x1][x2][x3][x4][x5])
+#define gmael gmael2
+#define gel   gmael1
 
 #define coeff(a,i,j)  ( ( (GEN) ( (GEN) (a))[j]) [i])
-#define gcoeff(a,i,j) ((GEN)coeff((a),(i),(j)))
+#define gcoeff(a,i,j) (((GEN**)(a))[j][i])
 
 #define labsi   (long)absi
 #define labsr   (long)absr

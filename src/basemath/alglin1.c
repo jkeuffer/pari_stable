@@ -56,8 +56,8 @@ gtrans_i(GEN x)
       dx=lg(x[1]); y=cgetg(dx,tx);
       for (i=1; i<dx; i++)
       {
-	p1=cgetg(lx,t_COL); y[i]=(long)p1;
-	for (j=1; j<lx; j++) p1[j]=coeff(x,i,j);
+	p1=cgetg(lx,t_COL); gel(y, i) = p1;
+	for (j=1; j<lx; j++) gel(p1, j) = gcoeff(x,i,j);
       }
       break;
 
@@ -486,7 +486,7 @@ row(GEN A, long x0)
 {
   long i, lB = lg(A);
   GEN B  = cgetg(lB, t_VEC);
-  for (i=1; i<lB; i++) B[i] = coeff(A, x0, i);
+  for (i=1; i<lB; i++) gel(B, i) = gcoeff(A, x0, i);
   return B;
 }
 
@@ -496,7 +496,7 @@ row_i(GEN A, long x0, long x1, long x2)
 {
   long i, lB = x2 - x1 + 2;
   GEN B  = cgetg(lB, t_VEC);
-  for (i=x1; i<=x2; i++) B[i] = coeff(A, x0, i);
+  for (i=x1; i<=x2; i++) gel(B, i) = gcoeff(A, x0, i);
   return B;
 }
 
@@ -505,7 +505,7 @@ vecextract_p(GEN A, GEN p)
 {
   long i,lB = lg(p);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) B[i] = A[p[i]];
+  for (i=1; i<lB; i++) gel(B, i) = gel(A, p[i]);
   return B;
 }
 
@@ -514,7 +514,7 @@ rowextract_p(GEN A, GEN p)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) B[i] = (long)vecextract_p((GEN)A[i],p);
+  for (i=1; i<lB; i++) gel(B, i) = vecextract_p(gel(A, i), p);
   return B;
 }
 
@@ -668,9 +668,8 @@ gscalmat_proto(GEN z, GEN myzero, long n, int flag)
   if (flag) z = (flag==1)? stoi((long)z): gcopy(z);
   for (i=1; i<=n; i++)
   {
-    y[i]=lgetg(n+1,t_COL);
-    for (j=1; j<=n; j++)
-      coeff(y,j,i) = (i==j)? (long)z: (long)myzero;
+    y[i] = lgetg(n+1,t_COL);
+    for (j=1; j<=n; j++) gcoeff(y,j,i) = (i==j)? z: myzero;
   }
   return y;
 }
@@ -756,7 +755,7 @@ gtomat(GEN x)
           y = cgetg(h, t_MAT);
           for (j=1 ; j<h; j++) {
             y[j] = lgetg(lx, t_COL);
-            for (i=1; i<lx; i++) coeff(y,i,j) = lcopy(gmael(x,i,j));
+            for (i=1; i<lx; i++) gcoeff(y,i,j) = gcopy(gmael(x,i,j));
           }
           return y;
         }
@@ -861,7 +860,7 @@ matmultodiagonal(GEN A, GEN B)
   {
     GEN z = gzero;
     for (j=1; j<lA; j++) z = gadd(z, gmul(gcoeff(A,i,j),gcoeff(B,j,i)));
-    coeff(y,i,i) = (long)z;
+    gcoeff(y,i,i) = z;
   }
   return y;
 }
@@ -872,7 +871,7 @@ mattodiagonal_i(GEN m)
 {
   long i, lx = lg(m);
   GEN y = cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) y[i] = coeff(m,i,i);
+  for (i=1; i<lx; i++) gel(y, i) = gcoeff(m,i,i);
   return y;
 }
 
@@ -1116,7 +1115,7 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
 }
 
 typedef ulong* uGEN;
-#define ucoeff(a,i,j)  ( ( (uGEN) ( (GEN) (a))[j]) [i])
+#define ucoeff(a,i,j)  (((ulong**)(a))[j][i])
 
 /* assume 0 <= a[i,j], b[i], invpiv < p */
 static uGEN
@@ -1287,8 +1286,8 @@ gauss_intern(GEN a, GEN b)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
+      for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
       p = gcoeff(a,i,i);
     }
     if (i == aco) break;
@@ -1355,8 +1354,8 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
+      for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
     }
     if (i == aco) break;
 
@@ -1399,7 +1398,7 @@ Flm_id(long n)
   GEN y = cgetg(n+1,t_MAT);
   long i;
   if (n < 0) err(talker,"negative size in Flm_id");
-  for (i=1; i<=n; i++) { y[i] = (long)vecsmall_const(n, 0); coeff(y, i,i) = 1; }
+  for (i=1; i<=n; i++) { gel(y,i) = vecsmall_const(n, 0); ucoeff(y, i,i) = 1; }
   return y;
 }
 
@@ -1445,7 +1444,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     for (k = i; k <= li; k++)
     {
       piv = remii(gcoeff(a,k,i), p);
-      coeff(a,k,i) = (long)piv;
+      gcoeff(a,k,i) = piv;
       if (signe(piv)) break;
     }
     if (k > li) return NULL;
@@ -1454,16 +1453,16 @@ FpM_gauss(GEN a, GEN b, GEN p)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
+      for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
     }
     if (i == aco) break;
 
     minvpiv = negi(invpiv);
     for (k=i+1; k<=li; k++)
     {
-      coeff(a,k,i) = lremii(gcoeff(a,k,i), p);
-      m = gcoeff(a,k,i); coeff(a,k,i) = zero;
+      gcoeff(a,k,i) = remii(gcoeff(a,k,i), p);
+      m = gcoeff(a,k,i); gcoeff(a,k,i) = gzero;
       if (signe(m))
       {
 	
@@ -1506,7 +1505,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     for (k = i; k <= li; k++)
     {
       piv = Fq_red(gcoeff(a,k,i), T,p);
-      coeff(a,k,i) = (long)piv;
+      gcoeff(a,k,i) = piv;
       if (signe(piv)) break;
     }
     if (k > li) return NULL;
@@ -1515,16 +1514,16 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=aco; j++) lswap(coeff(a,i,j), coeff(a,k,j));
-      for (j=1; j<=bco; j++) lswap(coeff(b,i,j), coeff(b,k,j));
+      for (j=i; j<=aco; j++) swap(gcoeff(a,i,j), gcoeff(a,k,j));
+      for (j=1; j<=bco; j++) swap(gcoeff(b,i,j), gcoeff(b,k,j));
       piv = gcoeff(a,i,i);
     }
     if (i == aco) break;
 
     for (k=i+1; k<=li; k++)
     {
-      coeff(a,k,i) = (long)Fq_red(gcoeff(a,k,i), T,p);
-      m = gcoeff(a,k,i); coeff(a,k,i) = zero;
+      gcoeff(a,k,i) = Fq_red(gcoeff(a,k,i), T,p);
+      m = gcoeff(a,k,i); gcoeff(a,k,i) = gzero;
       if (signe(m))
       {
 	m = Fq_neg(Fq_mul(m, invpiv, T,p), T, p);
@@ -1681,9 +1680,9 @@ detint(GEN x)
 	        p1 = addii(mulii(gcoeff(pass,i,j), piv),
 	 	 	   mulii(gcoeff(pass,t,j), p2));
                 if (rg>1) p1 = diviiexact(p1,pivprec);
-	        coeff(pass,i,j) = (long)p1;
+	        gcoeff(pass,i,j) = p1;
 	      }
-	    coeff(pass,i,t) = (long)p2;
+	    gcoeff(pass,i,t) = p2;
 	  }
       }
     }
@@ -1699,57 +1698,53 @@ detint(GEN x)
 }
 
 static void
-gerepile_gauss_ker(GEN x, long k, long t, pari_sp av)
+gerepile_mat(pari_sp av, pari_sp tetpil, GEN x, long k, long m, long n, long t)
 {
-  pari_sp tetpil = avma, A;
-  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
+  pari_sp A;
+  long u, i;
   size_t dec;
 
-  if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
-  for (u=t+1; u<=m; u++) copyifstack(coeff(x,u,k), coeff(x,u,k));
-  for (i=k+1; i<=n; i++)
-    for (u=1; u<=m; u++) copyifstack(coeff(x,u,i), coeff(x,u,i));
-
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
+
   for (u=t+1; u<=m; u++)
   {
-    A=(pari_sp)coeff(x,u,k);
-    if (A<av && A>=bot) coeff(x,u,k)+=dec;
+    A = (pari_sp)coeff(x,u,k);
+    if (A < av && A >= bot) coeff(x,u,k) += dec;
   }
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
     {
-      A=(pari_sp)coeff(x,u,i);
-      if (A<av && A>=bot) coeff(x,u,i)+=dec;
+      A = (pari_sp)coeff(x,u,i);
+      if (A < av && A >= bot) coeff(x,u,i) += dec;
     }
+}
+
+static void
+gerepile_gauss_ker(GEN x, long k, long t, pari_sp av)
+{
+  pari_sp tetpil = avma;
+  long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
+
+  if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
+  for (u=t+1; u<=m; u++) gcopyifstack(gcoeff(x,u,k), gcoeff(x,u,k));
+  for (i=k+1; i<=n; i++)
+    for (u=1; u<=m; u++) gcopyifstack(gcoeff(x,u,i), gcoeff(x,u,i));
+  gerepile_mat(av,tetpil,x,k,m,n,t);
 }
 
 static void
 gerepile_gauss_FpM_ker(GEN x, GEN p, long k, long t, pari_sp av)
 {
-  pari_sp tetpil = avma, A;
+  pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
-  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
-    if (isonstack(coeff(x,u,k))) coeff(x,u,k) = lmodii(gcoeff(x,u,k),p);
+    if (isonstack(gcoeff(x,u,k))) gcoeff(x,u,k) = modii(gcoeff(x,u,k),p);
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
-      if (isonstack(coeff(x,u,i))) coeff(x,u,i) = lmodii(gcoeff(x,u,i),p);
-
-  (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
-  for (u=t+1; u<=m; u++)
-  {
-    A=(pari_sp)coeff(x,u,k);
-    if (A<av && A>=bot) coeff(x,u,k)+=dec;
-  }
-  for (i=k+1; i<=n; i++)
-    for (u=1; u<=m; u++)
-    {
-      A=(pari_sp)coeff(x,u,i);
-      if (A<av && A>=bot) coeff(x,u,i)+=dec;
-    }
+      if (isonstack(gcoeff(x,u,i))) gcoeff(x,u,i) = modii(gcoeff(x,u,i),p);
+  gerepile_mat(av,tetpil,x,k,m,n,t);
 }
 
 /* special gerepile for huge matrices */
@@ -1763,10 +1758,10 @@ gerepile_gauss(GEN x,long k,long t,pari_sp av, long j, GEN c)
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
-    if (u==j || !c[u]) copyifstack(coeff(x,u,k), coeff(x,u,k));
+    if (u==j || !c[u]) gcopyifstack(gcoeff(x,u,k), gcoeff(x,u,k));
   for (u=1; u<=m; u++)
     if (u==j || !c[u])
-      for (i=k+1; i<=n; i++) copyifstack(coeff(x,u,i), coeff(x,u,i));
+      for (i=k+1; i<=n; i++) gcopyifstack(gcoeff(x,u,i), gcoeff(x,u,i));
 
   (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
   for (u=t+1; u<=m; u++)
@@ -1867,7 +1862,7 @@ keri(GEN x)
     {
       r++; l[k] = 0;
       for(j=1; j<k; j++)
-	if (l[j]) coeff(x,l[j],k) = lclone(gcoeff(x,l[j],k));
+	if (l[j]) gcoeff(x,l[j],k) = gclone(gcoeff(x,l[j],k));
       pp[k]=lclone(p);
     }
     else
@@ -1883,7 +1878,7 @@ keri(GEN x)
 	  {
 	    pari_sp av1 = avma;
 	    p1 = subii(mulii(p,gcoeff(x,t,i)), mulii(q,gcoeff(x,j,i)));
-	    coeff(x,t,i) = lpileuptoint(av1, diviiexact(p1,p0));
+	    gcoeff(x,t,i) = gerepileuptoint(av1, diviiexact(p1,p0));
 	  }
 	  if (low_stack(lim, stack_lim(av,1)))
           {
@@ -1995,7 +1990,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
   if (a)
   {
     if (n != m) err(consister,"gauss_pivot_ker");
-    for (k=1; k<=n; k++) coeff(x,k,k) = lsub(gcoeff(x,k,k), a);
+    for (k=1; k<=n; k++) gcoeff(x,k,k) = gsub(gcoeff(x,k,k), a);
   }
   get_pivot = use_maximal_pivot(x)? &gauss_get_pivot_max: &gauss_get_pivot_NZ;
   c=cgetg(m+1,t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
@@ -2008,21 +2003,21 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
     {
       r++; d[k]=0;
       for(j=1; j<k; j++)
-        if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
+        if (d[j]) gcoeff(x,d[j],k) = gclone(gcoeff(x,d[j],k));
     }
     else
     { /* pivot for column k on row j */
       c[j]=k; d[k]=j; p = gdiv(gminusone,gcoeff(x,j,k));
-      coeff(x,j,k) = (long)gminusone;
+      gcoeff(x,j,k) = gminusone;
       /* x[j,] /= - x[j,k] */
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = lmul(p,gcoeff(x,j,i));
+	gcoeff(x,j,i) = gmul(p,gcoeff(x,j,i));
       for (t=1; t<=m; t++)
 	if (t!=j)
 	{ /* x[t,] -= 1 / x[j,k] x[j,] */
-	  p=gcoeff(x,t,k); coeff(x,t,k)=zero;
+	  p = gcoeff(x,t,k); gcoeff(x,t,k) = gzero;
 	  for (i=k+1; i<=n; i++)
-	    coeff(x,t,i) = ladd(gcoeff(x,t,i),gmul(p,gcoeff(x,j,i)));
+	    gcoeff(x,t,i) = gadd(gcoeff(x,t,i),gmul(p,gcoeff(x,j,i)));
           if (low_stack(lim, stack_lim(av,1)))
             gerepile_gauss_ker(x,k,t,av);
 	}
@@ -2071,18 +2066,18 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
     {
       c[j]=k; d[d0[k]]=j; p = gdiv(gminusone, gcoeff(x,j,k));
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = lmul(p,gcoeff(x,j,i));
+	gcoeff(x,j,i) = gmul(p,gcoeff(x,j,i));
 
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
-          p=gcoeff(x,t,k); coeff(x,t,k)=zero;
+          p = gcoeff(x,t,k); gcoeff(x,t,k) = gzero;
           for (i=k+1; i<=n; i++)
-            coeff(x,t,i) = ladd(gcoeff(x,t,i), gmul(p,gcoeff(x,j,i)));
+            gcoeff(x,t,i) = gadd(gcoeff(x,t,i), gmul(p,gcoeff(x,j,i)));
           if (low_stack(lim, stack_lim(av,1)))
             gerepile_gauss(x,k,t,av,j,c);
         }
-      for (i=k; i<=n; i++) coeff(x,j,i) = zero; /* dummy */
+      for (i=k; i<=n; i++) gcoeff(x,j,i) = gzero; /* dummy */
     }
   }
   *dd=d; *rr=r;
@@ -2453,7 +2448,7 @@ FpM_mul(GEN x, GEN y, GEN p)
       long k;
       for (k=2; k<lx; k++)
 	p1 = addii(p1, mulii(gcoeff(x,i,k),gcoeff(y,k,j)));
-      coeff(z,i,j) = lpileuptoint(av, p?modii(p1,p):p1);
+      gcoeff(z,i,j) = gerepileuptoint(av, p?modii(p1,p):p1);
     }
   }
   return z;
@@ -2475,7 +2470,7 @@ FpC_FpV_mul(GEN x, GEN y, GEN p)
     {
       pari_sp av = avma;
       GEN p1 = mulii((GEN)x[i],(GEN)y[j]);
-      coeff(z,i,j) = p?lpileuptoint(av,modii(p1,p)):(long)p1;
+      gcoeff(z,i,j) = p? gerepileuptoint(av,modii(p1,p)): p1;
     }
   }
   return z;
@@ -2527,10 +2522,10 @@ Flm_mul(GEN x, GEN y, ulong p)
         ulong p1 = 0;
         for (k=1; k<lx; k++)
         {
-          p1 += coeff(x,i,k) * coeff(y,k,j);
+          p1 += ucoeff(x,i,k) * ucoeff(y,k,j);
           if (p1 & HIGHBIT) p1 %= p;
         }
-        coeff(z,i,j) = p1 % p;
+        ucoeff(z,i,j) = p1 % p;
       }
     }
     else
@@ -2539,8 +2534,8 @@ Flm_mul(GEN x, GEN y, ulong p)
       {
         ulong p1 = 0;
         for (k=1; k<lx; k++)
-          p1 = Fl_add(p1,Fl_mul(coeff(x,i,k),coeff(y,k,j),p),p);
-        coeff(z,i,j) = p1;
+          p1 = Fl_add(p1,Fl_mul(ucoeff(x,i,k), ucoeff(y,k,j),p),p);
+        ucoeff(z,i,j) = p1;
       }
     }
   }
@@ -2563,7 +2558,7 @@ Flm_Flv_mul(GEN x, GEN y, ulong p)
       ulong p1 = 0;
       for (k=1; k<lx; k++)
       {
-        p1 += coeff(x,i,k) * y[k];
+        p1 += ucoeff(x,i,k) * y[k];
         if (p1 & HIGHBIT) p1 %= p;
       }
       z[i] = p1 % p;
@@ -2576,7 +2571,7 @@ Flm_Flv_mul(GEN x, GEN y, ulong p)
       ulong p1 = 0;
       for (k=1; k<lx; k++)
       {
-        ulong t = Fl_mul(coeff(x,i,k), y[k], p);
+        ulong t = Fl_mul(ucoeff(x,i,k), y[k], p);
         p1 = Fl_add(p1, t, p);
       }
       z[i] = p1;
@@ -2612,7 +2607,7 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
     {
       if (deplin) {
         c = cgetg(n+1, t_VECSMALL);
-        for (i=1; i<k; i++) c[i] = coeff(x,d[i],k) % p;
+        for (i=1; i<k; i++) c[i] = ucoeff(x,d[i],k) % p;
         c[k] = 1; for (i=k+1; i<=n; i++) c[i] = 0;
         return c;
       }
@@ -2694,8 +2689,8 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = lmodii(gcoeff(x,j,k), p);
-        if (signe(coeff(x,j,k))) break;
+        gcoeff(x,j,k) = modii(gcoeff(x,j,k), p);
+        if (signe(gcoeff(x,j,k))) break;
       }
     if (j>m)
     {
@@ -2707,14 +2702,14 @@ FpM_ker_i(GEN x, GEN p, long deplin)
       }
       r++; d[k]=0;
       for(j=1; j<k; j++)
-        if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
+        if (d[j]) gcoeff(x,d[j],k) = gclone(gcoeff(x,d[j],k));
     }
     else
     {
       c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
-      coeff(x,j,k) = (long)gminusone;
+      gcoeff(x,j,k) = gminusone;
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = lmodii(mulii(piv,gcoeff(x,j,i)), p);
+	gcoeff(x,j,i) = modii(mulii(piv,gcoeff(x,j,i)), p);
       for (t=1; t<=m; t++)
       {
 	if (t==j) continue;
@@ -2722,9 +2717,9 @@ FpM_ker_i(GEN x, GEN p, long deplin)
         piv = modii(gcoeff(x,t,k), p);
         if (!signe(piv)) continue;
 
-        coeff(x,t,k)=zero;
+        gcoeff(x,t,k) = gzero;
         for (i=k+1; i<=n; i++)
-          coeff(x,t,i) = laddii(gcoeff(x,t,i),mulii(piv,gcoeff(x,j,i)));
+          gcoeff(x,t,i) = addii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
         if (low_stack(lim, stack_lim(av,1)))
           gerepile_gauss_FpM_ker(x,p,k,t,av);
       }
@@ -2794,27 +2789,28 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = ((ulong) coeff(x,j,k)) % p;
-        if (coeff(x,j,k)) break;
+        ucoeff(x,j,k) %= p;
+        if (ucoeff(x,j,k)) break;
       }
     if (j>m) { r++; d[k]=0; }
     else
     {
-      c[j]=k; d[k]=j; piv = p - Fl_inv(coeff(x,j,k), p);
+      c[j]=k; d[k]=j; piv = p - Fl_inv(ucoeff(x,j,k), p);
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = Fl_mul(piv,coeff(x,j,i), p);
+	ucoeff(x,j,i) = Fl_mul(piv, ucoeff(x,j,i), p);
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
-          piv=coeff(x,t,k);
+          piv = ucoeff(x,t,k);
           if (piv)
           {
-            coeff(x,t,k)=0;
+            ucoeff(x,t,k) = 0;
             for (i=k+1; i<=n; i++)
-              coeff(x,t,i) = Fl_add(coeff(x,t,i), Fl_mul(piv,coeff(x,j,i),p),p);
+              ucoeff(x,t,i) = Fl_add(ucoeff(x,t,i),
+                                     Fl_mul(piv,ucoeff(x,j,i),p),p);
           }
         }
-      for (i=k; i<=n; i++) coeff(x,j,i) = 0; /* dummy */
+      for (i=k; i<=n; i++) ucoeff(x,j,i) = 0; /* dummy */
     }
   }
   avma = (pari_sp) d;
@@ -2841,29 +2837,29 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = lmodii(gcoeff(x,j,k), p);
-        if (signe(coeff(x,j,k))) break;
+        gcoeff(x,j,k) = modii(gcoeff(x,j,k), p);
+        if (signe(gcoeff(x,j,k))) break;
       }
     if (j>m) { r++; d[k]=0; }
     else
     {
       c[j]=k; d[k]=j; piv = negi(Fp_inv(gcoeff(x,j,k), p));
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = lmodii(mulii(piv,gcoeff(x,j,i)), p);
+	gcoeff(x,j,i) = modii(mulii(piv,gcoeff(x,j,i)), p);
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
           piv=gcoeff(x,t,k);
           if (signe(piv))
           {
-            coeff(x,t,k)=zero;
+            gcoeff(x,t,k) = gzero;
             for (i=k+1; i<=n; i++)
-              coeff(x,t,i) = laddii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
+              gcoeff(x,t,i) = addii(gcoeff(x,t,i), mulii(piv,gcoeff(x,j,i)));
             if (low_stack(lim, stack_lim(av,1)))
               gerepile_gauss(x,k,t,av,j,c);
           }
         }
-      for (i=k; i<=n; i++) coeff(x,j,i) = zero; /* dummy */
+      for (i=k; i<=n; i++) gcoeff(x,j,i) = gzero; /* dummy */
     }
   }
   *dd=d; *rr=r;
@@ -2887,29 +2883,29 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = (long)Fq_red(gcoeff(x,j,k), T,p);
-        if (signe(coeff(x,j,k))) break;
+        gcoeff(x,j,k) = Fq_red(gcoeff(x,j,k), T,p);
+        if (signe(gcoeff(x,j,k))) break;
       }
     if (j>m) { r++; d[k]=0; }
     else
     {
       c[j]=k; d[k]=j; piv = gneg(Fq_inv(gcoeff(x,j,k), T,p));
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = (long)Fq_mul(piv,gcoeff(x,j,i), T, p);
+	gcoeff(x,j,i) = Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
         if (!c[t]) /* no pivot on that line yet */
         {
           piv=gcoeff(x,t,k);
           if (signe(piv))
           {
-            coeff(x,t,k)=zero;
+            gcoeff(x,t,k) = gzero;
             for (i=k+1; i<=n; i++)
-              coeff(x,t,i) = ladd(gcoeff(x,t,i), gmul(piv,gcoeff(x,j,i)));
+              gcoeff(x,t,i) = gadd(gcoeff(x,t,i), gmul(piv,gcoeff(x,j,i)));
             if (low_stack(lim, stack_lim(av,1)))
               gerepile_gauss(x,k,t,av,j,c);
           }
         }
-      for (i=k; i<=n; i++) coeff(x,j,i) = zero; /* dummy */
+      for (i=k; i<=n; i++) gcoeff(x,j,i) = gzero; /* dummy */
     }
   }
   *dd=d; *rr=r;
@@ -3010,61 +3006,31 @@ FpM_invimage(GEN m, GEN v, GEN p)
 static void
 Fq_gerepile_gauss_ker(GEN x, GEN T, GEN p, long k, long t, pari_sp av)
 {
-  pari_sp tetpil = avma,A;
+  pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
-  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
-    if (isonstack(coeff(x,u,k))) 
-      coeff(x,u,k) = (long) Fq_red(gcoeff(x,u,k),T,p);
+    if (isonstack(gcoeff(x,u,k))) gcoeff(x,u,k) = Fq_red(gcoeff(x,u,k),T,p);
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
-      if (isonstack(coeff(x,u,i))) 
-        coeff(x,u,i) = (long) Fq_red(gcoeff(x,u,i),T,p);
-
-  (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
-  for (u=t+1; u<=m; u++)
-  {
-    A=(pari_sp)coeff(x,u,k);
-    if (A<av && A>=bot) coeff(x,u,k)+=dec;
-  }
-  for (i=k+1; i<=n; i++)
-    for (u=1; u<=m; u++)
-    {
-      A=(pari_sp)coeff(x,u,i);
-      if (A<av && A>=bot) coeff(x,u,i)+=dec;
-    }
+      if (isonstack(gcoeff(x,u,i))) gcoeff(x,u,i) = Fq_red(gcoeff(x,u,i),T,p);
+  gerepile_mat(av,tetpil,x,k,m,n,t);
 }
 
 static void
 Flxq_gerepile_gauss_ker(GEN x, GEN T, ulong p, long k, long t, pari_sp av)
 {
-  pari_sp tetpil = avma,A;
+  pari_sp tetpil = avma;
   long u,i, n = lg(x)-1, m = n? lg(x[1])-1: 0;
-  size_t dec;
 
   if (DEBUGMEM > 1) err(warnmem,"gauss_pivot_ker. k=%ld, n=%ld",k,n);
   for (u=t+1; u<=m; u++)
-    if (isonstack(coeff(x,u,k))) 
-      coeff(x,u,k) = (long) Flx_rem(gcoeff(x,u,k),T,p);
+    if (isonstack(gcoeff(x,u,k))) gcoeff(x,u,k) = Flx_rem(gcoeff(x,u,k),T,p);
   for (i=k+1; i<=n; i++)
     for (u=1; u<=m; u++)
-      if (isonstack(coeff(x,u,i))) 
-        coeff(x,u,i) = (long) Flx_rem(gcoeff(x,u,i),T,p);
-
-  (void)gerepile(av,tetpil,NULL); dec = av-tetpil;
-  for (u=t+1; u<=m; u++)
-  {
-    A=(pari_sp)coeff(x,u,k);
-    if (A<av && A>=bot) coeff(x,u,k)+=dec;
-  }
-  for (i=k+1; i<=n; i++)
-    for (u=1; u<=m; u++)
-    {
-      A=(pari_sp)coeff(x,u,i);
-      if (A<av && A>=bot) coeff(x,u,i)+=dec;
-    }
+      if (isonstack(gcoeff(x,u,i))) gcoeff(x,u,i) = Flx_rem(gcoeff(x,u,i),T,p);
+  gerepile_mat(av,tetpil,x,k,m,n,t);
 }
 
 static GEN
@@ -3098,8 +3064,8 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = (long) Fq_red(gcoeff(x,j,k), T, p);
-        if (signe(coeff(x,j,k))) break;
+        gcoeff(x,j,k) = Fq_red(gcoeff(x,j,k), T, p);
+        if (signe(gcoeff(x,j,k))) break;
       }
     if (j>m)
     {
@@ -3111,14 +3077,14 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
       }
       r++; d[k]=0;
       for(j=1; j<k; j++)
-        if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
+        if (d[j]) gcoeff(x,d[j],k) = gclone(gcoeff(x,d[j],k));
     }
     else
     {
       c[j]=k; d[k]=j; piv = Fq_neg_inv(gcoeff(x,j,k), T, p);
-      coeff(x,j,k) = (long)gminusone;
+      gcoeff(x,j,k) = gminusone;
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = (long) Fq_mul(piv,gcoeff(x,j,i), T, p);
+	gcoeff(x,j,i) = Fq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
       {
         if (t==j) continue;
@@ -3127,9 +3093,9 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
         /*Assume signe work for both t_POL and t_INT*/
         if (!signe(piv)) continue;
 
-        coeff(x,t,k)=zero;
+        gcoeff(x,t,k) = gzero;
         for (i=k+1; i<=n; i++)
-          coeff(x,t,i) = (long)Fq_add(gcoeff(x,t,i),Fq_mul(piv,gcoeff(x,j,i), T, p), T, p);
+          gcoeff(x,t,i) = Fq_add(gcoeff(x,t,i), Fq_mul(piv,gcoeff(x,j,i), T, p), T, p);
         if (low_stack(lim, stack_lim(av,1)))
           Fq_gerepile_gauss_ker(x,T,p,k,t,av);
       }
@@ -3184,8 +3150,8 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
     for (j=1; j<=m; j++)
       if (!c[j])
       {
-        coeff(x,j,k) = (long) Flx_rem(gcoeff(x,j,k), T, p);
-        if (lgpol(coeff(x,j,k))) break;
+        gcoeff(x,j,k) = Flx_rem(gcoeff(x,j,k), T, p);
+        if (lgpol(gcoeff(x,j,k))) break;
       }
     if (j>m)
     {
@@ -3198,14 +3164,14 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
       }
       r++; d[k]=0;
       for(j=1; j<k; j++)
-        if (d[j]) coeff(x,d[j],k) = lclone(gcoeff(x,d[j],k));
+        if (d[j]) gcoeff(x,d[j],k) = gclone(gcoeff(x,d[j],k));
     }
     else
     {
       c[j]=k; d[k]=j; piv = Flx_neg(Flxq_inv(gcoeff(x,j,k), T, p), p);
-      coeff(x,j,k) = (long)mun;
+      gcoeff(x,j,k) = mun;
       for (i=k+1; i<=n; i++)
-	coeff(x,j,i) = (long) Flxq_mul(piv,gcoeff(x,j,i), T, p);
+	gcoeff(x,j,i) = Flxq_mul(piv,gcoeff(x,j,i), T, p);
       for (t=1; t<=m; t++)
       {
         if (t==j) continue;
@@ -3213,9 +3179,9 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
         piv = Flx_rem(gcoeff(x,t,k), T, p);
         if (!lgpol(piv)) continue;
 
-        coeff(x,t,k) = (long) zero_Flx(vs);
+        gcoeff(x,t,k) = zero_Flx(vs);
         for (i=k+1; i<=n; i++)
-          coeff(x,t,i) = (long)Flx_add(gcoeff(x,t,i),
+          gcoeff(x,t,i) = Flx_add(gcoeff(x,t,i),
               Flxq_mul(piv,gcoeff(x,j,i), T, p), p);
         if (low_stack(lim, stack_lim(av,1)))
           Flxq_gerepile_gauss_ker(x,T,p,k,t,av);
@@ -3362,7 +3328,7 @@ det_simple_gauss(GEN a, int inexact)
       {
 	m = gneg_i(gdiv(m,p));
 	for (j=i+1; j<=nbco; j++)
-	  coeff(a,j,k) = ladd(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
+	  gcoeff(a,j,k) = gadd(gcoeff(a,j,k), gmul(m,gcoeff(a,j,i)));
       }
     }
   }
