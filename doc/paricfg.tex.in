@@ -1,5 +1,4 @@
 \def\vers{@version@}
-\def\miscdir{@miscdir@}
 \def\includedir{@includedir@}
 \def\libdir{@libdir@}
 \def\wwwsite{\kbd{http://pari.math.u-bordeaux.fr/}}

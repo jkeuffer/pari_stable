@@ -43,7 +43,7 @@
 #  GPXDVI: which 'xdvi' program to call (xdvi by default)
 #
 $version= "@version@";
-$miscdir= "@miscdir@";
+$datadir= "@datadir@";
 # no expanded material (@key@) below
 $wwwsite= "http://pari.math.u-bordeaux.fr/";
 $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
@@ -51,14 +51,14 @@ $docdir = $ENV{GPDOCDIR} || $ENV{GPHELP_DOCDIR};
 if (!defined $docdir) {
   # work from TOPDIR/Oarch or TOPDIR too: may be uninstalled yet;
   my $d = $0; $d =~ s,/gphelp,,;
-  for ("$miscdir", '.', '..', $d) {
+  for ("$datadir", '.', '..', $d) {
     my $t = "$_/doc";
     if (-r "$t/translations") {
       $docdir = $t;
       last;
     }
   }
-  $docdir ||= "$miscdir/doc";	# Last resort
+  $docdir ||= "$datadir/doc";	# Last resort
 }
 
 if ($docdir =~ /^\./) {
@@ -687,7 +687,6 @@ sub basic_subst
   s/([^\\])\\-/$1/g;
   s/\A\\q?quad(?![a-zA-Z])\s*/$tr{nbrk}$tr{nbrk}/;
   s|\\wwwsite|$wwwsite|g;
-  s|\\miscdir|$miscdir|g;
   s/^\\def\\.*\{\n.*\n\}//gm;
   s/\\def\\.*//g;
   s(\\footnote\s*\{?\*+\}?\s*\{\s*((?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*)\})
@@ -899,7 +898,6 @@ sub presubst {
 sub code_subst {
   my $in = shift;
   $in =~ s/\@dots\b/.../g;
-  $in =~ s/\@miscdir\b/$miscdir/g;
   if ($in =~ /\@com(.*)/)
   {
     if ($to_pod) {

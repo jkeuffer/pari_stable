@@ -22,7 +22,7 @@ paricfg.tex: paricfg.tex.in
 	sed -e 's/@version@/$version.$patch/'\\
 	    -e 's!@includedir@!$includedir!'\\
 	    -e 's!@libdir@!$libdir!'\\
-	    -e 's!@miscdir@!$miscdir!' paricfg.tex.in > \$@
+	    -e 's!@datadir@!$datadir!' paricfg.tex.in > \$@
 
 %.pdf: %.tex paricfg.tex
 	-touch $pdf; pdftex \$<; rm -f $pdf

@@ -10,7 +10,8 @@ for dir in $extract_dir_list; do
     flist=`ls $dir/*.in`
     for file in $flist; do
       sed -e "s%@perl@%$perl%g"\
-          -e "s%@miscdir@%$miscdir%g"\
+          -e "s%@emacsdir@%$emacsdir%g"\
+          -e "s%@datadir@%$datadir%g"\
           -e "s%@bindir@%$bindir%g"\
           -e "s%@includedir@%$includedir%g"\
           -e "s%@libdir@%$libdir%g"\

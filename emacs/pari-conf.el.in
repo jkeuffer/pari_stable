@@ -10,5 +10,5 @@
 (defconst gp-gphelp-dir "@bindir@/"
   "The directory where gphelp is to be found")
 
-(defconst gp-pariemacs "@miscdir@/emacs/pariemacs.txt"
+(defconst gp-pariemacs "@emacsdir/pariemacs.txt"
   "The pariemacs file")
