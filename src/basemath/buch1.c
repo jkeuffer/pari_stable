@@ -671,28 +671,40 @@ computeP2(GEN bnr, GEN la, GEN flag, long prec)
   tetpil=avma; return gerepile(av,tetpil,gcopy(P));
 }
 
+#define nexta(a) (a>0 ? -a : 1-a)
+static GEN
+do_compo(GEN x, GEN y)
+{
+  long a, ph = degree(y);
+  GEN z;
+  y = gmul(gpuigs(polx[0],ph), gsubst(y,0,gdiv(polx[MAXVARN],polx[0])));
+  for  (a = 0;; a = nexta(a))
+  {
+    if (a) x = gsubst(x, 0, gaddsg(a, polx[0]));
+    z = subres(x,y);
+    if (lgef(ggcd(z,derivpol(z))) < 4) break;
+  }
+  return gsubst(z,MAXVARN,polx[0]);
+}
+#undef nexta
+
+
 static GEN
 compocyclo(GEN nf, long m, long d, long prec)
 {
   GEN p1,p2,p3,D,res,pol4,nf4;
-  long ell,vx,ph;
+  long ell,vx;
 
   D=(GEN)nf[3];
   p1=quadhilbertimag(D, gzero);
   p2=cyclo(m,0);
-  if (d==1)
-  {
-    ph=degree(p2);
-    p2=gmul(gpuigs(polx[0],ph),gsubst(p2,0,gdiv(polx[MAXVARN],polx[0])));
-    return gsubst(subres(p1,p2),MAXVARN,polx[0]);
-  }
+  if (d==1) return do_compo(p1,p2);
+
   ell = m%2 ? m : (m>>2);
   if (!signe(addsi(ell,D)))
   {
     p2=gcoeff(nffactor(nf,p2),1,1);
-    ph=degree(p2);
-    p2=gmul(gpuigs(polx[0],ph),gsubst(p2,0,gdiv(polx[MAXVARN],polx[0])));
-    return gsubst(subres(p1,p2),MAXVARN,polx[0]);
+    return do_compo(p1,p2);
   }
   if (ell%4==3) ell= -ell;
   p3=cgetg(5,t_POL);
@@ -705,9 +717,7 @@ compocyclo(GEN nf, long m, long d, long prec)
   nf4=initalg(pol4,prec);
   p1=gcoeff(nffactor(nf4,p1),1,1);
   p2=gcoeff(nffactor(nf4,p2),1,1);
-  ph=degree(p2);
-  p2=gmul(gpuigs(polx[0],ph),gsubst(p2,0,gdiv(polx[MAXVARN],polx[0])));
-  p3=gsubst(subres(p1,p2),MAXVARN,polx[0]);
+  p3=do_compo(p1,p2);
   p1=gmodulcp(gsubst(lift((GEN)res[2]),0,polx[vx]),pol4);
   return gsubst(lift0(p3,vx),vx,p1);
 }
