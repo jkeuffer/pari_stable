@@ -1823,7 +1823,7 @@ factorpadic4(GEN f,GEN p,long prec)
                  : Decomp(p,fx,mfx,polx[v],fx,g, (pr<=mfx)? mfx+1: pr);
     if (p2)
     {
-      p2 = gerepileupto(av1,p2);
+      p2 = gerepilecopy(av1,p2);
       p1 = (GEN)p2[1];
       p2 = (GEN)p2[2];
       for (k=1; k<lg(p1); k++,j++)
