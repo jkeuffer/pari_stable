@@ -1515,23 +1515,26 @@ isunit(GEN bnf,GEN x)
 GEN
 signunits(GEN bnf)
 {
-  long i, j, R1, RU, mun;
-  pari_sp av;
-  GEN matunit,y,p1,p2,nf,pi;
+  long i, j, R1, RU;
+  GEN matunit, y, nf, mun, pi = mppi(MEDDEFAULTPREC);
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
-  matunit = (GEN)bnf[3]; RU = lg(matunit);
-  R1=itos(gmael(nf,2,1)); pi=mppi(MEDDEFAULTPREC);
-  y=cgetg(RU,t_MAT); mun = lnegi(gun);
+  matunit = (GEN)bnf[3];
+  RU = lg(matunit);
+  R1 = nf_get_r1(nf);
+  y = cgetg(RU,t_MAT);
+  mun = negi(gun);
   for (j=1; j<RU; j++)
   {
-    p1=cgetg(R1+1,t_COL); y[j]=(long)p1; av=avma;
+    GEN c = cgetg(R1+1,t_COL);
+    pari_sp av = avma;
+    y[j] = (long)c;
     for (i=1; i<=R1; i++)
     {
-      p2 = ground(gdiv(gimag(gcoeff(matunit,i,j)),pi));
-      p1[i] = mpodd(p2)? mun: un;
+      GEN p1 = ground( gdiv(gimag(gcoeff(matunit,i,j)), pi) );
+      c[i] = mpodd(p1)? (long)mun: un;
     }
-    avma=av;
+    avma = av;
   }
   return y;
 }

@@ -414,7 +414,7 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
   double bndyx;
 
   if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions\n");
-  
+
   sqrtnRHS = absisqrtn(rhs, n, prec);
   bndyx = gtodouble(gadd(sqrtnRHS, Vecmax(gabs(ro,prec))));
 
@@ -989,23 +989,26 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
   S[0]=n[1]; inext[0]=1; isintnorm_loop(0);
 }
 
+/* Look for unit of norm -1. Return 1 if it exists and set *unit, 0 otherwise */
 static long
-get_unit_1(GEN bnf, GEN pol, GEN *unit)
+get_unit_1(GEN bnf, GEN *unit)
 {
-  GEN fu;
-  long j;
+  GEN tu, v, nf = checknf(bnf);
+  long i, n = degpol(nf[7]);
 
-  if (DEBUGLEVEL > 2)
-    fprintferr("looking for a fundamental unit of norm -1\n");
+  if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
 
-  *unit = gmael3(bnf,8,4,2);  /* torsion unit */
-  if (signe( gnorm(gmodulcp(*unit,pol)) ) < 0) return 1;
-
-  fu = gmael(bnf,8,5); /* fundamental units */
-  for (j=1; j<lg(fu); j++)
+  tu = gmael3(bnf,8,4,2);
+  /* torsion unit ok iff is -1 and odd degree */
+  if (odd(n) && gcmp_1(tu)) { *unit = tu; return 1; }
+  v = signunits(bnf);
+  for (i = 1; i < lg(v); i++)
   {
-    *unit = (GEN)fu[j];
-    if (signe( gnorm(gmodulcp(*unit,pol)) ) < 0) return 1;
+    GEN s = sum((GEN)v[i], 1, lg(v[i])-1);
+    if (mpodd(s)) {
+      GEN fu = check_units(bnf, "bnfisintnorm");
+      *unit = (GEN)fu[i]; return 1;
+    }
   }
   return 0;
 }
@@ -1013,11 +1016,11 @@ get_unit_1(GEN bnf, GEN pol, GEN *unit)
 GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
-  GEN nf, pol, res, unit, x, Primes;
+  GEN nf, res, unit, x, Primes;
   long sa, i, norm_1;
   pari_sp av = avma;
 
-  bnf = checkbnf(bnf); nf = (GEN)bnf[7]; pol = (GEN)nf[1];
+  bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(a)!=t_INT)
     err(talker,"expected an integer in bnfisintnorm");
   sa = signe(a);
@@ -1038,12 +1041,12 @@ bnfisintnorm(GEN bnf, GEN a)
       x = isprincipalfact(bnf, Primes, small_to_vec(x), NULL,
                           nf_FORCE | nf_GEN_IF_PRINCIPAL);
       x = basistoalg(nf, x);
-      sNx = signe(gnorm);
+      sNx = signe(gnorm(x));
     }
     /* x solution, up to sign */
     if (sNx != sa)
     {
-      if (! unit) norm_1 = get_unit_1(bnf,pol,&unit);
+      if (! unit) norm_1 = get_unit_1(bnf, &unit);
       if (norm_1) x = gmul(unit,x);
       else
       {
@@ -1051,7 +1054,7 @@ bnfisintnorm(GEN bnf, GEN a)
         continue;
       }
     }
-    res = concatsp(res, gmod(x, pol));
+    res = concatsp(res, lift_intern(x));
   }
   return gerepilecopy(av,res);
 }
