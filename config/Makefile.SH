@@ -267,9 +267,12 @@ EOT
 
 cat >> $file << EOT
 
-bench: $exec dobench
-test-compat: $exec dotest-compat
-test-graphic: $exec dotest-graphic
+bench: $exec
+	@$doexec
+test-compat: $exec
+	@$doexec -c
+test-graphic: $exec
+	@$doexec -g
 
 cleantest:
 	\$(RM) *.dif gp.out pari.ps
