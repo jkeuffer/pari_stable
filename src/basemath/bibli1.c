@@ -3113,8 +3113,8 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
         s = j; avma = av2;
         if (s)
         {
-          if (isclone(Sold)) { S = clonefill(S, s, stockmax); gunclone(Sold); }
           norme1 = (GEN)norms[ per[i-1] ];
+          if (isclone(Sold)) { S = clonefill(S, s, stockmax); gunclone(Sold); }
           norms = cgetg(stockmax+1, t_VEC);
           for (i=1; i<=s; i++) norms[i] = (long)norme1;
           borne1 = mpadd(norme1, eps);
