@@ -1828,6 +1828,7 @@ div_ser(GEN x, GEN y, long vx)
   pari_sp av;
 
   if (gcmp0(x)) return zeroser(vx, l);
+  if (ly <= 2) err(gdiver);
   y_lead = (GEN)y[2];
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
