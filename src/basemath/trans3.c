@@ -2045,40 +2045,40 @@ sagm(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL:
-      l = precision(x); y = cgetr(l); av=avma;
+      l = precision(x); y = cgetr(l); av = avma;
       a1 = x; b1 = realun(l);
       l = 5-bit_accuracy(prec);
       do
       {
-	a=a1; b=b1; a1 = addrr(a,b);
-        setexpo(a1,expo(a1)-1);
-	b1=mpsqrt(mulrr(a,b));
+	a = a1; b = b1; a1 = addrr(a,b);
+        setexpo(a1, expo(a1)-1);
+	b1 = mpsqrt(mulrr(a,b));
       }
-      while (expo(subrr(b1,a1))-expo(b1) >= l);
-      affrr(a1,y); avma=av; return y;
+      while (expo(subrr(b1,a1)) - expo(b1) >= l);
+      affrr(a1,y); avma = av; return y;
 
     case t_COMPLEX:
-      if (gcmp0((GEN)x[2]))
-        return transc(sagm,(GEN)x[1],prec);
-      av=avma; l=precision(x); if (l) prec=l;
-      a1=x; b1=gun; l = 5-bit_accuracy(prec);
+      if (gcmp0((GEN)x[2])) return transc(sagm, (GEN)x[1], prec);
+      av = avma; l = precision(x); if (l) prec = l;
+      a1 = x; b1 = gun; l = 5-bit_accuracy(prec);
       do
       {
-	a=a1; b=b1;
-	a1=gmul2n(gadd(a,b),-1);
-	b1=gsqrt(gmul(a,b),prec);
+	a = a1; b = b1;
+	a1 = gmul2n(gadd(a,b),-1);
+	b1 = gsqrt(gmul(a,b), prec);
       }
-      while (gexpo(gsub(b1,a1))-gexpo(b1) >= l);
+      while (gexpo(gsub(b1,a1)) - gexpo(b1) >= l);
       return gerepilecopy(av,a1);
 
     case t_PADIC:
       av=avma; a1=x; b1=gun; l=precp(x);
       do
       {
-	a=a1; b=b1;
-	a1=gmul2n(gadd(a,b),-1); b1=gsqrt(gmul(a,b),0);
-	p1=gsub(b1,a1); ep=valp(p1)-valp(b1);
-	if (ep<=0) { b1=gneg_i(b1); p1=gsub(b1,a1); ep=valp(p1)-valp(b1); }
+	a = a1; b = b1;
+	a1 = gmul2n(gadd(a,b),-1);
+        b1 = gsqrt(gmul(a,b),0);
+	p1 = gsub(b1,a1); ep = valp(p1)-valp(b1);
+	if (ep<=0) { b1 = gneg_i(b1); p1 = gsub(b1,a1); ep = valp(p1)-valp(b1); }
       }
       while (ep<l && !gcmp0(p1));
       return gerepilecopy(av,a1);
