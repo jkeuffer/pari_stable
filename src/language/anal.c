@@ -2239,28 +2239,29 @@ identifier(void)
         }
         return call_fun((GEN)ep->value, arglist, f);
       }
-
-      /* REDEFINE function */
       if (*analyseur != ',' && *analyseur != ')') skipexpr();
       while (*analyseur == ',') { analyseur++; skipexpr(); }
       match(')');
       if (*analyseur != '=' || analyseur[1] == '=')
         err(talker2,"too many parameters in user-defined function call",
             mark.identifier,mark.start);
-      analyseur = ch1-1; /* points to '(' */
 
-      free_args((gp_args*)ep->args);
-      ep->args = NULL;
-      ep->valence = EpNEW;
-    /* Fall through */
+      analyseur = ch1-1; /* points to '(' */
+    /* Fall through, REDEFINE function */
 
     case EpNEW: /* new function */
     {
-      GEN tokill = EpVALENCE(ep) == EpUSER?(GEN)ep->value:NULL;
-      GEN tmpargs = (GEN)avma;
+      GEN tokill = NULL, tmpargs = (GEN)avma;
       char *start;
       long len, narg, nloc;
 
+      if (ep->valence == EpUSER)
+      {
+        ep->valence = EpNEW;
+        tokill = (GEN)ep->value; /* can't kill now */
+        free_args((gp_args*)ep->args);
+        ep->args = INITIAL;
+      }
       check_new_fun = ep;
 
       /* checking arguments */
