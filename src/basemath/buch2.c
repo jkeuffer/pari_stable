@@ -896,12 +896,15 @@ prec_unit_matrix(GEN bnf)
   return 0; /* not reached */
 }
 
+#define nf_SPEC 64
+
 GEN
-isprincipalall(GEN bnf,GEN x,long flag)
+isprincipalall(GEN bnfd,GEN x,long flag)
 {
   long av = avma,c,pr, tx = typ(x);
-  GEN nf;
+  GEN bnf,nf;
 
+  bnf = (flag & nf_SPEC) ? (GEN)(*bnfd) : bnfd;
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (tx == t_POLMOD)
   {
@@ -924,12 +927,25 @@ isprincipalall(GEN bnf,GEN x,long flag)
   for (;;)
   {
     long av1 = avma;
+    GEN *gptr[2];
+
     GEN y = isprincipalall0(bnf,x,pr,flag);
-    if (typ(y) != t_INT) return gerepileupto(av,y);
+    if (typ(y) != t_INT) 
+    {
+      if (flag & nf_SPEC)
+      {
+	*((GEN*)bnfd)=bnf;
+	gptr[0]=(GEN*)bnfd; gptr[1]=&y; 
+	gerepilemany(av,gptr,2);
+	return y;
+      }
+      else return gerepileupto(av,y);
+    }
 
     pr = itos(y); avma = av1;
     if (DEBUGLEVEL) err(warnprec,"isprincipalall0",pr);
-    bnf = bnfnewprec(bnf,pr); setrand(c);
+    bnf = (flag & nf_SPEC) ? bnfinit0((GEN)nf[1],1,NULL,pr) : bnfnewprec(bnf,pr);
+    setrand(c);
   }
 }
 
@@ -943,6 +959,12 @@ GEN
 isprincipalgen(GEN bnf,GEN x)
 {
   return isprincipalall(bnf,x,nf_GEN);
+}
+
+GEN
+isprincipalgenspec(GEN* ptbnf,GEN x)
+{
+  return isprincipalall((GEN)ptbnf,x,nf_GEN|nf_FORCE|nf_SPEC);
 }
 
 GEN
@@ -1938,7 +1960,7 @@ decodeprime(GEN nf, GEN co)
 static GEN
 makematal(GEN bnf)
 {
-  GEN W,B,pfb,vp,nf,ma,pr;
+  GEN W,B,pfb,vp,nf,ma,pr,bnf1;
   long lm,lma,av=avma,tetpil,j,k;
 
   if (!gcmp0((GEN)bnf[10])) return (GEN)bnf[10];
@@ -1955,7 +1977,8 @@ makematal(GEN bnf)
       pr=(GEN)pfb[itos((GEN)vp[k])];
       id=idealmul(nf,id,idealpow(nf,pr,(GEN)ex[k]));
     }
-    ma[j]=isprincipalgen(bnf,id)[2];
+    bnf1=gcopy(bnf);
+    ma[j]=isprincipalgenspec(&bnf1,id)[2];
     if (lg(ma[j])==1)
       err(talker,"bnf not accurate enough to create a sbnf (makematal)");
   }
@@ -2066,17 +2089,28 @@ my_class_group_gen(GEN bnf, GEN *ptcl, GEN *ptcl2)
 GEN
 bnfnewprec(GEN bnf, long prec)
 {
-  GEN nf,ro,res,p1,funits,mun,matal,clgp,clgp2, y = cgetg(11,t_VEC);
-  long r1,r2,ru,av;
+  GEN nf,ro,res,p1,funits,mun,matal,clgp,clgp2,y;
+  long r1,r2,i,j,ru,av,pl1,pl2,prec1;
 
-  bnf = checkbnf(bnf); nf = nfnewprec((GEN)bnf[7],prec);
-  if (prec <= 0) return nf;
-  r1=itos(gmael(nf,2,1)); r2=itos(gmael(nf,2,2));
-  ru = r1+r2;
-  res=cgetg(7,t_VEC); p1=(GEN)bnf[8];
+  bnf = checkbnf(bnf);
+  if (prec <= 0) return nfnewprec(checknf(bnf),prec);
+  y = cgetg(11,t_VEC);
   funits = check_units(bnf,"bnfnewprec");
+  nf = (GEN)bnf[7];
+  ro = (GEN)nf[6];
+  r1 = itos(gmael(nf,2,1));
+  r2 = itos(gmael(nf,2,2));
+  ru = r1 + r2;
+  pl1 = gexpo(funits);
+  pl2 = gexpo(ro);
+  prec1 = prec;
+  prec += ((ru + r2 - 1) * (pl1 + (ru + r2) * pl2)) >> TWOPOTBITS_IN_LONG;
+  nf = nfnewprec((GEN)bnf[7],prec);
+  if (prec <= 0) return nf;
+  res=cgetg(7,t_VEC); p1=(GEN)bnf[8];
   ro=(GEN)nf[6];
   mun = get_mun(funits,ro,ru,r1,prec);
+  mun = gprec(mun,prec1); prec = prec1;
   res[2]=(long)get_regulator(mun,prec);
   res[3]=lcopy((GEN)p1[3]);
   res[4]=lcopy((GEN)p1[4]);
