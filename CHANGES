@@ -47,6 +47,8 @@ BA  1- gpflog could print some lines twice
    14- very inefficient Hensel lift (used ideas from Shoup's NTL)
    15- incorrect assumption on factor degrees in polcompositum (SEGV in rare
        cases)
+   16- Vec(VECSMALL) --> incorrect object
+   17- galoispermtopol didn't check permutation length (--> SEGV on bad input)
 
   Changed
     1- DOS distribution archives (GPM removed)
