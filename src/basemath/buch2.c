@@ -89,7 +89,7 @@ extern GEN arch_mul(GEN x, GEN y);
 extern void wr_rel(GEN col);
 extern void dbg_rel(long s, GEN col);
 
-#define SFB_MAX 4
+#define SFB_MAX 3
 
 static const int RANDOM_BITS = 4;
 static const int MAXRELSUP = 50;
@@ -1844,6 +1844,7 @@ static void
 small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
            double LIMC2)
 {
+  const int BMULT = 8;
   const int maxtry_DEP  = 20;
   const int maxtry_FACT = 500;
   const double eps = 0.000001;
@@ -1864,10 +1865,10 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
   G = gmael(nf,5,2);
  /* LLL reduction produces v0 in I such that
   *     T2(v0) <= (4/3)^((n-1)/2) NI^(2/n) disc(K)^(1/n)
-  * We consider v with T2(v) <= 2 T2(v0)
-  * Hence Nv <= ((4/3)^((n-1)/2) * 2 / n)^(n/2) NI sqrt(disc(K)) */
+  * We consider v with T2(v) <= BMULT * T2(v0)
+  * Hence Nv <= ((4/3)^((n-1)/2) * BMULT / n)^(n/2) NI sqrt(disc(K)) */
   precbound = 3 + (long)ceil(
-    (N/2. * ((N-1)/2.* log(4./3) + log(2./N)) + log(LIMC2) + LOGD / 2)
+    (N/2. * ((N-1)/2.* log(4./3) + log(BMULT/(double)N)) + log(LIMC2) + LOGD/2)
       / (BITS_IN_LONG * log(2.))); /* enough to compute norms */
   if (precbound < prec)
     Mlow = gprec_w(M, precbound);
@@ -1901,7 +1902,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,long nbrelpid,
 
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
     if (BOUND > v[1]) BOUND = v[1];
-    BOUND *= 2; /* at most twice larger than smallest known vector */
+    BOUND *= BMULT; /* at most BMULT x smallest known vector */
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");
