@@ -1,5 +1,6 @@
-This file lists some of the novelties in PARI/GP 2.0. Incompatible changes are
-described in COMPAT. See TODO for possible future improvements.
+This file lists some of the novelties in PARI/GP 2.x compared to 1.39.
+Incompatible changes are described in COMPAT. See TODO for possible future
+improvements.
 
 PARI/GP is now released under the GNU General Public License.
 
@@ -34,11 +35,15 @@ Many new or improved functions in the PARI library.
      - ray class groups computations (including discrete log).
      - explicit defining equations in simple cases (Kummer extensions of prime
        degree, quadratic base field).
+     The core bnf* routines are numerically more stable and faster.
 
    * roots is now entirely reliable, thanks to Xavier Gourdon.
 
    * much faster integer factorisation (including an MPQS implementation),
      due to Gerhard Niklasch, Thomas Papanikolaou and Xavier Roblot.
+
+   * factorization over Z[X] (van Hoeij's algorithm) or Fq[X] is much more
+     efficient.
 
    * some core routines have been optimized: Karatsuba fast multiplication,
      a specific function gsqr() for squarings,...

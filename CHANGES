@@ -29,7 +29,7 @@ XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
 ===========================================================================
-Done for version 2.0.22 (released ??/??/2000):
+Done for version 2.1.0 (released ??/??/2000):
 
   Fixed
     1- non portable \e in es.c (pb with Sun cc)
@@ -37,6 +37,7 @@ Done for version 2.0.22 (released ??/??/2000):
     3- polresultant(a,b,x,2) --> b
     4- exp(log(1.+x+y)) --> division by 0
     5- support cygwin version 1
+    6- TeXmacs interface
    
   Changed
     1- release PARI under the GNU GPL. Remove COPYRIGHT file, add COPYING
