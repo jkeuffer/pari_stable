@@ -611,30 +611,17 @@ $\kbd{lbot} < \kbd{ltop}$, and returns the updated object \kbd{q}. This means:
 $[\kbd{avma}, \kbd{lbot}[$, so that its right extremity abuts the address
 \kbd{ltop}. Graphically
 
-\vbox{
-\bprogtabs\+
-{\rm end of stack}  &|-&-----------&|++++++&|-/-/-/-/-/-/-&|++++++++&|
-\cr\+
-            &bot  &       &avma  &lbot         &ltop    &top
-\cr\+
-{\rm end of stack}  |------------[++++++[-/-/-/-/-/-/-|++++++++|\quad
-{\rm beginning of stack}
-\cr\+
-             & &{\rm free memory}
-\cr\eprog
-}\noindent becomes:
-
-\vbox{
-\bprogtabs\+
-{\rm end of stack}  &|--------&------------------&|++++++&|++++++++&|
-\cr\+
-             &bot      &                  &avma   &ltop     &top
-\cr\+
-{\rm end of stack} |--------------------------[++++++[++++++++|\quad
-{\rm beginning of stack}
-\cr\+
-                      &&{\rm free memory}
-\cr\eprog
+\vbox{\bprog
+             bot           avma   lbot          ltop     top
+End of stack  |-------------[++++++[-/-/-/-/-/-/-|++++++++|  Start
+                free memory            garbage
+@eprog
+\noindent becomes:
+\bprog
+             bot                         avma   ltop     top
+End of stack  |---------------------------[++++++[++++++++|  Start
+                       free memory
+@eprog
 }
 \noindent where \kbd{++} denote significant objects, \kbd{--} the unused part
 of the stack, and \kbd{-/-} the garbage we remove.
@@ -744,7 +731,7 @@ following program (we skip the necessary declarations; everything in sight is
 a \kbd{GEN}):
 \bprog
 p1 = gsqr(x);
-p2 = gsqr(y); z = gadd(p1,p2);}
+p2 = gsqr(y); z = gadd(p1,p2);
 @eprog\noindent
 The \kbd{GEN} \kbd{z} indeed points at the desired quantity. However,
 consider the stack: it contains as unnecessary garbage \kbd{p1} and \kbd{p2}.
@@ -802,7 +789,9 @@ For example suppose we want to write a function of two \kbd{GEN} variables
 \bprog
   p1 = gsqr(x); p2 = gadd(p1, y);
   p3 = gsqr(y); p4 = gadd(p3, x);
-  z = cgetg(3,t_VEC); z[1] = (long)p2; z[2] = (long)p4;
+  z = cgetg(3,t_VEC);
+  z[1] = (long)p2;
+  z[2] = (long)p4;
 @eprog
 \noindent
 This leaves a dirty stack containing (in this order) \kbd{z}, \kbd{p4},
@@ -813,7 +802,9 @@ following program with garbage collecting:
 %
 \bprog
   ltop = avma; p1 = gsqr(x); p3 = gsqr(y); lbot = avma;
-  z = cgetg(3,t_VEC); z[1] = ladd(p1,y); z[2] = ladd(p3,x);
+  z = cgetg(3,t_VEC);
+  z[1] = ladd(p1,y);
+  z[2] = ladd(p3,x);
   z = gerepile(ltop,lbot,z);
 @eprog
 
@@ -824,7 +815,9 @@ between \kbd{ltop}~/ \kbd{lbot} pairs.
 \noindent Beware that
 \bprog
   ltop = avma; p1 = gadd(gsqr(x), y); p3 = gadd(gsqr(y), x);
-  z = cgetg(3,t_VEC); z[1] = (long)p1; z[2] = (long)p3
+  z = cgetg(3,t_VEC);
+  z[1] = (long)p1;
+  z[2] = (long)p3
   z = gerepileupto(ltop,z); /*@Ccom WRONG !!! */
 @eprog
 \noindent would be a disaster since \kbd{p1} and \kbd{p3} would be created
@@ -839,10 +832,14 @@ $p_3=(x_r+x_i)*(y_r+y_i)$, and then we have $z_r=p_1-p_2$,
 $z_i=p_3-(p_1+p_2)$. The program is essentially as follows:
 %
 \bprog
-ltop = avma; p1 = gmul(x[1],y[1]); p2 = gmul(x[2],y[2]);
+ltop = avma;
+p1 = gmul(x[1],y[1]);
+p2 = gmul(x[2],y[2]);
 p3 = gmul(gadd(x[1],x[2]), gadd(y[1],y[2]));
 p4 = gadd(p1,p2); lbot = avma;
-z = cgetg(3,t_COMPLEX); z[1] = lsub(p1,p2); z[2] = lsub(p3,p4);
+z = cgetg(3,t_COMPLEX);
+z[1] = lsub(p1,p2);
+z[2] = lsub(p3,p4);
 z = gerepile(ltop,lbot,z);
 @eprog
 \noindent
@@ -1119,10 +1116,7 @@ $\kbd{z[3]} = \kbd{0x0}$.
 \subsec{Type \typ{INTMOD} (integermod):}\kbdsidx{t_INTMOD}\sidx{integermod}
 \kbd{z[1]} points to the modulus, and \kbd{z[2]} at the number representing
 the class \kbd{z}. Both are separate \kbd{GEN} objects, and both must be of
-type integer. In principle \kbd{z[1]} $>$ 0 and 0 $\le$ \kbd{z[2]} $<$
-\kbd{z[1]}, but this rule does not have to be strictly obeyed by the user.
-Any integermod obtained as the result of a PARI function call will satisfy
-these conditions.
+type integer, satisfying the inequality $0 \le \kbd{z[2]} < \kbd{z[1]}$.
 
 It is good practice to keep the modulus object on the heap, so that new
 integermods resulting from operations can point at this common object,

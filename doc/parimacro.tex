@@ -1,27 +1,36 @@
 % $Id$
 \catcode`\@=11
-\newif\ifgphelp
+%
+% GENERAL FORMATTING
+%
+\newif\ifGPHELP
+\newif\ifPDF
+\newread\std
+\def\checkfile#1{\def\@stdfile{#1}\openin\std=#1\relax}
 \long\def\@ifundef#1#2#3{\expandafter\ifx\csname
   #1\endcsname\relax#2\else#3\fi}
-\@ifundef{fromgphelp}{\gphelpfalse}{\gphelptrue}
 
-\ifgphelp
+% do we come from gphelp ?
+\@ifundef{fromgphelp}{\GPHELPfalse}{\GPHELPtrue}
+\ifGPHELP %YES
   \magnification=\magstep1
   \baselineskip=13pt
-\else
+\else     %NO
   \magnification=\magstephalf
+  \checkfile{wantpdfoutput} % check if we want PDF output
+  \ifeof\std \else \PDFtrue \fi
 \fi
 
 % if paricfg.tex is there (Configure succeeded), input it, otherwise use
 % default values
-\newread\std
-\def\checkfile#1{\def\@stdfile{#1}\openin\std=#1}
 \checkfile{paricfg.tex}
 \ifeof\std
   \checkfile{doc/paricfg.tex}
 \fi
 \ifeof\std
-  \message{paricfg.tex not found. You should run Configure.}
+  \ifGPHELP\else% OK for gphelp to use default values
+    \message{paricfg.tex not found. You should run Configure.}
+  \fi
   \def\vers{2.0.x}
   \def\miscdir{/usr/local/lib/pari}
   \def\includedir{/usr/local/include/pari}
@@ -39,89 +48,97 @@
 \parskip=6pt plus 3pt minus 1.5pt
 \overfullrule=0pt
 
-%
-% CROSS REFERENCING & INDEX
-%
-\newif\ifsecondpass
-\newwrite\out
-\newwrite\aux
-
-\ifgphelp % disable crossreferences
+%%
+%% CROSS REFERENCING & INDEX
+%%
+\ifGPHELP % disable crossreferences
   \def\idx#1{#1}
   \def\toindex#1{}
   \def\tocwrite#1{}
   \def\label#1{}
-  \def\ref#1{[{\bf ??}]}
-\else % start of non-gphelp section
-\def\typeout#1{\immediate\write\out{#1}}
-\def\@namedef#1{\expandafter\def\csname #1\endcsname}
-\def\newlabel#1#2{\@ifundef{r@#1}{}{\message{Label `#1' multiply
-  defined}}\global\@namedef{r@#1}{#2}}
+  \def\ref#1{[{\bf ??}]} % all crossref marked as [??]
+\else % none of the following is needed by gphelp
+  \newif\ifsecondpass
+  \newwrite\out
+  \newwrite\aux
+  \def\typeout#1{\immediate\write\out{#1}}
+  \def\@namedef#1{\expandafter\def\csname#1\endcsname}
+  \def\newlabel#1#2{\@ifundef{r@#1}{}{\message{Label `#1' multiply
+    defined}}\global\@namedef{r@#1}{#2}}
 
-\openin\std=users.std
-\ifeof\std
-  \secondpassfalse
-  \typeout{FIRST PASS}
-  \csname newwrite\endcsname\toc
-  \csname newwrite\endcsname\index
-  \openout\toc=\jobname.toc
-  \openout\index=\jobname.idx
-  \let\condwrite=\write
-\else
-  \secondpasstrue
-  \typeout{SECOND PASS}
-  \let\immediate\relax
-  \def\condwrite#1#2{}
-\fi
-% put #1 in index
-\def\f@nt{rm}
-\def\toindex#1{\immediate\condwrite\index{!#1!\f@nt!\the\pageno}}
-%cf TeXBook Exercice 21.10
-\def\tocwrite#1{{\let\the=0\edef\next{\condwrite\toc{#1}}\next}}
-% don't use \jobname here, macros may be used by tutorial.tex
-\checkfile{users.aux}
-\ifeof\std
-  \message{No aux file.}
-\else
-  \input\@stdfile
-\fi
-\openin\std=users.std
+  \openin\std=users.std
+  \ifeof\std
+    \secondpassfalse
+    \typeout{FIRST PASS}
+    \csname newwrite\endcsname\toc
+    \csname newwrite\endcsname\index
+    \openout\toc=\jobname.toc
+    \openout\index=\jobname.idx
+    \let\condwrite=\write
+  \else
+    \secondpasstrue
+    \typeout{SECOND PASS}
+    \let\immediate\relax
+    \def\condwrite#1#2{}
+  \fi
 
-% \ref, \label
-\openout\aux=\jobname.aux
+%default font for index entry
+  \def\f@nt{rm}
 
-\ifx\inputlineno\undefined
-  \let\on@line\empty
-\else
-  \def\on@line{ on input line \the\inputlineno}
-\fi
-\def\@errundef#1{\typeout{Reference `#1' on page \the\pageno \space
-undefined\on@line}}
+%% \toindex{#1} = put #1 in index; use font \f@nt, indicate \pageno.
+%% If PDF, associate the page to a unique integer (\pdfdestcntr).
+  \ifPDF
+    \def\toindex#1{\putdest
+      \immediate\condwrite\index{!#1!\f@nt!\the\pageno!\number\pdfdestcntr}}
+  \else
+    \def\toindex#1{%
+      \immediate\condwrite\index{!#1!\f@nt!\the\pageno!}}
+  \fi
 
-\def\@car#1#2\@nil{#1}
-\def\@cdr#1#2\@nil{#2}
+  \checkfile{users.aux}% don't use \jobname: may be used by tutorial.tex
+  \ifeof\std
+    \message{No aux file.}
+  \else
+    \input\@stdfile% input aux file if present
+  \fi
 
-\def\@ref {\expandafter\@cdr\@temp \@nil\null}
-\def\@cref{\expandafter\@car\@temp \@nil\null}
+% \ref, \label. We need an auxiliary file written during first pass
+  \openout\aux=\jobname.aux
 
-\def\label#1{\immediate\write\aux{\string
-  \newlabel{#1}{{\the\chapno}{\currentlabel}}}}
-\def\ref#1{\@ifundef{r@#1}
-  {{\bf ??}\@errundef{#1}}
-  {\edef\@temp{\csname r@#1\endcsname}%
-    \def\lbl{\@ref}\def\chp{\@cref}%
-    \ifx\chp{\the\chapno}\lbl\else\chp.\lbl\fi}}
+  \ifx\inputlineno\undefined
+    \let\on@line\empty
+  \else
+    \def\on@line{ on input line \the\inputlineno}
+  \fi
+  \def\@errundef#1{\typeout{Reference `#1' on page \the\pageno \space
+    undefined\on@line}}
 
+  \def\@car#1#2\@nil{#1}
+  \def\@cdr#1#2\@nil{#2}
+
+  \def\@ref {\expandafter\@cdr\@temp \@nil\null}
+  \def\@cref{\expandafter\@car\@temp \@nil\null}
+
+  \def\label#1{\immediate\write\aux{\string
+    \newlabel{#1}{{\the\chapno}{\currentlabel}}}}
+  \def\ref#1{\@ifundef{r@#1}
+    {{\bf ??}\@errundef{#1}}
+    {\edef\@temp{\csname r@#1\endcsname}%
+      \def\lbl{\@ref}\def\chp{\@cref}%
+      \ifx\chp{\the\chapno}\lbl\else\chp.\lbl\fi}}
 \fi % end of non-gphelp section
 
+%%
+%% VERBATIM MODE
+%%
 % \doverb: setup verbatim mode for the first argument, and execute \do{\arg}
 \def\setupverb{\def\do##1{\catcode`##1=12}\dospecials
-  \catcode`\ =10 % standard space
-  \catcode`\f=13 % to break ugly ligatures as in nf{}init, use \EFF instead
+  \catcode`\ =10% standard space
+  \catcode`\f=13% to break ugly ligatures as in nf{}init, use \EFF instead
 }
-{ \let\g=\gdef \global\let\EFF=f \catcode`\f=13
-  \gf{\EFF{}} % f won't produce any ligature in verbatim mode
-}
+% f won't produce any ligature if catcode 13, e.g in verbatim mode (cf above).
+{ \let\GDEF=\gdef \global\let\EFF=f \catcode`\f=13
+  \GDEFf{\EFF{}}}
 
 \begingroup
 \catcode`<=1\catcode`\{=12
@@ -139,11 +156,11 @@ undefined\on@line}}
 \def\doverb {\begingroup\setupverb\d@verb}
 \def\doverbb{\begingroup\setupverb\d@verbb}
 
-% argument goes to index (silent)
-\def\sidx{\gdef\f@nt{rm}\let\do=\toindex\doverb}
-\def\kbdsidx{\gdef\f@nt{tt}\let\do=\toindex\doverb}
+% argument (silently) goes to index
+\def\sidx{\gdef\f@nt{rm}\let\do=\toindex\doverb}   % \rm
+\def\kbdsidx{\gdef\f@nt{tt}\let\do=\toindex\doverb}% \tt
 
-% argument to index + set up as plain text
+% argument printed + sent to index
 \def\@idx#1{#1\toindex{#1}}
 \def\idx{\gdef\f@nt{rm}\let\do=\@idx\doverb}
 
@@ -174,9 +191,9 @@ undefined\on@line}}
 
 \def\secref#1{Section~\ref{#1}}
 
-%
-% SECTIONS
-%
+%%
+%% SECTIONS
+%%
 \newcount\appno
 \newcount\chapno
 \newcount\secno
@@ -184,19 +201,24 @@ undefined\on@line}}
 \newcount\subsubsecno
 
 \def\newpage{\hbox{}\vfill\eject}
-\let\sectionhook=
+%Table of contents. cf TeXBook Exercice 21.10
+\def\tocwrite#1{{\let\the=0\edef\next{\condwrite\toc{#1}}\next}}
+\let\putchapdest\relax
+\let\sectionhook\relax
 
 \def\title#1#2{%
   \ifodd\pageno\else\newpage\fi
   \tocwrite{#1 #2\string\dotfill\the\pageno}
-  \ifgphelp\else
+  \ifGPHELP\else
+     \putchapdest
      \centerline{\chaptertitlefont #1}\medskip
   \fi
   \centerline{\let\bf\chaptertitlebf \chaptertitlefont #2}\vskip1cm}
 \def\sectitle#1{%
-  \tocwrite{{\sevenrm\hskip0.5cm#1\string\dotfill\the\pageno}}
-  \vskip 0pt plus 54pt\penalty-600 % good break
-  \vskip 24pt plus -45pt minus 9pt
+  \tocwrite{{\sevenrm\hskip0.5cm#1\string\dotfill\the\pageno}}%
+  \vskip 0pt plus 54pt\penalty-600% good break
+  \vskip 24pt plus -45pt minus 9pt%
+  \putchapdest%
   \leftline{\sectionhook{\sectiontitlebf #1}.}
   \penalty10000 % impossible break
   \smallskip}% whatever follows will add a \parskip
@@ -204,28 +226,28 @@ undefined\on@line}}
 \def\subsectitle#1{%
   \vskip 0pt plus 45pt\penalty-300
   \vskip 6pt plus -42pt minus 3pt
-  \noindent\sectionhook{\bf{#1}}}
+  \sectionhook\noindent{\bf#1}}
 
 \def\subsubsectitle#1{% a \parskip is being added anyway by \noindent
   \par\vskip 0pt plus 39pt\penalty-200
   \vskip 0pt plus -37pt minus 1.5pt
-  \noindent\sectionhook{\bf{#1}}}
+  \sectionhook\noindent{\bf#1}}
 
-\ifgphelp
-  \def\maketitle{}
+\ifGPHELP
+  \let\maketitle\relax
 \else
-  \def\maketitle{
+  \def\maketitle{%
   \ifnum\chapno=0
-    \currentlabel. %
+    \currentlabel. 
   \else
-    \number\chapno.\currentlabel\ %
+    \number\chapno.\currentlabel\ 
   \fi}
 \fi
 
 \def\misctitle#1{\par\vskip 0pt plus 66pt\penalty-400
   \vskip 3pt plus -64pt minus 1.5pt\noindent{\bf #1}}
 
-% Chapter headings now occupy two lines in the manual (still only one in
+% Chapter headings occupy two lines in the manual (only one in
 % INSTALL.tex and gphelp-extracted bits).  Syntax requirement: After calling
 % \chapter{...} and possibly \label{...}  etc, an empty line _must_ follow
 % before the first paragraph of text or section heading begins. [GN]
@@ -235,29 +257,28 @@ undefined\on@line}}
 \def\appendix#1\par{
   \chapno=0
   \secno=0\global\advance\appno by 1
-  \title{Appendix %
-  \ifcase\appno\or A\or B\or C\or D\or E\or F\or G\or H\or I\or J\or K\fi:}%
-  {#1}\noindent\ignorespaces}
-\def\section#1{
-  \subsecno=0\advance\secno by 1
-  \gdef\currentlabel{\number\secno}
+  \def\applet{\ifcase\appno\or A\or B\or C\or D\or E\or F\or G\fi}
+  \title{Appendix \applet:}{#1}\noindent\ignorespaces}
+\def\section#1{%
+  \subsecno=0\global\advance\secno by 1%
+  \gdef\currentlabel{\number\secno}%
   \sectitle{\maketitle#1}}
 \def\subsec#1{
-  \subsubsecno=0\advance\subsecno by 1
+  \subsubsecno=0\global\advance\subsecno by 1
   \gdef\currentlabel{\number\secno.\number\subsecno}
   \subsectitle{\maketitle#1}}
 \def\subsubsec#1{
-  \advance\subsubsecno by 1
+  \global\advance\subsubsecno by 1
   \gdef\currentlabel{\number\secno.\number\subsecno.\number\subsubsecno}
   \subsubsectitle{\maketitle#1}}
 
-\def\unix{\strut\hbox to 0pt{\hss {UNIX: }\indent}}
-\def\unixx{\noindent\strut\hbox to 0pt{\hss {UNIX: }}}
-\def\emacs{\strut\hbox to 0pt{\hss {EMACS: }\indent}}
+\def\annotepar#1{\noindent\llap{#1:\ \ }}
+\def\unix{\annotepar{UNIX}}
+\def\emacs{\annotepar{EMACS}}
 
 \def\@secunix#1{\begingroup\def\sectionhook{\unix{}}\do{#1}\endgroup}
 \def\sectionunix#1{{\let\do=\section\@secunix{#1}}}
-\def\unixsubsecunix#1{{\let\do=\subsec\@secunix{#1}}}
+\def\subsecunix#1{{\let\do=\subsec\@secunix{#1}}}
 \def\subsubsecunix#1{{\let\do=\subsubsec\@secunix{#1}}}
 \def\@subsecidxunix#1{{\let\do=\@subsecidx\@secunix{#1}}}
 \def\@subsubsecidxunix#1{{\let\do=\@subsubsecidx\@secunix{#1}}}
@@ -266,7 +287,7 @@ undefined\on@line}}
 \def\@subsecidx#1{\subsec{#1}\toindex{#1}}
 \def\subsecidx{\gdef\f@nt{tt}\let\do=\@subsecidx\doverb}
 \def\@subsubsecidx#1{\subsubsec{#1}\toindex{#1}}
-\def\subsubsecidx{\gdef\f@nt{tt}\let\do=\@subsecidx\doverb}
+\def\subsubsecidx{\gdef\f@nt{tt}\let\do=\@subsubsecidx\doverb}
 
 \def\subsecidxunix{\gdef\f@nt{tt}\let\do=\@subsecidxunix\doverb}
 \def\subsubsecidxunix{\gdef\f@nt{tt}\let\do=\@subsubsecidxunix\doverb}
@@ -381,11 +402,4 @@ undefined\on@line}}
 % comments
 \def\Ccom{\begingroup\unverb\Ccomstart}
 \def\Ccomstart#1*/{\rm#1\endgroup*/}
-
-% variant of same, for use with tabbing.  Tabbing doesn't build paragraphs,
-% the lines go directly into the vlist -- so we must add our own \parskip. [GN]
-
-\def\bprogtabs{\par\vskip\parskip\begingroup%
-  \tt\settabs}
-
 \catcode`\@=12

@@ -1,6 +1,9 @@
 % $Id$
 % This should be compiled with plain TeX
 \input parimacro.tex
+\ifPDF
+  \input pdfmacs.tex
+\fi
 \def\maketitle#1{\currentlabel.\ #1}
 \begintitle
 \vskip2.5truecm
@@ -500,13 +503,13 @@ dummy variables which are used to number the rows and columns respectively
 in addition to the dimensions of the vector or matrix, to indicate explicitly
 the names of these variables.
 
-{\bf Warning.} The letter \kbd{I} is reserved for the complex number equal to
-the square root of $-1$. Hence it is absolutely forbidden to use it as a
-variable. Try typing \kbd{vector(10,I, I\pow 2)}, the error message that you
-get clearly indicates that GP does not consider \kbd{I} as a variable. There
-are two other reserved variable names: \kbd{Pi} and \kbd{Euler}. All function
-names are forbidden as well. On the other hand there is nothing special about
-\kbd{i}, \kbd{pi} or \kbd{euler}.
+\misctitle{Warning.} The letter \kbd{I} is reserved for the complex number
+equal to the square root of $-1$. Hence it is absolutely forbidden to use
+it as a variable. Try typing \kbd{vector(10,I, I\pow 2)}, the error message
+that you get clearly indicates that GP does not consider \kbd{I} as a
+variable. There are two other reserved variable names: \kbd{Pi} and
+\kbd{Euler}. All function names are forbidden as well. On the other hand
+there is nothing special about \kbd{i}, \kbd{pi} or \kbd{euler}.
 
 When creating vectors or matrices, it is often useful to use boolean
 operators and the \kbd{if()} statement (see the section on programming for

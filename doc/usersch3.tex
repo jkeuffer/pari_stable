@@ -6678,7 +6678,7 @@ funny way (following the same convention as used by the library function
 @eprog
 
 If you simply want to restore a variable to its original value (monomial of
-degree one), use the \idx{quote} operator: \kbd{x = 'x}.
+degree one), use the \idx{quote} operator: \kbd{a = 'a}.
 
 \subsubsecidx{print}$(\{\var{str}\}*)$: outputs its (string) arguments in raw
 format, ending with a newline.
@@ -6764,12 +6764,10 @@ GP prompt. In particular, current computation is then lost.
 The following error handler prints the list of all user variables, then
 stores in a file their name and their values:
 \bprog
-? {
-  trap( ,
-    print(reorder);
-    write("crash", reorder);
-    write("crash", eval(reorder))
-) }
+? { trap( ,
+      print(reorder);
+      write("crash", reorder);
+      write("crash", eval(reorder))) }
 @eprog
 
 If no recovery code is given (\var{rec} is omitted) a so-called
