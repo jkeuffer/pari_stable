@@ -122,6 +122,8 @@ prime_loop_init(GEN ga, GEN gb, long *a, long *b, long prime[])
   ulong P;
 
   ga = gceil(ga); gb = gfloor(gb);
+  if (typ(ga) != t_INT || typ(gb) != t_INT)
+    err(typeer,"prime_loop_init");
   if (is_bigint(ga) || is_bigint(gb))
   {
     if (cmpii(ga, gb) > 0) return NULL;
