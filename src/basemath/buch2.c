@@ -1113,7 +1113,7 @@ isprincipalall(GEN bnf,GEN x,long flag)
       err(talker,"not the same number field in isprincipal");
     x = (GEN)x[2]; tx = t_POL;
   }
-  if (tx == t_POL || tx == t_COL)
+  if (tx == t_POL || tx == t_COL || tx == t_INT || tx == t_FRAC)
   {
     if (gcmp0(x)) err(talker,"zero ideal in isprincipal");
     return triv_gen(nf, x, lg(mael3(bnf,8,1,2))-1, flag);
