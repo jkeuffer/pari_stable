@@ -303,11 +303,13 @@ files used to check whether GP has been built correctly (see \b{e}).
 64-bit machines, respectively): of the form x$m.n$, where x is a letter in
 $\{\kbd{e},\kbd{f},\kbd{g}\}$, and $n$, $m$ are integers. If x is \kbd{f},
 real numbers will be printed in \idx{fixed floating point format} with no
-explicit exponent (e.g.~\kbd{0.000033}); if the letter is \kbd{e}, they will
-be printed in \idx{scientific format}, always with an explicit exponent
-(e.g.~\kbd{3.3e-5}). If the letter is \kbd{g}, real numbers will be printed
-in \kbd{f} format, except when their absolute value is less than $2^{-32}$,
-in which case they are printed in \kbd{e} format. \label{se:format}
+explicit exponent (e.g.~\kbd{0.000033}), unless their integer part is not
+defined (not enough significant digits); if the letter is \kbd{e}, they
+will be printed in \idx{scientific format}, always with an explicit
+exponent (e.g.~\kbd{3.3e-5}). If the letter is \kbd{g}, real numbers will
+be printed in \kbd{f} format, except when their absolute value is less than
+$2^{-32}$, in which case they are printed in \kbd{e} format.
+\label{se:format}
 
 The number $n$ is the number of significant digits printed for real
 numbers, except if $n<0$ where all the significant digits will be printed

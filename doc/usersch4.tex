@@ -568,11 +568,11 @@ the stack {\it before\/} the function call are left alone. Except for the ones
 listed below, PARI functions only collect their own garbage.
 
 \noindent$\bullet$
-It may happen that you need to preserve {\it some\/} but not
-{\it all\/} objects that were created after a certain point~--- for instance,
-if the final result you need is not a \kbd{GEN}, or if some search proved
-futile. Then, it is enough to record the value of \kbd{avma} just
-{\it before\/} the first garbage is created, and restore it upon exit:
+It may happen that all objects that were created after a certain point can
+be deleted~--- for instance, if the final result you need is not a
+\kbd{GEN}, or if some search proved futile. Then, it is enough to record
+the value of \kbd{avma} just {\it before\/} the first garbage is created,
+and restore it upon exit:
 
 \bprog
 long ltop = avma; /*@Ccom record initial avma */
