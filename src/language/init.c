@@ -958,15 +958,17 @@ pop_catch_cell(stack **s)
   }
 }
 
-/* reset traps younger than V (included) */
+/* reset traps younger than v (included).
+ * Note the address of v is passed instead because we do not want compiler
+ * to put v into a register (could be clobbered by longjmp) */
 void
-err_leave(void *v)
+err_leave(void **pv)
 {
   while (err_catch_stack)
   {
     cell *t = (cell*)err_catch_stack->value;
     pop_catch_cell(&err_catch_stack);
-    if (t == (cell*)v) return;
+    if (t == (cell*)(*pv)) return;
   }
   reset_traps();
 }

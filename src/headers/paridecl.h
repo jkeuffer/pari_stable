@@ -1018,7 +1018,7 @@ void    disable_dbg(long val);
 GEN     dummycopy(GEN x);
 void    err(long numerr, ...);
 void   *err_catch(long errnum, jmp_buf *penv);
-void    err_leave(void *v);
+void    err_leave(void **v);
 GEN     forcecopy(GEN x);
 void    freeall(void);
 GEN     gcopy(GEN x);
