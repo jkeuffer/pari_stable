@@ -1,6 +1,6 @@
 # Which Executable Linker ?
 #
-_ld_list='LD LDFLAGS LIBS runpathprexix LDneedWl LDused GNULDused'
+_ld_list='LD LDFLAGS LIBS runpathprexix LDneedsWl LDused GNULDused'
 case "$osname" in
   darwin) LIBS= ;;
   osf1)   LIBS='-lm -lots';;

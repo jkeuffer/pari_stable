@@ -1,6 +1,7 @@
 # Format: filename_weight (weight = 1000 if omitted)
 #   individual times are printed as is, but accumulated time is weighed
 #   by (weight / 1000)
+_test_list='test_extra test_basic top_test_extra top_dotest_extra'
 
 test_extra="\
   compat\

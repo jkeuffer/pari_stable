@@ -155,6 +155,7 @@ for variable in\
   sizeof_long doubleformat\
   X11 X11_INC X11_LIBS which_graphic_lib graphic_lib_dll gnuplot gnuplot_libs\
   FLTKDIR FLTK_LIBS\
+  $_test_list\
   $_install_list\
   $_perl_list\
   $_cc_list\
