@@ -207,7 +207,7 @@ gp_preinit(void)
 static char*
 get_sep0(const char *t, int colon)
 {
-  static char buf[GET_SEP_SIZE], *lim = buf + (GET_SEP_SIZE-1);
+  static char buf[GET_SEP_SIZE], *lim = buf + GET_SEP_SIZE;
   char *s = buf;
   int outer = 1;
 
@@ -225,7 +225,8 @@ get_sep0(const char *t, int colon)
       case ':':
         if (outer && colon) { s[-1] = 0; return buf; } break;
     }
-    if (s == lim) err(talker,"buffer overflow in get_sep");
+    if (s == lim)
+      err(talker,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
   }
 }
 
