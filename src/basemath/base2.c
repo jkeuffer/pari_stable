@@ -2765,7 +2765,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, GEN id, GEN matId)
 static void
 check_pol(GEN x, long v)
 {
-  long i,tx, lx = lg(x);
+  long i,tx, lx = lgef(x);
   if (varn(x) != v)
     err(talker,"incorrect variable in rnf function");
   for (i=2; i<lx; i++)
@@ -2780,7 +2780,7 @@ GEN
 fix_relative_pol(GEN nf, GEN x, int chk_lead)
 {
   GEN xnf = (typ(nf) == t_POL)? nf: (GEN)nf[1];
-  long i, vnf = varn(xnf), lx = lg(x);
+  long i, vnf = varn(xnf), lx = lgef(x);
   if (typ(x) != t_POL || varn(x) >= vnf)
     err(talker,"incorrect polynomial in rnf function");
   x = dummycopy(x);
