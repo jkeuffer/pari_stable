@@ -62,12 +62,6 @@ static struct
   char *identifier, *symbol, *raw, *member, *start;
 } mark;
 
-/* when skipidentifier() detects that user function f() is being redefined,
- * (f()= ... ) this is set pointing to the opening parenthesis. Checked in
- * identifier(). Otherwise definition like f(x=1)= would change the value of
- * global variable x */
-static char *redefine_fun = NULL;
-
 /* points to the part of the string that remains to be parsed */
 static char *analyseur = NULL;
 
@@ -375,7 +369,6 @@ lisseq0(char *t, GEN (*f)(void))
   if (foreignExprHandler && *t == foreignExprSwitch)
     return (*foreignExprHandler)(t);
 
-  redefine_fun = NULL;
   check_new_fun = NULL;
   skipping_fun_def = 0;
   mark.start = analyseur = t;
@@ -417,7 +410,7 @@ readseq(char *c, int strict)
   check_new_fun=NULL; skipping_fun_def=0;
   added_newline = 1;
   doskipseq(c, strict);
-  z = lisseq0(c, seq); /* not lisseq: don't reset redefine_fun */
+  z = lisseq0(c, seq);
   if (!added_newline) pariputc('\n'); /* last output was print1() */
   return z;
 }
@@ -1452,20 +1445,20 @@ fun_seq(char *p)
 
 /* p = NULL + array of variable numbers (longs) + function text */
 static GEN
-call_fun(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
+call_fun(GEN p, GEN *arg, gp_args *f)
 {
-  GEN res;
+  GEN res, *loc = f->arg + f->narg;
   long i;
 
   p++; /* skip NULL */
   /* push new values for formal parameters */
-  for (i=0; i<narg; i++) copyvalue(*p++, *arg++);
-  for (i=0; i<nloc; i++) pushvalue(*p++, make_arg(*loc++));
+  for (i=0; i<f->narg; i++) copyvalue(*p++, *arg++);
+  for (i=0; i<f->nloc; i++) pushvalue(*p++, make_arg(*loc++));
   /* dumps arglist from identifier() to the garbage zone */
   res = fun_seq((char *)p);
   /* pop out ancient values of formal parameters */
-  for (i=0; i<nloc; i++) killvalue(*--p);
-  for (i=0; i<narg; i++) killvalue(*--p);
+  for (i=0; i<f->nloc; i++) killvalue(*--p);
+  for (i=0; i<f->narg; i++) killvalue(*--p);
   return res;
 }
 /* p = NULL + array of variable numbers (longs) + function text */
@@ -1536,6 +1529,18 @@ static void
 skipdecl(void)
 {
   if (*analyseur == ':') { analyseur++; skipexpr(); }
+}
+
+static void
+skip_arg_block(gp_args *f)
+{
+  int i, matchcomma = 0;
+  for (i = f->narg; i; i--)
+  {
+    if (do_switch(0,matchcomma))
+      matchcomma = 1;
+    else { match_comma(); skipexpr(); skipdecl(); }
+  }
 }
 
 static long
@@ -1637,7 +1642,7 @@ num_deriv(void *call, GEN argvec[])
 
 /* as above, for user functions */
 static GEN
-num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
+num_derivU(GEN p, GEN *arg, gp_args *f)
 {
   GEN eps,a,b, x = *arg;
   long fpr, pr, l, e, ex;
@@ -1645,7 +1650,7 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
 
   if (!is_const_t(typ(x)))
   {
-    a = call_fun(p,arg,loc,narg,nloc);
+    a = call_fun(p,arg,f);
     return gerepileupto(av, deriv(a,gvar9(a)));
   }
   fpr = precision(x)-2; /* required final prec (in sig. words) */
@@ -1657,8 +1662,8 @@ num_derivU(GEN p, GEN *arg, GEN *loc, int narg, int nloc)
   e = fpr * BITS_IN_HALFULONG; /* 1/2 required prec (in sig. bits) */
 
   eps = real2n(-e, l);
-  *arg = fix(gsub(x, eps), l); a = call_fun(p,arg,loc,narg,nloc);
-  *arg = fix(gadd(x, eps), l); b = call_fun(p,arg,loc,narg,nloc);
+  *arg = fix(gsub(x, eps), l); a = call_fun(p,arg,f);
+  *arg = fix(gadd(x, eps), l); b = call_fun(p,arg,f);
   setexpo(eps, e-1);
   return gerepileupto(av, gmul(gsub(b,a), eps));
 }
@@ -1726,7 +1731,7 @@ identifier(void)
     }
     return matrix_block((GEN)ep->value);
   }
-  ep = do_alias(ep); matchcomma = 0;
+  ep = do_alias(ep);
 #ifdef STACK_CHECK
   if (PARI_stack_limit && (void*) &ptr <= PARI_stack_limit)
       err(talker2, "deep recursion", mark.identifier, mark.start);
@@ -1762,6 +1767,7 @@ identifier(void)
     else                  ret = RET_GEN;
     /* Optimized for G and p. */
     i = 0;
+    matchcomma = 0;
     while (*s == 'G')
     {
       match_comma(); s++;
@@ -2020,6 +2026,7 @@ identifier(void)
 
       case 88: /* global */
         if (*analyseur == ')') return global0();
+        matchcomma = 0;
         while (*analyseur != ')')
         {
           match_comma(); ch1=analyseur;
@@ -2028,10 +2035,6 @@ identifier(void)
           switch(EpVALENCE(ep))
           {
             case EpGVAR:
-#if 0
-              err(warner,"%s already declared global", ep->name);
-#endif
-              /* fall through */
             case EpVAR: break;
             default: err(talker2,"symbol already in use",ch1,mark.start);
           }
@@ -2056,35 +2059,35 @@ identifier(void)
   switch (EpVALENCE(ep))
   {
     GEN *defarg; /* = default args, and values for local variables */
-    int narg, nloc;
+    GEN *arglist;
     gp_args *f;
 
     case EpUSER: /* user-defined functions */
       f = (gp_args*)ep->args;
-      defarg = f->arg;
-      narg = f->narg;
-      nloc = f->nloc;
       deriv = (*analyseur == '\'' && analyseur[1] == '(') && analyseur++;
+      arglist = (GEN*) new_chunk(f->narg);
       if (*analyseur != '(') /* no args */
       {
 	if (*analyseur != '='  ||  analyseur[1] == '=')
         {
-          GEN *arglist = (GEN*) new_chunk(narg);
-          for (i=0; i<narg; i++)
-            arglist[i] = make_arg(defarg[i]);
-	  return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+          for (i=0; i<f->narg; i++)
+            arglist[i] = make_arg(f->arg[i]);
+	  return call_fun((GEN)ep->value, arglist, f);
         }
 	match('('); /* ==> error */
       }
-      if (analyseur != redefine_fun)
+      analyseur++; /* skip '(' */
+      ch1 = analyseur;
+      skip_arg_block(f);
+      if (*analyseur == ')' && (analyseur[1] != '=' || analyseur[2] == '='))
       {
-        GEN *arglist = (GEN*) new_chunk(narg);
-        ch1 = analyseur; analyseur++;
-        for (i=0; i<narg; i++)
+        matchcomma = 0;
+        analyseur = ch1;
+        for (i=0; i<f->narg; i++)
         {
           if (do_switch(0,matchcomma))
           { /* default arg */
-            arglist[i] = make_arg(defarg[i]);
+            arglist[i] = make_arg(f->arg[i]);
             matchcomma = 1;
           }
           else
@@ -2095,27 +2098,24 @@ identifier(void)
             if (br_status) err(breaker,"here (reading function args)");
           }
         }
-        if (*analyseur++ == ')' && (*analyseur != '=' || analyseur[1] == '='))
+        analyseur++; /* skip ')' */
+        if (deriv)
         {
-          if (deriv)
-          {
-            if (!narg)
-              err(talker2, "can't derive this", mark.identifier, mark.start);
-            return num_derivU((GEN)ep->value, arglist, defarg+narg, narg, nloc);
-          }
-          return call_fun((GEN)ep->value, arglist, defarg+narg, narg, nloc);
+          if (!f->narg)
+            err(talker2, "can't derive this", mark.identifier, mark.start);
+          return num_derivU((GEN)ep->value, arglist, f);
         }
-
-        /* should happen only in cases like (f()= f()=); f (!!!) */
-        analyseur--;
-        if (*analyseur != ',' && *analyseur != ')') skipexpr();
-        while (*analyseur == ',') { analyseur++; skipexpr(); }
-        match(')');
-        if (*analyseur != '='  ||  analyseur[1] == '=')
-          err(nparamer1,mark.identifier,mark.start);
-        matchcomma=0; analyseur = ch1;
+        return call_fun((GEN)ep->value, arglist, f);
       }
-      redefine_fun = NULL;
+
+      /* REDEFINE function */
+      if (*analyseur != ',' && *analyseur != ')') skipexpr();
+      while (*analyseur == ',') { analyseur++; skipexpr(); }
+      match(')');
+      if (*analyseur != '='  ||  analyseur[1] == '=')
+        err(nparamer1,mark.identifier,mark.start);
+      analyseur = ch1-1; /* points to '(' */
+
       free_args((gp_args*)ep->args);
     /* Fall through */
 
@@ -2123,7 +2123,7 @@ identifier(void)
     {
       GEN tmpargs = (GEN)avma;
       char *start;
-      long len;
+      long len, narg, nloc;
 
       check_new_fun = ep;
 
@@ -2137,7 +2137,6 @@ identifier(void)
                      mark.identifier,mark.start);
       match('=');
       { /* checking function definition */
-        char *oldredef = redefine_fun;
         skipping_fun_def++;
         while (strncmp(analyseur,"local(",6) == 0)
         {
@@ -2146,7 +2145,7 @@ identifier(void)
           match(')'); while(separe(*analyseur)) analyseur++;
         }
         start = analyseur; skipseq(); len = analyseur-start;
-        skipping_fun_def--; redefine_fun = oldredef;
+        skipping_fun_def--;
       }
       /* function is ok. record it */
       newfun = ptr = (GEN) newbloc(narg+nloc + (len>>TWOPOTBYTES_IN_LONG) + 4);
@@ -2180,9 +2179,9 @@ identifier(void)
       /* record text */
       strncpy((char *)newfun, start, len);
       ((char *) newfun)[len] = 0;
-      if (EpVALENCE(ep) == EpUSER) gunclone((GEN)ep->value);
-     /* have to wait till here because of strncopy above. In pathological
+     /* wait till here for gunclone because of strncopy above. In pathological
       * cases, e.g. (f()=f()=x), new text is given by value of old one! */
+      if (EpVALENCE(ep) == EpUSER) gunclone((GEN)ep->value);
       ep->value = (void *)ptr;
       ep->valence = EpUSER;
       check_new_fun=NULL;
@@ -2771,9 +2770,8 @@ check_matcell()
 static void
 skipidentifier(void)
 {
-  int matchcomma=0;
+  int matchcomma;
   entree *ep;
-  char *old;
 
   mark.identifier = analyseur; ep = do_alias(skipentry());
   if (ep->code)
@@ -2789,6 +2787,7 @@ skipidentifier(void)
     analyseur++;
 
     /* Optimized for G and p. */
+    matchcomma = 0;
     while (*s == 'G') { match_comma(); skipexpr(); s++; }
     if (*s == 'p') s++;
     while (*s && *s != '\n') switch (*s++)
@@ -2881,6 +2880,7 @@ skipidentifier(void)
 	  break;
       case 81: case 82: skipexpr(); match(','); skipseq(); break;
       case 88:
+        matchcomma = 0;
         while (*analyseur != ')') { match_comma(); skipexpr(); };
         break;
       default: err(valencer1);
@@ -2896,8 +2896,6 @@ skipidentifier(void)
     case EpUSER: /* fonctions utilisateur */
     {
       char *ch1 = analyseur;
-      gp_args *f;
-      int i;
 
       if (*analyseur == '\'') analyseur++;
       if (*analyseur != '(')
@@ -2905,21 +2903,12 @@ skipidentifier(void)
 	if ( *analyseur != '='  ||  analyseur[1] == '=' ) return;
 	match('('); /* error */
       }
-      f = (gp_args*)ep->args;
       analyseur++;  /* skip '(' */
-      for (i = f->nloc + f->narg; i; i--)
-      {
-	if (do_switch(0,matchcomma))
-          matchcomma = 1;
-	else { match_comma(); skipexpr(); skipdecl(); }
-      }
-
-      if (*analyseur == ')')
-	if ( analyseur[1] != '=' || analyseur[2] == '=' )
+      skip_arg_block((gp_args*)ep->args);
+      if (*analyseur == ')' && (analyseur[1] != '=' || analyseur[2] == '='))
 	  { analyseur++; return; }
 
       /* here we are redefining a user function */
-      old = analyseur;
       if (*analyseur != ',' && *analyseur != ')') skipexpr();
       while (*analyseur == ',') { analyseur++; skipexpr(); }
       match(')');
@@ -2927,10 +2916,9 @@ skipidentifier(void)
       if (*analyseur != '=' || analyseur[1] == '=')
       {
         if (skipping_fun_def) return;
-        err(nparamer1,old,mark.start);
+        err(nparamer1,mark.identifier,mark.start);
       }
-      analyseur = ch1; matchcomma = 0;
-      if (!redefine_fun) redefine_fun = analyseur;
+      analyseur = ch1;
     } /* fall through */
 
     case EpNEW: /* new function */
@@ -2940,6 +2928,7 @@ skipidentifier(void)
 	err(paramer1, mark.identifier, mark.start);
       }
       check_new_fun = NOT_CREATED_YET; match('(');
+      matchcomma = 0;
       while (*analyseur != ')') { match_comma(); skipexpr(); skipdecl(); };
       match(')');
       if (*analyseur == '=' && analyseur[1] != '=')
