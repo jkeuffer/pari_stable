@@ -620,7 +620,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   long val,l;
   long n, cnd, complex=1;
   long card, phi_n;
-  if (flag<0 || flag>2) err(flagerr,"galoisubcyclo");
+  if (flag<0 || flag>2) err(flagerr,"galoissubcyclo");
   if ( v==-1 ) v=0;
   if (!sg) sg=gun;
   switch(typ(N))
@@ -635,6 +635,8 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       if (lg(N)==4)
       {
         Z=N;
+        if (typ(Z[3])!=t_VEC)
+          err(typeer,"galoissubcyclo");
         if (lg(Z[3])==1)
           n=1;
         else
@@ -650,7 +652,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
         break;
       }
     default: /*fall through*/
-      err(typeer,"galoisubcyclo");
+      err(typeer,"galoissubcyclo");
       return NULL;/*Not reached*/
   }
   if (n==1) {avma=ltop; return polx[v];}
@@ -684,7 +686,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       }
       break;
     default:
-      err(typeer,"galoisubcyclo");
+      err(typeer,"galoissubcyclo");
       return NULL;/*Not reached*/
   }
   if (!complex) /*Add complex conjugation*/
