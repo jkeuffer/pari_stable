@@ -105,13 +105,14 @@ IZ 16- readline: hit_return() would not work after Esc-H
    18- clean up in the bnrdisclist ray class group internal functions
    19- naming scheme for development versions library: libpari-2.2.so.0.0.0
    20- new Configure flags --share-prefix, --host
+   21- allow library functions to return NULL to the GP interpreter
 
   Added
     1- files README.WIN, config/[arch-osname|locatesymbol], doc/tex2mail.1
 GN  2- Jebelean extended gcd + rational number reconstruction
 XR  3- new flag to rnfconductor (check extension is abelian)
 IZ  4- set of default colors (boldfg)
-    5- modular univariate and bivariate resultant (internal for now).
+    5- modular univariate and bivariate resultant.
 
   Removed
     1- obsolete undocumented functions oldidealinv, idealinv0
