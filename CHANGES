@@ -37,6 +37,7 @@ Done for version 2.2.5 (released ??/11/2002): [hopefully]
   Fixed
     1- [bnfinit:] typo in be_honest() --> SEGV when cbach2 > cbach
     2- apprpadic() when p = 2 (could not work) + typos
+    3- typo in gphelp [detex mode]: ubiquitous "var" in translation!
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
