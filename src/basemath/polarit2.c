@@ -119,7 +119,7 @@ centermod_i(GEN x, GEN p, GEN ps2)
 	if (cmpii(p1,ps2)>0) p1=subii(p1,p);
 	y[i]=lpileupto(av,p1);
       }
-      return y;
+      return normalizepol_i(y, lx);
 
     case t_COL: lx=lg(x);
       y=cgetg(lx,t_COL);
