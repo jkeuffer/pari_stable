@@ -223,14 +223,16 @@ get_Char(GEN chic, long prec)
   C[3] = (long)d; return C;
 }
 
+/* factorization of conductor */
+static GEN
+factorcond(GEN bnr)
+{
+  GEN bid = (GEN)bnr[2];
+  return (GEN)bid[3];
+}
 /* prime divisors of conductor */
 static GEN
-divcond(GEN bnr)
-{ 
-  GEN bid = (GEN)bnr[2];
-  GEN fa = (GEN)bid[3];
-  return (GEN)fa[1];
-}
+divcond(GEN bnr) { return (GEN)factorcond(bnr)[1]; }
 
 /* Let chi a character defined over bnr and primitive over bnrc,
    compute the corresponding primitive character and the vectors of
@@ -746,7 +748,7 @@ ComputeArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   if (!gcmp1(gcoeff(idg, 1, 1)))
   {
     GEN p1 = idealfactor(nf, idg);
-    GEN p2 = divcond(bnr);
+    GEN p2 = factorcond(bnr);
     p2[2] = (long)zerocol(lg(p2[1])-1);
     p1 = concat_factor(p1,p2);
 
