@@ -75,7 +75,7 @@ if test -n "$DLLD"; then
   fi
   case "$osname" in
     os2) DLLDFLAGS="$CFLAGS -Zdll" ;; # assume DLLD = gcc
-    cygwin) DLLDFFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A),--export-all-symbols";;
+    cygwin) DLLDFLAGS="-Wl,--out-implib=\$(LIBPARI_SO)\$(_A),--export-all-symbols";;
   esac
   if test -n "$DLLDisGCC"; then
     DLLDFLAGS="-shared -mimpure-text \$(CFLAGS) $DLLDFLAGS"

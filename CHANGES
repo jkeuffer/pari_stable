@@ -107,7 +107,8 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
    44-  polredabs(x^4+9670527181567158504671*x^2+4840282594390812607599424249,16);
         --> impossible concatenation in concat [ from 2.2.5 ]
    45- [Cygwin compilation:] incorrect cygtop [ --> readline not found ]
-   46- [Cygwin:] DLL build. libpari.dll and gp-dyn build OK. Install still does        not work
+   46- [Cygwin:] DLL build. libpari.dll and gp-dyn build OK. Install does
+       not work in gp-sta (SEGV)
 
   Changed
     1- rnf structure (removed useless components)

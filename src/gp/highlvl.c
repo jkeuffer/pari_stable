@@ -40,7 +40,7 @@ install0(char *name, char *code, char *gpname, char *lib)
  /* dlopen(NULL) returns a handle to the running process. 
   * Bug report Y. Uchikawa: does not work for gp-dyn on FreeBSD 2.2.5
   */
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__CYGWIN__)
   if (! *lib) lib = DL_DFLT_NAME;
 #else
   if (! *lib) lib = NULL;
