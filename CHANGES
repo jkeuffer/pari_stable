@@ -125,6 +125,9 @@ IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    57- typo in nfroots [ returned inverse of roots when polynomial had small
        degree (using Trager's method) ]
    58- 'path' default incorrectly set on Cygwin
+   59- [internal:] isprincipalfact() incorrect if flag contained 
+       nf_GEN_IF_PRINCIPAL (was unused).
+   60- bnfisintnorm(bnfinit(y^4+y+1), -1) --> SEGV [ could occur for any unit ]
 
   Changed
     1- rnf structure (removed useless components)

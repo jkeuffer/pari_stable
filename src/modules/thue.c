@@ -14,6 +14,7 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
+#include "parinf.h"
 
 /* Thue equation solver. In all the forthcoming remarks, "paper"
  * designs the paper "Thue Equations of High Degree", by Yu. Bilu and
@@ -789,7 +790,7 @@ static long *n;        /* a = prod p^{ n_p }. n[i]=n_p if Primes[i] divides p */
 static long *inext;    /* index of first P above next p, 0 if p is last */
 static long *S;        /* S[i] = n[i] - sum_{ 1<=k<=i } f[k].u[k] */
 static long *u;        /* We want principal ideals I = prod Primes[i]^u[i] */
-static long **normsol; /* lists of copies of the u[] which are solutions */
+static GEN  *normsol; /* lists of copies of the u[] which are solutions */
 
 static long Nprimes; /* length(Relations) = #{max ideal above divisors of a} */
 static long sindex, smax; /* current index in normsol; max. index */
@@ -813,7 +814,7 @@ test_sol(long i)
   if (sindex == smax)
   {
     long new_smax = smax << 1;
-    long **new_normsol = (long **) new_chunk(new_smax+1);
+    GEN *new_normsol = (GEN*)new_chunk(new_smax+1);
 
     for (k=1; k<=smax; k++) new_normsol[k] = normsol[k];
     normsol = new_normsol; smax = new_smax;
@@ -821,8 +822,8 @@ test_sol(long i)
   sol = cgetg(Nprimes+1,t_VECSMALL);
   normsol[++sindex] = sol;
 
-  for (k=1; k<=i; k++) sol[k]=u[k];
-  for (   ; k<=Nprimes; k++) sol[k]=0;
+  for (k=1; k<=i; k++)       sol[k] = u[k];
+  for (   ; k<=Nprimes; k++) sol[k] = 0;
   if (DEBUGLEVEL>2)
   {
     fprintferr("sol = %Z\n",sol);
@@ -894,16 +895,16 @@ isintnorm_loop(long i)
 }
 
 static void
-get_sol_abs(GEN bnf, GEN a, GEN **ptPrimes)
+get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
 {
-  GEN dec, fact, primes, *Primes, *Fact;
+  GEN dec, fact, primes, Primes, *Fact;
   long *gcdlist, gcd,nprimes,Ngen,i,j;
 
   if (gcmp1(a))
   {
-    long *sol = new_chunk(Nprimes+1);
-    sindex = 1; normsol = (long**) new_chunk(2);
-    normsol[1] = sol; for (i=1; i<=Nprimes; i++) sol[i]=0;
+    GEN sol = cgetg(Nprimes+1, t_VECSMALL);
+    sindex = 1; normsol = (GEN*) new_chunk(2);
+    normsol[1] = sol; for (i=1; i<=Nprimes; i++) sol[i] = 0;
     return;
   }
 
@@ -940,12 +941,12 @@ get_sol_abs(GEN bnf, GEN a, GEN **ptPrimes)
   f = new_chunk(1+Nprimes); u = new_chunk(1+Nprimes);
   n = new_chunk(1+Nprimes); S = new_chunk(1+Nprimes);
   inext = new_chunk(1+Nprimes);
-  Primes = (GEN*) new_chunk(1+Nprimes);
+  Primes = cgetg(1+Nprimes, t_VEC);
   *ptPrimes = Primes;
 
   if (Ngen)
   {
-    Partial = (GEN*) new_chunk(1+Nprimes);
+    Partial   = (GEN*) new_chunk(1+Nprimes);
     Relations = (GEN*) new_chunk(1+Nprimes);
   }
   else /* trivial class group, no relations to check */
@@ -961,11 +962,11 @@ get_sol_abs(GEN bnf, GEN a, GEN **ptPrimes)
     v = (i==nprimes)? 0: j + lim;
     for (k=1; k < lim; k++)
     {
-      j++; Primes[j] = (GEN)dec[k];
+      j++; Primes[j] = dec[k];
       f[j] = itos(gmael(dec,k,4)) / gcd;
       n[j] = vn / gcd; inext[j] = v;
       if (Partial)
-	Relations[j] = isprincipal(bnf,Primes[j]);
+	Relations[j] = isprincipal(bnf, (GEN)Primes[j]);
     }
   }
   if (Partial)
@@ -984,7 +985,7 @@ get_sol_abs(GEN bnf, GEN a, GEN **ptPrimes)
 	gaffect(gzero,(GEN) Partial[i][j]);
       }
     }
-  smax=511; normsol = (long**) new_chunk(smax+1);
+  smax=511; normsol = (GEN*) new_chunk(smax+1);
   S[0]=n[1]; inext[0]=1; isintnorm_loop(0);
 }
 
@@ -1012,8 +1013,8 @@ get_unit_1(GEN bnf, GEN pol, GEN *unit)
 GEN
 bnfisintnorm(GEN bnf, GEN a)
 {
-  GEN nf,pol,res,unit,x,id, *Primes;
-  long sa,i,j,norm_1;
+  GEN nf, pol, res, unit, x, Primes;
+  long sa, i, norm_1;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7]; pol = (GEN)nf[1];
@@ -1029,23 +1030,28 @@ bnfisintnorm(GEN bnf, GEN a)
   norm_1 = 0; /* gcc -Wall */
   for (i=1; i<=sindex; i++)
   {
+    long sNx;
     x = normsol[i];
-    id = idealpow(nf,Primes[1], stoi(x[1]));
-    for (j=2; j<=Nprimes; j++) /* compute prod Primes[i]^u[i] */
-      id = idealmulpowprime(nf,id, Primes[j], stoi(x[j]));
-    x = (GEN) isprincipalgenforce(bnf,id)[2];
-    x = gmul((GEN)nf[7],x); /* x possible solution */
-    if (signe(gnorm(gmodulcp(x,(GEN)nf[1]))) != sa)
+    if (!Nprimes) { sNx = 1; x = gun; }
+    else
+    {
+      x = isprincipalfact(bnf, Primes, small_to_vec(x), NULL,
+                          nf_FORCE | nf_GEN_IF_PRINCIPAL);
+      x = basistoalg(nf, x);
+      sNx = signe(gnorm);
+    }
+    /* x solution, up to sign */
+    if (sNx != sa)
     {
       if (! unit) norm_1 = get_unit_1(bnf,pol,&unit);
       if (norm_1) x = gmul(unit,x);
       else
       {
         if (DEBUGLEVEL > 2) fprintferr("%Z eliminated because of sign\n",x);
-        x = NULL;
+        continue;
       }
     }
-    if (x) res = concatsp(res, gmod(x,pol));
+    res = concatsp(res, gmod(x, pol));
   }
   return gerepilecopy(av,res);
 }
