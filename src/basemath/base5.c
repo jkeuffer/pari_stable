@@ -266,7 +266,7 @@ makenfabs(GEN rnf)
   M = modulereltoabs(rnf, (GEN)rnf[7]);
   n = lg(M)-1;
   M = vecpol_to_mat(Q_remove_denom(M, &d), n);
-  if (d) M = gdiv(hnfcenter_ip(hnfmodidraw(M, d)), d);
+  if (d) M = gdiv(hnfcenter_ip(hnfmodid(M, d)), d);
   else   M = idmat(n);
 
   NF[1] = (long)pol;

@@ -2324,7 +2324,7 @@ hnf0(GEN A, int remove)
 GEN
 hnf(GEN x) { return hnf0(x,1); }
 
-enum { hnf_MODID = 1, hnf_PART = 2, hnf_RAW = 4 };
+enum { hnf_MODID = 1, hnf_PART = 2 };
 
 /* u*z[1..k] mod b, in place */
 static void
@@ -2340,11 +2340,9 @@ FpV_red_part_ip(GEN z, GEN p, long k)
   long i;
   for (i = 1; i <= k; i++) z[i] = lmodii((GEN)z[i], p);
 }
-/* dm = multiple of diag element (usually detint(x)) */
-/* flag & MODID: reduce mod dm * matid [ otherwise as above ]. Explicitly
- *               concatenate dm* matid unless (flag & RAW) */
-/* flag & PART: don't reduce once diagonal is known; */
-/* flag & RAW:  don't append dm * matid */
+/* dm = multiple of diag element (usually detint(x))
+ * flag & MODID: reduce mod dm * matid [ otherwise as above ].
+ * flag & PART: don't reduce once diagonal is known; */
 static GEN
 allhnfmod(GEN x, GEN dm, int flag)
 {
@@ -2418,7 +2416,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     if (!modid && i > 1) b = diviiexact(b,d);
   }
   for (i = 1; i <= ldef; i++) w[i] = (long)vec_Cei(li-1, i, dm);
-  if (modid && !(flag & hnf_RAW))
+  if (modid)
   { /* w[li] is an accumulator, discarded at the end */
     for (i = li-1; i > ldef; i--)
     { /* check that dm*Id \subset L + add up missing dm*Id components */
@@ -2474,8 +2472,6 @@ GEN
 hnfmod(GEN x, GEN detmat) { return allhnfmod(x,detmat, 0); }
 GEN
 hnfmodid(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID); }
-GEN
-hnfmodidraw(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID); }
 GEN
 hnfmodidpart(GEN x, GEN p) { return allhnfmod(x, p, hnf_MODID|hnf_PART); }
 

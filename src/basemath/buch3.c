@@ -557,7 +557,7 @@ rayclassno(GEN bnf,GEN ideal)
   cycbid = gmael(bid,2,2);
   if (lg(cycbid) == 1) return gerepileuptoint(av, icopy(h));
   D = get_dataunit(bnf, bid);
-  H = hnfmodidraw(D, (GEN)cycbid[1]); /* (Z_K/f)^* / units ~ Z^n / H */
+  H = hnfmodid(D, (GEN)cycbid[1]); /* (Z_K/f)^* / units ~ Z^n / H */
   return gerepileuptoint(av, mulii(h, dethnf_i(H)));
 }
 

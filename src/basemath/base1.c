@@ -1163,7 +1163,7 @@ nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec)
   A = Q_primitive_part(TI, &dA);
   mat[6] = (long)A; /* primitive part of codifferent, dA its denominator */
   dA = dA? diviiexact(T->dK, dA): T->dK;
-  A = hnfmodidraw(A, dA);
+  A = hnfmodid(A, dA);
   MDI = ideal_two_elt(nf, A);
   MDI[2] = (long)eltmul_get_table(nf, (GEN)MDI[2]);
   mat[7] = (long)MDI;
@@ -1185,7 +1185,7 @@ hnffromLLL(GEN nf)
   x = vecpol_to_mat((GEN)nf[7], degpol(nf[1]));
   x = Q_remove_denom(x, &d);
   if (!d) return x; /* power basis */
-  return gauss(hnfmodidraw(x, d), x);
+  return gauss(hnfmodid(x, d), x);
 }
 
 static GEN
@@ -1392,7 +1392,7 @@ nfpolred(int part, nfbasic_t *T)
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) a[i] = (long)RX_RXQ_compo((GEN)a[i], rev, xbest);
   mat = vecpol_to_mat(Q_remove_denom(a, &d), n);
-  if (d) mat = gdiv(hnfmodidraw(mat,d), d); else mat = idmat(n);
+  if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
 
   (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= mat_to_vecpol(mat, v);

@@ -196,7 +196,6 @@ GEN     hnflll_i(GEN A, GEN *ptB, int remove);
 GEN     hnfmod(GEN x, GEN detmat);
 GEN     hnfmodid(GEN x,GEN p);
 GEN     hnfmodidpart(GEN x, GEN p);
-GEN     hnfmodidraw(GEN x, GEN p);
 GEN     hnfperm(GEN x);
 GEN     intersect(GEN x, GEN y);
 GEN     jacobi(GEN a, long prec);
