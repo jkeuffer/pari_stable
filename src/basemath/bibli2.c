@@ -877,16 +877,16 @@ numtoperm(long n, GEN x)
   long i,a,r;
   GEN v,w;
 
-  if (n < 1) err(talker,"n too small (%ld) in numtoperm",n);
+  if (n < 0) err(talker,"n too small (%ld) in numtoperm",n);
   if (typ(x) != t_INT) err(arither1);
   v = cgetg(n+1, t_VEC);
-  v[1]=1; av = avma;
+  v[1] = 1; av = avma;
   if (signe(x) <= 0) x = modii(x, mpfact(n));
   for (r=2; r<=n; r++)
   {
     x = dvmdis(x,r,&w); a = itos(w);
     for (i=r; i>=a+2; i--) v[i] = v[i-1];
-    v[i]=r;
+    v[i] = r;
   }
   avma = av;
   for (i=1; i<=n; i++) v[i] = lstoi(v[i]);

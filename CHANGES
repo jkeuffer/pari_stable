@@ -78,6 +78,7 @@ BA  4- [Description system] Store GP functions in a database in
     6- ellpointtoz(E, P): remove the test that P be on E [ useless and
        often wrong when P has inexact entries]
     7- allow serconvol() with 0 series.
+MSo 8- allow numtoperm(0,k)  [ --> [] ]
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*
