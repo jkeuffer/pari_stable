@@ -2653,7 +2653,7 @@ break_loop(long numerr)
   static char *old = NULL;
   static Buffer *b = NULL;
   VOLATILE int go_on = 0;
-  VOLATILE char *s, *t;
+  char *s, *t;
   filtre_t F;
 
   if (b) jump_to_given_buffer(b);
