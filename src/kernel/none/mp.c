@@ -1423,7 +1423,11 @@ divrr(GEN x, GEN y)
     j=i; do x[--j]++; while (j && !x[j]);
   }
   x1 = x-1; for (j=i; j>=2; j--) x[j]=x1[j];
-  if (*x) { shift_right(x,x, 2,lz, 1,1); } else e--;
+  if (*x == 0) e--;
+  else if (*x == 1) { shift_right(x,x, 2,lz, 1,1); }
+  else { /* possible only when rounding up to 0x2 0x0 ... */
+    x[2] = HIGHBIT; e++;
+  }
   x[0] = evaltyp(t_REAL)|evallg(lz);
   x[1] = evalsigne(sx) | evalexpo(e);
   return x;
