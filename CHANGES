@@ -108,10 +108,13 @@ BA  1- function pith() [= pi(x), naïve implementation]
     2- new target for Makefile: gp.dbg
 BA  3- library functions FpX_roots_to_pol, FqX_roots_to_pol
 BA  4- library function FpX_FpXQ_compo (Brent & Kung)
-    5- library function FpM_inv and FpM_gauss
+    5- library function FpM_inv, FpM_gauss, ZM_inv, QM_inv
     6- library function primitive_part
 IZ  7- readline: allow switching readline editing on/off [for commandtools]
 IZ  8- readline: F1 has same effect as M-h, and F1F1 as M-H (short/long help)
+
+  Removed
+    1- obsolete functions twototwo, threetotwo, threetotwo2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.0 (released 30/04/2001):
