@@ -38,7 +38,6 @@ extern long u_center(ulong u, ulong p, ulong ps2);
 extern void gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 
 GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
-GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
 
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
