@@ -54,6 +54,7 @@ GEN   divrsns(GEN x, long i);
 GEN   init_remiimul(GEN M);
 ulong invrev(ulong b);
 GEN   ishiftr_lg(GEN x, long lx, long n);
+GEN   logagmcx(GEN q, long prec);
 GEN   muliispec(GEN x, GEN y, long nx, long ny);
 GEN   ptolift(GEN x, GEN Y);
 GEN   red_montgomery(GEN T, GEN N, ulong inv);

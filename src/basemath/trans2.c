@@ -27,6 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                          ARCTANGENT                            **/
 /**                                                                **/
 /********************************************************************/
+#define AGM_ATAN_LIMIT 130
 
 static GEN
 mpatan(GEN x)
@@ -43,6 +44,15 @@ mpatan(GEN x)
     y = Pi2n(-2, l+1); if (sx < 0) setsigne(y,-1);
     return y;
   }
+  if (l > AGM_ATAN_LIMIT)
+  {
+    av = avma;
+    y = cgetg(3, t_COMPLEX);
+    y[1] = un;
+    y[2] = (long)x;
+    return gerepileuptoleaf(av, (GEN)logagmcx(y,l)[2]);
+  }
+
   e = expo(x); inv = (e >= 0); /* = (|x| > 1 ) */
   if (e > 0) lp += (e>>TWOPOTBITS_IN_LONG);
 
@@ -151,7 +161,15 @@ gatan(GEN x, long prec)
 static GEN
 mpasin(GEN x) {
   pari_sp av = avma;
-  GEN z = mpatan( divrr(x, sqrtr( subsr(1, mulrr(x,x)) )) );
+  GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
+  if (lg(x) > AGM_ATAN_LIMIT)
+  {
+    z = cgetg(3, t_COMPLEX);
+    z[1] = (long)a;
+    z[2] = (long)x; z = (GEN)logagmcx(z, lg(x))[2];
+  }
+  else
+    z = mpatan(divrr(x, a));
   return gerepileuptoleaf(av, z);
 }
 
@@ -219,7 +237,15 @@ static GEN
 mpacos(GEN x)
 {
   pari_sp av = avma;
-  GEN z = mpatan( divrr(sqrtr( subsr(1, mulrr(x,x)) ), x) );
+  GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
+  if (lg(x) > AGM_ATAN_LIMIT)
+  {
+    z = cgetg(3, t_COMPLEX);
+    z[1] = (long)x;
+    z[2] = (long)a; z = (GEN)logagmcx(z, lg(x))[2];
+  }
+  else
+    z = mpatan(divrr(a, x));
   return gerepileuptoleaf(av, z);
 }
 

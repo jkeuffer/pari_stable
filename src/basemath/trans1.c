@@ -1606,7 +1606,7 @@ logagmr_abs(GEN q)
   affr_fixlg(y, z); return z;
 }
 
-/* assume imaginary part is non-zero */
+/* assume Im(q) != 0 */
 GEN
 logagmcx(GEN q, long prec)
 {
