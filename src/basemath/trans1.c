@@ -1366,13 +1366,14 @@ paexp(GEN x)
 {
   long k, e = valp(x), pp = precp(x), n = e + pp;
   pari_sp av;
-  GEN y,r,p1;
+  GEN y, r, p1;
+  int is2 = egalii(gdeux, (GEN)x[2]);
 
   if (gcmp0(x)) return gaddgs(x,1);
-  if (e<=0 || (!cmpis((GEN)x[2],2) && e==1))
+  if (e<=0 || (e == 1 && is2))
     err(talker,"p-adic argument out of range in gexp");
   av = avma;
-  if (egalii(gdeux,(GEN)x[2]))
+  if (is2)
   {
     n--; e--; k = n/e;
     if (n%e==0) k--;
