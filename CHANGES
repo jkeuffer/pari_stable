@@ -6,6 +6,7 @@ DB = Dominique Bernardi
 DC = Dan Christensen
 DE = Denis Excoffier
 DF = David Ford
+DS = Denis Simon
 GH = Guillaume Hanrot
 GN = Gerhard Niklasch
 GT = Glenn Thobe
@@ -123,7 +124,8 @@ BA 77- typo in isinexactfield
    90- inconsistant spacing after GP error messages
    91- regrouped code between idealred and idealmin
    92- prevent 'install' in secure mode
-   93-
+DS 93- typo in bnfisnorm(,,flag > 1) [extraneous gtrans]
+   94- don't reset pariErr in err_recover()
 
   Added
 IZ  1- [gnuplot] look up directory tree for gnuplot related files

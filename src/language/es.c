@@ -176,11 +176,11 @@ normalErrF(void)
 PariOUT defaultErr = {normalErrC, normalErrS, normalErrF, NULL};
 
 void
-initout(void)
+initout(int initerr)
 {
   infile = stdin; pari_outfile = stdout; errfile = stderr;
   pariOut = &defaultOut;
-  pariErr = &defaultErr;
+  if (initerr) pariErr = &defaultErr;
 }
 
 void
@@ -454,7 +454,7 @@ print_prefixed_text(char *s, char *prefix, char *str)
     {
       while (is_blank(*s)) s++;
       linelen += oldwlen;
-      if (linelen > w)
+      if (linelen >= w)
       {
         _new_line(prefix);
         linelen = oldwlen + prelen;
@@ -468,13 +468,13 @@ print_prefixed_text(char *s, char *prefix, char *str)
   else
     { *(u-2) = 0; oldwlen--; }
   linelen += oldwlen;
-  if (linelen > w) { _new_line(prefix); linelen = prelen + oldwlen; }
+  if (linelen >= w) { _new_line(prefix); linelen = prelen + oldwlen; }
   pariputs(word);
   if (str)
   {
     long i,len = strlen(str);
     int space = (*str == ' ' && str[1]);
-    if (linelen + len > w)
+    if (linelen + len >= w)
     {
       _new_line(prefix); linelen = prelen;
       if (space) { str++; len--; space = 0; }
@@ -643,7 +643,6 @@ get_pari_package(int i)
   (void)i;
   return &PARI_exports_1;
 }
-
 
 /********************************************************************/
 /**                                                                **/

@@ -58,7 +58,6 @@ static char *help_prg,*path;
 static char prompt[MAX_PROMPT_LEN];
 static char thestring[256];
 static long prettyp, test_mode, quiet_mode, gpsilent, simplifyflag;
-static long secure;
 static long chrono, pariecho, primelimit, parisize, strictmatch;
 static long tglobal, histsize, paribufsize, lim_lines;
 static gp_format fmt;
@@ -2207,17 +2206,6 @@ error0(GEN *g)
   pariputs("###   User error:\n\n   ");
   print0(g,f_RAW); term_color(c_NONE);
   err_recover(talker);
-}
-
-void 
-gpinstall(char *s, char *code, char *gpname, char *lib)
-{
-  if (secure)
-  {
-    fprintferr("[secure mode]: about to install '%s'. OK ? (^C if not)\n",s);
-    hit_return();
-  }
-  install0(s, code, gpname, lib);
 }
 
 void errcontext(char *msg, char *s, char *entry);

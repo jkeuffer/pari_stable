@@ -14,14 +14,7 @@
 #endif
 
 void kill0(entree *ep);
-void gpinstall(char *name, char *code, char *gpname, char *lib);
-
-void
-addhelp(entree *ep, char *s)
-{
-  if (ep->help && ! EpSTATIC(ep)) free(ep->help);
-  ep->help = pari_strdup(s);
-}
+long secure;
 
 #ifdef HAS_DLOPEN
 #include <dlfcn.h>
@@ -31,7 +24,7 @@ install0(char *name, char *code, char *gpname, char *lib)
   void *f, *handle;
 
  /* dlopen(NULL) returns a handle to the running process. 
-  * bug report Y. Uchikawa: does not work for gp-dyn on FreeBSD 2.2.5
+  * Bug report Y. Uchikawa: does not work for gp-dyn on FreeBSD 2.2.5
   */
 #ifdef __FreeBSD__
   if (! *lib) lib = DL_DFLT_NAME;
@@ -64,8 +57,12 @@ install0(char *name, char *code, char *gpname, char *lib)
   FARPROC f;
   HMODULE handle;
 #ifdef WINCE
-  short wlib[256];
-  short wname[256];
+  short wlib[256], wname[256];
+
+  MultiByteToWideChar(CP_ACP, 0, lib, strlen(lib)+1, wlib, 256);
+  MultiByteToWideChar(CP_ACP, 0, name, strlen(name)+1, wname, 256);
+  lib = wlib;
+  name = wname;
 #endif
 
 #ifdef DL_DFLT_NAME
@@ -73,23 +70,13 @@ install0(char *name, char *code, char *gpname, char *lib)
 #endif
   if (! *gpname) gpname=name;
   
-#ifdef WINCE
-  MultiByteToWideChar(CP_ACP, 0, lib, strlen(lib)+1, wlib, 256);
-  handle = LoadLibrary(wlib);
-#else
   handle = LoadLibrary(lib);
-#endif
   if (!handle)
   {
     if (lib) err(talker,"couldn't open dynamic library '%s'",lib);
     err(talker,"couldn't open dynamic symbol table of process");
   }
-#ifdef WINCE
-  MultiByteToWideChar(CP_ACP, 0, name, strlen(name)+1, wname, 256);
-  f = GetProcAddress(handle,wname);
-#else
   f = GetProcAddress(handle,name);
-#endif
   if (!f)
   {
     if (lib) err(talker,"can't find symbol '%s' in library '%s'",name,lib);
@@ -102,6 +89,24 @@ void
 install0(char *name, char *code, char *gpname, char *lib) { err(archer); }
 #endif
 #endif
+
+void 
+gpinstall(char *s, char *code, char *gpname, char *lib)
+{
+  if (secure)
+  {
+    fprintferr("[secure mode]: about to install '%s'. OK ? (^C if not)\n",s);
+    hit_return();
+  }
+  install0(s, code, gpname, lib);
+}
+
+void
+addhelp(entree *ep, char *s)
+{
+  if (ep->help && ! EpSTATIC(ep)) free(ep->help);
+  ep->help = pari_strdup(s);
+}
 
 static long
 get_type_num(char *st)

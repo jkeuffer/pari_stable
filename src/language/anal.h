@@ -43,7 +43,7 @@ char *term_get_color(int c);
 void push_val(entree *ep, GEN a);
 void pop_val(entree *ep);
 
-extern long prec;
+extern long prec, secure;
 extern GEN gnil;
 
 extern char *current_function;
@@ -71,7 +71,7 @@ extern entree  functions_gp[];
 extern entree  gp_member_list[];
 extern char   *helpmessages_highlevel[];
 extern entree  functions_highlevel[];
-extern int    gp_colors[];
+extern int     gp_colors[];
 extern int     disable_color,added_newline;
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
