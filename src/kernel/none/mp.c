@@ -1880,10 +1880,11 @@ void setmuli(long a) { KARATSUBA_MULI_LIMIT = a; }
 GEN
 speci(GEN x, long nx)
 {
-  GEN z = cgeti(nx+2);
+  GEN z;
   long i;
+  if (!nx) return gzero;
+  z = cgeti(nx+2); z[1] = evalsigne(1)|evallgefint(nx+2);
   for (i=0; i<nx; i++) z[i+2] = x[i];
-  z[1] = evalsigne(1)|evallgefint(nx+2);
   return z;
 }
 #else
@@ -2149,7 +2150,7 @@ resmod2n(GEN x, long n)
 static GEN
 quicksqri(GEN a, long na)
 {
-  GEN a0,c,c0,c1;
+  GEN a0,c;
   long av,n0,n0a,i;
 
   if (na < KARATSUBA_SQRI_LIMIT) return sqrispec(a,na);
@@ -2159,14 +2160,14 @@ quicksqri(GEN a, long na)
   c = quicksqri(a,na);
   if (n0a)
   {
-    c0 = quicksqri(a0,n0a);
+    GEN t, c1, c0 = quicksqri(a0,n0a);
 #if 0
     c1 = shifti(quickmulii(a0,a, n0a,na),1);
 #else /* slower !!! */
-    a = addiispec(a0,a,n0a,na);
-    a = quicksqri(a+2,lgefint(a)-2);
+    t = addiispec(a0,a,n0a,na);
+    t = quicksqri(t+2,lgefint(t)-2);
     c1= addiispec(c0+2,c+2, lgefint(c0)-2, lgefint(c)-2);
-    c1= subiispec(a+2, c1+2, lgefint(a)-2, lgefint(c1)-2);
+    c1= subiispec(t+2, c1+2, lgefint(t)-2, lgefint(c1)-2);
 #endif
     c = addshiftw(c,c1, n0);
     c = addshiftw(c,c0, n0);
