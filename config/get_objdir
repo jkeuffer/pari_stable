@@ -1,6 +1,9 @@
 # Target directory for object files
 pre=O
 cst_objdir=$pre$osname-$arch;
+case "$kernlvl1" in
+  gmp) cst_objdir=$cst_objdir-gmp;;
+esac
 case "$optimization" in
   full)      objdir=$cst_objdir;;
   debugging) objdir=$cst_objdir.dbg ;;
