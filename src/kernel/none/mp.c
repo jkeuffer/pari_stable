@@ -2156,7 +2156,7 @@ resmod2n(GEN x, long n)
   { /* strip leading zeroes from result */
     xd++; while (k && !*xd) { k--; xd++; }
     if (!k) return gzero;
-    ly = k+2;
+    ly = k+2; xd--;
   }
   else
     ly = k+3;
