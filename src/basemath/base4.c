@@ -1533,7 +1533,7 @@ GEN
 ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
 {
   long tx,N,av,i,j;
-  GEN I0,res,aI,p1,y,x,Nx,b,c,pol;
+  GEN I0,res,aI,p1,y,x,Nx,b,c1,c,pol;
 
   nf = checknf(nf);
   vdir = chk_vdir(nf,vdir);
@@ -1561,7 +1561,7 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   if (tx != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
 
   if (DEBUGLEVEL>=6) msgtimer("entering idealllred");
-  c = content(I); if (!gcmp1(c)) I = gdiv(I,c);
+  c1 = content(I); if (gcmp1(c1)) c1 = NULL; else I = gdiv(I,c1);
 
   for (i=1; ; i++)
   {
@@ -1597,9 +1597,9 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
     {
       if (typ(aI) == t_POLMOD)
       {
-        c = gclone(c);
+        c1 = gclone(c1);
         I = gerepileupto(av, I);
-        aI = gmul(c,aI); gunclone(c);
+        aI = gmul(c1,aI); gunclone(c1);
       }
       else
       {
@@ -1623,7 +1623,10 @@ ideallllredall(GEN nf, GEN I, GEN vdir, long prec, long precint)
   if (DEBUGLEVEL>=6) msgtimer("new ideal");
   if (aI)
   {
-    y = (typ(aI) == t_POLMOD)? gmul(x,c): gneg_i(get_arch(nf,y,prec));
+    if (typ(aI) == t_POLMOD)
+      y = gmul(x, gdiv(c1? mulii(c,c1): c,Nx));
+    else
+      y = gneg_i(get_arch(nf,y,prec));
     y = gclone(y);
   }
 
