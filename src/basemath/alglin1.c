@@ -904,7 +904,7 @@ _addmul(GEN b, long k, long i, GEN m)
  *
  * li > aco is allowed if b = NULL, in which case return c such that c a = Id */
 GEN
-gauss(GEN a, GEN b)
+gauss_intern(GEN a, GEN b)
 {
   long inexact,iscol,i,j,k,av,lim,li,bco, aco = lg(a)-1;
   GEN p,m,u;
@@ -940,12 +940,12 @@ gauss(GEN a, GEN b)
         e = gexpo(gcoeff(a,j,i));
         if (e > ex) { ex=e; k=j; }
       }
-      if (gcmp0(gcoeff(a,k,i))) err(matinv1);
+      if (gcmp0(gcoeff(a,k,i))) return NULL;
     }
     else if (gcmp0(p)) /* first non-zero pivot */
     {
       do k++; while (k<=li && gcmp0(gcoeff(a,k,i)));
-      if (k>li) err(matinv1);
+      if (k>li) return NULL;
     }
 
     /* if (k!=i), exchange the lines s.t. k = i */
@@ -997,6 +997,14 @@ gauss(GEN a, GEN b)
     }
   }
   return gerepileupto(av, gcopy(u));
+}
+
+GEN
+gauss(GEN a, GEN b)
+{
+  GEN z = gauss_intern(a,b);
+  if (!z) err(matinv1);
+  return z;
 }
 
 /* x a matrix with integer coefficients. Return a multiple of the determinant

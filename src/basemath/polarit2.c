@@ -940,6 +940,7 @@ init_padic_prec(long e, int BitPerFactor, long n0, double LOGp2)
 
 extern GEN sindexrank(GEN x);
 extern GEN vconcat(GEN Q1, GEN Q2);
+extern GEN gauss_intern(GEN a, GEN b);
 
 /* Recombination phase of Berlekamp-Zassenhaus algorithm using a variant of
  * van Hoeij's knapsack
@@ -989,7 +990,15 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
     if (tmax > 0)
     { /* bound small vector in terms of a modified L2 norm of a
        * left inverse of BL */
-      Nx = gtodouble(my_norml2(gmul(run, invmat(BL))));
+      GEN z = gauss_intern(BL,NULL); /* 1/BL */
+      if (!z) /* not maximal rank */
+      {
+        avma = av2;
+        BL = hnfall_i(BL,NULL,1);
+        r = lg(BL)-1; z = invmat(BL);
+        av2 = avma;
+      }
+      Nx = gtodouble(my_norml2(gmul(run, z)));
       avma = av2;
     }
     else
