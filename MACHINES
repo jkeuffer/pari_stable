@@ -38,6 +38,7 @@ alpha21164   500Mhz  Linux-2.2.13    gcc-2.95.3     4319    4253  2.2.2 (27)
 alpha21064   172Mhz  OSF1-3.0        cc            34104   35564  2.1.1
 ------------------------------------------------------------------------------
 Sun/SPARC
+UltraSPARC-IIe 502MHz Solaris-8      gcc            3608    3646  2.1.4     HR
 UltraSPARC60 450MHz  Solaris-7       gcc            3970    4010  2.0.19    IS
 UltraSPARC60 450MHz  Solaris-7        cc            5070    5210  2.0.19    IS
 UltraSPARC2i 440MHz  Solaris-8       gcc-2.95.2     3502    3486  2.2.4
@@ -331,6 +332,7 @@ Contributors:
   GN = Gerhard Niklasch
   HC = Henri Cohen
   HG = Herbert Gangl
+  HR = Herman te Riele
   HS = Hans Schaechl
   IS = Igor Schein
   JC = John Cremona
