@@ -2373,47 +2373,6 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
       fprintferr("B = %Z\n",B);
     }
   }
-/* [LLLKERIM]
-  u1u2=lllkerim(matgen); u1=(GEN)u1u2[1]; u2=(GEN)u1u2[2];
-  if (DEBUGLEVEL>6) fprintferr("lllkerim done\n");
-  if (lg(u2)<=lnz)
-    err(talker,"matrix not of maximal rank in hermite spec");
-  p1=gmul(matgen,u2);
-  detmat=absi(det(p1));
-  if (DEBUGLEVEL>6) fprintferr("det done\n");
-  H=hnfmod(p1,detmat);
-  if (DEBUGLEVEL>6) fprintferr("hnfmod done\n");
-  p2=gmul(u1,lllint(u1));
-  if (DEBUGLEVEL>6) fprintferr("lllint done\n");
-  p3=gmul(u2,gauss(p1,H));
-  if (DEBUGLEVEL>6) fprintferr("gauss done\n");
-  U=cgetg(col+1,t_MAT);
-  for (j=1; j<lg(p2); j++) U[j]=p2[j];
-  for (j=lg(p2); j<=col; j++) U[j]=p3[j+1-lg(p2)]; */
-
-/* [HNFHAVAS]
-
-  p2=hnfhavas(matgen); p1=(GEN)p2[1]; U=(GEN)p2[2]; p5=(GEN)p2[3];
-  if (DEBUGLEVEL>6) fprintferr("hnfhavas done\n");
-  for (i=1; i < lg(p1) && gcmp0(p1[i]); i++);
-  i1=i-1;
-  u1=cgetg(i,t_MAT); for (j=1; j<i; j++) u1[j]=U[j];
-  H=cgetg(j1=lg(p1)-i1,t_MAT); for (j=1; j<j1; j++) H[j]=p1[i1+j];
-  p2=cgetg(lg(p5),t_VEC);
-  for (i=1; i<lg(p5); i++) p2[i]=lstoi(perm[nlze+itos(p5[i])]);
-  for (i=1; i<lg(p5); i++) perm[nlze+i]=itos(p2[i]);
-  p2=u1;
-  p1=cgetg(j1,t_MAT); for (j=1; j<j1; j++) p1[j]=U[i1+j];
-  Bnew=cgetg(co-col,t_MAT);
-  for (j=1; j<co-col; j++)
-  {
-  p3=cgetg(lig+1,t_COL); Bnew[j]=(long)p3;
-  for (i=1; i<=nlze; i++) p3[i]=coeff(B,i,j);
-  for (; i<=lig; i++) p3[i]=coeff(B,nlze+itos(p5[i-nlze]),j);
-  }
-  B=Bnew; */
-
-/* [HNFBATUT] */
   p1 = hnfall(matgen);
   H = (GEN)p1[1]; /* lnz x lnz */
   U = (GEN)p1[2]; /* col x col */
@@ -2426,11 +2385,10 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
 
   av = avma; lim = stack_lim(av,1);
   Cnew = cgetg(co,t_MAT);
-  setlg(C, col+1);
-  p1 = gmul(C,U); setlg(C, co);
+  setlg(C, col+1); p1 = gmul(C,U);
   for (j=1; j<=col; j++) Cnew[j] = p1[j];
   for (   ; j<co ; j++)  Cnew[j] = C[j];
-  if (DEBUGLEVEL>5) fprintferr("    hnfall done\n");
+  if (DEBUGLEVEL>5) fprintferr("    hnflll done\n");
 
   /* Clean up B using new H */
   for (s=0,i=lnz; i; i--)
@@ -2510,9 +2468,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     if (DEBUGLEVEL>6)
     {
       if (nlze) fprintferr("dep = %Z\n",depnew);
-      fprintferr("mit = %Z\n",Hnew); outerr(Hnew);
-      fprintferr("B = %Z\n",Bnew);
-      fprintferr("C = %Z\n",C);
+      fprintferr("mit = %Z\nB = %Z\nC = %Z\n", Hnew, Bnew, C);
     }
   }
   if (nlze) *ptdep = depnew;
