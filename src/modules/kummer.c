@@ -546,7 +546,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, GEN tau)
   GEN g,Plog,raycycz,rayclgpz,genraycycz,U,polrel,steinitzZk;
   GEN nf = checknf(bnr);
 
-  polrel = computepolrel((GEN)nf[1], tau, polx[vnf]);
+  polrel = computepolrel((GEN)nf[1], polx[vnf], tau);
   steinitzZk = steinitzaux(nf,idmat(degKz), polrel); 
   rayclgpz = (GEN)bnrz[5];
   raycycz   = (GEN)rayclgpz[2]; l=lg(raycycz);
@@ -885,6 +885,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   {
     if (!gcmp0(subgroup)) gell = det(subgroup);
     else gell = det(diagonal(gmael(bnr,5,2)));
+    if (typ(gell) != t_INT) err(arither1);
   }
   if (gcmp1(gell)) { avma = av; return polx[varn(gmael3(bnr,1,7,1))]; }
   if (!isprime(gell)) err(impl,"kummer for composite relative degree");
@@ -893,7 +894,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (all && gcmp0(subgroup))
     err(talker,"kummer when zeta not in K requires a specific subgroup");
   bnf = (GEN)bnr[1];
-  nf = (GEN)bnf[7];
+  nf  = (GEN)bnf[7];
   polnf = (GEN)nf[1]; vnf = varn(polnf); degK = degpol(polnf);
   if (!vnf) err(talker,"main variable in kummer must not be x");
       /* step 7 */
