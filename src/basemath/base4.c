@@ -397,7 +397,7 @@ mat_ideal_two_elt(GEN nf, GEN x)
 {
   GEN y,a,beta,cx,xZ,mul;
   long i,lm, N = degpol(nf[1]);
-  gpmem_t av,tetpil;
+  gpmem_t av0,av,tetpil;
 
   y = cgetg(3,t_VEC); av = avma;
   if (lg(x[1]) != N+1) err(typeer,"ideal_two_elt");
@@ -416,15 +416,17 @@ mat_ideal_two_elt(GEN nf, GEN x)
     y[1] = lpilecopy(av,cx);
     y[2] = (long)gscalcol(cx, N); return y;
   }
+  av0 = avma;
   a = NULL; /* gcc -Wall */
   beta= cgetg(N+1, t_VEC);
   mul = cgetg(N+1, t_VEC); lm = 1; /* = lg(mul) */
   /* look for a in x such that a O/xZ = x O/xZ */
   for (i=2; i<=N; i++)
   {
+    gpmem_t av1 = avma;
     GEN t, y = eltmul_get_table(nf, (GEN)x[i]);
-    t = gmod(y, xZ);
-    if (gcmp0(t)) continue;
+    t = FpM_red(y, xZ);
+    if (gcmp0(t)) { avma = av1; continue; }
     if (ok_elt(x,xZ, t)) { a = (GEN)x[i]; break; }
     beta[lm]= x[i];
     /* mul[i] = { canonical generators for x[i] O/xZ as Z-module } */
