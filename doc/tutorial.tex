@@ -2005,10 +2005,10 @@ assignments to \kbd{v} in each of the three branches, and take the norm of
 \kbd{v} at the very end. 
 
 Notice that this is certainly not foolproof (try it with complex or quadratic
-arguments!), but we could refine it if the need arose. In fact there was no
-need for this function, since you can consider (\kbd{u}) as a principal
-ideal, and just type \kbd{idealnorm(nf,u)} whatever the chosen representation
-for \kbd{u}. We'll talk about ideals later on.
+arguments!), but we could refine it if the need arose. In fact, you can
+consider (\kbd{u}) as a principal ideal, and just type \kbd{idealnorm(nf,u)}
+whatever the chosen representation for \kbd{u}. Of course, in this way, we
+lose the sign information. We'll talk about ideals later on.
 
   If we want all the symmetric functions of \kbd{u} and not only the norm, we
 type \kbd{charpoly(u)}. Note that this gives the characteristic polynomial of
@@ -2101,12 +2101,13 @@ and the factors of 1537461 will not be looked at! (In this example it would
 be stupid to cheat, but if the discriminant has 2000 digits, this can be a
 handy trick.)
 
-3) A last way will work iff the \emph{field} discriminant is smooth (never
+3) A last way will work if the \emph{field} discriminant is smooth (never
 mind the polynomial discriminant). Simply call \kbd{B = nfbasis(T, 1)}, which
 will return a basis for an order which is possibly not maximal. In fact, it
-will be maximal iff the field discriminant is smooth with respect to the
-precomputed prime table, including \kbd{addprimes} offsprings. You may then
-input the resulting basis to \kbd{nfinit}, as \kbd{nfinit([T, B])}.
+will be maximal if the field discriminant is smooth with respect to the
+precomputed prime table, including \kbd{addprimes} offsprings (assuming the
+later are genuine primes). You may then input the resulting basis to
+\kbd{nfinit}, as \kbd{nfinit([T, B])}.
 
 \subsec{Ideals}
 
@@ -2119,13 +2120,13 @@ ideal expressed on the integral basis \kbd{nf.zk}. Standard means that most
 ideal related functions will use this representation for their output.
 
 Prime ideals can be represented in a special form as well (see
-\kbd{idealprimedec} in Chapter~3) and all ideal-related functions will accept
-them. On the other hand, the function \kbd{idealtwoelt} can be used to find a
-two-element $\Z_K$-basis of a given ideal (as $a\Z_K + b\Z_K$, where $a$ and
-$b$ belong to $K$), but this is \emph{not} a valid representation for an
-ideal under \kbd{gp}, and most functions will choke on it (or worse, take it
-for something else and output a meaningless result). To be able to use such
-an ideal, you will first have to convert it to HNF form.
+\kbd{idealprimedec}) and all ideal-related functions will accept them. On the
+other hand, the function \kbd{idealtwoelt} can be used to find a two-element
+$\Z_K$-basis of a given ideal (as $a\Z_K + b\Z_K$, where $a$ and $b$ belong
+to $K$), but this is \emph{not} a valid representation for an ideal under
+\kbd{gp}, and most functions will choke on it (or worse, take it for
+something else and output a meaningless result). To be able to use such an
+ideal, you will first have to convert it to HNF form.
 
 Whereas it's very easy to go to HNF form (use \kbd{idealhnf(nf,id)} for valid
 ideals, or \kbd{idealhnf(nf,a,b)} for a two-element representation as above),
@@ -2239,7 +2240,7 @@ to find the remainder of the characteristic polynomial of \kbd{u2} divided by
 coefficients, and we know that \kbd{u2}, being a root of both polynomials,
 is the root of \kbd{r}, hence can be obtained by typing 
 \bprog
-  u2 = -coeff(r,0) / coeff(r,1)
+  u2 = -polcoeff(r,0) / polcoeff(r,1)
 @eprog
 
   A last method is to use \kbd{nffactor(nf, y\pow 2 + u)}. Except that this
@@ -2257,8 +2258,8 @@ solved with PARI, namely the one associated to the invertible elements modulo
 an ideal: $(\Z_K / I)^*$. Just use \kbd{idealstar} (this is an \kbd{init}
 function) and \kbd{ideallog}.
 
-Most functions that you would want on ideals are available. We mention here
-the complete list, referring to Chapter 3 for detailed explanations:
+Many more functions on ideals are available. We mention here the complete
+list, referring to Chapter 3 for detailed explanations:
 
 \kbd{idealadd}, \kbd{idealaddtoone}, \kbd{idealappr}, \kbd{idealchinese},
 \kbd{idealcoprime}, \kbd{idealdiv}, \kbd{idealfactor}, \kbd{idealhnf},
@@ -2339,13 +2340,13 @@ the random seed before the computation. This was the purpose of the initial
 
 We are now ready to perform operations in the class group. First and
 foremost, let us certify the result: type \kbd{bnfcertify(bnf)}. The
-output is \kbd{1} if all went well, in fact no other output is possible,
+output is \kbd{1} if all went well; in fact no other output is possible,
 whether the input is correct or not, but you can get an error message (or in
 exceedingly rare cases an infinite loop) if it is incorrect.
 
 It means that we now know the class group and fundamental units
 unconditionally (no more GRH then!). In this case, the certification process
-takes a very short time, and you might wonder why it was not built in as a
+takes a very short time, and you might wonder why it is not built in as a
 final check in the \kbd{bnfinit} function. The answer is that as the
 regulator gets bigger this process gets increasingly difficult, and becomes
 soon impractical, while \kbd{bnfinit} still happily spits out results. So it
@@ -2369,7 +2370,7 @@ the generator \kbd{g} given in \kbd{bnf.gen}, in other words that it is a
 principal ideal. The second component gives us the algebraic number $\alpha$
 such that $\kbd{pr4}=\alpha\Z_K$, $\alpha$ being as usual expressed on the
 integral basis. Type \kbd{alpha = v[2]}. Let us check that the result is
-correct: first, type \kbd{idealnorm(bnf, alpha)} (Note that we can use a
+correct: first, type \kbd{idealnorm(bnf, alpha)}. (Note that we can use a
 \kbd{bnf} with all the \kbd{nf} functions; but not the other way round, of
 course.) It is indeed equal to $7^4 = 2401$, which is the norm of \kbd{pr4}.
 This is only a first check. The complete check is obtained by computing the
