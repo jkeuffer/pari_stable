@@ -653,16 +653,19 @@ coinit(long x)
   pariputs(p); return 9 - (p - cha);
 }
 
-/* as above, printing leading 0s, return # significant digits printed */
+/* as above, printing leading 0s, return # significant digits printed
+ * print at most dec significant digits */
 static long
-coinit2(long x)
+coinit2(long x, long dec)
 {
   char cha[10], *p = cha + 9;
   int i = 0;
 
   for (*p = 0; p > cha; x /= 10) *--p = x%10 + '0';
   while (cha[i] == '0') i++;
-  pariputs(cha); return 9 - i;
+  i = 9-i; /* # significant digits to print */
+  if (i > dec) { i = dec; cha[dec] = 0; }
+  pariputs(cha); return i;
 }
 
 
@@ -778,7 +781,7 @@ wr_float(GEN x)
   if (!s)
   {
     while (!*res) { res++; pariputs("000000000"); }
-    d = coinit2(*res++);
+    d = coinit2(*res++, dec);
   }
 
   /* d = # significant digits already printed */
