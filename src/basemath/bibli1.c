@@ -750,7 +750,7 @@ GEN
 lllint_ip(GEN x, long D)
 {
   GEN fl, h = lllint_i(x, D, 0, NULL, &fl, NULL);
-  if (!h) h = lll_trivial(x, lll_IM);
+  if (!h) return x;
   return lll_finish(h, fl, lll_IM);
 }
 
