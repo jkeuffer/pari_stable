@@ -1230,11 +1230,20 @@ oldidealinv(GEN nf, GEN x)
   res[1]=(long)dual; res[2]=lneg(ax); return res;
 }
 
+/* return p * P^(-1)  [integral] */
+GEN
+pidealprimeinv(GEN nf, GEN x)
+{
+  GEN y=cgetg(6,t_VEC); y[1]=x[1]; y[2]=x[5];
+  y[3]=y[5]=zero; y[4]=lsubsi(lgef(nf[1])-3, (GEN)x[4]);
+  return prime_to_ideal_aux(nf,y);
+}
+
 /* Calcule le dual de mat_id pour la forme trace */
 GEN
 idealinv(GEN nf, GEN x)
 {
-  GEN res,ax,p1;
+  GEN res,ax;
   long av=avma, tx = idealtyp(&x,&ax);
 
   if (ax) res = cgetg(3,t_VEC);
@@ -1257,9 +1266,7 @@ idealinv(GEN nf, GEN x)
       }
       x = idealhermite_aux(nf,x); break;
     case id_PRIME:
-      p1=cgetg(6,t_VEC); p1[1]=x[1]; p1[2]=x[5];
-      p1[3]=p1[5]=zero; p1[4]=lsubsi(lgef(nf[1])-3, (GEN)x[4]);
-      x = gdiv(prime_to_ideal_aux(nf,p1), (GEN)x[1]);
+      x = gdiv(pidealprimeinv(nf,x), (GEN)x[1]);
   }
   x = gerepileupto(av,x); if (!ax) return x;
   res[1]=(long)x; res[2]=lneg(ax); return res;
