@@ -2342,6 +2342,22 @@ int_read_more(GEN y, char **ps)
   return y;
 }
 
+static long
+exponent()
+{
+  char *old = analyseur;
+  long n;
+  int nb;
+  switch(*++analyseur)
+  {
+    case '-': analyseur++; n = -(long)number(&nb, &analyseur); break;
+    case '+': analyseur++; /* Fall through */
+    default: n = (long)number(&nb, &analyseur);
+  }
+  if (nb > 8) err(talker2,"exponent too large",old,mark.start);
+  return n;
+}
+
 static GEN
 constante()
 {
@@ -2356,6 +2372,11 @@ constante()
     case '.':
     {
       char *old = ++analyseur;
+      if (isalpha((int)*analyseur))
+      {
+        if (*analyseur == 'E' || *analyseur == 'e') { n = exponent(); break; }
+        analyseur--; return y; /* member */
+      }
       y = int_read_more(y, &analyseur);
       n = old - analyseur;
       if (*analyseur != 'E' && *analyseur != 'e')
@@ -2366,22 +2387,13 @@ constante()
     }
     /* Fall through */
     case 'E': case 'e':
-    {
-      char *old = analyseur;
-      switch(*++analyseur)
-      {
-        case '-': analyseur++; n -= (long)number(&nb, &analyseur); break;
-        case '+': analyseur++; /* Fall through */
-        default: n += (long)number(&nb, &analyseur);
-      }
-      if (nb > 8) err(talker2,"exponent too large",old,mark.start);
+      n += exponent();
       if (!signe(y))
       {
         avma = av;
         n = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
         return realzero_bit(n);
       }
-    }
   }
   l = lgefint(y); if (l < (long)prec) l = (long)prec;
   y = itor(y, l);
@@ -2788,6 +2800,11 @@ L1:
 }
 
 static void
+skipmember(void) {
+  while (is_key((int)*analyseur)) analyseur++;
+}
+
+static void
 skipfacteur(void)
 {
   if (*analyseur == '+' || *analyseur == '-') analyseur++;
@@ -2796,7 +2813,7 @@ skipfacteur(void)
     switch(*analyseur)
     {
       case '.':
-	analyseur++; while (isalnum((int)*analyseur)) analyseur++;
+	analyseur++; skipmember();
         if (*analyseur == '=' && analyseur[1] != '=')
           { analyseur++; skipseq(); }
         break;
@@ -3087,24 +3104,35 @@ skipidentifier(void)
 }
 
 static void
-skipconstante(void)
-{
+skipdigits(void) {
   while (isdigit((int)*analyseur)) analyseur++;
-  if ( *analyseur!='.' && *analyseur!='e' && *analyseur!='E' ) return;
-  if (*analyseur=='.')
-  {
-    if (isalpha((int)analyseur[1])
-        && analyseur[1] != 'e' && analyseur[1] != 'E')
-      return; /* member function */
-    analyseur++;
-  }
-  while (isdigit((int)*analyseur)) analyseur++;
-  if ( *analyseur=='e'  ||  *analyseur=='E' )
+}
+static void
+skipexponent(void) {
+  if (*analyseur=='e' || *analyseur=='E')
   {
     analyseur++;
     if ( *analyseur=='+' || *analyseur=='-' ) analyseur++;
-    while (isdigit((int)*analyseur)) analyseur++;
+    skipdigits();
   }
+}
+
+static void
+skipconstante(void)
+{
+  skipdigits();
+  if (*analyseur=='.')
+  {
+    char *old = ++analyseur;
+    if (isalpha((int)*analyseur))
+    {
+      skipexponent();
+      if (analyseur == old) analyseur--; /* member */
+      return;
+    }
+    skipdigits();
+  }
+  skipexponent();
 }
 
 static entree *
@@ -3129,10 +3157,6 @@ skipentry(void)
   return (*analyseur == '(') ? &fakeEpNEW : &fakeEpVAR;
 }
 
-/*
- * Only letters and digits in member names. AT MOST 8 of THEM
- * (or modify gp_rl.c::pari_completion)
- */
 #include "members.h"
 
 static entree*
