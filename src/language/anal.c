@@ -1739,7 +1739,9 @@ identifier(void)
           switch(EpVALENCE(ep))
           {
             case EpGVAR:
+#if 0
               err(warner,"%s already declared global", ep->name);
+#endif
               /* fall through */
             case EpVAR: break;
             default: err(talker2,"symbol already in use",ch1,mark.start);
