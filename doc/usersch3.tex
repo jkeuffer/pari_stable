@@ -1417,9 +1417,7 @@ factoring machinery described under \kbd{factorint}. It includes
 \idx{Shanks SQUFOF}, \idx{Pollard Rho}, \idx{ECM} and \idx{MPQS} stages, and
 has an early exit option for the functions \teb{moebius} and (the integer
 function underlying) \teb{issquarefree}. Note that it relies on a (fairly
-strong) probabilistic primality test: numbers found to be strong
-pseudo-primes after 10 successful trials of the \idx{Rabin-Miller} test are
-declared primes.
+strong) probabilistic primality test, see \kbd{ispseudoprime}.
 
 \bigskip
 \subsecidx{addprimes}$(\{x=[\,]\})$: adds the ``primes'' contained in the
@@ -1871,8 +1869,9 @@ end-matching to catch square roots of $-1$, followed by strong Lucas test for
 the sequence $(P,-1)$, $P$ smallest positive integer such that $P^2 - 4$ is
 not a square mod $x$). 
 
-There are no known composite numbers passing this test, although it is
-expected that infinitely such numbers exist.
+There are no known composite numbers passing this test (in particular, all
+composites $\leq 10^{13}$ are correctly detected), although it is expected
+that infinitely many such numbers exist.
 
 If $\fl > 0$, checks whether $x$ is a strong Miller-Rabin pseudo prime (with
 end-matching) for $\fl$ randomly chosen bases.
