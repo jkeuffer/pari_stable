@@ -1,4 +1,4 @@
-#line 1 "../src/kernel/none/gcdll.c"
+#line 2 "../src/kernel/none/gcdll.c"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.

@@ -1,4 +1,4 @@
-#line 1 "../src/kernel/none/ratlift.c"
+#line 2 "../src/kernel/none/ratlift.c"
 /* $Id$
 
 Copyright (C) 2003  The PARI group.

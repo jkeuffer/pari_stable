@@ -1,3 +1,4 @@
+#line 2 "../src/kernel/none/level1.h"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
@@ -812,6 +813,6 @@ INLINE long
 expi(GEN x)
 {
   const long lx=lgefint(x);
-  return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-bfffo(*int_MSW(x))-1;
+  return lx==2? -(long)HIGHEXPOBIT: bit_accuracy(lx)-(long)bfffo(*int_MSW(x))-1;
 }
 #endif

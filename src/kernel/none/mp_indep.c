@@ -1,4 +1,4 @@
-#line 1 "../src/kernel/none/mp_indep.c"
+#line 2 "../src/kernel/none/mp_indep.c"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.

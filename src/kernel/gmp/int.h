@@ -1,3 +1,4 @@
+#line 2 "../src/kernel/gmp/int.h"
 /* $Id$
 
 Copyright (C) 2000  The PARI group.
