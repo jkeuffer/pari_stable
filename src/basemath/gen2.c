@@ -1439,13 +1439,15 @@ quadtoc(GEN x, long prec)
 static GEN
 qtop(GEN x, GEN p, long d)
 { 
-  GEN p1, P = (GEN)x[1], b = (GEN)P[3], c = (GEN)P[2];
+  GEN z, P, b, c, u = (GEN)x[2], v = (GEN)x[3];
   pari_sp av;
-  if (gcmp0(x)) return zeropadic(p, d);
-  av = avma;
-  p1 = gsqrt(cvtop(subii(b, shifti(c,2)), p, egalii(p,gdeux)? d+2: d), 0);
-  p1 = gmul2n(gsub(p1, b), -1);
-  return gerepileupto(av, gadd((GEN)x[2], gmul((GEN)x[3], p1)));
+  if (gcmp0(v)) return cvtop(u, p, d);
+  P = (GEN)x[1];
+  b = (GEN)P[3];
+  c = (GEN)P[2]; av = avma;
+  z = gsqrt(cvtop(subii(b, shifti(c,2)), p, egalii(p,gdeux)? d+2: d), 0);
+  z = gmul2n(gsub(z, b), -1);
+  return gerepileupto(av, gadd(u, gmul(v, z)));
 }
 static GEN
 ctop(GEN x, GEN p, long d)
