@@ -69,6 +69,7 @@ cat > $file << EOT
 #  define USE_FTIME 1
 #  define HAS_STRFTIME
  /* comment this one if not on NT ??? */
+#  define HAS_OPENDIR
 #endif
 
 #endif

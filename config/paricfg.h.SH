@@ -152,4 +152,9 @@ esac
 case $has_strftime in
 yes) echo '#define HAS_STRFTIME' >> $file;;
 esac
+
+case $has_opendir in
+yes) echo '#define HAS_OPENDIR' >> $file;;
+esac
+
 echo '#endif' >> $file

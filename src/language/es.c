@@ -2264,6 +2264,20 @@ os_getenv(char *s)
 static char *last_filename = NULL;
 static char **dir_list = NULL;
 
+#ifdef HAS_OPENDIR
+#  include <dirent.h>
+#endif
+/* slow, but more portable than stat + S_I[FS]DIR */
+int
+pari_is_dir(char *name)
+{
+#ifdef HAS_OPENDIR
+  DIR *d = opendir(name);
+  if (d) { (void)closedir(d); return 1; }
+#endif
+  return 0;
+}
+
 /* expand tildes in filenames, return a malloc'ed buffer */
 static char *
 _expand_tilde(char *s)
@@ -2396,6 +2410,11 @@ gp_expand_path(char *v)
 static FILE *
 accept_file(char *name, FILE *file)
 {
+  if (pari_is_dir(name))
+  {
+    err(warner,"skipping directory %s",name);
+    return NULL;
+  }
   if (! last_tmp_file)
   {  /* empty file stack, record this name */
     if (last_filename) free(last_filename);
@@ -2430,8 +2449,8 @@ static FILE *
 try_name(char *name)
 {
   FILE *file = fopen(name, "r");
-  if (file) return accept_file(name,file);
-
+  if (file) file = accept_file(name,file);
+  if (!file)
   { /* try appending ".gp" to name */
     char *s = gpmalloc(strlen(name)+4);
     sprintf(s, "%s.gp", name);
@@ -2547,9 +2566,14 @@ char *
 env_ok(char *s)
 {
   char *t = os_getenv(s);
-  if (t && pari_is_rwx(t) == 0)
+  if (t && !pari_is_rwx(t))
   {
     err(warner,"%s is set (%s), but is not writeable", s,t);
+    t = NULL;
+  }
+  if (t && !pari_is_dir(t))
+  {
+    err(warner,"%s is set (%s), but is not a directory", s,t);
     t = NULL;
   }
   return t;
