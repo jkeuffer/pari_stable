@@ -14,6 +14,12 @@ with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 enum {
+  no_error,					/* Force errors into non-0 */
+
+  cant_deflate,
+
+/* Always catched up to this point */
+
   caracer1, caseer, caseer2, member, nparamer1,
   paramer1, varer1, obsoler, openfiler, talker2,
 

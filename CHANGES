@@ -233,6 +233,7 @@ IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
 RS  9- routine numbpart()
 BA 10- GMP kernel 
 BA 11- --kernel Configure option
+IZ 12- allow an arbitrary polynomial as a 2nd argument to subst()
 
   Removed
     1- macro definition BITS_IN_RANDOM (useless)

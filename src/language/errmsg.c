@@ -15,6 +15,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 char *errmessage[]=
 {
+/* no_error */
+  "bug in error-handling code",
+
+/* cant_deflate */
+  "can't deflate",
+
+/* Always catched up to this point */
+
 /* caracer1 */
   "unexpected character",
 /* caseer */

@@ -1631,7 +1631,7 @@ gdeflate(GEN x, long v, long d)
     if (vx > v) return gcopy(x);
     av = avma;
     if (checkdeflate(x) % d != 0)
-      err(talker,"impossible substitution in gdeflate");
+      err(cant_deflate);
     return gerepilecopy(av, poldeflate_i(x,d));
   }
   if (tx == t_RFRAC)
@@ -2075,7 +2075,7 @@ factor(GEN x)
           long killv;
 	  x = dummycopy(x); lx=lgef(x);
           pol = dummycopy(pol);
-          v = manage_var(4,NULL);
+          v = manage_var(manage_var_max_avail,NULL);
           for(i=2; i<lx; i++)
           {
             p1=(GEN)x[i];

@@ -5692,7 +5692,7 @@ of $x$. $x$ must be a power series whose valuation is exactly equal to one.
 replace the simple variable $y$ by the argument $z$ in the ``polynomial''
 expression $x$. Every type is allowed for $x$, but if it is not a genuine
 polynomial (or power series, or rational function), the substitution will be
-done as if the scalar components were polynomials of degree one. In
+done as if the scalar components were polynomials of degree zero. In
 particular, beware that:
 
 \bprog
@@ -5705,15 +5705,31 @@ particular, beware that:
 ? subst(1, x, Mat([0,1]))
   ***   forbidden substitution by a non square matrix
 @eprog
+\noindent If $x$ is a power series, $z$ must be either a polynomial, a power
+series, or a rational function.
 
-If $x$ is a power series, $z$ must be either a polynomial, a power series, or
-a rational function. $y$ must be a simple variable name, or a monomial of the
-form $t^k$ for some simple variable $t$. In the latter case, substitution
-may not always be possible since PARI doesn't know about algebraic functions.
+The ``variable'' $y$ is in fact allowed to be any polynomial, in which case,
+the substitution is done as per the following script:
+\bprog
+   subst_poly(pol, from, to) =
+   { local(t = 'subst_poly_t, M = from - t);
+
+     subst(lift(Mod(pol,M), variable(M)), t, to)
+   }
+@eprog
+\noindent For instance
+\bprog
+? subst(x^4 + x^2 + 1, x^2, y)
+%1 = y^2 + y + 1
+? subst(x^4 + x^2 + 1, x^3, y)
+%2 = x^2 + y*x + 1
+? subst(x^4 + x^2 + 1, (x+1)^2, y)
+%3 = (-4*y - 6)*x + (y^2 + 3*y - 3)
+@eprog
 
 \syn{gsubst}{x,v,z}, where $v$ is the number of the variable $y$ for regular
 usage. Also available is \tet{gsubst0}$(x,y,z)$ where $y$ is a \kbd{GEN}
-monomial of the form $t^k$.
+polynomial.
 
 \subsecidx{taylor}$(x,y)$: Taylor expansion around $0$ of $x$ with respect
 to\label{se:taylor}

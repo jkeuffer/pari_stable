@@ -567,7 +567,7 @@ pari_init(size_t parisize, ulong maxprime)
   reset_traps();
   default_exception_handler = NULL;
 
-  (void)manage_var(2,NULL); /* init nvar */
+  (void)manage_var(manage_var_init,NULL); /* init nvar */
   var_not_changed = 1; (void)fetch_named_var("x", 0);
   try_to_recover=1;
 }
@@ -790,7 +790,7 @@ changevar(GEN x, GEN y)
 GEN
 reorder(GEN x)
 {
-  long tx,lx,i,n, nvar = manage_var(3,NULL);
+  long tx,lx,i,n, nvar = manage_var(manage_var_next,NULL);
   int *var,*varsort,*t1;
 
   if (!x) return polvar;
@@ -1069,7 +1069,12 @@ err(long numerr, ...)
   pariflush(); pariOut = pariErr;
   pariflush(); term_color(c_ERR);
 
-  if (numerr < talker)
+  if (numerr <= cant_deflate)
+  {
+    pariputsf("  ***   Bug in PARI, please report.  Uncatched error: %s",
+	      errmessage[numerr]);
+  }
+  else if (numerr < talker)
   {
     strcpy(s, errmessage[numerr]);
     switch (numerr)

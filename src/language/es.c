@@ -1280,7 +1280,7 @@ etatpile(unsigned int n)
                  itos((GEN)adr[1]), itos((GEN)adr[2]));
   avma=av;
 
-  pariputsf(" %ld variable names used out of %d\n\n",manage_var(3,NULL),MAXVARN);
+  pariputsf(" %ld variable names used out of %d\n\n",manage_var(manage_var_next,NULL),MAXVARN);
   if (!n) return;
 
   if (n > (ulong)nu) n = nu;
@@ -3092,7 +3092,7 @@ writebin(char *name, GEN x)
   if (x) writeGEN(x,f);
   else
   {
-    long v, maxv = manage_var(3,NULL);
+    long v, maxv = manage_var(manage_var_next,NULL);
     for (v=0; v<maxv; v++)
     {
       entree *ep = varentries[v];

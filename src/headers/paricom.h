@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
  *   code
  * } ENDCATCH
  * will execute 'code', then 'recovery' if exception 'numer' is thrown
- * [ any exception if numer < 0 ].
+ * [ any exception if numer == CATCH_ALL ].
  * RETRY = as TRY, but execute 'recovery', then 'code' again [still catching] */
 #define CATCH(err) {         \
   VOLATILE long __err = err; \
@@ -55,6 +55,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ENDCATCH }} CATCH_RELEASE(); }
 
 #define CATCH_ALL -1
+/*=====================================================================*/
+/* VOLATILE int errorN;
+ * CATCH_ERR(errorN) {
+ *   code
+ * } ENDCATCH_ERR
+ * executes 'code', setting errorN to the number of exception thrown;
+ * errorN is 0 if no error was thrown. */
+
+#define CATCH_ERR(__err) {  \
+  jmp_buf __env;            \
+  __err = setjmp(__env);    \
+  if (!__err) {		    \
+    void *__catcherr = err_catch(CATCH_ALL, &__env);
+
+#define ENDCATCH_ERR	    \
+    CATCH_RELEASE();	    \
+  }}
+
 /*=====================================================================*/
 
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
@@ -95,6 +113,16 @@ extern const long lontyp[];
 extern void* global_err_data;
 
 extern int new_galois_format;
+
+enum manage_var_t {
+    manage_var_create,			/* 0 */
+    manage_var_delete,			/* 1 */
+    manage_var_init,			/* 2 */
+    manage_var_next,			/* 3 */
+    manage_var_max_avail,		/* 4 */
+    manage_var_pop,			/* 5 */
+};
+
 
 #define MAXITERPOL  10 /* max #of prec increase in polredabs-type operations */
 

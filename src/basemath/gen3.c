@@ -1314,17 +1314,52 @@ gconvsp(GEN x, int flpile)
   return flpile? gerepile(av,tetpil,p1): p1;
 }
 
+/*
+   subst_poly(pol, from, to) =
+   { local(t='subst_poly_t, M);
+
+     M = from - t;
+     subst(lift(Mod(pol,M), variable(M)),t,to)
+   }
+ */
+GEN
+gsubst_expr(GEN pol, GEN from, GEN to)
+{
+  pari_sp av = avma;
+  long v = fetch_var();		/* XXX Need fetch_var_low_priority() */
+  GEN tmp = gsub(from, polx[v]);	/* M */
+
+  if (v <= gvar(from))
+      err(talker, "subst: unexpected variable precedence");
+  tmp = gmodulcp(pol, tmp);
+  if (typ(tmp) == t_POLMOD)
+    tmp = (GEN)tmp[2];			/* optimize lift */
+  else					/* Vector? */
+    tmp = lift0(tmp, gvar(from));
+  tmp = gsubst(tmp, v, to);
+  delete_var();
+  return gerepilecopy(av, tmp);
+}
+
 GEN
 gsubst0(GEN x, GEN T, GEN y)
 {
   pari_sp av;
   long d, v;
+  GEN deflated;
+
   if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
-    err(talker,"variable number expected in subst");
+    return gsubst_expr(x,T,y);
   d = degpol(T); v = varn(T);
   if (d == 1) return gsubst(x, v, y);
   av = avma;
-  return gerepilecopy(av, gsubst(gdeflate(x, v, d), v, y));
+  CATCH(cant_deflate) {
+    avma = av;
+    return gsubst_expr(x,T,y);      
+  } TRY {
+    deflated = gdeflate(x, v, d);
+  } ENDCATCH
+  return gerepilecopy(av, gsubst(deflated, v, y));
 }
 
 GEN

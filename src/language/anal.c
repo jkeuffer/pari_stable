@@ -48,8 +48,13 @@ static void   skipseq();
 static void   skipstring();
 static void   skiptruc();
 static entree *entry();
-static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 static entree *skipentry(void);
+
+static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
+#define VAR_POLS_LONGS		7	/* 4 words for polx, 3 for polun */
+/* Is the name proper??? */
+#define SIZEOF_VAR_POLS		(VAR_POLS_LONGS*sizeof(long))
+
 
 extern void killbloc0(GEN x, int inspect);
 extern int term_width(void);
@@ -2388,31 +2393,29 @@ installep(void *f, char *name, int len, int valence, int add, entree **table)
 long
 manage_var(long n, entree *ep)
 {
-  static long max_avail = MAXVARN; /* first user variable not yet used */
+  static long max_avail = MAXVARN; /* max variable not yet used */
   static long nvar; /* first GP free variable */
   long var;
   GEN p;
 
-  if (n) /* special behaviour */
-  {
-    switch(n)
-    {
-      case 2: return nvar=0;
-      case 3: return nvar;
-      case 4: return max_avail;
-      case 5:
+  switch(n) {
+      case manage_var_init: return nvar=0;
+      case manage_var_next: return nvar;
+      case manage_var_max_avail: return max_avail;
+      case manage_var_pop:
       {
         long v = (long)ep;
         if (v != nvar-1) err(talker,"can't pop gp variable");
         setlg(polvar, nvar);
         return --nvar;
       }
-    }
-
-    /* user wants to delete one of his/her/its variables */
-    if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
-    free(polx[++max_avail]); /* frees both polun and polx */
-    return max_avail+1;
+      case manage_var_delete:
+	/* user wants to delete one of his/her/its variables */
+	if (max_avail == MAXVARN-1) return 0; /* nothing to delete */
+	free(polx[++max_avail]); /* frees both polun and polx */
+	return max_avail+1;
+      case manage_var_create: break;
+      default: err(talker, "panic");
   }
 
   if (nvar == max_avail) err(talker2,"no more variables available",
@@ -2424,7 +2427,7 @@ manage_var(long n, entree *ep)
   }
   else
   {
-    p = (GEN) gpmalloc(7*sizeof(long));
+    p = (GEN) gpmalloc(SIZEOF_VAR_POLS);
     var=max_avail--;
   }
 
@@ -2449,7 +2452,7 @@ manage_var(long n, entree *ep)
 long
 fetch_var(void)
 {
-  return manage_var(0,NULL);
+  return manage_var(manage_var_create,NULL);
 }
 
 entree *
@@ -2461,9 +2464,9 @@ fetch_named_var(char *s, int doerr)
     if (doerr) err(talker,"identifier already in use: %s", s);
     return ep;
   }
-  ep = installep(NULL,s,strlen(s),EpVAR, 7*sizeof(long),
+  ep = installep(NULL,s,strlen(s),EpVAR, SIZEOF_VAR_POLS,
                  functions_hash + hashvalue(s));
-  (void)manage_var(0,ep); return ep;
+  (void)manage_var(manage_var_create,ep); return ep;
 }
 
 long
@@ -2489,14 +2492,14 @@ fetch_user_var(char *s)
 void
 delete_named_var(entree *ep)
 {
-  (void)manage_var(5, (entree*)varn(initial_value(ep)));
+  (void)manage_var(manage_var_pop, (entree*)varn(initial_value(ep)));
   kill0(ep);
 }
 
 long
 delete_var(void)
 {
-  return manage_var(1,NULL);
+  return manage_var(manage_var_delete,NULL);
 }
 
 void
@@ -2505,7 +2508,7 @@ name_var(long n, char *s)
   entree *ep;
   char *u;
 
-  if (n < manage_var(3,NULL))
+  if (n < manage_var(manage_var_next,NULL))
     err(talker, "renaming a GP variable is forbidden");
   if (n > (long)MAXVARN)
     err(talker, "variable number too big");
@@ -2538,10 +2541,10 @@ entry(void)
   if (*analyseur == '(')
     { n=0; val=EpNEW; }
   else
-    { n=7*sizeof(long); val=EpVAR; }
+    { n=SIZEOF_VAR_POLS; val=EpVAR; }
   ep = installep(NULL,old,len,val,n, functions_hash + hash);
 
-  if (n) (void)manage_var(0,ep); /* Variable */
+  if (n) (void)manage_var(manage_var_create, ep); /* Variable */
   return ep;
 }
 

@@ -963,6 +963,7 @@ GEN     gshift(GEN x, long n);
 GEN     gshift3(GEN x, long n, long flag);
 GEN     gsubst(GEN x, long v, GEN y);
 GEN     gsubst0(GEN x, GEN v, GEN y);
+GEN	gsubst_expr(GEN pol, GEN from, GEN to);
 GEN     gtopoly(GEN x, long v);
 GEN     gtopolyrev(GEN x, long v);
 GEN     gtoser(GEN x, long v);
