@@ -2250,9 +2250,17 @@ cx_isrational(GEN x)
   return (isrational((GEN)x[1]) && isrational((GEN)x[2]));
 }
 
+/* y == 0 */
 static GEN
-zero_gcd(GEN x)
+zero_gcd(GEN x, GEN y)
 {
+  if (typ(y) == t_PADIC)
+  {
+    GEN p = (GEN)y[2];
+    long v = ggval(x, p), w = valp(y);
+    if (w < v) v = w;
+    return padiczero(p, v);
+  }
   switch(typ(x))
   {
     case t_INT: case t_FRAC: case t_FRACN:
@@ -2284,8 +2292,8 @@ ggcd(GEN x, GEN y)
     return z;
   }
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"g",x,y);
-  if (gcmp0(x)) return zero_gcd(y);
-  if (gcmp0(y)) return zero_gcd(x);
+  if (gcmp0(x)) return zero_gcd(y, x);
+  if (gcmp0(y)) return zero_gcd(x, y);
   if (is_const_t(tx))
   {
     if (ty == t_FRACN)
