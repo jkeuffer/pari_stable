@@ -1529,8 +1529,8 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
 GEN
 nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 {
-  long L, E, Fa, La, Ea, oE, Fg, eq = 0, er = 0, v = varn(fx), i, nv;
-  long fm = 0, go_fm = 2, Le, Ee, N, l, vn;
+  long Fa, La, Ea, oE, Fg, eq = 0, er = 0, v = varn(fx), i, nv;
+  long fm = 0, go_fm = 2, l, N  = degpol(fx);
   pari_sp av = avma, av2, limit;
   GEN p1, alph, chi, nu, w, phi, pmf, pdr, pmr, kapp, pie, chib = NULL;
   GEN ns, gamm, chig = NULL, nug, delt = NULL, beta, eta = NULL;
@@ -1555,7 +1555,6 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
   alph = polx[v];
   nu = gx;
-  N  = degpol(fx);
   oE = 0;
   opa = NULL;
 
@@ -1646,23 +1645,22 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	if (!(er%Ea))  { er = 0; eq++; }
       }
       else 
-      {
-	/* if pmf divides norm(beta) then it's useless */
-	p1 = gmod(gnorm(gmodulcp(beta, chi)), pmf);
+      { /* if pmf divides norm(beta) then it's useless */
+        long L, E;
+	p1 = modii(ZX_QX_resultant(chi, beta), pmf);
 	if (signe(p1))
 	{
 	  chib = NULL;
-	  vn = ggval(p1, p);
-	  eq = (long)(vn / N);
-	  er = (long)(vn*Ea/N - eq*Ea);
+          L = ggval(p1, p);
+          E = N;
 	}
 	else
 	{
 	  chib = mycaract(chi, beta, NULL, NULL, ns);
 	  vstar(p, chib, &L, &E);
-	  eq = (long)(L / E);
-	  er = (long)(L*Ea / E - eq*Ea);
 	}
+        eq = (long)(L / E);
+        er = (long)(L*Ea / E - eq*Ea);
       }
 
       if (DEBUGLEVEL >= 5)
@@ -1702,9 +1700,8 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	}
 	
 	if (!chig || !gcmp1(Q_denom(chig)))
-	{
-	  /* Valuation of beta was wrong. This means that
-	     gamma fails the v*-test */
+	{ /* Valuation of beta was wrong ==> gamma fails the v*-test */
+          long L, E;
 	  chib = mycaract(chi, beta, p, NULL, ns);
 	  vstar(p, chib, &L, &E);
 	  eq = (long)(-L / E);
@@ -1830,6 +1827,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 
       if (!fm) 
       {
+        long Le, Ee;
 	if (!signe(modii(constant_term(chie), pmr)))
 	  chie = mycaract(chi, eta, p, pmf, ns);
 	
