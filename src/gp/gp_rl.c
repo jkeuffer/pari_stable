@@ -684,8 +684,12 @@ init_readline(void)
   if (GP_DATA->flags & EMACS) rl_completion_query_items = 0x8fff;
 #endif
 #ifdef HAS_RL_BIND_KEY_IN_MAP
-#  define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
+#  ifdef _RL_FUNCTION_TYPEDEF
+#    define Bind(a,b,c) (rl_bind_key_in_map((a),(b),(c)))
+#  else
+#    define Bind(a,b,c) (((void(*)(int,Function*,Keymap)) rl_bind_key_in_map)\
   ((a), (Function*)(b), (c)))
+#  endif
 #else
 #  define Bind(a,b,c)
 #endif
