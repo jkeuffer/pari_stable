@@ -159,18 +159,7 @@ galoisconj2(GEN nf, long nbmax, long prec)
   9: complete detail
 */
 
-GEN vandermondeinverseprepold(GEN T, GEN L)
-{
-  int     i, n = lg(L);
-  GEN     V, dT;
-  dT = derivpol(T);
-  V = cgetg(n, t_VEC);
-  for (i = 1; i < n; i++)
-    V[i] = (long) poleval(dT, (GEN) L[i]);
-  return V;
-}
-
-GEN vandermondeinverseprep(GEN T, GEN L)
+GEN vandermondeinverseprep(GEN L)
 {
   int     i, j, n = lg(L);
   GEN     V;
@@ -198,7 +187,7 @@ vandermondeinverse(GEN L, GEN T, GEN den, GEN prep)
   long    x = varn(T);
   GEN     M, P;
   if (!prep)
-    prep=vandermondeinverseprep(T,L);
+    prep=vandermondeinverseprep(L);
   M = cgetg(n, t_MAT);
   for (i = 1; i < n; i++)
   {
@@ -251,7 +240,7 @@ initgaloisborne(GEN T, GEN dn, GEN *ptL, GEN *ptprep, GEN *ptdis, long *ptprec)
     L[i] = z[1];
   }
   if (DEBUGLEVEL>=4) gentimer(3);
-  prep=vandermondeinverseprep(T, L);
+  prep=vandermondeinverseprep(L);
   if (!dn)
   {
     GEN dis, res = divide_conquer_prod(gabs(prep,prec), mpmul);
@@ -2590,7 +2579,7 @@ galoismakepsi(long g, GEN sg, GEN pf)
 }
 
 static GEN
-galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
+galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, 
     struct galois_frobenius *gf,  struct galois_borne *gb) 
 {
   gpmem_t ltop=avma, av2;
@@ -2711,7 +2700,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden, long gmask,
 }
 
 static GEN
-galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
+galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     struct galois_borne *gb, const struct galois_analysis *ga)
 {
   gpmem_t lbot, ltop=avma;
@@ -2747,7 +2736,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN M, GEN den, struct galois_frobenius *gf,
       gf->Tmod=gcopy((GEN)Tmod[1]);
       if ( ((gmask&1) && gf->fp % deg == 0) || ((gmask&2) && gf->fp % 2== 0) )
       {
-	frob=galoisfrobeniuslift(T, den, L, Lden, gmask, gf, gb);
+	frob=galoisfrobeniuslift(T, den, L, Lden, gf, gb);
 	if (frob)
 	{
 	  GEN *gptr[3];
@@ -2907,7 +2896,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
       return gerepile(ltop, lbot, PG);
     avma = av;
   }
-  frob=galoisfindfrobenius(T, L, M, den, &gf, gb, ga);
+  frob=galoisfindfrobenius(T, L, den, &gf, gb, ga);
   if (!frob)
   {
     ltop=avma;
