@@ -230,6 +230,7 @@ idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
   struct muldata D;
   GEN y;
 
+  if (!signe(n)) return idealpow(nf,x,n);
   if (gcmp1(n)) return x;
   D.nf = nf;
   D.ideal= ideal;
