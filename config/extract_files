@@ -15,7 +15,6 @@ for dir in $extract_dir_list; do
           -e "s%@includedir@%$includedir%g"\
           -e "s%@libdir@%$libdir%g"\
           -e "s%@version@%$version.$patch%g"\
-          -e "s%@readline-enabledp@%$readline_enabledp%g"\
       $file > $dir/`basename $file .in`
     done
   fi
