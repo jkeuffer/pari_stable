@@ -844,6 +844,8 @@ err(long numerr, ...)
         op_err(ap, "*"); break;
       case gdiveri: case gdiverf:
         op_err(ap, "/"); break;
+      case gmoderi: case gmoderf:
+        op_err(ap, "%"); break;
 
       /* the following 4 are only warnings (they return) */
       case warnmem: case warner:

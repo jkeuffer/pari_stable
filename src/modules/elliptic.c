@@ -2272,23 +2272,23 @@ localreduction_result(long av, long f, long kod, long c, GEN v)
   return gerepile(av,tetpil, result);
 }
 
-/* ici, p1 != 2 et p1 != 3 */
+/* ici, p != 2 et p != 3 */
 static GEN
-localreduction_carac_not23(GEN e, GEN p1)
+localreduction_carac_not23(GEN e, GEN p)
 {
   long av = avma, k, f, kod, c, nuj, nudelta;
   GEN pk, p2k, a2prime, a3prime;
   GEN p2, r = gzero, s = gzero, t = gzero, v;
   GEN c4, c6, delta, unmodp, xun, tri, var, p4k, p6k;
 
-  nudelta = ggval((GEN)e[12], p1);
+  nudelta = ggval((GEN)e[12], p);
   v = cgetg(5,t_VEC); v[1] = un; v[2] = v[3] = v[4] = zero;
-  nuj = gcmp0((GEN)e[13]) ? 0 : - ggval((GEN)e[13], p1);
+  nuj = gcmp0((GEN)e[13])? 0: - ggval((GEN)e[13], p);
   k = (nuj > 0 ? nudelta - nuj : nudelta) / 12;
   c4 = (GEN)e[10]; c6 = (GEN)e[11]; delta = (GEN)e[12];
   if (k > 0) /* modele non minimal */
   {
-    pk = gpuigs(p1, k);
+    pk = gpuigs(p, k);
     if (mpodd((GEN)e[1]))
       s = shifti(subii(pk, (GEN)e[1]), -1);
     else
@@ -2317,20 +2317,20 @@ localreduction_carac_not23(GEN e, GEN p1)
   if (nuj > 0) switch(nudelta - nuj)
   {
     case 0: f = 1; kod = 4+nuj; /* Inu */
-      switch(kronecker(negi(c6),p1))
+      switch(kronecker(negi(c6),p))
       {
 	case  1: c = nudelta; break;
-	case -1: c = 2 - (nudelta % 2); break;
-	default: err(tater1);
+	case -1: c = odd(nudelta)? 1: 2; break;
+	default: err(bugparier,"localred (p | c6)");
       }
       break;
     case 6: f = 2; kod = -4-nuj; /* Inu* */
       if (nuj & 1)
-	c = 3 + kronecker(divii(mulii(c6, delta),gpuigs(p1, 9+nuj)), p1);
+	c = 3 + kronecker(divii(mulii(c6, delta),gpuigs(p, 9+nuj)), p);
       else
-	c = 3 + kronecker(divii(delta, gpuigs(p1, 6+nuj)), p1);
+	c = 3 + kronecker(divii(delta, gpuigs(p, 6+nuj)), p);
       break;
-    default: err(tater1);
+    default: err(bugparier,"localred (nu_delta - nu_j != 0,6)");
   }
   else switch(nudelta)
   {
@@ -2338,24 +2338,24 @@ localreduction_carac_not23(GEN e, GEN p1)
     case  2: f = 2; kod = 2; c = 1; break; /* II   */
     case  3: f = 2; kod = 3; c = 2; break; /* III  */
     case  4: f = 2; kod = 4; /* IV   */
-      c = 2 + kronecker(gdiv(mulis(c6, -6), sqri(p1)), p1);
+      c = 2 + kronecker(gdiv(mulis(c6, -6), sqri(p)), p);
       break;
     case  6: f = 2; kod = -1; /* I0*  */
-      p2 = sqri(p1);
-      unmodp = gmodulsg(1,p1);
+      p2 = sqri(p);
+      unmodp = gmodulsg(1,p);
       var = gmul(unmodp,polx[0]);
       tri = gsub(gsqr(var),gmul(divii(gmulsg(3, c4), p2),unmodp));
       tri = gsub(gmul(tri, var),
-		 gmul(divii(gmul2n(c6,1), mulii(p2,p1)),unmodp));
+		 gmul(divii(gmul2n(c6,1), mulii(p2,p)),unmodp));
       xun = gmodulcp(var,tri);
-      c = lgef(ggcd((GEN)(gsub(gpui(xun,p1,0),xun))[2], tri)) - 2;
+      c = lgef(ggcd((GEN)(gsub(gpui(xun,p,0),xun))[2], tri)) - 2;
       break;
     case  8: f = 2; kod = -4; /* IV*  */
-      c = 2 + kronecker(gdiv(mulis(c6,-6), gpuigs(p1,4)), p1);
+      c = 2 + kronecker(gdiv(mulis(c6,-6), gpuigs(p,4)), p);
       break;
     case  9: f = 2; kod = -3; c = 2; break; /* III* */
     case 10: f = 2; kod = -2; c = 1; break; /* II*  */
-    default: err(tater1);
+    default: err(bugparier,"localred");
   }
   return localreduction_result(av,f,kod,c,v);
 }

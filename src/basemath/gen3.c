@@ -563,7 +563,7 @@ gdivgs(GEN x, long s)
 GEN
 gmod(GEN x, GEN y)
 {
-  long av,tetpil,i, tx=typ(x);
+  long av,tetpil,i, tx=typ(x), ty = typ(y);
   GEN z,p1;
 
   if (is_matvec_t(tx))
@@ -572,7 +572,7 @@ gmod(GEN x, GEN y)
     for (i--; i; i--) z[i]=lmod((GEN)x[i],y);
     return z;
   }
-  switch(typ(y))
+  switch(ty)
   {
     case t_INT:
       switch(tx)
@@ -604,7 +604,7 @@ gmod(GEN x, GEN y)
 	case t_POLMOD: case t_POL:
 	  return gzero;
 
-	default: err(gmoder1);
+	default: err(gmoderf,tx,ty);
       }
 
     case t_REAL: case t_FRAC: case t_FRACN:
@@ -617,7 +617,7 @@ gmod(GEN x, GEN y)
 	case t_POLMOD: case t_POL:
 	  return gzero;
 
-	default: err(gmoder1);
+	default: err(gmoderf,tx,ty);
       }
 
     case t_POL:
@@ -640,10 +640,18 @@ gmod(GEN x, GEN y)
 	  p1=gmul((GEN)x[1],ginvmod((GEN)x[2],y)); tetpil=avma;
           return gerepile(av,tetpil,gres(p1,y));
 
-	default: err(talker,"type mod polynomial forbidden in gmod");
+        case t_SER:
+          if (ismonome(y) && varn(x) == varn(y))
+          {
+            long d = degree(y);
+            if (lg(x)-2 + valp(x) < d) err(gmoderi,tx,ty);
+            av = avma; 
+            return gerepileupto(av, gmod(gtrunc(x), y));
+          }
+	default: err(gmoderf,tx,ty);
       }
   }
-  err(talker,"modulus type forbidden in gmod");
+  err(gmoderf,tx,ty);
   return NULL; /* not reached */
 }
 
@@ -660,7 +668,7 @@ gmodulsg(long x, GEN y)
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1]=lcopy(y); z[2]=lstoi(x); return z;
   }
-  err(gmoder1); return NULL; /* not reached */
+  err(gmoderf,t_INT,typ(y)); return NULL; /* not reached */
 }
 
 GEN
@@ -680,7 +688,7 @@ gmodulo(GEN x,GEN y)
   if (is_matvec_t(tx))
   {
     l=lg(x); z=cgetg(l,tx);
-    for (i=1; i<l; i++) z[i] = (long) gmodulo((GEN)x[i],y);
+    for (i=1; i<l; i++) z[i] = lmodulo((GEN)x[i],y);
     return z;
   }
   switch(typ(y))
@@ -696,9 +704,10 @@ gmodulo(GEN x,GEN y)
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1] = lclone(y);
       if (is_scalar_t(tx)) { z[2]=lcopy(x); return z; }
-      if (tx==t_POL || is_rfrac_t(tx)) { z[2]=lmod(x,y); return z; }
+      if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
+      z[2]=lmod(x,y); return z;
   }
-  err(gmoder1); return NULL; /* not reached */
+  err(gmoderf,tx,typ(y)); return NULL; /* not reached */
 }
 
 
@@ -725,9 +734,10 @@ gmodulcp(GEN x,GEN y)
     case t_POL: z=cgetg(3,t_POLMOD);
       z[1]=lcopy(y);
       if (is_scalar_t(tx)) { z[2]=lcopy(x); return z; }
-      if (tx==t_POL || is_rfrac_t(tx)) { z[2]=lmod(x,y); return z; }
+      if (tx!=t_POL && !is_rfrac_t(tx) && tx!=t_SER) break;
+      z[2]=lmod(x,y); return z;
   }
-  err(gmoder1); return NULL; /* not reached */
+  err(gmoderf,tx,typ(y)); return NULL; /* not reached */
 }
 
 GEN

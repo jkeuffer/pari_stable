@@ -284,18 +284,20 @@ This function can be useful in connection with the function \kbd{concat}
 
 \subsecidx{Mod}$(x,y,\{\fl=0\})$:\label{se:Mod} creates the PARI object
 $(x \mod y)$, i.e.~an integermod or a polmod. $y$ must be an integer or a
-polynomial. If $y$ is an integer, $x$ must be an integer. If $y$ is a
-polynomial, $x$ must be a scalar or a polynomial. The result is put on the
-PARI stack.
+polynomial. If $y$ is an integer, $x$ must be an integer, a rational
+number, or a $p$-adic number compatible with the modulus $y$. If $y$ is a
+polynomial, $x$ must be a scalar, a polynomial, a rational function, or a
+power series. The result is put on the PARI stack.
 
 This function is not the same as $x$ \kbd{\%} $y$, the result of which is an
 integer or a polynomial.
 
 If $\fl$ is equal to $1$, the modulus of the created result is put on the
 heap and not on the stack, and hence becomes a permanent copy which cannot be
-erased later by garbage collecting (see \secref{se:garbage}). In particular,
-care should be taken to avoid creating too many such objects, since the heap
-is very small (typically a few thousand objects at most).
+erased later by garbage collecting (see \secref{se:garbage}). Functions
+will operate faster on such objects and memory consumption will be lower.
+On the other hand, care should be taken to avoid creating too many such
+objects.
 
 \syn{Mod0}{x,y,\fl}. Also available are
 

@@ -212,8 +212,6 @@ char *errmessage[]=
   "bad argument for an elliptic curve related function",
 /* heller1 */
   "point not on elliptic curve",
-/* tater1 */
-  "inconsistency in Tate's algorithm (please report)",
 
   /*  GEN.C */
 
@@ -221,9 +219,9 @@ char *errmessage[]=
   "impossible addition",
 /* gadderf */
   "forbidden addition",
-/* gmuleri*/
+/* gmuleri */
   "impossible multiplication",
-/* gmulerf*/
+/* gmulerf */
   "forbidden multiplication",
 /* gdiveri */
   "impossible division",
@@ -235,9 +233,11 @@ char *errmessage[]=
   "forbidden assignment",
 /* gdiver2 */
   "division by zero in gdiv, gdivgs or ginv",
-/* gmoder1 */
-  "type mod I forbidden in gmod",
+/* gmoderi */
+  "impossible division",
 
+/* gmoderf */
+  "forbidden division",
 /* inter2 */
   "a log/atan appears in the integration, PARI cannot handle that",
 /* overwriter */

@@ -1489,7 +1489,6 @@ gaffect(GEN x, GEN y)
   }
 
   if (is_const_t(ty)) {
-      /* initial_value macro is not defined now... */
 #define initial_value(ep) ((ep)+1)
       if (tx == t_POL) {
 	  entree *var = varentries[ordvar[varn(x)]];

@@ -47,13 +47,13 @@ enum {
 
 /* elliptic.c */
 
-  elliper1, heller1, tater1,
+  elliper1, heller1,
 
 /* gen.c */
   gadderi, gadderf, gmuleri, gmulerf, gdiveri,
-  gdiverf, assigneri, assignerf, gdiver2, gmoder1,
+  gdiverf, assigneri, assignerf, gdiver2, gmoderi,
 
-  inter2, overwriter,
+  gmoderf, inter2, overwriter,
 
 /* init.c */
 
