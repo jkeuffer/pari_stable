@@ -942,6 +942,33 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
   return c;
 }
 
+/* A, B integral upper HNF. A^(-1) B integral ? */
+int
+hnfdivide(GEN A, GEN B)
+{
+  ulong av = avma;
+  long n = lg(A)-1, i,j,k;
+  GEN u, b, m, r;
+
+  if (!n) return 1;
+  u = cgetg(n+1, t_COL);
+  for (k=1; k<=n; k++)
+  {
+    b = (GEN)B[k]; m = (GEN)b[k];
+    u[k] = ldvmdii(m, gcoeff(A,k,k), &r);
+    if (r != gzero) { avma = av; return 0; }
+    for (i=k-1; i>0; i--)
+    {
+      m = negi((GEN)b[i]);
+      for (j=i+1; j<=k; j++)
+        m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
+      u[i] = ldvmdii(negi(m), gcoeff(A,i,i), &r);
+      if (r != gzero) { avma = av; return 0; }
+    }
+  }
+  avma = av; return 1;
+}
+
 GEN
 gauss_get_col(GEN a, GEN b, GEN p, long li)
 {

@@ -113,17 +113,16 @@ addcell(sublist_t *S, GEN H)
   S->list = cell;
 }
 
-/* 0 if hinv*list[i] has a denominator for all i, 1 otherwise */
+extern int hnfdivide(GEN A, GEN B);
+
+/* 1 if h^(-1)*list[i] integral for some i, 0 otherwise */
 static int
 hnflistdivise(GEN list,GEN h)
 {
-  ulong av = avma;
-  long i, I = lg(list);
-  GEN hinv = ginv(h);
-
-  for (i=1; i<I; i++)
-    if (gcmp1(denom(gmul(hinv,(GEN)list[i])))) break;
-  avma = av; return i < I;
+  long i, n = lg(list);
+  for (i=1; i<n; i++)
+    if (hnfdivide(h, (GEN)list[i])) break;
+  return i < n;
 }
 
 static void
