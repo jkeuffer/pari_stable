@@ -69,6 +69,7 @@ BA 30- cotan(x) wasn't accepted
    31- wrong internal prototype for thetanullk (prec not taken into account)
    32- various bugs in gphelp -detex (??\a)
    33- trap + ^C + next would interrupt \r or read()
+IZ 34- external prettyprinter incompatible with colors
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -82,11 +83,13 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
     8- 0.e N now inputs a real 0 of decimal exponent N (was N-defaultprecision)
     9- try to avoid errors due to precision loss (while computing archimedian
        components) in bnfnewprec/bnfmake
+   10- restore \o2 to previous meaning, use \o3 for alternate prettyprinter
 
   Added
     1- new library function zerovec
     2- van Hoeij's algo. for modular factors recombination (factor over Z[X])
     3- algdep for p-adic numbers
+IZ  4- default values for 'colors' (light/dark) and 'prettyprinter' (tex2mail)
 
   Removed
     1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
