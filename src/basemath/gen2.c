@@ -773,7 +773,7 @@ Z_lval(GEN x, ulong p)
 long
 Z_lvalrem(GEN x, ulong p, GEN *py)
 {
-  long vx;
+  long vx, sx;
   pari_sp av;
   if (p == 2) { vx = vali(x); *py = shifti(x, -vx); return vx; }
   if (lgefint(x) == 3) {
@@ -783,11 +783,12 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     return vx;
   }
   av = avma; vx = 0; (void)new_chunk(lgefint(x));
+  sx = signe(x);
   for(vx = 0;;)
   {
     ulong r;
     GEN q = diviu_rem(x, p, &r);
-    if (r) { avma = av; *py = icopy(x); return vx; }
+    if (r) { avma = av; *py = icopy(x); setsigne(*py, sx); return vx; }
     vx++; x = q;
   }
 }
