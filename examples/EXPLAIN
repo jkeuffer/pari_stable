@@ -10,14 +10,14 @@ for PARI programs is included.
 file gives a brief description of these programs. They should be read into GP
 by the command \r file.
 
-1) bench.gp: This program computes the first 1000 terms of the Fibonacci
+-- bench.gp: This program computes the first 1000 terms of the Fibonacci
 sequence, the product p of successive terms, and the lowest common multiple
 q. It outputs the ratio log(p)/log(q) every 50 terms (this ratio tends to
 pi^2/6 as k tends to infinity). The name bench.gp comes from the fact that
 this program is one (among many) examples where GP/PARI performs orders of
 magnitude faster than systems such as Maple or Mathematica (try it!).
 
-2) cl.gp: Written entirely in the GP language without using bnfclassunit, the
+-- cl.gp: Written entirely in the GP language without using bnfclassunit, the
 programs included in this file allows you in many cases to compute the class
 number, the structure of the class group and a system of fundamental units of
 a general number field (they sometimes fail to give an answer). It can work
@@ -40,17 +40,21 @@ to 1). Finally, the function fu() (no parameters) returns a family of units
 which generates the unit group (you must extract a system of fundamental
 units yourself).
 
-3) classno.gp: A very simple function to compute analytically the class
+-- classno.gp: A very simple function to compute analytically the class
 number of imaginary quadratic fields (written by Fernando Rodriguez Villegas)
 
-4) lucas.gp: The function lucas(p) defined in this file performs the
+-- contfrac.gp: period(D) computes period of continued fraction for sqrt(D)
+[much slower than quadregulator, which does a bit more work, but is written
+in C!] (written by Igor Schein)
+
+-- lucas.gp: The function lucas(p) defined in this file performs the
 Lucas-Lehmer primality test on the Mersenne number 2^p-1. If the result is
 1, the Mersenne number is prime, otherwise not.
 
-5) rho.gp: A simple implementation of Pollard's rho method. The function
+-- rho.gp: A simple implementation of Pollard's rho method. The function
 rho(n) outputs the complete factorization of n in the same format as factor.
 
-6) squfof.gp: This defines a function squfof of a positive integer variable
+-- squfof.gp: This defines a function squfof of a positive integer variable
 n, which may allow you to factor the number n. SQUFOF is a very nice
 factoring method invented in the 70's by D. Shanks for factoring integers,
 and is reasonably fast for numbers having up to 15 or 16 digits. The squfof
@@ -58,7 +62,7 @@ program which is given is a very crude implementation. It also prints out
 some intermediate information as it goes along. The final result is some
 factor of the number to be factored.
 
-7) taylor.gp: Given a user function f (e.g defined by f(x) = sin(x)), defines
+-- taylor.gp: Given a user function f (e.g defined by f(x) = sin(x)), defines
 a function plot_taylor(xmin,xmax, ordlim, first,step) plots f together with
 its Taylor polynomials T_i (truncated series expansion of order i) in the
 interval [xmin,xmax]; i goes from first to ordlim in increments of steps.
