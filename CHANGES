@@ -113,6 +113,7 @@ MSo 8- allow numtoperm(0,k)  [ --> [] ]
        (sqrt(2)x, sqrt(2)y) to map complex embeddings to R^2.
    11- disallow Ser( t_MAT )  [ resulted in a series with t_COL coefficients ]
    12- nf format to improve idealinv() [ nf[5][6] and nf[5][7] ]
+   13- disallow sqrtint( x < 0 )
 
   Added
     1- [Configure:] flag --with-ncurses-lib=*

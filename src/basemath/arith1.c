@@ -384,12 +384,7 @@ racine(GEN a)
   {
     case 1: return isqrti(a);
     case 0: return gzero;
-    case -1:
-    {
-      GEN x = cgetg(3,t_COMPLEX);
-      x[1] = zero;
-      x[2] = (long)isqrti(a); return x; /* a<0 but isqrti use abs(a)*/
-    }
+    default: err(talker, "negative integer in sqrtint");
   }
   return NULL; /* not reached */
 }
