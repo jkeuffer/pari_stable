@@ -76,6 +76,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
     2- exported FFTinit() / FFT() wrappers to rootpol.c:fft() [not under GP yet]
     3- routines Rg_to_Fl, Rg_to_Fp, RgX_to_FpX, RgX_to_FpXQX, RgX_to_FqX,
        RgV_to_FpV, RgXQ_mul, RgXQ_sqr.
+    4- file Qfb.c [ stuff related to binary quad. forms moved out of arith1.c ]
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
@@ -104,6 +105,8 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
    11- removed buggy support for narrow class group in quadclassunit
        + rewrite binary quadratic forms [ qfr3 / qfr5 ]. TODO: move from
        arith1.c to qfb.c
+   12- reinstate cornacchia + cornacchia2 with a different interface [ use
+       cornacchia in qfbsolve ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):

@@ -181,6 +181,8 @@ long  Z_lvalrem_stop(GEN n, ulong p, int *stop);
 long  Z_issquarefree(GEN x);
 
 /* quadratic forms, quadratic numbers */
+long cornacchia(GEN d, GEN p, GEN *px, GEN *py);
+long cornacchia2(GEN d, GEN p, GEN *px, GEN *py);
 GEN  primeform_u(GEN x, ulong p);
 GEN  qf_disc(GEN x);
 void qfb_comp(GEN z,GEN x,GEN y);
