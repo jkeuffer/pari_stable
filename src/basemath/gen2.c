@@ -1770,74 +1770,71 @@ gsigne(GEN x)
 GEN
 listcreate(long n)
 {
-  GEN list;
-
-  if (n<0) err(talker,"negative length in listcreate");
-  n += 2;
-  if (n & ~LGEFBITS) err(talker,"list too long (max = %ld)",LGEFBITS-2);
-  list = cgetg(n,t_LIST);
-  list[1] = evallgeflist(2); return list;
+  GEN L;
+  if (n < 0) err(talker,"negative length in listcreate");
+  L = cgetg(n+2,t_LIST);
+  L[1] = evallgeflist(2); return L;
 }
 
 static void
-listaffect(GEN list, long index, GEN object)
+listaffect(GEN L, long index, GEN object)
 {
-  if (index < lgeflist(list) && isclone(list[index])) gunclone((GEN)list[index]);
-  list[index] = lclone(object);
+  if (index < lgeflist(L) && isclone(L[index])) gunclone((GEN)L[index]);
+  L[index] = lclone(object);
 }
 
 void
-listkill(GEN list)
+listkill(GEN L)
 {
   long l, i;
 
-  if (typ(list) != t_LIST) err(typeer,"listkill");
-  l = lgeflist(list);
+  if (typ(L) != t_LIST) err(typeer,"listkill");
+  l = lgeflist(L);
   for (i=2; i<l; i++)
-    if (isclone(list[i])) gunclone((GEN)list[i]);
-  list[1] = evallgeflist(2);
+    if (isclone(L[i])) gunclone((GEN)L[i]);
+  L[1] = evallgeflist(2);
 }
 
 GEN
-listput(GEN list, GEN object, long index)
+listput(GEN L, GEN object, long index)
 {
-  long l = lgeflist(list);
+  long l = lgeflist(L);
 
-  if (typ(list) != t_LIST) err(typeer,"listput");
+  if (typ(L) != t_LIST) err(typeer,"listput");
   if (index < 0) err(talker,"negative index (%ld) in listput", index);
   if (!index || index >= l-1)
   {
     index = l-1; l++;
-    if (l > lg(list))
-      err(talker,"no more room in this list (size %ld)", lg(list)-2);
+    if (l > lg(L))
+      err(talker,"no more room in this L (size %ld)", lg(L)-2);
   }
-  listaffect(list, index+1, object);
-  list[1] = evallgeflist(l);
-  return (GEN)list[index+1];
+  listaffect(L, index+1, object);
+  L[1] = evallgeflist(l);
+  return (GEN)L[index+1];
 }
 
 GEN
-listinsert(GEN list, GEN object, long index)
+listinsert(GEN L, GEN object, long index)
 {
-  long l = lgeflist(list), i;
+  long l = lgeflist(L), i;
 
-  if (typ(list) != t_LIST) err(typeer,"listinsert");
+  if (typ(L) != t_LIST) err(typeer,"listinsert");
   if (index <= 0 || index > l-1) err(talker,"bad index in listinsert");
-  l++; if (l > lg(list)) err(talker,"no more room in this list");
+  l++; if (l > lg(L)) err(talker,"no more room in this L");
 
-  for (i=l-2; i > index; i--) list[i+1] = list[i];
-  list[index+1] = lclone(object);
-  list[1] = evallgeflist(l);
-  return (GEN)list[index+1];
+  for (i=l-2; i > index; i--) L[i+1] = L[i];
+  L[index+1] = lclone(object);
+  L[1] = evallgeflist(l);
+  return (GEN)L[index+1];
 }
 
 GEN
 gtolist(GEN x)
 {
   long tx, lx, i;
-  GEN list;
+  GEN L;
 
-  if (!x) { list = cgetg(2, t_LIST); list[1] = evallgeflist(2); return list; }
+  if (!x) { L = cgetg(2, t_LIST); L[1] = evallgeflist(2); return L; }
 
   tx = typ(x);
   lx = (tx==t_LIST)? lgeflist(x): lg(x);
@@ -1846,42 +1843,42 @@ gtolist(GEN x)
     case t_VEC: case t_COL:
       lx++; x--; /* fall through */
     case t_LIST:
-      list = cgetg(lx,t_LIST);
-      for (i=2; i<lx; i++) list[i] = lclone((GEN)x[i]);
+      L = cgetg(lx,t_LIST);
+      for (i=2; i<lx; i++) L[i] = lclone((GEN)x[i]);
       break;
     default: err(typeer,"gtolist");
       return NULL; /* not reached */
   }
-  list[1] = evallgeflist(lx); return list;
+  L[1] = evallgeflist(lx); return L;
 }
 
 GEN
-listconcat(GEN list1, GEN list2)
+listconcat(GEN L1, GEN L2)
 {
   long i, l1, lx;
-  GEN list;
+  GEN L;
 
-  if (typ(list1) != t_LIST || typ(list2) != t_LIST) err(typeer,"listconcat");
-  l1 = lgeflist(list1)-2;
-  lx = l1 + lgeflist(list2);
-  list = listcreate(lx-2);
-  for (i=2; i<=l1+1; i++) listaffect(list, i, (GEN)list1[i]);
-  for (   ; i<lx;    i++) listaffect(list, i, (GEN)list2[i-l1]);
-  list[1] = evallgeflist(lx); return list;
+  if (typ(L1) != t_LIST || typ(L2) != t_LIST) err(typeer,"listconcat");
+  l1 = lgeflist(L1)-2;
+  lx = l1 + lgeflist(L2);
+  L = listcreate(lx-2);
+  for (i=2; i<=l1+1; i++) listaffect(L, i, (GEN)L1[i]);
+  for (   ; i<lx;    i++) listaffect(L, i, (GEN)L2[i-l1]);
+  L[1] = evallgeflist(lx); return L;
 }
 
 GEN
-listsort(GEN list, long flag)
+listsort(GEN L, long flag)
 {
-  long i, c = list[1], lx = lgeflist(list)-1;
+  long i, c = L[1], lx = lgeflist(L)-1;
   pari_sp av = avma;
   GEN perm, vec, l;
 
-  if (typ(list) != t_LIST) err(typeer,"listsort");
-  vec = list+1;
+  if (typ(L) != t_LIST) err(typeer,"listsort");
+  vec = L+1;
   vec[0] = evaltyp(t_VEC) | evallg(lx);
   perm = sindexsort(vec);
-  list[1] = c; l = cgetg(lx,t_VEC);
+  L[1] = c; l = cgetg(lx,t_VEC);
   for (i=1; i<lx; i++) l[i] = vec[perm[i]];
   if (flag)
   {
@@ -1891,10 +1888,10 @@ listsort(GEN list, long flag)
         vec[++c] = l[i];
       else
         if (isclone(l[i])) gunclone((GEN)l[i]);
-    setlgeflist(list, c+2);
+    setlgeflist(L, c+2);
   }
   else
     for (i=1; i<lx; i++) vec[i] = l[i];
 
-  avma = av; return list;
+  avma = av; return L;
 }
