@@ -1139,7 +1139,7 @@ err(long numerr, ...)
         long   y = va_arg(ap, long);
              if (*op == '+') f = "addition";
         else if (*op == '*') f = "multiplication";
-        else if (*op == '/' || *op == '%') f = "division";
+        else if (*op == '/' || *op == '%' || *op == '\\') f = "division";
         else if (*op == 'g') { op = ","; f = "gcd"; }
         else { op = "-->"; f = "assignment"; }
         pariputsf(" %s %s %s %s.",f,type_name(x),op,type_name(y));

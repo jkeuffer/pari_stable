@@ -587,22 +587,37 @@ gdivgs(GEN x, long s)
 
 /*******************************************************************/
 /*                                                                 */
-/*                    MODULO GENERAL                               */
+/*                    GENERIC REMAINDER                            */
 /*                                                                 */
 /*******************************************************************/
+/* euclidean quotient for scalars of admissible types */
+static GEN
+_quot(GEN x, GEN y)
+{
+  GEN q = gdiv(x,y), f = gfloor(q);
+  if (gsigne(y) < 0 && !gegal(f,q)) f = gadd(f,gun);
+  return f;
+}
+static GEN
+quot(GEN x, GEN y)
+{
+  ulong av = avma; return gerepileupto(av, _quot(x,y));
+}
 
 GEN
 gmod(GEN x, GEN y)
 {
-  long av,tetpil,i, tx=typ(x), ty = typ(y);
+  ulong av,tetpil;
+  long i,lx,ty, tx = typ(x);
   GEN z,p1;
 
   if (is_matvec_t(tx))
   {
-    i=lg(x); z=cgetg(i,tx);
-    for (i--; i; i--) z[i]=lmod((GEN)x[i],y);
+    lx=lg(x); z=cgetg(lx,tx);
+    for (i=1; i<lx; i++) z[i] = lmod((GEN)x[i],y);
     return z;
   }
+  ty = typ(y);
   switch(ty)
   {
     case t_INT:
@@ -637,6 +652,8 @@ gmod(GEN x, GEN y)
         }
 	case t_POLMOD: case t_POL:
 	  return gzero;
+      /* case t_REAL could be defined as below, but conlicting semantic
+       * with lift(x * Mod(1,y)). */
 
 	default: err(operf,"%",tx,ty);
       }
@@ -645,8 +662,8 @@ gmod(GEN x, GEN y)
       switch(tx)
       {
 	case t_INT: case t_REAL: case t_FRAC: case t_FRACN:
-	  av=avma; p1 = gfloor(gdiv(x,y)); p1 = gneg_i(gmul(p1,y));
-          tetpil=avma; return gerepile(av,tetpil,gadd(x,p1));
+	  av = avma;
+          return gerepileupto(av, gsub(x, gmul(quot(x,y),y)));
 
 	case t_POLMOD: case t_POL:
 	  return gzero;
@@ -658,7 +675,7 @@ gmod(GEN x, GEN y)
       if (is_scalar_t(tx))
       {
         if (tx!=t_POLMOD || varn(x[1]) > varn(y))
-          return (lgef(y) < 4)? gzero: gcopy(x);
+          return degpol(y)? gcopy(x): gzero;
 	if (varn(x[1])!=varn(y)) return gzero;
         z=cgetg(3,t_POLMOD);
         z[1]=lgcd((GEN)x[1],y);
@@ -801,55 +818,124 @@ Mod0(GEN x,GEN y,long flag)
 
 /*******************************************************************/
 /*                                                                 */
-/*                 DIVISION ENTIERE GENERALE                       */
-/*            DIVISION ENTIERE AVEC RESTE GENERALE                 */
+/*                 GENERIC EUCLIDEAN DIVISION                      */
 /*                                                                 */
 /*******************************************************************/
 
 GEN
 gdivent(GEN x, GEN y)
 {
-  long tx=typ(x),ty=typ(y);
+  long tx = typ(x);
 
-  if (tx == t_INT)
+  if (is_matvec_t(tx))
   {
-    if (ty == t_INT) return truedvmdii(x,y,NULL);
-    if (ty!=t_POL) err(typeer,"gdivent");
-    return gzero;
+    long i, lx = lg(x);
+    GEN z = cgetg(lx,tx);
+    for (i=1; i<lx; i++) z[i] = (long)gdivent((GEN)x[i],y);
+    return z;
   }
-  if (ty != t_POL) err(typeer,"gdivent");
-  if (tx == t_POL) return gdeuc(x,y);
-  if (! is_scalar_t(tx)) err(typeer,"gdivent");
-  return gzero;
+  switch(typ(y))
+  {
+    case t_INT:
+      switch(tx)
+      { /* equal to, but more efficient than, quot(x,y) */
+        case t_INT: return truedvmdii(x,y,NULL);
+        case t_REAL:
+        case t_FRAC:
+        case t_FRACN: return quot(x,y);
+        case t_POL: return gdiv(x,y);
+      }
+      break;
+    case t_REAL:
+    case t_FRAC:
+    case t_FRACN: return quot(x,y);
+    case t_POL:
+      if (is_scalar_t(tx))
+      {
+        if (tx == t_POLMOD) break;
+        return degpol(y)? gzero: gdiv(x,y);
+      }
+      if (tx == t_POL) return gdeuc(x,y);
+  }
+  err(operf,"\\",tx,typ(y));
+  return NULL; /* not reached */
+}
+
+/* with remainder */
+static GEN
+quotrem(GEN x, GEN y, GEN *r)
+{
+  ulong av;
+  GEN q = quot(x,y);
+  av = avma;
+  *r = gerepileupto(av, gsub(x, gmul(q,y)));
+  return q;
 }
 
 GEN
 gdiventres(GEN x, GEN y)
 {
-  long tx=typ(x),ty=typ(y);
-  GEN z = cgetg(3,t_COL);
+  long tx = typ(x);
+  GEN z,q,r;
 
-  if (tx==t_INT)
+  if (is_matvec_t(tx))
   {
-    if (ty==t_INT)
-    {
-      z[1]=(long)truedvmdii(x,y,(GEN*)(z+2));
-      return z;
-    }
-    if (ty!=t_POL) err(typeer,"gdiventres");
-    z[1]=zero; z[2]=licopy(x); return z;
-  }
-  if (ty != t_POL) err(typeer,"gdiventres");
-  if (tx == t_POL)
-  {
-    z[1]=ldivres(x,y,(GEN *)(z+2));
+    long i, lx = lg(x);
+    z = cgetg(lx,tx);
+    for (i=1; i<lx; i++) z[i] = (long)gdiventres((GEN)x[i],y);
     return z;
   }
-  if (! is_scalar_t(tx)) err(typeer,"gdiventres");
-  z[1]=zero; z[2]=lcopy(x); return z;
+  z = cgetg(3,t_COL);
+  switch(typ(y))
+  {
+    case t_INT:
+      switch(tx)
+      { /* equal to, but more efficient than next case */
+        case t_INT:
+          z[1] = (long)truedvmdii(x,y,(GEN*)(z+2));
+          return z;
+        case t_REAL:
+        case t_FRAC:
+        case t_FRACN:
+          q = quotrem(x,y,&r);
+          z[1] = (long)q;
+          z[2] = (long)r; return z;
+        case t_POL: return gdiv(x,y);
+      }
+      break;
+    case t_REAL:
+    case t_FRAC:
+    case t_FRACN:
+          q = quotrem(x,y,&r);
+          z[1] = (long)q;
+          z[2] = (long)r; return z;
+    case t_POL:
+      if (is_scalar_t(tx))
+      {
+        if (tx == t_POLMOD) break;
+        if (degpol(y))
+        {
+          q = gzero;
+          r = gcopy(x);
+        }
+        else
+        {
+          q = gdiv(x,y);
+          r = gzero;
+        }
+        return q;
+      }
+      if (tx == t_POL)
+      {
+        z[1]=ldivres(x,y,(GEN *)(z+2));
+        return z;
+      }
+  }
+  err(operf,"\\",tx,typ(y));
+  return NULL; /* not reached */
 }
 
-GEN swap_vars(GEN b0, long v);
+extern GEN swap_vars(GEN b0, long v);
 
 GEN
 divrem(GEN x, GEN y, long v)
@@ -871,6 +957,57 @@ divrem(GEN x, GEN y, long v)
   z[2] = (long)r; return gerepilecopy(av, z);
 }
 
+static int
+is_scal(long t) { return t==t_INT || t==t_FRAC || t==t_FRACN; }
+
+/* If x and y are not both scalars, same as gdivent.
+ * Otherwise, compute the quotient x/y, rounded to the nearest integer
+ * (towards +oo in case of tie). */
+GEN
+gdivround(GEN x, GEN y)
+{
+  ulong av1,av = avma;
+  long tx=typ(x),ty=typ(y);
+  GEN q,r;
+  int fl;
+
+  if (tx==t_INT && ty==t_INT)
+  {
+    q = dvmdii(x,y,&r); /* q = x/y rounded towards 0, sgn(r)=sgn(x) */
+    if (r==gzero) return q;
+    av1 = avma;
+    fl = absi_cmp(shifti(r,1),y);
+    avma = av1; cgiv(r);
+    if (fl >= 0) /* If 2*|r| >= |y| */
+    {
+      long sz = signe(x)*signe(y);
+      if (fl || sz > 0) q = gerepileuptoint(av, addis(q,sz));
+    }
+    return q;
+  }
+  if (is_scal(tx) && is_scal(ty))
+  { /* same as above but less efficient */
+    q = quotrem(x,y,&r);
+    av1 = avma;
+    fl = gcmp(gmul2n(gabs(r,0),1), gabs(y,0));
+    avma = av1; cgiv(r);
+    if (fl >= 0) /* If 2*|r| >= |y| */
+    {
+      long sz = signe(x)*signe(y);
+      if (fl || sz > 0) q = gerepileupto(av, gaddgs(q, sz));
+    }
+    return q;
+  }
+  if (is_matvec_t(tx))
+  {
+    long i,lx = lg(x);
+    GEN z = cgetg(lx,tx);
+    for (i=1; i<lx; i++) z[i] = (long)gdivround((GEN)x[i],y);
+    return z;
+  }
+  return gdivent(x,y);
+}
+
 GEN
 gdivmod(GEN x, GEN y, GEN *pr)
 {
@@ -885,43 +1022,6 @@ gdivmod(GEN x, GEN y, GEN *pr)
   }
   if (tx!=t_POL) err(typeer,"gdivmod");
   return poldivres(x,y,pr);
-}
-
-/* When x and y are integers, compute the quotient x/y, rounded to the
- * nearest integer. If there is a tie, the quotient is rounded towards zero.
- * If x and y are not both integers, same as gdivent.
- */
-GEN
-gdivround(GEN x, GEN y)
-{
-  long tx=typ(x),ty=typ(y);
-
-  if (tx==t_INT)
-  {
-    if (ty==t_INT)
-    {
-      long av = avma, av1,fl;
-      GEN r, q=dvmdii(x,y,&r); /* q = x/y rounded towards 0, sqn(r)=sgn(x) */
-
-      if (r==gzero) return q;
-      av1 = avma;
-      fl = absi_cmp(shifti(r,1),y);
-      avma = av1; cgiv(r);
-      if (fl >= 0) /* If 2*|r| >= |y| */
-      {
-        long sz = signe(x)*signe(y);
-	if (fl || sz > 0)
-          { av1=avma; q = gerepile(av,av1,addis(q,sz)); }
-      }
-      return q;
-    }
-    if (ty!=t_POL) err(typeer,"gdivround");
-    return gzero;
-  }
-  if (ty != t_POL) err(typeer,"gdivround");
-  if (tx == t_POL) return gdeuc(x,y);
-  if (! is_scalar_t(tx)) err(typeer,"gdivround");
-  return gzero;
 }
 
 /*******************************************************************/
