@@ -601,7 +601,7 @@ choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
   long j,k,oldllist,llist,r,lcm,oldlcm,pp,minp, N = degpol(pol), m = N/d;
   GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
  
-  minp = m*(m-1)/2 * (d-1);
+  minp = N*(m-1)/2;
   if (DEBUGLEVEL) timer2();
   di++; p = stoi(2);
   while (p[2]<=minp) p[2] += *di++;
