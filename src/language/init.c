@@ -2105,6 +2105,8 @@ entree functions_basic[]={
 {"galoisisabelian",99,(void*)galoisisabelian,6,"GD0,L,"},
 {"galoispermtopol",2,(void*)galoispermtopol,6,"GG"},
 {"galoissubcyclo",99,(void*)galoissubcyclo,6,"LGDGDnD0,L,"},
+{"galoissubfields",99,(void*)galoissubfields,6,"GD0,L,Dn"},
+{"galoissubgroups",18,(void*)galoissubgroups,6,"G"},
 {"gamma",1,(void*)ggamma,3,"Gp"},
 {"gammah",1,(void*)ggamd,3,"Gp"},
 {"gcd",99,(void*)gcd0,4,"GDGD0,L,"},

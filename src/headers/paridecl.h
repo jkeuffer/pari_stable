@@ -564,6 +564,8 @@ GEN     cyclo(long n, long v);
 GEN     dirdiv(GEN x, GEN y);
 GEN     dirmul(GEN x, GEN y);
 GEN     dirzetak(GEN nf, GEN b);
+long    gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN));
+GEN     gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN));
 GEN     gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN));
 GEN     genrand(GEN N);
 GEN     getheap(void);
@@ -774,6 +776,7 @@ void    writebin(char *name, GEN x);
 
 /* galconj.c */
 
+GEN     checkgal(GEN gal);
 GEN     corediscpartial(GEN n);
 GEN     galoisconj(GEN nf);
 GEN     galoisconj0(GEN nf, long flag, GEN d, long prec);
@@ -784,6 +787,8 @@ GEN     galoisinit(GEN nf, GEN den, long karma);
 GEN     galoisisabelian(GEN gal, long flag);
 GEN     galoispermtopol(GEN gal, GEN perm);
 GEN     galoissubcyclo(long n, GEN H, GEN Z, long v, long flag);
+GEN     galoissubgroups(GEN G);
+GEN     galoissubfields(GEN G, long flag, long v);
 long    numberofconjugates(GEN T, long pdepart);
 GEN     vandermondeinverse(GEN L, GEN T, GEN den, GEN prep);
 /* gen1.c */

@@ -740,9 +740,9 @@ setisset(GEN x)
 
 /* looks if y belongs to the set x and returns the index if yes, 0 if no */
 long
-setsearch(GEN x, GEN y, long flag)
+gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN))
 {
-  long av = avma,lx,j,li,ri,fl, tx = typ(x);
+  long lx,j,li,ri,fl, tx = typ(x);
 
   if (tx==t_VEC) lx = lg(x);
   else
@@ -752,17 +752,37 @@ setsearch(GEN x, GEN y, long flag)
   }
   if (lx==1) return flag? 1: 0;
 
-  if (typ(y) != t_STR) y = gtostr(y);
   li=1; ri=lx-1;
   do
   {
-    j = (ri+li)>>1; fl = gcmp((GEN)x[j],y);
-    if (!fl) { avma=av; return flag? 0: j; }
+    j = (ri+li)>>1; fl = cmp((GEN)x[j],y);
+    if (!fl) return flag? 0: j;
     if (fl<0) li=j+1; else ri=j-1;
   } while (ri>=li);
-  avma=av; if (!flag) return 0;
+  if (!flag) return 0;
   return (fl<0)? j+1: j;
 }
+
+
+long
+setsearch(GEN x, GEN y, long flag)
+{
+  long av = avma;
+  long res;
+  if (typ(y) != t_STR) y = gtostr(y);
+  res=gen_search(x,y,flag,gcmp);
+  avma=av; 
+  return res;
+}
+
+#if 0
+GEN
+gen_union(GEN x, GEN y, int (*cmp)(GEN,GEN)) 
+{
+  if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
+  
+}
+#endif
 
 GEN
 setunion(GEN x, GEN y)
@@ -788,16 +808,33 @@ setintersect(GEN x, GEN y)
 }
 
 GEN
+gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN))
+{
+  ulong ltop=avma;
+  long find;
+  long i,j,k;
+  GEN  diff=cgetg(lg(set1),t_VEC);
+  for(i=1,j=1,k=1; i < lg(set1); i++)
+  {
+    for(find=0; j < lg(set2); j++)
+    {
+      int s=cmp((GEN)set1[i],(GEN)set2[j]);
+      if (s<0)  break ;
+      if (s>0)  continue;
+      find=1;
+    }
+    if (!find)
+      diff[k++]=set1[i];
+  }
+  setlg(diff,k);
+  return gerepilecopy(ltop,diff);
+}
+
+GEN
 setminus(GEN x, GEN y)
 {
-  long av=avma,i,lx,c;
-  GEN z;
-
   if (!setisset(x) || !setisset(y)) err(talker,"not a set in setminus");
-  lx=lg(x); z=cgetg(lx,t_VEC); c=1;
-  for (i=1; i<lx; i++)
-    if (setsearch(y, (GEN)x[i], 1)) z[c++] = x[i];
-  setlg(z,c); return gerepilecopy(av,z);
+  return gen_setminus(x,y,gcmp);
 }
 
 /***********************************************************************/

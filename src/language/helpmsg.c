@@ -173,6 +173,8 @@ char *helpmessages_basic[]={
   "galoisisabelian(gal,{flag=0}): gal being as output by galoisinit, return 0 if gal is not abelian, and the hnf matrix of gal over gal.gen if flag=0, 1 if flag is 1",
   "galoispermtopol(gal,perm): gal being a galois field as output by galoisinit and perm a element of gal.group, return the polynomial defining the corresponding Galois automorphism",
   "galoissubcyclo(n,H,{Z},{v},{fl=0}):Compute a polynomial defining the subfield of Q(zeta_n) fixed by the subgroup H of Z/nZ. H can be given by a generator, a set of generator given by a vector or a SNF matrix. If present Z must be znstar(n), currently it is used only when H is a SNF matrix. If v is given, the polynomial is given in the variable v. If flag is 1, output only the conductor of the abelian extension. If flag is 2 output [pol,f] where pol is the polynomial and f the conductor.",
+  "galoissubfields(G,{flags=0},{v}):Output all the subfields of G. flags have the same meaning as for galoisfixedfield",
+  "galoissubgroups(G):Output all the subgroups of G",
   "gamma(x): gamma function at x",
   "gammah(x): gamma of x+1/2 (x integer)",
   "gcd(x,{y},{flag=0}): greatest common divisor of x and y. flag is optional, and can be 0: default, 1: use the modular gcd algorithm (x and y must be polynomials), 2 use the subresultant algorithm (x and y must be polynomials)",
