@@ -1722,26 +1722,31 @@ typedef struct {
   GEN u; /* matrix giving fincke-pohst-reduced Zk basis */
   GEN M; /* embeddings of initial (LLL-reduced) Zk basis */
   GEN bound; /* T2 norm of the polynomial defining nf */
-  nfbasic_t *T;
 } CG_data;
 
-/* characteristic pol of x */
+/* characteristic pol of x (given by embeddings) */
 static GEN
-get_polchar(CG_data *d, GEN x)
+get_pol(CG_data *d, GEN x)
 {
-  GEN g = gmul(d->ZKembed,x);
   long e;
-  g = grndtoi(roots_to_pol_r1r2(g, d->r1, d->v), &e);
-  if (e > -5) err(precer, "get_polchar");
+  GEN g = grndtoi(roots_to_pol_r1r2(x, d->r1, d->v), &e);
+  if (e > -5) err(precer, "get_pol");
   return g;
 }
 
-/* return a defining polynomial for Q(x) */
+/* characteristic pol of x (given as vector on (w_i)) */
 static GEN
-get_polmin(CG_data *d, GEN x)
+get_polchar(CG_data *d, GEN x)
 {
-  GEN g = get_polchar(d,x);
-  GEN h = modulargcd(g,derivpol(g));
+  return get_pol(d, gmul(d->ZKembed,x));
+}
+
+/* return a defining polynomial for Q(w_i) */
+static GEN
+get_polmin_w(CG_data *d, long k)
+{
+  GEN g = get_pol(d, (GEN)d->ZKembed[k]);
+  GEN h = modulargcd(g, derivpol(g));
   if (degpol(h)) g = gdivexact(g,h);
   return g;
 }
@@ -1753,20 +1758,10 @@ chk_gen(void *data, GEN x)
   pari_sp av = avma, av1;
   GEN h, g = get_polchar((CG_data*)data,x);
   av1 = avma;
-  h = modulargcd(g,derivpol(g));
+  h = modulargcd(g, derivpol(g));
   if (degpol(h)) { avma = av; return NULL; }
   if (DEBUGLEVEL>3) fprintferr("  generator: %Z\n",g);
   avma = av1; return gerepileupto(av, g);
-}
-
-static GEN
-norm_ei_from_Q(GEN Q, long k)
-{
-  GEN s = gcoeff(Q, k, k);
-  long i;
-  for (i = 1; i < k; i++)
-    s = gadd(s, gmul(gcoeff(Q,i,i), gsqr(gcoeff(Q,i,k))));
-  return s;
 }
 
 /* set V[k] := matrix of multiplication by k */
@@ -1786,64 +1781,85 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
   V[k] = (long)Mk; return Mk;
 }
 
-/* mat = base change matrix, R = Cholesky form of the quadratic form [matrix
+/* U = base change matrix, R = Cholesky form of the quadratic form [matrix
  * Q from algo 2.7.6] */
 static GEN
-chk_gen_init(FP_chk_fun *chk, GEN R, GEN mat)
+chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
 {
   CG_data *d = (CG_data*)chk->data;
-  nfbasic_t *T = d->T;
-  GEN V, inv, P, bound, prev, x, M = cgetg(1, t_MAT);
-  long l = lg(R), N = l-1, r1 = d->r1, r2 = (N-r1)>>1;
-  long i, v, dx, prec;
+  GEN V, S, inv, bound, M;
+  long N = lg(U)-1, r1 = d->r1, r2 = (N-r1)>>1;
+  long i, prec, firstprim = 0;
   int skipfirst = 0;
   pari_sp av;
 
-  d->u = mat;
-  d->ZKembed = gmul(d->M, mat);
+  d->u = U;
+  d->ZKembed = gmul(d->M, U);
 
-  av = avma;
-  inv = ginv( split_realimag(d->ZKembed, r1, r2) ); /*TODO: use QR?*/
-  V = cgetg(N+1, t_VEC);
-
-  v = varn(T->x);
+  av = avma; M = cgetg(1, t_MAT);
+  S = cgetg(N+1, t_VECSMALL);
   bound = d->bound;
-  prev = NULL;
-  x = zerocol(N);
-  for (i = 1; i < l; i++)
+  for (i = 1; i <= N; i++)
   {
-    GEN Mx, M2, B = norm_ei_from_Q(R, i);
-    long j, h, rankM;
-    if (gcmp(B,bound) >= 0 && skipfirst != i-1) continue;
-
-    x[i] = un; P = get_polmin(d,x); dx = degpol(P);
-    x[i] = zero;
-    if (dx == N)
+    GEN P = get_polmin_w(d, i), B = T2_from_embed((GEN)d->ZKembed[i], r1);
+    long dP = degpol(P);
+    if (dP == N)
     { /* primitive element */
       if (gcmp(B,bound) < 0) bound = B ;
-      continue;
+      if (!firstprim) firstprim = i; /* index of first primitive element */
+      S[i] = 0;
     }
-    if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
-    if (skipfirst != i-1) continue;
+    else
+    {
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: subfield %Z\n",P);
+      S[i] = dP;
+      if (firstprim)
+      { /* cycle basis vectors so that primitive elements come last */
+        GEN u = d->u, e = d->ZKembed;
+        GEN te = (GEN)e[i], tu = (GEN)u[i], tR = (GEN)R[i];
+        long j, tS = S[i];
+        for (j = i; j > firstprim; j--)
+        {
+          u[j] = u[j-1];
+          e[j] = e[j-1];
+          R[j] = R[j-1];
+          S[j] = S[j-1];
+        }
+        u[firstprim] = (long)tu;
+        e[firstprim] = (long)te;
+        R[firstprim] = (long)tR;
+        S[firstprim] = tS; firstprim++;
+      }
+    }
+  }
+
+  inv = ginv( split_realimag(d->ZKembed, r1, r2) ); /*TODO: use QR?*/
+  V = cgetg(N+1, t_VEC);
+  for (i = 1; i <= N; i++)
+  {
+    GEN Mx, M2;
+    long j, h, rkM, dP = S[i];
+
+    if (!dP || skipfirst != i-1) continue;
     Mx = set_mulid(V, d->ZKembed, inv, r1, r2, N, i);
     if (!Mx) continue;
-    rankM = lg(M)-1;
-    for (h = 1; h < dx; h++)
+    rkM = lg(M)-1;
+    for (h = 1; h < dP; h++)
     {
       long r, k = 1;
-      if (h > 1) M2 = cgetg(rankM+1, t_MAT);
+      if (h > 1) M2 = cgetg(rkM+1, t_MAT);
       else
       {
-        M2 = cgetg(rankM+2, t_MAT);
+        M2 = cgetg(rkM+2, t_MAT);
         M2[k++] = (long)vec_ei(N, i);
       }
-      for (j = 1; j <= rankM; j++) M2[k++] = lmul(Mx, (GEN)M[j]);
+      for (j = 1; j <= rkM; j++) M2[k++] = lmul(Mx, (GEN)M[j]);
       M = image(concatsp(M, M2));
       r = lg(M) - 1;
-      if (r == rankM) break;
-      if (r > rankM) rankM = r;
+      if (r == rkM) break;
+      if (r > rkM) rkM = r;
     }
-    if (rankM == N) continue;
+    if (rkM == N) continue;
 
     /* Q(w[1],...,w[i-1]) is a strict subfield of nf */
     skipfirst++;
@@ -1960,8 +1976,7 @@ _polredabs(nfbasic_t *T, GEN *u)
 
   d.v = varn(T->x);
   d.r1= T->r1;
-  d.bound = gmul(T2_from_embed(F.ro, d.r1), dbltor(1.00000001));
-  d.T = T;
+  d.bound = T2_from_embed(F.ro, d.r1);
   for (i=1; ; i++)
   {
     GEN R = R_from_QR(F.G, prec);

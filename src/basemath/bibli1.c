@@ -3246,18 +3246,19 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   rperm = cgetg(l,t_MAT);
   uperm = cgetg(l,t_MAT); perm = sindexsort(vnorm);
   for (i=1; i<l; i++) { uperm[l-i] = u[perm[i]]; rperm[l-i] = r[perm[i]]; }
-  r = sqred1_from_QR(rperm, gprecision(rperm));
-  if (!r) return NULL;
-
-  res = NULL;
+  u = uperm;
+  r = rperm; res = NULL;
   CATCH(precer) { }
   TRY {
     if (CHECK && CHECK->f_init)
-    {
-      bound = CHECK->f_init(CHECK, r, uperm);
+    { /* f_init allowed to permute the columns of u and r */
+      bound = CHECK->f_init(CHECK, r, u);
       if (!bound) err(precer,"fincke_pohst");
     }
+    r = sqred1_from_QR(r, gprecision(r));
+    if (!r) err(precer,"fincke_pohst");
     if (!bound) bound = gsqr(gcoeff(r,1,1));
+
     res = smallvectors(r, bound, stockmax, CHECK);
   } ENDCATCH;
   if (DEBUGLEVEL>2) fprintferr("leaving fincke_pohst\n");
@@ -3266,5 +3267,5 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
   z = cgetg(4,t_VEC);
   z[1] = lcopy((GEN)res[1]);
   z[2] = round? lround((GEN)res[2]): lcopy((GEN)res[2]);
-  z[3] = lmul(uperm, (GEN)res[3]); return gerepileupto(av,z);
+  z[3] = lmul(u, (GEN)res[3]); return gerepileupto(av,z);
 }
