@@ -929,7 +929,7 @@ mul_matvec_mod_pr(GEN mat, GEN y, GEN prh)
 
 /* smallest integer n such that g0^n=x modulo p prime. Assume g0 has order q
  * (p-1 if q = NULL) */
-static GEN
+GEN
 Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
 {
   long av=avma,av1,lim,lbaby,i,k,c;

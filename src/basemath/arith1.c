@@ -920,14 +920,14 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
  * y n'est pas une puissance l-ieme
  * m!=1
  * ouf!
- * FIXME: use baby-step giant-step.
  */
+GEN Fp_shanks(GEN x,GEN g0,GEN p, GEN q);
 static GEN
 mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
 {
   ulong av = avma, tetpil,lim;
-  long i,k;
-  GEN p1,p2,u1,u2,v,w,z;
+  long k;
+  GEN p1,u1,u2,v,w,z,dl;
   /* y contient un generateur de (Z/pZ)^* eleve a la puis (p-1)/(l^e) */
   bezout(r,l,&u1,&u2);
   v=powmodulo(a,u2,p);
@@ -945,11 +945,9 @@ mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
       k++;
     }while(!gcmp1(p1));
     if (k==e) { avma=av; return NULL; }
-    p2 = modii(mulii(z,m),p);
-    for(i=1; !gcmp1(p2); i++) p2 = modii(mulii(p2,m),p);/*should be a baby step
-							  giant step instead*/
-    p1=powmodulo(y,modii(mulsi(i,gpowgs(l,e-k-1)),q),p);
-    m=powmodulo(m,stoi(i),p);
+    dl=Fp_shanks(mpinvmod(z,p),m,p,l);
+    p1=powmodulo(y,modii(mulii(dl,gpowgs(l,e-k-1)),q),p);
+    m=powmodulo(m,dl,p);
     e = k;
     v = modii(mulii(p1,v),p);
     y = powmodulo(p1,l,p);
