@@ -55,13 +55,8 @@ for f in $gp $graph; do
   OBJSGP="$OBJSGP $f.o"
   OBJSDGP="$OBJSDGP $f-dyn.o"
 done
-OINLINE=''
 for f in $inline; do
-  if test -n "$__gnuc__" -a "$optimization" != debugging; then
-    OINLINE="$OINLINE $f.o"
-  else
-    OBJS="$OBJS $f.o"
-  fi
+  OBJS="$OBJS $f.o"
 done
 
 case "$which_graphic_lib" in
@@ -197,7 +192,6 @@ TOPLDDYN     = -L$TOP/$objdir \$(RLLIBS)
 OBJS   = $OBJS
 OBJSGP = $OBJSGP
 OBJSDGP = $OBJSDGP
-OINLINE = $OINLINE
 
 dft: gp $pari_elc
 	-
@@ -214,9 +208,9 @@ all: $exec lib-sta
 lib-sta: libpari.a
 lib-dyn: libpari.$somake
 
-libpari.a: \$(OBJS) \$(OINLINE)
+libpari.a: \$(OBJS)
 	-\$(RM) \$@
-	ar r \$@  \$(OBJS) \$(OINLINE)
+	ar r \$@ \$(OBJS)
 EOT
 if test -n "$ranlib"; then
 cat >> $file << EOT
@@ -348,9 +342,9 @@ gp-dyn: \$(OBJSGP) libpari.$somake \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 
-libpari.$somake: \$(OBJS) \$(OINLINE)
+libpari.$somake: \$(OBJS)
 	-\$(RM) libpari.$somake
-	\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(OINLINE) \$(EXTRADLLDFLAGS)
+	\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS)
 EOT
 # CYGWIN32 FIXME: somake & sodest make no difference...
     if test "$somake" != "$sodest"; then
