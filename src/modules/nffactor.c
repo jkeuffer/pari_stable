@@ -247,36 +247,36 @@ nfisgalois(GEN nf, GEN P)
 
 /* return a minimal lift of elt modulo id */
 static GEN
-nf_bestlift(GEN elt, GEN bound, nflift_t *T)
+nf_bestlift(GEN elt, GEN bound, nflift_t *L)
 {
   GEN u;
-  long i,l = lg(T->prk), t = typ(elt);
+  long i,l = lg(L->prk), t = typ(elt);
   if (t != t_INT)
   {
-    if (t == t_POL) elt = mulmat_pol(T->tozk, elt);
-    u = gmul(T->iprk,elt);
-    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->den);
+    if (t == t_POL) elt = mulmat_pol(L->tozk, elt);
+    u = gmul(L->iprk,elt);
+    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], L->den);
   }
   else
   {
-    u = gmul(elt, (GEN)T->iprk[1]);
-    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], T->den);
+    u = gmul(elt, (GEN)L->iprk[1]);
+    for (i=1; i<l; i++) u[i] = (long)diviiround((GEN)u[i], L->den);
     elt = gscalcol(elt, l-1);
   }
-  u = gsub(elt, gmul(T->prk, u));
+  u = gsub(elt, gmul(L->prk, u));
   if (bound && gcmp(QuickNormL2(u,DEFAULTPREC), bound) > 0) u = NULL;
   return u;
 }
 
-/* Warning: return T->topowden * (best lift) */
+/* Warning: return L->topowden * (best lift) */
 static GEN
-nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *T)
+nf_bestlift_to_pol(GEN elt, GEN bound, nflift_t *L)
 {
   pari_sp av = avma;
-  GEN v, u = nf_bestlift(elt,bound,T);
+  GEN v, u = nf_bestlift(elt,bound,L);
   if (!u) return NULL;
   v = gclone(u); avma = av;
-  u = gmul(T->topow, v); 
+  u = gmul(L->topow, v); 
   gunclone(v); return u;
 }
 
@@ -1133,6 +1133,29 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   init_proj(L, (GEN)nf[1], (GEN)pr[1]);
 }
 
+/* Let X = Tra * M_L, Y = bestlift(X) return V s.t Y = X - PRK V
+ * and set *eT2 = gexpo(Y)  [cf nf_bestlift, but memory efficient] */
+static GEN
+get_V(GEN Tra, GEN M_L, GEN PRK, GEN PRKinv, GEN pk, long *eT2)
+{
+  long i, e = 0, l = lg(M_L);
+  GEN V = cgetg(l, t_MAT);
+  *eT2 = 0;
+  for (i = 1; i < l; i++)
+  { /* cf nf_bestlift(Tra * c) */
+    pari_sp av = avma, av2;
+    GEN v, T2 = gmul(Tra, (GEN)M_L[i]);
+      
+    v = gdivround(gmul(PRKinv, T2), pk); /* small */
+    av2 = avma;
+    T2 = gsub(T2, gmul(PRK, v));
+    e = gexpo(T2); if (e > *eT2) *eT2 = e;
+    avma = av2;
+    V[i] = lpileupto(av, v); /* small */
+  }
+  return V;
+}
+
 static GEN
 nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
 {
@@ -1175,7 +1198,7 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
   /* tmax = current number of traces used (and computed so far) */
   for(tmax = 0;; tmax++)
   {
-    long a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
+    long eT2, a, b, bmin, bgood, delta, tnew = tmax + 1, r = lg(CM_L)-1;
     GEN oldCM_L, M_L, q, S1, P1, VV;
     int first = 1;
 
@@ -1222,21 +1245,17 @@ nf_LLL_cmbf(nfcmbf_t *T, GEN p, long k, long rec)
     b = delta = 0; /* -Wall */
 AGAIN:
     M_L = Q_div_to_int(CM_L, stoi(C));
-    T2 = gmul(Tra, M_L);
-    VV = gdivround(gmul(PRKinv, T2), pk);
-    T2 = gsub(T2, gmul(PRK, VV));
-
+    VV = get_V(Tra, M_L, PRK, PRKinv, pk, &eT2);
     if (first)
     { /* initialize lattice, using few p-adic digits for traces */
-      a = gexpo(T2);
+      a = eT2;
       bgood = (long)(a - max(32, BitPerFactor * r));
       b = max(bmin, bgood);
       delta = a - b;
     }
     else
     { /* add more p-adic digits and continue reduction */
-      long b0 = gexpo(T2);
-      if (b0 < b) b = b0;
+      if (eT2 < b) b = eT2;
       b = max(b-delta, bmin);
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
     }
@@ -1258,8 +1277,8 @@ AGAIN:
     }
     CM_L = LLL_check_progress(Bnorm, n0, m, b == bmin, /*dbg:*/ &ti_LLL);
     if (DEBUGLEVEL>2)
-      fprintferr("LLL_cmbf: b =%4ld; r =%3ld -->%3ld, time = %ld\n",
-                 b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
+      fprintferr("LLL_cmbf: (a,b) =%4ld,%4ld; r =%3ld -->%3ld, time = %ld\n",
+                 a,b, lg(m)-1, CM_L? lg(CM_L)-1: 1, TIMER(&TI));
     if (!CM_L) { list = _col(QXQ_normalize(P,nfT)); break; }
     if (b > bmin)
     {
