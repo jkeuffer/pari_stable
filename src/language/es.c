@@ -2579,12 +2579,21 @@ switchin(char *name0)
   err(openfiler,"input",name0);
 }
 
+static int is_magic_ok(FILE *f);
+
 void
 switchout(char *name)
 {
   if (name)
   {
-    FILE *f = fopen(name, "a");
+    FILE *f = fopen(name, "r");
+    if (f)
+    {
+      if (is_magic_ok(f))
+        err(talker,"%s is a GP binary file. Please use writebin", name);
+      fclose(f);
+    }
+    f = fopen(name, "a");
     if (!f) err(openfiler,"output",name);
     pari_outfile = f;
   }
