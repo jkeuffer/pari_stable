@@ -1432,6 +1432,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
   MINKOVSKI_BOUND = get_minkovski(N,R1,(GEN)nf[3],gborne);
   for (noideal=KC; noideal; noideal--)
   {
+    ulong av0 = avma;
     long nbrelideal=0, dependent = 0, oldcglob = cglob;
     GEN IDEAL, ideal = (GEN)vectbase[noideal];
     GEN normideal = idealnorm(nf,ideal);
@@ -1486,7 +1487,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
 	}
 	if (k==1) /* element complete */
 	{
-	  if (!x[1] && y[1]<=eps) goto ENDIDEAL;
+	  if (y[1]<=eps) goto ENDIDEAL; /* skip all scalars: [*,0...0] */
 	  if (ccontent(x)==1) /* primitive */
 	  {
             GEN Nx, gx = gmul_mati_smallvec(IDEAL,x);
@@ -1532,7 +1533,7 @@ small_norm_for_buchall(long cglob,GEN *mat,GEN matarch,long LIMC, long PRECREG,
       }
     }
 ENDIDEAL:
-    if (cglob == oldcglob) avma =av1; else invp = gerepilecopy(av1, invp);
+    if (cglob == oldcglob) avma = av0; else invp = gerepilecopy(av1, invp);
     if (DEBUGLEVEL>1) msgtimer("for this ideal");
   }
 END:
@@ -2146,7 +2147,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
  * Starting from the identity (canonical basis of Q^n), we obtain a base
  * change matrix P by taking the independant columns of A and vectors from
  * the canonical basis. Update invp = 1/P, and L in {0,1}^n, with L[i] = 0
- * of P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
+ * if P[i] = e_i, and 1 if P[i] = A_i (i-th column of A)
  */
 static GEN
 relationrank(GEN *A, long r, GEN L)
