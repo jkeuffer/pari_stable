@@ -164,11 +164,12 @@ sort_vecpol(GEN a)
   avma = av; return a;
 }
 
+/* centered residue x mod p. po2 = shifti(p, -1) or NULL (euclidean residue) */
 GEN
 centermodii(GEN x, GEN p, GEN po2)
 {
   GEN y = modii(x,p);
-  if (cmpii(y,po2) > 0) return subii(y,p);
+  if (po2 && cmpii(y,po2) > 0) return subii(y,p);
   return y;
 }
 
