@@ -81,6 +81,7 @@ SPARCv7(SS400)  ???  SunOS-4.1.4     gcc          107074  106494  2.0.16(19)DE
 SPARCv7(HWS210) ???  Linux-2.2.5     gcc           98488!      -  2.0.16(14)DE
 ------------------------------------------------------------------------------
 Intel/x86
+AMD Opteron 1333MHz  Linux-2.4.22    gcc-3.0         746     750  2.1.5     BA
 AMD Athlon  XP2400+  Linux-2.4.21    gcc-3.2         428     398  2.2.5 (41)MH
 AMD Athlon  XP1800+  Linux-2.4.17    gcc-3.0.4       616     616  2.2.3 (30)PE
 AMD Athlon  MP1800+  Linux-2.4.9     gcc-2.96        696     688  2.2.3 (29)HC
