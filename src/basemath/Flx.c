@@ -159,6 +159,9 @@ Flx_polx(long sv)
   return z;
 }
 
+/* Take an integer and return a scalar polynomial mod p,
+ * with evalvarn=vs */
+
 /*FIXME: Should be z_zx since modular reduction is not performed*/
 GEN
 Fl_Flx(ulong x, long sv)
@@ -169,9 +172,6 @@ Fl_Flx(ulong x, long sv)
   z[1] = sv;
   z[2] = (long)x; return z;
 }
-
-/* Take an integer and return a scalar polynomial mod p,
- * with evalvarn=vs */
 
 /* return x[0 .. dx] mod p as t_VECSMALL. Assume x a t_POL*/
 GEN
