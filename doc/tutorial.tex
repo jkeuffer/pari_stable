@@ -1335,24 +1335,46 @@ output by \kbd{ellinit}. (I'm sure you know how the other \kbd{init} functions
 will be called now, don't you? Oh, by the way, neither \kbd{clgpinit} nor
 \kbd{pridinit} exist.)
 
-  Let's try it. The discriminant \kbd{e.disc} is equal to 37, hence the
-conductor of the curve is 37. Of course in general it is not so trivial. In
-fact, the equation of the curve is clearly not minimal, so type \kbd{e =
-ellminimalmodel(e0)}, which gives the \kbd{ell} structure associated with the
-minimal model, exactly as if we had used \kbd{ellinit} on the minimal
-equation. For some related data, type \kbd{r = ellglobalred(e0)}. The first
-component \kbd{r[1]} tells us that the conductor is 37 as we already knew.
-The second component is a 4-component vector which allows us to get the
-minimal equation: in fact \kbd{e} is \kbd{ellchangecurve(e0, r[2])}. You can
-for the moment ignore the third component \kbd{r[3]} (for the impatient
-reader, this is the product of the local Tamagawa numbers, $c_p$).
+  Let's try it. The discriminant \kbd{e.disc} is equal to 37, hence
+the conductor of the curve is 37. Of course in general it is not so
+trivial. In fact, although the equation of the curve is clearly
+minimal (since the discriminant is $12$th-power-free), it is not in
+standard reduced form, so type \kbd{e = ellminimalmodel(e0)}, which
+gives the \kbd{ell} structure associated with the standard model,
+exactly as if we had used \kbd{ellinit} on a reduced equation. For
+some related data, type \kbd{gr = ellglobalred(e0)}. The first
+component \kbd{gr[1]} tells us that the conductor is 37 as we already
+knew.  The second component is a 4-component vector which allows us to
+get the minimal equation: in fact \kbd{e} is \kbd{ellchangecurve(e0,
+gr[2])}. You can for the moment ignore the third component \kbd{gr[3]}
+(for the impatient reader, this is the product of the local Tamagawa
+numbers, $c_p$).
 
-The new \kbd{e} tells us that the minimal equation is $y^2+y = x^3-x$.
-Let us now play a little with points on \kbd{e}. Type \kbd{q = [0,0]}, which is
-clearly on the curve (type \kbd{ellisoncurve(e, q)} to check). Well, \kbd{q}
-may be a torsion point. Type \kbd{ellheight(e, q)}, which computes the
-canonical Neron-Tate height of \kbd{q}. (Note that \kbd{ellheight} assumes
-that \kbd{e} is \emph{minimal}!) This is non-zero, hence \kbd{q} is not
+Type \kbd{q0=[-2,2]}.  This is a point on \kbd{e0}, as you may check
+by typing \kbd{ellisoncurve(e0, q0)}.  To transfer this point onto
+\kbd{e}, type \kbd{q=ellchangepoint(q0,gr[2])}, and then
+check with \kbd{ellisoncurve(e, q)}.  Note that \kbd{ellchangepoint()}
+is unusual among the elliptic curve functions in that it does not take
+an \kbd{ell} structure as its first argument: in \kbd{gp}, points do
+not ``know'' which curve they are on, but to move a point from one
+model to another we only need to know the coordinates of the point and
+the transformation data here stored in \kbd{gr[2]}.  Also, the point
+at infinity is represented as \kbd{[0]} on all elliptic curves; this is
+the identity for the group law.
+
+Here, \kbd{q=[0,0]} obviously lies on \kbd{e}, which has equation
+$y^2+y = x^3-x$.  Let us now play a little with points on \kbd{e}.
+The group law on an elliptic curve is implemented with the functions
+\kbd{elladd} for addition, \kbd{ellsub} for subtraction and
+\kbd{ellpow} for multiplication by an integer (``powering'').  For
+example, the negative of \kbd{q} is \kbd{ellsub(e,[0],q)}, and the
+double is obtained either as \kbd{ellpow(e,q,2)} or as
+\kbd{elladd(e,q,q)}.
+
+Now \kbd{q} may be a torsion point. Type \kbd{ellheight(e, q)}, which
+computes the canonical Neron-Tate height of \kbd{q}. (Note that
+\kbd{ellheight} assumes that
+\kbd{e} is \emph{minimal}!) This is non-zero, hence \kbd{q} is not
 torsion. To see this even better, type
 
 \kbd{for(k = 1, 20, print(ellpow(e, q, k)))}
@@ -1363,12 +1385,13 @@ the points. As a further check, type
 $400=20^2$ as it should be. You can also type \kbd{ellorder(e, q)} which
 returns 0, telling you that \kbd{q} is non-torsion.
 
-Notice how all those \kbd{ell}--prefixed functions take our elliptic curve as
-a first argument? This will be true with number fields as well: whatever
-object was initialized by an $ob$--\kbd{init} function will have to be used as
-a first argument of all the $ob$--prefixed functions. Conversely, you won't be
-able to use any such high-level function before you correctly initialize the
-relevant object. \smallskip
+Notice how (almost) all those \kbd{ell}--prefixed functions take our
+elliptic curve as a first argument? This will be true with number
+fields as well: whatever object was initialized by an $ob$--\kbd{init}
+function will have to be used as a first argument of all the
+$ob$--prefixed functions. Conversely, you won't be able to use any
+such high-level function before you correctly initialize the relevant
+object. \smallskip
 
 Ok, let's try another curve. Type \kbd{e = ellinit([0,-1,1,0,0])}. This
 corresponds to the equation $y^2+y = x^3-x^2$. Again from the discriminant
@@ -1378,11 +1401,13 @@ minimal. Type \kbd{q = [0,0]} which is clearly a point on \kbd{e}, and
 \kbd{ellheight(e, q)}. This time we obtain a value which is very close to
 zero, hence \kbd{q} must be a torsion point. Indeed, typing
 \bprog
-for(k=1, 5, print(ellpow(e, q,k)))
-@eprog\noindent
-we see that \kbd{q} is a point of order 5 (note that the point at infinity is
-represented as \kbd{[0]}). More simply, you can type \kbd{ellorder(e,
-q)}.\smallskip
+        for(k=1, 5, print(ellpow(e, q,k))) 
+@eprog\noindent 
+we see that \kbd{q} is a point of order 5. More simply, you can type
+\kbd{ellorder(e, q)}.  Moreover, typing \kbd{elltors(e)} shows that
+\kbd{q} generates all the torsion of \kbd{e}, which is cyclic of
+order~$5$.
+\smallskip
 
 Let's try still another curve. Type \kbd{e = ellinit([0,0,1,-7,6])} to get
 the curve $y^2+y=x^3-7x+6$. Typing \kbd{ellglobalred(e)} shows that this is a
@@ -1439,30 +1464,31 @@ canonical heights. Let us order the points according to their height. For
 this, type
 \bprog
   iv = vecsort(hv,, 1);    \\@com indirect sorting
-  hv = vecextract(hv, iv);
-  v  = vecextract( v, iv);
+  hv = vecextract(hv,     iv);
+  v  = vecextract(Vec(v), iv);
 @eprog\noindent
-It seems reasonable to take the numbers with smallest height as generators of
-the Mordell-Weil group. Let's try the first 4: type
+It seems reasonable to take the numbers with smallest height as
+possible generators of the Mordell-Weil group. Let's try the first
+four: type
 
 \kbd{m = ellheightmatrix(e, vecextract(v,[1,2,3,4])); matdet(m)}
 
-Since the curve has no torsion, the determinant being close to zero implies
-that the first four points are dependent. To find the dependency, it is
-enough to find the kernel of the matrix \kbd{m}. So type \kbd{matker(m)}:
-we indeed get a non-trivial kernel, and the coefficients are (close to)
-integers as they should. Typing \kbd{elladd(e, v[1],v[3])} does indeed show
-that it is equal to \kbd{v[4]}.
+Since the curve has no torsion, the determinant being close to zero
+implies that the first four points are dependent. To find the
+dependency, it is enough to find the kernel of the matrix \kbd{m}. So
+type \kbd{matker(m)}: we indeed get a non-trivial kernel, and the
+coefficients are (close to) integers. Typing \kbd{elladd(e,
+v[1],v[3])} does indeed show that it is equal to \kbd{v[4]}.
 
-Taking any other four points, we would in fact always find a dependency.
-Let's find them all. Type \kbd{vp = [v[1],v[2],v[3]]\til;
-m = ellheightmatrix(e,vp);
-matdet(m)}. This is now clearly non-zero so the first 3 points
-are linearly independent, showing that the rank of the curve is at least
-equal to 3 (it is in fact equal to 3, and \kbd{e} is the curve of smallest
-conductor having rank 3). We would like to see whether the other points are
-dependent. For this, we use the function \kbd{ellbil}. Indeed, if \kbd{Q} is
-some point which is dependent on \kbd{v[1],v[2]} and \kbd{v[3]}, then
+Taking any other four points, we would in fact always find a
+dependency.  Let's find them all. Type \kbd{vp = [v[1],v[2],v[3]]\til;
+m = ellheightmatrix(e,vp); matdet(m)}. This is now clearly non-zero so
+the first 3 points are linearly independent, showing that the rank of
+the curve is at least equal to 3 (it is in fact equal to 3, and
+\kbd{e} is the curve of smallest conductor having rank 3). We would
+like to see whether the other points are dependent. For this, we use
+the function \kbd{ellbil}. Indeed, if \kbd{Q} is some point which is
+dependent on \kbd{v[1],v[2]} and \kbd{v[3]}, then
 \kbd{matsolve(m, ellbil(e, vp,Q))} will by definition give the coefficients
 of the dependence relation. If these coefficients are close to integers, then
 there is a dependency, otherwise not.  This is safer than using the
@@ -1473,15 +1499,30 @@ there is a dependency, otherwise not.  This is safer than using the
  We ``see'' that the coefficients are all very close to integers, and we can
 quantify it by typing
 \bprog
-  wr = round(w); sqrt(norml2(w - wr))}
+  wr = round(w); sqrt(norml2(w - wr))
 @eprog\noindent
 which gives an upper bound on the maximum distance to an integer. Thus
 \kbd{wr} is the vector expressing all the components of \kbd{v} on its first
-3. We are thus led to strongly believe that the curve has rank exactly 3, and
-this can be proved to be the case.\smallskip
+3. We are thus led to strongly believe that the curve has rank exactly
+3, with generators \kbd{v[1],v[2]} and \kbd{v[3]}, and this can be
+proved to be the case.  
 
-Let's explore a few more elliptic curve related functions. Keep
-our curve \kbd{e} of rank 3, and type
+Two remarks: (1) Using the height pairing to find dependence relations
+as we have done only in fact finds relations modulo torsion; but in
+this example, the curve has trivial torsion, as we checked
+earlier. (2) In the above calculation we were lucky that all the
+\kbd{v[j]} were $\Z$-linear combinations of \kbd{v[1],v[2]} and
+\kbd{v[3]} and not just $\Q$-linear combinations;  in general the
+result of \kbd{matsolve(m, ellbil(e, vp,Q))} might have given a vector
+of rationals: if $k\ge2$ is minimal such that $kQ$ is in the subgroup
+generated by \kbd{v[1],v[2]} and
+\kbd{v[3]}, then the entries of \kbd{matsolve(m, ellbil(e,
+vp,Q))} will be rationals with common denominator~$k$.
+
+\smallskip
+
+Let's explore a few more elliptic curve related functions. Keep our
+curve \kbd{e} of rank 3, and type
 \bprog
   v1 = [1,0]; z1 = ellpointtoz(e, v1)
   v2 = [2,0]; z2 = ellpointtoz(e, v2)
@@ -1501,7 +1542,8 @@ Type
 \bprog
   (v^2 + v) - (u^3 - 7*u + 6)
 @eprog\noindent
-to see that this indeed parametrizes the curve.
+to see that this indeed parametrizes the curve.  (You can also check
+that \kbd{ellisoncurve(e,modul)} returns~$1$.)
 
 Now type \kbd{x * u' / (2*v + 1)}, and we see that this is equal to the
 modular form \kbd{f} found above (the quote \kbd{'} tells \kbd{gp} to take the
@@ -1510,9 +1552,21 @@ functions \kbd{u} and \kbd{v}, considered on the upper half plane (with
 $x=e^{2i\pi\tau}$), are in fact modular \emph{functions} for $\Gamma_0(5077)$.
 \smallskip
 
+The function \kbd{ellan(e, 30)} gives the first~$30$ coefficients
+$a_n$ of the $L$-series of \kbd{e}.  One can also ask for a single
+coefficient: the millionth is \kbd{ellak(e, 1000000)}.  Note however
+that calling (for example) \kbd{ellan(e,100000);} is much faster than
+the equivalent \kbd{vector(100000,k,ellak(e,k));}.  For a
+prime~\kbd{p},
+\kbd{ellap(e,p)} is equivalent to \kbd{ellak(e,p)};  this is the
+integer $a_p$ such that the number of points on \kbd{e} over $\F_p$ is
+$1+p-a_p$.  (At present, calling \kbd{ellap} is the only way of
+obtaining the order of an elliptic curve over $\F_p$ in \kbd{gp}.)
+
 Finally, let us come back to the curve defined by typing \kbd{e =
-ellinit([0,-1,1,0,0])} where we had seen that the point \kbd{q = [0,0]} was
-of order 5. To obtain the sign of the functional equation, type
+ellinit([0,-1,1,0,0])} where we had seen that the point \kbd{q =
+[0,0]} was of order 5. To obtain the sign of the functional equation,
+type
 \kbd{ellrootno(e)}. So assuming the rank parity conjecture, the Mordell-Weil
 group of $E$ has even rank. Now type \kbd{ls = elllseries(e, 1)}, and
 just as a check \kbd{elllseries(e, 1, 2)}. The values agree
@@ -1536,6 +1590,11 @@ last component of \kbd{ellglobalred(e)}, and here is equal to 1. We already
 know that the torsion subgroup of $E$ contains a point of order 5, and typing
 \kbd{elltors(e)} shows that it is of order exactly 5. So type
 \kbd{ls * 25/e.omega[1]}. This shows that $\sha$ must be the trivial group.
+
+For more detailed information on the local reduction of an elliptic
+curve at a spceific prime~\kbd{p}, use the function
+\kbd{elllocalred(e,p)}; the second component gives the Kodaira symbol
+in an encoded form.  See the manual or online help for details.
 
 \section{Working in Quadratic Number Fields}
 
