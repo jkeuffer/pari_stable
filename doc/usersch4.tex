@@ -545,7 +545,7 @@ is equal to the \kbd{size} argument of \kbd{pari\_init}. The PARI
 stack also has a ``current stack pointer'' called \teb{avma}, which
 stands for {\bf av}ailable {\bf m}emory {\bf a}ddress. These three variables
 are global (declared for you by \kbd{pari.h}). For historical reasons they
-are of type \kbd{long} and not of type \kbd{GEN} as would seem more natural.
+are of type \kbd{ulong} and not of type \kbd{GEN} as would seem more natural.
 
 The stack is oriented upside-down: the more recent an object, the closer to
 \kbd{bot}. Accordingly, initially \kbd{avma} = \kbd{top}, and \kbd{avma} gets
@@ -581,7 +581,7 @@ the value of \kbd{avma} just {\it before\/} the first garbage is created,
 and restore it upon exit:
 
 \bprog
-long ltop = avma; /*@Ccom record initial avma */
+ulong ltop = avma; /*@Ccom record initial avma */
 
 garbage ...
 avma = ltop; /*@Ccom restore it */
@@ -607,7 +607,7 @@ to give back accumulated garbage {\it during\/} a computation without losing
 recent data. For this you need the \kbd{gerepile} function (or one of its
 variants described hereafter):
 
-\fun{GEN}{gerepile}{long ltop, long lbot, GEN q}
+\fun{GEN}{gerepile}{ulong ltop, ulong lbot, GEN q}
 
 \noindent
 This function cleans up the stack between \kbd{ltop} and \kbd{lbot}, where
@@ -698,7 +698,7 @@ would return a pointer to random garbage.
 
 \noindent$\bullet$ A simple variant is
 
-\fun{GEN}{gerepileupto}{long ltop, GEN q}
+\fun{GEN}{gerepileupto}{ulong ltop, GEN q}
 
 \noindent which cleans the stack between \kbd{ltop} and the {\it connected\/}
 object \kbd{q} and returns \kbd{q} updated. For this to work, \kbd{q} must
@@ -710,7 +710,7 @@ stumble upon one that does not, consider it a bug worth reporting.
 To cope with complicated cases where many objects have to be
 preserved, you can use
 
-\fun{void}{gerepilemany}{long ltop, GEN *gptr[], long n)}
+\fun{void}{gerepilemany}{ulong ltop, GEN *gptr[], long n)}
 
 \noindent which cleans up the most recent part of the stack (between
 \kbd{ltop} and \kbd{avma}). All the \kbd{GEN}s pointed at by the elements of
@@ -721,7 +721,7 @@ prone to user error), but also the slowest.
 
 \noindent$\bullet$ More efficient, but trickier to use is
 
-\fun{void}{gerepilemanysp}{long ltop, long lbot, GEN *gptr[], long n}
+\fun{void}{gerepilemanysp}{ulong ltop, ulong lbot, GEN *gptr[], long n}
 
 \noindent which cleans the stack between \kbd{lbot} and \kbd{ltop} and
 updates the \kbd{GEN}s pointed at by the elements of \kbd{gptr} without doing
@@ -898,7 +898,7 @@ instead, which will usually be faster since we don't need the initial copy
 Another important usage is ``random'' garbage collection during loops
 whose size requirements we cannot (or don't bother to) control in advance:
 \bprog
-  long ltop = avma, limit = (avma+bot)/2;
+  ulong ltop = avma, limit = (avma+bot)/2;
   GEN x, y;
 
   while (...)
@@ -930,7 +930,7 @@ loop. To avoid this problem, we provide a robust macro
 for $n=2$). Hence, the above snippet should be written as
 
 \bprog
-  long ltop = avma, limit = stack_lim(avma,1);
+  ulong ltop = avma, limit = stack_lim(avma,1);
   @dots
 @eprog
 
