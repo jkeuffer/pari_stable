@@ -1241,7 +1241,6 @@ GEN     mppi(long prec);
 GEN     mpsqrt(GEN x);
 GEN     palog(GEN x);
 GEN     powgi(GEN x, GEN n);
-GEN     rootsofunity(GEN n, long prec);
 GEN     teich(GEN x);
 GEN     transc(GEN (*f) (GEN, long), GEN x, long prec);
 
