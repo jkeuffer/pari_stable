@@ -2591,7 +2591,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
              FP_chk_fun *CHECK)
 {
   long av = avma,av1,av2,lim,N,n,i,j,k,s,epsbit,checkcnt = 0;
-  GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms;
+  GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(GEN,GEN) = CHECK? CHECK->f: NULL;
   GEN data = CHECK? CHECK->data: NULL;
   int skipfirst = CHECK? CHECK->skipfirst: 0;
@@ -2610,13 +2610,14 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
   borne1=gadd(BORNE,eps);
   borne2=mpmul(borne1,alpha);
   v=cgetg(N,t_VEC);
+  dummy = cgetg(1,t_STR);
 
   av2=avma;
-  S = cgetg(stockmax+1,t_MAT);
-  norms = cgetg(stockmax+1,t_VEC);
-  x=cgetg(N,t_COL);
-  y=cgetg(N,t_COL);
-  z=cgetg(N,t_COL);
+  if (check) norms = cgetg(stockmax+1,t_VEC);
+  S = cgetg(stockmax+1,t_VEC);
+  x = cgetg(N,t_COL);
+  y = cgetg(N,t_COL);
+  z = cgetg(N,t_COL);
   for (i=1; i<N; i++) { v[i] = coeff(q,i,i); x[i]=y[i]=z[i] = zero; }
 
   x[n] = lmpent(mpsqrt(gdiv(borne1,(GEN)v[n])));
@@ -2669,22 +2670,22 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
       }
       if (low_stack(lim, stack_lim(av,1)))
       {
-	GEN *gptr[8];
-        int a = 4;
+	GEN *gptr[7];
+        int cnt = 4;
 	if(DEBUGMEM>1) err(warnmem,"smallvectors");
 	gptr[0]=&x; gptr[1]=&y; gptr[2]=&z; gptr[3]=&normax1;
 	if (stockmax)
-        {
-          for (i=s+1; i<=stockmax; i++) S[i]=zero;
-          gptr[4]=&S; a++;
+        { /* dummy values, needed to prevent a gerepilemany crash */
+          GEN T = S;
+          for (i=s+1; i<=stockmax; i++) S[i]=dummy;
+          S = gclone(S); if (isclone(T)) gunclone(T);
         }
         if (check)
         {
-          gptr[5]=&borne1; gptr[6]=&borne2; gptr[7]=&norms;
-          for (i=s+1; i<=stockmax; i++) norms[i]=zero;
-          a+=3;
+          gptr[cnt++]=&borne1; gptr[cnt++]=&borne2; gptr[cnt++]=&norms;
+          for (i=s+1; i<=stockmax; i++) norms[i]=dummy;
         }
-	gerepilemany(av2,gptr,a);
+	gerepilemany(av2,gptr,cnt);
       }
       if (DEBUGLEVEL>3)
       {
@@ -2718,7 +2719,7 @@ smallvectors(GEN a, GEN BORNE, long stockmax, long flag, long prec,
       else if (mpcmp(norme1,normax1) > 0) normax1=norme1;
       if (++s <= stockmax)
       {
-        norms[s] = (long)norme1;
+        if (check) norms[s] = (long)norme1;
         p1 = cgetg(N,t_COL); S[s] = (long)p1;
 	for (i=1; i<N; i++) p1[i]=x[i];
         if (s == stockmax && (flag&2) && check)
@@ -2764,11 +2765,21 @@ CONTINUE:
     }
     u = cgetg(3,t_VEC);
     setlg(pols,j+1); u[1] = (long)pols;
-    setlg(alph,j+1); u[2] = (long)alph; return u;
+    setlg(alph,j+1); u[2] = (long)alph;
+    if (isclone(S)) { alph = forcecopy(alph); gunclone(S); }
+    return u;
   }
   u=cgetg(4,t_VEC);
   u[1]=lstoi(s<<1);
-  u[2]=(long)normax1; setlg(S,stockmax+1);
+  u[2]=(long)normax1;
+  if (isclone(S)) { p1 = S; S = forcecopy(S); gunclone(p1); }
+  if (stockmax)
+  {
+    setlg(S,stockmax+1);
+    settyp(S,t_MAT);
+  }
+  else
+    S = cgetg(1,t_MAT);
   u[3]=(long)S; return u;
 }
 
@@ -2787,21 +2798,18 @@ get_Bnf(GEN nf)
   return p;
 }
 
-/* solve x~.a.x <= BOUND, a > 0. If check is non-NULL keep x only if check(x).
+/* solve x~.a.x <= bound, a > 0. If check is non-NULL keep x only if check(x).
  * flag & 1, return NULL in case of precision problems (sqred1 or lllgram)
- *   raise an error otherwse.
+ *   raise an error otherwise.
  * flag & 2, return as soon as stockmax vectors found.
  * If a is a number field, use its T2 matrix
  */
 GEN
-fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC,
+fincke_pohst(GEN a,GEN bound,long stockmax,long flag, long PREC,
              FP_chk_fun *CHECK)
 {
   VOLATILE long pr,av=avma,i,j,n, prec = PREC;
-  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm;
-  VOLATILE GEN gram, bound = BOUND;
-  VOLATILE GEN (*chk)(GEN,GEN) = CHECK? CHECK->f: NULL;
-  VOLATILE GEN (*chk_init)(GEN,GEN,GEN,GEN) = CHECK? CHECK->f_init: NULL;
+  VOLATILE GEN B,nf,r,rinvtrans,v,v1,u,s,res,z,vnorm,sperm,perm,uperm,gram;
   void *catcherr = NULL;
 
   if (DEBUGLEVEL>2) { fprintferr("entering fincke_pohst\n"); flusherr(); }
@@ -2863,8 +2871,8 @@ fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC,
     catcherr = err_catch(truer2, env, NULL);
   }
 
-  if (chk_init) 
-    CHECK->data = chk_init(CHECK->data,nf,uperm,NULL);
+  if (CHECK && CHECK->f_init) 
+    CHECK->data = CHECK->f_init(CHECK->data,nf,uperm,NULL);
   if (!bound)
   { /* set bound */
     GEN x = cgetg(n,t_COL);
@@ -2874,13 +2882,13 @@ fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC,
     {
       x[j] = un; B = gcoeff(gram,j,j);
       if (!bound || mpcmp(B,bound) < 0)
-        if (!chk || chk(CHECK->data,x)) bound = B;
+        if (!CHECK || CHECK->f(CHECK->data,x)) bound = B;
       x[j] = zero;
     }
   }
   /* update precision if needed */
-  if (chk_init)
-    if (!(prec = (long)chk_init(CHECK->data,nf,uperm,bound))) goto PRECPB;
+  if (CHECK && CHECK->f_init) 
+    if (!(prec = (long)CHECK->f_init(CHECK->data,nf,uperm,bound))) goto PRECPB;
 
   if (DEBUGLEVEL>2) {fprintferr("entering smallvectors\n"); flusherr();}
   i = (CHECK && CHECK->skipfirst)? 2: 1;
@@ -2890,7 +2898,7 @@ fincke_pohst(GEN a,GEN BOUND,long stockmax,long flag, long PREC,
     res = smallvectors(gram, bound? bound: gcoeff(gram,i,i),
                        stockmax,flag,prec,CHECK);
     if (!res) goto PRECPB;
-    if (!chk || lg(res[2]) > 1) break;
+    if (!CHECK || lg(res[2]) > 1) break;
     if (DEBUGLEVEL>2) fprintferr("  i = %ld failed\n",i);
   }
   err_leave(&catcherr); catcherr = NULL;
