@@ -1350,9 +1350,7 @@ Also:\n\
   if (has_ext_help()) pariputs("\
 Extended help looks available:\n\
   ??             (opens the full user's manual in a dvi previewer)\n\
-  ??  tutorial   (same with the GP tutorial)\n\
-  ??  refcard    (same with the GP reference card)\n\
-\n\
+  ??  tutorial / refcard / libpari (tutorial/reference card/libpari manual)\n\
   ??  keyword    (long help text about \"keyword\" from the user's manual)\n\
   ??? keyword    (a propos: list of related functions).");
 }
@@ -1503,7 +1501,7 @@ external_help(char *s, int num)
 
 char *keyword_list[]={
   "operator",
-  "user",
+  "libpari",
   "member",
   "integer",
   "real",

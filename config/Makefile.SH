@@ -427,6 +427,7 @@ install-doc::
 	-\$(INSTALL_DATA) $doc/usersch4.tex \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/usersch5.tex \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/paricfg.tex  \$(DOCDIR)
+	-\$(INSTALL_DATA) $doc/libpari.dvi    \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/users.dvi    \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/tutorial.dvi \$(DOCDIR)
 	-\$(INSTALL_DATA) $doc/refcard.dvi  \$(DOCDIR)
