@@ -55,9 +55,6 @@ Unless specified otherwise, examples assume 32bit machine and default precision
 3  after allocatemem() / default(parisize, ...), the rest of the command is
 discarded (ends by a longjmp).
 
-3  [readline]: \r<TAB>  completes files whose name start with "r". 
-               \r <TAB> works ok.
-
 2  under GP after an error, memory is only recovered from "entire variables".
    Individual components of lists/vectors/matrices are left alone if the
    GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
