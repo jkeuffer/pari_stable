@@ -29,6 +29,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #endif
 
 #if !defined(INLINE) || defined(INLINE_IS_STATIC)
+GEN    _col(GEN x);
+GEN    _mat(GEN x);
+GEN    _vec(GEN x);
+GEN    _vec2(GEN x, GEN y);
+GEN    _veccopy(GEN x);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
 GEN    addii(GEN x, GEN y);
@@ -224,6 +229,20 @@ cgetr(long x)
   z[0] = evaltyp(t_REAL) | evallg(x);
   return z;
 }
+INLINE GEN
+_veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
+INLINE GEN
+_vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
+INLINE GEN
+_vec2(GEN x, GEN y) {
+  GEN v = cgetg(3,t_VEC);
+  v[1] = (long)x;
+  v[2] = (long)y; return v;
+}
+INLINE GEN
+_col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+INLINE GEN
+_mat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN

@@ -441,7 +441,6 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
   }
 }
 
-#define PRECDIGIT (long)((prec-2.)*pariK)
 static GEN
 sd_realprecision(const char *v, int flag)
 {
@@ -458,7 +457,7 @@ sd_realprecision(const char *v, int flag)
   if (flag == d_RETURN) return stoi(fmt->sigd);
   if (flag == d_ACKNOWLEDGE)
   {
-    long n = PRECDIGIT;
+    long n = (long)bit_accuracy_mul(prec, L2SL10);
     pariputsf("   realprecision = %ld significant digits", n);
     if (n != fmt->sigd)
       pariputsf(" (%ld digits displayed)", fmt->sigd);
@@ -466,7 +465,6 @@ sd_realprecision(const char *v, int flag)
   }
   return gnil;
 }
-#undef PRECDIGIT
 
 static GEN
 sd_seriesprecision(const char *v, int flag)

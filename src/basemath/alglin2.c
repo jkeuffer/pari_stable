@@ -2229,7 +2229,7 @@ ZM_reduce(GEN A, GEN U, long i, long j0)
   }
 }
 
-/* A,B integral ideals in HNF. Return u in Z^n (v in Z^n not computed), such
+/* A,B integral ideals in HNF. Return Au in Z^n (v in Z^n not computed), such
  * that Au + Bv = 1 */
 GEN
 hnfmerge_get_1(GEN A, GEN B)
@@ -3505,6 +3505,48 @@ gsmith(GEN x) { return gsmithall(x,0); }
 
 GEN
 gsmith2(GEN x) { return gsmithall(x,1); }
+
+/* H relation matrix among row of generators g in HNF.  Let URV = D its SNF,
+ * newU R newV = newD its clean SNF (no 1 in Dnew). Return the diagonal of
+ * newD, newU and newUi such that  1/U = (newUi, ?).
+ * Rationale: let (G,0) = g Ui be the new generators then
+ * 0 = G U R --> G D = 0,  g = G newU  and  G = g newUi */
+GEN
+smithrel(GEN H, GEN *newU, GEN *newUi)
+{ 
+  GEN U, V, Ui, D = smithall(H, &U, newUi? &V: NULL);
+  long i, j, c, l = lg(D);
+
+  for (c=1; c<l; c++)
+  {
+    GEN t = gcoeff(D,c,c);
+    if (is_pm1(t)) break;
+  }
+  setlg(D, c); D = mattodiagonal_i(D);
+  if (newU) {
+    U = rowextract_i(U, 1, c-1);
+    for (i = 1; i < c; i++)
+    {
+      GEN d = (GEN)D[i], d2 = shifti(d, 1);
+      for (j = 1; j < lg(U); j++)
+        coeff(U,i,j) = (long)centermodii(gcoeff(U,i,j), d, d2);
+    }
+    *newU = U;
+  }
+  if (newUi) { /* UHV = D --> U^-1 mod H = H(VD^-1 mod 1) mod H */
+    if (c == 1) *newUi = cgetg(1, t_MAT);
+    else
+    { /* Ui = ZM_inv(U, gun); setlg(Ui, c); */
+      setlg(V, c);
+      V = FpM_red(V, (GEN)D[1]);
+      Ui = gmul(H, V);
+      for (i = 1; i < c; i++)
+        Ui[i] = (long)gdivexact((GEN)Ui[i], (GEN)D[i]);
+      *newUi = reducemodHNF(Ui, H, NULL);
+    }
+  }
+  return D;
+}
 
 /***********************************************************************
  ****                                                               ****

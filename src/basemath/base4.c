@@ -891,7 +891,7 @@ idealadd(GEN nf, GEN x, GEN y)
   return gerepileupto(av,z);
 }
 
-static GEN
+GEN
 get_hnfid(GEN nf, GEN x)
 {
   GEN junk;
@@ -969,29 +969,6 @@ GEN
 ideleaddone(GEN nf, GEN x, GEN y)
 {
   return addone(ideleaddone_i,nf,x,y);
-}
-
-/* given an element x in Z_K and an integral ideal y with x, y coprime,
-   outputs an element inverse of x modulo y */
-GEN
-element_invmodideal(GEN nf, GEN x, GEN y)
-{
-  pari_sp av = avma;
-  GEN a, xh, yh;
-
-  nf = checknf(nf);
-  if (gcmp1(gcoeff(y,1,1))) return zerocol( degpol(nf[1]) );
-
-  yh = get_hnfid(nf, y);
-  switch (typ(x))
-  {
-    case t_POL: case t_POLMOD: case t_COL:
-      xh = idealhermite_aux(nf,x); break;
-    default: err(typeer,"element_invmodideal");
-      return NULL; /* not reached */
-  }
-  a = element_div(nf, hnfmerge_get_1(xh, yh), x);
-  return gerepileupto(av, nfreducemodideal(nf, a, y));
 }
 
 GEN
@@ -1301,44 +1278,6 @@ famat_reduce(GEN fa)
   F = cgetg(3, t_MAT);
   setlg(G, k); F[1] = (long)G;
   setlg(E, k); F[2] = (long)E; return F;
-}
-
-/* assume (num(g[i]), id) = 1 for all i. Return prod g[i]^e[i] mod id.
- * EX = multiple of exponent of (O_K/id)^* */
-GEN
-famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
-{
-  GEN dh, h, n, z, plus = NULL, minus = NULL, idZ = gcoeff(id,1,1);
-  long i, lx = lg(g);
-  GEN EXo2 = (expi(EX) > 10)? shifti(EX,-1): NULL;
-
-  if (is_pm1(idZ)) lx = 1; /* id = Z_K */
-  for (i=1; i<lx; i++)
-  {
-    long sn;
-    n = centermodii((GEN)e[i], EX, EXo2);
-    sn = signe(n); if (!sn) continue;
-
-    h = Q_remove_denom((GEN)g[i], &dh);
-    if (dh)
-      h = FpV_red(gmul(h,Fp_inv(dh,idZ)), idZ);
-    if (sn > 0)
-    {
-      z = element_powmodideal(nf, h, n, id);
-      plus = (plus == NULL)? z: element_mulmodideal(nf, plus, z, id);
-    }
-    else /* sn < 0 */
-    {
-      z = element_powmodideal(nf, h, negi(n), id);
-      minus = (minus == NULL)? z: element_mulmodideal(nf, minus, z, id);
-    }
-  }
-  if (minus)
-  {
-    minus = element_invmodideal(nf, minus, id);
-    plus = plus? element_mulmodideal(nf, minus, plus, id): minus;
-  }
-  return plus? plus: gscalcol(gun, lg(id)-1);
 }
 
 /* assume pr has degree 1 and coprime to numerator(x) */

@@ -154,15 +154,6 @@ vconcat(GEN A, GEN B)
   return M;
 }
 
-GEN
-_veccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
-GEN
-_vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
-GEN
-_col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
-GEN
-_mat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
-
 /* routines for naive growarrays */
 GEN
 cget1(long l, long t)
@@ -3481,17 +3472,16 @@ det(GEN a)
 }
 
 /* return a solution of congruence system sum M_{ i,j } X_j = Y_i mod D_i
- * If ptu1 != NULL, put in *ptu1 a Z-basis of the homogeneous system
- */
+ * If ptu1 != NULL, put in *ptu1 a Z-basis of the homogeneous system */
 static GEN
 gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
 {
   pari_sp av = avma;
-  long n,m,i,j,lM;
-  GEN p1,delta,H,U,u1,u2,x;
+  long n, m, i, j, lM = lg(M);
+  GEN p1, delta, H, U, u1, u2, x;
 
   if (typ(M)!=t_MAT) err(typeer,"gaussmodulo");
-  lM = lg(M); m = lM-1;
+  m = lM-1;
   if (!m)
   {
     if ((typ(Y)!=t_INT && lg(Y)!=1)
@@ -3502,8 +3492,8 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   switch(typ(D))
   {
     case t_VEC:
-    case t_COL: delta=diagonal(D); break;
-    case t_INT: delta=gscalmat(D,n); break;
+    case t_COL: delta = diagonal(D); break;
+    case t_INT: delta =gscalmat(D,n); break;
     default: err(typeer,"gaussmodulo");
       return NULL; /* not reached */
   }
@@ -3513,10 +3503,8 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     for (i=1; i<=n; i++) p1[i]=(long)Y;
     Y = p1;
   }
-  p1 = hnfall(concatsp(M,delta));
-  H = (GEN)p1[1]; U = (GEN)p1[2];
-  Y = gauss(H,Y);
-  if (!gcmp1(denom(Y))) return gzero;
+  H = hnfall_i(concatsp(M,delta), &U, 1);
+  Y = hnf_gauss(H,Y); if (!Y) return gzero;
   u1 = cgetg(m+1,t_MAT);
   u2 = cgetg(n+1,t_MAT);
   for (j=1; j<=m; j++)
@@ -3530,8 +3518,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     p1 = (GEN)U[j]; setlg(p1,lM);
     u2[j] = (long)p1;
   }
-  x = gmul(u2,Y);
-  x = lllreducemodmatrix(x, u1);
+  x = lllreducemodmatrix(gmul(u2,Y), u1);
   if (!ptu1) x = gerepileupto(av, x);
   else
   {
@@ -3556,13 +3543,7 @@ matsolvemod0(GEN M, GEN D, GEN Y, long flag)
 }
 
 GEN
-gaussmodulo2(GEN M, GEN D, GEN Y)
-{
-  return matsolvemod0(M,D,Y,1);
-}
+gaussmodulo2(GEN M, GEN D, GEN Y) { return matsolvemod0(M,D,Y,1); }
 
 GEN
-gaussmodulo(GEN M, GEN D, GEN Y)
-{
-  return matsolvemod0(M,D,Y,0);
-}
+gaussmodulo(GEN M, GEN D, GEN Y) { return matsolvemod0(M,D,Y,0); }

@@ -77,72 +77,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define nbits2nlong(x) (((x)+BITS_IN_LONG-1) >> TWOPOTBITS_IN_LONG)
 #define nchar2nlong(x) (((x)+BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG)
 #define bit_accuracy(x) (((x)-2) << TWOPOTBITS_IN_LONG)
-
+#define bit_accuracy_mul(x,y) (((x)-2) * (BITS_IN_LONG*(y)))
 #define GSTR(x) ((char*) (((GEN) (x)) + 1 ))
 
-/* For compatibility with 1.x.x */
-#define err pari_err /* move to e.g paritr.h ? */
-#define init pari_init
-#define gen2str GENtostr
-#define gpui gpow
-#define gpuigs gpowgs
-#define classno3 hclassno
-#define strtoGEN flisexpr
-#define permute numtoperm
-#define permuteInv permtonum
-#define evallgef(x) 0
-#define lgef lg
-#define setlgef setlg
-#define leadingcoeff(x) (pollead((x),-1))
-#define poldivres poldivrem
-#define nfdivres nfdivrem
-#define gred gcopy
-#define pvaluation Z_pvalrem
-#define svaluation u_lvalrem
-
-#define glogagm glog
-#define logagm  mplog
-#define mpsqrtz  gopgz(absr,(x),(y))
-#define adduumod Fl_add
-#define subuumod Fl_sub
-#define muluumod Fl_mul
-#define divuumod Fl_div
-#define powuumod Fl_pow
-#define invumod Fl_inv
-#define invsmod Fl_inv_signed
-#define mpinvmod Fp_inv
-#define powmodulo Fp_pow
-#define mpsqrtmod Fp_sqrt
-#define mpsqrtnmod Fp_sqrtn
-#define mpsqrt  sqrtr
-#define mpsqrtn  sqrtnr
-#define resii  remii
-#define resis  remis
-#define ressi  remsi
-#define resss  remss
-#define resiiz  remiiz
-#define resisz  remisz
-#define ressiz  remsiz
-#define resssz  remssz
-#define gres    grem
-#define lres    lrem
-#define rcopy mpcopy
-#define gdivise gdvd
-#define divise dvdii
-#define mpdivis dvdiiz
-#define mpdivisis dvdisz
-#define absr  mpabs
-#define absi  mpabs
-#define negi  mpneg
-#define negr  mpneg
-#define mpent mpfloor
-#define mpentz mpfloorz
-#define mpnegz(x,y) \
-  STMT_START {pari_sp _av=avma;mpaff(mpneg(x),y);avma=_av;} STMT_END
-#define mpabsz(x,y) \
-  STMT_START {pari_sp _av=avma;mpaff(mpabs(x),y);avma=_av;} STMT_END
-#define absrz(x,z)  mpabsz((x),(z))
-#define negrz(x,z)  mpnegz((x),(z))
+#include <pariold.h>
 
 /* Common global variables: */
 extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
@@ -157,27 +95,19 @@ extern void* global_err_data;
 extern int new_galois_format;
 
 enum manage_var_t {
-    manage_var_create,			/* 0 */
-    manage_var_delete,			/* 1 */
-    manage_var_init,			/* 2 */
-    manage_var_next,			/* 3 */
-    manage_var_max_avail,		/* 4 */
-    manage_var_pop 			/* 5 */
+  manage_var_create,
+  manage_var_delete,
+  manage_var_init,
+  manage_var_next,
+  manage_var_max_avail,
+  manage_var_pop
 };
 
-
-#define MAXITERPOL  10 /* max #of prec increase in polredabs-type operations */
-
-                                                /* let SL = sizeof(long) */
-#define pariK  (9.632959862*(BYTES_IN_LONG/4))  /* SL*log(2)/log(10)     */
-#define pariK1 (0.103810253/(BYTES_IN_LONG/4))  /* log(10)/(SL*log(2))   */
-#define pariK2 (1.1239968)                      /* 1/(1-(log(2)/(2*pi))) */
-#define pariK4 (17.079468445347/BITS_IN_LONG)   /* 2*e*pi/SL             */
-#define LOG2   (0.69314718055994531)            /* log(2)                */
-#define L2SL10 (0.301029995663981)              /* log(2)/log(10)        */
-#define pariC1 (0.9189385332)                   /* log(2*pi)/2           */
-#define pariC2 (22.18070978*(BYTES_IN_LONG/4))  /* SL*log(2)             */
-#define pariC3 (0.0216950598/(BYTES_IN_LONG/4)) /* log((1+sqrt(5))/2)/C2 */
+/* let BIL = bits in long */
+#define pariK1 (0.103810253/(BYTES_IN_LONG/4))  /* log(10)/(BIL*log(2))   */
+#define LOG2   (0.69314718055994531)            /* log(2)                 */
+#define L2SL10 (0.301029995663981)              /* log(2)/log(10)         */
+#define pariC2 (22.18070978*(BYTES_IN_LONG/4))  /* BIL*log(2)             */
 
 #ifndef  PI
 #  define PI (3.141592653589)
@@ -366,19 +296,6 @@ enum manage_var_t {
 
 #define lift_intern(x) (lift_intern0((x),-1))
 #define invmat(a) (gauss((a),NULL))
-
-#define element_divmodideal(nf,x,y,ideal) (\
-  nfreducemodideal((nf),\
-    element_mul((nf),(x),element_invmodideal((nf),(y),(ideal)))\
-    ,(ideal)\
-  )\
-)
-#define element_mulmodideal(nf,x,y,ideal) (\
-  nfreducemodideal((nf),element_mul((nf),(x),(y)),(ideal))\
-)
-#define element_sqrmodideal(nf,x,ideal) (\
-  nfreducemodideal((nf),element_sqr((nf),(x)),(ideal))\
-)
 
 /* output of get_nf and get_bnf */
 #define typ_NULL 0

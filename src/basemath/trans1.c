@@ -1150,45 +1150,47 @@ GEN
 exp1r_abs(GEN x)
 {
   long l = lg(x), l2 = l+1, ex = expo(x), l1, i, n, m, s;
-  GEN y = cgetr(l), p1, p2, p3, p4, unr;
+  GEN y = cgetr(l), p1, p2, p3, X, unr;
   pari_sp av2, av = avma;
   double a, b, beta, gama = 2.0 /* optimized for SUN3 */;
                                 /* KB: 3.0 is better for UltraSparc */
   if (ex >= EXMAX) err(talker,"exponent too large in exp");
   beta = 5. + bit_accuracy(l)*LOG2;
   a = sqrt(beta/(gama*LOG2));
-  b = 31 - ex + log2(a * (gama/2.718281828459045) / (double)(ulong)x[2]);
+  b = (BITS_IN_LONG-1-ex)
+      + log2(a * (gama/2.718281828459045) / (double)(ulong)x[2]);
   if (a >= b)
   {
     n = (long)(1+a*gama);
     m = (long)(1+a-b);
     l2 += m>>TWOPOTBITS_IN_LONG;
   } else { /* rare ! */
-    b = -1 - log((double)(ulong)x[2]) + (31-ex)*LOG2; /* ~ -1 - log(x) */
-    n = (long)(1+beta/b);
+    b = -1 - log((double)(ulong)x[2]) + (BITS_IN_LONG-1-ex)*LOG2; /*-1-log(x)*/
+    n = (long)(1 + beta/b);
     m = 0;
   }
   unr=realun(l2);
   p2 =realun(l2); setlg(p2,3);
-  p4 = cgetr(l2); affrr(x, p4); setsigne(p4, 1);
-  if (m) setexpo(p4, ex-m);
+  X = cgetr(l2); affrr(x, X); setsigne(X, 1);
+  if (m) setexpo(X, ex-m);
 
   s = 0; l1 = 3; av2 = avma;
   for (i=n; i>=2; i--)
   {
-    setlg(p4,l1); p3 = divrs(p4,i);
+    setlg(X,l1); p3 = divrs(X,i);
     s -= expo(p3); p1 = mulrr(p3,p2); setlg(p1,l1);
     l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
     s &= (BITS_IN_LONG-1);
-    setlg(unr,l1); p1 = addrr(unr,p1);
+    setlg(unr,l1); p1 = addrr_sign(unr,1, p1,1);
     setlg(p2,l1); affrr(p1,p2); avma = av2;
   }
-  setlg(p2,l2); setlg(p4,l2); p2 = mulrr(p4,p2);
+  setlg(p2,l2);
+  setlg(X,l2); p2 = mulrr(X,p2);
 
   for (i=1; i<=m; i++)
   {
     setlg(p2,l2);
-    p2 = mulrr(addsr(2,p2),p2);
+    p2 = mulrr(p2, addsr(2,p2));
   }
   affrr(p2,y); avma = av; return y;
 }
@@ -1199,7 +1201,6 @@ mpexp1(GEN x)
   long sx = signe(x);
   GEN y, z;
   pari_sp av;
-  if (typ(x) != t_REAL) err(typeer,"mpexp1");
   if (!sx) return realzero_bit(expo(x));
   if (sx > 0) return exp1r_abs(x);
   /* compute exp(x) * (1 - exp(-x)) */
@@ -1221,7 +1222,7 @@ mpexp(GEN x)
   pari_sp av;
   GEN y;
 
-  if (!sx) return addsr(1,x);
+  if (!sx) return realun(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
   if (sx < 0)
   {
     long ex = expo(x);
@@ -1452,7 +1453,6 @@ logr_abs(GEN X)
 GEN
 mplog(GEN x)
 {
-  if (typ(x)!=t_REAL) err(typeer,"mplog");
   if (signe(x)<=0) err(talker,"non positive argument in mplog");
   return logr_abs(x);
 }
@@ -1544,8 +1544,8 @@ log0(GEN x, long flag,long prec)
 {
   switch(flag)
   {
-    case 0: return glog(x,prec);
-    case 1: return glogagm(x,prec);
+    case 0:
+    case 1: return glog(x,prec);
     default: err(flagerr,"log");
   }
   return NULL; /* not reached */
@@ -1560,8 +1560,12 @@ glog(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL:
-      if (signe(x)>=0) return logr_abs(x);
-      y=cgetg(3,t_COMPLEX);
+      if (signe(x) >= 0)
+      {
+        if (!signe(x)) err(talker,"zero argument in mplog");
+        return logr_abs(x);
+      }
+      y = cgetg(3,t_COMPLEX);
       y[1] = (long)logr_abs(x);
       y[2] = lmppi(lg(x)); return y;
 
@@ -1592,19 +1596,13 @@ glog(GEN x, long prec)
 
 /* Reduce x0 mod Pi/2 to x in [-Pi/4, Pi/4]. Return cos(x)-1 */
 static GEN
-mpsc1(GEN x0, long *ptmod8)
+mpsc1(GEN x, long *ptmod8)
 {
-  const long mmax = 23169; /* largest m such that (2m+2)(2m+1) < 2^31 */
- /* on a 64-bit machine with true 128 bit/64 bit division, one could
-  * take mmax=1518500248; on the alpha it does not seem worthwhile */
-  long e, l, l0, l1, l2, l4, i, n, m, s, t;
+  long e = expo(x), l = lg(x), l1, l2, i, n, m, s;
   pari_sp av;
-  double alpha,beta,a,b,c,d;
-  GEN y, p1, p2, x2, x = x0;
+  double beta, a, b, d;
+  GEN y, unr, p2, p1, x2;
 
-  l = lg(x); y = cgetr(l); av = avma;
-
-  e = expo(x);
   n = 0;
   if (e > 0)
   {
@@ -1617,78 +1615,58 @@ mpsc1(GEN x0, long *ptmod8)
     if (signe(q))
     {
       x = subrr(x, mulir(q, Pi2n(-1, l+1))); /* x mod Pi/2  */
-      n = mod4(q);
-      if (n && signe(q) < 0) n = 4 - n;
+      e = expo(x);
+      n = mod4(q); if (n && signe(q) < 0) n = 4 - n;
     }
   }
-  *ptmod8 = (signe(x) < 0)? 4 + n: n;
+  s = signe(x); *ptmod8 = (s < 0)? 4 + n: n;
+  if (!s) return realzero_bit(-bit_accuracy(l)<<1);
 
-  l1 = lg(x);
-  p1 = cgetr(l1+1); affrr(x, p1); x = p1;
-  if (l1 < l) { /* shorten y */
-    pari_sp av1 = avma;
-    avma = av; y = cgetr(l1); avma = av1;
-    l = l1;
-  }
-  l++;
-
-  if (gcmp0(x)) alpha = 1000000.0;
-  else
-  {
-    long e = expo(x);
-    alpha = -1 - ((e<-1022)? e*LOG2: log(fabs(rtodbl(x))));
-  }
-  beta = 5. + bit_accuracy(l)*LOG2;
-  a = 0.5 / LOG2;
-  b = 0.5 * a;
-  c = a + sqrt((beta+b) / LOG2);
-  d = ((beta/c) - alpha - log(c)) / LOG2;
+  l = lg(x); l2 = l+1; y = cgetr(l);
+  beta = 5. + bit_accuracy(l2)*LOG2;
+  a = sqrt(beta / LOG2);
+  d = a + 1/LOG2 - log2(a / (double)(ulong)x[2]) - (BITS_IN_LONG-1-e);
   if (d >= 0)
   {
+    n = (long)((1+a) / 2.0);
     m = (long)(1+d);
-    n = (long)((1+c) / 2.0);
-    setexpo(x, expo(x)-m);
+    l2 += m>>TWOPOTBITS_IN_LONG;
+  } else { /* rare ! */
+    b = -1 - log((double)(ulong)x[2]) + (BITS_IN_LONG-1-e)*LOG2; /*-1-log(x)*/
+    n = (long)(1 + beta/(2.0*b));
+    m = 0;
   }
-  else { m = 0; n = (long)((2+beta/alpha) / 2.0); }
-  l2=l+1+(m>>TWOPOTBITS_IN_LONG);
-  p1 = realun(l2);
+  unr= realun(l2);
+  p2 = realun(l2);
   x2 = cgetr(l2); av = avma;
   affrr(gsqr(x), x2);
+  if (m) setexpo(x2, expo(x2) - (m<<1));
 
-  setlg(x2, 3);
-  if (n > mmax)
-    p2 = divrs(divrs(x2, 2*n+2), 2*n+1);
-  else
-    p2 = divrs(x2, (2*n+2)*(2*n+1));
-  s = -expo(p2);
-  l4 = l1 = 3 + (s>>TWOPOTBITS_IN_LONG);
-  if (l4<=l2) { setlg(p1,l4); setlg(x2,l4); }
+  setlg(x2, 3); p1 = divrs(x2, 2*n+1);
+  s = -expo(p1);
+  l1 = 3 + (s>>TWOPOTBITS_IN_LONG);
+  setlg(p2,l1);
   s = 0;
   for (i=n; i>=2; i--)
   {
-    if (i > mmax)
-      p2 = divrs(divrs(x2, 2*i), 2*i-1);
-    else
-      p2 = divrs(x2, 2*i*(2*i-1));
-    s -= expo(p2);
-    t = s & (BITS_IN_LONG-1); l0 = (s>>TWOPOTBITS_IN_LONG);
-    if (t) l0++;
-    l1 += l0; if (l1>l2) { l0 += l2-l1; l1=l2; }
-    l4 += l0;
-    p2 = mulrr(p2,p1);
-    if (l4<=l2) { setlg(p1,l4); setlg(x2,l4); }
-    subsrz(1,p2, p1); avma = av;
+    setlg(x2,l1); p1 = divrsns(x2, 2*i-1);
+    s -= expo(p1); p1 = mulrr(p1,p2);
+    l1 += s>>TWOPOTBITS_IN_LONG; if (l1>l2) l1=l2;
+    s &= (BITS_IN_LONG-1);
+    setlg(unr,l1); p1 = addrr_sign(unr,1, p1,-signe(p1));
+    setlg(p2,l1); affrr(p1,p2); avma = av;
   }
-  setlg(p1,l2);
-  setlg(x2,l2);
-  p1[1] = evalsigne(-signe(p1)) | evalexpo(expo(p1)-1); /* p1 := -p1/2 */
-  p1 = mulrr(x2,p1);
-  /* Now p1 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
+  p2[1] = evalsigne(-signe(p2)) | evalexpo(expo(p2)-1); /* p2 := -p2/2 */
+  setlg(p2,l2);
+  setlg(x2,l2); p2 = mulrr(x2,p2);
+  /* Now p2 = sum {1<= i <=n} (-1)^i x^(2i) / (2i)! ~ cos(x) - 1 */
   for (i=1; i<=m; i++)
-  { /* p1 = cos(x)-1 --> cos(2x)-1 */
-    p1 = mulrr(p1, addsr(2,p1)); setexpo(p1, expo(p1)+1);
+  { /* p2 = cos(x)-1 --> cos(2x)-1 */
+    setlg(p2,l2);
+    p2 = mulrr(p2, addsr(2,p2));
+    setexpo(p2, expo(p2)+1);
   }
-  affrr(p1,y); avma=av; return y;
+  affrr(p2,y); return y;
 }
 
 /* sqrt (|1 - (1+x)^2|) = sqrt(|x*(x+2)|). Sends cos(x)-1 to |sin(x)| */
@@ -1712,8 +1690,7 @@ mpcos(GEN x)
   pari_sp av;
   GEN y,p1;
 
-  if (typ(x)!=t_REAL) err(typeer,"mpcos");
-  if (!signe(x)) return addsr(1,x);
+  if (!signe(x)) return realun(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
 
   av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
@@ -1776,7 +1753,6 @@ mpsin(GEN x)
   pari_sp av;
   GEN y,p1;
 
-  if (typ(x)!=t_REAL) err(typeer,"mpsin");
   if (!signe(x)) return realzero_bit(expo(x));
 
   av = avma; p1 = mpsc1(x,&mod8);
@@ -1840,11 +1816,12 @@ mpsincos(GEN x, GEN *s, GEN *c)
   pari_sp av, tetpil;
   GEN p1, *gptr[2];
 
-  if (typ(x)!=t_REAL) err(typeer,"mpsincos");
   if (!signe(x))
   {
-    *s = realzero_bit(expo(x));
-    *c = addsr(1,x); return;
+    long e = expo(x);
+    *s = realzero_bit(e);
+    *c = realun(3 + ((-e) >> TWOPOTBITS_IN_LONG));
+    return;
   }
 
   av=avma; p1=mpsc1(x,&mod8); tetpil=avma;

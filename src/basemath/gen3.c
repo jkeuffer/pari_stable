@@ -154,16 +154,12 @@ gprecision(GEN x)
 GEN
 ggprecision(GEN x)
 {
-  long a=gprecision(x);
-  return stoi(a ? (long) ((a-2)*pariK): VERYBIGINT);
+  long a = gprecision(x);
+  return stoi(a ? (long)bit_accuracy_mul(a, L2SL10): VERYBIGINT);
 }
 
 GEN
-precision0(GEN x, long n)
-{
-  if (n) return gprec(x,n);
-  return ggprecision(x);
-}
+precision0(GEN x, long n) { return n? gprec(x,n): ggprecision(x); }
 
 /* attention: precision p-adique absolue */
 long

@@ -1,0 +1,63 @@
+/* For compatibility with 1.x.x */
+#define err pari_err /* move to e.g paritr.h ? */
+#define init pari_init
+#define gen2str GENtostr
+#define gpui gpow
+#define gpuigs gpowgs
+#define classno3 hclassno
+#define strtoGEN flisexpr
+#define permute numtoperm
+#define permuteInv permtonum
+#define evallgef(x) 0
+#define lgef lg
+#define setlgef setlg
+#define leadingcoeff(x) (pollead((x),-1))
+#define poldivres poldivrem
+#define nfdivres nfdivrem
+#define gred gcopy
+#define pvaluation Z_pvalrem
+#define svaluation u_lvalrem
+
+#define glogagm glog
+#define logagm  mplog
+#define mpsqrtz  gopgz(absr,(x),(y))
+#define adduumod Fl_add
+#define subuumod Fl_sub
+#define muluumod Fl_mul
+#define divuumod Fl_div
+#define powuumod Fl_pow
+#define invumod Fl_inv
+#define invsmod Fl_inv_signed
+#define mpinvmod Fp_inv
+#define powmodulo Fp_pow
+#define mpsqrtmod Fp_sqrt
+#define mpsqrtnmod Fp_sqrtn
+#define mpsqrt  sqrtr
+#define mpsqrtn  sqrtnr
+#define resii  remii
+#define resis  remis
+#define ressi  remsi
+#define resss  remss
+#define resiiz  remiiz
+#define resisz  remisz
+#define ressiz  remsiz
+#define resssz  remssz
+#define gres    grem
+#define lres    lrem
+#define rcopy mpcopy
+#define gdivise gdvd
+#define divise dvdii
+#define mpdivis dvdiiz
+#define mpdivisis dvdisz
+#define absr  mpabs
+#define absi  mpabs
+#define negi  mpneg
+#define negr  mpneg
+#define mpent mpfloor
+#define mpentz mpfloorz
+#define mpnegz(x,y) \
+  STMT_START {pari_sp _av=avma;mpaff(mpneg(x),y);avma=_av;} STMT_END
+#define mpabsz(x,y) \
+  STMT_START {pari_sp _av=avma;mpaff(mpabs(x),y);avma=_av;} STMT_END
+#define absrz(x,z)  mpabsz((x),(z))
+#define negrz(x,z)  mpnegz((x),(z))

@@ -1009,6 +1009,8 @@ cxgamma(GEN s0, int dolog, long prec)
     else
       nn = 1;
 #if 0
+#define pariK2 (1.1239968) /* 1/(1-(log(2)/(2*pi))) */
+#define pariK4 (17.079468445347/BITS_IN_LONG) /* 2*e*pi/BIL */
     {/* same: old method */
       long e = gexpo(s);
       double beta;
