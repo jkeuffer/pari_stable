@@ -1067,6 +1067,25 @@ hnf_invimage(GEN A, GEN b)
   return u;
 }
 
+/* A upper HNF, B integral matrix or column. Return A^(-1) B if integral,
+ * NULL otherwise. Not memory clean */
+GEN 
+hnf_gauss(GEN A, GEN B)
+{
+  long i, l;
+  GEN C;
+
+  if (typ(B) == t_COL) return hnf_invimage(A, B);
+  l = lg(B);
+  C = cgetg(l, t_MAT);
+  for (i = 1; i < l; i++)
+  {
+    C[i] = (long)hnf_invimage(A, (GEN)B[i]);
+    if (!C[i]) return NULL;
+  }
+  return C;
+}
+
 GEN
 gauss_get_col(GEN a, GEN b, GEN p, long li)
 {
