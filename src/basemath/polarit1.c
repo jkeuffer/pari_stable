@@ -1403,13 +1403,19 @@ padic_trivfact(GEN x, GEN p, long r)
   y[2]=(long)_col(gun); return y;
 }
 
-/* assume x reduced mod p. q = p^e (simplified version of int_to_padic) */
+/* Assume x reduced mod p. q = p^e (simplified version of int_to_padic).
+ * If p = 2, is defined (and reduced) mod 4 [from rootmod] */
 GEN
 Fp_to_Zp(GEN x, GEN p, GEN q, long e)
 {
   GEN y = cgetg(5, t_PADIC);
-  if (!signe(x)) y[1] = evalprecp(0) | evalvalp(e);
-  else           y[1] = evalprecp(e) | evalvalp(0);
+  if (egalii(p, x)) /* implies p = x = 2 */
+  {
+    x = gun; q = shifti(q, -1);
+    y[1] = evalprecp(e-1) | evalvalp(1);
+  }
+  else if (!signe(x)) y[1] = evalprecp(0) | evalvalp(e);
+  else                y[1] = evalprecp(e) | evalvalp(0);
   y[2] = (long)p;
   y[3] = (long)q;
   y[4] = (long)x; return y;
