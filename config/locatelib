@@ -31,7 +31,4 @@ if test -z "$try"; then
     echo "### They usually come in $lib-devel (RPM) or lib$lib-dev (Debian) packages"
     echo "###"
   fi
-
-    echo "###"
-  fi
 fi
