@@ -2484,8 +2484,7 @@ galoisfixedfield(G, G.gen[2], 1)
 @eprog\noindent
 and get $x^2 + 2$. Now we want the factorisation of $x^4+1$ over that
 subfield. Of course, we could use \kbd{nffactor}, but here we have a much
-simpler option, to ask for the relative factorisation by setting flag=2 in
-\kbd{galoisfixedfield}: \kbd{galoisfixedfield(G,G.gen[1],2)} outputs
+simpler option: \kbd{galoisfixedfield(G, G.gen[1], 2)} outputs
 \bprog
 [x^2 + 2, Mod(x^3 + x, x^4 + 1), [x^2 - y*x - 1, x^2 + y*x - 1]]
 @eprog\noindent
@@ -2509,7 +2508,7 @@ underlying abstract group. Use \kbd{galoisidentify(G)}, which return $[18,
 $S_3\times\Z/3\Z$. This time, the subgroups of $G$ are not obvious,
 fortunately we can ask PARI : \kbd{galoissubgroups(G)}.
 
-We are looking for a polynomial $Q$ with the property that $K$ is the splitting
+Let us look for a polynomial $Q$ with the property that $K$ is the splitting
 field of $Q(x^2)$. For that purpose, let us take $\sigma$=\kbd{G.gen[3]}.  We
 check that \kbd{G.gen[3]\^{}2} is the identity, so $\sigma$ is of order $2$. We now compute the fixed field $K^\sigma$ and the relative factorisation of $P$ over
 $K^\sigma$: 
@@ -3039,8 +3038,6 @@ variables in user functions, as we have done so far with the keyword
 \kbd{local}, and global variables visible everywhere (with the key word
 \kbd{global}). It is possibly even more advisable to avoid global variables
 altogether, but you are the sole master on board at this point.
-
-
 
 To reach grandwizard status, you may need to understand the all powerful
 \kbd{install} function, which imports into \kbd{gp} an (almost) arbitrary
