@@ -77,6 +77,7 @@ IZ 34- external prettyprinter incompatible with colors
    39- INPUT colors was "leaking out" (affected status messages)
    40- idealpowred(, power > 2^32) --> wrong result
    41- when lines > 0, output driver didn't reset properly after overflow
+   42- huge precision losses in bnfinit computations (--> truncation error)
 
   Changed
 BA  1- more efficient quadratic Hensel lift
@@ -102,6 +103,8 @@ BA  3- more efficient factorff when pol belongs to Fp[X] (based on Fp_isom)
     2- van Hoeij's algo. for modular factors recombination (factor over Z[X])
     3- algdep for p-adic numbers
 IZ  4- default values for 'colors' (light/dark) and 'prettyprinter' (tex2mail)
+    5- hnflll implementation (old one was preliminary and didn't work at all)
+GN  6- squfof implementation
 
   Removed
     1- quadrayimagwei, preliminary implementation to quadray(D < 0) 
