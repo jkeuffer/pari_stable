@@ -65,7 +65,7 @@ char *helpmessages_gp[]={
   "quit(): quits GP and return to the system",
   "read({filename}): read from the input file filename. If filename is omitted, reread last input file (be it from readfile or \\r)",
   "system(a): a being a string, execute the system command a (not valid on every machine)",
-  "trap({err}, {seq}, {rec}): If called with 3 arguments, try to execute seq, trapping error err (all of them if err ommitted); sequence rec is executed if the error occurs. When called with less than 2 arguments, define seq as a default handler for error err (a break loop will be started if seq omitted). If seq is the empty string \"\" delete the last default handler and replace it by the previous one",
+  "trap({err}, {rec}, {seq}): try to execute seq, trapping error err (all of them if err ommitted); sequence rec is executed if the error occurs and is the result of the command. When seq is omitted, define rec as a default handler for error err (a break loop will be started if rec omitted). If rec is the empty string \"\" pop out the last default handler",
   "whatnow(fun): if f was present in GP version 1.39.15 or lower, gives the new function name",
   "write(filename,a): write the string expression a (same output as print) to filename",
   "write1(filename,a): write the string expression a (same output as print1) to filename",

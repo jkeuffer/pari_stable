@@ -2047,10 +2047,10 @@ check_meta(char *buf)
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
 static GEN
-gp_main_loop()
+gp_main_loop(int ismain)
 {
   char *promptbuf = prompt;
-  long av, i,j, first = (!bufstack);
+  long av, i,j;
   GEN z = gnil;
   Buffer *b = new_buffer();
   b->flenv = 1;
@@ -2059,7 +2059,7 @@ gp_main_loop()
   push_stack(&bufstack, (void*)b);
   for(; ; setjmp(b->env))
   {
-    if (first)
+    if (ismain)
     {
       static long tloc, outtyp;
       tloc = tglobal; outtyp = prettyp; recover(0);
@@ -2091,11 +2091,11 @@ gp_main_loop()
 	Sleep(10); if (win32ctrlc) dowin32ctrlc();
 #endif
 	if (popinfile()) gp_quit();
-	if (!first) { pop_buffer(); return z; }
+	if (!ismain) { pop_buffer(); return z; }
       }
       else if (!check_meta(b->buf)) break;
     }
-    if (first)
+    if (ismain)
     {
       char c = b->buf[strlen(b->buf) - 1];
       gpsilent = separe(c);
@@ -2104,7 +2104,7 @@ gp_main_loop()
     av = avma;
     z = readseq(b->buf, strictmatch);
     if (!added_newline) pariputc('\n'); /* last output was print1() */
-    if (! first) continue;
+    if (! ismain) continue;
     if (chrono) pariputs(do_time(ti_REGULAR)); else do_time(ti_NOPRINT);
     if (z == gnil) continue;
 
@@ -2136,7 +2136,7 @@ GEN
 read0(char *s)
 {
   switchin(s);
-  return gp_main_loop();
+  return gp_main_loop(0);
 }
 
 static void
@@ -2151,7 +2151,7 @@ extern0(char *s)
 {
   check_secure(s);
   infile = try_pipe(s, mf_IN)->file;
-  return gp_main_loop();
+  return gp_main_loop(0);
 }
 
 static int
@@ -2264,7 +2264,8 @@ break_loop()
 
   term_color(c_ERR);
   fprintferr("\n");
-  errcontext("Starting break loop (^D to exit)", _analyseur(), oldb->buf);
+  errcontext("Starting break loop ('break' or ^D to exit)",
+              _analyseur(), oldb->buf);
   term_color(c_NONE);
   infile = stdin;
   for(;;)
@@ -2273,6 +2274,7 @@ break_loop()
     if (!check_meta(b->buf))
     {
       GEN x = lisseq(b->buf);
+      if (loop_break()) break;
       if (x == gnil) continue;
 
       term_color(c_OUTPUT);
@@ -2424,6 +2426,6 @@ main(int argc, char **argv)
     chrono=c; pariecho=e; logfile=l; free(flist);
   }
   (void)gptimer(); (void)timer(); (void)timer2();
-  (void)gp_main_loop();
+  (void)gp_main_loop(1);
   gp_quit(); return 0; /* not reached */
 }
