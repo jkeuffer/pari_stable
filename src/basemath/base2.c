@@ -930,7 +930,7 @@ polmodi_keep(GEN x, GEN y)
 static GEN
 dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
 {
-  long n=degpol(f),dU,c;
+  long n=degpol(f),dU,i;
   GEN b,ha,pd,pdp;
 
   if (n == 1) return gscalmat(gun, 1);
@@ -948,31 +948,28 @@ dbasis(GEN p, GEN f, long mf, GEN alpha, GEN U)
   dU = typ(U)==t_POL? degpol(U): 0;
   b = cgetg(n,t_MAT); /* Z[a] + U/p Z[a] is maximal */
   /* skip first column = gscalcol(pd,n) */
-  for (c=1; c<n; c++)
+  for (i=1; i<n; i++)
   {
-    if (c == dU)
+    if (i == dU)
     {
       ha = gdiv(gmul(pd,eleval(f,U,alpha)),p);
       ha = polmodi(ha,pdp);
     }
     else
     {
-      GEN p2, mod;
+      GEN c, mod;
       ha = gmul(ha,alpha);
-      p2 = content(ha); /* to cancel denominator */
-      if (gcmp1(p2)) { p2 = NULL; mod = pdp; }
+      ha = Q_primitive_part(ha, &c);
+      if (!c)
+        mod = pdp;
+      else if (typ(c)==t_INT)
+        mod = diviiexact(pdp, mppgcd(pdp,c));
       else
-      {
-        ha = gdiv(ha,p2);
-        if (typ(p2)==t_INT)
-          mod = divii(pdp, mppgcd(pdp,p2));
-        else
-          mod = mulii(pdp, (GEN)p2[2]); /* p2 = a / p^e */
-      }
+        mod = mulii(pdp, (GEN)c[2]); /* c = a / p^e */
       ha = FpX_res(ha, f, mod);
-      if (p2) ha = gmul(ha,p2);
+      if (c) ha = gmul(ha,c);
     }
-    b[c] = (long)pol_to_vec(ha,n);
+    b[i] = (long)pol_to_vec(ha,n);
   }
   b = hnfmodid(b,pd);
   if (DEBUGLEVEL>5) fprintferr("  new order: %Z\n",b);
@@ -990,7 +987,7 @@ get_partial_order_as_pols(GEN p, GEN f)
 GEN
 Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 {
-  GEN res,pr,pk,ph,pdr,b1,b2,b3,a1,e,f1,f2;
+  GEN fred, res,pr,pk,ph,pdr,b1,b2,b3,a1,e,f1,f2;
 
   if (DEBUGLEVEL>2)
   {
@@ -1020,22 +1017,32 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
       a1 = gmul(a1,p1);
     }
   }
-  pdr = respm(f,derivpol(f),gpowgs(p,mf+1));
-  e = eleval(f,FpX_red(gmul(a1,b2), p),theta);
-  e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,p)),pdr);
+  pdr = respm(f, derivpol(f), gpowgs(p,mf+1));
+  pk = mulii(pdr, p);
+  fred = FpX_red(f, pk);
+  e = eleval(fred, FpX_red(gmul(a1,b2), p), theta);
+  e = gdiv(polmodi(gmul(pdr,e), pk),pdr);
 
   pr = flag? gpowgs(p,flag): mulii(p,sqri(pdr));
-  pk=p; ph=mulii(pdr,pr);
+  pk = p; ph = mulii(pdr,pr);
+  fred = FpX_red(f, mulii(pdr, ph));
   /* E(t) - e(t) belongs to p^k Op, which is contained in p^(k-df)*Zp[xi] */
   while (cmpii(pk,ph) < 0)
-  {
+  { /* e <-- e^2(3-2e) mod p^2k */
+    GEN pd, num, ce;
+    pk = sqri(pk);
     e = gmul(gsqr(e), gsubsg(3,gmul2n(e,1)));
-    e = gres(e,f); pk = sqri(pk);
-    e = gdiv(polmodi(gmul(pdr,e), mulii(pdr,pk)), pdr);
+    e = Q_primitive_part(e, &ce);
+    pd = ce? denom(ce): gun;
+    e = FpX_res(e, fred, mulii(pk, pd));
+    if (ce && !gcmp1(num = numer(ce))) e = gmul(e, num);
+    if (pd != gun) e = gdiv(e, pd);
   }
-  f1 = gcdpm(f,gmul(pdr,gsubsg(1,e)), ph);
-  f1 = FpX_res(f1,f, pr);
-  f2 = FpX_res(FpX_div(f,f1, pr), f, pr);
+  fred = FpX_red(fred, ph);
+  f1 = gcdpm(FpX_red(fred,ph), gmul(pdr,gsubsg(1,e)), ph);
+  fred = FpX_red(fred, pr);
+  f1 = FpX_res(f1, fred, pr);
+  f2 = FpX_res(FpX_div(fred,f1, pr), fred, pr);
 
   if (DEBUGLEVEL>2)
   {
@@ -1047,23 +1054,24 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 
   if (flag)
   {
-    b1=factorpadic4(f1,p,flag);
-    b2=factorpadic4(f2,p,flag); res=cgetg(3,t_MAT);
-    res[1]=(long)concatsp((GEN)b1[1],(GEN)b2[1]);
-    res[2]=(long)concatsp((GEN)b1[2],(GEN)b2[2]); return res;
+    b1 = factorpadic4(f1,p,flag);
+    b2 = factorpadic4(f2,p,flag); res = cgetg(3,t_MAT);
+    res[1] = (long)concatsp((GEN)b1[1],(GEN)b2[1]);
+    res[2] = (long)concatsp((GEN)b1[2],(GEN)b2[2]); return res;
   }
   else
   {
-    GEN ib1,ib2;
-    long n1,n2,i;
+    GEN ib1, ib2;
+    long n1, n2, i;
     ib1 = get_partial_order_as_pols(p,f1); n1=lg(ib1)-1;
     ib2 = get_partial_order_as_pols(p,f2); n2=lg(ib2)-1;
-    res=cgetg(n1+n2+1,t_VEC);
+    res = cgetg(n1+n2+1, t_VEC);
+    fred = FpX_red(f, pdr);
     for (i=1; i<=n1; i++)
-      res[i]=(long)polmodi(gmod(gmul(gmul(pdr,(GEN)ib1[i]),e),f), pdr);
-    e=gsubsg(1,e); ib2 -= n1;
+      res[i] = (long)FpX_res(gmul(gmul(pdr,(GEN)ib1[i]),e), fred, pdr);
+    e = gsubsg(1,e); ib2 -= n1;
     for (   ; i<=n1+n2; i++)
-      res[i]=(long)polmodi(gmod(gmul(gmul(pdr,(GEN)ib2[i]),e),f), pdr);
+      res[i] = (long)FpX_res(gmul(gmul(pdr,(GEN)ib2[i]),e), fred, pdr);
     return nbasis(res,pdr);
   }
 }
@@ -1358,8 +1366,7 @@ update_alpha(GEN p, GEN fx, GEN alph, GEN chi, GEN pmr, GEN pmf, long mf,
   {
     npmr  = mulii(sqri(pdr), p);
     nchi  = polmodi(nchi, npmr);
-    if (!nalph) nalph = redelt(alph, npmr, pmf);
-    else nalph = redelt(nalph, npmr, pmf);
+    nalph = redelt(nalph? nalph: alph, npmr, pmf);
   }
 
   affii(gzero, (GEN)ns[1]); /* kill cache again (contains data for fx) */
