@@ -342,13 +342,19 @@ gp-sta: $add_funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
 	\$(RM) \$@
 	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 
-bench: $exec dobench
+bench: $exec 
+	@\$(DOTEST) $test_basic
 dobench::
 	@\$(DOTEST) $test_basic
+test-all: $exec
+	@\$(DOTEST) $test_basic $test_extra
+dotest-all::
+	@\$(DOTEST) $test_basic $test_extra
 EOT
 for i in $test_extra; do
   cat >> $file << EOT
-test-$i: $exec dotest-$i
+test-$i: $exec
+	@\$(DOTEST) $i
 dotest-$i::
 	@\$(DOTEST) $i
 EOT

@@ -46,6 +46,8 @@ Done for version 2.2.8 (released ??/??/2004):
        bnr = bnrinit(bnfinit(quadpoly(1020,y)), 31,1);
        rnfkummer(bnr, matdiagonal([5,1,1]));
        --> SEGV ( typo in FpXQX_from_Kronecker )
+    4- make -j4 bench could start the bench before the binary was built
+
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.
        As a result maximal degree jumps to ~ 2^24 on 32bit machines
@@ -53,6 +55,7 @@ Done for version 2.2.8 (released ??/??/2004):
        nfdivres --> nfdivrem
 
   Added
+    1- make test-all [ all test suite (SLOW !)]
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but
