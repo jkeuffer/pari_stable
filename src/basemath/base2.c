@@ -874,16 +874,16 @@ maxord(GEN p,GEN f,long mf)
   }
   else
   {
-    w=(GEN)factmod(f,p)[1]; r=lg(w)-1;
-    g = h = lift_intern((GEN)w[r]); /* largest factor */
-    for (j=1; j<r; j++) g = FpX_red(gmul(g, lift_intern((GEN)w[j])), p);
+    w = (GEN)factmod0(f,p)[1]; r = lg(w)-1;
+    g = h = (GEN)w[r]; /* largest factor */
+    for (j=1; j<r; j++) g = FpX_red(gmul(g, (GEN)w[j]), p);
   }
   res = dedek(f,mf,p,g);
   if (res)
     res = dbasis(p,f,mf,polx[varn(f)],res);
   else
   {
-    if (flw) { w=(GEN)factmod(f,p)[1]; r=lg(w)-1; h=lift_intern((GEN)w[r]); }
+    if (flw) { w = (GEN)factmod0(f,p)[1]; r = lg(w)-1; h = (GEN)w[r]; }
     res = (r==1)? nilord(p,f,mf,h,0): Decomp(p,f,mf,polx[varn(f)],f,h,0);
   }
   return gerepileupto(av,res);
@@ -1046,7 +1046,8 @@ QpX_mod(GEN e, GEN f, GEN pk)
   return e;
 }
 
-/* if flag != 0, factorization to precision r (maximal order otherwise) */
+/* if flag != 0, factorization to precision r (maximal order otherwise)
+ * nu irreducible mod p, divides chi */
 GEN
 Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
 {
@@ -1064,7 +1065,8 @@ Decomp(GEN p,GEN f,long mf,GEN theta,GEN chi,GEN nu,long flag)
     fprintferr("\n");
   }
 
-  (void)FpX_val(chi, nu, p, &b1); /* nu irreducible mod p */
+  if (!FpX_val(chi, nu, p, &b1))
+    err(talker, "bug in Decomp (not a factor), is p = %Z a prime?", p);
   b2 = FpX_div(chi, b1, p);
   a = FpX_mul(FpXQ_inv(b2, b1, p), b2, p);
   pdr = respm(f, derivpol(f), gpowgs(p,mf+1));
@@ -1335,12 +1337,12 @@ factcp(GEN p, GEN f, GEN beta, GEN pp, GEN ns)
   GEN chi,nu, b = cgetg(4,t_VEC);
   long l;
 
-  chi=mycaract(f,beta,p,pp,ns);
-  av=avma; nu=(GEN)factmod(chi,p)[1]; l=lg(nu)-1;
-  nu=lift_intern((GEN)nu[1]);
-  b[1]=(long)chi;
-  b[2]=lpilecopy(av,nu);
-  b[3]=lstoi(l); return b;
+  chi = mycaract(f,beta,p,pp,ns);
+  av = avma; nu = (GEN)factmod0(chi,p)[1]; l = lg(nu)-1;
+  nu = (GEN)nu[1];
+  b[1] = (long)chi;
+  b[2] = lpilecopy(av,nu);
+  b[3] = lstoi(l); return b;
 }
 
 /* return the prime element in Zp[phi] */
@@ -1594,9 +1596,9 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
 	chig = mycaract(chi, gamm, p, pmf, ns);
       }
 
-      nug  = (GEN)factmod(chig, p)[1];
+      nug  = (GEN)factmod0(chig, p)[1];
       l    = lg(nug) - 1;
-      nug  = lift((GEN)nug[l]);
+      nug  = (GEN)nug[l];
 
       if (l > 1)
       {
@@ -1631,21 +1633,20 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
       nv = fetch_var();
       w = Fp_factor_irred(nug, p, gsubst(nu, varn(nu), polx[nv]));
       if (degpol(w[1]) != 1)
-        err(talker,"bug in nilord (no root). Is p a prime ?");
+        err(talker,"bug in nilord (no root). Is p = %Z a prime ?", p);
 
       for (i = 1;; i++)
       {
 	if (i >= lg(w))
-          err(talker, "bug in nilord (no suitable root), is p = %Z a prime?",
-	      (long)p);
+          err(talker, "bug in nilord (no root), is p = %Z a prime?", p);
         delt = gneg_i(gsubst(gcoeff(w, 2, i), nv, polx[v]));
         eta  = gsub(gamm, delt);	
         if (typ(delt) == t_INT)
         {
           chie = poleval(chig, gadd(polx[v], delt));
-          nue  = (GEN)factmod(chie, p)[1];
+          nue  = (GEN)factmod0(chie, p)[1];
           l    = lg(nue) - 1;
-          nue  = lift((GEN)nue[l]);
+          nue  = (GEN)nue[l];
         }
         else
         {
@@ -1712,7 +1713,7 @@ nilord(GEN p, GEN fx, long mf, GEN gx, long flag)
     {
       if (flag)
       {
-	p1 = lift((GEN)factmod(chi, p)[1]);
+	p1 = (GEN)factmod0(chi, p)[1];
 	l  = lg(p1) - 1;
 	if (l == 1) return NULL;
 	phi = redelt(alph, p, pmf);
