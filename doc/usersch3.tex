@@ -4352,8 +4352,8 @@ $\var{nf}[6]$ is the vector containing the $r1+r2$ roots
 embeddings of the number field into $\C$ (the first $r1$ components are real,
 the next $r2$ have positive imaginary part).
 
-$\var{nf}[7]$ is an integral basis in Hermite normal form for $\Z_K$
-(\kbd{\var{nf}.zk}) expressed on the powers of~$\theta$.
+$\var{nf}[7]$ is an integral basis for $\Z_K$ (\kbd{\var{nf}.zk}) expressed
+on the powers of~$\theta$. Its first element is guaranteed to be $1$.
 
 $\var{nf}[8]$ is the $n\times n$ integral matrix expressing the power
 basis in terms of the integral basis, and finally
@@ -4367,10 +4367,8 @@ useful given the existence of \tet{nfnewprec}, to input a \kbd{nf} or a
 \kbd{bnf} instead of a polynomial.
 
 The special input format $[x,B]$ is also accepted where $x$ is a polynomial
-as above and $B$ is the integer basis, as computed by \tet{nfbasis}. This can
-be useful since \kbd{nfinit} uses the round 4 algorithm by default, which can
-be very slow in pathological cases where round 2 (\kbd{nfbasis(x,2)}) would
-succeed very quickly.
+as above and $B$ is the integer basis, as would be computed by \tet{nfbasis}.
+This can be useful if the integer basis is known in advance.
 
 If $\fl=2$: \var{pol} is changed into another polynomial $P$ defining the same
 number field, which is as simple as can easily be found using the
