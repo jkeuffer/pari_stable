@@ -926,7 +926,7 @@ static long muldiv(long a,long b,long c)
 /* F = cycle decomposition of sigma, B = cycle decomposition of cl(tau).
  * Check all permutations pf who can possibly correspond to tau, such that
  * tau*sigma*tau^-1 = sigma^s and tau^d = sigma^t, where d = ord cl(tau)
- * x: vector of choices, y: vector of updates, G: vector allowing linear
+ * x: vector of choices, G: vector allowing linear
  * access to elts of F. */
 GEN
 testpermutation(GEN F, GEN B, long s, long t, long cut,
@@ -934,7 +934,7 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 {
   pari_sp av, avm = avma;
   int     a, b, c, d, n;
-  GEN     pf, x, ar, y, *G;
+  GEN     pf, x, ar, *G;
   int     p1, p2, p3, p4, p5, p6;
   long 	  l1, l2, N1, N2, R1;
   long    i, j, cx, hop = 0, start = 0;
@@ -949,16 +949,14 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
   s = (b + s) % b;
   pf = cgetg(n + 1, t_VECSMALL);
   av = avma;
-  ar = cgetg(a + 1, t_VECSMALL);
+  ar = cgetg(a + 2, t_VECSMALL); ar[a+1]=0;
   x = cgetg(a + 1, t_VECSMALL);
-  y = cgetg(a + 1, t_VECSMALL);
   G = (GEN *) cgetg(a + 1, t_VECSMALL);	/* Don't worry */
   W = matheadlong((GEN) td->PV[td->ordre[n]],td->ladic);
   for (cx = 1, i = 1, j = 1; cx <= a; cx++, i++)
   {
     x[cx] = (i != d) ? 0 : t;
-    y[cx] = 1;
-    G[cx] = (GEN) F[((long **) B)[j][i]];	/* Be happy */
+    G[cx] = (GEN) F[coeff(B,i,j)];	/* Be happy */
     if (i == d)
     {
       i = 0;
@@ -988,22 +986,15 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
       {
 	for (i = 1, j = d; i < a;)
 	{
-	  y[i] = 1;
 	  if ((++(x[i])) != b)
 	    break;
 	  x[i++] = 0;
-	  if (i == j)
-	  {
-	    y[i++] = 1;
-	    j += d;
-	  }
+	  if (i == j) { i++; j += d; }
 	}
-	y[i + 1] = 1;
       }
-      else start=1;
-      for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
-	if (y[p1])
-	{
+      else {start=1; i = a-1;}
+      for (p1 = 1, p5 = d; p1 <= i + 1; p1++, p5++)
+      {
 	  if (p5 == d)
 	  {
 	    p5 = 0;
@@ -1015,7 +1006,6 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 	    p6 = p1 + 1 - d;
 	  else
 	    p6 = p1 + 1;
-	  y[p1] = 0;
 	  V = 0;
 	  for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
 	  {
@@ -1035,11 +1025,11 @@ testpermutation(GEN F, GEN B, long s, long t, long cut,
 	      p3 += b;
 	  }
 	  ar[p1]=V;
-	}
-      V = 0;
-      for (p1 = 1; p1 <= a; p1++)
-	V += ar[p1];
-      if (labs(V)<=n)
+      }
+      
+      for (p1 = i + 1; p1 >= 1; p1--)
+        ar[p1] += ar[p1+1];
+      if ( -n <= ar[1] && ar[1] <= n )
       {
 	for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
 	{
