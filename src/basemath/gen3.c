@@ -2365,18 +2365,12 @@ compo(GEN x, long n)
   return gcopy((GEN)x[l]);
 }
 
-/* assume x a t_POL */
+/* assume v > varn(x), extract coeff of polx[v]^n */
 static GEN
-_polcoeff(GEN x, long n, long v)
+multi_coeff(GEN x, long n, long v, long dx)
 {
-  long i, w, dx;
+  long i;
   GEN z;
-  dx = degpol(x);
-  if (dx < 0) return gzero;
-  if (v < 0 || v == (w=varn(x)))
-    return (n < 0 || n > dx)? gzero: (GEN)x[n+2];
-  if (w > v) return n? gzero: x;
-  /* w < v */
   if (dx == 0) return polcoeff_i((GEN)x[2], n, v);
   z = cgetg(dx+3, t_POL);
   z[1] = x[1];
@@ -2384,13 +2378,25 @@ _polcoeff(GEN x, long n, long v)
   return normalizepol(z);
 }
 
+/* assume x a t_POL */
+static GEN
+_polcoeff(GEN x, long n, long v)
+{
+  long w, dx;
+  dx = degpol(x);
+  if (dx < 0) return gzero;
+  if (v < 0 || v == (w=varn(x)))
+    return (n < 0 || n > dx)? gzero: (GEN)x[n+2];
+  if (w > v) return n? gzero: x;
+  /* w < v */
+  return multi_coeff(x, n, v, dx);
+}
+
 /* assume x a t_SER */
 static GEN
 _sercoeff(GEN x, long n, long v)
 {
-  long i, w, dx, ex;
-  GEN z;
- 
+  long w, dx, ex;
   if (!signe(x)) return gzero;
   dx = lg(x)-3; ex = valp(x); n -= ex;
   if (v < 0 || v == (w=varn(x)))
@@ -2400,25 +2406,22 @@ _sercoeff(GEN x, long n, long v)
   }
   if (w > v) return n? gzero: x;
   /* w < v */
-  if (dx == 0) return polcoeff_i((GEN)x[2], n, v);
-  z = cgetg(dx+3, t_POL);
-  z[1] = x[1];
-  for (i=2; i<dx+3; i++) z[i] = (long)polcoeff_i((GEN)x[i], n, v);
-  return normalizepol(z);
+  return multi_coeff(x, n, v, dx);
 }
 
 /* assume x a t_RFRAC(n) */
 static GEN
 _rfraccoeff(GEN x, long n, long v)
 {
-  long ex, w = precdl;
-  if (v<0) v = gvar(x);
-  ex = ggval((GEN)x[2], polx[v]);
-  precdl = n + ex + 1; x = gtoser(x, v);
-  precdl = w;
-  return _sercoeff(x,n,v);
+  GEN P,Q, p = (GEN)x[1], q = (GEN)x[2];
+  long vp = gvar(p), vq = gvar(q);
+  if (v < 0) v = min(vp, vq);
+  P = (vp == v)? p: swap_vars(p, v);
+  Q = (vq == v)? q: swap_vars(q, v);
+  if (!ismonome(Q)) err(typeer, "polcoeff");
+  n += degpol(Q);
+  return gdiv(_polcoeff(P, n, v), leading_term(Q));
 }
-
 
 GEN
 polcoeff_i(GEN x, long n, long v)
@@ -2427,8 +2430,8 @@ polcoeff_i(GEN x, long n, long v)
   {
     case t_POL: return _polcoeff(x,n,v);
     case t_SER: return _sercoeff(x,n,v);
-    case t_RFRAC:
-    case t_RFRACN: return _rfraccoeff(x,n,v);
+    case t_RFRACN: err(typeer, "polcoeff"); /* too expensive to reduce */
+    case t_RFRAC: return _rfraccoeff(x,n,v);
     default: return n? gzero: x;
   }
 }
