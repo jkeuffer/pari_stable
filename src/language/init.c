@@ -1484,7 +1484,7 @@ checkmemory(GEN z)
   }
 #endif
 
-#define is_valid_timer(t) ((t) >= MAX_TIMER || (t) < MIN_TIMER)
+#define is_valid_timer(t) ((t) < MAX_TIMER || (t) >= MIN_TIMER)
 long
 gptimer() {return timer_proto(0);}
 long
