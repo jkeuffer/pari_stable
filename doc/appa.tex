@@ -76,31 +76,34 @@ some nonstandard place, you can use the \kbd{--prefix} option, as in
 
 \kbd{./Configure --prefix=/an/exotic/directory}
 
-\noindent (the default prefix is \kbd{/usr/local}). This phase extracts some
-files and creates a directory \kbd{O$xxx$} where the object files and
-executables will be built. The $xxx$ part depends on your architecture and
-operating system, thus you can build GP for several different machines from
-the same source tree (the builds are completely independent, so can be done
-simultaneously).
+\noindent (the default prefix is \kbd{/usr/local}). For example, to build a
+package for a Linux distribution, you may want to use
+
+\kbd{./Configure --prefix=/usr}
+
+This phase extracts some files and creates a directory \kbd{O$xxx$} where the
+object files and executables will be built. The $xxx$ part depends on your
+architecture and operating system, thus you can build GP for several
+different machines from the same source tree (the builds are completely
+independent, so can be done simultaneously).
 
 \misctitle{Technical note:} The precise default destinations are as follows:
 the \kbd{gp} binary, the scripts \kbd{gphelp} and \kbd{tex2mail} go to
 \kbd{\$prefix/bin}. The pari library goes to \kbd{\$prefix/lib} and include
-files to \kbd{\$prefix/include/pari}. As for architecture independent files,
-the man pages go into \kbd{\$prefix/man} and the rest in various
-subdirectories of \kbd{\$prefix/lib/pari}.
+files to \kbd{\$prefix/include/pari}. Other system-dependant data go to
+\kbd{\$prefix/lib/pari}.
 
-\noindent You can also supply a \kbd{--share-prefix} argument in which case
-architecture independent files go to different directories than in the above
-scheme: \kbd{\$share/pari} (galdata package), \kbd{\$share/man} (man pages)
-and \kbd{\$share/doc/pari/} (everything else: sample GP scripts and C code,
-documentation, emacs macros). For instance, to build a package for a Linux
-distribution, you may want to use
-
-\kbd{./Configure --prefix=/usr --share-prefix=/usr/share}
+As for architecture independent files, they go to various subdirectories
+of \kbd{\$share\_prefix}, which defaults to \kbd{\$prefix/share}, and can be
+specified via the \kbd{--share-prefix} argument. Man
+pages go into \kbd{\$share\_prefix/man}, Emacs files into
+\kbd{\$share\_prefix/emacs/site-lisp/pari}, and other system-independant data
+to various subdirectories of \kbd{\$share\_prefix/pari}: documentation,
+sample GP scripts and C code, extra packages like \kbd{galdata}.
 
 \noindent You can also set directly \kbd{--bindir}, \kbd{--libdir},
-\kbd{--mandir}, \kbd{--miscdir}, \kbd{--datadir}, \kbd{--includedir}.
+\kbd{--includedir}, \kbd{--mandir}, \kbd{--datadir}, and finally
+\kbd{--sysdatadir}.
 
 \misctitle{Technical note 2:} \kbd{Configure} lets the following
 environment variable override the defaults if set:
@@ -113,7 +116,7 @@ environment variable override the defaults if set:
 
 \kbd{LD}: Static linker.
 
-The contents of the following variables are \emph{appended} to the
+\noindent The contents of the following variables are \emph{appended} to the
 values computed by \kbd{Configure}:
 
 \kbd{CFLAGS}: Flags for \kbd{CC}.

@@ -17,21 +17,15 @@ EOT
 echo $n "Installation prefix ? $c"
 . ./myread; prefix=$ans
 
-if test -d $prefix/share -a -z "$share_prefix"; then 
+if test -z "$share_prefix"; then 
   share_prefix=$prefix/share
 fi
 echo $n "...for architecture-independent files (share-prefix) ? $c"
 dflt=$share_prefix; . ./myread; share_prefix=$ans
 
-if test -z "$share_prefix"; then
-  dfltman=$prefix/man/man1
-  dfltemacs=$prefix/share/emacs/site_lisp/pari
-  dfltdata=$prefix/lib/pari
-else
-  dfltman=$share_prefix/man/man1
-  dfltemacs=$share_prefix/emacs/site-lisp/pari
-  dfltdata=$share_prefix/pari
-fi
+dfltman=$share_prefix/man/man1
+dfltemacs=$share_prefix/emacs/site-lisp/pari
+dfltdata=$share_prefix/pari
 
 echo "Installation directories for:"
 echo $n ..."executables (gp, gphelp) ? $c"
