@@ -247,14 +247,14 @@ adj(GEN x)
 GEN
 hess(GEN x)
 {
-  pari_sp av = avma;
-  long lx=lg(x),m,i,j;
-  GEN p,p1,p2;
+  pari_sp av = avma, av2 = avma, lim;
+  long lx = lg(x), m, i, j;
+  GEN p, p1, p2;
 
   if (typ(x) != t_MAT) err(mattype1,"hess");
-  if (lx==1) return cgetg(1,t_MAT);
-  if (lg(x[1])!=lx) err(mattype1,"hess");
-  x = dummycopy(x);
+  if (lx == 1) return cgetg(1,t_MAT);
+  if (lg(x[1]) != lx) err(mattype1,"hess");
+  x = dummycopy(x); lim = stack_lim(av,1);
 
   for (m=2; m<lx-1; m++)
     for (i=m+1; i<lx; i++)
@@ -276,6 +276,11 @@ hess(GEN x)
         for (j=1; j<lx; j++)
           coeff(x,j,m) = ladd(gcoeff(x,j,m), gmul(p1,gcoeff(x,j,i)));
       }
+      if (low_stack(lim, stack_lim(av,1)))
+      {
+        if (DEBUGMEM>1) err(warnmem,"hess, m = %ld", m);
+        x = gerepilecopy(av2, x);
+      }
       break;
     }
   return gerepilecopy(av,x);
@@ -284,27 +289,27 @@ hess(GEN x)
 GEN
 carhess(GEN x, long v)
 {
-  pari_sp av,tetpil;
-  long lx,r,i;
-  GEN *y,p1,p2,p3,p4;
+  pari_sp av;
+  long lx, r, i;
+  GEN y, H, X_h;
 
-  if ((p1 = easychar(x,v,NULL))) return p1;
+  if ((H = easychar(x,v,NULL))) return H;
 
-  lx=lg(x); av=avma; y = (GEN*) new_chunk(lx);
-  y[0]=polun[v]; p1=hess(x); p2=polx[v];
-  tetpil=avma;
-  for (r=1; r<lx; r++)
+  lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
+  y[1] = lpolun[v]; H = hess(x);
+  X_h = dummycopy(polx[v]);
+  for (r = 1; r < lx; r++)
   {
-    y[r]=gmul(y[r-1], gsub(p2,gcoeff(p1,r,r)));
-    p3=gun; p4=gzero;
-    for (i=r-1; i; i--)
+    GEN p3 = gun, p4 = gzero;
+    for (i = r-1; i; i--)
     {
-      p3=gmul(p3,gcoeff(p1,i+1,i));
-      p4=gadd(p4,gmul(gmul(p3,gcoeff(p1,i,r)),y[i-1]));
+      p3 = gmul(p3, gcoeff(H,i+1,i));
+      p4 = gadd(p4, gmul(gmul(p3,gcoeff(H,i,r)), (GEN)y[i]));
     }
-    tetpil=avma; y[r]=gsub(y[r],p4);
+    X_h[2] = lneg(gcoeff(H,r,r));
+    y[r+1] = lsub(gmul((GEN)y[r], X_h), p4);
   }
-  return gerepile(av,tetpil,y[lx-1]);
+  return gerepileupto(av, (GEN)y[lx]);
 }
 
 /*******************************************************************/
