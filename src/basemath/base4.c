@@ -180,7 +180,7 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRINCIPAL)
   {
     x = _algtobasis(nf, x);
-    if (isnfscalar(x)) return gscalmat((GEN)x[1], lg(x)-1);
+    if (isnfscalar(x)) return gscalmat(gabs((GEN)x[1],0), lg(x)-1);
     x = eltmul_get_table(nf, x);
     return idealmat_to_hnf(nf,x);
   }
