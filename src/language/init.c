@@ -754,7 +754,7 @@ changevar(GEN x, GEN y)
 
   if (var_not_changed && y==polvar) return x;
   tx=typ(x); if (!is_recursive_t(tx)) return gcopy(x);
-  ty=typ(y); if (! is_vec_t(ty)) err(changer1);
+  ty=typ(y); if (! is_vec_t(ty)) err(typeer, "changevar");
   if (is_scalar_t(tx))
   {
     if (tx!=t_POLMOD) return gcopy(x);
@@ -778,7 +778,7 @@ changevar(GEN x, GEN y)
     p1=(GEN)y[vx];
     if (!signe(x))
     {
-      vy=gvar(p1); if (vy > (long)MAXVARN) err(changer1);
+      vy=gvar(p1); if (vy > (long)MAXVARN) err(typeer, "changevar");
       z=gcopy(x); setvarn(z,vy); return z;
     }
     av=avma; p2=changevar((GEN)x[lx-1],y);
@@ -1142,7 +1142,7 @@ err(long numerr, ...)
         pariputsf(" %s is not yet implemented.",ch1); break;
 
       case breaker: case typeer: case mattype1: case overwriter:
-      case accurer: case infprecer: case negexper: case polrationer:
+      case accurer: case infprecer: case negexper:
       case funder2: case constpoler: case notpoler: case redpoler:
       case zeropoler: case consister: case flagerr: case precer:
         pariputsf(" in %s.",va_arg(ap, char*)); break;

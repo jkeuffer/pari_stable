@@ -169,6 +169,7 @@ BA 21- type() does not allow to change object types anymore.
    22- internal routines setloop()/incloop() allocated 2 chunks of memory,
        then assumed they were connected [ true for the current allocation
        model ]. Remove that unecessary assumption.
+   23- more informative error messages in concat()
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
@@ -195,7 +196,7 @@ BA  4- cornacchia, in favour of qfbsolve.
     5- useless inefficient types FRACN / RFRACN
     6- routines gred [useless] / gredz [ useless did not work ]. Define
        gred --> gcopy for backward compatibility
-    7- many obsolete error codes from old mp.s
+    7- many obsolete error codes [ for err(...) ]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.7 (released 18/12/2003):

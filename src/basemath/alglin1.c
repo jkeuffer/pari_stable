@@ -178,6 +178,13 @@ appendL(GEN x, GEN t)
   long l = lg(x); x[l] = (long)t; setlg(x, l+1);
 }
 
+static void
+err_cat(GEN x, GEN y)
+{
+  err(talker,"inpossible concatenation in concat: %s %Z . %s %Z",
+      type_name(typ(x)), matsize(x), type_name(typ(y)), matsize(y));
+}
+
 GEN
 concatsp(GEN x, GEN y)
 {
@@ -190,12 +197,12 @@ concatsp(GEN x, GEN y)
   if (tx==t_MAT && lx==1)
   {
     if (ty!=t_VEC || ly==1) return gtomat(y);
-    err(concater);
+    err_cat(x,y);
   }
   if (ty==t_MAT && ly==1)
   {
     if (tx!=t_VEC || lx==1) return gtomat(x);
-    err(concater);
+    err_cat(x,y);
   }
 
   if (! is_matvec_t(tx))
@@ -209,7 +216,7 @@ concatsp(GEN x, GEN y)
     if (ty != t_MAT) p1 = x;
     else
     {
-      if (lg(y[1])!=2) err(concater);
+      if (lg(y[1])!=2) err_cat(x,y);
       p1=cgetg(2,t_COL); p1[1]=(long)x;
     }
     for (i=2; i<=ly; i++) z[i]=y[i-1];
@@ -221,7 +228,7 @@ concatsp(GEN x, GEN y)
     if (tx != t_MAT) p1 = y;
     else
     {
-      if (lg(x[1])!=2) err(concater);
+      if (lg(x[1])!=2) err_cat(x,y);
       p1=cgetg(2,t_COL); p1[1]=(long)y;
     }
     for (i=1; i<lx; i++) z[i]=x[i];
@@ -230,7 +237,7 @@ concatsp(GEN x, GEN y)
 
   if (tx == ty)
   {
-    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err(concater);
+    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
     z=cgetg(lx+ly-1,tx);
     for (i=1; i<lx; i++) z[i]=x[i];
     for (i=1; i<ly; i++) z[lx+i-1]=y[i];
@@ -283,7 +290,7 @@ concatsp(GEN x, GEN y)
       }
       break;
   }
-  err(concater);
+  err_cat(x,y);
   return NULL; /* not reached */
 }
 
@@ -302,7 +309,7 @@ concat(GEN x, GEN y)
       { lx = lg(x); i = 1; }
     else
     {
-      err(concater);
+      err_cat(x,y);
       return NULL; /* not reached */
     }
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
@@ -318,12 +325,12 @@ concat(GEN x, GEN y)
   if (tx==t_MAT && lx==1)
   {
     if (ty!=t_VEC || ly==1) return gtomat(y);
-    err(concater);
+    err_cat(x,y);
   }
   if (ty==t_MAT && ly==1)
   {
     if (tx!=t_VEC || lx==1) return gtomat(x);
-    err(concater);
+    err_cat(x,y);
   }
 
   if (! is_matvec_t(tx))
@@ -337,7 +344,7 @@ concat(GEN x, GEN y)
     if (ty != t_MAT) p1 = gcopy(x);
     else
     {
-      if (lg(y[1])!=2) err(concater);
+      if (lg(y[1])!=2) err_cat(x,y);
       p1=cgetg(2,t_COL); p1[1]=lcopy(x);
     }
     for (i=2; i<=ly; i++) z[i]=lcopy((GEN) y[i-1]);
@@ -349,7 +356,7 @@ concat(GEN x, GEN y)
     if (tx != t_MAT) p1 = gcopy(y);
     else
     {
-      if (lg(x[1])!=2) err(concater);
+      if (lg(x[1])!=2) err_cat(x,y);
       p1=cgetg(2,t_COL); p1[1]=lcopy(y);
     }
     for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
@@ -358,7 +365,7 @@ concat(GEN x, GEN y)
 
   if (tx == ty)
   {
-    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err(concater);
+    if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
     z=cgetg(lx+ly-1,tx);
     for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
     for (i=1; i<ly; i++) z[lx+i-1]=lcopy((GEN) y[i]);
@@ -411,7 +418,7 @@ concat(GEN x, GEN y)
       }
       break;
   }
-  err(concater);
+  err_cat(x,y);
   return NULL; /* not reached */
 }
 

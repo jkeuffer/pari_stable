@@ -552,9 +552,10 @@ conjvec(GEN x,long prec)
       for (i=2; i<lx; i++)
       {
 	tx=typ(y[i]);
-	if (tx==t_INTMOD) p=gmael(y,i,1);
+	if (tx==t_INTMOD) p = gmael(y,i,1);
 	else
-	  if (!is_rational_t(tx)) err(polrationer,"conjvec");
+	  if (!is_rational_t(tx))
+            err(talker,"not a rational polynomial in conjvec");
       }
       if (!p)
       {

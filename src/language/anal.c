@@ -910,7 +910,8 @@ readlong()
   GEN arg = expr();
 
   if (br_status) err(breaker,"here (reading long)");
-  if (typ(arg) != t_INT) err(caseer,old,mark.start);
+  if (typ(arg) != t_INT) err(talker2,"this should be an integer",
+                                     old,mark.start);
   m = itos(arg); avma=av; return m;
 }
 
@@ -1258,7 +1259,8 @@ facteur(void)
       case '!':
 	if (analyseur[1] != '=')
 	{
-	  if (typ(x) != t_INT) err(caseer,old,mark.start);
+	  if (typ(x) != t_INT) err(talker2,"this should be an integer",
+                                           old,mark.start);
 	  analyseur++; x=mpfact(itos(x)); break;
 	} /* Fall through */
 
@@ -1473,7 +1475,9 @@ change_compo(matcomp *c, GEN res)
   }
   if (c->full_row)
   {
-    if (typ(res) != t_VEC || lg(res) != lg(p)) err(caseer2,old,mark.start);
+    if (typ(res) != t_VEC || lg(res) != lg(p))
+      err(talker2,"incorrect type or length in matrix assignment",
+          old,mark.start);
     for (i=1; i<lg(p); i++)
     {
       GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) killbloc(p1);
@@ -1482,7 +1486,9 @@ change_compo(matcomp *c, GEN res)
     return res;
   }
   if (c->full_col)
-    if (typ(res) != t_COL || lg(res) != lg(*pt)) err(caseer2,old,mark.start);
+    if (typ(res) != t_COL || lg(res) != lg(*pt)) 
+      err(talker2,"incorrect type or length in matrix assignment",
+          old,mark.start);
 
   res = gclone(res);
   killsubblocs(*pt);
@@ -2205,7 +2211,8 @@ identifier(void)
       while (*analyseur == ',') { analyseur++; skipexpr(); }
       match(')');
       if (*analyseur != '=' || analyseur[1] == '=')
-        err(nparamer1,mark.identifier,mark.start);
+        err(talker2,"too many parameters in user-defined function call",
+            mark.identifier,mark.start);
       analyseur = ch1-1; /* points to '(' */
 
       free_args((gp_args*)ep->args);
@@ -3025,7 +3032,8 @@ skipidentifier(void)
       if (*analyseur != '=' || analyseur[1] == '=')
       {
         if (skipping_fun_def) return;
-        err(nparamer1,mark.identifier,mark.start);
+        err(talker2,"too many parameters in user-defined function call",
+            mark.identifier,mark.start);
       }
       analyseur = ch1;
     } /* fall through */

@@ -20,7 +20,7 @@ enum {
 
 /* Always catched up to this point */
 
-  caracer1, caseer, caseer2, member, nparamer1,
+  caracer1, member,
   paramer1, varer1, obsoler, openfiler, talker2,
 
 /* NO CONTEXT now */
@@ -39,7 +39,7 @@ enum {
 
 /* alglin.c */
 
-  concater, matinv1, mattype1,
+  matinv1, mattype1,
 
 /* anal.c   */
 
@@ -51,12 +51,12 @@ enum {
   funder2, generer, primer1, primer2, invmoder,
 
 /* base.c   */
-  polrationer, constpoler, notpoler, redpoler, zeropoler,
+  constpoler, notpoler, redpoler, zeropoler,
   idealer1, idealer2,
 
 /* bibli.c  */
 
-  changer1, intger2, lllger3,
+  intger2, lllger3,
 
 /* elliptic.c */
 

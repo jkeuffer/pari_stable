@@ -25,14 +25,8 @@ char *errmessage[]=
 
 /* caracer1 */
   "unexpected character",
-/* caseer */
-  "this should be an integer",
-/* caseer2 */
-  "incorrect type or length in matrix assignment",
 /* member */
   "incorrect type in .",
-/* nparamer1 */
-  "too many parameters in user-defined function call",
 /* paramer1 */
   "unknown function or error in formal parameters",
 /* varer1 */
@@ -102,8 +96,6 @@ char *errmessage[]=
 
   /*  ALGLIN.C  */
 
-/* concater */
-  "impossible concatenation in concat",
 /* matinv1 */
   "non invertible matrix in gauss",
 /* mattype1 */
@@ -136,8 +128,6 @@ char *errmessage[]=
   "impossible inverse modulo: ",
   /*  BASE.C  */
 
-/* polrationer */
-  "not a rational polynomial",
 /* constpoler */
   "constant polynomial",
 /* notpoler */
@@ -153,8 +143,6 @@ char *errmessage[]=
 
   /*  BIBLI.C  */
 
-/* changer1 */
-  "incorrect second argument in changevar",
 /* intger2 */
   "too many iterations for desired precision in integration routine",
 /* lllger3 */
