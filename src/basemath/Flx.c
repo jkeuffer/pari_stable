@@ -1266,10 +1266,13 @@ Flx_even_odd_comb(GEN P, ulong u, ulong v, ulong p)
 GEN
 Flv_polint(GEN xa, GEN ya, ulong p, long vs)
 {
-  GEN T,dP, P = NULL, Q = Flv_roots_to_pol(xa, p, vs);
-  long i, n = lg(xa);
+  long i, j, n = lg(xa);
+  GEN T,dP, P = cgetg(n+1, t_VECSMALL);
+  GEN Q = Flv_roots_to_pol(xa, p, vs);
   ulong inv;
-  pari_sp av = avma;
+  P[1] = vs;
+  if (DEBUGLEVEL>=4) fprintferr("Flv_polint(%ld)\n",n);
+  for (j=2; j<=n; j++) P[j] = 0UL;
   for (i=1; i<n; i++)
   {
     if (!ya[i]) continue;
@@ -1282,9 +1285,12 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
     }
     else
       dP = Flx_Fl_mul(T, Fl_mul(ya[i],inv,p), p);
-    P = P? Flx_add(P, dP, p): dP;
+    for (j=2; j<lg(dP); j++) 
+      P[j] = (long)Fl_add((ulong)P[j], (ulong)dP[j], p);
+    avma = (pari_sp)Q;
   }
-  return P? gerepileuptoleaf(av, P): zero_Flx(vs);
+  avma = (pari_sp)P;
+  return Flx_renormalize(P,n+1);
 }
 
 /***********************************************************************/
@@ -1924,4 +1930,3 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   y = FlxqX_from_Kronecker(y, T,p);
   return gerepileupto(av0, y);
 }
-
