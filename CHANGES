@@ -183,10 +183,12 @@ BA  3- galoisidentify for order 96 to 127.
 GTo 6- routine qfrep()
 BA  7- routine qfbsolve(Q,p) for Q imaginary and p prime
     8- new testsuite: make test-galois (~ 1 minute)
-    9- new options to Configure: --emacsdir --paricfgdir --descdir
+    9- new options to Configure: --with-fltk, --emacsdir, --datadir,
+       --sysdatadir
 
   Removed
     1- bruteall [ useless, undocumented variant of 'brute' ]
+    2- option to Configure: --miscdir
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.6 (released 19/06/2003):
