@@ -21,13 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern int OK_bern(long nb, long prec);
-extern GEN divrsns(GEN x, long i);
-extern GEN divgsns(GEN x, long i);
-extern void dcxlog(double s, double t, double *a, double *b);
-extern double dnorm(double s, double t);
-extern double dabs(double s, double t);
-
 GEN
 cgetc(long l)
 {

@@ -22,10 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-extern GEN caractducos(GEN p, GEN x, int v);
-extern double mylog2(GEN z);
-extern GEN revpol(GEN x);
-
 /*Renormalize (in place) polynomial with t_INT or t_POL coefficients.*/
 
 GEN

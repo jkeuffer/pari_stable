@@ -21,11 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern long polegal_spec(GEN x, GEN y);
-extern GEN idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
-extern GEN lift_if_rational(GEN x);
-extern GEN get_mul_table(GEN x,GEN basden,GEN invbas);
-extern GEN rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);
 
 GEN
 matbasistoalg(GEN nf,GEN x)
@@ -115,7 +110,6 @@ eltreltoabs(GEN rnfeq, GEN x)
 }
 
 #if 0
-extern GEN get_roots(GEN x,long r1,long prec);
 static GEN
 rnfmakematrices(GEN rnf)
 {

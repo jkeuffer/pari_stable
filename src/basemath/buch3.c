@@ -22,34 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "parinf.h"
 
-extern GEN idealcoprime_fact(GEN nf, GEN x, GEN fy);
-extern GEN zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
-extern GEN zsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
-extern GEN init_units(GEN BNF);
-extern GEN F2V_red_ip(GEN v);
-extern GEN zlog(GEN nf, GEN a, GEN sgn, zlog_S *S);
-extern GEN make_integral(GEN nf, GEN L0, GEN f, GEN *listpr);
-extern GEN unif_mod_fZ(GEN pr, GEN F);
-extern GEN init_unif_mod_fZ(GEN L);
-extern void testprimes(GEN bnf, long bound);
-extern GEN Fp_PHlog(GEN a, GEN g, GEN p, GEN ord);
-extern GEN arch_mul(GEN x, GEN y);
-extern GEN check_and_build_cycgen(GEN bnf);
-extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
-extern GEN detcyc(GEN cyc);
-extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
-extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
-extern GEN logunitmatrix(GEN nf, GEN U, GEN sgnU, GEN bid);
-extern GEN sqred1_from_QR(GEN x, long prec);
-extern GEN subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
-extern GEN to_Fp_simple(GEN nf, GEN x, GEN ffproj);
-extern long FqX_is_squarefree(GEN P, GEN T, GEN p);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
-extern void rowselect_p(GEN A, GEN B, GEN p, long init);
-extern GEN perm_to_arch(GEN nf, GEN archp);
-extern GEN archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
-
 /* FIXME: obsolete. Replace by a call to buchrayall (currently much slower) */
 GEN
 buchnarrow(GEN bnf)
@@ -1339,10 +1311,6 @@ check_subgroup(GEN bnr, GEN H, GEN *clhray, int triv_is_NULL, char *s)
   if (!H && !triv_is_NULL) H = D? D: diagonal(gmael(bnr,5,2));
   return H;
 }
-
-extern GEN log_gen_pr(zlog_S *S, long index, GEN nf, long e);
-extern GEN log_gen_arch(zlog_S *S, long index);
-extern GEN factorbackprime(GEN nf, GEN L, GEN e);
 
 /* return bnrisprincipal(bnr, (x)), assuming z = ideallog(x) */
 static GEN

@@ -23,10 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "parinf.h"
 
-extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
-extern GEN special_anti_uniformizer(GEN nf, GEN pr);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-
 static GEN mat_ideal_two_elt2(GEN nf, GEN x, GEN a);
 
 /*******************************************************************/
@@ -2648,7 +2644,6 @@ element_reduce(GEN nf, GEN x, GEN ideal)
   if (is_extscalar_t(tx)) x = algtobasis_i(checknf(nf), x);
   return gerepileupto(av, reducemodinvertible(x, ideal));
 }
-extern GEN close_modinvertible(GEN x, GEN y);
 /* Given an element x and an ideal in matrix form (not necessarily HNF),
  * gives an a in ideal such that x-a is small. No checks */
 static GEN 

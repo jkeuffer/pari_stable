@@ -22,9 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-extern GEN ishiftr_spec(GEN x, long lx, long n);
-extern GEN ptolift(GEN x, GEN Y);
-
 /********************************************************************/
 /**                                                                **/
 /**                 PRINCIPAL VARIABLE NUMBER                      **/
@@ -725,8 +722,6 @@ gdiventres(GEN x, GEN y)
   return NULL; /* not reached */
 }
 
-extern GEN swap_vars(GEN b0, long v);
-
 GEN
 divrem(GEN x, GEN y, long v)
 {
@@ -876,10 +871,6 @@ int2n(long n) {
 /*                              INVERSE                            */
 /*                                                                 */
 /*******************************************************************/
-extern GEN fix_rfrac_if_pol(GEN x, GEN y);
-extern GEN quad_polmod_norm(GEN x, GEN y);
-extern GEN quad_polmod_conj(GEN x, GEN y);
-
 GEN
 mpinv(GEN b)
 {

@@ -24,14 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define addshift(x,y) addshiftpol((x),(y),1)
 
-extern GEN addshiftpol(GEN x, GEN y, long d);
-extern GEN gassoc_proto(GEN f(GEN,GEN),GEN,GEN);
-extern GEN qf_disc(GEN x, GEN y, GEN z);
-extern int approx_0(GEN x, GEN y);
-extern void gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
-
-GEN matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
-
 /* compute Newton sums S_1(P), ... , S_n(P). S_k(P) = sum a_j^k, a_j root of P
  * If N != NULL, assume p-adic roots and compute mod N [assume integer coeffs]
  * If T != NULL, compute mod (T,N) [assume integer coeffs if N != NULL]

@@ -24,6 +24,9 @@ typedef struct default_type {
   void *fun;
 } default_type;
 
+extern default_type gp_default_list[];
+extern char *keyword_list[];
+
 typedef struct gp_args {
   int nloc, narg;
   GEN *arg;
@@ -33,6 +36,8 @@ typedef struct module {
   entree *func;
   char **help;
 } module;
+
+int  gp_init_entrees(module *modlist, entree **hash, int force);
 
 /* binary I/O */
 typedef struct GENbin {
@@ -75,6 +80,8 @@ typedef struct {
 
 void push_stack(stack **pts, void *a);
 void *pop_stack(stack **pts);
+void delete_dirs(gp_path *p);
+void gp_expand_path(gp_path *p);
 
 /* functions */
 void   changevalue_p(entree *ep, GEN x);
@@ -236,6 +243,7 @@ typedef struct {
 #define LBRACE '{'
 #define RBRACE '}'
 
+int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 char *filtre0(filtre_t *F);
 char *filtre(char *s, int flag);
 void check_filtre(filtre_t *F);
@@ -334,4 +342,4 @@ typedef struct {
 } gp_data;
 
 extern gp_data *GP_DATA;
-
+void gp_output(GEN z, gp_data *G);

@@ -63,16 +63,11 @@ int  (*default_exception_handler)(long);
 int  (*whatnow_fun)(char *, int);
 pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, f_RAW, 0 };
 
-extern void  delete_dirs(gp_path *p);
-extern void  initout(int initerr);
-extern int   term_width(void);
-
 #ifdef BOTH_GNUPLOT_AND_X11
 /* Satisfy DLL dependencies: dummy only */
 #define EXTERN_DLL_DPES *PL_markstack_ptr, PL_stack_max, *PL_Sv, *PL_stack_sp, \
   *PL_tmps_floor, *PL_tmps_ix, *PL_markstack_max, *PL_stack_base, *PL_na, \
   *PL_sv_yes, *PL_sv_no, *PL_curpad, *PL_op
-extern int EXTERN_DLL_DPES;
 int EXTERN_DLL_DPES;
 #endif	/* defined BOTH_GNUPLOT_AND_X11 */
 
@@ -198,7 +193,6 @@ gunclone(GEN x) { delete_from_bloclist(x); }
 void *PARI_stack_limit = NULL;
 
 #  ifdef __EMX__				/* Emulate */
-extern void* get_stack(double,int);
 #    define STACK_CHECK_INIT(b)		\
 	((void)b, PARI_stack_limit = get_stack(1./16, 32*1024))
 #  else /* !__EMX__ */
@@ -585,8 +579,6 @@ init_stack(size_t size)
   memused = 0; return s;
 }
 
-extern int pari_kernel_init(void);
-
 /* initialize PARI data. You can call pari_addfunctions() first to add other
  * routines to the default set */
 void
@@ -843,9 +835,6 @@ reorder(GEN x)
 /*                         ERROR RECOVERY                          */
 /*                                                                 */
 /*******************************************************************/
-extern int pop_val_if_newer(entree *ep, long loc);
-extern void kill_from_hashlist(entree *ep);
-
 /* if flag = 0: record address of next bloc allocated.
  * if flag = 1: (after an error) recover all memory allocated since last call
  */
@@ -1017,8 +1006,6 @@ err_seek(long n)
   }
   return NULL;
 }
-
-extern char *gp_function_name;
 
 /* untrapped error: kill all error handlers */
 void

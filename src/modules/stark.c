@@ -25,8 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define EXTRA_PREC (DEFAULTPREC-1)
 #define ADD_PREC   (DEFAULTPREC-2)*3
 
-extern GEN bnrGetSurj(GEN bnr1, GEN bnr2);
-
 /* ComputeCoeff */
 typedef struct {
   GEN L0, L1, L11, L2; /* VECSMALL of p */

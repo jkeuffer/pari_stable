@@ -16,7 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "parinf.h"
-extern GEN geni(void);
 
 static GEN
 prod0(GEN x, entree *ep, GEN a, GEN b, char *ch) {return produit(ep,a,b,ch,x);}

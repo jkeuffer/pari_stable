@@ -67,23 +67,6 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*                    GENERAL NUMBER FIELDS                        */
 /*                                                                 */
 /*******************************************************************/
-extern GEN u_idmat(long n);
-extern GEN R_from_QR(GEN x, long prec);
-extern GEN vecconst(GEN v, GEN x);
-extern GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
-extern GEN get_nfindex(GEN bas);
-extern GEN sqred1_from_QR(GEN x, long prec);
-extern double check_bach(double cbach, double B);
-extern GEN get_arch(GEN nf,GEN x,long prec);
-extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-extern GEN get_roots(GEN x,long r1,long prec);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *t);
-extern GEN norm_by_embed(long r1, GEN x);
-extern void minim_alloc(long n,double ***q,long **x,double **y,double **z,double **v);
-extern GEN arch_mul(GEN x, GEN y);
-extern void wr_rel(GEN col);
-extern void dbg_rel(long s, GEN col);
-
 #define SFB_MAX 3
 
 static const int RANDOM_BITS = 4;

@@ -1225,8 +1225,6 @@ Fp_sqrt(GEN a, GEN p)
 /*                       n-th ROOT MODULO p                        */
 /*                                                                 */
 /*******************************************************************/
-extern GEN Fp_shanks(GEN x,GEN g0,GEN p, GEN q);
-
 /* Assume l is prime. Return a non l-th power residue and set *zeta to a
  * primitive l-th root of 1.
  *

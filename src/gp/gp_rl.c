@@ -45,10 +45,8 @@ BEGINEXTERN
 #endif
 #ifndef HAS_RL_MESSAGE
 extern int rl_message (const char*, ...);
-extern int rl_clear_message();
-extern int rl_begin_undo_group(), rl_end_undo_group();
-extern int rl_read_key();
-extern int rl_stuff_char();
+extern int rl_clear_message(), rl_begin_undo_group(), rl_end_undo_group();
+extern int rl_read_key(), rl_stuff_char();
 extern char *filename_completion_function(char *text,int state);
 extern char *username_completion_function(char *text,int state);
 #endif
@@ -58,8 +56,6 @@ ENDEXTERN
 void print_fun_list(char **matches, int nbli);
 void aide(char *s, int flag);
 
-extern default_type gp_default_list[];
-extern char *keyword_list[];
 static int add_help_keywords;
 static entree *current_ep = NULL;
 
@@ -72,8 +68,7 @@ static int did_init_matched = 0;
 #  define RESTORE_PROMPT() rl_restore_prompt()
 #else
 #  ifdef HAS_UNDERSCORE_RL_SAVE_PROMPT
-extern void* _rl_restore_prompt(void);
-extern void* _rl_save_prompt(void);
+extern void* _rl_restore_prompt(void), _rl_save_prompt(void);
 #    define SAVE_PROMPT() _rl_save_prompt()
 #    define RESTORE_PROMPT() _rl_restore_prompt()
 #  else

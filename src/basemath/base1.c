@@ -24,12 +24,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int new_galois_format = 0;
 
-extern GEN split_realimag(GEN x, long r1, long r2);
-extern GEN R_from_QR(GEN x, long prec);
-extern GEN to_polmod(GEN x, GEN mod);
-extern GEN idealhermite_aux(GEN nf, GEN x);
-extern GEN galoisbig(GEN x, long prec);
-
 void
 checkrnf(GEN rnf)
 {

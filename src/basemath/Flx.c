@@ -15,8 +15,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
-extern GEN muliispec(GEN x, GEN y, long nx, long ny);
-extern GEN sqrispec(GEN x, long nx);
 
 /* Not so fast arithmetic with polynomials with small coefficients. */
 

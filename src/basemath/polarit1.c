@@ -22,10 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-extern GEN get_bas_den(GEN bas);
-extern GEN get_mul_table(GEN x,GEN bas,GEN invbas);
-extern GEN pol_to_monic(GEN pol, GEN *lead);
-
 /*******************************************************************/
 /*                                                                 */
 /*                           DIVISIBILITY                          */
@@ -498,7 +494,6 @@ rootmod0(GEN f, GEN p, long flag)
 /*                                                                 */
 /*******************************************************************/
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
-extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 
 /* Functions giving information on the factorisation. */
 
@@ -1885,9 +1880,6 @@ apprgen9(GEN f, GEN a)
 /*                      FACTORIZATION in Zp[X]                     */
 /*                                                                 */
 /*******************************************************************/
-extern GEN ZX_squff(GEN f, GEN *ex);
-extern GEN fact_from_DDF(GEN fa, GEN e, long n);
-
 int
 cmp_padic(GEN x, GEN y)
 {
@@ -1992,8 +1984,6 @@ factorpadic2(GEN f, GEN p, long prec)
 /***********************/
 /*   Using ROUND 4     */
 /***********************/
-extern GEN maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
-
 static int
 expo_is_squarefree(GEN e)
 {

@@ -25,6 +25,8 @@ typedef struct {
   GEN basden; /* [nums(bas), dens(bas)] */
 } nfbasic_t;
 
+GEN nfbasic_to_nf(nfbasic_t *T, GEN ro, long prec);
+
 typedef struct {
   GEN x;
   GEN ro;   /* roots of x */
@@ -37,6 +39,8 @@ typedef struct {
   GEN M;
   GEN G;
 } nffp_t;
+
+void remake_GM(GEN nf, nffp_t *F, long prec);
 
 #define id_PRINCIPAL 0
 #define id_PRIME     1
@@ -98,9 +102,9 @@ typedef struct FP_chk_fun {
   int skipfirst;
 } FP_chk_fun;
 
-extern GEN _initalg(GEN x, long flag, long prec);
-extern GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
-extern GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
+GEN _initalg(GEN x, long flag, long prec);
+GEN fincke_pohst(GEN a,GEN BOUND,long stockmax,long PREC, FP_chk_fun *CHECK);
+GEN polredfirstpol(GEN x, long flag, FP_chk_fun *CHECK);
 
 /* for ideallog / zlog */
 typedef struct {
@@ -111,4 +115,8 @@ typedef struct {
   long n;  /* total number of generators for all (O_K/P^e)^* and (O_K/f_oo) */
   GEN U; /* base change matrix from generators to bid.gen */
 } zlog_S;
-extern void init_zlog_bid(zlog_S *S, GEN bid);
+
+void init_zlog_bid(zlog_S *S, GEN bid);
+GEN  log_gen_arch(zlog_S *S, long index);
+GEN  log_gen_pr(zlog_S *S, long index, GEN nf, long e);
+GEN  zlog(GEN nf, GEN a, GEN sgn, zlog_S *S);

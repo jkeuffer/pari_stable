@@ -21,26 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "parinf.h"
 
-extern GEN TR_pol(GEN P, GEN c);
-extern GEN norm_by_embed(long r1, GEN x);
-extern GEN DDF2(GEN x, long hint);
-extern GEN eltabstorel(GEN x, GEN T, GEN pol, GEN k);
-extern GEN element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-extern GEN col_to_ff(GEN x, long v);
-extern GEN element_mulidid(GEN nf, long i, long j);
-extern GEN eltmulid_get_table(GEN nf, long i);
-extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
-extern GEN merge_factor_i(GEN f, GEN g);
-extern GEN nfgcd(GEN P, GEN Q, GEN nf, GEN den);
-extern GEN pidealprimeinv(GEN nf, GEN x);
-extern GEN pol_to_monic(GEN pol, GEN *lead);
-extern GEN sqr_by_tab(GEN tab, GEN x);
-extern GEN to_polmod(GEN x, GEN mod);
-extern GEN unnf_minus_x(GEN x);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
-extern GEN gauss_realimag(GEN x, GEN y);
-extern void check_ZKmodule(GEN x, char *s);
-
 /* FIXME: backward compatibility. Should use the proper nf_* equivalents */
 #define compat_PARTIAL 1
 #define compat_ROUND2  2
@@ -3209,7 +3189,6 @@ rnfsimplifybasis(GEN bnf, GEN x)
   return gerepilecopy(av, x);
 }
 
-extern GEN prodid(GEN nf, GEN I);
 GEN
 rnfdet2(GEN nf, GEN A, GEN I)
 {

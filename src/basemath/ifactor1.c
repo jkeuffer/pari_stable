@@ -20,12 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /********************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-extern GEN decomp_limit(GEN n, GEN limit);
-extern ulong ugcd(ulong x, ulong y);
-extern int BSW_isprime(GEN x);
-extern int BSW_isprime_small(GEN x);
-extern ulong ucarrecomplet(ulong A);
-extern GEN mpqs(GEN N);/* returns a factor, a vector of factors, or NULL */
 
 /*C++ on ia64 do not like (long)NULL*/
 #define LNULL ((long)(GEN)NULL)

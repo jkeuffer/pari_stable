@@ -54,9 +54,6 @@ static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
 /* Is the name proper??? */
 #define SIZEOF_VAR_POLS		(VAR_POLS_LONGS*sizeof(long))
 
-extern int term_width(void);
-extern GEN addumului(ulong a, ulong b, GEN Y);
-
 /* last time we began parsing an object of specified type */
 static struct
 {

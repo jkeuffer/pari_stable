@@ -779,7 +779,6 @@ bernfracspec(long k)
   }
 }
 #endif
-extern GEN bernfrac_using_zeta(long n);
 
 static GEN
 B2(void){ GEN z = cgetg(3, t_FRAC);

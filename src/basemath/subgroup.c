@@ -416,9 +416,6 @@ expand_sub(GEN x, long n)
   return p;
 }
 
-extern GEN matqpascal(long n, GEN q);
-static GEN subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen);
-
 static GEN
 init_powlist(long k, long p)
 {
@@ -433,6 +430,7 @@ init_powlist(long k, long p)
   return z;
 }
 
+static GEN subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen);
 static void
 subgroup_engine(subgp_iter *T)
 {

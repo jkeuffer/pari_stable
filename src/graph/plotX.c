@@ -32,8 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "rect.h"
 #include "../language/anal.h"
 
-extern void  free_graph(void);
-
 #ifdef HPPA
 #  ifndef __GNUC__
      typedef char *caddr_t;

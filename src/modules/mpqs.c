@@ -86,7 +86,6 @@ static long mpqs_prime_count = 0;
 /* END: global variables to disappear as soon as possible */
 
 /******************************/
-extern char *itostr(GEN x, int minus);
 char *i2str(GEN x) { return itostr(x, signe(x) < 0); }
 
 /* determines a unique name for a file based on a short nickname
@@ -1854,8 +1853,6 @@ mpqs_get_relation(long pos, FILE *FREL)
     err(talker, "FREL file truncated?!");
   return buf;
 }
-
-extern int miller(GEN n, long k);
 
 #define isprobableprime(n) (miller((n),17))
 static int

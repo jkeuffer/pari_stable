@@ -425,7 +425,6 @@ sieve_chunk(byteptr known_primes, ulong s, byteptr data, ulong count)
 }
 
 /* Do not inline sieve_chunk()!  It fits into registers in ix86 non-inlined */
-extern void (*sieve_chunk_p)(byteptr known_primes, ulong s, byteptr data, ulong count);
 void (*sieve_chunk_p)(byteptr known_primes, ulong s, byteptr data, ulong count)
     = sieve_chunk;
 
@@ -689,9 +688,6 @@ tridiv_bound(GEN n, long all)
   return 1UL<<19;             /* Rho will generally be faster above this */
 }
 
-/* function imported from ifactor1.c */
-extern long ifac_decomp_break(GEN n, long (*ifac_break)(GEN,GEN,GEN,GEN),
-                  GEN state, long hint);
 static GEN
 aux_end(GEN n, long nb)
 {

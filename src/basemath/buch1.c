@@ -53,8 +53,6 @@ static long *FB,*numFB, **hashtab;
 static GEN  powsubFB,vperm,subFB,Disc,sqrtD,isqrtD;
 
 GEN buchquad(GEN D, double c, double c2, long RELSUP0, long flag, long prec);
-extern GEN colreducemodHNF(GEN x, GEN y, GEN *Q);
-extern GEN quadhilbertreal(GEN D, GEN flag, long prec);
 
 GEN
 quadclassunit0(GEN x, long flag, GEN data, long prec)

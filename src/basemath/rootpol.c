@@ -22,8 +22,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-extern GEN TR_pol(GEN P, GEN c);
-extern GEN polrecip_i(GEN x);
 #define pariINFINITY 100000
 #define NEWTON_MAX 10
 

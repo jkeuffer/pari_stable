@@ -543,7 +543,6 @@ usqrtsafe(ulong a)
 /**                         RANDOM INTEGERS                        **/
 /**                                                                **/
 /********************************************************************/
-extern GEN int_normalize(GEN x, long known_zero_words);
 static long pari_randseed = 1;
 
 /* BSD rand gives this: seed = 1103515245*seed + 12345 */

@@ -34,8 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "gp.h"
 
 #ifdef READLINE
-  extern void init_readline(void);
-  extern void texmacs_completion(char *s, long pos);
   int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
@@ -49,18 +47,6 @@ BEGINEXTERN
 #  endif
 ENDEXTERN
 #endif
-
-extern void var_make_safe();
-extern void err_clean(void);
-extern void gp_output(GEN z, gp_data *G);
-extern void errcontext(char *msg, char *s, char *entry);
-extern void free_graph(void);
-extern void gp_expand_path(gp_path *p);
-extern int  gp_init_entrees(module *modlist, entree **hash, int force);
-extern void init_defaults(int force);
-extern void init_graph(void);
-extern void pari_sig_init(void (*f)(int));
-extern int  whatnow(char *s, int flag);
 
 static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
 
@@ -2600,8 +2586,6 @@ is_interactive(void)
   return (infile == stdin && !(f & TEXMACS));
 #endif
 }
-
-extern int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 
 /* return 0 if no line could be read (EOF) */
 static int

@@ -16,9 +16,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 
-extern GEN vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod);
-extern GEN supnorm(GEN L, long prec);
-
 /*************************************************************************/
 /**                                                                     **/
 /**              Routines for handling subgroups of (Z/nZ)^*            **/

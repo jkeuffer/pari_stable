@@ -44,9 +44,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*We need PARI invmod renamed to invmod_pari*/
 #define INVMOD_PARI
 
-void setmontgomerylimit(long n); 
-extern long Flx_INVMONTGOMERY_LIMIT;
-extern long Flx_POW_MONTGOMERY_LIMIT;
 int pari_kernel_init(void)
 {
   /*Montgomery mult is not supported*/

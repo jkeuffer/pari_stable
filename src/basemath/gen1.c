@@ -38,11 +38,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 else\
   gerepilecoeffssp((pari_sp)z, tetpil, z+1, 2); }
 
-extern GEN shiftpol_i(GEN x, long v);
-extern GEN quad_polmod_conj(GEN x, GEN y);
-extern GEN quad_polmod_norm(GEN x, GEN y);
-extern GEN ptolift(GEN x, GEN Y);
-
 static long
 kro_quad(GEN x, GEN y)
 {

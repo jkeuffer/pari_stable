@@ -21,12 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "parinf.h"
-extern GEN F2V_red_ip(GEN v);
-extern GEN check_and_build_cycgen(GEN bnf);
-extern GEN get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-extern GEN T2_from_embed_norm(GEN x, long r1);
-extern long int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx);
-extern GEN prodid(GEN nf, GEN I);
 
 typedef struct {
   GEN x;  /* tau ( Mod(x, nf.pol) ) */

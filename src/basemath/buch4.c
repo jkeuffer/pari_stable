@@ -23,10 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "paripriv.h"
 #include "parinf.h"
 
-extern GEN to_polmod(GEN x, GEN mod);
-extern GEN get_theta_abstorel(GEN T, GEN pol, GEN k);
-extern GEN _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
-
 static long
 psquare(GEN a,GEN p)
 {
@@ -480,17 +476,13 @@ nfhilbert0(GEN nf,GEN a,GEN b,GEN p)
   return nfhilbert(nf,a,b);
 }
 
-extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
-extern GEN factorback_i(GEN fa, GEN e, GEN nf, int red);
-extern GEN detcyc(GEN cyc);
 /* S a list of prime ideal in primedec format. Return res:
  * res[1] = generators of (S-units / units), as polynomials
  * res[2] = [perm, HB, den], for bnfissunit
  * res[3] = [] (was: log. embeddings of res[1])
  * res[4] = S-regulator ( = R * det(res[2]) * \prod log(Norm(S[i])))
  * res[5] = S class group
- * res[6] = S
- */
+ * res[6] = S */
 GEN
 bnfsunit(GEN bnf,GEN S,long prec)
 {
