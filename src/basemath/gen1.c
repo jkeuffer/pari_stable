@@ -1152,9 +1152,9 @@ gmul(GEN x, GEN y)
             for (i=1; i<lx; i++)
             {
               p1=gmul((GEN)x[i],(GEN)y[i]);
-              tetpil=avma; z=gadd(z,p1);
+              z=gadd(z,p1);
             }
-            return gerepile(l,tetpil,z);
+            return gerepileupto(l,z);
 
           case t_MAT:
             if (ly==1) return cgetg(1,t_VEC);
@@ -1167,9 +1167,9 @@ gmul(GEN x, GEN y)
               for (j=1; j<lx; j++)
               {
                 p2=gmul((GEN)x[j],gcoeff(y,j,i));
-                tetpil=avma; p1=gadd(p1,p2);
+                p1=gadd(p1,p2);
               }
-              z[i]=lpile(av,tetpil,p1);
+              z[i]=lpileupto(av,p1);
             }
             return z;
 
@@ -1219,9 +1219,9 @@ gmul(GEN x, GEN y)
               for (j=1; j<ly; j++)
               {
                 p2=gmul(gcoeff(x,i,j),(GEN)y[j]);
-                tetpil=avma; p1=gadd(p1,p2);
+                p1=gadd(p1,p2);
               }
-              z[i]=lpile(l,tetpil,p1);
+              z[i]=lpileupto(l,p1);
             }
             return z;
 
@@ -1244,9 +1244,9 @@ gmul(GEN x, GEN y)
                 for (k=1; k<lx; k++)
                 {
                   p2=gmul(gcoeff(x,i,k),gcoeff(y,k,j));
-                  tetpil=avma; p1=gadd(p1,p2);
+                  p1=gadd(p1,p2);
                 }
-                coeff(z,i,j)=lpile(av,tetpil,p1);
+                coeff(z,i,j)=lpileupto(av,p1);
               }
             }
             return z;
