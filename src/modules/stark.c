@@ -284,9 +284,7 @@ GetDeg(GEN dataCR)
 /********************************************************************/
 /*                    1rst part: find the field K                   */
 /********************************************************************/
-
 static GEN AllStark(GEN data,  GEN nf,  long flag,  long prec);
-static GEN QuadGetST(GEN dataCR, GEN vChar, long prec);
 
 /* Let A be a finite abelian group given by its relation and let C
    define a subgroup of A, compute the order of A / C, its structure and
@@ -1836,14 +1834,14 @@ init_cScT(ST_t *T, GEN CHI, long N, long prec)
   clear_cScT(T, N);
 }
 
-static GEN
-GetST(GEN dataCR, GEN vChar, long prec)
+static void
+GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
   const long cl = lg(dataCR) - 1;
   pari_sp av, av1, av2;
   long ncond, n, j, k, jc, n0, prec2, i0, r1, r2;
   GEN bnr, nf, racpi, *powracpi;
-  GEN rep, N0, C, T, S, an, degs, limx;
+  GEN N0, C, T, S, an, degs, limx;
   LISTray LIST;
   ST_t cScT;
 
@@ -1852,9 +1850,8 @@ GetST(GEN dataCR, GEN vChar, long prec)
 
   if (DEBUGLEVEL) (void)timer2();
   /* allocate memory for answer */
-  rep = cgetg(3, t_VEC);
-  S = cgetg(cl+1, t_VEC); rep[1] = (long)S;
-  T = cgetg(cl+1, t_VEC); rep[2] = (long)T;
+  *pS = S = cgetg(cl+1, t_VEC);
+  *pT = T = cgetg(cl+1, t_VEC);
   for (j = 1; j <= cl; j++)
   {
     S[j] = (long)cgetc(prec);
@@ -1935,7 +1932,7 @@ GetST(GEN dataCR, GEN vChar, long prec)
   }
   if (DEBUGLEVEL) msgtimer("S&T");
   clear_cScT(&cScT, n0);
-  avma = av; return rep;
+  avma = av;
 }
 
 /* Given W(chi) [possibly NULL], S(chi) and T(chi), return L(1, chi) if fl = 1,
@@ -2039,17 +2036,10 @@ static long
 TestOne(GEN plg, RC_data *d)
 {
   long j, v = d->v;
-  GEN p1;
-
-  p1 = gsub(d->beta, (GEN)plg[v]);
-  if (expo(p1) >= d->G) return 0;
-
-  for (j = 1; j <= d->N; j++)
-    if (j != v)
-    {
-      p1 = gabs((GEN)plg[j], DEFAULTPREC);
-      if (gcmp(p1, d->B) > 0) return 0;
-    }
+  GEN z = gsub(d->beta, (GEN)plg[v]);
+  if (expo(z) >= d->G) return 0;
+  for (j = 1; j < lg(plg); j++)
+    if (j != v && mpcmp(d->B, mpabs((GEN)plg[j])) < 0) return 0;
   return 1;
 }
 
@@ -2064,17 +2054,11 @@ static GEN
 chk_reccoeff(void *data, GEN x)
 {
   RC_data *d = (RC_data*)data;
-  long N = d->N, j;
-  GEN p1 = gmul(d->U, x), sol, plg;
+  GEN v = gmul(d->U, x), z = (GEN)v[1];
 
-  if (!gcmp1((GEN)p1[1])) return NULL;
-
-  sol = cgetg(N + 1, t_COL);
-  for (j = 1; j <= N; j++)
-    sol[j] = lmulii((GEN)p1[1], (GEN)p1[j + 1]);
-  plg = gmul(d->M, sol);
-
-  if (TestOne(plg, d)) return sol;
+  if (!gcmp1(z)) return NULL;
+  *++v = evaltyp(t_COL) | evallg( lg(d->M) );
+  if (TestOne(gmul(d->M, v), d)) return v;
   return NULL;
 }
 
@@ -2160,39 +2144,24 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 static GEN
 RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {
-  long i, bacmin, bacmax;
   pari_sp av = avma, av2;
-  GEN vec, velt, p1, cand, M, plg, pol, cand2;
-  GEN beta = d->beta;
+  GEN vec, M = gmael(nf, 5, 1), beta = d->beta;
+  long i, bacmin, bacmax, lM = lg(M);
 
   d->G = min(-20, -bit_accuracy(prec) >> 4);
-  M    = gmael(nf, 5, 1);
-  pol  = (GEN)nf[1];
-  vec  = gtrans((GEN)gtrans(M)[d->v]);
-  velt = (GEN)nf[7];
 
-  p1 = cgetg(2, t_VEC);
-  p1[1] = lneg(beta);
-  vec = concat(p1, vec);
-
-  p1[1] = zero;
-  velt = concat(p1, velt);
-
+  vec  = concatsp(_vec(gneg(beta)), row(M, d->v));
   bacmin = (long)bit_accuracy_mul(prec, .225);
   bacmax = (long)bit_accuracy_mul(prec, .315);
 
   av2 = avma;
   for (i = bacmax; i >= bacmin; i-=16, avma = av2)
   {
-    p1 = lindep2(vec, i);
-    if (!signe((GEN)p1[1])) continue;
-
-    p1    = ground(gdiv(p1, (GEN)p1[1]));
-    cand  = gmodulcp(gmul(velt, p1), pol);
-    cand2 = algtobasis(nf, cand);
-    plg   = gmul(M, cand2);
-
-    if (TestOne(plg, d)) return gerepilecopy(av, cand);
+    GEN v = lindep2(vec, i), z = (GEN)v[1];
+    if (!signe(z)) continue;
+    *++v = evaltyp(t_COL) | evallg(lM);
+    v = ground(gdiv(v, z));
+    if (TestOne(gmul(M, v), d)) return gerepileupto(av, basistoalg(nf, v));
   }
   /* failure */
   return RecCoeff3(nf,d,prec);
@@ -2371,19 +2340,18 @@ computean(GEN dtcr, LISTray *R, long n, long deg)
 }
 
 /* compute S and T for the quadratic case */
-static GEN
-QuadGetST(GEN dataCR, GEN vChar, long prec)
+static void
+QuadGetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
 {
   const long cl  = lg(dataCR) - 1;
   pari_sp av, av1, av2;
   long ncond, n, j, k, n0;
-  GEN rep, N0, C, T, S, cf, cfh, an, degs;
+  GEN N0, C, T, S, cf, cfh, an, degs;
   LISTray LIST;
 
   /* allocate memory for answer */
-  rep = cgetg(3, t_VEC);
-  S = cgetg(cl+1, t_VEC); rep[1] = (long)S;
-  T = cgetg(cl+1, t_VEC); rep[2] = (long)T;
+  *pS = S = cgetg(cl+1, t_VEC);
+  *pT = T = cgetg(cl+1, t_VEC);
   for (j = 1; j <= cl; j++)
   {
     S[j] = (long)cgetc(prec);
@@ -2444,10 +2412,7 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
         {
           p1 = gadd(p1, gmul(an, (GEN)vcn[n]));
 	  p2 = gadd(p2, gmul(an, (GEN)veint1[n]));
-          if (++c == 256)
-          { GEN *gptr[2]; gptr[0]=&p1; gptr[1]=&p2;
-            gerepilemany(av2,gptr,2); c = 0;
-          }
+          if (++c == 256) { gerepileall(av2,2, &p1,&p2); c = 0; }
         }
       gaffect(gmul(cfh, gmul(p1,c1)), (GEN)S[t]);
       gaffect(gmul(cf,  gconj(p2)),   (GEN)T[t]);
@@ -2457,7 +2422,7 @@ QuadGetST(GEN dataCR, GEN vChar, long prec)
     avma = av1;
   }
   if (DEBUGLEVEL) msgtimer("S & T");
-  avma = av; return rep;
+  avma = av;
 }
 
 typedef struct {
@@ -2570,8 +2535,8 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   long cl, i, j, cpt = 0, N, h, v, n, bnd = 300, sq = 1, r1, r2;
   pari_sp av, av2;
   int **matan;
-  GEN p0, p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
-  GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, *gptr[2], an;
+  GEN p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
+  GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, an;
   LISTray LIST;
 
   nf_get_sign(nf, &r1,&r2);
@@ -2595,11 +2560,9 @@ LABDOUB:
   {
     /* compute S,T differently if nf is real quadratic */
     if (degpol(nf[1]) == 2) 
-      p1 = QuadGetST(dataCR, vChar, newprec);
+      QuadGetST(&S, &T, dataCR, vChar, newprec);
     else 
-      p1 = GetST(dataCR, vChar, newprec);
-    S = (GEN)p1[1];
-    T = (GEN)p1[2];
+      GetST(&S, &T, dataCR, vChar, newprec);
     Lp = cgetg(cl + 1, t_VEC);
     for (i = 1; i <= cl; i++)
       Lp[i] = GetValue((GEN)dataCR[i], (GEN)W[i], (GEN)S[i], (GEN)T[i],
@@ -2618,17 +2581,13 @@ LABDOUB:
     if (DEBUGLEVEL) fprintferr("N0 in QuickPol: %ld \n", n);
     InitPrimes(gmael(dataCR,1,4), n, &LIST);
 
-    p0 = cgetg(3, t_COMPLEX);
-    p0[1] = (long)realzero(newprec);
-    p0[2] = (long)realzero(newprec);
-
     L1 = cgetg(cl+1, t_VEC);
     /* we use the formulae L(1) = sum (an / n) */
     for (i = 1; i <= cl; i++)
     {
       matan = ComputeCoeff((GEN)dataCR[i], &LIST, n, degs[i]);
       av2 = avma;
-      p1 = p0; p2 = gmael3(dataCR, i, 5, 2);
+      p1 = realzero(newprec); p2 = gmael3(dataCR, i, 5, 2);
       for (j = 1; j <= n; j++)
 	if ( (an = EvalCoeff(p2, matan[j], degs[i])) )
           p1 = gadd(p1, gdivgs(an, j));
@@ -2714,9 +2673,7 @@ LABDOUB:
     nf = nfnewprec(nf, newprec);
     dataCR = CharNewPrec(dataCR, nf, newprec);
 
-    gptr[0] = &dataCR;
-    gptr[1] = &nf; gerepilemany(av, gptr, 2);
-
+    gerepileall(av, 2, &nf, &dataCR);
     goto LABDOUB;
   }
 
@@ -2975,9 +2932,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   dataCR = InitChar(bnr, listCR, prec);
 
   vChar= sortChars(dataCR,0);
-  p1 = GetST(dataCR, vChar, prec);
-  S = (GEN)p1[1];
-  T = (GEN)p1[2];
+  GetST(&S, &T, dataCR, vChar, prec);
 
   if (flag & 1)
     L1 = cgetg(cl, t_VEC);
