@@ -782,9 +782,8 @@ L2:
   e3 = UNDEF;
   if (low_stack(lim, stack_lim(av,2)))
   {
-    GEN *gptr[2]; gptr[0]=&e2; gptr[1]=&e1;
     if(DEBUGMEM>1) err(warnmem,"expr");
-    gerepilemany(av,gptr,(e1==UNDEF)?1: 2);
+    gerepileall(av, (e1==UNDEF)?1: 2, &e2, &e1);
   }
 
   switch(*analyseur)
@@ -1388,8 +1387,8 @@ double_op()
 static F2GEN
 get_op_fun()
 {
-  char c = *analyseur, c1 = analyseur[1];
-  if (c && c1)
+  char c = *analyseur, c1;
+  if (c && (c1 = analyseur[1]))
   {
     if (c1 == '=')
     {
@@ -2186,7 +2185,7 @@ identifier(void)
       if (*analyseur != ',' && *analyseur != ')') skipexpr();
       while (*analyseur == ',') { analyseur++; skipexpr(); }
       match(')');
-      if (*analyseur != '='  ||  analyseur[1] == '=')
+      if (*analyseur != '=' || analyseur[1] == '=')
         err(nparamer1,mark.identifier,mark.start);
       analyseur = ch1-1; /* points to '(' */
 
@@ -2991,7 +2990,7 @@ skipidentifier(void)
       if (*analyseur == '\'') analyseur++;
       if (*analyseur != '(')
       {
-	if ( *analyseur != '='  ||  analyseur[1] == '=' ) return;
+	if ( *analyseur != '=' || analyseur[1] == '=' ) return;
 	match('('); /* error */
       }
       analyseur++;  /* skip '(' */
