@@ -65,6 +65,7 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    22- for transcendental function f and polynomial p, f(p) only gave
        seriesprecision significant terms when val(p) = 0
    23- Ser(a/b) --> 1 + O(x^16) (!!)
+   24- (x^2)^(1/2) --> error
 
   Changed:
     1- "not enough precomputed primes": output largest needed p if available
