@@ -176,7 +176,7 @@ famat_reduce(GEN fa)
   GEN E, F, G, L, g, e;
   long i, k, l;
 
-  if (lg(fa) == 1) return trivfact();
+  if (lg(fa) == 1) return fa;
   g = (GEN)fa[1]; l = lg(g);
   e = (GEN)fa[2];
   L = gen_sort(g, cmp_IND|cmp_C, &elt_cmp);
@@ -317,16 +317,16 @@ coprime_part(GEN x, GEN f)
   return x;
 }
 
-/* x t_INT, f ideal. Write x = x1 x2, x2 maximal s.t. (x2,f) = 1, return x2 */
+/* x t_INT, f ideal. Write x = x1 x2, sqf(x1) | f, (x2,f) = 1. Return x2 */
 static GEN
 nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
 {
-  long v, j, lp = lg(listpr);
-  GEN x2, ex, p, pr;
+  long v, j, lp = lg(listpr), N = degpol(nf[1]);
+  GEN x1, x2, ex, p, pr;
 
 #if 0 /*1) via many gcds. Expensive ! */
   f = hnfmodid(f, x); /* first gcd is less expensive since x in Z */
-  x = gscalmat(x, degpol(nf[1]));
+  x = gscalmat(x, N);
   for (;;)
   {
     if (gcmp1(gcoeff(f,1,1))) break;
@@ -335,25 +335,35 @@ nf_coprime_part(GEN nf, GEN x, GEN f, GEN *listpr)
   }
   x2 = x;
 #else /*2) from prime decomposition */
-  x2 = NULL;
+  x1 = NULL;
   for (j=1; j<lp; j++)
   {
     pr = listpr[j]; p = (GEN)pr[1];
     v = ggval(x, p); if (!v) continue;
 
     ex = mulsi(v, (GEN)pr[3]); /* = v_pr(x) > 0 */
-    x2 = x2? idealmulpowprime(nf, x2, pr, ex)
+    x1 = x1? idealmulpowprime(nf, x1, pr, ex)
            : idealpow(nf, pr, ex);
   }
+  x = gscalmat(x, N);
+  x2 = x1? idealdivexact(nf, x, x1): x;
 #endif
   return x2;
 }
 
-/* L0 in K, (L0,f) = 1. Return L integral, L = L0 mod f */
+/* L0 in K^*. 
+ * If ptd1 == NULL, assume (L0,f) = 1
+ *   return L integral, L0 = L mod f 
+ *
+ * Otherwise, assume v_pr(L0) <= 0 for all pr | f and set *ptd1 = d1
+ *   return L integral, L0 = L/d1 mod f, and such that 
+ *   if (L*I,f) = 1 for some integral I, then d1 | L*I  */
 static GEN
-make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
+make_integral(GEN nf, GEN L0, GEN f, GEN *listpr, GEN *ptd1)
 {
   GEN fZ, t, L, D2, d1, d2, d = denom(L0);
+
+  if (ptd1) *ptd1 = NULL;
 
   if (is_pm1(d)) return L0;
   
@@ -365,13 +375,16 @@ make_integral(GEN nf, GEN L0, GEN f, GEN *listpr)
   if (egalii(d, d2)) return L;
 
   d1 = diviiexact(d, d2);
-  /* L0 = (L / d1) mod f. d1, hence L, not coprime to f
-   * write (d1) = D1 D2, D2 minimal, (D2,f) = 1.
-   * If indeed (L/d1, f) = 1, then L in D1 */
+  /* L0 = (L / d1) mod f. d1 not coprime to f
+   * write (d1) = D1 D2, D2 minimal, (D2,f) = 1. */
   D2 = nf_coprime_part(nf, d1, f, listpr);
   t = idealaddtoone_i(nf, D2, f); /* in D2, 1 mod f */
-  L = element_muli(nf,t,L); /* in D1 D2 = (d1) */
-  return Q_div_to_int(L, d1); /* exact division */
+  L = element_muli(nf,t,L);
+
+  /* if (L0, f) = 1, then L in D1 ==> in D1 D2 = (d1) */
+  if (!ptd1) return Q_div_to_int(L, d1); /* exact division */
+
+  *ptd1 = d1; return L;
 }
 
 /* v_pr(L0 * cx). tau = pr[5] or (more efficient) mult. table for pr[5] */
@@ -431,11 +444,16 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     A = (GEN)G[2];
       L = (GEN)A[1];
       e = (GEN)A[2];
-    /* no reduction took place in compute_fact --> everybody still coprime
+    /* if no reduction took place in compute_fact, everybody is still coprime
      * to f + no denominators */
     if (!I)
     {
       basecl[i] = (long)famat_to_nf_modidele(nf, L, e, bid);
+      continue;
+    }
+    if (lg(A) == 1)
+    {
+      basecl[i] = (long)I;
       continue;
     }
 
@@ -474,7 +492,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
           LL = element_mul(nf, LL, t);
         }
       }
-      LL = make_integral(nf, LL, f, listpr);
+      LL = make_integral(nf, LL, f, listpr, NULL);
       newL[k] = (long)FpV_red(LL, fZ);
     }
 
@@ -482,11 +500,19 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
     G = famat_to_nf_modideal_coprime(nf, newL, gmod(e,EX), f);
     d = NULL;
     if (mulI)
-    { /* reduce mulI mod (f * numer(mulI)) */
+    {
       GEN mod;
-      d = denom(mulI); if (is_pm1(d)) d = NULL;
-      if (d) mulI = Q_remove_denom(mulI,d);
-      mod = idealmul(nf,f, idealadd(nf,f,mulI));
+
+      /* mulI integral, d | mulI * I,  sqf(dO_K) | f */
+      mulI = make_integral(nf,mulI,f,listpr, &d);
+
+      /* reduce mulI mod (f * (mulI,d)) */
+      if (!d) mod = f;
+      else
+      {
+        mod = hnfmodid(eltmul_get_table(nf,mulI), d); /* = (mulI,d) */
+        mod = idealmul(nf,f, mod);
+      }
       mulI = colreducemodHNF(mulI, mod, NULL);
       G = element_muli(nf, G, mulI);
 
