@@ -150,6 +150,16 @@ vecsmall_coincidence(GEN u, GEN v)
   return s;
 }
 
+long
+vecsmall_pack(GEN V, long base, long mod)
+{
+  long i,s=0;
+  for(i=1;i<lg(V);i++)
+    s=(base*s+V[i])%mod;
+  return s;
+}
+
+
 /*************************************************************************/
 /**                                                                     **/
 /**               Routine for handling bit vector                       **/
@@ -340,6 +350,24 @@ perm_cycles(GEN v)
   u[1] = (long) v;
   return gerepileupto(ltop, vecperm_orbits(u, lg(v)-1));
 }
+
+/*Output the order of p*/
+
+long
+perm_order(GEN v)
+{
+  pari_sp ltop = avma;
+  GEN u = cgetg(2, t_VEC);
+  GEN c;
+  long i,d;
+  u[1] = (long) v;
+  c=vecperm_orbits(u, lg(v)-1);
+  for(i=1, d=1; i<lg(c); i++)
+    d=clcm(d,lg(c[i])-1);
+  avma=ltop;
+  return d;
+}
+
 /* Compute the power of a permutation given by product of cycles
  * Ouput a perm, not a cyc.
  * */
@@ -358,33 +386,6 @@ cyc_powtoperm(GEN cyc, long exp)
       p[mael(cyc,j,k)] = mael(cyc,j,1 + (k + exp - 1) % n);
   }
   return p;
-}
-
-/*Output the order of p*/
-
-long
-perm_order(GEN p)
-{
-  long l=lg(p)-1;
-  GEN id=perm_identity(l);
-  GEN q=p;
-  long o=1,inc,linc=-1;
-  long k=1;
-  linc=vecsmall_coincidence(p,id);
-  while(linc<l)
-  {
-    q=perm_mul(p,q);  
-    k++; 
-    inc=vecsmall_coincidence(q,id);
-    if(inc>linc)
-    {
-      p=q;
-      o*=k;
-      k=1;
-      linc=inc;
-    }
-  }
-  return o;
 }
 
 /*
@@ -418,6 +419,7 @@ perm_to_GAP(GEN p)
     long lz = lg(z)-1;
     nb += 1+lz*(sz+2);
   }
+  nb++;
   /*Real run*/
   nb = (nb+2*BYTES_IN_LONG-1) >> TWOPOTBYTES_IN_LONG;
   gap = cgetg(nb,t_STR);
@@ -440,6 +442,15 @@ perm_to_GAP(GEN p)
   }
   s[c++] = 0;
   return gerepileupto(ltop,gap);
+}
+
+int
+perm_commute(GEN p, GEN q)
+{
+  pari_sp ltop=avma;
+  int test=gegal(perm_mul(p,q),perm_mul(q,p));
+  avma=ltop;
+  return test;
 }
 
 /*************************************************************************/
@@ -612,10 +623,11 @@ GEN group_quotient(GEN G, GEN H)
   long n=group_domain(G);
   long o=group_order(H);
   GEN elt = vecvecsmall_sort(group_elts(G,n));
-  GEN used = bitvec_alloc(lg(elt));
-  long l = (lg(elt)-1)/o;
+  long le=lg(elt)-1;
+  GEN used = bitvec_alloc(le+1);
+  long l = le/o;
   p2 = cgetg(l+1, t_VEC);
-  p3 = cgetg(lg(elt), t_VEC);
+  p3 = cgetg(le+1, t_VEC);
   for (i = 1, k = 1; i <= l; ++i)
   {
     GEN V;
@@ -630,7 +642,6 @@ GEN group_quotient(GEN G, GEN H)
     for (j = 1; j <= o; j++)
       p3[k++] = (long) vecsmall_append((GEN) V[j],i);
   }
-  setlg(p3,k);
   p1 = cgetg(3,t_VEC);
   p1[1] = lcopy(p2);
   p1[2]= (long) vecvecsmall_sort(p3);
@@ -713,6 +724,9 @@ GEN quotient_group(GEN C, GEN G)
   Q=cgetg(3,t_VEC);
   Q[1]=(long)Qgen;
   Q[2]=(long)Qord;
+  if (group_order(Q)!=n)
+    err(talker,"galoissubgroup: not a WSS group");
+
   return gerepilecopy(ltop,Q);
 }
 
@@ -776,6 +790,7 @@ static GEN liftsubgroup(GEN C, GEN H, GEN S)
   }
   return gerepilecopy(ltop,V);
 }
+
 /* 1:A4 2:S4 0: other */
 long
 group_isA4S4(GEN G)
@@ -850,7 +865,7 @@ GEN group_subgroups(GEN G)
   /* Loop over all subgroups of G/H */
   for (j = 1; j < lM; ++j)
     sg2[j] = (long) liftsubgroup(C, H, (GEN) M[j]);
-  p1 = concat(sg1, concat(sg2, NULL));
+  p1 = concat(sg1, concat(sg2,NULL));
   if (sg3)
     p1 = concat(p1, sg3);
   return gerepileupto(ltop,p1);
@@ -860,16 +875,11 @@ GEN group_subgroups(GEN G)
 long 
 group_isabelian(GEN G)
 {
-  pari_sp ltop=avma;
   long i,j;
   for(i=2;i<lg(G[1]);i++)
     for(j=1;j<i;j++)
-    {
-      long test=gegal(perm_mul(gmael(G,1,i),gmael(G,1,j)),
-	  perm_mul(gmael(G,1,j),gmael(G,1,i)));
-      avma=ltop;
-      if (!test) return 0;
-    }
+      if (!perm_commute(gmael(G,1,i),gmael(G,1,j)))
+        return 0;
   return 1;  
 }
 
@@ -912,7 +922,8 @@ GEN group_abelianHNF(GEN G, GEN S)
 
 /*If G is abelian, return its abstract SNF matrix*/
 
-GEN group_abelianSNF(GEN G, GEN L)
+GEN
+group_abelianSNF(GEN G, GEN L)
 {
   pari_sp ltop=avma;
   GEN S,H=group_abelianHNF(G,L);
@@ -952,8 +963,6 @@ abelian_group(GEN v)
   }
   return G;
 }
-
-
  
 GEN 
 group_export_GAP(GEN G)
@@ -1010,4 +1019,3 @@ group_export(GEN G, long format)
   err(flagerr,"galoisexport");
   return NULL; /*-Wall*/
 }
-
