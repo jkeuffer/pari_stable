@@ -228,6 +228,7 @@ BA 10- add POSIX-style long options --fast, --quiet, --primelimit and
    11- new internal library routine itos_or_0
    12- new member function .index
    13- rdivii, rdivis, rdivsi, rdivss to replace diviiz & co.
+   14- new routine mpround
 
   Removed
     1- obsolete macro leadingcoeff [kept for backward compatibility but

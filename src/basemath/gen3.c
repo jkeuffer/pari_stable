@@ -1576,31 +1576,32 @@ round0(GEN x, GEN *pte)
   return ground(x);
 }
 
+/* assume x a t_REAL */
+GEN
+mpround(GEN x)
+{
+  long ex, s = signe(x);
+  pari_sp av;
+  GEN t;
+  if (!s || (ex=expo(x)) < -1) return gzero;
+  if (ex < 0) return s>0? gun: negi(gun);
+  av = avma;
+  t = real2n(-1, 3 + (ex>>TWOPOTBITS_IN_LONG)); /* = 0.5 */
+  return gerepileuptoint(av, mpent( addrr(x,t) ));
+}
+
 GEN
 ground(GEN x)
 {
-  GEN y,p1;
+  GEN y;
   long i, lx, tx=typ(x);
   pari_sp av;
 
   switch(tx)
   {
-    case t_INT: case t_INTMOD: case t_QUAD:
-      return gcopy(x);
-
-    case t_REAL:
-    {
-      long ex, s = signe(x);
-      if (s==0 || (ex=expo(x)) < -1) return gzero;
-      if (ex < 0) return s>0? gun: negi(gun);
-      av = avma;
-      p1 = real2n(-1, 3 + (ex>>TWOPOTBITS_IN_LONG)); /* = 0.5 */
-      p1 = addrr(x,p1);
-      return gerepileuptoint(av, mpent(p1));
-    }
-    case t_FRAC:
-      return diviiround((GEN)x[1], (GEN)x[2]);
-
+    case t_INT: case t_INTMOD: case t_QUAD: return gcopy(x);
+    case t_REAL: return mpround(x);
+    case t_FRAC: return diviiround((GEN)x[1], (GEN)x[2]);
     case t_POLMOD: y=cgetg(3,t_POLMOD);
       copyifstack(x[1],y[1]);
       y[2]=lround((GEN)x[2]); return y;
@@ -1608,14 +1609,8 @@ ground(GEN x)
     case t_COMPLEX:
       av = avma; y = cgetg(3, t_COMPLEX);
       y[2] = lround((GEN)x[2]);
-      if (!signe(y[2]))
-      {
-        avma = av;
-        y = ground((GEN)x[1]);
-      }
-      else
-        y[1] = lround((GEN)x[1]);
-      return y;
+      if (!signe(y[2])) { avma = av; return ground((GEN)x[1]); }
+      y[1] = lround((GEN)x[1]); return y;
 
     case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);

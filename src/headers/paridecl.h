@@ -1114,6 +1114,7 @@ int     ismonome(GEN x);
 GEN     lift(GEN x);
 GEN     lift0(GEN x,long v);
 GEN     lift_intern0(GEN x,long v);
+GEN     mpround(GEN x);
 GEN     mulmat_real(GEN x, GEN y);
 GEN     numer(GEN x);
 long    padicprec(GEN x, GEN p);

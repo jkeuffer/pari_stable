@@ -766,8 +766,11 @@ minus the floor of~\kbd{x}.
 
 \fun{GEN}{gceil}{GEN x} creates the ceiling of~\kbd{x}.
 
-\fun{GEN}{ground}{GEN x} rounds the components of \kbd{x} to the nearest
-integers. Exact half-integers are rounded towards~$+\infty$.
+\fun{GEN}{ground}{GEN x} rounds towards~$+\infty$ the components of \kbd{x}
+to the nearest integers.
+
+\fun{GEN}{mpround}{GEN x} rounds towards~$+\infty$ the \typ{REAL} \kbd{x} to
+the nearest integer.
 
 \fun{GEN}{grndtoi}{GEN x, long *e} same as \key{round}, but in addition puts
 minus the number of significant binary bits left after rounding into~\kbd{*e}.
