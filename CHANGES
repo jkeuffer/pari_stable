@@ -39,6 +39,8 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.7 (released ??/07/2003):
   Fixed
     1- bench input files: should all start by a 'gettime()' instruction
+    2- bnfisnorm(bnfinit(x^2-11),1) --> [Mod(1, #), 1]   [ return a result
+       involving MAXVARN on trivial input ]
 
   Changed
     1- bnfinit: [small_norm phase] speed up norm computations.

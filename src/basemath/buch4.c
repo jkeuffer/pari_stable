@@ -805,7 +805,7 @@ rnfisnorm(GEN T, GEN x, long flag)
   drel = degpol(relpol);
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
   {
-    res[1] = (long)x;
+    res[1] = (long)simplify((GEN)x[2]);
     res[2] = un; return res;
   }
 
