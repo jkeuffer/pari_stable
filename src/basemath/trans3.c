@@ -2276,7 +2276,7 @@ thetanullk(GEN q, long k, long prec)
   GEN p1, ps, qn, y, ps2;
 
   l = precision(q);
-  if (!l) prec = l;
+  if (l) prec = l;
   q = gtofp(q, prec); if (gexpo(q) >= 0) err(talker,"q >= 1 in theta");
 
   if (!(k&1)) { avma = av; return gen_0; }
