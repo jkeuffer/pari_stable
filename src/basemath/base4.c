@@ -267,6 +267,7 @@ famat_get_arch_real(GEN nf,GEN x,GEN *emb,long prec)
   for (i=1; i<l; i++)
   {
     a = get_arch_real(nf, (GEN)g[i], &t, prec);
+    if (!a) return NULL;
     a = gmul((GEN)e[i], a);
     t = vecpow(t, (GEN)e[i]);
     if (i == 1) { A = a;          T = t; }
@@ -297,6 +298,12 @@ scalar_get_arch_real(long R1, long RU, GEN u, GEN *emb, long prec)
   *emb = x; return v;
 }
 
+static int
+low_prec(GEN x)
+{
+  return gcmp0(x) || (typ(x) == t_REAL && lg(x) == 3);
+}
+
 /* as above but return NULL if precision problem, and set *emb to the
  * embeddings of x */
 GEN
@@ -321,12 +328,12 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
   x = gmul(gmael(nf,5,1), x);
   for (i=1; i<=R1; i++)
   {
-    t = gabs((GEN)x[i],prec); if (gcmp0(t)) return NULL;
+    t = gabs((GEN)x[i],prec); if (low_prec(t)) return NULL;
     v[i] = llog(t,prec);
   }
   for (   ; i<=RU; i++)
   {
-    t = gnorm((GEN)x[i]); if (gcmp0(t)) return NULL;
+    t = gnorm((GEN)x[i]); if (low_prec(t)) return NULL;
     v[i] = llog(t,prec);
   }
   *emb = x; return v;
