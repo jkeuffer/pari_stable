@@ -87,6 +87,7 @@ IZ 45- ix86 inline assembler compilation problem [divll]
 XR 46- forgotten case in Round4 [ nfdisc(x^12-10*x^11-57*x^10+740*x^9+353*x^8-16130*x^7+17749*x^6+100120*x^5-108466*x^4-292200*x^3+128380*x^2+380800*x+133112)
 --> impossible inverse: Mod(2, ...) ]
    47- sin(1e-100) ---> 9.999999999999999999735998397 E-101 [ precision loss ]
+   48- idealpow(nf,x, n < 0, 1) did not reduce the result
 
   Changed
 BA  1- improved Fp_isom
