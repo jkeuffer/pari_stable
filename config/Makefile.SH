@@ -116,6 +116,7 @@ case "$static" in
   y) dft=sta; libdft= ;;
 esac
 
+
 cat > $file << EOT
 # Makefile for Pari/GP -- $pretty
 #

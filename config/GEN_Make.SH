@@ -17,7 +17,8 @@ case "$static" in
   y) dft=sta ;;
 esac
 
-DLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]* \\$(LIBPARI.*)//'`
+# remove soname imformation
+MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/-[hsoname]* \\$(LIBPARI.*)//'`
 
 cat > $file << EOT
 # Generic Makefile for PARI programs -- $pretty
@@ -59,7 +60,7 @@ CPPFLAGS   = -I. -I$includedir
 LD         = $LD
 LDFLAGS    = $LDFLAGS
 DLLD       = $DLLD
-DLLDFLAGS  = $DLLDFLAGS
+DLLDFLAGS  = $MYDLLDFLAGS
 EXTRADLLDFLAGS  = $EXTRADLLDFLAGS
 EXTRALIBS  =
 
