@@ -587,7 +587,7 @@ idealfactor(GEN nf, GEN x)
     ff=factor(denx); ff1=(GEN)ff[1]; ff2=(GEN)ff[2];
     lff=lg(ff1); x=gmul(denx,x);
   }
-  for (d=gun,i=1; i<=N; i++) d=mulii(d,gcoeff(x,i,i));
+  d = dethnf_i(x);
   f=factor(absi(d)); f1=(GEN)f[1]; f2=(GEN)f[2]; lf=lg(f1);
   y1=cgetg((lf+lff-2)*N+1,t_COL); y2=new_chunk((lf+lff-2)*N+1);
   k=0;
