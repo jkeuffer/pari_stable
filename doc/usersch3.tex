@@ -1729,7 +1729,8 @@ $\teb{simplefactmod}(x,p)$ (= $\teb{factormod}(x,p,1)$).
 \subsecidx{ffinit}$(p,n,\{v=x\})$: computes a monic polynomial of degree
 $n$ which is irreducible over $\F_p$. For instance if
 \kbd{P = ffinit(3,2,y)}, you can represent elements in $\F_{3^2}$ as polmods
-modulo \kbd{P}.
+modulo \kbd{P}. Starting with version 2.2.3 this function use a fast variant
+of Adleman--Lenstra algorithm, and is much faster than in earlier versions.
 
 \syn{ffinit}{p,n,v}, where $v$ is a variable number.
 
@@ -3654,6 +3655,21 @@ so is subject to change.
 
 \syn{galoissubcyclo}{n,H,Z,v} where n is a C long integer.
 
+\subsecidx{galoissubfields}$(G,\{fl=0\},\{v\})$: Output all the subfields of the Galois group \var{G},
+as a vector.
+This works by applying \kbd{galoisfixedfield} to all subgroups. The meaning of the flag \var{fl} is
+the same as for \kbd{galoisfixedfield}.
+
+\syn{galoissubfields}{\var{G},fl,v}, where \var{fl} is a long and \var{v} a variable number.
+
+\subsecidx{galoissubgroups}$(G)$: Output all the subgroups of the Galois group \kbd{G}.
+A subgroup is a vector $[gen, orders]$, with the same meaning as for $\var{gal}.gen$ 
+and $\var{gal}.orders$. Hence \var{gen} is a vector of permutations generating the
+subgroup, and \var{orders} is the relatives orders of the generators. The cardinal
+of a subgroup is the product of the relative orders.
+
+\syn{galoissubgroups}{\var{G}}.
+
 \subsecidx{idealadd}$(\var{nf},x,y)$: sum of the two ideals $x$ and $y$ in the
 number field $\var{nf}$. When $x$ and $y$ are given by $\Z$-bases, this does
 not depend on $\var{nf}$ and can be used to compute the sum of any two
@@ -5342,7 +5358,8 @@ field $\Q(\zeta_n)$, where $d\mid \phi(n)$. $(\Z/n\Z)^*$ has to be cyclic
 (i.e.~$n=2$, $4$, $p^k$ or $2p^k$ for an odd prime $p$). The function 
 \tet{galoissubcyclo} covers the general case.
 
-\syn{subcyclo}{n,d,v}, where $v$ is a variable number.
+\syn{subcyclo}{n,d,v}, where $n$, $d$ and $v$ are \kbd{long} and $v$ is a
+variable number.
 
 \subsecidx{polsylvestermatrix}$(x,y)$: forms the Sylvester matrix
 corresponding to the two polynomials $x$ and $y$, where the coefficients of
