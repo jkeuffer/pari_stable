@@ -999,7 +999,7 @@ red_montgomery(GEN T, GEN N, ulong inv)
 
 /* EXACT INTEGER DIVISION */
 
-/* assume xy>0, y odd */
+/* assume y != 0 and the division is exact */
 GEN
 diviuexact(GEN x, ulong y)
 {
