@@ -27,7 +27,11 @@ done
 if test -z "$try"; then
   if test "$osname" = linux -a  -n "$_pb"; then
     echo "###"
-    echo "### lib$lib.so not found. Please install $lib-devel.rpm"
+    echo "### lib$lib.so not found. Please install $lib development files."
+    echo "### They usually come in $lib-devel (RPM) or lib$lib-dev (Debian) packages"
+    echo "###"
+  fi
+
     echo "###"
   fi
 fi
