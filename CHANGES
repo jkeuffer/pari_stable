@@ -84,6 +84,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        too large in Fp_shanks [ conductor() was computing unnecessarily
        tough discrete logs ]
    32- [Configure:] add /lib64 and /usr/lib64 to library search path
+   33- SEGV in nfeltpowmodpr() for primes of degree 1 [see 2.2.7-F21]
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
