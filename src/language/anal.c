@@ -208,13 +208,15 @@ lisseq0(char *t, GEN (*f)(void))
   if (br_res) { killbloc(br_res); br_res = NULL; }
   res = f();
   analyseur = olds; mark.start = olde;
-
   if (br_status)
   {
     if (!br_res) { avma = av; return gnil; }
     res = forcecopy(br_res);
   }
-  return gerepileupto(av, res);
+  if (res == NULL)
+    return polx[fetch_user_var("NULL")];
+  else
+    return gerepileupto(av, res);
 }
 
 GEN
@@ -473,6 +475,7 @@ gshift_l(GEN x, GEN n)  { return gshift(x, itos(n)); }
 static GEN
 gshift_r(GEN x, GEN n) { return gshift(x,-itos(n)); }
 
+#define UNDEF (GEN)0x1
 static GEN
 expr(void)
 {
@@ -480,7 +483,7 @@ expr(void)
   GEN aux,e,e1,e2,e3;
   long av = avma, lim = stack_lim(av,2);
 
-  e1 = e2 = e3 = NULL;
+  e1 = e2 = e3 = UNDEF;
 
 L3:
   aux = facteur();
@@ -506,9 +509,9 @@ L3:
   f[3] = NULL;
 
 L2:
-  if (!e3) goto L3;
+  if (e3 == UNDEF) goto L3;
   e2 = f[2]? f[2](e2,e3): e3;
-  e3 = NULL;
+  e3 = UNDEF;
   if (low_stack(lim, stack_lim(av,2)))
   {
     GEN *gptr[2];
@@ -526,9 +529,9 @@ L2:
   f[2] = NULL;
 
 L1:
-  if (!e2) goto L2;
+  if (e2 == UNDEF) goto L2;
   e1 = f[1]? f[1](e1,e2): e2;
-  e2 = NULL;
+  e2 = UNDEF;
   switch(*analyseur)
   {
     case '<':
@@ -554,9 +557,9 @@ L1:
   f[1] = NULL;
 
 /* L0: */
-  if (!e1) goto L1;
+  if (e1 == UNDEF) goto L1;
   e = f[0]? (gcmp0(e1)? gzero: gun): e1;
-  e1 = NULL;
+  e1 = UNDEF;
   switch(*analyseur)
   {
     case '&':
@@ -571,6 +574,7 @@ L1:
   }
   return e;
 }
+#undef UNDEF
 
 /********************************************************************/
 /**                                                                **/
