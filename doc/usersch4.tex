@@ -755,7 +755,7 @@ object, and type is the type number of the object, preferably in symbolic
 form (see \secref{se:impl} for the list of these). The precise effect of
 this function is as follows: it first creates on the PARI \emph{stack} a
 chunk of memory of size \kbd{length} longwords, and saves the address of the
-chunk which it will in the end return.  If the stack has been used up, a
+chunk which it will in the end return. If the stack has been used up, a
 message to the effect that ``the PARI stack overflows'' is printed,
 and an error raised. Otherwise, it sets the type and length of the PARI object.
 In effect, it fills its first codeword (\kbd{z[0]} or \kbd{*z}). Many PARI
@@ -829,7 +829,7 @@ one has to follow this with a double loop to fill each column vector.
 These last two examples illustrate the fact that since PARI types are
 recursive, all the branches of the tree must be created. The function
 \teb{cgetg} creates only the ``root'', and other calls to \kbd{cgetg} must be
-made to produce the whole tree.  For matrices, a common mistake is to think
+made to produce the whole tree. For matrices, a common mistake is to think
 that \kbd{z = cgetg(4, t\_MAT)} (for example) creates the root of the
 matrix: one needs also to create the column vectors of the matrix (obviously,
 since we specified only one dimension in the first \kbd{cgetg}!). This is
@@ -914,7 +914,7 @@ Its effect is to assign the PARI object \kbd{x} into the \emph{preexisting}
 object \kbd{y}. This copies the whole structure of \kbd{x} into \kbd{y} so
 many conditions must be met for the assignment to be possible. For instance
 it is allowed to assign a \typ{INT} into a \typ{REAL}, but the converse is
-forbidden.  For that, you must use the truncation or rounding function of
+forbidden. For that, you must use the truncation or rounding function of
 your choice (see section 3.2). It can also happen that \kbd{y} is not large
 enough or does not have the proper tree structure to receive the object
 \kbd{x}. For instance, let \kbd{y} the zero integer with length equal to 2;
@@ -1348,7 +1348,7 @@ power series.
 
 If the power series is non-zero, \kbd{z[2]}, \kbd{z[3]},\dots
 \kbd{z[lg(z)-1]} point to the coefficients of \kbd{z} in ascending order,
-\kbd{z[2]} being the first non-zero coefficient.  Note that the exponent of a
+\kbd{z[2]} being the first non-zero coefficient. Note that the exponent of a
 power series can be negative, i.e.~we are then dealing with a Laurent series
 (with a finite number of negative terms).
 
@@ -1581,7 +1581,7 @@ first one has the following syntax:\label{se:flisexpr}
 
 \noindent
 Its effect is to analyze the input string s and to compute the result as a
-GP expression.  However it is limited to one expression. If you want to read
+GP expression. However it is limited to one expression. If you want to read
 and evaluate a sequence of expressions, use
 
 \fun{GEN}{flisseq}{char *s}
@@ -1833,7 +1833,7 @@ or
 \noindent
 Now that the preliminaries are out of the way, the best way to learn how to
 use the library mode is to work through a detailed example. We will write a
-program which computes the exponential of a square matrix~$x$.  The complete
+program which computes the exponential of a square matrix~$x$. The complete
 listing is given in Appendix~A, but each part of the program will be produced
 and explained here. We will use an algorithm which is not optimal but is not
 far from the one used for the PARI function \teb{gexp} (in fact embodied in
@@ -1841,7 +1841,7 @@ the function \kbd{mpexp1}). This consists in calculating the sum of the
 series:
 $$e^{x/(2^n)}=\sum_{k=0}^\infty \dfrac{(x/(2^n))^k}{k!}$$
 for a suitable positive integer $n$, and then computing $e^x$ by repeated
-squarings.  First, we need to compute the $L^2$-norm of the matrix~$x$,
+squarings. First, we need to compute the $L^2$-norm of the matrix~$x$,
 i.e.~the quantity:
 $$z=\|x\|_2=\sqrt{\sum |x_{i,j}|^2}.$$
 We then choose the integer $n$ such that the $L^2$-norm of $x/(2^n)$ is
@@ -2046,7 +2046,7 @@ A few remarks once again. First note the use of the function
 \noindent
 The effect of this function is to create the $\kbd{m}\times\kbd{m}$ scalar
 matrix whose diagonal entries are~\kbd{x}. Hence the length of the matrix
-including the codeword is in fact \kbd{m+1}.  There is a corresponding
+including the codeword is in fact \kbd{m+1}. There is a corresponding
 function \teb{gscalsmat} which takes a long as a first argument.
 
 If we refer to what has been said above, the main loop should be self-evident.
@@ -2056,7 +2056,7 @@ use of \teb{gerepile}, we keep the value of \kbd{avma} in \kbd{lbot} just
 \emph{before} the squaring, so that if it is the last one, \kbd{lbot} is
 indeed the bottom address of the garbage pile, and \kbd{gerepile}
 works. Note that it takes a completely negligible time to do this in each loop
-compared to a matrix squaring.  However, when \kbd{n} is initially equal to
+compared to a matrix squaring. However, when \kbd{n} is initially equal to
 0, no squaring has to be done, and we have our final result ready but we lost
 the address of the bottom of the garbage pile. Hence we use the trick of
 copying \kbd{y} again to the top of the stack. This is inefficient, but does
@@ -2276,7 +2276,7 @@ a \kbd{longjmp} statement. As well, instead of explicit \kbd{printf}~/
 function is in fact much more versatile, see \secref{se:dbg_output}).
 
 Declare all public functions in an appropriate header file, if you
-want to access them from C.  For example, if dynamic
+want to access them from C. For example, if dynamic
 loading is not available, you may need to modify PARI to access these
 functions, so put them in \kbd{paridecl.h}. The other functions should
 be declared \kbd{static} in your file.
@@ -2307,7 +2307,7 @@ addhelp(gpname, "some help text")
 @eprog
 \noindent(see \secref{se:addhelp} and~\ref{se:install}). The \idx{addhelp}
 part is not mandatory, but very useful if you want others to use your
-module.  \kbd{libname} is how the function is named in the library,
+module. \kbd{libname} is how the function is named in the library,
 usually the same name as one visible from C.
 
 Read that file from your \kbd{gp} session (from your \idx{preferences file} for

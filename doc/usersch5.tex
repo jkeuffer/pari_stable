@@ -192,7 +192,7 @@ respectively.
 or \typ{SER}~\kbd{x} to~\kbd{s} (where $0\le \kbd{s}\le\kbd{MAXVARN}$).
 
 \subsec{Type groups}\label{se:typegroup}.
-In the following macros, \kbd{t} denotes the type of a \kbd{GEN}. 
+In the following macros, \kbd{t} denotes the type of a \kbd{GEN}.
 Some of these macros may evaluate their argument twice. Always use them as in
 \bprog
   long tx = typ(x);
@@ -253,11 +253,11 @@ has \kbd{gzero} constant term.
 \fun{GEN}{leading_term}{GEN x} returns the address the leading term of
 \typ{POL}~\kbd{x}. This may be an inexact $0$.
 
-\fun{GEN}{gcoeff}{GEN x, long i, long j} returns the address of the 
+\fun{GEN}{gcoeff}{GEN x, long i, long j} returns the address of the
 \kbd{x[i,j]} entry of \typ{MAT}~\kbd{x}, i.e.~the coefficient at row~\kbd{i}
 and column~\kbd{j}.
 
-\fun{GEN}{gmael}{GEN x, long i, long j} returns the address of the 
+\fun{GEN}{gmael}{GEN x, long i, long j} returns the address of the
 \kbd{x[i][j]} entry of~\kbd{x}. (\kbd{mael} stands for multidimensional array
 element.)
 
@@ -329,7 +329,7 @@ otherwise.
 
 \fun{GEN}{gerepilecopy}{pari\_sp av, GEN x} cleans up the stack  from
 \kbd{av} on, preserving the object \kbd{x}. Special case of \kbd{gerepileall}
-(case $\kbd{n} = 1$), except that the routine returns the preserved \kbd{GEN} 
+(case $\kbd{n} = 1$), except that the routine returns the preserved \kbd{GEN}
 instead of updating its adress through a pointer.
 
 \fun{void}{gerepilemany}{pari\_sp av, GEN* g[], int n} alternative interface
@@ -464,7 +464,7 @@ of an \kbd{ulong}~\kbd{p} protected from overflows could read
    LOCAL_HIREMAINDER;
    ...
    pk = mulll(pk, p); if (hiremainder) break;
- } 
+ }
 @eprog
 
 \fun{ulong}{addll}{ulong x, ulong y} adds \kbd{x} and \kbd{y}, returns the
@@ -673,7 +673,7 @@ possible, otherwise raise an exception.
 \kbd{long}~\kbd{s}.
 
 \fun{GEN}{stor}{long s, long prec} converts the \kbd{long}~\kbd{s} into a
-\typ{REAL} of length \kbd{prec} and return the latter. Assumes that 
+\typ{REAL} of length \kbd{prec} and return the latter. Assumes that
 $\kbd{prec} > 2$.
 
 \fun{GEN}{utoi}{ulong s} converts the \kbd{ulong}~\kbd{s} into a \typ{INT}
@@ -684,7 +684,7 @@ and return the latter.
 $\kbd{prec} > 2$.
 
 \fun{GEN}{rtor}{GEN x, long prec} converts the \typ{REAL}~\kbd{x} to a
-\typ{REAL} of length \kbd{prec} and return the latter. If 
+\typ{REAL} of length \kbd{prec} and return the latter. If
 $\kbd{prec} < \kbd{lg(x)}$, round properly. If $\kbd{prec} > \kbd{lg(x)}$,
 padd with zeroes. Assumes that $\kbd{prec} > 2$.
 
@@ -908,7 +908,7 @@ their names:
 
 \fun{GEN}{sqri}{GEN x} squares the \typ{INT}~\kbd{x}
 
-\fun{GEN}{centermodii}{GEN x, GEN y, GEN y2}, given 
+\fun{GEN}{centermodii}{GEN x, GEN y, GEN y2}, given
 \typ{INT}s \kbd{x}, \kbd{y}, returns $z$ congruent to \kbd{x} modulo \kbd{y},
 such that $-\kbd{y}/2 \leq z < \kbd{y}/2$. Assumes that \kbd{y2 = shifti(y,
 -1)}. the representative of ssquares the \typ{INT}~\kbd{x}
@@ -1173,7 +1173,7 @@ vector of such elements, etc.
 counterpart, but coefficient arrays are implemented using \typ{VECSMALL}s.
 
 \noindent Omitting the letter means the argument is a scalar in the base
-ring. Standard functions \var{fun} are 
+ring. Standard functions \var{fun} are
 
   \kbd{add}: add
 
@@ -1185,11 +1185,11 @@ ring. Standard functions \var{fun} are
 
   \kbd{div}: divide (Euclidean quotient)
 
-  \kbd{rem}: Euclidean remainder 
+  \kbd{rem}: Euclidean remainder
 
   \kbd{divrem}: return Euclidean quotient, store remainder in a pointer
 argument.
-  
+
   \kbd{gcd}: GCD
 
   \kbd{extgcd}: return GCD, store Bezout coefficients in pointer arguments
@@ -1276,7 +1276,7 @@ coefficients such that $\kbd{*ux} + \kbd{*vy} = d$.
 
 \fun{GEN}{FpX_center}{GEN z, GEN p} returns the polynomial whose coefficient
 belong to the symmetric residue system (clean version of \kbd{centermod},
-which assumes the coefficients already belong to $[0,\kbd{p}-1]$). 
+which assumes the coefficients already belong to $[0,\kbd{p}-1]$).
 
 \subsubsec{Miscellaneous operations}
 
@@ -1298,7 +1298,7 @@ work with any non-zero \typ{INT} but is not efficient in this case).
 \fun{GEN}{FpX_eval}{GEN x, GEN y, GEN p} evaluates the \kbd{FpX}~\kbd{x}
 at the \kbd{Fp}~\kbd{y}. The result is an~\kbd{Fp}.
 
-\fun{GEN}{FpXV_FpV_innerprod}{GEN V, GEN W, GEN p} returns 
+\fun{GEN}{FpXV_FpV_innerprod}{GEN V, GEN W, GEN p} returns
 $\sum_{i=1}^{n} \kbd{V[i] * W[i]}$, where \kbd{V} is a vector of $n$
 \kbd{FpX}, and \kbd{W} is a vector of at least $n$ \kbd{INT}s.
 
@@ -1376,7 +1376,7 @@ definition, not the other way round.)
 reduce it to an \kbd{Fq} ($\kbd{T} = \kbd{NULL}$ is allowed iff \kbd{x} is a
 \typ{INT}).
 
-\fun{GEN}{FqX_red}{GEN x, GEN T, GEN p}, \kbd{x} a \typ{POL} 
+\fun{GEN}{FqX_red}{GEN x, GEN T, GEN p}, \kbd{x} a \typ{POL}
 whose coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{Fq}s. (If
 $\kbd{T} = \kbd{NULL}$, as \kbd{FpXX\_red(x, p)}.)
 
@@ -1500,7 +1500,7 @@ vector of irreducible \kbd{FqX}s factors (the exponents, being all equal to
 $1$, are not included).
 
 \fun{GEN}{FpX_ffisom}{GEN P, GEN Q, GEN p}. Assumes \kbd{p} prime,
-\kbd{P}, \kbd{Q} are \kbd{ZX}s, both irreducible mod \kbd{p}, and 
+\kbd{P}, \kbd{Q} are \kbd{ZX}s, both irreducible mod \kbd{p}, and
 $\deg(P) \mid \deg Q$. Outputs a monomorphism between $\F_p[X]/(P)$ and
 $\F_p[X]/(Q)$, as a polynomial $R$ such that $\kbd{Q} \mid \kbd{P}(R)$ in
 $\F_p[X]$. If \kbd{P} and \kbd{Q} have the same degree, it is of course an
@@ -1585,8 +1585,8 @@ or \kbd{NULL} if none exist.
 
 \fun{long}{FpM_rank}{GEN x, GEN p} as \kbd{rank}
 
-\fun{GEN}{FpM_indexrank}{GEN x, GEN p} as \kbd{indexrank} but returns a 
-\typ{VECSMALL} 
+\fun{GEN}{FpM_indexrank}{GEN x, GEN p} as \kbd{indexrank} but returns a
+\typ{VECSMALL}
 
 \fun{GEN}{FpM_suppl}{GEN x, GEN p} as \kbd{suppl}
 
@@ -1650,7 +1650,7 @@ collecting garbage.
 
 \fun{GEN}{Flx_Fl_mul}{GEN y, ulong x, ulong p}
 
-\fun{GEN}{Flx_recip}{GEN x}, returns the reciprocal polynomial 
+\fun{GEN}{Flx_recip}{GEN x}, returns the reciprocal polynomial
 
 \fun{ulong}{Flx_resultant}{GEN a, GEN b, ulong p}, returns the resultant
 of \kbd{a} and \kbd{b}
@@ -1679,7 +1679,7 @@ multiplicity of the $0$ root.
 
 
 \fun{GEN}{Flx_div_by_X_x}{GEN a, ulong x, ulong p, ulong *rem}, divides
-\kbd{Flx}~\kbd{a} by $X - \kbd{x}$, and sets \kbd{rem} to the remainder ($ = 
+\kbd{Flx}~\kbd{a} by $X - \kbd{x}$, and sets \kbd{rem} to the remainder ($ =
 \kbd{a}(\kbd{x})$).
 
 \fun{ulong}{Flx_eval}{GEN x, ulong y, ulong p}, as \kbd{FpX\_eval}.
@@ -1758,7 +1758,7 @@ variable) \kbd{x} and \kbd{y}. Uses Karatsuba algorithm.
 
 \fun{GEN}{RgX_mulspec}{GEN a, GEN b, long na, long nb}. Internal routine:
 \kbd{a} and \kbd{b} are arrays of coefficients representing polynomials
-$\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$ and 
+$\sum_{i = 0}^{\kbd{na}} \kbd{a}[i] X^i$ and
 $\sum_{i = 0}^{\kbd{nb}} \kbd{b}[i] X^i$. Returns their product (as a true
 \kbd{GEN}).
 
@@ -1858,7 +1858,7 @@ coefficients are non-negative.
 \subsubsec{Mixed precision linear algebra} Assumes dimensions are compatible.
 Multiply a multiprecision object by a single-precision one.
 
-\fun{GEN}{RgM_zc_mul}{GEN x, GEN y} 
+\fun{GEN}{RgM_zc_mul}{GEN x, GEN y}
 
 \fun{GEN}{RgM_zm_mul}{GEN x, GEN y}
 
@@ -1870,7 +1870,7 @@ Multiply a multiprecision object by a single-precision one.
 
 \fun{GEN}{ZM_zm_mul}{GEN x, GEN y}
 
-\subsubsec{Miscellaneous} 
+\subsubsec{Miscellaneous}
 
 \fun{GEN}{zero_Flx}{long sv} returns a zero \kbd{Flx} in variable $v$.
 
@@ -2330,7 +2330,7 @@ and returns the primitive part \kbd{x} / \kbd{c}.
 
 \op=\key{add}: addition (\kbd{x + y}).
 
-\op=\key{sub}: subtraction (\kbd{x - y}). 
+\op=\key{sub}: subtraction (\kbd{x - y}).
 
 \op=\key{mul}: multiplication (\kbd{x * y}).
 
@@ -2366,7 +2366,7 @@ into~\kbd{x} for the variable number~\kbd{v}.
 
 \subsec{Function to handle  \typ{VECSMALL}}
 Theses functions handle \typ{VECSMALL} as an abstract container type
-of small signed integers.  No specific meaning is attached to the content. 
+of small signed integers. No specific meaning is attached to the content.
 
 \fun{GEN}{vec_to_vecsmall}{GEN z} identical to \kbd{ZV\_to\_zv(z)}.
 
@@ -2376,7 +2376,7 @@ of small signed integers.  No specific meaning is attached to the content.
 
 \fun{GEN}{vecsmall_copy}{GEN x} makes a copy of \kbd{x} on the stack.
 
-\fun{GEN}{vecsmall_const}{long n, long c} returns a \typ{VECSMALL} 
+\fun{GEN}{vecsmall_const}{long n, long c} returns a \typ{VECSMALL}
 of \kbd{n} components equal to \kbd{c}.
 
 \fun{GEN}{vecsmall_shorten}{GEN v, long n} shortens the \typ{VECSMALL} \kbd{v}
@@ -2405,8 +2405,8 @@ to the length of the shortest and compares them lexicographically.
 this number modulo \kbd{mod}. This can be used as an hash function.
 
 \subsec{Functions to handle bit-vectors}
-Theses functions manipulate vectors of bits (stored in \typ{VECSMALL}). 
-Bits are numbered from 0. 
+Theses functions manipulate vectors of bits (stored in \typ{VECSMALL}).
+Bits are numbered from 0.
 
 \fun{GEN}{bitvec_alloc}{long n} allocates a bits-vector suitable for \kbd{n}
 bits.
@@ -2418,18 +2418,18 @@ bits.
 \kbd{bitvec}.
 
 \fun{void}{bitvec_set}{GEN bitvec, long b} (in place) sets the bit of index
-\kbd{b} of \kbd{bitvec}.  
+\kbd{b} of \kbd{bitvec}.
 
 \fun{void}{bitvec_clear}{GEN bitvec, long b} (in place) clears the bit of index \kbd{b} of \kbd{bitvec}.
 \subsec{Functions to handle vectors of \typ{VECSMALL}}
-Theses functions manipulate vectors of \typ{VECSMALL} (vecvecsmall). 
+Theses functions manipulate vectors of \typ{VECSMALL} (vecvecsmall).
 
 \fun{GEN}{vecvecsmall_sort}{GEN x} sorts lexicographically the components of
 the vector \kbd{x}.
 
 \fun{GEN}{vecvecsmall_indexsort}{GEN x} performs an indirect lexicographic sorting of the components of the vector \kbd{x} and return a permutation stored in a \typ{VECSMALL}.
 
-\fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted 
+\fun{long}{vecvecsmall_search}{GEN x, GEN y, long flag} \kbd{x} being a sorted
 vecvecsmall and \kbd{y} a \typ{VECSMALL}, search \kbd{y} inside \kbd{x}. \kbd{fla} has the same meaning as for \kbd{setsearch}.
 
 \vfill\eject

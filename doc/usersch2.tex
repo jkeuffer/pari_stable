@@ -155,7 +155,7 @@ is mostly useful to modify or set the defaults \kbd{primelimit} or
 \misctitle{(somewhat technical) Note:} As we will see in \secref{se:strings},
 the second argument to \kbd{default} will be subject to string context
 expansion, which means you can use run-time values. In other words, something
-like 
+like
 \bprog
   a = 3;
   default(logfile, "\var{some filename}" a ".log")
@@ -215,7 +215,7 @@ black on transparent background)
 aforementioned colormap
 
 \noindent $\bullet$ a triple $[c_0,c_1,c_2]$ where $c_0$ stands for foreground
-color, $c_1$ for background color, and $c_2$ for attributes (0 is default, 1 
+color, $c_1$ for background color, and $c_2$ for attributes (0 is default, 1
 is bold, 4 is underline).
 
 The output objects thus affected are respectively error messages,
@@ -298,7 +298,7 @@ Note that the default \tet{new_galois_format} is another compatibility setting,
 which is completely independent of \kbd{compatible}.
 
 \subsecidx{datapath} (default: the location of installed precomputed data):
-the name of directory containing the optional data files. For now, 
+the name of directory containing the optional data files. For now,
 only the \kbd{galdata} package, needed by polgalois in degrees 8 to 11.
 
 \subsecidx{debug} (default \kbd{0}): debugging level. If it is non-zero,
@@ -713,7 +713,7 @@ function occupies (a \kbd{struct entree} in C). If the range is reduced to
 a dash ('\kbd{-}'), outputs statistics about hash cell usage.
 
 \subsec{\b{l}} $\{$\var{logfile}$\}$: switches \tet{log} mode on and off.
-If a \var{logfile} argument is given, change the default logfile name to 
+If a \var{logfile} argument is given, change the default logfile name to
 \var{logfile} and switch log mode on.
 
 \subsec{\b{m}}: as \b{a}, but using prettymatrix format.
@@ -885,8 +885,8 @@ operations (typically between a polynomial and a polmod). For example, PARI
 will not recognize that \kbd{Mod(y, y\pow2 + 1)} is the same as \kbd{Mod(x,
 x\pow2 + 1)}. Hopefully, this problem will pass away when type ``element of a
 number field'' is eventually introduced. \footnote{*}{On the other hand, one can argue that
-there is no reason to consider these quantities equal.  E.g., one can be the
-opposite of another.  Compare with numerous discussions on whether ``the
+there is no reason to consider these quantities equal. E.g., one can be the
+opposite of another. Compare with numerous discussions on whether ``the
 algebraic closure of $\Q$ is canonically defined'', or one needs to consider
 a groupoid of algebraic closures.} See \secref{se:priority} for a
 definition of ``priority'' and a discussion of (PARI's idea of) multivariate
@@ -918,7 +918,7 @@ functions, which you ought to know about (use \b{u} if you are subject to
 memory lapses). The total number of different variable names is limited to
 $16384$ and $65536$ on 32-bit and 64-bit machines respectively, which
 should be enough. If you ever need hundreds of variables, you should
-probably be using vectors instead. See \secref{se:priority} for a discussion 
+probably be using vectors instead. See \secref{se:priority} for a discussion
 of multivariate polynomial rings.
 
 \subsec{Power series}\sidx{power series}\label{se:series}
@@ -1349,7 +1349,7 @@ degree 1 in this variable, as is natural for a mathematician.
 \subsec{Variable priorities}.\sidx{variable (priority)}\label{se:priority}
 PARI has no intelligent ``sparse'' representation of polynomials. So a
 multivariate polynomial in PARI is just a polynomial (in one variable), whose
-coefficients are themselves polynomials, arbitrary but for the fact that they 
+coefficients are themselves polynomials, arbitrary but for the fact that they
 do not involve the main variable. All computations are then just done
 formally on the coefficients as if the polynomial was univariate.
 
@@ -1408,7 +1408,7 @@ $y$:
 %4 = 0
 @eprog
 \noindent In the last exemple, the division by $y$ takes place in
-$\Q(y)[x]$, 
+$\Q(y)[x]$,
 hence the \kbd{Mod} object is a coset in $(\Q(y)[x]) / (y\Q(y)[x])$, which
 is the null ring since $y$ is invertible! So be very wary of variable
 ordering when your computations involve implicit divisions and many
@@ -1470,7 +1470,7 @@ local(}\var{list of local variables}\kbd{);} \var{seq}
 
 \noindent which looks better written on consecutive lines:
 \bprogpart
-name($x_0$, $x_1$, @dots) = 
+name($x_0$, $x_1$, @dots) =
 {
   local($t_0$, $t_1$, @dots);
   local(@dots);
@@ -1613,7 +1613,7 @@ your machine) from within \kbd{gp}. To increase it before launching \kbd{gp},
 you can use \tet{ulimit} or \tet{limit}, depending on your shell, and raise
 the process available stack space (increase \tet{stacksize}).
 
-\misctitle{Function which take functions as parameters ?} 
+\misctitle{Function which take functions as parameters ?}
 Use the following trick (neat example due to Bill Daly):
 
 \bprog
@@ -1649,7 +1649,7 @@ a user-defined function. When an error occurs, all of this maze (rather a
 tree, in fact) is searched and restored to the state preceding the last call
 of the main evaluator.
 
-\subsec{Variable scope}\label{se:varscope} 
+\subsec{Variable scope}\label{se:varscope}
 
 Local variables should more appropriately be called \emph{temporary values}
 since they are in fact local to the function declaring them \emph{and} any
@@ -1708,7 +1708,7 @@ zet(s) = sumalt(n=1, (-1)^(n-1)*n^(-s)) / (1 - 2^(1-s))
 \noindent would be a better definition. One last example: what is
 wrong with the following definition?
 \bprog
-FirstPrimeDiv(x) = 
+FirstPrimeDiv(x) =
 {
   local(p);
   forprime(p=2, x, if (x%p == 0, break));
@@ -1774,7 +1774,7 @@ function. For instance, one could implement (a dreadful idea as far as
 efficiency goes):
 
 \bprog
-correct_ell_if_needed(x) = 
+correct_ell_if_needed(x) =
 {
   local(tmp);
   if (type(x) != "t_VEC", tmp = ellinit(x))
@@ -1898,7 +1898,7 @@ necessary?). This part could also have been written as
 \kbd{concat(concat(Str(s), i), j)} (but \emph{not} as \kbd{concat(Str(s),
 concat(i,j))}!). More simply, we could have written \kbd{concat([Str(s),
 i,j])}, or even \kbd{concat([s,i,j])}, silently assuming that \kbd{s} will
-indeed be a string. 
+indeed be a string.
 
 In version 2.2.5, the prototype of \kbd{Str} was extended to allow more than
 one argument, which are concatenated into a single string. So, finally,
@@ -1945,7 +1945,7 @@ There are two kind of errors: syntax errors, and errors produced by functions
 in the PARI library. Both kinds are fatal to your computation: \kbd{gp} will
 report the error, perform some cleanup (restore variables modified while
 evaluating the erroneous command, close open files, reclaim unused memory,
-etc.), and will output its usual prompt. 
+etc.), and will output its usual prompt.
 
 When reporting a syntax error, \kbd{gp} tries to give meaningful context by copying
 the sentence it was trying to read (whitespace and comments stripped
@@ -1982,7 +1982,7 @@ identifier, but from the context, it looks like a function (it is followed by
 an open parenthesis), then we have an argument, then a closing parenthesis.
 Then if \kbd{siN} were a known function we would evaluate it; but it is not,
 so \kbd{gp} assumes that you were trying to \emph{define} it, as in
-\bprog 
+\bprog
 ? if (siN(x)=sin(x), ...)
 @eprog
 This is actually allowed (!) and defines the function \kbd{siN} as an alias for
@@ -2073,7 +2073,7 @@ A break loop looks like this:
 -1/2
 -1
   ***   division by zero in gdiv, gdivgs or ginv
-  ***   Starting break loop (type 'break' to go back to GP): 
+  ***   Starting break loop (type 'break' to go back to GP):
   ***   for(v=-2,2,print(1/v))
                             ^--
 break>
@@ -2090,7 +2090,7 @@ break> v
 only the name of a variable, of course. There is no special set of commands
 becoming available during a break loop, as they would in most debuggers.
 
-\misctitle{Important Note:} upon startup, this mechanism is \emph{off}. Type 
+\misctitle{Important Note:} upon startup, this mechanism is \emph{off}. Type
 \kbd{trap()} (or include it in a script) to start trapping errors in this
 way. By default, you will be sent back to the prompt.
 
@@ -2121,7 +2121,7 @@ variables is printed, and they are all saved in binary format in file
 \kbd{crash}, ready for inspection. Of course break loops are no longer
 available: the new handler has replaced the default one. Besides user-defined
 handlers as above, there are two special handlers you can use in \kbd{trap},
-which are 
+which are
 
 $\bullet$ \kbd{trap(, "")} (do-nothing handler): to disable the trapping
 mechanism and let errors propagate, which is the default situation on
@@ -2173,7 +2173,7 @@ specific type should be intercepted, to be chosen among
 instance, the following can be used to check in a safe way whether
 \tet{install} works correctly in your \kbd{gp}:
 \bprog
-broken_install() = 
+broken_install() =
 {
   trap(archer, return ("OS"),
     install(addii,GG)
@@ -2399,7 +2399,7 @@ a subprocess in \idx{Emacs}. To use this, you should include in your
 @eprog
 \noindent which autoloads functions from \kbd{pari.el}. See also
 \kbd{pariemacs.txt}. These files are included in the PARI distribution and
-are installed at the same time as \kbd{gp}. 
+are installed at the same time as \kbd{gp}.
 
 Once this is done, under GNU Emacs if you type \kbd{M-x gp} (where as usual
 \kbd{M} is the \kbd{Meta} key, i.e.~Escape, or on SUN keyboards, the Left

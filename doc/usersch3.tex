@@ -1536,13 +1536,13 @@ function \sidx{Riemann zeta-function} $\zeta(s)=\sum_{n\ge1}n^{-s}$,
 computed using the \idx{Euler-Maclaurin} summation formula, except
 when $s$ is of type integer, in which case it is computed using
 Bernoulli numbers\sidx{Bernoulli numbers} for $s\le0$ or $s>0$ and
-even, and using modular forms for $s>0$ and odd.  
+even, and using modular forms for $s>0$ and odd.
 
 For $s$ a $p$-adic number, Kubota-Leopoldt zeta function at $s$, that
 is the unique continuous $p$-adic function on the $p$-adic integers
 that interpolates the values of $(1 - p^{-k}) \zeta(k)$ at negative
 integers $k$ such that $k \equiv -1 \pmod{p-1}$ (resp. $k$ is odd) if
-$p$ is odd (resp. $p = 2$).   
+$p$ is odd (resp. $p = 2$).
 
 \syn{gzeta}{s,\var{prec}}.
 
@@ -1870,7 +1870,7 @@ prime $p$, using distinct degree plus
 \idx{Cantor-Zassenhaus}\sidx{Zassenhaus}. The coefficients of $x$ must be
 operation-compatible with $\Z/p\Z$. The result is a two-column matrix, the
 first column being the irreducible polynomials dividing $x$, and the second
-the exponents.  If you want only the \emph{degrees} of the irreducible
+the exponents. If you want only the \emph{degrees} of the irreducible
 polynomials (for example for computing an $L$-function), use
 $\kbd{factormod}(x,p,1)$. Note that the \kbd{factormod} algorithm is
 usually faster than \kbd{factorcantor}.
@@ -1990,7 +1990,7 @@ should be used if $x$ is known to be of type integer.
 
 \subsecidx{isperfectpower}$(x,\{\&n\})$: return the maximal $k \geq 2$ such
 that $x = n^k$ is a perfect power, or $0$ if no such $k$ exist. If $n$ is
-given puts the exact $k$-th root there. 
+given puts the exact $k$-th root there.
 
 \syn{isperfectpower}{x, \&n}, the result is a \kbd{long}.
 
@@ -2011,7 +2011,7 @@ only sensibly be proven (given the algorithms implemented in PARI) using the
 APRCL test. Otherwise ($x$ is large and $x-1$ is smooth) output a three
 column matrix as a primality certificate. The first column contains the prime
 factors $p$ of $x-1$, the second the corresponding elements $a_p$ as in
-Proposition~8.3.1 in GTM~138, and the third the output of isprime(p,1).  The
+Proposition~8.3.1 in GTM~138, and the third the output of isprime(p,1). The
 algorithm fails if one of the pseudo-prime factors is not prime, which is
 exceedingly unlikely (and well worth a bug report).
 
@@ -2393,9 +2393,9 @@ non-negative integer. The result is non-negative and rounded towards zero.
 \syn{racine}{x}.
 
 \subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
-$|x0| \leq X$ such that 
+$|x0| \leq X$ such that
 $$\gcd(N, P(x_0)) > B.$$
-$X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log N))$. 
+$X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log N))$.
 
 \syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
 
@@ -2890,7 +2890,7 @@ discrete logarithm problems.
 
 \item $\tev{bnr}$ denotes a ``ray number field'', i.e.~a data structure
 output by \kbd{bnrinit}, corresponding to the ray class group structure of
-the field, for some modulus $f$. It contains a \var{bnf}, the modulus 
+the field, for some modulus $f$. It contains a \var{bnf}, the modulus
 $f$, the ray class group $\Cl_f(K)$ and data associated to
 the discrete logarithm problem therein.
 \medskip
@@ -3244,7 +3244,7 @@ $\var{bnf}[6]$ used to contain a permutation of the prime factor base, but
 has been obsoleted. It contains a dummy $0$.
 
 $\var{bnf}[9]$ is a 3-element row vector used in \tet{bnfisprincipal} only
-and obtained as follows.  Let $D = U W V$ obtained by applying the
+and obtained as follows. Let $D = U W V$ obtained by applying the
 \idx{Smith normal form} algorithm to the matrix $W$ (= $\var{bnf}[1]$) and
 let $U_r$ be the reduction of $U$ modulo $D$. The first elements of the
 factorbase are given (in terms of \kbd{bnf.gen}) by the columns of $U_r$,
@@ -4581,7 +4581,7 @@ denominator of the conjugates expressed as polynomial in a root of
 
 A group G is ``weakly'' super solvable (WKSS) if it contains a super solvable
 normal subgroup $H$ such that $G=H$ , or $G/H \simeq A_4$ , or $G/H \simeq
-S_4$. Abelian and nilpotent groups are WKSS.  In practice, almost all groups
+S_4$. Abelian and nilpotent groups are WKSS. In practice, almost all groups
 of small order are WKSS, the exceptions having order 36(1 exception), 48(2),
 56(1), 60(1), 72(5), 75(1), 80(1), 96(10) and $\geq 108$.
 
@@ -4722,7 +4722,7 @@ useful given the existence of \tet{nfnewprec}, to input a \kbd{nf} or a
   ? nf.sign  \\ signature
   %6 = [1, 1]
   ? factor(abs(nf.disc ))  \\ determines ramified primes
-  %7 = 
+  %7 =
   [2 2]
 
   [3 5]
@@ -6235,7 +6235,7 @@ square matrix \kbd{M}. If $\fl=1$, returns only the elementary divisors. If
 $\fl=2$, returns a two-components vector [F,B] where \kbd{F} is the Frobenius
 form and \kbd{B} is the basis change so that $M=B^{-1}FB$.
 
-\syn{matfrobenius}{M,\fl}. 
+\syn{matfrobenius}{M,\fl}.
 
 \subsecidx{mathess}$(x)$: Hessenberg form of the square matrix $x$.
 
@@ -7833,7 +7833,7 @@ the keywords to \kbd{gp}, and there are currently far too many useless ones):
 \kbd{user}: user error (from the \kbd{error} function)
 
 \subsubsecidx{type}$(x)$: this is useful only under \kbd{gp}. Returns the
-internal type name of the PARI object $x$ as a  string.  Check out
+internal type name of the PARI object $x$ as a  string. Check out
 existing type names with the metacommand \b{t}.\label{se:gptype}
 For example \kbd{type(1)} will return "\typ{INT}".
 
