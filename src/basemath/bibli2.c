@@ -988,44 +988,31 @@ GEN
 polymodrecip(GEN x)
 {
   long v, i, j, n, lx;
-  gpmem_t av, tetpil;
-  GEN p1,p2,p3,p,phi,y,col;
+  GEN p1, T, a, y;
+  gpmem_t av;
 
-  if (typ(x)!=t_POLMOD) err(talker,"not a polymod in polymodrecip");
-  p=(GEN)x[1]; phi=(GEN)x[2];
-  v=varn(p); n=degpol(p); if (n<=0) return gcopy(x);
-  if (n==1)
+  if (typ(x)!=t_POLMOD) err(talker,"not a polmod in modreverse");
+  T = (GEN)x[1];
+  a = (GEN)x[2];
+  v = varn(T); n = degpol(T); if (n<=0) return gcopy(x);
+  if (n == 1)
   {
-    y=cgetg(3,t_POLMOD);
-    if (typ(phi)==t_POL) phi = (GEN)phi[2];
-    p1=cgetg(4,t_POL); p1[1]=p[1]; p1[2]=lneg(phi); p1[3]=un;
-    y[1]=(long)p1;
-    if (gcmp0((GEN)p[2])) p1 = zeropol(v);
-    else
-    {
-      p1=cgetg(3,t_POL); av=avma;
-      p1[1] = evalsigne(1) | evalvarn(n) | evallgef(3);
-      p2=gdiv((GEN)p[2],(GEN)p[3]); tetpil=avma;
-      p1[2] = lpile(av,tetpil,gneg(p2));
-    }
-    y[2]=(long)p1; return y;
+    y = cgetg(3,t_POLMOD);
+    y[1] = lsub(polx[v], a); av = avma;
+    y[2] = lpileupto(av, neg(gdiv((GEN)T[2], (GEN)T[3])));
+    return y;
   }
-  if (gcmp0(phi) || typ(phi) != t_POL)
-    err(talker,"reverse polymod does not exist");
-  av=avma; y=cgetg(n+1,t_MAT);
-  y[1]=(long)gscalcol_i(gun,n);
-  p2=phi;
+  if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
+  av = avma; y = cgetg(n+1,t_MAT);
+  y[1] = (long)gscalcol_i(gun,n);
+  p1 = a;
   for (j=2; j<=n; j++)
   {
-    lx=lgef(p2); p1=cgetg(n+1,t_COL); y[j]=(long)p1;
-    for (i=1; i<=lx-2; i++) p1[i]=p2[i+1];
-    for (   ; i<=n; i++) p1[i]=zero;
-    if (j<n) p2 = gmod(gmul(p2,phi), p);
+    y[j] = (long)pol_to_vec(p1, n);
+    if (j < n) p1 = gmod(gmul(p1,a), T);
   }
-  col=cgetg(n+1,t_COL); col[1]=zero; col[2]=un;
-  for (i=3; i<=n; i++) col[i]=zero;
-  p1=gauss(y,col); p2=gtopolyrev(p1,v); p3=caract(x,v);
-  tetpil=avma; return gerepile(av,tetpil,gmodulcp(p2,p3));
+  y = gauss(y, _ei(n, 2));
+  return gerepileupto(av, gmodulcp(vec_to_pol(y,v), caract(x,v)));
 }
 
 /********************************************************************/
