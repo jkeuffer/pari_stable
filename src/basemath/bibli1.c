@@ -2795,7 +2795,7 @@ perf(GEN a)
 static GEN
 smallvectors(GEN a, GEN BORNE, long stockmax, long flag, FP_chk_fun *CHECK)
 {
-  long av,av1,lim,N,n,i,j,k,s,epsbit,prec,checkcnt = 0;
+  long av,av1,lim,N,n,i,j,k,s,epsbit,prec, checkcnt = 1;
   GEN u,S,x,y,z,v,q,norme1,normax1,borne1,borne2,eps,p1,alpha,norms,dummy;
   GEN (*check)(GEN,GEN) = CHECK? CHECK->f: NULL;
   GEN data = CHECK? CHECK->data: NULL;
