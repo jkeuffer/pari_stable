@@ -361,7 +361,8 @@ one(tune_param *param)
   s.size = param->min_size;
   s.var  = param->var;
   ndat = since_positive = since_thresh_change = thresh_idx = 0;
-  if (option_trace >= 1) printf("Setting %s...\n", param->name);
+  if (option_trace >= 1)
+    printf("Setting %s... (default %ld)\n", param->name, *(param->var));
   if (option_trace >= 2)
   {
     printf("             algorithm-A  algorithm-B   ratio  possible\n");
