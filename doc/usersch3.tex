@@ -3465,10 +3465,13 @@ the subfield of a ray class field as defined by $[a_1,a_2,a_3]$ (see
 
   If $\fl = 1$, returns $[f, Cl_f, H]$, where $Cl_f$ is the ray class group 
 modulo $f$, as output by $\tet{bnrclass}(,f,1)$, and $H$ is the 
-subgroup of $Cl_f$ defining the extension.
+subgroup of $Cl_f$ defining the extension. If $a_1$ is a \kbd{bnr}, the
+algorithm requires that it has been computed by $\tet{bnrinit}(,,1)$,
+i.e.~with generators.
 
   If $\fl = 2$, returns $[f, \var{bnr}(f), H]$, as above except $Cl_f$ is
 replaced by a \kbd{bnr} structure, as output by $\tet{bnrinit}(,f,1)$.
+
 
 \syn{conductor}{\var{bnr}, \var{subgroup}, \fl}, where an omitted subgroup
 (trivial subgroup, i.e.~ray class field) is input as \kbd{NULL}, and $\fl$ is
