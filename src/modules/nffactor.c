@@ -663,11 +663,23 @@ is_sqf(GEN nf, GEN polbase)
   return 0;
 }
 
+/* rescale p in K[X] (coeffs in algtobasis form) --> primitive in O_K[X] */
+GEN
+nf_pol_to_int(GEN p, GEN *den)
+{
+  long i, l = lgef(p);
+  GEN d = gun;
+  for (i=2; i<l; i++)
+    d = mpppcm(d,denom((GEN)p[i]));
+  if (! gcmp1(d)) p = gmul(p, d);
+  *den = d; return p;
+}
+
 /* return the roots of pol in nf */
 GEN
 nfroots(GEN nf,GEN pol)
 {
-  long av=avma,tetpil,i,d=lgef(pol),fl;
+  long av=avma,tetpil,d=lgef(pol),fl;
   GEN p1,p2,polbase,polmod,den;
 
   p2=NULL; /* gcc -Wall */
@@ -695,14 +707,7 @@ nfroots(GEN nf,GEN pol)
   p1=element_inv(nf,leading_term(polbase));
   polbase=nf_pol_mul(nf,p1,polbase);
 
-  den=gun;
-  for (i=2; i<d; i++)
-    if (! gcmp0((GEN)polbase[i]))
-      den = glcm(den,denom((GEN)polbase[i]));
-  if (! gcmp1(absi(den)))
-    for (i=2; i<d; i++)
-      polbase[i] = lmul(den,(GEN)polbase[i]);
-
+  polbase = nf_pol_to_int(polbase, &den);
   polmod=unifpol(nf,polbase,1);
 
   if (DEBUGLEVEL>=4)
@@ -727,14 +732,7 @@ nfroots(GEN nf,GEN pol)
     p1=element_inv(nf,leading_term(polmod));
     polmod=nf_pol_mul(nf,p1,polmod);
 
-    d=lgef(polmod); den=gun;
-    for (i=2; i<d; i++)
-      if (!gcmp0((GEN)polmod[i]))
-	den = glcm(den,denom((GEN)polmod[i]));
-    if (!gcmp1(absi(den)))
-      for (i=2; i<d; i++)
-	polmod[i] = lmul(den,(GEN)polmod[i]);
-
+    polmod = nf_pol_to_int(polmod, &den);
     polmod=unifpol(nf,polmod,1);
   }
 
@@ -746,7 +744,10 @@ nfroots(GEN nf,GEN pol)
 static GEN
 nf_bestlift(GEN id,GEN idinv,GEN den,GEN elt)
 {
-  return gsub(elt,gmul(id,ground(gmul(den,gmul(idinv,elt)))));
+  GEN u = gmul(idinv,elt);
+  long i, l = lg(u);
+  for (i=1; i<l; i++) u[i] = (long)gdivround((GEN)u[i], den);
+  return gsub(elt, gmul(id, u));
 }
 
 /* return the lift of pol with coefficients of T2-norm <= C (if possible) */
@@ -754,12 +755,11 @@ static GEN
 nf_pol_lift(GEN id,GEN idinv,GEN den,GEN pol)
 {
   long i, d = lgef(pol);
-  GEN p1 = pol;
-
-  pol=cgetg(d,t_POL); pol[1]=p1[1];
+  GEN x = cgetg(d,t_POL);
+  x[1] = pol[1];
   for (i=2; i<d; i++)
-    pol[i] = (long) nf_bestlift(id,idinv,den,(GEN)p1[i]);
-  return pol;
+    x[i] = (long) nf_bestlift(id,idinv,den,(GEN)pol[i]);
+  return x;
 }
 
 #if 0
@@ -811,13 +811,8 @@ nffactor(GEN nf,GEN pol)
   p1=element_inv(nf,leading_term(pol));
   pol=nf_pol_mul(nf,p1,pol);
 
-  p1=unifpol(nf,pol,0); den=gun;
-  for (i=2; i<d; i++)
-    if (! gcmp0((GEN)p1[i]))
-      den = glcm(den,denom((GEN)p1[i]));
-  if (! gcmp1(absi(den)))
-    for (i=2; i<d; i++)
-      p1[i] = lmul(den,(GEN)p1[i]);
+  p1=unifpol(nf,pol,0);
+  p1 = nf_pol_to_int(p1, &den);
 
   if (DEBUGLEVEL>=4)
     fprintferr("test if the polynomial is square-free\n");
@@ -841,13 +836,7 @@ nffactor(GEN nf,GEN pol)
     p4=element_inv(nf,leading_term(p2));
     p2=nf_pol_mul(nf,p4,p2);
 
-    d=lgef(p2); den=gun;
-    for (i=2; i<d; i++)
-      if (!gcmp0((GEN)p2[i]))
-	den = glcm(den,denom((GEN)p2[i]));
-    if (!gcmp1(absi(den)))
-      for (i=2; i<d; i++)
-	p2[i] = lmul(den,(GEN)p2[i]);
+    p2 = nf_pol_to_int(p2, &den);
 
     p2=unifpol(nf,p2,1); 
     tetpil = avma; y = nfsqff(nf,p2,0);
@@ -1111,8 +1100,8 @@ nfsqff(GEN nf,GEN pol, long fl)
 
   if (DEBUGLEVEL >= 4) msgtimer("computation of the p-adic factorization");
 
-  den=ginv(det(h));
-  hinv=adj(h);
+  den = det(h); /* |den| = NP^k */
+  hinv= adj(h);
   lt=(GEN)leading_term(polbase)[1];
 
   if (fl)
@@ -1171,30 +1160,31 @@ nfsqff(GEN nf,GEN pol, long fl)
 static int
 nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
 {
-  int val=0; /* assume failure */
+  int val = 0; /* assume failure */
   GEN newf, newpsf = NULL;
-  long newd,ltop,i;
+  long av,newd,ltop,i;
 
-  if (dlim<=0) return 0;
-  if (fxn > nfcmbf.nfactmod) return 0;
+  /* Assertion: fxn <= nfcmbf.nfactmod && dlim > 0 */
+
   /* first, try deeper factors without considering the current one */
   if (fxn != nfcmbf.nfactmod)
   {
-    val=nf_combine_factors(nf,fxn+1,psf,dlim,hint);
+    val = nf_combine_factors(nf,fxn+1,psf,dlim,hint);
     if (val && psf) return 1;
   }
 
   /* second, try including the current modular factor in the product */
-  newf=(GEN)nfcmbf.fact[fxn];
+  newf = (GEN)nfcmbf.fact[fxn];
   if (!newf) return val; /* modular factor already used */
-  newd=lgef(newf)-3;
-  if (newd>dlim) return val; /* degree of new factor is too large */
+  newd = lgef(newf)-3;
+  if (newd > dlim) return val; /* degree of new factor is too large */
 
-  if (newd%hint == 0)
+  av = avma;
+  if (newd % hint == 0)
   {
     GEN p, quot,rem;
 
-    newpsf = nf_pol_mul(nf, (psf)? psf: nfcmbf.lt, newf);
+    newpsf = nf_pol_mul(nf, psf? psf: nfcmbf.lt, newf);
     newpsf = nf_pol_lift(nfcmbf.h,nfcmbf.hinv,nfcmbf.den,newpsf);
     /* try out the new combination */
     ltop=avma;
@@ -1208,8 +1198,7 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
       /* fix up target */
       p=gun; quot=unifpol(nf,quot,0);
       for (i=2; i<lgef(quot); i++)
-	if (!gcmp0((GEN)quot[i]))
-	  p = glcm(p, denom((GEN)quot[i]));
+        p = mpppcm(p, denom((GEN)quot[i]));
 
       nfcmbf.pol = nf_pol_mul(nf,p,quot);
       nfcmbf.lt  = leading_term(nfcmbf.pol);
@@ -1218,16 +1207,15 @@ nf_combine_factors(GEN nf,long fxn,GEN psf,long dlim,long hint)
     avma=ltop;
   }
 
-  /* newpsf needs more; try for it */
-  if (newd==dlim) return val; /* no more room in degree limit */
-  if (fxn==nfcmbf.nfactmod) return val; /* no more modular factors to try */
-
-  if (nf_combine_factors(nf,fxn+1,newpsf,dlim-newd,hint))
+  /* If room in degree limit + more modular factors to try, add more factors to
+   * newpsf */
+  if (newd < dlim && fxn < nfcmbf.nfactmod
+                  && nf_combine_factors(nf,fxn+1,newpsf,dlim-newd,hint))
   {
     nfcmbf.fact[fxn]=0; /* remove used modular factor */
     return 1;
   }
-  return val;
+  avma = av; return val;
 }
 
 /* return the characteristic polynomial of alpha over nf, where alpha 
