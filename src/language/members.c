@@ -280,7 +280,7 @@ member_fu(GEN x) /* fundamental units */
     member_err("fu");
   }
   if (t == typ_BNR) err(impl,"ray units");
-  return check_units(y,".fu");
+  return basistoalg(y, check_units(y,".fu"));
 }
 
 /* torsion units. return [w,e] where w is the number of roots of 1, and e a
@@ -288,8 +288,8 @@ member_fu(GEN x) /* fundamental units */
 GEN
 member_tu(GEN x)
 {
-  int t; GEN y = get_bnf(x,&t), res = cgetg(3,t_VEC);
-  if (!y)
+  int t; GEN y, bnf = get_bnf(x,&t), res = cgetg(3,t_VEC);
+  if (!bnf)
   {
     switch(t)
     {
@@ -309,18 +309,21 @@ member_tu(GEN x)
           if (typ(y) == t_VEC || lg(y) == 3) break;
         }
       default: member_err("tu");
+        return NULL; /* not reached */
     }
   }
   else
   {
     if (t == typ_BNR) err(impl,"ray torsion units");
-    x = (GEN)y[7]; y=(GEN)y[8];
+    x = (GEN)bnf[7];
+    y = (GEN)bnf[8];
     if (typ(y) == t_VEC && lg(y) > 5) y = (GEN)y[4];
     else
     {
       y = rootsof1(x);
       y[2] = lmul((GEN)x[7], (GEN)y[2]);
     }
+    y[2] = (long)basistoalg(bnf, (GEN)y[2]);
   }
   res[2] = y[2];
   res[1] = y[1]; return res;

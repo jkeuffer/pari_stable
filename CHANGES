@@ -273,6 +273,7 @@ JD 50- check for 'exuberant-ctags' before 'ctags' in make_vi_tags [ and fail
        gracefully if neither is found ]
 BA 51- support for gp2c-run on Darwin
    52- remove blanks in "raw" outputs ( default(output,0) )
+   53- made .fu and .tu return t_POLMOD, not t_POL
 
   Added
     1- make test-all [ all available test suites (SLOW !)]
