@@ -284,13 +284,6 @@ extern void* global_err_data;
 #define element_sqrmodpr(nf,x,prhall) (\
   nfreducemodpr((nf),element_sqr((nf),(x)),(prhall))\
 )
-#define idealmulmodideal(nf,x,y,ideal,prec) (\
-  ideallllredmodideal((nf),idealmullll((nf),(x),(y)),(ideal),(prec))\
-)
-#define idealsqrmodideal(nf,x,ideal,prec) (\
-  ideallllredmodideal((nf),idealsqrlll((nf),(x)),(ideal),(prec))\
-)
-
 #define buchgen(P,gcbach,gcbach2,prec) (\
   buchall((P),(gcbach),(gcbach2),stoi(5),gzero,4,3,0,(prec))\
 )
