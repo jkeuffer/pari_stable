@@ -5651,13 +5651,13 @@ series. Many other functions which can be applied on these objects are
 described in the other sections. Also, some of the functions described here
 can be applied to other types.
 
-\subsecidx{O}$(p$\kbd{\pow}$e)$: $p$-adic (if $p$ is an integer greater or
+\subsecidx{O}$(p\hbox{\kbd{\pow}}e)$: $p$-adic (if $p$ is an integer greater or
 equal to 2) or power series zero (in all other cases), with precision given
 by $e$.
 
-\syn{zeropadic}{p,e} for a $p$-adic and \teb{zeroser}(v,e) for a
-power series zero in variable $v$ (so $v$ is a long and $p = \kbd{polx[v]}$),
-where the precision $e$ is a \kbd{long}.
+\syn{zeropadic}{p,e} for a $p$-adic and \teb{zeroser}$(v,e)$ for a
+power series zero in variable $v$, which is a \kbd{long}. The precision $e$
+is a \kbd{long}.
 
 \subsecidx{deriv}$(x,\{v\})$: derivative of $x$ with respect to the main
 variable if $v$ is omitted, and with respect to $v$ otherwise. $x$ can be any
