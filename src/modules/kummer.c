@@ -36,17 +36,14 @@ static GEN bnfz,nfz,U,uu,gell,cyc,gencyc,vecalpha,R;
 static GEN
 groupproduct(GEN B, GEN T)
 {
-  long lB,lT,i,j;
-  GEN c,p1;
-
-  lB=lg(B)-1;
-  lT=lg(T)-1;
-  c=cgetg(lT+1,t_VEC);
-  for (j=1; j<=lT; j++)
+  long i,j, lB = lg(B), lT = lg(T);
+  GEN c = cgetg(lT,t_VEC);
+ 
+  for (j=1; j<lT; j++)
   {
-    p1=gun;
-    for (i=1; i<=lB; i++) p1=gmul(p1,gpui((GEN)B[i],gcoeff(T,i,j),0));
-    c[j]=(long)p1;
+    GEN p1 = gun;
+    for (i=1; i<lB; i++) p1 = gmul(p1, powgi((GEN)B[i],gcoeff(T,i,j)));
+    c[j] = (long)p1;
   }
   return c;
 }
@@ -55,9 +52,8 @@ static GEN
 grouppows(GEN B, long ex)
 {
   long lB = lg(B),j;
-  GEN c;
-
-  c = cgetg(lB,t_VEC);
+  GEN c = cgetg(lB,t_VEC);
+ 
   for (j=1; j<lB; j++) c[j] = lpowgs((GEN)B[j], ex);
   return c;
 }
@@ -531,18 +527,12 @@ isvirtualunit(GEN v)
 }
 
 static GEN
-lifttokz(GEN id, GEN A1)
+lifttoKz(GEN id, GEN A1)
 {
-  long i,j;
-  GEN p1,p2,p3;
-
-  p1=gsubst(gmul((GEN)nf[7],id),vnf,A1);
-  p2=gmodulcp((GEN)nfz[7],R);
-  p3=cgetg(degK*degKz+1,t_MAT);
-  for (i=1; i<=degK; i++)
-    for (j=1; j<=degKz; j++)
-      p3[(i-1)*degKz+j]=(long)algtobasis(nfz,gmul((GEN)p1[i],(GEN)p2[j]));
-  return hnfmod(p3,detint(p3));
+  GEN I = ideal_two_elt(nf,id);
+  GEN x = gsubst(gmul((GEN)nf[7],(GEN)I[2]),vnf,A1);
+  I[2] = (long)algtobasis(nfz,x);
+  return prime_to_ideal(nfz,I);
 }
 
 static GEN
@@ -947,12 +937,6 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   A1= (GEN)p1[2];
   A2= (GEN)p1[3];
   kk= (GEN)p1[4];
-  if (signe(leadingcoeff(R)) < 0)
-  {
-    R = gneg_i(R);
-    A1 = gmodulcp(lift(A1),R);
-    A2 = gmodulcp(lift(A2),R);
-  }
       /* step 2 */
   if (DEBUGLEVEL>2) fprintferr("Step 2\n");
   degKz = degpol(R);
@@ -961,14 +945,13 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   g = powuumod(itos(lift(gener(gell))), d, ell);
   if (powuumod(g, m, ell*ell) == 1) g += ell; /* ord(g)=m in all (Z/ell^k)^* */
       /* step reduction of R */
-  if (degKz<=20)
+  if (degKz <= 20)
   {
     GEN A3,A3rev;
 
     if (DEBUGLEVEL>2) fprintferr("Step reduction\n");
     p1 = polredabs2(R,prec);
-    if (DEBUGLEVEL>2) fprintferr("polredabs = %Z",p1[1]);
-    R = (GEN)p1[1];
+    R = (GEN)p1[1]; if (DEBUGLEVEL>2) fprintferr("polredabs = %Z",R);
     A3= (GEN)p1[2];
     A1 = poleval(lift(A1), A3);
     A2 = poleval(lift(A2), A3);
@@ -1048,7 +1031,7 @@ rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
       /* step 7 done above */
       /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 7 and 8\n");
-  idealz=lifttokz(ideal, A1);
+  idealz = lifttoKz(ideal, A1);
   computematexpoteta1(lift(A1), R);
   if (!divise(idealnorm(nf,ideal),gell)) gothf = idealz;
   else
