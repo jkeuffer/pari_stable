@@ -3312,8 +3312,8 @@ makebasis(GEN nf,GEN pol)
       p1 = gmul(bs, element_mul(nf,(GEN)vpro[i],gmael(ids,i,j)));
       B[(i-1)*n+j] = (long)pol_to_vec(lift_intern(p1), m);
     }
-  p1 = content(B); B = gdiv(B,p1);
-  B = hnfmod(B, detint(B)); B = gmul(B,p1);
+  p1 = denom(B); B = gmul(B,p1);
+  B = hnfmodid(B, p1); B = gdiv(B,p1);
   p1=cgetg(4,t_VEC);
   p1[1]=(long)polabs;
   p1[2]=(long)B;
