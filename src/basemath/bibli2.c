@@ -893,20 +893,26 @@ gp_rand()
 GEN
 genrand(GEN N)
 {
-  long lx,i;
-  GEN x;
+  long lx,i,nz;
+  GEN x, p1;
 
   if (!N) return stoi(mymyrand());
   if (typ(N)!=t_INT || signe(N)<=0) err(talker,"invalid bound in random");
 
   lx = lgefint(N); x = new_chunk(lx);
+  nz = lx-1; while (!N[nz]) nz--; /* nz = index of last non-zero word */
   for (i=2; i<lx; i++)
   {
-    long av = avma, n = N[i];
-    ulong r = gp_rand();
-    if (i < lx-1) n++; else if (!n) r = 0;
-    if (n) { GEN p1 = muluu(n,r); r = (lgefint(p1)<=3)? 0: p1[2]; }
-    avma = av; x[i] = r;
+    long n = N[i], r;
+    if (n == 0) r = 0;
+    else
+    {   
+      long av = avma;
+      if (i < nz) n++; /* allow for equality if we can go down later */
+      p1 = muluu(n, gp_rand()); /* < n * 2^32, so 0 <= first word < n */
+      r = (lgefint(p1)<=3)? 0: p1[2]; avma = av;
+    }
+    x[i] = r;
     if (r < (ulong)N[i]) break;
   }
   for (i++; i<lx; i++) x[i] = gp_rand();
