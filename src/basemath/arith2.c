@@ -586,6 +586,26 @@ boundfact(GEN n, long lim)
   err(arither1);
   return NULL; /* not reached */
 }
+/***********************************************************************/
+/**                                                                   **/
+/**                    SIMPLE FACTORISATIONS                          **/
+/**                                                                   **/
+/***********************************************************************/
+
+/*Return the primary factors of a small integer as a vecsmall*/
+GEN
+decomp_primary_small(long n)
+{
+  ulong ltop=avma;
+  GEN F = factor(stoi(n));
+  GEN fc = cgetg(lg(F[1]), t_VECSMALL);
+  ulong av=avma;
+  long i;
+  for (i = 1; i < lg(fc); i++)
+    fc[i] = itos(powgi(gmael(F,1,i), gmael(F,2,i)));
+  avma=av;
+  return gerepileupto(ltop,fc);
+}
 
 /***********************************************************************/
 /**                                                                   **/
