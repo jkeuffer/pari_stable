@@ -48,7 +48,7 @@ SectionEnd
 
 Section "Galois files" SecGAL
   SetOutPath "$INSTDIR\galdata"
-  File "..\galdata\*"
+  File "..\data\galdata\*"
 SectionEnd
 
 Section "documentation" SecDOC
@@ -62,7 +62,7 @@ Section "documentation" SecDOC
 SectionEnd
 
 Function .onInstSuccess
-  MessageBox MB_OK "Thanks for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP (colors, script search path, etc.)."
+  MessageBox MB_OK "Thank you for using PARI/GP! Double-click on 'gp' to start the calculator.$\r$\nTweak $INSTDIR\.gprc to customize GP (colors, script search path, etc.)."
   ExecShell "open" "$INSTDIR"
 FunctionEnd
 
@@ -111,7 +111,7 @@ Section "Uninstall"
   Delete "$INSTDIR\Uninstall.exe"
   Delete "$INSTDIR\cygperl5_8_0.dll"
   RMDir /r "$INSTDIR\doc"
-  RMDir /r "$INSTDIR\galdata"
+  RMDir /r "$INSTDIR\data"
 
   DeleteRegKey HKLM ${uninst}
   DeleteRegKey /ifempty HKLM "Software\PARI"
