@@ -1253,7 +1253,6 @@ get_red_G(nfbasic_t *T, GEN *pro)
       if (u0) u0 = gerepileupto(av, gmul(u0,u));
       else    u0 = gerepilecopy(av, u);
     }
-    if (i == MAXITERPOL) err(accurer,"red_T2");
     prec = (prec<<1)-2 + (gexpo(u0) >> TWOPOTBITS_IN_LONG);
     F.ro = NULL;
     if (DEBUGLEVEL) err(warnprec,"get_red_G", prec);
@@ -1951,6 +1950,8 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
   return y;
 }
 
+#define MAXITERPOL  10 /* max #of prec increase in polredabs-type operations */
+
 static GEN
 _polredabs(nfbasic_t *T, GEN *u)
 {
@@ -1981,7 +1982,7 @@ _polredabs(nfbasic_t *T, GEN *u)
       v = fincke_pohst(_vec(R),NULL,-1, 0, &chk);
       if (v) break;
     }
-    if (i==MAXITERPOL) err(accurer,"polredabs0");
+    if (i == MAXITERPOL) err(accurer,"polredabs0");
     prec = (prec<<1)-2;
     get_nf_fp_compo(T, &F, NULL, prec);
     if (DEBUGLEVEL) err(warnprec,"polredabs0",prec);
