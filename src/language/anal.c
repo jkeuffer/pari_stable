@@ -1012,8 +1012,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
 
   while (is_keyword_char(*s)) s++;
 
-  if ((*s == '"' || *s == ',' || *s == ')')
-    && (! is_entry_intern(analyseur, functions_hash,0)))
+  if ((*s == '"' || *s == ',' || *s == ')') && !is_entry(analyseur))
   { /* Do not create new user variable. Consider as a literal */ 
     tmp = analyseur;
     len = s - analyseur;
@@ -1909,6 +1908,12 @@ findentry(char *name, long len, entree *ep1)
   if (foreignAutoload) /* Try to autoload. */
     return foreignAutoload(name, len);
   return NULL; /* not found */
+}
+
+entree *
+is_entry(char *s)
+{
+  return is_entry_intern(s,functions_hash,NULL);
 }
 
 entree *

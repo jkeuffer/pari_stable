@@ -110,6 +110,7 @@ GEN     sqred3(GEN a);
 
 entree  *fetch_named_var(char *s, int doerr);
 entree  *gp_variable(char *s);
+entree  *is_entry(char *s);
 void    delete_named_var(entree *ep);
 long    delete_var(void);
 long    fetch_user_var(char *s);

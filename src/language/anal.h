@@ -120,8 +120,6 @@ extern void *PARI_stack_limit;
 #define NOT_CREATED_YET ((entree *)0x1L) /* for check_new_fun */
 #define initial_value(ep) ((ep)+1)
 
-#define is_entry(s) (is_entry_intern(s,functions_hash,NULL))
-
 /* blocs */
 #define BL_HEAD 3
 #define bl_base(x) ((x) - BL_HEAD)
