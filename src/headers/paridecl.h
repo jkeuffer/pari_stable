@@ -165,6 +165,7 @@ GEN     mpfactr(long n, long prec);
 GEN     mpinvmod(GEN a, GEN m);
 GEN     mppgcd(GEN a, GEN b);
 GEN     mpsqrtmod(GEN a, GEN p);
+GEN     mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan);
 GEN     order(GEN x);
 GEN     pnqn(GEN x);
 GEN     powmodulo(GEN a, GEN n, GEN m);

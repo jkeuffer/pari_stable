@@ -788,6 +788,175 @@ mpsqrtmod(GEN a, GEN p)
   tetpil=avma; return gerepile(av,tetpil,icopy(v));
 }
 
+/*******************************************************************/
+/*                                                                 */
+/*                       n-th ROOT MODULO p                        */
+/*                                                                 */
+/*******************************************************************/
+
+/* UNCLEAN
+ * p-1=l^e*r
+ * l doit etre premier
+ * q=p-1
+ * q=(l^e)*r
+ * e>=1
+ * pgcd(r,l)=1
+ * return a non l-power residue and set zeta to a primitive l root of unity.
+ */
+
+static GEN
+mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
+{
+  ulong av1;
+  GEN m,m1;
+  long k,i; 
+  av1 = avma;
+  for (k=1; ; k++)
+  {
+    m1 = m = powmodulo(stoi(k+1),r,p);
+    for (i=1; i<e; i++)
+      if (gcmp1(m=powmodulo(m,l,p))) break;
+    if (i==e) break;
+    avma = av1;
+  }
+  *zeta=m;
+  return m1;
+}
+/* resoud x^l=a mod (p)
+ * l doit etre premier
+ * q=p-1
+ * q=(l^e)*r
+ * e>=1
+ * pgcd(r,l)=1
+ * m=y^(q/l)
+ * y n'est pas une puissance l-ieme
+ * m!=1
+ * ouf!
+ * FIXME: use baby-step giant-step.
+ */
+static GEN
+mpsqrtlmod(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
+{
+  ulong av = avma, tetpil,lim;
+  long i,k;
+  GEN p1,p2,u1,u2,v,w,z;
+  /* y contient un generateur de (Z/pZ)^* eleve a la puis (p-1)/(l^e) */
+  bezout(r,l,&u1,&u2);
+  v=powmodulo(a,u2,p);
+  w=powmodulo(a,modii(mulii(negi(u1),r),q),p);
+  lim = stack_lim(av,1);
+  while (!gcmp1(w))
+  {
+    /* if p is not prime, next loop will not end */
+    k=0;
+    p1=w;
+    do
+    {
+      z=p1;
+      p1=powmodulo(p1,l,p);
+      k++;
+    }while(!gcmp1(p1));
+    if (k==e) { avma=av; return NULL; }
+    p2 = modii(mulii(z,m),p);
+    for(i=1; !gcmp1(p2); i++) p2 = modii(mulii(p2,m),p);/*should be a baby step
+							  giant step instead*/
+    p1=powmodulo(y,modii(mulsi(i,gpowgs(l,e-k-1)),q),p);
+    m=powmodulo(m,stoi(i),p);
+    e = k;
+    v = modii(mulii(p1,v),p);
+    y = powmodulo(p1,l,p);
+    w = modii(mulii(y,w),p);
+    if (low_stack(lim, stack_lim(av,1)))
+    {
+      GEN *gptr[4];
+      if(DEBUGMEM>1) err(warnmem,"mpsqrtlmod");
+      gptr[0]=&y; gptr[1]=&v; gptr[2]=&w; gptr[3]=&m;
+      gerepilemany(av,gptr,4);
+    }
+  }
+  tetpil=avma; return gerepile(av,tetpil,icopy(v));
+}
+/* a and n are integers, p is prime
+
+return a solution of 
+
+x^n=a mod p 
+
+1)If there is no solution return NULL and if zetan is not NULL set zetan to gzero.
+
+2) If there is solution there are exactly  m=gcd(p-1,n) of them.
+
+If zetan is not NULL, zetan is set to a primitive mth root of unity so that
+the set of solutions is {x*zetan^k;k=0 to m-1}
+
+If a=0 ,return 0 and if zetan is not NULL zetan is set to gun
+*/
+GEN 
+mpsqrtnmod(GEN a, GEN n, GEN p, GEN *zetan)
+{
+  ulong ltop=avma,lbot=0,av1,lim;
+  GEN m,u1,u2;
+  GEN q,z;
+  GEN *gptr[2];
+  if (typ(a) != t_INT || typ(n) != t_INT || typ(p)!=t_INT)
+    err(typeer,"mpsqrtnmod");
+  if(!signe(n))
+    err(talker,"1/0 exponent in mpsqrtnmod");
+  if(gcmp1(n)) {if (zetan) *zetan=gun;return gcopy(a);}
+  if(gcmp0(a)) {if (zetan) *zetan=gun;return gzero;}
+  q=addsi(-1,p);
+  m=bezout(n,q,&u1,&u2);
+  if (zetan) z=gun;
+  lim=stack_lim(ltop,1);
+  if (!gcmp1(m))
+  {
+    GEN F=decomp(m);
+    long i,j,e; 
+    GEN r,zeta,y,l;
+    av1=avma;
+    for (i = lg(F[1])-1; i; i--)
+    {
+      l=gcoeff(F,i,1); j=itos(gcoeff(F,i,2));
+      e=pvaluation(q,l,&r);
+      y=mplgenmod(l,e,r,p,&zeta);
+      if (zetan) z=modii(mulii(z,powmodulo(y,gpowgs(l,e-j),p)),p);
+      for(;j;j--)
+      {
+	lbot=avma;
+	a=mpsqrtlmod(a,l,p,q,e,r,y,zeta);
+	if (!a){avma=ltop;if (zetan)  *zetan=gzero;return gzero;}/*NULL*/
+	if (low_stack(lim, stack_lim(ltop,1)))/* n can have lots of prime factors*/
+	{
+	  if(DEBUGMEM>1) err(warnmem,"ffsqrtnmod");
+	  if (zetan)
+	  {
+	    z=gcopy(z);
+	    gptr[0]=&a;gptr[1]=&z;
+	    gerepilemanysp(av1,lbot,gptr,2);
+	  }
+	  else
+	    a=gerepileupto(av1,a);
+	}
+      }
+    }
+  }
+  if (cmpii(m,n))
+  {
+    GEN b=modii(u1,q);
+    lbot=avma;
+    a=powmodulo(a,b,p);
+  }
+  if (zetan)
+  {
+    *zetan=gcopy(z);
+    gptr[0]=&a;gptr[1]=zetan;
+    gerepilemanysp(ltop,lbot,gptr,2);
+  }
+  else
+    a=gerepileupto(ltop,a);
+  return a;
+}
+
 /*********************************************************************/
 /**                                                                 **/
 /**                        GCD & BEZOUT                             **/
