@@ -1928,14 +1928,14 @@ padicff(GEN x,GEN p,long pr)
 {
   pari_sp av = avma;
   GEN q, bas, invbas, mul, dK, nf, fa, g, e, dx = absi(ZX_disc(x));
-  long n = degpol(x);
+  long n = degpol(x), v = Z_pvalrem(dx,p,&q);
 
   nf = cgetg(10,t_VEC); nf[1] = (long)x;
   if (is_pm1(q)) {
     e = mkcol(gone);
     g = mkcol(p);
   } else {
-    e = mkcol2(stoi(Z_pvalrem(dx,p,&q)), gone);
+    e = mkcol2(stoi(v), gone);
     g = mkcol2(p, q);
   }
   fa = cgetg(3,t_MAT);
