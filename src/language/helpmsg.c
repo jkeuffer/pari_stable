@@ -149,7 +149,7 @@ char *helpmessages_basic[]={
   "forsubgroup(H=G,{bound},seq): execute seq for each subgroup H of the abelian group G (in SNF form), whose index is bounded by bound. H is given as a left divisor of G in HNF form",
   "forvec(x=v,seq,{flag=0}): v being a vector of two-component vectors of length n, the sequence is evaluated with x[i] going from v[i][1] to v[i][2] for i=n,..,1 if flag is zero or omitted. If flag = 1 (resp. flag = 2), restrict to increasing (resp. strictly increasing) sequences",
   "frac(x): fractional part of x = x-floor(x)",
-  "galoisfixedfield(gal,vec): gal being a galois field as output by galoisinit and vec a vector being a subset of gal[6], return [P,x] such that P is a polynomial defining the fixed field of gal[1] by v, and x is a root of p in gal expressed as a polmod in gal[1]",
+  "galoisfixedfield(gal,vec): gal being a galois field as output by galoisinit and vec a vector being a subset of gal[6], return [P,x] such that P is a polynomial defining the fixed field of gal[1] by vec, and x is a root of P in gal expressed as a polmod in gal[1]",
   "galoisinit(pol,{den}): pol being a polynomial or a number field as output by nfinit defining a Galois extension of Q, compute the Galois group and all the neccessary informations for computing fixed fields. den is optional and has the same meaning as in nfgaloisconj(,4)(see manual)",
   "galoispermtopol(gal,perm): gal being a galois field as output by galoisinit and perm a element of gal[6], return the polynomial defining the corresponding Galois automorphism",
   "gamma(x): gamma function at x",
