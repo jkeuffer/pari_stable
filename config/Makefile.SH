@@ -567,10 +567,10 @@ $src/funclist::
 	@sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
 
 $src/desc/Def: $src/funclist
-	cd $src/desc; make Def
+	cd $src/desc; $(MAKE) Def
 
-$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/desc/Def
-	cd $src/desc; make
+$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h: $src/desc/Def 
+	cd $src/desc; $(MAKE)
 EOT
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
