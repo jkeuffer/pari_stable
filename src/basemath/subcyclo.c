@@ -342,6 +342,20 @@ lift_check_modulus(GEN H, long n)
   return 0;/*not reached*/
 }
 
+/* Compute z^ex using the baby-step/giant-step table powz 
+ * with only one multiply.
+ * In the modular case, the result is not reduced.
+ */
+
+static GEN subcyclo_powz(GEN powz, long ex)
+{
+  long m=lg(powz[1])-1;
+  long q=ex/m, r=ex%m; /*ex=m*q+r*/
+  GEN z=gmul(gmael(powz,1,r+1),gmael(powz,2,q+1));
+  if (lg(powz)==4) z=greal(z);
+  return z;
+}
+
 GEN subcyclo_complex_bound(pari_sp ltop, GEN V, long prec)
 {
   GEN pol = roots_to_pol(V,0);
@@ -362,7 +376,11 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
     pari_sp av = avma;
     long ex = base;
     GEN s = gen_0;
-    for (k=0; k<m; k++, ex = Fl_mul(ex,g,n)) s = gadd(s,(GEN)powz[ex]);
+    for (k=0; k<m; k++, ex = Fl_mul(ex,g,n)) 
+    {
+      s = gadd(s,subcyclo_powz(powz,ex));
+      if ((k&0xff)==0) s=gerepileupto(av,s);
+    }
     if (le) s = modii(s, le);
     V[i] = lpileupto(av, s);
   }
@@ -384,7 +402,7 @@ _subcyclo_orbits(struct _subcyclo_orbits_s *data, long k)
   GEN *s = data->s;
   
   if (!data->count) data->ltop= avma;
-  *s = gadd(*s,(GEN)powz[k]);
+  *s = gadd(*s,subcyclo_powz(powz,k));
   data->count++;
   if ((data->count & 0xffUL) == 0)
     *s = gerepileupto(data->ltop, *s);
@@ -397,7 +415,7 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
   long i, d=lg(O);
   GEN V=cgetg(d,t_VEC);
   struct _subcyclo_orbits_s data;
-  long lle=le?lg(le)*2+1:2*lg(powz[1])+3;/*Assume dvmdii use lx+ly space*/
+  long lle=le?lg(le)*2+1:2*lg(gmael(powz,1,2))+3;/*Assume dvmdii use lx+ly space*/
   data.powz = powz;
   for(i=1; i<d; i++)
   {
@@ -451,23 +469,40 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   return gmodulcp(z,le);
 }
 
+/*Fill in the powz table:
+ *  powz[1]: baby-step 
+ *  powz[2]: giant-step
+ *  powz[3] exists only if the field is real (value is ignored).
+ */
 GEN
 subcyclo_complex_roots(long n, long real, long prec)
 {
-  GEN powz, z = exp_Ir(divrs(Pi2n(1, prec), n)); /* = e_n(1) */
-  long i, k = (n+3)>>1;
-
-  powz = cgetg(n,t_VEC);
-  powz[1] = (long)z;
-  for (i=2; i<k; i++) powz[i] = lmul(z,(GEN)powz[i-1]);
-  if (real) /* totally real field, take real part */
-  {
-    for (i=1; i<k; i++) powz[i] = mael(powz,i,1);
-    for (   ; i<n; i++) powz[i] = powz[n-i];
-  }
-  else
-    for (   ; i<n; i++) powz[i] = lconj((GEN)powz[n-i]);
+  long i;
+  long m=(long)1+sqrt((double) n);
+  GEN powbab, powgig, powz;
+  powz      = cgetg(real?4:3,t_VEC);
+  powbab    = cgetg(m+1,t_VEC);
+  powbab[1] = (long) gen_1;
+  powbab[2] = (long) exp_Ir(divrs(Pi2n(1, prec), n)); /* = e_n(1) */
+  for (i=3; i<=m; i++) powbab[i] = lmul((GEN)powbab[2],(GEN)powbab[i-1]);
+  powgig    = cgetg(m+1,t_VEC);
+  powgig[1] = (long) gen_1;
+  powgig[2] = lmul((GEN)powbab[2],(GEN)powbab[m]);;
+  for (i=3; i<=m; i++) powgig[i] = lmul((GEN)powgig[2],(GEN)powgig[i-1]);
+  powz[1]=(long)powbab;
+  powz[2]=(long)powgig;
+  if (real) powz[3]=(long) gen_0;
   return powz;
+}
+
+static GEN muliimod_sz(GEN x, GEN y, GEN l, long siz)
+{
+  pari_sp av=avma;
+  GEN p1;
+  (void)new_chunk(siz); /* HACK */
+  p1 = mulii(x,y);
+  avma=av;
+  return modii(p1,l);
 }
 
 GEN
@@ -477,17 +512,21 @@ subcyclo_roots(long n, GEN zl)
   GEN z=(GEN) zl[2];
   long lle=lg(le)*3; /*Assume dvmdii use lx+ly space*/
   long i;
-  GEN powz = cgetg(n,t_VEC);
-  powz[1] = (long) z;
-  for (i=2; i<n; i++)
-  {
-    pari_sp av=avma;
-    GEN p1;
-    (void)new_chunk(lle); /* HACK */
-    p1 = mulii(z,(GEN)powz[i-1]);
-    avma=av;
-    powz[i] = lmodii(p1,le);
-  }
+  long m=(long)1+sqrt((double) n);
+  GEN powbab, powgig, powz;
+  powz=cgetg(3,t_VEC);
+  powbab    = cgetg(m+1,t_VEC);
+  powbab[1] = (long) gen_1;
+  powbab[2] = lcopy(z);
+  for (i=3; i<=m; i++) 
+    powbab[i] = (long) muliimod_sz(z,(GEN)powbab[i-1],le,lle);
+  powgig    = cgetg(m+1,t_VEC);
+  powgig[1] = (long) gen_1;
+  powgig[2] = (long) muliimod_sz(z,(GEN)powbab[m],le,lle);;
+  for (i=3; i<=m; i++)
+    powgig[i] = (long) muliimod_sz((GEN)powgig[2],(GEN)powgig[i-1],le,lle);
+  powz[1]=(long)powbab;
+  powz[2]=(long)powgig;
   return powz;
 }
 
