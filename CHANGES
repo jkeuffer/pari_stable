@@ -31,9 +31,11 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.0 (released ??/??/????):
 
   Fixed
+BA  1- gpflog could print some lines twice
 
   Changed
     1- DOS distribution archives (GPM removed)
+XR  2- round 4 algorithm: compute char. polynomials via Newton sums
 
   Added
     1- file README.WIN
