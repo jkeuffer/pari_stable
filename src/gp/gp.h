@@ -29,9 +29,7 @@ typedef struct gp_format {
 enum { d_ACKNOWLEDGE, d_INITRC, d_SILENT, d_RETURN, d_EXISTS };
 
 /* output format */
-enum { f_RAW, f_PRETTYMAT, f_PRETTY, f_TEX };
-
-#define NBFORMATS 4
+enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX, NBFORMATS };
 
 /* aide() */
 #define h_REGULAR 0

@@ -137,7 +137,7 @@ gp_preinit(int force)
   tglobal = 0;
   bufstack = NULL;
   secure = test_mode = under_emacs = chrono = pariecho = 0;
-  prettyprinter = NULL;
+  prettyprinter = prettyprinter_dft;
   prettyprinter_file = NULL;
   fmt.format = 'g'; fmt.field = 0;
 #ifdef LONG_IS_64BIT
@@ -229,7 +229,8 @@ gp_output(GEN x)
     switch(prettyp)
     {
       case f_PRETTYMAT: matbrute(x, fmt.format, fmt.nb); break;
-      case f_PRETTY   : sor(x, fmt.format, fmt.nb, fmt.field); break;
+      case f_PRETTY:
+      case f_PRETTYOLD: sor(x, fmt.format, fmt.nb, fmt.field); break;
       case f_RAW      : brute(x, fmt.format, fmt.nb); break;
       case f_TEX      : texe(x, fmt.format, fmt.nb); break;
     }
@@ -687,8 +688,8 @@ sd_log(char *v, int flag)
 static GEN
 sd_output(char *v, int flag)
 {
-  char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)", NULL};
-  return sd_numeric(v,flag,"output",&prettyp, 0,2,msg);
+  char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)", "(external prettyprint)", NULL};
+  return sd_numeric(v,flag,"output",&prettyp, 0,3,msg);
 }
 
 void
@@ -1617,8 +1618,8 @@ escape(char *tch)
   s = tch;
   switch ((c = *s++))
   {
-    case 'w': case 'x': case 'a': case 'b': case 'm': /* history things */
-    {
+    case 'w': case 'x': case 'a': case 'b': case 'B': case 'm':
+    { /* history things */
       long d;
       GEN x;
       if (c != 'w' && c != 'x') d = get_int(s,0);
@@ -1633,7 +1634,18 @@ escape(char *tch)
 	case 'a': brute   (x, fmt.format, -1); break;
 	case 'm': matbrute(x, fmt.format, -1); break;
 	case 'b': sor     (x, fmt.format, -1, fmt.field); break;
-	case 'x': voir(x, get_int(s, -1)); return;
+	case 'B':
+        {
+          FILE *o_out = pari_outfile;
+          int o_typ = prettyp;
+          if (!(prettyprinter && prettyp_init()))
+            { sor(x, fmt.format, -1, fmt.field); break; }
+          gp_output(x);
+          prettyp_wait();
+          pari_outfile = o_out;
+          prettyp = o_typ; return;
+        }
+	case 'x': voir(x, get_int(s, -1)); return; 
         case 'w':
 	{
 	  GEN g[2]; g[0] = x; g[1] = NULL;
@@ -2258,13 +2270,15 @@ gp_main_loop(int ismain)
     if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }
     else
     { /* save state */
-      PariOUT *old = pariOut;
-      FILE *o_out = pari_outfile;
-      int prettyprint, o_prettyp = prettyp;
+      FILE *o_out;
+      int prettyprint;
 
       /* Emit before the switch to prettyprinter */
       if (prettyprinter && prettyp == f_PRETTY)
-	  term_color(c_OUTPUT);	/* There may be lines before the prompt */
+      {
+        o_out = pari_outfile;
+        term_color(c_OUTPUT);	/* There may be lines before the prompt */
+      }
       prettyprint = (prettyprinter && prettyp == f_PRETTY && prettyp_init());
 
       /* history number */
@@ -2296,12 +2310,13 @@ gp_main_loop(int ismain)
         init_lim_lines(thestring,lim_lines);
       }
       gp_output(z);
-      if (prettyprint) prettyp_wait();
+      if (prettyprint)
+      { /* flush and restore */
+        prettyp_wait();
+        prettyp = f_PRETTY;
+        pari_outfile = o_out;
+      }
 
-      /* restore */
-      pariOut = old;
-      pari_outfile = o_out;
-      prettyp = o_prettyp;
       term_color(c_NONE);
       if (!prettyprint) pariputc('\n');
     }
