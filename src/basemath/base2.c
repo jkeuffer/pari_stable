@@ -3064,48 +3064,35 @@ polcompositum0(GEN A, GEN B, long flall)
 {
   ulong av = avma;
   long v,k;
-  GEN p1,y,LPRS;
+  GEN C, LPRS;
 
   if (typ(A)!=t_POL || typ(B)!=t_POL) err(typeer,"polcompositum0");
   if (lgef(A)<=3 || lgef(B)<=3) err(constpoler,"compositum");
   v = varn(A);
   if (varn(B) != v) err(talker,"not the same variable in compositum");
-  p1 = content(A); if (!gcmp1(p1)) A = gdiv(A, p1);
-  p1 = content(B); if (!gcmp1(p1)) B = gdiv(B, p1);
+  C = content(A); if (!gcmC(C)) A = gdiv(A, C);
+  C = content(B); if (!gcmC(C)) B = gdiv(B, C);
   if (!issquarefree(A)) err(talker,"compositum: %Z not separable", A);
   if (!issquarefree(B)) err(talker,"compositum: %Z not separable", B);
 
-  k = 1; p1 = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
-  /* p1 = Res_Y (A, B(X + kY)) guaranteed to be squarefree */
-  y = squff2(p1,0,0); settyp(y, t_VEC);
+  k = 1; C = ZY_ZXY_resultant_all(A, B, &k, flall? &LPRS: NULL);
+  C = squff2(C,0,0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
   if (flall)
   {
-    long i,l = lg(y);
-    GEN Ba, w,a,c; /* a,b,c root of A,B,C = compositum, c = b - k a */
+    long i,l = lg(C);
+    GEN w,a,b; /* a,b,c root of A,B,C = compositum, c = b - k a */
     for (i=1; i<l; i++)
     {
-      c = gmodulcp(polx[v], (GEN)y[i]);
-      if (v == 0) gsetvarn(c, MAXVARN); else setvarn(A, 0);
-      /* Ba = polynomial in X, st Ba(a) = 0 */
-      Ba = poleval(B, gadd(c , gmulsg(k,polx[0])));
-      Ba = lift_intern(Ba);
-#if 0 /* too slow */
-      p1 = nfgcd(A, Ba, (GEN)c[1], NULL);
-      if (lgef(p1) != 4) err(bugparier,"compositum");
-      /* p1 = uX + v, with a as root, u in Q, v in Q(c) */
-      a = gneg_i(gdiv((GEN)p1[2], (GEN)p1[3]));
-#endif
-      a = gneg_i(gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)y[i])));
-  
-      if (v == 0) { gsetvarn(a, 0); gsetvarn(c, 0); } else setvarn(A, v);
+      a = gneg_i(gmul((GEN)LPRS[1], ginvmod((GEN)LPRS[2], (GEN)C[i])));
+      b = gadd(polx[v], gmulsg(k,a));
       w = cgetg(5,t_VEC); /* [C, a, b, n ] */
-      w[1] = y[i]; 
-      w[2] = lmodulcp(a, (GEN)y[i]);
-      w[3] = ladd(c, gmulsg(k,a));
-      w[4] = lstoi(-k); y[i] = (long)w;
+      w[1] = C[i]; 
+      w[2] = lmodulcp(a, (GEN)w[1]);
+      w[3] = lmodulcp(b, (GEN)w[1]);
+      w[4] = lstoi(-k); C[i] = (long)w;
     }
   }
-  return gerepileupto(av, gcopy(y));
+  settyp(C, t_VEC); return gerepileupto(av, gcopy(C));
 }
 
 /* FIXME: obsolete, to be deleted */
