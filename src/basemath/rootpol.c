@@ -725,22 +725,24 @@ dual_modulus(GEN p, GEN R, double tau, long l)
 /**                                                                **/
 /********************************************************************/
 
-static GEN
-gmulbyi(GEN z)
+GEN
+gmulbyi(GEN x)
 {
-  GEN aux = cgetg(3,t_COMPLEX);
-
-  if (typ(z)!=t_COMPLEX)
+  GEN z;
+  if (typ(x) != t_COMPLEX)
   {
-    aux[1]=zero;
-    aux[2]=(long) z;
+    z = cgetg(3,t_COMPLEX);
+    z[1] = zero;
+    z[2] = (long)x;
   }
   else
   {
-    aux[1]=lneg((GEN)z[2]);
-    aux[2]=z[1];
+    if (isexactzero((GEN)x[1])) return gneg((GEN)x[2]);
+    z = cgetg(3,t_COMPLEX);
+    z[1] = lneg((GEN)x[2]);
+    z[2] = x[1];
   }
-  return aux;
+  return z;
 }
 
 static void
