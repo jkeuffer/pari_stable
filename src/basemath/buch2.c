@@ -1867,9 +1867,16 @@ small_norm(RELCACHE_t *cache, FB_t *F, GEN G0, double LOGD, GEN nf,
       if (DEBUGLEVEL>3) fprintferr("v[%ld]=%.4g ",k,v[k]);
     }
 
+#if 0
+    BOUND = 2 * ( v[2] + v[1] * q[1][2] * q[1][2] );
+    if (BOUND < 2*v[1]) BOUND = 2*v[1];
+    if (BOUND > v[1] * BMULT) BOUND = v[1] * BMULT;
+    /* BOUND at most BMULT x smallest known vector */
+#else
     BOUND = v[2] + v[1] * q[1][2] * q[1][2];
     if (BOUND > v[1]) BOUND = v[1];
     BOUND *= BMULT; /* at most BMULT x smallest known vector */
+#endif
     if (DEBUGLEVEL>1)
     {
       if (DEBUGLEVEL>3) fprintferr("\n");

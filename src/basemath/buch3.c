@@ -646,13 +646,12 @@ isprincipalrayall(GEN bnr, GEN x, long flag)
     err(talker,"please apply bnrinit(,,1) and not bnrinit(,,0)");
 
   genray = (GEN)rayclass[3];
-  /* TODO: should be using nf_GENMAT and function should return a famat */
-  p1 = isprincipalfact(bnf, genray, gneg(ex), x, nf_GEN | nf_FORCE);
+  p1 = isprincipalfact(bnf, genray, gneg(ex), x, nf_GENMAT | nf_FORCE);
   if (!gcmp0((GEN)p1[1])) err(bugparier,"isprincipalray");
-  alpha = (GEN)p1[2];
+  p1 = (GEN)p1[2]; alpha = factorbackelt(p1, nf, NULL);
   if (lg(bid[5]) > 1 && lg(mael(bid,5,1)) > 1)
   {
-    GEN u = (GEN)bnr[6], y = gmul((GEN)u[1], zideallog(nf, alpha, bid));
+    GEN u = (GEN)bnr[6], y = gmul((GEN)u[1], zideallog(nf, p1, bid));
     y = reducemodinvertible(y, (GEN)u[2]);
     alpha = element_div(nf, alpha, factorbackelt(init_units(bnf), y, nf));
   }
