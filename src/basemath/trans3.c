@@ -1587,14 +1587,15 @@ END:
 
 extern GEN addmulXn(GEN x, GEN y, long d);
 
-/* compute phi^(m)_s(x); s must be an integer, assume x reduced mod p */ 
+/* compute phi^(m)_s(x); s must be an integer */ 
 static GEN 
 phi_ms(GEN vz, ulong p, GEN q, long m, GEN s, long x)
 {
+  long xp = x % p;
   GEN p1, p2; 
 
-  if (!x) return gzero;
-  p1 = Fp_pow((GEN)vz[x], addis(s, m), q); /* vz[x] = Teichmuller(x) */
+  if (!xp) return gzero;
+  p1 = Fp_pow((GEN)vz[xp], addis(s, m), q); /* vz[x] = Teichmuller(x) */
   p2 = Fp_pow(stoi(x), negi(s), q);
   return modii(mulii(p1,p2), q);
 }
@@ -1722,7 +1723,7 @@ zetap(GEN s)
   for (k = 1; k <= N; k++)
   {
     pari_sp av2 = avma;
-    GEN p1 = gzero, A = phi_ms(vz, p, q, -1, is, k % p);
+    GEN p1 = gzero, A = phi_ms(vz, p, q, -1, is, k);
     for (j = k - 1; j > 0; j--)
     {
       GEN b = addii((GEN)bn[j], (GEN)bn[j-1]);
@@ -1750,7 +1751,7 @@ zetap(GEN s)
     fprintferr("zetap: summing up and multiplying by correcting factor\n");
   
   /* sum and multiply by the corrective factor */
-  cft = gsubgs(gmulsg(c, phi_ms(vz, p, q, -1, is, c % p)), 1);
+  cft = gsubgs(gmulsg(c, phi_ms(vz, p, q, -1, is, c)), 1);
   val = gdiv(sum(vtz, 1, f-1), cft);
 
   /* adjust the precision and return */
