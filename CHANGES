@@ -197,7 +197,7 @@ JD 74- [Configure:] detection of times()
    97- readline: assume a file 'foo' exists, \rf<TAB> --> \foo [ r deleted! ]
        [\r f<TAB> was OK]. Solution: just expand to '\r f'; hitting <TAB>
        again completes properly --> \r foo.
-BA 98- Reduce stack concumption in ffinit(p,n), p<n.
+BA 98- Reduce stack consumption in ffinit and polsubcyclo.
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

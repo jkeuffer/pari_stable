@@ -2361,11 +2361,13 @@ leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
 GEN
 divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 {
+  pari_sp ltop, lim;
   long i,k,lx = lg(x);
 
   if (lx == 1) return gun;
   if (lx == 2) return gcopy((GEN)x[1]);
   x = dummycopy(x); k = lx;
+  ltop=avma; lim = stack_lim(ltop,1);
   while (k > 2)
   {
     if (DEBUGLEVEL>7)
@@ -2374,6 +2376,8 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
     for (i=1; i<lx-1; i+=2)
       x[k++] = (long)mul((GEN)x[i],(GEN)x[i+1]);
     if (i < lx) x[k++] = x[i];
+    if (low_stack(lim,stack_lim(av,1)))
+      gerepilecoeffs(ltop,x+1,k-1);
   }
   return (GEN)x[1];
 }
