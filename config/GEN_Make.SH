@@ -62,9 +62,8 @@ EXTRADLLDFLAGS = $EXTRADLLDFLAGS
 EXTRALIBS  =
 
 RUNPTH     = $RUNPTH
-LIBDIR     = -L$libdir
 DLCFLAGS   = $DLCFLAGS
-LIBS       = $LIBS -lpari
+LIBS       = $LIBS -L$libdir -l$libpari_base
 
 RM = rm -f
 
@@ -87,10 +86,10 @@ dynlib: \$(DYN)
 	\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS)
 
 \$(TARGET)-sta: \$(OBJS)
-	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(LIBDIR) \$(EXTRALIBS) \$(STATIC) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(EXTRALIBS) \$(STATIC) \$(LIBS)
 
 \$(TARGET)-dyn: \$(OBJS)
-	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(RUNPTH) \$(LIBDIR) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(RUNPTH) \$(LIBS)
 
 %.o: %.c
 	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$<

@@ -51,6 +51,7 @@ IS  8- typo in paricom.h [extra , in enum] --> compilation failure
 IS  9- typo in part.c [ // comments ] --> compilation failure
    10- y/(x/y) --> error [ wrong assumption that y is a genuine GEN in
        mulscalrfrac ]
+   11- example/Makefile wasn't up to date [ link with -lpari ]
 
   Changed
     1- rnf structure (removed useless components)
