@@ -284,16 +284,15 @@ _powpolmod(int pk, GEN jac, red_t *R, GEN (*_sqr)(GEN, red_t *))
 static GEN
 _powpolmodsimple(red_t *R, int pk, GEN jac)
 {
-  GEN w, wpow, wnew, ma = tabmatvite[pkfalse];
+  GEN w, ma = tabmatvite[pkfalse];
   int j, ph = lg(ma);
 
-  w = mulmat_pol(ma, jac);
-  w = FpV_red(w, R->N);
   R->red = &_redsimple;
-  wpow = cgetg(ph,t_COL);
-  for (j=1; j<ph; j++) wpow[j] = (long)_powpolmod(pk, (GEN)w[j], R, &sqrmod);
-  wnew = FpV_red( gmul(tabmatinvvite[pkfalse], wpow), R->N );
-  return gtopoly(wnew,0);
+  w = mulmat_pol(ma, jac);
+  for (j=1; j<ph; j++)
+    w[j] = (long)_powpolmod(pk, modii((GEN)w[j], R->N), R, &sqrmod);
+  w = FpV_red( gmul(tabmatinvvite[pkfalse], w), R->N );
+  return vec_to_pol(w, 0);
 }
 
 GEN
@@ -691,10 +690,10 @@ filltabs(GEN N, int p, int k, ulong ltab, int step5)
       return;
     }
     p1 = cgetg(ph+1,t_MAT);
-    p2 = cgetg(ph+1,t_COL); p1[ph] = (long)p2;
+    p2 = cgetg(ph+1,t_COL); p1[1] = (long)p2;
     for (i=1; i<=ph; i++) p2[i] = un;
-    j = ph-1; p1[j] = (long)vpa; p3 = vpa;
-    for (j--; j > 0; j--)
+    j = 2; p1[j] = (long)vpa; p3 = vpa;
+    for (j++; j <= ph; j++)
     {
       p2 = cgetg(ph+1,t_COL); p1[j] = (long)p2;
       for (i=1; i<=ph; i++) p2[i] = lmodii(mulii((GEN)vpa[i],(GEN)p3[i]), N);
