@@ -1199,26 +1199,27 @@ isqrti(GEN a)
 /* compute sqrt(|a|), s being signe(a)*/
 GEN sqrtr_abs(GEN a, long s)
 {
-  GEN res, b, c;
+  GEN res;
+  mp_limb_t *b, *c;
   long pr=RNLIMBS(a);
   long e=expo(a),er=e>>1;
   if (!s) return realzero_bit(er);
   res = cgetr(2 + pr);
   if (e&1)
   {
-    b = new_chunk((pr << 1)+2);
+    b = (mp_limb_t *) new_chunk((pr << 1)+2);
     xmpn_mirrorcopy(b+pr+2, RLIMBS(a), pr);
     xmpn_zero(b,pr+2);
   }
   else
   {
-    c = ishiftr_spec(a,pr+2,-1);
-    b = new_chunk(pr);
+    c = (mp_limb_t *) ishiftr_spec(a,pr+2,-1);
+    b = (mp_limb_t *) new_chunk(pr);
     /*xmpn_zero below will overwrite the code word of c, yay!*/
     c[1] = ((ulong)a[pr+1])<<(BITS_IN_LONG-1);
     xmpn_zero(b,pr+1);
   }
-  c = new_chunk(pr+1);
+  c = (mp_limb_t *) new_chunk(pr+1);
   mpn_sqrtrem(c,NULL,b,(pr<<1)+2);
   if ( ((ulong)c[0]) >= HIGHBIT-1 )
     if (mpn_add_1(c+1,c+1,pr,1))
