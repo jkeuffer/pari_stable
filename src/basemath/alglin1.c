@@ -1174,7 +1174,7 @@ u_Fp_gauss_get_col_OK(GEN a, GEN b, ulong invpiv, long li, ulong p)
   }
   return u;
 }
-static ulong
+static ulong *
 u_Fp_gauss_get_col(GEN a, GEN b, ulong invpiv, long li, ulong p)
 {
   ulong *u = (ulong*)cgetg(li+1,t_VECSMALL);
