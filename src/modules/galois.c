@@ -409,13 +409,46 @@ lireresolv(long n1, long n2, long n, resolv *R)
   R->nv = nv;
 }
 
+static int
+cmp_re(GEN x, GEN y)
+{
+  if (typ(x) != t_COMPLEX) return -1;
+  if (typ(y) != t_COMPLEX) return 1; /* t_REALS are smallest */
+  return gcmp((GEN)x[1], (GEN)y[1]);
+}
+
+/* multiply the r o bb. Sort first to detect pairs of conjugate */
 static GEN
 monomial(GEN r, PERM bb, long nbv)
 {
-  long i; GEN p1 = (GEN)r[(int)bb[1]];
+  GEN t, R = cgetg(nbv + 1, t_VEC);
+  long i, s = 1;
 
-  for (i=2; i<=nbv; i++) p1 = gmul(p1, (GEN)r[(int)bb[i]]);
-  return p1;
+  for (i = 1; i <= nbv; i++)
+  {
+    t = (GEN)r[(int)bb[i]];
+    if (typ(t) == t_COMPLEX && signe(t[1]) < 0) { s = -s; t = gneg(t); }
+    R[i] = (long)t;
+  }
+  if (nbv > 2) R = gen_sort(R, 0, &cmp_re);
+  t = NULL;
+  for (i=1; i<=nbv; i++)
+  {
+    GEN c = (GEN)R[i];
+    if (typ(c) == t_COMPLEX && i < nbv)
+    { /* detect conjugates */
+      GEN n = (GEN)R[++i];
+      if (!absr_cmp((GEN)n[1], (GEN)c[1])
+       && !absr_cmp((GEN)n[2], (GEN)c[2])
+       && signe(c[2]) != signe(n[2]))
+        c = mpadd(gsqr((GEN)c[1]), gsqr((GEN)c[2]));
+      else
+        c = gmul(c,n);
+    }
+    t = t? gmul(t, c): c;
+  }
+  if (s < 0) t = gneg(t);
+  return t;
 }
 
 static GEN
@@ -424,7 +457,8 @@ gpolynomial(GEN r, resolv *R)
   long i;
   GEN p1 = monomial(r,R->a[1], R->nv);
 
-  for (i=2; i<=R->nm; i++) p1 = gadd(p1, monomial(r,R->a[i], R->nv));
+  for (i=2; i<=R->nm; i++)
+    p1 = gadd(p1, monomial(r,R->a[i], R->nv));
   return p1;
 }
 
@@ -585,13 +619,15 @@ gpoly(GEN rr, long n1, long n2)
           || (n1==36 && n2==23) || (n1==34 && n2==15))
     {
       for (i=1; i<6; i++) z[i]=gadd(r[2*i-1],r[2*i]);
-      p2=gadd(z[2],z[5]); p2=gsub(p2,gadd(z[3],z[4]));
+      p2=gadd(z[2],z[5]);
+      p2=gsub(p2,gadd(z[3],z[4]));
       p1=gmul(p2,z[1]);
       p2=gsub(z[3],gadd(z[4],z[5]));
       p1=gadd(p1,gmul(p2,z[2]));
       p2=gsub(z[4],z[5]);
       p1=gadd(p1,gmul(p2,z[3]));
-      p1=gadd(p1,gmul(z[4],z[5])); return gsqr(p1);
+      p1=gadd(p1,gmul(z[4],z[5]));
+      return gsqr(p1);
     }
     else if ((n1==39 && n2==22) || (n1==38 && n2==12) || (n1==36 && n2==11)
           || (n1==29 && n2== 5) || (n1==25 && n2== 4) || (n1==23 && n2== 3)
@@ -791,7 +827,8 @@ is_int(GEN g)
 static long
 aux(GEN z)
 {
-  return 4*32 + expo(z) - (signe(z)? bit_accuracy(lg(z)): 0);
+  long e = expo(z);
+  return max(4*32, e) + e - (signe(z)? bit_accuracy(lg(z)): 0);
 }
 
 static long
@@ -815,7 +852,8 @@ get_ro_perm(PERM S1, PERM S2, long d, resolv *R, buildroot *BR)
     GEN rr = (GEN)BR->r[d];
     for (i=1; i<=N; i++) r[i] = rr[ (int)S1[(int)S2[i] ] ];
     ro = R->a? gpolynomial(r, R): gpoly(r,R->nm,R->nv);
-    sp = suffprec(ro); if (sp <= 0) return ro;
+    sp = suffprec(ro);
+    if (sp <= 0) return is_int(ro);
     BR->pr += 1 + (sp >> TWOPOTBITS_IN_LONG); moreprec(BR);
   }
 }
@@ -841,7 +879,6 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
   long nbgr,nbcos,nbracint,nbrac,lastnbri,lastnbrm;
   static long numi[M],numj[M],lastnum[M],multi[M],norac[M],lastnor[M];
   GEN  racint[M], roint;
-  PERM uu;
 
   if (getpreci(BR) != BR->pr) preci(BR, BR->pr);
   nbcos = getcard_obj(ss);
@@ -859,7 +896,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
         av2 = avma; nbrac = nbracint = 0;
         for (nocos=1; nocos<=nbcos; nocos++, avma = av2)
         {
-          roint = is_int( get_ro_perm(T, ss[nocos], d, R, BR) );
+          roint = get_ro_perm(T, ss[nocos], d, R, BR);
           if (!roint) continue;
 
           nbrac++;
@@ -879,13 +916,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
         }
         if (DEBUGLEVEL) dbg_rac(0,nbracint,numi,racint,multi);
         for (i=1; i<=nbracint; i++)
-          if (multi[i]==1)
-          {
-            uu = ss[numi[i]];
-            if (DEBUGLEVEL) fprintferr("      test roots reordering: %Z",
-                                       get_ro_perm(ID, uu, d, R, BR));
-            avma = av1; return permmul(T, uu);
-          }
+          if (multi[i]==1) { avma = av1; return permmul(T, ss[numi[i]]); }
         init = 1;
       }
       else
@@ -899,7 +930,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
             if (lastnor[k]==l)
             {
               nocos = lastnum[k];
-              roint = is_int( get_ro_perm(T, ss[nocos], d, R, BR) );
+              roint = get_ro_perm(T, ss[nocos], d, R, BR);
               if (!roint) { avma = av2; continue; }
 
               nbrac++;
@@ -914,13 +945,7 @@ check_isin(buildroot *BR, resolv *R, GROUP tau, GROUP ss)
             }
           if (DEBUGLEVEL) dbg_rac(nri,nbracint,numi,racint,multi);
           for (i=nri+1; i<=nbracint; i++)
-            if (multi[i]==1)
-            {
-              uu = ss[numi[i]];
-              if (DEBUGLEVEL) fprintferr("      test roots reordering: %Z",
-                                         get_ro_perm(ID, uu, d, R, BR));
-              avma = av1; return permmul(T, uu);
-            }
+            if (multi[i]==1) { avma = av1; return permmul(T, ss[numi[i]]); }
         }
       }
       avma = av1; if (!nbracint) break;
