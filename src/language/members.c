@@ -292,7 +292,7 @@ member_tu(GEN x)
         if (signe(y)<0 && cmpis(y,-4)>=0)
           y = stoi((itos(y) == -4)? 4: 6);
         else
-        { y = gtwo; x=negi(gone); }
+        { y = gtwo; x=gminusone; }
         res[1] = (long)y;
         res[2] = (long)x; return res;
       case typ_CLA:

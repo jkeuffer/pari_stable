@@ -339,7 +339,7 @@ powiu(GEN a, ulong N, long s)
 
   if (lgefint(a) == 3)
   { /* easy if |a| < 3 */
-    if (a[2] == 1) return (s>0)? gone: negi(gone);
+    if (a[2] == 1) return (s>0)? gone: gminusone;
     if (a[2] == 2) { a = int2n(N); setsigne(a,s); return a; }
   }
   if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
@@ -530,7 +530,7 @@ gpowgs(GEN x, long n)
       }
       s = (sx < 0 && odd(n))? -1: 1;
       if (n > 0) return powiu(x, n, s);
-      t = (s > 0)? gone: negi(gone);
+      t = (s > 0)? gone: gminusone;
       if (is_pm1(x)) return t;
       /* n < 0, |x| > 1 */
       y = cgetg(3,t_FRAC);
@@ -599,7 +599,7 @@ powgi(GEN x, GEN n)
 
     case t_INT:
       if (lgefint(x)==3 && x[2] == 1)
-        return (!signe(n) || signe(x) > 0)? gone: negi(gone);
+        return (!signe(n) || signe(x) > 0)? gone: gminusone;
       if (signe(x)) err(errlg);
       if (signe(n) < 0) err(gdiver);
       return gzero;
@@ -1038,7 +1038,7 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
     if (signe(q) < 0) x = ginv(x);
     x = gerepileupto(av, x);
     if (zetan)
-      *zetan = (e && lgefint(p)==3 && p[2]==2)? negi(gone) /*-1 in Q_2*/
+      *zetan = (e && lgefint(p)==3 && p[2]==2)? gminusone /*-1 in Q_2*/
                                               : gone;
     return x;
   }

@@ -1499,7 +1499,7 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
   if (vz)
     p1 =(GEN)vz[xp]; /* vz[x] = Teichmuller(x) */
   else 
-    p1 = (x & 2)? negi(gone): gone;
+    p1 = (x & 2)? gminusone: gone;
   p1 = Fp_pow(p1, addis(s, m), q);
   p2 = Fp_pow(stoi(x), negi(s), q);
   return modii(mulii(p1,p2), q);
@@ -1935,7 +1935,7 @@ gpolylog(long m, GEN x, long prec)
 
   if (m <= 0)
   {
-    GEN t = coefs_to_pol(2, negi(gone), gone); /* 1 - X */
+    GEN t = coefs_to_pol(2, gminusone, gone); /* 1 - X */
     p1 = polx[0];
     for (i=2; i <= -m; i++)
       p1 = gmul(polx[0], gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));

@@ -1951,7 +1951,7 @@ gdiv(GEN x, GEN y)
         if (!s) err(gdiver);
         if (signe(x) < 0) s = -s;
         z = cgetg(3, t_FRAC);
-        z[1] = s<0? lnegi(gone): one;
+        z[1] = (long)(s<0? gminusone: gone);
         z[2] = labsi(y); return z;
       }
       return gred_frac2(x,y);

@@ -174,12 +174,9 @@ static GEN
 rom_bsmall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long prec)
 {
   if (gcmpgs(a,-100) >= 0) return qrom2(E,eval,a,b,prec);
-  if (b == gone || gcmpgs(b, -1) >= 0)
-  { /* a < -100, b >= -1 */
-    GEN _1 = negi(gone); /* split at -1 */
-    return gadd(qromi(E,eval,a,_1,prec),
-                qrom2(E,eval,_1,b,prec));
-  }
+  if (b == gone || gcmpgs(b, -1) >= 0) /* a < -100, b >= -1 */
+    return gadd(qromi(E,eval,a,gminusone,prec), /* split at -1 */
+                qrom2(E,eval,gminusone,b,prec));
   /* a < -100, b < -1 */
   return qromi(E,eval,a,b,prec);
 }
@@ -574,7 +571,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
   b = suminit_start(sig);
   flii = gcmp0((GEN)b[2]);
   if (flii)
-    tab = intnuminit(mkvec(negi(gone)), mkvec(gone), m, prec);
+    tab = intnuminit(mkvec(gminusone), mkvec(gone), m, prec);
   else
     tab = intnuminit(gzero, b, m, prec);
   eps = bit_accuracy(prec);
@@ -1527,7 +1524,7 @@ mytra(GEN a, GEN x, long flag)
       if (!s) err(talker,"x = 0 in Fourier");
       if (s < 0) xa = gneg(xa);
       b = cgetg(3, t_VEC);
-      b[1] = (long)mkvec( codea > 0 ? gone : negi(gone) );
+      b[1] = (long)mkvec( codea > 0 ? gone : gminusone );
       b[2] = (long)(flag? mulcxI(xa): mulcxmI(xa));
       return b;
     case f_YOSCS: case f_YOSCC:

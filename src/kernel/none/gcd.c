@@ -161,40 +161,33 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   sa = signe(a); sb = signe(b);
   if (!sb)
   {
-    if (pv != NULL) *pv = gzero;
+    if (pv) *pv = gzero;
     switch(sa)
     {
-    case  0:
-      if (pu != NULL) *pu = gone; return gzero;
-    case  1:
-      if (pu != NULL) *pu = gone; return icopy(a);
-    case -1:
-      if (pu != NULL) *pu = negi(gone); return(negi(a));
+    case  0: if (pu) *pu = gone; return gzero;
+    case  1: if (pu) *pu = gone; return icopy(a);
+    case -1: if (pu) *pu = gminusone; return(negi(a));
     }
   }
   if (s == 0)			/* |a| == |b| != 0 */
   {
-    if (pu != NULL) *pu = gzero;
+    if (pu) *pu = gzero;
     if (sb > 0)
-    {
-      if (pv != NULL) *pv = gone; return icopy(b);
-    }
+    { if (pv) *pv = gone; return icopy(b); }
     else
-    {
-      if (pv != NULL) *pv = negi(gone); return(negi(b));
-    }
+    { if (pv) *pv = gminusone; return(negi(b)); }
   }
   /* now |a| > |b| > 0 */
 
   if (lgefint(a) == 3)		/* single-word affair */
   {
-    g = xxgcduu((ulong)(a[2]), (ulong)(b[2]), 0, &xu, &xu1, &xv, &xv1, &s);
+    g = xxgcduu((ulong)a[2], (ulong)b[2], 0, &xu, &xu1, &xv, &xv1, &s);
     sa = s > 0 ? sa : -sa;
     sb = s > 0 ? -sb : sb;
-    if (pu != NULL)
+    if (pu)
     {
       if (xu == 0) *pu = gzero; /* can happen when b divides a */
-      else if (xu == 1) *pu = sa < 0 ? negi(gone) : gone;
+      else if (xu == 1) *pu = sa < 0 ? gminusone : gone;
       else if (xu == 2) *pu = sa < 0 ? negi(gtwo) : gtwo;
       else
       {
@@ -203,9 +196,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	(*pu)[2] = xu;
       }
     }
-    if (pv != NULL)
+    if (pv)
     {
-      if (xv == 1) *pv = sb < 0 ? negi(gone) : gone;
+      if (xv == 1) *pv = sb < 0 ? gminusone : gone;
       else if (xv == 2) *pv = sb < 0 ? negi(gtwo) : gtwo;
       else
       {
@@ -214,7 +207,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	(*pv)[2] = xv;
       }
     }
-    if (g == 1) return gone;
+    if      (g == 1) return gone;
     else if (g == 2) return gtwo;
     else
     {
@@ -237,8 +230,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (!signe(d1))		/* a == qb */
     {
       avma = av;
-      if (pu != NULL) *pu = gzero;
-      if (pv != NULL) *pv = sb < 0 ? negi(gone) : gone;
+      if (pu) *pu = gzero;
+      if (pv) *pv = sb < 0 ? gminusone : gone;
       return (icopy(d));
     }
     else
@@ -332,8 +325,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     v = subii(muliu(v,xu), muliu(v1, xv));
     if (s < 0) { sa = -sa; sb = -sb; }
     avma = av;
-    if (pu != NULL) *pu = sa < 0 ? negi(u) : icopy(u);
-    if (pv != NULL) *pv = sb < 0 ? negi(v) : icopy(v);
+    if (pu) *pu = sa < 0 ? negi(u) : icopy(u);
+    if (pv) *pv = sb < 0 ? negi(v) : icopy(v);
     if (g == 1) return gone;
     else if (g == 2) return gtwo;
     else
@@ -348,8 +341,8 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
    * Now the matrix is final, and d contains the gcd.
    */
   avma = av;
-  if (pu != NULL) *pu = sa < 0 ? negi(u) : icopy(u);
-  if (pv != NULL) *pv = sb < 0 ? negi(v) : icopy(v);
+  if (pu) *pu = sa < 0 ? negi(u) : icopy(u);
+  if (pv) *pv = sb < 0 ? negi(v) : icopy(v);
   return icopy(d);
 }
 

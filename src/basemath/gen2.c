@@ -1523,7 +1523,7 @@ ctop(GEN x, GEN p, long d)
   pari_sp av = avma;
   GEN z, u = (GEN)x[1], v = (GEN)x[2];
   if (isexactzero(v)) return cvtop(u, p, d);
-  z = gsqrt(cvtop(negi(gone), p, d - ggval(v, p)), 0); /* = I */
+  z = gsqrt(cvtop(gminusone, p, d - ggval(v, p)), 0); /* = I */
   return gerepileupto(av, gadd(u, gmul(v, z)) );
 }
 

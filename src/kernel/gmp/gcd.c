@@ -150,37 +150,30 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (pv != NULL) *pv = gzero;
     switch(sa)
     {
-    case  0:
-      if (pu != NULL) *pu = gone; return gzero;
-    case  1:
-      if (pu != NULL) *pu = gone; return icopy(a);
-    case -1:
-      if (pu != NULL) *pu = negi(gone); return(negi(a));
+    case  0: if (pu) *pu = gone; return gzero;
+    case  1: if (pu) *pu = gone; return icopy(a);
+    case -1: if (pu) *pu = gminusone; return(negi(a));
     }
   }
   if (s == 0)			/* |a| == |b| != 0 */
   {
-    if (pu != NULL) *pu = gzero;
+    if (pu) *pu = gzero;
     if (sb > 0)
-    {
-      if (pv != NULL) *pv = gone; return icopy(b);
-    }
+    { if (pv) *pv = gone; return icopy(b); }
     else
-    {
-      if (pv != NULL) *pv = negi(gone); return(negi(b));
-    }
+    { if (pv) *pv = gminusone; return(negi(b)); }
   }
   /* now |a| > |b| > 0 */
 
   if (lgefint(a) == 3)		/* single-word affair */
   {
-    g = xxgcduu((ulong)(a[2]), (ulong)(b[2]), 0, &xu, &xu1, &xv, &xv1, &s);
+    g = xxgcduu((ulong)a[2], (ulong)b[2], 0, &xu, &xu1, &xv, &xv1, &s);
     sa = s > 0 ? sa : -sa;
     sb = s > 0 ? -sb : sb;
-    if (pu != NULL)
+    if (pu)
     {
       if (xu == 0) *pu = gzero; /* can happen when b divides a */
-      else if (xu == 1) *pu = sa < 0 ? negi(gone) : gone;
+      else if (xu == 1) *pu = sa < 0 ? gminusone : gone;
       else if (xu == 2) *pu = sa < 0 ? negi(gtwo) : gtwo;
       else
       {
@@ -189,9 +182,9 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 	(*pu)[2] = xu;
       }
     }
-    if (pv != NULL)
+    if (pv)
     {
-      if (xv == 1) *pv = sb < 0 ? negi(gone) : gone;
+      if (xv == 1) *pv = sb < 0 ? gminusone : gone;
       else if (xv == 2) *pv = sb < 0 ? negi(gtwo) : gtwo;
       else
       {
@@ -233,10 +226,10 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
     if (sa<0) su=-su;
     d[1] = evalsigne(1)|evallgefint(l+2);
     u[1] = evalsigne(su)|evallgefint(lu+2);
-    if (pv != NULL) v=diviiexact(subii(d,mulii(u,a)),b);
+    if (pv) v=diviiexact(subii(d,mulii(u,a)),b);
     avma = av;
-    if (pu != NULL) *pu=icopy(u);
-    if (pv != NULL) *pv=icopy(v);
+    if (pu) *pu=icopy(u);
+    if (pv) *pv=icopy(v);
     return icopy(d);
   }
 }

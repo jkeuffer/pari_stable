@@ -847,7 +847,7 @@ zell(GEN e, GEN z, long prec)
   }
   u = gdiv(x1,a); t = gaddsg(1,u);
   if (gcmp0(t) || gexpo(t) <  5 - bit_accuracy(prec))
-    t = negi(gone);
+    t = gminusone;
   else
     t = gdiv(u,gsqr(gaddsg(1,gsqrt(t,prec))));
   u = gsqrt(ginv(gmul2n(a,2)),prec);
@@ -3610,7 +3610,7 @@ ellrootno_p(GEN e, GEN p, GEN ex)
 
   if (gcmp1(ex)) return -kronecker(negi((GEN)e[11]),p);
   j=(GEN)e[13];
-  if (!gcmp0(j) && ggval(j,p) < 0) return kronecker(negi(gone),p);
+  if (!gcmp0(j) && ggval(j,p) < 0) return krosi(-1,p);
   ep = 12/cgcd(12,ggval((GEN)e[12],p));
   if (ep==4) z = 2; else z = (ep&1) ? 3 : 1;
   return krosi(-z, p);

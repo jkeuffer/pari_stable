@@ -2029,7 +2029,7 @@ Ipow(long e) {
   switch(e & 3)
   {
     case 1: return gi;
-    case 2: return negi(gone);
+    case 2: return gminusone;
     case 3: return gneg(gi);
   }
   return gone;

@@ -683,10 +683,10 @@ compute_data(blockdata *B)
   {
     GEN Xm1 = gsub(polx[varn(pol)], gone);
     GEN TR = addis((GEN)DATA[5], 1);
-    GEN mTR = negi(TR), mun = negi(gone), interp, bezoutC;
+    GEN mTR = negi(TR), interp, bezoutC;
 
     DATA[5] = (long)TR;
-    pol = TR_pol((GEN)DATA[1], mun);
+    pol = TR_pol((GEN)DATA[1], gminusone);
     l = lg(roo); p1 = cgetg(l, t_VEC);
     for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)roo[i]);
     roo = p1;
@@ -700,12 +700,12 @@ compute_data(blockdata *B)
     {
       if (degpol(interp[i]) > 0) /* do not turn polun[0] into gone */
       {
-        p1 = TR_pol((GEN)interp[i], mun);
+        p1 = TR_pol((GEN)interp[i], gminusone);
         interp[i] = (long)FpXX_red(p1, p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
-        p1 = TR_pol((GEN)bezoutC[i], mun);
+        p1 = TR_pol((GEN)bezoutC[i], gminusone);
         bezoutC[i] = (long)FpXX_red(p1, p);
       }
     }

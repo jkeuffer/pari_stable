@@ -2042,7 +2042,7 @@ nf_pm1(GEN y)
 static GEN
 is_primitive_root(GEN nf, GEN fa, GEN x, long w)
 {
-  GEN y, exp = gtwo, pp = (GEN)fa[1];
+  GEN y, exp = utoipos(2), pp = (GEN)fa[1];
   long i,p, l = lg(pp);
 
   for (i=1; i<l; i++)

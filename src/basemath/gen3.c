@@ -945,7 +945,7 @@ ginv(GEN x)
       if (is_pm1(x)) return icopy(x);
       s = signe(x); if (!s) err(gdiver);
       z = cgetg(3,t_FRAC);
-      z[1] = s<0? lnegi(gone): one;
+      z[1] = (long)(s<0? gminusone: gone);
       z[2] = labsi(x); return z;
 
     case t_REAL:
@@ -1670,7 +1670,7 @@ roundr(GEN x)
   pari_sp av;
   GEN t;
   if (!s || (ex=expo(x)) < -1) return gzero;
-  if (ex < 0) return s>0? gone: negi(gone);
+  if (ex < 0) return s>0? gone: gminusone;
   av = avma;
   t = real2n(-1, 3 + (ex>>TWOPOTBITS_IN_LONG)); /* = 0.5 */
   return gerepileuptoint(av, floorr( addrr(x,t) ));
@@ -1728,7 +1728,7 @@ grndtoi(GEN x, long *e)
       if (ex < 0)
       {
 	if (signe(p1)>=0) { *e = expo(x); avma = av; return gzero; }
-        *e = expo(addsr(1,x)); avma = av; return negi(gone);
+        *e = expo(addsr(1,x)); avma = av; return gminusone;
       }
       lx= lg(x); e1 = ex - bit_accuracy(lx) + 1;
       y = ishiftr_lg(p1, lx, e1);

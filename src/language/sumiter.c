@@ -864,7 +864,7 @@ sumalt(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = gpowgs(e1,N);
   d = shiftr(addrr(d, ginv(d)),-1);
-  az = negi(gone); c = d;
+  az = gminusone; c = d;
   s = gzero;
   for (k=0; ; k++)
   {
@@ -923,7 +923,7 @@ sumpos(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   e1 = addsr(3,gsqrt(stoi(8),prec));
   N = (long)(0.4*(bit_accuracy(prec) + 7));
   d = gpowgs(e1,N); d = shiftr(addrr(d, ginv(d)),-1);
-  az = negi(gone); c = d; s = gzero;
+  az = gminusone; c = d; s = gzero;
 
   G = -bit_accuracy(prec) - 5;
   stock = (GEN*)new_chunk(N+1); for (k=1; k<=N; k++) stock[k] = NULL;
