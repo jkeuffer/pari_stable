@@ -42,7 +42,8 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.10 (released ??/??/2005):
   Fixed
 BA  1- gp2c description of == operator was broken.
-    2- asin(I) --> SEGV, acos(1 + 0. * I) --> SEGV
+    2- asin(I) --> SEGV, acos(1 + 0. * I) --> SEGV, atan(I/2) --> SEGV
+       sqrt(0*I),acosh(1+0*I) --> oo loop
     3- make test-kernel didn't work [missing gen_m1 & int2n]
     4- thetanullk(1/2,1) --> SEGV [from 2.2.9]
 

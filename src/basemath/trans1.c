@@ -909,7 +909,7 @@ gsqrt(GEN x, long prec)
       y[2] = (long)p1; return y;
 
     case t_COMPLEX:
-      if (isexactzero((GEN)x[2])) return gsqrt(x, prec);
+      if (isexactzero((GEN)x[2])) return gsqrt((GEN)x[1], prec);
       y = cgetg(3,t_COMPLEX); av = avma;
 
       p1 = gsqr((GEN)x[1]);

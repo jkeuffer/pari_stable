@@ -121,7 +121,7 @@ GEN
 gatan(GEN x, long prec)
 {
   pari_sp av;
-  GEN a, y, p1;
+  GEN a, y;
 
   switch(typ(x))
   {
@@ -129,10 +129,7 @@ gatan(GEN x, long prec)
       return mpatan(x);
 
     case t_COMPLEX:
-      av = avma;
-      y = gerepileupto(av, gath(mulcxI(x),prec));
-      p1 = (GEN)y[1]; y[1] = y[2]; y[2] = (long)p1;
-      setsigne(p1,-signe(p1)); return y;
+      av = avma; return gerepilecopy(av, mulcxmI(gath(mulcxI(x),prec)));
 
     case t_INTMOD: case t_PADIC: err(typeer,"gatan");
 
@@ -517,9 +514,14 @@ gash(GEN x, long prec)
     case t_COMPLEX: av = avma; 
       p1 = gadd(x, gsqrt(gaddsg(1,gsqr(x)), prec));
       y = glog(p1,prec);
-      sz = gsigne((GEN)y[1]);
-      sx = gsigne((GEN)p1[1]);
-      sy = gsigne((GEN)p1[2]);
+      sz = (typ(y)==t_COMPLEX)? gsigne((GEN)y[1]): gsigne(y);
+      if (typ(p1) == t_COMPLEX) {
+        sx = gsigne((GEN)p1[1]);
+        sy = gsigne((GEN)p1[2]);
+      } else {
+        sx = gsigne(p1);
+        sy = 0;
+      }
       if (sx > 0 || (!sx && sy*sz<=0)) return gerepileupto(av, y);
 
       p1 = mppi(prec); if (sy<0) setsigne(p1,-1);
