@@ -80,6 +80,7 @@ mulpol_limb(GEN x, GEN y, char *ynonzero, long a, long b)
   return p1 ? gerepileupto(av, p1): gzero;
 }
 
+/* assume nx >= ny > 0 */
 static GEN
 mulpol(GEN x, GEN y, long nx, long ny)
 {
@@ -87,7 +88,6 @@ mulpol(GEN x, GEN y, long nx, long ny)
   GEN z;
   char *p1;
 
-  if (!ny) return zeropol(0);
   lz = nx+ny+1; nz = lz-2;
   z = cgetg(lz, t_POL) + 2; /* x:y:z [i] = term of degree i */
   p1 = gpmalloc(ny);
@@ -194,9 +194,10 @@ quickmul(GEN a, GEN b, long na, long nb)
 
   while (na && isexactzero((GEN)a[0])) { a++; na--; v++; }
   while (nb && isexactzero((GEN)b[0])) { b++; nb--; v++; }
-  if (v) (void)new_chunk(v);
-
   if (na < nb) swapspec(a,b, na,nb);
+  if (!nb) return zeropol(0);
+
+  if (v) (void)new_chunk(v); /* free cells for shiftpol_ip */
   if (nb < MUL_LIMIT)
     return shiftpol_ip(mulpol(a,b,na,nb), v);
   i=(na>>1); n0=na-i; na=i;
