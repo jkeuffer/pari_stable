@@ -3605,7 +3605,6 @@ modulargcd(GEN A0, GEN B0)
   {
     NEXT_PRIME_VIADIFF_CHECK(p,d);
     if (!umodiu(g,p)) continue;
-
     a = ZX_to_Flx(A, p);
     b = ZX_to_Flx(B, p); Hp = Flx_gcd_i(a,b, p);
     m = degpol(Hp);
@@ -3624,6 +3623,8 @@ modulargcd(GEN A0, GEN B0)
       H = ZX_init_CRT(Hp,p,varn(A0));
       q = utoi(p); n = m; continue;
     }
+    if (DEBUGLEVEL>5)
+      msgtimer("gcd mod %lu (bound 2^%ld)", p,expi(q));
 
     qp = muliu(q,p);
     if (ZX_incremental_CRT(&H, Hp, q, qp, p))
@@ -3636,9 +3637,8 @@ modulargcd(GEN A0, GEN B0)
     q = qp;
     if (low_stack(avlim, stack_lim(av,1)))
     {
-      GEN *gptr[2]; gptr[0]=&H; gptr[1]=&q;
       if (DEBUGMEM>1) err(warnmem,"modulargcd");
-      gerepilemany(av2,gptr,2);
+      gerepileall(av2, 2, &H, &q);
     }
   }
   return gerepileupto(av, gmul(D,H));
