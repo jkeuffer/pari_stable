@@ -545,6 +545,7 @@ isprincipalraygen(GEN bnr, GEN x)
   return isprincipalrayall(bnr,x,nf_GEN);
 }
 
+/* N! / N^N * (4/pi)^r2 * sqrt(|D|) */
 GEN
 minkowski_bound(GEN D, long N, long r2, long prec)
 {
