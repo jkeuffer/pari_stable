@@ -984,7 +984,8 @@ END:
   if (funeq)
   {
     GEN pitemp = mppi(prec); setexpo(pitemp,2); /* 2Pi */
-    y = gmul(gmul(y, ggamma(s,prec)), gpui(pitemp,gneg(s),prec));
+    y = gmul(gmul(y, ggamma(gprec_w(s,prec-1),prec)),
+             gpui(pitemp,gneg(s),prec));
     setexpo(pitemp,0); /* Pi/2 */
     y = gmul2n(gmul(y, gcos(gmul(pitemp,s),prec)), 1);
   }
