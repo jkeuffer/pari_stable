@@ -102,14 +102,6 @@ LogHeight(GEN x, long prec)
   return gdivgs(glog(LH,prec), n);
 }
 
-/* x^(1/n) */
-static GEN
-mpsqrtn(GEN x, long n)
-{
-  if (typ(x) != t_REAL) err(typeer,"mpsqrtn");
-  return mpexp(divrs(mplog(x), n));
-}
-
 /* |x|^(1/n), x t_INT */
 static GEN
 absisqrtn(GEN x, long n, long prec) {

@@ -1126,6 +1126,14 @@ padic_sqrtn(GEN x, GEN n, GEN *zetan)
   return gerepile(ltop,tetpil,x);
 }
 
+/* x^(1/n) */
+GEN
+mpsqrtn(GEN x, long n)
+{
+  if (typ(x) != t_REAL) err(typeer,"mpsqrtn");
+  return mpexp(divrs(mplog(x), n));
+}
+
 GEN
 gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 {
