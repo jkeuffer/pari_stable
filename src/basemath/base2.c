@@ -1445,12 +1445,15 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   return gerepilecopy(av, nu);
 }
 
-/* return the prime element in Zp[phi], nup, chip in Z[X] */
+/* return the prime element in Zp[phi], nup, chip in Z[X]
+ * if *Ep < oE or Ep divides Ediv (!=0) return NULL (not interesting)
+ * */
 static GEN
-getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
+getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep, 
+         long oE, long Ediv)
 {
-  long L, E, r, s;
-  GEN chin, pip, pp;
+  GEN chin, pip, pp, d;
+  long r, s;
 
   if (degpol(nup) == 1)
   {
@@ -1460,22 +1463,28 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep)
   else
     chin = ZX_caract(chip, nup, varn(chip));
 
-  vstar(S->p, chin, &L, &E);
-  (void)cbezout(L, -E, &r, &s);
+  vstar(S->p, chin, Lp, Ep);
+  if (*Ep < oE || (Ediv && Ediv % *Ep == 0)) return NULL;
+
+  if (*Ep == 1) return S->p;
+  (void)cbezout(*Lp, -*Ep, &r, &s);
   if (r <= 0)
   {
-    long q = 1 + ((-r) / E);
-    r += q*E;
-    s += q*L;
+    long q = 1 + ((-r) / *Ep);
+    r += q* *Ep;
+    s += q* *Lp;
   }
-  /* r > 0 minimal such that r L/E - s = 1/E */
+  /* r > 0 minimal such that r L/E - s = 1/E
+   * pi = nu^r / p^s is an element of valuation 1/E,
+   * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
 
   pip = RX_RXQ_compo(nup, phi, S->chi);
   pip = lift_intern(gpowgs(gmodulcp(pip, S->chi), r));
-  pp  = gpowgs(S->p, s);
 
-  *Lp = L;
-  *Ep = E; return gdiv(pip, pp);
+  pip = Q_remove_denom(pip, &d);
+  pp  = gpowgs(S->p, s);
+  if (d) pp = mulii(d, pp);
+  return gdiv(centermod(pip, mulii(pp,S->p)), pp);
 }
 
 static void
@@ -1753,12 +1762,9 @@ loop(decomp_t *S, long nv, GEN pdr, GEN pmr, GEN pmf, long Ea, long Fa, GEN ns)
         if (divise(constant_term(chie), pmr))
           chie = mycaract(S->chi, eta, S->p, pmf, -1, ns);
         
-        pie = getprime(S, eta, chie, nue, &Le, &Ee);
-        if (Ea % Ee)
-        {
-          pie = redelt(pie, S->p, S->p);
+        pie = getprime(S, eta, chie, nue, &Le, &Ee,  0,Ea);
+        if (pie)
           return testc2(S, pmr, pmf, S->nu, Ea, pie, Ee, ns);
-        }
         break;
       }
     }
@@ -1812,15 +1818,15 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   {
     l = 2; /* Decomp by default */
     Fa   = degpol(S->nu);
-    pia  = getprime(S, polx[v], S->chi, S->nu, &La, &Ea);
-    if (Ea < oE)
+    for(;;)
     {
+      pia  = getprime(S, polx[v], S->chi, S->nu, &La, &Ea, oE,0);
+      if (pia) break;
       S->phi = gadd(S->phi, opa);
       S->chi = NULL;
       if (!update_phi(S, &pdr, &pmr, ns)) break;
-      pia  = getprime(S, polx[v], S->chi, S->nu, &La, &Ea);
     }
-    pia  = redelt(pia, pmr, p);
+    if (!pia) break;
     oE = Ea; opa = RX_RXQ_compo(pia, S->phi, S->f);
     if (La > 1)
     { /* change phi such that nu = pia */
