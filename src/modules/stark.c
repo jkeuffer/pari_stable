@@ -2496,11 +2496,11 @@ GenusField(GEN bnf)
 static GEN
 AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 {
-  long cl, i, j, cpt = 0, N, h, v, n, bnd = 300, sq = 1, r1, r2;
+  long cl, i, j, cpt = 0, N, h, v, n, bnd = 300, r1, r2;
   pari_sp av, av2;
   int **matan;
   GEN p1, p2, S, T, polrelnum, polrel, Lp, W, A, veczeta, sig;
-  GEN vChar, degs, ro, C, Cmax, dataCR, cond1, L1, an;
+  GEN vChar, degs, C, Cmax, dataCR, cond1, L1, an;
   LISTray LIST;
 
   nf_get_sign(nf, &r1,&r2);
