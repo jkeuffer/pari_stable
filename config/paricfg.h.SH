@@ -8,15 +8,16 @@ case "$optimization" in
   *) debuginfo=" -- $optimization";;
 esac
 
-case "$osname" in
-  os2) gphelp="perl -S gphelp -detex" ;;
-  *) gphelp="$bindir/gphelp" ;;
-esac
+if test -n "$perl"; then
+  case "$osname" in
+    os2) gphelp="perl -S gphelp -detex" ;;
+    *) gphelp="$bindir/gphelp" ;;
+  esac
+fi
 
 cat > $file << EOT
 /*  This file was created by Configure. Any change made to it will be lost
- *  next time Configure is run.
- */
+ *  next time Configure is run. */
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 EOT
