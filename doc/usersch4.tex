@@ -1304,13 +1304,23 @@ to \tet{BIGINT}, which has lower priority than any other variable number.
 
 The components \kbd{z[2]}, \kbd{z[3]},\dots \kbd{z[lg(z)-1]} point to the
 coefficients of the polynomial \emph{in ascending order}, with \kbd{z[2]}
-being the constant term and so on. For an object of type \typ{POL},
-\tet{leading_term}, \tet{constant_term}, \tet{degpol} return a pointer to the
-leading term (with respect to the main variable of course), constant term,
-and degree of the polynomial (with the convention $\deg(0) = -1$). Applied to
-any other type, the result is unspecificied. Note that no copy is made on the
-pari stack so the returned value is not safe for a basic \kbd{gerepile} call.
-Note that $\kbd{degpol(z)} = \kbd{lg(z)} - 3$.
+being the constant term and so on.
+
+For an object of type \typ{POL}, \tet{leading_term}, \tet{constant_term},
+\tet{degpol} return a pointer to the leading term (with respect to the main
+variable of course), constant term, and degree of the polynomial (with the
+convention $\deg(0) = -1$). Applied to any other type, the result is
+unspecificied. Note that no copy is made on the pari stack so the returned
+value is not safe for a basic \kbd{gerepile} call. Note that $\kbd{degpol(z)}
+= \kbd{lg(z)} - 3$.
+
+The leading term is not allowed to be an exact $0$ (\emph{unnormalized
+polynomial}). To prevent this, one may use
+
+\fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
+(with all coefficients correctly set except that \kbd{leading\_term(x)} might
+be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
+internal use.
 
 \fun{long}{degree}{GEN x} returns the degree of \kbd{x} with respect to its
 main variable even when \kbd{x} is not a polynomial (a rational function for
@@ -1349,8 +1359,8 @@ type \typ{INT}. \kbd{z[4]} is Shanks's distance function, and must be of type
 
 \subsec{Type \typ{QFI} (definite binary quadratic form)}:%
 \kbdsidx{t_QFI}\sidx{definite binary quadratic form} \kbd{z[1]}, \kbd{z[2]},
-\kbd{z[3]} point to the three coefficients of the form. All three are
-of type \typ{INT}.
+\kbd{z[3]} point to the three coefficients of the form. All three are of type
+\typ{INT}.
 
 \subsec{Type \typ{VEC} and \typ{COL} (vector)}:%
 \kbdsidx{t_VEC}\kbdsidx{t_COL}\sidx{row vector}\sidx{column vector}
@@ -1405,8 +1415,8 @@ ascertained using
 which is $>0$, $=0$, $<0$ whenever $v$ has lower, resp.~same, resp.~higher
 priority than $w$.
 
-The way an object is considered in formal computations depends entirely
-on its ``principal variable number'' which is given by the function
+The way an object is considered in formal computations depends entirely on
+its ``principal variable number'' which is given by the function
 
 \fun{long}{gvar}{GEN z}
 

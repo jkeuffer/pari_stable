@@ -1907,8 +1907,9 @@ might be zero), normalizes \kbd{x} correctly in place. Returns~\kbd{x}.
 For internal use.
 
 \fun{GEN}{normalizepol}{GEN x} applied to an unnormalized \typ{POL}~\kbd{x}
-(with all coefficients correctly set except that \kbd{x[2]} might be zero),
-normalizes \kbd{x} correctly in place and returns~\kbd{x}. For internal use.
+(with all coefficients correctly set except that \kbd{leading\_term(x)} might
+be zero), normalizes \kbd{x} correctly in place and returns~\kbd{x}. For
+internal use.
 
 \subsec{Constructors}
 
@@ -1931,20 +1932,20 @@ Assumes that \kbd{x} is non-zero.
 \kbd{v}, whose constant coefficient is (a copy of) \kbd{x}.
 
 
-\fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to 
+\fun{GEN}{zerocol}{long n} creates a \typ{COL} with \kbd{n} components set to
 \kbd{gzero}.
 
-\fun{GEN}{zerovec}{long n} creates a \typ{VEC} with \kbd{n} components set to 
+\fun{GEN}{zerovec}{long n} creates a \typ{VEC} with \kbd{n} components set to
 \kbd{gzero}.
 
 \fun{GEN}{vec_ei}{long n, long i} creates a \typ{VEC} with \kbd{n} components
 set to \kbd{gzero}, but the \kbd{i}-th one which us set to \kbd{gun}
 (\kbd{i}-th vector in the canonical basis).
 
-\fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n} components
-set to \kbd{gzero}, but the \kbd{i}-th one which us set to \kbd{C}. \emph{No
-copy is made}, so if \kbd{C} is not a permanent object, the result is not
-suitable for \kbd{gerepileupto}.
+\fun{GEN}{vec_Cei}{long n, long i} creates a \typ{VEC} with \kbd{n}
+components set to \kbd{gzero}, but the \kbd{i}-th one which us set to
+\kbd{C}. \emph{No copy is made}, so if \kbd{C} is not a permanent object, the
+result is not suitable for \kbd{gerepileupto}.
 
 \fun{GEN}{zeromat}{long m, long n} creates a \typ{MAT} with \kbd{m} x \kbd{n}
 components set to \kbd{gzero}.
