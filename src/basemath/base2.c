@@ -1882,7 +1882,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
 GEN
 fast_respm(GEN f, GEN g, GEN p, long M)
 {
-  long m = 16 / (lgefint(p)-2);
+  long m = 32 / expi(p); /* p^m ~ 2^32 for initial value of m */
   GEN R, q = NULL;
   if (!m) m = 1;
   for(;; m <<= 1) {
@@ -1929,13 +1929,13 @@ indexpartial(GEN P, GEN DP)
   if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: discriminant");
   fa = auxdecomp(DP, 0);
   if(DEBUGLEVEL>=5) msgTIMER(&T,"IndexPartial: factorization");
-  nb = lg(fa[1]);
-  for (i = 1; i < nb; i++)
+  nb = lg(fa[1])-1;
+  for (i = 1; i <= nb; i++)
   {
     long E = itos(gmael(fa,2,i)), e = E >> 1;
     GEN p = gmael(fa,1,i), q = p;
-    if (i == nb-1)
-      q = gpowgs(p, (odd(e) && !BSW_psp(p))? e+1: e);
+    if (i == nb)
+      q = gpowgs(p, (odd(E) && !BSW_psp(p))? e+1: e);
     else if (e >= 2)
     {
       if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z^%ld ",p,E);
