@@ -1108,7 +1108,7 @@ GEN
 gmul(GEN x, GEN y)
 {
   long tx, ty, lx, ly, vx, vy, i, j, k, l;
-  pari_sp av, tetpil;
+  pari_sp av, av2, tetpil;
   GEN z,p1,p2,p3,p4;
 
   if (x == y) return gsqr(x);
@@ -1276,10 +1276,12 @@ gmul(GEN x, GEN y)
 	    x = gadd((GEN)x[1],(GEN)x[2]);
             y = gadd((GEN)y[1],(GEN)y[2]);
 	    y = gmul(x,y); x = gadd(p1,p2);
-	    tetpil = avma; z[1] = lsub(p1,p2); z[2] = lsub(y,x);
+	    tetpil = avma;
+            z[1] = lsub(p1,p2); av2 = avma;
+            z[2] = lsub(y,x);
             if (isexactzero((GEN)z[2]))
             {
-              avma = (pari_sp)z[1];
+              avma = av2;
               return gerepileupto((pari_sp)(z+3), (GEN)z[1]);
             }
 	    gerepilemanyvec(av,tetpil, z+1,2); return z;
