@@ -271,25 +271,30 @@ vpariputs(char* format, va_list args)
   for(;;)
   {
     int l;
-    s = buf = gpmalloc(bufsize);
+    buf = gpmalloc(bufsize);
     l = vsnprintf(buf,bufsize,str,args);
     if (l < 0) l = bufsize<<1; else if (l < bufsize) break;
     free(buf); bufsize++;
   }
   buf[bufsize] = 0; /* just in case */
 #else
-  s = buf = gpmalloc(bufsize);
+  buf = gpmalloc(bufsize);
   (void)vsprintf(buf,str,args); /* pray it does fit */
 #endif
+  f = s = buf;
   if (nb)
-    for (f=s; *f; f++)
+    while ( *f )
+    {
       if (*f == '\003' && f[21] == '\003')
       {
         *f = 0; f[21] = 0; /* remove the bracing chars */
         pariOut->puts(s); bruteall((GEN)atol(f+1),'g',-1,1);
-        f += 21; s = f;
-        if (!--nb) { s++; break; }
+        f += 22; s = f;
+        if (!--nb) break; 
       }
+      else
+        f++;
+    }
   pariOut->puts(s); free(buf); free(str);
 }
 
