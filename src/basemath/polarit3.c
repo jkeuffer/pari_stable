@@ -1414,7 +1414,7 @@ typedef struct {
 } FpXQYQ_muldata;
 
 static GEN
-_FpXQYQ_redswap(GEN x, GEN S, GEN T, GEN p)
+FpXQYQ_redswap(GEN x, GEN S, GEN T, GEN p)
 {
   gpmem_t ltop=avma;
   long n=degpol(S);
@@ -1428,22 +1428,22 @@ _FpXQYQ_redswap(GEN x, GEN S, GEN T, GEN p)
   return gerepilecopy(ltop,V); 
 }
 static GEN
-_FpXQYQ_sqr(void *data, GEN x)
+FpXQYQ_sqr(void *data, GEN x)
 {
   FpXQYQ_muldata *D = (FpXQYQ_muldata*)data;
-  return _FpXQYQ_redswap(FpXQX_sqr(x, D->S, D->p),D->S,D->T,D->p);
+  return FpXQYQ_redswap(FpXQX_sqr(x, D->S, D->p),D->S,D->T,D->p);
   
 }
 static GEN
-_FpXQYQ_mul(void *data, GEN x, GEN y)
+FpXQYQ_mul(void *data, GEN x, GEN y)
 {
   FpXQYQ_muldata *D = (FpXQYQ_muldata*)data;
-  return _FpXQYQ_redswap(FpXQX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
+  return FpXQYQ_redswap(FpXQX_mul(x,y, D->S, D->p),D->S,D->T,D->p);
 }
 
 /* x in Z[X,Y], S in Z[X] over Fq = Z[Y]/(p,T); compute lift(x^n mod (S,T,p)) */
 GEN
-_FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
+FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
   gpmem_t av = avma;
   FpXQYQ_muldata D;
@@ -1451,7 +1451,7 @@ _FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   D.S = S;
   D.T = T;
   D.p = p;
-  y = leftright_pow(x, n, (void*)&D, &_FpXQYQ_sqr, &_FpXQYQ_mul);
+  y = leftright_pow(x, n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
   return gerepileupto(av, y);
 }
 
@@ -1461,7 +1461,7 @@ typedef struct {
 } kronecker_muldata;
 
 static GEN
-FpXQYQ_red(void *data, GEN x)
+_FqXQ_red(void *data, GEN x)
 {
   kronecker_muldata *D = (kronecker_muldata*)data;
   GEN t = FpXQX_from_Kronecker(x, D->T,D->p);
@@ -1470,17 +1470,17 @@ FpXQYQ_red(void *data, GEN x)
   return to_Kronecker(t,D->T);
 }
 static GEN
-FpXQYQ_mul(void *data, GEN x, GEN y) {
-  return FpXQYQ_red(data, gmul(x,y));
+_FqXQ_mul(void *data, GEN x, GEN y) {
+  return _FqXQ_red(data, FpX_mul(x,y,NULL));
 }
 static GEN
-FpXQYQ_sqr(void *data, GEN x) {
-  return FpXQYQ_red(data, gsqr(x));
+_FqXQ_sqr(void *data, GEN x) {
+  return _FqXQ_red(data, FpX_sqr(x,NULL));
 }
 
 /* x over Fq, return lift(x^n) mod S */
 GEN
-FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
+FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
 {
   gpmem_t av0 = avma;
   long v = varn(x);
@@ -1492,7 +1492,7 @@ FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p)
   D.T = T;
   D.p = p;
   D.v = v;
-  y = leftright_pow(x, n, (void*)&D, &FpXQYQ_sqr, &FpXQYQ_mul);
+  y = leftright_pow(x, n, (void*)&D, &_FqXQ_sqr, &_FqXQ_mul);
   y = FpXQX_from_Kronecker(y, T,p);
   setvarn(y, v); return gerepileupto(av0, y);
 }
@@ -1937,8 +1937,8 @@ Fp_intersect(long n, GEN P, GEN Q, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       A=intersect_ker(P, MA, U, l); 
       B=intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) (void)timer2();
-      An=(GEN) _FpXQYQ_pow(A,stoi(pg),U,P,l)[2];
-      Bn=(GEN) _FpXQYQ_pow(B,stoi(pg),U,Q,l)[2];
+      An=(GEN) FpXQYQ_pow(A,stoi(pg),U,P,l)[2];
+      Bn=(GEN) FpXQYQ_pow(B,stoi(pg),U,Q,l)[2];
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
       z=FpXQ_inv(Bn,U,l);
       z=FpXQ_mul(An,z,U,l);

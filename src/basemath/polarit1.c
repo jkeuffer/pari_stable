@@ -529,7 +529,7 @@ rootmod0(GEN f, GEN p, long flag)
 #define FqX_sqr FpXQX_sqr
 static GEN spec_FpXQ_pow(GEN x, GEN p, GEN S);
 extern GEN pol_to_vec(GEN x, long N);
-extern GEN FpXQYQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
+extern GEN FqXQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
 extern GEN FpXQX_from_Kronecker(GEN z, GEN pol, GEN p);
 extern GEN FpXQX_safegcd(GEN P, GEN Q, GEN T, GEN p);
 extern GEN u_normalizepol(GEN x, long lx);
@@ -569,7 +569,7 @@ FqM_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p)
   GEN vker,v,w,Q,p1;
   if (DEBUGLEVEL > 7) (void)timer2();
   Q = cgetg(N+1,t_MAT); Q[1] = (long)zerocol(N);
-  w = v = FpXQYQ_pow(polx[varn(u)], q, u, T, p);
+  w = v = FqXQ_pow(polx[varn(u)], q, u, T, p);
   for (j=2; j<=N; j++)
   {
     p1 = pol_to_vec(w, N);
@@ -1237,7 +1237,7 @@ FqX_split_berlekamp(GEN *t, GEN q, GEN T, GEN p)
         gpmem_t av = avma;
         b = FqX_rem(polt, a, T,p);
         if (!degpol(b)) { avma=av; continue; }
-        b = FpXQYQ_pow(b,qo2, a,T,p);
+        b = FqXQ_pow(b,qo2, a,T,p);
         if (!degpol(b)) { avma=av; continue; }
         b[2] = ladd((GEN)b[2], gun);
         b = FqX_gcd(a,b, T,p); lb = degpol(b);
@@ -2148,7 +2148,7 @@ FqX_split(GEN *t, long d, GEN q, GEN S, GEN T, GEN p)
     }
     else
     {
-      w = FpXQYQ_pow(w, shifti(q,-1), *t, T, p);
+      w = FqXQ_pow(w, shifti(q,-1), *t, T, p);
       /* w in {-1,0,1}^r */
       if (!degpol(w)) continue;
       w[2] = ladd((GEN)w[2], gun);
@@ -2199,7 +2199,7 @@ init_pow_q_mod_pT(GEN X, GEN q, GEN u, GEN T, GEN p)
   long i, n = degpol(u);
   GEN p1, S = cgetg(n, t_VEC);
 
-  S[1] = (long)FpXQYQ_pow(X, q, u, T, p);
+  S[1] = (long)FqXQ_pow(X, q, u, T, p);
 #if 1 /* use as many squarings as possible */
   for (i=2; i < n; i+=2)
   {
