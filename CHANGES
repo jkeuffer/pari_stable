@@ -159,6 +159,10 @@ BA 67- matsnf(Mat([])) was returning a matrix instead of a vector.
    71- ellap(ellinit([0,1,0,1,0]),100) --> SEGV  [ 100 is not prime ! ]
 MS 72- recover from readline history corruption [ don't trust history_length
        in history_is_new() ]
+   73- obscure bug in thue() [ unit of norm -1 not found due
+       to interface inconsistencies ]
+          t = thueinit(x^6 - 2);
+          thue(t, 2638)  --> []
 
   Changed
     1- lgef / setlgef / evallgef removed. One may safely use lg for t_POLs.

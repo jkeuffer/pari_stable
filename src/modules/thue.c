@@ -1006,7 +1006,7 @@ get_unit_1(GEN bnf, GEN *unit)
   for (i = 1; i < lg(v); i++)
   {
     GEN s = sum((GEN)v[i], 1, lg(v[i])-1);
-    if (mpodd(s)) {
+    if (gcmp0(s)) {
       GEN fu = check_units(bnf, "bnfisintnorm");
       *unit = (GEN)fu[i]; return 1;
     }
