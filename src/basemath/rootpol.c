@@ -1774,7 +1774,7 @@ cauchy_bound(GEN p)
     y = divrs(mplog(y), n-i);
     if (gcmp(y,x) > 0) x = y;
   }
-  return gexp(x, prec);
+  return gmul2n(gexp(x, prec), 1);
 }
 
 static GEN
@@ -1856,7 +1856,7 @@ all_roots(GEN p, long bitprec)
   for (av=avma,i=1;; i++,avma=av)
   {
     roots_pol = cget1(n+1,t_VEC);
-    bitprec2 += e + (1<<i)*n;
+    bitprec2 += e + (n << i);
     q = gmul(myrealun(bitprec2), mygprec(pd,bitprec2));
     m = split_complete(q,bitprec2,roots_pol);
     roots_pol = fix_roots(roots_pol, &m, h, bitprec2);
