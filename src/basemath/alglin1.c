@@ -827,16 +827,16 @@ gauss_triangle_i(GEN A, GEN B)
 }
 
 GEN
-gauss_get_col(GEN a, GEN b, GEN p, long nbli)
+gauss_get_col(GEN a, GEN b, GEN p, long li)
 {
-  GEN m, u=cgetg(nbli+1,t_COL);
+  GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[nbli] = ldiv((GEN) b[nbli],p);
-  for (i=nbli-1; i>0; i--)
+  u[li] = ldiv((GEN) b[li],p);
+  for (i=li-1; i>0; i--)
   {
     m = gneg_i((GEN)b[i]);
-    for (j=i+1; j<=nbli; j++)
+    for (j=i+1; j<=li; j++)
       m = gadd(m, gmul(gcoeff(a,i,j),(GEN) u[j]));
     u[i] = ldiv(gneg_i(m), gcoeff(a,i,i));
   }
@@ -850,44 +850,48 @@ _addmul(GEN b, long k, long i, GEN m)
   b[k] = ladd((GEN)b[k], gmul(m, (GEN)b[i]));
 }
 
-/* Gauss pivot.
- * Compute a^(-1)*b, where nblig(a) = nbcol(a) = nblig(b).
+/* Gaussan Elimination. Compute a^(-1)*b
  * b is a matrix or column vector, NULL meaning: take the identity matrix
- * Be careful, if a or b is empty, the result is the empty matrix...
- */
+ * If a and b are empty, the result is the empty matrix.
+ *
+ * li: nb lines of a and b
+ * aco: nb columns of a
+ * bco: nb columns of b (if matrix)
+ *
+ * li > aco is allowed if b = NULL, in which case return c such that c a = Id */
 GEN
 gauss(GEN a, GEN b)
 {
-  long inexact,iscol,nbli,nbco,i,j,k,av,tetpil,lim;
+  long inexact,iscol,i,j,k,av,lim,li,bco, aco = lg(a)-1;
   GEN p,m,u;
-  /* nbli: nb lines of b = nb columns of a */
-  /* nbco: nb columns of b (if matrix) */
 
   if (typ(a)!=t_MAT) err(mattype1,"gauss");
   if (b && typ(b)!=t_COL && typ(b)!=t_MAT) err(typeer,"gauss");
-  if (lg(a) == 1)
+  if (!aco)
   {
     if (b && lg(b)!=1) err(consister,"gauss");
     if (DEBUGLEVEL) err(warner,"in Gauss lg(a)=1 lg(b)=%ld", b?1:-1);
     return cgetg(1,t_MAT);
   }
   av=avma; lim=stack_lim(av,1);
-  nbli = lg(a)-1; if (nbli!=lg(a[1])-1) err(mattype1,"gauss");
+  li = lg(a[1])-1;
+  if (li != aco && (li < aco || b)) err(mattype1,"gauss");
   a = dummycopy(a);
-  b = check_b(b,nbli); nbco = lg(b)-1;
+  b = check_b(b,li); bco = lg(b)-1;
   inexact = use_maximal_pivot(a);
   iscol   = (typ(b)==t_COL);
   if(DEBUGLEVEL>4)
     fprintferr("Entering gauss with inexact=%ld iscol=%ld\n",inexact,iscol);
 
-  for (i=1; i<nbli; i++)
+  p = NULL; /* gcc -Wall */
+  for (i=1; i<=aco; i++)
   {
     /* k is the line where we find the pivot */
-    p=gcoeff(a,i,i); k=i;
+    p = gcoeff(a,i,i); k = i;
     if (inexact) /* maximal pivot */
     {
       long e, ex = gexpo(p);
-      for (j=i+1; j<=nbli; j++)
+      for (j=i+1; j<=li; j++)
       {
         e = gexpo(gcoeff(a,j,i));
         if (e > ex) { ex=e; k=j; }
@@ -896,30 +900,31 @@ gauss(GEN a, GEN b)
     }
     else if (gcmp0(p)) /* first non-zero pivot */
     {
-      do k++; while (k<=nbli && gcmp0(gcoeff(a,k,i)));
-      if (k>nbli) err(matinv1);
+      do k++; while (k<=li && gcmp0(gcoeff(a,k,i)));
+      if (k>li) err(matinv1);
     }
 
     /* if (k!=i), exchange the lines s.t. k = i */
     if (k != i)
     {
-      for (j=i; j<=nbli; j++) swap(coeff(a,i,j), coeff(a,k,j));
+      for (j=i; j<=aco; j++) swap(coeff(a,i,j), coeff(a,k,j));
       if (iscol) { swap(b[i],b[k]); }
       else
-        for (j=1; j<=nbco; j++) swap(coeff(b,i,j), coeff(b,k,j));
+        for (j=1; j<=bco; j++) swap(coeff(b,i,j), coeff(b,k,j));
       p = gcoeff(a,i,i);
     }
+    if (i == aco) break;
 
-    for (k=i+1; k<=nbli; k++)
+    for (k=i+1; k<=li; k++)
     {
       m=gcoeff(a,k,i);
       if (!gcmp0(m))
       {
 	m = gneg_i(gdiv(m,p));
-	for (j=i+1; j<=nbli; j++) _addmul((GEN)a[j],k,i,m);
+	for (j=i+1; j<=aco; j++) _addmul((GEN)a[j],k,i,m);
 	if (iscol) _addmul(b,k,i,m);
         else 
-          for (j=1; j<=nbco; j++) _addmul((GEN)b[j],k,i,m); 
+          for (j=1; j<=bco; j++) _addmul((GEN)b[j],k,i,m); 
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -931,25 +936,23 @@ gauss(GEN a, GEN b)
   }
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
-  p=gcoeff(a,nbli,nbli);
-  if (!inexact && gcmp0(p)) err(matinv1);
-  if (iscol) u = gauss_get_col(a,b,p,nbli);
+  if (iscol) u = gauss_get_col(a,b,p,aco);
   else
   {
     long av1 = avma;
-    lim = stack_lim(av1,1); u=cgetg(nbco+1,t_MAT);
-    for (j=2; j<=nbco; j++) u[j] = zero; /* dummy */
-    for (j=1; j<=nbco; j++)
+    lim = stack_lim(av1,1); u=cgetg(bco+1,t_MAT);
+    for (j=2; j<=bco; j++) u[j] = zero; /* dummy */
+    for (j=1; j<=bco; j++)
     {
-      u[j] = (long)gauss_get_col(a,(GEN)b[j],p,nbli);
+      u[j] = (long)gauss_get_col(a,(GEN)b[j],p,aco);
       if (low_stack(lim, stack_lim(av1,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"gauss[2]. j=%ld", j);
-        tetpil=avma; u = gerepile(av1,tetpil,gcopy(u));
+        u = gerepileupto(av1, gcopy(u));
       }
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(u));
+  return gerepileupto(av, gcopy(u));
 }
 
 /* x a matrix with integer coefficients. Return a multiple of the determinant

@@ -1163,13 +1163,13 @@ factmod0(GEN f, GEN pp)
   for(;;)
   {
     f2 = FpX_gcd(f,derivpol(f), pp);
-    g1 = gcmp1(f2)? f: FpX_div(f,f2,pp);
+    g1 = lgef(f2)==3? f: FpX_div(f,f2,pp);
     k = 0;
     while (lgef(g1)>3)
     {
       k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
       p1 = FpX_gcd(f2,g1, pp); u = g1; g1 = p1;
-      if (!gcmp1(p1))
+      if (lgef(p1)!=3)
       {
         u = FpX_div( u,p1,pp);
         f2= FpX_div(f2,p1,pp);

@@ -40,7 +40,6 @@ charpoly0(GEN x, int v, long flag)
   err(flagerr,"charpoly"); return NULL; /* not reached */
 }
 
-
 static GEN
 caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
 {
