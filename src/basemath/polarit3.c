@@ -2916,7 +2916,7 @@ ZY_ZXY_ResBound(GEN A, GEN B)
 GEN
 ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
 {
-  int checksqfree = lambda? 1: 0, delete = 0, first = 1;
+  int checksqfree = lambda? 1: 0, delete = 0, first = 1, stable;
   ulong av = avma, av2, lim, bound;
   long i,n, lb, dres = deg(A)*deg(B0), nmax = (dres+1)>>1;
   long vX = varn(B0), vY = varn(A); /* assume vX < vY */
@@ -2986,7 +2986,12 @@ INIT:
         }
         /* last pol in ERS has degree > 1 ? */
         goal = lg(dglist)-1;
-        if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
+        if (deg(B) == 1) { if (!goal) goto INIT; }
+        else
+        {
+          if (goal <= 1) goto INIT;
+          if (dglist[goal] != 0 || dglist[goal-1] != 1) goto INIT;
+        }
         if (DEBUGLEVEL>4)
           fprintferr("Degree list for ERS (trials: %ld) = %Z\n",n+1,dglist);
       }
@@ -3033,43 +3038,30 @@ INIT:
       checksqfree = 0;
     }
 
-    if (LERS)
-    {
-      int stable;
-      if (!H)
-      {
-        q = utoi(p); stable = 0;
-        H = init_CRT(Hp, p,vX);
+    if (!H)
+    { /* initialize */
+      q = utoi(p); stable = 0;
+      H = init_CRT(Hp, p,vX);
+      if (LERS) {
         H0= init_CRT(H0p, p,vX);
         H1= init_CRT(H1p, p,vX);
       }
-      else /* probabilistic for H0,H1 */
-      {
-        GEN qp = muliu(q,p);
-        stable = incremental_CRT(H, Hp,  q,qp, p);
-        stable &= incremental_CRT(H0,H0p, q,qp, p);
-        stable &= incremental_CRT(H1,H1p, q,qp, p);
-        q = qp;
-      }
-      if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
-      if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     }
     else
     {
-      if (!H)
-      {
-        q = utoi(p);
-        H = init_CRT(Hp, p,vX);
+      GEN qp = muliu(q,p);
+      stable = incremental_CRT(H, Hp, q,qp, p);
+      if (LERS) {
+        stable &= incremental_CRT(H0,H0p, q,qp, p);
+        stable &= incremental_CRT(H1,H1p, q,qp, p);
       }
-      else /* could make it probabilistic ??? [e.g if stable twice, etc] */
-      {
-        GEN qp = muliu(q,p);
-        (void)incremental_CRT(H, Hp, q,qp, p);
-        q = qp;
-      }
-      if (DEBUGLEVEL>5) msgtimer("resultant mod %ld (bound 2^%ld)", p,expi(q));
-      if ((ulong)expi(q) >= bound) break; /* DONE */
+      q = qp;
     }
+    /* could make it probabilistic for H ? [e.g if stable twice, etc]
+     * Probabilistic anyway for H0, H1 */
+    if (DEBUGLEVEL>5)
+      msgtimer("resultant mod %ld (bound 2^%ld, stable=%ld)", p,expi(q),stable);
+    if (stable && (ulong)expi(q) >= bound) break; /* DONE */
     if (low_stack(lim, stack_lim(av,2)))
     {
       GEN *gptr[4]; gptr[0] = &H; gptr[1] = &q; gptr[2] = &H0; gptr[3] = &H1;
