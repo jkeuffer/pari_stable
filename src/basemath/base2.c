@@ -2794,12 +2794,12 @@ rnfround2all(GEN nf, GEN pol, long all)
   else
   {
     I = cgetg(n+1,t_VEC); for (i=1; i<=n; i++) I[i]=(long)id;
-    A = idmat_intern(n, unnf, gzero);
+    A = idmat_intern(n, unnf, zerocol(N));
   }
   W = mat_to_vecpol(lift_intern(basistoalg(nf,A)), vpol);
-  p2=cgetg(n+1,t_MAT); for (j=1; j<=n; j++) p2[j]=lgetg(n+1,t_COL);
   sym = polsym(pol,n-1);
   pol = lift(pol);
+  p2 = cgetg(n+1,t_MAT); for (j=1; j<=n; j++) p2[j] = lgetg(n+1,t_COL);
   for (j=1; j<=n; j++)
     for (i=j; i<=n; i++)
     {
@@ -3596,13 +3596,8 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     vbs[i] = ldiv(gmul((GEN)vbs[i-1],vbspro),den);
   bs = gmul(vbs, vecpol_to_mat((GEN)nf[7],n));
 
-  vpro=cgetg(N+1,t_VEC);
-  for (i=1;i<=N;i++)
-  {
-    p1=cgetg(3,t_POLMOD);
-    p1[1]=(long)polabs;
-    p1[2]=lpuigs(polx[v],i-1); vpro[i]=(long)p1;
-  }
+  vpro = cgetg(N+1,t_VEC);
+  for (i=1;i<=N;i++) vpro[i] = (long)to_polmod(gpowgs(polx[v],i-1), polabs);
   vpro = gmul(vpro,elts); B = cgetg(m+1, t_MAT);
   for(i=1;i<=N;i++)
     for(j=1;j<=n;j++)
