@@ -2360,20 +2360,25 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
   return (GEN)x[1];
 }
 
-static GEN static_nf;
+static GEN static_OBJ; /* nf or ell */
 
 static GEN
-idmulred(GEN x, GEN y) { return idealmulred(static_nf, x, y, 0); }
+idmulred(GEN x, GEN y) { return idealmulred(static_OBJ, x, y, 0); }
 static GEN
-idpowred(GEN x, GEN n) { return idealpowred(static_nf, x, n, 0); }
+idpowred(GEN x, GEN n) { return idealpowred(static_OBJ, x, n, 0); }
 static GEN
-idmul(GEN x, GEN y) { return idealmul(static_nf, x, y); }
+idmul(GEN x, GEN y) { return idealmul(static_OBJ, x, y); }
 static GEN
-idpow(GEN x, GEN n) { return idealpow(static_nf, x, n); }
+idpow(GEN x, GEN n) { return idealpow(static_OBJ, x, n); }
 static GEN
-eltmul(GEN x, GEN y) { return element_mul(static_nf, x, y); }
+eltmul(GEN x, GEN y) { return element_mul(static_OBJ, x, y); }
 static GEN
-eltpow(GEN x, GEN n) { return element_pow(static_nf, x, n); }
+eltpow(GEN x, GEN n) { return element_pow(static_OBJ, x, n); }
+
+static GEN
+ellmul(GEN x, GEN y) { return powell(static_OBJ, x, y); }
+static GEN
+ellpow(GEN x, GEN n) { return idealpow(static_OBJ, x, n); }
 
 GEN
 _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
@@ -2419,12 +2424,15 @@ _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
 }
 
 GEN
-factorback_i(GEN fa, GEN e, GEN nf, int red)
+factorback_i(GEN fa, GEN e, GEN OBJ, int red)
 {
-  if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
-  if (!nf) return _factorback(fa, e, &gmul, &powgi);
+  if (!OBJ && e && lg(e) > 1 && typ(e[1]) != t_INT) {
+    OBJ = e;
+    e = NULL;
+  }
+  if (!OBJ) return _factorback(fa, e, &gmul, &powgi);
 
-  static_nf = checknf(nf);
+  static_OBJ = checknf(OBJ);
   if (red)
     return _factorback(fa, e, &idmulred, &idpowred);
   else
@@ -2437,7 +2445,7 @@ factorbackelt(GEN fa, GEN e, GEN nf)
   if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
   if (!nf) err(talker, "missing nf in factorbackelt");
 
-  static_nf = checknf(nf);
+  static_OBJ = checknf(nf);
   return _factorback(fa, e, &eltmul, &eltpow);
 }
 
