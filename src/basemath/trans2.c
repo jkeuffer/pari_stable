@@ -1221,6 +1221,11 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, long *av, GEN *res)
     p1 = cgetr(l+1); gaffect(s,p1);
     *sig = s = p1;
   }
+  if (typ(s)==t_REAL)
+  {
+    p1 = mpent(s);
+    if (gcmp0(subri(s,p1))) *s0 = p1;
+  }
   *prec = l; return s;
 }
 

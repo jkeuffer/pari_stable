@@ -797,6 +797,35 @@ n_s(long n, GEN *tab)
   return x;
 }
 
+GEN czeta(GEN s0, long prec);
+
+/* assume k != 1 */
+static GEN
+izeta(long k, long prec)
+{
+  long av = avma;
+  GEN y,p1,pi2;
+
+  /* treat trivial cases */
+  if (!k) { y = realun(prec); setexpo(y,-1); setsigne(y,-1); return y; }
+  if (k < 0)
+  {
+    if ((k&1) == 0) return gzero;
+    y = bernreal(1-k,prec);
+    return gerepileuptoleaf(av, divrs(y,k-1));
+  }
+  if (k > bit_accuracy(prec)+1) return realun(prec);
+  if ((k&1) == 0)
+  {
+    pi2 = mppi(prec); setexpo(pi2,2); /* 2Pi */
+    p1 = mulrr(gpuigs(pi2,k),absr(bernreal(k,prec)));
+    y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
+    return gerepileuptoleaf(av, y);
+  }
+  /* k > 1 odd */
+  return czeta(stoi(k), prec);
+}
+
 extern GEN rpowsi(ulong a, GEN n, long prec);
 extern GEN divrs2_safe(GEN x, long i);
 extern void dcxlog(double s, double t, double *a, double *b);
@@ -811,7 +840,7 @@ czeta(GEN s0, long prec)
 {
   GEN s, u, a, y, res, tes, sig, invn2, p1, unr;
   GEN sim, ms, s1, s2, s3, s4, s5, *tab, tabn;
-  long p, i, sqn, nn, lim, lim2, ct, av, av2, avlim;
+  long p, i, sqn, nn, lim, lim2, ct, av, av2 = avma, avlim;
   int funeq = 0;
   byteptr d;
 
@@ -820,6 +849,11 @@ czeta(GEN s0, long prec)
   if (gcmp0(s)) { y = gneg(ghalf); goto END; }
   if (signe(sig) <= 0 || expo(sig) < -1)
   { /* s <--> 1-s */
+    if (typ(s0) == t_INT)
+    {
+      p = itos(s0); avma = av2;
+      return izeta(p,prec);
+    }
     funeq = 1; s = gsub(gun, s); sig = greal(s);
   }
   if (gcmp(sig, stoi(bit_accuracy(prec) + 1)) > 0) { y = gun; goto END; }
@@ -954,33 +988,6 @@ END:
     y = gmul2n(gmul(y, gcos(gmul(pitemp,s),prec)), 1);
   }
   gaffect(y,res); avma = av; return res;
-}
-
-/* assume k != 1 */
-static GEN
-izeta(long k, long prec)
-{
-  long av = avma;
-  GEN y,p1,pi2;
-
-  /* treat trivial cases */
-  if (!k) return gneg(ghalf);
-  if (k < 0)
-  {
-    if ((k&1) == 0) return gzero;
-    y = bernreal(1-k,prec);
-    return gerepileuptoleaf(av, divrs(y,k-1));
-  }
-  if (k > bit_accuracy(prec)+1) return realun(prec);
-  if ((k&1) == 0)
-  {
-    pi2 = mppi(prec); setexpo(pi2,2); /* 2Pi */
-    p1 = mulrr(gpuigs(pi2,k),absr(bernreal(k,prec)));
-    y = divrr(p1, mpfactr(k,prec)); setexpo(y,expo(y)-1);
-    return gerepileuptoleaf(av, y);
-  }
-  /* k > 1 odd */
-  return czeta(stoi(k), prec);
 }
 
 GEN
