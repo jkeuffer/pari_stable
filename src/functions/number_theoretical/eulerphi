@@ -1,8 +1,9 @@
-Function: primepi
+Function: eulerphi
 Section: number_theoretical
-C-Name: primepi
+C-Name: gphi
 Prototype: G
-Help: primepi(x): the prime counting function pi(x) = #{p <= x, p prime}.
+Help: eulerphi(x): Euler's totient function of x
 Description: 
- (gen):int	primepi($1)
+ (int):int	phi($1)
+ (gen):gen	gphi($1)
 
