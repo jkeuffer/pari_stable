@@ -350,12 +350,21 @@ roots_to_ZX(GEN z, long *e)
   return b;
 }
 
+static GEN
+_res(long n, long s, long k)
+{
+  GEN y = cgetg(4, t_VEC);
+  y[1] = lstoi(n);
+  y[2] = lstoi(s);
+  y[3] = lstoi(k); return y;
+}
+
 GEN
 galois(GEN x, long prec)
 {
   gpmem_t av = avma, av1;
   long i,j,k,n,f,l,l2,e,e1,pr,ind;
-  GEN x1,p1,p2,p3,p4,p5,w,y,z,ee;
+  GEN x1,p1,p2,p3,p4,p5,w,z,ee;
   static int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
   static int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
                        1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
@@ -370,23 +379,15 @@ galois(GEN x, long prec)
 
   if (n<4)
   {
-    if (n<3)
-    {
-      avma=av; y=cgetg(4,t_VEC);
-      y[1] = (n==1)? un: deux;
-      y[2]=lnegi(gun);
-    }
-    else /* n=3 */
-    {
-      f=carreparfait(discsr(x));
-      avma=av; y=cgetg(4,t_VEC);
-      if (f) { y[1]=lstoi(3); y[2]=un; }
-      else   { y[1]=lstoi(6); y[2]=lnegi(gun); }
-    }
-    y[3]=un; return y;
+    if (n == 1) { avma = av; return _res(1, 1,1); }
+    if (n == 2) { avma = av; return _res(2,-1,1); }
+    /* n = 3 */
+    f = carreparfait(discsr(x));
+    avma = av;
+    return f? _res(3,1,1): _res(6,-1,2);
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
-  if (n>7) return galoisbig(x,prec);
+  if (n > 7) return galoisbig(x,prec);
   for(;;)
   {
     GEN cb = cauchy_bound(x);
@@ -411,18 +412,13 @@ galois(GEN x, long prec)
 	p2 = (GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
-	  case 1: f=carreparfait(discsr(x)); avma=av; y=cgetg(4,t_VEC);
-	    y[3]=un;
-	    if (f) { y[2]=un; y[1]=lstoi(12); return y; }
-	    y[2]=lnegi(gun); y[1]=lstoi(24); return y;
+	  case 1: f = carreparfait(discsr(x)); avma = av;
+            return f? _res(12,1,4): _res(24,-1,5);
 
-	  case 2: avma=av; y=cgetg(4,t_VEC);
-	    y[3]=un; y[2]=lnegi(gun); y[1]=lstoi(8); return y;
+	  case 2: avma = av; return _res(8,-1,3);
 	
-	  case 3: avma=av; y=cgetg(4,t_VEC);
-	    y[1]=lstoi(4); y[3]=un;
-	    y[2] = (lgef(p2[1])==5)? un: lnegi(gun);
-	    return y;
+	  case 3: avma = av;
+	    return (degpol(p2[1])==2)? _res(4,1,2): _res(4,-1,1);
 
 	  default: err(bugparier,"galois (bug1)");
 	}
@@ -459,15 +455,11 @@ galois(GEN x, long prec)
 	  f=carreparfait(discsr(x));
 	  if (lg(p3)-1==1)
 	  {
-	    avma=av; y=cgetg(4,t_VEC); y[3]=un;
-	    if (f) { y[2]=un; y[1]=lstoi(60); return y; }
-	    else { y[2]=lneg(gun); y[1]=lstoi(120); return y; }
+	    avma = av;
+            return f? _res(60,1,4): _res(120,-1,5);
 	  }
-	  if (!f)
-	  {
-	    avma=av; y=cgetg(4,t_VEC);
-	    y[3]=un; y[2]=lneg(gun); y[1]=lstoi(20); return y;
-	  }
+	  if (!f) { avma = av; return _res(20,-1,3); }
+
           pr = - (bit_accuracy(prec) >> 1);
           for (l=1; l<=6; l++)
 	    if (ee[l] <= pr && gcmp0(poleval(p5,(GEN)w[l]))) break;
@@ -485,9 +477,8 @@ galois(GEN x, long prec)
 	  if (e <= -10)
 	  {
 	    if (gcmp0(p4)) goto tchi;
-	    f=carreparfait(p4); avma=av; y=cgetg(4,t_VEC);
-	    y[3]=y[2]=un; y[1]=lstoi(f?5:10);
-	    return y;
+	    f = carreparfait(p4); avma = av;
+            return f? _res(5,1,1): _res(10,1,2);
 	  }
 	  prec=(prec<<1)-2;
 	}
@@ -537,69 +528,47 @@ galois(GEN x, long prec)
 	      if (e <= -10)
 	      {
                 if (!ZX_is_squarefree(p5)) goto tchi;
-		p2=(GEN)factor(p5)[1];
-		f=carreparfait(discsr(x));
-		avma=av; y=cgetg(4,t_VEC); y[3]=un;
+		p2 = (GEN)factor(p5)[1];
+		f = carreparfait(discsr(x));
+		avma = av;
 		if (lg(p2)-1==1)
-		{
-		  if (f) { y[2]=un; y[1]=lstoi(360); }
-		  else { y[2]=lnegi(gun); y[1]=lstoi(720); }
-		}
+                  return f? _res(360,1,15): _res(720,-1,16);
 		else
-		{
-		  if (f) { y[2]=un; y[1]=lstoi(36); }
-		  else { y[2]=lnegi(gun); y[1]=lstoi(72); }
-		}
-                return y;
+                  return f? _res(36,1,10): _res(72,-1,13);
 	      }
 	      prec=(prec<<1)-2; break;
 		
 	    case 2: l2=degpol(p2[1]); if (l2>3) l2=6-l2;
 	      switch(l2)
 	      {
-		case 1: f=carreparfait(discsr(x));
-		  avma=av; y=cgetg(4,t_VEC); y[3]=un;
-		  if (f) { y[2]=un; y[1]=lstoi(60); }
-		  else { y[2]=lneg(gun); y[1]=lstoi(120); }
-		  return y;
-		case 2: f=carreparfait(discsr(x));
-		  if (f)
-		  {
-		    avma=av; y=cgetg(4,t_VEC);
-		    y[3]=y[2]=un; y[1]=lstoi(24);
-		  }
-		  else
-		  {
-		    p3=(lgef(p2[1])==5) ? (GEN)p2[2]:(GEN)p2[1];
-		    f=carreparfait(discsr(p3));
-		    avma=av; y=cgetg(4,t_VEC); y[2]=lneg(gun);
-		    if (f) { y[1]=lstoi(24); y[3]=deux; }
-		    else { y[1]=lstoi(48); y[3]=un; }
-		  }
-		  return y;
-		case 3: f=carreparfait(discsr((GEN)p2[1]))
-		       || carreparfait(discsr((GEN)p2[2]));
-		  avma=av; y=cgetg(4,t_VEC);
-		  y[3]=un; y[2]=lneg(gun); y[1]=lstoi(f? 18: 36);
-		  return y;
+		case 1: f = carreparfait(discsr(x));
+		  avma = av;
+                  return f? _res(60,1,12): _res(120,-1,14);
+		case 2: f = carreparfait(discsr(x));
+		  if (f) { avma = av; return _res(24,1,7); }
+                  p3 = (degpol(p2[1])==2)? (GEN)p2[2]: (GEN)p2[1];
+                  f = carreparfait(discsr(p3));
+                  avma = av;
+                  return f? _res(24,-1,6): _res(48,-1,11);
+		case 3: f = carreparfait(discsr((GEN)p2[1]))
+		         || carreparfait(discsr((GEN)p2[2]));
+		  avma = av;
+                  return f? _res(18,-1,5): _res(36,-1,9);
 	      }
 	    case 3:
 	      for (l2=1; l2<=3; l2++)
-		if (lgef(p2[l2])>=6) p3=(GEN)p2[l2];
-	      if (lgef(p3)==6)
+		if (degpol(p2[l2]) >= 3) p3 = (GEN)p2[l2];
+	      if (degpol(p3) == 3)
 	      {
-		f=carreparfait(discsr(p3)); avma=av; y=cgetg(4,t_VEC);
-                y[2]=lneg(gun); y[1]=lstoi(f? 6: 12);
+		f = carreparfait(discsr(p3)); avma = av;
+                return f? _res(6,-1,1): _res(12,-1,3);
 	      }
 	      else
 	      {
-		f=carreparfait(discsr(x)); avma=av; y=cgetg(4,t_VEC);
-		if (f) { y[2]=un; y[1]=lstoi(12); }
-		else { y[2]=lneg(gun); y[1]=lstoi(24); }
+		f = carreparfait(discsr(x)); avma = av;
+                return f? _res(12,1,4): _res(24,-1,8);
 	      }
-              y[3]=un; return y;
-	    case 4: avma=av; y=cgetg(4,t_VEC);
-	      y[1]=lstoi(6); y[2]=lneg(gun); y[3]=deux; return y;
+	    case 4: avma = av; return _res(6,-1,2);
             default: err(bugparier,"galois (bug3)");
 	  }
 	}
@@ -623,24 +592,17 @@ galois(GEN x, long prec)
 	p2=(GEN)factor(p5)[1];
 	switch(lg(p2)-1)
 	{
-	  case 1: f=carreparfait(discsr(x)); avma=av; y=cgetg(4,t_VEC); y[3]=un;
-	    if (f) { y[2]=un; y[1]=lstoi(2520); }
-	    else { y[2]=lneg(gun); y[1]=lstoi(5040); }
-	    return y;
-	  case 2: f=degpol(p2[1]); avma=av; y=cgetg(4,t_VEC); y[3]=un;
-	    if (f==7 || f==28) { y[2]=un; y[1]=lstoi(168); }
-	    else { y[2]=lneg(gun); y[1]=lstoi(42); }
-	    return y;
-	  case 3: avma=av; y=cgetg(4,t_VEC);
-	    y[3]=y[2]=un; y[1]=lstoi(21); return y;
-	  case 4: avma=av; y=cgetg(4,t_VEC);
-	    y[3]=un; y[2]=lneg(gun); y[1]=lstoi(14); return y;
-	  case 5: avma=av; y=cgetg(4,t_VEC);
-	    y[3]=y[2]=un; y[1]=lstoi(7); return y;
+	  case 1: f = carreparfait(discsr(x)); avma = av;
+            return f? _res(2520,1,6): _res(5040,-1,7);
+	  case 2: f = degpol(p2[1]); avma = av;
+	    return (f==7 || f==28)? _res(168,1,5): _res(42,-1,4);
+	  case 3: avma = av; return _res(21,1,3);
+	  case 4: avma = av; return _res(14,-1,2);
+	  case 5: avma = av; return _res(7,1,1);
           default: err(talker,"galois (bug2)");
 	}
     }
-    tchi: avma=av1; x=tschirnhaus(x1);
+    tchi: avma = av1; x = tschirnhaus(x1);
   }
 }
 
