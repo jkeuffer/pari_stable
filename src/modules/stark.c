@@ -2922,13 +2922,12 @@ bnrstark(GEN bnr,  GEN subgrp,  long flag,  long prec)
 
   /* check the bnr */
   checkbnrgen(bnr);
-
-  bnf  = (GEN)bnr[1];
-  nf   = (GEN)bnf[7];
-  Mcyc = diagonal(gmael(bnr, 5, 2));
+  bnf  = checkbnf(bnr);
+  nf   = checknf(bnf);
   N    = degpol(nf[1]);
-  if (N == 1)
-    err(talker, "the ground field must be distinct from Q");
+  if (N == 1) return galoissubcyclo(bnr, subgrp, 0, 0);
+ 
+  Mcyc = diagonal(gmael(bnr, 5, 2));
 
   /* check the bnf */
   if (!varn(nf[1]))
