@@ -258,8 +258,9 @@ u_FpX_neg(GEN x, ulong p)
 {
   long i, l = lgef(x);
   GEN z = cgetg(l, t_VECSMALL);
+  z[1] = x[1];
   for (i=2; i<l; i++) z[i] = x[i]? p - x[i]: 0;
-  return x;
+  return z;
 }
 
 static GEN
@@ -4087,6 +4088,8 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
     if (dres >= pp)
     {
       l = lgef(a);
+      a[0] = evaltyp(t_POL) | evallg(l);
+      a[1] = evalsigne(1)|evalvarn(vY)|evallgef(l);
       for (i=2; i<l; i++)
         a[i] = (long)u_scalarpol(a[i], 0);
       x = u_FpYX_subres(a, b, pp);
