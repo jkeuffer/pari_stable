@@ -349,11 +349,10 @@ Flx_shiftip(pari_sp av, GEN x, long v)
   GEN y;
   if (v <= 0 || x-2==0) return gerepileupto(av, x);
   avma = av; ly = lx + v;
-  x += lx; y = new_chunk(ly) + ly;
+  x += lx; y = cgetg(ly, t_VECSMALL) + ly;
   for (i = 2; i<lx; i++) *--y = *--x;
   for (i = 0; i< v; i++) *--y = 0;
-  *--y = 0;
-  *--y = evaltyp(t_VECSMALL) | evallg(ly); return y;
+  return y - 2;
 }
 
 INLINE ulong
@@ -402,7 +401,7 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
     for (  ; i<nx; i++) z[i] = (long)Flx_mullimb(x+i,y,p,0,ny);
     for (  ; i<nz; i++) z[i] = (long)Flx_mullimb(x+i,y,p,i-nx+1,ny);
   }
-  z -= 2; z[1]=0; return Flx_renormalize(z, lz);
+  z -= 2; return Flx_renormalize(z, lz);
 }
 
 /* fast product (Karatsuba) of polynomials a,b. These are not real GENs, a+2,
@@ -508,7 +507,7 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
       z[i] = (long)p1;
     }
   }
-  z -= 2; z[1] = 0; return Flx_renormalize(z,lz);
+  z -= 2; return Flx_renormalize(z,lz);
 }
 
 GEN
