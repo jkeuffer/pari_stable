@@ -2641,11 +2641,13 @@ product of the local Tamagawa numbers $c_p$, a quantity which enters in the
 \syn{globalreduction}{E}.
 
 \subsecidx{ellheight}$(E,z,\{\fl = 2\})$: global \idx{N\'eron-Tate height} of
-the point $z$ on the elliptic curve $E$, assumed to be integral, given by a minimal model. The vector $E$ must be a long vector
-of the type given by \kbd{ellinit(,1)}. If $\fl=0$, this
-computation is done using sigma and theta-functions and a trick due to J.
-Silverman. If $\fl=1$, use Tate's $4^n$ algorithm, which is much slower. If
-$\fl=2$, use Mestre's AGM algorithm.
+the point $z$ on the elliptic curve $E$ (defined over $\Q$), given by a
+standard minimal integral model. $E$ must be an \kbd{ell} as output by
+\kbd{ellinit}. \fl selects the algorithm used to compute the archimedean
+local height. If $\fl=0$, this computation is done using sigma and
+theta-functions and a trick due to J. Silverman. If $\fl=1$, use Tate's $4^n$
+algorithm. If $\fl=2$, use Mestre's AGM algorithm. The latter is much faster
+than the other two, both in theory (converges quadratically) and in practice.
 
 \syn{ellheight0}{E,z,\fl,\var{prec}}. The Archimedean
 contribution alone is given by the library function

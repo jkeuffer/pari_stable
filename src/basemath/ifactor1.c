@@ -3443,7 +3443,7 @@ ifac_main(GEN *partial)
   {
 #if IFAC_DEBUG
     if (!(here[2]))
-    { /* unknown: something has gen_1 wrong. Try to recover */
+    { /* unknown: something is wrong. Try to recover */
       err(warner, "IFAC: unknown factor seen in main loop");
       /* can only happen in Moebius mode */
       if (ifac_resort(partial, &here)) return gen_0;
