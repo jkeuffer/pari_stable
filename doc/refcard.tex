@@ -17,10 +17,10 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari-GP reference card}
-\def\versionnumber{2.14}% Version of this reference card
+\def\versionnumber{2.15}% Version of this reference card
 \def\PARIversion{2.2.5}% Version of PARI described on this reference card
 \def\year{2002}
-\def\month{October}
+\def\month{December}
 
 % ignore parimacro.tex's \magnification setting
 \let\oldmagnification\magnification
@@ -890,7 +890,7 @@ $($\kbd{nfelt}$)$\kbd{mul}, \kbd{pow}, \kbd{div}, \kbd{diveuc},
 \li{express $x$ on integer basis}{nfalgtobasis$(\var{nf},x)$}
 \li{express element\ $x$ as a polmod}{nfbasistoalg$(\var{nf},x)$}
 \li{quadratic Hilbert symbol (at $p$)}{nfhilbert$(\var{nf},a,b,\{p\})$}
-\li{roots of $g$ belonging to \var{nf}}{nfroots$(\var{nf},g)$}
+\li{roots of $g$ belonging to \var{nf}}{nfroots$(\{\var{nf}\},g)$}
 \li{factor $g$ in \var{nf}}{nffactor$(\var{nf},g)$}
 \li{factor $g$ mod prime $pr$ in \var{nf}}{nffactormod$(\var{nf},g,pr)$}
 \li{number of roots of unity in \var{nf}}{nfrootsof1$(\var{nf}\,)$}
