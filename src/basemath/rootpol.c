@@ -1769,7 +1769,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   setexpo(sigma, err + (long)log2((double)n) + 1);
   overn=dbltor(1./n);
   shatzle=gdiv(gpui(sigma,overn,0),
-	       gsub(gpui(gsub(gun,sigma),overn,0),
+	       gsub(gpui(gsub(realun(DEFAULTPREC),sigma),overn,0),
 		    gpui(sigma,overn,0)));
   shatzle=gmul2n(shatzle,1); e_max=-pariINFINITY;
   for (i=1; i<=n; i++)
