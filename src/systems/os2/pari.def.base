@@ -1,0 +1,6 @@
+LIBRARY 'pari' INITINSTANCE TERMINSTANCE
+; Can't put http://www.parigp-home.de/, since it is split on :
+DESCRIPTION '@#www.parigp-home.de/:@VERSION@#@GP/PARI compiled with @CFLAGS@
+CODE LOADONCALL
+DATA LOADONCALL NONSHARED MULTIPLE
+EXPORTS
