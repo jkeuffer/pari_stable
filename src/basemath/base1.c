@@ -1535,20 +1535,23 @@ nfgetprec(GEN x)
 }
 
 /* assume nf is an nf */
-static GEN
-_nfnewprec(GEN nf, long prec)
+GEN
+nfnewprec_i(GEN nf, long prec)
 {
-  pari_sp av = avma;
   GEN NF = dummycopy(nf);
   nffp_t F;
-
-  (void)checknf(nf);
   NF[5] = (long)dummycopy((GEN)NF[5]);
   remake_GM(NF, &F, prec);
   NF[6]  = (long)F.ro;
   mael(NF,5,1) = (long)F.M;
   mael(NF,5,2) = (long)F.G;
-  return gerepilecopy(av, NF);
+  return NF;
+}
+static GEN
+_nfnewprec(GEN nf, long prec)
+{
+  pari_sp av = avma;
+  return gerepilecopy(av, nfnewprec_i(nf, prec));
 }
 
 GEN
@@ -1567,7 +1570,7 @@ nfnewprec(GEN nf, long prec)
   {
     case 11: z = bnfnewprec(nf,prec); break;
     case  7: z = bnrnewprec(nf,prec); break;
-    default: z = _nfnewprec(nf,prec); break;
+    default: z = _nfnewprec(checknf(nf),prec); break;
   }
   if (res) res[1] = (long)z; else res = z;
   return res;

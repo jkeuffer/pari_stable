@@ -70,7 +70,9 @@ GEN     gtomat(GEN x);
 GEN     gtrans(GEN x);
 GEN     gtrans_i(GEN x);
 GEN     hnfadd(GEN mit,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
+GEN     hnfadd_i(GEN mit,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,GEN extramat,GEN extraC);
 GEN     hnfspec(long** mat,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
+GEN     hnfspec_i(long** mat,GEN perm,GEN* ptdep,GEN* ptA,GEN* ptC,long k0);
 GEN     idmat(long n);
 GEN     idmat_intern(long n,GEN myun,GEN myzero);
 GEN     image(GEN x);
@@ -350,6 +352,7 @@ void    nf_get_sign(GEN nf, long *r1, long *r2);
 long    nfgetprec(GEN x);
 GEN     nfinit0(GEN x,long flag, long prec);
 GEN     nfnewprec(GEN nf, long prec);
+GEN     nfnewprec_i(GEN nf, long prec);
 GEN     rootsof1(GEN x);
 GEN     tschirnhaus(GEN x);
 

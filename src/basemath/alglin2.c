@@ -1688,9 +1688,9 @@ elt_col(GEN Mk, GEN Mi, GEN q)
 ** column operations applied to C. IN PLACE
 **/
 GEN
-hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+hnfspec_i(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 {
-  pari_sp av = avma, av2, lim;
+  pari_sp av, lim;
   long n, s, nlze, lnz, nr, i, j, k, lk0, col, lig, *p, *matj;
   GEN p1, p2, matb, matbnew, vmax, matt, T, extramat, B, H, dep, permpro;
   const long co = lg(mat);
@@ -1708,7 +1708,7 @@ hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
     for (i=1; i<=k0; i++) p1[i] = lstoi(matj[perm[i]]);
   }
   vmax = cgetg(co,t_VECSMALL);
-  av2 = avma; lim = stack_lim(av2,1);
+  av = avma; lim = stack_lim(av,1);
 
   i = lig = li-1; col = co-1; lk0 = k0;
   T = (k0 || (lg(*ptC) > 1 && lg((*ptC)[1]) > 1))? idmat(col): NULL;
@@ -1778,10 +1778,10 @@ hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       if (T) elt_col((GEN)T[j], (GEN)T[col], stoi(-t));
     }
     lig--; col--;
-    if (low_stack(lim, stack_lim(av2,1)))
+    if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"hnfspec[1]");
-      if (T) T = gerepilecopy(av2, T); else avma = av2;
+      if (T) T = gerepilecopy(av, T); else avma = av;
     }
   }
   /* As above with lines containing a +/- 1 (no other assumption).
@@ -1820,10 +1820,10 @@ hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
       if (T) elt_col((GEN)T[j], (GEN)T[col], stoi(-t));
     }
     lig--; col--;
-    if (low_stack(lim, stack_lim(av2,1)))
+    if (low_stack(lim, stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"hnfspec[2]");
-      if (T) T = gerepilecopy(av2,T); else avma = av2;
+      if (T) T = gerepilecopy(av,T); else avma = av;
     }
   }
 
@@ -1862,17 +1862,17 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
         for (h=1; h<i0; h++) Bj[h] = lsubii((GEN)Bj[h], mulii(v,(GEN) Bk[h]));
       }
       if (T) elt_col((GEN)T[j], (GEN)T[k], negi(v));
-      if (low_stack(lim, stack_lim(av2,1)))
+      if (low_stack(lim, stack_lim(av,1)))
       {
         if(DEBUGMEM>1) err(warnmem,"hnfspec[3], (i,j) = %ld,%ld", i,j);
         for (h=1; h<co; h++) setlg(matb[h], i0+1); /* bottom can be forgotten */
-        gerepileall(av2, T? 2: 1, &matb, &T);
+        gerepileall(av, T? 2: 1, &matb, &T);
         Bk = (GEN)matb[k];
       }
     }
   }
   for (j=1; j<co; j++) setlg(matb[j], lig-k0+1); /* bottom can be forgotten */
-  gerepileall(av2, T? 2: 1, &matb, &T);
+  gerepileall(av, T? 2: 1, &matb, &T);
   if (DEBUGLEVEL>5) fprintferr("    matb cleaned up (using Id block)\n");
 
   nlze = lk0 - k0;  /* # of 0 rows */
@@ -1946,10 +1946,17 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
   *ptdep = dep;
   *ptB = B;
   H = hnffinal(matbnew,perm,ptdep,ptB,ptC);
-  gerepileall(av, 4, ptC, ptdep, ptB, &H);
   if (DEBUGLEVEL)
     msgtimer("hnfspec [%ld x %ld] --> [%ld x %ld]",li-1,co-1, lig-1,col-1);
   return H;
+}
+
+GEN
+hnfspec(long** mat, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
+{
+  pari_sp av = avma;
+  GEN H = hnfspec_i(mat, perm, ptdep, ptB, ptC, k0);
+  gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
 }
 
 /* HNF reduce x, apply same transforms to C */
@@ -2002,11 +2009,10 @@ TOOLARGE:
 
 /* add new relations to a matrix treated by hnfspec (extramat / extraC) */
 GEN
-hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
+hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
        GEN extramat,GEN extraC)
 {
   GEN matb, extratop, Cnew, permpro, B = *ptB, C = *ptC, dep = *ptdep;
-  pari_sp av = avma;
   long i;
   long lH = lg(H)-1;
   long lB = lg(B)-1;
@@ -2050,14 +2056,21 @@ hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
   *ptC = concatsp(vecextract_i(C, 1, col-lH), Cnew);
-
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>7) fprintferr("H = %Z\nC = %Z\n",H,*ptC);
     msgtimer("hnfadd (%ld)", lg(extramat)-1);
   }
-  gerepileall(av, 4, ptC, ptdep, ptB, &H);
   return H;
+}
+
+GEN
+hnfadd(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
+       GEN extramat,GEN extraC)
+{
+  pari_sp av = avma;
+  H = hnfadd_i(H, perm, ptdep, ptB, ptC, extramat, extraC);
+  gerepileall(av, 4, ptC, ptdep, ptB, &H); return H;
 }
 
 static void
