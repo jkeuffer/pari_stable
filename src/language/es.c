@@ -242,7 +242,7 @@ vpariputs(char* format, va_list args)
       if (f[1] != 'Z') { *s++ = *f++; *s++ = *f++; }
       else
       {
-        strcpy(s,"\003%016ld\003"); /* brace with unprobable characters */
+        strcpy(s,"\003%020ld\003"); /* brace with unprobable characters */
         nb++; s += 8; f += 2; /* skip %Z */
       }
     }
@@ -250,11 +250,11 @@ vpariputs(char* format, va_list args)
   *s = 0; vsprintf(buf,str,args); s = buf;
   if (nb)
     for (f=s; *f; f++)
-      if (*f == '\003' && f[17] == '\003')
+      if (*f == '\003' && f[21] == '\003')
       {
-        *f = 0; f[17] = 0; /* remove the bracing chars */
+        *f = 0; f[21] = 0; /* remove the bracing chars */
         pariOut->puts(s); bruteall((GEN)atol(f+1),'g',-1,1);
-        f += 18; s = f;
+        f += 22; s = f;
         nb--; if (!nb) break;
       }
   pariOut->puts(s);
