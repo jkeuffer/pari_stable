@@ -381,7 +381,7 @@ GEN
 galois(GEN x, long prec)
 {
   pari_sp av = avma, av1;
-  long i,j,k,n,f,l,l2,e,e1,pr,ind, prec;
+  long i,j,k,n,f,l,l2,e,e1,pr,ind;
   GEN x1,p1,p2,p3,p4,p5,w,z,ee;
   static int ind5[20]={2,5,3,4, 1,3,4,5, 1,5,2,4, 1,2,3,5, 1,4,2,3};
   static int ind6[60]={3,5,4,6, 2,6,4,5, 2,3,5,6, 2,4,3,6, 2,5,3,4,
