@@ -2293,46 +2293,22 @@ it!).
 
 \subsec{Integration the hard way}
 
-If \tet{install} is not available for your Operating System, it's more
+If \tet{install} is not available for your Operating System, things are more
 complicated: you have to hardcode your function in the GP binary (or
-install \idx{Linux}). Here's what needs to be done: 
+install \idx{Linux}). Here is what needs to be done: 
 
-In the definition of \kbd{functions\_basic} (file \kbd{language/init.c}),
-add your entry in exact alphabetical order by its GP name (note that digits
-come before letters), in a line of the form:
+You need to choose a section and add a file
+\kbd{functions/section/\var{gpname}}
+containing the following, keeping the notation above:
 \bprog
-{ "gpname", V, (void*)libname, secno, "code" }
+Function:  @com\var{gpname}
+Section:   @com\var{section}
+C-Name:    @com\var{libname}
+Prototype: @com\var{code}
+Help:      @com\var{some help text}
 @eprog
-
-\noindent where
-
-\kbd{libname} is the name of your function in library mode,
-
-\kbd{gpname} the name that you have chosen to call it under GP,
-
-\kbd{secno} is the section number of Chapter~3 in which this function would
-belong (type \kbd{?} in GP to see the list),
-
-\kbd{V} is a number between 0 and 99. Right now, for PARI there are only two
-significant values: zero means that it's possible to call the function
-without argument, and non-zero means it needs at least one argument.
-A binding of PARI to an external language (such as \kbd{Math::Pari}
-Perl module) may actually distinguish between different non-zero values.
-Better use 99 if you want a non-zero value which will not confuse anybody.
-
-\kbd{code} is the parser code.
-
-Once this has been done, in the file \kbd{language/helpmessages.c} add in
-exact alphabetical order a short message describing the effect of your
-function:
-\kbd{"name(x,y,...)=short descriptive message",}
-
-The message must be a single line, of arbitrary length. Do not use
-\kbd{\bs{n}}; the necessary newlines will be inserted by GP's online help
-functions. Optional arguments should be shown between braces (see the other
-messages for comparison).\smallskip
-
-Now, you can recompile GP.
+\noindent At this point you can rebuild the database by running \kbd{make
+Def} in the directory \kbd{desc}. Then, you can recompile GP.
 
 \subsec{Example}.
 %
@@ -2345,14 +2321,14 @@ A complete description could look like this:
     compute the necessary data for ...");
 }
 @eprog
-which means we have a function \kbd{ClassGroupInit} under GP, which calls
-the library function \kbd{bnfinit0} . The function has one mandatory
-argument, and possibly two more (two \kbd{'D'} in the code), plus the
-current real precision. More precisely, the first argument is a \kbd{GEN},
-the second one is converted to a \kbd{long} using \kbd{itos} (\kbd{0} is
-passed if it is omitted), and the third one is also a \kbd{GEN}, but we
-pass \kbd{NULL} if no argument was supplied by the user. This matches the C
-prototype (from \kbd{paridecl.h}):
+\noindent which means we have a function \kbd{ClassGroupInit} under GP, which
+calls the library function \kbd{bnfinit0} . The function has one mandatory
+argument, and possibly two more (two \kbd{'D'} in the code), plus the current
+real precision. More precisely, the first argument is a \kbd{GEN}, the second
+one is converted to a \kbd{long} using \kbd{itos} (\kbd{0} is passed if it is
+omitted), and the third one is also a \kbd{GEN}, but we pass \kbd{NULL} if no
+argument was supplied by the user. This matches the C prototype (from
+\kbd{paridecl.h}):
 %
 \bprog
   GEN bnfinit0(GEN P, long flag, GEN data, long prec)
@@ -2370,11 +2346,16 @@ since \kbd{NULL} is never a valid \kbd{GEN} pointer, this trick always
 enables you to distinguish between a default value and actual input: the
 user could explicitly supply an empty vector!
 
-\misctitle{Note:} If \kbd{install} were not available we would have to
-modify \kbd{language/helpmessages.c}, and \kbd{language/init.c} and
-recompile GP. The entry in \kbd{functions\_basic} corresponding to the
-function above is actually
+\misctitle{Note:} If \kbd{install} is not available, we have to add a file
+
+ \kbd{functions/number\_fields/bnfinit}
+
+\noindent containing the following:
 \bprog
-{ "bnfinit", 91, (void*)bnfinit0, 6, "GD0,L,DGp" }
+Function: ClassGroupInit
+Section: number_fields
+C-Name: bnfinit0
+Prototype: GD0,L,DGp
+Help: bnfinit(P,{flag=0},{tech=[]}): this routine does this and that@com\dots
 @eprog
 \vfill\eject
