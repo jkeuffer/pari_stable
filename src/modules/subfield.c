@@ -597,12 +597,12 @@ static GEN
 choose_prime(GEN pol,GEN dpol,long d,GEN *ptff,GEN *ptlistpotbl, long *ptlcm)
 {
   ulong av;
-  long j,k,oldllist,llist,r,lcm,oldlcm,N,pp,minp = N*(d-1);
+  long j,k,oldllist,llist,r,lcm,oldlcm,pp, N = degpol(pol), minp = N*(d-1);
   GEN p,listpotbl,oldlistpotbl,ff,oldff,n,oldn;
   byteptr di=diffptr;
 
   if (DEBUGLEVEL) timer2();
-  di++; p = stoi(2); N = degpol(pol);
+  di++; p = stoi(2);
   while (p[2]<=minp) p[2] += *di++;
   oldllist = 100000;
   oldlcm = 0;
