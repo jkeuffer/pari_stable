@@ -427,14 +427,15 @@ arguments of \kbd{Str} are evaluated in string context (see
 the pair \tet{strtoGEN}/\tet{GENtostr} to convert between \kbd{char*} and
 \kbd{GEN}.
 
-\subsecidx{Vec}$({x=[\,]})$: transforms the object $x$ into a row vector. The
-vector will be with one component only, except when $x$ is a vector/matrix or
-a quadratic form (in which case the resulting vector is simply the initial
-object considered as a row vector), but more importantly when $x$ is a
-polynomial or a power series. In the case of a polynomial, the coefficients
-of the vector start with the leading coefficient of the polynomial, while
-for power series only the significant coefficients are taken into account,
-but this time by increasing order of degree.
+\subsecidx{Vec}$({x=[\,]})$: transforms the object $x$ into a row vector.
+The vector will be with one component only, except when $x$ is a
+vector/matrix or a quadratic form (in which case the resulting vector is
+simply the initial object considered as a row vector), a character string
+(a vector of individual characters is returned), but more importantly when
+$x$ is a polynomial or a power series. In the case of a polynomial, the
+coefficients of the vector start with the leading coefficient of the
+polynomial, while for power series only the significant coefficients are
+taken into account, but this time by increasing order of degree.
 
 \syn{gtovec}{x}.
 
