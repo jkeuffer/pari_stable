@@ -2270,15 +2270,12 @@ gp_main_loop(int ismain)
     if (test_mode) { init80(0); gp_output(z); pariputc('\n'); }
     else
     { /* save state */
-      FILE *o_out;
+      FILE *o_out = pari_outfile;
       int prettyprint;
 
       /* Emit before the switch to prettyprinter */
       if (prettyprinter && prettyp == f_PRETTY)
-      {
-        o_out = pari_outfile;
         term_color(c_OUTPUT);	/* There may be lines before the prompt */
-      }
       prettyprint = (prettyprinter && prettyp == f_PRETTY && prettyp_init());
 
       /* history number */

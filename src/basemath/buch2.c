@@ -981,7 +981,7 @@ GEN
 isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
 {
   long av = avma, l = lg(e), i,prec,c;
-  GEN id,id2, nf = checknf(bnf), z;
+  GEN id,id2, nf = checknf(bnf), z = NULL; /* gcc -Wall */
   int gen = flag & nf_GEN;
   
   prec = prec_unit_matrix(bnf);

@@ -2138,13 +2138,14 @@ killallfiles(int leaving)
 }
 
 pariFILE *
-try_pipe(char *cmd, int flag)
+try_pipe(char *cmd, int fl)
 {
 #ifndef HAVE_PIPES
   err(archer); return NULL;
 #else
   FILE *file;
   char *f;
+  VOLATILE int flag = fl;
 
 #  ifdef __EMX__
   if (_osmode == DOS_MODE) /* no pipes under DOS */
@@ -2154,13 +2155,8 @@ try_pipe(char *cmd, int flag)
     f = pari_unique_filename("pipe");
     s = gpmalloc(strlen(cmd)+strlen(f)+4);
     sprintf(s,"%s > %s",cmd,f);
-    if (system(s)) file = NULL;
-    else
-    {
-      file = (FILE *) fopen(f,"r");
-      flag |= mf_FALSE;
-    }
-    free(s);
+    file = system(s)? NULL: (FILE *) fopen(f,"r");
+    flag |= mf_FALSE; free(s);
   }
   else
 #  endif
@@ -2171,19 +2167,15 @@ try_pipe(char *cmd, int flag)
     {
       jmp_buf env;
       void *c;
+      int i;
       if (DEBUGFILES) fprintferr("I/O: checking output pipe...\n");
-      if (setjmp(env))
-        file = NULL; 
-      else
-      {
-        int i;
-        c = err_catch(-1, env, NULL);
-        fprintf(file,"\n\n"); fflush(file);
-        for (i=1; i<1000; i++) fprintf(file,"                  \n");
-        fprintf(file,"\n"); fflush(file);
-      }
+      if (setjmp(env)) return NULL;
+
+      c = err_catch(-1, env, NULL);
+      fprintf(file,"\n\n"); fflush(file);
+      for (i=1; i<1000; i++) fprintf(file,"                  \n");
+      fprintf(file,"\n"); fflush(file);
       err_leave(&c);
-      if (!file) return NULL;
     }
     f = cmd;
   }

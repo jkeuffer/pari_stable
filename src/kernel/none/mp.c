@@ -1422,6 +1422,7 @@ DIVIDE: /* quotient is non-zero */
   }
 
   lr = lz+2;
+  rd = NULL; /* gcc -Wall */
   if (lz)
   { /* non zero remainder: initialize rd */
     xd = (ulong*)(x + lx);
