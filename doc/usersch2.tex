@@ -252,8 +252,8 @@ The hacker's way to check if this is the case would be to look in the
 the string \kbd{RL\_PROMPT\_START\_IGNORE}. If it's there, you are safe.
 
 A more sensible way is to make some experiments, and get a more recent
-\kbd{readline} if yours doesn't work the way you'd like it to. See the file
-\kbd{misc/gprc.dft} for some examples.
+\kbd{readline} if yours doesn't work the way you would like it to. See the
+file \kbd{misc/gprc.dft} for some examples.
 
 \subsecidx{compatible} (default \kbd{0}): The GP function names and syntax
 have changed tremendously between versions 1.xx and 2.00. To help you cope
@@ -289,6 +289,9 @@ been defined \var{before} changing \kbd{compatible} will get erased if this
 change modifies the function list, i.e.~if you move between groups
 $\{0,1\}$ and $\{2,3\}$ (variables are unaffected). We of course strongly
 encourage you to try and get used to the setting \kbd{compatible}=0.
+
+Note that the default \kbd{newgaloisformat} is another compatibility setting,
+which is set independantly of \kbd{compatible}.
 
 \subsecidx{debug} (default \kbd{0}): debugging level. If it is non-zero,
 some extra messages may be printed (some of it in French), according to
@@ -361,6 +364,13 @@ be \var{appended} at the end.
 
 \subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
 used when the \kbd{log} toggle is on. Tilde and time expansion are performed.
+
+\subsecidx{newgaloisformat} (default \kbd{0}): if this is set, the
+\tet{polgalois} command will use a different, more consistent, naming scheme
+for Galois groups. This default is provided to ensure that scripts
+can control this behaviour and do not break unexpectedly. Note that the
+default value of $0$ (unset) will change to $1$ (set) in the next major
+version.
 
 \subsecidx{output} (default \kbd{1}): there are four possible values: 0
 (=~\var{raw}), 1 (=~\var{prettymatrix}), 2 (=~\var{prettyprint}), or 3
