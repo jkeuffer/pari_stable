@@ -1226,9 +1226,6 @@ to_famat(GEN g, GEN e)
   h[2] = (long)e; return h;
 }
 
-static GEN
-_col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
-
 GEN
 to_famat_all(GEN x, GEN y) { return to_famat(_col(x), _col(y)); }
 
@@ -1238,6 +1235,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id)
 {
   GEN t = NULL, ch,h,n,z,idZ = gcoeff(id,1,1);
   long i, lx = lg(g);
+  if (is_pm1(idZ)) lx = 1; /* id = Z_K */
   for (i=1; i<lx; i++)
   {
     n = (GEN)e[i]; if (!signe(n)) continue;

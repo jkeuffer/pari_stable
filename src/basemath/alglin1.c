@@ -81,6 +81,42 @@ strconcat(GEN x, GEN y)
   return x;
 }
 
+/* concat 3 matrices. Internal */
+GEN
+concatsp3(GEN x, GEN y, GEN z)
+{
+  long i, lx = lg(x), ly = lg(y), lz = lg(z);
+  GEN r = cgetg(lx+ly+lz-2, t_MAT), t = r;
+  for (i=1; i<lx; i++) *++t = *++x;
+  for (i=1; i<ly; i++) *++t = *++y;
+  for (i=1; i<lz; i++) *++t = *++z;
+  return r;
+}
+
+/* concat A and B vertically. Internal */
+GEN
+vconcat(GEN A, GEN B)
+{
+  long la,ha,hb,hc,i,j;
+  GEN M,a,b,c;
+
+  la = lg(A); if (la==1) return A;
+  ha = lg(A[1]); M = cgetg(la,t_MAT);
+  hb = lg(B[1]); hc = ha+hb-1;
+  for (j=1; j<la; j++)
+  {
+    c = cgetg(hc,t_COL); M[j] = (long)c; a = (GEN)A[j]; b = (GEN)B[j];
+    for (i=1; i<ha; i++) *++c = *++a;
+    for (i=1; i<hb; i++) *++c = *++b;
+  }
+  return M;
+}
+
+GEN
+_vec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
+GEN
+_col(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+
 GEN
 concatsp(GEN x, GEN y)
 {

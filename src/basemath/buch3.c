@@ -21,6 +21,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "parinf.h"
 
+extern GEN concatsp3(GEN x, GEN y, GEN z);
 extern GEN check_and_build_cycgen(GEN bnf);
 extern GEN gmul_mat_smallvec(GEN x, GEN y);
 extern GEN ideleaddone_aux(GEN nf,GEN x,GEN ideal);
@@ -28,11 +29,26 @@ extern GEN logunitmatrix(GEN nf,GEN funits,GEN racunit,GEN bid);
 extern GEN vconcat(GEN Q1, GEN Q2);
 extern void minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
 extern GEN to_famat_all(GEN x, GEN y);
+extern GEN trivfact(void);
 extern GEN arch_mul(GEN x, GEN y);
 extern GEN isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag);
 extern GEN idealaddtoone_i(GEN nf, GEN x, GEN y);
 extern GEN ideallllred_elt(GEN nf, GEN I);
 
+/* U W V = D, Ui = U^(-1) */
+GEN
+compute_class_number(GEN W, GEN *D,GEN *Ui,GEN *V)
+{
+  GEN S = smith2(W);
+
+  *Ui= ginv((GEN)S[1]);
+  if (V) *V = (GEN)S[2];
+  *D = (GEN)S[3];
+  if (DEBUGLEVEL>=4) msgtimer("smith/class group");
+  return dethnf_i(*D);
+}
+
+/* FIXME: obsolete, see zarchstar (which is much slower unfortunately). */
 static GEN
 get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
 {
@@ -42,8 +58,8 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
   vecsign = cgetg(rankmax+1,t_COL);
   for (r=1,rr=3; ; r++,rr+=2)
   {
-    p1 = gpuigs(stoi(rr),N);
-    limr=(cmpis(p1,BIGINT)>1)? BIGINT: p1[2]; /* min(BIGINT,rr^N) */
+    p1 = gpowgs(stoi(rr),N);
+    limr = is_bigint(p1)? BIGINT: p1[2];
     limr = (limr-1)>>1;
     for (k=rr;  k<=limr; k++)
     {
@@ -70,20 +86,7 @@ get_full_rank(GEN nf, GEN v, GEN _0, GEN _1, GEN gen, long ngen, long rankmax)
   }
 }
 
-/* U W V = D, Ui = U^(-1) */
-GEN
-compute_class_number(GEN W, GEN *D,GEN *Ui,GEN *V)
-{
-  GEN S = smith2(W);
-
-  *Ui= ginv((GEN)S[1]);
-  if (V) *V = (GEN)S[2];
-  *D = (GEN)S[3];
-  if (DEBUGLEVEL>=4) msgtimer("smith/class group");
-  return dethnf_i(*D);
-}
-
-/* FIXME: obsolete. Replace by a call to buchrayall */
+/* FIXME: obsolete. Replace by a call to buchrayall (currently much slower) */
 GEN
 buchnarrow(GEN bnf)
 {
@@ -166,12 +169,10 @@ buchnarrow(GEN bnf)
 static GEN
 findalpha(GEN nf,GEN x,GEN id)
 {
-  GEN p1,idprod,y;
+  GEN p1, y;
   GEN alp = idealaddtoone_i(nf,x,id);
 
-  idprod = idealmullll(nf,x,id);
-  y = ideallllred_elt(nf, idprod);
-
+  y = ideallllred_elt(nf, idealmullll(nf,x,id));
   p1 = ground(element_div(nf,alp,y));
   alp = gsub(alp, element_mul(nf,p1,y));
   return gcmp0(alp)? y: alp;
@@ -218,6 +219,7 @@ idealmulmodidele(GEN nf,GEN x,GEN y, GEN ideal,GEN sarch,GEN arch)
 }
 
 /* assume n > 0 */
+/* FIXME: should compute x^n = a I using idealred, then reduce a mod idele */
 static GEN
 idealpowmodidele(GEN nf,GEN x,GEN n, GEN ideal,GEN sarch,GEN arch)
 {
@@ -396,25 +398,25 @@ buchrayall(GEN bnf,GEN module,long flag)
 }
 
 GEN
-buchrayinitgen(GEN bignf, GEN ideal)
+buchrayinitgen(GEN bnf, GEN ideal)
 {
-  return buchrayall(bignf,ideal, nf_INIT | nf_GEN);
+  return buchrayall(bnf,ideal, nf_INIT | nf_GEN);
 }
 
 GEN
-buchrayinit(GEN bignf, GEN ideal)
+buchrayinit(GEN bnf, GEN ideal)
 {
-  return buchrayall(bignf,ideal, nf_INIT);
+  return buchrayall(bnf,ideal, nf_INIT);
 }
 
 GEN
-buchray(GEN bignf, GEN ideal)
+buchray(GEN bnf, GEN ideal)
 {
-  return buchrayall(bignf,ideal, nf_GEN);
+  return buchrayall(bnf,ideal, nf_GEN);
 }
 
 GEN
-bnrclass0(GEN bignf, GEN ideal, long flag)
+bnrclass0(GEN bnf, GEN ideal, long flag)
 {
   switch(flag)
   {
@@ -423,11 +425,11 @@ bnrclass0(GEN bignf, GEN ideal, long flag)
     case 2: flag = nf_INIT | nf_GEN; break;
     default: err(flagerr,"bnrclass");
   }
-  return buchrayall(bignf,ideal,flag);
+  return buchrayall(bnf,ideal,flag);
 }
 
 GEN
-bnrinit0(GEN bignf, GEN ideal, long flag)
+bnrinit0(GEN bnf, GEN ideal, long flag)
 {
   switch(flag)
   {
@@ -435,7 +437,7 @@ bnrinit0(GEN bignf, GEN ideal, long flag)
     case 1: flag = nf_INIT | nf_GEN; break;
     default: err(flagerr,"bnrinit");
   }
-  return buchrayall(bignf,ideal,flag);
+  return buchrayall(bnf,ideal,flag);
 }
 
 GEN
@@ -621,7 +623,8 @@ zimmertbound(long N,long R2,GEN DK)
 static void
 testprime(GEN bnf, long minkowski)
 {
-  long av = avma, pp,i,nbideal,k,pmax;
+  ulong av = avma;
+  long pp,i,nbideal,k,pmax;
   GEN f,p1,vectpp,fb,dK, nf=checknf(bnf);
   byteptr delta = diffptr;
 
@@ -667,8 +670,8 @@ testprime(GEN bnf, long minkowski)
       else if (DEBUGLEVEL>1)
         fprintferr("    Norm(P) > Zimmert bound\n");
     }
+    avma = av;
   }
-  avma=av;
   if (DEBUGLEVEL>1) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
 }
 
@@ -696,26 +699,33 @@ hermiteconstant(long n)
   return gerepileupto(av, gmul(h,h1));
 }
 
-/* 1 if primitive for sure, 0 if MAYBE imprimitive */
+/* 1 if L (= nf != Q) primitive for sure, 0 if MAYBE imprimitive (may have a
+ * subfield K) */
 static long
 isprimitive(GEN nf)
 {
-  long N,first,i,l,ep;
+  long N,p,i,l,ep;
   GEN d,fa;
 
   N = lgef(nf[1])-3; fa = (GEN)factor(stoi(N))[1]; /* primes | N */
-  first = itos((GEN)fa[1]); if (first==N) return 1;
+  p = itos((GEN)fa[1]); if (p == N) return 1; /* prime degree */
 
-  d=absi((GEN)nf[3]); fa=(GEN)factor(d)[2]; /* expo. primes | disc(nf) */
-  if (mod2(d))
-    { i=1; ep=1; }
+  /* N = [L:Q] = product of primes >= p, same is true for [L:K]
+   * d_L = t d_K^[L:K] --> check that some q^p divides d_L */
+  d = absi((GEN)nf[3]);
+  fa = (GEN)auxdecomp(d,0)[2]; /* list of v_q(d_L). Don't check large primes */
+  if (mod2(d)) i = 1;
   else
-    { i=2; ep=itos((GEN)fa[1])>>1; }
-  l=lg(fa);
+  { /* q = 2 */
+    ep = itos((GEN)fa[1]);
+    if ((ep>>1) >= p) return 0; /* 2 | d_K ==> 4 | d_K */
+    i = 2;
+  }
+  l = lg(fa);
   for ( ; i < l; i++)
   {
-    if (ep >= first) return 0;
     ep = itos((GEN)fa[i]);
+    if (ep >= p) return 0;
   }
   return 1;
 }
@@ -726,30 +736,27 @@ regulatorbound(GEN bnf)
   long N,R1,R2,R;
   GEN nf,dKa,bound,p1,c1;
 
-  nf=(GEN)bnf[7]; N=lgef(nf[1])-3;
-  bound=dbltor(0.2);
+  nf = (GEN)bnf[7]; N = lgef(nf[1])-3;
+  bound = dbltor(0.2);
   if (!isprimitive(nf))
   {
-    if (DEBUGLEVEL>=2)
-      { fprintferr("Default bound for regulator: 0.2\n"); flusherr(); }
+    if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
     return bound;
   }
-  dKa=absi((GEN)nf[3]);
-  R1=itos(gmael(nf,2,1));
-  R2=itos(gmael(nf,2,2)); R=R1+R2-1;
-  if (!R2 && N<12) c1=gpuigs(stoi(4),N>>1); else c1=gpuigs(stoi(N),N);
-  if (cmpii(dKa,c1)<=0)
+  dKa = absi((GEN)nf[3]);
+  R1 = itos(gmael(nf,2,1));
+  R2 = itos(gmael(nf,2,2)); R = R1+R2-1;
+  if (!R2 && N<12) c1 = gpuigs(stoi(4),N>>1); else c1 = gpuigs(stoi(N),N);
+  if (cmpii(dKa,c1) <= 0)
   {
-    if (DEBUGLEVEL>=2)
-      { fprintferr("Default bound for regulator: 0.2\n"); flusherr(); }
+    if (DEBUGLEVEL>1) fprintferr("Default bound for regulator: 0.2\n");
     return bound;
   }
   p1 = gsqr(glog(gdiv(dKa,c1),DEFAULTPREC));
   p1 = gdivgs(gmul2n(gpuigs(gdivgs(gmulgs(p1,3),N*(N*N-1)-6*R2),R),R2),N);
   p1 = gsqrt(gdiv(p1, hermiteconstant(R)), DEFAULTPREC);
   if (gcmp(p1,bound) > 0) bound = p1;
-  if (DEBUGLEVEL>=2)
-    { fprintferr("Mahler bound for regulator: %Z\n",p1); flusherr(); }
+  if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Z\n",p1);
   return bound;
 }
 
@@ -780,7 +787,7 @@ is_unit(GEN M, long r1, GEN x)
 }
 
 #define NBMAX 5000
-/* should use smallvectors */
+/* FIXME: should use smallvectors */
 static GEN
 minimforunits(GEN nf, long BORNE, long stockmax)
 {
@@ -1231,40 +1238,41 @@ certifybuchall(GEN bnf)
 
 /*******************************************************************/
 /*                                                                 */
-/*     CORPS DE CLASSES DE RAYON : CONDUCTEURS ET DISCRIMINANTS    */
+/*        RAY CLASS FIELDS: CONDUCTORS AND DISCRIMINANTS           */
 /*                                                                 */
 /*******************************************************************/
 
-/* Si s est la surjection de Cl_m sur Cl_n et H ssgroupe de Cl_m,
- * retourne le ssgroupe s(H) de Cl_n
- */
+/* s: <gen> = Cl_f --> Cl_n --> 0, H subgroup of Cl_f (generators given as
+ * HNF on [gen]). Return subgroup s(H) in Cl_n (associated to bnr) */
 static GEN
-imageofgroup0(GEN H,GEN bnr,GEN subgroup)
+imageofgroup0(GEN gen,GEN bnr,GEN H)
 {
   long j,l;
-  GEN E,Delta = diagonal(gmael(bnr,5,2));
+  GEN E,Delta = diagonal(gmael(bnr,5,2)); /* SNF structure of Cl_n */
 
-  if (gcmp0(subgroup)) return Delta;
+  if (!H || gcmp0(H)) return Delta;
 
-  l=lg(H); E=cgetg(l,t_MAT);
-  for (j=1; j<l; j++)
-    E[j] = (long)isprincipalray(bnr,(GEN)H[j]);
-  E = concatsp(gmul(E,subgroup),Delta);
-  return hnf(E);
+  l=lg(gen); E=cgetg(l,t_MAT);
+  for (j=1; j<l; j++) /* compute s(gen) */
+    E[j] = (long)isprincipalray(bnr,(GEN)gen[j]);
+  return hnf(concatsp(gmul(E,H), Delta)); /* s(H) in Cl_n */
 }
 
 static GEN
-imageofgroup(GEN H,GEN bnr,GEN subgroup)
+imageofgroup(GEN gen,GEN bnr,GEN H)
 {
-  long av = avma;
-  return gerepileupto(av,imageofgroup0(H,bnr,subgroup));
+  ulong av = avma;
+  return gerepileupto(av,imageofgroup0(gen,bnr,H));
 }
 
-/* retourne le cardinal de Cl_n / s(H) */
+/* see imageofgroup0, return [Cl_f : s(H)], H given on gen */
 static GEN
-cardofimagofquotientgroup(GEN H,GEN bnr,GEN subgroup)
+orderofquotient(GEN bnf, GEN f, GEN H, GEN gen)
 {
-  return dethnf_i(imageofgroup0(H,bnr,subgroup));
+  GEN bnr;
+  if (!H) return rayclassno(bnf,f);
+  bnr = buchrayall(bnf,f,nf_INIT);
+  return dethnf_i(imageofgroup0(gen,bnr,H));
 }
 
 static GEN
@@ -1316,91 +1324,87 @@ bnrisconductor(GEN arg0,GEN arg1,GEN arg2)
 
 /* special for isprincipalrayall */
 static GEN
-getH(GEN bnf, GEN gen)
+getgen(GEN bnf, GEN gen)
 {
   long i,l = lg(gen);
-  GEN p1, H = cgetg(l, t_VEC);
+  GEN p1, g = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    p1 = cgetg(3,t_VEC); H[i] = (long)p1;
+    p1 = cgetg(3,t_VEC); g[i] = (long)p1;
     p1[1] = (long)gen[i];
     p1[2] = (long)quick_isprincipalgen(bnf, (GEN)gen[i]);
   }
-  return H;
+  return g;
 }
 
-/*   Given a number field bnf=bnr[1], a ray class group bnr (from buchrayinit),
- *   and a subgroup (HNF form) of the ray class group, compute the conductor
- *   of the subgroup (copy of discrayrelall) if all=0. If all > 0, compute
- *   furthermore the corresponding subgroup and output
- *   [[ideal,arch],[hm,cyc,gen],subgroup] if all = 1, and output
- *   [[ideal,arch],newbnr,subgroup] if all = 2. If all<0, answer only 1 is
- *   module is the conductor, 0 otherwise.
- */
+/* Given a number field bnf=bnr[1], a ray class group structure bnr (from
+ * buchrayinit), and a subgroup H (HNF form) of the ray class group, compute
+ * the conductor of H (copy of discrayrelall) if all=0. If all > 0, compute
+ * furthermore the corresponding H' and output
+ * if all = 1: [[ideal,arch],[hm,cyc,gen],H']
+ * if all = 2: [[ideal,arch],newbnr,H']
+ * if all < 0, answer only 1 is module is the conductor, 0 otherwise. */
 GEN
-conductor(GEN bnr,GEN subgroup,long all)
+conductor(GEN bnr, GEN H, long all)
 {
-  long r1,j,av=avma,tetpil,k,ep,trivial=0;
-  GEN bnf,nf,cl,cyc,gen,bid,ideal,arch,p1,p2,clhray,clhss;
-  GEN H,fa,arch2,bnr2,fa2,ex;
+  ulong av = avma;
+  long r1,j,k,ep;
+  GEN bnf,nf,gen,bid,ideal,arch,p1,clhray,clhss,fa,arch2,bnr2,P,ex,mod;
 
-  checkbnrgen(bnr); bnf=(GEN)bnr[1]; bid=(GEN)bnr[2];
-  cl=(GEN)bnr[5]; cyc=(GEN)cl[2]; gen=(GEN)cl[3];
-  nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
-  p1=(GEN)bid[1]; ideal=(GEN)p1[1]; arch=(GEN)p1[2];
-  if (gcmp0(subgroup)) { trivial=1; clhray=(GEN)cl[1]; }
+  checkbnrgen(bnr);
+  bnf = (GEN)bnr[1];
+  bid = (GEN)bnr[2];
+  clhray = gmael(bnr,5,1); gen = gmael(bnr,5,3);
+  nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
+  ideal= gmael(bid,1,1);
+  arch = gmael(bid,1,2);
+  if (gcmp0(H)) H = NULL;
   else
   {
-    p1 = gauss(subgroup,diagonal(cyc));
-    if (!gcmp1(denom(p1)))
-      err(talker,"incorrect subgroup in conductor");
-    if (gcmp1(det(p1))) trivial=1;
-    clhray = absi(det(subgroup));
+    p1 = gauss(H, diagonal(gmael(bnr,5,2)));
+    if (!gcmp1(denom(p1))) err(talker,"incorrect subgroup in conductor");
+    p1 = absi(det(H));
+    if (egalii(p1, clhray)) H = NULL; else clhray = p1;
   }
-  H = (!trivial || all > 0)? getH(bnf, gen): NULL;
-  fa=(GEN)bid[3]; fa2=(GEN)fa[1]; ex=(GEN)fa[2];
-  p2=cgetg(3,t_VEC); p2[2]=(long)arch;
-  for (k=1; k<lg(fa2); k++)
+  /* H = NULL --> trivial subgroup, else precompute isprincipal(gen) */
+  if (H || all > 0) gen = getgen(bnf, gen);
+
+  fa = (GEN)bid[3];
+  P  = (GEN)fa[1];
+  ex = (GEN)fa[2];
+  mod = cgetg(3,t_VEC); mod[2] = (long)arch;
+  for (k=1; k<lg(ex); k++)
   {
-    GEN pr=(GEN)fa2[k], prinv=idealinv(nf,pr);
+    GEN pr = (GEN)P[k];
     ep = (all>=0)? itos((GEN)ex[k]): 1;
     for (j=1; j<=ep; j++)
     {
-      p2[1]=(long)idealmul(nf,ideal,prinv);
-      if (trivial) clhss=rayclassno(bnf,p2);
-      else
-      {
-	bnr2=buchrayall(bnf,p2,nf_INIT);
-	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
-      }
+      mod[1] = (long)idealdivexact(nf,ideal,pr);
+      clhss = orderofquotient(bnf,mod,H,gen);
       if (!egalii(clhss,clhray)) break;
-      if (all<0) { avma=av; return gzero; }
-      ideal = (GEN)p2[1];
+      if (all < 0) { avma = av; return gzero; }
+      ideal = (GEN)mod[1];
     }
   }
-  p2[1]=(long)ideal; arch2=dummycopy(arch); p2[2]=(long)arch2;
+  mod[1] = (long)ideal; arch2 = dummycopy(arch);
+  mod[2] = (long)arch2;
   for (k=1; k<=r1; k++)
     if (signe(arch[k]))
     {
-      arch2[k]=zero;
-      if (trivial) clhss=rayclassno(bnf,p2);
-      else
-      {
-	bnr2=buchrayall(bnf,p2,nf_INIT);
-	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
-      }
-      if (!egalii(clhss,clhray)) arch2[k]=un;
-      else if (all<0) { avma=av; return gzero; }
+      arch2[k] = zero;
+      clhss = orderofquotient(bnf,mod,H,gen);
+      if (!egalii(clhss,clhray)) { arch2[k] = un; continue; }
+      if (all < 0) { avma = av; return gzero; }
     }
-  if (all<0) {avma=av; return gun;}
-  if (!all) { tetpil=avma; return gerepile(av,tetpil,gcopy(p2)); }
+  if (all < 0) { avma = av; return gun; }
+  if (!all) return gerepileupto(av, gcopy(mod));
 
-  bnr2=buchrayall(bnf,p2,nf_INIT | nf_GEN);
-  tetpil=avma; p1=cgetg(4,t_VEC);
-  p1[3]=(long)imageofgroup(H,bnr2,subgroup);
-  if (all==1) bnr2=(GEN)bnr2[5];
-  p1[2]=lcopy(bnr2);
-  p1[1]=lcopy(p2); return gerepile(av,tetpil,p1);
+  bnr2 = buchrayall(bnf,mod,nf_INIT | nf_GEN);
+  p1 = cgetg(4,t_VEC);
+  p1[3] = (long)imageofgroup(gen,bnr2,H);
+  if (all==1) bnr2 = (GEN)bnr2[5];
+  p1[2] = lcopy(bnr2);
+  p1[1] = lcopy(mod); return gerepileupto(av, p1);
 }
 
 /* etant donne un bnr et un polynome relatif, trouve le groupe des normes
@@ -1587,221 +1591,203 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
   return gerepile(av,tetpil,conductor(bnr,group,1));
 }
 
-/*   Etant donnes un corps de nombres bnf=bnr[1], un groupe de classes de rayon
- * bnr calcule par buchrayinit(), et une matrice HNF subgroup definissant un
- * sous-groupe du groupe de classes de rayon, calcule [n,r1,dk] associe a ce
- * sous groupe (cf. discrayall()). si flcond=0 le calcul est arrete si le
- * module n'est pas le conducteur et le programme retourne gzero.  Si
- * flrel=0, seul la norme de l'ideal dk est calculee au lieu de dk lui-meme
- */
+/* Given a number field bnf=bnr[1], a ray class group structure
+ * bnr (from buchrayinit), and a subgroup H (HNF form) of the ray class
+ * group, compute [n, r1, dk] associated to H (cf. discrayall).
+ * If flcond = 1, abort (return gzero) if module is not the conductor
+ * If flrel = 0, compute only N(dk) instead of the ideal dk proper */
 static GEN
-discrayrelall(GEN bnr,GEN subgroup,long flag)
+discrayrelall(GEN bnr, GEN H, long flag)
 {
-  long r1,degk,j,av=avma,tetpil,k,ep,nbdezero;
-  long trivial=0, flrel = flag & nf_REL, flcond = flag & nf_COND;
-  GEN bnf,nf,cyc,gen,bid,ideal,arch,p1,p2,clhray,clhss;
-  GEN H,fa,dlk,arch2,bnr2,idealrel,fa2,ex,som;
+  ulong av = avma;
+  long r1,j,k,ep, nz, flrel = flag & nf_REL, flcond = flag & nf_COND;
+  GEN bnf,nf,gen,bid,ideal,arch,p1,clhray,clhss,fa,arch2,idealrel,P,ex,mod,dlk;
 
-  checkbnrgen(bnr); bnf=(GEN)bnr[1];
-  cyc=gmael(bnr,5,2); gen=gmael(bnr,5,3);
-  nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
-
-  H = NULL; /* gcc -Wall */
-  if (gcmp0(subgroup)) { trivial=1; clhray=gmael(bnr,5,1); }
+  checkbnrgen(bnr);
+  bnf = (GEN)bnr[1];
+  bid = (GEN)bnr[2];
+  clhray = gmael(bnr,5,1); gen = gmael(bnr,5,3);
+  nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
+  ideal= gmael(bid,1,1);
+  arch = gmael(bid,1,2);
+  if (gcmp0(H)) H = NULL;
   else
   {
-    p1=gauss(subgroup,diagonal(cyc));
-    if (!gcmp1(denom(p1)))
-      err(talker,"incorrect subgroup in discray");
-    if (gcmp1(det(p1))) trivial=1;
-    clhray = det(subgroup);
-    H = getH(bnf,gen);
+    p1 = gauss(H, diagonal(gmael(bnr,5,2)));
+    if (!gcmp1(denom(p1))) err(talker,"incorrect subgroup in discray");
+    p1 = absi(det(H));
+    if (egalii(p1, clhray)) H = NULL; else clhray = p1;
   }
-  bid=(GEN)bnr[2]; ideal=gmael(bid,1,1); arch=gmael(bid,1,2);
-  fa=(GEN)bid[3]; fa2=(GEN)fa[1]; ex=(GEN)fa[2];
+  /* H = NULL --> trivial subgroup, else precompute isprincipal(gen) */
+  if (H) gen = getgen(bnf,gen);
 
-  degk=lgef(nf[1])-3;
-  idealrel=flrel?idmat(degk):gun;
+  fa = (GEN)bid[3];
+  P  = (GEN)fa[1];
+  ex = (GEN)fa[2];
+  mod = cgetg(3,t_VEC); mod[2] = (long)arch;
 
-  p2=cgetg(3,t_VEC); p2[2]=(long)arch;
-  for (k=1; k<lg(fa2); k++)
+  idealrel = flrel? idmat(lgef(nf[1])-3): gun;
+  for (k=1; k<lg(P); k++)
   {
-    GEN pr=(GEN)fa2[k], prinv=idealinv(nf,pr);
-
-    ep=itos((GEN)ex[k]); p2[1]=(long)ideal; som=gzero;
+    GEN pr = (GEN)P[k], S = gzero;
+    ep = itos((GEN)ex[k]);
+    mod[1] = (long)ideal;
     for (j=1; j<=ep; j++)
     {
-      p2[1]=(long)idealmul(nf,(GEN)p2[1],prinv);
-      if (trivial) clhss=rayclassno(bnf,p2);
-      else
-      {
-        bnr2=buchrayall(bnf,p2,nf_INIT);
-        clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
-      }
-      if (j==1 && egalii(clhss,clhray) && flcond) { avma=av; return gzero; }
-      if (is_pm1(clhss)) { som = addis(som, ep-j+1); break; }
-      som = addii(som, clhss);
+      mod[1] = (long)idealdivexact(nf,(GEN)mod[1],pr);
+      clhss = orderofquotient(bnf,mod,H,gen);
+      if (flcond && j==1 && egalii(clhss,clhray)) { avma = av; return gzero; }
+      if (is_pm1(clhss)) { S = addis(S, ep-j+1); break; }
+      S = addii(S, clhss);
     }
-    idealrel = flrel
-      ?  idealmul(nf,idealrel, idealpow(nf,pr, som))
-      :  mulii(idealrel, powgi((GEN)pr[1], mulii(som,(GEN)pr[4])));
+    idealrel = flrel? idealmul(nf,idealrel, idealpow(nf,pr, S))
+                    : mulii(idealrel, powgi(idealnorm(nf,pr),S));
   }
-  dlk = flrel
-    ?  idealdiv(nf,idealpow(nf,ideal,clhray),idealrel)
-    :  divii(powgi(dethnf(ideal),clhray),idealrel);
+  dlk = flrel? idealdivexact(nf,idealpow(nf,ideal,clhray), idealrel)
+             : divii(powgi(dethnf_i(ideal),clhray), idealrel);
 
-  p2[1]=(long)ideal; arch2=dummycopy(arch); p2[2]=(long)arch2; nbdezero=0;
+  mod[1] = (long)ideal; arch2 = dummycopy(arch);
+  mod[2] = (long)arch2; nz = 0;
   for (k=1; k<=r1; k++)
   {
     if (signe(arch[k]))
     {
-      arch2[k]=zero;
-      if (trivial) clhss=rayclassno(bnf,p2);
-      else
-      {
-	bnr2=buchrayall(bnf,p2,nf_INIT);
-	clhss=cardofimagofquotientgroup(H,bnr2,subgroup);
-      }
-      arch2[k]=un;
-      if (egalii(clhss,clhray))
-      {
-        if (flcond) { avma=av; return gzero; }
-	nbdezero++;
-      }
+      arch2[k] = zero;
+      clhss = orderofquotient(bnf,mod,H,gen);
+      if (!egalii(clhss,clhray)) { arch2[k] = un; continue; }
+      if (flcond) { avma = av; return gzero; }
     }
-    else nbdezero++;
+    nz++;
   }
-  tetpil=avma; p1=cgetg(4,t_VEC);
-  p1[1]=lcopy(clhray);
-  p1[2]=lstoi(nbdezero);
-  p1[3]=lcopy(dlk); return gerepile(av,tetpil,p1);
+  p1 = cgetg(4,t_VEC);
+  p1[1] = lcopy(clhray);
+  p1[2] = lstoi(nz);
+  p1[3] = lcopy(dlk); return gerepileupto(av, p1);
 }
 
 static GEN
 discrayabsall(GEN bnr, GEN subgroup,long flag)
 {
-  long av=avma,tetpil,degk,clhray,n,R1;
-  GEN p1,p2,p3,p4,nf,dkabs,bnf;
+  ulong av = avma;
+  long degk,clhray,n,R1;
+  GEN z,p1,D,dk,nf,dkabs,bnf;
 
-  p1=discrayrelall(bnr,subgroup,flag);
-  if (flag & nf_REL) return p1;
-  if (p1==gzero) { avma=av; return gzero; }
+  D = discrayrelall(bnr,subgroup,flag);
+  if (flag & nf_REL) return D;
+  if (D == gzero) { avma = av; return gzero; }
 
-  bnf=(GEN)bnr[1]; nf=(GEN)bnf[7]; degk=lgef(nf[1])-3;
-  dkabs=absi((GEN)nf[3]); p2=(GEN)p1[3];
-  clhray=itos((GEN)p1[1]); p3=gpuigs(dkabs,clhray);
-  n = degk * clhray; R1 = itos((GEN)p1[2]) * clhray;
-  if (((n-R1)&3)==2) p2=negi(p2);
-  tetpil=avma; p4=cgetg(4,t_VEC);
-  p4[1]=lstoi(n);
-  p4[2]=lstoi(R1);
-  p4[3]=lmulii(p2,p3); return gerepile(av,tetpil,p4);
+  bnf = (GEN)bnr[1]; nf = (GEN)bnf[7];
+  degk = lgef(nf[1])-3;
+  dkabs = absi((GEN)nf[3]);
+  dk = (GEN)D[3];
+  clhray = itos((GEN)D[1]); p1 = gpowgs(dkabs, clhray);
+  n = clhray * degk;
+  R1= clhray * itos((GEN)D[2]);
+  if (((n-R1)&3)==2) dk = negi(dk); /* (2r2) mod 4 = 2 : r2(relext) is odd */
+  z = cgetg(4,t_VEC);
+  z[1] = lstoi(n);
+  z[2] = lstoi(R1);
+  z[3] = lmulii(dk,p1); return gerepileupto(av, z);
 }
 
 GEN
 bnrdisc0(GEN arg0, GEN arg1, GEN arg2, long flag)
 {
-  GEN subgroup, bnr = args_to_bnr(arg0,arg1,arg2,&subgroup);
-  return discrayabsall(bnr,subgroup,flag);
+  GEN H, bnr = args_to_bnr(arg0,arg1,arg2,&H);
+  return discrayabsall(bnr,H,flag);
 }
 
 GEN
-discrayrel(GEN bnr, GEN subgroup)
+discrayrel(GEN bnr, GEN H)
 {
-  return discrayrelall(bnr,subgroup,nf_REL);
+  return discrayrelall(bnr,H,nf_REL);
 }
 
 GEN
-discrayrelcond(GEN bnr, GEN subgroup)
+discrayrelcond(GEN bnr, GEN H)
 {
-  return discrayrelall(bnr,subgroup,nf_REL | nf_COND);
+  return discrayrelall(bnr,H,nf_REL | nf_COND);
 }
 
 GEN
-discrayabs(GEN bnr, GEN subgroup)
+discrayabs(GEN bnr, GEN H)
 {
-  return discrayabsall(bnr,subgroup,nf_REGULAR);
+  return discrayabsall(bnr,H,nf_REGULAR);
 }
 
 GEN
-discrayabscond(GEN bnr, GEN subgroup)
+discrayabscond(GEN bnr, GEN H)
 {
-  return discrayabsall(bnr,subgroup,nf_COND);
+  return discrayabsall(bnr,H,nf_COND);
 }
 
-/* Etant donnes un corps de nombres bnf=bnr[1], un groupe de classes de rayon
- * bnr calcule par buchrayinit(), et un vecteur chi representant un caractere
- * sur les generateurs bnr[2][3], calcule le conducteur de ce caractere.
- */
+/* Given a number field bnf=bnr[1], a ray class group structure bnr and a
+ * vector chi representing a character on the generators bnr[2][3], compute
+ * the conductor of chi. */
 GEN
-bnrconductorofchar(GEN bnr,GEN chi)
+bnrconductorofchar(GEN bnr, GEN chi)
 {
-  long nbgen,i,av=avma,tetpil;
-  GEN p1,m,u,d1,cl,cyclic;
+  ulong av = avma;
+  long nbgen,i;
+  GEN p1,m,U,d1,cyc;
 
-  checkbnrgen(bnr); cl=(GEN)bnr[5];
-  cyclic=(GEN)cl[2]; nbgen=lg(cyclic)-1;
+  checkbnrgen(bnr);
+  cyc = gmael(bnr,5,2); nbgen = lg(cyc)-1;
   if (lg(chi)-1 != nbgen)
     err(talker,"incorrect character length in conductorofchar");
   if (!nbgen) return conductor(bnr,gzero,0);
 
-  d1=(GEN)cyclic[1]; m=cgetg(nbgen+2,t_MAT);
+  d1 = (GEN)cyc[1]; m = cgetg(nbgen+2,t_MAT);
   for (i=1; i<=nbgen; i++)
   {
-    p1=cgetg(2,t_COL); m[i]=(long)p1;
-    p1[1]=ldiv(gmul((GEN)chi[i],d1),(GEN)cyclic[i]);
-    if (typ(p1[1])!=t_INT) err(typeer,"conductorofchar");
+    if (typ(chi[i]) != t_INT) err(typeer,"conductorofchar");
+    p1 = cgetg(2,t_COL); m[i] = (long)p1;
+    p1[1] = lmulii((GEN)chi[i], divii(d1, (GEN)cyc[i]));
   }
-  p1=cgetg(2,t_COL); m[i]=(long)p1;
-  p1[1]=(long)d1; u=(GEN)hnfall(m)[2];
-  tetpil=avma; setlg(u,nbgen+1);
-  for (i=1; i<=nbgen; i++) setlg(u[i],nbgen+1);
-  return gerepile(av,tetpil,conductor(bnr,u,0));
+  p1 = cgetg(2,t_COL); m[i] = (long)p1;
+  p1[1] = (long)d1; U = (GEN)hnfall(m)[2];
+  setlg(U,nbgen+1);
+  for (i=1; i<=nbgen; i++) setlg(U[i],nbgen+1); /* U = Ker chi */
+  return gerepileupto(av, conductor(bnr,U,0));
 }
 
-/* Etant donne la liste des zidealstarinit et des matrices d'unites
- * correspondantes, sort la liste des nombres de classes
- */
+/* Given lists of [zidealstarinit, unit ideallogs], return lists of ray class
+ * numbers */
 GEN
-rayclassnolist(GEN bnf,GEN listes)
+rayclassnolist(GEN bnf,GEN lists)
 {
-  long av=avma,tetpil,i,j,k,kk,nc,nq,lx,ly;
-  GEN h,modulist,unitlist,classlist,sous,sousu,sousclass,p2,m,bid,q,cyclic;
+  ulong av = avma;
+  long i,j,lx,ly;
+  GEN blist,ulist,Llist,h,b,u,L,m;
 
-  if (typ(listes)!=t_VEC || lg(listes)!=3) err(typeer,"rayclassnolist");
-  bnf = checkbnf(bnf); h=gmael3(bnf,8,1,1);
-  modulist=(GEN)listes[1]; unitlist=(GEN)listes[2];
-  lx=lg(modulist); classlist=cgetg(lx,t_VEC);
+  if (typ(lists)!=t_VEC || lg(lists)!=3) err(typeer,"rayclassnolist");
+  bnf = checkbnf(bnf); h = gmael3(bnf,8,1,1);
+  blist = (GEN)lists[1];
+  ulist = (GEN)lists[2];
+  lx = lg(blist); Llist = cgetg(lx,t_VEC);
   for (i=1; i<lx; i++)
   {
-    sous=(GEN)modulist[i]; sousu=(GEN)unitlist[i]; ly=lg(sous);
-    sousclass=cgetg(ly,t_VEC); classlist[i]=(long)sousclass;
+    b = (GEN)blist[i]; /* bid's */
+    u = (GEN)ulist[i]; /* units zideallogs */
+    ly = lg(b); L = cgetg(ly,t_VEC); Llist[i] = (long)L;
     for (j=1; j<ly; j++)
     {
-      bid=(GEN)sous[j]; q=(GEN)sousu[j]; nq=lg(q)-1;
-      cyclic=gmael(bid,2,2); nc=lg(cyclic)-1;
-      if (lg(q[1]) != nc+1) err(bugparier,"rayclassnolist");
-      m=cgetg(nq+nc+1,t_MAT);
-      for (k=1; k<=nq; k++) m[k]=q[k];
-      for (   ; k<=nq+nc; k++)
-      {
-	p2=cgetg(nc+1,t_COL); m[k]=(long)p2;
-	for (kk=1; kk<=nc; kk++) p2[kk]=(kk==k-nq)?cyclic[kk]:zero;
-      }
-      sousclass[j] = lmul(h,dethnf(hnf(m)));
+      GEN bid = (GEN)b[j], cyc = gmael(bid,2,2);
+      m = concatsp((GEN)u[j], diagonal(cyc));
+      L[j] = lmulii(h, dethnf_i(hnf(m)));
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(classlist));
+  return gerepileupto(av, gcopy(Llist));
 }
 
-static GEN
-rayclassnolistes(GEN sous, GEN sousclass, GEN fac)
+static long
+rayclassnolists(GEN sous, GEN sousclass, GEN fac)
 {
   long i;
   for (i=1; i<lg(sous); i++)
-    if (gegal(gmael(sous,i,3),fac)) return (GEN)sousclass[i];
+    if (gegal(gmael(sous,i,3),fac)) return itos((GEN)sousclass[i]);
   err(bugparier,"discrayabslist");
-  return NULL; /* not reached */
+  return 0; /* not reached */
 }
 
 static GEN
@@ -1817,160 +1803,162 @@ rayclassnolistessimp(GEN sous, GEN fac)
 static GEN
 factormul(GEN fa1,GEN fa2)
 {
-  GEN pr,prnew,ex,exnew,v,p,y=cgetg(3,t_MAT);
+  GEN p,pnew,e,enew,v,P, y = cgetg(3,t_MAT);
   long i,c,lx;
 
-  pr=concatsp((GEN)fa1[1],(GEN)fa2[1]); y[1]=(long)pr;
-  ex=concatsp((GEN)fa1[2],(GEN)fa2[2]); y[2]=(long)ex;
-  v=sindexsort(pr); lx=lg(pr);
-  prnew=cgetg(lx,t_COL); exnew=cgetg(lx,t_COL);
-  for (i=1; i<lx; i++) prnew[i]=pr[v[i]];
-  for (i=1; i<lx; i++) exnew[i]=ex[v[i]];
-  p=gzero; c=0;
+  p = concatsp((GEN)fa1[1],(GEN)fa2[1]); y[1] = (long)p;
+  e = concatsp((GEN)fa1[2],(GEN)fa2[2]); y[2] = (long)e;
+  v = sindexsort(p); lx = lg(p);
+  pnew = cgetg(lx,t_COL); for (i=1; i<lx; i++) pnew[i] = p[v[i]];
+  enew = cgetg(lx,t_COL); for (i=1; i<lx; i++) enew[i] = e[v[i]];
+  P = gzero; c = 0;
   for (i=1; i<lx; i++)
   {
-    if (gegal((GEN)prnew[i],p))
-      ex[c]=laddii((GEN)ex[c],(GEN)exnew[i]);
+    if (gegal((GEN)pnew[i],P))
+      e[c] = laddii((GEN)e[c],(GEN)enew[i]);
     else
     {
-      c++; p=(GEN)prnew[i]; pr[c]=(long)p; ex[c]=exnew[i];
+      c++; P = (GEN)pnew[i];
+      p[c] = (long)P;
+      e[c] = enew[i];
     }
   }
-  setlg(pr,c+1); setlg(ex,c+1); return y;
+  setlg(p, c+1);
+  setlg(e, c+1); return y;
 }
 
 static GEN
 factordivexact(GEN fa1,GEN fa2)
 {
   long i,j,k,c,lx1,lx2;
-  GEN listpr,listex,y,listpr1,listex1,listpr2,listex2,p1;
+  GEN Lpr,Lex,y,Lpr1,Lex1,Lpr2,Lex2,p1;
 
-  listpr1=(GEN)fa1[1]; listex1=(GEN)fa1[2]; lx1=lg(listpr1);
-  listpr2=(GEN)fa2[1]; listex2=(GEN)fa2[2]; lx2=lg(listpr1);
-  y=cgetg(3,t_MAT);
-  listpr=cgetg(lx1,t_COL); y[1]=(long)listpr;
-  listex=cgetg(lx1,t_COL); y[2]=(long)listex;
+  Lpr1 = (GEN)fa1[1]; Lex1 = (GEN)fa1[2]; lx1 = lg(Lpr1);
+  Lpr2 = (GEN)fa2[1]; Lex2 = (GEN)fa2[2]; lx2 = lg(Lpr1);
+  y = cgetg(3,t_MAT);
+  Lpr = cgetg(lx1,t_COL); y[1] = (long)Lpr;
+  Lex = cgetg(lx1,t_COL); y[2] = (long)Lex;
   for (c=0,i=1; i<lx1; i++)
   {
-    j=isinvector(listpr2,(GEN)listpr1[i],lx2-1);
-    if (!j) { c++; listpr[c]=listpr1[i]; listex[c]=listex1[i]; }
+    j = isinvector(Lpr2,(GEN)Lpr1[i],lx2-1);
+    if (!j) { c++; Lpr[c] = Lpr1[i]; Lex[c] = Lex1[i]; }
     else
     {
-      p1=subii((GEN)listex1[i],(GEN)listex2[j]); k=signe(p1);
+      p1 = subii((GEN)Lex1[i], (GEN)Lex2[j]); k = signe(p1);
       if (k<0) err(talker,"factordivexact is not exact!");
-      if (k>0) { c++; listpr[c]=listpr1[i]; listex[c]=(long)p1; }
+      if (k>0) { c++; Lpr[c] = Lpr1[i]; Lex[c] = (long)p1; }
     }
   }
-  setlg(listpr,c+1); setlg(listex,c+1); return y;
+  setlg(Lpr,c+1);
+  setlg(Lex,c+1); return y;
 }
 
 static GEN
 factorpow(GEN fa,long n)
 {
-  GEN y=cgetg(3,t_MAT);
-
-  if (!n) { y[1]=lgetg(1,t_COL); y[2]=lgetg(1,t_COL); return y; }
-  y[1]=fa[1]; y[2]=lmulsg(n,(GEN)fa[2]); return y;
+  GEN y;
+  if (!n) return trivfact();
+  y = cgetg(3,t_MAT);
+  y[1] = fa[1];
+  y[2] = lmulsg(n, (GEN)fa[2]); return y;
 }
 
-/*   Etant donne la liste des zidealstarinit et des matrices d'unites
+/* Etant donne la liste des zidealstarinit et des matrices d'unites
  * correspondantes, sort la liste des discrayabs. On ne garde pas les modules
  * qui ne sont pas des conducteurs
  */
 GEN
-discrayabslist(GEN bnf,GEN listes)
+discrayabslist(GEN bnf,GEN lists)
 {
-  long av=avma,tetpil,ii,jj,i,j,k,clhss,ep,clhray,lx,ly,r1,som,degk,nbdezero;
-  long n,R1,normps,normi,lfa2;
-  GEN classlist,modulist,disclist,nf,dkabs,sous,sousclass,sousdisc;
-  GEN bid,module,ideal,arch,fa,fa2,ex,idealrel,p1,p2,pr;
-  GEN dlk,arch2,p3,fac,normp,fad,fad1,fad2,no1,no2;
+  ulong av = avma;
+  long ii,jj,i,j,k,clhss,ep,clhray,lx,ly,r1,degk,nz;
+  long n,R1,lP;
+  GEN hlist,blist,dlist,nf,dkabs,b,h,d;
+  GEN z,ideal,arch,fa,P,ex,idealrel,mod,pr,dlk,arch2,p3,fac;
 
-  classlist=rayclassnolist(bnf,listes); lx=lg(classlist);
-  modulist=(GEN)listes[1];
-  disclist=cgetg(lx,t_VEC); nf=(GEN)bnf[7]; r1 = nf_get_r1(nf);
-  degk=lgef(nf[1])-3; dkabs=absi((GEN)nf[3]);
-  nbdezero = 0; dlk = NULL; /* gcc -Wall */
+  hlist = rayclassnolist(bnf,lists);
+  blist = (GEN)lists[1];
+  lx = lg(hlist); dlist = cgetg(lx,t_VEC);
+  nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
+  degk = lgef(nf[1])-3; dkabs = absi((GEN)nf[3]);
+  nz = 0; dlk = NULL; /* gcc -Wall */
   for (ii=1; ii<lx; ii++)
   {
-    sous=(GEN)modulist[ii]; sousclass=(GEN)classlist[ii];
-    ly=lg(sous); sousdisc=cgetg(ly,t_VEC); disclist[ii]=(long)sousdisc;
+    b = (GEN)blist[ii]; /* zidealstarinits */
+    h = (GEN)hlist[ii]; /* class numbers */
+    ly = lg(b); d = cgetg(ly,t_VEC); dlist[ii] = (long)d; /* discriminants */
     for (jj=1; jj<ly; jj++)
     {
-      bid=(GEN)sous[jj]; clhray=itos((GEN)sousclass[jj]);
-      module=(GEN)bid[1]; ideal=(GEN)module[1]; arch=(GEN)module[2];
-      fa=(GEN)bid[3]; fa2=(GEN)fa[1]; ex=(GEN)fa[2]; fac=gcopy(fa);
-      idealrel=cgetg(3,t_MAT);
-      idealrel[1]=lgetg(1,t_COL);
-      idealrel[2]=lgetg(1,t_COL); lfa2=lg(fa2);
-      for (k=1; k<lfa2; k++)
+      GEN fac1,fac2, bid = (GEN)b[jj];
+      clhray = itos((GEN)h[jj]);
+      ideal= gmael(bid,1,1);
+      arch = gmael(bid,1,2);
+      fa = (GEN)bid[3]; fac = dummycopy(fa);
+      P = (GEN)fa[1]; fac1 = (GEN)fac[1];
+      ex= (GEN)fa[2]; fac2 = (GEN)fac[2];
+      lP = lg(P)-1; idealrel = trivfact();
+      for (k=1; k<=lP; k++)
       {
-	pr=(GEN)fa2[k]; ep=itos((GEN)ex[k]); som=0;
-	normp=gpui((GEN)pr[1],(GEN)pr[4],0);
-	normps=itos(normp); normi=ii;
-	normp=cgetg(3,t_MAT);
-	no1=cgetg(2,t_COL); no1[1]=pr[1]; normp[1]=(long)no1;
-	no2=cgetg(2,t_COL); no2[1]=pr[4]; normp[2]=(long)no2;
+        GEN normp;
+        long S = 0, normps, normi;
+	pr = (GEN)P[k]; ep = itos((GEN)ex[k]);
+	normi = ii; normps = itos(idealnorm(nf,pr));
 	for (j=1; j<=ep; j++)
 	{
-          if (j<ep) { coeff(fac,k,2)=lstoi(ep-j); fad=fac; }
+          GEN fad, fad1, fad2;
+          if (j < ep) { fac2[k] = lstoi(ep-j); fad = fac; }
           else
           {
-            fad=cgetg(3,t_MAT);
-            fad1=cgetg(lfa2-1,t_COL); fad[1]=(long)fad1;
-            fad2=cgetg(lfa2-1,t_COL); fad[2]=(long)fad2;
-            for (i=1; i<k; i++)
-              { fad1[i]=coeff(fac,i,1); fad2[i]=coeff(fac,i,2); }
-            for (   ; i<lfa2-1; i++)
-              { fad1[i]=coeff(fac,i+1,1); fad2[i]=coeff(fac,i+1,2); }
+            fad = cgetg(3,t_MAT);
+            fad1 = cgetg(lP,t_COL); fad[1] = (long)fad1;
+            fad2 = cgetg(lP,t_COL); fad[2] = (long)fad2;
+            for (i=1; i< k; i++) { fad1[i] = fac1[i];  fad2[i] = fac2[i]; }
+            for (   ; i<lP; i++) { fad1[i] = fac1[i+1];fad2[i] = fac2[i+1]; }
           }
           normi /= normps;
-          clhss = itos(rayclassnolistes((GEN)modulist[normi],
-                                        (GEN)classlist[normi],fad));
+          clhss = rayclassnolists((GEN)blist[normi],(GEN)hlist[normi], fad);
           if (j==1 && clhss==clhray)
 	  {
-	    clhray=0; coeff(fac,k,2)=ex[k]; goto LLDISCRAY;
+	    clhray = 0; fac2[k] = ex[k]; goto LLDISCRAY;
 	  }
-          if (clhss==1) { som += ep-j+1; break; }
-          som += clhss;
+          if (clhss == 1) { S += ep-j+1; break; }
+          S += clhss;
 	}
-	coeff(fac,k,2)=ex[k];
-	idealrel=factormul(idealrel,factorpow(normp,som));
+	fac2[k] = ex[k];
+	normp = to_famat_all((GEN)pr[1], (GEN)pr[4]);
+	idealrel = factormul(idealrel, factorpow(normp,S));
       }
-      dlk=factordivexact(factorpow(factor(stoi(ii)),clhray),idealrel);
-      p2=cgetg(3,t_VEC);
-      p2[1]=(long)ideal; arch2=dummycopy(arch);
-      p2[2]=(long)arch2; nbdezero=0;
+      dlk = factordivexact(factorpow(factor(stoi(ii)),clhray), idealrel);
+      mod = cgetg(3,t_VEC);
+      mod[1] = (long)ideal; arch2 = dummycopy(arch);
+      mod[2] = (long)arch2; nz = 0;
       for (k=1; k<=r1; k++)
       {
 	if (signe(arch[k]))
 	{
-	  arch2[k]=zero;
-	  clhss=itos(rayclassno(bnf,p2));
-	  arch2[k]=un;
-	  if (clhss==clhray) { clhray=0; break; }
+	  arch2[k] = zero;
+	  clhss = itos(rayclassno(bnf,mod));
+	  arch2[k] = un;
+	  if (clhss == clhray) { clhray = 0; break; }
 	}
-	else nbdezero++;
+	else nz++;
       }
-    LLDISCRAY:
-      if (!clhray) sousdisc[jj]=lgetg(1,t_VEC);
-      else
-      {
-	p3=factorpow(factor(dkabs),clhray); n=clhray*degk; R1=nbdezero*clhray;
-	if (((n-R1)&3) == 2)
-	{
-	  normp=cgetg(3,t_MAT);
-	  no1=cgetg(2,t_COL); normp[1]=(long)no1; no1[1]=lstoi(-1);
-	  no2=cgetg(2,t_COL); normp[2]=(long)no2; no2[1]=un;
-	  dlk=factormul(normp,dlk);
-	}
-	p1=cgetg(4,t_VEC); p1[1]=lstoi(n);
-	p1[2]=lstoi(R1); p1[3]=(long)factormul(dlk,p3);
-	sousdisc[jj]=(long)p1;
-      }
+LLDISCRAY:
+      if (!clhray) { d[jj] = lgetg(1,t_VEC); continue; }
+
+      p3 = factorpow(factor(dkabs),clhray);
+      n = clhray * degk;
+      R1= clhray * nz;
+      if (((n-R1)&3) == 2) /* r2 odd, set dlk = -dlk */
+        dlk = factormul(to_famat_all(stoi(-1),gun), dlk);
+      z = cgetg(4,t_VEC);
+      z[1] = lstoi(n);
+      z[2] = lstoi(R1);
+      z[3] = (long)factormul(dlk,p3);
+      d[jj] = (long)z;
     }
   }
-  tetpil=avma; return gerepile(av,tetpil,gcopy(disclist));
+  return gerepileupto(av, gcopy(dlist));
 }
 
 #define SHLGVINT 15
@@ -2021,12 +2009,12 @@ zsimp(GEN bid, GEN matunit)
 }
 
 static GEN
-zsimpjoin(GEN bidsimp, GEN bidp, GEN faussefa, GEN matunit)
+zsimpjoin(GEN bidsimp, GEN bidp, GEN dummyfa, GEN matunit)
 {
   long i,l1,l2,nbgen,c, av = avma;
   GEN U,U1,U2,cyc1,cyc2,cyc,u1u2,met, y = cgetg(5,t_VEC);
 
-  y[1] = (long)vconcat((GEN)bidsimp[1],faussefa);
+  y[1] = (long)vconcat((GEN)bidsimp[1],dummyfa);
   U1 = (GEN)bidsimp[3]; cyc1 = (GEN)bidsimp[2]; l1 = lg(cyc1);
   U2 = (GEN)bidp[5];    cyc2 = gmael(bidp,2,2); l2 = lg(cyc2);
   nbgen = l1+l2-2;
@@ -2056,161 +2044,135 @@ zsimpjoin(GEN bidsimp, GEN bidp, GEN faussefa, GEN matunit)
 }
 
 static GEN
-rayclassnointern(GEN sous, GEN clh)
+rayclassnointern(GEN blist, GEN h)
 {
-  long lx,nc,nq,k,kk,j;
-  GEN bidsimp,qm,sousray,cyclic,m,p2,p1;
+  long lx,j;
+  GEN bid,qm,L,cyc,m,z;
 
-  lx=lg(sous); sousray=cgetg(lx,t_VEC);
+  lx = lg(blist); L = cgetg(lx,t_VEC);
   for (j=1; j<lx; j++)
   {
-    bidsimp=(GEN)sous[j]; qm=gmul((GEN)bidsimp[3],(GEN)bidsimp[4]);
-    nq=lg(qm)-1; cyclic=(GEN)bidsimp[2]; nc=lg(cyclic)-1;
-    if (lg(qm[1]) != nc+1) err(bugparier,"rayclassnolist");
-    m=cgetg(nq+nc+1,t_MAT);
-    for (k=1; k<=nq; k++) m[k]=qm[k];
-    for (   ; k<=nq+nc; k++)
-    {
-      p2=cgetg(nc+1,t_COL); m[k]=(long)p2;
-      for (kk=1; kk<=nc; kk++) p2[kk]=(kk==k-nq)?cyclic[kk]:zero;
-    }
-    p1=cgetg(3,t_VEC); p1[2]=lmul(clh,dethnf(hnf(m)));
-    p1[1]=bidsimp[1]; sousray[j]=(long)p1;
+    bid = (GEN)blist[j];
+    qm = gmul((GEN)bid[3],(GEN)bid[4]);
+    cyc = (GEN)bid[2];
+    m = concatsp(qm, diagonal(cyc));
+    z = cgetg(3,t_VEC); L[j] = (long)z;
+    z[1] = bid[1];
+    z[2] = lmulii(h, dethnf_i(hnf(m)));
   }
-  return sousray;
+  return L;
 }
 
 void rowselect_p(GEN A, GEN B, GEN p, long init);
 
 static GEN
-rayclassnointernarch(GEN sous, GEN clh, GEN matarchunit)
+rayclassnointernarch(GEN blist, GEN h, GEN matU)
 {
-  long lx,nc,nq,k,kk,j,lm,lh,r1,jj,nba,nbarch;
-  GEN bidsimp,qm,sousray,cyclic,m,p2,p1,p1all,mm,qmk,matk,rowsel;
+  long lx,nc,k,kk,j,r1,jj,nba,nbarch;
+  GEN _2,bid,qm,Lray,cyc,m,z,z2,mm,rowsel;
 
-  if (!matarchunit) return rayclassnointern(sous,clh);
-  lx = lg(sous); if (lx == 1) return sous;
+  if (!matU) return rayclassnointern(blist,h);
+  lx = lg(blist); if (lx == 1) return blist;
 
-  lm=lg(matarchunit);
-  r1=lg(matarchunit[1])-1;
-  sousray=cgetg(lx,t_VEC); nbarch=(1<<r1);
+  r1 = lg(matU[1])-1; _2 = gscalmat(gdeux,r1);
+  Lray = cgetg(lx,t_VEC); nbarch = 1<<r1;
   for (j=1; j<lx; j++)
   {
-    bidsimp=(GEN)sous[j]; qm=gmul((GEN)bidsimp[3],(GEN)bidsimp[4]);
-    nq=lg(qm)-1; cyclic=(GEN)bidsimp[2]; nc=lg(cyclic)-1;
-    if (lm != nq+1) err(bugparier,"rayclassnointernarch (1)");
-    if (lg(qm[1]) != nc+1) err(bugparier,"rayclassnointernarch (2)");
-    m=cgetg(nq+nc+r1+1,t_MAT);
-    for (k=1; k<=nq; k++)
-    {
-      p2=cgetg(nc+r1+1,t_COL); m[k]=(long)p2; qmk=(GEN)qm[k];
-      matk=(GEN)matarchunit[k];
-      for (kk=1; kk<=nc; kk++) p2[kk]=qmk[kk];
-      for (    ; kk<=nc+r1; kk++) p2[kk]=matk[kk-nc];
-    }
-    for (  ; k<=nq+nc; k++)
-    {
-      p2=cgetg(nc+r1+1,t_COL); m[k]=(long)p2;
-      for (kk=1; kk<=nc+r1; kk++) p2[kk]=(kk==k-nq)?cyclic[kk]:zero;
-    }
-    for (   ; k<=nq+nc+r1; k++)
-    {
-      p2=cgetg(nc+r1+1,t_COL); m[k]=(long)p2;
-      for (kk=1; kk<=nc+r1; kk++) p2[kk]=(kk==k-nq)?deux:zero;
-    }
-    p1all=cgetg(nbarch+1,t_VEC);
-    m = hnf(m); lh = lg(m);
-    mm = dummycopy(m);
+    bid = (GEN)blist[j];
+    qm = gmul((GEN)bid[3],(GEN)bid[4]);
+    cyc = (GEN)bid[2]; nc = lg(cyc)-1;
+    /* [ qm   cyc 0 ]
+     * [ matU  0  2 ] */
+    m = concatsp3(vconcat(qm, matU),
+             vconcat(diagonal(cyc), zeromat(r1,nc)),
+             vconcat(zeromat(nc,r1), _2));
+    m = hnf(m); mm = dummycopy(m);
+    z2 = cgetg(nbarch+1,t_VEC);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);
-
-    for (k=0; k<=nbarch-1; k++)
+    for (k = 0; k < nbarch; k++)
     {
-      kk=k; nba=nc+1;
-      for (jj=1; jj<=r1; jj++)
-      {
+      nba = nc+1;
+      for (kk=k,jj=1; jj<=r1; jj++,kk>>=1)
 	if (kk&1) rowsel[nba++] = nc + jj;
-	kk>>=1;
-      }
       setlg(rowsel, nba);
       rowselect_p(m, mm, rowsel, nc+1);
-      p1all[k+1] = lmul(clh, dethnf(hnf(mm)));
+      z2[k+1] = lmulii(h, dethnf_i(hnf(mm)));
     }
-    p1 = cgetg(3,t_VEC); sousray[j] = (long)p1;
-    p1[1] = bidsimp[1];
-    p1[2] = (long)p1all;
+    z = cgetg(3,t_VEC); Lray[j] = (long)z;
+    z[1] = bid[1];
+    z[2] = (long)z2;
   }
-  return sousray;
+  return Lray;
 }
 
 GEN
 decodemodule(GEN nf, GEN fa)
 {
   long n,k,j,fauxpr,av=avma;
-  GEN fa2,ex,id,pr;
+  GEN g,e,id,pr;
 
-  nf=checknf(nf);
+  nf = checknf(nf);
   if (typ(fa)!=t_MAT || lg(fa)!=3)
     err(talker,"incorrect factorisation in decodemodule");
-  n=lgef(nf[1])-3; id=idmat(n);
-  fa2=(GEN)fa[1]; ex=(GEN)fa[2];
-  for (k=1; k<lg(fa2); k++)
+  n = lgef(nf[1])-3; id = idmat(n);
+  g = (GEN)fa[1];
+  e = (GEN)fa[2];
+  for (k=1; k<lg(g); k++)
   {
-    fauxpr=itos((GEN)fa2[k]);
-    j=(fauxpr%n)+1; fauxpr /= n*n;
+    fauxpr = itos((GEN)g[k]);
+    j = (fauxpr%n)+1; fauxpr /= n*n;
     pr = (GEN)primedec(nf,stoi(fauxpr))[j];
-    id = idealmul(nf,id,idealpow(nf,pr,(GEN)ex[k]));
+    id = idealmul(nf,id, idealpow(nf,pr,(GEN)e[k]));
   }
   return gerepileupto(av,id);
 }
 
-/*   Fait tout a partir du debut, et bound peut aller jusqu'a 2^30. Pour
- * l'instant ne s'occupe pas des sous-groupes.   le format de sortie est le
- * suivant: un vecteur vext dont les composantes vint ont exactement 2^LGVINT
- * vraies composantes sauf le dernier qui peut etre plus court. vext[i][j]
- * (ou j<=2^LGVINT) doit etre compris comme la composante d'indice
- * I=(i-1)*2^LGVINT+j d'un grand vecteur unique V.  Une telle composante
- * d'indice I est un vecteur indexe par tous les ideaux de norme egal a I. Si
- * m_0 est un tel ideal, la composante correspondante est la suivante:
+/* Do all from scratch, bound < 2^30. For the time being, no subgroups.
+ * Ouput: vector vext whose components vint have exactly 2^LGVINT entries
+ * but for the last one which is allowed to be shorter. vext[i][j]
+ * (where j<=2^LGVINT) is understood as component number I = (i-1)*2^LGVINT+j 
+ * in a unique huge vector V.  Such a component V[I] is a vector indexed by
+ * all ideals of norm I. Given such an ideal m_0, the component is as follows:
  *
- *  + si arch = NULL, on parcourt toutes les parties archimediennes possibles.
- * L'ordre des arch est l'ordre lexicographique inverse, donc [0,0,..,0],
- * [1,0,..,0], [0,1,..,0],... Dans ce cas: [m_0,V] ou V est un vecteur de
- * 2^r1 composantes, donnant pour chaque arch, le triplet [N,R1,D], ou N, R1,
- * D sont comme dans discrayabs sauf que D est sous forme factorisee.
+ * + if arch = NULL, run through all possible archimedean parts, the archs
+ * are ordered using inverse lexicographic order, [0,..,0], [1,0,..,0],
+ * [0,1,..,0],... Component is [m_0,V] where V is a vector with
+ * 2^r1 entries, giving for each arch the triple [N,R1,D], with N, R1, D 
+ * as in discrayabs [D is in factored form]
  *
- * + sinon [m_0,arch,N,R1,D], ou N, R1, D sont comme ci-dessus.
+ * + otherwise [m_0,arch,N,R1,D]
  *
- * Si ramip est different de 0 et -1, ne prend que les modules sans facteur
- * carres ailleurs qu'au dessus de ramip. Si ramip est strictement negatif,
- * archsquare.
+ * If ramip != 0 and -1, keep only modules which are squarefree outside ramip
+ * If ramip < 0, archsquare. (????)
  */
 static GEN
 discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
 {
   byteptr ptdif=diffptr;
-  long degk,lim,av0,av,av1,tetpil,i,j,k,p2s,lfa,lp1,sqbou,cex, allarch;
+  long degk,i,j,k,p2s,lfa,lp1,sqbou,cex, allarch;
   long ffs,fs,resp,flbou,nba, k2,karch,kka,nbarch,jjj,jj,square;
-  long ii2,ii,ly,clhray,lfa2,ep,som,clhss,normps,normi,nbdezero,r1,R1,n,c;
-  ulong q;
-  GEN nf,p,z,pol,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
-  GEN bigres,funits,racunit,embunit,sous,clh,sousray,raylist;
+  long ii2,ii,ly,clhray,lP,ep,S,clhss,normps,normi,nz,r1,R1,n,c;
+  ulong q, av0 = avma, av,av1,lim,tetpil;
+  GEN nf,p,z,p1,p2,p3,fa,pr,normp,ideal,bidp,z2,matarchunit;
+  GEN funits,racunit,embunit,sous,clh,sousray,raylist;
   GEN clhrayall,discall,faall,Id,idealrel,idealrelinit;
-  GEN sousdisc,module,fa2,ex,fac,no1,no2,fad,fad1,fad2,fadkabs,pz;
-  GEN arch2,dlk,disclist,bidsimp,p4,faussefa,pex,fauxpr,gprime;
+  GEN sousdisc,mod,P,ex,fac,fadkabs,pz;
+  GEN arch2,dlk,disclist,p4,faussefa,fauxpr,gprime;
   GEN *gptr[2];
 
-  clhray = nbdezero = 0; /* gcc -Wall */
-  module = Id = dlk = ideal = clhrayall = discall = faall = NULL;
+  if (bound <= 0) err(talker,"non-positive bound in discrayabslist");
+  clhray = nz = 0; /* gcc -Wall */
+  mod = Id = dlk = ideal = clhrayall = discall = faall = NULL;
 
   /* ce qui suit recopie d'assez pres ideallistzstarall */
   if (DEBUGLEVEL>2) timer2();
-  if (bound <= 0) err(talker,"non-positive bound in discrayabslist");
-  av0=avma; bnf = checkbnf(bnf); flbou=0;
-  nf=(GEN)bnf[7]; bigres=(GEN)bnf[8]; pol=(GEN)nf[1]; degk=lgef(pol)-3;
-  r1 = nf_get_r1(nf); fadkabs=factor(absi((GEN)nf[3]));
-  clh=gmael(bigres,1,1);
+  bnf = checkbnf(bnf); flbou=0;
+  nf = (GEN)bnf[7]; r1 = nf_get_r1(nf);
+  degk = lgef((GEN)nf[1])-3;
+  fadkabs = factor(absi((GEN)nf[3]));
+  clh = gmael3(bnf,8,1,1);
+  racunit = gmael3(bnf,8,4,2);
   funits = check_units(bnf,"discrayabslistarchintern");
-  racunit=gmael(bigres,4,2);
 
   if (ramip >= 0) square = 0;
   else
@@ -2226,12 +2188,13 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   else
   {
     if (lg(arch)!=r1+1)
-      err(talker,"incorrect archimedean argument in discrayabslistlong");
+      err(talker,"incorrect archimedean argument in discrayabslistarchintern");
     for (i=1; i<=r1; i++) if (signe(arch[i])) nba++;
-    if (nba) module=cgetg(3,t_VEC);
+    if (nba) mod = cgetg(3,t_VEC);
   }
-  p1=cgetg(3,t_VEC); p1[1]=(long)idmat(degk); p1[2]=(long)arch;
-  bidp=zidealstarinitall(nf,p1,0);
+  p1 = cgetg(3,t_VEC);
+  p1[1] = (long)idmat(degk);
+  p1[2] = (long)arch; bidp = zidealstarinitall(nf,p1,0);
   if (allarch)
   {
     matarchunit = logunitmatrix(nf,funits,racunit,bidp);
@@ -2240,54 +2203,50 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
   else
     matarchunit = (GEN)NULL;
 
-  p=cgeti(3); p[1]=evalsigne(1)|evallgef(3);
-  sqbou=(long)sqrt((double)bound) + 1;
-  av=avma; lim=stack_lim(av,1);
-  z=bigcgetvec(bound); for (i=2; i<=bound; i++) putcompobig(z,i,cgetg(1,t_VEC));
-  if (allarch) bidp=zidealstarinitall(nf,idmat(degk),0);
-  embunit=logunitmatrix(nf,funits,racunit,bidp);
-  p1=cgetg(2,t_VEC); putcompobig(z,1,p1); p1[1]=(long)zsimp(bidp,embunit);
-  if (DEBUGLEVEL>=2) fprintferr("Starting zidealstarunits computations\n");
+  p = cgeti(3); p[1] = evalsigne(1)|evallgef(3);
+  sqbou = (long)sqrt((double)bound) + 1;
+  av = avma; lim = stack_lim(av,1);
+  z = bigcgetvec(bound); for (i=2;i<=bound;i++) putcompobig(z,i,cgetg(1,t_VEC));
+  if (allarch) bidp = zidealstarinitall(nf,idmat(degk),0);
+  embunit = logunitmatrix(nf,funits,racunit,bidp);
+  putcompobig(z,1, _vec(zsimp(bidp,embunit))); 
+  if (DEBUGLEVEL>1) fprintferr("Starting zidealstarunits computations\n");
+  if (bound > (long)maxprime()) err(primer1);
   for (p[2]=0; p[2]<=bound; )
   {
-    if (!*ptdif) err(primer1);
     p[2] += *ptdif++;
     if (!flbou && p[2]>sqbou)
     {
-      flbou=1;
-      if (DEBUGLEVEL>=2)
-        { fprintferr("\nStarting rayclassno computations\n"); flusherr(); }
-      tetpil=avma; z=gerepile(av,tetpil,gcopy(z));
-      av1=avma; raylist=bigcgetvec(bound);
-      /* maintenant on suit rayclassnolist */
+      if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
+      flbou = 1;
+      tetpil = avma; z = gerepile(av,tetpil,gcopy(z));
+      av1 = avma; raylist = bigcgetvec(bound);
       for (i=1; i<=bound; i++)
       {
-	sous=getcompobig(z,i);
-        sousray=rayclassnointernarch(sous,clh,matarchunit);
+	sous = getcompobig(z,i);
+        sousray = rayclassnointernarch(sous,clh,matarchunit);
 	putcompobig(raylist,i,sousray);
       }
-      tetpil=avma; raylist=gerepile(av1,tetpil,gcopy(raylist));
-      z2=bigcgetvec(sqbou);
+      tetpil = avma; raylist = gerepile(av1,tetpil,gcopy(raylist));
+      z2 = bigcgetvec(sqbou);
       for (i=1; i<=sqbou; i++)
         putcompobig(z2,i, gcopy(getcompobig(z,i)));
       z = z2;
     }
-    fa=primedec(nf,p); lfa=lg(fa)-1;
+    fa = primedec(nf,p); lfa = lg(fa)-1;
     for (j=1; j<=lfa; j++)
     {
       pr = (GEN)fa[j]; p1 = powgi(p,(GEN)pr[4]);
-      if (DEBUGLEVEL>=2) { fprintferr("%ld ",p[2]); flusherr(); }
+      if (DEBUGLEVEL>1) { fprintferr("%ld ",p[2]); flusherr(); }
       if (is_bigint(p1) || (q = (ulong)itos(p1)) > (ulong)bound) continue;
 
-      fauxpr=stoi(p[2]*degk*degk+(itos((GEN)pr[4])-1)*degk+j-1);
+      fauxpr = stoi((p[2]*degk + itos((GEN)pr[4])-1)*degk + j-1);
       p2s = q; ideal = pr; cex = 0;
       while (q <= (ulong)bound)
       {
-        cex++; bidp=zidealstarinitall(nf,ideal,0);
-        faussefa=cgetg(3,t_MAT); p1=cgetg(2,t_COL); p1[1]=(long)fauxpr;
-        faussefa[1]=(long)p1; pex=cgetg(2,t_COL); pex[1]=lstoi(cex);
-        faussefa[2]=(long)pex;
-        embunit=logunitmatrix(nf,funits,racunit,bidp);
+        cex++; bidp = zidealstarinitall(nf,ideal,0);
+        faussefa = to_famat_all(fauxpr, stoi(cex));
+        embunit = logunitmatrix(nf,funits,racunit,bidp);
         for (i=q; i<=bound; i+=q)
         {
           p1 = getcompobig(z,i/q); lp1 = lg(p1);
@@ -2302,18 +2261,18 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
               p2[++c] = (long)zsimpjoin(p3,bidp,faussefa,embunit);
           }
 
-          setlg(p2,c+1);
-          if (p[2]<=sqbou)
+          setlg(p2, c+1);
+          if (p[2] <= sqbou)
           {
             pz = getcompobig(z,i);
-            if (lg(pz)>1) p2 = concatsp(pz,p2);
+            if (lg(pz) > 1) p2 = concatsp(pz,p2);
             putcompobig(z,i,p2);
           }
           else
           {
             p2 = rayclassnointernarch(p2,clh,matarchunit);
             pz = getcompobig(raylist,i);
-            if (lg(pz)>1) p2 = concatsp(pz,p2);
+            if (lg(pz) > 1) p2 = concatsp(pz,p2);
             putcompobig(raylist,i,p2);
           }
         }
@@ -2331,7 +2290,7 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       {
 	if (DEBUGLEVEL>2)
           fprintferr("avma = %ld, t(z) = %ld ",avma-bot,taille2(z));
-        tetpil=avma; z=gerepile(av,tetpil,gcopy(z));
+        z = gerepileupto(av, gcopy(z));
       }
       else
       {
@@ -2342,26 +2301,25 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
       if (DEBUGLEVEL>2) { fprintferr("avma = %ld ",avma-bot); flusherr(); }
     }
   }
-  if (!flbou) /* maintenant on suit rayclassnolist */
+  if (!flbou)
   {
-    if (DEBUGLEVEL>=2)
-    { fprintferr("\nStarting rayclassno computations\n"); flusherr(); }
-    tetpil=avma; z=gerepile(av,tetpil,gcopy(z));
-    av1=avma; raylist=bigcgetvec(bound);
+    if (DEBUGLEVEL>1) fprintferr("\nStarting rayclassno computations\n");
+    z = gerepileupto(av, gcopy(z));
+    av1 = avma; raylist = bigcgetvec(bound);
     for (i=1; i<=bound; i++)
     {
-      sous=getcompobig(z,i);
-      sousray=rayclassnointernarch(sous,clh,matarchunit);
+      sous = getcompobig(z,i);
+      sousray = rayclassnointernarch(sous,clh,matarchunit);
       putcompobig(raylist,i,sousray);
     }
   }
   if (DEBUGLEVEL>2)
     fprintferr("avma = %ld, t(r) = %ld ",avma-bot,taille2(raylist));
-  tetpil=avma; raylist=gerepile(av,tetpil,gcopy(raylist));
+  raylist = gerepileupto(av, gcopy(raylist));
   if (DEBUGLEVEL>2)
     { fprintferr("avma = %ld ",avma-bot); msgtimer("zidealstarlist"); }
-  /* maintenant on suit discrayabslist */
-  if (DEBUGLEVEL>=2)
+  /* following discrayabslist */
+  if (DEBUGLEVEL>1)
     { fprintferr("Starting discrayabs computations\n"); flusherr(); }
 
   if (allarch) nbarch = 1<<r1;
@@ -2373,28 +2331,29 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
     faall = cgetg(2,t_VEC);
     Id = idmat(degk);
   }
-  idealrelinit=cgetg(3,t_MAT);
-  idealrelinit[1]=lgetg(1,t_COL);
-  idealrelinit[2]=lgetg(1,t_COL);
-  av1=avma; lim=stack_lim(av1,1);
+  idealrelinit = trivfact();
+  av1 = avma; lim = stack_lim(av1,1);
   if (square) bound = sqbou-1;
-  disclist=bigcgetvec(bound);
+  disclist = bigcgetvec(bound);
   for (ii=1; ii<=bound; ii++) putcompobig(disclist,ii,cgetg(1,t_VEC));
   for (ii2=1; ii2<=bound; ii2++)
   {
     ii = square? ii2*ii2: ii2;
-    if (DEBUGLEVEL>=2 && ii%100==0) { fprintferr("%ld ",ii); flusherr(); }
-    sous=getcompobig(raylist,ii); ly=lg(sous); sousdisc=cgetg(ly,t_VEC);
+    if (DEBUGLEVEL>1 && ii%100==0) { fprintferr("%ld ",ii); flusherr(); }
+    sous = getcompobig(raylist,ii); ly = lg(sous); sousdisc = cgetg(ly,t_VEC);
     putcompobig(disclist, square? ii2: ii,sousdisc);
     for (jj=1; jj<ly; jj++)
     {
-      bidsimp=(GEN)sous[jj]; fa=(GEN)bidsimp[1]; fac=gcopy(fa);
-      fa2=(GEN)fa[1]; ex=(GEN)fa[2]; lfa2=lg(fa2);
+      GEN fac1, fac2, bidsimp = (GEN)sous[jj];
+      fa = (GEN)bidsimp[1]; fac = dummycopy(fa);
+      P = (GEN)fa[1]; fac1 = (GEN)fac[1];
+      ex= (GEN)fa[2]; fac2 = (GEN)fac[2];
+      lP = lg(P)-1;
 
       if (allarch)
       {
         clhrayall = (GEN)bidsimp[2];
-        discall=cgetg(nbarch+1,t_VEC);
+        discall = cgetg(nbarch+1,t_VEC);
       }
       else
         clhray = itos((GEN)bidsimp[2]);
@@ -2403,13 +2362,10 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
         if (!allarch) ideal = Id;
         else
         {
-          kka=karch; nba=0;
-          for (jjj=1; jjj<=r1; jjj++)
-          {
-            if (kka%2) nba++;
-            kka>>=1;
-          }
-          clhray=itos((GEN)clhrayall[karch+1]);
+          nba=0;
+          for (kka=karch,jjj=1; jjj<=r1; jjj++,kka>>=1)
+            if (kka & 1) nba++;
+          clhray = itos((GEN)clhrayall[karch+1]);
           for (k2=1,k=1; k<=r1; k++,k2<<=1)
           {
             if (karch&k2 && clhray==itos((GEN)clhrayall[karch-k2+1]))
@@ -2417,84 +2373,80 @@ discrayabslistarchintern(GEN bnf, GEN arch, long bound, long ramip)
           }
         }
         idealrel = idealrelinit;
-        for (k=1; k<lfa2; k++)
+        for (k=1; k<=lP; k++)
         {
-          fauxpr=(GEN)fa2[k]; ep=itos((GEN)ex[k]); ffs=itos(fauxpr);
+          fauxpr = (GEN)P[k]; ep = itos((GEN)ex[k]); ffs = itos(fauxpr);
           /* Hack for NeXTgcc 2.5.8 -- splitting "resp=fs%degk+1" */
-          fs=ffs/degk; resp=fs%degk; resp++; gprime=stoi((long)(fs/degk));
+          fs = ffs/degk; resp = fs%degk; resp++;
+          gprime = stoi((long)(fs/degk));
           if (!allarch && nba)
           {
-            p1=(GEN)primedec(nf,gprime)[ffs%degk+1];
+            p1 = (GEN)primedec(nf,gprime)[ffs%degk+1];
             ideal = idealmul(nf,ideal,idealpow(nf,p1,(GEN)ex[k]));
           }
-          som=0; clhss=0;
-          normp=gpuigs(gprime,resp); normps=itos(normp); normi=ii;
-          normp=cgetg(3,t_MAT);
-          no1=cgetg(2,t_COL); no1[1]=(long)gprime; normp[1]=(long)no1;
-          no2=cgetg(2,t_COL); no2[1]=lstoi(resp); normp[2]=(long)no2;
+          S=0; clhss=0;
+          normi = ii; normps= itos(gpuigs(gprime,resp));
           for (j=1; j<=ep; j++)
           {
-            if (clhss==1) som++;
+            GEN fad, fad1, fad2;
+            if (clhss==1) S++;
             else
             {
-              if (j<ep) { coeff(fac,k,2)=lstoi(ep-j); fad=fac; }
+              if (j < ep) { fac2[k] = lstoi(ep-j); fad = fac; }
               else
               {
-                fad=cgetg(3,t_MAT);
-                fad1=cgetg(lfa2-1,t_COL); fad[1]=(long)fad1;
-                fad2=cgetg(lfa2-1,t_COL); fad[2]=(long)fad2;
-                for (i=1; i<k; i++)
-                  { fad1[i]=coeff(fac,i,1); fad2[i]=coeff(fac,i,2); }
-                for (   ; i<lfa2-1; i++)
-                  { fad1[i]=coeff(fac,i+1,1); fad2[i]=coeff(fac,i+1,2); }
+                fad = cgetg(3,t_MAT);
+                fad1 = cgetg(lP,t_COL); fad[1] = (long)fad1;
+                fad2 = cgetg(lP,t_COL); fad[2] = (long)fad2;
+                for (i=1; i<k; i++) { fad1[i]=fac1[i];   fad2[i]=fac2[i]; }
+                for (   ; i<lP; i++){ fad1[i]=fac1[i+1]; fad2[i]=fac2[i+1]; }
               }
               normi /= normps;
-	      /* Hack for NeXTgcc 2.5.8 -- using dlk as temporary variable */
-	      dlk=rayclassnolistessimp(getcompobig(raylist,normi),fad);
+	      dlk = rayclassnolistessimp(getcompobig(raylist,normi),fad);
               if (allarch) dlk = (GEN)dlk[karch+1];
 	      clhss = itos(dlk);
               if (j==1 && clhss==clhray)
 	      {
-		clhray=0; coeff(fac,k,2)=ex[k]; goto LDISCRAY;
+		clhray=0; fac2[k] = ex[k]; goto LDISCRAY;
 	      }
-              som += clhss;
+              S += clhss;
             }
           }
-          coeff(fac,k,2)=ex[k];
-          idealrel=factormul(idealrel,factorpow(normp,som));
+          fac2[k] = ex[k];
+          normp = to_famat_all(gprime, stoi(resp));
+          idealrel = factormul(idealrel,factorpow(normp,S));
         }
-        dlk=factordivexact(factorpow(factor(stoi(ii)),clhray),idealrel);
+        dlk = factordivexact(factorpow(factor(stoi(ii)),clhray),idealrel);
         if (!allarch && nba)
         {
-          module[1]=(long)ideal; arch2=gcopy(arch); module[2]=(long)arch2;
-          nbdezero=0;
+          mod[1] = (long)ideal; arch2 = dummycopy(arch);
+          mod[2] = (long)arch2; nz = 0;
           for (k=1; k<=r1; k++)
           {
             if (signe(arch[k]))
             {
-              arch2[k]=zero;
-              clhss=itos(rayclassno(bnf,module));
-              arch2[k]=un;
+              arch2[k] = zero;
+              clhss = itos(rayclassno(bnf,mod));
+              arch2[k] = un;
               if (clhss==clhray) { clhray=0; goto LDISCRAY; }
             }
-            else nbdezero++;
+            else nz++;
           }
         }
-        else nbdezero = r1-nba;
+        else nz = r1-nba;
 LDISCRAY:
         p1=cgetg(4,t_VEC); discall[karch+1]=(long)p1;
 	if (!clhray) p1[1]=p1[2]=p1[3]=zero;
 	else
 	{
-	  p3=factorpow(fadkabs,clhray); n=clhray*degk; R1=nbdezero*clhray;
+	  p3 = factorpow(fadkabs,clhray);
+          n = clhray * degk;
+          R1= clhray * nz;
 	  if (((n-R1)&3)==2)
-	  {
-	    normp=cgetg(3,t_MAT);
-            no1=cgetg(2,t_COL); normp[1]=(long)no1; no1[1]=lstoi(-1);
-	    no2=cgetg(2,t_COL); normp[2]=(long)no2; no2[1]=un;
-	    dlk=factormul(normp,dlk);
-	  }
-	  p1[1]=lstoi(n); p1[2]=lstoi(R1); p1[3]=(long)factormul(dlk,p3);
+	    dlk=factormul(to_famat_all(stoi(-1),gun), dlk);
+	  p1[1] = lstoi(n);
+          p1[2] = lstoi(R1);
+          p1[3] = (long)factormul(dlk,p3);
 	}
       }
       if (allarch)
@@ -2507,13 +2459,13 @@ LDISCRAY:
         if(DEBUGMEM>1) err(warnmem,"[2]: discrayabslistarch");
         if (DEBUGLEVEL>2)
           fprintferr("avma = %ld, t(d) = %ld ",avma-bot,taille2(disclist));
-        tetpil=avma; disclist=gerepile(av1,tetpil,gcopy(disclist));
+        disclist = gerepileupto(av1, gcopy(disclist));
         if (DEBUGLEVEL>2) { fprintferr("avma = %ld ",avma-bot); flusherr(); }
       }
     }
   }
   if (DEBUGLEVEL>2) msgtimer("discrayabs");
-  tetpil=avma; return gerepile(av0,tetpil,gcopy(disclist));
+  return gerepileupto(av0, gcopy(disclist));
 }
 
 GEN
