@@ -1818,22 +1818,27 @@ padicsqrtnlift(GEN a, GEN n, GEN S, GEN p, long e)
   return gerepileupto(ltop,S);
 }
 /**************************************************************************/
-static long
-getprec(GEN x, long prec, GEN *p)
+static void
+scalar_getprec(GEN x, long *pprec, GEN *pp)
 {
-  long i,e;
-  GEN p1;
-
-  for (i = lgef(x)-1; i>1; i--)
+  if (typ(x)==t_PADIC)
   {
-    p1=(GEN)x[i];
-    if (typ(p1)==t_PADIC)
-    {
-      e=valp(p1); if (signe(p1[4])) e += precp(p1);
-      if (e<prec) prec = e; *p = (GEN)p1[2];
-    }
+    long e = valp(x); if (signe(x[4])) e += precp(x);
+    if (e < *pprec) *pprec = e;
+    if (*pp && !egalii(*pp, (GEN)x[2])) err(consister,"apprpadic");
+    *pp = (GEN)x[2];
   }
-  return prec;
+}
+
+static void
+getprec(GEN x, long *pprec, GEN *pp)
+{
+  long i;
+  if (typ(x) != t_POL)
+    scalar_getprec(x, pprec, pp);
+  else
+    for (i = lgef(x)-1; i>1; i--)
+      scalar_getprec((GEN)x[i], pprec, pp);
 }
 
 /* a belongs to finite extension of Q_p, return all roots of f equal to a
@@ -1841,72 +1846,75 @@ getprec(GEN x, long prec, GEN *p)
 GEN
 apprgen9(GEN f, GEN a)
 {
-  GEN fp,p1,p,pro,x,x2,u,ip,T,vecg;
+  GEN fp, p1, P, p, pro, x, x2, u, ip, T, vecg;
   long v, ps_1, i, j, k, n, prec, d, va, fl2;
-  gpmem_t av=avma, tetpil;
+  gpmem_t av = avma;
 
   if (typ(f)!=t_POL) err(notpoler,"apprgen9");
   if (gcmp0(f)) err(zeropoler,"apprgen9");
   if (typ(a)==t_PADIC) return apprgen(f,a);
-  if (typ(a)!=t_POLMOD || typ(a[2])!=t_POL) err(rootper1);
-
+  if (typ(a)!=t_POLMOD) err(rootper1);
   fp = derivpol(f); u = ggcd(f,fp);
   if (degpol(u) > 0) { f = gdeuc(f,u); fp = derivpol(f); }
   T = (GEN)a[1];
-  prec = getprec((GEN)a[2], BIGINT, &p);
-  prec = getprec(T, prec, &p);
-  if (prec==BIGINT) err(rootper1);
+  p = NULL;
+  prec = BIGINT;
+  getprec((GEN)a[2], &prec, &p);
+  getprec(T, &prec, &p);
+  if (!p) err(rootper1);
 
   p1 = poleval(f,a); v = ggval(lift_intern(p1),p); if (v<=0) err(rootper2);
   fl2 = egalii(p,gdeux);
   if (fl2 && v==1) err(rootper2);
-  v=ggval(lift_intern(poleval(fp,a)), p);
+  v = ggval(lift_intern(poleval(fp,a)), p);
   if (!v)
   {
     while (!gcmp0(p1))
     {
-      a = gsub(a, gdiv(p1,poleval(fp,a)));
+      a = gsub(a, gdiv(p1, poleval(fp,a)));
       p1 = poleval(f,a);
     }
-    tetpil=avma; pro=cgetg(2,t_COL); pro[1]=lcopy(a);
-    return gerepile(av,tetpil,pro);
+    return gerepilecopy(av, _col(a));
   }
-  n=degpol(f); pro=cgetg(n+1,t_COL);
+  n = degpol(f);
+  pro = cgetg(n+1,t_COL);
 
   if (is_bigint(p)) err(impl,"apprgen9 for p>=2^31");
-  x=gmodulcp(ggrandocp(p,prec), T);
+  x = gmodulcp(ggrandocp(p,prec), T);
   if (fl2)
   {
-    ps_1=3; x2=ggrandocp(p,2); p=stoi(4);
+    x2 = ggrandocp(p,2);
+    P = stoi(4);
   }
   else
   {
-    ps_1=itos(p)-1; x2=ggrandocp(p,1);
+    x2 = ggrandocp(p,1);
+    P = p;
   }
-  f = poleval(f,gadd(a,gmul(p,polx[varn(f)])));
-  f = gdiv(f,gpowgs(p,ggval(f,p)));
+  ps_1 = itos(p)-1; 
+  f = poleval(f, gadd(a, gmul(P,polx[varn(f)])));
+  f = gdiv(f, gpowgs(p, ggval(f,p)));
 
-  d=degpol(T); vecg=cgetg(d+1,t_COL);
-  for (i=1; i<=d; i++)
-    vecg[i] = (long)setloop(gzero);
-  va=varn(T); j = 1;
+  d = degpol(T); vecg = cgetg(d+1,t_COL);
+  for (i=1; i<=d; i++) vecg[i] = (long)setloop(gzero);
+  va = varn(T); j = 1;
   for(;;) /* loop through F_q */
   {
-    ip=gmodulcp(gtopoly(vecg,va),T);
-    if (gcmp0(poleval(f,gadd(ip,x2))))
+    ip = gmodulcp(gtopoly(vecg,va), T);
+    if (gcmp0(poleval(f, gadd(ip,x2))))
     {
-      u = apprgen9(f,gadd(ip,x));
-      for (k=1; k<lg(u); k++) pro[j++] = ladd(a, gmul(p,(GEN)u[k]));
+      u = apprgen9(f, gadd(ip,x));
+      for (k=1; k<lg(u); k++) pro[j++] = ladd(a, gmul(P,(GEN)u[k]));
     }
     for (i=d; i; i--)
     {
       p1 = (GEN)vecg[i];
-      if (p1[2] != ps_1) { (void)incloop(p1); break; }
+      if (itos(p1) != ps_1) { vecg[i] = (long)incloop(p1); break; }
       affsi(0, p1);
     }
     if (!i) break;
   }
-  setlg(pro,j); return gerepilecopy(av,pro);
+  setlg(pro,j); return gerepilecopy(av, pro);
 }
 
 /*******************************************************************/
