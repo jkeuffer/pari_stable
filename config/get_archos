@@ -46,17 +46,17 @@ case "$arch" in
   sparcv9)       asmarch=sparcv8_micro; pretty=UltraSparc ;;
   i?86)          asmarch=ix86 ;         pretty=$arch ;;
   ia64)          asmarch=none ;         pretty=ia64 ;;
-  hppa)          asmarch=none ;         pretty="HP Precision"
+  hppa)          asmarch=none ;         pretty='HP Precision'
         case "$osname-`uname -r`" in
         hpux-?.10.*)  asmarch=$arch ;;
         esac ;;
   alpha)         asmarch=$arch;         pretty=Alpha ;;
+  ppc)           asmarch=$arch;         pretty='Power PC' ;;
   arm*)          asmarch=none;          pretty=$arch ;;
   mips)          asmarch=none;          pretty=Mips ;;
-  fx2800)        asmarch=none;          pretty="Alliant FX/2800" ;;
-  ppc)           asmarch=ppc;           pretty="Power PC" ;;
-  s390)          asmarch=none;          pretty="S/390" ;;
-  none)          asmarch=none;          pretty="unknown" ;;
+  fx2800)        asmarch=none;          pretty='Alliant FX/2800' ;;
+  s390)          asmarch=none;          pretty='S/390' ;;
+  none)          asmarch=none;          pretty=unknown ;;
   *)             asmarch=none;          pretty=$arch
                  echo "        Warning ! architecture $arch not tested";;
 esac
@@ -90,19 +90,9 @@ EOM
 EOM
   fi
 fi
-tmp_kern=`./kernel-name $tmp_kern $asmarch`
+tmp_kern=`./kernel-name $tmp_kern $asmarch none`
 kernlvl0=`echo "$tmp_kern" | sed -e 's/\(.*\)-.*/\1/'`
 kernlvl1=`echo "$tmp_kern" | sed -e 's/.*-\(.*\)/\1/'`
-case "$kernlvl1" in
-  gmp|none) ;;
-  auto) kernlvl1=none ;;
-  *) cat << EOM
-###
-### Level1 kernel = '$kernlvl1' unknown, using 'none'
-###
-EOM
-     kernlvl1=none ;;
-esac
 
 case "$kernlvl0" in
   none)          prettyk="C portable";;

@@ -1,6 +1,7 @@
 #! /bin/sh
-name=$1;
-arch=$2;
+name=$1
+arch=$2
+lvl1=$3
 
 case "$name" in
   *-*) 
@@ -17,5 +18,16 @@ esac
 if [ "$kernlvl0" = "auto" ]; then
   kernlvl0="$arch";
 fi
+
+case "$kernlvl1" in
+  gmp|none) ;;
+  auto) kernlvl1=$lvl1;;
+  *) cat << EOM >& 2
+###
+### Level1 kernel = '$kernlvl1' unknown, using 'none'
+###
+EOM
+     kernlvl1=none ;;
+esac
 
 echo "$kernlvl0-$kernlvl1"
