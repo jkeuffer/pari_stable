@@ -1444,6 +1444,7 @@ GEN     Q_primpart(GEN x);
 GEN     Q_remove_denom(GEN x, GEN *ptd);
 GEN     RgX_extgcd(GEN x, GEN y, GEN *U, GEN *V);
 GEN     centermod(GEN x, GEN p);
+GEN     centermod_i(GEN x, GEN p, GEN ps2);
 GEN     centermodii(GEN x, GEN p, GEN po2);
 GEN     concat_factor(GEN f, GEN g);
 GEN     content(GEN x);

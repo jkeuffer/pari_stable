@@ -35,7 +35,6 @@ extern double *dalloc(size_t n);
 extern GEN sqred1_from_QR(GEN x, long prec);
 extern GEN GS_norms(GEN B, long prec);
 extern GEN apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
-extern GEN centermod_i(GEN x, GEN p, GEN ps2);
 extern GEN dim1proj(GEN prh);
 extern GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *ptL, GEN *ptprep, GEN *ptdis);
 extern GEN max_modulus(GEN p, double tau);
