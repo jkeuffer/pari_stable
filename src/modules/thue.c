@@ -263,7 +263,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
   tnf[6] = (long)T_A_Matrices(MatFU, s+t-1, &eps5, prec);
   tnf[7] = (long)csts;
   csts[1] = (long)c1; csts[2] = (long)c2;   csts[3] = (long)LogHeight(ro, prec);
-  csts[4] = (long)x0; csts[5] = (long)eps5; csts[6] = (long)stoi(prec);
+  csts[4] = (long)x0; csts[5] = (long)eps5; csts[6] = (long)utoipos(prec);
   csts[7] = (long)Ind; 
   return tnf;
 }
@@ -304,7 +304,7 @@ Baker(baker_s *BS)
   hb0 = gmax(hb0, gdiv(tmp, BS->bak));
   c9 = gmul(c9,hb0);
   /* Multiply c9 by the "constant" factor */
-  c9 = gmul(c9, gmul(mulri(mulsr(18,mppi(prec)), gpowgs(stoi(32),4+r)),
+  c9 = gmul(c9, gmul(mulri(mulsr(18,mppi(prec)), int2n(5*(4+r))),
                      gmul(gmul(mpfact(r+3), gpowgs(mulis(BS->bak,r+2), r+3)),
                           glog(mulis(BS->bak,2*(r+2)),prec))));
   c9 = gprec_w(myround(c9, 1), DEFAULTPREC);
@@ -400,7 +400,7 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   B0 = gmul(gdiv(BS->Ind, BS->c13), 
             mplog(gdiv(gmul(BS->Ind, BS->c15), l0)));
   Bx = gpow(gdiv(mulsr(2, gmul(BS->Ind, BS->c15)), l0), 
-            ginv(stoi(BS->deg)), DEFAULTPREC);
+            ginv(utoipos(BS->deg)), DEFAULTPREC);
 
   if (DEBUGLEVEL>=2)
     {
@@ -464,7 +464,7 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
 static GEN
 GuessQi(GEN b, GEN c, GEN *eps)
 {
-  GEN Q, Lat, C = gpowgs(stoi(10), 10);
+  GEN Q, Lat, C = int2n(33);
 
   Lat = idmat(3);
   mael(Lat,1,3) = (long)C;
@@ -553,27 +553,6 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
   {
     if (!x) continue;
 
-#if 0 
-    X = stoi(x); Xn = gpowgs(X,n);
-    interm = subii(rhs, mulii(Xn, (GEN)poly[2]));
-    Xnm1 = Xn; j = 2;
-    while (gcmp0(interm))
-    {
-      Xnm1 = divis(Xnm1, x);
-      interm = mulii((GEN)poly[++j], Xnm1);
-    }
-    /* y | interm */
-
-    Hpoly = rescale_pol(poly,X); /* homogenize */
-    By = (int)(x>0? bndyx*x: -bndyx*x);
-    if (gegal(gmul((GEN)poly[2],Xn),rhs)) add_sol(&S, gzero, X); /* y = 0 */
-    for(y = -By; y <= By; y++)
-    {
-      if (!y || smodis(interm, y)) continue;
-      Y = stoi(y);
-      if (gegal(poleval(Hpoly, Y), rhs)) add_sol(&S, Y, X);
-    }
-#else
     X = stoi(x); 
     P[lg(poly) - 1] = poly[lg(poly) - 1]; 
     for (j = lg(poly) - 2; j >= 2; j--) 
@@ -586,7 +565,6 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
 
     for (j = 1; j < lg(r); j++) 
       if (typ((GEN)r[j]) == t_INT) add_sol(&S, (GEN)r[j], stoi(x)); 
-#endif
     if (low_stack(lim,stack_lim(av,1)))
     {
       if(DEBUGMEM>1) err(warnmem,"Check_small");
@@ -699,7 +677,7 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     /* Reduce B0 as long as we make progress: newB0 < oldB0 - 0.1 */
     for (;;)
     {
-      GEN oldB0 = B0, kappa = stoi(10);
+      GEN oldB0 = B0, kappa = utoipos(10);
       int cf;
 
       for (cf = 0; cf < 10; cf++, kappa = mulis(kappa,10))
@@ -778,7 +756,7 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     /* Reduce B0 as long as we make progress: newB0 < oldB0 - 0.1 */
     for (;;)
     {
-      GEN oldBx = Bx, kappa = stoi(10);
+      GEN oldBx = Bx, kappa = utoipos(10);
       int cf;
 
       for (cf = 0; cf < 10; cf++, kappa = mulis(kappa,10))
@@ -804,7 +782,7 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 	B0 = divrr(mulir(BS->Ind, mplog(divrr(mulir(BS->Ind, BS->c15), l0))),
 		   BS->c13);
 	Bx = gpow(gdiv(mulsr(2, gmul(BS->Ind, BS->c15)), l0), 
-		  ginv(stoi(BS->deg)), DEFAULTPREC);
+		  ginv(utoipos(BS->deg)), DEFAULTPREC);
 
         if (DEBUGLEVEL>1) 
 	  fprintferr("Semirat. reduction: B0 -> %Z x <= %Z\n",B0, Bx);
@@ -1249,7 +1227,7 @@ get_unit_1(GEN bnf, GEN *unit)
   long i, n = degpol(nf[7]);
 
   if (DEBUGLEVEL > 2) fprintferr("looking for a fundamental unit of norm -1\n");
-  if (odd(n)) { *unit = stoi(-1); return 1; }
+  if (odd(n)) { *unit = utoineg(1); return 1; }
   v = signunits(bnf);
   for (i = 1; i < lg(v); i++)
   {

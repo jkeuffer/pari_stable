@@ -45,10 +45,7 @@ mpatan(GEN x)
   if (l > AGM_ATAN_LIMIT)
   {
     av = avma;
-    y = cgetg(3, t_COMPLEX);
-    y[1] = un;
-    y[2] = (long)x;
-    return gerepileuptoleaf(av, (GEN)logagmcx(y,l)[2]);
+    return gerepileuptoleaf(av, (GEN)logagmcx(mkcomplex(gun, x), l)[2]);
   }
 
   e = expo(x); inv = (e >= 0); /* = (|x| > 1 ) */
@@ -161,11 +158,7 @@ mpasin(GEN x) {
   pari_sp av = avma;
   GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
   if (lg(x) > AGM_ATAN_LIMIT)
-  {
-    z = cgetg(3, t_COMPLEX);
-    z[1] = (long)a;
-    z[2] = (long)x; z = (GEN)logagmcx(z, lg(x))[2];
-  }
+    z = (GEN)logagmcx(mkcomplex(a,x), lg(x))[2];
   else
     z = mpatan(divrr(x, a));
   return gerepileuptoleaf(av, z);
@@ -199,10 +192,8 @@ gasin(GEN x, long prec)
       return y;
 
     case t_COMPLEX:
-      av = avma; p1 = cgetg(3,t_COMPLEX);
-      p1[1] = (long)gneg_i((GEN)x[2]);
-      p1[2] = x[1];
-      y=gerepileupto(av, gash(p1,prec));
+      av = avma;
+      y = gerepileupto(av, gash(mulcxI(x), prec));
       p1 = (GEN)y[1]; y[1] = y[2]; y[2] = (long)p1;
       setsigne(p1, -signe(p1)); return y;
 
@@ -237,11 +228,7 @@ mpacos(GEN x)
   pari_sp av = avma;
   GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
   if (lg(x) > AGM_ATAN_LIMIT)
-  {
-    z = cgetg(3, t_COMPLEX);
-    z[1] = (long)x;
-    z[2] = (long)a; z = (GEN)logagmcx(z, lg(x))[2];
-  }
+    z = (GEN)logagmcx(mkcomplex(x,a), lg(x))[2];
   else
     z = mpatan(divrr(a, x));
   return gerepileuptoleaf(av, z);

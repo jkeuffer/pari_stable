@@ -14,8 +14,8 @@ void specinit()
   gzero = malloc(2);
   gzero[0] = evaltyp(t_INT)|evallg(2);
   gzero[1] = evallgefint(2);
-  gun   = stoi(1);
-  gdeux = stoi(2);
+  gun   = utoipos(1);
+  gdeux = utoipos(2);
 }
 
 void gerepileall(pari_sp av, int n, ...){}
@@ -48,8 +48,8 @@ int main()
 {
   GEN x,y,r,z, xr,yr;
   specinit();
-  x = stoi(187654321L);
-  y = stoi(-12345678L);
+  x = utoipos(187654321UL);
+  y = utoineg(12345678UL);
   printf("INT: %ld\n", itos(x));
   printf("conv:"); _voir(x);
   printf("+:"); _voir(addii(x,y));

@@ -600,13 +600,7 @@ addRe_modIm(GEN x, GEN a, GEN m)
   {
     re = gadd((GEN)x[1], a);
     im = gmod((GEN)x[2], m);
-    if (gcmp0(im)) z = re;
-    else
-    {
-      z = cgetg(3,t_COMPLEX);
-      z[1] = (long)re;
-      z[2] = (long)im;
-    }
+    z = gcmp0(im)? re: mkcomplex(re, im);
   }
   else
     z = gadd(x, a);

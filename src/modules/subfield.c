@@ -156,7 +156,7 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
   }
   Yp[lY] = (long)Zp;
 
-  K = divisors(stoi(n[1])); lK = lg(K);
+  K = divisors(utoipos(n[1])); lK = lg(K);
   for (i=1; i<lK; i++)
   {
     long ngcd = n[1], k = itos((GEN)K[i]), dk = B->size*k, lpn = 0;
@@ -591,7 +591,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   pari_sp av;
 
   if (DEBUGLEVEL) (void)timer2();
-  p = stoi(2);
+  p = utoipos(2);
   while (p[2] <= minp) NEXT_PRIME_VIADIFF(p[2], di);
   oldlcm = 0;
   oldff = oldn = NULL; pp = 0; /* gcc -Wall */
@@ -618,7 +618,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   if (DEBUGLEVEL) fprintferr("Chosen prime: p = %ld\n", pp);
   S->ff = oldff;
   S->lcm= oldlcm;
-  S->p  = stoi(pp);
+  S->p  = utoipos(pp);
   S->pol = FpX_red(pol, S->p); init_primedata(S);
 
   n = oldn; r = lg(n); Z = cgetg(r,t_VEC);
@@ -743,7 +743,7 @@ compute_data(blockdata *B)
   }
   DATA[3] = (long)roots_from_deg1(fhk);
 
-  p1 = mulsr(N, gsqrt(gpowgs(stoi(N-1),N-1),DEFAULTPREC));
+  p1 = mulsr(N, gsqrt(gpowgs(utoipos(N-1),N-1),DEFAULTPREC));
   p2 = gpowgs(maxroot, B->size + N*(N-1)/2);
   p1 = gdiv(gmul(p1,p2), gsqrt(B->PD->dis,DEFAULTPREC));
   DATA[7] = lmulii(shifti(ceil_safe(p1), 1), B->PD->den);
@@ -963,7 +963,7 @@ subfieldsall(GEN nf)
   pol = PD.pol;
 
   v0 = varn(pol); N = degpol(pol);
-  dg = divisors(stoi(N)); ld = lg(dg)-1;
+  dg = divisors(utoipos(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Z\n",pol);
 
   LSB = _subfield(pol, polx[0]);

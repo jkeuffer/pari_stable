@@ -2547,7 +2547,7 @@ rootsold(GEN x, long prec)
   pari_sp av=avma, av0, av1, av2, av3;
   long exc,expmin,m,deg0,k,ti,h,ii,e;
   GEN y,xc,xd0,xd,xdabs,p1,p2,p3,p4,p5,p6,p7;
-  GEN p11,p12,p1r,p1i,pa,pax,pb,pp,pq,ps;
+  GEN p11,p12,p1r,p1i,pa,pax,pb,pp,pq,ps, pi;
 
   if (typ(x)!=t_POL) err(typeer,"rootsold");
   deg0=degpol(x); expmin=12 - bit_accuracy(prec);
@@ -2574,9 +2574,8 @@ rootsold(GEN x, long prec)
   k = i-2;
   if (k==deg0) return y;
 
-  p2=cgetg(3,t_COMPLEX);
-  p2[1] = lmppi(DEFAULTPREC);
-  p2[2] = ldivrs((GEN)p2[1],10); /* Pi * (1+I/10) */
+  pi = mppi(DEFAULTPREC);
+  p2 = mkcomplex(pi, divrs(pi,10)); /* Pi * (1+I/10) */
   p11=cgetg(4,t_POL); p11[1]=x[1];
   p11[3]=un;
 
@@ -2896,7 +2895,7 @@ laguer(GEN pol,long N,GEN y0,long EPS,long PREC)
 
   MAXIT = MR*MT; rac = cgetc(PREC);
   av1 = avma;
-  I=cgetg(3,t_COMPLEX); I[1]=un; I[2]=un;
+  I = mkcomplex(gun,gun);
   ffrac = (GEN*)new_chunk(MR+1);
   ffrac[0] = dbltor(0.0);
   ffrac[1] = dbltor(0.5);
@@ -3119,16 +3118,8 @@ hqr(GEN mat) /* find all the eigenvalues of the matrix mat */
   if (DEBUGLEVEL>3) { fprintferr("* Eigenvalues computed\n"); flusherr(); }
   for (i=1; i<=n; i++) free(a[i]); free(a); eig=cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
-  {
-    if (wi[i] != 0.)
-    {
-      GEN p1 = cgetg(3,t_COMPLEX);
-      eig[i]=(long)p1;
-      p1[1]=(long)dbltor(wr[i]);
-      p1[2]=(long)dbltor(wi[i]);
-    }
-    else eig[i]=(long)dbltor(wr[i]);
-  }
+    eig[i] = (wi[i] == 0.)? (long)dbltor(wr[i])
+                          : (long)mkcomplex(dbltor(wr[i]), dbltor(wi[i]));
   free(wr); free(wi); return eig;
 }
 

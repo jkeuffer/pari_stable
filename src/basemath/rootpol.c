@@ -45,33 +45,34 @@ quickmulcc(GEN x, GEN y)
     if (ty==t_INT) return mulii(x,y);
     if (ty==t_COMPLEX)
     {
-      z=cgetg(3,t_COMPLEX);
-      z[1]=(long) mulii(x,(GEN) y[1]);
-      z[2]=(long) mulii(x,(GEN) y[2]);
+      z = cgetg(3,t_COMPLEX);
+      z[1] = (long)mulii(x,(GEN) y[1]);
+      z[2] = (long)mulii(x,(GEN) y[2]);
       return z;
     }
   }
 
   if (tx==t_COMPLEX)
   {
+    z = cgetg(3,t_COMPLEX);
     if (ty==t_INT)
     {
-      z=cgetg(3,t_COMPLEX);
-      z[1]=(long) mulii((GEN)x[1],y);
-      z[2]=(long) mulii((GEN)x[2],y);
+      z[1] = (long)mulii((GEN)x[1],y);
+      z[2] = (long)mulii((GEN)x[2],y);
       return z;
     }
     if (ty==t_COMPLEX)
     {
-      pari_sp av, tetpil;
-      GEN p1,p2;
+      pari_sp av = avma, tetpil;
+      GEN p1, p2;
 
-      z=cgetg(3,t_COMPLEX); av=avma;
-      p1=mulii((GEN)x[1],(GEN)y[1]); p2=mulii((GEN)x[2],(GEN)y[2]);
-      x=addii((GEN)x[1],(GEN)x[2]); y=addii((GEN)y[1],(GEN)y[2]);
-      y=mulii(x,y); x=addii(p1,p2);
-      tetpil=avma; z[1]=lsubii(p1,p2); z[2]=lsubii(y,x);
-      gerepilecoeffssp(av,tetpil,z+1,2);
+      p1 = mulii((GEN)x[1],(GEN)y[1]);
+      p2 = mulii((GEN)x[2],(GEN)y[2]);
+      y = mulii(addii((GEN)x[1],(GEN)x[2]),
+                addii((GEN)y[1],(GEN)y[2]));
+      x = addii(p1,p2); tetpil = avma;
+      z[1] = lsubii(p1,p2);
+      z[2] = lsubii(y,x); gerepilecoeffssp(av,tetpil,z+1,2);
       return z;
     }
   }
@@ -410,9 +411,9 @@ mygprecrc(GEN x, long bitprec, long e)
       if (!signe(x)) setexpo(y,-bitprec+e);
       break;
     case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX);
-      y[1]=(long) mygprecrc((GEN)x[1],bitprec,e);
-      y[2]=(long) mygprecrc((GEN)x[2],bitprec,e);
+      y = cgetg(3,t_COMPLEX);
+      y[1] = (long)mygprecrc((GEN)x[1],bitprec,e);
+      y[2] = (long)mygprecrc((GEN)x[2],bitprec,e);
       break;
     default: y=gcopy(x);
   }
@@ -804,14 +805,9 @@ initRU(long N, long bitprec)
 
   RU[0] = myrealun(bitprec);
   for (i=1; i<=N8; i++) RU[i] = gmul(prim, RU[i-1]);
-  for (i=1; i<N8; i++)
-  {
-    aux=cgetg(3,t_COMPLEX);
-    aux[1]=RU[i][2];
-    aux[2]=RU[i][1]; RU[N4-i]=aux;
-  }
-  for (i=0; i<N4; i++) RU[i+N4]=mulcxI(RU[i]);
-  for (i=0; i<N2; i++) RU[i+N2]=gneg(RU[i]);
+  for (i=1; i<N8; i++) RU[N4-i] = mkcomplex((GEN)RU[i][2], (GEN)RU[i][1]);
+  for (i=0; i<N4; i++) RU[i+N4] = mulcxI(RU[i]);
+  for (i=0; i<N2; i++) RU[i+N2] = gneg(RU[i]);
   return (GEN)RU;
 }
 
@@ -1607,9 +1603,9 @@ mygprec_absolute(GEN x, long bitprec)
 	y=mygprec_absolute((GEN)x[1],bitprec);
       else
       {
-	y=cgetg(3,t_COMPLEX);
-	y[1]=(long) mygprec_absolute((GEN)x[1],bitprec);
-	y[2]=(long) mygprec_absolute((GEN)x[2],bitprec);
+	y = cgetg(3,t_COMPLEX);
+	y[1] = (long)mygprec_absolute((GEN)x[1],bitprec);
+	y[2] = (long)mygprec_absolute((GEN)x[2],bitprec);
       }
       break;
 
@@ -1705,22 +1701,25 @@ cauchy_bound(GEN p)
 static GEN
 mygprecrc_special(GEN x, long bitprec, long e)
 {
-  long tx=typ(x),lx,ex;
+  long tx = typ(x), lx;
   GEN y;
 
   if (bitprec<=0) bitprec=0; /* should not happen */
   switch(tx)
   {
     case t_REAL:
-      lx=bitprec/BITS_IN_LONG+3;
-      if (lx<lg(x)) lx=lg(x);
-      y=cgetr(lx); affrr(x,y); ex=-bitprec+e;
-      if (!signe(x) && expo(x)>ex) setexpo(y,ex);
+      lx = bitprec/BITS_IN_LONG+3;
+      if (lx<lg(x)) lx = lg(x);
+      y = cgetr(lx); affrr(x,y);
+      if (!signe(x)) {
+        long ex = -bitprec+e;
+        if (expo(x) > ex) setexpo(y, ex);
+      }
       break;
     case t_COMPLEX:
-      y=cgetg(3,t_COMPLEX);
-      y[1]=(long) mygprecrc_special((GEN)x[1],bitprec,e);
-      y[2]=(long) mygprecrc_special((GEN)x[2],bitprec,e);
+      y = cgetg(3,t_COMPLEX);
+      y[1] = (long)mygprecrc_special((GEN)x[1],bitprec,e);
+      y[2] = (long)mygprecrc_special((GEN)x[2],bitprec,e);
       break;
     default: y=gcopy(x);
   }

@@ -52,12 +52,10 @@ typedef struct {
 GEN
 InitRU(GEN den, long prec)
 {
-  GEN c,s, z;
-  if (egalii(den, gdeux)) return stoi(-1);
+  GEN c, s;
+  if (egalii(den, gdeux)) return utoineg(1);
   gsincos(divri(Pi2n(1, prec), den), &s, &c, prec);
-  z = cgetg(3, t_COMPLEX);
-  z[1] = (long)c;
-  z[2] = (long)s; return z;
+  return mkcomplex(c, s);
 }
 /* Compute the image of logelt by chi as a complex number
    see InitChar in part 3 */
@@ -435,7 +433,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
   else
   {
     GEN mpr = cgetg(3, t_VEC);
-    GEN mpr0 = idealdivpowprime(bnf, mod0, pr, stoi(v));
+    GEN mpr0 = idealdivpowprime(bnf, mod0, pr, utoipos(v));
     mpr[1] = (long)mpr0; /* part of mod coprime to pr */
     mpr[2] = mod[2];
     bnrpr = buchrayinitgen(bnf, mpr);
@@ -1481,7 +1479,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   R->L2 = cget1(l, t_VECSMALL); R->condZ = condZ;
   R->L1 = cget1(l, t_VECSMALL); R->L1ray = (GEN*)cget1(l, t_VEC);
   R->L11= cget1(l, t_VECSMALL); R->L11ray= (GEN*)cget1(l, t_VEC);
-  prime = stoi(2);
+  prime = utoipos(2);
   for (p = 2; p <= N0; prime[2] = p) {
     switch (krois(dk, p))
     {
@@ -1512,7 +1510,7 @@ InitPrimesQuad(GEN bnr, long N0, LISTray *R)
   /* precompute isprincipalray(x), x in Z */
   R->rayZ = (GEN*)cgetg(condZ, t_VEC);
   for (i=1; i<condZ; i++)
-    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, stoi(i)): gzero;
+    R->rayZ[i] = (cgcd(i,condZ) == 1)? isprincipalray(bnr, utoipos(i)): gzero;
 
   gptr[0] = &(R->L0);
   gptr[1] = &(R->L2);  gptr[2] = (GEN*)&(R->rayZ);
@@ -1533,7 +1531,7 @@ InitPrimes(GEN bnr, long N0, LISTray *R)
   tmpray = (GEN*)cgetg(N+1, t_VEC);
   R->L1 = cget1(l, t_VECSMALL);
   R->L1ray = (GEN*)cget1(l, t_VEC);
-  prime = stoi(2);
+  prime = utoipos(2);
   for (p = 2; p <= N0; prime[2] = p)
   {
     pari_sp av = avma;
@@ -1618,7 +1616,7 @@ ppgamma(ST_t *T, long prec)
   gamun[3] = lneg(eul);
   for (i = 2; i <= r; i++)
   {
-    p1 = gdivgs(gzeta(stoi(i),prec), i);
+    p1 = gdivgs(szeta(i,prec), i);
     if (odd(i)) p1 = gneg(p1);
     gamun[i+2] = (long)p1;
   }
@@ -2045,7 +2043,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
-  eps = gpowgs(stoi(10), min(-8, (d->G >> 1)));
+  eps = gpowgs(utoipos(10), min(-8, (d->G >> 1)));
   tB  = gpow(gmul2n(eps, N), gdivgs(gun, 1-N), DEFAULTPREC);
 
   Bd    = gceil(gmin(B, tB));
@@ -2437,7 +2435,7 @@ makescind(GEN nf, GEN polrel, long cl)
   if (!pol)
   {
     nf2 = nfinit0(BAS, 0, DEFAULTPREC);
-    L  = subfields(nf2, stoi(cl));
+    L  = subfields(nf2, utoipos(cl));
     l = lg(L);
     if (DEBUGLEVEL) msgtimer("subfields");
 

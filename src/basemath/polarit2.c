@@ -1975,12 +1975,7 @@ roots_from_deg1(GEN x)
 }
 
 static GEN
-vec_to_gauss(GEN x)
-{
-  GEN y = cgetg(3, t_COMPLEX);
-  y[1] = x[1];
-  y[2] = x[2]; return y;
-}
+vec_to_gauss(GEN x) { return mkcomplex((GEN)x[1], (GEN)x[2]); }
 
 static GEN
 gauss_primpart(GEN x, GEN *c)
@@ -2126,7 +2121,7 @@ gauss_factor(GEN x)
       is2 = egalii(p, gdeux);
       e = itos((GEN)E[i]);
       if (is2)
-      { w = cgetg(3, t_COMPLEX); w[1] = un; w[2] = un; }
+        w = mkcomplex(gun,gun);
       else
         w = vec_to_gauss(qfbimagsolvep(qfi(gun,gzero,gun),p));
       P[i] = (long)w;
