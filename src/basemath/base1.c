@@ -1525,7 +1525,7 @@ remove_duplicates(GEN y, GEN a)
   gpmem_t av = avma;
   GEN z;
 
-  if (l < 2) return l;
+  if (l < 2) return l-1;
   z = new_chunk(3);
   z[1] = (long)y;
   z[2] = (long)a; (void)sort_factor(z, gcmp);
@@ -1537,7 +1537,7 @@ remove_duplicates(GEN y, GEN a)
       y[k] = y[i];
     }
   l = k+1; setlg(a,l); setlg(y,l);
-  avma = av; return k;
+  avma = av; return l-1;
 }
 
 /* if CHECK != NULL, return the first polynomial pol found such that
