@@ -847,9 +847,10 @@ gadd(GEN x, GEN y)
       z[2]=lmul((GEN)x[2],(GEN)y[2]); return z;
 
     case t_VEC: case t_COL: case t_MAT:
-      lx = lg(x); ly = lg(y);
-      if (lx!=ly || tx!=ty) err(operi,"+",x,y);
-      z=cgetg(ly,ty);
+      if (tx != ty) err(operf,"+",x,y);
+      ly = lg(y);
+      if (ly != lg(x)) err(operi,"+",x,y);
+      z = cgetg(ly,ty);
       for (i=1; i<ly; i++)
 	z[i]=ladd((GEN)x[i],(GEN)y[i]);
       return z;
