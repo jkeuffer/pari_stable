@@ -1617,21 +1617,36 @@ gdeflate(GEN x, long v, long d)
   GEN z;
   if (is_scalar_t(tx)) return gcopy(x);
   if (d <= 0) err(talker,"need positive degree in gdeflate");
-  if (tx == t_POL)
+  if (tx == t_POL || tx == t_SER)
   {
     long vx = varn(x);
     pari_sp av;
     if (vx < v)
     {
       lx = lgef(x);
-      z = cgetg(lx,t_POL); z[1] = x[1];
+      z = cgetg(lx, tx); z[1] = x[1];
       for (i=2; i<lx; i++) z[i] = (long)gdeflate((GEN)x[i],v,d);
       return z;
     }
     if (vx > v) return gcopy(x);
     av = avma;
-    if (checkdeflate(x) % d != 0)
-      err(cant_deflate);
+    if (tx == t_SER)
+    {
+      long V = valp(x);
+      GEN y;
+
+      if (!signe(x)) return zeroser(v, V / d);
+      if (V % d != 0)
+        err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
+      y = dummycopy(x); setvalp(y, 0); y = gtrunc(y);
+      if (checkdeflate(y) % d != 0)
+        err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
+      y = poldeflate_i(y, d);
+      settyp(y, t_SER);
+      y[1] = evalsigne(1) | evalvalp(V/d) | evalprecp(lg(y) - 2) | evalvarn(v);
+      return gerepilecopy(av, y);
+    }
+    if (checkdeflate(x) % d != 0) err(cant_deflate);
     return gerepilecopy(av, poldeflate_i(x,d));
   }
   if (tx == t_RFRAC)
