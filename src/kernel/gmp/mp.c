@@ -1179,18 +1179,32 @@ resmod2n(GEN x, long n)
 /**                                                                **/
 /********************************************************************/
 
-/* Return trunc(sqrt(a))). a must be an non-negative integer*/
+/* Return S (and set R) s.t S^2 + R = N, 0 <= R <= 2S.
+ * As for dvmdii, R is last on stack and guaranteed to be gzero in case the 
+ * remainder is 0. R = NULL is allowed. */
 GEN
-isqrti(GEN a)
+sqrtremi(GEN a, GEN *r)
 {
-  long l;
-  GEN res;
-  if (!signe(a)) return gzero;
-  l=(NLIMBS(a)+5)>>1;/* 2+ceil(na/2)*/
-  res= cgeti(l);
-  res[1] = evalsigne(1) | evallgefint(l);
-  mpn_sqrtrem(LIMBS(res),NULL,LIMBS(a),NLIMBS(a));
-  return res;
+  long l = NLIMBS(a);
+  GEN S;
+  if (!l) {
+    if (r) *r = gzero;
+    return gzero;
+  }
+  l = (l + 5) >> 1; /* 2 + ceil(na/2) */
+  S = cgeti(l); S[1] = evalsigne(1) | evallgefint(l);
+  if (r) *r = cgeti(l+1);
+  if (mpn_sqrtrem(LIMBS(S), r? LIMBS(*r): NULL, LIMBS(a), NLIMBS(a)))
+  {
+    if (r) (*r)[1] = evalsigne(1) | evallgefint(l+1);
+  }
+  else if (r) {
+    if ((*r)[2])
+      (*r)[1] = evalsigne(1) | evallgefint(l);
+    else
+    { avma = (pari_sp)S; *r = gzero; }
+  }
+  return S;
 }
 
 /* compute sqrt(|a|), assuming a != 0 */
@@ -1220,18 +1234,14 @@ sqrtr_abs(GEN a)
   mpn_sqrtrem(c,NULL,b,(pr<<1)+2);
   if ( ((ulong)c[0]) >= HIGHBIT-1 )
     if (mpn_add_1(c+1,c+1,pr,1))
-    {
-      /* This cannot happen unless c[0]==HIGHBIT-1, and we are not supposed
-       * to round up for that value. But native kernel does it that way... */
-      avma=(pari_sp)res;
-      affsr(1,res);
-      setexpo(res,er+1);
-      return res;
+    { /* This cannot happen unless c[0]==HIGHBIT-1. We are not supposed
+       * to round up for that value, but native kernel does it that way... */
+      avma = (pari_sp)(res + 2 + pr);
+      return real2n(er+1, pr+2);
     }
   xmpn_mirrorcopy(RLIMBS(res),c+1,pr);
   res[1] = evalsigne(1) | evalexpo(er);
-  avma=(pari_sp)res;
-  return res;
+  avma = (pari_sp)res; return res;
 }
 
 /* Normalize a non-negative integer.  */
@@ -1243,4 +1253,3 @@ int_normalize(GEN x, long known_zero_words)
     if (x[i]) { setlgefint(x, i+1); return x; }
   x[1] = evalsigne(0) | evallgefint(2); return x;
 }
-

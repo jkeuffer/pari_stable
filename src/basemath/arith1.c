@@ -357,29 +357,12 @@ gracine(GEN a)
 }
 
 GEN
-racine_i(GEN a, int roundup)
-{
-  pari_sp av = avma;
-  long k,m;
-  GEN x = isqrti(a);
-  if (roundup && signe(x))
-  {
-    long l=lgefint(a);
-    m = modBIL(x);
-    k = (m * m != a[l-1] || !egalii(sqri(x),a));
-    avma = (pari_sp)x;
-    if (k) x = gerepileuptoint(av, addis(x,1));
-  }
-  return x;
-}
-
-GEN
 racine(GEN a)
 {
   if (typ(a) != t_INT) err(arither1);
   switch (signe(a))
   {
-    case 1: return isqrti(a);
+    case 1: return sqrti(a);
     case 0: return gzero;
     default: err(talker, "negative integer in sqrtint");
   }
@@ -391,8 +374,6 @@ racine(GEN a)
 /**                      PERFECT SQUARE                             **/
 /**                                                                 **/
 /*********************************************************************/
-extern ulong usqrtsafe(ulong a);
-
 static int
 carremod(ulong A)
 {
@@ -428,7 +409,7 @@ long
 carrecomplet(GEN x, GEN *pt)
 {
   pari_sp av;
-  GEN y;
+  GEN y, r;
 
   switch(signe(x))
   {
@@ -443,9 +424,9 @@ carrecomplet(GEN x, GEN *pt)
     return 1;
   }
   if (!carremod(umodiu(x, 64*63*65*11))) return 0;
-  av=avma; y = racine(x);
-  if (!egalii(sqri(y),x)) { avma=av; return 0; }
-  if (pt) { *pt = y; avma=(pari_sp)y; } else avma=av;
+  av = avma; y = sqrtremi(x, &r);
+  if (r != gzero) { avma = av; return 0; }
+  if (pt) { *pt = y; avma = (pari_sp)y; } else avma = av;
   return 1;
 }
 
@@ -2424,7 +2405,7 @@ fundunit(GEN x)
   GEN pol, y, a, u, v, u1, v1, sqd, f;
 
   check_quaddisc_real(x, &r, "fundunit");
-  sqd = racine(x); av2 = avma; lim = stack_lim(av2,2);
+  sqd = sqrti(x); av2 = avma; lim = stack_lim(av2,2);
   a = shifti(addsi(r,sqd),-1);
   f = cgetg(3,t_MAT); f[1] = lgetg(3,t_COL); f[2] = lgetg(3,t_COL);
   coeff(f,1,1) = (long)a; coeff(f,1,2) = un;
@@ -2459,7 +2440,7 @@ regula(GEN x, long prec)
 {
   pari_sp av = avma, av2, lim;
   long r, fl, rexp;
-  GEN reg, rsqd, y, u, v, u1, v1, sqd = racine(x);
+  GEN reg, rsqd, y, u, v, u1, v1, sqd = sqrti(x);
 
   check_quaddisc_real(x, &r, "regula");
   rsqd = gsqrt(x,prec);
@@ -3044,7 +3025,7 @@ real_unit_form_by_disc(GEN D, long prec)
   long r;
 
   check_quaddisc_real(D, /*junk*/&r, "real_unit_form_by_disc");
-  y[1] = un; isqrtD = racine(D);
+  y[1] = un; isqrtD = sqrti(D);
   if ((r & 1) != mod2(isqrtD)) /* we know isqrtD > 0 */
     isqrtD = gerepileuptoint(av, addsi(-1,isqrtD));
   y[2] = (long)isqrtD; av = avma;
@@ -3300,7 +3281,7 @@ nupow(GEN x, GEN n)
   av = avma; y = imag_unit_form(x);
   if (!signe(n)) return y;
 
-  l = gclone( racine(shifti(racine((GEN)y[3]),1)) );
+  l = gclone( sqrti(shifti(sqrti((GEN)y[3]),1)) );
   avma = av;
   y = leftright_pow(x, n, (void*)l, &mul_nudupl, &mul_nucomp);
   gunclone(l);
@@ -3506,7 +3487,7 @@ redreal0(GEN x, long flag, GEN D, GEN isqrtD, GEN sqrtD)
     }
   }
   if (!isqrtD)
-    isqrtD = sqrtD? mptrunc(sqrtD): racine(D);
+    isqrtD = sqrtD? mptrunc(sqrtD): sqrti(D);
   else
     if (typ(isqrtD) != t_INT) err(arither1);
 

@@ -730,7 +730,7 @@ all_factor_bound(GEN x)
   GEN t, z = gzero;
   for (i=2; i<=n+2; i++) z = addii(z, sqri((GEN)x[i]));
   t = absi((GEN)x[n+2]);
-  z = addii(t, addsi(1, racine(z)));
+  z = addii(t, addsi(1, sqrti(z)));
   z = mulii(z, binome(stoi(n-1), n>>1));
   return shifti(mulii(t,z),1);
 }
@@ -4481,7 +4481,7 @@ nfgcd(GEN P, GEN Q, GEN nf, GEN den)
       mod = mulis(mod, p);
       M = lift(FpM_to_mod(M, mod));
       /* I suspect it must be better to take amax > bmax*/
-      bo = racine(shifti(mod, -1));
+      bo = sqrti(shifti(mod, -1));
       if ((sol = matratlift(M, mod, bo, bo, den)) == NULL) continue;
       sol = RgM_to_RgXX(sol,x,y);
       dsol = primpart(sol);

@@ -1092,7 +1092,7 @@ Fp_shanks(GEN x,GEN g0,GEN p, GEN q)
   if (is_pm1(x) || egalii(p,gdeux)) { avma = av; return gzero; }
   p1 = addsi(-1, p); if (!q) q = p1;
   if (egalii(p1,x)) { avma = av; return shifti(q,-1); }
-  p1 = racine(q);
+  p1 = sqrti(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in Fp_shanks");
   lbaby=itos(p1)+1; smalltable=cgetg(lbaby+1,t_VEC);
   g0inv = Fp_inv(g0, p); p1 = x;
@@ -1226,7 +1226,7 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
     return Fp_PHlog(x,g0,p,q);
   }
 
-  p1 = racine(q);
+  p1 = sqrti(q);
   if (cmpis(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fq_inv(g0,T,p);

@@ -1015,6 +1015,15 @@ and remainder of the \typ{long}~\kbd{x} by the \kbd{long}~\kbd{y}. As
 \fun{GEN}{truedvmdii}{GEN x, GEN y, GEN *r}, as \kbd{dvmdii} but with a
 non-negative remainder.
 
+\subsec{Square root and remainder}
+
+\fun{GEN}{sqrtremi}{GEN N, GEN *r}, returns the integer square root $S$ of
+the non-negative \typ{INT}~\kbd{N} (rounded towards 0) and puts the remainder
+$R$ into~\kbd{*r}. Precisely, $N = S^2 + R$ with $0\leq R \leq 2S$. If
+\kbd{r} is equal to \kbd{NULL}, the remainder is not created. In the generic
+case, the remainder is created after the quotient and can be disposed of
+individually with \kbd{cgiv(R)}. If the remainder is $0$ set \kbd{R = gzero}.
+
 \subsec{Pseudo-random integers}
 
 \fun{long}{random_bits}{long k} returns a random $0 \leq x < 2^k$. Assumes

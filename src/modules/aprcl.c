@@ -408,7 +408,7 @@ compt(GEN N)
   if (C <  99282) return 11138400;
   if (C < 105811) return  8648640;
 
-  B = racine(N);
+  B = sqrti(N);
   for (t = 8648640+840;; t+=840)
   {
     pari_sp av = avma;

@@ -474,7 +474,7 @@ plisprime(GEN N, long flag)
   N = absi(N);
   if (!F)
   {
-    F = (GEN)decomp_limit(addis(N,-1), isqrti(N))[1];
+    F = (GEN)decomp_limit(addis(N,-1), sqrti(N))[1];
     if (DEBUGLEVEL>3) fprintferr("PL: N-1 factored!\n");
   }
 
@@ -1886,9 +1886,6 @@ fin:
 /**  size. (Cf. Algo 8.7.2 in ACiCNT)                                 **/
 /**                                                                   **/
 /***********************************************************************/
-#define sqrs(b) mulss((b),(b))
-#define sqru(b) muluu((b),(b))
-extern ulong usqrtsafe(ulong a);
 
 /* The following is invoked to walk back along the ambiguous cycle* until we
  * hit an ambiguous form and thus the desired factor, which it returns.  If it
@@ -1990,16 +1987,16 @@ squfof(GEN n)
   if (nm4 == 1)
   { /* n = 1 (mod4):  run one iteration on D1 = n, another on D2 = 5n */
     D1 = n;
-    D2 = mulsi(5,n); d2 = itou(isqrti(D2)); dd2 = (long)((d2>>1) + (d2&1));
+    D2 = mulsi(5,n); d2 = itou(sqrti(D2)); dd2 = (long)((d2>>1) + (d2&1));
     b2 = (long)((d2-1) | 1);	/* b1, b2 will always stay odd */
   }
   else
   { /* n = 3 (mod4):  run one iteration on D1 = 3n, another on D2 = 4n */
     D1 = mulsi(3,n);
-    D2 = shifti(n,2); dd2 = itou(isqrti(n)); d2 =  dd2 << 1;
+    D2 = shifti(n,2); dd2 = itou(sqrti(n)); d2 =  dd2 << 1;
     b2 = (long)(d2 & (~1UL)); /* largest even below d2, will stay even */
   }
-  d1 = itou(isqrti(D1));
+  d1 = itou(sqrti(D1));
   b1 = (long)((d1-1) | 1); /* largest odd number not exceeding d1 */
   c1 = itos(shifti(subii(D1, sqru((ulong)b1)), -2));
   if (!c1) err(bugparier,"squfof [caller of] (n or 3n is a square)");

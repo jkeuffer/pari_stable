@@ -91,3 +91,8 @@ GEN _checknf(GEN nf);
 
 GEN initgaloisborne(GEN T, GEN dn, long prec, GEN *pL, GEN *pprep, GEN *pdis);
 GEN quicktrace(GEN x, GEN sym);
+
+#define sqrs(b) mulss((b),(b))
+#define sqru(b) muluu((b),(b))
+#define sqrti(x) sqrtremi((x),NULL)
+ulong usqrtsafe(ulong a);
