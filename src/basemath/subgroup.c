@@ -287,7 +287,7 @@ static void
 dopsub(subgp_iter *T, GEN p, GEN indexsubq)
 {
   long *M, *L = T->L;
-  long w,i,j,k, wG = weight(L), wmin = 0, wmax = wG, n = len(L);
+  long w,i,j,k,lsubq, wG = weight(L), wmin = 0, wmax = wG, n = len(L);
 
   if (DEBUGLEVEL) { fprintferr("\ngroup:"); printtyp(L); }
   T->count = 0;
@@ -302,6 +302,11 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     break;
   }
   T->M = M = new_chunk(n+1);
+  if (T->subq)
+  {
+    lsubq = lg(T->subq);
+    T->subqpart = T->bound? cgetg(lsubq, t_VEC): T->subq;
+  }
   M[1] = -1; for (i=2; i<=n; i++) M[i]=0;
   for(;;) /* go through all vectors mu_{i+1} <= mu_i <= lam_i */
   {
@@ -321,21 +326,16 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
     {
       GEN p1 = gun;
 
-      if (T->subq) /* G not a p-group */
+      if (T->subq && T->bound) /* G not a p-group */
       {
-        if (T->bound)
-        {
-          GEN indexH = gpowgs(p, wG - w);
-          GEN B = divii(T->bound, indexH);
-          long k, l = lg(T->subq);
-          T->subqpart = cgetg(l, t_VEC);
-          k = 1;
-          for (i=1; i<l; i++)
-            if (cmpii((GEN)indexsubq[i], B) <= 0)
-              T->subqpart[k++] = T->subq[i];
-          setlg(T->subqpart, k);
-        }
-        else T->subqpart = T->subq;
+        pari_sp av = avma;
+        GEN indexH = gpowgs(p, wG - w);
+        GEN B = divii(T->bound, indexH);
+        k = 1;
+        for (i=1; i<lsubq; i++)
+          if (cmpii((GEN)indexsubq[i], B) <= 0)
+            T->subqpart[k++] = T->subq[i];
+        setlg(T->subqpart, k); avma = av;
       }
       if (DEBUGLEVEL)
       {
@@ -357,11 +357,10 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         }
         fprintferr("  alpha_lambda(mu,p) = %Z\n",p1);
       }
-      T->countsub = 0;
 
-      dopsubtyp(T);
-
+      T->countsub = 0; dopsubtyp(T);
       T->count += T->countsub;
+
       if (DEBUGLEVEL)
       {
         fprintferr("  countsub = %ld\n", T->countsub);
