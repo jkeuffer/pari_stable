@@ -91,6 +91,7 @@ BA 31- uninitialized memory read in divrr(x,y), when lg(y) < lg(x), leading
        setrand(7); polgalois(x^8+162644002617632464507038884216211529274267271168000002) --> wrong result
   
        polgalois(x^11 - 2) took a looong time.
+   34- systematic warning in bnfisnorm()  [ "useless flag" ]
 
   Changed
     1- rnf structure (removed useless components)
