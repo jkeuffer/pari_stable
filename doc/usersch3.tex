@@ -1376,7 +1376,7 @@ e^{-t}t^{s-1}\,dt$.
 \subsecidx{log}$(x)$: principal branch of the natural logarithm of
 $x$, i.e.~such that $\text{Im(log}(x))\in{} ]-\pi,\pi]$. The result is complex
 (with imaginary part equal to $\pi$) if $x\in \R$ and $x < 0$. In general,
-the algorithm uses the formula 
+the algorithm uses the formula
 $$\log(x) \approx {\pi\over 2\text{agm}(1, 4/s)} - m \log 2, $$
 if $s = x 2^m$ is large enough. (The result is exact to $B$ bits provided
 $s > 2^{B/2}$.) At low accuracies, the series expansion near $1$ is used.
@@ -2007,8 +2007,8 @@ discriminant of a quadratic field, false (0) otherwise.
 which returns a \kbd{long} should be used if $x$ is known to be of type
 integer.
 
-\subsecidx{ispower}$(x,\{k\}, \{\&n\})$: 
- true (1) if $x$ is a $k$-th power, false (0) if not. If $n$ is 
+\subsecidx{ispower}$(x,\{k\}, \{\&n\})$:
+ true (1) if $x$ is a $k$-th power, false (0) if not. If $n$ is
 given and a $k$-th root was computed in the process, put that in $n$. If $k$
 is omitted, return the maximal $k \geq 2$ such that $x = n^k$ is a perfect
 power, or 0 if no such $k$ exist. Intmod a prime and $p$-adics are allowed,
@@ -2154,7 +2154,7 @@ the precalculated primes.
 \syn{prime}{x}. $x$ must be a \kbd{long}.
 
 \subsecidx{primepi}$(x)$: the prime counting function. Returns the number of
-primes $p$, $p \leq x$. Uses a naive algorithm so that $x$ must be less than 
+primes $p$, $p \leq x$. Uses a naive algorithm so that $x$ must be less than
 \kbd{primelimit}.
 
 \syn{primepi}{x}.
@@ -2259,7 +2259,7 @@ integer.
 \subsecidx{qfbprimeform}$(x,p)$: prime binary quadratic form of discriminant
 $x$ whose first coefficient is the prime number $p$. By abuse of notation,
 $p = \pm 1$ is a valid special case which returns the unit form. Returns an
-error if $x$ is not a quadratic residue mod $p$. In the case where $x>0$, 
+error if $x$ is not a quadratic residue mod $p$. In the case where $x>0$,
 $p < 0$ is allowed, and the ``distance'' component of the form is set equal
 to zero according to the current precision. (Note that negative definite
 \typ{QFI} are not implemented.)
@@ -2990,7 +2990,7 @@ Normal Form as a pair $[h,d]$ or triple $[h,d,g]$.
 Here $h$ is the cardinality of $G$, $(d_i)$ is the vector of elementary
 divisors, and $(g_i)$ is a vector of generators. In short,
 $G = \oplus_{i\leq n} (\Z/d_i\Z) g_i$, with $d_n \mid \dots \mid d_2 \mid d_1$
-and $\prod d_i = h$. This information can also be retrieved as 
+and $\prod d_i = h$. This information can also be retrieved as
 $G.\kbd{no}$, $G.\kbd{cyc}$ and $G.\kbd{gen}$.
 
 \item a \tev{character} on the abelian group
@@ -3056,7 +3056,7 @@ places at infinity.
 A \tev{bid} or ``big ideal'' is a structure output by \kbd{idealstar}
 needed to compute in $(\Z_K/I)^*$, where $I$ is a modulus in the above sense.
 If is a finite abelian group as described above, supplemented by
-technical data needed to solve discrete log problems. 
+technical data needed to solve discrete log problems.
 
 Finally we explain how to input ray number fields (or \var{bnr}), using class
 field theory. These are defined by a triple
@@ -3076,7 +3076,7 @@ $K$. As described above, this is input as a square matrix expressing
 generators of a subgroup of the ray class group \kbd{\var{bnr}.clgp} on the
 given generators.
 
-The corresponding \var{bnr} is the subfield of the ray class field of $K$ 
+The corresponding \var{bnr} is the subfield of the ray class field of $K$
 modulo $\goth{f}$, fixed by the given subgroup.
 
 \subsec{General use}
@@ -3639,7 +3639,7 @@ is DEPRECATED, use \kbd{bnrinit}}.
 
 $\var{bnf}$ being as output by \kbd{bnfinit} (the units are mandatory unless
 the ideal is trivial), and \var{ideal} being a modulus, computes the ray
-class group of the number field for the modulus \var{ideal}, as a 
+class group of the number field for the modulus \var{ideal}, as a
 finite abelian group.
 
 \syn{bnrclass0}{\var{bnf},\var{ideal},\fl}.
@@ -3751,7 +3751,7 @@ output by \kbd{bnfinit}, \var{ideal} is a modulus, initializes data linked to
 the ray class group structure corresponding to this module, a so-called
 \var{bnr} structure. The following member functions are available
 on the result: \kbd{.bnf} is the underlying \var{bnf},
-\kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the 
+\kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the
 modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{clgp} refer to the
 ray class group (as a finite abelian group), its cardinality, its elementary
 divisors, its generators. Note that the latter group are different from the
@@ -4238,6 +4238,31 @@ the units. More precisely, $U[i]$ gives the \kbd{ideallog}s of
 
 \quad 4: give only the HNF of the ideal.
 
+\bprog
+? nf = nfinit(x^2+1);
+? L = ideallist(nf, 100);
+? L[1]
+%3 = [[1, 0; 0, 1]]  \\@com A single ideal of norm 1
+? #L[65]
+%4 = 4               \\@com There are 4 ideals of norm 4 in $\Z[i]$
+@eprog
+If one wants more information, one could do instead:
+\bprog
+? nf = nfinit(x^2+1);
+? L = ideallist(nf, 100, 0);
+? l = L[25]; vector(#l, i, l[i].clgp)
+%3 = [[20, [20]], [16, [4, 4]], [20, [20]]]
+? l[1].mod
+%4 = [[25, 18; 0, 1], []]
+? l[2].mod
+%5 = [[5, 0; 0, 5], []]
+? l[3].mod
+%6 = [[25, 7; 0, 1], []]
+@eprog\noindent where we ask for the structures of the $(\Z[i]/I)^*$ for all
+three ideals of norm $25$. In fact, for all moduli with finite part of norm
+$25$ and trivial archimedean part, as the last 3 commands show. See
+\tet{ideallistarch} to treat general moduli.
+
 \syn{ideallist0}{\var{nf},\var{bound},\fl}, where \var{bound} must
 be a C long integer. Also available is \funs{ideallist}{\var{nf},\var{bound}},
 corresponding to the case $\fl=4$.
@@ -4366,7 +4391,7 @@ form, or a row vector whose first component is an ideal and whose second
 component is a row vector of $r_1$ 0 or 1.
 
 This \var{bid} is used in \tet{ideallog} to compute discrete logarithms. It
-also contains useful information which can be conveniently retrieved as 
+also contains useful information which can be conveniently retrieved as
 \kbd{\var{bid}.mod} (the modulus),
 \kbd{\var{bid}.clgp} ($G$ as a finite abelian group),
 \kbd{\var{bid}.no} (the cardinality of $G$),
@@ -6921,7 +6946,7 @@ summed, etc.) with two parameters named
 @eprog\noindent
 The second is meant to contain all auxilliary data needed by your function.
 The first is such that \kbd{eval(x, E)} returns your function evaluated at
-\kbd{x}. For instance, one may code the family of functions 
+\kbd{x}. For instance, one may code the family of functions
 $f_t: x \to (x+t)^2$ via
 \bprog
 GEN f(GEN x, void *t) { return gsqr(gadd(x, (GEN)t)); }
@@ -6935,7 +6960,7 @@ Since you can set \kbd{E} to a pointer to any \kbd{struct} (typecast to
 functions without extra parameters, you may set \kbd{E = NULL} and ignore
 that argument in your function definition.
 
-\misctitle{Numerical integration.}\sidx{numerical integration} 
+\misctitle{Numerical integration.}\sidx{numerical integration}
 Starting with version 2.2.9 the powerful ``double exponential'' univariate
 integration method is implemented in \tet{intnum} and its variants. Romberg
 integration is still available under the name \kbd{intnumromb}, but
@@ -7012,8 +7037,8 @@ is lengthy to compute, such as a gamma product.
 Note that the order of $m$ and $\fl$ are reversed compared to the \kbd{GP}
 syntax.
 
-\subsecidx{intlaplaceinv}$(X=sig,z,\var{expr},\{\var{tab}\})$: 
-numerical integration of $\var{expr}(X)e^{Xz}$ with respect to $X$ on the line 
+\subsecidx{intlaplaceinv}$(X=sig,z,\var{expr},\{\var{tab}\})$:
+numerical integration of $\var{expr}(X)e^{Xz}$ with respect to $X$ on the line
 $\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Laplace transform
 of the function corresponding to \var{expr} at the value $z$.
 
@@ -7060,8 +7085,8 @@ time = 330 ms.
 
 \synt{intlaplaceinv}{void *E, GEN (*eval)(GEN,void*), GEN sig,GEN z, GEN tab, long prec}.
 
-\subsecidx{intmellininv}$(X=sig,z,\var{expr},\{\var{tab}\})$: numerical 
-integration of $\var{expr}(X)z^{-X}$ with respect to $X$ on the line 
+\subsecidx{intmellininv}$(X=sig,z,\var{expr},\{\var{tab}\})$: numerical
+integration of $\var{expr}(X)z^{-X}$ with respect to $X$ on the line
 $\Re(X)=sig$, divided by $2i\pi$, in other words, inverse Mellin transform of
 the function corresponding to \var{expr} at the value $z$.
 
@@ -7090,7 +7115,7 @@ time = 51,300 ms. \\@com slow because of $\Gamma(s)^3$.
 
 \synt{intmellininv}{void *E, GEN (*eval)(GEN,void*), GEN sig, GEN z, GEN tab, long prec}.
 
-\subsecidx{intmellininvshort}$(sig,z,tab)$: numerical integration 
+\subsecidx{intmellininvshort}$(sig,z,tab)$: numerical integration
 of $s(X)z^{-X}$ with respect to $X$ on the line $\Re(X)=sig$, divided by
 $2i\pi$, in other words, inverse Mellin transform of $s(X)$ at the value $z$.
 Here $s(X)$ is implicitly contained in \var{tab} in \kbd{intfuncinit} format,
@@ -7110,7 +7135,7 @@ time = 2,500 ms. \\@com not too fast because of $\Gamma(s)^3$.
 ? tab = intfuncinit(t=[-oo, 3*Pi/2],[oo, 3*Pi/2], gamma(2+I*t)^3, 1);
 time = 1,370 ms.
 ? intmellininvshort(2,4, tab) - A
-time = 50 ms. 
+time = 50 ms.
 %4 = -1.26... - 3.25...E-109*I \\@com 50 times faster than \kbd{A} and perfect.
 ? tab2 = intfuncinit(t=-oo, oo, gamma(2+I*t)^3, 1);
 ? intmellininvshort(2,4, tab2)
@@ -7148,7 +7173,7 @@ consecutive values of $m$ until they give the same value up to an accepted
 error.
 
 The endpoints $a$ and $b$ are coded as follows. If $a$ is not at $\pm\infty$,
-it is either coded as a scalar (real or complex), or as a two component vector 
+it is either coded as a scalar (real or complex), or as a two component vector
 $[a,\alpha]$, where the function is assumed to have a singularity of the
 form $(x-a)^{\alpha+\epsilon}$ at $a$, where $\epsilon$ indicates that powers
 of logarithms are neglected. In particular, $[a,\alpha]$ with $\alpha\ge 0$
@@ -7156,7 +7181,7 @@ is equivalent to $a$. If a wrong singularity exponent is used, the result
 will lose a catastrophic number of decimals, for instance approximately half
 the number of digits will be correct if $\alpha=-1/2$ is omitted.
 
-The endpoints of integration can be $\pm\infty$, which is coded as 
+The endpoints of integration can be $\pm\infty$, which is coded as
 $[\pm 1]$ or as $[[\pm1],\alpha]$. Here $\alpha$ codes the behaviour of the
 function at $\pm\infty$ as follows.
 
@@ -7189,10 +7214,10 @@ Otherwise you will get nonsense. Note that $\cos(kx)$ (and similarly
 $\sin(kx)$) means that very function, and not a translated version such as
 $\cos(kx+a)$.
 
-If for instance $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero exponentially 
-fast as $\exp(-\alpha x)$, it is up to the user to choose between 
+If for instance $f(x)=\cos(kx)g(x)$ where $g(x)$ tends to zero exponentially
+fast as $\exp(-\alpha x)$, it is up to the user to choose between
 $[[\pm1],\alpha]$ and $[[\pm1],kI]$, but a good rule of thumb is that if the
-oscillations are much weaker than the exponential decrease, choose 
+oscillations are much weaker than the exponential decrease, choose
 $[[\pm1],\alpha]$, otherwise choose $[[\pm1],kI]$, although the latter can
 reasonably be used in all cases, while the former cannot. To take a specific
 example, in the inverse Mellin transform, the function to be integrated is
@@ -7230,7 +7255,7 @@ constant \kbd{Euler}. But
 ? intnum(x = 0, [oo,1],  f(x)) - Euler
 %1 = 6.00... E-67
 @eprog\noindent
-thus only correct to $76$ decimal digits. This is because close to $0$ the 
+thus only correct to $76$ decimal digits. This is because close to $0$ the
 function $f$ is computed with an enormous loss of accuracy.
  A better solution is
 
@@ -7370,7 +7395,7 @@ values of $m$ are $m=6$ or $m=7$ for $100$ decimal digits, and $m=9$ for
 $1000$ decimal digits.
 
 The result is technical, but in some cases it is useful to know the output.
-Let $x=\phi(t)$ be the change of variable which is used. \var{tab}[1] contains 
+Let $x=\phi(t)$ be the change of variable which is used. \var{tab}[1] contains
 the integer $m$ as above, either given by the user or computed from the default
 precision, and can be recomputed directly using the function \kbd{intnumstep}.
 \var{tab}[2] and \var{tab}[3] contain respectively the abcissa and weight
@@ -7386,7 +7411,7 @@ $\var{tab}[6]=-\var{tab}[4]$ and $\var{tab}[7]=\var{tab}[5]$).
 
 \subsecidx{intnumromb}$(X=a,b,\var{expr},\{\fl=0\})$: numerical integration of
 \var{expr} (smooth in $]a,b[$), with respect to $X$. This function is
-deprecated, use \tet{intnum} instead. 
+deprecated, use \tet{intnum} instead.
 
 Set $\fl=0$ (or omit it altogether) when $a$ and $b$ are not too large, the
 function is smooth, and can be evaluated exactly everywhere on the interval
@@ -7421,7 +7446,7 @@ infinity equal to 10 for example, and certainly not to 1e1000.
 
 \synt{intnumromb}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN b, long flag, long prec},
 where $\kbd{eval}(x, E)$ returns the value of the function at $x$.
-You may store any additional information required by \kbd{eval} in $E$, or set 
+You may store any additional information required by \kbd{eval} in $E$, or set
 it to \kbd{NULL}.
 
 \subsecidx{intnumstep}$()$: give the value of $m$ used in all the
@@ -7574,13 +7599,13 @@ time = 0 ms.
 
 \synt{suminf}{void *E, GEN (*eval)(GEN,void*), GEN a, long prec}.
 
-\subsecidx{sumnum}$(X=a,sig,\var{expr},\{\var{tab}\}),\{\fl=0\}$: numerical 
-summation of \var{expr}, the variable $X$ taking integer values from ceiling 
-of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic function 
-$f(X)$ for $\Re(X)\ge \sigma$. 
+\subsecidx{sumnum}$(X=a,sig,\var{expr},\{\var{tab}\}),\{\fl=0\}$: numerical
+summation of \var{expr}, the variable $X$ taking integer values from ceiling
+of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic function
+$f(X)$ for $\Re(X)\ge \sigma$.
 
 The free parameter $\sigma\in\R$ is coded in \kbd{sig} is coded as follows:
-it is either 
+it is either
 
 \item a real number $\sigma$, and then the function $f$ is assumed to
 decrease at least as $1/X^2$ at infinity, but not exponentially;
@@ -7607,7 +7632,7 @@ slowly decreasing functions.
 
 
 Finally, if $\fl$ is nonzero, we assume that the function $f$ to be summed is
-of real type, i.e. satisfies $\overline{f(z)}=f(\overline{z})$, which 
+of real type, i.e. satisfies $\overline{f(z)}=f(\overline{z})$, which
 speeds up the computation.
 
 \bprog
@@ -7621,7 +7646,7 @@ time = 460 ms. \\@com 3 times as fast as \kbd{sumpos}
 ? a - b
 %4 = -1.0... E-306 + 0.E-320*I \\@com perfect.
 ? sumnum(n=1, 2, 1/(n^3+n+1), tab, 1) - a; \\@com function of real type
-time = 240 ms. 
+time = 240 ms.
 %2 = -1.0... E-306 \\@com twice as fast, no imaginary part.
 ? c = sumnum(n=1, 2, 1/(n^2+1), tab, 1);
 time = 170 ms. \\@com fast
@@ -7690,8 +7715,8 @@ time = 11,770 ms.
 \synt{sumnum}{void *E, GEN (*eval)(GEN,void*), GEN a,GEN sig,GEN tab,long flag, long prec}.
 
 \subsecidx{sumnumalt}$(X=a,sig,\var{expr},\{\var{tab}\},\{\fl=0\})$: numerical
-summation of $(-1)^X\var{expr}(X)$, the variable $X$ taking integer values from 
-ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic 
+summation of $(-1)^X\var{expr}(X)$, the variable $X$ taking integer values from
+ceiling of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic
 function for $\Re(X)\ge sig$ (or $sig[1]$).
 
 \misctitle{Warning.} This function uses the \kbd{intnum} routines and is
@@ -7707,7 +7732,7 @@ $sig$ is coded as in \kbd{sumnum}. However for slowly decreasing functions
 really important to indicate $\alpha$. In fact, as for \kbd{sumalt}, the
 program will often give meaningful results (usually analytic continuations)
 even for divergent series. On the other hand the exponential decrease must be
-indicated. 
+indicated.
 
 \var{tab} is as in \kbd{intnum}, but if used must be initialized with
 \kbd{sumnuminit}. If $\fl$ is nonzero, assumes that the function $f$ to be
@@ -7722,14 +7747,14 @@ time = 1,620 ms. \\@com slow, but done once and for all.
 time = 230 ms. \\@com similar speed to \kbd{sumnum}
 ? b = sumalt(n=1, (-1)^n/(n^3+n+1));
 time = 0 ms. \\@com infinitely faster!
-? a - b 
+? a - b
 time = 0 ms.
 %1 = -1.66... E-308 \\@com perfect
 @eprog
 
 \synt{sumnumalt}{void *E, GEN (*eval)(GEN,void*), GEN a, GEN sig, GEN tab, long flag, long prec}.
 
-\subsecidx{sumnuminit}$(sig,{m=0},{sgn=1})$: initialize tables for numerical 
+\subsecidx{sumnuminit}$(sig,{m=0},{sgn=1})$: initialize tables for numerical
 summation using \kbd{sumnum} (with $\var{sgn}=1$) or \kbd{sumnumalt} (with
 $\var{sgn}=-1$), $sig$ is the abcissa of integration coded as in \kbd{sumnum},
 and $m$ is as in \kbd{intnuminit}.

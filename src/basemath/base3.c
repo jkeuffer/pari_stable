@@ -780,7 +780,7 @@ vec_setconst(GEN v, GEN x)
 GEN
 vec_const(long n, GEN x)
 {
-  GEN v = cgetg(n + 1, t_VEC);
+  GEN v = cgetg(n+1, t_VEC);
   long i;
   for (i = 1; i <= n; i++) v[i] = (long)x;
   return v;
@@ -788,7 +788,7 @@ vec_const(long n, GEN x)
 GEN
 col_const(long n, GEN x)
 {
-  GEN v = cgetg(n + 1, t_COL);
+  GEN v = cgetg(n+1, t_COL);
   long i;
   for (i = 1; i <= n; i++) v[i] = (long)x;
   return v;
@@ -2038,14 +2038,16 @@ static GEN
 join_bid(GEN nf, GEN bid1, GEN bid2)
 {
   pari_sp av = avma;
-  long i, nbgen, lx1, lx2, l1, l2, lx;
-  GEN f1, f2, G1, G2, fa1, fa2, lists1, lists2;
-  GEN lists, fa, U, U1, U2, cyc, cyc1, cyc2, y, u1 = NULL, x, gen;
+  long i, nbgen, lx, lx1,lx2, l1,l2;
+  GEN I1,I2, f1,f2, G1,G2, fa1,fa2, lists1,lists2, cyc1,cyc2;
+  GEN lists, fa, U, cyc, y, u1 = NULL, x, gen;
 
-  nf = checknf(nf); checkbid(bid1); checkbid(bid2);
-  f1 = gel(bid1,1); G1 = gel(bid1,2); fa1 = gel(bid1,3);
-  f2 = gel(bid2,1); G2 = gel(bid2,2); fa2 = gel(bid2,3);
-  x = idealmul(nf, gel(f1,1),gel(f2,1));
+  f1 = gel(bid1,1); I1 = gel(f1,1);
+  f2 = gel(bid2,1); I2 = gel(f2,1);
+  if (gcmp1(gcoeff(I1,1,1)))
+    return bid2; /* frequent trivial case */
+  G1 = gel(bid1,2); G2 = gel(bid2,2);
+  fa1= gel(bid1,3); fa2= gel(bid2,3); x = idealmul(nf, I1,I2);
   fa = concat_factor(fa1, fa2);
 
   lists1 = gel(bid1,4); lx1 = lg(lists1);
@@ -2055,16 +2057,21 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   for (i=1; i<lx1-1; i++) lists[i] = lists1[i];
   for (   ; i<lx; i++)    lists[i] = lists2[i-lx1+2];
 
-  U1 = gel(bid1,5); cyc1 = gel(G1,2); l1 = lg(cyc1);
-  U2 = gel(bid2,5); cyc2 = gel(G2,2); l2 = lg(cyc2);
+  cyc1 = gel(G1,2); l1 = lg(cyc1);
+  cyc2 = gel(G2,2); l2 = lg(cyc2);
   gen = (lg(G1)>3 && lg(G2)>3)? gen_1: NULL;
   nbgen = l1+l2-2;
-  cyc = diagonal_i(concatsp(cyc1,cyc2));
-  cyc = smithrel(cyc, &U, gen? &u1: NULL);
+  cyc = smithrel(diagonal_i(concatsp(cyc1,cyc2)),
+                 &U, gen? &u1: NULL);
+  if (nbgen) {
+    GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
+    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecextract_i(U, 1, l1-1),   U1);
+    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecextract_i(U, l1, nbgen), U2);
+    U = concatsp(U1, U2);
+  }
+  else
+    U = zeromat(0, lx-2);
 
-  if (nbgen)
-    U = concatsp(gmul(vecextract_i(U, 1,   l1-1), U1),
-                 gmul(vecextract_i(U, l1, nbgen), U2));
   if (gen)
   {
     GEN u, v, uv = idealaddtoone(nf,gel(f1,1),gel(f2,1));
@@ -2216,7 +2223,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
   if (big_id) id = Idealstar(nf,id,do_gen);
 
   /* z[i] will contain all "objects" of norm i. Depending on flag, this means
-   * an ideal, a bid, or a couple [bid, log(units)]. Such objects are stored 
+   * an ideal, a bid, or a couple [bid, log(units)]. Such objects are stored
    * in vectors, computed one primary component at a time; join_z
    * reconstructs the global object */
   z = cgetg(bound+1,t_VEC);
