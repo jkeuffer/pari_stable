@@ -1595,18 +1595,32 @@ rnfnormgroup(GEN bnr, GEN polrel)
   cgiv(detgroup); return gerepileupto(av,group);
 }
 
+static GEN
+liftpol(GEN pol, GEN q, long v)
+{
+  long i, l = lgef(pol);
+  GEN y = cgetg(l, t_POL);
+  y[1] = pol[1];
+  for (i = 2; i < l; i++)
+  {
+    y[i] = (long)lift_intern(poleval((GEN)pol[i], q));
+    if (typ(y[i]) == t_POL) setvarn(y[i], v);
+  }
+  return y;
+}
+
 /* FIXME: check should be done mod p [ p \nmid Norm(disc(pol)) ]*/
 static int
 rnf_is_abelian(GEN nf, GEN pol)
 {
-  GEN ro, rores, nfL, L, mod, d;
-  long i,j, l;
+  GEN ro, rores, nfL, L, eq, mod, d;
+  long i, j, l, v = varn(nf[1]);
 
-  nf = checknf(nf);
-  L = rnfequation(nf,pol);
-  mod = dummycopy(L); setvarn(mod, varn(nf[1]));
+  eq = rnfequation2(nf,pol);
+  L = (GEN)eq[1];
+  mod = dummycopy(L); setvarn(mod, v);
   nfL = _initalg(mod, nf_PARTIALFACT, DEFAULTPREC);
-  ro = nfroots(nfL, L);
+  ro = nfroots(nfL, liftpol(pol, (GEN)eq[2], v));
   l = lg(ro)-1;
   if (l != degpol(pol)) return 0;
   if (isprime(stoi(l))) return 1;
@@ -1630,26 +1644,25 @@ rnf_is_abelian(GEN nf, GEN pol)
   return 1;
 }
 
-/* Etant donne un bnf et un polynome relatif polrel definissant une extension
-   abelienne, calcule le conducteur et le groupe de congruence correspondant
-   a l'extension definie par polrel sous la forme
-   [[ideal,arch],[hm,cyc,gen],group] ou [ideal,arch] est le conducteur, et
-   [hm,cyc,gen] est le groupe de classes de rayon correspondant. Verifie
-   que polrel definit bien une extension abelienne si flag != 0 */
+/* Given bnf and polrel defining an abelian relative extension, compute the
+ * corresponding conductor and congruence subgroup. Return
+ * [[ideal,arch],[hm,cyc,gen],group] where [ideal,arch] is the conductor, and
+ * [hm,cyc,gen] is the corresponding ray class group.
+ * If flag != 0, check that the extension is abelian */
 GEN
 rnfconductor(GEN bnf, GEN polrel, long flag)
 {
   long R1, i;
   pari_sp av = avma;
-  GEN nf,module,arch,bnr,group,p1,pol2;
+  GEN nf, module, arch, bnr, group, p1, pol2;
 
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
-  if (typ(polrel)!=t_POL) err(typeer,"rnfconductor");
-  p1=unifpol(nf, polrel, 0);
-  p1=denom(gtovec(p1));
-  pol2=rescale_pol(polrel, p1);
-  if (flag && !rnf_is_abelian(bnf, pol2)) { avma = av; return gzero; }
+  if (typ(polrel) != t_POL) err(typeer,"rnfconductor");
+  p1 = unifpol(nf, polrel, 0);
+  pol2 = rescale_pol(polrel, Q_denom(p1));
+  if (flag && !rnf_is_abelian(nf, pol2)) { avma = av; return gzero; }
 
+  pol2 = fix_relative_pol(nf, pol2, 1);
   module = cgetg(3,t_VEC);
   module[1] = rnfdiscf(nf,pol2)[1];
   R1 = nf_get_r1(nf); arch = cgetg(R1+1,t_VEC);

@@ -1274,8 +1274,18 @@ nfsqff(GEN nf, GEN pol, long fl)
   /* heuristic */
   if (dpol*3 < n) 
   {
+    GEN z, t;
     if (DEBUGLEVEL>2) fprintferr("Using Trager's method\n");
-    return gerepilecopy(av, (GEN)polfnf(polmod, nfpol)[1]);
+    z = (GEN)polfnf(polmod, nfpol)[1];
+    if (fl) {
+      long l = lg(z);
+      for (i = 1; i < l; i++)
+      {
+        t = (GEN)z[i];
+        z[i] = lneg(gdiv((GEN)t[3], (GEN)t[2]));
+      }
+    }
+    return gerepilecopy(av, z);
   }
 
   pol = simplify_i(lift(polmod));
