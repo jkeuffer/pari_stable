@@ -324,6 +324,10 @@ enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
 /* GP */
 #define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
 
+/* time */
+enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
+char *gp_format_time(long flag);
+
 /* TeXmacs */
 #define DATA_BEGIN  ((char) 2)
 #define DATA_END    ((char) 5)

@@ -197,6 +197,7 @@ enum manage_var_t {
 #define OK_ULONG(p) (lgefint(p) == 3 && u_OK_ULONG(p[2]))
 
 #ifndef HAS_EXP2
+#  undef exp2
 #  ifdef __cplusplus
      inline double exp2(double x) {return exp(x*LOG2);}
 #  else
@@ -204,6 +205,7 @@ enum manage_var_t {
 #  endif
 #endif
 #ifndef HAS_LOG2
+#  undef log2
 #  ifdef __cplusplus
      inline double log2(double x) {return log(x)/LOG2;}
 #  else

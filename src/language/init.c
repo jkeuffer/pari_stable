@@ -325,14 +325,14 @@ pari_sighandler(int sig)
   err(talker,msg);
 }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN32__)
 int win32ctrlc = 0;
 
 void
 dowin32ctrlc()
 {
-   win32ctrlc = 0;
-   err(talker,"user interrupt");
+  win32ctrlc = 0;
+  err(siginter, gp_format_time(ti_INTERRUPT));
 }
 #endif
 
@@ -398,6 +398,11 @@ init_defaults(int force)
   current_psfile = pari_strdup("pari.ps");
   current_logfile= pari_strdup("pari.log");
   logfile = NULL;
+
+  pari_datadir = os_getenv("GP_DATA_DIR");
+  if (!pari_datadir) pari_datadir = GPDATADIR;
+  if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
+
   initout(1); next_bloc=0;
 }
 
@@ -639,10 +644,6 @@ pari_init(size_t parisize, ulong maxprime)
   (void)manage_var(manage_var_init,NULL); /* init nvar */
   var_not_changed = 1; (void)fetch_named_var("x", 0);
   try_to_recover = 1;
-
-  pari_datadir = os_getenv("GP_DATA_DIR");
-  if (!pari_datadir) pari_datadir = GPDATADIR;
-  if (pari_datadir) pari_datadir = pari_strdup(pari_datadir);
 }
 
 static void
@@ -1992,6 +1993,55 @@ msgtimer(char *format, ...)
   pariOut = out;
 }
 
+/* flag:
+ *   ti_NOPRINT   don't print
+ *   ti_REGULAR   print elapsed time (flags & CHRONO)
+ *   ti_LAST      print last elapsed time (##)
+ *   ti_INTERRUPT received a SIGINT
+ */
+char *
+gp_format_time(long flag)
+{
+  static char buf[64];
+  static long last = 0;
+  long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
+  char *s;
+
+  last = delay;
+  switch(flag)
+  {
+    case ti_REGULAR:   s = "time = "; break;
+    case ti_INTERRUPT: s = "user interrupt after "; break;
+    case ti_LAST:      s = "  ***   last result computed in "; break;
+    default: return NULL;
+  }
+  strcpy(buf,s); s = buf+strlen(s);
+  strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
+  if (delay >= 3600000)
+  {
+    sprintf(s, "%ldh, ", delay / 3600000); s+=strlen(s);
+    delay %= 3600000;
+  }
+  if (delay >= 60000)
+  {
+    sprintf(s, "%ldmn, ", delay / 60000); s+=strlen(s);
+    delay %= 60000;
+  }
+  if (delay >= 1000)
+  {
+    sprintf(s, "%ld,", delay / 1000); s+=strlen(s);
+    delay %= 1000;
+    if (delay < 100)
+    {
+      sprintf(s, "%s", (delay<10)? "00": "0");
+      s+=strlen(s);
+    }
+  }
+  sprintf(s, "%ld ms", delay); s+=strlen(s);
+  strcpy(s, term_get_color(c_NONE));
+  if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
+  return buf;
+}
 /*******************************************************************/
 /*                                                                 */
 /*                   FUNCTIONS KNOWN TO THE ANALYZER               */

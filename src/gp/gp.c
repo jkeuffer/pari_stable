@@ -190,10 +190,9 @@ gp_preinit(void)
 #define separe(c)  ((c)==';' || (c)==':')
 
 /* Return all chars, up to next separator
- * [as strtok but must handle verbatim character string]
- * If 'colon' is set, allow ';' and ':' as separator, only ';' otherwise */
+ * [as strtok but must handle verbatim character string] */
 static char*
-get_sep0(const char *t, int colon)
+get_sep(const char *t)
 {
   static char buf[GET_SEP_SIZE], *lim = buf + GET_SEP_SIZE;
   char *s = buf;
@@ -210,24 +209,10 @@ get_sep0(const char *t, int colon)
         return buf;
       case ';':
 	if (outer) { s[-1] = 0; return buf; } break;
-      case ':':
-        if (outer && colon) { s[-1] = 0; return buf; } break;
     }
     if (s == lim)
       err(talker,"get_sep: argument too long (< %ld chars)", GET_SEP_SIZE);
   }
-}
-
-static char*
-get_sep(const char *t)
-{
-  return get_sep0(t,1);
-}
-
-static char*
-get_sep_colon_ok(const char *t)
-{
-  return get_sep0(t,0);
 }
 
 static ulong
@@ -551,6 +536,7 @@ gp_get_color(char **st)
   *st = v; return c;
 }
 
+/* 1: error, 2: history, 3: prompt, 4: input, 5: output, 6: help, 7: timer */
 static GEN
 sd_colors(char *v, int flag)
 {
@@ -563,11 +549,11 @@ sd_colors(char *v, int flag)
     if (l <= 2 && strncmp(v, "no", l) == 0)
       v = "";
     if (l <= 6 && strncmp(v, "darkbg", l) == 0)
-      v = "1, 5, 3, 7, 6, 2, 3";	/* Assume recent ReadLine. */
+      v = "1, 5, 3, 7, 6, 2, 3"; /* Assume recent ReadLine. */
     if (l <= 7 && strncmp(v, "lightbg", l) == 0)
-      v = "1, 6, 3, 4, 5, 2, 3";	/* Assume recent ReadLine. */
+      v = "1, 6, 3, 4, 5, 2, 3"; /* Assume recent ReadLine. */
     if (l <= 6 && strncmp(v, "boldfg", l) == 0)	/* Good for darkbg consoles */
-      v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], [2,,1], [3,,1]";
+      v = "[1,,1], [5,,1], [3,,1], [7,,1], [6,,1], , [2,,1]";
     v0 = v = filtre(v, 0);
     for (c=c_ERR; c < c_LAST; c++)
       gp_colors[c] = gp_get_color(&v);
@@ -1283,10 +1269,9 @@ GPDATADIR);
     suggestions, technical questions, bug reports and patch submissions.\n\
   - pari-users for everything else!\n");
   print_text("\
-To subscribe, send an empty message to <listname>-subscribe@list.cr.yp.to. You \
-can only send messages to the lists you have subscribed to! An archive is kept \
-at the WWW site mentioned above. You can also reach the authors directly by \
-email: pari@math.u-bordeaux.fr (answer not guaranteed)."); }
+To subscribe, send an empty message to <listname>-subscribe@list.cr.yp.to. \
+An archive is kept at the WWW site mentioned above. You can also reach the \
+authors directly by email: pari@math.u-bordeaux.fr (answer not guaranteed)."); }
 
 static void
 gentypes(void)
@@ -1880,7 +1865,7 @@ escape0(char *tch)
 	case 'b': sor(x, GP_DATA->fmt->format, -1, GP_DATA->fmt->fieldw); break;
 	case 'x': voir(x, get_int(s, -1)); break;
         case 'w':
-	  s = get_sep_colon_ok(s); if (!*s) s = current_logfile;
+	  s = get_sep(s); if (!*s) s = current_logfile;
 	  write0(s, _vec(x)); return;
       }
       pariputc('\n'); return;
@@ -1902,7 +1887,7 @@ escape0(char *tch)
       break;
     case 'h': print_hash_list(s); break;
     case 'l':
-      s = get_sep_colon_ok(s);
+      s = get_sep(s);
       if (*s)
       {
         (void)sd_logfile(s,d_ACKNOWLEDGE);
@@ -1920,7 +1905,7 @@ escape0(char *tch)
       break;
     case 'q': gp_quit(); break;
     case 'r':
-      s = get_sep_colon_ok(s);
+      s = get_sep(s);
       switchin(s);
       if (file_is_binary(infile))
       {
@@ -2120,7 +2105,7 @@ get_preproc_value(char **s)
 
 /* 1) replace next separator by '\0' (t must be writeable)
  * 2) return the next expression ("" if none)
- * see get_sep0() */
+ * see get_sep() */
 static char *
 next_expr(char *t)
 {
@@ -2236,64 +2221,14 @@ gp_initrc(growarray *A, char *path)
 /*                           GP MAIN LOOP                           */
 /*                                                                  */
 /********************************************************************/
-/* flag:
- *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (flags & CHRONO)
- *   ti_LAST      print last elapsed time (##)
- *   ti_INTERRUPT received a SIGINT
- */
-static char *
-do_time(long flag)
-{
-  static char buf[64];
-  static long last = 0;
-  long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
-  char *s;
-
-  last = delay;
-  switch(flag)
-  {
-    case ti_REGULAR:   s = "time = "; break;
-    case ti_INTERRUPT: s = "user interrupt after "; break;
-    case ti_LAST:      s = "  ***   last result computed in "; break;
-    default: return NULL;
-  }
-  strcpy(buf,s); s = buf+strlen(s);
-  strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
-  if (delay >= 3600000)
-  {
-    sprintf(s, "%ldh, ", delay / 3600000); s+=strlen(s);
-    delay %= 3600000;
-  }
-  if (delay >= 60000)
-  {
-    sprintf(s, "%ldmn, ", delay / 60000); s+=strlen(s);
-    delay %= 60000;
-  }
-  if (delay >= 1000)
-  {
-    sprintf(s, "%ld,", delay / 1000); s+=strlen(s);
-    delay %= 1000;
-    if (delay < 100)
-    {
-      sprintf(s, "%s", (delay<10)? "00": "0");
-      s+=strlen(s);
-    }
-  }
-  sprintf(s, "%ld ms", delay); s+=strlen(s);
-  strcpy(s, term_get_color(c_NONE));
-  if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
-  return buf;
-}
-
 static void
 gp_handle_SIGINT(void)
 {
-#ifdef _WIN32
-  if (++win32ctrlc >= 5) _exit(3);
+#if defined(_WIN32) || defined(__CYGWIN32__)
+  win32ctrlc++;
 #else
   if (GP_DATA->flags & TEXMACS) tm_start_output();
-  err(siginter, do_time(ti_INTERRUPT));
+  err(siginter, gp_format_time(ti_INTERRUPT));
 #endif
 }
 
@@ -2349,10 +2284,12 @@ brace_color(char *s, int c, int force)
 #endif
   strcpy(s, term_get_color(c));
 #ifdef RL_PROMPT_START_IGNORE
-  if (!(GP_DATA->flags & USE_READLINE))
-    return;
-  s+=strlen(s);
-  *s++ = RL_PROMPT_END_IGNORE; *s = 0;
+  if (GP_DATA->flags & USE_READLINE)
+  {
+    s+=strlen(s);
+    *s++ = RL_PROMPT_END_IGNORE;
+    *s = 0;
+  }
 #endif
 }
 
@@ -2621,7 +2558,7 @@ chron(char *s)
   { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
     if (*s == '#') s++;
     if (*s) return 0;
-    pariputs(do_time(ti_LAST));
+    pariputs(gp_format_time(ti_LAST));
   }
   else { GP_DATA->flags ^= CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
   return 1;
@@ -2702,9 +2639,6 @@ gp_main_loop(int ismain)
 
     if (! read_line(&F, NULL))
     {
-#ifdef _WIN32
-      Sleep(10); if (win32ctrlc) dowin32ctrlc();
-#endif
       if (popinfile()) gp_quit();
       if (ismain) continue;
       pop_buffer(); return z;
@@ -2713,6 +2647,9 @@ gp_main_loop(int ismain)
 
     if (ismain)
     {
+#if defined(_WIN32) || defined(__CYGWIN32__)
+      win32ctrlc = 0;
+#endif
       gpsilent = is_silent(b->buf);
       TIMERstart(GP_DATA->T);
     }
@@ -2721,9 +2658,9 @@ gp_main_loop(int ismain)
     if (! ismain) continue;
 
     if (GP_DATA->flags & CHRONO)
-      pariputs(do_time(ti_REGULAR));
+      pariputs(gp_format_time(ti_REGULAR));
     else
-      (void)do_time(ti_NOPRINT);
+      (void)gp_format_time(ti_NOPRINT);
     if (z == gnil) continue;
 
     if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
@@ -2839,6 +2776,9 @@ break_loop(long numerr)
       if (popinfile()) break;
       continue;
     }
+#if defined(_WIN32) || defined(__CYGWIN32__)
+    win32ctrlc = 0;
+#endif
     if (check_meta(b->buf))
     { /* break loop initiated by ^C? Empty input --> continue computation */
       if (numerr == siginter && *(b->buf) == 0) { handle_C_C=go_on=1; break; }

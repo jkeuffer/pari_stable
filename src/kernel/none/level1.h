@@ -169,7 +169,7 @@ new_chunk(size_t x) /* x is a number of bytes */
 {
   const GEN z = ((GEN) avma) - x;
   if (x > ((avma-bot)>>TWOPOTBYTES_IN_LONG)) err(errpile);
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN32__)
   if (win32ctrlc) dowin32ctrlc();
 #endif
   avma = (pari_sp)z;
