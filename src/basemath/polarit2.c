@@ -1890,7 +1890,7 @@ factor(GEN x)
 #undef typs
 #undef tsh
 
-/* assume n > 0, t_INT. Compute x^n using left-right binary powering */
+/* assume n != 0, t_INT. Compute x^|n| using left-right binary powering */
 GEN
 leftright_pow(GEN x, GEN n, void *data,
              GEN (*sqr)(void*,GEN), GEN (*mul)(void*,GEN,GEN))
