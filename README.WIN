@@ -1,15 +1,15 @@
 This file describes the various ways you can run PARI/GP in a win32 environment
 (Windows 95,98,2000,NT). For earlier versions of Windows, see README.DOS.
 
-The only way to have a fully functional GP is to install GNU/Linux. It's a
-one hour job to install a minimal Linux system from current Linux
-distributions, without any technical background. The LILO boot system enables
-you to have Windows and Linux coexisting peacefully on your hard drive, so
-you can have the best of both worlds.
+WARNING: The only way to have a fully functional GP is to install GNU/Linux.
+It's a one hour job to install a minimal Linux system from current Linux
+distributions. The LILO boot system enables you to have Windows and Linux
+coexisting peacefully on your hard drive, so you can have the best of both
+worlds. The other solutions all stick to the Windows environment, suffer from
+various problems, and are discussed in the rest of this document.
 
-The other solutions all stick to the Windows environment and suffer from
-various problems. It is advised, but not mandatory to get the Documentation
-and Examples archive
+It is also advised, but not mandatory to get the Documentation and Examples
+archive
 
   ftp://megrez.math.u-bordeaux.fr/pub/pari/dos/GPDxxx.ZIP
 
@@ -66,7 +66,7 @@ http://sources.redhat.com/cygwin/ [ the Download and Installation process is
 automated and quite simple, you should be home in a few mouse clicks...
 provided your internet connection is good enough. ]. It provides a neat
 gcc-based development environment under Windows, under which most Unix
-pacakges can easily be ported. In particular you will be able to build GP
+packages can easily be ported. In particular you will be able to build GP
 from the generic (unix) sources.
 
 
