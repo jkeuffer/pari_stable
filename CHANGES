@@ -1,3 +1,5 @@
+Bug numbers refer to the BTS at http://pari.math.u-bordeaux.fr/Bugs/
+
    = Karim Belabas (maintainer)
 AW = Aleksander Wittlin
 BA = Bill Allombert
@@ -129,8 +131,10 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
    61- typo in matrixqz: matrixqz(Mat([1,1]~)/2,0) --> "not a rational matrix"
    62- [cf 2.2.7-F23-] use safer parameters in bernfrac(): bernfrac(166)
        was wrong.
-   63- gp --test: line splitting didn't occur until the first gp output.
-       print(vector(1000)) would bypass this.
+   63- [Bug #201] gp --test: line split mode initialized too late
+       print(vector(1000)) would bypass it.
+   64- [Bug #200] gmul2n(t_POL, n) would not normalize the resulting polynomial
+       [ needed in characteristic 2 for instance ].
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

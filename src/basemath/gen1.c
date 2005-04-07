@@ -2494,11 +2494,9 @@ gdivgs(GEN x, long s)
 GEN
 gmul2n(GEN x, long n)
 {
-  long tx, lx, i, k, l;
-  pari_sp av, tetpil;
-  GEN p2, p1, z;
+  long tx = typ(x), lx, i, k, l;
+  GEN z, a, b;
 
-  tx=typ(x);
   switch(tx)
   {
     case t_INT:
@@ -2507,60 +2505,61 @@ gmul2n(GEN x, long n)
       l = vali(x); n = -n;
       if (n<=l) return shifti(x,-n);
       z = cgetg(3,t_FRAC);
-      z[1] = lshifti(x,-l);
-      z[2] = (long)int2n(n-l); return z;
+      gel(z,1) = shifti(x,-l);
+      gel(z,2) = int2n(n-l); return z;
 	
     case t_REAL:
       return shiftr(x,n);
 
-    case t_INTMOD:
+    case t_INTMOD: b = gel(x,1); a = gel(x,2);
       z = cgetg(3,t_INTMOD);
-      if (n > 0)
+      if (n <= 0) return div_intmod_same(z, b, a, modii(int2n(-n), b));
+      gel(z,2) = gerepileuptoint((pari_sp)z, modii(shifti(a,n), b));
+      icopyifstack(b,z[1]); return z;
+
+    case t_FRAC: a = gel(x,1); b = gel(x,2);
+      l = vali(a);
+      k = vali(b);
+      if (n+l >= k)
       {
-        p2 = (GEN)x[1];
-        z[2] = lpileuptoint((pari_sp)z, modii(shifti((GEN)x[2],n),p2));
-        icopyifstack(p2,z[1]); return z;
-      }
-      return div_intmod_same(z, (GEN)x[1], (GEN)x[2],
-                                           modii(int2n(-n), (GEN)x[1]));
-    case t_FRAC:
-      l = vali((GEN)x[1]);
-      k = vali((GEN)x[2]);
-      if (n+l-k>=0)
-      {
-        if (expi((GEN)x[2]) == k) /* x[2] power of 2 */
-          return shifti((GEN)x[1],n-k);
+        if (expi(b) == k) return shifti(a,n-k); /* b power of 2 */
         l = n-k; k = -k;
       }
       else
       {
-        k = -l-n; l = -l;
+        k = -(l+n); l = -l;
       }
       z = cgetg(3,t_FRAC);
-      z[1] = lshifti((GEN)x[1],l);
-      z[2] = lshifti((GEN)x[2],k); return z;
+      gel(z,1) = shifti(a,l);
+      gel(z,2) = shifti(b,k); return z;
 
-    case t_QUAD: z=cgetg(4,t_QUAD);
+    case t_QUAD: z = cgetg(4,t_QUAD);
       copyifstack(x[1],z[1]);
-      z[2] = lmul2n((GEN)x[2],n);
-      z[3] = lmul2n((GEN)x[3],n); return z;
+      gel(z,2) = gmul2n(gel(x,2),n);
+      gel(z,3) = gmul2n(gel(x,3),n); return z;
 
-    case t_POLMOD: z=cgetg(3,t_POLMOD);
+    case t_POLMOD: z = cgetg(3,t_POLMOD);
       copyifstack(x[1],z[1]);
-      z[2] = lmul2n((GEN)x[2],n); return z;
+      gel(z,2) = gmul2n(gel(x,2),n); return z;
 
-    case t_COMPLEX: case t_POL: case t_SER:
-    case t_VEC: case t_COL: case t_MAT:
+    case t_POL:
       z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) z[i] = lmul2n((GEN)x[i],n);
+      for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
+      return normalizepol_i(z, lx); /* needed if char = 2 */
+    case t_SER:
+      z = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
+      return normalize(z); /* needed if char = 2 */
+    case t_COMPLEX: case t_VEC: case t_COL: case t_MAT:
+      z = init_gen_op(x, tx, &lx, &i);
+      for (; i<lx; i++) gel(z,i) = gmul2n(gel(x,i),n);
       return z;
 
-    case t_RFRAC: av=avma; p1 = gmul2n(gen_1,n); tetpil = avma;
-      return gerepile(av,tetpil, mul_rfrac_scal((GEN)x[1],(GEN)x[2], p1));
+    case t_RFRAC: /* int2n wrong if n < 0 */
+      return mul_rfrac_scal(gel(x,1),gel(x,2), gmul2n(gen_1,n));
 
-    case t_PADIC:
-      av=avma; z=gmul2n(gen_1,n); tetpil=avma;
-      return gerepile(av,tetpil,gmul(z,x));
+    case t_PADIC: /* int2n wrong if n < 0 */
+      return gmul(gmul2n(gen_1,n),x);
   }
   err(typeer,"gmul2n");
   return NULL; /* not reached */
