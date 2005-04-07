@@ -2360,7 +2360,7 @@ gmulsg(long s, GEN y)
     case t_RFRAC:
       if (!s) return zeropol(gvar(y));
       z = cgetg(3, t_RFRAC);
-      i = ggcd(stoi(s),(GEN)y[2])[2];
+      i = itos( ggcd(stoi(s),(GEN)y[2]) );
       avma = (pari_sp)z;
       if (i == 1)
       {
