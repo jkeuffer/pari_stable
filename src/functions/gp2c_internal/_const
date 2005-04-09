@@ -1,0 +1,18 @@
+Function: _const_smallreal
+Class: gp2c_internal
+Description:
+ (0):real:prec       realzero(prec)
+ (1):real:prec       realun(prec)
+ (-1):real:prec      realmun(prec)
+ (small):real:prec   stor($1, prec)
+
+Function: _const_quote
+Class: gp2c_internal
+Description:
+ (str):var       fetch_user_var($1)
+
+Function: _const_expr
+Class: gp2c_internal
+Description:
+ (str):gen       lisexpr($1)
+
