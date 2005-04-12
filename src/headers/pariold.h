@@ -11,6 +11,10 @@
 #define gzero gen_0
 #define gun   gen_1
 #define gdeux gen_2
+#define realzero real_0
+#define realzero_bit real_0_bit
+#define realun real_1
+#define realmun real_m1
 #define err pari_err /* move to e.g paritr.h ? */
 #define init pari_init
 #define gen2str GENtostr
