@@ -1686,7 +1686,7 @@ chk_listBU(GEN L, char *s) {
     GEN z = gel(L,1);
     if (typ(z) != t_VEC) err(typeer, s);
     if (lg(z) == 1) return;
-    z = gel(L,1); /* [bid,U] */
+    z = gel(z,1); /* [bid,U] */
     if (typ(z) != t_VEC || lg(z) != 3) err(typeer, s);
     checkbid(gel(z,1));
   }
