@@ -171,7 +171,7 @@ FpX_center(GEN T,GEN mod)
   mod2=gclone(shifti(mod,-1));/*clone*/
   avma=av;
   for(i=2;i<l;i++)
-    P[i]=cmpii((GEN)T[i],mod2)<0?licopy((GEN)T[i]):lsubii((GEN)T[i],mod);
+    P[i]=cmpii((GEN)T[i],mod2)<=0?licopy((GEN)T[i]):lsubii((GEN)T[i],mod);
   gunclone(mod2);/*unclone*/
   return P;
 }

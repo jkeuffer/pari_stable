@@ -135,6 +135,8 @@ LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
        print(vector(1000)) would bypass it.
    64- [Bug #200] gmul2n(t_POL, n) would not normalize the resulting polynomial
        [ needed in characteristic 2 for instance ].
+   65- FpX_center and centermod didn't use the same noramlizations. Fix
+       FpX_center
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
