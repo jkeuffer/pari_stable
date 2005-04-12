@@ -316,7 +316,7 @@ GEN    nfrootsall_and_pr(GEN nf, GEN pol);
 GEN    norm_by_embed(long r1, GEN x);
 GEN    perm_to_arch(GEN nf, GEN archp);
 GEN    pidealprimeinv(GEN nf, GEN x);
-GEN    primedec_apply_kummer(GEN nf,GEN pol,GEN e,GEN p);
+GEN    primedec_apply_kummer(GEN nf,GEN pol,long e,GEN p);
 GEN    prodid(GEN nf, GEN I);
 GEN    quadhilbertreal(GEN D, long prec);
 GEN    rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);

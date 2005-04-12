@@ -2017,35 +2017,43 @@ anti_uniformizer(GEN nf, GEN p, GEN u)
 /*                   BUCHMANN-LENSTRA ALGORITHM                    */
 /*                                                                 */
 /*******************************************************************/
+static GEN
+mk_pr(GEN p, GEN u, long e, long f, GEN t)
+{
+  GEN pr = cgetg(6, t_VEC);
+  gel(pr,1) = p;
+  gel(pr,2) = u;
+  gel(pr,3) = utoipos(e);
+  gel(pr,4) = utoipos(f);
+  gel(pr,5) = t; return pr;
+}
 
 /* pr = (p,u) of ramification index e */
 GEN
-primedec_apply_kummer(GEN nf,GEN u,GEN e,GEN p)
+primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
 {
-  GEN t, T = (GEN)nf[1], pr = cgetg(6,t_VEC);
+  GEN t, T = (GEN)nf[1];
   long f = degpol(u), N = degpol(T);
 
-  pr[1] = (long)p;
-  pr[3] = (long)e;
-  pr[4] = (long)utoipos(f);
   if (f == N) /* inert */
   {
-    pr[2] = (long)gscalcol_i(p,N);
-    pr[5] = (long)gscalcol_i(gen_1,N);
+    u = gscalcol_i(p,N);
+    t = gscalcol_i(gen_1,N);
   }
   else
   { /* make sure v_pr(u) = 1 (automatic if e>1) */
-    if (is_pm1(e))
+    t = algtobasis_i(nf, FpX_div(T,u,p));
+    t = centermod(t, p);
+    u = FpX_center(u, p);
+    if (e == 1)
     {
       norm_S S;
       S.D = S.w = S.M = NULL; S.T = T;
       if (!is_uniformizer(u, gpowgs(p,f+1), &S)) u[2] = laddii((GEN)u[2], p);
     }
-    t = algtobasis_i(nf, FpX_div(T,u,p));
-    pr[2] = (long)algtobasis_i(nf,u);
-    pr[5] = (long)centermod(t, p);
+    u = algtobasis_i(nf,u);
   }
-  return pr;
+  return mk_pr(p,u,e,f,t);
 }
 
 /* return a Z basis of Z_K's p-radical, phi = x--> x^p-x */
@@ -2100,26 +2108,16 @@ pol_min(GEN mul, GEN p)
 static GEN
 get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
 {
-  GEN pr, u, t;
+  GEN u, t;
   long e, f;
-  pari_sp av;
 
   if (typ(P) == t_VEC) return P; /* already done (Kummer) */
 
-  av = avma;
-  u = gerepilecopy(av, uniformizer(nf, S, P, V, p, ramif));
-  t = anti_uniformizer(nf,p,u);
-  if (!t) errprime(p);
-  av = avma;
+  u = uniformizer(nf, S, P, V, p, ramif);
+  t = anti_uniformizer(nf,p,u); if (!t) errprime(p);
   e = ramif? 1 + int_elt_val(nf,t,p,t,NULL): 1;
   f = degpol(nf[1]) - (lg(P)-1);
-  avma = av;
-  pr = cgetg(6,t_VEC);
-  pr[1] = (long)p;
-  pr[2] = (long)u;
-  pr[3] = (long)utoipos(e);
-  pr[4] = (long)utoipos(f);
-  pr[5] = (long)t; return pr;
+  return mk_pr(p,u,e,f,t);
 }
 
 /* prime ideal decomposition of p */
@@ -2127,43 +2125,36 @@ static GEN
 _primedec(GEN nf, GEN p)
 {
   long i, k, c, iL, N;
-  GEN ex, F, L, Ip, H, phi, mat1, T, f, g, h, p1, UN;
+  GEN E, F, L, Ip, H, phi, mat1, T, f, g, h, p1, UN;
 
-  if (DEBUGLEVEL>2) (void)timer2();
   nf = checknf(nf); T = (GEN)nf[1];
-  F = factmod(T,p);
-  ex = (GEN)F[2];
-  F  = (GEN)F[1]; F = centerlift(F);
-  if (DEBUGLEVEL>5) msgtimer("factmod");
+  F = FpX_factor(FpX_red(T,p), p);
+  E = gel(F,2);
+  F = gel(F,1);
 
-  k = lg(F);
-  if (k == 1) errprime(p);
+  k = lg(F); if (k == 1) errprime(p);
   if (signe(modii((GEN)nf[4],p))) /* p doesn't divide index */
   {
     L = cgetg(k,t_VEC);
     for (i=1; i<k; i++)
-      L[i] = (long)primedec_apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
-    if (DEBUGLEVEL>5) msgtimer("simple primedec");
+      L[i] = (long)primedec_apply_kummer(nf,(GEN)F[i], E[i],p);
     return L;
   }
 
-  g = (GEN)F[1];
-  for (i=2; i<k; i++) g = FpX_mul(g,(GEN)F[i], p);
+  g = FpXV_prod(F, p);
   h = FpX_div(T,g,p);
   f = FpX_red(gdivexact(gsub(gmul(g,h), T), p), p);
 
   N = degpol(T);
   L = cgetg(N+1,t_VEC); iL = 1;
   for (i=1; i<k; i++)
-    if (is_pm1(ex[i]) || signe(FpX_rem(f,(GEN)F[i],p)))
-      L[iL++] = (long)primedec_apply_kummer(nf,(GEN)F[i],(GEN)ex[i],p);
+    if (E[i] == 1 || signe(FpX_rem(f,(GEN)F[i],p)))
+      L[iL++] = (long)primedec_apply_kummer(nf,(GEN)F[i], E[i],p);
     else /* F[i] | (f,g,h), happens at least once by Dedekind criterion */
-      ex[i] = 0;
-  if (DEBUGLEVEL>2) msgtimer("%ld Kummer factors", iL-1);
+      E[i] = 0;
 
   /* phi matrix of x -> x^p - x in algebra Z_K/p */
   Ip = pradical(nf,p,&phi);
-  if (DEBUGLEVEL>2) msgtimer("pradical");
 
   /* split etale algebra Z_K / (p,Ip) */
   h = cgetg(N+1,t_VEC);
@@ -2171,7 +2162,7 @@ _primedec(GEN nf, GEN p)
   { /* split off Kummer factors */
     GEN mulbeta, beta = NULL;
     for (i=1; i<k; i++)
-      if (!ex[i]) beta = beta? FpX_mul(beta, (GEN)F[i], p): (GEN)F[i];
+      if (!E[i]) beta = beta? FpX_mul(beta, (GEN)F[i], p): (GEN)F[i];
     if (!beta) errprime(p);
     beta = FpV_red(algtobasis_i(nf,beta), p);
 
@@ -2222,7 +2213,6 @@ _primedec(GEN nf, GEN p)
     else /* A2 field ==> H maximal, f = N-k = dim(A2) */
       L[iL++] = (long)H;
   }
-  if (DEBUGLEVEL>2) msgtimer("splitting %ld factors",iL-1);
   setlg(L, iL);
 {
   GEN Lpr = cgetg(iL, t_VEC);
@@ -2231,7 +2221,6 @@ _primedec(GEN nf, GEN p)
   norm_S S; init_norm(&S, nf, p);
   for (i=1; i<iL; i++)
     Lpr[i] = (long)get_pr(nf, &S, p, (GEN)L[i], (GEN)LV[i], ramif);
-  if (DEBUGLEVEL>2) msgtimer("finding uniformizers");
   return Lpr;
 }
 }

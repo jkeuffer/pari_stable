@@ -1394,7 +1394,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
       }
       avma = av2;
     }
-    apr = primedec_apply_kummer(nf,r,gen_1,ap);
+    apr = primedec_apply_kummer(nf,r,1,ap);
 
     modpr = zk_to_ff_init(nf,&apr,&aT,&ap);
     red = modprX(polbase, nf, modpr);
