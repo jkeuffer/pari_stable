@@ -2322,7 +2322,9 @@ ideallistarch(GEN bnf, GEN L, GEN arch)
 
   if (typ(L) != t_VEC) err(typeer, "ideallistarch");
   if (l == 1) return cgetg(1,t_VEC);
-  z = gmael(L,1,1); /* either a bid or [bid,U] */
+  z = gel(L,1);
+  if (typ(z) != t_VEC) err(typeer, "ideallistarch");
+  z = gel(z,1); /* either a bid or [bid,U] */
   if (lg(z) == 3) { /* the latter: do units */
     if (typ(z) != t_VEC) err(typeer,"ideallistarch");
     join_z = &join_archunit;
