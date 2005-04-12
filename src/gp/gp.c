@@ -61,7 +61,7 @@ static char prompt[MAX_PROMPT_LEN], prompt_cont[MAX_PROMPT_LEN];
 static int handle_C_C = 0, gpsilent = 0;
 static int tm_is_waiting = 0, tm_did_complete = 0;
 
-static ulong paribufsize, primelimit;
+static ulong primelimit;
 
 #define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
@@ -161,7 +161,6 @@ gp_preinit(void)
   strcpy(prompt,      DFT_PROMPT);
   strcpy(prompt_cont, CONTPROMPT);
 
-  paribufsize = 1024;
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
 
   GP_DATA = &__GP_DATA;
@@ -294,7 +293,7 @@ Buffer *
 new_buffer(void)
 {
   Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
-  b->len = paribufsize;
+  b->len = 1024;
   b->buf = gpmalloc(b->len);
   return b;
 }
@@ -607,10 +606,6 @@ sd_secure(const char *v, int flag)
   return sd_gptoggle(v,flag,"secure", SECURE);
 }
 
-static GEN
-sd_buffersize(const char *v, int flag)
-{ return sd_ulong(v,flag,"buffersize",&paribufsize, 1,
-                    (VERYBIGINT / sizeof(long)) - 1,NULL); }
 static GEN
 sd_debug(const char *v, int flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
@@ -976,7 +971,6 @@ sd_prompt_cont(char *v, int flag)
 
 default_type gp_default_list[] =
 {
-  {"buffersize",(void*)sd_buffersize},
   {"colors",(void*)sd_colors},
   {"compatible",(void*)sd_compatible},
   {"datadir",(void*)sd_datadir},
@@ -1770,7 +1764,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
 void
 fix_buffer(Buffer *b, long newlbuf)
 {
-  b->len = paribufsize = newlbuf;
+  b->len = newlbuf;
   b->buf = gprealloc(b->buf, b->len);
 }
 
@@ -2511,8 +2505,10 @@ is_interactive(void)
 static int
 read_line(filtre_t *F, char *PROMPT)
 {
+  Buffer *b = (Buffer*)F->data;
   int res;
   if (compatible == OLDALL) F->downcase = 1;
+  if (b->len > 100000) fix_buffer(b, 100000);
   if (is_interactive())
   {
     char *bare_prompt;
@@ -2622,7 +2618,6 @@ gp_main_loop(int ismain)
         kill_all_buffers(b);
       }
     }
-    if (paribufsize != b->len) fix_buffer(b, paribufsize);
 
     if (! read_line(&F, NULL))
     {
@@ -2843,7 +2838,9 @@ read_opt(growarray *A, long argc, char **argv)
     i++;
     switch(*t++)
     {
-      case 'b': b = read_arg(&i,t,argc,argv); break;
+      case 'b': b = read_arg(&i,t,argc,argv);
+        err(warner, "buffersize is no longer used. -b ignored");
+        break;
       case 'p': p = read_arg(&i,t,argc,argv); break;
       case 's': s = read_arg(&i,t,argc,argv); break;
 
@@ -2889,7 +2886,6 @@ read_opt(growarray *A, long argc, char **argv)
   for ( ; i < argc; i++) grow_append(A, pari_strdup(argv[i]));
 
   /* override the values from gprc */
-  testuint(b, &paribufsize); if (paribufsize < 10) paribufsize = 10;
   testuint(p, &primelimit);
   testuint(s, (ulong*)&top);
   if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;

@@ -358,6 +358,10 @@ seq_init(char *t)
   if (br_res) { killbloc(br_res); br_res = NULL; }
 }
 
+#define HANDLE_FOREIGN(t)\
+  if (foreignExprHandler && *t == foreignExprSwitch)\
+    return (*foreignExprHandler)(t);
+
 /* Do not modify (analyseur,mark.start) */
 static GEN
 lisseq0(char *t, GEN (*f)(void))
@@ -366,8 +370,7 @@ lisseq0(char *t, GEN (*f)(void))
   char *olds = analyseur, *olde = mark.start;
   GEN z;
 
-  if (foreignExprHandler && *t == foreignExprSwitch)
-    return (*foreignExprHandler)(t);
+  HANDLE_FOREIGN(t);
 
   seq_init(t); z = f();
   analyseur = olds; mark.start = olde;
@@ -377,7 +380,6 @@ lisseq0(char *t, GEN (*f)(void))
     if (br_res) return gerepilecopy(av, br_res);
     if (!z) { avma = av; return gnil; }
   }
-  if (z == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
   /* ep->value, beware: it may be killed anytime.  */
   if (isclone(z)) { avma = av; return forcecopy(z); }
   return gerepileupto(av, z);
@@ -389,14 +391,12 @@ lisseq0_nobreak(char *t, GEN (*f)(void))
   char *olds = analyseur, *olde = mark.start;
   GEN z;
 
-  if (foreignExprHandler && *t == foreignExprSwitch)
-    return (*foreignExprHandler)(t);
+  HANDLE_FOREIGN(t);
 
   seq_init(t); z = f();
   analyseur = olds; mark.start = olde;
   if (br_status) err(talker,"break not allowed");
   av = top - av; /* safer than recording av = avma: f() may call allocatemem */
-  if (z == NULL) { avma = av; return polx[fetch_user_var("NULL")]; }
   /* ep->value, beware: it may be killed anytime.  */
   if (isclone(z)) { avma = av; return forcecopy(z); }
   return gerepileupto(av, z);
@@ -467,7 +467,6 @@ readseq(char *c, int strict)
     if (br_res) return br_res;
     if (!z) return gnil;
   }
-  if (z == NULL) return polx[fetch_user_var("NULL")];
   if (!added_newline) pariputc('\n'); /* last output was print1() */
   return z;
 }
@@ -1461,9 +1460,14 @@ truc(void)
       gp_hist *H = GP_DATA->hist;
       int junk;
       p = 0;
+      if (*analyseur == '#') { analyseur++; return utoi(H->total); }
       while (*analyseur == '`') { analyseur++; p++; }
-      return p ? gp_history(H, -p        , old, mark.start)
-               : gp_history(H, (long)number(&junk,&analyseur), old, mark.start);
+      if (p) return gp_history(H, -p, old, mark.start);
+      if (!isdigit((int)*analyseur)) return gp_history(H, 0, old, mark.start);
+      p = (long)number(&junk,&analyseur);
+      if (!p) err(talker2, "I can't remember before the big bang",
+                  old, mark.start);
+      return gp_history(H, p, old, mark.start);
     }
   }
   err(caracer1,analyseur-1,mark.start);
@@ -1613,15 +1617,24 @@ static GEN
 make_arg(GEN x) { return (x==gen_0)? x: flisseq(GSTR(x)); }
 
 static GEN
-fun_seq(char *p)
+fun_seq(char *t) /* lisseq0, simplified */
 {
-  GEN res = lisseq(p);
+  pari_sp av = top - avma;
+  char *olds = analyseur, *olde = mark.start;
+  GEN z;
+
+  HANDLE_FOREIGN(t);
+
+  seq_init(t); z = seq();
+  analyseur = olds; mark.start = olde;
+  av = top - av; /* safer than recording av = avma: f() may call allocatemem */
   if (br_status)
+  {
     br_status = br_NONE;
-  else
-    if (! is_universal_constant(res)) /* important for gnil */
-      res = forcecopy(res); /* make result safe */
-  return res;
+    if (br_res) return gerepilecopy(av, br_res);
+    if (!z) { avma = av; return gnil; }
+  }
+  return gerepilecopy(av, z);
 }
 
 /* p = NULL + array of variable numbers (longs) + function text */
@@ -2903,6 +2916,7 @@ skiptruc(void)
     {
       int junk;
       analyseur++;
+      if (*analyseur == '#') { analyseur++; return; }
       if (*analyseur == '`') { while (*++analyseur == '`') /*empty*/; return; }
       (void)number(&junk, &analyseur); return;
     }

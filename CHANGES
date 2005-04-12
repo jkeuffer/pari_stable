@@ -157,6 +157,7 @@ BA  9- new algorithm for exp(t_REAL) [ Newton ]
    12- member function .bid (from a bnr). Extend mod, clgp, no, cyc, gen to
        bid and bnr structure.
    13- new keywords for ?? : bid, CFT, ideal, idele, modulus, rnf. 
+   14- new construction %#: number of history entries so far
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,
@@ -211,12 +212,14 @@ MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
        instead of two vectors, output a vector of 2-component vectors.
        Change the input of all list routines (bnrclassnolist, bnrdisclist)
        accordingly.
+   26- %0 (undocumented) is no longer accepted as an alias for %
 
   Removed
     1- obsolete implementation incgam1 [ use incgam. As far as private
        functions go, incgam2 is better ]
     2- removed ideallistarch0, ideallistarchgen, ideallistunitarch,
        ideallistunitarchgen. Just use ideallistarch.
+    3- obsolete default 'buffersize'. Flag -b is a no-op.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.9 (released 23/12/2004):
