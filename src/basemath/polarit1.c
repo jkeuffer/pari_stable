@@ -810,6 +810,9 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
   return gerepileupto(av, FpX_red(z, p));
 }
 
+static int
+cmpGsGs(GEN a, GEN b) { return (long)a - (long)b; }
+
 /* factor f mod pp.
  * flag = 1: return the degrees, not the factors
  * flag = 2: return NULL if f is not irreducible */
@@ -898,8 +901,8 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   if (flag > 1) return gen_1; /* irreducible */
   setlg(t, nbfact);
   setlg(E, nbfact); y = mkvec2((GEN)t, E);
-  if (!flag) (void)sort_factor(y,cmpii);
-  return y;
+  return flag ? sort_factor_gen(y, cmpGsGs)
+              : sort_factor(y, cmpii);
 }
 GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
