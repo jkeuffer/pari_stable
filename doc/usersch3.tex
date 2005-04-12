@@ -4294,13 +4294,13 @@ be a C long integer. Also available is \funs{ideallist}{\var{nf},\var{bound}},
 corresponding to the case $\fl=4$.
 
 \subsecidx{ideallistarch}$(\var{nf},\var{list},\var{arch})$:
-\var{list} is a vector of bids, as output by \tet{ideallist} with flag
-$0$ to $3$. Return a vector of vectors with the same number of components as
-the original \var{list}. The leaves give information about moduli whose
-finite part is as in original list, in the same order, and archimedean part
-is now \var{arch} (it was originally trivial). The information contained is
-of the same kind as was present in the input; see \tet{ideallist}, in
-particular the meaning of \fl.
+\var{list} is a vector of vectors of bid's, as output by \tet{ideallist} with
+flag $0$ to $3$. Return a vector of vectors with the same number of
+components as the original \var{list}. The leaves give information about
+moduli whose finite part is as in original list, in the same order, and
+archimedean part is now \var{arch} (it was originally trivial). The
+information contained is of the same kind as was present in the input; see
+\tet{ideallist}, in particular the meaning of \fl.
 
 \bprog
 ? bnf = bnfinit(x^2-2);

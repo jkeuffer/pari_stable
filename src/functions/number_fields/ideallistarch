@@ -2,8 +2,9 @@ Function: ideallistarch
 Section: number_fields
 C-Name: ideallistarch
 Prototype: GGG
-Help: ideallistarch(nf,list,arch): vector of vectors of all
- idealstarinit of all modules in list with archimedean arch added.
- flag is optional whose binary digits are toggles meaning
- 1: give generators as well; 2: list format is [bid,U], see ideallist
-
+Help: ideallistarch(nf,list,arch): list is a vector of vectors of of bid's as
+ output by ideallist. Return a vector of vectors with the same number of
+ components as the original list. The leaves give information about
+ moduli whose finite part is as in original list, in the same order, and
+ archimedean part is now arch. The information contained is of the same kind
+ as was present in the input.
