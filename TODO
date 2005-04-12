@@ -156,6 +156,9 @@ Misc:
 
 5  add (printf-style) library functions corresponding to GP routines print*
 
+5  add a 'variable' as an optional last argument in content, denominator,
+   numerator, as is done in divrem (cf. 2.6.2)
+
 4  a system of DEBUGLEVEL classes [e.g \g 5 "LLL" ] (such that the user can
    easily define new ones)
 
