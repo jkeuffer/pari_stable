@@ -755,7 +755,7 @@ getheap(void)
 /**                                                                **/
 /********************************************************************/
 
-/* substitute globally componants of y for variables of x */
+/* substitute globally components of y for variables of x */
 GEN
 changevar(GEN x, GEN y)
 {
