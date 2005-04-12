@@ -192,9 +192,9 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
     if (!sx)
     {
       if (e > 0) ex = ey;
-      return realzero_bit(ex);
+      return real_0_bit(ex);
     }
-    if (e > 0) return realzero_bit(ey);
+    if (e > 0) return real_0_bit(ey);
     lz = 3 + ((-e)>>TWOPOTBITS_IN_LONG);
     lx = lg(x); if (lz > lx) lz = lx;
     z = cgetr(lz); while(--lz) z[lz] = x[lz];
@@ -202,7 +202,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   }
   if (!sx)
   {
-    if (e < 0) return realzero_bit(ex);
+    if (e < 0) return real_0_bit(ex);
     lz = 3 + (e>>TWOPOTBITS_IN_LONG);
     ly = lg(y); if (lz > ly) lz = ly;
     z = cgetr(lz); while (--lz) z[lz] = y[lz];
@@ -281,7 +281,7 @@ addrr_sign(GEN x, long sx, GEN y, long sy)
   else
   {
     i = 2; while (i < lx && x[i] == y[i]) i++;
-    if (i==lx) return realzero_bit(ey - bit_accuracy(lx));
+    if (i==lx) return real_0_bit(ey - bit_accuracy(lx));
     f2 = ((ulong)y[i] > (ulong)x[i]);
   }
   /* result is non-zero. f2 = (y > x) */

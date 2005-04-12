@@ -406,8 +406,8 @@ nf_Beauzamy_bound(GEN nf, GEN polbase)
   /* compute [POL]_2 */
   for (;;)
   {
-    run= realun(prec);
-    s = realzero(prec);
+    run= real_1(prec);
+    s = real_0(prec);
     for (i=0; i<=d; i++)
     {
       GEN p1 = gnorml2(arch_for_T2(G, gmul(run, (GEN)POL[i]))); /* T2(POL[i]) */
@@ -536,7 +536,7 @@ L2_bound(GEN T, GEN tozk, GEN *ptden)
   prec = ZX_get_prec(T) + ZM_get_prec(tozk);
   den = nf? gen_1: NULL;
   den = initgaloisborne(T, den, prec, &L, &prep, NULL);
-  M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
+  M = vandermondeinverse(L, gmul(T, real_1(prec)), den, prep);
   if (nf) M = gmul(tozk, M);
   if (gcmp1(den)) den = NULL;
   *ptden = den;
@@ -983,7 +983,7 @@ bestlift_bound(GEN C, long d, double alpha, GEN Npr)
 {
   const double y = 1 / (alpha - 0.25); /* = 2 if alpha = 3/4 */
   double t;
-  if (typ(C) != t_REAL) C = gmul(C, realun(DEFAULTPREC));
+  if (typ(C) != t_REAL) C = gmul(C, real_1(DEFAULTPREC));
   setlg(C, DEFAULTPREC);
   t = rtodbl(mplog(gmul2n(divrs(C,d), 4))) * 0.5 + (d-1) * log(1.5 * sqrt(y));
   return ceil((t * d) / log(gtodouble(Npr)));

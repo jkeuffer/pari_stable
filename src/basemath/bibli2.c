@@ -412,7 +412,7 @@ gprec_w(GEN x, long pr)
   switch(tx)
   {
     case t_REAL:
-      return signe(x)? rtor(x,pr): realzero(pr);
+      return signe(x)? rtor(x,pr): real_0(pr);
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);

@@ -36,7 +36,7 @@ mpatan(GEN x)
   GEN y, p1, p2, p3, p4, p5, unr;
   int inv;
 
-  if (!sx) return realzero_bit(expo(x));
+  if (!sx) return real_0_bit(expo(x));
   l = lp = lg(x);
   if (absrnz_egal1(x)) { /* |x| = 1 */
     y = Pi2n(-2, l+1); if (sx < 0) setsigne(y,-1);
@@ -95,7 +95,7 @@ mpatan(GEN x)
     affrr(divrr(p2,p5), p2); avma = av;
   }
   p3 = mulrr(p2,p2); l1 = 4;
-  unr = realun(l2); setlg(unr,4);
+  unr = real_1(l2); setlg(unr,4);
   p4 = cgetr(l2); setlg(p4,4);
   affrr(divrs(unr,2*n+1), p4);
   s = 0; e = expo(p3); av = avma;
@@ -172,7 +172,7 @@ gasin(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: sx = signe(x);
-      if (!sx) return realzero_bit(expo(x));
+      if (!sx) return real_0_bit(expo(x));
       if (absrnz_egal1(x)) { /* |x| = 1 */
         if (sx > 0) return Pi2n(-1, lg(x)); /* 1 */
         y = Pi2n(-1, lg(x)); setsigne(y, -1); return y; /* -1 */
@@ -241,7 +241,7 @@ gacos(GEN x, long prec)
     case t_REAL: sx = signe(x);
       if (!sx) return acos0(expo(x));
       if (absrnz_egal1(x)) /* |x| = 1 */
-        return sx > 0? realzero_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
+        return sx > 0? real_0_bit( -(bit_accuracy(lg(x))>>1) ) : mppi(lg(x));
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
@@ -286,7 +286,7 @@ mparg(GEN x, GEN y)
 
   if (!sy)
   {
-    if (sx > 0) return realzero_bit(expo(y) - expo(x));
+    if (sx > 0) return real_0_bit(expo(y) - expo(x));
     return mppi(lg(x));
   }
   prec = lg(y); if (prec < lg(x)) prec = lg(x);
@@ -335,7 +335,7 @@ garg(GEN x, long prec)
   {
     case t_REAL: prec = lg(x); /* fall through */
     case t_INT: case t_FRAC:
-      return (gsigne(x)>0)? realzero(prec): mppi(prec);
+      return (gsigne(x)>0)? real_0(prec): mppi(prec);
 
     case t_QUAD:
       av = avma;
@@ -365,8 +365,8 @@ mpch(GEN x)
 
   if (gcmp0(x)) { /* 1 + x */
     long e = expo(x);
-    if (e > 0) return realzero_bit(e);
-    return realun(3 + ((-e)>>TWOPOTBITS_IN_LONG));
+    if (e > 0) return real_0_bit(e);
+    return real_1(3 + ((-e)>>TWOPOTBITS_IN_LONG));
   }
   av = avma;
   z = mpexp(x); z = addrr(z, ginv(z)); setexpo(z, expo(z)-1);
@@ -406,7 +406,7 @@ mpsh(GEN x)
   pari_sp av;
   GEN z;
 
-  if (!signe(x)) return realzero_bit(expo(x));
+  if (!signe(x)) return real_0_bit(expo(x));
   av = avma;
   z = mpexp(x); z = addrr(z, divsr(-1,z)); setexpo(z, expo(z)-1);
   return gerepileuptoleaf(av, z);
@@ -446,10 +446,10 @@ mpth(GEN x)
   pari_sp av;
   GEN y, t;
 
-  if (!s) return realzero_bit(expo(x));
+  if (!s) return real_0_bit(expo(x));
   l = lg(x);
   if (cmprs(x, bit_accuracy(l)) >= 0) {
-    y = realun(l);
+    y = real_1(l);
   } else {
     av = avma; t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
     return gerepileuptoleaf(av, divrr(t, addsr(2,t)));
@@ -631,7 +631,7 @@ gath(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL:
-      if (!signe(x)) return realzero_bit(expo(x));
+      if (!signe(x)) return real_0_bit(expo(x));
       if (expo(x) < 0) return mpath(x);
 
       y = cgetg(3,t_COMPLEX);
@@ -707,7 +707,7 @@ mpbern(long nb, long prec)
 
   if (i == 1 && nb > 0)
   {
-    set_bern(c0, 1, divrs(realun(prec), 6)); /* B2 = 1/6 */
+    set_bern(c0, 1, divrs(real_1(prec), 6)); /* B2 = 1/6 */
     i = 2;
   }
   for (   ; i <= nb; i++, avma = av)
@@ -1316,7 +1316,7 @@ cxpsi(GEN s0, long prec)
     if (nn < 1) nn = 1;
     if (DEBUGLEVEL>2) fprintferr("lim, nn: [%ld, %ld]\n",lim,nn);
   }
-  prec++; unr = realun(prec); /* one extra word of precision */
+  prec++; unr = real_1(prec); /* one extra word of precision */
 
   a = gdiv(unr, gaddgs(s, nn)); /* 1 / (s+n) */
   av2 = avma; sum = gmul2n(a,-1);

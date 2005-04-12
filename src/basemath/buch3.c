@@ -784,7 +784,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
   r1 = nf_get_r1(nf); n = degpol(nf[1]);
   minim_alloc(n+1, &q, &x, &y, &z, &v);
   M = gprec_w(gmael(nf,5,1), prec);
-  a = gmul(gmael(nf,5,2), realun(prec));
+  a = gmul(gmael(nf,5,2), real_1(prec));
   r = sqred1_from_QR(a, prec);
   for (j=1; j<=n; j++)
   {

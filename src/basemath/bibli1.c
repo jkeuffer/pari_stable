@@ -118,7 +118,7 @@ FindApplyQ(GEN x, GEN mu, GEN B, long k, GEN Q, long prec)
     if (gcmp0(x2)) return 0;
 
     if (gcmp0(x1))
-      beta = mpmul(x2, realun(prec)); /* make sure typ(beta) != t_INT */
+      beta = mpmul(x2, real_1(prec)); /* make sure typ(beta) != t_INT */
     else
       beta = mpadd(x2, mpmul(Nx,x1));
     Q[k] = (long)mkvec2(ginv(beta), v);
@@ -1946,7 +1946,7 @@ lindep(GEN x, long prec)
 
   if (! is_vec_t(tx)) err(typeer,"lindep");
   if (n <= 1) return cgetg(1,t_VEC);
-  x = gmul(x, realun(prec)); if (tx != t_COL) settyp(x,t_COL);
+  x = gmul(x, real_1(prec)); if (tx != t_COL) settyp(x,t_COL);
   re = real_i(x);
   im = imag_i(x);
   /* independent over R ? */
@@ -2211,7 +2211,7 @@ maxnorml2(pslq_M *M)
     for (j=1; j<n; j++) s = gadd(s, gnorm(gcoeff(M->H,i,j)));
     ma = gmax(ma, s);
   }
-  return sqrtr(gmul(ma, realun(DEFAULTPREC)));
+  return sqrtr(gmul(ma, real_1(DEFAULTPREC)));
 }
 
 static void

@@ -491,7 +491,7 @@ suminf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   long fl, G;
   pari_sp av0 = avma, av, lim;
-  GEN p1,x = realun(prec);
+  GEN p1,x = real_1(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in suminf");
   a = setloop(a);
@@ -572,7 +572,7 @@ prodinf(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   pari_sp av0 = avma, av, lim;
   long fl,G;
-  GEN p1,x = realun(prec);
+  GEN p1,x = real_1(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf");
   a = setloop(a);
@@ -596,7 +596,7 @@ prodinf1(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
 {
   pari_sp av0 = avma, av, lim;
   long fl,G;
-  GEN p1,p2,x = realun(prec);
+  GEN p1,p2,x = real_1(prec);
 
   if (typ(a) != t_INT) err(talker,"non integral index in prodinf1");
   a = setloop(a);
@@ -632,7 +632,7 @@ prodeuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, long prec)
   long p[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3), 0};
   ulong a, b;
   pari_sp av, av0 = avma, lim;
-  GEN prime = p, x = realun(prec);
+  GEN prime = p, x = real_1(prec);
   byteptr d;
 
   av = avma;

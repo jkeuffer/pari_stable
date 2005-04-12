@@ -341,7 +341,7 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
   tabh = (GEN*)cgetg(m+n+2,t_VEC); tabh[1] = gen_0;
   if (flag <= 1)
   {
-    s = realun(prec); tabh[2] = s;
+    s = real_1(prec); tabh[2] = s;
     for (k=2; k<=m+n; k++)
     {
       s = divrs(addsr(1,mulsr(k,s)),k); tabh[k+1] = s;
@@ -663,7 +663,7 @@ incgam2_0(GEN x)
   z = divsr(-n, addsr(n<<1,x));
   for (i=n-1; i >= 1; i--)
     z = divsr(-i, addrr(addsr(i<<1,x), mulsr(i,z)));
-  return mulrr(divrr(mpexp(negr(x)), x), addrr(realun(l),z));
+  return mulrr(divrr(mpexp(negr(x)), x), addrr(real_1(l),z));
 }
 
 /* assume x != 0 */
@@ -736,7 +736,7 @@ incgamc(GEN s, GEN x, long prec)
     if (i != t_INT) b = s;
   }
   av2 = avma; avlim = stack_lim(av2,3);
-  S = t = realun(l);
+  S = t = real_1(l);
   for (i=1; gexpo(S) >= n; i++)
   {
     S = gdiv(gmul(x,S), gaddsg(i,s)); /* x^i / ((s+1)...(s+i)) */
@@ -796,7 +796,7 @@ eint1(GEN x, long prec)
     GEN p3, run;
     if (expo(x) >= 4) return gerepileupto(av, incgam2_0(x));
 
-    l = lg(x); run = realun(l);
+    l = lg(x); run = real_1(l);
     n = -bit_accuracy(l)-1;
     S = p3 = t = p1 = run;
     for (i = 2; expo(t) - expo(S) >= n; i++)
@@ -822,7 +822,7 @@ eint1(GEN x, long prec)
     y  = addrr(S, addrr(mplog(y), mpeuler(l)));
   } else {
     p1 = divsr(1, y);
-    t = S = realun(l);
+    t = S = real_1(l);
     for (i = 1; expo(t) - expo(S) >= -n; i++) {
       t = mulrr(p1, mulrs(t, i)); S = addrr(S, t);
     }
@@ -858,7 +858,7 @@ veceint1(GEN C, GEN nmax, long prec)
 
   e1 = mpexp(mulsr(-n,C));
   e2 = mpexp(mulsr(10,C));
-  unr = realun(prec);
+  unr = real_1(prec);
   av1 = avma;
 
   F0 = (GEN)y[n]; chkpoint = n;
@@ -919,7 +919,7 @@ gerfc(GEN x, long prec)
   GEN p1, p2;
 
   if (typ(x)!=t_REAL) return transc(&gerfc, x, prec);
-  if (!signe(x)) return realun(prec);
+  if (!signe(x)) return real_1(prec);
   av = avma; p1 = incgam(ghalf,gsqr(x),prec);
   p2 = sqrtr(mppi(lg(x)));
   p1 = divrr(p1,p2);
@@ -1173,7 +1173,7 @@ szeta_odd(long k, long prec)
 {
   long kk, n, li = -(1+bit_accuracy(prec));
   pari_sp av = avma, av2, limit;
-  GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= realun(prec+1);
+  GEN y, p1, qn, z, q, pi2 = Pi2n(1, prec), binom= real_1(prec+1);
 
   q = mpexp(pi2); kk = k+1; /* >= 4 */
   y = NULL; /* gcc -Wall */
@@ -1274,7 +1274,7 @@ szeta(long k, long prec)
     if ((k&1) == 0) return gen_0;
     return gerepileuptoleaf(av, divrs(single_bern(1 - k, prec), k - 1));
   }
-  if (k > bit_accuracy(prec)+1) return realun(prec);
+  if (k > bit_accuracy(prec)+1) return real_1(prec);
   if ((k&1) == 0)
   {
     if (!OK_bern(k >> 1, prec)
@@ -1354,7 +1354,7 @@ czeta(GEN s0, long prec)
   if (gcmpgs(sig, bit_accuracy(prec) + 1) > 0) { y = gen_1; goto END; }
   optim_zeta(s, prec, &lim, &nn);
   maxprime_check((ulong)nn);
-  prec++; unr = realun(prec); /* one extra word of precision */
+  prec++; unr = real_1(prec); /* one extra word of precision */
 
   tab = (GEN*)cgetg(nn, t_VEC); /* table of q^(-s), q = p^e */
   d = diffptr + 1;
@@ -1668,8 +1668,8 @@ gzeta(GEN x, long prec)
     case t_INT:
       if (is_bigint(x))
       {
-        if (signe(x) > 0) return realun(prec);
-        if (signe(x) < 0 && mod2(x) == 0) return realzero(prec);
+        if (signe(x) > 0) return real_1(prec);
+        if (signe(x) < 0 && mod2(x) == 0) return real_0(prec);
       }
       return szeta(itos(x),prec);
 
@@ -1743,7 +1743,7 @@ polylog(long m, GEN x, long prec)
     return gerepileupto(av, gneg(glog(gsub(gen_1,x), prec)));
 
   l = precision(x);
-  if (!l) { l=prec; x=gmul(x, realun(l)); }
+  if (!l) { l=prec; x=gmul(x, real_1(l)); }
   e = gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
   X = (e > 0)? ginv(x): x;
   G = -bit_accuracy(l);
@@ -1814,7 +1814,7 @@ polylogd0(long m, GEN x, long flag, long prec)
   if (gcmp0(x)) return gcopy(x);
   if (gcmp1(x) && m>=2) return m2?szeta(m,prec):gen_0;
   l = precision(x);
-  if (!l) { l=prec; x=gmul(x,realun(l)); }
+  if (!l) { l=prec; x=gmul(x,real_1(l)); }
   p1 = gabs(x,prec); fl=0;
   if (expo(p1) >= 0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 
@@ -1861,7 +1861,7 @@ polylogp(long m, GEN x, long prec)
   if (gcmp0(x)) return gcopy(x);
   if (gcmp1(x) && m>=2) return m2?szeta(m,prec):gen_0;
   l=precision(x);
-  if (!l) { l=prec; x=gmul(x,realun(l)); }
+  if (!l) { l=prec; x=gmul(x,real_1(l)); }
   p1=gabs(x,prec); fl=0;
   if (expo(p1) >= 0) { x=ginv(x); p1=gabs(x,prec); fl=!m2; }
 

@@ -90,7 +90,7 @@ qrom3(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 
   s = new_chunk(JMAX+KLOC-1);
   h = new_chunk(JMAX+KLOC-1);
-  h[0] = (long)realun(prec);
+  h[0] = (long)real_1(prec);
 
   p1 = eval(a, dat); if (p1 == a) p1 = rcopy(p1);
   p2 = eval(b, dat);
@@ -132,7 +132,7 @@ qrom2(void *dat, GEN (*eval)(GEN,void *), GEN a, GEN b, long prec)
 
   s = new_chunk(JMAX+KLOC-1);
   h = new_chunk(JMAX+KLOC-1);
-  h[0] = (long)realun(prec);
+  h[0] = (long)real_1(prec);
 
   p1 = shiftr(addrr(a,b),-1);
   s[0] = lmul(qlint, eval(p1, dat));
@@ -351,7 +351,7 @@ inittanhsinh(long m, long prec)
   intdata D; intinit_start(&D, m, 0, prec);
 
   lim = lg(D.tabxp) - 1;
-  D.tabx0 = realzero(prec);
+  D.tabx0 = real_0(prec);
   D.tabw0 = divr2_ip(stor(3, prec));
   h = real2n(-D.m, prec);
   et = ex = mpexp(h);
@@ -382,8 +382,8 @@ initsinhsinh(long m, long prec)
   intdata D; intinit_start(&D, m, 0, prec);
 
   lim = lg(D.tabxp) - 1;
-  D.tabx0 = realzero(prec);
-  D.tabw0 = realun(prec);
+  D.tabx0 = real_0(prec);
+  D.tabw0 = real_1(prec);
   h = real2n(-D.m, prec);
   et = ex = mpexp(h);
   for (k = 1; k <= lim; k++)
@@ -414,7 +414,7 @@ initsinh(long m, long prec)
   intdata D; intinit_start(&D, m, 0, prec);
 
   lim = lg(D.tabxp) - 1;
-  D.tabx0 = realzero(prec);
+  D.tabx0 = real_0(prec);
   D.tabw0 = real2n(1, prec);
   h = real2n(-D.m, prec);
   et = ex = mpexp(h);
@@ -443,11 +443,11 @@ initexpsinh(long m, long prec)
   intdata D; intinit_start(&D, m, 0, prec);
 
   lim = lg(D.tabxp) - 1;
-  D.tabx0 = realun(prec);
+  D.tabx0 = real_1(prec);
   D.tabw0 = real2n(1, prec);
   h = real2n(-D.m, prec);
   ex = mpexp(h);
-  et = realun(prec);
+  et = real_1(prec);
   for (k = 1; k <= lim; k++)
   {
     GEN t;
@@ -473,7 +473,7 @@ initexpexp(long m, long prec)
   intdata D; intinit_start(&D, m, 0, prec);
 
   lim = lg(D.tabxp) - 1;
-  D.tabx0 = mpexp(realmun(prec));
+  D.tabx0 = mpexp(real_m1(prec));
   D.tabw0 = gmul2n(D.tabx0, 1);
   h = real2n(-D.m, prec);
   et = ex = mpexp(negr(h));
@@ -591,7 +591,7 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
                           : (long)mulrr((GEN)tabwp[k], gth(t, prec));
     }
     else
-      if (sgn < 0) tabwp[k] = (long)realzero_bit(-eps);
+      if (sgn < 0) tabwp[k] = (long)real_0_bit(-eps);
     if (!flii)
     {
       t = mulrr(pi, (GEN)tabxm[k]);
@@ -750,7 +750,7 @@ intninfinfintern(void *E, GEN (*eval)(GEN, void*), GEN tab, long flag, long prec
   tabxp = TABxp(tab); tabwp = TABwp(tab); L = lg(tabxp);
   tabwm = TABwm(tab);
   spf = (lg(tabwm) == lg(tabwp));
-  S = flag > 0 ? realzero(prec + 1) : gmul(tabw0, eval(tabx0, E));
+  S = flag > 0 ? real_0(prec + 1) : gmul(tabw0, eval(tabx0, E));
   if (spf) S = gmul2n(real_i(S), -1);
   for (k = 1; k <= m; k++)
   {
@@ -1144,8 +1144,8 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
 
   if (not_osc(flag) || !gcmp1(eval(gen_0, E)))
   {
-    ab = realzero(precl);
-    tmpxw = ffprime(E, eval, ab, realzero(newprec), eps, h, precl);
+    ab = real_0(precl);
+    tmpxw = ffprime(E, eval, ab, real_0(newprec), eps, h, precl);
     tmpxwmodp = ffmodify(tmpxw, ab, flag);
     D.tabx0 = (GEN)tmpxwmodp[1];
     D.tabw0 = (GEN)tmpxwmodp[2];
@@ -1390,7 +1390,7 @@ intcirc(void *E, GEN (*eval)(GEN, void*), GEN a, GEN R, GEN tab, long prec)
   D.pi = mppi(prec);
   D.f = eval;
   D.E = E;
-  z = intnum(&D, &auxcirc, realmun(prec), realun(prec), tab, prec);
+  z = intnum(&D, &auxcirc, real_m1(prec), real_1(prec), tab, prec);
   return gmul2n(gmul(R, z), -1);
 }
 
@@ -1770,7 +1770,7 @@ sumnumall(void *E, GEN (*eval)(GEN, void*), GEN a, GEN sig, GEN tab, long flag, 
     if (mpodd(nsig)) nsig = addsi(1, nsig);
     si = mpodd(a) ? -1 : 1;
   }
-  SI = realzero(prec);
+  SI = real_0(prec);
   while (cmpii(a, nsig) <= 0)
   {
     SI = (si < 0) ? gsub(SI, eval(a, E)) : gadd(SI, eval(a, E));

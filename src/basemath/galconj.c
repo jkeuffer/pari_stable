@@ -254,7 +254,7 @@ GEN
 matrixnorm(GEN M, long prec)
 {
   long i,j, n = lg(M);
-  GEN B = realzero(prec);
+  GEN B = real_0(prec);
 
   for (i = 1; i < n; i++)
   {
@@ -273,7 +273,7 @@ supnorm(GEN L, long prec)
   long i, n = lg(L);
   GEN z, B;
 
-  if (n == 1) return realzero(prec);
+  if (n == 1) return real_0(prec);
   B = gabs((GEN)L[1], prec);
   for (i = 2; i < n; i++)
   {
@@ -297,7 +297,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   den = initgaloisborne(T,dn,prec, &L,&prep,NULL);
   if (!dn) den = gclone(den);
   if (DEBUGLEVEL>=4) TIMERstart(&ti);
-  M = vandermondeinverse(L, gmul(T, realun(prec)), den, prep);
+  M = vandermondeinverse(L, gmul(T, real_1(prec)), den, prep);
   if (DEBUGLEVEL>=4) msgTIMER(&ti,"vandermondeinverse");
   borne = matrixnorm(M, prec);
   borneroots = supnorm(L, prec);

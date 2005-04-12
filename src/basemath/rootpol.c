@@ -455,12 +455,12 @@ myshiftic(GEN z, long e)
   return signe(z)? mpshift(z,e): gen_0;
 }
 
-/* as realun with precision in bits, not in words */
+/* as real_1 with precision in bits, not in words */
 static GEN
-myrealun(long bit)
+myreal_1(long bit)
 {
   if (bit < 0) bit = 0;
-  return realun(nbits2prec(bit));
+  return real_1(nbits2prec(bit));
 }
 
 static GEN
@@ -469,7 +469,7 @@ mygprecrc(GEN x, long prec, long e)
   GEN y;
   switch(typ(x))
   {
-    case t_REAL: return signe(x)? rtor(x, prec): realzero_bit(e);
+    case t_REAL: return signe(x)? rtor(x, prec): real_0_bit(e);
     case t_COMPLEX:
       y = cgetg(3,t_COMPLEX);
       y[1] = (long)mygprecrc((GEN)x[1],prec,e);
@@ -576,7 +576,7 @@ lower_bound(GEN p, long *k, double eps)
 
   if (n < 4) { *k = n; return 0.; }
   S = cgetg(5,t_VEC);
-  a = cgetg(5,t_VEC); ilc = gdiv(realun(DEFAULTPREC), (GEN)p[n+2]);
+  a = cgetg(5,t_VEC); ilc = gdiv(real_1(DEFAULTPREC), (GEN)p[n+2]);
   for (i=1; i<=4; i++) a[i] = lmul(ilc,(GEN)p[n+2-i]);
   /* i = 1 split out from next loop for efficiency and initialization */
   s = (GEN)a[1];
@@ -616,7 +616,7 @@ logmax_modulus(GEN p, double tau)
 
   eps = - 1/log(1.5*tau2); /* > 0 */
   bit = (long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
-  gunr = myrealun(bit+2*n);
+  gunr = myreal_1(bit+2*n);
   aux = gdiv(gunr, (GEN)p[2+n]);
   q = gmul(aux,p); q[2+n] = (long)gunr;
   e = findpower(q);
@@ -674,7 +674,7 @@ logmodulus(GEN p, long k, double tau)
   double r, tau2 = tau/6;
 
   bit = (long)(n * (2. + log2(3.*n) + log2(1./tau2)));
-  gunr = myrealun(bit);
+  gunr = myreal_1(bit);
   av = avma;
   q = gprec_w(p, nbits2prec(bit));
   q = gmul(gunr, q);
@@ -731,7 +731,7 @@ logpre_modulus(GEN p, long k, double tau, double lrmin, double lrmax)
     aux = 2*aux + 2*tau2;
     tau2 *= 1.5;
     bit = (long)(n*(2. + aux / LOG2 - log2(1-exp(-tau2))));
-    q = gmul(myrealun(bit),q);
+    q = gmul(myreal_1(bit),q);
   }
   aux = exp2((double)imax);
   aux = logmodulus(q,k, aux*tau/3.) / aux;
@@ -846,7 +846,7 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
 static GEN
 RUgen(long N, long bit)
 {
-  if (N == 2) return mpneg(realun(nbits2prec(bit)));
+  if (N == 2) return mpneg(real_1(nbits2prec(bit)));
   if (N == 4) return gi;
   return exp_Ir(divrs(Pi2n(1, nbits2prec(bit)), N));
 }
@@ -860,7 +860,7 @@ initRU(long N, long bit)
 
   RU = (GEN*)cgetg(N+1,t_VEC); RU++;
 
-  RU[0] = myrealun(bit);
+  RU[0] = myreal_1(bit);
   RU[1] = z;
   for (i=1; i<N8; i++)
   {
@@ -952,11 +952,11 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
   for (   ; i<Lmax; i++) pc[i]= (long)gen_0;
 
   *mu = pariINFINITY;
-  g = realzero_bit(-bit);
-  ONE = realun(DEFAULTPREC);
+  g = real_0_bit(-bit);
+  ONE = real_1(DEFAULTPREC);
   TWO = real2n(1, DEFAULTPREC);
   av2 = avma;
-  RU = myrealun(bit);
+  RU = myreal_1(bit);
   for (i=0; i<K; i++)
   {
     if (i) {
@@ -1015,7 +1015,7 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
   for (i=1; i<=k; i++) W[i] = U[i] = (long)gen_0;
 
   RU[0] = (long)gen_1;
-  prim2 = myrealun(bit);
+  prim2 = myreal_1(bit);
   for (i=0; i<K; i++)
   {
     RU[1] = (long)prim2;
@@ -1237,7 +1237,7 @@ conformal_pol(GEN p, GEN a, long bit)
   long n = degpol(p), i;
   pari_sp av = avma, lim = stack_lim(av,2);
   
-  z = coefs_to_pol(2, ca, negr(myrealun(bit)));
+  z = coefs_to_pol(2, ca, negr(myreal_1(bit)));
   r = scalarpol((GEN)p[2+n], 0);
   for (i=n-1; ; i--)
   {
@@ -1455,7 +1455,7 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   q = scalepol(p,gr,bit2);
 
   bit2 = bit + gexpo(q) - ep + (long)((double)n*2.*log2(3.)+1);
-  TWO = myrealun(bit2); setexpo(TWO,1);
+  TWO = myreal_1(bit2); setexpo(TWO,1);
   v = cgetg(5,t_VEC);
   v[1] = (long)TWO;
   v[2] = (long)mpneg(TWO);
@@ -1512,7 +1512,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
   {
     if (k > n/2) k = n/2;
     bit2 += k<<1;
-    FF = monomial(myrealun(bit2), k, 0);
+    FF = monomial(myreal_1(bit2), k, 0);
     GG = shiftpol_i(q, k);
   }
   else
@@ -1558,7 +1558,7 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
   if (k > 0)
   {
     if (k > n/2) k = n/2;
-    *F = monomial(myrealun(bit), k, 0);
+    *F = monomial(myreal_1(bit), k, 0);
     *G = shiftpol_i(p, k);
   }
   else
@@ -1603,13 +1603,13 @@ root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
     }
   }
   rho = gabs(mygprec((GEN)roots_pol[k],31), DEFAULTPREC);
-  if (expo(rho) < 0) rho = realun(DEFAULTPREC);
+  if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
   aux = shiftr(gpowgs(rho,n), err);
 
   for (j=1; j<=2 || (j<=5 && gcmp(rap, dbltor(1.2)) > 0); j++)
   {
-    m = n; prod = realun(DEFAULTPREC);
+    m = n; prod = real_1(DEFAULTPREC);
     epsbis = mulrr(eps, dbltor(1.25));
     for (i=1; i<=n; i++)
     {
@@ -1636,7 +1636,7 @@ mygprec_absolute(GEN x, long bit)
   {
     case t_REAL:
       e = expo(x) + bit;
-      return (e < 0 || !signe(x))? realzero_bit(-bit): rtor(x, nbits2prec(e));
+      return (e < 0 || !signe(x))? real_0_bit(-bit): rtor(x, nbits2prec(e));
     case t_COMPLEX:
       if (gexpo((GEN)x[2]) < -bit) return mygprec_absolute((GEN)x[1],bit);
       y = cgetg(3,t_COMPLEX);
@@ -1714,7 +1714,7 @@ cauchy_bound(GEN p)
 {
   pari_sp av = avma;
   long i, n = degpol(p), prec = DEFAULTPREC;
-  GEN lc, y, q = gmul(p, realun(prec));
+  GEN lc, y, q = gmul(p, real_1(prec));
   double L = 0, Lmax = -pariINFINITY;
 
   if (n <= 0) err(constpoler,"cauchy_bound");
@@ -1737,7 +1737,7 @@ mygprecrc_special(GEN x, long prec, long e)
   switch(typ(x))
   {
     case t_REAL:
-      if (!signe(x)) return realzero_bit(min(e, expo(x)));
+      if (!signe(x)) return real_0_bit(min(e, expo(x)));
       return (prec > lg(x))? rtor(x, prec): x;
     case t_COMPLEX:
       y = cgetg(3,t_COMPLEX);
@@ -1818,7 +1818,7 @@ all_roots(GEN p, long bit)
   {
     roots_pol = cget1(n+1,t_VEC);
     bit2 += e + (n << i);
-    q = gmul(myrealun(bit2), mygprec(pd,bit2));
+    q = gmul(myreal_1(bit2), mygprec(pd,bit2));
     q[1] = evalsigne(1)|evalvarn(0);
     m = split_complete(q,bit2,roots_pol);
     roots_pol = fix_roots(roots_pol, &m, h, bit2);
@@ -1915,7 +1915,7 @@ roots_com(GEN q, long bit)
         if (y < x) x = y;
       }
     }
-    z = realzero_bit(x); l = v + lg(L);
+    z = real_0_bit(x); l = v + lg(L);
     M = cgetg(l, t_VEC); L -= v;
     for (i = 1; i <= v; i++) M[i] = (long)z;
     for (     ; i <  l; i++) M[i] = L[i];
@@ -1933,7 +1933,7 @@ tocomplex(GEN x, long l)
   if (typ(x) == t_COMPLEX)
     { y[2] = lgetr(l); gaffect(x,y); }
   else
-    { gaffect(x,(GEN)y[1]); y[2] = (long)realzero(l); }
+    { gaffect(x,(GEN)y[1]); y[2] = (long)real_0(l); }
  return y;
 }
 

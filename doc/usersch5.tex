@@ -620,18 +620,18 @@ of length~\kbd{n}, and initializes its first codeword. Identical to
 \typ{COMPLEX}, whose real and imaginary parts are \typ{REAL}s
 of length~\kbd{n}.
 
-\fun{GEN}{realun}{long prec} create a \typ{REAL} equal to $1$ to \kbd{prec}
+\fun{GEN}{real_1}{long prec} create a \typ{REAL} equal to $1$ to \kbd{prec}
 words of accuracy.
 
-\fun{GEN}{realmun}{long prec} create a \typ{REAL} equal to $-1$ to \kbd{prec}
+\fun{GEN}{real_m1}{long prec} create a \typ{REAL} equal to $-1$ to \kbd{prec}
 words of accuracy.
 
-\fun{GEN}{realzero_bit}{long bit} create a \typ{REAL} equal to $0$ with
+\fun{GEN}{real_0_bit}{long bit} create a \typ{REAL} equal to $0$ with
 exponent $-\kbd{bit}$.
 
-\fun{GEN}{realzero}{long prec} is a shorthand for
+\fun{GEN}{real_0}{long prec} is a shorthand for
 \bprog
-  realzero_bit( -bit_accuracy(prec) )
+  real_0_bit( -bit_accuracy(prec) )
 @eprog
 
 \subsec{Assignment}.

@@ -203,7 +203,7 @@ quadhilbertimag(GEN D, GEN pq)
     }
     if (DEBUGLEVEL>1) msgtimer("roots");
     /* to avoid integer overflow (1 + 0.) */
-    lead = (exmax < bit_accuracy(prec))? gen_1: realun(prec);
+    lead = (exmax < bit_accuracy(prec))? gen_1: real_1(prec);
 
     P = real_i( roots_to_pol_intern(lead,P,0,0) );
     P = grndtoi(P,&exmax);
@@ -948,7 +948,7 @@ is_bad(GEN D, ulong p)
 static GEN
 FBquad(GEN Disc, long n2, long n)
 {
-  GEN Res = realun(DEFAULTPREC);
+  GEN Res = real_1(DEFAULTPREC);
   long i, p, bad, s, LIM;
   pari_sp av;
   byteptr d = diffptr;
@@ -1094,7 +1094,7 @@ add_fact(GEN col, GEN F)
 static GEN
 get_clgp(GEN Disc, GEN W, GEN *ptD, long prec)
 {
-  GEN res, *init, u1, D = smithrel(W,NULL,&u1), Z = prec? realzero(prec): NULL;
+  GEN res, *init, u1, D = smithrel(W,NULL,&u1), Z = prec? real_0(prec): NULL;
   long i, j, l = lg(W), c = lg(D);
 
   if (DEBUGLEVEL) msgtimer("smith/class group");

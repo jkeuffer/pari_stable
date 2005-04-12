@@ -382,7 +382,7 @@ GEN
 QuickNormL2(GEN x, long prec)
 {
   pari_sp av = avma;
-  GEN y = gmul(x, realun(prec));
+  GEN y = gmul(x, real_1(prec));
   if (typ(x) == t_POL) *++y = evaltyp(t_VEC) | evallg(lg(x)-1);
   return gerepileupto(av, gnorml2(y));
 }
@@ -909,7 +909,7 @@ jacobi(GEN a, long prec)
       e = expo(gcoeff(c,i,j)); if (e > e2) { e2 = e; p = i; q = j; }
     }
   }
-  a = c; unr = realun(prec);
+  a = c; unr = real_1(prec);
   de = bit_accuracy(prec);
 
  /* e1 = min expo(a[i,i])

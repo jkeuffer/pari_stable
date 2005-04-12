@@ -618,7 +618,7 @@ divrr(GEN x, GEN y)
 
   if (!sy) err(gdiver);
   e = expo(x) - expo(y);
-  if (!sx) return realzero_bit(e);
+  if (!sx) return real_0_bit(e);
   if (sy<0) sx = -sx;
 
   lx=lg(x); ly=lg(y);
@@ -723,7 +723,7 @@ divri(GEN x, GEN y)
   GEN z;
 
   if (!s) err(gdiver);
-  if (!signe(x)) return realzero_bit(expo(x) - expi(y));
+  if (!signe(x)) return real_0_bit(expo(x) - expi(y));
   if (!is_bigint(y)) return divrs(x, s>0? y[2]: -y[2]);
 
   lx = lg(x); z = cgetr(lx); av = avma;

@@ -621,7 +621,7 @@ two_factor_bound(GEN x)
   GEN *invbin, c, r = cgetr(3), z;
 
   x += 2; invbin = (GEN*)new_chunk(n+1);
-  z = realun(3); /* invbin[i] = 1 / binomial(n, i) */
+  z = real_1(3); /* invbin[i] = 1 / binomial(n, i) */
   for (i=0,j=n; j >= i; i++,j--)
   {
     invbin[i] = invbin[j] = z;
@@ -675,7 +675,7 @@ Beauzamy_bound(GEN S)
   GEN bin, lS, s, C;
   bin = vecbinome(d);
 
-  s = realzero(prec);
+  s = real_0(prec);
   for (i=0; i<=d; i++)
   {
     GEN c = (GEN)S[i+2];
@@ -1044,7 +1044,7 @@ GEN
 GS_norms(GEN B, long prec)
 {
   long i, l = lg(B);
-  GEN v = gmul(B, realun(prec));
+  GEN v = gmul(B, real_1(prec));
   l--; setlg(v, l);
   for (i=1; i<l; i++)
     v[i] = ldivrr((GEN)v[i+1], (GEN)v[i]);

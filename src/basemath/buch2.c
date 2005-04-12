@@ -412,7 +412,7 @@ FBgen(FB_t *F, GEN nf,long n2,long n)
   F->iLP = cgetg(n2+1, t_VECSMALL);
   F->LV = (GEN*)new_chunk(n2+1);
 
-  Res = realun(DEFAULTPREC);
+  Res = real_1(DEFAULTPREC);
   prim = icopy(gen_1);
   i = ip = 0;
   F->KC = F->KCZ = 0;

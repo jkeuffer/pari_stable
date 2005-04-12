@@ -2555,7 +2555,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
   {
     GEN Pi = mppi(bigprec);
     if (ts == t_FRAC)
-      s = gmul(s, realun(bigprec));
+      s = gmul(s, real_1(bigprec));
     else
       s = gprec_w(s, bigprec);
 

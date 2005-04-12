@@ -122,7 +122,7 @@ mulsr(long x, GEN y)
   {
     if (x < 0) x = -x;
     e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
-    return realzero_bit(e);
+    return real_0_bit(e);
   }
   if (x==1)  return rcopy(y);
   if (x==-1) return negr(y);
@@ -142,7 +142,7 @@ mulur(ulong x, GEN y)
   if (!s)
   {
     e = expo(y) + (BITS_IN_LONG-1)-bfffo(x);
-    return realzero_bit(e);
+    return real_0_bit(e);
   }
   if (x==1) return rcopy(y);
   return mulur_2(x, y, s);
@@ -303,7 +303,7 @@ mulrr(GEN x, GEN y)
   long flag, ly, lz, sx = signe(x), sy = signe(y);
   GEN z;
 
-  if (!sx || !sy) return realzero_bit(expo(x) + expo(y));
+  if (!sx || !sy) return real_0_bit(expo(x) + expo(y));
   if (sy < 0) sx = -sx;
   lz = lg(x);
   ly = lg(y);
@@ -322,7 +322,7 @@ mulir(GEN x, GEN y)
   if (!sx) return gen_0;
   if (!is_bigint(x)) return mulsr(itos(x), y);
   sy = signe(y);
-  if (!sy) return realzero_bit(expi(x) + expo(y));
+  if (!sy) return real_0_bit(expi(x) + expo(y));
   if (sy < 0) sx = -sx;
   lz = lg(y); z = cgetr(lz);
   mulrrz_i(z, itor(x,lz),y, lz,0, sx);
@@ -444,7 +444,7 @@ divrs(GEN x, long y)
   LOCAL_HIREMAINDER;
 
   if (!y) err(gdiver);
-  if (!s) return realzero_bit(expo(x) - (BITS_IN_LONG-1)+bfffo(y));
+  if (!s) return real_0_bit(expo(x) - (BITS_IN_LONG-1)+bfffo(y));
   if (y<0) { s = -s; y = -y; }
   if (y==1) { z=rcopy(x); setsigne(z,s); return z; }
 
@@ -702,7 +702,7 @@ dbltor(double x)
   const int exp_mid = 0x3ff;/* exponent bias */
   const int expo_len = 11; /* number of bits of exponent */
 
-  if (x==0.) return realzero_bit(-exp_mid);
+  if (x==0.) return real_0_bit(-exp_mid);
   fi.f = x; z = cgetr(DEFAULTPREC);
   e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
   z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
@@ -785,7 +785,7 @@ dbltor(double x)
   const int expo_len = 11; /* number of bits of exponent */
   const int shift = mant_len-32;
 
-  if (x==0.) return realzero_bit(-exp_mid);
+  if (x==0.) return real_0_bit(-exp_mid);
   fi.f = x; z=cgetr(DEFAULTPREC);
   {
     const ulong a = fi.i[INDEX0];

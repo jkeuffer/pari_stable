@@ -3061,7 +3061,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   e = _coordch(e,(GEN)gr[2]);
   N = (GEN)gr[1];
   eps = ellrootno_global(e, N);
-  if (flun && eps < 0) { avma = av; return realzero(prec); }
+  if (flun && eps < 0) { avma = av; return real_0(prec); }
 
   gs = ggamma(s, prec);
   cg = divrr(Pi2n(1, prec), gsqrt(N,prec));
@@ -3142,7 +3142,7 @@ hells(GEN e, GEN x, long prec)
   GEN w, z, t, mu, b42, b62;
   long n, lim;
 
-  t = gdiv(realun(prec), (GEN)x[1]);
+  t = gdiv(real_1(prec), (GEN)x[1]);
   mu = gmul2n(glog(numer((GEN)x[1]),prec),-1);
   b42 = gmul2n(b4,1);
   b62 = gmul2n(b6,1);

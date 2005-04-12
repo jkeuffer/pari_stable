@@ -136,10 +136,10 @@ GEN    rdivis(GEN x, long y, long prec);
 GEN    rdivsi(long x, GEN y, long prec);
 GEN    rdivss(long x, long y, long prec);
 GEN    real2n(long n, long prec);
-GEN    realun(long prec);
-GEN    realmun(long prec);
-GEN    realzero_bit(long bitprec);
-GEN    realzero(long prec);
+GEN    real_1(long prec);
+GEN    real_m1(long prec);
+GEN    real_0_bit(long bitprec);
+GEN    real_0(long prec);
 void   remiiz(GEN x, GEN y, GEN z);
 GEN    remis(GEN x, long y);
 GEN    remsi(long x, GEN y);
@@ -512,11 +512,11 @@ INLINE void
 mpaff(GEN x, GEN y) { if (typ(x)==t_INT) affiz(x, y); else affrr(x,y); }
 
 INLINE GEN
-realzero_bit(long bitprec) { GEN x=cgetr(2); x[1]=evalexpo(bitprec); return x; }
+real_0_bit(long bitprec) { GEN x=cgetr(2); x[1]=evalexpo(bitprec); return x; }
 INLINE GEN
-realzero(long prec) { return realzero_bit(-bit_accuracy(prec)); }
+real_0(long prec) { return real_0_bit(-bit_accuracy(prec)); }
 INLINE GEN
-realun(long prec) {
+real_1(long prec) {
   GEN x = cgetr(prec);
   long i;
   x[1] = evalsigne(1) | _evalexpo(0);
@@ -524,7 +524,7 @@ realun(long prec) {
   return x;
 }
 INLINE GEN
-realmun(long prec) {
+real_m1(long prec) {
   GEN x = cgetr(prec);
   long i;
   x[1] = evalsigne(-1) | _evalexpo(0);
@@ -533,7 +533,7 @@ realmun(long prec) {
 }
 /* 2.^n */
 INLINE GEN
-real2n(long n, long prec) { GEN z = realun(prec); setexpo(z, n); return z; }
+real2n(long n, long prec) { GEN z = real_1(prec); setexpo(z, n); return z; }
 INLINE GEN
 stor(long s, long prec) { GEN z = cgetr(prec); affsr(s,z); return z; }
 INLINE GEN

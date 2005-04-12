@@ -2458,7 +2458,7 @@ LABDOUB:
     {
       matan = ComputeCoeff((GEN)dataCR[i], &LIST, n, degs[i]);
       av2 = avma;
-      p1 = realzero(newprec); p2 = gmael3(dataCR, i, 5, 2);
+      p1 = real_0(newprec); p2 = gmael3(dataCR, i, 5, 2);
       for (j = 1; j <= n; j++)
 	if ( (an = EvalCoeff(p2, matan[j], degs[i])) )
           p1 = gadd(p1, gdivgs(an, j));
@@ -2502,7 +2502,7 @@ LABDOUB:
 
   for (j = 1; j <= h; j++)
     veczeta[j] = lmul2n(gch((GEN)veczeta[j], newprec), 1);
-  polrelnum = roots_to_pol_intern(realun(newprec),veczeta, 0,0);
+  polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
   if (DEBUGLEVEL)
   {
     if (DEBUGLEVEL>1) fprintferr("polrelnum = %Z\n", polrelnum);
@@ -2521,7 +2521,7 @@ LABDOUB:
     fprintferr("It's not a square...\n");
     for (j = 1; j <= h; j++)
       veczeta[j] = lsubgs(gsqr((GEN)veczeta[j]), 2);
-    polrelnum = roots_to_pol_intern(realun(newprec),veczeta, 0,0);
+    polrelnum = roots_to_pol_intern(real_1(newprec),veczeta, 0,0);
     if (DEBUGLEVEL)
     {
       if (DEBUGLEVEL>1) fprintferr("polrelnum = %Z\n", polrelnum);

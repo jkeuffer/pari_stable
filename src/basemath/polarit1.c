@@ -2696,7 +2696,7 @@ roots2(GEN pol,long PREC)
   if (!N) return cgetg(1,t_COL);
   if (N==1)
   {
-    p1 = gmul(realun(PREC),(GEN)pol[3]);
+    p1 = gmul(real_1(PREC),(GEN)pol[3]);
     p2 = gneg_i(gdiv((GEN)pol[2],p1));
     return gerepilecopy(av,p2);
   }

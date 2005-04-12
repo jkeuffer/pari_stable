@@ -123,7 +123,7 @@ Qfb0(GEN x, GEN y, GEN z, GEN d, long prec)
   if (!s) err(talker,"zero discriminant in Qfb");
   if (s < 0) return qfi(x, y, z);
 
-  d = d? gtofp(d,prec): realzero(prec);
+  d = d? gtofp(d,prec): real_0(prec);
   return qfr(x,y,z,d);
 }
 
@@ -267,7 +267,7 @@ qfr_unit_by_disc(GEN D, long prec)
     isqrtD = gerepileuptoint(av, addsi(-1,isqrtD));
   y[2] = (long)isqrtD; av = avma;
   y[3] = lpileuptoint(av, shifti(subii(sqri(isqrtD), D),-2));
-  y[4] = (long)realzero(prec); return y;
+  y[4] = (long)real_0(prec); return y;
 }
 GEN
 qfr_unit(GEN x)
@@ -719,7 +719,7 @@ qfr_to_qfr5(GEN x, long prec)
   y[2] = x[2];
   y[3] = x[3];
   y[4] = (long)gen_0;
-  y[5] = (long)realun(prec); return y;
+  y[5] = (long)real_1(prec); return y;
 }
 
 /* d0 = initial distance, x = [a,b,c, expo(d), d], d = exp(2*distance) */
@@ -1008,7 +1008,7 @@ primeform(GEN x, GEN p, long prec)
     y = primeform_u(x, p[2]);
     if (sx < 0) return y;
     if (sp < 0) { gel(y,1) = negi(gel(y,1)); gel(y,3) = negi(gel(y,3)); }
-    return gcopy( qfr3_to_qfr(y, realzero(prec)) );
+    return gcopy( qfr3_to_qfr(y, real_0(prec)) );
   }
   s = mod8(x);
   if (sx < 0)
@@ -1019,7 +1019,7 @@ primeform(GEN x, GEN p, long prec)
   else
   {
     y = cgetg(5, t_QFR);
-    y[4] = (long)realzero(prec);
+    y[4] = (long)real_0(prec);
   }
   /* 2 or 3 mod 4 */
   if (s & 2) err(talker,"discriminant not congruent to 0,1 mod 4 in primeform");

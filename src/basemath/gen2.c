@@ -1557,7 +1557,7 @@ quadtoc(GEN x, long prec)
   pari_sp av;
   GEN z, Q;
   if (gcmp0(x)) return gen_0;
-  if (prec < 3) return realzero_bit( gexpo(x) );
+  if (prec < 3) return real_0_bit( gexpo(x) );
 
   av = avma; Q = (GEN) x[1];
   /* should be sqri(Q[3]), but is 0,1 ! see quadpoly */

@@ -104,7 +104,7 @@ constpi(long prec)
   if (n < 1) n = 1;
   prec++;
 
-  A = realun(prec);
+  A = real_1(prec);
   B = sqrtr_abs(real2n(1,prec)); setexpo(B, -1); /* = 1/sqrt(2) */
   C = real2n(-2, prec); av2 = avma;
   for (i = 0; i < n; i++)
@@ -173,8 +173,8 @@ consteuler(long prec)
 
   l = prec+1; x = (long) (1 + bit_accuracy_mul(l, LOG2/4));
   a = stor(x,l); u=logr_abs(a); setsigne(u,-1); affrr(u,a);
-  b = realun(l);
-  v = realun(l);
+  b = real_1(l);
+  v = real_1(l);
   n = (long)(1+3.591*x); /* z=3.591: z*[ ln(z)-1 ]=1 */
   n1 = min(n, SQRTVERYBIGINT);
   if (x < SQRTVERYBIGINT)
@@ -382,7 +382,7 @@ rpowuu(ulong a, ulong n, long prec)
   GEN y;
   sr_muldata D;
 
-  if (a == 1) return realun(prec);
+  if (a == 1) return real_1(prec);
   if (a == 2) return real2n(n, prec);
   if (n == 1) return stor(a, prec);
   av = avma;
@@ -407,7 +407,7 @@ GEN
 powrfrac(GEN x, long n, long d)
 {
   long z;
-  if (!n) return realun(lg(x));
+  if (!n) return real_1(lg(x));
   z = cgcd(n, d); if (z > 1) { n /= z; d /= z; }
   if (d == 1) return gpowgs(x, n);
   x = gpowgs(x, n);
@@ -728,7 +728,7 @@ gpow(GEN x, GEN n, long prec)
     x = ground(gmulsg(gexpo(x),n));
     if (is_bigint(x) || (ulong)x[2] >= HIGHEXPOBIT)
       err(talker,"gpow: underflow or overflow");
-    avma = av; return realzero_bit(itos(x));
+    avma = av; return real_0_bit(itos(x));
   }
   if (typ(n) == t_FRAC)
   {
@@ -765,7 +765,7 @@ sqrtr(GEN x) {
   long s = signe(x);
   GEN y;
   if (typ(x) != t_REAL) err(typeer,"sqrtr");
-  if (s == 0) return realzero_bit(expo(x) >> 1);
+  if (s == 0) return real_0_bit(expo(x) >> 1);
   if (s >= 0) return sqrtr_abs(x);
   y = cgetg(3,t_COMPLEX);
   y[2] = (long)sqrtr_abs(x);
@@ -942,7 +942,7 @@ GEN
 rootsof1complex(GEN n, long prec)
 {
   pari_sp av = avma;
-  if (is_pm1(n)) return realun(prec);
+  if (is_pm1(n)) return real_1(prec);
   if (lgefint(n)==3 && n[2]==2) return stor(-1, prec);
   return gerepileupto(av, exp_Ir( divri(Pi2n(1, prec), n) ));
 }
@@ -1111,17 +1111,17 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     i = precision(x); if (i) prec = i;
     if (tx==t_INT && is_pm1(x) && signe(x) > 0)
      /*speed-up since there is no way to call rootsof1complex from gp*/
-      y = realun(prec);
+      y = real_1(prec);
     else if (gcmp0(x))
     {
       if (signe(n) < 0) err(gdiver);
       if (isinexactreal(x))
       {
         long e = gexpo(x), junk;
-        y = realzero_bit(e < 2? 0: sdivsi_rem(e, n, &junk));
+        y = real_0_bit(e < 2? 0: sdivsi_rem(e, n, &junk));
       }
       else
-        y = realzero(prec);
+        y = real_0(prec);
     }
     else
       y = gerepileupto(av, gexp(gdiv(glog(x,prec), n), prec));
@@ -1174,8 +1174,8 @@ exp1r_abs(GEN x)
     n = (long)(1 + beta/b);
     m = 0;
   }
-  unr=realun(l2);
-  p2 =realun(l2); setlg(p2,3);
+  unr=real_1(l2);
+  p2 =real_1(l2); setlg(p2,3);
   X = cgetr(l2); affrr(x, X); setsigne(X, 1);
   if (m) setexpo(X, ex-m);
 
@@ -1206,7 +1206,7 @@ mpexp1(GEN x)
   long sx = signe(x);
   GEN y, z;
   pari_sp av;
-  if (!sx) return realzero_bit(expo(x));
+  if (!sx) return real_0_bit(expo(x));
   if (sx > 0) return exp1r_abs(x);
   /* compute exp(x) * (1 - exp(-x)) */
   av = avma; y = exp1r_abs(x);
@@ -1236,9 +1236,9 @@ mpexp(GEN x)
   long i, n, mask, p, l, sx = signe(x);
   GEN a, z;
 
-  if (!sx) return realun(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
+  if (!sx) return real_1(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
   if (sx < 0 && expo(x) >= EXMAX)
-    return realzero_bit(- (long) ((1L<<EXMAX) / LOG2));
+    return real_0_bit(- (long) ((1L<<EXMAX) / LOG2));
 
   l = lg(x);
   if (l <= max(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
@@ -1371,7 +1371,7 @@ agm1r_abs(GEN x)
   GEN a1, b1, y = cgetr(l);
   pari_sp av = avma;
 
-  a1 = addrr(realun(l), x); setexpo(a1, expo(a1)-1);
+  a1 = addrr(real_1(l), x); setexpo(a1, expo(a1)-1);
   b1 = sqrtr_abs(x);
   while (expo(subrr(b1,a1)) - expo(b1) >= L)
   {
@@ -1390,7 +1390,7 @@ agm1cx(GEN x, long prec)
   long L, l = precision(x); if (!l) l = prec;
 
   L = 5-bit_accuracy(l);
-  a1 = gmul2n(gadd(realun(l), x), -1);
+  a1 = gmul2n(gadd(real_1(l), x), -1);
   av2 = avma;
   b1 = gsqrt(x, prec);
   while (gexpo(gsub(b1,a1)) - gexpo(b1) >= L)
@@ -1484,7 +1484,7 @@ log2old(long prec)
   long k, l = prec+1, G = bit_accuracy(l+1);
   GEN s, u, S, U, z = cgetr(prec);
 
-  s = S = divrs(realun(l), _3);
+  s = S = divrs(real_1(l), _3);
   u = U = mpcopy(s); av = avma;
   for (k = 3; ; k += 2)
   {
@@ -1541,7 +1541,7 @@ logr_abs(GEN X)
 
   if (l > LOGAGM_LIMIT) return logagmr_abs(X);
   EX = expo(X);
-  if (absrnz_egal2n(X)) return EX? mulsr(EX, mplog2(l)): realzero(l);
+  if (absrnz_egal2n(X)) return EX? mulsr(EX, mplog2(l)): real_0(l);
 
   av = avma; z = cgetr(l); ltop = avma;
   l2 = l+1; x = cgetr(l2); affrr(X,x);
@@ -1573,7 +1573,7 @@ logr_abs(GEN X)
   y2 = gsqr(y);
   /* log(x) = log(1+y) - log(1-y) = 2 \sum_{k odd} y^k / k */
   k = 2*n + 1;
-  unr = realun(l2); S = x; av = avma;
+  unr = real_1(l2); S = x; av = avma;
   setlg(S,  3);
   setlg(unr,3); affrr(divrs(unr,k), S); /* destroy x, not needed anymore */
 
@@ -1602,7 +1602,7 @@ logagmr_abs(GEN q)
   GEN z, y, Q;
   pari_sp av;
 
-  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): realzero(prec);
+  if (absrnz_egal2n(q)) return e? mulsr(e, mplog2(prec)): real_0(prec);
   z = cgetr(prec); av = avma; prec++;
   lim = bit_accuracy(prec) >> 1;
   Q = cgetr(prec); affrr(q, Q);
@@ -1831,7 +1831,7 @@ mpsc1(GEN x, long *ptmod8)
     }
   }
   s = signe(x); *ptmod8 = (s < 0)? 4 + n: n;
-  if (!s) return realzero_bit(-bit_accuracy(l)<<1);
+  if (!s) return real_0_bit(-bit_accuracy(l)<<1);
 
   l = lg(x); l2 = l+1; y = cgetr(l);
   beta = 5. + bit_accuracy_mul(l2,LOG2);
@@ -1847,8 +1847,8 @@ mpsc1(GEN x, long *ptmod8)
     n = (long)(1 + beta/(2.0*b));
     m = 0;
   }
-  unr= realun(l2);
-  p2 = realun(l2);
+  unr= real_1(l2);
+  p2 = real_1(l2);
   x2 = cgetr(l2); av = avma;
   affrr(gsqr(x), x2);
   if (m) setexpo(x2, expo(x2) - (m<<1));
@@ -1886,7 +1886,7 @@ mpaut(GEN x)
 {
   pari_sp av = avma;
   GEN t = mulrr(x, addsr(2,x)); /* != 0 */
-  if (!signe(t)) return realzero_bit(expo(t) >> 1);
+  if (!signe(t)) return real_0_bit(expo(t) >> 1);
   return gerepileuptoleaf(av, sqrtr_abs(t));
 }
 
@@ -1901,7 +1901,7 @@ mpcos(GEN x)
   pari_sp av;
   GEN y,p1;
 
-  if (!signe(x)) return realun(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
+  if (!signe(x)) return real_1(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
 
   av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
@@ -1939,7 +1939,7 @@ gcos(GEN x, long prec)
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, realzero(prec));
+      x = gadd(x, real_0(prec));
       affr_fixlg(mpcos(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcos");
@@ -1964,7 +1964,7 @@ mpsin(GEN x)
   pari_sp av;
   GEN y,p1;
 
-  if (!signe(x)) return realzero_bit(expo(x));
+  if (!signe(x)) return real_0_bit(expo(x));
 
   av = avma; p1 = mpsc1(x,&mod8);
   switch(mod8)
@@ -2002,7 +2002,7 @@ gsin(GEN x, long prec)
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, realzero(prec));
+      x = gadd(x, real_0(prec));
       affr_fixlg(mpsin(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gsin");
@@ -2030,8 +2030,8 @@ mpsincos(GEN x, GEN *s, GEN *c)
   if (!signe(x))
   {
     long e = expo(x);
-    *s = realzero_bit(e);
-    *c = realun(3 + ((-e) >> TWOPOTBITS_IN_LONG));
+    *s = real_0_bit(e);
+    *c = real_1(3 + ((-e) >> TWOPOTBITS_IN_LONG));
     return;
   }
 
@@ -2189,7 +2189,7 @@ gtan(GEN x, long prec)
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, realzero(prec));
+      x = gadd(x, real_0(prec));
       affr_fixlg(mptan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gtan");
@@ -2232,7 +2232,7 @@ gcotan(GEN x, long prec)
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
       /* _not_ afrr: we want to be able to reduce mod Pi */
-      x = gadd(x, realzero(prec));
+      x = gadd(x, real_0(prec));
       affr_fixlg(mpcotan(x), y); avma = av; return y;
 
     case t_INTMOD: case t_PADIC: err(typeer,"gcotan");

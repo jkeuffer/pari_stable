@@ -2448,7 +2448,7 @@ constante()
       n = old - analyseur;
       if (*analyseur != 'E' && *analyseur != 'e')
       {
-        if (!signe(y)) { avma = av; return realzero(prec); }
+        if (!signe(y)) { avma = av; return real_0(prec); }
         break;
       }
     }
@@ -2459,7 +2459,7 @@ constante()
       {
         avma = av;
         n = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
-        return realzero_bit(n);
+        return real_0_bit(n);
       }
   }
   l = lgefint(y); if (l < (long)prec) l = (long)prec;
