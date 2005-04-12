@@ -23,13 +23,9 @@ This file lists the incompatible changes between Version 2.x and older versions
 
       \\ return y = rnfidealup(rnf,...) as an ideal in HNF form associated to
       \\ nf = nfinit(rnf.pol);
-      idealgentoHNF(nf, y) =
-      {
-        local(z); z = nfalgtobasis(nf, y);
-        z[1] = Mat(z[1]); mathnf( concat(z) );
-      }
+      idealgentoHNF(nf, y) = mathnf( Mat( nfalgtobasis(nf, y) ) );
 
-  - the "bitaccuracy component" for computations of principal ideal generators
+  - the "bit accuracy component" for computations of principal ideal generators
     (bnfisprincipal), units (bnfunit), and some of the bnf structures has
     been removed.
 
@@ -44,15 +40,14 @@ This file lists the incompatible changes between Version 2.x and older versions
   - ellheight now uses the standard normalization: twice the value it used to
     return. The values returned by ellbil() and ellheightmatrix are
     unaffected. In particular, ellheightmatrix() is the polar form of
-    elleight(), and ellbil now satisfies the proper identity for
-    B(P, Q) = (h(P+Q)-h(P)-h(Q)) / 2, and 
+    elleight(), and ellbil now satisfies the proper identity
+    B(P, Q) = (h(P+Q)-h(P)-h(Q)) / 2
 
   - ':' no longer allowed as a substitute for ';' if compatible = 0. Use GP2C
     semantics [ x:int, v:vec ]. For the time being the type information is
     discarded.
 
-  - log(x, {flag}): optional flag removed. Decide alone whether to use AGM
-    (unless precision is very low).
+  - log(x, {flag}): optional flag removed. Decide alone whether to use AGM.
 
   - valuation(x, 1) used to return 1, valuation(x, -1) returned 0 if (x >= 0)
     and 1 otherwise. Not anymore: error message.
@@ -60,6 +55,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - bnrdisclist has lost its 4th argument 'flag', and omitting the
     archimedean component now means that all 2^r1 possible values are
     substituted (formerly: indicate no ramification at infinity).
+
+  - 'buffersize' default has disappeared: it is adjusted internally whenever
+    needed. The -b xxx flag to gp is a no-op.
 
 * Specific to the PARI library:
 ===============================
