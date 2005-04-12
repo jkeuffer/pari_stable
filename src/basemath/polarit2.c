@@ -104,7 +104,7 @@ polcmp(GEN x, GEN y)
   return 0;
 }
 
-/* sort polynomial factorization so that factors appear by decreasing
+/* sort polynomial factorization so that factors appear by increasing
  * degree, sorting coefficients according to cmp. In place */
 GEN
 sort_factor(GEN y, int (*cmp)(GEN,GEN))
