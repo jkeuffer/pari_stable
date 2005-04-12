@@ -8,3 +8,4 @@ Help: ideallistarch(nf,list,arch): list is a vector of vectors of of bid's as
  moduli whose finite part is as in original list, in the same order, and
  archimedean part is now arch. The information contained is of the same kind
  as was present in the input.
+
