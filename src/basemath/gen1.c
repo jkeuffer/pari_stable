@@ -1163,20 +1163,28 @@ MC_mul(GEN x, GEN y, long l, long lz)
 static GEN
 mulcc(GEN x, GEN y)
 {
-  GEN p1, p2, z = cgetg(3,t_COMPLEX);
-  pari_sp tetpil, av2, av = avma;
-  p1 = gmul((GEN)x[1],(GEN)y[1]);
-  p2 = gmul((GEN)x[2],(GEN)y[2]);
-  x = gadd((GEN)x[1],(GEN)x[2]);
-  y = gadd((GEN)y[1],(GEN)y[2]);
-  y = gmul(x,y); x = gadd(p1,p2);
+  GEN xr = gel(x,1), xi = gel(x,2);
+  GEN yr = gel(y,1), yi = gel(y,2);
+  GEN p1, p2, p3, p4, z = cgetg(3,t_COMPLEX);
+  pari_sp tetpil, av = avma;
+#if 1 /* 3M */
+  p1 = gmul(xr,yr);
+  p2 = gmul(xi,yi); p2 = gneg(p2);
+  p3 = gmul(gadd(xr,xi), gadd(yr,yi));
+  p4 = gadd(p2, gneg(p1));
+#else /* standard product */
+  p1 = gmul(xr,yr);
+  p2 = gmul(xi,yi); p2 = gneg(p2);
+  p3 = gmul(xr,yi);
+  p4 = gmul(xi,yr);
+#endif
   tetpil = avma;
-  z[1] = lsub(p1,p2); av2 = avma;
-  z[2] = lsub(y,x);
-  if (isexactzero((GEN)z[2]))
+  gel(z,1) = gadd(p1,p2);
+  gel(z,2) = gadd(p3,p4);
+  if (isexactzero(gel(z,2)))
   {
-    avma = av2;
-    return gerepileupto((pari_sp)(z+3), (GEN)z[1]);
+    cgiv(gel(z,2));
+    return gerepileupto((pari_sp)(z+3), gel(z,1));
   }
   gerepilecoeffssp(av,tetpil, z+1,2); return z;
 }
