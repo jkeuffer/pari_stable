@@ -920,10 +920,28 @@ isreal(GEN p)
   return (i>n);
 }
 
-GEN
-abs_update(GEN x, double *mu) {
+/* x non complex */
+static GEN
+abs_update_r(GEN x, double *mu) {
   GEN y = gabs(gprec_w(x, DEFAULTPREC), DEFAULTPREC);
   double ly = dblogr(y); if (ly < *mu) *mu = ly;
+  return y;
+}
+/* return |x|, low accuracy. Set *mu = min(log(y), *mu) */
+static GEN
+abs_update(GEN x, double *mu) {
+  GEN y, xr, yr;
+  double ly;
+  if (typ(x) != t_COMPLEX) return abs_update_r(x, mu);
+  xr = gel(x,1);
+  yr = gel(x,2);
+  if (gcmp0(xr)) return abs_update_r(yr,mu);
+  if (gcmp0(yr)) return abs_update_r(xr,mu);
+  /* have to treat 0 specially: 0E-10 + 1e-20 = 0E-10 */
+  xr = gprec_w(xr, DEFAULTPREC);
+  yr = gprec_w(yr, DEFAULTPREC);
+  y = gsqrt(gadd(gsqr(xr), gsqr(yr)), DEFAULTPREC);
+  ly = dblogr(y); if (ly < *mu) *mu = ly;
   return y;
 }
 
