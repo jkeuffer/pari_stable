@@ -2733,8 +2733,9 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
     for (pii = 0; pii < relaprpos; pii+=2)
     {
       long remd_p;
-      pi = relaprimes[pii];
       ulong ei = relaprimes[pii+1];
+      GEN Qx_div_p;
+      pi = relaprimes[pii];
 
       /* Here, prime factors of k go their separate way.  We could have
        * introduced another FB entry flag for marking them, but it is easier
@@ -2763,7 +2764,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
        * then it has a common factor with k.  But those factors are soon
        * going to have disappeared before we get here.  However, inserting
        * an explicit if (!is_pm1(Qx)) here did not help any. */
-      GEN Qx_div_p = divis_rem(Qx, p, &remd_p);
+      Qx_div_p = divis_rem(Qx, p, &remd_p);
       while (remd_p == 0) {
 	ei++; Qx = Qx_div_p;
 	Qx_div_p = divis_rem(Qx, p, &remd_p);
