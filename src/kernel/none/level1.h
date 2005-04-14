@@ -665,7 +665,7 @@ INLINE GEN
 modsi(long x, GEN y) {
   long r;
   (void)sdivsi_rem(x, y, &r);
-  return (r >= 0)? stoi(r): addsi_sign(x, y, 1);
+  return (r >= 0)? stoi(r): addsi_sign(r, y, 1);
 }
 
 INLINE GEN
