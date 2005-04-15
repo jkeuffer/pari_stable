@@ -148,8 +148,8 @@ darwin) DLLD_modules=$CC;
         modulesflags="-bundle -flat_namespace -undefined suppress -fno-common -O3 -DGCC_INLINE -Wall -fomit-frame-pointer -no-cpp-precomp";;
 *)      DLLD_modules="$DLLD"; modulesflags="$mydlldflags";;
 esac;
-modules_build="$CC -c -o %s.o $CFLAGS -I$myincludedir %s.c && $DLLD_modules
--o %s.so $modulesflags %s.o $myextradlldflags"
+modules_build="$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$myincludedir %s.c &&
+$DLLD_modules -o %s.so $modulesflags %s.o $myextradlldflags"
 
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
