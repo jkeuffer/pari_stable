@@ -2005,7 +2005,8 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
   GEN ideal, m, ex = cgetg(lgsub, t_VECSMALL);
  
   if (DEBUGLEVEL) {
-    fprintferr("\n(more relations needed: %ld)\n", cache->end - cache->last);
+    long d = cache->end - cache->last;
+    fprintferr("\n(more relations needed: %ld)\n", d > 0? d: 1);
     if (L_jid) fprintferr("looking hard for %Z\n",L_jid);
   }
   for (av = avma;;)
