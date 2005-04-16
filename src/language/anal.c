@@ -2042,7 +2042,7 @@ identifier(void)
 	  match_comma();
 	  if (*s == '*') /* any number of string objects */
           {
-            argvec[i++] = any_string();
+            argvec[i++] = noparen? cgetg(1, t_VEC): any_string();
             s++; break;
           }
 
