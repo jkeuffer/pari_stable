@@ -1202,7 +1202,7 @@ GEN
 FpX_factor(GEN f, GEN p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, FpX_factor_i(f, p));
+  return gerepilecopy(av, FpX_factor_i(FpX_red(f,p), p));
 }
 
 GEN
@@ -1856,7 +1856,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
   for (j=i=1; i<n; i++)
   {
     pari_sp av1 = avma;
-    GEN fx = (GEN)poly[i], fa = FpX_factor(FpX_red(fx,p),p);
+    GEN fx = (GEN)poly[i], fa = FpX_factor(fx,p);
     w = (GEN)fa[1];
     if (expo_is_squarefree((GEN)fa[2]))
     { /* no repeated factors: Hensel lift */

@@ -600,7 +600,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   {
     do NEXT_PRIME_VIADIFF(p[2], di); while (!smodis(dpol, p[2]));
     if (k > 5 * N) err(talker,"sorry, too many block systems in nfsubfields");
-    ff = (GEN)FpX_factor(FpX_red(pol,p), p)[1];
+    ff = (GEN)FpX_factor(pol, p)[1];
     r = lg(ff)-1;
     if (r == N || r >= BIL) continue;
 

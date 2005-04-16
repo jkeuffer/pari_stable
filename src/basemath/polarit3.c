@@ -504,7 +504,7 @@ FpX_FpXQ_compo(GEN T,GEN x,GEN pol,GEN p)
 }
 
 /* Evaluation in Fp
- * x in Z[X] and y in Z return x(y) mod p
+ * x a ZX and y an Fp, return x(y) mod p
  *
  * If p is very large (several longs) and x has small coefficients(<<p),
  * then Brent & Kung algorithm is faster. */

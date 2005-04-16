@@ -1305,7 +1305,7 @@ mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
 static GEN
 get_nu(GEN chi, GEN p, long *ptl)
 {
-  GEN P = (GEN)FpX_factor(FpX_red(chi,p), p)[1];
+  GEN P = (GEN)FpX_factor(chi, p)[1];
   *ptl = lg(P) - 1;
   return (GEN)P[*ptl];
 }
@@ -2128,7 +2128,7 @@ _primedec(GEN nf, GEN p)
   GEN E, F, L, Ip, H, phi, mat1, T, f, g, h, p1, UN;
 
   nf = checknf(nf); T = (GEN)nf[1];
-  F = FpX_factor(FpX_red(T,p), p);
+  F = FpX_factor(T, p);
   E = gel(F,2);
   F = gel(F,1);
 

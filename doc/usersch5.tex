@@ -1003,7 +1003,7 @@ remainder of the \typ{INT}~\kbd{x} by the \kbd{ulong}~\kbd{y}.
 remainder of the \kbd{ulong}~\kbd{x} by the \typ{INT}~\kbd{|y|}.
 
 The routine \tet{smodsi} does not exist, since it would not always be
-defined: for a \emph{signed} \kbd{x}, its result \kbd{x + |y|} would
+defined: for a \emph{negative} \kbd{x}, its result \kbd{x + |y|} would
 in general not fit into a \kbd{long}. Use either \kbd{umodui} or
 \kbd{modsi}.
 
@@ -1016,7 +1016,7 @@ implemented).
 
 \fun{void}{diviuexact}{GEN x, ulong y} returns the Euclidean quotient
 $|\kbd{x}| / \kbd{y}$ (note the absolue value!), assuming $\kbd{y}$ divides
-$\kbd{x}$ and $\kbd{y}$ is \emph{odd}.
+$\kbd{x}$ and $\kbd{y}$ is non-zero.
 
 \fun{int}{dvdii}{GEN x, GEN y} if the \typ{INT}~\kbd{y} divides the
 \typ{INT}~\kbd{x}, returns 1 (true), otherwise returns 0 (false).
@@ -1223,7 +1223,10 @@ followed by a number of code letters. Base rings are among
             using \kbd{ulong}s
 
   \kbd{Fp}: $\Z/p\Z$ where $p$ is a \typ{INT}, not necessarily prime.
-Implemented as \typ{INT}s $z$, $0 \leq z < p$.
+Implemented as \typ{INT}s $z$, preferably satisfying $0 \leq z < p$.
+More precisely, any \typ{INT} can be used as an \kbd{Fp}, but reduced
+inputs are treated more efficiently. Outputs from \kbd{Fp}xxx routines are
+reduced.
 
   \kbd{Fq}: $\Z[X]/(p,T(X))$, $p$ a \typ{INT}, $T$ a \typ{POL} with \kbd{Fp}
 coefficients or \kbd{NULL} (in which case no reduction modulo \kbd{T} is
