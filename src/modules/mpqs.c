@@ -2338,7 +2338,7 @@ mpqs_self_init(mpqs_handle_t *h)
       tmp2 = Fl_add(mb, FB[j].fbe_sqrt_kN, p);
       tmp2 = Fl_mul(tmp2, inv_A2, p);
       FB[j].fbe_start2 = (mpqs_int32_t)Fl_add(tmp2, m, p);
-      for (i = 0; (ulong)i < h->omega_A - 1; i++)
+      for (i = 0; i < h->omega_A - 1; i++)
       {
         ulong h = umodiu(MPQS_H(i), p) << 1; if (h > p) h -= p;
 	MPQS_INV_A_H(i,j) = Fl_mul(h, inv_A2, p); /* 1/A * H[i] mod p_j */
@@ -2520,8 +2520,7 @@ mpqs_sieve(mpqs_handle_t *h)
 static long
 mpqs_eval_sieve(mpqs_handle_t *h)
 {
-  ulong M_2 = h->M << 1;
-  long x = 0, count = 0;
+  long x = 0, count = 0, M_2 = h->M << 1;
   /* XX Todo: replace the following by an auto-adjusting threshold driven
    * XX by histogram yield measurements */
   unsigned char th = h->sieve_threshold;
@@ -2740,7 +2739,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
       /* Here, prime factors of k go their separate way.  We could have
        * introduced another FB entry flag for marking them, but it is easier
        * to identify them just by their position before index0_FB. */
-      if (pi < h->index0_FB) {
+      if ((mpqs_int32_t)pi < h->index0_FB) {
 #ifdef MPQS_DEBUG
 	PRINT_IF_VERBOSE("\bk!");
 #endif
@@ -3770,7 +3769,7 @@ mpqs(GEN N)
    * - tests candidates of the sieve array */
 
   /* Let (A, B_i) the current pair of coeffs. If i == 0 a new A is generated */
-  handle->index_j = -1;		/* increment below will have it start at 0 */
+  handle->index_j = (mpqs_uint32_t)-1;	/* increment below will have it start at 0 */
 
   if (DEBUGLEVEL >= 5) fprintferr("MPQS: starting main loop\n");
   /* compute names for the temp files we'll need */
@@ -3794,7 +3793,7 @@ mpqs(GEN N)
     iterations++;
     /* when all of the B's have already been used, choose new A ;
        this is indicated by setting index_j to 0 */
-    if (handle->index_j == (handle->no_B - 1))
+    if (handle->index_j == (mpqs_uint32_t)(handle->no_B - 1))
     {
       handle->index_j = 0;
       handle->index_i++;	/* count finished A's */
@@ -3956,8 +3955,8 @@ mpqs(GEN N)
 	if (percentage + (followup_sort_interval >> 1) * tfc_ratio > 994)
 	{
 	  /* aim for a _slight_ overshoot */
-	  sort_interval = percentage + 2 +
-	    (1000 - percentage) / tfc_ratio;
+	  sort_interval = (ulong)(percentage + 2 +
+	    (1000 - percentage) / tfc_ratio);
 	}
 	else if (percentage >= 980)
 	  sort_interval = percentage + 8;
