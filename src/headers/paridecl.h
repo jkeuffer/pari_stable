@@ -515,6 +515,7 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 
 /* base3.c */
 
+int     RgV_isscalar(GEN x);
 GEN     _algtobasis(GEN nf, GEN x);
 GEN     _algtobasis_cp(GEN nf, GEN x);
 GEN     _basistoalg(GEN nf, GEN x);

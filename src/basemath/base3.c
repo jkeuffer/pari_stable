@@ -30,15 +30,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 
 int
-isnfscalar(GEN x)
+RgV_isscalar(GEN x)
 {
-  long lx=lg(x),i;
-
-  if (typ(x) != t_COL) return 0;
+  long lx = lg(x),i;
   for (i=2; i<lx; i++)
-    if (!gcmp0((GEN)x[i])) return 0;
+    if (!gcmp0(gel(x, i))) return 0;
   return 1;
 }
+int
+isnfscalar(GEN x) { return typ(x) == t_COL? RgV_isscalar(x): 0; }
 
 static GEN
 scal_mul(GEN nf, GEN x, GEN y, long ty)
@@ -129,8 +129,8 @@ element_mul(GEN nf, GEN x, GEN y)
   if (is_extscalar_t(tx)) return scal_mul(nf,x,y,ty);
   if (is_extscalar_t(ty)) return scal_mul(nf,y,x,tx);
   if (tx != t_COL || ty != t_COL) err(typeer,"element_mul");
-  if (isnfscalar(x)) return gmul((GEN)x[1],y);
-  if (isnfscalar(y)) return gmul((GEN)y[1],x);
+  if (RgV_isscalar(x)) return gmul((GEN)x[1],y);
+  if (RgV_isscalar(y)) return gmul((GEN)y[1],x);
 
   tab = get_tab(nf, &N);
   return mul_by_tabi(tab,x,y);
@@ -151,13 +151,13 @@ element_inv(GEN nf, GEN x)
     else if (tx==t_POL) x=gmodulcp(x,(GEN)nf[1]);
     return gerepileupto(av, algtobasis(nf, ginv(x)));
   }
-  if (isnfscalar(x))
+  if (tx != t_COL) err(typeer,"element_inv");
+  if (RgV_isscalar(x))
   {
     p1=cgetg(N+1,t_COL); p1[1]=linv((GEN)x[1]);
     for (i=2; i<=N; i++) p1[i]=lcopy((GEN)x[i]);
     return p1;
   }
-  if (tx != t_COL) err(typeer,"element_inv");
   p1 = QXQ_inv(gmul((GEN)nf[7],x), (GEN)nf[1]);
   return gerepileupto(av, algtobasis_i(nf,p1));
 }
@@ -195,8 +195,8 @@ element_div(GEN nf, GEN x, GEN y)
   }
   if (tx != t_COL || ty != t_COL) err(typeer,"element_div");
 
-  if (isnfscalar(y)) return gdiv(x,(GEN)y[1]);
-  if (isnfscalar(x))
+  if (RgV_isscalar(y)) return gdiv(x,(GEN)y[1]);
+  if (RgV_isscalar(x))
   {
     p1=element_inv(nf,y);
     return gerepileupto(av, gmul((GEN)x[1],p1));
@@ -402,7 +402,7 @@ element_pow(GEN nf, GEN x, GEN n)
     if (typ(x) != t_COL) err(typeer,"element_pow");
   }
 
-  if (isnfscalar(x))
+  if (RgV_isscalar(x))
   {
     y = gscalcol_i(gen_1,N);
     y[1] = (long)powgi((GEN)x[1],n); return y;
@@ -510,7 +510,7 @@ eltmul_get_table(GEN nf, GEN x)
     long i, N = degpol(nf[1]);
     GEN mul = cgetg(N+1,t_MAT);
     x = _algtobasis(nf, x);
-    if (isnfscalar(x)) return gscalmat((GEN)x[1], N);
+    if (RgV_isscalar(x)) return gscalmat((GEN)x[1], N);
     mul[1] = (long)x; /* assume w_1 = 1 */
     for (i=2; i<=N; i++) mul[i] = (long)element_mulid(nf,x,i);
     return mul;
@@ -573,7 +573,7 @@ element_val(GEN nf, GEN x, GEN vp)
       if (lg(x)==N+1) break;
     default: err(typeer,"element_val");
   }
-  if (isnfscalar(x)) return ggval((GEN)x[1],p)*e;
+  if (RgV_isscalar(x)) return ggval((GEN)x[1],p)*e;
 
   cx = content(x);
   if (gcmp1(cx)) vcx=0; else { x = gdiv(x,cx); vcx = ggval(cx,p); }
@@ -859,7 +859,7 @@ zsigne(GEN nf,GEN x,GEN arch)
     }
     case t_POLMOD: x = (GEN)x[2];      /* fall through */
     case t_POL: x = algtobasis(nf, x); /* fall through */
-    case t_COL: if (!isnfscalar(x)) break;
+    case t_COL: if (!RgV_isscalar(x)) break;
                 x = (GEN)x[1];         /* fall through */
     case t_INT: case t_FRAC:
       s = gsigne(x); if (!s) err(talker,"zero element in zsigne");

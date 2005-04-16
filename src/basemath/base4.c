@@ -72,10 +72,11 @@ idealtyp(GEN *ideal, GEN *arch)
       t = id_PRIME; break;
 
     case t_POL: case t_POLMOD: case t_COL:
+    case t_INT: case t_FRAC:
       t = id_PRINCIPAL; break;
     default:
-      if (!is_rational_t(tx)) err(talker, "incorrect ideal in idealtyp");
-      t = id_PRINCIPAL;
+      err(talker, "incorrect ideal in idealtyp");
+      return 0; /*not reached*/
   }
   *ideal = x; return t;
 }
@@ -96,24 +97,26 @@ prime_to_ideal(GEN nf, GEN vp)
   return gerepileupto(av, prime_to_ideal_aux(nf,vp));
 }
 
+static GEN
+vec_mulid(GEN nf, GEN x, long nx, long N)
+{
+  GEN m = cgetg(nx*N + 1, t_MAT);
+  long i, j, k;
+  for (i=k=1; i<=nx; i++)
+    for (j=1; j<=N; j++) gel(m, k++) = element_mulid(nf, gel(x,i),j);
+  return m;
+}
 /* x = ideal in matrix form. Put it in hnf. */
 static GEN
 idealmat_to_hnf(GEN nf, GEN x)
 {
-  long rx = lg(x)-1, N = degpol(nf[1]);
+  long nx = lg(x)-1, N = degpol(nf[1]);
   GEN cx;
 
-  if (!rx) return gscalmat(gen_0,N);
+  if (!nx) return gscalmat(gen_0,N);
 
   x = Q_primitive_part(x, &cx);
-  if (rx < N)
-  {
-    GEN m = cgetg(rx*N + 1, t_MAT);
-    long i,j,k;
-    for (i=k=1; i<=rx; i++)
-      for (j=1; j<=N; j++) m[k++] = (long)element_mulid(nf,(GEN)x[i],j);
-    x = m;
-  }
+  if (nx < N) x = vec_mulid(nf, x, nx, N);
   x = hnfmod(x, detint(x));
   return cx? gmul(x,cx): x;
 }
@@ -164,25 +167,24 @@ Z_ishnfall(GEN x)
 GEN
 idealhermite_aux(GEN nf, GEN x)
 {
-  long N,tx,lx;
   GEN z, cx;
+  long tx = idealtyp(&x,&z);
 
-  tx = idealtyp(&x,&z);
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
-  if (tx == id_PRINCIPAL)
-  {
+  if (tx == id_PRINCIPAL) {
     x = _algtobasis(nf, x);
-    if (isnfscalar(x)) return gscalmat(gabs((GEN)x[1],0), lg(x)-1);
+    if (RgV_isscalar(x)) return gscalmat(gabs((GEN)x[1],0), lg(x)-1);
+    x = Q_primitive_part(x, &cx);
     x = eltmul_get_table(nf, x);
-    return idealmat_to_hnf(nf,x);
-  }
-  N = degpol(nf[1]); lx = lg(x);
-  if (lg(x[1]) != N+1) err(talker,"incorrect matrix for ideal in idealhermite");
+  } else {
+    long N = degpol(nf[1]), nx = lg(x)-1;
+    if (lg(x[1]) != N+1) err(typeer,"idealhermite");
 
-  if (lx == N+1 && ishnfall(x)) return x;
-  if (lx <= N) return idealmat_to_hnf(nf,x);
-  x = Q_primitive_part(x, &cx);
-  x = hnfmod(x,detint(x));
+    if (nx == N && ishnfall(x)) return x;
+    x = Q_primitive_part(x, &cx);
+    if (nx < N) x = vec_mulid(nf, x, nx, N);
+  }
+  x = hnfmod(x, detint(x));
   return cx? gmul(x, cx): x;
 }
 
@@ -281,7 +283,7 @@ get_arch(GEN nf,GEN x,long prec)
     case t_MAT: return famat_get_arch(nf,x,prec);
     case t_POLMOD:
     case t_POL: x = algtobasis_i(nf,x);   /* fall through */
-    case t_COL: if (!isnfscalar(x)) break;
+    case t_COL: if (!RgV_isscalar(x)) break;
       x = (GEN)x[1]; /* fall through */
     default: /* rational number */
       return scalar_get_arch(R1, RU, x, prec);
@@ -359,7 +361,7 @@ get_arch_real(GEN nf, GEN x, GEN *emb, long prec)
 
     case t_POLMOD:
     case t_POL: x = algtobasis_i(nf,x);   /* fall through */
-    case t_COL: if (!isnfscalar(x)) break;
+    case t_COL: if (!RgV_isscalar(x)) break;
       x = (GEN)x[1]; /* fall through */
     default: /* rational number */
       return scalar_get_arch_real(R1, RU, x, emb, prec);
@@ -649,7 +651,7 @@ idealfactor(GEN nf, GEN x)
   if (tx == id_PRINCIPAL) 
   {
     x = _algtobasis(nf, x);
-    if (isnfscalar(x)) x = (GEN)x[1];
+    if (RgV_isscalar(x)) x = (GEN)x[1];
     tx = typ(x);
     if (tx == t_INT || tx == t_FRAC)
     {
@@ -867,7 +869,7 @@ idealadd(GEN nf, GEN x, GEN y)
     x = Q_muli_to_int(x, dz);
     y = Q_muli_to_int(y, dz);
   }
-  if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
+  if (RgV_isscalar((GEN)x[1]) && RgV_isscalar((GEN)y[1]))
   {
     p1 = gcdii(gcoeff(x,1,1), gcoeff(y,1,1));
     modid = 1;
@@ -1109,7 +1111,7 @@ idealmat_mul(GEN nf, GEN x, GEN y)
     for (i=1; i<=rx; i++)
       for (j=1; j<=ry; j++)
         m[(i-1)*ry+j] = (long)element_muli(nf,(GEN)x[i],(GEN)y[j]);
-    if (isnfscalar((GEN)x[1]) && isnfscalar((GEN)y[1]))
+    if (RgV_isscalar((GEN)x[1]) && RgV_isscalar((GEN)y[1]))
       y = hnfmodid(m,  mulii(gcoeff(x,1,1),gcoeff(y,1,1)));
     else
       y = hnfmod(m, detint(m));
@@ -1859,12 +1861,11 @@ isideal(GEN nf,GEN x)
                      (tx==t_POLMOD && gequal((GEN)nf[1],(GEN)x[1])));
   if (typ(x)==t_VEC) return (lx==6);
   if (typ(x)!=t_MAT) return 0;
-  if (lx == 1) return 1;
-  N = degpol(nf[1]); if (lg(x[1])-1 != N) return 0;
+  N = degpol(nf[1]);
+  if (lx-1 != N) return (lx == 1);
+  if (lg(x[1])-1 != N) return 0;
 
   av = avma; x = Q_primpart(x);
-  if (lx-1 != N) x = idealmat_to_hnf(nf,x);
-
   for (i=1; i<=N; i++)
     for (j=2; j<=N; j++)
       if (! hnf_invimage(x, element_mulid(nf,(GEN)x[i],j)))
@@ -2054,7 +2055,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   I = primitive_part(I, &c1);
   y = ideallllred_elt(nf, I, vdir);
 
-  if (isnfscalar(y))
+  if (RgV_isscalar(y))
   { /* already reduced */
     if (!aI) return gerepilecopy(av, I);
     y = NULL; goto END;
@@ -2081,7 +2082,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   J = Q_primitive_part(J, &c);
  /* c = content (I T / x) = T / den(I/x) --> d = den(I/x) = T / c
   * J = (d I / x); I[1,1] = I \cap Z --> d I[1,1] belongs to J and Z */
-  if (isnfscalar((GEN)I[1])) {
+  if (RgV_isscalar((GEN)I[1])) {
     b = mulii(gcoeff(I,1,1), c? diviiexact(T, c): T);
     I = hnfmodid(J,b);
   } else {
@@ -2541,7 +2542,7 @@ element_mulvec(GEN nf, GEN x, GEN v)
   GEN M, y;
 
   if (typ(x) != t_COL) return scalmul(x, v);
-  if (isnfscalar(x)) return scalmul((GEN)x[1], v);
+  if (RgV_isscalar(x)) return scalmul((GEN)x[1], v);
   M = eltmul_get_table(nf,x);
   l = lg(v); y = cgetg(l, typ(v));
   for (i=1; i < l; i++) y[i] = lmul(M, (GEN)v[i]);

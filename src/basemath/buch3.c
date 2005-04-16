@@ -388,7 +388,7 @@ Buchray(GEN bnf,GEN module,long flag)
     for (j=1; j<=ngen; j++)
     {
       p1 = idealcoprime_fact(nf, (GEN)gen[j], fx);
-      if (isnfscalar(p1)) p1 = (GEN)p1[1];
+      if (RgV_isscalar(p1)) p1 = (GEN)p1[1];
       El[j] = (long)p1;
     }
   }
@@ -826,7 +826,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
     if (norme > normax) normax = norme;
     if (is_unit(M,r1, x)
     && (norme > 2*n  /* exclude roots of unity */
-        || !isnfscalar(element_pow(nf, zv_to_ZC(x), w))))
+        || !RgV_isscalar(element_pow(nf, zv_to_ZC(x), w))))
     {
       if (norme < normin) normin = norme;
       if (DEBUGLEVEL>=2) { fprintferr("*"); flusherr(); }
