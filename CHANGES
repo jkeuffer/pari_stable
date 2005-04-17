@@ -148,6 +148,8 @@ BA 67- [from 2.2.9] -fPIC missing for gp2c-run on platforms that require it.
    71- [Bug #156] kbessel was unstably evaluated
        ? besselk(1,120)
        %1 = 448600744132608.0000000000000
+   72- hyperu and kbessel(,1) inaccurate. E.g: hyperu(1,1,1) at \p28 -> last
+       3 digits wrong
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

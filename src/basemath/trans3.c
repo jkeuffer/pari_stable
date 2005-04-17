@@ -231,7 +231,7 @@ GEN
 kbessel(GEN nu, GEN gx, long prec)
 {
   GEN x,y,yfin,p1,p2,zf,zz,s,t,q,r,u,v,e,f,c,d,ak,pitemp,nu2,w;
-  long l, lnew, lbin, k, k2, l1, n2, n, ex, rab=0;
+  long l, lnew, k, k2, l1, n2, n, ex, rab=0;
   pari_sp av, av1;
 
   if (typ(nu)==t_COMPLEX) return kbessel2(nu,gx,prec);
@@ -250,8 +250,7 @@ kbessel(GEN nu, GEN gx, long prec)
   nu2=gmulgs(gsqr(nu),-4);
   n = (long) (bit_accuracy_mul(l,LOG2) + PI*sqrt(gtodouble(gnorm(nu)))) / 2;
   n2=(n<<1); pitemp=mppi(l1);
-  /* this 10 should really be a 5, but then kbessel(15.99) enters oo loop */
-  lbin = 10 - bit_accuracy(l); av1=avma;
+  av1=avma;
   if (cmprs(x, n) < 0)
   {
     zf = gsqrt(gdivgs(pitemp,n2),prec);
@@ -263,9 +262,9 @@ kbessel(GEN nu, GEN gx, long prec)
         p1 = gadd(mulss(k2,k2),nu2);
       else
         p1 = gaddsg(k2*k2,nu2);
-      ak=gdivgs(gmul(p1,zz),-k);
-      s=gadd(gen_1,gmul(ak,s));
-      t=gaddsg(k2,gmul(ak,t));
+      ak = gdivgs(gmul(p1,zz),-k);
+      s = gaddsg(1, gmul(ak,s));
+      t = gaddsg(k2,gmul(ak,t));
     }
     gmulz(s,zf,u); t=gmul2n(t,-1);
     gdivgsz(gadd(gmul(t,zf),gmul(u,nu)),-n2,v); avma=av1;
@@ -286,13 +285,14 @@ kbessel(GEN nu, GEN gx, long prec)
 	gmulz(d,c,d);
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
 	gaddz(f,p1,f);
-	if (gexpo(p1)-gexpo(f) <= lbin) break;
+	if (gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1))) break;
 	avma=av1;
       }
       p1=u; u=e; e=p1;
       p1=v; v=f; f=p1;
       gmulz(q,gaddsg(1,c),q);
-      if (expo(subrr(q,r)) <= lbin) break;
+      if (expo(subrr(q,r)) - expo(r) <= 1-bit_accuracy(lnew)) break;
+      avma=av1;
     }
     gmulz(u,gpow(divrs(x,n),nu,prec),y);
   }
@@ -307,8 +307,8 @@ kbessel(GEN nu, GEN gx, long prec)
         p1=gadd(mulss(k2,k2),nu2);
       else
         p1=gaddsg(k2*k2,nu2);
-      ak=gdivgs(gmul(p1,zz),k);
-      s=gsub(gen_1,gmul(ak,s));
+      ak = gdivgs(gmul(p1,zz),k);
+      s = gsub(gen_1,gmul(ak,s));
     }
     gmulz(s,zf,y);
   }
@@ -392,8 +392,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       i = precision(z); if (i) prec = i;
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
-/* Experimentally optimal on a PIII 500 Mhz. Your optimum may vary. */
-      if (!flag && ex > bit_accuracy(prec)/4 + gexpo(n))
+      if (!flag && ex > bit_accuracy(prec)/8 + gexpo(n))
         return kbessel(n,z,prec);
       L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
@@ -539,7 +538,7 @@ GEN
 hyperu(GEN a, GEN b, GEN gx, long prec)
 {
   GEN x,y,p1,p2,p3,zf,zz,s,t,q,r,u,v,e,f,c,d,w,a1,gn;
-  long l, lbin, k, l1, n, ex;
+  long l, k, l1, n, ex;
   pari_sp av, av1, av2;
 
   if(gsigne(gx) <= 0) err(talker,"hyperu's third argument must be positive");
@@ -560,7 +559,7 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     d=cgetr(l1); e=cgetr(l1); f=cgetr(l1);
   }
   n=(long)(bit_accuracy_mul(l, LOG2) + PI*sqrt(gtodouble(gabs(gmul(a,a1),l1))));
-  lbin = 10-bit_accuracy(l); av1=avma;
+  av1=avma;
   if (cmprs(x,n)<0)
   {
     gn=stoi(n); zf=gpow(gn,gneg_i(a),l1);
@@ -573,31 +572,30 @@ hyperu(GEN a, GEN b, GEN gx, long prec)
     }
     gmulz(s,zf,u); t=gmul(t,zz); gmulz(t,zf,v); avma=av1;
     q = stor(n, l1); r=x; av1=avma;
-    do
+    for(;;)
     {
       p1=divsr(5,q); if (expo(p1)>= -1) p1=ghalf;
       p2=subsr(1,divrr(r,q)); if (gcmp(p1,p2)>0) p1=p2;
       gnegz(p1,c); avma=av1;
-      k=0; gaffsg(1,d);
-      gaffect(u,e); gaffect(v,f);
-      p3=gsub(q,b); av2=avma;
-      for(;;)
+      gaffsg(1,d); gaffect(u,e); gaffect(v,f);
+      p3=gsub(q,b); av2 = avma;
+      for(k=1;;k++)
       {
-	w=gadd(gmul(gaddsg(k,a),u),gmul(gaddsg(-k,p3),v));
-	k++; gdivgsz(gmul(q,v),k,u);
+	w=gadd(gmul(gaddsg(k-1,a),u),gmul(gaddsg(1-k,p3),v));
+	gdivgsz(gmul(q,v),k,u);
 	gdivgsz(w,k,v);
 	gmulz(d,c,d);
 	gaddz(e,gmul(d,u),e); p1=gmul(d,v);
 	gaddz(f,p1,f);
-	if (gexpo(p1)-gexpo(f) <= lbin) break;
+	if (gexpo(p1) - gexpo(f) <= 1-bit_accuracy(precision(p1))) break;
 	avma=av2;
       }
       p1=u; u=e; e=p1;
       p1=v; v=f; f=p1;
       gmulz(q,gadd(gen_1,c),q);
-      p1=subrr(q,r); ex=expo(p1); avma=av1;
+      if (expo(subrr(q,r)) - expo(r) <= 1-bit_accuracy(l)) break;
+      avma=av1;
     }
-    while (ex>lbin);
   }
   else
   {
