@@ -60,12 +60,25 @@ _jbessel(GEN n, GEN z, long flag, long m)
   return s;
 }
 
+/* return L * approximate solution to x log x = B */
+static long
+bessel_get_lim(double B, double L)
+{
+  long lim;
+  double x = 1 + B; /* 3 iterations are enough except in pathological cases */
+  x = (x + B)/(log(x)+1);
+  x = (x + B)/(log(x)+1);
+  x = (x + B)/(log(x)+1); x = L*x;
+  lim = (long)x; if (lim < 2) lim = 2;
+  return lim;
+}
+
 static GEN
 jbesselintern(GEN n, GEN z, long flag, long prec)
 {
-  long i, lz, lim, k=-1, ki, precnew;
+  long i, lz, lim, k, ki, precnew;
   pari_sp av = avma;
-  double B, N, L, x;
+  double B, L;
   GEN p1, p2, y;
 
   switch(typ(z))
@@ -73,34 +86,24 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
     case t_INT: case t_FRAC: case t_QUAD:
     case t_REAL: case t_COMPLEX:
       i = precision(z); if (i) prec = i;
+      p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
+      if (gcmp0(z)) return gerepilecopy(av, p2);
+
+      L = 1.3591409 * gtodouble(gabs(z,prec));
+      precnew = prec;
+      if (L >= 1.0) precnew += 1 + (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
       if (isint(n,&ki))
       {
 	k = labs(ki);
-	p2 = gdiv(gpowgs(gmul2n(z,-1),k), mpfact(k));
-	if ((flag&k&1) && ki < 0) p2 = gneg(p2);
-      }
-      else
-        p2 = gdiv(gpow(gmul2n(z,-1),n,prec), ggamma(gaddgs(n,1),prec));
-      if (gcmp0(z)) return gerepilecopy(av, p2);
-      x = gtodouble(gabs(z,prec));
-      precnew  = prec;
-      if (x >= 1.0) precnew += 1 + (long)(x/(LOG2*BITS_IN_LONG));
-      if (k >= 0) n = stoi(k);
-      else
-      {
+        n = stoi(k);
+      } else {
         i = precision(n);
         if (i && i < precnew) n = gtofp(n,precnew);
       }
       z = gtofp(z,precnew);
-      L = x*1.3591409;
-      B = bit_accuracy_mul(prec, LOG2/2)/L;
-      N = 1 + B;
-/* 3 Newton iterations are enough except in pathological cases */
-      N = (N + B)/(log(N)+1);
-      N = (N + B)/(log(N)+1);
-      N = (N + B)/(log(N)+1); N = L*N;
-      lim = (long)N; if (lim < 2) lim = 2;
-      p1 = gtofp(_jbessel(n,z,flag,lim),prec);
+      B = bit_accuracy_mul(prec, LOG2/2) / L;
+      lim = bessel_get_lim(B, L);
+      p1 = gprec_wtrunc(_jbessel(n,z,flag,lim), prec);
       return gerepileupto(av, gmul(p2,p1));
 
     case t_VEC: case t_COL: case t_MAT:
@@ -313,8 +316,8 @@ kbessel(GEN nu, GEN gx, long prec)
   avma=av; return yfin;
 }
 
-/*   sum_{k=0}^m ((-1)^flag*z^2/4)^k / (k!*(k+n)!) * (H(k)+H(k+n))
- * + sum_{k=0}^{n-1} ((-1)^(flag+1)*z^2/4)^(k-n) * (n-k-1)!/k!.
+/*   sum_{k=0}^m Z^k (H(k)+H(k+n)) / (k! (k+n)!)
+ * + sum_{k=0}^{n-1} (-Z)^(k-n) (n-k-1)!/k!   with Z := (-1)^flag*z^2/4.
  * Warning: contrary to _jbessel, no n! in front.
  * When flag > 1, compute exactly the H(k) and factorials (slow) */
 static GEN
@@ -322,50 +325,51 @@ _kbessel(long n, GEN z, long flag, long m, long prec)
 {
   long k, limit;
   pari_sp av;
-  GEN p1,p2,p3,s,*tabh;
+  GEN Z, p1, p2, s, H;
 
-  p1 = gmul2n(gsqr(z),-2); if (flag & 1) p1 = gneg(p1);
+  Z = gmul2n(gsqr(z),-2); if (flag & 1) Z = gneg(Z);
   if (typ(z) == t_SER)
   {
     long v = valp(z);
-    k = lg(p1)-2 - v;
+    k = lg(Z)-2 - v;
     if (v < 0) err(negexper,"kbessel");
     if (v == 0) err(impl,"kbessel around a!=0");
     if (k <= 0) return gadd(gen_1, zeroser(varn(z), 2*v));
-    p1 = gprec(p1, k);
+    Z = gprec(Z, k);
   }
-  tabh = (GEN*)cgetg(m+n+2,t_VEC); tabh[1] = gen_0;
+  H = cgetg(m+n+2,t_VEC); gel(H,1) = gen_0;
   if (flag <= 1)
   {
-    tabh[2] = s = real_1(prec);
-    for (k=2; k<=m+n; k++) tabh[k+1] = s = divrs(addsr(1,mulsr(k,s)),k);
+    gel(H,2) = s = real_1(prec);
+    for (k=2; k<=m+n; k++) gel(H,k+1) = s = divrs(addsr(1,mulsr(k,s)),k);
   }
   else
   {
-    tabh[2] = s = gen_1;
-    for (k=2; k<=m+n; k++) tabh[k+1] = s = gdivgs(gaddsg(1,gmulsg(k,s)),k);
+    gel(H,2) = s = gen_1;
+    for (k=2; k<=m+n; k++) gel(H,k+1) = s = gdivgs(gaddsg(1,gmulsg(k,s)),k);
   }
-  s = gadd(tabh[m+1],tabh[m+n+1]);
+  s = gadd(gel(H,m+1), gel(H,m+n+1));
   av = avma; limit = stack_lim(av,1);
-  for (k=m; k>=1; k--)
+  for (k=m; k>0; k--)
   {
-    s = gadd(gadd(tabh[k],tabh[k+n]),gdiv(gmul(p1,s),mulss(k,k+n)));
+    s = gadd(gadd(gel(H,k),gel(H,k+n)),gdiv(gmul(Z,s),mulss(k,k+n)));
     if (low_stack(limit,stack_lim(av,1)))
     {
       if (DEBUGMEM>1) err(warnmem,"kbessel");
       s = gerepilecopy(av, s);
     }
   }
-  p3 = (flag <= 1) ? mpfactr(n,prec) : mpfact(n);
-  s = gdiv(s,p3);
+  p1 = (flag <= 1) ? mpfactr(n,prec) : mpfact(n);
+  s = gdiv(s,p1);
   if (n)
   {
-    p1 = gneg(ginv(p1));
-    p2 = gmulsg(n,gdiv(p1,p3));
-    for (k=n-1; k>=0; k--)
+    Z = gneg(ginv(Z));
+    p2 = gmulsg(n, gdiv(Z,p1));
+    s = gadd(s,p2);
+    for (k=n-1; k>0; k--)
     {
+      p2 = gmul(p2, gmul(mulss(k,n-k),Z));
       s = gadd(s,p2);
-      p2 = gmul(p2,gmul(mulss(k,n-k),p1));
     }
   }
   return s;
@@ -376,7 +380,8 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 {
   long i, k, ki, lz, lim, precnew, fl, fl2, ex;
   pari_sp av = avma;
-  GEN p1,p2,y,p3,pp,pm,s,c;
+  GEN p1, p2, y, p3, pp, pm, s, c;
+  double B, L;
 
   fl = (flag & 1) == 0;
   switch(typ(z))
@@ -390,31 +395,23 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 /* Experimentally optimal on a PIII 500 Mhz. Your optimum may vary. */
       if (!flag && ex > bit_accuracy(prec)/4 + gexpo(n))
         return kbessel(n,z,prec);
+      L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
-      if (ex >= 0)
-      {
-	long rab = ex >> TWOPOTBITS_IN_LONG;
+      if (L >= 1.3591409) {
+        long rab = (long)(L/(1.3591409*LOG2*BITS_IN_LONG));
         if (fl) rab *= 2;
-	precnew += 1 + rab;
+         precnew += 1 + rab;
       }
       z = gtofp(z, precnew);
       if (isint(n,&ki))
       {
-        double B, N, L;
         GEN z2 = gmul2n(z, -1);
-        
 	k = labs(ki);
-	L = 1.3591409 * gtodouble(gabs(z,prec));
-	B = bit_accuracy_mul(prec,LOG2/2)/L;
+	B = bit_accuracy_mul(prec,LOG2/2) / L;
 	if (fl) B += 0.367879;
-	N = 1 + B; /* 3 iterations are enough except in pathological cases */
-	N = (N + B)/(log(N)+1);
-        N = (N + B)/(log(N)+1);
-        N = (N + B)/(log(N)+1); N = L*N;
-	lim = (long)N; if (lim < 2) lim = 2;
-	p1 = _kbessel(k,z,flag,lim,precnew);
-	p1 = gmul(gpowgs(z2,k),p1);
-	p2 = gadd(mpeuler(precnew),glog(z2,precnew));
+        lim = bessel_get_lim(B, L);
+	p1 = gmul(gpowgs(z2,k), _kbessel(k,z,flag,lim,precnew));
+	p2 = gadd(mpeuler(precnew), glog(z2,precnew));
 	p3 = jbesselintern(stoi(k),z,flag,precnew);
 	p2 = gsub(gmul2n(p1,-1),gmul(p2,p3));
 	p2 = gprec_wtrunc(p2, prec);

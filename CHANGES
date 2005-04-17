@@ -91,7 +91,7 @@ RS 21- gcc-3.4 breaks on compatibility code to support old readline versions
        + inputs containing t_INTMODs yield unpredictable [wrong] results
    34- znlog(x,g): first check whether x == g [ quite frequent ]
    35- rnfisnorminit(nfinit(y^2+y+1), x^3-y,2) --> "incompatible variables"
-   36- nffactormod() returned a factorization which was not a proper t_MAT 
+   36- nffactormod() returned a factorization which was not a proper t_MAT
    37- rnfequation(y^2+1, x + Mod(z*y - 1, y^2+1)) --> SEGV [ BIB ]
    38- many problems in matfrobenius for _inexact_ matrices
 LGr39- very rare SEGV in idealprimedec() [ typo in init_norm(), using FpX_red
@@ -145,7 +145,9 @@ BA 67- [from 2.2.9] -fPIC missing for gp2c-run on platforms that require it.
    69- more stringent tests in ideal* functions: don't accept t_COL with
        incorrect length as ideals ([]~ produced SEGV in many cases)
    70- factorback([1,1; 0,1],nfinit(x^3+2)) --> SEGV
-
+   71- [Bug #156] kbessel was unstably evaluated
+       ? besselk(1,120)
+       %1 = 448600744132608.0000000000000
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu
@@ -164,7 +166,7 @@ BA  9- new algorithm for exp(t_REAL) [ Newton ]
    11- use Trager's trick in factorff()
    12- member function .bid (from a bnr). Extend mod, clgp, no, cyc, gen to
        bid and bnr structure.
-   13- new keywords for ?? : bid, CFT, ideal, idele, modulus, rnf. 
+   13- new keywords for ?? : bid, CFT, ideal, idele, modulus, rnf.
    14- new construction %#: number of history entries so far
 
   Changed
@@ -221,7 +223,7 @@ MW 13- ellap: if E has CM by a principal order, use Cornacchia instead
        Change the input of all list routines (bnrclassnolist, bnrdisclist)
        accordingly.
    26- %0 (undocumented) is no longer accepted as an alias for %
-   27- renamed realzero -> real_0, realun -> real_1, realmun -> real_m1. 
+   27- renamed realzero -> real_0, realun -> real_1, realmun -> real_m1.
 GN 28- MPQS rewrite [cleaner, faster]
 
   Removed
