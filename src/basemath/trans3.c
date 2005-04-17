@@ -392,7 +392,8 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       i = precision(z); if (i) prec = i;
       i = precision(n); if (i && prec > i) prec = i;
       ex = gexpo(z);
-      if (!flag && ex > bit_accuracy(prec)/8 + gexpo(n))
+      /* experimental */
+      if (!flag && ex > bit_accuracy(prec)/16 + gexpo(n))
         return kbessel(n,z,prec);
       L = 1.3591409 * gtodouble(gabs(z,prec));
       precnew = prec;
@@ -447,7 +448,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
       else
         p1 = gsub(gmul(c,pp),pm);
       p1 = gdiv(p1, s);
-      return gerepileupto(av, gprec_wtrunc(p1,prec));
+      return gerepilecopy(av, gprec_wtrunc(p1,prec));
 
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
