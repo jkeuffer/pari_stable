@@ -33,6 +33,7 @@ MW = Mark Watkins
 NS = Nils Skoruppa
 OR = Olivier Ramare
 OV = Oliver Voigt
+PC = Phil Carmody
 PM = Peter Montgomery
 PW = Paul van Wamelen
 RS = Ralf Stephan
@@ -170,6 +171,7 @@ BA  9- new algorithm for exp(t_REAL) [ Newton ]
        bid and bnr structure.
    13- new keywords for ?? : bid, CFT, ideal, idele, modulus, rnf.
    14- new construction %#: number of history entries so far
+PC 15- an optional 2nd argument to znorder() to limit the search space
 
   Changed
     1- renamed gegal --> gequal, gegalgs --> gequalgs, gegalsg --> gequalsg,

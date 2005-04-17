@@ -363,6 +363,7 @@ GEN     seq_umul(ulong a, ulong b);
 ulong   Fl_sqrt(ulong a, ulong p);
 ulong   Fl_gener_fact(ulong p, GEN fa);
 ulong   Fl_gener(ulong p);
+GEN     znorder(GEN x, GEN o);
 GEN     znstar(GEN x);
 
 /* arith2.c */

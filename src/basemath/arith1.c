@@ -132,15 +132,19 @@ gassoc_proto(GEN f(GEN,GEN), GEN x, GEN y)
 /*********************************************************************/
 
 GEN
-order(GEN x)
+znorder(GEN x, GEN o)
 {
   pari_sp av = avma;
   long i, e;
-  GEN o, m, p, b = (GEN)x[1], a = (GEN)x[2];
+  GEN m, p, b = gel(x,1), a = gel(x,2);
 
   if (typ(x) != t_INTMOD || !gcmp1(gcdii(a,b)))
     err(talker,"not an element of (Z/nZ)* in order");
-  o = phi(b); m = decomp(o);
+  if (!o)
+    o = phi(b); 
+  else if(typ(o) != t_INT) err(arither1);
+
+  m = decomp(o);
   for (i = lg(m[1])-1; i; i--)
   {
     p = gcoeff(m,i,1); e = itos(gcoeff(m,i,2));
@@ -154,6 +158,8 @@ order(GEN x)
   }
   return gerepilecopy(av, o);
 }
+GEN
+order(GEN x) { return znorder(x, NULL); }
 
 /******************************************************************/
 /*                                                                */
