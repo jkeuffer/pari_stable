@@ -138,32 +138,6 @@ isidentity(GEN x)
   return 1;
 }
 
-int
-ishnfall(GEN x)
-{
-  long i,j, lx = lg(x);
-  for (i=2; i<lx; i++)
-  {
-    if (gsigne(gcoeff(x,i,i)) <= 0) return 0;
-    for (j=1; j<i; j++)
-      if (!gcmp0(gcoeff(x,i,j))) return 0;
-  }
-  return (gsigne(gcoeff(x,1,1)) > 0);
-}
-/* same x is known to be integral */
-int
-Z_ishnfall(GEN x)
-{
-  long i,j, lx = lg(x);
-  for (i=2; i<lx; i++)
-  {
-    if (signe(gcoeff(x,i,i)) <= 0) return 0;
-    for (j=1; j<i; j++)
-      if (signe(gcoeff(x,i,j))) return 0;
-  }
-  return (signe(gcoeff(x,1,1)) > 0);
-}
-
 GEN
 idealhermite_aux(GEN nf, GEN x)
 {
@@ -180,7 +154,7 @@ idealhermite_aux(GEN nf, GEN x)
     long N = degpol(nf[1]), nx = lg(x)-1;
     if (lg(x[1]) != N+1) err(typeer,"idealhermite");
 
-    if (nx == N && ishnfall(x)) return x;
+    if (nx == N && RgM_ishnf(x)) return x;
     x = Q_primitive_part(x, &cx);
     if (nx < N) x = vec_mulid(nf, x, nx, N);
   }
@@ -446,12 +420,6 @@ idealhnf0(GEN nf, GEN a, GEN b)
   av = avma; nf = checknf(nf);
   x = concatsp(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
   return gerepileupto(av, idealmat_to_hnf(nf, x));
-}
-
-GEN
-idealhermite2(GEN nf, GEN a, GEN b)
-{
-  return idealhnf0(nf,a,b);
 }
 
 static int
@@ -897,7 +865,7 @@ get_hnfid(GEN nf, GEN x)
 {
   GEN junk;
   long t = idealtyp(&x, &junk);
-  return (t != id_MAT || lg(x) == 1 || lg(x) != lg(x[1]) || !ishnfall(x))
+  return (t != id_MAT || lg(x) == 1 || lg(x) != lg(x[1]) || !RgM_ishnf(x))
     ? idealhermite_aux(nf,x): x;
 }
 
@@ -1118,8 +1086,9 @@ idealmat_mul(GEN nf, GEN x, GEN y)
   }
   else
   {
-    if (!Z_ishnfall(x)) x = idealmat_to_hnf(nf,x);
-    if (!Z_ishnfall(y)) y = idealmat_to_hnf(nf,y);
+    if (!ZM_ishnf(x)) x = idealmat_to_hnf(nf,x);
+    if (!ZM_ishnf(y)) y = idealmat_to_hnf(nf,y);
+    if (lg(x) == 1 || lg(y) == 1) return cgetg(1,t_MAT);
     y = idealmulh(nf,x,y);
   }
   return cx? gmul(y,cx): y;

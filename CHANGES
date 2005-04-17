@@ -144,6 +144,8 @@ BA 67- [from 2.2.9] -fPIC missing for gp2c-run on platforms that require it.
        read the following arguments as its own ]
    69- more stringent tests in ideal* functions: don't accept t_COL with
        incorrect length as ideals ([]~ produced SEGV in many cases)
+   70- factorback([1,1; 0,1],nfinit(x^3+2)) --> SEGV
+
 
   Added
     1- routines equalsi/equalis, equaliu/equalui, cmpui/cmpiu

@@ -191,7 +191,9 @@ GEN     vecextract_p(GEN A, GEN p);
 
 GEN     QuickNormL1(GEN x,long prec);
 GEN     QuickNormL2(GEN x,long prec);
+int     RgM_ishnf(GEN x);
 GEN     ZM_to_zm(GEN z);
+int     ZM_ishnf(GEN x);
 GEN     adj(GEN x);
 GEN     assmat(GEN x);
 GEN     caract(GEN x, int v);
@@ -570,7 +572,6 @@ GEN     zsigns(GEN nf,GEN alpha);
 
 /* base4.c */
 
-int     Z_ishnfall(GEN x);
 GEN     element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     element_invmodpr(GEN nf, GEN y, GEN modpr);
 GEN     element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr);
@@ -595,7 +596,6 @@ GEN     idealdivpowprime(GEN nf, GEN x, GEN vp, GEN n);
 GEN     idealmulpowprime(GEN nf, GEN x, GEN vp, GEN n);
 GEN     idealfactor(GEN nf, GEN x);
 GEN     idealhermite(GEN nf, GEN x);
-GEN     idealhermite2(GEN nf, GEN a, GEN b);
 GEN     idealhnf0(GEN nf, GEN a, GEN b);
 GEN     idealintersect(GEN nf, GEN x, GEN y);
 GEN     idealinv(GEN nf, GEN ix);
@@ -614,7 +614,6 @@ GEN     idealpowred(GEN nf, GEN ix, GEN n,long prec);
 GEN     idealpows(GEN nf, GEN ideal, long iexp);
 long    idealtyp(GEN *ideal, GEN *arch);
 GEN     ideleaddone(GEN nf, GEN x, GEN idele);
-int     ishnfall(GEN x);
 int     isidentity(GEN x);
 GEN     hnfall_i(GEN A, GEN *ptB, long remove);
 long    isideal(GEN nf,GEN x);

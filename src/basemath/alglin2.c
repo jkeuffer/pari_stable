@@ -1232,6 +1232,32 @@ init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
   return Q_muli_to_int(x, *denx);
 }
 
+int
+RgM_ishnf(GEN x)
+{
+  long i,j, lx = lg(x);
+  for (i=2; i<lx; i++)
+  {
+    if (gsigne(gcoeff(x,i,i)) <= 0) return 0;
+    for (j=1; j<i; j++)
+      if (!gcmp0(gcoeff(x,i,j))) return 0;
+  }
+  return (gsigne(gcoeff(x,1,1)) > 0);
+}
+/* same x is known to be integral */
+int
+ZM_ishnf(GEN x)
+{
+  long i,j, lx = lg(x);
+  for (i=2; i<lx; i++)
+  {
+    if (signe(gcoeff(x,i,i)) <= 0) return 0;
+    for (j=1; j<i; j++)
+      if (signe(gcoeff(x,i,j))) return 0;
+  }
+  return (signe(gcoeff(x,1,1)) > 0);
+}
+
 GEN
 ZV_copy(GEN x)
 {
@@ -3133,11 +3159,11 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
       if (typ(coeff(x,i,j)) != t_INT)
         err(talker,"non integral matrix in smithall");
 
-  U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [so act on columns]*/
+  U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
   V0 = NULL;
   x = dummycopy(x);
-  if (m == n && Z_ishnfall(x))
+  if (m == n && ZM_ishnf(x))
   {
     mdet = dethnf_i(x);
     if (V) *ptV = idmat(n);

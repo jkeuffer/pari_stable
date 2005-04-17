@@ -36,6 +36,7 @@
 #define isprincipalrayall bnrisprincipal
 #define rayclassno bnrclassno
 #define rayclassnolist bnrclassnolist
+#define idealhermite2 idealhnf0
 
 #define apprgen padicappr
 #define apprgen9 padicappr

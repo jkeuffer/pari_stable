@@ -260,7 +260,7 @@ entree oldfonctions[]={
 {"idealdivexact",3,(void *)idealdivexact,6,"GGG"},
 {"idealfactor",2,(void *)idealfactor,6,"GG"},
 {"idealhermite",2,(void *)idealhermite,6,"GG"},
-{"idealhermite2",3,(void *)idealhermite2,6,"GGG"},
+{"idealhermite2",3,(void *)idealhnf0,6,"GGG"},
 {"idealintersect",3,(void *)idealintersect,6,"GGG"},
 {"idealinv",2,(void *)idealinv,6,"GG"},
 {"idealinv2",2,(void *)idealinv,6,"GG"},
