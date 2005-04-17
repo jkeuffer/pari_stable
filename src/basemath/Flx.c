@@ -2111,6 +2111,7 @@ FlxqXQ_sqr(void *data, GEN x) {
   return FlxqXQ_red(data, Flx_sqr(x,((kronecker_muldata*) data)->p));
 }
 
+#if 0
 static GEN
 FlxqXQ_red_montgomery(void *data, GEN x)
 {
@@ -2127,6 +2128,7 @@ static GEN
 FlxqXQ_sqr_montgomery(void *data, GEN x) {
   return FlxqXQ_red_montgomery(data, Flx_sqr(x,((kronecker_muldata*) data)->p));
 }
+#endif
 
 long FlxqXQ_POW_MONTGOMERY_LIMIT = 0;
 
