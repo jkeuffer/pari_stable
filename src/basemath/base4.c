@@ -173,12 +173,7 @@ idealhermite_aux(GEN nf, GEN x)
   if (tx == id_PRIME) return prime_to_ideal_aux(nf,x);
   if (tx == id_PRINCIPAL) {
     x = _algtobasis(nf, x);
-    if (RgV_isscalar(x))
-    {
-      long n = lg(x)-1;
-      if (!n) err(typeer,"idealhermite_aux");
-      return gscalmat(gabs(gel(x,1),0), n);
-    }
+    if (RgV_isscalar(x)) return gscalmat(gabs(gel(x,1),0), lg(x)-1);
     x = Q_primitive_part(x, &cx);
     x = eltmul_get_table(nf, x);
   } else {

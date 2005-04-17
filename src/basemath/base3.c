@@ -651,7 +651,8 @@ _algtobasis(GEN nf, GEN x)
       return gscalcol_i(x, degpol( checknf(nf)[1] ));
     case t_POLMOD: case t_POL:
       return algtobasis(nf,x);
-    case t_COL:   break;
+    case t_COL:
+      if (lg(x) == lg(nf[7])) break;
     default: err(typeer,"_algtobasis");
   }
   return x;
