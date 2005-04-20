@@ -2124,10 +2124,9 @@ get_pr(GEN nf, norm_S *S, GEN p, GEN P, GEN V, int ramif)
 static GEN
 _primedec(GEN nf, GEN p)
 {
+  GEN E, F, L, Ip, H, phi, mat1, f, g, h, p1, UN, T = (GEN)nf[1];
   long i, k, c, iL, N;
-  GEN E, F, L, Ip, H, phi, mat1, T, f, g, h, p1, UN;
 
-  nf = checknf(nf); T = (GEN)nf[1];
   F = FpX_factor(T, p);
   E = gel(F,2);
   F = gel(F,1);
@@ -2229,7 +2228,9 @@ GEN
 primedec(GEN nf, GEN p)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gen_sort(_primedec(nf,p), 0, cmp_prime_over_p));
+  if (typ(p) != t_INT) err(typeer, "primedec");
+  return gerepileupto(av, gen_sort(_primedec(checknf(nf),p),
+                                   0, cmp_prime_over_p));
 }
 
 /* return [Fp[x]: Fp] */

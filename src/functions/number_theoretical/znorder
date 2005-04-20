@@ -1,6 +1,6 @@
 Function: znorder
 Section: number_theoretical
-C-Name: order
+C-Name: znorder
 Prototype: GDG
 Help: znorder(x,{o}): order of the integermod x in (Z/nZ)*. Optional o is
  assumed to be a multiple of the order.
