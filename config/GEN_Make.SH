@@ -95,7 +95,7 @@ dynlib: \$(DYN)
 	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(RUNPTH) \$(LIBS)
 
 %.o: %.c
-	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$<
+	\$(CC) -c \$(CFLAGS) \$(CPPFLAGS) \$(DLCFLAGS) \$<
 clean:
 	-\$(RM) *.o \$(ALL)
 EOT
