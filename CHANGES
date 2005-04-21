@@ -43,6 +43,10 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
+Done for version 2.2.11 (released 21/05/2005):
+  Fixed
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
   Fixed
 BA  1- gp2c description of == operator was broken.
