@@ -12,7 +12,7 @@ Description:
  (bnr):bnf	                checkbnr($1)
  (prid):void	                checkprimeid($1)
  (@clgp):bool:parens	        lg($1) != 3 || typ($(1)[2]) != t_POLMOD
- (ell):lg	                checkell($1)
+ (ell):void	                checkell($1)
  (bell):void	                checkbell($1)
  (*gal):gal:parens              $1=checkgal($1)
 
