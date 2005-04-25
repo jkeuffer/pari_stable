@@ -79,6 +79,7 @@ Function: _proto_code
 Class: gp2c_internal
 Help: Code for argument of a function
 Description:
+ (var)          n
  (C!long)       L
  (C!GEN)        G
  (C!char*)      s
