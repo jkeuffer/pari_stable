@@ -92,7 +92,8 @@ if test -z "$__gnuc__"; then
   exe=$osname-$arch-gnu$$
   $CC $extraflag -o $exe gnu.c
   if $exe; then
-    __gnuc__=`$CC -v 2>&1 | sed -n 's/.*version //p'`
+    # avoid internationalization trouble by setting LANG=C
+    __gnuc__=`env LANG=C $CC -v 2>&1 | sed -n 's/.*version //p'`
     echo GNU compiler version $__gnuc__
   fi
   rm -f $exe $exe$exe_suff
