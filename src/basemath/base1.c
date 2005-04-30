@@ -369,16 +369,48 @@ roots_to_ZX(GEN z, long *e)
   return b;
 }
 
-static GEN
-_res(long n, long s, long k)
+GEN
+polgaloisnames(long a, long b)
 {
-  if (!new_galois_format)
-    k = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
-  return mkvec3s(n,s,k);
+  const char * const t[]={"S1", "S2", "A3", "S3", 
+       "C(4) = 4", "E(4) = 2[x]2", "D(4)", "A4", "S4",
+       "C(5) = 5", "D(5) = 5:2", "F(5) = 5:4", "A5", "S5",
+       "C(6) = 6 = 3[x]2", "D_6(6) = [3]2", "D(6) = S(3)[x]2",
+             "A_4(6) = [2^2]3", "F_18(6) = [3^2]2 = 3 wr 2", 
+             "2A_4(6) = [2^3]3 = 2 wr 3", "S_4(6d) = [2^2]S(3)", 
+             "S_4(6c) = 1/2[2^3]S(3)", "F_18(6):2 = [1/2.S(3)^2]2", 
+             "F_36(6) = 1/2[S(3)^2]2", "2S_4(6) = [2^3]S(3) = 2 wr S(3)", 
+             "L(6) = PSL(2,5) = A_5(6)", "F_36(6):2 = [S(3)^2]2 = S(3) wr 2", 
+             "L(6):2 = PGL(2,5) = S_5(6)", "A6", "S6",
+       "C(7) = 7", "D(7) = 7:2", "F_21(7) = 7:3", "F_42(7) = 7:6", 
+             "L(7) = L(3,2)", "A7", "S7"};
+
+   const long idx[]={0,1,2,4,9,14,30};
+   return strtoGENstr(t[idx[a-1]+b-1]); 
 }
 
+static GEN
+galois_res(long d, long n, long s, long k, long flag)
+{
+  long kk=k;
+  if (!new_galois_format)
+    kk = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
+  if (flag) 
+  {
+    GEN z= cgetg(5,t_VEC);
+    z[1] = lstoi(n);
+    z[2] = lstoi(s);
+    z[3] = lstoi(kk);
+    z[4] = (long) polgaloisnames(d,k);
+    return z;
+  }
+  return mkvec3s(n,s,kk);
+}
+
+#define _res(a,b,c) galois_res(n,a,b,c,flag)
+
 GEN
-galois(GEN x, long prec)
+polgalois(GEN x, long flag, long prec)
 {
   pari_sp av = avma, av1;
   long i,j,k,n,f,l,l2,e,e1,pr,ind;
@@ -388,6 +420,7 @@ galois(GEN x, long prec)
                        1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                        1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
   if (typ(x)!=t_POL) err(notpoler,"galois");
+  if (flag<0 || flag>1) err(flagerr,"galois");
   n=degpol(x); if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
   x = primpart(x);
@@ -409,7 +442,7 @@ galois(GEN x, long prec)
      * or S_6 */
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
-  if (n > 7) return galoisbig(x, prec);
+  if (n > 7) return galoisbig(x, flag, prec);
   for(;;)
   {
     double cb = cauchy_bound(x);
@@ -623,6 +656,10 @@ galois(GEN x, long prec)
     tchi: avma = av1; x = tschirnhaus(x1);
   }
 }
+
+#undef _res
+
+GEN galois(GEN x, long prec) {return polgalois(x,0,prec);}
 
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)

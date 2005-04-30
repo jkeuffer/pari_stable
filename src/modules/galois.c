@@ -2430,7 +2430,26 @@ isin_G_H(buildroot *BR, long n1, long n2)
 }
 
 GEN
-galoisbig(GEN pol, long prec)
+polgaloisnamesbig(long n, long k)
+{
+  pari_sp ltop=avma;
+  char *s = gpmalloc(strlen(pari_datadir) + 13 + 20);
+  FILE *stream;
+  GEN V;
+
+  sprintf(s, "%s/galdata/NAM%ld", pari_datadir, n);
+  stream = fopen(s,"r");
+  if (!stream) err(talker,"galois files not available\n[missing %s]",s);
+  V = lisGEN(stream);
+  if (!V || typ(V)!=t_VEC || k>=lg(V))
+    err(talker,"galois files %s not compatible\n",s);
+  fclose(stream);
+  free(s); 
+  return gerepilecopy(ltop,(GEN)V[k]);
+}
+
+GEN
+galoisbig(GEN pol, long flag, long prec)
 {
   GEN dpol;
   long *tab, t = 0;
@@ -2492,5 +2511,15 @@ galoisbig(GEN pol, long prec)
     }
     for (i = 1; i < lg(BR.r); i++) gunclone((GEN)BR.r[i]);
   }
-  avma = av; return mkvec3s(tab[t], EVEN? 1: -1, t);
+  avma = av; 
+  if (!flag) return mkvec3s(tab[t], EVEN? 1: -1, t);
+  else
+  {
+    GEN z= cgetg(5,t_VEC);
+    z[1] = lstoi(tab[t]);
+    z[2] = lstoi(EVEN? 1: -1);
+    z[3] = lstoi(t);
+    z[4] = (long) polgaloisnamesbig(N,t);
+    return z;
+  }
 }

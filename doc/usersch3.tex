@@ -5098,16 +5098,22 @@ the field $\Q(\zeta_5, 5^{1/5})$:
 
 \syn{polcompositum0}{P,Q,\fl}.
 
-\subsecidx{polgalois}$(x)$: \idx{Galois} group of the non-constant polynomial
-$x\in\Q[X]$. In the present version \vers, $x$ must be irreducible and
-the degree of $x$ must be less than or equal to 7. On certain versions for
-which the data file of Galois resolvents has been installed (available
-in the Unix distribution as a separate package), degrees 8, 9, 10 and 11
-are also implemented.
+\subsecidx{polgalois}$(x,\{\fl=0\})$: \idx{Galois} group of the non-constant
+polynomial $x\in\Q[X]$. In the present version \vers, $x$ must be irreducible
+and the degree of $x$ must be less than or equal to 7. On certain versions for
+which the data file of Galois resolvents has been installed (available in the
+Unix distribution as a separate package), degrees 8, 9, 10 and 11 are also
+implemented.
 
-The output is a 3-component vector $[n,s,k]$ with the following meaning: $n$
-is the cardinality of the group, $s$ is its signature ($s=1$ if the group is
-a subgroup of the alternating group $A_n$, $s=-1$ otherwise).
+If $\fl=0$ (default), the output is a 3-component vector $[n,s,k]$ with the
+following meaning: $n$ is the cardinality of the group, $s$ is its signature
+($s=1$ if the group is a subgroup of the alternating group $A_n$, $s=-1$
+otherwise).
+
+If $\fl=1$, the output is a 4-component vector $[n,s,k,name]$, where $n$, $s$,
+$k$ are as above and name is a character string containing name of the
+transitive group according to the GAP 4 transitive groups library by Alexander
+Hulpke.
 
 $k$ is more arbitrary and the choice made up to version~2.2.3 of PARI is rather
 unfortunate: for $n > 7$, $k$ is the numbering of the group among all
@@ -5174,8 +5180,8 @@ sensitive to the current precision. The precision is updated internally but,
 in very rare cases, a wrong result may be returned if the initial precision
 was not sufficient.
 
-\syn{galois}{x,\var{prec}}. To enable the new format in library mode, set the
-global variable \tet{new_galois_format} to $1$.
+\syn{polgalois}{x,\fl,\var{prec}}. To enable the new format in library mode,
+set the global variable \tet{new_galois_format} to $1$.
 
 \subsecidx{polred}$(x,\{\fl=0\},\{fa\})$: finds polynomials with reasonably
 small coefficients defining subfields of the number field defined by $x$.
