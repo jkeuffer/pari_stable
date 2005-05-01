@@ -52,7 +52,7 @@ none)
   graph=plotnull;;
 qt)
   PLOTCFLAGS='-D__FANCY_WIN__ -I$(QTDIR)/include'
-  PLOTLIBS='-L$(QTDIR)/lib -lqt'
+  PLOTLIBS="-L\$(QTDIR)/lib $QTLIB"
   graph=plotQt;;
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
