@@ -2008,7 +2008,7 @@ ellrootno_2(GEN e)
       {
 	case 1: return -kross(2,u*v);
 	case 2: return -kross(2,v);
-	case 3: y1 = (u - (v << (v6-5))) % 16;
+	case 3: y1 = (u - (v << (v6-5))) & 15;
 	  return (y1==7 || y1==11) ? 1 : -1;
 	case 4: return (v%8==3 || (2*u+v)%8==7) ? 1 : -1;
 	case 5: return v6==8 ? kross(2,x1) : kross(-2,u);
@@ -2046,7 +2046,7 @@ ellrootno_2(GEN e)
       if (n2==1) return 1;
       else
       {
-	y1 = (u + (v << (v6-6))) % 16;
+	y1 = (u + (v << (v6-8))) & 15;
 	if (v6==10) return (y1==9 || y1==13) ? 1 : -1;
 	else return (y1==9 || y1==5) ? 1 : -1;
       }
