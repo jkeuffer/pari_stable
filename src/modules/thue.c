@@ -1102,7 +1102,7 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
     GEN sol = cgetg(Nprimes+1, t_VECSMALL);
     sindex = 1; normsol = (GEN*) new_chunk(2);
     normsol[1] = sol; for (i=1; i<=Nprimes; i++) sol[i] = 0;
-    return;
+    *ptPrimes = NULL; return;
   }
 
   fact=factor(a); primes=(GEN)fact[1];
