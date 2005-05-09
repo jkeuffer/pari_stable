@@ -637,7 +637,7 @@ sdivss_rem(long x, long y, long *rem)
   hiremainder = 0; q = divll((ulong)labs(x),(ulong)labs(y));
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (y < 0) q = -q;
-  return q;
+  *rem = hiremainder; return q;
 }
 
 INLINE GEN
