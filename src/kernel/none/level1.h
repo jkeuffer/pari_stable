@@ -50,6 +50,7 @@ GEN    mkvec4(GEN x, GEN y, GEN z, GEN t);
 GEN    mkveccopy(GEN x);
 GEN    mkvecs(long x);
 GEN    mkvecsmall(long x);
+GEN    mkvecsmall2(long x,long y);
 GEN    mkvecsmall3(long x,long y, long z);
 void   affiz(GEN x, GEN y);
 void   affsz(long x, GEN y);
@@ -278,6 +279,9 @@ INLINE GEN
 mkvec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
 INLINE GEN
 mkvecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
+INLINE GEN
+mkvecsmall2(long x,long y) { GEN v = cgetg(3, t_VECSMALL);
+  v[1]=x; v[2]=y; return v; }
 INLINE GEN
 mkvecsmall3(long x,long y, long z) { GEN v = cgetg(4, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; return v; }
