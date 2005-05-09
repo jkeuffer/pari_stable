@@ -1363,6 +1363,12 @@ gexp(GEN x, long prec)
 /**                           AGM(X, Y)                            **/
 /**                                                                **/
 /********************************************************************/
+static int
+agmr_gap(GEN a, GEN b, long L)
+{
+  GEN d = subrr(b, a);
+  return (signe(d) && expo(d) - expo(b) >= L);
+}
 /* assume x > 0 */
 static GEN
 agm1r_abs(GEN x)
@@ -1373,7 +1379,7 @@ agm1r_abs(GEN x)
 
   a1 = addrr(real_1(l), x); setexpo(a1, expo(a1)-1);
   b1 = sqrtr_abs(x);
-  while (expo(subrr(b1,a1)) - expo(b1) >= L)
+  while (agmr_gap(a1,b1,L))
   {
     GEN a = a1;
     a1 = addrr(a,b1); setexpo(a1, expo(a1)-1);
@@ -1382,6 +1388,12 @@ agm1r_abs(GEN x)
   affr_fixlg(a1,y); avma = av; return y;
 }
 
+static int
+agmcx_gap(GEN a, GEN b, long L)
+{
+  GEN d = gsub(b, a);
+  return (!gcmp0(d) && gexpo(d) - gexpo(b) >= L);
+}
 static GEN
 agm1cx(GEN x, long prec)
 {
@@ -1393,7 +1405,7 @@ agm1cx(GEN x, long prec)
   a1 = gmul2n(gadd(real_1(l), x), -1);
   av2 = avma;
   b1 = gsqrt(x, prec);
-  while (gexpo(gsub(b1,a1)) - gexpo(b1) >= L)
+  while (agmcx_gap(a1,b1,L))
   {
     GEN a = a1;
     a1 = gmul2n(gadd(a,b1),-1);
