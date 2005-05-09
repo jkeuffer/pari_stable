@@ -1737,6 +1737,8 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   const long li = lg(perm); /* = lg(mat0[1]) */
   const long CO = lg(mat0);
 
+  n = 0; /* -Wall */
+
   C = *ptC; co = CO;
   if (co > 300 && co > 1.5 * li)
   { /* treat the rest at the end */
