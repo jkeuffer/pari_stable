@@ -45,6 +45,7 @@ YU = Yoshiaki Uchikawa
 
 Done for version 2.2.11 (released 21/05/2005):
   Fixed
+    1- a()=b(1,) --> error message
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):

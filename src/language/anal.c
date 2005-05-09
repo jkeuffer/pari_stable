@@ -1715,16 +1715,17 @@ skipdecl(void)
   if (*analyseur == ':') { analyseur++; skipexpr(); }
 }
 
+#define skip_arg() STMT_START {\
+  if (do_switch(0,matchcomma))\
+    matchcomma = 1;\
+  else { match_comma(); skipexpr(); skipdecl(); }\
+} STMT_END
+
 static void
 skip_arg_block(gp_args *f)
 {
   int i, matchcomma = 0;
-  for (i = f->narg; i; i--)
-  {
-    if (do_switch(0,matchcomma))
-      matchcomma = 1;
-    else { match_comma(); skipexpr(); skipdecl(); }
-  }
+  for (i = f->narg; i; i--) skip_arg();
 }
 
 static long
@@ -3116,8 +3117,8 @@ skipidentifier(void)
       }
       check_new_fun = NOT_CREATED_YET; match('(');
       matchcomma = 0;
-      while (*analyseur != ')') { match_comma(); skipexpr(); skipdecl(); };
-      match(')');
+      while (*analyseur != ')') skip_arg();
+      analyseur++; /* skip ')' */
       if (*analyseur == '=' && analyseur[1] != '=')
       {
 	skipping_fun_def++;
