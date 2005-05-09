@@ -223,18 +223,29 @@ rootmod2(GEN f, GEN pp)
   return gerepileupto(av, FpV_to_mod(y, pp));
 }
 
-/* assume x reduced mod p, monic, squarefree. Return one root, or NULL if
- * irreducible */
+/* assume x reduced mod p, monic. */
+static int
+FpX_quad_factortype(GEN x, GEN p)
+{
+  GEN b = (GEN)x[3], c = (GEN)x[2];
+  GEN D;
+
+  if (equaliu(p, 2)) {
+    if (!signe(b)) return 0;
+    return signe(c)? -1: 1;
+  }
+  D = subii(sqri(b), shifti(c,2));
+  return kronecker(D,p);
+}
+/* assume x reduced mod p, monic. Return one root, or NULL if irreducible */
 GEN
 FpX_quad_root(GEN x, GEN p, int unknown)
 {
-  GEN b = (GEN)x[3], c = (GEN)x[2];
-  GEN s,u,D;
+  GEN s, u, D, b = gel(x,3), c = gel(x,2);
 
-  if (equaliu(p, 2))
-  {
-    if (signe(c)) return NULL;
-    return gen_1;
+  if (equaliu(p, 2)) {
+    if (!signe(b)) return c;
+    return signe(c)? NULL: gen_1;
   }
   D = subii(sqri(b), shifti(c,2));
   D = remii(D,p);
@@ -245,11 +256,11 @@ FpX_quad_root(GEN x, GEN p, int unknown)
   u = addis(shifti(p,-1), 1); /* = 1/2 */
   return modii(mulii(u, subii(s,b)), p);
 }
-
 static GEN
 otherroot(GEN x, GEN r, GEN p)
 {
   GEN s = addii((GEN)x[3], r);
+  if (!signe(s)) return s;
   s = subii(p, s); if (signe(s) < 0) s = addii(s,p);
   return s;
 }
@@ -813,6 +824,45 @@ spec_FpXQ_pow(GEN x, GEN p, GEN S)
 static int
 cmpGsGs(GEN a, GEN b) { return (long)a - (long)b; }
 
+static GEN
+FpX_is_irred_2(GEN f, GEN p, long d)
+{
+  if (!d) return NULL;
+  if (d == 1) return gen_1;
+  return FpX_quad_factortype(f, p) == -1? gen_1: NULL;
+}
+static GEN
+FpX_degfact_2(GEN f, GEN p, long d)
+{
+  if (!d) return trivfact();
+  if (d == 1) return mkvec2(mkvecsmall(1), mkvecsmall(1));
+  switch(FpX_quad_factortype(f, p)) {
+    case 1: return mkvec2(mkvecsmall2(1,1), mkvecsmall2(1,1));
+    case -1:return mkvec2(mkvecsmall(2), mkvecsmall(1));
+    default: return mkvec2(mkvecsmall(1), mkvecsmall(2));
+  }
+}
+static GEN
+FpX_factor_2(GEN f, GEN p, long d)
+{
+  GEN r, s, R, S;
+  long v;
+  int sgn;
+  if (!d) return trivfact();
+  if (d == 1) return mkmat2(mkcol(f), mkvecsmall(1));
+  r = FpX_quad_root(f, p, 1);
+  if (!r) return mkmat2(mkcol(f), mkvecsmall(1));
+  v = varn(f);
+  s = otherroot(f, r, p);
+  if (signe(r)) r = subii(p, r);
+  if (signe(s)) s = subii(p, s);
+  sgn = cmpii(s, r); if (sgn < 0) swap(s,r);
+  R = deg1pol_i(gen_1, r, v);
+  if (!sgn) return mkmat2(mkcol(R), mkvecsmall(2));
+  S = deg1pol_i(gen_1, s, v);
+  return mkmat2(mkcol2(R,S), mkvecsmall2(1,1));
+}
+
 /* factor f mod pp.
  * flag = 1: return the degrees, not the factors
  * flag = 2: return NULL if f is not irreducible */
@@ -824,7 +874,11 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   GEN E,y,f2,g,g1,u,v,pd,q;
   GEN *t;
 
-  if (!d) return flag == 2? NULL: trivfact();
+  if (d <= 2) switch(flag) {
+    case 2: return FpX_is_irred_2(f, pp, d);
+    case 1: return FpX_degfact_2(f, pp, d);
+    case 0: return FpX_factor_2(f, pp, d);
+  }
   p = init_p(pp);
 
   /* to hold factors and exponents */
@@ -904,11 +958,13 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   return flag ? sort_factor_gen(y, cmpGsGs)
               : sort_factor(y, cmpii);
 }
+static GEN
+FpX_factmod_init(GEN f, GEN p) { return FpX_normalize(FpX_red(f,p), p); }
 GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
 {
   pari_sp av = avma;
-  GEN z = FpX_factcantor_i(f,pp,flag);
+  GEN z = FpX_factcantor_i(FpX_factmod_init(f,pp),pp,flag);
   if (flag == 2) { avma = av; return z; }
   return gerepileupto(av, z);
 }
@@ -941,11 +997,13 @@ factcantor0(GEN f, GEN pp, long flag)
 /* Use this function when you think f is reducible, and that there are lots of
  * factors. If you believe f has few factors, use FpX_nbfact(f,p)==1 instead */
 long
-FpX_is_irred(GEN f, GEN p) { return !!FpX_factcantor_i(f,p,2); }
+FpX_is_irred(GEN f, GEN p) {
+  return !!FpX_factcantor_i(FpX_factmod_init(f,p),p,2);
+}
 GEN
 FpX_degfact(GEN f, GEN p) {
   pari_sp av = avma;
-  GEN z = FpX_factcantor_i(f,p,1);
+  GEN z = FpX_factcantor_i(FpX_factmod_init(f,p),p,1);
   settyp(z[1], t_VECSMALL);
   settyp(z, t_MAT); return gerepilecopy(av, z);
 }
@@ -1156,7 +1214,7 @@ FpX_factor_i(GEN f, GEN pp)
   ulong p, k, j;
   GEN pps2, E, f2, p1, g1, u, *t;
 
-  if (!d) return trivfact();
+  if (d <= 2) return FpX_factor_2(f, pp, d);
   p = init_p(pp);
 
   /* to hold factors and exponents */
@@ -1202,7 +1260,7 @@ GEN
 FpX_factor(GEN f, GEN p)
 {
   pari_sp av = avma;
-  return gerepilecopy(av, FpX_factor_i(FpX_red(f,p), p));
+  return gerepilecopy(av, FpX_factor_i(FpX_factmod_init(f, p), p));
 }
 
 GEN
