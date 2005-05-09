@@ -781,9 +781,7 @@ nfiso0(GEN a, GEN b, long fliso)
     GEN db = nfb? (GEN)nfb[3]: ZX_disc(b);
     if (fliso)
     {
-      p1=gdiv(da,db);
-      if (typ(p1)==t_FRAC) p1=mulii((GEN)p1[1],(GEN)p1[2]);
-      if (!gcarreparfait(p1)) { avma=av; return gen_0; }
+      if (gcarreparfait(gdiv(da,db)) == gen_0) { avma=av; return gen_0; }
     }
     else
     {
