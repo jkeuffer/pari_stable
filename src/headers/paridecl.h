@@ -460,7 +460,7 @@ long    nfgetprec(GEN x);
 GEN     nfinit0(GEN x,long flag, long prec);
 GEN     nfnewprec(GEN nf, long prec);
 GEN     nfnewprec_i(GEN nf, long prec);
-GEN     polgalois(GEN x, long flag, long prec);
+GEN     polgalois(GEN x, long prec);
 GEN     rootsof1(GEN x);
 GEN     tschirnhaus(GEN x);
 

@@ -2439,7 +2439,12 @@ polgaloisnamesbig(long n, long k)
 
   sprintf(s, "%s/galdata/NAM%ld", pari_datadir, n);
   stream = fopen(s,"r");
-  if (!stream) err(talker,"galois files not available\n[missing %s]",s);
+  if (!stream) 
+  {
+    err(warner,"Galois names files not available, please upgrade galdata\n[missing %s]",s);
+    free(s); 
+    return strtoGENstr("");
+  }
   V = lisGEN(stream);
   if (!V || typ(V)!=t_VEC || k>=lg(V))
     err(talker,"galois files %s not compatible\n",s);
@@ -2449,9 +2454,9 @@ polgaloisnamesbig(long n, long k)
 }
 
 GEN
-galoisbig(GEN pol, long flag, long prec)
+galoisbig(GEN pol, long prec)
 {
-  GEN dpol;
+  GEN dpol, res;
   long *tab, t = 0;
   pari_sp av = avma;
   long tab8[]={0,
@@ -2512,14 +2517,10 @@ galoisbig(GEN pol, long flag, long prec)
     for (i = 1; i < lg(BR.r); i++) gunclone((GEN)BR.r[i]);
   }
   avma = av; 
-  if (!flag) return mkvec3s(tab[t], EVEN? 1: -1, t);
-  else
-  {
-    GEN z= cgetg(5,t_VEC);
-    z[1] = lstoi(tab[t]);
-    z[2] = lstoi(EVEN? 1: -1);
-    z[3] = lstoi(t);
-    z[4] = (long) polgaloisnamesbig(N,t);
-    return z;
-  }
+  res    = cgetg(5,t_VEC);
+  res[1] = lstoi(tab[t]);
+  res[2] = lstoi(EVEN? 1: -1);
+  res[3] = lstoi(t);
+  res[4] = (long) polgaloisnamesbig(N,t);
+  return res;
 }

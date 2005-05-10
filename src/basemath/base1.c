@@ -390,27 +390,23 @@ polgaloisnames(long a, long b)
 }
 
 static GEN
-galois_res(long d, long n, long s, long k, long flag)
+galois_res(long d, long n, long s, long k)
 {
   long kk=k;
+  GEN z = cgetg(5,t_VEC);
   if (!new_galois_format)
     kk = ((n == 24 && k == 6) || (n == 6 && k == 2))? 2: 1;
-  if (flag) 
-  {
-    GEN z= cgetg(5,t_VEC);
-    z[1] = lstoi(n);
-    z[2] = lstoi(s);
-    z[3] = lstoi(kk);
-    z[4] = (long) polgaloisnames(d,k);
-    return z;
-  }
-  return mkvec3s(n,s,kk);
+  z[1] = lstoi(n);
+  z[2] = lstoi(s);
+  z[3] = lstoi(kk);
+  z[4] = (long) polgaloisnames(d,k);
+  return z;
 }
 
-#define _res(a,b,c) galois_res(n,a,b,c,flag)
+#define _res(a,b,c) galois_res(n,a,b,c)
 
 GEN
-polgalois(GEN x, long flag, long prec)
+polgalois(GEN x, long prec)
 {
   pari_sp av = avma, av1;
   long i,j,k,n,f,l,l2,e,e1,pr,ind;
@@ -420,7 +416,6 @@ polgalois(GEN x, long flag, long prec)
                        1,4,5,6, 1,5,3,6, 1,6,3,4, 1,3,4,5, 1,6,2,5,
                        1,2,4,6, 1,5,2,4, 1,3,2,6, 1,2,3,5, 1,4,2,3};
   if (typ(x)!=t_POL) err(notpoler,"galois");
-  if (flag<0 || flag>1) err(flagerr,"galois");
   n=degpol(x); if (n<=0) err(constpoler,"galois");
   if (n>11) err(impl,"galois of degree higher than 11");
   x = primpart(x);
@@ -442,7 +437,7 @@ polgalois(GEN x, long flag, long prec)
      * or S_6 */
   }
   x1 = x = primitive_pol_to_monic(x,NULL); av1=avma;
-  if (n > 7) return galoisbig(x, flag, prec);
+  if (n > 7) return galoisbig(x, prec);
   for(;;)
   {
     double cb = cauchy_bound(x);
@@ -659,7 +654,8 @@ polgalois(GEN x, long flag, long prec)
 
 #undef _res
 
-GEN galois(GEN x, long prec) {return polgalois(x,0,prec);}
+/*Deprecated*/
+GEN galois(GEN x, long prec) {return polgalois(x,prec);}
 
 GEN
 galoisapply(GEN nf, GEN aut, GEN x)
