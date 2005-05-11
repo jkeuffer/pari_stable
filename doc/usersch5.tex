@@ -1307,6 +1307,22 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 %GEN     ZM_inv(GEN M, GEN dM);
 %GEN     QM_inv(GEN M, GEN dM);
 
+\fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{ZX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{ZX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
+
+\fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{ZX_sqr}{GEN x,GEN p} returms $\kbd{x}^2$. 
+
+The functions above are currently implemented through generic routines,
+but it might change in the future.
+
+\fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
+
 \subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but
 be wary. An \kbd{Fp} object is a \typ{INT} belonging to $[0,
@@ -1909,6 +1925,15 @@ place (destroys~\kbd{x}).
 where \kbd{A} and \kbd{B} are \kbd{QX}s.
 
 \subsec{\kbd{RgX}}.
+
+\fun{GEN}{RgX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{RgX_sub}{GEN x,GEN y} subtracts \kbd{x} and \kbd{y}. 
+
+\fun{GEN}{RgX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
+
+The functions above are currently implemented through the generic routines,
+but it might change in the future.
 
 \fun{GEN}{RgX_mul}{GEN x, GEN y} multiplies the two \typ{POL} (in the same
 variable) \kbd{x} and \kbd{y}. Uses Karatsuba algorithm.
