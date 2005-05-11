@@ -34,12 +34,6 @@ ZX_renormalize(GEN x, long lx)
   setlg(x, i+1); setsigne(x, i!=1); return x;
 }
 
-#define FpX_renormalize ZX_renormalize
-#define FpXX_renormalize ZX_renormalize
-#define FpXQX_renormalize ZX_renormalize
-#define ZX_mul RgX_mul
-#define ZX_sqr RgX_sqr
-
 /************************************************************************
  **                                                                    ** 
  **                      Arithmetic in Z/pZ[X]                         **

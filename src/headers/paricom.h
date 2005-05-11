@@ -277,6 +277,20 @@ enum manage_var_t {
 #define FpX_rem(x,y,p)   (FpX_divrem((x),(y),(p), ONLY_REM))
 #define Flx_div(x,y,p)   (Flx_divrem((x),(y),(p), NULL))
 
+#define FpX_renormalize   ZX_renormalize
+#define FpXX_renormalize  ZX_renormalize
+#define FpXQX_renormalize ZX_renormalize
+
+#define RgX_add gadd
+#define RgX_sub gsub
+#define RgX_neg gneg
+
+#define ZX_add RgX_add
+#define ZX_sub RgX_sub
+#define ZX_neg RgX_neg
+#define ZX_mul RgX_mul
+#define ZX_sqr RgX_sqr
+
 #define zv_to_ZV(x)    (vecsmall_to_vec((x)))
 #define zv_to_ZC(x)    (vecsmall_to_col((x)))
 #define ZV_to_zv(x)    (vec_to_vecsmall((x)))
