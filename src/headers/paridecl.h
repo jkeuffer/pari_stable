@@ -1629,6 +1629,7 @@ GEN     RgX_to_FqX(GEN x, GEN T, GEN p);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);
 int     ZX_is_squarefree(GEN x);
+GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_resultant(GEN A, GEN B);
 GEN     ZX_QX_resultant(GEN A, GEN B);
 GEN     ZX_s_add(GEN y,long x);
