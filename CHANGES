@@ -51,7 +51,7 @@ Done for version 2.2.11 (released 21/05/2005):
 BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4.
-BA  2- New functions ZX_add, ZX_sub, ZX_neg.
+BA  2- New functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
