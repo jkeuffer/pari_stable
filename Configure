@@ -29,10 +29,10 @@ extract_dir_list="$doc_dir $emacs_dir $misc_dir" # for extract_files
 
 cd $config_dir
 # Process options, initialize
+. ./get_head # do we need head -n # or head -# ?
 . ./get_config_options
 ####################### CONFIGURE - SHELL ###################################
 . ./get_nl # how to get echo without \n ? (for config questions)
-. ./get_head # do we need head -n # or head -# ?
 . ./get_PATH
 #  We might need the following :
 echo Looking for some tools first ...
