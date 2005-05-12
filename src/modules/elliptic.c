@@ -1202,8 +1202,7 @@ ellzeta(GEN om, GEN z, long prec)
     }
   }
   y = mulcxI(gmul(gdiv(pi2,T.W2), y));
-  if (et) y = gadd(y, et);
-  return gerepileupto(av, y);
+  return et? gerepileupto(av, gadd(y,et)): gerepilecopy(av, y);
 }
 
 /* if flag=0, return ellsigma, otherwise return log(ellsigma) */
