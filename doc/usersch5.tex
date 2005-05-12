@@ -1359,24 +1359,18 @@ of \kbd{FpX}s).
 \noindent Now, except for \kbd{p}, the operands and outputs are all \kbd{FpX}
 objects. Results are undefined on other inputs.
 
-\fun{GEN}{FpX_add}{GEN x,GEN y, GEN p} adds \kbd{x} and \kbd{y}. If \kbd{p}
-is \kbd{NULL}, the result is not reduced mod \kbd{p} (ordinary \typ{INT}s)
+\fun{GEN}{FpX_add}{GEN x,GEN y, GEN p} adds \kbd{x} and \kbd{y}. 
 
 \fun{GEN}{FpX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
 \fun{GEN}{FpX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
 $\kbd{l} = \kbd{lg(x)}$, in place.
 
-\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} subtracts \kbd{y} from \kbd{x}. If
-\kbd{p} is \kbd{NULL}, the result is not reduced mod \kbd{p} (ordinary
-\typ{INT}s)
+\fun{GEN}{FpX_sub}{GEN x,GEN y,GEN p} subtracts \kbd{y} from \kbd{x}. 
 
-\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} multiplies \kbd{x} and \kbd{y}. If
-\kbd{p} is \kbd{NULL}, the result is not reduced mod \kbd{p} (ordinary
-\typ{INT}s)
+\fun{GEN}{FpX_mul}{GEN x,GEN y,GEN p} multiplies \kbd{x} and \kbd{y}. 
 
-\fun{GEN}{FpX_sqr}{GEN x,GEN p} returms $\kbd{x}^2$. If \kbd{p} is
-\kbd{NULL}, the result is not reduced mod \kbd{p} (ordinary \typ{INT}s)
+\fun{GEN}{FpX_sqr}{GEN x,GEN p} returms $\kbd{x}^2$. 
 
 \fun{GEN}{FpX_divrem}{GEN x, GEN y, GEN p, GEN *pr} returns the quotient
 of \kbd{x} by \kbd{y}, and sets \kbd{pr} to the remainder.
