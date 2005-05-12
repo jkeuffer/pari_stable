@@ -878,15 +878,18 @@ GEN
 gerfc(GEN x, long prec)
 {
   pari_sp av;
-  GEN p1, p2;
+  GEN z, sqrtpi;
 
-  if (typ(x)!=t_REAL) return transc(&gerfc, x, prec);
+  if (typ(x) != t_REAL) {
+    x = gtofp(x, prec);
+    if (typ(x) != t_REAL) err(typeer,"erfc");
+  }
   if (!signe(x)) return real_1(prec);
-  av = avma; p1 = incgam(ghalf,gsqr(x),prec);
-  p2 = sqrtr(mppi(lg(x)));
-  p1 = divrr(p1,p2);
-  if (signe(x) < 0) p1 = subsr(2,p1);
-  return gerepileupto(av,p1);
+  av = avma; sqrtpi = sqrtr(mppi(lg(x)));
+  z = incgam0(ghalf, gsqr(x), sqrtpi, prec);
+  z = divrr(z, sqrtpi);
+  if (signe(x) < 0) z = subsr(2,z);
+  return gerepileupto(av,z);
 }
 
 /***********************************************************************/
