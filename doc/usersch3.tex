@@ -6204,13 +6204,13 @@ generating sets (such as \tet{mathnf}, \tet{qflll}, etc.) take matrices as
 arguments. As usual, the generating vectors are taken to be the
 \emph{columns} of the given matrix.
 
-\subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic
-dependence}\label{se:algdep} $x$ being real, complex, or $p$-adic, finds a
-polynomial of degree at most $k$ with integer coefficients having $x$ as
-approximate root. Note that the polynomial which is obtained is not
-necessarily the ``correct'' one (it's not even guaranteed to be
-irreducible!). One can check the closeness either by a polynomial evaluation
-or substitution, or by computing the roots of the polynomial given by algdep.
+\subsecidx{algdep}$(x,k,\{\fl=0\})$:\sidx{algebraic dependence}
+\label{se:algdep} $x$ being real, complex, or $p$-adic, finds a polynomial of
+degree at most $k$ with integer coefficients having $x$ as approximate root.
+Note that the polynomial which is obtained is not necessarily the ``correct''
+one (it's not even guaranteed to be irreducible!). One can check the
+closeness either by a polynomial evaluation or substitution, or by computing
+the roots of the polynomial given by algdep.
 
 If $x$ is $p$-adic, $\fl$ is meaningless and the algorithm LLL-reduces the
 ``dual lattice'' corresponding to the powers of $x$.
