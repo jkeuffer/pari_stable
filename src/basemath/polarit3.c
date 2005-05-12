@@ -3574,12 +3574,12 @@ ffinit_Artin_Shreier(GEN ip, long l)
   GEN x,xp,yp,y2pm1;
   GEN P, Q;
   xp=monomial(gen_1,p,0);
-  P = FpX_sub(xp, deg1pol_i(gen_1,gen_1,0), NULL);
+  P = ZX_sub(xp, deg1pol_i(gen_1,gen_1,0));
   if (l == 1) return P;
   x=polx[0];
   yp=monomial(gen_1,p,MAXVARN);
   y2pm1=monomial(gen_1,2*p-1,MAXVARN);
-  Q = gsub(FpX_sub(xp, x, NULL), FpX_sub(y2pm1, yp, NULL));
+  Q = gsub(ZX_sub(xp, x), ZX_sub(y2pm1, yp));
   for (i = 2; i <= l; ++i)
   {
     setvarn(P,MAXVARN);
