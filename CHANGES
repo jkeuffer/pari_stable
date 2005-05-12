@@ -50,12 +50,16 @@ Done for version 2.2.11 (released 21/05/2005):
     2- agm(-1.0000000004656,1) --> oo loop [Bug #214]
     3- sdivss_rem(x,y,&rem) did not set rem, contrary to the documentation
 BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
+
   Changed
-BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, and Flm_Flv_mul to Flm_Flc_mul.
-    2- retain 'CHANGES' revision after 'make distrib'
+BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, and Flm_Flv_mul to Flm_Flc_mul
+BA  2- FpXV_FpV_innerprod renamed to FpXV_FpC_mul and FlxV_Flv_innerprod to
+       FlxV_Flc_mul
+    3- retain 'CHANGES' revision after 'make distrib'
+
   Added
-BA  1- polgalois(): 4th component: transitive group name following GAP4.
-BA  2- New functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul.
+BA  1- polgalois(): 4th component: transitive group name following GAP4
+BA  2- New functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):

@@ -414,7 +414,7 @@ FpXQ_div(GEN x,GEN y,GEN T,GEN p)
 }
 
 GEN
-FpXV_FpV_innerprod(GEN V, GEN W, GEN p)
+FpXV_FpC_mul(GEN V, GEN W, GEN p)
 {
   pari_sp ltop=avma;
   long i;
@@ -476,7 +476,7 @@ brent_kung_optpow(long d, long n)
   return (d+l-1) / l;
 }
 
-/*Close to FpXV_FpV_innerprod*/
+/*Close to FpXV_FpC_mul*/
 
 static GEN
 spec_compo_powers(GEN P, GEN V, long a, long n)
@@ -1416,7 +1416,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
   GEN  PV=RgX_to_RgV(P, lgpol(P));
   M=cgetg(l+1,t_VEC);
   M[1]=(long)scalarpol(poleval(P,gen_1),v);
-  M[2]=(long)FpXV_FpV_innerprod(V,PV,p);
+  M[2]=(long)FpXV_FpC_mul(V,PV,p);
   btop=avma;
   gptr[0]=&Mi;
   gptr[1]=&W;
@@ -1429,7 +1429,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
     for(j=1;j<lV;j++)
       W2[j]=(long)FpXQ_mul((GEN)W[j],(GEN)V[j],T,p);
     bbot=avma;
-    Mi=FpXV_FpV_innerprod(W2,PV,p);
+    Mi=FpXV_FpC_mul(W2,PV,p);
     W=gcopy(W2);
     gerepilemanysp(btop,bbot,gptr,2);
     btop=(pari_sp)W;
@@ -1451,7 +1451,7 @@ FlxqV_Flx_Frobenius(GEN V, GEN P, GEN T, ulong p)
   long lV=lg(V);
   M=cgetg(l+1,t_VEC);
   M[1]=(long)Fl_to_Flx(Flx_eval(P,1,p),v);
-  M[2]=(long)FlxV_Flv_innerprod(V,PV,p);
+  M[2]=(long)FlxV_Flc_mul(V,PV,p);
   btop=avma;
   gptr[0]=&Mi;
   gptr[1]=&W;
@@ -1464,7 +1464,7 @@ FlxqV_Flx_Frobenius(GEN V, GEN P, GEN T, ulong p)
     for(j=1;j<lV;j++)
       W2[j]=(long)Flxq_mul((GEN)W[j],(GEN)V[j],T,p);
     bbot=avma;
-    Mi=FlxV_Flv_innerprod(W2,PV,p);
+    Mi=FlxV_Flc_mul(W2,PV,p);
     W=gcopy(W2);
     gerepilemanysp(btop,bbot,gptr,2);
     btop=(pari_sp)W;

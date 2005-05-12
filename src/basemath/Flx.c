@@ -1488,7 +1488,7 @@ Flxq_powers(GEN x, long l, GEN T, ulong p)
 }
 
 GEN
-FlxV_Flv_innerprod(GEN V, GEN W, ulong p)
+FlxV_Flc_mul(GEN V, GEN W, ulong p)
 {
   pari_sp ltop=avma;
   long i;

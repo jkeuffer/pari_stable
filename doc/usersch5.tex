@@ -1433,9 +1433,9 @@ work with any non-zero \typ{INT} but is not efficient in this case).
 \fun{GEN}{FpX_eval}{GEN x, GEN y, GEN p} evaluates the \kbd{FpX}~\kbd{x}
 at the \kbd{Fp}~\kbd{y}. The result is an~\kbd{Fp}.
 
-\fun{GEN}{FpXV_FpV_innerprod}{GEN V, GEN W, GEN p} returns
-$\sum_{i=1}^{n} \kbd{V[i] * W[i]}$, where \kbd{V} is a vector of $n$
-\kbd{FpX}, and \kbd{W} is a vector of at least $n$ \kbd{INT}s.
+\fun{GEN}{FpXV_FpC_mul}{GEN V, GEN W, GEN p} multiplies a line vector
+of\kbd{FpX} by a column vector of \kbd{Fp} (scalar product). The result is
+an~\kbd{FpX}.
 
 \fun{GEN}{FpXV_prod}{GEN V, GEN p}, \kbd{V} being a vector of \kbd{FpX},
 returns their product.
@@ -1851,8 +1851,7 @@ Euclidean quotient of the \kbd{Flx}~\kbd{A} by $X - \kbd{a}$, and sets
 
 \fun{ulong}{Flx_eval}{GEN x, ulong y, ulong p}, as \kbd{FpX\_eval}.
 
-\fun{GEN}{FlxV_Flv_innerprod}{GEN V, GEN W, ulong p}, as
-\kbd{FpXV\_FpV\_innerprod}.
+\fun{GEN}{FlxV_Flc_mul}{GEN V, GEN W, ulong p}, as \kbd{FpXV\_FpC\_mul}.
 
 \fun{int}{Flx_is_squarefree}{GEN z, ulong p}
 
