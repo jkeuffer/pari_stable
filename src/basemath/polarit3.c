@@ -1,6 +1,6 @@
 /* $Id$
 
-Copyright (C) 2000-2004  The PARI group.
+Copyright (C) 2000-2005  The PARI group.
 
 This file is part of the PARI/GP package.
 
@@ -32,6 +32,56 @@ ZX_renormalize(GEN x, long lx)
     if (signe((GEN)x[i])) break;
   stackdummy(x + (i+1), lg(x) - (i+1));
   setlg(x, i+1); setsigne(x, i!=1); return x;
+}
+
+GEN
+ZX_add(GEN x, GEN y)
+{
+  long lx,ly,i;
+  GEN z;
+  lx = lg(x); ly = lg(y); if (lx < ly) swapspec(x,y, lx,ly);
+  z = cgetg(lx,t_POL); z[1] = x[1];
+  for (i=2; i<ly; i++) z[i]=laddii((GEN)x[i],(GEN)y[i]);
+  for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
+  z = ZX_renormalize(z, lx);
+  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
+  return z;
+}
+
+GEN
+ZX_sub(GEN x,GEN y)
+{
+  long lx,ly,i,lz;
+  GEN z;
+  lx = lg(x); ly = lg(y);
+  lz=max(lx,ly);
+  z = cgetg(lz,t_POL);
+  if (lx >= ly)
+  {
+    z[1] = x[1];
+    for (i=2; i<ly; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
+    for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
+    if (lx == ly) z = ZX_renormalize(z, lz);
+  }
+  else
+  {
+    z[1] = y[1];
+    for (i=2; i<lx; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
+    for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
+  }
+  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
+  return z;
+}
+
+GEN
+ZX_neg(GEN x)
+{
+  long i,d=lg(x);
+  GEN y;
+  y=cgetg(d,t_POL); y[1]=x[1];
+  for(i=2;i<d;i++)
+    y[i]=lnegi((GEN)x[i]);
+  return y;
 }
 
 /************************************************************************
@@ -198,54 +248,28 @@ I don't like C++.  I am wrong.
 GEN
 FpX_add(GEN x,GEN y,GEN p)
 {
-  long lx,ly,i;
-  GEN z;
-  lx = lg(x); ly = lg(y); if (lx < ly) swapspec(x,y, lx,ly);
-  z = cgetg(lx,t_POL); z[1] = x[1];
-  for (i=2; i<ly; i++) z[i]=laddii((GEN)x[i],(GEN)y[i]);
-  for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
-  z = FpX_renormalize(z, lx);
-  if (!lgpol(z)) { avma = (pari_sp)(z + lx); return zeropol(varn(x)); }
-  if (p) z = FpX_red(z, p);
-  return z;
+  GEN z = ZX_add(x,y);
+  return p? FpX_red(z, p): z;
 }
 
 GEN
 FpX_sub(GEN x,GEN y,GEN p)
 {
-  long lx,ly,i,lz;
-  GEN z;
-  lx = lg(x); ly = lg(y);
-  lz=max(lx,ly);
-  z = cgetg(lz,t_POL);
-  if (lx >= ly)
-  {
-    z[1] = x[1];
-    for (i=2; i<ly; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
-    for (   ; i<lx; i++) z[i]=licopy((GEN)x[i]);
-    if (p) z = FpX_red(z, p);
-    else if (lx == ly) z = FpX_renormalize(z, lz);
-  }
-  else
-  {
-    z[1] = y[1];
-    for (i=2; i<lx; i++) z[i]=lsubii((GEN)x[i],(GEN)y[i]);
-    for (   ; i<ly; i++) z[i]=lnegi((GEN)y[i]);
-    if (p) z = FpX_red(z, p);
-  }
-  if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
-  return z;
+  GEN z = ZX_sub(x,y);
+  return p? FpX_red(z, p): z;
 }
+
 GEN
 FpX_mul(GEN x,GEN y,GEN p)
 {
-  GEN z = RgX_mul(x, y);
+  GEN z = ZX_mul(x, y);
   return p? FpX_red(z, p): z;
 }
+
 GEN
 FpX_sqr(GEN x,GEN p)
 {
-  GEN z = RgX_sqr(x);
+  GEN z = ZX_sqr(x);
   return p? FpX_red(z, p): z;
 }
 
@@ -375,7 +399,7 @@ FpXV_FpV_innerprod(GEN V, GEN W, GEN p)
   long i;
   GEN z = FpX_Fp_mul((GEN)V[1],(GEN)W[1],NULL);
   for(i=2;i<lg(V);i++)
-    z=FpX_add(z,FpX_Fp_mul((GEN)V[i],(GEN)W[i],NULL),NULL);
+    z=ZX_add(z,FpX_Fp_mul((GEN)V[i],(GEN)W[i],NULL));
   return gerepileupto(ltop,FpX_red(z,p));
 }
 
@@ -440,7 +464,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n)
   GEN z;
   z = scalarpol((GEN)P[2+a],varn(P));
   for(i=1;i<=n;i++)
-    z=FpX_add(z,FpX_Fp_mul((GEN)V[i+1],(GEN)P[2+a+i],NULL),NULL);
+    z=ZX_add(z,FpX_Fp_mul((GEN)V[i+1],(GEN)P[2+a+i],NULL));
   return z;
 }
 /*Try to implement algorithm in Brent & Kung (Fast algorithms for
@@ -471,12 +495,12 @@ FpX_FpXQV_compo(GEN P, GEN V, GEN T, GEN p)
   while(d>=l-1)
   {
     u=spec_compo_powers(P,V,d-l+2,l-2);
-    z=FpX_add(u,FpXQ_mul(z,(GEN)V[l],T,p),NULL);
+    z=ZX_add(u,FpXQ_mul(z,(GEN)V[l],T,p));
     d-=l-1;
     cnt++;
   }
   u=spec_compo_powers(P,V,0,d);
-  z=FpX_add(u,FpXQ_mul(z,(GEN)V[d+2],T,p),NULL);
+  z=ZX_add(u,FpXQ_mul(z,(GEN)V[d+2],T,p));
   cnt++;
   if (DEBUGLEVEL>=8) fprintferr("FpX_FpXQV_compo: %d FpXQ_mul [%d]\n",cnt,l-1);
   return gerepileupto(ltop,FpX_red(z,p));
@@ -1170,7 +1194,7 @@ static GEN fflgen(GEN l, long e, GEN r, GEN T ,GEN p, GEN *zeta)
     z = gaddgs(z, k%pp);
     while(u)
     {
-      z = FpX_add(z, monomial(utoipos(u%pp),v,x), NULL);
+      z = ZX_add(z, monomial(utoipos(u%pp),v,x));
       u /= pp; v++;
     }
     if ( DEBUGLEVEL>=6 ) fprintferr("FF l-Gen:next %Z\n",z);
@@ -1629,9 +1653,9 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
       Bp=RgV_to_RgX(Bp,vq);
       if (DEBUGLEVEL>=4) msgtimer("FpM_invimage");
     }
-  }/*FpX_add is not clean, so we must do it *before* lbot=avma*/
-  A=FpX_add(A,Ap,NULL);
-  B=FpX_add(B,Bp,NULL);
+  }
+  A=ZX_add(A,Ap);
+  B=ZX_add(B,Bp);
   lbot=avma;
   *SP=FpX_red(A,l);
   *SQ=FpX_red(B,l);

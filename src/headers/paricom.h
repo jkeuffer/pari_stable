@@ -285,9 +285,6 @@ enum manage_var_t {
 #define RgX_sub gsub
 #define RgX_neg gneg
 
-#define ZX_add RgX_add
-#define ZX_sub RgX_sub
-#define ZX_neg RgX_neg
 #define ZX_mul RgX_mul
 #define ZX_sqr RgX_sqr
 
