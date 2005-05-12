@@ -206,14 +206,25 @@ RgX_to_FpX(GEN x, GEN p)
   for (i = 2; i < l; i++) z[i] = (long)Rg_to_Fp((GEN)x[i], p);
   return normalizepol_i(z, l);
 }
+
 GEN
 RgV_to_FpV(GEN x, GEN p)
 {
   long i, l = lg(x);
-  GEN z = cgetg(l, typ(x)); z[1] = x[1];
+  GEN z = cgetg(l, t_VEC); z[1] = x[1];
   for (i = 2; i < l; i++) z[i] = (long)Rg_to_Fp((GEN)x[i], p);
   return z;
 }
+
+GEN
+RgC_to_FpC(GEN x, GEN p)
+{
+  long i, l = lg(x);
+  GEN z = cgetg(l, t_COL); z[1] = x[1];
+  for (i = 2; i < l; i++) z[i] = (long)Rg_to_Fp((GEN)x[i], p);
+  return z;
+}
+
 GEN
 RgX_to_FpXQX(GEN x, GEN T, GEN p)
 {

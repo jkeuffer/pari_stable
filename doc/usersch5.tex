@@ -1356,7 +1356,12 @@ underlying prime $p$. Returns \kbd{lift(z * Mod(1,p))}, normalized.
 \kbd{FpX} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
 
 \fun{GEN}{RgV_to_FpV}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
-returns the \kbd{FpV} obtained by applying \kbd{Rg\_to\_Fp} coefficientwise.
+returns the \kbd{FpV} (as a \typ{VEC}) obtained by applying \kbd{Rg\_to\_Fp}
+coefficientwise.
+
+\fun{GEN}{RgC_to_FpC}{GEN z, GEN p}, \kbd{z} a \typ{VEC} or \typ{COL},
+returns the \kbd{FpC} (as a \typ{COL}) obtained by applying \kbd{Rg\_to\_Fp}
+coefficientwise.
 
 \fun{GEN}{FpX_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZX}. Returns \kbd{z *
 Mod(1,p)}, normalized. Hence the returned value has \typ{INTMOD}

@@ -1623,6 +1623,7 @@ GEN     FqX_sqr(GEN x, GEN T, GEN p);
 GEN     QXQ_inv(GEN A, GEN B);
 ulong   Rg_to_Fl(GEN x, ulong p);
 GEN     Rg_to_Fp(GEN x, GEN p);
+GEN     RgC_to_FpC(GEN x, GEN p);
 GEN     RgV_to_FpV(GEN x, GEN p);
 GEN     RgX_to_FpX(GEN x, GEN p);
 GEN     RgX_to_FqX(GEN x, GEN T, GEN p);
