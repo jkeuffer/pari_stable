@@ -630,8 +630,8 @@ vector/matrix.
 
 \syn{binaire}{x}.
 
-\subsecidx{bitand}$(x,y)$:\label{se:bitand} bitwise \tet{and}\sidx{bitwise
-and} of two integers $x$ and $y$, that is the integer
+\subsecidx{bitand}$(x,y)$:\label{se:bitand} bitwise \tet{and}
+\sidx{bitwise and}of two integers $x$ and $y$, that is the integer
 $$\sum_i (x_i~\kbd{and}~y_i) 2^i$$
 
 Negative numbers behave $2$-adically, i.e.~the result is the $2$-adic limit
@@ -682,9 +682,9 @@ a vector for $n$.
 
 \syn{bittest}{x,n}, where $n$ and the result are \kbd{long}s.
 
-\subsecidx{bitxor}$(x,y)$: bitwise (exclusive) \tet{or}\sidx{bitwise
-exclusive or} of two integers $x$ and $y$, that is the integer $$\sum
-(x_i~\kbd{xor}~y_i) 2^i$$
+\subsecidx{bitxor}$(x,y)$: bitwise (exclusive) \tet{or}
+\sidx{bitwise exclusive or}of two integers $x$ and $y$, that is the integer
+$$\sum (x_i~\kbd{xor}~y_i) 2^i$$
 
 See \secref{se:bitand} for the behaviour for negative arguments.
 
@@ -6432,17 +6432,17 @@ form and \kbd{B} is the basis change so that $M=B^{-1}FB$.
 
 \syn{hess}{x}.
 
-\subsecidx{mathilbert}$(x)$: $x$ being a \kbd{long}, creates the \idx{Hilbert
-matrix} of order $x$, i.e.~the matrix whose coefficient ($i$,$j$) is $1/
-(i+j-1)$.
+\subsecidx{mathilbert}$(x)$: $x$ being a \kbd{long}, creates the
+\idx{Hilbert matrix}of order $x$, i.e.~the matrix whose coefficient
+($i$,$j$) is $1/ (i+j-1)$.
 
 \syn{mathilbert}{x}.
 
 \subsecidx{mathnf}$(x,\{\fl=0\})$: if $x$ is a (not necessarily square)
-matrix with integer entries, finds the \emph{upper triangular} \idx{Hermite
-normal form} of $x$. If the rank of $x$ is equal to its number of rows, the
-result is a square matrix. In general, the columns of the result form a basis
-of the lattice spanned by the columns of $x$.
+matrix with integer entries, finds the \emph{upper triangular}
+\idx{Hermite normal form} of $x$. If the rank of $x$ is equal to its number
+of rows, the result is a square matrix. In general, the columns of the result
+form a basis of the lattice spanned by the columns of $x$.
 
 If $\fl=0$, uses the naive algorithm. This should never be used if the
 dimension is at all large (larger than 10, say). It is recommanded to use
