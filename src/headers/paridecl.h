@@ -1627,6 +1627,8 @@ GEN     RgV_to_FpV(GEN x, GEN p);
 GEN     RgX_to_FpX(GEN x, GEN p);
 GEN     RgX_to_FqX(GEN x, GEN T, GEN p);
 GEN     ZX_QX_resultant(GEN A, GEN B);
+GEN     ZX_Z_add(GEN y,GEN x);
+GEN     ZX_Z_mul(GEN y,GEN x);
 GEN     ZX_add(GEN x, GEN y);
 GEN     ZX_caract(GEN A, GEN B, long v);
 GEN     ZX_disc(GEN x);

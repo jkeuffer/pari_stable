@@ -1300,12 +1300,14 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 %int     ZX_is_squarefree(GEN x);
 %GEN     ZX_QX_resultant(GEN A, GEN B);
 %GEN     ZX_resultant(GEN A, GEN B);
-%GEN     ZX_s_add(GEN y,long x);
 %GEN     QX_invmod(GEN A, GEN B);
 %long    ZX_valuation(GEN x, GEN *Z);
 %
 %GEN     ZM_inv(GEN M, GEN dM);
 %GEN     QM_inv(GEN M, GEN dM);
+
+\fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
+$\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{ZX_add}{GEN x,GEN y} adds \kbd{x} and \kbd{y}. 
 
@@ -1313,12 +1315,13 @@ resp.~\typ{POL}) with \typ{INT} coefficients.
 
 \fun{GEN}{ZX_neg}{GEN x,GEN p} returns $-\kbd{x}$.
 
+\fun{GEN}{ZX_Z_add}{GEN x,GEN y} adds the integer \kbd{y} to the polynomial \kbd{x}. 
+
+\fun{GEN}{ZX_Z_mul}{GEN x,GEN y} multiplies the polynomial \kbd{x} by the integer \kbd{y}. 
+
 \fun{GEN}{ZX_mul}{GEN x,GEN y} multiplies \kbd{x} and \kbd{y}. 
 
 \fun{GEN}{ZX_sqr}{GEN x,GEN p} returms $\kbd{x}^2$. 
-
-\fun{GEN}{ZX_renormalize}{GEN x, long l}, as \kbd{normalizepol}, where
-$\kbd{l} = \kbd{lg(x)}$, in place.
 
 \subsec{\kbd{FpX}}. Let \kbd{p} an understood \typ{INT}, to be given in
 the function arguments; in practice \kbd{p} is not assumed to be prime, but

@@ -84,6 +84,45 @@ ZX_neg(GEN x)
   return y;
 }
 
+GEN
+ZX_Z_add(GEN y, GEN x)
+{
+  GEN z;
+  long lz, i;
+  if (!signe(y))
+    return scalarpol(x,varn(y));
+  lz=lg(y);
+  z=cgetg(lz,t_POL);
+  z[1]=y[1];
+  z[2]=laddii(gel(y,2),x);
+  for(i=3;i<lz;i++)
+    z[i]=licopy(gel(y,i));
+  if (lz==2) z = ZX_renormalize(z,lz);
+  return z;
+}
+
+GEN
+ZX_s_add(GEN y, long x)
+{
+  return ZX_Z_add(y,stoi(x));
+}
+
+/*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
+
+GEN
+ZX_Z_mul(GEN y,GEN x)
+{
+  GEN z;
+  long i;
+  if (!signe(x)) 
+    return zeropol(varn(y));
+  z=cgetg(lg(y),t_POL);
+  z[1]=y[1];
+  for(i=2;i<lg(y);i++)
+    z[i]=lmulii((GEN)y[i],x);
+  return z;
+}
+
 /************************************************************************
  **                                                                    ** 
  **                      Arithmetic in Z/pZ[X]                         **
@@ -233,7 +272,7 @@ FpX_neg(GEN x,GEN p)
 }
 /**********************************************************************
 Unclean functions, do not garbage collect.
-This is a feature: The malloc is corrupted only by the call to FpX_red
+This is a feature: The stack is corrupted only by the call to FpX_red
 so garbage collecting so often is not desirable.
 FpX_red can sometime be avoided by passing NULL for p.
 In this case the function is usually clean (see below for detail)
@@ -270,6 +309,13 @@ GEN
 FpX_sqr(GEN x,GEN p)
 {
   GEN z = ZX_sqr(x);
+  return p? FpX_red(z, p): z;
+}
+
+GEN
+FpX_Fp_mul(GEN x,GEN y,GEN p)
+{
+  GEN z = ZX_Z_mul(x,y);
   return p? FpX_red(z, p): z;
 }
 
@@ -321,36 +367,6 @@ FpX_Fp_add(GEN y,GEN x,GEN p)
   if (!signe(y[2]) && degpol(y) == 0) return zeropol(varn(y));
   return y;
 }
-GEN
-ZX_s_add(GEN y,long x)
-{
-  if (!x) return y;
-  if (!signe(y))
-    return scalarpol(stoi(x),varn(y));
-  y[2] = laddis((GEN)y[2],x);
-  if (!signe(y[2]) && degpol(y) == 0) return zeropol(varn(y));
-  return y;
-}
-/* y is a polynomial in ZZ[X] and x an integer.
- * If p is NULL, no reduction is performed and return x*y
- *
- * else the result is lift(y*x*Mod(1,p))
- */
-GEN
-FpX_Fp_mul(GEN y,GEN x,GEN p)
-{
-  GEN z;
-  int i;
-  if (!signe(x))
-    return zeropol(varn(y));
-  z=cgetg(lg(y),t_POL);
-  z[1]=y[1];
-  for(i=2;i<lg(y);i++)
-    z[i]=lmulii((GEN)y[i],x);
-  if(!p) return z;
-  return FpX_red(z,p);
-}
-
 /* as above over Fp[X] */
 GEN
 FpX_rescale(GEN P, GEN h, GEN p)
