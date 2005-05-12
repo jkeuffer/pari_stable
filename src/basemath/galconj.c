@@ -487,7 +487,7 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
     }
     Wr = W;
     S = FpXQ_mul(Wr, FpX_FpXQV_compo(Pr, Spow, Qr, q),Qr,q);
-    S = FpX_sub(Sr, S, NULL);
+    S = ZX_sub(Sr, S);
     lbot = avma;
     Wr = gcopy(Wr);
     S = FpX_red(S, q);
@@ -683,7 +683,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       {
 	u = v;
 	for (j = 1; j < m; j++)
-	  u = FpX_add(u, gmael(C,SG[pf[j]],j),NULL);
+	  u = ZX_add(u, gmael(C,SG[pf[j]],j));
 	u = FpX_center(FpX_red(u, gl->Q), gl->Q);
 	if (poltopermtest(u, gl, frob))
 	{
@@ -2007,8 +2007,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
   res = (GEN) scalarpol((GEN)u[2],varn(u));
   for (i = 1; i < d ; i++)
   {
-    GEN z;
-    z = FpX_Fp_mul((GEN) liftpow[i], (GEN) u[i + 2],NULL);
+    GEN z = ZX_Z_mul((GEN) liftpow[i], (GEN) u[i + 2]);
     res = FpX_add(res,z ,gl->Q);
   }
   res = FpX_center(FpX_Fp_mul(res,gl->den,gl->Q), gl->Q);
@@ -2133,15 +2132,15 @@ s4galoisgen(struct galois_lift *gl)
       avm1 = avma;
       for (j2 = 0; j2 < 4; j2++)
       {
-	u2 = FpX_add(u1, FpXQ_mul((GEN) bezoutcoeff[sg[3]], 
-				       (GEN) pauto[1 + j2],TQ,Q),NULL);
+	u2 = ZX_add(u1, FpXQ_mul((GEN) bezoutcoeff[sg[3]], 
+				       (GEN) pauto[1 + j2],TQ,Q));
 	u2 = FpX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[4]], (GEN)
 				       pauto[((-j2) & 3) + 1],TQ,Q),Q);
 	avm2 = avma;
 	for (j3 = 0; j3 < 4; j3++)
 	{
-	  u3 = FpX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[1]],
-					 (GEN) pauto[1 + j3],TQ,Q),NULL);
+	  u3 = ZX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[1]],
+					 (GEN) pauto[1 + j3],TQ,Q));
 	  u3 = FpX_add(u3, FpXQ_mul((GEN) bezoutcoeff[sg[2]], (GEN)
 					 pauto[((-j3) & 3) + 1],TQ,Q),Q);
 	  if (DEBUGLEVEL >= 4)
@@ -2244,14 +2243,14 @@ suites4_2:
       i = h + abc - g;
       u = FpXQ_mul((GEN) pauto[(g & 3) + 1],
 		   (GEN) bezoutcoeff[sg[1]],TQ,Q);
-      u = FpX_add(u, FpXQ_mul((GEN) pauto[((-g) & 3) + 1],
-			      (GEN) bezoutcoeff[sg[4]],TQ,Q),NULL);
-      u = FpX_add(u, FpXQ_mul((GEN) pauto[(h & 3) + 1],
-			      (GEN) bezoutcoeff[sg[2]],TQ,Q),NULL);
-      u = FpX_add(u, FpXQ_mul((GEN) pauto[((-h) & 3) + 1],
-			      (GEN) bezoutcoeff[sg[5]],TQ,Q),NULL);
-      u = FpX_add(u, FpXQ_mul((GEN) pauto[(i & 3) + 1],
-			      (GEN) bezoutcoeff[sg[3]],TQ,Q),NULL);
+      u = ZX_add(u, FpXQ_mul((GEN) pauto[((-g) & 3) + 1],
+			      (GEN) bezoutcoeff[sg[4]],TQ,Q));
+      u = ZX_add(u, FpXQ_mul((GEN) pauto[(h & 3) + 1],
+			      (GEN) bezoutcoeff[sg[2]],TQ,Q));
+      u = ZX_add(u, FpXQ_mul((GEN) pauto[((-h) & 3) + 1],
+			      (GEN) bezoutcoeff[sg[5]],TQ,Q));
+      u = ZX_add(u, FpXQ_mul((GEN) pauto[(i & 3) + 1],
+			      (GEN) bezoutcoeff[sg[3]],TQ,Q));
       u = FpX_add(u, FpXQ_mul((GEN) pauto[((-i) & 3) + 1],
 			      (GEN) bezoutcoeff[sg[6]],TQ,Q),Q);
       if (DEBUGLEVEL >= 4)

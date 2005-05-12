@@ -494,7 +494,7 @@ FpX_split_part(GEN f, GEN p)
   if (n <= 1) return f;
   f = FpX_red(f, p);
   z = FpXQ_pow(X, p, f, p);
-  z = FpX_sub(z, X, NULL);
+  z = FpX_sub(z, X, p);
   return FpX_gcd(z,f,p);
 }
 
@@ -1110,7 +1110,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     {
       GEN pol = scalarpol(genrand(p), vu);
       for (i=2; i<=d; i++)
-        pol = FpX_add(pol, FpX_Fp_mul((GEN)vker[i], randomi(p),NULL),NULL);
+        pol = ZX_add(pol, ZX_Z_mul((GEN)vker[i], randomi(p)));
       polt = FpX_red(pol,p);
     }
     for (i=ir; i<L && L<d; i++)

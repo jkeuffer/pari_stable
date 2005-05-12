@@ -413,9 +413,9 @@ FpXV_FpV_innerprod(GEN V, GEN W, GEN p)
 {
   pari_sp ltop=avma;
   long i;
-  GEN z = FpX_Fp_mul((GEN)V[1],(GEN)W[1],NULL);
+  GEN z = ZX_Z_mul((GEN)V[1],(GEN)W[1]);
   for(i=2;i<lg(V);i++)
-    z=ZX_add(z,FpX_Fp_mul((GEN)V[i],(GEN)W[i],NULL));
+    z=ZX_add(z,ZX_Z_mul((GEN)V[i],(GEN)W[i]));
   return gerepileupto(ltop,FpX_red(z,p));
 }
 
@@ -480,7 +480,7 @@ spec_compo_powers(GEN P, GEN V, long a, long n)
   GEN z;
   z = scalarpol((GEN)P[2+a],varn(P));
   for(i=1;i<=n;i++)
-    z=ZX_add(z,FpX_Fp_mul((GEN)V[i+1],(GEN)P[2+a+i],NULL));
+    z=ZX_add(z,ZX_Z_mul((GEN)V[i+1],(GEN)P[2+a+i]));
   return z;
 }
 /*Try to implement algorithm in Brent & Kung (Fast algorithms for
