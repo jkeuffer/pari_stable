@@ -1235,7 +1235,7 @@ $\deg(z) < \deg \kbd{T}$.
 
   \kbd{Z}:  the integers $\Z$, implemented as \typ{INT}s.
 
-  \kbd{z}:  the integers $\Z$, implemented using \kbd{long}s
+  \kbd{z}:  the integers $\Z$, implemented using (signed) \kbd{long}s
 
   \kbd{Q}:  the rational numbers $\Q$, implemented as \typ{INT}s and
 \typ{FRAC}s.
@@ -1250,20 +1250,33 @@ $\deg(z) < \deg \kbd{T}$.
 
   \kbd{Y}: polynomial in $Y\neq X$. E.g. \kbd{FpXY} means $((\Z/p\Z)[Y])[X]$
 
-  \kbd{V}: vector (\typ{VEC} or \typ{COL}). E.g. \kbd{ZV} means $\Z^k$ for
-           some $k$.
+  \kbd{V}: vector (\typ{VEC} or \typ{COL}), treated as a line vector
+  (independantly of the actual type). E.g. \kbd{ZV} means $\Z^k$ for some $k$.
 
-  \kbd{C}: column vector, e.g. \kbd{ZC} means $\Z^k$ for some $k$. (Used to
-clarify the meaning of \kbd{V} when ambiguous.)
+  \kbd{C}: vector (\typ{VEC} or \typ{COL}), treated as a column vector
+  (independantly of the actual type). The difference with \kbd{V} is purely
+  semantic.
 
-  \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational entries
+  \kbd{M}: matrix (\typ{MAT}). E.g. \kbd{QM} means a matrix with rational
+  entries
 
-  \kbd{Q}: representative (\typ{POL}) of a class in a polynomial quotient
-ring. E.g.~an \kbd{FpXQ} belongs to $(\Z/p\Z)[X]/(T(X))$, \kbd{FpXQV} means a
-vector of such elements, etc.
+  \kbd{Q}: representative (\typ{POL}) of a class in a polynomial quotient ring.
+  E.g.~an \kbd{FpXQ} belongs to $(\Z/p\Z)[X]/(T(X))$, \kbd{FpXQV} means a
+  vector of such elements, etc.
 
-  \kbd{x}, \kbd{m}, \kbd{v}, \kbd{c}, \kbd{q}: as their uppercase
-counterpart, but coefficient arrays are implemented using \typ{VECSMALL}s.
+  \kbd{x}, \kbd{m}, \kbd{v}, \kbd{c}, \kbd{q}: as their uppercase counterpart,
+  but coefficient arrays are implemented using \typ{VECSMALL}s, which
+  coefficient understood as \kbd{ulong}s.
+
+  \kbd{x} (and \kbd{q}) are implemented by a \typ{VECSMALL} whose first
+  coefficient is used as a code-word and the following are the coefficients
+  , similarly to a \typ{POL}. This is known as a 'POLSMALL'.
+  
+  \kbd{m} are implemented by a \typ{MAT} whose components (columns) are
+  \typ{VECSMALL}s. This is know as a 'MATSMALL'.
+
+  \kbd{v} and \kbd{c} are regular \typ{VECSMALL}s. Difference between the
+  two is purely semantic.
 
 \noindent Omitting the letter means the argument is a scalar in the base
 ring. Standard functions \var{fun} are
@@ -1700,11 +1713,11 @@ Mod(1,p))}, which is an \kbd{FpM}.
 and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 \kbd{p} to obtain an \kbd{FpM}.
 
-\fun{GEN}{FpM_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
-by the \kbd{ZV}~\kbd{y} (assumed to have compatible dimensions), and reduce
-modulo \kbd{p} to obtain an \kbd{FpV}.
+\fun{GEN}{FpM_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
+by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
+dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.  
 
-\fun{GEN}{FpC_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
+\fun{GEN}{FpC_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
 (seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
 assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
 an \kbd{FpM}.
@@ -1894,7 +1907,7 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \subsec{\kbd{Flv}, \kbd{Flm}}. See \kbd{FpV}, \kbd{FpM} operations.
 
-\fun{GEN}{Flm_Flv_mul}{GEN x, GEN y, ulong p}
+\fun{GEN}{Flm_Flc_mul}{GEN x, GEN y, ulong p}
 
 \fun{GEN}{Flm_deplin}{GEN x, ulong p}
 
