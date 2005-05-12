@@ -101,12 +101,6 @@ ZX_Z_add(GEN y, GEN x)
   return z;
 }
 
-GEN
-ZX_s_add(GEN y, long x)
-{
-  return ZX_Z_add(y,stoi(x));
-}
-
 /*ZX_mul and ZX_sqr are alias for RgX_mul and Rgx_sqr currently*/
 
 GEN

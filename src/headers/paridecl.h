@@ -1636,7 +1636,6 @@ int     ZX_is_squarefree(GEN x);
 GEN     ZX_neg(GEN x);
 GEN     ZX_renormalize(GEN x, long lx);
 GEN     ZX_resultant(GEN A, GEN B);
-GEN     ZX_s_add(GEN y, long x);
 GEN     ZX_sub(GEN x, GEN y);
 long    brent_kung_optpow(long d, long n);
 GEN     modulargcd(GEN a,GEN b);

@@ -294,9 +294,9 @@ FpX_roots_i(GEN f, GEN p)
   /* take gcd(x^(p-1) - 1, f) by splitting (x^q-1) * (x^q+1) */
   b = FpXQ_pow(polx[varn(f)],q, f,p);
   if (lg(b) < 3) err(talker,"not a prime in rootmod");
-  b = ZX_s_add(b,-1); /* b = x^((p-1)/2) - 1 mod f */
+  b = ZX_Z_add(b, gen_m1); /* b = x^((p-1)/2) - 1 mod f */
   a = FpX_gcd(f,b, p);
-  b = ZX_s_add(b, 2); /* b = x^((p-1)/2) + 1 mod f */
+  b = ZX_Z_add(b, gen_2); /* b = x^((p-1)/2) + 1 mod f */
   b = FpX_gcd(f,b, p);
   da = degpol(a);
   db = degpol(b); n += da + db; setlg(y, n+1);
@@ -316,7 +316,7 @@ FpX_roots_i(GEN f, GEN p)
     }
     else for (pol0[2]=1; ; pol0[2]++)
     {
-      b = ZX_s_add(FpXQ_pow(pol,q, a,p), -1); /* pol^(p-1)/2 - 1 */
+      b = ZX_Z_add(FpXQ_pow(pol,q, a,p), gen_m1); /* pol^(p-1)/2 - 1 */
       b = FpX_gcd(a,b, p); db = degpol(b);
       if (db && db < da)
       {
@@ -739,7 +739,7 @@ split(ulong m, GEN *t, long d, GEN p, GEN q, long r, GEN S)
       w = FpX_rem(stopoly(m,ps,v),*t, p);
       m++; w = try_pow(w,*t,p,q,r);
       if (!w) continue;
-      w = ZX_s_add(w, -1);
+      w = ZX_Z_add(w, gen_m1);
     }
     w = FpX_gcd(*t,w, p);
     l = degpol(w); if (l && l!=dv) break;
@@ -766,7 +766,7 @@ splitgen(GEN m, GEN *t, long d, GEN  p, GEN q, long r)
     w = FpX_rem(stopoly_gen(m,p,v),*t, p);
     w = try_pow(w,*t,p,q,r);
     if (!w) continue;
-    w = ZX_s_add(w,-1);
+    w = ZX_Z_add(w, gen_m1);
     w = FpX_gcd(*t,w, p); l=degpol(w);
     if (l && l!=dv) break;
 
@@ -1132,7 +1132,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
         pari_sp av = avma;
         b = FpX_rem(polt, a, p);
         if (degpol(b) <= 0) { avma=av; continue; }
-        b = ZX_s_add(FpXQ_pow(b,po2, a,p), -1);
+        b = ZX_Z_add(FpXQ_pow(b,po2, a,p), gen_m1);
         b = FpX_gcd(a,b, p); lb = degpol(b);
         if (lb && lb < la)
         {

@@ -472,7 +472,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     /* h0 := h0 * (2 - h0 g'(w1)) mod (T,q)
      *     = h0 + h0 * (1 - h0 g'(w1)) */
     a = gmul(gneg(h0), FpX_FpXQV_compo(gp, FpXV_red(wpow,q),T,q));
-    a = ZX_s_add(FpX_rem(a, T,q), 1); /* 1 - h0 g'(w1) = 0 (p) */
+    a = ZX_Z_add(FpX_rem(a, T,q), gen_1); /* 1 - h0 g'(w1) = 0 (p) */
     a = gmul(h0, gdivexact(a, p));
     h0 = gadd(h0, gmul(p, FpX_rem(a, T,p)));
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
