@@ -2088,7 +2088,7 @@ get_powers(GEN mul, GEN p)
   for (i=1; i<=d; i++)
   {
     P[i] = (long)z; /* a^i */
-    if (i!=d) z = FpM_FpV_mul(mul, z, p);
+    if (i!=d) z = FpM_FpC_mul(mul, z, p);
   }
   return pow;
 }
@@ -2194,7 +2194,7 @@ _primedec(GEN nf, GEN p)
       GEN I, R, r, a, mula, mul2, v = (GEN)mat1[2];
       long n;
 
-      a = FpM_FpV_mul(M2,v, p);
+      a = FpM_FpC_mul(M2,v, p);
       mula = FpM_red(eltmul_get_table(nf, a), p);
       mul2 = FpM_mul(Mi2, FpM_mul(mula,M2, p), p);
       R = FpX_roots(pol_min(mul2,p), p); /* totally split mod p */
@@ -2243,7 +2243,7 @@ ffdegree(GEN x, GEN frob, GEN p)
 
   for (d=1; d < f; d++)
   {
-    y = FpM_FpV_mul(frob, y, p);
+    y = FpM_FpC_mul(frob, y, p);
     if (gequal(y, x)) break;
   }
   avma = av; return d;
@@ -2397,7 +2397,7 @@ modprinit(GEN nf, GEN pr, int zk)
     for (i=1; i<=f; i++)
     {
       x = element_powid_mod_p(nf,c[i],p, p);
-      frob[i] = (long)FpM_FpV_mul(ffproj, x, p);
+      frob[i] = (long)FpM_FpC_mul(ffproj, x, p);
     }
     u = vec_ei(f,2); k = 2;
     deg1 = ffdegree(u, frob, p);

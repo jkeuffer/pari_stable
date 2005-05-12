@@ -2493,7 +2493,7 @@ FpC_FpV_mul(GEN x, GEN y, GEN p)
 
 /*If p is NULL no reduction is performed.*/
 GEN
-FpM_FpV_mul(GEN x, GEN y, GEN p)
+FpM_FpC_mul(GEN x, GEN y, GEN p)
 {
   long i,k,l,lx=lg(x), ly=lg(y);
   GEN z;
@@ -2558,7 +2558,7 @@ Flm_mul(GEN x, GEN y, ulong p)
 }
 
 GEN
-Flm_Flv_mul(GEN x, GEN y, ulong p)
+Flm_Flc_mul(GEN x, GEN y, ulong p)
 {
   long i,k,l,lx=lg(x), ly=lg(y);
   GEN z;

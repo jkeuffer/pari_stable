@@ -542,7 +542,7 @@ FpX_is_totally_split(GEN f, GEN p)
   return degpol(z) == 1 && gcmp1((GEN)z[3]) && !signe(z[2]); /* x^p = x ? */
 }
 
-/* Flv_Flx( Flm_Flv_mul(x, Flx_Flv(y), p) ) */
+/* Flv_Flx( Flm_Flc_mul(x, Flx_Flv(y), p) ) */
 static GEN
 Flm_Flx_mul(GEN x, GEN y, ulong p)
 {

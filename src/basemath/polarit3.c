@@ -1362,7 +1362,7 @@ FpM_Frobenius(GEN M, long r, GEN p, long v)
   W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
   {
-    W = FpM_FpV_mul(M,W,p);
+    W = FpM_FpC_mul(M,W,p);
     V[i] = (long) RgV_to_RgX(W,v);
   }
   return V;
@@ -1380,7 +1380,7 @@ Flm_Frobenius(GEN M, long r, ulong p, long v)
   W = (GEN)M[2];
   for (i = 3; i <= r+1; ++i)
   {
-    W = Flm_Flv_mul(M,W,p);
+    W = Flm_Flc_mul(M,W,p);
     V[i] = (long) Flv_to_Flx(W,v);
   }
   return V;
@@ -1472,7 +1472,7 @@ Flm_Frobenius_pow(GEN M, long d, GEN T, ulong p)
   pari_sp ltop=avma;
   long i,l=degpol(T);
   GEN R, W = (GEN) M[2];
-  for (i = 2; i <= d; ++i) W = Flm_Flv_mul(M,W,p);
+  for (i = 2; i <= d; ++i) W = Flm_Flc_mul(M,W,p);
   R=Flxq_matrix_pow(Flv_to_Flx(W,T[2]),l,l,T,p);
   return gerepileupto(ltop,R);
 }
@@ -1483,7 +1483,7 @@ FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p)
   pari_sp ltop=avma;
   long i,l=degpol(T);
   GEN R, W = (GEN) M[2];
-  for (i = 2; i <= d; ++i) W = FpM_FpV_mul(M,W,p);
+  for (i = 2; i <= d; ++i) W = FpM_FpC_mul(M,W,p);
   R=FpXQ_matrix_pow(RgV_to_RgX(W,varn(T)),l,l,T,p);
   return gerepilecopy(ltop,R);
 }
@@ -1530,9 +1530,9 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   ib0=negi(Fp_inv((GEN)U[2],l));
   R=cgetg(r+1,t_MAT);
   R[1]=A[1];
-  R[r]=(long)FpM_FpV_mul(MA,gmul((GEN)A[1],ib0),l);
+  R[r]=(long)FpM_FpC_mul(MA,gmul((GEN)A[1],ib0),l);
   for(i=r-1;i>1;i--)
-    R[i]=(long)FpV_red(gadd(FpM_FpV_mul(MA,(GEN)R[i+1],l),
+    R[i]=(long)FpV_red(gadd(FpM_FpC_mul(MA,(GEN)R[i+1],l),
          gmul((GEN)U[i+2],(GEN)R[r])),l);
   R=gtrans_i(R);
   for(i=1;i<lg(R);i++)
@@ -1717,7 +1717,7 @@ FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
   z=RgX_to_RgV((GEN)V[1],n);
   for(k=2;k<=m;k++)
   {
-    z=FpM_FpV_mul(M,z,l);
+    z=FpM_FpC_mul(M,z,l);
     V[k]=(long)RgV_to_RgX(z,w);
   }
   if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: roots");

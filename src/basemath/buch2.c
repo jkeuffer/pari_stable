@@ -1739,7 +1739,7 @@ static int
 addcolumn_mod(GEN V, GEN invp, GEN L, ulong p)
 {
   pari_sp av = avma;
-  GEN a = Flm_Flv_mul(invp, V, p);
+  GEN a = Flm_Flc_mul(invp, V, p);
   long i,j,k, n = lg(invp);
   ulong invak;
 
