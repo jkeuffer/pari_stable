@@ -50,6 +50,7 @@ Done for version 2.2.11 (released 21/05/2005):
     2- agm(-1.0000000004656,1) --> oo loop [Bug #214]
     3- sdivss_rem(x,y,&rem) did not set rem, contrary to the documentation
 BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
+    5- random() was less random on 64 bit machines
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, and Flm_Flv_mul to Flm_Flc_mul

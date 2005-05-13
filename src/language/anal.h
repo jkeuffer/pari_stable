@@ -270,6 +270,7 @@ typedef struct input_method {
   FILE *file;
   char * (*fgets)(char *,int,FILE*);
   char * (*getline)(Buffer*, char**, struct input_method*);
+  void (*onempty)(void);
 } input_method;
 
 void fix_buffer(Buffer *b, long newlbuf);

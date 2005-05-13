@@ -656,7 +656,11 @@ randomi(GEN N)
       }
     }
   /* MSW needs to be generated between 0 and n */
-  if (n) n = (ulong)((((ulong)*xMSW) / (HIGHBIT*2.)) * (n + 1));
+  if (n) {
+    LOCAL_HIREMAINDER;
+    (void)mulll((ulong)*xMSW, n + 1);
+    n = hiremainder;
+  }
   *xMSW = (long)n;
   if (!n) x = int_normalize(x, 1);
   return x;
