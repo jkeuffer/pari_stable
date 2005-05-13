@@ -2427,6 +2427,12 @@ exponent()
 }
 
 static GEN
+real_0_digits(long n) {
+  long b = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
+  return real_0_bit(b);
+}
+
+static GEN
 constante()
 {
   pari_sp av = avma;
@@ -2442,7 +2448,11 @@ constante()
       char *old = ++analyseur;
       if (isalpha((int)*analyseur))
       {
-        if (*analyseur == 'E' || *analyseur == 'e') { n = exponent(); break; }
+        if (*analyseur == 'E' || *analyseur == 'e') {
+          n = exponent();
+          if (!signe(y)) { avma = av; return real_0_digits(n); }
+          break;
+        }
         analyseur--; return y; /* member */
       }
       y = int_read_more(y, &analyseur);
@@ -2456,12 +2466,7 @@ constante()
     /* Fall through */
     case 'E': case 'e':
       n += exponent();
-      if (!signe(y))
-      {
-        avma = av;
-        n = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
-        return real_0_bit(n);
-      }
+      if (!signe(y)) { avma = av; return real_0_digits(n); }
   }
   l = lgefint(y); if (l < (long)prec) l = (long)prec;
   y = itor(y, l);
