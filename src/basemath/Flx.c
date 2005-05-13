@@ -120,9 +120,9 @@ Flm_to_FlxV(GEN x, long sv)
   return y;
 }
 
-/*FlxV_to_ZXC=zxV_to_ZXC*/
+/*FlxC_to_ZXC=zxC_to_ZXC*/
 GEN
-FlxV_to_ZXC(GEN x)
+FlxC_to_ZXC(GEN x)
 {
   long i, l=lg(x);
   GEN z = cgetg(l,t_COL); 
@@ -136,7 +136,7 @@ FlxM_to_ZXM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)FlxV_to_ZXC((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)FlxC_to_ZXC((GEN)z[i]);
   return x;
 }
 

@@ -55,7 +55,8 @@ BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
     7- ellminimalmodel(e).a2 was not always in {-1,0,1}
 
   Changed
-BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, and Flm_Flv_mul to Flm_Flc_mul
+BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
+       FlxV_to_ZXC to FlxC_to_ZXC
 BA  2- FpXV_FpV_innerprod renamed to FpXV_FpC_mul and FlxV_Flv_innerprod to
        FlxV_Flc_mul
     3- retain 'CHANGES' revision after 'make distrib'
