@@ -1557,10 +1557,10 @@ isunit(GEN bnf,GEN x)
   prec = nfgetprec(nf);
   for (i=1;;)
   {
-    GEN logN, rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
+    GEN rx = get_arch_real(nf,x,&emb, MEDDEFAULTPREC);
     if (rx)
     {
-      logN = sum(rx, 1, RU); /* log(Nx), should be ~ 0 */
+      GEN logN = sum(rx, 1, RU); /* log(Nx), should be ~ 0 */
       if (gexpo(logN) > -20)
       {
         long p = 2 + max(1, (nfgetprec(nf)-2) / 2);
@@ -2201,6 +2201,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
 
   if (DEBUGLEVEL) { fprintferr("\n#### Computing check\n"); flusherr(); }
   D = gmul2n(gmul(*ptkR,z), 1); /* bound for denom(lambda) */
+  if (expo(D) < 0 && rtodbl(D) < 0.95) return fupb_BACH;
   lambda = bestappr_noer(lambda,D);
   if (!lambda)
   {
@@ -2226,6 +2227,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
     fprintferr("\n#### Tentative regulator : %Z\n", gprec_w(R,3));
     fprintferr("\n ***** check = %f\n",c);
   }
+  if (c < 0.55) { avma = av; return fupb_BACH; }
   if (c < 0.75 || c > 1.3) { avma = av; return fupb_RELAT; }
   *ptkR = R; *ptL = L; return fupb_NONE;
 }
@@ -3067,7 +3069,8 @@ PRECPB:
     case fupb_RELAT: goto MORE; /* not enough relations */
     case fupb_PRECI: /* prec problem unless we cheat on Bach constant */
       if ((precdouble&7) < 7 || cbach>2) { precpb = "compute_R"; goto PRECPB; }
-      goto START;
+    /* fall through */
+    case fupb_BACH: goto START;
   }
   /* DONE */
 

@@ -61,6 +61,8 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
     5- rename globalreduction -> ellglobalred, localreduction -> elllocalred
     6- taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
        old = precdl; precdl = prec; x = taniyama(e); precdl = old;
+    7- [bnfinit] retune compute_R to try and detect cheating with Bach's
+       constant.
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
