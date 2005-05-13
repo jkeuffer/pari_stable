@@ -112,6 +112,9 @@ Incompatible changes:
     instead of two vectors, output a vector of 2-component vectors.
     Change the input of all list routines (bnrclassnolist, bnrdisclist)
     accordingly.
+  - rename globalreduction -> ellglobalred
+  - taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
+      old = precdl; precdl = prec; x = taniyama(e); precdl = old;
 
 Partially compatible changes:
 -----------------------------

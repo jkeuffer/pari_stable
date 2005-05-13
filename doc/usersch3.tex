@@ -2493,13 +2493,12 @@ point at infinity, i.e.~the identity element of the group law, represented by
 the one-component vector \kbd{[0]}.
 
   It is useful to have at one's disposal more information. This is given by
-the function \tet{ellinit} (see there), which usually gives a 19 component
-vector (which we will call a long vector in this section). If a specific flag
-is added, a vector with only 13 component will be output (which we will call
-a medium vector). A medium vector just gives the first 13 components of the
-long vector corresponding to the same curve, but is of course faster to
-compute. The following \idx{member functions} are available to deal with the
-output of \kbd{ellinit}:
+the function \tet{ellinit} (see there), which initalizes and returns an
+\tev{ell} structure by default. If a specific flag is added, a
+shortened \tev{sell}, for small \tev{ell}, is returned, which is a little
+faster to compute but contains less information. The following \idx{member
+functions} are available to deal with the output of \kbd{ellinit},
+both \var{ell} and \var{sell}:
 \settabs\+xxxxxxxxxxxxxxxxxx&: &\cr
 
 \+ \kbd{a1}--\kbd{a6}, \kbd{b2}--\kbd{b8}, \kbd{c4}--\kbd{c6} &: &
@@ -2540,13 +2539,14 @@ routine will yield a wrong result!}
 
 All functions related to elliptic curves share the prefix \kbd{ell}, and the
 precise curve we are interested in is always the first argument, in either
-one of the three formats discussed above, unless otherwise specified. For
-instance, in functions which do not use the extra information given by long
-vectors, the curve can be given either as a five-component vector, or by one
-of the longer vectors computed by \kbd{ellinit}.
+one of the three formats discussed above, unless otherwise specified. The
+requirements are given as the \emph{minimal} ones: any richer structure may
+replace the ones requested. For instance, in functions which have no use for
+the extra information given by an \tev{ell} structure, the curve can be given
+either as a five-component vector, as an \emph{sell}, or as an \emph{ell}.
 
 \subsecidx{elladd}$(E,z1,z2)$: sum of the points $z1$ and $z2$ on the
-elliptic curve corresponding to the vector $E$.
+elliptic curve corresponding to $E$.
 
 \syn{addell}{E,z1,z2}.
 
@@ -2554,11 +2554,11 @@ elliptic curve corresponding to the vector $E$.
 $L$-function of the elliptic curve $E$, i.e.~in principle coefficients of a
 newform of weight 2 assuming \idx{Taniyama-Weil conjecture} (which is now
 known to hold in full generality thanks to the work of \idx{Breuil},
-\idx{Conrad}, \idx{Diamond}, \idx{Taylor} and \idx{Wiles}). $E$ must be a
-medium or long vector of the type given by \kbd{ellinit}. For this function
+\idx{Conrad}, \idx{Diamond}, \idx{Taylor} and \idx{Wiles}). $E$ must be an
+\var{sell} as output by \kbd{ellinit}. For this function
 to work for every $n$ and not just those prime to the conductor, $E$ must
 be a minimal Weierstrass equation. If this is not the case, use the
-function \kbd{ellminimalmodel} first before using \kbd{ellak}.
+function \kbd{ellminimalmodel} before using \kbd{ellak}.
 
 \syn{akell}{E,n}.
 
@@ -2579,9 +2579,9 @@ unreasonable when $p$ has about 30 digits.
 If $\fl$ is $1$, computes the $a_p$ as a sum of Legendre symbols. This is
 slower than the previous method as soon as $p$ is greater than 100, say.
 
-No checking is done that $p$ is indeed prime. $E$ must be a medium or long
-vector of the type given by \kbd{ellinit}, defined over $\Q$, $\F_p$ or
-$\Q_p$. $E$ must be given by a Weierstrass equation minimal at $p$.
+No checking is done that $p$ is indeed prime. $E$ must be an \var{sell} as
+output by \kbd{ellinit}, defined over $\Q$, $\F_p$ or $\Q_p$. $E$ must be
+given by a Weierstrass equation minimal at $p$.
 
 \syn{ellap0}{E,p,\fl}. Also available are \funs{apell}{E,p}, corresponding
 to $\fl=0$, and \funs{apell2}{E,p} ($\fl=1$).
@@ -2598,8 +2598,7 @@ where \kbd{+} denotes of course addition on $E$. In addition, $z1$ or $z2$
 \subsecidx{ellchangecurve}$(E,v)$: changes the data for the elliptic curve $E$
 by changing the coordinates using the vector \kbd{v=[u,r,s,t]}, i.e.~if $x'$
 and $y'$ are the new coordinates, then $x=u^2x'+r$, $y=u^3y'+su^2x'+t$.
-The vector $E$ must be a medium or long vector of the type given by
-\kbd{ellinit}.
+$E$ must be an \var{sell} as output by \kbd{ellinit}.
 
 \syn{coordch}{E,v}.
 
@@ -2635,16 +2634,16 @@ $[\eta_1,\eta_2]$ of quasi-periods associated to $\kbd{om} = [\omega_1,
 \syn{elleta}{om, \var{prec}}
 
 \subsecidx{ellglobalred}$(E)$: calculates the arithmetic conductor, the global
-minimal model of $E$ and the global \idx{Tamagawa number} $c$. Here $E$ is an
-elliptic curve given by a medium or long vector of the type given by
-\kbd{ellinit}, \emph{and is supposed to have all its coefficients $a_i$ in}
-$\Q$. The result is a 3 component vector $[N,v,c]$. $N$ is the arithmetic
-conductor of the curve. $v$ gives the coordinate change for $E$ over $\Q$ to
-the minimal integral model (see \tet{ellminimalmodel}). Finally $c$ is the
-product of the local Tamagawa numbers $c_p$, a quantity which enters in the
-\idx{Birch and Swinnerton-Dyer conjecture}.\sidx{minimal model}
+minimal model of $E$ and the global \idx{Tamagawa number} $c$. 
+$E$ must be an \var{sell} as output by \kbd{ellinit}, \emph{and is supposed
+to have all its coefficients $a_i$ in} $\Q$. The result is a 3 component
+vector $[N,v,c]$. $N$ is the arithmetic conductor of the curve. $v$ gives the
+coordinate change for $E$ over $\Q$ to the minimal integral model (see
+\tet{ellminimalmodel}). Finally $c$ is the product of the local Tamagawa
+numbers $c_p$, a quantity which enters in the \idx{Birch and Swinnerton-Dyer
+conjecture}.\sidx{minimal model}
 
-\syn{globalreduction}{E}.
+\syn{ellglobalred}{E}.
 
 \subsecidx{ellheight}$(E,z,\{\fl = 2\})$: global \idx{N\'eron-Tate height} of
 the point $z$ on the elliptic curve $E$ (defined over $\Q$), given by a
@@ -2672,23 +2671,21 @@ given by a minimal model.
 
 \syn{mathell}{E,x,\var{prec}}.
 
-\subsecidx{ellinit}$(E,\{\fl=0\})$: computes some fixed data concerning the
-given elliptic curve which will be essential
-for most further computations on the curve.
-$E$ is a $5$-component vector $a_1,a_2,a_3,a_4,a_6$
-defining the elliptic curve with Weierstrass equation
+\subsecidx{ellinit}$(E,\{\fl=0\})$: initialize an \tet{ell} structure,
+associated to the elliptic curve $E$. $E$ is a $5$-component
+vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic curve with Weierstrass
+equation
 $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
-The result of \tet{ellinit} is a
-19-component vector E (called a long vector in this section), shortened
-to 13 components (medium vector) if $\fl=1$. Both contain the
-following information in the first 13 components:
+The result of \tet{ellinit} is a an \tev{ell} structure by default, and
+a shorted \tev{sell} if $\fl=1$. Both contain the following information in
+their components:
 %
 $$ a_1,a_2,a_3,a_4,a_6,b_2,b_4,b_6,b_8,c_4,c_6,\Delta,j.$$
 %
-In particular, the discriminant is \kbd{$E$.disc}, and the
-$j$-invariant is \kbd{$E$.j}.
+All are accessible via member functions. In particular, the discriminant is
+\kbd{$E$.disc}, and the $j$-invariant is \kbd{$E$.j}.
 
-The other six components are only present if $\fl$ is $0$ (or omitted!).
+The other six components are only present if $\fl$ is $0$ or omitted.
 Their content depends on whether the curve is defined over $\R$ or not:
 \smallskip
 \item When $E$ is defined over $\R$, \kbd{$E$.roots} is a vector whose
@@ -2745,9 +2742,8 @@ $p$-adic number with positive valuation.
 
 \subsecidx{elllocalred}$(E,p)$: calculates the \idx{Kodaira} type of the
 local fiber of the elliptic curve $E$ at the prime $p$.
-$E$ must be given by a medium or
-long vector of the type given by \kbd{ellinit}, and is assumed to have all
-its coefficients $a_i$ in $\Z$. The result is a 4-component vector
+$E$ must be an \var{sell} as output by \kbd{ellinit}, and is assumed to have
+all its coefficients $a_i$ in $\Z$. The result is a 4-component vector
 $[f,kod,v,c]$. Here $f$ is the exponent of $p$ in the arithmetic conductor of
 $E$, and $kod$ is the Kodaira type which is coded as follows:
 
@@ -2761,12 +2757,12 @@ Finally, the last component $c$ is the local \idx{Tamagawa number} $c_p$.
 
 \syn{localreduction}{E,p}.
 
-\subsecidx{elllseries}$(E,s,\{A=1\})$: $E$ being a medium or long vector
-given by \kbd{ellinit}, this computes the value of the L-series of $E$ at
-$s$. It is assumed that $E$ is defined over $\Q$, not necessarily minimal.
-The optional parameter $A$ is a cutoff point for the integral, which must be
-chosen close to 1 for best speed. The result must be independent of $A$, so
-this allows some internal checking of the function.
+\subsecidx{elllseries}$(E,s,\{A=1\})$: $E$ being an \var{sell} as output by
+\kbd{ellinit}, this computes the value of the L-series of $E$ at $s$. It is
+assumed that $E$ is defined over $\Q$, not necessarily minimal. The optional
+parameter $A$ is a cutoff point for the integral, which must be chosen close
+to 1 for best speed. The result must be independent of $A$, so this allows
+some internal checking of the function.
 
 Note that if the conductor of the curve is large, say greater than $10^{12}$,
 this function will take an unreasonable amount of time since it uses an
@@ -2811,7 +2807,7 @@ and $0 \leq \Im(t) < \Im(w2)$.
 If $E$ has coefficients in $\Q_p$, then either Tate's $u$ is in $\Q_p$, in
 which case the output is a $p$-adic number $t$ corresponding to the point $z$
 under the Tate parametrization, or only its square is, in which case the
-output is $t+1/t$. $E$ must be a long vector output by \kbd{ellinit}.
+output is $t+1/t$. $E$ must be an \var{ell} as output by \kbd{ellinit}.
 
 \syn{zell}{E,z,\var{prec}}.
 
@@ -2822,13 +2818,12 @@ by $n$ (if not, an error message is issued).
 
 \syn{powell}{E,z,n}.
 
-\subsecidx{ellrootno}$(E,\{p=1\})$: $E$ being a medium or long vector given
-by \kbd{ellinit}, this computes the local (if $p\neq 1$) or global (if $p=1$)
+\subsecidx{ellrootno}$(E,\{p=1\})$: $E$ being an \var{sell} as output by
+\kbd{ellinit}, this computes the local (if $p\neq 1$) or global (if $p=1$)
 root number of the L-series of the elliptic curve $E$. Note that the global
 root number is the sign of the functional equation and conjecturally is the
-parity of the rank of the \idx{Mordell-Weil group}.
-The equation for $E$ must have
-coefficients in $\Q$ but need \emph{not} be minimal.
+parity of the rank of the \idx{Mordell-Weil group}. The equation for $E$ must
+have coefficients in $\Q$ but need \emph{not} be minimal.
 
 \syn{ellrootno}{E,p} and the result (equal to $\pm1$) is a \kbd{long}.
 
@@ -2842,33 +2837,32 @@ If $\fl=2,3$, same using the product expansion instead of theta series.
 \syn{ellsigma}{E,z,\fl}
 
 \subsecidx{ellsub}$(E,z1,z2)$: difference of the points $z1$ and $z2$ on the
-elliptic curve corresponding to the vector $E$.
+elliptic curve corresponding to $E$.
 
 \syn{subell}{E,z1,z2}.
 
 \subsecidx{elltaniyama}$(E)$: computes the modular parametrization of the
-elliptic curve $E$, where $E$ is given in the (long or medium) format output
-by \kbd{ellinit}, in the form of a two-component vector $[u,v]$ of power
-series, given to the current default series precision. This vector is
-characterized by the following two properties. First the point $(x,y)=(u,v)$
-satisfies the equation of the elliptic curve. Second, the differential
-$du/(2v+a_1u+a_3)$ is equal to $f(z)dz$, a differential form on
-$H/\Gamma_0(N)$ where $N$ is the conductor of the curve. The variable used in
-the power series for $u$ and $v$ is $x$, which is implicitly understood to be
-equal to $\exp(2i\pi z)$. It is assumed that the curve is a \emph{strong}
-\idx{Weil curve}, and the Manin constant is equal to 1. The equation of
-the curve $E$ must be minimal (use \kbd{ellminimalmodel} to get a minimal
-equation).
+elliptic curve $E$, where $E$ is an \var{sell} as output by \kbd{ellinit}, in
+the form of a two-component vector $[u,v]$ of power series, given to the
+current default series precision. This vector is characterized by the
+following two properties. First the point $(x,y)=(u,v)$ satisfies the
+equation of the elliptic curve. Second, the differential $du/(2v+a_1u+a_3)$
+is equal to $f(z)dz$, a differential form on $H/\Gamma_0(N)$ where $N$ is the
+conductor of the curve. The variable used in the power series for $u$ and $v$
+is $x$, which is implicitly understood to be equal to $\exp(2i\pi z)$. It is
+assumed that the curve is a \emph{strong} \idx{Weil curve}, and that the
+Manin constant is equal to 1. The equation of the curve $E$ must be minimal
+(use \kbd{ellminimalmodel} to get a minimal equation).
 
-\syn{taniyama}{E}, and the precision of the result is determined by the
-global variable \kbd{precdl}.
+\syn{elltaniyama}{E, prec}, and the precision of the result is determined by
+\kbd{prec}.
 
 \subsecidx{elltors}$(E,\{\fl=0\})$: if $E$ is an elliptic curve \emph{defined
 over $\Q$}, outputs the torsion subgroup of $E$ as a 3-component vector
 \kbd{[t,v1,v2]}, where \kbd{t} is the order of the torsion group, \kbd{v1}
 gives the structure of the torsion group as a product of cyclic groups
 (sorted by decreasing order), and \kbd{v2} gives generators for these cyclic
-groups. $E$ must be a long vector as output by \kbd{ellinit}.
+groups. $E$ must be an \var{ell} as output by \kbd{ellinit}.
 
 \bprog
 ?  E = ellinit([0,0,0,-1,0]);
@@ -2882,8 +2876,8 @@ If $\fl = 0$, use Doud's algorithm: bound torsion by computing $\#E(\F_p)$
 for small primes of good reduction, then look for torsion points using
 Weierstrass parametrization (and Mazur's classification).
 
-If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be a
-medium vector.
+If $\fl = 1$, use Lutz-Nagell (\emph{much} slower), $E$ is allowed to be an
+\var{sell}.
 
 \syn{elltors0}{E,flag}.
 
@@ -2911,13 +2905,13 @@ be given as a lattice $[\omega_1,\omega_2]$).
 
 \syn{ellzeta}{E,z}.
 
-\subsecidx{ellztopoint}$(E,z)$: $E$ being a long vector, computes the
-coordinates $[x,y]$ on the curve $E$ corresponding to the complex number $z$.
-Hence this is the inverse function of \kbd{ellpointtoz}. In other words, if
-the curve is put in Weierstrass form, $[x,y]$ represents the
-\idx{Weierstrass $\wp$-function} and its derivative.
-If $z$ is in the lattice defining $E$ over
-$\C$, the result is the point at infinity $[0]$.
+\subsecidx{ellztopoint}$(E,z)$: $E$ being an \var{ell} as output by
+\kbd{ellinit}, computes the coordinates $[x,y]$ on the curve $E$
+corresponding to the complex number $z$. Hence this is the inverse function
+of \kbd{ellpointtoz}. In other words, if the curve is put in Weierstrass
+form, $[x,y]$ represents the \idx{Weierstrass $\wp$-function} and its
+derivative. If $z$ is in the lattice defining $E$ over $\C$, the result is
+the point at infinity $[0]$.
 
 \syn{pointell}{E,z,\var{prec}}.
 

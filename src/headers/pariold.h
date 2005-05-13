@@ -1,4 +1,6 @@
 /* For compatibility with 1.x.x */
+#define globalreduction ellglobalred
+#define taniyama(e) elltaniyama((e),precdl)
 #define chinois chinese
 #define binome binomial
 #define egalii equalii

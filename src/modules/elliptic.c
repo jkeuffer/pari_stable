@@ -1823,7 +1823,7 @@ ellminimalmodel(GEN E, GEN *ptv)
  *   [u, r, s, t] = the change of variable reducing E to its minimal model,
  *     with u > 0 */
 GEN
-globalreduction(GEN E)
+ellglobalred(GEN E)
 {
   long k, l;
   pari_sp av = avma;
@@ -2137,7 +2137,7 @@ ellrootno(GEN e, GEN p)
   long s;
   GEN gr, N;
   checkell(e);
-  e = ell_to_small(e); gr = globalreduction(e);
+  e = ell_to_small(e); gr = ellglobalred(e);
   e = _coordch(e,(GEN)gr[2]); N = (GEN)gr[1];
   if (!p || gcmp1(p))
     s = ellrootno_global(e, N);
@@ -3056,7 +3056,7 @@ lseriesell(GEN e, GEN s, GEN A, long prec)
   if (typ(s) == t_INT && signe(s) <= 0) { avma = av; return gen_0; }
   flun = gcmp1(A) && gcmp1(s);
   checkell(e);
-  e = ell_to_small(e); gr = globalreduction(e);
+  e = ell_to_small(e); gr = ellglobalred(e);
   e = _coordch(e,(GEN)gr[2]);
   N = (GEN)gr[1];
   eps = ellrootno_global(e, N);
@@ -3382,10 +3382,10 @@ bilhell(GEN e, GEN z1, GEN z2, long prec)
 /********************************************************************/
 
 GEN
-taniyama(GEN e)
+elltaniyama(GEN e, long prec)
 {
   GEN x, w, c, d, s1, s2, s3, X, C;
-  long n, m, prec = (long)precdl;
+  long n, m;
   pari_sp av=avma, tetpil;
 
   checkell(e); x = cgetg(prec+3,t_SER);
