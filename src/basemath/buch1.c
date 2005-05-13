@@ -848,7 +848,6 @@ isless_iu(GEN q, ulong p) {
   return l==2 || (l == 3 && (ulong)q[2] <= p);
 }
 
-long
 static long
 factorquad(GEN f, long kcz, ulong limp)
 {
