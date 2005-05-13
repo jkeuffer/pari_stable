@@ -1650,7 +1650,7 @@ multiplicity. $x$ must be an integer.
 
 \syn{bigomega}{x}, the result is a \kbd{long}.
 
-\subsecidx{binomial}$(x,y)$: \idx{binomial coefficient} $\binom x y$.
+\subsecidx{binomial}$(x,y)$: \idx{binomial coefficient} $\binom{x}{y}$.
 Here $y$ must be an integer, but $x$ can be any PARI object.
 
 \syn{binomial}{x,y}, where $y$ must be a \kbd{long}.
@@ -2276,7 +2276,7 @@ if $x$ is indefinite). The binary digits of $\fl$ are toggles meaning
 \quad 2: don't update \idx{Shanks}'s distance
 
   $D$, \var{isqrtD}, \var{sqrtD}, if present, supply the values of the
-discriminant, $\lfloor \sqrt{D}\rfloor$, and $\sqrt{D}$ respectively
+discriminant, $\floor{\sqrt{D}}$, and $\sqrt{D}$ respectively
 (no checking is done of these facts). If $D<0$ these values are useless,
 and all references to Shanks's distance are irrelevant.
 
@@ -2615,8 +2615,10 @@ output by \kbd{ellinit} (or, alternatively, given by a 2-component vector
 $[\omega_1,\omega_2]$ representing its periods), and $k$ being an even
 positive integer, computes the numerical value of the Eisenstein series of
 weight $k$ at $E$, namely
-$$ (2i\pi/\omega_2)^k\Big(1 + 2/\zeta(1-k) \sum_{n\geq 0}
-n^{k-1}q^n/(1-q^n)\Big), $$
+$$
+(2i \pi/\omega_2)^k
+  \Big(1 + 2/\zeta(1-k) \sum_{n\geq 0} n^{k-1}q^n / (1-q^n)\Big),
+$$
 where $q = e(\omega_1/\omega_2)$.
 
 When \fl\ is non-zero and $k=4$ or 6, returns the elliptic invariants $g_2$
@@ -7662,18 +7664,18 @@ summation of \var{expr}, the variable $X$ taking integer values from ceiling
 of $a$ to $+\infty$, where \var{expr} is assumed to be a holomorphic function
 $f(X)$ for $\Re(X)\ge \sigma$.
 
-The free parameter $\sigma\in\R$ is coded in \kbd{sig} is coded as follows:
-it is either
+The parameter $\sigma\in\R$ is coded in the argument \kbd{sig} as follows: it
+is either
 
-\item a real number $\sigma$, and then the function $f$ is assumed to
+\item a real number $\sigma$. Then the function $f$ is assumed to
 decrease at least as $1/X^2$ at infinity, but not exponentially;
 
 \item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
-before, $\alpha < -1$, and the function $f$ is now assumed to decrease like
+before, $\alpha < -1$. The function $f$ is assumed to decrease like
 $X^{\alpha}$. In particular, $\alpha\le-2$ is equivalent to no $\alpha$ at all.
 
 \item a two-component vector $[\sigma,\alpha]$, where $\sigma$ is as
-before, $\alpha > 0$, and the function $f$ is now assumed to decrease like
+before, $\alpha > 0$. The function $f$ is assumed to decrease like
 $\exp(-\alpha X)$. In this case it is essential that $\alpha$ be exactly the
 rate of exponential decrease, and it is usually a good idea to increase
 the default value of $m$ used for the integration step. In practice, if
@@ -8388,8 +8390,8 @@ should be useless in interactive usage.
 
 \subsubsecidx{allocatemem}$(\{x=0\})$: this is a very special operation which
 allows the user to change the stack size \emph{after} initialization. $x$
-must be a non-negative integer. If $x!=0$, a new stack of size $16*\lceil
-x/16\rceil$ bytes is allocated, all the PARI data on the old stack is
+must be a non-negative integer. If $x!=0$, a new stack of size
+$16*\ceil{x/16}$ bytes is allocated, all the PARI data on the old stack is
 moved to the new one, and the old stack is discarded. If $x=0$, the size of
 the new stack is twice the size of the old one.
 
