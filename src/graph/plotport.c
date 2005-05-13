@@ -110,7 +110,7 @@ static GEN quark_gen;
 static GEN
 READ_EXPR(char *s, entree *ep, GEN x) {
   if (s == QUARK) return gsubst(quark_gen,0,x);
-  ep->value = x; return lisexpr(s);
+  ep->value = x; return readexpr(s);
 }
 
 void

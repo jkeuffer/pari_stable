@@ -115,6 +115,8 @@ Incompatible changes:
   - rename globalreduction -> ellglobalred, localreduction -> elllocalred
   - taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
       old = precdl; precdl = prec; x = taniyama(e); precdl = old;
+  - rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
+    flisseq -> freadseq
 
 Partially compatible changes:
 -----------------------------

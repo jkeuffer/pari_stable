@@ -14,5 +14,5 @@ Description:
 Function: _const_expr
 Class: gp2c_internal
 Description:
- (str):gen       lisexpr($1)
+ (str):gen       readexpr($1)
 

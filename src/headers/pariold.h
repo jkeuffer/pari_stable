@@ -23,7 +23,12 @@
 #define gpui gpow
 #define gpuigs gpowgs
 #define classno3 hclassno
-#define strtoGEN flisexpr
+#define strtoGEN freadexpr
+#define flisexpr freadexpr
+#define flisseq freadseq
+#define lisseq readseq
+#define lisGEN readGEN
+#define lisexpr readexpr
 #define permute numtoperm
 #define permuteInv permtonum
 #define evallgef(x) 0

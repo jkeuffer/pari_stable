@@ -2445,7 +2445,7 @@ polgaloisnamesbig(long n, long k)
     free(s); 
     return strtoGENstr("");
   }
-  V = lisGEN(stream);
+  V = readGEN(stream);
   if (!V || typ(V)!=t_VEC || k>=lg(V))
     err(talker,"galois files %s not compatible\n",s);
   fclose(stream);

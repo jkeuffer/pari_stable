@@ -934,8 +934,8 @@ sd_prettyprinter(char *v, int flag)
   }
   if (flag == d_RETURN)
 	  /*FIXME: The cast is needed by g++ but is a kludge but changing
-	   * flisexpr to accept a const char * is non-trivial.*/
-    return flisexpr(pp->cmd? pp->cmd:(char *) "");
+	   * freadexpr to accept a const char * is non-trivial.*/
+    return freadexpr(pp->cmd? pp->cmd:(char *) "");
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
@@ -2611,7 +2611,7 @@ gp_main_loop(int ismain)
       if (setjmp(GP_DATA->env))
       { /* recover from error */
         char *s = (char*)global_err_data;
-        if (s && *s) outerr(lisseq(s));
+        if (s && *s) outerr(readseq(s));
 	avma = top; av = 0;
         prune_history(H, tloc);
         GP_DATA->fmt->prettyp = outtyp;
@@ -2636,7 +2636,7 @@ gp_main_loop(int ismain)
       TIMERstart(GP_DATA->T);
     }
     avma = top - av;
-    z = readseq(b->buf, GP_DATA->flags & STRICTMATCH);
+    z = gpreadseq(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
 
     if (GP_DATA->flags & CHRONO)
@@ -2692,7 +2692,7 @@ input0(void)
   push_stack(&bufstack, (void*)b);
   while (! get_line_from_file(DFT_INPROMPT,&F,infile))
     if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
-  x = lisseq(b->buf);
+  x = readseq(b->buf);
   pop_buffer(); return x;
 }
 
@@ -2758,7 +2758,7 @@ break_loop(long numerr)
       if (numerr == siginter && *(b->buf) == 0) { handle_C_C=go_on=1; break; }
       continue;
     }
-    x = lisseq(b->buf);
+    x = readseq(b->buf);
     if (did_break()) break;
     if (x == gnil || is_silent(b->buf)) continue;
 
@@ -2783,7 +2783,7 @@ gp_exception_handler(long numerr)
     else
     {
       recovering = 1;
-      fprintferr("\n"); outerr(lisseq(s));
+      fprintferr("\n"); outerr(readseq(s));
       recovering = 0; return 0;
     }
   }

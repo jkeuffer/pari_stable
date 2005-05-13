@@ -160,7 +160,7 @@ filtre(char *s, int downcase)
 }
 
 GEN
-lisGEN(FILE *fi)
+readGEN(FILE *fi)
 {
   long size = 512, n = size;
   char *buf = gpmalloc(n), *s = buf;
@@ -169,7 +169,7 @@ lisGEN(FILE *fi)
   {
     if (s[strlen(s)-1] == '\n')
     {
-      GEN x = flisexpr(buf);
+      GEN x = freadexpr(buf);
       free(buf); return x;
     }
     buf = gprealloc(buf, size<<1);

@@ -100,7 +100,7 @@ std_fun(subgp_iter *T, GEN x)
 {
   expr_t *E = (expr_t *)T->fundata;
   E->ep->value = (void*)x;
-  (void)lisseq(E->s); T->countsub++;
+  (void)readseq(E->s); T->countsub++;
 }
 /* ----subgp_iter 'fun' associated to subgrouplist ------------- */
 static void

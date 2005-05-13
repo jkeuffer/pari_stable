@@ -402,7 +402,7 @@ lisseq0_nobreak(char *t, GEN (*f)(void))
   return gerepileupto(av, z);
 }
 
-/* for sumiter: (void)lisseq(t) */
+/* for sumiter: (void)readseq(t) */
 void
 lisseq_void(char *t)
 {
@@ -418,7 +418,7 @@ lisseq_void(char *t)
   avma = top - av;
 }
 
-/* filtered lisexpr = remove blanks and comments */
+/* filtered readexpr = remove blanks and comments */
 static GEN
 flisseq0(char *s, GEN (*f)(void))
 {
@@ -429,14 +429,14 @@ flisseq0(char *s, GEN (*f)(void))
 
 GEN lisseq_nobreak(char *t)  { return lisseq0_nobreak(t, seq);  }
 GEN lisexpr_nobreak(char *t) { return lisseq0_nobreak(t, expr); }
-GEN lisseq(char *t)  { return lisseq0(t, seq);  }
-GEN lisexpr(char *t) { return lisseq0(t, expr); }
-GEN flisseq(char *s) { return flisseq0(s, seq); }
-GEN flisexpr(char *s){ return flisseq0(s, expr);}
+GEN readseq(char *t)  { return lisseq0(t, seq);  }
+GEN readexpr(char *t) { return lisseq0(t, expr); }
+GEN freadseq(char *s) { return flisseq0(s, seq); }
+GEN freadexpr(char *s){ return flisseq0(s, expr);}
 
 /* check syntax, then execute */
 GEN
-readseq(char *c, int strict)
+gpreadseq(char *c, int strict)
 {
   char *olds = analyseur, *olde = mark.start;
   GEN z;
@@ -1614,7 +1614,7 @@ matrix_block(GEN p)
 /* x = gen_0: no default value, otherwise a t_STR, formal expression for
  * default argument. Evaluate and return. */
 static GEN
-make_arg(GEN x) { return (x==gen_0)? x: flisseq(GSTR(x)); }
+make_arg(GEN x) { return (x==gen_0)? x: freadseq(GSTR(x)); }
 
 static GEN
 fun_seq(char *t) /* lisseq0, simplified */

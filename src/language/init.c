@@ -1249,8 +1249,8 @@ trap0(char *e, char *r, char *f)
     VOLATILE GEN x;
 
     CATCH(numerr) { x = NULL; }
-    TRY { x = lisseq(f); } ENDCATCH;
-    if (!x) { avma = av; gp_function_name = NULL; x = lisseq(r); }
+    TRY { x = readseq(f); } ENDCATCH;
+    if (!x) { avma = av; gp_function_name = NULL; x = readseq(r); }
     set_analyseur(a); return x;
   }
 
@@ -1760,7 +1760,7 @@ gerepileupto(pari_sp av, GEN q)
   /* The garbage is only empty when av==q. It's probably a mistake if
    * av < q. But "temporary variables" from sumiter are a problem since
    * ep->values are returned as-is by identifier() and they can be in the
-   * stack: if we put a gerepileupto in lisseq(), we get an error. Maybe add,
+   * stack: if we put a gerepileupto in readseq(), we get an error. Maybe add,
    * if (DEBUGMEM) err(warner,"av>q in gerepileupto") ???
    */
 
@@ -2106,9 +2106,9 @@ geni(void) { return gi; }
  * code: describe function prototype. NULL = use valence instead.
  * -----
  * Arguments:
- *  I  input position (to be processed with lisseq) - a string with a
+ *  I  input position (to be processed with readseq) - a string with a
  *     sequence of PARI expressions.
- *  E  input position (to be processed with lisexpr) - a string with a
+ *  E  input position (to be processed with readexpr) - a string with a
  *     PARI expression.
  *  G  GEN
  *  L  long

@@ -93,14 +93,14 @@ Many new or improved functions in the PARI library.
      PARI object (with a simpler syntax: GENtostring(g) returns a malloc'ed
      string containing g as gp would print it).
 
-     - lisexpr has a relative flisexpr (for filtered lisexpr), which enables
+     - readexpr has a relative freadexpr (for filtered readexpr), which enables
      you to use input containing whitespaces.
 
      - you can use GENs in formatted output, a la printf.
 
    * improved garbage collecting.
 
-   * private variables can be created without an explicit lisexpr(), using
+   * private variables can be created without an explicit readexpr(), using
      fetch_var() and delete_var().
 
 ==========================================================================

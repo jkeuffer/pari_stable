@@ -354,6 +354,7 @@ void  errcontext(char *msg, char *s, char *entry);
 void  free_graph(void);
 GEN   geni(void);
 void* get_stack(double,int);
+GEN   gpreadseq(char *c, int strict);
 void  init_defaults(int force);
 void  init_graph(void);
 void  initout(int initerr);

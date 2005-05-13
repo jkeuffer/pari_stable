@@ -63,6 +63,8 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
        old = precdl; precdl = prec; x = taniyama(e); precdl = old;
     7- [bnfinit] retune compute_R to try and detect cheating with Bach's
        constant.
+    8- rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
+       flisseq -> freadseq
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
@@ -1805,7 +1807,7 @@ XR  8- added flag in rnfconductor to check extension is abelian (under GRH)
     9- made Vec("pari") return ["p","a","r","i"] instead of ["pari"]
    10- renamed library function gsize() to sizedigit()  [conflict with gtk]
 XR 11- bnrstark: check if N0 is too large (=> computation impossible)
-IK 12- let lisGEN() return NULL when EOF is met (was oo loop)
+IK 12- let readGEN() return NULL when EOF is met (was oo loop)
    13- algorithm for zeta(), gamma() [initial GP code by HC]
    14- improved rnfnormgroup() [reduce number of calls to isprincipal]
 IZ 15- flags for OS/2 build + use generic [pre|suf]fix for object files
@@ -2258,7 +2260,7 @@ IS 27- C++ keywords (new, class) occurred as variable names
    43- confusing "array index out of allowed range" message (e.g [1-0])
 IS 44- fixed obscure compiler optimization bugs in smithall() and eint1()
 GN 45- weird results in ellisoncurve() due to misguided precision heuristics
-   46- typo in forvec([],...): lisexpr() --> lisseq()
+   46- typo in forvec([],...): readexpr() --> readseq()
    47- check arguments in ploth()
 XR 48- rare bug in bnrL1 (wrong value!)
    49- precision problems in polredabs
@@ -3005,7 +3007,7 @@ XR  7- improved the nffactor module
 HC  8- elllseries (use ellglobalred + ellrootno)
 
   Added
-    1- new function in library mode lisGEN()
+    1- new function in library mode readGEN()
 HC  2- new GP function ellrootno
 
   Removed

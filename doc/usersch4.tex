@@ -1424,14 +1424,14 @@ GEN gy = polx[v];
 This function raises an error if $s$ is already registered as a function name.
 
 \misctitle{Caveat}: it is possible to use \teb{flissexpr}
-(see~\secref{se:flisexpr}) to execute a GP command and create GP variables
+(see~\secref{se:freadexpr}) to execute a GP command and create GP variables
 on the fly as needed:
 
 \bprog
-GEN gy = flisexpr("'y"); /*@Ccom returns polx[$v$], for some $v$ */
+GEN gy = freadexpr("'y"); /*@Ccom returns polx[$v$], for some $v$ */
 long v = varn(gy);
 @eprog\noindent
-But please note the quote \kbd{'y} in the above. Using \kbd{flisexpr("y")}
+But please note the quote \kbd{'y} in the above. Using \kbd{freadexpr("y")}
 might work, but is dangerous, especially when programming functions that are
 used under \kbd{gp}. It would read the value of \kbd{y}, as currently known
 by the \kbd{gp} interpreter (possibly creating it in the process). But if
@@ -1511,34 +1511,34 @@ For \idx{input}, PARI provides you with two powerful high level functions
 which enables you to input your objects as if you were under \kbd{gp}. In fact,
 the second one \emph{is} essentially the GP syntactical parser, hence you
 can use it not only for input but for (most) computations that you can do
-under \kbd{gp}. These functions are called \teb{flisexpr} and \teb{flisseq}. The
-first one has the following syntax:\label{se:flisexpr}
+under \kbd{gp}. These functions are called \teb{freadexpr} and \teb{freadseq}. The
+first one has the following syntax:\label{se:freadexpr}
 
-\fun{GEN}{flisexpr}{char *s}
+\fun{GEN}{freadexpr}{char *s}
 
 \noindent
 Its effect is to analyze the input string s and to compute the result as a
 GP expression. However it is limited to one expression. If you want to read
 and evaluate a sequence of expressions, use
 
-\fun{GEN}{flisseq}{char *s}
+\fun{GEN}{freadseq}{char *s}
 
 \noindent\sidx{filter}
 In fact these two functions start by \emph{filtering} out all spaces and
 comments in the input string (that is what the initial \kbd{f} stands for).
 They then call the underlying basic functions, the GP parser proper:
-\fun{GEN}{lisexpr}{char *s} and \fun{GEN}{lisseq}{char *s}, which are
+\fun{GEN}{readexpr}{char *s} and \fun{GEN}{readseq}{char *s}, which are
 slightly faster but which you probably do not need.
 
 To read a \kbd{GEN} from a file, you can use the simpler interface
 
-\fun{GEN}{lisGEN}{FILE *file}
+\fun{GEN}{readGEN}{FILE *file}
 
 which reads a character string of arbitrary length from the stream \kbd{file}
-(up to the first newline character), applies \kbd{flisexpr} to it, and
+(up to the first newline character), applies \kbd{freadexpr} to it, and
 returns the resulting \kbd{GEN}. This way, you do not have to worry about
 allocating buffers to hold the string. To interactively input an expression,
-use \kbd{lisGEN(stdin)}. This function returns \kbd{NULL} if \kbd{EOF} is
+use \kbd{readGEN(stdin)}. This function returns \kbd{NULL} if \kbd{EOF} is
 encountered before a complete expression could be read.
 
 Once in a while, it may be necessary to evaluate a GP expression sequence
@@ -1855,10 +1855,10 @@ functions)\cr
 \+& \kbd{n} & variable, expects a \idx{variable number} (a \kbd{long}, not an
 \kbd{*entree})\cr
 \+& \kbd{I} & string containing a sequence of GP statements (a \var{seq}), %
-to be processed by \kbd{lisseq}\cr
+to be processed by \kbd{readseq}\cr
 \+&&(useful for control statements)\cr
 \+& \kbd{E} & string containing a \emph{single} GP statement (an %
-\var{expr}), to be processed by \kbd{lisexpr}\cr
+\var{expr}), to be processed by \kbd{readexpr}\cr
 \+& \kbd{r} & raw input (treated as a string without quotes). Quoted %
  args are copied as strings\cr
 \+&&\quad Stops at first unquoted \kbd{')'} or \kbd{','}. Special chars can

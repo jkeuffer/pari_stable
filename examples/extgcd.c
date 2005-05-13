@@ -26,8 +26,8 @@ main()
 {
   GEN x, y, d, u, v;
   pari_init(1000000,2);
-  printf("x = "); x = lisGEN(stdin);
-  printf("y = "); y = lisGEN(stdin);
+  printf("x = "); x = readGEN(stdin);
+  printf("y = "); y = readGEN(stdin);
   d = extgcd(x, y, &u, &v);
   pariputsf("gcd = %Z\nu = %Z\nv = %Z\n", d,u,v);
   return 0;
