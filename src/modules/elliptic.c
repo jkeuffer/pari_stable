@@ -1783,8 +1783,9 @@ ellintegralmodel(GEN e)
 static void
 standard_model(GEN e, GEN *pv)
 {
-  GEN r, t, s = truedivis((GEN)e[1], -2), s2 = sqri(s);
-  r = truedivis(addis(addii((GEN)e[2], s2), 1), -3);
+  GEN a1 = gel(e,1), a2 = gel(e,2);
+  GEN r, t, s = truedivis(a1, -2);
+  r = truedivis(addis(subii(a2, mulii(s,addii(s,a1))), 1), -3);
   t = truedivis(ellLHS0_i(e,r), -2);
   cumulev(pv, gen_1, r, s, t);
 }

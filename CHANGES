@@ -52,6 +52,7 @@ Done for version 2.2.11 (released 21/05/2005):
 BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
     5- random() was less random on 64 bit machines
     6- typing 0.e-28 returned 0.E-38 (!)
+    7- ellminimalmodel(e).a2 was not always in {-1,0,1}
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, and Flm_Flv_mul to Flm_Flc_mul
