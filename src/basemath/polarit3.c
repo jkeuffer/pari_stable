@@ -1145,7 +1145,7 @@ FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
   {
     ulong pp = (long)p[2];
     GEN Tl = ZX_to_Flx(T, pp);
-    GEN Vl = FqV_to_FlxC(V, T, p);
+    GEN Vl = FqV_to_FlxV(V, T, p);
     Tl = FlxqV_roots_to_pol(Vl, Tl, pp, v);
     return gerepileupto(ltop, FlxX_to_ZXX(Tl));
   }
@@ -1172,7 +1172,20 @@ FqV_red(GEN z, GEN T, GEN p)
 }
 
 GEN
-FqV_to_FlxC(GEN v, GEN T, GEN pp)
+FqV_to_FlxV(GEN v, GEN T, GEN pp)
+{
+  long j, N = lg(v);
+  long vT = varn(T);
+  ulong p = pp[2];
+  GEN y = cgetg(N, t_VEC);
+  for (j=1; j<N; j++) 
+    y[j] = (long)(typ(v[j])==t_INT?  Z_to_Flx((GEN)v[j], p, vT)
+                                  : ZX_to_Flx((GEN)v[j], p));
+  return y;
+}
+
+GEN
+FqC_to_FlxC(GEN v, GEN T, GEN pp)
 {
   long j, N = lg(v);
   long vT = varn(T);
@@ -1191,7 +1204,7 @@ FqM_to_FlxM(GEN x, GEN T, GEN pp)
   GEN y = cgetg(n,t_MAT);
   if (n == 1) return y;
   for (j=1; j<n; j++) 
-    y[j] = (long)FqV_to_FlxC((GEN)x[j], T, pp);
+    y[j] = (long)FqC_to_FlxC((GEN)x[j], T, pp);
   return y;
 }
 
