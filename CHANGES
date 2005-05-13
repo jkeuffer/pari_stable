@@ -56,6 +56,8 @@ BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, and Flm_Flv_mul to Flm_Flc_mul
 BA  2- FpXV_FpV_innerprod renamed to FpXV_FpC_mul and FlxV_Flv_innerprod to
        FlxV_Flc_mul
     3- retain 'CHANGES' revision after 'make distrib'
+GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
+       index1 too large" warning
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
