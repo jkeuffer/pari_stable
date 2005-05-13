@@ -20,12 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 /* Flx.c */
 GEN     Fl_to_Flx(ulong x, long sv);
+GEN     Flc_to_ZC(GEN z);
 GEN     Flm_id(long n);
 GEN     Flm_to_FlxV(GEN x, long sv);
 GEN     Flm_to_FlxX(GEN x, long v,long w);
 GEN     Flm_to_ZM(GEN z);
 GEN     Flv_to_Flx(GEN x, long vs);
-GEN     Flv_to_ZC(GEN z);
 GEN     Flv_to_ZV(GEN z);
 GEN     Flv_polint(GEN xa, GEN ya, ulong p, long vs);
 GEN     Flv_roots_to_pol(GEN a, ulong p, long vs);

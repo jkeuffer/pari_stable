@@ -60,7 +60,7 @@ Flv_to_ZV(GEN z)
 }
 
 GEN
-Flv_to_ZC(GEN z)
+Flc_to_ZC(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_COL);
@@ -73,7 +73,7 @@ Flm_to_ZM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)Flv_to_ZC((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)Flc_to_ZC((GEN)z[i]);
   return x;
 }
 

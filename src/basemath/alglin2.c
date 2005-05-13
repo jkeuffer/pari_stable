@@ -2083,7 +2083,7 @@ TOOLARGE:
   return rowextract_i(x, lx-ly+1, k); /* H */
 }
 
-/* same as Flv_to_ZV, Flv_to_ZC, Flm_to_ZM but do not assume positivity */
+/* same as Flv_to_ZV, Flc_to_ZC, Flm_to_ZM but do not assume positivity */
 GEN
 zx_to_ZX(GEN z)
 {
