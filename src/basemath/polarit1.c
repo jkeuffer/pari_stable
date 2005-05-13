@@ -220,7 +220,7 @@ rootmod2(GEN f, GEN pp)
     y = Flv_to_ZC(Flx_roots_naive(ZX_to_Flx(f,p), p));
   else
     y = root_mod_even(f,p);
-  return gerepileupto(av, FpV_to_mod(y, pp));
+  return gerepileupto(av, FpC_to_mod(y, pp));
 }
 
 /* assume x reduced mod p, monic. */
@@ -353,7 +353,7 @@ rootmod(GEN f, GEN p)
     y = FpX_roots_i(f, p);
   else
     y = root_mod_even(f,q);
-  return gerepileupto(av, FpV_to_mod(y, p));
+  return gerepileupto(av, FpC_to_mod(y, p));
 }
 
 GEN

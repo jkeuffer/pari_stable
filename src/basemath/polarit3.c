@@ -1823,7 +1823,17 @@ GEN
 FpV_to_mod(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l,typ(z));
+  GEN x = cgetg(l, t_VEC);
+  if (isonstack(p)) p = icopy(p);
+  for (i=1; i<l; i++) x[i] = (long)to_intmod((GEN)z[i], p);
+  return x;
+}
+/* z in Z^n, return z * Mod(1,p), normalized*/
+GEN
+FpC_to_mod(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_COL);
   if (isonstack(p)) p = icopy(p);
   for (i=1; i<l; i++) x[i] = (long)to_intmod((GEN)z[i], p);
   return x;

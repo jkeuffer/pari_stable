@@ -1702,8 +1702,11 @@ same with \kbd{Fp} coordinates; operations are understood over $\Z/p\Z$. An
 
 \subsubsec{Basic operations}
 
-\fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{z *
-Mod(1,p)}, hence with \typ{INTMOD} coefficients.
+\fun{GEN}{FpC_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{Col(z) *
+Mod(1,p)}, hence a \typ{COL} with \typ{INTMOD} coefficients.
+
+\fun{GEN}{FpV_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{Vec(z) *
+Mod(1,p)}, hence a \typ{VEC} with \typ{INTMOD} coefficients.
 
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
 Mod(1,p)}, hence with \typ{INTMOD} coefficients.
