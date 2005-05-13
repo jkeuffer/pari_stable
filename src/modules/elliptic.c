@@ -1716,18 +1716,22 @@ localred(GEN e, GEN p, int minim)
     return localred_p(e,p, minim);
   else
   {
-    GEN z = localred_23(e,itos(p));
+    long l = itos(p);
+    GEN z;
+    if (l < 2) err(talker,"not a prime in localred");
+    z = localred_23(e, l);
     return minim? (GEN)z[3]: z;
   }
 }
 
 GEN
-localreduction(GEN e, GEN p)
+elllocalred(GEN e, GEN p)
 {
   pari_sp av = avma;
   checkell(e);
   if (typ(e[12]) != t_INT)
-    err(talker,"not an integral curve in localreduction");
+    err(talker,"not an integral curve in elllocalred");
+  if (typ(p) != t_INT || signe(p) <= 0) err(typeer,"elllocalred");
   return gerepileupto(av, localred(e, p, 0));
 }
 

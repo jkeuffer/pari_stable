@@ -368,7 +368,7 @@ entree oldfonctions[]={
 {"lllrat",1,(void *)suppressed,8,"G"},
 {"ln",1,(void *)glog,3,"Gp"},
 {"lngamma",1,(void *)glngamma,3,"Gp"},
-{"localred",2,(void *)localreduction,5,"GG"},
+{"localred",2,(void *)elllocalred,5,"GG"},
 {"log",1,(void *)glog,3,"Gp"},
 {"logagm",1,(void *)glogagm,3,"Gp"},
 {"lseriesell",4,(void *)lseriesell0,5,"GGGGp"},
