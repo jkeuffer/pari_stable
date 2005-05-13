@@ -2483,13 +2483,6 @@ get_line_from_file(char *prompt, filtre_t *F, FILE *file)
 }
 
 static int
-get_line_from_user(char *prompt, filtre_t *F)
-{
-  pariputs(prompt);
-  return get_line_from_file(prompt,F,infile);
-}
-
-static int
 is_interactive(void)
 {
   ulong f = GP_DATA->flags;
@@ -2502,8 +2495,8 @@ is_interactive(void)
 }
 
 /* return 0 if no line could be read (EOF) */
-static int
-read_line(filtre_t *F, char *PROMPT)
+int
+pari_read_line(filtre_t *F, char *PROMPT)
 {
   Buffer *b = (Buffer*)F->data;
   int res;
@@ -2522,7 +2515,10 @@ read_line(filtre_t *F, char *PROMPT)
       res = get_line_from_readline(PROMPT, bare_prompt, F);
     else
 #endif
-      res = get_line_from_user(PROMPT, F);
+    {
+      pariputs(PROMPT);
+      res = get_line_from_file(PROMPT,F,infile);
+    }
     if (!disable_color) { term_color(c_NONE); pariflush(); }
   }
   else
@@ -2619,7 +2615,7 @@ gp_main_loop(int ismain)
       }
     }
 
-    if (! read_line(&F, NULL))
+    if (! pari_read_line(&F, NULL))
     {
       if (popinfile()) gp_quit();
       if (ismain) continue;
@@ -2745,7 +2741,7 @@ break_loop(long numerr)
   {
     GEN x;
     if (setjmp(b->env)) pariputc('\n');
-    if (! read_line(&F, BREAK_LOOP_PROMPT))
+    if (! pari_read_line(&F, BREAK_LOOP_PROMPT))
     {
       if (popinfile()) break;
       continue;
