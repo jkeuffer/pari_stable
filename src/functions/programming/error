@@ -4,4 +4,16 @@ Section: programming
 C-Name: error0
 Prototype: vs*
 Help: error(\"msg\"): abort script with error message msg
+Description:
+ (?gen,...):void  err(talker, "${2 format_string}"${2 format_args})
+
+Function: _err_primes
+Class: gp2c_internal
+Description:
+ ():void  err(primer1)
+
+Function: _err_type
+Class: gp2c_internal
+Description:
+ (str):void  err(typeer, $1)
 
