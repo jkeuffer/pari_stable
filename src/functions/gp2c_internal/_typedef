@@ -1,5 +1,6 @@
 Function: _declaration
 Class: gp2c_internal
+Help: Obsoleted by gp2c-0.0.4
 Description: 
  (C!void)          void $1
  (C!long)          long $1
@@ -86,9 +87,25 @@ Description:
 
 Function: _proto_default
 Class: gp2c_internal
-Help: Code for default value of GP function
+Help: Obsoleted by gp2c-0.0.4
 Description:
  (C!long)       0
  (C!GEN)        0
  (C!char*)      \"\"
+
+Function: _default_marker
+Class: gp2c_internal
+Help: Code for default value of GP function
+Description:
+ (C!GEN)      NULL
+ (var)        -1
+ (small)      0
+ (str)        ""
+
+Function: _default_check
+Class: gp2c_internal
+Help: Code to check for the default marker
+Description:
+ (C!GEN):bool    !$(1)
+ (var):bool      $(1)==-1
 
