@@ -3,6 +3,6 @@ Class: highlevel
 Section: graphic
 C-Name: plot_outfile_set
 Prototype: ls
-Help: plotfile(filename): set the output file for plotting output. \"-\"
+Help: plotfile(filename): set the output file for plotting output. "-"
  redirects to the same place as PARI output
 

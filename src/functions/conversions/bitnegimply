@@ -2,7 +2,7 @@ Function: bitnegimply
 Section: conversions
 C-Name: gbitnegimply
 Prototype: GG
-Help: bitnegimply(x,y): bitwise \"negated imply\" of two integers x and y,
+Help: bitnegimply(x,y): bitwise "negated imply" of two integers x and y,
  in other words, x BITAND BITNEG(y). Negative numbers behave as if modulo big
  power of 2
 Description: 

@@ -45,6 +45,7 @@ foreach my $name (sort keys %funcs)
       {
         my $fproto=$proto;
         $proto =~ s/^[vl]//;
+        $fproto =~ s/"/\\"/g;
         $valence=($proto eq "" || $proto =~ /^(s\*)|[DpP]/)?0:1;
         print "{\"$gpname\",$valence,(void*)$cname,$sec,\"$fproto\"},\n";
       }

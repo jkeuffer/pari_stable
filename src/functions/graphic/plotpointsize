@@ -3,6 +3,6 @@ Class: highlevel
 Section: graphic
 C-Name: rectpointsize
 Prototype: vLG
-Help: plotpointsize(w,size): change the \"size\" of following points in
+Help: plotpointsize(w,size): change the "size" of following points in
  rectwindow w. w=-1 changes global value
 

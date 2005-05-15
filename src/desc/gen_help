@@ -11,6 +11,8 @@ foreach my $name (sort keys %funcs)
       my $help=$func{'Help'};
       defined($help) or die("No help for function $name");
       $help =~ s/\n/ /g;
+      $help =~ s/\\/\\\\/g;
+      $help =~ s/"/\\"/g;
       print "  \"$help\",\n";
 }
 print <<EOF
