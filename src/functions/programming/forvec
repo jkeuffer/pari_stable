@@ -13,3 +13,9 @@ Help: Initializes parameters for forvec_start.
 Description:
  (gen, small, &gen, &func_GG):vec    forvec_start($1, $2, &$3, &$4)
 
+Function: _call_GG
+Class: gp2c_internal
+Help: Call a function with proto GG on two GENs
+Description:
+ (func_GG, gen, gen):gen         $(1)($2, $3)
+
