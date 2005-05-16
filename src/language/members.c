@@ -163,6 +163,10 @@ member_sign(GEN x) /* signature */
   }
   return (GEN)y[2];
 }
+GEN
+member_r1(GEN x) { return gel(member_sign(x), 1); }
+GEN
+member_r2(GEN x) { return gel(member_sign(x), 2); }
 
 GEN
 member_index(GEN x)
