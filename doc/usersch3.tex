@@ -6936,12 +6936,15 @@ order, using the heapsort method. $x$ must be a vector, and its components
 integers, reals, or fractions.
 
 If $k$ is present and is an integer, sorts according to the value of the
-$k$-th subcomponents of the components of~$x$. $k$ can also be a vector,
-in which case the
-sorting is done lexicographically according to the components listed in the
-vector $k$. For example, if $k=[2,1,3]$, sorting will be done with respect
-to the second component, and when these are equal, with respect to the
-first, and when these are equal, with respect to the third.
+$k$-th subcomponents of the components of~$x$. Note that heapsort is
+unstable, hence is allowed to swap "equal" entries (with respect to the
+sorting criterion).
+
+$k$ can also be a vector, in which case the sorting is done lexicographically
+according to the components listed in the vector $k$. For example, if
+$k=[2,1,3]$, sorting will be done with respect to the second component, and
+when these are equal, with respect to the first, and when these are equal,
+with respect to the third.
 
 \noindent The binary digits of \fl\ mean:
 
