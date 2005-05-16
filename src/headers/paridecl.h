@@ -1262,6 +1262,8 @@ GEN     member_orders(GEN x);
 GEN     member_p(GEN x);
 GEN     member_pol(GEN x);
 GEN     member_reg(GEN x);
+GEN     member_r1(GEN x);
+GEN     member_r2(GEN x);
 GEN     member_roots(GEN x);
 GEN     member_sign(GEN x);
 GEN     member_t2(GEN x);
