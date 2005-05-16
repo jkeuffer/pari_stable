@@ -1354,26 +1354,23 @@ diff, codiff: different and codifferent                    nf, bnf, bnr\n\
 disc : discriminant                                   ell, nf, bnf, bnr\n\
 e, f : inertia/residue  degree            prid\n\
 fu   : fundamental units                                       bnf, bnr\n\
-futu : [u,w] where u=unit group, w=torsion                     bnf, bnr\n\
 gen  : generators                    bid, prid, clgp,          bnf, bnr\n\
-index: index                                                   bnf, bnr\n\
+index: index                                               nf, bnf, bnr\n\
 j    : j-invariant                                    ell\n\
 mod  : modulus                       bid,                           bnr\n\
 nf   : number field                                            bnf, bnr\n\
 no   : number of elements            bid,       clgp,          bnf, bnr\n\
 omega, eta: [omega1,omega2] and [eta1, eta2]          ell\n\
-p    : rational prime contained in prid   prid\n\
+p    : rational prime below prid          prid\n\
 pol  : defining polynomial                                 nf, bnf, bnr\n\
 reg  : regulator                                               bnf, bnr\n\
 roots: roots                                          ell  nf, bnf, bnr\n\
-sign : signature                                           nf, bnf, bnr\n\
+sign,r1,r2 : signature                                     nf, bnf, bnr\n\
 t2   : t2 matrix                                           nf, bnf, bnr\n\
-tate : Tate's [u^2,u,q]                               ell\n\
+tate : Tate's [u^2, u, q]                             ell\n\
 tu   : torsion unit and its order                              bnf, bnr\n\
-tufu : [w,u] where u=unit group, w=torsion                     bnf, bnr\n\
 w    : Mestre's w                                     ell\n\
-zk   : integral basis                                      nf, bnf, bnr\n\
-zkst : structure of (Z_K/m)^* (valid for idealstar also)            bnr\n");
+zk   : integral basis                                      nf, bnf, bnr\n");
 }
 
 #define QUOTE "_QUOTE"
