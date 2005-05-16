@@ -1015,7 +1015,7 @@ number of \emph{words} instead.
 
 \subsecidx{sizedigit}$(x)$: outputs a quick bound for the number of decimal
 digits of (the components of) $x$, off by at most $1$. If you want the
-exact value, you can use \kbd{length(Str(x))}, which is much slower.
+exact value, you can use \kbd{#Str(x)}, which is slower.
 
 \syn{sizedigit}{x} which returns a \kbd{long}.
 
@@ -3141,19 +3141,21 @@ following three subclasses:\cr
 \+\tet{fu}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: &
  \idx{fundamental units}.\cr
 
-\+\tet{futu} &(\var{bnr},& \var{bnf}&&)&: & $[u,w]$, $u$ is a vector of
-fundamental units, $w$ generates the torsion.\cr
+\+\tet{index}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: &
+ \idx{index} of the power order in the ring of integers.\cr
 
 \+\tet{nf}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & number field.\cr
+
+\+\tet{r1} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & the number
+of real embeddings.\cr
+
+\+\tet{r2} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & the number
+of pairs of complex embeddings.\cr
 
 \+\tet{reg}  &(\var{bnr},& \var{bnf},&&)&: & regulator.\cr
 
 \+\tet{roots}&(\var{bnr},& \var{bnf},& \var{nf}&)&: & roots of the
 polynomial generating the field.\cr
-
-\+\tet{sign} &(\var{bnr},& \var{bnf},& \var{nf}&)&: & $[r_1,r_2]$ the
-signature of the field. This means that the field has $r_1$ real \cr
-\+ &&&&&&  embeddings, $2r_2$ complex ones.\cr
 
 \+\tet{t2}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & the T2 matrix (see
 \kbd{nfinit}).\cr
@@ -3161,14 +3163,12 @@ signature of the field. This means that the field has $r_1$ real \cr
 \+\tet{tu}   &(\var{bnr},& \var{bnf},&&)&: & a generator for the torsion
 units.\cr
 
-\+\tet{tufu} &(\var{bnr},& \var{bnf},&&)&: & as \kbd{futu}, but outputs
-$[w,u]$.\cr
+\+\tet{tufu} &(\var{bnr},& \var{bnf},&&)&: &
+ $[w,u_1,...,u_r]$, $(u_i)$ is a vector of
+fundamental units, $w$ generates the torsion units.\cr
 
 \+\tet{zk}   &(\var{bnr},& \var{bnf},& \var{nf}&)&: & integral basis, i.e.~a
 $\Z$-basis of the maximal order.\cr
-
-\+\tet{zkst} &(\var{bnr}&    &    &)&: & structure of $(\Z_K/m)^*$ (can be
-extracted also from a \var{bid}).\cr
 
   For instance, assume that $\var{bnf} = \kbd{bnfinit}(\var{pol})$, for some
 polynomial. Then \kbd{\var{bnf}.clgp} retrieves the class group, and
@@ -3543,17 +3543,16 @@ tpuexpo(bnf)=
 
   S = bnfsignunit(bnf); d = matsize(S);
   S = matrix(d[1],d[2], i,j, if (S[i,j] < 0, 1,0));
-  S = concat(S, vectorv(d[1],i,1));   \\ sign(-1)
+  S = concat(vectorv(d[1],i,1), S);   \\ add sign(-1)
   K = lift(matker(S * Mod(1,2)));
   if (K, mathnfmodid(K, 2), 2*matid(d[1]))
 }
 
 /* totally positive units */
 tpu(bnf)=
-{ local(vu, ex = tpuexpo(bnf));
+{ local(vu = bnf.tufu, ex = tpuexpo(bnf));
 
-  vu = nfbasistoalg(bnf, bnf.tufu);
-  vector(length(ex)-1, i, factorback([vu, ex[,i+1]]))  \\ ex[,1] is 1
+  vector(#ex-1, i, factorback(vu, ex[,i+1]))  \\ ex[,1] is 1
 }
 @eprog
 
@@ -3783,25 +3782,31 @@ or \tet{bnrdisc} is more efficient.
 
 \syn{bnrdisclist0}{bnf,\var{bound},\var{arch}}.
 
-\subsecidx{bnrinit}$(\var{bnf},\var{ideal},\{\fl=0\})$: $\var{bnf}$ is as
-output by \kbd{bnfinit}, \var{ideal} is a modulus, initializes data linked to
+\subsecidx{bnrinit}$(\var{bnf},f,\{\fl=0\})$: $\var{bnf}$ is as
+output by \kbd{bnfinit}, $f$ is a modulus, initializes data linked to
 the ray class group structure corresponding to this module, a so-called
 \var{bnr} structure. The following member functions are available
 on the result: \kbd{.bnf} is the underlying \var{bnf},
 \kbd{.mod} the modulus, \kbd{.bid} the \var{bid} structure associated to the
 modulus; finally, \kbd{.clgp}, \kbd{.no}, \kbd{.cyc}, \kbd{clgp} refer to the
 ray class group (as a finite abelian group), its cardinality, its elementary
-divisors, its generators. Note that the latter group are different from the
-members of the underlying \var{bnf}, which refer to the class group; use
-\kbd{\var{bnr}.bnf.clgp} to access these.
+divisors, its generators. 
 
+The last group of functions are different from the members of the underlying
+\var{bnf}, which refer to the class group; use \kbd{\var{bnr}.bnf.\var{xxx}}
+to access these, e.g.~\kbd{\var{bnr}.bnf.cyc} to get the cyclic decomposition
+of the class group.
+
+They are also different from the members of the underlying \var{bid}, which
+refer to $(\O_K/f)^*$; use \kbd{\var{bnr}.bid.\var{xxx}} to access these,
+e.g.~\kbd{\var{bnr}.bnf.no} to get $\phi(f)$.
 
 If $\fl=0$ (default), the generators of the ray class group are not computed,
 which saves time. Hence \kbd{\var{bnr}.gen} would produce an error.
 
 If $\fl=1$, as the default, except that generators are computed.
 
-\syn{bnrinit0}{\var{bnf},\var{ideal},\fl}.
+\syn{bnrinit0}{\var{bnf},f,\fl}.
 
 \subsecidx{bnrisconductor}$(a1,\{a2\},\{a3\})$: $a1$, $a2$, $a3$ represent
 an extension of the base field, given by class field theory for some modulus
@@ -4398,20 +4403,19 @@ must be a (positive) prime number. Note that the fact that $p$ is prime is
 not checked, so if a non-prime number $p$ is given it may lead to
 unpredictable results.
 
-The result is a vector of 5-component vectors, each representing one of the
+The result is a vector of \tev{pr} structures, each representing one of the
 prime ideals above $p$ in the number field $\var{nf}$. The representation
 $P=[p,a,e,f,b]$ of a prime ideal means the following. The prime ideal is
 equal to $p\Z_K+\alpha\Z_K$ where $\Z_K$ is the ring of integers of the field
 and $\alpha=\sum_i a_i\omega_i$ where the $\omega_i$ form the integral basis
 \kbd{\var{nf}.zk}, $e$ is the ramification index, $f$ is the residual index,
-and $b$ represents a $\beta\in\Z_K$ such that $P^{-1}=\Z_K+\beta/p\Z_K$
-which will be useful for computing valuations, but which the user can ignore.
-The number $\alpha$ is guaranteed to have a valuation equal to 1 at the prime
+and $b$ represents a $\beta\in\Z_K$ such that $P^{-1}=\Z_K+\beta/p\Z_K$ which
+will be useful for computing valuations, but which the user can ignore. The
+number $\alpha$ is guaranteed to have a valuation equal to 1 at the prime
 ideal (this is automatic if $e>1$).
 
-The components of \kbd{P} may conveniently be accessed by member functions:
-\kbd{P.p}, \kbd{P.e}, \kbd{P.f}, and \kbd{P.gen} (returns the vector
-$[p,a]$).
+The components of \kbd{P} should be accessed by member functions: \kbd{P.p},
+\kbd{P.e}, \kbd{P.f}, and \kbd{P.gen} (returns the vector $[p,a]$).
 
 \syn{primedec}{\var{nf},p}.
 
@@ -4837,8 +4841,8 @@ components:
 
 $\var{nf}[1]$ contains the polynomial \var{pol} (\kbd{\var{nf}.pol}).
 
-$\var{nf}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}), the number of real
-and complex places of $K$.
+$\var{nf}[2]$ contains $[r1,r2]$ (\kbd{\var{nf}.sign}, \kbd{\var{nf}.r1},
+\kbd{\var{nf}.r2}), the number of real and complex places of $K$.
 
 $\var{nf}[3]$ contains the discriminant $d(K)$ (\kbd{\var{nf}.disc}) of $K$.
 

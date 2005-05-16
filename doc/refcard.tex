@@ -830,7 +830,7 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \subsec{nf members:}
 \beginindentedkeys
 \key{polynomial defining \var{nf}, $f(\theta)=0$}{\var{nf}.pol}
-\key{number of [real,complex] places}{\var{nf}.sign}
+\key{number of real/complex places}{\var{nf}.r1, \var{nf}.r2}
 \key{discriminant of \var{nf}}{\var{nf}.disc}
 \key{$T_2$ matrix}{\var{nf}.t2}
 \key{vector of roots of $f$}{\var{nf}.roots}
@@ -849,7 +849,7 @@ A number field $K$ is given by a monic irreducible $f\in\ZZ[X]$.\hfill\break
 \key{regulator}{\var{bnf}.reg}
 \key{fundamental units}{\var{bnf}.fu}
 \key{torsion units}{\var{bnf}.tu}
-\key{$[tu,fu]$, $[fu,tu]$}{\var{bnf}.tufu{\rm/}futu}
+\key{$[tu,fu]$}{\var{bnf}.tufu}
 \endindentedkeys
 \li{compute a \var{bnf}\ from small \var{bnf}}{bnfmake$(\var{sbnf})$}
 %
