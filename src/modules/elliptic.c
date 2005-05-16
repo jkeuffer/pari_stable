@@ -1435,6 +1435,13 @@ localred_result(long f, long kod, long c, GEN v)
   z[3] = lcopy(v);
   z[4] = lstoi(c); return z;
 }
+static GEN
+localredbug(GEN p, char *s)
+{
+  if (BSW_psp(p)) err(bugparier, s);
+  err(talker,"not a prime in localred");
+  return NULL; /* not reached */
+}
 
 /* Here p > 3. e assumed integral */
 static GEN
@@ -1495,8 +1502,7 @@ localred_p(GEN e, GEN p, int minim)
       {
 	case  1: c = nuD; break;
 	case -1: c = odd(nuD)? 1: 2; break;
-	default: err(bugparier,"localred (p | c6)");
-          return NULL; /* not reached */
+	default: return localredbug(p,"localred (p | c6)");
       }
       break;
     case 6: f = 2; kod = -4-nuj; /* Inu* */
@@ -1505,8 +1511,7 @@ localred_p(GEN e, GEN p, int minim)
       else
 	c = 3 + kronecker(diviiexact(D, gpowgs(p, 6+nuj)), p);
       break;
-    default: err(bugparier,"localred (nu_D - nu_j != 0,6)");
-      return NULL; /* not reached */
+    default: return localredbug(p,"localred (nu_D - nu_j != 0,6)");
   }
   else switch(nuD)
   {
@@ -1529,8 +1534,7 @@ localred_p(GEN e, GEN p, int minim)
       break;
     case  9: f = 2; kod = -3; c = 2; break; /* III* */
     case 10: f = 2; kod = -2; c = 1; break; /* II*  */
-    default: err(bugparier,"localred");
-      return NULL; /* not reached */
+    default: return localredbug(p,"localred");
   }
   return localred_result(f, kod, c, v);
 }
