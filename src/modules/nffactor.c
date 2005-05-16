@@ -1039,7 +1039,7 @@ bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
   pari_timer ti;
 
   TIMERstart(&ti);
-  if (!a) a = (long)bestlift_bound(C, d, alpha, idealnorm(nf,pr));
+  if (!a) a = (long)bestlift_bound(C, d, alpha, pr_norm(pr));
 
   for (;; avma = av, a<<=1)
   {

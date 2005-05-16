@@ -864,10 +864,10 @@ ComputeAChi(GEN dtcr, long *r, long flag, long prec)
     p1  = ComputeImagebyChar(chi, isprincipalray(bnrc, pr));
 
     if (flag)
-      B = gsub(gen_1, gdiv(p1, idealnorm(nf, pr)));
+      B = gsub(gen_1, gdiv(p1, pr_norm(pr)));
     else if (gcmp1(p1))
     {
-      B = glog(idealnorm(nf, pr), prec);
+      B = glog(pr_norm(pr), prec);
       (*r)++;
     }
     else
@@ -1719,7 +1719,7 @@ GetValue1(GEN bnr, long flag, long prec)
     diff = divcond(bnr);
     l = lg(diff) - 1; r += l;
     for (i = 1; i <= l; i++)
-      c = gmul(c, glog(idealnorm(nf, (GEN)diff[i]), prec));
+      c = gmul(c, glog(pr_norm((GEN)diff[i]), prec));
   }
   return gerepilecopy(av, mkvec2(stoi(r), c));
 }

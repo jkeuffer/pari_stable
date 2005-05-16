@@ -641,11 +641,11 @@ zimmertbound(long N,long R2,GEN DK)
 {/*20*/28.1285704, 27.4021674, 26.6807314, 25.9645140, 25.2537867, 24.5488420,
        23.8499943, 23.1575823, 22.4719720, 21.7935548, 21.1227537}
     };
-    w = gmul(dbltor(exp(-c[N-2][R2])), gsqrt(DK,MEDDEFAULTPREC));
+    w = gmul(dbltor(exp(-c[N-2][R2])), gsqrt(DK,DEFAULTPREC));
   }
   else
   {
-    w = minkowski_bound(DK, N, R2, MEDDEFAULTPREC);
+    w = minkowski_bound(DK, N, R2, DEFAULTPREC);
   }
   n = itos_or_0( gceil(w) );
   if (!n) err(talker,"Minkowski bound is too large");
@@ -720,17 +720,17 @@ static GEN
 regulatorbound(GEN bnf)
 {
   long N, R1, R2, R;
-  GEN nf, dKa, p1, c1;
+  GEN nf, dK, p1, c1;
 
   nf = (GEN)bnf[7]; N = degpol(nf[1]);
   if (!isprimitive(nf)) return dft_bound();
 
-  dKa = absi((GEN)nf[3]);
+  dK = absi((GEN)nf[3]);
   nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
-  c1 = (!R2 && N<12)? gpowgs(utoipos(4),N>>1): gpowgs(utoipos(N),N);
-  if (cmpii(dKa,c1) <= 0) return dft_bound();
+  c1 = (!R2 && N<12)? int2n(N & (~1UL)): gpowgs(utoipos(N),N);
+  if (cmpii(dK,c1) <= 0) return dft_bound();
 
-  p1 = gsqr(glog(gdiv(dKa,c1),DEFAULTPREC));
+  p1 = gsqr(glog(gdiv(dK,c1),DEFAULTPREC));
   p1 = divrs(gmul2n(gpowgs(divrs(mulrs(p1,3),N*(N*N-1)-6*R2),R),R2), N);
   p1 = sqrtr(gdiv(p1, hermiteconstant(R)));
   if (DEBUGLEVEL>1) fprintferr("Mahler bound for regulator: %Z\n",p1);
@@ -778,7 +778,7 @@ minimforunits(GEN nf, long BORNE, GEN w)
   if (DEBUGLEVEL>=2)
   {
     fprintferr("Searching minimum of T2-form on units:\n");
-    if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BOUND);
+    if (DEBUGLEVEL>2) fprintferr("   BOUND = %ld\n",BORNE);
     flusherr();
   }
   r1 = nf_get_r1(nf); n = degpol(nf[1]);
@@ -1584,7 +1584,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
       sum = addii(sum, clhss);
     }
     dlk = flrel? idealdivpowprime(nf, dlk, pr, sum)
-               : diviiexact(dlk, powgi(idealnorm(nf,pr),sum));
+               : diviiexact(dlk, powgi(pr_norm(pr),sum));
   }
   l = lg(archp); nz = nf_get_r1(nf) - (l-1);
   for (k = 1; k < l; k++)

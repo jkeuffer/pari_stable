@@ -140,7 +140,7 @@ psquarenf(GEN nf,GEN a,GEN pr)
   v = idealval(nf,a,pr); if (v&1) return 0;
   if (v) a = gdiv(a, gpowgs(basistoalg(nf, (GEN)pr[2]), v));
 
-  norm = gshift(idealnorm(nf,pr), -1);
+  norm = gshift(pr_norm(pr), -1);
   a = gmul(a, gmodulsg(1,(GEN)pr[1]));
   a = gaddgs(powgi(a,norm), -1);
   if (gcmp0(a)) { avma = av; return 1; }
@@ -377,7 +377,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
   if (odd(va) && odd(vb)) t = gneg_i(t); /* t mod pr = tame_pr(a,b) */
 
   /* quad. symbol is image of t by the quadratic character  */
-  ord = subis( idealnorm(nf,pr), 1 ); /* |(O_K / pr)^*| */
+  ord = subis( pr_norm(pr), 1 ); /* |(O_K / pr)^*| */
   ordp= subis( p, 1);                 /* |F_p^*|        */
   modpr = nf_to_ff_init(nf, &pr,&T,&p);
   t = nf_to_ff(nf,t,modpr);

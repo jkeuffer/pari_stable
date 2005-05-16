@@ -1056,17 +1056,18 @@ get_Vbase(GEN bnf)
 
 /* all primes up to Minkowski bound factor on factorbase ? */
 void
-testprimes(GEN bnf, long bound)
+testprimes(GEN bnf, ulong bound)
 {
   pari_sp av0 = avma, av;
-  long p, i, nbideal, k, pmax;
+  ulong p, pmax;
+  long i, nbideal, k;
   GEN f, dK, p1, Vbase, vP, fb, nf = checknf(bnf);
   byteptr d = diffptr;
   FB_t F;
 
-  maxprime_check((ulong)bound);
+  maxprime_check(bound);
   if (DEBUGLEVEL>1)
-    fprintferr("PHASE 1: check primes to Zimmert bound = %ld\n\n",bound);
+    fprintferr("PHASE 1: check primes to Zimmert bound = %lu\n\n",bound);
   dK= (GEN)nf[3];
   f = (GEN)nf[4];
   if (!gcmp1(f))
@@ -1078,22 +1079,22 @@ testprimes(GEN bnf, long bound)
   }
   /* sort factorbase for tablesearch */
   fb = gen_sort((GEN)bnf[5], 0, &cmp_prime_ideal);
-  pmax = itos(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
+  pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
   for (av=avma, p=0; p < bound; avma=av)
   {
     NEXT_PRIME_VIADIFF(p, d);
-    if (DEBUGLEVEL>1) fprintferr("*** p = %ld\n",p);
+    if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
     vP = primedec(bnf, utoipos(p));
     nbideal = lg(vP)-1;
     /* loop through all P | p if ramified, all but one otherwise */
-    if (!smodis(dK,p)) nbideal++;
+    if (!umodiu(dK,p)) nbideal++;
     for (i=1; i<nbideal; i++)
     {
       GEN P = (GEN)vP[i];
       if (DEBUGLEVEL>1) fprintferr("  Testing P = %Z\n",P);
-      if (cmpiu(idealnorm(bnf,P), bound) >= 0)
+      if (cmpiu(pr_norm(P), bound) >= 0)
       {
         if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
         continue;

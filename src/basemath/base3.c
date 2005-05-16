@@ -2248,8 +2248,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
     for (j=1; j<lg(fa); j++)
     {
       GEN pr = gel(fa,j), z2;
-      long f = itos(gel(pr,4));
-      ulong q, iQ, Q = itou_or_0(gpowgs(p,f));
+      ulong q, iQ, Q = itou_or_0(pr_norm(pr));
       if (!Q || Q > bound) break;
 
       z2 = dummycopy(z);

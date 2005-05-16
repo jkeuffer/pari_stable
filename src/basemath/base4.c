@@ -92,8 +92,7 @@ prime_to_ideal_aux(GEN nf, GEN vp)
 GEN
 prime_to_ideal(GEN nf, GEN vp)
 {
-  pari_sp av=avma;
-  if (typ(vp) == t_INT) return gscalmat(vp, degpol(nf[1]));
+  pari_sp av = avma;
   return gerepileupto(av, prime_to_ideal_aux(nf,vp));
 }
 

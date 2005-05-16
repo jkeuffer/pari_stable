@@ -348,6 +348,9 @@ powiu(GEN a, ulong N, long s)
   y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
   setsigne(y,s); return gerepileuptoint(av, y);
 }
+/* assume pr in primedec format */
+GEN 
+pr_norm(GEN pr) { GEN f = gel(pr,4); return powiu(gel(pr,1), (ulong)f[2], 1); }
 
 typedef struct {
   long prec, a;
