@@ -3,5 +3,6 @@ Class: member_functions
 C-Name: member_r2
 Prototype: G
 Description: 
- (gen):vec                      member_r2($1)
+ (nf):int:copy                  gmael($1, 2, 2)
+ (gen):int                      member_r2($1)
 
