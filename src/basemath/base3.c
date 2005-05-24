@@ -1419,19 +1419,19 @@ GEN
 FpXQ_gener(GEN T, GEN p)
 {
   long i,j, k, vT = varn(T), f = degpol(T);
-  GEN g, list, pf_1 = subis(gpowgs(p, f), 1);
+  GEN g, L, pf_1 = subis(gpowgs(p, f), 1);
   pari_sp av0 = avma, av;
 
-  list = (GEN)factor(pf_1)[1];
-  k = lg(list)-1;
+  L = (GEN)decomp(pf_1)[1];
+  k = lg(L)-1;
 
-  for (i=1; i<=k; i++) list[i] = (long)diviiexact(pf_1, (GEN)list[i]);
+  for (i=1; i<=k; i++) L[i] = (long)diviiexact(pf_1, (GEN)L[i]);
   for (av = avma;; avma = av)
   {
     g = FpX_rand(f, vT, p);
     if (degpol(g) < 1) continue;
     for (j=1; j<=k; j++)
-      if (gcmp1(FpXQ_pow(g, (GEN)list[j], T, p))) break;
+      if (gcmp1(FpXQ_pow(g, (GEN)L[j], T, p))) break;
     if (j > k) return gerepilecopy(av0, g);
   }
 }

@@ -578,8 +578,8 @@ prime, and \kbd{x} to be a square modulo \kbd{p}.
 \fun{ulong}{Fl_gener}{ulong p} returns a \idx{primitive root} modulo \kbd{p},
 assuming \kbd{p} is prime.
 
-\fun{ulong}{Fl_gener_fact}{ulong p, GEN fa} as \kbd{Fl\_gener}, assuming
-\kbd{fa} is the factorization of $\kbd{p} - 1$. (As output by \kbd{factor}.)
+\fun{ulong}{Fl_gener_local}{ulong p, GEN L}, see \kbd{Fp\_gener\_local},
+\kbd{L} is an \kbd{Flv}.
 
 \fun{long}{krouu}{ulong x, ulong y} returns the \idx{Kronecker symbol}
 $(x|y)$, i.e.$-1$, $0$ or $1$. Assumes \kbd{y} is non-zero. If \kbd{y} is an
@@ -1160,8 +1160,11 @@ of \typ{INT}s~x and~\kbd{y}. As \kbd{kross} otherwise.
 \fun{GEN}{Fp_gener}{GEN p} returns a primitive root modulo \kbd{p}, assuming
 \kbd{p} is prime.
 
-\fun{GEN}{Fp_gener_fact}{GEN p, GEN fa} as \kbd{Fp\_gener}, assuming
-\kbd{fa} is the factorization of $\kbd{p} - 1$.
+\fun{GEN}{Fp_gener_local}{GEN p, GEN L}, \kbd{L} being a vector of
+primes dividing $p - 1$, returns an integer $x$ which is a generator of the
+$\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In other words,
+$x^{(p-1)/\ell} \neq 1$ for all such $\ell$. In particular, returns
+\kbd{Fp\_gener(p)} if \kbd{L} contains all primes dividing $p - 1$.
 
 \subsec{Miscellaneous functions}
 

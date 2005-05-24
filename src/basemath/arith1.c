@@ -175,7 +175,7 @@ ggener(GEN m)
 
 /* assume p prime */
 ulong
-Fl_gener_fact(ulong p, GEN fa)
+Fl_gener_local(ulong p, GEN L0)
 {
   const pari_sp av = avma;
   const ulong q = p - 1;
@@ -183,10 +183,16 @@ Fl_gener_fact(ulong p, GEN fa)
   GEN L;
   if (p == 2) return 1;
 
-  if (!fa) { fa = L = (GEN)decomp(utoipos(q))[1]; k = lg(fa)-1; }
-  else { fa = (GEN)fa[1]; k = lg(fa)-1; L = cgetg(k + 1, t_VECSMALL); }
+  if (!L0) {
+    L0 = gel(decomp(utoipos(q)), 1);
+    L0 = L = vec_to_vecsmall_ulong(L0);
+    k = lg(L)-1;
+  } else {
+    k = lg(L0)-1;
+    L = cgetg(k + 1, t_VECSMALL);
+  }
 
-  for (i=1; i<=k; i++) L[i] = (long)(q / itou((GEN)fa[i]));
+  for (i=1; i<=k; i++) L[i] = q / (ulong)L0[i];
   for (x=2;;x++)
     if (x % p)
     {
@@ -197,30 +203,41 @@ Fl_gener_fact(ulong p, GEN fa)
   avma = av; return x;
 }
 ulong
-Fl_gener(ulong p) { return Fl_gener_fact(p, NULL); }
+Fl_gener(ulong p) { return Fl_gener_local(p, NULL); }
 
-/* assume p prime */
+/* assume p prime, return a generator of all L[i]-Sylows in F_p^*. */
 GEN
-Fp_gener_fact(GEN p, GEN fa)
+Fp_gener_local(GEN p, GEN L0)
 {
   pari_sp av0 = avma;
   long k, i;
-  GEN x, q, V;
+  GEN x, q, L;
   if (equaliu(p, 2)) return gen_1;
-  if (lgefint(p) == 3) return utoipos(Fl_gener_fact((ulong)p[2], fa));
+  if (lgefint(p) == 3)
+  {
+    ulong z;
+    if (L0) L0 = vec_to_vecsmall_ulong(L0);
+    z = Fl_gener_local((ulong)p[2], L0);
+    avma = av0; return utoipos(z);
+  }
 
   q = subis(p, 1);
-  if (!fa) { fa = V = (GEN)decomp(q)[1]; k = lg(fa)-1; }
-  else { fa = (GEN)fa[1]; k = lg(fa)-1; V = cgetg(k + 1, t_VEC); }
+  if (!L0) {
+    L0 = L = gel(decomp(q), 1);
+    k = lg(L)-1;
+  } else {
+    k = lg(L0)-1;
+    L = cgetg(k + 1, t_VEC);
+  }
 
-  for (i=1; i<=k; i++) V[i] = (long)diviiexact(q, (GEN)fa[i]);
+  for (i=1; i<=k; i++) L[i] = (long)diviiexact(q, (GEN)L0[i]);
   x = utoipos(2);
   for (;; x[2]++)
   {
     GEN d = gcdii(p,x);
     if (!is_pm1(d)) continue;
     for (i = k; i; i--) {
-      GEN e = Fp_pow(x, (GEN)V[i], p);
+      GEN e = Fp_pow(x, (GEN)L[i], p);
       if (is_pm1(e)) break;
     }
     if (!i) { avma = av0; return utoipos((ulong)x[2]); }
@@ -228,7 +245,7 @@ Fp_gener_fact(GEN p, GEN fa)
 }
 
 GEN
-Fp_gener(GEN p) { return Fp_gener_fact(p, NULL); }
+Fp_gener(GEN p) { return Fp_gener_local(p, NULL); }
 
 /* p prime, e > 0. Return a primitive root modulo p^e */
 static GEN
@@ -1385,16 +1402,15 @@ mplgenmod(GEN l, long e, GEN r,GEN p,GEN *zeta)
   const pari_sp av1 = avma;
   GEN m, m1;
   long k, i;
-  for (k=1; ; k++)
+  for (k=2; ; k++)
   {
-    m1 = m = Fp_pow(utoipos(k+1), r, p);
+    m1 = m = Fp_pow(utoipos(k), r, p);
     if (is_pm1(m)) { avma = av1; continue; }
     for (i=1; i<e; i++)
       if (gcmp1(m = Fp_pow(m,l,p))) break;
-    if (i==e) break;
+    if (i==e) { *zeta = m; return m1; }
     avma = av1;
   }
-  *zeta = m; return m1;
 }
 
 /* solve x^l = a mod (p), l prime

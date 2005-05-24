@@ -31,6 +31,15 @@ vec_to_vecsmall(GEN z)
 }
 
 GEN
+vec_to_vecsmall_ulong(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itou((GEN)z[i]);
+  return x;
+}
+
+GEN
 vecsmall_to_vec(GEN z)
 {
   long i, l = lg(z);

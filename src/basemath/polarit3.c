@@ -432,6 +432,10 @@ FpXQ_powers(GEN x, long l, GEN T, GEN p)
   long i;
   gel(V,1) = polun[varn(T)]; if (l==0) return V;
   gel(V,2) = gcopy(x);       if (l==1) return V;
+  if (lgefint(p) == 3) {
+    long pp = p[2];
+    return FlxC_to_ZXC(Flxq_powers(ZX_to_Flx(x, pp), l, ZX_to_Flx(T,pp), pp));
+  }
   gel(V,3) = FpXQ_sqr(x,T,p);
   if ((degpol(x)<<1) < degpol(T)) {
     for(i = 4; i < l+2; i++)
@@ -1349,7 +1353,6 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
 }
 /*******************************************************************/
 /*  Isomorphisms between finite fields                             */
-/*                                                                 */
 /*******************************************************************/
 GEN
 FpXQ_matrix_pow(GEN y, long n, long m, GEN P, GEN l)
@@ -1583,118 +1586,110 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   ulong pg;
   GEN A, B, Ap, Bp;
   GEN *gptr[2];
-  vp=varn(P);vq=varn(Q);
-  np=degpol(P);nq=degpol(Q);
+  vp = varn(P); np = degpol(P);
+  vq = varn(Q); nq = degpol(Q);
   if (np<=0 || nq<=0 || n<=0 || np%n!=0 || nq%n!=0)
-    err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,degpol(P),degpol(Q));
+    err(talker,"bad degrees in FpX_ffintersect: %d,%d,%d",n,np,nq);
   e = u_pvalrem(n, l, &pg);
-  avma=ltop;
-  if(!MA) MA=FpXQ_matrix_pow(FpXQ_pow(polx[vp],l,P,l),np,np,P,l);
-  if(!MB) MB=FpXQ_matrix_pow(FpXQ_pow(polx[vq],l,Q,l),nq,nq,Q,l);
-  A=Ap=zeropol(vp);
-  B=Bp=zeropol(vq);
+  if(!MA) MA = FpXQ_matrix_pow(FpXQ_pow(polx[vp],l,P,l),np,np,P,l);
+  if(!MB) MB = FpXQ_matrix_pow(FpXQ_pow(polx[vq],l,Q,l),nq,nq,Q,l);
+  A = Ap = zeropol(vp);
+  B = Bp = zeropol(vq);
   if (pg > 1)
   {
     GEN ipg = utoipos(pg);
     if (umodiu(l,pg) == 1)
-      /*We do not need to use relative extension in this setting, so
-        we don't. (Well,now that we don't in the other case also, it is more
-       dubious to treat cases apart...)*/
+    /* No need to use relative extension, so don't. (Well, now we don't
+     * in the other case either, but this special case is more efficient) */
     {
-      GEN L,An,Bn,z;
-      z=FpX_roots(FpX_red(cyclo(pg,0),l), l);
-      if (lg(z)<2) err(talker,"%Z is not a prime in FpX_ffintersect",l);
-      z=negi((GEN)z[1]);
+      GEN L, An, Bn, z;
+      z = Fp_gener_local(l, gel(decomp(ipg), 1));
+      z = Fp_pow(z, diviuexact(subis(l,1), pg), l); /* prim. pg-th root of 1 */
+      z = negi(z);
       if (DEBUGLEVEL>=4) (void)timer2();
-      A=FpM_ker(gaddmat(z, MA),l);
+      A = FpM_ker(gaddmat(z, MA),l);
       if (lg(A)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,polx[vp],P);
-      A=RgV_to_RgX((GEN)A[1],vp);
-      B=FpM_ker(gaddmat(z, MB),l);
+      A = RgV_to_RgX((GEN)A[1],vp);
+
+      B = FpM_ker(gaddmat(z, MB),l);
       if (lg(B)!=2)
 	err(talker,"ZZ_%Z[%Z]/(%Z) is not a field in FpX_ffintersect"
 	    ,l,polx[vq],Q);
-      B=RgV_to_RgX((GEN)B[1],vq);
+      B = RgV_to_RgX((GEN)B[1],vq);
+
       if (DEBUGLEVEL>=4) msgtimer("FpM_ker");
-      An=(GEN) FpXQ_pow(A,ipg,P,l)[2];
-      Bn=(GEN) FpXQ_pow(B,ipg,Q,l)[2];
+      An = (GEN) FpXQ_pow(A,ipg,P,l)[2];
+      Bn = (GEN) FpXQ_pow(B,ipg,Q,l)[2];
       if (!invmod(Bn,l,&z))
         err(talker,"Polynomials not irreducible in FpX_ffintersect");
-      z=modii(mulii(An,z),l);
-      L=Fp_sqrtn(z,ipg,l,NULL);
+      z = modii(mulii(An,z),l);
+      L = Fp_sqrtn(z,ipg,l,NULL);
       if ( !L )
         err(talker,"Polynomials not irreducible in FpX_ffintersect");
       if (DEBUGLEVEL>=4) msgtimer("Fp_sqrtn");
-      B=FpX_Fp_mul(B,L,l);
+      B = FpX_Fp_mul(B,L,l);
     }
     else
     {
-      GEN L,An,Bn,U,z;
-      U=lift(gmael(factmod(cyclo(pg,MAXVARN),l),1,1));
-      A=intersect_ker(P, MA, U, l); 
-      B=intersect_ker(Q, MB, U, l);
+      GEN L, An, Bn, z, U;
+      U = gmael(FpX_factor(cyclo(pg,MAXVARN),l),1,1);
+      A = intersect_ker(P, MA, U, l); 
+      B = intersect_ker(Q, MB, U, l);
       if (DEBUGLEVEL>=4) (void)timer2();
-      An=(GEN) FpXYQQ_pow(A,ipg,U,P,l)[2];
-      Bn=(GEN) FpXYQQ_pow(B,ipg,U,Q,l)[2];
+      An = (GEN) FpXYQQ_pow(A,ipg,U,P,l)[2];
+      Bn = (GEN) FpXYQQ_pow(B,ipg,U,Q,l)[2];
       if (DEBUGLEVEL>=4) msgtimer("pows [P,Q]");
-      z=FpXQ_inv(Bn,U,l);
-      z=FpXQ_mul(An,z,U,l);
-      L=FpXQ_sqrtn(z,ipg,U,l,NULL);
+      z = FpXQ_inv(Bn,U,l);
+      z = FpXQ_mul(An,z,U,l);
+      L = FpXQ_sqrtn(z,ipg,U,l,NULL);
       if (DEBUGLEVEL>=4) msgtimer("FpXQ_sqrtn");
       if (!L) err(talker,"Polynomials not irreducible in FpX_ffintersect");
-      B=FqX_Fq_mul(B,L,U,l);
-      B=gsubst(B,MAXVARN,gen_0);
-      A=gsubst(A,MAXVARN,gen_0);
+      B = FqX_Fq_mul(B,L,U,l);
+      B = gsubst(B,MAXVARN,gen_0);
+      A = gsubst(A,MAXVARN,gen_0);
     }
   }
-  if (e!=0)
+  if (e)
   {
-    GEN VP,VQ,Ay,By,lmun;
-    int i,j;
-    lmun=addis(l,-1);
-    MA=gaddmat(gen_m1,MA);
-    MB=gaddmat(gen_m1,MB);
-    Ay=polun[vp];
-    By=polun[vq];
-    VP=cgetg(np+1,t_COL);
-    VP[1]= (long)gen_1;
-    for(i=2;i<=np;i++) VP[i]= (long)gen_0;
-    if (np==nq) VQ=VP;/*save memory*/
-    else
-    {
-      VQ=cgetg(nq+1,t_COL);
-      VQ[1]= (long)gen_1;
-      for(i=2;i<=nq;i++) VQ[i]= (long)gen_0;
-    }
+    GEN VP, VQ, Ay, By, lmun = addis(l,-1);
+    int i, j;
+    MA = gaddmat(gen_m1,MA);
+    MB = gaddmat(gen_m1,MB);
+    Ay = polun[vp];
+    By = polun[vq];
+    VP = vec_ei(np, 1);
+    VQ = np == nq? VP: vec_ei(nq, 1); /* save memory */
     for(j=0;j<e;j++)
     {
       if (j)
       {
-	Ay=FpXQ_mul(Ay,FpXQ_pow(Ap,lmun,P,l),P,l);
-	for(i=1;i<lg(Ay)-1;i++) VP[i]=Ay[i+1];
-	for(;i<=np;i++) VP[i]= (long)gen_0;
+	Ay = FpXQ_mul(Ay,FpXQ_pow(Ap,lmun,P,l),P,l);
+	for(i=1;i<lg(Ay)-1;i++) VP[i] = Ay[i+1];
+	for(;i<=np;i++) VP[i] = (long)gen_0;
       }
-      Ap=FpM_invimage(MA,VP,l);
-      Ap=RgV_to_RgX(Ap,vp);
+      Ap = FpM_invimage(MA,VP,l);
+      Ap = RgV_to_RgX(Ap,vp);
+
       if (j)
       {
-	By=FpXQ_mul(By,FpXQ_pow(Bp,lmun,Q,l),Q,l);
-	for(i=1;i<lg(By)-1;i++) VQ[i]=By[i+1];
-	for(;i<=nq;i++) VQ[i]= (long)gen_0;
+	By = FpXQ_mul(By,FpXQ_pow(Bp,lmun,Q,l),Q,l);
+	for(i=1;i<lg(By)-1;i++) VQ[i] = By[i+1];
+	for(;i<=nq;i++) VQ[i] = (long)gen_0;
       }
-      Bp=FpM_invimage(MB,VQ,l);
-      Bp=RgV_to_RgX(Bp,vq);
+      Bp = FpM_invimage(MB,VQ,l);
+      Bp = RgV_to_RgX(Bp,vq);
       if (DEBUGLEVEL>=4) msgtimer("FpM_invimage");
     }
   }
-  A=ZX_add(A,Ap);
-  B=ZX_add(B,Bp);
-  lbot=avma;
-  *SP=FpX_red(A,l);
-  *SQ=FpX_red(B,l);
-  gptr[0]=SP;gptr[1]=SQ;
-  gerepilemanysp(ltop,lbot,gptr,2);
+  A = ZX_add(A,Ap);
+  B = ZX_add(B,Bp);
+  lbot = avma;
+  *SP = FpX_red(A,l);
+  *SQ = FpX_red(B,l);
+  gptr[0] = SP; 
+  gptr[1] = SQ; gerepilemanysp(ltop,lbot,gptr,2);
 }
 /* Let l be a prime number, P, Q in ZZ[X].  P and Q are both
  * irreducible modulo l and degree(P) divides degree(Q).  Output a
@@ -1711,42 +1706,62 @@ FpX_ffisom(GEN P,GEN Q,GEN l)
   return gerepileupto(av, FpX_FpXQ_compo(R,SQ,Q,l));
 }
 
-/* Let l be a prime number, P in ZZ[X]. P is irreducible modulo l.
- * Compute the factorisation of P over the subfield of FF_l[X]/(P)
- * of index d. MP must be the matrix of the Frobenius automorphism
- * of FF_l[X]/(P).*/
-
+/* Let l be a prime number, P a ZX irreducible modulo l, MP the matrix of the
+ * Frobenius automorphism of F_l[X]/(P).
+ * Factor P over the subfield of F_l[X]/(P) of index d. */
 static GEN
 FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
 {
-  pari_sp ltop=avma;
-  GEN R,V,Tl,z,M;
-  long n,k,m;
-  long v;
-  v=varn(P);
-  n=degpol(P);
-  m=n/d;
-  if (DEBUGLEVEL>=4) (void)timer2();
-  if (lgefint(l)==3)
+  pari_sp ltop = avma;
+  GEN R, V, Tl, z, M;
+  long k, n = degpol(P), m = n/d;
+  long v = varn(P);
+
+  /* x - y */
+  if (m == 1) return deg1pol_i(gen_1, deg1pol_i(subis(l,1), gen_0, w), v);
+  M = FpM_Frobenius_pow(MP,d,P,l);
+
+  Tl = gcopy(P); setvarn(Tl,w);
+  V = cgetg(m+1,t_VEC);
+  gel(V,1) = polx[w];
+  z = gel(M,2);
+  gel(V,2) = RgV_to_RgX(z,w);
+  for(k=3;k<=m;k++)
   {
-    ulong p=l[2];
-    M=Flm_to_ZM(Flm_Frobenius_pow(ZM_to_Flm(MP,p),d,ZX_to_Flx(P,p),p));
+    z = FpM_FpC_mul(M,z,l);
+    gel(V,k) = RgV_to_RgX(z,w);
   }
-  else
-    M=FpM_Frobenius_pow(MP,d,P,l);
-  if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: Frobenius power");
-  Tl=gcopy(P); setvarn(Tl,w);
-  V=cgetg(m+1,t_VEC);
-  V[1]=lpolx[w];
-  z=RgX_to_RgV((GEN)V[1],n);
+  R = FqV_roots_to_pol(V,Tl,l,v);
+  return gerepileupto(ltop,R);
+}
+/* same: P is an Flx, MP an Flm */
+static GEN
+Flx_factorgalois(GEN P, ulong l, long d, long w, GEN MP)
+{
+  pari_sp ltop = avma;
+  GEN R, V, Tl, z, M;
+  long k, n = degpol(P), m = n/d;
+  long v = varn(P);
+
+  if (m == 1) {
+    R = polx_Flx(v);
+    gel(R,2) = z = polx_Flx(w); z[3] = l - 1; /* - y */
+    gel(R,3) = Fl_to_Flx(1, w);
+    return R; /* x - y */
+  }
+  M = Flm_Frobenius_pow(MP,d,P,l);
+
+  Tl = gcopy(P); setvarn(Tl,w);
+  V = cgetg(m+1,t_VEC);
+  gel(V,1) = polx_Flx(w);
+  z = gel(M,2);
+  gel(V,2) = Flv_to_Flx(z,w);
   for(k=2;k<=m;k++)
   {
-    z=FpM_FpC_mul(M,z,l);
-    V[k]=(long)RgV_to_RgX(z,w);
+    z = Flm_Flc_mul(M,z,l);
+    gel(V,k) = Flv_to_Flx(z,w);
   }
-  if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: roots");
-  R=FqV_roots_to_pol(V,Tl,l,v);
-  if (DEBUGLEVEL>=4) msgtimer("FpX_factorgalois: pol");
+  R = FlxqV_roots_to_pol(V,Tl,l,v);
   return gerepileupto(ltop,R);
 }
 
@@ -1755,35 +1770,35 @@ FpX_factorgalois(GEN P, GEN l, long d, long w, GEN MP)
 GEN
 FpX_factorff_irred(GEN P, GEN Q, GEN l)
 {
-  pari_sp ltop=avma, av;
-  GEN SP,SQ,MP,MQ,M,FP,FQ,E,V,IR,res;
-  long np=degpol(P),nq=degpol(Q);
-  long i,d=cgcd(np,nq);
-  long vp=varn(P),vq=varn(Q);
+  pari_sp ltop = avma, av;
+  GEN SP, SQ, MP, MQ, M, FP, FQ, E, V, IR, res;
+  long np = degpol(P), nq = degpol(Q), d = cgcd(np,nq);
+  long i, vp = varn(P), vq = varn(Q);
 
   if (d==1) return mkcolcopy(P);
   if (DEBUGLEVEL>=4) (void)timer2();
-  FP=FpXQ_matrix_pow(FpXQ_pow(polx[vp],l,P,l),np,np,P,l);
-  FQ=FpXQ_matrix_pow(FpXQ_pow(polx[vq],l,Q,l),nq,nq,Q,l);
-  if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
-  FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
-  av=avma;
-  E = FpX_factorgalois(P,l,d,vq,FP);
   if (lgefint(l)==3)
   {
     ulong p = l[2];
-    E = FlxX_to_Flm(ZXX_to_FlxX(E,p,vp),np);
-    MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,ZX_to_Flx(P,p),p);
+    GEN Px = ZX_to_Flx(P,p), Qx = ZX_to_Flx(Q,p);
+    FQ = Flxq_matrix_pow(Flxq_pow(polx_Flx(vq),l,Qx,p),nq,nq,Qx,p);
+    av = avma;
+    FP = Flxq_matrix_pow(Flxq_pow(polx_Flx(vp),l,Px,p),np,np,Px,p);
+    if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
+    FpX_ffintersect(P,Q,d,l,&SP,&SQ, Flm_to_ZM(FP), Flm_to_ZM(FQ));
+
+    E = Flx_factorgalois(Px,p,d,vq, FP);
+    E = FlxX_to_Flm(E,np);
+    MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,Px,p);
     IR= (GEN)Flm_indexrank(MP,p)[1];
     E = rowextract_p(E, IR);
     M = rowextract_p(MP,IR);
     M = Flm_inv(M,p);
-    MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,ZX_to_Flx(Q,p),p);
+    MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,Qx,p);
     M = Flm_mul(MQ,M,p);
     M = Flm_mul(M,E,p);
     if (DEBUGLEVEL>=4) msgtimer("factor_irred_mat");
     M = gerepileupto(av,M);
-    FQ= ZM_to_Flm(FQ,p);
     V = cgetg(d+1,t_VEC);
     V[1] = (long) M;
     for(i=2;i<=d;i++)
@@ -1794,6 +1809,13 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
   }
   else
   {
+    FQ = FpXQ_matrix_pow(FpXQ_pow(polx[vq],l,Q,l),nq,nq,Q,l);
+    av = avma;
+    FP = FpXQ_matrix_pow(FpXQ_pow(polx[vp],l,P,l),np,np,P,l);
+    if (DEBUGLEVEL>=4) msgtimer("FpXQ_matrix_pows");
+    FpX_ffintersect(P,Q,d,l,&SP,&SQ,FP,FQ);
+
+    E = FpX_factorgalois(P,l,d,vq,FP);
     E = RgXX_to_RgM(E,np);
     MP= FpXQ_matrix_pow(SP,np,d,P,l);
     IR= (GEN)FpM_indexrank(MP,l)[1];

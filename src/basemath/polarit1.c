@@ -272,10 +272,10 @@ FpX_roots_i(GEN f, GEN p)
   long n, j, da, db;
   GEN y, pol, pol0, a, b, q = shifti(p,-1);
 
+  n = ZX_valuation(f, &f)? 1: 0;
   y = cgetg(lg(f), t_COL);
   j = 1;
-  if (!ZX_valuation(f, &f)) n = 0;
-  else {
+  if (n) {
     gel(y, j++) = gen_0;
     if (lg(f) <= 3) { setlg(y, 2); return y; }
     n = 1;
@@ -331,13 +331,15 @@ FpX_roots_i(GEN f, GEN p)
   return sort(y);
 }
 
+static GEN
+FpX_factmod_init(GEN f, GEN p) { return FpX_normalize(FpX_red(f,p), p); }
 GEN
 FpX_roots(GEN f, GEN p) {
   pari_sp av = avma;
   long q = modBIL(p);
   if (lg(f) == 3) return cgetg(1, t_COL);
   if ((q & 1) == 0) return root_mod_even(f,q);
-  return gerepileupto(av, FpX_roots_i(FpX_normalize(f,p), p));
+  return gerepileupto(av, FpX_roots_i(FpX_factmod_init(f,p), p));
 }
 
 GEN
@@ -958,8 +960,6 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   return flag ? sort_factor_gen(y, cmpGsGs)
               : sort_factor(y, cmpii);
 }
-static GEN
-FpX_factmod_init(GEN f, GEN p) { return FpX_normalize(FpX_red(f,p), p); }
 GEN
 FpX_factcantor(GEN f, GEN pp, long flag)
 {
@@ -1212,7 +1212,7 @@ FpX_factor_i(GEN f, GEN pp)
 {
   long e, N, nbfact, val, d = degpol(f);
   ulong p, k, j;
-  GEN pps2, E, f2, p1, g1, u, *t;
+  GEN pps2, E, f2, g1, u, *t;
 
   if (d <= 2) return FpX_factor_2(f, pp, d);
   p = init_p(pp);
@@ -1227,16 +1227,21 @@ FpX_factor_i(GEN f, GEN pp)
   for(;;)
   {
     f2 = FpX_gcd(f,ZX_deriv(f), pp);
-    g1 = lg(f2)==3? f: FpX_div(f,f2,pp);
+    g1 = lg(f2)==3? f: FpX_div(f,f2,pp); /* is squarefree */
     k = 0;
     while (lg(g1)>3)
     {
       k++; if (p && !(k%p)) { k++; f2 = FpX_div(f2,g1,pp); }
-      p1 = FpX_gcd(f2,g1, pp); u = g1; g1 = p1;
-      if (degpol(p1))
+      u = g1; 
+      if (!degpol(f2)) g1 = polun[0]; /* only its degree (= 0) matters */
+      else
       {
-        u = FpX_div( u,p1,pp);
-        f2= FpX_div(f2,p1,pp);
+        g1 = FpX_gcd(f2,g1, pp);
+        if (degpol(g1))
+        {
+          u = FpX_div( u,g1,pp);
+          f2= FpX_div(f2,g1,pp);
+        }
       }
       /* u is square-free (product of irred. of multiplicity e * k) */
       N = degpol(u);
@@ -1438,7 +1443,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
   f = gdivexact(f, gpowgs(p,ggval(f, p)));
   z = cgetg(degpol(f)+1,t_COL);
 
-  R = FpX_roots(FpX_red(f, p), p);
+  R = FpX_roots(f, p);
   for (j=i=1; i<lg(R); i++)
   {
     GEN u = ZX_Zp_root(f, gel(R,i), p, prec-1);
@@ -1476,7 +1481,7 @@ ZX_Zp_roots(GEN f, GEN p, long prec)
   z = modulargcd(f, ZX_deriv(f));
   if (degpol(z) > 0) f = RgX_div(f,z);
   q = equaliu(p,2)? utoipos(4): p;
-  rac = FpX_roots(FpX_red(f,q), q);
+  rac = FpX_roots(f, q);
   lx = lg(rac); if (lx == 1) return rac;
   y = cgetg(degpol(f)+1,t_COL);
   for (j=i=1; i<lx; i++)
@@ -1649,7 +1654,7 @@ GEN
 rootpadicfast(GEN f, GEN p, long e)
 {
   pari_sp av = avma;
-  GEN y, S = FpX_roots(FpX_red(f,p), p); /*no multiplicity*/
+  GEN y, S = FpX_roots(f, p); /*no multiplicity*/
   if (lg(S)==1) { avma = av; return cgetg(1,t_COL); }
   S = gclone(S); avma = av;
   y = ZpX_liftroots(f,S,p,e);
@@ -2040,10 +2045,10 @@ to_Fq_fact(GEN P, GEN E, GEN T, GEN p, pari_sp av)
   v = cgetg(nbf,t_COL); y[2] = (long)v;
   for (j=1; j<l; j++)
   {
-    u[j] = (long)simplify((GEN)P[j]); /* may contain pols of degree 0 */
+    u[j] = (long)simplify_i((GEN)P[j]); /* may contain pols of degree 0 */
     v[j] = lutoi((ulong)E[j]);
   }
-  y = gerepileupto(av, y); u = (GEN)y[1];
+  y = gerepilecopy(av, y); u = (GEN)y[1];
   p = icopy(p);
   T = FpX_to_mod(T, p);
   for (j=1; j<nbf; j++) u[j] = (long)to_Fq_pol((GEN)u[j], T,p);
@@ -2474,16 +2479,15 @@ FqX_factor_i(GEN f, GEN T, GEN p)
     }
     /* u is square-free (product of irreducibles of multiplicity e) */
     nb0 = nbfact; N = degpol(u);
-    u = FqX_normalize(u, T,p);
-    t[nbfact] = u;
+    t[nbfact] = FqX_normalize(u, T,p);
     if (N == 1) nbfact++;
     else
     {
 #if 0
       nbfact += FqX_split_Berlekamp(t+nbfact, q, T, p);
 #else
-      GEN P = FqX_split_Trager(u, T, p);
-      if (E) {
+      GEN P = FqX_split_Trager(t[nbfact], T, p);
+      if (P) {
         for (j = 1; j < lg(P); j++) t[nbfact++] = gel(P,j);
       } else {
         if (DEBUGLEVEL) err(warner, "FqX_split_Trager failed!");
