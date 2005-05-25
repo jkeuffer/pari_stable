@@ -79,6 +79,7 @@ BA  1- polgalois(): 4th component: transitive group name following GAP4
 BA  2- New functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul
 BA  3- New functions FpC_to_mod, FqV_to_FlxV
     4- Member functions r1, r2
+    5- Functions factoru(), factoru_pow()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):

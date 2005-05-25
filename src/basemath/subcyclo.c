@@ -185,20 +185,18 @@ znstar_reduce_modulus(GEN H, long n)
     gen[i] = mael(H,1,i)%n;
   return gerepileupto(ltop, znstar_generate(n,gen));
 }
-/*Compute conductor of H*/
 
-long znstar_conductor(long n, GEN H)
+/*Compute conductor of H*/
+long
+znstar_conductor(long n, GEN H)
 {
   pari_sp ltop=avma;
   int i,j;
-  GEN F;
+  GEN F = factoru(n), P = gel(F,1), E = gel(F,2); 
   long cnd=n;
-  F = decomp_small(n); 
   for(i=lg((GEN)F[1])-1;i>0;i--)
   {
-    long p=coeff(F,i,1);
-    long e=coeff(F,i,2);
-    long q=n;
+    long p = P[i], e = E[i], q = n;
     if (DEBUGLEVEL>=4)
       fprintferr("SubCyclo: testing %ld^%ld\n",p,e);
     for (  ; e>=1; e--)

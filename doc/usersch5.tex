@@ -1181,6 +1181,15 @@ such that $\kbd{au} + \kbd{bv} = d$.
 \typ{INT}s \kbd{a} and \kbd{b} and sets \kbd{u}, \kbd{v} to the Bezout
 coefficients such that $\kbd{au} + \kbd{bv} = d$.
 
+\fun{GEN}{factoru}{ulong n}, returns the factorization of $n$. The result
+is a $2$-component vector $[P,E]$, where $P$ and $E$ are \typ{VECSMALL}
+containing the prime divisors of $n$, and the $v_p(n)$.
+
+\fun{GEN}{factoru_pow}{ulong n}, returns the factorization of $n$. The result
+is a $3$-component vector $[P,E,C]$, where $P$, $E$ and $C$ are
+\typ{VECSMALL} containing the prime divisors of $n$, the $v_p(n)$
+and the $p^{v_p(n)}$.
+
 \fun{GEN}{gcdii}{GEN x, GEN y}, returns the GCD of the \typ{INT}s \kbd{x} and
 \kbd{y}.
 

@@ -3689,7 +3689,7 @@ fpinit(GEN p, long l)
 static GEN
 ffinit_fact(GEN p, long n)
 {
-  GEN F = (GEN)decomp_small(n)[3];
+  GEN F = (GEN)factoru_pow(n)[3];
   GEN P; /* pol */
   long i;
   /* If n is even, then F[1] is 2^bfffo(n)*/

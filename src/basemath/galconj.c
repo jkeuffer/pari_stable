@@ -1453,7 +1453,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   else err(warner,"entering black magic computation");
   O = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) O[i]=0;
-  F =decomp_small(n);
+  F = factoru_pow(n);
   Fp =(GEN)F[1];
   Fe =(GEN)F[2];
   Fpe=(GEN)F[3];
@@ -2372,7 +2372,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   }
   gt.Cd=gcopy(gt.C);
 
-  F =decomp_small(gf->fp);
+  F =factoru(gf->fp);
   Fp=(GEN) F[1];
   Fe=(GEN) F[2];
   frob = cgetg(lg(L), t_VECSMALL);
@@ -2756,7 +2756,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
     long s  = gf.psi[Pg[j]];
     GEN  B  = perm_cycles(gj);
     long oj = lg(B[1]) - 1;
-    GEN  F  = decomp_small(oj);
+    GEN  F  = factoru_pow(oj);
     GEN  Fp = (GEN) F[1];
     GEN  Fe = (GEN) F[2];
     GEN  Fc = (GEN) F[3];

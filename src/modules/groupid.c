@@ -113,7 +113,7 @@ group_ident_i(GEN G, GEN S)
   if (!S)
     S=group_elts(G,group_domain(G));
   s=groupelts_sumorders(S);/*This is used as a hash value*/
-  F=decomp_small(n);
+  F=factoru(n);
   p=(GEN) F[1];
   e=(GEN) F[2];
   switch(lg(p)-1)

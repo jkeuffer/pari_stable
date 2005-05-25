@@ -877,27 +877,48 @@ boundfact(GEN n, long lim)
 /**                                                                   **/
 /***********************************************************************/
 
-/*Factor n and output [p,e,c] where
- * p, e and c are vecsmall with n = prod{p[i]^e[i]} and c[i] = p[i]^e[i] */
+/* Factor n and output [p,e] where
+ * p, e are vecsmall with n = prod{p[i]^e[i]} */
 GEN
-decomp_small(long n)
+factoru(ulong n)
 {
   pari_sp ltop = avma;
-  GEN F = decomp(stoi(n));
-  long i, l = lg(F[1]);
+  GEN F = decomp(utoi(n)), P = gel(F,1), E = gel(F,2);
+  long i, l = lg(P);
+  GEN f = cgetg(3,t_VEC);
+  GEN p = cgetg(l,t_VECSMALL);
+  GEN e = cgetg(l,t_VECSMALL);
+  pari_sp lbot = avma;
+  gel(f,1) = p;
+  gel(f,2) = e;
+  for (i = 1; i < l; i++)
+  {
+    p[i] = itou(gel(P,i));
+    e[i] = itou(gel(E,i));
+  }
+  avma = lbot; return gerepileupto(ltop,f);
+}
+/* Factor n and output [p,e,c] where
+ * p, e and c are vecsmall with n = prod{p[i]^e[i]} and c[i] = p[i]^e[i] */
+GEN
+factoru_pow(ulong n)
+{
+  pari_sp ltop = avma;
+  GEN F = decomp(utoi(n)), P = gel(F,1), E = gel(F,2);
+  long i, l = lg(P);
   GEN f = cgetg(4,t_VEC);
   GEN p = cgetg(l,t_VECSMALL);
   GEN e = cgetg(l,t_VECSMALL);
   GEN c = cgetg(l,t_VECSMALL);
   pari_sp lbot = avma;
-  f[1] = (long)p;
-  f[2] = (long)e;
-  f[3] = (long)c;
+  gel(f,1) = p;
+  gel(f,2) = e;
+  gel(f,3) = c;
   for(i = 1; i < l; i++)
   {
-    p[i] = itos(gcoeff(F,i,1));
-    e[i] = itos(gcoeff(F,i,2));
-    c[i] = itos(powgi(gcoeff(F,i,1), gcoeff(F,i,2)));
+    p[i] = itou(gel(P,i));
+    e[i] = itou(gel(E,i));
+    c[i] = itou(gpowgs(gel(P,i), e[i]));
   }
   avma = lbot; return gerepileupto(ltop,f);
 }
