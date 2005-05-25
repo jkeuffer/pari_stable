@@ -337,9 +337,13 @@ GEN
 FpX_roots(GEN f, GEN p) {
   pari_sp av = avma;
   long q = modBIL(p);
-  if (lg(f) == 3) return cgetg(1, t_COL);
-  if ((q & 1) == 0) return root_mod_even(f,q);
-  return gerepileupto(av, FpX_roots_i(FpX_factmod_init(f,p), p));
+  GEN F = FpX_factmod_init(f,p);
+  switch(degpol(F))
+  {
+    case -1: err(zeropoler,"factmod");
+    case 0: avma = av; return cgetg(1, t_COL);
+  }
+  return gerepileupto(av, odd(q)? FpX_roots_i(F, p): root_mod_even(F,q));
 }
 
 GEN
@@ -850,6 +854,7 @@ FpX_factor_2(GEN f, GEN p, long d)
   GEN r, s, R, S;
   long v;
   int sgn;
+  if (d < 0) err(zeropoler,"FpX_factor_2");
   if (!d) return trivfact();
   if (d == 1) return mkmat2(mkcol(f), mkvecsmall(1));
   r = FpX_quad_root(f, p, 1);
@@ -879,7 +884,7 @@ FpX_factcantor_i(GEN f, GEN pp, long flag)
   if (d <= 2) switch(flag) {
     case 2: return FpX_is_irred_2(f, pp, d);
     case 1: return FpX_degfact_2(f, pp, d);
-    case 0: return FpX_factor_2(f, pp, d);
+    default: return FpX_factor_2(f, pp, d);
   }
   p = init_p(pp);
 
