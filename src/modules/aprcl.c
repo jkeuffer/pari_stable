@@ -431,7 +431,7 @@ computetabdl(ulong q)
   GEN v = cgetg(q-1,t_VECSMALL), w = v-1; /* w[i] = dl(i) */
   ulong g,qm3s2,qm1s2,a,i;
 
-  g = Fl_gener(q);
+  g = gener_Fl(q);
   qm3s2 = (q-3)>>1;
   qm1s2 = qm3s2+1;
   w[q-1] = qm1s2; a = 1;

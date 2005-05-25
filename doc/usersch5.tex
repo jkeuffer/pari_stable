@@ -575,10 +575,10 @@ positive representative of $x^n$ modulo $m$.
 modulo \kbd{p} (smallest positive representative). Assumes \kbd{p} to be
 prime, and \kbd{x} to be a square modulo \kbd{p}.
 
-\fun{ulong}{Fl_gener}{ulong p} returns a \idx{primitive root} modulo \kbd{p},
+\fun{ulong}{gener_Fl}{ulong p} returns a \idx{primitive root} modulo \kbd{p},
 assuming \kbd{p} is prime.
 
-\fun{ulong}{Fl_gener_local}{ulong p, GEN L}, see \kbd{Fp\_gener\_local},
+\fun{ulong}{gener_Fl_local}{ulong p, GEN L}, see \kbd{Fp\_gener\_local},
 \kbd{L} is an \kbd{Flv}.
 
 \fun{long}{krouu}{ulong x, ulong y} returns the \idx{Kronecker symbol}
@@ -1157,10 +1157,10 @@ of \kbd{long}~x and \typ{INT}~\kbd{y}. As \kbd{kross} otherwise.
 \fun{long}{kronecker}{GEN x, GEN y} returns the \idx{Kronecker symbol} $(x|y)$
 of \typ{INT}s~x and~\kbd{y}. As \kbd{kross} otherwise.
 
-\fun{GEN}{Fp_gener}{GEN p} returns a primitive root modulo \kbd{p}, assuming
+\fun{GEN}{gener_Fp}{GEN p} returns a primitive root modulo \kbd{p}, assuming
 \kbd{p} is prime.
 
-\fun{GEN}{Fp_gener_local}{GEN p, GEN L}, \kbd{L} being a vector of
+\fun{GEN}{gener_Fp_local}{GEN p, GEN L}, \kbd{L} being a vector of
 primes dividing $p - 1$, returns an integer $x$ which is a generator of the
 $\ell$-Sylow of $\F_p^*$ for every $\ell$ in \kbd{L}. In other words,
 $x^{(p-1)/\ell} \neq 1$ for all such $\ell$. In particular, returns

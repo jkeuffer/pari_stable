@@ -1603,7 +1603,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
      * in the other case either, but this special case is more efficient) */
     {
       GEN L, An, Bn, z;
-      z = Fp_gener_local(l, gel(decomp(ipg), 1));
+      z = gener_Fp_local(l, gel(decomp(ipg), 1));
       z = Fp_pow(z, diviuexact(subis(l,1), pg), l); /* prim. pg-th root of 1 */
       z = negi(z);
       if (DEBUGLEVEL>=4) (void)timer2();

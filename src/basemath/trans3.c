@@ -1523,7 +1523,7 @@ init_teich(ulong p, GEN q, long prec)
     return NULL;
   else
   { /* primitive (p-1)-th root of 1 */
-    GEN z, z0 = padicsqrtnlift(gen_1, utoipos(p-1), Fp_gener(gp), gp, prec);
+    GEN z, z0 = padicsqrtnlift(gen_1, utoipos(p-1), gener_Fp(gp), gp, prec);
     z = z0;
     vz = cgetg(p, t_VEC);
     for (j = 1; j < (long)p-2; j++)

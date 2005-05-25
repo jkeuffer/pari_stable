@@ -460,7 +460,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: val=%ld\n",val);
   le=gpowgs(l,val);
-  z = Fp_pow(Fp_gener(l), utoipos(e), l);
+  z = Fp_pow(gener_Fp(l), utoipos(e), l);
   z=padicsqrtnlift(gen_1,utoipos(n),z,l,val);
   if (DEBUGLEVEL >= 1)
     msgtimer("padicsqrtnlift.");

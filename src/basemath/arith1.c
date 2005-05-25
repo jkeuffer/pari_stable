@@ -175,7 +175,7 @@ ggener(GEN m)
 
 /* assume p prime */
 ulong
-Fl_gener_local(ulong p, GEN L0)
+gener_Fl_local(ulong p, GEN L0)
 {
   const pari_sp av = avma;
   const ulong q = p - 1;
@@ -203,11 +203,11 @@ Fl_gener_local(ulong p, GEN L0)
   avma = av; return x;
 }
 ulong
-Fl_gener(ulong p) { return Fl_gener_local(p, NULL); }
+gener_Fl(ulong p) { return gener_Fl_local(p, NULL); }
 
 /* assume p prime, return a generator of all L[i]-Sylows in F_p^*. */
 GEN
-Fp_gener_local(GEN p, GEN L0)
+gener_Fp_local(GEN p, GEN L0)
 {
   pari_sp av0 = avma;
   long k, i;
@@ -217,7 +217,7 @@ Fp_gener_local(GEN p, GEN L0)
   {
     ulong z;
     if (L0) L0 = vec_to_vecsmall_ulong(L0);
-    z = Fl_gener_local((ulong)p[2], L0);
+    z = gener_Fl_local((ulong)p[2], L0);
     avma = av0; return utoipos(z);
   }
 
@@ -245,7 +245,7 @@ Fp_gener_local(GEN p, GEN L0)
 }
 
 GEN
-Fp_gener(GEN p) { return Fp_gener_local(p, NULL); }
+gener_Fp(GEN p) { return gener_Fp_local(p, NULL); }
 
 /* p prime, e > 0. Return a primitive root modulo p^e */
 static GEN
@@ -259,7 +259,7 @@ Zpn_gener(GEN p, long e)
       case 2: return utoipos(3);
       default: err(talker,"primitive root mod 2^%ld does not exist", e);
     }
-  x = Fp_gener(p);
+  x = gener_Fp(p);
   if (e > 1)
   {
     GEN y = Fp_pow(x, subis(p,1), sqri(p));

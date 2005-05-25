@@ -2431,7 +2431,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
     /* this is intended to be used after trial division, so we won't check
      * whether residue is zero here - that cannot normally happen */
     /* find a generator of the subgroup of index curexp in (Z/qZ)^* */
-    prkmodq = elt = Fl_pow(Fl_gener(q), p, q);
+    prkmodq = elt = Fl_pow(gener_Fl(q), p, q);
     /* see whether our residue is in the subgroup */
     for (k = (q - 1)/p; k > 0; k--)
     {
