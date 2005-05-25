@@ -756,9 +756,9 @@ subcyclo(long n, long d, long v)
   if (d<=0 || n<=0) err(typeer,"subcyclo");
   if ((n & 3) == 2) n >>= 1;
   if (n == 1 || d >= n) err(talker,"degree does not divide phi(n) in subcyclo");
-  fa = decomp(utoipos(n));
-  p = itos(gmael(fa,1,1));
-  al= itos(gmael(fa,2,1));
+  fa = factoru(n);
+  p = mael(fa,1,1);
+  al= mael(fa,2,1);
   if (lg((GEN)fa[1]) > 2 || (p==2 && al>2))
     err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
   avma=ltop;

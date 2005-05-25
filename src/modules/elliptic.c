@@ -2631,7 +2631,7 @@ s_powell(sellpt *Q, sellpt *P, long n, long c4, long p)
 static long
 sexact_order(long H, sellpt *f, long c4, long p)
 {
-  GEN P, e, fa = decomp(utoipos(H));
+  GEN P, e, fa = factoru(H);
   long h = H, pp, i, j, l;
   sellpt fh;
 
@@ -2639,8 +2639,8 @@ sexact_order(long H, sellpt *f, long c4, long p)
   e = (GEN)fa[2];
   for (i=1; i<l; i++)
   {
-    pp = itos((GEN)P[i]);
-    for (j=itos((GEN)e[i]); j; j--)
+    pp = P[i];
+    for (j=e[i]; j; j--)
     {
       long n = h / pp;
       s_powell(&fh, f, n, c4, p);

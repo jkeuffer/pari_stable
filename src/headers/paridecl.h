@@ -1399,7 +1399,6 @@ GEN     perm_pow(GEN perm, long exp);
 GEN     quotient_group(GEN C, GEN G);
 GEN     quotient_perm(GEN C, GEN p);
 GEN     vec_to_vecsmall(GEN z);
-GEN     vec_to_vecsmall_ulong(GEN z);
 GEN     vecperm_orbits(GEN v, long n);
 GEN     vecsmall_append(GEN V, long s);
 long    vecsmall_coincidence(GEN u, GEN v);
@@ -1419,6 +1418,7 @@ GEN     vecsmall_uniq(GEN V);
 GEN     vecvecsmall_indexsort(GEN x);
 GEN     vecvecsmall_sort(GEN x);
 long    vecvecsmall_search(GEN x, GEN y, long flag);
+GEN     ZV_to_nv(GEN z);
 
 /* polarit1.c */
 

@@ -312,16 +312,11 @@ e(ulong t, GEN *globfa)
   ulong nbd, m, k, d;
   int lfa, i, j;
 
-  fa = decomp(utoipos(t));
-  P = (GEN)fa[1]; settyp(P, t_VECSMALL);
-  E = (GEN)fa[2]; settyp(E, t_VECSMALL); lfa = lg(P);
+  fa = factoru(t);
+  P = (GEN)fa[1];
+  E = (GEN)fa[2]; lfa = lg(P);
   nbd = 1;
-  for (i=1; i<lfa; i++)
-  {
-    E[i] = itos((GEN)E[i]) + 1;
-    P[i] = itos((GEN)P[i]);
-    nbd *= E[i];
-  }
+  for (i=1; i<lfa; i++) { E[i]++; nbd *= E[i]; }
   Primes = cget1(nbd + 1, t_VECSMALL);
   s = gen_2; /* nbd = number of divisors */
   for (k=0; k<nbd; k++)
@@ -520,12 +515,9 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
   for (i=1; i<l; i++)
   {
     q = globfa[i]; /* odd prime */
-    faq = decomp( utoipos(q-1) ); tabfaq[i] = (long)faq;
-    P = (GEN)faq[1]; settyp(P, t_VECSMALL);
-    E = (GEN)faq[2]; settyp(E, t_VECSMALL); lfaq = lg(P);
-    P[1] = 2;
-    E[1] = itos((GEN)E[1]);
-
+    faq = factoru(q-1); tabfaq[i] = (long)faq;
+    P = (GEN)faq[1];
+    E = (GEN)faq[2]; lfaq = lg(P);
     av = avma;
     compute_fg(q, 1, &tabf, &tabg);
 
@@ -534,8 +526,8 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
     for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
     {
       int pk;
-      p = itos((GEN)P[j]); P[j] = p;
-      e = itos((GEN)E[j]); E[j] = e; pk = u_pow(p,e);
+      p = P[j];
+      e = E[j]; pk = u_pow(p,e);
       J[j] = (long)get_jac(pC[pk], q, pk, tabf, tabg);
     }
     tabj[i] = (long)gerepilecopy(av, J);
@@ -690,15 +682,13 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   R->lv = 1 << (k-1);
   R->mask = (1UL << k) - 1;
 
-  fat = decomp(utoipos(t));
-  P = (GEN)fat[1]; settyp(P, t_VECSMALL);
-  E = (GEN)fat[2]; settyp(E, t_VECSMALL); lfa = lg(P);
+  fat = factoru(t);
+  P = (GEN)fat[1];
+  E = (GEN)fat[2]; lfa = lg(P);
   lv = 1;
   for (i=1; i<lfa; i++)
   {
-    p = itos((GEN)P[i]); P[i] = p;
-    e = itos((GEN)E[i]); E[i] = e;
-    pk = u_pow(p, e);
+    pk = u_pow(P[i], E[i]);
     if (pk > lv) lv = pk;
   }
   pC = (Cache**)cgetg(lv + 1, t_VEC);

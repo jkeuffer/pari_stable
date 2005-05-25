@@ -31,7 +31,7 @@ vec_to_vecsmall(GEN z)
 }
 
 GEN
-vec_to_vecsmall_ulong(GEN z)
+ZV_to_nv(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l, t_VECSMALL);

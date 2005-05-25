@@ -1598,19 +1598,15 @@ ZX_DDF(GEN x, long hint)
   L = DDF(x, hint, 0);
   if (m > 1)
   {
-    GEN e, v, fa = decomp(utoipos(m));
+    GEN e, v, fa = factoru(m);
     long i,j,k, l;
 
     e = (GEN)fa[2]; k = 0;
     fa= (GEN)fa[1]; l = lg(fa);
-    for (i=1; i<l; i++)
-    {
-      e[i] = itos((GEN)e[i]);
-      k += e[i];
-    }
+    for (i=1; i<l; i++) k += e[i];
     v = cgetg(k+1, t_VECSMALL); k = 1;
     for (i=1; i<l; i++)
-      for (j=1; j<=e[i]; j++) v[k++] = itou((GEN)fa[i]);
+      for (j=1; j<=e[i]; j++) v[k++] = fa[i];
     for (k--; k; k--)
     {
       GEN L2 = cgetg(1,t_VEC);

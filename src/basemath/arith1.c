@@ -184,8 +184,7 @@ gener_Fl_local(ulong p, GEN L0)
   if (p == 2) return 1;
 
   if (!L0) {
-    L0 = gel(decomp(utoipos(q)), 1);
-    L0 = L = vec_to_vecsmall_ulong(L0);
+    L0 = L = gel(factoru(q), 1);
     k = lg(L)-1;
   } else {
     k = lg(L0)-1;
@@ -216,7 +215,7 @@ gener_Fp_local(GEN p, GEN L0)
   if (lgefint(p) == 3)
   {
     ulong z;
-    if (L0) L0 = vec_to_vecsmall_ulong(L0);
+    if (L0) L0 = ZV_to_nv(L0);
     z = gener_Fl_local((ulong)p[2], L0);
     avma = av0; return utoipos(z);
   }
@@ -790,13 +789,13 @@ gisanypower(GEN x, GEN *pty)
     if (sw) swap(a, b);
     k = isanypower(a, pty? &a: NULL);
     if (!k) { avma = av; return 0; }
-    fa = decomp(utoipos(k));
+    fa = factoru(k);
     P = (GEN)fa[1];
     E = (GEN)fa[2]; h = k;
     for (i = lg(P) - 1; i > 0; i--)
     {
-      p = itou((GEN)P[i]);
-      e = itou((GEN)E[i]);
+      p = P[i];
+      e = E[i];
       for (j = 0; j < e; j++)
         if (!is_kth_power(b, p, &b, NULL)) break;
       if (j < e) k /= u_pow(p, e - j);
