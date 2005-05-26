@@ -62,6 +62,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - the member function bnr.zkst is deprecated, use bnr.bid.clgp
   - the member function bnr.futu is deprecated. Please don't use bnr.tufu
     either.
+  - use \frac instead of \over in TeX output. Define
+      \def\frac#1#2{{#1\over#2}}
+    if you insist on using plain TeX and run into problems.
 
 * Specific to the PARI library:
 ===============================

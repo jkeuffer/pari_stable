@@ -67,7 +67,6 @@ enum logstyles {
     logstyle_TeX 	/* 3 */
 };
 
-#define TEXSTYLE_FRAC	1
 #define TEXSTYLE_PAREN	2
 #define TEXSTYLE_BREAK	4
 

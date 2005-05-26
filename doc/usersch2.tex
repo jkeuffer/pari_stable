@@ -1763,7 +1763,7 @@ The specific positive values of \kbd{log} have the following meaning
 
 2: emit color codes to the logfile (if \kbd{colors} is set).
 
-3: write TeX output to the logfile (can be further customized using
+3: write LaTeX output to the logfile (can be further customized using
 \tet{TeXstyle}).
 
 \subsecidx{logfile} (default \kbd{"pari.log"}): name of the log file to be
@@ -1922,12 +1922,9 @@ can be useful when you're not sure how many parentheses you have to close after
 complicated nested loops.
 
 \subsecidx{TeXstyle} (default \kbd{0}): the bits of this default allow
-\kbd{gp}
-to use less rigid TeX formatting commands in the logfile. This default is
-only taken into account when $\kbd{log} = 3$. The bits of \kbd{TeXstyle}
-have the following meaning
-
-1: use \kbd{\bs frac} instead of \kbd{\bs over} for fractions.
+\kbd{gp} to use less rigid TeX formatting commands in the logfile. This
+default is only taken into account when $\kbd{log} = 3$. The bits of
+\kbd{TeXstyle} have the following meaning
 
 2: insert \kbd{\bs right} / \kbd{\bs left} pairs where appropriate.
 

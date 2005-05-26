@@ -80,7 +80,7 @@ filtre0(filtre_t *F)
       {
         while (c != '*' || *s != '/')
         {
-          if (!*s) 
+          if (!*s)
           {
             if (!F->more_input) F->more_input = 1;
             goto END;
@@ -267,7 +267,7 @@ vpariputs(const char* format, va_list args)
   long nb = 0, bufsize = 1023;
   const char *f = format;
   char *buf, *str, *s, *t;
-  
+
   /* replace each %Z (2 chars) by braced address format (8 chars) */
   s = str = gpmalloc(strlen(format)*4 + 1);
   while (*f)
@@ -310,7 +310,7 @@ vpariputs(const char* format, va_list args)
         *t = 0; t[21] = 0; /* remove the bracing chars */
         pariOut->puts(s); gen_output((GEN)atol(t+1), &T);
         t += 22; s = t;
-        if (!--nb) break; 
+        if (!--nb) break;
       }
       else t++;
     }
@@ -956,7 +956,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
   GEN z;
   ulong *res, *resd;
   char *s, *t;
-  
+
   if (dec > 0)
   { /* reduce precision if possible */
     l = ndec2prec(dec);
@@ -1105,13 +1105,13 @@ voir2(GEN x, long nb, long bl)
   tx = typ(x);
   if (tx == t_INT && x == gen_0) { pariputs("gen_0\n"); return; }
   sorstring(VOIR_STRING1,(ulong)x);
-  
+
   lx = lg(x);
   pariputsf("%s(lg=%ld%s):",type_name(tx)+2,lx,isclone(x)? ",CLONE" : "");
   sorstring(VOIR_STRING2,x[0]);
   if (! is_recursive_t(tx)) /* t_INT, t_REAL, t_STR, t_VECSMALL */
   {
-    if (tx == t_STR) 
+    if (tx == t_STR)
       pariputs("chars:");
     else if (tx == t_INT)
       pariputsf("(%c,lgefint=%ld):", vsigne(x), lgefint(x));
@@ -1340,7 +1340,12 @@ texnome(const char *v, long deg)
   if (deg)
   {
     pariputs(v);
-    if (deg!=1) pariputsf("^{%ld}",deg);
+    if (deg !=1 ) {
+      if (deg >= 0 && deg < 10)
+        pariputsf("^%ld",deg);
+      else
+        pariputsf("^{%ld}",deg);
+    }
   }
   else pariputc('1');
 }
@@ -1512,56 +1517,77 @@ isdenom(GEN g)
   return 1;
 }
 
+static void
+paren(pariout_t *T, GEN a)
+{
+  pariputc('('); bruti(a,T,1); pariputc(')');
+}
+static void
+texparen(pariout_t *T, GEN a)
+{
+  if (T->TeXstyle & TEXSTYLE_PAREN) pariputs(" ("); else pariputs(" \\left(");
+  texi_nobrace(a,T,1); /* With braces no auto-linebreaks */
+  if (T->TeXstyle & TEXSTYLE_PAREN) pariputs(") "); else pariputs("\\right) ");
+}
+static void
+times_texnome(const char *v, long d)
+{
+  if (d)
+  {
+    if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
+    else pariputc(' ');
+    texnome(v,d);
+  }
+}
+static void
+times_monome(const char *v, long d)
+{
+  if (d) { pariputc('*'); monome(v,d); }
+}
+
 /* write a * v^d */
 static void
 wr_monome(pariout_t *T, GEN a, const char *v, long d)
 {
   long sig = isone(a);
 
-  if (sig) { sp_sign_sp(T,sig); monome(v,d); }
-  else
-  {
+  if (sig) {
+    sp_sign_sp(T,sig); monome(v,d);
+  } else {
     sig = isfactor(a);
     if (sig) { sp_sign_sp(T,sig); bruti(a,T,0); }
-    else
-    {
-      sp_sign_sp(T,1); pariputc('('); bruti(a,T,1); pariputc(')');
-    }
-    if (d) { pariputc('*'); monome(v,d); }
+    else { sp_sign_sp(T,1); paren(T, a); }
+    times_monome(v, d);
   }
 }
-
 static void
 wr_texnome(pariout_t *T, GEN a, const char *v, long d)
 {
   long sig = isone(a);
 
-  if (sig) { putsigne(sig); texnome(v,d); }
-  else
-  {
+  pariputc('\n'); /* Avoid TeX buffer overflow */
+  if (T->TeXstyle & TEXSTYLE_BREAK) pariputs("\\PARIbreak ");
+
+  if (sig) {
+    putsigne(sig); texnome(v,d);
+  } else {
     sig = isfactor(a);
-    if (sig) { putsigne(sig); texi(a,T,0); }
-    else
-    {
-      if (T->TeXstyle & TEXSTYLE_PAREN)
-        pariputs(" + (");
-      else
-	pariputs(" + \\left(");
-      texi_nobrace(a,T,1);		/* With braces no auto-linebreaks */
-      if (T->TeXstyle & TEXSTYLE_PAREN)
-        pariputs(") ");
-      else
-	pariputs("\\right) ");
-    }
-    if (d)
-    {
-      if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
-      texnome(v,d);
-    }
-    if (T->TeXstyle & TEXSTYLE_BREAK)
-      pariputs("\\PARIbreak ");
-    if (!sig)
-      pariputc('\n');			/* Avoid TeX buffer overflow */
+    if (sig) { putsigne(sig); texi_nobrace(a,T,0); }
+    else { pariputs(" +"); texparen(T, a); }
+    times_texnome(v, d);
+  }
+}
+static void
+sor_monome(pariout_t *T, GEN a, const char *v, long d)
+{
+  long sig = isone(a);
+  if (sig) {
+    putsigne(sig); monome(v,d);
+  } else {
+    sig = isfactor(a);
+    if (sig) { putsigne(sig); if (sig < 0) a = gneg(a); }
+    else pariputs(" + ");
+    sori(a,T); if (d) { pariputc(' '); monome(v,d);}
   }
 }
 
@@ -1569,53 +1595,38 @@ static void
 wr_lead_monome(pariout_t *T, GEN a,const char *v, long d, int addsign)
 {
   long sig = isone(a);
-  if (sig)
-  {
+  if (sig) {
     if (addsign && sig<0) pariputc('-');
     monome(v,d);
-  }
-  else
-  {
+  } else {
     if (isfactor(a)) bruti(a,T,addsign);
-    else
-    {
-      pariputc('('); bruti(a,T,1); pariputc(')');
-    }
-    if (d) { pariputc('*'); monome(v,d); }
+    else paren(T, a);
+    times_monome(v, d);
   }
 }
-
 static void
 wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int addsign)
 {
   long sig = isone(a);
-  if (sig)
-  {
+  if (sig) {
     if (addsign && sig<0) pariputc('-');
     texnome(v,d);
+  } else {
+    if (isfactor(a)) texi_nobrace(a,T,addsign);
+    else texparen(T, a);
+    times_texnome(v, d);
   }
-  else
-  {
-    if (isfactor(a)) texi(a,T,addsign);
-    else
-    {
-      if (T->TeXstyle & TEXSTYLE_PAREN)
-        pariputs(" (");
-      else
-        pariputs(" \\left(");
-      texi_nobrace(a,T,1);		/* With braces no auto-linebreaks */
-      if (T->TeXstyle & TEXSTYLE_PAREN)
-        pariputs(") ");
-      else
-	pariputs("\\right) ");
-    }
-    if (d)
-    {
-      if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
-      texnome(v,d);
-    }
-    if (T->TeXstyle & TEXSTYLE_BREAK)
-      pariputs("\\PARIbreak ");
+}
+static void
+sor_lead_monome(pariout_t *T, GEN a, const char *v, long d)
+{
+  long sig = isone(a);
+  if (sig) {
+    if (sig < 0) pariputc('-');
+    monome(v,d);
+  } else {
+    sori(a,T);
+    if (d) { pariputc(' '); monome(v,d); }
   }
 }
 
@@ -1632,10 +1643,10 @@ sors(GEN g, pariout_t *T)
   pariputsf("%ld", (long)g);
 }
 
-static void 
+static void
 quote_string(char *s)
 {
-  pariputc('"'); 
+  pariputc('"');
   while (*s)
   {
     char c=*s++;
@@ -1792,12 +1803,12 @@ bruti(GEN g, pariout_t *T, int addsign)
       r = lg(g); if (r==1) { pariputs("[;]"); return; }
       l = lg(g[1]);
       if (l==1)
-      { 
+      {
         pariputsf(new_fun_set? "matrix(0,%ld)":"matrix(0,%ld,j,k,0)", r-1);
         return;
       }
       print = (typ(g[1]) == t_VECSMALL)? prints: bruti;
-      if (l==2) 
+      if (l==2)
       {
         pariputs(new_fun_set? "Mat(": "mat(");
         if (r == 2) { print(gcoeff(g,1,1),T,1); pariputc(')'); return; }
@@ -1839,36 +1850,6 @@ matbruti(GEN g, pariout_t *T)
       print(gcoeff(g,i,j),T,1); if (j<r-1) pariputc(' ');
     }
     if (i<l-1) pariputs("]\n\n"); else pariputs("]\n");
-  }
-}
-
-static void
-sor_monome(pariout_t *T, GEN a, const char *v, long d)
-{
-  long sig = isone(a);
-  if (sig) { putsigne(sig); monome(v,d); }
-  else
-  {
-    sig = isfactor(a);
-    if (sig) { putsigne(sig); if (sig < 0) a = gneg(a); }
-    else pariputs(" + ");
-    sori(a,T); if (d) { pariputc(' '); monome(v,d);}
-  }
-}
-
-static void
-sor_lead_monome(pariout_t *T, GEN a, const char *v, long d)
-{
-  long sig = isone(a);
-  if (sig)
-  {
-    if (sig < 0) pariputc('-');
-    monome(v,d);
-  }
-  else
-  {
-    sori(a,T);
-    if (d) { pariputc(' '); monome(v,d); }
   }
 }
 
@@ -2049,7 +2030,7 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
   if (r)
   {
     if (addsign && r<0) pariputc('-');
-    pariputs("1"); return;
+    pariputc('1'); return;
   }
 
   tg = typ(g);
@@ -2063,12 +2044,11 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
       texi((GEN)g[1],T,1); break;
 
     case t_FRAC: case t_RFRAC:
-      if (T->TeXstyle & TEXSTYLE_FRAC)
-	pariputs("\\frac");		/* Assume that texi() puts braces */
-      texi((GEN)g[1],T,addsign); 
-      if (!(T->TeXstyle & TEXSTYLE_FRAC))
-	  pariputs("\\over");
-      texi((GEN)g[2],T,1); break;
+      pariputs("\\frac{");
+      texi_nobrace((GEN)g[1],T,addsign);
+      pariputs("}{");
+      texi_nobrace((GEN)g[2],T,1);
+      pariputs("}"); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
       a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
@@ -2163,16 +2143,14 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
 
     case t_STR:
     {
-#if 0 /* This makes it impossible to print reliably. What it I want to 
+#if 0 /* This makes it impossible to print reliably. What it I want to
          printtex("$$", x, "$$") ? */
       char *s = GSTR(g);
       pariputs("\\hbox{");
       while (*s) {
-	if (strchr("\\{}$_^%#&~", *s))
-	  pariputc('\\');		/* What to do with \\ ? */
+	if (strchr("\\{}$_^%#&~", *s)) pariputc('\\');
 	pariputc(*s);
-	if (strchr("^~", *s++))
-	  pariputs("{}");
+	if (strchr("^~", *s++)) pariputs("{}");
       }
       pariputc('}'); break;
 #else
@@ -2245,7 +2223,7 @@ tex2mail_output(GEN z, long n)
   pariout_t T = *(GP_DATA->fmt); /* copy */
   FILE *o_out;
   FILE *o_logfile = logfile;
-  
+
   if (!prettyp_init()) return 0;
   o_out = pari_outfile; /* save state */
 
@@ -2272,24 +2250,20 @@ tex2mail_output(GEN z, long n)
       sprintf(s, "\\%%%ld = ", n);
     pariputs_opt(s);
     if (o_logfile) {
-	switch (logstyle) {
-	case logstyle_plain:
-	  plain_out:
-	    fprintf(o_logfile, "%%%ld = ", n);
-	    break;
-	case logstyle_color:
-	    if (!n)
-		goto plain_out;
-	    fprintf(o_logfile, "%s%%%ld = ", term_get_color(c_HIST), n);
-	    /* Can't merge, term_get_color() uses statics...: */
-	    fprintf(o_logfile, "%s", term_get_color(c_OUTPUT));
-	    break;
-	case logstyle_TeX:
-	    fprintf(o_logfile, "\\PARIout{%ld}", n);
-	    break;
-	    
-	}
-    }    
+      switch (logstyle) {
+      case logstyle_plain:
+        fprintf(o_logfile, "%%%ld = ", n);
+        break;
+      case logstyle_color:
+        fprintf(o_logfile, "%s%%%ld = ", term_get_color(c_HIST), n);
+        /* Can't merge, term_get_color() uses statics...: */
+        fprintf(o_logfile, "%s", term_get_color(c_OUTPUT));
+        break;
+      case logstyle_TeX:
+        fprintf(o_logfile, "\\PARIout{%ld}", n);
+        break;
+      }
+    }
   }
   /* output */
   gen_output(z, &T);
@@ -2300,18 +2274,9 @@ tex2mail_output(GEN z, long n)
     pari_outfile = o_logfile;
     /* XXXX Maybe it is better to output in another format? */
     if (logstyle == logstyle_TeX) {
-	int extrabraces = 0;
-	switch (typ(z)) {
-	case t_FRAC: case t_RFRAC:
-	    if (!(T.TeXstyle & TEXSTYLE_FRAC))
-		/* Extra braces disable line breaks, avoid them if possible */
-		extrabraces = 1;
-	}
-	if (extrabraces) pariputc('{');
-	T.TeXstyle |= TEXSTYLE_BREAK;
-        gen_output(z, &T);
-	if (extrabraces) pariputc('}');
-	pariputc('%');
+      T.TeXstyle |= TEXSTYLE_BREAK;
+      gen_output(z, &T);
+      pariputc('%');
     } else
 	outbrute(z);
     pariputc('\n'); pariflush();
@@ -2822,7 +2787,7 @@ _expand_tilde(const char *s)
   if (!*s || *s == '/')
   {
     p = getpwuid(geteuid());
-    if (!p) 
+    if (!p)
     { /* host badly configured, don't kill session on startup
        * (when expanding path) */
       err(warner,"can't expand ~");
@@ -3242,7 +3207,7 @@ writebin(char *name, GEN x)
 {
   FILE *f = fopen(name,"r");
   int already = f? 1: 0;
-  
+
   if (f) { check_magic(name,f); fclose(f); }
   f = fopen(name,"a");
   if (!f) err(openfiler,"binary output",name);
