@@ -1204,6 +1204,9 @@ and the $p^{v_p(n)}$.
 
 \fun{GEN}{powiu}{GEN n, ulong k}, assumes $n$ is a \typ{INT} and returns $n^k$.
 
+\fun{ulong}{upowuu}{ulong n, ulong k}, returns $n^k$ modulo $2^\B$. This is
+meant to be used for tiny $k$, where in fact $n^k$ fits into an \kbd{ulong}.
+
 \fun{void}{rdivii}{GEN x, GEN y, long prec}, assuming \kbd{x} and \kbd{y}
 are both of type \typ{INT}, return the quotient x/y as a \typ{REAL} of
 precision \kbd{prec}.
