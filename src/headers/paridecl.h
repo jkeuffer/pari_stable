@@ -1804,12 +1804,12 @@ GEN     mplog2(long prec);
 GEN     mppi(long prec);
 GEN     mpsin(GEN x);
 void    mpsincos(GEN x, GEN *s, GEN *c);
-ulong   npownn(ulong p, ulong k);
 GEN     sqrtr(GEN x);
 GEN     sqrtnr(GEN x, long n);
 GEN     palog(GEN x);
 GEN     powgi(GEN x, GEN n);
 GEN     teich(GEN x);
+ulong   upowuu(ulong p, ulong k);
 
 /* trans2.c */
 

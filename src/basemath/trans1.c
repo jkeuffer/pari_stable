@@ -354,7 +354,7 @@ pr_norm(GEN pr) { GEN f = gel(pr,4); return powiu(gel(pr,1), (ulong)f[2], 1); }
 
 /* assume p^k is SMALL */
 ulong
-npownn(ulong p, ulong k)
+upowuu(ulong p, ulong k)
 {
   long i, pk;
 

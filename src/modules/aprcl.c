@@ -324,15 +324,14 @@ e(ulong t, GEN *globfa)
     m = k; d = 1;
     for (j=1; m; j++)
     {
-      d *= npownn(P[j], m % E[j]);
+      d *= upowuu(P[j], m % E[j]);
       m /= E[j];
     }
     /* d runs through the divisors of t */
     if (BSW_psp(utoipos(++d)))
     {
       if (d != 2) appendL(Primes, (GEN)d);
-      s = muliu(s, (ulong)npownn(d, 1 + u_lval(t,d)));
-
+      s = muliu(s, upowuu(d, 1 + u_lval(t,d)));
     }
   }
   if (globfa) { vecsmall_sort(Primes); *globfa = Primes; }
@@ -779,7 +778,7 @@ look_eta2(long k, GEN z)
 static long
 step4a(Cache *C, Red *R, ulong q, long p, long k, GEN jpq)
 {
-  const long pk = npownn(p,k);
+  const long pk = upowuu(p,k);
   long ind;
   GEN s1, s2, s3;
   
@@ -876,7 +875,7 @@ step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
 
     if (umodiu(R->N,q) == 0) return -1;
     k = u_lval(q-1, p);
-    pk = npownn(p,k);
+    pk = upowuu(p,k);
     if (pk < lg(pC) && pC[pk]) { C = pC[pk]; Cp = pC[p]; }
     else {
       C = pC[1]; C->matvite = NULL; /* re-init */
