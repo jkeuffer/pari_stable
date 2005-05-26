@@ -1761,7 +1761,7 @@ chk_reccoeff(void *data, GEN x)
 static GEN
 RecCoeff3(GEN nf, RC_data *d, long prec)
 {
-  GEN A, M, nB, cand, p1, B2, C2, tB, beta2, eps, nf2, Bd;
+  GEN A, M, nB, cand, p1, B2, C2, tB, beta2, BIG, nf2, Bd;
   GEN beta = d->beta, B = d->B;
   long N = d->N, v = d->v;
   long i, j, k, l, ct = 0, prec2;
@@ -1770,8 +1770,8 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
-  eps = powuu(10, min(-8, (d->G >> 1)));
-  tB  = gpow(gmul2n(eps, N), gdivgs(gen_1, 1-N), DEFAULTPREC);
+  BIG = powuu(10, max(8, -(d->G >> 1)));
+  tB  = gpow(gmul2n(BIG, -N), gdivgs(gen_1, 1-N), DEFAULTPREC);
 
   Bd    = gceil(gmin(B, tB));
   prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
@@ -1781,7 +1781,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 
 LABrcf: ct++;
   B2 = sqri(Bd);
-  C2 = gdiv(B2, gsqr(eps));
+  C2 = mulii(B2, sqri(BIG));
 
   M = gmael(nf2, 5, 1);
   d->M = M;
