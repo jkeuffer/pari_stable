@@ -474,7 +474,7 @@ get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
 
   compute_fg(q,0, &tabf,&tabg);
 
-  pk = u_pow(2,k);
+  pk = 1 << k;;
   vpk = vecsmall_const(pk, 0);
 
   qm3s2 = (q-3)>>1;
@@ -504,7 +504,7 @@ get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
 static void
 calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
 {
-  GEN J, tabf, tabg, faq, tabfaq, tabj, P, E;
+  GEN J, tabf, tabg, faq, tabfaq, tabj, P, E, PE;
   int lfaq, p, e, j;
   ulong i, q, l;
   pari_sp av;
@@ -515,9 +515,10 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
   for (i=1; i<l; i++)
   {
     q = globfa[i]; /* odd prime */
-    faq = factoru(q-1); tabfaq[i] = (long)faq;
-    P = (GEN)faq[1];
-    E = (GEN)faq[2]; lfaq = lg(P);
+    faq = factoru(q-1); gel(tabfaq,i) = faq;
+    P = gel(faq,1); lfaq = lg(P);
+    E = gel(faq,2);
+    PE= gel(faq,3);
     av = avma;
     compute_fg(q, 1, &tabf, &tabg);
 
@@ -525,12 +526,12 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
     J[1] = lgetg(1,t_STR); /* dummy */
     for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
     {
-      int pk;
+      long pe = PE[j];
       p = P[j];
-      e = E[j]; pk = u_pow(p,e);
-      J[j] = (long)get_jac(pC[pk], q, pk, tabf, tabg);
+      e = E[j];
+      gel(J,j) = get_jac(pC[pe], q, pe, tabf, tabg);
     }
-    tabj[i] = (long)gerepilecopy(av, J);
+    gel(tabj,i) = gerepilecopy(av, J);
   }
 }
 
@@ -667,7 +668,7 @@ alloc_cache()
 static Cache **
 calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
 {
-  GEN fat, P, E;
+  GEN fat, P, E, PE;
   int lv, lfa, pk, p, e, i, k;
   long ltab, b;
   Cache **pC;
@@ -683,13 +684,14 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   R->mask = (1UL << k) - 1;
 
   fat = factoru(t);
-  P = (GEN)fat[1];
-  E = (GEN)fat[2]; lfa = lg(P);
+  P = gel(fat,1); lfa = lg(P);
+  E = gel(fat,2);
+  PE= gel(fat,3);
   lv = 1;
   for (i=1; i<lfa; i++)
   {
-    pk = u_pow(P[i], E[i]);
-    if (pk > lv) lv = pk;
+    long pe = PE[i];
+    if (pe > lv) lv = pe;
   }
   pC = (Cache**)cgetg(lv + 1, t_VEC);
   pC[1] = alloc_cache(); /* to be used as temp in step5() */
@@ -808,7 +810,7 @@ is_m1(GEN x, GEN N)
 static int
 step4b(Cache *C, Red *R, ulong q, int k)
 {
-  const int pk = u_pow(2,k);
+  const int pk = 1 << k;
   int ind;
   GEN s1, s2, s3, j2q, j3q;
 
