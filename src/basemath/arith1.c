@@ -798,7 +798,7 @@ gisanypower(GEN x, GEN *pty)
       e = E[i];
       for (j = 0; j < e; j++)
         if (!is_kth_power(b, p, &b, NULL)) break;
-      if (j < e) k /= u_pow(p, e - j);
+      if (j < e) k /= npownn(p, e - j);
     }
     if (k == 1) { avma = av; return 0; }
     if (!pty) { avma = av; return k; }

@@ -352,6 +352,18 @@ powiu(GEN a, ulong N, long s)
 GEN 
 pr_norm(GEN pr) { GEN f = gel(pr,4); return powiu(gel(pr,1), (ulong)f[2], 1); }
 
+/* assume p^k is SMALL */
+ulong
+npownn(ulong p, ulong k)
+{
+  long i, pk;
+
+  if (!k) return 1;
+  if (p == 2) return 1<<k;
+  pk = p; for (i=2; i<=k; i++) pk *= p;
+  return pk;
+}
+
 typedef struct {
   long prec, a;
   GEN (*sqr)(GEN);

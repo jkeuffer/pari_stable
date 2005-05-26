@@ -1259,6 +1259,15 @@ ZM_ishnf(GEN x)
 }
 
 GEN
+ZV_to_nv(GEN z)
+{
+  long i, l = lg(z);
+  GEN x = cgetg(l, t_VECSMALL);
+  for (i=1; i<l; i++) x[i] = itou((GEN)z[i]);
+  return x;
+}
+
+GEN
 ZV_copy(GEN x)
 {
   long i, lx = lg(x);

@@ -26,7 +26,7 @@ typedef struct Red {
   GEN N; /* prime we are certifying */
   GEN N2; /* floor(N/2) */
 /* globa data for flexible window */
-  int k, lv;
+  long k, lv;
   ulong mask;
 /* reduction data */
   long n;
@@ -83,7 +83,7 @@ red_cyclop(GEN T, long p)
 
 /* x t_VECSMALL, as red_cyclo2n_ip */
 static GEN
-u_red_cyclo2n_ip(GEN x, int n)
+u_red_cyclo2n_ip(GEN x, long n)
 {
   long i, pow2 = 1<<(n-1);
   GEN z;
@@ -98,7 +98,7 @@ u_red_cyclo2n_ip(GEN x, int n)
 }
 /* x t_POL, n > 0. Return x mod polcyclo(2^n) = (x^(2^(n-1)) + 1). IN PLACE */
 static GEN
-red_cyclo2n_ip(GEN x, int n)
+red_cyclo2n_ip(GEN x, long n)
 {
   long i, pow2 = 1<<(n-1);
   for (i = lg(x)-1; i>pow2+1; i--)
@@ -106,7 +106,7 @@ red_cyclo2n_ip(GEN x, int n)
   return normalizepol_i(x, i+1);
 }
 static GEN
-red_cyclo2n(GEN x, int n) { return red_cyclo2n_ip(dummycopy(x), n); }
+red_cyclo2n(GEN x, long n) { return red_cyclo2n_ip(dummycopy(x), n); }
 
 /* x a non-zero VECSMALL */
 static GEN
@@ -245,9 +245,9 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
 {
   const GEN taba = C->aall;
   const GEN tabt = C->tall;
-  const int efin = lg(taba)-1, lv = R->lv;
+  const long efin = lg(taba)-1, lv = R->lv;
   GEN vz, res = jac, pol2 = _sqr(res, R);
-  int f;
+  long f;
   pari_sp av;
 
   vz = cgetg(lv+1, t_VEC); vz[1] = (long)res;
@@ -256,7 +256,7 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
   for (f = efin; f >= 1; f--)
   {
     GEN t = (GEN)vz[taba[f]];
-    int tf = tabt[f];
+    long tf = tabt[f];
     res = f==efin ? t
                   : _mul(t, res, R);
     while (tf--) res = _sqr(res, R);
@@ -269,7 +269,7 @@ static GEN
 _powpolmodsimple(Cache *C, Red *R, GEN jac)
 {
   GEN w = mulmat_pol(C->matvite, jac);
-  int j, ph = lg(w);
+  long j, ph = lg(w);
 
   R->red = &_redsimple;
   for (j=1; j<ph; j++)
@@ -279,7 +279,7 @@ _powpolmodsimple(Cache *C, Red *R, GEN jac)
 }
 
 static GEN
-powpolmod(Cache *C, Red *R, int p, int k, GEN jac)
+powpolmod(Cache *C, Red *R, long p, long k, GEN jac)
 {
   GEN (*_sqr)(GEN, Red *);
 
@@ -310,7 +310,7 @@ e(ulong t, GEN *globfa)
 {
   GEN fa, P, E, s, Primes;
   ulong nbd, m, k, d;
-  int lfa, i, j;
+  long lfa, i, j;
 
   fa = factoru(t);
   P = (GEN)fa[1];
@@ -324,14 +324,14 @@ e(ulong t, GEN *globfa)
     m = k; d = 1;
     for (j=1; m; j++)
     {
-      d *= u_pow(P[j], m % E[j]);
+      d *= npownn(P[j], m % E[j]);
       m /= E[j];
     }
     /* d runs through the divisors of t */
     if (BSW_psp(utoipos(++d)))
     {
       if (d != 2) appendL(Primes, (GEN)d);
-      s = muliu(s, (ulong)u_pow(d, 1 + u_lval(t,d)));
+      s = muliu(s, (ulong)npownn(d, 1 + u_lval(t,d)));
 
     }
   }
@@ -440,7 +440,7 @@ computetabdl(ulong q)
 }
 
 static void
-compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
+compute_fg(ulong q, long half, GEN *tabf, GEN *tabg)
 {
   const ulong qm3s2 = (q-3)>>1;
   const ulong l = half? qm3s2: q-2;
@@ -452,7 +452,7 @@ compute_fg(ulong q, int half, GEN *tabf, GEN *tabg)
 
 /* p odd prime */
 static GEN
-get_jac(Cache *C, ulong q, int pk, GEN tabf, GEN tabg)
+get_jac(Cache *C, ulong q, long pk, GEN tabf, GEN tabg)
 {
   ulong x, qm3s2;
   GEN vpk = vecsmall_const(pk, 0);
@@ -465,7 +465,7 @@ get_jac(Cache *C, ulong q, int pk, GEN tabf, GEN tabg)
 
 /* p = 2 */
 static GEN
-get_jac2(GEN N, ulong q, int k, GEN *j2q, GEN *j3q)
+get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
 {
   GEN jpq, vpk, tabf, tabg;
   ulong x, pk, i, qm3s2;
@@ -505,7 +505,7 @@ static void
 calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
 {
   GEN J, tabf, tabg, faq, tabfaq, tabj, P, E, PE;
-  int lfaq, p, e, j;
+  long lfaq, p, e, j;
   ulong i, q, l;
   pari_sp av;
 
@@ -515,7 +515,7 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
   for (i=1; i<l; i++)
   {
     q = globfa[i]; /* odd prime */
-    faq = factoru(q-1); gel(tabfaq,i) = faq;
+    faq = factoru_pow(q-1); gel(tabfaq,i) = faq;
     P = gel(faq,1); lfaq = lg(P);
     E = gel(faq,2);
     PE= gel(faq,3);
@@ -537,7 +537,7 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
 
 /* N = 1 mod p^k, return an elt of order p^k in (Z/N)^* */
 static GEN
-finda(Cache *Cp, GEN N, int pk, int p)
+finda(Cache *Cp, GEN N, long pk, long p)
 {
   GEN a, pv;
   if (Cp && Cp->avite) {
@@ -548,7 +548,7 @@ finda(Cache *Cp, GEN N, int pk, int p)
   {
     GEN gp = utoipos(p), ph, b, q;
     ulong u = 2;
-    int v = Z_pvalrem(addis(N,-1), gp, &q);
+    long v = Z_pvalrem(addis(N,-1), gp, &q);
     ph = gpowgs(gp, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
     if (p > 2)
     {
@@ -578,11 +578,11 @@ finda(Cache *Cp, GEN N, int pk, int p)
 }
 
 /* return 0: N not a prime, 1: no problem so far */
-static int
-filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
+static long
+filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
 {
   pari_sp av;
-  int i, j;
+  long i, j;
   long e;
   GEN tabt, taba, m;
 
@@ -590,7 +590,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
 
   if (p > 2)
   {
-    int LE = pk - pk/p + 1;
+    long LE = pk - pk/p + 1;
     GEN E = cgetg(LE, t_VECSMALL), eta = cgetg(pk+1,t_VEC);
     for (i=1,j=0; i<pk; i++)
       if (i%p) E[++j] = i;
@@ -605,7 +605,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
   }
   else if (pk >= 8)
   {
-    int LE = (pk>>2) + 1;
+    long LE = (pk>>2) + 1;
     GEN E = cgetg(LE, t_VECSMALL);
     for (i=1,j=0; i<pk; i++)
       if ((i%8)==1 || (i%8)==3) E[++j] = i;
@@ -615,7 +615,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, int p, int pk, long ltab)
   if (pk > 2 && umodiu(R->N,pk) == 1)
   {
     GEN vpa, p1, p2, p3, a2 = NULL, a = finda(Cp, R->N, pk, p);
-    int jj, ph = pk - pk/p;
+    long jj, ph = pk - pk/p;
 
     vpa = cgetg(ph+1,t_COL); vpa[1] = (long)a;
     if (pk > p) a2 = centermodii(sqri(a), R->N, R->N2);
@@ -669,7 +669,7 @@ static Cache **
 calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
 {
   GEN fat, P, E, PE;
-  int lv, lfa, pk, p, e, i, k;
+  long lv, lfa, pk, p, e, i, k;
   long ltab, b;
   Cache **pC;
 
@@ -683,7 +683,7 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
   R->lv = 1 << (k-1);
   R->mask = (1UL << k) - 1;
 
-  fat = factoru(t);
+  fat = factoru_pow(t);
   P = gel(fat,1); lfa = lg(P);
   E = gel(fat,2);
   PE= gel(fat,3);
@@ -713,10 +713,10 @@ calcglobs(Red *R, ulong t, long *pltab, GEN *pP)
 
 /* sig_a^{-1}(z) for z in Q(ze) and sig_a: ze -> ze^a */
 static GEN
-aut(int pk, GEN z, int a)
+aut(long pk, GEN z, long a)
 {
   GEN v = cgetg(pk+1,t_VEC);
-  int i;
+  long i;
   for (i=1; i<=pk; i++)
     v[i] = (long)polcoeff0(z, (a*(i-1))%pk, 0);
   return gtopolyrev(v,0);
@@ -724,9 +724,9 @@ aut(int pk, GEN z, int a)
 
 /* z^v for v in Z[G], represented by couples [sig_x^{-1},x] */
 static GEN
-autvec_TH(int pk, GEN z, GEN v, GEN C)
+autvec_TH(long pk, GEN z, GEN v, GEN C)
 {
-  int i, lv = lg(v);
+  long i, lv = lg(v);
   GEN s = polun[varn(C)];
   for (i=1; i<lv; i++)
   {
@@ -737,11 +737,11 @@ autvec_TH(int pk, GEN z, GEN v, GEN C)
 }
 
 static GEN
-autvec_AL(int pk, GEN z, GEN v, Red *R)
+autvec_AL(long pk, GEN z, GEN v, Red *R)
 {
-  const int r = umodiu(R->N, pk);
+  const long r = umodiu(R->N, pk);
   GEN s = polun[varn(R->C)];
-  int i, lv = lg(v);
+  long i, lv = lg(v);
   for (i=1; i<lv; i++)
   {
     long y = (r*v[i]) / pk;
@@ -751,8 +751,8 @@ autvec_AL(int pk, GEN z, GEN v, Red *R)
 }
 
 /* 0 <= i < pk, such that x^i = z mod cyclo(pk),  -1 if no such i exist */
-static int
-look_eta(GEN eta, int pk, GEN z)
+static long
+look_eta(GEN eta, long pk, GEN z)
 {
   long i;
   for (i=1; i<=pk; i++)
@@ -760,8 +760,8 @@ look_eta(GEN eta, int pk, GEN z)
   return -1;
 }
 /* same pk = 2^k */
-static int
-look_eta2(int k, GEN z)
+static long
+look_eta2(long k, GEN z)
 {
   long d, s;
   if (typ(z) != t_POL) d = 0; /* t_INT */
@@ -776,11 +776,11 @@ look_eta2(int k, GEN z)
   return (s > 0)? d: d + (1<<(k-1));
 }
 
-static int
-step4a(Cache *C, Red *R, ulong q, int p, int k, GEN jpq)
+static long
+step4a(Cache *C, Red *R, ulong q, long p, long k, GEN jpq)
 {
-  const int pk = u_pow(p,k);
-  int ind;
+  const long pk = npownn(p,k);
+  long ind;
   GEN s1, s2, s3;
   
   if (!jpq)
@@ -800,18 +800,18 @@ step4a(Cache *C, Red *R, ulong q, int p, int k, GEN jpq)
 }
 
 /* x == -1 mod N ? */
-static int
+static long
 is_m1(GEN x, GEN N)
 {
   return equalii(addis(x,1), N);
 }
 
 /* p=2, k>=3 */
-static int
-step4b(Cache *C, Red *R, ulong q, int k)
+static long
+step4b(Cache *C, Red *R, ulong q, long k)
 {
-  const int pk = 1 << k;
-  int ind;
+  const long pk = 1 << k;
+  long ind;
   GEN s1, s2, s3, j2q, j3q;
 
   (void)get_jac2(R->N,q,k, &j2q,&j3q);
@@ -831,10 +831,10 @@ step4b(Cache *C, Red *R, ulong q, int k)
 }
 
 /* p=2, k=2 */
-static int
+static long
 step4c(Cache *C, Red *R, ulong q)
 {
-  int ind;
+  long ind;
   GEN s0,s1,s3, jpq = get_jac2(R->N,q,2, NULL,NULL);
 
   s0 = sqrmod4(jpq, R);
@@ -851,7 +851,7 @@ step4c(Cache *C, Red *R, ulong q)
 }
 
 /* p=2, k=1 */
-static int
+static long
 step4d(Cache *C, Red *R, ulong q)
 {
   GEN s1 = Fp_pow(utoipos(q), R->N2, R->N); 
@@ -863,10 +863,10 @@ step4d(Cache *C, Red *R, ulong q)
 
 /* return 1 [OK so far] or <= 0 [not a prime] */
 static long
-step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
+step5(Cache **pC, Red *R, long p, GEN et, ulong ltab)
 {
   ulong ct = 1, q;
-  int pk, k, fl = -1;
+  long pk, k, fl = -1;
   byteptr d = diffptr+2;
   Cache *C, *Cp;
 
@@ -876,7 +876,7 @@ step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
 
     if (umodiu(R->N,q) == 0) return -1;
     k = u_lval(q-1, p);
-    pk = u_pow(p,k);
+    pk = npownn(p,k);
     if (pk < lg(pC) && pC[pk]) { C = pC[pk]; Cp = pC[p]; }
     else {
       C = pC[1]; C->matvite = NULL; /* re-init */
@@ -889,7 +889,7 @@ step5(Cache **pC, Red *R, int p, GEN et, ulong ltab)
     else if (k >= 3) fl = step4b(C,R, q,k);
     else if (k == 2) fl = step4c(C,R, q);
     else             fl = step4d(C,R, q);
-    if (fl == -1) return (int)(-q);
+    if (fl == -1) return (long)(-q);
     if (fl == 1) return ct;
     ct++;
    repeat:
@@ -924,7 +924,7 @@ GEN
 aprcl(GEN N)
 {
   GEN et, fat, flaglp, tabfaq, tabj, res, globfa;
-  long i, j, l, ltab, lfat, lfaq, fl, ctglob = 0;
+  long i, j, l, ltab, lfat, fl, ctglob = 0;
   ulong p, q, t;
   pari_sp av, av2;
   Red R;
@@ -964,23 +964,22 @@ aprcl(GEN N)
   }
   for (i=1; i<l; i++)
   {
-    GEN P, E, faq;
+    GEN faq = gel(tabfaq,i), P = gel(faq,1), E = gel(faq,2), PE = gel(faq,3);
+    long lfaq = lg(P);
     avma = av;
     q = globfa[i]; if (DEBUGLEVEL>2) fprintferr("%ld ",q);
-    faq = (GEN)tabfaq[i];
-    P = (GEN)faq[1];
-    E = (GEN)faq[2]; lfaq = lg(P);
     av2 = avma;
     for (j=1; j<lfaq; j++, avma = av2)
     {
       Cache *C;
-      int pk, k;
+      long pe, e;
       p = P[j];
-      k = E[j]; pk = u_pow(p, k); C = pC[pk];
+      e = E[j];
+      pe= PE[j]; C = pC[pe];
       R.C = C->cyc;
-      if (p >= 3)      fl = step4a(C,&R, q,p,k, gmael(tabj,i,j));
-      else if (k >= 3) fl = step4b(C,&R, q,k);
-      else if (k == 2) fl = step4c(C,&R, q);
+      if (p >= 3)      fl = step4a(C,&R, q,p,e, gmael(tabj,i,j));
+      else if (e >= 3) fl = step4b(C,&R, q,e);
+      else if (e == 2) fl = step4c(C,&R, q);
       else             fl = step4d(C,&R, q);
       if (fl == -1) return _res(q,p);
       if (fl == 1) flaglp[p] = 1;

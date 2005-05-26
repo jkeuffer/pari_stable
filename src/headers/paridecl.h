@@ -122,6 +122,7 @@ GEN     FqM_ker(GEN x, GEN T, GEN p);
 GEN     FqM_suppl(GEN x, GEN T, GEN p);
 GEN     QM_inv(GEN M, GEN dM);
 GEN     ZM_inv(GEN M, GEN dM);
+GEN     ZV_to_nv(GEN z);
 void    appendL(GEN x, GEN t);
 GEN     cget1(long l, long t);
 GEN     concat(GEN x, GEN y);
@@ -1418,7 +1419,6 @@ GEN     vecsmall_uniq(GEN V);
 GEN     vecvecsmall_indexsort(GEN x);
 GEN     vecvecsmall_sort(GEN x);
 long    vecvecsmall_search(GEN x, GEN y, long flag);
-GEN     ZV_to_nv(GEN z);
 
 /* polarit1.c */
 
@@ -1647,8 +1647,6 @@ long    brent_kung_optpow(long d, long n);
 GEN     modulargcd(GEN a,GEN b);
 GEN     stopoly(ulong m, ulong p, long v);
 GEN     stopoly_gen(GEN m, GEN p, long v);
-int     u_pow(int p, int k);
-long    u_val(ulong n, ulong p);
 
 /* RgX.c */
 
@@ -1806,6 +1804,7 @@ GEN     mplog2(long prec);
 GEN     mppi(long prec);
 GEN     mpsin(GEN x);
 void    mpsincos(GEN x, GEN *s, GEN *c);
+ulong   npownn(ulong p, ulong k);
 GEN     sqrtr(GEN x);
 GEN     sqrtnr(GEN x, long n);
 GEN     palog(GEN x);

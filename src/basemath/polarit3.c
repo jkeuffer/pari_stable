@@ -2004,32 +2004,6 @@ to_Kronecker(GEN P, GEN Q)
 /*                          MODULAR GCD                            */
 /*                                                                 */
 /*******************************************************************/
-/* assume p^k is SMALL */
-int
-u_pow(int p, int k)
-{
-  int i, pk;
-
-  if (!k) return 1;
-  if (p == 2) return 1<<k;
-  pk = p; for (i=2; i<=k; i++) pk *= p;
-  return pk;
-}
-
-#if 0
-static ulong
-umodratu(GEN a, ulong p)
-{
-  if (typ(a) == t_INT)
-    return umodiu(a,p);
-  else { /* assume a a t_FRAC */
-    ulong num = umodiu((GEN)a[1],p);
-    ulong den = umodiu((GEN)a[2],p);
-    return (ulong)Fl_mul(num, Fl_inv(den,p), p);
-  }
-}
-#endif
-
 /*FIXME: Unify the following 3 divrem routines. Treat the case x,y (lifted) in
  * R[X], y non constant. Given: (lifted) [inv(), mul()], (delayed) red() in R */
 
