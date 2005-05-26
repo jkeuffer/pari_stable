@@ -729,7 +729,7 @@ get_bnfpol(GEN x, GEN *bnf, GEN *nf)
 {
   *bnf = _checkbnf(x);
   *nf  = _checknf(x);
-  if (*nf) return (GEN)(*nf)[1];
+  if (*nf) x = gel(*nf, 1);
   if (typ(x) != t_POL) err(typeer,"get_bnfpol");
   return x;
 }
