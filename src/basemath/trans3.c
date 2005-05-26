@@ -1159,7 +1159,7 @@ szeta_odd(long k, long prec)
     qn = gsqr(q); z = ginv( addrs(q,-1) );
     for (n=2; ; n++)
     {
-      p1 = ginv( mulir(gpowgs(stoi(n),k),addrs(qn,-1)) );
+      p1 = ginv( mulir(powuu(n,k),addrs(qn,-1)) );
 
       z = addrr(z,p1); if (expo(p1)< li) break;
       qn = mulrr(qn,q);
@@ -1190,7 +1190,7 @@ szeta_odd(long k, long prec)
     qn = q; z=gen_0;
     for (n=1; ; n++)
     {
-      p1=mulir(gpowgs(stoi(n),k),gsqr(addrs(qn,-1)));
+      p1=mulir(powuu(n,k),gsqr(addrs(qn,-1)));
       p1=divrr(addrs(mulrr(qn,addsr(1,mulsr(n<<1,p2))),-1),p1);
 
       z=addrr(z,p1); if (expo(p1) < li) break;
@@ -1698,7 +1698,7 @@ polylog(long m, GEN x, long prec)
 {
   long l, e, i, G, sx;
   pari_sp av, av1, limpile;
-  GEN X, Xn, z, p1, p2, n, y;
+  GEN X, Xn, z, p1, p2, y;
 
   if (m<0) err(talker,"negative index in polylog");
   if (!m) return gneg(ghalf);
@@ -1712,12 +1712,11 @@ polylog(long m, GEN x, long prec)
   e = gexpo(gnorm(x)); if (!e || e== -1) return cxpolylog(m,x,prec);
   X = (e > 0)? ginv(x): x;
   G = -bit_accuracy(l);
-  n = icopy(gen_1);
   av1=avma; limpile=stack_lim(av1,1);
   y = Xn = X;
   for (i=2; ; i++)
   {
-    n[2] = i; Xn = gmul(X,Xn); p2 = gdiv(Xn,gpowgs(n,m));
+    Xn = gmul(X,Xn); p2 = gdiv(Xn,powuu(i,m));
     y = gadd(y,p2);
     if (gexpo(p2) <= G) break;
 
@@ -2224,7 +2223,7 @@ thetanullk(GEN q, long k, long prec)
     GEN t;
     qn = gmul(qn,ps);
     ps = gmul(ps,ps2);
-    t = gmul(qn, gpowgs(utoipos(2*n+1), k)); y = gadd(y, t);
+    t = gmul(qn, powuu(2*n+1, k)); y = gadd(y, t);
     if (gexpo(t) < -bit_accuracy(prec)) break;
   }
   p1 = gmul2n(gsqrt(gsqrt(q,prec),prec),1);

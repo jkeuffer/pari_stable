@@ -722,7 +722,7 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
   }
   if (!galois)
   {
-    GEN Ndiscrel = diviiexact((GEN)nfabs[3], gpowgs((GEN)nf[3], drel));
+    GEN Ndiscrel = diviiexact((GEN)nfabs[3], powiu((GEN)nf[3], drel));
     fa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
   }
 

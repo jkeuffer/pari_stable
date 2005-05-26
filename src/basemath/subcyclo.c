@@ -449,7 +449,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
       Vecmax(Vec((x+o)^d)=max{binomial(d,i)*o^i ;1<=i<=d} 
      */
     i=d-(1+d)/(1+o);
-    borne=mulii(binomial(utoipos(d),i),gpowgs(utoipos(o),i));
+    borne=mulii(binomial(utoipos(d),i),powiu(o,i));
   }
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: borne=%Z\n",borne);
@@ -457,7 +457,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   avma=av;
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: val=%ld\n",val);
-  le=gpowgs(l,val);
+  le=powiu(l,val);
   z = Fp_pow(gener_Fp(l), utoipos(e), l);
   z=padicsqrtnlift(gen_1,utoipos(n),z,l,val);
   if (DEBUGLEVEL >= 1)
@@ -747,7 +747,7 @@ subcyclo(long n, long d, long v)
 {
   pari_sp ltop=avma;
   long o,p,al,r,g,gd;
-  GEN fa,G;
+  GEN fa;
   GEN zl,L,T,le;
   long l,val;
   GEN B,powz;
@@ -772,9 +772,8 @@ subcyclo(long n, long d, long v)
     GEN z = coefs_to_pol(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
     setvarn(z,v); return z;
   }
-  G=gener(utoipos(n));
-  g=itos((GEN)G[2]);
-  gd=itos((GEN)gpowgs(G,d)[2]);
+  g = gener_Fl(n);
+  gd = Fl_pow(g, d, n);
   avma=ltop;
   powz=subcyclo_complex_roots(n,(o&1)==0,3);
   L=subcyclo_cyclic(n,d,o,g,gd,powz,NULL);

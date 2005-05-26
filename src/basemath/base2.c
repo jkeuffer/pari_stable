@@ -903,7 +903,7 @@ compmod(GEN f, GEN g, GEN T, GEN p)
   f = Q_remove_denom(f, &df);
   g = Q_remove_denom(g, &dg);
   if (df) D = df;
-  if (dg) D = mul_content(D, gpowgs(dg, degpol(f)));
+  if (dg) D = mul_content(D, powiu(dg, degpol(f)));
   q = D ? mulii(p, D): p;
   if (dg) f = FpX_rescale(f, dg, q);
   z = FpX_FpXQ_compo(f, g, T, q);
@@ -924,7 +924,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
     fprintferr("  entering Dedekind Basis with parameters p=%Z\n",p);
     fprintferr("  f = %Z,\n  a = %Z\n",f,a);
   }
-  ha = pd = gpowgs(p,mf/2); pdp = mulii(pd,p);
+  ha = pd = powiu(p,mf/2); pdp = mulii(pd,p);
   dU = U ? degpol(U): 0;
   b = cgetg(n, t_MAT); /* Z[a] + U/p Z[a] is maximal */
   /* skip first column = gscalcol(pd,n) */
@@ -1022,7 +1022,7 @@ Decomp(decomp_t *S, long flag)
   /* E = e / de, e in Z[X], de in Z,  E = a(phi) mod (f, p) */
   th = Q_remove_denom(S->phi, &dt);
   if (!dt) dt = gen_1;
-  de = gpowgs(dt, degpol(a));
+  de = powiu(dt, degpol(a));
   pr = mulii(p, de);
   e = FpX_FpXQ_compo(FpX_rescale(a, dt, pr), th, S->f, pr);
   update_den(&e, &de, NULL);
@@ -1039,7 +1039,7 @@ Decomp(decomp_t *S, long flag)
     e = FpX_rem(e, centermod(S->f, D), D); /* e/de defined mod pk */
     update_den(&e, &de, NULL);
   }
-  pr = gpowgs(p, r); /* required precision of the factors */
+  pr = powiu(p, r); /* required precision of the factors */
   ph = mulii(de, pr);
   fred = centermod(S->f, ph);
   e    = centermod(e, ph);
@@ -1111,7 +1111,7 @@ redelt_i(GEN a, GEN N, GEN p, GEN *pda)
   {
     long v = Z_pvalrem(*pda, p, &z);
     if (v) {
-      *pda = gpowgs(p, v);
+      *pda = powiu(p, v);
       N  = mulii(*pda, N);
     }
     else
@@ -1234,7 +1234,7 @@ newtoncharpoly(GEN pp, GEN p, GEN NS)
       s = addii(s, t);
     }
     if (v) {
-      s = gdiv(s, gpowgs(p, v));
+      s = gdiv(s, powiu(p, v));
       if (typ(s) != t_INT) return NULL;
     }
     s = mulii(s, Fp_inv(utoipos(z), pp));
@@ -1256,7 +1256,7 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   if (c < 2) c = 2;
   a = Q_remove_denom(a, &d);
   m = d? Z_pval(d, p): 0; /* >= 0 */
-  pp = gpowgs(p, (m+1)*c+1);
+  pp = powiu(p, (m+1)*c+1);
   ns = manage_cache(chi, pp, ns);
   v = newtonsums(a, d, chi, c, pp, ns);
   if (!v) return 0;
@@ -1288,11 +1288,11 @@ mycaract(GEN f, GEN a, GEN p, GEN pp, long dr, GEN ns)
 
   a = Q_remove_denom(a, &d);
   npp = pp;
-  if (lgefint(p) == 3) npp = mulii(npp, gpowgs(p, val_fact(n, itou(p))));
+  if (lgefint(p) == 3) npp = mulii(npp, powiu(p, val_fact(n, itou(p))));
   nspp = NPP = npp;
   if (d) {
-    NPP = mulii(NPP, gpowgs(d, n));
-    nspp = (dr < 0)? NPP: mulii(nspp, gpowgs(p, dr));
+    NPP = mulii(NPP, powiu(d, n));
+    nspp = (dr < 0)? NPP: mulii(nspp, powiu(p, dr));
   }
   ns = newtonsums(a, d, f, n, NPP, manage_cache(f, nspp, ns));
   if (!ns) return NULL;
@@ -1425,9 +1425,9 @@ getprime(decomp_t *S, GEN phi, GEN chip, GEN nup, long *Lp, long *Ep,
    * pi = nu^r / p^s is an element of valuation 1/E,
    * so is pi + O(p) since 1/E < 1. May compute nu^r mod p^(s+1) */
 
-  q = gpowgs(S->p, s+1);
+  q = powiu(S->p, s+1);
   nup = FpXQ_pow(nup, utoipos(r), S->chi, q);
-  return gdiv(compmod(nup, phi, S->chi, q), gpowgs(S->p, s));
+  return gdiv(compmod(nup, phi, S->chi, q), powiu(S->p, s));
 }
 
 static void
@@ -1515,7 +1515,7 @@ testc2(decomp_t *S, GEN A, long Ea, GEN T, long Et, GEN ns)
   while (s < 0) { s = s + Ea; t++; }
 
   c = RgX_mul(RgXQ_u_pow(A, s, S->chi), RgXQ_u_pow(T, r, S->chi));
-  c = gdiv(RgX_rem(c, S->chi), gpowgs(S->p, t));
+  c = gdiv(RgX_rem(c, S->chi), powiu(S->p, t));
   S->phi = gadd( polx[ varn(S->chi) ], redelt(c, S->pmr, S->p) );
   if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
   S->phi0 = T0; return 0; /* E_phi = lcm(E_alpha,E_theta) */
@@ -1527,8 +1527,8 @@ init_NS(long N, GEN pp, GEN pmf, GEN pmr)
 {
   GEN q, ns = cgetg(N+1, t_COL);
   long i, l, p = itos_or_0(pp);
-  q = p? gpowgs(pp, (long)ceil( N * 1. / (p * (p-1)) )): pp;
-  q = sqri(mulii(q, mulii(pmf, gpowgs(pmr, N))));
+  q = p? powiu(pp, (ulong)ceil( N * 1. / (p * (p-1)) )): pp;
+  q = sqri(mulii(q, mulii(pmf, powiu(pmr, N))));
   l  = lgefint(q); /* should be more than enough ... */
   for (i = 1; i <= N; i++) ns[i] = lgeti(l);
   kill_cache(ns); return ns;
@@ -1545,7 +1545,7 @@ ch_var(GEN x, long v)
 static GEN
 get_gamma(decomp_t *S, GEN x, long eq, long er)
 {
-  GEN q, g = x, Dg = eq ? gpowgs(S->p, eq): gen_1;
+  GEN q, g = x, Dg = powiu(S->p, eq);
   if (er)
   {
     if (!S->invnu)
@@ -1554,7 +1554,7 @@ get_gamma(decomp_t *S, GEN x, long eq, long er)
       S->invnu = QXQ_inv(S->nu, S->chi);
       S->invnu = redelt_i(S->invnu, S->pmr, S->p, &(S->Dinvnu));
     }
-    if (S->Dinvnu) Dg = mulii(Dg, gpowgs(S->Dinvnu, er));
+    if (S->Dinvnu) Dg = mulii(Dg, powiu(S->Dinvnu, er));
     q = mulii(S->p, Dg);
     g = gmul(g, FpXQ_pow(S->invnu, stoi(er), S->chi, q));
     g = FpX_rem(g, S->chi, q);
@@ -1623,9 +1623,9 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       }
       else
       { /* gamm = beta/p^eq, special case of the above */
-        GEN h = gpowgs(S->p, eq);
+        GEN h = powiu(S->p, eq);
         gamm = gdiv(beta, h);
-        chig = gdiv(RgX_unscale(chib, h), gpowgs(h, N));
+        chig = gdiv(RgX_unscale(chib, h), powiu(h, N));
         chig = gcmp1(Q_denom(chig))? FpX_red(chig, S->pmf): NULL;
       }
 
@@ -1701,7 +1701,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
       err(talker, "no root in nilord. Is p = %Z a prime?", S->p);
     }
 
-    if (eq) delt = gmul(delt, gpowgs(S->p,  eq));
+    if (eq) delt = gmul(delt, powiu(S->p,  eq));
     if (er) delt = gmul(delt, gpowgs(S->nu, er));
     beta = gsub(beta, delt);
 
@@ -1736,7 +1736,7 @@ nilord(decomp_t *S, GEN dred, long mf, long flag)
   S->pmr = mulii(sqri(dred), p);
   S->pdr = mulii(dred, p);
   S->chi = centermod(S->f, S->pmr);
-  S->pmf = gpowgs(p, mf + 1);
+  S->pmf = powiu(p, mf + 1);
   ns = init_NS(N, p, S->pmf, S->pmr);
   oE = 0;
   opa = NULL;
@@ -1788,10 +1788,10 @@ fast_respm(GEN f, GEN g, GEN p, long M)
   if (!m) m = 1;
   for(;; m <<= 1) {
     if (M < 2*m) break;
-    q = q? sqri(q): gpowgs(p, m); /* p^m */
+    q = q? sqri(q): powiu(p, m); /* p^m */
     R = respm(f,g, q); if (signe(R)) return R;
   }
-  q = gpowgs(p, M);
+  q = powiu(p, M);
   R = respm(f,g, q); return signe(R)? R: q;
 }
 
@@ -1836,7 +1836,7 @@ indexpartial(GEN P, GEN DP)
     long E = itos(gmael(fa,2,i)), e = E >> 1;
     GEN p = gmael(fa,1,i), q = p;
     if (i == nb)
-      q = gpowgs(p, (odd(E) && !BSW_psp(p))? e+1: e);
+      q = powiu(p, (odd(E) && !BSW_psp(p))? e+1: e);
     else if (e >= 2)
     {
       if(DEBUGLEVEL>=5) fprintferr("IndexPartial: factor %Z^%ld ",p,E);
@@ -1943,7 +1943,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   if (!m) return gscalcol_i(p,N);
   /* we want v_p(Norm(x)) = p^f, f = N-m */
   f = N - m;
-  q = mulii(gpowgs(p,f), p);
+  q = powiu(p,f+1);
 
   u = FpM_invimage(concatsp(P, V), vec_ei(N,1), p);
   setlg(u, lg(P));
@@ -1992,7 +1992,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
     else {
       GEN w1 = D;
       long v = Z_pval(D, p);
-      D = gpowgs(p, v);
+      D = powiu(p, v);
       Dp = mulii(D, Dp);
       gel(w, 1) = resii(w1, Dp);
     }
@@ -2049,7 +2049,7 @@ primedec_apply_kummer(GEN nf,GEN u,long e,GEN p)
     {
       norm_S S;
       S.D = S.w = S.M = NULL; S.T = T;
-      if (!is_uniformizer(u, gpowgs(p,f+1), &S)) u[2] = laddii((GEN)u[2], p);
+      if (!is_uniformizer(u, powiu(p,f+1), &S)) u[2] = laddii((GEN)u[2], p);
     }
     u = algtobasis_i(nf,u);
   }
@@ -2264,7 +2264,7 @@ GEN
 special_anti_uniformizer(GEN nf, GEN pr)
 {
   GEN p = (GEN)pr[1], e = (GEN)pr[3];
-  return gdivexact(element_pow(nf,(GEN)pr[5],e), gpowgs(p,itos(e)-1));
+  return gdivexact(element_pow(nf,(GEN)pr[5],e), powiu(p, e[2]-1));
 }
 
 /* return t = 1 mod pr, t = 0 mod p / pr^e(pr/p) */
@@ -2773,7 +2773,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
     pal = RgXQX_rem(RgXQX_mul(pal,X,nfT),P,nfT);
   }
   /* the modulus is integral */
-  base = nfhermitemod(nf,base, gmul(gpowgs(p, m-d),
+  base = nfhermitemod(nf,base, gmul(powiu(p, m-d),
                                     idealpows(nf, prinvp, d)));
   base[2] = ldiv((GEN)base[2], p); /* cancel the factor p */
   vt = vdisc - 2*d;
@@ -2829,7 +2829,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   pip = basistoalg(nf, (GEN)pr[2]);
   nfT = (GEN)nf[1];
   n = degpol(pol); vpol = varn(pol);
-  q = T? gpowgs(p,degpol(T)): p;
+  q = T? powiu(p,degpol(T)): p;
   q1 = q; while (cmpiu(q1,n) < 0) q1 = mulii(q1,q);
   rnfId = idmat(n);
   id    = idmat(degpol(nfT));

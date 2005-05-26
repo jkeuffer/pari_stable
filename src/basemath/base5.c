@@ -256,7 +256,7 @@ makenfabs(GEN rnf)
   else   M = idmat(n);
 
   NF[1] = (long)pol;
-  NF[3] = (long)mulii(gpowgs((GEN)nf[3], degpol(rnf[1])),
+  NF[3] = (long)mulii(powiu((GEN)nf[3], degpol(rnf[1])),
                       idealnorm(nf, (GEN)rnf[3]));
   NF[7] = (long)RgM_to_RgXV(M,varn(pol));
   NF[8] = (long)linvmat(M);

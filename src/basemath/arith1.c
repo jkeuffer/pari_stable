@@ -354,7 +354,7 @@ znstar(GEN n)
   for ( ; j<=nbp; i++,j++)
   {
     long e = itos((GEN)E[j]);
-    GEN p = (GEN)P[j], q = gpowgs(p, e-1), Q = mulii(p, q);
+    GEN p = (GEN)P[j], q = powiu(p, e-1), Q = mulii(p, q);
     cyc[i] = lsubii(Q, q); /* phi(p^e) */
     gen[i] = (long)Zpn_gener(p, e);
     mod[i] = (long)Q;
@@ -677,7 +677,7 @@ pow_check(ulong p, GEN *x, GEN *logx, long *k)
   long e;
   setlg(*logx, DEFAULTPREC + (lg(*x)-2) / p);
   u = divrs(*logx, p); y = grndtoi(mpexp(u), &e);
-  if (e >= -10 || !equalii(gpowgs(y, p), *x)) return 0;
+  if (e >= -10 || !equalii(powiu(y, p), *x)) return 0;
   *k *= p; *x = y; *logx = u; return 1;
 }
 
@@ -802,7 +802,7 @@ gisanypower(GEN x, GEN *pty)
     }
     if (k == 1) { avma = av; return 0; }
     if (!pty) { avma = av; return k; }
-    if (k != h) a = gpowgs(a, h/k);
+    if (k != h) a = powiu(a, h/k);
     *pty = gerepilecopy(av, mkfrac(a, b));
     return k;
   }
@@ -1439,7 +1439,7 @@ Fp_sqrtl(GEN a, GEN l, GEN p, GEN q,long e, GEN r, GEN y, GEN m)
     } while(!is_pm1(p1));
     if (k==e) { avma = av; return NULL; }
     dl = Fp_shanks(Fp_inv(z,p),m,p,l);
-    p1 = Fp_pow(y, modii(mulii(dl,gpowgs(l,e-k-1)),q), p);
+    p1 = Fp_pow(y, modii(mulii(dl,powiu(l,e-k-1)),q), p);
     m = Fp_pow(m,dl,p);
     e = k;
     v = modii(mulii(p1,v),p);
@@ -1489,7 +1489,7 @@ Fp_sqrtn(GEN a, GEN n, GEN p, GEN *zetan)
       j = itos(gcoeff(F,i,2));
       e = Z_pvalrem(q,l,&r);
       y = mplgenmod(l,e,r,p,&zeta);
-      if (zetan) z = modii(mulii(z, Fp_pow(y,gpowgs(l,e-j),p)), p);
+      if (zetan) z = modii(mulii(z, Fp_pow(y,powiu(l,e-j),p)), p);
       do
       {
 	lbot = avma;
@@ -2738,7 +2738,7 @@ conductor_part(GEN x, long r, GEN *ptD, GEN *ptreg, GEN *ptfa)
     if (k >= 2)
     {
       H = mulii(H, subis(p, kronecker(D,p)));
-      if (k>=4) H = mulii(H,gpowgs(p,(k>>1)-1));
+      if (k>=4) H = mulii(H, powiu(p,(k>>1)-1));
     }
   }
 

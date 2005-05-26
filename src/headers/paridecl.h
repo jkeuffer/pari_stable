@@ -1804,6 +1804,8 @@ GEN     mplog2(long prec);
 GEN     mppi(long prec);
 GEN     mpsin(GEN x);
 void    mpsincos(GEN x, GEN *s, GEN *c);
+GEN     powiu(GEN p, ulong k);
+GEN     powuu(ulong p, ulong k);
 GEN     sqrtr(GEN x);
 GEN     sqrtnr(GEN x, long n);
 GEN     palog(GEN x);

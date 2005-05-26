@@ -425,8 +425,8 @@ RecTreeLift(GEN link, GEN v, GEN w, GEN T, GEN pd, GEN p0, GEN f, long j, int no
 static void
 TreeLift(GEN link, GEN v, GEN w, GEN T, GEN p, long e0, long e1, GEN f, int noinv)
 {
-  GEN p0 = gpowgs(p, e0);
-  GEN pd = gpowgs(p, e1-e0);
+  GEN p0 = powiu(p, e0);
+  GEN pd = powiu(p, e1-e0);
   RecTreeLift(link, v, w, T, pd, p0, f, lgpol(v), noinv);
 }
 
@@ -541,7 +541,7 @@ bezout_lift_fact(GEN pol, GEN Q, GEN p, long e)
   GEN E, link, v, w, pe;
   long i, k = lg(Q)-1;
   if (k == 1) return mkvec(pol);
-  pe = gpowgs(p, e);
+  pe = powiu(p, e);
   pol = FpX_normalize(pol, pe);
   E = MultiLift(pol, Q, NULL, p, e, 1);
   link = (GEN) E[2];
@@ -605,7 +605,7 @@ polhensellift(GEN pol, GEN fct, GEN p, long exp)
           err(talker, "polhensellift: factors %Z and %Z are not coprime",
                      p1[i], p1[j]);
   }
-  return gerepilecopy(av, hensel_lift_fact(pol,p1,NULL,p,gpowgs(p,exp),exp));
+  return gerepilecopy(av, hensel_lift_fact(pol,p1,NULL,p,powiu(p,exp),exp));
 }
 
 #if 0
@@ -734,7 +734,7 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
 {
   long K = 1, cnt = 1, i,j,k, curdeg, lfamod = lg(famod)-1;
   ulong spa_b, spa_bs2, Sbound;
-  GEN lc, lcpol, pa = gpowgs(p,a), pas2 = shifti(pa,-1);
+  GEN lc, lcpol, pa = powiu(p,a), pas2 = shifti(pa,-1);
   uGEN trace1   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
   uGEN trace2   = (uGEN)cgetg(lfamod+1, t_VECSMALL);
   GEN ind      = cgetg(lfamod+1, t_VECSMALL);
@@ -752,9 +752,9 @@ cmbf(GEN pol, GEN famod, GEN bound, GEN p, long a, long b,
   {
     GEN pa_b,pa_bs2,pb, lc2 = lc? sqri(lc): NULL;
 
-    pa_b = gpowgs(p, a-b); /* < 2^31 */
+    pa_b = powiu(p, a-b); /* < 2^31 */
     pa_bs2 = shifti(pa_b,-1);
-    pb= gpowgs(p, b);
+    pb= powiu(p, b);
     for (i=1; i <= lfamod; i++)
     {
       GEN T1,T2, P = (GEN)famod[i];
@@ -1004,7 +1004,7 @@ root_bound(GEN P0)
   {
     z = shifti(addii(x,y), -1);
     if (equalii(x,z) || k > 5) break;
-    if (cmpii(poleval(Q,z), mulii(lP, gpowgs(z, d))) < 0)
+    if (cmpii(poleval(Q,z), mulii(lP, powiu(z, d))) < 0)
       y = z;
     else
       x = z;
@@ -1190,7 +1190,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       a = (long)ceil(bmin + 3*N0*logBr) + 1; /* enough for 3 more rounds */
       a = (long)next2pow((ulong)a);
 
-      pa = gpowgs(p,a);
+      pa = powiu(p,a);
       famod = hensel_lift_fact(P,famod,NULL,p,pa,a);
       for (i=1; i<=n0; i++) TT[i] = 0;
     }
@@ -1203,7 +1203,7 @@ LLL_cmbf(GEN P, GEN famod, GEN p, GEN pa, GEN bound, long a, long rec)
       for (j=1; j<=N0; j++) p1[j] = p2[j];
       if (lP)
       { /* make Newton sums integral */
-        GEN lPpow = gpowgs(lP, tmax);
+        GEN lPpow = powiu(lP, tmax);
         for (j=1; j<=N0; j++)
         {
           lPpow = mulii(lPpow,lP);
@@ -1235,11 +1235,11 @@ AGAIN:
       if (b - delta/2 < bmin) b = bmin; /* near there. Go all the way */
     }
 
-    q = gpowgs(p, b);
+    q = powiu(p, b);
     m = vconcat( CM_L, gdivround(T2, q) );
     if (first)
     {
-      GEN P1 = gscalmat(gpowgs(p, a-b), N0);
+      GEN P1 = gscalmat(powiu(p, a-b), N0);
       first = 0;
       m = concatsp( m, vconcat(ZERO, P1) );
       /*     [ C M_L        0     ]
@@ -1304,14 +1304,14 @@ cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 
   b = logint(B, q, qb);
   amin = b + d;
-  if (gcmp(gpowgs(q, amin), A) <= 0)
+  if (gcmp(powiu(q, amin), A) <= 0)
   {
     a = logint(A, q, qa);
-    b = a - d; *qb = gpowgs(q, b);
+    b = a - d; *qb = powiu(q, b);
   }
   else
   { /* not enough room */
-    a = amin;  *qa = gpowgs(q, a);
+    a = amin;  *qa = powiu(q, a);
     fl = 1;
   }
   if (DEBUGLEVEL > 3) {
@@ -2004,7 +2004,7 @@ gauss_factor(GEN x)
     w = is2? mkcomplex(gen_1,gen_1): gauss_factor_p(p);
     w2 = gauss_normal( gconj(w) );
     /* w * w2 * I^3 = p, w2 = gconj(w) * I */
-    pe = gpowgs(p, e);
+    pe = powiu(p, e);
     we = gpowgs(w, e);
     t = gauss_primpart_try( gmul(y, gconj(we)), pe );
     if (t) y = t; /* y /= w^e */
@@ -2525,7 +2525,7 @@ padic_gcd(GEN x, GEN y)
   GEN p = (GEN)y[2];
   long v = ggval(x,p), w = valp(y);
   if (w < v) v = w;
-  return gpowgs(p, v);
+  return powiu(p, v);
 }
 
 /* x,y in Z[i], at least one of which is t_COMPLEX */
@@ -2566,7 +2566,7 @@ zero_gcd(GEN x, GEN y, long tx, long ty)
     long v = ggval(x,p), w = valp(y);
     if (w < v) return zeropadic(p, w);
     if (gcmp0(x)) return zeropadic(p, v);
-    return gpowgs(p, v);
+    return powiu(p, v);
   }
   switch(tx)
   {
@@ -2629,7 +2629,7 @@ ggcd(GEN x, GEN y)
       case t_PADIC:
         if (!equalii((GEN)x[2],(GEN)y[2])) return gen_1;
         vx = valp(x);
-        vy = valp(y); return gpowgs((GEN)y[2], min(vy,vx));
+        vy = valp(y); return powiu((GEN)y[2], min(vy,vx));
 
       case t_QUAD:
         av=avma; p1=gdiv(x,y);

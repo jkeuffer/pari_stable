@@ -990,16 +990,17 @@ static GEN
 trueE(GEN tau, long k, long prec)
 {
   pari_sp lim, av;
-  GEN p1, q, y, qn, n;
+  GEN p1, q, y, qn;
+  long n = 1;
 
   q = expIxy(Pi2n(1, prec), tau, prec);
   q = check_real(q);
-  y = gen_0; n = utoi(1);
-  av = avma; lim = stack_lim(av,2); qn = gen_1; n[2] = 0;
-  for(;;)
+  y = gen_0;
+  av = avma; lim = stack_lim(av,2); qn = gen_1;
+  for(;; n++)
   { /* compute y := sum_{n>0} n^(k-1) q^n / (1-q^n) */
-    n[2]++; qn = gmul(q,qn);
-    p1 = gdiv(gmul(gpowgs(n,k-1),qn), gsub(gen_1,qn));
+    qn = gmul(q,qn);
+    p1 = gdiv(gmul(powuu(n,k-1),qn), gsub(gen_1,qn));
     if (gcmp0(p1) || gexpo(p1) <= - bit_accuracy(prec) - 5) break;
     y = gadd(y, p1);
     if (low_stack(lim, stack_lim(av,2)))
@@ -1463,7 +1464,7 @@ localred_p(GEN e, GEN p, int minim)
   }
   else
   { /* model not minimal */
-    GEN pk = gpowgs(p,k), p2k = sqri(pk), p4k = sqri(p2k), p6k = mulii(p4k,p2k);
+    GEN pk = powiu(p,k), p2k = sqri(pk), p4k = sqri(p2k), p6k = mulii(p4k,p2k);
     GEN r, s, t;
 
     s = negi((GEN)e[1]);
@@ -1507,9 +1508,9 @@ localred_p(GEN e, GEN p, int minim)
       break;
     case 6: f = 2; kod = -4-nuj; /* Inu* */
       if (nuj & 1)
-	c = 3 + kronecker(diviiexact(mulii(c6, D),gpowgs(p, 9+nuj)), p);
+	c = 3 + kronecker(diviiexact(mulii(c6, D),powiu(p, 9+nuj)), p);
       else
-	c = 3 + kronecker(diviiexact(D, gpowgs(p, 6+nuj)), p);
+	c = 3 + kronecker(diviiexact(D, powiu(p, 6+nuj)), p);
       break;
     default: return localredbug(p,"localred (nu_D - nu_j != 0,6)");
   }
@@ -1778,7 +1779,7 @@ ellintegralmodel(GEN e)
 	m = r * n + ggval((GEN)a[i], p);
 	while (m < 0) { n++; m += r; }
       }
-    u = mulii(u, gpowgs(p, n));
+    u = mulii(u, powiu(p, n));
   }
   v = init_ch(); v[1] = linv(u); return v;
 }

@@ -1246,12 +1246,12 @@ EvalCoeff(GEN z, int* c, long deg)
       if (j==0)
       {
         if (!e) return NULL;
-        if (i!=j) z = gpuigs(z,i-j+1);
+        if (i!=j) z = gpowgs(z,i-j+1);
         return gmul(e,z);
       }
     if (e)
     {
-      r = (i==j)? z: gpuigs(z,i-j+1);
+      r = (i==j)? z: gpowgs(z,i-j+1);
       e = gadd(gmul(e,r), stoi(c[j]));
     }
     else
@@ -1770,7 +1770,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
-  eps = gpowgs(utoipos(10), min(-8, (d->G >> 1)));
+  eps = powuu(10, min(-8, (d->G >> 1)));
   tB  = gpow(gmul2n(eps, N), gdivgs(gen_1, 1-N), DEFAULTPREC);
 
   Bd    = gceil(gmin(B, tB));
@@ -2335,7 +2335,7 @@ makescindold(GEN nf, GEN polrel, long cl)
 
   /* attempt to find the subfields using polred */
   T.cl = cl; dk  = (GEN)nf[3];
-  T.dkpow = (cl & 1) ? NULL: gpowgs(dk, cl>>1);
+  T.dkpow = (cl & 1) ? NULL: powiu(dk, cl>>1);
   CHECK.f = &define_hilbert;
   CHECK.data = (void*)&T;
   pol = polredfirstpol(BAS, 0, &CHECK);

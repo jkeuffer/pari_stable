@@ -317,8 +317,8 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   gb->bornesol = gerepileupto(ltop, ceil_safe(mulrs(borneroots,2)));
   if (DEBUGLEVEL >= 9)
     fprintferr("GaloisConj: Bound %Z\n",borneroots);
-  gb->ladicsol = gpowgs(gb->l, gb->valsol);
-  gb->ladicabs = gpowgs(gb->l, gb->valabs);
+  gb->ladicsol = powiu(gb->l, gb->valsol);
+  gb->ladicabs = powiu(gb->l, gb->valabs);
   gb->lbornesol = subii(gb->ladicsol,gb->bornesol);
   if (!dn) { dn = icopy(den); gunclone(den); }
   return dn;
@@ -363,7 +363,7 @@ initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct
   gl->e = logint(gmul2n(gb->bornesol, 2+BITS_IN_LONG),p,NULL);
   gl->e = max(2,gl->e);
   lbot = avma;
-  gl->Q = gpowgs(p, gl->e);
+  gl->Q = powiu(p, gl->e);
   gl->Q = gerepile(ltop, lbot, gl->Q);
   gl->TQ = FpX_red(T,gl->Q);
 }
@@ -948,7 +948,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
       j++;
     }
   }				/* Be happy now! */
-  NN = divis(gpowgs(utoipos(b), c * (d - d/e)),cut);
+  NN = divis(powuu(b, c * (d - d/e)),cut);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
   N1=1000000;

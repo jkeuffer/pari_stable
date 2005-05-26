@@ -1276,7 +1276,7 @@ FpXQ_sqrtl(GEN a, GEN l, GEN T ,GEN p , GEN q, long e, GEN r, GEN y, GEN m)
     if (k==e) { avma=av; return NULL; }
     p2 = FpXQ_mul(z,m,T,p);
     for (i=1; !gcmp1(p2); i++) p2 = FpXQ_mul(p2,m,T,p);/*TODO: BS/GS instead*/
-    p1= FpXQ_pow(y, modii(mulsi(i,gpowgs(l,e-k-1)), q), T,p);
+    p1= FpXQ_pow(y, modii(mulsi(i,powiu(l,e-k-1)), q), T,p);
     m = FpXQ_pow(m,utoipos(i),T,p);
     e = k;
     v = FpXQ_mul(p1,v,T,p);
@@ -1313,7 +1313,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
   if (gcmp1(n)) {if (zetan) *zetan=gen_1;return gcopy(a);}
   if (gcmp0(a)) {if (zetan) *zetan=gen_1;return gen_0;}
 
-  q = addsi(-1, gpowgs(p,degpol(T)));
+  q = addsi(-1, powiu(p,degpol(T)));
   m = bezout(n,q,&u1,&u2);
   if (!equalii(m,n)) a = FpXQ_pow(a, modii(u1,q), T,p);
   if (zetan) z = polun[varn(T)];
@@ -1329,7 +1329,7 @@ GEN FpXQ_sqrtn(GEN a, GEN n, GEN T, GEN p, GEN *zetan)
       if(DEBUGLEVEL>=6) (void)timer2();
       y = fflgen(l,e,r,T,p,&zeta);
       if(DEBUGLEVEL>=6) msgtimer("fflgen");
-      if (zetan) z = FpXQ_mul(z, FpXQ_pow(y,gpowgs(l,e-j),T,p), T,p);
+      if (zetan) z = FpXQ_mul(z, FpXQ_pow(y,powiu(l,e-j),T,p), T,p);
       for (; j; j--)
       {
 	a = FpXQ_sqrtl(a,l,T,p,q,e,r,y,zeta);
@@ -3240,7 +3240,7 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   R = ZY_ZXY_resultant(A, B0, lambda);
   if (delvar) (void)delete_var();
   setvarn(R, v); a = leading_term(A);
-  if (!gcmp1(a)) R = gdiv(R, gpowgs(a, dB));
+  if (!gcmp1(a)) R = gdiv(R, powiu(a, dB));
   return gerepileupto(av, R);
 }
 
@@ -3256,7 +3256,7 @@ static GEN
 trivial_case(GEN A, GEN B)
 {
   long d;
-  if (typ(A) == t_INT) return gpowgs(A, degpol(B));
+  if (typ(A) == t_INT) return powiu(A, degpol(B));
   d = degpol(A);
   if (d == 0) return trivial_case((GEN)A[2],B);
   if (d < 0) return gen_0;
@@ -3345,7 +3345,7 @@ ZX_QX_resultant(GEN A, GEN B)
   n = numer(c);
   d = denom(c); if (is_pm1(d)) d = NULL;
   R = ZX_resultant_all(A, B, d, 0);
-  if (!is_pm1(n)) R = mulii(R, gpowgs(n, degpol(A)));
+  if (!is_pm1(n)) R = mulii(R, powiu(n, degpol(A)));
   return gerepileuptoint(av, R);
 }
 

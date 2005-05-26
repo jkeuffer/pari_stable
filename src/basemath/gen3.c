@@ -1907,7 +1907,7 @@ gtrunc(GEN x)
       if (!v) return gcopy((GEN)x[4]);
       if (v>0)
       { /* here p^v is an integer */
-        av = avma; y = gpowgs((GEN)x[2],v);
+        av = avma; y = powiu((GEN)x[2],v);
         return gerepileuptoint(av, mulii(y,(GEN)x[4]));
       }
       y=cgetg(3,t_FRAC);

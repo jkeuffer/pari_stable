@@ -2220,7 +2220,7 @@ compute_R(GEN lambda, GEN z, GEN *ptL, GEN *ptkR)
   H = hnfall_i(L, NULL, 1); r = lg(H)-1;
 
   /* tentative regulator */
-  R = gmul(*ptkR, gdiv(dethnf_i(H), gpowgs(den, r)));
+  R = gmul(*ptkR, gdiv(dethnf_i(H), powiu(den, r)));
   c = gtodouble(gmul(R,z)); /* should be n (= 1 if we are done) */
   if (DEBUGLEVEL)
   {

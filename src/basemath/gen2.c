@@ -1227,7 +1227,7 @@ padic_to_Fp(GEN x, GEN Y) {
   if (vx >= vy) return gen_0;
   z = (GEN)x[4];
   if (!signe(z) || vy > vx + precp(x)) err(operi,"",x, gmodulsg(1,Y));
-  if (vx) z = mulii(z, gpowgs((GEN)x[2],vx));
+  if (vx) z = mulii(z, powiu((GEN)x[2],vx));
   return remii(z, Y);
 }
 ulong
@@ -1240,7 +1240,7 @@ padic_to_Fl(GEN x, ulong Y) {
   if (vx >= vy) return 0;
   z = (GEN)x[4];
   if (!signe(z) || vy > vx + precp(x)) err(operi,"",x, mkintmodu(1,Y));
-  if (vx) z = mulii(z, gpowgs((GEN)x[2],vx));
+  if (vx) z = mulii(z, powiu((GEN)x[2],vx));
   return umodiu(z, Y);
 }
 

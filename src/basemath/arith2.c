@@ -918,7 +918,7 @@ factoru_pow(ulong n)
   {
     p[i] = itou(gel(P,i));
     e[i] = itou(gel(E,i));
-    c[i] = itou(gpowgs(gel(P,i), e[i]));
+    c[i] = itou(powiu(gel(P,i), e[i]));
   }
   avma = lbot; return gerepileupto(ltop,f);
 }
@@ -1116,7 +1116,7 @@ phi(GEN n)
     v = Z_lvalrem_stop(n, p, &stop);
     if (v) {
       m = mulis(m, p-1);
-      if (v > 2) m = mulii(m, gpowgs(utoipos(p), v-1));
+      if (v > 2) m = mulii(m, powuu(p, v-1));
       else if (v == 2) m = mulis(m, p);
     }
     if (stop) { 
@@ -1240,20 +1240,20 @@ sumdivk(GEN n, long k)
     if (v)
     {
       long i;
-      GEN pk = gpowgs(utoipos(p),k), m1 = addsi(1,pk);
+      GEN pk = powuu(p,k), m1 = addsi(1,pk);
       for (i = 1; i < v; i++) m1 = addsi(1, mulii(pk,m1));
       m = mulii(m1,m);
     }
     if (stop)
     {
-      if (!is_pm1(n)) m = mulii(m, addsi(1, gpuigs(n,k)));
+      if (!is_pm1(n)) m = mulii(m, addsi(1, powiu(n,k)));
       goto fin;
     }
   }
-  if (BSW_psp(n)) { m = mulii(m, addsi(1, gpuigs(n,k))); goto fin; }
+  if (BSW_psp(n)) { m = mulii(m, addsi(1, powiu(n,k))); goto fin; }
   m = mulii(m, ifac_sumdivk(n, k, decomp_default_hint));
  fin:
-  if (k1 < 0) m = gdiv(m, gpowgs(n1,k));
+  if (k1 < 0) m = gdiv(m, powiu(n1,k));
   return gerepileupto(av,m);
 }
 

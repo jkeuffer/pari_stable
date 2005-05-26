@@ -2375,7 +2375,7 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
     { resbyte = 1; exponent = 3; }
 
   y = mpround( sqrtnr(itor(x, 3 + (lx-2) / exponent), exponent) );
-  if (!equalii(gpowgs(y, exponent), x))
+  if (!equalii(powiu(y, exponent), x))
   {
     if (DEBUGLEVEL >= 5)
     {
@@ -2449,7 +2449,7 @@ is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
   if (DEBUGLEVEL>4) fprintferr("OddPwrs: passed modular checks\n");
   /* go to the horse's mouth... */
   y = mpround( sqrtnr(itor(x, 3 + (lx-2) / p), p) );
-  if (!equalii(gpowgs(y, p), x)) {
+  if (!equalii(powiu(y, p), x)) {
     if (DEBUGLEVEL>4) fprintferr("\tBut it wasn't a pure power.\n");
     avma = av; return 0;
   }
@@ -3732,7 +3732,7 @@ ifac_totient(GEN n, long hint)
       if (here[1] == (long)gen_2)
 	phi = mulii(phi, (GEN)*here);
       else
-	phi = mulii(phi, gpowgs((GEN)*here, itos((GEN)here[1]) - 1));
+	phi = mulii(phi, powiu((GEN)*here, itou((GEN)here[1]) - 1));
     }
     here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
@@ -3829,7 +3829,7 @@ ifac_sumdivk(GEN n, long k, long hint)
   while (here != gen_1)
   {
     exponent = itos((GEN)here[1]);
-    q = gpowgs((GEN)*here, k);
+    q = powiu((GEN)*here, k);
     contrib = addsi(1, q);
     for (; exponent > 1; exponent--)
       contrib = addsi(1, mulii(q, contrib));

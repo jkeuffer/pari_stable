@@ -545,10 +545,10 @@ finda(Cache *Cp, GEN N, long pk, long p)
   }
   else
   {
-    GEN gp = utoipos(p), ph, b, q;
+    GEN ph, b, q;
     ulong u = 2;
-    long v = Z_pvalrem(addis(N,-1), gp, &q);
-    ph = gpowgs(gp, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
+    long v = Z_lvalrem(addis(N,-1), p, &q);
+    ph = powuu(p, v-1); pv = mulis(ph, p); /* N - 1 = p^v q */ 
     if (p > 2)
     {
       for (;;u++)

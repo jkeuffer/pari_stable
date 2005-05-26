@@ -1816,7 +1816,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     }
     /* Z is the upper bound for the L^1 norm of the polynomial, 
        ie. N^delta if B = N, B^delta otherwise */ 
-    if (B != N) Z = gpowgs(B, delta); else Z = N0; 
+    if (B != N) Z = powiu(B, delta); else Z = N0; 
 
     if (DEBUGLEVEL >= 2)
     {
@@ -2751,7 +2751,7 @@ plindep(GEN x)
       err(talker,"inconsistent primes in plindep");
   }
   if (!p) err(talker,"not a p-adic vector in plindep");
-  v = ggval(x,p); pn = gpowgs(p,prec);
+  v = ggval(x,p); pn = powiu(p,prec);
   if (v != 0) x = gmul(x, gpowgs(p, -v));
   x = RgV_to_FpV(x, pn);
 

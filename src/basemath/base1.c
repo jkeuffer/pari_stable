@@ -329,8 +329,8 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
       v = Z_pval((GEN)a[j], p);
       while (v + d < k * j) { k++; d += n; }
     }
-    pk = gpowgs(p,k); j0 = d/k;
-    pku = gpowgs(p,d - k*j0);
+    pk = powiu(p,k); j0 = d/k;
+    pku = powiu(p,d - k*j0);
     /* a[j] *= p^(d - kj) */
     for (j=j0; j>=0; j--)
     {
@@ -338,7 +338,7 @@ primitive_pol_to_monic(GEN pol, GEN *ptlead)
       a[j] = lmulii((GEN)a[j], pku);
     }
     j0++;
-    pku = gpowgs(p,k*j0 - d);
+    pku = powiu(p,k*j0 - d);
     /* a[j] /= p^(kj - d) */
     for (j=j0; j<=n; j++)
     {
@@ -769,7 +769,7 @@ nfiso0(GEN a, GEN b, long fliso)
        || !gequal((GEN)nfa[3],(GEN)nfb[3])) return gen_0;
     }
     else
-      if (!dvdii((GEN)nfb[3], gpowgs((GEN)nfa[3],n/m))) return gen_0;
+      if (!dvdii((GEN)nfb[3], powiu((GEN)nfa[3],n/m))) return gen_0;
   }
   else
   {
@@ -782,10 +782,10 @@ nfiso0(GEN a, GEN b, long fliso)
     else
     {
       long q=n/m;
-      GEN fa=factor(da), ex=(GEN)fa[2];
+      GEN fa=decomp(da), ex=(GEN)fa[2];
       fa=(GEN)fa[1]; lx=lg(fa);
       for (i=1; i<lx; i++)
-        if (mod2((GEN)ex[i]) && !dvdii(db,gpowgs((GEN)fa[i],q)))
+        if (mod2((GEN)ex[i]) && !dvdii(db, powiu((GEN)fa[i],q)))
           { avma=av; return gen_0; }
     }
   }
@@ -1430,7 +1430,7 @@ get_nfindex(GEN bas)
   long n = lg(bas)-1;
   GEN d, mat = RgXV_to_RgM(Q_remove_denom(bas, &d), n);
   if (!d) { avma = av; return gen_1; }
-  return gerepileuptoint(av, diviiexact(gpowgs(d, n), det(mat)));
+  return gerepileuptoint(av, diviiexact(powiu(d, n), det(mat)));
 }
 
 void
@@ -2181,7 +2181,7 @@ dirzetak0(GEN nf, long N0)
     }
     for (i=1; i<lx; i++)
     {
-      GEN N = gpowgs(court, vect[i]); /* N = court^f */
+      GEN N = powiu(court, vect[i]); /* N = court^f */
       if (cmpiu(N, N0) > 0) break;
 
       q = p = (ulong)N[2]; limk = N0/q;
@@ -2225,7 +2225,7 @@ zeta_get_limx(long r1, long r2, long bit)
   c1 = mulrs(powrfrac(real2n(1, DEFAULTPREC), -2*r2, N), N);
 
   p1 = gpowgs(Pi2n(1, DEFAULTPREC), r - 1);
-  p2 = gmul2n(mpmul(gpowgs(utoipos(N),r), p1), -r2);
+  p2 = gmul2n(mpmul(powuu(N,r), p1), -r2);
   c0 = sqrtr( mpdiv(p2, gpowgs(c1, r+1)) );
 
   A0 = logr_abs( gmul2n(c0, bit) ); p2 = gdiv(A0, c1);
@@ -2265,7 +2265,7 @@ zeta_get_i0(long r1, long r2, long bit, GEN limx)
 {
   pari_sp av = avma;
   GEN B = gmul(sqrtr( gdiv(gpowgs(mppi(DEFAULTPREC), r2-3), limx) ),
-               gmul2n(gpowgs(utoipos(5), r1), bit + r2));
+               gmul2n(powuu(5, r1), bit + r2));
   long i0 = get_i0(r1, r2, B, limx);
   if (DEBUGLEVEL>1) { fprintferr("i0 = %ld\n",i0); flusherr(); }
   avma = av; return i0;
@@ -2361,8 +2361,8 @@ initzeta(GEN pol, long prec)
     for (   ; j<R; j++) p1[j] = (long)gen_0;
     i++;
 
-    c_even = gdiv(c_even,gmul(gpowgs(utoipos(i),r),gpowgs(utoipos(2*i-1),r2)));
-    c_odd  = gdiv(c_odd, gmul(gpowgs(utoipos(i),r2),gpowgs(utoipos(2*i+1),r)));
+    c_even = gdiv(c_even,gmul(powuu(i,r),powuu(2*i-1,r2)));
+    c_odd  = gdiv(c_odd, gmul(powuu(i,r2),powuu(2*i+1,r)));
     c_even = gmul2n(c_even,-r2);
     c_odd  = gmul2n(c_odd,r1-r2);
     if (r1 & 1) { c_even = gneg_i(c_even); c_odd = gneg_i(c_odd); }
@@ -2598,7 +2598,7 @@ gzetakall(GEN nfz, GEN s, long flag, long prec2)
     cs = gexp(gmul(cstlog,s),prec);
     var1 = gmul(Pi,s);
     gammaunmoins = gdiv(Pi, gmul(gsin(var1,prec),gammas));
-    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpui(gen_2,gsub(s,gen_1),prec)),
+    gammaunmoins2= gdiv(gmul(gmul(sqrtr(Pi),gpow(gen_2,gsub(s,gen_1),prec)),
                              gammas2),
                         gmul(gcos(gmul2n(var1,-1),prec),gammas));
     var1 = var2 = gen_1;

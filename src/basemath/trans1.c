@@ -332,7 +332,7 @@ _muli(void *data /* ignored */, GEN x, GEN y) { (void)data; return mulii(x,y); }
  * to s (= 1,-1). Makes life easier for caller, which otherwise might do a
  * setsigne(gen_1 / gen_m1) */
 static GEN
-powiu(GEN a, ulong N, long s)
+powiu_sign(GEN a, ulong N, long s)
 {
   pari_sp av;
   GEN y;
@@ -348,9 +348,25 @@ powiu(GEN a, ulong N, long s)
   y = leftright_pow_u(a, N, NULL, &_sqri, &_muli);
   setsigne(y,s); return gerepileuptoint(av, y);
 }
-/* assume pr in primedec format */
-GEN 
-pr_norm(GEN pr) { GEN f = gel(pr,4); return powiu(gel(pr,1), (ulong)f[2], 1); }
+/* a^N */
+GEN
+powiu(GEN a, ulong N)
+{
+  long s;
+  if (!N) return gen_1;
+  s = signe(a);
+  if (!s) return gen_0;
+  return powiu_sign(a, N, (s < 0 && odd(N))? -1: 1);
+}
+GEN
+powuu(ulong p, ulong N)
+{
+  long P[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
+  if (!N) return gen_1;
+  if (!p) return gen_0;
+  P[2] = p;
+  return powiu_sign(P, N, 1);
+}
 
 /* assume p^k is SMALL */
 ulong
@@ -480,7 +496,7 @@ powps(GEN x, long n)
   if (v == 0) mod = icopy(mod);
   else
   {
-    mod = mulii(mod, gpowgs(p,v));
+    mod = mulii(mod, powiu(p,v));
     mod = gerepileuptoint((pari_sp)y, mod);
   }
   y[1] = evalprecp(precp(x) + v) | evalvalp(e);
@@ -513,7 +529,7 @@ powp(GEN x, GEN n)
   if (v == 0) mod = icopy(mod);
   else
   {
-    mod = mulii(mod, gpowgs(p,v));
+    mod = mulii(mod, powiu(p,v));
     mod = gerepileuptoint((pari_sp)y, mod);
   }
   y[1] = evalprecp(precp(x) + v) | evalvalp(0);
@@ -544,13 +560,13 @@ gpowgs(GEN x, long n)
         return gen_0;
       }
       s = (sx < 0 && odd(n))? -1: 1;
-      if (n > 0) return powiu(x, n, s);
+      if (n > 0) return powiu_sign(x, n, s);
       t = (s > 0)? gen_1: gen_m1;
       if (is_pm1(x)) return t;
       /* n < 0, |x| > 1 */
       y = cgetg(3,t_FRAC);
       y[1] = (long)t;
-      y[2] = (long)powiu(x, -n, 1); /* force denominator > 0 */
+      y[2] = (long)powiu_sign(x, -n, 1); /* force denominator > 0 */
       return y;
     }
     case t_INTMOD:
@@ -568,12 +584,12 @@ gpowgs(GEN x, long n)
       s = (sx < 0 && odd(n))? -1: 1;
       if (n < 0) {
         n = -n;
-        if (is_pm1(a)) return powiu(b, n, s); /* +-1/x[2] inverts to t_INT */
+        if (is_pm1(a)) return powiu_sign(b, n, s); /* +-1/x[2] inverts to t_INT */
         swap(a, b);
       }
       y = cgetg(3, t_FRAC);
-      y[1] = (long)powiu(a, n, s);
-      y[2] = (long)powiu(b, n, 1);
+      y[1] = (long)powiu_sign(a, n, s);
+      y[2] = (long)powiu_sign(b, n, 1);
       return y;
     }
     case t_PADIC: return powps(x, n);
@@ -981,7 +997,7 @@ GEN
 padic_sqrtn_ram(GEN x, long e)
 {
   pari_sp ltop=avma;
-  GEN a, p = (GEN)x[2], n = gpowgs(p,e);
+  GEN a, p = (GEN)x[2], n = powiu(p,e);
   long v = valp(x);
   if (v)
   {

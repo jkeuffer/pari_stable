@@ -764,7 +764,7 @@ bernfracspec(long k)
     b = gadd(b, gdivgs(mulii(c,s), n));
     if (n == K) return gerepileupto(av, b);
 
-    N[2] = (long)n; s = addii(s, gpowgs(N,k));
+    N[2] = (long)n; s = addii(s, powiu(N,k));
     if (low_stack(lim, stack_lim(av,2)))
     {
       if (DEBUGMEM>1) err(warnmem,"bernfrac");

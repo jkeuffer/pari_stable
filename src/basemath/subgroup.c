@@ -283,7 +283,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
   {
   case b_MAX: /* upper bound */
     wmin = (long) (wG - (log(gtodouble(T->bound)) / log(gtodouble(p))));
-    if (cmpii(gpowgs(p, wG - wmin), T->bound) > 0) wmin++;
+    if (cmpii(powiu(p, wG - wmin), T->bound) > 0) wmin++;
     break;
   case b_EXACT: /* exact value */
     wmin = wmax = wG - Z_pval(T->bound, p);
@@ -319,7 +319,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
       if (T->subq && T->bound) /* G not a p-group */
       {
         pari_sp av = avma;
-        GEN indexH = gpowgs(p, wG - w);
+        GEN indexH = powiu(p, wG - w);
         GEN B = divii(T->bound, indexH);
         k = 1;
         for (i=1; i<lsubq; i++)
@@ -342,7 +342,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         }
         for (j=1; j<=len(Mp); j++)
         {
-          p1 = mulii(p1, gpuigs(p, Mp[j+1]*(Lp[j]-Mp[j])));
+          p1 = mulii(p1, powiu(p, Mp[j+1]*(Lp[j]-Mp[j])));
           p1 = mulii(p1, gcoeff(BINMAT, Lp[j]-Mp[j+1]+1, Mp[j]-Mp[j+1]+1));
         }
         fprintferr("  alpha_lambda(mu,p) = %Z\n",p1);

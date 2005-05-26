@@ -302,7 +302,7 @@ Baker(baker_s *BS)
   c9 = gmul(c9,hb0);
   /* Multiply c9 by the "constant" factor */
   c9 = gmul(c9, gmul(mulri(mulsr(18,mppi(prec)), int2n(5*(4+r))),
-                     gmul(gmul(mpfact(r+3), gpowgs(mulis(BS->bak,r+2), r+3)),
+                     gmul(gmul(mpfact(r+3), powiu(mulis(BS->bak,r+2), r+3)),
                           glog(mulis(BS->bak,2*(r+2)),prec))));
   c9 = gprec_w(myround(c9, 1), DEFAULTPREC);
   /* Compute B0 according to Lemma 2.3.3 */
@@ -431,7 +431,7 @@ static void
 check_sol(GEN x, GEN y, GEN P, GEN rhs, GEN *pS)
 {
   if (gcmp0(y))
-  { if (gequal(gpowgs(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
+  { if (equalii(powiu(x,degpol(P)), rhs)) add_sol(pS, x, gen_0); }
   else
   { if (gequal(poleval(RgX_rescale(P,y),x), rhs)) add_sol(pS, x, y); }
 }
@@ -452,7 +452,7 @@ CheckSol(GEN *pS, GEN z1, GEN z2, GEN P, GEN rhs, GEN ro)
   if (e <= -13)
   {
     check_sol(     x ,      y,  P,rhs,pS);
-    check_sol(gneg(x), gneg(y), P,rhs,pS);
+    check_sol(negi(x), negi(y), P,rhs,pS);
   }
   return 1;
 }
@@ -539,9 +539,9 @@ SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
 
   /* x = 0 first */
   Y = ground(sqrtnRHS);
-  if (gequal(gpowgs(Y,n), rhs)) add_sol(&S, Y, gen_0);
+  if (gequal(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
   Y = negi(Y);
-  if (gequal(gpowgs(Y,n), rhs)) add_sol(&S, Y, gen_0);
+  if (gequal(powiu(Y,n), rhs)) add_sol(&S, Y, gen_0);
 
   /* x != 0 */
   P = cgetg(lg(poly), t_POL); P[1] = poly[1]; 

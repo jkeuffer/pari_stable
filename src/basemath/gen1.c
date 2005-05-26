@@ -365,7 +365,7 @@ addpp(GEN x, GEN y)
   ry = precp(y);
   if (d) /* v(x) < v(y) */
   {
-    r = d+ry; z = gpowgs(p,d);
+    r = d+ry; z = powiu(p,d);
     if (r < rx) mod = mulii(z,(GEN)y[3]); else { r = rx; mod = (GEN)x[3]; }
     u = addii((GEN)x[4], mulii(z,(GEN)y[4]));
     u = remii(u, mod);
@@ -380,7 +380,7 @@ addpp(GEN x, GEN y)
     }
     if (c)
     {
-      mod = diviiexact(mod, gpowgs(p,c));
+      mod = diviiexact(mod, powiu(p,c));
       r -= c;
       e += c;
     }
@@ -415,7 +415,7 @@ addQp(GEN x, GEN y)
 
   if (d > 0)
   {
-    q = gpowgs(p,d);
+    q = powiu(p,d);
     mod = mulii(mod, q);
     u   = mulii(u, q);
     if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, Fp_inv(p2,mod));
@@ -423,7 +423,7 @@ addQp(GEN x, GEN y)
   }
   else if (d < 0)
   {
-    q = gpowgs(p,-d);
+    q = powiu(p,-d);
     if (tx != t_INT && !is_pm1(p2)) p1 = mulii(p1, Fp_inv(p2,mod));
     p1 = mulii(p1, q);
     u = addii(u, p1);
@@ -440,7 +440,7 @@ addQp(GEN x, GEN y)
     }
     if (c)
     {
-      mod = diviiexact(mod, gpowgs(p,c));
+      mod = diviiexact(mod, powiu(p,c));
       r -= c;
       e += c;
     }

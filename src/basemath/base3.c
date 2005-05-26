@@ -1222,7 +1222,7 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
     avma = av; return gen_0;
   }
   ordp = subis(p, 1);
-  ord = T? subis(gpowgs(p,degpol(T)), 1): p;
+  ord = T? subis(powiu(p,degpol(T)), 1): p;
   if (equalii(a, ordp)) /* -1 */
     return gerepileuptoint(av, shifti(ord,-1));
 
@@ -1303,7 +1303,7 @@ ff_PHlog(GEN a, GEN g, GEN T, GEN p)
   if (typ(a) == t_INT)
     return gerepileuptoint(av, ff_PHlog_Fp(a,g,T,p));
   /* f > 1 ==> T != NULL */
-  ord = subis(gpowgs(p, degpol(T)), 1);
+  ord = subis(powiu(p, degpol(T)), 1);
   fa = factor(ord);
   ex = (GEN)fa[2];
   fa = (GEN)fa[1];
@@ -1419,7 +1419,7 @@ GEN
 FpXQ_gener(GEN T, GEN p)
 {
   long i,j, k, vT = varn(T), f = degpol(T);
-  GEN g, L, pf_1 = subis(gpowgs(p, f), 1);
+  GEN g, L, pf_1 = subis(powiu(p, f), 1);
   pari_sp av0 = avma, av;
 
   L = (GEN)decomp(pf_1)[1];
@@ -1476,7 +1476,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
 
   list = cget1(e+1, t_VEC);
   y = cgetg(6,t_VEC); appendL(list, y);
-  y[1] = (long)mkvec(addis(gpowgs(p,f), -1));
+  y[1] = (long)mkvec(addis(powiu(p,f), -1));
   y[2] = (long)mkvec(g);
   y[3] = (long)mkvec(g0);
   y[4] = (long)mkvec(zsigne(nf,g0,arch));

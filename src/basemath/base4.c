@@ -758,7 +758,7 @@ idealval(GEN nf, GEN ix, GEN P)
     do_mul = 1;
   }
   B = cgetg(N+1,t_MAT);
-  pk = gpowgs(p, (long)ceil((double)vmax / e));
+  pk = powiu(p, (ulong)ceil((double)vmax / e));
   /* B[1] not needed: v_pr(ix[1]) = v_pr(ix \cap Z) is known already */
   B[1] = (long)gen_0; /* dummy */
   for (j=2; j<=N; j++)
@@ -1520,6 +1520,13 @@ idealmul(GEN nf, GEN x, GEN y)
   res[1]=(long)p1; res[2]=(long)ax; return res;
 }
 
+/* assume pr in primedec format */
+GEN 
+pr_norm(GEN pr) {
+  GEN f = gel(pr,4);
+  return powiu(gel(pr,1), (ulong)f[2]);
+}
+
 /* norm of an ideal */
 GEN
 idealnorm(GEN nf, GEN x)
@@ -1532,7 +1539,7 @@ idealnorm(GEN nf, GEN x)
   switch(idealtyp(&x,&y))
   {
     case id_PRIME:
-      return gpowgs((GEN)x[1], itos((GEN)x[4]));
+      return pr_norm(x);
     case id_PRINCIPAL:
       x = gnorm(basistoalg(nf,x)); break;
     default:

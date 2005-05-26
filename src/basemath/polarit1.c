@@ -511,7 +511,7 @@ FqX_split_part(GEN f, GEN T, GEN p)
   GEN z, X = polx[varn(f)];
   if (n <= 1) return f;
   f = FpXQX_red(f, T, p);
-  z = FpXQYQ_pow(X, gpowgs(p, degpol(T)), f, T, p);
+  z = FpXQYQ_pow(X, powiu(p, degpol(T)), f, T, p);
   z = gsub(z, X);
   return FqX_gcd(z, f, T, p);
 }
@@ -687,7 +687,7 @@ FqX_nbfact(GEN u, GEN T, GEN p)
   pari_sp av = avma;
   GEN vker;
   if (!T) return FpX_nbfact(u, p);
-  vker = FqX_Berlekamp_ker(u, T, gpowgs(p, degpol(T)), p);
+  vker = FqX_Berlekamp_ker(u, T, powiu(p, degpol(T)), p);
   avma = av; return lg(vker)-1;
 }
 
@@ -1362,7 +1362,7 @@ static GEN
 ZV_to_ZpV(GEN z, GEN p, long prec)
 {
   long i, l = lg(z);
-  GEN Z = cgetg(l, typ(z)), q = gpowgs(p, prec);
+  GEN Z = cgetg(l, typ(z)), q = powiu(p, prec);
   for (i=1; i<lg(z); i++) gel(Z,i) = Z_to_Zp(gel(z,i),p,q,prec);
   return Z;
 }
@@ -1392,7 +1392,7 @@ static GEN
 ZXV_to_ZpXQV(GEN z, GEN T, GEN p, long prec)
 {
   long i, l = lg(z);
-  GEN Z = cgetg(l, typ(z)), q = gpowgs(p, prec);
+  GEN Z = cgetg(l, typ(z)), q = powiu(p, prec);
   T = gcopy(T);
   for (i=1; i<lg(z); i++) gel(Z,i) = mkpolmod(ZX_to_ZpX(gel(z,i),p,q,prec),T);
   return Z;
@@ -1445,7 +1445,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
   }
 
   f = poleval(f, gadd(a, gmul(p,polx[varn(f)])));
-  f = gdivexact(f, gpowgs(p,ggval(f, p)));
+  f = gdivexact(f, powiu(p,ggval(f, p)));
   z = cgetg(degpol(f)+1,t_COL);
 
   R = FpX_roots(f, p);
@@ -1645,7 +1645,7 @@ ZpX_liftroots(GEN f, GEN S, GEN q, long e)
     pari_sp av = avma;
     GEN z = gel(f, d+1);/* -trace(roots) */
     for(i=1; i<n;i++) z = addii(z, gel(y,i));
-    z = modii(negi(z), gpowgs(q,e));
+    z = modii(negi(z), powiu(q,e));
     gel(y,n) = gerepileuptoint(av,z);
   }
   return y;
@@ -1729,11 +1729,11 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
   }
   /* TODO: need RgX_RgYQX_compo ? */
   f = lift_intern(poleval(f, gadd(mkpolmod(a,T), gmul(p, polx[varn(f)]))));
-  f = gdiv(f, gpowgs(p, ggval(f,p)));
+  f = gdiv(f, powiu(p, ggval(f,p)));
   z = cgetg(degpol(f)+1,t_COL);
 
 #if 1 /* TODO: need a public FqX_roots */
-  lR = FqX_split_deg1(&R, FqX_red(f, T, p), gpowgs(p, degpol(T)), T, p) + 1;
+  lR = FqX_split_deg1(&R, FqX_red(f, T, p), powiu(p, degpol(T)), T, p) + 1;
   R = roots_from_deg1(FqX_split_roots(R, T, p, NULL));
 #else
   R = FqX_factor(FqX_red(f, T, p), T, p);
@@ -1861,7 +1861,7 @@ padicff(GEN x,GEN p,long pr)
 static GEN
 padic_trivfact(GEN x, GEN p, long r)
 {
-  return mkmat2(mkcol(ZX_to_ZpX_normalized(x, p, gpowgs(p,r), r)),
+  return mkmat2(mkcol(ZX_to_ZpX_normalized(x, p, powiu(p,r), r)),
                 mkcol(gen_1));
 }
 
@@ -1928,7 +1928,7 @@ ZX_monic_factorpadic(GEN f, GEN p, long prec)
     w = (GEN)fa[1];
     if (expo_is_squarefree((GEN)fa[2]))
     { /* no repeated factors: Hensel lift */
-      p1 = hensel_lift_fact(fx, w, NULL, p, gpowgs(p,pr), pr);
+      p1 = hensel_lift_fact(fx, w, NULL, p, powiu(p,pr), pr);
       p2 = utoipos(ex[i]);
       for (k=1; k<lg(p1); k++,j++)
       {
@@ -1982,7 +1982,7 @@ factorpadic4(GEN f,GEN p,long prec)
   E = gel(y,2); l = lg(P);
   if (lead)
     for (i=1; i<l; i++) gel(P,i) = primpart( RgX_unscale(gel(P,i), lead) );
-  ppow = gpowgs(p,prec);
+  ppow = powiu(p,prec);
   for (i=1; i<l; i++)
   {
     GEN t = gel(P,i);
@@ -2197,7 +2197,7 @@ polfnf(GEN a, GEN T)
 static GEN
 FqX_frob_deflate(GEN f, GEN T, GEN p)
 {
-  GEN F = poldeflate_i(f, itos(p)), frobinv = gpowgs(p, degpol(T)-1);
+  GEN F = poldeflate_i(f, itos(p)), frobinv = powiu(p, degpol(T)-1);
   long i, l = lg(F);
   for (i=2; i<l; i++) gel(F,i) = Fq_pow(gel(F,i), frobinv, T,p);
   return F;
@@ -2363,7 +2363,7 @@ FqX_split_equal(GEN L, GEN S, GEN T, GEN p)
   long n = itos((GEN)L[1]);
   GEN u = (GEN)L[2], z = cgetg(n + 1, t_VEC);
   z[1] = (long)u;
-  FqX_split((GEN*)(z+1), degpol(u) / n, gpowgs(p, degpol(T)), S, T, p);
+  FqX_split((GEN*)(z+1), degpol(u) / n, powiu(p, degpol(T)), S, T, p);
   return z;
 }
 GEN
@@ -2454,7 +2454,7 @@ FqX_factor_i(GEN f, GEN T, GEN p)
   t = (GEN*)cgetg(d+1,t_VEC);
   E = cgetg(d+1, t_VECSMALL);
 
-  q = gpowgs(p, degpol(T));
+  q = powiu(p, degpol(T));
   e = nbfact = 1;
   pk = 1;
   f3 = NULL;

@@ -289,7 +289,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
       pinvpi = get_pinvpi(nf, fZ, p, pi, &vecpinvpi[j]);
       t = element_pow(nf, pinvpi, stoi(v));
       mulI = mulI? element_mul(nf, mulI, t): t;
-      t = gpowgs((GEN)pr[1], v);
+      t = powiu((GEN)pr[1], v);
       dmulI = dmulI? mulii(dmulI, t): t;
     }
 
@@ -312,7 +312,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
           pinvpi = get_pinvpi(nf, fZ, p, pi, &vecpinvpi[j]);
           t = element_pow(nf,pinvpi,stoi(v));
           LL = element_mul(nf, LL, t);
-          LL = gdiv(LL, gpowgs(p, v));
+          LL = gdiv(LL, powiu(p, v));
         }
         else
         {
@@ -591,7 +591,7 @@ minkowski_bound(GEN D, long N, long r2, long prec)
 {
   pari_sp av = avma;
   GEN p1;
-  p1 = gdiv(mpfactr(N,prec), gpowgs(utoipos(N),N));
+  p1 = gdiv(mpfactr(N,prec), powuu(N,N));
   p1 = gmul(p1, gpowgs(gdivsg(4,mppi(prec)), r2));
   p1 = gmul(p1, gsqrt(absi(D),prec));
   return gerepileupto(av, p1);
@@ -727,7 +727,7 @@ regulatorbound(GEN bnf)
 
   dK = absi((GEN)nf[3]);
   nf_get_sign(nf, &R1, &R2); R = R1+R2-1;
-  c1 = (!R2 && N<12)? int2n(N & (~1UL)): gpowgs(utoipos(N),N);
+  c1 = (!R2 && N<12)? int2n(N & (~1UL)): powuu(N,N);
   if (cmpii(dK,c1) <= 0) return dft_bound();
 
   p1 = gsqr(glog(gdiv(dK,c1),DEFAULTPREC));
@@ -891,9 +891,9 @@ compute_M0(GEN M_star,long N)
       { /* n3 > N/3 >= n1 */
 	long k = N - 2*n2;
 	p2 = gsub(M_star, gmulgs(X,n2));
-	p3 = gmul(gpowgs(stoi(k),k), 
+	p3 = gmul(powuu(k,k), 
                   gpowgs(gsubgs(gmul(M_star,p2),k*k),n2));
-	pol = gsub(p3, gmul(gmul(gpowgs(stoi(n2),n2),gpowgs(X,n2)),
+	pol = gsub(p3, gmul(gmul(powuu(n2,n2),gpowgs(X,n2)),
                             gpowgs(p2, N-n2)));
 	r = roots(pol, DEFAULTPREC); lr = lg(r);
 	for (i=1; i<lr; i++)
@@ -1608,7 +1608,7 @@ Discrayabs(GEN bnr, GEN subgroup, long flag)
 
   nf = checknf(bnr);
   dkabs = absi((GEN)nf[3]);
-  clhray = itos((GEN)D[1]); p1 = gpowgs(dkabs, clhray);
+  clhray = itos((GEN)D[1]); p1 = powiu(dkabs, clhray);
   n = clhray * degpol(nf[1]);
   R1= clhray * itos((GEN)D[2]);
   dk = (GEN)D[3];
@@ -1864,7 +1864,7 @@ get_discray(disc_data *D, GEN V, GEN x, GEN z, long N)
     GEN pr = gel(P,k), p = gel(pr,1);
     long e, ep = E[k], f = itos(gel(pr,4));
     long S = 0, norm = N, Npr, clhss;
-    Npr = itos(gpowgs(p,f));
+    Npr = itos(powiu(p,f));
     for (e=1; e<=ep; e++)
     {
       GEN fad;
@@ -2141,7 +2141,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
     for (j=1; j<lg(fa); j++)
     {
       GEN pr = gel(fa,j);
-      long prcode, q, f = itos(gel(pr,4)), Q = itos_or_0(gpowgs(p,f));
+      long prcode, q, f = itos(gel(pr,4)), Q = itos_or_0(powiu(p,f));
       if (!Q || Q > bound) continue;
 
       /* p, f-1, j-1 as a single integer in "base degk" (f,j <= degk)*/
@@ -2240,7 +2240,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
           long e, ep = E[k], pf = P[k] / degk, f = (pf%degk) + 1;
           long S = 0, normi = i, Npr, clhss;
           p = utoipos(pf / degk);
-          Npr = itos(gpowgs(p,f));
+          Npr = itos(powiu(p,f));
           for (e=1; e<=ep; e++)
           {
             GEN fad;
