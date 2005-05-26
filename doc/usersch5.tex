@@ -1247,7 +1247,9 @@ $\deg(z) < \deg \kbd{T}$.
 
   \kbd{Z}:  the integers $\Z$, implemented as \typ{INT}s.
 
-  \kbd{z}:  the integers $\Z$, implemented using (signed) \kbd{long}s
+  \kbd{z}:  the integers $\Z$, implemented using (signed) \kbd{long}s.
+
+  \kbd{n}:  the integers $\Z$, implemented using unsigned \kbd{long}s.
 
   \kbd{Q}:  the rational numbers $\Q$, implemented as \typ{INT}s and
 \typ{FRAC}s.
@@ -2048,6 +2050,8 @@ repeatedly called on the vector's coefficients.
 (yielding an \kbd{Flm}).
 
 \fun{GEN}{ZV_to_zv}{GEN z}, converts coefficients using \kbd{itos}
+
+\fun{GEN}{ZV_to_nv}{GEN z}, converts coefficients using \kbd{itou}
 
 \fun{GEN}{ZM_to_zm}{GEN z}, converts coefficients using \kbd{itos}
 
