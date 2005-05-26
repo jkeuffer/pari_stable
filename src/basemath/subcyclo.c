@@ -449,7 +449,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
       Vecmax(Vec((x+o)^d)=max{binomial(d,i)*o^i ;1<=i<=d} 
      */
     i=d-(1+d)/(1+o);
-    borne=mulii(binomial(utoipos(d),i),powiu(o,i));
+    borne=mulii(binomial(utoipos(d),i),powuu(o,i));
   }
   if (DEBUGLEVEL >= 4)
     fprintferr("Subcyclo: borne=%Z\n",borne);
