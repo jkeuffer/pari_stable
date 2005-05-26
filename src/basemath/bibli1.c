@@ -2963,6 +2963,9 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   pari_sp av0 = avma, av1, av, lim;
   double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
+  BORNE = gfloor(BORNE);
+  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) err(typeer, "minim00");
+
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
   {
@@ -3020,7 +3023,6 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   }
   else
   {
-    BORNE = gfloor(BORNE);
     BOUND = gtodouble(BORNE)+eps;
     maxnorm = 0.;
   }
