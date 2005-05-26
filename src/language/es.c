@@ -301,13 +301,13 @@ vpariputs(const char* format, va_list args)
   t = s = buf;
   if (nb)
   {
-    pariout_t T; _initout(&T,'g',-1,1,0, f_RAW);
+    pariout_t *T = GP_DATA? GP_DATA->fmt: &DFLT_OUTPUT;
     for(;;)
     {
       if (*t == '\003' && t[21] == '\003')
       {
         *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariOut->puts(s); gen_output((GEN)atol(t+1), &T);
+        pariOut->puts(s); gen_output((GEN)atol(t+1), T);
         t += 22; s = t;
         if (!--nb) break; 
       }

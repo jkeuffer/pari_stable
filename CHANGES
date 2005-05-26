@@ -57,6 +57,7 @@ BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
 BA  9- [GP2C] type-checking codes generated for some types was wrong.
    10- stray output: (a()= for(i=1,1, return);) a() --> 0
    11- qfminim & qfrep didn't check their arguments
+   12- [library:] pariputsf() and GP print() used different output formats
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
