@@ -1634,7 +1634,7 @@ fun_seq(char *t) /* lisseq0, simplified */
     if (br_res) return gerepilecopy(av, br_res);
     if (!z) { avma = av; return gnil; }
   }
-  return gerepilecopy(av, z);
+  return z == gnil? z: gerepilecopy(av, z);
 }
 
 /* p = NULL + array of variable numbers (longs) + function text */

@@ -55,6 +55,7 @@ BA  4- ellzeta(ellinit([0,0,0,0,1]),1) --> gerepile error
     7- ellminimalmodel(e).a2 was not always in {-1,0,1}
     8- check arguments in elllocalred
 BA  9- [GP2C] type-checking codes generated for some types was wrong.
+   10- stray output: (a()= for(i=1,1, return);) a() --> 0
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
