@@ -289,7 +289,7 @@ enum manage_var_t {
 #define ZX_sqr RgX_sqr
 
 #define zv_to_ZV(x)    (vecsmall_to_vec((x)))
-#define zv_to_ZC(x)    (vecsmall_to_col((x)))
+#define zc_to_ZC(x)    (vecsmall_to_col((x)))
 #define ZV_to_zv(x)    (vec_to_vecsmall((x)))
 #define zx_to_zv(x,y)  (Flx_to_Flv((x),(y)))
 #define zv_to_zx(x,y)  (Flv_to_Flx((x),(y)))

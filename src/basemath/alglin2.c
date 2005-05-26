@@ -2098,7 +2098,7 @@ zm_to_ZM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)zv_to_ZC((GEN)z[i]);
+  for (i=1; i<l; i++) x[i] = (long)zc_to_ZC((GEN)z[i]);
   return x;
 }
 
