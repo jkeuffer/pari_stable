@@ -927,7 +927,7 @@ dbasis(GEN p, GEN f, long mf, GEN a, GEN U)
   ha = pd = powiu(p,mf/2); pdp = mulii(pd,p);
   dU = U ? degpol(U): 0;
   b = cgetg(n, t_MAT); /* Z[a] + U/p Z[a] is maximal */
-  /* skip first column = gscalcol(pd,n) */
+  /* skip first column = [pd, 0,...,0] */
   for (i=1; i<n; i++)
   {
     if (i == dU)
@@ -1386,7 +1386,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   for (j = 1; j <= n; j++)
     h = FpX_gcd(h, gtopoly((GEN)G[j], v), p);
 
-  if (gcmp1(h)) { avma = av; return NULL; }
+  if (!degpol(h)) { avma = av; return NULL; }
   nu = get_nu(h, p, &l);
   if (l > 1) { avma = av; return NULL; }
   return gerepilecopy(av, nu);

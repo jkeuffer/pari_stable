@@ -255,8 +255,8 @@ or
 \fun{int}{is_const_t}{long t} \kbd{true} iff \kbd{t} is a scalar which is not
 \typ{POLMOD}.
 
-\subsec{Accessors and components}. The first two functions return \kbd{GEN}
-components as copies on the stack:
+\subsec{Accessors and components}.\label{se:accessors}
+The first two functions return \kbd{GEN} components as copies on the stack:
 
 \fun{GEN}{compo}{GEN x, long n} creates a copy of the \kbd{n}-th true
 component (i.e.\ not counting the codewords) of the object~\kbd{x}.
@@ -1422,7 +1422,8 @@ remainder $\kbd{A}(\kbd{a})$.
 \fun{GEN}{FpX_rem}{GEN x, GEN y, GEN p} returns the remainder \kbd{x} mod
 \kbd{y}
 
-\fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns GCD(\kbd{x},\kbd{y}).
+\fun{GEN}{FpX_gcd}{GEN x, GEN y, GEN p} returns a (not necessarily monic)
+greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{FpX_extgcd}{GEN x, GEN y, GEN p, GEN *u, GEN *v} returns
 $d = \text{GCD}(\kbd{x},\kbd{y})$, and sets \kbd{*u}, \kbd{*v} to the Bezout
@@ -1824,7 +1825,8 @@ non-negative coefficients to \kbd{Flx} (by reducing them mod \kbd{p}).
 
 \fun{GEN}{Flx_deriv}{GEN z, ulong p}
 
-\fun{GEN}{Flx_gcd}{GEN a, GEN b, ulong p}
+\fun{GEN}{Flx_gcd}{GEN a, GEN b, ulong p} returns a (not necessarily monic)
+greatest common divisor of $x$  and $y$.
 
 \fun{GEN}{Flx_gcd_i}{GEN a, GEN b, ulong p}, same as \kbd{Flx\_gcd} without
 collecting garbage.
@@ -2328,7 +2330,7 @@ with main variable number~\kbd{v}.
 might be zero), normalizes \kbd{x} correctly in place. Returns~\kbd{x}.
 For internal use.
 
-\subsec{Clean Constructors}
+\subsec{Clean Constructors}\secref{se:clean}
 
 \fun{GEN}{zeropadic}{GEN p, long n} creates a $0$ \typ{PADIC} equal to
 $O(\kbd{p}^\kbd{n})$.
@@ -2392,7 +2394,7 @@ containing \kbd{[x, y]}.
 \fun{GEN}{mkvecsmall3}{long x, long y, long z} creates a 3-dimensional
 \typ{VECSMALL} containing \kbd{[x, y, z]}.
 
-\subsec{Unclean Constructors}
+\subsec{Unclean Constructors}\label{se:unclean}
 
 Contrary to the policy of general PARI functions, the functions in this
 subsection do \emph{not} copy their arguments, nor do they produce an object
@@ -2712,7 +2714,28 @@ binary powering.
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
 into~\kbd{x} for the variable number~\kbd{v}.
 
-\subsec{Function to handle  \typ{VECSMALL}}
+\subsec{Vectors and Matrices}
+See~\secref{se:clean} and~\secref{se:unclean} for various useful constructors.
+Coefficients are accessed and set using \tet{gel}, \tet{gcoeff},
+see~\secref{se:accessors}. There are many internal functions to extract or
+manipulate subvectors or submatrices but, like the accessors above, none of
+them are suitable for \tet{gerepileupto}.
+
+GEN     row(GEN A, long x1);
+GEN     row_i(GEN A, long x0, long x1, long x2);
+GEN     rowextract_i(GEN A, long x1, long x2);
+GEN     rowextract_ip(GEN A, GEN p, long x1, long x2);
+GEN     rowextract_p(GEN A, GEN p);
+GEN     gtrans_i(GEN x);
+GEN     vconcat(GEN A, GEN B);
+GEN     vecextract_i(GEN A, long y1, long y2);
+GEN     vecextract_ip(GEN A, GEN p, long y1, long y2);
+GEN     vecextract_p(GEN A, GEN p);
+
+
+
+
+\subsec{Function to handle \typ{VECSMALL}}
 Theses functions handle \typ{VECSMALL} as an abstract container type
 of small signed integers. No specific meaning is attached to the content.
 
