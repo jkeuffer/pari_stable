@@ -78,8 +78,11 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
     8- rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
        flisseq -> freadseq
     9- rename Fp_gener -> gener_Fp, Fl_gener -> gener_Fl
-   10- replace \over by \frac in TeX output [ most people use AMS styles
-       which forbids \over, not plain TeX, which doesn't have \frac ]
+   10- change TeX output so that it's easier to handle:
+       - replace \over by \frac [ most people use AMS styles which forbids
+         \over, not plain TeX, which doesn't have \frac ]
+       - remove many extra braces { }  [ would prevent line breaks ]
+       - insert carriage returns
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

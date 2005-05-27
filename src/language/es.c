@@ -1323,36 +1323,6 @@ get_texvar(long v, char *buf, unsigned int len)
   return buf;
 }
 
-static void
-monome(const char *v, long deg)
-{
-  if (deg)
-  {
-    pariputs(v);
-    if (deg!=1) pariputsf("^%ld",deg);
-  }
-  else pariputc('1');
-}
-
-static void
-texnome(const char *v, long deg)
-{
-  if (deg)
-  {
-    pariputs(v);
-    if (deg !=1 ) {
-      if (deg >= 0 && deg < 10)
-        pariputsf("^%ld",deg);
-      else
-        pariputsf("^{%ld}",deg);
-    }
-  }
-  else pariputc('1');
-}
-
-#define padic_nome(p,e) {pariputs(p); if (e != 1) pariputsf("^%ld",e);}
-#define padic_texnome(p,e) {pariputs(p); if (e != 1) pariputsf("^{%ld}",e);}
-
 void
 etatpile(unsigned int n)
 {
@@ -1395,11 +1365,6 @@ etatpile(unsigned int n)
   pariputc('\n');
 }
 
-/********************************************************************/
-/**                                                                **/
-/**                           RAW OUTPUT                           **/
-/**                                                                **/
-/********************************************************************/
 #define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(g[2]): isnull(g))
 
 /* is to be printed as '0' */
@@ -1517,6 +1482,43 @@ isdenom(GEN g)
   return 1;
 }
 
+/********************************************************************/
+/**                                                                **/
+/**                           RAW OUTPUT                           **/
+/**                                                                **/
+/********************************************************************/
+/* ^e */
+static void
+texexpo(long e)
+{
+  if (e !=1 ) {
+    if (e >= 0 && e < 10)
+      pariputsf("^%ld",e);
+    else
+      pariputsf("^{%ld}",e);
+  }
+}
+static void
+wrexpo(long e)
+{
+  if (e!=1) pariputsf("^%ld",e);
+}
+
+/* v^e */
+#define VpowE(v,e)    STMT_START {pariputs(v); wrexpo(e);}  STMT_END
+#define texVpowE(v,e) STMT_START {pariputs(v); texexpo(e);} STMT_END
+static void
+monome(const char *v, long e)
+{
+  if (e) VpowE(v, e); else pariputc('1');
+}
+static void
+texnome(const char *v, long e)
+{
+  if (e) texVpowE(v,e); else pariputc('1');
+}
+
+/* ( a ) */
 static void
 paren(pariout_t *T, GEN a)
 {
@@ -1526,9 +1528,11 @@ static void
 texparen(pariout_t *T, GEN a)
 {
   if (T->TeXstyle & TEXSTYLE_PAREN) pariputs(" ("); else pariputs(" \\left(");
-  texi_nobrace(a,T,1); /* With braces no auto-linebreaks */
+  texi(a,T,1);
   if (T->TeXstyle & TEXSTYLE_PAREN) pariputs(") "); else pariputs("\\right) ");
 }
+
+/* * v^d */
 static void
 times_texnome(const char *v, long d)
 {
@@ -1572,7 +1576,7 @@ wr_texnome(pariout_t *T, GEN a, const char *v, long d)
     putsigne(sig); texnome(v,d);
   } else {
     sig = isfactor(a);
-    if (sig) { putsigne(sig); texi_nobrace(a,T,0); }
+    if (sig) { putsigne(sig); texi(a,T,0); }
     else { pariputs(" +"); texparen(T, a); }
     times_texnome(v, d);
   }
@@ -1612,7 +1616,7 @@ wr_lead_texnome(pariout_t *T, GEN a,const char *v, long d, int addsign)
     if (addsign && sig<0) pariputc('-');
     texnome(v,d);
   } else {
-    if (isfactor(a)) texi_nobrace(a,T,addsign);
+    if (isfactor(a)) texi(a,T,addsign);
     else texparen(T, a);
     times_texnome(v, d);
   }
@@ -1666,24 +1670,29 @@ quote_string(char *s)
   pariputc('"');
 }
 
-void
-bruti(GEN g, pariout_t *T, int addsign)
+static int
+print_0_or_pm1(GEN g, int addsign)
 {
-  long tg,l,i,j,r;
-  GEN a,b;
-  const char *v;
-  char buf[32];
-
-  if (!g) { pariputs("NULL"); return; }
-  if (isnull(g)) { pariputc('0'); return; }
+  long r;
+  if (!g) { pariputs("NULL"); return 1; }
+  if (isnull(g)) { pariputc('0'); return 1; }
   r = isone(g);
   if (r)
   {
     if (addsign && r<0) pariputc('-');
-    pariputc('1'); return;
+    pariputc('1'); return 1;
   }
+  return 0;
+}
 
-  tg = typ(g);
+static void
+bruti_intern(GEN g, pariout_t *T, int addsign)
+{
+  long l,i,j,r, tg = typ(g);
+  GEN a,b;
+  const char *v;
+  char buf[32];
+
   switch(tg)
   {
     case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
@@ -1757,12 +1766,12 @@ bruti(GEN g, pariout_t *T, int addsign)
 	  {
 	    wr_intsgn(a, 0); if (i) pariputc('*');
 	  }
-	  if (i) padic_nome(ev,i);
+	  if (i) VpowE(ev,i);
           sp_sign_sp(T,1);
 	}
         if ((i & 0xff) == 0) g = gerepileuptoint(av,g);
       }
-      pariputs("O("); padic_nome(ev,i); pariputc(')');
+      pariputs("O("); VpowE(ev,i); pariputc(')');
       free(ev); break;
     }
 
@@ -1829,6 +1838,13 @@ bruti(GEN g, pariout_t *T, int addsign)
 
     default: sorstring(VOIR_STRING2,*g);
   }
+}
+
+void
+bruti(GEN g, pariout_t *T, int addsign)
+{
+  if (!print_0_or_pm1(g, addsign))
+    bruti_intern(g, T, addsign);
 }
 
 void
@@ -1914,12 +1930,12 @@ sori(GEN g, pariout_t *T)
 	  {
 	    wr_int(T,a,1); pariputc(i? '*': ' ');
 	  }
-	  if (i) { padic_nome(ev,i); pariputc(' '); }
+	  if (i) { VpowE(ev,i); pariputc(' '); }
           pariputs("+ ");
 	}
       }
       pariputs("O(");
-      if (!i) pariputs(" 1)"); else padic_nome(ev,i);
+      if (!i) pariputs(" 1)"); else VpowE(ev,i);
       pariputc(')'); free(ev); break;
     }
 
@@ -2007,47 +2023,40 @@ sori(GEN g, pariout_t *T)
 /**                           TeX OUTPUT                           **/
 /**                                                                **/
 /********************************************************************/
-
-/* this follows bruti exactly */
+/* this follows bruti */
 void
 texi(GEN g, pariout_t *T, int addsign)
-{
-    pariputc('{');
-    texi_nobrace(g, T, addsign);
-    pariputc('}');
-}
-
-void
-texi_nobrace(GEN g, pariout_t *T, int addsign)
 {
   long tg,i,j,l,r;
   GEN a,b;
   const char *v;
   char buf[67];
 
-  if (isnull(g)) { pariputc('0'); return; }
-  r = isone(g);
-  if (r)
-  {
-    if (addsign && r<0) pariputc('-');
-    pariputc('1'); return;
-  }
+  if (print_0_or_pm1(g, addsign)) return;
 
   tg = typ(g);
   switch(tg)
   {
-    case t_INT: wr_intsgn(g, addsign && signe(g) < 0); break;
-    case t_REAL: wr_real(T,g,addsign); break;
+    case t_INT: case t_REAL: case t_QFR: case t_QFI:
+      bruti_intern(g, T, addsign); break;
 
     case t_INTMOD: case t_POLMOD:
       texi((GEN)g[2],T,1); pariputs(" mod ");
       texi((GEN)g[1],T,1); break;
 
-    case t_FRAC: case t_RFRAC:
+    case t_FRAC: 
+      if (addsign && isfactor(gel(g,1)) < 0) pariputc('-');
       pariputs("\\frac{");
-      texi_nobrace((GEN)g[1],T,addsign);
+      texi((GEN)g[1],T,0);
       pariputs("}{");
-      texi_nobrace((GEN)g[2],T,1);
+      texi((GEN)g[2],T,0);
+      pariputs("}"); break;
+
+    case t_RFRAC:
+      pariputs("\\frac{");
+      texi((GEN)g[1],T,1); /* too complicated otherwise */
+      pariputs("}{");
+      texi((GEN)g[2],T,0);
       pariputs("}"); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
@@ -2102,26 +2111,19 @@ texi_nobrace(GEN g, pariout_t *T, int addsign)
 	  {
 	    wr_intsgn(a, 0); if (i) pariputs("\\cdot");
 	  }
-	  if (i) padic_texnome(ev,i);
+	  if (i) texVpowE(ev,i);
 	  pariputc('+');
 	}
       }
-      pariputs("O("); padic_texnome(ev,i); pariputc(')');
+      pariputs("O("); texVpowE(ev,i); pariputc(')');
       free(ev); break;
     }
-    case t_QFR: case t_QFI: r = (tg == t_QFR);
-      if (new_fun_set) pariputs("Qfb("); else pariputs(r? "qfr(": "qfi(");
-      texi((GEN)g[1],T,1); pariputs(", ");
-      texi((GEN)g[2],T,1); pariputs(", ");
-      texi((GEN)g[3],T,1);
-      if (r) { pariputs(", "); texi((GEN)g[4],T,1); }
-      pariputc(')'); break;
 
     case t_VEC:
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi((GEN)g[i],T,1); if (i<lg(g)-1) pariputc('&');
+	texi((GEN)g[i],T,1); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -2361,9 +2363,9 @@ gen_output(GEN x, pariout_t *T)
   {
     case f_PRETTYMAT: matbruti(y, T); break;
     case f_PRETTY:
-    case f_PRETTYOLD: sori (y, T); break;
+    case f_PRETTYOLD: sori(y, T); break;
     case f_RAW      : bruti(y, T, 1); break;
-    case f_TEX      : texi (y, T, 1); break;
+    case f_TEX      : texi(y, T, 1); break;
   }
   avma = av;
 }
