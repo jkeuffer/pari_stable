@@ -1523,8 +1523,9 @@ idealmul(GEN nf, GEN x, GEN y)
 /* assume pr in primedec format */
 GEN 
 pr_norm(GEN pr) {
-  GEN f = gel(pr,4);
-  return powiu(gel(pr,1), (ulong)f[2]);
+  GEN F = gel(pr,4), p = gel(pr,1);
+  ulong f = (ulong)F[2];
+  return powiu(p, f);
 }
 
 /* norm of an ideal */

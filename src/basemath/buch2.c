@@ -1062,7 +1062,7 @@ testprimes(GEN bnf, ulong bound)
   ulong p, pmax;
   long i, nbideal, k;
   GEN f, dK, p1, Vbase, vP, fb, nf = checknf(bnf);
-  byteptr d = diffptr;
+  byteptr d = diffptr + 1;
   FB_t F;
 
   maxprime_check(bound);
@@ -1082,9 +1082,8 @@ testprimes(GEN bnf, ulong bound)
   pmax = itou(gmael(fb, lg(fb)-1, 1)); /* largest p in factorbase */
   Vbase = get_Vbase(bnf);
   (void)recover_partFB(&F, Vbase, degpol(nf[1]));
-  for (av=avma, p=0; p < bound; avma=av)
+  for (av=avma, p=2; p < bound; avma=av)
   {
-    NEXT_PRIME_VIADIFF(p, d);
     if (DEBUGLEVEL>1) fprintferr("*** p = %lu\n",p);
     vP = primedec(bnf, utoipos(p));
     nbideal = lg(vP)-1;
@@ -1097,7 +1096,7 @@ testprimes(GEN bnf, ulong bound)
       if (cmpiu(pr_norm(P), bound) >= 0)
       {
         if (DEBUGLEVEL>1) fprintferr("    Norm(P) > Zimmert bound\n");
-        continue;
+        break;
       }
       if (p <= pmax && (k = tablesearch(fb, P, &cmp_prime_ideal)))
       { if (DEBUGLEVEL>1) fprintferr("    #%ld in factor base\n",k); }
@@ -1106,6 +1105,7 @@ testprimes(GEN bnf, ulong bound)
       else /* faster: don't compute result */
         (void)SPLIT(&F, nf, prime_to_ideal(nf,P), Vbase);
     }
+    NEXT_PRIME_VIADIFF(p, d);
   }
   if (DEBUGLEVEL>1) { fprintferr("End of PHASE 1.\n\n"); flusherr(); }
   avma = av0;
