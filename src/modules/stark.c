@@ -1770,8 +1770,9 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   chk.data = (void*)d;
 
   d->G = min(-10, -bit_accuracy(prec) >> 4);
+  /* FIXME: why a power of 10 ? Use a power of 2. */
   BIG = powuu(10, max(8, -(d->G >> 1)));
-  tB  = gpow(gmul2n(BIG, -N), gdivgs(gen_1, 1-N), DEFAULTPREC);
+  tB  = sqrtnr(gmul2n(itor(BIG,DEFAULTPREC), -N), N-1);
 
   Bd    = gceil(gmin(B, tB));
   prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
@@ -1839,16 +1840,16 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {
   pari_sp av = avma, av2;
   GEN vec, M = gmael(nf, 5, 1), beta = d->beta;
-  long i, bacmin, bacmax, lM = lg(M);
+  long i, min, max, lM = lg(M);
 
   d->G = min(-20, -bit_accuracy(prec) >> 4);
 
   vec  = concatsp(mkvec(gneg(beta)), row(M, d->v));
-  bacmin = (long)bit_accuracy_mul(prec, .225);
-  bacmax = (long)bit_accuracy_mul(prec, .315);
+  min = (long)bit_accuracy_mul(prec, .225);
+  max = (long)bit_accuracy_mul(prec, .315);
 
   av2 = avma;
-  for (i = bacmax; i >= bacmin; i-=16, avma = av2)
+  for (i = max; i >= min; i-=16, avma = av2)
   {
     GEN v = lindep2(vec, i), z = (GEN)v[1];
     if (!signe(z)) continue;
@@ -1866,17 +1867,15 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
-  long j, md, G, cl = degpol(pol);
+  long j, md, cl = degpol(pol);
   pari_sp av = avma;
-  GEN p1, beta;
   RC_data d;
 
   /* if precision(pol) is too low, abort */
   for (j = 2; j <= cl+1; j++)
   {
-    p1 = (GEN)pol[j];
-    G  = bit_accuracy(gprecision(p1)) - gexpo(p1);
-    if (G < 34) { avma = av; return NULL; }
+    GEN t = gel(pol, j);
+    if (bit_accuracy(gprecision(t)) - gexpo(t) < 34) return NULL;
   }
 
   md = cl/2;
@@ -1889,18 +1888,13 @@ RecCoeff(GEN nf,  GEN pol,  long v, long prec)
   { /* start with the coefficients in the middle,
        since they are the harder to recognize! */
     long cf = md + (j%2? j/2: -j/2);
-    GEN bound = binomial(stoi(cl), cf);
+    GEN t, bound = shifti(binomial(utoipos(cl), cf), cl-cf);
 
-    bound = shifti(bound, cl - cf);
-
-    if (DEBUGLEVEL>1)
-      fprintferr("In RecCoeff with cf = %ld and B = %Z\n", cf, bound);
-
-    beta = real_i((GEN)pol[cf+2]);
-    d.beta = beta;
+    if (DEBUGLEVEL>1) fprintferr("RecCoeff (cf = %ld, B = %Z)\n", cf, bound);
+    d.beta = real_i( gel(pol,cf+2) );
     d.B    = bound;
-    if (! (p1 = RecCoeff2(nf, &d, prec)) ) return NULL;
-    pol[cf+2] = (long)p1;
+    if (! (t = RecCoeff2(nf, &d, prec)) ) return NULL;
+    gel(pol, cf+2) = t;
   }
   pol[cl+2] = (long)gen_1;
   return gerepilecopy(av, pol);
