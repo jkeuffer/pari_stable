@@ -632,7 +632,7 @@ long
 Flx_nbfact(GEN z, ulong p)
 {
   long lgg, nfacp = 0, d = 0, e = degpol(z);
-  GEN g, w, MP = Flx_Frobenius(z, p), PolX = polx_Flx(0);
+  GEN g, w, MP = Flx_Frobenius(z, p), PolX = polx_Flx(z[1]);
 
   w = PolX;
   while (d < (e>>1))
