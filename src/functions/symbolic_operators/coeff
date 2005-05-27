@@ -11,3 +11,10 @@ Description:
  (gen,small):gen:copy           gel($1, $2)
  (gen,small,small):gen:copy     gcoeff($1, $2, $3)
 
+Function: _[_,]
+Class: symbolic_operators
+Description:
+ (mp,small):gen                 $"Scalar has no rows"
+ (vec,small):gen                row($1, $2)
+ (gen,small):gen                row($1, $2)
+
