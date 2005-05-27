@@ -3026,7 +3026,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
   co = lg(A); if (co==1) return cgetg(1,t_MAT);
 
   li = lg(A[1]);
-  unnf = gscalcol(gen_1,N);
+  unnf = gscalcol_i(gen_1,N);
   detmat = lllint_ip(Q_remove_denom(detmat, NULL), 100);
 
   av = avma; lim = stack_lim(av,2);

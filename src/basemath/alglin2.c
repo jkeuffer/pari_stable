@@ -2265,7 +2265,7 @@ hnfmerge_get_1(GEN A, GEN B)
   t = NULL; /* -Wall */
   b = gcoeff(B,1,1); lb = lgefint(b);
   if (!signe(b)) {
-    if (gcmp1(gcoeff(A,1,1))) return gscalcol(gen_1, l-1);
+    if (gcmp1(gcoeff(A,1,1))) return gscalcol_i(gen_1, l-1);
     l = 0; /* trigger error */
   }
   for (j = 1; j < l; j++)

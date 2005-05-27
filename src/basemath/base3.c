@@ -1088,7 +1088,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
   }
   if (minus)
     plus = element_mulmodideal(nf, plus, element_invmodideal(nf,minus,id), id);
-  return plus? plus: gscalcol(gen_1, lg(id)-1);
+  return plus? plus: gscalcol_i(gen_1, lg(id)-1);
 }
 
 /* given 2 integral ideals x, y in HNF s.t x | y | x^2, compute the quotient

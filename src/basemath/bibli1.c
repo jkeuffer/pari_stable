@@ -667,7 +667,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   if (gram && hx != lx) err(mattype1,"lllint");
 
   av = avma; lim = stack_lim(av,1); x = dummycopy(x);
-  B = gscalcol(gen_1, lx);
+  B = gscalcol_i(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
   {
@@ -925,7 +925,7 @@ lllgramallgen(GEN x, long flag)
   fl = cgetg(lx, t_VECSMALL);
 
   av = avma; lim = stack_lim(av,1);
-  B = gscalcol(gen_1, lx);
+  B = gscalcol_i(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) { L[j] = (long)zerocol(n); fl[j] = 0; }
 
