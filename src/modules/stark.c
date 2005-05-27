@@ -1840,16 +1840,16 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 {
   pari_sp av = avma, av2;
   GEN vec, M = gmael(nf, 5, 1), beta = d->beta;
-  long i, min, max, lM = lg(M);
+  long i, imin, imax, lM = lg(M);
 
   d->G = min(-20, -bit_accuracy(prec) >> 4);
 
   vec  = concatsp(mkvec(gneg(beta)), row(M, d->v));
-  min = (long)bit_accuracy_mul(prec, .225);
-  max = (long)bit_accuracy_mul(prec, .315);
+  imin = (long)bit_accuracy_mul(prec, .225);
+  imax = (long)bit_accuracy_mul(prec, .315);
 
   av2 = avma;
-  for (i = max; i >= min; i-=16, avma = av2)
+  for (i = imax; i >= imin; i-=16, avma = av2)
   {
     GEN v = lindep2(vec, i), z = (GEN)v[1];
     if (!signe(z)) continue;
@@ -2692,6 +2692,7 @@ static GEN
 get_subgroup(GEN subgp, GEN cyc)
 {
   if (!subgp || gcmp0(subgp)) return cyc;
+  subgp = hnf(subgp);
   return hnfdivide(subgp, cyc)? subgp: NULL;
 }
 
