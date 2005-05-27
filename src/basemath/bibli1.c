@@ -2956,7 +2956,7 @@ addcolumntomatrix(GEN V, GEN invp, GEN L)
  *  flag = min_VECSMALL2, same but count only vectors with even norm, and shift the answer
  */
 static GEN
-minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
+minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 {
   GEN x,res,p1,u,r,L,gnorme,invp,V;
   long n = lg(a), i, j, k, s, maxrank;
@@ -2964,7 +2964,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   double p,maxnorm,BOUND,*v,*y,*z,**q, eps = 0.000001;
 
   BORNE = gfloor(BORNE);
-  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) err(typeer, "minim00");
+  if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) err(typeer, "minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
@@ -2981,7 +2981,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
       if (gcmp0(BORNE)) return res;
       break;
-    default: err(talker, "incorrect flag in minim00");
+    default: err(talker, "incorrect flag in minim0");
   }
   if (n == 1)
   {
@@ -3001,7 +3001,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   av1 = avma;
 
   u = lllgramint(a);
-  if (lg(u) != n) err(talker,"not a definite form in minim00");
+  if (lg(u) != n) err(talker,"not a definite form in minim0");
   a = qf_base_change(a,u,1);
 
   n--;
@@ -3031,6 +3031,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     case min_ALL:
       maxrank = itos(STOCKMAX);
+      if (maxrank < 1) err(talker,"negative number of vectors in minim0");
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
@@ -3138,7 +3139,7 @@ minim00(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
         if (low_stack(lim, stack_lim(av1,1)))
         {
-          if(DEBUGMEM>1) err(warnmem,"minim00, rank>=%ld",s);
+          if(DEBUGMEM>1) err(warnmem,"minim0, rank>=%ld",s);
           invp = gerepilecopy(av1, invp);
         }
       }
@@ -3171,7 +3172,7 @@ GEN
 qfrep0(GEN a, GEN borne, long flag)
 {
   pari_sp av = avma;
-  GEN g = minim00(a, borne, gen_0, (flag & 1)? min_VECSMALL2: min_VECSMALL);
+  GEN g = minim0(a, borne, gen_0, (flag & 1)? min_VECSMALL2: min_VECSMALL);
   if ((flag & 2) == 0) g = gerepileupto(av, gtovec(g));
   return g;
 }
@@ -3181,8 +3182,8 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
 {
   switch(flag)
   {
-    case 0: return minim00(a,borne,stockmax,min_ALL);
-    case 1: return minim00(a,borne,gen_0   ,min_FIRST);
+    case 0: return minim0(a,borne,stockmax,min_ALL);
+    case 1: return minim0(a,borne,gen_0   ,min_FIRST);
     case 2:
     {
       GEN x = fincke_pohst(a,borne,itos(stockmax),prec,NULL);
@@ -3197,19 +3198,19 @@ qfminim0(GEN a, GEN borne, GEN stockmax, long flag, long prec)
 GEN
 minim(GEN a, GEN borne, GEN stockmax)
 {
-  return minim00(a,borne,stockmax,min_ALL);
+  return minim0(a,borne,stockmax,min_ALL);
 }
 
 GEN
 minim2(GEN a, GEN borne, GEN stockmax)
 {
-  return minim00(a,borne,stockmax,min_FIRST);
+  return minim0(a,borne,stockmax,min_FIRST);
 }
 
 GEN
 perf(GEN a)
 {
-  return minim00(a,gen_0,gen_0,min_PERF);
+  return minim0(a,gen_0,gen_0,min_PERF);
 }
 
 static GEN
