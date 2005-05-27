@@ -2330,7 +2330,7 @@ with main variable number~\kbd{v}.
 might be zero), normalizes \kbd{x} correctly in place. Returns~\kbd{x}.
 For internal use.
 
-\subsec{Clean Constructors}\secref{se:clean}
+\subsec{Clean Constructors}\label{se:clean}
 
 \fun{GEN}{zeropadic}{GEN p, long n} creates a $0$ \typ{PADIC} equal to
 $O(\kbd{p}^\kbd{n})$.
@@ -2721,18 +2721,25 @@ see~\secref{se:accessors}. There are many internal functions to extract or
 manipulate subvectors or submatrices but, like the accessors above, none of
 them are suitable for \tet{gerepileupto}.
 
-GEN     row(GEN A, long x1);
-GEN     row_i(GEN A, long x0, long x1, long x2);
-GEN     rowextract_i(GEN A, long x1, long x2);
-GEN     rowextract_ip(GEN A, GEN p, long x1, long x2);
-GEN     rowextract_p(GEN A, GEN p);
-GEN     gtrans_i(GEN x);
-GEN     vconcat(GEN A, GEN B);
-GEN     vecextract_i(GEN A, long y1, long y2);
-GEN     vecextract_ip(GEN A, GEN p, long y1, long y2);
-GEN     vecextract_p(GEN A, GEN p);
+\fun{GEN}{row}{GEN A, long x1}
 
+\fun{GEN}{row_i}{GEN A, long x0, long x1, long x2}
 
+\fun{GEN}{rowextract_i}{GEN A, long x1, long x2}
+
+\fun{GEN}{rowextract_ip}{GEN A, GEN p, long x1, long x2}
+
+\fun{GEN}{rowextract_p}{GEN A, GEN p}
+
+\fun{GEN}{gtrans_i}{GEN x}
+
+\fun{GEN}{vconcat}{GEN A, GEN B}
+
+\fun{GEN}{vecextract_i}{GEN A, long y1, long y2}
+
+\fun{GEN}{vecextract_ip}{GEN A, GEN p, long y1, long y2}
+
+\fun{GEN}{vecextract_p}{GEN A, GEN p}
 
 
 \subsec{Function to handle \typ{VECSMALL}}
