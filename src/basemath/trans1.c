@@ -372,7 +372,7 @@ powuu(ulong p, ulong N)
 ulong
 upowuu(ulong p, ulong k)
 {
-  long i, pk;
+  ulong i, pk;
 
   if (!k) return 1;
   if (p == 2) return 1<<k;
