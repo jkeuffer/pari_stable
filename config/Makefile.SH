@@ -387,11 +387,11 @@ install-bin-sta: gp-sta
 
 install-man::
 	-mkdir -p \$(MANDIR)
+	-\$(RM) \$(MANDIR)/pari.1 \$(MANDIR)/gp.1 \$(MANDIR)/gp-$version.1
 	\$(INSTALL_DATA) $doc/gphelp.1 \$(MANDIR)
-	\$(INSTALL_DATA) $doc/gp.1 \$(MANDIR)
-	-\$(RM) \$(MANDIR)/pari.1 \$(MANDIR)/gp-$version.1
+	\$(INSTALL_DATA) $doc/gp.1 \$(MANDIR)/gp-$version.1
 	-\$(LN) gp.1 \$(MANDIR)/pari.1
-	-\$(LN) gp.1 \$(MANDIR)/gp-$version.1
+	-\$(LN) gp-$version.1 \$(MANDIR)/gp.1
 
 install-misc: $install_emacs_files
 	-mkdir -p \$(MISCDIR) \$(BINDIR)
