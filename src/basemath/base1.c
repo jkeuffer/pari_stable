@@ -1890,7 +1890,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
 
   /* should be DEF + gexpo( max_k C^n_k (bound/k)^(k/2) ) */
   bound = gerepileuptoleaf(av, bound);
-  prec = DEFAULTPREC + (((gexpo(bound)*N)/2) >> TWOPOTBITS_IN_LONG);
+  prec = nbits2prec(32 + (gexpo(bound)*N) / 2);
   if (DEBUGLEVEL)
     fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
   if (prec > d->prec) err(bugparier, "polredabs (precision problem)");
