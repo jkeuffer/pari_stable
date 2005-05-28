@@ -97,6 +97,7 @@ BA  2- New functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul
 BA  3- New functions FpC_to_mod, FqV_to_FlxV
     4- Member functions r1, r2
     5- Functions factoru(), factoru_pow(), powiu(), powuu().
+    6- symbolic link $MANDIR/gp-$version.1 -> $MANDIR/gp.1
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
