@@ -84,6 +84,11 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
          \over, not plain TeX, which doesn't have \frac ]
        - remove many extra braces { }  [ would prevent line breaks ]
        - insert carriage returns
+   11- [GP handling of print1()] get rid of 'added_newline' hack 
+       - always output \n before an error message 
+       - Now ? print1(xxx)
+             xxx?
+         (the behaviour added_newline was meant to avoid).
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

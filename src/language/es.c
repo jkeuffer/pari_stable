@@ -3276,8 +3276,8 @@ print0(GEN g, long flag)
       gen_output((GEN)g[i], &T);
 }
 
-#define PR_NL() {added_newline = 1; pariputc('\n'); pariflush(); }
-#define PR_NO() {added_newline = 0; pariflush(); }
+#define PR_NL() {pariputc('\n'); pariflush(); }
+#define PR_NO() pariflush()
 void print   (GEN g) { print0(g, f_RAW);       PR_NL(); }
 void printp  (GEN g) { print0(g, f_PRETTYOLD); PR_NL(); }
 void printtex(GEN g) { print0(g, f_TEX);       PR_NL(); }

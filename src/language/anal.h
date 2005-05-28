@@ -147,7 +147,7 @@ extern entree  gp_member_list[];
 extern char   *helpmessages_highlevel[];
 extern entree  functions_highlevel[];
 extern int     gp_colors[];
-extern int     disable_color,added_newline;
+extern int     disable_color;
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
 extern module *pari_oldmodules;    /* list of functions modules */

@@ -1,6 +1,7 @@
    echo = 1 (on)
 ? default(compatible,3)
    compatible = 3 (use old functions, ignore case)
+
   *** default: Warning: user functions re-initialized.
 ? gettime;+3
 3
@@ -357,6 +358,7 @@ mod(x^3 + 5, x^5 - 5*x^3 + 5*x + 25)
 [1]
 
 ? setrand(1);buchgenfu(x^2-x-100000)
+
   *** buchgenfu: Warning: insufficient precision for fundamental units, not given.
 
 [x^2 - x - 100000]
@@ -836,6 +838,7 @@ x^5 + 3021*x^4 - 786303*x^3 - 6826636057*x^2 - 546603588746*x + 385389051407
 [x^8 - x^7 + x^5 - x^4 + x^3 - x + 1 1]
 
 ? factpol2(x^15-1,0)
+
   *** factpol2: this function has been suppressed.
 ? fibo(100)
 354224848179261915075
@@ -944,6 +947,7 @@ mod(x^5, x^6 + 108)
  168, 420, 360, 1785, 658, 2542; 84, 140, 360, 315, 1582, 588, 2266; 70, 120
 , 315, 280, 1421, 532, 2046; 60, 105, 280, 252, 1290, 486, 1866]]
 ? hermitehavas(amat)
+
   *** hermitehavas: this function has been suppressed.
 ? hermitemod(amat,detint(amat))
 
@@ -1325,6 +1329,7 @@ ok
 ? incgam(2,1)
 0.73575888234288464319104754032292173491
 ? incgam1(2,1)
+
   *** incgam1: this function has been suppressed.
 ? incgam2(2,1)
 0.73575888234288464319104754032292173489
@@ -1501,6 +1506,7 @@ x
 [0 1 -1]
 
 ? kerint2(matrix(4,6,x,y,2520/(x+y)))
+
   *** kerint2: this function has been suppressed.
 ? f(u)=u+1;
 ? print(f(5));kill(f);
@@ -1587,6 +1593,7 @@ x
 [-60 -105 280 252 -486 191 1290]
 
 ? lll1(m)
+
   *** lll1: this function has been suppressed.
 ? lllgram(m)
 
@@ -1605,6 +1612,7 @@ x
 [0 1 3 -17 3 -7 3]
 
 ? lllgram1(m)
+
   *** lllgram1: this function has been suppressed.
 ? lllgramint(m)
 
@@ -1677,6 +1685,7 @@ x
 ; 1, 0, 0, 0, 0, 0, 0; 0, 1, 0, 0, 0, 0, 0; 0, 0, 1, 0, 0, 0, 0; 0, 0, 0, 1,
  0, 0, 0; 0, 0, 0, 0, 1, 0, 0; 0, 0, 0, 0, 0, 1, 0; 0, 0, 0, 0, 0, 0, 1]]
 ? lllrat(m)
+
   *** lllrat: this function has been suppressed.
 ? \precision=96
    realprecision = 96 significant digits
@@ -1904,6 +1913,7 @@ mod(2, 7)
 ? modp(-12,7)
 mod(2, 7)
 ? mod(10873,49649)^-1
+
   ***   impossible inverse modulo: mod(131, 49649).
 ? modreverse(mod(x^2+1,x^3-x-1))
 mod(x^2 - 3*x + 2, x^3 - 5*x^2 + 8*x - 5)

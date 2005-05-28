@@ -459,7 +459,6 @@ gpreadseq(char *c, int strict)
     err(warner, "unused characters: %s", s);
     free(s);
   }
-  added_newline = 1;
   seq_init(c); z = seq();
   analyseur = olds; mark.start = olde;
   if (br_status)
@@ -467,7 +466,6 @@ gpreadseq(char *c, int strict)
     if (br_res) return br_res;
     if (!z) return gnil;
   }
-  if (!added_newline) pariputc('\n'); /* last output was print1() */
   return z;
 }
 

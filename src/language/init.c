@@ -39,7 +39,7 @@ GEN     primetab; /* private primetable */
 byteptr diffptr;
 char    *current_logfile, *current_psfile, *pari_datadir = NULL;
 int     gp_colors[c_LAST];
-int     disable_color = 1, added_newline = 1;
+int     disable_color = 1;
 
 entree  **varentries;
 
@@ -1086,7 +1086,7 @@ err(long numerr, ...)
     }
   }
 
-  if (!added_newline) { pariputc('\n'); added_newline=1; }
+  pariputc('\n'); /* make sure err msg starts at the beginning of line */
   pariflush(); pariOut = pariErr;
   pariflush(); term_color(c_ERR);
 
