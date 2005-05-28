@@ -1976,9 +1976,10 @@ inteta(GEN q)
     if (valp(q) <= 0) err(talker,"non-positive valuation in eta");
     for(;;)
     {
-      p1=gneg_i(gmul(ps,gmul(q,gsqr(qn))));
-      y=gadd(y,p1); qn=gmul(qn,q); ps=gmul(p1,qn);
-      p1=y; y=gadd(y,ps); if (gequal(p1,y)) return y;
+      p1 = gneg_i(gmul(ps,gmul(q,gsqr(qn))));
+      y = gadd(y,p1); qn = gmul(qn,q); ps = gmul(p1,qn);
+      p1 = y;
+      y = gadd(y,ps); if (gequal(p1,y)) return y;
     }
   }
   else
@@ -2062,7 +2063,7 @@ trueeta(GEN x, long prec)
   long tx = typ(x);
   ulong Nmod24;
   pari_sp av = avma;
-  GEN q, q24, N, n, m, run;
+  GEN q24, N, n, m, run;
 
   if (!is_scalar_t(tx)) err(typeer,"trueeta");
   x = upper_half(x, &prec);
@@ -2080,8 +2081,10 @@ trueeta(GEN x, long prec)
   Nmod24 = umodiu(N, 24);
   if (Nmod24) m = gmul(m, e12(Nmod24, prec));
   q24 = gexp(gdivgs(gmul(Pi2n(1,prec), mulcxI(x)), 24),prec); /* e(x/24) */
-  q = gpowgs(q24, 24);
-  return gerepileupto(av, gmul(gmul(m,q24), inteta(q)));
+  m = gmul(q24, m);
+  if (24 * gexpo(q24) >= -bit_accuracy(prec))
+    m = gmul(m, inteta( gpowgs(q24,24) ));
+  return gerepileupto(av, m);
 }
 
 GEN
