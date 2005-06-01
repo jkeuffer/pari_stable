@@ -637,9 +637,15 @@ mpqs_set_parameters(mpqs_handle_t *h)
   else
     i = h->digit_size_kN - 9;
 
-  if (i >= 64)
+  /* (cf PARI bug#235) the following has always been, and will remain,
+   * a moving target... increased thresholds from 64, 80 to 79, 86
+   * respectively --GN20050601.  Note that the new values correspond to
+   * kN having >= 86 or >= 95 decimal digits, respectively.  Note also
+   * that the current sizing parameters for 90 or more digits are based
+   * on 100% theory and 0% practice. */
+  if (i >= 79)
     err(warner, "MPQS: factoring this number will take %s hours",
-	i >= 80 ? "many": "several");
+        i >= 86 ? "many": "several");
 
   if (DEBUGLEVEL >= 5)
   {

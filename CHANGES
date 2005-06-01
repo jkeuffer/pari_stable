@@ -62,6 +62,8 @@ BA  9- [GP2C] type-checking codes generated for some types was wrong.
        in Round 4: gcmp1(d) --> degpol(d) == 0 ]
    14- forvec(v=vector(4,k,[1,4]),,2) -> oo loop [bad initialization]
    15- eta(x << 1) used far too much accuracy in intermediate computations
+GN 16- MPQS warning "factoring this number will take several/many hours" now
+       assume more current hardware.
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
