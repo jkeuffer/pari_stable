@@ -200,7 +200,7 @@ sqred1_from_QR(GEN x, long prec)
   for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
   if (!Householder_get_mu(x, L, B, k, NULL, prec)) return NULL;
   for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
-  return gtrans_i(L);
+  return dummytrans(L);
 }
 
 GEN
@@ -212,7 +212,7 @@ R_from_QR(GEN x, long prec)
   for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
   for (j=1; j<=k; j++)
     if (!incrementalQ(x, L, B, Q, j, prec)) return NULL;
-  return gtrans_i(L);
+  return dummytrans(L);
 }
 
 /********************************************************************/
@@ -1866,7 +1866,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
       if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
       {
         for (l = 1; l < lg(sol) && !equalii(z, (GEN)sol[l]); l++) /*empty*/;
-        if (l == lg(sol)) sol = concatsp(sol, z);
+        if (l == lg(sol)) sol = dummyconcat(sol, z);
       }
     }
     if (i < bnd) R[2] = (long)addii((GEN)R[2], Z);
@@ -2055,7 +2055,7 @@ lindep(GEN x, long prec)
     }
   }
   p1 = cgetg(lx,t_COL); p1[n] = (long)gen_1; for (i=1; i<n; i++) p1[i] = (long)gen_0;
-  return gerepileupto(av, gauss(gtrans_i((GEN)b),p1));
+  return gerepileupto(av, gauss(dummytrans((GEN)b),p1));
 }
 
 /* PSLQ Programs */
@@ -3478,14 +3478,14 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
   }
   /* now r~ * r = a in LLL basis */
-  rinvtrans = gtrans_i( invmat(r) );
+  rinvtrans = dummytrans( invmat(r) );
   if (DEBUGLEVEL>2)
     fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lllintern(rinvtrans, 100, 1, 0);
   if (!v) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
-  v = ZM_inv(gtrans_i(v),gen_1);
+  v = ZM_inv(dummytrans(v),gen_1);
   r = gmul(r,v);
   u = u? gmul(u,v): v;
 

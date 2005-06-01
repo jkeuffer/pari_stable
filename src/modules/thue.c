@@ -424,7 +424,7 @@ static void
 add_sol(GEN *pS, GEN x, GEN y)
 {
   GEN u = mkvec2(x,y);
-  if (new_sol(u, *pS)) *pS = concatsp(*pS, mkvec(u));
+  if (new_sol(u, *pS)) *pS = dummyconcat(*pS, mkvec(u));
 }
 
 static void

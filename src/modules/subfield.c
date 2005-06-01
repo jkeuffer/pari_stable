@@ -739,7 +739,7 @@ compute_data(blockdata *B)
     F = cgetg(di+1, t_VEC);
     for (j=1; j<=di; j++) F[j] = fk[l++];
     L = hensel_lift_fact(L, F, T, p, pe, e);
-    fhk = fhk? concatsp(fhk, L): L;
+    fhk = fhk? dummyconcat(fhk, L): L;
   }
   DATA[3] = (long)roots_from_deg1(fhk);
 
@@ -831,7 +831,7 @@ test_block(blockdata *B, GEN L, GEN D)
   GEN sub = subfield(D, B);
   if (sub) {
     GEN old = L;
-    L = gclone( L? concatsp(L, sub): sub );
+    L = gclone( L? dummyconcat(L, sub): sub );
     if (old) gunclone(old);
   }
   avma = av; return L;
@@ -982,7 +982,7 @@ subfieldsall(GEN nf)
     }
     (void)delete_var(); /* from choose_prime */
   }
-  LSB = concatsp(LSB, _subfield(polx[0], pol));
+  LSB = dummyconcat(LSB, _subfield(polx[0], pol));
   if (DEBUGLEVEL) fprintferr("\n***** Leaving subfields\n\n");
   return fix_var(gerepilecopy(av, LSB), v0);
 }

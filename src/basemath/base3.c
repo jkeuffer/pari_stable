@@ -1862,11 +1862,11 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   {
     GEN L = zprimestar(nf, (GEN)P[i], (GEN)E[i], t, archp);
     lists[i] = (long)L;
-    for (j=1; j<lg(L); j++) gen = concatsp(gen,gmael(L,j,3));
+    for (j=1; j<lg(L); j++) gen = dummyconcat(gen,gmael(L,j,3));
   }
   sarch = zarchstar(nf, x, archp);
   lists[i] = (long)sarch;
-  gen = concatsp(gen, (GEN)sarch[2]);
+  gen = dummyconcat(gen, (GEN)sarch[2]);
 
   nbgen = lg(gen)-1;
   if (nbp)
@@ -2061,13 +2061,13 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   cyc2 = gel(G2,2); l2 = lg(cyc2);
   gen = (lg(G1)>3 && lg(G2)>3)? gen_1: NULL;
   nbgen = l1+l2-2;
-  cyc = smithrel(diagonal_i(concatsp(cyc1,cyc2)),
+  cyc = smithrel(diagonal_i(dummyconcat(cyc1,cyc2)),
                  &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
     U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecextract_i(U, 1, l1-1),   U1);
     U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecextract_i(U, l1, nbgen), U2);
-    U = concatsp(U1, U2);
+    U = dummyconcat(U1, U2);
   }
   else
     U = zeromat(0, lx-2);
@@ -2077,7 +2077,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
     GEN u, v, uv = idealaddtoone(nf,gel(f1,1),gel(f2,1));
     u = gel(uv,1);
     v = gel(uv,2);
-    gen = concatsp(makeprimetoidealvec(nf,x,u,v, gel(G1,3)),
+    gen = dummyconcat(makeprimetoidealvec(nf,x,u,v, gel(G1,3)),
                    makeprimetoidealvec(nf,x,v,u, gel(G2,3)));
   }
   y = cgetg(6,t_VEC);
@@ -2109,9 +2109,9 @@ join_bid_arch(GEN nf, GEN bid1, GEN arch)
   gel(lists,i) = sarch;
 
   gen = (lg(G1)>3)? gen_1: NULL;
-  cyc = diagonal_i(concatsp(gel(G1,2), gel(sarch,1)));
+  cyc = diagonal_i(dummyconcat(gel(G1,2), gel(sarch,1)));
   cyc = smithrel(cyc, &U, gen? &u1: NULL);
-  if (gen) gen = concatsp(gel(G1,3), gel(sarch,2));
+  if (gen) gen = dummyconcat(gel(G1,3), gel(sarch,2));
   y = cgetg(6,t_VEC);
   gel(y,1) = mkvec2(x, arch);
   gel(y,3) = fa1;

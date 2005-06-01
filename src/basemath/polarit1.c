@@ -2370,7 +2370,7 @@ GEN
 FqX_split_roots(GEN z, GEN T, GEN p, GEN pol)
 {
   GEN S = (GEN)z[1], L = (GEN)z[2], rep = FqX_split_equal(L, S, T, p);
-  if (pol) rep = concatsp(rep, FqX_div(pol, (GEN)L[2], T,p));
+  if (pol) rep = dummyconcat(rep, FqX_div(pol, (GEN)L[2], T,p));
   return rep;
 }
 GEN
@@ -2379,7 +2379,7 @@ FqX_split_all(GEN z, GEN T, GEN p)
   GEN S = (GEN)z[1], rep = cgetg(1, t_VEC);
   long i, l = lg(z);
   for (i = 2; i < l; i++)
-    rep = concatsp(rep, FqX_split_equal((GEN)z[i], S, T, p));
+    rep = dummyconcat(rep, FqX_split_equal((GEN)z[i], S, T, p));
   return rep;
 }
 

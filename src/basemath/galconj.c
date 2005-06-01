@@ -805,7 +805,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   ltop = avma;
   td->PV[td->ordre[n]] = (long) gclone(Vmatrix(td->ordre[n], td));
   avma = ltop;
-  td->TM = gtrans_i(M);
+  td->TM = dummytrans(M);
   settyp(td->TM, t_VEC);
   for (i = 1; i < lg(td->TM); i++)
     settyp(td->TM[i], t_VEC);

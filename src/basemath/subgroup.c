@@ -120,7 +120,7 @@ static void
 list_fun(subgp_iter *T, GEN x)
 {
   sublist_t *S = (sublist_t*)T->fundata;
-  GEN H = hnf(concatsp(S->hnfgroup,x));
+  GEN H = hnf(dummyconcat(S->hnfgroup,x));
   if (S->gen)
   { /* test conductor */
     long i, l = lg(S->gen);
@@ -142,7 +142,7 @@ treatsub(subgp_iter *T, GEN H)
     GEN Hp = gmul(T->expoI, H); /* lift H to G */
     long l = lg(T->subqpart);
     for (i=1; i<l; i++)
-      T->fun(T, concatsp(Hp, (GEN)T->subqpart[i]));
+      T->fun(T, dummyconcat(Hp, (GEN)T->subqpart[i]));
   }
 }
 

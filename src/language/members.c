@@ -346,14 +346,14 @@ GEN
 member_futu(GEN x) /*  concatenation of fu and tu, w is lost */
 {
   GEN fuc = member_fu(x);
-  return concatsp(fuc, (GEN)member_tu(x)[2]);
+  return dummyconcat(fuc, (GEN)member_tu(x)[2]);
 }
 
 GEN
 member_tufu(GEN x) /*  concatenation of tu and fu, w is lost */
 {
   GEN fuc = member_fu(x);
-  return concatsp((GEN)member_tu(x)[2], fuc);
+  return dummyconcat((GEN)member_tu(x)[2], fuc);
 }
 
 GEN

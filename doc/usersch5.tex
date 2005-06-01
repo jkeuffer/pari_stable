@@ -2719,28 +2719,73 @@ See~\secref{se:clean} and~\secref{se:unclean} for various useful constructors.
 Coefficients are accessed and set using \tet{gel}, \tet{gcoeff},
 see~\secref{se:accessors}. There are many internal functions to extract or
 manipulate subvectors or submatrices but, like the accessors above, none of
-them are suitable for \tet{gerepileupto}.
+them are suitable for \tet{gerepileupto}. Worse, there are no type
+verification, nor bound checking, so use at your own risk.
 
-\fun{GEN}{row}{GEN A, long x1}
+\misctitle{Note.} In the function names below, $i$ stands for \emph{interval}
+and $p$ for \emph{permutation}.
 
-\fun{GEN}{row_i}{GEN A, long x0, long x1, long x2}
+\fun{GEN}{dummycopy}{GEN x} returns a \typ{GEN} whose components are the
+components of $x$ (no copy is made). The result may now be used to compute in
+place without destroying $x$. This is essentially equivalent to
+\bprog
+  GEN y = cgetg(lg(x), typ(x));
+  for (i = 1; i < lg(x); i++) y[i] = x[i];
+  return y;
+@eprog\noindent
+except that \typ{POLMOD} (resp.~\typ{MAT}) are treated specially since a
+dummy copy of the representative (resp.~all columns) is also made.
 
-\fun{GEN}{rowextract_i}{GEN A, long x1, long x2}
+\fun{GEN}{dummytrans}{GEN x} returns the transpose of $x$, \emph{without}
+copying its components, i.~e.,~it returns a \kbd{GEN} whose components are
+(physically) the components of $x$. This is the internal function underlying
+\tet{gtrans}.
 
-\fun{GEN}{rowextract_ip}{GEN A, GEN p, long x1, long x2}
+\fun{GEN}{dummyconcat}{GEN x, GEN y} concatenate $x$ and $y$, \emph{without}
+copying compoents, i.~e.,~it returns a \kbd{GEN} whose components are 
+(physically) the comonents of $x$ and $y$.
 
-\fun{GEN}{rowextract_p}{GEN A, GEN p}
+\fun{GEN}{vconcat}{GEN A, GEN B} concatenate vertically the two \typ{MAT} $A$
+and $B$ of compatible dimensions. A \kbd{NULL} pointer is accepted for an
+empty matrix. See \tet{dummyconcat}.
 
-\fun{GEN}{gtrans_i}{GEN x}
+\fun{GEN}{row}{GEN A, long i} return $A[i,]$, the $i$-th row of the \typ{MAT}
+$A$.
 
-\fun{GEN}{vconcat}{GEN A, GEN B}
+\fun{GEN}{row_i}{GEN A, long i, long j1, long j2} return part of the $i$-th
+row of \typ{MAT} $A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
+\leq j_2$.
 
-\fun{GEN}{vecextract_i}{GEN A, long y1, long y2}
+\fun{GEN}{rowextract_i}{GEN A, long i1, long i2} return the \typ{MAT}
+formed by the $i_1$-th through $i_2$-th rows of \typ{MAT} $A$. Assume $i_1
+\leq i_2$.
 
-\fun{GEN}{vecextract_ip}{GEN A, GEN p, long y1, long y2}
+\fun{GEN}{rowextract_p}{GEN A, GEN p}, $p$ being a \typ{VECSMALL}
+representing a list $[p_1,\dots,p_n]$ of rows of \typ{MAT} $A$, returns the
+matrix whose rows are $A[p_1,],\dots, A[p_n,]$.
 
-\fun{GEN}{vecextract_p}{GEN A, GEN p}
+\fun{GEN}{rowextract_ip}{GEN A, GEN p, long x1, long x2}, short for
+\bprog
+  rowextract_i(rowextract_p(A,p), x1, x2)
+@eprog\noindent
+(more efficient).
 
+\fun{GEN}{vecextract_i}{GEN A, long j1, long j2}, return $A[j_1], \dots,
+A[j_2]$. If $A$ is a \typ{MAT}, these correspond to \emph{columns} of $A$.
+The object returned has the same type as $A$ (\typ{VEC}, \typ{COL} or
+\typ{MAT}). Assume $j_1 \leq j_2$.
+
+\fun{GEN}{vecextract_p}{GEN A, GEN p} $p$ is a \typ{VECSMALL} representing
+a list $[p_1,\dots,p_n]$ of indices. Returns a \kbd{GEN} which has the same
+type as $A$ (\typ{VEC}, \typ{COL} or \typ{MAT}), and whose components
+are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
+\emph{columns} of $A$.
+
+\fun{GEN}{vecextract_ip}{GEN A, GEN p, long y1, long y2} short for 
+\bprog
+  vecextract_i(vecextract_p(A,p), y1, y2)
+@eprog\noindent
+(more efficient).
 
 \subsec{Function to handle \typ{VECSMALL}}
 Theses functions handle \typ{VECSMALL} as an abstract container type

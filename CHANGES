@@ -92,6 +92,7 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
          (the behaviour added_newline was meant to avoid).
    12- do not install libpari.a.xxx [ include files are not versionned either
        and libpari.a is useless without the correct ones, contrary to .so ]
+   13- rename gtrans_i -> dummytrans, concatsp -> dummyconcat.
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

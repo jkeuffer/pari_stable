@@ -567,7 +567,7 @@ get_coprimes(GEN a, GEN b)
       if (d == gen_1) continue;
       c = diviiexact(c, d);
       u[i] = (long)diviiexact((GEN)u[i], d);
-      u = concatsp(u, d);
+      u = dummyconcat(u, d);
     }
     u[++k] = (long)c;
   }
@@ -605,7 +605,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   /* "complete" factorization first */
   for (i=1; i<lw; i++)
   {
-    if (w2[i] == 1) { ordmax = concatsp(ordmax, gen_1); continue; }
+    if (w2[i] == 1) { ordmax = dummyconcat(ordmax, gen_1); continue; }
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
@@ -619,7 +619,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for (k = 1; k < l; k++) u[k] = coeff(auxdecomp((GEN)u[k], 2),1,1);
 
       w1[i] = u[1];
-      w1 = concatsp(w1, vecextract_i(u, 2, l-1));
+      w1 = dummyconcat(w1, vecextract_i(u, 2, l-1));
       N = *dx;
       w2[i] = Z_pvalrem(N, (GEN)w1[i], &N);
       k  = lw;
@@ -627,7 +627,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for ( ; k < lw; k++) w2[k] = Z_pvalrem(N, (GEN)w1[k], &N);
     } RETRY {
       if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],w2[i]);
-      ordmax = concatsp(ordmax, mkvec( maxord((GEN)w1[i],f,w2[i]) ));
+      ordmax = dummyconcat(ordmax, mkvec( maxord((GEN)w1[i],f,w2[i]) ));
     } ENDCATCH;
   }
 
@@ -1945,7 +1945,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   f = N - m;
   q = powiu(p,f+1);
 
-  u = FpM_invimage(concatsp(P, V), vec_ei(N,1), p);
+  u = FpM_invimage(dummyconcat(P, V), vec_ei(N,1), p);
   setlg(u, lg(P));
   u = centermod(gmul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
@@ -2166,7 +2166,7 @@ _primedec(GEN nf, GEN p)
     beta = FpV_red(algtobasis_i(nf,beta), p);
 
     mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
-    p1 = concatsp(mulbeta, Ip);
+    p1 = dummyconcat(mulbeta, Ip);
     /* Fp-base of ideal (Ip, beta) in ZK/p */
     h[1] = (long)FpM_image(p1, p);
   }
@@ -2181,7 +2181,7 @@ _primedec(GEN nf, GEN p)
     long dim;
 
     H = (GEN)h[c]; k = lg(H)-1;
-    M   = FpM_suppl(concatsp(H,UN), p);
+    M   = FpM_suppl(dummyconcat(H,UN), p);
     Mi  = FpM_inv(M, p);
     M2  = vecextract_i(M, k+1,N); /* M = (H|M2) invertible */
     Mi2 = rowextract_i(Mi,k+1,N);
@@ -2204,7 +2204,7 @@ _primedec(GEN nf, GEN p)
       {
         r = lift_intern((GEN)R[i]);
         I = gaddmat_i(negi(r), mula);
-	h[c++] = (long)FpM_image(concatsp(H, I), p);
+	h[c++] = (long)FpM_image(dummyconcat(H, I), p);
       }
       if (n == dim)
         for (i=1; i<=n; i++) { H = (GEN)h[--c]; L[iL++] = (long)H; }
@@ -3260,10 +3260,10 @@ rnfbasis(GEN bnf, GEN order)
   if (!a)
   {
     GEN p1 = ideal_two_elt(nf, cl);
-    A = concatsp(A, gmul((GEN)p1[1], col));
+    A = dummyconcat(A, gmul((GEN)p1[1], col));
     a = (GEN)p1[2];
   }
-  A = concatsp(A, element_mulvec(nf, a, col));
+  A = dummyconcat(A, element_mulvec(nf, a, col));
   return gerepilecopy(av, A);
 }
 
@@ -3355,7 +3355,7 @@ polcompositum0(GEN A, GEN B, long flall)
   {
     D = RgX_rescale(A, stoi(1 - k));
     C = gdivexact(C, D);
-    if (degpol(C) <= 0) C = mkvec(D); else C = concatsp(ZX_DDF(C, 0), D);
+    if (degpol(C) <= 0) C = mkvec(D); else C = dummyconcat(ZX_DDF(C, 0), D);
   }
   else
     C = ZX_DDF(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
@@ -3492,7 +3492,7 @@ mattocomplex(GEN nf, GEN x)
   {
     GEN c = (GEN)x[j], b = cgetg(l, t_MAT);
     for (i=1; i<l; i++) b[i] = (long)nftocomplex(nf, (GEN)c[i]);
-    b = gtrans_i(b); settyp(b, t_COL);
+    b = dummytrans(b); settyp(b, t_COL);
     v[j] = (long)b;
   }
   return v;
@@ -3525,7 +3525,7 @@ rnfscal(GEN m, GEN x, GEN y)
   long i, l = lg(m);
   GEN z = cgetg(l, t_COL);
   for (i = 1; i < l; i++)
-    z[i] = lmul(gconj(gtrans_i((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
+    z[i] = lmul(gconj(dummytrans((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
   return z;
 }
 

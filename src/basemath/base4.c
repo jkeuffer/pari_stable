@@ -417,7 +417,7 @@ idealhnf0(GEN nf, GEN a, GEN b)
 
   /* HNF of aZ_K+bZ_K */
   av = avma; nf = checknf(nf);
-  x = concatsp(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
+  x = dummyconcat(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
   return gerepileupto(av, idealmat_to_hnf(nf, x));
 }
 
@@ -631,8 +631,8 @@ idealfactor(GEN nf, GEN x)
         long l = lg(P);
         z = cgetg(l, t_COL);
         for (j = 1; j < l; j++) z[j] = lmulii(gmael(P,j,3), E);
-        f1 = concatsp(f1, P);
-        f2 = concatsp(f2, z);
+        f1 = dummyconcat(f1, P);
+        f2 = dummyconcat(f2, z);
       }
       f[1] = (long)f1; settyp(f1, t_COL);
       f[2] = (long)f2; return gerepilecopy(av, f);
@@ -853,7 +853,7 @@ idealadd(GEN nf, GEN x, GEN y)
     z = gscalmat(dz, N);
     gunclone(dz); return z;
   }
-  z = concatsp(x,y);
+  z = dummyconcat(x,y);
   z = modid? hnfmodid(z,p1): hnfmod(z, p1);
   if (dz) z = gdiv(z,dz);
   return gerepileupto(av,z);
@@ -955,7 +955,7 @@ idealaddmultoone(GEN nf, GEN list)
   {
     GEN I = (GEN)list[i];
     if (typ(I) != t_MAT || lg(I) != lg(I[1])) I = idealhermite_aux(nf,I);
-    L[i] = (long)I; z = concatsp(z, I);
+    L[i] = (long)I; z = dummyconcat(z, I);
   }
   H = hnfperm_i(z, &U, &perm);
   if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
@@ -1328,7 +1328,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   else
   {
     newg[i] = (long)FpV_red(special_anti_uniformizer(nf, pr), prkZ);
-    e = concatsp(e, negi(zpow));
+    e = dummyconcat(e, negi(zpow));
   }
   return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);
 }
@@ -1494,7 +1494,7 @@ idealmul(GEN nf, GEN x, GEN y)
         {
           GEN mx = eltmul_get_table(nf, x);
           GEN mpi= eltmul_get_table(nf, (GEN)y[2]);
-          p1 = concatsp(gmul(mx,(GEN)y[1]), gmul(mx,mpi));
+          p1 = dummyconcat(gmul(mx,(GEN)y[1]), gmul(mx,mpi));
           p1 = idealmat_to_hnf(nf, p1);
           break;
         }
@@ -1573,7 +1573,7 @@ hnfideal_inv(GEN nf, GEN I)
   J = idealmulh(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
-  dual = gtrans_i( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
+  dual = dummytrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
   dual = hnfmodid(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
   return gdiv(dual,IZ);
@@ -1928,7 +1928,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   if (dx) y = gmul(y, dx);
   if (dy) x = gmul(x, dy);
   dx = mul_content(dx,dy);
-  z = kerint(concatsp(x,y)); lz = lg(z);
+  z = kerint(dummyconcat(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = gmul(x,z);
   z = hnfmodid(z, lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
@@ -2147,7 +2147,7 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
   {
     if (gcmp1(gcoeff(f,1,1))) break;
     x = idealdivexact(nf, x, f);
-    f = hnfmodid(concatsp(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
+    f = hnfmodid(dummyconcat(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
   }
   x2 = x;
 #else /*2) from prime decomposition */
@@ -2401,7 +2401,7 @@ idealchinese(GEN nf, GEN x, GEN w)
     w = vecextract_p(w, p); settyp(w, t_VEC); /* make sure typ = t_VEC */
     merge_factor(&L, &e, (GEN)fa[1], (GEN)fa[2]);
     i = lg(L);
-    w = concatsp(w, zerovec(i - r));
+    w = dummyconcat(w, zerovec(i - r));
     r = i;
   }
   else

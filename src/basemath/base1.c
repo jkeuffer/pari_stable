@@ -1870,7 +1870,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       long r; /* add to M2 the elts of M * nf.zk[i]  */
       for (j = 1; j <= rkM; j++) M2[k++] = lmul(Mx, (GEN)M[j]);
       setlg(M2, k); k = 1;
-      M = image(concatsp(M, M2));
+      M = image(dummyconcat(M, M2));
       r = lg(M) - 1;
       if (r == rkM) break;
       if (r > rkM)

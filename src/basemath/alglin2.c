@@ -1178,7 +1178,7 @@ intersect(GEN x, GEN y)
   if (typ(x)!=t_MAT || typ(y)!=t_MAT) err(typeer,"intersect");
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
 
-  av=avma; z=ker(concatsp(x,y));
+  av=avma; z=ker(dummyconcat(x,y));
   for (j=lg(z)-1; j; j--) setlg(z[j],lx);
   tetpil=avma; return gerepile(av,tetpil,gmul(x,z));
 }
@@ -2149,8 +2149,8 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
     extratop = gsub(extratop, ZM_zm_mul(B, c));
   }
 
-  extramat = concatsp(extratop, vconcat(dep, H));
-  Cnew     = concatsp(extraC, vecextract_i(C, col-lH+1, co));
+  extramat = dummyconcat(extratop, vconcat(dep, H));
+  Cnew     = dummyconcat(extraC, vecextract_i(C, col-lH+1, co));
   if (DEBUGLEVEL>5) fprintferr("    1st phase done\n");
   permpro = imagecomplspec(extramat, &nlze);
   extramat = rowextract_p(extramat, permpro);
@@ -2162,7 +2162,7 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   matb    = rowextract_i(extramat, nlze+1, lig);
   if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
-  *ptC = concatsp(vecextract_i(C, 1, col-lH), Cnew);
+  *ptC = dummyconcat(vecextract_i(C, 1, col-lH), Cnew);
   if (DEBUGLEVEL)
   {
     msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
@@ -3218,9 +3218,9 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   {
     if (n)
     {
-      x = smithall(gtrans_i(x), ptV, ptU); /* ptV, ptU swapped! */
-      if (typ(x) == t_MAT && n != m) x = gtrans_i(x);
-      if (V) V = gmul(V, gtrans_i(*ptV));
+      x = smithall(dummytrans(x), ptV, ptU); /* ptV, ptU swapped! */
+      if (typ(x) == t_MAT && n != m) x = dummytrans(x);
+      if (V) V = gmul(V, dummytrans(*ptV));
       if (U) U = *ptU; /* TRANSPOSE */
     }
     else /* 0 matrix */
@@ -3324,18 +3324,18 @@ THEEND:
   {
     if (typ(x) == t_MAT) x = mattodiagonal_i(x);
     m = lg(x)-1;
-    if (m0 > m) x = concatsp(zerovec(m0-m), x);
+    if (m0 > m) x = dummyconcat(zerovec(m0-m), x);
     return gerepilecopy(av0, x);
   }
 
   if (V0)
   {
-    x = concatsp(zeromat(m,n0-n), x);
-    if (V) V = concatsp(V0, V);
+    x = dummyconcat(zeromat(m,n0-n), x);
+    if (V) V = dummyconcat(V0, V);
   }
   if (U)
   {
-    U = gtrans_i(U);
+    U = dummytrans(U);
     if (perm) U = vecextract_p(U, perm_inv(perm));
   }
   snf_pile(av0, &x,&U,&V);
@@ -3523,7 +3523,7 @@ gsmithall(GEN x,long all)
       }
     }
   }
-  z = all? mkvec3(gtrans_i(U), V, x): mattodiagonal_i(x);
+  z = all? mkvec3(dummytrans(U), V, x): mattodiagonal_i(x);
   return gerepilecopy(av, z);
 }
 

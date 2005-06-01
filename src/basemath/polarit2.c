@@ -1241,7 +1241,7 @@ AGAIN:
     {
       GEN P1 = gscalmat(powiu(p, a-b), N0);
       first = 0;
-      m = concatsp( m, vconcat(ZERO, P1) );
+      m = dummyconcat( m, vconcat(ZERO, P1) );
       /*     [ C M_L        0     ]
        * m = [                    ]   square matrix
        *     [  T2'  p^(a-b) I_N0 ]   T2' = Tra * M_L  truncated
@@ -1354,7 +1354,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
     L = LLL_cmbf((GEN)res[l], famod, p, pa, A, a, maxK);
     if (DEBUGLEVEL>2) msgTIMER(&T,"Knapsack");
     /* remove last elt, possibly unfactored. Add all new ones. */
-    setlg(res, l); res = concatsp(res, L);
+    setlg(res, l); res = dummyconcat(res, L);
   }
   return res;
 }
@@ -1385,7 +1385,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   lz = lg(z)-1;
   if (lz > (degpol(pol) >> 2))
   { /* many roots */
-    z = concatsp(deg1_from_roots(z, v),
+    z = dummyconcat(deg1_from_roots(z, v),
                  FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
     z = hensel_lift_fact(pol, z, NULL, p, pe, e);
   }
@@ -1611,7 +1611,7 @@ ZX_DDF(GEN x, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = concatsp(L2, DDF(polinflate((GEN)L[i], v[k]), hint, 0));
+        L2 = dummyconcat(L2, DDF(polinflate((GEN)L[i], v[k]), hint, 0));
       L = L2;
     }
   }
@@ -1703,7 +1703,7 @@ nfrootsQ(GEN x)
   d = modulargcd(derivpol(x), x);
   if (degpol(d)) x = RgX_div(x, d);
   z = DDF(x, 1, 1);
-  if (val) z = concatsp(z, gen_0);
+  if (val) z = dummyconcat(z, gen_0);
   return gerepilecopy(av, z);
 }
 
@@ -1875,8 +1875,8 @@ concat_factor(GEN f, GEN g)
 {
   if (lg(f) == 1) return g;
   if (lg(g) == 1) return f;
-  return mkmat2(concatsp((GEN)f[1], (GEN)g[1]),
-                concatsp((GEN)f[2], (GEN)g[2]));
+  return mkmat2(dummyconcat((GEN)f[1], (GEN)g[1]),
+                dummyconcat((GEN)f[2], (GEN)g[2]));
 }
 
 /* assume f and g coprime integer factorizations */
@@ -2064,8 +2064,8 @@ gauss_factor(GEN x)
         E[i] = lstoi(e << 1);
       else
       {
-        P = concatsp(P, gauss_normal( gconj(w) ));
-        E = concatsp(E, (GEN)E[i]);
+        P = dummyconcat(P, gauss_normal( gconj(w) ));
+        E = dummyconcat(E, (GEN)E[i]);
       }
       exp += 3*e;
       exp &= 3;
@@ -2078,8 +2078,8 @@ gauss_factor(GEN x)
 
   y = gmul(y, Ipow(exp));
   if (!gcmp1(y)) {
-    fa[1] = (long)concatsp(mkcol(y), (GEN)fa[1]);
-    fa[2] = (long)concatsp(gen_1,     (GEN)fa[2]);
+    fa[1] = (long)dummyconcat(mkcol(y), (GEN)fa[1]);
+    fa[2] = (long)dummyconcat(gen_1,     (GEN)fa[2]);
   }
   return gerepilecopy(av, fa);
 }

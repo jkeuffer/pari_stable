@@ -690,6 +690,6 @@ rnfidealmul(GEN rnf,GEN x,GEN y) /* x et y sous HNF relative uniquement */
   x2 = (GEN)x[2];
   p1 = gmul((GEN)z[1], (GEN)x[1]);
   p2 = rnfalgtobasis(rnf, gmul((GEN)z[2], x1)); settyp(p2, t_MAT);
-  z = mkvec2(concatsp(p1, p2), concatsp(x2, x2));
+  z = mkvec2(dummyconcat(p1, p2), dummyconcat(x2, x2));
   return gerepileupto(av, nfhermite(nf,z));
 }

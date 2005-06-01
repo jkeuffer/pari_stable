@@ -740,7 +740,7 @@ setunion(GEN x, GEN y)
   GEN z;
 
   if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
-  z=concatsp(x,y); tetpil=avma; return gerepile(av,tetpil,gtoset(z));
+  z=dummyconcat(x,y); tetpil=avma; return gerepile(av,tetpil,gtoset(z));
 }
 
 GEN

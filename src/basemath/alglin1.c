@@ -37,12 +37,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* No copy*/
 GEN
-gtrans_i(GEN x)
+dummytrans(GEN x)
 {
   long i,j,lx,dx, tx=typ(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) err(typeer,"gtrans_i");
+  if (! is_matvec_t(tx)) err(typeer,"dummytrans");
   switch(tx)
   {
     case t_VEC:
@@ -177,7 +177,7 @@ err_cat(GEN x, GEN y)
 }
 
 GEN
-concatsp(GEN x, GEN y)
+dummyconcat(GEN x, GEN y)
 {
   long tx=typ(x),ty=typ(y),lx=lg(x),ly=lg(y),i;
   GEN z,p1;
@@ -237,12 +237,12 @@ concatsp(GEN x, GEN y)
       switch(ty)
       {
 	case t_COL:
-	  if (lx<=2) return (lx==1)? y: concatsp(gel(x,1),y);
+	  if (lx<=2) return (lx==1)? y: dummyconcat(gel(x,1),y);
           if (ly>=3) break;
-          return (ly==1)? x: concatsp(x,gel(y,1));
+          return (ly==1)? x: dummyconcat(x,gel(y,1));
 	case t_MAT:
 	  z=cgetg(ly,ty); if (lx != ly) break;
-	  for (i=1; i<ly; i++) gel(z,i) = concatsp(gel(x,i),gel(y,i));
+	  for (i=1; i<ly; i++) gel(z,i) = dummyconcat(gel(x,i),gel(y,i));
           return z;
       }
       break;
@@ -251,9 +251,9 @@ concatsp(GEN x, GEN y)
       switch(ty)
       {
 	case t_VEC:
-	  if (lx<=2) return (lx==1)? y: concatsp(gel(x,1), y);
+	  if (lx<=2) return (lx==1)? y: dummyconcat(gel(x,1), y);
 	  if (ly>=3) break;
-	  return (ly==1)? x: concatsp(x, gel(y,1));
+	  return (ly==1)? x: dummyconcat(x, gel(y,1));
 	case t_MAT:
 	  if (lx != lg(y[1])) break;
 	  z=cgetg(ly+1,ty); gel(z,1) = x;
@@ -267,7 +267,7 @@ concatsp(GEN x, GEN y)
       {
 	case t_VEC:
 	  z=cgetg(lx,tx); if (ly != lx) break;
-	  for (i=1; i<lx; i++) gel(z,i) = concatsp(gel(x,i), gel(y,i));
+	  for (i=1; i<lx; i++) gel(z,i) = dummyconcat(gel(x,i), gel(y,i));
           return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
@@ -301,7 +301,7 @@ concat(GEN x, GEN y)
     }
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
     y = (GEN)x[i++];
-    for (; i<lx; i++) y = concatsp(y, (GEN)x[i]);
+    for (; i<lx; i++) y = dummyconcat(y, (GEN)x[i]);
     return gerepilecopy(av,y);
   }
   ty = typ(y);
@@ -2181,7 +2181,7 @@ imagecomplspec(GEN x, long *nlze)
   GEN d,y;
   long i,j,k,l,r;
 
-  x = gtrans_i(x); l = lg(x);
+  x = dummytrans(x); l = lg(x);
   gauss_pivot(x,&d,&r);
   avma=av; y = cgetg(l,t_VECSMALL);
   for (i=j=1, k=r+1; i<l; i++)
@@ -2769,7 +2769,7 @@ FpM_intersect(GEN x, GEN y, GEN p)
   GEN z;
 
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
-  z = FpM_ker(concatsp(x,y), p);
+  z = FpM_ker(dummyconcat(x,y), p);
   for (j=lg(z)-1; j; j--) setlg(z[j],lx);
   return gerepileupto(av, FpM_mul(x,z,p));
 }
@@ -3477,7 +3477,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     case t_COL: break;
     default: err(typeer,"gaussmodulo");
   }
-  H = hnfall_i(concatsp(M,delta), &U, 1);
+  H = hnfall_i(dummyconcat(M,delta), &U, 1);
   Y = hnf_gauss(H,Y); if (!Y) return gen_0;
   u1 = cgetg(m+1,t_MAT);
   u2 = cgetg(n+1,t_MAT);

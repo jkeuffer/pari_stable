@@ -1561,7 +1561,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   for(i=r-1;i>1;i--)
     R[i]=(long)FpV_red(gadd(FpM_FpC_mul(MA,(GEN)R[i+1],l),
          gmul((GEN)U[i+2],(GEN)R[r])),l);
-  R=gtrans_i(R);
+  R=dummytrans(R);
   for(i=1;i<lg(R);i++)
     R[i]=(long)RgV_to_RgX((GEN)R[i],vu);
   A=gtopolyrev(R,vp);

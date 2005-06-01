@@ -3242,12 +3242,12 @@ readbin(const char *name, FILE *f)
   cx = 0; /* gcc -Wall */
   while ((y = readobj(f, &cy)))
   {
-    if (x && cx == BIN_GEN) z = z? concatsp(z, mkvec(x)): mkvec(x);
+    if (x && cx == BIN_GEN) z = z? dummyconcat(z, mkvec(x)): mkvec(x);
     x = y; cx = cy;
   }
   if (z)
   {
-    if (x && cx == BIN_GEN) z = z? concatsp(z, mkvec(x)): mkvec(x);
+    if (x && cx == BIN_GEN) z = z? dummyconcat(z, mkvec(x)): mkvec(x);
     if (DEBUGLEVEL)
       err(warner,"%ld unnamed objects read. Returning then in a vector",
           lg(z)-1);

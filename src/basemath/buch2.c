@@ -1148,7 +1148,7 @@ red_mod_units(GEN col, GEN z, long prec)
   RU = lg(mat); x = cgetg(RU+1,t_COL);
   for (i=1; i<RU; i++) x[i] = (long)real_i((GEN)col[i]);
   x[RU] = (long)N2;
-  x = lllintern(concatsp(mat,x),100, 1,prec);
+  x = lllintern(dummyconcat(mat,x),100, 1,prec);
   if (!x) return NULL;
   x = (GEN)x[RU];
   if (signe(x[RU]) < 0) x = gneg_i(x);
@@ -1324,7 +1324,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   {
     GEN Garch, V = (GEN)clg2[2];
     Bex = zc_to_ZC(Bex);
-    p1 = c? concatsp(gmul(V,Q), Bex): Bex;
+    p1 = c? dummyconcat(gmul(V,Q), Bex): Bex;
     col = act_arch(p1, WB_C);
     if (c)
     {
@@ -1552,7 +1552,7 @@ isunit(GEN bnf,GEN x)
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) v[i] = (long)gen_1;
   for (   ; i<=RU; i++) v[i] = (long)gen_2;
-  logunit = concatsp(logunit, v);
+  logunit = dummyconcat(logunit, v);
   /* ex = fundamental units exponents */
   rlog = real_i(logunit);
   prec = nfgetprec(nf);
@@ -2149,7 +2149,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) T[i] = (long)gen_1;
   for (   ; i<=RU; i++) T[i] = (long)gen_2;
-  mdet = concatsp(xreal,T); /* det(Span(mdet)) = N * R */
+  mdet = dummyconcat(xreal,T); /* det(Span(mdet)) = N * R */
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet_t = (i <= 4)? mdet: gprec_w(mdet,i-1);
@@ -2629,7 +2629,7 @@ buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
     x[1]=nf[1];
     x[2]=nf[2];
     x[3]=(long)mkvec2((GEN)nf[3], (GEN)nf[4]);
-    x[4]=nf[7]; return mkmat( concatsp(x, res) );
+    x[4]=nf[7]; return mkmat( dummyconcat(x, res) );
   }
   z = cgetg(11,t_VEC);
   z[1]=(long)W;

@@ -230,7 +230,7 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   nf    = gmael(bnr, 1, 7);
 
   M = bnrGetSurj(bnr, bnrc);
-  (void)hnfall_i(concatsp(M, Mrc), &U, 1);
+  (void)hnfall_i(dummyconcat(M, Mrc), &U, 1);
   l = lg((GEN)M[1]);
   chic = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
@@ -298,10 +298,10 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
   long nbA = lg(DA)-1, rk;
   GEN U;
 
-  rk = nbA + lg(DB) - lg(hnfall_i(concatsp(P, DB), &U, 1));
+  rk = nbA + lg(DB) - lg(hnfall_i(dummyconcat(P, DB), &U, 1));
   U = vecextract_i(U, 1,rk);
   U = rowextract_i(U, 1,nbA);
-  if (!gcmp0(DA)) U = concatsp(U, DA);
+  if (!gcmp0(DA)) U = dummyconcat(U, DA);
   return gerepileupto(av, hnf(U));
 }
 
@@ -345,7 +345,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   subgrp  = subgrouplist(D, mkvec(gen_2));
   nb = lg(subgrp);
   for (i = 1; i < nb; i++)
-    subgrp[i] = (long)hnf(concatsp(gmul(T, (GEN)subgrp[i]), Mr));
+    subgrp[i] = (long)hnf(dummyconcat(gmul(T, (GEN)subgrp[i]), Mr));
 
   disable_dbg(-1);
   return gerepilecopy(av, subgrp);
@@ -397,7 +397,7 @@ GetIndex(GEN pr, GEN bnr, GEN subgroup)
     bnrpr = buchrayinitgen(bnf, mpr);
     cycpr = gmael(bnrpr, 5, 2);
     M = gmul(bnrGetSurj(bnr, bnrpr), subgroup);
-    subpr = hnf(concatsp(M, diagonal_i(cycpr)));
+    subpr = hnf(dummyconcat(M, diagonal_i(cycpr)));
     /* e = #(bnr/subgroup) / #(bnrpr/subpr) */
     e = itos( diviiexact(dethnf_i(subgroup), dethnf_i(subpr)) );
   }
@@ -1844,7 +1844,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 
   d->G = min(-20, -bit_accuracy(prec) >> 4);
 
-  vec  = concatsp(mkvec(gneg(beta)), row(M, d->v));
+  vec  = dummyconcat(mkvec(gneg(beta)), row(M, d->v));
   imin = (long)bit_accuracy_mul(prec, .225);
   imax = (long)bit_accuracy_mul(prec, .315);
 
@@ -2746,7 +2746,7 @@ bnrstark(GEN bnr, GEN subgrp, long prec)
     {
       GEN t = (GEN)M[i];
       if (is_pm1(cyc[i])) continue;
-      M[i] = Mcyc[i]; H = hnf(concatsp(M, Mcyc));
+      M[i] = Mcyc[i]; H = hnf(dummyconcat(M, Mcyc));
       M[i] = (long)t;
       vec[j++] = (long)bnrstark(bnr, H, prec);
     }
