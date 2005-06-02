@@ -477,7 +477,7 @@ get_Selmer(GEN bnf, GEN cycgen, long rc)
 {
   GEN fu = check_units(bnf,"rnfkummer");
   GEN tu = gmael3(bnf,8,4,2);
-  return shallowconcat(algtobasis(bnf,shallowconcat(fu,tu)), vecsplice(cycgen,1,rc));
+  return shallowconcat(algtobasis(bnf,shallowconcat(fu,tu)), vecslice(cycgen,1,rc));
 }
 
 

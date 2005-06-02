@@ -46,7 +46,7 @@ buchnarrow(GEN bnf)
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
   v = archstar_full_rk(NULL, gmael(nf,5,1), ZM_to_Flm(v, 2), gen + (ngen - t));
-  v = rowsplice(v, t+1, r1);
+  v = rowslice(v, t+1, r1);
 
   logs = cgetg(ngen+1,t_MAT);
   GD = gmael(bnf,9,3); invpi = ginv( mppi(DEFAULTPREC) );
@@ -1305,7 +1305,7 @@ ideallog_to_bnr(GEN bnr, GEN z)
   if (lz != lU)
   {
     if (lz == 1) return zerocol(lg(U[1]) - 1); /* lU != 1 */
-    U = vecsplice(U, lU-lz+1, lU-1); /* remove Cl(K) part */
+    U = vecslice(U, lU-lz+1, lU-1); /* remove Cl(K) part */
   }
   z = gmul(U, z);
   if (col)
@@ -1966,8 +1966,8 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
     U = (GEN)u1u2[1];
     D = (GEN)u1u2[3];
     U = shallowconcat(
-      l1==1   ? zeromat(nbgen, lg(U1)-1): gmul(vecsplice(U, 1,   l1-1), U1),
-      l1>nbgen? zeromat(nbgen, lg(U2)-1): gmul(vecsplice(U, l1, nbgen), U2)
+      l1==1   ? zeromat(nbgen, lg(U1)-1): gmul(vecslice(U, 1,   l1-1), U1),
+      l1>nbgen? zeromat(nbgen, lg(U2)-1): gmul(vecslice(U, l1, nbgen), U2)
     );
   }
   else

@@ -446,7 +446,7 @@ get_range(char *s, long *a, long *b, long *cmpl, long lx)
 }
 
 GEN
-vecsplice(GEN A, long y1, long y2)
+vecslice(GEN A, long y1, long y2)
 {
   long i,lB = y2 - y1 + 2;
   GEN B = cgetg(lB, typ(A));
@@ -463,7 +463,7 @@ vecslicepermute(GEN A, GEN p, long y1, long y2)
   return B;
 }
 
-/* rowsplice(rowpermute(A,p), x1, x2) */
+/* rowslice(rowpermute(A,p), x1, x2) */
 GEN
 rowslicepermute(GEN A, GEN p, long x1, long x2)
 {
@@ -474,11 +474,11 @@ rowslicepermute(GEN A, GEN p, long x1, long x2)
 }
 
 GEN
-rowsplice(GEN A, long x1, long x2)
+rowslice(GEN A, long x1, long x2)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) gel(B,i) = vecsplice(gel(A,i),x1,x2);
+  for (i=1; i<lB; i++) gel(B,i) = vecslice(gel(A,i),x1,x2);
   return B;
 }
 

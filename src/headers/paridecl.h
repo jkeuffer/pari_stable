@@ -175,7 +175,7 @@ GEN     mattodiagonal_i(GEN m);
 long    rank(GEN x);
 GEN     row(GEN A, long x1);
 GEN     row_i(GEN A, long x0, long x1, long x2);
-GEN     rowsplice(GEN A, long x1, long x2);
+GEN     rowslice(GEN A, long x1, long x2);
 GEN     rowslicepermute(GEN A, GEN p, long x1, long x2);
 GEN     rowpermute(GEN A, GEN p);
 GEN     sindexrank(GEN x);
@@ -184,7 +184,7 @@ GEN     suppl(GEN x);
 GEN     vconcat(GEN A, GEN B);
 GEN     vec_ei(long n, long i);
 GEN     vec_Cei(long n, long i, GEN c);
-GEN     vecsplice(GEN A, long y1, long y2);
+GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
 

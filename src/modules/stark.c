@@ -299,8 +299,8 @@ ComputeKernel0(GEN P, GEN DA, GEN DB)
   GEN U;
 
   rk = nbA + lg(DB) - lg(hnfall_i(shallowconcat(P, DB), &U, 1));
-  U = vecsplice(U, 1,rk);
-  U = rowsplice(U, 1,nbA);
+  U = vecslice(U, 1,rk);
+  U = rowslice(U, 1,nbA);
   if (!gcmp0(DA)) U = shallowconcat(U, DA);
   return gerepileupto(av, hnf(U));
 }

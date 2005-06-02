@@ -2065,8 +2065,8 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
                  &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
-    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecsplice(U, 1, l1-1),   U1);
-    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecsplice(U, l1, nbgen), U2);
+    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecslice(U, 1, l1-1),   U1);
+    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecslice(U, l1, nbgen), U2);
     U = shallowconcat(U1, U2);
   }
   else

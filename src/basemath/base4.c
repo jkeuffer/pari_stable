@@ -964,7 +964,7 @@ idealaddmultoone(GEN nf, GEN list)
     if (perm[i] == 1) break;
   U = (GEN)U[(l-2)*N + i]; /* z U = 1 */
   for (i=1; i<l; i++)
-    L[i] = lmul((GEN)L[i], vecsplice(U, (i-1)*N + 1, i*N));
+    L[i] = lmul((GEN)L[i], vecslice(U, (i-1)*N + 1, i*N));
   return gerepilecopy(av, L);
 }
 

@@ -156,7 +156,7 @@ T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
   GEN A, p1, m1, IntM, nia, eps3, eps2;
   long e = bit_accuracy(prec);
 
-  m1 = rowsplice(vecsplice(MatFU, 1,r), 1,r); /* minor order r */
+  m1 = rowslice(vecslice(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1,prec);
 
   A = invmat(m1);

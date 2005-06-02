@@ -2758,7 +2758,7 @@ $A$.
 row of \typ{MAT} $A$: $A[i,j_1]$, $A[i,j_1+1]\dots,A[i,j_2]$. Assume $j_1
 \leq j_2$.
 
-\fun{GEN}{rowsplice}{GEN A, long i1, long i2} return the \typ{MAT}
+\fun{GEN}{rowslice}{GEN A, long i1, long i2} return the \typ{MAT}
 formed by the $i_1$-th through $i_2$-th rows of \typ{MAT} $A$. Assume $i_1
 \leq i_2$.
 
@@ -2768,11 +2768,11 @@ matrix whose rows are $A[p_1,],\dots, A[p_n,]$.
 
 \fun{GEN}{rowslicepermute}{GEN A, GEN p, long x1, long x2}, short for
 \bprog
-  rowsplice(rowpermute(A,p), x1, x2)
+  rowslice(rowpermute(A,p), x1, x2)
 @eprog\noindent
 (more efficient).
 
-\fun{GEN}{vecsplice}{GEN A, long j1, long j2}, return $A[j_1], \dots,
+\fun{GEN}{vecslice}{GEN A, long j1, long j2}, return $A[j_1], \dots,
 A[j_2]$. If $A$ is a \typ{MAT}, these correspond to \emph{columns} of $A$.
 The object returned has the same type as $A$ (\typ{VEC}, \typ{COL} or
 \typ{MAT}). Assume $j_1 \leq j_2$.
@@ -2785,7 +2785,7 @@ are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 
 \fun{GEN}{vecslicepermute}{GEN A, GEN p, long y1, long y2} short for 
 \bprog
-  vecsplice(vecpermute(A,p), y1, y2)
+  vecslice(vecpermute(A,p), y1, y2)
 @eprog\noindent
 (more efficient).
 

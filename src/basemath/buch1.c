@@ -1029,7 +1029,7 @@ subFBquad(GEN D, double PROD, long KC)
   for (j = 1; j < ino;i++,j++) vperm[i] = no[j];
   for (     ; i < lv; i++)     vperm[i] = i;
   if (DEBUGLEVEL) msgtimer("subFBquad (%ld elt.)", lgsub-1);
-  avma = av; return vecsplice(vperm, 1, lgsub-1);
+  avma = av; return vecslice(vperm, 1, lgsub-1);
 }
 
 /* assume n >= 1, x[i][j] = subFB[i]^j, for j = 1..n */

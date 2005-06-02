@@ -3044,7 +3044,7 @@ PRECPB:
       if (need > 5)
       {
         if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
-        L_jid = vecsplice(F.perm, 1, need);
+        L_jid = vecslice(F.perm, 1, need);
         vecsmall_sort(L_jid); jid = 0; 
       }
       goto MORE;
@@ -3052,7 +3052,7 @@ PRECPB:
   }
   need = 1;
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
-  A = vecsplice(C, 1, zc); /* cols corresponding to units */
+  A = vecslice(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A, RU, N, &lambda);
   if (!R)
   { /* not full rank for units */
@@ -3096,7 +3096,7 @@ PRECPB:
       L = vecpermute(L, v);
     }
     /* arch. components of fund. units */
-    H = hnflll_i(L, &U, 1); U = vecsplice(U, lg(U)-(RU-1), lg(U)-1);
+    H = hnflll_i(L, &U, 1); U = vecslice(U, lg(U)-(RU-1), lg(U)-1);
     U = gmul(U, lll(H, DEFAULTPREC));
     A = cleanarch(gmul(A, U), N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");

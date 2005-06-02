@@ -1821,7 +1821,7 @@ padicff2(GEN nf,GEN p,long k)
     long e = itos((GEN)P[3]), ef = e * itos((GEN)P[4]);
     D = smithall(idealpows(nf,P, k*e), &U, NULL);
     Ui= ginv(U); setlg(Ui, ef+1); /* cf smithrel */
-    U = rowsplice(U, 1, ef);
+    U = rowslice(U, 1, ef);
     mat = gmul(U, gmul(mulx, Ui));
     fa[i] = (long)caradj(mat,0,NULL);
   }

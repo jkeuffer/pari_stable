@@ -619,7 +619,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for (k = 1; k < l; k++) u[k] = coeff(auxdecomp((GEN)u[k], 2),1,1);
 
       w1[i] = u[1];
-      w1 = shallowconcat(w1, vecsplice(u, 2, l-1));
+      w1 = shallowconcat(w1, vecslice(u, 2, l-1));
       N = *dx;
       w2[i] = Z_pvalrem(N, (GEN)w1[i], &N);
       k  = lw;
@@ -1381,7 +1381,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   if (DEBUGLEVEL >= 6) fprintferr("  fastnu: HNF(G) is computed\n");
 
   setlg(G, n+2);
-  G = rowsplice(G, 1, n+1);
+  G = rowslice(G, 1, n+1);
   h = gtopoly((GEN)G[n+1], v);
   for (j = 1; j <= n; j++)
     h = FpX_gcd(h, gtopoly((GEN)G[j], v), p);
@@ -2183,8 +2183,8 @@ _primedec(GEN nf, GEN p)
     H = (GEN)h[c]; k = lg(H)-1;
     M   = FpM_suppl(shallowconcat(H,UN), p);
     Mi  = FpM_inv(M, p);
-    M2  = vecsplice(M, k+1,N); /* M = (H|M2) invertible */
-    Mi2 = rowsplice(Mi,k+1,N);
+    M2  = vecslice(M, k+1,N); /* M = (H|M2) invertible */
+    Mi2 = rowslice(Mi,k+1,N);
     /* FIXME: FpM_mul(,M2) could be done with vecpermute */
     phi2 = FpM_mul(Mi2, FpM_mul(phi,M2, p), p);
     mat1 = FpM_ker(phi2, p);
@@ -3254,7 +3254,7 @@ rnfbasis(GEN bnf, GEN order)
     I = (GEN)order[2];
   }
   A = (GEN)order[1];
-  col= (GEN)A[n]; A = vecsplice(A, 1, n-1);
+  col= (GEN)A[n]; A = vecslice(A, 1, n-1);
   cl = (GEN)I[n];
   a = gen_if_principal(bnf, cl);
   if (!a)

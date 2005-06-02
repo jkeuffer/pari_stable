@@ -1687,7 +1687,7 @@ static void
 p_mat(long **mat, GEN perm, long k)
 {
   pari_sp av = avma;
-  perm = vecsplice(perm, k+1, lg(perm)-1);
+  perm = vecslice(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
     fprintferr("matgen = %Z\n", zm_to_ZM( rowpermute((GEN)mat, perm) ));
@@ -2086,10 +2086,10 @@ TOOLARGE:
   setlg(perm,k+1);
   x = rowpermute(x, perm); /* upper part */
   setlg(perm,ly);
-  *ptB = vecsplice(x, j+lx-ly, lx-1);
+  *ptB = vecslice(x, j+lx-ly, lx-1);
   setlg(x, j);
-  *ptdep = rowsplice(x, 1, lx-ly);
-  return rowsplice(x, lx-ly+1, k); /* H */
+  *ptdep = rowslice(x, 1, lx-ly);
+  return rowslice(x, lx-ly+1, k); /* H */
 }
 
 /* same as Flv_to_ZV, Flc_to_ZC, Flm_to_ZM but do not assume positivity */
@@ -2143,14 +2143,14 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   extratop = zm_to_ZM( rowslicepermute(extramat, perm, 1, lig) );
   if (li != lig)
   { /* zero out bottom part, using the Id block */
-    GEN A = vecsplice(C, col+1, co);
+    GEN A = vecslice(C, col+1, co);
     GEN c = rowslicepermute(extramat, perm, lig+1, li);
     extraC   = gsub(extraC, typ(A)==t_MAT? RgM_zm_mul(A, c): RgV_zm_mul(A,c));
     extratop = gsub(extratop, ZM_zm_mul(B, c));
   }
 
   extramat = shallowconcat(extratop, vconcat(dep, H));
-  Cnew     = shallowconcat(extraC, vecsplice(C, col-lH+1, co));
+  Cnew     = shallowconcat(extraC, vecslice(C, col-lH+1, co));
   if (DEBUGLEVEL>5) fprintferr("    1st phase done\n");
   permpro = imagecomplspec(extramat, &nlze);
   extramat = rowpermute(extramat, permpro);
@@ -2158,11 +2158,11 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   permpro = vecpermute(perm, permpro);
   for (i=1; i<=lig; i++) perm[i] = permpro[i]; /* perm o= permpro */
 
-  *ptdep  = rowsplice(extramat, 1, nlze);
-  matb    = rowsplice(extramat, nlze+1, lig);
+  *ptdep  = rowslice(extramat, 1, nlze);
+  matb    = rowslice(extramat, nlze+1, lig);
   if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
-  *ptC = shallowconcat(vecsplice(C, 1, col-lH), Cnew);
+  *ptC = shallowconcat(vecslice(C, 1, col-lH), Cnew);
   if (DEBUGLEVEL)
   {
     msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
@@ -2273,8 +2273,8 @@ hnfmerge_get_1(GEN A, GEN B)
     c = j+1;
     U[j] = (long)vec_ei(l-1, j);
     U[c] = (long)zerocol(l-1); /* dummy */
-    C[j] = (long)vecsplice((GEN)A[j], 1,j);
-    C[c] = (long)vecsplice((GEN)B[j], 1,j);
+    C[j] = (long)vecslice((GEN)A[j], 1,j);
+    C[c] = (long)vecslice((GEN)B[j], 1,j);
     for (k = j; k > 0; k--)
     {
       t = gcoeff(C,k,c);
@@ -3208,8 +3208,8 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     V = *ptV;
     if (n != n0)
     {
-      V0 = vecsplice(V, 1, n0 - n); /* kernel */
-      V  = vecsplice(V, n0-n+1, n0);
+      V0 = vecslice(V, 1, n0 - n); /* kernel */
+      V  = vecslice(V, n0-n+1, n0);
       av = avma;
     }
   }
@@ -3563,7 +3563,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
   }
   setlg(D, c); D = mattodiagonal_i(D);
   if (newU) {
-    U = rowsplice(U, 1, c-1);
+    U = rowslice(U, 1, c-1);
     for (i = 1; i < c; i++)
     {
       GEN d = (GEN)D[i], d2 = shifti(d, 1);
