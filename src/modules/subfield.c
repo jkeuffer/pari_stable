@@ -64,7 +64,7 @@ TR_pol(GEN P, GEN c)
   long i, k, n;
 
   if (!signe(P) || gcmp0(c)) return gcopy(P);
-  Q = dummycopy(P);
+  Q = shallowcopy(P);
   R = (GEN*)(Q+2); n = degpol(P);
   lim = stack_lim(av, 2);
   if (gcmp1(c))
@@ -561,7 +561,7 @@ init_primedata(primedata *S)
 
   if (S->lcm == degpol(S->ff[lff-1]))
   {
-    T = dummycopy((GEN)S->ff[lff-1]);
+    T = shallowcopy((GEN)S->ff[lff-1]);
     setvarn(T, v);
   }
   else
@@ -718,8 +718,8 @@ compute_data(blockdata *B)
     DATA = cgetg(10,t_VEC);
     fk = S->fk;
     DATA[5]= (long)gen_0;
-    DATA[6]= (long)dummycopy(S->bezoutC);
-    DATA[9]= (long)dummycopy(S->interp);
+    DATA[6]= (long)shallowcopy(S->bezoutC);
+    DATA[9]= (long)shallowcopy(S->interp);
   }
   DATA[1] = (long)pol;
   MM = gmul2n(bound_for_coeff(B->d, roo, &maxroot), 1);
@@ -739,7 +739,7 @@ compute_data(blockdata *B)
     F = cgetg(di+1, t_VEC);
     for (j=1; j<=di; j++) F[j] = fk[l++];
     L = hensel_lift_fact(L, F, T, p, pe, e);
-    fhk = fhk? dummyconcat(fhk, L): L;
+    fhk = fhk? shallowconcat(fhk, L): L;
   }
   DATA[3] = (long)roots_from_deg1(fhk);
 
@@ -831,7 +831,7 @@ test_block(blockdata *B, GEN L, GEN D)
   GEN sub = subfield(D, B);
   if (sub) {
     GEN old = L;
-    L = gclone( L? dummyconcat(L, sub): sub );
+    L = gclone( L? shallowconcat(L, sub): sub );
     if (old) gunclone(old);
   }
   avma = av; return L;
@@ -866,7 +866,7 @@ subfields_poldata(GEN T, poldata *PD)
 {
   GEN  nf,L,dis;
 
-  T = dummycopy(get_nfpol(T, &nf));
+  T = shallowcopy(get_nfpol(T, &nf));
   PD->pol = T; setvarn(T, 0);
   if (nf)
   {
@@ -956,7 +956,7 @@ subfieldsall(GEN nf)
     S = cgetg(l, t_VECSMALL);
     for (i=1; i<l; i++) S[i] = lg(gmael(L,i,1));
     p = gen_sort(S, cmp_IND | cmp_C, NULL);
-    return gerepilecopy(av,  vecextract_p(L, p));
+    return gerepilecopy(av,  vecpermute(L, p));
   }
 
   subfields_poldata(nf, &PD);
@@ -982,7 +982,7 @@ subfieldsall(GEN nf)
     }
     (void)delete_var(); /* from choose_prime */
   }
-  LSB = dummyconcat(LSB, _subfield(polx[0], pol));
+  LSB = shallowconcat(LSB, _subfield(polx[0], pol));
   if (DEBUGLEVEL) fprintferr("\n***** Leaving subfields\n\n");
   return fix_var(gerepilecopy(av, LSB), v0);
 }

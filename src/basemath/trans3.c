@@ -855,7 +855,7 @@ veceint1(GEN C, GEN nmax, long prec)
             Mx = addrr(Mx,mcn);
           }
           My = addrr(My,minvn);
-          vdiff = dummyconcat(vdiff, z);
+          vdiff = shallowconcat(vdiff, z);
           cd++;
         }
 	p1 = mulrr(den, (GEN)vdiff[k]);

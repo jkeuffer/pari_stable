@@ -717,7 +717,7 @@ ZV_sort_uniq(GEN L)
 
   if (l < 2) return cgetg(1, typ(L));
   perm = gen_sort(L, cmp_C, &cmpii);
-  L = vecextract_p(L, perm);
+  L = vecpermute(L, perm);
   c = 1;
   for (i = 2; i < l; i++)
     if (!equalii((GEN)L[i], (GEN)L[c])) L[++c] = L[i];
@@ -740,7 +740,7 @@ setunion(GEN x, GEN y)
   GEN z;
 
   if (typ(x) != t_VEC || typ(y) != t_VEC) err(talker,"not a set in setunion");
-  z=dummyconcat(x,y); tetpil=avma; return gerepile(av,tetpil,gtoset(z));
+  z=shallowconcat(x,y); tetpil=avma; return gerepile(av,tetpil,gtoset(z));
 }
 
 GEN
@@ -851,7 +851,7 @@ dirdiv(GEN x, GEN y)
   dy = dirval(y); ly = lg(y);
   if (dy != 1 || ly == 1) err(talker,"not an invertible dirseries in dirdiv");
   lz = min(lx,ly*dx); p1 = (GEN)y[1];
-  if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = dummycopy(x);
+  if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = shallowcopy(x);
   z = zerovec(lz-1);
   for (j=dx; j<lz; j++)
   {

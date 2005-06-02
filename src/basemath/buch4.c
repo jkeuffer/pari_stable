@@ -259,7 +259,7 @@ repres(GEN nf,GEN pr)
   mat=idealhermite(nf,pr);
   for (i=1; i<lg(mat); i++)
     if (!gcmp1(gmael(mat,i,i)))
-      fond = dummyconcat(fond,gmael(nf,7,i));
+      fond = shallowconcat(fond,gmael(nf,7,i));
   f=lg(fond)-1;
   pp=itos((GEN) pr[1]);
   for (i=1,ppf=1; i<=f; i++) ppf*=pp;
@@ -482,7 +482,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
     M[i] = (long)isprincipal(bnf,p1);
   }
   /* 2) relations from bnf class group */		
-  M = dummyconcat(M, diagonal_i((GEN) classgp[2]));
+  M = shallowconcat(M, diagonal_i((GEN) classgp[2]));
 
   /* S class group */
   H = hnfall_i(M, &U, 1);
@@ -527,7 +527,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
       sunit[i] = isprincipalfact(bnf,Sperm,(GEN)B[j],(GEN)Sperm[i],fl)[2];
 
     den = dethnf_i(H); H = ZM_inv(H,den);
-    A = dummyconcat(H, gneg(gmul(H,B))); /* top part of inverse * den */
+    A = shallowconcat(H, gneg(gmul(H,B))); /* top part of inverse * den */
     sunit = basistoalg(nf,sunit);
     /* HNF in split form perm + (H B) [0 Id missing] */
     res[1] = (long)lift_intern(sunit);
@@ -584,7 +584,7 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   }
   p1 += cH;
   p1[0] = evaltyp(t_COL) | evallg(lB);
-  v = dummyconcat(v, p1); /* append bottom of p1 (= [0 Id] part) */
+  v = shallowconcat(v, p1); /* append bottom of p1 (= [0 Id] part) */
 
   xp = gen_1; xm = gen_1; gen = (GEN)suni[1];
   for (i=1; i<ls; i++)
@@ -632,8 +632,8 @@ pr_append(GEN nf, GEN rel, GEN p, GEN *prod, GEN *S1, GEN *S2)
 {
   if (dvdii(*prod, p)) return;
   *prod = mulii(*prod, p);
-  *S1 = dummyconcat(*S1, primedec(nf,p));
-  *S2 = dummyconcat(*S2, primedec(rel,p));
+  *S1 = shallowconcat(*S1, primedec(nf,p));
+  *S2 = shallowconcat(*S2, primedec(rel,p));
 }
 
 static void
@@ -792,11 +792,11 @@ rnfisnorm(GEN T, GEN x, long flag)
   /* computation on T-units */
   w  = gmael3(rel,8,4,1);
   tu = gmael3(rel,8,4,2);
-  futu = dummyconcat(check_units(rel,"rnfisnorm"), tu);
+  futu = shallowconcat(check_units(rel,"rnfisnorm"), tu);
   suni = bnfsunit(bnf,S1,3);
   sunitrel = (GEN)bnfsunit(rel,S2,3)[1];
   if (lg(sunitrel) > 1) sunitrel = lift_intern(basistoalg(rel,sunitrel));
-  sunitrel = dummyconcat(futu, sunitrel);
+  sunitrel = shallowconcat(futu, sunitrel);
 
   A = lift(bnfissunit(bnf,suni,x));
   L = lg(sunitrel);

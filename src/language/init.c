@@ -1373,7 +1373,7 @@ stackify(GEN x)
 }
 
 GEN
-dummycopy(GEN x)
+shallowcopy(GEN x)
 {
   long tx = typ(x), lx = lg(x), i;
   GEN y = cgetg_copy(lx, x);
@@ -1381,10 +1381,10 @@ dummycopy(GEN x)
   switch(tx)
   {
     case t_POLMOD:
-      y[1] = x[1]; y[2] = (long)dummycopy((GEN)x[2]);
+      y[1] = x[1]; y[2] = (long)shallowcopy((GEN)x[2]);
       break;
     case t_MAT:
-      for (i=lx-1;i;i--) y[i] = (long)dummycopy((GEN)x[i]);
+      for (i=lx-1;i;i--) y[i] = (long)shallowcopy((GEN)x[i]);
       break;
     default:
       for (i=lx-1;i;i--) y[i] = x[i];

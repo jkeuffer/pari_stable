@@ -347,7 +347,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
 
     matGS = cgetg(d+2, t_MAT);
     for (j=0; j<=d; j++) matGS[j+1] = (long)arch_for_T2(G, (GEN)polbase[j+2]);
-    matGS = dummytrans(matGS);
+    matGS = shallowtrans(matGS);
     for (j=1; j <= r1; j++) /* N2[j] = || sigma_j(S) ||_2 */
     {
       N2[j] = lsqrt( QuickNormL2((GEN)matGS[j], DEFAULTPREC), DEFAULTPREC );
@@ -877,7 +877,7 @@ END:
 
     if (C2lt && lfamod < 2*K) pol = QXQX_normalize(Q_primpart(pol), nfpol);
     setlg(famod, lfamod+1);
-    listmod[cnt] = (long)dummycopy(famod);
+    listmod[cnt] = (long)shallowcopy(famod);
     fa[cnt++] = (long)pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
@@ -1216,7 +1216,7 @@ AGAIN:
     if (first)
     {
       first = 0;
-      m = dummyconcat( m, vconcat(ZERO, P1) );
+      m = shallowconcat( m, vconcat(ZERO, P1) );
       /*     [ C M_L   0  ]
        * m = [            ]   square matrix
        *     [  T2'   PRK ]   T2' = Tra * M_L  truncated
@@ -1285,7 +1285,7 @@ nf_combine_factors(nfcmbf_t *T, GEN polred, GEN p, long a, long klim)
     if (l > 1) T->polbase = unifpol(nf, (GEN)res[l], t_COL);
     L = nf_LLL_cmbf(T, p, a, maxK);
     /* remove last elt, possibly unfactored. Add all new ones. */
-    setlg(res, l); res = dummyconcat(res, L);
+    setlg(res, l); res = shallowconcat(res, L);
   }
 
   m = lg(res); z = cgetg(m, t_VEC);

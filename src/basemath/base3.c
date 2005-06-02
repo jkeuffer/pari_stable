@@ -529,7 +529,7 @@ int_elt_val(GEN nf, GEN x, GEN p, GEN b, GEN *newx)
 
   mul = (typ(b) == t_MAT)? b: eltmul_get_table(nf, b);
   y = cgetg(N+1, t_COL); /* will hold the new x */
-  x = dummycopy(x);
+  x = shallowcopy(x);
   for(w=0;; w++)
   {
     for (i=1; i<=N; i++)
@@ -1270,7 +1270,7 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   }
   giant = FpXQ_div(x,p1,T,p);
   perm = gen_sort(smalltable, cmp_IND | cmp_C, cmp_pol);
-  smalltable = vecextract_p(smalltable, perm);
+  smalltable = vecpermute(smalltable, perm);
   p1 = giant;
 
   av1 = avma; lim=stack_lim(av1,2);
@@ -1492,7 +1492,7 @@ zprimestar(GEN nf, GEN pr, GEN ep, GEN x, GEN arch)
     if(DEBUGLEVEL>3) fprintferr("  treating a = %ld, b = %ld\n",a,b);
     prb = (b >= e)? pre: idealpows(nf,pr,b);
     z = zidealij(pra, prb, &U);
-    gen = dummycopy((GEN)z[2]);
+    gen = shallowcopy((GEN)z[2]);
     l = lg(gen); s = cgetg(l, t_VEC);
     if(DEBUGLEVEL>3) fprintferr("zidealij done\n");
     for (i = 1; i < l; i++)
@@ -1593,7 +1593,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
     y[3] = (long)gscalmat(gen_1,1); return y;
   }
   bas = gmael(nf,5,1); N = lg(bas)-1;
-  if (lg(bas[1]) > lg(archp)) bas = rowextract_p(bas, archp);
+  if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
   gen = cgetg(nba+1,t_VEC);
   v = mkmat( vecsmall_const(nba, 1) );
   gen[1] = (long)gZ;
@@ -1862,11 +1862,11 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   {
     GEN L = zprimestar(nf, (GEN)P[i], (GEN)E[i], t, archp);
     lists[i] = (long)L;
-    for (j=1; j<lg(L); j++) gen = dummyconcat(gen,gmael(L,j,3));
+    for (j=1; j<lg(L); j++) gen = shallowconcat(gen,gmael(L,j,3));
   }
   sarch = zarchstar(nf, x, archp);
   lists[i] = (long)sarch;
-  gen = dummyconcat(gen, (GEN)sarch[2]);
+  gen = shallowconcat(gen, (GEN)sarch[2]);
 
   nbgen = lg(gen)-1;
   if (nbp)
@@ -2061,13 +2061,13 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
   cyc2 = gel(G2,2); l2 = lg(cyc2);
   gen = (lg(G1)>3 && lg(G2)>3)? gen_1: NULL;
   nbgen = l1+l2-2;
-  cyc = smithrel(diagonal_i(dummyconcat(cyc1,cyc2)),
+  cyc = smithrel(diagonal_i(shallowconcat(cyc1,cyc2)),
                  &U, gen? &u1: NULL);
   if (nbgen) {
     GEN U1 = gel(bid1,5), U2 = gel(bid2,5);
-    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecextract_i(U, 1, l1-1),   U1);
-    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecextract_i(U, l1, nbgen), U2);
-    U = dummyconcat(U1, U2);
+    U1 = l1 == 1? zeromat(nbgen,lg(U1)-1): gmul(vecsplice(U, 1, l1-1),   U1);
+    U2 = l2 == 1? zeromat(nbgen,lg(U2)-1): gmul(vecsplice(U, l1, nbgen), U2);
+    U = shallowconcat(U1, U2);
   }
   else
     U = zeromat(0, lx-2);
@@ -2077,7 +2077,7 @@ join_bid(GEN nf, GEN bid1, GEN bid2)
     GEN u, v, uv = idealaddtoone(nf,gel(f1,1),gel(f2,1));
     u = gel(uv,1);
     v = gel(uv,2);
-    gen = dummyconcat(makeprimetoidealvec(nf,x,u,v, gel(G1,3)),
+    gen = shallowconcat(makeprimetoidealvec(nf,x,u,v, gel(G1,3)),
                    makeprimetoidealvec(nf,x,v,u, gel(G2,3)));
   }
   y = cgetg(6,t_VEC);
@@ -2109,9 +2109,9 @@ join_bid_arch(GEN nf, GEN bid1, GEN arch)
   gel(lists,i) = sarch;
 
   gen = (lg(G1)>3)? gen_1: NULL;
-  cyc = diagonal_i(dummyconcat(gel(G1,2), gel(sarch,1)));
+  cyc = diagonal_i(shallowconcat(gel(G1,2), gel(sarch,1)));
   cyc = smithrel(cyc, &U, gen? &u1: NULL);
-  if (gen) gen = dummyconcat(gel(G1,3), gel(sarch,2));
+  if (gen) gen = shallowconcat(gel(G1,3), gel(sarch,2));
   y = cgetg(6,t_VEC);
   gel(y,1) = mkvec2(x, arch);
   gel(y,3) = fa1;
@@ -2175,7 +2175,7 @@ zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid)
   GEN m = cgetg(l, t_MAT);
   zlog_S S; init_zlog_bid(&S, bid);
   for (j = 1; j < l; j++)
-    gel(m,j) = zlog(nf, gel(U,j), vecextract_p(gel(sgnU,j), S.archp), &S);
+    gel(m,j) = zlog(nf, gel(U,j), vecpermute(gel(sgnU,j), S.archp), &S);
   return m;
 }
 /* compute matrix of zlogs of units, assuming S.archp = [] */
@@ -2196,7 +2196,7 @@ zlog_unitsarch(GEN sgnU, GEN bid)
   GEN U, liste = gel(bid,4), arch = gmael(bid,1,2);
   long i;
   U = gmul(gmael(liste, lg(liste)-1, 3),
-           rowextract_p(sgnU, arch_to_perm(arch)));
+           rowpermute(sgnU, arch_to_perm(arch)));
   for (i = 1; i < lg(U); i++) F2V_red_ip(gel(U,i));
   return U;
 }
@@ -2251,7 +2251,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
       ulong q, iQ, Q = itou_or_0(pr_norm(pr));
       if (!Q || Q > bound) break;
 
-      z2 = dummycopy(z);
+      z2 = shallowcopy(z);
       q = Q;
       ID.pr = ID.prL = pr;
       for (l=1; Q <= bound; l++, Q *= q) /* add pr^l */

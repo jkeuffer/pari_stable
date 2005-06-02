@@ -1436,7 +1436,7 @@ FpXQV_FpX_Frobenius(GEN V, GEN P, GEN T, GEN p)
   btop=avma;
   gptr[0]=&Mi;
   gptr[1]=&W;
-  W=dummycopy(V);
+  W=shallowcopy(V);
   for(i=3;i<=l;i++)
   {
     long j;
@@ -1561,7 +1561,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   for(i=r-1;i>1;i--)
     R[i]=(long)FpV_red(gadd(FpM_FpC_mul(MA,(GEN)R[i+1],l),
          gmul((GEN)U[i+2],(GEN)R[r])),l);
-  R=dummytrans(R);
+  R=shallowtrans(R);
   for(i=1;i<lg(R);i++)
     R[i]=(long)RgV_to_RgX((GEN)R[i],vu);
   A=gtopolyrev(R,vp);
@@ -1791,8 +1791,8 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     E = FlxX_to_Flm(E,np);
     MP= Flxq_matrix_pow(ZX_to_Flx(SP,p),np,d,Px,p);
     IR= (GEN)Flm_indexrank(MP,p)[1];
-    E = rowextract_p(E, IR);
-    M = rowextract_p(MP,IR);
+    E = rowpermute(E, IR);
+    M = rowpermute(MP,IR);
     M = Flm_inv(M,p);
     MQ= Flxq_matrix_pow(ZX_to_Flx(SQ,p),nq,d,Qx,p);
     M = Flm_mul(MQ,M,p);
@@ -1819,8 +1819,8 @@ FpX_factorff_irred(GEN P, GEN Q, GEN l)
     E = RgXX_to_RgM(E,np);
     MP= FpXQ_matrix_pow(SP,np,d,P,l);
     IR= (GEN)FpM_indexrank(MP,l)[1];
-    E = rowextract_p(E, IR);
-    M = rowextract_p(MP,IR);
+    E = rowpermute(E, IR);
+    M = rowpermute(MP,IR);
     M = FpM_inv(M,l);
     MQ= FpXQ_matrix_pow(SQ,nq,d,Q,l);
     M = FpM_mul(MQ,M,l);
@@ -2050,10 +2050,10 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     GEN b = ZX_to_Flx(y, pp);
     z = Flx_divrem(a,b,pp, pr);
     avma = av0; /* HACK: assume pr last on stack, then z */
-    z = dummycopy(z);
+    z = shallowcopy(z);
     if (pr && pr != ONLY_DIVIDES && pr != ONLY_REM)
     {
-      *pr = dummycopy(*pr);
+      *pr = shallowcopy(*pr);
       *pr = Flx_to_ZX_inplace(*pr);
     }
     return Flx_to_ZX_inplace(z);
@@ -3062,7 +3062,7 @@ ZY_ZXY_resultant_all(GEN A, GEN B0, long *lambda, GEN *LERS)
   {
     vY = fetch_var(); delvar = 1;
     B0 = gsubst(B0, MAXVARN, polx[vY]);
-    A = dummycopy(A); setvarn(A, vY);
+    A = shallowcopy(A); setvarn(A, vY);
   }
   L = polx[MAXVARN];
   B0 = Q_remove_denom(B0, &dB);
@@ -3230,8 +3230,8 @@ ZX_caract_sqf(GEN A, GEN B, long *lambda, long v)
   if (varn(A) == 0)
   {
     long v0 = fetch_var(); delvar = 1;
-    A = dummycopy(A); setvarn(A,v0);
-    B = dummycopy(B); setvarn(B,v0);
+    A = shallowcopy(A); setvarn(A,v0);
+    B = shallowcopy(B); setvarn(B,v0);
   }
   B0 = cgetg(4, t_POL);
   B0[1] = evalsigne(1);
@@ -3551,8 +3551,8 @@ GEN
 FpX_direct_compositum(GEN A, GEN B, GEN p)
 {
   GEN C,a,b,x;
-  a = dummycopy(A); setvarn(a, MAXVARN);
-  b = dummycopy(B); setvarn(b, MAXVARN);
+  a = shallowcopy(A); setvarn(a, MAXVARN);
+  b = shallowcopy(B); setvarn(b, MAXVARN);
   x = gadd(polx[0], polx[MAXVARN]);
   C = FpY_FpXY_resultant(a, poleval(b,x),p);
   return C;
@@ -3564,8 +3564,8 @@ FpX_compositum(GEN A, GEN B, GEN p)
   GEN C, a,b;
   long k;
 
-  a = dummycopy(A); setvarn(a, MAXVARN);
-  b = dummycopy(B); setvarn(b, MAXVARN);
+  a = shallowcopy(A); setvarn(a, MAXVARN);
+  b = shallowcopy(B); setvarn(b, MAXVARN);
   for (k = 1;; k = next_lambda(k))
   {
     GEN x = gadd(polx[0], gmulsg(k, polx[MAXVARN]));

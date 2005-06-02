@@ -121,7 +121,7 @@ reducebetanaive(GEN bnfz, GEN be, GEN b, GEN ell)
   c = logarch2arch(c, r1, prec); /* = embeddings of fu^ell */
   c = gprec_w(gnorm(c), DEFAULTPREC);
   b = gprec_w(gnorm(b), DEFAULTPREC); /* need little precision */
-  z[1] = (long)dummyconcat(c, vecinv(c));
+  z[1] = (long)shallowconcat(c, vecinv(c));
   for (k=2; k<=n; k++) z[k] = (long) vecmul((GEN)z[1], (GEN)z[k-1]);
   nmax = T2_from_embed_norm(b, r1);
   ru = lg(c)-1; c = zerovec(ru);
@@ -211,7 +211,7 @@ reducebeta(GEN bnfz, GEN be, GEN ell)
     if (DEBUGLEVEL) err(warnprec,"reducebeta",prec);
     nf = nfnewprec(nf,prec);
   }
-  z = dummyconcat(matunit, z);
+  z = shallowconcat(matunit, z);
   u = lllintern(z, 100, 1, prec);
   if (u)
   {
@@ -477,7 +477,7 @@ get_Selmer(GEN bnf, GEN cycgen, long rc)
 {
   GEN fu = check_units(bnf,"rnfkummer");
   GEN tu = gmael3(bnf,8,4,2);
-  return dummyconcat(algtobasis(bnf,dummyconcat(fu,tu)), vecextract_i(cycgen,1,rc));
+  return shallowconcat(algtobasis(bnf,shallowconcat(fu,tu)), vecsplice(cycgen,1,rc));
 }
 
 
@@ -538,8 +538,8 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
   if (i) return no_sol(all,i);
 
   lSml2 = lg(L.Sml2)-1;
-  Sp = dummyconcat(L.Sm, L.Sml1); lSp = lg(Sp)-1;
-  listprSp = dummyconcat(L.Sml2, L.Sl); lSl2 = lg(listprSp)-1;
+  Sp = shallowconcat(L.Sm, L.Sml1); lSp = lg(Sp)-1;
+  listprSp = shallowconcat(L.Sml2, L.Sl); lSl2 = lg(listprSp)-1;
 
   cycgen = check_and_build_cycgen(bnf);
   clgp = gmael(bnf,8,1);
@@ -557,7 +557,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
     e = (GEN)L[1]; matP[j]  = (long)e;
     a = (GEN)L[2]; vecBp[j] = (long)a;
   }
-  vecWB = dummyconcat(vecW, vecBp);
+  vecWB = shallowconcat(vecW, vecBp);
 
   prec = DEFAULTPREC +
     nbits2nlong(((degK-1) * (gexpo(vecWB) + gexpo(gmael(nf,5,1)))));
@@ -579,7 +579,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
     M = vconcat(M, logall(nf, vecWB, 0,0, ell, pr,z));
   }
   lW = lg(vecW);
-  M = vconcat(M, dummyconcat(zeromat(rc,lW-1), matP));
+  M = vconcat(M, shallowconcat(zeromat(rc,lW-1), matP));
 
   K = FpM_ker(M, gell);
   dK = lg(K)-1;
@@ -599,7 +599,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
         be = compute_beta(X, vecWB, gell, bnf);
         be = lift_if_rational(basistoalg(bnf, be));
         P = gsub(gpowgs(polx[0],ell), be);
-        if (all) res = dummyconcat(res, gerepileupto(av, P));
+        if (all) res = shallowconcat(res, gerepileupto(av, P));
         else
         {
           if (gequal(rnfnormgroup(bnr,P),subgroup)) return P; /*DONE*/
@@ -636,7 +636,7 @@ isvirtualunit(GEN bnf, GEN v, GEN cycgen, GEN cyc, GEN gell, long rc)
   setlg(y, rc+1);
   b = isunit(bnf,eps);
   if (lg(b) == 1) err(bugparier,"isvirtualunit");
-  return dummyconcat(lift_intern(b), y);
+  return shallowconcat(lift_intern(b), y);
 }
 
 /* id a vector of elements in nfz = relative extension of nf by polrel,
@@ -691,9 +691,9 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
     g = idealdiv(nf, g, StZk); /* N_{Kz/K}(gen[j]) */
     P[j] = (long)isprincipalray(bnr, g);
   }
-  (void)hnfall_i(dummyconcat(P, subgroup), &U, 1);
+  (void)hnfall_i(shallowconcat(P, subgroup), &U, 1);
   setlg(U, l); for (j=1; j<l; j++) setlg(U[j], l);
-  return hnfmodid(dummyconcat(U, diagonal_i(raycycz)), (GEN)raycycz[1]);
+  return hnfmodid(shallowconcat(U, diagonal_i(raycycz)), (GEN)raycycz[1]);
 }
 
 static GEN
@@ -806,7 +806,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
   p1 = to_alg(nfz, factorbackelt(powtaubet, get_reverse(r), nfz));
   num_t = Q_remove_denom(p1, &den_t);
 
-  nfzpol = dummycopy((GEN)nfz[1]);
+  nfzpol = shallowcopy((GEN)nfz[1]);
   setvarn(nfzpol, MAXVARN);
   S = cgetg(ell+1, t_VEC); /* Newton sums */
   S[1] = (long)gen_0;
@@ -990,7 +990,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   for (j=1; j<lW; j++) vecW[j] = (long)famat_factorback(vselmer, (GEN)P[j]);
   /* step 6 */
   if (DEBUGLEVEL>2) fprintferr("Step 6\n");
-  Q = FpM_ker(gsubgs(dummytrans(Tc), g), gell);
+  Q = FpM_ker(gsubgs(shallowtrans(Tc), g), gell);
   /* step 8 */
   if (DEBUGLEVEL>2) fprintferr("Step 8\n");
   p1 = RgX_powers(lift_intern(COMPO.p), COMPO.R, degK-1);
@@ -1014,8 +1014,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   if (i) return no_sol(all,i);
 
   lSml2 = lg(L.Sml2)-1;
-  Sp = dummyconcat(L.Sm, L.Sml1); lSp = lg(Sp)-1;
-  listprSp = dummyconcat(L.Sml2, L.Sl); lSl2 = lg(listprSp)-1;
+  Sp = shallowconcat(L.Sm, L.Sml1); lSp = lg(Sp)-1;
+  listprSp = shallowconcat(L.Sml2, L.Sl); lSl2 = lg(listprSp)-1;
 
   /* step 12 */
   if (DEBUGLEVEL>2) fprintferr("Step 12\n");
@@ -1040,8 +1040,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   }
   /* step 13 */
   if (DEBUGLEVEL>2) fprintferr("Step 13\n");
-  vecWA = dummyconcat(vecW, vecAp);
-  vecWB = dummyconcat(vecW, vecBp);
+  vecWA = shallowconcat(vecW, vecAp);
+  vecWB = shallowconcat(vecW, vecBp);
 
   /* step 14, 15, and 17 */
   if (DEBUGLEVEL>2) fprintferr("Step 14, 15 and 17\n");
@@ -1063,8 +1063,8 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   dc = lg(Q)-1;
   if (dc)
   {
-    GEN QtP = gmul(dummytrans(Q), matP);
-    M = vconcat(M, dummyconcat(zeromat(dc,lW-1), QtP));
+    GEN QtP = gmul(shallowtrans(Q), matP);
+    M = vconcat(M, shallowconcat(zeromat(dc,lW-1), QtP));
   }
   if (!M) M = zeromat(1, lSp + lW - 1);
   /* step 16 */
@@ -1090,7 +1090,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
         P = lift_if_rational(P);
         if (DEBUGLEVEL>1) fprintferr("polrel(beta) = %Z\n", P);
         if (!all && gequal(subgroup, rnfnormgroup(bnr, P))) return P; /* DONE */
-        res = dummyconcat(res, P);
+        res = shallowconcat(res, P);
       }
     } while (increment(y, dK, ell));
     y[dK--] = 0;

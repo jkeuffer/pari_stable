@@ -37,19 +37,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* No copy*/
 GEN
-dummytrans(GEN x)
+shallowtrans(GEN x)
 {
   long i,j,lx,dx, tx=typ(x);
   GEN y;
 
-  if (! is_matvec_t(tx)) err(typeer,"dummytrans");
+  if (! is_matvec_t(tx)) err(typeer,"shallowtrans");
   switch(tx)
   {
     case t_VEC:
-      y=dummycopy(x); settyp(y,t_COL); break;
+      y=shallowcopy(x); settyp(y,t_COL); break;
 
     case t_COL:
-      y=dummycopy(x); settyp(y,t_VEC); break;
+      y=shallowcopy(x); settyp(y,t_VEC); break;
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
@@ -177,7 +177,7 @@ err_cat(GEN x, GEN y)
 }
 
 GEN
-dummyconcat(GEN x, GEN y)
+shallowconcat(GEN x, GEN y)
 {
   long tx=typ(x),ty=typ(y),lx=lg(x),ly=lg(y),i;
   GEN z,p1;
@@ -237,12 +237,12 @@ dummyconcat(GEN x, GEN y)
       switch(ty)
       {
 	case t_COL:
-	  if (lx<=2) return (lx==1)? y: dummyconcat(gel(x,1),y);
+	  if (lx<=2) return (lx==1)? y: shallowconcat(gel(x,1),y);
           if (ly>=3) break;
-          return (ly==1)? x: dummyconcat(x,gel(y,1));
+          return (ly==1)? x: shallowconcat(x,gel(y,1));
 	case t_MAT:
 	  z=cgetg(ly,ty); if (lx != ly) break;
-	  for (i=1; i<ly; i++) gel(z,i) = dummyconcat(gel(x,i),gel(y,i));
+	  for (i=1; i<ly; i++) gel(z,i) = shallowconcat(gel(x,i),gel(y,i));
           return z;
       }
       break;
@@ -251,9 +251,9 @@ dummyconcat(GEN x, GEN y)
       switch(ty)
       {
 	case t_VEC:
-	  if (lx<=2) return (lx==1)? y: dummyconcat(gel(x,1), y);
+	  if (lx<=2) return (lx==1)? y: shallowconcat(gel(x,1), y);
 	  if (ly>=3) break;
-	  return (ly==1)? x: dummyconcat(x, gel(y,1));
+	  return (ly==1)? x: shallowconcat(x, gel(y,1));
 	case t_MAT:
 	  if (lx != lg(y[1])) break;
 	  z=cgetg(ly+1,ty); gel(z,1) = x;
@@ -267,7 +267,7 @@ dummyconcat(GEN x, GEN y)
       {
 	case t_VEC:
 	  z=cgetg(lx,tx); if (ly != lx) break;
-	  for (i=1; i<lx; i++) gel(z,i) = dummyconcat(gel(x,i), gel(y,i));
+	  for (i=1; i<lx; i++) gel(z,i) = shallowconcat(gel(x,i), gel(y,i));
           return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
@@ -301,7 +301,7 @@ concat(GEN x, GEN y)
     }
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
     y = (GEN)x[i++];
-    for (; i<lx; i++) y = dummyconcat(y, (GEN)x[i]);
+    for (; i<lx; i++) y = shallowconcat(y, (GEN)x[i]);
     return gerepilecopy(av,y);
   }
   ty = typ(y);
@@ -446,7 +446,7 @@ get_range(char *s, long *a, long *b, long *cmpl, long lx)
 }
 
 GEN
-vecextract_i(GEN A, long y1, long y2)
+vecsplice(GEN A, long y1, long y2)
 {
   long i,lB = y2 - y1 + 2;
   GEN B = cgetg(lB, typ(A));
@@ -455,7 +455,7 @@ vecextract_i(GEN A, long y1, long y2)
 }
 
 GEN
-vecextract_ip(GEN A, GEN p, long y1, long y2)
+vecslicepermute(GEN A, GEN p, long y1, long y2)
 {
   long i,lB = y2 - y1 + 2;
   GEN B = cgetg(lB, typ(A));
@@ -463,22 +463,22 @@ vecextract_ip(GEN A, GEN p, long y1, long y2)
   return B;
 }
 
-/* rowextract_i(rowextract_p(A,p), x1, x2) */
+/* rowsplice(rowpermute(A,p), x1, x2) */
 GEN
-rowextract_ip(GEN A, GEN p, long x1, long x2)
+rowslicepermute(GEN A, GEN p, long x1, long x2)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) gel(B,i) = vecextract_ip(gel(A,i),p,x1,x2);
+  for (i=1; i<lB; i++) gel(B,i) = vecslicepermute(gel(A,i),p,x1,x2);
   return B;
 }
 
 GEN
-rowextract_i(GEN A, long x1, long x2)
+rowsplice(GEN A, long x1, long x2)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) gel(B,i) = vecextract_i(gel(A,i),x1,x2);
+  for (i=1; i<lB; i++) gel(B,i) = vecsplice(gel(A,i),x1,x2);
   return B;
 }
 
@@ -503,7 +503,7 @@ row_i(GEN A, long x0, long x1, long x2)
 }
 
 GEN
-vecextract_p(GEN A, GEN p)
+vecpermute(GEN A, GEN p)
 {
   long i,lB = lg(p);
   GEN B = cgetg(lB, typ(A));
@@ -512,11 +512,11 @@ vecextract_p(GEN A, GEN p)
 }
 
 GEN
-rowextract_p(GEN A, GEN p)
+rowpermute(GEN A, GEN p)
 {
   long i, lB = lg(A);
   GEN B = cgetg(lB, typ(A));
-  for (i=1; i<lB; i++) gel(B, i) = vecextract_p(gel(A, i), p);
+  for (i=1; i<lB; i++) gel(B, i) = vecpermute(gel(A, i), p);
   return B;
 }
 
@@ -1239,12 +1239,12 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     {
       case t_MAT:
         if (lg(*b) == 1) return 0;
-        *b = dummycopy(*b);
+        *b = shallowcopy(*b);
         if (lg((*b)[1])-1 != *aco) err(consister,"gauss");
         break;
       case t_COL: *iscol = 1;
         if (lg(*b)-1 != *aco) err(consister,"gauss");
-        *b = mkmat( dummycopy(*b) );
+        *b = mkmat( shallowcopy(*b) );
         break;
       default: err(typeer,"gauss");
     }
@@ -1272,7 +1272,7 @@ gauss_intern(GEN a, GEN b)
   GEN p,m,u;
 
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
-  a = dummycopy(a);
+  a = shallowcopy(a);
   bco = lg(b)-1;
   inexact = use_maximal_pivot(a);
   if(DEBUGLEVEL>4) fprintferr("Entering gauss with inexact=%ld\n",inexact);
@@ -1419,7 +1419,7 @@ Flm_id(long n)
 
 GEN
 Flm_gauss(GEN a, GEN b, ulong p) {
-  return Flm_gauss_sp(dummycopy(a), dummycopy(b), p);
+  return Flm_gauss_sp(shallowcopy(a), shallowcopy(b), p);
 }
 static GEN
 Flm_inv_sp(GEN a, ulong p) {
@@ -1427,7 +1427,7 @@ Flm_inv_sp(GEN a, ulong p) {
 }
 GEN
 Flm_inv(GEN a, ulong p) {
-  return Flm_inv_sp(dummycopy(a), p);
+  return Flm_inv_sp(shallowcopy(a), p);
 }
 
 GEN
@@ -1449,7 +1449,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
-  a = dummycopy(a);
+  a = shallowcopy(a);
   bco = lg(b)-1;
   piv = invpiv = NULL; /* -Wall */
   for (i=1; i<=aco; i++)
@@ -1511,7 +1511,7 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   if (!init_gauss(a, &b, &aco, &li, &iscol)) return cgetg(1, t_MAT);
  
   lim = stack_lim(av,1);
-  a = dummycopy(a);
+  a = shallowcopy(a);
   bco = lg(b)-1;
   piv = invpiv = NULL; /* -Wall */
   for (i=1; i<=aco; i++)
@@ -1865,7 +1865,7 @@ keri(GEN x)
 
   av0=avma; m=lg(x[1])-1; r=0;
   pp=cgetg(n+1,t_COL);
-  x=dummycopy(x); p=gen_1;
+  x=shallowcopy(x); p=gen_1;
   c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   l=cgetg(n+1, t_VECSMALL);
   av = avma; lim = stack_lim(av,1);
@@ -1936,7 +1936,7 @@ deplin(GEN x0)
   GEN x,y,piv,q,c,l,*d,*ck,*cj;
 
   t = typ(x0);
-  if (t == t_MAT) x = dummycopy(x0);
+  if (t == t_MAT) x = shallowcopy(x0);
   else
   {
     if (t != t_VEC) err(typeer,"deplin");
@@ -2001,7 +2001,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
   n=lg(x0)-1; if (!n) { *dd=NULL; *rr=0; return cgetg(1,t_MAT); }
   m=lg(x0[1])-1; r=0;
 
-  x = dummycopy(x0);
+  x = shallowcopy(x0);
   if (a)
   {
     if (n != m) err(consister,"gauss_pivot_ker");
@@ -2062,14 +2062,14 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
     for (k=1; k<=n; k++)
       d0[k] = isinexactreal((GEN)x0[k])? -gexpo((GEN)x0[k]): -VERYBIGINT;
     d0 = gen_sort(d0, cmp_C|cmp_IND, NULL);
-    x0 = vecextract_p(x0, d0);
+    x0 = vecpermute(x0, d0);
   }
   else
   {
     get_pivot = gauss_get_pivot_NZ;
     for (k=1; k<=n; k++) d0[k] = k;
   }
-  x = dummycopy(x0);
+  x = shallowcopy(x0);
   m=lg(x[1])-1; r=0;
   c=cgetg(m+1, t_VECSMALL); for (k=1; k<=m; k++) c[k]=0;
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
@@ -2181,7 +2181,7 @@ imagecomplspec(GEN x, long *nlze)
   GEN d,y;
   long i,j,k,l,r;
 
-  x = dummytrans(x); l = lg(x);
+  x = shallowtrans(x); l = lg(x);
   gauss_pivot(x,&d,&r);
   avma=av; y = cgetg(l,t_VECSMALL);
   for (i=j=1, k=r+1; i<l; i++)
@@ -2695,7 +2695,7 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   }
 
   m=lg(x[1])-1; r=0;
-  x=dummycopy(x);
+  x=shallowcopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -2769,7 +2769,7 @@ FpM_intersect(GEN x, GEN y, GEN p)
   GEN z;
 
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
-  z = FpM_ker(dummyconcat(x,y), p);
+  z = FpM_ker(shallowconcat(x,y), p);
   for (j=lg(z)-1; j; j--) setlg(z[j],lx);
   return gerepileupto(av, FpM_mul(x,z,p));
 }
@@ -2796,7 +2796,7 @@ Flm_gauss_pivot(GEN x, ulong p, long *rr)
 
   m=lg(x[1])-1; r=0;
   d=cgetg(n+1,t_VECSMALL);
-  x=dummycopy(x);
+  x=shallowcopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   av=avma; 
   for (k=1; k<=n; k++)
@@ -2844,7 +2844,7 @@ FpM_gauss_pivot(GEN x, GEN p, GEN *dd, long *rr)
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
   m=lg(x[1])-1; r=0;
-  x=dummycopy(x);
+  x=shallowcopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -2890,7 +2890,7 @@ FqM_gauss_pivot(GEN x, GEN T, GEN p, GEN *dd, long *rr)
   n=lg(x)-1; if (!n) { *dd=NULL; *rr=0; return; }
 
   m=lg(x[1])-1; r=0;
-  x=dummycopy(x);
+  x=shallowcopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
@@ -3070,7 +3070,7 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     return gerepileupto(ltop,p1);
   }
   m=lg(x[1])-1; r=0; av0 = avma;
-  x=dummycopy(x);
+  x=shallowcopy(x);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -3156,7 +3156,7 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
   vs = mael3(x,1,1,1);
 
   m=lg(x[1])-1; r=0; av0 = avma;
-  x=dummycopy(x); mun=Fl_to_Flx(p-1,vs);
+  x=shallowcopy(x); mun=Fl_to_Flx(p-1,vs);
   c=new_chunk(m+1); for (k=1; k<=m; k++) c[k]=0;
   d=new_chunk(n+1);
   av=avma; lim=stack_lim(av,1);
@@ -3307,7 +3307,7 @@ det_simple_gauss(GEN a, int inexact)
   long i,j,k,s, nbco = lg(a)-1;
   GEN x,p;
 
-  av=avma; s=1; x=gen_1; a=dummycopy(a);
+  av=avma; s=1; x=gen_1; a=shallowcopy(a);
   for (i=1; i<nbco; i++)
   {
     p=gcoeff(a,i,i); k=i;
@@ -3385,7 +3385,7 @@ det(GEN a)
   if (DEBUGLEVEL > 7) (void)timer2();
 
   av = avma; lim = stack_lim(av,2);
-  a = dummycopy(a); s = 1;
+  a = shallowcopy(a); s = 1;
   for (pprec=gen_1,i=1; i<nbco; i++,pprec=p)
   {
     GEN *ci, *ck, m, p1;
@@ -3477,7 +3477,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
     case t_COL: break;
     default: err(typeer,"gaussmodulo");
   }
-  H = hnfall_i(dummyconcat(M,delta), &U, 1);
+  H = hnfall_i(shallowconcat(M,delta), &U, 1);
   Y = hnf_gauss(H,Y); if (!Y) return gen_0;
   u1 = cgetg(m+1,t_MAT);
   u2 = cgetg(n+1,t_MAT);

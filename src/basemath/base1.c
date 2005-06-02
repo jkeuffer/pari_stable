@@ -260,7 +260,7 @@ static GEN
 transroot(GEN x, int i, int j)
 {
   long k;
-  x = dummycopy(x);
+  x = shallowcopy(x);
   k=x[i]; x[i]=x[j]; x[j]=k; return x;
 }
 
@@ -273,7 +273,7 @@ tschirnhaus(GEN x)
 
   if (typ(x)!=t_POL) err(notpoler,"tschirnhaus");
   if (lg(x) < 4) err(constpoler,"tschirnhaus");
-  if (v) { u=dummycopy(x); setvarn(u,0); x=u; }
+  if (v) { u=shallowcopy(x); setvarn(u,0); x=u; }
   p1[1] = evalsigne(1)|evalvarn(0);
   do
   {
@@ -309,7 +309,7 @@ GEN
 primitive_pol_to_monic(GEN pol, GEN *ptlead)
 {
   long i,j,n = degpol(pol);
-  GEN lead,fa,e,a, POL = dummycopy(pol);
+  GEN lead,fa,e,a, POL = shallowcopy(pol);
 
   a = POL + 2; lead = (GEN)a[n];
   if (signe(lead) < 0) { POL = gneg_i(POL); a = POL+2; lead = negi(lead); }
@@ -789,8 +789,8 @@ nfiso0(GEN a, GEN b, long fliso)
           { avma=av; return gen_0; }
     }
   }
-  a = dummycopy(a); setvarn(a,0);
-  b = dummycopy(b); vb=varn(b);
+  a = shallowcopy(a); setvarn(a,0);
+  b = shallowcopy(b); vb=varn(b);
   if (nfb)
   {
     if (vb == 0) nfb = gsubst(nfb, 0, polx[MAXVARN]);
@@ -835,7 +835,7 @@ nfisincl(GEN a, GEN b) { return nfiso0(a,b,0); }
 GEN
 get_roots(GEN x,long r1,long prec)
 {
-  GEN roo = (typ(x)!=t_POL)? dummycopy(x): roots(x,prec);
+  GEN roo = (typ(x)!=t_POL)? shallowcopy(x): roots(x,prec);
   long i, ru = (lg(roo)-1 + r1) >> 1;
 
   for (i=1; i<=r1; i++) roo[i] = (long)real_i((GEN)roo[i]);
@@ -946,7 +946,7 @@ get_Tr(GEN mul, GEN x, GEN basden)
 GEN
 get_bas_den(GEN bas)
 {
-  GEN b,d,den, dbas = dummycopy(bas);
+  GEN b,d,den, dbas = shallowcopy(bas);
   long i, l = lg(bas);
   int power = 1;
   den = cgetg(l,t_VEC);
@@ -1224,14 +1224,14 @@ nfbasechange(GEN u, GEN x)
       return gmul(u, x);
 
     case t_MAT: /* ideal */
-      y = dummycopy(x);
+      y = shallowcopy(x);
       lx = lg(x);
       for (i=1; i<lx; i++) y[i] = lmul(u, (GEN)y[i]);
       break;
 
     case t_VEC: /* pr */
       checkprimeid(x);
-      y = dummycopy(x);
+      y = shallowcopy(x);
       y[2] = lmul(u, (GEN)y[2]);
       y[5] = lmul(u, (GEN)y[5]);
       break;
@@ -1557,9 +1557,9 @@ nfgetprec(GEN x)
 GEN
 nfnewprec_i(GEN nf, long prec)
 {
-  GEN NF = dummycopy(nf);
+  GEN NF = shallowcopy(nf);
   nffp_t F;
-  NF[5] = (long)dummycopy((GEN)NF[5]);
+  NF[5] = (long)shallowcopy((GEN)NF[5]);
   remake_GM(NF, &F, prec);
   NF[6]  = (long)F.ro;
   mael(NF,5,1) = (long)F.M;
@@ -1876,7 +1876,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       long r; /* add to M2 the elts of M * nf.zk[i]  */
       for (j = 1; j <= rkM; j++) M2[k++] = lmul(Mx, (GEN)M[j]);
       setlg(M2, k); k = 1;
-      M = image(dummyconcat(M, M2));
+      M = image(shallowconcat(M, M2));
       r = lg(M) - 1;
       if (r == rkM) break;
       if (r > rkM)

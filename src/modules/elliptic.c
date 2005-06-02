@@ -1755,7 +1755,7 @@ ellintegralmodel(GEN e)
     {
       case t_INT: break;
       case t_FRAC: /* partial factorization */
-        L = dummyconcat(L, (GEN)auxdecomp((GEN)u[2], 0)[1]);
+        L = shallowconcat(L, (GEN)auxdecomp((GEN)u[2], 0)[1]);
         break;
       default: err(talker, "not a rational curve in ellintegralmodel");
     }
@@ -1849,7 +1849,7 @@ ellglobalred(GEN E)
   P = (GEN)decomp(gcdii(c4,c6))[1];
   l = lg(P);
   for (k = 1; k < l; k++) (long)Z_pvalrem(D, (GEN)P[k], &D);
-  if (!is_pm1(D)) P = dummyconcat(P, (GEN)decomp(absi(D))[1]);
+  if (!is_pm1(D)) P = shallowconcat(P, (GEN)decomp(absi(D))[1]);
   l = lg(P); c = N = gen_1;
   for (k = 1; k < l; k++)
   {
@@ -3214,7 +3214,7 @@ exphellagm(GEN e, GEN z, int flag, long prec)
     p1 = gmul2n(gsub(x, ab), -1);
     p2 = gsqr(a);
     x = gadd(p1, gsqrt(gadd(gsqr(p1), gmul(x, p2)), prec));
-    V = dummyconcat(V, gadd(x, p2));
+    V = shallowconcat(V, gadd(x, p2));
   }
   x = (GEN)V[n];
   while (--n > 0) x = gdiv(gsqr(x), (GEN)V[n]);

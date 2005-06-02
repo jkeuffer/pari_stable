@@ -897,7 +897,7 @@ END:
     if (signe(leading_term(pol)) < 0) pol = gneg_i(pol);
 
     setlg(famod, lfamod+1);
-    listmod[cnt] = (long)dummycopy(famod);
+    listmod[cnt] = (long)shallowcopy(famod);
     fa[cnt++] = (long)pol;
   }
   if (DEBUGLEVEL>6) fprintferr("\n");
@@ -983,7 +983,7 @@ shifteval(GEN Q, long n)
 static GEN
 root_bound(GEN P0)
 {
-  GEN Q = dummycopy(P0), lP = absi(leading_term(Q)), x,y,z;
+  GEN Q = shallowcopy(P0), lP = absi(leading_term(Q)), x,y,z;
   long k, d = degpol(Q);
 
   /* P0 = lP x^d + Q, deg Q < d */
@@ -1241,7 +1241,7 @@ AGAIN:
     {
       GEN P1 = gscalmat(powiu(p, a-b), N0);
       first = 0;
-      m = dummyconcat( m, vconcat(ZERO, P1) );
+      m = shallowconcat( m, vconcat(ZERO, P1) );
       /*     [ C M_L        0     ]
        * m = [                    ]   square matrix
        *     [  T2'  p^(a-b) I_N0 ]   T2' = Tra * M_L  truncated
@@ -1354,7 +1354,7 @@ combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
     L = LLL_cmbf((GEN)res[l], famod, p, pa, A, a, maxK);
     if (DEBUGLEVEL>2) msgTIMER(&T,"Knapsack");
     /* remove last elt, possibly unfactored. Add all new ones. */
-    setlg(res, l); res = dummyconcat(res, L);
+    setlg(res, l); res = shallowconcat(res, L);
   }
   return res;
 }
@@ -1385,7 +1385,7 @@ DDF_roots(GEN pol, GEN polp, GEN p)
   lz = lg(z)-1;
   if (lz > (degpol(pol) >> 2))
   { /* many roots */
-    z = dummyconcat(deg1_from_roots(z, v),
+    z = shallowconcat(deg1_from_roots(z, v),
                  FpX_div(polp, FpV_roots_to_pol(z, p, v), p));
     z = hensel_lift_fact(pol, z, NULL, p, pe, e);
   }
@@ -1537,7 +1537,7 @@ gdeflate(GEN x, long v, long d)
       if (!signe(x)) return zeroser(v, V / d);
       if (V % d != 0)
         err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
-      y = dummycopy(x); setvalp(y, 0); y = gtrunc(y);
+      y = shallowcopy(x); setvalp(y, 0); y = gtrunc(y);
       if (checkdeflate(y) % d != 0)
         err(talker, "can't deflate this power series (d = %ld): %Z", d, x);
       y = poldeflate_i(y, d);
@@ -1611,7 +1611,7 @@ ZX_DDF(GEN x, long hint)
     {
       GEN L2 = cgetg(1,t_VEC);
       for (i=1; i < lg(L); i++)
-        L2 = dummyconcat(L2, DDF(polinflate((GEN)L[i], v[k]), hint, 0));
+        L2 = shallowconcat(L2, DDF(polinflate((GEN)L[i], v[k]), hint, 0));
       L = L2;
     }
   }
@@ -1703,7 +1703,7 @@ nfrootsQ(GEN x)
   d = modulargcd(derivpol(x), x);
   if (degpol(d)) x = RgX_div(x, d);
   z = DDF(x, 1, 1);
-  if (val) z = dummyconcat(z, gen_0);
+  if (val) z = shallowconcat(z, gen_0);
   return gerepilecopy(av, z);
 }
 
@@ -1875,8 +1875,8 @@ concat_factor(GEN f, GEN g)
 {
   if (lg(f) == 1) return g;
   if (lg(g) == 1) return f;
-  return mkmat2(dummyconcat((GEN)f[1], (GEN)g[1]),
-                dummyconcat((GEN)f[2], (GEN)g[2]));
+  return mkmat2(shallowconcat((GEN)f[1], (GEN)g[1]),
+                shallowconcat((GEN)f[2], (GEN)g[2]));
 }
 
 /* assume f and g coprime integer factorizations */
@@ -2064,8 +2064,8 @@ gauss_factor(GEN x)
         E[i] = lstoi(e << 1);
       else
       {
-        P = dummyconcat(P, gauss_normal( gconj(w) ));
-        E = dummyconcat(E, (GEN)E[i]);
+        P = shallowconcat(P, gauss_normal( gconj(w) ));
+        E = shallowconcat(E, (GEN)E[i]);
       }
       exp += 3*e;
       exp &= 3;
@@ -2078,8 +2078,8 @@ gauss_factor(GEN x)
 
   y = gmul(y, Ipow(exp));
   if (!gcmp1(y)) {
-    fa[1] = (long)dummyconcat(mkcol(y), (GEN)fa[1]);
-    fa[2] = (long)dummyconcat(gen_1,     (GEN)fa[2]);
+    fa[1] = (long)shallowconcat(mkcol(y), (GEN)fa[1]);
+    fa[2] = (long)shallowconcat(gen_1,     (GEN)fa[2]);
   }
   return gerepilecopy(av, fa);
 }
@@ -2153,8 +2153,8 @@ factor(GEN x)
         default:
         {
           long killv;
-	  x = dummycopy(x); lx=lg(x);
-          pol = dummycopy(pol);
+	  x = shallowcopy(x); lx=lg(x);
+          pol = shallowcopy(pol);
           v = manage_var(manage_var_max_avail,NULL);
           for(i=2; i<lx; i++)
           {
@@ -2328,7 +2328,7 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
 
   if (lx == 1) return gen_1;
   if (lx == 2) return gcopy((GEN)x[1]);
-  x = dummycopy(x); k = lx;
+  x = shallowcopy(x); k = lx;
   ltop=avma; lim = stack_lim(ltop,1);
   while (k > 2)
   {
@@ -3695,7 +3695,7 @@ static GEN
 reductum(GEN P)
 {
   if (signe(P)==0) return P;
-  return normalizepol_i(dummycopy(P),lg(P)-1);
+  return normalizepol_i(shallowcopy(P),lg(P)-1);
 }
 
 static GEN

@@ -567,7 +567,7 @@ get_coprimes(GEN a, GEN b)
       if (d == gen_1) continue;
       c = diviiexact(c, d);
       u[i] = (long)diviiexact((GEN)u[i], d);
-      u = dummyconcat(u, d);
+      u = shallowconcat(u, d);
     }
     u[++k] = (long)c;
   }
@@ -605,7 +605,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   /* "complete" factorization first */
   for (i=1; i<lw; i++)
   {
-    if (w2[i] == 1) { ordmax = dummyconcat(ordmax, gen_1); continue; }
+    if (w2[i] == 1) { ordmax = shallowconcat(ordmax, gen_1); continue; }
 
     CATCH(invmoder) { /* caught false prime, update factorization */
       GEN x = (GEN)global_err_data;
@@ -619,7 +619,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for (k = 1; k < l; k++) u[k] = coeff(auxdecomp((GEN)u[k], 2),1,1);
 
       w1[i] = u[1];
-      w1 = dummyconcat(w1, vecextract_i(u, 2, l-1));
+      w1 = shallowconcat(w1, vecsplice(u, 2, l-1));
       N = *dx;
       w2[i] = Z_pvalrem(N, (GEN)w1[i], &N);
       k  = lw;
@@ -627,7 +627,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       for ( ; k < lw; k++) w2[k] = Z_pvalrem(N, (GEN)w1[k], &N);
     } RETRY {
       if (DEBUGLEVEL) fprintferr("Treating p^k = %Z^%ld\n",w1[i],w2[i]);
-      ordmax = dummyconcat(ordmax, mkvec( maxord((GEN)w1[i],f,w2[i]) ));
+      ordmax = shallowconcat(ordmax, mkvec( maxord((GEN)w1[i],f,w2[i]) ));
     } ENDCATCH;
   }
 
@@ -1381,7 +1381,7 @@ fastnu(GEN p, GEN f, GEN beta, GEN pdr)
   if (DEBUGLEVEL >= 6) fprintferr("  fastnu: HNF(G) is computed\n");
 
   setlg(G, n+2);
-  G = rowextract_i(G, 1, n+1);
+  G = rowsplice(G, 1, n+1);
   h = gtopoly((GEN)G[n+1], v);
   for (j = 1; j <= n; j++)
     h = FpX_gcd(h, gtopoly((GEN)G[j], v), p);
@@ -1537,7 +1537,7 @@ init_NS(long N, GEN pp, GEN pmf, GEN pmr)
 static GEN
 ch_var(GEN x, long v)
 {
-  if (typ(x) == t_POL) { x = dummycopy(x); setvarn(x, v); }
+  if (typ(x) == t_POL) { x = shallowcopy(x); setvarn(x, v); }
   return x;
 }
 
@@ -1945,7 +1945,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   f = N - m;
   q = powiu(p,f+1);
 
-  u = FpM_invimage(dummyconcat(P, V), vec_ei(N,1), p);
+  u = FpM_invimage(shallowconcat(P, V), vec_ei(N,1), p);
   setlg(u, lg(P));
   u = centermod(gmul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
@@ -1988,7 +1988,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
   {
     GEN D, w = Q_remove_denom((GEN)nf[7], &D), Dp = sqri(p);
     long i;
-    if (!D) w = dummycopy(w);
+    if (!D) w = shallowcopy(w);
     else {
       GEN w1 = D;
       long v = Z_pval(D, p);
@@ -2166,7 +2166,7 @@ _primedec(GEN nf, GEN p)
     beta = FpV_red(algtobasis_i(nf,beta), p);
 
     mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
-    p1 = dummyconcat(mulbeta, Ip);
+    p1 = shallowconcat(mulbeta, Ip);
     /* Fp-base of ideal (Ip, beta) in ZK/p */
     h[1] = (long)FpM_image(p1, p);
   }
@@ -2181,11 +2181,11 @@ _primedec(GEN nf, GEN p)
     long dim;
 
     H = (GEN)h[c]; k = lg(H)-1;
-    M   = FpM_suppl(dummyconcat(H,UN), p);
+    M   = FpM_suppl(shallowconcat(H,UN), p);
     Mi  = FpM_inv(M, p);
-    M2  = vecextract_i(M, k+1,N); /* M = (H|M2) invertible */
-    Mi2 = rowextract_i(Mi,k+1,N);
-    /* FIXME: FpM_mul(,M2) could be done with vecextract_p */
+    M2  = vecsplice(M, k+1,N); /* M = (H|M2) invertible */
+    Mi2 = rowsplice(Mi,k+1,N);
+    /* FIXME: FpM_mul(,M2) could be done with vecpermute */
     phi2 = FpM_mul(Mi2, FpM_mul(phi,M2, p), p);
     mat1 = FpM_ker(phi2, p);
     dim = lg(mat1)-1; /* A2 product of 'dim' fields */
@@ -2204,7 +2204,7 @@ _primedec(GEN nf, GEN p)
       {
         r = lift_intern((GEN)R[i]);
         I = gaddmat_i(negi(r), mula);
-	h[c++] = (long)FpM_image(dummyconcat(H, I), p);
+	h[c++] = (long)FpM_image(shallowconcat(H, I), p);
       }
       if (n == dim)
         for (i=1; i<=n; i++) { H = (GEN)h[--c]; L[iL++] = (long)H; }
@@ -2363,7 +2363,7 @@ modprinit(GEN nf, GEN pr, int zk)
     else
       ffproj[i] = lneg((GEN)prh[i]);
   }
-  ffproj = rowextract_p(ffproj, c);
+  ffproj = rowpermute(ffproj, c);
   if (! dvdii((GEN)nf[4], p))
   {
     GEN basis = (GEN)nf[7];
@@ -2371,7 +2371,7 @@ modprinit(GEN nf, GEN pr, int zk)
     else
     {
       T = Q_primpart(gmul(basis, (GEN)pr[2]));
-      basis = vecextract_p(basis, c);
+      basis = vecpermute(basis, c);
     }
     ffproj = FpM_mul(get_proj_modT(basis, T, p), ffproj, p);
 
@@ -2385,7 +2385,7 @@ modprinit(GEN nf, GEN pr, int zk)
   if (isprime(gf))
   {
     mul = eltmulid_get_table(nf, c[2]);
-    mul = vecextract_p(mul, c);
+    mul = vecpermute(mul, c);
   }
   else
   {
@@ -2515,7 +2515,7 @@ nfreducemodpr_i(GEN x, GEN prh)
   GEN p = gcoeff(prh,1,1);
   long i,j;
 
-  x = dummycopy(x);
+  x = shallowcopy(x);
   for (i=lg(x)-1; i>=2; i--)
   {
     GEN t = (GEN)prh[i], p1 = remii((GEN)x[i], p);
@@ -2844,7 +2844,7 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   av1 = avma; lim = stack_lim(av1,1);
   for(cmpt=1; ; cmpt++)
   {
-    GEN I0 = dummycopy(I), W0 = dummycopy(W);
+    GEN I0 = shallowcopy(I), W0 = shallowcopy(W);
     GEN Wa, Wainv, Waa, Ip, A, Ainv, MWmod, F, pseudo, G;
 
     if (DEBUGLEVEL>1) fprintferr("    pass no %ld\n",cmpt);
@@ -2964,7 +2964,7 @@ fix_relative_pol(GEN nf, GEN x, int chk_lead)
   long i, vnf = varn(xnf), lx = lg(x);
   if (typ(x) != t_POL || varncmp(varn(x), vnf) >= 0)
     err(talker,"incorrect polynomial in rnf function");
-  x = dummycopy(x);
+  x = shallowcopy(x);
   for (i=2; i<lx; i++)
     switch(typ(x[i]))
     {
@@ -3099,7 +3099,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   if (typ(x)!=t_VEC || lg(x)<3)
     err(talker,"not a pseudo-basis in nfsimplifybasis");
-  x = dummycopy(x);
+  x = shallowcopy(x);
   A = (GEN)x[1];
   I = (GEN)x[2]; l = lg(I);
   id = idmat(degpol(nf[1]));
@@ -3197,7 +3197,7 @@ rnfsteinitz(GEN nf, GEN order)
   Id = idmat(degpol(nf[1]));
   order = get_order(nf, order, "rnfsteinitz");
   A = matalgtobasis(nf, (GEN)order[1]);
-  I = dummycopy((GEN)order[2]); n=lg(A)-1;
+  I = shallowcopy((GEN)order[2]); n=lg(A)-1;
   if (typ(A) != t_MAT || typ(I) != t_VEC || lg(I) != n+1)
     err(typeer,"rnfsteinitz");
   for (i=1; i<n; i++)
@@ -3254,16 +3254,16 @@ rnfbasis(GEN bnf, GEN order)
     I = (GEN)order[2];
   }
   A = (GEN)order[1];
-  col= (GEN)A[n]; A = vecextract_i(A, 1, n-1);
+  col= (GEN)A[n]; A = vecsplice(A, 1, n-1);
   cl = (GEN)I[n];
   a = gen_if_principal(bnf, cl);
   if (!a)
   {
     GEN p1 = ideal_two_elt(nf, cl);
-    A = dummyconcat(A, gmul((GEN)p1[1], col));
+    A = shallowconcat(A, gmul((GEN)p1[1], col));
     a = (GEN)p1[2];
   }
-  A = dummyconcat(A, element_mulvec(nf, a, col));
+  A = shallowconcat(A, element_mulvec(nf, a, col));
   return gerepilecopy(av, A);
 }
 
@@ -3281,7 +3281,7 @@ rnfhermitebasis(GEN bnf, GEN order)
   bnf = checkbnf(bnf); nf = (GEN)bnf[7];
   id = idmat(degpol(nf[1]));
   order = get_order(nf, order, "rnfbasis");
-  A = (GEN)order[1]; A = dummycopy(A);
+  A = (GEN)order[1]; A = shallowcopy(A);
   I = (GEN)order[2]; n = lg(A)-1;
   for (j=1; j<=n; j++)
   {
@@ -3355,7 +3355,7 @@ polcompositum0(GEN A, GEN B, long flall)
   {
     D = RgX_rescale(A, stoi(1 - k));
     C = gdivexact(C, D);
-    if (degpol(C) <= 0) C = mkvec(D); else C = dummyconcat(ZX_DDF(C, 0), D);
+    if (degpol(C) <= 0) C = mkvec(D); else C = shallowconcat(ZX_DDF(C, 0), D);
   }
   else
     C = ZX_DDF(C, 0); /* C = Res_Y (A, B(X + kY)) guaranteed squarefree */
@@ -3492,7 +3492,7 @@ mattocomplex(GEN nf, GEN x)
   {
     GEN c = (GEN)x[j], b = cgetg(l, t_MAT);
     for (i=1; i<l; i++) b[i] = (long)nftocomplex(nf, (GEN)c[i]);
-    b = dummytrans(b); settyp(b, t_COL);
+    b = shallowtrans(b); settyp(b, t_COL);
     v[j] = (long)b;
   }
   return v;
@@ -3525,7 +3525,7 @@ rnfscal(GEN m, GEN x, GEN y)
   long i, l = lg(m);
   GEN z = cgetg(l, t_COL);
   for (i = 1; i < l; i++)
-    z[i] = lmul(gconj(dummytrans((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
+    z[i] = lmul(gconj(shallowtrans((GEN)x[i])), gmul((GEN)m[i], (GEN)y[i]));
   return z;
 }
 
@@ -3686,7 +3686,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   I = (GEN)order[2]; lx = lg(I);
   if (lx < 3) return gcopy(order);
   if (lx-1 != degpol(pol)) err(consister,"rnflllgram");
-  I = dummycopy(I);
+  I = shallowcopy(I);
   H = NULL;
   MPOL = matbasistoalg(nf, M);
   MCS = idmat(lx-1); /* dummy for gerepile */

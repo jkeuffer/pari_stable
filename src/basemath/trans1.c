@@ -707,7 +707,7 @@ ser_powfrac(GEN x, GEN q, long prec)
   if (typ(E) != t_INT)
     err(talker,"%Z should divide valuation (= %ld) in sqrtn",q[2], e);
   e = val_from_i(E);
-  y = dummycopy(x); setvalp(y, 0);
+  y = shallowcopy(x); setvalp(y, 0);
   y = ser_pow(y, q, prec);
   if (typ(y) == t_SER) /* generic case */
     y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
@@ -2156,7 +2156,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
       if (!ex)
       {
-        p1 = dummycopy(y); p1[2] = (long)gen_0;
+        p1 = shallowcopy(y); p1[2] = (long)gen_0;
         gsincos(normalize(p1),&u,&v,prec);
         gsincos((GEN)y[2],&u1,&v1,prec);
         p1 = gmul(v1,v);

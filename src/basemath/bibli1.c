@@ -154,7 +154,7 @@ static GEN
 ApplyAllQ(GEN Q, GEN r0, long k)
 {
   pari_sp av = avma;
-  GEN r = dummycopy(r0);
+  GEN r = shallowcopy(r0);
   long j;
   for (j=1; j<k; j++) ApplyQ((GEN)Q[j], r);
   return gerepilecopy(av, r);
@@ -200,7 +200,7 @@ sqred1_from_QR(GEN x, long prec)
   for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
   if (!Householder_get_mu(x, L, B, k, NULL, prec)) return NULL;
   for (j=1; j<=k; j++) coeff(L,j,j) = B[j];
-  return dummytrans(L);
+  return shallowtrans(L);
 }
 
 GEN
@@ -212,7 +212,7 @@ R_from_QR(GEN x, long prec)
   for (j=1; j<=k; j++) L[j] = (long)zerocol(k);
   for (j=1; j<=k; j++)
     if (!incrementalQ(x, L, B, Q, j, prec)) return NULL;
-  return dummytrans(L);
+  return shallowtrans(L);
 }
 
 /********************************************************************/
@@ -247,7 +247,7 @@ GEN
 gram_schmidt(GEN e, GEN *ptB)
 {
   long i,j,lx = lg(e);
-  GEN f = dummycopy(e), B, iB;
+  GEN f = shallowcopy(e), B, iB;
 
   B = cgetg(lx, t_VEC);
   iB= cgetg(lx, t_VEC);
@@ -666,7 +666,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
   hx = lg(x[1]);
   if (gram && hx != lx) err(mattype1,"lllint");
 
-  av = avma; lim = stack_lim(av,1); x = dummycopy(x);
+  av = avma; lim = stack_lim(av,1); x = shallowcopy(x);
   B = gscalcol_i(gen_1, lx);
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++)
@@ -972,7 +972,7 @@ HRS(int MARKED, long k, int prim, long kmax, GEN X, GEN Xs, GEN h, GEN R,
 
   E[k] = prim? E[k-1]: 0;
   F[k] = 0;
-  Xs[k] = E[k]? lmul2n((GEN)X[k], E[k]): (long)dummycopy((GEN)X[k]);
+  Xs[k] = E[k]? lmul2n((GEN)X[k], E[k]): (long)shallowcopy((GEN)X[k]);
   rounds = 0;
   if (k == MARKED) goto DONE; /* no size reduction/scaling */
 
@@ -1758,7 +1758,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   /* bnd-hack is only for the case B = N */
   if (!equalii(B,N)) bnd = 1;
 
-  P = dummycopy(P0); d = degpol(P);
+  P = shallowcopy(P0); d = degpol(P);
   if (!gcmp1((GEN)P[d+2]))
   {
     P[d+2] = (long)bezout((GEN)P[d+2], N, &z, &r);
@@ -1866,7 +1866,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
       if (cmpii(tst, B) >= 0) /* We have found a factor of N >= B */
       {
         for (l = 1; l < lg(sol) && !equalii(z, (GEN)sol[l]); l++) /*empty*/;
-        if (l == lg(sol)) sol = dummyconcat(sol, z);
+        if (l == lg(sol)) sol = shallowconcat(sol, z);
       }
     }
     if (i < bnd) R[2] = (long)addii((GEN)R[2], Z);
@@ -2055,7 +2055,7 @@ lindep(GEN x, long prec)
     }
   }
   p1 = cgetg(lx,t_COL); p1[n] = (long)gen_1; for (i=1; i<n; i++) p1[i] = (long)gen_0;
-  return gerepileupto(av, gauss(dummytrans((GEN)b),p1));
+  return gerepileupto(av, gauss(shallowtrans((GEN)b),p1));
 }
 
 /* PSLQ Programs */
@@ -3352,7 +3352,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
     if (++s <= stockmax)
     {
       if (check) norms[s] = (long)norme1;
-      S[s] = (long)dummycopy(x);
+      S[s] = (long)shallowcopy(x);
       if (s == stockmax)
       { /* overflow */
         pari_sp av2;
@@ -3478,14 +3478,14 @@ fincke_pohst(GEN a, GEN B0, long stockmax, long PREC, FP_chk_fun *CHECK)
     }
   }
   /* now r~ * r = a in LLL basis */
-  rinvtrans = dummytrans( invmat(r) );
+  rinvtrans = shallowtrans( invmat(r) );
   if (DEBUGLEVEL>2)
     fprintferr("final LLL: prec = %ld\n", gprecision(rinvtrans));
   v = lllintern(rinvtrans, 100, 1, 0);
   if (!v) return NULL;
 
   rinvtrans = gmul(rinvtrans, v);
-  v = ZM_inv(dummytrans(v),gen_1);
+  v = ZM_inv(shallowtrans(v),gen_1);
   r = gmul(r,v);
   u = u? gmul(u,v): v;
 

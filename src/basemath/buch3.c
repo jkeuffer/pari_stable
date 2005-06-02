@@ -46,7 +46,7 @@ buchnarrow(GEN bnf)
   for (i=1; i<=ngen; i++) p1[i] = gen[i];
   gen = p1;
   v = archstar_full_rk(NULL, gmael(nf,5,1), ZM_to_Flm(v, 2), gen + (ngen - t));
-  v = rowextract_i(v, t+1, r1);
+  v = rowsplice(v, t+1, r1);
 
   logs = cgetg(ngen+1,t_MAT);
   GD = gmael(bnf,9,3); invpi = ginv( mppi(DEFAULTPREC) );
@@ -58,7 +58,7 @@ buchnarrow(GEN bnf)
   }
   /* [ cyc  0 ]
    * [ logs 2 ] = relation matrix for Cl_f */
-  R = dummyconcat(
+  R = shallowconcat(
     vconcat(diagonal_i(cyc), logs),
     vconcat(zeromat(ngen, r1-t), gscalmat(gen_2,r1-t))
   );
@@ -355,7 +355,7 @@ get_dataunit(GEN bnf, GEN bid)
   D = zsignunits(bnf, S.archp, 1); l = lg(D);
   for (i = 1; i < l; i++)
     gel(D,i) = vecmodii(gmul(S.U, zlog(nf, gel(U,i),gel(D,i), &S)), cyc);
-  return dummyconcat(D, diagonal_i(cyc));
+  return shallowconcat(D, diagonal_i(cyc));
 }
 
 static GEN
@@ -435,7 +435,7 @@ Buchray(GEN bnf,GEN module,long flag)
   }
   /* [ cyc  0 ]
    * [-logs H ] = relation matrix for Cl_f */
-  h = dummyconcat(
+  h = shallowconcat(
     vconcat(diagonal_i(cyc), gneg_i(logs)),
     vconcat(zeromat(ngen, Ri), H)
   );
@@ -552,7 +552,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   for (i=1; i<j; i++) /* modify beta as if gen -> El.gen (coprime to bid) */
     if (typ(El[i]) != t_INT && signe(ep[i])) /* <==> != 1 */
       beta = arch_mul(to_famat_all((GEN)El[i], negi((GEN)ep[i])), beta);
-  p1 = gmul(U, dummyconcat(ep, zideallog(nf,beta,bid)));
+  p1 = gmul(U, shallowconcat(ep, zideallog(nf,beta,bid)));
   ex = vecmodii(p1, divray);
   if (!(flag & nf_GEN)) return gerepileupto(av, ex);
 
@@ -1089,7 +1089,7 @@ primecertify(GEN bnf, GEN beta, ulong p, GEN bad)
         fprintferr("       column #%ld of the matrix log(b_j/Q): %Z\n",
                    nbcol, newcol);
       }
-      mat1 = dummyconcat(mat,newcol); ra = rank(mat1);
+      mat1 = shallowconcat(mat,newcol); ra = rank(mat1);
       if (ra==nbcol) continue;
 
       if (DEBUGLEVEL>2) fprintferr("       new rank: %ld\n",ra);
@@ -1168,10 +1168,10 @@ certifybuchall(GEN bnf)
   }
   /* p | bad <--> p | some element occurring in cycgen[i]  */
 
-  funits = dummycopy(funits);
+  funits = shallowcopy(funits);
   for (i=1; i<lg(funits); i++)
     funits[i] = (long)algtobasis(nf, (GEN)funits[i]);
-  zu = dummycopy(zu);
+  zu = shallowcopy(zu);
   zu[2] = (long)algtobasis(nf, (GEN)zu[2]);
 
   for (p = *delta++; p <= bound; ) {  
@@ -1222,7 +1222,7 @@ imageofgroup(GEN bnr, GEN bnr2, GEN H)
 
   if (!H) return Delta;
   H2 = gmul(bnrGetSurj(bnr, bnr2), H);
-  return hnf( dummyconcat(H2, Delta) ); /* s(H) in Cl_n */
+  return hnf( shallowconcat(H2, Delta) ); /* s(H) in Cl_n */
 }
 
 static GEN
@@ -1305,7 +1305,7 @@ ideallog_to_bnr(GEN bnr, GEN z)
   if (lz != lU)
   {
     if (lz == 1) return zerocol(lg(U[1]) - 1); /* lU != 1 */
-    U = vecextract_i(U, lU-lz+1, lU-1); /* remove Cl(K) part */
+    U = vecsplice(U, lU-lz+1, lU-1); /* remove Cl(K) part */
   }
   z = gmul(U, z);
   if (col)
@@ -1463,7 +1463,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
 
       /* pr^f = N P, P | pr, hence is in norm group */
       col = gmulsg(f, bnrisprincipal(bnr,pr,0));
-      group = hnf(dummyconcat(group, col));
+      group = hnf(shallowconcat(group, col));
       detgroup = dethnf_i(group);
       k = cmpiu(detgroup,reldeg);
       if (k < 0) err(talker,"not an Abelian extension in rnfnormgroup");
@@ -1490,7 +1490,7 @@ rnf_is_abelian(GEN nf, GEN pol)
   ulong p, k, ka;
 
   eq = rnfequation2(nf,pol);
-  C =   dummycopy((GEN)eq[1]); setvarn(C, v);
+  C =   shallowcopy((GEN)eq[1]); setvarn(C, v);
   a = lift_intern((GEN)eq[2]); setvarn(a, v); /* root of nf[1] */
   nfL = _initalg(C, nf_PARTIALFACT, DEFAULTPREC);
   z = nfrootsall_and_pr(nfL, liftpol(pol, a));
@@ -1577,7 +1577,7 @@ Discrayrel(GEN bnr, GEN H0, long flag)
     for (j = ep; j > 0; j--)
     {
       GEN z = bnr_log_gen_pr(bnr, &S, nf, j, k);
-      H = hnf(dummyconcat(H, z));
+      H = hnf(shallowconcat(H, z));
       clhss = dethnf_i(H);
       if (flcond && j==ep && equalii(clhss,clhray)) { avma = av; return gen_0; }
       if (is_pm1(clhss)) { sum = addis(sum, j); break; }
@@ -1675,7 +1675,7 @@ static GEN
 get_classno(GEN t, GEN h)
 {
   GEN bid = gel(t,1), cyc = gmael(bid,2,2);
-  GEN m = dummyconcat(gel(t,2), diagonal_i(cyc));
+  GEN m = shallowconcat(gel(t,2), diagonal_i(cyc));
   return mulii(h, dethnf_i(hnf(m)));
 }
 
@@ -1785,8 +1785,8 @@ factormul(GEN fa1,GEN fa2)
 
   p = (GEN)y[1]; v = sindexsort(p); lx = lg(p);
   e = (GEN)y[2];
-  pnew = vecextract_p(p, v);
-  enew = vecextract_p(e, v);
+  pnew = vecpermute(p, v);
+  enew = vecpermute(e, v);
   P = gen_0; c = 0;
   for (i=1; i<lx; i++)
   {
@@ -1807,7 +1807,7 @@ factormul(GEN fa1,GEN fa2)
 static long
 get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
 {
-  GEN arch2 = dummycopy(arch), mod = mkvec2(ideal, arch2);
+  GEN arch2 = shallowcopy(arch), mod = mkvec2(ideal, arch2);
   long nz = 0, l = lg(arch), k, clhss;
   for (k = 1; k < l; k++)
   { /* FIXME: this is wasteful. Use the same algorithm as conductor */
@@ -1962,12 +1962,12 @@ zsimpjoin(GEN b, GEN bid, GEN embunit, long prcode, long e)
   nbgen = l1+l2-2;
   if (nbgen)
   {
-    u1u2 = matsnf0(diagonal_i(dummyconcat(cyc1,cyc2)), 1 | 4); /* all && clean */
+    u1u2 = matsnf0(diagonal_i(shallowconcat(cyc1,cyc2)), 1 | 4); /* all && clean */
     U = (GEN)u1u2[1];
     D = (GEN)u1u2[3];
-    U = dummyconcat(
-      l1==1   ? zeromat(nbgen, lg(U1)-1): gmul(vecextract_i(U, 1,   l1-1), U1),
-      l1>nbgen? zeromat(nbgen, lg(U2)-1): gmul(vecextract_i(U, l1, nbgen), U2)
+    U = shallowconcat(
+      l1==1   ? zeromat(nbgen, lg(U1)-1): gmul(vecsplice(U, 1,   l1-1), U1),
+      l1>nbgen? zeromat(nbgen, lg(U2)-1): gmul(vecsplice(U, l1, nbgen), U2)
     );
   }
   else
@@ -1993,7 +1993,7 @@ bnrclassnointern(GEN B, GEN h)
   for (j=1; j<lx; j++)
   {
     b = gel(B,j); qm = gmul(gel(b,3),gel(b,4));
-    m = dummyconcat(qm, diagonal_i(gel(b,2)));
+    m = shallowconcat(qm, diagonal_i(gel(b,2)));
     gel(L,j) = mkvec2(gel(b,1),
                       mkvecsmall( itou( mulii(h, dethnf_i(hnf(m))) ) ));
   }
@@ -2017,9 +2017,9 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
     cyc = gel(b,2); nc = lg(cyc)-1;
     /* [ qm   cyc 0 ]
      * [ matU  0  2 ] */
-    m = dummyconcat(vconcat(qm, matU),
-                 diagonal_i(dummyconcat(cyc, _2)));
-    m = hnf(m); mm = dummycopy(m);
+    m = shallowconcat(vconcat(qm, matU),
+                 diagonal_i(shallowconcat(cyc, _2)));
+    m = hnf(m); mm = shallowcopy(m);
     H = cgetg(nbarch+1,t_VECSMALL);
     rowsel = cgetg(nc+r1+1,t_VECSMALL);
     for (k = 0; k < nbarch; k++)
@@ -2170,7 +2170,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
           setlg(p2, c+1);
           pz = bigel(Ray,i);
           if (flbou) p2 = bnrclassnointernarch(p2,h,matarchunit);
-          if (lg(pz) > 1) p2 = dummyconcat(pz,p2);
+          if (lg(pz) > 1) p2 = shallowconcat(pz,p2);
           bigel(Ray,i) = p2;
         }
         Q = itos_or_0( mulss(Q, q) );

@@ -919,7 +919,7 @@ inv_ser(GEN b)
 {
   pari_sp av = avma, av2, lim;
   long i, j, le, l = lg(b), e = valp(b), v = varn(b);
-  GEN E, y, x = cgetg(l, t_SER), a = dummycopy(b);
+  GEN E, y, x = cgetg(l, t_SER), a = shallowcopy(b);
 
   if (!signe(b)) err(gdiver);
 

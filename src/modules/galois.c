@@ -2279,7 +2279,7 @@ closure11(buildroot *BR)
     GEN h = BR->p, r = compositum(h, h);
     r = (GEN)r[lg(r)-1];
     if (degpol(r) == 22) return 2; /* D11 */
-    h = dummycopy(h); setvarn(h, MAXVARN);
+    h = shallowcopy(h); setvarn(h, MAXVARN);
     setvarn(r, 0);
     r = nffactor(_initalg(h, nf_PARTIALFACT, DEFAULTPREC), r);
     /* S11 of F_110[11] */

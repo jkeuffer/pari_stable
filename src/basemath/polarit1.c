@@ -1821,7 +1821,7 @@ padicff2(GEN nf,GEN p,long k)
     long e = itos((GEN)P[3]), ef = e * itos((GEN)P[4]);
     D = smithall(idealpows(nf,P, k*e), &U, NULL);
     Ui= ginv(U); setlg(Ui, ef+1); /* cf smithrel */
-    U = rowextract_i(U, 1, ef);
+    U = rowsplice(U, 1, ef);
     mat = gmul(U, gmul(mulx, Ui));
     fa[i] = (long)caradj(mat,0,NULL);
   }
@@ -2370,7 +2370,7 @@ GEN
 FqX_split_roots(GEN z, GEN T, GEN p, GEN pol)
 {
   GEN S = (GEN)z[1], L = (GEN)z[2], rep = FqX_split_equal(L, S, T, p);
-  if (pol) rep = dummyconcat(rep, FqX_div(pol, (GEN)L[2], T,p));
+  if (pol) rep = shallowconcat(rep, FqX_div(pol, (GEN)L[2], T,p));
   return rep;
 }
 GEN
@@ -2379,7 +2379,7 @@ FqX_split_all(GEN z, GEN T, GEN p)
   GEN S = (GEN)z[1], rep = cgetg(1, t_VEC);
   long i, l = lg(z);
   for (i = 2; i < l; i++)
-    rep = dummyconcat(rep, FqX_split_equal((GEN)z[i], S, T, p));
+    rep = shallowconcat(rep, FqX_split_equal((GEN)z[i], S, T, p));
   return rep;
 }
 
@@ -2970,7 +2970,7 @@ balanc(GEN x)
   long last,i,j, sqrdx = (RADIX<<1), n = lg(x);
   GEN r,c,cofgen,a;
 
-  a = dummycopy(x);
+  a = shallowcopy(x);
   last = 0; cofgen = dbltor(COF);
   while (!last)
   {

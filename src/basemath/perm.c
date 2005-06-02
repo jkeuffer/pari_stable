@@ -1057,8 +1057,8 @@ group_export_GAP(GEN G)
   s = strtoGENstr("Group(");
   for (i = 1; i < l; ++i)
   {
-    if (i > 1) s = dummyconcat(s, strtoGENstr(", "));
-    s = dummyconcat(s, perm_to_GAP((GEN)g[i]));
+    if (i > 1) s = shallowconcat(s, strtoGENstr(", "));
+    s = shallowconcat(s, perm_to_GAP((GEN)g[i]));
   }
   s = concat(s, strtoGENstr(")"));
   return gerepileupto(ltop,s);
@@ -1072,12 +1072,12 @@ group_export_MAGMA(GEN G)
   long i, l = lg(g);
   if (l == 1) return strtoGENstr("PermutationGroup<1|>");
   s = strtoGENstr("PermutationGroup<");
-  s = dummyconcat(s, stoi(group_domain(G)));
-  s = dummyconcat(s, strtoGENstr("|"));
+  s = shallowconcat(s, stoi(group_domain(G)));
+  s = shallowconcat(s, strtoGENstr("|"));
   for (i = 1; i < l; ++i)
   {
-    if (i > 1) s = dummyconcat(s, strtoGENstr(", "));
-    s = dummyconcat(s, vecsmall_to_vec((GEN)g[i]));
+    if (i > 1) s = shallowconcat(s, strtoGENstr(", "));
+    s = shallowconcat(s, vecsmall_to_vec((GEN)g[i]));
   }
   s = concat(s, strtoGENstr(">"));
   return gerepileupto(ltop,s);

@@ -265,7 +265,7 @@ getallelts(GEN bnr)
     return (GEN)list;
   }
   pows = (GEN**)cgetg(lc+1,t_VEC);
-  c = dummycopy(c); settyp(c, t_VECSMALL);
+  c = shallowcopy(c); settyp(c, t_VECSMALL);
   for (i=1; i<=lc; i++)
   {
     c[i] = k = itos((GEN)c[i]);
@@ -424,7 +424,7 @@ do_compo(GEN x, GEN y)
 {
   long a, i, l = lg(y);
   GEN z;
-  y = dummycopy(y); /* y := t^deg(y) y(#/t) */
+  y = shallowcopy(y); /* y := t^deg(y) y(#/t) */
   for (i = 2; i < l; i++)
     if (signe(y[i])) y[i] = (long)monomial((GEN)y[i], l-i-1, MAXVARN);
   for  (a = 0;; a = nexta(a))
@@ -1029,7 +1029,7 @@ subFBquad(GEN D, double PROD, long KC)
   for (j = 1; j < ino;i++,j++) vperm[i] = no[j];
   for (     ; i < lv; i++)     vperm[i] = i;
   if (DEBUGLEVEL) msgtimer("subFBquad (%ld elt.)", lgsub-1);
-  avma = av; return vecextract_i(vperm, 1, lgsub-1);
+  avma = av; return vecsplice(vperm, 1, lgsub-1);
 }
 
 /* assume n >= 1, x[i][j] = subFB[i]^j, for j = 1..n */

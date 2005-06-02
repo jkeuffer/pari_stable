@@ -120,7 +120,7 @@ static void
 list_fun(subgp_iter *T, GEN x)
 {
   sublist_t *S = (sublist_t*)T->fundata;
-  GEN H = hnf(dummyconcat(S->hnfgroup,x));
+  GEN H = hnf(shallowconcat(S->hnfgroup,x));
   if (S->gen)
   { /* test conductor */
     long i, l = lg(S->gen);
@@ -142,7 +142,7 @@ treatsub(subgp_iter *T, GEN H)
     GEN Hp = gmul(T->expoI, H); /* lift H to G */
     long l = lg(T->subqpart);
     for (i=1; i<l; i++)
-      T->fun(T, dummyconcat(Hp, (GEN)T->subqpart[i]));
+      T->fun(T, shallowconcat(Hp, (GEN)T->subqpart[i]));
   }
 }
 
@@ -486,7 +486,7 @@ subgroup_engine(subgp_iter *T)
   }
   else
   { /* not a p-group */
-    GEN cycI = dummycopy(cyc);
+    GEN cycI = shallowcopy(cyc);
     long lsubq;
     for (i=1; i<n; i++)
     {
@@ -536,7 +536,7 @@ get_snf(GEN x, long *N)
       if (!isdiagonal(x)) return NULL;
       cyc = mattodiagonal_i(x); break;
     case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = (GEN)x[2];
-    case t_COL: cyc = dummycopy(x); break;
+    case t_COL: cyc = shallowcopy(x); break;
     default: return NULL;
   }
   *N = lg(cyc)-1;

@@ -156,7 +156,7 @@ T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
   GEN A, p1, m1, IntM, nia, eps3, eps2;
   long e = bit_accuracy(prec);
 
-  m1 = rowextract_i(vecextract_i(MatFU, 1,r), 1,r); /* minor order r */
+  m1 = rowsplice(vecsplice(MatFU, 1,r), 1,r); /* minor order r */
   m1 = logabs(m1,prec);
 
   A = invmat(m1);
@@ -424,7 +424,7 @@ static void
 add_sol(GEN *pS, GEN x, GEN y)
 {
   GEN u = mkvec2(x,y);
-  if (new_sol(u, *pS)) *pS = dummyconcat(*pS, mkvec(u));
+  if (new_sol(u, *pS)) *pS = shallowconcat(*pS, mkvec(u));
 }
 
 static void

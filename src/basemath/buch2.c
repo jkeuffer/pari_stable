@@ -899,7 +899,7 @@ recover_partFB(FB_t *F, GEN Vbase, long N)
   {
     if (!L[p]) continue;
     FB[++i] = p;
-    LV[p] = (long)vecextract_p(Vbase, (GEN)L[p]);
+    LV[p] = (long)vecpermute(Vbase, (GEN)L[p]);
     iLP[p]= ip; ip += lg(L[p])-1;
   }
   F->KCZ = i;
@@ -1148,7 +1148,7 @@ red_mod_units(GEN col, GEN z, long prec)
   RU = lg(mat); x = cgetg(RU+1,t_COL);
   for (i=1; i<RU; i++) x[i] = (long)real_i((GEN)col[i]);
   x[RU] = (long)N2;
-  x = lllintern(dummyconcat(mat,x),100, 1,prec);
+  x = lllintern(shallowconcat(mat,x),100, 1,prec);
   if (!x) return NULL;
   x = (GEN)x[RU];
   if (signe(x[RU]) < 0) x = gneg_i(x);
@@ -1324,7 +1324,7 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   {
     GEN Garch, V = (GEN)clg2[2];
     Bex = zc_to_ZC(Bex);
-    p1 = c? dummyconcat(gmul(V,Q), Bex): Bex;
+    p1 = c? shallowconcat(gmul(V,Q), Bex): Bex;
     col = act_arch(p1, WB_C);
     if (c)
     {
@@ -1552,7 +1552,7 @@ isunit(GEN bnf,GEN x)
   R1 = nf_get_r1(nf); v = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) v[i] = (long)gen_1;
   for (   ; i<=RU; i++) v[i] = (long)gen_2;
-  logunit = dummyconcat(logunit, v);
+  logunit = shallowconcat(logunit, v);
   /* ex = fundamental units exponents */
   rlog = real_i(logunit);
   prec = nfgetprec(nf);
@@ -2149,7 +2149,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   T = cgetg(RU+1,t_COL);
   for (i=1; i<=R1; i++) T[i] = (long)gen_1;
   for (   ; i<=RU; i++) T[i] = (long)gen_2;
-  mdet = dummyconcat(xreal,T); /* det(Span(mdet)) = N * R */
+  mdet = shallowconcat(xreal,T); /* det(Span(mdet)) = N * R */
 
   i = gprecision(mdet); /* truncate to avoid "near dependent" vectors */
   mdet_t = (i <= 4)? mdet: gprec_w(mdet,i-1);
@@ -2157,7 +2157,7 @@ compute_multiple_of_R(GEN A,long RU,long N,GEN *ptlambda)
   /* check we have full rank for units */
   if (lg(v) != RU+1) { avma=av; return NULL; }
 
-  Im_mdet = vecextract_p(mdet,v);
+  Im_mdet = vecpermute(mdet,v);
   /* integral multiple of R: the cols we picked form a Q-basis, they have an
    * index in the full lattice. Last column is T */
   kR = gdivgs(det2(Im_mdet), N);
@@ -2569,12 +2569,12 @@ bnfnewprec(GEN bnf, long prec)
   if (prec != prec1) { mun = gprec_w(mun,prec1); prec = prec1; }
   matal = check_and_build_matal(bnf);
 
-  y = dummycopy(bnf);
+  y = shallowcopy(bnf);
   y[3] = (long)mun;
   y[4] = (long)get_archclean(nf,matal,prec,0);
   y[7] = (long)nf;
   my_class_group_gen(y,prec,nf0, &clgp,&clgp2);
-  res = dummycopy((GEN)bnf[8]);
+  res = shallowcopy((GEN)bnf[8]);
   res[1] = (long)clgp;
   res[2] = (long)get_regulator(mun);
   y[8] = (long)res;
@@ -2629,7 +2629,7 @@ buchall_end(GEN nf,long fl,GEN res, GEN clg2, GEN W, GEN B, GEN A, GEN C,
     x[1]=nf[1];
     x[2]=nf[2];
     x[3]=(long)mkvec2((GEN)nf[3], (GEN)nf[4]);
-    x[4]=nf[7]; return mkmat( dummyconcat(x, res) );
+    x[4]=nf[7]; return mkmat( shallowconcat(x, res) );
   }
   z = cgetg(11,t_VEC);
   z[1]=(long)W;
@@ -2812,7 +2812,7 @@ extract_full_lattice(GEN x)
 
     for (k = 0; k < dj; k++) v[lv+k] = j+k;
     setlg(v, lv + dj);
-    h2 = hnfall_i(vecextract_p(x, v), NULL, 1);
+    h2 = hnfall_i(vecpermute(x, v), NULL, 1);
     if (gequal(h, h2))
     { /* these dj columns can be eliminated */
       avma = av; setlg(v, lv);
@@ -2899,7 +2899,7 @@ shift_embed(GEN G, GEN Gtw, long a, long r1)
 static GEN
 shift_G(GEN G, GEN Gtw, long a, long b, long r1)
 {
-  GEN g = dummycopy(G);
+  GEN g = shallowcopy(G);
   if (a != b) shift_embed(g,Gtw,a,r1);
   shift_embed(g,Gtw,b,r1); return g;
 }
@@ -2974,7 +2974,7 @@ START:
 
   Res = FBgen(&F, nf, LIMC2, LIMC);
   if (!Res || !subFBgen(&F, nf, min(lim,LIMC2) + 0.5, minsFB)) goto START;
-  PERM = dummycopy(F.perm); /* to be restored in case of precision increase */
+  PERM = shallowcopy(F.perm); /* to be restored in case of precision increase */
   av2 = avma;
   init_rel(&cache, &F, RU); /* trivial relations */
   if (nbrelpid > 0) {
@@ -3044,7 +3044,7 @@ PRECPB:
       if (need > 5)
       {
         if (need > 20 && !first) F.sfb_chg = sfb_CHANGE;
-        L_jid = vecextract_i(F.perm, 1, need);
+        L_jid = vecsplice(F.perm, 1, need);
         vecsmall_sort(L_jid); jid = 0; 
       }
       goto MORE;
@@ -3052,7 +3052,7 @@ PRECPB:
   }
   need = 1;
   zc = (cache.last - cache.base) - (lg(B)-1) - (lg(W)-1);
-  A = vecextract_i(C, 1, zc); /* cols corresponding to units */
+  A = vecsplice(C, 1, zc); /* cols corresponding to units */
   R = compute_multiple_of_R(A, RU, N, &lambda);
   if (!R)
   { /* not full rank for units */
@@ -3092,11 +3092,11 @@ PRECPB:
     GEN U, H, v = extract_full_lattice(L); /* L may be very large */
     if (v)
     {
-      A = vecextract_p(A, v);
-      L = vecextract_p(L, v);
+      A = vecpermute(A, v);
+      L = vecpermute(L, v);
     }
     /* arch. components of fund. units */
-    H = hnflll_i(L, &U, 1); U = vecextract_i(U, lg(U)-(RU-1), lg(U)-1);
+    H = hnflll_i(L, &U, 1); U = vecsplice(U, lg(U)-(RU-1), lg(U)-1);
     U = gmul(U, lll(H, DEFAULTPREC));
     A = cleanarch(gmul(A, U), N, PRECREG);
     if (DEBUGLEVEL) msgtimer("cleanarch");
@@ -3117,7 +3117,7 @@ PRECPB:
   /* class group generators */
   i = lg(C)-zc; C += zc; C[0] = evaltyp(t_MAT)|evallg(i);
   C = cleanarch(C, N, PRECREG);
-  Vbase = vecextract_p(F.LP, F.perm);
+  Vbase = vecpermute(F.LP, F.perm);
   class_group_gen(nf,W,C,Vbase,PRECREG,NULL, &clg1, &clg2);
   res = get_clfu(clg1, R, zu, fu, flun);
   return buchall_end(nf,flun,res,clg2,W,B,A,C,Vbase);

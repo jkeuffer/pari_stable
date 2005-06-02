@@ -51,7 +51,7 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
   if (typ(x) != t_POL)
     return gerepileupto(av, gpowgs(gsub(polx[v], x), degpol(p)));
   x = gneg_i(x);
-  if (varn(x) == MAXVARN) { setvarn(x, 0); p = dummycopy(p); setvarn(p, 0); }
+  if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
   x[2] = ladd((GEN)x[2], polx[MAXVARN]);
   ch = subres_f(p, x, NULL);
   if (v != MAXVARN)
@@ -132,7 +132,7 @@ caract(GEN x, int v)
   if ((p1 = easychar(x,v,NULL))) return p1;
 
   p1 = gen_0; Q = p2 = gen_1; n = lg(x)-1;
-  x_k = dummycopy(polx[v]);
+  x_k = shallowcopy(polx[v]);
   for (k=0; k<=n; k++)
   {
     GEN mk = utoineg(k);
@@ -197,7 +197,7 @@ caradj(GEN x, long v, GEN *py)
     p[2] = lpileupto(av, gadd(gmul(a,d), gneg(gmul(b,c))));
     return p;
   }
-  av = avma; y = dummycopy(x);
+  av = avma; y = shallowcopy(x);
   for (i = 1; i < l; i++) coeff(y,i,i) = ladd(gcoeff(y,i,i), t);
   for (k = 2; k < l-1; k++)
   {
@@ -243,7 +243,7 @@ hess(GEN x)
   if (typ(x) != t_MAT) err(mattype1,"hess");
   if (lx == 1) return cgetg(1,t_MAT);
   if (lg(x[1]) != lx) err(mattype1,"hess");
-  x = dummycopy(x); lim = stack_lim(av,1);
+  x = shallowcopy(x); lim = stack_lim(av,1);
 
   for (m=2; m<lx-1; m++)
     for (i=m+1; i<lx; i++)
@@ -286,7 +286,7 @@ carhess(GEN x, long v)
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
   y[1] = lpolun[v]; H = hess(x);
-  X_h = dummycopy(polx[v]);
+  X_h = shallowcopy(polx[v]);
   for (r = 1; r < lx; r++)
   {
     GEN p3 = gen_1, p4 = gen_0;
@@ -791,7 +791,7 @@ sqred2(GEN a, long signature)
   av = avma;
   r = vecsmall_const(n, 1);
   av1= avma; lim = stack_lim(av1,1);
-  a = dummycopy(a);
+  a = shallowcopy(a);
   t = n; sp = sn = 0;
   while (t)
   {
@@ -1130,7 +1130,7 @@ matrixqz2(GEN x)
 {
   pari_sp av = avma;
   if (typ(x)!=t_MAT) err(typeer,"matrixqz2");
-  x = dummycopy(x);
+  x = shallowcopy(x);
   return gerepileupto(av, matrixqz_aux(x));
 }
 
@@ -1143,7 +1143,7 @@ matrixqz3(GEN x)
 
   if (typ(x)!=t_MAT) err(typeer,"matrixqz3");
   n = lg(x); if (n==1) return gcopy(x);
-  m = lg(x[1]); x = dummycopy(x);
+  m = lg(x[1]); x = shallowcopy(x);
   c = cgetg(n,t_VECSMALL);
   for (j=1; j<n; j++) c[j] = 0;
   av1 = avma; lim = stack_lim(av1,1);
@@ -1178,7 +1178,7 @@ intersect(GEN x, GEN y)
   if (typ(x)!=t_MAT || typ(y)!=t_MAT) err(typeer,"intersect");
   if (lx==1 || lg(y)==1) return cgetg(1,t_MAT);
 
-  av=avma; z=ker(dummyconcat(x,y));
+  av=avma; z=ker(shallowconcat(x,y));
   for (j=lg(z)-1; j; j--) setlg(z[j],lx);
   tetpil=avma; return gerepile(av,tetpil,gmul(x,z));
 }
@@ -1228,7 +1228,7 @@ init_hnf(GEN x, GEN *denx, long *co, long *li, pari_sp *av)
   *li=lg(x[1]); *denx=denom(x); *av=avma;
 
   if (gcmp1(*denx)) /* no denominator */
-    { *denx = NULL; return dummycopy(x); }
+    { *denx = NULL; return shallowcopy(x); }
   return Q_muli_to_int(x, *denx);
 }
 
@@ -1451,7 +1451,7 @@ hnf_special(GEN x, long remove)
   lim = stack_lim(av,1);
   def=co-1; ldef=(li>co)? li-co: 0;
   if (lg(x2) != co) err(talker,"incompatible matrices in hnf_special");
-  x2 = dummycopy(x2);
+  x2 = shallowcopy(x2);
   for (i=li-1; i>ldef; i--)
   {
     for (j=def-1; j; j--)
@@ -1639,7 +1639,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
   Hnew = cgetg(lnz+1,t_MAT);
   depnew = cgetg(lnz+1,t_MAT); /* only used if nlze > 0 */
   Bnew = cgetg(co-col,t_MAT);
-  C = dummycopy(Cnew);
+  C = shallowcopy(Cnew);
   for (j=1,i1=j1=0; j<=lnz+s; j++)
   {
     GEN z = (GEN)H[j];
@@ -1687,10 +1687,10 @@ static void
 p_mat(long **mat, GEN perm, long k)
 {
   pari_sp av = avma;
-  perm = vecextract_i(perm, k+1, lg(perm)-1);
+  perm = vecsplice(perm, k+1, lg(perm)-1);
   fprintferr("Permutation: %Z\n",perm);
   if (DEBUGLEVEL > 6)
-    fprintferr("matgen = %Z\n", zm_to_ZM( rowextract_p((GEN)mat, perm) ));
+    fprintferr("matgen = %Z\n", zm_to_ZM( rowpermute((GEN)mat, perm) ));
   avma = av;
 }
 
@@ -2084,12 +2084,12 @@ TOOLARGE:
       perm[++k] = i;
   }
   setlg(perm,k+1);
-  x = rowextract_p(x, perm); /* upper part */
+  x = rowpermute(x, perm); /* upper part */
   setlg(perm,ly);
-  *ptB = vecextract_i(x, j+lx-ly, lx-1);
+  *ptB = vecsplice(x, j+lx-ly, lx-1);
   setlg(x, j);
-  *ptdep = rowextract_i(x, 1, lx-ly);
-  return rowextract_i(x, lx-ly+1, k); /* H */
+  *ptdep = rowsplice(x, 1, lx-ly);
+  return rowsplice(x, lx-ly+1, k); /* H */
 }
 
 /* same as Flv_to_ZV, Flc_to_ZC, Flm_to_ZM but do not assume positivity */
@@ -2140,29 +2140,29 @@ hnfadd_i(GEN H, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, /* cf hnfspec */
   *       [--------|-----] lig
   *       [   0    | Id  ]
   *       [        |     ] li */
-  extratop = zm_to_ZM( rowextract_ip(extramat, perm, 1, lig) );
+  extratop = zm_to_ZM( rowslicepermute(extramat, perm, 1, lig) );
   if (li != lig)
   { /* zero out bottom part, using the Id block */
-    GEN A = vecextract_i(C, col+1, co);
-    GEN c = rowextract_ip(extramat, perm, lig+1, li);
+    GEN A = vecsplice(C, col+1, co);
+    GEN c = rowslicepermute(extramat, perm, lig+1, li);
     extraC   = gsub(extraC, typ(A)==t_MAT? RgM_zm_mul(A, c): RgV_zm_mul(A,c));
     extratop = gsub(extratop, ZM_zm_mul(B, c));
   }
 
-  extramat = dummyconcat(extratop, vconcat(dep, H));
-  Cnew     = dummyconcat(extraC, vecextract_i(C, col-lH+1, co));
+  extramat = shallowconcat(extratop, vconcat(dep, H));
+  Cnew     = shallowconcat(extraC, vecsplice(C, col-lH+1, co));
   if (DEBUGLEVEL>5) fprintferr("    1st phase done\n");
   permpro = imagecomplspec(extramat, &nlze);
-  extramat = rowextract_p(extramat, permpro);
-  *ptB     = rowextract_p(B,        permpro);
-  permpro = vecextract_p(perm, permpro);
+  extramat = rowpermute(extramat, permpro);
+  *ptB     = rowpermute(B,        permpro);
+  permpro = vecpermute(perm, permpro);
   for (i=1; i<=lig; i++) perm[i] = permpro[i]; /* perm o= permpro */
 
-  *ptdep  = rowextract_i(extramat, 1, nlze);
-  matb    = rowextract_i(extramat, nlze+1, lig);
+  *ptdep  = rowsplice(extramat, 1, nlze);
+  matb    = rowsplice(extramat, nlze+1, lig);
   if (DEBUGLEVEL>5) fprintferr("    2nd phase done\n");
   H = hnffinal(matb,perm,ptdep,ptB,&Cnew);
-  *ptC = dummyconcat(vecextract_i(C, 1, col-lH), Cnew);
+  *ptC = shallowconcat(vecsplice(C, 1, col-lH), Cnew);
   if (DEBUGLEVEL)
   {
     msgtimer("hnfadd (%ld + %ld)", lg(extratop)-1, lg(dep)-1);
@@ -2273,8 +2273,8 @@ hnfmerge_get_1(GEN A, GEN B)
     c = j+1;
     U[j] = (long)vec_ei(l-1, j);
     U[c] = (long)zerocol(l-1); /* dummy */
-    C[j] = (long)vecextract_i((GEN)A[j], 1,j);
-    C[c] = (long)vecextract_i((GEN)B[j], 1,j);
+    C[j] = (long)vecsplice((GEN)A[j], 1,j);
+    C[c] = (long)vecsplice((GEN)B[j], 1,j);
     for (k = j; k > 0; k--)
     {
       t = gcoeff(C,k,c);
@@ -2410,7 +2410,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   co = lg(x); if (co == 1) return cgetg(1,t_MAT);
   li = lg(x[1]);
   av = avma; lim = stack_lim(av,1);
-  x = dummycopy(x);
+  x = shallowcopy(x);
 
   ldef = 0;
   if (li > co)
@@ -2788,7 +2788,7 @@ extendedgcd(GEN A)
   n = lg(A);
   for (i=1; i<n; i++)
     if (typ(A[i]) != t_INT) err(typeer,"extendedgcd");
-  A = dummycopy(A);
+  A = shallowcopy(A);
   B = idmat(n-1);
   D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
   for (i=0; i<n; i++) D[i] = gen_1;
@@ -2847,7 +2847,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
   l = vecsmall_const(n, 0);
   perm = cgetg(m+1, t_VECSMALL);
   av1 = avma; lim = stack_lim(av1,1);
-  A = dummycopy(A);
+  A = shallowcopy(A);
   U = ptU? idmat(n): NULL;
   /* U base change matrix : A0*U = A all along */
   for (r=0, k=1; k <= n; k++)
@@ -2929,7 +2929,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
       if (l[j])
       {
         u[k + n-r] = U[j];
-        p[k--] = (long)vecextract_p((GEN)A[j], perm);
+        p[k--] = (long)vecpermute((GEN)A[j], perm);
       }
       else
         u[t++] = U[j];
@@ -2940,7 +2940,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
   else
   {
     for (k=r,j=1; j<=n; j++)
-      if (l[j]) p[k--] = (long)vecextract_p((GEN)A[j], perm);
+      if (l[j]) p[k--] = (long)vecpermute((GEN)A[j], perm);
     if (ptperm) *ptperm = perm;
     gerepileall(av, ptperm? 2: 1, &p, ptperm);
   }
@@ -2975,7 +2975,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
   c = cgetg(m+1,t_VECSMALL); for (i=1; i<=m; i++) c[i]=0;
   h = cgetg(n+1,t_VECSMALL); for (j=1; j<=n; j++) h[j]=m;
   av1 = avma; lim = stack_lim(av1,1);
-  A = dummycopy(A);
+  A = shallowcopy(A);
   B = ptB? idmat(n): NULL;
   r = n+1;
   for (li=m; li; li--)
@@ -3173,7 +3173,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
   V = ptV? gen_1: NULL;
   V0 = NULL;
-  x = dummycopy(x);
+  x = shallowcopy(x);
   if (m == n && ZM_ishnf(x))
   {
     mdet = dethnf_i(x);
@@ -3208,8 +3208,8 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     V = *ptV;
     if (n != n0)
     {
-      V0 = vecextract_i(V, 1, n0 - n); /* kernel */
-      V  = vecextract_i(V, n0-n+1, n0);
+      V0 = vecsplice(V, 1, n0 - n); /* kernel */
+      V  = vecsplice(V, n0-n+1, n0);
       av = avma;
     }
   }
@@ -3218,9 +3218,9 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   {
     if (n)
     {
-      x = smithall(dummytrans(x), ptV, ptU); /* ptV, ptU swapped! */
-      if (typ(x) == t_MAT && n != m) x = dummytrans(x);
-      if (V) V = gmul(V, dummytrans(*ptV));
+      x = smithall(shallowtrans(x), ptV, ptU); /* ptV, ptU swapped! */
+      if (typ(x) == t_MAT && n != m) x = shallowtrans(x);
+      if (V) V = gmul(V, shallowtrans(*ptV));
       if (U) U = *ptU; /* TRANSPOSE */
     }
     else /* 0 matrix */
@@ -3236,10 +3236,10 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   /* square, maximal rank n */
   p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &negcmpii);
   ys = cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++) ys[j] = (long)vecextract_p((GEN)x[p1[j]], p1);
+  for (j=1; j<=n; j++) ys[j] = (long)vecpermute((GEN)x[p1[j]], p1);
   x = ys;
-  if (U) U = vecextract_p(U, p1);
-  if (V) V = vecextract_p(V, p1);
+  if (U) U = vecpermute(U, p1);
+  if (V) V = vecpermute(V, p1);
 
   p1 = hnfmod(x, mdet);
   if (V) V = gmul(V, gauss(x,p1));
@@ -3324,19 +3324,19 @@ THEEND:
   {
     if (typ(x) == t_MAT) x = mattodiagonal_i(x);
     m = lg(x)-1;
-    if (m0 > m) x = dummyconcat(zerovec(m0-m), x);
+    if (m0 > m) x = shallowconcat(zerovec(m0-m), x);
     return gerepilecopy(av0, x);
   }
 
   if (V0)
   {
-    x = dummyconcat(zeromat(m,n0-n), x);
-    if (V) V = dummyconcat(V0, V);
+    x = shallowconcat(zeromat(m,n0-n), x);
+    if (V) V = shallowconcat(V0, V);
   }
   if (U)
   {
-    U = dummytrans(U);
-    if (perm) U = vecextract_p(U, perm_inv(perm));
+    U = shallowtrans(U);
+    if (perm) U = vecpermute(U, perm_inv(perm));
   }
   snf_pile(av0, &x,&U,&V);
   if (ptU) *ptU = U;
@@ -3437,7 +3437,7 @@ gsmithall(GEN x,long all)
   if (!n) return trivsmith(all);
   if (lg(x[1]) != n+1) err(mattype1,"gsmithall");
   av = avma; lim = stack_lim(av,1);
-  x = dummycopy(x);
+  x = shallowcopy(x);
   if (all) { U = idmat(n); V = idmat(n); }
   for (i=n; i>=2; i--)
   {
@@ -3523,7 +3523,7 @@ gsmithall(GEN x,long all)
       }
     }
   }
-  z = all? mkvec3(dummytrans(U), V, x): mattodiagonal_i(x);
+  z = all? mkvec3(shallowtrans(U), V, x): mattodiagonal_i(x);
   return gerepilecopy(av, z);
 }
 
@@ -3563,7 +3563,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
   }
   setlg(D, c); D = mattodiagonal_i(D);
   if (newU) {
-    U = rowextract_i(U, 1, c-1);
+    U = rowsplice(U, 1, c-1);
     for (i = 1; i < c; i++)
     {
       GEN d = (GEN)D[i], d2 = shifti(d, 1);

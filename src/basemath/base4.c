@@ -417,7 +417,7 @@ idealhnf0(GEN nf, GEN a, GEN b)
 
   /* HNF of aZ_K+bZ_K */
   av = avma; nf = checknf(nf);
-  x = dummyconcat(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
+  x = shallowconcat(eltmul_get_table(nf,a), eltmul_get_table(nf,b));
   return gerepileupto(av, idealmat_to_hnf(nf, x));
 }
 
@@ -433,7 +433,7 @@ static GEN
 addmul_col(GEN a, long s, GEN b)
 {
   long i,l;
-  if (!s) return a? dummycopy(a): a;
+  if (!s) return a? shallowcopy(a): a;
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (i=1; i<l; i++)
@@ -446,7 +446,7 @@ static GEN
 addmul_mat(GEN a, long s, GEN b)
 {
   long j,l;
-  if (!s) return a? dummycopy(a): a; /* copy otherwise next call corrupts a */
+  if (!s) return a? shallowcopy(a): a; /* copy otherwise next call corrupts a */
   if (!a) return gmulsg(s,b);
   l = lg(a);
   for (j=1; j<l; j++)
@@ -631,8 +631,8 @@ idealfactor(GEN nf, GEN x)
         long l = lg(P);
         z = cgetg(l, t_COL);
         for (j = 1; j < l; j++) z[j] = lmulii(gmael(P,j,3), E);
-        f1 = dummyconcat(f1, P);
-        f2 = dummyconcat(f2, z);
+        f1 = shallowconcat(f1, P);
+        f2 = shallowconcat(f2, z);
       }
       f[1] = (long)f1; settyp(f1, t_COL);
       f[2] = (long)f2; return gerepilecopy(av, f);
@@ -853,7 +853,7 @@ idealadd(GEN nf, GEN x, GEN y)
     z = gscalmat(dz, N);
     gunclone(dz); return z;
   }
-  z = dummyconcat(x,y);
+  z = shallowconcat(x,y);
   z = modid? hnfmodid(z,p1): hnfmod(z, p1);
   if (dz) z = gdiv(z,dz);
   return gerepileupto(av,z);
@@ -955,7 +955,7 @@ idealaddmultoone(GEN nf, GEN list)
   {
     GEN I = (GEN)list[i];
     if (typ(I) != t_MAT || lg(I) != lg(I[1])) I = idealhermite_aux(nf,I);
-    L[i] = (long)I; z = dummyconcat(z, I);
+    L[i] = (long)I; z = shallowconcat(z, I);
   }
   H = hnfperm_i(z, &U, &perm);
   if (lg(H) == 1 || !gcmp1(gcoeff(H,1,1)))
@@ -964,7 +964,7 @@ idealaddmultoone(GEN nf, GEN list)
     if (perm[i] == 1) break;
   U = (GEN)U[(l-2)*N + i]; /* z U = 1 */
   for (i=1; i<l; i++)
-    L[i] = lmul((GEN)L[i], vecextract_i(U, (i-1)*N + 1, i*N));
+    L[i] = lmul((GEN)L[i], vecsplice(U, (i-1)*N + 1, i*N));
   return gerepilecopy(av, L);
 }
 
@@ -1098,8 +1098,8 @@ idealmat_mul(GEN nf, GEN x, GEN y)
 GEN
 to_famat(GEN g, GEN e)
 {
-  if (typ(g) != t_COL) { g = dummycopy(g); settyp(g, t_COL); }
-  if (typ(e) != t_COL) { e = dummycopy(e); settyp(e, t_COL); }
+  if (typ(g) != t_COL) { g = shallowcopy(g); settyp(g, t_COL); }
+  if (typ(e) != t_COL) { e = shallowcopy(e); settyp(e, t_COL); }
   return mkmat2(g, e);
 }
 
@@ -1328,7 +1328,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   else
   {
     newg[i] = (long)FpV_red(special_anti_uniformizer(nf, pr), prkZ);
-    e = dummyconcat(e, negi(zpow));
+    e = shallowconcat(e, negi(zpow));
   }
   return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);
 }
@@ -1494,7 +1494,7 @@ idealmul(GEN nf, GEN x, GEN y)
         {
           GEN mx = eltmul_get_table(nf, x);
           GEN mpi= eltmul_get_table(nf, (GEN)y[2]);
-          p1 = dummyconcat(gmul(mx,(GEN)y[1]), gmul(mx,mpi));
+          p1 = shallowconcat(gmul(mx,(GEN)y[1]), gmul(mx,mpi));
           p1 = idealmat_to_hnf(nf, p1);
           break;
         }
@@ -1573,7 +1573,7 @@ hnfideal_inv(GEN nf, GEN I)
   J = idealmulh(nf,I, gmael(nf,5,7));
  /* I in HNF, hence easily inverted; multiply by IZ to get integer coeffs
   * missing content cancels while solving the linear equation */
-  dual = dummytrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
+  dual = shallowtrans( gauss_triangle_i(J, gmael(nf,5,6), IZ) );
   dual = hnfmodid(dual, IZ);
   if (dI) IZ = gdiv(IZ,dI);
   return gdiv(dual,IZ);
@@ -1637,7 +1637,7 @@ idealpowprime_spec(GEN nf, GEN vp, GEN n, GEN *d)
   if (s == 0) err(talker, "0th power in idealpowprime_spec");
   if (s < 0) n = negi(n);
   /* now n > 0 */
-  x = dummycopy(vp);
+  x = shallowcopy(vp);
   if (is_pm1(n)) /* n = 1 special cased for efficiency */
   {
     if (s < 0)
@@ -1928,7 +1928,7 @@ idealintersect(GEN nf, GEN x, GEN y)
   if (dx) y = gmul(y, dx);
   if (dy) x = gmul(x, dy);
   dx = mul_content(dx,dy);
-  z = kerint(dummyconcat(x,y)); lz = lg(z);
+  z = kerint(shallowconcat(x,y)); lz = lg(z);
   for (i=1; i<lz; i++) setlg(z[i], N+1);
   z = gmul(x,z);
   z = hnfmodid(z, lcmii(gcoeff(x,1,1), gcoeff(y,1,1)));
@@ -1967,7 +1967,7 @@ computeGtwist(GEN nf, GEN vdir)
   vdir = chk_vdir(nf, vdir);
   if (!vdir) return G;
   l = lg(vdir); lG = lg(G);
-  p1 = dummycopy(G);
+  p1 = shallowcopy(G);
   nf_get_sign(nf, &r1, &r2);
   for (i=1; i<l; i++)
   {
@@ -2147,7 +2147,7 @@ nf_coprime_part(GEN nf, GEN x, GEN *listpr)
   {
     if (gcmp1(gcoeff(f,1,1))) break;
     x = idealdivexact(nf, x, f);
-    f = hnfmodid(dummyconcat(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
+    f = hnfmodid(shallowconcat(f,x), gcoeff(x,1,1)); /* gcd(f,x) */
   }
   x2 = x;
 #else /*2) from prime decomposition */
@@ -2396,16 +2396,16 @@ idealchinese(GEN nf, GEN x, GEN w)
   {
     GEN p = gen_sort(x, cmp_IND|cmp_C, &cmp_prime_ideal);
     GEN fa = idealfactor(nf, den); /* sorted */
-    L = vecextract_p(L, p);
-    e = vecextract_p(e, p);
-    w = vecextract_p(w, p); settyp(w, t_VEC); /* make sure typ = t_VEC */
+    L = vecpermute(L, p);
+    e = vecpermute(e, p);
+    w = vecpermute(w, p); settyp(w, t_VEC); /* make sure typ = t_VEC */
     merge_factor(&L, &e, (GEN)fa[1], (GEN)fa[2]);
     i = lg(L);
-    w = dummyconcat(w, zerovec(i - r));
+    w = shallowconcat(w, zerovec(i - r));
     r = i;
   }
   else
-    e = dummycopy(e); /* do not destroy x[2] */
+    e = shallowcopy(e); /* do not destroy x[2] */
   for (i=1; i<r; i++)
     if (signe(e[i]) < 0) e[i] = (long)gen_0;
 
@@ -2504,7 +2504,7 @@ scalmul(GEN x, GEN v)
 {
   long i, l;
   GEN y;
-  if (gcmp1(x)) return dummycopy(v);
+  if (gcmp1(x)) return shallowcopy(v);
   if (gcmp_1(x)) return gneg(v);
   l = lg(v); y = cgetg(l, typ(v));
   for (i = 1; i < l; i++) y[i] = lmul(x, (GEN)v[i]);
@@ -2679,7 +2679,7 @@ nfhermite(GEN nf, GEN x)
 
   av = avma; lim = stack_lim(av, 2);
   A = matalgtobasis(nf,A);
-  I = dummycopy(I);
+  I = shallowcopy(I);
   J = zerovec(k); def = k+1;
   for (i=m; i>=1; i--)
   {
@@ -2754,9 +2754,9 @@ nfsmith(GEN nf, GEN x)
   if (n > m) err(impl,"nfsmith for non square matrices");
 
   av = avma; lim = stack_lim(av,1);
-  A = dummycopy(A);
-  I = dummycopy(I);
-  J = dummycopy(J);
+  A = shallowcopy(A);
+  I = shallowcopy(I);
+  J = shallowcopy(J);
   for (j=1; j<=n; j++)
     if (typ(I[j])!=t_MAT) I[j]=(long)idealhermite_aux(nf,(GEN)I[j]);
   for (j=1; j<=n; j++)
@@ -3032,7 +3032,7 @@ nfhermitemod(GEN nf, GEN x, GEN detmat)
 
   av = avma; lim = stack_lim(av,2);
   A = matalgtobasis(nf, A);
-  I = dummycopy(I);
+  I = shallowcopy(I);
   def = co; ldef = (li>co)? li-co+1: 1;
   for (i=li-1; i>=ldef; i--)
   {

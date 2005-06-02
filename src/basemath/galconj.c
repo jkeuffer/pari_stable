@@ -34,7 +34,7 @@ galoisconj(GEN nf)
     nf = gsubst(nf, 0, polx[MAXVARN]);
   else
   {
-    x = dummycopy(x);
+    x = shallowcopy(x);
     setvarn(x, 0);
   }
   z = nfroots(nf, x);
@@ -805,7 +805,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   ltop = avma;
   td->PV[td->ordre[n]] = (long) gclone(Vmatrix(td->ordre[n], td));
   avma = ltop;
-  td->TM = dummytrans(M);
+  td->TM = shallowtrans(M);
   settyp(td->TM, t_VEC);
   for (i = 1; i < lg(td->TM); i++)
     settyp(td->TM[i], t_VEC);
