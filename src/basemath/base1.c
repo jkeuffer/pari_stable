@@ -1799,6 +1799,12 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
   V[k] = (long)Mk; return Mk;
 }
 
+static long
+chk_gen_prec(long N, long bit)
+{
+  return nbits2prec(10 + (long)log2((double)N) + bit);
+}
+
 /* U = base change matrix, R = Cholesky form of the quadratic form [matrix
  * Q from algo 2.7.6] */
 static GEN
@@ -1890,7 +1896,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
 
   /* should be DEF + gexpo( max_k C^n_k (bound/k)^(k/2) ) */
   bound = gerepileuptoleaf(av, bound);
-  prec = nbits2prec(32 + (gexpo(bound)*N) / 2);
+  prec = chk_gen_prec(N, (gexpo(bound)*N)/2);
   if (DEBUGLEVEL)
     fprintferr("chk_gen_init: new prec = %ld (initially %ld)\n", prec, d->prec);
   if (prec > d->prec) err(bugparier, "polredabs (precision problem)");
@@ -1981,7 +1987,7 @@ _polredabs(nfbasic_t *T, GEN *u)
 
   /* || polchar ||_oo < 2^e */
   e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
-  prec = DEFAULTPREC + (e >> TWOPOTBITS_IN_LONG);
+  prec = chk_gen_prec(n, e);
 
   get_nf_fp_compo(T, &F, ro, prec);
 
