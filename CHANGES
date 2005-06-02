@@ -103,6 +103,8 @@ BA  3- New functions FpC_to_mod, FqV_to_FlxV
     4- Member functions r1, r2
     5- Functions factoru(), factoru_pow(), powiu(), powuu().
     6- symbolic link $MANDIR/gp-$version.1 -> $MANDIR/gp.1
+    7- New functions shallowcopy, shallowconcat, shallowtrans, vecsplice,
+       vecpermute, vecslicepermute, rowsplice, rowpermute, rowslicepermute
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
