@@ -108,5 +108,6 @@ you should really free the (\kbd{malloc}ed) precomputed table first, and then
 all pointers into the old table will become invalid.
 
 PARI currently guarantees that the first 6547 primes, up to and including
-65557, will be present in the table, even if you set \kbd{maxnum} to zero.
+65557, are present in the table, even if you set \kbd{maxprime} to zero.
+in the \kbd{pari\_init} call.
 \vfill\eject
