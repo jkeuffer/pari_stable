@@ -1373,6 +1373,7 @@ truc(void)
   long N, i, j, m, n, p;
   GEN *table, z;
   char *old;
+  pari_sp av0, av, lim;
 
   if (isalpha((int)*analyseur)) return identifier();
   if (isdigit((int)*analyseur) || *analyseur == '.') return constante();
@@ -1420,8 +1421,16 @@ truc(void)
       n = 0; N = 1024;
       table = (GEN*) gpmalloc((N + 1)*sizeof(GEN));
 
+      av0 = av = avma; lim = stack_lim(av,2);
       if (*analyseur != ']') _append(&table, &n, &N);
-      while (*analyseur == ',') { analyseur++; _append(&table, &n, &N); }
+      while (*analyseur == ',') {
+        analyseur++; _append(&table, &n, &N);
+        if (low_stack(lim, stack_lim(av,2))) {
+          if(DEBUGMEM>1) err(warnmem,"truc(): n = %ld", n);
+          gerepilecoeffs(av0, (GEN)(table+1), n);
+          av = avma; lim = stack_lim(av,2);
+        }
+      }
       switch (*analyseur++)
       {
 	case ']':
@@ -1429,7 +1438,13 @@ truc(void)
           long tx;
           if (*analyseur == '~') { analyseur++; tx=t_COL; } else tx=t_VEC;
 	  z = cgetg(n+1,tx);
-	  for (i=1; i<=n; i++) z[i] = lcopy(table[i]);
+          if (n < 500) {
+            for (i=1; i<=n; i++) gel(z,i) = gcopy(table[i]);
+          } else {
+            /* huge vector: GC needed */
+            for (i=1; i<=n; i++) gel(z,i) = table[i];
+            z = gerepilecopy(av0, z);
+          }
 	  break;
         }
 
