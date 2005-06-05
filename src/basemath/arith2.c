@@ -452,7 +452,7 @@ initprimes0(ulong maxnum, long *lenp, ulong *lastp)
      be broken by large enough maxnum.  However, assuming exponential
      distribution of gaps with the average log(n), we are safe up to
      circa exp(-256/log(1/0.09)) = 1.5e46.  OK with LONG_BITS <= 128. ;-) */
-  size = (long) (1.09 * maxnum/log((double)maxnum)) + 145;
+  size = (long) (1.09 * maxnum/log((double)maxnum)) + 146;
   p1 = (byteptr) gpmalloc(size);
   rootnum = (ulong) sqrt((double)maxnum); /* cast it back to a long */
   rootnum |= 1;
