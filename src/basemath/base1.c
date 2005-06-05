@@ -1972,12 +1972,10 @@ storeallpol(GEN x, GEN z, GEN a, GEN lead, long flag)
   return y;
 }
 
-#define MAXITERPOL  10 /* max #of prec increase in polredabs-type operations */
-
 static GEN
 _polredabs(nfbasic_t *T, GEN *u)
 {
-  long i, prec, e, n = degpol(T->x);
+  long prec, e, n = degpol(T->x);
   GEN v, ro = NULL;
   FP_chk_fun chk = { &chk_gen, &chk_gen_init, NULL, 0 };
   nffp_t F;
@@ -1988,23 +1986,21 @@ _polredabs(nfbasic_t *T, GEN *u)
   /* || polchar ||_oo < 2^e */
   e = n * (long)(cauchy_bound(T->x) / LOG2 + log2((double)n)) + 1;
   prec = chk_gen_prec(n, e);
-
   get_nf_fp_compo(T, &F, ro, prec);
 
   d.v = varn(T->x);
   d.r1= T->r1;
-  d.bound = T2_from_embed(F.ro, d.r1);
-  for (i=1; ; i++)
+  d.bound = T2_from_embed(F.ro, T->r1);
+  for (;;)
   {
     GEN R = R_from_QR(F.G, prec);
-    d.prec = prec;
-    d.M    = F.M;
     if (R)
     {
+      d.prec = prec;
+      d.M    = F.M;
       v = fincke_pohst(mkvec(R),NULL,-1, 0, &chk);
       if (v) break;
     }
-    if (i == MAXITERPOL) err(accurer,"polredabs0");
     prec = (prec<<1)-2;
     get_nf_fp_compo(T, &F, NULL, prec);
     if (DEBUGLEVEL) err(warnprec,"polredabs0",prec);
@@ -2127,7 +2123,7 @@ rootsof1(GEN nf)
   if ( nf_get_r1(nf) ) return trivroots(nf);
 
   N = degpol(nf[1]); prec = nfgetprec(nf);
-  for (i=1; ; i++)
+  for (;;)
   {
     GEN R = R_from_QR(gmael(nf,5,2), prec);
     if (R)
@@ -2135,7 +2131,6 @@ rootsof1(GEN nf)
       y = fincke_pohst(mkvec(R), utoipos(N), 1000, 0, NULL);
       if (y) break;
     }
-    if (i == MAXITERPOL) err(accurer,"rootsof1");
     prec = (prec<<1)-2;
     if (DEBUGLEVEL) err(warnprec,"rootsof1",prec);
     nf = nfnewprec(nf,prec);
