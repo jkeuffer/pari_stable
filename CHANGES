@@ -66,6 +66,7 @@ GN 16- MPQS warning "factoring this number will take several/many hours" now
        assume more current hardware.
    17- off-by-1 error in initprimes0 allocation [Bug #237]
        -> SEGV in default(primelimit,155100 + 41*7) 
+   18-[Cygwin] incorrect links created by 'make install'
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

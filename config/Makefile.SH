@@ -371,18 +371,17 @@ install-bin: install-bin-$dft
 
 install-bin-dyn: gp-dyn
 	-mkdir -p \$(BINDIR)
-	-\$(RM) \$(BINDIR)/gp-$version \$(BINDIR)/gp$exe_suff
-	-\$(LD) -o \$(BINDIR)/gp-$version \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
-	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version
+	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
+	-\$(LD) -o \$(BINDIR)/gp-$version$exe_suff \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH_FINAL) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
+	-\$(STRIP) \$(STRIPFLAGS) \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 
 install-bin-sta: gp-sta
 	-mkdir -p \$(BINDIR)
-	-\$(RM) \$(BINDIR)/gp-$version \$(BINDIR)/gp$exe_suff
+	-\$(RM) \$(BINDIR)/gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
 	\$(INSTALL_PROGRAM) gp-sta$exe_suff \$(BINDIR)/gp-$version$exe_suff
 	-\$(LN) gp-$version$exe_suff \$(BINDIR)/gp$exe_suff
-# Can't strip it if we want install() to work on Linux or OSF.
-# Note: it seems that strip work on linux.
+# Can't strip it if we want install() to work on OSF.
 #	-\$(STRIP) \$(STRIPFLAGS)  \$(BINDIR)/gp-$version
 
 install-man::
