@@ -2116,8 +2116,7 @@ geni(void) { return gi; }
  *  V  variable (same as S, but valence must equal EpVAR/EpGVAR)
  *  n  variable number
  *  &  *GEN
- *  F  Fake *GEN (function requires a *GEN, but we don't use the resulting GEN)
- *  f  Fake *long
+ *  f  Fake *long (function requires it, but we don't use the resulting long)
  *  p  real precision (prec for the C library)
  *  P  series precision (precdl for the C library)
  *  r  raw input (treated as a string without quotes).
