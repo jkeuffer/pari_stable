@@ -469,12 +469,10 @@ install-lib-sta: \$(LIBPARI_STA)
 
 install-lib-dyn-base:
 	-mkdir -p \$(LIBDIR)
-	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN)
+	-\$(RM) \$(LIBDIR)/\$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME) \$(LIBDIR)/\$(LIBPARI_SO)
 	\$(INSTALL_PROGRAM) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_DYN)
 install-lib-dyn-link: install-lib-dyn-base
 	-if test "\$(LIBPARI_SONAME)" != "\$(LIBPARI_SO)"; then \
-	  \$(RM) \$(LIBDIR)/\$(LIBPARI_SONAME);\
-	  \$(RM) \$(LIBDIR)/\$(LIBPARI_SO);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SONAME);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBDIR)/\$(LIBPARI_SO); fi
 install-lib-dyn: \$(LIBPARI_DYN) install-lib-dyn-link
