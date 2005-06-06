@@ -3135,7 +3135,10 @@ skipidentifier(void)
       }
       check_new_fun = NOT_CREATED_YET; match('(');
       matchcomma = 0;
-      while (*analyseur != ')') skip_arg();
+      while (*analyseur != ')') {
+        if (!*analyseur) match(')'); /* error */
+        skip_arg();
+      }
       analyseur++; /* skip ')' */
       if (*analyseur == '=' && analyseur[1] != '=')
       {
