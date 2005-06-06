@@ -68,6 +68,8 @@ GN 16- MPQS warning "factoring this number will take several/many hours" now
        -> SEGV in default(primelimit,155100 + 41*7) 
    18-[Cygwin] incorrect links created by 'make install'
    19- a( <Return> --> oo loop in parser [Bug #240]
+   20- at \p366, the last digits of Pi were wrong [ not enough iterations, from
+       2.2.9, A-2]. [Bug #238]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

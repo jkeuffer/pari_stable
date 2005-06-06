@@ -91,28 +91,26 @@ void
 constpi(long prec)
 {
   GEN A, B, C, tmppi;
-  long i, n;
+  long i, G;
   pari_sp av, av2;
 
   if (gpi && lg(gpi) >= prec) return;
 
   av = avma; tmppi = newbloc(prec);
   *tmppi = evaltyp(t_REAL) | evallg(prec);
-
-  /* 0.10... ~ log(2) / log( (2*Pi^4) / (Pi - (1+1/sqrt(2))^2) ) */
-  n = (long)ceil( log2( bit_accuracy_mul(prec, 0.10263977) ) );
-  if (n < 1) n = 1;
+  G = - bit_accuracy(prec);
   prec++;
 
   A = real_1(prec);
   B = sqrtr_abs(real2n(1,prec)); setexpo(B, -1); /* = 1/sqrt(2) */
   C = real2n(-2, prec); av2 = avma;
-  for (i = 0; i < n; i++)
+  for (i = 0;; i++)
   {
-    GEN y = A, a,b;
+    GEN y, a, b, B_A = subrr(B, A);
+    if (expo(B_A) < G) break;
     a = addrr(A,B); setexpo(a, expo(a)-1);
-    b = sqrtr_abs( mulrr(y, B) );
-    y = gsqr(subrr(a,y)); setexpo(y, expo(y) + i);
+    b = sqrtr_abs( mulrr(A, B) );
+    y = gsqr(B_A); setexpo(y, expo(y) + i - 2);
     affrr(subrr(C, y), C);
     affrr(a, A);
     affrr(b, B); avma = av2;
