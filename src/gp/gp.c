@@ -1343,7 +1343,8 @@ slash_commands(void)
 static void
 member_commands(void)
 {
-  pariputs("Member functions, followed by relevant objects\n\n\
+  pariputs("\
+Member functions, followed by relevant objects\n\n\
 a1-a6, b2-b8, c4-c6 : coeff. of the curve.            ell\n\
 area : area                                           ell\n\
 bid  : big ideal                                                    bnr\n\
@@ -1356,7 +1357,9 @@ e, f : inertia/residue  degree            prid\n\
 fu   : fundamental units                                       bnf, bnr\n\
 gen  : generators                    bid, prid, clgp,          bnf, bnr\n\
 index: index                                               nf, bnf, bnr\n\
-j    : j-invariant                                    ell\n\
+j    : j-invariant                                    ell\n");
+/* split: some compilers can't handle long constant strings */
+  pariputs("\
 mod  : modulus                       bid,                           bnr\n\
 nf   : number field                                            bnf, bnr\n\
 no   : number of elements            bid,       clgp,          bnf, bnr\n\
