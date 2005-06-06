@@ -72,7 +72,7 @@ cat > $file << EOT
 #  define HAS_STRFTIME
 #endif
 #if defined(_WIN32) && defined(_MSC_VER)
-#  define HAS_OPENDIR
+#  define HAS_STAT
 #endif
 
 #endif
