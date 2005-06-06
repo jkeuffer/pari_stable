@@ -103,6 +103,7 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
    13- rename gtrans_i -> dummytrans, concatsp -> dummyconcat.
    14- add GC in parsing loop for huge input vectors [ needs roughly 2 or 3
        times less memory ]
+   15- implement pari_is_dir() using stat() instead of opendir()
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

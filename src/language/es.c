@@ -2759,15 +2759,37 @@ os_getenv(char *s)
 static char *last_filename = NULL;
 
 #ifdef HAS_OPENDIR
-#  include <dirent.h>
-#endif
 /* slow, but more portable than stat + S_I[FS]DIR */
+#  include <dirent.h>
+int
+is_dir_opendir(char *name)
+{
+  DIR *d = opendir(name);
+  if (d) { (void)closedir(d); return 1; }
+  return 0;
+}
+#endif
+
+#ifdef HAS_STAT
+#include <sys/stat.h>
+int
+is_dir_stat(char *name)
+{
+  struct stat buf; 
+  if (stat(name, &buf)) return 0;
+  return (buf.st_mode & S_IFDIR);
+}
+#endif
+
 int
 pari_is_dir(char *name)
 {
-#ifdef HAS_OPENDIR
-  DIR *d = opendir(name);
-  if (d) { (void)closedir(d); return 1; }
+#ifdef HAS_STAT
+  return is_dir_stat(name);
+#else
+#  ifdef HAS_OPENDIR
+  return is_dir_opendir(name);
+#  endif
 #endif
   return 0;
 }

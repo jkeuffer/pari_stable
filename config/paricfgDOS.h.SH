@@ -66,12 +66,13 @@ cat > $file << EOT
 /* Headers are clean - ulong not defined */
 #define ULONG_NOT_DEFINED
 
-#ifndef WINCE
+#if !defined(WINCE) && !(defined(_WIN32) && defined(_MSC_VER))
 /* Timings: Don't use times because of the HZ / CLK_TCK confusion. */
 #  define USE_FTIME 1
 #  define HAS_STRFTIME
-/* This might work on NT ??? */
-/* #  define HAS_OPENDIR */
+#endif
+#if defined(_WIN32) && defined(_MSC_VER)
+#  define HAS_OPENDIR
 #endif
 
 #endif

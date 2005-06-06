@@ -194,4 +194,8 @@ case $has_opendir in
 yes) echo '#define HAS_OPENDIR' >> $file;;
 esac
 
+case $has_stat in
+yes) echo '#define HAS_STAT' >> $file;;
+esac
+
 echo '#endif' >> $file

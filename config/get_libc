@@ -10,13 +10,13 @@ list=log2; . ./look
 extra_flags=
 list=strftime; . ./look
 case "$osname" in
-    *cygwin*) list='times ftime';; # getrusage based timer always returns 0
-    *) list='getrusage times ftime';;
+  *cygwin*) list='times ftime';; # getrusage based timer always returns 0
+  *) list='getrusage times ftime';;
 esac; . ./look
 list='sigsetmask sigrelse'; . ./look
 list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
-list=opendir; . ./look
+list='stat opendir'; . ./look
 list=vsnprintf; . ./look
 
 # For install(). Do we need libdl.so?
