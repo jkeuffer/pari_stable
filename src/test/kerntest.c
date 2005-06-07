@@ -27,21 +27,20 @@ void gerepilemany(pari_sp av, GEN* gptr[], int n){}
 /* used in addrr */
 void stackdummy(GEN z, long l) { z[0] = evaltyp(t_VECSMALL) | evallg(l); }
 
-void sorstring(char* b, long x)
+void sorstring(long x)
 {
 #ifdef LONG_IS_64BIT
-  printf(b,(ulong)x>>32,x & MAXHALFULONG);
+  printf("%08x%08x  ", (ulong)x>>32, x & MAXHALFULONG);
 #else
-  printf(b,x);
+  printf("%08lx  ", x);
 #endif
 }
 
 void _voir(GEN x)
 {
-  long tx = typ(x), lx = lg(x),i;
-  sorstring(VOIR_STRING2,x[0]);
-  if (tx==t_INT) lx = lgefint(x);
-  for (i=1; i < lx; i++) sorstring(VOIR_STRING2,x[i]);
+  long i, tx = typ(x), lx = (tx == t_INT)? lgefint(x): lg(x);
+  sorstring(x[0]);
+  for (i=1; i < lx; i++) sorstring(x[i]);
   printf("\n");
 }
 

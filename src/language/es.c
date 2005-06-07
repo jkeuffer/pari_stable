@@ -1055,20 +1055,8 @@ wr_real(pariout_t *T, GEN x, int addsign)
 /**                       HEXADECIMAL OUTPUT                       **/
 /**                                                                **/
 /********************************************************************/
-
-static void
-sorstring(char* b, long x)
-{
-#ifdef LONG_IS_64BIT
-  pariputsf(b,(ulong)x>>32,x & MAXHALFULONG);
-#else
-  pariputsf(b,x);
-#endif
-}
-
 /* English ordinal numbers -- GN1998Apr17 */
 static const char *ordsuff[4] = {"st","nd","rd","th"};
-
 const char*
 eng_ord(long i)                        /* i > 0 assumed */
 {
@@ -1088,6 +1076,47 @@ eng_ord(long i)                        /* i > 0 assumed */
   }
 }
 
+char *
+type_name(long t)
+{
+  char *s;
+  switch(t)
+  {
+    case t_INT    : s="t_INT";     break;
+    case t_REAL   : s="t_REAL";    break;
+    case t_INTMOD : s="t_INTMOD";  break;
+    case t_FRAC   : s="t_FRAC";    break;
+    case t_COMPLEX: s="t_COMPLEX"; break;
+    case t_PADIC  : s="t_PADIC";   break;
+    case t_QUAD   : s="t_QUAD";    break;
+    case t_POLMOD : s="t_POLMOD";  break;
+    case t_POL    : s="t_POL";     break;
+    case t_SER    : s="t_SER";     break;
+    case t_RFRAC  : s="t_RFRAC";   break;
+    case t_QFR    : s="t_QFR";     break;
+    case t_QFI    : s="t_QFI";     break;
+    case t_VEC    : s="t_VEC";     break;
+    case t_COL    : s="t_COL";     break;
+    case t_MAT    : s="t_MAT";     break;
+    case t_LIST   : s="t_LIST";    break;
+    case t_STR    : s="t_STR";     break;
+    case t_VECSMALL:s="t_VECSMALL";break;
+    default: err(talker,"unknown type %ld",t);
+      s = NULL; /* not reached */
+  }
+  return s;
+}
+
+static void
+sorstring(char* b, long x)
+{
+#ifdef LONG_IS_64BIT
+  pariputsf(b,(ulong)x>>32,x & MAXHALFULONG);
+#else
+  pariputsf(b,x);
+#endif
+}
+
 static char
 vsigne(GEN x)
 {
@@ -1095,6 +1124,14 @@ vsigne(GEN x)
   if (!s) return '0';
   return (s > 0) ? '+' : '-';
 }
+
+#ifndef LONG_IS_64BIT
+#  define VOIR_STRING1 "[&=%08lx] "
+#  define VOIR_STRING2 "%08lx  "
+#else
+#  define VOIR_STRING1 "[&=%08x%08x] "
+#  define VOIR_STRING2 "%08x%08x  "
+#endif
 
 static void
 voir2(GEN x, long nb, long bl)
@@ -1220,35 +1257,73 @@ voir(GEN x, long nb)
   voir2(x,nb,0);
 }
 
-char *
-type_name(long t)
+static void
+print_entree(entree *ep, long hash)
 {
-  char *s;
-  switch(t)
+  pariputsf(" %s ",ep->name); pariputsf(VOIR_STRING1,(ulong)ep);
+  pariputsf(":\n   hash = %3ld, valence = %3ld, menu = %2ld, code = %s\n",
+            hash, ep->valence, ep->menu, ep->code? ep->code: "NULL");
+  if (ep->next)
   {
-    case t_INT    : s="t_INT";     break;
-    case t_REAL   : s="t_REAL";    break;
-    case t_INTMOD : s="t_INTMOD";  break;
-    case t_FRAC   : s="t_FRAC";    break;
-    case t_COMPLEX: s="t_COMPLEX"; break;
-    case t_PADIC  : s="t_PADIC";   break;
-    case t_QUAD   : s="t_QUAD";    break;
-    case t_POLMOD : s="t_POLMOD";  break;
-    case t_POL    : s="t_POL";     break;
-    case t_SER    : s="t_SER";     break;
-    case t_RFRAC  : s="t_RFRAC";   break;
-    case t_QFR    : s="t_QFR";     break;
-    case t_QFI    : s="t_QFI";     break;
-    case t_VEC    : s="t_VEC";     break;
-    case t_COL    : s="t_COL";     break;
-    case t_MAT    : s="t_MAT";     break;
-    case t_LIST   : s="t_LIST";    break;
-    case t_STR    : s="t_STR";     break;
-    case t_VECSMALL:s="t_VECSMALL";break;
-    default: err(talker,"unknown type %ld",t);
-      s = NULL; /* not reached */
+    pariputsf("   next = %s ",(ep->next)->name);
+    pariputsf(VOIR_STRING1,(ulong)(ep->next));
   }
-  return s;
+  pariputs("\n");
+}
+
+/* s = digit n : list of entrees in functions_hash[n] (s = $: last entry)
+ *   = range m-n: functions_hash[m..n]
+ *   = identifier: entree for that identifier */
+void
+print_functions_hash(const char *s)
+{
+  long m, n;
+  entree *ep;
+
+  if (isalpha((int)*s))
+  {
+    /*FIXME: the cast below is a C++ kludge because
+     * it is difficult to change is_entry_intern to take a const*/
+    ep = is_entry_intern((char *)s,functions_hash,&n);
+    if (!ep) err(talker,"no such function");
+    print_entree(ep,n); return;
+  }
+  if (isdigit((int)*s) || *s == '$')
+  {
+    m = functions_tblsz-1; n = atol(s);
+    if (*s=='$') n = m;
+    if (m<n) err(talker,"invalid range in print_functions_hash");
+    while (isdigit((int)*s)) s++;
+
+    if (*s++ != '-') m = n;
+    else
+    {
+      if (*s !='$') m = min(atol(s),m);
+      if (m<n) err(talker,"invalid range in print_functions_hash");
+    }
+
+    for(; n<=m; n++)
+    {
+      pariputsf("*** hashcode = %lu\n",n);
+      for (ep=functions_hash[n]; ep; ep=ep->next)
+	print_entree(ep,n);
+    }
+    return;
+  }
+  if (*s=='-')
+  {
+    for (n=0; n<functions_tblsz; n++)
+    {
+      m=0;
+      for (ep=functions_hash[n]; ep; ep=ep->next) m++;
+      pariputsf("%3ld:%3ld ",n,m);
+      if (n%9 == 8) pariputc('\n');
+    }
+    pariputc('\n'); return;
+  }
+  for (n=0; n<functions_tblsz; n++)
+    for (ep=functions_hash[n]; ep; ep=ep->next)
+      print_entree(ep,n);
 }
 
 /********************************************************************/

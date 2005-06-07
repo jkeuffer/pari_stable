@@ -366,6 +366,7 @@ void  member_err(char *s);
 int   pari_kernel_init(void);
 void  pari_sig_init(void (*f)(int));
 int   pop_val_if_newer(entree *ep, long loc);
+void  print_functions_hash(const char *s);
 void  print_fun_list(char **matches, int nbli);
 int   term_width(void);
 void  texmacs_completion(char *s, long pos);

@@ -191,15 +191,6 @@ enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 #define bl_prev(x) (((GEN)x)[-2])
 #define bl_num(x)  (((GEN)x)[-1])
 
-/* formatted printing */
-#ifndef LONG_IS_64BIT
-#  define VOIR_STRING1 "[&=%08lx] "
-#  define VOIR_STRING2 "%08lx  "
-#else
-#  define VOIR_STRING1 "[&=%08x%08x] "
-#  define VOIR_STRING2 "%08x%08x  "
-#endif
-
 /* signals */
 #define INIT_JMPm 1
 #define INIT_SIGm 2

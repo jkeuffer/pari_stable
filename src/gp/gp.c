@@ -1590,72 +1590,6 @@ aide(char *s, int flag)
 /**                                                                **/
 /********************************************************************/
 
-static void
-print_entree(entree *ep, long hash)
-{
-  pariputsf(" %s ",ep->name); pariputsf(VOIR_STRING1,(ulong)ep);
-  pariputsf(":\n   hash = %3ld, valence = %3ld, menu = %2ld, code = %s\n",
-            hash, ep->valence, ep->menu, ep->code? ep->code: "NULL");
-  if (ep->next)
-  {
-    pariputsf("   next = %s ",(ep->next)->name);
-    pariputsf(VOIR_STRING1,(ulong)(ep->next));
-  }
-  pariputs("\n");
-}
-
-static void
-print_hash_list(const char *s)
-{
-  long m,n;
-  entree *ep;
-
-  if (isalpha((int)*s))
-  {
-    /*FIXME: the cast below is a C++ kludge because
-     * it is difficult to change is_entry_intern to tqke a const*/
-    ep = is_entry_intern((char *)s,functions_hash,&n);
-    if (!ep) err(talker,"no such function");
-    print_entree(ep,n); return;
-  }
-  if (isdigit((int)*s) || *s == '$')
-  {
-    m = functions_tblsz-1; n = atol(s);
-    if (*s=='$') n = m;
-    if (m<n) err(talker,"invalid range in print_entree");
-    while (isdigit((int)*s)) s++;
-
-    if (*s++ != '-') m = n;
-    else
-    {
-      if (*s !='$') m = min(atol(s),m);
-      if (m<n) err(talker,"invalid range in print_entree");
-    }
-
-    for(; n<=m; n++)
-    {
-      pariputsf("*** hashcode = %lu\n",n);
-      for (ep=functions_hash[n]; ep; ep=ep->next)
-	print_entree(ep,n);
-    }
-    return;
-  }
-  if (*s=='-')
-  {
-    for (n=0; n<functions_tblsz; n++)
-    {
-      m=0;
-      for (ep=functions_hash[n]; ep; ep=ep->next) m++;
-      pariputsf("%3ld:%3ld ",n,m);
-      if (n%9 == 8) pariputc('\n');
-    }
-    pariputc('\n'); return;
-  }
-  for (n=0; n<functions_tblsz; n++)
-    for (ep=functions_hash[n]; ep; ep=ep->next)
-      print_entree(ep,n);
-}
-
 static char *
 what_readline()
 {
@@ -1862,7 +1796,7 @@ escape0(char *tch)
         default : (void)sd_debug(s,d_ACKNOWLEDGE); break;
       }
       break;
-    case 'h': print_hash_list(s); break;
+    case 'h': print_functions_hash(s); break;
     case 'l':
       s = get_sep(s);
       if (*s)
