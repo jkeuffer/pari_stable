@@ -909,7 +909,7 @@ void    brute(GEN g, char format, long dec);
 void    bruteall(GEN g, char f, long d, long sp);
 void    bruterr(GEN x,char format,long dec);
 void    error0(GEN g);
-void    etatpile(unsigned int n);
+void    etatpile();
 char*   expand_tilde(const char *s);
 int     file_is_binary(FILE *f);
 void    flusherr(void);

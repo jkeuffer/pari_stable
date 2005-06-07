@@ -1895,7 +1895,7 @@ escape0(char *tch)
         }
       }
       break;
-    case 's': etatpile(0); break;
+    case 's': etatpile(); break;
     case 't': gentypes(); break;
     case 'u':
       switch (*s)

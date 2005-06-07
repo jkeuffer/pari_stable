@@ -1324,45 +1324,34 @@ get_texvar(long v, char *buf, unsigned int len)
 }
 
 void
-etatpile(unsigned int n)
+etatpile()
 {
-  long nu, i, l, m;
-  pari_sp av=avma;
-  GEN adr,adr1;
+  long nu, l;
+  pari_sp av = avma;
+  GEN adr;
   double r;
 
   nu = (top-avma)/BYTES_IN_LONG;
   l = (top-bot)/BYTES_IN_LONG;
   r = 100.0*nu/l;
   pariputsf("\n Top : %lx   Bottom : %lx   Current stack : %lx\n",
-          top, bot, avma);
+            top, bot, avma);
 
   pariputsf(" Used :                         %ld  long words  (%ld K)\n",
-           nu, nu/1024*BYTES_IN_LONG);
+            nu, nu/1024*BYTES_IN_LONG);
 
   pariputsf(" Available :                    %ld  long words  (%ld K)\n",
            (l-nu), (l-nu)/1024*BYTES_IN_LONG);
 
   pariputsf(" Occupation of the PARI stack : %6.2f percent\n",r);
 
-  adr=getheap();
+  adr = getheap();
   pariputsf(" %ld objects on heap occupy %ld long words\n\n",
-                 itos((GEN)adr[1]), itos((GEN)adr[2]));
-  avma=av;
+            itos((GEN)adr[1]), itos((GEN)adr[2]));
+  avma = av;
 
-  pariputsf(" %ld variable names used out of %d\n\n",manage_var(manage_var_next,NULL),MAXVARN);
-  if (!n) return;
-
-  if (n > (ulong)nu) n = nu;
-  adr = (GEN)avma; adr1 = adr+n;
-  while (adr<adr1)
-  {
-    sorstring(VOIR_STRING3,(ulong)adr);
-    l=lg(adr); m = (adr==polvar) ? MAXVARN : 0;
-    for (i=0; i<l && adr<adr1; i++,adr++) sorstring(VOIR_STRING2,*adr);
-    pariputc('\n'); adr=polvar+m;
-  }
-  pariputc('\n');
+  pariputsf(" %ld variable names used out of %d\n\n",
+            manage_var(manage_var_next,NULL), MAXVARN);
 }
 
 #define isnull_for_pol(g)  ((typ(g)==t_INTMOD)? !signe(g[2]): isnull(g))

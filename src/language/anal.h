@@ -208,11 +208,9 @@ extern void *PARI_stack_limit;
 #ifndef LONG_IS_64BIT
 #  define VOIR_STRING1 "[&=%08lx] "
 #  define VOIR_STRING2 "%08lx  "
-#  define VOIR_STRING3 "  %08lx  :  "
 #else
 #  define VOIR_STRING1 "[&=%08x%08x] "
 #  define VOIR_STRING2 "%08x%08x  "
-#  define VOIR_STRING3 "  %08x%08x  :  "
 #endif
 
 /* signals */
