@@ -4244,12 +4244,31 @@ $\var{nf}[7]$ or as algebraic numbers.
 \syn{idealhnf0}{\var{nf},a,b} where an omitted $b$ is coded as \kbd{NULL}.
 Also available is \funs{idealhermite}{\var{nf},a} ($b$ omitted).
 
-\subsecidx{idealintersect}$(\var{nf},x,y)$: intersection of the two ideals
-$x$ and $y$ in the number field $\var{nf}$. When $x$ and $y$ are given by
-$\Z$-bases, this does not depend on $\var{nf}$ and can be used to compute the
-intersection of any two $\Z$-modules. The result is given in HNF.
+\subsecidx{idealintersect}$(\var{nf},A,B)$: intersection of the two ideals
+$A$ and $B$ in the number field $\var{nf}$. The result is given in HNF.
+\bprog
+    ? nf = nfinit(x^2+1);
+    ? idealintersect(nf, 2, x+1)
+    %2 = 
+    [2 0]
 
-\syn{idealintersect}{\var{nf},x,y}.
+    [0 2]
+@eprog
+
+This function does not apply to general $\Z$-modules, e.g.~orders, since its
+arguments are replaced by the ideals they generate. The following script
+intersects $\Z$-modules $A$ and $B$ given by matrices of compatible
+dimensions with integer coefficients:
+\bprog
+    ZM_intersect(A,B) =
+    { local(Ker);
+        Ker = matkerint(concat(A,B));
+        Ker = vecextract(Ker, Str(1, "..", #A), "..");
+        mathnf(Ker * A)
+    }
+@eprog
+
+\syn{idealintersect}{\var{nf},A,B}.
 
 \subsecidx{idealinv}$(\var{nf},x)$: inverse of the ideal $x$ in the
 number field $\var{nf}$. The result is the Hermite normal form of the
