@@ -1676,7 +1676,7 @@ ommitted \kbd{y}.
 
 \subsecidx{content}$(x)$: computes the gcd of all the coefficients of $x$,
 when this gcd makes sense. If $x$ is a scalar, this simply returns the
-absolute value of $x$ if $x$ is rationnal (\typ{INT} or \typ{FRAC}), and $x$
+absolute value of $x$ if $x$ is rational (\typ{INT} or \typ{FRAC}), and $x$
 otherwise. If $x$ is a polynomial (and by extension a power series), it gives
 the usual content of $x$. If $x$ is a rational function, it gives the ratio
 of the contents of the numerator and the denominator. Finally, if $x$ is a
@@ -3901,15 +3901,18 @@ factorization over $\Q$ (\idx{Trager}'s trick). The direct approach of
 in general faster.
 
 The main variable of $t$ must be of \emph{lower} priority than that of $x$
-(see \secref{se:priority}). However if the coefficients of the number field
-occur explicitly (as polmods) as coefficients of $x$, the variable of these
-polmods \emph{must} be the same as the main variable of $t$. For example
+(see \secref{se:priority}). However if non-rational number field elements
+occur (as polmods or polynomials) as coefficients of $x$, the variable of
+these polmods \emph{must} be the same as the main variable of $t$. For
+example
 
 \bprog
 ? factornf(x^2 + Mod(y, y^2+1), y^2+1);
-? factornf(x^2 + 1, y^2+1); \\@com these two are OK
+? factornf(x^2 + y, y^2+1); \\@com these two are OK
 ? factornf(x^2 + Mod(z,z^2+1), y^2+1)
-  ***   incorrect type in gmulsg
+  *** factornf: inconsistent data in rnf function.
+? factornf(x^2 + z, y^2+1)
+  *** factornf: incorrect variable in rnf function.
 @eprog
 
 \syn{polfnf}{x,t}.
