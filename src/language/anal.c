@@ -48,9 +48,8 @@ static entree *entry();
 static entree *skipentry(void);
 
 static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
-#define VAR_POLS_LONGS		7	/* 4 words for polx, 3 for polun */
-/* Is the name proper??? */
-#define SIZEOF_VAR_POLS		(VAR_POLS_LONGS*sizeof(long))
+#define VAR_POLS_LONGS	7 /* 4 words for polx, 3 for polun */
+#define SIZEOF_VAR_POLS	(VAR_POLS_LONGS*sizeof(long))
 
 /* last time we began parsing an object of specified type */
 static struct
@@ -70,6 +69,7 @@ static long skipping_fun_def;
  *   as EpNEW; first syntax error (missing = after function definition
  *   usually) triggers err_new_fun() if check_new_fun is set. */
 static entree *check_new_fun;
+#define NOT_CREATED_YET ((entree *)0x1L)
 
 /* for control statements */
 enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM, };
