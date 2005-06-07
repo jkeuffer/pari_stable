@@ -885,7 +885,7 @@ recover(int flag)
           while (pop_val_if_newer(ep,listloc)) /* empty */;
           break;
         case EpNEW:
-          kill_from_hashlist(ep);
+          kill_from_hashlist(ep, n);
           break;
         case EpUSER:
         case EpALIAS:
@@ -893,8 +893,7 @@ recover(int flag)
           if (bl_num(ep->value) >= listloc)
           {
             gunclone((GEN)ep->value);
-            ep->value = (void*)initial_value(ep);
-            kill_from_hashlist(ep);
+            kill_from_hashlist(ep, n);
           }
       }
     }

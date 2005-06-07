@@ -2911,12 +2911,11 @@ geval(GEN x)
     case t_POL:
       lx=lg(x); if (lx==2) return gen_0;
       {
-#define initial_value(ep) (GEN)((ep)+1) /* cf anal.h */
-        entree *ep = varentries[varn(x)];
+        long vx = varn(x);
+        entree *ep = varentries[vx];
         if (!ep) return gcopy(x);
         z = (GEN)ep->value;
-        if (gequal(x, initial_value(ep))) return gcopy(z);
-#undef initial_value
+        if (gequal(x, polx[vx])) return gcopy(z);
       }
       y=gen_0; av=avma;
       for (i=lx-1; i>1; i--)

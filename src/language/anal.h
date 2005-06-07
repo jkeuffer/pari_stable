@@ -178,23 +178,11 @@ extern void *PARI_stack_limit;
 #endif
 
 /* entrees */
-#define Epstatic 0x100
 #define EpVALENCE(ep) ((ep)->valence & 0xFF)
 #define EpSTATIC(ep) ((ep)->valence & 0x100)
 #define EpSETSTATIC(ep) ((ep)->valence |= 0x100)
-#define PARAMSHIFT 9
-#define EpNPARAM(ep) ((ep)->valence >> PARAMSHIFT)
 #define EpPREDEFINED(ep) (EpVALENCE(ep) < EpUSER)
-
-#define EpINSTALL 200
-#define EpMEMBER  105
-#define EpGVAR    104
-#define EpVAR     103
-#define EpALIAS   102
-#define EpNEW     101
-#define EpUSER    100
-
-#define initial_value(ep) ((ep)+1)
+enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 
 /* blocs */
 #define BL_HEAD 3

@@ -70,6 +70,7 @@ static long skipping_fun_def;
  *   usually) triggers err_new_fun() if check_new_fun is set. */
 static entree *check_new_fun;
 #define NOT_CREATED_YET ((entree *)0x1L)
+#define initial_value(ep) ((ep)+1)
 
 /* for control statements */
 enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM, };
@@ -703,22 +704,20 @@ var_make_safe()
       }
 }
 
+/* n = hashvalue(ep->name), delete ep */
 void
-kill_from_hashlist(entree *ep)
+kill_from_hashlist(entree *ep, long n)
 {
-  char *s = ep->name;
-  long hash = hashvalue(&s);
-  entree *ep1;
-
-  if (functions_hash[hash] == ep)
+  entree *e = functions_hash[n];
+  if (e == ep)
   {
-    functions_hash[hash] = ep->next;
+    functions_hash[n] = ep->next;
     freeep(ep); return;
   }
-  for (ep1 = functions_hash[hash]; ep1; ep1 = ep1->next)
-    if (ep1->next == ep)
+  for (; e; e = e->next)
+    if (e->next == ep)
     {
-      ep1->next = ep->next;
+      e->next = ep->next;
       freeep(ep); return;
     }
 }
@@ -744,6 +743,7 @@ kill_alias(entree *EP)
 void
 kill0(entree *ep)
 {
+  char *s = ep->name;
   long v;
 
   if (EpSTATIC(ep))
@@ -760,7 +760,7 @@ kill0(entree *ep)
     case EpALIAS:
       gunclone((GEN)ep->value); break;
   }
-  kill_from_hashlist(ep);
+  kill_from_hashlist(ep, hashvalue(&s));
 }
 
 void
