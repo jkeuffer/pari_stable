@@ -2153,7 +2153,8 @@ polfnf(GEN a, GEN T)
   T = primpart(T);
   tmonic = is_pm1(leading_term(T));
 
-  dent = indexpartial(T, NULL); unt = mkpolmod(gen_1,T);
+  dent = tmonic? indexpartial(T, NULL): ZX_disc(T);
+  unt = mkpolmod(gen_1,T);
   G = nfgcd(A,derivpol(A), T, dent);
   sqfree = gcmp1(G);
   u = sqfree? A: RgXQX_div(A, G, T);

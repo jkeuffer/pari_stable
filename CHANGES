@@ -71,6 +71,8 @@ GN 16- MPQS warning "factoring this number will take several/many hours" now
    20- at \p366, the last digits of Pi were wrong [ not enough iterations, from
        2.2.9, A-2]. [Bug #238]
 GTo21- wrong prototype for qfrep
+   22- factornf(P, T) did not accept non-monic T [Bug #241]
+
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
        FlxV_to_ZXC to FlxC_to_ZXC, Flv_to_ZC to Flc_to_ZC, FqV_to_FlxC to
