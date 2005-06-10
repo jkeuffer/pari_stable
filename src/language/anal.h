@@ -19,14 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                       */
 /*************************************************************************/
 /* structs */
-typedef struct default_type {
-  char *name;
-  void *fun;
-} default_type;
-
-extern default_type gp_default_list[];
-extern char *keyword_list[];
-
 typedef struct gp_args {
   int nloc, narg;
   GEN *arg;
@@ -305,12 +297,6 @@ void system0(char *cmd);
 GEN  trap0(char *e, char *f, char *r);
 int  whatnow(char *s, int silent);
 
-/* GP_DATA->flags */
-enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
-       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512};
-/* GP */
-#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
-
 /* time */
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
 char *gp_format_time(long flag);
@@ -320,6 +306,7 @@ char *gp_format_time(long flag);
 #define DATA_END    ((char) 5)
 #define DATA_ESCAPE ((char) 27)
 
+/* GP_DATA */
 typedef struct {
   jmp_buf env;
   gp_hist *hist;
@@ -330,6 +317,8 @@ typedef struct {
   char *help;
   pari_timer *T;
 } gp_data;
+  /* GP_DATA->flags */
+enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
+       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512};
 
 extern gp_data *GP_DATA;
-void gp_output(GEN z, gp_data *G);

@@ -1709,7 +1709,7 @@ gp_quit(void)
   kill_all_buffers(NULL);
   if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
-  pariputs_opt("Goodbye!\n");
+  if (!(GP_DATA->flags & QUIET)) pariputs("Goodbye!\n");
   if (GP_DATA->flags & TEXMACS) tm_end_output();
   exit(0);
 }

@@ -25,6 +25,7 @@ void init80col(long n);
 int term_height(void);
 int term_width(void);
 void hit_return(void);
+void gp_output(GEN z, gp_data *G);
 
 extern int secure;
 extern ulong init_opts;
@@ -43,3 +44,13 @@ enum { d_ACKNOWLEDGE, d_INITRC, d_SILENT, d_RETURN, d_EXISTS };
 #define h_LONG    1
 #define h_APROPOS 2
 #define h_RL      4
+
+/* readline completions */
+typedef struct default_type {
+  char *name;
+  void *fun;
+} default_type;
+
+extern default_type gp_default_list[];
+extern char *keyword_list[];
+

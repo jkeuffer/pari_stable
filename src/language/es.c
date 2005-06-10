@@ -2251,6 +2251,7 @@ texi(GEN g, pariout_t *T, int addsign)
 /**                          GP OUTPUT                            **/
 /**                                                               **/
 /*******************************************************************/
+#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
 
 /* EXTERNAL PRETTYPRINTER */
 
