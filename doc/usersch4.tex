@@ -903,15 +903,22 @@ Beware that universal objects which occur in specific components of certain
 types (mainly moduli for types \typ{INTMOD} and \typ{PADIC}) are not
 copied, as they are assumed to be permanent. In this case, \kbd{gcopy} only
 copies the pointer. Use \fun{GEN}{forcecopy}{GEN x} if you want a complete
-copy.
+copy. 
 
-Make sure at this point that you understand the difference between
-\kbd{y = x}, \kbd{y = gcopy(x)}, and \kbd{gaffect(x,y)}.
+Sometimes, on the contrary, a quick copy of the skeleton of \kbd{x} is
+enough, leaving pointers to the original data in \kbd{x} for the sake of
+speed instead of making a full recursive copy. Use
+\fun{GEN}{shallowcopy}{GEN x} for this. Note that the result is not suitable
+for \tet{gerepileupto} !
+
+Make sure at this point that you understand the difference between \kbd{y =
+x}, \kbd{y = gcopy(x)}, \kbd{y = shallowcopy(x)} and \kbd{gaffect(x,y)}.
 
 \subsec{Clones}.\sidx{clone}\label{se:clone}
-Sometimes, it may be more efficient to create a \emph{permanent} copy of a
-PARI object. This is not created on the stack but on the heap. The function
-which does this is called \teb{gclone}. Its syntax is:
+Sometimes, it is more efficient to create a \emph{persistent} copy of a PARI
+object. This is not created on the stack but on the heap, hence unaffected by
+\tet{gerepile} and friends. The function which does this is called
+\teb{gclone}. Its syntax is:
 
 \fun{GEN}{gclone}{GEN x}
 
@@ -951,17 +958,15 @@ significant.
 \label{se:impl}
 
 \noindent
-We now go through each type and explain its
-implementation. Let \kbd{z} be a \kbd{GEN}, pointing at a PARI object. In
-the following paragraphs, we will constantly mix two points of view: on the
-one hand, \kbd{z} is treated as the C pointer it is (in the context of
-program fragments like \kbd{z[1]}), on the other, as PARI's handle on (the
-internal representation of) some mathematical entity, so we will shamelessly
-write $\kbd{z} \ne 0$ to indicate that the \emph{value} thus represented
-is nonzero (in which case the \emph{pointer}~\kbd{z} is certainly
-non-\kbd{NULL}). We offer no apologies for this style. In fact, you had
-better feel comfortable juggling both views simultaneously in your mind if
-you want to write correct PARI programs.
+We now go through each type and explain its implementation. Let \kbd{z} be a
+\kbd{GEN}, pointing at a PARI object. In the following paragraphs, we will
+constantly mix two points of view: on the one hand, \kbd{z} is treated as the
+C pointer it is, on the other, as PARI's handle on some mathematical entity,
+so we will shamelessly write $\kbd{z} \ne 0$ to indicate that the
+\emph{value} thus represented is nonzero (in which case the
+\emph{pointer}~\kbd{z} is certainly non-\kbd{NULL}). We offer no apologies
+for this style. In fact, you had better feel comfortable juggling both views
+simultaneously in your mind if you want to write correct PARI programs.
 
 Common to all the types is the first codeword \kbd{z[0]}, which we do not
 have to worry about since this is taken care of by \kbd{cgetg}. Its precise
@@ -991,8 +996,8 @@ an advanced example in \secref{se:prog}).
 
 \fun{void}{unsetisclone}{GEN z} unsets the \emph{clone} bit.
 
-\misctitle{Remark} The clone bit is there so that \kbd{gunclone} can check it
-is deleting an object which was allocated by \kbd{gclone}. Miscellaneous
+\misctitle{Remark.} The clone bit is there so that \kbd{gunclone} can check
+it is deleting an object which was allocated by \kbd{gclone}. Miscellaneous
 vector entries are often cloned by \kbd{gp} so that a GP statement like
 \kbd{v[1] = x} does not involve copying the whole of \kbd{v}: the component
 \kbd{v[1]} is deleted if its clone bit is set, and is replaced by a clone of
@@ -1002,16 +1007,15 @@ when the said vector is scheduled to be uncloned. Hackish code may abuse the
 clone bit to tag objects for reasons unrelated to the above instead of using
 proper data structures. Don't do that.
 
-
 These macros are written in such a way that you do not need to worry about
 type casts when using them: i.e.~if \kbd{z} is a \kbd{GEN}, \kbd{typ(z[2])}
-is accepted by your compiler, without your having to explicitly type
-\kbd{typ((GEN)z[2])}. Note that for the sake of efficiency, none of the
-codeword-handling macros check the types of their arguments even when there
-are stringent restrictions on their use.
+is accepted by your compiler, as well as the more proper \kbd{typ(gel(z,2))}.
+Note that for the sake of efficiency, none of the codeword-handling macros
+check the types of their arguments even when there are stringent restrictions
+on their use.
 
-The possible second codeword is used differently by the different types, and
-we will describe it as we now consider each of them in turn:
+Some types have a second codeword, used differently by each type, and
+we will describe it as we now consider each of them in turn.
 
 \subsec{Type \typ{INT} (integer)}:\sidx{integer}\kbdsidx{t_INT} this type has
 a second codeword \kbd{z[1]} which contains the following information:
