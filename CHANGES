@@ -72,6 +72,7 @@ GN 16- MPQS warning "factoring this number will take several/many hours" now
        2.2.9, A-2]. [Bug #238]
 GTo21- wrong prototype for qfrep
    22- factornf(P, T) did not accept non-monic T [Bug #241]
+   23- lngamma(1E+10) --> "Impossible assignment I --> S"
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

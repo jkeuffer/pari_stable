@@ -1036,15 +1036,27 @@ cxgamma(GEN s0, int dolog, long prec)
   y = s;
   if (typ(s0) == t_INT)
   {
-    long ss = itos(s0);
-    if (ss < 0) err(talker,"non-positive integer argument in cxgamma");
-    for (i=1; i < nn; i++)
-    {
-      y = mulrs(y, ss + i);
-      if (low_stack(avlim,stack_lim(av2,3)))
+    if (signe(s0) <= 0) err(talker,"non-positive integer argument in cxgamma");
+    if (is_bigint(s0)) {
+      for (i=1; i < nn; i++)
       {
-        if(DEBUGMEM>1) err(warnmem,"gamma");
-        y = gerepileuptoleaf(av2, y);
+        y = mulri(y, addis(s0, i));
+        if (low_stack(avlim,stack_lim(av2,3)))
+        {
+          if(DEBUGMEM>1) err(warnmem,"gamma");
+          y = gerepileuptoleaf(av2, y);
+        }
+      }
+    } else {
+      ulong ss = itou(s0);
+      for (i=1; i < nn; i++)
+      {
+        y = mulru(y, ss + i);
+        if (low_stack(avlim,stack_lim(av2,3)))
+        {
+          if(DEBUGMEM>1) err(warnmem,"gamma");
+          y = gerepileuptoleaf(av2, y);
+        }
       }
     }
     if (dolog) y = logr_abs(y);
