@@ -2714,6 +2714,12 @@ binary powering.
 \fun{GEN}{gsubst}{GEN x, long v, GEN y} substitutes the object \kbd{y}
 into~\kbd{x} for the variable number~\kbd{v}.
 
+\subsec{Miscellaneous functions}
+
+\fun{const char*}{type_name}{long t} given a type number \kbd{t} this routine
+returns a string containing its symbolic name. E.g \kbd{type\_name(\typ{INT})}
+returns \kbd{"\typ{INT}"}. The return value is read-only.
+
 \section{Further type specific functions}
 
 \subsec{Vectors and Matrices}

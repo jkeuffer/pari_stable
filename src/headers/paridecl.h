@@ -956,7 +956,7 @@ void    switchin(const char *name);
 void    switchout(char *name);
 void    texe(GEN g, char format, long dec);
 pariFILE* try_pipe(char *cmd, int flag);
-char*   type_name(long t);
+const char* type_name(long t);
 void    voir(GEN x, long nb);
 void    vpariputs(const char* format, va_list args);
 void    write0(const char *s, GEN g);

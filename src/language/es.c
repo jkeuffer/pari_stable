@@ -1078,7 +1078,7 @@ eng_ord(long i)                        /* i > 0 assumed */
   }
 }
 
-char *
+const char *
 type_name(long t)
 {
   char *s;

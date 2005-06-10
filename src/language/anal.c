@@ -766,7 +766,7 @@ addhelp(entree *ep, char *s)
 GEN
 type0(GEN x)
 {
-  char *s = type_name(typ(x));
+  const char *s = type_name(typ(x));
   return strtoGENstr(s);
 }
 
