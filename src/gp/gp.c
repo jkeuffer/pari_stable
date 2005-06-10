@@ -1118,93 +1118,6 @@ commands(int n)
 }
 
 static void
-print_def_arg(GEN x)
-{
-  if (x == gen_0) return;
-  pariputc('=');
-  if (typ(x)==t_STR)
-    pariputs(GSTR(x)); /* otherwise it's surrounded by "" */
-  else
-    brute(x,'g',-1);
-}
-
-static void
-print_user_fun(entree *ep)
-{
-  gp_args *f= (gp_args*)ep->args;
-  GEN q = (GEN)ep->value, *arg = f->arg;
-  int i, narg;
-
-  q++; /* skip initial NULL */
-  pariputs(ep->name); pariputc('(');
-  narg = f->narg;
-  for (i=1; i<=narg; i++, arg++)
-  {
-    entree *ep = varentries[*q++];
-    pariputs(ep? ep->name:"#");
-    print_def_arg(*arg);
-    if (i == narg) { arg++; break; }
-    pariputs(", ");
-  }
-  pariputs(") = ");
-  narg = f->nloc;
-  if (narg)
-  {
-    pariputs("local(");
-    for (i=1; i<=narg; i++, arg++)
-    {
-      entree *ep = varentries[*q++];
-      pariputs(ep? ep->name:"#");
-      print_def_arg(*arg);
-      if (i == narg) break;
-      pariputs(", ");
-    }
-    pariputs("); ");
-  }
-  pariputs((char*)q);
-}
-
-static void
-print_user_member(entree *ep)
-{
-  GEN q = (GEN)ep->value;
-  entree *ep2;
-
-  q++; /* skip initial NULL */
-  ep2 = varentries[*q++];
-  pariputs(ep2? ep2->name:"#");
-  pariputsf(".%s = ", ep->name);
-  pariputs((char*)q);
-}
-
-static void
-brace_print(entree *ep, void print(entree *))
-{
-  pariputc('{'); print(ep);
-  pariputc('}'); pariputs("\n\n");
-}
-
-static void
-user_fun(void)
-{
-  entree *ep;
-  int i;
-  for (i = 0; i < functions_tblsz; i++)
-    for (ep = functions_hash[i]; ep; ep = ep->next)
-      if (EpVALENCE(ep) == EpUSER) brace_print(ep, &print_user_fun);
-}
-
-static void
-user_member(void)
-{
-  entree *ep;
-  int i;
-  for (i = 0; i < functions_tblsz; i++)
-    for (ep = members_hash[i]; ep; ep = ep->next)
-      if (EpVALENCE(ep) == EpMEMBER) brace_print(ep, &print_user_member);
-}
-
-static void
 center(char *s)
 {
   long i, l = strlen(s), pad = term_width() - l;
@@ -1827,8 +1740,8 @@ escape0(char *tch)
     case 'u':
       switch (*s)
       {
-        case 'm': user_member(); break;
-        default: user_fun();
+        case 'm': print_all_user_member(); break;
+        default: print_all_user_fun();
       }
       break;
     case 'v': print_version(); break;

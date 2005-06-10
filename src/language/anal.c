@@ -27,6 +27,13 @@ typedef GEN (*PFGEN)(ANYARG);
 typedef GEN (*F2GEN)(GEN,GEN);
 typedef GEN (*F1GEN)(GEN);
 
+/* for user functions */
+typedef struct gp_args {
+  int nloc, narg; /* # of local variables, # of format parameters */
+  GEN *arg; /* values for these nloc + narg variables */
+} gp_args;
+
+
 char *gp_function_name=NULL;
 
 static GEN    constante();
@@ -3336,5 +3343,98 @@ alias0(char *s, char *old)
   x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
   x[1] = (long)ep;
   (void)installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
+}
+
+/********************************************************************/
+/**                                                                **/
+/**            PRINT USER FUNCTION AND MEMBER FUNCTION             **/
+/**                                                                **/
+/********************************************************************/
+
+static void
+print_def_arg(GEN x)
+{
+  if (x == gen_0) return;
+  pariputc('=');
+  if (typ(x)==t_STR)
+    pariputs(GSTR(x)); /* otherwise it's surrounded by "" */
+  else
+    brute(x,'g',-1);
+}
+
+void
+print_user_fun(entree *ep)
+{
+  gp_args *f= (gp_args*)ep->args;
+  GEN q = (GEN)ep->value, *arg = f->arg;
+  int i, narg;
+
+  q++; /* skip initial NULL */
+  pariputs(ep->name); pariputc('(');
+  narg = f->narg;
+  for (i=1; i<=narg; i++, arg++)
+  {
+    entree *ep = varentries[*q++];
+    pariputs(ep? ep->name:"#");
+    print_def_arg(*arg);
+    if (i == narg) { arg++; break; }
+    pariputs(", ");
+  }
+  pariputs(") = ");
+  narg = f->nloc;
+  if (narg)
+  {
+    pariputs("local(");
+    for (i=1; i<=narg; i++, arg++)
+    {
+      entree *ep = varentries[*q++];
+      pariputs(ep? ep->name:"#");
+      print_def_arg(*arg);
+      if (i == narg) break;
+      pariputs(", ");
+    }
+    pariputs("); ");
+  }
+  pariputs((char*)q);
+}
+
+void
+print_user_member(entree *ep)
+{
+  GEN q = (GEN)ep->value;
+  entree *ep2;
+
+  q++; /* skip initial NULL */
+  ep2 = varentries[*q++];
+  pariputs(ep2? ep2->name:"#");
+  pariputsf(".%s = ", ep->name);
+  pariputs((char*)q);
+}
+
+static void
+brace_print(entree *ep, void print(entree *))
+{
+  pariputc('{'); print(ep);
+  pariputc('}'); pariputs("\n\n");
+}
+
+void
+print_all_user_fun(void)
+{
+  entree *ep;
+  int i;
+  for (i = 0; i < functions_tblsz; i++)
+    for (ep = functions_hash[i]; ep; ep = ep->next)
+      if (EpVALENCE(ep) == EpUSER) brace_print(ep, &print_user_fun);
+}
+
+void
+print_all_user_member(void)
+{
+  entree *ep;
+  int i;
+  for (i = 0; i < functions_tblsz; i++)
+    for (ep = members_hash[i]; ep; ep = ep->next)
+      if (EpVALENCE(ep) == EpMEMBER) brace_print(ep, &print_user_member);
 }
 
