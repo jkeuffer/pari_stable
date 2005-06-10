@@ -2053,7 +2053,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
         free((void*)rel->R); rel--;
         if (++cptzer > MAXRELSUP)
         {
-          if (L_jid) { cptzer -= 10; break; }
+          if (L_jid) { cptzer = 0; L_jid = NULL; break; } /* second chance */
           *pjid = jid; return 0;
         }
         continue;
