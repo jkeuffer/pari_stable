@@ -1523,7 +1523,6 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
   double drc, lim, LOGD, LOGD2;
-  const long MAXRELSUP = 7;
 
   check_quaddisc(D, &s, /*junk*/&i, "buchquad");
   Disc = D;
@@ -1637,7 +1636,7 @@ MORE:
       cbach /= 2; goto START;
 
     case fupb_RELAT:
-      if (++nrelsup <= MAXRELSUP) { need = min(KC, nrelsup); goto MORE; }
+      if (++nrelsup <= 7 || cbach > 1) { need = min(KC, nrelsup); goto MORE; }
       goto START;
   }
   /* DONE */
