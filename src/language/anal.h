@@ -18,12 +18,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                 Declarations specific to the analyzer                 */
 /*                                                                       */
 /*************************************************************************/
-/* structs */
+/* modules */
 typedef struct module {
   entree *func;
   char **help;
 } module;
 
+/* GP control structures */
 typedef struct {
   entree *ep;
   char *ch;
