@@ -40,6 +40,8 @@ hit_return(void)
 /********************************************************************/
 #define ONE_LINE_COMMENT   2
 #define MULTI_LINE_COMMENT 1
+#define LBRACE '{'
+#define RBRACE '}'
 /* Filter F->s into F->t */
 char *
 filtre0(filtre_t *F)
@@ -1331,6 +1333,11 @@ print_functions_hash(const char *s)
 /**                        FORMATTED OUTPUT                        **/
 /**                                                                **/
 /********************************************************************/
+/* forward declarations. Maybe these should be static ? */
+void bruti(GEN g, pariout_t *T, int nosign);
+void sori(GEN g, pariout_t *T);
+void texi(GEN g, pariout_t *T, int nosign);
+
 static char *
 get_var(long v, char *buf)
 {

@@ -114,6 +114,12 @@ debug_stack(void)
 /*                                                                   */
 /*********************************************************************/
 /*#define DEBUG*/
+#define BL_HEAD 3
+#define bl_base(x) ((x) - BL_HEAD)
+#define bl_next(x) (((GEN)x)[-3])
+#define bl_prev(x) (((GEN)x)[-2])
+#define bl_num(x)  (((GEN)x)[-1])
+
 static long next_bloc;
 static GEN cur_bloc=NULL; /* current bloc in bloc list */
 #ifdef DEBUG
@@ -192,6 +198,16 @@ killbloc(GEN x)
 }
 void
 gunclone(GEN x) { delete_from_bloclist(x); }
+
+int
+pop_entree_bloc(entree *ep, long loc)
+{
+  GEN x = (GEN)ep->value;
+  if (bl_num(x) < loc) return 0; /* older */
+  if (DEBUGMEM>2)
+    fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
+  killbloc(x); return 1;
+}
 
 /*********************************************************************/
 /*                                                                   */
@@ -897,29 +913,7 @@ recover(int flag)
           }
       }
     }
- if (DEBUGMEM>2) fprintferr("leaving recover()\n");
-#if 0
- /* This causes SEGV on lists and GP-2.0 vectors: internal component is
-  * destroyed while global object is not updated. Two solutions:
-  *  - comment it out: should not be a big memory problem except for huge
-  *  vec. components. Has the added advantadge that the results computed so
-  *  far are not lost.
-  *
-  *  - tag every variable whose component has been modified in the last
-  *  cycle. Untag it at the begining of each cycle. Maybe this should be
-  *  done. But do we really want to destroy a huge global vector if one of
-  *  its components was modified before the error ? (we don't copy the whole
-  *  thing anymore). K.B.
-  */
-  {
-    GEN y;
-    for (x = cur_bloc; x && bl_num(x) >= listloc; x = y)
-    {
-      y = (GEN)bl_prev(x);
-      if (x != gpi && x != geuler && x != bernzone) killbloc(x);
-    }
-  }
-#endif
+  if (DEBUGMEM>2) fprintferr("leaving recover()\n");
   try_to_recover=1;
   (void)os_signal(SIGINT, sigfun);
 }

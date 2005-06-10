@@ -176,13 +176,6 @@ extern void *PARI_stack_limit;
 #define EpPREDEFINED(ep) (EpVALENCE(ep) < EpUSER)
 enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 
-/* blocs */
-#define BL_HEAD 3
-#define bl_base(x) ((x) - BL_HEAD)
-#define bl_next(x) (((GEN)x)[-3])
-#define bl_prev(x) (((GEN)x)[-2])
-#define bl_num(x)  (((GEN)x)[-1])
-
 /* signals */
 #define INIT_JMPm 1
 #define INIT_SIGm 2
@@ -202,7 +195,6 @@ enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 #define print_text(s) print_prefixed_text((s),NULL,NULL);
 
 /* infiles */
-#define MAX_BUFFER 64
 #define mf_IN    1
 #define mf_PIPE  2
 #define mf_FALSE 4
@@ -217,11 +209,8 @@ typedef struct {
   void *data;
 } filtre_t;
 
-#define LBRACE '{'
-#define RBRACE '}'
 #define separator(c)  ((c)==';')
 
-int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 char *filtre0(filtre_t *F);
 char *filtre(char *s, int flag);
 void check_filtre(filtre_t *F);
@@ -273,12 +262,6 @@ typedef struct {
 } pariout_t;
 
 void gen_output(GEN x, pariout_t *T);
-char *GENtostr0(GEN x, pariout_t *T, void(*do_out)(GEN, pariout_t *));
-void bruti(GEN g, pariout_t *T, int nosign);
-void matbruti(GEN g, pariout_t *T);
-void sori(GEN g, pariout_t *T);
-void texi(GEN g, pariout_t *T, int nosign);
-void texi_nobrace(GEN g, pariout_t *T, int nosign);
 extern pariout_t DFLT_OUTPUT;
 
 /* gp specific routines */

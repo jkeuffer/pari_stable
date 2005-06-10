@@ -347,6 +347,8 @@ void   init_dalloc();
 double *dalloc(size_t n);
 void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);
 void   minim_alloc(long n, double ***q, GEN *x, double **y,  double **z, double **v);
+int    pop_entree_bloc(entree *ep, long loc);
+int    pop_val_if_newer(entree *ep, long loc);
 
 /* Interfaces (GP, etc.) */
 void  aide(char *s, int flag);
@@ -365,7 +367,6 @@ void  kill_from_hashlist(entree *ep, long n);
 void  member_err(char *s);
 int   pari_kernel_init(void);
 void  pari_sig_init(void (*f)(int));
-int   pop_val_if_newer(entree *ep, long loc);
 void  print_functions_hash(const char *s);
 void  print_fun_list(char **matches, int nbli);
 int   term_width(void);

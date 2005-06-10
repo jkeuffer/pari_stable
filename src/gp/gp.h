@@ -26,6 +26,7 @@ int term_height(void);
 int term_width(void);
 void hit_return(void);
 void gp_output(GEN z, gp_data *G);
+int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 
 extern int secure;
 extern ulong init_opts;

@@ -645,14 +645,7 @@ pop_val_if_newer(entree *ep, long loc)
   var_cell *v = (var_cell*) ep->args;
 
   if (v == INITIAL) return 0;
-  if (v->flag == COPY_VAL)
-  {
-    GEN x = (GEN)ep->value;
-    if (bl_num(x) < loc) return 0; /* older */
-    if (DEBUGMEM>2)
-      fprintferr("popping %s (bloc no %ld)\n", ep->name, bl_num(x));
-    killbloc((GEN)ep->value);
-  }
+  if (v->flag == COPY_VAL) return pop_entree_bloc(ep, loc);
   ep->value = v->value;
   ep->args  = (void*) v->prev;
   free((void*)v); return 1;
@@ -1098,7 +1091,7 @@ expand_string(char *bp, char **ptbuf, char **ptlimit)
     char *old = analyseur;
     GEN z = expr();
     NO_BREAK("here (expanding string)", old);
-    tmp = GENtostr0(z, &DFLT_OUTPUT, &gen_output);
+    tmp = GENtostr(z);
     len = strlen(tmp); avma = av;
   }
   if (ptlimit && bp + len > *ptlimit)

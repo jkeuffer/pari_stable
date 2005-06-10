@@ -1182,18 +1182,20 @@ print_user_member(entree *ep)
 }
 
 static void
+brace_print(entree *ep, void print(entree *))
+{
+  pariputc('{'); print(ep);
+  pariputc('}'); pariputs("\n\n");
+}
+
+static void
 user_fun(void)
 {
   entree *ep;
   int hash;
-
   for (hash = 0; hash < functions_tblsz; hash++)
     for (ep = functions_hash[hash]; ep; ep = ep->next)
-      if (EpVALENCE(ep) == EpUSER)
-      {
-	pariputc(LBRACE); print_user_fun(ep);
-	pariputc(RBRACE); pariputs("\n\n");
-      }
+      if (EpVALENCE(ep) == EpUSER) brace_print(ep, &print_user_fun);
 }
 
 static void
@@ -1201,14 +1203,9 @@ user_member(void)
 {
   entree *ep;
   int hash;
-
   for (hash = 0; hash < functions_tblsz; hash++)
     for (ep = members_hash[hash]; ep; ep = ep->next)
-      if (EpVALENCE(ep) == EpMEMBER)
-      {
-	pariputc(LBRACE); print_user_member(ep);
-	pariputc(RBRACE); pariputs("\n\n");
-      }
+      if (EpVALENCE(ep) == EpMEMBER) brace_print(ep, &print_user_member);
 }
 
 static void
