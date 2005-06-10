@@ -2991,8 +2991,10 @@ START:
 MORE:
     pre_allocate(&cache, need); cache.end = cache.last + need;
     if (++nreldep > MAXRELSUP) {
-      F.sfb_chg = sfb_INCREASE;
-      if (++sfb_trials > SFB_MAX) goto START;
+      if (++sfb_trials <= SFB_MAX)
+        F.sfb_chg = sfb_INCREASE;
+      else if (cbach < 4)
+        goto START;
     }
     if (F.sfb_chg) {
       if (!subFB_change(&F, nf, L_jid)) goto START;
