@@ -98,7 +98,6 @@ long   is_keyword_char(char c);
 char   *readstring(char *src, char *s);
 long   loop_break(void);
 long   did_break(void);
-void   print_prefixed_text(char *s, char *prefix, char *str);
 GEN    gp_history(gp_hist *H, long p, char *old, char *entry);
 GEN    set_hist_entry(gp_hist *H, GEN x);
 void   lisseq_void(char *t);
@@ -155,10 +154,6 @@ enum { NONE, WARN, OLDFUN, OLDALL };
 /* return type for GP functions */
 enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
-#ifdef __EMX__
-#  define STACK_CHECK
-#endif
-
 #ifdef STACK_CHECK
 extern void *PARI_stack_limit;
 #endif
@@ -177,6 +172,7 @@ extern void *PARI_stack_limit;
 enum { EpUSER = 100, EpNEW, EpALIAS, EpVAR, EpGVAR, EpMEMBER, EpINSTALL };
 
 /* signals */
+extern ulong init_opts;
 #define INIT_JMPm 1
 #define INIT_SIGm 2
 #define INIT_JMP     (init_opts & INIT_JMPm)
@@ -192,6 +188,7 @@ void decode_color(int n, int *c);
 enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 
 /* general printing */
+void print_prefixed_text(char *s, char *prefix, char *str);
 #define print_text(s) print_prefixed_text((s),NULL,NULL);
 
 /* infiles */

@@ -29,7 +29,6 @@ void gp_output(GEN z, gp_data *G);
 int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
 
 extern int secure;
-extern ulong init_opts;
 extern char *current_logfile;
 
 extern ulong readline_state;

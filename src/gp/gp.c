@@ -1192,9 +1192,9 @@ static void
 user_fun(void)
 {
   entree *ep;
-  int hash;
-  for (hash = 0; hash < functions_tblsz; hash++)
-    for (ep = functions_hash[hash]; ep; ep = ep->next)
+  int i;
+  for (i = 0; i < functions_tblsz; i++)
+    for (ep = functions_hash[i]; ep; ep = ep->next)
       if (EpVALENCE(ep) == EpUSER) brace_print(ep, &print_user_fun);
 }
 
@@ -1202,9 +1202,9 @@ static void
 user_member(void)
 {
   entree *ep;
-  int hash;
-  for (hash = 0; hash < functions_tblsz; hash++)
-    for (ep = members_hash[hash]; ep; ep = ep->next)
+  int i;
+  for (i = 0; i < functions_tblsz; i++)
+    for (ep = members_hash[i]; ep; ep = ep->next)
       if (EpVALENCE(ep) == EpMEMBER) brace_print(ep, &print_user_member);
 }
 

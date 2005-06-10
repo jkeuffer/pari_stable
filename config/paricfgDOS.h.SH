@@ -45,6 +45,7 @@ cat > $file << EOT
 #endif
 
 #ifdef __EMX__
+#  define STACK_CHECK
 #  define READLINE
 #  define READLINE_LIBRARY
 #  define HAS_RL_MESSAGE
