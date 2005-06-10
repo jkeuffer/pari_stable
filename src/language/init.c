@@ -622,15 +622,29 @@ init_stack(size_t size)
   memused = 0; return s;
 }
 
+static entree **
+init_fun_hash() {
+  entree **H = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
+  long i;
+  for (i = 0; i < functions_tblsz; i++) H[i] = NULL;
+  return H;
+}
+
+int
+gp_init_functions(int force)
+{
+  return gp_init_entrees(new_fun_set? pari_modules: pari_oldmodules,
+                         functions_hash, force);
+}
+
 /* initialize PARI data. You can call pari_addfunctions() first to add other
  * routines to the default set */
 void
 pari_init(size_t parisize, ulong maxprime)
 {
   ulong u;
-  long i;
 
-  STACK_CHECK_INIT(&i);
+  STACK_CHECK_INIT(&u);
   init_defaults(0);
   if (INIT_JMP && setjmp(environnement))
   {
@@ -656,23 +670,15 @@ pari_init(size_t parisize, ulong maxprime)
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
   pari_addfunctions(&pari_modules, functions_basic,helpmessages_basic);
-  functions_hash = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
-  for (i = 0; i < functions_tblsz; i++) functions_hash[i] = NULL;
-
   pari_addfunctions(&pari_oldmodules, oldfonctions,oldhelpmessage);
-  funct_old_hash = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
-  for (i = 0; i < functions_tblsz; i++) funct_old_hash[i] = NULL;
-  gp_init_entrees(pari_oldmodules, funct_old_hash, 1);
-
-  if (new_fun_set)
-    gp_init_entrees(pari_modules, functions_hash, 1);
-  else
-    gp_init_entrees(pari_oldmodules, functions_hash, 1);
-
   pari_addfunctions(&pari_membermodules, gp_member_list, NULL);
-  members_hash = (entree **) gpmalloc(sizeof(entree*)*functions_tblsz);
-  for (i = 0; i < functions_tblsz; i++) members_hash[i] = NULL;
-  gp_init_entrees(pari_membermodules, members_hash, 1);
+
+  funct_old_hash = init_fun_hash();
+  functions_hash = init_fun_hash();
+  members_hash = init_fun_hash();
+  (void)gp_init_entrees(pari_oldmodules, funct_old_hash, 1);
+  (void)gp_init_entrees(pari_membermodules, members_hash, 1);
+  gp_init_functions(1);
 
   whatnow_fun = NULL;
   dft_handler = (char **) gpmalloc((noer + 1) *sizeof(char *));

@@ -586,12 +586,8 @@ sd_compatible(const char *v, int flag)
   ulong old = compatible;
   GEN r = sd_ulong(v,flag,"compatible",&compatible, 0,3,msg);
 
-  if (old != compatible && flag != d_INITRC)
-  {
-    int res = gp_init_entrees(new_fun_set? pari_modules: pari_oldmodules,
-        	              functions_hash, 0);
-    if (res) err(warner,"user functions re-initialized");
-  }
+  if (old != compatible && flag != d_INITRC && gp_init_functions(0))
+    err(warner,"user functions re-initialized");
   return r;
 }
 

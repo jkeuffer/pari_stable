@@ -28,7 +28,6 @@ typedef struct module {
   entree *func;
   char **help;
 } module;
-int  gp_init_entrees(module *modlist, entree **hash, int force);
 
 typedef struct {
   entree *ep;
