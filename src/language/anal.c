@@ -645,7 +645,7 @@ pop_val_if_newer(entree *ep, long loc)
   var_cell *v = (var_cell*) ep->args;
 
   if (v == INITIAL) return 0;
-  if (v->flag == COPY_VAL) return pop_entree_bloc(ep, loc);
+  if (v->flag == COPY_VAL && !pop_entree_bloc(ep, loc)) return 0;
   ep->value = v->value;
   ep->args  = (void*) v->prev;
   free((void*)v); return 1;
