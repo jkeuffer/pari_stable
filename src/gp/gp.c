@@ -99,15 +99,7 @@ init_hist(gp_hist *H, size_t l, ulong total)
 static void
 init_path(gp_path *path)
 {
-  char *p;
-#if PATH_SEPARATOR == ';'
-  p = ".;C:;C:/gp";
-#elif defined(UNIX)
-  p = ".:~:~/gp";
-#else
-  p = ".";
-#endif
-  path->PATH = pari_strdup(p);
+  path->PATH = pari_strdup(pari_default_path());
   path->dirs = NULL;
 }
 

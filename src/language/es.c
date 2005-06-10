@@ -2981,6 +2981,23 @@ delete_dirs(gp_path *p)
   }
 }
 
+#if defined(__EMX__) || defined(_WIN32) || defined(__CYGWIN32__)
+#  define PATH_SEPARATOR ';' /* beware DOSish 'C:' disk drives */
+#else
+#  define PATH_SEPARATOR ':'
+#endif
+
+const char *
+pari_default_path() {
+#if PATH_SEPARATOR == ';'
+  return ".;C:;C:/gp";
+#elif defined(UNIX)
+  return ".:~:~/gp";
+#else
+  return ".";
+#endif
+}
+
 void
 gp_expand_path(gp_path *p)
 {

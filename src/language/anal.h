@@ -82,6 +82,7 @@ void push_stack(stack **pts, void *a);
 void *pop_stack(stack **pts);
 void delete_dirs(gp_path *p);
 void gp_expand_path(gp_path *p);
+const char *pari_default_path();
 
 /* functions */
 void   changevalue_p(entree *ep, GEN x);
@@ -151,12 +152,6 @@ enum { RET_GEN, RET_INT, RET_LONG, RET_VOID };
 
 #ifdef STACK_CHECK
 extern void *PARI_stack_limit;
-#endif
-
-#if defined(__EMX__) || defined(_WIN32) || defined(__CYGWIN32__)
-#  define PATH_SEPARATOR ';' /* beware DOSish 'C:' disk drives */
-#else
-#  define PATH_SEPARATOR ':'
 #endif
 
 /* entrees */
