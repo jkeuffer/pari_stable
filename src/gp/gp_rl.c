@@ -887,13 +887,14 @@ gp_add_history(char *s)
 /* Read line; returns a malloc()ed string of the user input or NULL on EOF.
    Increments the buffer size appropriately if needed; fix *endp if so. */
 static char *
-gprl_input(Buffer *b, char **endp, input_method *IM)
+gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
 {
+  Buffer *b = F->buf;
   ulong used = *endp - b->buf;
   ulong left = b->len - used, l;
-  char *s, *t;
+  char *s, *t, *prompt = expand_prompt(first? IM->prompt: IM->prompt_cont, F);
 
-  if (! (s = readline(IM->prompt)) ) return NULL; /* EOF */
+  if (! (s = readline(color_prompt(prompt))) ) return NULL; /* EOF */
   gp_add_history(s); /* Makes a copy */
   l = strlen(s) + 1;
   /* put back \n that readline stripped. This is needed for
@@ -928,18 +929,19 @@ unblock_SIGINT(void)
  * Return 0: EOF
  *        1: got one line from readline or infile */
 int
-get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
+get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
 {
   const int index = history_length;
   char *s;
   input_method IM;
 
-  IM.prompt = prompt;
-  IM.getline= &gprl_input;
+  IM.prompt      = prompt;
+  IM.prompt_cont = prompt_cont;
+  IM.getline = &gprl_input;
   IM.free = 1;
   if (! input_loop(F,&IM)) { pariputs("\n"); return 0; }
 
-  s = ((Buffer*)F->data)->buf;
+  s = F->buf->buf;
   if (*s)
   {
     if (history_length > index+1)
@@ -952,22 +954,24 @@ get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F)
       gp_add_history(s);
     }
 
-    /* update logfile */
-    if (logfile) switch (logstyle) {
-    case logstyle_TeX:
-      fprintf(logfile,
-              "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-              bare_prompt,s);
-      break;
-    case logstyle_plain:
-      fprintf(logfile, "%s%s\n",bare_prompt,s);
-      break;
-    case logstyle_color:
-      /* Can't do in one pass, since term_get_color() returns a static */
-      fprintf(logfile, "%s%s", term_get_color(c_PROMPT), bare_prompt);
-      fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
-      fprintf(logfile, "%s\n", term_get_color(c_NONE));
-      break;
+    if (logfile) { /* update logfile */
+      char *bare_prompt = expand_prompt(IM.prompt, F);
+      switch (logstyle) {
+      case logstyle_TeX:
+        fprintf(logfile,
+                "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+                bare_prompt,s);
+        break;
+      case logstyle_plain:
+        fprintf(logfile, "%s%s\n",bare_prompt,s);
+        break;
+      case logstyle_color:
+        /* Can't do in one pass, since term_get_color() returns a static */
+        fprintf(logfile, "%s%s", term_get_color(c_PROMPT), bare_prompt);
+        fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
+        fprintf(logfile, "%s\n", term_get_color(c_NONE));
+        break;
+      }
     }
   }
   unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */

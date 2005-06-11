@@ -378,3 +378,131 @@ void  texmacs_completion(char *s, long pos);
 void  var_make_safe();
 int   whatnow(char *s, int flag);
 void  whatnow_new_syntax(char *f, long n);
+
+/* defaults */
+GEN sd_TeXstyle(const char *v, int flag);
+GEN sd_colors(char *v, int flag);
+GEN sd_compatible(const char *v, int flag);
+GEN sd_datadir(char *v, int flag);
+GEN sd_debug(const char *v, int flag);
+GEN sd_debugfiles(const char *v, int flag);
+GEN sd_debugmem(const char *v, int flag);
+GEN sd_echo(const char *v, int flag);
+GEN sd_factor_add_primes(char *v, int flag);
+GEN sd_filename(const char *v, int flag, char *s, char **f);
+GEN sd_format(const char *v, int flag);
+GEN sd_help(char *v, int flag);
+GEN sd_histsize(const char *v, int flag);
+GEN sd_lines(const char *v, int flag);
+GEN sd_log(const char *v, int flag);
+GEN sd_logfile(const char *v, int flag);
+GEN sd_new_galois_format(char *v, int flag);
+GEN sd_output(const char *v, int flag);
+GEN sd_parisize(const char *v, int flag);
+GEN sd_path(char *v, int flag);
+GEN sd_prettyprinter(char *v, int flag);
+GEN sd_primelimit(const char *v, int flag);
+GEN sd_prompt(const char *v, int flag);
+GEN sd_prompt_cont(const char *v, int flag);
+GEN sd_psfile(const char *v, int flag);
+GEN sd_realprecision(const char *v, int flag);
+GEN sd_rl(const char *v, int flag);
+GEN sd_secure(const char *v, int flag);
+GEN sd_seriesprecision(const char *v, int flag);
+GEN sd_simplify(const char *v, int flag);
+GEN sd_strictmatch(const char *v, int flag);
+GEN sd_timer(const char *v, int flag);
+GEN setdefault(const char *s, const char *v, int flag);
+
+/* history */
+typedef struct {
+  GEN *res;    /* array of previous results, FIFO */
+  size_t size; /* # res */
+  ulong total; /* # of results computed since big bang */
+} gp_hist;
+
+/* prettyprinter */
+typedef struct {
+  pariFILE *file;
+  char *cmd;
+} gp_pp;
+
+/* path */
+typedef struct {
+  char *PATH;
+  char **dirs;
+} gp_path;
+
+/* for output */
+typedef struct {
+  char format; /* e,f,g */
+  long fieldw; /* 0 (ignored) or field width */
+  long sigd;   /* -1 (all) or number of significant digits printed */
+  int sp;      /* 0 = suppress whitespace from output */
+  int prettyp; /* output style: raw, prettyprint, etc */
+  int TeXstyle;
+} pariout_t;
+
+void gen_output(GEN x, pariout_t *T);
+extern pariout_t DFLT_OUTPUT;
+
+/* GP_DATA */
+typedef struct {
+  ulong primelimit;
+  jmp_buf env;
+  gp_hist *hist;
+  gp_pp *pp;
+  gp_path *path;
+  pariout_t *fmt;
+  ulong flags, lim_lines;
+  char *help, *prompt, *prompt_cont;
+  pari_timer *T;
+} gp_data;
+  /* GP_DATA->flags */
+enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
+       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512};
+
+extern gp_data *GP_DATA;
+
+typedef struct Buffer {
+  char *buf;
+  ulong len;
+  jmp_buf env;
+} Buffer;
+
+typedef struct {
+  char *s, *t, *end; /* source, target, last char read */
+  int in_string, in_comment, more_input, wait_for_brace, downcase;
+  Buffer *buf;
+} filtre_t;
+
+void init_hist(gp_data *D, size_t l, ulong total);
+void init_path(gp_data *D);
+char *init_help();
+pariout_t *init_fmt();
+void init_pp(gp_data *D);
+char *color_prompt(char *prompt);
+GEN  gp_history(gp_hist *H, long p, char *old, char *entry);
+GEN  set_hist_entry(gp_hist *H, GEN x);
+
+void delete_dirs(gp_path *p);
+void gp_expand_path(gp_path *p);
+const char *pari_default_path();
+char *expand_prompt(char *prompt, filtre_t *F);
+
+char *filtre0(filtre_t *F);
+char *filtre(char *s, int flag);
+void check_filtre(filtre_t *F);
+
+typedef struct input_method {
+  int free;
+  char *prompt, *prompt_cont;
+  FILE *file;
+  char * (*fgets)(char *,int,FILE*);
+  char * (*getline)(char**, int f, struct input_method*, filtre_t *F);
+  void (*onempty)(void);
+} input_method;
+
+void fix_buffer(Buffer *b, long newlbuf);
+int input_loop(filtre_t *F, input_method *IM);
+

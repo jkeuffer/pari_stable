@@ -59,30 +59,8 @@ typedef struct stack {
   void *value;
 } stack;
 
-/* history */
-typedef struct {
-  GEN *res;    /* array of previous results, FIFO */
-  size_t size; /* # res */
-  ulong total; /* # of results computed since big bang */
-} gp_hist;
-
-/* prettyprinter */
-typedef struct {
-  pariFILE *file;
-  char *cmd;
-} gp_pp;
-
-/* path */
-typedef struct {
-  char *PATH;
-  char **dirs;
-} gp_path;
-
 void push_stack(stack **pts, void *a);
 void *pop_stack(stack **pts);
-void delete_dirs(gp_path *p);
-void gp_expand_path(gp_path *p);
-const char *pari_default_path();
 
 /* functions */
 void   changevalue_p(entree *ep, GEN x);
@@ -94,8 +72,6 @@ long   is_keyword_char(char c);
 char   *readstring(char *src, char *s);
 long   loop_break(void);
 long   did_break(void);
-GEN    gp_history(gp_hist *H, long p, char *old, char *entry);
-GEN    set_hist_entry(gp_hist *H, GEN x);
 void   readseq_void(char *t);
 GEN    readseq_nobreak(char *t);
 GEN    readexpr_nobreak(char *t);
@@ -172,6 +148,28 @@ extern ulong init_opts;
 #define INIT_JMP_off (init_opts &= ~INIT_JMPm)
 #define INIT_SIG_off (init_opts &= ~INIT_SIGm)
 
+/* defaults  */
+#define is_default(s) setdefault((s),"",d_EXISTS) == gen_1
+enum { d_ACKNOWLEDGE, d_INITRC, d_SILENT, d_RETURN, d_EXISTS };
+char* get_sep(const char *t);
+long get_int(const char *s, long dflt);
+ulong get_uint(const char *s);
+int  gp_init_functions(int force);
+
+extern char *current_logfile;
+extern ulong readline_state;
+#define DO_MATCHED_INSERT	2
+#define DO_ARGS_COMPLETE	4
+
+/* readline completions */
+typedef struct default_type {
+  char *name;
+  void *fun;
+} default_type;
+
+extern default_type gp_default_list[];
+extern char *keyword_list[];
+
 /* gp_colors */
 void decode_color(int n, int *c);
 #define c_NONE 0xffffUL
@@ -190,35 +188,14 @@ void print_prefixed_text(char *s, char *prefix, char *str);
 #define mf_TEST 32
 
 /* for filtre */
-typedef struct {
-  char *s, *t, *end; /* source, target, last char read */
-  int in_string, in_comment, more_input, wait_for_brace, downcase;
-  void *data;
-} filtre_t;
-
 #define separator(c)  ((c)==';')
 
-char *filtre0(filtre_t *F);
-char *filtre(char *s, int flag);
-void check_filtre(filtre_t *F);
-
-typedef struct Buffer {
-  char *buf;
-  ulong len;
-  jmp_buf env;
-} Buffer;
-
-typedef struct input_method {
-  int free;
-  char *prompt;
-  FILE *file;
-  char * (*fgets)(char *,int,FILE*);
-  char * (*getline)(Buffer*, char**, struct input_method*);
-  void (*onempty)(void);
-} input_method;
-
-void fix_buffer(Buffer *b, long newlbuf);
-int input_loop(filtre_t *F, input_method *IM);
+#define MAX_PROMPT_LEN 128
+#define DFT_PROMPT "? "
+#define BREAK_LOOP_PROMPT "break> "
+#define COMMENTPROMPT "comment> "
+#define CONTPROMPT ""
+#define DFT_INPROMPT ""
 
 /* GP output && output format */
 enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
@@ -237,19 +214,6 @@ void writetex(const char *s, GEN g);
 GEN Str(GEN g);
 GEN Strexpand(GEN g);
 GEN Strtex(GEN g);
-
-/* for output */
-typedef struct {
-  char format; /* e,f,g */
-  long fieldw; /* 0 (ignored) or field width */
-  long sigd;   /* -1 (all) or number of significant digits printed */
-  int sp;      /* 0 = suppress whitespace from output */
-  int prettyp; /* output style: raw, prettyprint, etc */
-  int TeXstyle;
-} pariout_t;
-
-void gen_output(GEN x, pariout_t *T);
-extern pariout_t DFLT_OUTPUT;
 
 /* gp specific routines */
 void alias0(char *s, char *old);
@@ -276,19 +240,3 @@ char *gp_format_time(long flag);
 #define DATA_END    ((char) 5)
 #define DATA_ESCAPE ((char) 27)
 
-/* GP_DATA */
-typedef struct {
-  jmp_buf env;
-  gp_hist *hist;
-  gp_pp *pp;
-  gp_path *path;
-  pariout_t *fmt;
-  ulong flags, lim_lines;
-  char *help;
-  pari_timer *T;
-} gp_data;
-  /* GP_DATA->flags */
-enum { QUIET=1, TEST=2, SIMPLIFY=4, CHRONO=8, ECHO=16, STRICTMATCH=32,
-       USE_READLINE=64, SECURE=128, EMACS=256, TEXMACS=512};
-
-extern gp_data *GP_DATA;

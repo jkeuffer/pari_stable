@@ -26,32 +26,10 @@ int term_height(void);
 int term_width(void);
 void hit_return(void);
 void gp_output(GEN z, gp_data *G);
-int get_line_from_readline(char *prompt, char *bare_prompt, filtre_t *F);
-int  gp_init_functions(int force);
-
-extern int secure;
-extern char *current_logfile;
-
-extern ulong readline_state;
-#define DO_MATCHED_INSERT	2
-#define DO_ARGS_COMPLETE	4
-
-/* default functions (i.e setd*) */
-#define is_default(s) setdefault((s),"",d_EXISTS)==gun
-enum { d_ACKNOWLEDGE, d_INITRC, d_SILENT, d_RETURN, d_EXISTS };
+int get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F);
 
 /* aide() */
 #define h_REGULAR 0
 #define h_LONG    1
 #define h_APROPOS 2
 #define h_RL      4
-
-/* readline completions */
-typedef struct default_type {
-  char *name;
-  void *fun;
-} default_type;
-
-extern default_type gp_default_list[];
-extern char *keyword_list[];
-
