@@ -50,3 +50,8 @@ typedef struct default_type {
 
 extern default_type gp_default_list[];
 extern char *keyword_list[];
+
+/* TeXmacs */
+#define DATA_BEGIN  ((char) 2)
+#define DATA_END    ((char) 5)
+#define DATA_ESCAPE ((char) 27)

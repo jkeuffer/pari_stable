@@ -207,9 +207,3 @@ int  whatnow(char *s, int silent);
 /* time */
 enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
 char *gp_format_time(long flag);
-
-/* TeXmacs */
-#define DATA_BEGIN  ((char) 2)
-#define DATA_END    ((char) 5)
-#define DATA_ESCAPE ((char) 27)
-

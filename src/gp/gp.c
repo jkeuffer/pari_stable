@@ -1772,3 +1772,166 @@ main(int argc, char **argv)
   (void)gp_main_loop(1);
   gp_quit(); return 0; /* not reached */
 }
+
+/*******************************************************************/
+/**                                                               **/
+/**                          GP OUTPUT                            **/
+/**                                                               **/
+/*******************************************************************/
+#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
+
+/* EXTERNAL PRETTYPRINTER */
+
+/* Wait for prettinprinter to finish, to prevent new prompt from overwriting
+ * the output.  Fill the output buffer, wait until it is read.
+ * Better than sleep(2): give possibility to print */
+static void
+prettyp_wait(void)
+{
+  char *s = "                                                     \n";
+  int i = 400;
+
+  pariputs("\n\n"); pariflush(); /* start translation */
+  while (--i) pariputs(s);
+  pariputs("\n"); pariflush();
+}
+
+/* initialise external prettyprinter (tex2mail) */
+static int
+prettyp_init(void)
+{
+  gp_pp *pp = GP_DATA->pp;
+  if (!pp->cmd) return 0;
+  if (!pp->file)
+    pp->file = try_pipe(pp->cmd, mf_OUT | mf_TEST);
+  if (pp->file) return 1;
+
+  err(warner,"broken prettyprinter: '%s'",pp->cmd);
+  free(pp->cmd); pp->cmd = NULL; return 0;
+}
+
+/* n = history number. if n = 0 no history */
+static int
+tex2mail_output(GEN z, long n)
+{
+  pariout_t T = *(GP_DATA->fmt); /* copy */
+  FILE *o_out;
+  FILE *o_logfile = logfile;
+
+  if (!prettyp_init()) return 0;
+  o_out = pari_outfile; /* save state */
+
+  /* Emit first: there may be lines before the prompt */
+  if (n) term_color(c_OUTPUT);
+  pariflush();
+  pari_outfile = GP_DATA->pp->file->file;
+  T.prettyp = f_TEX;
+  logfile = NULL;
+
+  /* history number */
+  if (n)
+  {
+    char s[128];
+
+    if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
+    {
+      char col1[80];
+      strcpy(col1, term_get_color(c_HIST));
+      sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
+              col1, n, term_get_color(c_OUTPUT));
+    }
+    else
+      sprintf(s, "\\%%%ld = ", n);
+    pariputs_opt(s);
+    if (o_logfile) {
+      switch (logstyle) {
+      case logstyle_plain:
+        fprintf(o_logfile, "%%%ld = ", n);
+        break;
+      case logstyle_color:
+        fprintf(o_logfile, "%s%%%ld = ", term_get_color(c_HIST), n);
+        /* Can't merge, term_get_color() uses statics...: */
+        fprintf(o_logfile, "%s", term_get_color(c_OUTPUT));
+        break;
+      case logstyle_TeX:
+        fprintf(o_logfile, "\\PARIout{%ld}", n);
+        break;
+      }
+    }
+  }
+  /* output */
+  gen_output(z, &T);
+
+  /* flush and restore */
+  prettyp_wait();
+  if (o_logfile) {
+    pari_outfile = o_logfile;
+    /* XXXX Maybe it is better to output in another format? */
+    if (logstyle == logstyle_TeX) {
+      T.TeXstyle |= TEXSTYLE_BREAK;
+      gen_output(z, &T);
+      pariputc('%');
+    } else
+	outbrute(z);
+    pariputc('\n'); pariflush();
+  }
+  logfile = o_logfile;
+  pari_outfile = o_out;
+  if (n) term_color(c_NONE);
+  return 1;
+}
+
+/* TEXMACS */
+
+static void
+texmacs_output(GEN z, long n)
+{
+  pariout_t T = *(GP_DATA->fmt); /* copy */
+  char *sz;
+
+  T.prettyp = f_TEX;
+  T.fieldw = 0;
+  sz = GENtostr0(z, &T, &gen_output);
+  printf("%clatex:", DATA_BEGIN);
+  if (n) printf("\\magenta\\%%%ld = ", n);
+  printf("$\\blue%s$%c", sz,DATA_END);
+  free(sz); fflush(stdout);
+}
+
+/* REGULAR */
+
+static void
+normal_output(GEN z, long n)
+{
+  long l = 0;
+  /* history number */
+  if (n)
+  {
+    char s[64];
+    term_color(c_HIST);
+    sprintf(s, "%%%ld = ", n);
+    pariputs_opt(s);
+    l = strlen(s);
+  }
+  /* output */
+  term_color(c_OUTPUT);
+  if (GP_DATA->lim_lines)
+    lim_lines_output(z, GP_DATA->fmt, l, GP_DATA->lim_lines);
+  else
+    gen_output(z, GP_DATA->fmt);
+  term_color(c_NONE); pariputc('\n');
+}
+
+void
+gp_output(GEN z, gp_data *G)
+{
+  if (G->flags & TEST) {
+    init80col(0);
+    gen_output(z, G->fmt); pariputc('\n');
+  }
+  else if (G->flags & TEXMACS)
+    texmacs_output(z, G->hist->total);
+  else if (G->fmt->prettyp != f_PRETTY || !tex2mail_output(z, G->hist->total))
+    normal_output(z, G->hist->total);
+  pariflush();
+}
