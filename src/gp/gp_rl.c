@@ -700,6 +700,11 @@ rl_long_help(int count, int key)
 void
 init_readline(void)
 {
+  static int init_done = 0;
+
+  if (init_done) return;
+  init_done = 1;
+
   /* Allow conditional parsing of the ~/.inputrc file. */
   rl_readline_name = "Pari-GP";
 

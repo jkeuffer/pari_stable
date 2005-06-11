@@ -34,7 +34,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "gp.h"
 
 #ifdef READLINE
-  int readline_init = 1;
 BEGINEXTERN
 #  if defined(__cplusplus) && defined(__SUNPRO_CC)
   extern char* readline(char*); /* bad prototype for readline() in readline.h */
@@ -608,14 +607,10 @@ sd_rl(const char *v, int flag)
 #ifdef READLINE
   ulong o_readline_state = readline_state;
 #endif
-  GEN res;
+  GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
 
-  res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
 #ifdef READLINE
-  if (!readline_init && *v && *v != '0') {
-    init_readline();
-    readline_init = 1;
-  }
+  if (*v && *v != '0') init_readline();
   if (o_readline_state != readline_state)
     (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", USE_READLINE);
 #endif
@@ -2755,10 +2750,7 @@ main(int argc, char **argv)
   INIT_SIG_on;
   pari_sig_init(gp_sighandler);
 #ifdef READLINE
-  if (GP_DATA->flags & USE_READLINE) {
-    init_readline();
-    readline_init = 1;
-  }
+  if (GP_DATA->flags & USE_READLINE) init_readline();
 #endif
   whatnow_fun = whatnow;
   default_exception_handler = gp_exception_handler;
