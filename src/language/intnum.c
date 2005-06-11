@@ -38,7 +38,7 @@ _gp_eval(GEN x, void *dat)
 {
   exprdat *E = (exprdat*)dat;
   E->ep->value = x;
-  return lisexpr_nobreak(E->ch);
+  return readexpr_nobreak(E->ch);
 }
 
 #if 0
@@ -48,7 +48,7 @@ _gp_eval2(GEN x, GEN y, void *dat)
   exprdoub *E = (exprdoub*)dat;
   E->epx->value = x;
   E->epy->value = y;
-  return lisexpr_nobreak(E->ch);
+  return readexpr_nobreak(E->ch);
 }
 #endif
 

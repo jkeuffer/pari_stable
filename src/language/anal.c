@@ -372,7 +372,7 @@ seq_init(char *t)
 
 /* Do not modify (analyseur,mark.start) */
 static GEN
-lisseq0(char *t, GEN (*f)(void))
+readseq0(char *t, GEN (*f)(void))
 {
   pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
@@ -393,7 +393,7 @@ lisseq0(char *t, GEN (*f)(void))
   return gerepileupto(av, z);
 }
 static GEN
-lisseq0_nobreak(char *t, GEN (*f)(void))
+readseq0_nobreak(char *t, GEN (*f)(void))
 {
   pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
@@ -412,7 +412,7 @@ lisseq0_nobreak(char *t, GEN (*f)(void))
 
 /* for sumiter: (void)readseq(t) */
 void
-lisseq_void(char *t)
+readseq_void(char *t)
 {
   const pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;
@@ -428,19 +428,19 @@ lisseq_void(char *t)
 
 /* filtered readexpr = remove blanks and comments */
 static GEN
-flisseq0(char *s, GEN (*f)(void))
+freadseq0(char *s, GEN (*f)(void))
 {
   char *t = filtre(s, (compatible == OLDALL));
-  GEN x = lisseq0(t, f);
+  GEN x = readseq0(t, f);
   free(t); return x;
 }
 
-GEN lisseq_nobreak(char *t)  { return lisseq0_nobreak(t, seq);  }
-GEN lisexpr_nobreak(char *t) { return lisseq0_nobreak(t, expr); }
-GEN readseq(char *t)  { return lisseq0(t, seq);  }
-GEN readexpr(char *t) { return lisseq0(t, expr); }
-GEN freadseq(char *s) { return flisseq0(s, seq); }
-GEN freadexpr(char *s){ return flisseq0(s, expr);}
+GEN readseq_nobreak(char *t)  { return readseq0_nobreak(t, seq);  }
+GEN readexpr_nobreak(char *t) { return readseq0_nobreak(t, expr); }
+GEN readseq(char *t)  { return readseq0(t, seq);  }
+GEN readexpr(char *t) { return readseq0(t, expr); }
+GEN freadseq(char *s) { return freadseq0(s, seq); }
+GEN freadexpr(char *s){ return freadseq0(s, expr);}
 
 /* check syntax, then execute */
 GEN
@@ -1630,7 +1630,7 @@ static GEN
 make_arg(GEN x) { return (x==gen_0)? x: freadseq(GSTR(x)); }
 
 static GEN
-fun_seq(char *t) /* lisseq0, simplified */
+fun_seq(char *t) /* readseq0, simplified */
 {
   pari_sp av = top - avma;
   char *olds = analyseur, *olde = mark.start;

@@ -96,9 +96,9 @@ long   loop_break(void);
 long   did_break(void);
 GEN    gp_history(gp_hist *H, long p, char *old, char *entry);
 GEN    set_hist_entry(gp_hist *H, GEN x);
-void   lisseq_void(char *t);
-GEN    lisseq_nobreak(char *t);
-GEN    lisexpr_nobreak(char *t);
+void   readseq_void(char *t);
+GEN    readseq_nobreak(char *t);
+GEN    readexpr_nobreak(char *t);
 
 char*  get_analyseur(void);
 void   set_analyseur(char *s);

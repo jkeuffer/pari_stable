@@ -34,7 +34,7 @@ forpari(entree *ep, GEN a, GEN b, char *ch)
   push_val(ep, a);
   while (gcmp(a,b) <= 0)
   {
-    pari_sp av1=avma; lisseq_void(ch); avma=av1;
+    pari_sp av1=avma; readseq_void(ch); avma=av1;
     if (loop_break()) break;
     a = (GEN) ep->value; a = typ(a) == t_INT? addis(a, 1): gadd(a,gen_1);
     if (low_stack(lim, stack_lim(av,1)))
@@ -70,7 +70,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   i = 0;
   while (cmp(a,b) <= 0)
   {
-    pari_sp av1=avma; lisseq_void(ch); avma=av1;
+    pari_sp av1=avma; readseq_void(ch); avma=av1;
     if (loop_break()) break;
     if (v)
     {
@@ -159,7 +159,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   avma = av; push_val(ep, (GEN)prime);
   while (prime[2] < b)
   {
-    lisseq_void(ch); if (loop_break()) break;
+    readseq_void(ch); if (loop_break()) break;
     if (ep->value == prime)
       NEXT_PRIME_VIADIFF(prime[2], d);
     else
@@ -168,7 +168,7 @@ forprime(entree *ep, GEN ga, GEN gb, char *ch)
   }
   /* if b = P --> *d = 0 now and the loop wouldn't end if it read 'while
    * (prime[2] <= b)' */
-  if (prime[2] == b) { lisseq_void(ch); (void)loop_break(); avma = av; }
+  if (prime[2] == b) { readseq_void(ch); (void)loop_break(); avma = av; }
   pop_val(ep);
 }
 
@@ -183,7 +183,7 @@ fordiv(GEN a, entree *ep, char *ch)
   for (i=1; i<l; i++)
   {
     ep->value = (void*) t[i];
-    lisseq_void(ch); if (loop_break()) break;
+    readseq_void(ch); if (loop_break()) break;
     avma = av2;
   }
   pop_val(ep); avma=av;
@@ -455,7 +455,7 @@ forvec(entree *ep, GEN x, char *c, long flag)
   GEN v = forvec_start(x, flag, &D, &next);
   push_val(ep, v);
   while (v) {
-    pari_sp av2 = avma; lisseq_void(c); avma = av2;
+    pari_sp av2 = avma; readseq_void(c); avma = av2;
     if (loop_break()) break;
     v = next(D, v);
   }
@@ -484,7 +484,7 @@ somme(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = lisexpr_nobreak(ch);
+    p1 = readexpr_nobreak(ch);
     x=gadd(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -538,7 +538,7 @@ divsum(GEN num, entree *ep, char *ch)
   for (i=1; i<l; i++)
   {
     ep->value = (void*)t[i];
-    y = gadd(y, lisseq_nobreak(ch));
+    y = gadd(y, readseq_nobreak(ch));
   }
   pop_val(ep); return gerepileupto(av,y);
 }
@@ -565,7 +565,7 @@ produit(entree *ep, GEN a, GEN b, char *ch, GEN x)
   push_val(ep, a);
   for(;;)
   {
-    p1 = lisexpr_nobreak(ch);
+    p1 = readexpr_nobreak(ch);
     x = gmul(x,p1); if (cmpii(a,b) >= 0) break;
     a = incloop(a);
     if (low_stack(lim, stack_lim(av,1)))
@@ -781,7 +781,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
   y = cgetg(m+1,t_VEC); push_val(ep, c);
   for (i=1; i<=m; i++)
   {
-    c[2] = i; p1 = lisseq_nobreak(ch);
+    c[2] = i; p1 = readseq_nobreak(ch);
     y[i] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
   }
   pop_val(ep); return y;
@@ -799,7 +799,7 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
   if (m < 0)  err(talker,"negative number of components in vector");
   if (!ep || !ch) return vecsmall_const(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
-  for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(lisseq_nobreak(ch)); }
+  for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(readseq_nobreak(ch)); }
   pop_val(ep); return y;
 }
 
@@ -834,7 +834,7 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
     c2[2] = i; z = cgetg(n+1,t_COL); y[i] = (long)z;
     for (j=1; j<=n; j++)
     {
-      c1[2] = j; p1 = lisseq_nobreak(ch);
+      c1[2] = j; p1 = readseq_nobreak(ch);
       z[j] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
     }
   }
