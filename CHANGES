@@ -110,7 +110,8 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
    14- add GC in parsing loop for huge input vectors [ needs roughly 2 or 3
        times less memory ]
    15- implement pari_is_dir() using stat() instead of opendir()
-   16- moved defaults from gp/gp.c to language/default.c
+   16- moved defaults from gp/gp.c to language/default.c [ -> into libpari ]
+   17- moved input_loop to language/es.c [-> into libpari ]
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

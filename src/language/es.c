@@ -184,6 +184,36 @@ readGEN(FILE *fi)
   return NULL;
 }
 
+/* Read a "complete line" and filter it. Return: 0 if EOF, 1 otherwise */
+int
+input_loop(filtre_t *F, input_method *IM)
+{
+  Buffer *b = (Buffer*)F->buf;
+  char *to_read, *s = b->buf;
+
+  /* read first line */
+  if (! (to_read = IM->getline(&s,1, IM, F)) ) { check_filtre(F); return 0; }
+
+  /* buffer is not empty, init filter */
+  F->in_string = 0;
+  F->more_input= 0;
+  F->wait_for_brace = 0;
+  for(;;)
+  {
+    F->s = to_read;
+    F->t = s;
+    (void)filtre0(F);
+    if (IM->free) free(to_read);
+    if (! F->more_input) break;
+
+    /* read continuation line */
+    s = F->end;
+    to_read = IM->getline(&s,0, IM, F);
+    if (!to_read) break;
+  }
+  return 1;
+}
+
 /********************************************************************/
 /**                                                                **/
 /**                  GENERAL PURPOSE PRINTING                      **/

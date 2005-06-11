@@ -20,6 +20,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
+#include "../language/anal.h"
+#include "gp.h"
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -27,31 +29,151 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #    include <process.h>
 #  endif
 #endif
-#include "../language/anal.h"
-#include "gp.h"
 
 #ifdef READLINE
 BEGINEXTERN
-#  if defined(__cplusplus) && defined(__SUNPRO_CC)
-  extern char* readline(char*); /* bad prototype for readline() in readline.h */
+#  ifdef READLINE_LIBRARY
+#    include <readline.h>
 #  else
-#   ifdef READLINE_LIBRARY
-#     include <readline.h>
-#   else
-#     include <readline/readline.h>
-#   endif
+#    include <readline/readline.h>
 #  endif
 ENDEXTERN
 #endif
 
-static int handle_C_C = 0, gpsilent = 0;
-static int tm_is_waiting = 0, tm_did_complete = 0;
-
-#define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
-static stack *bufstack = NULL;
-
 #define skip_space(s) while (isspace((int)*s)) s++
 #define skip_alpha(s) while (isalpha((int)*s)) s++
+
+/* naive grow-arrays: pari stack is a priori not available yet. Don't use it */
+
+typedef struct {
+  void **v;
+  long len; /* len cells allocated */
+  long n; /* first n cells occupied */
+} growarray;
+
+void
+grow_append(growarray *A, void *e)
+{
+  if (A->n == A->len-1)
+  {
+    A->len <<= 1;
+    A->v = (void**)gprealloc(A->v, A->len * sizeof(void*));
+  }
+  A->v[A->n++] = e;
+}
+
+void
+grow_init(growarray *A)
+{
+  A->len = 4;
+  A->n   = 0;
+  A->v   = (void**)gpmalloc(A->len * sizeof(void*));
+}
+
+/*******************************************************************/
+/**                                                               **/
+/**                    TEXMACS-SPECIFIC STUFF                     **/
+/**                                                               **/
+/*******************************************************************/
+static int tm_is_waiting = 0, tm_did_complete = 0;
+
+/* tell TeXmacs GP will start outputing data */
+static void
+tm_start_output(void)
+{
+  if (!tm_is_waiting) { printf("%cverbatim:",DATA_BEGIN); fflush(stdout); }
+  tm_is_waiting = 1;
+}
+/* tell TeXmacs GP is done and is waiting for new data */
+static void
+tm_end_output(void)
+{
+  if (tm_is_waiting) { printf("%c", DATA_END); fflush(stdout); }
+  tm_is_waiting = 0;
+}
+static char *
+fgets_texmacs(char *s, int n, FILE *f)
+{
+  if (!tm_did_complete)
+  {
+    tm_start_output(); tm_end_output(); /* tell TeXmacs we need input */
+  }
+  return fgets(s,n,f);
+}
+
+#ifdef READLINE
+typedef struct {
+  char *cmd;
+  long n; /* number of args */
+  char **v; /* args */
+} tm_cmd;
+
+static void
+parse_texmacs_command(tm_cmd *c, const char *ch)
+{
+  long l = strlen(ch);
+  char *t, *s = (char*)ch, *send = s+l-1;
+  growarray A;
+
+  if (*s != DATA_BEGIN || *send-- != DATA_END)
+    err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
+  s++;
+  if (strncmp(s, "special:", 8)) err(talker, "unrecognized TeXmacs command");
+  s += 8;
+  if (*s != '(' || *send-- != ')')
+    err(talker, "missing enclosing parentheses for TeXmacs command");
+  s++; t = s;
+  skip_alpha(s);
+  c->cmd = pari_strndup(t, s - t);
+  grow_init(&A);
+  for (c->n = 0; s <= send; c->n++)
+  {
+    char *u = gpmalloc(strlen(s) + 1);
+    skip_space(s);
+    if (*s == '"') s = readstring(s, u);
+    else
+    { /* read integer */
+      t = s;
+      while (isdigit((int)*s)) s++;
+      strncpy(u, t, s - t); u[s-t] = 0;
+    }
+    grow_append(&A, (void*)u);
+  }
+  c->v = (char**)A.v;
+}
+
+static void
+free_cmd(tm_cmd *c)
+{
+  while (c->n--) free((void*)c->v[c->n]);
+  free((void*)c->v);
+}
+
+static void
+handle_texmacs_command(const char *s)
+{
+  tm_cmd c;
+  parse_texmacs_command(&c, s);
+  if (strcmp(c.cmd, "complete"))
+    err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
+  if (c.n != 2) 
+    err(talker,"was expecting 2 arguments for Texmacs_stdin command");
+  texmacs_completion(c.v[0], atol(c.v[1]));
+  free_cmd(&c);
+  tm_did_complete = 1;
+}
+#else
+static void
+handle_texmacs_command(const char *s) { err(talker, "readline not available"); }
+#endif
+
+/*******************************************************************/
+/**                                                               **/
+/**                            GP                                 **/
+/**                                                               **/
+/*******************************************************************/
+#define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
+static stack *bufstack = NULL;
 
 static void
 usage(char *s)
@@ -107,22 +229,6 @@ gp_preinit(void)
   init_pp(GP_DATA);
   strcpy(Prompt,      DFT_PROMPT); GP_DATA->prompt = Prompt;
   strcpy(Prompt_cont, CONTPROMPT); GP_DATA->prompt_cont = Prompt_cont;
-}
-
-/* tell TeXmacs GP will start outputing data */
-static void
-tm_start_output(void)
-{
-  if (!tm_is_waiting) { printf("%cverbatim:",DATA_BEGIN); fflush(stdout); }
-  tm_is_waiting = 1;
-}
-
-/* tell TeXmacs GP is done and is waiting for new data */
-static void
-tm_end_output(void)
-{
-  if (tm_is_waiting) { printf("%c", DATA_END); fflush(stdout); }
-  tm_is_waiting = 0;
 }
 
 Buffer *
@@ -1090,31 +1196,6 @@ next_expr(char *t)
   }
 }
 
-typedef struct {
-  void **v;
-  long len; /* len cells allocated */
-  long n; /* first n cells occupied */
-} growarray;
-
-void
-grow_append(growarray *A, void *e)
-{
-  if (A->n == A->len-1)
-  {
-    A->len <<= 1;
-    A->v = (void**)gprealloc(A->v, A->len * sizeof(void*));
-  }
-  A->v[A->n++] = e;
-}
-
-void
-grow_init(growarray *A)
-{
-  A->len = 4;
-  A->n   = 0;
-  A->v   = (void**)gpmalloc(A->len * sizeof(void*));
-}
-
 static void
 gp_initrc(growarray *A, char *path)
 {
@@ -1236,16 +1317,6 @@ gp_sighandler(int sig)
   err(bugparier, msg);
 }
 
-static char *
-fgets_texmacs(char *s, int n, FILE *f)
-{
-  if (!tm_did_complete)
-  {
-    tm_start_output(); tm_end_output(); /* tell TeXmacs we need input */
-  }
-  return fgets(s,n,f);
-}
-
 /* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
 static char *
 file_input(char **s0, int junk, input_method *IM, filtre_t *F)
@@ -1276,92 +1347,6 @@ file_input(char **s0, int junk, input_method *IM, filtre_t *F)
     used += l;
   }
 }
-
-/* Read a "complete line" and filter it. Return: 0 if EOF, 1 otherwise */
-int
-input_loop(filtre_t *F, input_method *IM)
-{
-  Buffer *b = (Buffer*)F->buf;
-  char *to_read, *s = b->buf;
-
-  /* read first line */
-  handle_C_C = 0;
-  while (! (to_read = IM->getline(&s,1, IM, F)) )
-  { /* EOF */
-    if (!handle_C_C) { check_filtre(F); return 0; }
-    /* received ^C in getline and coming back from break_loop();
-     * retry (as if "\n" were input) */
-    handle_C_C = 0;
-  }
-
-  /* buffer is not empty, init filter */
-  F->in_string = 0;
-  F->more_input= 0;
-  F->wait_for_brace = 0;
-  for(;;)
-  {
-    F->s = to_read;
-    F->t = s;
-    (void)filtre0(F);
-    if (IM->free) free(to_read);
-    if (! F->more_input) break;
-
-    /* read continuation line */
-    s = F->end;
-    to_read = IM->getline(&s,0, IM, F);
-    if (!to_read) break;
-  }
-  return 1;
-}
-
-#ifdef READLINE
-typedef struct {
-  char *cmd;
-  long n; /* number of args */
-  char **v; /* args */
-} tm_cmd;
-
-static void
-parse_texmacs_command(tm_cmd *c, char *ch)
-{
-  long l = strlen(ch);
-  char *t, *s = ch, *send = s+l-1;
-  growarray A;
-
-  if (*s != DATA_BEGIN || *send-- != DATA_END)
-    err(talker, "missing DATA_[BEGIN | END] in TeXmacs command");
-  s++;
-  if (strncmp(s, "special:", 8)) err(talker, "unrecognized TeXmacs command");
-  s += 8;
-  if (*s != '(' || *send-- != ')')
-    err(talker, "missing enclosing parentheses for TeXmacs command");
-  s++; t = s;
-  skip_alpha(s);
-  c->cmd = pari_strndup(t, s - t);
-  grow_init(&A);
-  for (c->n = 0; s <= send; c->n++)
-  {
-    char *u = gpmalloc(strlen(s) + 1);
-    skip_space(s);
-    if (*s == '"') s = readstring(s, u);
-    else
-    { /* read integer */
-      t = s;
-      while (isdigit((int)*s)) s++;
-      strncpy(u, t, s - t); u[s-t] = 0;
-    }
-    grow_append(&A, (void*)u);
-  }
-  c->v = (char**)A.v;
-}
-
-static void
-free_cmd(tm_cmd *c)
-{
-  while (c->n--) free((void*)c->v[c->n]);
-  free((void*)c->v);
-}
-#endif
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
 static int
@@ -1403,23 +1388,9 @@ get_line_from_file(char *PROMPT, filtre_t *F, FILE *file)
   {
     tm_did_complete = 0;
     if (Texmacs_stdin && *s == DATA_BEGIN)
-    {
-#ifdef READLINE
-      tm_cmd c;
-      parse_texmacs_command(&c, s);
-      if (strcmp(c.cmd, "complete"))
-        err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
-      if (c.n != 2) 
-        err(talker,"was expecting 2 arguments for Texmacs_stdin command");
-      texmacs_completion(c.v[0], atol(c.v[1]));
-      free_cmd(&c); *s = 0;
-      tm_did_complete = 1;
-#else
-      err(talker, "readline not available");
-#endif
-      return 1;
-    }
-    tm_start_output();
+    { handle_texmacs_command(s); *s = 0; }
+    else
+      tm_start_output();
   }
   return 1;
 }
@@ -1513,12 +1484,6 @@ prune_history(gp_hist *H, long loc)
 }
 
 static int
-silent(void)
-{
-  if (gpsilent) return 1;
-  { char c = get_analyseur()[1]; return separator(c); }
-}
-static int
 is_silent(char *s) { char c = s[strlen(s) - 1]; return separator(c); }
 
 /* If there are other buffers open (bufstack != NULL), we are doing an
@@ -1566,7 +1531,6 @@ gp_main_loop(int ismain)
 #if defined(_WIN32) || defined(__CYGWIN32__)
       win32ctrlc = 0;
 #endif
-      gpsilent = is_silent(b->buf);
       TIMERstart(GP_DATA->T);
     }
     avma = top - av;
@@ -1581,7 +1545,7 @@ gp_main_loop(int ismain)
 
     if (GP_DATA->flags & SIMPLIFY) z = simplify_i(z);
     z = set_hist_entry(H, z);
-    if (!gpsilent) gp_output(z, GP_DATA);
+    if (! is_silent(b->buf) ) gp_output(z, GP_DATA);
   }
 }
 
@@ -1611,8 +1575,7 @@ extern0(char *s)
 GEN
 default0(char *a, char *b, long flag)
 {
-  return setdefault(a,b, flag? d_RETURN
-                             : silent()? d_SILENT: d_ACKNOWLEDGE);
+  return setdefault(a,b, flag? d_RETURN: d_ACKNOWLEDGE);
 }
 
 GEN
@@ -1689,7 +1652,7 @@ break_loop(long numerr)
 #endif
     if (check_meta(b->buf))
     { /* break loop initiated by ^C? Empty input --> continue computation */
-      if (numerr == siginter && *(b->buf) == 0) { handle_C_C=go_on=1; break; }
+      if (numerr == siginter && *(b->buf) == 0) { go_on=1; break; }
       continue;
     }
     x = readseq(b->buf);
