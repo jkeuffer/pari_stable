@@ -179,24 +179,6 @@ enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 void print_prefixed_text(char *s, char *prefix, char *str);
 #define print_text(s) print_prefixed_text((s),NULL,NULL);
 
-/* infiles */
-#define mf_IN    1
-#define mf_PIPE  2
-#define mf_FALSE 4
-#define mf_OUT   8
-#define mf_PERM 16
-#define mf_TEST 32
-
-/* for filtre */
-#define separator(c)  ((c)==';')
-
-#define MAX_PROMPT_LEN 128
-#define DFT_PROMPT "? "
-#define BREAK_LOOP_PROMPT "break> "
-#define COMMENTPROMPT "comment> "
-#define CONTPROMPT ""
-#define DFT_INPROMPT ""
-
 /* GP output && output format */
 enum { f_RAW, f_PRETTYMAT, f_PRETTYOLD, f_PRETTY, f_TEX };
 

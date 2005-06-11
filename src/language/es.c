@@ -43,7 +43,7 @@ hit_return(void)
 #define LBRACE '{'
 #define RBRACE '}'
 /* Filter F->s into F->t */
-char *
+static char *
 filtre0(filtre_t *F)
 {
   const int downcase = F->downcase;
@@ -205,7 +205,6 @@ readGEN(FILE *fi)
 
   IM.file = fi;
   IM.fgets= &fgets;
-  IM.prompt = NULL;
   IM.getline= &file_input;
   IM.free = 0;
   (void)input_loop(&F,&IM);

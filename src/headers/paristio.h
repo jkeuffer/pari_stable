@@ -54,6 +54,10 @@ typedef struct pariFILE {
   struct pariFILE* prev;
   struct pariFILE* next;
 } pariFILE;
+/* pariFILE.type */
+enum { mf_IN  = 1, mf_PIPE = 2, mf_FALSE = 4,
+       mf_OUT = 8, mf_PERM = 16, mf_TEST = 32 };
+
 /* Common global variables: */
 
 extern PariOUT *pariOut, *pariErr;

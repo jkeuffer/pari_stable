@@ -442,6 +442,25 @@ GEN readexpr(char *t) { return readseq0(t, expr); }
 GEN freadseq(char *s) { return freadseq0(s, seq); }
 GEN freadexpr(char *s){ return freadseq0(s, expr);}
 
+static void
+unused_chars(char *c, int strict)
+{
+  long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
+  char *s;
+  if (strict) err(talker2,"unused characters", analyseur, c);
+  if ((long)strlen(analyseur) > n)
+  {
+    s = gpmalloc(n + 1);
+    n -= 5;
+    (void)strncpy(s,analyseur, n);
+    strcpy(s + n, "[+++]");
+  }
+  else
+    s = pari_strdup(analyseur);
+  err(warner, "unused characters: %s", s);
+  free(s);
+}
+
 /* check syntax, then execute */
 GEN
 gpreadseq(char *c, int strict)
@@ -449,24 +468,7 @@ gpreadseq(char *c, int strict)
   char *olds = analyseur, *olde = mark.start;
   GEN z;
 
-  seq_init(c); skipseq();
-  if (*analyseur)
-  {
-    long n = 2 * term_width() - (17+19+1); /* Warning + unused... + . */
-    char *s;
-    if (strict) err(talker2,"unused characters", analyseur, c);
-    if ((long)strlen(analyseur) > n)
-    {
-      s = gpmalloc(n + 1);
-      n -= 5;
-      (void)strncpy(s,analyseur, n);
-      strcpy(s + n, "[+++]");
-    }
-    else
-      s = pari_strdup(analyseur);
-    err(warner, "unused characters: %s", s);
-    free(s);
-  }
+  seq_init(c); skipseq(); if (*analyseur) unused_chars(c, strict);
   seq_init(c); z = seq();
   analyseur = olds; mark.start = olde;
   if (br_status)
@@ -782,6 +784,8 @@ type0(GEN x)
 /*                              PARSER                             */
 /*                                                                 */
 /*******************************************************************/
+#define separator(c)  ((c)==';')
+
 static void
 allocate_loop_err(void) {
   err(talker2,"can't allow allocatemem() in loops", analyseur, mark.start);

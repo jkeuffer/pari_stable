@@ -351,8 +351,6 @@ int    pop_entree_bloc(entree *ep, long loc);
 int    pop_val_if_newer(entree *ep, long loc);
 
 /* Interfaces (GP, etc.) */
-void  aide(char *s, int flag);
-void  err_clean(void);
 void  errcontext(char *msg, char *s, char *entry);
 void  free_graph(void);
 GEN   geni(void);
@@ -471,6 +469,7 @@ typedef struct Buffer {
 } Buffer;
 Buffer *new_buffer(void);
 void delete_buffer(Buffer *b);
+void fix_buffer(Buffer *b, long newlbuf);
 
 typedef struct {
   char *s, *t, *end; /* source, target, last char read */
@@ -478,12 +477,10 @@ typedef struct {
   Buffer *buf;
 } filtre_t;
 void init_filtre(filtre_t *F, Buffer *buf);
+char *filtre(char *s, int flag);
+void check_filtre(filtre_t *F);
 
-void init_hist(gp_data *D, size_t l, ulong total);
-void init_path(gp_data *D);
-char *init_help();
-pariout_t *init_fmt();
-void init_pp(gp_data *D);
+gp_data *default_gp_data(void);
 char *color_prompt(char *prompt);
 GEN  gp_history(gp_hist *H, long p, char *old, char *entry);
 GEN  set_hist_entry(gp_hist *H, GEN x);
@@ -493,19 +490,16 @@ void gp_expand_path(gp_path *p);
 const char *pari_default_path();
 char *expand_prompt(char *prompt, filtre_t *F);
 
-char *filtre0(filtre_t *F);
-char *filtre(char *s, int flag);
-void check_filtre(filtre_t *F);
-
 typedef struct input_method {
-  int free;
-  char *prompt, *prompt_cont;
-  FILE *file;
+/* mandatory */
   char * (*fgets)(char *,int,FILE*);
   char * (*getline)(char**, int f, struct input_method*, filtre_t *F);
-  void (*onempty)(void);
+  int free; /* boolean: must we free the output of getline() ? */
+/* for interactive methods */
+  char *prompt, *prompt_cont;
+/* for non-interactive methods */
+  FILE *file;
 } input_method;
 
-void fix_buffer(Buffer *b, long newlbuf);
 int input_loop(filtre_t *F, input_method *IM);
 char *file_input(char **s0, int junk, input_method *IM, filtre_t *F);

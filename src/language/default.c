@@ -15,6 +15,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
+#include "../gp/gp.h"
+
 #ifdef HAS_STRFTIME
 #  include <time.h>
 #endif
@@ -27,6 +29,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #else
 #  define GET_SEP_SIZE 128
 #endif
+
+#define MAX_PROMPT_LEN 128
 
 /* Return all chars, up to next separator
  * [as strtok but must handle verbatim character string] */
@@ -119,7 +123,7 @@ get_uint(const char *s)
 /*                            DEFAULTS                              */
 /*                                                                  */
 /********************************************************************/
-void
+static void
 init_hist(gp_data *D, size_t l, ulong total)
 {
   gp_hist *H = D->hist;
@@ -129,7 +133,7 @@ init_hist(gp_data *D, size_t l, ulong total)
   memset(H->res,0, l * sizeof(GEN));
 }
 
-void
+static void
 init_path(gp_data *D)
 {
   gp_path *path = D->path;
@@ -137,19 +141,19 @@ init_path(gp_data *D)
   path->dirs = NULL;
 }
 
-char *
-init_help()
+static void
+init_help(gp_data *D)
 {
   char *h = os_getenv("GPHELP");
 # ifdef GPHELP
   if (!h) h = GPHELP;
 # endif
   if (h) h = pari_strdup(h);
-  return h;
+  D->help = h;
 }
 
-pariout_t *
-init_fmt()
+static void
+init_fmt(gp_data *D)
 {
   pariout_t *f = &DFLT_OUTPUT;
   f->prettyp= f_PRETTYMAT;
@@ -158,11 +162,11 @@ init_fmt()
 #else
   f->sigd     = 28;
 #endif
-  return f;
+  D->fmt = f;
 }
 
 static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";
-void
+static void
 init_pp(gp_data *D)
 {
   gp_pp *p = D->pp;
@@ -903,3 +907,33 @@ setdefault(const char *s, const char *v, int flag)
   return NULL; /* not reached */
 }
 
+gp_data *
+default_gp_data(void)
+{
+  static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
+  static gp_data __GP_DATA;
+  static gp_hist __HIST;
+  static gp_pp   __PP;
+  static gp_path __PATH;
+  static pari_timer __T;
+
+#ifdef READLINE
+  GP_DATA->flags = (STRICTMATCH | SIMPLIFY | USE_READLINE);
+#else
+  GP_DATA->flags = (STRICTMATCH | SIMPLIFY);
+#endif
+  GP_DATA->primelimit = 500000;
+  GP_DATA->lim_lines = 0;
+  GP_DATA->T    = &__T;
+  GP_DATA->hist = &__HIST;
+  GP_DATA->pp   = &__PP;
+  GP_DATA->path = &__PATH;
+  init_help(GP_DATA);
+  init_fmt(GP_DATA);
+  init_hist(GP_DATA, 5000, 0);
+  init_path(GP_DATA);
+  init_pp(GP_DATA);
+  strcpy(Prompt,      DFT_PROMPT); GP_DATA->prompt = Prompt;
+  strcpy(Prompt_cont, CONTPROMPT); GP_DATA->prompt_cont = Prompt_cont;
+  return &__GP_DATA;
+}

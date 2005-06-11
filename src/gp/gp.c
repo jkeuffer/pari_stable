@@ -197,38 +197,13 @@ usage(char *s)
 static void
 gp_preinit(void)
 {
-  static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
-  static gp_data __GP_DATA;
-  static gp_hist __HIST;
-  static gp_pp   __PP;
-  static gp_path __PATH;
-  static pari_timer __T;
   long i;
 
   for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
   bot = (pari_sp)0;
   top = (pari_sp)(1000000*sizeof(long));
 
-  GP_DATA = &__GP_DATA;
-
-#ifdef READLINE
-  GP_DATA->flags = (STRICTMATCH | SIMPLIFY | USE_READLINE);
-#else
-  GP_DATA->flags = (STRICTMATCH | SIMPLIFY);
-#endif
-  GP_DATA->primelimit = 500000;
-  GP_DATA->lim_lines = 0;
-  GP_DATA->T    = &__T;
-  GP_DATA->hist = &__HIST;
-  GP_DATA->pp   = &__PP;
-  GP_DATA->path = &__PATH;
-  GP_DATA->help = init_help();
-  GP_DATA->fmt  = init_fmt();
-  init_hist(GP_DATA, 5000, 0);
-  init_path(GP_DATA);
-  init_pp(GP_DATA);
-  strcpy(Prompt,      DFT_PROMPT); GP_DATA->prompt = Prompt;
-  strcpy(Prompt_cont, CONTPROMPT); GP_DATA->prompt_cont = Prompt_cont;
+  GP_DATA = default_gp_data();
 }
 
 static void
@@ -1430,7 +1405,7 @@ prune_history(gp_hist *H, long loc)
 }
 
 static int
-is_silent(char *s) { char c = s[strlen(s) - 1]; return separator(c); }
+is_silent(char *s) { return s[strlen(s) - 1] == ';'; }
 
 /* If there are other buffers open (bufstack != NULL), we are doing an
  * immediate read (with read, extern...) */
