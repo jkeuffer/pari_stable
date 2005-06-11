@@ -93,7 +93,7 @@ void *dlopen(const char *path, int mode)
         if (!make_private_module_public)
         {
           _dyld_func_lookup("__dyld_NSMakePrivateModulePublic",
-        (void*)&make_private_module_public);
+        (void**)&make_private_module_public);
         }
         make_private_module_public((NSModule)module);
       }
