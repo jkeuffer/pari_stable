@@ -134,12 +134,16 @@ case "$osname" in
 esac
 
 mydlldflags=`echo "$DLLDFLAGS" | \
-   sed -e "s/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//" \
-       -e "s!\\$(CFLAGS)!$CFLAGS!"`
+   sed -e 's/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//' \
+       -e 's!\$(CFLAGS)'"!$CFLAGS!" \
+       -e 's/--out-implib=\$(LIBPARI_SO)\$(_A),\?//'`
 
 __LIBS=$LIBS
 if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
-myextradlldflags=`eval echo $EXTRADLLDFLAGS`
+case $osname in
+cygwin) myextradlldflags="-L$libdir -lpari.dll";;
+*)      myextradlldflags=`eval echo $EXTRADLLDFLAGS`;;
+esac;
 LIBS=$__LIBS
 
 myincludedir=`echo "$includedir" | sed -e 's/\/pari\/*$//'`
