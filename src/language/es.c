@@ -177,7 +177,7 @@ init_filtre(filtre_t *F, Buffer *buf)
 /**                        INPUT METHODS                           **/
 /**                                                                **/
 /********************************************************************/
-
+/* create */
 Buffer *
 new_buffer(void)
 {
@@ -186,11 +186,19 @@ new_buffer(void)
   b->buf = gpmalloc(b->len);
   return b;
 }
+/* delete */
 void
 delete_buffer(Buffer *b)
 {
   if (!b) return;
   free((void*)b->buf); free((void*)b);
+}
+/* resize */
+void
+fix_buffer(Buffer *b, long newlbuf)
+{
+  b->len = newlbuf;
+  b->buf = gprealloc(b->buf, b->len);
 }
 
 GEN

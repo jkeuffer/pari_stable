@@ -169,42 +169,11 @@ handle_texmacs_command(const char *s) { err(talker, "readline not available"); }
 
 /*******************************************************************/
 /**                                                               **/
-/**                            GP                                 **/
+/**                          BUFFERS                              **/
 /**                                                               **/
 /*******************************************************************/
 #define current_buffer (bufstack?((Buffer*)(bufstack->value)):NULL)
 static stack *bufstack = NULL;
-
-static void
-usage(char *s)
-{
-  printf("### Usage: %s [options] [GP files]\n", s);
-  printf("Options are:\n");
-  printf("\t[-f,--fast]\tFaststart: do not read .gprc\n");
-  printf("\t[-q,--quiet]\tQuiet mode: do not print banner and history numbers\n");
-  printf("\t[-p,--primelimit primelimit]\n\t\t\tPrecalculate primes up to the limit\n");
-  printf("\t[-s,--stacksize stacksize]\n\t\t\tStart with the PARI stack of given size (in bytes)\n");
-  printf("\t[--emacs]\tRun as if in Emacs shell\n");
-  printf("\t[--help]\tPrint this message\n");
-  printf("\t[--test]\tTest mode. No history, wrap long lines (bench only)\n");
-  printf("\t[--texmacs]\tRun as if using TeXmacs frontend\n");
-  printf("\t[--version]\tOutput version info and exit\n");
-  printf("\t[--version-short]\tOutput version number and exit\n\n");
-  exit(0);
-}
-
-/* must be called BEFORE pari_init() */
-static void
-gp_preinit(void)
-{
-  long i;
-
-  for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
-  bot = (pari_sp)0;
-  top = (pari_sp)(1000000*sizeof(long));
-
-  GP_DATA = default_gp_data();
-}
 
 static void
 pop_buffer(void)
@@ -339,6 +308,24 @@ center(char *s)
   while (*s) *u++ = *s++;
   *u++ = '\n'; *u = 0;
   pariputs(buf); free(buf);
+}
+
+static void
+usage(char *s)
+{
+  printf("### Usage: %s [options] [GP files]\n", s);
+  printf("Options are:\n");
+  printf("\t[-f,--fast]\tFaststart: do not read .gprc\n");
+  printf("\t[-q,--quiet]\tQuiet mode: do not print banner and history numbers\n");
+  printf("\t[-p,--primelimit primelimit]\n\t\t\tPrecalculate primes up to the limit\n");
+  printf("\t[-s,--stacksize stacksize]\n\t\t\tStart with the PARI stack of given size (in bytes)\n");
+  printf("\t[--emacs]\tRun as if in Emacs shell\n");
+  printf("\t[--help]\tPrint this message\n");
+  printf("\t[--test]\tTest mode. No history, wrap long lines (bench only)\n");
+  printf("\t[--texmacs]\tRun as if using TeXmacs frontend\n");
+  printf("\t[--version]\tOutput version info and exit\n");
+  printf("\t[--version-short]\tOutput version number and exit\n\n");
+  exit(0);
 }
 
 static void
@@ -704,10 +691,9 @@ aide(char *s, int flag)
 
 /********************************************************************/
 /**                                                                **/
-/**                         METACOMMANDS                           **/
+/**                         GP HEADER                              **/
 /**                                                                **/
 /********************************************************************/
-
 static char *
 what_readline()
 {
@@ -813,12 +799,11 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
   pariputsf("parisize = %lu, primelimit = %lu\n", top-bot, GP_DATA->primelimit);
 }
 
-void
-fix_buffer(Buffer *b, long newlbuf)
-{
-  b->len = newlbuf;
-  b->buf = gprealloc(b->buf, b->len);
-}
+/********************************************************************/
+/**                                                                **/
+/**                         METACOMMANDS                           **/
+/**                                                                **/
+/********************************************************************/
 
 void
 gp_quit(void)
@@ -973,6 +958,7 @@ escape(char *tch)
   escape0(tch);
   set_analyseur(old);
 }
+
 /********************************************************************/
 /*                                                                  */
 /*                              GPRC                                */
@@ -1092,18 +1078,15 @@ read_version(char **s)
 static int
 get_preproc_value(char **s)
 {
-  if (!strncmp(*s,"EMACS",5))
-  {
+  if (!strncmp(*s,"EMACS",5)) {
     *s += 5;
     return GP_DATA->flags & (EMACS|TEXMACS);
   }
-  if (!strncmp(*s,"READL",5))
-  {
+  if (!strncmp(*s,"READL",5)) {
     *s += 5;
     return GP_DATA->flags & USE_READLINE;
   }
-  if (!strncmp(*s,"VERSION",7))
-  {
+  if (!strncmp(*s,"VERSION",7)) {
     int less = 0, orequal = 0;
     long d;
     *s += 7;
@@ -1708,6 +1691,19 @@ read_opt(growarray *A, long argc, char **argv)
   testuint(s, (ulong*)&top);
   if (GP_DATA->flags & (EMACS|TEXMACS|TEST)) disable_color = 1;
   pari_outfile = stdout;
+}
+
+/* must be called BEFORE pari_init() */
+static void
+gp_preinit(void)
+{
+  long i;
+
+  for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
+  bot = (pari_sp)0;
+  top = (pari_sp)(1000000*sizeof(long));
+
+  GP_DATA = default_gp_data();
 }
 
 #ifdef WINCE
