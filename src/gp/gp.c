@@ -674,6 +674,15 @@ sd_histsize(const char *v, int flag)
   return r;
 }
 
+static void
+TeX_define(const char *s, const char *def) {
+  fprintf(logfile, "\\ifx\\%s\\undefined\n  \\def\\%s{%s}\\fi\n", s,s,def);
+}
+static void
+TeX_define2(const char *s, const char *def) {
+  fprintf(logfile, "\\ifx\\%s\\undefined\n  \\def\\%s#1#2{%s}\\fi\n", s,s,def);
+}
+
 static GEN
 sd_log(const char *v, int flag)
 {
@@ -705,18 +714,14 @@ sd_log(const char *v, int flag)
   }
   if (logfile && oldstyle != logstyle && logstyle == logstyle_TeX)
   {
-    fprintf(logfile, "%s%s%s%s%s%s%s%s%s%s\n",
-      "\\ifx \\PARIbreak\\undefined\n",
-      "  \\def\\PARIbreak{\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}\\fi\n",
-      "\\ifx \\PARIpromptSTART\\undefined\n",
-      "  \\def\\PARIpromptSTART|{\\vskip\\medskipamount\\bgroup\\bf}\\fi\n",
-      "\\ifx \\PARIpromptEND\\undefined\n",
-      "  \\def\\PARIpromptEND|{\\egroup\\bgroup\\tt}\\fi\n",
-      "\\ifx \\PARIinputEND\\undefined\n",
-      "  \\def\\PARIinputEND|{\\egroup}\\fi\n",
-      "\\ifx \\PARIout\\undefined\n",
-      "  \\def\\PARIout#1#2{\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$}\\fi\n");
-}
+    TeX_define("PARIbreak", 
+               "\\hskip 0pt plus \\hsize\\relax\\discretionary{}{}{}}");
+    TeX_define("PARIpromptSTART", "\\vskip\\medskipamount\\bgroup\\bf");
+    TeX_define("PARIpromptEND", "\\egroup\\bgroup\\tt");
+    TeX_define("PARIinputEND", "\\egroup");
+    TeX_define2("PARIout",
+                "\\vskip\\smallskipamount$\\displaystyle{\\tt\\%#1} = #2$");
+  }
   return res;
 }
 
@@ -724,7 +729,7 @@ static GEN
 sd_TeXstyle(const char *v, int flag)
 {
   static const char * const msg[] = { NULL,
-	"(bits 0x1/0x2/0x4 control output of \\frac/\\left/\\PARIbreak)"};
+	"(bits 0x2/0x4 control output of \\left/\\PARIbreak)"};
   ulong n = GP_DATA->fmt->TeXstyle;
   GEN z = sd_ulong(v,flag,"TeXstyle", &n, 0, 7, (char**)msg);
   GP_DATA->fmt->TeXstyle = n; return z;
