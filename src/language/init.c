@@ -61,6 +61,7 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 
 int  (*default_exception_handler)(long);
 int  (*whatnow_fun)(char *, int);
+void (*sigint_fun)(void);
 pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, f_RAW, 0 };
 
 #ifdef BOTH_GNUPLOT_AND_X11
@@ -305,12 +306,15 @@ cgetalloc(long t, size_t l)
 }
 
 static void
+dflt_sigint_fun(void) { err(talker, "user interrupt"); }
+
+static void
 pari_handle_SIGINT(void)
 {
 #ifdef _WIN32
   if (++win32ctrlc >= 5) _exit(3);
 #else
-  err(talker, "user interrupt");
+  sigint_fun();
 #endif
 }
 
@@ -365,7 +369,7 @@ void
 dowin32ctrlc()
 {
   win32ctrlc = 0;
-  err(siginter, gp_format_time(ti_INTERRUPT));
+  sigint_fun();
 }
 #endif
 
@@ -681,6 +685,7 @@ pari_init(size_t parisize, ulong maxprime)
   gp_init_functions(1);
 
   whatnow_fun = NULL;
+  sigint_fun = dflt_sigint_fun;
   dft_handler = (char **) gpmalloc((noer + 1) *sizeof(char *));
   reset_traps();
   default_exception_handler = NULL;
@@ -2015,55 +2020,6 @@ msgtimer(char *format, ...)
   pariOut = out;
 }
 
-/* flag:
- *   ti_NOPRINT   don't print
- *   ti_REGULAR   print elapsed time (flags & CHRONO)
- *   ti_LAST      print last elapsed time (##)
- *   ti_INTERRUPT received a SIGINT
- */
-char *
-gp_format_time(long flag)
-{
-  static char buf[64];
-  static long last = 0;
-  long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
-  char *s;
-
-  last = delay;
-  switch(flag)
-  {
-    case ti_REGULAR:   s = "time = "; break;
-    case ti_INTERRUPT: s = "user interrupt after "; break;
-    case ti_LAST:      s = "  ***   last result computed in "; break;
-    default: return NULL;
-  }
-  strcpy(buf,s); s = buf+strlen(s);
-  strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
-  if (delay >= 3600000)
-  {
-    sprintf(s, "%ldh, ", delay / 3600000); s+=strlen(s);
-    delay %= 3600000;
-  }
-  if (delay >= 60000)
-  {
-    sprintf(s, "%ldmn, ", delay / 60000); s+=strlen(s);
-    delay %= 60000;
-  }
-  if (delay >= 1000)
-  {
-    sprintf(s, "%ld,", delay / 1000); s+=strlen(s);
-    delay %= 1000;
-    if (delay < 100)
-    {
-      sprintf(s, "%s", (delay<10)? "00": "0");
-      s+=strlen(s);
-    }
-  }
-  sprintf(s, "%ld ms", delay); s+=strlen(s);
-  strcpy(s, term_get_color(c_NONE));
-  if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
-  return buf;
-}
 /*******************************************************************/
 /*                                                                 */
 /*                   FUNCTIONS KNOWN TO THE ANALYZER               */

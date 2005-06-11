@@ -954,25 +954,7 @@ get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
       gp_add_history(s);
     }
 
-    if (logfile) { /* update logfile */
-      char *bare_prompt = expand_prompt(IM.prompt, F);
-      switch (logstyle) {
-      case logstyle_TeX:
-        fprintf(logfile,
-                "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-                bare_prompt,s);
-        break;
-      case logstyle_plain:
-        fprintf(logfile, "%s%s\n",bare_prompt,s);
-        break;
-      case logstyle_color:
-        /* Can't do in one pass, since term_get_color() returns a static */
-        fprintf(logfile, "%s%s", term_get_color(c_PROMPT), bare_prompt);
-        fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
-        fprintf(logfile, "%s\n", term_get_color(c_NONE));
-        break;
-      }
-    }
+    if (logfile) update_logfile(expand_prompt(IM.prompt, F), s);
   }
   unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
   return 1;

@@ -28,6 +28,7 @@ void pari_addfunctions(module **modlist_p, entree *func, char **help);
 void recover(int flag);
 int  term_height(void);
 int  term_width(void);
+void update_logfile(const char *prompt, const char *s);
 
 /* aide() */
 #define h_REGULAR 0

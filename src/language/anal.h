@@ -88,6 +88,7 @@ extern GEN gnil;
 
 extern char *gp_function_name;
 extern int  (*whatnow_fun)(char *, int);
+extern void (*sigint_fun)(void);
 extern void *foreignHandler;
 extern GEN  (*foreignExprHandler)(char*);
 extern char foreignExprSwitch;
@@ -203,7 +204,3 @@ GEN  return0(GEN x);
 void system0(char *cmd);
 GEN  trap0(char *e, char *f, char *r);
 int  whatnow(char *s, int silent);
-
-/* time */
-enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
-char *gp_format_time(long flag);

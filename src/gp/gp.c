@@ -156,7 +156,7 @@ handle_texmacs_command(const char *s)
   parse_texmacs_command(&c, s);
   if (strcmp(c.cmd, "complete"))
     err(talker,"Texmacs_stdin command %s not implemented", c.cmd);
-  if (c.n != 2) 
+  if (c.n != 2)
     err(talker,"was expecting 2 arguments for Texmacs_stdin command");
   texmacs_completion(c.v[0], atol(c.v[1]));
   free_cmd(&c);
@@ -804,6 +804,7 @@ Type ?12 for how to get moral (and possibly technical) support.\n\n");
 /**                         METACOMMANDS                           **/
 /**                                                                **/
 /********************************************************************/
+#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
 
 void
 gp_quit(void)
@@ -812,7 +813,7 @@ gp_quit(void)
   kill_all_buffers(NULL);
   if (INIT_SIG) pari_sig_init(SIG_DFL);
   term_color(c_NONE);
-  if (!(GP_DATA->flags & QUIET)) pariputs("Goodbye!\n");
+  pariputs_opt("Goodbye!\n");
   if (GP_DATA->flags & TEXMACS) tm_end_output();
   exit(0);
 }
@@ -957,6 +958,86 @@ escape(char *tch)
   set_analyseur(tch); /* for error messages */
   escape0(tch);
   set_analyseur(old);
+}
+
+enum { ti_NOPRINT, ti_REGULAR, ti_LAST, ti_INTERRUPT };
+/* flag:
+ *   ti_NOPRINT   don't print
+ *   ti_REGULAR   print elapsed time (flags & CHRONO)
+ *   ti_LAST      print last elapsed time (##)
+ *   ti_INTERRUPT received a SIGINT
+ */
+static char *
+gp_format_time(long flag)
+{
+  static char buf[64];
+  static long last = 0;
+  long delay = (flag == ti_LAST)? last: TIMER(GP_DATA->T);
+  char *s;
+
+  last = delay;
+  switch(flag)
+  {
+    case ti_REGULAR:   s = "time = "; break;
+    case ti_INTERRUPT: s = "user interrupt after "; break;
+    case ti_LAST:      s = "  ***   last result computed in "; break;
+    default: return NULL;
+  }
+  strcpy(buf,s); s = buf+strlen(s);
+  strcpy(s, term_get_color(c_TIME)); s+=strlen(s);
+  if (delay >= 3600000)
+  {
+    sprintf(s, "%ldh, ", delay / 3600000); s+=strlen(s);
+    delay %= 3600000;
+  }
+  if (delay >= 60000)
+  {
+    sprintf(s, "%ldmn, ", delay / 60000); s+=strlen(s);
+    delay %= 60000;
+  }
+  if (delay >= 1000)
+  {
+    sprintf(s, "%ld,", delay / 1000); s+=strlen(s);
+    delay %= 1000;
+    if (delay < 100)
+    {
+      sprintf(s, "%s", (delay<10)? "00": "0");
+      s+=strlen(s);
+    }
+  }
+  sprintf(s, "%ld ms", delay); s+=strlen(s);
+  strcpy(s, term_get_color(c_NONE));
+  if (flag != ti_INTERRUPT) { s+=strlen(s); *s++='.'; *s++='\n'; *s=0; }
+  return buf;
+}
+
+static int
+chron(char *s)
+{
+  if (*s)
+  { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
+    if (*s == '#') s++;
+    if (*s) return 0;
+    pariputs(gp_format_time(ti_LAST));
+  }
+  else { GP_DATA->flags ^= CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
+  return 1;
+}
+
+/* return 0: can't interpret *buf as a metacommand
+ *        1: did interpret *buf as a metacommand or empty command */
+static int
+check_meta(char *buf)
+{
+  switch(*buf++)
+  {
+    case '?': aide(buf, h_REGULAR); break;
+    case '#': return chron(buf);
+    case '\\': escape(buf); break;
+    case '\0': break;
+    default: return 0;
+  }
+  return 1;
 }
 
 /********************************************************************/
@@ -1199,57 +1280,25 @@ gp_initrc(growarray *A, char *path)
 /*                           GP MAIN LOOP                           */
 /*                                                                  */
 /********************************************************************/
-static void
-gp_handle_SIGINT(void)
+void
+update_logfile(const char *prompt, const char *s)
 {
-#if defined(_WIN32) || defined(__CYGWIN32__)
-  win32ctrlc++;
-#else
-  if (GP_DATA->flags & TEXMACS) tm_start_output();
-  err(siginter, gp_format_time(ti_INTERRUPT));
-#endif
-}
-
-static void
-gp_sighandler(int sig)
-{
-  char *msg;
-  (void)os_signal(sig,gp_sighandler);
-  switch(sig)
-  {
-#ifdef SIGBREAK
-    case SIGBREAK: gp_handle_SIGINT(); return;
-#endif
-#ifdef SIGINT
-    case SIGINT:   gp_handle_SIGINT(); return;
-#endif
-
-#ifdef SIGSEGV
-    case SIGSEGV: msg = "GP (Segmentation Fault)"; break;
-#endif
-#ifdef SIGBUS
-    case SIGBUS:  msg = "GP (Bus Error)"; break;
-#endif
-#ifdef SIGFPE
-    case SIGFPE:  msg = "GP (Floating Point Exception)"; break;
-#endif
-
-#ifdef SIGPIPE
-    case SIGPIPE:
-    {
-      pariFILE *f = GP_DATA->pp->file;
-      if (f && pari_outfile == f->file)
-      {
-        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
-        pari_outfile = stdout; pari_fclose(f);
-      }
-      err(talker, "Broken Pipe, resetting file stack...");
-      return; /* not reached */
-    }
-#endif
-    default: msg = "signal handling"; break;
+  switch (logstyle) {
+  case logstyle_TeX:
+    fprintf(logfile,
+            "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
+            prompt,s);
+    break;
+  case logstyle_plain:
+    fprintf(logfile, "%s%s\n",prompt,s);
+    break;
+  case logstyle_color:
+    /* Can't do in one pass, since term_get_color() returns a static */
+    fprintf(logfile, "%s%s", term_get_color(c_PROMPT), prompt);
+    fprintf(logfile, "%s%s", term_get_color(c_INPUT), s);
+    fprintf(logfile, "%s\n", term_get_color(c_NONE));
+    break;
   }
-  err(bugparier, msg);
 }
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */
@@ -1276,19 +1325,11 @@ get_line_from_file(char *PROMPT, filtre_t *F, FILE *file)
   {
     if (GP_DATA->flags & ECHO)
       { pariputs(PROMPT); pariputs(s); pariputc('\n'); }
-    else
-      if (logfile) {
-	if (logstyle == logstyle_TeX)
-	  fprintf(logfile,
-		  "\\PARIpromptSTART|%s\\PARIpromptEND|%s\\PARIinputEND|%%\n",
-		  PROMPT,s);
-	else
-	  fprintf(logfile, "%s%s\n",PROMPT,s);
-      }
-    
+    else if (logfile)
+      update_logfile(PROMPT, s);
     pariflush();
   }
-  if (GP_DATA->flags & TEXMACS) 
+  if (GP_DATA->flags & TEXMACS)
   {
     tm_did_complete = 0;
     if (Texmacs_stdin && *s == DATA_BEGIN)
@@ -1312,8 +1353,8 @@ is_interactive(void)
 }
 
 /* return 0 if no line could be read (EOF) */
-int
-pari_read_line(filtre_t *F, char *PROMPT)
+static int
+gp_read_line(filtre_t *F, char *PROMPT)
 {
   Buffer *b = (Buffer*)F->buf;
   int res;
@@ -1337,35 +1378,6 @@ pari_read_line(filtre_t *F, char *PROMPT)
   else
     res = get_line_from_file(DFT_PROMPT,F,infile);
   return res;
-}
-
-static int
-chron(char *s)
-{
-  if (*s)
-  { /* if "#" or "##" timer metacommand. Otherwise let the parser get it */
-    if (*s == '#') s++;
-    if (*s) return 0;
-    pariputs(gp_format_time(ti_LAST));
-  }
-  else { GP_DATA->flags ^= CHRONO; (void)sd_timer("",d_ACKNOWLEDGE); }
-  return 1;
-}
-
-/* return 0: can't interpret *buf as a metacommand
- *        1: did interpret *buf as a metacommand or empty command */
-static int
-check_meta(char *buf)
-{
-  switch(*buf++)
-  {
-    case '?': aide(buf, h_REGULAR); break;
-    case '#': return chron(buf);
-    case '\\': escape(buf); break;
-    case '\0': break;
-    default: return 0;
-  }
-  return 1;
 }
 
 /* kill all history entries since loc */
@@ -1422,7 +1434,7 @@ gp_main_loop(int ismain)
       }
     }
 
-    if (! pari_read_line(&F, NULL))
+    if (! gp_read_line(&F, NULL))
     {
       if (popinfile()) gp_quit();
       if (ismain) continue;
@@ -1453,59 +1465,65 @@ gp_main_loop(int ismain)
   }
 }
 
-GEN
-read0(char *s)
+/********************************************************************/
+/*                                                                  */
+/*                      EXCEPTION HANDLER                           */
+/*                                                                  */
+/********************************************************************/
+void
+gp_sigint_fun(void) { err(siginter, gp_format_time(ti_INTERRUPT)); }
+
+static void
+gp_handle_SIGINT(void)
 {
-  switchin(s);
-  if (file_is_binary(infile)) return gpreadbin(s);
-  return gp_main_loop(0);
+#if defined(_WIN32) || defined(__CYGWIN32__)
+  win32ctrlc++;
+#else
+  if (GP_DATA->flags & TEXMACS) tm_start_output();
+  gp_sigint_fun();
+#endif
 }
 
 static void
-check_secure(char *s)
+gp_sighandler(int sig)
 {
-  if (GP_DATA->flags & SECURE)
-    err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
-}
-
-GEN
-extern0(char *s)
-{
-  check_secure(s);
-  infile = try_pipe(s, mf_IN)->file;
-  return gp_main_loop(0);
-}
-
-GEN
-default0(char *a, char *b, long flag)
-{
-  return setdefault(a,b, flag? d_RETURN: d_ACKNOWLEDGE);
-}
-
-GEN
-input0(void)
-{
-  Buffer *b = new_buffer();
-  filtre_t F;
-  GEN x;
-
-  init_filtre(&F, b);
-  push_stack(&bufstack, (void*)b);
-  while (! get_line_from_file(DFT_INPROMPT,&F,infile))
-    if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
-  x = readseq(b->buf);
-  pop_buffer(); return x;
-}
-
-void
-system0(char *s)
-{
-#if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
-  check_secure(s);
-  system(s);
-#else
-  err(archer);
+  char *msg;
+  (void)os_signal(sig,gp_sighandler);
+  switch(sig)
+  {
+#ifdef SIGBREAK
+    case SIGBREAK: gp_handle_SIGINT(); return;
 #endif
+#ifdef SIGINT
+    case SIGINT:   gp_handle_SIGINT(); return;
+#endif
+
+#ifdef SIGSEGV
+    case SIGSEGV: msg = "GP (Segmentation Fault)"; break;
+#endif
+#ifdef SIGBUS
+    case SIGBUS:  msg = "GP (Bus Error)"; break;
+#endif
+#ifdef SIGFPE
+    case SIGFPE:  msg = "GP (Floating Point Exception)"; break;
+#endif
+
+#ifdef SIGPIPE
+    case SIGPIPE:
+    {
+      pariFILE *f = GP_DATA->pp->file;
+      if (f && pari_outfile == f->file)
+      {
+        GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
+        pari_outfile = stdout; pari_fclose(f);
+      }
+      err(talker, "Broken Pipe, resetting file stack...");
+      return; /* not reached */
+    }
+#endif
+    default: msg = "signal handling"; break;
+  }
+  err(bugparier, msg);
 }
 
 int
@@ -1546,7 +1564,7 @@ break_loop(long numerr)
   {
     GEN x;
     if (setjmp(b->env)) pariputc('\n');
-    if (! pari_read_line(&F, BREAK_LOOP_PROMPT))
+    if (! gp_read_line(&F, BREAK_LOOP_PROMPT))
     {
       if (popinfile()) break;
       continue;
@@ -1580,7 +1598,7 @@ gp_exception_handler(long numerr)
     /* prevent infinite recursion in case s raises an exception */
     static int recovering = 0;
     if (recovering)
-      recovering = 0; 
+      recovering = 0;
     else
     {
       recovering = 1;
@@ -1592,6 +1610,70 @@ gp_exception_handler(long numerr)
   return break_loop(numerr);
 }
 
+/********************************************************************/
+/*                                                                  */
+/*                      GP-SPECIFIC ROUTINES                        */
+/*                                                                  */
+/********************************************************************/
+static void
+check_secure(char *s)
+{
+  if (GP_DATA->flags & SECURE)
+    err(talker, "[secure mode]: system commands not allowed\nTried to run '%s'",s);
+}
+
+GEN
+read0(char *s)
+{
+  switchin(s);
+  if (file_is_binary(infile)) return gpreadbin(s);
+  return gp_main_loop(0);
+}
+
+GEN
+extern0(char *s)
+{
+  check_secure(s);
+  infile = try_pipe(s, mf_IN)->file;
+  return gp_main_loop(0);
+}
+
+GEN
+default0(char *a, char *b, long flag)
+{
+  return setdefault(a,b, flag? d_RETURN: d_ACKNOWLEDGE);
+}
+
+GEN
+input0(void)
+{
+  Buffer *b = new_buffer();
+  filtre_t F;
+  GEN x;
+
+  init_filtre(&F, b);
+  push_stack(&bufstack, (void*)b);
+  while (! get_line_from_file(DFT_INPROMPT,&F,infile))
+    if (popinfile()) { fprintferr("no input ???"); gp_quit(); }
+  x = readseq(b->buf);
+  pop_buffer(); return x;
+}
+
+void
+system0(char *s)
+{
+#if defined(UNIX) || defined(__EMX__) || defined(_WIN32)
+  check_secure(s); system(s);
+#else
+  err(archer);
+#endif
+}
+
+/*******************************************************************/
+/**                                                               **/
+/**                        INITIALIZATION                         **/
+/**                                                               **/
+/*******************************************************************/
 static void
 testuint(char *s, ulong *d) { if (s) *d = get_uint(s); }
 
@@ -1612,7 +1694,6 @@ read_arg_equal(int *nread, char *t, long argc, char **argv)
   if (*t || i==argc) usage(argv[0]);
   *nread = i+1; return argv[i];
 }
-
 
 static void
 init_trivial_stack()
@@ -1657,7 +1738,7 @@ read_opt(growarray *A, long argc, char **argv)
 	initrc = 0; break;
       case '-':
         if (strcmp(t, "version-short") == 0) { print_shortversion(); exit(0); }
-        if (strcmp(t, "version") == 0) { 
+        if (strcmp(t, "version") == 0) {
           init_trivial_stack(); print_version();
           free((void*)bot); exit(0);
         }
@@ -1693,19 +1774,6 @@ read_opt(growarray *A, long argc, char **argv)
   pari_outfile = stdout;
 }
 
-/* must be called BEFORE pari_init() */
-static void
-gp_preinit(void)
-{
-  long i;
-
-  for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
-  bot = (pari_sp)0;
-  top = (pari_sp)(1000000*sizeof(long));
-
-  GP_DATA = default_gp_data();
-}
-
 #ifdef WINCE
 int
 WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -1719,8 +1787,14 @@ main(int argc, char **argv)
 {
 #endif
   growarray A;
+  long i;
 
-  init_defaults(1); gp_preinit();
+  init_defaults(1);
+  for (i=0; i<c_LAST; i++) gp_colors[i] = c_NONE;
+  bot = (pari_sp)0;
+  top = (pari_sp)(1000000*sizeof(long));
+
+  GP_DATA = default_gp_data();
   if (setjmp(GP_DATA->env))
   {
     pariputs("### Errors on startup, exiting...\n\n");
@@ -1744,6 +1818,7 @@ main(int argc, char **argv)
   if (GP_DATA->flags & USE_READLINE) init_readline();
 #endif
   whatnow_fun = whatnow;
+  sigint_fun = gp_sigint_fun;
   default_exception_handler = gp_exception_handler;
   gp_expand_path(GP_DATA->path);
 
@@ -1774,10 +1849,7 @@ main(int argc, char **argv)
 /**                          GP OUTPUT                            **/
 /**                                                               **/
 /*******************************************************************/
-#define pariputs_opt(s) if (!(GP_DATA->flags & QUIET)) pariputs(s)
-
-/* EXTERNAL PRETTYPRINTER */
-
+    /* EXTERNAL PRETTYPRINTER */
 /* Wait for prettinprinter to finish, to prevent new prompt from overwriting
  * the output.  Fill the output buffer, wait until it is read.
  * Better than sleep(2): give possibility to print */
@@ -1811,8 +1883,7 @@ static int
 tex2mail_output(GEN z, long n)
 {
   pariout_t T = *(GP_DATA->fmt); /* copy */
-  FILE *o_out;
-  FILE *o_logfile = logfile;
+  FILE *o_out, *o_logfile = logfile;
 
   if (!prettyp_init()) return 0;
   o_out = pari_outfile; /* save state */
@@ -1827,15 +1898,13 @@ tex2mail_output(GEN z, long n)
   /* history number */
   if (n)
   {
-    char s[128];
+    char s[128], c_hist[16], c_out[16];
 
-    if (*term_get_color(c_HIST) || *term_get_color(c_OUTPUT))
-    {
-      char col1[80];
-      strcpy(col1, term_get_color(c_HIST));
+    strcpy(c_hist, term_get_color(c_HIST));
+    strcpy(c_out , term_get_color(c_OUTPUT));
+    if (*c_hist || *c_out)
       sprintf(s, "\\LITERALnoLENGTH{%s}\\%%%ld =\\LITERALnoLENGTH{%s} ",
-              col1, n, term_get_color(c_OUTPUT));
-    }
+              c_hist, n, c_out);
     else
       sprintf(s, "\\%%%ld = ", n);
     pariputs_opt(s);
@@ -1845,9 +1914,7 @@ tex2mail_output(GEN z, long n)
         fprintf(o_logfile, "%%%ld = ", n);
         break;
       case logstyle_color:
-        fprintf(o_logfile, "%s%%%ld = ", term_get_color(c_HIST), n);
-        /* Can't merge, term_get_color() uses statics...: */
-        fprintf(o_logfile, "%s", term_get_color(c_OUTPUT));
+        fprintf(o_logfile, "%s%%%ld = %s", c_hist, n, c_out);
         break;
       case logstyle_TeX:
         fprintf(o_logfile, "\\PARIout{%ld}", n);
@@ -1877,8 +1944,7 @@ tex2mail_output(GEN z, long n)
   return 1;
 }
 
-/* TEXMACS */
-
+    /* TEXMACS */
 static void
 texmacs_output(GEN z, long n)
 {
@@ -1894,8 +1960,7 @@ texmacs_output(GEN z, long n)
   free(sz); fflush(stdout);
 }
 
-/* REGULAR */
-
+    /* REGULAR */
 static void
 normal_output(GEN z, long n)
 {
