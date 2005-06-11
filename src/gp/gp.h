@@ -41,3 +41,12 @@ int  term_width(void);
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""
+
+/* readline completions */
+typedef struct default_type {
+  char *name;
+  void *fun;
+} default_type;
+
+extern default_type gp_default_list[];
+extern char *keyword_list[];

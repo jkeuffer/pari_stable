@@ -911,29 +911,29 @@ gp_data *
 default_gp_data(void)
 {
   static char Prompt[MAX_PROMPT_LEN], Prompt_cont[MAX_PROMPT_LEN];
-  static gp_data __GP_DATA;
+  static gp_data __GPDATA, *D = &__GPDATA;
   static gp_hist __HIST;
   static gp_pp   __PP;
   static gp_path __PATH;
   static pari_timer __T;
 
 #ifdef READLINE
-  GP_DATA->flags = (STRICTMATCH | SIMPLIFY | USE_READLINE);
+  D->flags = (STRICTMATCH | SIMPLIFY | USE_READLINE);
 #else
-  GP_DATA->flags = (STRICTMATCH | SIMPLIFY);
+  D->flags = (STRICTMATCH | SIMPLIFY);
 #endif
-  GP_DATA->primelimit = 500000;
-  GP_DATA->lim_lines = 0;
-  GP_DATA->T    = &__T;
-  GP_DATA->hist = &__HIST;
-  GP_DATA->pp   = &__PP;
-  GP_DATA->path = &__PATH;
-  init_help(GP_DATA);
-  init_fmt(GP_DATA);
-  init_hist(GP_DATA, 5000, 0);
-  init_path(GP_DATA);
-  init_pp(GP_DATA);
-  strcpy(Prompt,      DFT_PROMPT); GP_DATA->prompt = Prompt;
-  strcpy(Prompt_cont, CONTPROMPT); GP_DATA->prompt_cont = Prompt_cont;
-  return &__GP_DATA;
+  D->primelimit = 500000;
+  D->lim_lines = 0;
+  D->T    = &__T;
+  D->hist = &__HIST;
+  D->pp   = &__PP;
+  D->path = &__PATH;
+  init_help(D);
+  init_fmt(D);
+  init_hist(D, 5000, 0);
+  init_path(D);
+  init_pp(D);
+  strcpy(Prompt,      DFT_PROMPT); D->prompt = Prompt;
+  strcpy(Prompt_cont, CONTPROMPT); D->prompt_cont = Prompt_cont;
+  return D;
 }

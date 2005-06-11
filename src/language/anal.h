@@ -161,15 +161,6 @@ extern ulong readline_state;
 #define DO_MATCHED_INSERT	2
 #define DO_ARGS_COMPLETE	4
 
-/* readline completions */
-typedef struct default_type {
-  char *name;
-  void *fun;
-} default_type;
-
-extern default_type gp_default_list[];
-extern char *keyword_list[];
-
 /* gp_colors */
 void decode_color(int n, int *c);
 #define c_NONE 0xffffUL
