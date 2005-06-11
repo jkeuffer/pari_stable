@@ -231,27 +231,11 @@ gp_preinit(void)
   strcpy(Prompt_cont, CONTPROMPT); GP_DATA->prompt_cont = Prompt_cont;
 }
 
-Buffer *
-new_buffer(void)
-{
-  Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
-  b->len = 1024;
-  b->buf = gpmalloc(b->len);
-  return b;
-}
-
-void
-del_buffer(Buffer *b)
-{
-  if (!b) return;
-  free(b->buf); free((void*)b);
-}
-
 static void
 pop_buffer(void)
 {
   Buffer *b = (Buffer*) pop_stack(&bufstack);
-  del_buffer(b);
+  delete_buffer(b);
 }
 
 /* kill all buffers until B is met or nothing is left */
@@ -722,6 +706,8 @@ aide0(char *s, int flag)
     case EpINSTALL:
       if (!ep->help) { aide_print(s, "installed function"); return; }
       long_help=0; break;
+
+    case EpNEW: aide_print(s, "new identifier (no valence assigned)"); return;
   }
   if (long_help) { external_help(ep->name,3); return; }
   if (ep->help) { print_text(ep->help); return; }
@@ -1024,15 +1010,6 @@ escape(char *tch)
 static int get_line_from_file(char *prompt, filtre_t *F, FILE *file);
 #define err_gprc(s,t,u) { fprintferr("\n"); err(talker2,s,t,u); }
 
-static void
-init_filtre(filtre_t *F, Buffer *buf)
-{
-  F->buf = buf;
-  F->in_string  = 0;
-  F->in_comment = 0;
-  F->downcase = 0;
-}
-
 /* LOCATE GPRC */
 
 /* return $HOME or the closest we can find */
@@ -1254,7 +1231,7 @@ gp_initrc(growarray *A, char *path)
       }
     }
   }
-  del_buffer(b);
+  delete_buffer(b);
   if (!(GP_DATA->flags & QUIET)) fprintferr("Done.\n\n");
   fclose(file);
 }
@@ -1315,37 +1292,6 @@ gp_sighandler(int sig)
     default: msg = "signal handling"; break;
   }
   err(bugparier, msg);
-}
-
-/* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
-static char *
-file_input(char **s0, int junk, input_method *IM, filtre_t *F)
-{
-  Buffer *b = (Buffer*)F->buf;
-  int first = 1;
-  char *s = *s0;
-  ulong used0, used = s - b->buf;
-
-  (void)junk;
-  used0 = used;
-  for(;;)
-  {
-    ulong left = b->len - used, l;
-
-    if (left < 512)
-    {
-      fix_buffer(b, b->len << 1);
-      left = b->len - used;
-      *s0 = b->buf + used0;
-    }
-    s = b->buf + used;
-    if (! IM->fgets(s, left, IM->file))
-      return first? NULL: *s0; /* EOF */
-
-    l = strlen(s); first = 0;
-    if (l+1 < left || s[l-1] == '\n') return *s0; /* \n */
-    used += l;
-  }
 }
 
 /* prompt = NULL --> from gprc. Return 1 if new input, and 0 if EOF */

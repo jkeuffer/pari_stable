@@ -76,6 +76,7 @@ GTo21- wrong prototype for qfrep
    24- "couldn't deal with this field" errors in bnfinit/quadclassunit for
        tiny discriminants, huge Bach constants (e.g. 12), and unlucky random
        seeds. Remove arbitrary limits and let the loop run to completion.
+   25- Neither freadseq() nor readGEN() were able to parse '{' / '}' [Bug #216]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

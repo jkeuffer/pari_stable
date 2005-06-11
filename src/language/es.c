@@ -54,12 +54,6 @@ filtre0(filtre_t *F)
 
   if (F->more_input == 1) F->more_input = 0;
 
-  if (! (F->in_comment | F->in_string))
-  {
-    while (isspace((int)*s)) s++; /* Skip space */
-    if (*s == LBRACE) { s++; F->more_input = 2; F->wait_for_brace = 1; }
-  }
-
   while ((c = *s++))
   {
     if (F->in_string)
@@ -134,6 +128,14 @@ filtre0(filtre_t *F)
         break;
 
       case '"': F->in_string = 1;
+        break;
+
+      case LBRACE:
+        t--;
+        if (F->wait_for_brace) err(impl,"embedded braces (in parser)");
+        F->more_input = 2;
+        F->wait_for_brace = 1;
+        break;
     }
   }
 
@@ -161,27 +163,85 @@ filtre(char *s, int downcase)
   return filtre0(&T);
 }
 
+void
+init_filtre(filtre_t *F, Buffer *buf)
+{
+  F->buf = buf;
+  F->in_string  = 0;
+  F->in_comment = 0;
+  F->downcase = 0;
+}
+
+/********************************************************************/
+/**                                                                **/
+/**                        INPUT METHODS                           **/
+/**                                                                **/
+/********************************************************************/
+
+Buffer *
+new_buffer(void)
+{
+  Buffer *b = (Buffer*) gpmalloc(sizeof(Buffer));
+  b->len = 1024;
+  b->buf = gpmalloc(b->len);
+  return b;
+}
+void
+delete_buffer(Buffer *b)
+{
+  if (!b) return;
+  free((void*)b->buf); free((void*)b);
+}
+
 GEN
 readGEN(FILE *fi)
 {
-  long size = 512, n = size;
-  char *buf = gpmalloc(n), *s = buf;
+  Buffer *b = new_buffer();
+  input_method IM;
+  filtre_t F;
+  GEN x;
 
-  while (fgets(s, n, fi))
+  init_filtre(&F, b);
+
+  IM.file = fi;
+  IM.fgets= &fgets;
+  IM.prompt = NULL;
+  IM.getline= &file_input;
+  IM.free = 0;
+  (void)input_loop(&F,&IM);
+  x = readseq(b->buf);
+  delete_buffer(b); return x;
+}
+
+/* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
+char *
+file_input(char **s0, int junk, input_method *IM, filtre_t *F)
+{
+  Buffer *b = (Buffer*)F->buf;
+  int first = 1;
+  char *s = *s0;
+  ulong used0, used = s - b->buf;
+
+  (void)junk;
+  used0 = used;
+  for(;;)
   {
-    if (s[strlen(s)-1] == '\n')
+    ulong left = b->len - used, l;
+
+    if (left < 512)
     {
-      GEN x = freadexpr(buf);
-      free(buf); return x;
+      fix_buffer(b, b->len << 1);
+      left = b->len - used;
+      *s0 = b->buf + used0;
     }
-    buf = gprealloc(buf, size<<1);
-    s = buf + (size-1); n = size+1; size <<= 1;
+    s = b->buf + used;
+    if (! IM->fgets(s, left, IM->file))
+      return first? NULL: *s0; /* EOF */
+
+    l = strlen(s); first = 0;
+    if (l+1 < left || s[l-1] == '\n') return *s0; /* \n */
+    used += l;
   }
-#if defined(UNIX) || defined(__EMX__)
-  if (!feof(fi))
-#endif
-    err(talker, "failed read from file");
-  return NULL;
 }
 
 /* Read a "complete line" and filter it. Return: 0 if EOF, 1 otherwise */

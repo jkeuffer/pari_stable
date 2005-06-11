@@ -469,12 +469,15 @@ typedef struct Buffer {
   ulong len;
   jmp_buf env;
 } Buffer;
+Buffer *new_buffer(void);
+void delete_buffer(Buffer *b);
 
 typedef struct {
   char *s, *t, *end; /* source, target, last char read */
   int in_string, in_comment, more_input, wait_for_brace, downcase;
   Buffer *buf;
 } filtre_t;
+void init_filtre(filtre_t *F, Buffer *buf);
 
 void init_hist(gp_data *D, size_t l, ulong total);
 void init_path(gp_data *D);
@@ -505,4 +508,4 @@ typedef struct input_method {
 
 void fix_buffer(Buffer *b, long newlbuf);
 int input_loop(filtre_t *F, input_method *IM);
-
+char *file_input(char **s0, int junk, input_method *IM, filtre_t *F);
