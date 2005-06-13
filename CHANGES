@@ -76,7 +76,7 @@ GTo21- wrong prototype for qfrep
    24- "couldn't deal with this field" errors in bnfinit/quadclassunit for
        tiny discriminants, huge Bach constants (e.g. 12), and unlucky random
        seeds. Remove arbitrary limits and let the loop run to completion.
-   25- Neither freadseq() nor readGEN() were able to parse '{' / '}' [Bug #216]
+   25- neither freadseq() nor readGEN() were able to parse '{' / '}' [Bug #216]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
@@ -116,13 +116,14 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
-BA  2- New functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul
-BA  3- New functions FpC_to_mod, FqV_to_FlxV
-    4- Member functions r1, r2
-    5- Functions factoru(), factoru_pow(), powiu(), powuu().
+BA  2- new functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul
+BA  3- new functions FpC_to_mod, FqV_to_FlxV
+    4- member functions r1, r2
+    5- functions factoru(), factoru_pow(), powiu(), powuu().
     6- symbolic link $MANDIR/gp-$version.1 -> $MANDIR/gp.1
-    7- New functions shallowcopy, shallowconcat, shallowtrans, vecslice,
+    7- new functions shallowcopy, shallowconcat, shallowtrans, vecslice,
        vecpermute, vecslicepermute, rowslice, rowpermute, rowslicepermute
+BA  8- support for gp2c-run on cygwin
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
