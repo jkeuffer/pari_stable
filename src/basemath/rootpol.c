@@ -1672,6 +1672,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   GEN sigma, shatzle, x;
 
   err += (long)log2((double)n) + 1;
+  if (err > -2) return 0;
   sigma = real2n(-err, 3);
   /*  2 / ((s - 1)^(1/n) - 1) */
   shatzle = divsr(2, subrs(sqrtnr(subrs(sigma,1),n), 1));
