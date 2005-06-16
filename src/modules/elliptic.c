@@ -148,6 +148,8 @@ smallinitell(GEN x)
 {
   pari_sp av = avma;
   GEN y = cgetg(14,t_VEC);
+  if (typ(x)==t_STR)
+    x=gel(ellsearchcurve(x),2);
   smallinitell0(x,y); return gerepilecopy(av,y);
 }
 
@@ -408,6 +410,8 @@ GEN
 initell(GEN x, long prec)
 {
   pari_sp av = avma;
+  if (typ(x)==t_STR)
+    x=gel(ellsearchcurve(x),2);
   return gerepilecopy(av, initell0(x,prec));
 }
 
