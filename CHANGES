@@ -125,6 +125,9 @@ BA  3- new functions FpC_to_mod, FqV_to_FlxV
     7- new functions shallowcopy, shallowconcat, shallowtrans, vecslice,
        vecpermute, vecslicepermute, rowslice, rowpermute, rowslicepermute
 BA  8- support for gp2c-run on cygwin
+BA  9- new optional package 'elldata' and new GP functions ellsearch and
+       ellidentify to access it.
+BA 10- support for ellinit("<curve name>") through elldata.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
