@@ -595,6 +595,49 @@ pointch(GEN x, GEN ch)
   return gerepilecopy(av,y);
 }
 
+/* x =  u^2*X +r
+ * y =  u^3*Y +s*u^2*X+t */
+static GEN
+pointchinv0(GEN x, GEN u2, GEN u3, GEN r, GEN s, GEN t)
+{
+  GEN u2X, z;
+  GEN X=gel(x,1), Y=gel(x,2);
+  if (is_inf(x)) return x;
+
+  u2X = gmul(u2,X);
+  z = cgetg(3, t_VEC); 
+  z[1] = ladd(u2X, r);
+  z[2] = ladd(gmul(u3, Y), gadd(gmul(s, u2X), t));
+  return z;
+}
+
+GEN
+pointchinv(GEN x, GEN ch)
+{
+  GEN y, u, r, s, t, u2, u3;
+  long tx, i, lx = lg(x);
+  pari_sp av = avma;
+
+  checkpt(x); checkch(ch);
+  if (lx < 2) return gcopy(x);
+  u = (GEN)ch[1];
+  r = (GEN)ch[2];
+  s = (GEN)ch[3];
+  t = (GEN)ch[4];
+  tx = typ(x[1]);
+  u2=gsqr(u); u3=gmul(u,u2);
+  if (is_matvec_t(tx))
+  {
+    y = cgetg(lx,tx);
+    for (i=1; i<lx; i++)
+      y[i] = (long)pointchinv0((GEN)x[i],u2,u3,r,s,t);
+  }
+  else
+    y = pointchinv0(x,u2,u3,r,s,t);
+  return gerepilecopy(av,y);
+}
+
+
 static long
 ellexpo(GEN E)
 {

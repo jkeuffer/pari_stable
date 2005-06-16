@@ -887,6 +887,7 @@ int     oncurve(GEN e, GEN z);
 GEN     ordell(GEN e, GEN x, long prec);
 GEN     orderell(GEN e, GEN p);
 GEN     pointch(GEN x, GEN ch);
+GEN     pointchinv(GEN x, GEN ch); 
 GEN     pointell(GEN e, GEN z, long prec);
 GEN     powell(GEN e, GEN z, GEN n);
 GEN     smallinitell(GEN x);
