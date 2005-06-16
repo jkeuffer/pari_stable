@@ -1654,7 +1654,7 @@ mygprec_absolute(GEN x, long bit)
   {
     case t_REAL:
       e = expo(x) + bit;
-      return (e < 0 || !signe(x))? real_0_bit(-bit): rtor(x, nbits2prec(e));
+      return (e <= 0 || !signe(x))? real_0_bit(-bit): rtor(x, nbits2prec(e));
     case t_COMPLEX:
       if (gexpo((GEN)x[2]) < -bit) return mygprec_absolute((GEN)x[1],bit);
       y = cgetg(3,t_COMPLEX);
