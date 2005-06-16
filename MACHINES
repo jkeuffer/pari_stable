@@ -1,9 +1,13 @@
 This file gives information about architectures/operating systems GP has been
 compiled on. If your configuration is not listed, it means that nobody sent us
 information about it. If indeed GP builds successfuly, we'd be grateful if you
-could notify us (including a line analogous to the ones below), so that we can
-accordingly expand the list.
+could notify us at the address
 
+  pari@math.u-bordeaux.fr
+
+Please include a line analogous to the ones below, so that we can
+accordingly expand the list.
+==============================================================================
 General notes: binaries should be compiled with native kernel (--without-gmp)
 - Arch
  a star (*) in the first column means GP was built using portable kernel.
