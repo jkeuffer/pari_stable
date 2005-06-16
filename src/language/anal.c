@@ -1566,9 +1566,10 @@ affect_block(GEN *res)
   *res = r; return f;
 }
 
-/* assign res at *pt in "simple array object" p */
+/* assign res at *pt in "simple array object" p and return it, or a copy.
+ * In the latter case, reset avma to av */
 static GEN
-change_compo(matcomp *c, GEN res)
+change_compo(pari_sp av, matcomp *c, GEN res)
 {
   GEN p = c->parent, *pt = c->ptcell;
   long i;
@@ -1597,7 +1598,7 @@ change_compo(matcomp *c, GEN res)
       err(talker2,"incorrect type or length in matrix assignment",
           old,mark.start);
 
-  res = gclone(res);
+  res = gclone(res); avma = av;
   killbloc(*pt);
   return *pt = res;
 }
@@ -1611,12 +1612,13 @@ matrix_block(GEN p)
 
   if (*analyseur != ',' && *analyseur != ')') /* fast shortcut */
   {
+    pari_sp av = avma;
     GEN res;
     F2GEN fun = affect_block(&res);
     if (res)
     {
       if (fun) res = fun(cpt, res);
-      return change_compo(&c,res);
+      return change_compo(av, &c,res);
     }
   }
 #if 0
@@ -1716,10 +1718,12 @@ static void
 check_pointers(gp_pointer ptrs[], unsigned int ind)
 {
   unsigned int i;
+  pari_sp av = avma;
   for (i=0; i<ind; i++)
   {
     gp_pointer *g = &(ptrs[i]);
-    if (g->ep) changevalue(g->ep, g->x); else (void)change_compo(&(g->c), g->x);
+    if (g->ep) changevalue(g->ep, g->x);
+    else (void)change_compo(av, &(g->c), g->x);
   }
 }
 
