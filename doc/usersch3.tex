@@ -2682,11 +2682,21 @@ given by a minimal model.
 
 \syn{mathell}{E,x,\var{prec}}.
 
+\subsecidx{ellidentify}$(E)$: if $E$ is an elliptic curve as output by
+\kbd{ellinit()}, return \kbd{[[N, M],C]}  where $N$ is the name of
+the curve in J. E.  Cremona database, $M$ the minimal model and $C$ the
+coordinates change (see \kbd{ellchangecurve}).
+
+\syn{ellidentify}{E}.
+
 \subsecidx{ellinit}$(E,\{\fl=0\})$: initialize an \tet{ell} structure,
 associated to the elliptic curve $E$. $E$ is a $5$-component
 vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic curve with Weierstrass
 equation
 $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
+or a string, in this case the coefficients of the curve with matching name are
+looked in the elldata database if available.
+
 The result of \tet{ellinit} is a an \tev{ell} structure by default, and
 a shorted \tev{sell} if $\fl=1$. Both contain the following information in
 their components:
@@ -2846,6 +2856,14 @@ If $\fl=1$, computes an (arbitrary) determination of $\log(\sigma(z))$.
 
 If $\fl=2,3$, same using the product expansion instead of theta series.
 \syn{ellsigma}{E,z,\fl}
+
+\subsecidx{ellsearch}$(N)$: if $N$ is an integer, it is taken as a conductor
+else if $N$ is a string, it can be a curve name ("11A1"), a isogeny class
+("11A") or a conductor "11". Return all curves in the elldata database with the
+given property.  
+
+\syn{ellsearch}{N}. Also available is \funs{ellsearchcurve}{N} that only
+accept complete curve names.
 
 \subsecidx{ellsub}$(E,z1,z2)$: difference of the points $z1$ and $z2$ on the
 elliptic curve corresponding to $E$.
