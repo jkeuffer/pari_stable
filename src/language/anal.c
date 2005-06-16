@@ -1631,7 +1631,7 @@ matrix_block(GEN p)
 /* x = gen_0: no default value, otherwise a t_STR, formal expression for
  * default argument. Evaluate and return. */
 static GEN
-make_arg(GEN x) { return (x==gen_0)? x: freadseq(GSTR(x)); }
+make_arg(GEN x) { return (x==gen_0)? x: readseq(GSTR(x)); }
 
 static GEN
 fun_seq(char *t) /* readseq0, simplified */
