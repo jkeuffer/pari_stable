@@ -224,8 +224,10 @@ mpacos(GEN x)
   GEN z, a = sqrtr(subsr(1, mulrr(x,x)));
   if (lg(x) > AGM_ATAN_LIMIT)
     z = (GEN)logagmcx(mkcomplex(x,a), lg(x))[2];
-  else
+  else {
     z = mpatan(divrr(a, x));
+    if (signe(x) < 0) z = addrr(mppi(lg(z)), z);
+  }
   return gerepileuptoleaf(av, z);
 }
 

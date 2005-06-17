@@ -78,6 +78,7 @@ GTo21- wrong prototype for qfrep
        seeds. Remove arbitrary limits and let the loop run to completion.
    25- neither freadseq() nor readGEN() were able to parse '{' / '}' [Bug #216]
    26- accuracy problem in polroots (--> division by zero) [Bug #252]
+   27- acos(x < 0) --> result off by Pi [ introduced in 2.2.9-A3 ]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
