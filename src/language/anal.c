@@ -1487,7 +1487,7 @@ truc(void)
       return gp_history(H, p, old, mark.start);
     }
   }
-  err(caracer1,analyseur-1,mark.start);
+  err(caracer1,analyseur,mark.start);
   return NULL; /* not reached */
 }
 
@@ -2948,7 +2948,7 @@ skiptruc(void)
       (void)number(&junk, &analyseur); return;
     }
   }
-  err(caracer1,analyseur-1,mark.start);
+  err(caracer1,analyseur,mark.start);
 }
 
 static void
