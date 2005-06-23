@@ -261,16 +261,12 @@ sd_gptoggle(const char *v, int flag, char *s, ulong FLAG)
   return z;
 }
 
-static GEN
-sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
-           char **msg)
+static void
+sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
 {
-  ulong n;
-  if (*v == 0) n = *ptn;
-  else
+  if (*v)
   {
-    n = get_uint(v);
-    if (*ptn == n) return gnil;
+    ulong n = get_uint(v);
     if (n > Max || n < Min)
     {
       char *buf = stackmalloc(strlen(s) + 2 * 20 + 40);
@@ -280,6 +276,16 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     }
     *ptn = n;
   }
+}
+
+static GEN
+sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
+           char **msg)
+{
+  ulong n = *ptn;
+  sd_ulong_init(v, s, ptn, Min, Max);
+  if (*ptn == n) return gnil;
+  n = *ptn;
   switch(flag)
   {
     case d_RETURN: return utoi(n);
@@ -302,12 +308,11 @@ sd_realprecision(const char *v, int flag)
   pariout_t *fmt = GP_DATA->fmt;
   if (*v)
   {
-    long newnb = get_int(v, fmt->sigd);
-    ulong newprec = (ulong)ndec2prec(newnb);
-
-    if (fmt->sigd == newnb && prec == newprec) return gnil;
-    if (newnb <= 0) err(talker,"default: realprecision must be positive");
-    fmt->sigd = newnb; prec = newprec;
+    ulong newnb = fmt->sigd;
+    sd_ulong_init(v, "realprecision", &newnb, 0,LGBITS);
+    if (fmt->sigd == (long)newnb) return gnil;
+    fmt->sigd = newnb;
+    prec = (ulong)ndec2prec(newnb);
   }
   if (flag == d_RETURN) return stoi(fmt->sigd);
   if (flag == d_ACKNOWLEDGE)
