@@ -489,6 +489,7 @@ static int col_index, lin_index, max_width, max_lin;
 static int
 term_width_intern(void)
 {
+  if (GP_DATA && GP_DATA->flags & TEST) return 0;
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
@@ -514,6 +515,7 @@ term_width_intern(void)
 static int
 term_height_intern(void)
 {
+  if (GP_DATA && GP_DATA->flags & TEST) return 0;
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;

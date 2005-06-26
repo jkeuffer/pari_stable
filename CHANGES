@@ -116,6 +116,7 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
    15- implement pari_is_dir() using stat() instead of opendir()
    16- moved defaults from gp/gp.c to language/default.c [ -> into libpari ]
    17- moved input_loop to language/es.c [-> into libpari ]
+   18- when called as 'gp --test', disregard actual terminal dimensions
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
