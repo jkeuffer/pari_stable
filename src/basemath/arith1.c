@@ -2207,10 +2207,7 @@ Qsfcont(GEN x, GEN y, long k)
   if (i > 1 && gcmp1((GEN)z[i]))
   {
     cgiv((GEN)z[i]); --i;
-    if (is_universal_constant(z[i]))
-      z[i] = laddsi(1, (GEN)z[i]); /* may be gen_0 */
-    else
-      addsiz(1,(GEN)z[i], (GEN)z[i]);
+    z[i] = laddsi(1, (GEN)z[i]); /* unclean: leave old z[i] on stack */
   }
   setlg(z,i+1); return z;
 }
