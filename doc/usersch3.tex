@@ -2694,8 +2694,11 @@ associated to the elliptic curve $E$. $E$ is a $5$-component
 vector $[a_1,a_2,a_3,a_4,a_6]$ defining the elliptic curve with Weierstrass
 equation
 $$ Y^2 + a_1 XY + a_3 Y = X^3 + a_2 X^2 + a_4 X + a_6 $$
-or a string, in this case the coefficients of the curve with matching name are
-looked in the elldata database if available.
+or a string, in this case the coefficients of the curve with matching name
+are looked in the elldata database if available. For the time being, only
+curves over a prime field $\F_p$ and over the $p$-adic or real numbers
+(including rational numbers) are fully supported. Other domains are only
+supported for very basic operations such as point addition.
 
 The result of \tet{ellinit} is a an \tev{ell} structure by default, and
 a shorted \tev{sell} if $\fl=1$. Both contain the following information in

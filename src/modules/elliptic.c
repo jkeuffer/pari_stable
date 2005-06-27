@@ -342,7 +342,7 @@ initell0(GEN x, long prec)
 {
   GEN D, R, T, p, w, a1, b1, x1, u2, q, pi, pi2, tau, w1, w2;
   GEN y = cgetg(20,t_VEC);
-  long ty, i, e;
+  long i, e, stop = 0;
 
   smallinitell0(x,y);
 
@@ -350,21 +350,27 @@ initell0(GEN x, long prec)
   for (i=1; i<=5; i++)
   {
     q = (GEN)y[i];
-    if (typ(q)==t_PADIC)
-    {
-      long e2 = signe(q[4])? precp(q)+valp(q): valp(q);
-      if (e2 < e) e = e2;
-      if (!p) p = (GEN)q[2];
-      else if (!equalii(p,(GEN)q[2]))
-        err(talker,"incompatible p-adic numbers in initell");
+    switch(typ(q)) {
+      case t_PADIC:
+      {
+        long e2 = signe(q[4])? precp(q)+valp(q): valp(q);
+        if (e2 < e) e = e2;
+        if (!p) p = (GEN)q[2];
+        else if (!equalii(p,(GEN)q[2]))
+          err(talker,"incompatible p-adic numbers in initell");
+        break;
+      }
+      case t_INT: case t_REAL: case t_FRAC:
+        break;
+      default:
+        stop = 1; break;
     }
   }
   if (e < BIGINT) return padic_initell(y,p,e);
-
-  D = (GEN)y[12]; ty = typ(D);
-  if (!prec || !is_const_t(ty) || ty==t_INTMOD) { set_dummy(y); return y; }
+  if (!prec || stop) { set_dummy(y); return y; }
 
   R = roots(RHSpol(y),prec);
+  D = (GEN)y[12];
   if (gsigne(D) < 0) R[1] = (long)real_i((GEN)R[1]);
   else /* sort roots in decreasing order */
     R = gen_sort(real_i(R), 0, invcmp);
