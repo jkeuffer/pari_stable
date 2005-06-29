@@ -3746,7 +3746,7 @@ torsbound(GEN e)
 }
 
 static GEN
-_round(GEN x, long *e)
+myround(GEN x, long *e)
 {
   GEN y = grndtoi(x,e);
   if (*e > -5 && bit_accuracy(gprecision(x)) < gexpo(y) - 10)
@@ -3761,9 +3761,9 @@ torspnt(GEN E, GEN w, long n, long prec)
 {
   GEN p = cgetg(3,t_VEC), q = pointell(E, w, prec);
   long e;
-  p[1] = lmul2n(_round(gmul2n((GEN)q[1],2), &e),-2);
+  p[1] = lmul2n(myround(gmul2n((GEN)q[1],2), &e),-2);
   if (e > -5 || typ(p[1]) == t_COMPLEX) return NULL;
-  p[2] = lmul2n(_round(gmul2n((GEN)q[2],3), &e),-3);
+  p[2] = lmul2n(myround(gmul2n((GEN)q[2],3), &e),-3);
   if (e > -5 || typ(p[2]) == t_COMPLEX) return NULL;
   return (oncurve(E,p)
       && is_inf(powell(E,p,utoipos(n)))
