@@ -2164,6 +2164,7 @@ dirzetak0(GEN nf, long N0)
   byteptr d = diffptr;
   long court[] = {evaltyp(t_INT)|_evallg(3), evalsigne(1)|evallgefint(3),0};
 
+  (void)evallg(N0+1);
   c  = cgetalloc(t_VECSMALL, N0+1);
   c2 = cgetalloc(t_VECSMALL, N0+1);
   c2[1] = c[1] = 1; for (i=2; i<=N0; i++) c[i] = 0;
