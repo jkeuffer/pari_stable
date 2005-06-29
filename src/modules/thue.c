@@ -524,12 +524,12 @@ MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, int s, GEN c1)
 
 /* Check for solutions under a small bound (see paper) */
 static GEN
-SmallSols(GEN S, int Bx, GEN poly, GEN rhs, GEN ro)
+SmallSols(GEN S, long Bx, GEN poly, GEN rhs, GEN ro)
 {
   pari_sp av = avma, lim = stack_lim(av, 1);
   const long prec = DEFAULTPREC;
   GEN X, Y, sqrtnRHS, P, r;
-  int x, j, n = degpol(poly);
+  long x, j, n = degpol(poly);
   double bndyx;
 
   if (DEBUGLEVEL>1) fprintferr("* Checking for small solutions\n");
