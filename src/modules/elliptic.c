@@ -2441,6 +2441,7 @@ apell1(GEN e, GEN p)
   A = gen_0; B = gen_1; h = p1p;
   for(;;)
   {
+    long CODE;
     while (!KRO || KRO == KROold)
     { /* look for points alternatively on E and its quadratic twist E' */
       x++; /* u = x^3 + c4 x + c6 */
@@ -2462,6 +2463,7 @@ apell1(GEN e, GEN p)
     if (!fh) goto FOUND;
 
     s = itos( gceil(gsqrt(gdiv(pordmin,B),DEFAULTPREC)) ) >> 1;
+    CODE = evaltyp(t_VECSMALL) | evallg(s+1);
     /* look for h s.t f^h = 0 */
     if (!tx)
     { /* first time: initialize */
@@ -2470,7 +2472,7 @@ apell1(GEN e, GEN p)
       ti = newbloc(s+1);
     }
     F = powsell(cp4,f,B,p);
-    *tx = evaltyp(t_VECSMALL) | evallg(s+1);
+    *tx = CODE;
 
     /* F = B.f */
     p1 = gcopy(fh);
