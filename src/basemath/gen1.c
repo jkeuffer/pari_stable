@@ -941,13 +941,9 @@ gadd(GEN x, GEN y)
         /* take advantage of y = t^n ! */
         d = degpol(d)? greffe(d,l,1) : gel(d,2);
         y = gdiv(n, d);
-        if (typ(y) == t_SER) {
-          setvalp(y, valp(y) - vd);
-          return gerepileupto(av, gadd(y, x));
-        }
-        y = add_ser_scal(x, y, vx, valp(x) + vd);
+        if (typ(y) != t_SER) y = greffe(y,l,1);
         setvalp(y, valp(y) - vd);
-        return gerepileupto(av, y);
+        return gerepileupto(av, gadd(y, x));
       }
       break;
   }
