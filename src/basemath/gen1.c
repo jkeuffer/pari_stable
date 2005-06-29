@@ -372,7 +372,7 @@ addpp(GEN x, GEN y)
   }
   else
   {
-    if (ry < rx) { r=ry; mod = (GEN)x[3]; } else { r=rx; mod = (GEN)y[3]; }
+    if (ry < rx) { r=ry; mod = (GEN)y[3]; } else { r=rx; mod = (GEN)x[3]; }
     u = addii((GEN)x[4], (GEN)y[4]);
     if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
     {
