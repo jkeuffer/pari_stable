@@ -78,9 +78,6 @@ is wrong [second one is principal]. Group structure and regulator are correct!
 
 4  changing primelimit from within forprime loop yields unpredictable results
 
-3  after allocatemem() / default(parisize, ...), the rest of the command is
-   discarded (ends by a longjmp).
-
 2  under GP after an error, memory is only recovered from "entire variables".
    Individual components of lists/vectors/matrices are left alone if the
    GLOBAL object wasn't modified during the last cycle (i.e only v[x] = ... 
