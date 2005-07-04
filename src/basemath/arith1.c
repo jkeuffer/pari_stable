@@ -2778,7 +2778,7 @@ static GEN
 sqr_primeform(GEN x, long f) { return redimag(gsqr(primeform_u(x, f))); }
 
 #define MAXFORM 11
-#define _low(to, x) { GEN __x = (GEN)(x); to = modBIL(__x); }
+#define _low(to, x) { GEN __x = (GEN)(x); to = signe(__x)?modBIL(__x):0; }
 
 /* h(x) for x<0 using Baby Step/Giant Step.
  * Assumes G is not too far from being cyclic.

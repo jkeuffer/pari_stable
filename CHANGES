@@ -81,6 +81,8 @@ GTo21- wrong prototype for qfrep
    27- acos(x < 0) --> result off by Pi [ introduced in 2.2.9-A3 ]
    27- ellrootno(e,p) incorrect in the case of good reduction [#262]
    28- (rare) "impossible assignment I-->I" in contfrac
+   29- typo in qfbclassno's hash function (when D < 0, function can't handle 0).
+       qfbclassno(-948) --> division by 0 [GMP kernel]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
