@@ -454,6 +454,7 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   y[4] = lmul(v4,gadd(p1,gmul(r,gadd(gmul2n((GEN)e[2],1),rx3))));
   /* A6 = (r^3 + a2 r^2 + a4 r + a6 - t(t + a1 r + a3)) / u^6 */
   y[5] = lmul(v6,gsub(ellRHS(e,r), gmul(t,gadd(t, p2))));
+  if (lx == 6) return y;
 
   /* B2 = (b2 + 12r) / u^2 */
   y[6] = lmul(v2,gadd((GEN)e[6],gmul2n(rx3,2)));
@@ -506,7 +507,7 @@ GEN
 coordch(GEN e, GEN w)
 {
   pari_sp av = avma;
-  checkch(w); checkell(e);
+  checkch(w); checksell(e);
   return gerepilecopy(av, _coordch(e, w));
 }
 

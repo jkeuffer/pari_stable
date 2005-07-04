@@ -162,12 +162,10 @@ GEN
 ellidentify(GEN E)
 {
   pari_sp ltop=avma;
-  GEN G, V, M;
+  GEN V, M, G = ellglobalred(E);
   long j;
-  checkell(E);
-  G=ellglobalred(E);
-  V=ellcondlist(itos(gel(G,1)));
-  M=vecslice(coordch(E,gel(G,2)),1,5);
+  V = ellcondlist(itos(gel(G,1)));
+  M = coordch(vecslice(E,1,5),gel(G,2));
   for (j=1; j<lg(V); j++)
     if (gequal(gmael(V,j,2), M))
       return gerepilecopy(ltop, mkvec2(gel(V,j),gel(G,2)));
