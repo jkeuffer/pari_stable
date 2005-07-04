@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lceil   (long)gceil
 #define lch     (long)gch
 #define lconcat (long)concat
+#define lconj   (long)gconj
 #define lcontent (long)content
 #define ldet2   (long)det2
 #define ldet    (long)det

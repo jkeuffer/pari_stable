@@ -1129,7 +1129,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
 	hitsum += ((4.0 * h->M) / p);
       }
       fprintferr("MPQS DEBUG: hits from FB[%d]=%ld up: %10.2f\n",
-		 j, (long) FB[j].fbe_p, hitsum);
+		 j, (long)(FB[j].fbe_p), hitsum);
     }
   }
 #endif
@@ -3483,8 +3483,8 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
           fprintferr("MPQS: splitting N after %ld kernel vector%s\n",
                      i+1, (i? "s" : ""));
         (void)dvdiiz(N, D1, N); /* divide N in place */
-        res[1] = (long)(N); /* we'll gcopy this anyway before exiting */
-        res[2] = (long)D1;
+        gel(res,1) = N; /* we'll gcopy this anyway before exiting */
+        gel(res,2) = D1;
         res_last = res_next = 3;
         if (res_max == 2) break; /* two out of two possible factors seen */
 
@@ -3507,14 +3507,14 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
 	/* actually, also skip square roots of squares etc.  They are a lot
          * smaller than the original N, and should be easy to deal with later */
 	av3 = avma;
-	D1 = gcdii(X_plus_Y, (GEN)res[j]);
+	D1 = gcdii(X_plus_Y, gel(res,j));
 	if (is_pm1(D1)) continue; /* this one doesn't help us */
-	if ( (flag = egalii(D1, (GEN)res[j])) )
+	if ( (flag = egalii(D1, gel(res,j))) )
 	{ /* bad one, try the other */
           avma = av3;
-	  D1 = gcdii(X_minus_Y, (GEN)res[j]);
+	  D1 = gcdii(X_minus_Y, gel(res,j));
 	}
-	if (!flag || (!is_pm1(D1) && !egalii(D1, (GEN)res[j])))
+	if (!flag || (!is_pm1(D1) && !egalii(D1, gel(res,j))))
 	{ /* got one which splits this factor */
           if (DEBUGLEVEL >= 5)
             fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",
@@ -3536,13 +3536,13 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
 	  }
 	  /* now there is room; divide into existing factor and store the
 	     new gcd.  Remove the known-composite flag from the old entry */
-	  (void)dvdiiz((GEN)res[j], D1, (GEN)res[j]);
-	  res[res_next] = (long)D1; res[res_size+j] = 0;
+	  (void)dvdiiz(gel(res,j), D1, gel(res,j));
+	  gel(res,res_next) = D1; res[res_size+j] = 0;
 	  if (++res_next > res_max) break; /* all possible factors seen */
 
 	  /* no longer bother preserving the cloned N or what is left of it
            * when we hit it here */
-          if (split((GEN)res[j], &res[res_size+j], res + j)) done++;
+          if (split(gel(res,j), &res[res_size+j], res + j)) done++;
           if (split(D1, &res[res_size+res_last], res + res_last)) done++;
 	} /* else it didn't help on this factor, try the next one... */
 	else avma = av3;	/* ...after destroying the gcds */
@@ -3603,7 +3603,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
 				   mark as `unknown' */
     if (DEBUGLEVEL >= 6)
       fprintferr("\tpackaging %ld: %Z ^%ld (%s)\n", i, res[i],
-		 itos((GEN)new_res[j-2]), (flag == (long)gen_0 ? "comp." : "unknown"));
+		 itos(gel(new_res,j-2)), (flag == (long)gen_0 ? "comp." : "unknown"));
   }
   return gerepileupto(av, new_res);
 }

@@ -117,8 +117,9 @@ galoisconj2(GEN nf, long nbmax, long prec)
     polr[i] = p1[i];
   for (j = i; i <= ru; i++)
   {
-    polr[j++] = p1[i];
-    polr[j++] = lconj((GEN) p1[i]);
+    GEN z = gel(p1,i);
+    gel(polr,j++) = z;
+    gel(polr,j++) = gconj(z);
   }
   p2 = gmael(nf, 5, 1);
   w = cgetg(n + 2, t_VEC);

@@ -50,10 +50,10 @@ makepoldeg1(GEN c, GEN d)
   GEN z;
   if (signe(c)) {
     z = cgetg(4,t_POL); z[1] = evalsigne(1);
-    z[2] = (long)d; z[3] = (long)c;
+    gel(z,2) = d; gel(z,3) = c;
   } else if (signe(d)) {
     z = cgetg(3,t_POL); z[1] = evalsigne(1);
-    z[2] = (long)d;
+    gel(z,2) = d;
   } else {
     z = cgetg(2,t_POL); z[1] = evalsigne(0);
   }
@@ -93,7 +93,7 @@ u_red_cyclo2n_ip(GEN x, long n)
     if (x[i]) break;
   i += 2;
   z = cgetg(i, t_POL); z[1] = evalsigne(1);
-  for (i--; i>=2; i--) z[i] = lstoi(x[i-1]);
+  for (i--; i>=2; i--) gel(z,i) = stoi(x[i-1]);
   return z;
 }
 /* x t_POL, n > 0. Return x mod polcyclo(2^n) = (x^(2^(n-1)) + 1). IN PLACE */
@@ -102,7 +102,7 @@ red_cyclo2n_ip(GEN x, long n)
 {
   long i, pow2 = 1<<(n-1);
   for (i = lg(x)-1; i>pow2+1; i--)
-    if (signe(x[i])) x[i-pow2] = lsubii((GEN)x[i-pow2], (GEN)x[i]);
+    if (signe(x[i])) x[i-pow2] = lsubii(gel(x,i-pow2), gel(x,i));
   return normalizepol_i(x, i+1);
 }
 static GEN
@@ -118,7 +118,7 @@ smallpolrev(GEN x)
   while (lx-- && x[lx]==0) /* empty */;
   i = lx+2; y = cgetg(i,t_POL);
   y[1] = evalsigne(1);
-  for (j=2; j<i; j++) y[j] = lstoi(x[j-1]);
+  for (j=2; j<i; j++) gel(y,j) = stoi(x[j-1]);
   return y;
 }
 
@@ -154,7 +154,7 @@ static GEN
 sqrconst(GEN pol, Red *R)
 {
   GEN z = cgetg(3,t_POL);
-  z[2] = (long)centermodii(sqri((GEN)pol[2]), R->N, R->N2);
+  gel(z,2) = centermodii(sqri(gel(pol,2)), R->N, R->N2);
   z[1] = pol[1]; return z;
 }
 
@@ -167,8 +167,8 @@ sqrmod3(GEN pol, Red *R)
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);
-  a = (GEN)pol[3];
-  b = (GEN)pol[2]; bma = subii(b,a);
+  a = gel(pol,3);
+  b = gel(pol,2); bma = subii(b,a);
   A = centermodii(mulii(a,addii(b,bma)), R->N, R->N2);
   B = centermodii(mulii(bma,addii(a,b)), R->N, R->N2);
   return makepoldeg1(A,B);
@@ -183,8 +183,8 @@ sqrmod4(GEN pol, Red *R)
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);
-  a = (GEN)pol[3];
-  b = (GEN)pol[2];
+  a = gel(pol,3);
+  b = gel(pol,2);
   A = centermodii(mulii(a, shifti(b,1)), R->N, R->N2);
   B = centermodii(mulii(subii(b,a),addii(b,a)), R->N, R->N2);
   return makepoldeg1(A,B);
@@ -199,8 +199,8 @@ sqrmod5(GEN pol, Red *R)
 
   if (lv==2) return pol;
   if (lv==3) return sqrconst(pol, R);
-  c = (GEN)pol[3]; c2 = shifti(c,1);
-  d = (GEN)pol[2];
+  c = gel(pol,3); c2 = shifti(c,1);
+  d = gel(pol,2);
   if (lv==4)
   {
     A = sqri(d);
@@ -210,7 +210,7 @@ sqrmod5(GEN pol, Red *R)
     B = centermodii(B, R->N, R->N2);
     C = centermodii(C, R->N, R->N2); return coefs_to_pol(3,A,B,C);
   }
-  b = (GEN)pol[4];
+  b = gel(pol,4);
   if (lv==5)
   {
     A = mulii(b, subii(c2,b));
@@ -220,7 +220,7 @@ sqrmod5(GEN pol, Red *R)
   }
   else
   { /* lv == 6 */
-    GEN a = (GEN)pol[5], a2 = shifti(a,1);
+    GEN a = gel(pol,5), a2 = shifti(a,1);
     /* 2a(d - c) + b(2c - b) */
     A = addii(mulii(a2, subii(d,c)), mulii(b, subii(c2,b)));
     /* c(c - 2a) + b(2d - b) */
@@ -250,8 +250,8 @@ _powpolmod(Cache *C, GEN jac, Red *R, GEN (*_sqr)(GEN, Red *))
   long f;
   pari_sp av;
 
-  vz = cgetg(lv+1, t_VEC); vz[1] = (long)res;
-  for (f=2; f<=lv; f++) vz[f] = (long)_mul((GEN)vz[f-1], pol2, R);
+  vz = cgetg(lv+1, t_VEC); gel(vz,1) = res;
+  for (f=2; f<=lv; f++) gel(vz,f) = _mul(gel(vz,f-1), pol2, R);
   av = avma;
   for (f = efin; f >= 1; f--)
   {
@@ -273,7 +273,7 @@ _powpolmodsimple(Cache *C, Red *R, GEN jac)
 
   R->red = &_redsimple;
   for (j=1; j<ph; j++)
-    w[j] = (long)_powpolmod(C, centermodii((GEN)w[j], R->N, R->N2), R, &sqrmod);
+    gel(w,j) = _powpolmod(C, centermodii(gel(w,j), R->N, R->N2), R, &sqrmod);
   w = centermod_i( gmul(C->matinvvite, w), R->N, R->N2 );
   return RgV_to_RgX(w, 0);
 }
@@ -313,8 +313,8 @@ e(ulong t, GEN *globfa)
   long lfa, i, j;
 
   fa = factoru(t);
-  P = (GEN)fa[1];
-  E = (GEN)fa[2]; lfa = lg(P);
+  P = gel(fa,1);
+  E = gel(fa,2); lfa = lg(P);
   nbd = 1;
   for (i=1; i<lfa; i++) { E[i]++; nbd *= E[i]; }
   Primes = cget1(nbd + 1, t_VECSMALL);
@@ -522,7 +522,7 @@ calcjac(Cache **pC, GEN globfa, GEN *ptabfaq, GEN *ptabj)
     compute_fg(q, 1, &tabf, &tabg);
 
     J = cgetg(lfaq,t_VEC);
-    J[1] = lgetg(1,t_STR); /* dummy */
+    gel(J,1) = cgetg(1,t_STR); /* dummy */
     for (j=2; j<lfaq; j++) /* skip p = P[1] = 2 */
     {
       long pe = PE[j];
@@ -598,7 +598,7 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
     for (i=1; i<=pk; i++)
     {
       GEN z = FpX_rem(gpowgs(polx[0],i-1), C->cyc, R->N);
-      eta[i] = (long)centermod_i(z, R->N, R->N2);
+      gel(eta,i) = centermod_i(z, R->N, R->N2);
     }
     C->eta = eta;
   }
@@ -616,24 +616,24 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
     GEN vpa, p1, p2, p3, a2 = NULL, a = finda(Cp, R->N, pk, p);
     long jj, ph = pk - pk/p;
 
-    vpa = cgetg(ph+1,t_COL); vpa[1] = (long)a;
+    vpa = cgetg(ph+1,t_COL); gel(vpa,1) = a;
     if (pk > p) a2 = centermodii(sqri(a), R->N, R->N2);
     jj = 1;
     for (i=2; i<pk; i++) /* vpa = { a^i, (i,p) = 1 } */
       if (i%p) { 
-        GEN z = mulii((i%p==1) ? a2 : a, (GEN)vpa[jj]);
-        vpa[++jj] = (long)centermodii(z , R->N, R->N2);
+        GEN z = mulii((i%p==1) ? a2 : a, gel(vpa,jj));
+        gel(vpa,++jj) = centermodii(z , R->N, R->N2);
       }
-    if (!gcmp1( centermodii( mulii(a, (GEN)vpa[ph]), R->N, R->N2) )) return 0;
+    if (!gcmp1( centermodii( mulii(a, gel(vpa,ph)), R->N, R->N2) )) return 0;
     p1 = cgetg(ph+1,t_MAT);
-    p2 = cgetg(ph+1,t_COL); p1[1] = (long)p2;
-    for (i=1; i<=ph; i++) p2[i] = (long)gen_1;
-    j = 2; p1[j] = (long)vpa; p3 = vpa;
+    p2 = cgetg(ph+1,t_COL); gel(p1,1) = p2;
+    for (i=1; i<=ph; i++) gel(p2,i) = gen_1;
+    j = 2; gel(p1,j) = vpa; p3 = vpa;
     for (j++; j <= ph; j++)
     {
-      p2 = cgetg(ph+1,t_COL); p1[j] = (long)p2;
+      p2 = cgetg(ph+1,t_COL); gel(p1,j) = p2;
       for (i=1; i<=ph; i++) 
-        p2[i] = (long)centermodii(mulii((GEN)vpa[i],(GEN)p3[i]), R->N, R->N2);
+        gel(p2,i) = centermodii(mulii(gel(vpa,i),gel(p3,i)), R->N, R->N2);
       p3 = p2;
     }
     C->matvite = p1;
@@ -717,7 +717,7 @@ aut(long pk, GEN z, long a)
   GEN v = cgetg(pk+1,t_VEC);
   long i;
   for (i=1; i<=pk; i++)
-    v[i] = (long)polcoeff0(z, (a*(i-1))%pk, 0);
+    gel(v,i) = polcoeff0(z, (a*(i-1))%pk, 0);
   return gtopolyrev(v,0);
 }
 
@@ -755,7 +755,7 @@ look_eta(GEN eta, long pk, GEN z)
 {
   long i;
   for (i=1; i<=pk; i++)
-    if (gequal(z, (GEN)eta[i])) return i-1;
+    if (gequal(z, gel(eta,i))) return i-1;
   return -1;
 }
 /* same pk = 2^k */
@@ -768,7 +768,7 @@ look_eta2(long k, GEN z)
   { 
     if (!ismonome(z)) return -1;
     d = degpol(z);
-    z = (GEN)z[d+2]; /* leading term */
+    z = gel(z,d+2); /* leading term */
   }
   s = signe(z);
   if (!s || !is_pm1(z)) return -1;

@@ -42,7 +42,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define laddrr  (long)addrr
 #define laddsi  (long)addsi
 #define lclone  (long)gclone
-#define lconj   (long)gconj
 #define lcopy   (long)gcopy
 #define lcos    (long)gcos
 #define lcvtoi  (long)gcvtoi

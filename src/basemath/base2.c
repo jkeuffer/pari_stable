@@ -3636,18 +3636,18 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
   roorder = nf_all_roots(nf, pol, prec);
   if (!roorder) return NULL;
   ru = lg(roorder);
-  unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) unro[i] = (long)gen_1;
-  powreorder = cgetg(lx,t_MAT); powreorder[1] = (long)unro;
+  unro = cgetg(lx,t_COL); for (i=1; i<lx; i++) gel(unro,i) = gen_1;
+  powreorder = cgetg(lx,t_MAT); gel(powreorder,1) = unro;
   T2 = cgetg(ru, t_VEC);
   for (i = 1; i < ru; i++)
   {
-    GEN ro = (GEN)roorder[i];
+    GEN ro = gel(roorder,i);
     GEN m = initmat(lx);
     for (k=2; k<lx; k++)
     {
-      GEN c = cgetg(lx, t_COL); powreorder[k] = (long)c;
+      GEN c = cgetg(lx, t_COL); gel(powreorder,k) = c;
       for (j=1; j < lx; j++)
-	c[j] = lmul((GEN)ro[j], gmael(powreorder,k-1,j));
+	c[j] = lmul(gel(ro,j), gmael(powreorder,k-1,j));
     }
     for (l = 1; l < lx; l++)
       for (k = 1; k <= l; k++)
@@ -3657,14 +3657,14 @@ rel_T2(GEN nf, GEN pol, long lx, long prec)
           s = gadd(s, gmul(gconj(gmael(powreorder,k,j)),
                                  gmael(powreorder,l,j)));
         if (l == k)
-          coeff(m, l, l) = (long)real_i(s);
+          gcoeff(m, l, l) = real_i(s);
         else
         {
-          coeff(m, k, l) = (long)s;
-          coeff(m, l, k) = lconj(s);
+          gcoeff(m, k, l) = s;
+          gcoeff(m, l, k) = gconj(s);
         }
       }
-    T2[i] = (long)m;
+    gel(T2,i) = m;
   }
   return T2;
 }
