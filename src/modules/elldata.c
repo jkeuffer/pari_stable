@@ -131,14 +131,13 @@ ellsearch(GEN A)
     f=itos(A); 
     c=-1; 
     i=-1;
-  }
-  else if (typ(A)==t_STR) 
-  {
+  } else if (typ(A)==t_STR) {
     if (!ellparsename(GSTR(A),&f,&c,&i))
       err(talker,"Incorrect curve name in ellsearch");
-  }
-  else
+  } else {
     err(typeer,"ellsearch");
+    return NULL;
+  }
   V=ellcondlist(f);
   if (c<0) 
     return V;
