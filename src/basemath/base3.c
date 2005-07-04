@@ -1634,7 +1634,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     for (i = 1; i < lg(cyc); i++)
     {
       GEN t = modii(negi(gel(e,i)), gel(cyc,i));
-      *++y = lnegi(t); if (!signe(t)) continue;
+      *++y = (long)negi(t); if (!signe(t)) continue;
 
       if (mod2(t)) *psigne = *psigne? gadd(*psigne, gel(s,i)): gel(s,i);
       if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);
@@ -1885,7 +1885,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
         { /* log(g^f) mod idele */
           GEN g = gel(G,k), f = gel(F,k), a = element_powmodideal(nf,g,f,x);
           GEN sgn = mpodd(f)? zsigne(nf, g, S.archp): zerocol(lg(S.archp)-1);
-          h[++cp] = lneg(zlog_ind(nf, a, &S, sgn, i));
+          gel(h,++cp) = gneg(zlog_ind(nf, a, &S, sgn, i));
           coeff(h,cp,cp) = F[k];
         }
       }

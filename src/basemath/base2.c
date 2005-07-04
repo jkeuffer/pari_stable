@@ -3109,7 +3109,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
     if (gequal(gel(I,i),id)) { gel(Iz,i) = id; Az[i] = A[i]; continue; }
 
     gel(Iz,i) = Q_primitive_part(gel(I,i), &p1);
-    Az[i] = p1? lmul(gel(A,i),p1): A[i];
+    gel(Az,i) = p1? gmul(gel(A,i),p1): gel(A,i);
     if (p1 && gequal(gel(Iz,i), id)) continue;
 
     p1 = gen_if_principal(bnf, gel(Iz,i));
@@ -3210,7 +3210,7 @@ rnfsteinitz(GEN nf, GEN order)
     if (gequal(b,Id))
     {
       gel(A,i) = c2;
-      A[i+1]= lneg(c1);
+      gel(A,i+1) = gneg(c1);
       gel(I,i) = b;
       gel(I,i+1) = a;
     }

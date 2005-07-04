@@ -795,7 +795,7 @@ compute_polrel(GEN nfz, toK_s *T, GEN be, long g, long ell)
     p1 = to_alg(nfz, factorbackelt(powtau_prim_invbe, m_mu, nfz));
     if (C_invbe) p1 = gmul(p1, powgi(C_invbe, sum(m_mu,1,m)));
     /* root += zeta_ell^{r_i} T^{r_i} be^mu_i */
-    root[ 2 + r[i+1] ] = lmul(gpowgs(polx[vT], r[i+1]), p1);
+    gel(root, 2 + r[i+1]) = gmul(gpowgs(polx[vT], r[i+1]), p1);
   }
   /* Other roots are as above with z_ell --> z_ell^j. 
    * Treat all contents (C_*) and principal parts (prim_*) separately */

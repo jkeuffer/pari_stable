@@ -37,64 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #define ladd    (long)gadd
 #define lcopy   (long)gcopy
-#define licopy  (long)icopy
-#define limag   (long)gimag
-#define linteg  (long)integ
-#define linv    (long)ginv
-#define linvmat (long)invmat
-#define linvmod (long)ginvmod
-#define llegendre (long)legendre
 #define llift   (long)lift
-#define llngamma  (long)glngamma
-#define llog    (long)glog
-#define lmaxgs    (long)gmaxgs
-#define lmax    (long)gmax
-#define lmaxsg    (long)gmaxsg
-#define lmings    (long)gmings
-#define lmin    (long)gmin
-#define lminsg    (long)gminsg
-#define lmodgs    (long)gmodgs
-#define lmodii  (long)modii
-#define lmod    (long)gmod
-#define lmodsg    (long)gmodsg
-#define lmodsi  (long)modsi
-#define lmodulcp  (long)gmodulcp
-#define lmodulo  (long)gmodulo
-#define lmpabs  (long)mpabs
-#define lmpadd  (long)mpadd
-#define lmpcos  (long)mpcos
-#define lmpdiv  (long)mpdiv
-#define lmpent  (long)mpent
-#define lmpeuler (long)mpeuler
-#define lmpexp1 (long)mpexp1
-#define lmpexp  (long)mpexp
-#define lmpfact (long)mpfact
-#define lmplog  (long)mplog
-#define lmpmul  (long)mpmul
-#define lmpneg  (long)mpneg
-#define lmppgcd (long)mppgcd
-#define lmppi   (long)mppi
-#define lmpshift (long)mpshift
-#define lmpsin  (long)mpsin
-#define lmpsqrt (long)mpsqrt
-#define lmpsub  (long)mpsub
-#define lmptrunc (long)mptrunc
-#define lmul2n  (long)gmul2n
-#define lmulgs  (long)gmulgs
-#define lmulii  (long)mulii
-#define lmulir  (long)mulir
-#define lmulis  (long)mulis
-#define lmul    (long)gmul
-#define lmulri  (long)mulri
-#define lmulrr  (long)mulrr
-#define lmulrs  (long)mulrs
-#define lmulsg  (long)gmulsg
-#define lmulsi  (long)mulsi
-#define lmulsr  (long)mulsr
-#define lmulss  (long)mulss
-#define lnegi   (long)negi
-#define lneg    (long)gneg
-#define lnegr   (long)negr
 #define lnorml2 (long)gnorml2
 #define lnorm   (long)gnorm
 #define lpilecopy (long)gerepilecopy
@@ -140,9 +83,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lsubrs  (long)subrs
 #define lsubst  (long)gsubst
 #define lutoi   (long)utoi
-
-/* ldiv is a predefined macro on some AIX versions --GN1997Jan27 */
-#ifdef ldiv
-#undef ldiv
-#endif
-#define ldiv    (long)gdiv

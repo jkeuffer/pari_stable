@@ -2335,7 +2335,7 @@ image2(GEN x)
   else p1=idmat(n);
 
   tetpil=avma; p2=cgetg(n-k+1,t_MAT);
-  for (i=k+1; i<=n; i++) p2[i-k]=lmul(x,gel(p1,i));
+  for (i=k+1; i<=n; i++) gel(p2,i-k) = gmul(x,gel(p1,i));
   return gerepile(av,tetpil,p2);
 }
 

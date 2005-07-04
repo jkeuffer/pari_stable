@@ -750,7 +750,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
     s0 = gdiv(s0, sqrtnc);
     if (check && - expo(subrs(gnorm(s0), 1)) < bit_accuracy(prec) >> 1)
       err(bugparier, "ArtinNumber");
-    W[indW[ic]] = lmul(s0, z);
+    gel(W, indW[ic]) = gmul(s0, z);
   }
   return gerepilecopy(av, W);
 }

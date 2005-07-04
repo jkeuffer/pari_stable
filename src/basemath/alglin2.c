@@ -1474,8 +1474,8 @@ hnf_special(GEN x, long remove)
     {
       if (s < 0)
       {
-        x[def] = lneg(gel(x,def)); p1 = gcoeff(x,i,def);
-        x2[def]= lneg(gel(x2,def));
+        gel(x,def) = gneg(gel(x,def)); p1 = gcoeff(x,i,def);
+        gel(x2,def)= gneg(gel(x2,def));
       }
       for (j=def+1; j<co; j++)
       {

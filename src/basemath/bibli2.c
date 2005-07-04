@@ -156,7 +156,7 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
   {
     p2 = cgetg(4,t_POL); gel(p1,k++) = p2;
     p2[1] = code = evalsigne(1)|evalvarn(v);
-    p2[2] = plus? a[i]: lneg(gel(a,i));
+    gel(p2,2) = plus? gel(a,i): gneg(gel(a,i));
     gel(p2,3) = L;
   }
   setlg(p1, k); return divide_conquer_prod(p1, gmul);
@@ -306,7 +306,7 @@ convol(GEN x, GEN y)
 
   z = cgetg(lx - ex, t_SER);
   z[1] = evalsigne(1) | evalvalp(ex) | evalvarn(vx);
-  for (j = ex+2; j<lx; j++) z[j-ex] = lmul(gel(x,j),gel(y,j));
+  for (j = ex+2; j<lx; j++) gel(z,j-ex) = gmul(gel(x,j),gel(y,j));
   return normalize(z);
 }
 

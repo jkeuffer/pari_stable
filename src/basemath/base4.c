@@ -991,7 +991,7 @@ idealmulspec(GEN nf, GEN x, GEN y)
     for (i=1; i<=N; i++) gel(m,i) = element_muli(nf,alpha,gel(x,i));
   }
   mod = mulii(a, gcoeff(x,1,1));
-  for (i=1; i<=N; i++) m[i+N] = lmul(a,gel(x,i));
+  for (i=1; i<=N; i++) gel(m,i+N) = gmul(a,gel(x,i));
   return hnfmodid(m,mod);
 }
 

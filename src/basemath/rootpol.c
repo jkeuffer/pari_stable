@@ -321,7 +321,7 @@ graeffe(GEN p)
   t = cgetg(ns1+4, t_POL);
   t[1] = evalsigne(1)|evalvarn(0);
   gel(t,2) = gen_0;
-  for (i=0; i<=ns1; i++) t[3+i] = lneg(gel(s1,2+i));
+  for (i=0; i<=ns1; i++) gel(t,3+i) = gneg(gel(s1,2+i));
   return gadd(s0,t); /* now t contains -x * s1 */
 }
 
@@ -536,7 +536,7 @@ homothetie(GEN p, double lrho, long bit)
   t = iR; r[n+2] = q[n+2];
   for (i=n-1; i>0; i--)
   {
-    r[i+2] = lmul(t, gel(q,i+2));
+    gel(r,i+2) = gmul(t, gel(q,i+2));
     t = mulrr(t, iR);
   }
   gel(r,2) = gmul(t, gel(q,2)); return r;
@@ -1037,7 +1037,7 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
   for (i=0; i<K; i++)
   {
     gel(RU,1) = prim2;
-    for (j=1; j<n; j++) RU[j+1] = lmul(gel(RU,j),prim2);
+    for (j=1; j<n; j++) gel(RU,j+1) = gmul(gel(RU,j),prim2);
     /* RU[j] = prim^(ij)= prim2^j */
 
     for (j=1; j<n; j++) gel(pd,j) = gmul(gel(qd,j+2),gel(RU,j));
@@ -1815,7 +1815,7 @@ fix_roots(GEN r, GEN *m, long h, long bit)
   {
     GEN p2, p1 = gel(r,i);
     p2 = (h == 2)? gsqrt(p1, prec): gsqrtn(p1, utoipos(h), NULL, prec);
-    for (j=0; j<h; j++) allr[k++] = lmul(p2, gel(ro1,j));
+    for (j=0; j<h; j++) gel(allr,k++) = gmul(p2, gel(ro1,j));
     gunclone(p1);
   }
   *m = roots_to_pol(allr, 0);

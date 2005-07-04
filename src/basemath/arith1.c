@@ -1600,7 +1600,7 @@ chinese(GEN x, GEN y)
       p1 = gdiv(gel(x,1),d);
       p2 = gadd(gel(x,2), gmul(gmul(u,p1), p2));
 
-      tetpil=avma; gel(z,1) = gmul(p1,gel(y,1)); z[2]=lmod(p2,gel(z,1));
+      tetpil=avma; gel(z,1) = gmul(p1,gel(y,1)); gel(z,2) = gmod(p2,gel(z,1));
       gerepilecoeffssp(av,tetpil,z+1,2); return z;
     case t_INTMOD:
       z = cgetg(3,t_INTMOD); av = avma;

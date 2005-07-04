@@ -391,7 +391,7 @@ initell0(GEN x, long prec)
   pi = mppi(prec); pi2 = gmul2n(pi,1);
   tau = mulcxmI( gdiv(glog(q,prec),pi2) );
 
-  y[19] = lmul(gmul(gsqr(pi2),gabs(u2,prec)), imag_i(tau));
+  gel(y,19) = gmul(gmul(gsqr(pi2),gabs(u2,prec)), imag_i(tau));
   w1 = gmul(pi2, gsqrt(gneg_i(u2),prec));
   w2 = gmul(tau, w1);
   if (signe(b1) < 0)
@@ -473,10 +473,10 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
   p1 = gadd(gmulsg(3,gel(e,7)),gadd(b2r, gmulsg(3,r2)));
   gel(y,9) = gmul(gsqr(v4),
               gadd(gel(e,9), gmul(r,gadd(gmulsg(3,gel(e,8)), gmul(r,p1)))));
-  y[10] = lmul(v4,gel(e,10));
-  y[11] = lmul(v6,gel(e,11));
-  y[12] = lmul(gsqr(v6),gel(e,12));
-  y[13] = e[13];
+  gel(y,10) = gmul(v4,gel(e,10));
+  gel(y,11) = gmul(v6,gel(e,11));
+  gel(y,12) = gmul(gsqr(v6),gel(e,12));
+  gel(y,13) = gel(e,13);
   if (lx > 14)
   {
     GEN R = gel(e,14);
@@ -484,10 +484,10 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
     else if (typ(e[1])==t_PADIC)
     {
       gel(y,14) = mkvec( gmul(v2, gsub(gel(R,1),r)) );
-      y[15] = lmul(gel(e,15), gsqr(u));
-      y[16] = lmul(gel(e,16), u);
-      y[17] = e[17];
-      y[18] = lmul(gel(e,18), v2);
+      gel(y,15) = gmul(gel(e,15), gsqr(u));
+      gel(y,16) = gmul(gel(e,16), u);
+      gel(y,17) = gel(e,17);
+      gel(y,18) = gmul(gel(e,18), v2);
       gel(y,19) = gen_0;
     }
     else
@@ -3397,7 +3397,7 @@ mathell(GEN e, GEN x, long prec)
     {
       h = ghell(e, addell(e,gel(x,i),gel(x,j)), prec);
       h = gsub(h, gadd(gel(pdiag,i),gel(pdiag,j)));
-      coeff(y,j,i) = coeff(y,i,j) = lmul2n(h, -1);
+      gcoeff(y,j,i) = gcoeff(y,i,j) = gmul2n(h, -1);
     }
   }
   return gerepilecopy(av,y);
@@ -3502,7 +3502,7 @@ elltaniyama(GEN e, long prec)
       setlg(x, prec+3);
       s2 = gsub(s1, gmul(c,gsqr(w)));
       s2 = gel(s2,2);
-      X[n+2] = lneg(gdiv(gel(s2,2),gel(s2,3)));
+      gel(X,n+2) = gneg(gdiv(gel(s2,2),gel(s2,3)));
     }
   }
 END:

@@ -918,8 +918,8 @@ factor_quad(GEN x, GEN res, long *ptcnt)
   z1 = gdiv(t, a); u = denom(z1);
   z2 = gdiv(addii(t, d), a);
   v = varn(x);
-  res[cnt++] = lmul(u, gsub(polx[v], z1)); u = diviiexact(a, u);
-  res[cnt++] = lmul(u, gsub(polx[v], z2)); *ptcnt = cnt;
+  gel(res,cnt++) = gmul(u, gsub(polx[v], z1)); u = diviiexact(a, u);
+  gel(res,cnt++) = gmul(u, gsub(polx[v], z2)); *ptcnt = cnt;
 }
 
 /* y > 1 and B integers. Let n such that y^(n-1) <= B < y^n.
@@ -3396,7 +3396,7 @@ pseudodiv(GEN x, GEN y, GEN *ptr)
   for (iz=0;;)
   {
     p--;
-    z[iz++] = lmul(gel(x,0), gel(ypow,p));
+    gel(z,iz++) = gmul(gel(x,0), gel(ypow,p));
     gel(x,0) = gneg(gel(x,0));
     for (i=1; i<=dy; i++)
       gel(x,i) = gadd(gmul(gel(y,0), gel(x,i)), gmul(gel(x,0),gel(y,i)));

@@ -425,7 +425,7 @@ subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le)
     znstar_coset_func(n, H, (void (*)(void *,long)) _subcyclo_orbits,
       (void *) &data, O[i]);
     avma = av; /* HACK */
-    V[i] = le?lmodii(s,le):lcopy(s);
+    gel(V,i) = le? modii(s,le): gcopy(s);
   }
   return V;
 }

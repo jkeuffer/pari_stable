@@ -88,7 +88,7 @@ extern char    *errmessage[], *current_psfile, *pari_datadir;
 #define copyifstack(x,y)  STMT_START {pari_sp _t=(pari_sp)(x); \
   (y)=(_t>=bot &&_t<top)? lcopy((GEN)_t): (long)_t;} STMT_END
 #define icopyifstack(x,y) STMT_START {pari_sp _t=(pari_sp)(x); \
-  (y)=(_t>=bot &&_t<top)? licopy((GEN)_t): (long)_t;} STMT_END
+  (y)=(_t>=bot &&_t<top)? (long)icopy((GEN)_t): (long)_t;} STMT_END
 #define isonstack(x) ((pari_sp)(x)>=bot && (pari_sp)(x)<top)
 
 /* Define this to (1) locally (in a given file, NOT here) to check

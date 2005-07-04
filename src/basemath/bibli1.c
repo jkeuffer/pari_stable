@@ -1765,7 +1765,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (!gcmp1(gel(P,d+2)))
   {
     gel(P,d+2) = bezout(gel(P,d+2), N, &z, &r);
-    for (j = 0; j < d; j++) P[j+2] = lmodii(mulii(gel(P,j+2), z), N);
+    for (j = 0; j < d; j++) gel(P,j+2) = modii(mulii(gel(P,j+2), z), N);
   }
   if (DEBUGLEVEL >= 2) fprintferr("Modified P: %Z\n", P);
 
