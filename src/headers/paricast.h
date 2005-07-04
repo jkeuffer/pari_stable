@@ -43,8 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define laddsi  (long)addsi
 #define lclone  (long)gclone
 #define lcopy   (long)gcopy
-#define lcos    (long)gcos
-#define lcvtoi  (long)gcvtoi
 #define lderiv  (long)deriv
 #define ldeuc   (long)gdeuc
 #define ldiscsr (long)discsr
@@ -164,8 +162,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lshifti (long)shifti
 #define lshift  (long)gshift
 #define lshiftr (long)shiftr
-#define lsh     (long)gsh
-#define lsin    (long)gsin
 #define lsqri   (long)sqri
 #define lsqr    (long)gsqr
 #define lsqrt   (long)gsqrt
@@ -183,12 +179,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lsubsi  (long)subsi
 #define lsubsr  (long)subsr
 #define lsubst  (long)gsubst
-#define ltan    (long)gtan
-#define ltchebi (long)tchebi
-#define lth     (long)gth
-#define ltrace  (long)gtrace
-#define ltrans  (long)gtrans
-#define ltrunc  (long)gtrunc
 #define lutoi   (long)utoi
 
 /* ldiv is a predefined macro on some AIX versions --GN1997Jan27 */

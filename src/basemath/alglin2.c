@@ -2017,8 +2017,8 @@ END2: /* clean up mat: remove everything to the right of the 1s on diagonal */
       GEN mat = cgetg(l + 1, t_MAT), emb = cgetg(l + 1, t_MAT);
       for (j = 1 ; j <= l; j++)
       {
-        mat[j] = gel(m0,j);
-        emb[j] = gel(CC,j);
+        mat[j] = m0[j];
+        emb[j] = CC[j];
       }
       H = hnfadd_i(H, perm, ptdep, ptB, &C, mat, emb);
       if (a == L) break;
