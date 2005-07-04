@@ -868,7 +868,7 @@ reorder(GEN x)
   for (n=0; n<lx; n++)
   { /* variables are numbered 0,1 etc... while polvar starts at 1. */
     i = var[n];
-    polvar[varsort[n]+1] = lpolx[i];
+    gel(polvar, varsort[n]+1) = polx[i];
     ordvar[i] = varsort[n];
   }
 

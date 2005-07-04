@@ -43,7 +43,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define laddsi  (long)addsi
 #define lclone  (long)gclone
 #define lcopy   (long)gcopy
-#define lderiv  (long)deriv
 #define ldeuc   (long)gdeuc
 #define ldiscsr (long)discsr
 #define ldiventgs (long)gdiventgs
@@ -175,9 +174,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lsubri  (long)subri
 #define lsubrr  (long)subrr
 #define lsubrs  (long)subrs
-#define lsubsg  (long)gsubsg
-#define lsubsi  (long)subsi
-#define lsubsr  (long)subsr
 #define lsubst  (long)gsubst
 #define lutoi   (long)utoi
 
@@ -186,8 +182,3 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #undef ldiv
 #endif
 #define ldiv    (long)gdiv
-
-#define lhalf   (long)ghalf
-#define lpolx   (long)polx
-#define lpolun  (long)polun
-

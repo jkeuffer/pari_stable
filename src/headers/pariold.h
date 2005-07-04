@@ -43,16 +43,24 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lcontent (long)content
 #define lcos    (long)gcos
 #define lcvtoi  (long)gcvtoi
+#define lderiv  (long)deriv
 #define ldet2   (long)det2
 #define ldet    (long)det
 #define lsin    (long)gsin
 #define lsh     (long)gsh
+#define lsubsg  (long)gsubsg
+#define lsubsi  (long)subsi
+#define lsubsr  (long)subsr
 #define ltan    (long)gtan
 #define ltchebi (long)tchebi
 #define lth     (long)gth
 #define ltrace  (long)gtrace
 #define ltrans  (long)gtrans
 #define ltrunc  (long)gtrunc
+
+#define lhalf   (long)ghalf
+#define lpolx   (long)polx
+#define lpolun  (long)polun
 
 /*functions renamed*/
 #define globalreduction ellglobalred

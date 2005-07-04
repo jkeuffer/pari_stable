@@ -3130,8 +3130,8 @@ hqr(GEN mat)
   if (DEBUGLEVEL>3) { fprintferr("* Eigenvalues computed\n"); flusherr(); }
   eig = cgetg(n+1,t_COL);
   for (i=1; i<=n; i++)
-    eig[i] = (wi[i] == 0.)? (long)dbltor(wr[i])
-                          : (long)mkcomplex(dbltor(wr[i]), dbltor(wi[i]));
+    gel(eig,i) = (wi[i] == 0.)? dbltor(wr[i])
+                              : mkcomplex(dbltor(wr[i]), dbltor(wi[i]));
   return eig;
 }
 

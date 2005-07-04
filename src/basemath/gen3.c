@@ -1467,19 +1467,72 @@ deriv(GEN x, long v)
   return NULL; /* not reached */
 }
 
+/********************************************************************/
+/**                                                                **/
+/**                         TAYLOR SERIES                          **/
+/**                                                                **/
+/********************************************************************/
+static GEN
+tayl_vec(long v, long vx) {
+  GEN y = cgetg(v+2,t_VEC);
+  long i;
+  for (i=0; i<v; i++) gel(y,i+1) = polx[i];
+  gel(y,vx+1) = polx[v];
+  gel(y,v+1)  = polx[vx]; return y;
+}
+
+GEN
+tayl(GEN x, long v, long precS)
+{
+  long vx = gvar9(x);
+  pari_sp av = avma;
+  GEN y, t;
+
+  if (v <= vx) return gadd(zeroser(v,precS),x);
+  y = tayl_vec(v, vx);
+  t = tayl(changevar(x,y), vx,precS);
+  return gerepileupto(av, changevar(t,y));
+}
+
+GEN
+ggrando(GEN x, long n)
+{
+  long m, v;
+
+  switch(typ(x))
+  {
+  case t_INT:/* bug 3 + O(1). We suppose x is a truc() */
+    if (!signe(x)) err(talker,"zero argument in O()");
+    if (!is_pm1(x)) return zeropadic(x,n);
+    /* +/-1 = x^0 */
+    v = m = 0; break;
+  case t_POL:
+    if (!signe(x)) err(talker,"zero argument in O()");
+    v = varn(x); if ((ulong)v > MAXVARN) err(talker,"incorrect object in O()");
+    m = n * polvaluation(x, NULL); break;
+  case t_RFRAC:
+    if (!gcmp0((GEN)x[1])) err(talker,"zero argument in O()");
+    v = gvar(x); if ((ulong)v > MAXVARN) err(talker,"incorrect object in O()");
+    m = n * gval(x,v); break;
+    default: err(talker,"incorrect argument in O()");
+      v = m = 0; /* not reached */
+  }
+  return zeroser(v,m);
+}
+
 /*******************************************************************/
 /*                                                                 */
-/*                    INTEGRATION FORMELLE                         */
+/*                    FORMAL INTEGRATION                           */
 /*                                                                 */
 /*******************************************************************/
 
 static GEN
 triv_integ(GEN x, long v, long tx, long lx)
 {
-  GEN y=cgetg(lx,tx);
+  GEN y = cgetg(lx,tx);
   long i;
 
-  y[1]=x[1];
+  y[1] = x[1];
   for (i=2; i<lx; i++) gel(y,i) = integ(gel(x,i),v);
   return y;
 }
@@ -1488,7 +1541,7 @@ GEN
 integ(GEN x, long v)
 {
   long lx, tx, e, i, vx, n;
-  pari_sp av=avma, tetpil;
+  pari_sp av = avma;
   GEN y,p1;
 
   tx = typ(x);
@@ -1560,16 +1613,14 @@ integ(GEN x, long v)
 	y=cgetg(4,t_POL);
 	y[1] = signe(x[1])? evalvarn(v) | evalsigne(1)
 	                  : evalvarn(v);
-        gel(y,2) = gen_0; y[3]=lcopy(x); return y;
+        gel(y,2) = gen_0;
+        gel(y,3) = gcopy(x); return y;
       }
       if (varncmp(vx, v) < 0)
       {
-	p1=cgetg(v+2,t_VEC);
-	for (i=0; i<vx; i++)   p1[i+1] = lpolx[i];
-	for (i=vx+1; i<v; i++) p1[i+1] = lpolx[i];
-        p1[v+1] = lpolx[vx]; p1[vx+1] = lpolx[v];
-	y=integ(changevar(x,p1),vx); tetpil=avma;
-	return gerepile(av,tetpil,changevar(y,p1));
+        p1 = tayl_vec(v, vx);
+	y = integ(changevar(x,p1),vx);
+	return gerepileupto(av, changevar(y,p1));
       }
 
       tx = typ(x[1]); i = is_scalar_t(tx)? 0: degpol(x[1]);

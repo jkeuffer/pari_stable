@@ -457,8 +457,8 @@ plisprime(GEN N, long flag)
 
   if (t == t_VEC)
   { /* [ N, [p1,...,pk] ], pi list of pseudoprime divisors of N */
-    F = (GEN)N[2];
-    N = (GEN)N[1]; t = typ(N);
+    F = gel(N,2);
+    N = gel(N,1); t = typ(N);
   }
   if (t != t_INT) err(arither1);
   if (DEBUGLEVEL>3) fprintferr("PL: proving primality of N = %Z\n", N);
@@ -474,17 +474,17 @@ plisprime(GEN N, long flag)
   }
 
   C = cgetg(4,t_MAT); l = lg(F);
-  C[1] = lgetg(l,t_COL);
-  C[2] = lgetg(l,t_COL);
-  C[3] = lgetg(l,t_COL);
+  gel(C,1) = cgetg(l,t_COL);
+  gel(C,2) = cgetg(l,t_COL);
+  gel(C,3) = cgetg(l,t_COL);
   for(i=1; i<l; i++)
   {
-    GEN p = (GEN)F[i], r;
+    GEN p = gel(F,i), r;
     ulong witness = pl831(N,p);
 
     if (!witness) { avma = ltop; return gen_0; }
-    mael(C,1,i) = licopy(p);
-    mael(C,2,i) = lutoi(witness);
+    gmael(C,1,i) = icopy(p);
+    gmael(C,2,i) = utoi(witness);
     if (!flag) r = BSW_isprime(p)? gen_1: gen_0;
     else
     {
@@ -1845,21 +1845,21 @@ fin:
       flusherr();
     }
     res = cgetg(7, t_VEC);
-    res[1] = licopy(g);         /* factor */
-    res[2] = (long)gen_1;		/* exponent 1 */
+    gel(res,1) = icopy(g);         /* factor */
+    gel(res,2) = gen_1;		/* exponent 1 */
     res[3] = (g1!=n? (long)gen_0: LNULL); /* known composite when g1!=n */
 
-    res[4] = (long)diviiexact(n,g);       /* cofactor */
-    res[5] = (long)gen_1;		/* exponent 1 */
+    gel(res,4) = diviiexact(n,g);       /* cofactor */
+    gel(res,5) = gen_1;		/* exponent 1 */
     res[6] = LNULL;	/* unknown */
     return res;
   }
   /* g < g1 < n : our lucky day -- we've split g1, too */
   res = cgetg(10, t_VEC);
   /* unknown status for all three factors */
-  res[1] = licopy(g);              res[2] = (long)gen_1; res[3] = LNULL;
-  res[4] = (long)diviiexact(g1,g); res[5] = (long)gen_1; res[6] = LNULL;
-  res[7] = (long)diviiexact(n,g1); res[8] = (long)gen_1; res[9] = LNULL;
+  gel(res,1) = icopy(g);              gel(res,2) = gen_1; res[3] = LNULL;
+  gel(res,4) = diviiexact(g1,g); gel(res,5) = gen_1; res[6] = LNULL;
+  gel(res,7) = diviiexact(n,g1); gel(res,8) = gen_1; res[9] = LNULL;
   if (DEBUGLEVEL >= 4)
   {
     rho_dbg(c0-(c>>5), 0);
@@ -2779,7 +2779,7 @@ ifac_start(GEN n, long moebius, long hint)
   part = cgetg(ifac_initial_length, t_VEC);
   here = part + ifac_initial_length;
   part[1] = moebius? (long)gen_1 : LNULL;
-  part[2] = lstoi(hint);
+  gel(part,2) = stoi(hint);
   if (isonstack(n)) n = absi(n);
   /* make copy, because we'll later want to replace it in place.
    * If it's not on stack, then we assume it is a clone made for us by
@@ -2920,10 +2920,10 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
       err(talker, "`washere\' out of bounds in ifac_sort_one");
   }
   value = (GEN)*washere;
-  exponent = (GEN)washere[1];
+  exponent = gel(washere,1);
   if (exponent != gen_1 && moebius_mode && cmpui(1,exponent) < 0)
     return 1;			/* should have been detected by caller */
-  class0 = (GEN)washere[2];
+  class0 = gel(washere,2);
 
   if (scan < *where) return 0;	/* nothing to do, washere==*where */
 
@@ -2956,8 +2956,8 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     if (cmp_res < 0 && scan != *where)
       err(talker, "misaligned partial detected in ifac_sort_one");
     *scan = (long)value;
-    scan[1] = (long)exponent;
-    scan[2] = (long)class0; return 0;
+    gel(scan,1) = exponent;
+    gel(scan,2) = class0; return 0;
   }
   /* case cmp_res == 0: repeated factor detected */
   if (DEBUGLEVEL >= 4)
@@ -2966,7 +2966,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   if (moebius_mode) return 1;	/* not squarefree */
   /* if old class0 was composite and new is prime, or vice versa, complain
    * (and if one class0 was unknown and the other wasn't, use the known one) */
-  class1 = (GEN)scan[-1];
+  class1 = gel(scan,-1);
   if (class0) /* should never be used */
   {
     if (class1)
@@ -2976,18 +2976,18 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
       else if (class0 != gen_0 && class1 == gen_0)
 	err(talker, "prime equals composite in ifac_sort_one");
       else if (class0 == gen_2)	/* should happen even less */
-	scan[2] = (long)class0;	/* use it */
+	gel(scan,2) = class0;	/* use it */
     }
     else			/* shouldn't happen either */
-      scan[2] = (long)class0;	/* use it */
+      gel(scan,2) = class0;	/* use it */
   }
   /* else stay with the existing known class0 */
-  scan[2] = (long)class1;
+  gel(scan,2) = class1;
   /* in any case, add exponents */
   if (scan[-2] == (long)gen_1 && exponent == gen_1)
-    scan[1] = (long)gen_2;
+    gel(scan,1) = gen_2;
   else
-    scan[1] = laddii((GEN)scan[-2], exponent);
+    gel(scan,1) = addii(gel(scan,-2), exponent);
   /* move the value over and null out the vacated slot below */
   *scan = scan[-3];
   *--scan = LNULL;
@@ -3055,7 +3055,7 @@ ifac_whoiswho(GEN *partial, GEN *where, long after_crack)
 	  fprintferr("IFAC: prime %Z\n\tappears with exponent = %ld\n",
 		     **where, itos((GEN)*where[1]));
 	}
-	scan[2] = (long)gen_2;
+	gel(scan,2) = gen_2;
       }
       continue;
     }
@@ -3103,7 +3103,7 @@ ifac_divide(GEN *partial, GEN *where)
     while (dvdiiz((GEN)*scan, (GEN)**where, (GEN)*scan))
     {
       if (moebius_mode) return 1; /* immediately */
-      if (!otherexp) otherexp = itos((GEN)scan[1]);
+      if (!otherexp) otherexp = itos(gel(scan,1));
       newexp += otherexp;
     }
     if (newexp > exponent)	/* did anything happen? */
@@ -3514,7 +3514,7 @@ ifac_main(GEN *partial)
   }
   if (factor_add_primes && !(hint & 8))
   {
-    GEN p = (GEN)here[0];
+    GEN p = gel(here,0);
     if (lgefint(p)>3 || (ulong)p[2] > 0x1000000UL) addprimes(p);
   }
   return here;
@@ -3530,7 +3530,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
   else if (here == gen_0) { *exponent = 0; return gen_0; }
 
   res = icopy((GEN)*here);
-  *exponent = itos((GEN)here[1]);
+  *exponent = itos(gel(here,1));
   here[2] = here[1] = *here = LNULL;
   return res;
 }
@@ -3595,7 +3595,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
     affii((GEN)*here, pairs);
     pairs -= 3;
     *pairs = evaltyp(t_INT) | evallg(3);
-    affii((GEN)here[1], pairs);
+    affii(gel(here,1), pairs);
     if (ifac_break && (*ifac_break)(n,pairs,here,state))
     {
       if (DEBUGLEVEL >= 3) fprintferr("IFAC: (Partial fact.)Stop requested.\n");
@@ -3633,7 +3633,7 @@ ifac_moebius(GEN n, long hint)
 
   while (here != gen_1 && here != gen_0)
   {
-    if (itos((GEN)here[1]) > 1) { here = gen_0; break; } /* won't happen */
+    if (itos(gel(here,1)) > 1) { here = gen_0; break; } /* won't happen */
     mu = -mu;
     here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
@@ -3656,7 +3656,7 @@ ifac_issquarefree(GEN n, long hint)
 
   while (here != gen_1 && here != gen_0)
   {
-    if (itos((GEN)here[1]) > 1) { here = gen_0; break; } /* won't happen */
+    if (itos(gel(here,1)) > 1) { here = gen_0; break; } /* won't happen */
     here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
@@ -3702,7 +3702,7 @@ ifac_bigomega(GEN n, long hint)
 
   while (here != gen_1)
   {
-    Omega += itos((GEN)here[1]);
+    Omega += itos(gel(here,1));
     here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
@@ -3732,7 +3732,7 @@ ifac_totient(GEN n, long hint)
       if (here[1] == (long)gen_2)
 	phi = mulii(phi, (GEN)*here);
       else
-	phi = mulii(phi, powiu((GEN)*here, itou((GEN)here[1]) - 1));
+	phi = mulii(phi, powiu((GEN)*here, itou(gel(here,1)) - 1));
     }
     here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
@@ -3762,7 +3762,7 @@ ifac_numdiv(GEN n, long hint)
 
   while (here != gen_1)
   {
-    tau = mulis(tau, 1 + itos((GEN)here[1]));
+    tau = mulis(tau, 1 + itos(gel(here,1)));
     here[2] = here[1] = *here = LNULL;
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
@@ -3793,7 +3793,7 @@ ifac_sumdiv(GEN n, long hint)
 
   while (here != gen_1)
   {
-    exponent = itos((GEN)here[1]);
+    exponent = itos(gel(here,1));
     contrib = addsi(1, (GEN)*here);
     for (; exponent > 1; exponent--)
       contrib = addsi(1, mulii((GEN)*here, contrib));
@@ -3828,7 +3828,7 @@ ifac_sumdivk(GEN n, long k, long hint)
 
   while (here != gen_1)
   {
-    exponent = itos((GEN)here[1]);
+    exponent = itos(gel(here,1));
     q = powiu((GEN)*here, k);
     contrib = addsi(1, q);
     for (; exponent > 1; exponent--)

@@ -139,7 +139,7 @@ gatan(GEN x, long prec)
       if (lg(y)==2) return gcopy(y);
       /* lg(y) > 2 */
       a = integ(gdiv(derivser(y), gaddsg(1,gsqr(y))), varn(y));
-      if (!valp(y)) a = gadd(a, gatan((GEN)y[2],prec));
+      if (!valp(y)) a = gadd(a, gatan(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return transc(gatan,x,prec);
@@ -179,8 +179,8 @@ gasin(GEN x, long prec)
       }
       if (expo(x) < 0) return mpasin(x);
       y = cgetg(3,t_COMPLEX);
-      y[1] = (long)Pi2n(-1, lg(x));
-      y[2] = (long)mpach(x);
+      gel(y,1) = Pi2n(-1, lg(x));
+      gel(y,2) = mpach(x);
       if (sx < 0)
       {
         setsigne(y[1],-signe(y[1]));
@@ -200,7 +200,7 @@ gasin(GEN x, long prec)
       if (valp(y) < 0) err(negexper,"gasin");
       p1 = gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec));
       a = integ(p1,varn(y));
-      if (!valp(y)) a = gadd(a, gasin((GEN)y[2],prec));
+      if (!valp(y)) a = gadd(a, gasin(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return transc(gasin,x,prec);
@@ -247,12 +247,12 @@ gacos(GEN x, long prec)
       if (expo(x) < 0) return mpacos(x);
 
       y = cgetg(3,t_COMPLEX); p1 = mpach(x);
-      if (sx < 0) y[1] = lmppi(lg(x));
+      if (sx < 0) gel(y,1) = mppi(lg(x));
       else {
-	y[1] = (long)gen_0;
+	gel(y,1) = gen_0;
         setsigne(p1,-signe(p1));
       }
-      y[2] = (long)p1; return y;
+      gel(y,2) = p1; return y;
 
     case t_COMPLEX: av = avma;
       return gerepilecopy(av, mulcxmI(gach(x,prec)));
@@ -264,11 +264,11 @@ gacos(GEN x, long prec)
       if (lg(y) > 2)
       {
 	p1 = integ(gdiv(derivser(y), gsqrt(gsubsg(1,gsqr(y)),prec)), varn(y));
-	if (gcmp1((GEN)y[2]) && !valp(y)) /*y = 1+O(y^k), k>=1*/
+	if (gcmp1(gel(y,2)) && !valp(y)) /*y = 1+O(y^k), k>=1*/
 	  return gerepileupto(av, gneg(p1));
       }
       else p1 = y;
-      a = (lg(y)==2 || valp(y))? Pi2n(-1, prec): gacos((GEN)y[2],prec);
+      a = (lg(y)==2 || valp(y))? Pi2n(-1, prec): gacos(gel(y,2),prec);
       return gerepileupto(av, gsub(a,p1));
   }
   return transc(gacos,x,prec);
@@ -313,7 +313,7 @@ rfix(GEN x,long prec)
   switch(typ(x))
   {
     case t_INT: return itor(x, prec);
-    case t_FRAC: return rdivii((GEN)x[1],(GEN)x[2], prec);
+    case t_FRAC: return rdivii(gel(x,1),gel(x,2), prec);
   }
   return x;
 }
@@ -344,7 +344,7 @@ garg(GEN x, long prec)
       return gerepileuptoleaf(av, garg(quadtoc(x, prec), prec));
 
     case t_COMPLEX:
-      return cxarg((GEN)x[1],(GEN)x[2],prec);
+      return cxarg(gel(x,1),gel(x,2),prec);
 
     case t_VEC: case t_COL: case t_MAT:
       return transc(garg,x,prec);
@@ -516,10 +516,10 @@ gash(GEN x, long prec)
     case t_COMPLEX: av = avma; 
       p1 = gadd(x, gsqrt(gaddsg(1,gsqr(x)), prec));
       y = glog(p1,prec);
-      sz = (typ(y)==t_COMPLEX)? gsigne((GEN)y[1]): gsigne(y);
+      sz = (typ(y)==t_COMPLEX)? gsigne(gel(y,1)): gsigne(y);
       if (typ(p1) == t_COMPLEX) {
-        sx = gsigne((GEN)p1[1]);
-        sy = gsigne((GEN)p1[2]);
+        sx = gsigne(gel(p1,1));
+        sy = gsigne(gel(p1,2));
       } else {
         sx = gsigne(p1);
         sy = 0;
@@ -536,7 +536,7 @@ gash(GEN x, long prec)
 
       p1 = gdiv(derivser(y), gsqrt(gaddsg(1,gsqr(y)),prec));
       a = integ(p1,varn(y));
-      if (!valp(y)) a = gadd(a, gash((GEN)y[2],prec));
+      if (!valp(y)) a = gadd(a, gash(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return transc(gash,x,prec);
@@ -566,17 +566,17 @@ gach(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL:
-      if (signe(x) == 0) { y=cgetimag(); y[2]=(long)acos0(expo(x)); return y; }
+      if (signe(x) == 0) { y=cgetimag(); gel(y,2) = acos0(expo(x)); return y; }
       if (signe(x) > 0 && expo(x) >= 0) return mpach(x); /* x >= 1 */
       /* -1 < x < 1 */
-      if (expo(x) < 0) { y = cgetimag(); y[2] = (long)mpacos(x); return y; }
+      if (expo(x) < 0) { y = cgetimag(); gel(y,2) = mpacos(x); return y; }
       /* x <= -1 */
-      if (absrnz_egal1(x)) { y = cgetimag(); y[2] = lmppi(lg(x)); return y; }
+      if (absrnz_egal1(x)) { y = cgetimag(); gel(y,2) = mppi(lg(x)); return y; }
       y = cgetg(3,t_COMPLEX);
       av = avma; p1 = mpach(x);
       setsigne(p1, -signe(p1));
-      y[1] = (long)p1;
-      y[2] = lmppi(lg(x)); return y;
+      gel(y,1) = p1;
+      gel(y,2) = mppi(lg(x)); return y;
 
     case t_COMPLEX:
       av = avma; 
@@ -602,7 +602,7 @@ gach(GEN x, long prec)
         p1 = PiI2n(-1, prec); /* I Pi/2 */
       else
       {
-        p1 = (GEN)y[2]; if (gcmp1(p1)) return gerepileupto(av,a);
+        p1 = gel(y,2); if (gcmp1(p1)) return gerepileupto(av,a);
         p1 = gach(p1, prec);
       }
       return gerepileupto(av, gadd(p1,a));
@@ -642,8 +642,8 @@ gath(GEN x, long prec)
       if (!signe(p1)) err(talker,"singular argument in atanh");
       p1 = logr_abs(p1);
       setexpo(p1, expo(p1)-1);
-      y[1]=(long)gerepileuptoleaf(av, p1);
-      y[2]=(long)Pi2n(-1, lg(x)); return y;
+      gel(y,1) = gerepileuptoleaf(av, p1);
+      gel(y,2) = Pi2n(-1, lg(x)); return y;
 
     case t_COMPLEX:
       av = avma; p1 = glog( gaddgs(gdivsg(2,gsubsg(1,x)),-1), prec );
@@ -655,7 +655,7 @@ gath(GEN x, long prec)
       if (valp(y) < 0) err(negexper,"gath");
       p1 = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integ(p1, varn(y));
-      if (!valp(y)) a = gadd(a, gath((GEN)y[2],prec));
+      if (!valp(y)) a = gadd(a, gath(gel(y,2),prec));
       return gerepileupto(av, a);
   }
   return transc(gath,x,prec);
@@ -766,7 +766,7 @@ bernfracspec(long k)
     b = gadd(b, gdivgs(mulii(c,s), n));
     if (n == K) return gerepileupto(av, b);
 
-    N[2] = (long)n; s = addii(s, powiu(N,k));
+    gel(N,2) = n; s = addii(s, powiu(N,k));
     if (low_stack(lim, stack_lim(av,2)))
     {
       if (DEBUGMEM>1) err(warnmem,"bernfrac");
@@ -778,13 +778,13 @@ bernfracspec(long k)
 
 static GEN
 B2(void){ GEN z = cgetg(3, t_FRAC);
-  z[1] = (long)gen_1;
-  z[2] = (long)utoipos(6); return z;
+  gel(z,1) = gen_1;
+  gel(z,2) = utoipos(6); return z;
 }
 static GEN
 B4(void) { GEN z = cgetg(3, t_FRAC);
-  z[1] = (long)gen_m1;
-  z[2] = (long)utoipos(30); return z;
+  gel(z,1) = gen_m1;
+  gel(z,2) = utoipos(30); return z;
 }
 
 GEN
@@ -808,7 +808,7 @@ bernvec_old(long nb)
   if (nb < 0) return cgetg(1, t_VEC);
   if (nb > 46340 && BITS_IN_LONG == 32) err(impl, "bernvec for n > 46340");
 
-  y = cgetg(nb+2, t_VEC); y[1] = (long)gen_1;
+  y = cgetg(nb+2, t_VEC); gel(y,1) = gen_1;
   for (n = 1; n <= nb; n++)
   { /* compute y[n+1] = B_{2n} */
     pari_sp av = avma;
@@ -819,7 +819,7 @@ bernvec_old(long nb)
     for (i = 1; i < n; i++)
     {
       c = diviiexact(muliu(c, u1*u2), utoipos(d1*d2));/*= binomial(2n+1, 2*i) */
-      b = gadd(b, gmul(c, (GEN)y[i+1]));
+      b = gadd(b, gmul(c, gel(y,i+1)));
       u1 -= 2; u2--; d1++; d2 += 2;
     }
     y[n+1] = lpileupto(av, gdivgs(b, -(1+2*n)));
@@ -832,10 +832,10 @@ bernvec(long nb)
   GEN y = cgetg(nb+2, t_VEC), z = y + 1;
   long i;
   if (nb < 20) return bernvec_old(nb);
-  for (i = nb; i > 2; i--) z[i] = (long)bernfrac_using_zeta(i << 1);
-  y[3] = (long)B4();
-  y[2] = (long)B2();
-  y[1] = (long)gen_1; return y;
+  for (i = nb; i > 2; i--) gel(z,i) = bernfrac_using_zeta(i << 1);
+  gel(y,3) = B4();
+  gel(y,2) = B2();
+  gel(y,1) = gen_1; return y;
 }
 
 /********************************************************************/
@@ -907,7 +907,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
   if (typ(s) == t_COMPLEX)
   { /* s = sig + i t */
     *res = cgetc(l); *av = avma;
-    s = ctofp(s, l+1); *sig = (GEN)s[1];
+    s = ctofp(s, l+1); *sig = gel(s,1);
   }
   else /* real number */
   {
@@ -957,7 +957,7 @@ cxgamma(GEN s0, int dolog, long prec)
   s = trans_fix_arg(&prec,&s0,&sig,&av,&res);
 
   if ((signe(sig) <= 0 || expo(sig) < -1)
-    && (typ(s) == t_REAL || gexpo((GEN)s[2]) <= 16))
+    && (typ(s) == t_REAL || gexpo(gel(s,2)) <= 16))
   { /* s <--> 1-s */
     funeq = 1; s = gsub(gen_1, s); sig = real_i(s);
   }
@@ -1118,7 +1118,7 @@ cxgamma(GEN s0, int dolog, long prec)
       if (signe(z)) {
         if (gsigne(imag_i(s)) < 0) setsigne(z, -signe(z));
         if (typ(y) == t_COMPLEX)
-          y[2] = ladd((GEN)y[2], z);
+          gel(y,2) = gadd(gel(y,2), z);
         else
           y = gadd(y, pureimag(z));
       }
@@ -1145,8 +1145,8 @@ cxgamma(GEN s0, int dolog, long prec)
   else
   {
     if (typ(res) == t_REAL) return gerepileupto(av, y);
-    affr_fixlg((GEN)y[1], (GEN)res[1]);
-    affr_fixlg((GEN)y[2], (GEN)res[2]);
+    affr_fixlg(gel(y,1), gel(res,1));
+    affr_fixlg(gel(y,2), gel(res,2));
   }
   avma = av; return res;
 }
@@ -1222,8 +1222,8 @@ ggamma(GEN x, long prec)
       return cxgamma(x, 0, prec);
 
     case t_FRAC:
-      if (!equaliu((GEN)x[2],2)) break;
-      z = (GEN)x[1]; /* true argument is z/2 */
+      if (!equaliu(gel(x,2),2)) break;
+      z = gel(x,1); /* true argument is z/2 */
       if (is_bigint(z) || labs(m = itos(z)) > 962354)
       {
         err(talker, "argument too large in ggamma");
@@ -1359,8 +1359,8 @@ cxpsi(GEN s0, long prec)
   if (typ(z) == t_REAL) affr_fixlg(z, res);
   else
   {
-    affr_fixlg((GEN)z[1], (GEN)res[1]);
-    affr_fixlg((GEN)z[2], (GEN)res[2]);
+    affr_fixlg(gel(z,1), gel(res,1));
+    affr_fixlg(gel(z,2), gel(res,2));
   }
   avma = av; return res;
 }

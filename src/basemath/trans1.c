@@ -141,8 +141,8 @@ GEN
 PiI2n(long n, long prec)
 {
   GEN z = cgetg(3,t_COMPLEX);
-  z[1] = (long)gen_0;
-  z[2] = (long)Pi2n(n, prec); return z;
+  gel(z,1) = gen_0;
+  gel(z,2) = Pi2n(n, prec); return z;
 }
 
 /* 2I * Pi */
@@ -245,7 +245,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_FRAC:
-      p1 = rdivii((GEN)x[1], (GEN)x[2], prec); tetpil=avma;
+      p1 = rdivii(gel(x,1), gel(x,2), prec); tetpil=avma;
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_QUAD:
@@ -257,14 +257,14 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y = cgetg(lx,typ(x));
-      for (i=1; i<lx; i++) y[i] = (long)f((GEN)x[i],prec);
+      for (i=1; i<lx; i++) gel(y,i) = f(gel(x,i),prec);
       return y;
 
     case t_POLMOD:
-      p1 = cleanroots((GEN)x[1],prec); lx = lg(p1);
-      for (i=1; i<lx; i++) p1[i] = lpoleval((GEN)x[2],(GEN)p1[i]);
+      p1 = cleanroots(gel(x,1),prec); lx = lg(p1);
+      for (i=1; i<lx; i++) gel(p1,i) = poleval(gel(x,2),gel(p1,i));
       tetpil = avma; y = cgetg(lx,t_COL);
-      for (i=1; i<lx; i++) y[i] = (long)f((GEN)p1[i],prec);
+      for (i=1; i<lx; i++) gel(y,i) = f(gel(p1,i),prec);
       return gerepile(av,tetpil,y);
 
     default: err(typeer,"a transcendental function");
@@ -291,11 +291,11 @@ puiss0(GEN x)
 
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1], y[1]);
-      y[2] = (long)gen_1; return y;
+      gel(y,2) = gen_1; return y;
 
     case t_POLMOD:
       y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
-      y[2] = lpolun[varn(x[1])]; return y;
+      gel(y,2) = polun[varn(x[1])]; return y;
 
     case t_POL: case t_SER: case t_RFRAC:
       return polun[gvar(x)];
@@ -464,15 +464,15 @@ pow_monome(GEN x, long n)
     d = dx*n + 2;
   if ((d + 1) & ~LGBITS) err(talker,"degree overflow in pow_monome");
   A = cgetg(d+1, t_POL); A[1] = x[1];
-  for (i=2; i < d; i++) A[i] = (long)gen_0;
-  b = gpowgs((GEN)x[dx+2], n); /* not memory clean if (n < 0) */
+  for (i=2; i < d; i++) gel(A,i) = gen_0;
+  b = gpowgs(gel(x,dx+2), n); /* not memory clean if (n < 0) */
   if (!y) y = A;
   else {
     GEN c = denom(b);
-    y[1] = (long)c; if (c != gen_1) b = gmul(b,c);
-    y[2] = (long)A;
+    gel(y,1) = c; if (c != gen_1) b = gmul(b,c);
+    gel(y,2) = A;
   }
-  A[d] = (long)b; return y;
+  gel(A,d) = b; return y;
 }
 
 /* x t_PADIC */
@@ -480,7 +480,7 @@ static GEN
 powps(GEN x, long n)
 {
   long e = n*valp(x), v;
-  GEN t, y, mod, p = (GEN)x[2];
+  GEN t, y, mod, p = gel(x,2);
   pari_sp av;
 
   if (!signe(x[4])) {
@@ -490,7 +490,7 @@ powps(GEN x, long n)
   v = z_pval(n, p);
 
   y = cgetg(5,t_PADIC);
-  mod = (GEN)x[3];
+  mod = gel(x,3);
   if (v == 0) mod = icopy(mod);
   else
   {
@@ -499,12 +499,12 @@ powps(GEN x, long n)
   }
   y[1] = evalprecp(precp(x) + v) | evalvalp(e);
   icopyifstack(p, y[2]);
-  y[3] = (long)mod;
+  gel(y,3) = mod;
 
-  av = avma; t = (GEN)x[4];
+  av = avma; t = gel(x,4);
   if (n < 0) { t = Fp_inv(t, mod); n = -n; }
   t = Fp_powu(t, n, mod);
-  y[4] = lpileuptoint(av, t);
+  gel(y,4) = gerepileuptoint(av, t);
   return y;
 }
 /* x t_PADIC */
@@ -512,7 +512,7 @@ static GEN
 powp(GEN x, GEN n)
 {
   long v;
-  GEN y, mod, p = (GEN)x[2];
+  GEN y, mod, p = gel(x,2);
 
   if (valp(x)) err(errlg);
 
@@ -523,7 +523,7 @@ powp(GEN x, GEN n)
   v = Z_pval(n, p);
 
   y = cgetg(5,t_PADIC);
-  mod = (GEN)x[3];
+  mod = gel(x,3);
   if (v == 0) mod = icopy(mod);
   else
   {
@@ -532,8 +532,8 @@ powp(GEN x, GEN n)
   }
   y[1] = evalprecp(precp(x) + v) | evalvalp(0);
   icopyifstack(p, y[2]);
-  y[3] = (long)mod;
-  y[4] = (long)Fp_pow((GEN)x[4], n, mod);
+  gel(y,3) = mod;
+  gel(y,4) = Fp_pow(gel(x,4), n, mod);
   return y;
 }
 
@@ -563,17 +563,17 @@ gpowgs(GEN x, long n)
       if (is_pm1(x)) return t;
       /* n < 0, |x| > 1 */
       y = cgetg(3,t_FRAC);
-      y[1] = (long)t;
-      y[2] = (long)powiu_sign(x, -n, 1); /* force denominator > 0 */
+      gel(y,1) = t;
+      gel(y,2) = powiu_sign(x, -n, 1); /* force denominator > 0 */
       return y;
     }
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      y[2] = (long)Fp_pows((GEN)x[2], n, (GEN)x[1]);
+      gel(y,2) = Fp_pows(gel(x,2), n, gel(x,1));
       return y;
     case t_FRAC:
     {
-      GEN a = (GEN)x[1], b = (GEN)x[2];
+      GEN a = gel(x,1), b = gel(x,2);
       long sx = signe(a), s;
       if (!sx) {
         if (n < 0) err(gdiver);
@@ -586,16 +586,16 @@ gpowgs(GEN x, long n)
         swap(a, b);
       }
       y = cgetg(3, t_FRAC);
-      y[1] = (long)powiu_sign(a, n, s);
-      y[2] = (long)powiu_sign(b, n, 1);
+      gel(y,1) = powiu_sign(a, n, s);
+      gel(y,2) = powiu_sign(b, n, 1);
       return y;
     }
     case t_PADIC: return powps(x, n);
     case t_RFRAC:
     {
       av = avma; y = cgetg(3, t_RFRAC); m = labs(n);
-      y[1] = lpowgs((GEN)x[1],m);
-      y[2] = lpowgs((GEN)x[2],m);
+      gel(y,1) = gpowgs(gel(x,1),m);
+      gel(y,2) = gpowgs(gel(x,2),m);
       if (n < 0) y = ginv(y);
       return gerepileupto(av,y);
     }
@@ -622,7 +622,7 @@ powgi(GEN x, GEN n)
   {
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      y[2] = (long)Fp_pow((GEN)x[2], n, (GEN)x[1]);
+      gel(y,2) = Fp_pow(gel(x,2), n, gel(x,1));
       return y;
     case t_PADIC: return powp(x, n);
 
@@ -656,7 +656,7 @@ ser_pow(GEN x, GEN n, long prec)
   GEN y, p1, p2, lead;
 
   if (gvar9(n) <= varn(x)) return gexp(gmul(n, glog(x,prec)), prec);
-  lead = (GEN)x[2];
+  lead = gel(x,2);
   if (gcmp1(lead))
   {
     GEN X, Y, alp = gadd(n,gen_1); /* will be left on the stack */
@@ -668,21 +668,21 @@ ser_pow(GEN x, GEN n, long prec)
     X = x+2;
     Y = y+2;
 
-    d = mi = lx-3; while (mi>=1 && gcmp0((GEN)X[mi])) mi--;
-    Y[0] = (long)gen_1;
+    d = mi = lx-3; while (mi>=1 && gcmp0(gel(X,mi))) mi--;
+    gel(Y,0) = gen_1;
     for (i=1; i<=d; i++)
     {
       av = avma; p1 = gen_0;
       for (j=1; j<=min(i,mi); j++)
       {
         p2 = gsubgs(gmulgs(alp,j),i);
-        p1 = gadd(p1, gmul(gmul(p2,(GEN)X[j]),(GEN)Y[i-j]));
+        p1 = gadd(p1, gmul(gmul(p2,gel(X,j)),gel(Y,i-j)));
       }
-      tetpil = avma; Y[i] = lpile(av,tetpil, gdivgs(p1,i));
+      tetpil = avma; gel(Y,i) = gerepile(av,tetpil, gdivgs(p1,i));
     }
     return y;
   }
-  p1 = gdiv(x,lead); p1[2] = (long)gen_1; /* in case it's inexact */
+  p1 = gdiv(x,lead); gel(p1,2) = gen_1; /* in case it's inexact */
   p1 = gpow(p1,  n, prec);
   p2 = gpow(lead,n, prec); return gmul(p1, p2);
 }
@@ -729,7 +729,7 @@ gpow(GEN x, GEN n, long prec)
   if (is_matvec_t(tx))
   {
     lx = lg(x); y = cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i] = lpui((GEN)x[i],n,prec);
+    for (i=1; i<lx; i++) gel(y,i) = gpui(gel(x,i),n,prec);
     return y;
   }
   av = avma;
@@ -761,15 +761,15 @@ gpow(GEN x, GEN n, long prec)
   }
   if (typ(n) == t_FRAC)
   {
-    GEN z, d = (GEN)n[2], a = (GEN)n[1];
+    GEN z, d = gel(n,2), a = gel(n,1);
     if (tx == t_INTMOD)
     {
-      if (!BSW_psp((GEN)x[1])) err(talker,"gpow: modulus %Z is not prime",x[1]);
+      if (!BSW_psp(gel(x,1))) err(talker,"gpow: modulus %Z is not prime",x[1]);
       y = cgetg(3,tx); copyifstack(x[1],y[1]);
       av = avma;
-      z = Fp_sqrtn((GEN)x[2], d, (GEN)x[1], NULL);
+      z = Fp_sqrtn(gel(x,2), d, gel(x,1), NULL);
       if (!z) err(talker,"gpow: nth-root does not exist");
-      y[2] = lpileuptoint(av, Fp_pow(z, a, (GEN)x[1]));
+      gel(y,2) = gerepileuptoint(av, Fp_pow(z, a, gel(x,1)));
       return y;
     }
     else if (tx == t_PADIC)
@@ -797,8 +797,8 @@ sqrtr(GEN x) {
   if (s == 0) return real_0_bit(expo(x) >> 1);
   if (s >= 0) return sqrtr_abs(x);
   y = cgetg(3,t_COMPLEX);
-  y[2] = (long)sqrtr_abs(x);
-  y[1] = (long)gen_0; return y;
+  gel(y,2) = sqrtr_abs(x);
+  gel(y,1) = gen_0; return y;
 }
 
 /* assume x unit, precp(x) = pp > 3 */
@@ -870,7 +870,7 @@ static GEN
 padic_sqrt(GEN x)
 {
   long pp, e = valp(x);
-  GEN z,y,mod, p = (GEN)x[2];
+  GEN z,y,mod, p = gel(x,2);
   pari_sp av;
 
   if (gcmp0(x)) return zeropadic(p, (e+1) >> 1);
@@ -878,8 +878,8 @@ padic_sqrt(GEN x)
 
   y = cgetg(5,t_PADIC);
   pp = precp(x);
-  mod = (GEN)x[3];
-  x   = (GEN)x[4]; /* lift to int */
+  mod = gel(x,3);
+  x   = gel(x,4); /* lift to int */
   e >>= 1; av = avma;
   if (equaliu(p,2))
   {
@@ -912,8 +912,8 @@ padic_sqrt(GEN x)
   }
   y[1] = evalprecp(pp) | evalvalp(e);
   copyifstack(p,y[2]);
-  y[3] = (long)mod;
-  y[4] = (long)z; return y;
+  gel(y,3) = mod;
+  gel(y,4) = z; return y;
 }
 
 GEN
@@ -928,27 +928,27 @@ gsqrt(GEN x, long prec)
 
     case t_INTMOD:
       y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-      p1 = Fp_sqrt((GEN)x[2],(GEN)y[1]);
+      p1 = Fp_sqrt(gel(x,2),gel(y,1));
       if (!p1) err(sqrter5);
-      y[2] = (long)p1; return y;
+      gel(y,2) = p1; return y;
 
     case t_COMPLEX:
-      if (isexactzero((GEN)x[2])) return gsqrt((GEN)x[1], prec);
+      if (isexactzero(gel(x,2))) return gsqrt(gel(x,1), prec);
       y = cgetg(3,t_COMPLEX); av = avma;
 
-      p1 = gsqr((GEN)x[1]);
-      p2 = gsqr((GEN)x[2]); p1 = gsqrt(gadd(p1,p2), prec);
-      if (gcmp0(p1)) { y[1] = y[2] = (long)sqrtr(p1); return y; }
-      if (gsigne((GEN)x[1]) < 0)
+      p1 = gsqr(gel(x,1));
+      p2 = gsqr(gel(x,2)); p1 = gsqrt(gadd(p1,p2), prec);
+      if (gcmp0(p1)) { gel(y,1) = gel(y,2) = sqrtr(p1); return y; }
+      if (gsigne(gel(x,1)) < 0)
       {
-        p1 = sqrtr( gmul2n(gsub(p1,(GEN)x[1]), -1) );
-        if (gsigne((GEN)x[2]) < 0) setsigne(p1, -signe(p1));
-        y[2] = (long)gerepileuptoleaf(av, p1); av = avma;
-        y[1] = (long)gerepileuptoleaf(av, gdiv((GEN)x[2], gmul2n(p1,1)));
+        p1 = sqrtr( gmul2n(gsub(p1,gel(x,1)), -1) );
+        if (gsigne(gel(x,2)) < 0) setsigne(p1, -signe(p1));
+        gel(y,2) = gerepileuptoleaf(av, p1); av = avma;
+        gel(y,1) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
       } else {
-        p1 = sqrtr( gmul2n(gadd(p1,(GEN)x[1]), -1) );
-        y[1] = (long)gerepileuptoleaf(av, p1); av = avma;
-        y[2] = (long)gerepileuptoleaf(av, gdiv((GEN)x[2], gmul2n(p1,1)));
+        p1 = sqrtr( gmul2n(gadd(p1,gel(x,1)), -1) );
+        gel(y,1) = gerepileuptoleaf(av, p1); av = avma;
+        gel(y,2) = gerepileuptoleaf(av, gdiv(gel(x,2), gmul2n(p1,1)));
       }
       return y;
 
@@ -983,10 +983,10 @@ rootsof1padic(GEN n, GEN y)
   pari_sp av0 = avma, av;
   GEN z, r = cgetp(y);
 
-  av = avma; (void)Fp_sqrtn(gen_1,n,(GEN)y[2],&z);
+  av = avma; (void)Fp_sqrtn(gen_1,n,gel(y,2),&z);
   if (z==gen_0) { avma = av0; return gen_0; }/*should not happen*/
-  z = padicsqrtnlift(gen_1, n, z, (GEN)y[2], precp(y));
-  affii(z, (GEN)r[4]); avma = av; return r;
+  z = padicsqrtnlift(gen_1, n, z, gel(y,2), precp(y));
+  affii(z, gel(r,4)); avma = av; return r;
 }
 
 static GEN paexp(GEN x);
@@ -995,7 +995,7 @@ GEN
 padic_sqrtn_ram(GEN x, long e)
 {
   pari_sp ltop=avma;
-  GEN a, p = (GEN)x[2], n = powiu(p,e);
+  GEN a, p = gel(x,2), n = powiu(p,e);
   long v = valp(x);
   if (v)
   {
@@ -1005,7 +1005,7 @@ padic_sqrtn_ram(GEN x, long e)
     x = gcopy(x); setvalp(x,0);
   }
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
-  if (lgefint(p)==3 && p[2]==2 && mod8((GEN)x[4])!=signe((GEN)x[4]))
+  if (lgefint(p)==3 && p[2]==2 && mod8(gel(x,4))!=signe(gel(x,4)))
     return NULL;
   a = paexp(gdiv(palog(x), n));
   if (!a) return NULL;
@@ -1020,7 +1020,7 @@ GEN
 padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
 {
   pari_sp av;
-  GEN Z, a, r, p = (GEN)x[2];
+  GEN Z, a, r, p = gel(x,2);
   long v = valp(x);
   if (v)
   {
@@ -1031,12 +1031,12 @@ padic_sqrtn_unram(GEN x, GEN n, GEN *zetan)
   r = cgetp(x); setvalp(r,v);
   Z = NULL; /* -Wall */
   if (zetan) Z = cgetp(x);
-  av = avma; a = Fp_sqrtn((GEN)x[4], n, p, zetan);
+  av = avma; a = Fp_sqrtn(gel(x,4), n, p, zetan);
   if (!a) return NULL;
-  affii(padicsqrtnlift((GEN)x[4], n, a, p, precp(x)), (GEN)r[4]);
+  affii(padicsqrtnlift(gel(x,4), n, a, p, precp(x)), gel(r,4));
   if (zetan)
   {
-    affii(padicsqrtnlift(gen_1, n, *zetan, p, precp(x)), (GEN)Z[4]);
+    affii(padicsqrtnlift(gen_1, n, *zetan, p, precp(x)), gel(Z,4));
     *zetan = Z;
   }
   avma = av; return r;
@@ -1046,7 +1046,7 @@ GEN
 padic_sqrtn(GEN x, GEN n, GEN *zetan)
 {
   pari_sp av = avma, tetpil;
-  GEN q, p = (GEN)x[2];
+  GEN q, p = gel(x,2);
   long e;
   if (!signe(x[4]))
   {
@@ -1110,7 +1110,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
   if (is_matvec_t(tx))
   {
     lx = lg(x); y = cgetg(lx,tx);
-    for (i=1; i<lx; i++) y[i] = (long)gsqrtn((GEN)x[i],n,NULL,prec);
+    for (i=1; i<lx; i++) gel(y,i) = gsqrtn(gel(x,i),n,NULL,prec);
     return y;
   }
   av = avma;
@@ -1120,12 +1120,12 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     z = gen_0;
     if (zetan) { z = cgetg(3,t_INTMOD); copyifstack(x[1],z[1]); }
     y = cgetg(3,t_INTMOD); copyifstack(x[1],y[1]);
-    y[2] = (long)Fp_sqrtn((GEN)x[2],n,(GEN)x[1],zetan);
+    gel(y,2) = Fp_sqrtn(gel(x,2),n,gel(x,1),zetan);
     if (!y[2]) {
       if (zetan) return gen_0;
       err(talker,"nth-root does not exist in gsqrtn");
     }
-    if (zetan) { z[2] = (long)*zetan; *zetan = z; }
+    if (zetan) { gel(z,2) = *zetan; *zetan = z; }
     return y;
 
   case t_PADIC:
@@ -1291,7 +1291,7 @@ paexp(GEN x)
 {
   long k, e = valp(x), pp = precp(x), n = e + pp;
   pari_sp av;
-  GEN y, r, p = (GEN)x[2];
+  GEN y, r, p = gel(x,2);
   int is2 = equaliu(p,2);
 
   if (gcmp0(x)) return gaddgs(x,1);
@@ -1321,8 +1321,8 @@ cxexp(GEN x, long prec)
   if (!signe(r)) { gel(y,1) = r; gel(y,2) = r; return y; }
   gsincos(gel(x,2),&p2,&p1,prec);
   tetpil = avma;
-  y[1] = lmul(r,p1);
-  y[2] = lmul(r,p2);
+  gel(y,1) = gmul(r,p1);
+  gel(y,2) = gmul(r,p2);
   gerepilecoeffssp(av,tetpil,y+1,2);
   return y;
 }
@@ -1341,26 +1341,26 @@ serexp(GEN x, long prec)
   if (ex)
   {
     ly = lx+ex; y = cgetg(ly,t_SER);
-    mi = lx-1; while (mi>=3 && gcmp0((GEN)x[mi])) mi--;
+    mi = lx-1; while (mi>=3 && gcmp0(gel(x,mi))) mi--;
     mi += ex-2;
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
     /* zd[i] = coeff of X^i in z */
     xd = x+2-ex; yd = y+2; ly -= 2;
-    yd[0] = (long)gen_1;
-    for (i=1; i<ex; i++) yd[i]= (long)gen_0;
+    gel(yd,0) = gen_1;
+    for (i=1; i<ex; i++) gel(yd,i) = gen_0;
     for (   ; i<ly; i++)
     {
       av = avma; p1 = gen_0;
       for (j=ex; j<=min(i,mi); j++)
-        p1 = gadd(p1, gmulgs(gmul((GEN)xd[j],(GEN)yd[i-j]),j));
-      yd[i] = lpileupto(av, gdivgs(p1,i));
+        p1 = gadd(p1, gmulgs(gmul(gel(xd,j),gel(yd,i-j)),j));
+      gel(yd,i) = gerepileupto(av, gdivgs(p1,i));
     }
     return y;
   }
   av = avma; y = cgetg(lx, t_SER);
-  y[1] = x[1]; y[2] = (long)gen_0;
+  y[1] = x[1]; gel(y,2) = gen_0;
   for (i=3; i <lx; i++) y[i] = x[i];
-  p1 = gexp((GEN)x[2],prec);
+  p1 = gexp(gel(x,2),prec);
   y = gmul(p1, serexp(normalize(y),prec));
   return gerepileupto(av, y);
 }
@@ -1458,8 +1458,8 @@ agm1(GEN x, long prec)
     case t_REAL: return signe(x) > 0? agm1r_abs(x): agm1cx(x, prec);
 
     case t_COMPLEX:
-      if (gcmp0((GEN)x[2]) && gsigne((GEN)x[1]) > 0)
-        return agm1((GEN)x[1], prec);
+      if (gcmp0(gel(x,2)) && gsigne(gel(x,1)) > 0)
+        return agm1(gel(x,1), prec);
       return agm1cx(x, prec);
 
     case t_PADIC:
@@ -1665,16 +1665,16 @@ logagmcx(GEN q, long prec)
   int neg = 0;
   
   z = cgetc(prec); av = avma; prec++;
-  if (gsigne((GEN)q[1]) < 0) { q = gneg(q); neg = 1; }
+  if (gsigne(gel(q,1)) < 0) { q = gneg(q); neg = 1; }
   lim = bit_accuracy(prec) >> 1;
   Q = gtofp(q, prec);
-  a = (GEN)Q[1];
-  b = (GEN)Q[2];
+  a = gel(Q,1);
+  b = gel(Q,2);
   if (gcmp0(a)) {
-    affr_fixlg(logr_abs(b), (GEN)z[1]);
+    affr_fixlg(logr_abs(b), gel(z,1));
     y = Pi2n(-1, prec);
     if (signe(b) < 0) setsigne(y, -1);
-    affr_fixlg(y, (GEN)z[2]); avma = av; return z;
+    affr_fixlg(y, gel(z,2)); avma = av; return z;
   }
   ea = expo(a);
   eb = expo(b);
@@ -1691,13 +1691,13 @@ logagmcx(GEN q, long prec)
 
   /* Pi / 2agm(1, 4/Q) ~ log(Q), q = Q * 2^e */
   y = gdiv(Pi2n(-1, prec), agm1cx( gdivsg(4, Q), prec ));
-  a = (GEN)y[1];
-  b = (GEN)y[2];
+  a = gel(y,1);
+  b = gel(y,2);
   a = addrr(a, mulsr(-e, mplog2(prec)));
   if (neg) b = gsigne(b) <= 0? gadd(b, mppi(prec))
                              : gsub(b, mppi(prec));
-  affr_fixlg(a, (GEN)z[1]);
-  affr_fixlg(b, (GEN)z[2]); avma = av; return z;
+  affr_fixlg(a, gel(z,1));
+  affr_fixlg(b, gel(z,2)); avma = av; return z;
 }
 
 GEN
@@ -1716,9 +1716,9 @@ teich(GEN x)
 
   if (typ(x)!=t_PADIC) err(talker,"not a p-adic argument in teichmuller");
   if (!signe(x[4])) return gcopy(x);
-  p = (GEN)x[2];
-  q = (GEN)x[3];
-  z = (GEN)x[4]; y = cgetp(x); av = avma;
+  p = gel(x,2);
+  q = gel(x,3);
+  z = gel(x,4); y = cgetp(x); av = avma;
   if (equaliu(p,2))
     z = (mod4(z) & 2)? addsi(-1,q): gen_1;
   else
@@ -1729,7 +1729,7 @@ teich(GEN x)
     for (k=1; k<n; k<<=1)
       z = modii(mulii(z,addsi(1,mulii(aux,addsi(-1,Fp_pow(z,p1,q))))), q);
   }
-  affii(z, (GEN)y[4]); avma = av; return y;
+  affii(z, gel(y,4)); avma = av; return y;
 }
 
 /* Let x = 1 mod p and y := (x-1)/(x+1) = 0 (p). Then
@@ -1739,9 +1739,9 @@ static GEN
 palogaux(GEN x)
 {
   long k,e,pp;
-  GEN y,s,y2, p = (GEN)x[2];
+  GEN y,s,y2, p = gel(x,2);
 
-  if (equalii(gen_1, (GEN)x[4]))
+  if (equalii(gen_1, gel(x,4)))
   {
     long v = valp(x)+precp(x);
     if (equaliu(p,2)) v--;
@@ -1770,7 +1770,7 @@ GEN
 palog(GEN x)
 {
   pari_sp av = avma;
-  GEN y, p = (GEN)x[2];
+  GEN y, p = gel(x,2);
 
   if (!signe(x[4])) err(talker,"zero argument in palog");
   if (equaliu(p,2))
@@ -1780,9 +1780,9 @@ palog(GEN x)
   }
   else
   { /* compute log(x^(p-1)) / (p-1) */
-    GEN mod = (GEN)x[3], p1 = subis(p,1);
+    GEN mod = gel(x,3), p1 = subis(p,1);
     y = cgetp(x);
-    y[4] = (long)Fp_pow((GEN)x[4], p1, mod);
+    gel(y,4) = Fp_pow(gel(x,4), p1, mod);
     p1 = diviiexact(subis(mod,1), p1); /* 1/(1-p) */
     y = gmul(palogaux(y), mulis(p1, -2));
   }
@@ -1816,16 +1816,16 @@ glog(GEN x, long prec)
         return logr_abs(x);
       }
       y = cgetg(3,t_COMPLEX);
-      y[1] = (long)logr_abs(x);
-      y[2] = lmppi(lg(x)); return y;
+      gel(y,1) = logr_abs(x);
+      gel(y,2) = mppi(lg(x)); return y;
 
     case t_COMPLEX:
-      if (gcmp0((GEN)x[2])) return glog((GEN)x[1], prec);
+      if (gcmp0(gel(x,2))) return glog(gel(x,1), prec);
       if (prec > LOGAGMCX_LIMIT) return logagmcx(x, prec);
       y = cgetg(3,t_COMPLEX);
       y[2] = larg(x,prec);
       av = avma; p1 = glog(cxnorm(x),prec); tetpil = avma;
-      y[1] = lpile(av,tetpil,gmul2n(p1,-1)); return y;
+      gel(y,1) = gerepile(av,tetpil,gmul2n(p1,-1)); return y;
 
     case t_PADIC:
       return palog(x);
@@ -1835,7 +1835,7 @@ glog(GEN x, long prec)
       av = avma; if (!(y = _toser(x))) break;
       if (valp(y) || gcmp0(y)) err(talker,"log is not meromorphic at 0");
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
-      if (!gcmp1((GEN)y[2])) p1 = gadd(p1, glog((GEN)y[2],prec));
+      if (!gcmp1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
       return gerepileupto(av, p1);
   }
   return transc(glog,x,prec);
@@ -1970,12 +1970,12 @@ gcos(GEN x, long prec)
     case t_COMPLEX:
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
-      r = gexp((GEN)x[2],prec);
+      r = gexp(gel(x,2),prec);
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(v1, r); /* = - I*sin(I*Im(x)) */
-      gsincos((GEN)x[1],&u,&v,prec);
-      affr_fixlg(gmul(v1,v), (GEN)y[1]);
-      affr_fixlg(gmul(u1,u), (GEN)y[2]); return y;
+      gsincos(gel(x,1),&u,&v,prec);
+      affr_fixlg(gmul(v1,v), gel(y,1));
+      affr_fixlg(gmul(u1,u), gel(y,2)); return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
@@ -2033,12 +2033,12 @@ gsin(GEN x, long prec)
     case t_COMPLEX:
       i = precision(x); if (!i) i = prec;
       y = cgetc(i); av = avma;
-      r = gexp((GEN)x[2],prec);
+      r = gexp(gel(x,2),prec);
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
-      gsincos((GEN)x[1],&u,&v,prec);
-      affr_fixlg(gmul(v1,u), (GEN)y[1]);
-      affr_fixlg(gmul(u1,v), (GEN)y[2]); return y;
+      gsincos(gel(x,1),&u,&v,prec);
+      affr_fixlg(gmul(v1,u), gel(y,1));
+      affr_fixlg(gmul(u1,v), gel(y,2)); return y;
 
     case t_INT: case t_FRAC:
       y = cgetr(prec); av = avma;
@@ -2099,7 +2099,7 @@ exp_Ir(GEN x)
   pari_sp av = avma;
   GEN v = cgetg(3,t_COMPLEX);
   mpsincos(x, (GEN*)(v+2), (GEN*)(v+1));
-  if (!signe(x)) return gerepilecopy(av, (GEN)v[1]);
+  if (!signe(x)) return gerepilecopy(av, gel(v,1));
   return v;
 }
 
@@ -2127,14 +2127,14 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       i = precision(x); if (!i) i = prec;
       ps = cgetc(i); *s = ps;
       pc = cgetc(i); *c = pc; av = avma;
-      r = gexp((GEN)x[2],prec);
+      r = gexp(gel(x,2),prec);
       v1 = gmul2n(addrr(ginv(r),r), -1); /* = cos(I*Im(x)) */
       u1 = subrr(r, v1); /* = I*sin(I*Im(x)) */
-      gsincos((GEN)x[1], &u,&v, prec);
-      affr_fixlg(mulrr(v1,u),       (GEN)ps[1]);
-      affr_fixlg(mulrr(u1,v),       (GEN)ps[2]);
-      affr_fixlg(mulrr(v1,v),       (GEN)pc[1]);
-      affr_fixlg(mulrr(mpneg(u1),u),(GEN)pc[2]); return;
+      gsincos(gel(x,1), &u,&v, prec);
+      affr_fixlg(mulrr(v1,u),       gel(ps,1));
+      affr_fixlg(mulrr(u1,v),       gel(ps,2));
+      affr_fixlg(mulrr(v1,v),       gel(pc,1));
+      affr_fixlg(mulrr(mpneg(u1),u),gel(pc,2)); return;
 
     case t_QUAD:
       av = avma; gsincos(quadtoc(x, prec), s, c, prec);
@@ -2154,9 +2154,9 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
       if (!ex)
       {
-        p1 = shallowcopy(y); p1[2] = (long)gen_0;
+        p1 = shallowcopy(y); gel(p1,2) = gen_0;
         gsincos(normalize(p1),&u,&v,prec);
-        gsincos((GEN)y[2],&u1,&v1,prec);
+        gsincos(gel(y,2),&u1,&v1,prec);
         p1 = gmul(v1,v);
         p2 = gmul(u1,u);
         p3 = gmul(v1,u);
@@ -2169,27 +2169,27 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       }
 
       ly = lx+2*ex;
-      mi = lx-1; while (mi>=3 && gcmp0((GEN)y[mi])) mi--;
+      mi = lx-1; while (mi>=3 && gcmp0(gel(y,mi))) mi--;
       mi += ex-2;
       pc = cgetg(ly,t_SER); *c = pc;
       ps = cgetg(lx,t_SER); *s = ps;
       pc[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
-      pc[2] = (long)gen_1; ps[1] = y[1];
-      for (i=2; i<ex+2; i++) ps[i] = lcopy((GEN)y[i]);
-      for (i=3; i< ex2; i++) pc[i] = (long)gen_0;
+      gel(pc,2) = gen_1; ps[1] = y[1];
+      for (i=2; i<ex+2; i++) gel(ps,i) = gcopy(gel(y,i));
+      for (i=3; i< ex2; i++) gel(pc,i) = gen_0;
       for (i=ex2; i<ly; i++)
       {
 	ii = i-ex; av = avma; p1 = gen_0;
 	for (j=ex; j<=min(ii-2,mi); j++)
-	  p1 = gadd(p1, gmulgs(gmul((GEN)y[j-ex+2],(GEN)ps[ii-j]),j));
-	pc[i] = lpileupto(av, gdivgs(p1,2-i));
+	  p1 = gadd(p1, gmulgs(gmul(gel(y,j-ex+2),gel(ps,ii-j)),j));
+	gel(pc,i) = gerepileupto(av, gdivgs(p1,2-i));
 	if (ii < lx)
 	{
 	  av = avma; p1 = gen_0;
 	  for (j=ex; j<=min(i-ex2,mi); j++)
-	    p1 = gadd(p1,gmulgs(gmul((GEN)y[j-ex+2],(GEN)pc[i-j]),j));
+	    p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
 	  p1 = gdivgs(p1,i-2);
-	  ps[i-ex] = lpileupto(av, gadd(p1,(GEN)y[i-ex]));
+	  ps[i-ex] = lpileupto(av, gadd(p1,gel(y,i-ex)));
 	}
       }
       return;
