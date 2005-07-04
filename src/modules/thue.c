@@ -1007,7 +1007,7 @@ test_sol(long i)
   {
     pari_sp av=avma;
     for (k=1; k<lg(Partial[1]); k++)
-      if ( signe(modii( gel(Partial,i)[k], gen_ord[k] )) )
+      if ( signe(modii( gmael(Partial,i,k), gen_ord[k] )) )
         { avma=av; return; }
     avma=av;
   }
@@ -1037,8 +1037,8 @@ fix_Partial(long i)
   long k;
   pari_sp av = avma;
   for (k=1; k<lg(Partial[1]); k++)
-    affii(addii(gel(Partial,i-1)[k], mulis(gel(Relations,i)[k], u[i])),
-          gel(Partial,i)[k]);
+    affii(addii(gmael(Partial,i-1,k), mulis(gmael(Relations,i,k), u[i])),
+          gmael(Partial,i,k));
   avma = av;
 }
 
