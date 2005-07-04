@@ -30,11 +30,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 /* assume z[1] was created last */
 #define fix_frac_if_int(z) if (is_pm1(z[2]))\
-  z = gerepileupto((pari_sp)(z+3), (GEN)z[1]);
+  z = gerepileupto((pari_sp)(z+3), gel(z,1));
 
 /* assume z[1] was created last */
 #define fix_frac_if_int_GC(z,tetpil) { if (is_pm1(z[2]))\
-  z = gerepileupto((pari_sp)(z+3), (GEN)z[1]);\
+  z = gerepileupto((pari_sp)(z+3), gel(z,1));\
 else\
   gerepilecoeffssp((pari_sp)z, tetpil, z+1, 2); }
 
@@ -44,7 +44,7 @@ kro_quad(GEN x, GEN y)
   long k;
   pari_sp av=avma;
 
-  x = subii(sqri((GEN)x[3]), shifti((GEN)x[2],2));
+  x = subii(sqri(gel(x,3)), shifti(gel(x,2),2));
   k = kronecker(x,y); avma=av; return k;
 }
 
@@ -54,7 +54,7 @@ to_primitive(GEN x, GEN *cx)
   if (typ(x) != t_POL)
     { *cx = x; x = gen_1; }
   else if (lg(x) == 3)
-    { *cx = (GEN)x[2]; x = gen_1; }
+    { *cx = gel(x,2); x = gen_1; }
   else
     { *cx = content(x); if (!gcmp1(*cx)) x = gdiv(x,*cx); }
   return x;
@@ -75,42 +75,42 @@ static GEN divpp(GEN x, GEN y);
 static GEN
 addRc(GEN x, GEN y) {
   GEN z = cgetg(3,t_COMPLEX);
-  z[1]=ladd(x,(GEN)y[1]);
-  z[2]=lcopy((GEN)y[2]); return z;
+  gel(z,1) = gadd(x,gel(y,1));
+  gel(z,2) = gcopy(gel(y,2)); return z;
 }
 static GEN
 mulRc(GEN x, GEN y) {
   GEN z = cgetg(3,t_COMPLEX);
-  z[1] = lmul(x,(GEN)y[1]);
-  z[2] = lmul(x,(GEN)y[2]); return z;
+  gel(z,1) = gmul(x,gel(y,1));
+  gel(z,2) = gmul(x,gel(y,2)); return z;
 }
 static GEN
 divRc(GEN x, GEN y) {
   GEN a, b, N, z = cgetg(3,t_COMPLEX);
   pari_sp tetpil, av = avma;
-  a = gmul(x, (GEN)y[1]);
-  b = gmul(x, (GEN)y[2]); if(!gcmp0(b)) b = gneg_i(b);
+  a = gmul(x, gel(y,1));
+  b = gmul(x, gel(y,2)); if(!gcmp0(b)) b = gneg_i(b);
   N = cxnorm(y); tetpil = avma;
-  z[1] = ldiv(a, N);
-  z[2] = ldiv(b, N); gerepilecoeffssp(av,tetpil,z+1,2); return z;
+  gel(z,1) = gdiv(a, N);
+  gel(z,2) = gdiv(b, N); gerepilecoeffssp(av,tetpil,z+1,2); return z;
 }
 static GEN
 divcR(GEN x, GEN y) {
   GEN z = cgetg(3,t_COMPLEX);
-  z[1] = ldiv((GEN)x[1], y);
-  z[2] = ldiv((GEN)x[2], y); return z;
+  gel(z,1) = gdiv(gel(x,1), y);
+  gel(z,2) = gdiv(gel(x,2), y); return z;
 }
 static GEN
 addRq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD); copyifstack(y[1], z[1]);
-  z[2] = ladd(x, (GEN)y[2]);
-  z[3] = lcopy((GEN)y[3]); return z;
+  gel(z,2) = gadd(x, gel(y,2));
+  gel(z,3) = gcopy(gel(y,3)); return z;
 }
 static GEN
 mulRq(GEN x, GEN y) {
   GEN z = cgetg(4,t_QUAD); copyifstack(y[1], z[1]);
-  z[2] = lmul(x,(GEN)y[2]);
-  z[3] = lmul(x,(GEN)y[3]); return z;
+  gel(z,2) = gmul(x,gel(y,2));
+  gel(z,3) = gmul(x,gel(y,3)); return z;
 }
 static GEN
 addqf(GEN x, GEN y, long prec) { pari_sp av = avma;
@@ -137,7 +137,7 @@ addTp(GEN x, GEN y) { pari_sp av = avma; GEN z;
   if (!valp(y)) z = cvtop2(x,y);
   else {
     long l = signe(y[4])? valp(y) + precp(y): valp(y);
-    z  = cvtop(x, (GEN)y[2], l);
+    z  = cvtop(x, gel(y,2), l);
   }
   return gerepileupto(av, addpp(z, y));
 }
@@ -163,11 +163,11 @@ static GEN
 add_intmod_same(GEN z, GEN X, GEN x, GEN y) {
   if (lgefint(X) == 3) {
     ulong u = Fl_add(itou(x),itou(y), X[2]);
-    avma = (pari_sp)z; z[2] = lutoi(u);
+    avma = (pari_sp)z; gel(z,2) = utoi(u);
   }
   else {
     GEN u = addii(x,y); if (cmpii(u, X) >= 0) u = subii(u, X);
-    z[2] = lpileuptoint((pari_sp)z, u);
+    gel(z,2) = gerepileuptoint((pari_sp)z, u);
   }
   icopyifstack(X, z[1]); return z;
 }
@@ -176,10 +176,10 @@ static GEN
 mul_intmod_same(GEN z, GEN X, GEN x, GEN y) {
   if (lgefint(X) == 3) {
     ulong u = Fl_mul(itou(x),itou(y), X[2]);
-    avma = (pari_sp)z; z[2] = lutoi(u);
+    avma = (pari_sp)z; gel(z,2) = utoi(u);
   }
   else
-    z[2] = lpileuptoint((pari_sp)z, remii(mulii(x,y), X) );
+    gel(z,2) = gerepileuptoint((pari_sp)z, remii(mulii(x,y), X) );
   icopyifstack(X, z[1]); return z;
 }
 /* cf add_intmod_same */
@@ -190,10 +190,10 @@ div_intmod_same(GEN z, GEN X, GEN x, GEN y)
     ulong m = (ulong)X[2], u = Fl_inv(itou(y), m);
     if (!u) err(invmoder,"%Z", gmodulcp(y, X));
     u = Fl_mul(itou(x), u, m);
-    avma = (pari_sp)z; z[2] = lutoi(u);
+    avma = (pari_sp)z; gel(z,2) = utoi(u);
   }
   else
-    z[2] = lpileuptoint((pari_sp)z, remii(mulii(x, Fp_inv(y,X)), X) );
+    gel(z,2) = gerepileuptoint((pari_sp)z, remii(mulii(x, Fp_inv(y,X)), X) );
   icopyifstack(X, z[1]); return z;
 }
 
@@ -207,8 +207,8 @@ static GEN
 gred_rfrac_copy(GEN n, GEN d)
 {
   GEN y = cgetg(3,t_RFRAC);
-  y[1] = lcopy(n);
-  y[2] = lcopy(d); return y;
+  gel(y,1) = gcopy(n);
+  gel(y,2) = gcopy(d); return y;
 }
 
 /* n is scalar, non-zero */
@@ -223,8 +223,8 @@ gred_rfrac_simple(GEN n, GEN d)
 
   c = denom(n);
   y = cgetg(3,t_RFRAC);
-  y[1] = lmul(n,c);
-  y[2] = lmul(d,c); return y;
+  gel(y,1) = gmul(n,c);
+  gel(y,2) = gmul(d,c); return y;
 }
 
 static GEN
@@ -292,8 +292,8 @@ gred_rfrac2_i(GEN n, GEN d)
     cd = denom(c);
   }
   p1 = cgetg(3,t_RFRAC);
-  p1[1] = lmul(n,cn);
-  p1[2] = lmul(d,cd); return p1;
+  gel(p1,1) = gmul(n,cn);
+  gel(p1,2) = gmul(d,cd); return p1;
 }
 
 GEN
@@ -316,15 +316,15 @@ gred_frac2(GEN x1, GEN x2)
   if (is_pm1(p1))
   {
     avma = av; y = cgetg(3,t_FRAC);
-    y[1] = licopy(x1);
-    y[2] = licopy(x2);
+    gel(y,1) = icopy(x1);
+    gel(y,2) = icopy(x2);
   }
   else
   {
     p1 = gclone(p1);
     avma = av; y = cgetg(3,t_FRAC);
-    y[1] = (long)diviiexact(x1,p1);
-    y[2] = (long)diviiexact(x2,p1);
+    gel(y,1) = diviiexact(x1,p1);
+    gel(y,2) = diviiexact(x2,p1);
     gunclone(p1);
   }
   fix_frac(y); return y;
@@ -355,7 +355,7 @@ addpp(GEN x, GEN y)
 {
   pari_sp av = avma;
   long c,d,e,r,rx,ry;
-  GEN u, z, mod, p = (GEN)x[2];
+  GEN u, z, mod, p = gel(x,2);
 
   (void)new_chunk(5 + lgefint(x[3]) + lgefint(y[3]));
   e = valp(x);
@@ -366,14 +366,14 @@ addpp(GEN x, GEN y)
   if (d) /* v(x) < v(y) */
   {
     r = d+ry; z = powiu(p,d);
-    if (r < rx) mod = mulii(z,(GEN)y[3]); else { r = rx; mod = (GEN)x[3]; }
-    u = addii((GEN)x[4], mulii(z,(GEN)y[4]));
+    if (r < rx) mod = mulii(z,gel(y,3)); else { r = rx; mod = gel(x,3); }
+    u = addii(gel(x,4), mulii(z,gel(y,4)));
     u = remii(u, mod);
   }
   else
   {
-    if (ry < rx) { r=ry; mod = (GEN)y[3]; } else { r=rx; mod = (GEN)x[3]; }
-    u = addii((GEN)x[4], (GEN)y[4]);
+    if (ry < rx) { r=ry; mod = gel(y,3); } else { r=rx; mod = gel(x,3); }
+    u = addii(gel(x,4), gel(y,4));
     if (!signe(u) || (c = Z_pvalrem(u,p,&u)) >= r)
     {
       avma = av; return zeropadic(p, e+r);
@@ -388,8 +388,8 @@ addpp(GEN x, GEN y)
   }
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);
-  z[3] = licopy(mod);
-  z[4] = licopy(u);
+  gel(z,3) = icopy(mod);
+  gel(z,4) = icopy(u);
   icopyifstack(p, z[2]); return z;
 }
 
@@ -403,14 +403,14 @@ addQp(GEN x, GEN y)
 
   if (gcmp0(x)) return gcopy(y);
 
-  av = avma; p = (GEN)y[2]; tx = typ(x);
+  av = avma; p = gel(y,2); tx = typ(x);
   e = (tx == t_INT)? Z_pvalrem(x,p,&p1)
-                   : Z_pvalrem((GEN)x[1],p,&p1) -
-                     Z_pvalrem((GEN)x[2],p,&p2);
+                   : Z_pvalrem(gel(x,1),p,&p1) -
+                     Z_pvalrem(gel(x,2),p,&p2);
   vy = valp(y); d = vy - e; py = precp(y); r = d + py;
   if (r <= 0) { avma = av; return gcopy(y); }
-  mod = (GEN)y[3];
-  u   = (GEN)y[4];
+  mod = gel(y,3);
+  u   = gel(y,4);
   (void)new_chunk(5 + ((lgefint(mod) + lgefint(p)*labs(d)) << 1));
 
   if (d > 0)
@@ -448,8 +448,8 @@ addQp(GEN x, GEN y)
   u = modii(u, mod);
   avma = av; z = cgetg(5,t_PADIC);
   z[1] = evalprecp(r) | evalvalp(e);
-  z[3] = licopy(mod);
-  z[4] = licopy(u);
+  gel(z,3) = icopy(mod);
+  gel(z,4) = icopy(u);
   icopyifstack(p, z[2]); return z;
 }
 
@@ -464,21 +464,21 @@ add_polmod(GEN X, GEN Y, GEN x, GEN y)
   long vx = varn(X), vy = varn(Y);
   if (vx==vy) {
     pari_sp av;
-    z[1] = (long)srgcd(X,Y); av = avma;
-    z[2] = lpileupto(av, gmod(gadd(x, y), (GEN)z[1])); return z;
+    gel(z,1) = srgcd(X,Y); av = avma;
+    gel(z,2) = gerepileupto(av, gmod(gadd(x, y), gel(z,1))); return z;
   }
   if (varncmp(vx, vy) < 0)
-  { copyifstack(X, z[1]); T[1]=(long)Y; T[2]=(long)y; y = T; }
+  { copyifstack(X, z[1]); gel(T,1) = Y; gel(T,2) = y; y = T; }
   else
-  { copyifstack(Y, z[1]); T[1]=(long)X; T[2]=(long)x; x = T; }
-  z[2] = ladd(x, y); return z;
+  { copyifstack(Y, z[1]); gel(T,1) = X; gel(T,2) = x; x = T; }
+  gel(z,2) = gadd(x, y); return z;
 }
 /* Mod(y, Y) + x,  assuming x scalar or polynomial in same var and reduced degree */
 static GEN
 add_polmod_scal(GEN Y, GEN y, GEN x)
 {
   GEN z = cgetg(3,t_POLMOD); copyifstack(Y, z[1]);
-  z[2] = ladd(x, y); return z;
+  gel(z,2) = gadd(x, y); return z;
 }
 /* typ(y) == t_POL, varn(y) = vy, x "scalar" [e.g object in lower variable] */
 static GEN
@@ -489,20 +489,20 @@ add_pol_scal(GEN y, GEN x, long vy)
   if (ly <= 3) {
     if (ly == 2) return isexactzero(x)? zeropol(vy): scalarpol(x,vy);
     z = cgetg(3, t_POL); z[1] = y[1];
-    z[2] = ladd(x,(GEN)y[2]);
-    if (gcmp0((GEN)z[2])) {
-      if (isexactzero((GEN)z[2])) { avma = (pari_sp)(z+3); return zeropol(vy); }
+    gel(z,2) = gadd(x,gel(y,2));
+    if (gcmp0(gel(z,2))) {
+      if (isexactzero(gel(z,2))) { avma = (pari_sp)(z+3); return zeropol(vy); }
       setsigne(z, 0);
     }
     return z;
   }
   z = cgetg(ly,t_POL); z[1] = y[1];
-  z[2] = ladd(x,(GEN)y[2]);
-  for (i = 3; i < ly; i++) z[i] = lcopy((GEN)y[i]);
+  gel(z,2) = gadd(x,gel(y,2));
+  for (i = 3; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
   /* normalize_pol optimized for this case */
   for (i = ly-1; i > 2; i--)
-    if (!gcmp0((GEN)z[i])) { /* setsigne(z, 1); already true */ return z; }
-  if (!gcmp0((GEN)z[2])) { setsigne(z, 1); return z; }
+    if (!gcmp0(gel(z,i))) { /* setsigne(z, 1); already true */ return z; }
+  if (!gcmp0(gel(z,2))) { setsigne(z, 1); return z; }
   setsigne(z, 0); return z;
 }
 /* typ(y) == t_SER, varn(y) = vy, x "scalar" [e.g object in lower variable] */
@@ -519,9 +519,9 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
   if (l < 0)
   {
     z = cgetg(ly,t_SER); z[1] = y[1];
-    for (i = 2; i <= 1-l; i++) z[i] = lcopy((GEN)y[i]);
-    for (i = 3-l; i < ly; i++) z[i] = lcopy((GEN)y[i]);
-    z[2-l] = ladd(x,(GEN)y[2-l]); return z;
+    for (i = 2; i <= 1-l; i++) gel(z,i) = gcopy(gel(y,i));
+    for (i = 3-l; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
+    z[2-l] = ladd(x,gel(y,2-l)); return z;
   }
   if (l > 0)
   {
@@ -529,27 +529,27 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
 
     ly += l; z = cgetg(ly,t_SER);
     z[1] = evalsigne(1) | evalvalp(0) | evalvarn(vy);
-    for (i=3; i<=l+1; i++) z[i] = (long)gen_0;
-    for (   ; i < ly; i++) z[i] = lcopy((GEN)y[i-l]);
-    z[2] = lcopy(x); return z;
+    for (i=3; i<=l+1; i++) gel(z,i) = gen_0;
+    for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i-l));
+    gel(z,2) = gcopy(x); return z;
   }
   /* l = 0 */
   if (!signe(y)) return zeroser(vy, 0); /* 1 + O(1) --> O(1) */
 
   av = avma; z = cgetg(ly,t_SER);
-  t = gadd(x, (GEN)y[2]);
+  t = gadd(x, gel(y,2));
   if (!isexactzero(t))
   {
     z[1] = evalsigne(1)|evalvalp(0) | evalvarn(vy);
-    z[2] = (long)t;
-    for (i=3; i<ly; i++) z[i] = lcopy((GEN)y[i]);
+    gel(z,2) = t;
+    for (i=3; i<ly; i++) gel(z,i) = gcopy(gel(y,i));
     return z;
   }
   avma = av; /* first coeff is 0 */
-  i = 3; while (i < ly && isexactzero((GEN)y[i])) i++;
+  i = 3; while (i < ly && isexactzero(gel(y,i))) i++;
   ly -= i; if (!ly) return zeroser(vy,i-2);
   z = cgetg(ly+2,t_SER); z[1] = evalvalp(i-2)|evalvarn(vy)|evalsigne(1);
-  for (j = 2; j <= ly+1; j++) z[j] = lcopy((GEN)y[j+i-2]);
+  for (j = 2; j <= ly+1; j++) gel(z,j) = gcopy(gel(y,j+i-2));
   return z;
 }
 /* typ(y) == RFRAC, x polynomial in same variable or "scalar" */
@@ -559,24 +559,24 @@ add_rfrac_scal(GEN y, GEN x)
   GEN p1,num, z = cgetg(3,t_RFRAC);
   pari_sp tetpil, av;
 
-  p1 = gmul(x,(GEN)y[2]); tetpil = avma;
-  num = gadd(p1,(GEN)y[1]);
+  p1 = gmul(x,gel(y,2)); tetpil = avma;
+  num = gadd(p1,gel(y,1));
   av = avma;
-  p1 = content((GEN)y[2]);
+  p1 = content(gel(y,2));
   if (!gcmp1(p1))
   {
     p1 = ggcd(p1, content(num));
     if (!gcmp1(p1))
     {
       tetpil = avma;
-      z[1] = ldiv(num, p1);
-      z[2] = ldiv((GEN)y[2], p1);
+      gel(z,1) = gdiv(num, p1);
+      gel(z,2) = gdiv(gel(y,2), p1);
       gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
     }
   }
   avma = av;
-  z[1]=lpile((pari_sp)z,tetpil, num);
-  z[2]=lcopy((GEN)y[2]); return z;
+  gel(z,1) = gerepile((pari_sp)z,tetpil, num);
+  gel(z,2) = gcopy(gel(y,2)); return z;
 }
 
 /* x "scalar", ty != t_MAT and non-scalar */
@@ -601,14 +601,14 @@ add_scal(GEN y, GEN x, long ty, long vy)
 static GEN
 addfrac(GEN x, GEN y)
 {
-  GEN x1 = (GEN)x[1], x2 = (GEN)x[2], z = cgetg(3,t_FRAC);
-  GEN y1 = (GEN)y[1], y2 = (GEN)y[2], p1, r, n, d, delta;
+  GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_FRAC);
+  GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
 
   delta = gcdii(x2,y2);
   if (is_pm1(delta))
   { /* numerator is non-zero */
-    z[1] = lpileuptoint((pari_sp)z, addii(mulii(x1,y2), mulii(y1,x2)));
-    z[2] = lmulii(x2,y2); return z;
+    gel(z,1) = gerepileuptoint((pari_sp)z, addii(mulii(x1,y2), mulii(y1,x2)));
+    gel(z,2) = mulii(x2,y2); return z;
   }
   x2 = diviiexact(x2,delta);
   y2 = diviiexact(y2,delta);
@@ -620,8 +620,8 @@ addfrac(GEN x, GEN y)
   {
     if (is_pm1(d)) { avma = (pari_sp)(z+3); return icopy(p1); }
     avma = (pari_sp)z;
-    z[2] = licopy(d);
-    z[1] = licopy(p1); return z;
+    gel(z,2) = icopy(d);
+    gel(z,1) = icopy(p1); return z;
   }
   p1 = gcdii(delta, r);
   if (!is_pm1(p1))
@@ -630,22 +630,22 @@ addfrac(GEN x, GEN y)
     n     = diviiexact(n, p1);
   }
   d = mulii(d,delta); avma = (pari_sp)z;
-  z[1] = licopy(n);
-  z[2] = licopy(d); return z;
+  gel(z,1) = icopy(n);
+  gel(z,2) = icopy(d); return z;
 }
 
 static GEN
 add_rfrac(GEN x, GEN y)
 {
-  GEN x1 = (GEN)x[1], x2 = (GEN)x[2], z = cgetg(3,t_RFRAC);
-  GEN y1 = (GEN)y[1], y2 = (GEN)y[2], p1, r, n, d, delta;
+  GEN x1 = gel(x,1), x2 = gel(x,2), z = cgetg(3,t_RFRAC);
+  GEN y1 = gel(y,1), y2 = gel(y,2), p1, r, n, d, delta;
   pari_sp tetpil;
 
   delta = ggcd(x2,y2);
   if (gcmp1(delta))
   { /* numerator is non-zero */
-    z[1] = lpileupto((pari_sp)z, gadd(gmul(x1,y2), gmul(y1,x2)));
-    z[2] = lmul(x2, y2); return z;
+    gel(z,1) = gerepileupto((pari_sp)z, gadd(gmul(x1,y2), gmul(y1,x2)));
+    gel(z,2) = gmul(x2, y2); return z;
   }
   x2 = gdeuc(x2,delta);
   y2 = gdeuc(y2,delta);
@@ -657,27 +657,27 @@ add_rfrac(GEN x, GEN y)
   {
     if (lg(d) == 3) /* "constant" denominator */
     {
-      d = (GEN)d[2];
+      d = gel(d,2);
            if (gcmp_1(d)) p1 = gneg(p1);
       else if (!gcmp1(d)) p1 = gdiv(p1, d);
       return gerepileupto((pari_sp)(z+3), p1);
     }
-    z[1]=(long)p1; z[2]=(long)d;
+    gel(z,1) = p1; gel(z,2) = d;
     gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
   }
   p1 = ggcd(delta, r);
   if (gcmp1(p1))
   {
     tetpil = avma;
-    z[1] = lcopy(n);
+    gel(z,1) = gcopy(n);
   }
   else
   {
     delta = gdeuc(delta, p1);
     tetpil = avma;
-    z[1] = ldeuc(n,p1);
+    gel(z,1) = gdeuc(n,p1);
   }
-  z[2] = lmul(d,delta);
+  gel(z,2) = gmul(d,delta);
   gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
 
@@ -692,36 +692,36 @@ gadd(GEN x, GEN y)
   {
     case t_INT: return addii(x,y);
     case t_REAL: return addrr(x,y);
-    case t_INTMOD:  { GEN X = (GEN)x[1], Y = (GEN)y[1];
+    case t_INTMOD:  { GEN X = gel(x,1), Y = gel(y,1);
       z = cgetg(3,t_INTMOD);
       if (X==Y || equalii(X,Y))
-        return add_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
-      z[1] = (long)gcdii(X,Y);
-      av = avma; p1 = addii((GEN)x[2],(GEN)y[2]);
-      z[2] = (long)gerepileuptoint(av, remii(p1, (GEN)z[1])); return z;
+        return add_intmod_same(z, X, gel(x,2), gel(y,2));
+      gel(z,1) = gcdii(X,Y);
+      av = avma; p1 = addii(gel(x,2),gel(y,2));
+      gel(z,2) = gerepileuptoint(av, remii(p1, gel(z,1))); return z;
     }
     case t_FRAC: return addfrac(x,y);
     case t_COMPLEX: z = cgetg(3,t_COMPLEX);
-      z[2] = ladd((GEN)x[2],(GEN)y[2]);
-      if (isexactzero((GEN)z[2]))
+      gel(z,2) = gadd(gel(x,2),gel(y,2));
+      if (isexactzero(gel(z,2)))
       {
         avma = (pari_sp)(z+3);
-        return gadd((GEN)x[1],(GEN)y[1]);
+        return gadd(gel(x,1),gel(y,1));
       }
-      z[1] = ladd((GEN)x[1],(GEN)y[1]);
+      gel(z,1) = gadd(gel(x,1),gel(y,1));
       return z;
     case t_PADIC:
-      if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"+",x,y);
+      if (!equalii(gel(x,2),gel(y,2))) err(operi,"+",x,y);
       return addpp(x,y);
     case t_QUAD: z = cgetg(4,t_QUAD);
-      if (!gequal((GEN)x[1],(GEN)y[1])) err(operi,"+",x,y);
+      if (!gequal(gel(x,1),gel(y,1))) err(operi,"+",x,y);
       copyifstack(x[1], z[1]);
-      z[2] = ladd((GEN)x[2],(GEN)y[2]);
-      z[3] = ladd((GEN)x[3],(GEN)y[3]); return z;
+      gel(z,2) = gadd(gel(x,2),gel(y,2));
+      gel(z,3) = gadd(gel(x,3),gel(y,3)); return z;
     case t_POLMOD:
-      if (gequal((GEN)x[1], (GEN)y[1]))
-        return add_polmod_same((GEN)x[1], (GEN)x[2], (GEN)y[2]);
-      return add_polmod((GEN)x[1], (GEN)y[1], (GEN)x[2], (GEN)y[2]);
+      if (gequal(gel(x,1), gel(y,1)))
+        return add_polmod_same(gel(x,1), gel(x,2), gel(y,2));
+      return add_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2));
     case t_POL:
       vx = varn(x);
       vy = varn(y);
@@ -734,18 +734,18 @@ gadd(GEN x, GEN y)
       ly = lg(y);
       if (lx == ly) {
         z = cgetg(lx, t_POL); z[1] = x[1];
-        for (i=2; i < lx; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
+        for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
         return normalizepol_i(z, lx);
       }
       if (ly < lx) {
         z = cgetg(lx,t_POL); z[1] = x[1];
-        for (i=2; i < ly; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
-        for (   ; i < lx; i++) z[i] = lcopy((GEN)x[i]);
+        for (i=2; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
+        for (   ; i < lx; i++) gel(z,i) = gcopy(gel(x,i));
         if (!signe(x)) z = normalizepol_i(z, lx);
       } else {
         z = cgetg(ly,t_POL); z[1] = y[1];
-        for (i=2; i < lx; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
-        for (   ; i < ly; i++) z[i] = lcopy((GEN)y[i]);
+        for (i=2; i < lx; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
+        for (   ; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
         if (!signe(y)) z = normalizepol_i(z, ly);
       }
       return z;
@@ -768,20 +768,20 @@ gadd(GEN x, GEN y)
       if (l)
       {
         if (l > lx-2) { avma = av; return gcopy(x); }
-        for (i=2; i<=l+1; i++) z[i] = lcopy((GEN)x[i]);
-        for (   ; i < ly; i++) z[i] = ladd((GEN)x[i],(GEN)y[i-l]);
+        for (i=2; i<=l+1; i++) gel(z,i) = gcopy(gel(x,i));
+        for (   ; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i-l));
         z[1] = x[1]; return z;
       }
       for (i = 2; i < ly; i++)
       {
-        p1 = gadd((GEN)x[i],(GEN)y[i]);
+        p1 = gadd(gel(x,i),gel(y,i));
         if (!isexactzero(p1))
         {
           l = i-2; stackdummy(z,l); z += l;
           z[0] = evaltyp(t_SER) | evallg(ly-l);
           z[1] = evalvalp(valp(x)+i-2) | evalsigne(1) | evalvarn(vx);
-          for (j=i+1; j<ly; j++) z[j-l] = ladd((GEN)x[j],(GEN)y[j]);
-          z[2] = (long)p1; return z;
+          for (j=i+1; j<ly; j++) z[j-l] = ladd(gel(x,j),gel(y,j));
+          gel(z,2) = p1; return z;
         }
         avma = (pari_sp)z;
       }
@@ -799,7 +799,7 @@ gadd(GEN x, GEN y)
       ly = lg(y);
       if (ly != lg(x)) err(operi,"+",x,y);
       z = cgetg(ly, ty);
-      for (i = 1; i < ly; i++) z[i] = ladd((GEN)x[i],(GEN)y[i]);
+      for (i = 1; i < ly; i++) gel(z,i) = gadd(gel(x,i),gel(y,i));
       return z;
 
     default: err(operf,"+",x,y);
@@ -815,10 +815,10 @@ gadd(GEN x, GEN y)
         case t_REAL: return addir(x,y);
         case t_INTMOD:
           z = cgetg(3, t_INTMOD);
-          return add_intmod_same(z, (GEN)y[1], (GEN)y[2], modii(x, (GEN)y[1]));
+          return add_intmod_same(z, gel(y,1), gel(y,2), modii(x, gel(y,1)));
         case t_FRAC: z = cgetg(3,t_FRAC);
-          z[1] = lpileuptoint((pari_sp)z, addii((GEN)y[1], mulii((GEN)y[2],x)));
-          z[2] = licopy((GEN)y[2]); return z;
+          gel(z,1) = gerepileuptoint((pari_sp)z, addii(gel(y,1), mulii(gel(y,2),x)));
+          gel(z,2) = icopy(gel(y,2)); return z;
         case t_COMPLEX: return addRc(x, y);
         case t_PADIC: return addQp(x,y);
         case t_QUAD: return addRq(x, y);
@@ -831,11 +831,11 @@ gadd(GEN x, GEN y)
           if (!signe(y[1])) return rcopy(x);
           if (!signe(x))
           {
-            lx = expi((GEN)y[1]) - expi((GEN)y[2]) - expo(x);
+            lx = expi(gel(y,1)) - expi(gel(y,2)) - expo(x);
             return lx <= 0? rcopy(x): fractor(y, nbits2prec(lx));
           }
-          av=avma; z=addir((GEN)y[1],mulir((GEN)y[2],x)); tetpil=avma;
-          return gerepile(av,tetpil,divri(z,(GEN)y[2]));
+          av=avma; z=addir(gel(y,1),mulir(gel(y,2),x)); tetpil=avma;
+          return gerepile(av,tetpil,divri(z,gel(y,2)));
         case t_COMPLEX: return addRc(x, y);
         case t_QUAD: return gcmp0(y)? rcopy(x): addqf(y, x, lg(x));
 
@@ -845,15 +845,15 @@ gadd(GEN x, GEN y)
     case t_INTMOD:
       switch(ty)
       {
-        case t_FRAC: { GEN X = (GEN)x[1];
+        case t_FRAC: { GEN X = gel(x,1);
           z = cgetg(3, t_INTMOD);
-          p1 = modii(mulii((GEN)y[1], Fp_inv((GEN)y[2],X)), X);
-          return add_intmod_same(z, X, p1, (GEN)x[2]);
+          p1 = modii(mulii(gel(y,1), Fp_inv(gel(y,2),X)), X);
+          return add_intmod_same(z, X, p1, gel(x,2));
         }
         case t_COMPLEX: return addRc(x, y);
-        case t_PADIC: { GEN X = (GEN)x[1];
+        case t_PADIC: { GEN X = gel(x,1);
           z = cgetg(3, t_INTMOD);
-          return add_intmod_same(z, X, (GEN)x[2], padic_to_Fp(y, X));
+          return add_intmod_same(z, X, gel(x,2), padic_to_Fp(y, X));
         }
         case t_QUAD: return addRq(x, y);
       }
@@ -870,14 +870,14 @@ gadd(GEN x, GEN y)
       switch(ty)
       {
         case t_PADIC:
-          return Zp_nosquare_m1((GEN)y[2])? addRc(y, x): addTp(x, y);
+          return Zp_nosquare_m1(gel(y,2))? addRc(y, x): addTp(x, y);
         case t_QUAD:
           lx = precision(x); if (!lx) err(operi,"+",x,y);
           return gcmp0(y)? rcopy(x): addqf(y, x, lx);
       }
 
     case t_PADIC: /* ty == t_QUAD */
-      return (kro_quad((GEN)y[1],(GEN)x[2]) == -1)? addRq(x, y): addTp(y, x);
+      return (kro_quad(gel(y,1),gel(x,2)) == -1)? addRq(x, y): addTp(y, x);
   }
   /* tx < ty, !is_const_t(y) */
   if (ty == t_MAT) {
@@ -886,16 +886,16 @@ gadd(GEN x, GEN y)
     return gaddmat(x,y);
   }
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
-    return add_polmod_scal((GEN)y[1], (GEN)y[2], x);
+    return add_polmod_scal(gel(y,1), gel(y,2), x);
   vy = gvar(y);
   if (is_scalar_t(tx))  {
     if (tx == t_POLMOD)
     {
       vx = varn(x[1]);
-      if (vx == vy) y = gmod(y, (GEN)x[1]); /* error if ty == t_SER */
+      if (vx == vy) y = gmod(y, gel(x,1)); /* error if ty == t_SER */
       else
         if (varncmp(vx,vy) > 0) return add_scal(y, x, ty, vy);
-      return add_polmod_scal((GEN)x[1], (GEN)x[2], y);
+      return add_polmod_scal(gel(x,1), gel(x,2), y);
     }
     return add_scal(y, x, ty, vy);
   }
@@ -963,14 +963,14 @@ gaddsg(long x, GEN y)
     case t_REAL: return addsr(x,y);
     case t_INTMOD:
       z = cgetg(3, t_INTMOD);
-      return add_intmod_same(z, (GEN)y[1], (GEN)y[2], modsi(x, (GEN)y[1]));
+      return add_intmod_same(z, gel(y,1), gel(y,2), modsi(x, gel(y,1)));
     case t_FRAC: z = cgetg(3,t_FRAC);
-      z[1] = lpileuptoint((pari_sp)z, addii((GEN)y[1], mulis((GEN)y[2],x)));
-      z[2] = licopy((GEN)y[2]); return z;
+      gel(z,1) = gerepileuptoint((pari_sp)z, addii(gel(y,1), mulis(gel(y,2),x)));
+      gel(z,2) = icopy(gel(y,2)); return z;
     case t_COMPLEX:
       z = cgetg(3, t_COMPLEX);
-      z[1] = laddsg(x, (GEN)y[1]);
-      z[2] = lcopy((GEN)y[2]); return z;
+      gel(z,1) = gaddsg(x, gel(y,1));
+      gel(z,2) = gcopy(gel(y,2)); return z;
 
     default: return gadd(stoi(x), y);
   }
@@ -1020,10 +1020,10 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
   {
     long td;
     p1 = ggcd(x,d);
-    while (typ(p1) == t_POL && lg(p1) == 3) p1 = (GEN)p1[2];
+    while (typ(p1) == t_POL && lg(p1) == 3) p1 = gel(p1,2);
     if (typ(p1) == t_POL && lg(p1) > 3) { x=gdeuc(x,p1); d=gdeuc(d,p1); }
-    while (typ(x) == t_POL && lg(x) == 3) x = (GEN)x[2];
-    while ((td = typ(d)) == t_POL && lg(d) == 3) d = (GEN)d[2];
+    while (typ(x) == t_POL && lg(x) == 3) x = gel(x,2);
+    while ((td = typ(d)) == t_POL && lg(d) == 3) d = gel(d,2);
     if (is_scalar_t(td))
       return gerepileupto(av, gdiv(gmul(x,n), d));
     x = to_primitive(x, &cx);
@@ -1042,9 +1042,9 @@ mul_rfrac_scal(GEN n, GEN d, GEN x)
     cd = denom(cx);
   }
   tetpil = avma;
-  z[2] = lmul(d, cd);
-  z[1] = lmul(n, cn);
-  p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
+  gel(z,2) = gmul(d, cd);
+  gel(z,1) = gmul(n, cn);
+  p1 = fix_rfrac_if_pol(gel(z,1),gel(z,2));
   if (p1) return gerepileupto(av, p1);
   gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
@@ -1058,9 +1058,9 @@ mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
   p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdiv(x1,p1); y2 = gdiv(y2,p1); }
   p1 = ggcd(x2, y1); if (!gcmp1(p1)) { x2 = gdiv(x2,p1); y1 = gdiv(y1,p1); }
   tetpil = avma;
-  z[2] = lmul(x2,y2);
-  z[1] = lmul(x1,y1);
-  p1 = fix_rfrac_if_pol((GEN)z[1],(GEN)z[2]);
+  gel(z,2) = gmul(x2,y2);
+  gel(z,1) = gmul(x1,y1);
+  p1 = fix_rfrac_if_pol(gel(z,1),gel(z,2));
   if (p1) return gerepileupto((pari_sp)(z+3), p1);
   gerepilecoeffssp((pari_sp)z,tetpil,z+1,2); return z;
 }
@@ -1070,7 +1070,7 @@ static GEN
 mul_polmod_scal(GEN Y, GEN y, GEN x)
 {
   GEN z = cgetg(3,t_POLMOD); copyifstack(Y, z[1]);
-  z[2] = lmul(x,y); return z;
+  gel(z,2) = gmul(x,y); return z;
 }
 /* Mod(x,X) * Mod(y,X) */
 static GEN
@@ -1081,11 +1081,11 @@ mul_polmod_same(GEN X, GEN x, GEN y)
   long v;
   copyifstack(X, z[1]); av = avma;
   t = gmul(x, y);
-  /* gmod(t, (GEN)z[1])) optimised */
+  /* gmod(t, gel(z,1))) optimised */
   if (typ(t) == t_POL  && (v = varn(X)) == varn(t) && lg(t) >= lg(X))
-    z[2] = lpileupto(av, RgX_divrem(t, X, ONLY_REM));
+    gel(z,2) = gerepileupto(av, RgX_divrem(t, X, ONLY_REM));
   else
-    z[2] = (long)t;
+    gel(z,2) = t;
   return z;
 }
 /* Mod(x,X) * Mod(y,Y) */
@@ -1098,14 +1098,14 @@ mul_polmod(GEN X, GEN Y, GEN x, GEN y)
   pari_sp av;
 
   if (vx==vy) {
-    z[1] = (long)srgcd(X,Y); av = avma;
-    z[2] = lpileupto(av, gmod(gmul(x, y), (GEN)z[1])); return z;
+    gel(z,1) = srgcd(X,Y); av = avma;
+    gel(z,2) = gerepileupto(av, gmod(gmul(x, y), gel(z,1))); return z;
   }
   if (varncmp(vx, vy) < 0)
-  { copyifstack(X, z[1]); T[1]=(long)Y; T[2]=(long)y; y = T; }
+  { copyifstack(X, z[1]); gel(T,1) = Y; gel(T,2) = y; y = T; }
   else
-  { copyifstack(Y, z[1]); T[1]=(long)X; T[2]=(long)x; x = T; }
-  z[2] = lmul(x, y); return z;
+  { copyifstack(Y, z[1]); gel(T,1) = X; gel(T,2) = x; x = T; }
+  gel(z,2) = gmul(x, y); return z;
 }
 
 static GEN
@@ -1115,7 +1115,7 @@ mul_ser_scal(GEN y, GEN x) {
   if (isexactzero(x)) { long vy = varn(y); return zeropol(vy); }
   if (!signe(y)) return gcopy(y);
   ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
-  for (i = 2; i < ly; i++) z[i] = lmul(x,(GEN)y[i]);
+  for (i = 2; i < ly; i++) gel(z,i) = gmul(x,gel(y,i));
   return normalize(z);
 }
 static GEN
@@ -1125,7 +1125,7 @@ mul_scal(GEN y, GEN x, long ty)
   {
     case t_POL: return RgX_Rg_mul(y, x);
     case t_SER: return mul_ser_scal(y, x);
-    case t_RFRAC: return mul_rfrac_scal((GEN)y[1],(GEN)y[2], x);
+    case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
     case t_QFI: case t_QFR:
       if (typ(x) == t_INT && gcmp1(x)) return gcopy(y); /* fall through */
   }
@@ -1142,8 +1142,8 @@ VC_mul(GEN x, GEN y, long l)
   long i;
   for (i=1; i<l; i++)
   {
-    GEN c = (GEN)y[i];
-    if (!isexactzeroscalar(c)) z = gadd(z, gmul((GEN)x[i], c));
+    GEN c = gel(y,i);
+    if (!isexactzeroscalar(c)) z = gadd(z, gmul(gel(x,i), c));
   }
   return gerepileupto(av,z);
 }
@@ -1159,10 +1159,10 @@ MC_mul(GEN x, GEN y, long l, long lz)
     GEN t = gen_0;
     for (j=1; j<l; j++)
     {
-      GEN c = (GEN)y[j];
+      GEN c = gel(y,j);
       if (!isexactzeroscalar(c)) t = gadd(t, gmul(gcoeff(x,i,j), c));
     }
-    z[i] = lpileupto(av,t);
+    gel(z,i) = gerepileupto(av,t);
   }
   return z;
 }
@@ -1201,13 +1201,13 @@ mulpp(GEN x, GEN y) {
   long l = valp(x) + valp(y);
   pari_sp av;
   GEN z, t;
-  if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"*",x,y);
-  if (!signe(x[4])) return zeropadic((GEN)x[2], l);
-  if (!signe(y[4])) return zeropadic((GEN)x[2], l);
+  if (!equalii(gel(x,2),gel(y,2))) err(operi,"*",x,y);
+  if (!signe(x[4])) return zeropadic(gel(x,2), l);
+  if (!signe(y[4])) return zeropadic(gel(x,2), l);
 
   t = (precp(x) > precp(y))? y: x;
   z = cgetp(t); setvalp(z,l); av = avma;
-  affii(remii(mulii((GEN)x[4],(GEN)y[4]), (GEN)t[3]), (GEN)z[4]);
+  affii(remii(mulii(gel(x,4),gel(y,4)), gel(t,3)), gel(z,4));
   avma = av; return z;
 }
 /* x,y QUAD */
@@ -1215,28 +1215,28 @@ static GEN
 mulqq(GEN x, GEN y) {
   GEN p1,p2,p3,p4, z = cgetg(4,t_QUAD);
   pari_sp av, tetpil;
-  p1 = (GEN)x[1];
-  if (!gequal(p1, (GEN)y[1])) err(operi,"*",x,y);
+  p1 = gel(x,1);
+  if (!gequal(p1, gel(y,1))) err(operi,"*",x,y);
 
   copyifstack(p1, z[1]); av = avma;
-  p2 = gmul((GEN)x[2],(GEN)y[2]);
-  p3 = gmul((GEN)x[3],(GEN)y[3]);
-  p4 = gmul(gneg_i((GEN)p1[2]),p3);
+  p2 = gmul(gel(x,2),gel(y,2));
+  p3 = gmul(gel(x,3),gel(y,3));
+  p4 = gmul(gneg_i(gel(p1,2)),p3);
 
-  if (gcmp0((GEN)p1[3]))
+  if (gcmp0(gel(p1,3)))
   {
     tetpil = avma;
-    z[2] = lpile(av,tetpil,gadd(p4,p2));
+    gel(z,2) = gerepile(av,tetpil,gadd(p4,p2));
     av = avma;
-    p2 = gmul((GEN)x[2],(GEN)y[3]);
-    p3 = gmul((GEN)x[3],(GEN)y[2]); tetpil = avma;
-    z[3] = lpile(av,tetpil,gadd(p2,p3)); return z;
+    p2 = gmul(gel(x,2),gel(y,3));
+    p3 = gmul(gel(x,3),gel(y,2)); tetpil = avma;
+    gel(z,3) = gerepile(av,tetpil,gadd(p2,p3)); return z;
   }
 
-  p1 = gadd(gmul((GEN)x[2],(GEN)y[3]), gmul((GEN)x[3],(GEN)y[2]));
+  p1 = gadd(gmul(gel(x,2),gel(y,3)), gmul(gel(x,3),gel(y,2)));
   tetpil = avma;
-  z[2] = ladd(p2,p4);
-  z[3] = ladd(p1,p3);
+  gel(z,2) = gadd(p2,p4);
+  gel(z,3) = gadd(p1,p3);
   gerepilecoeffssp(av,tetpil,z+2,2); return z;
 }
 
@@ -1247,14 +1247,14 @@ mulcxI(GEN x)
   if (typ(x) != t_COMPLEX)
   {
     z = cgetg(3,t_COMPLEX);
-    z[1] = (long)gen_0;
-    z[2] = (long)x;
+    gel(z,1) = gen_0;
+    gel(z,2) = x;
   }
   else
   {
-    if (isexactzero((GEN)x[1])) return gneg((GEN)x[2]);
+    if (isexactzero(gel(x,1))) return gneg(gel(x,2));
     z = cgetg(3,t_COMPLEX);
-    z[1] = lneg((GEN)x[2]);
+    gel(z,1) = gneg(gel(x,2));
     z[2] = x[1];
   }
   return z;
@@ -1266,15 +1266,15 @@ mulcxmI(GEN x)
   if (typ(x) != t_COMPLEX)
   {
     z = cgetg(3,t_COMPLEX);
-    z[1] = (long)gen_0;
-    z[2] = lneg(x);
+    gel(z,1) = gen_0;
+    gel(z,2) = gneg(x);
   }
   else
   {
-    if (isexactzero((GEN)x[1])) return (GEN)x[2];
+    if (isexactzero(gel(x,1))) return gel(x,2);
     z = cgetg(3,t_COMPLEX);
     z[1] = x[2];
-    z[2] = lneg((GEN)x[1]);
+    gel(z,2) = gneg(gel(x,1));
   }
   return z;
 }
@@ -1292,34 +1292,34 @@ gmul(GEN x, GEN y)
   {
     case t_INT: return mulii(x,y);
     case t_REAL: return mulrr(x,y);
-    case t_INTMOD: { GEN X = (GEN)x[1], Y = (GEN)y[1];
+    case t_INTMOD: { GEN X = gel(x,1), Y = gel(y,1);
       z = cgetg(3,t_INTMOD); 
       if (X==Y || equalii(X,Y))
-        return mul_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
-      z[1] = (long)gcdii(X,Y); av = avma; p1 = mulii((GEN)x[2],(GEN)y[2]);
-      z[2] = (long)gerepileuptoint(av, remii(p1, (GEN)z[1])); return z;
+        return mul_intmod_same(z, X, gel(x,2), gel(y,2));
+      gel(z,1) = gcdii(X,Y); av = avma; p1 = mulii(gel(x,2),gel(y,2));
+      gel(z,2) = gerepileuptoint(av, remii(p1, gel(z,1))); return z;
     }
     case t_FRAC:
     {
-      GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
-      GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
+      GEN x1 = gel(x,1), x2 = gel(x,2);
+      GEN y1 = gel(y,1), y2 = gel(y,2);
       z=cgetg(3,t_FRAC);
       p1 = gcdii(x1, y2);
       if (!is_pm1(p1)) { x1 = diviiexact(x1,p1); y2 = diviiexact(y2,p1); }
       p1 = gcdii(x2, y1);
       if (!is_pm1(p1)) { x2 = diviiexact(x2,p1); y1 = diviiexact(y1,p1); }
       tetpil = avma;
-      z[2] = lmulii(x2,y2);
-      z[1] = lmulii(x1,y1);
+      gel(z,2) = mulii(x2,y2);
+      gel(z,1) = mulii(x1,y1);
       fix_frac_if_int_GC(z,tetpil); return z;
     }
     case t_COMPLEX: return mulcc(x, y);
     case t_PADIC: return mulpp(x, y);
     case t_QUAD: return mulqq(x, y);
     case t_POLMOD:
-      if (gequal((GEN)x[1], (GEN)y[1]))
-        return mul_polmod_same((GEN)x[1], (GEN)x[2], (GEN)y[2]);
-      return mul_polmod((GEN)x[1], (GEN)y[1], (GEN)x[2], (GEN)y[2]);
+      if (gequal(gel(x,1), gel(y,1)))
+        return mul_polmod_same(gel(x,1), gel(x,2), gel(y,2));
+      return mul_polmod(gel(x,1), gel(y,1), gel(x,2), gel(y,2));
     case t_POL:
       vx = varn(x);
       vy = varn(y);
@@ -1350,7 +1350,7 @@ gmul(GEN x, GEN y)
           for (i = 2; i < lx; i++) z[i] = y[i];
         } else {
           for (i = 2; i < ly; i++) z[i] = y[i];
-          for (     ; i < lx; i++) z[i] = (long)gen_0;
+          for (     ; i < lx; i++) gel(z,i) = gen_0;
         }
         return gerepilecopy((pari_sp)(z + lx), z);
       }
@@ -1359,26 +1359,26 @@ gmul(GEN x, GEN y)
       mix = miy = 0;
       for (i=0; i<=lx; i++)
       {
-        p2[i] = !isexactzero((GEN)y[i]); if (p2[i]) miy = i;
-        if (!isexactzero((GEN)x[i])) mix = i;
+        p2[i] = !isexactzero(gel(y,i)); if (p2[i]) miy = i;
+        if (!isexactzero(gel(x,i))) mix = i;
         p1 = gen_0; av = avma;
         for (j=i-mix; j<=min(i,miy); j++)
-          if (p2[j]) p1 = gadd(p1, gmul((GEN)y[j],(GEN)x[i-j]));
-        z[i] = lpileupto(av,p1);
+          if (p2[j]) p1 = gadd(p1, gmul(gel(y,j),gel(x,i-j)));
+        gel(z,i) = gerepileupto(av,p1);
       }
       z -= 2; /* back to normalcy */
       free(p2); return normalize(z);
     }
     case t_QFI: return compimag(x,y);
     case t_QFR: return compreal(x,y);
-    case t_RFRAC: return mul_rfrac((GEN)x[1],(GEN)x[2], (GEN)y[1],(GEN)y[2]);
+    case t_RFRAC: return mul_rfrac(gel(x,1),gel(x,2), gel(y,1),gel(y,2));
     case t_MAT:
       ly = lg(y); if (ly == 1) return cgetg(1,t_MAT);
       lx = lg(x);
       if (lx != lg(y[1])) err(operi,"*",x,y);
       z = cgetg(ly,t_MAT);
       l = (lx == 1)? 1: lg(x[1]);
-      for (j=1; j<ly; j++) z[j] = (long)MC_mul(x, (GEN)y[j], lx, l);
+      for (j=1; j<ly; j++) gel(z,j) = MC_mul(x, gel(y,j), lx, l);
       return z;
 
     case t_VECSMALL: /* multiply as permutation. cf perm_mul */
@@ -1406,22 +1406,22 @@ gmul(GEN x, GEN y)
         case t_REAL: return mulir(x,y);
         case t_INTMOD:
           z = cgetg(3, t_INTMOD);
-          return mul_intmod_same(z, (GEN)y[1], (GEN)y[2], modii(x, (GEN)y[1]));
+          return mul_intmod_same(z, gel(y,1), gel(y,2), modii(x, gel(y,1)));
         case t_FRAC:
           if (!signe(x)) return gen_0;
           z=cgetg(3,t_FRAC);
-          p1 = gcdii(x,(GEN)y[2]);
+          p1 = gcdii(x,gel(y,2));
           if (is_pm1(p1))
           {
             avma = (pari_sp)z;
-            z[2] = licopy((GEN)y[2]);
-            z[1] = lmulii((GEN)y[1], x);
+            gel(z,2) = icopy(gel(y,2));
+            gel(z,1) = mulii(gel(y,1), x);
           }
           else
           {
             x = diviiexact(x,p1); tetpil = avma;
-            z[2] = (long)diviiexact((GEN)y[2], p1);
-            z[1] = lmulii((GEN)y[1], x);
+            gel(z,2) = diviiexact(gel(y,2), p1);
+            gel(z,1) = mulii(gel(y,1), x);
             fix_frac_if_int_GC(z,tetpil);
           }
           return z;
@@ -1436,7 +1436,7 @@ gmul(GEN x, GEN y)
         case t_FRAC:
           if (!signe(y[1])) return gen_0;
           av = avma;
-          return gerepileuptoleaf(av, divri(mulri(x,(GEN)y[1]), (GEN)y[2]));
+          return gerepileuptoleaf(av, divri(mulri(x,gel(y,1)), gel(y,2)));
         case t_COMPLEX: return mulRc(x, y);
         case t_QUAD: return mulqf(y, x, lg(x));
         default: err(operf,"*",x,y);
@@ -1445,14 +1445,14 @@ gmul(GEN x, GEN y)
     case t_INTMOD:
       switch(ty)
       {
-        case t_FRAC: { GEN X = (GEN)x[1];
-          z = cgetg(3, t_INTMOD); p1 = modii(mulii((GEN)y[1], (GEN)x[2]), X);
-          return div_intmod_same(z, X, p1, remii((GEN)y[2], X)); 
+        case t_FRAC: { GEN X = gel(x,1);
+          z = cgetg(3, t_INTMOD); p1 = modii(mulii(gel(y,1), gel(x,2)), X);
+          return div_intmod_same(z, X, p1, remii(gel(y,2), X)); 
         }
         case t_COMPLEX: return mulRc(x, y);
-        case t_PADIC: { GEN X = (GEN)x[1];
+        case t_PADIC: { GEN X = gel(x,1);
           z = cgetg(3, t_INTMOD);
-          return mul_intmod_same(z, X, (GEN)x[2], padic_to_Fp(y, X));
+          return mul_intmod_same(z, X, gel(x,2), padic_to_Fp(y, X));
         }
         case t_QUAD: return mulRq(x, y);
       }
@@ -1469,14 +1469,14 @@ gmul(GEN x, GEN y)
       switch(ty)
       {
         case t_PADIC:
-          return Zp_nosquare_m1((GEN)y[2])? mulRc(y, x): mulTp(x, y);
+          return Zp_nosquare_m1(gel(y,2))? mulRc(y, x): mulTp(x, y);
         case t_QUAD:
           lx = precision(x); if (!lx) err(operi,"*",x,y);
           return mulqf(y, x, lx);
       }
 
     case t_PADIC: /* ty == t_QUAD */
-      return (kro_quad((GEN)y[1],(GEN)x[2])== -1)? mulRq(x, y): mulTp(y, x);
+      return (kro_quad(gel(y,1),gel(x,2))== -1)? mulRq(x, y): mulTp(y, x);
     }
   }
 
@@ -1487,7 +1487,7 @@ gmul(GEN x, GEN y)
     {
       if (is_noncalc_t(tx)) err(operf, "*",x,y); /* necessary if ly = 1 */
       z = cgetg(ly,ty);
-      for (i=1; i<ly; i++) z[i] = lmul(x,(GEN)y[i]);
+      for (i=1; i<ly; i++) gel(z,i) = gmul(x,gel(y,i));
       return z;
     }
     lx = lg(x);
@@ -1505,7 +1505,7 @@ gmul(GEN x, GEN y)
             if (ly == 1) return cgetg(1,t_VEC);
             if (lx != lg(y[1])) err(operi,"*",x,y);
             z = cgetg(ly, t_VEC);
-            for (i=1; i<ly; i++) z[i] = (long)VC_mul(x, (GEN)y[i], lx);
+            for (i=1; i<ly; i++) gel(z,i) = VC_mul(x, gel(y,i), lx);
             return z;
         }
         break;
@@ -1517,16 +1517,16 @@ gmul(GEN x, GEN y)
             z = cgetg(ly,t_MAT);
             for (i=1; i<ly; i++)
             {
-              p1 = gmul((GEN)y[i],x);
+              p1 = gmul(gel(y,i),x);
               if (typ(p1) != t_COL) err(operi,"*",x,y);
-              z[i] = (long)p1;
+              gel(z,i) = p1;
             }
             return z;
 
           case t_MAT:
             if (ly != 1 && lg(y[1]) != 2) err(operi,"*",x,y);
             z = cgetg(ly,t_MAT);
-            for (i=1; i<ly; i++) z[i] = lmul(gcoeff(y,1,i),x);
+            for (i=1; i<ly; i++) gel(z,i) = gmul(gcoeff(y,1,i),x);
             return z;
         }
         break;
@@ -1537,7 +1537,7 @@ gmul(GEN x, GEN y)
           case t_VEC:
             if (lx != 2) err(operi,"*",x,y);
             z = cgetg(ly,t_MAT);
-            for (i=1; i<ly; i++) z[i] = lmul((GEN)y[i],(GEN)x[1]);
+            for (i=1; i<ly; i++) gel(z,i) = gmul(gel(y,i),gel(x,1));
             return z;
 
           case t_COL:
@@ -1550,25 +1550,25 @@ gmul(GEN x, GEN y)
   {
     if (is_noncalc_t(ty)) err(operf, "*",x,y); /* necessary if lx = 1 */
     lx = lg(x); z = cgetg(lx,tx);
-    for (i=1; i<lx; i++) z[i] = lmul(y,(GEN)x[i]);
+    for (i=1; i<lx; i++) gel(z,i) = gmul(y,gel(x,i));
     return z;
   }
   if (tx > ty) { swap(x,y); lswap(tx,ty); }
   /* tx < ty, !ismatvec(x and y) */
 
   if (ty == t_POLMOD) /* is_const_t(tx) in this case */
-    return mul_polmod_scal((GEN)y[1], (GEN)y[2], x);
+    return mul_polmod_scal(gel(y,1), gel(y,2), x);
   if is_scalar_t(tx) {
     if (tx == t_POLMOD) {
       vx = varn(x[1]);
       vy = gvar(y);
       if (vx != vy) {
         if (varncmp(vx,vy) > 0) return mul_scal(y, x, ty);
-        return mul_polmod_scal((GEN)x[1], (GEN)x[2], y);
+        return mul_polmod_scal(gel(x,1), gel(x,2), y);
       }
       /* error if ty == t_SER */
-      av = avma; y = gmod(y, (GEN)x[1]);
-      return gerepileupto(av, mul_polmod_same((GEN)x[1], (GEN)x[2], y));
+      av = avma; y = gmod(y, gel(x,1));
+      return gerepileupto(av, mul_polmod_same(gel(x,1), gel(x,2), y));
     }
     return mul_scal(y, x, ty);
   }
@@ -1602,7 +1602,7 @@ gmul(GEN x, GEN y)
           return p2;
         }
 	
-        case t_RFRAC: return mul_rfrac_scal((GEN)y[1],(GEN)y[2], x);
+        case t_RFRAC: return mul_rfrac_scal(gel(y,1),gel(y,2), x);
       }
       break;
 	
@@ -1612,7 +1612,7 @@ gmul(GEN x, GEN y)
 	case t_RFRAC:
 	  if (gcmp0(y)) return zeropol(vx);
 	  if (gcmp0(x)) return zeroser(vx, valp(x) + gval(y,vx));
-	  av = avma; return gerepileupto(av, gdiv(gmul((GEN)y[1],x), (GEN)y[2]));
+	  av = avma; return gerepileupto(av, gdiv(gmul(gel(y,1),x), gel(y,2)));
       }
       break;
   }
@@ -1630,8 +1630,8 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   lx = lg(P); Q = *pol;
   for (i=2; i<lx; i++)
   {
-    p1 = (GEN)P[i]; if (typ(p1) != t_POLMOD) {Q=NULL;break;}
-    p2 = (GEN)p1[1];
+    p1 = gel(P,i); if (typ(p1) != t_POLMOD) {Q=NULL;break;}
+    p2 = gel(p1,1);
     if (Q==NULL) { Q = p2; if (degpol(Q) <= 0) return 0; }
     else if (p2 != Q)
     {
@@ -1650,17 +1650,17 @@ ff_poltype(GEN *x, GEN *p, GEN *pol)
   pr = *p; y = cgetg(lx, t_POL);
   for (i=lx-1; i>1; i--)
   {
-    p1 = (GEN)P[i];
+    p1 = gel(P,i);
     switch(typ(p1))
     {
       case t_INTMOD: break;
       case t_INT:
         if (*p) p1 = modii(p1, *p);
-        y[i] = (long)p1; continue;
+        gel(y,i) = p1; continue;
       default:
         return (Q && !pr)? 1: 0;
     }
-    p2 = (GEN)p1[1];
+    p2 = gel(p1,1);
     if (pr==NULL) pr = p2;
     else if (p2 != pr)
     {
@@ -1689,64 +1689,64 @@ gsqr(GEN x)
     {
       case t_INT: return sqri(x);
       case t_REAL: return mulrr(x,x);
-      case t_INTMOD: { GEN X = (GEN)x[1];
+      case t_INTMOD: { GEN X = gel(x,1);
         z = cgetg(3,t_INTMOD);
-        z[2] = lpileuptoint((pari_sp)z, remii(sqri((GEN)x[2]), X));
+        gel(z,2) = gerepileuptoint((pari_sp)z, remii(sqri(gel(x,2)), X));
         icopyifstack(X,z[1]); return z;
       }
       case t_FRAC: z=cgetg(3,t_FRAC);
-	z[1]=lsqri((GEN)x[1]);
-	z[2]=lsqri((GEN)x[2]); return z;
+	gel(z,1) = sqri(gel(x,1));
+	gel(z,2) = sqri(gel(x,2)); return z;
 
       case t_COMPLEX:
-        if (isexactzero((GEN)x[1])) {
+        if (isexactzero(gel(x,1))) {
           av = avma;
-          return gerepileupto(av, gneg(gsqr((GEN)x[2])));
+          return gerepileupto(av, gneg(gsqr(gel(x,2))));
         }
 	z = cgetg(3,t_COMPLEX); av = avma;
-	p1 = gadd((GEN)x[1],(GEN)x[2]);
-	p2 = gadd((GEN)x[1], gneg_i((GEN)x[2]));
-	p3 = gmul((GEN)x[1],(GEN)x[2]);
+	p1 = gadd(gel(x,1),gel(x,2));
+	p2 = gadd(gel(x,1), gneg_i(gel(x,2)));
+	p3 = gmul(gel(x,1),gel(x,2));
 	tetpil = avma;
-	z[1] = lmul(p1,p2);
-        z[2] = lshift(p3,1); gerepilecoeffssp(av,tetpil,z+1,2); return z;
+	gel(z,1) = gmul(p1,p2);
+        gel(z,2) = gshift(p3,1); gerepilecoeffssp(av,tetpil,z+1,2); return z;
 	
       case t_PADIC:
 	z = cgetg(5,t_PADIC);
-	i = (equaliu((GEN)x[2], 2) && signe(x[4]))? 1: 0;
+	i = (equaliu(gel(x,2), 2) && signe(x[4]))? 1: 0;
         if (i && precp(x) == 1) i = 2; /* (1 + O(2))^2 = 1 + O(2^3) */
         z[1] = evalprecp(precp(x)+i) | evalvalp(valp(x) << 1);
 	icopyifstack(x[2], z[2]);
-        z[3] = lshifti((GEN)x[3], i); av = avma;
-	z[4] = lpileuptoint(av, remii(sqri((GEN)x[4]), (GEN)z[3]));
+        gel(z,3) = shifti(gel(x,3), i); av = avma;
+	gel(z,4) = gerepileuptoint(av, remii(sqri(gel(x,4)), gel(z,3)));
 	return z;
 	
       case t_QUAD: z = cgetg(4,t_QUAD);
-	p1 = (GEN)x[1];
+	p1 = gel(x,1);
         copyifstack(p1,z[1]); av = avma;
-	p2 = gsqr((GEN)x[2]);
-        p3 = gsqr((GEN)x[3]);
-	p4 = gmul(gneg_i((GEN)p1[2]),p3);
+	p2 = gsqr(gel(x,2));
+        p3 = gsqr(gel(x,3));
+	p4 = gmul(gneg_i(gel(p1,2)),p3);
 
-	if (gcmp0((GEN)p1[3]))
+	if (gcmp0(gel(p1,3)))
 	{
 	  tetpil = avma;
-	  z[2] = lpile(av,tetpil,gadd(p4,p2));
+	  gel(z,2) = gerepile(av,tetpil,gadd(p4,p2));
 	  av = avma;
-          p2 = gmul((GEN)x[2],(GEN)x[3]); tetpil = avma;
-	  z[3] = lpile(av,tetpil,gmul2n(p2,1)); return z;
+          p2 = gmul(gel(x,2),gel(x,3)); tetpil = avma;
+	  gel(z,3) = gerepile(av,tetpil,gmul2n(p2,1)); return z;
 	}
 
-	p1 = gmul2n(gmul((GEN)x[2],(GEN)x[3]), 1);
+	p1 = gmul2n(gmul(gel(x,2),gel(x,3)), 1);
         tetpil = avma;
-	z[2] = ladd(p2,p4);
-        z[3] = ladd(p1,p3);
+	gel(z,2) = gadd(p2,p4);
+        gel(z,3) = gadd(p1,p3);
 	gerepilecoeffssp(av,tetpil,z+2,2); return z;
 
       case t_POLMOD:
         z=cgetg(3,t_POLMOD); copyifstack(x[1],z[1]);
-	av=avma; p1=gsqr((GEN)x[2]); tetpil=avma;
-        z[2]=lpile(av,tetpil, grem(p1,(GEN)z[1]));
+	av=avma; p1=gsqr(gel(x,2)); tetpil=avma;
+        gel(z,2) = gerepile(av,tetpil, grem(p1,gel(z,1)));
 	return z;
     }
 
@@ -1779,26 +1779,26 @@ gsqr(GEN x)
       mi = 0;
       for (i=0; i<=lx; i++)
       {
-	p2[i] = !isexactzero((GEN)x[i]); if (p2[i]) mi = i;
+	p2[i] = !isexactzero(gel(x,i)); if (p2[i]) mi = i;
         p1=gen_0; av=avma; l=((i+1)>>1) - 1;
         for (j=i-mi; j<=min(l,mi); j++)
-          if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul((GEN)x[j],(GEN)x[i-j]));
+          if (p2[j] && p2[i-j]) p1 = gadd(p1, gmul(gel(x,j),gel(x,i-j)));
         p1 = gshift(p1,1);
         if ((i&1) == 0 && p2[i>>1])
           p1 = gadd(p1, gsqr((GEN)x[i>>1]));
-        z[i] = lpileupto(av,p1);
+        gel(z,i) = gerepileupto(av,p1);
       }
       z -= 2; free(p2); return normalize(z);
     }
     case t_RFRAC: z = cgetg(3,t_RFRAC);
-      z[1] = lsqr((GEN)x[1]);
-      z[2] = lsqr((GEN)x[2]); return z;
+      gel(z,1) = gsqr(gel(x,1));
+      gel(z,2) = gsqr(gel(x,2)); return z;
 
     case t_MAT:
       lx = lg(x);
       if (lx!=1 && lx != lg(x[1])) err(operi,"*",x,x);
       z = cgetg(lx, t_MAT);
-      for (j=1; j<lx; j++) z[j] = (long)MC_mul(x, (GEN)x[j], lx, lx);
+      for (j=1; j<lx; j++) gel(z,j) = MC_mul(x, gel(x,j), lx, lx);
       return z;
 
     case t_QFR: return sqcompreal(x);
@@ -1824,20 +1824,20 @@ gsqr(GEN x)
 /********************************************************************/
 static GEN
 div_rfrac_scal(GEN x, GEN y)
-{ return mul_rfrac((GEN)x[1],(GEN)x[2], gen_1,y); }
+{ return mul_rfrac(gel(x,1),gel(x,2), gen_1,y); }
 static GEN
 div_scal_rfrac(GEN x, GEN y)
-{ return mul_rfrac_scal((GEN)y[2], (GEN)y[1], x); }
+{ return mul_rfrac_scal(gel(y,2), gel(y,1), x); }
 static GEN
 div_rfrac(GEN x, GEN y)
-{ return mul_rfrac((GEN)x[1],(GEN)x[2], (GEN)y[2],(GEN)y[1]); }
+{ return mul_rfrac(gel(x,1),gel(x,2), gel(y,2),gel(y,1)); }
 
 #define div_ser_scal div_pol_scal
 static GEN
 div_pol_scal(GEN x, GEN y) {
   long i, lx = lg(x);
   GEN z = cgetg_copy(lx, x); z[1] = x[1];
-  for (i=2; i<lx; i++) z[i] = ldiv((GEN)x[i],y);
+  for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
   return z;
 }
 static GEN
@@ -1855,7 +1855,7 @@ div_T_scal(GEN x, GEN y, long tx) {
 static GEN
 div_scal_pol(GEN x, GEN y) {
   long ly = lg(y);
-  if (ly == 3) return gdiv(x,(GEN)y[2]);
+  if (ly == 3) return gdiv(x,gel(y,2));
   if (isexactzero(x)) return zeropol(varn(y));
   return gred_rfrac2(x,y);
 }
@@ -1867,7 +1867,7 @@ div_scal_ser(GEN x, GEN y) { /* TODO: improve */
   ly = lg(y); z = (GEN)gpmalloc(ly*sizeof(long));
   z[0] = evaltyp(t_SER) | evallg(ly);
   z[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(y));
-  z[2] = (long)x; for (i=3; i<ly; i++) z[i] = (long)gen_0;
+  gel(z,2) = x; for (i=3; i<ly; i++) gel(z,i) = gen_0;
   y = gdiv(z,y); free(z); return y;
 }
 static GEN
@@ -1892,13 +1892,13 @@ div_ser(GEN x, GEN y, long vx)
 
   if (gcmp0(x)) return zeroser(vx, l);
   if (ly <= 2) err(gdiver);
-  y_lead = (GEN)y[2];
+  y_lead = gel(y,2);
   if (gcmp0(y_lead)) /* normalize denominator if leading term is 0 */
   {
     err(warner,"normalizing a series with 0 leading term");
     for (i=3,y++; i<ly; i++,y++)
     {
-      y_lead = (GEN)y[2]; ly--; l--;
+      y_lead = gel(y,2); ly--; l--;
       if (!gcmp0(y_lead)) break;
     }
     if (i>=ly) err(gdiver);
@@ -1907,30 +1907,30 @@ div_ser(GEN x, GEN y, long vx)
   p2 = (GEN)gpmalloc(lx*sizeof(long));
   for (i=3; i<lx; i++)
   {
-    p1 = (GEN)y[i];
+    p1 = gel(y,i);
     if (isexactzero(p1)) p2[i] = 0;
     else
     {
-      av = avma; p2[i] = lclone(gneg_i(p1));
+      av = avma; gel(p2,i) = gclone(gneg_i(p1));
       avma = av;
     }
   }
   z = cgetg(lx,t_SER);
   z[1] = evalvalp(l) | evalvarn(vx) | evalsigne(1);
-  z[2] = ldiv((GEN)x[2], y_lead);
+  gel(z,2) = gdiv(gel(x,2), y_lead);
   for (i=3; i<lx; i++)
   {
-    av = avma; p1 = (GEN)x[i];
+    av = avma; p1 = gel(x,i);
     for (j=2; j<i; j++)
     {
       l = i-j+2;
-      if (p2[l]) p1 = gadd(p1, gmul((GEN)z[j], (GEN)p2[l]));
+      if (p2[l]) p1 = gadd(p1, gmul(gel(z,j), gel(p2,l)));
     }
     p1 = gdiv(p1, y_lead);
-    z[i] = lpileupto(av, forcecopy(p1));
+    gel(z,i) = gerepileupto(av, forcecopy(p1));
   }
   for (i=3; i<lx; i++)
-    if (p2[i]) gunclone((GEN)p2[i]);
+    if (p2[i]) gunclone(gel(p2,i));
   free(p2); return z;
 }
 /* x,y compatible PADIC */
@@ -1940,14 +1940,14 @@ divpp(GEN x, GEN y) {
   long a, b;
   GEN z, M;
 
-  if (!signe(x[4])) return zeropadic((GEN)x[2], valp(x)-valp(y));
+  if (!signe(x[4])) return zeropadic(gel(x,2), valp(x)-valp(y));
   a = precp(x);
-  b = precp(y); if (a > b) { M = (GEN)y[3]; } else { M = (GEN)x[3]; b = a; }
+  b = precp(y); if (a > b) { M = gel(y,3); } else { M = gel(x,3); b = a; }
   z = cgetg(5, t_PADIC);
   z[1] = evalprecp(b) | evalvalp(valp(x) - valp(y));
   icopyifstack(x[2], z[2]);
-  z[3] = licopy(M); av = avma;
-  z[4] = lpileuptoint(av, remii(mulii((GEN)x[4], Fp_inv((GEN)y[4], M)), M) );
+  gel(z,3) = icopy(M); av = avma;
+  gel(z,4) = gerepileuptoint(av, remii(mulii(gel(x,4), Fp_inv(gel(y,4), M)), M) );
   return z;
 }
 
@@ -1973,25 +1973,25 @@ gdiv(GEN x, GEN y)
       return gred_frac2(x,y);
 
     case t_REAL: return divrr(x,y);
-    case t_INTMOD: { GEN X = (GEN)x[1], Y = (GEN)y[1];
+    case t_INTMOD: { GEN X = gel(x,1), Y = gel(y,1);
       z = cgetg(3,t_INTMOD);
       if (X==Y || equalii(X,Y))
-        return div_intmod_same(z, X, (GEN)x[2], (GEN)y[2]);
-      z[1] = (long)gcdii(X,Y); av = avma;
-      p1 = mulii((GEN)x[2], Fp_inv((GEN)y[2], (GEN)z[1]));
-      z[2] = lpileuptoint(av, remii(p1, (GEN)z[1])); return z;
+        return div_intmod_same(z, X, gel(x,2), gel(y,2));
+      gel(z,1) = gcdii(X,Y); av = avma;
+      p1 = mulii(gel(x,2), Fp_inv(gel(y,2), gel(z,1)));
+      gel(z,2) = gerepileuptoint(av, remii(p1, gel(z,1))); return z;
     }
     case t_FRAC: {
-      GEN x1 = (GEN)x[1], x2 = (GEN)x[2];
-      GEN y1 = (GEN)y[1], y2 = (GEN)y[2];
+      GEN x1 = gel(x,1), x2 = gel(x,2);
+      GEN y1 = gel(y,1), y2 = gel(y,2);
       z = cgetg(3, t_FRAC);
       p1 = gcdii(x1, y1);
       if (!is_pm1(p1)) { x1 = diviiexact(x1,p1); y1 = diviiexact(y1,p1); }
       p1 = gcdii(x2, y2);
       if (!is_pm1(p1)) { x2 = diviiexact(x2,p1); y2 = diviiexact(y2,p1); }
       tetpil = avma;
-      z[2] = lmulii(x2,y1);
-      z[1] = lmulii(x1,y2);
+      gel(z,2) = mulii(x2,y1);
+      gel(z,1) = mulii(x1,y2);
       fix_frac(z);
       fix_frac_if_int_GC(z,tetpil);
       return z;
@@ -2001,20 +2001,20 @@ gdiv(GEN x, GEN y)
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_PADIC:
-      if (!equalii((GEN)x[2],(GEN)y[2])) err(operi,"/",x,y);
+      if (!equalii(gel(x,2),gel(y,2))) err(operi,"/",x,y);
       return divpp(x, y);
 
     case t_QUAD:
-      if (!gequal((GEN)x[1],(GEN)y[1])) err(operi,"/",x,y);
+      if (!gequal(gel(x,1),gel(y,1))) err(operi,"/",x,y);
       av = avma; p1 = quadnorm(y); p2 = mulqq(x, gconj(y)); tetpil = avma;
       return gerepile(av, tetpil, gdiv(p2,p1));
 
     case t_POLMOD: av = avma;
-      if (gequal((GEN)x[1], (GEN)y[1]))
+      if (gequal(gel(x,1), gel(y,1)))
       {
-        GEN X = (GEN)x[1];
-        x = (GEN)x[2];
-        y = (GEN)y[2];
+        GEN X = gel(x,1);
+        x = gel(x,2);
+        y = gel(y,2);
         if (degpol(X) == 2) { /* optimized for speed */
           z = mul_polmod_same(X, x, quad_polmod_conj(y, X));
           return gdiv(z, quad_polmod_norm(y, X));
@@ -2032,7 +2032,7 @@ gdiv(GEN x, GEN y)
                             else return div_scal_pol(x, y);
       }
       if (!signe(y)) err(gdiver);
-      if (lg(y) == 3) return gdiv(x,(GEN)y[2]);
+      if (lg(y) == 3) return gdiv(x,gel(y,2));
       if (isexactzero(x)) return zeropol(vy);
       return gred_rfrac2(x,y);
 
@@ -2079,7 +2079,7 @@ gdiv(GEN x, GEN y)
     if (!s) {
       if (gcmp0(y)) err(gdiver);
       if (ty != t_INTMOD) return gen_0;
-      z = cgetg(3,t_INTMOD); icopyifstack(y[1],z[1]); z[2] = (long)gen_0;
+      z = cgetg(3,t_INTMOD); icopyifstack(y[1],z[1]); gel(z,2) = gen_0;
       return z;
     }
     if (is_pm1(x)) {
@@ -2091,22 +2091,22 @@ gdiv(GEN x, GEN y)
       case t_REAL: return divir(x,y);
       case t_INTMOD:
         z = cgetg(3, t_INTMOD);
-        return div_intmod_same(z, (GEN)y[1], modii(x, (GEN)y[1]), (GEN)y[2]);
+        return div_intmod_same(z, gel(y,1), modii(x, gel(y,1)), gel(y,2));
       case t_FRAC:
-        z = cgetg(3,t_FRAC); p1 = gcdii(x,(GEN)y[1]);
+        z = cgetg(3,t_FRAC); p1 = gcdii(x,gel(y,1));
         if (is_pm1(p1))
         {
           avma = (pari_sp)z;
-          z[2] = licopy((GEN)y[1]);
-          z[1] = lmulii((GEN)y[2], x);
+          gel(z,2) = icopy(gel(y,1));
+          gel(z,1) = mulii(gel(y,2), x);
           fix_frac(z);
           fix_frac_if_int(z);
         }
         else
         {
           x = diviiexact(x,p1); tetpil = avma;
-          z[2] = (long)diviiexact((GEN)y[1], p1);
-          z[1] = lmulii((GEN)y[2], x);
+          gel(z,2) = diviiexact(gel(y,1), p1);
+          gel(z,1) = mulii(gel(y,2), x);
           fix_frac(z);
           fix_frac_if_int_GC(z,tetpil);
         }
@@ -2128,7 +2128,7 @@ gdiv(GEN x, GEN y)
       {
         case t_INT: return divri(x,y);
         case t_FRAC:
-          av = avma; z = divri(mulri(x,(GEN)y[2]), (GEN)y[1]);
+          av = avma; z = divri(mulri(x,gel(y,2)), gel(y,1));
           return gerepileuptoleaf(av, z);
         case t_COMPLEX: return divRc(x, y);
         case t_QUAD: return divfq(x, y, lg(x));
@@ -2140,10 +2140,10 @@ gdiv(GEN x, GEN y)
       {
         case t_INT:
           z = cgetg(3, t_INTMOD);
-          return div_intmod_same(z, (GEN)x[1], (GEN)x[2], modii(y, (GEN)x[1]));
-        case t_FRAC: { GEN X = (GEN)x[1];
-          z = cgetg(3,t_INTMOD); p1 = remii(mulii((GEN)y[2], (GEN)x[2]), X);
-          return div_intmod_same(z, X, p1, modii((GEN)y[1], X));
+          return div_intmod_same(z, gel(x,1), gel(x,2), modii(y, gel(x,1)));
+        case t_FRAC: { GEN X = gel(x,1);
+          z = cgetg(3,t_INTMOD); p1 = remii(mulii(gel(y,2), gel(x,2)), X);
+          return div_intmod_same(z, X, p1, modii(gel(y,1), X));
         }
         case t_COMPLEX:
           av = avma; p1 = cxnorm(y); p2 = mulRc(x, gconj(y)); tetpil = avma;
@@ -2153,9 +2153,9 @@ gdiv(GEN x, GEN y)
           av = avma; p1 = quadnorm(y); p2 = gmul(x,gconj(y)); tetpil = avma;
           return gerepile(av,tetpil, gdiv(p2,p1));
 
-        case t_PADIC: { GEN X = (GEN)x[1];
+        case t_PADIC: { GEN X = gel(x,1);
           z = cgetg(3, t_INTMOD);
-          return div_intmod_same(z, X, (GEN)x[2], padic_to_Fp(y, X));
+          return div_intmod_same(z, X, gel(x,2), padic_to_Fp(y, X));
         }
         case t_REAL: err(operf,"/",x,y);
       }
@@ -2164,29 +2164,29 @@ gdiv(GEN x, GEN y)
       switch(ty)
       {
         case t_INT: z = cgetg(3, t_FRAC);
-        p1 = gcdii(y,(GEN)x[1]);
+        p1 = gcdii(y,gel(x,1));
         if (is_pm1(p1))
         {
           avma = (pari_sp)z; tetpil = 0;
-          z[1] = licopy((GEN)x[1]);
+          gel(z,1) = icopy(gel(x,1));
         }
         else
         {
           y = diviiexact(y,p1); tetpil = avma;
-          z[1] = (long)diviiexact((GEN)x[1], p1);
+          gel(z,1) = diviiexact(gel(x,1), p1);
         }
-        z[2] = lmulii((GEN)x[2],y);
+        gel(z,2) = mulii(gel(x,2),y);
         fix_frac(z);
         if (tetpil) fix_frac_if_int_GC(z,tetpil);
         return z;
 
         case t_REAL:
-          av=avma; p1=mulri(y,(GEN)x[2]); tetpil=avma;
-          return gerepile(av, tetpil, divir((GEN)x[1], p1));
+          av=avma; p1=mulri(y,gel(x,2)); tetpil=avma;
+          return gerepile(av, tetpil, divir(gel(x,1), p1));
 
-        case t_INTMOD: { GEN Y = (GEN)y[1];
-          z = cgetg(3,t_INTMOD); p1 = remii(mulii((GEN)y[2],(GEN)x[2]), Y);
-          return div_intmod_same(z, Y, (GEN)x[1], p1);
+        case t_INTMOD: { GEN Y = gel(y,1);
+          z = cgetg(3,t_INTMOD); p1 = remii(mulii(gel(y,2),gel(x,2)), Y);
+          return div_intmod_same(z, Y, gel(x,1), p1);
         }
         case t_COMPLEX: return divRc(x, y);
 
@@ -2204,7 +2204,7 @@ gdiv(GEN x, GEN y)
       {
         case t_INT: case t_REAL: case t_INTMOD: case t_FRAC: return divcR(x,y);
         case t_PADIC:
-          return Zp_nosquare_m1((GEN)y[2])? divcR(x,y): divTp(x, y);
+          return Zp_nosquare_m1(gel(y,2))? divcR(x,y): divTp(x, y);
         case t_QUAD:
           lx = precision(x); if (!lx) err(operi,"/",x,y);
           return divfq(x, y, lx);
@@ -2213,13 +2213,13 @@ gdiv(GEN x, GEN y)
     case t_PADIC:
       switch(ty)
       {
-        case t_INT: case t_FRAC: { GEN p = (GEN)x[2];
+        case t_INT: case t_FRAC: { GEN p = gel(x,2);
           return signe(x[4])? divpT(x, y)
                             : zeropadic(p, valp(x) - ggval(y,p));
         }
-        case t_INTMOD: { GEN Y = (GEN)y[1];
+        case t_INTMOD: { GEN Y = gel(y,1);
           z = cgetg(3, t_INTMOD);
-          return div_intmod_same(z, Y, padic_to_Fp(x, Y), (GEN)y[2]);
+          return div_intmod_same(z, Y, padic_to_Fp(x, Y), gel(y,2));
         }
         case t_COMPLEX: case t_QUAD:
           av=avma; p1=gmul(x,gconj(y)); p2=gnorm(y); tetpil=avma;
@@ -2233,8 +2233,8 @@ gdiv(GEN x, GEN y)
       {
         case t_INT: case t_INTMOD: case t_FRAC:
           z = cgetg(4,t_QUAD); copyifstack(x[1], z[1]);
-          z[2] = ldiv((GEN)x[2], y);
-          z[3] = ldiv((GEN)x[3], y); return z;
+          gel(z,2) = gdiv(gel(x,2), y);
+          gel(z,3) = gdiv(gel(x,3), y); return z;
         case t_REAL: return divqf(x, y, lg(y));
         case t_PADIC: return divTp(x, y);
         case t_COMPLEX:
@@ -2250,21 +2250,21 @@ gdiv(GEN x, GEN y)
   }
   if (is_matvec_t(tx)) {
     lx = lg(x); z = cgetg_copy(lx, x);
-    for (i=1; i<lx; i++) z[i] = ldiv((GEN)x[i],y);
+    for (i=1; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
     return z;
   }
 
   vy = gvar(y);
-  if (tx == t_POLMOD) { GEN X = (GEN)x[1];
+  if (tx == t_POLMOD) { GEN X = gel(x,1);
     vx = varn(X);
     if (vx != vy) {
       if (varncmp(vx, vy) > 0) return div_scal_T(x, y, ty);
       z = cgetg(3,t_POLMOD); copyifstack(X,z[1]);
-      z[2] = ldiv((GEN)x[2], y); return z;
+      gel(z,2) = gdiv(gel(x,2), y); return z;
     }
     /* y is POL, SER or RFRAC */
     av = avma; y = ginvmod(gmod(y,X), X);
-    return gerepileupto(av, mul_polmod_same(X, (GEN)x[2], y));
+    return gerepileupto(av, mul_polmod_same(X, gel(x,2), y));
   }
   /* x and y are not both is_scalar_t. If one of them is scalar, it's not a
    * POLMOD (done already), hence its variable is BIGINT. If the other has
@@ -2296,7 +2296,7 @@ gdiv(GEN x, GEN y)
           free(p1); return p2;
 	case t_RFRAC:
 	  av = avma;
-	  return gerepileupto(av, gdiv(gmul(x,(GEN)y[2]), (GEN)y[1]));
+	  return gerepileupto(av, gdiv(gmul(x,gel(y,2)), gel(y,1)));
       }
       break;
 
@@ -2306,7 +2306,7 @@ gdiv(GEN x, GEN y)
 	case t_POL: return div_rfrac_scal(x,y);
 	case t_SER:
 	  av = avma;
-	  return gerepileupto(av, gdiv((GEN)x[1], gmul((GEN)x[2],y)));
+	  return gerepileupto(av, gdiv(gel(x,1), gmul(gel(x,2),y)));
       }
       break;
   }
@@ -2330,31 +2330,31 @@ gmulsg(long s, GEN y)
   {
     case t_INT:  return mulsi(s,y);
     case t_REAL: return mulsr(s,y);
-    case t_INTMOD: { GEN p = (GEN)y[1];
+    case t_INTMOD: { GEN p = gel(y,1);
       z = cgetg(3,t_INTMOD);
-      z[2] = lpileuptoint((pari_sp)z, modii(mulsi(s,(GEN)y[2]), p));
+      gel(z,2) = gerepileuptoint((pari_sp)z, modii(mulsi(s,gel(y,2)), p));
       icopyifstack(p, z[1]); return z;
     }
     case t_FRAC:
       if (!s) return gen_0;
       z = cgetg(3,t_FRAC);
-      i = cgcd(s, smodis((GEN)y[2], s));
+      i = cgcd(s, smodis(gel(y,2), s));
       if (i == 1)
       {
-        z[2] = licopy((GEN)y[2]);
-        z[1] = lmulis((GEN)y[1], s);
+        gel(z,2) = icopy(gel(y,2));
+        gel(z,1) = mulis(gel(y,1), s);
       }
       else
       {
-        z[2] = ldivis((GEN)y[2], i);
-        z[1] = lmulis((GEN)y[1], s/i);
+        gel(z,2) = divis(gel(y,2), i);
+        gel(z,1) = mulis(gel(y,1), s/i);
         fix_frac_if_int(z);
       }
       return z;
 
     case t_COMPLEX: z = cgetg(3, t_COMPLEX);
-      z[1] = lmulsg(s,(GEN)y[1]);
-      z[2] = lmulsg(s,(GEN)y[2]); return z;
+      gel(z,1) = gmulsg(s,gel(y,1));
+      gel(z,2) = gmulsg(s,gel(y,2)); return z;
 
     case t_PADIC:
       if (!s) return gen_0;
@@ -2362,46 +2362,46 @@ gmulsg(long s, GEN y)
 
     case t_QUAD: z = cgetg(4, t_QUAD);
       copyifstack(y[1],z[1]);
-      z[2] = lmulsg(s,(GEN)y[2]);
-      z[3] = lmulsg(s,(GEN)y[3]); return z;
+      gel(z,2) = gmulsg(s,gel(y,2));
+      gel(z,3) = gmulsg(s,gel(y,3)); return z;
 
     case t_POLMOD: z = cgetg(3, t_POLMOD);
-      z[2] = lmulsg(s,(GEN)y[2]);
+      gel(z,2) = gmulsg(s,gel(y,2));
       copyifstack(y[1],z[1]); return z;
 
     case t_POL:
       if (!s || !signe(y)) return zeropol(varn(y));
       ly = lg(y); z = cgetg(ly,t_POL); z[1]=y[1];
-      for (i=2; i<ly; i++) z[i] = lmulsg(s,(GEN)y[i]);
+      for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return normalizepol_i(z, ly);
 
     case t_SER:
       if (!s) return zeropol(varn(y));
       if (gcmp0(y)) return gcopy(y);
       ly = lg(y); z = cgetg(ly,t_SER); z[1] = y[1];
-      for (i=2; i<ly; i++) z[i] = lmulsg(s,(GEN)y[i]);
+      for (i=2; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return normalize(z);
 
     case t_RFRAC:
       if (!s) return zeropol(gvar(y));
       z = cgetg(3, t_RFRAC);
-      i = itos( ggcd(stoi(s),(GEN)y[2]) );
+      i = itos( ggcd(stoi(s),gel(y,2)) );
       avma = (pari_sp)z;
       if (i == 1)
       {
-        z[1] = lmulgs((GEN)y[1], s);
-        z[2] = lcopy((GEN)y[2]);
+        gel(z,1) = gmulgs(gel(y,1), s);
+        gel(z,2) = gcopy(gel(y,2));
       }
       else
       {
-        z[1] = lmulgs((GEN)y[1], s/i);
-        z[2] = ldivgs((GEN)y[2], i);
+        gel(z,1) = gmulgs(gel(y,1), s/i);
+        gel(z,2) = gdivgs(gel(y,2), i);
       }
       return z;
 
     case t_VEC: case t_COL: case t_MAT:
       ly = lg(y); z = cgetg(ly,ty);
-      for (i=1; i<ly; i++) z[i] = lmulsg(s,(GEN)y[i]);
+      for (i=1; i<ly; i++) gel(z,i) = gmulsg(s,gel(y,i));
       return z;
   }
   err(typeer,"gmulsg");
@@ -2437,49 +2437,49 @@ gdivgs(GEN x, long s)
         s /= i; y = diviuexact(x, i);
         if (signe(x) < 0) setsigne(y, -1);
       }
-      z[1] = (long)y;
-      z[2] = lstoi(s); fix_frac(z); return z;
+      gel(z,1) = y;
+      gel(z,2) = stoi(s); fix_frac(z); return z;
 
     case t_REAL:
       return divrs(x,s);
 
     case t_INTMOD:
       z = cgetg(3, t_INTMOD);
-      return div_intmod_same(z, (GEN)x[1], (GEN)x[2], modsi(s, (GEN)x[1]));
+      return div_intmod_same(z, gel(x,1), gel(x,2), modsi(s, gel(x,1)));
 
     case t_FRAC: z = cgetg(3, t_FRAC);
-      i = cgcd(s, smodis((GEN)x[1], s));
+      i = cgcd(s, smodis(gel(x,1), s));
       if (i == 1)
       {
-        z[2] = lmulsi(s, (GEN)x[2]);
-        z[1] = licopy((GEN)x[1]);
+        gel(z,2) = mulsi(s, gel(x,2));
+        gel(z,1) = icopy(gel(x,1));
       }
       else
       {
-        z[2] = lmulsi(s/i, (GEN)x[2]);
-        z[1] = ldivis((GEN)x[1], i);
+        gel(z,2) = mulsi(s/i, gel(x,2));
+        gel(z,1) = divis(gel(x,1), i);
       }
       fix_frac(z);
       fix_frac_if_int(z); return z;
 
     case t_COMPLEX: z = cgetg(3, t_COMPLEX);
-      z[1] = ldivgs((GEN)x[1],s);
-      z[2] = ldivgs((GEN)x[2],s); return z;
+      gel(z,1) = gdivgs(gel(x,1),s);
+      gel(z,2) = gdivgs(gel(x,2),s); return z;
 
     case t_PADIC: return gdiv(x, stoi(s));
 
     case t_QUAD: z = cgetg(4, t_QUAD);
       copyifstack(x[1],z[1]);
-      z[2] = ldivgs((GEN)x[2],s);
-      z[3] = ldivgs((GEN)x[3],s); return z;
+      gel(z,2) = gdivgs(gel(x,2),s);
+      gel(z,3) = gdivgs(gel(x,3),s); return z;
 
     case t_POLMOD: z = cgetg(3, t_POLMOD);
       copyifstack(x[1],z[1]);
-      z[2] = ldivgs((GEN)x[2],s); return z;
+      gel(z,2) = gdivgs(gel(x,2),s); return z;
 
     case t_RFRAC:
       av = avma;
-      p1 = ggcd(stoi(s),(GEN)x[1]);
+      p1 = ggcd(stoi(s),gel(x,1));
       if (typ(p1) == t_INT)
       {
         avma = av;
@@ -2487,27 +2487,27 @@ gdivgs(GEN x, long s)
         i = p1[2];
         if (i == 1)
         {
-          z[1] = lcopy((GEN)x[1]);
-          z[2] = lmulsg(s,(GEN)x[2]);
+          gel(z,1) = gcopy(gel(x,1));
+          gel(z,2) = gmulsg(s,gel(x,2));
         }
         else
         {
-          z[1] = ldivgs((GEN)x[1], i);
-          z[2] = lmulgs((GEN)x[2], s/i);
+          gel(z,1) = gdivgs(gel(x,1), i);
+          gel(z,2) = gmulgs(gel(x,2), s/i);
         }
       }
       else /* t_FRAC */
       {
         z = cgetg(3, t_RFRAC);
-        z[1] = ldiv((GEN)x[1], p1);
-        z[2] = lmul((GEN)x[2], gdivsg(s,p1));
+        gel(z,1) = gdiv(gel(x,1), p1);
+        gel(z,2) = gmul(gel(x,2), gdivsg(s,p1));
         z = gerepilecopy(av, z);
       }
       return z;
 
     case t_POL: case t_SER: case t_VEC: case t_COL: case t_MAT:
       z = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) z[i] = ldivgs((GEN)x[i],s);
+      for (; i<lx; i++) gel(z,i) = gdivgs(gel(x,i),s);
       return z;
     
   }

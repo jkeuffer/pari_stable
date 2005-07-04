@@ -831,7 +831,7 @@ changevar(GEN x, GEN y)
     return gerepileupto(av,p2);
   }
   z = cgetg(lx,tx);
-  for (i=1; i<lx; i++) z[i] = lchangevar((GEN)x[i],y);
+  for (i=1; i<lx; i++) gel(z,i) = changevar(gel(x,i),y);
   return z;
 }
 

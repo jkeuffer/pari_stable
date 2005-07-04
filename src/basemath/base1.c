@@ -815,7 +815,7 @@ nfiso0(GEN a, GEN b, long fliso)
     p1 = (GEN)y[i];
     if (typ(p1) == t_POL) setvarn(p1, vb); else p1 = scalarpol(p1, vb);
     if (lb) p1 = poleval(p1, gmul(polx[vb],lb));
-    y[i] = la? ldiv(p1,la): (long)p1;
+    gel(y,i) = la? gdiv(p1,la): p1;
   }
   return gerepilecopy(av,y);
 }

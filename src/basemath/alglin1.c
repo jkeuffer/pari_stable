@@ -300,8 +300,8 @@ concat(GEN x, GEN y)
       return NULL; /* not reached */
     }
     if (i>=lx) err(talker,"trying to concat elements of an empty vector");
-    y = (GEN)x[i++];
-    for (; i<lx; i++) y = shallowconcat(y, (GEN)x[i]);
+    y = gel(x,i++);
+    for (; i<lx; i++) y = shallowconcat(y, gel(x,i));
     return gerepilecopy(av,y);
   }
   ty = typ(y);
@@ -330,7 +330,7 @@ concat(GEN x, GEN y)
       if (lg(y[1])!=2) err_cat(x,y);
       p1 = mkcolcopy(x);
     }
-    for (i=2; i<=ly; i++) z[i]=lcopy((GEN) y[i-1]);
+    for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
     gel(z,1) = p1; return z;
   }
   if (! is_matvec_t(ty))
@@ -342,7 +342,7 @@ concat(GEN x, GEN y)
       if (lg(x[1])!=2) err_cat(x,y);
       p1 = mkcolcopy(y);
     }
-    for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
+    for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
     gel(z,lx) = p1; return z;
   }
 
@@ -350,8 +350,8 @@ concat(GEN x, GEN y)
   {
     if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
     z=cgetg(lx+ly-1,tx);
-    for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
-    for (i=1; i<ly; i++) z[lx+i-1]=lcopy((GEN) y[i]);
+    for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
+    for (i=1; i<ly; i++) z[lx+i-1]=lcopy(gel(y,i));
     return z;
   }
 
@@ -361,12 +361,12 @@ concat(GEN x, GEN y)
       switch(ty)
       {
 	case t_COL:
-	  if (lx<=2) return (lx==1)? gcopy(y): concat((GEN) x[1],y);
+	  if (lx<=2) return (lx==1)? gcopy(y): concat(gel(x,1),y);
           if (ly>=3) break;
-          return (ly==1)? gcopy(x): concat(x,(GEN) y[1]);
+          return (ly==1)? gcopy(x): concat(x,gel(y,1));
 	case t_MAT:
 	  z=cgetg(ly,ty); if (lx != ly) break;
-	  for (i=1; i<ly; i++) z[i]=lconcat((GEN) x[i],(GEN) y[i]);
+	  for (i=1; i<ly; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
           return z;
       }
       break;
@@ -375,13 +375,13 @@ concat(GEN x, GEN y)
       switch(ty)
       {
 	case t_VEC:
-	  if (lx<=2) return (lx==1)? gcopy(y): concat((GEN) x[1],y);
+	  if (lx<=2) return (lx==1)? gcopy(y): concat(gel(x,1),y);
 	  if (ly>=3) break;
-	  return (ly==1)? gcopy(x): concat(x,(GEN) y[1]);
+	  return (ly==1)? gcopy(x): concat(x,gel(y,1));
 	case t_MAT:
 	  if (lx != lg(y[1])) break;
-	  z=cgetg(ly+1,ty); z[1]=lcopy(x);
-	  for (i=2; i<=ly; i++) z[i]=lcopy((GEN) y[i-1]);
+	  z=cgetg(ly+1,ty); gel(z,1) = gcopy(x);
+	  for (i=2; i<=ly; i++) gel(z,i) = gcopy(gel(y,i-1));
           return z;
       }
       break;
@@ -391,12 +391,12 @@ concat(GEN x, GEN y)
       {
 	case t_VEC:
 	  z=cgetg(lx,tx); if (ly != lx) break;
-	  for (i=1; i<lx; i++) z[i]=lconcat((GEN) x[i],(GEN) y[i]);
+	  for (i=1; i<lx; i++) gel(z,i) = concat(gel(x,i),gel(y,i));
           return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
 	  z=cgetg(lx+1,tx); z[lx]=lcopy(y);
-	  for (i=1; i<lx; i++) z[i]=lcopy((GEN) x[i]);
+	  for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
           return z;
       }
       break;
@@ -534,7 +534,7 @@ rowselect_p(GEN A, GEN B, GEN p, long init)
 {
   long i, lB = lg(A), lp = lg(p);
   for (i=1; i<init; i++) setlg(B[i],lp);
-  for (   ; i<lB;   i++) vecselect_p((GEN)A[i],(GEN)B[i],p,init,lp);
+  for (   ; i<lB;   i++) vecselect_p(gel(A,i),gel(B,i),p,init,lp);
 }
 
 GEN
@@ -572,14 +572,14 @@ extract(GEN x, GEN l)
       if (first <= last)
       {
         y = cgetg(lx - (last - first + 1),tx);
-        for (j=1; j<first; j++) y[j] = lcopy((GEN)x[j]);
-        for (i=last+1; i<lx; i++,j++) y[j] = lcopy((GEN)x[i]);
+        for (j=1; j<first; j++) gel(y,j) = gcopy(gel(x,j));
+        for (i=last+1; i<lx; i++,j++) gel(y,j) = gcopy(gel(x,i));
       }
       else
       {
         y = cgetg(lx - (first - last + 1),tx);
-        for (j=1,i=lx-1; i>first; i--,j++) y[j] = lcopy((GEN)x[i]);
-        for (i=last-1; i>0; i--,j++) y[j] = lcopy((GEN)x[i]);
+        for (j=1,i=lx-1; i>first; i--,j++) gel(y,j) = gcopy(gel(x,i));
+        for (i=last-1; i>0; i--,j++) gel(y,j) = gcopy(gel(x,i));
       }
     }
     else
@@ -587,12 +587,12 @@ extract(GEN x, GEN l)
       if (first <= last)
       {
         y = cgetg(last-first+2,tx);
-        for (i=first,j=1; i<=last; i++,j++) y[j] = lcopy((GEN)x[i]);
+        for (i=first,j=1; i<=last; i++,j++) gel(y,j) = gcopy(gel(x,i));
       }
       else
       {
         y = cgetg(first-last+2,tx);
-        for (i=first,j=1; i>=last; i--,j++) y[j] = lcopy((GEN)x[i]);
+        for (i=first,j=1; i>=last; i--,j++) gel(y,j) = gcopy(gel(x,i));
       }
     }
     return y;
@@ -603,9 +603,9 @@ extract(GEN x, GEN l)
     long ll=lg(l); y=cgetg(ll,tx);
     for (i=1; i<ll; i++)
     {
-      j = itos((GEN) l[i]);
+      j = itos(gel(l,i));
       if (j>=lx || j<=0) err(talker,"no such component in vecextract");
-      y[i] = lcopy((GEN) x[j]);
+      gel(y,i) = gcopy(gel(x,j));
     }
     return y;
   }
@@ -616,7 +616,7 @@ extract(GEN x, GEN l)
     {
       j = l[i];
       if (j>=lx || j<=0) err(talker,"no such component in vecextract");
-      y[i] = lcopy((GEN) x[j]);
+      gel(y,i) = gcopy(gel(x,j));
     }
     return y;
   }
@@ -649,8 +649,8 @@ sum(GEN v, long a, long b)
   long i;
   if (a > b) return gen_0;
   if (b > lg(v)-1) err(talker,"incorrect length in sum");
-  p = (GEN)v[a];
-  for (i=a+1; i<=b; i++) p = gadd(p, (GEN)v[i]);
+  p = gel(v,a);
+  for (i=a+1; i<=b; i++) p = gadd(p, gel(v,i));
   return p;
 }
 
@@ -756,7 +756,7 @@ gtomat(GEN x)
         if (i == lx) { /* matrix with h cols */
           y = cgetg(h, t_MAT);
           for (j=1 ; j<h; j++) {
-            y[j] = lgetg(lx, t_COL);
+            gel(y,j) = cgetg(lx, t_COL);
             for (i=1; i<lx; i++) gcoeff(y,i,j) = gcopy(gmael(x,i,j));
           }
           return y;
@@ -856,7 +856,7 @@ matmuldiagonal(GEN m, GEN d)
   if (! is_vec_t(j) || lg(d)!=lx)
     err(talker,"incorrect vector in matmuldiagonal");
   y=cgetg(lx,t_MAT);
-  for (j=1; j<lx; j++) y[j] = lmul((GEN) d[j],(GEN) m[j]);
+  for (j=1; j<lx; j++) gel(y,j) = gmul(gel(d,j),gel(m,j));
   return y;
 }
 
@@ -898,7 +898,7 @@ mattodiagonal(GEN m)
   GEN y = cgetg(lx,t_VEC);
 
   if (typ(m)!=t_MAT) err(typeer,"mattodiagonal");
-  for (i=1; i<lx; i++) y[i] = lcopy(gcoeff(m,i,i));
+  for (i=1; i<lx; i++) gel(y,i) = gcopy(gcoeff(m,i,i));
   return y;
 }
 
@@ -921,9 +921,9 @@ gaddmat(GEN x, GEN y)
   z=cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
-    cz = cgetg(d,t_COL); z[i] = (long)cz; cy = (GEN)y[i];
+    cz = cgetg(d,t_COL); gel(z,i) = cz; cy = gel(y,i);
     for (j=1; j<d; j++)
-      cz[j] = i==j? ladd(x,(GEN)cy[j]): lcopy((GEN)cy[j]);
+      cz[j] = i==j? ladd(x,gel(cy,j)): lcopy(gel(cy,j));
   }
   return z;
 }
@@ -941,9 +941,9 @@ gaddmat_i(GEN x, GEN y)
   z = cgetg(l,t_MAT);
   for (i=1; i<l; i++)
   {
-    cz = cgetg(d,t_COL); z[i] = (long)cz; cy = (GEN)y[i];
+    cz = cgetg(d,t_COL); gel(z,i) = cz; cy = gel(y,i);
     for (j=1; j<d; j++)
-      cz[j] = i==j? ladd(x,(GEN)cy[j]): cy[j];
+      cz[j] = i==j? ladd(x,gel(cy,j)): cy[j];
   }
   return z;
 }
@@ -981,16 +981,16 @@ gauss_triangle_i(GEN A, GEN B, GEN t)
   if (!n) return c;
   for (k=1; k<=n; k++)
   {
-    GEN u = cgetg(n+1, t_COL), b = (GEN)B[k];
+    GEN u = cgetg(n+1, t_COL), b = gel(B,k);
     pari_sp av = avma;
-    c[k] = (long)u; m = mulii((GEN)b[n],t);
-    u[n] = lpileuptoint(av, diviiexact(m, gcoeff(A,n,n)));
+    gel(c,k) = u; m = mulii(gel(b,n),t);
+    gel(u,n) = gerepileuptoint(av, diviiexact(m, gcoeff(A,n,n)));
     for (i=n-1; i>0; i--)
     {
-      av = avma; m = mulii(negi((GEN)b[i]),t);
+      av = avma; m = mulii(negi(gel(b,i)),t);
       for (j=i+1; j<=n; j++)
-        m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
-      u[i] = lpileuptoint(av, diviiexact(negi(m), gcoeff(A,i,i)));
+        m = addii(m, mulii(gcoeff(A,i,j),gel(u,j)));
+      gel(u,i) = gerepileuptoint(av, diviiexact(negi(m), gcoeff(A,i,i)));
     }
   }
   return c;
@@ -1009,18 +1009,18 @@ hnfdivide(GEN A, GEN B)
   u = cgetg(n+1, t_COL);
   for (k=1; k<=n; k++)
   {
-    b = (GEN)B[k];
-    m = (GEN)b[k];
-    u[k] = ldvmdii(m, gcoeff(A,k,k), &r);
+    b = gel(B,k);
+    m = gel(b,k);
+    gel(u,k) = dvmdii(m, gcoeff(A,k,k), &r);
     if (r != gen_0) { avma = av; return 0; }
     for (i=k-1; i>0; i--)
     {
-      m = negi((GEN)b[i]);
+      m = negi(gel(b,i));
       for (j=i+1; j<=k; j++)
-        m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
+        m = addii(m, mulii(gcoeff(A,i,j),gel(u,j)));
       m = dvmdii(m, gcoeff(A,i,i), &r);
       if (r != gen_0) { avma = av; return 0; }
-      u[i] = lnegi(m);
+      gel(u,i) = negi(m);
     }
   }
   avma = av; return 1;
@@ -1037,20 +1037,20 @@ hnf_invimage(GEN A, GEN b)
 
   if (!n) return NULL;
   u = cgetg(n+1, t_COL);
-  m = (GEN)b[n];
+  m = gel(b,n);
   if (typ(m) != t_INT) err(typeer,"hnf_invimage");
-  u[n] = ldvmdii(m, gcoeff(A,n,n), &r);
+  gel(u,n) = dvmdii(m, gcoeff(A,n,n), &r);
   if (r != gen_0) { avma = av; return NULL; }
   for (i=n-1; i>0; i--)
   {
     av2 = avma;
     if (typ(b[i]) != t_INT) err(typeer,"hnf_invimage");
-    m = negi((GEN)b[i]);
+    m = negi(gel(b,i));
     for (j=i+1; j<=n; j++)
-      m = addii(m, mulii(gcoeff(A,i,j),(GEN) u[j]));
+      m = addii(m, mulii(gcoeff(A,i,j),gel(u,j)));
     m = dvmdii(m, gcoeff(A,i,i), &r);
     if (r != gen_0) { avma = av; return NULL; }
-    u[i] = lpileuptoint(av2, negi(m));
+    gel(u,i) = gerepileuptoint(av2, negi(m));
   }
   return u;
 }
@@ -1068,7 +1068,7 @@ hnf_gauss(GEN A, GEN B)
   C = cgetg(l, t_MAT);
   for (i = 1; i < l; i++)
   {
-    C[i] = (long)hnf_invimage(A, (GEN)B[i]);
+    gel(C,i) = hnf_invimage(A, gel(B,i));
     if (!C[i]) return NULL;
   }
   return C;
@@ -1080,14 +1080,14 @@ gauss_get_col(GEN a, GEN b, GEN p, long li)
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = ldiv((GEN)b[li], p);
+  u[li] = ldiv(gel(b,li), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    m = gneg_i((GEN)b[i]);
+    m = gneg_i(gel(b,i));
     for (j=i+1; j<=li; j++)
-      m = gadd(m, gmul(gcoeff(a,i,j), (GEN)u[j]));
-    u[i] = lpileupto(av, gdiv(gneg_i(m), gcoeff(a,i,i)));
+      m = gadd(m, gmul(gcoeff(a,i,j), gel(u,j)));
+    gel(u,i) = gerepileupto(av, gdiv(gneg_i(m), gcoeff(a,i,i)));
   }
   return u;
 }
@@ -1098,15 +1098,15 @@ Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = lremii(mulii((GEN)b[li], invpiv), p);
+  u[li] = lremii(mulii(gel(b,li), invpiv), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    m = (GEN)b[i];
+    m = gel(b,i);
     for (j=i+1; j<=li; j++)
-      m = subii(m, mulii(gcoeff(a,i,j), (GEN)u[j]));
+      m = subii(m, mulii(gcoeff(a,i,j), gel(u,j)));
     m = remii(m, p);
-    u[i] = lpileuptoint(av, remii(mulii(m, Fp_inv(gcoeff(a,i,i), p)), p));
+    gel(u,i) = gerepileuptoint(av, remii(mulii(m, Fp_inv(gcoeff(a,i,i), p)), p));
   }
   return u;
 }
@@ -1116,15 +1116,15 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = (long)Fq_mul((GEN)b[li], invpiv, T,p);
+  gel(u,li) = Fq_mul(gel(b,li), invpiv, T,p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
-    m = (GEN)b[i];
+    m = gel(b,i);
     for (j=i+1; j<=li; j++)
-      m = Fq_sub(m, Fq_mul(gcoeff(a,i,j), (GEN)u[j], T, p), NULL,p);
+      m = Fq_sub(m, Fq_mul(gcoeff(a,i,j), gel(u,j), T, p), NULL,p);
     m = Fq_red(m, T,p);
-    u[i] = lpileupto(av, Fq_mul(m, Fq_inv(gcoeff(a,i,i), T,p), T,p));
+    gel(u,i) = gerepileupto(av, Fq_mul(m, Fq_inv(gcoeff(a,i,i), T,p), T,p));
   }
   return u;
 }
@@ -1178,23 +1178,23 @@ u_Fp_gauss_get_col(GEN a, uGEN b, ulong invpiv, long li, ulong p)
 static void
 _addmul(GEN b, long k, long i, GEN m)
 {
-  b[k] = ladd((GEN)b[k], gmul(m, (GEN)b[i]));
+  gel(b,k) = gadd(gel(b,k), gmul(m, gel(b,i)));
 }
 
 /* same, reduce mod p */
 static void
 _Fp_addmul(GEN b, long k, long i, GEN m, GEN p)
 {
-  if (lgefint(b[i]) > lgefint(p)) b[i] = lremii((GEN)b[i], p);
-  b[k] = laddii((GEN)b[k], mulii(m, (GEN)b[i]));
+  if (lgefint(b[i]) > lgefint(p)) gel(b,i) = remii(gel(b,i), p);
+  gel(b,k) = addii(gel(b,k), mulii(m, gel(b,i)));
 }
 
 /* same, reduce mod (T,p) */
 static void
 _Fq_addmul(GEN b, long k, long i, GEN m, GEN T, GEN p)
 {
-  b[i] = (long)Fq_red((GEN)b[i], T,p);
-  b[k] = (long)ladd((GEN)b[k], gmul(m, (GEN)b[i]));
+  gel(b,i) = Fq_red(gel(b,i), T,p);
+  gel(b,k) = gadd(gel(b,k), gmul(m, gel(b,i)));
 }
 
 /* assume m < p && u_OK_ULONG(p) && (! (b[i] & b[k] & MASK)) */
@@ -1313,8 +1313,8 @@ gauss_intern(GEN a, GEN b)
       if (!gcmp0(m))
       {
 	m = gneg_i(gdiv(m,p));
-	for (j=i+1; j<=aco; j++) _addmul((GEN)a[j],k,i,m);
-        for (j=1;   j<=bco; j++) _addmul((GEN)b[j],k,i,m);
+	for (j=i+1; j<=aco; j++) _addmul(gel(a,j),k,i,m);
+        for (j=1;   j<=bco; j++) _addmul(gel(b,j),k,i,m);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1326,8 +1326,8 @@ gauss_intern(GEN a, GEN b)
 
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
-  for (j=1; j<=bco; j++) u[j] = (long)gauss_get_col(a,(GEN)b[j],p,aco);
-  return gerepilecopy(av, iscol? (GEN)u[1]: u);
+  for (j=1; j<=bco; j++) gel(u,j) = gauss_get_col(a,gel(b,j),p,aco);
+  return gerepilecopy(av, iscol? gel(u,1): u);
 }
 
 GEN
@@ -1400,11 +1400,11 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
     for (j=1; j<=bco; j++)
-      u[j] = (long)u_Fp_gauss_get_col_OK(a,(uGEN)b[j], invpiv, aco, p);
+      gel(u,j) = u_Fp_gauss_get_col_OK(a,(uGEN)b[j], invpiv, aco, p);
   else
     for (j=1; j<=bco; j++)
-      u[j] = (long)u_Fp_gauss_get_col(a,(uGEN)b[j], invpiv, aco, p);
-  return iscol? (GEN)u[1]: u;
+      gel(u,j) = u_Fp_gauss_get_col(a,(uGEN)b[j], invpiv, aco, p);
+  return iscol? gel(u,1): u;
 }
 
 GEN
@@ -1445,7 +1445,7 @@ FpM_gauss(GEN a, GEN b, GEN p)
     a = ZM_to_Flm(a, pp);
     b = ZM_to_Flm(b, pp);
     u = Flm_gauss_sp(a,b, pp);
-    u = iscol? Flc_to_ZC((GEN)u[1]): Flm_to_ZM(u);
+    u = iscol? Flc_to_ZC(gel(u,1)): Flm_to_ZM(u);
     return gerepileupto(av, u);
   }
   lim = stack_lim(av,1);
@@ -1482,8 +1482,8 @@ FpM_gauss(GEN a, GEN b, GEN p)
       {
 	
         m = remii(mulii(m, minvpiv), p); /* -1/piv mod p */
-	for (j=i+1; j<=aco; j++) _Fp_addmul((GEN)a[j],k,i,m, p);
-        for (j=1  ; j<=bco; j++) _Fp_addmul((GEN)b[j],k,i,m, p);
+	for (j=i+1; j<=aco; j++) _Fp_addmul(gel(a,j),k,i,m, p);
+        for (j=1  ; j<=bco; j++) _Fp_addmul(gel(b,j),k,i,m, p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1496,8 +1496,8 @@ FpM_gauss(GEN a, GEN b, GEN p)
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
   for (j=1; j<=bco; j++)
-    u[j] = (long)Fp_gauss_get_col(a, (GEN)b[j], invpiv, aco, p);
-  return gerepilecopy(av, iscol? (GEN)u[1]: u);
+    gel(u,j) = Fp_gauss_get_col(a, gel(b,j), invpiv, aco, p);
+  return gerepilecopy(av, iscol? gel(u,1): u);
 }
 GEN
 FqM_gauss(GEN a, GEN b, GEN T, GEN p)
@@ -1542,8 +1542,8 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
       if (signe(m))
       {
 	m = Fq_neg(Fq_mul(m, invpiv, T,p), T, p);
-	for (j=i+1; j<=aco; j++) _Fq_addmul((GEN)a[j],k,i,m, T,p);
-        for (j=1;   j<=bco; j++) _Fq_addmul((GEN)b[j],k,i,m, T,p);
+	for (j=i+1; j<=aco; j++) _Fq_addmul(gel(a,j),k,i,m, T,p);
+        for (j=1;   j<=bco; j++) _Fq_addmul(gel(b,j),k,i,m, T,p);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -1556,8 +1556,8 @@ FqM_gauss(GEN a, GEN b, GEN T, GEN p)
   if(DEBUGLEVEL>4) fprintferr("Solving the triangular system\n");
   u = cgetg(bco+1,t_MAT);
   for (j=1; j<=bco; j++)
-    u[j] = (long)Fq_gauss_get_col(a, (GEN)b[j], invpiv, aco, T, p);
-  return gerepilecopy(av, iscol? (GEN)u[1]: u);
+    gel(u,j) = Fq_gauss_get_col(a, gel(b,j), invpiv, aco, T, p);
+  return gerepilecopy(av, iscol? gel(u,1): u);
 }
 
 
@@ -1658,8 +1658,8 @@ detint(GEN x)
   av1=avma; pass=cgetg(m1,t_MAT);
   for (j=1; j<=m; j++)
   {
-    p1=cgetg(m1,t_COL); pass[j]=(long)p1;
-    for (i=1; i<=m; i++) p1[i]= (long)gen_0;
+    p1=cgetg(m1,t_COL); gel(pass,j) = p1;
+    for (i=1; i<=m; i++) gel(p1,i) = gen_0;
   }
   for (k=1; k<=n; k++)
     for (j=1; j<=m; j++)
@@ -1676,19 +1676,19 @@ detint(GEN x)
 	vi=mulii(piv,gcoeff(x,i,k));
 	for (j=1; j<=m; j++)
 	  if (c[j]) vi=addii(vi,mulii(gcoeff(pass,i,j),gcoeff(x,j,k)));
-	v[i]=(long)vi; if (!t && signe(vi)) t=i;
+	gel(v,i) = vi; if (!t && signe(vi)) t=i;
       }
     if (t)
     {
       if (rg == m-1)
-        { det1=gcdii((GEN)v[t],det1); c[t]=0; }
+        { det1=gcdii(gel(v,t),det1); c[t]=0; }
       else
       {
-        rg++; pivprec = piv; piv=(GEN)v[t]; c[t]=k;
+        rg++; pivprec = piv; piv=gel(v,t); c[t]=k;
 	for (i=1; i<=m; i++)
 	  if (!c[i])
 	  {
-            GEN p2 = negi((GEN)v[i]);
+            GEN p2 = negi(gel(v,i));
 	    for (j=1; j<=m; j++)
 	      if (c[j] && j!=t)
 	      {
@@ -1809,11 +1809,11 @@ gauss_get_pivot_NZ(GEN x, GEN x0/*unused*/, GEN c, long i0)
     for (i=i0; i<lx; i++)
     {
       if (c[i]) continue; /* already a pivot in line i */
-      if (!gcmp0((GEN)x[i])) break;
+      if (!gcmp0(gel(x,i))) break;
     }
   else
     for (i=i0; i<lx; i++)
-      if (!gcmp0((GEN)x[i])) break;
+      if (!gcmp0(gel(x,i))) break;
   return i;
 
 }
@@ -1824,7 +1824,7 @@ approx_0(GEN x, GEN y)
 {
   long tx = typ(x);
   if (tx == t_COMPLEX)
-    return approx_0((GEN)x[1], y) && approx_0((GEN)x[2], y);
+    return approx_0(gel(x,1), y) && approx_0(gel(x,2), y);
   return gcmp0(x) ||
          (tx == t_REAL && gexpo(y) - gexpo(x) > bit_accuracy(lg(x)));
 }
@@ -1838,17 +1838,17 @@ gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
     for (i=i0; i<lx; i++)
     {
       if (c[i]) continue;
-      e = gexpo((GEN)x[i]);
+      e = gexpo(gel(x,i));
       if (e > ex) { ex=e; k=i; }
     }
   else
     for (i=i0; i<lx; i++)
     {
-      e = gexpo((GEN)x[i]);
+      e = gexpo(gel(x,i));
       if (e > ex) { ex=e; k=i; }
     }
-  p = (GEN)x[k];
-  r = (GEN)x0[k]; if (isexactzero(r)) r = x0;
+  p = gel(x,k);
+  r = gel(x0,k); if (isexactzero(r)) r = x0;
   return approx_0(p, r)? i: k;
 }
 
@@ -1878,7 +1878,7 @@ keri(GEN x)
       r++; l[k] = 0;
       for(j=1; j<k; j++)
 	if (l[j]) gcoeff(x,l[j],k) = gclone(gcoeff(x,l[j],k));
-      pp[k]=lclone(p);
+      gel(pp,k) = gclone(p);
     }
     else
     {
@@ -1913,17 +1913,17 @@ keri(GEN x)
   for (j=k=1; j<=r; j++,k++)
   {
     p = cgetg(n+1, t_COL);
-    y[j]=(long)p; while (l[k]) k++;
+    gel(y,j) = p; while (l[k]) k++;
     for (i=1; i<k; i++)
       if (l[i])
       {
 	c=gcoeff(x,l[i],k);
-	p[i] = (long) forcecopy(c); gunclone(c);
+	gel(p,i) = forcecopy(c); gunclone(c);
       }
       else
-	p[i] = (long)gen_0;
-    p[k]=lnegi((GEN)pp[k]); gunclone((GEN)pp[k]);
-    for (i=k+1; i<=n; i++) p[i]= (long)gen_0;
+	gel(p,i) = gen_0;
+    gel(p,k) = negi(gel(pp,k)); gunclone(gel(pp,k));
+    for (i=k+1; i<=n; i++) gel(p,i) = gen_0;
   }
   return gerepile(av0,tetpil,y);
 }
@@ -1968,14 +1968,14 @@ deplin(GEN x0)
   if (k > nc) { avma = av; return zerocol(nc); }
   if (k == 1) { avma = av; return gscalcol_i(gen_1,nc); }
   y = cgetg(nc+1,t_COL);
-  y[1] = (long)ck[ l[1] ];
+  gel(y,1) = ck[ l[1] ];
   for (q=d[1],j=2; j<k; j++)
   {
-    y[j] = lmul(ck[ l[j] ], q);
+    gel(y,j) = gmul(ck[ l[j] ], q);
     q = gmul(q, d[j]);
   }
-  y[j] = lneg(q);
-  for (j++; j<=nc; j++) y[j] = (long)gen_0;
+  gel(y,j) = gneg(q);
+  for (j++; j<=nc; j++) gel(y,j) = gen_0;
   return gerepileupto(av, gdiv(y,content(y)));
 }
 
@@ -2013,7 +2013,7 @@ gauss_pivot_ker(GEN x0, GEN a, GEN *dd, long *rr)
   av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
-    j = get_pivot((GEN)x[k], (GEN)x0[k], c, 1);
+    j = get_pivot(gel(x,k), gel(x0,k), c, 1);
     if (j > m)
     {
       r++; d[k]=0;
@@ -2060,7 +2060,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
   { /* put exact columns first, then largest inexact ones */
     get_pivot = gauss_get_pivot_max;
     for (k=1; k<=n; k++)
-      d0[k] = isinexactreal((GEN)x0[k])? -gexpo((GEN)x0[k]): -VERYBIGINT;
+      d0[k] = isinexactreal(gel(x0,k))? -gexpo(gel(x0,k)): -VERYBIGINT;
     d0 = gen_sort(d0, cmp_C|cmp_IND, NULL);
     x0 = vecpermute(x0, d0);
   }
@@ -2075,7 +2075,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
   d=(GEN)gpmalloc((n+1)*sizeof(long)); av=avma; lim=stack_lim(av,1);
   for (k=1; k<=n; k++)
   {
-    j = get_pivot((GEN)x[k], (GEN)x0[k], c, 1);
+    j = get_pivot(gel(x,k), gel(x0,k), c, 1);
     if (j>m) { r++; d[d0[k]]=0; }
     else
     {
@@ -2113,16 +2113,16 @@ ker0(GEN x, GEN a)
   {
     GEN p = cgetg(n+1,t_COL);
 
-    y[j]=(long)p; while (d[k]) k++;
+    gel(y,j) = p; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	p[i] = (long)forcecopy(p1); gunclone(p1);
+	gel(p,i) = forcecopy(p1); gunclone(p1);
       }
       else
-	p[i] = (long)gen_0;
-    p[k]= (long)gen_1; for (i=k+1; i<=n; i++) p[i]= (long)gen_0;
+	gel(p,i) = gen_0;
+    gel(p,k) = gen_1; for (i=k+1; i<=n; i++) gel(p,i) = gen_0;
   }
   return gerepile(av,tetpil,y);
 }
@@ -2155,7 +2155,7 @@ image(GEN x)
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
-    if (d[k]) y[j++] = lcopy((GEN)x[k]);
+    if (d[k]) y[j++] = lcopy(gel(x,k));
   free(d); return y;
 }
 
@@ -2169,7 +2169,7 @@ imagecompl(GEN x)
   gauss_pivot(x,&d,&r);
   avma=av; y=cgetg(r+1,t_VEC);
   for (i=j=1; j<=r; i++)
-    if (!d[i]) y[j++] = (long)utoipos(i);
+    if (!d[i]) gel(y,j++) = utoipos(i);
   if (d) free(d); return y;
 }
 
@@ -2200,12 +2200,12 @@ sinverseimage(GEN mat, GEN y)
   if (nbcol==1) return NULL;
   if (lg(y) != lg(mat[1])) err(consister,"inverseimage");
 
-  p1[nbcol] = (long)y;
+  gel(p1,nbcol) = y;
   for (i=1; i<nbcol; i++) p1[i]=mat[i];
   p1 = ker(p1); i=lg(p1)-1;
   if (!i) return NULL;
 
-  col = (GEN)p1[i]; p1 = (GEN) col[nbcol];
+  col = gel(p1,i); p1 = gel(col,nbcol);
   if (gcmp0(p1)) return NULL;
 
   p1 = gneg_i(p1); setlg(col,nbcol); tetpil=avma;
@@ -2232,18 +2232,18 @@ inverseimage(GEN m,GEN v)
   lv=lg(v)-1; y=cgetg(lv+1,t_MAT);
   for (j=1; j<=lv; j++)
   {
-    p1 = sinverseimage(m,(GEN)v[j]);
+    p1 = sinverseimage(m,gel(v,j));
     if (!p1) { avma = av; return cgetg(1,t_MAT); }
-    y[j] = (long)p1;
+    gel(y,j) = p1;
   }
   return y;
 }
 
 /* i-th vector in the standard basis */
 GEN
-vec_ei(long n, long i) { GEN e = zerocol(n); e[i] = (long)gen_1; return e; }
+vec_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
 GEN
-vec_Cei(long n, long i, GEN c) { GEN e = zerocol(n); e[i] = (long)c; return e; }
+vec_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
 
 /* NB: d freed */
 static GEN
@@ -2275,9 +2275,9 @@ get_suppl(GEN x, GEN d, long r)
 
   rx -= r;
   for (j=1; j<=rx; j++)
-    y[j] = lcopy((GEN)y[j]);
+    gel(y,j) = gcopy(gel(y,j));
   for (   ; j<=n; j++)
-    y[j] = (long)vec_ei(n, y[j]);
+    gel(y,j) = vec_ei(n, y[j]);
   free(d); return y;
 }
 
@@ -2335,7 +2335,7 @@ image2(GEN x)
   else p1=idmat(n);
 
   tetpil=avma; p2=cgetg(n-k+1,t_MAT);
-  for (i=k+1; i<=n; i++) p2[i-k]=lmul(x,(GEN) p1[i]);
+  for (i=k+1; i<=n; i++) p2[i-k]=lmul(x,gel(p1,i));
   return gerepile(av,tetpil,p2);
 }
 
@@ -2380,8 +2380,8 @@ Flm_indexrank(GEN x, ulong p)
   r = n - r;
 
   res=cgetg(3,t_VEC);
-  p1 = cgetg(r+1,t_VECSMALL); res[1] = (long)p1;
-  p2 = cgetg(r+1,t_VECSMALL); res[2] = (long)p2;
+  p1 = cgetg(r+1,t_VECSMALL); gel(res,1) = p1;
+  p2 = cgetg(r+1,t_VECSMALL); gel(res,2) = p2;
   if (d)
   {
     for (i=0,j=1; j<=n; j++)
@@ -2406,8 +2406,8 @@ indexrank0(GEN x, GEN p, int vecsmall)
   n = lg(x)-1; r = n - r;
 
   avma=av; res=cgetg(3,t_VEC);
-  p1 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[1] = (long)p1;
-  p2 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); res[2] = (long)p2;
+  p1 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); gel(res,1) = p1;
+  p2 = cgetg(r+1,vecsmall? t_VECSMALL: t_VEC); gel(res,2) = p2;
   if (d)
   {
     for (i=0,j=1; j<=n; j++)
@@ -2417,8 +2417,8 @@ indexrank0(GEN x, GEN p, int vecsmall)
   }
   if (!vecsmall)
     for (i=1;i<=r;i++) {
-      p1[i]=(long)utoipos(p1[i]);
-      p2[i]=(long)utoipos(p2[i]);
+      gel(p1,i) = utoipos(p1[i]);
+      gel(p2,i) = utoipos(p2[i]);
     }
   return res;
 }
@@ -2449,13 +2449,13 @@ FpM_mul(GEN x, GEN y, GEN p)
   z=cgetg(ly,t_MAT);
   if (lx==1)
   {
-    for (i=1; i<ly; i++) z[i]=lgetg(1,t_COL);
+    for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_COL);
     return z;
   }
   l=lg(x[1]);
   for (j=1; j<ly; j++)
   {
-    z[j] = lgetg(l,t_COL);
+    gel(z,j) = cgetg(l,t_COL);
     for (i=1; i<l; i++)
     {
       pari_sp av = avma;
@@ -2480,11 +2480,11 @@ FpC_FpV_mul(GEN x, GEN y, GEN p)
   z=cgetg(ly,t_MAT);
   for (j=1; j<ly; j++)
   {
-    z[j] = lgetg(lx,t_COL);
+    gel(z,j) = cgetg(lx,t_COL);
     for (i=1; i<lx; i++)
     {
       pari_sp av = avma;
-      GEN p1 = mulii((GEN)x[i],(GEN)y[j]);
+      GEN p1 = mulii(gel(x,i),gel(y,j));
       gcoeff(z,i,j) = p? gerepileuptoint(av,modii(p1,p)): p1;
     }
   }
@@ -2504,10 +2504,10 @@ FpM_FpC_mul(GEN x, GEN y, GEN p)
   for (i=1; i<l; i++)
   {
     pari_sp av = avma;
-    GEN p1 = mulii(gcoeff(x,i,1),(GEN)y[1]);
+    GEN p1 = mulii(gcoeff(x,i,1),gel(y,1));
     for (k = 2; k < lx; k++)
-      p1 = addii(p1, mulii(gcoeff(x,i,k),(GEN)y[k]));
-    z[i] = lpileuptoint(av, p?modii(p1,p):p1);
+      p1 = addii(p1, mulii(gcoeff(x,i,k),gel(y,k)));
+    gel(z,i) = gerepileuptoint(av, p?modii(p1,p):p1);
   }
   return z;
 }
@@ -2522,14 +2522,14 @@ Flm_mul(GEN x, GEN y, ulong p)
   z=cgetg(ly,t_MAT);
   if (lx==1)
   {
-    for (i=1; i<ly; i++) z[i]=lgetg(1,t_VECSMALL);
+    for (i=1; i<ly; i++) gel(z,i) = cgetg(1,t_VECSMALL);
     return z;
   }
   l=lg(x[1]);
   for (j=1; j<ly; j++)
   {
     long k;
-    z[j] = lgetg(l,t_VECSMALL);
+    gel(z,j) = cgetg(l,t_VECSMALL);
     if (u_OK_ULONG(p))
     {
       for (i=1; i<l; i++)
@@ -2663,10 +2663,10 @@ Flm_ker_sp(GEN x, ulong p, long deplin)
   {
     GEN C = cgetg(n+1, t_VECSMALL);
 
-    y[j] = (long)C; while (d[k]) k++;
+    gel(y,j) = C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
-        C[i] = (long)(ucoeff(x,d[i],k) % p);
+        C[i] = ucoeff(x,d[i],k) % p;
       else
 	C[i] = 0;
     C[k] = 1; for (i=k+1; i<=n; i++) C[i] = 0;
@@ -2711,8 +2711,8 @@ FpM_ker_i(GEN x, GEN p, long deplin)
     {
       if (deplin) {
         c = cgetg(n+1, t_COL);
-        for (i=1; i<k; i++) c[i] = lmodii(gcoeff(x,d[i],k), p);
-        c[k] = (long)gen_1; for (i=k+1; i<=n; i++) c[i] = (long)gen_0;
+        for (i=1; i<k; i++) gel(c,i) = modii(gcoeff(x,d[i],k), p);
+        gel(c,k) = gen_1; for (i=k+1; i<=n; i++) gel(c,i) = gen_0;
         return gerepileupto(av0, c);
       }
       r++; d[k]=0;
@@ -2747,16 +2747,16 @@ FpM_ker_i(GEN x, GEN p, long deplin)
   {
     GEN C = cgetg(n+1,t_COL);
 
-    y[j]=(long)C; while (d[k]) k++;
+    gel(y,j) = C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	C[i] = lmodii(p1, p); gunclone(p1);
+	gel(C,i) = modii(p1, p); gunclone(p1);
       }
       else
-	C[i] = (long)gen_0;
-    C[k]= (long)gen_1; for (i=k+1; i<=n; i++) C[i]= (long)gen_0;
+	gel(C,i) = gen_0;
+    gel(C,k) = gen_1; for (i=k+1; i<=n; i++) gel(C,i) = gen_0;
   }
   return gerepile(av0,tetpil,y);
 }
@@ -2942,7 +2942,7 @@ FpM_image(GEN x, GEN p)
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
-    if (d[k]) y[j++] = lcopy((GEN)x[k]);
+    if (d[k]) y[j++] = lcopy(gel(x,k));
   free(d); return y;
 }
 
@@ -2970,21 +2970,21 @@ sFpM_invimage(GEN mat, GEN y, GEN p)
   if (nbcol==1) return NULL;
   if (lg(y) != lg(mat[1])) err(consister,"FpM_invimage");
 
-  p1[nbcol] = (long)y;
+  gel(p1,nbcol) = y;
   for (i=1; i<nbcol; i++) p1[i]=mat[i];
   p1 = FpM_ker(p1,p); i=lg(p1)-1;
   if (!i) return NULL;
 
-  col = (GEN)p1[i]; p1 = (GEN) col[nbcol];
+  col = gel(p1,i); p1 = gel(col,nbcol);
   if (gcmp0(p1)) return NULL;
 
   p1 = Fp_inv(negi(p1),p);
   setlg(col,nbcol);
   for(i=1;i<nbcol;i++)
-    col[i]=lmulii((GEN)col[i],p1);
+    gel(col,i) = mulii(gel(col,i),p1);
   res=cgetg(nbcol,t_COL);
   for(i=1;i<nbcol;i++)
-    res[i]=lmodii((GEN)col[i],p);
+    gel(res,i) = modii(gel(col,i),p);
   return gerepileupto(av,res);
 }
 
@@ -3008,9 +3008,9 @@ FpM_invimage(GEN m, GEN v, GEN p)
   lv=lg(v)-1; y=cgetg(lv+1,t_MAT);
   for (j=1; j<=lv; j++)
   {
-    p1 = sFpM_invimage(m,(GEN)v[j],p);
+    p1 = sFpM_invimage(m,gel(v,j),p);
     if (!p1) { avma = av; return cgetg(1,t_MAT); }
-    y[j] = (long)p1;
+    gel(y,j) = p1;
   }
   return y;
 }
@@ -3086,8 +3086,8 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
     {
       if (deplin) {
         c = cgetg(n+1, t_COL);
-        for (i=1; i<k; i++) c[i] = (long)Fq_red(gcoeff(x,d[i],k), T, p);
-        c[k] = (long)gen_1; for (i=k+1; i<=n; i++) c[i] = (long)gen_0;
+        for (i=1; i<k; i++) gel(c,i) = Fq_red(gcoeff(x,d[i],k), T, p);
+        gel(c,k) = gen_1; for (i=k+1; i<=n; i++) gel(c,i) = gen_0;
         return gerepileupto(av0, c); 
       }
       r++; d[k]=0;
@@ -3123,16 +3123,16 @@ FqM_ker_i(GEN x, GEN T, GEN p, long deplin)
   {
     GEN C = cgetg(n+1,t_COL);
 
-    y[j]=(long)C; while (d[k]) k++;
+    gel(y,j) = C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	C[i] = (long) Fq_red(p1, T, p); gunclone(p1);
+	gel(C,i) = Fq_red(p1, T, p); gunclone(p1);
       }
       else
-	C[i] = (long)gen_0;
-    C[k]= (long)gen_1; for (i=k+1; i<=n; i++) C[i]= (long)gen_0;
+	gel(C,i) = gen_0;
+    gel(C,k) = gen_1; for (i=k+1; i<=n; i++) gel(C,i) = gen_0;
   }
   return gerepile(av0,tetpil,y);
 }
@@ -3172,9 +3172,9 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
     {
       if (deplin) {
         c = cgetg(n+1, t_COL);
-        for (i=1; i<k; i++) c[i] = (long)Flx_rem(gcoeff(x,d[i],k), T, p);
-        c[k] = (long) Fl_to_Flx(1,vs); 
-        for (i=k+1; i<=n; i++) c[i] = (long) zero_Flx(vs);
+        for (i=1; i<k; i++) gel(c,i) = Flx_rem(gcoeff(x,d[i],k), T, p);
+        gel(c,k) = Fl_to_Flx(1,vs); 
+        for (i=k+1; i<=n; i++) gel(c,i) = zero_Flx(vs);
         return gerepileupto(av0, c); 
       }
       r++; d[k]=0;
@@ -3210,17 +3210,17 @@ FlxqM_ker_i(GEN x, GEN T, ulong p, long deplin)
   {
     GEN C = cgetg(n+1,t_COL);
 
-    y[j]=(long)C; while (d[k]) k++;
+    gel(y,j) = C; while (d[k]) k++;
     for (i=1; i<k; i++)
       if (d[i])
       {
 	GEN p1=gcoeff(x,d[i],k);
-	C[i] = (long) Flx_rem(p1, T, p); gunclone(p1);
+	gel(C,i) = Flx_rem(p1, T, p); gunclone(p1);
       }
       else
-	C[i] = (long) zero_Flx(vs);
-    C[k] = (long) Fl_to_Flx(1,vs);
-    for (i=k+1; i<=n; i++) C[i] = (long) zero_Flx(vs);
+	gel(C,i) = zero_Flx(vs);
+    gel(C,k) = Fl_to_Flx(1,vs);
+    for (i=k+1; i<=n; i++) gel(C,i) = zero_Flx(vs);
   }
   return gerepile(av0,tetpil,y);
 }
@@ -3254,10 +3254,10 @@ eigen(GEN x, long prec)
   p=caradj(x,0,NULL); rr=roots(p,prec);
   for (i=1; i<n; i++)
   {
-    GEN p1 = (GEN)rr[i];
-    if (!signe(p1[2]) || gexpo((GEN)p1[2]) - gexpo(p1) < ex) rr[i] = p1[1];
+    GEN p1 = gel(rr,i);
+    if (!signe(p1[2]) || gexpo(gel(p1,2)) - gexpo(p1) < ex) rr[i] = p1[1];
   }
-  ly=1; k=2; r2=(GEN)rr[1];
+  ly=1; k=2; r2=gel(rr,1);
   for(;;)
   {
     r3 = grndtoi(r2, &e); if (e < ex) r2 = r3;
@@ -3274,7 +3274,7 @@ eigen(GEN x, long prec)
         setlg(y,ly); /* x may not be diagonalizable */
         return gerepilecopy(av,y);
       }
-      r2 = (GEN)rr[k++];
+      r2 = gel(rr,k++);
       r3 = gsub(r1,r2);
     }
     while (gcmp0(r3) || gexpo(r3) < ex);
@@ -3402,13 +3402,13 @@ det(GEN a)
     ci = (GEN*)a[i];
     for (k=i+1; k<=nbco; k++)
     {
-      ck = (GEN*)a[k]; m = (GEN)ck[i];
+      ck = (GEN*)a[k]; m = gel(ck,i);
       if (gcmp0(m))
       {
         if (gcmp1(p))
         {
           if (diveuc)
-            a[k] = (long)mydiv((GEN)a[k], pprec);
+            gel(a,k) = mydiv(gel(a,k), pprec);
         }
         else
           for (j=i+1; j<=nbco; j++)
@@ -3472,7 +3472,7 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   {
     case t_INT:
       p1 = cgetg(n+1,t_COL);
-      for (i=1; i<=n; i++) p1[i]=(long)Y;
+      for (i=1; i<=n; i++) gel(p1,i) = Y;
       Y = p1; break;
     case t_COL: break;
     default: err(typeer,"gaussmodulo");
@@ -3483,14 +3483,14 @@ gaussmoduloall(GEN M, GEN D, GEN Y, GEN *ptu1)
   u2 = cgetg(n+1,t_MAT);
   for (j=1; j<=m; j++)
   {
-    p1 = (GEN)U[j]; setlg(p1,lM);
-    u1[j] = (long)p1;
+    p1 = gel(U,j); setlg(p1,lM);
+    gel(u1,j) = p1;
   }
   U += m;
   for (j=1; j<=n; j++)
   {
-    p1 = (GEN)U[j]; setlg(p1,lM);
-    u2[j] = (long)p1;
+    p1 = gel(U,j); setlg(p1,lM);
+    gel(u2,j) = p1;
   }
   x = lllreducemodmatrix(gmul(u2,Y), u1);
   if (!ptu1) x = gerepileupto(av, x);
@@ -3513,7 +3513,7 @@ matsolvemod0(GEN M, GEN D, GEN Y, long flag)
   av=avma; y = cgetg(3,t_VEC);
   p1 = gaussmoduloall(M,D,Y, (GEN*)y+2);
   if (p1==gen_0) { avma=av; return gen_0; }
-  y[1] = (long)p1; return y;
+  gel(y,1) = p1; return y;
 }
 
 GEN

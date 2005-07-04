@@ -19,6 +19,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define labsr   (long)absr
 #define lach    (long)gach
 #define lacos   (long)gacos
+#define laddgs  (long)gaddgs
+#define laddsg  (long)gaddsg
+#define laddmat (long)gaddmat
+#define laddrs  (long)addrs
+#define laddsr  (long)addsr
+#define ladj    (long)adj
+#define larg    (long)garg
+#define lash    (long)gash
+#define lasin   (long)gasin
+#define lassmat (long)assmat
+#define latan   (long)gatan
+#define lath    (long)gath
+#define lbezout (long)bezout
+#define lbinome (long)binomial
+#define lcaract (long)caract
+#define lcaradj (long)caradj
+#define lchangevar (long)changevar
+#define lceil   (long)gceil
+#define lch     (long)gch
+#define lconcat (long)concat
+#define lcontent (long)content
+#define ldet2   (long)det2
+#define ldet    (long)det
 
 /*functions renamed*/
 #define globalreduction ellglobalred
