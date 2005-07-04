@@ -481,6 +481,7 @@ term_get_color(int n)
 /**                                                                **/
 /********************************************************************/
 static int col_index, lin_index, max_width, max_lin;
+#undef larg /* problems with SCO Unix headers (ioctl_arg) */
 #ifdef HAS_TIOCGWINSZ
 #  include <sys/termios.h>
 #  include <sys/ioctl.h>
