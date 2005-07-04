@@ -587,7 +587,7 @@ addprimes(GEN p)
   tx = typ(p);
   if (is_vec_t(tx))
   {
-    for (i=1; i < lg(p); i++) (void)addprimes((GEN) p[i]);
+    for (i=1; i < lg(p); i++) (void)addprimes(gel(p,i));
     return primetab;
   }
   if (tx != t_INT) err(typeer,"addprime");
@@ -600,16 +600,16 @@ addprimes(GEN p)
   L = cgetg(2*lp,t_VEC); k = 1;
   for (i=1; i < lp; i++)
   {
-    GEN n = (GEN)primetab[i], d = gcdii(n, p);
+    GEN n = gel(primetab,i), d = gcdii(n, p);
     if (! is_pm1(d))
     {
-      if (!equalii(p,d)) L[k++] = (long)d;
-      L[k++] = (long)diviiexact(n,d);
+      if (!equalii(p,d)) gel(L,k++) = d;
+      gel(L,k++) = diviiexact(n,d);
       gunclone(n); primetab[i] = 0;
     }
   }
   primetab = (GEN) gprealloc(primetab, (lp+1)*sizeof(long));
-  primetab[i] = lclone(p); setlg(primetab, lp+1);
+  gel(primetab,i) = gclone(p); setlg(primetab, lp+1);
   if (k > 1) { cleanprimetab(); setlg(L,k); (void)addprimes(L); }
   avma = av; return primetab;
 }
@@ -621,9 +621,9 @@ removeprime(GEN prime)
 
   if (typ(prime) != t_INT) err(typeer,"removeprime");
   for (i=lg(primetab) - 1; i; i--)
-    if (absi_equal((GEN) primetab[i], prime))
+    if (absi_equal(gel(primetab,i), prime))
     {
-      gunclone((GEN)primetab[i]); primetab[i]=0;
+      gunclone(gel(primetab,i)); primetab[i]=0;
       cleanprimetab(); break;
     }
   if (!i) err(talker,"prime %Z is not in primetable", prime);
@@ -641,12 +641,12 @@ removeprimes(GEN prime)
   {
     if (prime == primetab)
     {
-      for (i=1; i < lg(prime); i++) gunclone((GEN)prime[i]);
+      for (i=1; i < lg(prime); i++) gunclone(gel(prime,i));
       setlg(prime, 1);
     }
     else
     {
-      for (i=1; i < lg(prime); i++) (void)removeprime((GEN) prime[i]);
+      for (i=1; i < lg(prime); i++) (void)removeprime(gel(prime,i));
     }
     return primetab;
   }
@@ -690,11 +690,11 @@ aux_end(GEN n, long nb)
   p2 = cgetg(nb+1,t_COL);
   for (i=nb; i; i--)
   {
-    p2[i] = (long)z; z += lg(z);
-    p1[i] = (long)z; z += lg(z);
+    gel(p2,i) = z; z += lg(z);
+    gel(p1,i) = z; z += lg(z);
   }
-  z[1] = (long)p1;
-  z[2] = (long)p2;
+  gel(z,1) = p1;
+  gel(z,2) = p2;
   if (nb) (void)sort_factor_gen(z, absi_cmp);
   return z;
 }
@@ -751,10 +751,10 @@ auxdecomp1(GEN n, long (*ifac_break)(GEN n, GEN pairs, GEN here, GEN state),
   /* trial divide by the "special primes" (usually huge composites) */
   lp = lg(primetab);
   for (i=1; i<lp; i++)
-    if (dvdiiz(n,(GEN)primetab[i], n))
+    if (dvdiiz(n,gel(primetab,i), n))
     {
-      long k = 1; while (dvdiiz(n,(GEN)primetab[i], n)) k++;
-      STOREi((GEN)primetab[i], k);
+      long k = 1; while (dvdiiz(n,gel(primetab,i), n)) k++;
+      STOREi(gel(primetab,i), k);
       if (absi_cmp(pp, n) > 0)
       {
         if (!is_pm1(n)) STOREi(n, 1);
@@ -792,14 +792,14 @@ ifac_break_limit(GEN n, GEN pairs/*unused*/, GEN here, GEN state)
     N = n;
   else
   {
-    GEN q = powgi((GEN)here[0],(GEN)here[1]); /* primary factor found.*/
+    GEN q = powgi(gel(here,0),gel(here,1)); /* primary factor found.*/
     if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: Primary factor: %Z\n",q);
-    N = diviiexact((GEN)state[1],q); /* divide unfactored part by q */
+    N = diviiexact(gel(state,1),q); /* divide unfactored part by q */
   }
-  affii(N, (GEN)state[1]); /* affect()ed to state[1] to preserve stack. */
+  affii(N, gel(state,1)); /* affect()ed to state[1] to preserve stack. */
   if (DEBUGLEVEL>2) fprintferr("IFAC: Stop: remaining %Z\n",state[1]);
   /* check the stopping criterion, then restore stack */
-  res = cmpii((GEN)state[1],(GEN)state[2]) <= 0;
+  res = cmpii(gel(state,1),gel(state,2)) <= 0;
   avma = ltop; return res;
 }
 
@@ -836,8 +836,8 @@ decomp_limit(GEN n, GEN limit)
   GEN state = cgetg(3,t_VEC);
  /* icopy is mainly done to allocate memory for affect().
   * Currently state[1] is discarded in initial call to ifac_break_limit */
-  state[1] = licopy(n);
-  state[2] = lcopy(limit);
+  gel(state,1) = icopy(n);
+  gel(state,2) = gcopy(limit);
   return auxdecomp1(n, &ifac_break_limit, state, 1, decomp_default_hint);
 }
 
@@ -864,8 +864,8 @@ boundfact(GEN n, long lim)
   {
     case t_INT: return auxdecomp(n,lim);
     case t_FRAC:
-      p1 = auxdecomp((GEN)n[1],lim);
-      p2 = auxdecomp((GEN)n[2],lim); p2[2] = (long)gneg_i((GEN)p2[2]);
+      p1 = auxdecomp(gel(n,1),lim);
+      p2 = auxdecomp(gel(n,2),lim); gel(p2,2) = gneg_i(gel(p2,2));
       return gerepilecopy(av, merge_factor_i(p1,p2));
   }
   err(arither1);
@@ -1273,14 +1273,14 @@ divisors(GEN n)
 
   if (typ(n) != t_MAT || lg(n) != 3) n = auxdecomp(n,1);
 
-  P = (GEN)n[1]; l = lg(P);
-  E = (GEN)n[2];
+  P = gel(n,1); l = lg(P);
+  E = gel(n,2);
   if (l>1 && signe(P[1]) < 0) { E++; P++; l--; } /* skip -1 */
   e = cgetg(l, t_VECSMALL);
   nbdiv = 1;
   for (i=1; i<l; i++)
   {
-    e[i] = itos((GEN)E[i]);
+    e[i] = itos(gel(E,i));
     nbdiv = itos_or_0( mulss(nbdiv, 1+e[i]) );
   }
   if (!nbdiv || nbdiv & ~LGBITS)
@@ -1289,7 +1289,7 @@ divisors(GEN n)
   *++d = gen_1;
   for (i=1; i<l; i++)
     for (t1=t,j=e[i]; j; j--,t1=t2)
-      for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, (GEN)P[i]);
+      for (t2=d, t3=t1; t3<t2; ) *++d = mulii(*++t3, gel(P,i));
   tetpil = avma; return gerepile(av,tetpil,sort((GEN)t));
 }
 
@@ -1301,10 +1301,10 @@ corepartial(GEN n, long all)
   GEN fa,p1,p2,c = gen_1;
 
   fa = auxdecomp(n,all);
-  p1 = (GEN)fa[1];
-  p2 = (GEN)fa[2];
+  p1 = gel(fa,1);
+  p2 = gel(fa,2);
   for (i=1; i<lg(p1); i++)
-    if (mod2((GEN)p2[i])) c = mulii(c,(GEN)p1[i]);
+    if (mod2(gel(p2,i))) c = mulii(c,gel(p1,i));
   return gerepileuptoint(av, c);
 }
 
@@ -1316,13 +1316,13 @@ core2partial(GEN n, long all)
   GEN fa,p1,p2,e,c=gen_1,f=gen_1;
 
   fa = auxdecomp(n,all);
-  p1 = (GEN)fa[1];
-  p2 = (GEN)fa[2];
+  p1 = gel(fa,1);
+  p2 = gel(fa,2);
   for (i=1; i<lg(p1); i++)
   {
-    e = (GEN)p2[i];
-    if (mod2(e))   c = mulii(c, (GEN)p1[i]);
-    if (!gcmp1(e)) f = mulii(f, powgi((GEN)p1[i], shifti(e,-1)));
+    e = gel(p2,i);
+    if (mod2(e))   c = mulii(c, gel(p1,i));
+    if (!gcmp1(e)) f = mulii(f, powgi(gel(p1,i), shifti(e,-1)));
   }
   return gerepilecopy(av, mkvec2(c,f));
 }
@@ -1351,12 +1351,12 @@ coredisc2(GEN n)
 {
   pari_sp av = avma;
   GEN y = core2(n);
-  GEN c = (GEN)y[1], f = (GEN)y[2];
+  GEN c = gel(y,1), f = gel(y,2);
   long r = _mod4(c);
   if (r==1 || r==4) return y;
   y = cgetg(3,t_VEC);
-  y[1] = lshifti(c,2);
-  y[2] = lmul2n(f,-1); return gerepileupto(av, y);
+  gel(y,1) = shifti(c,2);
+  gel(y,2) = gmul2n(f,-1); return gerepileupto(av, y);
 }
 
 GEN
@@ -1388,11 +1388,11 @@ binaire(GEN x)
       ly = BITS_IN_LONG+1; m=HIGHBIT; u=*xp;
       while (!(m & u)) { m>>=1; ly--; }
       y = cgetg(ly+((lx-3)<<TWOPOTBITS_IN_LONG),t_VEC); ly=1;
-      do { y[ly] = m & u ? (long)gen_1 : (long)gen_0; ly++; } while (m>>=1);
+      do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
       for (i=3; i<lx; i++)
       {
         m=HIGHBIT; xp=int_precW(xp); u=*xp;
-        do { y[ly] = m & u ? (long)gen_1 : (long)gen_0; ly++; } while (m>>=1);
+        do { gel(y,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
       }
       break;
     }
@@ -1401,7 +1401,7 @@ binaire(GEN x)
       if (!signe(x))
       {
         lx=1+max(-ex,0); y=cgetg(lx,t_VEC);
-        for (i=1; i<lx; i++) y[i]= (long)gen_0;
+        for (i=1; i<lx; i++) gel(y,i) = gen_0;
         return y;
       }
 
@@ -1409,11 +1409,12 @@ binaire(GEN x)
       if (ex > bit_accuracy(lx)) err(precer,"binary");
       p1 = cgetg(max(ex,0)+2,t_VEC);
       p2 = cgetg(bit_accuracy(lx)-ex,t_VEC);
-      y[1] = (long) p1; y[2] = (long) p2;
+      gel(y,1) = p1;
+      gel(y,2) = p2;
       ly = -ex; ex++; m = HIGHBIT;
       if (ex<=0)
       {
-        p1[1]= (long)gen_0; for (i=1; i <= -ex; i++) p2[i]= (long)gen_0;
+        gel(p1,1) = gen_0; for (i=1; i <= -ex; i++) gel(p2,i) = gen_0;
         i=2;
       }
       else
@@ -1423,7 +1424,7 @@ binaire(GEN x)
         {
           m=HIGHBIT; u=x[i];
           do
-            { p1[ly] = (m & u) ? (long)gen_1 : (long)gen_0; ly++; }
+            { gel(p1,ly) = (m & u) ? gen_1 : gen_0; ly++; }
           while ((m>>=1) && ly<=ex);
         }
         ly=1;
@@ -1432,14 +1433,14 @@ binaire(GEN x)
       for (; i<lx; i++)
       {
         u=x[i];
-        do { p2[ly] = m & u ? (long)gen_1 : (long)gen_0; ly++; } while (m>>=1);
+        do { gel(p2,ly) = m & u ? gen_1 : gen_0; ly++; } while (m>>=1);
         m=HIGHBIT;
       }
       break;
 
     case t_VEC: case t_COL: case t_MAT:
       lx=lg(x); y=cgetg(lx,tx);
-      for (i=1; i<lx; i++) y[i]=(long)binaire((GEN)x[i]);
+      for (i=1; i<lx; i++) gel(y,i) = binaire(gel(x,i));
       break;
     default: err(typeer,"binary");
       return NULL; /* not reached */

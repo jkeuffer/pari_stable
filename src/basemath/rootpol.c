@@ -42,19 +42,19 @@ addCC(GEN x, GEN y)
     if (typ(y) == t_INT) return addii(x,y);
     /* ty == t_COMPLEX */
     z = cgetg(3,t_COMPLEX);
-    z[1] = laddii(x, (GEN)y[1]);
-    z[2] = licopy((GEN)y[2]); return z;
+    gel(z,1) = addii(x, gel(y,1));
+    gel(z,2) = icopy(gel(y,2)); return z;
   }
   /* tx == t_COMPLEX */
   z = cgetg(3,t_COMPLEX);
   if (typ(y) == t_INT)
   {
-    z[1] = laddii((GEN)x[1],y);
-    z[2] = licopy((GEN)x[2]); return z;
+    gel(z,1) = addii(gel(x,1),y);
+    gel(z,2) = icopy(gel(x,2)); return z;
   }
   /* ty == t_COMPLEX */
-  z[1] = laddii((GEN)x[1],(GEN)y[1]);
-  z[2] = laddii((GEN)x[2],(GEN)y[2]); return z;
+  gel(z,1) = addii(gel(x,1),gel(y,1));
+  gel(z,2) = addii(gel(x,2),gel(y,2)); return z;
 }
 /* fast product of x,y: t_INT or t_COMPLEX(t_INT) */
 static GEN
@@ -67,28 +67,28 @@ mulCC(GEN x, GEN y)
     if (typ(y) == t_INT) return mulii(x,y);
     /* ty == t_COMPLEX */
     z = cgetg(3,t_COMPLEX);
-    z[1] = (long)mulii(x, (GEN)y[1]);
-    z[2] = (long)mulii(x, (GEN)y[2]); return z;
+    gel(z,1) = mulii(x, gel(y,1));
+    gel(z,2) = mulii(x, gel(y,2)); return z;
   }
   /* tx == t_COMPLEX */
   z = cgetg(3,t_COMPLEX);
   if (typ(y) == t_INT)
   {
-    z[1] = (long)mulii((GEN)x[1],y);
-    z[2] = (long)mulii((GEN)x[2],y); return z;
+    gel(z,1) = mulii(gel(x,1),y);
+    gel(z,2) = mulii(gel(x,2),y); return z;
   }
   /* ty == t_COMPLEX */
   {
     pari_sp av = avma, tetpil;
     GEN p1, p2;
 
-    p1 = mulii((GEN)x[1],(GEN)y[1]);
-    p2 = mulii((GEN)x[2],(GEN)y[2]);
-    y = mulii(addii((GEN)x[1],(GEN)x[2]),
-              addii((GEN)y[1],(GEN)y[2]));
+    p1 = mulii(gel(x,1),gel(y,1));
+    p2 = mulii(gel(x,2),gel(y,2));
+    y = mulii(addii(gel(x,1),gel(x,2)),
+              addii(gel(y,1),gel(y,2)));
     x = addii(p1,p2); tetpil = avma;
-    z[1] = lsubii(p1,p2);
-    z[2] = lsubii(y,x); gerepilecoeffssp(av,tetpil,z+1,2);
+    gel(z,1) = subii(p1,p2);
+    gel(z,2) = subii(y,x); gerepilecoeffssp(av,tetpil,z+1,2);
     return z;
   }
 }
@@ -105,12 +105,12 @@ sqrCC(GEN x)
     pari_sp av = avma, tetpil;
     GEN y, p1, p2;
 
-    p1 = sqri((GEN)x[1]);
-    p2 = sqri((GEN)x[2]);
-    y = sqri(addii((GEN)x[1],(GEN)x[2]));
+    p1 = sqri(gel(x,1));
+    p2 = sqri(gel(x,2));
+    y = sqri(addii(gel(x,1),gel(x,2)));
     x = addii(p1,p2); tetpil = avma;
-    z[1] = lsubii(p1,p2);
-    z[2] = lsubii(y,x); gerepilecoeffssp(av,tetpil,z+1,2);
+    gel(z,1) = subii(p1,p2);
+    gel(z,2) = subii(y,x); gerepilecoeffssp(av,tetpil,z+1,2);
     return z;
   }
 }
@@ -135,22 +135,22 @@ CX_square_spec(GEN P, long lP)
 
   nn = n<<1; s = cgetg(nn+3,t_POL); s[1] = evalsigne(1)|evalvarn(0);
   S = s+2;
-  s[2] = (long)sqrCC((GEN)P[0]); /* i = 0 */
+  gel(s,2) = sqrCC(gel(P,0)); /* i = 0 */
   for (i=1; i<=n; i++)
   {
     av = avma; l = (i+1)>>1;
-    t = mulCC((GEN)P[0], (GEN)P[i]); /* j = 0 */
-    for (j=1; j<l; j++) t = addCC(t, mulCC((GEN)P[j], (GEN)P[i-j]));
+    t = mulCC(gel(P,0), gel(P,i)); /* j = 0 */
+    for (j=1; j<l; j++) t = addCC(t, mulCC(gel(P,j), gel(P,i-j)));
     t = gmul2n(t,1);
     if ((i & 1) == 0) t = addCC(t, sqrCC((GEN)P[i>>1]));
     s[i+2] = lpileupto(av, t);
   }
-  s[nn+2] = (long)sqrCC((GEN)P[n]); /* i = nn */
+  gel(s,nn+2) = sqrCC(gel(P,n)); /* i = nn */
   for (   ; i<nn; i++)
   {
     av = avma; l = (i+1)>>1;
-    t = mulCC((GEN)P[i-n],(GEN)P[n]); /* j = i-n */
-    for (j=i-n+1; j<l; j++) t = addCC(t, mulCC((GEN)P[j],(GEN)P[i-j]));
+    t = mulCC(gel(P,i-n),gel(P,n)); /* j = i-n */
+    for (j=i-n+1; j<l; j++) t = addCC(t, mulCC(gel(P,j),gel(P,i-j)));
     t = gmul2n(t,1);
     if ((i & 1) == 0) t = addCC(t, sqrCC((GEN)P[i>>1]));
     s[i+2] = lpileupto(av, t);
@@ -165,17 +165,17 @@ RgX_addspec(GEN x, long nx, GEN y, long ny)
   long i;
   if (nx == ny) {
     z = cgetg(nx+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
-    for (i=0; i < nx; i++) t[i] = ladd((GEN)x[i],(GEN)y[i]);
+    for (i=0; i < nx; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
     return normalizepol_i(z, nx+2);
   }
   if (ny < nx) {
     z = cgetg(nx+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
-    for (i=0; i < ny; i++) t[i] = ladd((GEN)x[i],(GEN)y[i]);
+    for (i=0; i < ny; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
     for (   ; i < nx; i++) t[i] = x[i];
     return normalizepol_i(z, nx+2);
   } else {
     z = cgetg(ny+2,t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z+2;
-    for (i=0; i < nx; i++) t[i] = ladd((GEN)x[i],(GEN)y[i]);
+    for (i=0; i < nx; i++) gel(t,i) = gadd(gel(x,i),gel(y,i));
     for (   ; i < ny; i++) t[i] = y[i];
     return normalizepol_i(z, ny+2);
   }
@@ -188,7 +188,7 @@ RgX_s_mulspec(GEN x, long nx, long s)
   long i;
   if (!s || !nx) return zeropol(0);
   z = cgetg(nx+2, t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z + 2;
-  for (i=0; i < nx; i++) t[i] = lmulgs((GEN)x[i], s);
+  for (i=0; i < nx; i++) gel(t,i) = gmulgs(gel(x,i), s);
   return z;
 }
 /* nx = lgpol(x), return x << s. Inefficient if s = 0... */
@@ -199,7 +199,7 @@ RgX_shiftspec(GEN x, long nx, long s)
   long i;
   if (!nx) return zeropol(0);
   z = cgetg(nx+2, t_POL); z[1] = evalsigne(1)|evalvarn(0); t = z + 2;
-  for (i=0; i < nx; i++) t[i] = lmul2n((GEN)x[i], s);
+  for (i=0; i < nx; i++) gel(t,i) = gmul2n(gel(x,i), s);
   return z;
 }
 
@@ -222,12 +222,12 @@ karasquare(GEN P, long nP)
   a = cgetg(N + 2, t_POL); a[1] = evalsigne(1)|evalvarn(0);
   t = a+2; l = lgpol(s0); s0 += 2; N0 = n0<<1;
   for (i=0; i < l;  i++) t[i] = s0[i];
-  for (   ; i < N0; i++) t[i] = (long)gen_0;
+  for (   ; i < N0; i++) gel(t,i) = gen_0;
   t = a+2 + N0; l = lgpol(s2); s2 += 2; N1 = N - N0;
   for (i=0; i < l;  i++) t[i] = s2[i];
-  for (   ; i < N1; i++) t[i] = (long)gen_0;
+  for (   ; i < N1; i++) gel(t,i) = gen_0;
   t = a+2 + n0; l = lgpol(s1); s1 += 2;
-  for (i=0; i < l; i++)  t[i] = ladd((GEN)t[i], (GEN)s1[i]);
+  for (i=0; i < l; i++)  gel(t,i) = gadd(gel(t,i), gel(s1,i));
   return gerepilecopy(av, normalizepol_i(a, N+2));
 }
 /* spec function. nP = lgpol(P) */
@@ -252,55 +252,55 @@ cook_square(GEN P, long nP)
   r = RgX_addspec(p0,n0, p2,n0);
   t = RgX_addspec(p1,n0, p3,n3);
   q[-1] = ladd(r,gneg(t));
-  q[ 1] = ladd(r,t);
+  gel(q,1) = gadd(r,t);
   r = RgX_addspec(p0,n0, RgX_shiftspec(p2,n0, 2)+2,n0);
   t = gmul2n(RgX_addspec(p1,n0, RgX_shiftspec(p3,n3, 2)+2,n3), 1);
   q[-2] = ladd(r,gneg(t));
-  q[ 2] = ladd(r,t);
+  gel(q,2) = gadd(r,t);
   r = RgX_addspec(p0,n0, RgX_s_mulspec(p2,n0, 9)+2,n0);
   t = gmulsg(3, RgX_addspec(p1,n0, RgX_s_mulspec(p3,n3, 9)+2,n3));
   q[-3] = ladd(r,gneg(t));
-  q[ 3] = ladd(r,t);
+  gel(q,3) = gadd(r,t);
 
   r = new_chunk(7);
   vp = cgetg(4,t_VEC);
   vm = cgetg(4,t_VEC);
   for (i=1; i<=3; i++)
   {
-    GEN a = (GEN)q[i], b = (GEN)q[-i];
+    GEN a = gel(q,i), b = gel(q,-i);
     a = cook_square(a+2, lgpol(a));
     b = cook_square(b+2, lgpol(b));
-    vp[i] = ladd(b, a);
-    vm[i] = ladd(b, gneg(a));
+    gel(vp,i) = gadd(b, a);
+    gel(vm,i) = gadd(b, gneg(a));
   }
-  r[0] = (long)Q;
-  r[1] = ldivgs(gsub(gsub(gmulgs((GEN)vm[2],9),(GEN)vm[3]),
-                     gmulgs((GEN)vm[1],45)),
+  gel(r,0) = Q;
+  gel(r,1) = gdivgs(gsub(gsub(gmulgs(gel(vm,2),9),gel(vm,3)),
+                     gmulgs(gel(vm,1),45)),
                 60);
-  r[2] = ldivgs(gadd(gadd(gmulgs((GEN)vp[1],270),gmulgs(Q,-490)),
-                     gadd(gmulgs((GEN)vp[2],-27),gmulgs((GEN)vp[3],2))),
+  gel(r,2) = gdivgs(gadd(gadd(gmulgs(gel(vp,1),270),gmulgs(Q,-490)),
+                     gadd(gmulgs(gel(vp,2),-27),gmulgs(gel(vp,3),2))),
                 360);
-  r[3] = ldivgs(gadd(gadd(gmulgs((GEN)vm[1],13),gmulgs((GEN)vm[2],-8)),
-                    (GEN)vm[3]),
+  gel(r,3) = gdivgs(gadd(gadd(gmulgs(gel(vm,1),13),gmulgs(gel(vm,2),-8)),
+                    gel(vm,3)),
                 48);
-  r[4] = ldivgs(gadd(gadd(gmulgs(Q,56),gmulgs((GEN)vp[1],-39)),
-                     gsub(gmulgs((GEN)vp[2],12),(GEN)vp[3])),
+  gel(r,4) = gdivgs(gadd(gadd(gmulgs(Q,56),gmulgs(gel(vp,1),-39)),
+                     gsub(gmulgs(gel(vp,2),12),gel(vp,3))),
                 144);
-  r[5] = ldivgs(gsub(gadd(gmulgs((GEN)vm[1],-5),gmulgs((GEN)vm[2],4)),
-                     (GEN)vm[3]),
+  gel(r,5) = gdivgs(gsub(gadd(gmulgs(gel(vm,1),-5),gmulgs(gel(vm,2),4)),
+                     gel(vm,3)),
                 240);
-  r[6] = ldivgs(gadd(gadd(gmulgs(Q,-20),gmulgs((GEN)vp[1],15)),
-                     gadd(gmulgs((GEN)vp[2],-6),(GEN)vp[3])),
+  gel(r,6) = gdivgs(gadd(gadd(gmulgs(Q,-20),gmulgs(gel(vp,1),15)),
+                     gadd(gmulgs(gel(vp,2),-6),gel(vp,3))),
                 720);
   q = cgetg(2*n+3,t_POL); q[1] = evalsigne(1)|evalvarn(0);
   t = q+2;
-  for (i=0; i<=2*n; i++) t[i] = (long)gen_0;
+  for (i=0; i<=2*n; i++) gel(t,i) = gen_0;
   for (i=0; i<=6; i++,t += n0)
   {
-    GEN h = (GEN)r[i];
+    GEN h = gel(r,i);
     long d = lgpol(h);
     h += 2;
-    for (j=0; j<d; j++) t[j] = ladd((GEN)t[j], (GEN)h[j]);
+    for (j=0; j<d; j++) gel(t,j) = gadd(gel(t,j), gel(h,j));
   }
   return gerepilecopy(av, normalizepol_i(q, 2*n+3));
 }
@@ -320,8 +320,8 @@ graeffe(GEN p)
   s1 = cook_square(p1, n1); ns1 = degpol(s1);
   t = cgetg(ns1+4, t_POL);
   t[1] = evalsigne(1)|evalvarn(0);
-  t[2] = (long)gen_0;
-  for (i=0; i<=ns1; i++) t[3+i] = lneg((GEN)s1[2+i]);
+  gel(t,2) = gen_0;
+  for (i=0; i<=ns1; i++) t[3+i] = lneg(gel(s1,2+i));
   return gadd(s0,t); /* now t contains -x * s1 */
 }
 
@@ -368,8 +368,8 @@ mylog2(GEN z)
   double x, y;
 
   if (typ(z) != t_COMPLEX) return log2ir(z);
-  x = log2ir((GEN)z[1]);
-  y = log2ir((GEN)z[2]);
+  x = log2ir(gel(z,1));
+  y = log2ir(gel(z,2));
   if (fabs(x-y) > 10) return max(x,y);
   return x + 0.5*log2(1 + exp2(2*(y-x)));
 }
@@ -382,11 +382,11 @@ findpower(GEN p)
   double x, L, mins = pariINFINITY;
   long n = degpol(p),i;
 
-  L = mylog2((GEN)p[n+2]); /* log2(lc * binom(n,i)) */
+  L = mylog2(gel(p,n+2)); /* log2(lc * binom(n,i)) */
   for (i=n-1; i>=0; i--)
   {
     L += log2((double)(i+1) / (double)(n-i));
-    x = mylog2((GEN)p[i+2]);
+    x = mylog2(gel(p,i+2));
     if (x != -pariINFINITY)
     {
       double s = (L - x) / (double)(n-i);
@@ -411,7 +411,7 @@ newton_polygon(GEN p, long k)
   vertex = (long*)new_chunk(n+1);
 
   /* vertex[i] = 1 if i a vertex of convex hull, 0 otherwise */
-  for (i=0; i<=n; i++) { logcoef[i] = mylog2((GEN)p[2+i]); vertex[i] = 0; }
+  for (i=0; i<=n; i++) { logcoef[i] = mylog2(gel(p,2+i)); vertex[i] = 0; }
   vertex[0] = 1; /* sentinel */
   for (i=0; i < n; i=h)
   {
@@ -448,8 +448,8 @@ myshiftic(GEN z, long e)
 {
   if (typ(z)==t_COMPLEX)
   {
-    z[1] = signe(z[1])? lmpshift((GEN)z[1],e): (long)gen_0;
-    z[2] = lmpshift((GEN)z[2],e);
+    gel(z,1) = signe(z[1])? mpshift(gel(z,1),e): gen_0;
+    gel(z,2) = mpshift(gel(z,2),e);
     return z;
   }
   return signe(z)? mpshift(z,e): gen_0;
@@ -472,8 +472,8 @@ mygprecrc(GEN x, long prec, long e)
     case t_REAL: return signe(x)? rtor(x, prec): real_0_bit(e);
     case t_COMPLEX:
       y = cgetg(3,t_COMPLEX);
-      y[1] = (long)mygprecrc((GEN)x[1],prec,e);
-      y[2] = (long)mygprecrc((GEN)x[2],prec,e);
+      gel(y,1) = mygprecrc(gel(x,1),prec,e);
+      gel(y,2) = mygprecrc(gel(x,2),prec,e);
       return y;
     default: return gcopy(x);
   }
@@ -494,7 +494,7 @@ mygprec(GEN x, long bit)
   {
     case t_POL:
       lx = lg(x); y = cgetg(lx, t_POL); y[1] = x[1];
-      for (i=2; i<lx; i++) y[i] = (long)mygprecrc((GEN)x[i],prec,e);
+      for (i=2; i<lx; i++) gel(y,i) = mygprecrc(gel(x,i),prec,e);
       break;
 
     default: y = mygprecrc(x,prec,e);
@@ -509,7 +509,7 @@ pol_to_gaussint(GEN p, long shift)
 {
   long i, l = lg(p);
   GEN q = cgetg(l, t_POL); q[1] = p[1];
-  for (i=2; i<l; i++) q[i] = (long)gfloor2n((GEN)p[i], shift);
+  for (i=2; i<l; i++) gel(q,i) = gfloor2n(gel(p,i), shift);
   return q;
 }
 
@@ -519,7 +519,7 @@ eval_rel_pol(GEN p, long bit)
 {
   long i;
   for (i = 2; i < lg(p); i++)
-    if (gcmp0((GEN)p[i])) p[i] = (long)gen_0; /* bad behaviour of gexpo */
+    if (gcmp0(gel(p,i))) gel(p,i) = gen_0; /* bad behaviour of gexpo */
   return pol_to_gaussint(p, bit-gexpo(p)+1);
 }
 
@@ -536,10 +536,10 @@ homothetie(GEN p, double lrho, long bit)
   t = iR; r[n+2] = q[n+2];
   for (i=n-1; i>0; i--)
   {
-    r[i+2] = lmul(t, (GEN)q[i+2]);
+    r[i+2] = lmul(t, gel(q,i+2));
     t = mulrr(t, iR);
   }
-  r[2] = lmul(t, (GEN)q[2]); return r;
+  gel(r,2) = gmul(t, gel(q,2)); return r;
 }
 
 /* change q in 2^(n*e) p(x*2^(-e)), n=deg(q)  [ ~as above with R = 2^-e ]*/
@@ -549,7 +549,7 @@ homothetie2n(GEN p, long e)
   if (e)
   {
     long i,n = lg(p)-1;
-    for (i=2; i<=n; i++) myshiftrc((GEN)p[i], (n-i)*e);
+    for (i=2; i<=n; i++) myshiftrc(gel(p,i), (n-i)*e);
   }
 }
 
@@ -560,7 +560,7 @@ homothetie_gauss(GEN p, long e, long f)
   if (e || f)
   {
     long i, n = lg(p)-1;
-    for (i=2; i<=n; i++) p[i] = (long)myshiftic((GEN)p[i], f+(n-i)*e);
+    for (i=2; i<=n; i++) gel(p,i) = myshiftic(gel(p,i), f+(n-i)*e);
   }
 }
 
@@ -576,18 +576,18 @@ lower_bound(GEN p, long *k, double eps)
 
   if (n < 4) { *k = n; return 0.; }
   S = cgetg(5,t_VEC);
-  a = cgetg(5,t_VEC); ilc = gdiv(real_1(DEFAULTPREC), (GEN)p[n+2]);
-  for (i=1; i<=4; i++) a[i] = lmul(ilc,(GEN)p[n+2-i]);
+  a = cgetg(5,t_VEC); ilc = gdiv(real_1(DEFAULTPREC), gel(p,n+2));
+  for (i=1; i<=4; i++) gel(a,i) = gmul(ilc,gel(p,n+2-i));
   /* i = 1 split out from next loop for efficiency and initialization */
-  s = (GEN)a[1];
-  S[1] = lneg(s); /* Newton sum S_i */
+  s = gel(a,1);
+  gel(S,1) = gneg(s); /* Newton sum S_i */
   rho = r = gtodouble(gabs(s,3));
   R = r / n;
   for (i=2; i<=4; i++)
   {
-    s = gmulsg(i,(GEN)a[i]);
-    for (j=1; j<i; j++) s = gadd(s, gmul((GEN)S[j],(GEN)a[i-j]));
-    S[i] = lneg(s); /* Newton sum S_i */
+    s = gmulsg(i,gel(a,i));
+    for (j=1; j<i; j++) s = gadd(s, gmul(gel(S,j),gel(a,i-j)));
+    gel(S,i) = gneg(s); /* Newton sum S_i */
     r = gtodouble(gabs(s,3));
     if (r > 0.)
     {
@@ -617,8 +617,8 @@ logmax_modulus(GEN p, double tau)
   eps = - 1/log(1.5*tau2); /* > 0 */
   bit = (long) ((double) n*log2(1./tau2)+3*log2((double) n))+1;
   gunr = myreal_1(bit+2*n);
-  aux = gdiv(gunr, (GEN)p[2+n]);
-  q = gmul(aux,p); q[2+n] = (long)gunr;
+  aux = gdiv(gunr, gel(p,2+n));
+  q = gmul(aux,p); gel(q,2+n) = gunr;
   e = findpower(q);
   homothetie2n(q,e);
   affsi(e, r);
@@ -634,7 +634,7 @@ logmax_modulus(GEN p, double tau)
 
     bit = (long) ((double)k * log2(1./tau2) +
                      (double)(nn-k)*log2(1./eps) + 3*log2((double)nn)) + 1;
-    homothetie_gauss(q, e, bit-(long)floor(mylog2((GEN)q[2+nn])+0.5));
+    homothetie_gauss(q, e, bit-(long)floor(mylog2(gel(q,2+nn))+0.5));
     nn -= polvaluation(q, &q);
     set_karasquare_limit(gexpo(q));
     q = gerepileupto(av, graeffe(q));
@@ -659,7 +659,7 @@ logmin_modulus(GEN p, double tau)
   pari_sp av = avma;
   double r;
 
-  if (gcmp0((GEN)p[2])) return -pariINFINITY;
+  if (gcmp0(gel(p,2))) return -pariINFINITY;
   r = - logmax_modulus(polrecip_i(p),tau);
   avma = av; return r;
 }
@@ -745,7 +745,7 @@ ind_maxlog2(GEN q)
   double L = - pariINFINITY;
   for (i=0; i<=degpol(q); i++)
   {
-    double d = mylog2((GEN)q[2+i]);
+    double d = mylog2(gel(q,2+i));
     if (d > L) { L = d; k = i; }
   }
   return k;
@@ -797,20 +797,20 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
 
   if (l == 2)
   {
-    f[0] = ladd((GEN)p[0],(GEN)p[step]);
-    f[1] = ladd((GEN)p[0], gneg((GEN)p[step])); return;
+    gel(f,0) = gadd(gel(p,0),gel(p,step));
+    gel(f,1) = gadd(gel(p,0), gneg(gel(p,step))); return;
   }
   if (l == 4)
   {
-    f1 = gadd((GEN)p[0],   (GEN)p[step<<1]);
-    f2 = gadd((GEN)p[0],   gneg((GEN)p[step<<1]));
-    f3 = gadd((GEN)p[step],(GEN)p[3*step]);
-    f02= gadd((GEN)p[step],gneg((GEN)p[3*step]));
+    f1 = gadd(gel(p,0),   (GEN)p[step<<1]);
+    f2 = gadd(gel(p,0),   gneg((GEN)p[step<<1]));
+    f3 = gadd(gel(p,step),(GEN)p[3*step]);
+    f02= gadd(gel(p,step),gneg((GEN)p[3*step]));
     f02 = mulcxI(f02);
-    f[0] = ladd(f1, f3);
-    f[1] = ladd(f2, f02);
-    f[2] = ladd(f1, gneg(f3));
-    f[3] = ladd(f2, gneg(f02)); return;
+    gel(f,0) = gadd(f1, f3);
+    gel(f,1) = gadd(f2, f02);
+    gel(f,2) = gadd(f1, gneg(f3));
+    gel(f,3) = gadd(f2, gneg(f02)); return;
   }
 
   ltop = avma;
@@ -824,12 +824,12 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
   for (i=0; i<l1; i++)
   {
     rapi = step*i;
-    f1 = gmul((GEN)Omega[rapi],    (GEN)f[i+l1]);
-    f2 = gmul((GEN)Omega[rapi<<1], (GEN)f[i+l2]);
-    f3 = gmul((GEN)Omega[3*rapi],  (GEN)f[i+l3]);
+    f1 = gmul(gel(Omega,rapi),    gel(f,i+l1));
+    f2 = gmul((GEN)Omega[rapi<<1], gel(f,i+l2));
+    f3 = gmul((GEN)Omega[3*rapi],  gel(f,i+l3));
 
-    f02 = gadd((GEN)f[i],f2);
-    g02 = gadd((GEN)f[i],gneg(f2));
+    f02 = gadd(gel(f,i),f2);
+    g02 = gadd(gel(f,i),gneg(f2));
     f13 = gadd(f1,f3);
     g13 = mulcxI(gadd(f1,gneg(f3)));
 
@@ -866,7 +866,7 @@ initRU(long N, long bit)
   {
     GEN t = RU[i];
     RU[i+1] = gmul(z, t);
-    RU[N4-i] = mkcomplex((GEN)t[2], (GEN)t[1]);
+    RU[N4-i] = mkcomplex(gel(t,2), gel(t,1));
   }
   for (i=0; i<N4; i++) RU[i+N4] = mulcxI(RU[i]);
   for (i=0; i<N2; i++) RU[i+N2] = gneg(RU[i]);
@@ -902,7 +902,7 @@ FFT(GEN x, GEN Omega)
   if (n < l) {
     z = cgetg(l, t_VECSMALL); /* cf stackdummy */
     for (i = 1; i < n; i++) z[i] = x[i];
-    for (     ; i < l; i++) z[i] = (long)gen_0;
+    for (     ; i < l; i++) gel(z,i) = gen_0;
   }
   else z = x;
   y = cgetg(l, t_VEC);
@@ -967,7 +967,7 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
   A = cgetg(Lmax+1,t_VEC); A++;
   pc= cgetg(Lmax+1,t_VEC); pc++;
   for (i=0; i <= n; i++) pc[i]= q[i];
-  for (   ; i<Lmax; i++) pc[i]= (long)gen_0;
+  for (   ; i<Lmax; i++) gel(pc,i) = gen_0;
 
   *mu = pariINFINITY;
   g = real_0_bit(-bit);
@@ -981,17 +981,17 @@ parameters(GEN p, long *LMAX, double *mu, double *gamma,
       GEN z = RU;
       for (j=1; j<n; j++)
       {
-        pc[j] = lmul((GEN)q[j],z);
+        gel(pc,j) = gmul(gel(q,j),z);
         z = gmul(z,RU); /* RU = prim^i, z=prim^(ij) */
       }
-      pc[n] = lmul((GEN)q[n],z);
+      gel(pc,n) = gmul(gel(q,n),z);
     }
 
     fft(Omega,pc,A,1,Lmax);
     if (polreal && i>0 && i<K-1)
-      for (j=0; j<Lmax; j++) g = addrr(g, divrr(TWO, abs_update((GEN)A[j],mu)));
+      for (j=0; j<Lmax; j++) g = addrr(g, divrr(TWO, abs_update(gel(A,j),mu)));
     else
-      for (j=0; j<Lmax; j++) g = addrr(g, divrr(ONE, abs_update((GEN)A[j],mu)));
+      for (j=0; j<Lmax; j++) g = addrr(g, divrr(ONE, abs_update(gel(A,j),mu)));
     RU = gmul(RU, prim);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -1024,28 +1024,28 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
   C = cgetg(Lmax+1,t_VEC); C++;
   pc = cgetg(Lmax+1,t_VEC); pc++;
   pd = cgetg(Lmax+1,t_VEC); pd++;
-  pc[0] = q[2];  for (i=n+1; i<Lmax; i++) pc[i] = (long)gen_0;
-  pd[0] = qd[2]; for (i=n;   i<Lmax; i++) pd[i] = (long)gen_0;
+  pc[0] = q[2];  for (i=n+1; i<Lmax; i++) gel(pc,i) = gen_0;
+  pd[0] = qd[2]; for (i=n;   i<Lmax; i++) gel(pd,i) = gen_0;
 
   ltop = avma;
   W = cgetg(k+1,t_VEC);
   U = cgetg(k+1,t_VEC);
-  for (i=1; i<=k; i++) W[i] = U[i] = (long)gen_0;
+  for (i=1; i<=k; i++) gel(W,i) = gel(U,i) = gen_0;
 
-  RU[0] = (long)gen_1;
+  gel(RU,0) = gen_1;
   prim2 = myreal_1(bit);
   for (i=0; i<K; i++)
   {
-    RU[1] = (long)prim2;
-    for (j=1; j<n; j++) RU[j+1] = lmul((GEN)RU[j],prim2);
+    gel(RU,1) = prim2;
+    for (j=1; j<n; j++) RU[j+1] = lmul(gel(RU,j),prim2);
     /* RU[j] = prim^(ij)= prim2^j */
 
-    for (j=1; j<n; j++) pd[j] = lmul((GEN)qd[j+2],(GEN)RU[j]);
+    for (j=1; j<n; j++) gel(pd,j) = gmul(gel(qd,j+2),gel(RU,j));
     fft(Omega,pd,A,1,Lmax);
-    for (j=1; j<=n; j++) pc[j] = lmul((GEN)q[j+2],(GEN)RU[j]);
+    for (j=1; j<=n; j++) gel(pc,j) = gmul(gel(q,j+2),gel(RU,j));
     fft(Omega,pc,B,1,Lmax);
-    for (j=0; j<Lmax; j++) C[j] = linv((GEN)B[j]);
-    for (j=0; j<Lmax; j++) B[j] = lmul((GEN)A[j],(GEN)C[j]);
+    for (j=0; j<Lmax; j++) gel(C,j) = ginv(gel(B,j));
+    for (j=0; j<Lmax; j++) gel(B,j) = gmul(gel(A,j),gel(C,j));
     fft(Omega,B,A,1,Lmax);
     fft(Omega,C,B,1,Lmax);
 
@@ -1055,16 +1055,16 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
       {
         for (j=1; j<=k; j++)
         {
-          W[j] = ladd((GEN)W[j], gshift(real_i(gmul((GEN)A[j+1],(GEN)RU[j+1])),1));
-          U[j] = ladd((GEN)U[j], gshift(real_i(gmul((GEN)B[j],(GEN)RU[j])),1));
+          gel(W,j) = gadd(gel(W,j), gshift(real_i(gmul(gel(A,j+1),gel(RU,j+1))),1));
+          gel(U,j) = gadd(gel(U,j), gshift(real_i(gmul(gel(B,j),gel(RU,j))),1));
         }
       }
       else
       {
         for (j=1; j<=k; j++)
         {
-          W[j] = ladd((GEN)W[j], real_i(gmul((GEN)A[j+1],(GEN)RU[j+1])));
-          U[j] = ladd((GEN)U[j], real_i(gmul((GEN)B[j],(GEN)RU[j])));
+          gel(W,j) = gadd(gel(W,j), real_i(gmul(gel(A,j+1),gel(RU,j+1))));
+          gel(U,j) = gadd(gel(U,j), real_i(gmul(gel(B,j),gel(RU,j))));
         }
       }
     }
@@ -1072,8 +1072,8 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
     {
       for (j=1; j<=k; j++)
       {
-        W[j] = ladd((GEN)W[j], gmul((GEN)A[j+1],(GEN)RU[j+1]));
-        U[j] = ladd((GEN)U[j], gmul((GEN)B[j],(GEN)RU[j]));
+        gel(W,j) = gadd(gel(W,j), gmul(gel(A,j+1),gel(RU,j+1)));
+        gel(U,j) = gadd(gel(U,j), gmul(gel(B,j),gel(RU,j)));
       }
     }
     prim2 = gmul(prim2,prim);
@@ -1082,14 +1082,14 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
 
   for (i=1; i<=k; i++)
   {
-    aux=(GEN)W[i];
-    for (j=1; j<i; j++) aux = gadd(aux, gmul((GEN)W[i-j],(GEN)F[k+2-j]));
+    aux=gel(W,i);
+    for (j=1; j<i; j++) aux = gadd(aux, gmul(gel(W,i-j),gel(F,k+2-j)));
     F[k+2-i] = ldivgs(aux,-i*NN);
   }
   for (i=0; i<k; i++)
   {
-    aux=(GEN)U[k-i];
-    for (j=1+i; j<k; j++) aux = gadd(aux,gmul((GEN)F[2+j],(GEN)U[j-i]));
+    aux=gel(U,k-i);
+    for (j=1+i; j<k; j++) aux = gadd(aux,gmul(gel(F,2+j),gel(U,j-i)));
     H[i+2] = ldivgs(aux,NN);
   }
 }
@@ -1181,12 +1181,12 @@ split_fromU(GEN p, long k, double delta, long bit,
   pari_sp ltop;
   double mu, gamma;
 
-  pp = gdiv(p, (GEN)p[2+n]);
+  pp = gdiv(p, gel(p,2+n));
   parameters(pp, &Lmax,&mu,&gamma, polreal,param,param2);
 
   H  = cgetg(k+2,t_POL); H[1] = p[1];
   FF = cgetg(k+3,t_POL); FF[1]= p[1];
-  FF[k+2] = (long)gen_1;
+  gel(FF,k+2) = gen_1;
 
   NN = (long)(0.5/delta); NN |= 1; if (NN < 2) NN = 2;
   NN *= Lmax; ltop = avma;
@@ -1197,7 +1197,7 @@ split_fromU(GEN p, long k, double delta, long bit,
     if (refine_F(pp,&FF,&GG,H,bit,gamma)) break;
     NN <<= 1; avma = ltop;
   }
-  *G = gmul(GG,(GEN)p[2+n]); *F = FF;
+  *G = gmul(GG,gel(p,2+n)); *F = FF;
 }
 
 static void
@@ -1228,7 +1228,7 @@ static void
 scalepol2n(GEN p, long e)
 {
   long i,n=lg(p)-1;
-  for (i=2; i<=n; i++) p[i]=lmul2n((GEN)p[i],(i-n)*e);
+  for (i=2; i<=n; i++) gel(p,i) = gmul2n(gel(p,i),(i-n)*e);
 }
 
 /* returns p(x/R)*R^n */
@@ -1241,7 +1241,7 @@ scalepol(GEN p, GEN R, long bit)
   aux = gR = mygprec(R,bit); q = mygprec(p,bit);
   for (i=lg(p)-2; i>=2; i--)
   {
-    q[i]=lmul(aux,(GEN)q[i]);
+    gel(q,i) = gmul(aux,gel(q,i));
     aux = gmul(aux,gR);
   }
   return q;
@@ -1256,11 +1256,11 @@ conformal_pol(GEN p, GEN a, long bit)
   pari_sp av = avma, lim = stack_lim(av,2);
   
   z = coefs_to_pol(2, ca, negr(myreal_1(bit)));
-  r = scalarpol((GEN)p[2+n], 0);
+  r = scalarpol(gel(p,2+n), 0);
   for (i=n-1; ; i--)
   {
     r = addmulXn(r, gmul(ma,r), 1); /* r *= (X - a) */
-    r = gadd(r, gmul(z, (GEN)p[2+i]));
+    r = gadd(r, gmul(z, gel(p,2+i)));
     if (i == 0) return gerepileupto(av, r);
     z = addmulXn(gmul(z,ca), gneg(z), 1); /* z *= conj(a)X - 1 */
     if (low_stack(lim, stack_lim(av,2)))
@@ -1475,21 +1475,21 @@ split_1(GEN p, long bit, GEN *F, GEN *G)
   bit2 = bit + gexpo(q) - ep + (long)((double)n*2.*log2(3.)+1);
   TWO = myreal_1(bit2); setexpo(TWO,1);
   v = cgetg(5,t_VEC);
-  v[1] = (long)TWO;
-  v[2] = (long)mpneg(TWO);
-  v[3] = (long)pureimag((GEN)v[1]);
-  v[4] = (long)pureimag((GEN)v[2]);
+  gel(v,1) = TWO;
+  gel(v,2) = mpneg(TWO);
+  gel(v,3) = pureimag(gel(v,1));
+  gel(v,4) = pureimag(gel(v,2));
   q = mygprec(q,bit2); lthick = 0;
   newq = ctr = NULL; /* -Wall */
   imax = polreal? 3: 4;
   for (i=1; i<=imax; i++)
   {
-    qq = TR_pol(q, (GEN)v[i]);
+    qq = TR_pol(q, gel(v,i));
     lrmin = logmin_modulus(qq,0.05);
     if (LOG3 > lrmin + lthick)
     {
       double lquo = logmax_modulus(qq,0.05) - lrmin;
-      if (lquo > lthick) { lthick = lquo; newq = qq; ctr = (GEN)v[i]; }
+      if (lquo > lthick) { lthick = lquo; newq = qq; ctr = gel(v,i); }
     }
     if (lthick > LOG2) break;
     if (polreal && i==2 && lthick > LOG3 - LOG2) break;
@@ -1512,7 +1512,7 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
 {
   GEN q, b, FF, GG;
   long n = degpol(p), k, bit2, eq;
-  double aux = mylog2((GEN)p[n+1]) - mylog2((GEN)p[n+2]);
+  double aux = mylog2(gel(p,n+1)) - mylog2(gel(p,n+2));
 
   /* beware double overflow */
   if (aux >= 0 && (aux > 1e4 || exp2(aux) > 2.5*n)) return 0;
@@ -1521,11 +1521,11 @@ split_0_2(GEN p, long bit, GEN *F, GEN *G)
   bit2 = bit+1 + (long)(log2((double)n) + aux);
 
   q = mygprec(p,bit2);
-  b = gdivgs(gdiv((GEN)q[n+1],(GEN)q[n+2]),-n);
-  q = TR_pol(q,b); q[n+1] = (long)gen_0; eq = gexpo(q);
+  b = gdivgs(gdiv(gel(q,n+1),gel(q,n+2)),-n);
+  q = TR_pol(q,b); gel(q,n+1) = gen_0; eq = gexpo(q);
   k = 0;
-  while (k <= n/2 && (- gexpo((GEN)q[k+2]) > bit2 + 2*(n-k) + eq
-                      || gcmp0((GEN)q[k+2]))) k++;
+  while (k <= n/2 && (- gexpo(gel(q,k+2)) > bit2 + 2*(n-k) + eq
+                      || gcmp0(gel(q,k+2)))) k++;
   if (k > 0)
   {
     if (k > n/2) k = n/2;
@@ -1572,7 +1572,7 @@ split_0(GEN p, long bit, GEN *F, GEN *G)
   long n = degpol(p), k = 0;
   GEN q;
 
-  while (gexpo((GEN)p[k+2]) < -bit && k <= n/2) k++;
+  while (gexpo(gel(p,k+2)) < -bit && k <= n/2) k++;
   if (k > 0)
   {
     if (k > n/2) k = n/2;
@@ -1616,11 +1616,11 @@ root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
   {
     if (i!=k)
     {
-      aux = gsub((GEN)roots_pol[i], (GEN)roots_pol[k]);
-      d[i] = (long)gabs(mygprec(aux,31), DEFAULTPREC);
+      aux = gsub(gel(roots_pol,i), gel(roots_pol,k));
+      gel(d,i) = gabs(mygprec(aux,31), DEFAULTPREC);
     }
   }
-  rho = gabs(mygprec((GEN)roots_pol[k],31), DEFAULTPREC);
+  rho = gabs(mygprec(gel(roots_pol,k),31), DEFAULTPREC);
   if (expo(rho) < 0) rho = real_1(DEFAULTPREC);
   eps = mulrr(rho, shatzle);
   aux = shiftr(gpowgs(rho,n), err);
@@ -1631,10 +1631,10 @@ root_error(long n, long k, GEN roots_pol, long err, GEN shatzle)
     epsbis = mulrr(eps, dbltor(1.25));
     for (i=1; i<=n; i++)
     {
-      if (i != k && cmprr((GEN)d[i],epsbis) > 0)
+      if (i != k && cmprr(gel(d,i),epsbis) > 0)
       {
         m--;
-        prod = mulrr(prod, subrr((GEN)d[i],eps));
+        prod = mulrr(prod, subrr(gel(d,i),eps));
       }
     }
     eps2 = sqrtnr(mpdiv(shiftr(aux,2*m-2), prod), m);
@@ -1656,10 +1656,10 @@ mygprec_absolute(GEN x, long bit)
       e = expo(x) + bit;
       return (e <= 0 || !signe(x))? real_0_bit(-bit): rtor(x, nbits2prec(e));
     case t_COMPLEX:
-      if (gexpo((GEN)x[2]) < -bit) return mygprec_absolute((GEN)x[1],bit);
+      if (gexpo(gel(x,2)) < -bit) return mygprec_absolute(gel(x,1),bit);
       y = cgetg(3,t_COMPLEX);
-      y[1] = (long)mygprec_absolute((GEN)x[1],bit);
-      y[2] = (long)mygprec_absolute((GEN)x[2],bit);
+      gel(y,1) = mygprec_absolute(gel(x,1),bit);
+      gel(y,2) = mygprec_absolute(gel(x,2),bit);
       return y;
     default: return x;
   }
@@ -1680,7 +1680,7 @@ a_posteriori_errors(GEN p, GEN roots_pol, long err)
   {
     x = root_error(n,i,roots_pol,err,shatzle);
     e = gexpo(x); if (e > e_max) e_max = e;
-    roots_pol[i] = (long)mygprec_absolute((GEN)roots_pol[i], -e);
+    gel(roots_pol,i) = mygprec_absolute(gel(roots_pol,i), -e);
   }
   return e_max;
 }
@@ -1704,22 +1704,22 @@ split_complete(GEN p, long bit, GEN roots_pol)
 
   if (n == 1)
   {
-    a = gneg_i(gdiv((GEN)p[2], (GEN)p[3]));
+    a = gneg_i(gdiv(gel(p,2), gel(p,3)));
     (void)append_clone(roots_pol,a); return p;
   }
   ltop = avma;
   if (n == 2)
   {
-    F = gsub(gsqr((GEN)p[3]), gmul2n(gmul((GEN)p[2],(GEN)p[4]), 2));
+    F = gsub(gsqr(gel(p,3)), gmul2n(gmul(gel(p,2),gel(p,4)), 2));
     F = gsqrt(F, nbits2prec(bit));
-    p1 = ginv(gmul2n((GEN)p[4],1));
-    a = gneg_i(gmul(gadd(F,(GEN)p[3]), p1));
-    b =        gmul(gsub(F,(GEN)p[3]), p1);
+    p1 = ginv(gmul2n(gel(p,4),1));
+    a = gneg_i(gmul(gadd(F,gel(p,3)), p1));
+    b =        gmul(gsub(F,gel(p,3)), p1);
     a = append_clone(roots_pol,a);
     b = append_clone(roots_pol,b); avma = ltop;
     a = mygprec(a, 3*bit);
     b = mygprec(b, 3*bit);
-    return gmul((GEN)p[4], coefs_to_pol(3, gun, gneg(gadd(a,b)), gmul(a,b)));
+    return gmul(gel(p,4), coefs_to_pol(3, gun, gneg(gadd(a,b)), gmul(a,b)));
   }
   split_0(p,bit,&F,&G);
   m1 = split_complete(F,bit,roots_pol);
@@ -1738,11 +1738,11 @@ cauchy_bound(GEN p)
 
   if (n <= 0) err(constpoler,"cauchy_bound");
 
-  lc = gabs((GEN)q[n+2],prec); /* leading coefficient */
+  lc = gabs(gel(q,n+2),prec); /* leading coefficient */
   lc = ginv(lc);
   for (i=0; i<n; i++)
   {
-    y = (GEN)q[i+2]; if (gcmp0(y)) continue;
+    y = gel(q,i+2); if (gcmp0(y)) continue;
     L = dblogr(gmul(gabs(y,prec), lc)) / (n-i);
     if (L > Lmax) Lmax = L;
   }
@@ -1760,8 +1760,8 @@ mygprecrc_special(GEN x, long prec, long e)
       return (prec > lg(x))? rtor(x, prec): x;
     case t_COMPLEX:
       y = cgetg(3,t_COMPLEX);
-      y[1] = (long)mygprecrc_special((GEN)x[1],prec,e);
-      y[2] = (long)mygprecrc_special((GEN)x[2],prec,e);
+      gel(y,1) = mygprecrc_special(gel(x,1),prec,e);
+      gel(y,2) = mygprecrc_special(gel(x,2),prec,e);
       return y;
     default: return x;
   }
@@ -1781,7 +1781,7 @@ mygprec_special(GEN x, long bit)
   {
     case t_POL:
       lx = lg(x); y = cgetg(lx,t_POL); y[1] = x[1];
-      for (i=2; i<lx; i++) y[i] = (long)mygprecrc_special((GEN)x[i],prec,e);
+      for (i=2; i<lx; i++) gel(y,i) = mygprecrc_special(gel(x,i),prec,e);
       break;
 
     default: y = mygprecrc_special(x,prec,e);
@@ -1796,8 +1796,8 @@ fix_roots1(GEN r, GEN *m, long bit)
   GEN allr = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    GEN t = (GEN)r[i];
-    allr[i] = lcopy(t); gunclone(t);
+    GEN t = gel(r,i);
+    gel(allr,i) = gcopy(t); gunclone(t);
   }
   return allr;
 }
@@ -1813,9 +1813,9 @@ fix_roots(GEN r, GEN *m, long h, long bit)
   allr = cgetg(h*l+1, t_VEC);
   for (k=1,i=1; i<=l; i++)
   {
-    GEN p2, p1 = (GEN)r[i];
+    GEN p2, p1 = gel(r,i);
     p2 = (h == 2)? gsqrt(p1, prec): gsqrtn(p1, utoipos(h), NULL, prec);
-    for (j=0; j<h; j++) allr[k++] = lmul(p2, (GEN)ro1[j]);
+    for (j=0; j<h; j++) allr[k++] = lmul(p2, gel(ro1,j));
     gunclone(p1);
   }
   *m = roots_to_pol(allr, 0);
@@ -1865,7 +1865,7 @@ isexactpol(GEN p)
 {
   long i,n = degpol(p);
   for (i=0; i<=n; i++)
-    if (!isexactscalar((GEN)p[i+2])) return 0;
+    if (!isexactscalar(gel(p,i+2))) return 0;
   return 1;
 }
 
@@ -1876,7 +1876,7 @@ isvalidcoeff(GEN x)
   {
     case t_INT: case t_REAL: case t_FRAC: return 1;
     case t_COMPLEX:
-      if (isvalidcoeff((GEN)x[1]) && isvalidcoeff((GEN)x[2])) return 1;
+      if (isvalidcoeff(gel(x,1)) && isvalidcoeff(gel(x,2))) return 1;
   }
   return 0;
 }
@@ -1886,7 +1886,7 @@ isvalidpol(GEN p)
 {
   long i,n = lg(p);
   for (i=2; i<n; i++)
-    if (!isvalidcoeff((GEN)p[i])) return 0;
+    if (!isvalidcoeff(gel(p,i))) return 0;
   return 1;
 }
 
@@ -1899,7 +1899,7 @@ solve_exact_pol(GEN p, long bit)
   factors = ZX_squff(Q_primpart(p), &ex);
   for (i=1; i<lg(factors); i++)
   {
-    GEN roots_fact = all_roots((GEN)factors[i], bit);
+    GEN roots_fact = all_roots(gel(factors,i), bit);
     n = degpol(factors[i]);
     m = ex[i];
     for (j=1; j<=n; j++)
@@ -1918,7 +1918,7 @@ roots_com(GEN q, long bit)
   else L = isexactpol(p)? solve_exact_pol(p,bit): all_roots(p,bit);
   if (v)
   {
-    GEN M, z, t = (GEN)q[2];
+    GEN M, z, t = gel(q,2);
     long i, x, y, l, n;
 
     if (isexactzero(t)) x = -bit;
@@ -1928,7 +1928,7 @@ roots_com(GEN q, long bit)
       x = n / v; l = degpol(q);
       for (i = v; i <= l; i++)
       {
-        t  = (GEN)q[i+2];
+        t  = gel(q,i+2);
         if (isexactzero(t)) continue;
         y = (n - gexpo(t)) / i;
         if (y < x) x = y;
@@ -1936,7 +1936,7 @@ roots_com(GEN q, long bit)
     }
     z = real_0_bit(x); l = v + lg(L);
     M = cgetg(l, t_VEC); L -= v;
-    for (i = 1; i <= v; i++) M[i] = (long)z;
+    for (i = 1; i <= v; i++) gel(M,i) = z;
     for (     ; i <  l; i++) M[i] = L[i];
     L = M;
   }
@@ -1948,11 +1948,11 @@ tocomplex(GEN x, long l)
 {
   GEN y = cgetg(3,t_COMPLEX);
 
-  y[1] = lgetr(l);
+  gel(y,1) = cgetr(l);
   if (typ(x) == t_COMPLEX)
-    { y[2] = lgetr(l); gaffect(x,y); }
+    { gel(y,2) = cgetr(l); gaffect(x,y); }
   else
-    { gaffect(x,(GEN)y[1]); y[2] = (long)real_0(l); }
+    { gaffect(x,gel(y,1)); gel(y,2) = real_0(l); }
  return y;
 }
 
@@ -1966,11 +1966,11 @@ isrealappr(GEN x, long e)
     case t_INT: case t_REAL: case t_FRAC:
       return 1;
     case t_COMPLEX:
-      return (gexpo((GEN)x[2]) < e);
+      return (gexpo(gel(x,2)) < e);
     case t_POL: case t_SER: case t_RFRAC: case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
       for (i=lontyp[tx]; i<lx; i++)
-        if (! isrealappr((GEN)x[i],e)) return 0;
+        if (! isrealappr(gel(x,i),e)) return 0;
       return 1;
     default: err(typeer,"isrealappr"); return 0;
   }
@@ -1981,8 +1981,8 @@ static int
 isconj(GEN x, GEN y, long e)
 {
   pari_sp av = avma;
-  long i= (gexpo( gsub((GEN)x[1],(GEN)y[1]) ) < e
-        && gexpo( gadd((GEN)x[2],(GEN)y[2]) ) < e);
+  long i= (gexpo( gsub(gel(x,1),gel(y,1)) ) < e
+        && gexpo( gadd(gel(x,2),gel(y,2)) ) < e);
   avma = av; return i;
 }
 
@@ -2008,7 +2008,7 @@ roots(GEN p, long l)
   if (!isreal(p))
   {
     res = cgetg(n,t_COL);
-    for (i=1; i<n; i++) res[i] = (long)tocomplex((GEN)L[i],l);
+    for (i=1; i<n; i++) gel(res,i) = tocomplex(gel(L,i),l);
     return gerepileupto(av,res);
   }
   e = 5 - bit_accuracy(l);
@@ -2016,26 +2016,26 @@ roots(GEN p, long l)
   com = cgetg(n,t_COL); t = 0;
   for (i=1; i<n; i++)
   {
-    p1 = (GEN)L[i];
+    p1 = gel(L,i);
     if (isrealappr(p1,e)) {
-      if (typ(p1) == t_COMPLEX) p1 = (GEN)p1[1];
-      rea[++s] = (long)p1;
+      if (typ(p1) == t_COMPLEX) p1 = gel(p1,1);
+      gel(rea,++s) = p1;
     }
-    else com[++t] = (long)p1;
+    else gel(com,++t) = p1;
   }
   setlg(rea,s+1); rea = sort(rea);
   res = cgetg(n,t_COL);
-  for (i=1; i<=s; i++) res[i] = (long)tocomplex((GEN)rea[i],l);
+  for (i=1; i<=s; i++) gel(res,i) = tocomplex(gel(rea,i),l);
   for (i=1; i<=t; i++)
   {
-    c = (GEN)com[i]; if (!c) continue;
-    res[++s] = (long)tocomplex(c,l);
+    c = gel(com,i); if (!c) continue;
+    gel(res,++s) = tocomplex(c,l);
     for (k=i+1; k<=t; k++)
     {
-      p1 = (GEN)com[k]; if (!p1) continue;
+      p1 = gel(com,k); if (!p1) continue;
       if (isconj(c,p1,e))
       {
-        res[++s] = (long)tocomplex(p1,l);
+        gel(res,++s) = tocomplex(p1,l);
         com[k] = 0; break;
       }
     }
@@ -2064,7 +2064,7 @@ cleanroots(GEN p, long prec)
   long i, l = lg(r);
   for (i=1; i<l; i++)
   {
-    s = (GEN)r[i];
+    s = gel(r,i);
     if (signe(s[2])) break; /* remaining roots are complex */
     r[i] = s[1]; /* root is real; take real part */
   }

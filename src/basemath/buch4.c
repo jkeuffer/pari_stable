@@ -138,10 +138,10 @@ psquarenf(GEN nf,GEN a,GEN pr)
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
-  if (v) a = gdiv(a, gpowgs(basistoalg(nf, (GEN)pr[2]), v));
+  if (v) a = gdiv(a, gpowgs(basistoalg(nf, gel(pr,2)), v));
 
   norm = gshift(pr_norm(pr), -1);
-  a = gmul(a, gmodulsg(1,(GEN)pr[1]));
+  a = gmul(a, gmodulsg(1,gel(pr,1)));
   a = gaddgs(powgi(a,norm), -1);
   if (gcmp0(a)) { avma = av; return 1; }
   a = lift(lift(a));
@@ -157,8 +157,8 @@ check2(GEN nf, GEN a, GEN zinit)
 
   for (i=1; i<l; i++)
   {
-    if (mpodd((GEN)cyc[i])) break;
-    if (mpodd((GEN)zlog[i])) return 0;
+    if (mpodd(gel(cyc,i))) break;
+    if (mpodd(gel(zlog,i))) return 0;
   }
   return 1;
 }
@@ -172,7 +172,7 @@ psquare2nf(GEN nf,GEN a,GEN pr,GEN zinit)
 
   if (gcmp0(a)) return 1;
   v = idealval(nf,a,pr); if (v&1) return 0;
-  if (v) a = gdiv(a, gpowgs(basistoalg(nf, (GEN)pr[2]), v));
+  if (v) a = gdiv(a, gpowgs(basistoalg(nf, gel(pr,2)), v));
   /* now (a,pr) = 1 */
   v = check2(nf,a,zinit); avma = ltop; return v;
 }
@@ -220,8 +220,8 @@ lemma7nf(GEN nf,GEN pol,GEN pr,long nu,GEN x,GEN zinit)
     if (lambda&1) return -1;
     q=(nu<<1)-lambda; res=0;
   }
-  if (q > itos((GEN) pr[3])<<1)  return -1;
-  p1 = gpowgs(basistoalg(nf, (GEN)pr[2]), lambda);
+  if (q > itos(gel(pr,3))<<1)  return -1;
+  p1 = gpowgs(basistoalg(nf, gel(pr,2)), lambda);
 
   zinit = zidealstarinit(nf, idealpows(nf,pr,q));
   if (!check2(nf,gdiv(gx,p1),zinit)) res = -1;
@@ -240,10 +240,10 @@ zpsolnf(GEN nf,GEN pol,GEN pr,long nu,GEN pnu,GEN x0,GEN repr,GEN zinit)
   avma = ltop;
   if (result== 1) return 1;
   if (result==-1) return 0;
-  pnup = gmul(pnu, basistoalg(nf,(GEN)pr[2]));
+  pnup = gmul(pnu, basistoalg(nf,gel(pr,2)));
   nu++;
   for (i=1; i<lg(repr); i++)
-    if (zpsolnf(nf,pol,pr,nu,pnup,gadd(x0,gmul(pnu,(GEN)repr[i])),repr,zinit))
+    if (zpsolnf(nf,pol,pr,nu,pnup,gadd(x0,gmul(pnu,gel(repr,i))),repr,zinit))
     { avma=ltop; return 1; }
   avma=ltop; return 0;
 }
@@ -261,15 +261,15 @@ repres(GEN nf,GEN pr)
     if (!gcmp1(gmael(mat,i,i)))
       fond = shallowconcat(fond,gmael(nf,7,i));
   f=lg(fond)-1;
-  pp=itos((GEN) pr[1]);
+  pp=itos(gel(pr,1));
   for (i=1,ppf=1; i<=f; i++) ppf*=pp;
   rep=cgetg(ppf+1,t_VEC);
-  rep[1]= (long)gen_0; ppi=1;
+  gel(rep,1) = gen_0; ppi=1;
   for (i=0; i<f; i++,ppi*=pp)
     for (j=1; j<pp; j++)
       for (k=1; k<=ppi; k++)
-	rep[j*ppi+k]=ladd((GEN) rep[k],gmulsg(j,(GEN) fond[i+1]));
-  return gmodulcp(rep,(GEN) nf[1]);
+	rep[j*ppi+k]=ladd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
+  return gmodulcp(rep,gel(nf,1));
 }
 
 /* =1 si l'equation y^2 = z^deg(pol) * pol(x/z) a une solution rationnelle
@@ -287,7 +287,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   checkprimeid(pr);
   nf = checknf(nf);
 
-  if (equaliu((GEN)pr[1], 2))
+  if (equaliu(gel(pr,1), 2))
   { /* tough case */
     zinit = zidealstarinit(nf, idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
     if (psquare2nf(nf,constant_term(pol),pr,zinit)) return 1;
@@ -301,7 +301,7 @@ qpsolublenf(GEN nf,GEN pol,GEN pr)
   }
   repr = repres(nf,pr);
   if (zpsolnf(nf,pol,pr,0,gen_1,gen_0,repr,zinit)) { avma=ltop; return 1; }
-  p1 = basistoalg(nf, (GEN)pr[2]);
+  p1 = basistoalg(nf, gel(pr,2));
   if (zpsolnf(nf,polrecip(pol),pr,1,p1,gen_0,repr,zinit))
     { avma=ltop; return 1; }
 
@@ -322,7 +322,7 @@ zpsolublenf(GEN nf,GEN pol,GEN pr)
   checkprimeid(pr);
   nf = checknf(nf);
 
-  if (equaliu((GEN)pr[1],2))
+  if (equaliu(gel(pr,1),2))
   {
     zinit = zidealstarinit(nf,idealpows(nf,pr,1+2*idealval(nf,gen_2,pr)));
     if (psquare2nf(nf,constant_term(pol),pr,zinit)) return 1;
@@ -364,7 +364,7 @@ nfhilbertp(GEN nf,GEN a,GEN b,GEN pr)
 
   if (gcmp0(a) || gcmp0(b)) err (talker,"0 argument in nfhilbertp");
   checkprimeid(pr); nf = checknf(nf);
-  p = (GEN)pr[1];
+  p = gel(pr,1);
 
   if (equaliu(p,2)) return hilb2nf(nf,a,b,pr);
 
@@ -412,10 +412,10 @@ nfhilbert(GEN nf,GEN a,GEN b)
   al = lift(a);
   bl = lift(b);
  /* local solutions in real completions ? */
-  r1 = nf_get_r1(nf); ro = (GEN)nf[6];
+  r1 = nf_get_r1(nf); ro = gel(nf,6);
   for (i=1; i<=r1; i++)
-    if (signe(poleval(al,(GEN)ro[i])) < 0 &&
-        signe(poleval(bl,(GEN)ro[i])) < 0)
+    if (signe(poleval(al,gel(ro,i))) < 0 &&
+        signe(poleval(bl,gel(ro,i))) < 0)
     {
       if (DEBUGLEVEL>=4)
         fprintferr("nfhilbert not soluble at real place %ld\n",i);
@@ -428,7 +428,7 @@ nfhilbert(GEN nf,GEN a,GEN b)
   S = (GEN) idealfactor(nf,gmul(gmulsg(2,a),b))[1];
   /* product of all hilbertp is 1 ==> remove one prime (above 2!) */
   for (i=lg(S)-1; i>1; i--)
-    if (nfhilbertp(nf,a,b,(GEN) S[i]) < 0)
+    if (nfhilbertp(nf,a,b,gel(S,i)) < 0)
     {
       if (DEBUGLEVEL >=4)
 	fprintferr("nfhilbert not soluble at finite place: %Z\n",S[i]);
@@ -460,16 +460,16 @@ bnfsunit(GEN bnf,GEN S,long prec)
   GEN sunit,card,sreg,res,pow;
 
   if (typ(S) != t_VEC) err(typeer,"bnfsunit");
-  bnf = checkbnf(bnf); nf=(GEN)bnf[7];
+  bnf = checkbnf(bnf); nf=gel(bnf,7);
   classgp=gmael(bnf,8,1);
-  gen = (GEN)classgp[3];
+  gen = gel(classgp,3);
 
   sreg = gmael(bnf,8,2);
   res=cgetg(7,t_VEC);
   res[1]=res[2]=res[3]=lgetg(1,t_VEC);
-  res[4]=(long)sreg;
-  res[5]=(long)classgp;
-  res[6]=(long)S; ls=lg(S);
+  gel(res,4) = sreg;
+  gel(res,5) = classgp;
+  gel(res,6) = S; ls=lg(S);
 
  /* M = relation matrix for the S class group (in terms of the class group
   * generators given by gen)
@@ -478,11 +478,11 @@ bnfsunit(GEN bnf,GEN S,long prec)
   M = cgetg(ls,t_MAT);
   for (i=1; i<ls; i++)
   {
-    p1 = (GEN)S[i]; checkprimeid(p1);
-    M[i] = (long)isprincipal(bnf,p1);
+    p1 = gel(S,i); checkprimeid(p1);
+    gel(M,i) = isprincipal(bnf,p1);
   }
   /* 2) relations from bnf class group */		
-  M = shallowconcat(M, diagonal_i((GEN) classgp[2]));
+  M = shallowconcat(M, diagonal_i(gel(classgp,2)));
 
   /* S class group */
   H = hnfall_i(M, &U, 1);
@@ -495,8 +495,8 @@ bnfsunit(GEN bnf,GEN S,long prec)
     setlg(D,i);
     p1=cgetg(i,t_VEC); pow=ZM_inv(U,gen_1);
     for(i--; i; i--)
-      p1[i] = (long)factorback_i(gen, (GEN)pow[i], nf, 1);
-    res[5] = (long)mkvec3(card,D,p1);
+      gel(p1,i) = factorback_i(gen, gel(pow,i), nf, 1);
+    gel(res,5) = mkvec3(card,D,p1);
   }
 
   /* S-units */
@@ -508,7 +508,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
    /* U1 = upper left corner of U, invertible. S * U1 = principal ideals
     * whose generators generate the S-units */
     setlg(U1,ls); p1 = cgetg(ls, t_MAT); /* p1 is junk for mathnfspec */
-    for (i=1; i<ls; i++) { setlg(U1[i],ls); p1[i] = lgetg(1,t_COL); }
+    for (i=1; i<ls; i++) { setlg(U1[i],ls); gel(p1,i) = cgetg(1,t_COL); }
     H = mathnfspec(U1,&perm,&dep,&B,&p1);
     lH = lg(H);
     lB = lg(B);
@@ -522,27 +522,27 @@ bnfsunit(GEN bnf,GEN S,long prec)
 
     setlg(Sperm, lH);
     for (i=1; i<lH; i++)
-      sunit[i] = isprincipalfact(bnf,Sperm,(GEN)H[i],NULL,fl)[2];
+      sunit[i] = isprincipalfact(bnf,Sperm,gel(H,i),NULL,fl)[2];
     for (j=1; j<lB; j++,i++)
-      sunit[i] = isprincipalfact(bnf,Sperm,(GEN)B[j],(GEN)Sperm[i],fl)[2];
+      sunit[i] = isprincipalfact(bnf,Sperm,gel(B,j),gel(Sperm,i),fl)[2];
 
     den = dethnf_i(H); H = ZM_inv(H,den);
     A = shallowconcat(H, gneg(gmul(H,B))); /* top part of inverse * den */
     sunit = basistoalg(nf,sunit);
     /* HNF in split form perm + (H B) [0 Id missing] */
-    res[1] = (long)lift_intern(sunit);
-    res[2] = (long)mkvec3(perm,A,den);
+    gel(res,1) = lift_intern(sunit);
+    gel(res,2) = mkvec3(perm,A,den);
   }
 
   /* S-regulator */
   sreg = gmul(sreg,card);
   for (i=1; i<ls; i++)
   {
-    GEN p = (GEN)S[i];
-    if (typ(p) == t_VEC) p = (GEN) p[1];
+    GEN p = gel(S,i);
+    if (typ(p) == t_VEC) p = gel(p,1);
     sreg = gmul(sreg,glog(p,prec));
   }
-  res[4]=(long) sreg;
+  gel(res,4) = sreg;
   return gerepilecopy(ltop,res);
 }
 
@@ -553,44 +553,44 @@ make_unit(GEN bnf, GEN suni, GEN *px)
   GEN den,gen,S,v,p1,xp,xm,xb,N,HB,perm;
 
   if (gcmp0(*px)) return NULL;
-  S = (GEN) suni[6]; ls=lg(S);
+  S = gel(suni,6); ls=lg(S);
   if (ls==1) return cgetg(1, t_COL);
 
   xb = algtobasis(bnf,*px); p1 = Q_denom(xb);
   N = mulii(gnorm(gmul(*px,p1)), p1); /* relevant primes divide N */
   if (is_pm1(N)) return zerocol(ls -1);
 
-  p1 = (GEN)suni[2];
-  perm = (GEN)p1[1];
-  HB = (GEN)p1[2];
-  den = (GEN)p1[3];
+  p1 = gel(suni,2);
+  perm = gel(p1,1);
+  HB = gel(p1,2);
+  den = gel(p1,3);
   cH = lg(HB[1]) - 1;
   lB = lg(HB) - cH;
   v = cgetg(ls, t_VECSMALL);
   for (i=1; i<ls; i++)
   {
-    GEN P = (GEN)S[i];
-    v[i] = (remii(N, (GEN)P[1]) == gen_0)? element_val(bnf,xb,P): 0;
+    GEN P = gel(S,i);
+    v[i] = (remii(N, gel(P,1)) == gen_0)? element_val(bnf,xb,P): 0;
   }
   /* here, x = S v */
   p1 = cgetg(ls, t_COL);
-  for (i=1; i<ls; i++) p1[i] = lstoi(v[perm[i]]); /* p1 = v o perm */
+  for (i=1; i<ls; i++) gel(p1,i) = stoi(v[perm[i]]); /* p1 = v o perm */
   v = gmul(HB, p1);
   for (i=1; i<=cH; i++)
   {
-    GEN w = gdiv((GEN)v[i], den);
+    GEN w = gdiv(gel(v,i), den);
     if (typ(w) != t_INT) return NULL;
-    v[i] = (long)w;
+    gel(v,i) = w;
   }
   p1 += cH;
   p1[0] = evaltyp(t_COL) | evallg(lB);
   v = shallowconcat(v, p1); /* append bottom of p1 (= [0 Id] part) */
 
-  xp = gen_1; xm = gen_1; gen = (GEN)suni[1];
+  xp = gen_1; xm = gen_1; gen = gel(suni,1);
   for (i=1; i<ls; i++)
   {
-    k = -itos((GEN)v[i]); if (!k) continue;
-    p1 = basistoalg(bnf, (GEN)gen[i]);
+    k = -itos(gel(v,i)); if (!k) continue;
+    p1 = basistoalg(bnf, gel(gen,i));
     if (k > 0) xp = gmul(xp, gpowgs(p1, k));
     else       xm = gmul(xm, gpowgs(p1,-k));
   }
@@ -643,7 +643,7 @@ fa_pr_append(GEN nf,GEN rel,GEN N,GEN *prod,GEN *S1,GEN *S2)
   {
     GEN v = (GEN)factor(N)[1];
     long i, l = lg(v);
-    for (i=1; i<l; i++) pr_append(nf,rel,(GEN)v[i],prod,S1,S2);
+    for (i=1; i<l; i++) pr_append(nf,rel,gel(v,i),prod,S1,S2);
   }
 }
 
@@ -713,27 +713,27 @@ rnfisnorminit(GEN T, GEN relpol, int galois)
 
   prod = gen_1; S1 = S2 = cgetg(1, t_VEC);
   res = gmael(bnfabs,8,1);
-  cyc = (GEN)res[2];
-  gen = (GEN)res[3]; l = lg(cyc);
+  cyc = gel(res,2);
+  gen = gel(res,3); l = lg(cyc);
   for(i=1; i<l; i++)
   {
-    if (cgcd(umodiu((GEN)cyc[i], drel), drel) == 1) break;
+    if (cgcd(umodiu(gel(cyc,i), drel), drel) == 1) break;
     fa_pr_append(nf,bnfabs,gmael3(gen,i,1,1),&prod,&S1,&S2);
   }
   if (!galois)
   {
-    GEN Ndiscrel = diviiexact((GEN)nfabs[3], powiu((GEN)nf[3], drel));
+    GEN Ndiscrel = diviiexact(gel(nfabs,3), powiu(gel(nf,3), drel));
     fa_pr_append(nf,bnfabs,absi(Ndiscrel), &prod,&S1,&S2);
   }
 
-  y[1] = (long)bnf;
-  y[2] = (long)bnfabs;
-  y[3] = (long)relpol;
-  y[4] = (long)get_theta_abstorel(T, relpol, k);
-  y[5] = (long)prod;
-  y[6] = (long)S1;
-  y[7] = (long)S2;
-  y[8] = lstoi(galois); return gerepilecopy(av, y);
+  gel(y,1) = bnf;
+  gel(y,2) = bnfabs;
+  gel(y,3) = relpol;
+  gel(y,4) = get_theta_abstorel(T, relpol, k);
+  gel(y,5) = prod;
+  gel(y,6) = S1;
+  gel(y,7) = S2;
+  gel(y,8) = stoi(galois); return gerepilecopy(av, y);
 }
 
 /* T as output by rnfisnorminit
@@ -747,7 +747,7 @@ GEN
 rnfisnorm(GEN T, GEN x, long flag)
 {
   pari_sp av = avma;
-  GEN bnf = (GEN)T[1], rel = (GEN)T[2], relpol = (GEN)T[3], theta = (GEN)T[4];
+  GEN bnf = gel(T,1), rel = gel(T,2), relpol = gel(T,3), theta = gel(T,4);
   GEN nf, aux, H, U, Y, M, A, suni, sunitrel, futu, tu, w, prod, S1, S2;
   long L, i, drel, itu;
 
@@ -762,15 +762,15 @@ rnfisnorm(GEN T, GEN x, long flag)
   if (gcmp0(x) || gcmp1(x) || (gcmp_1(x) && odd(drel)))
   {
     GEN res = cgetg(3, t_VEC);
-    res[1] = (long)simplify((GEN)x[2]);
-    res[2] = (long)gen_1; return res;
+    gel(res,1) = simplify(gel(x,2));
+    gel(res,2) = gen_1; return res;
   }
 
   /* build set T of ideals involved in the solutions */
-  prod = (GEN)T[5];
-  S1   = (GEN)T[6];
-  S2   = (GEN)T[7];
-  if (flag && !gcmp0((GEN)T[8]))
+  prod = gel(T,5);
+  S1   = gel(T,6);
+  S2   = gel(T,7);
+  if (flag && !gcmp0(gel(T,8)))
     err(warner,"useless flag in rnfisnorm: the extension is Galois");
   if (flag > 0)
   {
@@ -804,16 +804,16 @@ rnfisnorm(GEN T, GEN x, long flag)
   M = cgetg(L+1,t_MAT);
   for (i=1; i<L; i++)
   {
-    GEN u = poleval((GEN)sunitrel[i], theta); /* abstorel */
-    if (typ(u) != t_POLMOD) u = mkpolmod(u, (GEN)theta[1]);
-    sunitrel[i] = (long)u;
+    GEN u = poleval(gel(sunitrel,i), theta); /* abstorel */
+    if (typ(u) != t_POLMOD) u = mkpolmod(u, gel(theta,1));
+    gel(sunitrel,i) = u;
     u = bnfissunit(bnf,suni, gnorm(u));
     if (lg(u) == 1) err(bugparier,"rnfisnorm");
-    u[itu] = llift((GEN)u[itu]); /* lift root of 1 part */
-    M[i] = (long)u;
+    u[itu] = llift(gel(u,itu)); /* lift root of 1 part */
+    gel(M,i) = u;
   }
-  aux = zerocol(lg(A)-1); aux[itu] = (long)w;
-  M[L] = (long)aux;
+  aux = zerocol(lg(A)-1); gel(aux,itu) = w;
+  gel(M,L) = aux;
   H = hnfall_i(M, &U, 0);
   Y = gmul(U, inverseimage(H,A));
   /* Y: sols of MY = A over Q */
@@ -822,11 +822,11 @@ rnfisnorm(GEN T, GEN x, long flag)
   x = gdiv(x, gnorm(gmodulcp(lift_intern(aux), relpol)));
   if (typ(x) == t_POLMOD && (typ(x[2]) != t_POL || !degpol(x[2])))
   {
-    x = (GEN)x[2]; /* rational number */
-    if (typ(x) == t_POL) x = (GEN)x[2];
+    x = gel(x,2); /* rational number */
+    if (typ(x) == t_POL) x = gel(x,2);
   }
   if (typ(aux) == t_POLMOD && degpol(nf[1]) == 1)
-    aux[2] = (long)lift_intern((GEN)aux[2]);
+    gel(aux,2) = lift_intern(gel(aux,2));
   return gerepilecopy(av, mkvec2(aux, x));
 }
 

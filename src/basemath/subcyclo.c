@@ -34,8 +34,8 @@ void
 znstar_partial_coset_func(long n, GEN H, void (*func)(void *data,long c)
     , void *data, long d, long c)
 {
-  GEN gen = (GEN) H[1];
-  GEN ord = (GEN) H[2];
+  GEN gen = gel(H,1);
+  GEN ord = gel(H,2);
   GEN cache = vecsmall_const(d,c);
   long i, j, card = 1;
 
@@ -123,8 +123,8 @@ znstar_generate(long n, GEN V)
   GEN ord=cgetg(lg(V),t_VECSMALL);
   GEN bits;
   long i,r=0;
-  res[1]=(long)gen;
-  res[2]=(long)ord;
+  gel(res,1) = gen;
+  gel(res,2) = ord;
   bits=znstar_partial_bits(n,res,r);
   for(i=1;i<lg(V);i++)
   {
@@ -146,7 +146,7 @@ znstar_generate(long n, GEN V)
   }
   setlg(gen,r+1);
   setlg(ord,r+1);
-  res[3]=(long)bits;
+  gel(res,3) = bits;
   return gerepilecopy(ltop,res);
 }
 
@@ -158,7 +158,7 @@ GEN
 znstar_elts(long n, GEN H)
 {
   long card=group_order(H);
-  GEN gen=(GEN)H[1], ord=(GEN)H[2];
+  GEN gen=gel(H,1), ord=gel(H,2);
   GEN sg = cgetg(1 + card, t_VECSMALL);
   long k, j, l;
   sg[1] = 1;
@@ -166,7 +166,7 @@ znstar_elts(long n, GEN H)
   {
     int c = l * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      sg[++l] = (long)Fl_mul((ulong)sg[k], (ulong)gen[j], (ulong)n);
+      sg[++l] = Fl_mul((ulong)sg[k], (ulong)gen[j], (ulong)n);
   }
   vecsmall_sort(sg);
   return sg;
@@ -194,7 +194,7 @@ znstar_conductor(long n, GEN H)
   int i,j;
   GEN F = factoru(n), P = gel(F,1), E = gel(F,2); 
   long cnd=n;
-  for(i=lg((GEN)F[1])-1;i>0;i--)
+  for(i=lg(gel(F,1))-1;i>0;i--)
   {
     long p = P[i], e = E[i], q = n;
     if (DEBUGLEVEL>=4)
@@ -206,7 +206,7 @@ znstar_conductor(long n, GEN H)
       for (j = 1; j < p; j++)
       {
 	z += q;
-	if (!bitvec_test((GEN) H[3],z) && cgcd(z,n)==1)
+	if (!bitvec_test(gel(H,3),z) && cgcd(z,n)==1)
           break;
       } 
       if ( j < p )
@@ -261,9 +261,9 @@ GEN
 znstar_small(GEN zn)
 {
   GEN Z = cgetg(4,t_VEC);
-  Z[1] = licopy(gmael3(zn,3,1,1));
-  Z[2] = (long)gtovecsmall((GEN)zn[2]);
-  Z[3] = (long)lift((GEN)zn[3]); return Z;
+  gel(Z,1) = icopy(gmael3(zn,3,1,1));
+  gel(Z,2) = gtovecsmall(gel(zn,2));
+  gel(Z,3) = lift(gel(zn,3)); return Z;
 }
 
 /* Compute generators for the subgroup of (Z/nZ)* given in HNF. */
@@ -273,15 +273,15 @@ znstar_hnf_generators(GEN Z, GEN M)
   long l = lg(M);
   GEN gen = cgetg(l, t_VECSMALL);
   pari_sp ltop = avma;
-  GEN zgen = (GEN) Z[3];
-  ulong n = itou((GEN)Z[1]);
+  GEN zgen = gel(Z,3);
+  ulong n = itou(gel(Z,1));
   long j, h;
   for (j = 1; j < l; j++)
   {
     gen[j] = 1;
     for (h = 1; h < l; h++)
-      gen[j] = (long)Fl_mul((ulong)gen[j], 
-                  Fl_pow(itou((GEN)zgen[h]), itou(gmael(M,j,h)), n), n);
+      gen[j] = Fl_mul((ulong)gen[j], 
+                      Fl_pow(itou(gel(zgen,h)), itou(gmael(M,j,h)), n), n);
   }
   avma = ltop; return gen;
 }
@@ -289,7 +289,7 @@ znstar_hnf_generators(GEN Z, GEN M)
 GEN
 znstar_hnf(GEN Z, GEN M)
 {
-  return znstar_generate(itos((GEN)Z[1]),znstar_hnf_generators(Z,M));
+  return znstar_generate(itos(gel(Z,1)),znstar_hnf_generators(Z,M));
 }
 
 GEN
@@ -297,7 +297,7 @@ znstar_hnf_elts(GEN Z, GEN H)
 {
   pari_sp ltop = avma;
   GEN G = znstar_hnf(Z,H);
-  long n = itos((GEN)Z[1]);
+  long n = itos(gel(Z,1));
   return gerepileupto(ltop, znstar_elts(n,G));
 }
 
@@ -312,8 +312,8 @@ static GEN gscycloconductor(GEN g, long n, long flag)
   if (flag==2)
   {
     GEN V=cgetg(3,t_VEC);
-    V[1]=lcopy(g);
-    V[2]=lstoi(n);
+    gel(V,1) = gcopy(g);
+    gel(V,2) = stoi(n);
     return V;
   }
   return g;
@@ -327,9 +327,9 @@ lift_check_modulus(GEN H, long n)
   switch(t)
   {
     case t_INTMOD:
-      if (!equalsi(n, (GEN)H[1]))
+      if (!equalsi(n, gel(H,1)))
 	err(talker,"wrong modulus in galoissubcyclo");
-      H = (GEN)H[2];
+      H = gel(H,2);
     case t_INT:
       h=smodis(H,n);
       if (cgcd(h,n)!=1)
@@ -380,7 +380,7 @@ subcyclo_cyclic(long n, long d, long m ,long z, long g, GEN powz, GEN le)
       if ((k&0xff)==0) s=gerepileupto(av,s);
     }
     if (le) s = modii(s, le);
-    V[i] = lpileupto(av, s);
+    gel(V,i) = gerepileupto(av, s);
   }
   return V;
 }
@@ -480,16 +480,16 @@ subcyclo_complex_roots(long n, long real, long prec)
   GEN powbab, powgig, powz;
   powz      = cgetg(real?4:3,t_VEC);
   powbab    = cgetg(m+1,t_VEC);
-  powbab[1] = (long) gen_1;
-  powbab[2] = (long) exp_Ir(divrs(Pi2n(1, prec), n)); /* = e_n(1) */
-  for (i=3; i<=m; i++) powbab[i] = lmul((GEN)powbab[2],(GEN)powbab[i-1]);
+  gel(powbab,1) = gen_1;
+  gel(powbab,2) = exp_Ir(divrs(Pi2n(1, prec), n)); /* = e_n(1) */
+  for (i=3; i<=m; i++) gel(powbab,i) = gmul(gel(powbab,2),gel(powbab,i-1));
   powgig    = cgetg(m+1,t_VEC);
-  powgig[1] = (long) gen_1;
-  powgig[2] = lmul((GEN)powbab[2],(GEN)powbab[m]);;
-  for (i=3; i<=m; i++) powgig[i] = lmul((GEN)powgig[2],(GEN)powgig[i-1]);
-  powz[1]=(long)powbab;
-  powz[2]=(long)powgig;
-  if (real) powz[3]=(long) gen_0;
+  gel(powgig,1) = gen_1;
+  gel(powgig,2) = gmul(gel(powbab,2),gel(powbab,m));;
+  for (i=3; i<=m; i++) gel(powgig,i) = gmul(gel(powgig,2),gel(powgig,i-1));
+  gel(powz,1) = powbab;
+  gel(powz,2) = powgig;
+  if (real) gel(powz,3) = gen_0;
   return powz;
 }
 
@@ -506,25 +506,25 @@ static GEN muliimod_sz(GEN x, GEN y, GEN l, long siz)
 GEN
 subcyclo_roots(long n, GEN zl)
 {
-  GEN le=(GEN) zl[1];
-  GEN z=(GEN) zl[2];
+  GEN le=gel(zl,1);
+  GEN z=gel(zl,2);
   long lle=lg(le)*3; /*Assume dvmdii use lx+ly space*/
   long i;
   long m = (long)(1+sqrt((double) n));
   GEN powbab, powgig, powz;
   powz=cgetg(3,t_VEC);
   powbab    = cgetg(m+1,t_VEC);
-  powbab[1] = (long) gen_1;
-  powbab[2] = lcopy(z);
+  gel(powbab,1) = gen_1;
+  gel(powbab,2) = gcopy(z);
   for (i=3; i<=m; i++) 
-    powbab[i] = (long) muliimod_sz(z,(GEN)powbab[i-1],le,lle);
+    gel(powbab,i) = muliimod_sz(z,gel(powbab,i-1),le,lle);
   powgig    = cgetg(m+1,t_VEC);
-  powgig[1] = (long) gen_1;
-  powgig[2] = (long) muliimod_sz(z,(GEN)powbab[m],le,lle);;
+  gel(powgig,1) = gen_1;
+  gel(powgig,2) = muliimod_sz(z,gel(powbab,m),le,lle);;
   for (i=3; i<=m; i++)
-    powgig[i] = (long) muliimod_sz((GEN)powgig[2],(GEN)powgig[i-1],le,lle);
-  powz[1]=(long)powbab;
-  powz[2]=(long)powgig;
+    gel(powgig,i) = muliimod_sz(gel(powgig,2),gel(powgig,i-1),le,lle);
+  gel(powz,1) = powbab;
+  gel(powz,2) = powgig;
   return powz;
 }
 
@@ -538,35 +538,35 @@ galoiscyclo(long n, long v)
   GEN L;
   long i,j,k;
   GEN zn=znstar(stoi(n));
-  long card=itos((GEN) zn[1]);
-  GEN gen=lift((GEN)zn[3]);
-  GEN ord=gtovecsmall((GEN)zn[2]);
+  long card=itos(gel(zn,1));
+  GEN gen=lift(gel(zn,3));
+  GEN ord=gtovecsmall(gel(zn,2));
   GEN elts;
   z=subcyclo_start(n,card/2,2,NULL,&val,&l);
-  le=(GEN) z[1];
-  z=(GEN) z[2];
+  le=gel(z,1);
+  z=gel(z,2);
   L = cgetg(1+card,t_VEC);
-  L[1] = (long) z;
+  gel(L,1) = z;
   for (j = 1, i = 1; j < lg(gen); j++)
   {
     int     c = i * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
-      L[++i] = (long) Fp_pow((GEN)L[k],(GEN)gen[j],le);
+      gel(L,++i) = Fp_pow(gel(L,k),gel(gen,j),le);
   }
   G=abelian_group(ord);
   elts = group_elts(G, card); /*not stack clean*/
   grp = cgetg(9, t_VEC);
-  grp[1] = (long) cyclo(n,v);
-  grp[2] = lgetg(4,t_VEC); 
-  mael(grp,2,1) = lstoi(l);
-  mael(grp,2,2) = lstoi(val);
-  mael(grp,2,3) = licopy(le);
-  grp[3] = lcopy(L);
-  grp[4] = (long) vandermondeinversemod(L, (GEN) grp[1], gen_1, le);
-  grp[5] = (long)gen_1;
-  grp[6] = lcopy(elts);
-  grp[7] = lcopy((GEN)G[1]);
-  grp[8] = lcopy((GEN)G[2]);
+  gel(grp,1) = cyclo(n,v);
+  gel(grp,2) = cgetg(4,t_VEC); 
+  gmael(grp,2,1) = stoi(l);
+  gmael(grp,2,2) = stoi(val);
+  gmael(grp,2,3) = icopy(le);
+  gel(grp,3) = gcopy(L);
+  gel(grp,4) = vandermondeinversemod(L, gel(grp,1), gen_1, le);
+  gel(grp,5) = gen_1;
+  gel(grp,6) = gcopy(elts);
+  gel(grp,7) = gcopy(gel(G,1));
+  gel(grp,8) = gcopy(gel(G,2));
   return gerepileupto(ltop,grp);
 }
 
@@ -581,8 +581,8 @@ bnr_to_znstar(GEN bnr, long *complex)
   checkbnrgen(bnr);
   if (degpol(gmael3(bnr,1,7,1))!=1)
     err(talker,"bnr must be over Q in bnr_to_znstar");
-  zk = (GEN) bnr[5];
-  gen = (GEN) zk[3];
+  zk = gel(bnr,5);
+  gen = gel(zk,3);
   /*cond is the finite part of the conductor
    * complex is the infinite part*/
   cond = gcoeff(gmael3(bnr,2,1,1), 1, 1);
@@ -591,14 +591,14 @@ bnr_to_znstar(GEN bnr, long *complex)
   v = cgetg(l2, t_VEC);
   for (i = 1; i < l2; ++i)
   {
-    GEN x=(GEN) gen[i];
+    GEN x=gel(gen,i);
     if (typ(x) == t_MAT)
       x = gcoeff(x, 1, 1);
     else if (typ(x) == t_COL)
-      x = (GEN) x[1];
-    v[i] = (long) gmodulcp(absi(x), cond);
+      x = gel(x,1);
+    gel(v,i) = gmodulcp(absi(x), cond);
   }
-  return mkvec3((GEN)zk[1], (GEN)zk[2], v);
+  return mkvec3(gel(zk,1), gel(zk,2), v);
 }
 
 GEN 
@@ -663,9 +663,8 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
       break;
     case t_VEC:
     case t_COL:
-      V=cgetg(lg(sg),t_VECSMALL);
-      for(i=1;i<lg(sg);i++)
-        V[i] = (long)lift_check_modulus((GEN)sg[i],n);
+      V = cgetg(lg(sg),t_VECSMALL);
+      for(i=1;i<lg(sg);i++) V[i] = lift_check_modulus(gel(sg,i),n);
       break;
     case t_MAT:/*Fall through*/
       {
@@ -692,11 +691,11 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   {
     fprintferr("Subcyclo: elements:");
     for (i=1;i<n;i++)
-      if (bitvec_test((GEN)H[3],i))
+      if (bitvec_test(gel(H,3),i))
         fprintferr(" %ld",i);
     fprintferr("\n");
   }
-  complex = !bitvec_test((GEN) H[3],n-1);
+  complex = !bitvec_test(gel(H,3),n-1);
   if (DEBUGLEVEL >= 6)
     fprintferr("Subcyclo: complex=%ld\n",complex);
   if (DEBUGLEVEL >= 1) (void)timer2();
@@ -735,7 +734,7 @@ galoissubcyclo(GEN N, GEN sg, long flag, long v)
   B=subcyclo_complex_bound(av,L,3);
   zl=subcyclo_start(n,phi_n/card,card,B,&val,&l);
   powz=subcyclo_roots(n,zl);
-  le=(GEN) zl[1];
+  le=gel(zl,1);
   L=subcyclo_orbits(n,H,O,powz,le);
   T=FpV_roots_to_pol(L,le,v);
   T=FpX_center(T,le);
@@ -759,7 +758,7 @@ subcyclo(long n, long d, long v)
   fa = factoru(n);
   p = mael(fa,1,1);
   al= mael(fa,2,1);
-  if (lg((GEN)fa[1]) > 2 || (p==2 && al>2))
+  if (lg(gel(fa,1)) > 2 || (p==2 && al>2))
     err(talker,"non-cyclic case in polsubcyclo: use galoissubcyclo instead");
   avma=ltop;
   r = cgcd(d,n); /* = p^(v_p(d))*/
@@ -779,7 +778,7 @@ subcyclo(long n, long d, long v)
   L=subcyclo_cyclic(n,d,o,g,gd,powz,NULL);
   B=subcyclo_complex_bound(ltop,L,3);
   zl=subcyclo_start(n,d,o,B,&val,&l);
-  le=(GEN)zl[1];
+  le=gel(zl,1);
   powz=subcyclo_roots(n,zl);
   if (DEBUGLEVEL >= 6) msgtimer("subcyclo_roots"); 
   L=subcyclo_cyclic(n,d,o,g,gd,powz,le);
@@ -795,20 +794,20 @@ GEN polsubcyclo(long n, long d, long v)
   pari_sp ltop=avma;
   GEN L, Z=znstar(stoi(n));
   /*subcyclo is twice faster but Z must be cyclic*/
-  if (lg(Z[2]) == 2 && dvdii((GEN)Z[1],stoi(d)))
+  if (lg(Z[2]) == 2 && dvdii(gel(Z,1),stoi(d)))
   {
     avma=ltop; 
     return subcyclo(n, d, v);
   }
-  L=subgrouplist((GEN) Z[2], mkvec(stoi(d)));
+  L=subgrouplist(gel(Z,2), mkvec(stoi(d)));
   if (lg(L) == 2)
-    return gerepileupto(ltop, galoissubcyclo(Z, (GEN) L[1], 0, v));
+    return gerepileupto(ltop, galoissubcyclo(Z, gel(L,1), 0, v));
   else
   {
     GEN V=cgetg(lg(L),t_VEC);
     long i;
     for (i=1; i< lg(V); i++)
-      V[i] = (long) galoissubcyclo(Z, (GEN) L[i], 0, v);
+      gel(V,i) = galoissubcyclo(Z, gel(L,i), 0, v);
     return gerepileupto(ltop,V);
   }
 }
