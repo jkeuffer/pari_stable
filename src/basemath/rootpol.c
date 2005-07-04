@@ -1084,13 +1084,13 @@ dft(GEN p, long k, long NN, long Lmax, long bit, GEN F, GEN H, long polreal)
   {
     aux=gel(W,i);
     for (j=1; j<i; j++) aux = gadd(aux, gmul(gel(W,i-j),gel(F,k+2-j)));
-    F[k+2-i] = ldivgs(aux,-i*NN);
+    gel(F,k+2-i) = gdivgs(aux,-i*NN);
   }
   for (i=0; i<k; i++)
   {
     aux=gel(U,k-i);
     for (j=1+i; j<k; j++) aux = gadd(aux,gmul(gel(F,2+j),gel(U,j-i)));
-    H[i+2] = ldivgs(aux,NN);
+    gel(H,i+2) = gdivgs(aux,NN);
   }
 }
 

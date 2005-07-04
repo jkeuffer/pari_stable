@@ -260,7 +260,7 @@ cgetr(long x)
 INLINE GEN
 cgetc(long l)
 {
-  GEN u = cgetg(3,t_COMPLEX); u[1]=lgetr(l); u[2]=lgetr(l);
+  GEN u = cgetg(3,t_COMPLEX); gel(u,1) = cgetr(l); gel(u,2) = cgetr(l);
   return u;
 }
 INLINE GEN

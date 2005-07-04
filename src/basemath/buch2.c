@@ -1431,7 +1431,7 @@ isprincipalfact(GEN bnf,GEN P, GEN e, GEN C, long flag)
   if (gen)
   {
     z = cgetg(3,t_VEC);
-    z[2] = (flag & nf_GENMAT)? lgetg(1, t_MAT): lmodulcp(gen_1,gel(nf,1));
+    gel(z,2) = (flag & nf_GENMAT)? cgetg(1, t_MAT): gmodulcp(gen_1,gel(nf,1));
   }
   id = C;
   for (i=1; i<l; i++) /* compute prod P[i]^e[i] */

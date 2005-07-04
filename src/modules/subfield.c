@@ -149,17 +149,17 @@ calc_block(blockdata *B, GEN Z, GEN Y, GEN SB)
       if (n[j] % k) break;
     if (j == r)
     {
-      Yp[lY] = (long)Z;
+      gel(Yp,lY) = Z;
       SB = print_block_system(B, Yp, SB);
       avma = av;
     }
   }
-  Yp[lY] = (long)Zp;
+  gel(Yp,lY) = Zp;
 
   K = divisors(utoipos(n[1])); lK = lg(K);
   for (i=1; i<lK; i++)
   {
-    long ngcd = n[1], k = itos((GEN)K[i]), dk = B->size*k, lpn = 0;
+    long ngcd = n[1], k = itos(gel(K,i)), dk = B->size*k, lpn = 0;
     for (j=2; j<r; j++)
       if (n[j]%k == 0)
       {
@@ -238,8 +238,8 @@ im_block_by_perm(GEN D,GEN perm)
   lb=lg(D); Dn=cgetg(lb,t_VEC);
   for (i=1; i<lb; i++)
   {
-    cy=(GEN)D[i]; lcy=lg(cy);
-    Dn[i]=lgetg(lcy,t_VECSMALL); p1=(GEN)Dn[i];
+    cy=gel(D,i); lcy=lg(cy);
+    gel(Dn,i) = cgetg(lcy,t_VECSMALL); p1=gel(Dn,i);
     for (j=1; j<lcy; j++) p1[j] = perm[cy[j]];
   }
   return Dn;
@@ -269,20 +269,20 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
   Z = cgetg(r+1, t_VEC);
   for (ns=0,i=1; i<r; i++)
   {
-    GEN Yi = (GEN)Y[i];
+    GEN Yi = gel(Y,i);
     long ki = 0, si = lg(Yi)-1;
 
     for (j=1; j<=si; j++) { n[j] = lg(Yi[j])-1; ki += n[j]; }
     ki /= B->size;
     De = cgetg(ki+1,t_VEC);
-    for (j=1; j<=ki; j++) De[j] = (long)VOID;
+    for (j=1; j<=ki; j++) gel(De,j) = VOID;
     for (j=1; j<=si; j++)
     {
-      GEN cy = (GEN)Yi[j];
+      GEN cy = gel(Yi,j);
       for (l=1,lp=0; l<=n[j]; l++)
       {
         lp++; if (lp > ki) lp = 1;
-        De[lp] = (long)vecsmall_append((GEN)De[lp], cy[l]);
+        gel(De,lp) = vecsmall_append(gel(De,lp), cy[l]);
       }
     }
     append(D, De);
@@ -293,7 +293,7 @@ print_block_system(blockdata *B, GEN Y, GEN SB)
       ns++;
       t[ns] = si-1;
       k[ns] = ki-1;
-      Z[ns] = (long)p1;
+      gel(Z,ns) = p1;
     }
   }
   if (DEBUGLEVEL>2) fprintferr("\nns = %ld\n",ns);
@@ -356,7 +356,7 @@ polsimplify(GEN x)
 {
   long i,lx = lg(x);
   for (i=2; i<lx; i++)
-    if (typ(x[i]) == t_POL) x[i] = (long)constant_term((GEN)x[i]);
+    if (typ(x[i]) == t_POL) gel(x,i) = constant_term(gel(x,i));
   return x;
 }
 
@@ -366,7 +366,7 @@ ok_coeffs(GEN g,GEN M)
 {
   long i, lg = lg(g)-1; /* g is monic, and cst term is ok */
   for (i=3; i<lg; i++)
-    if (absi_cmp((GEN)g[i], (GEN)M[i]) > 0) return 0;
+    if (absi_cmp(gel(g,i), gel(M,i)) > 0) return 0;
   return 1;
 }
 
@@ -376,11 +376,11 @@ trace(GEN x, GEN Trq, GEN p)
 {
   long i, l;
   GEN s;
-  if (typ(x) == t_INT) return modii(mulii(x, (GEN)Trq[1]), p);
+  if (typ(x) == t_INT) return modii(mulii(x, gel(Trq,1)), p);
   l = lg(x)-1; if (l == 1) return gen_0;
-  x++; s = mulii((GEN)x[1], (GEN)Trq[1]);
+  x++; s = mulii(gel(x,1), gel(Trq,1));
   for (i=2; i<l; i++)
-    s = addii(s, mulii((GEN)x[i], (GEN)Trq[i]));
+    s = addii(s, mulii(gel(x,i), gel(Trq,i)));
   return modii(s, p);
 }
 
@@ -392,7 +392,7 @@ poltrace(GEN x, GEN Trq, GEN p)
   GEN y;
   if (typ(x) == t_INT || varn(x) != 0) return trace(x, Trq, p);
   l = lg(x); y = cgetg(l,t_POL); y[1]=x[1];
-  for (i=2; i<l; i++) y[i] = (long)trace((GEN)x[i],Trq,p);
+  for (i=2; i<l; i++) gel(y,i) = trace(gel(x,i),Trq,p);
   return y;
 }
 
@@ -404,17 +404,17 @@ poltrace(GEN x, GEN Trq, GEN p)
 static GEN
 chinese_retrieve_pol(GEN DATA, primedata *S, GEN listdelta)
 {
-  GEN interp, bezoutC, h, pol = FpX_red((GEN)DATA[1], S->p);
+  GEN interp, bezoutC, h, pol = FpX_red(gel(DATA,1), S->p);
   long i, l;
-  interp = (GEN)DATA[9];
-  bezoutC= (GEN)DATA[6];
+  interp = gel(DATA,9);
+  bezoutC= gel(DATA,6);
 
   h = NULL; l = lg(interp);
   for (i=1; i<l; i++)
   { /* h(firstroot[i]) = listdelta[i] */
-    GEN t = FqX_Fq_mul((GEN)interp[i], (GEN)listdelta[i], S->T,S->p);
+    GEN t = FqX_Fq_mul(gel(interp,i), gel(listdelta,i), S->T,S->p);
     t = poltrace(t, (GEN)S->Trk[i], S->p);
-    t = gmul(t, (GEN)bezoutC[i]);
+    t = gmul(t, gel(bezoutC,i));
     h = h? gadd(h,t): t;
   }
   return FpX_rem(FpX_red(h, S->p), pol, S->p);
@@ -432,8 +432,8 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
   long rt;
   pari_sp av;
 
-  T   = (GEN)DATA[1]; rt = brent_kung_optpow(degpol(T), 2);
-  maxp= (GEN)DATA[7];
+  T   = gel(DATA,1); rt = brent_kung_optpow(degpol(T), 2);
+  maxp= gel(DATA,7);
   gp = derivpol(g); av = avma;
   w0 = chinese_retrieve_pol(DATA, S, listdelta);
   w0_Q = centermod(gmul(w0,den), p);
@@ -477,7 +477,7 @@ embedding(GEN g, GEN DATA, primedata *S, GEN den, GEN listdelta)
     h0 = gadd(h0, gmul(p, FpX_rem(a, T,p)));
     w0 = w1; w0_Q = w1_Q; p = q; q = q2;
   }
-  TR = (GEN)DATA[5];
+  TR = gel(DATA,5);
   if (!gcmp0(TR)) w1_Q = TR_pol(w1_Q, TR);
   return gdiv(w1_Q,den);
 }
@@ -491,13 +491,13 @@ get_bezout(GEN pol, GEN fk, GEN p)
   GEN A, B, d, u, v, U = cgetg(l, t_VEC);
   for (i=1; i<l; i++)
   {
-    A = (GEN)fk[i];
+    A = gel(fk,i);
     B = FpX_div(pol, A, p);
     d = FpX_extgcd(A,B,p, &u, &v);
     if (degpol(d) > 0) err(talker, "relatively prime polynomials expected");
     d = constant_term(d);
     if (!gcmp1(d)) v = FpX_Fp_mul(v, Fp_inv(d, p), p);
-    U[i] = (long)FpX_mul(B,v, p);
+    gel(U,i) = FpX_mul(B,v, p);
   }
   return U;
 }
@@ -511,25 +511,25 @@ init_traces(GEN ff, GEN T, GEN p)
 
   k = degpol(ff[r-1]); /* largest degree in modular factorization */
   pow = cgetg(k+1, t_VEC);
-  pow[1] = (long)zero; /* dummy */
-  pow[2] = (long)Frob;
+  gel(pow,1) = gen_0; /* dummy */
+  gel(pow,2) = Frob;
   pow1= cgetg(k+1, t_VEC); /* 1st line */
   for (i=3; i<=k; i++)
-    pow[i] = (long)FpM_mul((GEN)pow[i-1], Frob, p);
-  pow1[1] = (long)zero; /* dummy */
+    gel(pow,i) = FpM_mul(gel(pow,i-1), Frob, p);
+  gel(pow1,1) = gen_0; /* dummy */
   for (i=2; i<=k; i++)
   {
     p1 = cgetg(N+1, t_VEC);
-    pow1[i] = (long)p1; p2 = (GEN)pow[i];
+    gel(pow1,i) = p1; p2 = gel(pow,i);
     for (j=1; j<=N; j++) p1[j] = coeff(p2,1,j);
   }
-  p1 = cgetg(N+1,t_VEC); p1[1] = (long)gen_1;
-  for (i=2; i<=N; i++) p1[i] = (long)gen_0;
+  p1 = cgetg(N+1,t_VEC); gel(p1,1) = gen_1;
+  for (i=2; i<=N; i++) gel(p1,i) = gen_0;
   /* Trk[i] = line 1 of x -> x + x^p + ... + x^{p^(i-1)} */
   Trk = pow; /* re-use (destroy) pow */
-  Trk[1] = (long)p1;
+  gel(Trk,1) = p1;
   for (i=2; i<=k; i++)
-    Trk[i] = ladd((GEN)Trk[i-1], (GEN)pow1[i]);
+    gel(Trk,i) = gadd(gel(Trk,i-1), gel(pow1,i));
   y = cgetg(r, t_VEC);
   for (i=1; i<r; i++) y[i] = Trk[degpol(ff[i])];
   return y;
@@ -543,10 +543,10 @@ interpol(GEN H, GEN T, GEN p)
   long i, m = lg(H);
   GEN X = polx[0],d,p1,p2,a;
 
-  p1=polun[0]; p2=gen_1; a = gneg(constant_term((GEN)H[1])); /* = D[1] */
+  p1=polun[0]; p2=gen_1; a = gneg(constant_term(gel(H,1))); /* = D[1] */
   for (i=2; i<m; i++)
   {
-    d = constant_term((GEN)H[i]); /* -D[i] */
+    d = constant_term(gel(H,i)); /* -D[i] */
     p1 = FpXQX_mul(p1,gadd(X,d), T,p);
     p2 = Fq_mul(p2, gadd(a,d), T,p);
   }
@@ -573,8 +573,8 @@ init_primedata(primedata *S)
   S->fk = cgetg(N+1, t_VEC);
   for (l=1,j=1; j<lff; j++)
   { /* compute roots and fix ordering (Frobenius cycles) */
-    GEN F = FpX_factorff_irred((GEN)S->ff[j], T, p);
-    S->interp[j] = (long)interpol(F,T,p);
+    GEN F = FpX_factorff_irred(gel(S->ff,j), T, p);
+    gel(S->interp,j) = interpol(F,T,p);
     S->firstroot[j] = l;
     for (i=1; i<lg(F); i++,l++) S->fk[l] = F[i];
   }
@@ -624,7 +624,7 @@ choose_prime(primedata *S, GEN pol, GEN dpol)
   n = oldn; r = lg(n); Z = cgetg(r,t_VEC);
   for (k=0,i=1; i<r; i++)
   {
-    GEN t = cgetg(n[i]+1, t_VECSMALL); Z[i] = (long)t;
+    GEN t = cgetg(n[i]+1, t_VECSMALL); gel(Z,i) = t;
     for (j=1; j<=n[i]; j++) t[j] = ++k;
   }
   S->Z = Z;
@@ -642,16 +642,16 @@ bound_for_coeff(long m, GEN rr, GEN *maxroot)
 
   rr = gabs(rr,0); *maxroot = vecmax(rr);
   for (i=1; i<lrr; i++)
-    if (gcmp((GEN)rr[i], gen_1) < 0) rr[i] = (long)gen_1;
-  for (b1=gen_1,i=1; i<=r1; i++) b1 = gmul(b1, (GEN)rr[i]);
-  for (b2=gen_1    ; i<lrr; i++) b2 = gmul(b2, (GEN)rr[i]);
+    if (gcmp(gel(rr,i), gen_1) < 0) gel(rr,i) = gen_1;
+  for (b1=gen_1,i=1; i<=r1; i++) b1 = gmul(b1, gel(rr,i));
+  for (b2=gen_1    ; i<lrr; i++) b2 = gmul(b2, gel(rr,i));
   B = gmul(b1, gsqr(b2)); /* Mahler measure */
-  M = cgetg(m+2, t_VEC); M[1]=M[2]= (long)gen_0; /* unused */
+  M = cgetg(m+2, t_VEC); gel(M,1) = gel(M,2) = gen_0; /* unused */
   for (i=1; i<m; i++)
   {
     p1 = gadd(gmul(gcoeff(C, m, i+1), B),/* binom(m-1, i)   */
               gcoeff(C, m, i));          /* binom(m-1, i-1) */
-    M[i+2] = (long)ceil_safe(p1);
+    gel(M,i+2) = ceil_safe(p1);
   }
   return M;
 }
@@ -682,51 +682,51 @@ compute_data(blockdata *B)
   if (DATA) /* update (translate) an existing DATA */
   {
     GEN Xm1 = gsub(polx[varn(pol)], gen_1);
-    GEN TR = addis((GEN)DATA[5], 1);
+    GEN TR = addis(gel(DATA,5), 1);
     GEN mTR = negi(TR), interp, bezoutC;
 
-    DATA[5] = (long)TR;
-    pol = TR_pol((GEN)DATA[1], gen_m1);
+    gel(DATA,5) = TR;
+    pol = TR_pol(gel(DATA,1), gen_m1);
     l = lg(roo); p1 = cgetg(l, t_VEC);
-    for (i=1; i<l; i++) p1[i] = ladd(TR, (GEN)roo[i]);
+    for (i=1; i<l; i++) gel(p1,i) = gadd(TR, gel(roo,i));
     roo = p1;
 
-    fk = (GEN)DATA[4]; l = lg(fk);
-    for (i=1; i<l; i++) fk[i] = lsub(Xm1, (GEN)fk[i]);
+    fk = gel(DATA,4); l = lg(fk);
+    for (i=1; i<l; i++) gel(fk,i) = gsub(Xm1, gel(fk,i));
 
-    bezoutC = (GEN)DATA[6]; l = lg(bezoutC);
-    interp  = (GEN)DATA[9];
+    bezoutC = gel(DATA,6); l = lg(bezoutC);
+    interp  = gel(DATA,9);
     for (i=1; i<l; i++)
     {
       if (degpol(interp[i]) > 0) /* do not turn polun[0] into gen_1 */
       {
-        p1 = TR_pol((GEN)interp[i], gen_m1);
-        interp[i] = (long)FpXX_red(p1, p);
+        p1 = TR_pol(gel(interp,i), gen_m1);
+        gel(interp,i) = FpXX_red(p1, p);
       }
       if (degpol(bezoutC[i]) > 0)
       {
-        p1 = TR_pol((GEN)bezoutC[i], gen_m1);
-        bezoutC[i] = (long)FpXX_red(p1, p);
+        p1 = TR_pol(gel(bezoutC,i), gen_m1);
+        gel(bezoutC,i) = FpXX_red(p1, p);
       }
     }
     ff = cgetg(lff, t_VEC); /* copy, don't overwrite! */
     for (i=1; i<lff; i++)
-      ff[i] = (long)FpX_red(TR_pol((GEN)S->ff[i], mTR), p);
+      gel(ff,i) = FpX_red(TR_pol((GEN)S->ff[i], mTR), p);
   }
   else
   {
     DATA = cgetg(10,t_VEC);
     fk = S->fk;
-    DATA[5]= (long)gen_0;
-    DATA[6]= (long)shallowcopy(S->bezoutC);
-    DATA[9]= (long)shallowcopy(S->interp);
+    gel(DATA,5) = gen_0;
+    gel(DATA,6) = shallowcopy(S->bezoutC);
+    gel(DATA,9) = shallowcopy(S->interp);
   }
-  DATA[1] = (long)pol;
+  gel(DATA,1) = pol;
   MM = gmul2n(bound_for_coeff(B->d, roo, &maxroot), 1);
-  DATA[8] = (long)MM;
+  gel(DATA,8) = MM;
   e = logint(shifti(vecmax(MM),20), p, &pe); /* overlift 2^20 [for d-1 test] */
-  DATA[2] = (long)pe;
-  DATA[4] = (long)roots_from_deg1(fk);
+  gel(DATA,2) = pe;
+  gel(DATA,4) = roots_from_deg1(fk);
 
   /* compute fhk = hensel_lift_fact(pol,fk,T,p,pe,e) in 2 steps
    * 1) lift in Zp to precision p^e */
@@ -734,19 +734,19 @@ compute_data(blockdata *B)
   fhk = NULL;
   for (l=i=1; i<lff; i++)
   { /* 2) lift factorization of ff[i] in Qp[X] / T */
-    GEN F, L = (GEN)ffL[i];
+    GEN F, L = gel(ffL,i);
     long di = degpol(L);
     F = cgetg(di+1, t_VEC);
     for (j=1; j<=di; j++) F[j] = fk[l++];
     L = hensel_lift_fact(L, F, T, p, pe, e);
     fhk = fhk? shallowconcat(fhk, L): L;
   }
-  DATA[3] = (long)roots_from_deg1(fhk);
+  gel(DATA,3) = roots_from_deg1(fhk);
 
   p1 = mulsr(N, gsqrt(gpowgs(utoipos(N-1),N-1),DEFAULTPREC));
   p2 = gpowgs(maxroot, B->size + N*(N-1)/2);
   p1 = gdiv(gmul(p1,p2), gsqrt(B->PD->dis,DEFAULTPREC));
-  DATA[7] = lmulii(shifti(ceil_safe(p1), 1), B->PD->den);
+  gel(DATA,7) = mulii(shifti(ceil_safe(p1), 1), B->PD->den);
 
   if (DEBUGLEVEL>1) {
     fprintferr("f = %Z\n",DATA[1]);
@@ -783,10 +783,10 @@ subfield(GEN A, blockdata *B)
   d_1_term = gen_0;
   for (i=1; i<=m; i++)
   {
-    GEN Ai = (GEN)A[i], p1 = (GEN)fhk[Ai[1]];
+    GEN Ai = gel(A,i), p1 = (GEN)fhk[Ai[1]];
     for (j=2; j<=d; j++)
       p1 = Fq_mul(p1, (GEN)fhk[Ai[j]], T, pe);
-    delta[i] = (long)p1;
+    gel(delta,i) = p1;
     if (DEBUGLEVEL>2) fprintferr("delta[%ld] = %Z\n",i,p1);
     /* g = prod (X - delta[i])
      * if g o h = 0 (pol), we'll have h(Ai[j]) = delta[i] for all j */
@@ -796,7 +796,7 @@ subfield(GEN A, blockdata *B)
     d_1_term = addii(d_1_term, p1);
   }
   d_1_term = centermod(d_1_term, pe); /* Tr(g) */
-  if (absi_cmp(d_1_term, (GEN)M[3]) > 0) {
+  if (absi_cmp(d_1_term, gel(M,3)) > 0) {
     if (DEBUGLEVEL>1) fprintferr("d-1 test failed\n");
     return NULL;
   }
@@ -857,7 +857,7 @@ fix_var(GEN x, long v)
 {
   long i, l = lg(x);
   if (!v) return x;
-  for (i=1; i<l; i++) { GEN t = (GEN)x[i]; setvarn(t[1],v); setvarn(t[2],v); }
+  for (i=1; i<l; i++) { GEN t = gel(x,i); setvarn(t[1],v); setvarn(t[2],v); }
   return x;
 }
 
@@ -870,9 +870,9 @@ subfields_poldata(GEN T, poldata *PD)
   PD->pol = T; setvarn(T, 0);
   if (nf)
   {
-    PD->den = Q_denom((GEN)nf[7]);
-    PD->roo = (GEN)nf[6];
-    PD->dis = mulii(absi((GEN)nf[3]), sqri((GEN)nf[4]));
+    PD->den = Q_denom(gel(nf,7));
+    PD->roo = gel(nf,6);
+    PD->dis = mulii(absi(gel(nf,3)), sqri(gel(nf,4)));
   }
   else
   {
@@ -908,9 +908,9 @@ subfields(GEN nf, GEN d0)
     k = 1;
     for (i=1; i<l; i++)
     {
-      GEN H = (GEN)L[i];
+      GEN H = gel(L,i);
       if (group_order(H) == o)
-        F[k++] = (long) lift_intern(galoisfixedfield(G, (GEN)H[1], 0, v0));
+        gel(F,k++) = lift_intern(galoisfixedfield(G, gel(H,1), 0, v0));
     }
     setlg(F, k);
     return gerepilecopy(av, F);
@@ -975,7 +975,7 @@ subfieldsall(GEN nf)
     choose_prime(&S, PD.pol, PD.dis);
     for (i=2; i<ld; i++)
     {
-      B.size  = itos((GEN)dg[i]);
+      B.size  = itos(gel(dg,i));
       B.d = N / B.size;
       NLSB = subfields_of_given_degree(&B);
       if (NLSB) { LSB = concat(LSB, NLSB); gunclone(NLSB); }

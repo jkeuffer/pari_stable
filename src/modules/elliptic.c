@@ -409,8 +409,8 @@ initell0(GEN x, long prec)
   if (gcmp0(gel(T,1))) err(precer,"initell");
   T = check_real(gdiv(gel(T,2), gel(T,1)));
   /* pi^2 / 6w1 * theta'''(q,0) / theta'(q,0) */
-  y[17] = ldiv(gmul(gsqr(pi),T), gmulsg(6,w1));
-  y[18] = ldiv(gadd(gmul(gel(y,17),w2), mulcxmI(pi)), w1);
+  gel(y,17) = gdiv(gmul(gsqr(pi),T), gmulsg(6,w1));
+  gel(y,18) = gdiv(gadd(gmul(gel(y,17),w2), mulcxmI(pi)), w1);
   return y;
 }
 
@@ -495,11 +495,11 @@ coordch4(GEN e, GEN u, GEN r, GEN s, GEN t)
       p2 = cgetg(4,t_COL);
       for (i=1; i<=3; i++) gel(p2,i) = gmul(v2, gsub(gel(R,i),r));
       gel(y,14) = p2;
-      y[15] = lmul(gel(e,15), u);
-      y[16] = lmul(gel(e,16), u);
-      y[17] = ldiv(gel(e,17), u);
-      y[18] = ldiv(gel(e,18), u);
-      y[19] = lmul(gel(e,19), gsqr(u));
+      gel(y,15) = gmul(gel(e,15), u);
+      gel(y,16) = gmul(gel(e,16), u);
+      gel(y,17) = gdiv(gel(e,17), u);
+      gel(y,18) = gdiv(gel(e,18), u);
+      gel(y,19) = gmul(gel(e,19), gsqr(u));
     }
   }
   return y;
@@ -3491,7 +3491,7 @@ elltaniyama(GEN e, long prec)
 	else
           s1 = gadd(s1, gmul2n(gmul(gel(X,m),gel(X,n-m)),1));
       }
-      X[n+2] = ldivgs(gsub(gadd(gmulsg(6,s1),s3),s2), (n+2)*(n+1)-12);
+      gel(X,n+2) = gdivgs(gsub(gadd(gmulsg(6,s1),s3),s2), (n+2)*(n+1)-12);
     }
     else
     {

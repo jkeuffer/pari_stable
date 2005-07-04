@@ -259,7 +259,7 @@ hess(GEN x)
         if (gcmp0(p1)) continue;
 
         p1 = gmul(p1,p); p2 = gneg_i(p1);
-        coeff(x,i,m-1) = (long)gen_0;
+        gcoeff(x,i,m-1) = gen_0;
         for (j=m; j<lx; j++)
           gcoeff(x,i,j) = gadd(gcoeff(x,i,j), gmul(p2,gcoeff(x,m,j)));
         for (j=1; j<lx; j++)
@@ -611,8 +611,7 @@ assmat(GEN x)
   for (i=1; i<lx-1; i++)
   {
     p1=cgetg(lx,t_COL); gel(y,i) = p1;
-    for (j=1; j<lx; j++)
-      p1[j] = (j==(i+1))? (long)gen_1: (long)gen_0;
+    for (j=1; j<lx; j++) gel(p1,j) = (j==(i+1))? gen_1: gen_0;
   }
   p1=cgetg(lx,t_COL); gel(y,i) = p1;
   if (gcmp1(gel(x,lx+1)))
@@ -799,14 +798,14 @@ sqred2(GEN a, long signature)
       }
       r[k] = 0; t--;
       for (j=1; j<=n; j++)
-	coeff(a,k,j) = r[j] ? ldiv(gcoeff(a,k,j),p) : (long)gen_0;
+	gcoeff(a,k,j) = r[j] ? gdiv(gcoeff(a,k,j),p) : gen_0;
 	
       for (i=1; i<=n; i++) if (r[i])
 	for (j=1; j<=n; j++)
-	  coeff(a,i,j) = r[j] ? lsub(gcoeff(a,i,j),
+	  gcoeff(a,i,j) = r[j] ? gsub(gcoeff(a,i,j),
 	                             gmul(gmul(gcoeff(a,k,i),gcoeff(a,k,j)),p))
-			      : (long)gen_0;
-      coeff(a,k,k) = (long)p;
+			      : gen_0;
+      gcoeff(a,k,k) = p;
     }
     else
     {
@@ -819,20 +818,20 @@ sqred2(GEN a, long signature)
           sp++; sn++; t -= 2;
 	  for (i=1; i<=n; i++) if (r[i])
 	    for (j=1; j<=n; j++)
-	      coeff(a,i,j) =
-		r[j]? lsub(gcoeff(a,i,j),
+	      gcoeff(a,i,j) =
+		r[j]? gsub(gcoeff(a,i,j),
 			   gdiv(gadd(gmul(gcoeff(a,k,i),gcoeff(a,l,j)),
 				     gmul(gcoeff(a,k,j),gcoeff(a,l,i))),
 				p))
-		    : (long)gen_0;
+		    : gen_0;
 	  for (i=1; i<=n; i++) if (r[i])
           {
             GEN u = gcoeff(a,k,i);
 	    gcoeff(a,k,i) = gdiv(gadd(u, gcoeff(a,l,i)), p);
 	    gcoeff(a,l,i) = gdiv(gsub(u, gcoeff(a,l,i)), p);
           }
-	  coeff(a,k,l) = (long)gen_1;
-          coeff(a,l,k) = (long)gen_m1;
+	  gcoeff(a,k,l) = gen_1;
+          gcoeff(a,l,k) = gen_m1;
 	  gcoeff(a,k,k) = gmul2n(p,-1);
           gcoeff(a,l,l) = gneg(gcoeff(a,k,k));
 	  if (low_stack(lim, stack_lim(av1,1)))
@@ -889,7 +888,7 @@ jacobi(GEN a, long prec)
   for (j=1; j<l; j++)
   {
     gel(r,j) = cgetg(l,t_COL);
-    for (i=1; i<l; i++) coeff(r,i,j) = (long)stor(i==j, prec);
+    for (i=1; i<l; i++) gcoeff(r,i,j) = stor(i==j, prec);
   }
   av1 = avma;
 
@@ -900,7 +899,7 @@ jacobi(GEN a, long prec)
     gel(c,j) = cgetg(j,t_COL);
     for (i=1; i<j; i++)
     {
-      coeff(c,i,j) = (long)gtofp(gcoeff(a,i,j), prec);
+      gcoeff(c,i,j) = gtofp(gcoeff(a,i,j), prec);
       e = expo(gcoeff(c,i,j)); if (e > e2) { e2 = e; p = i; q = j; }
     }
   }
@@ -1147,7 +1146,7 @@ matrixqz3(GEN x)
     j=1; while (j<n && (c[j] || gcmp0(gcoeff(x,k,j)))) j++;
     if (j==n) continue;
 
-    c[j]=k; x[j]=ldiv(gel(x,j),gcoeff(x,k,j));
+    c[j]=k; gel(x,j) = gdiv(gel(x,j),gcoeff(x,k,j));
     for (j1=1; j1<n; j1++)
       if (j1!=j)
       {
@@ -1267,7 +1266,7 @@ ZV_copy(GEN x)
 {
   long i, lx = lg(x);
   GEN y = cgetg(lx, t_COL);
-  for (i=1; i<lx; i++) y[i] = signe(x[i])? licopy(gel(x,i)): (long)gen_0;
+  for (i=1; i<lx; i++) gel(y,i) = signe(x[i])? icopy(gel(x,i)): gen_0;
   return y;
 }
 
@@ -2292,7 +2291,7 @@ hnfmerge_get_1(GEN A, GEN B)
       GEN u,v;
       t = bezout(b, gcoeff(C,1,1), &u, &v); /* >= 0 */
       if (signe(v) && !gcmp1(v)) gel(U,1) = ZV_Z_mul(gel(U,1), v);
-      coeff(C,1,1) = (long)t;
+      gcoeff(C,1,1) = t;
     }
     if (signe(t) && is_pm1(t)) break;
   }
@@ -2461,7 +2460,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     { /* check that dm*Id \subset L + add up missing dm*Id components */
       GEN d, c;
       d = bezout(gcoeff(x,i,i),dm, &u,&v);
-      coeff(x,i,i) = (long)d;
+      gcoeff(x,i,i) = d;
       if (is_pm1(d))
       {
         FpV_Fp_mul_part_ip(gel(x,i), u, dm, i-1);
@@ -2494,7 +2493,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     for (i = li-1; i > 0; i--)
     {
       GEN d = bezout(gcoeff(x,i,i),b, &u,&v);
-      coeff(x,i,i) = (long)d;
+      gcoeff(x,i,i) = d;
       FpV_Fp_mul_part_ip(gel(x,i), u, b, i-1);
       if (i > 1) b = diviiexact(b,d);
     }
@@ -3271,10 +3270,10 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
           GEN t = addii(mulii(u,gcoeff(x,i,k)),mulii(v,gcoeff(x,j,k)));
           gcoeff(x,j,k) = subii(mulii(a,gcoeff(x,j,k)),
                                 mulii(b,gcoeff(x,i,k)));
-          coeff(x,i,k) = (long)t;
+          gcoeff(x,i,k) = t;
         }
-        coeff(x,j,i) = (long)gen_0;
-        coeff(x,i,i) = (long)d;
+        gcoeff(x,j,i) = gen_0;
+        gcoeff(x,i,i) = d;
         if (U) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         if (low_stack(lim, stack_lim(av,1)))
         {
@@ -3378,7 +3377,7 @@ smithclean(GEN z)
   for (i=1; i<c; i++)
   {
     GEN p2 = cgetg(c,t_COL); gel(p1,i) = p2;
-    for (j=1; j<c; j++) p2[j] = i==j? lcopy(gcoeff(d,i,i)): (long)gen_0;
+    for (j=1; j<c; j++) gel(p2,j) = i==j? gcopy(gcoeff(d,i,i)): gen_0;
   }
   return y;
 }
@@ -3449,10 +3448,10 @@ gsmithall(GEN x,long all)
         {
           GEN t = gadd(gmul(u,gcoeff(x,k,i)),gmul(v,gcoeff(x,k,j)));
           gcoeff(x,k,j) = gsub(gmul(a,gcoeff(x,k,j)),gmul(b,gcoeff(x,k,i)));
-          coeff(x,k,i) = (long)t;
+          gcoeff(x,k,i) = t;
         }
-        coeff(x,i,j) = (long)gen_0;
-        coeff(x,i,i) = (long)d;
+        gcoeff(x,i,j) = gen_0;
+        gcoeff(x,i,i) = d;
         if (all) update(u,v,a,b,(GEN*)(V+i),(GEN*)(V+j));
       }
       for (j=i-1; j>=1; j--)
@@ -3464,10 +3463,10 @@ gsmithall(GEN x,long all)
         {
           GEN t = gadd(gmul(u,gcoeff(x,i,k)),gmul(v,gcoeff(x,j,k)));
           gcoeff(x,j,k) = gsub(gmul(a,gcoeff(x,j,k)),gmul(b,gcoeff(x,i,k)));
-          coeff(x,i,k) = (long)t;
+          gcoeff(x,i,k) = t;
         }
-        coeff(x,j,i) = (long)gen_0;
-        coeff(x,i,i) = (long)d;
+        gcoeff(x,j,i) = gen_0;
+        gcoeff(x,i,i) = d;
         if (all) update(u,v,a,b,(GEN*)(U+i),(GEN*)(U+j));
         c = 1;
       }
@@ -3563,7 +3562,7 @@ smithrel(GEN H, GEN *newU, GEN *newUi)
     {
       GEN d = gel(D,i), d2 = shifti(d, 1);
       for (j = 1; j < lg(U); j++)
-        coeff(U,i,j) = (long)centermodii(gcoeff(U,i,j), d, d2);
+        gcoeff(U,i,j) = centermodii(gcoeff(U,i,j), d, d2);
     }
     *newU = U;
   }

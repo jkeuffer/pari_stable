@@ -259,7 +259,7 @@ FpX_center(GEN T,GEN mod)
   mod2=gclone(shifti(mod,-1));/*clone*/
   avma=av;
   for(i=2;i<l;i++)
-    P[i]=cmpii(gel(T,i),mod2)<=0?licopy(gel(T,i)):lsubii(gel(T,i),mod);
+    gel(P,i) = cmpii(gel(T,i),mod2)<=0? icopy(gel(T,i)): subii(gel(T,i),mod);
   gunclone(mod2);/*unclone*/
   return P;
 }
@@ -2064,7 +2064,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = gel(x,dx); av = avma;
-  z[dz] = lead? lpileupto(av, modii(mulii(p1,lead), p)): licopy(p1);
+  gel(z,dz) = lead? gerepileupto(av, modii(mulii(p1,lead), p)): icopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);

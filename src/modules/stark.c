@@ -1534,7 +1534,7 @@ ppgamma(ST_t *T, long prec)
   {
     aij[i] = p1 = cgetg(r+1, t_VEC);
     bij[i] = p2 = cgetg(r+1, t_VEC);
-    for (j=1; j<=r; j++) { gel(p1,j) = cgetr(prec); p2[j] = lgetr(prec); }
+    for (j=1; j<=r; j++) { gel(p1,j) = cgetr(prec); gel(p2,j) = cgetr(prec); }
   }
   av = avma;
 
@@ -1549,7 +1549,7 @@ ppgamma(ST_t *T, long prec)
   gel(gamun,2) = gen_0;
   gel(gamun,3) = gneg(eul);
   for (i = 2; i <= r; i++)
-    gamun[i+2] = ldivrs(szeta(i,prec), odd(i)? -i: i);
+    gel(gamun,i+2) = divrs(szeta(i,prec), odd(i)? -i: i);
   gamun = gexp(gamun, prec); /* Gamma(1 + x) */
   gam = gdiv(gamun,x); /* Gamma(x) */
 
@@ -2257,7 +2257,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
       fprintferr("* conductor no %ld/%ld (N = %ld)\n\tInit: ", jc,ncond,NN);
 
     cScT.c1 = gel(C,jc);
-    init_cScT(&cScT, (GEN)dataCR[LChar[1]], NN, prec2);
+    init_cScT(&cScT, gel(dataCR, LChar[1]), NN, prec2);
     av2 = avma;
     for (k = 1; k <= nChar; k++)
     {

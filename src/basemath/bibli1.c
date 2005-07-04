@@ -1968,7 +1968,7 @@ lindep(GEN x, long prec)
     be[i] = cgetg(lx,t_COL);
     m[i]  = (GEN*)new_chunk(lx);
     for (j=1; j<i ; j++) m[i][j] = cgetr(prec+1);
-    for (j=1; j<=n; j++) be[i][j]= lgetr(prec+1);
+    for (j=1; j<=n; j++) be[i][j]= (long)cgetr(prec+1);
   }
   px = sqscal(re);
   py = sqscal(im); pxy = gscal(re,im);

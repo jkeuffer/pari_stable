@@ -2351,12 +2351,12 @@ initzeta(GEN pol, long prec)
   i = 0;
   while (i < i0/2)
   {
-    for (k=1; k<R; k++) serie_even[k+1] = ldivgs(gel(ck_even,k),k);
+    for (k=1; k<R; k++) gel(serie_even,k+1) = gdivgs(gel(ck_even,k),k);
     serie_exp = gmul(c_even, gexp(serie_even,0));
     p1 = (GEN)aij[2*i+1];
     for (j=1; j<R; j++) p1[j] = serie_exp[r+3-j];
 
-    for (k=1; k<=r2+1; k++) serie_odd[k+1] = ldivgs(gel(ck_odd,k),k);
+    for (k=1; k<=r2+1; k++) gel(serie_odd,k+1) = gdivgs(gel(ck_odd,k),k);
     serie_exp = gmul(c_odd, gexp(serie_odd,0));
     p1 = (GEN)aij[2*i+2];
     for (j=1; j<=r2+1; j++) p1[j] = serie_exp[r2+3-j];

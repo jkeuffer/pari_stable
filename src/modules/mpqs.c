@@ -3589,21 +3589,21 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
     fprintferr("MPQS: wrapping up vector of %ld factors\n", res_last);
   for (i=1,j=1; i <= res_last; i++)
   {
+    GEN F = gel(res, res_size+i);
     icopyifstack(res[i], new_res[j++]); /* factor */
-    flag = res[res_size+i];
-    new_res[j++] =		/* exponent */
-      flag ?			/* flag was zero or one or ... */
-	(flag == (long)gen_0 ? (long)gen_1 :
-	 (isonstack((GEN)flag) ? licopy((GEN)flag) : flag)
+    gel(new_res,j++) = /* exponent */
+      F ?			/* F was zero or one or ... */
+	(F == gen_0 ? gen_1 :
+	 (isonstack(F) ? icopy(F) : F)
 	 ) :
-	   (long)gen_1;			/* flag was (long)NULL */
-    new_res[j++] =		/* class */
-      flag == (long)gen_0 ? (long)gen_0 :	/* known composite */		
-	(long)NULL;		/* base of power or suspected prime --
+	   gen_1;			/* F was (long)NULL */
+    gel(new_res,j++) = /* class */
+      F == gen_0 ? gen_0 :	/* known composite */		
+	NULL;		/* base of power or suspected prime --
 				   mark as `unknown' */
     if (DEBUGLEVEL >= 6)
       fprintferr("\tpackaging %ld: %Z ^%ld (%s)\n", i, res[i],
-		 itos(gel(new_res,j-2)), (flag == (long)gen_0 ? "comp." : "unknown"));
+		 itos(gel(new_res,j-2)), (F == gen_0 ? "comp." : "unknown"));
   }
   return gerepileupto(av, new_res);
 }

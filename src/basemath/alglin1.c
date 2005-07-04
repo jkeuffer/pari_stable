@@ -1080,7 +1080,7 @@ gauss_get_col(GEN a, GEN b, GEN p, long li)
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = ldiv(gel(b,li), p);
+  gel(u,li) = gdiv(gel(b,li), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;

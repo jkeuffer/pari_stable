@@ -4284,7 +4284,7 @@ newtonpoly(GEN x, GEN p)
       r1=vval[a]-vval[c]; r2=c-a;
       if (u1*r2<=u2*r1) { u1=r1; u2=r2; b=c; }
     }
-    while (ind<=b) { affsi(u1,num); y[ind++] = ldivgs(num,u2); }
+    while (ind<=b) { affsi(u1,num); gel(y,ind++) = gdivgs(num,u2); }
   }
   free(vval); return y;
 }

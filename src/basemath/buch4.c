@@ -466,7 +466,7 @@ bnfsunit(GEN bnf,GEN S,long prec)
 
   sreg = gmael(bnf,8,2);
   res=cgetg(7,t_VEC);
-  res[1]=res[2]=res[3]=lgetg(1,t_VEC);
+  gel(res,1) = gel(res,2) = gel(res,3) = cgetg(1,t_VEC);
   gel(res,4) = sreg;
   gel(res,5) = classgp;
   gel(res,6) = S; ls=lg(S);
