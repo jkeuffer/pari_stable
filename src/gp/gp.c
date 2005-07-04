@@ -1815,7 +1815,7 @@ main(int argc, char **argv)
   INIT_SIG_on;
   pari_sig_init(gp_sighandler);
 #ifdef READLINE
-  if (GP_DATA->flags & USE_READLINE) init_readline();
+  init_readline();
 #endif
   whatnow_fun = whatnow;
   sigint_fun = gp_sigint_fun;

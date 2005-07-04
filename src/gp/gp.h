@@ -23,6 +23,7 @@ void aide(char *s, int flag);
 int  get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F);
 void gp_output(GEN z, gp_data *G);
 void hit_return(void);
+void init_readline(void);
 void init80col(long n);
 void pari_addfunctions(module **modlist_p, entree *func, char **help);
 void recover(int flag);
@@ -36,20 +37,7 @@ void update_logfile(const char *prompt, const char *s);
 #define h_APROPOS 2
 #define h_RL      4
 
-/* prompts */
-#define DFT_PROMPT "? "
-#define BREAK_LOOP_PROMPT "break> "
-#define COMMENTPROMPT "comment> "
-#define CONTPROMPT ""
-#define DFT_INPROMPT ""
-
 /* readline completions */
-typedef struct default_type {
-  char *name;
-  void *fun;
-} default_type;
-
-extern default_type gp_default_list[];
 extern char *keyword_list[];
 
 /* TeXmacs */

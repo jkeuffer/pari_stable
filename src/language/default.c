@@ -15,7 +15,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #include "pari.h"
 #include "paripriv.h"
 #include "anal.h"
-#include "../gp/gp.h"
 
 #ifdef HAS_STRFTIME
 #  include <time.h>
@@ -493,7 +492,6 @@ sd_rl(const char *v, int flag)
   GEN res = sd_ulong(v,flag,"readline", &readline_state, 0, 7, (char**)msg);
 
 #ifdef READLINE
-  if (*v && *v != '0') init_readline();
   if (o_readline_state != readline_state)
     (void)sd_gptoggle(readline_state? "1": "0", d_SILENT, "readline", USE_READLINE);
 #endif

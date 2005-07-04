@@ -162,6 +162,19 @@ extern ulong readline_state;
 #define DO_MATCHED_INSERT	2
 #define DO_ARGS_COMPLETE	4
 
+typedef struct default_type {
+  char *name;
+  void *fun;
+} default_type;
+extern default_type gp_default_list[];
+
+/* prompts */
+#define DFT_PROMPT "? "
+#define BREAK_LOOP_PROMPT "break> "
+#define COMMENTPROMPT "comment> "
+#define CONTPROMPT ""
+#define DFT_INPROMPT ""
+
 /* gp_colors */
 void decode_color(int n, int *c);
 #define c_NONE 0xffffUL

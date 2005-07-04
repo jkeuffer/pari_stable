@@ -359,7 +359,6 @@ GEN   gpreadseq(char *c, int strict);
 void  init_defaults(int force);
 void  init_graph(void);
 void  initout(int initerr);
-void  init_readline(void);
 char* itostr(GEN x, int minus);
 void  kill_from_hashlist(entree *ep, long n);
 void  member_err(char *s);
