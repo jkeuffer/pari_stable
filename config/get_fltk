@@ -21,6 +21,7 @@ if test -n "$with_fltk"; then
     fi;;
   esac
   if test -n "$FLTKDIR"; then
+    case "$FLTKDIR" in /) FLTKDIR=;; esac
     echo "Using FLTK library, FLTKDIR = $FLTKDIR"
   else
     echo "### FLTK not found. Building without FLTK support"

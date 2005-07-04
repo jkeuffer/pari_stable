@@ -111,6 +111,9 @@ while test $# -gt 0; do
   esac
   shift
 done
+# The behaviour of $prefix/lib --> '//lib' is implementation-dependent
+case "$prefix" in /) prefix=;; esac
+case "$share_prefix" in /) prefix=;; esac
 
 case "$error" in
 true) cat >&2 <<EOT

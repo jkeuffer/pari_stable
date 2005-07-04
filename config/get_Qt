@@ -22,6 +22,7 @@ if test -n "$with_qt"; then
     fi;;
   esac
   if test -n "$QTDIR"; then
+    case "$QTDIR" in /) QTDIR=;; esac
     exe=$osname-$arch-Qt$$
     if ($CC $extraflag -o $exe ansi.c -L$QTDIR/lib -lqt-mt 2>/dev/null); then
       QTLIB=-lqt-mt
