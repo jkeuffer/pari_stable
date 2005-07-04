@@ -1919,20 +1919,20 @@ findmindisc(GEN *py, GEN *pa)
   GEN v, dmin, z, b, discs, y = *py, a = *pa;
   long i,k, l = lg(y);
 
-  if (l == 2) { *py = (GEN)y[1]; *pa = (GEN)a[1]; return; }
+  if (l == 2) { *py = gel(y,1); *pa = gel(a,1); return; }
 
   discs = cgetg(l,t_VEC);
-  for (i=1; i<l; i++) discs[i] = labsi(ZX_disc((GEN)y[i]));
+  for (i=1; i<l; i++) gel(discs,i) = absi(ZX_disc(gel(y,i)));
   v = sindexsort(discs);
   k = v[1];
-  dmin = (GEN)discs[k];
-  z    = (GEN)y[k];
-  b = (GEN)a[k];
+  dmin = gel(discs,k);
+  z    = gel(y,k);
+  b = gel(a,k);
   for (i=2; i<l; i++)
   {
     k = v[i];
-    if (!equalii((GEN)discs[k], dmin)) break;
-    if (gpolcomp((GEN)y[k],z) < 0) { z = (GEN)y[k]; b = (GEN)a[k]; }
+    if (!equalii(gel(discs,k), dmin)) break;
+    if (gpolcomp(gel(y,k),z) < 0) { z = gel(y,k); b = gel(a,k); }
   }
   *py = z; *pa = b;
 }

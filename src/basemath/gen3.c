@@ -540,11 +540,13 @@ gmodulsg(long x, GEN y)
 
   switch(typ(y))
   {
-    case t_INT: z=cgetg(3,t_INTMOD);
-      z[1]=labsi(y); z[2]=lmodsi(x,y); return z;
+    case t_INT: z = cgetg(3,t_INTMOD);
+      gel(z,1) = absi(y); 
+      gel(z,2) = modsi(x,y); return z;
 
-    case t_POL: z=cgetg(3,t_POLMOD);
-      z[1]=lcopy(y); z[2]=lstoi(x); return z;
+    case t_POL: z = cgetg(3,t_POLMOD);
+      gel(z,1) = gcopy(y);
+      gel(z,2) = stoi(x); return z;
   }
   err(operf,"%",stoi(x),y); return NULL; /* not reached */
 }
@@ -552,9 +554,10 @@ gmodulsg(long x, GEN y)
 GEN
 gmodulss(long x, long y)
 {
-  GEN z=cgetg(3,t_INTMOD);
-
-  y=labs(y); z[1]=lstoi(y); z[2]=(long)modss(x, y); return z;
+  GEN z = cgetg(3,t_INTMOD);
+  y = labs(y);
+  gel(z,1) = stoi(y);
+  gel(z,2) = modss(x, y); return z;
 }
 
 static GEN 
@@ -609,20 +612,19 @@ gmodulcp(GEN x,GEN y)
   }
   switch(typ(y))
   {
-    case t_INT:
-      z=cgetg(3,t_INTMOD);
-      z[1] = labsi(y);
-      z[2] = (long)Rg_to_Fp(x,y); return z;
+    case t_INT: z = cgetg(3,t_INTMOD);
+      gel(z,1) = absi(y);
+      gel(z,2) = Rg_to_Fp(x,y); return z;
 
-    case t_POL: z=cgetg(3,t_POLMOD);
-      z[1] = lcopy(y);
+    case t_POL: z = cgetg(3,t_POLMOD);
+      gel(z,1) = gcopy(y);
       if (is_scalar_t(tx))
       {
-        z[2] = (lg(y) > 3)? lcopy(x): lmod(x,y);
+        gel(z,2) = (lg(y) > 3)? gcopy(x): gmod(x,y);
         return z;
       }
       if (tx!=t_POL && tx != t_RFRAC && tx!=t_SER) break;
-      z[2]=(long)specialmod(x,y); return z;
+      gel(z,2) = specialmod(x,y); return z;
   }
   err(operf,"%",x,y); return NULL; /* not reached */
 }
@@ -960,8 +962,8 @@ ginv(GEN x)
       if (is_pm1(x)) return icopy(x);
       s = signe(x); if (!s) err(gdiver);
       z = cgetg(3,t_FRAC);
-      z[1] = (long)(s<0? gen_m1: gen_1);
-      z[2] = labsi(x); return z;
+      gel(z,1) = s<0? gen_m1: gen_1;
+      gel(z,2) = absi(x); return z;
 
     case t_REAL:
       return divsr(1,x);

@@ -1967,8 +1967,8 @@ gdiv(GEN x, GEN y)
         if (!s) err(gdiver);
         if (signe(x) < 0) s = -s;
         z = cgetg(3, t_FRAC);
-        z[1] = (long)(s<0? gen_m1: gen_1);
-        z[2] = labsi(y); return z;
+        gel(z,1) = s<0? gen_m1: gen_1;
+        gel(z,2) = absi(y); return z;
       }
       return gred_frac2(x,y);
 

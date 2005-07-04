@@ -35,10 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define coeff(a,i,j)  ( ( (GEN) ( (GEN) (a))[j]) [i])
 #define gcoeff(a,i,j) (((GEN**)(a))[j][i])
 
-#define labsi   (long)absi
-#define labsr   (long)absr
-#define lach    (long)gach
-#define lacos   (long)gacos
 #define laddgs  (long)gaddgs
 #define laddii  (long)addii
 #define laddir  (long)addir

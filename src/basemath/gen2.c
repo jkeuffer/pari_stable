@@ -1034,8 +1034,8 @@ gabs(GEN x, long prec)
       return mpabs(x);
 
     case t_FRAC: y=cgetg(3, t_FRAC);
-      y[1]=labsi((GEN)x[1]);
-      y[2]=licopy((GEN)x[2]); return y;
+      gel(y,1) = absi( gel(x,1));
+      gel(y,2) = icopy(gel(x,2)); return y;
 
     case t_COMPLEX:
       av=avma; p1=cxnorm(x);
