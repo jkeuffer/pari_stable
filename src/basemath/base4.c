@@ -1229,7 +1229,7 @@ famat_reduce(GEN fa)
     E[k] = e[L[i]];
     if (k > 1 && elt_egal(gel(G,k), gel(G,k-1)))
     {
-      E[k-1] = laddii(gel(E,k), gel(E,k-1));
+      gel(E,k-1) = addii(gel(E,k), gel(E,k-1));
       k--;
     }
   }

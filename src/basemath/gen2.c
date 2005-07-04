@@ -1836,7 +1836,7 @@ static void
 listaffect(GEN L, long index, GEN object)
 {
   if (index < lgeflist(L) && isclone(L[index])) gunclone(gel(L,index));
-  L[index] = lclone(object);
+  gel(L,index) = gclone(object);
 }
 
 void
@@ -1879,7 +1879,7 @@ listinsert(GEN L, GEN object, long index)
   l++; if (l > lg(L)) err(talker,"no more room in this list");
 
   for (i=l-2; i > index; i--) L[i+1] = L[i];
-  L[index+1] = lclone(object);
+  gel(L,index+1) = gclone(object);
   L[1] = evallgeflist(l);
   return gel(L,index+1);
 }

@@ -146,18 +146,18 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
   code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<lx-1; i+=2)
   {
-    p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
-    p2[2] = lmul((GEN)a[i],(GEN)a[i+1]);
-    p2[3] = ladd((GEN)a[i],(GEN)a[i+1]);
-    if (plus == 0) p2[3] = lneg((GEN)p2[3]);
-    p2[4] = (long)L; p2[1] = code;
+    p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
+    gel(p2,2) = gmul(gel(a,i),gel(a,i+1));
+    gel(p2,3) = gadd(gel(a,i),gel(a,i+1));
+    if (plus == 0) gel(p2,3) = gneg(gel(p2,3));
+    gel(p2,4) = L; p2[1] = code;
   }
   if (i < lx)
   {
-    p2 = cgetg(4,t_POL); p1[k++] = (long)p2;
+    p2 = cgetg(4,t_POL); gel(p1,k++) = p2;
     p2[1] = code = evalsigne(1)|evalvarn(v);
-    p2[2] = plus? a[i]: lneg((GEN)a[i]);
-    p2[3] = (long)L;
+    p2[2] = plus? a[i]: lneg(gel(a,i));
+    gel(p2,3) = L;
   }
   setlg(p1, k); return divide_conquer_prod(p1, gmul);
 }
@@ -179,19 +179,19 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
   code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<r1; i+=2)
   {
-    GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
-    p2[2] = lmul((GEN)a[i],(GEN)a[i+1]);
-    p2[3] = lneg(gadd((GEN)a[i],(GEN)a[i+1]));
-    p2[4] = (long)gen_1; p2[1] = code;
+    GEN p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
+    gel(p2,2) = gmul(gel(a,i),gel(a,i+1));
+    gel(p2,3) = gneg(gadd(gel(a,i),gel(a,i+1)));
+    gel(p2,4) = gen_1; p2[1] = code;
   }
   if (i < r1+1)
-    p1[k++] = ladd(polx[v], gneg((GEN)a[i]));
+    p1[k++] = ladd(polx[v], gneg(gel(a,i)));
   for (i=r1+1; i<lx; i++)
   {
-    GEN p2 = cgetg(5,t_POL); p1[k++] = (long)p2;
-    p2[2] = lnorm((GEN)a[i]);
-    p2[3] = lneg(gtrace((GEN)a[i]));
-    p2[4] = (long)gen_1; p2[1] = code;
+    GEN p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
+    gel(p2,2) = gnorm(gel(a,i));
+    gel(p2,3) = gneg(gtrace(gel(a,i)));
+    gel(p2,4) = gen_1; p2[1] = code;
   }
   setlg(p1, k); return divide_conquer_prod(p1, gmul);
 }
@@ -211,11 +211,11 @@ mathilbert(long n) /* Hilbert matrix of order n */
   p = cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
-    p[j] = lgetg(n+1,t_COL);
+    gel(p,j) = cgetg(n+1,t_COL);
     for (i=1+(j==1); i<=n; i++)
-      coeff(p,i,j) = (long)mkfrac(gen_1, utoipos(i+j-1));
+      gcoeff(p,i,j) = mkfrac(gen_1, utoipos(i+j-1));
   }
-  if (n) coeff(p,1,1) = (long)gen_1;
+  if (n) gcoeff(p,1,1) = gen_1;
   return p;
 }
 
@@ -229,7 +229,7 @@ matqpascal(long n, GEN q)
 
   if (n<0) n = -1;
   n++; m = cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++) m[j] = lgetg(n+1,t_COL);
+  for (j=1; j<=n; j++) gel(m,j) = cgetg(n+1,t_COL);
   if (q)
   {
     I = (n+1)/2;
@@ -238,19 +238,19 @@ matqpascal(long n, GEN q)
   }
   for (i=1; i<=n; i++)
   {
-    I = (i+1)/2; coeff(m,i,1)= (long)gen_1;
+    I = (i+1)/2; gcoeff(m,i,1)= gen_1;
     if (q)
     {
       for (j=2; j<=I; j++)
-        coeff(m,i,j) = ladd(gmul(qpow[j],gcoeff(m,i-1,j)), gcoeff(m,i-1,j-1));
+        gcoeff(m,i,j) = gadd(gmul(qpow[j],gcoeff(m,i-1,j)), gcoeff(m,i-1,j-1));
     }
     else
     {
       for (j=2; j<=I; j++)
-        coeff(m,i,j) = laddii(gcoeff(m,i-1,j), gcoeff(m,i-1,j-1));
+        gcoeff(m,i,j) = addii(gcoeff(m,i-1,j), gcoeff(m,i-1,j-1));
     }
-    for (   ; j<=i; j++) coeff(m,i,j) = coeff(m,i,i+1-j);
-    for (   ; j<=n; j++) coeff(m,i,j) = (long)gen_0;
+    for (   ; j<=i; j++) gcoeff(m,i,j) = gcoeff(m,i,i+1-j);
+    for (   ; j<=n; j++) gcoeff(m,i,j) = gen_0;
   }
   return gerepilecopy(av, m);
 }
@@ -277,7 +277,7 @@ laplace(GEN x)
   p1=mpfact(ec); y[1]=x[1];
   for (i=2; i<l; i++)
   {
-    y[i]=lmul(p1,(GEN)x[i]);
+    gel(y,i) = gmul(p1,gel(x,i));
     ec++; p1=mulsi(ec,p1);
   }
   return gerepilecopy(av,y);
@@ -306,7 +306,7 @@ convol(GEN x, GEN y)
 
   z = cgetg(lx - ex, t_SER);
   z[1] = evalsigne(1) | evalvalp(ex) | evalvarn(vx);
-  for (j = ex+2; j<lx; j++) z[j-ex] = lmul((GEN)x[j],(GEN)y[j]);
+  for (j = ex+2; j<lx; j++) z[j-ex] = lmul(gel(x,j),gel(y,j));
   return normalize(z);
 }
 
@@ -329,11 +329,11 @@ gprec(GEN x, long l)
       return rtor(x, ndec2prec(l));
 
     case t_PADIC:
-      if (!signe(x[4])) return zeropadic((GEN)x[2], l+precp(x));
+      if (!signe(x[4])) return zeropadic(gel(x,2), l+precp(x));
       y=cgetg(5,t_PADIC); copyifstack(x[2], y[2]);
       y[1]=x[1]; setprecp(y,l);
-      y[3]=lpowgs((GEN)x[2],l);
-      y[4]=lmodii((GEN)x[4], (GEN)y[3]);
+      gel(y,3) = gpowgs(gel(x,2),l);
+      gel(y,4) = modii(gel(x,4), gel(y,3));
       break;
 
     case t_SER:
@@ -341,14 +341,14 @@ gprec(GEN x, long l)
       y=cgetg(l+2,t_SER); y[1]=x[1]; l++; i=l;
       lx = lg(x);
       if (l>=lx)
-	for ( ; i>=lx; i--) y[i]= (long)gen_0;
-      for ( ; i>=2; i--) y[i]=lcopy((GEN)x[i]);
+	for ( ; i>=lx; i--) gel(y,i) = gen_0;
+      for ( ; i>=2; i--) gel(y,i) = gcopy(gel(x,i));
       break;
 
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) y[i] = lprec((GEN)x[i],l);
+      for (; i<lx; i++) gel(y,i) = gprec(gel(x,i),l);
       break;
     default: y = gcopy(x);
   }
@@ -369,7 +369,7 @@ gprec_w(GEN x, long pr)
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) y[i] = (long)gprec_w((GEN)x[i],pr);
+      for (; i<lx; i++) gel(y,i) = gprec_w(gel(x,i),pr);
       break;
     default: return x;
   }
@@ -391,7 +391,7 @@ gprec_wtrunc(GEN x, long pr)
     case t_COMPLEX: case t_POLMOD: case t_POL: case t_RFRAC:
     case t_VEC: case t_COL: case t_MAT:
       y = init_gen_op(x, tx, &lx, &i);
-      for (; i<lx; i++) y[i]=(long)gprec_wtrunc((GEN)x[i],pr);
+      for (; i<lx; i++) gel(y,i) = gprec_wtrunc(gel(x,i),pr);
       break;
     default: return x;
   }
@@ -411,7 +411,7 @@ polrecip(GEN x)
   GEN y = cgetg(lx,t_POL);
 
   if (typ(x) != t_POL) err(typeer,"polrecip");
-  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = lcopy((GEN)x[j]);
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = lcopy(gel(x,j));
   return normalizepol_i(y,lx);
 }
 
@@ -471,7 +471,7 @@ binomial(GEN n, long k)
     else
     {
       y = cgetg(k+1,t_VEC);
-      for (i=1; i<=k; i++) y[i] = lsubis(n,i-1);
+      for (i=1; i<=k; i++) gel(y,i) = subis(n,i-1);
       y = divide_conquer_prod(y,mulii);
     }
     y = diviiexact(y, mpfact(k));
@@ -479,7 +479,7 @@ binomial(GEN n, long k)
   else
   {
     y = cgetg(k+1,t_VEC);
-    for (i=1; i<=k; i++) y[i] = lsubgs(n,i-1);
+    for (i=1; i<=k; i++) gel(y,i) = gsubgs(n,i-1);
     y = divide_conquer_prod(y,gmul);
     y = gdiv(y, mpfact(k));
   }
@@ -519,7 +519,7 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
   if (!xa)
   {
     xa = cgetg(n+1, t_VEC);
-    for (i=1; i<=n; i++) xa[i] = (long)utoipos(i);
+    for (i=1; i<=n; i++) gel(xa,i) = utoipos(i);
     xa++;
   }
   if (is_scalar_t(tx) && tx != t_INTMOD && tx != t_PADIC && tx != t_POLMOD)
@@ -527,26 +527,26 @@ polint_i(GEN xa, GEN ya, GEN x, long n, GEN *ptdy)
     GEN dif = NULL, dift;
     for (i=0; i<n; i++)
     {
-      dift = gabs(gsub(x,(GEN)xa[i]), MEDDEFAULTPREC);
+      dift = gabs(gsub(x,gel(xa,i)), MEDDEFAULTPREC);
       if (!dif || gcmp(dift,dif)<0) { ns = i; dif = dift; }
     }
   }
   c = new_chunk(n);
   d = new_chunk(n); for (i=0; i<n; i++) c[i] = d[i] = ya[i];
-  y = (GEN)d[ns--];
+  y = gel(d,ns--);
   dy = NULL; tetpil = 0; /* gcc -Wall */
   for (m=1; m<n; m++)
   {
     for (i=0; i<n-m; i++)
     {
-      GEN ho = gsub((GEN)xa[i],x);
-      GEN hp = gsub((GEN)xa[i+m],x), den = gsub(ho,hp);
+      GEN ho = gsub(gel(xa,i),x);
+      GEN hp = gsub(gel(xa,i+m),x), den = gsub(ho,hp);
       if (gcmp0(den)) err(talker,"two abcissas are equal in polint");
-      den = gdiv(gsub((GEN)c[i+1],(GEN)d[i]), den);
-      c[i] = lmul(ho,den);
-      d[i] = lmul(hp,den);
+      den = gdiv(gsub(gel(c,i+1),gel(d,i)), den);
+      gel(c,i) = gmul(ho,den);
+      gel(d,i) = gmul(hp,den);
     }
-    dy = (2*(ns+1) < n-m)? (GEN)c[ns+1]: (GEN)d[ns--];
+    dy = (2*(ns+1) < n-m)? gel(c,ns+1): gel(d,ns--);
     tetpil = avma; y = gadd(y,dy);
   }
   if (!ptdy) y = gerepile(av,tetpil,y);
@@ -573,7 +573,7 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
   if (lx <= 2)
   {
     if (lx == 1) err(talker,"no data in polinterpolate");
-    ya=gcopy((GEN)ya[1]); if (ptdy) *ptdy = ya;
+    ya=gcopy(gel(ya,1)); if (ptdy) *ptdy = ya;
     return ya;
   }
   if (!x) x = polx[0];
@@ -597,16 +597,16 @@ gtoset(GEN x)
   if (!is_vec_t(tx))
   {
     if (tx != t_LIST)
-      { y=cgetg(2,t_VEC); y[1]=(long)GENtocanonicalstr(x); return y; }
+      { y=cgetg(2,t_VEC); gel(y,1) = GENtocanonicalstr(x); return y; }
     lx = lgeflist(x)-1; x++;
   }
   if (lx==1) return cgetg(1,t_VEC);
   av=avma; y=cgetg(lx,t_VEC);
-  for (i=1; i<lx; i++) y[i]=(long)GENtocanonicalstr((GEN)x[i]);
+  for (i=1; i<lx; i++) gel(y,i) = GENtocanonicalstr(gel(x,i));
   y = sort(y);
   c=1;
   for (i=2; i<lx; i++)
-    if (!gequal((GEN)y[i], (GEN)y[c])) y[++c] = y[i];
+    if (!gequal(gel(y,i), gel(y,c))) y[++c] = y[i];
   setlg(y,c+1); return gerepilecopy(av,y);
 }
 
@@ -618,7 +618,7 @@ setisset(GEN x)
   if (typ(x)!=t_VEC) return 0;
   lx=lg(x)-1; if (!lx) return 1;
   for (i=1; i<lx; i++)
-    if (typ(x[i]) != t_STR || gcmp((GEN)x[i+1],(GEN)x[i])<=0) return 0;
+    if (typ(x[i]) != t_STR || gcmp(gel(x,i+1),gel(x,i))<=0) return 0;
   return typ(x[i]) == t_STR;
 }
 
@@ -639,7 +639,7 @@ gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN))
   li=1; ri=lx-1;
   do
   {
-    j = (ri+li)>>1; fl = cmp((GEN)x[j],y);
+    j = (ri+li)>>1; fl = cmp(gel(x,j),y);
     if (!fl) return flag? 0: j;
     if (fl<0) li=j+1; else ri=j-1;
   } while (ri>=li);
@@ -673,7 +673,7 @@ ZV_sort_uniq(GEN L)
   L = vecpermute(L, perm);
   c = 1;
   for (i = 2; i < l; i++)
-    if (!equalii((GEN)L[i], (GEN)L[c])) L[++c] = L[i];
+    if (!equalii(gel(L,i), gel(L,c))) L[++c] = L[i];
   setlg(L, c+1); return gerepilecopy(av, L);
 }
 
@@ -706,7 +706,7 @@ setintersect(GEN x, GEN y)
   if (!setisset(x) || !setisset(y)) err(talker,"not a set in setintersect");
   lx=lg(x); z=cgetg(lx,t_VEC); c=1;
   for (i=1; i<lx; i++)
-    if (setsearch(y, (GEN)x[i], 0)) z[c++] = x[i];
+    if (setsearch(y, gel(x,i), 0)) z[c++] = x[i];
   setlg(z,c); return gerepilecopy(av,z);
 }
 
@@ -721,7 +721,7 @@ gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN))
   {
     for(find=0; j < lg(set2); j++)
     {
-      int s=cmp((GEN)set1[i],(GEN)set2[j]);
+      int s=cmp(gel(set1,i),gel(set2,j));
       if (s<0)  break ;
       if (s>0)  continue;
       find=1;
@@ -753,7 +753,7 @@ static long
 dirval(GEN x)
 {
   long i = 1, lx = lg(x);
-  while (i < lx && gcmp0((GEN)x[i])) i++;
+  while (i < lx && gcmp0(gel(x,i))) i++;
   return i;
 }
 
@@ -772,16 +772,16 @@ dirmul(GEN x, GEN y)
   z = zerovec(lz-1);
   for (j=dx; j<lx; j++)
   {
-    GEN c = (GEN)x[j];
+    GEN c = gel(x,j);
     if (gcmp0(c)) continue;
     if (gcmp1(c))
-      for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],(GEN)y[k]);
+      for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gel(y,k));
     else
     {
       if (gcmp_1(c))
-        for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=lsub((GEN)z[i],(GEN)y[k]);
+        for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gsub(gel(z,i),gel(y,k));
       else
-        for (k=dy,i=j*dy; i<lz; i+=j,k++) z[i]=ladd((GEN)z[i],gmul(c,(GEN)y[k]));
+        for (k=dy,i=j*dy; i<lz; i+=j,k++) gel(z,i) = gadd(gel(z,i),gmul(c,gel(y,k)));
     }
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -803,21 +803,21 @@ dirdiv(GEN x, GEN y)
   dx = dirval(x); lx = lg(x);
   dy = dirval(y); ly = lg(y);
   if (dy != 1 || ly == 1) err(talker,"not an invertible dirseries in dirdiv");
-  lz = min(lx,ly*dx); p1 = (GEN)y[1];
+  lz = min(lx,ly*dx); p1 = gel(y,1);
   if (!gcmp1(p1)) { y = gdiv(y,p1); x = gdiv(x,p1); } else x = shallowcopy(x);
   z = zerovec(lz-1);
   for (j=dx; j<lz; j++)
   {
-    p1=(GEN)x[j]; z[j]=(long)p1;
+    p1=gel(x,j); gel(z,j) = p1;
     if (gcmp0(p1)) continue;
     if (gcmp1(p1))
-      for (i=j+j; i<lz; i+=j) x[i]=lsub((GEN)x[i],(GEN)y[i/j]);
+      for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),(GEN)y[i/j]);
     else
     {
       if (gcmp_1(p1))
-        for (i=j+j; i<lz; i+=j) x[i]=ladd((GEN)x[i],(GEN)y[i/j]);
+        for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),(GEN)y[i/j]);
       else
-        for (i=j+j; i<lz; i+=j) x[i]=lsub((GEN)x[i],gmul(p1,(GEN)y[i/j]));
+        for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,(GEN)y[i/j]));
     }
   }
   return gerepilecopy(av,z);
@@ -869,7 +869,7 @@ numtoperm(long n, GEN x)
     v[i] = r;
   }
   avma = av;
-  for (i=1; i<=n; i++) v[i] = lstoi(v[i]);
+  for (i=1; i<=n; i++) gel(v,i) = stoi(v[i]);
   return v;
 }
 
@@ -915,7 +915,7 @@ modreverse_i(GEN a, GEN T)
 
   if (n <= 0) return gcopy(a);
   if (n == 1)
-    return gerepileupto(av, gneg(gdiv((GEN)T[2], (GEN)T[3])));
+    return gerepileupto(av, gneg(gdiv(gel(T,2), gel(T,3))));
   if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
 
   y = RgXV_to_RgM(RgX_powers(a,T,n-1), n);
@@ -930,13 +930,13 @@ polymodrecip(GEN x)
   GEN T, a, y;
 
   if (typ(x)!=t_POLMOD) err(talker,"not a polmod in modreverse");
-  T = (GEN)x[1];
-  a = (GEN)x[2];
+  T = gel(x,1);
+  a = gel(x,2);
   n = degpol(T); if (n <= 0) return gcopy(x);
   v = varn(T);
   y = cgetg(3,t_POLMOD);
-  y[1] = (n==1)? lsub(polx[v], a): (long)caract2(T, a, v);
-  y[2] = (long)modreverse_i(a, T); return y;
+  gel(y,1) = (n==1)? gsub(polx[v], a): caract2(T, a, v);
+  gel(y,2) = modreverse_i(a, T); return y;
 }
 
 /********************************************************************/
@@ -998,9 +998,9 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   if (lx==2)
   {
     if      (flag & cmp_C)   y[1] = 1;
-    else if (flag & cmp_IND) y[1] = (long)gen_1;
+    else if (flag & cmp_IND) gel(y,1) = gen_1;
     else if (tx == t_VECSMALL) y[1] = x[1];
-    else y[1] = lcopy((GEN)x[1]); 
+    else gel(y,1) = gcopy(gel(x,1)); 
     return y;
   }
   if (!cmp) cmp = &longcmp;
@@ -1016,7 +1016,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
       indxt = indx[ir]; indx[ir] = indx[1];
       if (--ir == 1) break; /* DONE */
     }
-    q = (GEN)x[indxt]; i = l;
+    q = gel(x,indxt); i = l;
     for (j=i<<1; j<=ir; j<<=1)
     {
       if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) < 0) j++;
@@ -1037,11 +1037,11 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   if (flag & cmp_C)
     for (i=1; i<lx; i++) y[i] = indx[i];
   else if (flag & cmp_IND)
-    for (i=1; i<lx; i++) y[i] = (long)utoipos(indx[i]);
+    for (i=1; i<lx; i++) gel(y,i) = utoipos(indx[i]);
   else if (tx == t_VECSMALL)
     for (i=1; i<lx; i++) y[i] = x[indx[i]];
   else
-    for (i=1; i<lx; i++) y[i] = lcopy((GEN)x[indx[i]]);
+    for (i=1; i<lx; i++) gel(y,i) = gcopy((GEN)x[indx[i]]);
   free(indx); return y;
 }
 
@@ -1056,7 +1056,7 @@ gen_vecsort(GEN x, GEN k, long flag)
   t = typ(k); vcmp_cmp = sort_fun(flag);
   if (t==t_INT)
   {
-    tmp[1] = (long)k; k = tmp;
+    gel(tmp,1) = k; k = tmp;
     vcmp_lk = 2;
   }
   else
@@ -1068,7 +1068,7 @@ gen_vecsort(GEN x, GEN k, long flag)
   vcmp_k = (GEN)gpmalloc(vcmp_lk * sizeof(long));
   for (i=1; i<vcmp_lk; i++)
   {
-    j = itos((GEN)k[i]);
+    j = itos(gel(k,i));
     if (j<=0) err(talker,"negative index in vecsort");
     vcmp_k[i]=j; if (j>l) l=j;
   }
@@ -1078,7 +1078,7 @@ gen_vecsort(GEN x, GEN k, long flag)
   {
     t = typ(x[j]);
     if (! is_vec_t(t)) err(typeer,"vecsort");
-    if (lg((GEN)x[j]) <= l) err(talker,"index too large in vecsort");
+    if (lg(gel(x,j)) <= l) err(talker,"index too large in vecsort");
   }
   x = gen_sort(x, flag, veccmp);
   free(vcmp_k); return x;
@@ -1142,7 +1142,7 @@ tablesearch(GEN T, GEN x, int (*cmp)(GEN,GEN))
 
   while (u>=l)
   {
-    i = (l+u)>>1; s = cmp(x,(GEN)T[i]);
+    i = (l+u)>>1; s = cmp(x,gel(T,i));
     if (!s) return i;
     if (s<0) u=i-1; else l=i+1;
   }
@@ -1155,7 +1155,7 @@ cmp_vecint(GEN x, GEN y)
 {
   long fl,i, lx = lg(x);
   for (i=1; i<lx; i++)
-    if (( fl = cmpii((GEN)x[i], (GEN)y[i]) )) return fl;
+    if (( fl = cmpii(gel(x,i), gel(y,i)) )) return fl;
   return 0;
 }
 
@@ -1165,12 +1165,12 @@ cmp_prime_over_p(GEN x, GEN y)
 {
   int k = mael(x,4,2) - mael(y,4,2); /* diff. between residue degree */
   return k? ((k > 0)? 1: -1)
-          : cmp_vecint((GEN)x[2], (GEN)y[2]);
+          : cmp_vecint(gel(x,2), gel(y,2));
 }
 
 int
 cmp_prime_ideal(GEN x, GEN y)
 {
-  int k = cmpii((GEN)x[1], (GEN)y[1]);
+  int k = cmpii(gel(x,1), gel(y,1));
   return k? k: cmp_prime_over_p(x,y);
 }

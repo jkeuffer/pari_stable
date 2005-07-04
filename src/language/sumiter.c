@@ -62,7 +62,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
   if (is_vec_t(typ(s)))
   {
     v = s; s = gen_0;
-    for (i=lg(v)-1; i; i--) s = gadd(s,(GEN)v[i]);
+    for (i=lg(v)-1; i; i--) s = gadd(s,gel(v,i));
   }
   ss = gsigne(s);
   if (!ss) err(talker, "step equal to zero in forstep");
@@ -75,7 +75,7 @@ forstep(entree *ep, GEN a, GEN b, GEN s, char *ch)
     if (v)
     {
       if (++i >= lg(v)) i = 1;
-      s = (GEN)v[i];
+      s = gel(v,i);
     }
     a = (GEN) ep->value; a = gadd(a,s);
 
@@ -111,7 +111,7 @@ update_p(entree *ep, byteptr *ptr, ulong prime[])
   ulong a, c;
 
   if (typ(z) == t_INT) a = 1; else { z = gceil(z); a = 0; }
-  if (lgefint(z) > 3) { prime[2] = (long)MAXULONG; /* = infinity */ return; }
+  if (lgefint(z) > 3) { prime[2] = MAXULONG; /* = infinity */ return; }
   a += itou(z); c = prime[2];
   if (c < a)
     prime[2] = sinitp(a, c, ptr); /* increased */
@@ -379,7 +379,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
   d->M = (GEN*)cgetg(l,t_VEC);
   for (i = 1; i < l; i++)
   {
-    GEN a, e = (GEN)x[i], m = (GEN)e[1], M = (GEN)e[2];
+    GEN a, e = gel(x,i), m = gel(e,1), M = gel(e,2);
     tx = typ(e);
     if (! is_vec_t(tx) || lg(e)!=3)
       err(talker,"not a vector of two-component vectors in forvec");
@@ -685,7 +685,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
   if (n < b) b = n;
 
   y = cgetg(n+1,t_VEC); av = avma;
-  x = zerovec(n); x[1] = (long)gen_1; p = prime[2];
+  x = zerovec(n); gel(x,1) = gen_1; p = prime[2];
   while (p <= b)
   {
     s = eval(prime, E);
@@ -706,7 +706,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
       if (tx != t_POL) err(typeer,"direuler");
       lx = degpol(polnum);
       if (lx < 0) err(talker,"constant term != 1 in direuler");
-      c = (GEN)polnum[2];
+      c = gel(polnum,2);
       if (!gcmp1(c))
       {
         if (!gcmp_1(c)) err(talker,"constant term != 1 in direuler");
@@ -717,10 +717,10 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
       q = p; qlim = n/p;
       for (j = 1; q<=n && j<=lx; j++)
       {
-	c = (GEN)polnum[j+2];
+	c = gel(polnum,j+2);
 	if (!gcmp0(c))
 	  for (k=1,k1=q; k1<=n; k1+=q,k++)
-	    x[k1] = ladd((GEN)x[k1], gmul(c,(GEN)y[k]));
+	    gel(x,k1) = gadd(gel(x,k1), gmul(c,gel(y,k)));
         if (q > qlim) break;
 	q *= p;
       }
@@ -733,7 +733,7 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
     else
     {
       if (tx != t_POL) err(typeer,"direuler");
-      c = (GEN)polden[2];
+      c = gel(polden,2);
       if (!gcmp1(c)) err(talker,"constant term != 1 in direuler");
       lx = degpol(polden);
       for (i=p; i<=n; i+=p)
@@ -741,10 +741,10 @@ direuler(void *E, GEN (*eval)(GEN,void*), GEN ga, GEN gb, GEN c)
 	s = gen_0; k = i;
 	for (j = 1; !(k%p) && j<=lx; j++)
 	{
-	  c = (GEN)polden[j+2]; k /= p;
-	  if (!gcmp0(c)) s = gadd(s, gmul(c,(GEN)x[k]));
+	  c = gel(polden,j+2); k /= p;
+	  if (!gcmp0(c)) s = gadd(s, gmul(c,gel(x,k)));
 	}
-	x[i] = lsub((GEN)x[i],s);
+	gel(x,i) = gsub(gel(x,i),s);
       }
     }
     if (low_stack(lim, stack_lim(av,1)))
@@ -782,7 +782,7 @@ vecteur(GEN nmax, entree *ep, char *ch)
   for (i=1; i<=m; i++)
   {
     c[2] = i; p1 = readseq_nobreak(ch);
-    y[i] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
+    gel(y,i) = isonstack(p1)? p1 : forcecopy(p1);
   }
   pop_val(ep); return y;
 }
@@ -831,11 +831,11 @@ matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch)
   push_val(ep2, c2); y = cgetg(m+1,t_MAT);
   for (i=1; i<=m; i++)
   {
-    c2[2] = i; z = cgetg(n+1,t_COL); y[i] = (long)z;
+    c2[2] = i; z = cgetg(n+1,t_COL); gel(y,i) = z;
     for (j=1; j<=n; j++)
     {
       c1[2] = j; p1 = readseq_nobreak(ch);
-      z[j] = isonstack(p1)? (long)p1 : (long)forcecopy(p1);
+      gel(z,j) = isonstack(p1)? p1 : forcecopy(p1);
     }
   }
   pop_val(ep2);
@@ -886,7 +886,7 @@ sumalt2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   s = gen_0;
   for (k=0; k<=N; k++)
   {
-    s = gadd(s, gmul((GEN)pol[k+2], eval(a, E)));
+    s = gadd(s, gmul(gel(pol,k+2), eval(a, E)));
     if (k == N) break;
     a = addsi(1,a);
   }
@@ -987,7 +987,7 @@ sumpos2(void *E, GEN (*eval)(GEN,void*), GEN a, long prec)
   pol = RgX_div_by_X_x(pol, gen_1, &dn);
   for (k=1; k<=lg(pol)-2; k++)
   {
-    GEN p1 = gmul((GEN)pol[k+1],stock[k]);
+    GEN p1 = gmul(gel(pol,k+1),stock[k]);
     if (odd(k)) p1 = gneg_i(p1);
     s = gadd(s,p1);
   }
@@ -1038,18 +1038,18 @@ polzagreel(long n, long m, long prec)
   Bx = coefs_to_pol(3, gen_1, gen_1, gen_0); /* x + x^2 */
   v = cgetg(d+1,t_VEC);
   g = cgetg(d+1,t_VEC);
-  v[d] = (long)gen_1; b = stor(d2, prec);
-  g[d] = (long)b;
+  gel(v,d) = gen_1; b = stor(d2, prec);
+  gel(g,d) = b;
   for (k = 1; k < d; k++)
   {
-    v[d-k] = (long)gen_1;
+    gel(v,d-k) = gen_1;
     for (j=1; j<k; j++)
-      v[d-k+j] = laddii((GEN)v[d-k+j], (GEN)v[d-k+j+1]);
+      gel(v,d-k+j) = addii(gel(v,d-k+j), gel(v,d-k+j+1));
     /* v[d-k+j] = binom(k, j), j = 0..k */
     k2 = k+k; b = divri(mulri(b,mulss(d2-k2+1,d2-k2)), mulss(k2,k2+1));
     for (j=1; j<=k; j++)
-      g[d-k+j] = lmpadd((GEN)g[d-k+j], mulri(b,(GEN)v[d-k+j]));
-    g[d-k] = (long)b;
+      g[d-k+j] = lmpadd(gel(g,d-k+j), mulri(b,gel(v,d-k+j)));
+    gel(g,d-k) = b;
   }
   g = gmul(RgV_to_RgX(g,0), gpowgs(Bx,r));
   for (j=0; j<=r; j++)
@@ -1061,8 +1061,8 @@ polzagreel(long n, long m, long prec)
       h[1] = evalsigne(1);
       h[2] = g[2];
       for (k=1; k<n; k++)
-	h[k+2] = ladd(gmulsg(k+k+1,(GEN)g[k+2]), gmulsg(k<<1,(GEN)g[k+1]));
-      h[n+2] = lmulsg(n<<1, (GEN)g[n+1]);
+	gel(h,k+2) = gadd(gmulsg(k+k+1,gel(g,k+2)), gmulsg(k<<1,gel(g,k+1)));
+      gel(h,n+2) = gmulsg(n<<1, gel(g,n+1));
       g = h;
     }
   }

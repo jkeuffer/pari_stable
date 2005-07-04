@@ -1031,7 +1031,7 @@ readvar()
   const GEN x = expr();
 
   if (typ(x) != t_POL || lg(x) != 4 ||
-    !gcmp0((GEN)x[2]) || !gcmp1((GEN)x[3])) err(varer1,old,mark.start);
+    !gcmp0(gel(x,2)) || !gcmp1(gel(x,3))) err(varer1,old,mark.start);
   return varn(x);
 }
 
@@ -1162,7 +1162,7 @@ any_string()
     else
     {
       char *old = analyseur;
-      res[n++] = (long)expr();
+      gel(res,n++) = expr();
       NO_BREAK("in print()", old);
     }
     if (n == len)
@@ -1255,7 +1255,7 @@ matcell(GEN p, matcomp *C)
           { /* collapse [,c][r] into [r,c] */
             analyseur++;
             r = check_array_index(lg(p[c]));
-            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+            pt = (GEN*)((gel(p,c)) + r); /* &coeff(p,r,c) */
             match(']');
           }
           else
@@ -1275,7 +1275,7 @@ matcell(GEN p, matcomp *C)
           { /* collapse [r,][c] into [r,c] */
             analyseur++;
             c = check_array_index(lg(p));
-            pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+            pt = (GEN*)((gel(p,c)) + r); /* &coeff(p,r,c) */
             match(']');
           }
           else
@@ -1289,7 +1289,7 @@ matcell(GEN p, matcomp *C)
         else
         {
           c = check_array_index(lg(p));
-          pt = (GEN*)(((GEN)p[c]) + r); /* &coeff(p,r,c) */
+          pt = (GEN*)((gel(p,c)) + r); /* &coeff(p,r,c) */
           match(']');
         }
         break;
@@ -1458,7 +1458,7 @@ truc(void)
 	  z = cgetg(m+1,t_MAT); p = n/m + 1;
 	  for (j=1; j<=m; j++)
 	  {
-            GEN c = cgetg(p,t_COL); z[j] = (long)c;
+            GEN c = cgetg(p,t_COL); gel(z,j) = c;
 	    for (i=j; i<=n; i+=m) *++c = lcopy(table[i]);
 	  }
 	  break;
@@ -1589,7 +1589,7 @@ change_compo(pari_sp av, matcomp *c, GEN res)
     for (i=1; i<lg(p); i++)
     {
       GEN p1 = gcoeff(p,c->full_row,i); if (isclone(p1)) killbloc(p1);
-      coeff(p,c->full_row,i) = lclone((GEN)res[i]);
+      gcoeff(p,c->full_row,i) = gclone(gel(res,i));
     }
     return res;
   }
@@ -1706,8 +1706,8 @@ global0()
     entree *ep = varentries[n];
     if (ep && EpVALENCE(ep) == EpGVAR)
     {
-      res=new_chunk(1);
-      res[0]=(long)polx[n]; i++;
+      res = new_chunk(1);
+      gel(res,0) = gel(polx,n); i++;
     }
   }
   if (i) { res = cgetg(1,t_VEC); setlg(res, i+1); }
@@ -1782,10 +1782,10 @@ check_args()
       char *old = ++analyseur;
       pari_sp av = avma;
       skipexpr();
-      cell[1] = lclone(_strtoGENstr(old, analyseur-old));
+      gel(cell,1) = gclone(_strtoGENstr(old, analyseur-old));
       avma = av;
     }
-    else cell[1] = (long)gen_0;
+    else gel(cell,1) = gen_0;
   }
   analyseur++; /* match(')') */
   return nparam;
@@ -2371,7 +2371,7 @@ identifier(void)
       {
         GEN cell = tmpargs-(i<<1);
 	*newfun++ =      cell[0];
-        *defarg++ = (GEN)cell[1];
+        *defarg++ = gel(cell,1);
       }
       if (narg > 1)
       { /* check for duplicates */
@@ -2622,19 +2622,19 @@ manage_var(long n, entree *ep)
   /* create polx[var] */
   p[0] = evaltyp(t_POL) | evallg(4);
   p[1] = evalsigne(1) | evalvarn(var);
-  p[2] = (long)gen_0;
-  p[3] = (long)gen_1;
+  gel(p,2) = gen_0;
+  gel(p,3) = gen_1;
   polx[var] = p;
 
   /* create polun[nvar] */
   p += 4;
   p[0] = evaltyp(t_POL) | evallg(3);
   p[1] = evalsigne(1) | evalvarn(var);
-  p[2] = (long)gen_1;
+  gel(p,2) = gen_1;
   polun[var] = p;
 
   varentries[var] = ep;
-  if (ep) { polvar[nvar] = (long) ep->value; setlg(polvar, nvar+1); }
+  if (ep) { gel(polvar,nvar) = ep->value; setlg(polvar, nvar+1); }
   return var;
 }
 
@@ -3349,7 +3349,7 @@ alias0(char *s, char *old)
   }
   ep = do_alias(ep); x = newbloc(2);
   x[0] = evaltyp(t_STR)|evallg(2); /* for getheap */
-  x[1] = (long)ep;
+  gel(x,1) = (GEN)ep;
   (void)installep(x, s, strlen(s), EpALIAS, 0, functions_hash + hash);
 }
 

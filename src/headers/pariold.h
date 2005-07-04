@@ -20,7 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lach    (long)gach
 #define lacos   (long)gacos
 #define laddgs  (long)gaddgs
+#define laddii  (long)addii
+#define laddir  (long)addir
+#define laddis  (long)addis
+#define laddrr  (long)addrr
 #define laddsg  (long)gaddsg
+#define laddsi  (long)addsi
 #define laddmat (long)gaddmat
 #define laddrs  (long)addrs
 #define laddsr  (long)addsr

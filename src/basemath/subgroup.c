@@ -323,7 +323,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
         GEN B = divii(T->bound, indexH);
         k = 1;
         for (i=1; i<lsubq; i++)
-          if (cmpii((GEN)indexsubq[i], B) <= 0)
+          if (cmpii(gel(indexsubq,i), B) <= 0)
             T->subqpart[k++] = T->subq[i];
         setlg(T->subqpart, k); avma = av;
       }
@@ -380,7 +380,7 @@ parse_bound(subgp_iter *T)
     T->boundtype = b_MAX;
     break;
   case t_VEC: /* exact value */
-    b = (GEN)B[1];
+    b = gel(B,1);
     if (lg(B) != 2 || typ(b) != t_INT) err(typeer,"subgroup");
     T->boundtype = b_EXACT;
     T->bound = b;
@@ -404,9 +404,9 @@ expand_sub(GEN x, long n)
 
   for (i=1; i<m; i++)
   {
-    q = (GEN)p[i]; c = (GEN)x[i];
+    q = gel(p,i); c = gel(x,i);
     for (j=1; j<m; j++) q[j] = c[j];
-    for (   ; j<n; j++) q[j] = (long)gen_0;
+    for (   ; j<n; j++) gel(q,j) = gen_0;
   }
   return p;
 }
@@ -416,7 +416,7 @@ init_powlist(long k, long p)
 {
   GEN z = new_chunk(k+1);
   long i;
-  z[0] = 1; z[1] = (long)p;
+  z[0] = 1; z[1] = p;
   for (i=1; i<=k; i++)
   {
     GEN t = muluu(p, z[i-1]);
@@ -440,7 +440,7 @@ subgroup_engine(subgp_iter *T)
     cyc = mattodiagonal_i(cyc);
   }
   for (i=1; i<n-1; i++)
-    if (!dvdii((GEN)cyc[i], (GEN)cyc[i+1]))
+    if (!dvdii(gel(cyc,i), gel(cyc,i+1)))
       err(talker,"not a group in forsubgroup");
   if (n == 1) {
     parse_bound(T);
@@ -453,22 +453,22 @@ subgroup_engine(subgp_iter *T)
   }
   if (!signe(cyc[1])) err(talker,"infinite group in forsubgroup");
   if (DEBUGLEVEL) (void)timer2();
-  fa = factor((GEN)cyc[1]); primlist = (GEN)fa[1];
+  fa = factor(gel(cyc,1)); primlist = gel(fa,1);
   nbprim = lg(primlist);
   listL = new_chunk(n); imax = k = 0;
   for (i=1; i<nbprim; i++)
   {
-    L = new_chunk(n); p = (GEN)primlist[i];
+    L = new_chunk(n); p = gel(primlist,i);
     for (j=1; j<n; j++)
     {
-      L[j] = Z_pval((GEN)cyc[j], p);
+      L[j] = Z_pval(gel(cyc,j), p);
       if (!L[j]) break;
     }
     j--; setlen(L, j);
     if (j > k) { k = j; imax = i; }
-    listL[i] = (long)L;
+    gel(listL,i) = L;
   }
-  L = (GEN)listL[imax]; p = (GEN)primlist[imax];
+  L = gel(listL,imax); p = gel(primlist,imax);
   k = L[1];
   T->L = L;
   T->powlist = init_powlist(k, itos(p));
@@ -490,8 +490,8 @@ subgroup_engine(subgp_iter *T)
     long lsubq;
     for (i=1; i<n; i++)
     {
-      cycI[i] = ldivis((GEN)cycI[i], T->powlist[L[i]]);
-      if (gcmp1((GEN)cycI[i])) break;
+      gel(cycI,i) = divis(gel(cycI,i), T->powlist[L[i]]);
+      if (gcmp1(gel(cycI,i))) break;
     }
     setlg(cycI, i); /* cyclic factors of I */
     if (T->boundtype == b_EXACT)
@@ -499,21 +499,21 @@ subgroup_engine(subgp_iter *T)
       (void)Z_pvalrem(T->bound,p,&B);
       B = mkvec(B);
     }
-    T->expoI = (GEN)cycI[1];
+    T->expoI = gel(cycI,1);
     T->subq = subgrouplist_i(cycI, B, T->expoI, NULL);
 
     lsubq = lg(T->subq);
     for (i=1; i<lsubq; i++)
-      T->subq[i] = (long)expand_sub((GEN)T->subq[i], n);
+      gel(T->subq,i) = expand_sub(gel(T->subq,i), n);
     if (T->bound)
     {
       indexsubq = cgetg(lsubq,t_VEC);
       for (i=1; i<lsubq; i++)
-        indexsubq[i] = (long)dethnf_i((GEN)T->subq[i]);
+        gel(indexsubq,i) = dethnf_i(gel(T->subq,i));
     }
     /* lift subgroups of I to G */
     for (i=1; i<lsubq; i++)
-      T->subq[i] = lmulsg(T->powlist[k],(GEN)T->subq[i]);
+      gel(T->subq,i) = gmulsg(T->powlist[k],gel(T->subq,i));
     if (DEBUGLEVEL>2)
     {
       fprintferr("(lifted) subgp of prime to %Z part:\n",p);
@@ -535,21 +535,21 @@ get_snf(GEN x, long *N)
     case t_MAT:
       if (!isdiagonal(x)) return NULL;
       cyc = mattodiagonal_i(x); break;
-    case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = (GEN)x[2];
+    case t_VEC: if (lg(x) == 4 && typ(x[2]) == t_VEC) x = gel(x,2);
     case t_COL: cyc = shallowcopy(x); break;
     default: return NULL;
   }
   *N = lg(cyc)-1;
   for (n = *N; n > 0; n--) /* take care of trailing 1s */
   {
-    GEN c = (GEN)cyc[n];
+    GEN c = gel(cyc,n);
     if (typ(c) != t_INT) return NULL;
     if (!gcmp1(c)) break;
   }
   setlg(cyc, n+1);
   for ( ; n > 0; n--)
   {
-    GEN c = (GEN)cyc[n];
+    GEN c = gel(cyc,n);
     if (typ(c) != t_INT) return NULL;
   }
   return cyc;
@@ -609,16 +609,16 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
   for (ii=1; ii<=nbsub; ii++)
   {
     list = sublist; sublist = list->next; free(list);
-    H = cgetg(N+1,t_MAT); z[ii]=(long)H; k=0;
+    H = cgetg(N+1,t_MAT); gel(z,ii) = H; k=0;
     for (j=1; j<=n; j++)
     {
-      H[j] = lgetg(N+1, t_COL);
-      for (i=1; i<=j; i++) coeff(H,i,j) = lstoi(sublist->data[k++]);
+      gel(H,j) = cgetg(N+1, t_COL);
+      for (i=1; i<=j; i++) gcoeff(H,i,j) = stoi(sublist->data[k++]);
       for (   ; i<=N; i++) coeff(H,i,j) = (long)gen_0;
     }
     for (   ; j<=N; j++)
     {
-      H[j] = lgetg(N+1, t_COL);
+      gel(H,j) = cgetg(N+1, t_COL);
       for (i=1; i<=N; i++) coeff(H,i,j) = (i==j)? (long)gen_1: (long)gen_0;
     }
   }

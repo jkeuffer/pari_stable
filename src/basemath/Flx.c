@@ -46,7 +46,7 @@ Flx_to_ZX(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_POL);
-  for (i=2; i<l; i++) x[i] = lutoi((ulong)z[i]);
+  for (i=2; i<l; i++) gel(x,i) = utoi(z[i]);
   x[1] = evalsigne(l-2!=0)| z[1]; return x;
 }
 
@@ -55,7 +55,7 @@ Flv_to_ZV(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l, t_VEC);
-  for (i=1; i<l; i++) x[i] = lutoi((ulong)z[i]);
+  for (i=1; i<l; i++) gel(x,i) = utoi(z[i]);
   return x;
 }
 
@@ -64,7 +64,7 @@ Flc_to_ZC(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_COL);
-  for (i=1; i<l; i++) x[i] = lutoi((ulong)z[i]);
+  for (i=1; i<l; i++) gel(x,i) = utoi(z[i]);
   return x;
 }
 
@@ -73,7 +73,7 @@ Flm_to_ZM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)Flc_to_ZC((GEN)z[i]);
+  for (i=1; i<l; i++) gel(x,i) = Flc_to_ZC(gel(z,i));
   return x;
 }
 
@@ -82,7 +82,7 @@ GEN
 Flx_to_ZX_inplace(GEN z)
 {
   long i, l = lg(z);
-  for (i=2; i<l; i++) z[i] = lutoi((ulong)z[i]);
+  for (i=2; i<l; i++) gel(z,i) = utoi(z[i]);
   settyp(z, t_POL); z[1]=evalsigne(l-2!=0)|z[1]; return z;
 }
 
@@ -116,7 +116,7 @@ Flm_to_FlxV(GEN x, long sv)
 {
   long j, lx = lg(x);
   GEN y = cgetg(lx, t_VEC);
-  for (j=1; j<lx; j++) y[j] = (long)Flv_to_Flx((GEN)x[j], sv);
+  for (j=1; j<lx; j++) gel(y,j) = Flv_to_Flx(gel(x,j), sv);
   return y;
 }
 
@@ -126,7 +126,7 @@ FlxC_to_ZXC(GEN x)
 {
   long i, l=lg(x);
   GEN z = cgetg(l,t_COL); 
-  for (i=1; i<l ; i++) z[i] = (long)Flx_to_ZX((GEN)x[i]);
+  for (i=1; i<l ; i++) gel(z,i) = Flx_to_ZX(gel(x,i));
   return z;
 }
 
@@ -136,7 +136,7 @@ FlxM_to_ZXM(GEN z)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) x[i] = (long)FlxC_to_ZXC((GEN)z[i]);
+  for (i=1; i<l; i++) gel(x,i) = FlxC_to_ZXC(gel(z,i));
   return x;
 }
 
@@ -177,7 +177,7 @@ Fl_to_Flx(ulong x, long sv)
   if (!x) return zero_Flx(sv);
   z = cgetg(3, t_VECSMALL);
   z[1] = sv;
-  z[2] = (long)x; return z;
+  z[2] = x; return z;
 }
 
 GEN
@@ -187,7 +187,7 @@ Z_to_Flx(GEN x, ulong p, long v)
   long sv=evalvarn(v);
   z = cgetg(3, t_VECSMALL);
   z[1] = sv;
-  z[2] = (long) umodiu(x,p); 
+  z[2] = umodiu(x,p); 
   if (!z[2]) {avma = (pari_sp)(z + lg(z)); z = zero_Flx(sv);}
   return z;
 }
@@ -200,7 +200,7 @@ ZX_to_Flx(GEN x, ulong p)
   long lx = lg(x); 
   GEN a = cgetg(lx, t_VECSMALL);
   a[1]=((ulong)x[1])&VARNBITS;
-  for (i=2; i<lx; i++) a[i] = (long)umodiu((GEN)x[i], p);
+  for (i=2; i<lx; i++) a[i] = umodiu(gel(x,i), p);
   return Flx_renormalize(a,lx);
 }
 
@@ -209,7 +209,7 @@ ZV_to_Flv(GEN x, ulong p)
 {
   long i, n = lg(x);
   GEN y = cgetg(n,t_VECSMALL);
-  for (i=1; i<n; i++) y[i] = (long)umodiu((GEN)x[i], p);
+  for (i=1; i<n; i++) y[i] = umodiu(gel(x,i), p);
   return y;
 }
 
@@ -219,7 +219,7 @@ ZM_to_Flm(GEN x, ulong p)
   long j,n = lg(x);
   GEN y = cgetg(n,t_MAT);
   if (n == 1) return y;
-  for (j=1; j<n; j++) y[j] = (long)ZV_to_Flv((GEN)x[j], p);
+  for (j=1; j<n; j++) gel(y,j) = ZV_to_Flv(gel(x,j), p);
   return y;
 }
 
@@ -250,8 +250,7 @@ Flx_red_lg_i(GEN z, long l, ulong p)
   long i;
   ulong *y=(ulong *)z;
   GEN x = cgetg(l, t_VECSMALL);
-  for (i=2; i<l; i++)
-    x[i] = (long) y[i]%p;
+  for (i=2; i<l; i++) x[i] = y[i]%p;
   return x; 
 }
 
@@ -272,7 +271,7 @@ Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly)
 
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx+2; z = cgetg(lz, t_VECSMALL) + 2;
-  for (i=0; i<ly; i++) z[i] = (long)Fl_add((ulong)x[i], (ulong)y[i], p);
+  for (i=0; i<ly; i++) z[i] = Fl_add(x[i], y[i], p);
   for (   ; i<lx; i++) z[i] = x[i];
   z -= 2; return Flx_renormalize(z, lz);
 }
@@ -286,7 +285,7 @@ Flx_add(GEN x, GEN y, ulong p)
   long ly=lg(y);
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx; z = cgetg(lz, t_VECSMALL); z[1]=x[1];
-  for (i=2; i<ly; i++) z[i] = (long)Fl_add((ulong)x[i], (ulong)y[i], p);
+  for (i=2; i<ly; i++) z[i] = Fl_add(x[i], y[i], p);
   for (   ; i<lx; i++) z[i] = x[i];
   return Flx_renormalize(z, lz);
 }
@@ -300,13 +299,13 @@ Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly)
   if (ly <= lx)
   {
     lz = lx+2; z = cgetg(lz, t_VECSMALL)+2;
-    for (i=0; i<ly; i++) z[i] = (long)Fl_sub((ulong)x[i],(ulong)y[i],p);
+    for (i=0; i<ly; i++) z[i] = Fl_sub(x[i],y[i],p);
     for (   ; i<lx; i++) z[i] = x[i];
   }
   else
   {
     lz = ly+2; z = cgetg(lz, t_VECSMALL)+2;
-    for (i=0; i<lx; i++) z[i] = (long)Fl_sub((ulong)x[i],(ulong)y[i],p);
+    for (i=0; i<lx; i++) z[i] = Fl_sub(x[i],y[i],p);
     for (   ; i<ly; i++) z[i] = y[i]? (long)(p - y[i]): y[i];
   }
  return Flx_renormalize(z-2, lz);
@@ -321,13 +320,13 @@ Flx_sub(GEN x, GEN y, ulong p)
   if (ly <= lx)
   {
     lz = lx; z = cgetg(lz, t_VECSMALL);
-    for (i=2; i<ly; i++) z[i] = (long)Fl_sub((ulong)x[i],(ulong)y[i],p);
+    for (i=2; i<ly; i++) z[i] = Fl_sub(x[i],y[i],p);
     for (   ; i<lx; i++) z[i] = x[i];
   }
   else
   {
     lz = ly; z = cgetg(lz, t_VECSMALL);
-    for (i=2; i<lx; i++) z[i] = (long)Fl_sub((ulong)x[i],(ulong)y[i],p);
+    for (i=2; i<lx; i++) z[i] = Fl_sub(x[i],y[i],p);
     for (   ; i<ly; i++) z[i] = y[i]? (long)(p - y[i]): y[i];
   }
   z[1]=x[1]; return Flx_renormalize(z, lz);
@@ -356,7 +355,7 @@ Flx_neg_inplace(GEN x, ulong p)
 {
   long i, l = lg(x);
   for (i=2; i<l; i++)
-    if (x[i]) x[i] = (long)p - x[i];
+    if (x[i]) x[i] = p - x[i];
   return x;
 }
 
@@ -368,7 +367,7 @@ Flx_Fl_mul(GEN y, ulong x, ulong p)
   if (!x) return zero_Flx(y[1]);
   l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1]; 
   if (HIGHWORD(x | p))
-    for(i=2; i<l; i++) z[i] = (long)Fl_mul(y[i], x, p);
+    for(i=2; i<l; i++) z[i] = Fl_mul(y[i], x, p);
   else
     for(i=2; i<l; i++) z[i] = (y[i] * x) % p;
   return z;
@@ -493,15 +492,15 @@ Flx_mulspec_basecase(GEN x, GEN y, ulong p, long nx, long ny)
   z = cgetg(lz, t_VECSMALL) + 2; /* x:y:z [i] = term of degree i */
   if (u_OK_ULONG(p))
   {
-    for (i=0; i<ny; i++)z[i] = (long)Flx_mullimb_ok(x+i,y,p,0,i+1);
-    for (  ; i<nx; i++) z[i] = (long)Flx_mullimb_ok(x+i,y,p,0,ny);
-    for (  ; i<nz; i++) z[i] = (long)Flx_mullimb_ok(x+i,y,p,i-nx+1,ny);
+    for (i=0; i<ny; i++)z[i] = Flx_mullimb_ok(x+i,y,p,0,i+1);
+    for (  ; i<nx; i++) z[i] = Flx_mullimb_ok(x+i,y,p,0,ny);
+    for (  ; i<nz; i++) z[i] = Flx_mullimb_ok(x+i,y,p,i-nx+1,ny);
   }
   else
   {
-    for (i=0; i<ny; i++)z[i] = (long)Flx_mullimb(x+i,y,p,0,i+1);
-    for (  ; i<nx; i++) z[i] = (long)Flx_mullimb(x+i,y,p,0,ny);
-    for (  ; i<nz; i++) z[i] = (long)Flx_mullimb(x+i,y,p,i-nx+1,ny);
+    for (i=0; i<ny; i++)z[i] = Flx_mullimb(x+i,y,p,0,i+1);
+    for (  ; i<nx; i++) z[i] = Flx_mullimb(x+i,y,p,0,ny);
+    for (  ; i<nz; i++) z[i] = Flx_mullimb(x+i,y,p,i-nx+1,ny);
   }
   z -= 2; return z; 
 }
@@ -592,14 +591,14 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
       p1 = Flx_mullimb_ok(x+i,x,p,0, (i+1)>>1);
       p1 <<= 1; 
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
-      z[i] = (long) (p1 % p);
+      z[i] = (p1 % p);
     }
     for (  ; i<nz; i++)
     {
       p1 = Flx_mullimb_ok(x+i,x,p,i-nx+1, (i+1)>>1);
       p1 <<= 1; 
       if ((i&1) == 0) p1 += x[i>>1] * x[i>>1];
-      z[i] = (long) (p1 % p);
+      z[i] = (p1 % p);
     }
   }
   else
@@ -609,14 +608,14 @@ Flx_sqrspec_basecase(GEN x, ulong p, long nx)
       p1 = Flx_mullimb(x+i,x,p,0, (i+1)>>1);
       p1 = Fl_add(p1, p1, p);
       if ((i&1) == 0) p1 = Fl_add(p1, Fl_mul(x[i>>1], x[i>>1], p), p);
-      z[i] = (long)p1;
+      z[i] = p1;
     }
     for (  ; i<nz; i++)
     {
       p1 = Flx_mullimb(x+i,x,p,i-nx+1, (i+1)>>1);
       p1 = Fl_add(p1, p1, p);
       if ((i&1) == 0) p1 = Fl_add(p1, Fl_mul(x[i>>1], x[i>>1], p), p);
-      z[i] = (long)p1;
+      z[i] = p1;
     }
   }
   z -= 2; return z;
@@ -629,7 +628,7 @@ Flx_2_mul(GEN x, ulong p)
 {
   long i, l = lg(x);
   GEN z = cgetg(l, t_VECSMALL);
-  for (i=2; i<l; i++) z[i] = (long)Fl_add(x[i], x[i], p);
+  for (i=2; i<l; i++) z[i] = Fl_add(x[i], x[i], p);
   z[1] = x[1]; return z;
 }
 #endif
@@ -741,7 +740,7 @@ Flx_rem(GEN x, GEN y, ulong p)
         p1 += z[j]*y[i-j];
         if (p1 & HIGHBIT) p1 %= p;
       }
-      c[i] = (long)Fl_sub((ulong)x[i], p1%p, p);
+      c[i] = Fl_sub(x[i], p1%p, p);
     }
   }
   else
@@ -759,7 +758,7 @@ Flx_rem(GEN x, GEN y, ulong p)
       p1 = Fl_mul(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
         p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      c[i] = (long)Fl_sub((ulong)x[i], p1, p);
+      c[i] = Fl_sub(x[i], p1, p);
     }
   }
   i = dy-1; while (i>=0 && !c[i]) i--;
@@ -804,7 +803,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
 
   if (u_OK_ULONG(p))
   {
-    z[dz] = (long) (inv*x[dx]) % p;
+    z[dz] = (inv*x[dx]) % p;
     for (i=dx-1; i>=dy; --i)
     {
       p1 = p - x[i]; /* compute -p1 instead of p1 (pb with ulongs otherwise) */
@@ -819,13 +818,13 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
   }
   else
   {
-    z[dz] = (long)Fl_mul(inv, x[dx], p);
+    z[dz] = Fl_mul(inv, x[dx], p);
     for (i=dx-1; i>=dy; --i)
     { /* compute -p1 instead of p1 (pb with ulongs otherwise) */
       p1 = p - (ulong)x[i];
       for (j=i-dy+1; j<=i && j<=dz; j++)
         p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      z[i-dy] = p1? (long)Fl_mul(p - p1, inv, p): 0;
+      z[i-dy] = p1? Fl_mul(p - p1, inv, p): 0;
     }
   }
   q = Flx_renormalize(z-2, dz+3);
@@ -842,7 +841,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
         p1 += (ulong)z[j]*y[i-j];
         if (p1 & HIGHBIT) p1 %= p;
       }
-      c[i] = (long)Fl_sub((ulong)x[i], p1%p, p);
+      c[i] = Fl_sub(x[i], p1%p, p);
     }
   }
   else
@@ -852,7 +851,7 @@ Flx_divrem(GEN x, GEN y, ulong p, GEN *pr)
       p1 = Fl_mul(z[0],y[i],p);
       for (j=1; j<=i && j<=dz; j++)
         p1 = Fl_add(p1, Fl_mul(z[j],y[i-j],p), p);
-      c[i] = (long)Fl_sub((ulong)x[i], p1, p);
+      c[i] = Fl_sub(x[i], p1, p);
     }
   }
   i=dy-1; while (i>=0 && !c[i]) i--;
@@ -904,15 +903,15 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
       long u = 0;
       for (k=3;k<i;k++) { u += T[l-i+k] * r[k]; if (u & HIGHBIT) u %= p; }
       u %= p;
-      r[i] = (long)Fl_neg((ulong)u, p);
+      r[i] = Fl_neg(u, p);
     }
   }
   else {
     for (i=4;i<l;i++)
     {
       ulong u = 0;
-      for (k=3;k<i;k++) u = Fl_sub(u, Fl_mul((ulong)T[l-i+k],(ulong)r[k],p),p);
-      r[i] = (long)u;
+      for (k=3;k<i;k++) u = Fl_sub(u, Fl_mul(T[l-i+k],r[k],p),p);
+      r[i] = u;
     }
   }
   r = Flx_renormalize(r,l);
@@ -1068,7 +1067,7 @@ Flx_deriv(GEN z, ulong p)
   if (l < 2) l = 2;
   x = cgetg(l, t_VECSMALL); x[1] = z[1]; z++;
   if (HIGHWORD(l | p))
-    for (i=2; i<l; i++) x[i] = (long)Fl_mul((ulong)i-1, (ulong)z[i], p);
+    for (i=2; i<l; i++) x[i] = Fl_mul((ulong)i-1, z[i], p);
   else
     for (i=2; i<l; i++) x[i] = ((i-1) * z[i]) % p;
   return Flx_renormalize(x,l);
@@ -1262,7 +1261,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
   p1 = cgetg(lx, t_VEC); global_pp = p;
   for (k=1,i=1; i<lx-1; i+=2)
   {
-    p2 = cgetg(5,t_VECSMALL); p1[k++] = (long)p2;
+    p2 = cgetg(5,t_VECSMALL); gel(p1,k++) = p2;
     p2[1] = vs;
     p2[2] = Fl_mul(a[i], a[i+1], p);
     p2[3] = a[i] + a[i+1];
@@ -1272,7 +1271,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
   }
   if (i < lx)
   {
-    p2 = cgetg(4,t_VECSMALL); p1[k++] = (long)p2;
+    p2 = cgetg(4,t_VECSMALL); gel(p1,k++) = p2;
     p2[1] = vs;
     p2[2] = a[i]?p - a[i]:0;
     p2[3] = 1;
@@ -1349,8 +1348,7 @@ Flv_polint(GEN xa, GEN ya, ulong p, long vs)
     }
     else
       dP = Flx_Fl_mul(T, Fl_mul(ya[i],inv,p), p);
-    for (j=2; j<lg(dP); j++) 
-      P[j] = (long)Fl_add((ulong)P[j], (ulong)dP[j], p);
+    for (j=2; j<lg(dP); j++) P[j] = Fl_add(P[j], dP[j], p);
     avma = (pari_sp)Q;
   }
   avma = (pari_sp)P;
@@ -1492,9 +1490,9 @@ FlxV_Flc_mul(GEN V, GEN W, ulong p)
 {
   pari_sp ltop=avma;
   long i;
-  GEN z = Flx_Fl_mul((GEN)V[1],W[1],p);
+  GEN z = Flx_Fl_mul(gel(V,1),W[1],p);
   for(i=2;i<lg(V);i++)
-    z=Flx_add(z,Flx_Fl_mul((GEN)V[i],W[i],p),p);
+    z=Flx_add(z,Flx_Fl_mul(gel(V,i),W[i],p),p);
   return gerepileuptoleaf(ltop,z);
 }
 
@@ -1503,7 +1501,7 @@ ZXV_to_FlxV(GEN v, ulong p)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_VEC);
-  for (j=1; j<N; j++) y[j] = (long)ZX_to_Flx((GEN)v[j], p);
+  for (j=1; j<N; j++) gel(y,j) = ZX_to_Flx(gel(v,j), p);
   return y;
 }
 
@@ -1512,7 +1510,7 @@ FlxV_to_Flm(GEN v, long n)
 {
   long j, N = lg(v);
   GEN y = cgetg(N, t_MAT);
-  for (j=1; j<N; j++) y[j] = (long)Flx_to_Flv((GEN)v[j], n);
+  for (j=1; j<N; j++) gel(y,j) = Flx_to_Flv(gel(v,j), n);
   return y;
 }
 
@@ -1544,9 +1542,9 @@ FlxX_to_ZXX(GEN B)
   GEN b=cgetg(lb,t_POL);
   for (i=2; i<lb; i++) 
     if (lgpol(B[i]))
-      b[i] = (long) Flx_to_ZX((GEN)B[i]);
+      gel(b,i) = Flx_to_ZX(gel(B,i));
     else
-      b[i] = (long)gen_0;
+      gel(b,i) = gen_0;
   b[1] = B[1]; return b;
 }
 
@@ -1563,10 +1561,10 @@ ZXX_to_FlxX(GEN B, ulong p, long v)
     switch (typ(B[i]))
     {
     case t_INT:  
-      b[i] = (long) Z_to_Flx((GEN)B[i], p, v);
+      gel(b,i) = Z_to_Flx(gel(B,i), p, v);
       break;
     case t_POL:
-      b[i] = (long)ZX_to_Flx((GEN)B[i], p);
+      gel(b,i) = ZX_to_Flx(gel(B,i), p);
       break;
     }
   return FlxX_renormalize(b, lb);
@@ -1577,7 +1575,7 @@ ZXXV_to_FlxXV(GEN V, ulong p, long v)
 {
   long j, N = lg(V);
   GEN y = cgetg(N, t_VEC);
-  for (j=1; j<N; j++) y[j] = (long)ZXX_to_FlxX((GEN)V[j], p, v);
+  for (j=1; j<N; j++) gel(y,j) = ZXX_to_FlxX(gel(V,j), p, v);
   return y;
 }
 
@@ -1589,7 +1587,7 @@ FlxX_to_Flm(GEN v, long n)
   long j, N = lg(v)-1;
   GEN y = cgetg(N, t_MAT);
   v++;
-  for (j=1; j<N; j++) y[j] = (long)Flx_to_Flv((GEN)v[j], n);
+  for (j=1; j<N; j++) gel(y,j) = Flx_to_Flv(gel(v,j), n);
   return y;
 }
 
@@ -1600,7 +1598,7 @@ Flm_to_FlxX(GEN x, long v,long w)
   GEN y = cgetg(lx+1, t_POL);
   y[1]=evalsigne(1) | v;
   y++;
-  for (j=1; j<lx; j++) y[j] = (long)Flv_to_Flx((GEN)x[j], w);
+  for (j=1; j<lx; j++) gel(y,j) = Flv_to_Flx(gel(x,j), w);
   return FlxX_renormalize(--y, lx+1);
 }
 
@@ -1621,7 +1619,7 @@ FlxX_swap(GEN x, long n, long ws)
         p1[k] = mael(x,k,j);
       else
         p1[k] = 0;
-    y[j] = (long)Flx_renormalize(p1,lx);
+    gel(y,j) = Flx_renormalize(p1,lx);
   }
   return FlxX_renormalize(y,ly);
 }
@@ -1637,7 +1635,7 @@ FlxX_to_Kronecker_spec(GEN P, long lp, GEN Q)
   GEN y = cgetg((N-2)*lp + 2, t_VECSMALL)+2;
   for (k=i=0; i<lp; i++)
   {
-    p1 = (GEN)P[i];
+    p1 = gel(P,i);
     l = lg(p1);
     for (j=2; j < l; j++) y[k++] = p1[j];
     if (i == lp-1) break;
@@ -1659,7 +1657,7 @@ FlxX_to_Kronecker(GEN P, GEN Q)
   y[1] = P[1];
   for (k=i=2; i<lx; i++)
   {
-    p1 = (GEN)P[i];
+    p1 = gel(P,i);
     l = lg(p1);
     for (j=2; j < l; j++) y[k++] = p1[j];
     if (i == lx-1) break;
@@ -1677,8 +1675,8 @@ FlxX_add(GEN x, GEN y, ulong p)
   long ly=lg(y);
   if (ly>lx) swapspec(x,y, lx,ly);
   lz = lx; z = cgetg(lz, t_POL); z[1]=x[1];
-  for (i=2; i<ly; i++) z[i] = (long) Flx_add((GEN)x[i], (GEN)y[i], p);
-  for (   ; i<lx; i++) z[i] = (long) vecsmall_copy((GEN)x[i]);
+  for (i=2; i<ly; i++) gel(z,i) = Flx_add(gel(x,i), gel(y,i), p);
+  for (   ; i<lx; i++) gel(z,i) = vecsmall_copy(gel(x,i));
   return FlxX_renormalize(z, lz);
 }
 
@@ -1691,14 +1689,14 @@ FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly)
   if (ly <= lx)
   {
     lz = lx+2; z = cgetg(lz, t_POL)+2;
-    for (i=0; i<ly; i++) z[i] = (long)Flx_sub((GEN)x[i],(GEN)y[i],p);
-    for (   ; i<lx; i++) z[i] = (long)vecsmall_copy((GEN)x[i]);
+    for (i=0; i<ly; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
+    for (   ; i<lx; i++) gel(z,i) = vecsmall_copy(gel(x,i));
   }
   else
   {
     lz = ly+2; z = cgetg(lz, t_POL)+2;
-    for (i=0; i<lx; i++) z[i] = (long)Flx_sub((GEN)x[i],(GEN)y[i],p);
-    for (   ; i<ly; i++) z[i] = (long)Flx_neg((GEN)x[i],p);
+    for (i=0; i<lx; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
+    for (   ; i<ly; i++) gel(z,i) = Flx_neg(gel(x,i),p);
   }
  return FlxX_renormalize(z-2, lz);
 }
@@ -1716,15 +1714,15 @@ FlxX_sub(GEN x, GEN y, ulong p)
   if (lx >= ly)
   {
     z[1] = x[1];
-    for (i=2; i<ly; i++) z[i]=(long) Flx_sub((GEN)x[i],(GEN)y[i],p);
-    for (   ; i<lx; i++) z[i]=(long) vecsmall_copy((GEN)x[i]);
+    for (i=2; i<ly; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
+    for (   ; i<lx; i++) gel(z,i) = vecsmall_copy(gel(x,i));
     if (lx==ly) z = FlxX_renormalize(z, lz);
   }
   else
   {
     z[1] = y[1];
-    for (i=2; i<lx; i++) z[i]=(long) Flx_sub((GEN)x[i],(GEN)y[i],p);
-    for (   ; i<ly; i++) z[i]=(long) Flx_neg((GEN)y[i],p);
+    for (i=2; i<lx; i++) gel(z,i) = Flx_sub(gel(x,i),gel(y,i),p);
+    for (   ; i<ly; i++) gel(z,i) = Flx_neg(gel(y,i),p);
   }
   if (!lgpol(z)) { avma = (pari_sp)(z + lz); z = zeropol(varn(x)); }
   return z;
@@ -1740,7 +1738,7 @@ FlxX_shift(GEN a, long n)
   vs = mael(a,2,1);
   b = cgetg(l+n, t_POL);
   b[1] = a[1];
-  for (i=0; i<n; i++) b[2+i] = (long) zero_Flx(vs);
+  for (i=0; i<n; i++) gel(b,2+i) = zero_Flx(vs);
   for (i=2; i<l; i++) b[i+n] = a[i];
   return b;
 }
@@ -1751,9 +1749,9 @@ FlxX_recipspec(GEN x, long l, long n, long vs)
   long i;
   GEN z=cgetg(n+2,t_POL)+2;
   for(i=0; i<l; i++)
-    z[n-i-1] = (long) vecsmall_copy((GEN)x[i]);
+    gel(z,n-i-1) = vecsmall_copy(gel(x,i));
   for(   ; i<n; i++)
-    z[n-i-1] = (long) zero_Flx(vs);
+    gel(z,n-i-1) = zero_Flx(vs);
   return FlxX_renormalize(z-2,n+2);
 }
 
@@ -1778,11 +1776,11 @@ FlxqX_from_Kronecker(GEN z, GEN T, ulong p)
   {
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    x[i] = (long)Flx_rem(Flx_renormalize(t,N), T,p);
+    gel(x,i) = Flx_rem(Flx_renormalize(t,N), T,p);
   }
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  x[i] = (long)Flx_rem(Flx_renormalize(t,N), T,p);
+  gel(x,i) = Flx_rem(Flx_renormalize(t,N), T,p);
   return FlxX_renormalize(x, i+1);
 }
 
@@ -1793,7 +1791,7 @@ FlxqX_red(GEN z, GEN T, ulong p)
   int i, l = lg(z);
   res = cgetg(l,t_POL); res[1] = z[1];
   for(i=2;i<l;i++)
-    res[i] = (long)Flx_rem((GEN)z[i],T,p);
+    gel(res,i) = Flx_rem(gel(z,i),T,p);
   return FlxX_renormalize(res,lg(res));
 }
 
@@ -1839,7 +1837,7 @@ FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p)
   GEN res = cgetg(lP,t_POL);
   res[1] = P[1];
   for(i=2; i<lP; i++)
-    res[i] = (long)Flxq_mul(U,(GEN)P[i], T,p);
+    gel(res,i) = Flxq_mul(U,gel(P,i), T,p);
   return FlxX_renormalize(res,lg(res));
 }
 
@@ -1893,13 +1891,13 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   z = cgetg(dz+3,t_POL); z[1] = x[1];
   x += 2; y += 2; z += 2;
 
-  p1 = (GEN)x[dx]; av = avma;
+  p1 = gel(x,dx); av = avma;
   z[dz] = lead? lpileupto(av, Flxq_mul(p1,lead, T, p)): lcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
-    av=avma; p1=(GEN)x[i];
+    av=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
-      p1 = Flx_sub(p1, Flx_mul((GEN)z[j],(GEN)y[i-j],p),p);
+      p1 = Flx_sub(p1, Flx_mul(gel(z,j),gel(y,i-j),p),p);
     if (lead) p1 = Flx_mul(p1, lead,p);
     tetpil=avma; z[i-dy] = lpile(av,tetpil,Flx_rem(p1,T,p));
   }
@@ -1908,9 +1906,9 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   rem = (GEN)avma; av = (pari_sp)new_chunk(dx+3);
   for (sx=0; ; i--)
   {
-    p1 = (GEN)x[i];
+    p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
-      p1 = Flx_sub(p1, Flx_mul((GEN)z[j],(GEN)y[i-j],p),p);
+      p1 = Flx_sub(p1, Flx_mul(gel(z,j),gel(y,i-j),p),p);
     tetpil=avma; p1 = Flx_rem(p1, T, p); if (lgpol(p1)) { sx = 1; break; }
     if (!i) break;
     avma=av;
@@ -1925,13 +1923,13 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   rem[0] = evaltyp(t_POL) | evallg(lr);
   rem[1] = z[-1];
   p1 = gerepile((pari_sp)rem,tetpil,p1);
-  rem += 2; rem[i]=(long)p1;
+  rem += 2; gel(rem,i) = p1;
   for (i--; i>=0; i--)
   {
-    av=avma; p1 = (GEN)x[i];
+    av=avma; p1 = gel(x,i);
     for (j=0; j<=i && j<=dz; j++)
-      p1 = Flx_sub(p1, Flx_mul((GEN)z[j],(GEN)y[i-j],p), p);
-    tetpil=avma; rem[i]=lpile(av,tetpil, Flx_rem(p1, T, p));
+      p1 = Flx_sub(p1, Flx_mul(gel(z,j),gel(y,i-j),p), p);
+    tetpil=avma; gel(rem,i) = gerepile(av,tetpil, Flx_rem(p1, T, p));
   }
   rem -= 2;
   if (lead) gunclone(lead);
@@ -1946,15 +1944,15 @@ FlxqX_invmontgomery_basecase(GEN T, GEN Q, ulong p)
   long i, l=lg(T)-1, k;
   long sv=Q[1];
   GEN r=cgetg(l,t_POL); r[1]=T[1];
-  r[2] = (long) zero_Flx(sv); 
-  r[3] = (long) Fl_to_Flx(1,sv);
+  gel(r,2) = zero_Flx(sv); 
+  gel(r,3) = Fl_to_Flx(1,sv);
   for (i=4;i<l;i++)
   {
     pari_sp ltop=avma;
     GEN z = zero_Flx(sv);
     for (k=3;k<i;k++)
-      z = Flx_sub(z,Flxq_mul((GEN)T[l-i+k],(GEN)r[k],Q,p),p);
-    r[i] = lpileupto(ltop, z);
+      z = Flx_sub(z,Flxq_mul(gel(T,l-i+k),gel(r,k),Q,p),p);
+    gel(r,i) = gerepileupto(ltop, z);
   }
   r = FlxX_renormalize(r,l);
   return r;
@@ -1967,7 +1965,7 @@ FlxqX_invmontgomery(GEN T, GEN Q, ulong p)
   pari_sp ltop=avma;
   long l=lg(T);
   GEN r;
-  GEN c=(GEN)T[l-1], ci=NULL;
+  GEN c=gel(T,l-1), ci=NULL;
   if (l<5) return zero_Flx(T[1]);
   if (degpol(c) || c[2]!=1)
   {
@@ -2178,7 +2176,7 @@ FlxqV_roots_to_pol(GEN V, GEN T, ulong p, long v)
   long k;
   GEN W = cgetg(lg(V),t_VEC);
   for(k=1; k < lg(V); k++)
-    W[k] = (long)deg1pol_i(Fl_to_Flx(1,T[1]),Flx_neg((GEN)V[k],p),v);
+    gel(W,k) = deg1pol_i(Fl_to_Flx(1,T[1]),Flx_neg(gel(V,k),p),v);
   return gerepileupto(ltop, FlxqXV_prod(W, T, p));
 }
 
