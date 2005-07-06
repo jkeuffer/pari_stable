@@ -937,7 +937,7 @@ get_Tr(GEN mul, GEN x, GEN basden)
   {
     gel(T,i) = cgetg(n+1,t_COL); coeff(T,1,i) = T1[i];
     for (j=2; j<=i; j++)
-      coeff(T,i,j) = coeff(T,j,i) = (long)trace_col((GEN)mul[j+(i-1)*n], T1);
+      gcoeff(T,i,j) = gcoeff(T,j,i) = trace_col((GEN)mul[j+(i-1)*n], T1);
   }
   return T;
 }
@@ -1562,8 +1562,8 @@ nfnewprec_i(GEN nf, long prec)
   gel(NF,5) = shallowcopy(gel(NF,5));
   remake_GM(NF, &F, prec);
   gel(NF,6) = F.ro;
-  mael(NF,5,1) = (long)F.M;
-  mael(NF,5,2) = (long)F.G;
+  gmael(NF,5,1) = F.M;
+  gmael(NF,5,2) = F.G;
   return NF;
 }
 static GEN
@@ -2450,7 +2450,7 @@ initzeta(GEN pol, long prec)
           if (i > 1) p2 = mpmul(p2, tabcstni[n]);
           p1 = p1? mpadd(p1,p2): p2;
         }
-      coeff(C,i,k) = (long)gerepileuptoleaf(av2,p1);
+      gcoeff(C,i,k) = gerepileuptoleaf(av2,p1);
       av2 = avma;
     }
     if (i > 1 && i < i0) {

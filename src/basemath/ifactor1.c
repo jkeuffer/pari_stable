@@ -23,8 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 int factor_add_primes = 0;
 
-/*C++ on ia64 do not like (long)NULL*/
-#define LNULL ((long)(GEN)NULL)
 /*********************************************************************/
 /**                                                                 **/
 /**               PSEUDO PRIMALITY (MILLER-RABIN)                   **/
@@ -2785,10 +2783,10 @@ ifac_start(GEN n, long moebius, long hint)
    * If it's not on stack, then we assume it is a clone made for us by
    * auxdecomp1, and we assume the sign has already been set positive */
   /* fill first slot at the top end */
-  *--here = (long)gen_0;/* initially composite */
-  *--here = (long)gen_1;/* initial exponent 1 */
-  *--here = (long) n;
-  while (here > part + 3) *--here = LNULL;
+  gel(--here,0) = gen_0;/* initially composite */
+  gel(--here,0) = gen_1;/* initial exponent 1 */
+  gel(--here,0) = n;
+  while (here > part + 3) gel(--here,0) = NULL;
   return part;
 }
 
@@ -2841,7 +2839,7 @@ ifac_defrag(GEN *partial, GEN *where)
   }
   scan_new += 3; /* back up to last slot written */
   *where = scan_new;
-  while (scan_new > *partial + 3) *--scan_new = LNULL; /* erase junk */
+  while (scan_new > *partial + 3) gel(--scan_new,0) = NULL; /* erase junk */
 }
 
 /* and complex version combined with reallocation.  If new_lg is 0, use the old
@@ -2893,7 +2891,7 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
     scan_new[2] = scan_old[2]; scan_new -= 3;
   }
   scan_new += 3; /* back up to last slot written */
-  while (scan_new > newpart + 3) *--scan_new = LNULL;
+  while (scan_new > newpart + 3) gel(--scan_new,0) = NULL;
   *partial = newpart;
 }
 
@@ -2955,7 +2953,7 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
   {
     if (cmp_res < 0 && scan != *where)
       err(talker, "misaligned partial detected in ifac_sort_one");
-    *scan = (long)value;
+    gel(scan,0) = value;
     gel(scan,1) = exponent;
     gel(scan,2) = class0; return 0;
   }
@@ -2990,9 +2988,9 @@ ifac_sort_one(GEN *partial, GEN *where, GEN washere)
     gel(scan,1) = addii(gel(scan,-2), exponent);
   /* move the value over and null out the vacated slot below */
   *scan = scan[-3];
-  *--scan = LNULL;
-  *--scan = LNULL;
-  *--scan = LNULL;
+  gel(--scan,0) = NULL;
+  gel(--scan,0) = NULL;
+  gel(--scan,0) = NULL;
   /* finally, see whether *where should be pulled in */
   if (scan == *where) *where += 3;
   return 0;
@@ -3112,14 +3110,14 @@ ifac_divide(GEN *partial, GEN *where)
       exponent = newexp;
       if (is_pm1(*scan)) /* factor dissolved completely */
       {
-	*scan = scan[1] = LNULL;
+	gel(scan,0) = gel(scan,1) = NULL;
 	if (DEBUGLEVEL >= 4)
 	  fprintferr("IFAC: a factor was a power of another prime factor\n");
       }
       else if (DEBUGLEVEL >= 4)
 	fprintferr("IFAC: a factor was divisible by another prime factor,\n"
 	           "\tleaving a cofactor = %Z\n", *scan);
-      scan[2] = LNULL;	/* at any rate it's Unknown now */
+      gel(scan,2) = NULL;	/* at any rate it's Unknown now */
       res = 1;
       if (DEBUGLEVEL >= 5)
 	fprintferr("IFAC: prime %Z\n\tappears at least to the power %ld\n",
@@ -3325,7 +3323,7 @@ ifac_crack(GEN *partial, GEN *where)
   gel(*where,-2) = isonstack(exponent) ? icopy(exponent) : exponent;
   *where -= 3;
   if (cmp_res < 0)
-    **where = (long)factor; /* common case */
+    gel(*where,0) = factor; /* common case */
   else if (cmp_res > 0)
   { /* factor > cofactor, rearrange */
     **where = (*where)[3];	/* move cofactor pointer to lowest slot */
@@ -3442,7 +3440,7 @@ ifac_main(GEN *partial)
   while (gel(here,2) != gen_2)
   {
 #if IFAC_DEBUG
-    if (!(here[2]))
+    if (gel(here,2) == NULL)
     { /* unknown: something is wrong. Try to recover */
       err(warner, "IFAC: unknown factor seen in main loop");
       /* can only happen in Moebius mode */
@@ -3520,6 +3518,8 @@ ifac_main(GEN *partial)
   return here;
 }
 
+#define INIT_HERE(here) gel(here,2) = gel(here,1) = gel(here,0) = NULL;
+
 /* Caller of the following should worry about stack management */
 GEN
 ifac_primary_factor(GEN *partial, long *exponent)
@@ -3531,8 +3531,7 @@ ifac_primary_factor(GEN *partial, long *exponent)
 
   res = icopy((GEN)*here);
   *exponent = itos(gel(here,1));
-  here[2] = here[1] = *here = LNULL;
-  return res;
+  INIT_HERE(here); return res;
 }
 
 /* encapsulated routines */
@@ -3601,7 +3600,7 @@ ifac_decomp_break(GEN n, long (*ifac_break)(GEN n,GEN pairs,GEN here,GEN state),
       if (DEBUGLEVEL >= 3) fprintferr("IFAC: (Partial fact.)Stop requested.\n");
       break;
     }
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3635,7 +3634,7 @@ ifac_moebius(GEN n, long hint)
   {
     if (itos(gel(here,1)) > 1) { here = gen_0; break; } /* won't happen */
     mu = -mu;
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3657,7 +3656,7 @@ ifac_issquarefree(GEN n, long hint)
   while (here != gen_1 && here != gen_0)
   {
     if (itos(gel(here,1)) > 1) { here = gen_0; break; } /* won't happen */
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3680,7 +3679,7 @@ ifac_omega(GEN n, long hint)
   while (here != gen_1)
   {
     omega++;
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3703,7 +3702,7 @@ ifac_bigomega(GEN n, long hint)
   while (here != gen_1)
   {
     Omega += itos(gel(here,1));
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3734,7 +3733,7 @@ ifac_totient(GEN n, long hint)
       else
 	phi = mulii(phi, powiu((GEN)*here, itou(gel(here,1)) - 1));
     }
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3763,7 +3762,7 @@ ifac_numdiv(GEN n, long hint)
   while (here != gen_1)
   {
     tau = mulis(tau, 1 + itos(gel(here,1)));
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3798,7 +3797,7 @@ ifac_sumdiv(GEN n, long hint)
     for (; exponent > 1; exponent--)
       contrib = addsi(1, mulii((GEN)*here, contrib));
     sigma = mulii(sigma, contrib);
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {
@@ -3834,7 +3833,7 @@ ifac_sumdivk(GEN n, long k, long hint)
     for (; exponent > 1; exponent--)
       contrib = addsi(1, mulii(q, contrib));
     sigma = mulii(sigma, contrib);
-    here[2] = here[1] = *here = LNULL;
+    INIT_HERE(here);
     here = ifac_main(&part);
     if (low_stack(lim, stack_lim(av,1)))
     {

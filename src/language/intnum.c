@@ -587,16 +587,16 @@ sumnuminit(GEN sig, long m, long sgn, long prec)
     if (cmprs(gel(tabxp,k), eps) < 0)
     {
       t = mulrr(pi, gel(tabxp,k));
-      tabwp[k] = (sgn < 0)? (long)divrr(gel(tabwp,k), gch(t, prec))
-                          : (long)mulrr(gel(tabwp,k), gth(t, prec));
+      gel(tabwp,k) = (sgn < 0)? divrr(gel(tabwp,k), gch(t, prec))
+                              : mulrr(gel(tabwp,k), gth(t, prec));
     }
     else
       if (sgn < 0) gel(tabwp,k) = real_0_bit(-eps);
     if (!flii)
     {
       t = mulrr(pi, gel(tabxm,k));
-      tabwm[k] = (sgn < 0)? (long)divrr(gel(tabwm,k), gch(t, prec))
-                          : (long)mulrr(gel(tabwm,k), gth(t, prec));
+      gel(tabwm,k) = (sgn < 0)? divrr(gel(tabwm,k), gch(t, prec))
+                              : mulrr(gel(tabwm,k), gth(t, prec));
     }
   }
   return gerepilecopy(ltop, tab);

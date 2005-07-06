@@ -429,9 +429,9 @@ addmulXn(GEN x, GEN y, long d)
   {
     lz = (a>nx)? ny+2: nx+d+2;
     (void)new_chunk(lz); xd = x+nx; yd = y+ny;
-    while (xd > x) *--zd = *--xd;
+    while (xd > x) gel(--zd,0) = gel(--xd,0);
     x = zd + a;
-    while (zd > x) *--zd = (long)gen_0;
+    while (zd > x) gel(--zd,0) = gen_0;
   }
   else
   {
@@ -654,10 +654,10 @@ RgX_div_by_X_x(GEN a, GEN x, GEN *r)
   z0 = z + l-2; *z0 = *a0--;
   for (i=l-3; i>1; i--) /* z[i] = a[i+1] + x*z[i+1] */
   {
-    GEN t = gadd((GEN)*a0--, gmul(x, (GEN)*z0--));
-    *z0 = (long)t;
+    GEN t = gadd(gel(a0--,0), gmul(x, gel(z0--,0)));
+    gel(z0,0) = t;
   }
-  if (r) *r = gadd((GEN)*a0, gmul(x, (GEN)*z0));
+  if (r) *r = gadd(gel(a0,0), gmul(x, gel(z0,0)));
   return z;
 }
 /* Polynomial division x / y:

@@ -1002,7 +1002,7 @@ get_R(GEN M)
     prec = (prec-1)<<1;
   }
   l = lg(R);
-  for (i=1; i<l; i++) coeff(R,i,i) = (long)gen_1;
+  for (i=1; i<l; i++) gcoeff(R,i,i) = gen_1;
   return R;
 }
 
@@ -1315,7 +1315,7 @@ nf_DDF_roots(GEN pol, GEN polred, GEN nfpol, GEN lt, GEN init_fa, long nbf,
   else
     z = rootpadicfast(polred, L->p, L->k);
   Cltx_r[1] = evalsigne(1) | evalvarn(varn(pol));
-  Cltx_r[3] = Clt? (long)Clt: (long)gen_1;
+  gel(Cltx_r,3) = Clt? Clt: gen_1;
   C2ltpol  = C2lt? gmul(C2lt, pol): pol;
   for (m=1,i=1; i<lg(z); i++)
   {

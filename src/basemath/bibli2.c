@@ -44,16 +44,16 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 
   q = cgetg(n+3, t_POL); r = q + n+2;
   a = int2n(n-1);
-  *r-- = (long)a;
-  *r-- = (long)gen_0;
+  gel(r--,0) = a;
+  gel(r--,0) = gen_0;
   if (n < SQRTVERYBIGINT)
     for (k=1,l=n; l>1; k++,l-=2)
     {
       av = avma;
       a = divis(mulis(a, l*(l-1)), 4*k*(n-k));
       a = gerepileuptoint(av, negi(a));
-      *r-- = (long)a;
-      *r-- = (long)gen_0;
+      gel(r--,0) = a;
+      gel(r--,0) = gen_0;
     }
   else
     for (k=1,l=n; l>1; k++,l-=2)
@@ -62,8 +62,8 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
       a = mulis(mulis(a, l), l-1);
       a = divis(divis(a, 4*k), n-k);
       a = gerepileuptoint(av, negi(a));
-      *r-- = (long)a;
-      *r-- = (long)gen_0;
+      gel(r--,0) = a;
+      gel(r--,0) = gen_0;
     }
   q[1] = evalsigne(1) | evalvarn(v);
   return q;

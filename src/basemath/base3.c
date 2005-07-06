@@ -1635,7 +1635,7 @@ zlog_pk(GEN nf, GEN a0, GEN y, GEN pr, GEN prk, GEN list, GEN *psigne)
     for (i = 1; i < lg(cyc); i++)
     {
       GEN t = modii(negi(gel(e,i)), gel(cyc,i));
-      *++y = (long)negi(t); if (!signe(t)) continue;
+      gel(++y,0) = negi(t); if (!signe(t)) continue;
 
       if (mod2(t)) *psigne = *psigne? gadd(*psigne, gel(s,i)): gel(s,i);
       if (j != llist) a = elt_mulpow_modideal(nf, a, gel(gen,i), t, prk);

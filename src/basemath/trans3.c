@@ -1528,10 +1528,10 @@ init_teich(ulong p, GEN q, long prec)
     vz = cgetg(p, t_VEC);
     for (j = 1; j < (long)p-2; j++)
     {
-      vz[ umodiu(z, p) ] = (long)z; /* z = z0^i */
+      gel(vz, umodiu(z, p)) = z; /* z = z0^i */
       z = modii(mulii(z, z0), q);
     }
-    vz[ umodiu(z, p) ] = (long)z; /* z = z0^(p-2) */
+    gel(vz, umodiu(z, p)) = z; /* z = z0^(p-2) */
     gel(vz,1) = gen_1; /* z0^(p-1) */
   }
   return gerepileupto(av, gcopy(vz));

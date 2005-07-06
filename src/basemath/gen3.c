@@ -2319,7 +2319,7 @@ _gtoser(GEN x, long v, long prec)
       if (isexactzero(x)) return zeroser(v,prec);
       y = poltoser(x, v, prec); l = lg(y);
       for (i=2; i<l; i++)
-        if (y[i] != (long)gen_0) gel(y,i) = gcopy(gel(y,i));
+        if (gel(y,i) != gen_0) gel(y,i) = gcopy(gel(y,i));
       break;
 
     case t_RFRAC:
@@ -3256,11 +3256,11 @@ qf_base_change(GEN q, GEN M, int flag)
   for (i=1;i<k;i++)
   {
     gel(res,i) = cgetg(k,t_COL);
-    coeff(res,i,i) = (long) qf(q,gel(M,i),n);
+    gcoeff(res,i,i) = qf(q,gel(M,i),n);
   }
   for (i=2;i<k;i++)
     for (j=1;j<i;j++)
-      coeff(res,i,j)=coeff(res,j,i) = (long) qfb(q,gel(M,i),gel(M,j),n);
+      gcoeff(res,i,j)=gcoeff(res,j,i) = qfb(q,gel(M,i),gel(M,j),n);
   return res;
 }
 

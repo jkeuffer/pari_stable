@@ -287,7 +287,7 @@ qfi_unit_by_disc(GEN D)
 
   check_quaddisc_imag(D, &r, "qfi_unit_by_disc");
   gel(y,1) = gen_1;
-  y[2] = r? (long)gen_1: (long)gen_0;
+  gel(y,2) = r? gen_1: gen_0;
   /* upon return, y[3] = (1-D) / 4 or -D / 4, whichever is an integer */
   gel(y,3) = shifti(D,-2);
   if (r) {

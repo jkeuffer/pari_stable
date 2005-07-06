@@ -1052,7 +1052,7 @@ CharNewPrec(GEN dataCR, GEN nf, long prec)
     GEN dtcr = gel(dataCR,j);
     gel(dtcr,2) = gmul(C, gsqrt(dethnf_i(gel(dtcr,7)), prec2));
 
-    mael3(dtcr, 3, 1, 7) = (long)nf;
+    gmael3(dtcr, 3, 1, 7) = nf;
 
     p1 = gel(dtcr,5); gel(p1,2) = InitRU(gel(p1,3), prec2);
     p1 = gel(dtcr,8); gel(p1,2) = InitRU(gel(p1,3), prec2);
@@ -1795,7 +1795,7 @@ LABrcf: ct++;
   for (j = 2; j <= N+1; j++)
   {
     p1 = gmul(C2, gmul(gneg_i(beta2), gcoeff(M, v, j-1)));
-    coeff(A, 1, j) = coeff(A, j, 1) = (long)p1;
+    gcoeff(A, 1, j) = gcoeff(A, j, 1) = p1;
   }
   for (i = 2; i <= N+1; i++)
     for (j = 2; j <= N+1; j++)
@@ -1807,7 +1807,7 @@ LABrcf: ct++;
         if (k == v) p2 = gmul(C2, p2);
         p1 = gadd(p1,p2);
       }
-      coeff(A, i, j) = coeff(A, j, i) = (long)p1;
+      gcoeff(A, i, j) = gcoeff(A, j, i) = p1;
     }
 
   nB = mulsi(N+1, B2);
@@ -2669,9 +2669,9 @@ START:
       for (i = 1; i < l; i++)
 	{
           GEN t = gcoeff(M,i,i);
-	  coeff(M,i,i) = (long)gen_1;
+	  gcoeff(M,i,i) = gen_1;
 	  gel(vec,i) = bnrstark(bnr, M, prec);
-	  coeff(M,i,i) = (long)t;
+	  gcoeff(M,i,i) = t;
 	}
       CATCH_RELEASE();
       return vec;

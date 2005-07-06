@@ -141,7 +141,7 @@ Conj_LH(GEN v, GEN *H, GEN r, long prec)
   {
     if (! (e = get_emb(gel(v,j), r, prec)) ) return NULL; /* FAIL */
     gel(M,j) = e;
-    (*H)[j]= (long)LogHeight(e, prec);
+    gel(*H,j) = LogHeight(e, prec);
   }
   return M;
 }
@@ -375,15 +375,15 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
   lllmat = idmat(3);
   if (gcmp(B0, BS -> Ind) > 0) 
   {
-    coeff(lllmat, 1, 1) = (long)grndtoi(divri(B0, BS -> Ind), &e); 
+    gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS -> Ind), &e); 
     triv = mulsr(2, gsqr(B0)); 
   }
   else 
     triv = addir(gsqr(BS -> Ind), gsqr(B0)); 
 
-  coeff(lllmat, 3, 1) = (long)ground(gneg(gmul(C, lambda)));
-  coeff(lllmat, 3, 2) = (long)ground(gneg(gmul(C, delta)));
-  coeff(lllmat, 3,3) = (long)C;
+  gcoeff(lllmat, 3, 1) = ground(gneg(gmul(C, lambda)));
+  gcoeff(lllmat, 3, 2) = ground(gneg(gmul(C, delta)));
+  gcoeff(lllmat, 3,3) = C;
   lllmat = gmul(lllmat, lllint(lllmat));
 
   l0 = gnorml2(gel(lllmat,1));
@@ -464,7 +464,7 @@ GuessQi(GEN b, GEN c, GEN *eps)
   GEN Q, Lat, C = int2n(33);
 
   Lat = idmat(3);
-  mael(Lat,1,3) = (long)C;
+  gmael(Lat,1,3) = C;
   gmael(Lat,2,3) = ground(gmul(C,b));
   gmael(Lat,3,3) = ground(gmul(C,c));
 
