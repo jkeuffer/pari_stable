@@ -1694,7 +1694,7 @@ void
 gerepilecoeffs(pari_sp av, GEN x, int n)
 {
   int i;
-  for (i=0; i<n; i++) gel(x,i) = copy_bin(gel(x,i));
+  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
   avma = av;
   for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
 }
@@ -1703,8 +1703,8 @@ void
 gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
 {
   int i;
-  for (i=0; i<n; i++) gel(x,i) = copy_bin(gel(x,i));
-  for (i=0; i<o; i++) gel(y,i) = copy_bin(gel(y,i));
+  for (i=0; i<n; i++) gel(x,i) = (GEN)copy_bin(gel(x,i));
+  for (i=0; i<o; i++) gel(y,i) = (GEN)copy_bin(gel(y,i));
   avma = av;
   for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
   for (i=0; i<o; i++) gel(y,i) = bin_copy((GENbin*)y[i]);
