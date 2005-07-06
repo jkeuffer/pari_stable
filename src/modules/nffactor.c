@@ -358,7 +358,7 @@ nf_Mignotte_bound(GEN nf, GEN polbase)
       GEN q1 = QuickNormL2(gel(matGS,j  ), DEFAULTPREC);
       GEN q2 = QuickNormL2(gel(matGS,j+1), DEFAULTPREC);
       p1 = gmul2n(mpadd(q1, q2), -1);
-      N2[j] = N2[j+1] = lsqrt( p1, DEFAULTPREC );
+      gel(N2,j) = gel(N2,j+1) = gsqrt( p1, DEFAULTPREC );
       if (lg(N2[j]) < DEFAULTPREC) goto PRECPB;
     }
     if (j > n) break; /* done */

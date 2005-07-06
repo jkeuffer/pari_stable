@@ -2071,7 +2071,7 @@ FpX_divrem(GEN x, GEN y, GEN p, GEN *pr)
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = subii(p1, mulii(gel(z,j),gel(y,i-j)));
     if (lead) p1 = mulii(p1,lead);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil,modii(p1, p));
+    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil,modii(p1, p));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
@@ -2170,14 +2170,14 @@ FpXQX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = gel(x,dx); av = avma;
-  z[dz] = lead? lpileupto(av, Fq_mul(p1,lead, T, p)): lcopy(p1);
+  gel(z,dz) = lead? gerepileupto(av, Fq_mul(p1,lead, T, p)): gcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = Fq_sub(p1, Fq_mul(gel(z,j),gel(y,i-j),NULL,p),NULL,p);
     if (lead) p1 = Fq_mul(p1, lead, NULL,p);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil,Fq_red(p1,T,p));
+    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil,Fq_red(p1,T,p));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 
@@ -2483,7 +2483,7 @@ stopoly(ulong m, ulong p, long v)
 {
   GEN y = new_chunk(BITS_IN_LONG + 2);
   long l = 2;
-  do { ulong q = m/p; y[l++] = lutoi(m - q*p); m=q; } while (m);
+  do { ulong q = m/p; gel(y,l++) = utoi(m - q*p); m=q; } while (m);
   y[1] = evalsigne(1) | evalvarn(v); 
   y[0] = evaltyp(t_POL) | evallg(l); return y;
 }
@@ -3005,7 +3005,7 @@ FpY_FpXY_resultant(GEN a, GEN b0, GEN p)
   for (i=0,n = 1; i < dres; n++)
   {
     gel(x,++i) = utoipos(n); gel(y,i) = FpX_eval_resultant(a,b,gel(x,i),p,la);
-    x[++i]=lsubis(p,n);      gel(y,i) = FpX_eval_resultant(a,b,gel(x,i),p,la);
+    gel(x,++i) = subis(p,n); gel(y,i) = FpX_eval_resultant(a,b,gel(x,i),p,la);
   }
   if (i == dres)
   {

@@ -629,7 +629,7 @@ polgalois(GEN x, long prec)
 	    for (j=i+1; j<=6; j++)
             {
               GEN t = gadd(gel(p1,i),gel(p1,j));
-	      for (k=j+1; k<=7; k++) z[++ind] = ladd(t, gel(p1,k));
+	      for (k=j+1; k<=7; k++) gel(z,++ind) = gadd(t, gel(p1,k));
             }
           p5 = roots_to_ZX(z, &e); if (e <= -10) break;
           prec = (prec<<1)-2;
@@ -989,7 +989,7 @@ get_mul_table(GEN x,GEN basden,GEN invbas)
         d = _mulii(gel(den,i), gel(den,j));
         if (d) z = gdivexact(z, d);
       }
-      mul[j+(i-1)*n] = mul[i+(j-1)*n] = lpileupto(av,z);
+      gel(mul,j+(i-1)*n) = gel(mul,i+(j-1)*n) = gerepileupto(av,z);
     }
   return mul;
 }

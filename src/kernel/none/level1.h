@@ -193,7 +193,7 @@ evalexpo(long x)
 }
 
 INLINE GEN
-constant_term(GEN x) { return signe(x)? (GEN)x[2]: gen_0; }
+constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
 INLINE GEN
 leading_term(GEN x) { return (GEN)x[lg(x)-1]; }
 
@@ -265,18 +265,18 @@ cgetc(long l)
 }
 INLINE GEN
 mkintmod(GEN x, GEN y) { GEN v = cgetg(3, t_INTMOD);
-  v[1] = (long)y; v[2] = (long)x; return v; }
+  gel(v,1) = y; gel(v,2) = x; return v; }
 INLINE GEN
 mkpolmod(GEN x, GEN y) { GEN v = cgetg(3, t_POLMOD);
-  v[1] = (long)y; v[2] = (long)x; return v; }
+  gel(v,1) = y; gel(v,2) = x; return v; }
 INLINE GEN
 mkfrac(GEN x, GEN y) { GEN v = cgetg(3, t_FRAC);
-  v[1] = (long)x; v[2] = (long)y; return v; }
+  gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
 mkcomplex(GEN x, GEN y) { GEN v = cgetg(3, t_COMPLEX);
-  v[1] = (long)x; v[2] = (long)y; return v; }
+  gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
-mkvec(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = (long)x; return v; }
+mkvec(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = x; return v; }
 INLINE GEN
 mkvecsmall(long x) { GEN v = cgetg(2, t_VECSMALL); v[1] = x; return v; }
 INLINE GEN
@@ -286,33 +286,33 @@ INLINE GEN
 mkvecsmall3(long x,long y, long z) { GEN v = cgetg(4, t_VECSMALL);
   v[1]=x; v[2]=y; v[3]=z; return v; }
 INLINE GEN
-mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); v[1] = lcopy(x); return v; }
+mkveccopy(GEN x) { GEN v = cgetg(2, t_VEC); gel(v,1) = gcopy(x); return v; }
 INLINE GEN
 mkvec2(GEN x, GEN y) {
-  GEN v = cgetg(3,t_VEC); v[1] = (long)x; v[2] = (long)y; return v; }
+  GEN v = cgetg(3,t_VEC); gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
 mkvec3(GEN x, GEN y, GEN z) {
-  GEN v=cgetg(4,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; return v; }
+  GEN v=cgetg(4,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; return v; }
 INLINE GEN
 mkvec4(GEN x, GEN y, GEN z, GEN t) {
-  GEN v=cgetg(5,t_VEC); v[1]=(long)x; v[2]=(long)y; v[3]=(long)z; v[4]=(long)t;
+  GEN v=cgetg(5,t_VEC); gel(v,1) = x; gel(v,2) = y; gel(v,3) = z; gel(v,4) = t;
   return v; }
 INLINE GEN
 mkvec2copy(GEN x, GEN y) {
-  GEN v = cgetg(3,t_VEC); v[1] = lcopy(x); v[2] = lcopy(y); return v; }
+  GEN v = cgetg(3,t_VEC); gel(v,1) = gcopy(x); gel(v,2) = gcopy(y); return v; }
 INLINE GEN
-mkcol(GEN x) { GEN v = cgetg(2, t_COL); v[1] = (long)x; return v; }
+mkcol(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = x; return v; }
 INLINE GEN
 mkcol2(GEN x, GEN y) {
-  GEN v = cgetg(3,t_COL); v[1] = (long)x; v[2] = (long)y; return v; }
+  GEN v = cgetg(3,t_COL); gel(v,1) = x; gel(v,2) = y; return v; }
 INLINE GEN
-mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); v[1] = lcopy(x); return v; }
+mkcolcopy(GEN x) { GEN v = cgetg(2, t_COL); gel(v,1) = gcopy(x); return v; }
 INLINE GEN
-mkmat(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = (long)x; return v; }
+mkmat(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = x; return v; }
 INLINE GEN
 mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
 INLINE GEN
-mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); v[1] = lcopy(x); return v; }
+mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN
@@ -398,18 +398,20 @@ stoi(long x)
   return x > 0? utoipos((ulong)x): utoineg((ulong)-x);
 }
 INLINE GEN
-mkvecs(long x) { GEN v = cgetg(2, t_VEC); v[1] = lstoi(x); return v; }
+mkvecs(long x) { GEN v = cgetg(2, t_VEC); gel(v,1) = stoi(x); return v; }
 INLINE GEN
 mkvec2s(long x, long y) {
-  GEN v = cgetg(3,t_VEC); v[1] = lstoi(x); v[2] = lstoi(y); return v; }
+  GEN v = cgetg(3,t_VEC); gel(v,1) = stoi(x); gel(v,2) = stoi(y); return v; }
 INLINE GEN
 mkvec3s(long x, long y, long z) {
-  GEN v=cgetg(4,t_VEC); v[1]=lstoi(x); v[2]=lstoi(y); v[3]=lstoi(z); return v; }
+  GEN v=cgetg(4,t_VEC);
+  gel(v,1)=stoi(x); gel(v,2)=stoi(y); gel(v,3)=stoi(z); return v;
+}
 INLINE GEN
 mkintmodu(ulong x, ulong y) {
   GEN v = cgetg(3,t_INTMOD);
-  v[1] = (long)utoipos(y);
-  v[2] = (long)utoi(x); return v;
+  gel(v,1) = utoipos(y);
+  gel(v,2) = utoi(x); return v;
 }
 
 INLINE GEN
@@ -426,7 +428,7 @@ itos(GEN x)
   long u;
 
   if (!s) return 0;
-  u = (long)x[2]; if (lgefint(x) > 3 || u < 0) err(affer2);
+  u = x[2]; if (lgefint(x) > 3 || u < 0) err(affer2);
   return (s>0) ? u : -u;
 }
 
@@ -548,8 +550,8 @@ INLINE GEN
 rtor(GEN x, long prec) { GEN z = cgetr(prec); affrr(x,z); return z; }
 INLINE GEN
 ctofp(GEN x, long prec) { GEN z = cgetg(3,t_COMPLEX);
-  z[1] = (long)gtofp((GEN)x[1],prec);
-  z[2] = (long)gtofp((GEN)x[2],prec); return z;
+  gel(z,1) = gtofp(gel(x,1),prec);
+  gel(z,2) = gtofp(gel(x,2),prec); return z;
 }
 
 INLINE GEN
@@ -658,7 +660,7 @@ sdivsi_rem(long x, GEN y, long *rem)
   LOCAL_HIREMAINDER;
 
   if (!s) err(gdiver);
-  if (!x || lgefint(y)>3 || ((long)y[2])<0) { *rem = x; return 0; }
+  if (!x || lgefint(y)>3 || (gel(y,2))<0) { *rem = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (s < 0) q = -q;
@@ -810,7 +812,7 @@ rdiviiz(GEN x, GEN y, GEN z)
 INLINE GEN 
 rdivii(GEN x, GEN y, long prec) { return rdiviiz(x, y, cgetr(prec)); }
 INLINE GEN
-fractor(GEN x, long prec) { return rdivii((GEN)x[1], (GEN)x[2], prec); }
+fractor(GEN x, long prec) { return rdivii(gel(x,1), gel(x,2), prec); }
 
 INLINE void
 divrrz(GEN x, GEN y, GEN z)

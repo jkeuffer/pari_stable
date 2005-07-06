@@ -84,7 +84,7 @@ partitions(long n)
   if (DEBUGLEVEL > 7)
   {
     fprintferr("Partitions of %ld (%ld)\n",n, p);
-    for (i=1; i<=p; i++) fprintferr("i = %ld: %Z\n",i,(GEN)T[i]);
+    for (i=1; i<=p; i++) fprintferr("i = %ld: %Z\n",i,gel(T,i));
   }
   T[0] = evallg(p + 1) | evaltyp(t_VEC); return T;
 }
@@ -253,10 +253,10 @@ preci(buildroot *BR, long p)
   if (p > BR->prmax) err(talker,"too large precision in preci()");
   for (j = 1; j < l; j++)
   {
-    GEN x, o = (GEN)r[j];
+    GEN x, o = gel(r,j);
     for (i=1; i<=N; i++)
     {
-      x = (GEN)o[i];
+      x = gel(o,i);
       if (typ(x)==t_COMPLEX) { setlg(x[1],p); setlg(x[2],p); } else setlg(x,p);
     }
   }
@@ -390,7 +390,7 @@ cmp_re(GEN x, GEN y)
 {
   if (typ(x) != t_COMPLEX) return -1;
   if (typ(y) != t_COMPLEX) return 1; /* t_REALS are smallest */
-  return gcmp((GEN)x[1], (GEN)y[1]);
+  return gcmp(gel(x,1), gel(y,1));
 }
 
 /* multiply the r o bb. Sort first to detect pairs of conjugate */
@@ -404,7 +404,7 @@ Monomial(GEN r, PERM bb, long nbv)
   {
     t = (GEN)r[(int)bb[i]];
     if (typ(t) == t_COMPLEX && signe(t[1]) < 0) { s = -s; t = gneg(t); }
-    R[i] = (long)t;
+    gel(R,i) = t;
   }
   if (nbv > 2)
     R = gen_sort(R, 0, &cmp_re);
@@ -415,14 +415,14 @@ Monomial(GEN r, PERM bb, long nbv)
   t = NULL;
   for (i=1; i<=nbv; i++)
   {
-    GEN c = (GEN)R[i];
+    GEN c = gel(R,i);
     if (typ(c) == t_COMPLEX && i < nbv)
     { /* detect conjugates */
-      GEN n = (GEN)R[++i];
-      if (!absr_cmp((GEN)n[1], (GEN)c[1])
-       && !absr_cmp((GEN)n[2], (GEN)c[2])
+      GEN n = gel(R,++i);
+      if (!absr_cmp(gel(n,1), gel(c,1))
+       && !absr_cmp(gel(n,2), gel(c,2))
        && signe(c[2]) != signe(n[2]))
-        c = mpadd(gsqr((GEN)c[1]), gsqr((GEN)c[2]));
+        c = mpadd(gsqr(gel(c,1)), gsqr(gel(c,2)));
       else
         c = gmul(c,n);
     }
@@ -696,9 +696,9 @@ new_pol(GEN r, GEN a)
   GEN x, z, v = cgetg(N+1, t_VEC);
   for (i=1; i<=N; i++)
   {
-    z = (GEN)r[i]; x = gaddsg(a[2], z);
+    z = gel(r,i); x = gaddsg(a[2], z);
     for (j = 3; j < l; j++) x = gaddsg(a[j], gmul(z,x));
-    v[i] = (long)x;
+    gel(v,i) = x;
   }
   return gclone(v);
 }
@@ -743,7 +743,7 @@ sortroots(GEN newr, GEN oldr)
     for (j=1; j<l; j++)
       if (t[j])
       {
-        e = gexpo(gsub((GEN)oldr[i], (GEN)newr[j]));
+        e = gexpo(gsub(gel(oldr,i), gel(newr,j)));
         if (e < e0) { e0 = e; k = j; }
       }
     z[i] = newr[k]; t[k] = 0;
@@ -757,7 +757,7 @@ delete_roots(buildroot *BR)
 {
   GEN r = BR->r;
   long i, l = lg(r);
-  for (i = 1; i < l; i++) gunclone((GEN)r[i]);
+  for (i = 1; i < l; i++) gunclone(gel(r,i));
   setlg(r, 1);
 }
 
@@ -797,8 +797,8 @@ is_int(GEN g)
 
   if (typ(g) == t_COMPLEX)
   {
-    if (!is_zero((GEN)g[2])) return NULL;
-    g = (GEN)g[1];
+    if (!is_zero(gel(g,2))) return NULL;
+    g = gel(g,1);
   }
   gint = ground(g); av = avma;
   if (!is_zero(subri(g, gint))) return NULL;
@@ -818,8 +818,8 @@ suffprec(GEN z)
 {
   if (typ(z)==t_COMPLEX)
   {
-    long s = aux((GEN)z[1]);
-    long t = aux((GEN)z[2]); return max(t, s);
+    long s = aux(gel(z,1));
+    long t = aux(gel(z,2)); return max(t, s);
   }
   return aux(z);
 }
@@ -2450,7 +2450,7 @@ polgaloisnamesbig(long n, long k)
     err(talker,"galois files %s not compatible\n",s);
   fclose(stream);
   free(s); 
-  return gerepilecopy(ltop,(GEN)V[k]);
+  return gerepilecopy(ltop,gel(V,k));
 }
 
 GEN
@@ -2497,7 +2497,7 @@ galoisbig(GEN pol, long prec)
     GEN z = cgetg(N + 1, t_VEC);
     for (i = 1; i <= N; i++) 
     {
-      z[i] = (long)cgetg(i+2,t_VECSMALL);
+      gel(z,i) = cgetg(i+2,t_VECSMALL);
       mael(z,i,1)=0;
     }
     BR.coef = z;
@@ -2518,9 +2518,9 @@ galoisbig(GEN pol, long prec)
   }
   avma = av; 
   res    = cgetg(5,t_VEC);
-  res[1] = lstoi(tab[t]);
-  res[2] = lstoi(EVEN? 1: -1);
-  res[3] = lstoi(t);
-  res[4] = (long) polgaloisnamesbig(N,t);
+  gel(res,1) = stoi(tab[t]);
+  gel(res,2) = stoi(EVEN? 1: -1);
+  gel(res,3) = stoi(t);
+  gel(res,4) = polgaloisnamesbig(N,t);
   return res;
 }

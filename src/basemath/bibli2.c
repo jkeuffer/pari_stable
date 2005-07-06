@@ -185,7 +185,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
     gel(p2,4) = gen_1; p2[1] = code;
   }
   if (i < r1+1)
-    p1[k++] = ladd(polx[v], gneg(gel(a,i)));
+    gel(p1,k++) = gadd(polx[v], gneg(gel(a,i)));
   for (i=r1+1; i<lx; i++)
   {
     GEN p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
@@ -411,7 +411,7 @@ polrecip(GEN x)
   GEN y = cgetg(lx,t_POL);
 
   if (typ(x) != t_POL) err(typeer,"polrecip");
-  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) y[i] = lcopy(gel(x,j));
+  y[1] = x[1]; for (i=2,j=lx-1; i<lx; i++,j--) gel(y,i) = gcopy(gel(x,j));
   return normalizepol_i(y,lx);
 }
 

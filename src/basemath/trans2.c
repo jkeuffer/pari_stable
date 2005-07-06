@@ -822,7 +822,7 @@ bernvec_old(long nb)
       b = gadd(b, gmul(c, gel(y,i+1)));
       u1 -= 2; u2--; d1++; d2 += 2;
     }
-    y[n+1] = lpileupto(av, gdivgs(b, -(1+2*n)));
+    gel(y,n+1) = gerepileupto(av, gdivgs(b, -(1+2*n)));
   }
   return y;
 }

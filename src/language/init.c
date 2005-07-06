@@ -188,11 +188,11 @@ killbloc(GEN x)
   {
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x);
-      for (i=1;i<lx;i++) killbloc((GEN)x[i]);
+      for (i=1;i<lx;i++) killbloc(gel(x,i));
       break;
     case t_LIST:
       lx = lgeflist(x);
-      for (i=2;i<lx;i++) killbloc((GEN)x[i]);
+      for (i=2;i<lx;i++) killbloc(gel(x,i));
       break;
   }
   if (isclone(x)) delete_from_bloclist(x);
@@ -588,11 +588,11 @@ init_universal_constants(void)
 
   ghalf = p; p+=3; gi = p; p+=3;
   ghalf[0] = evaltyp(t_FRAC) | evallg(3);
-  ghalf[1] = (long)gen_1;
-  ghalf[2] = (long)gen_2;
+  gel(ghalf,1) = gen_1;
+  gel(ghalf,2) = gen_2;
   gi[0] = evaltyp(t_COMPLEX) | evallg(3);
-  gi[1] = (long)gen_0;
-  gi[2] = (long)gen_1;
+  gel(gi,1) = gen_0;
+  gel(gi,2) = gen_1;
 }
 
 static size_t
@@ -798,15 +798,15 @@ changevar(GEN x, GEN y)
   if (tx == t_POLMOD)
   {
     av = avma;
-    p1 = changevar((GEN)x[1],y);
-    p2 = changevar((GEN)x[2],y);
+    p1 = changevar(gel(x,1),y);
+    p2 = changevar(gel(x,2),y);
     return gerepileupto(av, gmodulcp(p2,p1));
   }
   if (tx == t_RFRAC)
   {
     av = avma;
-    p1 = changevar((GEN)x[1],y);
-    p2 = changevar((GEN)x[2],y);
+    p1 = changevar(gel(x,1),y);
+    p2 = changevar(gel(x,2),y);
     return gerepileupto(av, gdiv(p1,p2));
   }
 
@@ -814,15 +814,15 @@ changevar(GEN x, GEN y)
   if (tx == t_POL || tx == t_SER)
   {
     vx = varn(x)+1; if (vx >= lg(y)) return gcopy(x);
-    p1 = (GEN)y[vx];
+    p1 = gel(y,vx);
     if (!signe(x))
     {
       vy = gvar(p1); if (vy == BIGINT) err(typeer, "changevar");
       z = gcopy(x); setvarn(z,vy); return z;
     }
-    av = avma; p2 = changevar((GEN)x[lx-1],y);
+    av = avma; p2 = changevar(gel(x,lx-1),y);
     for (i=lx-2; i>=2; i--)
-      p2 = gadd(gmul(p2,p1), changevar((GEN)x[i],y));
+      p2 = gadd(gmul(p2,p1), changevar(gel(x,i),y));
     if (tx == t_SER)
     {
       p2 = gadd(p2, ggrando(p1,lx-2));
@@ -856,7 +856,7 @@ reorder(GEN x)
   for (n=0; n<nvar; n++) t1[n] = 0;
   for (n=0; n<lx; n++)
   {
-    var[n] = i = gvar((GEN)x[n+1]);
+    var[n] = i = gvar(gel(x,n+1));
     if (i >= nvar) err(talker,"variable out of range in reorder");
     varsort[n] = ordvar[i]; /* position in polvar */
     /* check if x is a permutation */
@@ -1315,7 +1315,7 @@ gcopy(GEN x)
   if (tx == t_LIST) lx = lgeflist(x);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   if (nocp[tx]) { copyifstack(x[i],y[i]); i++; }
-  for (; i<lx; i++) y[i] = lcopy((GEN)x[i]);
+  for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
   return y;
 }
 
@@ -1332,7 +1332,7 @@ gcopy_i(GEN x, long lx)
   y = cgetg(lx, tx); /* cgetg_copy would be incorrect if lx < lg(x) */
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
   if (nocp[tx]) { copyifstack(x[i],y[i]); i++; }
-  for (; i<lx; i++) y[i] = lcopy((GEN)x[i]);
+  for (; i<lx; i++) gel(y,i) = gcopy(gel(x,i));
   return y;
 }
 
@@ -1346,7 +1346,7 @@ forcecopy(GEN x)
   lx = lg(x); y = cgetg_copy(lx, x);
   if (tx == t_LIST) lx = lgeflist(x);
   if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-  for (; i<lx; i++) y[i] = (long)forcecopy((GEN)x[i]);
+  for (; i<lx; i++) gel(y,i) = forcecopy(gel(x,i));
   return y;
 }
 
@@ -1364,13 +1364,13 @@ stackify(GEN x)
   {
     if (tx == t_POLMOD || tx == t_INTMOD)
     {
-      if (!isonstack(x[1])) x[1] = (long)forcecopy((GEN)x[1]);
-      x[2] = (long)stackify((GEN)x[2]);
+      if (!isonstack(x[1])) gel(x,1) = forcecopy(gel(x,1));
+      gel(x,2) = stackify(gel(x,2));
     }
     else
     {
       lx = LG(x, tx);
-      for (i=lontyp[tx]; i<lx; i++) x[i] = (long)stackify((GEN)x[i]);
+      for (i=lontyp[tx]; i<lx; i++) gel(x,i) = stackify(gel(x,i));
     }
   }
   return x;
@@ -1385,10 +1385,10 @@ shallowcopy(GEN x)
   switch(tx)
   {
     case t_POLMOD:
-      y[1] = x[1]; y[2] = (long)shallowcopy((GEN)x[2]);
+      y[1] = x[1]; gel(y,2) = shallowcopy(gel(x,2));
       break;
     case t_MAT:
-      for (i=lx-1;i;i--) y[i] = (long)shallowcopy((GEN)x[i]);
+      for (i=lx-1;i;i--) gel(y,i) = shallowcopy(gel(x,i));
       break;
     default:
       for (i=lx-1;i;i--) y[i] = x[i];
@@ -1422,7 +1422,7 @@ gcopy_av(GEN x, GEN *AVMA)
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     if (tx == t_LIST) lx = lgeflist(x);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) y[i] = (long)gcopy_av((GEN)x[i], AVMA);
+    for (; i<lx; i++) gel(y,i) = gcopy_av(gel(x,i), AVMA);
   }
   return y;
 }
@@ -1446,7 +1446,7 @@ gcopy_av0(GEN x, GEN *AVMA)
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     if (tx == t_LIST) lx = lgeflist(x);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) y[i] = (long)gcopy_av0((GEN)x[i], AVMA);
+    for (; i<lx; i++) gel(y,i) = gcopy_av0(gel(x,i), AVMA);
   }
   return y;
 }
@@ -1479,7 +1479,7 @@ gcopy_av0_canon(GEN x, GEN *AVMA)
     lx = lg(x); y = cgetg_copy_av(lx, x, AVMA);
     if (tx == t_LIST) lx = lgeflist(x);
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) y[i] = (long)gcopy_av0_canon((GEN)x[i], AVMA);
+    for (; i<lx; i++) gel(y,i) = gcopy_av0_canon(gel(x,i), AVMA);
   }
   return y;
 }
@@ -1496,7 +1496,7 @@ taille0(GEN x)
   }
   n = lg(x);
   if (tx == t_LIST) lx = lgeflist(x); else lx = n;
-  for (i=lontyp[tx]; i<lx; i++) n += taille0((GEN)x[i]);
+  for (i=lontyp[tx]; i<lx; i++) n += taille0(gel(x,i));
   return n;
 }
 
@@ -1508,7 +1508,7 @@ taille(GEN x)
     return (tx == t_INT)? lgefint(x): lg(x);
   n = lg(x);
   if (tx == t_LIST) lx = lgeflist(x); else lx = n;
-  for (i=lontyp[tx]; i<lx; i++) n += taille((GEN)x[i]);
+  for (i=lontyp[tx]; i<lx; i++) n += taille(gel(x,i));
   return n;
 }
 
@@ -1531,7 +1531,7 @@ gclone(GEN x)
     lx = LG(x, tx);
     y[0] = x[0];
     if (lontyp[tx] == 1) i = 1; else { y[1] = x[1]; i = 2; }
-    for (; i<lx; i++) y[i] = (long)gcopy_av((GEN)x[i], &AVMA);
+    for (; i<lx; i++) gel(y,i) = gcopy_av(gel(x,i), &AVMA);
   }
   setisclone(y); return y;
 }
@@ -1544,11 +1544,11 @@ shiftaddress(GEN x, long dec)
   {
     lx = LG(x, tx);
     for (i=lontyp[tx]; i<lx; i++) {
-      if (!x[i]) x[i] = (long)gen_0;
+      if (!x[i]) gel(x,i) = gen_0;
       else
       {
         x[i] += dec;
-        shiftaddress((GEN)x[i], dec);
+        shiftaddress(gel(x,i), dec);
       }
     }
   }
@@ -1577,11 +1577,11 @@ shiftaddress_canon(GEN x, long dec)
   {
     lx = LG(x, tx);
     for (i=lontyp[tx]; i<lx; i++) {
-      if (!x[i]) x[i] = (long)gen_0;
+      if (!x[i]) gel(x,i) = gen_0;
       else
       {
         x[i] += dec;
-        shiftaddress_canon((GEN)x[i], dec);
+        shiftaddress_canon(gel(x,i), dec);
       }
     }
   }
@@ -1694,20 +1694,20 @@ void
 gerepilecoeffs(pari_sp av, GEN x, int n)
 {
   int i;
-  for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
+  for (i=0; i<n; i++) gel(x,i) = copy_bin(gel(x,i));
   avma = av;
-  for (i=0; i<n; i++) x[i] = (long)bin_copy((GENbin*)x[i]);
+  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
 }
 
 void
 gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o)
 {
   int i;
-  for (i=0; i<n; i++) x[i] = (long)copy_bin((GEN)x[i]);
-  for (i=0; i<o; i++) y[i] = (long)copy_bin((GEN)y[i]);
+  for (i=0; i<n; i++) gel(x,i) = copy_bin(gel(x,i));
+  for (i=0; i<o; i++) gel(y,i) = copy_bin(gel(y,i));
   avma = av;
-  for (i=0; i<n; i++) x[i] = (long)bin_copy((GENbin*)x[i]);
-  for (i=0; i<o; i++) y[i] = (long)bin_copy((GENbin*)y[i]);
+  for (i=0; i<n; i++) gel(x,i) = bin_copy((GENbin*)x[i]);
+  for (i=0; i<o; i++) gel(y,i) = bin_copy((GENbin*)y[i]);
 }
 
 INLINE void
@@ -1808,7 +1808,7 @@ _ok_gerepileupto(GEN av, GEN x)
 
   lx = LG(x, tx);
   for (i=lontyp[tx]; i<lx; i++)
-    if (!_ok_gerepileupto(av, (GEN)x[i]))
+    if (!_ok_gerepileupto(av, gel(x,i)))
     {
       err(warner,"bad component %ld in object %Z",i,x);
       return 0;

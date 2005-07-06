@@ -76,7 +76,7 @@ polsym_gen(GEN P, GEN y0, long n, GEN T, GEN N)
     }
     else
       if (P_lead) s = gdiv(s, P_lead);
-    av2 = avma; y[k+1] = lpile(av1,av2, gneg(s));
+    av2 = avma; gel(y,k+1) = gerepile(av1,av2, gneg(s));
   }
   return y;
 }

@@ -350,8 +350,8 @@ concat(GEN x, GEN y)
   {
     if (tx == t_MAT && lg(x[1]) != lg(y[1])) err_cat(x,y);
     z=cgetg(lx+ly-1,tx);
-    for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
-    for (i=1; i<ly; i++) z[lx+i-1]=lcopy(gel(y,i));
+    for (i=1; i<lx; i++) gel(z,i)     = gcopy(gel(x,i));
+    for (i=1; i<ly; i++) gel(z,lx+i-1)= gcopy(gel(y,i));
     return z;
   }
 
@@ -395,7 +395,7 @@ concat(GEN x, GEN y)
           return z;
 	case t_COL:
 	  if (ly != lg(x[1])) break;
-	  z=cgetg(lx+1,tx); z[lx]=lcopy(y);
+	  z=cgetg(lx+1,tx); gel(z,lx) = gcopy(y);
 	  for (i=1; i<lx; i++) gel(z,i) = gcopy(gel(x,i));
           return z;
       }
@@ -923,7 +923,7 @@ gaddmat(GEN x, GEN y)
   {
     cz = cgetg(d,t_COL); gel(z,i) = cz; cy = gel(y,i);
     for (j=1; j<d; j++)
-      cz[j] = i==j? ladd(x,gel(cy,j)): lcopy(gel(cy,j));
+      gel(cz,j) = i==j? gadd(x,gel(cy,j)): gcopy(gel(cy,j));
   }
   return z;
 }
@@ -943,7 +943,7 @@ gaddmat_i(GEN x, GEN y)
   {
     cz = cgetg(d,t_COL); gel(z,i) = cz; cy = gel(y,i);
     for (j=1; j<d; j++)
-      cz[j] = i==j? ladd(x,gel(cy,j)): cy[j];
+      gel(cz,j) = i==j? gadd(x,gel(cy,j)): gel(cy,j);
   }
   return z;
 }
@@ -1098,7 +1098,7 @@ Fp_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN p)
   GEN m, u=cgetg(li+1,t_COL);
   long i,j;
 
-  u[li] = lremii(mulii(gel(b,li), invpiv), p);
+  gel(u,li) = remii(mulii(gel(b,li), invpiv), p);
   for (i=li-1; i>0; i--)
   {
     pari_sp av = avma;
@@ -2156,7 +2156,7 @@ image(GEN x)
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
-    if (d[k]) y[j++] = lcopy(gel(x,k));
+    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
   free(d); return y;
 }
 
@@ -2943,7 +2943,7 @@ FpM_image(GEN x, GEN p)
   r = lg(x)-1 - r; avma=av;
   y=cgetg(r+1,t_MAT);
   for (j=k=1; j<=r; k++)
-    if (d[k]) y[j++] = lcopy(gel(x,k));
+    if (d[k]) gel(y,j++) = gcopy(gel(x,k));
   free(d); return y;
 }
 

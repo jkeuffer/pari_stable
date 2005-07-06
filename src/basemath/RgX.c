@@ -336,7 +336,7 @@ zx_copy_spec(GEN x, long nx)
 {
   GEN z = cgetg(nx+2,t_POL);
   long i;
-  for (i=0; i<nx; i++) z[i+2] = lstoi(x[i]);
+  for (i=0; i<nx; i++) gel(z,i+2) = stoi(x[i]);
   z[1] = evalsigne(1); return z;
 }
 
@@ -484,9 +484,9 @@ addmulXncopy(GEN x, GEN y, long d)
   {
     lz = nx+d+2;
     (void)new_chunk(lz); xd = x+nx; yd = y+ny;
-    while (xd > x) *--zd = lcopy((GEN)*--xd);
+    while (xd > x) gel(--zd,0) = gcopy(gel(--xd,0));
     x = zd + a;
-    while (zd > x) *--zd = (long)gen_0;
+    while (zd > x) gel(--zd,0) = gen_0;
   }
   else
   {
@@ -495,7 +495,7 @@ addmulXncopy(GEN x, GEN y, long d)
     lz = (a>nx)? ny+2: lg(x)+d;
     x += 2; while (xd > x) *--zd = *--xd;
   }
-  while (yd > y) *--zd = lcopy((GEN)*--yd);
+  while (yd > y) gel(--zd,0) = gcopy(gel(--yd,0));
   *--zd = evalsigne(1);
   *--zd = evaltyp(t_POL) | evallg(lz); return zd;
 }
@@ -779,7 +779,7 @@ RgX_divrem(GEN x, GEN y, GEN *pr)
     for (j=0; j<=i && j<=dz; j++)
       if (y[i-j] && gel(z,j) != gen_0) p1 = gadd(p1, gmul(gel(z,j),gel(y,i-j)));
     if (mod && avma==av1) p1 = gmul(p1,mod);
-    rem[i]=avma==av1? lcopy(p1):lpileupto(av1,p1);
+    gel(rem,i) = avma==av1? gcopy(p1):gerepileupto(av1,p1);
   }
   rem -= 2;
   if (!sx) (void)normalizepol_i(rem, lr);
@@ -833,14 +833,14 @@ RgXQX_divrem(GEN x, GEN y, GEN T, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = gel(x,dx); av = avma;
-  z[dz] = lead? lpileupto(av, grem(gmul(p1,lead), T)): lcopy(p1);
+  gel(z,dz) = lead? gerepileupto(av, grem(gmul(p1,lead), T)): gcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = gsub(p1, gmul(gel(z,j),gel(y,i-j)));
     if (lead) p1 = gmul(grem(p1, T), lead);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil, grem(p1, T));
+    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil, grem(p1, T));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 

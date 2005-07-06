@@ -664,7 +664,7 @@ rectpoints(long ne, GEN listx, GEN listy)
   py = (double*) gpmalloc(lx*sizeof(double));
   for (i=0; i<lx; i++)
   {
-    px[i]=gtodouble((GEN)listx[i+1]); py[i]=gtodouble((GEN)listy[i+1]);
+    px[i]=gtodouble(gel(listx,i+1)); py[i]=gtodouble(gel(listy,i+1));
   }
   rectpoints0(ne,px,py,lx);
   free(px); free(py);
@@ -715,8 +715,8 @@ rectlines(long ne, GEN listx, GEN listy, long flag)
   y = (double*) gpmalloc(lx*sizeof(double));
   for (i=0; i<lx; i++)
   {
-    x[i] = gtodouble((GEN)listx[i+1]);
-    y[i] = gtodouble((GEN)listy[i+1]);
+    x[i] = gtodouble(gel(listx,i+1));
+    y[i] = gtodouble(gel(listy,i+1));
   }
   rectlines0(ne,x,y,lx,flag);
   free(x); free(y);
@@ -1202,8 +1202,8 @@ gtodblList(GEN data, long flags)
   for (i=0; i<nl-1; i+=2)
   {
     u = i+1;
-    x = (GEN)data[u];   tx = typ(x); lx = lg(x);
-    y = (GEN)data[u+1]; ty = typ(y);
+    x = gel(data,u);   tx = typ(x); lx = lg(x);
+    y = gel(data,u+1); ty = typ(y);
     if (!is_vec_t(tx) || !is_vec_t(ty) || lg(y) != lx
         || (!param && lx != lx1)) err(typeer,"gtodblList");
 
@@ -1213,8 +1213,8 @@ gtodblList(GEN data, long flags)
     for (j=0; j<lx; j=v)
     {
       v = j+1;
-      l[i].d[j] = gtodouble((GEN)x[v]);
-      l[u].d[j] = gtodouble((GEN)y[v]);
+      l[i].d[j] = gtodouble(gel(x,v));
+      l[u].d[j] = gtodouble(gel(y,v));
     }
     l[i].nb = l[u].nb = lx;
   }
@@ -1308,8 +1308,8 @@ param_recursion(dblPointList *pl,char *ch,entree *ep, GEN tleft,GEN xleft,
 
   tt=gmul2n(gadd(tleft,tright),-1);
   p1 = READ_EXPR(ch,ep,tt);
-  xx = gtofp((GEN)p1[1], 3);
-  yy = gtofp((GEN)p1[2], 3);
+  xx = gtofp(gel(p1,1), 3);
+  yy = gtofp(gel(p1,2), 3);
 
   if (dx && dy)
   {
@@ -1381,12 +1381,12 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 
     if (param)
     {
-      xbig=xsml=gtodouble((GEN)p1[1]);
-      ybig=ysml=gtodouble((GEN)p1[2]);
+      xbig=xsml=gtodouble(gel(p1,1));
+      ybig=ysml=gtodouble(gel(p1,2));
       for (i=3; i<=nl; i++)
       {
-	fx=gtodouble((GEN)p1[i]); i++;
-        fy=gtodouble((GEN)p1[i]);
+	fx=gtodouble(gel(p1,i)); i++;
+        fy=gtodouble(gel(p1,i));
 	if (xsml>fx) xsml=fx; else if (xbig<fx) xbig=fx;
 	if (ysml>fy) ysml=fy; else if (ybig<fy) ybig=fy;
       }
@@ -1414,8 +1414,8 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
       tleft=cgetr(prec); tright=cgetr(prec);
       av2=avma;
       gaffect(a,tleft); p1=READ_EXPR(ch,ep,tleft);
-      gaffect((GEN)p1[1],xleft);
-      gaffect((GEN)p1[2],yleft);
+      gaffect(gel(p1,1),xleft);
+      gaffect(gel(p1,2),yleft);
       for (i=0; i<testpoints-1; i++)
       {
 	if (i) {
@@ -1424,7 +1424,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 	gaddz(tleft,dx,tright);
         p1 = READ_EXPR(ch,ep,tright);
         if (lg(p1) != 3) err(talker,"inconsistent data in rectplothin");
-        gaffect((GEN)p1[1],xright); gaffect((GEN)p1[2],yright);
+        gaffect(gel(p1,1),xright); gaffect(gel(p1,2),yright);
 
 	Appendx(&pl[0],&pl[0],rtodbl(xleft));
 	Appendy(&pl[0],&pl[1],rtodbl(yleft));
@@ -1477,10 +1477,10 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
         if (lg(p1) != nl+1) err(talker,"inconsistent data in rectplothin");
 	for (j=0; j<nl; j=k)
 	{
-	  k=j+1; z=gtodouble((GEN)p1[k]);
+	  k=j+1; z=gtodouble(gel(p1,k));
 	  Appendx(&pl[0], &pl[j],z);
 
-	  j=k; k++; z=gtodouble((GEN)p1[k]);
+	  j=k; k++; z=gtodouble(gel(p1,k));
 	  Appendy(&pl[0], &pl[j],z);
 	 }
 	gaddz(x,dx,x); avma=av2;
@@ -1492,7 +1492,7 @@ rectplothin(entree *ep, GEN a, GEN b, char *ch, long prec, ulong flags,
 	p1 = READ_EXPR(ch,ep,x);
         if (lg(p1) != nl) err(talker,"inconsistent data in rectplothin");
 	pl[0].d[i]=gtodouble(x);
-	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble((GEN)p1[j])); }
+	for (j=1; j<nl; j++) { Appendy(&pl[0],&pl[j],gtodouble(gel(p1,j))); }
 	gaddz(x,dx,x); avma=av2;
       }
   }
@@ -1514,12 +1514,12 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 
   if (lx < 4) err(talker, "Too few points (%ld) for spline plot", lx);
   for (i = 1; i <= lx; i++) {
-    xa[i] = (long) dbltor(x[i-1]);
-    ya[i] = (long) dbltor(y[i-1]);
+    gel(xa,i) = dbltor(x[i-1]);
+    gel(ya,i) = dbltor(y[i-1]);
   }
   if (flag & PLOT_PARAMETRIC) {
     tas = new_chunk(4);
-    for (j = 1; j <= 4; j++) tas[j-1] = lstoi(j);
+    for (j = 1; j <= 4; j++) gel(tas,j-1) = stoi(j);
     quark_gen = cgetg(3, t_VEC);
   }
   else tas = NULL; /* for lint */
@@ -1528,8 +1528,8 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 
     xa++; ya++;
     if (flag & PLOT_PARAMETRIC) {
-      quark_gen[1] = (long)polint_i(tas, xa, polx[0], 4, NULL);
-      quark_gen[2] = (long)polint_i(tas, ya, polx[0], 4, NULL);
+      gel(quark_gen,1) = polint_i(tas, xa, polx[0], 4, NULL);
+      gel(quark_gen,2) = polint_i(tas, ya, polx[0], 4, NULL);
     } else {
       quark_gen = polint_i(xa, ya, polx[0], 4, NULL);
       tas = xa;
@@ -1715,8 +1715,8 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 
   avma=ltop;
   res = cgetg(5,t_VEC);
-  res[1]=(long)dbltor(xsml); res[2]=(long)dbltor(xbig);
-  res[3]=(long)dbltor(ysml); res[4]=(long)dbltor(ybig);
+  gel(res,1) = dbltor(xsml); gel(res,2) = dbltor(xbig);
+  gel(res,3) = dbltor(ysml); gel(res,4) = dbltor(ybig);
   return res;
 }
 
@@ -1766,8 +1766,8 @@ plothraw0(long stringrect, long drawrect, GEN listx, GEN listy, long flags)
   long data[] = {evaltyp(t_VEC) | _evallg(3), 0, 0};
   dblPointList *pl;
 
-  data[1] = (long) listx;
-  data[2] = (long) listy;
+  gel(data,1) = listx;
+  gel(data,2) = listy;
   pl=gtodblList(data,PLOT_PARAMETRIC);
   if (!pl) return cgetg(1,t_VEC);
   return rectplothrawin(stringrect,drawrect,pl,flags | PLOT_PARAMETRIC,output);
@@ -1833,18 +1833,18 @@ plothsizes_flag(long flag)
   GEN vect = cgetg(1+6,t_VEC);
 
   PARI_get_plot(0);
-  vect[1] = lstoi(w_width);
-  vect[2] = lstoi(w_height);
+  gel(vect,1) = stoi(w_width);
+  gel(vect,2) = stoi(w_height);
   if (flag) {
-    vect[3] = (long)dbltor(h_unit*1.0/w_width);
-    vect[4] = (long)dbltor(v_unit*1.0/w_height);
-    vect[5] = (long)dbltor(f_width*1.0/w_width);
-    vect[6] = (long)dbltor(f_height*1.0/w_height);
+    gel(vect,3) = dbltor(h_unit*1.0/w_width);
+    gel(vect,4) = dbltor(v_unit*1.0/w_height);
+    gel(vect,5) = dbltor(f_width*1.0/w_width);
+    gel(vect,6) = dbltor(f_height*1.0/w_height);
   } else {
-    vect[3] = lstoi(h_unit);
-    vect[4] = lstoi(v_unit);
-    vect[5] = lstoi(f_width);
-    vect[6] = lstoi(f_height);
+    gel(vect,3) = stoi(h_unit);
+    gel(vect,4) = stoi(v_unit);
+    gel(vect,5) = stoi(f_width);
+    gel(vect,6) = stoi(f_height);
   }
   return vect;
 }	

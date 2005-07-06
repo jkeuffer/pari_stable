@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define labsr   (long)absr
 #define lach    (long)gach
 #define lacos   (long)gacos
+#define ladd    (long)gadd
 #define laddgs  (long)gaddgs
 #define laddii  (long)addii
 #define laddir  (long)addir
@@ -47,6 +48,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lconcat (long)concat
 #define lconj   (long)gconj
 #define lcontent (long)content
+#define lcopy   (long)gcopy
 #define lcos    (long)gcos
 #define lcvtoi  (long)gcvtoi
 #define lderiv  (long)deriv
@@ -89,6 +91,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define linvmat (long)invmat
 #define linvmod (long)ginvmod
 #define llegendre (long)legendre
+#define llift   (long)lift
 #define llngamma  (long)glngamma
 #define llog    (long)glog
 #define lmaxgs    (long)gmaxgs
@@ -139,8 +142,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lnegi   (long)negi
 #define lneg    (long)gneg
 #define lnegr   (long)negr
-#define lsin    (long)gsin
+#define lnorml2 (long)gnorml2
+#define lnorm   (long)gnorm
+#define lpile   (long)gerepile
+#define lpilecopy (long)gerepilecopy
+#define lpileupto (long)gerepileupto
+#define lpileuptoint (long)gerepileuptoint
+#define lpileuptoleaf (long)gerepileuptoleaf
+#define lpoleval (long)poleval
+#define lpowgs  (long)gpowgs
+#define lprec   (long)gprec
+#define lpsi    (long)gpsi
+#define lpuigs  (long)gpuigs
+#define lpui    (long)gpui
+#define lquadgen (long)quadgen
+#define lquadpoly (long)quadpoly
+#define lracine (long)racine
+#define lrcopy  (long)rcopy
+#define lreal   (long)greal
+#define lrecip  (long)recip
+#define lred    (long)gred
+#define lremii  (long)remii
+#define lrem    (long)grem
+#define lrndtoi (long)grndtoi
+#define lroots  (long)roots
+#define lscalmat (long)gscalmat
+#define lscalsmat (long)gscalsmat
 #define lsh     (long)gsh
+#define lshifti (long)shifti
+#define lshift  (long)gshift
+#define lshiftr (long)shiftr
+#define lsin    (long)gsin
+#define lsqri   (long)sqri
+#define lsqr    (long)gsqr
+#define lsqrt   (long)gsqrt
+#define lstoi   (long)stoi
+#define lsub    (long)gsub
+#define lsubgs  (long)gsubgs
+#define lsubii  (long)subii
+#define lsubir  (long)subir
+#define lsubis  (long)subis
+#define lsubres (long)subres
+#define lsubri  (long)subri
+#define lsubrr  (long)subrr
+#define lsubrs  (long)subrs
+#define lsubst  (long)gsubst
 #define lsubsg  (long)gsubsg
 #define lsubsi  (long)subsi
 #define lsubsr  (long)subsr
@@ -150,14 +196,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ltrace  (long)gtrace
 #define ltrans  (long)gtrans
 #define ltrunc  (long)gtrunc
+#define lutoi   (long)utoi
 
 #define lhalf   (long)ghalf
 #define lpolx   (long)polx
 #define lpolun  (long)polun
 
-/* ldiv is a predefined macro on some AIX versions --GN1997Jan27 */
-#ifdef ldiv
-#undef ldiv
+#ifdef lround /* in some Mac header */
+#  undef lround
+#endif
+#define lround  (long)ground
+
+#ifdef ldiv /* predefined macro on some AIX versions --GN1997Jan27 */
+#  undef ldiv
 #endif
 #define ldiv    (long)gdiv
 

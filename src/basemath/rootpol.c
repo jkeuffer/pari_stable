@@ -143,7 +143,7 @@ CX_square_spec(GEN P, long lP)
     for (j=1; j<l; j++) t = addCC(t, mulCC(gel(P,j), gel(P,i-j)));
     t = gmul2n(t,1);
     if ((i & 1) == 0) t = addCC(t, sqrCC((GEN)P[i>>1]));
-    s[i+2] = lpileupto(av, t);
+    gel(s,i+2) = gerepileupto(av, t);
   }
   gel(s,nn+2) = sqrCC(gel(P,n)); /* i = nn */
   for (   ; i<nn; i++)
@@ -153,7 +153,7 @@ CX_square_spec(GEN P, long lP)
     for (j=i-n+1; j<l; j++) t = addCC(t, mulCC(gel(P,j),gel(P,i-j)));
     t = gmul2n(t,1);
     if ((i & 1) == 0) t = addCC(t, sqrCC((GEN)P[i>>1]));
-    s[i+2] = lpileupto(av, t);
+    gel(s,i+2) = gerepileupto(av, t);
   }
   return normalizepol_i(s, nn+3);
 }
@@ -251,16 +251,16 @@ cook_square(GEN P, long nP)
   Q = cook_square(p0, n0);
   r = RgX_addspec(p0,n0, p2,n0);
   t = RgX_addspec(p1,n0, p3,n3);
-  q[-1] = ladd(r,gneg(t));
-  gel(q,1) = gadd(r,t);
+  gel(q,-1) = gadd(r,gneg(t));
+  gel(q,1)  = gadd(r,t);
   r = RgX_addspec(p0,n0, RgX_shiftspec(p2,n0, 2)+2,n0);
   t = gmul2n(RgX_addspec(p1,n0, RgX_shiftspec(p3,n3, 2)+2,n3), 1);
-  q[-2] = ladd(r,gneg(t));
-  gel(q,2) = gadd(r,t);
+  gel(q,-2) = gadd(r,gneg(t));
+  gel(q,2)  = gadd(r,t);
   r = RgX_addspec(p0,n0, RgX_s_mulspec(p2,n0, 9)+2,n0);
   t = gmulsg(3, RgX_addspec(p1,n0, RgX_s_mulspec(p3,n3, 9)+2,n3));
-  q[-3] = ladd(r,gneg(t));
-  gel(q,3) = gadd(r,t);
+  gel(q,-3) = gadd(r,gneg(t));
+  gel(q,3)  = gadd(r,t);
 
   r = new_chunk(7);
   vp = cgetg(4,t_VEC);
@@ -833,10 +833,10 @@ fft(GEN Omega, GEN p, GEN f, long step, long l)
     f13 = gadd(f1,f3);
     g13 = mulcxI(gadd(f1,gneg(f3)));
 
-    ff[i+1]    = ladd(f02, f13);
-    ff[i+l1+1] = ladd(g02, g13);
-    ff[i+l2+1] = ladd(f02, gneg(f13));
-    ff[i+l3+1] = ladd(g02, gneg(g13));
+    gel(ff,i+1)    = gadd(f02, f13);
+    gel(ff,i+l1+1) = gadd(g02, g13);
+    gel(ff,i+l2+1) = gadd(f02, gneg(f13));
+    gel(ff,i+l3+1) = gadd(g02, gneg(g13));
   }
   ff = gerepilecopy(ltop,ff);
   for (i=0; i<l; i++) f[i] = ff[i+1];

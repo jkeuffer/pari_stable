@@ -1892,14 +1892,14 @@ FlxqX_divrem(GEN x, GEN y, GEN T, ulong p, GEN *pr)
   x += 2; y += 2; z += 2;
 
   p1 = gel(x,dx); av = avma;
-  z[dz] = lead? lpileupto(av, Flxq_mul(p1,lead, T, p)): lcopy(p1);
+  gel(z,dz) = lead? gerepileupto(av, Flxq_mul(p1,lead, T, p)): gcopy(p1);
   for (i=dx-1; i>=dy; i--)
   {
     av=avma; p1=gel(x,i);
     for (j=i-dy+1; j<=i && j<=dz; j++)
       p1 = Flx_sub(p1, Flx_mul(gel(z,j),gel(y,i-j),p),p);
     if (lead) p1 = Flx_mul(p1, lead,p);
-    tetpil=avma; z[i-dy] = lpile(av,tetpil,Flx_rem(p1,T,p));
+    tetpil=avma; gel(z,i-dy) = gerepile(av,tetpil,Flx_rem(p1,T,p));
   }
   if (!pr) { if (lead) gunclone(lead); return z-2; }
 

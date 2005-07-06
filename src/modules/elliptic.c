@@ -316,7 +316,7 @@ padic_initell(GEN y, GEN p, long prec)
 
   gel(y,14) = mkvec(e1);
   gel(y,15) = u2;
-  y[16] = ((valp(u2)&1) || kronecker(gel(u2,4),p) <= 0)? (long)gen_0: lsqrt(u2,0);
+  gel(y,16) = ((valp(u2)&1) || kronecker(gel(u2,4),p) <= 0)? gen_0: gsqrt(u2,0);
   gel(y,17) = q;
   gel(y,19) = gen_0; return y;
 }
@@ -2353,9 +2353,9 @@ addsell_part2(GEN e, GEN z1, GEN z2, GEN p, GEN p2inv)
 static GEN
 negsell(GEN f, GEN p)
 {
-  GEN g = cgetg(3, t_VEC);
-  g[1] = f[1];
-  g[2] = signe(f[2])? lsubii(p, gel(f,2)): f[2];
+  GEN g = cgetg(3, t_VEC), y = gel(f,2);
+  gel(g,1) = gel(f,1);
+  gel(g,2) = signe(y)? subii(p, y): y;
   return g;
 }
 

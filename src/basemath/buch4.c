@@ -268,7 +268,7 @@ repres(GEN nf,GEN pr)
   for (i=0; i<f; i++,ppi*=pp)
     for (j=1; j<pp; j++)
       for (k=1; k<=ppi; k++)
-	rep[j*ppi+k]=ladd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
+	gel(rep, j*ppi+k) = gadd(gel(rep,k),gmulsg(j,gel(fond,i+1)));
   return gmodulcp(rep,gel(nf,1));
 }
 
@@ -809,7 +809,7 @@ rnfisnorm(GEN T, GEN x, long flag)
     gel(sunitrel,i) = u;
     u = bnfissunit(bnf,suni, gnorm(u));
     if (lg(u) == 1) err(bugparier,"rnfisnorm");
-    u[itu] = llift(gel(u,itu)); /* lift root of 1 part */
+    gel(u,itu) = lift_intern(gel(u,itu)); /* lift root of 1 part */
     gel(M,i) = u;
   }
   aux = zerocol(lg(A)-1); gel(aux,itu) = w;

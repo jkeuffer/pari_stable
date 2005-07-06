@@ -208,7 +208,7 @@ caradj(GEN x, long v, GEN *py)
     y = gclone(y);
     /* beware: since y is a clone and t computed from it some components
      * may be out of stack (eg. INTMOD/POLMOD) */
-    p[l-k+1] = lpileupto(av, forcecopy(t)); av = avma;
+    gel(p,l-k+1) = gerepileupto(av, forcecopy(t)); av = avma;
     if (k > 2) gunclone(y0);
   }
   t = gen_0;
@@ -296,7 +296,7 @@ carhess(GEN x, long v)
       p4 = gadd(p4, gmul(gmul(p3,gcoeff(H,i,r)), gel(y,i)));
     }
     gel(X_h,2) = gneg(gcoeff(H,r,r));
-    y[r+1] = lsub(gmul(gel(y,r), X_h), p4);
+    gel(y,r+1) = gsub(gmul(gel(y,r), X_h), p4);
   }
   return gerepileupto(av, gel(y,lx));
 }
@@ -506,8 +506,8 @@ gconj(GEN x)
 
     case t_QUAD:
       z = cgetg(4,t_QUAD); copyifstack(x[1],z[1]);
-      z[2] = gcmp0(gmael(x,1,3))? lcopy(gel(x,2))
-                                : ladd(gel(x,2), gel(x,3));
+      gel(z,2) = gcmp0(gmael(x,1,3))? gcopy(gel(x,2))
+                                    : gadd(gel(x,2), gel(x,3));
       gel(z,3) = gneg(gel(x,3));
       break;
 
@@ -1151,7 +1151,7 @@ matrixqz3(GEN x)
       if (j1!=j)
       {
         GEN t = gcoeff(x,k,j1);
-        if (!gcmp0(t)) x[j1] = lsub(gel(x,j1),gmul(t,gel(x,j)));
+        if (!gcmp0(t)) gel(x,j1) = gsub(gel(x,j1),gmul(t,gel(x,j)));
       }
     if (low_stack(lim, stack_lim(av1,1)))
     {

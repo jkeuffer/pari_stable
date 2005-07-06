@@ -718,7 +718,7 @@ get_m_mu(long b, GEN r, long ell)
 {
   long i, m = lg(r)-1;
   GEN M = cgetg(m+1, t_VEC);
-  for (i = 0; i < m; i++) M[i+1] = lstoi((r[b + 1] * r[m - i]) / ell);
+  for (i = 0; i < m; i++) gel(M,i+1) = stoi((r[b + 1] * r[m - i]) / ell);
   return M;
 }
 /* theta^ell = be ^ ( sum tau^a r_{d-1-a} ) */
@@ -727,7 +727,7 @@ get_reverse(GEN r)
 {
   long i, m = lg(r)-1;
   GEN M = cgetg(m+1, t_VEC);
-  for (i = 0; i < m; i++) M[i+1] = lstoi(r[m - i]);
+  for (i = 0; i < m; i++) gel(M,i+1) = stoi(r[m - i]);
   return M;
 }
 

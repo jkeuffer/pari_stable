@@ -1146,7 +1146,7 @@ polsymmodp(GEN g, GEN p)
     for (i = 1; i < k; i++)
       s = addii(s, mulii(gel(y,k-i+1), polcoeff0(g,d-i,-1)));
     av2 = avma;
-    y[k + 1] = lpile(av1, av2, centermod(negi(s), p));
+    gel(y,k+1) = gerepile(av1, av2, centermod(negi(s), p));
   }
 
   return y;
@@ -3218,9 +3218,9 @@ rnfsteinitz(GEN nf, GEN order)
     {
       p1 = nfidealdet1(nf,a,b);
       gel(A,i) = gadd(element_mulvec(nf, gel(p1,1), c1),
-                   element_mulvec(nf, gel(p1,2), c2));
-      A[i+1]= ladd(element_mulvec(nf, gel(p1,3), c1),
-                   element_mulvec(nf, gel(p1,4), c2));
+                      element_mulvec(nf, gel(p1,2), c2));
+      gel(A,i+1) = gadd(element_mulvec(nf, gel(p1,3), c1),
+                        element_mulvec(nf, gel(p1,4), c2));
       gel(I,i) = Id;
       gel(I,i+1) = Q_primitive_part(idealmul(nf,a,b), &p1);
       if (p1) gel(A,i+1) = element_mulvec(nf, p1,gel(A,i+1));

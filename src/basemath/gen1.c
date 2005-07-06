@@ -521,7 +521,7 @@ add_ser_scal(GEN y, GEN x, long vy, long l)
     z = cgetg(ly,t_SER); z[1] = y[1];
     for (i = 2; i <= 1-l; i++) gel(z,i) = gcopy(gel(y,i));
     for (i = 3-l; i < ly; i++) gel(z,i) = gcopy(gel(y,i));
-    z[2-l] = ladd(x,gel(y,2-l)); return z;
+    gel(z,2-l) = gadd(x,gel(y,2-l)); return z;
   }
   if (l > 0)
   {
@@ -780,7 +780,7 @@ gadd(GEN x, GEN y)
           l = i-2; stackdummy(z,l); z += l;
           z[0] = evaltyp(t_SER) | evallg(ly-l);
           z[1] = evalvalp(valp(x)+i-2) | evalsigne(1) | evalvarn(vx);
-          for (j=i+1; j<ly; j++) z[j-l] = ladd(gel(x,j),gel(y,j));
+          for (j=i+1; j<ly; j++) gel(z,j-l) = gadd(gel(x,j),gel(y,j));
           gel(z,2) = p1; return z;
         }
         avma = (pari_sp)z;

@@ -1459,7 +1459,7 @@ truc(void)
 	  for (j=1; j<=m; j++)
 	  {
             GEN c = cgetg(p,t_COL); gel(z,j) = c;
-	    for (i=j; i<=n; i+=m) *++c = lcopy(table[i]);
+	    for (i=j; i<=n; i+=m) gel(++c,0) = gcopy(table[i]);
 	  }
 	  break;
 
@@ -2634,7 +2634,7 @@ manage_var(long n, entree *ep)
   polun[var] = p;
 
   varentries[var] = ep;
-  if (ep) { gel(polvar,nvar) = ep->value; setlg(polvar, nvar+1); }
+  if (ep) { gel(polvar,nvar) = (GEN)ep->value; setlg(polvar, nvar+1); }
   return var;
 }
 

@@ -746,12 +746,13 @@ nfmod(GEN nf, GEN a, GEN b)
 GEN
 nfdivrem(GEN nf, GEN a, GEN b)
 {
-  pari_sp av=avma,tetpil;
+  pari_sp av = avma;
   GEN p1,z, y = ground(element_div(nf,a,b));
 
-  p1=gneg_i(element_mul(nf,b,y)); tetpil=avma;
-  z=cgetg(3,t_VEC); gel(z,1) = gcopy(y); z[2]=ladd(a,p1);
-  return gerepile(av,tetpil,z);
+  p1 = gneg_i(element_mul(nf,b,y));
+  z = cgetg(3,t_VEC);
+  gel(z,1) = gcopy(y);
+  gel(z,2) = gadd(a,p1); return gerepileupto(av, z);
 }
 
 /*************************************************************************/

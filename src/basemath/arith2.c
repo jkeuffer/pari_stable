@@ -64,7 +64,7 @@ primes(long n)
   while (n--)
   {
     NEXT_PRIME_VIADIFF_CHECK(prime,p);
-    *++z = lutoi(prime);
+    gel(++z, 0) = utoi(prime);
   }
   return y;
 }

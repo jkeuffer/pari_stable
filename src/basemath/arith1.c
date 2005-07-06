@@ -2091,7 +2091,7 @@ seq_umul(ulong a, ulong b)
     l = N - k; if (l <= k) break;
     gel(x,lx++) = muluu(k,l);
   }
-  if (l == k) x[lx++] = lutoi(k);
+  if (l == k) gel(x,lx++) = utoi(k);
   setlg(x, lx);
   return gerepileuptoint(av, divide_conquer_prod(x, mulii));
 }

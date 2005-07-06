@@ -836,7 +836,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     GEN Delta, MatNE, Hmu, c5, c7;
 
     Vect = cgetg(r+1,t_COL); for (i=1; i<=r; i++) gel(Vect,i) = gen_1;
-    if (iroot <= r) Vect[iroot] = lstoi(1-n);
+    if (iroot <= r) gel(Vect,iroot) = stoi(1-n);
     Delta = gmul(A,Vect);
 
     c5 = Vecmax(gabs(Delta,Prec));

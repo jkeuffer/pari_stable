@@ -2189,7 +2189,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
 	  for (j=ex; j<=min(i-ex2,mi); j++)
 	    p1 = gadd(p1,gmulgs(gmul(gel(y,j-ex+2),gel(pc,i-j)),j));
 	  p1 = gdivgs(p1,i-2);
-	  ps[i-ex] = lpileupto(av, gadd(p1,gel(y,i-ex)));
+	  gel(ps,i-ex) = gerepileupto(av, gadd(p1,gel(y,i-ex)));
 	}
       }
       return;

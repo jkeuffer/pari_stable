@@ -1452,7 +1452,7 @@ ZX_Zp_root(GEN f, GEN a, GEN p, long prec)
   for (j=i=1; i<lg(R); i++)
   {
     GEN u = ZX_Zp_root(f, gel(R,i), p, prec-1);
-    for (k=1; k<lg(u); k++) z[j++] = ladd(a, gmul(p, gel(u,k)));
+    for (k=1; k<lg(u); k++) gel(z,j++) = gadd(a, gmul(p, gel(u,k)));
   }
   setlg(z,j); return z;
 }
@@ -1748,7 +1748,7 @@ ZXY_ZpQ_root(GEN f, GEN a, GEN T, GEN p, long prec)
   for(j=i=1; i<lR; i++)
   {
     GEN u = ZXY_ZpQ_root(f, gel(R,i), T, p, prec-1);
-    for (k=1; k<lg(u); k++) z[j++] = ladd(a, gmul(p, gel(u,k)));
+    for (k=1; k<lg(u); k++) gel(z,j++) = gadd(a, gmul(p, gel(u,k)));
   }
   setlg(z,j); return z;
 }
