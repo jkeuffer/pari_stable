@@ -1130,7 +1130,8 @@ Fq_gauss_get_col(GEN a, GEN b, GEN invpiv, long li, GEN T, GEN p)
 }
 
 typedef ulong* uGEN;
-#define ucoeff(a,i,j)  (((ulong**)(a))[j][i])
+#define ucoeff(a,i,j)  (((uGEN*)(a))[j][i])
+#define ugel(a,i) ((uGEN*)(a))[i]
 
 /* assume 0 <= a[i,j], b[i], invpiv < p */
 static uGEN
@@ -1400,10 +1401,10 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
   u = cgetg(bco+1,t_MAT);
   if (OK_ulong)
     for (j=1; j<=bco; j++)
-      gel(u,j) = u_Fp_gauss_get_col_OK(a,(uGEN)b[j], invpiv, aco, p);
+      ugel(u,j) = u_Fp_gauss_get_col_OK(a,(uGEN)b[j], invpiv, aco, p);
   else
     for (j=1; j<=bco; j++)
-      gel(u,j) = u_Fp_gauss_get_col(a,(uGEN)b[j], invpiv, aco, p);
+      ugel(u,j) = u_Fp_gauss_get_col(a,(uGEN)b[j], invpiv, aco, p);
   return iscol? gel(u,1): u;
 }
 
