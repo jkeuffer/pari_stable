@@ -269,14 +269,12 @@ degree(GEN x)
   return poldegree(x,-1);
 }
 
-/* si v<0, par rapport a la variable principale, sinon par rapport a v.
- * On suppose que x est one polynome ou une serie.
- */
+/* If v<0, leading coeff with respect to the main variable, otherwise wrt v. */
 GEN
 pollead(GEN x, long v)
 {
   long l, tx = typ(x), w;
-  pari_sp av, tetpil;
+  pari_sp av;
   GEN xinit;
 
   if (is_scalar_t(tx)) return gcopy(x);
@@ -289,26 +287,30 @@ pollead(GEN x, long v)
 	l=lg(x);
 	return (l==2)? gen_0: gcopy(gel(x,l-1));
       }
-      if (v < w) return gcopy(x);
-      av = avma; xinit = x;
-      x = gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
-      if (gvar(x)) { avma = av; return gcopy(xinit); }
-      l = lg(x); if (l == 2) { avma = av; return gen_0; }
-      tetpil = avma; x = gsubst(gel(x,l-1),MAXVARN,polx[w]);
-      return gerepile(av,tetpil,x);
+      break;
 
     case t_SER:
-      if (v < 0 || v == w) return (!signe(x))? gen_0: gcopy(gel(x,2));
-      if (v < w) return gcopy(x);
-      av = avma; xinit = x;
-      x = gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
-      if (gvar(x)) { avma = av; return gcopy(xinit);}
-      if (!signe(x)) { avma = av; return gen_0;}
-      tetpil = avma; x = gsubst(gel(x,2),MAXVARN,polx[w]);
-      return gerepile(av,tetpil,x);
+      if (v < 0 || v == w) return signe(x)? gcopy(gel(x,2)): gen_0;
+      break;
+
+    default:
+      err(typeer,"pollead");
+      return NULL; /* not reached */
   }
-  err(typeer,"pollead");
-  return NULL; /* not reached */
+  if (v < w) return gcopy(x);
+  av = avma; xinit = x;
+  x = gsubst(gsubst(x,w,polx[MAXVARN]),v,polx[0]);
+  if (gvar(x)) { avma = av; return gcopy(xinit);}
+  tx = typ(x);
+  if (tx == t_POL) {
+    l = lg(x); if (l == 2) { avma = av; return gen_0; }
+    x = gel(x,l-1);
+  }
+  else if (tx == t_SER) {
+    if (!signe(x)) { avma = av; return gen_0;}
+    x = gel(x,2);
+  } else err(typeer,"pollead");
+  return gerepileupto(av, gsubst(x,MAXVARN,polx[w]));
 }
 
 /* returns 1 if there's a real component in the structure, 0 otherwise */

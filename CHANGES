@@ -85,6 +85,7 @@ GTo21- wrong prototype for qfrep
        qfbclassno(-948) --> division by 0 [GMP kernel]
    30- [Makefiles:] the behaviour of '//' as path leader is undefined. Make
        sure path prefixes are not '/' [ e.g $prefix/lib --> //lib ]
+   31- pollead(u*v + (v+1)/v, v) --> 'x' [ should raise an error ]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
