@@ -406,7 +406,7 @@ iscomplex(GEN x)
     case t_COMPLEX:
       return !gcmp0(gel(x,2));
     case t_QUAD:
-      return signe(mael(x,1,2)) > 0;
+      return signe(gmael(x,1,2)) > 0;
   }
   err(typeer,"iscomplex");
   return 0; /* not reached */

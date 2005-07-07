@@ -2789,7 +2789,7 @@ roots2(GEN pol,long PREC)
   for (i=1; i<=N; i++)
   {
     p1 = cgetc(PREC); gel(rr,i) = p1;
-    for (j=3; j<PREC; j++) mael(p1,2,j)=mael(p1,1,j)=0;
+    for (j=3; j<PREC; j++) mael(p1,2,j) = mael(p1,1,j) = 0;
   }
   if (flagexactpol) factors = ZX_squff(pol, &ex);
   else

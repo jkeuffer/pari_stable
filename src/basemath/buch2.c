@@ -790,7 +790,7 @@ init_units(GEN BNF)
     funits = gel(x,5);
   }
   l = lg(funits) + 1;
-  v = cgetg(l, t_VEC); v[1] = mael(x, 4, 2);
+  v = cgetg(l, t_VEC); gel(v,1) = gmael(x, 4, 2);
   for (i = 2; i < l; i++) v[i] = funits[i-1];
   return v;
 }
@@ -1035,7 +1035,7 @@ split_ideal(GEN nf, GEN x, GEN Vbase)
       p = q;
       j = k;
     }
-    primfact[i] = mael(L, p, j);
+    gel(primfact,i) = gmael(L, p, j);
   }
   return y;
 }
@@ -2495,19 +2495,19 @@ smallbuchinit(GEN pol, double bach, double bach2, long nbrelpid, long prec)
   res = gel(bnf,8);
 
   y = cgetg(13,t_VEC);
-  y[1] = nf[1];
-  y[2] = mael(nf,2,1);
-  y[3] = nf[3];
-  y[4] = nf[7];
-  y[5] = nf[6];
-  y[6] = mael(nf,5,5);
-  y[7] = bnf[1];
-  y[8] = bnf[2];
+  gel(y,1) = gel(nf,1);
+  gel(y,2) = gmael(nf,2,1);
+  gel(y,3) = gel(nf,3);
+  gel(y,4) = gel(nf,7);
+  gel(y,5) = gel(nf,6);
+  gel(y,6) = gmael(nf,5,5);
+  gel(y,7) = gel(bnf,1);
+  gel(y,8) = gel(bnf,2);
   gel(y,9) = codeprimes(gel(bnf,5), degpol(nf[1]));
   gel(y,10) = mkvec2(gmael(res,4,1), algtobasis(bnf,gmael(res,4,2)));
   gel(y,11) = algtobasis(bnf, gel(res,5));
   (void)check_and_build_matal(bnf);
-  y[12]= bnf[10]; return gerepilecopy(av, y);
+  gel(y,12) = gel(bnf,10); return gerepilecopy(av, y);
 }
 
 static GEN

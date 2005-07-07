@@ -1226,10 +1226,9 @@ Fl_sqrt(ulong a, ulong p)
 GEN
 sqrt_Cipolla_sqr(void *data, GEN y)
 { 
-  GEN u=gel(y,1);
-  GEN v=gel(y,2);
-  GEN p=((GEN*) data)[2];
-  GEN n=((GEN*) data)[3];
+  GEN u = gel(y,1), v = gel(y,2);
+  GEN p = gel(data,2);
+  GEN n = gel(data,3);
   GEN u2 = sqri(u);
   GEN v2 = sqri(v);
   v = modii(subii(sqri(addii(v,u)), addii(u2,v2)), p);
@@ -1240,11 +1239,10 @@ sqrt_Cipolla_sqr(void *data, GEN y)
 GEN
 sqrt_Cipolla_msqr(void *data, GEN y)
 { 
-  GEN a =((GEN*) data)[1];
-  GEN p =((GEN*) data)[2];
+  GEN u = gel(y,1), v = gel(y,2);
+  GEN a = gel(data,1);
+  GEN p = gel(data,2);
   long t= mael(data,4,2);
-  GEN u =gel(y,1);
-  GEN v =gel(y,2);
   GEN d = addii(u, mulsi(t,v));
   GEN d2= sqri(d);
   GEN b = remii(mulii(a,v), p);
@@ -2338,7 +2336,7 @@ contfrac0(GEN x, GEN b, long flag)
   lb = lg(b); if (lb==1) return cgetg(1,t_VEC);
   if (tb != t_MAT) return sfcont2(b,x,flag);
   if (lg(b[1])==1) return sfcont(x,flag);
-  y = cgetg(lb, t_VEC); for (i=1; i<lb; i++) y[i] = mael(b,i,1);
+  y = cgetg(lb, t_VEC); for (i=1; i<lb; i++) gel(y,i) = gmael(b,i,1);
   x = sfcont2(y,x,flag); return x;
 }
 
@@ -2367,7 +2365,7 @@ pnqn(GEN x)
     ly = lg(x[1]);
     if (ly==2)
     {
-      p1 = cgetg(lx,t_VEC); for (i=1; i<lx; i++) p1[i] = mael(x,i,1);
+      p1 = cgetg(lx,t_VEC); for (i=1; i<lx; i++) gel(p1,i) = gmael(x,i,1);
       return pnqn(p1);
     }
     if (ly!=3) err(talker,"incorrect size in pnqn");

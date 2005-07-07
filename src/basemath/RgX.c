@@ -285,8 +285,8 @@ RgXY_swap(GEN x, long n, long w)
     GEN p1=cgetg(lx,t_POL);
     p1[1] = evalsigne(1) | evalvarn(w);
     for (k=2; k<lx; k++)
-      if( j<lg(x[k]))
-        p1[k] = mael(x,k,j);
+      if (j < lg(x[k]))
+        gel(p1,k) = gmael(x,k,j);
       else
         gel(p1,k) = gen_0;
     gel(y,j) = normalizepol_i(p1,lx);

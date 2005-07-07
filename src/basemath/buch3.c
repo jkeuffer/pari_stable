@@ -402,7 +402,7 @@ Buchray(GEN bnf,GEN module,long flag)
   {
     clg = cgetg(add_gen? 4: 3,t_VEC);
     if (add_gen) gel(clg,3) = Gen;
-    clg[1] = mael(bigres,1,1);
+    gel(clg,1) = gmael(bigres,1,1);
     gel(clg,2) = cyc;
     if (!do_init) return gerepilecopy(av,clg);
     y = cgetg(7,t_VEC);
@@ -564,7 +564,7 @@ bnrisprincipal(GEN bnr, GEN x, long flag)
   p1 = isprincipalfact(bnf, genray, gneg(ex), x, nf_GENMAT | nf_FORCE);
   if (!gcmp0(gel(p1,1))) err(bugparier,"isprincipalray");
   p1 = gel(p1,2); alpha = factorbackelt(p1, nf, NULL);
-  if (lg(bid[5]) > 1 && lg(mael(bid,5,1)) > 1)
+  if (lg(bid[5]) > 1 && lg(gmael(bid,5,1)) > 1)
   {
     GEN u = gel(bnr,6), y = gmul(gel(u,1), zideallog(nf, p1, bid));
     y = reducemodinvertible(y, gel(u,2));

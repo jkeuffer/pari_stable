@@ -1788,7 +1788,7 @@ set_mulid(GEN V, GEN M, GEN Mi, long r1, long r2, long N, long k)
 {
   GEN v, Mk = cgetg(N+1, t_MAT);
   long i, e;
-  for (i = 1; i < k; i++) Mk[i] = mael(V, i, k);
+  for (i = 1; i < k; i++) gel(Mk,i) = gmael(V, i, k);
   for (     ; i <=N; i++) 
   {
     v = vecmul(gel(M,k), gel(M,i));

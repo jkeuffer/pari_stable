@@ -3512,7 +3512,7 @@ nf_all_roots(GEN nf, GEN x, long prec)
   z = cgetg(l, t_POL); z[1] = x[1];
   for (i=1; i<ru; i++)
   {
-    for (j = 2; j < l; j++) z[j] = mael(y,j,i);
+    for (j = 2; j < l; j++) gel(z,j) = gmael(y,j,i);
     gel(v,i) = cleanroots(z, prec);
   }
   return v;

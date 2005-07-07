@@ -564,7 +564,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
             gel(p2,4) = InitQuotient(ImC);
             if (DEBUGLEVEL>1)
               fprintferr("\nTrying modulus = %Z and subgroup = %Z\n",
-	                 mael(bnrm, 2, 1), D);
+	                 gmael(bnrm, 2, 1), D);
             cpl = CplxModulus(p2, &pr, prec);
             if (oldcpl < 0 || cpl < oldcpl)
             {
@@ -2225,7 +2225,7 @@ GetST(GEN *pS, GEN *pT, GEN dataCR, GEN vChar, long prec)
   limx = zeta_get_limx(r1, r2, bit_accuracy(prec));
   for (j = 1; j <= ncond; j++)
   {
-    C[j]  = mael(dataCR, mael(vChar,j,1), 2);
+    gel(C,j) = gmael(dataCR, mael(vChar,j,1), 2);
     N0[j] = zeta_get_N0(gel(C,j), limx);
     if (n0 < N0[j]) n0  = N0[j];
   }
@@ -2441,7 +2441,7 @@ LABDOUB:
   else
   { /* compute a crude approximation of the result */
     C = cgetg(cl + 1, t_VEC);
-    for (i = 1; i <= cl; i++) C[i] = mael(dataCR, i, 2);
+    for (i = 1; i <= cl; i++) gel(C,i) = gmael(dataCR, i, 2);
     n = zeta_get_N0(vecmax(C), zeta_get_limx(r1, r2, bit_accuracy(newprec)));
     if (n > BND) n = BND;
     if (DEBUGLEVEL) fprintferr("N0 in QuickPol: %ld \n", n);

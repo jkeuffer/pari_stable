@@ -573,7 +573,7 @@ long
 group_domain(GEN G)
 {
   if (lg(G[1]) < 2) err(talker,"empty group in group_domain");
-  return lg(mael(G,1,1)) - 1;
+  return lg(gmael(G,1,1)) - 1;
 }
 
 /*Compute the left coset of g mod G: gG*/
@@ -717,8 +717,8 @@ quotient_subgroup_lift(GEN C, GEN H, GEN S)
   long l1 = lg(H[1])-1;
   long l2 = lg(S[1])-1, j;
   GEN p1 = cgetg(3, t_VEC), L = cgetg(l1+l2+1, t_VEC);
-  for (j = 1; j <= l1; ++j) L[j] = mael(H,1,j);
-  for (j = 1; j <= l2; ++j) L[l1+j] = mael(C,1,mael3(S,1,j,1));
+  for (j = 1; j <= l1; ++j) gel(L,j) = gmael(H,1,j);
+  for (j = 1; j <= l2; ++j) gel(L,l1+j) = gmael(C,1,mael3(S,1,j,1));
   gel(p1,1) = L;
   gel(p1,2) = vecsmall_concat(gel(H,2),gel(S,2));
   return p1;

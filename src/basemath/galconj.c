@@ -395,10 +395,10 @@ poltopermtest(GEN f, struct galois_lift *gl, GEN pf)
     fp[i] = 1;
   for (i = 1; i < ll; i++)
   {
-    fx = FpX_eval(f, (GEN) gl->L[i],gl->gb->ladicsol);
+    fx = FpX_eval(f, gel(gl->L,i), gl->gb->ladicsol);
     for (j = 1; j < ll; j++)
     {
-      if (fp[j] && equalii(fx, (GEN) gl->Lden[j]))
+      if (fp[j] && equalii(fx, gel(gl->Lden,j)))
       {
 	pf[i] = j;
 	fp[j] = 0;
@@ -646,8 +646,8 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   avma = ltop2;
   C=gt->C;
   Cd=gt->Cd;
-  v = FpX_Fp_mul(FpXQ_mul((GEN)gt->pauto[1+el%ord], (GEN)
-	gt->bezoutcoeff[m],gl->TQ,gl->Q),gl->den,gl->Q);
+  v = FpXQ_mul(gel(gt->pauto, 1+el%ord), gel(gt->bezoutcoeff, m),gl->TQ,gl->Q);
+  v = FpX_Fp_mul(v,gl->den,gl->Q);
   SG=cgetg(lg(sg),t_VECSMALL);
   for(i=1;i<lg(SG);i++)
     SG[i]=(el*sg[i])%ord + 1;
@@ -773,8 +773,7 @@ Vmatrix(long n, struct galois_test *td)
   GEN     V;
   long    i;
   V = cgetg(lg(td->L), t_VEC);
-  for (i = 1; i < lg(V); i++)
-    V[i] = mael(td->M,i,n);
+  for (i = 1; i < lg(V); i++) gel(V,i) = gmael(td->M,i,n);
   V = FpC_FpV_mul(td->L, V, td->ladic);
   return gerepileupto(ltop, V);
 }
@@ -822,7 +821,7 @@ freetest(struct galois_test *td)
   for (i = 1; i < lg(td->PV); i++)
     if (td->PV[i])
     {
-      gunclone((GEN) td->PV[i]);
+      gunclone(gel(td->PV,i));
       td->PV[i] = 0;
     }
 }
@@ -839,7 +838,7 @@ padicisint(GEN P, struct galois_test *td)
   GEN     U;
   /*if (typ(P) != t_INT)    err(typeer, "padicisint");*/
   U = modii(P, td->ladic);
-  r = gcmp(U, (GEN) td->borne) <= 0 || gcmp(U, (GEN) td->lborne) >= 0;
+  r = gcmp(U, td->borne) <= 0 || gcmp(U, td->lborne) >= 0;
   avma = ltop;
   return r;
 }
@@ -862,7 +861,7 @@ verifietest(GEN pf, struct galois_test *td)
     long    ord;
     GEN     PW;
     ord = td->ordre[i];
-    PW = (GEN) td->PV[ord];
+    PW = gel(td->PV, ord);
     if (PW)
     {
       V = gmael(PW,1,pf[1]);
@@ -870,7 +869,7 @@ verifietest(GEN pf, struct galois_test *td)
 	V = addii(V, gmael(PW,j,pf[j]));
     }
     else
-      V = centermod(gmul((GEN) td->TM[ord], P),td->ladic);
+      V = centermod(gmul(gel(td->TM,ord), P),td->ladic);
     if (!padicisint(V, td))
       break;
   }
@@ -939,10 +938,10 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   av = avma;
   ar = cgetg(a + 2, t_VECSMALL); ar[a+1]=0;
   G = (GEN *) cgetg(a + 1, t_VECSMALL);	/* Don't worry */
-  W = matheadlong((GEN) td->PV[td->ordre[n]],td->ladic);
+  W = matheadlong(gel(td->PV, td->ordre[n]), td->ladic);
   for (cx = 1, i = 1, j = 1; cx <= a; cx++, i++)
   {
-    G[cx] = (GEN) F[coeff(B,i,j)];	/* Be happy */
+    G[cx] = gel(F, coeff(B,i,j));	/* Be happy */
     if (i == d)
     {
       i = 0;
@@ -1353,7 +1352,7 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
 {
   long n = lg(v), i, k;
   pari_sp av;
-  GEN z = cgetg(n+1,t_POL),p1,p2,mod2;
+  GEN z = cgetg(n+1,t_POL),p1,mod2;
   av=avma;
   mod2=gclone(shifti(mod,-1));/*clone*/
   avma=av;
@@ -1362,14 +1361,10 @@ vectopol(GEN v, GEN M, GEN den , GEN mod, long x)
   {
     p1=gen_0; av=avma;
     for (k=1; k<n; k++)
-    {
-      p2=mulii(gcoeff(M,i-1,k),gel(v,k));
-      p1=addii(p1,p2);
-    }
+      p1 = addii(p1, mulii(gcoeff(M,i-1,k),gel(v,k)));
     p1=modii(p1,mod);
     if (cmpii(p1,mod2)>0) p1=subii(p1,mod);
-    p1=gdiv(p1,den);
-    gel(z,i) = gerepileupto(av,p1);
+    gel(z,i) = gerepileupto(av, gdiv(p1,den));
   }
   gunclone(mod2);/*unclone*/
   return normalizepol_i(z,n+1);
@@ -1380,7 +1375,7 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
 {
   long n = lg(L), i, k;
   pari_sp av;
-  GEN z = cgetg(n+1,t_POL),p1,p2,mod2;
+  GEN z = cgetg(n+1,t_POL),p1,mod2;
   if (lg(p) != n) err(talker,"incorrect permutation in permtopol");
   av=avma;
   mod2=gclone(shifti(mod,-1)); /*clone*/
@@ -1390,14 +1385,10 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   {
     p1=gen_0; av=avma;
     for (k=1; k<n; k++)
-    {
-      p2=mulii(gcoeff(M,i-1,k),(GEN)L[p[k]]);
-      p1=addii(p1,p2);
-    }
+      p1 = addii(p1, mulii(gcoeff(M,i-1,k), gel(L,p[k])));
     p1=modii(p1,mod);
     if (cmpii(p1,mod2)>0) p1=subii(p1,mod);
-    p1=gdiv(p1,den);
-    gel(z,i) = gerepileupto(av,p1);
+    gel(z,i) = gerepileupto(av, gdiv(p1,den));
   }
   gunclone(mod2); /*unclone*/
   return normalizepol_i(z,n+1);
@@ -2005,7 +1996,7 @@ s4test(GEN u, GEN liftpow, struct galois_lift *gl, GEN phi)
     avma=ltop;
     return 0;
   }
-  res = (GEN) scalarpol(gel(u,2),varn(u));
+  res = scalarpol(gel(u,2),varn(u));
   for (i = 1; i < d ; i++)
   {
     GEN z = ZX_Z_mul(gel(liftpow,i), gel(u,i + 2));
@@ -2126,24 +2117,24 @@ s4galoisgen(struct galois_lift *gl)
     av2 = avma;
     for (j1 = 0; j1 < 4; j1++)
     {
-      u1 = FpX_add(FpXQ_mul((GEN) bezoutcoeff[sg[5]],
-				 gel(pauto,1 + j1),TQ,Q),
-		  FpXQ_mul((GEN) bezoutcoeff[sg[6]],
-				 (GEN) pauto[((-j1) & 3) + 1],TQ,Q),Q);
+      u1 = FpX_add(FpXQ_mul(gel(bezoutcoeff, sg[5]),
+			    gel(pauto,1 + j1),TQ,Q),
+                   FpXQ_mul(gel(bezoutcoeff, sg[6]),
+                            gel(pauto, ((-j1) & 3) + 1),TQ,Q),Q);
       avm1 = avma;
       for (j2 = 0; j2 < 4; j2++)
       {
-	u2 = ZX_add(u1, FpXQ_mul((GEN) bezoutcoeff[sg[3]], 
-				       gel(pauto,1 + j2),TQ,Q));
-	u2 = FpX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[4]], (GEN)
-				       pauto[((-j2) & 3) + 1],TQ,Q),Q);
+	u2 = ZX_add(u1, FpXQ_mul(gel(bezoutcoeff, sg[3]), 
+				 gel(pauto,1 + j2),TQ,Q));
+	u2 = FpX_add(u2, FpXQ_mul(gel(bezoutcoeff,sg[4]),
+				  gel(pauto,((-j2) & 3) + 1), TQ,Q),Q);
 	avm2 = avma;
 	for (j3 = 0; j3 < 4; j3++)
 	{
-	  u3 = ZX_add(u2, FpXQ_mul((GEN) bezoutcoeff[sg[1]],
-					 gel(pauto,1 + j3),TQ,Q));
-	  u3 = FpX_add(u3, FpXQ_mul((GEN) bezoutcoeff[sg[2]], (GEN)
-					 pauto[((-j3) & 3) + 1],TQ,Q),Q);
+	  u3 = ZX_add(u2, FpXQ_mul(gel(bezoutcoeff, sg[1]),
+				   gel(pauto,1 + j3),TQ,Q));
+	  u3 = FpX_add(u3, FpXQ_mul(gel(bezoutcoeff, sg[2]),
+				    gel(pauto,((-j3) & 3) + 1), TQ,Q),Q);
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/4:%d/4:%d/4:%Z\n",
 		       i, j1,j2, j3, sg);
@@ -2189,10 +2180,10 @@ suites4:
 	pari_sp av3;
 	GEN     uu;
 	pj[6] = (w + pj[3]) & 3;
-	uu =FpX_add(FpXQ_mul((GEN) bezoutcoeff[sg[5]],
-			  (GEN) pauto[(pj[6] & 3) + 1],TQ,Q),
-		   FpXQ_mul((GEN) bezoutcoeff[sg[6]],
-			  (GEN) pauto[((-pj[6]) & 3) + 1],TQ,Q),Q);
+	uu =FpX_add(FpXQ_mul(gel(bezoutcoeff,sg[5]),
+			     gel(pauto,(pj[6] & 3) + 1), TQ,Q),
+                    FpXQ_mul(gel(bezoutcoeff,sg[6]),
+			     gel(pauto,((-pj[6]) & 3) + 1), TQ,Q),Q);
 	av3 = avma;
 	for (i = 0; i < 4; i++)
 	{
@@ -2202,14 +2193,14 @@ suites4:
 	  if (DEBUGLEVEL >= 4)
 	    fprintferr("S4GaloisConj:Testing %d/3:%d/2:%d/2:%d/4:%Z:%Z\n",
 		       j - 1, w >> 1, l, i, sg, pj);
-	  u = FpX_add(uu, FpXQ_mul((GEN) pauto[(pj[4] & 3) + 1],
-				(GEN) bezoutcoeff[sg[1]],TQ,Q),Q);
-	  u = FpX_add(u,	 FpXQ_mul((GEN) pauto[((-pj[4]) & 3) + 1],
-				(GEN) bezoutcoeff[sg[3]],TQ,Q),Q);
-	  u = FpX_add(u,	 FpXQ_mul((GEN) pauto[(pj[5] & 3) + 1],
-				(GEN) bezoutcoeff[sg[2]],TQ,Q),Q);
-	  u = FpX_add(u,	 FpXQ_mul((GEN) pauto[((-pj[5]) & 3) + 1],
-				(GEN) bezoutcoeff[sg[4]],TQ,Q),Q);
+	  u = FpX_add(uu, FpXQ_mul(gel(pauto,(pj[4] & 3) + 1),
+				   gel(bezoutcoeff,sg[1]),TQ,Q),Q);
+	  u = FpX_add(u,  FpXQ_mul(gel(pauto,((-pj[4]) & 3) + 1),
+				   gel(bezoutcoeff,sg[3]), TQ,Q),Q);
+	  u = FpX_add(u,  FpXQ_mul(gel(pauto,(pj[5] & 3) + 1),
+				   gel(bezoutcoeff,sg[2]), TQ,Q),Q);
+	  u = FpX_add(u,  FpXQ_mul(gel(pauto,((-pj[5]) & 3) + 1),
+				   gel(bezoutcoeff,sg[4]), TQ,Q),Q);
 	  if (s4test(u, liftpow, gl, tau))
 	    goto suites4_2;
 	  avma = av3;
@@ -2242,18 +2233,18 @@ suites4_2:
       h = j & 3;
       g = abcdef + ((j & 4) >> 1);
       i = h + abc - g;
-      u = FpXQ_mul((GEN) pauto[(g & 3) + 1],
-		   (GEN) bezoutcoeff[sg[1]],TQ,Q);
-      u = ZX_add(u, FpXQ_mul((GEN) pauto[((-g) & 3) + 1],
-			      (GEN) bezoutcoeff[sg[4]],TQ,Q));
-      u = ZX_add(u, FpXQ_mul((GEN) pauto[(h & 3) + 1],
-			      (GEN) bezoutcoeff[sg[2]],TQ,Q));
-      u = ZX_add(u, FpXQ_mul((GEN) pauto[((-h) & 3) + 1],
-			      (GEN) bezoutcoeff[sg[5]],TQ,Q));
-      u = ZX_add(u, FpXQ_mul((GEN) pauto[(i & 3) + 1],
-			      (GEN) bezoutcoeff[sg[3]],TQ,Q));
-      u = FpX_add(u, FpXQ_mul((GEN) pauto[((-i) & 3) + 1],
-			      (GEN) bezoutcoeff[sg[6]],TQ,Q),Q);
+      u = FpXQ_mul(gel(pauto,(g & 3) + 1),
+		   gel(bezoutcoeff,sg[1]),TQ,Q);
+      u = ZX_add(u, FpXQ_mul(gel(pauto,((-g) & 3) + 1),
+			     gel(bezoutcoeff,sg[4]),TQ,Q));
+      u = ZX_add(u, FpXQ_mul(gel(pauto,(h & 3) + 1),
+			     gel(bezoutcoeff,sg[2]),TQ,Q));
+      u = ZX_add(u, FpXQ_mul(gel(pauto,((-h) & 3) + 1),
+			     gel(bezoutcoeff,sg[5]), TQ,Q));
+      u = ZX_add(u, FpXQ_mul(gel(pauto,(i & 3) + 1),
+			     gel(bezoutcoeff,sg[3]), TQ,Q));
+      u = FpX_add(u, FpXQ_mul(gel(pauto,((-i) & 3) + 1),
+			      gel(bezoutcoeff,sg[6]), TQ,Q),Q);
       if (DEBUGLEVEL >= 4)
 	fprintferr("S4GaloisConj:Testing %d/8 %d:%d:%d\n",
 		   j, g & 3, h & 3, i & 3);
@@ -2391,7 +2382,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
       dg *= Fp[k]; el /= Fp[k];
       if ( DEBUGLEVEL>=4 )
 	fprintferr("Trying degre %d.\n",dg);
-      if (galoisfrobeniustest((GEN)gt.pauto[el+1],&gl,frob))
+      if (galoisfrobeniustest(gel(gt.pauto,el+1),&gl,frob))
       {
 	dgf = dg; 
 	psi = vecsmall_const(g,1);
@@ -2436,8 +2427,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   }
   for (i = 1; i <= gf->fp; i++)
     for (j = 1; j <= gt.g; j++)
-      if (mael(gt.C,i,j))
-	gunclone(gmael(gt.C,i,j));
+      if (mael(gt.C,i,j)) gunclone(gmael(gt.C,i,j));
   if (DEBUGLEVEL>=4 && res)
     fprintferr("Best lift: %d\n",deg);
   if (deg==1)
@@ -2477,7 +2467,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
     long    i;
     GEN     ip,Tmod;
     ip = utoipos(gf->p);
-    Tmod = lift((GEN) factmod(T, ip));
+    Tmod = lift_intern(factmod(T, ip));
     isram = 0;
     for (i = 1; i < lg(Tmod[2]) && !isram; i++)
       if (!gcmp1(gmael(Tmod,2,i)))
