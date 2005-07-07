@@ -2097,7 +2097,7 @@ u2toi(ulong a, ulong b)
 #ifdef LONG_IS_64BIT
   x = cgeti(3);
   x[1] = evallgefint(3)|evalsigne(1);
-  gel(x,2) = ((a << 32) | b);
+  x[2] = ((a << 32) | b);
 #else
   x = cgeti(4);
   x[1] = evallgefint(4)|evalsigne(1);
