@@ -2796,7 +2796,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
         pari_sp av1 = avma;
 	GEN rhs = mpqs_factorback(h, relations);
 	GEN Qx_2 = remii(sqri(Y), h->N);
-	if (!egalii(Qx_2, rhs))
+	if (!equalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
 	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
@@ -2833,7 +2833,7 @@ mpqs_eval_cand(mpqs_handle_t *h, long number_of_cand,
 	GEN Qx_2 = remii(sqri(Y), h->N);
 
         rhs = modii(mulii(rhs, Qx), h->N);
-	if (!egalii(Qx_2, rhs))
+	if (!equalii(Qx_2, rhs))
 	{
 	  PRINT_IF_VERBOSE("\b(!)\n");
 	  fprintferr("MPQS: %Z @ %Z :%s\n", Y, Qx, relations);
@@ -2935,7 +2935,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
      * kN instead of mod N), but never mind - we're not in the fast path
      * at this point.  It could be N when N is quite small;  or we might
      * just have found a divisor by sheer luck. */
-    if (is_pm1(inv_q) || egalii(inv_q, h->N)) /* pity */
+    if (is_pm1(inv_q) || equalii(inv_q, h->N)) /* pity */
     {
 #ifdef MPQS_DEBUG
       fprintferr("MPQS: skipping relation with non-invertible q\n");
@@ -2962,7 +2962,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       if (!invmod(utoipos(old_q), h->N, &inv_q)) /* can happen --GN */
       {
 	inv_q = gcdii(inv_q, h->N);
-	if (is_pm1(inv_q) || egalii(inv_q, h->N)) /* pity */
+	if (is_pm1(inv_q) || equalii(inv_q, h->N)) /* pity */
 	{
 #ifdef MPQS_DEBUG
 	  fprintferr("MPQS: skipping relation with non-invertible q\n");
@@ -3039,7 +3039,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
       }
       avma = av1;
 
-      if (!egalii(Qx_2, prod_pi_ei))
+      if (!equalii(Qx_2, prod_pi_ei))
 	err(talker, "MPQS: combined large prime relation is false");
     }
 #endif
@@ -3475,9 +3475,9 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
        * gcd(X-Y_prod,N)==N, we can skip X-Y_prod in such cases */
       D1 = gcdii(X_plus_Y, N);
       if (is_pm1(D1)) { avma = av3; continue; }
-      if ( (flag = egalii(D1, N)) ) /* this one's useless, try the other */
+      if ( (flag = equalii(D1, N)) ) /* this one's useless, try the other */
         D1 = gcdii(subii(X,Y_prod), N);
-      if (!flag || (!is_pm1(D1) && !egalii(D1,N)))
+      if (!flag || (!is_pm1(D1) && !equalii(D1,N)))
       { /* got something that works */
         if (DEBUGLEVEL >= 5)
           fprintferr("MPQS: splitting N after %ld kernel vector%s\n",
@@ -3509,12 +3509,12 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
 	av3 = avma;
 	D1 = gcdii(X_plus_Y, gel(res,j));
 	if (is_pm1(D1)) continue; /* this one doesn't help us */
-	if ( (flag = egalii(D1, gel(res,j))) )
+	if ( (flag = equalii(D1, gel(res,j))) )
 	{ /* bad one, try the other */
           avma = av3;
 	  D1 = gcdii(X_minus_Y, gel(res,j));
 	}
-	if (!flag || (!is_pm1(D1) && !egalii(D1, gel(res,j))))
+	if (!flag || (!is_pm1(D1) && !equalii(D1, gel(res,j))))
 	{ /* got one which splits this factor */
           if (DEBUGLEVEL >= 5)
             fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",

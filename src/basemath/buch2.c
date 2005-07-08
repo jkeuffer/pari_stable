@@ -40,7 +40,7 @@ obj_insert(GEN S, GEN O, long K)
 static GEN
 get_extra_obj(GEN S, long K)
 {
-  GEN v = (GEN)S[lg(S)-1];
+  GEN v = gel(S,lg(S)-1);
   if (typ(v) == t_VEC)
   {
     GEN O = gel(v,K);
@@ -196,7 +196,7 @@ reallocate(RELCACHE_t *M, long len)
 static int
 ok_subFB(FB_t *F, long t, GEN D)
 {
-  GEN LP, P = (GEN)F->LP[t];
+  GEN LP, P = gel(F->LP,t);
   long p = itos(gel(P,1));
   LP = F->LV[p];
   return smodis(D,p) && (!isclone(LP) || t != F->iLP[p] + lg(LP)-1);
@@ -347,7 +347,7 @@ powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
   if (cache) pre_allocate(cache, n);
   for (i=1; i<n; i++)
   {
-    GEN M, m, alg, id2, vp = (GEN)F->LP[ F->subFB[i] ];
+    GEN M, m, alg, id2, vp = gel(F->LP, F->subFB[i]);
     id2 = cgetg(a+1,t_VEC); gel(Id2,i) = id2;
     gel(id2,1) = mkvec2(gel(vp,1), gel(vp,2));
     alg = cgetg(a+1,t_VEC); gel(Alg,i) = alg; gel(alg,1) = gen_1;
@@ -1616,7 +1616,7 @@ zsign_from_logarch(GEN LA, GEN invpi, GEN archp)
 
   for (i=1; i<l; i++)
   {
-    GEN p1 = ground( gmul(imag_i((GEN)LA[archp[i]]), invpi) );
+    GEN p1 = ground( gmul(imag_i(gel(LA,archp[i])), invpi) );
     gel(y,i) = mpodd(p1)? gen_1: gen_0;
   }
   avma = av; return y;
@@ -1821,7 +1821,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
   for (av = avma, noideal = F->KC; noideal; noideal--, avma = av)
   {
     long nbrelideal = 0, dependent = 0, try_factor = 0;
-    GEN IDEAL, ideal = (GEN)F->LP[noideal];
+    GEN IDEAL, ideal = gel(F->LP,noideal);
     pari_sp av2;
 
     if (DEBUGLEVEL>1)
@@ -2024,7 +2024,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
       if (jid == F->KC) jid = 1; else jid++;
     }
     avma = av;
-    ideal = P = prime_to_ideal(nf, (GEN)F->LP[jid]);
+    ideal = P = prime_to_ideal(nf, gel(F->LP,jid));
     do {
       for (i=1; i<lgsub; i++)
       { /* reduce mod apparent order */
@@ -2038,7 +2038,7 @@ rnd_rel(RELCACHE_t *cache, FB_t *F, GEN nf, GEN L_jid, long *pjid)
     if (DEBUGLEVEL>1) fprintferr("(%ld)", jid);
     for (av1 = avma, j = 1; j <= nbG; j++, avma = av1)
     { /* reduce along various directions */
-      m = pseudomin(ideal, (GEN)(F->vecG)[j]);
+      m = pseudomin(ideal, gel(F->vecG,j));
       if (!factorgen(F,nf,ideal,m))
       {
         if (DEBUGLEVEL>1) { fprintferr("."); flusherr(); }
@@ -2108,7 +2108,7 @@ be_honest(FB_t *F, GEN nf)
         ideal = remove_content(ideal);
         for (av1 = avma, k = 1; k <= nbG; k++, avma = av1)
 	{
-          m = pseudomin(ideal, (GEN)(F->vecG)[k]);
+          m = pseudomin(ideal, gel(F->vecG,k));
           if (factorgen(F,nf,ideal,m)) break;
 	}
 	avma = av2; if (k < ru) break;

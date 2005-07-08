@@ -900,7 +900,7 @@ trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res)
 {
   GEN s, p1;
   long l;
-  if (typ(*s0)==t_COMPLEX && gcmp0((GEN)(*s0)[2])) *s0 = (GEN)(*s0)[1];
+  if (typ(*s0)==t_COMPLEX && gcmp0(gel(*s0,2))) *s0 = gel(*s0,1);
   s = *s0;
   l = precision(s); if (!l) l = *prec;
 

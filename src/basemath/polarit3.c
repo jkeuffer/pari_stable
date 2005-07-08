@@ -138,13 +138,13 @@ Rg_to_Fp(GEN x, GEN p)
       pari_sp av = avma;
       GEN z = modii(gel(x,1), p);
       if (z == gen_0) return gen_0;
-      return gerepileuptoint(av, resii(mulii(z, Fp_inv(gel(x,2), p)), p));
+      return gerepileuptoint(av, remii(mulii(z, Fp_inv(gel(x,2), p)), p));
     }
     case t_PADIC: return padic_to_Fp(x, p);
     case t_INTMOD: {
       GEN q = gel(x,1), a = gel(x,2);
       if (equalii(q, p)) return icopy(a);
-      return resii(a, p);
+      return remii(a, p);
     }
     default: err(typeer, "Rg_to_Fp");
       return NULL; /* not reached */
@@ -1964,13 +1964,13 @@ from_Kronecker(GEN z, GEN T)
     gel(a,1) = T;
     for (j=2; j<N; j++) t[j] = z[j];
     z += (N-2);
-    a[2] = lres(normalizepol_i(t,N), T);
+    gel(a,2) = grem(normalizepol_i(t,N), T);
   }
   a = cgetg(3,t_POLMOD); gel(x,i) = a;
   gel(a,1) = T;
   N = (l-2) % (N-2) + 2;
   for (j=2; j<N; j++) t[j] = z[j];
-  a[2] = lres(normalizepol_i(t,N), T);
+  gel(a,2) = grem(normalizepol_i(t,N), T);
   return normalizepol_i(x, i+1);
 }
 
@@ -2491,11 +2491,11 @@ stopoly(ulong m, ulong p, long v)
 GEN
 stopoly_gen(GEN m, GEN p, long v)
 {
-  GEN *y = (GEN*)new_chunk(bit_accuracy(lgefint(m))+2);
+  GEN y = new_chunk(bit_accuracy(lgefint(m))+2);
   long l = 2;
-  do { m = dvmdii(m,p,&(y[l])); l++; } while (signe(m));
-  y[1] = (GEN)(evalsigne(1) | evalvarn(v));
-  y[0] = (GEN)(evaltyp(t_POL) | evallg(l)); return (GEN)y;
+  do { m = dvmdii(m, p, &gel(y,l)); l++; } while (signe(m));
+  y[1] = evalsigne(1) | evalvarn(v);
+  y[0] = evaltyp(t_POL) | evallg(l); return y;
 }
 
 static GEN
@@ -2663,10 +2663,10 @@ FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r)
   z0 = z + l-2; *z0 = *a0--;
   for (i=l-3; i>1; i--) /* z[i] = (a[i+1] + x*z[i+1]) % p */
   {
-    GEN t = addii((GEN)*a0--, muliimod(x, (GEN)*z0--, p));
+    GEN t = addii(gel(a0--,0), muliimod(x, gel(z0--,0), p));
     *z0 = (long)t;
   }
-  if (r) *r = addii((GEN)*a0, muliimod(x, (GEN)*z0, p));
+  if (r) *r = addii(gel(a0,0), muliimod(x, gel(z0,0), p));
   return z;
 }
 

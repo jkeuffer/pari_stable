@@ -996,7 +996,7 @@ Fl_sqr(ulong a, ulong p)
 INLINE ulong
 Fl_div(ulong a, ulong b, ulong p)
 {
-  return Fl_mul(a, invumod(b, p), p);
+  return Fl_mul(a, Fl_inv(b, p), p);
 }
 
 INLINE long

@@ -1535,8 +1535,8 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
       tas = xa;
     }
     rectploth(ne, var0,
-               (GEN)(i==0 ? tas[0] : tas[1]),
-               (GEN)(i==lx-4 ? tas[3] : tas[2]),
+               i==0 ? gel(tas,0) : gel(tas,1),
+               i==lx-4 ? gel(tas,3) : gel(tas,2),
                QUARK,
                DEFAULTPREC,		/* XXXX precision */
                PLOT_RECURSIVE
@@ -1912,7 +1912,6 @@ static void
 gendraw(GEN list, long ps, long flag)
 {
   long i,n,ne,*w,*x,*y;
-  GEN x0,y0,win;
 
   if (typ(list) != t_VEC) err(talker,"not a vector in rectdraw");
   n = lg(list)-1; if (!n) return;
@@ -1925,22 +1924,21 @@ gendraw(GEN list, long ps, long flag)
     PARI_get_plot(0);
   for (i=0; i<n; i++)
   {
-    win=(GEN)list[3*i+1]; x0=(GEN)list[3*i+2]; y0=(GEN)list[3*i+3];
-    if (typ(win)!=t_INT || (!flag && (typ(x0)!=t_INT || typ(y0)!= t_INT)))
-      err(talker, "not an integer type in rectdraw");
+    GEN win = gel(list,3*i+1), x0 = gel(list,3*i+2), y0 = gel(list,3*i+3);
+    long xi, yi;
+    if (typ(win)!=t_INT) err(typeer,"rectdraw");
     if (flag) {
-      double xd = gtodouble(x0), yd = gtodouble(y0);
-      long xi, yi;
-
-      xi = w_width - 1;  yi = w_height - 1;
-      xi = DTOL(xd*xi);
-      yi = DTOL(yd*yi);
-      x[i] = xi; y[i] = yi;
+      xi = DTOL(gtodouble(x0)*(w_width - 1));
+      yi = DTOL(gtodouble(y0)*(w_height - 1));
     } else {
-      x[i]=itos(x0); y[i]=itos(y0);
+      if (typ(x0)!=t_INT || typ(y0)!= t_INT) err(typeer,"rectdraw");
+      xi = itos(x0);
+      yi = itos(y0);
     }
-    ne=itos(win); check_rect(ne);
-    w[i]=ne;
+    x[i] = xi;
+    y[i] = yi;
+    ne = itos(win); check_rect(ne);
+    w[i] = ne;
   }
   if (ps) postdraw00(w,x,y,n,flag); else rectdraw0(w,x,y,n, 1);
   free(x); free(y); free(w);

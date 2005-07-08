@@ -614,13 +614,9 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
     {
       gel(H,j) = cgetg(N+1, t_COL);
       for (i=1; i<=j; i++) gcoeff(H,i,j) = stoi(sublist->data[k++]);
-      for (   ; i<=N; i++) coeff(H,i,j) = (long)gen_0;
+      for (   ; i<=N; i++) gcoeff(H,i,j) = gen_0;
     }
-    for (   ; j<=N; j++)
-    {
-      gel(H,j) = cgetg(N+1, t_COL);
-      for (i=1; i<=N; i++) coeff(H,i,j) = (i==j)? (long)gen_1: (long)gen_0;
-    }
+    for (   ; j<=N; j++) gel(H,j) = vec_ei(N, j);
   }
   free(sublist); return z;
 }

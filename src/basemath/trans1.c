@@ -304,7 +304,7 @@ puiss0(GEN x)
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
       if (lx != lg(x[1])) err(mattype1,"gpow");
       y = idmat(lx-1);
-      for (i=1; i<lx; i++) coeff(y,i,i) = (long)puiss0(gcoeff(x,i,i));
+      for (i=1; i<lx; i++) gcoeff(y,i,i) = puiss0(gcoeff(x,i,i));
       return y;
     case t_QFR: return qfr_unit(x);
     case t_QFI: return qfi_unit(x);
@@ -729,7 +729,7 @@ gpow(GEN x, GEN n, long prec)
   if (is_matvec_t(tx))
   {
     lx = lg(x); y = cgetg(lx,tx);
-    for (i=1; i<lx; i++) gel(y,i) = gpui(gel(x,i),n,prec);
+    for (i=1; i<lx; i++) gel(y,i) = gpow(gel(x,i),n,prec);
     return y;
   }
   av = avma;
@@ -1344,7 +1344,7 @@ serexp(GEN x, long prec)
     mi = lx-1; while (mi>=3 && gcmp0(gel(x,mi))) mi--;
     mi += ex-2;
     y[1] = evalsigne(1) | evalvalp(0) | evalvarn(varn(x));
-    /* zd[i] = coeff of X^i in z */
+    /* zd[i] = coefficient of X^i in z */
     xd = x+2-ex; yd = y+2; ly -= 2;
     gel(yd,0) = gen_1;
     for (i=1; i<ex; i++) gel(yd,i) = gen_0;
@@ -1823,7 +1823,7 @@ glog(GEN x, long prec)
       if (gcmp0(gel(x,2))) return glog(gel(x,1), prec);
       if (prec > LOGAGMCX_LIMIT) return logagmcx(x, prec);
       y = cgetg(3,t_COMPLEX);
-      y[2] = larg(x,prec);
+      gel(y,2) = garg(x,prec);
       av = avma; p1 = glog(cxnorm(x),prec); tetpil = avma;
       gel(y,1) = gerepile(av,tetpil,gmul2n(p1,-1)); return y;
 

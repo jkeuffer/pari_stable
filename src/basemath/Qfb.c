@@ -631,7 +631,7 @@ rhoimag(GEN x)
  * qfr3 / qfr5 routines take a container of t_INTs (e.g a t_VEC) as argument,
  * at least 3 (resp. 5) components [it is a feature that they do not check the
  * precise type or length of the input]. They return a vector of length 3
- * (resp. 5). A qfr3 [a,b,c] contains the form coeff., in a qfr5 [a,b,c, e,d]
+ * (resp. 5). A qfr3 [a,b,c] contains the form coeffs, in a qfr5 [a,b,c, e,d]
  * the t_INT e is a binary exponent, d a t_REAL, coding the distance in
  * multiplicative form: the true distance is obtained from qfr5_dist.
  * D, sqrtD, isqrtD are included in the function's arguments [sqrtD is only
@@ -1042,13 +1042,13 @@ primeform(GEN x, GEN p, long prec)
 static GEN 
 SL2_div_mul_e1(GEN N, GEN M)
 {
-  GEN b = (GEN) coeff(M, 2, 1);
-  GEN d = (GEN) coeff(M, 2, 2);
+  GEN b = gcoeff(M, 2, 1);
+  GEN d = gcoeff(M, 2, 2);
   GEN p2 = cgetg(3, t_VEC);
-  gel(p2,1) = subii(mulii((GEN) coeff(N, 1, 1), d),
-                       mulii((GEN) coeff(N, 1, 2), b));
-  gel(p2,2) = subii(mulii((GEN) coeff(N, 2, 1), d),
-                       mulii((GEN) coeff(N, 2, 2), b));
+  gel(p2,1) = subii(mulii(gcoeff(N, 1, 1), d),
+                    mulii(gcoeff(N, 1, 2), b));
+  gel(p2,2) = subii(mulii(gcoeff(N, 2, 1), d),
+                    mulii(gcoeff(N, 2, 2), b));
   return p2;
 }
 
@@ -1212,7 +1212,7 @@ cornacchia(GEN d, GEN p, GEN *px, GEN *py)
   av2 = avma; lim = stack_lim(av2, 1);
   while (absi_cmp(b, L) > 0)
   {
-    r = resii(a, b); a = b; b = r;
+    r = remii(a, b); a = b; b = r;
     if (low_stack(lim, stack_lim(av2, 1))) {
       if (DEBUGMEM>1) err(warnmem,"cornacchia");
       gerepileall(av2, 2, &a,&b);
@@ -1263,7 +1263,7 @@ cornacchia2(GEN d, GEN p, GEN *px, GEN *py)
   av2 = avma; lim = stack_lim(av2, 1);
   while (cmpii(b, L) > 0)
   {
-    r = resii(a, b); a = b; b = r;
+    r = remii(a, b); a = b; b = r;
     if (low_stack(lim, stack_lim(av2, 1))) {
       if (DEBUGMEM>1) err(warnmem,"cornacchia");
       gerepileall(av2, 2, &a,&b);

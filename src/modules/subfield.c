@@ -521,13 +521,12 @@ init_traces(GEN ff, GEN T, GEN p)
   {
     p1 = cgetg(N+1, t_VEC);
     gel(pow1,i) = p1; p2 = gel(pow,i);
-    for (j=1; j<=N; j++) p1[j] = coeff(p2,1,j);
+    for (j=1; j<=N; j++) gel(p1,j) = gcoeff(p2,1,j);
   }
-  p1 = cgetg(N+1,t_VEC); gel(p1,1) = gen_1;
-  for (i=2; i<=N; i++) gel(p1,i) = gen_0;
+  
   /* Trk[i] = line 1 of x -> x + x^p + ... + x^{p^(i-1)} */
   Trk = pow; /* re-use (destroy) pow */
-  gel(Trk,1) = p1;
+  gel(Trk,1) = vec_ei(N,1);
   for (i=2; i<=k; i++)
     gel(Trk,i) = gadd(gel(Trk,i-1), gel(pow1,i));
   y = cgetg(r, t_VEC);

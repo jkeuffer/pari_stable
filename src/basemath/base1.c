@@ -487,8 +487,8 @@ polgalois(GEN x, long prec)
 	      p3=gen_0;
               for (k=0,i=1; i<=5; i++,k+=4)
 	      {
-		p5 = gadd(gmul((GEN)p2[ind5[k]],(GEN)p2[ind5[k+1]]),
-		          gmul((GEN)p2[ind5[k+2]],(GEN)p2[ind5[k+3]]));
+		p5 = gadd(gmul(gel(p2,ind5[k]),gel(p2,ind5[k+1])),
+		          gmul(gel(p2,ind5[k+2]),gel(p2,ind5[k+3])));
 		p3 = gadd(p3, gmul(gsqr(gel(p2,i)),p5));
 	      }
 	      gel(w,l) = grndtoi(real_i(p3),&e);
@@ -544,8 +544,8 @@ polgalois(GEN x, long prec)
 	      p3=gen_0; k=0;
               for (i=1; i<=5; i++) for (j=i+1; j<=6; j++)
 	      {
-		p5=gadd(gmul((GEN)p2[ind6[k]],(GEN)p2[ind6[k+1]]),
-		        gmul((GEN)p2[ind6[k+2]],(GEN)p2[ind6[k+3]]));
+		p5=gadd(gmul(gel(p2,ind6[k]),gel(p2,ind6[k+1])),
+		        gmul(gel(p2,ind6[k+2]),gel(p2,ind6[k+3])));
 		p3=gadd(p3,gmul(gsqr(gmul(gel(p2,i),gel(p2,j))),p5));
                 k += 4;
 	      }
@@ -738,7 +738,7 @@ GEN
 get_nfpol(GEN x, GEN *nf)
 {
   if (typ(x) == t_POL) { *nf = NULL; return x; }
-  *nf = checknf(x); return (GEN)(*nf)[1];
+  *nf = checknf(x); return gel(*nf,1);
 }
 
 /* if fliso test for isomorphism, for inclusion otherwise. */
@@ -876,7 +876,7 @@ trace_col(GEN x, GEN T)
 
 /* pol belonging to Z[x], return a monic polynomial generating the same field
  * as pol (x-> ax+b)) set lead = NULL if pol was monic (after dividing
- * by the content), and to to leading coeff otherwise.
+ * by the content), and to to leading coefficient otherwise.
  * No garbage collecting done.
  */
 GEN
@@ -935,9 +935,9 @@ get_Tr(GEN mul, GEN x, GEN basden)
   gel(T,1) = T1;
   for (i=2; i<=n; i++)
   {
-    gel(T,i) = cgetg(n+1,t_COL); coeff(T,1,i) = T1[i];
+    gel(T,i) = cgetg(n+1,t_COL); gcoeff(T,1,i) = gel(T1,i);
     for (j=2; j<=i; j++)
-      gcoeff(T,i,j) = gcoeff(T,j,i) = trace_col((GEN)mul[j+(i-1)*n], T1);
+      gcoeff(T,i,j) = gcoeff(T,j,i) = trace_col(gel(mul,j+(i-1)*n), T1);
   }
   return T;
 }
@@ -1012,7 +1012,7 @@ make_Tr(GEN x, GEN w)
   for (i=1; i<=n; i++)
   {
     p1 = cgetg(n+1,t_COL); gel(T,i) = p1;
-    for (j=1; j<i ; j++) p1[j] = coeff(T,i,j);
+    for (j=1; j<i ; j++) gel(p1,j) = gcoeff(T,i,j);
     for (   ; j<=n; j++)
     {
       av = avma;
@@ -1039,14 +1039,14 @@ get_roots_for_M(nffp_t *F)
   { /* not initialized yet */
     double er;
     n = degpol(F->x);
-    eBD = 1 + gexpo((GEN)F->basden[1]);
+    eBD = 1 + gexpo(gel(F->basden,1));
     er  = F->ro? (1+gexpo(F->ro)): cauchy_bound(F->x)/LOG2;
     if (er < 0) er = 0;
     F->extraprec = (long)((n*er + eBD + log2(n)) / BITS_IN_LONG);
   }
 
   PREC = F->prec + F->extraprec;
-  if (F->ro && gprecision((GEN)F->ro[1]) >= PREC) return;
+  if (F->ro && gprecision(gel(F->ro,1)) >= PREC) return;
   F->ro = get_roots(F->x, F->r1, PREC);
 }
 
@@ -1054,7 +1054,7 @@ get_roots_for_M(nffp_t *F)
 static void
 make_M(nffp_t *F, int trunc)
 {
-  GEN bas = (GEN)F->basden[1], den = (GEN)F->basden[2], ro = F->ro;
+  GEN bas = gel(F->basden,1), den = gel(F->basden,2), ro = F->ro;
   GEN m, d, M;
   long i, j, l = lg(ro), n = lg(bas);
   M = cgetg(n,t_MAT);
@@ -1104,8 +1104,8 @@ make_G(nffp_t *F)
       GEN r = gel(m,i);
       if (typ(r) == t_COMPLEX)
       {
-        g[k++] = lmpadd(gel(r,1), gel(r,2));
-        g[k++] = lmpsub(gel(r,1), gel(r,2));
+        gel(g,k++) = mpadd(gel(r,1), gel(r,2));
+        gel(g,k++) = mpsub(gel(r,1), gel(r,2));
       }
       else
       {
@@ -1361,8 +1361,8 @@ ok_pol(void *TT, GEN xn)
   return NULL;
 }
 
-/* z in Z[X] with positive leading coeff. Set z := z(-X) or z(X) so that
- * second coeff is > 0. In place. */
+/* z in Z[X] with positive leading coefficient. Set z := z(-X) or z(X) so that
+ * second coefficient is > 0. In place. */
 static int
 canon_pol(GEN z)
 {
@@ -1409,7 +1409,7 @@ nfpolred(int part, nfbasic_t *T)
   if (!better_pol(xbest, dxbest, x, dx)) return NULL; /* no improvement */
 
   /* update T */
-  phi = (GEN)a[O.indbest];
+  phi = gel(a, O.indbest);
   if (canon_pol(xbest) < 0) phi = gneg_i(phi);
   if (DEBUGLEVEL>1) fprintferr("xbest = %Z\n",xbest);
   rev = modreverse_i(phi, x);
@@ -1763,7 +1763,7 @@ get_polchar(CG_data *d, GEN x)
 static GEN
 get_polmin_w(CG_data *d, long k)
 {
-  GEN g = get_pol(d, (GEN)d->ZKembed[k]);
+  GEN g = get_pol(d, gel(d->ZKembed,k));
   GEN h = modulargcd(g, derivpol(g));
   if (degpol(h)) g = gdivexact(g,h);
   return g;
@@ -1824,7 +1824,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   S = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
-    GEN P = get_polmin_w(d, i), B = T2_from_embed((GEN)d->ZKembed[i], r1);
+    GEN P = get_polmin_w(d, i), B = T2_from_embed(gel(d->ZKembed,i), r1);
     S[i] = degpol(P);
     if (S[i] == N)
     { /* primitive element */
@@ -2353,12 +2353,12 @@ initzeta(GEN pol, long prec)
   {
     for (k=1; k<R; k++) gel(serie_even,k+1) = gdivgs(gel(ck_even,k),k);
     serie_exp = gmul(c_even, gexp(serie_even,0));
-    p1 = (GEN)aij[2*i+1];
+    p1 = gel(aij,2*i+1);
     for (j=1; j<R; j++) p1[j] = serie_exp[r+3-j];
 
     for (k=1; k<=r2+1; k++) gel(serie_odd,k+1) = gdivgs(gel(ck_odd,k),k);
     serie_exp = gmul(c_odd, gexp(serie_odd,0));
-    p1 = (GEN)aij[2*i+2];
+    p1 = gel(aij,2*i+2);
     for (j=1; j<=r2+1; j++) p1[j] = serie_exp[r2+3-j];
     for (   ; j<R; j++) gel(p1,j) = gen_0;
     i++;

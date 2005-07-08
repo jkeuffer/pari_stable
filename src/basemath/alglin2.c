@@ -251,7 +251,7 @@ hess(GEN x)
       p = gcoeff(x,i,m-1);
       if (gcmp0(p)) continue;
 
-      for (j=m-1; j<lx; j++) lswap(coeff(x,i,j), coeff(x,m,j));
+      for (j=m-1; j<lx; j++) swap(gcoeff(x,i,j), gcoeff(x,m,j));
       lswap(x[i], x[m]); p = ginv(p);
       for (i=m+1; i<lx; i++)
       {
@@ -581,7 +581,7 @@ conjvec(GEN x,long prec)
 	return gerepile(av,tetpil,z);
       }
       z=cgetg(lx-2,t_COL); gel(z,1) = gcopy(x);
-      for (i=2; i<=lx-3; i++) gel(z,i) = gpui(gel(z,i-1),p,prec);
+      for (i=2; i<=lx-3; i++) gel(z,i) = gpow(gel(z,i-1),p,prec);
       break;
 
     default:
@@ -1641,7 +1641,7 @@ hnffinal(GEN matgen,GEN perm,GEN* ptdep,GEN* ptB,GEN* ptC)
     { /* hit exactly s times */
       i1++; C[i1+col] = Cnew[j+zc];
       p1 = cgetg(lig+1,t_COL); gel(Bnew,i1) = p1;
-      for (i=1; i<=nlze; i++) p1[i] = coeff(dep,i,j);
+      for (i=1; i<=nlze; i++) gel(p1,i) = gcoeff(dep,i,j);
       p1 += nlze;
     }
     else
@@ -1801,7 +1801,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
 
 #define absmax(s,z) {long _z; _z = labs(z); if (_z > s) s = _z;}
   /* Get rid of all lines containing only 0 and +/- 1, keeping track of column
-   * operations in T. Leave the rows 1..lk0 alone [up to k0, coeff
+   * operations in T. Leave the rows 1..lk0 alone [up to k0, coefficient
    * explosion, between k0+1 and lk0, row is 0] */
   s = 0;
   while (lig > lk0 && s < (long)(HIGHBIT>>1))
@@ -2412,7 +2412,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     ldef = li - co;
     if (!modid) err(talker,"nb lines > nb columns in hnfmod");
   }
-  /* To prevent coeff explosion, only reduce mod dm when lg(coeff) > ldm */
+  /* To prevent coeffs explosion, only reduce mod dm when lg() > ldm */
   ldm = lgefint(dm);
   for (def = co-1,i = li-1; i > ldef; i--,def--)
   {
@@ -2439,7 +2439,7 @@ allhnfmod(GEN x, GEN dm, int flag)
 	x = gerepilecopy(av, x);
       }
     }
-    if (modid && !signe(coeff(x,i,def)))
+    if (modid && !signe(gcoeff(x,i,def)))
     { /* missing pivot on line i, insert column */
       GEN a = cgetg(co + 1, t_MAT);
       for (k = 1; k <= def; k++) a[k] = x[k];
@@ -2504,7 +2504,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   if (modid) b = vec_const(li-1, dm);
   else
   { /* compute optimal value for dm */
-    b = cgetg(li, t_VEC); b[1] = coeff(x,1,1);
+    b = cgetg(li, t_VEC); gel(b,1) = gcoeff(x,1,1);
     for (i = 2; i < li; i++) gel(b,i) = mulii(gel(b,i-1), gcoeff(x,i,i));
   }
   dm = b;
@@ -2721,7 +2721,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
       D = (GEN*)(b+1);
     }
   }
-  /* handle trivial case: return negative diag coeff otherwise */
+  /* handle trivial case: return negative diag coefficient otherwise */
   if (n == 2) (void)findi_normalize(gel(A,1), B,1,lambda);
   A = fix_rows(A);
   if (remove)
@@ -3161,7 +3161,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   m0 = m = lg(x[1])-1;
   for (j=1; j<=n; j++)
     for (i=1; i<=m; i++)
-      if (typ(coeff(x,i,j)) != t_INT)
+      if (typ(gcoeff(x,i,j)) != t_INT)
         err(talker,"non integral matrix in smithall");
 
   U = ptU? gen_1: NULL; /* TRANSPOSE of row transform matrix [act on columns]*/
@@ -3230,7 +3230,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   /* square, maximal rank n */
   p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &negcmpii);
   ys = cgetg(n+1,t_MAT);
-  for (j=1; j<=n; j++) gel(ys,j) = vecpermute((GEN)x[p1[j]], p1);
+  for (j=1; j<=n; j++) gel(ys,j) = vecpermute(gel(x, p1[j]), p1);
   x = ys;
   if (U) U = vecpermute(U, p1);
   if (V) V = vecpermute(V, p1);

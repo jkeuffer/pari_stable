@@ -1048,7 +1048,7 @@ polzagreel(long n, long m, long prec)
     /* v[d-k+j] = binom(k, j), j = 0..k */
     k2 = k+k; b = divri(mulri(b,mulss(d2-k2+1,d2-k2)), mulss(k2,k2+1));
     for (j=1; j<=k; j++)
-      g[d-k+j] = lmpadd(gel(g,d-k+j), mulri(b,gel(v,d-k+j)));
+      gel(g,d-k+j) = mpadd(gel(g,d-k+j), mulri(b,gel(v,d-k+j)));
     gel(g,d-k) = b;
   }
   g = gmul(RgV_to_RgX(g,0), gpowgs(Bx,r));

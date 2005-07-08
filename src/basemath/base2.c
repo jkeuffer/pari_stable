@@ -212,7 +212,7 @@ rowred(GEN a, GEN rmod)
       if(DEBUGMEM>1) err(warnmem,"rowred j=%ld", j);
       p1 = gerepilecopy(av,a);
       for (j1=1; j1<r; j1++)
-        for (k1=1; k1<c; k1++) coeff(a,j1,k1) = coeff(p1,j1,k1);
+        for (k1=1; k1<c; k1++) gcoeff(a,j1,k1) = gcoeff(p1,j1,k1);
     }
   }
 }
@@ -311,7 +311,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
     {
       for (j=1; j<=n; j++)
       {
-	for (i=1; i<=n; i++) coeff(T,i,j) = coeff(w[j],1,i);
+	for (i=1; i<=n; i++) gcoeff(T,i,j) = gcoeff(w[j],1,i);
 	/* ici la boucle en k calcule la puissance p mod p de w[j] */
 	for (k=1; k<sp; k++)
 	{
@@ -325,7 +325,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
             }
             gel(v,i) = modii(p1, p);
 	  }
-	  for (i=1; i<=n; i++) coeff(T,i,j)=v[i];
+	  for (i=1; i<=n; i++) gcoeff(T,i,j) = gel(v,i);
 	}
       }
       t = powmati(T, hard_case_exponent);
@@ -498,7 +498,7 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
       if (equalii(gcoeff(at,j,j), gcoeff(at,j-1,j-1)))
       {
         gcoeff(at,1,j)= gen_0;
-        for (k=2; k<=j; k++) coeff(at,k,j)=coeff(at,k-1,j-1);
+        for (k=2; k<=j; k++) gcoeff(at,k,j) = gcoeff(at,k-1,j-1);
       }
     tetpil=avma; a=gtrans(at);
     {
@@ -615,7 +615,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
       u = get_coprimes(p, diviiexact(gel(x,1),p));
       l = lg(u);
       /* no small factors, but often a prime power */
-      for (k = 1; k < l; k++) u[k] = coeff(auxdecomp(gel(u,k), 2),1,1);
+      for (k = 1; k < l; k++) gel(u,k) = gcoeff(auxdecomp(gel(u,k), 2),1,1);
 
       w1[i] = u[1];
       w1 = shallowconcat(w1, vecslice(u, 2, l-1));
@@ -1306,7 +1306,7 @@ get_nu(GEN chi, GEN p, long *ptl)
 {
   GEN P = (GEN)FpX_factor(chi, p)[1];
   *ptl = lg(P) - 1;
-  return (GEN)P[*ptl];
+  return gel(P,*ptl);
 }
 
 /* Factor characteristic polynomial of S->phi mod (p, S->chi) */
@@ -1993,7 +1993,7 @@ init_norm(norm_S *S, GEN nf, GEN p)
       long v = Z_pval(D, p);
       D = powiu(p, v);
       Dp = mulii(D, Dp);
-      gel(w, 1) = resii(w1, Dp);
+      gel(w, 1) = remii(w1, Dp);
     }
     for (i=2; i<=N; i++) gel(w,i) = FpX_red(gel(w,i), Dp);
     S->D = D;
@@ -2459,7 +2459,7 @@ to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p, int zk)
   GEN modpr = (typ(*pr) == t_COL)? *pr: modprinit(nf, *pr, zk);
   *T = lg(modpr)==SMALLMODPR? NULL: gel(modpr,mpr_T);
   *pr = gel(modpr,mpr_PR);
-  *p = (GEN)(*pr)[1]; return modpr;
+  *p = gel(*pr,1); return modpr;
 }
 GEN
 nf_to_ff_init(GEN nf, GEN *pr, GEN *T, GEN *p) {
@@ -3416,7 +3416,7 @@ _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS)
   B = primpart(lift_intern(B));
   check_ZXY(B,"rnfequation");
   for (k=2; k<lB; k++)
-    if (lg(B[k]) >= lA) B[k] = lres(gel(B,k),A);
+    if (lg(B[k]) >= lA) gel(B,k) = grem(gel(B,k),A);
 
   if (!nfissquarefree(A,B))
     err(talker,"inseparable relative equation in rnfequation");
@@ -3603,7 +3603,7 @@ do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
   lswap(MC[k-1],MC[k]);
   lswap(h[k-1],  h[k]);
   lswap(I[k-1],  I[k]);
-  for (j=1; j<=k-2; j++) lswap(coeff(mu,k-1,j),coeff(mu,k,j));
+  for (j=1; j<=k-2; j++) swap(gcoeff(mu,k-1,j),gcoeff(mu,k,j));
   muf = gcoeff(mu,k,k-1);
   mufc = gconj(muf);
   Bf = gadd(gel(B,k), vecmul(real_i(vecmul(muf,mufc)), gel(B,k-1)));

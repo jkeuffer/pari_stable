@@ -289,15 +289,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define resssz  remssz
 #define gres    grem
 #define lres    lrem
-#define rcopy mpcopy
 #define gdivise gdvd
 #define divise dvdii
 #define mpdivis dvdiiz
 #define mpdivisis dvdisz
-#define absr  mpabs
-#define absi  mpabs
-#define negi  mpneg
-#define negr  mpneg
 #define mpent mpfloor
 #define mpentz mpfloorz
 #define mpnegz(x,y) \

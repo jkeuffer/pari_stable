@@ -824,7 +824,7 @@ nextK:
       y = lc;
       for (i=1; i<=K; i++)
       {
-        GEN q = constant_term((GEN)famod[ind[i]]);
+        GEN q = constant_term(gel(famod,ind[i]));
         if (y) q = mulii(y, q);
         y = centermod_i(q, pa, pas2);
       }
@@ -836,7 +836,7 @@ nextK:
       y = lc; /* full computation */
       for (i=1; i<=K; i++)
       {
-        GEN q = (GEN)famod[ind[i]];
+        GEN q = gel(famod,ind[i]);
         if (y) q = gmul(y, q);
         y = centermod_i(q, pa, pas2);
       }
@@ -2137,7 +2137,7 @@ factor(GEN x)
             gel(p2,i) = deg1pol_i(gen_1, negr(gel(p1,i)), v);
 	  for(   ; i<lx; i++)
 	  {
-	    GEN a = (GEN) p1[2*i-r1];
+	    GEN a = gel(p1,2*i-r1);
 	    p = cgetg(5, t_POL); gel(p2,i) = p;
 	    p[1] = x[1];
 	    gel(p,2) = gnorm(a);

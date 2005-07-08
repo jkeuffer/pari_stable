@@ -817,14 +817,14 @@ pGENtostr(GEN g, long flag) {
 
   T.prettyp = flag;
   /* frequent special case */
-  if (l == 2) return GENtostr0((GEN)g[1], &T, &gen_output);
+  if (l == 2) return GENtostr0(gel(g,1), &T, &gen_output);
 
   Ls = cgetg(l, t_VEC);
   Ll = cgetg(l, t_VECSMALL);
   for (i = 1; i < l; i++)
   {
-    char *s = GENtostr0((GEN)g[i], &T, &gen_output);
-    Ls[i] = (long)s;
+    char *s = GENtostr0(gel(g,i), &T, &gen_output);
+    gel(Ls,i) = (GEN)s;
     Ll[i] = strlen(s);
     tlen += Ll[i];
   }
@@ -892,7 +892,7 @@ Strchr(GEN g)
   if (is_vec_t(t)) {
     l = lg(g); len = nchar2nlong(l);
     x = cgetg(len+1, t_STR); s = GSTR(x);
-    for (i=1; i<l; i++) *s++ = itoc((GEN)g[i]);
+    for (i=1; i<l; i++) *s++ = itoc(gel(g,i));
   }
   else if (t == t_VECSMALL)
   {
@@ -1282,31 +1282,31 @@ voir2(GEN x, long nb, long bl)
     {
       const char *s = (tx==t_INTMOD)? "int = ": "pol = ";
       if (isonstack(x[1])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
-      pariputs("mod = "); voir2((GEN)x[1],nb,bl);
-      blancs(bl); pariputs(s);        voir2((GEN)x[2],nb,bl);
+      pariputs("mod = "); voir2(gel(x,1),nb,bl);
+      blancs(bl); pariputs(s);        voir2(gel(x,2),nb,bl);
       break;
     }
     case t_FRAC: case t_RFRAC:
-      blancs(bl); pariputs("num = "); voir2((GEN)x[1],nb,bl);
-      blancs(bl); pariputs("den = "); voir2((GEN)x[2],nb,bl);
+      blancs(bl); pariputs("num = "); voir2(gel(x,1),nb,bl);
+      blancs(bl); pariputs("den = "); voir2(gel(x,2),nb,bl);
       break;
 
     case t_COMPLEX:
-      blancs(bl); pariputs("real = "); voir2((GEN)x[1],nb,bl);
-      blancs(bl); pariputs("imag = "); voir2((GEN)x[2],nb,bl);
+      blancs(bl); pariputs("real = "); voir2(gel(x,1),nb,bl);
+      blancs(bl); pariputs("imag = "); voir2(gel(x,2),nb,bl);
       break;
 
     case t_PADIC:
       if (isonstack(x[2])) blancs(bl); else { blancs(bl-2); pariputs("* "); }
-                  pariputs("  p : "); voir2((GEN)x[2],nb,bl);
-      blancs(bl); pariputs("p^l : "); voir2((GEN)x[3],nb,bl);
-      blancs(bl); pariputs("  I : "); voir2((GEN)x[4],nb,bl);
+                  pariputs("  p : "); voir2(gel(x,2),nb,bl);
+      blancs(bl); pariputs("p^l : "); voir2(gel(x,3),nb,bl);
+      blancs(bl); pariputs("  I : "); voir2(gel(x,4),nb,bl);
       break;
 
     case t_QUAD:
-      blancs(bl); pariputs("pol = ");  voir2((GEN)x[1],nb,bl);
-      blancs(bl); pariputs("real = "); voir2((GEN)x[2],nb,bl);
-      blancs(bl); pariputs("imag = "); voir2((GEN)x[3],nb,bl);
+      blancs(bl); pariputs("pol = ");  voir2(gel(x,1),nb,bl);
+      blancs(bl); pariputs("real = "); voir2(gel(x,2),nb,bl);
+      blancs(bl); pariputs("imag = "); voir2(gel(x,3),nb,bl);
       break;
 
     case t_POL: case t_SER:
@@ -1314,7 +1314,7 @@ voir2(GEN x, long nb, long bl)
       for (i=2; i<lx; i++)
       {
 	blancs(bl); pariputsf("coef of degree %ld = ",e);
-	e++; voir2((GEN)x[i],nb,bl);
+	e++; voir2(gel(x,i),nb,bl);
       }
       break;
 
@@ -1323,20 +1323,20 @@ voir2(GEN x, long nb, long bl)
       for (   ; i<lx; i++)
       {
         blancs(bl); pariputsf("%ld%s component = ",i,eng_ord(i));
-	voir2((GEN)x[i],nb,bl);
+	voir2(gel(x,i),nb,bl);
       }
       break;
 
     case t_MAT:
     {
-      GEN c = (GEN)x[1];
+      GEN c = gel(x,1);
       if (lx == 1) return;
       if (typ(c) == t_VECSMALL)
       {
         for (i = 1; i < lx; i++)
         {
           blancs(bl); pariputsf("%ld%s column = ",i,eng_ord(i));
-          voir2((GEN)x[i],nb,bl);
+          voir2(gel(x,i),nb,bl);
         }
       }
       else
@@ -1529,7 +1529,7 @@ etatpile()
 
   adr = getheap();
   pariputsf(" %ld objects on heap occupy %ld long words\n\n",
-            itos((GEN)adr[1]), itos((GEN)adr[2]));
+            itos(gel(adr,1)), itos(gel(adr,2)));
   avma = av;
 
   pariputsf(" %ld variable names used out of %d\n\n",
@@ -1548,16 +1548,16 @@ isnull(GEN g)
     case t_INT:
       return !signe(g);
     case t_COMPLEX:
-      return isnull((GEN)g[1]) && isnull((GEN)g[2]);
+      return isnull(gel(g,1)) && isnull(gel(g,2));
     case t_QUAD:
-      return isnull((GEN)g[2]) && isnull((GEN)g[3]);
+      return isnull(gel(g,2)) && isnull(gel(g,3));
     case t_FRAC: case t_RFRAC:
-      return isnull((GEN)g[1]);
+      return isnull(gel(g,1));
     case t_POLMOD:
-      return isnull((GEN)g[2]);
+      return isnull(gel(g,2));
     case t_POL:
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull((GEN)g[i])) return 0;
+	if (!isnull(gel(g,i))) return 0;
       return 1;
   }
   return 0;
@@ -1573,16 +1573,16 @@ isone(GEN g)
     case t_INT:
       return (signe(g) && is_pm1(g))? signe(g): 0;
     case t_COMPLEX:
-      return isnull((GEN)g[2])? isone((GEN)g[1]): 0;
+      return isnull(gel(g,2))? isone(gel(g,1)): 0;
     case t_QUAD:
-      return isnull((GEN)g[3])? isone((GEN)g[2]): 0;
+      return isnull(gel(g,3))? isone(gel(g,2)): 0;
     case t_FRAC: case t_RFRAC:
-      return isone((GEN)g[1]) * isone((GEN)g[2]);
+      return isone(gel(g,1)) * isone(gel(g,2));
     case t_POL:
       if (!signe(g)) return 0;
       for (i=lg(g)-1; i>2; i--)
-	if (!isnull((GEN)g[i])) return 0;
-      return isone((GEN)g[2]);
+	if (!isnull(gel(g,i))) return 0;
+      return isone(gel(g,2));
   }
   return 0;
 }
@@ -1597,28 +1597,28 @@ isfactor(GEN g)
     case t_INT: case t_REAL:
       return (signe(g)<0)? -1: 1;
     case t_FRAC: case t_RFRAC:
-      return isfactor((GEN)g[1]);
+      return isfactor(gel(g,1));
     case t_COMPLEX:
-      if (isnull((GEN)g[1])) return isfactor((GEN)g[2]);
-      if (isnull((GEN)g[2])) return isfactor((GEN)g[1]);
+      if (isnull(gel(g,1))) return isfactor(gel(g,2));
+      if (isnull(gel(g,2))) return isfactor(gel(g,1));
       return 0;
     case t_PADIC:
-      return !signe((GEN)g[4]);
+      return !signe(gel(g,4));
     case t_QUAD:
-      if (isnull((GEN)g[2])) return isfactor((GEN)g[3]);
-      if (isnull((GEN)g[3])) return isfactor((GEN)g[2]);
+      if (isnull(gel(g,2))) return isfactor(gel(g,3));
+      if (isnull(gel(g,3))) return isfactor(gel(g,2));
       return 0;
     case t_POL: deja = 0; sig = 1;
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull((GEN)g[i]))
+        if (!isnull(gel(g,i)))
 	{
 	  if (deja) return 0;
-	  sig=isfactor((GEN)g[i]); deja=1;
+	  sig=isfactor(gel(g,i)); deja=1;
 	}
       return sig? sig: 1;
     case t_SER:
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull((GEN)g[i])) return 0;
+        if (!isnull(gel(g,i))) return 0;
   }
   return 1;
 }
@@ -1632,23 +1632,23 @@ isdenom(GEN g)
   {
     case t_FRAC: case t_RFRAC:
       return 0;
-    case t_COMPLEX: return isnull((GEN)g[2]);
-    case t_PADIC: return !signe((GEN)g[4]);
-    case t_QUAD: return isnull((GEN)g[3]);
+    case t_COMPLEX: return isnull(gel(g,2));
+    case t_PADIC: return !signe(gel(g,4));
+    case t_QUAD: return isnull(gel(g,3));
 
     case t_POL: deja = 0;
       for (i=lg(g)-1; i>1; i--)
-        if (!isnull((GEN)g[i]))
+        if (!isnull(gel(g,i)))
 	{
 	  if (deja) return 0;
-	  if (i==2) return isdenom((GEN)g[2]);
-	  if (!isone((GEN)g[i])) return 0;
+	  if (i==2) return isdenom(gel(g,2));
+	  if (!isone(gel(g,i))) return 0;
 	  deja=1;
 	}
       return 1;
     case t_SER:
       for (i=lg(g)-1; i>1; i--)
-	if (!isnull((GEN)g[i])) return 0;
+	if (!isnull(gel(g,i))) return 0;
   }
   return 1;
 }
@@ -1871,21 +1871,21 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
     case t_INTMOD: case t_POLMOD:
       pariputs(new_fun_set? "Mod(": "mod(");
-      bruti((GEN)g[2],T,1); comma_sp(T);
-      bruti((GEN)g[1],T,1); pariputc(')'); break;
+      bruti(gel(g,2),T,1); comma_sp(T);
+      bruti(gel(g,1),T,1); pariputc(')'); break;
 
     case t_FRAC: case t_RFRAC:
-      r = isfactor((GEN)g[1]); if (!r) pariputc('(');
-      bruti((GEN)g[1],T,addsign);
+      r = isfactor(gel(g,1)); if (!r) pariputc('(');
+      bruti(gel(g,1),T,addsign);
       if (!r) pariputc(')');
       pariputc('/');
-      r = isdenom((GEN)g[2]); if (!r) pariputc('(');
-      bruti((GEN)g[2],T,1);
+      r = isdenom(gel(g,2)); if (!r) pariputc('(');
+      bruti(gel(g,2),T,1);
       if (!r) pariputc(')');
       break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
-      a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
+      a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a))
       {
         wr_lead_monome(T,b,v,1,addsign);
@@ -1897,11 +1897,11 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
     case t_POL: v = get_var(ordvar[varn(g)], buf);
       /* hack: we want g[i] = coeff of degree i. */
-      i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
-      wr_lead_monome(T,(GEN)g[i],v,i,addsign);
+      i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
+      wr_lead_monome(T,gel(g,i),v,i,addsign);
       while (i--)
       {
-        a = (GEN)g[i];
+        a = gel(g,i);
         if (!isnull_for_pol(a)) wr_monome(T,a,v,i);
       }
       break;
@@ -1911,10 +1911,10 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       if (signe(g))
       { /* hack: we want g[i] = coeff of degree i. */
         l = i + lg(g)-2; g += (2-i);
-        wr_lead_monome(T,(GEN)g[i],v,i,addsign);
+        wr_lead_monome(T,gel(g,i),v,i,addsign);
         while (++i < l)
         {
-          a = (GEN)g[i];
+          a = gel(g,i);
           if (!isnull_for_pol(a)) wr_monome(T,a,v,i);
         }
         sp_sign_sp(T,1);
@@ -1923,11 +1923,11 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
     case t_PADIC:
     {
-      GEN p = (GEN)g[2];
+      GEN p = gel(g,2);
       pari_sp av = avma;
       char *ev;
       i = valp(g); l = precp(g)+i;
-      g = (GEN)g[4]; ev = GENtostr(p);
+      g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
 	g = dvmdii(g,p,&a);
@@ -1948,17 +1948,17 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
 
     case t_QFR: case t_QFI: r = (tg == t_QFR);
       if (new_fun_set) pariputs("Qfb("); else pariputs(r? "qfr(": "qfi(");
-      bruti((GEN)g[1],T,1); comma_sp(T);
-      bruti((GEN)g[2],T,1); comma_sp(T);
-      bruti((GEN)g[3],T,1);
-      if (r) { comma_sp(T); bruti((GEN)g[4],T,1); }
+      bruti(gel(g,1),T,1); comma_sp(T);
+      bruti(gel(g,2),T,1); comma_sp(T);
+      bruti(gel(g,3),T,1);
+      if (r) { comma_sp(T); bruti(gel(g,4),T,1); }
       pariputc(')'); break;
 
     case t_VEC: case t_COL:
       pariputc('['); l = lg(g);
       for (i=1; i<l; i++)
       {
-        bruti((GEN)g[i],T,1);
+        bruti(gel(g,i),T,1);
         if (i<l-1) comma_sp(T);
       }
       pariputc(']'); if (tg==t_COL) pariputc('~');
@@ -1969,7 +1969,7 @@ bruti_intern(GEN g, pariout_t *T, int addsign)
       pariputs("List(["); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
-        bruti((GEN)g[i],T,1);
+        bruti(gel(g,i),T,1);
         if (i<l-1) comma_sp(T);
       }
       pariputs("])"); break;
@@ -2059,7 +2059,7 @@ sori(GEN g, pariout_t *T)
       pariputs("List("); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
-	sori((GEN)g[i], T); if (i < l-1) pariputs(", ");
+	sori(gel(g,i), T); if (i < l-1) pariputs(", ");
       }
       pariputs(")\n"); return;
   }
@@ -2072,26 +2072,26 @@ sori(GEN g, pariout_t *T)
   switch(tg)
   {
     case t_INTMOD: case t_POLMOD:
-      a = (GEN)g[2]; b = (GEN)g[1];
+      a = gel(g,2); b = gel(g,1);
       if (tg == t_INTMOD && signe(a) < 0) a = addii(a,b);
       sori(a,T); pariputs(" mod "); sori(b,T); break;
 	
     case t_FRAC:
-      a=(GEN)g[1]; wr_int(T,a,0); pariputs(" /");
-      b=(GEN)g[2]; wr_int(T,b,0); break;
+      a=gel(g,1); wr_int(T,a,0); pariputs(" /");
+      b=gel(g,2); wr_int(T,b,0); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
-      a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
+      a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a)) { sor_lead_monome(T,b,v,1); break; }
       sori(a,T); if (!isnull(b)) sor_monome(T,b,v,1);
       break;
 
     case t_PADIC:
     {
-      GEN p = (GEN)g[2];
+      GEN p = gel(g,2);
       char *ev;
       i = valp(g); l = precp(g)+i;
-      g = (GEN)g[4]; ev = GENtostr(p);
+      g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
 	g = dvmdii(g,p,&a);
@@ -2113,11 +2113,11 @@ sori(GEN g, pariout_t *T)
     case t_POL:
       if (!signe(g)) { pariputc('0'); break; }
       v = get_var(ordvar[varn(g)],buf);
-      i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
-      sor_lead_monome(T,(GEN)g[i],v,i);
+      i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
+      sor_lead_monome(T,gel(g,i),v,i);
       while (i--)
       {
-        a = (GEN)g[i]; if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
+        a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
       }
       break;
 	
@@ -2126,10 +2126,10 @@ sori(GEN g, pariout_t *T)
       if (signe(g))
       { /* hack: we want g[i] = coeff of degree i. */
         l = i + lg(g)-2; g += (2-i);
-        sor_lead_monome(T,(GEN)g[i],v,i);
+        sor_lead_monome(T,gel(g,i),v,i);
         while (++i < l)
         {
-          a = (GEN)g[i]; if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
+          a = gel(g,i); if (!isnull_for_pol(a)) sor_monome(T,a,v,i);
         }
         pariputs(" + ");
       }
@@ -2138,20 +2138,20 @@ sori(GEN g, pariout_t *T)
       pariputc(')'); break;
 
     case t_RFRAC:
-      sori((GEN)g[1],T); pariputs(" / "); sori((GEN)g[2],T);
+      sori(gel(g,1),T); pariputs(" / "); sori(gel(g,2),T);
       break;
 	
     case t_QFR: case t_QFI: pariputc('{');
-      sori((GEN)g[1],T); pariputs(", ");
-      sori((GEN)g[2],T); pariputs(", ");
-      sori((GEN)g[3],T);
-      if (tg == t_QFR) { pariputs(", "); sori((GEN)g[4],T); }
+      sori(gel(g,1),T); pariputs(", ");
+      sori(gel(g,2),T); pariputs(", ");
+      sori(gel(g,3),T);
+      if (tg == t_QFR) { pariputs(", "); sori(gel(g,4),T); }
       pariputs("}\n"); break;
 	
     case t_VEC: pariputc('[');
       for (i=1; i<lg(g); i++)
       {
-	sori((GEN)g[i],T); if (i<lg(g)-1) pariputs(", ");
+	sori(gel(g,i),T); if (i<lg(g)-1) pariputs(", ");
       }
       pariputc(']'); break;
     case t_VECSMALL: wr_vecsmall(T,g); break;
@@ -2161,7 +2161,7 @@ sori(GEN g, pariout_t *T)
       pariputc('\n');
       for (i=1; i<lg(g); i++)
       {
-        pariputc('['); sori((GEN)g[i],T); pariputs("]\n");
+        pariputc('['); sori(gel(g,i),T); pariputs("]\n");
       }
       break;
 	
@@ -2212,26 +2212,26 @@ texi(GEN g, pariout_t *T, int addsign)
       bruti_intern(g, T, addsign); break;
 
     case t_INTMOD: case t_POLMOD:
-      texi((GEN)g[2],T,1); pariputs(" mod ");
-      texi((GEN)g[1],T,1); break;
+      texi(gel(g,2),T,1); pariputs(" mod ");
+      texi(gel(g,1),T,1); break;
 
     case t_FRAC: 
       if (addsign && isfactor(gel(g,1)) < 0) pariputc('-');
       pariputs("\\frac{");
-      texi((GEN)g[1],T,0);
+      texi(gel(g,1),T,0);
       pariputs("}{");
-      texi((GEN)g[2],T,0);
+      texi(gel(g,2),T,0);
       pariputs("}"); break;
 
     case t_RFRAC:
       pariputs("\\frac{");
-      texi((GEN)g[1],T,1); /* too complicated otherwise */
+      texi(gel(g,1),T,1); /* too complicated otherwise */
       pariputs("}{");
-      texi((GEN)g[2],T,0);
+      texi(gel(g,2),T,0);
       pariputs("}"); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
-      a = (GEN)g[r+1]; b = (GEN)g[r+2]; v = r? "w": "I";
+      a = gel(g,r+1); b = gel(g,r+2); v = r? "w": "I";
       if (isnull(a))
       {
         wr_lead_texnome(T,b,v,1,addsign);
@@ -2243,11 +2243,11 @@ texi(GEN g, pariout_t *T, int addsign)
 
     case t_POL: v = get_texvar(ordvar[varn(g)], buf, sizeof(buf));
       /* hack: we want g[i] = coeff of degree i. */
-      i = degpol(g); g += 2; while (isnull((GEN)g[i])) i--;
-      wr_lead_texnome(T,(GEN)g[i],v,i,addsign);
+      i = degpol(g); g += 2; while (isnull(gel(g,i))) i--;
+      wr_lead_texnome(T,gel(g,i),v,i,addsign);
       while (i--)
       {
-        a = (GEN)g[i];
+        a = gel(g,i);
         if (!isnull_for_pol(a)) wr_texnome(T,a,v,i);
       }
       break;
@@ -2257,10 +2257,10 @@ texi(GEN g, pariout_t *T, int addsign)
       if (signe(g))
       { /* hack: we want g[i] = coeff of degree i. */
         l = i + lg(g)-2; g += (2-i);
-        wr_lead_texnome(T,(GEN)g[i],v,i,addsign);
+        wr_lead_texnome(T,gel(g,i),v,i,addsign);
         while (++i < l)
         {
-          a = (GEN)g[i];
+          a = gel(g,i);
           if (!isnull_for_pol(a)) wr_texnome(T,a,v,i);
         }
         pariputs("+ ");
@@ -2269,10 +2269,10 @@ texi(GEN g, pariout_t *T, int addsign)
 
     case t_PADIC:
     {
-      GEN p = (GEN)g[2];
+      GEN p = gel(g,2);
       char *ev;
       i = valp(g); l = precp(g)+i;
-      g = (GEN)g[4]; ev = GENtostr(p);
+      g = gel(g,4); ev = GENtostr(p);
       for (; i<l; i++)
       {
 	g = dvmdii(g,p,&a);
@@ -2294,7 +2294,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi((GEN)g[i],T,1); if (i < l-1) pariputc('&');
+	texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -2302,7 +2302,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lgeflist(g);
       for (i=2; i<l; i++)
       {
-	texi((GEN)g[i],T,1); if (i < l-1) pariputc('&');
+	texi(gel(g,i),T,1); if (i < l-1) pariputc('&');
       }
       pariputs("\\cr}\n"); break;
 
@@ -2310,7 +2310,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\pmatrix{ "); l = lg(g);
       for (i=1; i<l; i++)
       {
-	texi((GEN)g[i],T,1); pariputs("\\cr\n");
+	texi(gel(g,i),T,1); pariputs("\\cr\n");
       }
       pariputc('}'); break;
 
@@ -3318,7 +3318,7 @@ print0(GEN g, long flag)
     if (flag != f_TEX && typ(g[i])==t_STR)
       pariputs(GSTR(g[i])); /* text surrounded by "" otherwise */
     else
-      gen_output((GEN)g[i], &T);
+      gen_output(gel(g,i), &T);
 }
 
 #define PR_NL() {pariputc('\n'); pariflush(); }

@@ -811,13 +811,13 @@ dirdiv(GEN x, GEN y)
     p1=gel(x,j); gel(z,j) = p1;
     if (gcmp0(p1)) continue;
     if (gcmp1(p1))
-      for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),(GEN)y[i/j]);
+      for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gel(y,i/j));
     else
     {
       if (gcmp_1(p1))
-        for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),(GEN)y[i/j]);
+        for (i=j+j; i<lz; i+=j) gel(x,i) = gadd(gel(x,i),gel(y,i/j));
       else
-        for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,(GEN)y[i/j]));
+        for (i=j+j; i<lz; i+=j) gel(x,i) = gsub(gel(x,i),gmul(p1,gel(y,i/j)));
     }
   }
   return gerepilecopy(av,z);
@@ -967,7 +967,7 @@ veccmp(GEN x, GEN y)
 
   for (i=1; i<vcmp_lk; i++)
   {
-    s = vcmp_cmp((GEN) x[vcmp_k[i]], (GEN) y[vcmp_k[i]]);
+    s = vcmp_cmp(gel(x,vcmp_k[i]), gel(y,vcmp_k[i]));
     if (s) return s;
   }
   return 0;
@@ -1019,8 +1019,8 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
     q = gel(x,indxt); i = l;
     for (j=i<<1; j<=ir; j<<=1)
     {
-      if (j<ir && cmp((GEN)x[indx[j]],(GEN)x[indx[j+1]]) < 0) j++;
-      if (cmp(q,(GEN)x[indx[j]]) >= 0) break;
+      if (j<ir && cmp(gel(x,indx[j]), gel(x,indx[j+1])) < 0) j++;
+      if (cmp(q,gel(x,indx[j])) >= 0) break;
 
       indx[i] = indx[j]; i = j;
     }
@@ -1041,7 +1041,7 @@ gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
   else if (tx == t_VECSMALL)
     for (i=1; i<lx; i++) y[i] = x[indx[i]];
   else
-    for (i=1; i<lx; i++) gel(y,i) = gcopy((GEN)x[indx[i]]);
+    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,indx[i]));
   free(indx); return y;
 }
 

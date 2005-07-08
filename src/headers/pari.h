@@ -86,7 +86,6 @@ ENDEXTERN
 #  pragma pointers_in_A0
 #endif
 
-#include "pariport.h"
 BEGINEXTERN
 #include "pariinl.h"
 ENDEXTERN

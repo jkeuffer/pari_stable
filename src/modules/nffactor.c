@@ -91,7 +91,7 @@ unifpol(GEN nf, GEN x, long flag)
     for (i=2; i<d; i++) gel(y,i) = unifpol0(nf, gel(x,i), flag);
     return y;
   }
-  return unifpol0(nf, (GEN)x, flag);
+  return unifpol0(nf, x, flag);
 }
 
 GEN
@@ -204,7 +204,7 @@ nf_bestlift(GEN elt, GEN bound, nflift_t *L)
   }
   else
   {
-    u = gmul(elt, (GEN)L->iprk[1]);
+    u = gmul(elt, gel(L->iprk,1));
     for (i=1; i<l; i++) gel(u,i) = diviiround(gel(u,i), L->den);
     elt = gscalcol(elt, l-1);
   }
@@ -588,11 +588,11 @@ get_trace(GEN ind, trace_data *T)
   long i, j, l, K = lg(ind)-1;
   GEN z, s, v;
 
-  s = (GEN)T->S1[ ind[1] ];
+  s = gel(T->S1, ind[1]);
   if (K == 1) return s;
 
   /* compute s = S1 u */
-  for (j=2; j<=K; j++) s = gadd(s, (GEN)T->S1[ ind[j] ]);
+  for (j=2; j<=K; j++) s = gadd(s, gel(T->S1, ind[j]));
 
   /* compute v := - round(P^1 S u) */
   l = lg(s);
@@ -639,7 +639,7 @@ init_trace(trace_data *T, GEN S, nflift_t *L, GEN q)
   for (j = 1; j < l; j++)
   {
     double *t = dalloc(h * sizeof(double));
-    GEN c = (GEN)T->dPinvS[j];
+    GEN c = gel(T->dPinvS,j);
     pari_sp av = avma;
     T->PinvSdbl[j] = t;
     for (i=1; i < h; i++) t[i] = rtodbl(mpmul(invd, gel(c,i)));
@@ -743,8 +743,8 @@ nfcmbf(nfcmbf_t *T, GEN p, long a, long maxK, long klim)
           t1 = FpX_red(gmul(ltdn, t1), pk);
           t2 = FpX_red(gmul(lt2dn,t2), pk);
         } else {
-          t1 = resii(mulii(ltdn, t1), pk);
-          t2 = resii(mulii(lt2dn,t2), pk);
+          t1 = remii(mulii(ltdn, t1), pk);
+          t2 = remii(mulii(lt2dn,t2), pk);
         }
       }
       gel(trace1,i) = gclone( nf_bestlift(t1, NULL, T->L) );
@@ -804,7 +804,7 @@ nextK:
       y = lt; /* full computation */
       for (i=1; i<=K; i++)
       {
-        GEN q = (GEN)famod[ind[i]];
+        GEN q = gel(famod, ind[i]);
         if (y) q = gmul(y, q);
         y = FqX_centermod(q, Tpk, pk, pks2);
       }
@@ -1420,7 +1420,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
     }
 
     if (!nbf || anbf < nbf
-             || (anbf == nbf && cmpii(gel(apr,4), (GEN)(*pr)[4]) > 0))
+             || (anbf == nbf && cmpii(gel(apr,4), gel(*pr,4)) > 0))
     {
       nbf = anbf;
       *pr = apr;
@@ -1436,7 +1436,7 @@ nf_pick_prime(long ct, GEN nf, GEN polbase, long fl,
 }
 
 /* return the factorization of the square-free polynomial x.
-   The coeff of x are in Z_nf and its leading term is a rational integer.
+   The coeffs of x are in Z_nf and its leading term is a rational integer.
    deg(x) > 1, deg(nfpol) > 1
    If fl = 1, return only the roots of x in nf
    If fl = 2, as fl=1 if pol splits, [] otherwise */

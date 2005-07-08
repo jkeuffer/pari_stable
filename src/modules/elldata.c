@@ -69,7 +69,7 @@ ellcondfile(long f)
   if (!stream) 
     err(talker,"Elliptic curves files not available for conductor %ld\n"
                "[missing %s]",f,s);
-  V = lisGEN(stream);
+  V = readGEN(stream);
   if (!V || typ(V)!=t_VEC )
     err(talker,"Elliptic files %s not compatible\n",s);
   fclose(stream);

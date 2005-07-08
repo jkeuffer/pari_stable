@@ -1565,7 +1565,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
   if (LIMC2 < LIMC) LIMC2 = LIMC;
   if (PRECREG)
   {
-    sqrtD  = mpsqrt(itor(Disc,PRECREG));
+    sqrtD  = sqrtr(itor(Disc,PRECREG));
     isqrtD = truncr(sqrtD);
   }
 

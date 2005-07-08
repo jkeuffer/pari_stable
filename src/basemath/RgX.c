@@ -129,7 +129,7 @@ RgX_powers(GEN a, GEN T, long l)
 
   if (degpol(a) >= degpol(T)) a = grem(a, T);
   gel(v,2) = a;
-  for (i=3; i<l; i++) v[i] = lres(gmul(gel(v,i-1), a), T);
+  for (i=3; i<l; i++) gel(v,i) = grem(gmul(gel(v,i-1), a), T);
   return v;
 }
 

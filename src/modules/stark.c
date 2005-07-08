@@ -693,7 +693,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
      runs through the classes of (Ok/cond0)^* and beta cond1-positive */
 
   vt = cgetg(N + 1, t_VEC); /* Tr(w_i) */
-  for (i = 1; i <= N; i++) vt[i] = coeff(T,i,1);
+  for (i = 1; i <= N; i++) gel(vt,i) = gcoeff(T,i,1);
 
   G.cyc = gtovecsmall(cyc);
   G.r = nz;
@@ -1075,7 +1075,7 @@ _0toCoeff(int *rep, long deg)
   for (i=0; i<deg; i++) rep[i] = 0;
 }
 
-/* transform a polmod into coeff */
+/* transform a polmod into Coeff */
 static void
 Polmod2Coeff(int *rep, GEN polmod, long deg)
 {
@@ -1121,7 +1121,7 @@ FreeMat(int **A, long n)
   free((void*)A);
 }
 
-/* initialize coeff reduction */
+/* initialize Coeff reduction */
 static int**
 InitReduction(GEN CHI, long deg)
 {
@@ -1224,7 +1224,7 @@ AddMulCoeff(int *c0, int *c1, int* c2, int** reduc, long deg)
   avma = av;
 }
 
-/* evaluate the coeff. No Garbage collector */
+/* evaluate the Coeff. No Garbage collector */
 static GEN
 EvalCoeff(GEN z, int* c, long deg)
 {
@@ -1559,7 +1559,7 @@ ppgamma(ST_t *T, long prec)
   gel(gamdm,2) = gen_0;
   gel(gamdm,3) = gneg(gadd(gmul2n(mplog2(prec), 1), eul));
   for (i = 2; i <= r; i++)
-    gamdm[i+2] = lmulri(gel(gamun,i+2), subis(int2n(i), 1));
+    gel(gamdm,i+2) = mulri(gel(gamun,i+2), subis(int2n(i), 1));
   gamdm = gmul(sqpi, gexp(gamdm, prec)); /* Gamma(1/2 + x) */
 
  /* We simplify to get one of the following two expressions
@@ -2590,7 +2590,7 @@ makescind(GEN nf, GEN P, long cl)
   {
     GEN c = gel(pol,i);
     if (typ(c) != t_POL) continue;
-    c = RgX_rem(c, nfpol); /* degree <= 0 polynomial [t_INT coeff] */
+    c = RgX_rem(c, nfpol); /* ZX, degree <= 0 */
     c = signe(c)? gel(c,2) : gen_0;
     gel(pol,i) = c;
   }
@@ -2602,7 +2602,7 @@ makescind(GEN nf, GEN P, long cl)
   Pp = gsubst(P, varn(nfpol), a);
   Pp = FpX_red(Pp, p); /* P mod a prime \wp above p (which splits) */
   roo = gel(G,3);
-  is_P = gcmp0( FpX_eval(Pp, resii(gel(roo,1),p), p) );
+  is_P = gcmp0( FpX_eval(Pp, remii(gel(roo,1),p), p) );
   /* each roo[i] mod p is a root of P or (exclusive) tau(P) mod \wp */
   /* record whether roo[1] is a root of P or tau(P) */
   
@@ -2611,7 +2611,7 @@ makescind(GEN nf, GEN P, long cl)
   {
     perm = gel(L,i);
     k = perm[1]; if (k == 1) continue;
-    k = gcmp0( FpX_eval(Pp, resii(gel(roo,k),p), p) );
+    k = gcmp0( FpX_eval(Pp, remii(gel(roo,k),p), p) );
     /* roo[k] is a root of the other polynomial */
     if (k != is_P) break;
   }

@@ -22,7 +22,7 @@ groupelts_sumorders(GEN S)
   long i;
   long s=0;
   for(i=1; i < lg(S); i++)
-    s += perm_order((GEN)S[i]);
+    s += perm_order(gel(S,i));
   return s;
 }
 
@@ -32,7 +32,7 @@ vecgroup_sumorders(GEN L)
   long i;
   long s=0;
   for(i=1; i<lg(L); i++)
-    s+=group_order((GEN)L[i]);
+    s+=group_order(gel(L,i));
   return s;
 }
 
@@ -42,7 +42,7 @@ indexgroupsubgroup(GEN L, long order, const long *good, const long *bad)
   long i;
   for(i=1; i<lg(L); i++)
   {
-    GEN G=(GEN)L[i];
+    GEN G=gel(L,i);
     long idx;
     const long *p;
     if (group_order(G)!=order)
@@ -62,7 +62,7 @@ indexgroupcentre(GEN G, GEN Z, const long *good, const long *bad)
   long i;
   for(i=1;i<lg(Z);i++)
   {
-    GEN z=(GEN)Z[i];
+    GEN z=gel(Z,i);
     if (perm_order(z)==2)
     {
       pari_sp btop=avma;
@@ -88,12 +88,12 @@ vecgroup_idxlist(GEN L, long order)
   GEN V;
   long i,j,n;
   for (n=0,i=1; i<lg(L); i++)
-    if (group_order((GEN)L[i])==order)
+    if (group_order(gel(L,i))==order)
       n++;
   V=cgetg(n+1,t_VECSMALL);
   for(i=1,j=1; j<=n; i++)
-    if (group_order((GEN)L[i])==order)
-      V[j++]=group_ident((GEN)L[i],NULL);
+    if (group_order(gel(L,i))==order)
+      V[j++]=group_ident(gel(L,i),NULL);
   vecsmall_sort(V);
   return gerepileupto(ltop,vecsmall_uniq(V));
 }
@@ -114,8 +114,8 @@ group_ident_i(GEN G, GEN S)
     S=group_elts(G,group_domain(G));
   s=groupelts_sumorders(S);/*This is used as a hash value*/
   F=factoru(n);
-  p=(GEN) F[1];
-  e=(GEN) F[2];
+  p = gel(F,1);
+  e = gel(F,2);
   switch(lg(p)-1)
   {
   case 1:/*prime power*/

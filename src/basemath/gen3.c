@@ -508,7 +508,7 @@ gmod(GEN x, GEN y)
 	if (varn(x[1])!=varn(y)) return gen_0;
         z=cgetg(3,t_POLMOD);
         gel(z,1) = ggcd(gel(x,1),y);
-        z[2]=lres(gel(x,2),gel(z,1)); return z;
+        gel(z,2) = grem(gel(x,2),gel(z,1)); return z;
       }
       switch(tx)
       {

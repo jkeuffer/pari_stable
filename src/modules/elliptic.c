@@ -1451,7 +1451,7 @@ ellwp0(GEN w, GEN z, long flag, long prec, long PREC)
         GEN p1 = gmul2n(gpowgs(z,3),1);
         pari_sp tetpil = avma;
         v = cgetg(3,t_VEC);
-	gel(v,1) = gpuigs(z,-2);
+	gel(v,1) = gpowgs(z,-2);
 	gel(v,2) = gneg(p1); return gerepile(av,tetpil,v);
       }
       return v;
