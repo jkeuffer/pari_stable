@@ -1097,12 +1097,13 @@ get_sol_abs(GEN bnf, GEN a, GEN *ptPrimes)
   GEN dec, fact, primes, Primes, *Fact;
   long *gcdlist, gcd,nprimes,Ngen,i,j;
 
+  *ptPrimes = NULL;
   if (gcmp1(a))
   {
     GEN sol = cgetg(Nprimes+1, t_VECSMALL);
     sindex = 1; normsol = (GEN*) new_chunk(2);
     normsol[1] = sol; for (i=1; i<=Nprimes; i++) sol[i] = 0;
-    *ptPrimes = NULL; return;
+    return;
   }
 
   fact=factor(a); primes=gel(fact,1);

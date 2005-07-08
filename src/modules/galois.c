@@ -2386,7 +2386,7 @@ init_isin(long n1, long n2, GROUP *tau, GROUP *ss, PERM *s0, resolv *R)
        || (n1== 6 && n2==1)
        || (n1== 5 && n2==3)) fl = 0;
       *s0=data10(n1,n2,tau); break;
-    case 11:
+    default: /* case 11: */
       *s0=data11(n1,tau); break;
   }
   *ss = lirecoset(n1,n2,N);

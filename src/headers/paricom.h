@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
   VOLATILE long __err = err; \
   int pari_errno;            \
   jmp_buf __env;             \
-  void *__catcherr;          \
+  void *__catcherr = NULL;   \
   if ((pari_errno = setjmp(__env))) 
 
 #define RETRY { __catcherr = err_catch(__err, &__env); {
