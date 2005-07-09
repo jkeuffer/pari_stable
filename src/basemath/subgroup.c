@@ -616,7 +616,7 @@ subgrouplist_i(GEN cyc, GEN bound, GEN expoI, GEN gen)
       for (i=1; i<=j; i++) gcoeff(H,i,j) = stoi(sublist->data[k++]);
       for (   ; i<=N; i++) gcoeff(H,i,j) = gen_0;
     }
-    for (   ; j<=N; j++) gel(H,j) = vec_ei(N, j);
+    for (   ; j<=N; j++) gel(H,j) = col_ei(N, j);
   }
   free(sublist); return z;
 }

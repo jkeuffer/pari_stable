@@ -2626,7 +2626,7 @@ nfbezout(GEN nf,GEN a,GEN b, GEN A,GEN B, GEN *pu,GEN *pv,GEN *pw,GEN *pdi)
     w = B;
     v = gen_0;
     if (a == gen_1)
-      u = vec_ei(lg(B)-1, 1);
+      u = col_ei(lg(B)-1, 1);
     else
     {
       u = element_inv(nf, a);

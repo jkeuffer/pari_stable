@@ -182,8 +182,6 @@ GEN     sindexrank(GEN x);
 GEN     sum(GEN v, long a, long b);
 GEN     suppl(GEN x);
 GEN     vconcat(GEN A, GEN B);
-GEN     vec_ei(long n, long i);
-GEN     vec_Cei(long n, long i, GEN c);
 GEN     vecslice(GEN A, long y1, long y2);
 GEN     vecslicepermute(GEN A, GEN p, long y1, long y2);
 GEN     vecpermute(GEN A, GEN p);
@@ -1163,12 +1161,6 @@ GEN     tayl(GEN x, long v, long precdl);
 GEN     truecoeff(GEN x, long n);
 GEN     trunc0(GEN x, GEN *pte);
 GEN     u2toi(ulong a, ulong b);
-GEN     zerocol(long n);
-GEN     zeromat(long m, long n);
-GEN     zeropadic(GEN p, long e);
-GEN     zeropol(long v);
-GEN     zeroser(long v, long prec);
-GEN     zerovec(long n);
 
 /* groupid.c*/
 

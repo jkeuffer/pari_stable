@@ -2244,7 +2244,7 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   if (! is_vec_t(tx)) err(typeer,"pslq");
   /* check trivial cases */
   for (k = 1; k <= n; k++)
-    if (gcmp0(gel(x,k))) return vec_ei(n, k);
+    if (gcmp0(gel(x,k))) return col_ei(n, k);
   if (n <= 1) return cgetg(1, t_COL);
   prec = gprecision(x) - 1; /* don't trust the last word */
   if (prec < 0)

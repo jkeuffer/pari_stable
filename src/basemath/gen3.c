@@ -1995,61 +1995,6 @@ trunc0(GEN x, GEN *pte)
 }
 /*******************************************************************/
 /*                                                                 */
-/*                             ZERO                                */
-/*                                                                 */
-/*******************************************************************/
-/* O(p^e) */
-GEN
-zeropadic(GEN p, long e)
-{
-  GEN y = cgetg(5,t_PADIC);
-  gel(y,4) = gen_0;
-  gel(y,3) = gen_1;
-  copyifstack(p,y[2]);
-  y[1] = evalvalp(e) | evalprecp(0);
-  return y;
-}
-/* O(polx[v]^e) */
-GEN
-zeroser(long v, long e)
-{
-  GEN x = cgetg(2, t_SER);
-  x[1] = evalvalp(e) | evalvarn(v); return x;
-}
-/* 0 * polx[v] */
-GEN
-zeropol(long v)
-{
-  GEN x = cgetg(2,t_POL);
-  x[1] = evalvarn(v); return x;
-}
-/* vector(n) */
-GEN
-zerocol(long n)
-{
-  GEN y = cgetg(n+1,t_COL);
-  long i; for (i=1; i<=n; i++) gel(y,i) = gen_0;
-  return y;
-}
-/* vectorv(n) */
-GEN
-zerovec(long n)
-{
-  GEN y = cgetg(n+1,t_VEC);
-  long i; for (i=1; i<=n; i++) gel(y,i) = gen_0;
-  return y;
-}
-/* matrix(m, n) */
-GEN
-zeromat(long m, long n)
-{
-  GEN y = cgetg(n+1,t_MAT);
-  GEN v = zerocol(m);
-  long i; for (i=1; i<=n; i++) gel(y,i) = v;
-  return y;
-}
-/*******************************************************************/
-/*                                                                 */
 /*                  CONVERSIONS -->  INT, POL & SER                */
 /*                                                                 */
 /*******************************************************************/

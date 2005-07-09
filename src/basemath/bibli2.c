@@ -884,7 +884,7 @@ permtonum(GEN x)
   ary = cgetg(lx+1,t_VECSMALL);
   for (ind=1; ind<=lx; ind++)
   {
-    res = (GEN)*++x;
+    res = gel(++x, 0);
     if (typ(res) != t_INT) err(typeer,"permtonum");
     ary[ind] = itos(res);
   }
@@ -919,7 +919,7 @@ modreverse_i(GEN a, GEN T)
   if (gcmp0(a) || typ(a) != t_POL) err(talker,"reverse polmod does not exist");
 
   y = RgXV_to_RgM(RgX_powers(a,T,n-1), n);
-  y = gauss(y, vec_ei(n, 2));
+  y = gauss(y, col_ei(n, 2));
   return gerepilecopy(av, RgV_to_RgX(y, varn(T)));
 }
 

@@ -1867,9 +1867,9 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
     Mx = set_mulid(V, d->ZKembed, inv, r1, r2, N, i);
     if (!Mx) break; /* prec. problem. Stop */
     rkM = lg(M)-1;
-    if (dP == 1 && !rkM) M = mkmat(vec_ei(N, 1));
+    if (dP == 1 && !rkM) M = mkmat(col_ei(N, 1));
     M2 = cgetg(N+1, t_MAT); /* we will add to M the elts of M2 */
-    gel(M2,1) = vec_ei(N, i); /* nf.zk[i] */
+    gel(M2,1) = col_ei(N, i); /* nf.zk[i] */
     k = 2;
     for (h = 1; h < dP; h++)
     { 

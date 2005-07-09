@@ -512,7 +512,7 @@ rnfelementdown(GEN rnf,GEN x)
 static GEN
 rnfid(long n, long m)
 {
-  return idmat_intern(n, gscalcol_i(gen_1,m), zerocol(m));
+  return idmat_intern(n, col_ei(m,1), zerocol(m));
 }
 
 /* x est exprime sur la base relative */

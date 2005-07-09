@@ -1944,7 +1944,7 @@ uniformizer(GEN nf, norm_S *S, GEN P, GEN V, GEN p, int ramif)
   f = N - m;
   q = powiu(p,f+1);
 
-  u = FpM_invimage(shallowconcat(P, V), vec_ei(N,1), p);
+  u = FpM_invimage(shallowconcat(P, V), col_ei(N,1), p);
   setlg(u, lg(P));
   u = centermod(gmul(P, u), p);
   if (is_uniformizer(u, q, S)) return u;
@@ -2172,7 +2172,7 @@ _primedec(GEN nf, GEN p)
   else
     gel(h,1) = Ip;
 
-  UN = vec_ei(N, 1);
+  UN = col_ei(N, 1);
   for (c=1; c; c--)
   { /* Let A:= (Z_K/p) / Ip; try to split A2 := A / Im H ~ Im M2
        H * ? + M2 * Mi2 = Id_N ==> M2 * Mi2 projector A --> A2 */
@@ -2358,7 +2358,7 @@ modprinit(GEN nf, GEN pr, int zk)
   for (k=i=1; i<=N; i++)
   {
     x = gcoeff(prh, i,i);
-    if (!is_pm1(x)) { c[k] = i; gel(ffproj,i) = vec_ei(N, i); k++; }
+    if (!is_pm1(x)) { c[k] = i; gel(ffproj,i) = col_ei(N, i); k++; }
     else
       gel(ffproj,i) = gneg(gel(prh,i));
   }
@@ -2398,11 +2398,11 @@ modprinit(GEN nf, GEN pr, int zk)
       x = element_powid_mod_p(nf,c[i],p, p);
       gel(frob,i) = FpM_FpC_mul(ffproj, x, p);
     }
-    u = vec_ei(f,2); k = 2;
+    u = col_ei(f,2); k = 2;
     deg1 = ffdegree(u, frob, p);
     while (deg1 < f)
     {
-      k++; u2 = vec_ei(f, k);
+      k++; u2 = col_ei(f, k);
       deg2 = ffdegree(u2, frob, p);
       deg = clcm(deg1,deg2);
       if (deg == deg1) continue;
@@ -2759,7 +2759,7 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
   prinvp = pidealprimeinv(nf,pr); /* again multiplied by p */
   for (j=1; j<=m; j++)
   {
-    gel(A,j) = vec_ei(m, j);
+    gel(A,j) = col_ei(m, j);
     gel(I,j) = matid;
   }
   X = polx[varn(P)];

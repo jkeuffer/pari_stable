@@ -4165,7 +4165,7 @@ RgXQ_inv_inexact(GEN x, GEN y)
   GEN v, z;
 
   if (dx < 0 || dy < 0) err(talker,"non-invertible polynomial in RgXQ_inv");
-  v = gauss(sylvestermatrix(y,x), vec_ei(dz, dz));
+  v = gauss(sylvestermatrix(y,x), col_ei(dz, dz));
   z = cgetg(dy+2,t_POL); z[1] = y[1];
   for (i=2; i<dy+2; i++) z[i] = v[dz-i+2];
   return gerepilecopy(av, normalizepol_i(z, dy+2));

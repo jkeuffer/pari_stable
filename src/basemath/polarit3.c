@@ -1373,7 +1373,7 @@ FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
   pari_sp ltop = avma;
   int n = degpol(T);
   GEN V, M = FpXQ_matrix_pow(S,n,n,T,p);
-  V = FpM_invimage(M, vec_ei(n, 2), p);
+  V = FpM_invimage(M, col_ei(n, 2), p);
   return gerepileupto(ltop, gtopolyrev(V, varn(T)));
 }
 
@@ -1659,8 +1659,8 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
     MB = gaddmat(gen_m1,MB);
     Ay = polun[vp];
     By = polun[vq];
-    VP = vec_ei(np, 1);
-    VQ = np == nq? VP: vec_ei(nq, 1); /* save memory */
+    VP = col_ei(np, 1);
+    VQ = np == nq? VP: col_ei(nq, 1); /* save memory */
     for(j=0;j<e;j++)
     {
       if (j)

@@ -166,6 +166,14 @@ GEN    utoineg(ulong x);
 GEN    utoipos(ulong x);
 GEN    utor(ulong s, long prec);
 long   vali(GEN x);
+GEN    zerocol(long n);
+GEN    zeromat(long m, long n);
+GEN    zeropadic(GEN p, long e);
+GEN    zeropol(long v);
+GEN    zeroser(long v, long e);
+GEN    zerovec(long n);
+GEN    col_ei(long n, long i);
+GEN    vec_ei(long n, long i);
 
 #else
 
@@ -313,6 +321,63 @@ INLINE GEN
 mkmat2(GEN x, GEN y) { GEN v=cgetg(3,t_MAT); gel(v,1)=x; gel(v,2)=y; return v; }
 INLINE GEN
 mkmatcopy(GEN x) { GEN v = cgetg(2, t_MAT); gel(v,1) = gcopy(x); return v; }
+
+/***   ZERO   ***/
+/* O(p^e) */
+INLINE GEN
+zeropadic(GEN p, long e)
+{
+  GEN y = cgetg(5,t_PADIC);
+  gel(y,4) = gen_0;
+  gel(y,3) = gen_1;
+  copyifstack(p,y[2]);
+  y[1] = evalvalp(e) | evalprecp(0);
+  return y;
+}
+/* O(polx[v]^e) */
+INLINE GEN
+zeroser(long v, long e)
+{
+  GEN x = cgetg(2, t_SER);
+  x[1] = evalvalp(e) | evalvarn(v); return x;
+}
+/* 0 * polx[v] */
+INLINE GEN
+zeropol(long v)
+{
+  GEN x = cgetg(2,t_POL);
+  x[1] = evalvarn(v); return x;
+}
+/* vector(n) */
+INLINE GEN
+zerocol(long n)
+{
+  GEN y = cgetg(n+1,t_COL);
+  long i; for (i=1; i<=n; i++) gel(y,i) = gen_0;
+  return y;
+}
+/* vectorv(n) */
+INLINE GEN
+zerovec(long n)
+{
+  GEN y = cgetg(n+1,t_VEC);
+  long i; for (i=1; i<=n; i++) gel(y,i) = gen_0;
+  return y;
+}
+/* matrix(m, n) */
+INLINE GEN
+zeromat(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  GEN v = zerocol(m);
+  long i; for (i=1; i<=n; i++) gel(y,i) = v;
+  return y;
+}
+/* i-th vector in the standard basis */
+INLINE GEN
+col_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
+INLINE GEN
+vec_ei(long n, long i) { GEN e = zerovec(n); gel(e,i) = gen_1; return e; }
 
 /* cannot do memcpy because sometimes x and y overlap */
 INLINE GEN

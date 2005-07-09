@@ -143,6 +143,7 @@ BA  8- support for gp2c-run on cygwin
 BA  9- new optional package 'elldata' and new GP functions ellsearch and
        ellidentify to access it.
 BA 10- support for ellinit("<curve name>") through elldata.
+   11- new functions vec_ei / col_ei
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):

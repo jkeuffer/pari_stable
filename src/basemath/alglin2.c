@@ -2265,7 +2265,7 @@ hnfmerge_get_1(GEN A, GEN B)
   for (j = 1; j < l; j++)
   {
     c = j+1;
-    gel(U,j) = vec_ei(l-1, j);
+    gel(U,j) = col_ei(l-1, j);
     gel(U,c) = zerocol(l-1); /* dummy */
     gel(C,j) = vecslice(gel(A,j), 1,j);
     gel(C,c) = vecslice(gel(B,j), 1,j);
@@ -2359,6 +2359,9 @@ hnf0(GEN A, int remove)
 GEN
 hnf(GEN x) { return hnf0(x,1); }
 
+static GEN
+ZC_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
+
 enum { hnf_MODID = 1, hnf_PART = 2 };
 
 /* u*z[1..k] mod b, in place */
@@ -2443,7 +2446,7 @@ allhnfmod(GEN x, GEN dm, int flag)
     { /* missing pivot on line i, insert column */
       GEN a = cgetg(co + 1, t_MAT);
       for (k = 1; k <= def; k++) a[k] = x[k];
-      gel(a,k++) = vec_Cei(li-1, i, dm);
+      gel(a,k++) = ZC_Cei(li-1, i, dm);
       for (     ; k <= co;  k++) a[k] = x[k-1];
       ldef--; if (ldef < 0) ldef = 0;
       co++; def++; x = a;
@@ -2454,7 +2457,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   { /* w[li] is an accumulator, discarded at the end */
     GEN w = cgetg(li+1, t_MAT);
     for (i = li-1; i > ldef; i--) w[i] = x[i];
-    for (        ; i > 0;    i--) gel(w,i) = vec_Cei(li-1, i, dm);
+    for (        ; i > 0;    i--) gel(w,i) = ZC_Cei(li-1, i, dm);
     x = w;
     for (i = li-1; i > 0; i--)
     { /* check that dm*Id \subset L + add up missing dm*Id components */

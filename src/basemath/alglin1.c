@@ -2240,13 +2240,7 @@ inverseimage(GEN m,GEN v)
   return y;
 }
 
-/* i-th vector in the standard basis */
-GEN
-vec_ei(long n, long i) { GEN e = zerocol(n); gel(e,i) = gen_1; return e; }
-GEN
-vec_Cei(long n, long i, GEN c) { GEN e = zerocol(n); gel(e,i) = c; return e; }
-
-/* NB: d freed */
+/* NB: d freed inside */
 static GEN
 get_suppl(GEN x, GEN d, long r)
 {
@@ -2278,7 +2272,7 @@ get_suppl(GEN x, GEN d, long r)
   for (j=1; j<=rx; j++)
     gel(y,j) = gcopy(gel(y,j));
   for (   ; j<=n; j++)
-    gel(y,j) = vec_ei(n, y[j]);
+    gel(y,j) = col_ei(n, y[j]);
   free(d); return y;
 }
 

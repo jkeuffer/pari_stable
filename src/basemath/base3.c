@@ -450,7 +450,7 @@ element_powid_mod_p(GEN nf, long I, GEN n, GEN p)
   D.nf = nf;
   D.p = p;
   D.I = I;
-  y = leftright_pow(vec_ei(N, I), n, (void*)&D, &_sqrmod, &_mulidmod);
+  y = leftright_pow(col_ei(N, I), n, (void*)&D, &_sqrmod, &_mulidmod);
   return gerepileupto(av,y);
 }
 
@@ -1802,7 +1802,7 @@ GEN
 log_gen_arch(zlog_S *S, long index)
 {
   GEN y = zerocol(S->n);
-  zlog_add_sign(y, vec_ei(lg(S->archp)-1, index), S->lists);
+  zlog_add_sign(y, col_ei(lg(S->archp)-1, index), S->lists);
   return gmul(S->U, y);
 }
 
