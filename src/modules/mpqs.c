@@ -3321,17 +3321,17 @@ mpqs_get_relation(long pos, FILE *FREL)
 
 #define isprobableprime(n) (miller((n),17))
 static int
-split(GEN N, long *e, long *res)
+split(GEN N, GEN *e, GEN *res)
 {
   ulong mask;
   long flag;
   GEN base;
-  if (isprobableprime(N)) { *e = (long)gen_1; return 1; }
+  if (isprobableprime(N)) { *e = gen_1; return 1; }
   if (carrecomplet(N, &base))
   { /* squares could cost us a lot of time */
     /* GN20050707: as used now, this is always called with res!=NULL */
-    *res = (long)base;
-    *e = (long)gen_2;
+    *res = base;
+    *e = gen_2;
     if (DEBUGLEVEL >= 5) fprintferr("MPQS: decomposed a square\n");
     return 1;
   }
@@ -3340,15 +3340,15 @@ split(GEN N, long *e, long *res)
    * dealing with cubes, higher powers can be handled essentially for free) */
   if ( (flag = is_357_power(N, &base, &mask)) )
   {
-    *res = (long)base;
-    *e = (long)utoipos(flag);
+    *res = base;
+    *e = utoipos(flag);
     if (DEBUGLEVEL >= 5)
       fprintferr("MPQS: decomposed a %s\n",
                  (flag == 3 ? "cube" :
                   (flag == 5 ? "5th power" : "7th power")));
     return 1;
   }
-  *e = (long)gen_0; return 0; /* known composite */
+  *e = gen_0; return 0; /* known composite */
 }
 
 static GEN
@@ -3497,8 +3497,8 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
       gel(res,2) = D1;
       res_last = res_next = 3;
 
-      if ( split(gel(res,1),  &res[res_size+1], &res[1]) ) done++;
-      if ( split(D1, &res[res_size+2], &res[2]) ) done++;
+      if ( split(gel(res,1),  &gel(res,res_size+1), &gel(res,1)) ) done++;
+      if ( split(D1, &gel(res,res_size+2), &gel(res,2)) ) done++;
       if (done == 2) break;     /* both factors look prime or were powers */
       /* GN20050707: moved following line down to here, was before the
        * two split() invocations.  Very rare case anyway. */
@@ -3546,14 +3546,14 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
          new gcd.  Remove the known-composite flag from the old entry */
       (void)dvdiiz(gel(res,j), D1, gel(res,j));
       gel(res,res_next) = D1;
-      res[res_size+j] = 0;
+      gel(res,res_size+j) = NULL;
 
-      if (split( gel(res,j), &res[res_size+j], res + j) ) done++;
+      if (split( gel(res,j), &gel(res,res_size+j), &gel(res,j)) ) done++;
       /* GN20050707 Fixed:
        * Don't increment done when the newly stored factor seems to be
        * prime or otherwise devoid of interest - this happens later
        * when we routinely revisit it during the present inner loop. */
-      (void)split(D1, &res[res_size+res_next], &res[res_next]);
+      (void)split(D1, &gel(res,res_size+res_next), &gel(res,res_next));
 
       /* GN20050707: Following line moved down to here, was before the
        * two split() invocations. */
