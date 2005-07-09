@@ -2948,7 +2948,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
     *f = gerepileuptoint(av0, inv_q);
     return c;
   }
-  Y1 = readexpr(e[0].Y);
+  Y1 = strtoi(e[0].Y);
   av2 = avma; /* preserve inv_q and Y1 */
 
   while (fgets(buf, MPQS_STRING_LENGTH, COMB))
@@ -2974,7 +2974,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
         *f = gerepileuptoint(av0, inv_q);
         return c;
       }
-      Y1 = readexpr(e[i].Y);
+      Y1 = strtoi(e[i].Y);
       i = 1 - i; /* subsequent relations go to other row */
       av2 = avma; /* preserve inv_q and Y1 */
       continue;
@@ -2984,7 +2984,7 @@ mpqs_combine_large_primes(mpqs_handle_t *h,
     memset((void *)ei, 0, ei_size * sizeof(long));
     mpqs_set_exponents(ei, e[0].E);
     mpqs_set_exponents(ei, e[1].E);
-    Y2 = readexpr(e[i].Y);
+    Y2 = strtoi(e[i].Y);
     new_Y = modii(mulii(mulii(Y1, Y2), inv_q), h->N);
     new_Y1 = subii(h->N, new_Y);
     if (absi_cmp(new_Y1, new_Y) < 0) new_Y = new_Y1;
@@ -3295,7 +3295,7 @@ mpqs_add_relation(GEN Y_prod, GEN N, long *ei, char *rel)
 
   s = strchr(rel, ':') - 1;
   *s = '\0';
-  Y = readexpr(rel);
+  Y = strtoi(rel);
   res = remii(mulii(Y_prod, Y), N);
 
   s = strtok(s + 3, " \n");

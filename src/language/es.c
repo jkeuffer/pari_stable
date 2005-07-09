@@ -202,7 +202,7 @@ fix_buffer(Buffer *b, long newlbuf)
 }
 
 GEN
-readGEN(FILE *fi)
+gp_read_file(FILE *fi)
 {
   Buffer *b = new_buffer();
   input_method IM;

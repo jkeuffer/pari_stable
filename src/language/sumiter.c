@@ -384,7 +384,7 @@ forvec_start(GEN x, long flag, GEN *gd, GEN (**next)(GEN,GEN))
     if (! is_vec_t(tx) || lg(e)!=3)
       err(talker,"not a vector of two-component vectors in forvec");
     if (typ(m) != t_INT) t = t_REAL;
-    /* in case x is an ep->value and readexpr() kills it, have to copy */
+    /* in case x is an ep->value and readseq_void() kills it, have to copy */
     if (i > 1) switch(flag)
     {
       case 1: /* a >= m[i-1] - m */

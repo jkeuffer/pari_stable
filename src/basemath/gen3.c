@@ -2900,7 +2900,7 @@ geval(GEN x)
   switch(tx)
   {
     case t_STR:
-      return freadseq(GSTR(x));
+      return gp_read_str(GSTR(x));
 
     case t_POLMOD: y=cgetg(3,tx);
       gel(y,1) = geval(gel(x,1));

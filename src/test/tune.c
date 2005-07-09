@@ -475,7 +475,7 @@ main(int argc, char **argv)
             if (++i == argc) error(argv);
             s = argv[i];
           }
-          DFLT_mod = itou(freadexpr(s)); break;
+          DFLT_mod = itou(gp_read_str(s)); break;
         case 's':
           if (!*++s)
           {

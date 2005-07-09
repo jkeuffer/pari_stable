@@ -426,21 +426,18 @@ readseq_void(char *t)
   avma = top - av;
 }
 
-/* filtered readexpr = remove blanks and comments */
-static GEN
-freadseq0(char *s, GEN (*f)(void))
-{
-  char *t = filtre(s, (compatible == OLDALL));
-  GEN x = readseq0(t, f);
-  free(t); return x;
-}
-
 GEN readseq_nobreak(char *t)  { return readseq0_nobreak(t, seq);  }
 GEN readexpr_nobreak(char *t) { return readseq0_nobreak(t, expr); }
 GEN readseq(char *t)  { return readseq0(t, seq);  }
 GEN readexpr(char *t) { return readseq0(t, expr); }
-GEN freadseq(char *s) { return freadseq0(s, seq); }
-GEN freadexpr(char *s){ return freadseq0(s, expr);}
+/* filtered readseq = remove blanks and comments */
+GEN
+gp_read_str(char *s)
+{
+  char *t = filtre(s, (compatible == OLDALL));
+  GEN x = readseq0(t, seq);
+  free(t); return x;
+}
 
 static void
 unused_chars(char *c, int strict)
@@ -2451,6 +2448,15 @@ static GEN
 real_0_digits(long n) {
   long b = (n > 0)? (long)(n/L2SL10): (long)-((-n)/L2SL10 + 1);
   return real_0_bit(b);
+}
+
+GEN
+strtoi(char *s)
+{
+  int nb;
+  GEN y = utoi(number(&nb, &s));
+  if (nb == 9) y = int_read_more(y, &s);
+  return y;
 }
 
 static GEN
