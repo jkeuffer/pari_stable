@@ -174,6 +174,7 @@ extern default_type gp_default_list[];
 #define COMMENTPROMPT "comment> "
 #define CONTPROMPT ""
 #define DFT_INPROMPT ""
+#define MAX_PROMPT_LEN 128
 
 /* gp_colors */
 void decode_color(int n, int *c);

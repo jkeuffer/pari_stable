@@ -1280,6 +1280,40 @@ gp_initrc(growarray *A, char *path)
 /*                           GP MAIN LOOP                           */
 /*                                                                  */
 /********************************************************************/
+static void
+brace_color(char *s, int c, int force)
+{
+  if (disable_color || (gp_colors[c] == c_NONE && !force)) return;
+#ifdef RL_PROMPT_START_IGNORE
+  if (GP_DATA->flags & USE_READLINE)
+    *s++ = RL_PROMPT_START_IGNORE;
+#endif
+  strcpy(s, term_get_color(c));
+#ifdef RL_PROMPT_START_IGNORE
+  if (GP_DATA->flags & USE_READLINE)
+  {
+    s+=strlen(s);
+    *s++ = RL_PROMPT_END_IGNORE;
+    *s = 0;
+  }
+#endif
+}
+
+char *
+color_prompt(char *prompt)
+{
+  static char buf[MAX_PROMPT_LEN + 24]; /* + room for color codes */
+  char *s;
+
+  if (GP_DATA->flags & TEST) return prompt;
+  s = buf; *s = 0;
+  /* escape sequences bug readline, so use special bracing (if available) */
+  brace_color(s, c_PROMPT, 0);
+  s += strlen(s); strcpy(s, prompt);
+  s += strlen(s);
+  brace_color(s, c_INPUT, 1); return buf;
+}
+
 void
 update_logfile(const char *prompt, const char *s)
 {
