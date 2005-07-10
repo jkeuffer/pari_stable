@@ -2870,7 +2870,7 @@ ifac_realloc(GEN *partial, GEN *where, long new_lg)
     fprintferr("IFAC: new partial factorization structure (%ld slots)\n",
 	       (new_lg - 3)/3);
   newpart[1] = (*partial)[1];	/* moebius */
-  icopyifstack(newpart[2], (*partial)[2]); /* hint */
+  icopyifstack((*partial)[2], newpart[2]); /* hint */
   /* downward sweep through the old *partial, picking up where1 and carrying it
    * over if and when we pass it.  (This will only be useful if it pointed at a
    * non-empty slot.)  Factors are icopy()d so that we again have a nice object
