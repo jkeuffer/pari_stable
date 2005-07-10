@@ -22,6 +22,9 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+/* Modified for PARI/GP by the PARI group */
+#ifndef HAS_DLOPEN
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -203,3 +206,5 @@ void *dlsym(void *handle, const char *symbol)
   }
   return value;
 }
+
+#endif
