@@ -445,16 +445,16 @@ static GEN
 mpth(GEN x)
 {
   long l, s = signe(x);
-  pari_sp av;
-  GEN y, t;
+  GEN y;
 
   if (!s) return real_0_bit(expo(x));
   l = lg(x);
   if (cmprs(x, bit_accuracy(l)) >= 0) {
     y = real_1(l);
   } else {
-    av = avma; t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
-    return gerepileuptoleaf(av, divrr(t, addsr(2,t)));
+    pari_sp av = avma;
+    GEN t = exp1r_abs(gmul2n(x,1)); /* exp(|2x|) - 1 */
+    y = gerepileuptoleaf(av, divrr(t, addsr(2,t)));
   }
   if (s < 0) setsigne(y, -signe(y)); /* tanh is odd */
   return y;
