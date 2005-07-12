@@ -2227,7 +2227,7 @@ texi(GEN g, pariout_t *T, int addsign)
       pariputs("\\frac{");
       texi(gel(g,1),T,1); /* too complicated otherwise */
       pariputs("}{");
-      texi(gel(g,2),T,0);
+      texi(gel(g,2),T,1);
       pariputs("}"); break;
 
     case t_COMPLEX: case t_QUAD: r = (tg==t_QUAD);
