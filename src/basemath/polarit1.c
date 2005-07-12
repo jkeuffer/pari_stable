@@ -2218,6 +2218,7 @@ FqX_split_Trager(GEN A, GEN T, GEN p)
     GEN U = poleval(u, gadd(polx[varn(A)], gmulsg(k, polx[varn(T)])));
     n = FpY_FpXY_resultant(T, U, p);
     if (FpX_is_squarefree(n, p)) break;
+    n = NULL;
   }
   if (!n) return NULL;
   if (DEBUGLEVEL>4) fprintferr("FqX_split_Trager: choosing k = %ld\n",k);

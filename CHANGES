@@ -92,6 +92,7 @@ GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
    33- tanh(x) was actually computing tanh(|x|) for real x ([#269] from 2.2.8)
    34- [MacOS X] dlopen is now part of the system library. Don't redefine
        dlopen in darwin.c if HAS_DLOPEN is defined.
+   35- fix Trager's trick in factorff (from 2.2.10)
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
