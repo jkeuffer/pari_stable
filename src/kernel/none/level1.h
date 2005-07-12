@@ -725,7 +725,7 @@ sdivsi_rem(long x, GEN y, long *rem)
   LOCAL_HIREMAINDER;
 
   if (!s) err(gdiver);
-  if (!x || lgefint(y)>3 || (gel(y,2))<0) { *rem = x; return 0; }
+  if (!x || lgefint(y)>3 || ((long)y[2]) < 0) { *rem = x; return 0; }
   hiremainder=0; q = (long)divll(labs(x), (ulong)y[2]);
   if (x < 0) { hiremainder = -((long)hiremainder); q = -q; }
   if (s < 0) q = -q;

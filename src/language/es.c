@@ -2795,9 +2795,10 @@ pari_is_dir(char *name)
 #else
 #  ifdef HAS_OPENDIR
   return is_dir_opendir(name);
+#  else
+  return 0;
 #  endif
 #endif
-  return 0;
 }
 
 /* expand tildes in filenames, return a malloc'ed buffer */
