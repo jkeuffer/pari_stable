@@ -84,7 +84,6 @@ char *term_get_color(int c);
 void hit_return(void);
 
 extern ulong prec;
-extern GEN gnil;
 
 extern char *gp_function_name;
 extern int  (*whatnow_fun)(char *, int);

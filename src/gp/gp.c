@@ -1828,7 +1828,6 @@ main(int argc, char **argv)
   bot = (pari_sp)0;
   top = (pari_sp)(1000000*sizeof(long));
 
-  GP_DATA = default_gp_data();
   if (setjmp(GP_DATA->env))
   {
     pariputs("### Errors on startup, exiting...\n\n");

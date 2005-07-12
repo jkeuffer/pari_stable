@@ -1466,13 +1466,11 @@ truc(void)
       }
       free(table); return z;
 
-    case '%':
-    old = analyseur; analyseur++;
-    if (!GP_DATA) err(talker2,"history not available", old, mark.start);
-    else
-    {
+    case '%': {
       gp_hist *H = GP_DATA->hist;
       int junk;
+
+      old = analyseur; analyseur++;
       p = 0;
       if (*analyseur == '#') { analyseur++; return utoi(H->total); }
       while (*analyseur == '`') { analyseur++; p++; }

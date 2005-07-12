@@ -91,7 +91,7 @@ extern ulong DEBUGFILES, DEBUGLEVEL, DEBUGMEM, precdl;
 extern long  *ordvar;
 extern GEN   bernzone,gpi,geuler;
 extern GEN   polvar,*polun,*polx,primetab;
-extern GEN   gen_m1,gen_1,gen_2,ghalf,gi,gen_0;
+extern GEN   gen_m1,gen_1,gen_2,ghalf,gi,gen_0,gnil;
 
 extern const long lontyp[];
 extern void* global_err_data;

@@ -26,7 +26,7 @@ void
 hit_return(void)
 {
   int c;
-  if (GP_DATA && (GP_DATA->flags & (EMACS|TEXMACS))) return;
+  if (GP_DATA->flags & (EMACS|TEXMACS)) return;
   pariputs("---- (type RETURN to continue) ----");
   /* if called from a readline callback, may be in a funny TTY mode,  */
   do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r' && c != ' ');
@@ -400,7 +400,7 @@ vpariputs(const char* format, va_list args)
   t = s = buf;
   if (nb)
   {
-    pariout_t T = GP_DATA? *(GP_DATA->fmt): DFLT_OUTPUT; /* copy */
+    pariout_t T = *(GP_DATA->fmt); /* copy */
     T.prettyp = f_RAW;
     for(;;)
     {
@@ -490,11 +490,11 @@ static int col_index, lin_index, max_width, max_lin;
 static int
 term_width_intern(void)
 {
-  if (GP_DATA && GP_DATA->flags & TEST) return 0;
+  if (GP_DATA->flags & TEST) return 0;
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!(GP_DATA && (GP_DATA->flags & (EMACS|TEXMACS)))
+    if (!(GP_DATA->flags & (EMACS|TEXMACS))
      && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_col;
   }
 #endif
@@ -516,11 +516,11 @@ term_width_intern(void)
 static int
 term_height_intern(void)
 {
-  if (GP_DATA && GP_DATA->flags & TEST) return 0;
+  if (GP_DATA->flags & TEST) return 0;
 #ifdef HAS_TIOCGWINSZ
   {
     struct winsize s;
-    if (!(GP_DATA && (GP_DATA->flags & (EMACS|TEXMACS)))
+    if (!(GP_DATA->flags & (EMACS|TEXMACS))
      && !ioctl(0, TIOCGWINSZ, &s)) return s.ws_row;
   }
 #endif
@@ -1709,7 +1709,7 @@ times_texnome(const char *v, long d)
 {
   if (d)
   {
-    if (GP_DATA && (GP_DATA->flags & TEXMACS)) pariputs("\\*");
+    if (GP_DATA->flags & TEXMACS) pariputs("\\*");
     else pariputc(' ');
     texnome(v,d);
   }
@@ -3029,7 +3029,7 @@ switchin(const char *name0)
   /* if name contains '/',  don't use dir_list */
   s=name; while (*s && *s != '/' && *s != '\\') s++;
   if (*s) { if (try_name(name)) return; }
-  else if (GP_DATA)
+  else
   {
     char **tmp = GP_DATA->path->dirs;
     for ( ; *tmp; tmp++)
@@ -3311,7 +3311,7 @@ readbin(const char *name, FILE *f)
 void
 print0(GEN g, long flag)
 {
-  pariout_t T = GP_DATA? *(GP_DATA->fmt): DFLT_OUTPUT; /* copy */
+  pariout_t T = *(GP_DATA->fmt); /* copy */
   long i, l = lg(g);
   T.prettyp = flag;
   for (i = 1; i < l; i++)
@@ -3334,7 +3334,7 @@ void error0(GEN g) { err(user, g); }
 static char *
 wr_check(const char *s) {
   char *t = expand_tilde(s);
-  if (GP_DATA && GP_DATA->flags & SECURE)
+  if (GP_DATA->flags & SECURE)
   {
     fprintferr("[secure mode]: about to write to '%s'. OK ? (^C if not)\n",t);
     hit_return();

@@ -135,6 +135,9 @@ GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
    21- typecast cleanup: move most of paricast.h to pariold.h
    22- rename readGEN -> gp_read_file, freadseq -> gp_read_str.
        freadexpr/readexpr are deprecated, use gp_read_str/readseq
+   23- make sure GP_DATA is always defined --> default() becomes available
+       in libpari
+   24- make gnil public
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

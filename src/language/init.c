@@ -79,7 +79,6 @@ typedef struct {
 
 static stack *err_catch_stack = NULL;
 static char **dft_handler;
-static jmp_buf environnement;
 
 void
 push_stack(stack **pts, void *a)
@@ -421,6 +420,7 @@ init_defaults(int force)
   if (done && !force) return;
   done = 1;
 
+  GP_DATA = default_gp_data();
 #ifdef LONG_IS_64BIT
   prec=4;
 #else
@@ -650,7 +650,7 @@ pari_init(size_t parisize, ulong maxprime)
 
   STACK_CHECK_INIT(&u);
   init_defaults(0);
-  if (INIT_JMP && setjmp(environnement))
+  if (INIT_JMP && setjmp(GP_DATA->env))
   {
     fprintferr("  ***   Error in the PARI system. End of program.\n");
     exit(1);
@@ -715,7 +715,6 @@ delete_path(gp_path *p)
 static void
 free_gp_data(gp_data *D)
 {
-  if (!D) return;
   delete_hist(D->hist);
   delete_path(D->path);
   delete_pp(D->pp);
@@ -1061,7 +1060,7 @@ err_recover(long numerr)
 
   /* reclaim memory stored in "blocs" */
   if (try_to_recover) recover(1);
-  longjmp(GP_DATA? GP_DATA->env: environnement, numerr);
+  longjmp(GP_DATA->env, numerr);
 }
 
 void
@@ -1259,7 +1258,7 @@ trap0(char *e, char *r, char *f)
   }
 
   F = f? f: r; /* define a default handler */
- /* will execute F (break loop if F = NULL), then jump to environnement */
+ /* will execute F (break loop if F = NULL), then jump to 'env' */
   if (numerr == CATCH_ALL) numerr = noer;
   kill_dft_handler(numerr);
   if (!F)
