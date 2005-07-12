@@ -3518,52 +3518,57 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
          * smaller than the original N, and should be easy to deal with later */
         av3 = avma;
         D1 = gcdii(X_plus_Y, gel(res,j));
-      if (is_pm1(D1) || egalii(D1, gel(res,j))) { avma = av3; continue; }
-      /* got one which splits this factor */
-      if (DEBUGLEVEL >= 5)
-        fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",
-                   i+1);      /* always plural */
-      /* first make sure there's room for another factor */
-      if (res_next > res_size)
-      { /* need to reallocate (_very_ rare case) */
-        long i1, new_size = 2*res_size;
-        GEN new_res;
-        if (new_size > res_max) new_size = res_max;
-        new_res = cgetg(2*new_size+1, t_VEC);
-        for (i1=2*new_size; i1>=res_next; i1--) new_res[i1] = 0;
-        for (i1=1; i1<res_next; i1++)
-        {
-          /* GN20050707:
-           * on-stack contents of new_res must be rejuvenated */
-          icopyifstack(res[i1], new_res[i1]); /* factors */
-          if (res[res_size+i1])
-            icopyifstack(res[res_size+i1], new_res[new_size+i1]);
-          /* primality tags */
-        }
-        res = new_res; res_size = new_size;   /* res_next unchanged */
-      }
-      /* now there is room; divide into existing factor and store the
-         new gcd.  Remove the known-composite flag from the old entry */
-      (void)dvdiiz(gel(res,j), D1, gel(res,j));
-      gel(res,res_next) = D1;
-      gel(res,res_size+j) = NULL;
+	if (is_pm1(D1) || egalii(D1, gel(res,j))) { avma = av3; continue; }
+	/* got one which splits this factor */
+	if (DEBUGLEVEL >= 5)
+	  fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",
+		     i+1);      /* always plural */
+	/* first make sure there's room for another factor */
+	if (res_next > res_size)
+	{ /* need to reallocate (_very_ rare case) */
+	  long i1, new_size = 2*res_size;
+	  GEN new_res;
+	  if (new_size > res_max) new_size = res_max;
+	  new_res = cgetg(2*new_size+1, t_VEC);
+	  for (i1=2*new_size; i1>=res_next; i1--) new_res[i1] = 0;
+	  for (i1=1; i1<res_next; i1++)
+	  {
+	    /* GN20050707:
+	     * on-stack contents of new_res must be rejuvenated */
+	    icopyifstack(res[i1], new_res[i1]); /* factors */
+	    if (res[res_size+i1])
+	      icopyifstack(res[res_size+i1], new_res[new_size+i1]);
+	    /* primality tags */
+	  }
+	  res = new_res; res_size = new_size;   /* res_next unchanged */
+	}
+	/* now there is room; divide into existing factor and store the
+	   new gcd */
+	(void)dvdiiz(gel(res,j), D1, gel(res,j));
+	gel(res,res_next) = D1;
 
-      if (split( gel(res,j), &gel(res,res_size+j), &gel(res,j)) ) done++;
-      /* GN20050707 Fixed:
-       * Don't increment done when the newly stored factor seems to be
-       * prime or otherwise devoid of interest - this happens later
-       * when we routinely revisit it during the present inner loop. */
-      (void)split(D1, &gel(res,res_size+res_next), &gel(res,res_next));
+	/* following overwrites the old known-composite indication at j */
+	if (split( gel(res,j), &gel(res,res_size+j), &gel(res,j)) ) done++;
+	/* GN20050707 Fixed:
+	 * Don't increment done when the newly stored factor seems to be
+	 * prime or otherwise devoid of interest - this happens later
+	 * when we routinely revisit it during the present inner loop. */
+	(void)split(D1, &gel(res,res_size+res_next), &gel(res,res_next));
 
-      /* GN20050707: Following line moved down to here, was before the
-       * two split() invocations. */
-      if (++res_next > res_max)
-        break; /* all possible factors seen */
+	/* GN20050707: Following line moved down to here, was before the
+	 * two split() invocations. */
+	if (++res_next > res_max)
+	{
+	  /* all possible factors seen, outer loop postprocessing will
+	   * proceed to break out of the outer loop below. */
+	  break;
+	}
       }       /* loop over known composite factors */
 
       if (res_next > res_last)
       {
-        if (DEBUGLEVEL >= 5 && done < res_last)
+	res_last = res_next - 1; /* we might have resplit more than one */
+        if (DEBUGLEVEL >= 5)
           fprintferr("MPQS: got %ld factors%s\n", res_last,
                      (done < res_last ? ", looking for more..." : ""));
         res_last = res_next;
