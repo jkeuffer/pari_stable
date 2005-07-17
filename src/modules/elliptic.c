@@ -2681,6 +2681,7 @@ s_powell(sellpt *Q, sellpt *P, long n, long c4, long p)
 
   if (n < 0) { n = -n; if (R.y) R.y = p - R.y; }
   Q->isnull = 1;
+  Q->x = Q->y = 0; /* -Wall */
   for(;;)
   {
     if (n&1) s_addell(Q, &R, c4, p);
