@@ -503,6 +503,7 @@ nf_root_bounds(GEN P, GEN T)
   if (RgX_is_rational(P)) return logmax_modulus_bound(P);
   T = get_nfpol(T, &nf);
 
+  P = Q_primpart(P);
   prec = ZXY_get_prec(P);
   l = lg(P);
   if (nf && nfgetprec(nf) >= prec)
