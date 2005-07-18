@@ -806,7 +806,7 @@ seq(void)
       allocmem = 1;
     }
 
-    if (((top - avma)>>1) > top - av)
+    if (top - avma > ((top - av)>>1))
     {
       if(DEBUGMEM>1) err(warnmem,"seq");
       if (is_universal_constant(res)) avma = top - av;
@@ -885,7 +885,7 @@ L2:
   if (e3 == UNDEF) goto L3;
   e2 = F2? F2(e2,e3): e3;
   e3 = UNDEF;
-  if ((top - avma)>>1 > top - bot)
+  if (top - avma > ((top - bot)>>1))
   {
     if(DEBUGMEM>1) err(warnmem,"expr");
     gerepileall(top - av, (e1==UNDEF)?1: 2, &e2, &e1);
