@@ -1833,21 +1833,26 @@ approx_0(GEN x, GEN y)
 static long
 gauss_get_pivot_max(GEN x, GEN x0, GEN c, long i0)
 {
-  long i,e, k = i0, ex = - (long)HIGHEXPOBIT, lx = lg(x);
+  long i,e, k, ex = - (long)HIGHEXPOBIT, lx = lg(x);
   GEN p,r;
   if (c)
+  {
+    k = 0;
     for (i=i0; i<lx; i++)
     {
       if (c[i]) continue;
       e = gexpo(gel(x,i));
       if (e > ex) { ex=e; k=i; }
     }
-  else
+    if (!k) return lx;
+  } else {
+    k = i0;
     for (i=i0; i<lx; i++)
     {
       e = gexpo(gel(x,i));
       if (e > ex) { ex=e; k=i; }
     }
+  }
   p = gel(x,k);
   r = gel(x0,k); if (isexactzero(r)) r = x0;
   return approx_0(p, r)? i: k;

@@ -94,6 +94,7 @@ GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
        dlopen in darwin.c if HAS_DLOPEN is defined.
    35- fix Trager's trick in factorff (from 2.2.10)
    36- rnfisnorminit(quadpoly(145,y),quadray(145,1)) --> stack overflow [#273]
+   37- matker([1,2,3;4,5,6]*1.) --> [;]  (missing 1 vector)
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
