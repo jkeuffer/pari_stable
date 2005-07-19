@@ -1447,16 +1447,18 @@ nfsqff(GEN nf, GEN pol, long fl)
   long n, nbf, dpol = degpol(pol);
   pari_sp av = avma;
   GEN pr, C0, polbase, init_fa = NULL;
-  GEN N2, rep, polmod, polred, lt, nfpol;
+  GEN N2, rep, polmod, polred, lt, nfpol = gel(nf,1);
   nfcmbf_t T;
   nflift_t L;
   pari_timer ti, ti_tot;
 
   if (DEBUGLEVEL>2) { TIMERstart(&ti); TIMERstart(&ti_tot); }
-  nfpol = gel(nf,1); n = degpol(nfpol);
+  n = degpol(nfpol);
   polbase = unifpol(nf, pol, t_COL);
   if (typ(polbase) != t_POL) err(typeer, "nfsqff");
   polmod  = unifpol(nf, pol, t_POLMOD);
+  if (dpol == 1) /* irreducible */
+    return gerepilecopy(av, mkvec(QXQX_normalize(polmod, nfpol)));
   /* heuristic */
   if (dpol*3 < n) 
   {
