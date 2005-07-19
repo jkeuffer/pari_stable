@@ -172,6 +172,7 @@ nfroots(GEN nf,GEN pol)
   return gerepileupto(av, gen_sort(A, 0, cmp_pol));
 }
 
+/* assume x is squarefree */
 int
 nfissplit(GEN nf, GEN x)
 {
@@ -182,7 +183,7 @@ nfissplit(GEN nf, GEN x)
   avma = av; return l != 1;
 }
 
-/* nf = K[y] / (P). Galois over K ? */
+/* nf = K[y] / (P) [P irreducible / K]. Is nf Galois over K ? */
 int
 nfisgalois(GEN nf, GEN P)
 {
