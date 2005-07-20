@@ -213,6 +213,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ldiv    (long)gdiv
 
 /*functions renamed*/
+#define localreduction elllocalred
 #define globalreduction ellglobalred
 #define taniyama(e) elltaniyama((e),precdl)
 #define chinois chinese
