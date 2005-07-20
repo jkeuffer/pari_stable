@@ -152,14 +152,12 @@ init_help(gp_data *D)
 static void
 init_fmt(gp_data *D)
 {
-  pariout_t *f = &DFLT_OUTPUT;
-  f->prettyp= f_PRETTYMAT;
 #ifdef LONG_IS_64BIT
-  f->sigd     = 38;
+  static pariout_t DFLT_OUTPUT = { 'g', 0, 38, 1, f_PRETTYMAT, 0 };
 #else
-  f->sigd     = 28;
+  static pariout_t DFLT_OUTPUT = { 'g', 0, 28, 1, f_PRETTYMAT, 0 };
 #endif
-  D->fmt = f;
+  D->fmt = &DFLT_OUTPUT;
 }
 
 static char *DFT_PRETTYPRINTER = "tex2mail -TeX -noindent -ragged -by_par";

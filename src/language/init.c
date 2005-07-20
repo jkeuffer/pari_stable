@@ -62,7 +62,6 @@ void (*foreignFuncFree)(entree *);    /* How to free external entree.    */
 int  (*default_exception_handler)(long);
 int  (*whatnow_fun)(char *, int);
 void (*sigint_fun)(void);
-pariout_t DFLT_OUTPUT = { 'g', 0, -1, 1, f_RAW, 0 };
 
 #ifdef BOTH_GNUPLOT_AND_X11
 /* Satisfy DLL dependencies: dummy only */

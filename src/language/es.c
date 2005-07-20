@@ -799,7 +799,7 @@ GENtostr(GEN x) { return GENtostr0(x, NULL, &gen_output); }
 /* Returns gpmalloc()ed string */
 char *
 GENtoTeXstr(GEN x) {
-  pariout_t T = DFLT_OUTPUT;
+  pariout_t T = *(GP_DATA->fmt);
 
   T.prettyp = f_TEX;
   T.fieldw = 0;
@@ -809,7 +809,7 @@ GENtoTeXstr(GEN x) {
 /* see print0(). Returns gpmalloc()ed string */
 char *
 pGENtostr(GEN g, long flag) {
-  pariout_t T = DFLT_OUTPUT;
+  pariout_t T = *(GP_DATA->fmt);
   pari_sp av = avma;
   char *t, *t2;
   long i, tlen = 0, l = lg(g);
@@ -854,7 +854,7 @@ Strexpand(GEN g) {
 GEN
 GENtoGENstr(GEN x)
 {
-  pariout_t T = DFLT_OUTPUT;
+  pariout_t T = *(GP_DATA->fmt);
   char *s;
   GEN z;
   T.prettyp = f_RAW;
@@ -865,7 +865,7 @@ GENtoGENstr(GEN x)
 GEN
 GENtocanonicalstr(GEN x)
 {
-  pariout_t T = DFLT_OUTPUT;
+  pariout_t T = *(GP_DATA->fmt);
   char *s;
   GEN z;
   T.prettyp = f_RAW;
@@ -2364,7 +2364,7 @@ gen_output(GEN x, pariout_t *T)
 {
   pari_sp av = avma;
   GEN y = changevar(x, polvar);
-  if (!T) T = &DFLT_OUTPUT;
+  if (!T) T = GP_DATA->fmt;
   switch(T->prettyp)
   {
     case f_PRETTYMAT: matbruti(y, T); break;
