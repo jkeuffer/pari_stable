@@ -1929,11 +1929,23 @@ ser2rfrac(GEN x)
   long e = valp(x);
   GEN a = ser_to_pol_i(x, lg(x));
   if (e) {
-    GEN z;
+    GEN z, c, cd, cn;
     if (e > 0) return gerepilecopy(av, gmulXn(a, e));
     z = cgetg(3, t_RFRAC);
-    gel(z,2) = monomial(gen_1, labs(e), varn(a));
-    gel(z,1) = a; return gerepilecopy(av, z);
+    a = primitive_part(a, &c);
+    if (typ(c) == t_POL) /* see gred_rfrac2_i */
+    {
+      cd = denom(content(c));
+      cn = gmul(c, cd);
+    }
+    else
+    {
+      cn = numer(c);
+      cd = denom(c);
+    }
+    gel(z,1) = gmul(a, cn);
+    gel(z,2) = monomial(cd, -e, varn(a));
+    return gerepilecopy(av, z);
   }
   return gerepilecopy(av, a);
 }
