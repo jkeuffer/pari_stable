@@ -247,22 +247,23 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
 {
   ulong n = *ptn;
   sd_ulong_init(v, s, ptn, Min, Max);
-  if (*ptn == n) return gnil;
-  n = *ptn;
   switch(flag)
   {
-    case d_RETURN: return utoi(n);
+    case d_RETURN:
+      if (*ptn != n) return utoi(*ptn);
+      break;
     case d_ACKNOWLEDGE:
       if (msg)
       {
 	if (!*msg) msg++; /* single msg, always printed */
-	else       msg += n; /* one per possible value */
-	pariputsf("   %s = %lu %s\n", s, n, *msg);
+	else       msg += *ptn; /* one per possible value */
+	pariputsf("   %s = %lu %s\n", s, *ptn, *msg);
       }
       else
-	pariputsf("   %s = %lu\n", s, n);
-    default: return gnil;
+	pariputsf("   %s = %lu\n", s, *ptn);
+      break;
   }
+  return gnil;
 }
 
 GEN
