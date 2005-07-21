@@ -150,7 +150,7 @@ extern ulong init_opts;
 
 /* defaults  */
 #define is_default(s) setdefault((s),"",d_EXISTS) == gen_1
-enum { d_ACKNOWLEDGE, d_INITRC, d_SILENT, d_RETURN, d_EXISTS };
+enum { d_SILENT, d_ACKNOWLEDGE, d_INITRC, d_RETURN, d_EXISTS };
 char* get_sep(const char *t);
 long get_int(const char *s, long dflt);
 ulong get_uint(const char *s);
