@@ -1547,7 +1547,7 @@ gbitneg(GEN x, long bits)
   }
   x = icopy(x);
   for (i = 2; i < xl; i++) x[i] = ~x[i];
-  return ibittrunc(x, bits);
+  return ibittrunc(int_normalize(x,0), bits);
 }
 
 /* bitwise 'and' of two positive integers (any integers, but we ignore sign).
