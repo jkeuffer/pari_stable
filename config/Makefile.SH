@@ -609,7 +609,7 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
     ;;
-  es|sumiter)
+  default|es|sumiter)
     depend="$src/language/anal.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
