@@ -377,6 +377,10 @@ int   whatnow(char *s, int flag);
 void  whatnow_new_syntax(char *f, long n);
 
 /* defaults */
+#define is_default(s) setdefault((s),"",d_EXISTS) == gen_1
+enum { d_SILENT, d_ACKNOWLEDGE, d_INITRC, d_RETURN, d_EXISTS };
+extern ulong prec;
+
 GEN sd_TeXstyle(const char *v, int flag);
 GEN sd_colors(char *v, int flag);
 GEN sd_compatible(const char *v, int flag);

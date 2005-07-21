@@ -83,8 +83,6 @@ void term_color(int c);
 char *term_get_color(int c);
 void hit_return(void);
 
-extern ulong prec;
-
 extern char *gp_function_name;
 extern int  (*whatnow_fun)(char *, int);
 extern void (*sigint_fun)(void);
@@ -149,8 +147,6 @@ extern ulong init_opts;
 #define INIT_SIG_off (init_opts &= ~INIT_SIGm)
 
 /* defaults  */
-#define is_default(s) setdefault((s),"",d_EXISTS) == gen_1
-enum { d_SILENT, d_ACKNOWLEDGE, d_INITRC, d_RETURN, d_EXISTS };
 char* get_sep(const char *t);
 long get_int(const char *s, long dflt);
 ulong get_uint(const char *s);
