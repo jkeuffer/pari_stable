@@ -271,7 +271,7 @@ sd_realprecision(const char *v, int flag)
   if (*v)
   {
     ulong newnb = fmt->sigd;
-    sd_ulong_init(v, "realprecision", &newnb, 0,LGBITS);
+    sd_ulong_init(v, "realprecision", &newnb, 1,LGBITS);
     if (fmt->sigd == (long)newnb) return gnil;
     fmt->sigd = newnb;
     prec = (ulong)ndec2prec(newnb);
@@ -292,7 +292,7 @@ GEN
 sd_seriesprecision(const char *v, int flag)
 {
   char *msg[] = {NULL, "significant terms"};
-  return sd_ulong(v,flag,"seriesprecision",&precdl, 0,LGBITS,msg);
+  return sd_ulong(v,flag,"seriesprecision",&precdl, 1,LGBITS,msg);
 }
 
 GEN
