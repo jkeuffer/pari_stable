@@ -2238,9 +2238,10 @@ zeta_get_limx(long r1, long r2, long bit)
 long
 zeta_get_N0(GEN C,  GEN limx)
 {
+  long e;
   pari_sp av = avma;
-  GEN z = gfloor(gdiv(C, limx));
-  if (is_bigint(z))
+  GEN z = gcvtoi(gdiv(C, limx), &e); /* avoid truncation error */
+  if (e >= 0 || is_bigint(z))
     err(talker, "need %Z coefficients in initzeta: computation impossible", z);
   if (DEBUGLEVEL>1) fprintferr("\ninitzeta: N0 = %Z\n", z);
   avma = av; return itos(z);
