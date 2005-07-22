@@ -543,16 +543,16 @@ coefficients of the vector are understood to be the coefficients of the power
 series starting from the constant term (i.e.~the reverse of the function
 \kbd{Pol}).
 
-The warning given for \kbd{Pol} applies here: this is not a substitution
+The warning given for \kbd{Pol} also applies here: this is not a substitution
 function.
 
 \syn{gtoser}{x,v}, where $v$ is a variable number (i.e.~a C integer).
 
-\subsecidx{Set}$(\{x=[\,]\})$: converts $x$ into a set, i.e.~into a row vector
-with strictly increasing entries. $x$ can be of any type, but is most useful
-when $x$ is already a vector. The components of $x$ are put in canonical form
-(type \typ{STR}) so as to be easily sorted. To recover an ordinary \kbd{GEN}
-from such an element, you can apply \tet{eval} to it.
+\subsecidx{Set}$(\{x=[\,]\})$: converts $x$ into a set, i.e.~into a row
+vector of character strings, with strictly increasing entries with respect to
+lexicographic ordering. The components of $x$ are put in canonical form (type
+\typ{STR}) so as to be easily sorted. To recover an ordinary \kbd{GEN} from
+such an element, you can apply \tet{eval} to it.
 
 \syn{gtoset}{x}.
 
@@ -3820,7 +3820,7 @@ of the class group.
 
 They are also different from the members of the underlying \var{bid}, which
 refer to $(\O_K/f)^*$; use \kbd{\var{bnr}.bid.\var{xxx}} to access these,
-e.g.~\kbd{\var{bnr}.bnf.no} to get $\phi(f)$.
+e.g.~\kbd{\var{bnr}.bid.no} to get $\phi(f)$.
 
 If $\fl=0$ (default), the generators of the ray class group are not computed,
 which saves time. Hence \kbd{\var{bnr}.gen} would produce an error.
