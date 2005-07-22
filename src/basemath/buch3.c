@@ -1507,6 +1507,7 @@ rnf_is_abelian(GEN nf, GEN pol)
   sig= cgetg(l+1, t_VECSMALL);
   /* image of c = ro[1] + k a [distinguished root of C] by the l automorphisms
    * sig[i]: ro[1] -> ro[i] */
+  ro = lift_intern(ro);
   for (i = 1; i <= l; i++)
     sig[i] = Fl_add(ka, itou(nf_to_ff(nfL, gel(ro,i), modpr)), p);
   ro = Q_primpart(ro);

@@ -99,6 +99,7 @@ GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
    39- add -fno-gcse-after-reload if using gcc-4 on ix86 [#274]
    40- truncate(1/4/x+1+O(x)) -> (x + 1/4)/x instead of (4*x + 1)/(4*x) [#276]
    41- bitneg(2^32-1,32) -> corrupt integer [#279]
+   42- typo in rnf_is_abelian [#277]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
