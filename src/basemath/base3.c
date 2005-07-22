@@ -1241,9 +1241,9 @@ ff_PHlog_Fp(GEN a, GEN g, GEN T, GEN p)
 }
 
 /* smallest n >= 0 such that g0^n=x modulo pr, assume g0 reduced
- * q = order of g0 is prime (and != p) */
+ * N = order of g0 is prime (and != p) */
 static GEN
-ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
+ffshanks(GEN x, GEN g0, GEN N, GEN T, GEN p)
 {
   pari_sp av = avma, av1, lim;
   long lbaby,i,k;
@@ -1252,13 +1252,13 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   if (!degpol(x)) x = constant_term(x);
   if (typ(x) == t_INT)
   {
-    if (!gcmp1(modii(p,q))) return gen_0;
-    /* g0 in Fp^*, order q | (p-1) */
+    if (!gcmp1(modii(p,N))) return gen_0;
+    /* g0 in Fp^*, order N | (p-1) */
     if (typ(g0) == t_POL) g0 = constant_term(g0);
-    return Fp_PHlog(x,g0,p,q);
+    return Fp_PHlog(x,g0,p,N);
   }
 
-  p1 = sqrti(q);
+  p1 = sqrti(N);
   if (cmpiu(p1,LGBITS) >= 0) err(talker,"module too large in ffshanks");
   lbaby = itos(p1)+1; smalltable = cgetg(lbaby+1,t_VEC);
   g0inv = Fq_inv(g0,T,p);
@@ -1268,7 +1268,8 @@ ffshanks(GEN x, GEN g0, GEN q, GEN T, GEN p)
   {
     if (gcmp1(p1)) { avma = av; return stoi(i-1); }
     gel(smalltable,i) = p1; if (i==lbaby) break;
-    p1 = FpXQ_mul(p1,g0inv, T,p);
+    av1 = avma;
+    p1 = gerepileupto(av1, FpXQ_mul(p1,g0inv, T,p));
   }
   giant = FpXQ_div(x,p1,T,p);
   perm = gen_sort(smalltable, cmp_IND | cmp_C, cmp_pol);
