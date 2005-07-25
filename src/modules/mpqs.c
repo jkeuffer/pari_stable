@@ -408,6 +408,7 @@ typedef struct mpqs_handle {
   /* further sizing parameters: */
   mpqs_int32_t target_no_rels;  /* target number of full relations */
   mpqs_int32_t largest_FB_p;    /* largest prime in the FB */
+  mpqs_int32_t pmin_index1;	/* lower bound for primes used for sieving */
   mpqs_int32_t lp_scale;        /* factor by which LPs may exceed FB primes */
 
   mpqs_int32_t first_sort_point; /* when to sort and combine */
@@ -472,8 +473,8 @@ typedef struct mpqs_parameterset {
   /* following is auto-adjusted to account for prime factors of k inserted
    * near the start of the FB.  NB never ever sieve on the prime 2  (which
    * would just contribute a constant at each sieve point). */
-  mpqs_int32_t index1_FB;       /* lowest FB subscript used for sieving */
-  /* the last two are expressed in percent  (of the target number of full
+  mpqs_int32_t pmin_index1;     /* lower bound for primes used for sieving */
+  /* the remaining two are expressed in percent  (of the target number of full
    * relations),  and determine when we stop sieving to review the contents
    * of the relations DB and sort them and combine full relations from LP
    * ones.  Note that the handle has these in parts per thousand instead. */
@@ -486,108 +487,115 @@ typedef struct mpqs_parameterset {
 /* indexed by size of kN in decimal digits, subscript 0 corresponding to
  * 9 (or fewer) digits */
 static mpqs_parameterset_t mpqs_parameters[] =
-{ /*       tol lp_scl     M   szFB  oA  ix1 1st  sti */
-  {  /*9*/ 0.8,   1,    900,    20,  3,   3, 70,  8},
-  { /*10*/ 0.8,   1,    900,    21,  3,   3, 70,  8},
-  { /*11*/ 0.8,   1,    920,    22,  3,   3, 70,  6},
-  { /*12*/ 0.8,   1,    960,    24,  3,   3, 70,  6},
-  { /*13*/ 0.8,   1,   1020,    26,  3,   3, 70,  6},
-  { /*14*/ 0.8,   1,   1100,    29,  3,   3, 70,  6},
-  { /*15*/ 0.8,   1,   1200,    32,  3,   3, 60,  8},
-  { /*16*/ 0.8,   1,   1400,    35,  3,   3, 60,  8},
-  { /*17*/ 0.8,   1,   3000,    40,  3,   3, 60,  8},
-  { /*18*/ 0.8,   1,   3000,    60,  3,   3, 50, 10},
-  { /*19*/ 0.8,   8,   3600,    80,  3,   3, 50, 10},
-  { /*20*/ 0.8,  15,   4000,   100,  3,   3, 40, 10},
-  { /*21*/ 0.8,  22,   4300,   100,  3,   3, 40, 10},
-  { /*22*/ 0.8,  28,   4500,   120,  3,   3, 40, 10},
-  { /*23*/ 0.8,  33,   4800,   140,  3,   3, 30, 10},
-  { /*24*/ 0.8,  37,   5000,   160,  3,   4, 30, 10},
-  { /*25*/ 0.8,  40,   5000,   180,  3,   4, 30, 10},
-  { /*26*/ 0.9,  43,   6000,   200,  4,   4, 30, 10},
-  { /*27*/ 1.17, 46,   6000,   220,  4,   5, 30, 10},
-  { /*28*/ 1.17, 49,   6500,   240,  4,   5, 30, 10},
-  { /*29*/ 1.17, 52,   6500,   260,  5,   5, 30, 10},
-  { /*30*/ 1.36, 54,   7000,   325,  5,   5, 20, 10},
-  { /*31*/ 1.36, 56,   7000,   355,  5,   5, 20, 10},
-  { /*32*/ 1.36, 58,   7500,   375,  5,   5, 20, 10},
-  { /*33*/ 1.43, 60,   7500,   400,  6,   6, 20, 10},
-  { /*34*/ 1.43, 62,   7500,   425,  6,   6, 20, 10},
-  { /*35*/ 1.43, 63,   7500,   550,  6,   6, 20, 10},
-  { /*36*/ 1.43, 64,   8000,   650,  6,   6, 20, 10},
-  { /*37*/ 1.69, 65,   9000,   750,  6,   7, 20, 10},
-  { /*38*/ 1.69, 66,  10000,   850,  6,   7, 20, 10},
-  { /*39*/ 1.69, 67,  11000,   950,  6,   7, 20, 10},
+{ /*       tol lp_scl     M   szFB  oA pmx1 1st  sti */
+  {  /*9*/ 0.8,   1,    900,    20,  3,   5, 70,  8},
+  { /*10*/ 0.8,   1,    900,    21,  3,   5, 70,  8},
+  { /*11*/ 0.8,   1,    920,    22,  3,   5, 70,  6},
+  { /*12*/ 0.8,   1,    960,    24,  3,   5, 70,  6},
+  { /*13*/ 0.8,   1,   1020,    26,  3,   5, 70,  6},
+  { /*14*/ 0.8,   1,   1100,    29,  3,   5, 70,  6},
+  { /*15*/ 0.8,   1,   1200,    32,  3,   5, 60,  8},
+  { /*16*/ 0.8,   1,   1500,    35,  3,   5, 60,  8},
+  { /*17*/ 0.8,   1,   1900,    40,  3,   5, 60,  8},
+  { /*18*/ 0.8,   1,   2500,    60,  3,   5, 50, 10},
+  { /*19*/ 0.8,   1,   3200,    80,  3,   5, 50, 10},
+  { /*20*/ 0.8,   1,   4000,   100,  3,   5, 40, 10},
+  { /*21*/ 0.8,   1,   4300,   100,  3,   5, 40, 10},
+  { /*22*/ 0.8,   1,   4500,   120,  3,   5, 40, 10},
+  { /*23*/ 0.8,   1,   4800,   140,  3,   5, 30, 10},
+  { /*24*/ 0.8,   1,   5100,   160,  4,   7, 30, 10},
+  { /*25*/ 0.8,   1,   5400,   180,  4,   7, 30, 10},
+  { /*26*/ 0.9,   1,   5700,   200,  4,   7, 30, 10},
+  { /*27*/ 1.12,  1,   6000,   220,  4,   7, 30, 10},
+  { /*28*/ 1.17,  1,   6300,   240,  4,  11, 30, 10},
+  { /*29*/ 1.22,  1,   6500,   260,  4,  11, 30, 10},
+  { /*30*/ 1.30,  1,   6800,   325,  4,  11, 20, 10},
+  { /*31*/ 1.33,  1,   7000,   355,  4,  13, 20, 10},
+  { /*32*/ 1.36,  1,   7200,   375,  5,  13, 20, 10},
+  { /*33*/ 1.40,  1,   7400,   400,  5,  13, 20, 10},
+  { /*34*/ 1.43,  1,   7600,   425,  5,  17, 20, 10},
+  /* around here, sieving takes long enough to make it worthwhile recording
+   * LP relations into their separate output files, although they tend not
+   * yet to contribute a lot to the full relations until we get up to around
+   * 47 digits or so. */
+  { /*35*/ 1.48, 30,   7800,   550,  5,  17, 20, 10},
+  { /*36*/ 1.53, 45,   8100,   650,  5,  17, 20, 10},
+  { /*37*/ 1.60, 60,   9000,   750,  6,  19, 20, 10},
+  { /*38*/ 1.66, 70,  10000,   850,  6,  19, 20, 10},
+  { /*39*/ 1.69, 80,  11000,   950,  6,  23, 20, 10},
   /* around here, the largest prime in FB becomes comparable to M in size */
-  { /*40*/ 1.69, 68,  14000,  1000,  6,   7, 20, 10},
-  { /*41*/ 1.69, 69,  14000,  1150,  6,   8, 10, 10},
-  { /*42*/ 1.69, 70,  15000,  1300,  6,   8, 10, 10},
-  { /*43*/ 1.69, 70,  15000,  1600,  6,   8, 10, 10},
-  { /*44*/ 1.69, 71,  15000,  1900,  7,   9, 10, 10},
-  { /*45*/ 1.69, 71,  15000,  2200,  7,   9, 10, 10},
-  { /*46*/ 1.69, 72,  20000,  2500,  7,   9, 10, 10},
-  { /*47*/ 1.69, 72,  25000,  2500,  7,  10, 10, 10},
-  { /*48*/ 1.69, 73,  27500,  2700,  7,  10, 10, 10},
-  { /*49*/ 1.69, 73,  30000,  2800,  7,  10, 10, 10},
-  { /*50*/ 1.75, 74,  35000,  2900,  7,  10, 10, 10},
-  { /*51*/ 1.75, 74,  40000,  3000,  7,  10, 10, 10},
-  { /*52*/ 1.85, 75,  50000,  3200,  7,  11, 10, 10},
-  { /*53*/ 1.85, 75,  50000,  3500,  7,  11, 10, 10},
-  { /*54*/ 1.95, 76,  80000,  3800,  7,  11, 10, 10},
-  { /*55*/ 1.95, 76,  90000,  4100,  7,  11, 10, 10},
-  { /*56*/ 1.95, 77, 100000,  4400,  7,  11, 10,  8},
-  { /*57*/ 1.95, 77,  80000,  4700,  8,  12, 10,  8},
-  { /*58*/ 1.95, 78,  80000,  5000,  8,  12, 10,  8},
-  { /*59*/ 2.15, 78, 130000,  5500,  8,  12, 10,  8},
-  { /*60*/ 2.15, 79, 140000,  5800,  8,  12, 10,  8},
-  { /*61*/ 2.15, 79, 150000,  6100,  8,  13, 10,  8},
-  { /*62*/ 2.15, 80, 160000,  6400,  8,  13, 10,  6},
-  { /*63*/ 2.35, 80, 170000,  6700,  8,  13, 10,  6},
-  { /*64*/ 2.35, 80, 180000,  7000,  8,  13, 10,  6},
-  { /*65*/ 2.35, 80, 190000,  7300,  8,  13, 10,  6},
-  { /*66*/ 2.35, 81, 200000,  7600,  8,  13, 10,  6},
-  { /*67*/ 2.4,  81, 150000,  7900,  8,  13, 10,  6},
-  { /*68*/ 2.4,  81, 150000,  8200,  8,  13, 10,  6},
-  { /*69*/ 2.4,  81, 130000,  8600,  8,  13,  8,  6},
-  { /*70*/ 2.45, 82, 130000,  8800,  8,  13,  8,  6},
-  { /*71*/ 2.45, 82, 130000,  8800,  9,  13,  8,  6},
-  { /*72*/ 2.4,  82, 260000,  9400,  9,  13,  5,  5},
-  { /*73*/ 2.4,  82, 270000,  9700,  9,  13,  5,  5},
-  { /*74*/ 2.4,  83, 280000,  9800,  9,  13,  5,  5},
-  { /*75*/ 2.6,  83, 140000,  9000,  9,  13,  5,  5},
-  { /*76*/ 2.6,  83, 160000,  9400,  9,  13,  5,  5},
-  { /*77*/ 2.6,  84, 180000,  9600,  9,  13,  5,  5},
-  { /*78*/ 2.6,  84, 200000,  9800,  9,  13,  5,  5},
-  { /*79*/ 2.65, 85, 220000, 10000,  9,  13,  5,  4},
-  { /*80*/ 2.65, 85, 250000, 10500,  9,  13,  5,  4},
-  /* entries below due to Thomas Denny */
-  { /*81*/ 3.1, 86, 1500000, 16000,  9,  15,  4,  4},
-  { /*82*/ 3.1, 87, 1500000, 17000,  9,  15,  4,  4},
-  { /*83*/ 3.1, 88, 1500000, 18500,  9,  16,  4,  4},
-  { /*84*/ 3.2, 88, 1500000, 20000,  9,  16,  4,  4},
-  { /*85*/ 3.2, 89, 1500000, 21500,  9,  16,  4,  3},
-  { /*86*/ 3.2, 89, 1500000, 23000,  9,  16,  4,  3},
-  { /*87*/ 3.2, 90, 1500000, 25000,  9,  17,  4,  3},
-  { /*88*/ 3.3, 90, 1500000, 27000,  9,  17,  4,  3},
-  { /*89*/ 3.3, 90, 1500000, 28000,  9,  17,  4,  3},
-  { /*90*/ 3.5, 90, 2000000, 30500,  9,  17,  2,  2},
-  { /*91*/ 3.6, 90, 2000000, 32000,  9,  18,  2,  2},
-  { /*92*/ 3.6, 90, 2000000, 35000,  9,  18,  2,  2},
-  { /*93*/ 3.7, 90, 2000000, 37000,  9,  18,  2,  2},
-  { /*94*/ 3.7, 90, 2000000, 39500,  9,  18,  2,  2},
-  { /*95*/ 3.7, 90, 2500000, 41500,  9,  18,  2,  2},
-  { /*96*/ 3.8, 90, 2500000, 45000, 10,  18,  2,  2},
-  { /*97*/ 3.8, 90, 2500000, 47500, 10,  18,  2,  2},
-  { /*98*/ 3.7, 90, 3000000, 51000, 10,  18,  2,  2},
-  { /*99*/ 3.8, 90, 3000000, 53000, 10,  18,  2,  2},
-  {/*100*/ 3.8, 90, 3500000, 51000, 10,  18,  2,  2},
-  {/*101*/ 3.8, 90, 3500000, 54000, 10,  18,  2,  2},
-  {/*102*/ 3.8, 90, 3500000, 57000, 10,  18,  2,  2},
-  {/*103*/ 3.9, 90, 4000000, 61000, 10,  18,  2,  2},
-  {/*104*/ 3.9, 90, 4000000, 66000, 10,  18,  2,  2},
-  {/*105*/ 3.9, 90, 4000000, 70000, 10,  18,  2,  2},
-  {/*106*/ 3.9, 90, 4000000, 75000, 10,  18,  2,  2},
-  {/*107*/ 3.9, 90, 4000000, 80000, 10,  18,  2,  2},
+  { /*40*/ 1.69, 80,  12500,  1000,  6,  23, 20, 10},
+  { /*41*/ 1.69, 80,  14000,  1150,  6,  23, 10, 10},
+  { /*42*/ 1.69, 80,  15000,  1300,  6,  29, 10, 10},
+  { /*43*/ 1.69, 80,  16000,  1500,  6,  29, 10, 10},
+  { /*44*/ 1.69, 80,  17000,  1700,  7,  31, 10, 10},
+  { /*45*/ 1.69, 80,  18000,  1900,  7,  31, 10, 10},
+  { /*46*/ 1.69, 80,  20000,  2100,  7,  37, 10, 10},
+  { /*47*/ 1.69, 80,  25000,  2300,  7,  37, 10, 10},
+  { /*48*/ 1.69, 80,  27500,  2500,  7,  37, 10, 10},
+  { /*49*/ 1.72, 80,  30000,  2700,  7,  41, 10, 10},
+  { /*50*/ 1.75, 80,  35000,  2900,  7,  41, 10, 10},
+  { /*51*/ 1.80, 80,  40000,  3000,  7,  43, 10, 10},
+  { /*52*/ 1.85, 80,  50000,  3200,  7,  43, 10, 10},
+  { /*53*/ 1.90, 80,  60000,  3500,  7,  47, 10, 10},
+  { /*54*/ 1.95, 80,  70000,  3800,  7,  47, 10, 10},
+  { /*55*/ 1.95, 80,  80000,  4100,  7,  53, 10, 10},
+  { /*56*/ 1.95, 80,  90000,  4400,  7,  53, 10,  8},
+  { /*57*/ 2.00, 80, 100000,  4700,  8,  53, 10,  8},
+  { /*58*/ 2.05, 80, 110000,  5000,  8,  59, 10,  8},
+  { /*59*/ 2.10, 80, 120000,  5400,  8,  59, 10,  8},
+  { /*60*/ 2.15, 80, 130000,  5800,  8,  61, 10,  8},
+  { /*61*/ 2.20, 80, 140000,  6100,  8,  61, 10,  8},
+  { /*62*/ 2.25, 80, 150000,  6400,  8,  67, 10,  6},
+  { /*63*/ 2.39, 80, 160000,  6700,  8,  67, 10,  6},
+  { /*64*/ 2.30, 80, 165000,  7000,  8,  67, 10,  6},
+  { /*65*/ 2.31, 80, 170000,  7300,  8,  71, 10,  6},
+  { /*66*/ 2.32, 80, 175000,  7600,  8,  71, 10,  6},
+  { /*67*/ 2.33, 80, 180000,  7900,  8,  73, 10,  6},
+  { /*68*/ 2.34, 80, 185000,  8200,  8,  73, 10,  6},
+  { /*69*/ 2.35, 80, 190000,  8600,  8,  79,  8,  6},
+  { /*70*/ 2.36, 80, 195000,  8800,  8,  79,  8,  6},
+  { /*71*/ 2.37, 80, 200000,  9000,  9,  79,  8,  6},
+  { /*72*/ 2.38, 80, 205000,  9250,  9,  83,  5,  5},
+  { /*73*/ 2.41, 80, 210000,  9500,  9,  83,  5,  5},
+  { /*74*/ 2.46, 80, 220000,  9750,  9,  83,  5,  5},
+  { /*75*/ 2.51, 80, 230000, 10000,  9,  89,  5,  5},
+  { /*76*/ 2.56, 80, 240000, 10500,  9,  89,  5,  5},
+  { /*77*/ 2.58, 80, 250000, 11200,  9,  89,  5,  5},
+  { /*78*/ 2.60, 80, 260000, 12500,  9,  89,  5,  5},
+  { /*79*/ 2.63, 80, 270000, 14000,  9,  97,  5,  4},
+  { /*80*/ 2.65, 80, 280000, 15500,  9,  97,  5,  4},
+  { /*81*/ 2.72, 80, 300000, 17000,  9,  97,  4,  4},
+  { /*82*/ 2.77, 80, 320000, 18500,  9, 101,  4,  4},
+  { /*83*/ 2.82, 80, 340000, 20000, 10, 101,  4,  4},
+  { /*84*/ 2.84, 80, 360000, 21500, 10, 103,  4,  4},
+  { /*85*/ 2.86, 80, 400000, 23000, 10, 103,  4,  3},
+  { /*86*/ 2.88, 80, 460000, 24500, 10, 107,  4,  3},
+  /* architectures with 1MBy L2 cache will become noticeably slower here
+   * as 2*M exceeds that mark - to be addressed in a future version by
+   * segmenting the sieve interval */
+  { /*87*/ 2.90, 80, 520000, 26000, 10, 107,  4,  3},
+  { /*88*/ 2.91, 80, 580000, 27500, 10, 109,  4,  3},
+  { /*89*/ 2.92, 80, 640000, 29000, 10, 109,  4,  3},
+  { /*90*/ 2.93, 80, 700000, 30500, 10, 113,  2,  2},
+  { /*91*/ 2.94, 80, 770000, 32200, 10, 113,  2,  2},
+  /* entries below due to Thomas Denny, never tested */
+  { /*92*/ 3.6, 90, 2000000, 35000,  9, 113,  2,  2},
+  { /*93*/ 3.7, 90, 2000000, 37000,  9, 113,  2,  2},
+  { /*94*/ 3.7, 90, 2000000, 39500,  9, 127,  2,  2},
+  { /*95*/ 3.7, 90, 2500000, 41500,  9, 127,  2,  2},
+  { /*96*/ 3.8, 90, 2500000, 45000, 10, 127,  2,  2},
+  { /*97*/ 3.8, 90, 2500000, 47500, 10, 131,  2,  2},
+  { /*98*/ 3.7, 90, 3000000, 51000, 10, 131,  2,  2},
+  { /*99*/ 3.8, 90, 3000000, 53000, 10, 133,  2,  2},
+  {/*100*/ 3.8, 90, 3500000, 51000, 10, 133,  2,  2},
+  {/*101*/ 3.8, 90, 3500000, 54000, 10, 139,  2,  2},
+  {/*102*/ 3.8, 90, 3500000, 57000, 10, 139,  2,  2},
+  {/*103*/ 3.9, 90, 4000000, 61000, 10, 139,  2,  2},
+  {/*104*/ 3.9, 90, 4000000, 66000, 10, 149,  2,  2},
+  {/*105*/ 3.9, 90, 4000000, 70000, 10, 149,  2,  2},
+  {/*106*/ 3.9, 90, 4000000, 75000, 10, 151,  2,  2},
+  {/*107*/ 3.9, 90, 4000000, 80000, 10, 151,  2,  2},
 };
 
 #define MPQS_MAX_DIGIT_SIZE_KN 107
@@ -666,18 +674,18 @@ mpqs_set_parameters(mpqs_handle_t *h)
   h->M                = P->M;
   h->omega_A          = P->omega_A;
   h->no_B             = 1UL << (P->omega_A - 1);
+  h->pmin_index1      = P->pmin_index1;
   /* certain subscripts into h->FB should also be offset by omega_k: */
   h->index0_FB        = 3 + h->_k.omega_k;
-  h->index1_FB        = P->index1_FB + h->_k.omega_k;
   /* following are converted from % to parts per thousand: */
   h->first_sort_point = 10 * P->first_sort_point;
   h->sort_pt_interval = 10 * P->sort_pt_interval;
 
   mb = (h->size_of_FB + 1)/(8.*1048576.) * h->target_no_rels;
-  if (mb > 32.)
+  if (mb > 128.)
   {
     err(warner,
-        "MPQS: Gauss elimination will require more than\n\t32MBy of memory");
+        "MPQS: Gauss elimination will require more than\n\t128MBy of memory");
     if (DEBUGLEVEL >= 1)
       fprintferr("\t(estimated memory needed: %4.1fMBy)\n", mb);
   }
@@ -1133,6 +1141,11 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
     }
   }
 #endif
+  /* locate the smallest prime that will be used for sieving */
+  for (i = h->index0_FB; FB[i].fbe_p != 0; i++)
+    if (FB[i].fbe_p >= h->pmin_index1) break;
+  h->index1_FB = i;
+  /* assert: with our parameters this will never fall of the end of the FB */
 
   *f = 0;
   return FB;
@@ -1216,15 +1229,15 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
 }
 
 /* Given the partially populated handle, find the optimum place in the FB
- * to pick prime factors for A from.  The lowest desirable subscript is,
- * a priori, index1_FB, and the lowest admissible is index0_FB.  The highest
- * admissible, in a pinch, is size_of_FB + 1, where the largest FB prime
- * resides.  The ideal corner is about (sqrt(kN)/M) ^ (1/omega_A), so that
- * A will end up of size comparable to sqrt(kN)/M;  experimentally it seems
- * desirable to stay very slightly below this.  Moreover, the selection of
- * the individual primes happens to err on the large side, for which it is
- * wise to compensate a bit.  This is what the (small positive) quantity
- * MPQS_A_FUDGE is for.
+ * to pick prime factors for A from.  The lowest admissible subscript is
+ * index0_FB, but unless kN is very small, we'll stay away a bit from that.
+ * The highest admissible, in a pinch, is size_of_FB + 1, where the largest
+ * FB prime resides.  The ideal corner is about (sqrt(kN)/M) ^ (1/omega_A),
+ * so that A will end up of size comparable to sqrt(kN)/M;  experimentally
+ * it seems desirable to stay very slightly below this.  Moreover, the
+ * selection of the individual primes happens to err on the large side, for
+ * which it is wise to compensate a bit.  This is what the (small positive)
+ * quantity MPQS_A_FUDGE is for.
  * We rely on a few auxiliary fields in the handle to be already set by
  * mqps_set_sieve_threshold() before we are called.
  * This function may fail under highly unfortunate circumstances, so we
@@ -1233,7 +1246,11 @@ mpqs_set_sieve_threshold(mpqs_handle_t *h)
 static int
 mpqs_locate_A_range(mpqs_handle_t *h)
 {
-  long i = h->index0_FB;
+  /* i will be counted up to the desirable index2_FB + 1, and omega_A is never
+   * less than 3, and we want
+   *   index2_FB - (omega_A - 1) + 1 >= index0_FB + omega_A - 3,
+   * so: */
+  long i = h->index0_FB + 2*(h->omega_A) - 4;
   double l2_target_pA;
   mpqs_FB_entry_t *FB = h->FB;
 
@@ -1244,76 +1261,33 @@ mpqs_locate_A_range(mpqs_handle_t *h)
   while ((FB[i].fbe_p != 0) && (FB[i].fbe_flogp <= l2_target_pA)) i++;
 
 #ifdef MPQS_DEBUG_LOCATE_A_RANGE
-  fprintferr("MPQS DEBUG: omega_A=%ld, index0=%ld, index1=%ld, i=%ld\n",
-             (long) h->omega_A, (long) h->index0_FB, (long) h->index1_FB,
-             i);
+  fprintferr("MPQS DEBUG: omega_A=%ld, index0=%ld, i=%ld\n",
+             (long) h->omega_A, (long) h->index0_FB, i);
 #endif
 
-  /* check whether this hasn't bumped into anything... */
-  if (FB[i].fbe_p == 0)
+  /* check whether this hasn't walked off the top end... */
+  /* The following should actually NEVER happen. */
+  if (i > h->size_of_FB - 3)
   {
     /* ok now, now this isn't going to work at all. */
     err(warner,
         "MPQS: sizing out of tune, FB too small or\n\tway too few primes in A");
     return 0;
   }
-  /* XXX upper limit for index2_FB must become a tunable separate from
-   * XXX size_of_FB in order for segmented FB to become possible.  (Primes
-   * XXX for A must always be chosen from the bottom FB segment and used
-   * XXX directly for the sieve, or self-initialization in the upper segments
-   * XXX becomes a nightmare.) */
-  /* XXX once parameters become tunable on the fly, we should really check
-   * XXX here that there's enough room between index1_FB and the top of the
-   * XXX factor base, and back off from the top by quite a bit, or self
-   * XXX initialization will keep crashing into the top.  Following is just
-   * XXX a partial guard against that. */
-  if (i > h->size_of_FB - 3) i = h->size_of_FB - 3;
-  /* The sieve will still work (but not too well) when index2_FB stays too
-   * far below index1_FB, so we'll issue a warning but try it anyway. */
-  if (i - h->omega_A - 1 <= h->index1_FB)
-  {
-    /* as a courtesy, suppress the warning for small input (which we'll
-     * recognize by omega_A being 3) unless running at elevated debug
-     * level. */
-    if (h->omega_A > 3)
-      err(warner,
-          "MPQS: sizing marginal, index1 too large or\n\ttoo many primes in A");
-    else if (MPQS_DEBUGLEVEL >= 6)
-      fprintferr("MPQS: sizing marginal, kN very small.\n");
 
-    if (i - h->omega_A - 1 <= h->index0_FB)
-    {
-      /* last resort... */
-      i = h->index0_FB + h->omega_A - 1;
-#ifdef MPQS_DEBUG_LOCATE_A_RANGE
-      fprintferr("MPQS DEBUG: new i = %ld\n", i);
-#endif
-      /* recheck we aren't constrained at *both* ends... */
-      if (i > h->size_of_FB - 3)
-      {
-        err(warner,
-            "MPQS: sizing out of tune, FB too small to find primes for A\n");
-        return 0;
-      }
-    }
-  }
+  /* GN 20050723 - comparison against index1_FB removed. */
   h->index2_FB = i - 1;
 #ifdef MPQS_DEBUG_LOCATE_A_RANGE
   fprintferr("MPQS DEBUG: index2_FB = %ld\n", i - 1);
 #endif
-  /* assert: unless we took the last resort, index2_FB - index0_FB > omega_A
-   * (thus since we're going to use subscript index2_FB, index2_FB - 1, etc.
-   * for the first omega_A-1 primes in A, and can use subscript index0_FB
-   * itself in a pinch, we have three usable subscripts below the initial
-   * consecutive run - this should get us off the ground.  In the emergency
-   * case, we'll need to back off right after the first cohort of polynomials,
-   * though.
+  /* GN20050723
+   * assert: index0_FB + (omega_A - 3) [the lowest FB subscript eligible to
+   * be used in picking primes for A]  plus  (omega_A - 2)  does not exceed
+   * index2_FB  [the subscript from which the choice of primes for A starts,
+   * putting omega_A - 1 of them at or below index2_FB, and the last and
+   * largest one above, cf. mpqs_si_choose_primes() below].
    * Moreover, index2_FB indicates the last prime below the ideal size, unless
-   * we were desperate.
-   * Now, one last sanity check in the opposite direction... */
-  if (i - h->index1_FB > (h->size_of_FB >> 1))
-    err(warner,
-        "MPQS: sizing marginal, FB rather small or\n\ttoo few primes in A");
+   * (when kN is very small) the ideal size was too small to use. */
 
   return 1;
 }
@@ -2022,7 +1996,7 @@ check_root(mpqs_handle_t *h, long p, long start)
  * latter so as to get log2(A) as close as possible to l2_target_A.
  * The lower prime factors are chosen using bit patterns of constant weight,
  * gradually moving away from index2_FB towards smaller FB subscripts.
- * If this bumps into index1_FB  (might happen for very small input),  we
+ * If this bumps into index0_FB  (might happen for very small input),  we
  * back up by increasing index2_FB by two, and from then on choosing only
  * bit patterns with either or both of their bottom bits set, so at least
  * one of the omega_A - 1 smaller prime factor will be beyond the original
@@ -2130,19 +2104,33 @@ mpqs_increment(mpqs_uint32_t *x)
  * too large, should just call us again, which then is guaranteed to succeed:
  * we'll start again with a right-justified sequence of 1 bits in bin_index,
  * now interpreted as selecting primes relative to the new index2_FB. */
+#ifndef MPQS_DEBUG_SI_CHOOSE_PRIMES
+#  define MPQS_DEBUG_SI_CHOOSE_PRIMES 0
+#endif
 INLINE int
 mpqs_si_choose_primes(mpqs_handle_t *h)
 {
   mpqs_FB_entry_t *FB = h->FB;
   mpqs_per_A_prime_t *per_A_pr = h->per_A_pr;
   double l2_last_p = h->l2_target_A;
-  int i, j, v2;
-  int room = h->index2_FB - h->index0_FB + 1;
-  /* assert: room >= omega_A - 1 (and unless we took the emergency option
-   * in mpqs_locate_A_range, >= omega_A + 2 actually) */
+  mpqs_int32_t omega_A = h->omega_A;
+  int i, j, v2, prev_last_p_idx;
+  int room = h->index2_FB - h->index0_FB - omega_A + 4;
+  /* GN 20050723:  I.e., index2_FB minus (index0_FB + omega_A - 3) plus 1
+   * The notion of room here (cf mpqs_locate_A_range() above) is the number
+   * of primes at or below index2_FB which are eligible for A.
+   * At the very least, we need omega_A - 1 of them, and it is guaranteed
+   * by mpqs_locate_A_range() that at least this many are available when we
+   * first get here.  The logic here ensures that the lowest FB slot used
+   * for A is never less than index0_FB + omega_A - 3.  In other words, when
+   * omega_A == 3 (very small kN), we allow ourselves to reach all the way
+   * down to index0_FB;  otherwise, we keep away from it by at least one
+   * position.  For omega_A >= 4 this avoids situations where the selection
+   * of the smaller primes here has advanced to a lot of very small ones, and
+   * the single last larger one has soared away to bump into the top end of
+   * the FB. */
   mpqs_uint32_t room_mask;
   mpqs_int32_t p;
-  mpqs_int32_t omega_A = h->omega_A;
   ulong bits;
 
   /* XXX also clear the index_j field here? */
@@ -2153,12 +2141,14 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
      * Caller will have ensured that there are enough primes for this in the
      * FB below index2_FB. */
     h->bin_index = (1UL << (omega_A - 1)) - 1;
+    prev_last_p_idx = 0;
   }
   else
   {
     /* clear out the old flags */
     for (i = 0; i < omega_A; i++)
       MPQS_FLG(i) &= ~MPQS_FBE_DIVIDES_A;
+    prev_last_p_idx = MPQS_I(omega_A-1);
 
     /* find out how much maneuvering room we have before we're up against
      * the index0_FB wall */
@@ -2170,8 +2160,8 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
      * something in the least significant 2 bits - this to ensure that we
      * never re-use an A which we'd used before increasing index2_FB - but
      * also stop if something shows up in the forbidden bits on the left
-     * where we'd run out of bits or out of subscripts  (bumping into
-     * index0_FB). */
+     * where we'd run out of bits or out of subscripts  (i.e. walk beyond
+     * index0_FB + omega_A - 3). */
     mpqs_increment(&h->bin_index);
     if (h->index2_moved)
     {
@@ -2186,7 +2176,7 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
       h->index2_FB += 2;        /* caller to check this isn't too large!!! */
       h->index2_moved = 1;
       h->bin_index = 0;
-      if (MPQS_DEBUGLEVEL >= 5)
+      if (MPQS_DEBUG_SI_CHOOSE_PRIMES || (MPQS_DEBUGLEVEL >= 5))
         fprintferr("MPQS: wrapping, more primes for A now chosen near FB[%ld] = %ld\n",
                    (long)h->index2_FB,
                    (long)FB[h->index2_FB].fbe_p);
@@ -2196,7 +2186,7 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
   /* assert: we aren't occupying any of the room_mask bits now, and if
    * index2_moved had already been on, at least one of the two LSBs is on */
   bits = h->bin_index;
-  if (MPQS_DEBUGLEVEL >= 6)
+  if (MPQS_DEBUG_SI_CHOOSE_PRIMES || (MPQS_DEBUGLEVEL >= 6))
     fprintferr("MPQS: new bit pattern for primes for A: 0x%lX\n", bits);
 
   /* map bits to FB subscripts, counting downward with bit 0 corresponding
@@ -2220,12 +2210,22 @@ mpqs_si_choose_primes(mpqs_handle_t *h)
   {
     if (FB[j].fbe_flogp > l2_last_p) break;
   }
+  /* GN 20050724: The following trick avoids generating a relatively large
+   * proportion of duplicate relations when the last prime happens to fall
+   * into an area where there are large gaps from one FB prime to the next,
+   * and would otherwise often be repeated  (so that successive A's would
+   * wind up too similar to each other).  While this trick isn't perfect,
+   * it seems to get rid of a major part of the potential duplication. */
+  if ((p != 0) && (j == prev_last_p_idx))
+  {
+    j++; p = FB[j].fbe_p;
+  }
   MPQS_I(omega_A - 1) = (p == 0 ? /* did we fall off the end of the FB? */
                          h->size_of_FB + 1 : /* then improvise */
                          j);
   MPQS_FLG(omega_A - 1) |= MPQS_FBE_DIVIDES_A;
 
-  if (MPQS_DEBUGLEVEL >= 6)
+  if (MPQS_DEBUG_SI_CHOOSE_PRIMES || (MPQS_DEBUGLEVEL >= 6))
   {
     fprintferr("MPQS: chose primes for A");
     for (i = 0; i < omega_A; i++)
@@ -4011,13 +4011,9 @@ mpqs(GEN N)
       { /* total_full_relations are always plural */
         /* GN20050708: present code doesn't succeed in discarding all
          * dups, so don't lie about it... */
-#if 0
-        fprintferr("MPQS: found %ld full relations after discarding dups\n",
-                   total_full_relations);
-#else
         fprintferr("MPQS: found %ld full relations\n",
                    total_full_relations);
-#endif
+	if (lp_scale > 1)
         fprintferr("MPQS:   (%ld of these from partial relations)\n",
                    total_partial_relations);
         fprintferr("MPQS: Net yield: %4.3g full relations per 100 candidates\n",
@@ -4045,8 +4041,10 @@ mpqs(GEN N)
        try finishing it off */
 
     /* solve the system over F_2 */
+    /* present code does NOT in fact guarantee absence of dup FRELs,
+     * therefore removing the adjective "distinct" for the time being */
     if (DEBUGLEVEL >= 4)
-      fprintferr("\nMPQS: starting Gauss over F_2 on %ld distinct relations\n",
+      fprintferr("\nMPQS: starting Gauss over F_2 on %ld relations\n",
                  total_full_relations);
     fact = mpqs_solve_linear_system(handle, total_full_relations);
 
