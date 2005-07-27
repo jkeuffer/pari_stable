@@ -100,7 +100,7 @@ GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
    40- truncate(1/4/x+1+O(x)) -> (x + 1/4)/x instead of (4*x + 1)/(4*x) [#276]
    41- bitneg(2^32-1,32) -> corrupt integer [#279]
    42- typo in rnf_is_abelian [#277]
-GN 43- extensive re-tuning and several minor fixes in mpqs.c
+GN 43- several minor fixes in mpqs.c
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
@@ -109,7 +109,7 @@ BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
 BA  2- FpXV_FpV_innerprod renamed to FpXV_FpC_mul and FlxV_Flv_innerprod to
        FlxV_Flc_mul
     3- retain 'CHANGES' revision after 'make distrib'
-GN  4- minor tuning in MPQS (26 to 28 digits) --> avoid "sizing marginal,
+GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
        index1 too large" warning
     5- rename globalreduction -> ellglobalred, localreduction -> elllocalred
     6- taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
