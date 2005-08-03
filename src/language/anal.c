@@ -80,7 +80,7 @@ static entree *check_new_fun;
 #define initial_value(ep) ((ep)+1)
 
 /* for control statements */
-enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM, };
+enum { br_NONE = 0, br_BREAK, br_NEXT, br_MULTINEXT, br_RETURN, br_ALLOCMEM };
 static long br_status, br_count;
 static GEN br_res = NULL;
 
