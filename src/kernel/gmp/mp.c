@@ -689,7 +689,7 @@ divrr_with_gmp(GEN x, GEN y)
 }
 
 /* We keep llx bits of x and lly bits of y*/
-GEN
+static GEN
 divri_with_gmp(GEN x, GEN y)
 {
   long llx=RNLIMBS(x),ly=NLIMBS(y);
