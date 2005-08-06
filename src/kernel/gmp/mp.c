@@ -269,11 +269,11 @@ affir(GEN x, GEN y)
     if (lx <= ly)
     {
       for (i=lx; i<ly; i++) y[i]=0;
-      if(mpn_lshift(LIMBS(y),LIMBS(x),lx-2,sh)) err(talker,"GMP affir 2");
+      mpn_lshift(LIMBS(y),LIMBS(x),lx-2,sh);
       xmpn_mirror(LIMBS(y),lx-2);
       return;
     }
-    if(mpn_lshift(LIMBS(y),LIMBS(x)+lx-ly,ly-2,sh)) err(talker,"GMP affir 1");
+    mpn_lshift(LIMBS(y),LIMBS(x)+lx-ly,ly-2,sh);
     y[2]|=((ulong) x[lx-ly+1])>>(BITS_IN_LONG-sh);
     xmpn_mirror(LIMBS(y),ly-2);
     /* lx > ly: round properly */
