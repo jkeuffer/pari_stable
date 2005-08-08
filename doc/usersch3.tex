@@ -2682,10 +2682,11 @@ given by a minimal model.
 
 \syn{mathell}{E,x,\var{prec}}.
 
-\subsecidx{ellidentify}$(E)$: if $E$ is an elliptic curve as output by
-\kbd{ellinit()}, return \kbd{[[N, M],C]}  where $N$ is the name of
-the curve in J. E.  Cremona database, $M$ the minimal model and $C$ the
-coordinates change (see \kbd{ellchangecurve}).
+\subsecidx{ellidentify}$(E)$: look up the elliptic curve $E$ (over $\Z$) in the
+elldata database and return \kbd{[[N, M, G], C]}  where $N$ is the name of the
+curve in J.  E.  Cremona database, $M$ the minimal model, $G$ a $\Z$-basis of
+the free part of the \idx{Mordell-Weil group} of $E$ and $C$ the coordinates
+change (see \kbd{ellchangecurve}).
 
 \syn{ellidentify}{E}.
 
@@ -2862,8 +2863,16 @@ If $\fl=2,3$, same using the product expansion instead of theta series.
 
 \subsecidx{ellsearch}$(N)$: if $N$ is an integer, it is taken as a conductor
 else if $N$ is a string, it can be a curve name ("11A1"), a isogeny class
-("11A") or a conductor "11". Return all curves in the elldata database with the
-given property.  
+("11A") or a conductor "11". This function finds all curves in the elldata
+database with the given property. 
+
+If $N$ is a full curve name, the output format is $[N, [a_1,a_2,a_3,a_4,a_6],
+G]$ where $[a_1,a_2,a_3,a_4,a_6]$ are the coefficients of the Weierstrass
+equation of the curve and $G$ is a $\Z$-basis of the free part of the
+\idx{Mordell-Weil group} associated to the curve.
+
+If $N$ is not a full-curve name, the output is the list (as a vector) of all
+matching curves in the above format.
 
 \syn{ellsearch}{N}. Also available is \funs{ellsearchcurve}{N} that only
 accept complete curve names.
