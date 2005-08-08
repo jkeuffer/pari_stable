@@ -862,6 +862,7 @@ GEN     coordch(GEN e, GEN ch);
 GEN     ellap0(GEN e, GEN p, long flag);
 GEN     elleisnum(GEN om, long k, long flag, long prec);
 GEN     elleta(GEN om, long prec);
+GEN     ellgenerators(GEN e);
 GEN     ellglobalred(GEN e1);
 GEN     ellheight0(GEN e, GEN a, long flag,long prec);
 GEN     ellidentify(GEN E);

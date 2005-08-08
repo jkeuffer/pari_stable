@@ -174,16 +174,11 @@ ellidentify(GEN E)
 }
 
 GEN
-ellgens(GEN E)
+ellgenerators(GEN E)
 {
   pari_sp ltop=avma;
-  if (typ(E)==t_STR)
-    return gerepilecopy(ltop, gel(ellsearchcurve(E), 3));
-  else
-  {
-    GEN V=ellidentify(E);
-    GEN gens=gmael(V,1,3);
-    GEN W=pointchinv(gens,gel(V,2));
-    return gerepileupto(ltop,W);
-  }
+  GEN V=ellidentify(E);
+  GEN gens=gmael(V,1,3);
+  GEN W=pointchinv(gens,gel(V,2));
+  return gerepileupto(ltop,W);
 }
