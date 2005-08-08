@@ -1422,12 +1422,12 @@ struct galois_analysis
   byteptr primepointer; /* allow computing the primes following p */
 };
 void
-galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type)
+galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
 {
   pari_sp ltop=avma;
   long n,p;
   long i;
-  enum k_code {k_amoeba=0,k_snake=1,k_fish=2,k_bird=4,k_rodent=6,k_dog=8,k_human=9,k_cat=12} karma;
+  long karma=0;
   long group,linf;
   /*TODO: complete the table to at least 200*/
   const int prim_nonss_orders[]={36,48,56,60,72,75,80,96,108,120,132,0};
@@ -1441,8 +1441,6 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
     err(talker, "Polynomial not squarefree in galoisinit");
   if (DEBUGLEVEL >= 1) (void)timer2();
   n = degpol(T);
-  if (!karma_type) karma_type=n;
-  else err(warner,"entering black magic computation");
   O = cgetg(n+1,t_VECSMALL);
   for(i=1;i<=n;i++) O[i]=0;
   F = factoru_pow(n);
@@ -1489,7 +1487,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
   min_prime=n*max((long)(BITS_IN_LONG-bfffo(n)-4),2);
   plift = 0;
   nbmax = 8+(n>>1);
-  nbtest = 0; karma = k_amoeba;
+  nbtest = 0; 
   deg = Fp[np];
   for (p = 0, pp = primepointer = diffptr;
        (plift == 0 
@@ -1548,22 +1546,22 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l, long karma_type
       {
 	if (!(group&ga_all_normal) || o > order || 
 	    (o == order && (plift == 0 || norm_o > deg 
-			    || (norm_o == deg && cgcd(p-1,karma_type) > (long)karma ))))
+			    || (norm_o == deg && cgcd(p-1,n) > (long)karma ))))
 	{
 	  deg = norm_o;
 	  order = o;
 	  plift = p;
-	  karma=(enum k_code)cgcd(p-1,karma_type);
+	  karma=cgcd(p-1,n);
 	  pp = primepointer;
 	  group |= ga_all_normal;
 	}
       }
       else if (!(group&ga_all_normal) && (plift == 0 || o > order 
-	    || ( o == order && cgcd(p-1,karma_type) > (long)karma )))
+	    || ( o == order && cgcd(p-1,n) > (long)karma )))
       {
 	order = o;
 	plift = p;
-	karma=(enum k_code)cgcd(p-1,karma_type);
+	karma=cgcd(p-1,n);
 	pp = primepointer;
       }
     }
@@ -2559,7 +2557,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     struct galois_analysis Pga;
     struct galois_borne Pgb;
     long j;
-    galoisanalysis(P, &Pga, 0, 0);
+    galoisanalysis(P, &Pga, 0);
     if (Pga.deg == 0)
       return NULL;		/* Avoid computing the discriminant */
     Pgb.l = gb->l;
@@ -2821,7 +2819,7 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 /* T: polynomial or nf, den multiple of common denominator of solutions or
  * NULL (unknown). If T is nf, and den unknown, use den = denom(nf.zk) */
 GEN
-galoisconj4(GEN T, GEN den, long flag, long karma)
+galoisconj4(GEN T, GEN den, long flag)
 {
   pari_sp ltop = avma;
   GEN     G, L, M, res, aut, grp=NULL;/*keep gcc happy on the wall*/
@@ -2852,7 +2850,7 @@ galoisconj4(GEN T, GEN den, long flag, long karma)
     den = gen_1;
   }
   else
-    galoisanalysis(T, &ga, 1, karma);
+    galoisanalysis(T, &ga, 1);
   if (ga.deg == 0)
   {
     avma = ltop;
@@ -2992,7 +2990,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   {
   case 0:
     ltop = avma;
-    G = galoisconj4(nf, d, 0, 0);
+    G = galoisconj4(nf, d, 0);
     if (typ(G) != t_INT)	/* Success */
       return G;
     else
@@ -3018,7 +3016,7 @@ galoisconj0(GEN nf, long flag, GEN d, long prec)
   case 2:
     return galoisconj2(nf, degpol(T), prec);
   case 4:
-    G = galoisconj4(nf, d, 0, 0);
+    G = galoisconj4(nf, d, 0);
     if (typ(G) != t_INT) return G;
     break;			/* Failure */
   default:
@@ -3058,10 +3056,10 @@ checkgal(GEN gal)
 }
 
 GEN
-galoisinit(GEN nf, GEN den, long karma)
+galoisinit(GEN nf, GEN den)
 {
   GEN     G;
-  G = galoisconj4(nf, den, 1, karma);
+  G = galoisconj4(nf, den, 1);
   if (typ(G) == t_INT)
     err(talker, "field not Galois or Galois group not weakly super solvable");
   return G;
