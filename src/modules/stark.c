@@ -2595,7 +2595,7 @@ makescind(GEN nf, GEN P, long cl)
     gel(pol,i) = c;
   }
   /* pol = rnfequation(nf, P); */
-  G = galoisinit(pol, NULL, 0);
+  G = galoisinit(pol, NULL);
   L = gel(G,6);
   p = gmael(G,2,1);
   a = FpX_quad_root(nfpol, p, 0);
