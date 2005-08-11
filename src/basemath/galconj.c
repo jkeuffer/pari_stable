@@ -1075,10 +1075,10 @@ int pari_compare_lg(GEN x, GEN y)
   return lg(x)-lg(y);
 }
 
-/* List of subgroups of (\ZZ/m\ZZ)^* whose order divide p, et return the list
+/* List of subgroups of (\ZZ/m\ZZ)^* whose order divide p, and return the list
  * of their elements */
 GEN
-listsousgroupes(long m, long p)
+listznstarelts(long m, long p)
 {
   pari_sp ltop = avma;
   GEN     zn, zns, lss, res;
@@ -2388,7 +2388,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
 	continue;
       }
       disable_dbg(0);
-      lo = listsousgroupes(dg, n / gf->fp);
+      lo = listznstarelts(dg, n / gf->fp);
       disable_dbg(-1);
       if (e!=1)
 	lo = galoisfindgroups(lo, sg, dgf);
