@@ -1731,8 +1731,11 @@ Mod(1,p)}, hence a \typ{VEC} with \typ{INTMOD} coefficients.
 \fun{GEN}{FpM_to_mod}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{z *
 Mod(1,p)}, hence with \typ{INTMOD} coefficients.
 
-\fun{GEN}{FpV_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{lift(z *
-Mod(1,p))}, which is an \kbd{FpV}
+\fun{GEN}{FpC_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZC}. Returns \kbd{lift(Col(z) *
+Mod(1,p))}, hence a \typ{COL}.
+
+\fun{GEN}{FpV_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZV}. Returns \kbd{lift(Vec(z) *
+Mod(1,p))}, hence a \typ{VEC}
 
 \fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
 Mod(1,p))}, which is an \kbd{FpM}.

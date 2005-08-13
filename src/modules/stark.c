@@ -712,7 +712,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   while ( (i = NextElt(&G)) )
   {
-    vB[i] = FpV_red(element_muli(nf, vB[i], gen[i]), condZ);
+    vB[i] = FpC_red(element_muli(nf, vB[i], gen[i]), condZ);
     for (j=1; j<i; j++) vB[j] = vB[i];
 
     for (ic = 1; ic <= nChar; ic++)

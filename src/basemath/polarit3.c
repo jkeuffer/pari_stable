@@ -1559,7 +1559,7 @@ intersect_ker(GEN P, GEN MA, GEN U, GEN l)
   R[1]=A[1];
   gel(R,r) = FpM_FpC_mul(MA,gmul(gel(A,1),ib0),l);
   for(i=r-1;i>1;i--)
-    gel(R,i) = FpV_red(gadd(FpM_FpC_mul(MA,gel(R,i+1),l),
+    gel(R,i) = FpC_red(gadd(FpM_FpC_mul(MA,gel(R,i+1),l),
          gmul(gel(U,i+2),gel(R,r))),l);
   R=shallowtrans(R);
   for(i=1;i<lg(R);i++)
@@ -1909,12 +1909,22 @@ FpXV_red(GEN z, GEN p)
   return x;
 }
 
-/* z in Z^n, return lift(z * Mod(1,p)) */
+/* z in Z^n, return lift(Col(z) * Mod(1,p)) */
+GEN
+FpC_red(GEN z, GEN p)
+{
+  long i,l = lg(z);
+  GEN x = cgetg(l, t_COL);
+  for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
+  return x;
+}
+
+/* z in Z^n, return lift(Vec(z) * Mod(1,p)) */
 GEN
 FpV_red(GEN z, GEN p)
 {
   long i,l = lg(z);
-  GEN x = cgetg(l,typ(z));
+  GEN x = cgetg(l, t_VEC);
   for (i=1; i<l; i++) gel(x,i) = modii(gel(z,i),p);
   return x;
 }
@@ -1925,7 +1935,7 @@ FpM_red(GEN z, GEN p)
 {
   long i, l = lg(z);
   GEN x = cgetg(l,t_MAT);
-  for (i=1; i<l; i++) gel(x,i) = FpV_red(gel(z,i), p);
+  for (i=1; i<l; i++) gel(x,i) = FpC_red(gel(z,i), p);
   return x;
 }
 

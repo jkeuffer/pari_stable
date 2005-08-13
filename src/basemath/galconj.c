@@ -1245,7 +1245,7 @@ fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN LN, long n, long m)
     sym[j]++;
     if (DEBUGLEVEL>=4) fprintferr("FixedField: Sym: %Z\n",sym);
     L=sympol_eval(sym, O, mod);
-    if (L==gen_0 || !fixedfieldtest(FpV_red(L,l))) continue;
+    if (L==gen_0 || !fixedfieldtest(FpC_red(L,l))) continue;
     P=FpX_center(FpV_roots_to_pol(L,mod,v),mod);
     if (!p || FpX_is_squarefree(P,p))
       return mkvec3(sym,L,P);
@@ -1273,7 +1273,7 @@ fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
   for(i=1, nb=1; i<n; i++, nb*=4)
   {
     gel(LN,i) = sympol_eval_newtonsum(i,O,mod);
-    gel(Ll,i) = FpV_red(gel(LN,i),l);
+    gel(Ll,i) = FpC_red(gel(LN,i),l);
     if (DEBUGLEVEL>=6) fprintferr("FixedField: LN[%d]=%Z \n",i,Ll[i]);
     ok = (ok || fixedfieldtests(Ll,i));
     if (ok)
@@ -2571,7 +2571,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
       PL = ZpX_liftroots(P,PL,gb->l,Pgb.valabs);
     }
     else if (Pgb.valabs < gb->valabs)
-      PL = FpV_red(PL, Pgb.ladicabs);
+      PL = FpC_red(PL, Pgb.ladicabs);
     PM = vandermondeinversemod(PL, P, Pden, Pgb.ladicabs);
     PG = galoisgen(P, PL, PM, Pden, &Pgb, &Pga);
     if (PG == gen_0) return NULL;

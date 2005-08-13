@@ -1326,7 +1326,7 @@ famat_makecoprime(GEN nf, GEN g, GEN e, GEN pr, GEN prk, GEN EX)
   if (zpow == gen_0) setlg(newg, l);
   else
   {
-    gel(newg,i) = FpV_red(special_anti_uniformizer(nf, pr), prkZ);
+    gel(newg,i) = FpC_red(special_anti_uniformizer(nf, pr), prkZ);
     e = shallowconcat(e, negi(zpow));
   }
   return famat_to_nf_modideal_coprime(nf, newg, e, prk, EX);

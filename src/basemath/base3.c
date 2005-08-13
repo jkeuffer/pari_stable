@@ -424,13 +424,13 @@ _mulidmod(void *data, GEN x, GEN y)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
   (void)y; /* ignored */
-  return FpV_red(element_mulid(D->nf, x, D->I), D->p);
+  return FpC_red(element_mulid(D->nf, x, D->I), D->p);
 }
 static GEN
 _sqrmod(void *data, GEN x)
 {
   eltmod_muldata *D = (eltmod_muldata*)data;
-  return FpV_red(element_sqri(D->nf, x), D->p);
+  return FpC_red(element_sqri(D->nf, x), D->p);
 }
 
 /* x = I-th vector of the Z-basis of Z_K, in Z^n, compute lift(x^n mod p) */
@@ -1082,7 +1082,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
     sn = signe(n); if (!sn) continue;
 
     h = Q_remove_denom(gel(g,i), &dh);
-    if (dh) h = FpV_red(gmul(h,Fp_inv(dh,idZ)), idZ);
+    if (dh) h = FpC_red(gmul(h,Fp_inv(dh,idZ)), idZ);
     if (sn > 0)
       plus = elt_mulpow_modideal(nf, plus, h, n, id);
     else /* sn < 0 */

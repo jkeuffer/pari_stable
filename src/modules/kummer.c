@@ -66,7 +66,7 @@ ok_congruence(GEN X, GEN ell, long lW, GEN vecMsup)
     if (gcmp0(gel(X,i))) return 0;
   l = lg(vecMsup);
   for (i=1; i<l; i++)
-    if (gcmp0(FpV_red(gmul(gel(vecMsup,i),X), ell))) return 0;
+    if (gcmp0(FpC_red(gmul(gel(vecMsup,i),X), ell))) return 0;
   return 1;
 }
 
@@ -153,7 +153,7 @@ reduce_mod_Qell(GEN bnfz, GEN be, GEN gell)
   if (c)
   {
     fa = factor(c);
-    gel(fa,2) = FpV_red(gel(fa,2), gell);
+    gel(fa,2) = FpC_red(gel(fa,2), gell);
     c = factorback(fa, NULL);
     be = gmul(be, c);
   }
@@ -304,7 +304,7 @@ isprimeidealconj(GEN nfz, GEN pr1, GEN pr2, tau_s *tau)
   for(;;)
   {
     if (int_elt_val(nfz,x,p,b2,NULL)) return 1;
-    x = FpV_red(tauofelt(x, tau), p);
+    x = FpC_red(tauofelt(x, tau), p);
     if (int_elt_val(nfz,x,p,b1,NULL)) return 0;
   }
 }
@@ -440,7 +440,7 @@ isprincipalell(GEN bnfz, GEN id, GEN cycgen, GEN u, GEN gell, long rc)
   long i, l = lg(cycgen);
   GEN logdisc, b, y = quick_isprincipalgen(bnfz, id);
 
-  logdisc = FpV_red(gel(y,1), gell);
+  logdisc = FpC_red(gel(y,1), gell);
   b = gel(y,2);
   for (i=rc+1; i<l; i++)
   {
@@ -592,7 +592,7 @@ rnfkummersimple(GEN bnr, GEN subgroup, GEN gell, long all)
     do
     {
       pari_sp av = avma;
-      GEN be, P, X = FpV_red(ZM_zc_mul(K, y), gell);
+      GEN be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
       if (ok_congruence(X, gell, lW, vecMsup) && ok_sign(X, msign, arch)) 
       {/* be satisfies all congruences, x^ell - be is irreducible, signature
         * and relative discriminant are correct */
@@ -982,7 +982,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   {
     p1 = tauofelt(gel(vselmer,j), tau);
     if (typ(p1) == t_MAT) /* famat */
-      p1 = factorbackelt(gel(p1,1), FpV_red(gel(p1,2),gell), nfz);
+      p1 = factorbackelt(gel(p1,1), FpC_red(gel(p1,2),gell), nfz);
     gel(Tv,j) = isvirtualunit(bnfz, p1, cycgen,cyc,gell,rc);
   }
   P = FpM_ker(gsubgs(Tv, g), gell);
@@ -1082,7 +1082,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
     y[i] = 1; /* y = [0,...,0,1,0,...,0], 1 at dK'th position */
     do
     { /* cf. algo 5.3.18 */
-      GEN be, P, X = FpV_red(ZM_zc_mul(K, y), gell);
+      GEN be, P, X = FpC_red(ZM_zc_mul(K, y), gell);
       if (ok_congruence(X, gell, lW, vecMsup))
       {
         be = compute_beta(X, vecWB, gell, bnfz);

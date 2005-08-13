@@ -152,7 +152,7 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
 BA  2- new functions ZX_add, ZX_sub, ZX_neg, ZX_Z_add, ZX_Z_mul
-BA  3- new functions FpC_to_mod, FqV_to_FlxV
+BA  3- new functions FpC_to_mod, FqV_to_FlxV, FpC_red
     4- member functions r1, r2
     5- functions factoru(), factoru_pow(), powiu(), powuu().
     6- symbolic link $MANDIR/gp-$version.1 -> $MANDIR/gp.1

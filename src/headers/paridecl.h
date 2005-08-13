@@ -1541,6 +1541,7 @@ GEN     vecbezoutres(GEN x, GEN y);
 ulong   Fl_pow(ulong x, ulong n, ulong p);
 GEN     Fp_pows(GEN A, long k, GEN N);
 GEN     Fp_powu(GEN x, ulong k, GEN p);
+GEN     FpC_red(GEN z, GEN p);
 GEN     FpC_to_mod(GEN z, GEN p);
 GEN     FpM_red(GEN z, GEN p);
 GEN     FpM_to_mod(GEN z, GEN p);

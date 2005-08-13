@@ -2162,7 +2162,7 @@ _primedec(GEN nf, GEN p)
     for (i=1; i<k; i++)
       if (!E[i]) beta = beta? FpX_mul(beta, gel(F,i), p): gel(F,i);
     if (!beta) errprime(p);
-    beta = FpV_red(algtobasis_i(nf,beta), p);
+    beta = FpC_red(algtobasis_i(nf,beta), p);
 
     mulbeta = FpM_red(eltmul_get_table(nf, beta), p);
     p1 = shallowconcat(mulbeta, Ip);
@@ -2271,7 +2271,7 @@ static GEN
 anti_uniformizer2(GEN nf, GEN pr)
 {
   GEN p = gel(pr,1), z;
-  z = FpV_red(special_anti_uniformizer(nf, pr), p);
+  z = FpC_red(special_anti_uniformizer(nf, pr), p);
   z = hnfmodid(eltmul_get_table(nf, z), p);
   z = idealaddtoone_i(nf, pr, z);
   return unnf_minus_x(z);
@@ -2481,7 +2481,7 @@ zk_to_ff(GEN x, GEN modpr)
   GEN p = gel(pr,1);
   GEN y = gmul(gel(modpr,mpr_FFP), x);
   if (lg(modpr) == SMALLMODPR) return modii(y,p);
-  y = FpV_red(y, p);
+  y = FpC_red(y, p);
   return col_to_ff(y, varn(modpr[mpr_T]));
 }
 
@@ -2504,7 +2504,7 @@ kill_denom(GEN x, GEN nf, GEN p, GEN modpr)
   }
   x = Q_primitive_part(x, &cx);
   if (cx) x = gmul(Rg_to_Fp(cx, p), x);
-  return FpV_red(x, p);
+  return FpC_red(x, p);
 }
 
 /* x integral, reduce mod prh in HNF */

@@ -198,7 +198,7 @@ static GEN
 make_integral_Z(GEN x, GEN fZ)
 {
   GEN d, y = Q_remove_denom(x, &d);
-  if (d) y = FpV_red(gmul(y, Fp_inv(d, fZ)), fZ);
+  if (d) y = FpC_red(gmul(y, Fp_inv(d, fZ)), fZ);
   return y;
 }
 
@@ -320,7 +320,7 @@ compute_raygen(GEN nf, GEN u1, GEN gen, GEN bid)
           LL = element_mul(nf, LL, t);
         }
       }
-      gel(newL,k) = FpV_red(make_integral(nf,LL,f,listpr), fZ);
+      gel(newL,k) = FpC_red(make_integral(nf,LL,f,listpr), fZ);
     }
 
     av = avma;
@@ -1414,7 +1414,7 @@ rnfnormgroup(GEN bnr, GEN polrel)
   reldeg = degpol(polrel);
   /* reldeg-th powers are in norm group */
   greldeg = utoipos(reldeg);
-  group = diagonal_i(FpV_red(gel(raycl,2), greldeg));
+  group = diagonal_i(FpC_red(gel(raycl,2), greldeg));
   for (i=1; i<lg(group); i++)
     if (!signe(gcoeff(group,i,i))) gcoeff(group,i,i) = greldeg;
   detgroup = dethnf_i(group);

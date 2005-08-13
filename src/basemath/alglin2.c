@@ -2275,7 +2275,7 @@ hnfmerge_get_1(GEN A, GEN B)
       if (gcmp0(t)) continue;
       setlg(C[c], k+1);
       ZV_elem(t, gcoeff(C,k,k), C, U, c, k);
-      if (lgefint(gcoeff(C,k,k)) > lb) gel(C,k) = FpV_red(gel(C,k), b);
+      if (lgefint(gcoeff(C,k,k)) > lb) gel(C,k) = FpC_red(gel(C,k), b);
       if (j > 4)
       {
         GEN u = gel(U,k);
