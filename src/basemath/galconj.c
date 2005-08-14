@@ -285,7 +285,7 @@ supnorm(GEN L, long prec)
 }
 
 GEN
-galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
+galoisborne(GEN T, GEN dn, struct galois_borne *gb)
 {
   pari_sp ltop = avma, av2;
   GEN     borne, borneroots, borneabs;
@@ -303,9 +303,7 @@ galoisborne(GEN T, GEN dn, struct galois_borne *gb, long ppp)
   borne = matrixnorm(M, prec);
   borneroots = supnorm(L, prec);
   n = degpol(T);
-  borneabs = addsr(1, gmulsg(n, gpowgs(borneroots, n/ppp)));
-  /*if (ppp == 1)
-    borneabs = addsr(1, gmulsg(n, gpowgs(borneabs, 2)));*/
+  borneabs = addsr(1, gmulsg(n, gpowgs(borneroots, n)));
   borneroots = addsr(1, gmul(borne, borneroots));
   av2 = avma;
   /*We use d-1 test, so we must overlift to 2^BITS_IN_LONG*/
@@ -1416,7 +1414,6 @@ struct galois_analysis
   long    deg; /* degree of the lift */
   long    ord;
   long    l; /* l: prime number such that T is totally split mod l */
-  long    ppp; /* ppp: smallest prime divisor of deg(T) */
   long    p4;
   enum ga_code group;
   byteptr primepointer; /* allow computing the primes following p */
@@ -1616,7 +1613,6 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
   ga->ord = order;
   ga->l = O[1];
   ga->primepointer = pp;
-  ga->ppp = Fp[1];
   ga->p4 = O[4];
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisAnalysis:p=%ld l=%ld group=%ld deg=%ld ord=%ld\n",
@@ -2561,7 +2557,7 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
     if (Pga.deg == 0)
       return NULL;		/* Avoid computing the discriminant */
     Pgb.l = gb->l;
-    Pden = galoisborne(P, NULL, &Pgb, Pga.ppp);
+    Pden = galoisborne(P, NULL, &Pgb);
     Pladicabs=Pgb.ladicabs;
     if (Pgb.valabs > gb->valabs)
     {
@@ -2846,7 +2842,6 @@ galoisconj4(GEN T, GEN den, long flag)
     if (!flag) return mkcol( polx[varn(T)] );
     ga.l = 3;
     ga.deg = 1;
-    ga.ppp = 1;
     den = gen_1;
   }
   else
@@ -2864,7 +2859,7 @@ galoisconj4(GEN T, GEN den, long flag)
   }
   gb.l = utoipos(ga.l);
   if (DEBUGLEVEL >= 1) (void)timer2();
-  den = galoisborne(T, den, &gb, ga.ppp);
+  den = galoisborne(T, den, &gb);
   if (DEBUGLEVEL >= 1)
     msgtimer("galoisborne()");
   L = rootpadicfast(T, gb.l, gb.valabs);
@@ -3036,7 +3031,7 @@ isomborne(GEN P, GEN den, GEN p)
   pari_sp ltop=avma;
   struct galois_borne gb;
   gb.l=p;
-  (void)galoisborne(P,den,&gb,degpol(P));
+  (void)galoisborne(P,den,&gb);
   avma=ltop;
   return gb.valsol;
 }
@@ -3211,7 +3206,7 @@ galoisfixedfield(GEN gal, GEN perm, long flag, long y)
       struct galois_borne Pgb;
       long val=itos(gmael(gal,2,2));
       Pgb.l = gmael(gal,2,1);
-      Pden = galoisborne(P, NULL, &Pgb, 1);
+      Pden = galoisborne(P, NULL, &Pgb);
       if (Pgb.valabs > val)
       {
         if (DEBUGLEVEL>=4)
