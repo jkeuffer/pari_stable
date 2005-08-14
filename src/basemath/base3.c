@@ -1082,7 +1082,7 @@ famat_to_nf_modideal_coprime(GEN nf, GEN g, GEN e, GEN id, GEN EX)
     sn = signe(n); if (!sn) continue;
 
     h = Q_remove_denom(gel(g,i), &dh);
-    if (dh) h = FpC_red(gmul(h,Fp_inv(dh,idZ)), idZ);
+    if (dh) h = FpC_Fp_mul(h, Fp_inv(dh,idZ), idZ);
     if (sn > 0)
       plus = elt_mulpow_modideal(nf, plus, h, n, id);
     else /* sn < 0 */

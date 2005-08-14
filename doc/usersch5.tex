@@ -1740,6 +1740,15 @@ Mod(1,p))}, hence a \typ{VEC}
 \fun{GEN}{FpM_red}{GEN z, GEN p}, \kbd{z} a \kbd{ZM}. Returns \kbd{lift(z *
 Mod(1,p))}, which is an \kbd{FpM}.
 
+\fun{GEN}{FpC_Fp_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
+(seen as a column vector) by the \typ{INT}~\kbd{y} and reduce modulo \kbd{p} to
+obtain an \kbd{FpC}.
+
+\fun{GEN}{FpC_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
+(seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
+assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
+an \kbd{FpM}.
+
 \fun{GEN}{FpM_mul}{GEN x, GEN y, GEN p} multiplies the two \kbd{ZM}s~\kbd{x}
 and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 \kbd{p} to obtain an \kbd{FpM}.
@@ -1747,11 +1756,6 @@ and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 \fun{GEN}{FpM_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZM}~\kbd{x}
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.  
-
-\fun{GEN}{FpC_FpV_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZC}~\kbd{x}
-(seen as a column vector) by the \kbd{ZV}~\kbd{y} (seen as a row vector,
-assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
-an \kbd{FpM}.
 
 \subsubsec{\kbd{Fp}-linear algebra}. The implementations are not
 asymptotically efficient ($O(n^3)$ standard algorithms).

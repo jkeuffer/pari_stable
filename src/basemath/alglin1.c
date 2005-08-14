@@ -2438,6 +2438,17 @@ FpM_indexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
 /*                                                                 */
 /*******************************************************************/
 
+/*Not stack clean*/
+GEN
+FpC_Fp_mul(GEN x, GEN y, GEN p)
+{
+  long i, l=lg(y);
+  GEN z=cgetg(l, t_COL);
+  for (i=1;i<=l;i++)
+    gel(z,i)=modii(mulii(gel(x,i),y),p);
+  return z;
+}
+
 /*If p is NULL no reduction is performed.*/
 GEN
 FpM_mul(GEN x, GEN y, GEN p)
