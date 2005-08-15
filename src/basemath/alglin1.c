@@ -2444,7 +2444,7 @@ FpC_Fp_mul(GEN x, GEN y, GEN p)
 {
   long i, l=lg(y);
   GEN z=cgetg(l, t_COL);
-  for (i=1;i<=l;i++)
+  for (i=1;i<l;i++)
     gel(z,i)=modii(mulii(gel(x,i),y),p);
   return z;
 }
