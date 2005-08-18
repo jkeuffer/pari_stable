@@ -909,7 +909,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 {
   pari_sp av, avm = avma;
   int     a, b, c, d, n;
-  GEN     pf, ar, *G;
+  GEN     pf, ar, G;
   int     p1, p2, p3, p4, p5, p6;
   long 	  l1, l2, N1, N2, R1;
   long    i, j, cx, hop = 0, start = 0;
@@ -925,17 +925,17 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   pf = cgetg(n + 1, t_VECSMALL);
   av = avma;
   ar = cgetg(a + 2, t_VECSMALL); ar[a+1]=0;
-  G = (GEN *) cgetg(a + 1, t_VECSMALL);	/* Don't worry */
-  W = matheadlong(gel(td->PV, td->ordre[n]), td->ladic);
+  G  = cgetg(a + 1, t_VECSMALL);
+  W  = matheadlong(gel(td->PV, td->ordre[n]), td->ladic);
   for (cx = 1, i = 1, j = 1; cx <= a; cx++, i++)
   {
-    G[cx] = gel(F, coeff(B,i,j));	/* Be happy */
+    gel(G,cx) = gel(F, coeff(B,i,j));
     if (i == d)
     {
       i = 0;
       j++;
     }
-  }				/* Be happy now! */
+  }
   NN = divis(powuu(b, c * (d - d/e)),cut);
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:I will try %Z permutations\n", NN);
@@ -980,7 +980,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
         V = 0;
         for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
         {
-          V += mael(W,G[p6][p3],G[p1][p2]);
+          V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
           p3 += s;
           if (p3 > b)
             p3 -= b;
@@ -990,7 +990,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
           p3 += b;
         for (p2 = p4; p2 >= 1; p2--)
         {
-          V += mael(W,G[p6][p3],G[p1][p2]);
+          V += mael(W,mael(G,p6,p3),mael(G,p1,p2));
           p3 -= s;
           if (p3 <= 0)
             p3 += b;
@@ -1015,7 +1015,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
             p6 = p1 + 1;
           for (p2 = 1 + p4, p3 = 1 + x[p1]; p2 <= b; p2++)
           {
-            pf[G[p1][p2]] = G[p6][p3];
+            pf[mael(G,p1,p2)] = mael(G,p6,p3);
             p3 += s;
             if (p3 > b)
               p3 -= b;
@@ -1025,7 +1025,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
             p3 += b;
           for (p2 = p4; p2 >= 1; p2--)
           {
-            pf[G[p1][p2]] = G[p6][p3];
+            pf[mael(G,p1,p2)] = mael(G,p6,p3);
             p3 -= s;
             if (p3 <= 0)
               p3 += b;
