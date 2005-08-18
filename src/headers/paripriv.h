@@ -139,8 +139,6 @@ GEN  supnorm(GEN L, long prec);
 GEN  znstar_hnf_elts(GEN Z, GEN H);
 GEN  ZV_lincomb(GEN u, GEN v, GEN X, GEN Y);
 GEN  vec_setconst(GEN v, GEN x);
-GEN  vec_const(long n, GEN x);
-GEN  col_const(long n, GEN x);
   
 GEN  GS_norms(GEN B, long prec);
 GEN  dim1proj(GEN prh);

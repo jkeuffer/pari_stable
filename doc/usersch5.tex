@@ -2802,6 +2802,13 @@ are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 @eprog\noindent
 (more efficient).
 
+\fun{int}{vec_isconst}{GEN v} Returns 1 if all the components of \kbd{v} are
+equal, else returns 0.
+
+\fun{int}{vec_is1to1}{GEN v}  Returns 1 if the components of \kbd{v} are
+pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
+0.
+
 \subsec{Function to handle \typ{VECSMALL}}
 Theses functions handle \typ{VECSMALL} as an abstract container type
 of small signed integers. No specific meaning is attached to the content.
