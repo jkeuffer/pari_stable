@@ -738,16 +738,6 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
   avma = ltop; return 0;
 }
 
-/* allocate a scratchboard for n t_INTs of length s, for permutation tests */
-GEN
-alloue_ardoise(long n, long s)
-{
-  GEN ar = cgetg(n+1, t_VEC);
-  long i;
-  for (i = 1; i <= n; i++) gel(ar,i) = cgeti(s);
-  return ar;
-}
-
 /* structure containing all data for permutation test:
  * 
  * ordre :ordre des tests pour verifie_test ordre[lg(ordre)]: numero du test
@@ -1617,7 +1607,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   long    n;
   long    N, hop = 0;
   long  **O;
-  GEN    *ar, **mt;		/* tired of casting */
+  GEN     ar, mt;
   GEN     t, u;
   GEN     res, orb, ry;
   GEN     pft, pfu, pfv;
@@ -1637,8 +1627,9 @@ a4galoisgen(GEN T, struct galois_test *td)
   ry[3] = 3;
   gel(res,2) = ry;
   av = avma;
-  ar = (GEN *) alloue_ardoise(n, 1 + lg(td->ladic));
-  mt = (GEN **) td->PV[td->ordre[n]];
+  ar = cgetg(n+1, t_VEC);
+  for (i = 1; i <= n; i++) gel(ar,i) = cgeti(1 + lg(td->ladic));
+  mt = gel(td->PV,td->ordre[n]);
   t = cgetg(n + 1, t_VECSMALL) + 1;	/* Sorry for this hack */
   u = cgetg(n + 1, t_VECSMALL) + 1;	/* too lazy to correct */
   av2 = avma;
@@ -1654,10 +1645,10 @@ a4galoisgen(GEN T, struct galois_test *td)
     int     a, x, y;
     if (i == 0)
     {
-      affsi(0, ar[(n - 2) >> 1]);
+      affsi(0, gel(ar,(n - 2) >> 1));
       for (k = n - 2; k > 2; k -= 2)
-	addiiz(ar[k >> 1], addii(mt[k + 1][k + 2], mt[k + 2][k + 1]),
-	      ar[(k >> 1) - 1]);
+	addiiz(gel(ar,k >> 1), addii(gmael(mt,k + 1,k + 2), gmael(mt,k + 2,k + 1)),
+	       gel(ar,(k >> 1) - 1));
     }
     else
     {
@@ -1693,7 +1684,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	x = t[4];
 	t[4] = t[4 - a];
 	t[4 - a] = x;
-	addiiz(ar[2], addii(mt[t[4]][t[5]], mt[t[5]][t[4]]), ar[1]);
+	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       case 7:
 	x = t[0];
@@ -1705,8 +1696,8 @@ a4galoisgen(GEN T, struct galois_test *td)
 	x = t[6];
 	t[6] = t[6 - a];
 	t[6 - a] = x;
-	addiiz(ar[3], addii(mt[t[6]][t[7]], mt[t[7]][t[6]]), ar[2]);
-	addiiz(ar[2], addii(mt[t[4]][t[5]], mt[t[5]][t[4]]), ar[1]);
+	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
+	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       case 9:
 	x = t[0];
@@ -1720,9 +1711,9 @@ a4galoisgen(GEN T, struct galois_test *td)
 	x = t[8];
 	t[8] = t[8 - a];
 	t[8 - a] = x;
-	addiiz(ar[4], addii(mt[t[8]][t[9]], mt[t[9]][t[8]]), ar[3]);
-	addiiz(ar[3], addii(mt[t[6]][t[7]], mt[t[7]][t[6]]), ar[2]);
-	addiiz(ar[2], addii(mt[t[4]][t[5]], mt[t[5]][t[4]]), ar[1]);
+	addiiz(gel(ar,4), addii(gmael(mt,t[8],t[9]), gmael(mt,t[9],t[8])), gel(ar,3));
+	addiiz(gel(ar,3), addii(gmael(mt,t[6],t[7]), gmael(mt,t[7],t[6])), gel(ar,2));
+	addiiz(gel(ar,2), addii(gmael(mt,t[4],t[5]), gmael(mt,t[5],t[4])), gel(ar,1));
 	break;
       default:
 	y--;
@@ -1742,13 +1733,13 @@ a4galoisgen(GEN T, struct galois_test *td)
 	t[y] = t[y - a];
 	t[y - a] = x;
 	for (k = y; k > 2; k -= 2)
-	  addiiz(ar[k >> 1],
-		addii(mt[t[k]][t[k + 1]], mt[t[k + 1]][t[k]]),
-		ar[(k >> 1) - 1]);
+	  addiiz(gel(ar,k >> 1),
+		addii(gmael(mt,t[k],t[k + 1]), gmael(mt,t[k + 1],t[k])),
+		gel(ar,(k >> 1) - 1));
       }
     }
-    g = addii(ar[1], addii(addii(mt[t[0]][t[1]], mt[t[1]][t[0]]),
-			 addii(mt[t[2]][t[3]], mt[t[3]][t[2]])));
+    g = addii(gel(ar,1), addii(addii(gmael(mt,t[0],t[1]), gmael(mt,t[1],t[0])),
+			 addii(gmael(mt,t[2],t[3]), gmael(mt,t[3],t[2]))));
     if (padicisint(g, td))
     {
       for (k = 0; k < n; k += 2)
@@ -1845,7 +1836,7 @@ a4galoisgen(GEN T, struct galois_test *td)
     }
     g = gen_0;
     for (k = 0; k < n; k += 2)
-      g = addii(g, addii(mt[u[k]][u[k + 1]], mt[u[k + 1]][u[k]]));
+      g = addii(g, addii(gmael(mt,u[k],u[k + 1]), gmael(mt,u[k + 1],u[k])));
     if (padicisint(g, td))
     {
       for (k = 0; k < n; k += 2)
@@ -1927,7 +1918,7 @@ a4galoisgen(GEN T, struct galois_test *td)
       pfv[O[3][3 - j]] = O[1][4];
       g = gen_0;
       for (k = 1; k <= n; k++)
-	g = addii(g, mt[k][pfv[k]]);
+	g = addii(g, gmael(mt,k,pfv[k]));
       if (padicisint(g, td) && verifietest(pfv, td))
       {
 	avma = av;
