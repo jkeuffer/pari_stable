@@ -133,7 +133,7 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
          (the behaviour added_newline was meant to avoid).
    12- do not install libpari.a.xxx [ include files are not versionned either
        and libpari.a is useless without the correct ones, contrary to .so ]
-   13- rename gtrans_i -> dummytrans, concatsp -> dummyconcat.
+   13- rename gtrans_i -> shallowtrans, concatsp -> shallowconcat.
    14- add GC in parsing loop for huge input vectors [ needs roughly 2 or 3
        times less memory ]
    15- implement pari_is_dir() using stat() instead of opendir()
