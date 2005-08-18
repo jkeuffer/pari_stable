@@ -1106,10 +1106,12 @@ listznstarelts(long m, long p)
 }
 /* A sympol is a symmetric polynomial
  *
- * Currently sympol are t_VECSMALL.
- * v[1]...v[k] represent the polynomial
- * sum(i=1,k,v[i]*s_i) where s_i(X_1,...,X_n)=sum(j=1,n,X_j^i)
+ * Currently sympol are couple of t_VECSMALL [v,w]
+ * v[1]...v[k], w[1]...w[k]  represent the polynomial
+ * sum(i=1,k,v[i]*s_w[i]) where s_i(X_1,...,X_n)=sum(j=1,n,X_j^i)
  */
+
+/*Return s_e*/
 
 static GEN
 sympol_eval_newtonsum(long e, GEN O, GEN mod)
@@ -1131,21 +1133,14 @@ sympol_eval_newtonsum(long e, GEN O, GEN mod)
   return PL;
 }
 
-/* Compute the value of the symmetric polynomial sym on the orbits
- * O=[O[1],...,O[n]] modulo mod.
- * return [sym(O[1]),...,sym(O[n])] where 
- * sym(O[i])=sym(O[i][1],...,O[i][k])
- */
-
 GEN
-sympol_eval(GEN sym, GEN O, GEN mod)
+sympol_eval(GEN v, GEN NS)
 {
   pari_sp ltop=avma;
   long i;
   GEN S=gen_0;
-  for(i=1;i<lg(sym);i++)
-    if (sym[i])
-      S=gadd(S,gmulsg(sym[i],sympol_eval_newtonsum(i, O, mod)));
+  for(i=1;i<lg(v);i++)
+    if (v[i]) S=gadd(S,gmulsg(v[i],gel(NS,i)));
   return gerepileupto(ltop, S);
 }
 
@@ -1162,20 +1157,19 @@ sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p)
   pari_sp ltop=avma;
   long i, j, npows;
   GEN  s, f, pows;
+  GEN v=gel(sym,1), w=gel(sym,2);
   sigma = RgX_to_FpX(sigma, p);
   f=polx[varn(sigma)];
   s=zeropol(varn(sigma));
-  for(j=1;j<lg(sym);j++)
-    if(sym[j])
-      s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(j),Tp,p),stoi(sym[j]),p),p);
+  for(j=1; j<lg(v); j++)
+    s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(w[j]),Tp,p),stoi(v[j]),p),p);
   npows = brent_kung_optpow(lg(Tp)-4,g-1);
   pows  = FpXQ_powers(sigma,npows,Tp,p);
   for(i=2; i<=g;i++)
   {
     f=FpX_FpXQV_compo(f,pows,Tp,p);
-    for(j=1;j<lg(sym);j++)
-      if(sym[j])
-	s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(j),Tp,p),stoi(sym[j]),p),p);
+    for(j=1; j<lg(v); j++)
+      s=FpX_add(s,FpX_Fp_mul(FpXQ_pow(f,stoi(w[j]),Tp,p),stoi(v[j]),p),p);
   }
   return gerepileupto(ltop, s);
 }
@@ -1197,43 +1191,17 @@ fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod)
   return F;
 }
 
-static long 
-fixedfieldtests(GEN LN, long n)
-{
-  long i,j,k;
-  for (i=1;i<lg(LN[1]);i++)
-    for(j=i+1;j<lg(LN[1]);j++)
-    {
-      for(k=1;k<=n;k++)
-	if (!equalii(gmael(LN,k,j),gmael(LN,k,i)))
-	  break;
-      if (k>n)
-	return 0;
-    }
-  return 1;
-}
-
-/*V is the root of some polynomials. Check whether it is squarefree*/
-
-static long 
-fixedfieldtest(GEN V)
-{
-  long i,j;
-  for (i=1;i<lg(V);i++)
-    for(j=i+1;j<lg(V);j++)
-      if (!cmpii(gel(V,i),gel(V,j)))
-	return 0;
-  return 1;
-}
-
 static GEN
-fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN LN, long n, long m)
+fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN NS, GEN W)
 {
   long i,j;
-  const long step=4;
+  const long step=3;
+  long n=lg(W)-1;
+  long m=1<<((n-1)<<1);
   GEN sym=cgetg(n+1,t_VECSMALL);
   for (j=1;j<n;j++) sym[j]=step;
   sym[n]=0;
+  if (DEBUGLEVEL>=4) fprintferr("FixedField: Weight: %Z\n",W);
   for (i=0;i<m;i++)
   {
     pari_sp av=avma;
@@ -1241,15 +1209,34 @@ fixedfieldsurmer(GEN O, GEN mod, GEN l, GEN p, long v, GEN LN, long n, long m)
     for (j=1;sym[j]==step;j++)
       sym[j]=0;
     sym[j]++;
-    if (DEBUGLEVEL>=4) fprintferr("FixedField: Sym: %Z\n",sym);
-    L=sympol_eval(sym, O, mod);
-    if (L==gen_0 || !fixedfieldtest(FpC_red(L,l))) continue;
+    if (DEBUGLEVEL>=6) fprintferr("FixedField: Sym: %Z\n",sym);
+    L=sympol_eval(sym,NS);
+    if (!vec_is1to1(FpC_red(L,l))) continue;
     P=FpX_center(FpV_roots_to_pol(L,mod,v),mod);
     if (!p || FpX_is_squarefree(P,p))
-      return mkvec3(sym,L,P);
+      return mkvec3(mkvec2(sym,W),L,P);
     avma=av;
   }
   return NULL;
+}
+
+/*Check whether the line of NS are pair-wise distinct.*/
+
+static long
+sympol_is1to1_lg(GEN NS, long n)
+{
+  long i,j,k;
+  long l=lg(NS[1]);
+  for (i=1;i<l;i++)
+    for(j=i+1;j<l;j++)
+    {
+      for(k=1;k<n;k++)
+        if (!equalii(gmael(NS,k,j),gmael(NS,k,i)))
+          break;
+      if (k>=n)
+        return 0;
+    }
+  return 1;
 }
 
 /* Let O a set of orbits of roots (see fixedfieldorbits) modulo mod,
@@ -1263,26 +1250,25 @@ GEN
 fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v)
 {
   pari_sp ltop=avma;
-  GEN V=NULL;
-  long n=lg(O[1])*2;
-  GEN LN=cgetg(n,t_MAT);
-  GEN Ll=cgetg(n,t_MAT);
-  long i,nb,ok=0;
-  for(i=1, nb=1; i<n; i++, nb*=4)
+  const long n=(BITS_IN_LONG>>1)-1;
+  GEN NS=cgetg(n+1,t_MAT);
+  GEN sym=NULL, W=cgetg(n+1,t_VECSMALL);
+  long i, e=1;
+  if (DEBUGLEVEL>=4) 
+    fprintferr("FixedField: Size: %ldx%ld\n",lg(O)-1,lg(O[1])-1);
+  for(i=1;!sym && i<=n; i++)
   {
-    gel(LN,i) = sympol_eval_newtonsum(i,O,mod);
-    gel(Ll,i) = FpC_red(gel(LN,i),l);
-    if (DEBUGLEVEL>=6) fprintferr("FixedField: LN[%d]=%Z \n",i,Ll[i]);
-    ok = (ok || fixedfieldtests(Ll,i));
-    if (ok)
-      if ((V=fixedfieldsurmer(O,mod,l,p,v,LN,i,nb)))
-      {
-        if (DEBUGLEVEL>=4) pariputsf("FixedField: Sym: %Z\n",gel(V,1));
-        return gerepilecopy(ltop,V);
-      }
+    GEN L = sympol_eval_newtonsum(e++, O, mod);
+    if (lg(O)>2)
+      while (vec_isconst(L))
+        L = sympol_eval_newtonsum(e++, O, mod);
+    W[i] = e-1; gel(NS,i) = L;
+    if (sympol_is1to1_lg(NS,i+1))
+      sym=fixedfieldsurmer(O,mod,l,p,v,NS,vecsmall_shorten(W,i));
   }
-  err(talker,"p too small in fixedfieldsympol");
-  return NULL;
+  if (!sym) err(talker,"p too small in fixedfieldsympol");
+  if (DEBUGLEVEL>=2) fprintferr("FixedField: Found: %Z\n",gel(sym,1));
+  return gerepilecopy(ltop,sym);
 }
 
 /* Let O a set of orbits as indices and L the corresponding roots.

@@ -103,6 +103,7 @@ GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
 GN 43- several minor fixes in mpqs.c
 BA 44- ellrootno(e,2) was wrong for curves of Kodaira type 3 and -7. 
                                                            ([#212] from 2.2.9)
+BA 45- galoisfixedfield() was not robust enough ([#256, #228 from 2.2.9)
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
