@@ -2442,7 +2442,7 @@ FpM_indexrank(GEN x, GEN p) { return indexrank0(x,p,1); }
 GEN
 FpC_Fp_mul(GEN x, GEN y, GEN p)
 {
-  long i, l=lg(y);
+  long i, l=lg(x);
   GEN z=cgetg(l, t_COL);
   for (i=1;i<l;i++)
     gel(z,i)=modii(mulii(gel(x,i),y),p);
