@@ -1606,8 +1606,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   long    i, j, k;
   long    n;
   long    N, hop = 0;
-  long  **O;
-  GEN     ar, mt;
+  GEN     O, ar, mt;
   GEN     t, u;
   GEN     res, orb, ry;
   GEN     pft, pfu, pfv;
@@ -1866,16 +1865,16 @@ a4galoisgen(GEN T, struct galois_test *td)
   gel(orb,2) = pfu;
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:orb=%Z \n", orb);
-  O = (long**) vecperm_orbits(orb, 12);
+  O = vecperm_orbits(orb, 12);
   if (DEBUGLEVEL >= 4)
     fprintferr("A4GaloisConj:O=%Z \n", O);
   av2 = avma;
   for (j = 0; j < 2; j++)
   {
-    pfv[O[1][1]] = O[2][1];
-    pfv[O[1][2]] = O[2][3 + j];
-    pfv[O[1][3]] = O[2][4 - (j << 1)];
-    pfv[O[1][4]] = O[2][2 + j];
+    pfv[mael(O,1,1)] = mael(O,2,1);
+    pfv[mael(O,1,2)] = mael(O,2,3 + j);
+    pfv[mael(O,1,3)] = mael(O,2,4 - (j << 1));
+    pfv[mael(O,1,4)] = mael(O,2,2 + j);
     for (i = 0; i < 4; i++)
     {
       long    x;
@@ -1885,37 +1884,37 @@ a4galoisgen(GEN T, struct galois_test *td)
       case 0:
 	break;
       case 1:
-	x = O[3][1];
-	O[3][1] = O[3][2];
-	O[3][2] = x;
-	x = O[3][3];
-	O[3][3] = O[3][4];
-	O[3][4] = x;
+	x = mael(O,3,1);
+	mael(O,3,1) = mael(O,3,2);
+	mael(O,3,2) = x;
+	x = mael(O,3,3);
+	mael(O,3,3) = mael(O,3,4);
+	mael(O,3,4) = x;
 	break;
       case 2:
-	x = O[3][1];
-	O[3][1] = O[3][4];
-	O[3][4] = x;
-	x = O[3][2];
-	O[3][2] = O[3][3];
-	O[3][3] = x;
+	x = mael(O,3,1);
+	mael(O,3,1) = mael(O,3,4);
+	mael(O,3,4) = x;
+	x = mael(O,3,2);
+	mael(O,3,2) = mael(O,3,3);
+	mael(O,3,3) = x;
 	break;
       case 3:
-	x = O[3][1];
-	O[3][1] = O[3][2];
-	O[3][2] = x;
-	x = O[3][3];
-	O[3][3] = O[3][4];
-	O[3][4] = x;
+	x = mael(O,3,1);
+	mael(O,3,1) = mael(O,3,2);
+	mael(O,3,2) = x;
+	x = mael(O,3,3);
+	mael(O,3,3) = mael(O,3,4);
+	mael(O,3,4) = x;
       }
-      pfv[O[2][1]] = O[3][1];
-      pfv[O[2][3 + j]] = O[3][4 - j];
-      pfv[O[2][4 - (j << 1)]] = O[3][2 + (j << 1)];
-      pfv[O[2][2 + j]] = O[3][3 - j];
-      pfv[O[3][1]] = O[1][1];
-      pfv[O[3][4 - j]] = O[1][2];
-      pfv[O[3][2 + (j << 1)]] = O[1][3];
-      pfv[O[3][3 - j]] = O[1][4];
+      pfv[mael(O,2,1)] = mael(O,3,1);
+      pfv[mael(O,2,3 + j)] = mael(O,3,4 - j);
+      pfv[mael(O,2,4 - (j << 1))] = mael(O,3,2 + (j << 1));
+      pfv[mael(O,2,2 + j)] = mael(O,3,3 - j);
+      pfv[mael(O,3,1)] = mael(O,1,1);
+      pfv[mael(O,3,4 - j)] = mael(O,1,2);
+      pfv[mael(O,3,2 + (j << 1))] = mael(O,1,3);
+      pfv[mael(O,3,3 - j)] = mael(O,1,4);
       g = gen_0;
       for (k = 1; k <= n; k++)
 	g = addii(g, gmael(mt,k,pfv[k]));
