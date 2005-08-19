@@ -66,7 +66,7 @@ ok_congruence(GEN X, GEN ell, long lW, GEN vecMsup)
     if (gcmp0(gel(X,i))) return 0;
   l = lg(vecMsup);
   for (i=1; i<l; i++)
-    if (gcmp0(FpC_Fp_mul(gel(vecMsup,i), X, ell))) return 0;
+    if (gcmp0(FpM_FpC_mul(gel(vecMsup,i),X, ell))) return 0;
   return 1;
 }
 
