@@ -1137,7 +1137,7 @@ trivial_relations(GEN mat, long KC, GEN C, GEN Disc)
   for (i = 1; i <= KC; i++) 
   { /* ramified prime ==> trivial relation */
     if (umodiu(Disc, FB[i])) continue;
-    col = vecsmall_const(KC, 0);
+    col = const_vecsmall(KC, 0);
     col[i] = 2; j++;
     gel(mat,j) = col;
     gel(C,j) = gen_0;
@@ -1600,14 +1600,14 @@ MORE:
     triv = 0;
   if (PRECREG) {
     for (i = triv+1; i<=need; i++) {
-      gel(mat,i) = vecsmall_const(KC, 0);
+      gel(mat,i) = const_vecsmall(KC, 0);
       gel(extraC,i) = cgetr(PRECREG);
     }
     real_relations(need - triv, &current, s,LIMC,mat + triv,extraC + triv);
   }
   else {
     for (i = triv+1; i<=need; i++) {
-      gel(mat,i) = vecsmall_const(KC, 0);
+      gel(mat,i) = const_vecsmall(KC, 0);
       gel(extraC,i) = gen_0;
     }
     imag_relations(need - triv, &current, s,LIMC,mat + triv);

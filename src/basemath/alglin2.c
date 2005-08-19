@@ -783,7 +783,7 @@ sqred2(GEN a, long signature)
   n--;
 
   av = avma;
-  r = vecsmall_const(n, 1);
+  r = const_vecsmall(n, 1);
   av1= avma; lim = stack_lim(av1,1);
   a = shallowcopy(a);
   t = n; sp = sn = 0;
@@ -2504,7 +2504,7 @@ allhnfmod(GEN x, GEN dm, int flag)
   x[0] = evaltyp(t_MAT) | evallg(li); /* kill 0 columns / discard accumulator */
   if (flag & hnf_PART) return x;
 
-  if (modid) b = vec_const(li-1, dm);
+  if (modid) b = const_vec(li-1, dm);
   else
   { /* compute optimal value for dm */
     b = cgetg(li, t_VEC); gel(b,1) = gcoeff(x,1,1);
@@ -2840,8 +2840,8 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
     return cgetg(1, t_MAT);
   }
   m = lg(A[1])-1;
-  c = vecsmall_const(m, 0);
-  l = vecsmall_const(n, 0);
+  c = const_vecsmall(m, 0);
+  l = const_vecsmall(n, 0);
   perm = cgetg(m+1, t_VECSMALL);
   av1 = avma; lim = stack_lim(av1,1);
   A = shallowcopy(A);

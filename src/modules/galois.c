@@ -735,7 +735,7 @@ static GEN
 sortroots(GEN newr, GEN oldr)
 {
   long e, e0, i, j, k, l = lg(newr);
-  GEN r = cgetg(l, t_VEC), z = cgetg(l, t_VEC), t = vecsmall_const(l-1, 1);
+  GEN r = cgetg(l, t_VEC), z = cgetg(l, t_VEC), t = const_vecsmall(l-1, 1);
   k = 0; /* gcc -Wall */
   for (i=1; i<l; i++)
   {

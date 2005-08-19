@@ -1064,8 +1064,8 @@ lll_scaled(int MARKED, GEN X0, long D)
 
   delta = stor(D-1, DEFAULTPREC);
   delta = divrs(delta,D);
-  E  = vecsmall_const(N-1, 0);
-  F  = vecsmall_const(N-1, 0);
+  E  = const_vecsmall(N-1, 0);
+  F  = const_vecsmall(N-1, 0);
 
   av = avma; lim = stack_lim(av, 1);
   h = idmat(N-1);
@@ -2980,7 +2980,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_VECSMALL:
     case min_VECSMALL2:
       maxrank = itos(BORNE);
-      res = vecsmall_const(maxrank, 0);
+      res = const_vecsmall(maxrank, 0);
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
       if (gcmp0(BORNE)) return res;
       break;
@@ -3040,7 +3040,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_PERF:
       BORNE = gerepileupto(av1,BORNE);
       maxrank = (n*(n+1)) >> 1;
-      L = vecsmall_const(maxrank, 0);
+      L = const_vecsmall(maxrank, 0);
       V = cgetg(1+maxrank, t_VECSMALL);
   }
 
@@ -3266,7 +3266,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   borne1 = gadd(BORNE,eps);
   borne2 = mpmul(borne1,alpha);
   v = cgetg(N,t_VEC);
-  inc = vecsmall_const(n, 1);
+  inc = const_vecsmall(n, 1);
 
   av = avma; lim = stack_lim(av,2);
   if (stockall) stockmax = 200;

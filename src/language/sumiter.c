@@ -797,7 +797,7 @@ vecteursmall(GEN nmax, entree *ep, char *ch)
   if (typ(nmax) != t_INT) err(typeer,"vector");
   m = itos(nmax);
   if (m < 0)  err(talker,"negative number of components in vector");
-  if (!ep || !ch) return vecsmall_const(m, 0);
+  if (!ep || !ch) return const_vecsmall(m, 0);
   y = cgetg(m+1,t_VECSMALL); push_val(ep, c);
   for (i=1; i<=m; i++) { c[2] = i; y[i] = itos(readseq_nobreak(ch)); }
   pop_val(ep); return y;

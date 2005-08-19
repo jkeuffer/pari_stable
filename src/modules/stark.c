@@ -151,7 +151,7 @@ EltsOfGroup(long order, GEN cyc)
 
   G.cyc = gtovecsmall(cyc);
   G.r = lg(cyc)-1;
-  G.j = vecsmall_const(G.r, 0);
+  G.j = const_vecsmall(G.r, 0);
 
   rep = cgetg(order + 1, t_VEC);
   gel(rep,order) = vecsmall_to_col(G.j);
@@ -697,10 +697,10 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   G.cyc = gtovecsmall(cyc);
   G.r = nz;
-  G.j = vecsmall_const(nz, 0);
+  G.j = const_vecsmall(nz, 0);
 
   vN = (GEN*)cgetg(nChar+1, t_VEC);
-  for (ic = 1; ic <= nChar; ic++) vN[ic] = vecsmall_const(nz, 0);
+  for (ic = 1; ic <= nChar; ic++) vN[ic] = const_vecsmall(nz, 0);
 
   av2 = avma; lim = stack_lim(av2, 1);
   vB = (GEN*)cgetg(nz+1, t_VEC);

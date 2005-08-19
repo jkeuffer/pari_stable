@@ -454,7 +454,7 @@ static GEN
 get_jac(Cache *C, ulong q, long pk, GEN tabf, GEN tabg)
 {
   ulong x, qm3s2;
-  GEN vpk = vecsmall_const(pk, 0);
+  GEN vpk = const_vecsmall(pk, 0);
 
   qm3s2 = (q-3)>>1;
   for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;
@@ -474,7 +474,7 @@ get_jac2(GEN N, ulong q, long k, GEN *j2q, GEN *j3q)
   compute_fg(q,0, &tabf,&tabg);
 
   pk = 1 << k;;
-  vpk = vecsmall_const(pk, 0);
+  vpk = const_vecsmall(pk, 0);
 
   qm3s2 = (q-3)>>1;
   for (x=1; x<=qm3s2; x++) vpk[ tabg[x]%pk + 1 ] += 2;

@@ -36,7 +36,7 @@ znstar_partial_coset_func(long n, GEN H, void (*func)(void *data,long c)
 {
   GEN gen = gel(H,1);
   GEN ord = gel(H,2);
-  GEN cache = vecsmall_const(d,c);
+  GEN cache = const_vecsmall(d,c);
   long i, j, card = 1;
 
   (*func)(data,c);

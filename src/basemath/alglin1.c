@@ -1414,7 +1414,7 @@ Flm_id(long n)
   GEN y = cgetg(n+1,t_MAT);
   long i;
   if (n < 0) err(talker,"negative size in Flm_id");
-  for (i=1; i<=n; i++) { gel(y,i) = vecsmall_const(n, 0); ucoeff(y, i,i) = 1; }
+  for (i=1; i<=n; i++) { gel(y,i) = const_vecsmall(n, 0); ucoeff(y, i,i) = 1; }
   return y;
 }
 
@@ -2259,7 +2259,7 @@ get_suppl(GEN x, GEN d, long r)
   if (rx == n && r == 0) { free(d); return gcopy(x); }
   y = cgetg(n+1, t_MAT);
   av = avma;
-  c = vecsmall_const(n,0);
+  c = const_vecsmall(n,0);
   k = 1;
   /* c = lines containing pivots (could get it from gauss_pivot, but cheap)
    * In theory r = 0 and d[j] > 0 for all j, but why take chances? */

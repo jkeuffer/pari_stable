@@ -2813,6 +2813,9 @@ pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
 Theses functions handle \typ{VECSMALL} as an abstract container type
 of small signed integers. No specific meaning is attached to the content.
 
+\fun{GEN}{const_vecsmall}{long n, long c} returns a \typ{VECSMALL}
+of \kbd{n} components equal to \kbd{c}.
+
 \fun{GEN}{vec_to_vecsmall}{GEN z} identical to \kbd{ZV\_to\_zv(z)}.
 
 \fun{GEN}{vecsmall_to_vec}{GEN z} identical to \kbd{zv\_to\_ZV(z)}.
@@ -2820,9 +2823,6 @@ of small signed integers. No specific meaning is attached to the content.
 \fun{GEN}{vecsmall_to_col}{GEN z} identical to \kbd{zv\_to\_ZC(z)}.
 
 \fun{GEN}{vecsmall_copy}{GEN x} makes a copy of \kbd{x} on the stack.
-
-\fun{GEN}{vecsmall_const}{long n, long c} returns a \typ{VECSMALL}
-of \kbd{n} components equal to \kbd{c}.
 
 \fun{GEN}{vecsmall_shorten}{GEN v, long n} shortens the \typ{VECSMALL} \kbd{v}
 to \kbd{n} components.

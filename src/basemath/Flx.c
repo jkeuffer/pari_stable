@@ -964,7 +964,7 @@ static GEN
 Flx_invmontgomery_newton(GEN T, ulong p)
 {
   long i, lx, lz, lq, e, l = degpol(T);
-  GEN E, q, y, z, x = vecsmall_const(l+1, 0) + 2;
+  GEN E, q, y, z, x = const_vecsmall(l+1, 0) + 2;
   pari_sp av;
 
   y = T+2;

@@ -59,7 +59,7 @@ vecsmall_copy(GEN x)
 }
 
 GEN
-vecsmall_const(long n, long c)
+const_vecsmall(long n, long c)
 {
   long i;
   GEN V = cgetg(n+1,t_VECSMALL);
@@ -202,7 +202,7 @@ GEN
 bitvec_alloc(long n)
 {
   long l = 1 + (n>>TWOPOTBITS_IN_LONG);
-  return vecsmall_const(l,0);
+  return const_vecsmall(l,0);
 }
 
 

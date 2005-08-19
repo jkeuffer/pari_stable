@@ -780,7 +780,7 @@ vec_setconst(GEN v, GEN x)
   return v;
 }
 GEN
-vec_const(long n, GEN x)
+const_vec(long n, GEN x)
 {
   GEN v = cgetg(n+1, t_VEC);
   long i;
@@ -817,7 +817,7 @@ vec_is1to1(GEN v)
 }
 
 GEN
-col_const(long n, GEN x)
+const_col(long n, GEN x)
 {
   GEN v = cgetg(n+1, t_COL);
   long i;
@@ -1627,7 +1627,7 @@ zarchstar(GEN nf, GEN x, GEN archp)
   bas = gmael(nf,5,1); N = lg(bas)-1;
   if (lg(bas[1]) > lg(archp)) bas = rowpermute(bas, archp);
   gen = cgetg(nba+1,t_VEC);
-  v = mkmat( vecsmall_const(nba, 1) );
+  v = mkmat( const_vecsmall(nba, 1) );
   gel(gen,1) = gZ;
 
   mat = archstar_full_rk(x, bas, v, gen);

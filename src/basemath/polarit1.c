@@ -442,7 +442,7 @@ Flx_Berlekamp_ker(GEN u, ulong p)
   GEN v,w,Q,p1;
   pari_timer T;
   TIMER(&T);
-  Q = cgetg(N+1,t_VEC); gel(Q,1) = vecsmall_const(N,0);
+  Q = cgetg(N+1,t_VEC); gel(Q,1) = const_vecsmall(N,0);
   w = v = Flxq_pow(polx_Flx(u[1]), utoipos(p), u, p);
   for (j=2; j<=N; j++)
   {
@@ -558,7 +558,7 @@ Flm_Flx_mul(GEN x, GEN y, ulong p)
   if (ly==1) return zero_Flx(vs);
   l = lg(x[1]);
   y++;
-  z = vecsmall_const(l,0) + 1;
+  z = const_vecsmall(l,0) + 1;
   if (u_OK_ULONG(p))
   {
     for (k=1; k<ly; k++)
@@ -611,7 +611,7 @@ Flx_Frobenius(GEN u, ulong p)
 
   if (DEBUGLEVEL > 7) TIMERstart(&T);
   Q = cgetg(N+1,t_MAT);
-  gel(Q,1) = vecsmall_const(N, 0);
+  gel(Q,1) = const_vecsmall(N, 0);
   coeff(Q,1,1) = 1;
   w = v = Flxq_pow(polx_Flx(u[1]), utoipos(p), u, p);
   for (j=2; j<=N; j++)
@@ -1102,7 +1102,7 @@ FpX_split_Berlekamp(GEN *t, GEN p)
     GEN polt;
     if (ps)
     {
-      GEN pol = vecsmall_const(l-2,0);
+      GEN pol = const_vecsmall(l-2,0);
       pol[1] = u[1];
       pol[2] = small_rand(ps); /*Assume vker[1]=1*/
       for (i=2; i<=d; i++)

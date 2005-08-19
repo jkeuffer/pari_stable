@@ -2314,7 +2314,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
   if (DEBUGLEVEL >= 4)
     fprintferr("GaloisConj:p=%ld deg=%ld fp=%ld\n", gf->p, deg, gf->fp);
   res = cgetg(lg(L), t_VECSMALL);
-  gf->psi = vecsmall_const(g,1);
+  gf->psi = const_vecsmall(g,1);
   av2=avma;
   initlift(T, den, ip, L, Lden, gb, &gl);
   aut = galoisdolift(&gl, res);
@@ -2355,7 +2355,7 @@ galoisfrobeniuslift(GEN T, GEN den, GEN L,  GEN Lden,
       if (galoisfrobeniustest(gel(gt.pauto,el+1),&gl,frob))
       {
 	dgf = dg; 
-	psi = vecsmall_const(g,1);
+	psi = const_vecsmall(g,1);
 	fres= gcopy(frob);
 	continue;
       }

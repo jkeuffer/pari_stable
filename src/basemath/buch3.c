@@ -1539,7 +1539,7 @@ rnfconductor(GEN bnf, GEN polrel, long flag)
 
   pol2 = fix_relative_pol(nf, pol2, 1);
   module = mkvec2((GEN)rnfdiscf(nf,pol2)[1],
-                  vec_const(nf_get_r1(nf), gen_1));
+                  const_vec(nf_get_r1(nf), gen_1));
   bnr   = Buchray(bnf,module,nf_INIT | nf_GEN);
   group = rnfnormgroup(bnr,pol2);
   if (!group) { avma = av; return gen_0; }
@@ -2010,7 +2010,7 @@ bnrclassnointernarch(GEN B, GEN h, GEN matU)
   if (!matU) return bnrclassnointern(B,h);
   lx = lg(B); if (lx == 1) return B;
 
-  r1 = lg(matU[1])-1; _2 = vec_const(r1, gen_2);
+  r1 = lg(matU[1])-1; _2 = const_vec(r1, gen_2);
   L = cgetg(lx,t_VEC); nbarch = 1<<r1;
   for (j=1; j<lx; j++)
   {
@@ -2096,7 +2096,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   U = init_units(bnf);
   sgnU = zsignunits(bnf, NULL, 1);
 
-  if (allarch) arch = vec_const(r1, gen_1);
+  if (allarch) arch = const_vec(r1, gen_1);
   bidp = Idealstar(nf, mkvec2(gen_1, arch), 0);
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);

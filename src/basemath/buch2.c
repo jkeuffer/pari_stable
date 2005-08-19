@@ -1291,8 +1291,8 @@ _isprincipal(GEN bnf, GEN x, long *ptprec, long flag)
   /* factor x */
   x = Q_primitive_part(x, &xc);
   xar = split_ideal(nf,x,get_Vbase(bnf));
-  lW = lg(W)-1; Wex = vecsmall_const(lW, 0);
-  lB = lg(B)-1; Bex = vecsmall_const(lB, 0);
+  lW = lg(W)-1; Wex = const_vecsmall(lW, 0);
+  lB = lg(B)-1; Bex = const_vecsmall(lB, 0);
   for (i=1; i<=primfact[0]; i++)
   {
     long k = primfact[i];
@@ -1635,7 +1635,7 @@ zsignunits(GEN bnf, GEN archp, int add_zu)
   if (add_zu)
   {
     GEN w = gmael3(bnf,8,4,1);
-    gel(y, j++) = equaliu(w,2)? col_const(l - 1, gen_1): cgetg(1, t_COL);
+    gel(y, j++) = equaliu(w,2)? const_col(l - 1, gen_1): cgetg(1, t_COL);
   }
   for ( ; j < RU; j++) gel(y,j) = zsign_from_logarch(gel(A,j), invpi, archp);
   return y;
@@ -1798,7 +1798,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
   long nbsmallnorm, nbfact, j, k, noideal, precbound;
   long N = degpol(nf[1]), R1 = nf_get_r1(nf), prec = nfgetprec(nf);
   GEN x, gx, Mlow, M, G, r;
-  GEN L = vecsmall_const(F->KC, 0), invp = relationrank(cache, L, mod_p);
+  GEN L = const_vecsmall(F->KC, 0), invp = relationrank(cache, L, mod_p);
   REL_t *rel = cache->last;
 
   if (DEBUGLEVEL)
