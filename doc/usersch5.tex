@@ -2802,6 +2802,12 @@ are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 @eprog\noindent
 (more efficient).
 
+\fun{GEN}{const_col}{long n, long c} returns a \typ{COL} of \kbd{n} components
+equal to \kbd{c}.
+
+\fun{GEN}{const_vec}{long n, long c} returns a \typ{VEC} of \kbd{n} components
+equal to \kbd{c}.
+
 \fun{int}{vec_isconst}{GEN v} Returns 1 if all the components of \kbd{v} are
 equal, else returns 0.
 
