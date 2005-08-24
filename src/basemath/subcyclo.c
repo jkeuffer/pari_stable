@@ -226,8 +226,8 @@ znstar_conductor(long n, GEN H)
   return cnd;
 }
 
-/* Calcule les orbites d'one sous-groupe de Z/nZ donne par one
- * generateur ou d'one ensemble de generateur donne par one vecteur. 
+/* Compute the orbits of a subgroups of Z/nZ given by a generator
+ * or a set of generators given as a vector. 
  */
 GEN
 znstar_cosets(long n, long phi_n, GEN H)
@@ -445,7 +445,7 @@ subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val,long *ptr_l)
   av=avma;
   if (!borne)
   {
-    /*Borne utilise': 
+    /*We use the following trivial bound:
       Vecmax(Vec((x+o)^d)=max{binomial(d,i)*o^i ;1<=i<=d} 
      */
     i=d-(1+d)/(1+o);
@@ -583,7 +583,7 @@ bnr_to_znstar(GEN bnr, long *complex)
     err(talker,"bnr must be over Q in bnr_to_znstar");
   zk = gel(bnr,5);
   gen = gel(zk,3);
-  /*cond is the finite part of the conductor
+  /* cond is the finite part of the conductor,
    * complex is the infinite part*/
   cond = gcoeff(gmael3(bnr,2,1,1), 1, 1);
   *complex = signe(gmael4(bnr,2,1,2,1));
