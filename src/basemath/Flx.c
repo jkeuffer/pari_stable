@@ -918,39 +918,6 @@ Flx_invmontgomery_basecase(GEN T, ulong p)
   return r;
 }
 
-/*Use newton style inversion.
- * Use log2(n) sqr +log2(n) mul*/
-GEN 
-Flx_invmontgomery_newton_old(GEN T, ulong p)
-{
-  long i, l=lgpol(T), ll=l+2;
-  GEN x, q, z;
-  long v=T[1];
-  pari_sp av, av2;
-  x = Flx_recipspec(T+2,l-1,l);
-  x[1] = v;
-  x = Flx_neg(x,p);
-  q = vecsmall_copy(x); q[2]=1;
-  i = Flx_valuation(x);
-  av=avma;
-  new_chunk(ll<<1);
-  av2=avma;
-  for (  ; i<l; i<<=1)
-  {
-    x=Flx_sqr(x,p);
-    x=Flx_renormalize(x,min(lg(x),ll));
-    z=Flx_mul(q,x,p);
-    z=Flx_renormalize(z,min(lg(z),ll));
-    q=Flx_add(q,z,p);
-    avma=av;
-    q=vecsmall_copy(q);
-    x=vecsmall_copy(x);
-    avma=av2;
-  }
-  q=Flx_shift(q,1);
-  return q;
-}
-
 /* Return new lgpol */
 static long
 Flx_lgrenormalizespec(GEN x, long lx)
