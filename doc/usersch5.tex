@@ -1757,6 +1757,11 @@ and \kbd{y} (assumed to have compatible dimensions), and reduce modulo
 by the \kbd{ZC}~\kbd{y} (seen as a column vector, assumed to have compatible
 dimensions), and reduce modulo \kbd{p} to obtain an \kbd{FpC}.  
 
+\fun{GEN}{FpV_FpC_mul}{GEN x, GEN y, GEN p} multiplies the \kbd{ZV}~\kbd{x}
+(seen as a row vector) by the \kbd{ZC}~\kbd{y} (seen as a column vector,
+assumed to have compatible dimensions), and reduce modulo \kbd{p} to obtain
+an \kbd{Fp}.
+
 \subsubsec{\kbd{Fp}-linear algebra}. The implementations are not
 asymptotically efficient ($O(n^3)$ standard algorithms).
 

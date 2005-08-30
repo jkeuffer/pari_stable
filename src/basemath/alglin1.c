@@ -2502,6 +2502,24 @@ FpC_FpV_mul(GEN x, GEN y, GEN p)
   return z;
 }
 
+/*If p is NULL no reduction is performed.
+ *Multiply a line vector by a column and return a scalar (t_INT).
+ */
+GEN
+FpV_FpC_mul(GEN x, GEN y, GEN p)
+{
+  pari_sp av = avma;
+  long i;
+  long lx=lg(x), ly=lg(y);
+  GEN p1;
+  if (lx != ly) err(operi,"* [mod p]",x,y);
+  if (lx==1) return gen_0;
+  p1 = mulii(gel(x,1),gel(y,1));
+  for (i=2; i<lx; i++)
+    p1 = addii(p1, mulii(gel(x,i),gel(y,i)));
+  return gerepileuptoint(av, p?modii(p1,p):p1);
+}
+
 /*If p is NULL no reduction is performed.*/
 GEN
 FpM_FpC_mul(GEN x, GEN y, GEN p)

@@ -118,6 +118,7 @@ GEN     FpM_mul(GEN x, GEN y, GEN p);
 long    FpM_rank(GEN x, GEN p);
 GEN     FpM_indexrank(GEN x, GEN p);
 GEN     FpM_suppl(GEN x, GEN p);
+GEN     FpV_FpC_mul(GEN x, GEN y, GEN p);
 GEN     FqM_gauss(GEN a, GEN b, GEN T, GEN p);
 GEN     FqM_ker(GEN x, GEN T, GEN p);
 GEN     FqM_suppl(GEN x, GEN T, GEN p);
