@@ -111,7 +111,7 @@ x + 1
 ? \p57
    realprecision = 57 significant digits
 ? Pi
-3.14159265358979323846264338327950288419716939937510582097
+3.14159265358979323846264338327950288419716939937510582098
 ? \p38
    realprecision = 38 significant digits
 ? O(x^12)
@@ -125,5 +125,5 @@ O(x^12)
 ? getheap
 [61, 825]
 ? print("Total time spent: ",gettime);
-Total time spent: 0
+Total time spent: 10
 ? \q

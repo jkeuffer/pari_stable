@@ -105,6 +105,8 @@ BA 44- ellrootno(e,2) was wrong for curves of Kodaira type 3 and -7.
                                                            ([#212] from 2.2.9)
 BA 45- galoisfixedfield() was not robust enough ([#256, #228 from 2.2.9)
    46- tanh(-10^20) --> error instead of -1  [tanh(10^20) was treated properly]
+BA 47- wrong rounding in wr_float: with default(format,"f0.10")
+        1.23456789049999999997 -> 1.234567891
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

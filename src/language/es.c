@@ -1078,7 +1078,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
   else z = mpabs(x);
 
   /* x ~ z / 10^beta, z in N */
-  z = grndtoi(z, &l); /* l is junk */
+  z = gcvtoi(z, &l); /* l is junk */
   res = convi(z, &ldec);
   resd = res - 1; /* leading word */
   dec0 = numdig(*resd);
@@ -1090,7 +1090,7 @@ wr_float(pariout_t *T, GEN x, int f_format)
   else if (dec < dec0) /* ==> 0 < dec < 9 */
   {
     ulong p10 = u_pow10(dec0 - dec);
-    if (*resd % p10 > (p10>>1)) *resd += p10; /* round up */
+    if (*resd % p10 >= (p10>>1)) *resd += p10; /* round up */
   }
   else if (dec < decdig)
   {
@@ -1099,10 +1099,11 @@ wr_float(pariout_t *T, GEN x, int f_format)
     resd -= l / 9;
     if (d)
     { /* cut resd[-1] to first d digits when printing */
-      ulong p10 = u_pow10(9 - d);
-      if (*--resd % p10 > (p10>>1)) round_up(resd, p10, res);
+      ulong p10 = u_pow10(9 - d), r = *--resd % p10;
+      if (r >= (p10>>1)) round_up(resd, p10, res);
+    } else {
+      if ((ulong)resd[-1] >= 500000000UL) round_up(resd, 1, res);
     }
-    else if ((ulong)resd[-1] > 500000000) round_up(resd, 1, res);
   }
 
   s = t = (char*)new_chunk(decdig + 1);
