@@ -449,7 +449,7 @@ mpth(GEN x)
 
   if (!s) return real_0_bit(expo(x));
   l = lg(x);
-  if (cmprs(x, bit_accuracy(l)) >= 0) {
+  if (absr_cmp(x, stor(bit_accuracy(l), 3)) >= 0) {
     y = real_1(l);
   } else {
     pari_sp av = avma;
