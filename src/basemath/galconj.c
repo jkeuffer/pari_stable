@@ -740,7 +740,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 
 /* structure containing all data for permutation test:
  * 
- * ordre :ordre des tests pour verifie_test ordre[lg(ordre)]: numero du test
+ * ordre :ordre des tests pour galois_test_perm ordre[lg(ordre)]: numero du test
  * principal borne : borne sur les coefficients a trouver ladic: modulo
  * l-adique des racines lborne:ladic-borne TM:vecteur des ligne de M
  * PV:vecteur des clones des matrices de test (Vmatrix) (ou NULL si non
@@ -832,17 +832,16 @@ padicisint(GEN P, struct galois_test *td)
 }
 
 /*
- * Verifie si pf est une vrai solution et non pas one "hop"
+ * Check if the permutation pf is valid according to td.
+ * If not, update td to make subsequent test faster (hopefully).
  */
 static long
-verifietest(GEN pf, struct galois_test *td)
+galois_test_perm(struct galois_test *td, GEN pf)
 {
   pari_sp av = avma;
   GEN     P, V;
   int     i, j;
   int     n = lg(td->L) - 1;
-  if (DEBUGLEVEL >= 8)
-    fprintferr("GaloisConj:Entree Verifie Test\n");
   P = perm_mul(td->L, pf);
   for (i = 1; i < n; i++)
   {
@@ -863,8 +862,6 @@ verifietest(GEN pf, struct galois_test *td)
   }
   if (i == n)
   {
-    if (DEBUGLEVEL >= 8)
-      fprintferr("GaloisConj:Sortie Verifie Test:1\n");
     avma = av;
     return 1;
   }
@@ -886,8 +883,6 @@ verifietest(GEN pf, struct galois_test *td)
     if (DEBUGLEVEL >= 8)
       fprintferr("%Z", td->ordre);
   }
-  if (DEBUGLEVEL >= 8)
-    fprintferr("GaloisConj:Sortie Verifie Test:0\n");
   avma = av;
   return 0;
 }
@@ -1031,7 +1026,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
               p3 += b;
           }
         }
-        if (verifietest(pf, td))
+        if (galois_test_perm(td, pf))
         {
           if (DEBUGLEVEL >= 1)
           {
@@ -1746,7 +1741,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	pft[t[k]] = t[k + 1];
 	pft[t[k + 1]] = t[k];
       }
-      if (verifietest(pft, td))
+      if (galois_test_perm(td, pft))
 	break;
       else
 	hop++;
@@ -1843,7 +1838,7 @@ a4galoisgen(GEN T, struct galois_test *td)
 	pfu[u[k]] = u[k + 1];
 	pfu[u[k + 1]] = u[k];
       }
-      if (verifietest(pfu, td))
+      if (galois_test_perm(td, pfu))
 	break;
       else
 	hop++;
@@ -1918,7 +1913,7 @@ a4galoisgen(GEN T, struct galois_test *td)
       g = gen_0;
       for (k = 1; k <= n; k++)
 	g = addii(g, gmael(mt,k,pfv[k]));
-      if (padicisint(g, td) && verifietest(pfv, td))
+      if (padicisint(g, td) && galois_test_perm(td, pfv))
       {
 	avma = av;
 	if (DEBUGLEVEL >= 1)
