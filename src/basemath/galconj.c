@@ -570,15 +570,12 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
   }
 }
 
+/* We should have 0<=x<mod. */
+
 long intheadlong(GEN x, GEN mod)
 {
   pari_sp ltop=avma;
-  GEN r;
-  int s;
-  long res;
-  r=divii(shifti(x,BITS_IN_LONG),mod);
-  s=signe(r);
-  res=s?s>0?r[2]:-r[2]:0;
+  long res= (long) itou(divii(shifti(x,BITS_IN_LONG),mod));
   avma=ltop;
   return res;
 }
