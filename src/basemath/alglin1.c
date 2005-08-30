@@ -1167,8 +1167,7 @@ u_Fp_gauss_get_col(GEN a, uGEN b, ulong invpiv, long li, ulong p)
   {
     m = p - b[i]%p;
     for (j = i+1; j <= li; j++)
-      m += Fl_mul(ucoeff(a,i,j), u[j], p);
-    m %= p;
+      m = Fl_add(m, Fl_mul(ucoeff(a,i,j), u[j], p), p);
     if (m) m = Fl_mul(p-m, Fl_inv(ucoeff(a,i,i), p), p);
     u[i] = m;
   }
