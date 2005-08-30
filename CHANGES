@@ -109,6 +109,7 @@ BA 47- wrong rounding in wr_float: with default(format,"f0.10")
         1.23456789049999999997 -> 1.234567891
 GH 48- typo in thue.c:MiddleSols() --> missing solutions [#264]
    49- default(prettyprinter,,1) --> t_POL instead of t_STR [#296]
+BA 50- truncate(1/x+O(x)) --> SEGV
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

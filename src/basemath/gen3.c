@@ -1933,6 +1933,12 @@ ser2rfrac(GEN x)
     if (e > 0) return gerepilecopy(av, gmulXn(a, e));
     z = cgetg(3, t_RFRAC);
     a = primitive_part(a, &c);
+    if (!c)
+    {
+      gel(z,1) = a;
+      gel(z,2) = monomial(gen_1, -e, varn(a)); 
+      return z;
+    }
     if (typ(c) == t_POL) /* see gred_rfrac2_i */
     {
       cd = denom(content(c));
