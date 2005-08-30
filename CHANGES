@@ -112,6 +112,12 @@ GH 48- typo in thue.c:MiddleSols() --> missing solutions [#264]
 BA 50- truncate(1/x+O(x)) --> SEGV
    51- overflow in Flm_gauss (when solving triangular system) --> wrong result
        [#284]
+   52- isprime(25, 2)
+         *** impossible inverse modulo: Mod(5, 25).
+       although it's useful to get a factor, it's not nice to raise an error,
+       since 'trap' then becomes mandatory. Removed this feature: the factor
+       is silently discarded (exceedingly rare anyway).
+
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

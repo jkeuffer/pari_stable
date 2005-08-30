@@ -566,7 +566,7 @@ finda(Cache *Cp, GEN N, long pk, long p)
     }
     /* checking b^p = 1 mod N done economically in caller */
     b = gcdii(addis(b,-1), N);
-    if (!gcmp1(b)) err(invmoder,"%Z",gmodulcp(b,N)); /* trap this! */
+    if (!gcmp1(b)) return NULL;
     
     if (Cp) {
       Cp->avite  = a; /* a has order p^v */
@@ -614,8 +614,10 @@ filltabs(Cache *C, Cache *Cp, Red *R, long p, long pk, long ltab)
   if (pk > 2 && umodiu(R->N,pk) == 1)
   {
     GEN vpa, p1, p2, p3, a2 = NULL, a = finda(Cp, R->N, pk, p);
-    long jj, ph = pk - pk/p;
-
+    long jj, ph;
+    
+    if (!a) return 0;
+    ph = pk - pk/p;
     vpa = cgetg(ph+1,t_COL); gel(vpa,1) = a;
     if (pk > p) a2 = centermodii(sqri(a), R->N, R->N2);
     jj = 1;
