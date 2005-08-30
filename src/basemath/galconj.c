@@ -815,18 +815,15 @@ freetest(struct galois_test *td)
 }
 
 /*
- * Test si le nombre padique P est proche d'one entier inferieur a td->borne
- * en valeur absolue.
+ * Check if the integer P seen as a p-adic number is close from an integer less
+ * than td->borne in absolute value. 
  */
 static long
 padicisint(GEN P, struct galois_test *td)
 {
-  long    r;
   pari_sp ltop = avma;
-  GEN     U;
-  /*if (typ(P) != t_INT)    err(typeer, "padicisint");*/
-  U = modii(P, td->ladic);
-  r = gcmp(U, td->borne) <= 0 || gcmp(U, td->lborne) >= 0;
+  GEN U  = modii(P, td->ladic);
+  long r = cmpii(U, td->borne) <= 0 || cmpii(U, td->lborne) >= 0;
   avma = ltop;
   return r;
 }
