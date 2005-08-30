@@ -480,7 +480,7 @@ static GEN
 MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, int s, GEN c1) 
 {
   int j, k, d = degpol(poly); 
-  GEN bndcf = sqrtnr(c1, d - 2); 
+  GEN bndcf = sqrtnr(shiftr(c1,1), d - 2); 
 
   if (cmprr(bound, bndcf) == -1) return bound; 
 
