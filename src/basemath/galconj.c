@@ -857,7 +857,7 @@ verifietest(GEN pf, struct galois_test *td)
 	V = addii(V, gmael(PW,j,pf[j]));
     }
     else
-      V = centermod(gmul(gel(td->TM,ord), P),td->ladic);
+      V = centermod(FpV_FpC_mul(gel(td->TM,ord), P, td->ladic), td->ladic);
     if (!padicisint(V, td))
       break;
   }
