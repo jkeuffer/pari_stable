@@ -767,7 +767,7 @@ sd_prettyprinter(char *v, int flag)
   if (flag == d_RETURN)
     /*FIXME: The cast is a kludge needed by g++ but changing
      * gp_read_str to accept a const char * is non-trivial.*/
-    return gp_read_str(pp->cmd? pp->cmd:(char *) "");
+    return strtoGENstr(pp->cmd? pp->cmd:(char *) "");
   if (flag == d_ACKNOWLEDGE)
     pariputsf("   prettyprinter = \"%s\"\n",pp->cmd? pp->cmd: "");
   return gnil;
