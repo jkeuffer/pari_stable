@@ -740,7 +740,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 
 /* structure containing all data for permutation test:
  * 
- * ordre :ordre des tests pour galois_test_perm ordre[lg(ordre)]: numero du test
+ * order :ordre des tests pour galois_test_perm order[lg(ordre)]: numero du test
  * principal borne : borne sur les coefficients a trouver ladic: modulo
  * l-adique des racines lborne:ladic-borne TM:vecteur des ligne de M
  * PV:vecteur des clones des matrices de test (Vmatrix) (ou NULL si non
@@ -748,7 +748,7 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
  */
 struct galois_test
 {
-  GEN     ordre;
+  GEN     order;
   GEN     borne, lborne, ladic;
   GEN     PV, TM;
   GEN     L, M;
@@ -777,11 +777,11 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   int     n = lg(L) - 1;
   if (DEBUGLEVEL >= 8)
     fprintferr("GaloisConj:Entree Init Test\n");
-  td->ordre = cgetg(n + 1, t_VECSMALL);
+  td->order = cgetg(n + 1, t_VECSMALL);
   for (i = 1; i <= n - 2; i++)
-    td->ordre[i] = i + 2;
+    td->order[i] = i + 2;
   for (; i <= n; i++)
-    td->ordre[i] = i - n + 2;
+    td->order[i] = i - n + 2;
   td->borne = borne;ltop = avma;
   td->lborne = subii(ladic, borne);
   td->ladic = ladic;
@@ -791,7 +791,7 @@ inittest(GEN L, GEN M, GEN borne, GEN ladic, struct galois_test *td)
   for (i = 1; i <= n; i++)
     td->PV[i] = 0;
   ltop = avma;
-  gel(td->PV, td->ordre[n]) = gclone(Vmatrix(td->ordre[n], td));
+  gel(td->PV, td->order[n]) = gclone(Vmatrix(td->order[n], td));
   avma = ltop;
   td->TM = shallowtrans(M);
   settyp(td->TM, t_VEC);
@@ -844,7 +844,7 @@ galois_test_perm(struct galois_test *td, GEN pf)
   {
     long    ord;
     GEN     PW;
-    ord = td->ordre[i];
+    ord = td->order[i];
     PW = gel(td->PV, ord);
     if (PW)
     {
@@ -862,9 +862,9 @@ galois_test_perm(struct galois_test *td, GEN pf)
     avma = av;
     return 1;
   }
-  if (!td->PV[td->ordre[i]])
+  if (!td->PV[td->order[i]])
   {
-    gel(td->PV, td->ordre[i]) = gclone(Vmatrix(td->ordre[i], td));
+    gel(td->PV, td->order[i]) = gclone(Vmatrix(td->order[i], td));
     if (DEBUGLEVEL >= 4)
       fprintferr("M");
   }
@@ -873,12 +873,12 @@ galois_test_perm(struct galois_test *td, GEN pf)
   if (i > 1)
   {
     long    z;
-    z = td->ordre[i];
+    z = td->order[i];
     for (j = i; j > 1; j--)
-      td->ordre[j] = td->ordre[j - 1];
-    td->ordre[1] = z;
+      td->order[j] = td->order[j - 1];
+    td->order[1] = z;
     if (DEBUGLEVEL >= 8)
-      fprintferr("%Z", td->ordre);
+      fprintferr("%Z", td->order);
   }
   avma = av;
   return 0;
@@ -918,7 +918,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   av = avma;
   ar = cgetg(a + 2, t_VECSMALL); ar[a+1]=0;
   G  = cgetg(a + 1, t_VECSMALL);
-  W  = matheadlong(gel(td->PV, td->ordre[n]), td->ladic);
+  W  = matheadlong(gel(td->PV, td->order[n]), td->ladic);
   for (cx = 1, i = 1, j = 1; cx <= a; cx++, i++)
   {
     gel(G,cx) = gel(F, coeff(B,i,j));
@@ -1620,7 +1620,7 @@ a4galoisgen(GEN T, struct galois_test *td)
   av = avma;
   ar = cgetg(n+1, t_VEC);
   for (i = 1; i <= n; i++) gel(ar,i) = cgeti(1 + lg(td->ladic));
-  mt = gel(td->PV,td->ordre[n]);
+  mt = gel(td->PV,td->order[n]);
   t = cgetg(n + 1, t_VECSMALL) + 1;	/* Sorry for this hack */
   u = cgetg(n + 1, t_VECSMALL) + 1;	/* too lazy to correct */
   av2 = avma;
