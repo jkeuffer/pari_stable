@@ -163,6 +163,9 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
    23- make sure GP_DATA is always defined --> default() becomes available
        in libpari
    24- make gnil public
+   25- change content() so that it always returns the gcd of all entries (as
+       documented). Used to return the gcd of all _contents_ of the entries
+       of a t_VEC/t_COL/t_MAT.
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

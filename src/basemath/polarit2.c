@@ -2992,14 +2992,27 @@ content(GEN x)
       return gerepileupto(av, gdiv(content(n), content(d)));
     }
 
-    case t_VEC: case t_COL: case t_MAT:
+    case t_VEC: case t_COL:
       lx = lg(x); if (lx==1) return gen_1;
-      p1=content(gel(x,1));
-      for (i=2; i<lx; i++) p1 = ggcd(p1,content(gel(x,i)));
-      return gerepileupto(av,p1);
+      break;
 
-    case t_POL:
-    case t_SER:
+    case t_MAT:
+    {
+      long hx, j;
+      lx = lg(x);
+      if (lx == 1) return gen_1;
+      hx = lg(x[1]);
+      if (hx == 1) return gen_1;
+      if (lx == 2) { x = gel(x,1); break; }
+      if (hx == 2) { x = row_i(x, 1, 1, lx-1); break; }
+      p1 = content(gel(x,1));
+      for (j=2; j<lx; j++)
+        for (i=1; i<hx; i++) p1 = ggcd(p1,gcoeff(x,i,j));
+      if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gen_1; }
+      return gerepileupto(av,p1);
+    }
+
+    case t_POL: case t_SER:
       lx = lg(x); if (lx == 2) return gen_0;
       break;
     case t_QFR: case t_QFI:

@@ -1882,7 +1882,7 @@ GEN
 idealdivexact(GEN nf, GEN x0, GEN y0)
 {
   pari_sp av = avma;
-  GEN x,y,Nx,Ny,Nz, cy = content(y0);
+  GEN x,y,Nx,Ny,Nz, cy = Q_content(y0);
 
   nf = checknf(nf);
   if (gcmp0(cy)) err(talker, "cannot invert zero ideal");
@@ -2028,7 +2028,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
     goto END;
   }
   if (typ(I) != id_MAT || lg(I) != N+1) I = idealhermite_aux(nf,I);
-  I = primitive_part(I, &c1);
+  I = Q_primitive_part(I, &c1);
   y = ideallllred_elt(nf, I, vdir);
 
   if (RgV_isscalar(y))
