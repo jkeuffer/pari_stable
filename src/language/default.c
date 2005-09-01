@@ -248,17 +248,18 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
   switch(flag)
   {
     case d_RETURN:
-      if (*ptn != n) return utoi(*ptn);
-      break;
+      return utoi(*ptn);
     case d_ACKNOWLEDGE:
-      if (msg)
-      {
-	if (!*msg) msg++; /* single msg, always printed */
-	else       msg += *ptn; /* one per possible value */
-	pariputsf("   %s = %lu %s\n", s, *ptn, *msg);
+      if (*ptn != n) {
+        if (msg)
+        {
+          if (!*msg) msg++; /* single msg, always printed */
+          else       msg += *ptn; /* one per possible value */
+          pariputsf("   %s = %lu %s\n", s, *ptn, *msg);
+        }
+        else
+          pariputsf("   %s = %lu\n", s, *ptn);
       }
-      else
-	pariputsf("   %s = %lu\n", s, *ptn);
       break;
   }
   return gnil;
