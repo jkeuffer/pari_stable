@@ -336,7 +336,6 @@ int    pop_val_if_newer(entree *ep, long loc);
 
 /* Interfaces (GP, etc.) */
 void  errcontext(char *msg, char *s, char *entry);
-void  free_graph(void);
 GEN   geni(void);
 void* get_stack(double,int);
 GEN   gpreadseq(char *c, int strict);
