@@ -628,7 +628,7 @@ powgi(GEN x, GEN n)
 
     case t_INT:
       if (lgefint(x)==3 && x[2] == 1)
-        return (!signe(n) || signe(x) > 0)? gen_1: gen_m1;
+        return (signe(x) < 0 && mpodd(n))? gen_m1: gen_1;
       if (signe(x)) err(errlg);
       if (signe(n) < 0) err(gdiver);
       return gen_0;

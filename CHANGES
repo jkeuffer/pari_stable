@@ -117,7 +117,7 @@ BA 50- truncate(1/x+O(x)) --> SEGV
        although it's useful to get a factor, it's not nice to raise an error,
        since 'trap' then becomes mandatory. Removed this feature: the factor
        is silently discarded (exceedingly rare anyway).
-
+   53- (-1)^(any integer >= 2^31) --> -1 [ from 2.2.9 ]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
