@@ -1762,6 +1762,9 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   if (!equalii(B,N)) bnd = 1;
 
   P = shallowcopy(P0); d = degpol(P);
+  if (d == 0) { avma = av; return cgetg(1, t_VEC); }
+  if (d < 0) err(talker, "zero polynomial forbidden");
+
   if (!gcmp1(gel(P,d+2)))
   {
     gel(P,d+2) = bezout(gel(P,d+2), N, &z, &r);
@@ -1781,8 +1784,7 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     Xpowers[0] = gen_1;
     for (j = 1; j <= dim; j++) Xpowers[j] = gmul(Xpowers[j-1], X);
 
-    /* TODO: in case of failure, use the part of the matrix
-       already computed */
+    /* TODO: in case of failure, use the part of the matrix already computed */
     M = cgetg(dim + 1, t_MAT);
     for (j = 1; j <= dim; j++) gel(M,j) = zerocol(dim);
 
@@ -1829,7 +1831,12 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
     }
 
     sh = lllint_fp_ip(M, 4);
+    /* Take the first vector if it is non constant */
     short_pol = gel(sh,1);
+    for (j = 2; j <= dim; j++)
+      if (signe(gel(short_pol, j))) break;
+    if (j > dim) short_pol = gel(sh, 2);
+
     nsp = gen_0;
     for (j = 1; j <= dim; j++) nsp = addii(nsp, absi(gel(short_pol,j)));
 
