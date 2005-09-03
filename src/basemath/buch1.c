@@ -1029,13 +1029,15 @@ subFBquad(GEN D, double PROD, long KC)
   for (j = 1; j < ino;i++,j++) vperm[i] = no[j];
   for (     ; i < lv; i++)     vperm[i] = i;
   if (DEBUGLEVEL) msgtimer("subFBquad (%ld elt.)", lgsub-1);
-  avma = av; return vecslice(vperm, 1, lgsub-1);
+  no = gclone(vecslice(vperm, 1, lgsub-1));
+  avma = av; return no;
 }
 
 /* assume n >= 1, x[i][j] = subFB[i]^j, for j = 1..n */
 static GEN
 powsubFBquad(long n)
 {
+  pari_sp av = avma;
   long i,j, l = lg(subFB);
   GEN F, y, x = cgetg(l, t_VEC);
 
@@ -1060,7 +1062,7 @@ powsubFBquad(long n)
     }
   }
   if (DEBUGLEVEL) msgtimer("powsubFBquad");
-  return x;
+  x = gclone(x); avma = av; return x;
 }
 
 static void
@@ -1521,7 +1523,7 @@ GEN
 buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
 {
   pari_sp av0 = avma, av, av2;
-  long i, s, current, triv, nrelsup, nreldep, need;
+  long i, s, current, triv, nrelsup, nreldep, need, nsubFB;
   ulong LIMC, LIMC2, cp;
   GEN h, W, cyc, res, gen, dep, mat, C, extraC, B, R, resc, Res, z;
   double drc, lim, LOGD, LOGD2;
@@ -1575,6 +1577,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
   if (!Res) goto START;
   subFB = subFBquad(Disc, lim + 0.5, KC);
   if (!subFB) goto START;
+  nsubFB = lg(subFB) - 1;
   powsubFB = powsubFBquad(CBUCH+1);
   limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
   for (i=0; i<HASHT; i++) hashtab[i] = NULL;
@@ -1582,7 +1585,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
   need = KC + RELSUP - 2;
   current = 0;
   W = NULL;
-  s = lg(subFB)-1 + RELSUP;
+  s = nsubFB + RELSUP;
   av2 = avma;
 
 MORE:
@@ -1612,17 +1615,19 @@ MORE:
   }
 
   if (!W)
-    W = hnfspec_i((long**)mat,vperm,&dep,&B,&C,lg(subFB)-1);
+    W = hnfspec_i((long**)mat,vperm,&dep,&B,&C,nsubFB);
   else
     W = hnfadd_i(W,vperm,&dep,&B,&C, mat,extraC);
-  gerepileall(av2, 6, &W,&C,&B,&dep,&subFB,&powsubFB);
+  gerepileall(av2, 4, &W,&C,&B,&dep);
   need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
   if (need)
   {
     if (++nreldep > 15 && cbach < 0.4) goto START;
     if ((nreldep & 3) == 1) {
       if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-      subFB = vecslice(vperm, 1, lg(subFB)-1);
+      gunclone(subFB);
+      gunclone(powsubFB);
+      subFB = gclone(vecslice(vperm, 1, nsubFB));
       powsubFB = powsubFBquad(CBUCH+1);
     }
     goto MORE;
@@ -1646,6 +1651,8 @@ MORE:
   if (!quad_be_honest()) goto START;
 
   gen = get_clgp(Disc,W,&cyc,PRECREG);
+  gunclone(subFB);
+  gunclone(powsubFB);
 
   res = cgetg(5,t_VEC);
   gel(res,1) = h;
