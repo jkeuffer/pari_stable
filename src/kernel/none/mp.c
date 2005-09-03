@@ -1176,12 +1176,7 @@ diviiexact(GEN x, GEN y)
       }
     }
   }
-#if 0
-  i=2; while(i<lz && !z[i]) i++;
-  if (i==lz) err(bugparier,"diviiexact");
-#else
   i=2; while(!z[i]) i++;
-#endif
   z += i-2; lz -= (i-2);
   z[0] = evaltyp(t_INT)|evallg(lz);
   z[1] = evalsigne((sx+sy)? 1: -1) | evallg(lz);
@@ -1571,38 +1566,6 @@ catii(GEN a, long la, GEN b, long lb)
   return int_normalize(z, 0);
 }
 
-#ifdef LONG_IS_64BIT
-/* 64 bits of b = sqrt(a[0] * 2^64 + a[1])  [ up to 1ulp ] */
-static ulong
-sqrtu2(ulong *a)
-{
-  ulong c, b = dblmantissa( sqrt((double)a[0]) );
-  LOCAL_HIREMAINDER;
-  LOCAL_OVERFLOW;
-
-  /* > 32 correct bits, 1 Newton iteration to reach 64 */
-  if (b <= a[0]) return HIGHBIT | (a[0] >> 1);
-  hiremainder = a[0]; c = divll(a[1], b);
-  return (addll(c, b) >> 1) | HIGHBIT;
-}
-/* 64 bits of sqrt(a[0] * 2^63) */
-static ulong
-sqrtu2_1(ulong *a)
-{
-  ulong t[2];
-  t[0] = (a[0] >> 1);
-  t[1] = (a[0] << (BITS_IN_LONG-1)) | (a[1] >> 1);
-  return sqrtu2(t);
-}
-#else
-/* 32 bits of sqrt(a[0] * 2^32) */
-static ulong
-sqrtu2(ulong *a)   { return dblmantissa( sqrt((double)a[0]) ); }
-/* 32 bits of sqrt(a[0] * 2^31) */
-static ulong
-sqrtu2_1(ulong *a) { return dblmantissa( sqrt(2. * a[0]) ); }
-#endif
-
 /* sqrt n[0..1], assume n normalized */
 static GEN
 sqrtispec2(GEN n, GEN *pr)
@@ -1613,18 +1576,6 @@ sqrtispec2(GEN n, GEN *pr)
   *pr = hi? cat1u(r): utoi(r);
   return S;
 }
-
-#if 0
-/* n[0] */
-static GEN
-sqrtispec1_sh(GEN n, GEN *r)
-{
-  ulong a = usqrtsafe(n[0]);
-  GEN S = utoi(a);
-  if (r) *r = utoi(n[0] - a*a);
-  return S;
-}
-#endif
 
 /* sqrt n[0], _dont_ assume n normalized */
 static GEN
@@ -1758,8 +1709,71 @@ sqrtremi(GEN N, GEN *r)
 
 /* compute sqrt(|a|), assuming a != 0 */
 
+#if 1
 GEN
-sqrtr_abs_Newton(GEN x)
+sqrtr_abs(GEN x)
+{
+  long l = lg(x) - 2, e = expo(x), er = e>>1;
+  GEN b, c, res = cgetr(2 + l);
+  res[1] = evalsigne(1) | evalexpo(er);
+  if (e&1) {
+    b = new_chunk(l << 1);
+    xmpn_copy(b, x+2, l);
+    xmpn_zero(b + l,l);
+    b = sqrtispec(b, l, &c);
+    xmpn_copy(res+2, b+2, l);
+    if (cmpii(c, b) > 0) roundr_up_ip(res, l+2);
+  } else {
+    ulong u;
+    b = new_chunk(2 + (l << 1));
+    shift_left(b+1, x+2, 0,l-1, 0, BITS_IN_LONG-1);
+    b[0] = ((ulong)x[2])>>1;
+    xmpn_zero(b + l+1,l+1);
+    b = sqrtispec(b, l+1, &c);
+    xmpn_copy(res+2, b+2, l);
+    u = (ulong)b[l+2];
+    if ( u&HIGHBIT || (u == ~HIGHBIT && cmpii(c,b) > 0))
+      roundr_up_ip(res, l+2);
+  }
+  avma = (pari_sp)res; return res;
+}
+
+#else /* use t_REAL: currently much slower (quadratic division) */
+
+#ifdef LONG_IS_64BIT
+/* 64 bits of b = sqrt(a[0] * 2^64 + a[1])  [ up to 1ulp ] */
+static ulong
+sqrtu2(ulong *a)
+{
+  ulong c, b = dblmantissa( sqrt((double)a[0]) );
+  LOCAL_HIREMAINDER;
+  LOCAL_OVERFLOW;
+
+  /* > 32 correct bits, 1 Newton iteration to reach 64 */
+  if (b <= a[0]) return HIGHBIT | (a[0] >> 1);
+  hiremainder = a[0]; c = divll(a[1], b);
+  return (addll(c, b) >> 1) | HIGHBIT;
+}
+/* 64 bits of sqrt(a[0] * 2^63) */
+static ulong
+sqrtu2_1(ulong *a)
+{
+  ulong t[2];
+  t[0] = (a[0] >> 1);
+  t[1] = (a[0] << (BITS_IN_LONG-1)) | (a[1] >> 1);
+  return sqrtu2(t);
+}
+#else
+/* 32 bits of sqrt(a[0] * 2^32) */
+static ulong
+sqrtu2(ulong *a)   { return dblmantissa( sqrt((double)a[0]) ); }
+/* 32 bits of sqrt(a[0] * 2^31) */
+static ulong
+sqrtu2_1(ulong *a) { return dblmantissa( sqrt(2. * a[0]) ); }
+#endif
+
+GEN
+sqrtr_abs(GEN x)
 {
   long l1, i, l = lg(x), ex = expo(x);
   GEN a, t, y = cgetr(l);
@@ -1790,30 +1804,4 @@ sqrtr_abs_Newton(GEN x)
   avma = av0; return y;
 }
 
-GEN
-sqrtr_abs(GEN x)
-{
-  long l = lg(x) - 2, e = expo(x), er = e>>1;
-  GEN b, c, res = cgetr(2 + l);
-  res[1] = evalsigne(1) | evalexpo(er);
-  if (e&1) {
-    b = new_chunk(l << 1);
-    xmpn_copy(b, x+2, l);
-    xmpn_zero(b + l,l);
-    b = sqrtispec(b, l, &c);
-    xmpn_copy(res+2, b+2, l);
-    if (cmpii(c, b) > 0) roundr_up_ip(res, l+2);
-  } else {
-    ulong u;
-    b = new_chunk(2 + (l << 1));
-    shift_left(b+1, x+2, 0,l-1, 0, BITS_IN_LONG-1);
-    b[0] = ((ulong)x[2])>>1;
-    xmpn_zero(b + l+1,l+1);
-    b = sqrtispec(b, l+1, &c);
-    xmpn_copy(res+2, b+2, l);
-    u = (ulong)b[l+2];
-    if ( u&HIGHBIT || (u == ~HIGHBIT && cmpii(c,b) > 0))
-      roundr_up_ip(res, l+2);
-  }
-  avma = (pari_sp)res; return res;
-}
+#endif
