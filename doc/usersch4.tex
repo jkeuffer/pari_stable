@@ -1527,13 +1527,20 @@ which you probably do not need.
 
 To read a \kbd{GEN} from a file, you can use the simpler interface
 
-\fun{GEN}{gp_read_file}{FILE *file}
+\fun{GEN}{gp_read_stream}{FILE *file}
 
 \noindent which reads a character string of arbitrary length from the stream
 \kbd{file} (up to the first complete expression sequence), applies
-\kbd{gp\_read\_str} to it, and returns the resulting \kbd{GEN}. This way, you do
-not have to worry about allocating buffers to hold the string. To
+\kbd{gp\_read\_str} to it, and returns the resulting \kbd{GEN}. This way, you
+do not have to worry about allocating buffers to hold the string. To
 interactively input an expression, use \kbd{gp\_read\_file(stdin)}.
+
+Finally, you can read in a whole file, as in GP's \tet{read} statement
+
+\fun{GEN}{gp_read_file}{char *name}
+
+\noindent As usual, the return value is that of the last non-empty expression
+evaluated. Note that \kbd{gp}'s metacommands are not recognized.
 
 Once in a while, it may be necessary to evaluate a GP expression sequence
 involving a call to a function you have defined in~C. This is easy using

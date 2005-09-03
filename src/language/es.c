@@ -201,13 +201,11 @@ fix_buffer(Buffer *b, long newlbuf)
   b->buf = gprealloc(b->buf, b->len);
 }
 
-GEN
-gp_read_file(FILE *fi)
+static int
+gp_read_stream_buf(FILE *fi, Buffer *b)
 {
-  Buffer *b = new_buffer();
   input_method IM;
   filtre_t F;
-  GEN x;
 
   init_filtre(&F, b);
 
@@ -215,9 +213,34 @@ gp_read_file(FILE *fi)
   IM.fgets= &fgets;
   IM.getline= &file_input;
   IM.free = 0;
-  (void)input_loop(&F,&IM);
-  x = readseq(b->buf);
+  return input_loop(&F,&IM);
+}
+
+GEN
+gp_read_stream(FILE *fi)
+{
+  Buffer *b = new_buffer();
+  GEN x = gp_read_stream_buf(fi, b)? readseq(b->buf): gnil;
   delete_buffer(b); return x;
+}
+
+GEN
+gp_read_file(char *s)
+{
+  GEN x = gnil;
+  switchin(s);
+  if (file_is_binary(infile))
+    x = readbin(s,infile);
+  else {
+    Buffer *b = new_buffer();
+    x = gnil;
+    for (;;) {
+      if (!gp_read_stream_buf(infile, b)) break;
+      if (*(b->buf)) x = readseq(b->buf);
+    }
+    delete_buffer(b);
+  }
+  popinfile(); return x;
 }
 
 /* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */

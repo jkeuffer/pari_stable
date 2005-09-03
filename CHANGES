@@ -156,7 +156,7 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
    19- allow ellinit over any ring (support only basic operations)
    20- allow ellchangecurve on e = [a1,a2,a3,a4,a6].
    21- typecast cleanup: move most of paricast.h to pariold.h
-   22- rename readGEN -> gp_read_file, freadseq -> gp_read_str.
+   22- rename readGEN -> gp_read_stream, freadseq -> gp_read_str.
        freadexpr/readexpr are deprecated, use gp_read_str/readseq
    23- make sure GP_DATA is always defined --> default() becomes available
        in libpari
@@ -183,6 +183,7 @@ BA 10- support for ellinit("<curve name>") through elldata.
    11- new functions vec_ei / col_ei
 BA 12- new function  FpC_Fp_mul, FpV_FpC_mul
 BA 13- new functions const_col, const_vec, vec_is1to1, vec_isconst
+   14- new function gp_read_file
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):

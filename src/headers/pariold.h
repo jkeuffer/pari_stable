@@ -242,7 +242,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define flisexpr gp_read_str
 #define flisseq gp_read_str
 #define lisseq readseq
-#define lisGEN gp_read_file
+#define lisGEN gp_read_stream
 #define lisexpr readseq
 #define permute numtoperm
 #define permuteInv permtonum

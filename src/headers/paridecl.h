@@ -922,7 +922,7 @@ void    flusherr(void);
 void    fprintferr(const char* pat, ...);
 void    killallfiles(int check);
 int     killfile(pariFILE *f);
-GEN     gp_read_file(FILE *f);
+GEN     gp_read_stream(FILE *f);
 void    matbrute(GEN g, char format, long dec);
 pariFILE* newfile(FILE *f, char *name, int type);
 void    os_close(long fd);
