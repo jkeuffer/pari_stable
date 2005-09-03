@@ -142,11 +142,8 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
          \over, not plain TeX, which doesn't have \frac ]
        - remove many extra braces { }  [ would prevent line breaks ]
        - insert carriage returns
-   11- [GP handling of print1()] get rid of 'added_newline' hack 
-       - always output \n before an error message 
-       - Now ? print1(xxx)
-             xxx?
-         (the behaviour added_newline was meant to avoid).
+   11- [GP handling of print1()] get rid of 'added_newline' hack, replace by
+       monitoring in pariputc/pariputs.[#243]
    12- do not install libpari.a.xxx [ include files are not versionned either
        and libpari.a is useless without the correct ones, contrary to .so ]
    13- rename gtrans_i -> shallowtrans, concatsp -> shallowconcat.

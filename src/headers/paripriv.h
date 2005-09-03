@@ -347,6 +347,8 @@ void  kill_from_hashlist(entree *ep, long n);
 void  member_err(char *s);
 int   pari_kernel_init(void);
 void  pari_sig_init(void (*f)(int));
+int   pari_last_was_newline(void);
+void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
 void  print_fun_list(char **matches, int nbli);
 void  print_user_fun(entree *ep);

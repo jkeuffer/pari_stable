@@ -337,11 +337,24 @@ initout(int initerr)
   if (initerr) pariErr = &defaultErr;
 }
 
-void
-pariputc(char c) { pariOut->putch(c); }
+static int last_was_newline = 0;
 
 void
-pariputs(const char *s) { pariOut->puts(s); }
+pariputc(char c) {
+  last_was_newline = (c == '\n');
+  pariOut->putch(c);
+}
+
+void
+pariputs(const char *s) {
+  last_was_newline = s[strlen(s)-1] == '\n';
+  pariOut->puts(s);
+}
+
+int
+pari_last_was_newline(void) { return last_was_newline; }
+void
+pari_set_last_newline(int last) { last_was_newline = last; };
 
 void
 pariflush(void) { pariOut->flush(); }
@@ -407,14 +420,14 @@ vpariputs(const char* format, va_list args)
       if (*t == '\003' && t[21] == '\003')
       {
         *t = 0; t[21] = 0; /* remove the bracing chars */
-        pariOut->puts(s); gen_output((GEN)atol(t+1), &T);
+        pariputs(s); gen_output((GEN)atol(t+1), &T);
         t += 22; s = t;
         if (!--nb) break;
       }
       else t++;
     }
   }
-  pariOut->puts(s); free(buf); free(str);
+  pariputs(s); free(buf); free(str);
 }
 
 void
@@ -434,7 +447,8 @@ term_color(int c)
   FILE *o_logfile = logfile;
 
   if (logstyle != logstyle_color) logfile = 0; /* Ugly hack */
-  pariputs(term_get_color(c));
+  /* _not_ pariputs, because of last_was_newline */
+  pariOut->puts(term_get_color(c));
   logfile = o_logfile;
 }
 
@@ -781,6 +795,7 @@ GENtostr0(GEN x, pariout_t *T, void (*do_out)(GEN, pariout_t*))
 {
   PariOUT *tmp = pariOut;
   outString *tmps = OutStr, newStr;
+  int last = pari_last_was_newline();
 
   if (typ(x) == t_STR) return pari_strdup(GSTR(x));
   pariOut = &pariOut2Str;
@@ -789,6 +804,7 @@ GENtostr0(GEN x, pariout_t *T, void (*do_out)(GEN, pariout_t*))
   newStr.string= NULL; OutStr = &newStr;
   do_out(x, T);
   OutStr->string[OutStr->len] = 0;
+  pari_set_last_newline(last);
 
   pariOut = tmp; OutStr = tmps; return newStr.string;
 }

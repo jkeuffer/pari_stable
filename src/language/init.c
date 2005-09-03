@@ -1088,7 +1088,8 @@ err(long numerr, ...)
     }
   }
 
-  pariputc('\n'); /* make sure err msg starts at the beginning of line */
+  if (!pari_last_was_newline())
+    pariputc('\n'); /* make sure err msg starts at the beginning of line */
   pariflush(); pariOut = pariErr;
   pariflush(); term_color(c_ERR);
 
@@ -1182,7 +1183,7 @@ err(long numerr, ...)
 
       case warnfile:
         ch1=va_arg(ap, char*);
-        pariputsf(" %s: %s", ch1, va_arg(ap, char*));
+        pariputsf(" %s: %s\n", ch1, va_arg(ap, char*));
         ret = 1; break;
     }
   }

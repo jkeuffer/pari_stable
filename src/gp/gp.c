@@ -1485,8 +1485,11 @@ gp_main_loop(int ismain)
       TIMERstart(GP_DATA->T);
     }
     avma = top - av;
+    pari_set_last_newline(1);
     z = gpreadseq(b->buf, GP_DATA->flags & STRICTMATCH);
     if (! ismain) continue;
+
+    if (!pari_last_was_newline()) pariputc('\n');
 
     if (GP_DATA->flags & CHRONO)
       pariputs(gp_format_time(ti_REGULAR));
