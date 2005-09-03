@@ -1136,7 +1136,7 @@ gsubst(GEN x, long v, GEN y)
 {
   long tx = typ(x), ty = typ(y), lx = lg(x), ly = lg(y);
   long l, vx, vy, e, ex, ey, i, j, k, jb;
-  pari_sp tetpil, av, limite;
+  pari_sp av, lim;
   GEN t,p1,p2,z;
 
   if (ty==t_MAT)
@@ -1159,14 +1159,11 @@ gsubst(GEN x, long v, GEN y)
     p2=gsubst(gel(x,2),v,y); vy=gvar(p2);
     if (typ(p1)!=t_POL)
       err(talker,"forbidden substitution in a scalar type");
-    if (varncmp(vy, vx) >= 0)
-    {
-      tetpil=avma;
-      return gerepile(av,tetpil,gmodulcp(p2,p1));
-    }
-    lx=lg(p2); tetpil=avma; z=cgetg(lx,t_POL); z[1]=p2[1];
+    if (varncmp(vy, vx) >= 0) return gerepileupto(av, gmodulcp(p2,p1));
+    lx = lg(p2);
+    z = cgetg(lx,t_POL); z[1] = p2[1];
     for (i=2; i<lx; i++) gel(z,i) = gmodulcp(gel(p2,i),p1);
-    return gerepile(av,tetpil, normalizepol_i(z,lx));
+    return gerepileupto(av, normalizepol_i(z,lx));
   }
 
   switch(tx)
@@ -1219,13 +1216,6 @@ gsubst(GEN x, long v, GEN y)
           vy = varn(y);
 	  if (ey < 1) return zeroser(vy, ey*(ex+lx-2));
           if (!signe(x)) return zeroser(vy, ey*ex);
-	  l = (lx-2)*ey+2;
-	  if (ex) { if (l>ly) l = ly; }
-	  else
-	  {
-	    if (gcmp0(y)) l = ey+2;
-	    else if (l>ly) l = ey+ly;
-	  }
 	  if (vy != vx)
 	  {
 	    av = avma; z = zeroser(vy,0);
@@ -1233,15 +1223,28 @@ gsubst(GEN x, long v, GEN y)
 	    if (ex) z = gmul(z, gpowgs(y,ex));
 	    return gerepileupto(av,z);
 	  }
+	  l = (lx-2)*ey+2;
+	  if (ex) { if (l>ly) l = ly; }
+	  else if (lx != 3)
+          {
+            long l2;
+            for (i = 3; i < lx; i++)
+              if (!isexactzero(gel(x,i))) break;
+            l2 = (i-2)*ey + (gcmp0(y)? 2 : ly);
+            if (l > l2) l = l2;
+          }
 
-	  av = avma; limite=stack_lim(av,1);
-          t = cgetg(ly,t_SER);
+	  av = avma; lim=stack_lim(av,1);
+          t = shallowcopy(y);
+          if (l < ly) setlg(t, l);
+          p2 = ex? gpowgs(t, ex): NULL;
           z = scalarser(gel(x,2),varn(y),l-2);
-	  for (i=2; i<ly; i++) t[i] = y[i];
 	  for (i=3,jb=ey; jb<=l-2; i++,jb+=ey)
 	  {
-	    for (j=jb+2; j<l; j++)
-	      gel(z,j) = gadd(gel(z,j), gmul(gel(x,i),gel(t,j-jb)));
+            if (i < lx) {
+              for (j=jb+2; j<min(l, jb+ly); j++)
+                gel(z,j) = gadd(gel(z,j), gmul(gel(x,i),gel(t,j-jb)));
+            }
 	    for (j=l-1-jb-ey; j>1; j--)
 	    {
 	      p1 = gen_0;
@@ -1249,17 +1252,14 @@ gsubst(GEN x, long v, GEN y)
 		p1 = gadd(p1, gmul(gel(t,j-k+2),gel(y,k)));
 	      gel(t,j) = gadd(p1, gmul(gel(t,2),gel(y,j)));
 	    }
-            if (low_stack(limite, stack_lim(av,1)))
+            if (low_stack(lim, stack_lim(av,1)))
 	    {
 	      if(DEBUGMEM>1) err(warnmem,"gsubst");
 	      gerepileall(av,2, &z,&t);
 	    }
 	  }
 	  if (!ex) return gerepilecopy(av,z);
-
-          if (l < ly) { setlg(y,l); p1 = gpowgs(y,ex); setlg(y,ly); }
-          else p1 = gpowgs(y,ex);
-          tetpil=avma; return gerepile(av,tetpil,gmul(z,p1));
+          return gerepileupto(av, gmul(z,p2));
 
         case t_POL: case t_RFRAC:
           if (isexactzero(y)) return scalarser(gel(x,2),v,lx-2);
@@ -1277,8 +1277,7 @@ gsubst(GEN x, long v, GEN y)
 
     case t_RFRAC: av=avma;
       p1=gsubst(gel(x,1),v,y);
-      p2=gsubst(gel(x,2),v,y); tetpil=avma;
-      return gerepile(av,tetpil,gdiv(p1,p2));
+      p2=gsubst(gel(x,2),v,y); return gerepileupto(av, gdiv(p1,p2));
 
     case t_VEC: case t_COL: case t_MAT: z=cgetg(lx,tx);
       for (i=1; i<lx; i++) gel(z,i) = gsubst(gel(x,i),v,y);
