@@ -121,6 +121,7 @@ BA 50- truncate(1/x+O(x)) --> SEGV
 GH 54- zncoppersmith(x,1002,1001) --> SEGV [#221]
    55- subst(1+O(x),x,x^2+O(x^3)) --> SEGV [#287] (patch by MSo)
        subst(1+O(x^2),x, x^2+O(x^3)) --> 1 + O(x^3)  [ should be O(x^4) ]
+   56- component() didn't work on lists [ SEGV ]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

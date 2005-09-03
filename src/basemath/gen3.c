@@ -2414,6 +2414,7 @@ compo(GEN x, long n)
   if (n < 1) err(talker,"nonexistent component");
   if (tx == t_POL && (ulong)n+1 >= lx) return gen_0;
   if (tx == t_SER && !signe(x)) return gen_0;
+  if (tx == t_LIST) lx = (ulong)lgeflist(x);
   l = (ulong)lontyp[tx] + (ulong)n-1; /* beware overflow */
   if (l >= lx) err(talker,"nonexistent component");
   return gcopy(gel(x,l));
