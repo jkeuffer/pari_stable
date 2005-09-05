@@ -1204,9 +1204,8 @@ GEN
 bnrGetSurj(GEN bnr1, GEN bnr2)
 {
   long l, i;
-  GEN gen, M;
+  GEN M, gen = gmael(bnr1, 5, 3);
 
-  gen = gmael(bnr1, 5, 3);
   l = lg(gen); M = cgetg(l, t_MAT);
   for (i = 1; i < l; i++)
     gel(M,i) = isprincipalray(bnr2, gel(gen,i));
