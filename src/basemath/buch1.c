@@ -1558,6 +1558,8 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   if (!PRECREG) lim /= sqrt(3.);
   cp = (ulong)exp(sqrt(LOGD*log(LOGD)/8.0));
   if (cp < 20) cp = 20;
+  if (cbach > 6.) cbach = 6.;
+  if (cbach <= 0.) err(talker,"Bach constant <= 0 in buchquad");
   av = avma; cbach /= 2;
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
