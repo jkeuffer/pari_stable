@@ -2951,7 +2951,10 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   LOGD = log(drc); LOGD2 = LOGD*LOGD;
   lim = (long) (exp(-(double)N) * sqrt(2*PI*N*drc) * pow(4/PI,(double)R2));
   if (lim < 3) lim = 3;
-  if (cbach > 12.) cbach = 12.;
+  if (cbach > 12.) {
+    if (cbach2 < cbach) cbach2 = cbach;
+    cbach = 12.;
+  }
   if (cbach <= 0.) err(talker,"Bach constant <= 0 in buch");
 
   /* resc ~ sqrt(D) w / 2^r1 (2pi)^r2 = hR / Res(zeta_K, s=1) */
