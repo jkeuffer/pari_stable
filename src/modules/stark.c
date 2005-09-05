@@ -1617,14 +1617,11 @@ ppgamma(ST_t *T, long prec)
 }
 
 static GEN
-_cond(GEN dtcr, int quad)
-{
-  return quad? gel(dtcr,7): mkvec2(gel(dtcr,7), gel(dtcr,9));
-}
+_cond(GEN dtcr) { return mkvec2(gel(dtcr,7), gel(dtcr,9)); }
 
 /* sort chars according to conductor */
 static GEN
-sortChars(GEN dataCR, int quad)
+sortChars(GEN dataCR)
 {
   const long cl = lg(dataCR) - 1;
   GEN vCond  = cgetg(cl+1, t_VEC);
@@ -1638,7 +1635,7 @@ sortChars(GEN dataCR, int quad)
   ncond = 0;
   for (j = 1; j <= cl; j++)
   {
-    GEN cond = _cond(gel(dataCR,j), quad);
+    GEN cond = _cond(gel(dataCR,j));
     for (k = 1; k <= ncond; k++)
       if (gequal(cond, gel(vCond,k))) break;
     if (k > ncond) gel(vCond,++ncond) = cond;
@@ -2424,7 +2421,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 
 LABDOUB:
   av = avma;
-  vChar = sortChars(dataCR, N==2);
+  vChar = sortChars(dataCR);
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
   if (DEBUGLEVEL) msgtimer("Compute W");
   Lp = cgetg(cl + 1, t_VEC);
@@ -2841,7 +2838,7 @@ bnrL1(GEN bnr, GEN subgp, long flag, long prec)
   /* compute the data for these characters */
   dataCR = InitChar(bnr, listCR, prec);
 
-  vChar = sortChars(dataCR, N==2);
+  vChar = sortChars(dataCR);
   GetST(&S, &T, dataCR, vChar, prec);
   W = ComputeAllArtinNumbers(dataCR, vChar, 1, prec);
 
