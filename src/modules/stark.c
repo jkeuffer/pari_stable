@@ -184,12 +184,24 @@ ComputeLift(GEN dataC)
   return gerepileupto(av, elt);
 }
 
+/* Return c[1],  [c[1]/c[1] = 1,...,c[n]/c[1]] */
 static GEN
-get_chic(GEN chi, GEN cyc)
+init_get_chic(GEN c)
+{
+  long i, l = lg(c); /* > 1 */
+  GEN D = cgetg(l, t_VEC), C = gel(c,1);
+  gel(D,1) = gen_1;
+  for (i = 2; i < l; i++) gel(D,i) = diviiexact(C, gel(c,i));
+  return mkvec2(C, D);
+}
+
+static GEN
+get_chic(GEN chi, GEN D)
 {
   long i, l = lg(chi);
   GEN chic = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++) gel(chic,i) = gdiv(gel(chi,i), gel(cyc,i));
+  gel(chic,1) = gel(chi,1);
+  for (i = 2; i < l; i++) gel(chic,i) = mulii(gel(chi,i), gel(D,i));
   return chic;
 }
 
@@ -198,62 +210,59 @@ get_chic(GEN chi, GEN cyc)
      a_i= log(id) on the generators of bnr
      z  = exp(2i * Pi / d) */
 static GEN
-get_Char(GEN chic, long prec)
+get_Char(GEN chi, GEN initc, GEN U, long prec)
 {
-  GEN d, C;
-  C = cgetg(4, t_VEC);
-  gel(C,1) = Q_remove_denom(chic, &d); if (!d) d = gen_1;
-  gel(C,2) = InitRU(d, prec);
-  gel(C,3) = d; return C;
+  GEN d, ch = cgetg(4, t_VEC), chic = get_chic(chi, gel(initc,2));
+  if (U) chic = gmul(chic, U);
+  chic = primitive_part(chic, &d);
+  if (d) {
+    GEN t = gdiv(gel(initc,1), d);
+    d = denom(t);
+    if (!is_pm1(d)) chic = gmul(d, chic);
+    d = numer(t);
+  } else
+    d = gel(initc,1);
+
+  gel(ch,1) = chic;
+  gel(ch,2) = InitRU(d, prec);
+  gel(ch,3) = d; return ch;
 }
 
 /* prime divisors of conductor */
 static GEN
 divcond(GEN bnr) { GEN bid = gel(bnr,2); return gmael(bid,3,1); }
 
-/* Let chi a character defined over bnr and primitive over bnrc,
-   compute the corresponding primitive character and the vectors of
-   prime ideals dividing bnr but not bnrc. Returns NULL if bnr = bnrc */
+/* vector of prime ideals dividing bnr but not bnrc */
+static GEN
+get_prdiff(GEN bnr, GEN condc)
+{
+  GEN prdiff, M = gel(condc,1), D = divcond(bnr), nf = gmael(bnr, 1, 7);
+  long nd, i, l  = lg(D);
+  prdiff = cgetg(l, t_COL);
+  for (nd=1, i=1; i < l; i++)
+    if (!idealval(nf, M, gel(D,i))) prdiff[nd++] = D[i];
+  setlg(prdiff, nd); return prdiff;
+}
+
+/* Let chi a character defined over bnr and primitive over bnrc, compute the
+ * corresponding primitive character. Returns NULL if bnr = bnrc */
 static GEN
 GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
-  long nbg, i, j, l, nd;
+  long lM, l;
   pari_sp av = avma;
-  GEN s, chic, cyc, U, M, cond, condc, p1, nf;
-  GEN prdiff, Mrc;
+  GEN U, M, cond, condc, initc, Mrc;
 
   cond  = gmael(bnr,  2, 1);
   condc = gmael(bnrc, 2, 1); if (gequal(cond, condc)) return NULL;
 
-  cyc   = gmael(bnr, 5, 2); nbg = lg(cyc)-1;
+  initc = init_get_chic(gmael(bnr, 5, 2));
   Mrc   = diagonal_i(gmael(bnrc, 5, 2));
-  nf    = gmael(bnr, 1, 7);
-
   M = bnrGetSurj(bnr, bnrc);
   (void)hnfall_i(shallowconcat(M, Mrc), &U, 1);
-  l = lg(gel(M,1));
-  chic = cgetg(l, t_VEC);
-  for (i = 1; i < l; i++)
-  {
-    GEN u = gel(U,i + nbg);
-    s  = gen_0;
-    for (j = 1; j <= nbg; j++)
-      s  = gadd(s, gdiv(mulii(gel(u,j), gel(chi,j)), gel(cyc,j)));
-    gel(chic,i) = s;
-  }
-
-  condc = gel(condc,1);
-  p1 = divcond(bnr); l  = lg(p1);
-  prdiff = cgetg(l, t_COL);
-  for (nd=1, i=1; i < l; i++)
-    if (!idealval(nf, condc, gel(p1,i))) prdiff[nd++] = p1[i];
-  setlg(prdiff, nd);
-
-  p1  = cgetg(3, t_VEC);
-  gel(p1,1) = get_Char(chic,prec);
-  gel(p1,2) = prdiff;
-
-  return gerepilecopy(av,p1);
+  lM = lg(M); l = lg(Mrc)-1;
+  U = rowslice(vecslice(U, lM, l+lM-1), 1, l);
+  return gerepilecopy(av, get_Char(chi, initc, U, prec));
 }
 
 static GEN
@@ -262,8 +271,7 @@ GetDeg(GEN dataCR)
   long i, l = lg(dataCR);
   GEN degs = cgetg(l, t_VECSMALL);
 
-  for (i = 1; i < l; i++)
-    degs[i] = itos(phi(gmael3(dataCR, i, 5, 3)));
+  for (i = 1; i < l; i++) degs[i] = itou(phi(gmael3(dataCR, i, 5, 3)));
   return degs;
 }
 
@@ -807,14 +815,14 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 
   if (flag)
   {
-    GEN cyc  = gmael(bnr, 5, 2);
+    GEN initc = init_get_chic(gmael(bnr, 5, 2));
     bnrc = bnr;
-    CHI = get_Char(get_chic(chi,cyc), prec);
+    CHI = get_Char(chi, initc, NULL, prec);
   }
   else
   {
     bnrc = buchrayinitgen(gel(bnr,1), condc);
-    CHI = (GEN)GetPrimChar(chi, bnr, bnrc, prec)[1];
+    CHI = GetPrimChar(chi, bnr, bnrc, prec);
   }
   return gerepilecopy(av, SingleArtinNumber(bnrc, CHI, prec));
 }
@@ -908,7 +916,7 @@ static GEN
 InitChar(GEN bnr, GEN listCR, long prec)
 {
   GEN bnf = checkbnf(bnr), nf = checknf(bnf);
-  GEN modul, dk, C, dataCR, chi, cond, Mr, z1, p1;
+  GEN modul, dk, C, dataCR, chi, cond, Mr, initc;
   long N, r1, r2, prec2, i, j, l;
   pari_sp av = avma;
 
@@ -919,10 +927,9 @@ InitChar(GEN bnr, GEN listCR, long prec)
   nf_get_sign(nf, &r1,&r2);
   prec2 = ((prec-2) << 1) + EXTRA_PREC;
   C     = gmul2n(sqrtr_abs(divir(dk, gpowgs(mppi(prec2),N))), -r2);
+  initc = init_get_chic(Mr);
 
   disable_dbg(0);
-
-  z1 = _data9(gel(modul,2),r1,r2);
 
   l = lg(listCR); dataCR = cgetg(l, t_VEC);
   for (i = 1; i < l; i++)
@@ -933,51 +940,39 @@ InitChar(GEN bnr, GEN listCR, long prec)
     chi  = gmael(listCR, i, 1);
     cond = gmael(listCR, i, 2);
 
-    /* do we already know about the invariants of chi? */
+    /* do we already know the invariants of chi? */
     olddata = NULL;
     for (j = 1; j < i; j++)
       if (gequal(cond, gmael(listCR,j,2))) { olddata = gel(dataCR,j); break; }
 
-    /* if cond(chi) = cond(bnr) */
-    if (!olddata && gequal(cond, modul))
-    {
-      gel(data,2) = gmul(C, gsqrt(det(gel(cond,1)), prec2));
-      gel(data,3) = bnr;
-      gel(data,6) = cgetg(1, t_VEC);
-      data[7] = modul[1];
-      gel(data,9) = z1;
-
-      olddata = data;
-    }
-
     gel(data,1) = chi; /* the character */
+    gel(data,4) = bnr; /* bnr(m) */
+    gel(data,5) = get_Char(chi,initc,NULL,prec); /* associated to bnr(m) */
+    gel(data,7) = gel(cond,1);
     if (!olddata)
     {
       gel(data,2) = gmul(C, gsqrt(det(gel(cond,1)), prec2));
-      gel(data,3) = buchrayinitgen(bnf, cond);
+      gel(data,3) = gequal(cond,modul)? bnr: buchrayinitgen(bnf, cond);
+      gel(data,9) = _data9(gel(cond,2),r1,r2);
     }
     else
     {
-      data[2] = olddata[2]; /* constant C(chi) */
-      data[3] = olddata[3]; /* bnr(cond(chi)) */
+      gel(data,2) = gel(olddata,2); /* constant C(chi) */
+      gel(data,3) = gel(olddata,3); /* bnr(cond(chi)) */
+      gel(data,9) = gel(olddata,9);
     }
-    gel(data,4) = bnr; /* bnr(m) */
-    gel(data,5) = get_Char(get_chic(chi,Mr),prec); /* associated to bnr(m) */
 
-    /* compute diff(chi) and the corresponding primitive character */
-    data[7] = cond[1];
-    p1 = GetPrimChar(chi, bnr, gel(data,3), prec2);
-    if (p1)
+    chi = GetPrimChar(chi, bnr, gel(data,3), prec2);
+    if (chi)
     {
-      data[6] = p1[2];
-      data[8] = p1[1];
+      gel(data,6) = get_prdiff(bnr, cond);
+      gel(data,8) = chi;
     }
     else
     {
       gel(data,6) = cgetg(1, t_VEC);
-      data[8] = data[5];
+      gel(data,8) = gel(data,5);
     }
-    data[9] = olddata? olddata[9]: (long)_data9(gel(cond,2),r1,r2);
   }
 
   disable_dbg(-1);
@@ -2411,6 +2406,7 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
   N     = degpol(nf[1]);
   cond1 = gmael4(data, 1, 2, 1, 2);
   dataCR = gel(data,5);
+  vChar = sortChars(dataCR);
 
   v = 1;
   while (gcmp1(gel(cond1,v))) v++;
@@ -2421,7 +2417,6 @@ AllStark(GEN data,  GEN nf,  long flag,  long newprec)
 
 LABDOUB:
   av = avma;
-  vChar = sortChars(dataCR);
   W = ComputeAllArtinNumbers(dataCR, vChar, (flag >= 0), newprec);
   if (DEBUGLEVEL) msgtimer("Compute W");
   Lp = cgetg(cl + 1, t_VEC);
