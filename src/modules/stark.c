@@ -248,7 +248,7 @@ get_prdiff(GEN bnr, GEN condc)
 static GEN
 GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
 {
-  long lM, l;
+  long l;
   pari_sp av = avma;
   GEN U, M, cond, condc, initc, Mrc;
 
@@ -259,8 +259,8 @@ GetPrimChar(GEN chi, GEN bnr, GEN bnrc, long prec)
   Mrc   = diagonal_i(gmael(bnrc, 5, 2));
   M = bnrGetSurj(bnr, bnrc);
   (void)hnfall_i(shallowconcat(M, Mrc), &U, 1);
-  lM = lg(M); l = lg(Mrc)-1;
-  U = rowslice(vecslice(U, lM, l+lM-1), 1, l);
+  l = lg(M);
+  U = rowslice(vecslice(U, l, lg(U)-1), 1, l-1);
   return gerepilecopy(av, get_Char(chi, initc, U, prec));
 }
 
