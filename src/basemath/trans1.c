@@ -617,7 +617,7 @@ powgi(GEN x, GEN n)
   GEN y;
 
   if (!is_bigint(n)) return gpowgs(x, itos(n));
-  /* overflow for non-modular types */
+  /* probable overflow for non-modular types (typical exception: (X^0)^N) */
   switch(typ(x))
   {
     case t_INTMOD:
@@ -635,7 +635,6 @@ powgi(GEN x, GEN n)
       if (signe(x[1])) err(errlg);
       if (signe(n) < 0) err(gdiver);
       return gen_0;
-    case t_POL: err(errlg);
 
     case t_QFR: return qfr_pow(x,n);
     default: {

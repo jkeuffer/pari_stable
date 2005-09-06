@@ -124,6 +124,7 @@ GH 54- zncoppersmith(x,1002,1001) --> SEGV [#221]
    56- component() didn't work on lists [ SEGV ]
    57- quadclassunit(D,, [c0 > 6]) --> weird error message
    58- weird errors in bnrstark [#285]
+   59- (x^0)^2^31 --> length overflow
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
