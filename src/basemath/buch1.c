@@ -1009,7 +1009,7 @@ subFBquad(GEN D, double PROD, long KC)
   pari_sp av;
   GEN no;
 
-  minSFB = (expi(D) > 10)? 3: 2;
+  minSFB = (expi(D) > 20)? 3: 2;
   vperm = cgetg(lv, t_VECSMALL);
   av = avma;
   no    = cgetg(lv, t_VECSMALL);
@@ -1178,23 +1178,17 @@ imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
 {
   long lgsub = lg(subFB), current = *pc, nbtest = 0, s = 0;
   long i, fpc;
-  int extra = (current != 0);
   pari_sp av;
   GEN col, form, ex = cgetg(lgsub, t_VECSMALL);
 
-  if (!current) current = lgsub-1;
+  if (!current) current = 1;
   av = avma;
   for(;;)
   {
-    long s0 = s;
     if (s >= need) break;
-    if (!extra && s >= lim) {
-      extra = 1;
-      if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
-    }
     avma = av;
     form = qfi_random(ex);
-    if (!extra) form = compimag(form, qfi_pf(Disc, FB[current]));
+    form = compimag(form, qfi_pf(Disc, FB[current]));
     nbtest++; fpc = factorquad(form,KC,LIMC);
     if (!fpc)
     {
@@ -1203,7 +1197,7 @@ imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
     }
     if (fpc > 1)
     {
-      long *fpd = largeprime(fpc,ex,extra? 0: current,0);
+      long *fpd = largeprime(fpc,ex,current,0);
       ulong b1, b2, p;
       GEN form2;
       if (!fpd)
@@ -1238,14 +1232,8 @@ imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
       for (i=1; i<lgsub; i++) col[subFB[i]] = -ex[i];
       add_fact(col, form);
     }
-    if (!extra) {
-      col[current]--;
-      if (fpc == 1 && !col[current])
-      {
-        s--; for (i=1; i<=KC; i++) col[i]=0;
-      }
-      if (s0 != s && ++current > KC) current = 1; /* _not_ lgsub */
-    }
+    col[current]--;
+    if (++current > KC) current = 1;
   }
   if (DEBUGLEVEL) dbg_all("random", s, nbtest);
   *pc = current;
@@ -1278,25 +1266,24 @@ real_relations(long need, long *pc, long lim, ulong LIMC, GEN mat, GEN C)
 {
   long lgsub = lg(subFB), current = *pc, nbtest = 0, s = 0;
   long i, fpc, endcycle, rhoacc, rho;
-  int extra = (current != 0);
+  /* in a 2nd phase, don't include FB[current] but run along the cyle 
+   * ==> get more units */
+  int first = (current == 0);
   pari_sp av, av1, limstack;
   GEN d, col, form, form0, form1, ex = cgetg(lgsub, t_VECSMALL);
 
-  if (!current) current = lgsub-1;
+  if (!current) current = 1;
   if (lim > need) lim = need;
   av = avma; limstack = stack_lim(av,1);
   for(;;)
   {
-    long s0 = s;
     if (s >= need) break;
-    if (!extra && s >= lim) {
-      extra = 1;
+    if (first && s >= lim) {
+      first = 0;
       if (DEBUGLEVEL) dbg_all("initial", s, nbtest);
     }
     avma = av; form = qfr3_random(ex);
-    if (!extra) {
-      form = QFR3_comp(form, qfr3_pf(Disc, FB[current]));
-    }
+    if (!first) form = QFR3_comp(form, qfr3_pf(Disc, FB[current]));
     av1 = avma;
     form0 = form; form1 = NULL;
     endcycle = rhoacc = 0;
@@ -1314,7 +1301,7 @@ CYCLE:
     {
       form = qfr3_rho(form, Disc, isqrtD); rho++;
       rhoacc++;
-      if (extra)
+      if (first)
         endcycle = (absi_equal(gel(form,1),gel(form0,1))
              && equalii(gel(form,2),gel(form0,2)));
       else
@@ -1339,7 +1326,7 @@ CYCLE:
     }
     if (fpc > 1)
     { /* look for Large Prime relation */
-      long *fpd = largeprime(fpc,ex,extra? 0: current,rhoacc);
+      long *fpd = largeprime(fpc,ex,first? 0: current,rhoacc);
       ulong b1, b2, p;
       GEN form2;
       if (!fpd)
@@ -1350,7 +1337,7 @@ CYCLE:
       if (!form1)
       {
         form1 = qfr5_factorback(ex);
-        if (!extra) form1 = QFR5_comp(form1, qfr5_pf(Disc, FB[current]));
+        if (!first) form1 = QFR5_comp(form1, qfr5_pf(Disc, FB[current]));
       }
       form1 = qrf5_rho_pow(form1, rho);
       rho = 0;
@@ -1394,7 +1381,7 @@ CYCLE:
       if (!form1)
       {
         form1 = qfr5_factorback(ex);
-        if (!extra) form1 = QFR5_comp(form1, qfr5_pf(Disc, FB[current]));
+        if (!first) form1 = QFR5_comp(form1, qfr5_pf(Disc, FB[current]));
       }
       form1 = qrf5_rho_pow(form1,rho);
       rho = 0;
@@ -1406,7 +1393,7 @@ CYCLE:
       if (DEBUGLEVEL) fprintferr(" %ld",s);
     }
     affrr(d, gel(C,s));
-    if (extra)
+    if (first)
     {
       if (s >= lim) continue;
       goto CYCLE;
@@ -1414,11 +1401,7 @@ CYCLE:
     else
     {
       col[current]--;
-      if (fpc == 1 && !col[current])
-      {
-        s--; for (i=1; i<=KC; i++) col[i]=0;
-      }
-      if (s0 != s && ++current > KC) current = 1; /* _not_ lgsub */
+      if (++current > KC) current = 1;
     }
   }
   if (DEBUGLEVEL) dbg_all("random", s, nbtest);
@@ -1595,7 +1578,7 @@ START: avma = av; cbach = check_bach(cbach,6.);
 
 MORE:
   need += 2;
-  mat    = cgetg(need+1, t_VEC);
+  mat    = cgetg(need+1, t_MAT);
   extraC = cgetg(need+1, t_VEC);
   if (!W) { /* first time */
     C = extraC;
