@@ -2771,19 +2771,21 @@ roots2(GEN pol,long PREC)
     return gerepilecopy(av,p2);
   }
   EPS = 12 - bit_accuracy(PREC); /* 2^EPS is "zero" */
-  flagrealpol=1; flagexactpol=1;
+  flagrealpol = flagexactpol = 1;
   for (i=2; i<=N+2; i++)
   {
-    ti=typ(pol[i]);
-    if (ti!=t_INT && ti!=t_INTMOD && ti!=t_FRAC)
-    {
-      flagexactpol=0;
-      if (ti!=t_REAL) flagrealpol=0;
-    }
-    if (ti==t_QUAD)
-    {
-      p1=gmael3(pol,i,1,2);
-      flagrealpol = (gsigne(p1)>0)? 0 : 1;
+    c = gel(pol,i);
+    switch (typ(c)) {
+      case t_INT: case t_FRAC: break;
+
+      case t_REAL: flagexactpol = 0; break;
+
+      case t_COMPLEX: flagexactpol = flagrealpol = 0; break;
+
+      case t_QUAD: flagexactpol = 0;
+        if (gsigne(gmael(c,1,2)) > 0) flagrealpol = 0;
+        break;
+      default: err(typeer, "roots2");
     }
   }
   rr=cgetg(N+1,t_COL);
@@ -2792,7 +2794,7 @@ roots2(GEN pol,long PREC)
     p1 = cgetc(PREC); gel(rr,i) = p1;
     for (j=3; j<PREC; j++) mael(p1,2,j) = mael(p1,1,j) = 0;
   }
-  if (flagexactpol) factors = ZX_squff(pol, &ex);
+  if (flagexactpol) { pol = Q_primpart(pol); factors = ZX_squff(pol, &ex); }
   else
   {
     factors = mkcol(pol);
