@@ -1009,7 +1009,7 @@ subFBquad(GEN D, double PROD, long KC)
   pari_sp av;
   GEN no;
 
-  minSFB = (expi(D) > 20)? 3: 2;
+  minSFB = (expi(D) > 15)? 3: 2;
   vperm = cgetg(lv, t_VECSMALL);
   av = avma;
   no    = cgetg(lv, t_VECSMALL);
@@ -1172,7 +1172,6 @@ dbg_rel(long s, GEN col)
 }
 /* Imaginary Quadratic fields */
 
-/* Strategy 1 until lim relation found, then Strategy 2 until LIM. */
 static void
 imag_relations(long need, long *pc, long lim, ulong LIMC, GEN mat)
 {
