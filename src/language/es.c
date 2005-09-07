@@ -136,6 +136,11 @@ filtre0(filtre_t *F)
         F->more_input = 2;
         F->wait_for_brace = 1;
         break;
+
+      case RBRACE:
+        if (!F->wait_for_brace) err(talker,"unexpected closing brace");
+        F->more_input = 0; t--;
+        break;
     }
   }
 
@@ -144,7 +149,6 @@ filtre0(filtre_t *F)
     c = t[-1]; /* = last input char */
     if (c == '=')                 F->more_input = 2;
     else if (! F->wait_for_brace) F->more_input = 0;
-    else if (c == RBRACE)       { F->more_input = 0; t--; }
   }
 
 END:
