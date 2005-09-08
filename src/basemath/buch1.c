@@ -1576,6 +1576,13 @@ START: avma = av; cbach = check_bach(cbach,6.);
   av2 = avma;
 
 MORE:
+  if ((nreldep & 3) == 1 || (nrelsup & 7) == 1) {
+    if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
+    gunclone(subFB);
+    gunclone(powsubFB);
+    subFB = gclone(vecslice(vperm, 1, nsubFB));
+    powsubFB = powsubFBquad(CBUCH+1);
+  }
   need += 2;
   mat    = cgetg(need+1, t_MAT);
   extraC = cgetg(need+1, t_VEC);
@@ -1610,13 +1617,6 @@ MORE:
   if (need)
   {
     if (++nreldep > 15 && cbach < 1) goto START;
-    if ((nreldep & 3) == 1) {
-      if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
-      gunclone(subFB);
-      gunclone(powsubFB);
-      subFB = gclone(vecslice(vperm, 1, nsubFB));
-      powsubFB = powsubFBquad(CBUCH+1);
-    }
     goto MORE;
   }
 
