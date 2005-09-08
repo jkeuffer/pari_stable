@@ -1750,8 +1750,12 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
   int delta, i, j, row, d, l, dim, t, bnd = 10;
   pari_sp av = avma;
 
-  if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "Coppersmith");
-  if (typ(X) != t_INT) X = gfloor(X);
+  if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "zncoppersmith");
+  if (typ(X) != t_INT) {
+    X = gfloor(X);
+    if (typ(X) != t_INT) err(typeer, "zncoppersmith");
+  }
+  if (signe(X) < 0) err(talker, "negative bound in zncoppersmith");
   if (!B) B = N;
   if (typ(B) != t_INT) B = gceil(B);
 
