@@ -2439,7 +2439,7 @@ $s$ such that $s^2 = x+r$, with $0 \leq r \leq 2s$.
 
 \subsecidx{zncoppersmith}$(P, N, X, \{B=N\})$: finds all integers $x_0$ with
 $|x0| \leq X$ such that
-$$\gcd(N, P(x_0)) > B.$$
+$$\gcd(N, P(x_0)) \geq B.$$
 $X$ must be smaller than $\exp(\log^2 B / (\deg(P) \log N))$.
 
 \syn{zncoppersmith}{P, N, X, B}, where an omitted $B$ is coded as \kbd{NULL}.
