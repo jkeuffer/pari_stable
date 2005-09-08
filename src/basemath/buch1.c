@@ -1609,7 +1609,7 @@ MORE:
   need = lg(dep)>1? lg(dep[1])-1: lg(B[1])-1;
   if (need)
   {
-    if (++nreldep > 15 && cbach < 0.4) goto START;
+    if (++nreldep > 15 && cbach < 1) goto START;
     if ((nreldep & 3) == 1) {
       if (DEBUGLEVEL) fprintferr("*** Changing sub factor base\n");
       gunclone(subFB);
