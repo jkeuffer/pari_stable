@@ -3518,7 +3518,7 @@ mpqs_solve_linear_system(mpqs_handle_t *h, long rel)
          * smaller than the original N, and should be easy to deal with later */
         av3 = avma;
         D1 = gcdii(X_plus_Y, gel(res,j));
-	if (is_pm1(D1) || egalii(D1, gel(res,j))) { avma = av3; continue; }
+	if (is_pm1(D1) || equalii(D1, gel(res,j))) { avma = av3; continue; }
 	/* got one which splits this factor */
 	if (DEBUGLEVEL >= 5)
 	  fprintferr("MPQS: resplitting a factor after %ld kernel vectors\n",
