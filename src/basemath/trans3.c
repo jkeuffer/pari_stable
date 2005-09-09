@@ -1495,7 +1495,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   }
   Dx = FpXQX_mul(Dx, Cx, cyc, q); /* va[1] = 1 */
   Bx = gerepileupto(av, FpXQX_mul(Dx, Bx, cyc, q));  
-  rep = gzero;
+  rep = gen_0;
   av2 = avma; lim = stack_lim(av2, 1);
   for (k = 1; k <= N; k++)
   {
