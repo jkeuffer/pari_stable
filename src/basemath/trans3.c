@@ -1424,21 +1424,16 @@ END:
   gaffect(y,res); avma = av; return res;
 }
 
-/* compute phi^(m)_s(x); s must be an integer */
-GEN
-phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
+/* return P mod x^n where P is polynomial in x */
+static GEN
+pol_mod_xn(GEN P, long n)
 {
-  long xp = x % p;
-  GEN p1, p2;
-
-  if (!xp) return gen_0;
-  if (vz)
-    p1 =gel(vz,xp); /* vz[x] = Teichmuller(x) */
-  else 
-    p1 = (x & 2)? gen_m1: gen_1;
-  p1 = Fp_pow(p1, addis(s, m), q);
-  p2 = Fp_pow(stoi(x), negi(s), q);
-  return modii(mulii(p1,p2), q);
+  long j;
+  GEN R = cgetg(n+2, t_POL);
+  R[1] = evalvarn(0);
+  for (j = 0; j < n; j++)
+    R[j+2] = (long)polcoeff0(P, j, 0);
+  return normalizepol_i(R, n+2);
 }
 
 /* compute the values of the twisted partial
@@ -1446,66 +1441,71 @@ phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
 GEN
 twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
 {
-  long j, k, lva = lg(va)-1, a, N = lg(cff)-1;
-  pari_sp av, lim;
-  GEN x = polx[0], y = polx[fetch_user_var("y")], eta, _1, mon, den;
-  GEN cyc, psm, invden, rep, ser;
+  long j, k, lva = lg(va)-1, N = lg(cff)-1;
+  pari_sp av, av2, lim;
+  GEN Ax, Cx, Bx, Dx, x = polx[0], y = polx[fetch_user_var("y")], eta;
+  GEN cyc, psm, rep;
 
   cyc = gdiv(gsubgs(gpowgs(y, c), 1), gsubgs(y, 1));
   psm = polsym(cyc, degpol(cyc) - 1);
   eta = gmodulcp(y, cyc);
-  _1 = gmodulsg(1, q); /* Mod(1, q); */
-  mon = gaddsg(1, x);
-  den = gsubsg(1, gmul(gpowgs(gmul(_1,eta), f), gpowgs(gmul(_1,mon), f)));
-  den = gadd(den, zeroser(0, N+1));
-  av = avma; lim = stack_lim(av, 1);
-  invden = ginv(den);
-  rep = zerovec(lva);
-  /* a = 1 is always the first element of va */
-  ser = gmul(gmul(eta, mon), invden);
-  ser = lift_intern(lift_intern(ser)); /* t_SER of ZY */
-  /* ser is a unit, convert to POL */
-  ser[0] = evaltyp(t_POL)| evallg(lg(ser));
-  ser[1] = evalsigne(1)| evalvarn(0);
-  a = 1;
-  for (j = 1; j <= lva; j++)
+  av = avma;
+  Ax  = gsubgs(gpowgs(gaddgs(x, 1), f), 1);
+  Ax  = gdiv(gmul(Ax, gpowgs(eta, f)), gsubsg(1, gpowgs(eta, f)));
+  Ax  = gerepileupto(av, RgX_to_FqX(Ax, cyc, q));
+  Cx  = Ax;
+  Bx  = gen_1;
+  av  = avma; lim = stack_lim(av, 1);
+  for (j = 2; j <= N; j++) 
   {
-    GEN p1 = gen_0;
-    if (DEBUGLEVEL > 2 && !(j%50))
-      fprintferr("  twistpartialzeta: %ld%%\n", 100*j/lva);      
-    for (k = 1; k <= N; k++)
-    {
-      pari_sp av2 = avma;
-      GEN p2 = quicktrace(polcoeff_i(ser,k,0), psm);
-      p1 = gerepileupto(av2, addii(p1, mulii(gel(cff,k), p2)));
-    }
-    gel(rep,j) = modii(p1, q);
-    if (j < lva)
-    {
-      long e = va[j+1] - a, i;
-      GEN z = eta;
-      for (i = 1; i <= e; i++) /* assume e small */
-      {
-        ser = addmulXn(ser, ser, 1); /* ser *= 1+x */
-        setlg(ser, lg(ser)-1); /* truncate highest degree term */
-      }
-      if (e > 1) z = gpowgs(z, e);
-      z = lift_intern(z);
-      if (!degpol(z)) {
-        z = gel(z,2); /* +/- 1 */
-        if (signe(z) < 0) ser = gneg(ser);
-        ser = FpXX_red(ser, q);
-      } else {
-        ser = gmul(z, ser);
-        for (i=2; i<lg(ser); i++)
-          gel(ser,i) = FpX_rem(gel(ser,i), cyc, q);
-      }
-      a = va[j+1];
-    }
+    Bx = gadd(Bx, Cx);
+    Bx = FpXQX_red(Bx, cyc, q);
+    Cx = FpXQX_mul(Cx, Ax, cyc, q);
+    Cx = pol_mod_xn(Cx, N);
+    if (gcmp0(Cx)) break; 
     if (low_stack(lim, stack_lim(av, 1)))
     {
-      if(DEBUGMEM>1) err(warnmem, "twistpartialzeta, j = %ld/%ld", j,lva);
-      gerepileall(av, 2, &rep, &ser);
+      if(DEBUGMEM>1) err(warnmem, "twistpartialzeta (1), j = %ld/%ld", j, N);
+      gerepileall(av, 2, &Cx, &Bx);
+    }
+  }
+  Bx  = lift(gmul(ginv(gsubsg(1, gpowgs(eta, f))), Bx));
+  Bx  = gerepileupto(av, RgX_to_FqX(Bx, cyc, q));
+  Cx = lift(gmul(eta, gaddsg(1, x)));
+  Dx = gaddsg(1, gmul(gen_0, x)); /* need a polynomial */
+  av2 = avma; lim = stack_lim(av2, 1);
+  for (j = lva; j > 1; j--)
+  {  
+    GEN Ex;
+    long e = va[j] - va[j-1];
+    if (e == 1)
+      Ex = Cx;
+    else
+      /* e is very small in general and actually very rarely different
+	 to 1, it is always 1 for zetap (so it should be OK not to store 
+	 them or to compute them in a smart way) */ 
+      Ex = gpowgs(Cx, e);
+    Dx = gaddsg(1, FpXQX_mul(Dx, Ex, cyc, q));
+    if (low_stack(lim, stack_lim(av2, 1)))
+    {
+      if(DEBUGMEM>1) 
+	err(warnmem, "twistpartialzeta (2), j = %ld/%ld", lva-j, lva);
+      Dx = gerepileupto(av2, FpXQX_red(Dx, cyc, q));
+    }
+  }
+  Dx = FpXQX_mul(Dx, Cx, cyc, q); /* va[1] = 1 */
+  Bx = gerepileupto(av, FpXQX_mul(Dx, Bx, cyc, q));  
+  rep = gzero;
+  av2 = avma; lim = stack_lim(av2, 1);
+  for (k = 1; k <= N; k++)
+  {
+    GEN p2, ak = polcoeff_i(Bx, k, 0); 
+    p2  = quicktrace(ak, psm);
+    rep = modii(addii(rep, mulii(gel(cff, k), p2)), q);
+    if (low_stack(lim, stack_lim(av2, 1)))
+    {
+      if(DEBUGMEM>1) err(warnmem, "twistpartialzeta (3), j = %ld/%ld", k, N);
+      rep = gerepileupto(av2, rep);
     }
   }
   return rep;
@@ -1517,7 +1517,8 @@ GEN
 init_teich(ulong p, GEN q, long prec)
 {
   GEN vz, gp = utoipos(p);
-  long av = avma, j;
+  pari_sp av = avma;
+  long j;
 
   if (p == 2UL)
     return NULL;
@@ -1537,46 +1538,115 @@ init_teich(ulong p, GEN q, long prec)
   return gerepileupto(av, gcopy(vz));
 }
 
+/* compute phi^(m)_s(x); s must be an integer */
+GEN
+phi_ms(ulong p, GEN q, long m, GEN s, long x, GEN vz)
+{
+  long xp = x % p;
+  GEN p1, p2;
+
+  if (!xp) return gen_0;
+  if (vz)
+    p1 =gel(vz,xp); /* vz[x] = Teichmuller(x) */
+  else 
+    p1 = (x & 2)? gen_m1: gen_1;
+  p1 = Fp_pow(p1, addis(s, m), q);
+  p2 = Fp_pow(stoi(x), negi(s), q);
+  return modii(mulii(p1,p2), q);
+}
+
 /* compute the first N coefficients of the Mahler expansion 
    of phi^m_s skipping the first one (which is zero) */
 GEN
 coeff_of_phi_ms(ulong p, GEN q, long m, GEN s, long N, GEN vz)
 {
-  GEN bn, cff = cgetg(N+1, t_VEC);
-  long k, j, l;
+  GEN qs2 = shifti(q, -1), cff = zerovec(N);
+  pari_sp av, lim;
+  long k, j;
 
-  bn = new_chunk(N+2); /* bn[i] = binom(k, i), i <= k */
-  l = lg(q);
-  for (k = 0; k <= N; k++) { GEN t = cgeti(l); affsi(1, t); gel(bn,k) = t; }
-  for (k = 1; k <= N; k++)
+  av = avma; lim = stack_lim(av, 2);
+  for (k = 1; k <= N; k++) 
   {
-    pari_sp av2 = avma;
-    GEN p1 = gen_0, A = phi_ms(p, q, m, s, k, vz);
-    for (j = k - 1; j > 0; j--)
+    gel(cff, k) = phi_ms(p, q, m, s, k, vz); 
+    if (low_stack(lim, stack_lim(av, 2)))
     {
-      GEN b = addii(gel(bn,j), gel(bn,j-1));
-      if (cmpii(b, q) >= 0) b = subii(b, q);
-      affii(b, gel(bn,j)); /* = binom(k, j+1) */
+      if(DEBUGMEM>1) 
+	err(warnmem, "coeff_of_phi_ms (1), k = %ld/%ld", N-k, N);
+      cff = gerepileupto(av, gcopy(cff));
     }
-    for (j = 1; j < k; j++)
-      p1 = addii(p1, mulii(gel(bn,j), gel(cff,j)));
-    gel(cff,k) = gerepileuptoint(av2, modii(subii(A, p1), q));
   }
-  while(gcmp0(gel(cff,k-1))) k--;
-  setlg(cff, k);
-  if (DEBUGLEVEL > 3) 
+  for (j = N; j > 1; j--)
+  {
+    GEN b = subii(gel(cff, j), gel(cff, j-1));
+    gel(cff, j) = centermodii(b, q, qs2);
+    if (low_stack(lim, stack_lim(av, 2)))
+    {
+      if(DEBUGMEM>1) 
+	err(warnmem, "coeff_of_phi_ms (2), j = %ld/%ld", N-j, N);
+      cff = gerepileupto(av, gcopy(cff));
+    }
+  }
+  for (k = 1; k < N; k++)
+    for (j = N; j > k; j--)
+    {
+      GEN b = subii(gel(cff, j), gel(cff, j-1));
+      gel(cff, j) = centermodii(b, q, qs2);
+      if (low_stack(lim, stack_lim(av, 2)))
+      {
+	if(DEBUGMEM>1) 
+	  err(warnmem, "coeff_of_phi_ms (3), (k,j) = (%ld,%ld)/%ld", 
+	      k, N-j, N);
+	cff = gerepileupto(av, gcopy(cff));
+      }
+    }
+  k = N; while(gcmp0(gel(cff, k))) k--;
+  setlg(cff, k+1);
+  if (DEBUGLEVEL > 2) 
     fprintferr("  coeff_of_phi_ms: %ld coefficients kept out of %ld\n", 
-	       k-1, N);
-  return cff;
+	       k, N);
+  return gerepileupto(av, cff);
+}
+
+static long
+valfact(long N, ulong p)
+{
+  long f = 0;
+  while (N > 1) 
+  {
+    N /= p;
+    f += N;
+  }
+  return f;
+}
+
+static long
+number_of_terms(ulong p, long prec)
+{
+  long N, f;
+
+  N = (p-1)*prec + (p>>1)*(log2(prec)/log2(p));
+  N = p*(N/p);
+  f = valfact(N, p);
+  while (f > prec) 
+  {
+    N = p*(N/p) - 1;
+    f -= u_lval(N+1, p);
+  }
+  while (f < prec) 
+  {
+    N = p*(N/p+1);
+    f += u_lval(N, p);
+  }
+  return N;
 }
 
 static GEN
 zetap(GEN s)
 {
   ulong p;
-  long xp, N, f, c, prec = precp(s);
+  long N, f, c, prec = precp(s);
   pari_sp av = avma;
-  GEN gp, q, vz, is, cff, vtz, val, va, cft;
+  GEN gp, q, vz, is, cff, val, va, cft;
 
   if (valp(s) < 0)
     err(talker, "argument must be a gp-adic integer");
@@ -1584,16 +1654,13 @@ zetap(GEN s)
   gp = gel(s,2); p = itou(gp);
   is = gtrunc(s);  /* make s an integer */
 
-  xp = (long) log2(p); /* the extra precision; FIXME: quite arbitrary */
-  if (DEBUGLEVEL > 2) fprintferr("zetap: extra prec = %ld\n", xp);
-
-  N  = itos(muluu(p,prec)) + xp;     /* FIXME: quite arbitrary */
-  q  = gpowgs(gp, prec + xp);
+  N  = number_of_terms(p, prec);
+  q  = gpowgs(gp, prec);
 
   /* initialize the roots of unity for the computation
      of the Teichmuller character (also the values of f and c) */
   if (DEBUGLEVEL > 1) fprintferr("zetap: computing (p-1)th roots of 1\n");
-  vz = init_teich(p, q, prec + xp);
+  vz = init_teich(p, q, prec);
   if (p == 2UL) {  f = 4; c = 3; } else { f = (long)p; c = 2; }
 
   /* compute the first N coefficients of the Mahler expansion
@@ -1608,17 +1675,17 @@ zetap(GEN s)
      possibility of later adding gp-adic Dirichlet L-functions */
   va = perm_identity(f - 1);
   if (DEBUGLEVEL > 1)
-    fprintferr("zetap: computing twisted partial zeta functions\n");
-  vtz = twistpartialzeta(gp, q, f, c, va, cff);
+    fprintferr("zetap: computing values of twisted partial zeta functions\n");
+  val = twistpartialzeta(gp, q, f, c, va, cff);
 
   /* sum over all a's the coefficients of the twisted
      partial zeta functions and integrate */
   if (DEBUGLEVEL > 1)
-    fprintferr("zetap: summing up and multiplying by correcting factor\n");
+    fprintferr("zetap: multiplying by correcting factor\n");
 
-  /* sum and multiply by the corrective factor */
+  /* multiply by the corrective factor */
   cft = gsubgs(gmulsg(c, phi_ms(p, q, -1, is, c, vz)), 1);
-  val = gdiv(sum(vtz, 1, f-1), cft);
+  val = gdiv(val, cft);
 
   /* adjust the precision and return */
   return gerepileupto(av, cvtop(val, gp, prec));
