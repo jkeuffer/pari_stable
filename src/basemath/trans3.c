@@ -1472,7 +1472,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   Bx  = lift(gmul(ginv(gsubsg(1, gpowgs(eta, f))), Bx));
   Bx  = gerepileupto(av, RgX_to_FqX(Bx, cyc, q));
   Cx = lift(gmul(eta, gaddsg(1, x)));
-  Dx = gaddsg(1, gmul(gen_0, x)); /* need a polynomial */
+  Dx = polun[varn(x)];
   av2 = avma; lim = stack_lim(av2, 1);
   for (j = lva; j > 1; j--)
   {  
