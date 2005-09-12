@@ -59,9 +59,9 @@ CC         = $CC
 CPPFLAGS   = -I. -I$includedir
 LD         = $LD
 LDFLAGS    = $LDFLAGS
-DLLD       = $DLLD
-DLLDFLAGS  = $MYDLLDFLAGS
-EXTRADLLDFLAGS = $EXTRADLLDFLAGS
+DLLD       = $DLLD_modules
+DLLDFLAGS  = $modulesflags
+EXTRADLLDFLAGS = $modulesextraflags
 EXTRALIBS  =
 
 RUNPTH     = $RUNPTH
