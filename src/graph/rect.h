@@ -110,6 +110,20 @@ typedef struct RectObjPS {
   double size;
 } RectObjPS;
 
+struct plot_points { long x, y; };
+
+struct plot_eng {
+  PARI_plot *pl;
+  void (*sc)(void *data, long col);
+  void (*pt)(void *data, long x, long y);
+  void (*ln)(void *data, long x1, long y1, long x2, long y2);
+  void (*bx)(void *data, long x, long y, long w, long h);
+  void (*mp)(void *data, long n, struct plot_points *points);
+  void (*ml)(void *data, long n, struct plot_points *points);
+  void (*st)(void *data, long x, long y, char *s, long l);
+};
+
+
 #define BLACK      1 /* Default */
 #define BLUE       2 /* Axes */
 #define VIOLET     3 /* Odd numbered curves in ploth */
@@ -295,6 +309,8 @@ void  rectstring3(long ne, char *x, long dir);
 void  rectclip(long rect);
 
 void  free_graph(void);
+
+void gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys);
 
 /* architecture-dependent plot file (plotX.c, plognuplot.c...) */
 void  PARI_get_plot(long fatal);

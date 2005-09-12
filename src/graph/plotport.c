@@ -731,7 +731,7 @@ put_string(long win, long x, long y, char *str, long dir)
 void
 rectstring(long ne, char *str)
 {
-    rectstring3(ne,str,RoSTdirLEFT);
+  rectstring3(ne,str,RoSTdirLEFT);
 }
 
 /* Allocate memory, then put string */
@@ -840,35 +840,35 @@ void
 rectcopy(long source, long dest, long xoff, long yoff)
 {
   PariRect *s = check_rect_init(source), *d = check_rect_init(dest);
-  RectObj *p1 = RHead(s);
+  RectObj *R = RHead(s);
   RectObj *tail = RTail(d);
   RectObj *next;
   int i;
 
-  while (p1)
+  while (R)
   {
-    switch(RoType(p1))
+    switch(RoType(R))
     {
       case ROt_PT:
 	next = (RectObj*) gpmalloc(sizeof(RectObj1P));
-	memcpy(next,p1,sizeof(RectObj1P));
+	memcpy(next,R,sizeof(RectObj1P));
 	RoPTx(next) += xoff; RoPTy(next) += yoff;
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_LN: case ROt_BX:
 	next = (RectObj*) gpmalloc(sizeof(RectObj2P));
-	memcpy(next,p1,sizeof(RectObj2P));
+	memcpy(next,R,sizeof(RectObj2P));
 	RoLNx1(next) += xoff; RoLNy1(next) += yoff;
 	RoLNx2(next) += xoff; RoLNy2(next) += yoff;
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_MP: case ROt_ML:
 	next = (RectObj*) gpmalloc(sizeof(RectObjMP));
-	memcpy(next,p1,sizeof(RectObjMP));
+	memcpy(next,R,sizeof(RectObjMP));
 	RoMPxs(next) = (double*) gpmalloc(sizeof(double)*RoMPcnt(next));
 	RoMPys(next) = (double*) gpmalloc(sizeof(double)*RoMPcnt(next));
-	memcpy(RoMPxs(next),RoMPxs(p1),sizeof(double)*RoMPcnt(next));
-	memcpy(RoMPys(next),RoMPys(p1),sizeof(double)*RoMPcnt(next));
+	memcpy(RoMPxs(next),RoMPxs(R),sizeof(double)*RoMPcnt(next));
+	memcpy(RoMPys(next),RoMPys(R),sizeof(double)*RoMPcnt(next));
 	for (i=0; i<RoMPcnt(next); i++)
 	{
 	  RoMPxs(next)[i] += xoff; RoMPys(next)[i] += yoff;
@@ -877,19 +877,19 @@ rectcopy(long source, long dest, long xoff, long yoff)
 	break;
       case ROt_ST:
 	next = (RectObj*) gpmalloc(sizeof(RectObjST));
-	memcpy(next,p1,sizeof(RectObjMP));
-	RoSTs(next) = (char*) gpmalloc(RoSTl(p1)+1);
-	memcpy(RoSTs(next),RoSTs(p1),RoSTl(p1)+1);
+	memcpy(next,R,sizeof(RectObjMP));
+	RoSTs(next) = (char*) gpmalloc(RoSTl(R)+1);
+	memcpy(RoSTs(next),RoSTs(R),RoSTl(R)+1);
 	RoSTx(next) += xoff; RoSTy(next) += yoff;
 	RoNext(tail) = next; tail = next;
 	break;
       case ROt_PTT: case ROt_LNT: case ROt_PTS:
 	next = (RectObj*) gpmalloc(sizeof(RectObjPN));
-	memcpy(next,p1,sizeof(RectObjPN));
+	memcpy(next,R,sizeof(RectObjPN));
 	RoNext(tail) = next; tail = next;
 	break;
     }
-    p1=RoNext(p1);
+    R=RoNext(R);
   }
   RoNext(tail) = NULL; RTail(d) = tail;
 }
@@ -990,7 +990,7 @@ void
 rectclip(long rect)
 {
   PariRect *s = check_rect_init(rect);
-  RectObj *p1 = RHead(s);
+  RectObj *R = RHead(s);
   RectObj **prevp = &RHead(s);
   RectObj *next;
   double xmin = 0;
@@ -998,59 +998,59 @@ rectclip(long rect)
   double ymin = 0;
   double ymax = RYsize(s);
 
-  while (p1) {
+  while (R) {
       int did_clip = 0;
 
-      next = RoNext(p1);
-      switch(RoType(p1)) {
+      next = RoNext(R);
+      switch(RoType(R)) {
       case ROt_PT:
-	  if ( DTOL(RoPTx(p1)) < xmin || DTOL(RoPTx(p1)) > xmax
-	       || DTOL(RoPTy(p1)) < ymin || DTOL(RoPTy(p1)) > ymax) {
+	  if ( DTOL(RoPTx(R)) < xmin || DTOL(RoPTx(R)) > xmax
+	       || DTOL(RoPTy(R)) < ymin || DTOL(RoPTy(R)) > ymax) {
 		 remove:
 	      *prevp = next;
-	      free(p1);
+	      free(R);
 	      break;
 	  }
 	  goto do_next;
       case ROt_BX:
-	  if (RoLNx1(p1) < xmin)
-	      RoLNx1(p1) = xmin, did_clip = 1;
-	  if (RoLNx2(p1) < xmin)
-	      RoLNx2(p1) = xmin, did_clip = 1;
-	  if (RoLNy1(p1) < ymin)
-	      RoLNy1(p1) = ymin, did_clip = 1;
-	  if (RoLNy2(p1) < ymin)
-	      RoLNy2(p1) = ymin, did_clip = 1;
-	  if (RoLNx1(p1) > xmax)
-	      RoLNx1(p1) = xmax, did_clip = 1;
-	  if (RoLNx2(p1) > xmax)
-	      RoLNx2(p1) = xmax, did_clip = 1;
-	  if (RoLNy1(p1) > ymax)
-	      RoLNy1(p1) = ymax, did_clip = 1;
-	  if (RoLNy2(p1) > ymax)
-	      RoLNy2(p1) = ymax, did_clip = 1;
+	  if (RoLNx1(R) < xmin)
+	      RoLNx1(R) = xmin, did_clip = 1;
+	  if (RoLNx2(R) < xmin)
+	      RoLNx2(R) = xmin, did_clip = 1;
+	  if (RoLNy1(R) < ymin)
+	      RoLNy1(R) = ymin, did_clip = 1;
+	  if (RoLNy2(R) < ymin)
+	      RoLNy2(R) = ymin, did_clip = 1;
+	  if (RoLNx1(R) > xmax)
+	      RoLNx1(R) = xmax, did_clip = 1;
+	  if (RoLNx2(R) > xmax)
+	      RoLNx2(R) = xmax, did_clip = 1;
+	  if (RoLNy1(R) > ymax)
+	      RoLNy1(R) = ymax, did_clip = 1;
+	  if (RoLNy2(R) > ymax)
+	      RoLNy2(R) = ymax, did_clip = 1;
 	  /* Remove zero-size clipped boxes */
 	  if ( did_clip
-	       && RoLNx1(p1) == RoLNx2(p1) && RoLNy1(p1) == RoLNy2(p1) )
+	       && RoLNx1(R) == RoLNx2(R) && RoLNy1(R) == RoLNy2(R) )
 	      goto remove;
 	  goto do_next;
       case ROt_LN:
 	  if (!clipline(xmin, xmax, ymin, ymax,
-			&RoLNx1(p1), &RoLNy1(p1), &RoLNx2(p1), &RoLNy2(p1)))
+			&RoLNx1(R), &RoLNy1(R), &RoLNx2(R), &RoLNy2(R)))
 	      goto remove;
 	  goto do_next;
       case ROt_MP:
       {
-	  int c = RoMPcnt(p1);
+	  int c = RoMPcnt(R);
 	  int f = 0, t = 0;
 
 	  while (f < c) {
-	      if ( DTOL(RoMPxs(p1)[f]) >= xmin && DTOL(RoMPxs(p1)[f]) <= xmax
-		   && DTOL(RoMPys(p1)[f]) >= ymin
-		   && DTOL(RoMPys(p1)[f]) <= ymax) {
+	      if ( DTOL(RoMPxs(R)[f]) >= xmin && DTOL(RoMPxs(R)[f]) <= xmax
+		   && DTOL(RoMPys(R)[f]) >= ymin
+		   && DTOL(RoMPys(R)[f]) <= ymax) {
 		  if (t != f) {
-		      RoMPxs(p1)[t] = RoMPxs(p1)[f];
-		      RoMPys(p1)[t] = RoMPys(p1)[f];
+		      RoMPxs(R)[t] = RoMPxs(R)[f];
+		      RoMPys(R)[t] = RoMPys(R)[f];
 		  }
 		  t++;
 	      }
@@ -1058,26 +1058,26 @@ rectclip(long rect)
 	  }
 	  if (t == 0)
 	      goto remove;
-	  RoMPcnt(p1) = t;
+	  RoMPcnt(R) = t;
 	  goto do_next;
       }
       case ROt_ML:
       {
 	  /* Hard case.  Here we need to break a multiline into
 	     several pieces if some part is clipped. */
-	  int c = RoMPcnt(p1) - 1;
+	  int c = RoMPcnt(R) - 1;
 	  int f = 0, t = 0, had_lines = 0, had_hole = 0, rc;
-	  double ox = RoMLxs(p1)[0], oy = RoMLys(p1)[0], oxn, oyn;
+	  double ox = RoMLxs(R)[0], oy = RoMLys(R)[0], oxn, oyn;
 
 	  while (f < c) {
 	      /* Endpoint of this segment is the startpoint of the
 		 next one, so we need to preserve it if it is clipped. */
-	      oxn = RoMLxs(p1)[f + 1], oyn = RoMLys(p1)[f + 1];
+	      oxn = RoMLxs(R)[f + 1], oyn = RoMLys(R)[f + 1];
 	      rc = clipline(xmin, xmax, ymin, ymax,
-			    /* &RoMLxs(p1)[f], &RoMLys(p1)[f], */
+			    /* &RoMLxs(R)[f], &RoMLys(R)[f], */
 			    &ox, &oy,
-			    &RoMLxs(p1)[f+1], &RoMLys(p1)[f+1]);
-	      RoMLxs(p1)[f] = ox; RoMLys(p1)[f] = oy;
+			    &RoMLxs(R)[f+1], &RoMLys(R)[f+1]);
+	      RoMLxs(R)[f] = ox; RoMLys(R)[f] = oy;
 	      ox = oxn; oy = oyn;
 	      if (!rc) {
 		  if (had_lines)
@@ -1091,46 +1091,46 @@ rectclip(long rect)
 		  had_lines = 1;
 		  if (t != f) {
 		      if (t == 0) {
-			  RoMPxs(p1)[t] = RoMPxs(p1)[f];
-			  RoMPys(p1)[t] = RoMPys(p1)[f];
+			  RoMPxs(R)[t] = RoMPxs(R)[f];
+			  RoMPys(R)[t] = RoMPys(R)[f];
 		      }
-		      RoMPxs(p1)[t+1] = RoMPxs(p1)[f+1];
-		      RoMPys(p1)[t+1] = RoMPys(p1)[f+1];
+		      RoMPxs(R)[t+1] = RoMPxs(R)[f+1];
+		      RoMPys(R)[t+1] = RoMPys(R)[f+1];
 		  }
 		  t++;
 		  f++;
 		  if ( rc & CLIPLINE_CLIP_2)
-		      had_hole = 1, RoMLcnt(p1) = t + 1;
+		      had_hole = 1, RoMLcnt(R) = t + 1;
 		  continue;
 	      }
-	      /* Is not continuous, automatically p1 is not free()ed.  */
-	      RoMLcnt(p1) = t + 1;
+	      /* Is not continuous, automatically R is not free()ed.  */
+	      RoMLcnt(R) = t + 1;
 	      if ( rc & CLIPLINE_CLIP_2) { /* Needs separate entry */
 		  RectObj *n = (RectObj*) gpmalloc(sizeof(RectObj2P));
 
 		  RoType(n) = ROt_LN;
-		  RoCol(n) = RoCol(p1);
-		  RoLNx1(n) = RoMLxs(p1)[f];	RoLNy1(n) = RoMLys(p1)[f];
-		  RoLNx2(n) = RoMLxs(p1)[f+1];	RoLNy2(n) = RoMLys(p1)[f+1];
+		  RoCol(n) = RoCol(R);
+		  RoLNx1(n) = RoMLxs(R)[f];	RoLNy1(n) = RoMLys(R)[f];
+		  RoLNx2(n) = RoMLxs(R)[f+1];	RoLNy2(n) = RoMLys(R)[f+1];
 		  RoNext(n) = next;
-		  RoNext(p1) = n;
+		  RoNext(R) = n;
 		  /* Restore the unclipped value: */
-		  RoMLxs(p1)[f + 1] = oxn;	RoMLys(p1)[f + 1] = oyn;
+		  RoMLxs(R)[f + 1] = oxn;	RoMLys(R)[f + 1] = oyn;
 		  f++;
 		  prevp = &RoNext(n);
 	      }
 	      if (f + 1 < c) {		/* Are other lines */
 		  RectObj *n = (RectObj*) gpmalloc(sizeof(RectObjMP));
 		  RoType(n) = ROt_ML;
-		  RoCol(n) = RoCol(p1);
+		  RoCol(n) = RoCol(R);
 		  RoMLcnt(n) = c - f;
 		  RoMLxs(n) = (double*) gpmalloc(sizeof(double)*(c - f));
 		  RoMLys(n) = (double*) gpmalloc(sizeof(double)*(c - f));
-		  memcpy(RoMPxs(n),RoMPxs(p1) + f, sizeof(double)*(c - f));
-		  memcpy(RoMPys(n),RoMPys(p1) + f, sizeof(double)*(c - f));
+		  memcpy(RoMPxs(n),RoMPxs(R) + f, sizeof(double)*(c - f));
+		  memcpy(RoMPys(n),RoMPys(R) + f, sizeof(double)*(c - f));
 		  RoMPxs(n)[0] = oxn; RoMPys(n)[0] = oyn;
 		  RoNext(n) = next;
-		  RoNext(p1) = n;
+		  RoNext(R) = n;
 		  next = n;
 	      }
 	      goto do_next;
@@ -1139,23 +1139,13 @@ rectclip(long rect)
 	      goto remove;
 	  goto do_next;
       }
-#if 0
-      case ROt_ST:
-	  next = (RectObj*) gpmalloc(sizeof(RectObjMP));
-	  memcpy(next,p1,sizeof(RectObjMP));
-	  RoSTs(next) = (char*) gpmalloc(RoSTl(p1)+1);
-	  memcpy(RoSTs(next),RoSTs(p1),RoSTl(p1)+1);
-	  RoSTx(next) += xoff; RoSTy(next) += yoff;
-	  RoNext(tail) = next; tail = next;
-	  break;
-#endif
       default: {
 	do_next:
-	      prevp = &RoNext(p1);
+	      prevp = &RoNext(R);
 	      break;
 	  }
       }
-      p1 = next;
+      R = next;
   }
 }
 
@@ -1880,29 +1870,15 @@ plot_count(long *w, long lw, col_counter rcolcnt)
 /*                                                                       */
 /*************************************************************************/
 
-typedef struct spoint {
-  int x,y; } SPoint;
-typedef struct ssegment {
-  int x1,y1,x2,y2; } SSegment;
-typedef struct srectangle {
-  int x,y,width,height; } SRectangle;
-
-static void ps_point(FILE *psfile, int x, int y);
-static void ps_line(FILE *psfile, int x1, int y1, int x2, int y2);
-static void ps_rect(FILE *psfile, int x1, int y1, int x2, int y2);
-static void ps_string(FILE *psfile, int x, int y, char *c, long dir);
-
-#undef ISCR
-#undef JSCR
-#define ISCR 1120 /* 1400 for hi-res */
-#define JSCR 800  /* 1120 for hi-res */
-
 static void
 PARI_get_psplot(void)
 {
-  pari_psplot.height = JSCR - 60;
-  pari_psplot.width  = ISCR - 40;
-  pari_psplot.fheight = 15;
+  if (pari_psplot.init) return;
+  pari_psplot.init = 1;
+
+  pari_psplot.width = 1120 - 60; /* 1400 - 60 for hi-res */
+  pari_psplot.height=  800 - 40; /* 1120 - 60 for hi-res */
+  pari_psplot.fheight= 15;
   pari_psplot.fwidth = 6;
   pari_psplot.hunit = 5;
   pari_psplot.vunit = 5;
@@ -1956,211 +1932,206 @@ postdraw_flag(GEN list, long flag) { gendraw(list, 1, flag); }
 void
 rectdraw_flag(GEN list, long flag) { gendraw(list, 0, flag); }
 
-static char*
-zmalloc(size_t x)
-{
-  return x? gpmalloc(x): NULL;
-}
-
 void
 postdraw0(long *w, long *x, long *y, long lw)
 {
   postdraw00(w, x, y, lw, 0);
 }
 
+static void
+ps_sc(void *data, long col) { (void)data; (void)col; }
+
+static void
+ps_point(void *data, long x, long y)
+{
+  fprintf((FILE*)data,"%ld %ld p\n",y,x);
+}
+
+static void
+ps_line(void *data, long x1, long y1, long x2, long y2)
+{
+  fprintf((FILE*)data,"%ld %ld m %ld %ld l\n",y1,x1,y2,x2);
+  fprintf((FILE*)data,"stroke\n");
+}
+
+static void
+ps_rect(void *data, long x, long y, long w, long h)
+{
+  fprintf((FILE*)data,"%ld %ld m %ld %ld l %ld %ld l %ld %ld l closepath\n",y,x, y,x+w, y+h,x+w, y+h,x);
+}
+
+static void
+ps_points(void *data, long nb, struct plot_points *p)
+{
+  long i;
+  for (i=0; i<nb; i++) ps_point(data, p[i].x, p[i].y);
+}
+
+static void
+ps_lines(void *data, long nb, struct plot_points *p)
+{
+  FILE *psfile = (FILE*)data;
+  long i;
+  fprintf(psfile,"%ld %ld m\n",p[0].y,p[0].x);
+  for (i=1; i<nb; i++) fprintf(psfile, "%ld %ld l\n", p[i].y, p[i].x);
+  fprintf(psfile,"stroke\n");
+}
+
+static void
+ps_string(void *data, long x, long y, char *s, long length)
+{
+  FILE *psfile = (FILE*)data;
+  (void)length;
+  if (strpbrk(s, "(\\)")) {
+    fprintf(psfile,"(");
+    while (*s) {
+      if ( *s=='(' || *s==')' || *s=='\\' ) fputc('\\', psfile);
+      fputc(*s, psfile);
+      s++;
+    }
+  } else
+    fprintf(psfile,"(%s", s);
+  fprintf(psfile,") %ld %ld m 90 rotate show -90 rotate\n", y, x);
+}
+
 void
 postdraw00(long *w, long *x, long *y, long lw, long scale)
 {
-  double *ptx,*pty;
-  long *numpoints,*numtexts,*xtexts,*ytexts,*dirtexts;
-  RectObj *p1;
-  PariRect *e;
-  long i,j,x0,y0;
-  long a,b,c,d,nd[ROt_MAX+1];
-  char **texts;
+  struct plot_eng plot;
   FILE *psfile;
   double xscale = 0.65, yscale = 0.65;
-  long fontsize = 16, xtick = 5, ytick = 5;
+  long fontsize = 16;
 
-  SPoint *points, **lines, *SLine;
-  SSegment *seg;
-  SRectangle *rect, SRec;
-
+  PARI_get_psplot();
   if (scale) {
-    double postxsize, postysize;
+    double psxscale, psyscale;
 
-    PARI_get_psplot();
-    postxsize = pari_psplot.width;
-    postysize = pari_psplot.height;
     PARI_get_plot(0);
-    xscale *= postxsize * 1.0/w_width;
-    fontsize = (long) (fontsize/(postxsize * 1.0/w_width));
-    yscale *= postysize * 1.0/w_height;
-    xtick = h_unit;  ytick = v_unit;
+    psxscale = pari_psplot.width * 1.0/pari_plot.width ;
+    psyscale = pari_psplot.height* 1.0/pari_plot.height;
+    fontsize = (long) (fontsize/psxscale);
+    xscale *= psxscale;
+    yscale *= psyscale;
   }
   psfile = fopen(current_psfile, "a");
   if (!psfile)
     err(openfiler,"postscript",current_psfile);
 
-  for (i=0; i<=ROt_MAX; i++) nd[i]=0;
-
-  for (i=0; i<lw; i++)
-  {
-    e = check_rect_init(w[i]); p1=RHead(e);
-    while (p1)
-    {
-      if (RoType(p1) != ROt_MP) nd[RoType(p1)]++;
-      else nd[ROt_PT]+=RoMPcnt(p1);
-      p1=RoNext(p1);
-    }
-  }
-  points=(SPoint*) zmalloc(nd[ROt_PT]*sizeof(SPoint));
-  seg=(SSegment*) zmalloc(nd[ROt_LN]*sizeof(SSegment));
-  rect=(SRectangle*) zmalloc(nd[ROt_BX]*sizeof(SRectangle));
-  lines=(SPoint**) zmalloc(nd[ROt_ML]*sizeof(SPoint*));
-  numpoints=(long*) zmalloc(nd[ROt_ML]*sizeof(long));
-  texts=(char**) zmalloc(nd[ROt_ST]*sizeof(char*));
-  numtexts=(long*) zmalloc(nd[ROt_ST]*sizeof(long));
-  xtexts = (long*) zmalloc(nd[ROt_ST]*sizeof(long));
-  ytexts = (long*) zmalloc(nd[ROt_ST]*sizeof(long));
-  dirtexts = (long*) zmalloc(nd[ROt_ST]*sizeof(long));
-  for (i=0; i<=ROt_MAX; i++) nd[i]=0;
-
-  for (i=0; i<lw; i++)
-  {
-    e=rectgraph[w[i]]; p1=RHead(e); x0=x[i]; y0=y[i];
-    while (p1)
-    {
-      switch(RoType(p1))
-      {
-	case ROt_PT:
-	  points[nd[ROt_PT]].x = DTOL(RoPTx(p1)+x0);
-	  points[nd[ROt_PT]].y = DTOL(RoPTy(p1)+y0);
-	  nd[ROt_PT]++; break;
-	case ROt_LN:
-	  seg[nd[ROt_LN]].x1 = DTOL(RoLNx1(p1)+x0);
-	  seg[nd[ROt_LN]].y1 = DTOL(RoLNy1(p1)+y0);
-	  seg[nd[ROt_LN]].x2 = DTOL(RoLNx2(p1)+x0);
-	  seg[nd[ROt_LN]].y2 = DTOL(RoLNy2(p1)+y0);
-	  nd[ROt_LN]++; break;
-	case ROt_BX:
-	  a=rect[nd[ROt_BX]].x = DTOL(RoBXx1(p1)+x0);
-	  b=rect[nd[ROt_BX]].y = DTOL(RoBXy1(p1)+y0);
-	  rect[nd[ROt_BX]].width = DTOL(RoBXx2(p1)+x0-a);
-	  rect[nd[ROt_BX]].height = DTOL(RoBXy2(p1)+y0-b);
-	  nd[ROt_BX]++; break;
-	case ROt_MP:
-	  ptx = RoMPxs(p1); pty = RoMPys(p1);
-	  for (j=0; j<RoMPcnt(p1); j++)
-	  {
-	    points[nd[ROt_PT]+j].x = DTOL(ptx[j]+x0);
-	    points[nd[ROt_PT]+j].y = DTOL(pty[j]+y0);
-	  }
-	  nd[ROt_PT]+=RoMPcnt(p1); break;
-	case ROt_ML:
-	  ptx=RoMLxs(p1); pty=RoMLys(p1);
-	  numpoints[nd[ROt_ML]]=RoMLcnt(p1);
-	  lines[nd[ROt_ML]]=(SPoint*)gpmalloc(RoMLcnt(p1)*sizeof(SPoint));
-	  for (j=0; j<RoMLcnt(p1); j++)
-	  {
-	    lines[nd[ROt_ML]][j].x = DTOL(ptx[j]+x0);
-	    lines[nd[ROt_ML]][j].y = DTOL(pty[j]+y0);
-	  }
-	  nd[ROt_ML]++; break;
-	case ROt_ST:
-	  texts[nd[ROt_ST]] = RoSTs(p1);
-	  numtexts[nd[ROt_ST]] = RoSTl(p1);
-	  xtexts[nd[ROt_ST]] = DTOL(RoSTx(p1)+x0);
-	  ytexts[nd[ROt_ST]] = DTOL(RoSTy(p1)+y0);
-	  dirtexts[nd[ROt_ST]] = RoSTdir(p1);
-	  nd[ROt_ST]++; break;
-	default: break;
-      }
-      p1=RoNext(p1);
-    }
-  }
   /* Definitions taken from post terminal of Gnuplot. */
-  fprintf(psfile,"%%!\n50 50 translate\n/Times-Roman findfont %ld scalefont setfont\n%g %g scale\n", fontsize, yscale,xscale);
-  fprintf(psfile,"/Lshow { moveto 90 rotate show -90 rotate } def\n/Rshow { 3 -1 roll dup 4 1 roll stringwidth pop sub Lshow } def\n/Cshow { 3 -1 roll dup 4 1 roll stringwidth pop 2 div sub Lshow } def\n");
-  fprintf(psfile,"/Xgap %ld def\n/Ygap %ld def\n", xtick, ytick);
-  fprintf(psfile,"/Bbox { gsave newpath 0 0 moveto true charpath pathbbox grestore } def\n");
-  fprintf(psfile,"/Height { Bbox 4 1 roll pop pop pop } def\n");
-  fprintf(psfile,"/TopAt { 3 -1 roll dup 4 1 roll Height 3 -1 roll add exch } def\n");
-  fprintf(psfile,"/VCenter { 3 -1 roll dup 4 1 roll Height 2 div 3 -1 roll add exch } def\n");
-  fprintf(psfile,"/Tgap { exch Ygap add exch } def\n");
-  fprintf(psfile,"/Bgap { exch Ygap sub exch } def\n");
-  fprintf(psfile,"/Lgap { Xgap add } def\n");
-  fprintf(psfile,"/Rgap { Xgap sub } def\n");
+  fprintf(psfile,"%%!\n\
+50 50 translate\n\
+/p {moveto 0 2 rlineto 2 0 rlineto 0 -2 rlineto closepath fill} def\n\
+/l {lineto} def\n\
+/m {moveto} def\n\
+/Times-Roman findfont %ld scalefont setfont\n\
+%g %g scale\n", fontsize, yscale, xscale);
 
-  for (i=0; i<nd[ROt_PT]; i++)
-    ps_point(psfile,points[i].x,points[i].y);
-  for (i=0; i<nd[ROt_LN]; i++)
-    ps_line(psfile,seg[i].x1,seg[i].y1,seg[i].x2,seg[i].y2);
-  for (i=0; i<nd[ROt_BX]; i++)
+  plot.sc = &ps_sc;
+  plot.pt = &ps_point;
+  plot.ln = &ps_line;
+  plot.bx = &ps_rect;
+  plot.mp = &ps_points;
+  plot.ml = &ps_lines;
+  plot.st = &ps_string;
+  plot.pl = &pari_psplot;
+
+  gen_rectdraw0(&plot, (void*)psfile, w, x, y, lw, 1, 1);
+  fprintf(psfile,"stroke showpage\n"); fclose(psfile);
+}
+
+void
+gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys)
+{
+  long i, j;
+  long hgapsize = eng->pl->hunit, fheight = eng->pl->fheight;
+  long vgapsize = eng->pl->vunit,  fwidth = eng->pl->fwidth;
+  for(i=0; i<lw; i++)
   {
-    SRec=rect[i]; a=SRec.x; b=SRec.y; c=a+SRec.width;
-    d=b+SRec.height; ps_rect(psfile,a,b,c,d);
-  }
-  for (i=0; i<nd[ROt_ML]; i++)
-  {
-    SLine=lines[i];
-    for (j=0; j<numpoints[i]; j++)
+    PariRect *e = rectgraph[w[i]];
+    RectObj *R;
+    long x0 = x[i], y0 = y[i];
+    for (R = RHead(e); R; R = RoNext(R))
     {
-      if (!j) fprintf(psfile,"%d %d moveto\n",SLine[0].y,SLine[0].x);
-      else fprintf(psfile,"%d %d lineto\n",SLine[j].y,SLine[j].x);
+      switch(RoType(R))
+      {
+      case ROt_PT:
+        eng->sc(data,RoCol(R));
+        eng->pt(data, DTOL((RoPTx(R)+x0)*xs), DTOL((RoPTy(R)+y0)*ys));
+        break;
+      case ROt_LN:
+        eng->sc(data,RoCol(R));
+        eng->ln(data, DTOL((RoLNx1(R)+x0)*xs),
+                      DTOL((RoLNy1(R)+y0)*ys),
+                      DTOL((RoLNx2(R)+x0)*xs),
+                      DTOL((RoLNy2(R)+y0)*ys));
+        break;
+      case ROt_BX:
+        eng->sc(data,RoCol(R));
+        eng->bx(data,
+                DTOL((RoBXx1(R)+x0)*xs),
+                DTOL((RoBXy1(R)+y0)*ys),
+                DTOL((RoBXx2(R)-RoBXx1(R))*xs), 
+                DTOL((RoBXy2(R)-RoBXy1(R))*ys));
+        break;
+      case ROt_MP:
+        {
+          double *ptx = RoMPxs(R); 
+          double *pty = RoMPys(R);
+          long     nb = RoMPcnt(R);
+          struct plot_points *points = 
+            (struct plot_points *) gpmalloc(sizeof(*points)*nb);
+          for(j=0;j<nb;j++)
+          {
+            points[j].x = DTOL((ptx[j]+x0)*xs);
+            points[j].y = DTOL((pty[j]+y0)*ys);
+          }
+          eng->sc(data,RoCol(R));
+          eng->mp(data, nb, points);
+          free(points);
+          break;
+        }
+      case ROt_ML:
+        {
+          double *ptx = RoMLxs(R); 
+          double *pty = RoMLys(R);
+          long     nb = RoMLcnt(R);
+          struct plot_points *points = 
+            (struct plot_points *) gpmalloc(sizeof(*points)*nb);
+          for(j=0;j<nb;j++)
+          {
+            points[j].x = DTOL((ptx[j]+x0)*xs);
+            points[j].y = DTOL((pty[j]+y0)*ys);
+          }
+          eng->sc(data,RoCol(R));
+          eng->ml(data, nb, points);
+          free(points);
+          break;
+        }
+      case ROt_ST:
+        {
+          long dir = RoSTdir(R);
+          long hjust = dir & RoSTdirHPOS_mask, hgap  = dir & RoSTdirHGAP;
+          long vjust = dir & RoSTdirVPOS_mask, vgap  = dir & RoSTdirVGAP;
+          char *text = RoSTs(R);
+          long l     = RoSTl(R);
+          long x, y;
+          long shift = (hjust == RoSTdirLEFT ? 0 :
+              (hjust == RoSTdirRIGHT ? 2 : 1));
+          if (hgap)
+            hgap = (hjust == RoSTdirLEFT) ? hgapsize : -hgapsize;
+          if (vgap)
+            vgap = (vjust == RoSTdirBOTTOM) ? 2*vgapsize : -2*vgapsize;
+          if (vjust != RoSTdirBOTTOM)
+            vgap -= ((vjust == RoSTdirTOP) ? 2 : 1)*(fheight - 1);
+          x = DTOL((RoSTx(R) + x0 + hgap - (l * fwidth * shift)/2)*xs);
+          y = DTOL((RoSTy(R) + y0 - vgap/2)*ys);
+          eng->sc(data,RoCol(R));
+          eng->st(data, x, y, text, l); 
+          break;
+        }
+      default: 
+        break;
+      }
     }
   }
-  for (i=0; i<nd[ROt_ST]; i++)
-    ps_string(psfile,xtexts[i],ytexts[i],texts[i], dirtexts[i]);
-  fprintf(psfile,"stroke showpage\n"); fclose(psfile);
-#define xfree(pointer) if (pointer) free(pointer)
-  xfree(points); xfree(seg); xfree(rect); xfree(numpoints);
-  for (i=0; i<nd[ROt_ML]; i++) xfree(lines[i]);
-  xfree(lines); xfree(texts); xfree(numtexts); xfree(xtexts); xfree(ytexts);
-#undef xfree
-}
-
-static void
-ps_point(FILE *psfile, int x, int y)
-{
-  fprintf(psfile,"%d %d moveto\n0 2 rlineto 2 0 rlineto 0 -2 rlineto closepath fill\n",y,x);
-}
-
-static void
-ps_line(FILE *psfile, int x1, int y1, int x2, int y2)
-{
-  fprintf(psfile,"%d %d moveto\n%d %d lineto\n",y1,x1,y2,x2);
-}
-
-static void
-ps_rect(FILE *psfile, int x1, int y1, int x2, int y2)
-{
-  fprintf(psfile,"%d %d moveto\n%d %d lineto\n%d %d lineto\n%d %d lineto\nclosepath\n",y1,x1,y1,x2,y2,x2,y2,x1);
-}
-
-static void
-ps_string(FILE *psfile, int x, int y, char *s, long dir)
-{
-    if (strpbrk(s, "(\\)")) {
-	fprintf(psfile,"(");
-	while (*s) {
-	    if ( *s=='(' || *s==')' || *s=='\\' )
-		fputc('\\', psfile);
-	    fputc(*s, psfile);
-	    s++;
-	}
-    } else
-	fprintf(psfile,"(%s", s);
-    fprintf(psfile,") %d %d %s%s%s%sshow\n",
-	    y, x,
-	    ((dir & RoSTdirVGAP)
-	     ? ((dir & RoSTdirVPOS_mask) == RoSTdirTOP ? "Tgap " : "Bgap ")
-	     : ""),
-	    ((dir & RoSTdirHGAP)
-	     ? ((dir & RoSTdirHPOS_mask) == RoSTdirRIGHT ? "Rgap " : "Lgap ")
-	     : ""),
-	    ((dir & RoSTdirVPOS_mask) == RoSTdirBOTTOM ? ""
-	     : (dir & RoSTdirVPOS_mask) == RoSTdirTOP ? "TopAt " : "VCenter "),
-	    ((dir & RoSTdirHPOS_mask) == RoSTdirLEFT ? "L"
-	     : ((dir & RoSTdirHPOS_mask) == RoSTdirRIGHT ? "R" : "C")));
 }

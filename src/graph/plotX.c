@@ -48,6 +48,73 @@ static Colormap PARI_Colormap;
 static XColor  *PARI_Colors;
 static XColor  *PARI_ExactColors;
 
+struct data_x
+{
+  Display *display;
+  Window win;
+  GC gc;
+};
+
+static void SetForeground(void *data, long col)
+{
+   struct data_x *dx = (struct data_x *) data;
+   XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
+}
+
+
+static void DrawPoint(void *data, long x, long y)
+{
+   struct data_x *dx = (struct data_x *) data;
+   XDrawPoint(dx->display,dx->win,dx->gc, x,y);
+}
+
+static void DrawLine(void *data, long x1, long y1, long x2, long y2)
+{
+   struct data_x *dx = (struct data_x *) data;
+   XDrawLine(dx->display,dx->win,dx->gc, x1,y1, x2,y2);
+}
+
+static void DrawRectangle(void *data, long x, long y, long w, long h)
+{
+   struct data_x *dx = (struct data_x *) data;
+   XDrawRectangle(dx->display,dx->win,dx->gc, x,y, w,h);
+}
+
+static void DrawPoints(void *data, long nb, struct plot_points *p)
+{
+   struct data_x *dx = (struct data_x *) data;
+   XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
+   long i;
+   for (i=0;i<nb;i++)
+   {
+     xp[i].x=p[i].x;
+     xp[i].y=p[i].y;
+   }
+   XDrawPoints(dx->display,dx->win,dx->gc, xp, nb, 0);
+   free(xp);
+}
+
+static void DrawLines(void *data, long nb, struct plot_points *p)
+{
+   struct data_x *dx = (struct data_x *) data;
+   XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
+   long i;
+   for (i=0;i<nb;i++)
+   {
+     xp[i].x=p[i].x;
+     xp[i].y=p[i].y;
+   }
+   XDrawLines(dx->display,dx->win,dx->gc, xp, nb, 0);
+   free(xp);
+}
+
+static void DrawString(void *data, long x, long y, char *text, long numtext)
+{
+  struct data_x *dx = (struct data_x *) data;
+  XDrawString(dx->display,dx->win,dx->gc, x,y, text, numtext);
+}
+
+
 static char *PARI_DefaultColors[MAX_COLORS] =
 {
   " ",
@@ -102,27 +169,13 @@ IOerror(Display *d) {
   exiterr(buf); return 0;
 }
 
-static char*
-zmalloc(size_t x)
-{
-  return x? gpmalloc(x): NULL;
-}
-
 void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
-  double *ptx,*pty;
-  long *c, shift;
-  long *numpoints[MAX_COLORS],*numtexts[MAX_COLORS];
-  long *xtexts[MAX_COLORS],*ytexts[MAX_COLORS];
-  col_counter rcolcnt;
-  long col,i,j,x0,y0,oldwidth,oldheight;
-  long hjust, vjust, hgap, vgap, hgapsize = h_unit, vgapsize = v_unit;
-  char **texts[MAX_COLORS];
-  PariRect *e;
-  RectObj *p1;
+  long oldwidth,oldheight;
+  struct plot_eng plotX;
+  struct data_x dx;
   double xs = 1, ys = 1;
-
   int screen;
   Display *display;
   GC gc;
@@ -131,9 +184,6 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   XSizeHints size_hints;
   XFontStruct *font_info;
   XSetWindowAttributes attrib;
-  XPoint *points[MAX_COLORS],**lines[MAX_COLORS];
-  XSegment *seg[MAX_COLORS];
-  XRectangle *rec[MAX_COLORS];
   Atom wm_delete_window, wm_protocols;
 
   if (fork()) return;  /* parent process returns */
@@ -149,28 +199,6 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   XSetErrorHandler(Xerror);
   XSetIOErrorHandler(IOerror);
   PARI_ColorSetUp(display,PARI_DefaultColors,MAX_COLORS);
-
-  plot_count(w, lw, rcolcnt);
-  for (col=1; col<MAX_COLORS; col++)
-  {
-    char *m;
-    long *c = rcolcnt[col];
-    points[col]=(XPoint*)zmalloc(c[ROt_PT]*sizeof(XPoint));
-    seg[col]=(XSegment*)zmalloc(c[ROt_LN]*sizeof(XSegment));
-    rec[col]=(XRectangle*)zmalloc(c[ROt_BX]*sizeof(XRectangle));
-
-    i = c[ROt_ML]; m = zmalloc(i * (sizeof(long) + sizeof(XPoint*)));
-    numpoints[col]=(long*)m; i *= sizeof(XPoint*);
-    m += i; lines[col]=(XPoint**)m;
-
-    i = c[ROt_ST]; m = zmalloc(i * (sizeof(char*) + 3*sizeof(long)));
-    texts[col]=(char**)m; i *= sizeof(long);
-    m += i; numtexts[col]=(long*)m;
-    m += i; xtexts[col]=(long*)m;
-    m += i; ytexts[col]=(long*)m;
-
-    c[ROt_PT]=c[ROt_LN]=c[ROt_BX]=c[ROt_ML]=c[ROt_ST]=0;
-  }
 
   screen = DefaultScreen(display);
   win = XCreateSimpleWindow
@@ -204,6 +232,17 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
   XMapWindow(display, win);
   oldwidth  = w_width;
   oldheight = w_height;
+  dx.display= display;
+  dx.win = win;
+  dx.gc = gc;
+  plotX.sc = &SetForeground;
+  plotX.pt = &DrawPoint;
+  plotX.ln = &DrawLine;
+  plotX.bx = &DrawRectangle;
+  plotX.mp = &DrawPoints;
+  plotX.ml = &DrawLines;
+  plotX.st = &DrawString;
+  plotX.pl = &pari_plot;
 
   for(;;)
   {
@@ -216,14 +255,6 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
       case ButtonPress:
       case DestroyNotify:
 	XUnloadFont(display,font_info->fid); XFreeGC(display,gc);
-#define myfree(x) if (x) free(x)
-	for(col=1;col<MAX_COLORS;col++)
-	{
-	  myfree(points[col]); myfree(seg[col]); myfree(rec[col]);
-	  for(i=0;i<rcolcnt[col][ROt_ML];i++) myfree(lines[col][i]);
-	  myfree(numpoints[col]); myfree(texts[col]);
-        }
-#undef myfree
 	free_graph(); if (do_free) { free(w); free(x); free(y); }
 	XCloseDisplay(display); exit(0);
 
@@ -240,90 +271,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 	xs = ((double)width)/w_width; ys=((double)height)/w_height;
       }
       case Expose: 
-	for(i=0; i<lw; i++)
-	{
-	  e=rectgraph[w[i]]; x0=x[i]; y0=y[i];
-	  for (p1 = RHead(e); p1; p1 = RoNext(p1))
-	  {
-	    col = RoCol(p1);
-            c = rcolcnt[col];
-	    switch(RoType(p1))
-	    {
-	      case ROt_PT:
-		points[col][c[ROt_PT]].x = DTOL((RoPTx(p1)+x0)*xs);
-		points[col][c[ROt_PT]].y = DTOL((RoPTy(p1)+y0)*ys);
-		c[ROt_PT]++;break;
-	      case ROt_LN:
-		seg[col][c[ROt_LN]].x1 = DTOL((RoLNx1(p1)+x0)*xs);
-		seg[col][c[ROt_LN]].y1 = DTOL((RoLNy1(p1)+y0)*ys);
-		seg[col][c[ROt_LN]].x2 = DTOL((RoLNx2(p1)+x0)*xs);
-		seg[col][c[ROt_LN]].y2 = DTOL((RoLNy2(p1)+y0)*ys);
-		c[ROt_LN]++;break;
-	      case ROt_BX:
-                rec[col][c[ROt_BX]].x = DTOL((RoBXx1(p1)+x0)*xs);
-                rec[col][c[ROt_BX]].y = DTOL((RoBXy1(p1)+y0)*ys);
-                rec[col][c[ROt_BX]].width = DTOL((RoBXx2(p1)-RoBXx1(p1))*xs);
-                rec[col][c[ROt_BX]].height = DTOL((RoBXy2(p1)-RoBXy1(p1))*ys);
-                c[ROt_BX]++;break;
-	      case ROt_MP:
-		ptx = RoMPxs(p1); pty = RoMPys(p1);
-		for(j=0;j<RoMPcnt(p1);j++)
-		{
-		  points[col][c[ROt_PT]+j].x = DTOL((ptx[j]+x0)*xs);
-		  points[col][c[ROt_PT]+j].y = DTOL((pty[j]+y0)*ys);
-		}
-		c[ROt_PT]+=RoMPcnt(p1);break;
-	      case ROt_ML:
-		ptx=RoMLxs(p1); pty=RoMLys(p1);
-		numpoints[col][c[ROt_ML]] = RoMLcnt(p1);
-		lines[col][c[ROt_ML]] =
-		  (XPoint*)zmalloc(RoMLcnt(p1)*sizeof(XPoint));
-		for(j=0;j<RoMLcnt(p1);j++)
-		{
-		  lines[col][c[ROt_ML]][j].x = DTOL((ptx[j]+x0)*xs);
-		  lines[col][c[ROt_ML]][j].y = DTOL((pty[j]+y0)*ys);
-		}
-		c[ROt_ML]++;break;
-	      case ROt_ST:
-		hjust = RoSTdir(p1) & RoSTdirHPOS_mask;
-		vjust = RoSTdir(p1) & RoSTdirVPOS_mask;
-		hgap = RoSTdir(p1) & RoSTdirHGAP;
-		if (hgap)
-		  hgap = (hjust == RoSTdirLEFT) ? hgapsize : -hgapsize;
-		vgap = RoSTdir(p1) & RoSTdirVGAP;
-		if (vgap)
-		  vgap = (vjust == RoSTdirBOTTOM) ? 2*vgapsize : -2*vgapsize;
-		if (vjust != RoSTdirBOTTOM)
-		  vgap -= ((vjust == RoSTdirTOP) ? 2 : 1)*(f_height - 1);
-		texts[col][c[ROt_ST]]=RoSTs(p1);
-		numtexts[col][c[ROt_ST]]=RoSTl(p1);
-		shift = (hjust == RoSTdirLEFT ? 0 :
-			 (hjust == RoSTdirRIGHT ? 2 : 1));
-		xtexts[col][c[ROt_ST]] 
-		    = DTOL(( RoSTx(p1) + x0 + hgap
-			       - (strlen(RoSTs(p1)) * pari_plot.fwidth
-				  * shift)/2)*xs);
-		ytexts[col][c[ROt_ST]] = DTOL((RoSTy(p1)+y0-vgap/2)*ys);
-		c[ROt_ST]++;break;
-	      default: break;
-	    }
-	  }
-	}
-	for(col=1; col<MAX_COLORS; col++)
-	{
-          long *c = rcolcnt[col];
-	  XSetForeground(display, gc, PARI_Colors[col].pixel);
-	  if(c[ROt_PT]) XDrawPoints(display,win,gc,points[col],c[ROt_PT],0);
-	  if(c[ROt_LN]) XDrawSegments(display,win,gc,seg[col],c[ROt_LN]);
-	  if(c[ROt_BX]) XDrawRectangles(display,win,gc,rec[col],c[ROt_BX]);
-	  for(i=0;i<c[ROt_ML];i++)
-	    XDrawLines(display,win,gc,lines[col][i],numpoints[col][i],0);
-	  for(i=0;i<c[ROt_ST];i++)
-	    XDrawString(display,win,gc, xtexts[col][i],ytexts[col][i],
-              texts[col][i],numtexts[col][i]);
-
-	  c[ROt_PT]=c[ROt_LN]=c[ROt_BX]=c[ROt_ML]=c[ROt_ST]=0;
-        }
+        gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
     }
   }
 }
@@ -357,3 +305,4 @@ plot_outfile_set(char *s) { (void)s; return 1; }
 
 void
 set_pointsize(double d) { (void)d; }
+
