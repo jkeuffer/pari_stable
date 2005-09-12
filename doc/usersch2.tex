@@ -16,6 +16,12 @@ operations and functions available in PARI and \kbd{gp} are described in
 the next chapter. In the present one, we describe the specific use of the
 \kbd{gp} programmable calculator.
 
+\emacs If you have GNU Emacs, you can work in a special Emacs shell,
+described in \secref{se:emacs}. Specific features of this Emacs shell are
+indicated by an EMACS sign in the left margin.
+
+\subsec{Startup}
+
 To start the calculator, the general command line syntax is:
 
 \kbd{gp [-s \var{stacksize}] [-p \var{primelimit}] [\var{files}]}
@@ -44,9 +50,7 @@ on-line help and line editing are available or not is indicated in this
 Consider investigating the matter with the person who installed \kbd{gp} if
 they are not. Do this as well if there is no mention of the GMP kernel.
 
-Note that at any point you can type \kbd{Ctrl-C} (that is press
-simultaneously the \kbd{Control} and \kbd{C} keys): the current computation
-is interrupted and control given back to you at the \kbd{gp} prompt.
+\subsec{Getting help}
 
 To get help, type a \kbd{?} and hit return. A menu appears, describing the
 eleven main categories of available functions and how to get more detailed
@@ -83,9 +87,29 @@ available metacommands can be divided into default setting commands
 (explained below) and simple commands (or keyboard shortcuts, to be dealt
 with in \secref{se:meta}).
 
-\emacs If you have GNU Emacs, you can work in a special Emacs shell,
-described in \secref{se:emacs}. Specific features of this Emacs shell are
-indicated by an EMACS sign in the left margin.
+\subsec{Input}
+
+Just type in an instruction, e.g. \kbd{1 + 1}, or \kbd{Pi}. No action is
+undertaken until you hit the \kbd{<Return>} key. Then computation starts, and
+a result is eventually printed. To suppress printing of the result, end the
+expression with a \kbd{;} sign. Note that many systems use \kbd{;} to
+indicate end of input. Not so in \kbd{gp}: this will hide the result from you!
+(Which is certainly useful if it occupies several screens.)
+
+\subsec{Interrupt, Quit}
+
+Typing \kbd{quit} at the prompt ends the session and exits \kbd{gp}. At any
+point you can type \kbd{Ctrl-C} (that is press simultaneously the
+\kbd{Control} and \kbd{C} keys): the current computation is interrupted and
+control given back to you at the \kbd{gp} prompt, together with a message
+like
+\bprog
+  *** gcd: user interrupt after 840 ms.
+@eprog\noindent
+telling you how much time ellapsed since the last command was typed in and
+in which GP function the computation was aborted. It does not mean that that
+much time was spent in the function, only that the evaluator was busy
+processing that specific function when you stopped it.
 
 \section{The general gp input line}
 
@@ -104,8 +128,7 @@ follows. First, one types a sequence of characters at the \kbd{gp} prompt;
 see \secref{se:readline} for a description of the line editor. When you hit
 the \kbd{<Return>} key, \kbd{gp} gets your input, evaluates it, then prints
 the result and assigns it to an ``history'' array if it is not void (see
-next section). To suppress printing, end the expression with a \kbd{;} sign.
-(See also the \tet{lines} default.)
+next section).
 
 More precisely, you input either a metacommand or a sequence of
 expressions. Metacommands, described in \secref{se:meta}, are not part of the
