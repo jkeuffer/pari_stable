@@ -146,13 +146,12 @@ cygwin) modulesextraflags="-L$libdir -lpari.dll";;
 esac;
 LIBS=$__LIBS
 
-myincludedir=`echo "$includedir" | sed -e 's/\/pari\/*$//'`
 case $osname in
 darwin) DLLD_modules=$CC; 
         modulesflags="-bundle -flat_namespace -undefined suppress -fno-common -O3 -DGCC_INLINE -Wall -fomit-frame-pointer -no-cpp-precomp";;
 *)      DLLD_modules="$DLLD"; modulesflags="$mydlldflags";;
 esac;
-modules_build="$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$myincludedir %s.c &&
+modules_build="$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$includedir %s.c &&
 $DLLD_modules -o %s.so $modulesflags %s.o $modulesextraflags"
 
 for variable in\

@@ -1,4 +1,4 @@
-#include <pari.h>
+#include <pari/pari.h>
 
 /*
 GP;install("extgcd", "GG&&", "gcdex", "./libextgcd.so");

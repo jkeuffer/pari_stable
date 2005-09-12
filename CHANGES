@@ -179,6 +179,8 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
        [specifically, change subfactorbase, #298]
 BA 27- rewrite rectdraw in an object-oriented way [ reduce code duplication
        in hi-res plot routines ]
+BA 28- change the semantic of includedir to not include the pari suffix.
+       Instead /pari is automatically added my make install.
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

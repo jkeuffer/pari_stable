@@ -359,13 +359,13 @@ clean: cleanobj cleantest cleanemacs
 install: install-lib-$dft install-include install-bin install-man install-misc install-doc install-examples install-cfg install-data
 
 install-include:
-	-mkdir -p \$(INCLUDEDIR)
-	\$(INSTALL_DATA) paricfg.h                \$(INCLUDEDIR)
-	\$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)
+	-mkdir -p \$(INCLUDEDIR)/pari
+	\$(INSTALL_DATA) paricfg.h                \$(INCLUDEDIR)/pari
+	\$(INSTALL_DATA) pariinl.h                \$(INCLUDEDIR)/pari
 	-for i in $headerlist; do \\
-	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR); done
-	-\$(RM) \$(INCLUDEDIR)/genpari.h
-	-\$(LN) pari.h \$(INCLUDEDIR)/genpari.h
+	   \$(INSTALL_DATA) $src/headers/\$\$i.h  \$(INCLUDEDIR)/pari; done
+	-\$(RM) \$(INCLUDEDIR)/pari/genpari.h
+	-\$(LN) pari.h \$(INCLUDEDIR)/pari/genpari.h
 
 install-bin: install-bin-$dft
 
