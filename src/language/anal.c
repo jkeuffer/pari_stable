@@ -2162,6 +2162,7 @@ identifier(void)
 
   if (EpPREDEFINED(ep))
   {
+    char *oldname=gp_function_name;
     if (*analyseur != '(')
     {
       if (EpVALENCE(ep) == 88) return global0();
@@ -2171,12 +2172,14 @@ identifier(void)
     switch(EpVALENCE(ep))
     {
       case 50: /* O */
+        gp_function_name="O";
         res = truc();
         NO_BREAK("in O()", ch1);
 	if (*analyseur=='^') { analyseur++; m = readlong(); } else m = 1;
 	res = ggrando(res,m); break;
 
       case 80: /* if then else */
+        gp_function_name="if";
         av = avma; res = expr();
         NO_BREAK("in test expression", ch1);
         m = gcmp0(res); avma = av; match(',');
@@ -2198,6 +2201,7 @@ identifier(void)
 	break;
 
       case 81: /* while do */
+        gp_function_name="while";
         av = avma;
 	for(;;)
 	{
@@ -2212,6 +2216,7 @@ identifier(void)
 	avma = av; skipseq(); res = gnil; break;
 
       case 82: /* repeat until */
+        gp_function_name="until";
         av = avma; skipexpr();
 	for(;;)
 	{
@@ -2225,6 +2230,7 @@ identifier(void)
 	avma = av; skipseq(); res = gnil; break;
 
       case 88: /* global */
+        gp_function_name="global";
         if (*analyseur == ')') return global0();
         matchcomma = 0;
         while (*analyseur != ')')
@@ -2254,6 +2260,7 @@ identifier(void)
       default: err(valencer1);
         return NULL; /* not reached */
     }
+    gp_function_name=oldname;
     match(')'); return res;
   }
 
