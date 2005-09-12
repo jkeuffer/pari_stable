@@ -1973,12 +1973,14 @@ BSW_isprime(GEN x)
 {
   pari_sp av = avma;
   long l, res;
-  GEN F, p;
+  GEN F, p, e;
 
   if (BSW_isprime_small(x)) return 1;
-  F = (GEN)auxdecomp(subis(x,1), 0)[1];
-  l = lg(F); p = gel(F,l-1);
-  if (BSW_psp(p))
+  F = auxdecomp(subis(x,1), 0);
+  l = lg(gel(F,1))-1; p = gcoeff(F,l,1); e = gcoeff(F,l,2); F=gel(F,1);
+  if (cmpii(powgi(p, shifti(e,1)), x)<0)
+    res = isprimeSelfridge(mkvec2(x,vecslice(F,1,l-1))); /* half-smooth */
+  else if (BSW_psp(p))
     res = isprimeSelfridge(mkvec2(x,F)); /* smooth */
   else
     res = isprimeAPRCL(x);

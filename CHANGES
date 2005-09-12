@@ -127,6 +127,9 @@ GH 54- zncoppersmith(x,1002,1001) --> SEGV [#221]
    59- (x^0)^2^31 --> length overflow
    60- polroots(pollegendre(51),1) --> SEGV [#293]
    61- print({}) --> oo loop
+BA 62- when choosing between (p-1) and APRCL, isprime() required a complete
+       factorization of p-1, whereas accumuluting factors up to sqrt(p-1) was
+       enough. (e.g 2^127 - 1)
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
