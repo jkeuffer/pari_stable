@@ -250,17 +250,16 @@ initrect_gen(long ne, GEN x, GEN y, long flag)
     double xd = gtodouble(x), yd = gtodouble(y);
 
     PARI_get_plot(0);
-    xi = w_width - 1;  yi = w_height - 1;
+    xi = pari_plot.width - 1;
+    yi = pari_plot.height - 1;
     if (xd) xi = DTOL(xd*xi);
     if (yd) yi = DTOL(yd*yi);
   } else {
-    xi = itos(x);  yi = itos(y);
-    if (!xi || !yi)
-      PARI_get_plot(0);
-    if (!xi)
-      xi = w_width - 1;
-    if (!yi)
-      yi = w_height - 1;
+    xi = itos(x);
+    yi = itos(y);
+    if (!xi || !yi) PARI_get_plot(0);
+    if (!xi) xi = pari_plot.width - 1;
+    if (!yi) yi = pari_plot.height - 1;
   }
   initrect(ne, xi, yi);
 }
@@ -449,15 +448,8 @@ rectticks(PARI_plot *WW, long ne,
   if (dx < 0) dx = -dx;
   if (dy < 0) dy = -dy;
   dxy1 = max(dx, dy);
-  if (WW) {
-    dx /= WW->hunit;
-    dy /= WW->vunit;
-  }
-  else {
-    PARI_get_plot(0);
-    dx /= h_unit;
-    dy /= v_unit;
-  }
+  dx /= WW->hunit;
+  dy /= WW->vunit;
   dxy = (long)sqrt(dx*dx + dy*dy);
   nticks = (long) ((dxy + 2.5)/4);
   if (!nticks) return;
@@ -513,12 +505,12 @@ rectticks(PARI_plot *WW, long ne,
   }
   x = dx1 + (dx2 - dx1) * (l_min - l1) / (l2 - l1);
   y = dy1 + (dy2 - dy1) * (l_min - l1) / (l2 - l1);
-  /* assume h_unit and v_unit form a square.  For clockwise ticks: */
-  dtx = h_unit * dy/dxy * (y2 > y1 ? 1 : -1);	/* y-coord runs down */
-  dty = v_unit * dx/dxy * (x2 > x1 ? 1 : -1);
+  /* assume hunit and vunit form a square.  For clockwise ticks: */
+  dtx = WW->hunit * dy/dxy * (y2 > y1 ? 1 : -1);	/* y-coord runs down */
+  dty = WW->vunit * dx/dxy * (x2 > x1 ? 1 : -1);
   for (n = 0; n < nticks; n++) {
     RectObj *z = (RectObj*) gpmalloc(sizeof(RectObj2P));
-    double lunit = h_unit > 1 ? 1.5 : 2;
+    double lunit = WW->hunit > 1 ? 1.5 : 2;
     double l = (do_double && (n + n1) % dn == 0) ? lunit: 1;
 
     RoNext(z) = 0;
@@ -810,7 +802,8 @@ rectcopy_gen(long source, long dest, GEN xoff, GEN yoff, long flag)
     double xd = gtodouble(xoff), yd = gtodouble(yoff);
 
     PARI_get_plot(0);
-    xi = w_width - 1;  yi = w_height - 1;
+    xi = pari_plot.width - 1;
+    yi = pari_plot.height - 1;
     xi = DTOL(xd*xi);
     yi = DTOL(yd*yi);
   } else {
@@ -1600,7 +1593,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
 
     wx[0]=wy[0]=0; wx[1]=lm; wy[1]=tm;
    /* Window size (W.width x W.height) is given in pixels, and
-    * correct pixels are 0..w_width-1.
+    * correct pixels are 0..W.width-1.
     * On the other hand, rect functions work with windows whose pixel
     * range is [0,width]. */
     initrect(stringrect, W.width-1, W.height-1);
@@ -1629,21 +1622,23 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
   if (!(flags & PLOT_NO_FRAME))
   {
     int do_double = (flags & PLOT_NODOUBLETICK) ? TICKS_NODOUBLE : 0;
+    PARI_plot *pl = WW;
+    if (!pl) pl = &pari_plot;
 
     rectlinetype(drawrect, -2); 		/* Frame. */
     current_color[drawrect]=BLACK;
     rectmove0(drawrect,xsml,ysml,0);
     rectbox0(drawrect,xbig,ybig,0);
     if (!(flags & PLOT_NO_TICK_X)) {
-      rectticks(WW, drawrect, xsml, ysml, xbig, ysml, xsml, xbig,
+      rectticks(pl, drawrect, xsml, ysml, xbig, ysml, xsml, xbig,
 	TICKS_CLOCKW | do_double);
-      rectticks(WW, drawrect, xbig, ybig, xsml, ybig, xbig, xsml,
+      rectticks(pl, drawrect, xbig, ybig, xsml, ybig, xbig, xsml,
 	TICKS_CLOCKW | do_double);
     }
     if (!(flags & PLOT_NO_TICK_Y)) {
-      rectticks(WW, drawrect, xbig, ysml, xbig, ybig, ysml, ybig,
+      rectticks(pl, drawrect, xbig, ysml, xbig, ybig, ysml, ybig,
 	TICKS_CLOCKW | do_double);
-      rectticks(WW, drawrect, xsml, ybig, xsml, ysml, ybig, ysml,
+      rectticks(pl, drawrect, xsml, ybig, xsml, ysml, ybig, ysml,
 	TICKS_CLOCKW | do_double);
     }
   }
@@ -1823,18 +1818,18 @@ plothsizes_flag(long flag)
   GEN vect = cgetg(1+6,t_VEC);
 
   PARI_get_plot(0);
-  gel(vect,1) = stoi(w_width);
-  gel(vect,2) = stoi(w_height);
+  gel(vect,1) = stoi(pari_plot.width);
+  gel(vect,2) = stoi(pari_plot.height);
   if (flag) {
-    gel(vect,3) = dbltor(h_unit*1.0/w_width);
-    gel(vect,4) = dbltor(v_unit*1.0/w_height);
-    gel(vect,5) = dbltor(f_width*1.0/w_width);
-    gel(vect,6) = dbltor(f_height*1.0/w_height);
+    gel(vect,3) = dbltor(pari_plot.hunit*1.0/pari_plot.width);
+    gel(vect,4) = dbltor(pari_plot.vunit*1.0/pari_plot.height);
+    gel(vect,5) = dbltor(pari_plot.fwidth*1.0/pari_plot.width);
+    gel(vect,6) = dbltor(pari_plot.fheight*1.0/pari_plot.height);
   } else {
-    gel(vect,3) = stoi(h_unit);
-    gel(vect,4) = stoi(v_unit);
-    gel(vect,5) = stoi(f_width);
-    gel(vect,6) = stoi(f_height);
+    gel(vect,3) = stoi(pari_plot.hunit);
+    gel(vect,4) = stoi(pari_plot.vunit);
+    gel(vect,5) = stoi(pari_plot.fwidth);
+    gel(vect,6) = stoi(pari_plot.fheight);
   }
   return vect;
 }	
@@ -1904,8 +1899,8 @@ gendraw(GEN list, long ps, long flag)
     long xi, yi;
     if (typ(win)!=t_INT) err(typeer,"rectdraw");
     if (flag) {
-      xi = DTOL(gtodouble(x0)*(w_width - 1));
-      yi = DTOL(gtodouble(y0)*(w_height - 1));
+      xi = DTOL(gtodouble(x0)*(pari_plot.width - 1));
+      yi = DTOL(gtodouble(y0)*(pari_plot.height - 1));
     } else {
       if (typ(x0)!=t_INT || typ(y0)!= t_INT) err(typeer,"rectdraw");
       xi = itos(x0);

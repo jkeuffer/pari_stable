@@ -41,10 +41,6 @@ extern PARI_plot *pari_plot_engine;
 #define f_width (pari_plot_engine->fwidth)
 #define h_unit (pari_plot_engine->hunit)
 #define v_unit (pari_plot_engine->vunit)
-#define lmargin (f_width*10)
-#define rmargin (h_unit - 1)
-#define tmargin (v_unit - 1)
-#define bmargin (v_unit + f_height - 1)
 
 typedef struct dblPointList{
   double *d;                   /* data */

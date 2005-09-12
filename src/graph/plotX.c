@@ -25,7 +25,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define PARI_get_plot		X11_PARI_get_plot
 #  define plot_outfile_set	X11_plot_outfile_set
 #  define set_pointsize		X11_set_pointsize
-#  define pari_plot		pari_X11plot
 #endif
 
 #include "pari.h"
@@ -57,55 +56,54 @@ struct data_x
 
 static void SetForeground(void *data, long col)
 {
-   struct data_x *dx = (struct data_x *) data;
-   XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
+  struct data_x *dx = (struct data_x *) data;
+  XSetForeground(dx->display,dx->gc, PARI_Colors[col].pixel);
 }
-
 
 static void DrawPoint(void *data, long x, long y)
 {
-   struct data_x *dx = (struct data_x *) data;
-   XDrawPoint(dx->display,dx->win,dx->gc, x,y);
+  struct data_x *dx = (struct data_x *) data;
+  XDrawPoint(dx->display,dx->win,dx->gc, x,y);
 }
 
 static void DrawLine(void *data, long x1, long y1, long x2, long y2)
 {
-   struct data_x *dx = (struct data_x *) data;
-   XDrawLine(dx->display,dx->win,dx->gc, x1,y1, x2,y2);
+  struct data_x *dx = (struct data_x *) data;
+  XDrawLine(dx->display,dx->win,dx->gc, x1,y1, x2,y2);
 }
 
 static void DrawRectangle(void *data, long x, long y, long w, long h)
 {
-   struct data_x *dx = (struct data_x *) data;
-   XDrawRectangle(dx->display,dx->win,dx->gc, x,y, w,h);
+  struct data_x *dx = (struct data_x *) data;
+  XDrawRectangle(dx->display,dx->win,dx->gc, x,y, w,h);
 }
 
 static void DrawPoints(void *data, long nb, struct plot_points *p)
 {
-   struct data_x *dx = (struct data_x *) data;
-   XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
-   long i;
-   for (i=0;i<nb;i++)
-   {
-     xp[i].x=p[i].x;
-     xp[i].y=p[i].y;
-   }
-   XDrawPoints(dx->display,dx->win,dx->gc, xp, nb, 0);
-   free(xp);
+  struct data_x *dx = (struct data_x *) data;
+  XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
+  long i;
+  for (i=0;i<nb;i++)
+  {
+    xp[i].x=p[i].x;
+    xp[i].y=p[i].y;
+  }
+  XDrawPoints(dx->display,dx->win,dx->gc, xp, nb, 0);
+  free(xp);
 }
 
 static void DrawLines(void *data, long nb, struct plot_points *p)
 {
-   struct data_x *dx = (struct data_x *) data;
-   XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
-   long i;
-   for (i=0;i<nb;i++)
-   {
-     xp[i].x=p[i].x;
-     xp[i].y=p[i].y;
-   }
-   XDrawLines(dx->display,dx->win,dx->gc, xp, nb, 0);
-   free(xp);
+  struct data_x *dx = (struct data_x *) data;
+  XPoint *xp=(XPoint*)gpmalloc(sizeof(xp)*nb);
+  long i;
+  for (i=0;i<nb;i++)
+  {
+    xp[i].x=p[i].x;
+    xp[i].y=p[i].y;
+  }
+  XDrawLines(dx->display,dx->win,dx->gc, xp, nb, 0);
+  free(xp);
 }
 
 static void DrawString(void *data, long x, long y, char *text, long numtext)
@@ -113,7 +111,6 @@ static void DrawString(void *data, long x, long y, char *text, long numtext)
   struct data_x *dx = (struct data_x *) data;
   XDrawString(dx->display,dx->win,dx->gc, x,y, text, numtext);
 }
-
 
 static char *PARI_DefaultColors[MAX_COLORS] =
 {
@@ -202,14 +199,15 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 
   screen = DefaultScreen(display);
   win = XCreateSimpleWindow
-    (display, RootWindow(display, screen), 0, 0, w_width, w_height,
-     4, BlackPixel(display, screen), WhitePixel(display, screen));
+    (display, RootWindow(display, screen), 0, 0,
+     pari_plot.width, pari_plot.height, 4,
+     BlackPixel(display, screen), WhitePixel(display, screen));
 
   size_hints.flags = PPosition | PSize;
   size_hints.x = 0;
   size_hints.y = 0;
-  size_hints.width  = w_width;
-  size_hints.height = w_height;
+  size_hints.width  = pari_plot.width;
+  size_hints.height = pari_plot.height;
   XSetStandardProperties
     (display, win, "rectplot", NULL, None, NULL, 0, &size_hints);
 
@@ -230,8 +228,8 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 
   XClearWindow(display, win);
   XMapWindow(display, win);
-  oldwidth  = w_width;
-  oldheight = w_height;
+  oldwidth  = pari_plot.width;
+  oldheight = pari_plot.height;
   dx.display= display;
   dx.win = win;
   dx.gc = gc;
@@ -268,7 +266,8 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
         oldheight = height; 
 
         /* recompute scale */
-	xs = ((double)width)/w_width; ys=((double)height)/w_height;
+	xs = ((double)width)/pari_plot.width;
+        ys = ((double)height)/pari_plot.height;
       }
       case Expose: 
         gen_rectdraw0(&plotX, (void *)&dx, w, x, y,lw,xs,ys);
@@ -289,10 +288,12 @@ PARI_get_plot(long fatal)
     err(talker, "no X server");
   }
   screen = DefaultScreen(display);
-  w_width = DisplayWidth(display, screen) - 40;
-  w_height = DisplayHeight(display, screen) - 60;
-  f_height = 15; f_width = 9;
-  h_unit = 5; v_unit = 5;
+  pari_plot.width  = DisplayWidth(display, screen) - 40;
+  pari_plot.height = DisplayHeight(display, screen) - 60;
+  pari_plot.fheight = 15;
+  pari_plot.fwidth  = 9;
+  pari_plot.hunit   = 5;
+  pari_plot.vunit   = 5;
   pari_plot.init = 1;
   XCloseDisplay(display);
 }
