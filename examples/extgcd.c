@@ -1,5 +1,9 @@
 #include <pari.h>
 
+/*
+GP;install("extgcd", "GG&&", "gcdex", "./libextgcd.so");
+*/
+
 /* return d = gcd(a,b), sets u, v such that au + bv = gcd(a,b) */
 GEN
 extgcd(GEN A, GEN B, GEN *U, GEN *V)
