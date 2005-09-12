@@ -14,5 +14,5 @@ Description:
 Function: _const_expr
 Class: gp2c_internal
 Description:
- (str):gen       readexpr($1)
+ (str):gen       readseq($1)
 
