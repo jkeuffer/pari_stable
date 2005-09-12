@@ -31,8 +31,8 @@ cat > $file << EOT
 #  extgcd-sta (linked statically)
 #  libextgcd.so (to be used by "install" under GP)
 #
-# Under GP: install(extgcd, Gp, gcdex, "./libextgcd.so") enables you to
-# subsequently use gcdex to call extgcd (see the reference manual).
+# Under GP: install("extgcd", "GG&&", "gcdex", "./libextgcd.so") enables
+# you to subsequently use gcdex to call extgcd (see the reference manual).
 #
 
 # change this TARGET to compile your own programs
