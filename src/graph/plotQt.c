@@ -60,7 +60,6 @@ protected:
 public:
     Plotter( long *w, long *x, long *y, long lw,
 	     QWidget* parent = 0, const char* name = 0, WFlags fl = 0);
-    ~Plotter();
     void save( const QString& s = *plotFile + ".xpm",//QString("pariplot.xpm"),
 	       const QString& f = QString( "XPM"));
 
@@ -72,24 +71,14 @@ protected:
 #endif
 
 private:
-    void alloc();
-    void plot();
-
-private:
     long *w;                           // map into rectgraph indexes
     long *x;                           // x, y: array of x,y-coorinates of the
     long *y;                           //   top left corners of the rectwindows
     long lw;                           // lw: number of rectwindows
-    col_counter rcolcnt;
-    QPointArray _points[MAX_COLORS];
-    QPointArray _seg[MAX_COLORS];
-    QPointArray *_lines[MAX_COLORS];
-    QRect *_rec[MAX_COLORS];
-    QPointArray _textPos[MAX_COLORS];
-    QString *_texts[MAX_COLORS];
     QColor color[MAX_COLORS];
     QFont font;
     static QString *plotFile;
+    void draw(QPainter *p);
 
 // public:
 //     static void setPlotFile( const char *);
@@ -104,7 +93,6 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     : QWidget( parent, name, fl), font( "lucida", 9) {
 
     this->w=w; this->x=x; this->y=y; this->lw=lw;
-    alloc();
 #ifndef __FANCY_WIN__
     this->resize( pari_plot.width, pari_plot.height);
     this->setCaption( "Pari QtPlot");
@@ -122,23 +110,85 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color[GAINSBORO] = QColor( 220, 220, 220);
 }
 
-
-Plotter::~Plotter() {
-
-    for( int col = 1; col < MAX_COLORS; col++) {
-	delete[] _rec[col];
-	delete[] _lines[col];
-	delete[] _texts[col];
-    }
-}
-
-
 // void Plotter::setPlotFile( const char *s) {
 
 //     delete Plotter::plotFile;
 //     Plotter::plotFile = new QString( s);
 // }
 
+struct data_qt
+{
+  QPainter *p;
+  QColor *color;
+};
+
+static void SetForeground(void *data, long col)
+{
+   struct data_qt *d = (struct data_qt *) data;
+   d->p->setPen(d->color[col]);
+}
+
+static void DrawPoint(void *data, long x, long y)
+{
+   struct data_qt *d = (struct data_qt *) data;
+   d->p->drawPoint(x, y);
+}
+
+static void DrawLine(void *data, long x1, long y1, long x2, long y2)
+{
+   struct data_qt *d = (struct data_qt *) data;
+   d->p->drawLine(x1, y1, x2, y2);
+}
+
+static void DrawRectangle(void *data, long x, long y, long w, long h)
+{
+   struct data_qt *d = (struct data_qt *) data;
+   d->p->drawRect(x, y, w, h);
+}
+
+static void DrawPoints(void *data, long nb, struct plot_points *p)
+{
+   struct data_qt *d = (struct data_qt *) data;
+   QPointArray xp=QPointArray(nb);
+   long i;
+   for (i=0;i<nb;i++)
+     xp.setPoint(i,p[i].x, p[i].y);
+   d->p->drawPoints(xp);
+}
+
+static void DrawLines(void *data, long nb, struct plot_points *p)
+{
+   struct data_qt *d = (struct data_qt *) data;
+   QPointArray xp=QPointArray(nb);
+   long i;
+   for (i=0;i<nb;i++)
+     xp.setPoint(i,p[i].x, p[i].y);
+   d->p->drawPolyline(xp);
+}
+
+static void DrawString(void *data, long x, long y, char *text, long numtext)
+{
+  struct data_qt *d = (struct data_qt *) data;
+  d->p->drawText(x, y, QString(text), numtext);
+}
+
+void Plotter::draw(QPainter *p){
+  struct plot_eng plotQt;
+  struct data_qt d;
+  d.p= p;
+  d.color=color;
+  plotQt.sc=&SetForeground;
+  plotQt.pt=&DrawPoint;
+  plotQt.ln=&DrawLine;
+  plotQt.bx=&DrawRectangle;
+  plotQt.mp=&DrawPoints;
+  plotQt.ml=&DrawLines;
+  plotQt.st=&DrawString;
+  plotQt.pl=&pari_plot;
+  double xs = double(this->width()) / pari_plot.width,
+         ys = double(this->height()) / pari_plot.height;
+  gen_rectdraw0(&plotQt, (void *)&d, this->w, this->x, this->y,this->lw,xs,ys);
+}
 
 void Plotter::save( const QString& s, const QString& f){
 
@@ -147,48 +197,22 @@ void Plotter::save( const QString& s, const QString& f){
 
     p.begin( &pm, this);
     p.fillRect( 0, 0, pm.width(), pm.height(), white);
-    long *c;
-    for( int col = 1; col < MAX_COLORS; col++) {
-	c = rcolcnt[col];
-	p.setPen( color[col]);
-	if( _points[col].size()) p.drawPoints( _points[col]);
-	if( _seg[col].size()) p.drawLineSegments( _seg[col]);
-	for( int i = 0; i < c[ROt_BX]; i++) p.drawRect( _rec[col][i]);
-	for( int i = 0; i < c[ROt_ML]; i++) p.drawPolyline( _lines[col][i]);
-	for( int i = 0; i < c[ROt_ST]; i++)
-	    p.drawText ( _textPos[col].point(i), _texts[col][i]);
-    }
+    this->draw(&p);
     p.end();
 
     // supported formats in qt2: BMP, JPEG, PNG, PNM, XBM, XPM ; PNG is broken
     pm.save( s, f);
 }
 
-
 void Plotter::paintEvent( QPaintEvent *) {
 
     QPainter p;
     p.begin( this);
-    long *c;
-    for( int col = 1; col < MAX_COLORS; col++) {
-	c = rcolcnt[col];
-	p.setPen( color[col]);
-	if( _points[col].size()) p.drawPoints( _points[col]);
-	if( _seg[col].size()) p.drawLineSegments( _seg[col]);
-	for( int i = 0; i < c[ROt_BX]; i++) p.drawRect( _rec[col][i]);
- 	for( int i = 0; i < c[ROt_ML]; i++) p.drawPolyline( _lines[col][i]);
- 	for( int i = 0; i < c[ROt_ST]; i++)
-	    p.drawText ( _textPos[col].point(i), _texts[col][i]);
-    }
+    this->draw(&p);
     p.end();
 }
 
-
-void Plotter::resizeEvent( QResizeEvent *) {
-
-    this->plot();
-}
-
+void Plotter::resizeEvent( QResizeEvent *) { }
 
 #ifndef __FANCY_WIN__
 void Plotter::keyPressEvent( QKeyEvent *e) {
@@ -209,120 +233,6 @@ void Plotter::mouseReleaseEvent( QMouseEvent*) {
     emit clicked();
 }
 #endif
-
-
-void Plotter::plot() {
-
-    PariRect *e;
-    RectObj *p1;
-    long col, x0, y0;
-    long *c;
-
-    double xs = double(this->width())/pari_plot.width,
-	ys = double(this->height())/pari_plot.height;
-
-    for( int col = 1; col < MAX_COLORS; col++) {
-	c = rcolcnt[col];
-	c[ROt_PT]=c[ROt_LN]=c[ROt_BX]=c[ROt_ML]=c[ROt_ST]=0;
-    }
-
-    for( int i = 0; i < lw; i++) {
-	e = rectgraph[w[i]]; p1 = RHead( e); x0 = x[i]; y0 = y[i];
-	while(p1) {
-	    col = RoCol( p1); c = rcolcnt[col];
-	    switch( RoType( p1)) {
-		case ROt_PT:
-		    _points[col].setPoint( c[ROt_PT],
-					   DTOL((RoPTx(p1)+x0)*xs),
-					   DTOL((RoPTy(p1)+y0)*ys));
-		    c[ROt_PT]++;
-		    break;
-		case ROt_LN:
-		    _seg[col].setPoint( 2*c[ROt_LN],
-					DTOL((RoLNx1(p1)+x0)*xs),
-					DTOL((RoLNy1(p1)+y0)*ys));
-		    _seg[col].setPoint( 2*c[ROt_LN] + 1,
-					DTOL((RoLNx2(p1)+x0)*xs),
-					DTOL((RoLNy2(p1)+y0)*ys));
-		    c[ROt_LN]++;
-		    break;
-		case ROt_BX:
-		    _rec[col][c[ROt_BX]].setX( DTOL((RoBXx1(p1)+x0)*xs));
-		    _rec[col][c[ROt_BX]].setY( DTOL((RoBXy1(p1)+y0)*ys));
-		    _rec[col][c[ROt_BX]].setWidth(
-			DTOL((RoBXx2(p1)-RoBXx1(p1))*xs));
-		    _rec[col][c[ROt_BX]].setHeight(
-			DTOL((RoBXy2(p1)-RoBXy1(p1))*ys));
-		    c[ROt_BX]++;
-		    break;
-		case ROt_MP:
-		    double *ptx, *pty;
-		    ptx = RoMPxs(p1), pty = RoMPys(p1);
-		    for( int j = 0; j < RoMPcnt(p1); j++) {
-			_points[col].setPoint( c[ROt_PT]+j,
-					       DTOL((ptx[j]+x0)*xs),
-					       DTOL((pty[j]+y0)*ys));
-		    }
-		    c[ROt_PT]+=RoMPcnt(p1);
-		    break;
-		case ROt_ML:
-		    // double *ptx, *pty;
-		    ptx=RoMLxs(p1); pty=RoMLys(p1);
-		    _lines[col][c[ROt_ML]].resize( RoMLcnt(p1));
-		    for( int j = 0; j < RoMLcnt(p1); j++) 
-			_lines[col][c[ROt_ML]].setPoint( j,
-							 DTOL((ptx[j]+x0)*xs),
-							 DTOL((pty[j]+y0)*ys));
-		    c[ROt_ML]++;
-		    break;
-		case ROt_ST:
- 		    _texts[col][c[ROt_ST]] = QString( RoSTs(p1));
-
-		    long hjust, vjust, hgap, vgap, hgapsize, vgapsize, shift;
-
-		    hjust = RoSTdir(p1) & RoSTdirHPOS_mask;
-		    vjust = RoSTdir(p1) & RoSTdirVPOS_mask;
-		    hgap = RoSTdir(p1) & RoSTdirHGAP;
-		    hgapsize = pari_plot.hunit;  vgapsize = pari_plot.vunit;
-		    if (hgap)
-			hgap = (hjust == RoSTdirLEFT) ? hgapsize : -hgapsize;
-		    vgap = RoSTdir(p1) & RoSTdirVGAP;
-		    if (vgap)
-			vgap = (vjust == RoSTdirBOTTOM) ? 2*vgapsize : -2*vgapsize;
-		    if (vjust != RoSTdirBOTTOM)
-			vgap -= ((vjust == RoSTdirTOP) ? 2 : 1)*(pari_plot.fheight - 1);
-		    shift = (hjust == RoSTdirLEFT ? 0 :
-			     (hjust == RoSTdirRIGHT ? 2 : 1));
-
-		    _textPos[col].setPoint( c[ROt_ST],
-					    DTOL(( RoSTx(p1) + x0 + hgap
-						   - (strlen(RoSTs(p1)) * pari_plot.fwidth
-						      * shift)/2)*xs),
-					    DTOL((RoSTy(p1)+y0-vgap/2)*ys));
- 		    c[ROt_ST]++;
-		    break;
-		default:
-		    break;
-	    }
-	    p1 = RoNext( p1);
-	}
-    }
-}
-
-
-void Plotter::alloc() {
-    long *c;
-    plot_count(w, lw, rcolcnt);
-    for (int col = 1; col<MAX_COLORS; col++) {
-	c = rcolcnt[col];
-	_points[col].resize( c[ROt_PT]);
-	_seg[col].resize( 2*c[ROt_LN]);
-	_rec[col] = new QRect[c[ROt_BX]];
-	_lines[col] = new QPointArray[c[ROt_ML]];
-	_textPos[col].resize( c[ROt_ST]);
-	_texts[col] = new QString[c[ROt_ST]];
-    }
-}
 
 
 
