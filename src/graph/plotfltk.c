@@ -32,10 +32,7 @@ extern "C" {
 class Plotter: public Fl_Window {
 
 public:
-    //Plotter(int x, int y, int w, int h, const char
-    //   *label = 0);
     Plotter( long *w, long *x, long *y, long lw, const char* name = 0);
-    ~Plotter();
 
 private:
     void draw();
@@ -71,8 +68,6 @@ Plotter::Plotter( long *w, long *x, long *y, long lw,
     color[GAINSBORO] = rgb_color( 220, 220, 220);
 }
 
-Plotter::~Plotter() { }
-
 static void DrawPoint(void *data, long x, long y)
 {
   (void)data;
@@ -93,8 +88,9 @@ static void DrawRectangle(void *data, long x, long y, long w, long h)
 
 static void DrawPoints(void *data, long nb, struct plot_points *p)
 {
+  long i;
   (void)data;
-  for(int i=0;i<nb;i++) fl_point(p[i].x, p[i].y);
+  for (i=0; i<nb; i++) fl_point(p[i].x, p[i].y);
 }
 
 static void SetForeground(void *data, long col)
@@ -105,8 +101,9 @@ static void SetForeground(void *data, long col)
 
 static void DrawLines(void *data, long nb, struct plot_points *p)
 {
+  long i;
   (void)data;
-  for(int i=1;i<nb;i++) fl_line(p[i-1].x, p[i-1].y, p[i].x, p[i].y);
+  for (i=1; i<nb; i++) fl_line(p[i-1].x, p[i-1].y, p[i].x, p[i].y);
 }
 
 static void DrawString(void *data, long x, long y, char *text, long numtext)
