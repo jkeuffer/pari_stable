@@ -213,7 +213,7 @@ get_Char(GEN chi, GEN initc, GEN U, long prec)
 {
   GEN d, ch = cgetg(4, t_VEC), chic = get_chic(chi, gel(initc,2));
   if (U) chic = gmul(chic, U);
-  chic = primitive_part(chic, &d);
+  chic = Q_primitive_part(chic, &d);
   if (d) {
     GEN t = gdiv(gel(initc,1), d);
     d = denom(t);

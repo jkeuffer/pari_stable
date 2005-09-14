@@ -2966,9 +2966,9 @@ gcdmonome(GEN x, GEN y)
 GEN
 content(GEN x)
 {
-  long lx,i,tx=typ(x);
+  long lx, i, tx = typ(x);
   pari_sp av;
-  GEN p1;
+  GEN c;
 
   if (is_scalar_t(tx))
   {
@@ -3005,11 +3005,11 @@ content(GEN x)
       if (hx == 1) return gen_1;
       if (lx == 2) { x = gel(x,1); break; }
       if (hx == 2) { x = row_i(x, 1, 1, lx-1); break; }
-      p1 = content(gel(x,1));
+      c = content(gel(x,1));
       for (j=2; j<lx; j++)
-        for (i=1; i<hx; i++) p1 = ggcd(p1,gcoeff(x,i,j));
-      if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gen_1; }
-      return gerepileupto(av,p1);
+        for (i=1; i<hx; i++) c = ggcd(c,gcoeff(x,i,j));
+      if (typ(c) == t_INTMOD || isinexactreal(c)) { avma=av; return gen_1; }
+      return gerepileupto(av,c);
     }
 
     case t_POL: case t_SER:
@@ -3023,25 +3023,33 @@ content(GEN x)
   }
   for (i=lontyp[tx]; i<lx; i++)
     if (typ(x[i]) != t_INT) break;
-  lx--; p1=gel(x,lx);
+  lx--; c=gel(x,lx);
   if (i > lx)
   { /* integer coeffs */
     while (lx>lontyp[tx])
     {
-      lx--; p1=gcdii(p1,gel(x,lx));
-      if (is_pm1(p1)) { avma=av; return gen_1; }
+      lx--; c=gcdii(c,gel(x,lx));
+      if (is_pm1(c)) { avma=av; return gen_1; }
     }
   }
   else
   {
     while (lx>lontyp[tx])
     {
-      lx--; p1=ggcd(p1,gel(x,lx));
+      lx--; c=ggcd(c,gel(x,lx));
     }
-    if (typ(p1) == t_INTMOD || isinexactreal(p1)) { avma=av; return gen_1; }
+    if (typ(c) == t_INTMOD || isinexactreal(c)) { avma=av; return gen_1; }
   }
-  i = typ(p1); if (is_matvec_t(i)) err(typeer, "content");
-  return av==avma? gcopy(p1): gerepileupto(av,p1);
+  switch(typ(c))
+  {
+    case t_INT:
+      if (signe(c) < 0) c = negi(c);
+      break;
+    case t_VEC: case t_COL: case t_MAT:
+      err(typeer, "content");
+  }
+
+  return av==avma? gcopy(c): gerepileupto(av,c);
 }
 
 GEN
