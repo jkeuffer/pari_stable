@@ -96,7 +96,8 @@ GN 32- problems in MPQS : some factors missed e.g factor(2^263-9) -->
    36- rnfisnorminit(quadpoly(145,y),quadray(145,1)) --> stack overflow [#273]
    37- matker([1,2,3;4,5,6]*1.) --> [;]  (missing 1 vector)
    38- rnfconductor(bnfinit(y),x,1) --> error [#277]
-   39- add -fno-gcse-after-reload if using gcc-4 on ix86 [#274]
+   39- gcc-4.0 miscompiles PARI on ix86 [#274]
+       ( http://gcc.gnu.org/bugzilla/show_bug.cgi?id=23453 )
    40- truncate(1/4/x+1+O(x)) -> (x + 1/4)/x instead of (4*x + 1)/(4*x) [#276]
    41- bitneg(2^32-1,32) -> corrupt integer [#279]
    42- typo in rnf_is_abelian [#277]
