@@ -2749,12 +2749,12 @@ DOGEN:
 GEN
 plindep(GEN x)
 {
-  long i, j, prec = VERYBIGINT, lx = lg(x)-1, ly, v;
+  long i, j, prec = VERYBIGINT, nx = lg(x)-1, v;
   pari_sp av = avma;
   GEN p = NULL, pn,p1,m,a;
 
-  if (lx < 2) return cgetg(1,t_VEC);
-  for (i=1; i<=lx; i++)
+  if (nx < 2) return cgetg(1,t_VEC);
+  for (i=1; i<=nx; i++)
   {
     p1 = gel(x,i);
     if (typ(p1) != t_PADIC) continue;
@@ -2769,17 +2769,17 @@ plindep(GEN x)
   if (v != 0) x = gmul(x, gpowgs(p, -v));
   x = RgV_to_FpV(x, pn);
 
-  ly = 2*lx - 1;
-  m = cgetg(ly+1,t_MAT);
-  for (j=1; j<=ly; j++) gel(m,j) = zerocol(lx);
   a = negi(gel(x,1));
-  for (i=1; i<lx; i++)
+  m = cgetg(nx,t_MAT);
+  for (i=1; i<nx; i++)
   {
-    gcoeff(m,1+i,i) = a;
-    gcoeff(m,1  ,i) = gel(x,i+1);
+    GEN c = zerocol(nx);
+    gel(c,1+i) = a;
+    gel(c,1) = gel(x,i+1);
+    gel(m,i) = c;
   }
-  for (i=1; i<=lx; i++) gcoeff(m,i,lx-1+i) = pn;
-  m = lllint_ip(m, 100);
+  m = lllintpartial_ip( hnfmodid(m, pn) );
+  m = lllint_fp_ip(m, 100);
   return gerepilecopy(av, gel(m,1));
 }
 
