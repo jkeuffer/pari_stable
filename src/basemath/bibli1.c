@@ -3045,7 +3045,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   {
     case min_ALL:
       maxrank = itos(STOCKMAX);
-      if (maxrank < 1) err(talker,"negative number of vectors in minim0");
+      if (maxrank < 0) err(talker,"negative number of vectors in minim0");
       L = new_chunk(1+maxrank);
       break;
     case min_PERF:
