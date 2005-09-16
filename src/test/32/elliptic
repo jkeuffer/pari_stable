@@ -112,7 +112,7 @@ q^101)
 ? l=elllseries(ccurve,2)
 0.38157540826071121129371040958008663665
 ? elllseries(ccurve,2,1.2)-l
-7.34683969 E-39
+1.028557557 E-38
 ? tcurve=ellinit([1,0,1,-19,26]);
 ? ellorder(tcurve,[1,2])
 6
@@ -160,5 +160,5 @@ q^101)
 ? getheap
 [57, 4632]
 ? print("Total time spent: ",gettime);
-Total time spent: 60
+Total time spent: 33
 ? \q

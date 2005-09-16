@@ -2501,16 +2501,13 @@ constante()
       if (!signe(y)) { avma = av; return real_0_digits(n); }
   }
   l = lgefint(y); if (l < (long)prec) l = (long)prec;
-  y = itor(y, l);
-  if (n)
-  {
-    if (n > 0)
-      y = mulrr(y, rpowuu(10UL, (ulong)n, l+1));
-    else
-      y = divrr(y, rpowuu(10UL, (ulong)-n, l+1));
-    y = gerepileuptoleaf(av, y);
-  }
-  return y;
+  if (!n) return itor(y, l);
+  y = itor(y, l+1);
+  if (n > 0)
+    y = mulrr(y, rpowuu(10UL, (ulong)n, l+1));
+  else
+    y = divrr(y, rpowuu(10UL, (ulong)-n, l+1));
+  return gerepileuptoleaf(av, rtor(y, l));
 }
 
 /********************************************************************/
