@@ -1677,12 +1677,6 @@ extern0(char *s)
 }
 
 GEN
-default0(char *a, char *b, long flag)
-{
-  return setdefault(a,b, flag? d_RETURN: d_ACKNOWLEDGE);
-}
-
-GEN
 input0(void)
 {
   Buffer *b = new_buffer();

@@ -872,6 +872,12 @@ setdefault(const char *s, const char *v, int flag)
   return NULL; /* not reached */
 }
 
+GEN
+default0(char *a, char *b, long flag)
+{
+  return setdefault(a,b, flag? d_RETURN: d_ACKNOWLEDGE);
+}
+
 gp_data *
 default_gp_data(void)
 {

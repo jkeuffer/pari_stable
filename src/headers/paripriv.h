@@ -366,6 +366,7 @@ void  whatnow_new_syntax(char *f, long n);
 enum { d_SILENT, d_ACKNOWLEDGE, d_INITRC, d_RETURN, d_EXISTS };
 extern ulong prec;
 
+GEN default0(char *a, char *b, long flag);
 GEN sd_TeXstyle(const char *v, int flag);
 GEN sd_colors(char *v, int flag);
 GEN sd_compatible(const char *v, int flag);

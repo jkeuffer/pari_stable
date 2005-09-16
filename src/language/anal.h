@@ -202,7 +202,6 @@ GEN Strtex(GEN g);
 void alias0(char *s, char *old);
 void allocatemem0(size_t newsize);
 GEN  break0(long n);
-GEN  default0(char *a, char *b, long flag);
 GEN  extern0(char *cmd);
 void gp_quit(void);
 GEN  input0(void);
