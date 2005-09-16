@@ -43,12 +43,12 @@
 /x^2)-Pi/2
 -9.363352709384396655 E-97
 ? intnum(x=0,[oo,1],sin(x)^3*exp(-x))-0.3
-2.340838177346099163 E-97
+0.E-96
 ? intnum(x=0,[oo,-I],sin(x)^3*exp(-x))-0.3
--1.3352846258124984009 E-89
+-1.3352846492208801743 E-89
 ? tab=intnuminit(0,[oo,-I],m+1);
 ? intnum(x=0,oo,sin(x)^3*exp(-x),tab)-0.3
-2.340838177346099163 E-97
+0.E-96
 ? intnum(x=0,[oo,-I],x^2*sin(x))+2
 0.E-96
 ? tab=intnuminit(-1,1);
@@ -86,5 +86,5 @@
 ? a-b
 -1.3906711615670008645 E-308
 ? print("Total time spent: ",gettime);
-Total time spent: 14425
+Total time spent: 14306
 ? \q
