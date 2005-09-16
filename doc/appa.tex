@@ -92,7 +92,8 @@ specified via the \kbd{--share-prefix} argument. Man pages go into
 \kbd{\$share\_prefix/man}, Emacs files into
 \kbd{\$share\_prefix/emacs/site-lisp/pari}, and other system-independant data
 to various subdirectories of \kbd{\$share\_prefix/pari}: documentation,
-sample GP scripts and C code, extra packages like \kbd{galdata}.
+sample GP scripts and C code, extra packages like \kbd{elldata} or
+\kbd{galdata}.
 
 \noindent You can also set directly \kbd{--bindir} (executables),
 \kbd{--libdir} (library), \kbd{--includedir} (include files), \kbd{--mandir}
@@ -346,7 +347,12 @@ of just installing the new dynamic library. On the other hand, there is no
 risk of breaking them by installing a new pari library.
 
 \subsec{Extra packages:} The following optional packages endow PARI with some
-extra capabilities (a single package for now!).
+extra capabilities (only two packages for now!).
+
+$\bullet$ \kbd{elldata}: This package contains the elliptic curves in
+John Cremona's database. It is needed by the functions \kbd{ellidentify},
+\kbd{ellsearch} and can be used by \kbd{ellinit} to initialize a curve
+given by its standard code.
 
 $\bullet$ \kbd{galdata}: The default \kbd{polgalois} function can only
 compute Galois groups of polynomials of degree less or equal to 7. Install
@@ -406,8 +412,20 @@ online browsing (the manual is complete with hyperlinks); type
 you can link your C programs to the PARI library. A sample makefile
 \kbd{examples/Makefile} is provided to illustrate the use of the various
 libraries. Type \kbd{make all} in the \kbd{examples} directory to see how
-they perform on the \kbd{mattrans.c} program, which is commented in the
-manual.
+they perform on the \kbd{extgcd.c} program, which is commented in the
+manual. 
+
+This should produce a statically linked binary \kbd{extgcd-sta}
+(standalone), a dynamically linked binary \kbd{extgcd-dyn} (loads libpari
+at runtime) and a shared library \kbd{libextgcd}, which can be used from
+\kbd{gp} to \kbd{install} your new \kbd{extgcd} command.
+
+The standalone binary should be bulletproof, but the other two may fail
+for various reasons. If when running \kbd{extgcd-dyn}, you get a message
+of the form ``DLL not found'', then stick to statically linked binaries
+or look at your system documentation to see how to indicate at linking
+time where the required DLLs may be found! (E.g.~on Windows, you will
+need to move \kbd{libpari.dll} somewhere in your \kbd{PATH}.)
 
 \subsec{GP scripts:} Several complete sample GP programs are also given in
 the \kbd{examples} directory, for example Shanks's SQUFOF factoring method,
