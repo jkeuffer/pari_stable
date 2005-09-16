@@ -5,4 +5,6 @@ C-Name: read0
 Prototype: D"",s,
 Help: read({filename}): read from the input file filename. If filename is
  omitted, reread last input file, be it from read() or \r
+Description:
+ (str):gen      gp_read_file($1)
 
