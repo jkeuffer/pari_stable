@@ -2321,7 +2321,7 @@ leftright_pow_u(GEN x, ulong n, void *data, GEN (*sqr)(void*,GEN),
 }
 
 GEN
-divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
+divide_conquer_assoc(GEN x, GEN (*mul)(void *,GEN,GEN),void *data)
 {
   pari_sp ltop, lim;
   long i,k,lx = lg(x);
@@ -2336,7 +2336,7 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
       fprintferr("prod: remaining objects %ld\n",k-1);
     lx = k; k = 1;
     for (i=1; i<lx-1; i+=2)
-      gel(x,k++) = mul(gel(x,i),gel(x,i+1));
+      gel(x,k++) = mul(data,gel(x,i),gel(x,i+1));
     if (i < lx) x[k++] = x[i];
     if (low_stack(lim,stack_lim(av,1)))
       gerepilecoeffs(ltop,x+1,k-1);
@@ -2344,30 +2344,41 @@ divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
   return gel(x,1);
 }
 
-static GEN static_OBJ; /* nf or ell */
+static GEN
+_domul(void *data, GEN x, GEN y)
+{
+  GEN (*mul)(GEN,GEN)=(GEN (*)(GEN,GEN)) data;
+  return mul(x,y);
+}
+
+GEN
+divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN))
+{
+  return divide_conquer_assoc(x, _domul, (void *)mul);
+}
 
 static GEN
-idmulred(GEN x, GEN y) { return idealmulred(static_OBJ, x, y, 0); }
+idmulred(void *nf, GEN x, GEN y) { return idealmulred((GEN) nf, x, y, 0); }
 static GEN
-idpowred(GEN x, GEN n) { return idealpowred(static_OBJ, x, n, 0); }
+idpowred(void *nf, GEN x, GEN n) { return idealpowred((GEN) nf, x, n, 0); }
 static GEN
-idmul(GEN x, GEN y) { return idealmul(static_OBJ, x, y); }
+idmul(void *nf, GEN x, GEN y) { return idealmul((GEN) nf, x, y); }
 static GEN
-idpow(GEN x, GEN n) { return idealpow(static_OBJ, x, n); }
+idpow(void *nf, GEN x, GEN n) { return idealpow((GEN) nf, x, n); }
 static GEN
-eltmul(GEN x, GEN y) { return element_mul(static_OBJ, x, y); }
+eltmul(void *nf, GEN x, GEN y) { return element_mul((GEN) nf, x, y); }
 static GEN
-eltpow(GEN x, GEN n) { return element_pow(static_OBJ, x, n); }
+eltpow(void *nf, GEN x, GEN n) { return element_pow((GEN) nf, x, n); }
 
 #if 0
 static GEN
-ellmul(GEN x, GEN y) { return powell(static_OBJ, x, y); }
+ellmul(void *ell, GEN x, GEN y) { return addell((GEN) ell, x, y); }
 static GEN
-ellpow(GEN x, GEN n) { return idealpow(static_OBJ, x, n); }
+ellpow(void *GEN x, GEN n) { return powell((GEN) ell, x, n); }
 #endif
 
 GEN
-_factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
+_factorback(GEN fa, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(void*,GEN,GEN), void *data)
 {
   pari_sp av = avma;
   long k,l,lx,t = typ(fa);
@@ -2383,7 +2394,7 @@ _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
       if (l != 3) err(talker,"not a factorisation in factorback");
     } else {
       if (!is_vec_t(t)) err(talker,"not a factorisation in factorback");
-      return gerepileupto(av, divide_conquer_prod(fa, _mul));
+      return gerepileupto(av, divide_conquer_assoc(fa, _mul,data));
     }
     p = gel(fa,1);
     e = gel(fa,2);
@@ -2402,10 +2413,13 @@ _factorback(GEN fa, GEN e, GEN (*_mul)(GEN,GEN), GEN (*_pow)(GEN,GEN))
   x = cgetg(lx,t_VEC);
   for (l=1,k=1; k<lx; k++)
     if (signe(e[k]))
-      gel(x,l++) = _pow(gel(p,k),gel(e,k));
+      gel(x,l++) = _pow(data,gel(p,k),gel(e,k));
   setlg(x,l);
-  return gerepileupto(av, divide_conquer_prod(x, _mul));
+  return gerepileupto(av, divide_conquer_assoc(x, _mul,data));
 }
+
+static GEN _agmul(void *a, GEN x, GEN y) { return gmul(x,y);}
+static GEN _apowgi(void *a, GEN x, GEN y) { return powgi(x,y);}
 
 GEN
 factorback_i(GEN fa, GEN e, GEN OBJ, int red)
@@ -2415,11 +2429,10 @@ factorback_i(GEN fa, GEN e, GEN OBJ, int red)
     if (e) {
       OBJ = _checknf(e); if (OBJ) e = NULL;
     }
-    if (!OBJ) return _factorback(fa, e, &gmul, &powgi);
+    if (!OBJ) return _factorback(fa, e, &_agmul, &_apowgi, NULL);
   }
-  static_OBJ = OBJ;
-  if (red) return _factorback(fa, e, &idmulred, &idpowred);
-  else     return _factorback(fa, e, &idmul,    &idpow);
+  if (red) return _factorback(fa, e, &idmulred, &idpowred, OBJ);
+  else     return _factorback(fa, e, &idmul,    &idpow, OBJ);
 }
 
 GEN
@@ -2428,8 +2441,8 @@ factorbackelt(GEN fa, GEN e, GEN nf)
   if (!nf && e && lg(e) > 1 && typ(e[1]) != t_INT) { nf = e; e = NULL; }
   if (!nf) err(talker, "missing nf in factorbackelt");
 
-  static_OBJ = checknf(nf);
-  return _factorback(fa, e, &eltmul, &eltpow);
+  nf = checknf(nf);
+  return _factorback(fa, e, &eltmul, &eltpow, nf);
 }
 
 GEN

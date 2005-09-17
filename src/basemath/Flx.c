@@ -1211,11 +1211,10 @@ Flx_eval(GEN x, ulong y, ulong p)
   return p1;
 }
 
-static ulong global_pp;
 static GEN
-_Flx_mul(GEN a, GEN b)
+_Flx_mul(void *p, GEN a, GEN b)
 {
-  return Flx_mul(a,b, global_pp);
+  return Flx_mul(a,b, (ulong)p);
 }
 
 /* compute prod (x - a[i]) */
@@ -1225,7 +1224,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
   long i,k,lx = lg(a);
   GEN p1,p2;
   if (lx == 1) return Fl_to_Flx(1,vs);
-  p1 = cgetg(lx, t_VEC); global_pp = p;
+  p1 = cgetg(lx, t_VEC); 
   for (k=1,i=1; i<lx-1; i+=2)
   {
     p2 = cgetg(5,t_VECSMALL); gel(p1,k++) = p2;
@@ -1243,7 +1242,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
     p2[2] = a[i]?p - a[i]:0;
     p2[3] = 1;
   }
-  setlg(p1, k); return divide_conquer_prod(p1, _Flx_mul);
+  setlg(p1, k); return divide_conquer_assoc(p1, _Flx_mul,(void *)p);
 }
 
 GEN
@@ -2125,15 +2124,18 @@ FlxqXQ_pow(GEN x, GEN n, GEN S, GEN T, ulong p)
   return gerepileupto(av0, y);
 }
 
-static GEN Tmodulo;
-static ulong modulo; 
-static GEN _FlxqX_mul(GEN a,GEN b){return FlxqX_mul(a,b,Tmodulo,modulo);}
+struct _FlxqX {ulong p; GEN T;};
+static GEN _FlxqX_mul(void *data,GEN a,GEN b)
+{
+  struct _FlxqX *d=(struct _FlxqX*)data;
+  return FlxqX_mul(a,b,d->T,d->p);
+}
 
 GEN 
 FlxqXV_prod(GEN V, GEN T, ulong p)
 {
-  modulo = p; Tmodulo = T;
-  return divide_conquer_prod(V, &_FlxqX_mul);
+  struct _FlxqX d; d.p=p; d.T=T;
+  return divide_conquer_assoc(V, &_FlxqX_mul, (void*)&d);
 }
 
 GEN

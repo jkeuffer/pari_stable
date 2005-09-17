@@ -1493,6 +1493,7 @@ GEN     content(GEN x);
 GEN     deg1_from_roots(GEN L, long v);
 GEN     discsr(GEN x);
 GEN     divide_conquer_prod(GEN x, GEN (*mul)(GEN,GEN));
+GEN     divide_conquer_assoc(GEN x, GEN (*mul)(void*,GEN,GEN), void *data);
 GEN     factor(GEN x);
 GEN     factor0(GEN x,long flag);
 GEN     factorback(GEN fa,GEN nf);

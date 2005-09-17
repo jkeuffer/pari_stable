@@ -669,13 +669,11 @@ FpXQ_pow(GEN x, GEN n, GEN pol, GEN p)
   return gerepileupto(av, y);
 }
 
-static GEN modulo;
-static GEN _FpX_mul(GEN a,GEN b){return FpX_mul(a,b,modulo);}
+static GEN _FpX_mul(void *p,GEN a,GEN b){return FpX_mul(a,b,(GEN)p);}
 GEN 
 FpXV_prod(GEN V, GEN p)
 {
-  modulo = p; 
-  return divide_conquer_prod(V, &_FpX_mul);
+  return divide_conquer_assoc(V, &_FpX_mul,(void *)p);
 }
 
 GEN
@@ -1121,8 +1119,12 @@ FqX_divrem(GEN x, GEN y, GEN T, GEN p, GEN *z)
   return T? FpXQX_divrem(x,y,T,p,z): FpX_divrem(x,y,p,z);
 }
 
-static GEN Tmodulo;
-static GEN _FpXQX_mul(GEN a,GEN b){return FpXQX_mul(a,b,Tmodulo,modulo);}
+struct _FpXQX { GEN T,p; };
+static GEN _FpXQX_mul(void *data, GEN a,GEN b)
+{
+  struct _FpXQX *d=(struct _FpXQX*)data;
+  return FpXQX_mul(a,b,d->T,d->p);
+}
 GEN 
 FpXQXV_prod(GEN V, GEN T, GEN p)
 {
@@ -1135,8 +1137,13 @@ FpXQXV_prod(GEN V, GEN T, GEN p)
     Tl = FlxqXV_prod(Vl, Tl, pp);
     return gerepileupto(av, FlxX_to_ZXX(Tl));
   }
-  modulo = p; Tmodulo = T;
-  return divide_conquer_prod(V, &_FpXQX_mul);
+  else
+  {
+    struct _FpXQX d;
+    d.p=p; 
+    d.T=T;
+    return divide_conquer_assoc(V, &_FpXQX_mul,(void*)&d);
+  }
 }
 
 GEN
