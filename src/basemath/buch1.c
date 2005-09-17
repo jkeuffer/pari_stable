@@ -927,6 +927,17 @@ largeprime(long q, long *ex, long np, long nrho)
   return (pt[-2]==np)? (GEN)NULL: pt;
 }
 
+static void
+freehash(long **hash)
+{
+  long *pt;
+  long i;
+  for (i=0; i<HASHT; i++) {
+    for (pt = hash[i]; pt; pt = (long*) pt[0]) free((void*)(pt - 3));
+    hash[i] = NULL;
+  }
+}
+
 /* p | conductor of order of disc D ? */
 static int
 is_bad(GEN D, ulong p)
@@ -1528,6 +1539,7 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   primfact   = new_chunk(100);
   exprimfact = new_chunk(100);
   hashtab = (long**) new_chunk(HASHT);
+  for (i=0; i<HASHT; i++) hashtab[i] = NULL;
 
   drc = fabs(gtodouble(Disc));
   LOGD = log(drc);
@@ -1546,9 +1558,13 @@ buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec)
   }
   if (cbach <= 0.) err(talker,"Bach constant <= 0 in buchquad");
   av = avma; cbach /= 2;
+  powsubFB = subFB = NULL;
 
 /* LIMC = Max(cbach*(log D)^2, exp(sqrt(log D loglog D) / 8)) */
 START: avma = av; cbach = check_bach(cbach,6.);
+  if (subFB) gunclone(subFB);
+  if (powsubFB) gunclone(powsubFB);
+  freehash(hashtab);
   nreldep = nrelsup = 0;
   LIMC = (ulong)(cbach*LOGD2);
   if (LIMC < cp) { LIMC = cp; cbach = (double)LIMC / LOGD2; }
@@ -1567,7 +1583,6 @@ START: avma = av; cbach = check_bach(cbach,6.);
   nsubFB = lg(subFB) - 1;
   powsubFB = powsubFBquad(CBUCH+1);
   limhash = (LIMC & HIGHMASK)? (HIGHBIT>>1): LIMC*LIMC;
-  for (i=0; i<HASHT; i++) hashtab[i] = NULL;
 
   need = KC + RELSUP - 2;
   current = 0;
@@ -1636,11 +1651,11 @@ MORE:
   }
   /* DONE */
   if (!quad_be_honest()) goto START;
+  freehash(hashtab);
 
   gen = get_clgp(Disc,W,&cyc,PRECREG);
   gunclone(subFB);
   gunclone(powsubFB);
-
   res = cgetg(5,t_VEC);
   gel(res,1) = h;
   gel(res,2) = cyc;
