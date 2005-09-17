@@ -17,9 +17,6 @@ if test -n "$runpathprefix"; then
   RUNPTH=`config/ldflags "$LDneedsWl" "$runpathprefix $runpath"`
 fi
 
-# remove soname imformation
-MYDLLDFLAGS=`echo $DLLDFLAGS | sed -e 's/,*-[hsoname]*[,= \t]*\\$(LIBPARI.*)//'`
-
 cat > $file << EOT
 # Generic Makefile for PARI programs -- $pretty
 #
@@ -59,9 +56,9 @@ CC         = $CC
 CPPFLAGS   = -I. -I$includedir
 LD         = $LD
 LDFLAGS    = $LDFLAGS
-DLLD       = $DLLD_modules
-DLLDFLAGS  = $modulesflags
-EXTRADLLDFLAGS = $modulesextraflags
+MODLD       = $MODLD
+MODLDFLAGS  = $MODLDFLAGS
+EXTRAMODLDFLAGS = $EXTRAMODLDFLAGS
 EXTRALIBS  =
 
 RUNPTH     = $RUNPTH
@@ -86,7 +83,7 @@ dyn: \$(TARGET)-dyn
 dynlib: \$(DYN)
 
 \$(DYN): \$(OBJS)
-	\$(DLLD) -o \$@ \$(DLLDFLAGS) \$(OBJS) \$(EXTRADLLDFLAGS)
+	\$(MODLD) -o \$@ \$(MODLDFLAGS) \$(OBJS) \$(EXTRAMODLDFLAGS)
 
 \$(TARGET)-sta: \$(OBJS)
 	\$(LD) -o \$@ \$(LDFLAGS) \$< \$(EXTRALIBS) \$(STATIC) \$(LIBS)

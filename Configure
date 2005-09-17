@@ -133,33 +133,35 @@ case "$osname" in
     *) shell_q="'"; echo "shell_q=\"'\"" >> $dflt_conf_file;;
 esac
 
-mydlldflags=`echo "$DLLDFLAGS" | \
-   sed -e 's/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//' \
-       -e 's!\$(CFLAGS)'"!$CFLAGS!" \
-       -e 's/--out-implib=\$(LIBPARI_SO)\$(_A),\?//'`
-
 __LIBS=$LIBS
 if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
 case $osname in
-cygwin) modulesextraflags="-L$libdir -lpari.dll";;
-*)      modulesextraflags=`eval echo $EXTRADLLDFLAGS`;;
+cygwin) EXTRAMODLDFLAGS="-L$libdir -lpari.dll";;
+*)      EXTRAMODLDFLAGS=`eval echo $EXTRADLLDFLAGS`;;
 esac;
 LIBS=$__LIBS
 
 case $osname in
-darwin) DLLD_modules=$CC; 
-        modulesflags="-bundle -flat_namespace -undefined suppress -fno-common -O3 -DGCC_INLINE -Wall -fomit-frame-pointer -no-cpp-precomp";;
-*)      DLLD_modules="$DLLD"; modulesflags="$mydlldflags";;
+darwin) MODLD=$CC;
+        MODLDFLAGS="-bundle -flat_namespace -undefined suppress \
+\$(CFLAGS) \$(DLCFLAGS)";;
+*)      MODLD="$DLLD";
+        MODLDFLAGS=`echo "$DLLDFLAGS" | \
+   sed -e 's/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//' \
+       -e 's/--out-implib=\$(LIBPARI_SO)\$(_A),\?//'`;;
 esac;
-modules_build="$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$includedir %s.c &&
-$DLLD_modules -o %s.so $modulesflags %s.o $modulesextraflags"
+
+modules_build=`echo "$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$includedir %s.c \
+&& $MODLD -o %s.so $MODLDFLAGS %s.o $EXTRAMODLDFLAGS" | \
+               sed -e 's!\$(CFLAGS)'"!$CFLAGS!g" \
+                   -e 's!\$(DLCFLAGS)'"!$DLCFLAGS!g"`
 
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1\
   gnuas AS ASFLAGS KERNELCPPFLAGS LIBS\
-  modules_build DLLD_modules modulesflags modulesextraflags\
+  modules_build MODLD MODLDFLAGS EXTRAMODLDFLAGS\
   dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
