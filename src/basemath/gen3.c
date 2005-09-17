@@ -1286,6 +1286,35 @@ gsubst(GEN x, long v, GEN y)
   return gcopy(x);
 }
 
+GEN
+gsubstvec(GEN e, GEN v, GEN r)
+{
+  pari_sp ltop=avma;
+  long i,l=lg(v);
+  GEN w,z;
+  if ( !is_vec_t(typ(v)) || !is_vec_t(typ(r)) )
+    err(typeer,"substvec");
+  if (lg(r)!=l) 
+    err(talker,"different number of variables and values in substvec");
+  w=cgetg(l,t_VECSMALL);
+  z=cgetg(l,t_VECSMALL);
+  for(i=1;i<l;i++)
+  { 
+    GEN T=(GEN)v[i];
+    if (typ(T) != t_POL || !ismonome(T) || !gcmp1(leading_term(T)))
+      err(talker,"not a variable in substvec");
+    w[i]=varn(T);
+    z[i]=fetch_var();
+  }
+  for(i=1;i<l;i++)
+    e=gsubst(e,w[i],polx[z[i]]);
+  for(i=1;i<l;i++)
+    e=gsubst(e,z[i],(GEN)r[i]);
+  for(i=1;i<l;i++)
+    delete_var();
+  return gerepileupto(ltop,e);
+}
+
 /*******************************************************************/
 /*                                                                 */
 /*                SERIE RECIPROQUE D'UNE SERIE                     */

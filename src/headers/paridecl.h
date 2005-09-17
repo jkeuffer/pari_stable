@@ -1121,6 +1121,7 @@ GEN     ground(GEN x);
 GEN     gshift(GEN x, long n);
 GEN     gsubst(GEN x, long v, GEN y);
 GEN     gsubstpol(GEN x, GEN v, GEN y);
+GEN     gsubstvec(GEN x, GEN v, GEN y);
 GEN     gtocol(GEN x);
 GEN     gtopoly(GEN x, long v);
 GEN     gtopolyrev(GEN x, long v);

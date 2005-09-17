@@ -205,6 +205,7 @@ BA 10- support for ellinit("<curve name>") through elldata.
 BA 12- new function  FpC_Fp_mul, FpV_FpC_mul
 BA 13- new functions const_col, const_vec, vec_is1to1, vec_isconst
    14- new function gp_read_file
+BA 15- new function substvec
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
