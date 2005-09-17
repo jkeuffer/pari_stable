@@ -186,6 +186,7 @@ BA 27- rewrite rectdraw in an object-oriented way [ reduce code duplication
 BA 28- change the semantic of includedir to not include the pari suffix.
        Instead /pari is automatically added my make install.
    29- improve plindep (use lllintpartial and floating point LLL)
+      + allow lindep with p-adic entries
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

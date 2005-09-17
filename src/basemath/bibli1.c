@@ -1894,22 +1894,6 @@ zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 /**                                                                **/
 /********************************************************************/
 
-GEN pslq(GEN x);
-GEN pslqL2(GEN x);
-
-GEN
-lindep0(GEN x,long bit,long prec)
-{
-  switch (bit)
-  {
-    case 0: return pslq(x);
-    case -1: return lindep(x,prec);
-    case -2: return deplin(x);
-    case -3: return pslqL2(x);
-    default: return lindep2(x,labs(bit));
-  }
-}
-
 static int
 real_indep(GEN re, GEN im, long bitprec)
 {
@@ -2781,6 +2765,22 @@ plindep(GEN x)
   m = lllintpartial_ip( hnfmodid(m, pn) );
   m = lllint_fp_ip(m, 100);
   return gerepilecopy(av, gel(m,1));
+}
+
+GEN
+lindep0(GEN x,long bit,long prec)
+{
+  long i;
+  for (i = 1; i < lg(x); i++)
+    if (typ(gel(x,i)) == t_PADIC) return plindep(x);
+  switch (bit)
+  {
+    case 0: return pslq(x);
+    case -1: return lindep(x,prec);
+    case -2: return deplin(x);
+    case -3: return pslqL2(x);
+    default: return lindep2(x,labs(bit));
+  }
 }
 
 GEN

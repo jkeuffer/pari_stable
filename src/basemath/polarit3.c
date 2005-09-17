@@ -211,8 +211,8 @@ GEN
 RgV_to_FpV(GEN x, GEN p)
 {
   long i, l = lg(x);
-  GEN z = cgetg(l, t_VEC); z[1] = x[1];
-  for (i = 2; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
+  GEN z = cgetg(l, t_VEC);
+  for (i = 1; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
   return z;
 }
 
@@ -220,8 +220,8 @@ GEN
 RgC_to_FpC(GEN x, GEN p)
 {
   long i, l = lg(x);
-  GEN z = cgetg(l, t_COL); z[1] = x[1];
-  for (i = 2; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
+  GEN z = cgetg(l, t_COL);
+  for (i = 1; i < l; i++) gel(z,i) = Rg_to_Fp(gel(x,i), p);
   return z;
 }
 
