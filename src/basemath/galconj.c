@@ -670,12 +670,12 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       }
       cache[j]=cache[j+1]+mael(Cd,h,j);
     }
-    if (labs(cache[1])<=n )
+    if (-(ulong)cache[1]<n)
     {
       long ZZ=Z;
       for (j = 1; j < m; j++)
 	ZZ += polheadlong(gmael(C,SG[pf[j]],j),2,gl->Q);
-      if (labs(ZZ)<=n )
+      if (-(ulong)ZZ<n)
       {
 	u = v;
 	for (j = 1; j < m; j++)
@@ -987,7 +987,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
         ar[p1] = ar[p1+1] + V;
       }
 
-      if ( -n <= ar[1] && ar[1] <= n )
+      if (-(ulong)ar[1]<n)
       {
         for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
         {
