@@ -1,5 +1,4 @@
 Function: print1
-Class: gp
 Section: programming
 C-Name: print1
 Prototype: vs*

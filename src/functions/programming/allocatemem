@@ -1,5 +1,4 @@
 Function: allocatemem
-Class: gp
 Section: programming
 C-Name: allocatemem0
 Prototype: vD0,L,

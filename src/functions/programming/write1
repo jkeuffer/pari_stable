@@ -1,5 +1,4 @@
 Function: write1
-Class: gp
 Section: programming
 C-Name: write1
 Prototype: vss*

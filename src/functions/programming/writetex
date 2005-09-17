@@ -1,5 +1,4 @@
 Function: writetex
-Class: gp
 Section: programming
 C-Name: writetex
 Prototype: vss*

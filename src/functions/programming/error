@@ -1,5 +1,4 @@
 Function: error
-Class: gp
 Section: programming
 C-Name: error0
 Prototype: vs*

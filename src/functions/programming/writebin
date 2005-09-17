@@ -1,5 +1,4 @@
 Function: writebin
-Class: gp
 Section: programming
 C-Name: gpwritebin
 Prototype: vsDG
