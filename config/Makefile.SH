@@ -587,6 +587,10 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags -I$src/graph"
     depend="$src/graph/rect.h $src/gp/gp_init.h"
     ;;
+  default)
+    depend="$src/language/anal.h ./paricfg.h"
+    cflags="$cflags \$(DLCFLAGS)"
+    ;;
   plotport)
     cflags="$cflags -I$src/graph"
     depend="$src/graph/rect.h"
@@ -609,7 +613,7 @@ for dir in basemath modules language gp graph graphdyn systems; do
     cflags="$cflags \$(PLOTCFLAGS)"
     depend="$src/graph/rect.h"
     ;;
-  default|es|sumiter)
+  es|sumiter)
     depend="$src/language/anal.h"
     cflags="$cflags \$(DLCFLAGS)"
     ;;
