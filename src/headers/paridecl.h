@@ -853,6 +853,10 @@ long    qpsolublenf(GEN bnf,GEN pol,GEN p);
 long    zpsoluble(GEN pol,GEN p);
 long    zpsolublenf(GEN bnf,GEN pol,GEN p);
 
+/* default.c */
+
+GEN default0(char *a, char *b, long flag);
+
 /* elliptic.c */
 
 GEN     addell(GEN e, GEN z1, GEN z2);
