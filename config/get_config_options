@@ -111,6 +111,18 @@ while test $# -gt 0; do
   esac
   shift
 done
+# Convert relative paths to absolute.
+# Variables that can be set interactively should not be listed here,
+# see get_install.
+for i in with_readline with_readline-lib with_readline-include \
+         with_gmp with_gmp_lib with_gmp_include \
+         with_ncurses_lib with_qt with_fltk ; do
+  eval "dflt=\"\$$i\""
+  case $dflt in 
+    ''|yes|/*) ;; 
+            *) eval "$i='$TOP/$dflt'";;
+  esac
+done
 # The behaviour of $prefix/lib --> '//lib' is implementation-dependent
 case "$prefix" in /) prefix=;; esac
 case "$share_prefix" in /) prefix=;; esac
