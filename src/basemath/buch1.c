@@ -933,7 +933,10 @@ freehash(long **hash)
   long *pt;
   long i;
   for (i=0; i<HASHT; i++) {
-    for (pt = hash[i]; pt; pt = (long*) pt[0]) free((void*)(pt - 3));
+    for (pt = hash[i]; pt; ) {
+      void *z = (void*)(pt - 3);
+      pt = (long*) pt[0]; free(z);
+    }
     hash[i] = NULL;
   }
 }
