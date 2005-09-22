@@ -124,6 +124,7 @@ Incompatible changes:
       old = precdl; precdl = prec; x = taniyama(e); precdl = old;
   - rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
     flisseq -> freadseq
+  - rename idmat -> matid
 
 Partially compatible changes:
 -----------------------------

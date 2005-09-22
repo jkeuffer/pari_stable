@@ -21,7 +21,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /* Flx.c */
 GEN     Fl_to_Flx(ulong x, long sv);
 GEN     Flc_to_ZC(GEN z);
-GEN     Flm_id(long n);
 GEN     Flm_to_FlxV(GEN x, long sv);
 GEN     Flm_to_FlxX(GEN x, long v,long w);
 GEN     Flm_to_ZM(GEN z);
@@ -155,7 +154,8 @@ GEN     gtomat(GEN x);
 GEN     gtrans(GEN x);
 GEN     shallowtrans(GEN x);
 int     hnfdivide(GEN A, GEN B);
-GEN     idmat(long n);
+GEN     matid(long n);
+GEN     matid_Flm(long n);
 GEN     idmat_intern(long n,GEN myun,GEN myzero);
 GEN     image(GEN x);
 GEN     image2(GEN x);

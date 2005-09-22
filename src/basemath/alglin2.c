@@ -183,7 +183,7 @@ caradj(GEN x, long v, GEN *py)
   if (l == 1) { if (py) *py = cgetg(1,t_MAT); return p; }
   av = avma; t = gerepileupto(av, gneg(mattrace(x)));
   gel(p,l) = t;
-  if (l == 2) { if (py) *py = idmat(1); return p; }
+  if (l == 2) { if (py) *py = matid(1); return p; }
   if (l == 3) {
     GEN a = gcoeff(x,1,1), b = gcoeff(x,1,2);
     GEN c = gcoeff(x,2,1), d = gcoeff(x,2,2);
@@ -984,7 +984,7 @@ matrixqz(GEN x, GEN p)
   {
     p1 = det(x);
     if (gcmp0(p1)) err(talker,"matrix of non-maximal rank in matrixqz");
-    avma = av; return idmat(n);
+    avma = av; return matid(n);
   }
   /* m > n */
   p1 = x; x = cgetg(n+1,t_MAT);
@@ -1766,7 +1766,7 @@ hnfspec_i(long** mat0, GEN perm, GEN* ptdep, GEN* ptB, GEN* ptC, long k0)
   av = avma; lim = stack_lim(av,1);
 
   i = lig = li-1; col = co-1; lk0 = k0;
-  T = (k0 || (lg(C) > 1 && lg(C[1]) > 1))? idmat(col): NULL;
+  T = (k0 || (lg(C) > 1 && lg(C[1]) > 1))? matid(col): NULL;
   /* Look for lines with a single non-0 entry, equal to 1 in absolute value */
   while (i > lk0)
     switch( count(mat,perm[i],col,&n) )
@@ -2674,7 +2674,7 @@ hnflll_i(GEN A, GEN *ptB, int remove)
   if (typ(A) != t_MAT) err(typeer,"hnflll");
   n = lg(A);
   A = ZM_copy(fix_rows(A));
-  B = ptB? idmat(n-1): NULL;
+  B = ptB? matid(n-1): NULL;
   D = (GEN*)cgetg(n+1,t_VEC); lambda = (GEN**) cgetg(n,t_MAT);
   D++;
   for (i=0; i<n; i++) D[i] = gen_1;
@@ -2786,7 +2786,7 @@ extendedgcd(GEN A)
   for (i=1; i<n; i++)
     if (typ(A[i]) != t_INT) err(typeer,"extendedgcd");
   A = shallowcopy(A);
-  B = idmat(n-1);
+  B = matid(n-1);
   D = (GEN*)new_chunk(n); lambda = (GEN**) cgetg(n,t_MAT);
   for (i=0; i<n; i++) D[i] = gen_1;
   for (i=1; i<n; i++) lambda[i] = (GEN*)zerocol(n-1);
@@ -2845,7 +2845,7 @@ hnfperm_i(GEN A, GEN *ptU, GEN *ptperm)
   perm = cgetg(m+1, t_VECSMALL);
   av1 = avma; lim = stack_lim(av1,1);
   A = shallowcopy(A);
-  U = ptU? idmat(n): NULL;
+  U = ptU? matid(n): NULL;
   /* U base change matrix : A0*U = A all along */
   for (r=0, k=1; k <= n; k++)
   {
@@ -2973,7 +2973,7 @@ hnfall_i(GEN A, GEN *ptB, long remove)
   h = cgetg(n+1,t_VECSMALL); for (j=1; j<=n; j++) h[j]=m;
   av1 = avma; lim = stack_lim(av1,1);
   A = shallowcopy(A);
-  B = ptB? idmat(n): NULL;
+  B = ptB? matid(n): NULL;
   r = n+1;
   for (li=m; li; li--)
   {
@@ -3174,7 +3174,7 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
   if (m == n && ZM_ishnf(x))
   {
     mdet = dethnf_i(x);
-    if (V) *ptV = idmat(n);
+    if (V) *ptV = matid(n);
   }
   else
   {
@@ -3224,11 +3224,11 @@ smithall(GEN x, GEN *ptU, GEN *ptV)
     {
       x = cgetg(1,t_MAT);
       if (V) V = cgetg(1, t_MAT);
-      if (U) U = idmat(m);
+      if (U) U = matid(m);
     }
     goto THEEND;
   }
-  if (U) U = idmat(n);
+  if (U) U = matid(n);
 
   /* square, maximal rank n */
   p1 = gen_sort(mattodiagonal_i(x), cmp_IND | cmp_C, &negcmpii);
@@ -3435,7 +3435,7 @@ gsmithall(GEN x,long all)
   if (lg(x[1]) != n+1) err(mattype1,"gsmithall");
   av = avma; lim = stack_lim(av,1);
   x = shallowcopy(x);
-  if (all) { U = idmat(n); V = idmat(n); }
+  if (all) { U = matid(n); V = matid(n); }
   for (i=n; i>=2; i--)
   {
     for(;;)

@@ -400,7 +400,7 @@ static GEN
 expand_sub(GEN x, long n)
 {
   long i,j, m = lg(x);
-  GEN p = idmat(n-1), q,c;
+  GEN p = matid(n-1), q,c;
 
   for (i=1; i<m; i++)
   {

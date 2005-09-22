@@ -226,7 +226,7 @@ matinv(GEN x, GEN d)
   long i,j,k, n = lg(x[1]); /* Warning: lg(x) from ordmax is bogus */
   GEN y,h;
 
-  y = idmat(n-1);
+  y = matid(n-1);
   for (i=1; i<n; i++)
     gcoeff(y,i,i) = diviiexact(d,gcoeff(x,i,i));
   av=avma;
@@ -274,7 +274,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
   w = (GEN*)new_chunk(n+1);
 
   av2 = avma; limit = stack_lim(av2,1);
-  delta=gen_1; m=idmat(n);
+  delta=gen_1; m=matid(n);
 
   for(;;)
   {
@@ -451,7 +451,7 @@ allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
   cf[2]=companion(f);
   for (i=3; i<=n; i++) cf[i]=mulmati(cf[2],cf[i-1]);
 
-  a=idmat(n); da=gen_1;
+  a=matid(n); da=gen_1;
   for (i=1; i<=h; i++)
   {
     pari_sp av1 = avma;
@@ -684,7 +684,7 @@ allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
   else
   {
     *index = gen_1;
-    a = idmat(n);
+    a = matid(n);
   }
 
   if (ptw)
@@ -1913,7 +1913,7 @@ get_LV(GEN nf, GEN L, GEN p, long N)
   GEN LV, LW, A, B;
 
   LV = cgetg(l+1, t_VEC);
-  if (l == 1) { gel(LV,1) = idmat(N); return LV; }
+  if (l == 1) { gel(LV,1) = matid(N); return LV; }
   LW = cgetg(l+1, t_VEC);
   for (i=1; i<=l; i++) gel(LW,i) = Fp_basis(nf, gel(L,i));
 
@@ -2783,10 +2783,10 @@ rnfdedekind_i(GEN nf, GEN P, GEN pr, long vdisc)
 static GEN
 triv_order(long n, long m)
 {
-  GEN I, z = cgetg(3, t_VEC), id = idmat(m);
+  GEN I, z = cgetg(3, t_VEC), id = matid(m);
   long i;
   I = cgetg(n+1,t_VEC); for (i=1; i<=n; i++) gel(I,i) = id;
-  gel(z,1) = idmat(n);
+  gel(z,1) = matid(n);
   gel(z,2) = I; return z;
 }
 
@@ -2830,8 +2830,8 @@ rnfordmax(GEN nf, GEN pol, GEN pr, long vdisc)
   n = degpol(pol); vpol = varn(pol);
   q = T? powiu(p,degpol(T)): p;
   q1 = q; while (cmpiu(q1,n) < 0) q1 = mulii(q1,q);
-  rnfId = idmat(n);
-  id    = idmat(degpol(nfT));
+  rnfId = matid(n);
+  id    = matid(degpol(nfT));
 
   prhinv = idealinv(nf, pr);
   C = cgetg(n+1, t_MAT);
@@ -3029,7 +3029,7 @@ rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pf)
       if (ep[i]>1) fprintferr("%Z^%ld\n",P[i],ep[i]);
     flusherr();
   }
-  id = idmat(N); z = NULL;
+  id = matid(N); z = NULL;
   for (i=1; i < l; i++)
     if (ep[i] > 1)
     {
@@ -3101,7 +3101,7 @@ rnfsimplifybasis(GEN bnf, GEN x)
   x = shallowcopy(x);
   A = gel(x,1);
   I = gel(x,2); l = lg(I);
-  id = idmat(degpol(nf[1]));
+  id = matid(degpol(nf[1]));
   Az = cgetg(l, t_MAT); gel(x,1) = Az;
   Iz = cgetg(l, t_VEC); gel(x,2) = Iz;
   for (i = 1; i < l; i++)
@@ -3193,7 +3193,7 @@ rnfsteinitz(GEN nf, GEN order)
   GEN Id,A,I,p1,a,b;
 
   nf = checknf(nf);
-  Id = idmat(degpol(nf[1]));
+  Id = matid(degpol(nf[1]));
   order = get_order(nf, order, "rnfsteinitz");
   A = matalgtobasis(nf, gel(order,1));
   I = shallowcopy(gel(order,2)); n=lg(A)-1;
@@ -3243,7 +3243,7 @@ rnfbasis(GEN bnf, GEN order)
   GEN nf, A, I, cl, col, a, id;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  id = idmat(degpol(nf[1]));
+  id = matid(degpol(nf[1]));
   order = get_order(nf, order, "rnfbasis");
   I = gel(order,2); n = lg(I)-1;
   j=1; while (j<n && gequal(gel(I,j),id)) j++;
@@ -3278,7 +3278,7 @@ rnfhermitebasis(GEN bnf, GEN order)
   GEN nf, A, I, a, id;
 
   bnf = checkbnf(bnf); nf = gel(bnf,7);
-  id = idmat(degpol(nf[1]));
+  id = matid(degpol(nf[1]));
   order = get_order(nf, order, "rnfbasis");
   A = gel(order,1); A = shallowcopy(A);
   I = gel(order,2); n = lg(A)-1;
@@ -3302,7 +3302,7 @@ _rnfisfree(GEN bnf, GEN order)
   bnf = checkbnf(bnf);
   if (gcmp1(gmael3(bnf,8,1,1))) return 1;
 
-  nf = gel(bnf,7); id = idmat(degpol(nf[1]));
+  nf = gel(bnf,7); id = matid(degpol(nf[1]));
   order = get_order(nf, order, "rnfisfree");
   I = gel(order,2); n = lg(I)-1;
   j=1; while (j<=n && gequal(gel(I,j),id)) j++;
@@ -3688,7 +3688,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   I = shallowcopy(I);
   H = NULL;
   MPOL = matbasistoalg(nf, M);
-  MCS = idmat(lx-1); /* dummy for gerepile */
+  MCS = matid(lx-1); /* dummy for gerepile */
 PRECNF:
   if (count == MAX_COUNT)
   {
@@ -3706,7 +3706,7 @@ PRECPB:
     H = H? gmul(H, h): h;
     MPOL = gmul(MPOL, h);
   }
-  h = idmat(lx-1);
+  h = matid(lx-1);
   MC = mattocomplex(nf, MPOL);
   mu = cgetg(lx,t_MAT);
   B  = cgetg(lx,t_COL);
@@ -3778,7 +3778,7 @@ rnfpolred(GEN nf, GEN pol, long prec)
   id = rnfpseudobasis(nf,pol);
   if (bnf && gcmp1(gmael3(bnf,8,1,1))) /* if bnf is principal */
   {
-    GEN newI, newO, zk = idmat(degpol(nfpol));
+    GEN newI, newO, zk = matid(degpol(nfpol));
     O = gel(id,1);
     I = gel(id,2); n = lg(I)-1;
     newI = cgetg(n+1,t_VEC);
@@ -3861,7 +3861,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
     }
   }
   B = Q_remove_denom(B, &den);
-  if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = idmat(m);
+  if (den) { B = hnfmodid(B, den); B = gdiv(B, den); } else B = matid(m);
   return gerepilecopy(av, mkvec2(polabs, B));
 }
 

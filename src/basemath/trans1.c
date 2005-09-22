@@ -303,7 +303,7 @@ puiss0(GEN x)
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);
       if (lx != lg(x[1])) err(mattype1,"gpow");
-      y = idmat(lx-1);
+      y = matid(lx-1);
       for (i=1; i<lx; i++) gcoeff(y,i,i) = puiss0(gcoeff(x,i,i));
       return y;
     case t_QFR: return qfr_unit(x);

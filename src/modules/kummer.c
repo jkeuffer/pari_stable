@@ -645,7 +645,7 @@ static GEN
 Stelt(GEN nf, GEN id, GEN polrel)
 {
   long i, l = lg(id);
-  GEN x, A, I, matid = idmat(degpol(nf[1]));
+  GEN x, A, I, matid = matid(degpol(nf[1]));
 
   A = cgetg(l, t_VEC);
   I = cgetg(l, t_VEC);
@@ -963,7 +963,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   {
     for (j=1; j<=rc; j++) gel(vecC,j) = cgetg(1, t_MAT);
     p1 = cgetg(m,t_VEC);
-    gel(p1,1) = idmat(rc);
+    gel(p1,1) = matid(rc);
     for (j=2; j<=m-1; j++) gel(p1,j) = gmul(gel(p1,j-1),Tc);
     p2 = vecB;
     for (j=1; j<=m-1; j++)

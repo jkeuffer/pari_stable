@@ -253,7 +253,7 @@ makenfabs(GEN rnf)
   n = lg(M)-1;
   M = RgXV_to_RgM(Q_remove_denom(M, &d), n);
   if (d) M = gdiv(hnfcenter_ip(hnfmodid(M, d)), d);
-  else   M = idmat(n);
+  else   M = matid(n);
 
   gel(NF,1) = pol;
   gel(NF,3) = mulii(powiu(gel(nf,3), degpol(rnf[1])),
@@ -557,7 +557,7 @@ prodid(GEN nf, GEN I)
 {
   long i, l = lg(I);
   GEN z;
-  if (l == 1) return idmat(degpol(nf[1]));
+  if (l == 1) return matid(degpol(nf[1]));
   z = gel(I,1);
   for (i=2; i<l; i++) z = idealmul(nf, z, gel(I,i));
   return z;
@@ -581,7 +581,7 @@ rnfidealnormrel(GEN rnf, GEN id)
   GEN z, nf = gel(rnf,10);
 
   checkrnf(rnf);
-  if (degpol(rnf[1]) == 1) return idmat(degpol(nf[1]));
+  if (degpol(rnf[1]) == 1) return matid(degpol(nf[1]));
 
   z = prodid(nf, (GEN)rnfidealhermite(rnf,id)[2]);
   return gerepileupto(av, idealmul(nf,z, gel(rnf,4)));
@@ -626,7 +626,7 @@ rnfidealabstorel(GEN rnf, GEN x)
   if (lg(x)-1 != N) err(typeer, "rnfidealabstorel");
   if (typ(x) != t_VEC) err(typeer,"rnfidealabstorel");
   A = cgetg(N+1,t_MAT);
-  I = cgetg(N+1,t_VEC); z = mkvec2(A,I); id = idmat(m);
+  I = cgetg(N+1,t_VEC); z = mkvec2(A,I); id = matid(m);
   for (j=1; j<=N; j++)
   {
     GEN t = lift_intern( rnfelementabstorel(rnf, gel(x,j)) );

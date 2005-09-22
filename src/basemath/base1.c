@@ -1312,7 +1312,7 @@ get_LLL_basis(nfbasic_t *T, GEN *pro)
   {
     long MARKED = 1;
     u = lllfp_marked(&MARKED, make_Tr(T->x, T->bas), 100, 0, DEFAULTPREC, 1);
-    if (!u) u = idmat(1);
+    if (!u) u = matid(1);
     else
       if (MARKED != 1) lswap(u[1], u[MARKED]);
   }
@@ -1415,7 +1415,7 @@ nfpolred(int part, nfbasic_t *T)
   rev = modreverse_i(phi, x);
   for (i=1; i<=n; i++) gel(a,i) = RgX_RgXQ_compo(gel(a,i), rev, xbest);
   mat = RgXV_to_RgM(Q_remove_denom(a, &d), n);
-  if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = idmat(n);
+  if (d) mat = gdiv(hnfmodid(mat,d), d); else mat = matid(n);
 
   (void)carrecomplet(diviiexact(dxbest,T->dK), &(T->index));
   T->bas= RgM_to_RgXV(mat, v);
@@ -1693,7 +1693,7 @@ ordred(GEN x)
   if (typ(x) != t_POL) err(typeer,"ordred");
   if (!gcmp1(leading_term(x))) err(impl,"ordred");
   if (!signe(x)) return gcopy(x);
-  y = mkvec2(x, idmat(degpol(x)));
+  y = mkvec2(x, matid(degpol(x)));
   return gerepileupto(av, polred(y));
 }
 

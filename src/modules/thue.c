@@ -160,7 +160,7 @@ T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
   m1 = logabs(m1,prec);
 
   A = invmat(m1);
-  IntM = gsub(gmul(A,m1), idmat(r));
+  IntM = gsub(gmul(A,m1), matid(r));
 
   eps2 = gadd(vecmax(gabs(IntM,prec)), real2n(-e, prec));
   nia = vecmax(gabs(A,prec));
@@ -372,7 +372,7 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
 		    gpow(B0, dbltor(2.2), DEFAULTPREC)), &e);
 
   if (DEBUGLEVEL > 1) fprintferr("C (bitsize) : %d\n", expi(C)); 
-  lllmat = idmat(3);
+  lllmat = matid(3);
   if (gcmp(B0, BS -> Ind) > 0) 
   {
     gcoeff(lllmat, 1, 1) = grndtoi(divri(B0, BS -> Ind), &e); 
@@ -463,7 +463,7 @@ GuessQi(GEN b, GEN c, GEN *eps)
 {
   GEN Q, Lat, C = int2n(33);
 
-  Lat = idmat(3);
+  Lat = matid(3);
   gmael(Lat,1,3) = C;
   gmael(Lat,2,3) = ground(gmul(C,b));
   gmael(Lat,3,3) = ground(gmul(C,c));

@@ -1934,7 +1934,7 @@ Idealstar(GEN nf, GEN ideal,long add_gen)
   {
     cyc = cgetg(nbgen+1, t_VEC);
     for (j=1; j<=nbgen; j++) gel(cyc,j) = gen_2;
-    U = idmat(nbgen);
+    U = matid(nbgen);
     if (add_gen) u1 = gen_1;
   }
 
@@ -2251,7 +2251,7 @@ Ideallist(GEN bnf, ulong bound, long flag)
 
   nf = checknf(bnf);
   if ((long)bound <= 0) return empty;
-  id = idmat(degpol(nf[1]));
+  id = matid(degpol(nf[1]));
   if (big_id) id = Idealstar(nf,id,do_gen);
 
   /* z[i] will contain all "objects" of norm i. Depending on flag, this means

@@ -409,9 +409,9 @@ Buchray(GEN bnf,GEN module,long flag)
     gel(y,1) = bnf;
     gel(y,2) = bid;
     gel(y,3) = El;
-    gel(y,4) = idmat(ngen);
+    gel(y,4) = matid(ngen);
     gel(y,5) = clg;
-    gel(y,6) = mkvec2(cgetg(1,t_MAT), idmat(RU));
+    gel(y,6) = mkvec2(cgetg(1,t_MAT), matid(RU));
     return gerepilecopy(av,y);
   }
 
@@ -2058,7 +2058,7 @@ decodemodule(GEN nf, GEN fa)
     id = id? idealmulpowprime(nf,id, pr,e)
            : idealpow(nf, pr,e);
   }
-  if (!id) { avma = av; return idmat(n); }
+  if (!id) { avma = av; return matid(n); }
   return gerepileupto(av,id);
 }
 
@@ -2099,7 +2099,7 @@ discrayabslistarch(GEN bnf, GEN arch, long bound)
   bidp = Idealstar(nf, mkvec2(gen_1, arch), 0);
   if (allarch) {
     matarchunit = zlog_units(nf, U, sgnU, bidp);
-    bidp = Idealstar(nf,idmat(degk),0);
+    bidp = Idealstar(nf,matid(degk),0);
     if (r1>15) err(talker,"r1>15 in discrayabslistarch");
     nba = r1;
   } else {

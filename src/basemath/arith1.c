@@ -2350,7 +2350,7 @@ pnqn(GEN x)
   GEN p0, p1, q0, q1, a, b, p2, q2;
 
   if (! is_matvec_t(tx)) err(typeer,"pnqn");
-  lx=lg(x); if (lx==1) return idmat(2);
+  lx=lg(x); if (lx==1) return matid(2);
   p0=gen_1; q0=gen_0;
   if (tx != t_MAT)
   {

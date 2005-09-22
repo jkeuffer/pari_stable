@@ -690,7 +690,7 @@ idmat_intern(long n, GEN _1, GEN _0) {
   fill_scalmat(y, _1, _0, n); return y;
 }
 GEN
-idmat(long n) { return idmat_intern(n, gen_1, gen_0); }
+matid(long n) { return idmat_intern(n, gen_1, gen_0); }
 
 static void
 fill_scalcol(GEN y, GEN t, GEN _0, long n)
@@ -865,7 +865,7 @@ GEN
 matmultodiagonal(GEN A, GEN B)
 {
   long i, j, hA, hB, lA = lg(A), lB = lg(B);
-  GEN y = idmat(lB-1);
+  GEN y = matid(lB-1);
 
   if (typ(A) != t_MAT || typ(B) != t_MAT) err(typeer,"matmultodiagonal");
   hA = (lA == 1)? lB: lg(A[1]);
@@ -1250,7 +1250,7 @@ init_gauss(GEN a, GEN *b, long *aco, long *li, int *iscol)
     }
   }
   else
-    *b = idmat(*li);
+    *b = matid(*li);
   return 1;
 }
 
@@ -1408,11 +1408,11 @@ Flm_gauss_sp(GEN a, GEN b, ulong p)
 }
 
 GEN
-Flm_id(long n)
+matid_Flm(long n)
 {
   GEN y = cgetg(n+1,t_MAT);
   long i;
-  if (n < 0) err(talker,"negative size in Flm_id");
+  if (n < 0) err(talker,"negative size in matid_Flm");
   for (i=1; i<=n; i++) { gel(y,i) = const_vecsmall(n, 0); ucoeff(y, i,i) = 1; }
   return y;
 }
@@ -1423,7 +1423,7 @@ Flm_gauss(GEN a, GEN b, ulong p) {
 }
 static GEN
 Flm_inv_sp(GEN a, ulong p) {
-  return Flm_gauss_sp(a, Flm_id(lg(a)-1), p);
+  return Flm_gauss_sp(a, matid_Flm(lg(a)-1), p);
 }
 GEN
 Flm_inv(GEN a, ulong p) {
@@ -2331,7 +2331,7 @@ image2(GEN x)
   k=lg(x)-1; if (!k) return gcopy(x);
   n=lg(x[1])-1; p1=ker(x); k=lg(p1)-1;
   if (k) { p1=suppl(p1); n=lg(p1)-1; }
-  else p1=idmat(n);
+  else p1=matid(n);
 
   tetpil=avma; p2=cgetg(n-k+1,t_MAT);
   for (i=k+1; i<=n; i++) gel(p2,i-k) = gmul(x,gel(p1,i));

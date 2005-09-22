@@ -847,7 +847,7 @@ idealadd(GEN nf, GEN x, GEN y)
   }
   if (gcmp1(p1))
   {
-    if (!dz) { avma = av; return idmat(N); }
+    if (!dz) { avma = av; return matid(N); }
     dz = gclone(ginv(dz)); avma = av;
     z = gscalmat(dz, N);
     gunclone(dz); return z;
@@ -1674,7 +1674,7 @@ idealpowprime(GEN nf, GEN vp, GEN n)
   long s = signe(n);
 
   nf = checknf(nf);
-  if (s == 0) return idmat(degpol(nf[1]));
+  if (s == 0) return matid(degpol(nf[1]));
   x = idealpowprime_spec(nf, vp, n, &d);
   x = prime_to_ideal_aux(nf,x);
   if (d) x = gdiv(x, d);
@@ -1727,7 +1727,7 @@ idealpow(GEN nf, GEN x, GEN n)
   res = ax? cgetg(3,t_VEC): NULL;
   nf = checknf(nf);
   av = avma; N = degpol(nf[1]);
-  if (!s) x = idmat(N);
+  if (!s) x = matid(N);
   else
     switch(tx)
     {
@@ -2023,7 +2023,7 @@ ideallllred(GEN nf, GEN I, GEN vdir, long prec)
   T = x = c = c1 = NULL;
   if (idealtyp(&I,&aI) == id_PRINCIPAL)
   {
-    if (gcmp0(I)) { y=gen_1; I=cgetg(1,t_MAT); } else { y=I; I=idmat(N); }
+    if (gcmp0(I)) { y=gen_1; I=cgetg(1,t_MAT); } else { y=I; I=matid(N); }
     if (!aI) return I;
     goto END;
   }
@@ -2201,7 +2201,7 @@ idealprodprime(GEN nf, GEN L)
   long l = lg(L), i;
   GEN z;
 
-  if (l == 1) return idmat(degpol(nf[1]));
+  if (l == 1) return matid(degpol(nf[1]));
   z = prime_to_ideal(nf, gel(L,1));
   for (i=2; i<l; i++) z = idealmulprime(nf,z, gel(L,i));
   return z;
@@ -2214,7 +2214,7 @@ factorbackprime(GEN nf, GEN L, GEN e)
   long l = lg(L), i;
   GEN z;
 
-  if (l == 1) return idmat(degpol(nf[1]));
+  if (l == 1) return matid(degpol(nf[1]));
   z = idealpow(nf, gel(L,1), gel(e,1));
   for (i=2; i<l; i++)
     if (signe(e[i])) z = idealmulpowprime(nf,z, gel(L,i),gel(e,i));
@@ -2934,7 +2934,7 @@ nfdetint(GEN nf, GEN x)
   n = lg(A)-1; if (!n) return gen_1;
 
   m1 = lg(A[1]); m = m1-1;
-  id = idmat(N);
+  id = matid(N);
   c = new_chunk(m1); for (k=1; k<=m; k++) c[k] = 0;
   piv = pivprec = gscalcol_i(gen_1,N);
 

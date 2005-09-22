@@ -292,10 +292,10 @@ lll_trivial(GEN x, long flag)
   {
     switch(flag & (~lll_GRAM))
     {
-      case lll_KER: return idmat(1);
+      case lll_KER: return matid(1);
       case lll_IM : return cgetg(1,t_MAT);
       default: y=cgetg(3,t_VEC);
-        gel(y,1) = idmat(1);
+        gel(y,1) = matid(1);
         gel(y,2) = cgetg(1,t_MAT); return y;
     }
   }
@@ -303,10 +303,10 @@ lll_trivial(GEN x, long flag)
   switch (flag)
   {
     case lll_KER: return cgetg(1,t_MAT);
-    case lll_IM : return idmat(1);
+    case lll_IM : return matid(1);
     default: y=cgetg(3,t_VEC);
       gel(y,1) = cgetg(1,t_MAT);
-      gel(y,2) = x? gcopy(x): idmat(1); return y;
+      gel(y,2) = x? gcopy(x): matid(1); return y;
   }
 }
 
@@ -678,7 +678,7 @@ lllint_marked(long *pMARKED, GEN x, long D, int gram,
       if (typ(gcoeff(x,i,j)) != t_INT) err(typeer,"lllint_marked");
     fl[j] = 0; gel(L,j) = zerocol(n);
   }
-  h = pth? idmat(n): NULL;
+  h = pth? matid(n): NULL;
   ZincrementalGS(x, L, B, 1, fl, gram);
   kmax = 1;
   if (DEBUGLEVEL>5) fprintferr("k = ");
@@ -932,7 +932,7 @@ lllgramallgen(GEN x, long flag)
   L = cgetg(lx,t_MAT);
   for (j=1; j<lx; j++) { gel(L,j) = zerocol(n); fl[j] = 0; }
 
-  h = idmat(n);
+  h = matid(n);
   for (i=1; i<lx; i++)
     incrementalGSgen(x, L, B, i, fl);
   flc = 0;
@@ -1068,7 +1068,7 @@ lll_scaled(int MARKED, GEN X0, long D)
   F  = const_vecsmall(N-1, 0);
 
   av = avma; lim = stack_lim(av, 1);
-  h = idmat(N-1);
+  h = matid(N-1);
   X = rescale_to_int(X0);
 
 PRECPB:
@@ -1153,7 +1153,7 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   const int in_place = (flag == 3);
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
-  n = lx-1; if (n <= 1) return idmat(n);
+  n = lx-1; if (n <= 1) return matid(n);
 #if 0 /* doesn't work yet */
   return lll_scaled(MARKED, x, D);
 #endif
@@ -1198,7 +1198,7 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
   * KMAX = same over all runs (after PRECPB) */
   MARKED = pMARKED? *pMARKED: 0;
   kmax = KMAX = 1;
-  h = idmat(n);
+  h = matid(n);
 
 #ifdef LONG_IS_64BIT
 #  define PREC_THRESHOLD 32
@@ -1227,7 +1227,7 @@ PRECPB:
           xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
           gerepileall(av, in_place? 1: 2, &xinit, &H);
           x = mat_to_MP(xinit, prec);
-          h = idmat(n);
+          h = matid(n);
           retry = 1; /* never abort if x is exact */
           count_max = min(count_max << 1, 512);
           if (DEBUGLEVEL>3) fprintferr("count_max = %ld\n", count_max);
@@ -1281,7 +1281,7 @@ PRECPB:
       xinit = gram? qf_base_change(xinit, h, 1): gmul(xinit, h);
       gerepileall(av, in_place? 4: 5,&B,&L,&Q,&xinit, &H);
       x = mat_to_MP(xinit, prec);
-      h = idmat(n);
+      h = matid(n);
     }
     else if (DEBUGLEVEL>5) fprintferr(" %ld",k);
     L1 = gcoeff(L,k,k-1);
@@ -1335,7 +1335,7 @@ PRECPB:
           prec = good_prec(xinit, kmax);
           if (DEBUGLEVEL>3) fprintferr("in precision %ld\n", prec);
           x = mat_to_MP(xinit, prec);
-          h = idmat(n);
+          h = matid(n);
           exact_can_leave = 1;
           k = 2; kmax = 1; continue;
         }
@@ -1481,15 +1481,15 @@ lllintpartialall(GEN m, long flag)
   GEN tm1, tm2, mid;
 
   if (typ(m) != t_MAT) err(typeer,"lllintpartial");
-  if (ncol <= 1) return flag? idmat(ncol): gcopy(m);
+  if (ncol <= 1) return flag? matid(ncol): gcopy(m);
 
-  tm1 = flag? idmat(ncol): NULL;
+  tm1 = flag? matid(ncol): NULL;
   {
     const pari_sp av2 = avma;
     GEN dot11 = sqscali(gel(m,1));
     GEN dot22 = sqscali(gel(m,2));
     GEN dot12 = gscali(gel(m,1), gel(m,2));
-    GEN tm  = idmat(2); /* For first two columns only */
+    GEN tm  = matid(2); /* For first two columns only */
 
     int progress = 0;
     long npass2 = 0;
@@ -1580,7 +1580,7 @@ lllintpartialall(GEN m, long flag)
     long i, j, npass = 0, e = VERYBIGINT;
     GEN dot = cgetg(ncol+1, t_MAT); /* scalar products */
 
-    tm2 = idmat(ncol);
+    tm2 = matid(ncol);
     for (i=1; i <= ncol; i++)
     {
       gel(dot,i) = cgetg(ncol+1,t_COL);
@@ -1953,7 +1953,7 @@ lindep(GEN x, long prec)
   if (EXP > -10) err(precer,"lindep");
 
   qzer = cgetg(lx, t_VECSMALL);
-  b = (GEN*)idmat(n);
+  b = (GEN*)matid(n);
   be= (GEN*)new_chunk(lx);
   bn= (GEN*)new_chunk(lx);
   m = (GEN**)new_chunk(lx);
@@ -2274,8 +2274,8 @@ init_pslq(pslq_M *M, GEN x, long *PREC)
   if (DEBUGLEVEL>=3) { (void)timer(); init_timer(M->T); }
   x = col_to_MP(x, prec); settyp(x,t_VEC);
   M->n = n;
-  M->A = idmat(n);
-  M->B = idmat(n);
+  M->A = matid(n);
+  M->B = matid(n);
   s1 = cgetg(lx,t_VEC); gel(s1,n) = gnorm(gel(x,n));
   s  = cgetg(lx,t_VEC); gel(s,n) = gabs(gel(x,n),prec);
   for (k=n-1; k>=1; k--)
@@ -2630,8 +2630,8 @@ pslqL2(GEN x)
 
   flreal = M.flreal;
   tabga = get_tabga(flreal, n, prec);
-  Abargen = idmat(n);
-  Bbargen = idmat(n);
+  Abargen = matid(n);
+  Bbargen = matid(n);
 
   Mbarst.n = Mbar.n = n;
   Mbar.A = Abar = (double**)new_chunk(n+1);
@@ -3058,7 +3058,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
   s = 0; av1 = avma; lim = stack_lim(av1,1);
   k = n; y[n] = z[n] = 0;
   x[n] = (long)sqrt(BOUND/v[n]);
-  if (flag == min_PERF) invp = idmat(maxrank);
+  if (flag == min_PERF) invp = matid(maxrank);
   for(;;x[1]--)
   {
     do
@@ -3102,7 +3102,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
       {
         BOUND=gtodouble(gnorme)+eps; s=0;
         affii(gnorme,BORNE); avma = av1;
-        if (flag == min_PERF) invp = idmat(maxrank);
+        if (flag == min_PERF) invp = matid(maxrank);
       }
     }
     s++;
