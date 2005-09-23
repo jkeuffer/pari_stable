@@ -178,9 +178,16 @@ else
       readline_version="1.0=Header/$readline_version=Lib"
       rl_fake_library_version=yes
     fi
-    rm -f $exe $exe$exe_suff
-    echo "Using GNU readline, version $readline_version"
+    case "$readline_version" in
+    *Editline*) readline=;
+      echo "### Editline wrapper detected, building without readline support";;
+    *) rm -f $exe $exe$exe_suff;
+      echo "Using GNU readline, version $readline_version";;
+    esac
   fi
+fi
+
+if test -n "$readline"; then 
   if test -z "$rl_appendchar"; then
     echo ..."Library readline does not have completion_append_char"
   fi
