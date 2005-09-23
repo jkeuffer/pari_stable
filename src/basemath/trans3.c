@@ -1624,7 +1624,7 @@ number_of_terms(ulong p, long prec)
 {
   long N, f;
 
-  N = (p-1)*prec + (p>>1)*(log2(prec)/log2(p));
+  N = (long)((p-1)*prec + (p>>1)*(log2(prec)/log2(p)));
   N = p*(N/p);
   f = valfact(N, p);
   while (f > prec) 
