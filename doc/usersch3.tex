@@ -1591,23 +1591,24 @@ function underlying) \teb{issquarefree}. Note that it relies on a (fairly
 strong) probabilistic primality test, see \kbd{ispseudoprime}.
 
 \bigskip
-\subsecidx{addprimes}$(\{x=[\,]\})$: adds the ``primes'' contained in the
-vector $x$ (or the single integer $x$) to the table computed upon \kbd{gp}
-initialization (by \kbd{pari\_init} in library mode), and returns a row
-vector entries contain all such user primes. Whenever \kbd{factor} or
-\kbd{smallfact} is subsequently called, first the primes in the table
-computed by \kbd{pari\_init} will be checked, and then the additional
-primes in this table. If $x$ is empty or omitted, just returns the current
-list of extra primes.
+\subsecidx{addprimes}$(\{x=[\,]\})$: adds the integers contained in the
+vector $x$ (or the single integer $x$) to a special table of
+``user-defined primes'', and returns that table. Whenever \kbd{factor} is
+subsequently called, it will trial divise by the elements in this table.
+If $x$ is empty or omitted, just returns the current list of extra
+primes.
 
-The entries in $x$ are not checked for primality. They need only be positive
-integers not divisible by any of the pre-computed primes. It's in fact a nice
-trick to add composite numbers, which for example the function
-$\kbd{factor}(x,0)$ was not able to factor. In case the message
-``impossible inverse modulo $\langle$\var{some INTMOD}$\rangle$'' shows up
-afterwards, you have just stumbled over a non-trivial factor. Note that the
-arithmetic functions in the narrow sense, like \teb{eulerphi}, do \emph{not}
-use this extra table.
+The entries in $x$ are not checked for primality, and in fact they need
+only be positive integers. The algorithm makes sure that all elements in
+the table are pairwise coprime, so it may end up containing divisors
+of the input integers. 
+
+It is a useful trick to add known composite numbers, which for example
+the function $\kbd{factor}(x,0)$ was not able to factor. In case the
+message ``impossible inverse modulo $\langle$\var{some INTMOD}$\rangle$''
+shows up afterwards, you have just stumbled over a non-trivial factor.
+Note that the arithmetic functions in the narrow sense, like
+\teb{eulerphi}, do \emph{not} use this extra table.
 
 To remove primes from the list use \kbd{removeprimes}.
 
