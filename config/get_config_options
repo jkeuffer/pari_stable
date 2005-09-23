@@ -114,7 +114,7 @@ done
 # Convert relative paths to absolute.
 # Variables that can be set interactively should not be listed here,
 # see get_install.
-for i in with_readline with_readline-lib with_readline-include \
+for i in with_readline with_readline_lib with_readline_include \
          with_gmp with_gmp_lib with_gmp_include \
          with_ncurses_lib with_qt with_fltk ; do
   eval "dflt=\"\$$i\""
