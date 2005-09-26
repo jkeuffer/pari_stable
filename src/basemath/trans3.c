@@ -1624,6 +1624,7 @@ number_of_terms(ulong p, long prec)
 {
   long N, f;
 
+  if (prec == 0) return p;
   N = (long)((p-1)*prec + (p>>1)*(log2(prec)/log2(p)));
   N = p*(N/p);
   f = valfact(N, p);
@@ -1654,13 +1655,13 @@ zetap(GEN s)
   gp = gel(s,2); p = itou(gp);
   is = gtrunc(s);  /* make s an integer */
 
-  N  = number_of_terms(p, prec);
-  q  = gpowgs(gp, prec);
+  N  = number_of_terms(p, prec? prec:1);
+  q  = gpowgs(gp, prec? prec:1);
 
   /* initialize the roots of unity for the computation
      of the Teichmuller character (also the values of f and c) */
   if (DEBUGLEVEL > 1) fprintferr("zetap: computing (p-1)th roots of 1\n");
-  vz = init_teich(p, q, prec);
+  vz = init_teich(p, q, prec? prec:1);
   if (p == 2UL) {  f = 4; c = 3; } else { f = (long)p; c = 2; }
 
   /* compute the first N coefficients of the Mahler expansion
