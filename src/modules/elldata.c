@@ -24,36 +24,51 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static long
 strtoclass(const char *s)
 {
-  int c=0;
+  long c=0;
   while (*s && *s<='9') s++;
   if (!*s) return -1;
-  while ('A'<=*s && *s<='Z')
-    c=26*c+*(s++)-'A';
+  while ('a'<=*s && *s<='z')
+    c=26*c+*(s++)-'a';
   return c;
 }
 
-/*Take a curve name like "100A2" and set
+/*This function is used externally to build elldata*/
+
+long
+ellnamecond(const char *s)
+{
+  long f=0;
+  while ('0'<=*s && *s<='9')
+    f=10*f+*(s++)-'0';
+  return f;
+}
+
+/*Take a curve name like "100a2" and set
  * f to the conductor, (100)
- * c to the isogeny class (in base 26), ("A" or 1)
+ * c to the isogeny class (in base 26), ("a" or 0)
  * i to the curve index (2).
  * return 0 if garbage is found at the end.
  */
 static int
 ellparsename(const char *s, long *f, long *c, long *i)
 {
+  long j;
   *f=-1; *c=-1; *i=-1;
   if (*s<'0' || *s>'9') return !*s;
   *f=0;
-  while ('0'<=*s && *s<='9')
+  for (j=0;j<10 && '0'<=*s && *s<='9';j++)
     *f=10**f+*(s++)-'0';
-  if (*s<'A' || *s>'Z') return !*s;
+  if (j==10) {*f=-1; return 0;}
+  if (*s<'a' || *s>'z') return !*s;
   *c=0;
-  while ('A'<=*s && *s<='Z')
-    *c=26**c+*(s++)-'A';
+  for (j=0; j<7 && 'a'<=*s && *s<='z';j++)
+    *c=26**c+*(s++)-'a';
+  if (j==7) {*c=-1; return 0;}
   if (*s<'0' || *s>'9') return !*s;
   *i=0;
-  while ('0'<=*s && *s<='9')
+  for (j=0; j<10 && '0'<=*s && *s<='9';j++)
     *i=10**i+*(s++)-'0';
+  if (j==10) {*i=-1; return 0;}
   return !*s;
 }
 

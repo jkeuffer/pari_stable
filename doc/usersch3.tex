@@ -2645,6 +2645,13 @@ $[\eta_1,\eta_2]$ of quasi-periods associated to $\kbd{om} = [\omega_1,
 
 \syn{elleta}{om, \var{prec}}
 
+\subsecidx{ellgenerators}$(E)$: returns a $\Z$-basis of the free part of the
+\idx{Mordell-Weil group} associated to $E$.  This function depends on the
+elldata database being installed and referencing the curve, and so is only
+available for curves over $\Z$ of small conductors.
+
+\syn{ellgenerators}{E}.
+
 \subsecidx{ellglobalred}$(E)$: calculates the arithmetic conductor, the global
 minimal model of $E$ and the global \idx{Tamagawa number} $c$. 
 $E$ must be an \var{sell} as output by \kbd{ellinit}, \emph{and is supposed
@@ -2863,8 +2870,8 @@ If $\fl=2,3$, same using the product expansion instead of theta series.
 \syn{ellsigma}{E,z,\fl}
 
 \subsecidx{ellsearch}$(N)$: if $N$ is an integer, it is taken as a conductor
-else if $N$ is a string, it can be a curve name ("11A1"), a isogeny class
-("11A") or a conductor "11". This function finds all curves in the elldata
+else if $N$ is a string, it can be a curve name ("11a1"), a isogeny class
+("11a") or a conductor "11". This function finds all curves in the elldata
 database with the given property. 
 
 If $N$ is a full curve name, the output format is $[N, [a_1,a_2,a_3,a_4,a_6],
