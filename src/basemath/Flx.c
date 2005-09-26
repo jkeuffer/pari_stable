@@ -1214,7 +1214,7 @@ Flx_eval(GEN x, ulong y, ulong p)
 static GEN
 _Flx_mul(void *p, GEN a, GEN b)
 {
-  return Flx_mul(a,b, (ulong)p);
+  return Flx_mul(a,b, *(ulong*)p);
 }
 
 /* compute prod (x - a[i]) */
@@ -1242,7 +1242,7 @@ Flv_roots_to_pol(GEN a, ulong p, long vs)
     p2[2] = a[i]?p - a[i]:0;
     p2[3] = 1;
   }
-  setlg(p1, k); return divide_conquer_assoc(p1, _Flx_mul,(void *)p);
+  setlg(p1, k); return divide_conquer_assoc(p1, _Flx_mul,(void *)&p);
 }
 
 GEN
