@@ -136,6 +136,7 @@ BA 63- function name not always properly reported on interrupt (e.g if, while)
    65- memory leaks in quadclassunit (#318)
 BA 66- [Configure] check that 'readline' is not an EditLine wrapper
        [ ==> compilation failure otherwise ]
+   67- Str() --> junk string (uninitialized data) (#326)
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

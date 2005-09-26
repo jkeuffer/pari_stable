@@ -872,6 +872,7 @@ pGENtostr(GEN g, long flag) {
     tlen += Ll[i];
   }
   t2 = t = gpmalloc(tlen + 1);
+  *t = 0;
   for (i = 1; i < l; i++)
   {
     strcpy(t2, (char*)Ls[i]);
