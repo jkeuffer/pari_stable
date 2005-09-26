@@ -10,6 +10,7 @@ Description:
  (mp,mp):vec           concat($1, $2)
  (vec,mp):vec          concat($1, $2)
  (mp,vec):vec          concat($1, $2)
+ (vec,vec):vec         concat($1, $2)
  (genstr,gen):genstr   concat($1, $2)
  (gen,genstr):genstr   concat($1, $2)
  (gen,?gen):gen        concat($1, $2)
