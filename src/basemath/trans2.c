@@ -314,6 +314,8 @@ rfix(GEN x,long prec)
   {
     case t_INT: return itor(x, prec);
     case t_FRAC: return rdivii(gel(x,1),gel(x,2), prec);
+    case t_REAL: break;
+    default: err(typeer,"rfix (conversion to t_REAL)");
   }
   return x;
 }
@@ -384,10 +386,10 @@ gch(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpch(x);
-    case t_COMPLEX:
+    case t_COMPLEX: case t_PADIC: 
       av = avma; p1 = gexp(x,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD: case t_PADIC: err(typeer,"gch");
+    case t_INTMOD: err(typeer,"gch");
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (gcmp0(y) && valp(y) == 0) return gcopy(y);
@@ -423,10 +425,10 @@ gsh(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpsh(x);
-    case t_COMPLEX:
+    case t_COMPLEX: case t_PADIC:
       av = avma; p1 = gexp(x,prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
-    case t_INTMOD: case t_PADIC: err(typeer,"gsh");
+    case t_INTMOD: 
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (gcmp0(y) && valp(y) == 0) return gcopy(y);
@@ -469,12 +471,12 @@ gth(GEN x, long prec)
   switch(typ(x))
   {
     case t_REAL: return mpth(x);
-    case t_COMPLEX:
+    case t_COMPLEX: case t_PADIC:
       av = avma;
       t = gexp(gmul2n(x,1),prec);
       t = gdivsg(-2, gaddgs(t,1));
       return gerepileupto(av, gaddsg(1,t));
-    case t_INTMOD: case t_PADIC: err(typeer,"gth");
+    case t_INTMOD: err(typeer,"gth");
     default:
       av = avma; if (!(y = _toser(x))) break;
       if (gcmp0(y)) return gcopy(y);
