@@ -2436,7 +2436,6 @@ int_read_more(GEN y, char **ps)
 static long
 exponent()
 {
-  char *old = analyseur;
   long n;
   int nb;
   switch(*++analyseur)
@@ -2445,7 +2444,6 @@ exponent()
     case '+': analyseur++; /* Fall through */
     default: n = (long)number(&nb, &analyseur);
   }
-  if (nb > 8) err(talker2,"exponent too large",old,mark.start);
   return n;
 }
 
