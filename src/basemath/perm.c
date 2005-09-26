@@ -15,11 +15,87 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #include "pari.h"
 #include "paripriv.h"
+
 /*************************************************************************/
 /**                                                                     **/
-/**                   Routines for handling VECSMALL                    **/
+/**                   Routines for handling VEC/COL                     **/
 /**                                                                     **/
 /*************************************************************************/
+
+/* The functions below are shallow*/
+
+GEN
+vec_setconst(GEN v, GEN x)
+{
+  long i, l = lg(v);
+  for (i = 1; i < l; i++) gel(v,i) = x;
+  return v;
+}
+
+GEN
+const_vec(long n, GEN x)
+{
+  GEN v = cgetg(n+1, t_VEC);
+  long i;
+  for (i = 1; i <= n; i++) gel(v,i) = x;
+  return v;
+}
+
+int
+vec_isconst(GEN v)
+{
+  long i, l=lg(v);
+  if (l==1) return 1;
+  for(i=2;i<l;i++)
+    if (!gequal(gel(v,i), gel(v,1)))
+      return 0;
+  return 1;
+}
+
+/* Check if all the elements of v are different.
+ * Use a quadratic algorithm.
+ * It could be done in n*log(n) by sorting.
+ */
+
+int
+vec_is1to1(GEN v)
+{
+  long i,j;
+  long l=lg(v);
+  for (i=1; i<l; i++)
+    for(j=i+1; j<l; j++)
+      if (gequal(gel(v,i), gel(v,j)))
+	return 0;
+  return 1;
+}
+
+GEN
+const_col(long n, GEN x)
+{
+  GEN v = cgetg(n+1, t_COL);
+  long i;
+  for (i = 1; i <= n; i++) gel(v,i) = x;
+  return v;
+}
+
+GEN
+vec_shorten(GEN v, long n)
+{
+  long i;
+  GEN V = cgetg(n+1,t_VEC);
+  for(i=1;i<=n;i++) V[i] = v[i];
+  return V;
+}
+
+GEN
+vec_lengthen(GEN v, long n)
+{
+  long i;
+  long l=lg(v);
+  GEN V = cgetg(n+1,t_VEC);
+  for(i=1;i<l;i++) V[i] = v[i];
+  return V;
+}
 
 GEN
 vec_to_vecsmall(GEN z)
@@ -29,6 +105,12 @@ vec_to_vecsmall(GEN z)
   for (i=1; i<l; i++) x[i] = itos(gel(z,i));
   return x;
 }
+
+/*************************************************************************/
+/**                                                                     **/
+/**                   Routines for handling VECSMALL                    **/
+/**                                                                     **/
+/*************************************************************************/
 
 GEN
 vecsmall_to_vec(GEN z)
@@ -75,6 +157,16 @@ vecsmall_shorten(GEN v, long n)
   for(i=1;i<=n;i++) V[i] = v[i];
   return V;
  
+}
+
+GEN
+vecsmall_lengthen(GEN v, long n)
+{
+  long i;
+  long l=lg(v);
+  GEN V = cgetg(n+1,t_VECSMALL);
+  for(i=1;i<l;i++) V[i] = v[i];
+  return V;
 }
 
 /*in place sort.*/

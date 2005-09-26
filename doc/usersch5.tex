@@ -2807,6 +2807,16 @@ are $A[p_1],\dots,A[p_n]$. If $A$ is a \typ{MAT}, these are the
 @eprog\noindent
 (more efficient).
 
+\subsec{Low-level vectors and columns functions}
+
+Theses functions handle \typ{VEC} as an abstract container type
+of \kbd{GEN}s. No specific meaning is attached to the content.
+
+They accept both \typ{VEC} and \typ{COL} as input, but \kbd{col} functions
+always return \typ{COL} and \kbd{vec} functions alway return \typ{VEC}.
+
+\misctitle{Note.} All the functions below are shallow.
+
 \fun{GEN}{const_col}{long n, long c} returns a \typ{COL} of \kbd{n} components
 equal to \kbd{c}.
 
@@ -2820,7 +2830,14 @@ equal, else returns 0.
 pair-wise distinct, i.e. if $i\mapsto v[i]$ is a 1-to-1 mapping, else returns
 0.
 
+\fun{GEN}{vec_shorten}{GEN v, long n} shortens the vector \kbd{v} to \kbd{n}
+components.
+
+\fun{GEN}{vec_lengthen}{GEN v, long n} lengthens the vector \kbd{v}
+to \kbd{n} components. The extra components are not initialised.
+
 \subsec{Function to handle \typ{VECSMALL}}
+
 Theses functions handle \typ{VECSMALL} as an abstract container type
 of small signed integers. No specific meaning is attached to the content.
 
@@ -2837,6 +2854,9 @@ of \kbd{n} components equal to \kbd{c}.
 
 \fun{GEN}{vecsmall_shorten}{GEN v, long n} shortens the \typ{VECSMALL} \kbd{v}
 to \kbd{n} components.
+
+\fun{GEN}{vecsmall_lengthen}{GEN v, long n} lengthens the \typ{VECSMALL}
+\kbd{v} to \kbd{n} components. The extra components are not initialised.
 
 \fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
 
