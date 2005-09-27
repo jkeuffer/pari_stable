@@ -106,6 +106,9 @@ echo "Hi-Res Graphics: $which_graphic_lib"
 # For dynamic linking, before and after installing
 runpath="$libdir" 
 LDDYN="-L$libdir -lpari"
+# get_modld needs $includedir from get_install, static, and LDDYN
+. ./get_modld   # $_modld_list
+
 # Which copy, SHELL ?
 case "$osname" in
   os2) ln_s=cp;      make_sh=sh;;
@@ -133,35 +136,11 @@ case "$osname" in
     *) shell_q="'"; echo "shell_q=\"'\"" >> $dflt_conf_file;;
 esac
 
-__LIBS=$LIBS
-if test "$static" = n; then LIBS="$LIBS $LDDYN"; fi
-case $osname in
-cygwin) EXTRAMODLDFLAGS="-L$libdir -lpari.dll";;
-*)      EXTRAMODLDFLAGS=`eval echo $EXTRADLLDFLAGS`;;
-esac;
-LIBS=$__LIBS
-
-case $osname in
-darwin) MODLD=$CC;
-        MODLDFLAGS="-bundle -flat_namespace -undefined suppress \
-\$(CFLAGS) \$(DLCFLAGS)";;
-*)      MODLD="$DLLD";
-        MODLDFLAGS=`echo "$DLLDFLAGS" | \
-   sed -e 's/,*-[^ \t-]*[ \t,=]*\\$(LIBPARI_SONAME)//' \
-       -e 's/--out-implib=\$(LIBPARI_SO)\$(_A),\?//'`;;
-esac;
-
-modules_build=`echo "$CC -c -o %s.o $CFLAGS $DLCFLAGS -I$includedir %s.c \
-&& $MODLD -o %s.so $MODLDFLAGS %s.o $EXTRAMODLDFLAGS" | \
-               sed -e 's!\$(CFLAGS)'"!$CFLAGS!g" \
-                   -e 's!\$(DLCFLAGS)'"!$DLCFLAGS!g"`
-
 for variable in\
   pari_release pari_release_verbose version libpari_base static TOP objdir\
   arch asmarch osname pretty\
   kernlvl0 kernlvl1\
   gnuas AS ASFLAGS KERNELCPPFLAGS LIBS\
-  modules_build MODLD MODLDFLAGS EXTRAMODLDFLAGS\
   dir_sep runpath runpathprefix LDDYN\
   ranlib gzip zcat emacs perl ln_s make_sh\
   sizeof_long doubleformat\
@@ -174,6 +153,7 @@ for variable in\
   $_ld_list\
   $_dl_list\
   $_dlld_list\
+  $_modld_list\
   $_readline_list\
   $_gmp_list\
   $_has_list; do
