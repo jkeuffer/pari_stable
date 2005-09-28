@@ -781,7 +781,7 @@ type0(GEN x)
 /*                              PARSER                             */
 /*                                                                 */
 /*******************************************************************/
-#define separator(c)  ((c)==';')
+#define separator(c)  ((c)==';' || (compatible && (c)==':'))
 
 static void
 allocate_loop_err(void) {
