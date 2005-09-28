@@ -491,6 +491,7 @@ sub nl { push(@f_text, shift); }
 sub format_text {
   my($last_void) = 0;
   my($add_stuff) = 0;
+  my($init) = 1;
   my($cols) = ($ENV{'COLUMNS'} || 80) - 1;
   my($first) = $cols - length($indent);
 
@@ -514,15 +515,19 @@ sub format_text {
     elsif (is_void($_))    # line is empty
     {
       next if (!$add_stuff);
-      nl("") if (!$last_void);
-      $last_void = $add_stuff = 0;
-      nl("\@[endbold]$indent" . &fit_line($first));
+      if ($init) {
+        nl(&fit_line($first));
+      } else {
+        nl("") if (!$last_void);
+        nl("\@[endbold]$indent" . &fit_line($first));
+      }
       while (@w) { nl(&fit_line($cols)); }
+      $init = $last_void = $add_stuff = 0;
     }
     else
     {
       $add_stuff = 1; s/^ +//;
-      @_ = split(/ /, $_);
+      @_ = split(/\s+/, $_);
       for (@_)
       {
 	s/\Q$tr{nbrk}/ /g; push(@w, $_);
@@ -563,7 +568,6 @@ sub get_match {
 
 sub detex {
   my($fun,$args);
-  chomp;
 # 1: get the function "prototype"
   $fun = &get_match($_,'{','}');
   # name
@@ -584,19 +588,19 @@ sub detex {
   }
   $args .= ":" if ($args !~ /: *$/ && ($args || $fun !~ /: */));
 
-  $fun = "\@[startbold]$fun\@[endbold]$args";
-  if ($raw) { print("$fun "); } else { &TeXprint($fun); }
-# 2: start parsing the function description
+  push(@text, "\@[startbold]$fun\@[endbold]$args");
+  push(@text, "");
+# 2: parse the function description
   if ($_) { s/^ *://; &presubst(); }
   while (<DOC>)
   {
     last if /^\\(section|sub[sub]*sec)/i;
     &presubst();
   }
-  if ($raw) { print join("\n", @text); return; }
-
+  if ($raw) { join("\n", @text); return; }
+#  for (@text) { print("AA{$_}BB\n"); } # DEBUG
   &format_text();
-  for (@f_text) { &TeXprint("$_"); }
+  for (@f_text) { &TeXprint($_); }
 }
 
 # We use the special char @ to transmit special sequences
