@@ -144,7 +144,7 @@ sub init {
   $indent = "   ";
   # avoid Glob.pm! (for minimal Windows install)
   opendir(DIR, $docdir) || die "$docdir not found";
-  @file_list = grep { /usersch.*tex/ } readdir(DIR);
+  @file_list = grep { /^usersch.*tex/ } readdir(DIR);
   closedir(DIR);
 
   chdir($docdir);
@@ -239,15 +239,14 @@ sub treat {
     $help = $_;
     for (@file_list)
     {
-      if (/usersch(.*)\.tex/)
+      next if (!/^usersch(.*)\.tex/);
+
+      &treat("$help\@$1");
+      if ($apropos && $#list > 0 || $#sentence_list > 0)
       {
-        &treat("$help\@$1");
-        if ($apropos && $#list > 0 || $#sentence_list > 0)
-        {
-          print "\nChapter $1:\n";
-          print "==========\n";
-          &apropos_final_print();
-        }
+        print "\nChapter $1:\n";
+        print "==========\n";
+        &apropos_final_print();
       }
     }
     return not_found($help) if (!$found && !$apropos);
