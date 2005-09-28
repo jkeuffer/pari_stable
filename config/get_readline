@@ -168,6 +168,7 @@ else
     else
       readline_version="?.?";
     fi
+    rm -f $exe $exe$exe_suff;
     if test -z "$rl_library_version" -a "X$readline_version" != "X?.?"; then
       echo "!!! Possible mismatch between readline headers and library:"
       echo "!!!  header is apparently for v1.0, library reports $readline_version!"
@@ -181,8 +182,7 @@ else
     case "$readline_version" in
     *Editline*) readline=;
       echo "### Editline wrapper detected, building without readline support";;
-    *) rm -f $exe $exe$exe_suff;
-      echo "Using GNU readline, version $readline_version";;
+    *) echo "Using GNU readline, version $readline_version";;
     esac
   fi
 fi
