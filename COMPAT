@@ -65,6 +65,9 @@ This file lists the incompatible changes between Version 2.x and older versions
   - use \frac instead of \over in TeX output. Define
       \def\frac#1#2{{#1\over#2}}
     if you insist on using plain TeX and run into problems.
+  - automatic concatenation for strings: use longest match for expression.
+    print("a"[1]) is not valid since "a" is not a vector print("a", [1])
+    prints 'a[1]'.
 
 * Specific to the PARI library:
 ===============================
@@ -73,7 +76,7 @@ Incompatible changes:
   - gsize() renamed to sizedigit()  [conflict with gtk]
   - hnfhavas removed (didn't work properly, hnflll provides an alternative)
   - real zeroes are now coded on 2 words. Beware of constructs like
-    t = cgetg(lg(x), t_REAL); gaffect(y, t). If x = 0, so will be t
+    t = cgetg(lg(x), t_REAL); gaffect(y, t). If x = 0, so will be t.
   - polgalois(): old format deprecated. New preferred format for result 
     has 3rd component giving numbering among all transitive subgroups of S_n
     [ was ad hoc up to 7, as described above for n >= 8 ]. Old format is
@@ -103,7 +106,7 @@ Incompatible changes:
   - mymyrand() has been removed, use pari_rand31() or pari_rand() instead
   - diviiz(x,y,z), divisz, divsiz and divssz always assign the euclidean
     quotient [ used to  depend on the type of z: if t_REAL computed exact
-    quotien ]. Use rdivii, rdivis, rdivsi, rdivss for analogous
+    quotient ]. Use rdivii, rdivis, rdivsi, rdivss for analogous
     functionality (no "z" variant);
   - mpdivz(x,y,z) assigns the euclidean quotient when x,y are t_INT (used
     to depend on the type of z)
@@ -115,16 +118,11 @@ Incompatible changes:
   - changed the prototype of bnrdisclist0
   - removed ideallistarch0, ideallistarchgen, ideallistunitarch,
     ideallistunitarchgen. Just use ideallistarch.
-  - Change the output of ideallist with technical (flag 2,3) [ with units ]:
+  - change the output of ideallist with technical (flag 2,3) [ with units ]:
     instead of two vectors, output a vector of 2-component vectors.
-    Change the input of all list routines (bnrclassnolist, bnrdisclist)
+    change the input of all list routines (bnrclassnolist, bnrdisclist)
     accordingly.
-  - rename globalreduction -> ellglobalred, localreduction -> elllocalred
-  - taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
-      old = precdl; precdl = prec; x = taniyama(e); precdl = old;
-  - rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
-    flisseq -> freadseq
-  - rename idmat -> matid
+  - rename gtrans_i -> shallowtrans, concatsp -> shallowconcat.
 
 Partially compatible changes:
 -----------------------------
@@ -132,15 +130,17 @@ Partially compatible changes:
 support the old names but are likely to become mandatory in 2.4, so we
 advise you to update soon ]
 
+  - typecasting macros (e.g. ladd(), lmul() ...) are obsolete and
+    shouldn't be used in new programs. Use accessors gel() and friends.
   - stack locations used to be of type long or ulong, now they have a
     dedicated type pari_sp [ pari stack pointer ]
-  - in order to compare variable numbers, use the macro varcmp() instead of
-    < or > operators
+  - in order to compare variable numbers, use the macro varncmp() instead of
+    < or > operators. 
   - access to the prime numbers table is done via the macros            
     NEXT_PRIME_VIADIFF or NEXT_PRIME_VIADIFF_CHECK.   
   - direct access to the mantissa of t_INT is deprecated. Instead you should   
     use the t_INT API (macros int_MSW, int_LSW, int_precW, int_nextW, int_W).
-    This will ensure your code is compatible with the native and GMP kernels.
+    This will ensure your code is compatible with both native and GMP kernels.
   - the macros lgef / setlgef / evallgef have been removed. t_POLs no longer
     include an "effective length". One should use lg() for t_POLs as for
     most other types. Don't use lgef() in new code.
@@ -168,6 +168,12 @@ advise you to update soon ]
   - rename mpent --> mpfloor
   - rename isprincipalrayall -> bnrisprincipal, rayclassno -> bnrclassno
     rayclassnolist -> bnrclassnolist
+  - rename globalreduction -> ellglobalred, localreduction -> elllocalred
+  - taniyama(e) is deprecated. Use elltaniyama(e, prec) instead of
+      old = precdl; precdl = prec; x = taniyama(e); precdl = old;
+  - rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
+    flisseq -> freadseq
+  - rename idmat -> matid
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
