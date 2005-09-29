@@ -1511,6 +1511,7 @@ twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff)
   return rep;
 }
 
+#if 0
 /* initialize the roots of unity for the computation
    of the Teichmuller character (also the values of f and c) */
 GEN
@@ -1691,6 +1692,64 @@ zetap(GEN s)
   /* adjust the precision and return */
   return gerepileupto(av, cvtop(val, gp, prec));
 }
+#else
+static GEN
+hurwitz_p(GEN cache, GEN s, GEN x, GEN p, long prec)
+{
+  GEN S, x2, x2j, s_1 = gsubgs(s,1);
+  long j, J = lg(cache)-2;
+  x = ginv(gadd(x, zeropadic(p, prec)));
+  x2 = gsqr(x);
+  S = gmul2n(gmul(s_1, x), -1);
+  x2j = gen_1;
+  for (j = 0;; j++)
+  {
+    S = gadd(S, gmul(gel(cache, j+1), x2j));
+    if (j == J) break;
+    x2j = gmul(x2, x2j);
+  }
+  return gmul(gdiv(S, s_1), gexp(gmul(s_1, glog(x, 0)), 0));
+}
+
+static GEN
+init_cache(long J, GEN s)
+{
+  GEN C = gen_1, cache = bernvec(J);
+  long j;
+
+  for (j = 1; j <= J; j++)
+  { /* B_{2j} * binomial(1-s, 2j) */
+    GEN t = gmul(gaddgs(s, 2*j-3), gaddgs(s, 2*j-2));
+    C = gdiv(gmul(C, t), mulss(2*j, 2*j-1));
+    gel(cache, j+1) = gmul(gel(cache, j+1), C);
+  }
+  return cache;
+}
+
+static GEN
+zetap(GEN s)
+{
+  pari_sp av = avma;
+  GEN cache, S, gp = gel(s,2);
+  ulong a, p = itou(gp);
+  long J, prec = valp(s) + precp(s);
+
+  if (prec <= 0) prec = 1;
+  if (p == 2) {
+    J = ((long)(1+ceil((prec+1.)/2))) >> 1;
+    cache = init_cache(J, s);
+    S = gmul2n(hurwitz_p(cache, s, gmul2n(gen_1, -2), gen_2, prec), -1);
+  } else {
+    J = (prec+2) >> 1;
+    cache = init_cache(J, s);
+    S = gen_0;
+    for (a = 1; a <= (p-1)>>1; a++)
+      S = gadd(S, hurwitz_p(cache, s, gdivsg(a, gp), gp, prec));
+    S = gdiv(gmul2n(S, 1), gp);
+  }
+  return gerepileupto(av, S);
+}
+#endif
 
 GEN
 gzeta(GEN x, long prec)

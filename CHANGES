@@ -213,6 +213,7 @@ BA 13- new functions const_col, const_vec, vec_is1to1, vec_isconst
    14- new function gp_read_file
 BA 15- new function substvec
 BA 16- new divide_conquer_assoc (make divide_conquer_prod thread-safe)
+   17- p-adic zeta function
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):
