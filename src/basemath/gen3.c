@@ -1206,7 +1206,7 @@ gsubst(GEN x, long v, GEN y)
         /* FIXME: improve this */
         av = avma; p1 = ser_to_pol_i(x, lx);
         z = tayl(gsubst(p1,v,y), vx, lx-2);
-        if (ex) z = gmul(z, gpowgs(polx[vx],ex));
+        if (ex) z = gmul(z, monomial(gen_1,ex,vx));
         return gerepileupto(av, z);
       }
       switch(ty) /* here vx == v */
@@ -2493,7 +2493,7 @@ _sercoeff(GEN x, long n, long v)
   if (w > v) return N? gen_0: x;
   /* w < v */
   z = multi_coeff(x, n, v, dx);
-  if (ex) z = gmul(z, gpowgs(polx[w], ex));
+  if (ex) z = gmul(z, monomial(gen_1,ex, w));
   return z;
 }
 

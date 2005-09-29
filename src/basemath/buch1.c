@@ -533,14 +533,14 @@ treatspecialsigma(GEN nf, GEN gf)
     if (i == 4 || i == 5 || i == 7) return cyclo(i,0);
     if (!equaliu(gcoeff(gf,1,1),9) || !equaliu(content(gf),3)) return NULL;
     p1 = (GEN)nfroots(nf,cyclo(3,0))[1]; /* f = P_3^3 */
-    return gadd(gpowgs(polx[0],3), p1); /* x^3+j */
+    return gadd(monomial(gen_1,3,0), p1); /* x^3+j */
   }
   if (equaliu(D,4))
   {
     if (i == 3 || i == 5) return cyclo(i,0);
     if (i != 4) return NULL;
     p1 = (GEN)nfroots(nf,cyclo(4,0))[1];
-    return gadd(gpowgs(polx[0],2), p1); /* x^2+i */
+    return gadd(monomial(gen_1,2,0), p1); /* x^2+i */
   }
   Ds = smodis(D,48);
   if (i)

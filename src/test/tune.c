@@ -94,7 +94,7 @@ static GEN
 rand_NFlx(long n)
 {
   pari_sp av = avma;
-  GEN x = gadd(gpowgs(polx[0], n), FpX_rand(n, 0, utoipos(DFLT_mod)));
+  GEN x = gadd(monomial(gen_1,n,0), FpX_rand(n, 0, utoipos(DFLT_mod)));
   return gerepileuptoleaf(av, ZX_to_Flx(x, DFLT_mod));
 }
 

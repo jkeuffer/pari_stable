@@ -804,15 +804,39 @@ FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
   return FpXQX_renormalize(res,lg(res));
 }
 
-/* a X^degpol, assume degpol >= 0 */
+/* a X^d */
 GEN
-monomial(GEN a, int degpol, int v)
+monomial(GEN a, int d, int v)
 {
-  long i, lP = degpol+3;
-  GEN P = cgetg(lP, t_POL);
-  P[1] = evalsigne(1) | evalvarn(v);
-  lP--; gel(P,lP) = a;
-  for (i=2; i<lP; i++) gel(P,i) = gen_0;
+  long i, lP = d+3;
+  GEN P;
+  if (d < 0) {
+    P = cgetg(3, t_RFRAC);
+    gel(P,1) = a;
+    gel(P,2) = monomial(gen_1, -d, v);
+  } else {
+    P = cgetg(lP, t_POL);
+    P[1] = evalsigne(1) | evalvarn(v);
+    lP--; gel(P,lP) = a;
+    for (i=2; i<lP; i++) gel(P,i) = gen_0;
+  }
+  return P;
+}
+GEN
+monomialcopy(GEN a, int d, int v)
+{
+  long i, lP = d+3;
+  GEN P;
+  if (d < 0) {
+    P = cgetg(3, t_RFRAC);
+    gel(P,1) = gcopy(a);
+    gel(P,2) = monomial(gen_1, -d, v);
+  } else {
+    P = cgetg(lP, t_POL);
+    P[1] = evalsigne(1) | evalvarn(v);
+    lP--; gel(P,lP) = gcopy(a);
+    for (i=2; i<lP; i++) gel(P,i) = gen_0;
+  }
   return P;
 }
 
@@ -3558,7 +3582,7 @@ ffinit_rand(GEN p,long n)
 
   for(;; avma = av)
   {
-    pol = gadd(gpowgs(polx[0],n), FpX_rand(n-1,0, p));
+    pol = gadd(monomial(gen_1, n, 0), FpX_rand(n-1,0, p));
     if (FpX_is_irred(pol, p)) break;
   }
   return pol;
@@ -3628,15 +3652,15 @@ ffinit_Artin_Shreier(GEN ip, long l)
 {
   long i;
   long p=itos(ip);
-  GEN x,xp,yp,y2pm1;
+  GEN xp,yp,y2pm1;
   GEN P, Q;
   xp=monomial(gen_1,p,0);
   P = ZX_sub(xp, deg1pol_i(gen_1,gen_1,0));
   if (l == 1) return P;
-  x=polx[0];
+  
   yp=monomial(gen_1,p,MAXVARN);
   y2pm1=monomial(gen_1,2*p-1,MAXVARN);
-  Q = gsub(ZX_sub(xp, x), ZX_sub(y2pm1, yp));
+  Q = gsub(ZX_sub(xp, polx[0]), ZX_sub(y2pm1, yp));
   for (i = 2; i <= l; ++i)
   {
     setvarn(P,MAXVARN);

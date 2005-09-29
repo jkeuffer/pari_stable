@@ -831,7 +831,7 @@ CM_ellpow(GEN e, GEN z, GEN n)
   if (!ln) err(talker, "norm too large in CM");
   vn = (ln-4)>>2;
   z1 = weipell(e, ln);
-  z2 = gsubst(z1, 0, gmul(n,polx[0]));
+  z2 = gsubst(z1, 0, monomial(n, 1, 0));
   b2ov12 = gdivgs(gel(e,6), 12); /* x - b2/12 */
   grdx = gadd(gel(z,1), b2ov12);
   p0 = gen_0; p1 = gen_1;
@@ -842,7 +842,7 @@ CM_ellpow(GEN e, GEN z, GEN n)
     do
     {
       ep = (-valp(z2)) >> 1;
-      ss = gadd(ss, gmul(gel(z2,2), gpowgs(polx[0], ep)));
+      ss = gadd(ss, gmul(gel(z2,2), monomial(gen_1, ep, 0)));
       z2 = gsub(z2, gmul(gel(z2,2), gpowgs(z1, ep)));
     }
     while (valp(z2) <= 0);

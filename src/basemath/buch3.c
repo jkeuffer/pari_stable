@@ -1019,7 +1019,7 @@ lowerboundforregulator_i(GEN bnf)
     fprintferr("M* = %Z\n", bound);
     if (DEBUGLEVEL>2)
     {
-      p1=polx[0]; pol=gaddgs(gsub(gpowgs(p1,N),gmul(bound,p1)),N-1);
+      pol = gaddgs(gsub(monomial(gen_1,N,0),monomial(bound,1,0)),N-1);
       p1 = roots(pol,DEFAULTPREC);
       y= real_i((GEN)p1[ N&1? 3: 2]);
       M0 = gmul2n(gmulsg(N*(N-1),gsqr(glog(y,DEFAULTPREC))),-2);

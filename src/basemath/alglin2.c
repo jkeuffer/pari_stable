@@ -47,7 +47,7 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
   long d;
   GEN ch, L = leading_term(p);
 
-  if (!signe(x)) return gpowgs(polx[v], degpol(p));
+  if (!signe(x)) return monomial(gen_1, degpol(p), v);
   if (typ(x) != t_POL)
     return gerepileupto(av, gpowgs(gsub(polx[v], x), degpol(p)));
   x = gneg_i(x);
@@ -132,7 +132,7 @@ caract(GEN x, int v)
   if ((p1 = easychar(x,v,NULL))) return p1;
 
   p1 = gen_0; Q = p2 = gen_1; n = lg(x)-1;
-  x_k = shallowcopy(polx[v]);
+  x_k = monomial(gen_1, 1, v);
   for (k=0; k<=n; k++)
   {
     GEN mk = utoineg(k);
@@ -286,7 +286,7 @@ carhess(GEN x, long v)
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
   gel(y,1) = polun[v]; H = hess(x);
-  X_h = shallowcopy(polx[v]);
+  X_h = monomial(gen_1, 1, v);
   for (r = 1; r < lx; r++)
   {
     GEN p3 = gen_1, p4 = gen_0;
@@ -3619,7 +3619,7 @@ build_frobeniusbc(GEN V, long n)
   GEN M = cgetg(n+1, t_MAT);
   for(i=1; i<=n; i++)
     gel(M,i) = zerocol(n);
-  z = gneg(polx[0]);
+  z = monomial(gen_m1, 1, 0);
   for (k=1,l=1+m,i=1;i<=m;i++,k++)
   {
     GEN  P = gel(V,i);
@@ -3653,24 +3653,26 @@ build_basischange(GEN N, GEN U)
   return p2;
 }
 
-GEN matfrobenius(GEN M, long flag)
+GEN
+matfrobenius(GEN M, long flag)
 {
   pari_sp ltop=avma;
   long n;
-  GEN D,A,N,B,R;
+  GEN D, A, N, B, R, M_x;
   if (typ(M)!=t_MAT) err(typeer,"matfrobenius");
   if (gvar(M)==0)
     err(talker,"matrix coefficients must no use variable x");
   n = lg(M)-1;
   if (n && lg(M[1])!=n+1) err(mattype1,"matfrobenius");
+  M_x = gaddmat(monomial(gen_m1, 1, 0), M);
   if (flag<2)
   {
-    D = matsnf0(gaddmat(gneg(polx[0]),M),6);
+    D = matsnf0(M_x,6);
     if (flag != 1) D = Frobeniusform(D, n);
     return gerepileupto(ltop, D);
   }
   if (flag>2) err(flagerr,"matfrobenius");
-  A = matsnf0(gaddmat(gneg(polx[0]),M),3);
+  A = matsnf0(M_x,3);
   D = smithclean(mattodiagonal_i(gel(A,3)));
   N = Frobeniusform(D, n);
   B = build_frobeniusbc(D, n);

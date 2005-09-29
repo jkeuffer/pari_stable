@@ -2766,13 +2766,9 @@ ggcd(GEN x, GEN y)
     case t_POL:
       switch(ty)
       {
-	case t_POL:
-	  return srgcd(x,y);
-
-	case t_SER:
-	  return gpowgs(polx[vx],min(valp(y),gval(x,vx)));
-
-	case t_RFRAC: av=avma; z=cgetg(3,ty);
+	case t_POL: return srgcd(x,y);
+	case t_SER: return monomial(gen_1, min(valp(y),gval(x,vx)), vx);
+	case t_RFRAC: z=cgetg(3,ty);
           gel(z,1) = ggcd(x,gel(y,1));
           gel(z,2) = gcopy(gel(y,2)); return z;
       }
@@ -2781,11 +2777,8 @@ ggcd(GEN x, GEN y)
     case t_SER:
       switch(ty)
       {
-	case t_SER:
-	  return gpowgs(polx[vx],min(valp(x),valp(y)));
-
-	case t_RFRAC:
-	  return gpowgs(polx[vx],min(valp(x),gval(y,vx)));
+	case t_SER:   return monomial(gen_1, min(valp(x),valp(y)), vx);
+	case t_RFRAC: return monomial(gen_1, min(valp(x),gval(y,vx)), vx);
       }
       break;
 
@@ -2962,12 +2955,11 @@ static GEN
 gcdmonome(GEN x, GEN y)
 {
   long dx=degpol(x), v=varn(x), e=gval(y, v);
-  pari_sp tetpil, av=avma;
-  GEN p1,p2;
+  pari_sp av = avma;
+  GEN t = ggcd(leading_term(x), content(y));
 
   if (dx < e) e = dx;
-  p1=ggcd(leading_term(x),content(y)); p2=gpowgs(polx[v],e);
-  tetpil=avma; return gerepile(av,tetpil,gmul(p1,p2));
+  return gerepileupto(av, monomialcopy(t, e, v));
 }
 
 /*******************************************************************/
@@ -4074,8 +4066,8 @@ GEN
 reduceddiscsmith(GEN pol)
 {
   long i, j, n;
-  pari_sp av=avma, tetpil;
-  GEN polp,alpha,p1,m;
+  pari_sp av = avma;
+  GEN polp, p1, m;
 
   if (typ(pol)!=t_POL) err(typeer,"reduceddiscsmith");
   n=degpol(pol);
@@ -4083,15 +4075,15 @@ reduceddiscsmith(GEN pol)
   check_ZX(pol,"poldiscreduced");
   if (!gcmp1(gel(pol,n+2)))
     err(talker,"non-monic polynomial in poldiscreduced");
-  polp = derivpol(pol); alpha = polx[varn(pol)];
+  polp = derivpol(pol);
   m=cgetg(n+1,t_MAT);
   for (j=1; j<=n; j++)
   {
     p1=cgetg(n+1,t_COL); gel(m,j) = p1;
     for (i=1; i<=n; i++) gel(p1,i) = truecoeff(polp,i-1);
-    if (j<n) polp = grem(gmul(alpha,polp), pol);
+    if (j<n) polp = grem(gmulXn(polp, 1), pol);
   }
-  tetpil=avma; return gerepile(av,tetpil,smith(m));
+  return gerepileupto(av, smith(m));
 }
 
 /***********************************************************************/

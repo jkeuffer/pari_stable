@@ -1682,7 +1682,7 @@ loop(decomp_t *S, long nv, long Ea, long Fa, GEN ns)
         S->chi= chie; composemod(S, eta, S->phi); return 1;
       }
 
-      if (gequal(nue, polx[v]))
+      if (ismonome(nue))
       { /* vp(eta) = vp(gamma - delta) > 0 */
         long Le, Ee;
         GEN pie;
@@ -3848,7 +3848,7 @@ makebasis(GEN nf, GEN pol, GEN rnfeq)
   bs = gmul(vbs, RgXV_to_RgM(gel(nf,7),n));
 
   vpro = cgetg(N+1,t_VEC);
-  for (i=1; i<=N; i++) gel(vpro,i) = gpowgs(polx[v], i-1);
+  for (i=1; i<=N; i++) gel(vpro,i) = monomial(gen_1, i-1, v);
   vpro = gmul(vpro, elts);
   B = cgetg(m+1, t_MAT);
   for(i=k=1; i<=N; i++)

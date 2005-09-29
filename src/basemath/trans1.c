@@ -708,7 +708,7 @@ ser_powfrac(GEN x, GEN q, long prec)
   if (typ(y) == t_SER) /* generic case */
     y[1] = evalsigne(1) | evalvalp(e) | evalvarn(varn(x));
   else /* e.g coeffs are POLMODs */
-    y = gmul(y, gpowgs(polx[varn(x)], e));
+    y = gmul(y, monomial(gen_1, e, varn(x)));
   return y;
 }
 

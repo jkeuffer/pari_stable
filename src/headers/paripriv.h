@@ -207,6 +207,7 @@ GEN  fix_rfrac_if_pol(GEN x, GEN y);
 GEN  gmulXn(GEN x, long d);
 GEN  lift_if_rational(GEN x);
 GEN  monomial(GEN a, int degpol, int v);
+GEN  monomialcopy(GEN a, int degpol, int v);
 GEN  mulmat_pol(GEN A, GEN x);
 long polegal_spec(GEN x, GEN y);
 GEN  polrecip_i(GEN x);
