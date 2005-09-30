@@ -1702,7 +1702,7 @@ global0()
     if (ep && EpVALENCE(ep) == EpGVAR)
     {
       res = new_chunk(1);
-      gel(res,0) = gel(polx,n); i++;
+      gel(res,0) = polx[n]; i++;
     }
   }
   if (i) { res = cgetg(1,t_VEC); setlg(res, i+1); }
@@ -3376,6 +3376,12 @@ print_def_arg(GEN x)
     brute(x,'g',-1);
 }
 
+static void
+print_var(long n) {
+  entree *ep = varentries[n];
+  pariputs(ep? ep->name:"#");
+}
+
 void
 print_user_fun(entree *ep)
 {
@@ -3388,8 +3394,7 @@ print_user_fun(entree *ep)
   narg = f->narg;
   for (i=1; i<=narg; i++, arg++)
   {
-    entree *ep = varentries[*q++];
-    pariputs(ep? ep->name:"#");
+    print_var(*q++);
     print_def_arg(*arg);
     if (i == narg) { arg++; break; }
     pariputs(", ");
@@ -3401,8 +3406,7 @@ print_user_fun(entree *ep)
     pariputs("local(");
     for (i=1; i<=narg; i++, arg++)
     {
-      entree *ep = varentries[*q++];
-      pariputs(ep? ep->name:"#");
+      print_var(*q++);
       print_def_arg(*arg);
       if (i == narg) break;
       pariputs(", ");
@@ -3416,11 +3420,9 @@ void
 print_user_member(entree *ep)
 {
   GEN q = (GEN)ep->value;
-  entree *ep2;
 
   q++; /* skip initial NULL */
-  ep2 = varentries[*q++];
-  pariputs(ep2? ep2->name:"#");
+  print_var(*q++);
   pariputsf(".%s = ", ep->name);
   pariputs((char*)q);
 }
