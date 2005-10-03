@@ -634,6 +634,14 @@ exponent $-\kbd{bit}$.
   real_0_bit( -bit_accuracy(prec) )
 @eprog
 
+\fun{GEN}{int2n}{long n} creates a \typ{INT} equal to \kbd{1<<n} (i.e
+$2^n$ if $n \geq 0$, and $0$ otherwise).
+
+\fun{GEN}{int2u}{ulong n} creates a \typ{INT} equal to $2^n$.
+
+\fun{GEN}{real2n}{long n, long prec} create a \typ{REAL} equal to $2^n$
+to \kbd{prec} words of accuracy.
+
 \subsec{Assignment}.
 In this section, the \kbd{z} argument in the \kbd{z}-functions must be of type
 \typ{INT} or~\typ{REAL}.

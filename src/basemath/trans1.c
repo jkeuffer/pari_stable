@@ -338,7 +338,7 @@ powiu_sign(GEN a, ulong N, long s)
   if (lgefint(a) == 3)
   { /* easy if |a| < 3 */
     if (a[2] == 1) return (s>0)? gen_1: gen_m1;
-    if (a[2] == 2) { a = int2n(N); setsigne(a,s); return a; }
+    if (a[2] == 2) { a = int2u(N); setsigne(a,s); return a; }
   }
   if (N == 1) { a = icopy(a); setsigne(a,s); return a; }
   if (N == 2) return sqri(a);

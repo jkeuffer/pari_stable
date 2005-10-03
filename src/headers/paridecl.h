@@ -1318,6 +1318,7 @@ GEN     floorr(GEN x);
 GEN     gcdii(GEN x, GEN y);
 GEN     int_normalize(GEN x, long known_zero_words);
 GEN     int2n(long n);
+GEN     int2u(ulong n);
 int     invmod(GEN a, GEN b, GEN *res);
 ulong   invrev(ulong b);
 ulong   Fl_inv(ulong x, ulong p);

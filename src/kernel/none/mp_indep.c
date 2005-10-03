@@ -522,6 +522,21 @@ int2n(long n) {
   for (i = 2; i < l; i++) z[i] = 0;
   *int_MSW(z) = 1L << m; return z;
 }
+/* To avoid problems when 2^(BIL-1) < n. Overflow cleanly, where int2n
+ * returns gen_0 */
+GEN
+int2u(ulong n) {
+  ulong i, m, d, l;
+  GEN z;
+  if (n == 0) return gen_1;
+
+  d = n>>TWOPOTBITS_IN_LONG;
+  m = n & (BITS_IN_LONG-1);
+  l = d + 3; z = cgeti(l);
+  z[1] = evalsigne(1) | evallgefint(l);
+  for (i = 2; i < l; i++) z[i] = 0;
+  *int_MSW(z) = 1L << m; return z;
+}
 
 /* actual operations will take place on a+2 and b+2: we strip the codewords */
 GEN

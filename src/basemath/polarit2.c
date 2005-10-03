@@ -2538,7 +2538,7 @@ padic_gcd(GEN x, GEN y)
   GEN p = gel(y,2);
   long v = ggval(x,p), w = valp(y);
   if (w < v) v = w;
-  return powiu(p, v);
+  return gpowgs(p, v);
 }
 
 /* x,y in Z[i], at least one of which is t_COMPLEX */
