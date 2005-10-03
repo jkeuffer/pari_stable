@@ -1206,6 +1206,143 @@ ggamd(GEN x, long prec)
   return transc(ggamd,x,prec);
 }
 
+/* find n such that n-v_p(n!)>=k */
+static long nboft(long k, long p)
+{
+  long s,n;
+  for (s=0,n=0; n-s<k; s += u_lval(++n, p));
+  return n; 
+}
+
+/*
+ * Using Dwork's expansion, compute \Gamma(px+1)=-\Gamma(px) with x a
+ * unit.
+ * See p$-Adic Gamma Functions and Dwork Cohomology,
+ * Maurizio Boyarsky
+ * Transactions of the American Mathematical Society,
+ * Vol. 257, No. 2. (Feb., 1980), pp. 359-369.
+ * Inspired by a GP script by Fernando Rodriguez-Villegas 
+ */
+
+static GEN
+gadw(GEN x, long p)
+{
+  pari_sp ltop=avma;
+  GEN s, t;
+  long j, k;
+  long n = nboft(precp(x)+valp(x)+1,p);
+  GEN  u = cgetg(p+1, t_VEC);
+  s = gaddsg(1, zeropadic(gel(x,2), n));
+  t = s;
+  gel(u, 1) = s;
+  for (j = 1; j < p; ++j)
+    gel(u, j + 1) = gdivgs(gel(u, j), j);
+  for (k = 1; k < n; ++k)
+  {
+    gel(u, 1) = gdivgs(gdivgs(gadd(gel(u, 1), gel(u, p)), k), p);
+    for (j = 1; j < p; ++j)
+      gel(u, j + 1) = gdivgs(gadd(gel(u, j), gel(u, j + 1)), (k*p) + j);
+    
+    t = gmul(t, gaddgs(x, k-1));
+    s = gadd(s, gmul(gmul(gel(u, 1), gpowgs(gel(x,2), k)), t));
+    if ((k&0xFL)==0) gerepileall(ltop, 3, &u,&s,&t);
+  }
+  
+  return gneg(s);
+}
+
+/*Use Dwork expansion*/
+/*This is a O(p*e*log(pe)) algorithm, should be used when p small
+ * If p==2 this is a O(pe) algorithm...
+ */
+static GEN
+gammap_Dwork(GEN x, long p)
+{
+  pari_sp ltop = avma;
+  long k = itos(gmodgs(x, p));
+  GEN p1;
+  long j;
+  if (k)
+  {
+    x = gdivgs(gsubgs(x, k), p);
+    k--;
+    p1 = gadw(x, p);
+    if (k%2==1) p1 = gneg(p1);
+    for (j = 1; j <= k; ++j)
+      p1 = gmul(p1, gaddgs(gmulsg(p, x), j));
+  }
+  else
+    p1 = gneg(gadw(gdivgs(x, p), p));
+  return gerepileupto(ltop, p1);
+}
+
+/* 
+ * Compute gammap using the definition. This is a O(x*M(log(pe))) algorithm.
+ * This should be used if x is very small.
+ */
+static GEN
+gammap_Morita(long n, GEN p, long e)
+{
+  pari_sp ltop=avma;
+  GEN p2 = gaddsg((n&1)?-1:1, zeropadic(p, e+1));
+  long i;
+  long pp=is_bigint(p)? 0: itos(p);
+  for (i = 2; i < n; i++)
+    if (!pp || i%pp)
+    {
+      p2 = gmulgs(p2, i);
+      if ((i&0xFL) == 0xFL)
+        p2 = gerepileupto(ltop, p2);
+    }
+  return gerepileupto(ltop, p2);
+}
+
+/*
+ * x\in\N: Gamma(-x)=(-1)^(1+x+x\p)*Gamma(1+x)
+ */
+
+static GEN
+gammap_neg_Morita(long n, GEN p, long e)
+{
+  GEN g=ginv(gammap_Morita(n+1,p,e));
+  long s=(n&1);
+  if (is_bigint(p)) 
+    return s ? g:gneg(g);
+  else
+    return (s^((n/itos(p))&1)) ? g:gneg(g);
+}
+
+/* p-adic Gamma function for x a p-adic integer */
+/*
+  There are three cases:
+  n is small            : we use Morita definition.
+  n is large, p is small: we use Dwork expansion.
+  n is large, p is large: we don't know how to proceed.
+  TODO: handle p=2 better (gammap_Dwork is very slow for p=2).
+*/
+#define GAMMAP_DWORK_LIMIT 50000UL
+static GEN
+gammap(GEN x)
+{
+  GEN p = gel(x,2);
+  long e= precp(x);
+  GEN n,m,nm;
+  if (valp(x)<0) 
+    err(talker,"Gamma not defined for non-integral p-adic number");
+  n = gtrunc(x);
+  m = gtrunc(gneg(x));
+  nm= cmpii(n,m)<=0?n:m;
+  if (lgefint(nm)==3 && (is_bigint(p) || (ulong)nm[2]<GAMMAP_DWORK_LIMIT))
+  {
+    if(nm==n)
+      return gammap_Morita(itos(n),p,e);
+    else 
+      return gammap_neg_Morita(itos(m),p,e);
+  }
+  else
+    return gammap_Dwork(x, itos(p));
+}
+
 GEN
 ggamma(GEN x, long prec)
 {
@@ -1233,7 +1370,7 @@ ggamma(GEN x, long prec)
       }
       return gammahs(m-1, prec);
 
-    case t_PADIC: err(impl,"p-adic gamma function");
+    case t_PADIC: return gammap(x);
     case t_INTMOD: err(typeer,"ggamma");
     default:
       av = avma; if (!(y = _toser(x))) break;

@@ -987,7 +987,7 @@ rootsof1padic(GEN n, GEN y)
   affii(z, gel(r,4)); avma = av; return r;
 }
 
-static GEN paexp(GEN x);
+static GEN exp_p(GEN x);
 /*compute the p^e th root of x p-adic, assume x != 0 */
 GEN
 padic_sqrtn_ram(GEN x, long e)
@@ -1005,7 +1005,7 @@ padic_sqrtn_ram(GEN x, long e)
   /*If p=2 -1 is an root of unity in U1,we need an extra check*/
   if (lgefint(p)==3 && p[2]==2 && mod8(gel(x,4))!=signe(gel(x,4)))
     return NULL;
-  a = paexp(gdiv(palog(x), n));
+  a = exp_p(gdiv(palog(x), n));
   if (!a) return NULL;
   /*Here n=p^e and a^n=z*x where z is a (p-1)th-root of unity. Note that
       z^p=z; hence for b = a/z, then b^n=x. We say b=x/a^(n-1)*/
@@ -1284,17 +1284,13 @@ mpexp(GEN x)
 }
 #undef EXMAX
 
-static GEN
-paexp(GEN x)
+static long
+exp_p_prec(GEN x)
 {
-  long k, e = valp(x), pp = precp(x), n = e + pp;
-  pari_sp av;
-  GEN y, r, p = gel(x,2);
+  long k, e = valp(x), n = e + precp(x);
+  GEN p = gel(x,2);
   int is2 = equaliu(p,2);
-
-  if (gcmp0(x)) return gaddgs(x,1);
-  if (e <= 0 || (e == 1 && is2)) return NULL;
-  av = avma;
+  if (e < 1 || (e == 1 && is2)) return -1;
   if (is2)
   {
     n--; e--; k = n/e;
@@ -1302,12 +1298,64 @@ paexp(GEN x)
   }
   else
   {
-    GEN t = subis(p, 1);
+    GEN r, t = subis(p, 1);
     k = itos(dvmdii(subis(mulis(t,n), 1), subis(mulis(t,e), 1), &r));
     if (!signe(r)) k--;
   }
+  return k;
+}
+
+static GEN
+exp_p(GEN x)
+{
+  long k;
+  pari_sp av;
+  GEN y;
+
+  if (gcmp0(x)) return gaddgs(x,1);
+  k = exp_p_prec(x);
+  if (k < 0) return NULL;
+  av = avma;
   for (y=gen_1; k; k--) y = gaddsg(1, gdivgs(gmul(y,x), k));
   return gerepileupto(av, y);
+}
+static GEN
+cos_p(GEN x)
+{
+  long k;
+  pari_sp av;
+  GEN x2, y;
+
+  if (gcmp0(x)) return gaddgs(x,1);
+  k = exp_p_prec(x);
+  if (k < 0) return NULL;
+  av = avma; x2 = gsqr(x);
+  if (k & 1) k--;
+  for (y=gen_1; k; k-=2) 
+  {
+    GEN t = gdiv(gmul(y,x2), mulss(k, k-1));
+    y = gsubsg(1, t);
+  }
+  return gerepileupto(av, y);
+}
+static GEN
+sin_p(GEN x)
+{
+  long k;
+  pari_sp av;
+  GEN x2, y;
+
+  if (gcmp0(x)) return gaddgs(x,1);
+  k = exp_p_prec(x);
+  if (k < 0) return NULL;
+  av = avma; x2 = gsqr(x);
+  if (k & 1) k--;
+  for (y=gen_1; k; k-=2) 
+  {
+    GEN t = gdiv(gmul(y,x2), mulss(k, k+1));
+    y = gsubsg(1, t);
+  }
+  return gerepileupto(av, gmul(y, x));
 }
 
 static GEN
@@ -1370,7 +1418,7 @@ gexp(GEN x, long prec)
   {
     case t_REAL: return mpexp(x);
     case t_COMPLEX: return cxexp(x,prec);
-    case t_PADIC: x = paexp(x);
+    case t_PADIC: x = exp_p(x);
       if (!x) err(talker,"p-adic argument out of range in gexp");
       return x;
     case t_INTMOD: err(typeer,"gexp");
@@ -1981,7 +2029,11 @@ gcos(GEN x, long prec)
       x = gadd(x, real_0(prec));
       affr_fixlg(mpcos(x), y); avma = av; return y;
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gcos");
+    case t_INTMOD: err(typeer,"gcos");
+    
+    case t_PADIC: x = cos_p(x);
+      if (!x) err(talker,"p-adic argument out of range in gcos");
+      return x;
 
     default:
       av = avma; if (!(y = _toser(x))) break;
@@ -2044,7 +2096,11 @@ gsin(GEN x, long prec)
       x = gadd(x, real_0(prec));
       affr_fixlg(mpsin(x), y); avma = av; return y;
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gsin");
+    case t_INTMOD: err(typeer,"gsin");
+
+    case t_PADIC: x = sin_p(x);
+      if (!x) err(talker,"p-adic argument out of range in gsin");
+      return x;
 
     default:
       av = avma; if (!(y = _toser(x))) break;
