@@ -185,7 +185,8 @@ qfb_comp(GEN z, GEN x, GEN y)
   c3 = addii(c, mulii(r,addii(gel(y,2),p1)));
   gel(z,1) = mulii(v1,v2);
   gel(z,2) = addii(gel(y,2), shifti(p1,1));
-  gel(z,3) = diviiexact(c3,v1);
+  gel(z,3) = dvmdii(c3,v1, &s);
+  if (signe(s)) err(talker,"different discriminants in qfb_comp");
 }
 
 static GEN

@@ -139,6 +139,7 @@ BA 66- [Configure] check that 'readline' is not an EditLine wrapper
    67- Str() --> junk string (uninitialized data) (#326)
    68- arg(I*O(7^5)+1) --> junk, exp(3*I + O(3^5)) --> junk. (#328)
    69- powiu(2, ulong n) called int2n(long n), incorrect for huge n (#331)
+   70- Qfb(8,-4,1)*Qfb(5,-4,1) --> Floating Point Exception (BIB, #332)
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
