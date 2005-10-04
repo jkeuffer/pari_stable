@@ -1651,7 +1651,7 @@ zetap(GEN s)
   GEN gp, q, vz, is, cff, val, va, cft;
 
   if (valp(s) < 0)
-    err(talker, "argument must be a gp-adic integer");
+    err(talker, "argument must be a p-adic integer");
 
   gp = gel(s,2); p = itou(gp);
   is = gtrunc(s);  /* make s an integer */
@@ -1674,7 +1674,7 @@ zetap(GEN s)
   /* compute the coefficients of the power series corresponding
      to the twisted partial zeta function Z_f(a, c, s) for a in va */
   /* The line below looks a bit stupid but it is to keep the
-     possibility of later adding gp-adic Dirichlet L-functions */
+     possibility of later adding p-adic Dirichlet L-functions */
   va = perm_identity(f - 1);
   if (DEBUGLEVEL > 1)
     fprintferr("zetap: computing values of twisted partial zeta functions\n");
