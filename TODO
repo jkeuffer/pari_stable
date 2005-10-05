@@ -135,6 +135,9 @@ Misc:
    gives mostly bogus results at high precision. E.g.
    \p300
    zetak(zetakinit(x^2-2),2) --> ~ 1e183
+   Also, also close to (but not at) rationnal integers:
+   ? zetak(zetakinit(x),3-1e-38)
+   %1 = 7.41787592 E21
    To be rewritten...
 
 3  have quadclassunit return bnf structure
