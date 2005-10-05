@@ -143,6 +143,12 @@ BA 66- [Configure] check that 'readline' is not an EditLine wrapper
    71- t_QRF distance component was evaluated using an unstable algorithm,
        possibly leading to catastrophic cancellation (#333)
    72- dbltor did not recognize Infinity, NaN, or unnormalized numbers.
+   73- makerfrac(1,quadgen(24)*x^0)%b --> SEGV, where
+       GEN makerfrac(GEN p,GEN q) {
+          GEN z=cgetg(3,t_RFRAC);
+          z[1]=lcopy(p);
+          z[2]=lcopy(q); return z;
+        }
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

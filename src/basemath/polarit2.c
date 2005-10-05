@@ -4208,6 +4208,7 @@ RgXQ_inv(GEN x, GEN y)
   {
     if (varncmp(vx,vy) > 0)
     {
+      if (vx == BIGINT) return ginv(x);
       d = cgetg(3,t_RFRAC);
       gel(d,1) = polun[vx];
       gel(d,2) = gcopy(x); return d;
