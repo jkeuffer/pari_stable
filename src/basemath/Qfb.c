@@ -696,6 +696,7 @@ GEN
 qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
 {
   GEN B, C, y, b = gel(x,2), c = gel(x,3);
+  long sb = signe(b);
 
   rho_get_BC(&B, &C, b, c, D, isqrtD);
   y = cgetg(6, t_VEC);
@@ -704,8 +705,13 @@ qfr5_rho(GEN x, GEN D, GEN sqrtD, GEN isqrtD)
   gel(y,3) = C;
   y[4] = x[4];
   y[5] = x[5];
-  if (signe(b)) {
-    GEN t = divrr(addir(b,sqrtD), subir(b,sqrtD));
+  if (sb) {
+    GEN t = subii(sqri(b), D);
+    if (sb < 0)
+      t = divir(t, gsqr(subir(b,sqrtD)));
+    else
+      t = divri(gsqr(addir(b,sqrtD)), t);
+    /* t = (b + sqrt(D)) / (b - sqrt(D)), evaluated stably */
     gel(y,5) = mulrr(t, gel(y,5)); fix_expo(y);
   }
   return y;
