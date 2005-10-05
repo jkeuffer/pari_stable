@@ -2346,18 +2346,25 @@ identifier(void)
       if (*analyseur != '=' && strcmp(ep->name, "local") == 0)
         err(talker2, "local() bloc must appear before any other expression",
                      mark.identifier,mark.start);
-      match('=');
-      { /* checking function definition */
-        skipping_fun_def++;
-        while (strncmp(analyseur,"local(",6) == 0)
-        {
-          analyseur += 5; /* on '(' */
-          nloc += check_args();
-          while(separator(*analyseur)) analyseur++;
-        }
-        start = analyseur; skipseq(); len = analyseur-start;
-        skipping_fun_def--;
+      if (*analyseur != '=')
+      {
+        char *str = stackmalloc(128 + strlen(ep->name));
+        sprintf(str,"unknown function '%s', expected '=' instead of", ep->name);
+        err(talker2,str, analyseur, mark.start);
       }
+      analyseur++;
+
+      /* checking function definition */
+      skipping_fun_def++;
+      while (strncmp(analyseur,"local(",6) == 0)
+      {
+        analyseur += 5; /* on '(' */
+        nloc += check_args();
+        while(separator(*analyseur)) analyseur++;
+      }
+      start = analyseur; skipseq(); len = analyseur-start;
+      skipping_fun_def--;
+
       /* function is ok. record it */
       /* record default args */
       f = (gp_args*) gpmalloc((narg+nloc)*sizeof(GEN) + sizeof(gp_args));
