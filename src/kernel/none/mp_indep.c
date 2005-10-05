@@ -723,9 +723,22 @@ dbltor(double x)
 
   if (x==0.) return real_0_bit(-exp_mid);
   fi.f = x; z = cgetr(DEFAULTPREC);
-  e = ((fi.i & (HIGHBIT-1)) >> mant_len) - exp_mid;
-  z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
-  z[2] = (fi.i << expo_len) | HIGHBIT;
+  {
+    const ulong a = fi.i;
+    ulong A;
+    e = ((a & (HIGHBIT-1)) >> mant_len) - exp_mid;
+    if (e == exp_mid+1) err(talker, "NaN or Infinity in dbltor");
+    A = a << expo_len;
+    if (e == -exp_mid)
+    { /* unnormalized values */
+      int sh = bfffo(A);
+      e -= sh-1;
+      z[2] = A << sh;
+    }
+    else
+      z[2] = HIGHBIT | A;
+    z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
+  }
   return z;
 }
 
@@ -805,14 +818,39 @@ dbltor(double x)
   const int shift = mant_len-32;
 
   if (x==0.) return real_0_bit(-exp_mid);
-  fi.f = x; z=cgetr(DEFAULTPREC);
+  fi.f = x; z = cgetr(DEFAULTPREC);
   {
     const ulong a = fi.i[INDEX0];
     const ulong b = fi.i[INDEX1];
+    ulong A, B;
     e = ((a & (HIGHBIT-1)) >> shift) - exp_mid;
+    if (e == exp_mid+1) err(talker, "NaN or Infinity in dbltor");
+    A = b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
+    B = b << expo_len;
+    if (e == -exp_mid)
+    { /* unnormalized values */
+      int sh;
+      if (A)
+      {
+        sh = bfffo(A);
+        e -= sh-1;
+        z[2] = (A << sh) | (B >> (32-sh));
+        z[3] = B << sh;
+      }
+      else 
+      {
+        sh = bfffo(B); /* B != 0 */
+        e -= sh-1 + 32;
+        z[2] = B << sh;
+        z[3] = 0;
+      }
+    }
+    else
+    {
+      z[3] = B;
+      z[2] = HIGHBIT | A;
+    }
     z[1] = evalexpo(e) | evalsigne(x<0? -1: 1);
-    z[3] = b << expo_len;
-    z[2] = HIGHBIT | b >> (BITS_IN_LONG-expo_len) | (a << expo_len);
   }
   return z;
 }
