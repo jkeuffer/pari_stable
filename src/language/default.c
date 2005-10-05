@@ -250,7 +250,7 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
     case d_RETURN:
       return utoi(*ptn);
     case d_ACKNOWLEDGE:
-      if (*ptn != n) {
+      if (!*v || *ptn != n) {
         if (msg)
         {
           if (!*msg) msg++; /* single msg, always printed */
