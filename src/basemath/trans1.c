@@ -1260,7 +1260,7 @@ GEN
 mpexp(GEN x)
 {
   const long s = 6; /*Initial steps using basecase*/
-  long i, n, mask, p, l, sx = signe(x);
+  long i, n, mask, p, l, sx = signe(x), sh=0;
   GEN a, z;
 
   if (!sx) return real_1(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
@@ -1270,17 +1270,26 @@ mpexp(GEN x)
   l = lg(x);
   if (l <= max(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
   z = cgetr(l); /* room for result */
+  if (expo(x) >= 0)
+  { /* x>=1 : we do x %= log(2) to keep x small*/
+    sh = (long) (rtodbl(x)/LOG2);
+    x = subrr(rtor(x,l+1), mulsr(sh, mplog2(l+1)));
+    if (!signe(x)) { avma = (pari_sp)(z+l); return real2n(sh, l); }
+  }
   n = hensel_lift_accel(l-1,&mask);
   for(i=0, p=1; i<s; i++) { p <<= 1; if (mask&(1<<i)) p--; }
   a = mpexp_basecase(rtor(x, p+2));
   x = addrs(x,1);
+  if (lg(x) < l+1) x = rtor(x, l+1);
   for(i=s; i<n; i++)
   {
     p <<= 1; if (mask&(1<<i)) p--;
     setlg(x, p+2); a = rtor(a, p+2);
     a = mulrr(a, subrr(x, logr_abs(a))); /* a := a (x - log(a)) */
   }
-  affrr(a,z); avma = (pari_sp)z; return z;
+  affrr(a,z); 
+  if (sh) setexpo(z, expo(z) + sh);
+  avma = (pari_sp)z; return z;
 }
 #undef EXMAX
 
