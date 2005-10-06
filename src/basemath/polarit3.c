@@ -816,7 +816,8 @@ monomial(GEN a, int d, int v)
     gel(P,2) = monomial(gen_1, -d, v);
   } else {
     P = cgetg(lP, t_POL);
-    P[1] = evalsigne(1) | evalvarn(v);
+    if (gcmp0(a)) P[1] = evalsigne(0) | evalvarn(v);
+    else          P[1] = evalsigne(1) | evalvarn(v);
     lP--; gel(P,lP) = a;
     for (i=2; i<lP; i++) gel(P,i) = gen_0;
   }
@@ -833,7 +834,8 @@ monomialcopy(GEN a, int d, int v)
     gel(P,2) = monomial(gen_1, -d, v);
   } else {
     P = cgetg(lP, t_POL);
-    P[1] = evalsigne(1) | evalvarn(v);
+    if (gcmp0(a)) P[1] = evalsigne(0) | evalvarn(v);
+    else          P[1] = evalsigne(1) | evalvarn(v);
     lP--; gel(P,lP) = gcopy(a);
     for (i=2; i<lP; i++) gel(P,i) = gen_0;
   }
