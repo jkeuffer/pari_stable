@@ -2770,7 +2770,8 @@ plindep(GEN x)
 GEN
 lindep0(GEN x,long bit,long prec)
 {
-  long i;
+  long i, tx = typ(x);
+  if (! is_vec_t(tx) && tx != t_MAT) err(typeer,"lindep");
   for (i = 1; i < lg(x); i++)
     if (typ(gel(x,i)) == t_PADIC) return plindep(x);
   switch (bit)
