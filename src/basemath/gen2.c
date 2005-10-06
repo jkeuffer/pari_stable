@@ -776,7 +776,10 @@ Z_lval(GEN x, ulong p)
     GEN q = diviu_rem(x, p, &r);
     if (r) break;
     vx++; x = q;
-    if (vx == 32) { vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break; }
+    if (vx == 32) {
+      if (p == 1) err(talker, "p = 1 in Z_lvalrem");
+      vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break;
+    }
   }
   avma = av; return vx;
 }
@@ -800,7 +803,10 @@ Z_lvalrem(GEN x, ulong p, GEN *py)
     GEN q = diviu_rem(x, p, &r);
     if (r) break;
     vx++; x = q;
-    if (vx == 32) { vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break; }
+    if (vx == 32) {
+      if (p == 1) err(talker, "p = 1 in Z_lvalrem");
+      vx = 32 + Z_pvalrem_DC(x, utoipos(p), &x); break;
+    }
   }
   avma = av; *py = icopy(x); setsigne(*py, sx); return vx;
 }

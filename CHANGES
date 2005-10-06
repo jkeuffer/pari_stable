@@ -150,6 +150,8 @@ BA 66- [Configure] check that 'readline' is not an EditLine wrapper
           z[2]=lcopy(q); return z;
         }
 BA 74- exp(x) gave imprecise results at huge accuracies for expo(x) >> 1.
+   75- valuation(x,p) using a divide & conquer algorithm would kill the
+       session if p = 1
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
