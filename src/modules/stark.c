@@ -803,11 +803,12 @@ bnrrootnumber(GEN bnr, GEN chi, long flag, long prec)
 {
   long l;
   pari_sp av = avma;
-  GEN cond, condc, bnrc, CHI, cyc = gmael(bnr, 5, 2);
+  GEN cond, condc, bnrc, CHI, cyc;
 
   if (flag < 0 || flag > 1) err(flagerr,"bnrrootnumber");
 
   checkbnr(bnr);
+  cyc = gmael(bnr, 5, 2);
   cond = gmael(bnr, 2, 1);
   l    = lg(cyc);
 
