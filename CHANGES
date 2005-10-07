@@ -207,6 +207,7 @@ BA 28- change the semantic of includedir to not include the pari suffix.
       + allow lindep with p-adic entries
 BA 30- allow relative paths in Configure --with-xxx directives
 BA 31- allow sinh, cosh, tanh with t_PADIC arguments
+XR 32- bnrstark(): try harder to find solutions [increase precision faster #255]
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4

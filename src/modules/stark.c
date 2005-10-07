@@ -447,7 +447,7 @@ CplxModulus(GEN data, long *newprec, long prec)
   {
     gel(data,5) = InitChar(bnr, listCR, dprec);
     pol = AllStark(data, nf, -1, dprec);
-    pr = gexpo(pol) >> (TWOPOTBITS_IN_LONG+1);
+    pr = 1 + (gexpo(pol)>>TWOPOTBITS_IN_LONG);
     if (pr < 0) pr = 0;
     dprec = max(dprec, pr) + EXTRA_PREC;
     if (!gcmp0(leading_term(pol)))
@@ -1766,7 +1766,7 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
 {
   GEN A, M, nB, cand, p1, B2, C2, tB, beta2, BIG, nf2, Bd;
   GEN beta = d->beta, B = d->B;
-  long N = d->N, v = d->v;
+  long N = d->N, v = d->v, e;
   long i, j, k, l, ct = 0, prec2;
   pari_sp av = avma;
   FP_chk_fun chk = { &chk_reccoeff, &chk_reccoeff_init, NULL, 0 };
@@ -1776,8 +1776,9 @@ RecCoeff3(GEN nf, RC_data *d, long prec)
   /* FIXME: why a power of 10 ? Use a power of 2. */
   BIG = powuu(10, max(8, -(d->G >> 1)));
   tB  = sqrtnr(gmul2n(itor(BIG,DEFAULTPREC), -N), N-1);
-
-  Bd    = gceil(gmin(B, tB));
+  Bd    = grndtoi(gmin(B, tB), &e);
+  if (e > 0) return NULL; /* failure */
+  Bd = addis(Bd, 1);
   prec2 = BIGDEFAULTPREC + (expi(Bd)>>TWOPOTBITS_IN_LONG);
   prec2 = max((prec << 1) - 2, prec2);
   nf2   = nfnewprec(nf, prec2);
@@ -1854,10 +1855,12 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
   av2 = avma;
   for (i = imax; i >= imin; i-=16, avma = av2)
   {
+    long e;
     GEN v = lindep2(vec, i), z = gel(v,1);
     if (!signe(z)) continue;
     *++v = evaltyp(t_COL) | evallg(lM);
-    v = ground(gdiv(v, z));
+    v = grndtoi(gdiv(v, z), &e);
+    if (e > 0) return RecCoeff3(nf,d,prec); /* failure */
     if (TestOne(gmul(M, v), d)) return gerepileupto(av, basistoalg(nf, v));
   }
   /* failure */
@@ -2533,13 +2536,18 @@ LABDOUB:
 
   if (!polrel) /* if it fails... */
   {
-    long pr;
+    long incr_pr;
     if (++cpt >= 3) err(precer, "stark (computation impossible)");
 
-    /* compute the precision we need */
-    pr = 1 + (gexpo(polrelnum)>>TWOPOTBITS_IN_LONG);
-    if (pr < 0) pr = 0;
-    newprec = ADD_PREC + max(newprec,pr);
+    /* compute the precision, we need 
+          a) get at least EXTRA_PREC fractional digits if there is none;
+       or b) double the fractional digits.
+    */
+    incr_pr = (bit_accuracy(gprecision(polrelnum)) - 
+	       gexpo(polrelnum))>>TWOPOTBITS_IN_LONG;
+    if (incr_pr < 0) 
+      incr_pr = -incr_pr + EXTRA_PREC;
+    newprec = newprec + max(ADD_PREC, cpt*incr_pr);
 
     if (DEBUGLEVEL) err(warnprec, "AllStark", newprec);
 
