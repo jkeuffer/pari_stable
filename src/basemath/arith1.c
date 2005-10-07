@@ -1753,6 +1753,7 @@ Fl_pow(ulong x, ulong n0, ulong p)
     if (n0 == 1) return x;
     if (n0 == 0) return 1;
   }
+  if (x <= 1) return x; /* 0 or 1 */
   y = 1; z = x; n = n0;
   for(;;)
   {
@@ -1872,6 +1873,7 @@ Fp_pow(GEN A, GEN k, GEN N)
     }
     if (lgefint(k) == 3) return utoi(Fl_pow(a, (ulong)k[2], n));
     /* should not occur */
+    if (a <= 1) return utoi(a); /* 0 or 1 */
     err(warner, "multiword exponent in Fl_pow");
     return utoi( (ulong)leftright_pow((GEN)a, k, (void*)n, &_Flsqr, &_Flmul) );
   }
