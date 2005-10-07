@@ -773,6 +773,7 @@ gpow(GEN x, GEN n, long prec)
     else if (tx == t_PADIC)
     {
       z = equaliu(d, 2)? padic_sqrt(x): padic_sqrtn(x, d, NULL);
+      if (!z) return gerepileupto(av, gexp(gmul(n, glog(x,0)), 0));
       return gerepileupto(av, powgi(z, a));
     }
   }
