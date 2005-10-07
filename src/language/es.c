@@ -247,6 +247,42 @@ gp_read_file(char *s)
   popinfile(); return x;
 }
 
+GEN
+gp_readvec_stream(FILE *fi)
+{
+  pari_sp ltop = avma;
+  Buffer *b = new_buffer();
+  long i = 1, n = 16;
+  GEN z = cgetg(n+1,t_VEC);
+  for(;;)
+  {
+    if (!gp_read_stream_buf(fi, b)) break;
+    if (!*(b->buf)) continue;
+    if (i>n)
+    {
+      if (DEBUGLEVEL) fprintferr("gp_readvec_stream: reaching %ld entries\n",n);
+      n <<= 1;
+      z = vec_lengthen(z,n);
+    }
+    gel(z,i++) = readseq(b->buf);
+  }
+  if (DEBUGLEVEL) fprintferr("gp_readvec_stream: found %ld entries\n",i-1);
+  setlg(z,i); delete_buffer(b);
+  return gerepilecopy(ltop,z);
+}
+
+GEN
+gp_readvec_file(char *s)
+{
+  GEN x = NULL;
+  switchin(s);
+  if (file_is_binary(infile))
+    x = readbin(s,infile);
+  else 
+    x = gp_readvec_stream(infile);
+  popinfile(); return x;
+}
+
 /* Read from file (up to '\n' or EOF) and copy at s0 (points in b->buf) */
 char *
 file_input(char **s0, int junk, input_method *IM, filtre_t *F)

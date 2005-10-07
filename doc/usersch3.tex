@@ -1603,12 +1603,12 @@ only be positive integers. The algorithm makes sure that all elements in
 the table are pairwise coprime, so it may end up containing divisors
 of the input integers. 
 
-It is a useful trick to add known composite numbers, which for example
-the function $\kbd{factor}(x,0)$ was not able to factor. In case the
-message ``impossible inverse modulo $\langle$\var{some INTMOD}$\rangle$''
-shows up afterwards, you have just stumbled over a non-trivial factor.
-Note that the arithmetic functions in the narrow sense, like
-\teb{eulerphi}, do \emph{not} use this extra table.
+It is a useful trick to add known composite numbers, which the function
+$\kbd{factor}(x,0)$ was not able to factor. In case the message
+``impossible inverse modulo $\langle$\var{some INTMOD}$\rangle$'' shows
+up afterwards, you have just stumbled over a non-trivial factor. Note
+that the arithmetic functions in the narrow sense, like \teb{eulerphi},
+do \emph{not} use this extra table.
 
 To remove primes from the list use \kbd{removeprimes}.
 
@@ -8682,12 +8682,38 @@ dynamic file names if you wish).
 
 \subsubsecidx{quit}$()$: exits \kbd{gp}.\label{se:quit}
 
-\subsubsecidx{read}$(\{\var{str}\})$: reads in the file whose name results
-from the expansion of the string \var{str}. If \var{str} is omitted,
-re-reads the last file that was fed into \kbd{gp}. The return value is the result of
-the last expression evaluated.\label{se:read} If a GP \tet{binary file} is
-read using this command (see \secref{se:writebin}), the file is loaded and
-the last object in the file is returned.
+\subsubsecidx{read}$(\{\var{filename}\})$: reads in the file
+\var{filename} (subject to string expansion). If \var{filename} is
+omitted, re-reads the last file that was fed into \kbd{gp}. The return
+value is the result of the last expression evaluated.\label{se:read}
+
+If a GP \tet{binary file} is read using this command (see
+\secref{se:writebin}), the file is loaded and the last object in the file
+is returned.
+
+\subsubsecidx{readvec}$(\{\var{str}\})$:  reads in the file
+\var{filename} (subject to string expansion). If \var{filename} is
+omitted, re-reads the last file that was fed into \kbd{gp}. The return
+value is a vector whose components are the evaluation of all sequences
+of instructions contained in the file. For instance, if \var{file} contains
+\bprog
+  1
+  2
+  3
+@eprog\noindent
+then we will get:
+\bprog
+  ? \r a
+  %1 = 1
+  %2 = 2
+  %3 = 3
+  ? read(a)
+  %4 = 3
+  ? readvec(a)
+  %5 = [1, 2, 3]
+@eprog
+In general a sequence is just a single line, but as usual braces and
+\kbd{\bs\bs} may be used to enter multiline sequences.
 
 \subsubsecidx{reorder}$(\{x=[\,]\})$: $x$ must be a vector. If $x$ is the
 empty vector, this gives the vector whose components are the existing

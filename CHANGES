@@ -230,6 +230,7 @@ BA 15- new function substvec
 BA 16- new divide_conquer_assoc (make divide_conquer_prod thread-safe)
    17- p-adic zeta, cos & sin
 BA 18- p-adic gamma
+BA 19- new routine readvec()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.10 (released 17/04/2005):

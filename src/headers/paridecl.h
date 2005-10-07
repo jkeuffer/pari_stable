@@ -922,6 +922,8 @@ void    flusherr(void);
 void    fprintferr(const char* pat, ...);
 GEN     gp_read_file(char *s);
 GEN     gp_read_stream(FILE *f);
+GEN     gp_readvec_file(char *s);
+GEN     gp_readvec_stream(FILE *f);
 void    killallfiles(int check);
 int     killfile(pariFILE *f);
 void    matbrute(GEN g, char format, long dec);
