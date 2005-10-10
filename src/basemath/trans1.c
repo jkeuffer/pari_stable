@@ -2301,7 +2301,11 @@ gtan(GEN x, long prec)
       x = gadd(x, real_0(prec));
       affr_fixlg(mptan(x), y); avma = av; return y;
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gtan");
+    case t_PADIC:
+      av = avma;
+      return gerepileupto(av, gdiv(gsin(x,prec), gcos(x,prec)));
+
+    case t_INTMOD: err(typeer,"gtan");
 
     default:
       av = avma; if (!(y = _toser(x))) break;
@@ -2344,7 +2348,11 @@ gcotan(GEN x, long prec)
       x = gadd(x, real_0(prec));
       affr_fixlg(mpcotan(x), y); avma = av; return y;
 
-    case t_INTMOD: case t_PADIC: err(typeer,"gcotan");
+    case t_PADIC: 
+      av = avma;
+      return gerepileupto(av, gdiv(gcos(x,prec), gsin(x,prec)));
+
+    case t_INTMOD: err(typeer,"gcotan");
 
     default:
       av = avma; if (!(y = _toser(x))) break;
