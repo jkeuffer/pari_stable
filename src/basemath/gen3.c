@@ -1233,11 +1233,11 @@ gsubst(GEN x, long v, GEN y)
             l2 = (i-2)*ey + (gcmp0(y)? 2 : ly);
             if (l > l2) l = l2;
           }
+          p2 = ex? gpowgs(y, ex): NULL;
 
 	  av = avma; lim=stack_lim(av,1);
           t = shallowcopy(y);
           if (l < ly) setlg(t, l);
-          p2 = ex? gpowgs(t, ex): NULL;
           z = scalarser(gel(x,2),varn(y),l-2);
 	  for (i=3,jb=ey; jb<=l-2; i++,jb+=ey)
 	  {
@@ -1258,7 +1258,7 @@ gsubst(GEN x, long v, GEN y)
 	      gerepileall(av,2, &z,&t);
 	    }
 	  }
-	  if (!ex) return gerepilecopy(av,z);
+	  if (!p2) return gerepilecopy(av,z);
           return gerepileupto(av, gmul(z,p2));
 
         case t_POL: case t_RFRAC:
