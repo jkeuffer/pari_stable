@@ -680,7 +680,9 @@ ser_pow(GEN x, GEN n, long prec)
     }
     return y;
   }
-  p1 = gdiv(x,lead); gel(p1,2) = gen_1; /* in case it's inexact */
+  p1 = gdiv(x,lead);
+  if (typ(p1) != t_SER) err(typeer, "ser_pow");
+  gel(p1,2) = gen_1; /* in case it's inexact */
   p1 = gpow(p1,  n, prec);
   p2 = gpow(lead,n, prec); return gmul(p1, p2);
 }
