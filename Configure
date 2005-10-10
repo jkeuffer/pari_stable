@@ -83,10 +83,6 @@ if test "$optimization" != profiling; then
   . ./get_gnuplot_libs # gnuplot, gnuplot_libs
   . ./get_readline # $_readline_list (includes 'readline')
   . ./get_graphic_lib # which_graphic_lib, graphic_lib_dll
-  if test -z "$X11$gnuplot$readline" \
-          -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
-    echo ...none
-  fi
 fi
 #############################################################################
 case $kernlvl1 in

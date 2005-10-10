@@ -36,3 +36,7 @@ else # fastread = yes
     which_graphic_lib=gnuplot
   fi
 fi
+if test -z "$X11$gnuplot" \
+        -a "X$which_graphic_lib" != Xgnuplot-dynamic; then
+  echo ...none
+fi
