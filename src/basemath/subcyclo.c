@@ -768,7 +768,7 @@ subcyclo(long n, long d, long v)
   if (o % d) err(talker,"degree does not divide phi(n) in subcyclo");
   o /= d;
   if (p==2) {
-    GEN z = coefs_to_pol(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
+    GEN z = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
     setvarn(z,v); return z;
   }
   g = gener_Fl(n);

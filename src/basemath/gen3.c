@@ -2048,7 +2048,7 @@ trunc0(GEN x, GEN *pte)
 /* return a_n B^n + ... + a_0, where B = 2^32. Assume n even if BIL=64 and
  * the a_i are 32bits integers */
 GEN
-coefs_to_int(long n, ...)
+mkintn(long n, ...)
 {
   va_list ap;
   pari_sp av = avma;
@@ -2100,7 +2100,7 @@ u2toi(ulong a, ulong b)
 
 /* return a_(n-1) x^(n-1) + ... + a_0 */
 GEN
-coefs_to_pol(long n, ...)
+mkpoln(long n, ...)
 {
   va_list ap;
   GEN x, y;
@@ -2114,7 +2114,7 @@ coefs_to_pol(long n, ...)
 
 /* return [a_1, ..., a_n] */
 GEN
-coefs_to_vec(long n, ...)
+mkvecn(long n, ...)
 {
   va_list ap;
   GEN x;
@@ -2126,7 +2126,7 @@ coefs_to_vec(long n, ...)
 }
 
 GEN
-coefs_to_col(long n, ...)
+mkcoln(long n, ...)
 {
   va_list ap;
   GEN x;

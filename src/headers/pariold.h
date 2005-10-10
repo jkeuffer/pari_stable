@@ -213,6 +213,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ldiv    (long)gdiv
 
 /*functions renamed*/
+#define coefs_to_col mkcoln
+#define coefs_to_int mkintn
+#define coefs_to_pol mkpoln
+#define coefs_to_vec mkvecn
 #define localreduction elllocalred
 #define idmat matid
 #define globalreduction ellglobalred

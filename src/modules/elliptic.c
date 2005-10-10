@@ -1583,7 +1583,7 @@ localred_p(GEN e, GEN p, int minim)
     case  6: f = 2; kod = -1; /* I0*  */
       p2 = sqri(p);
       /* x^3 - 3c4/p^2 x - 2c6/p^3 */
-      tri = coefs_to_pol(4, gen_1, gen_0,
+      tri = mkpoln(4, gen_1, gen_0,
                             negi(mulsi(3, diviiexact(c4, p2))),
                             negi(shifti(diviiexact(c6, mulii(p2,p)), 1)));
       c = 1 + FpX_nbroots(tri, p);

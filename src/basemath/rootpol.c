@@ -1255,7 +1255,7 @@ conformal_pol(GEN p, GEN a, long bit)
   long n = degpol(p), i;
   pari_sp av = avma, lim = stack_lim(av,2);
   
-  z = coefs_to_pol(2, ca, negr(myreal_1(bit)));
+  z = mkpoln(2, ca, negr(myreal_1(bit)));
   r = scalarpol(gel(p,2+n), 0);
   for (i=n-1; ; i--)
   {
@@ -1719,7 +1719,7 @@ split_complete(GEN p, long bit, GEN roots_pol)
     b = append_clone(roots_pol,b); avma = ltop;
     a = mygprec(a, 3*bit);
     b = mygprec(b, 3*bit);
-    return gmul(gel(p,4), coefs_to_pol(3, gen_1, gneg(gadd(a,b)), gmul(a,b)));
+    return gmul(gel(p,4), mkpoln(3, gen_1, gneg(gadd(a,b)), gmul(a,b)));
   }
   split_0(p,bit,&F,&G);
   m1 = split_complete(F,bit,roots_pol);

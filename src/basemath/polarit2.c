@@ -1749,7 +1749,7 @@ poltype(GEN x, GEN *ptp, GEN *ptpol, long *ptpa)
 	assign_or_fail(gel(p1,1),p);
         t[3]=1; break;
       case t_COMPLEX:
-        if (!pcx) pcx = coefs_to_pol(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
+        if (!pcx) pcx = mkpoln(3, gen_1,gen_0,gen_1); /* x^2 + 1 */
 	for (j=1; j<=2; j++)
 	{
 	  p2 = gel(p1,j);

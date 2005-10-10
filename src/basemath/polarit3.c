@@ -3629,12 +3629,12 @@ f2init(long l)
 
   if (l == 1) return cyclo(3, MAXVARN);
 
-  S = coefs_to_pol(4, gen_1,gen_1,gen_0,gen_0); /* #(#^2 + #) */
+  S = mkpoln(4, gen_1,gen_1,gen_0,gen_0); /* #(#^2 + #) */
   setvarn(S, MAXVARN);
-  q = coefs_to_pol(3, gen_1,gen_1, S); /* X^2 + X + #(#^2+#) */
+  q = mkpoln(3, gen_1,gen_1, S); /* X^2 + X + #(#^2+#) */
 
   /* x^4+x+1, irred over F_2, minimal polynomial of a root of q */
-  T = coefs_to_pol(5, gen_1,gen_0,gen_0,gen_1,gen_1);
+  T = mkpoln(5, gen_1,gen_0,gen_0,gen_1,gen_1);
   for (i=2; i<l; i++)
   { /* q = X^2 + X + a(#) irred. over K = F2[#] / (T(#))
      * ==> X^2 + X + a(#) b irred. over K for any root b of q

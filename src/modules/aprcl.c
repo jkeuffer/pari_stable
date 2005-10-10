@@ -208,7 +208,7 @@ sqrmod5(GEN pol, Red *R)
     C = sqri(c);
     A = centermodii(A, R->N, R->N2);
     B = centermodii(B, R->N, R->N2);
-    C = centermodii(C, R->N, R->N2); return coefs_to_pol(3,A,B,C);
+    C = centermodii(C, R->N, R->N2); return mkpoln(3,A,B,C);
   }
   b = gel(pol,4);
   if (lv==5)
@@ -233,7 +233,7 @@ sqrmod5(GEN pol, Red *R)
   A = centermodii(A, R->N, R->N2);
   B = centermodii(B, R->N, R->N2);
   C = centermodii(C, R->N, R->N2);
-  D = centermodii(D, R->N, R->N2); return coefs_to_pol(4,A,B,C,D);
+  D = centermodii(D, R->N, R->N2); return mkpoln(4,A,B,C,D);
 }
 
 static GEN

@@ -173,7 +173,9 @@ advise you to update soon ]
       old = precdl; precdl = prec; x = taniyama(e); precdl = old;
   - rename lisexpr -> readexp, lisseq -> readseq, flisexpr -> freadexpr,
     flisseq -> freadseq
-  - rename idmat -> matid
+  - rename idmat --> matid
+  - rename coefs_to_col --> mkcoln, coefs_to_int --> mkintn
+           coefs_to_pol --> mkpoln, coefs_to_vec --> mkvecn
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% VERSION 2.1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

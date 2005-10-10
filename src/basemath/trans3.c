@@ -1997,7 +1997,7 @@ gpolylog(long m, GEN x, long prec)
 
   if (m <= 0)
   {
-    GEN t = coefs_to_pol(2, gen_m1, gen_1); /* 1 - X */
+    GEN t = mkpoln(2, gen_m1, gen_1); /* 1 - X */
     p1 = polx[0];
     for (i=2; i <= -m; i++)
       p1 = gmul(polx[0], gadd(gmul(t,derivpol(p1)), gmulsg(i,p1)));

@@ -206,12 +206,13 @@ GN  4- extensive re-tuning in MPQS (all sizes) and avoid "sizing marginal,
 BA 27- rewrite rectdraw in an object-oriented way [ reduce code duplication
        in hi-res plot routines ]
 BA 28- change the semantic of includedir to not include the pari suffix.
-       Instead /pari is automatically added my make install.
+       Instead /pari is automatically added by make install.
    29- improve plindep (use lllintpartial and floating point LLL)
       + allow lindep with p-adic entries
 BA 30- allow relative paths in Configure --with-xxx directives
 BA 31- allow sinh, cosh, tanh with t_PADIC arguments
 XR 32- bnrstark(): try harder to find solutions [increase precision faster #255]
+BA 33- rename coefs_to_xxx() to mkxxxn() for xxx in {vec,col,pol,int}.
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
