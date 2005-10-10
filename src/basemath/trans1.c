@@ -1264,7 +1264,11 @@ mpexp(GEN x)
   long i, n, mask, p, l, sx = signe(x), sh=0;
   GEN a, z;
 
-  if (!sx) return real_1(3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG));
+  if (!sx) {
+    l = 3 + ((-expo(x)) >> TWOPOTBITS_IN_LONG);
+    if (l < 3) l = 3;
+    return real_1(l);
+  }
   if (sx < 0 && expo(x) >= EXMAX)
     return real_0_bit(- (long) ((1L<<EXMAX) / LOG2));
 
