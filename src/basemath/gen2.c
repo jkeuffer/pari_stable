@@ -1083,16 +1083,14 @@ gabs(GEN x, long prec)
 }
 
 GEN
-gmax(GEN x, GEN y)
-{
-  if (gcmp(x,y)>0) y=x; return gcopy(y);
-}
+gmax(GEN x, GEN y) { if (gcmp(x,y)>0) y=x; return gcopy(y); }
+GEN
+gmaxgs(GEN x, long s) { return (gcmpsg(s,x)>=0)? stoi(s): gcopy(x); }
 
 GEN
-gmin(GEN x, GEN y)
-{
-  if (gcmp(x,y)<0) y=x; return gcopy(y);
-}
+gmin(GEN x, GEN y) { if (gcmp(x,y)<0) y=x; return gcopy(y); }
+GEN
+gmings(GEN x, long s) { return (gcmpsg(s,x)>0)? gcopy(x): stoi(s); }
 
 GEN
 vecmax(GEN x)

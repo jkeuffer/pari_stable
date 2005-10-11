@@ -549,6 +549,46 @@ gmod(GEN x, GEN y)
 }
 
 GEN
+gmodgs(GEN x, long y)
+{
+  ulong u;
+  long i, lx, tx = typ(x);
+  GEN z;
+  if (is_matvec_t(tx))
+  {
+    lx=lg(x); z=cgetg(lx,tx);
+    for (i=1; i<lx; i++) gel(z,i) = gmodgs(gel(x,i),y);
+    return z;
+  }
+  switch(tx)
+  {
+    case t_INT:
+      return modis(x,y);
+
+    case t_INTMOD: z=cgetg(3,tx);
+      i = cgcd(smodis(gel(x,1), y), y);
+      gel(z,1) = utoi(i);
+      gel(z,2) = modis(gel(x,2), i); return z;
+
+    case t_FRAC:
+      u = (ulong)labs(y);
+      return utoi( Fl_mul(umodiu(gel(x,1), u),
+                          Fl_inv(umodiu(gel(x,2), u), u), u) );
+
+    case t_QUAD: z=cgetg(4,tx);
+      copyifstack(x[1],z[1]);
+      gel(z,2) = gmodgs(gel(x,2),y);
+      gel(z,3) = gmodgs(gel(x,3),y); return z;
+
+    case t_PADIC: return padic_to_Fp(x, stoi(y));
+    case t_POLMOD: case t_POL:
+      return gen_0;
+  }
+  err(operf,"%",x,stoi(y));
+  return NULL; /* not reached */
+}
+
+GEN
 gmodulsg(long x, GEN y)
 {
   GEN z;
