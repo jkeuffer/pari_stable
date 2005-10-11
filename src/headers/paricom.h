@@ -311,7 +311,6 @@ enum manage_var_t {
 
 #define gaddgs(y,s)     gaddsg((s),(y))
 #define gcmpgs(s,y)     (-gcmpsg(y,s))
-#define gdiventgs(y,s)  (gopgs2(gdivent,(y),(s)))
 #define gdiventsg(s,y)  (gopsg2(gdivent,(s),(y)))
 #define gdivsg(s,y)     (gopsg2(gdiv,(s),(y)))
 #define gequalgs(s,y)    (gequalsg((y),(s)))
@@ -327,7 +326,7 @@ enum manage_var_t {
 
 #define gaddgsz(y,s,z)    gopgsz(gaddgs,(x),(s),(z))
 #define gaddsgz(s,y,z)    gaddgsz((y),(s),(z))
-#define gdiventgsz(y,s,z) gopgs2z(gdivent,(y),(s),(z))
+#define gdiventgsz(y,s,z) gopgsz(gdiventgs,(y),(s),(z))
 #define gdiventsgz(s,y,z) gopsg2z(gdivent,(s),y),(z)
 #define gdivgsz(y,s,z)    gopgsz(gdivgs,(y),(s),(z))
 #define gdivsgz(s,y,z)    gopsg2z(gdiv,(s),(y),(z))
