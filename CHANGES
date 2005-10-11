@@ -157,6 +157,7 @@ BA 74- exp(x) gave imprecise results at huge accuracies for expo(x) >> 1.
    78- stack corruption in gsubst [#343]
    79- Pol([Mat(0.1)],x)^3. --> crash [#346]
    80- besseljh(0,2^65) --> crash [#340]
+BA 81- [plotQt:] ^C while hi-res window is present would crash the session
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
