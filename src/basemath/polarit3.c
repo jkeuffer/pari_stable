@@ -1789,7 +1789,7 @@ Flx_factorgalois(GEN P, ulong l, long d, long w, GEN MP)
   gel(V,1) = polx_Flx(w);
   z = gel(M,2);
   gel(V,2) = Flv_to_Flx(z,w);
-  for(k=2;k<=m;k++)
+  for(k=3;k<=m;k++)
   {
     z = Flm_Flc_mul(M,z,l);
     gel(V,k) = Flv_to_Flx(z,w);
