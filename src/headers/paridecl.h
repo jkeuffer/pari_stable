@@ -1000,7 +1000,6 @@ GEN     gsqr(GEN x);
 GEN     gsub(GEN x, GEN y);
 
 /* gen2.c */
-GEN     gopgs2(GEN (*f)(GEN, GEN), GEN y, long s);
 GEN     gopsg2(GEN (*f)(GEN, GEN), long s, GEN y);
 
 long    ZX_valuation(GEN x, GEN *Z);

@@ -36,20 +36,9 @@ gopsg2(GEN (*f)(GEN, GEN), long s, GEN y)
   affsi(s,court_p); return f(court_p,y);
 }
 
-GEN
-gopgs2(GEN (*f)(GEN, GEN), GEN y, long s)
-{
-  affsi(s,court_p); return f(y,court_p);
-}
-
 void
 gopsg2z(GEN (*f)(GEN, GEN), long s, GEN y, GEN z) {
   pari_sp av=avma; gaffect(gopsg2(f,s,y),z); avma=av;
-}
-
-void
-gopgs2z(GEN (*f)(GEN, GEN), GEN y, long s, GEN z) {
-  pari_sp av=avma; gaffect(gopgs2(f,y,s),z); avma=av;
 }
 
 /*******************************************************************/
