@@ -158,8 +158,8 @@ GEN
 jbesselh(GEN n, GEN z, long prec)
 {
   long gz, k, l, linit, i, lz;
-  pari_sp av = avma;
-  GEN y, p1;
+  pari_sp av;
+  GEN res, y, p1;
 
   if (typ(n)!=t_INT) err(talker,"not an integer index in jbesselh");
   k = itos(n);
@@ -171,19 +171,35 @@ jbesselh(GEN n, GEN z, long prec)
     case t_REAL: case t_COMPLEX:
       if (gcmp0(z))
       {
+        av = avma;
 	p1 = gmul(gsqrt(gdiv(z,mppi(prec)),prec),gpowgs(z,k));
-	p1 = gdiv(gmul(mpfact(k),p1),mpfact(2*k+1));
+	p1 = gdiv(p1, seq_umul(k+1, 2*k+1)); /* x k! / (2k+1)! */
 	return gerepileupto(av, gmul2n(p1,2*k));
       }
       gz = gexpo(z);
       linit = precision(z); if (!linit) linit = prec;
+      res = cgetc(linit);
+      av = avma;
       if (gz>=0) l = linit;
       else l = linit - 1 + ((-2*k*gz)>>TWOPOTBITS_IN_LONG);
       if (l>prec) prec = l;
       prec += (-gz)>>TWOPOTBITS_IN_LONG;
-      z = gtofp(z,prec);
+      if (prec < 3) prec = 3;
+      z = gadd(z, real_0(prec));
+      if (typ(z) == t_COMPLEX) gel(z,2) = gadd(gel(z,2), real_0(prec));
       p1 = gmul(_jbesselh(k,z,prec), gsqrt(gdiv(z,Pi2n(-1,prec)),prec));
-      return gerepileupto(av, gtofp(p1,linit));
+      avma = av;
+      if (typ(p1) == t_COMPLEX)
+      {
+        affr_fixlg(gel(p1,1), gel(res,1));
+        affr_fixlg(gel(p1,2), gel(res,2));
+      }
+      else
+      {
+        res = cgetr(linit);
+        affr_fixlg(p1, res);
+      }
+      return res;
 
     case t_VEC: case t_COL: case t_MAT:
       lz=lg(z); y=cgetg(lz,typ(z));
