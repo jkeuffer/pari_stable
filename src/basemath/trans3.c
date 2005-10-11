@@ -207,6 +207,7 @@ jbesselh(GEN n, GEN z, long prec)
       return y;
 
     case t_POLMOD:
+      av = avma;
       y = cleanroots(gel(z,1), prec); lz = lg(y);
       for (i=1; i<lz; i++) {
         GEN t = poleval(gel(z,2), gel(y,i));
@@ -216,6 +217,7 @@ jbesselh(GEN n, GEN z, long prec)
 
     case t_PADIC: err(impl,"p-adic jbesselh function");
     default:
+      av = avma;
       if (!(y = _toser(z))) break;
       if (gcmp0(y)) return gpowgs(y,k);
       if (valp(y) < 0) err(negexper,"jbesselh");
