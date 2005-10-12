@@ -57,8 +57,8 @@ qt)
 fltk)
   PLOTCFLAGS="-I\$(FLTKDIR)/include $X11_INC"
   PLOTLIBS="-L\$(FLTKDIR)/lib -lfltk $FLTK_LIBS"
-  compilepost_sta='fltk-config --post gp-sta || echo "cannot find fltk-config"'
-  compilepost_dyn='fltk-config --post gp-sta || echo "cannot find fltk-config"'
+  compilepost_sta='fltk-config --post gp-sta || echo "ignoring missing fltk-config"'
+  compilepost_dyn='fltk-config --post gp-dyn || echo "ignoring missing fltk-config"'
   graph=plotfltk;;
 *gnuplot-dynamic*)
   case "$graphic_lib_dll" in
