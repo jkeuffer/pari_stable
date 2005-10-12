@@ -43,7 +43,6 @@ extern "C" {
 #include <qcolor.h>
 #include <qpixmap.h>
 #include <qimage.h>
-#include <unistd.h>
 
 
 class Plotter: public QWidget {
@@ -573,12 +572,9 @@ void
 rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
     if (fork()) return;  // parent process returns
-    
-    //
-    // child process goes on
-    //
 
-    setsid();   // Create a new session.
+    pari_sig_init(SIG_IGN); /* disable interrupt handler */
+
     freeall();  // PARI stack isn't needed anymore, keep rectgraph
     PARI_get_plot(1);
 

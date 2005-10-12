@@ -185,10 +185,9 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 
   if (fork()) return;  /* parent process returns */
 
+  pari_sig_init(SIG_IGN); /* disable interrupt handler */
+
   freeall();  /* PARI stack isn't needed anymore, keep rectgraph */
-  /* if gnuplot X11 plotting is active, may get SIGPIPE...  XXXX Better disable
-   * some X callback? */
-  os_signal(SIGPIPE, SIG_IGN);
   PARI_get_plot(1);
   display = XOpenDisplay(NULL);
   font_info = XLoadQueryFont(display, "9x15");

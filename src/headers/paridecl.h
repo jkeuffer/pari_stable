@@ -1224,6 +1224,7 @@ void    msgTIMER(pari_timer *T, char *format, ...);
 void    msgtimer(char *format, ...);
 GEN     newbloc(long n);
 void    pari_init(size_t parisize, ulong maxprime);
+void    pari_sig_init(void (*f)(int));
 GEN     reorder(GEN x);
 void    stackdummy(GEN x, long l);
 GEN     stackify(GEN x);

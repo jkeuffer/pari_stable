@@ -182,13 +182,8 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
 {
     Plotter *win;
     if (fork()) return;  // parent process returns
-    
-    //
-    // child process goes on
-    //
-    os_signal(SIGPIPE, SIG_IGN);
-    os_signal(SIGSEGV, SIG_IGN);
-    os_signal(SIGBUS, SIG_IGN);
+
+    pari_sig_init(SIG_IGN); /* disable interrupt handler */
 
     freeall();  // PARI stack isn't needed anymore, keep rectgraph
     PARI_get_plot(1);
