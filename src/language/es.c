@@ -2395,6 +2395,15 @@ texi(GEN g, pariout_t *T, int addsign)
       }
       pariputc('}'); break;
 
+    case t_VECSMALL:
+      pariputs("\\pmatrix{ "); l = lg(g);
+      for (i=1; i<l; i++)
+      {
+        pariputsf("%ld", g[i]);
+	if (i < l-1) pariputc('&');
+      }
+      pariputs("\\cr}\n"); break;
+
     case t_STR:
     {
 #if 0 /* This makes it impossible to print reliably. What it I want to
