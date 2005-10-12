@@ -10,6 +10,10 @@ may contain severe bugs, benches may fail, they may not even compile. Stable
 releases are made available on a regular basis using the customary method:
 a message to pari-announce.
 
+Note that in order to use the sources fetched via CVS, you will need a
+working 'perl' installation as well as the regular build system (C
+compiler, etc.).
+
 1) First connection to the anonymous CVS server:
 ================================================
 Type the following commands from the shell
