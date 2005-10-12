@@ -2607,8 +2607,8 @@ ggcd(GEN x, GEN y)
     return z;
   }
   if (is_noncalc_t(tx) || is_noncalc_t(ty)) err(operf,"g",x,y);
-  if (gcmp0(x)) return zero_gcd(y, x, ty, tx);
-  if (gcmp0(y)) return zero_gcd(x, y, tx, ty);
+  if (isexactzero(x)) return zero_gcd(y, x, ty, tx);
+  if (isexactzero(y)) return zero_gcd(x, y, tx, ty);
   if (is_const_t(tx))
   {
     if (ty == tx) switch(tx)

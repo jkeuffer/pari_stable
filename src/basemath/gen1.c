@@ -261,10 +261,14 @@ gred_rfrac2_i(GEN n, GEN d)
       vn = polvaluation(n, NULL);
       if (vn)
       {
-        long v = min(vn, vd);
-        n = shiftpol_i(n, v);
-        d = shiftpol_i(d, v);
-        if (gcmp1(d)) d = NULL;
+        long v = min(vn, vd), dn = degpol(n);
+        if (dn >= 0)
+        {
+          if (v > dn) v = dn;
+          n = shiftpol_i(n, v);
+          d = shiftpol_i(d, v);
+          if (gcmp1(d)) d = NULL;
+        }
       }
     }
     n = gdiv(n,cd);
@@ -1058,8 +1062,8 @@ mul_rfrac(GEN x1, GEN x2, GEN y1, GEN y2)
   GEN z = cgetg(3,t_RFRAC), p1;
   pari_sp tetpil;
 
-  p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdiv(x1,p1); y2 = gdiv(y2,p1); }
-  p1 = ggcd(x2, y1); if (!gcmp1(p1)) { x2 = gdiv(x2,p1); y1 = gdiv(y1,p1); }
+  p1 = ggcd(x1, y2); if (!gcmp1(p1)) { x1 = gdeuc(x1,p1); y2 = gdeuc(y2,p1); }
+  p1 = ggcd(x2, y1); if (!gcmp1(p1)) { x2 = gdeuc(x2,p1); y1 = gdeuc(y1,p1); }
   tetpil = avma;
   gel(z,2) = gmul(x2,y2);
   gel(z,1) = gmul(x1,y1);
