@@ -184,7 +184,7 @@ else
       echo "###"
       echo "### Editline wrapper detected, building without readline support"
       echo "###";;
-    \?.\?)
+    \?.\?) readline=;
       echo "###"
       echo "### Readline library detected, but does not seem to work"
       echo "###";;
