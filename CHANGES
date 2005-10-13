@@ -159,6 +159,7 @@ BA 74- exp(x) gave imprecise results at huge accuracies for expo(x) >> 1.
    80- besseljh(0,2^65) --> crash [#340]
 BA 81- [plotQt:] ^C while hi-res window is present would crash the session
    82- Strtex(Vecsmall) --> SEGV [#348]
+   83- infinite loop in zeta() [catastrophic cancellation in get_xinf() ]
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

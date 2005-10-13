@@ -920,7 +920,7 @@ const double log2PI = 1.83787706641;
 static double
 get_xinf(double beta)
 {
-  const double eps = 0.0087, maxbeta = 0.06415003; /* 3^(-2.5) */
+  const double maxbeta = 0.06415003; /* 3^(-2.5) */
   double x0, y0, x1;
 
   if (beta < maxbeta) return beta + pow(3*beta, 1.0/3.0);
@@ -929,7 +929,7 @@ get_xinf(double beta)
   {
     y0 = x0*x0;
     x1 = (beta+atan(x0)) * (1+y0) / y0 - 1/x0;
-    if (x0 - x1 < eps) return x1;
+    if (0.99*x0 < x1) return x1;
     x0 = x1;
   }
 }
