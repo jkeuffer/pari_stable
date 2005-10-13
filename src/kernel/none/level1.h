@@ -203,7 +203,7 @@ evalexpo(long x)
 INLINE GEN
 constant_term(GEN x) { return signe(x)? gel(x,2): gen_0; }
 INLINE GEN
-leading_term(GEN x) { return (GEN)x[lg(x)-1]; }
+leading_term(GEN x) { return lg(x) == 2? gen_0: (GEN)x[lg(x)-1]; }
 
 INLINE GEN
 new_chunk(size_t x) /* x is a number of bytes */
