@@ -181,7 +181,13 @@ else
     fi
     case "$readline_version" in
     *Editline*) readline=;
-      echo "### Editline wrapper detected, building without readline support";;
+      echo "###"
+      echo "### Editline wrapper detected, building without readline support"
+      echo "###";;
+    \?.\?)
+      echo "###"
+      echo "### Readline library detected, but does not seem to work"
+      echo "###";;
     *) echo "Using GNU readline, version $readline_version";;
     esac
   fi
