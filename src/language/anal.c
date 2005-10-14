@@ -1830,11 +1830,7 @@ num_derivU(GEN p, GEN *arg, gp_args *f)
   long fpr, pr, l, e, ex;
   pari_sp av = avma;
 
-  if (!is_const_t(typ(x)))
-  {
-    a = call_fun(p,arg,f);
-    return gerepileupto(av, deriv(a,gvar9(a)));
-  }
+  if (!is_const_t(typ(x))) err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
   if (fpr == -2) fpr = prec-2;
   ex = gexpo(x);
