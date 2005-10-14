@@ -1806,11 +1806,7 @@ num_deriv(void *call, GEN argvec[])
   GEN eps,a,b, y, x = argvec[0];
   long fpr, pr, l, e, ex;
   pari_sp av = avma;
-  if (!is_const_t(typ(x)))
-  {
-    a = do_call(call, x, argvec);
-    return gerepileupto(av, deriv(a,gvar9(a)));
-  }
+  if (!is_const_t(typ(x))) err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
   if (fpr == -2) fpr = prec-2;
   ex = gexpo(x);

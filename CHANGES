@@ -221,6 +221,7 @@ BA 33- rename coefs_to_xxx() to mkxxxn() for xxx in {vec,col,pol,int}.
    34- semantics of gcd with inexact zeros: now gcd(0., a) is 1 [used to be a
        and led to problems: e.g 0./(1.*a)/(1.*a) not simplified ]
    35- warn if 'perl' is found but doesn't seem to work
+   36- forbid the f'(x) construction when x is not a constant type [#327]
 
   Added
 BA  1- polgalois(): 4th component: transitive group name following GAP4
