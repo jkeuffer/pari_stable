@@ -1490,7 +1490,14 @@ testb2(decomp_t *S, long D, GEN theta, GEN ns)
   if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
   for (t = 1;; t++)
   {
-    GEN h = m? stopoly(t, m, v): scalarpol(utoipos(t), v);
+    GEN h;
+    if (m)
+      h = stopoly(t, m, v);
+    else
+    { /* should be a random polynomial / Fp */
+      h = scalarpol(utoipos(t), v);
+      if ((t & 3) == 0) h = gadd(polx[0], h);
+    }
     S->phi = gadd(theta, RgX_rem(h, S->chi));
     /* phi non-primary ? */
     if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
