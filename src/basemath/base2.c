@@ -1483,22 +1483,13 @@ update_phi(decomp_t *S, GEN ns, long *ptl, long flag)
 static int
 testb2(decomp_t *S, long D, GEN theta, GEN ns)
 {
-  long v = varn(S->chi);
-  ulong t, m = itos_or_0(S->p);
+  long v = varn(S->chi), dlim = degpol(S->chi)-1;
   GEN T0 = S->phi, chi0 = S->chi;
 
   if (DEBUGLEVEL>4) fprintferr("  Increasing Fa\n");
-  for (t = 1;; t++)
+  for (;;)
   {
-    GEN h;
-    if (m)
-      h = stopoly(t, m, v);
-    else
-    { /* should be a random polynomial / Fp */
-      h = scalarpol(utoipos(t), v);
-      if ((t & 3) == 0) h = gadd(polx[0], h);
-    }
-    S->phi = gadd(theta, RgX_rem(h, S->chi));
+    S->phi = gadd(theta, FpX_rand(dlim, v, S->p));
     /* phi non-primary ? */
     if (factcp(S, ns) > 1) { composemod(S, S->phi, T0); return 1; }
     if (degpol(S->nu) == D) break;
