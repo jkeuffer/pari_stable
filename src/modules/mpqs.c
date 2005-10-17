@@ -652,8 +652,8 @@ mpqs_set_parameters(mpqs_handle_t *h)
    * that the current sizing parameters for 90 or more digits are based
    * on 100% theory and 0% practice. */
   if (i >= 79)
-    err(warner, "MPQS: factoring this number will take %s hours",
-        i >= 86 ? "many": "several");
+    err(warner, "MPQS: factoring this number will take %s hours:\nN = %Z",
+        i >= 86 ? "many": "several", h->N);
 
   if (DEBUGLEVEL >= 5)
   {
