@@ -802,6 +802,7 @@ qfr5_init(GEN x, GEN *D, GEN *isqrtD, GEN *sqrtD)
   GEN d = gel(x,4);
   long prec = lg(d), l = nbits2prec(-expo(d));
   if (l > prec) prec = l;
+  if (prec < 3) prec = 3;
   x = qfr_to_qfr5(x,prec);
 
   if (!*D) *D = qf_disc(x);
