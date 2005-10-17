@@ -161,6 +161,7 @@ BA 81- [plotQt:] ^C while hi-res window is present would crash the session
    82- Strtex(Vecsmall) --> SEGV [#348]
    83- infinite loop in zeta() [catastrophic cancellation in get_xinf() ]
    84- infinite loop in nfdisc() [#350]
+   85- Mod(1,2)*x / (1/2) --> incorrect t_POL
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and

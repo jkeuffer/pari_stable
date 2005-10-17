@@ -1839,13 +1839,19 @@ static GEN
 div_rfrac(GEN x, GEN y)
 { return mul_rfrac(gel(x,1),gel(x,2), gel(y,2),gel(y,1)); }
 
-#define div_ser_scal div_pol_scal
 static GEN
 div_pol_scal(GEN x, GEN y) {
   long i, lx = lg(x);
   GEN z = cgetg_copy(lx, x); z[1] = x[1];
   for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
-  return z;
+  return normalizepol_i(z, lx);
+}
+static GEN
+div_ser_scal(GEN x, GEN y) {
+  long i, lx = lg(x);
+  GEN z = cgetg_copy(lx, x); z[1] = x[1];
+  for (i=2; i<lx; i++) gel(z,i) = gdiv(gel(x,i),y);
+  return normalize(z);
 }
 static GEN
 div_T_scal(GEN x, GEN y, long tx) {
