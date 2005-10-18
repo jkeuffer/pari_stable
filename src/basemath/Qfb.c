@@ -1100,8 +1100,12 @@ qfbimagsolvep(GEN Q, GEN p)
     return gerepileupto(av, gmul(mkvec2(x,y), shallowtrans(N)));
   }
   b = redimagsl2(primeform(d, p, 0), &M);
-  if (!gequal(a, b)) return gen_0;
-  return gerepilecopy(av, SL2_div_mul_e1(N,M));
+  if (   !   equalii(gel(a,1),gel(b,1))
+      || !absi_equal(gel(a,2),gel(b,2))
+      || !   equalii(gel(a,3),gel(b,3))) return gen_0;
+  x = SL2_div_mul_e1(N,M);
+  if (signe(gel(a,2)) != signe(gel(b,2))) gel(x,2) = negi(gel(x,2));
+  return gerepilecopy(av, x);
 }
 
 GEN
