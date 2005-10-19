@@ -571,6 +571,18 @@ inittestlift( GEN plift, GEN Tmod, struct galois_lift *gl,
 }
 
 /* We should have 0<=x<mod. */
+/* Explanation of the intheadlong technique:
+ * Let B be a bound B, M a modulo M>B*2^BITS_IN_LONG,
+ * 0<=a_i<M for i=1,...,n.
+ * We want to test if it exists k,l, |k| < B, such that sum a_i = k +l*M
+ * The trick is to write a_i*2^BITS_IN_LONG/M=b_i+c_i with b_i integer
+ * and 0<=c_i<1. We get sum b_i+c_i = k*2^BITS_IN_LONG/M +l*2^BITS_IN_LONG
+ * so sum b_i -l*2^BITS_IN_LONG=k*2^BITS_IN_LONG/M -sum c_i
+ * We have -1<k*2^BITS_IN_LONG/M<1, 0<=c_i<1 so
+ * so -n-1 < sum b_i -l*2^BITS_IN_LONG<1 so
+ * n<=sum b_i -l*2^BITS_IN_LONG<=0
+ * So we compute z=sum b_i [2^BITS_IN_LONG] and check if 0<=-z<=n.
+ */
 
 long intheadlong(GEN x, GEN mod)
 {
@@ -670,12 +682,12 @@ frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
       }
       cache[j]=cache[j+1]+mael(Cd,h,j);
     }
-    if (-(ulong)cache[1]<(ulong)n)
+    if (-(ulong)cache[1]<=(ulong)n)
     {
       long ZZ=Z;
       for (j = 1; j < m; j++)
 	ZZ += polheadlong(gmael(C,SG[pf[j]],j),2,gl->Q);
-      if (-(ulong)ZZ<(ulong)n)
+      if (-(ulong)ZZ<=(ulong)n)
       {
 	u = v;
 	for (j = 1; j < m; j++)
@@ -987,7 +999,7 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
         ar[p1] = ar[p1+1] + V;
       }
 
-      if (-(ulong)ar[1]<(ulong)n)
+      if (-(ulong)ar[1]<=(ulong)n)
       {
         for (p1 = 1, p5 = d; p1 <= a; p1++, p5++)
         {
