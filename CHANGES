@@ -163,6 +163,9 @@ BA 81- [plotQt:] ^C while hi-res window is present would crash the session
    84- infinite loop in nfdisc() [#350]
    85- Mod(1,2)*x / (1/2) --> incorrect t_POL
    86- qfbsolve forgot some solutions: qfbsolve(Qfb(2,1,3),3) --> 0
+   87- multiplying ideals could lead to factoring big integers (failsafe
+       algorithm in idealtwoelt, when random trials don't work): fix
+       idealtwoelt.
 
   Changed
 BA  1- FpM_FpV_mul is renamed to FpM_FpC_mul, Flm_Flv_mul to Flm_Flc_mul and
