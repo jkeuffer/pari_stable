@@ -2507,12 +2507,8 @@ galoisgenfixedfield(GEN Tp, GEN Pmod, GEN V, GEN ip, struct galois_borne *gb, GE
   if (degpol(P)==2)
   {
     PG=cgetg(3,t_VEC);
-    gel(PG,1) = cgetg(2,t_VEC);
-    gel(PG,2) = cgetg(2,t_VECSMALL);
-    gmael(PG,1,1) = cgetg(3,t_VECSMALL);
-    mael(PG,2,1)=2;
-    mael3(PG,1,1,1)=2;
-    mael3(PG,1,1,2)=1;
+    gel(PG,1) = mkvec( mkvecsmall2(2,1) );
+    gel(PG,2) = mkvecsmall(2);
     tau = deg1pol_i(gen_m1, negi(gel(P,3)), x);
     tau = RgX_to_FpX(tau, ip);
     tau = FpX_FpXQ_compo(gel(Pmod,gp), tau,Pp,ip);
@@ -2670,10 +2666,8 @@ galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
   {
     lbot = avma;
     res = cgetg(3, t_VEC);
-    gel(res,1) = cgetg(2, t_VEC);
-    gel(res,2) = cgetg(2, t_VECSMALL);
-    gmael(res,1,1) = cyc_pow_perm(O,1);
-    mael(res,2,1) = deg;
+    gel(res,1) = mkvec( cyc_pow_perm(O,1) );
+    gel(res,2) = mkvecsmall(deg);
     return gerepile(ltop, lbot, res);
   }
   if (DEBUGLEVEL >= 9)
