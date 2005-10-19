@@ -44,7 +44,7 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
-Done for version 2.2.11 (released 21/05/2005):
+Done for version 2.2.11 (released 19/10/2005):
   Fixed
     1- a()=b(1,) --> error message
     2- agm(-1.0000000004656,1) --> oo loop [Bug #214]
