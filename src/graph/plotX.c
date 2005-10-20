@@ -19,14 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 
-#ifdef BOTH_GNUPLOT_AND_X11		/* The switch support in plotgnuplot */
-#  define rectdraw0		X11_rectdraw0
-#  define term_set		X11_term_set
-#  define PARI_get_plot		X11_PARI_get_plot
-#  define plot_outfile_set	X11_plot_outfile_set
-#  define set_pointsize		X11_set_pointsize
-#endif
-
 #include "pari.h"
 #include "rect.h"
 #include "../language/anal.h"
@@ -167,7 +159,7 @@ IOerror(Display *d) {
 }
 
 void
-rectdraw0(long *w, long *x, long *y, long lw, long do_free)
+rectdraw0(long *w, long *x, long *y, long lw)
 {
   long oldwidth,oldheight;
   struct plot_eng plotX;
@@ -252,7 +244,7 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
       case ButtonPress:
       case DestroyNotify:
 	XUnloadFont(display,font_info->fid); XFreeGC(display,gc);
-	free_graph(); if (do_free) { free(w); free(x); free(y); }
+	free_graph();
 	XCloseDisplay(display); exit(0);
 
       case ConfigureNotify:
@@ -296,13 +288,4 @@ PARI_get_plot(long fatal)
   pari_plot.init = 1;
   XCloseDisplay(display);
 }
-
-long
-term_set(char *s) { (void)s; return 1; }
-
-long
-plot_outfile_set(char *s) { (void)s; return 1; }
-
-void
-set_pointsize(double d) { (void)d; }
 

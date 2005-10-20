@@ -30,9 +30,6 @@ typedef struct PARI_plot {
 } PARI_plot;
 
 extern PARI_plot pari_plot, pari_psplot;
-#ifdef BOTH_GNUPLOT_AND_X11
-extern PARI_plot pari_X11plot;
-#endif
 extern PARI_plot *pari_plot_engine;
 
 #define w_height (pari_plot_engine->height)
@@ -308,9 +305,6 @@ void  free_graph(void);
 
 void gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, long lw, double xs, double ys);
 
-/* architecture-dependent plot file (plotX.c, plognuplot.c...) */
+/* architecture-dependent plot file (plotX.c ...) */
 void  PARI_get_plot(long fatal);
-long  plot_outfile_set(char *s);
-void  rectdraw0(long *w, long *x, long *y, long lw, long do_free);
-void  set_pointsize(double d);
-long  term_set(char *s);
+void  rectdraw0(long *w, long *x, long *y, long lw);

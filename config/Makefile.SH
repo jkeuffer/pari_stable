@@ -60,27 +60,12 @@ fltk)
   compilepost_sta='fltk-config --post gp-sta || echo "ignoring missing fltk-config"'
   compilepost_dyn='fltk-config --post gp-dyn || echo "ignoring missing fltk-config"'
   graph=plotfltk;;
-*gnuplot-dynamic*)
-  case "$graphic_lib_dll" in
-    NULL)tmp=NULL ;;
-    *)   tmp="\\\"$graphic_lib_dll\\\"" ;;
-  esac
-  PLOTCFLAGS="-DDYNAMIC_PLOTTING -DDYNAMIC_PLOTTING_RUNTIME_LINK=$tmp"
-  graph=plotgnuplot;;
-*gnuplot*)
-  GNUPLOT_OBJS="bitmap\$(_O) term\$(_O) util\$(_O) version\$(_O) stdfn\$(_O)"
-  PLOTLIBS=$gnuplot_libs
-  libgnuplot=$gnuplot/${shortlib_prefix}gnuplot.a
-  graph=plotgnuplot;;
 esac
 graph="plotport $graph"
 
 plotrunpath=
 case "$which_graphic_lib" in
   *X11*)
-    case "$which_graphic_lib" in
-      *gnuplot*) CFLAGS="$CFLAGS -DBOTH_GNUPLOT_AND_X11" ;;
-    esac
     PLOTCFLAGS="$PLOTCFLAGS $X11_INC"
     PLOTLIBS="$PLOTLIBS $X11_LIBS"
     plotrunpath=$X11
@@ -261,7 +246,6 @@ QTDIR      = $QTDIR
 MOC        = \$(QTDIR)/bin/moc
 PLOTCFLAGS = $PLOTCFLAGS
 PLOTLIBS   = $PLOTLIBS
-GNUPLOT_OBJS = $GNUPLOT_OBJS
 CPLUSPLUS  = g++
 
 FLTKDIR    = $FLTKDIR
@@ -320,9 +304,9 @@ tune-dyn: tune.o \$(LIBPARI_DYN)
 tune-sta: tune.o \$(LIBPARI_STA)
 	\$(LD) \$(LDFLAGS) -o \$@ \$< \$(GMPOBJS) ./\$(LIBPARI_STA) \$(LIBS)
 
-gp-sta: $add_funclist \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS)
+gp-sta: $add_funclist \$(OBJS) \$(OBJSGP)
 	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJS) \$(OBJSGP) \$(RUNPTH) \$(RLLIBS) \$(PLOTLIBS) \$(LIBS)
 	$compilepost_sta
 
 bench: $exec
@@ -504,9 +488,9 @@ EOT
   fi
   cat >> $file << EOT
 
-gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
+gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(EXPORT_LIB)
 	\$(RM) \$@
-	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(GNUPLOT_OBJS) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
+	\$(LD) -o \$@ \$(LDFLAGS) \$(OBJSGP) \$(RUNPTH) \$(TOPLDDYN) \$(LDDYN) \$(PLOTLIBS) \$(LIBS)
 	$compilepost_dyn
 
 \$(LIBPARI_DYN): $add_funclist \$(OBJS) \$(EXPORT_FILE)
@@ -518,14 +502,6 @@ gp-dyn: $add_funclist \$(OBJSGP) \$(LIBPARI_DYN) \$(GNUPLOT_OBJS) \$(EXPORT_LIB)
 	-if test "\$(LIBPARI_DYN)" != "\$(LIBPARI_SONAME)"; then \
 	  \$(RM) \$(LIBPARI_SONAME);\
 	  \$(LN) \$(LIBPARI_DYN) \$(LIBPARI_SONAME); fi
-EOT
-fi
-
-if test -n "$GNUPLOT_OBJS"; then
-cat >> $file << EOT
-\$(GNUPLOT_OBJS):
-	\$(AR) x $libgnuplot \$(GNUPLOT_OBJS)
-
 EOT
 fi
 

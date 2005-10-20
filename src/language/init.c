@@ -63,14 +63,6 @@ int  (*default_exception_handler)(long);
 int  (*whatnow_fun)(char *, int);
 void (*sigint_fun)(void);
 
-#ifdef BOTH_GNUPLOT_AND_X11
-/* Satisfy DLL dependencies: dummy only */
-#define EXTERN_DLL_DPES *PL_markstack_ptr, PL_stack_max, *PL_Sv, *PL_stack_sp, \
-  *PL_tmps_floor, *PL_tmps_ix, *PL_markstack_max, *PL_stack_base, *PL_na, \
-  *PL_sv_yes, *PL_sv_no, *PL_curpad, *PL_op
-int EXTERN_DLL_DPES;
-#endif	/* defined BOTH_GNUPLOT_AND_X11 */
-
 typedef struct {
   jmp_buf *penv;
   long flag;

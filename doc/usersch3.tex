@@ -8058,10 +8058,6 @@ Overlapping regions will thus be drawn twice, and the windows are considered
 transparent. Then display the whole drawing in a special window on your
 screen.
 
-\subsecidx{plotfile}$(s)$: set the output file for plotting output. The
-special filename \kbd{"-"} redirects to the same place as PARI output. This
-is only taken into account by the \kbd{gnuplot} interface.
-
 \subsecidx{ploth}$(X=a,b,\var{expr},\{\fl=0\},\{n=0\})$: high precision
 plot of the function $y=f(x)$ represented by the expression \var{expr}, $x$
 going from $a$ to $b$. This opens a specific window (which is killed
@@ -8278,15 +8274,6 @@ left if 0, right if 2, center if 1. Bits 4 and 8 regulate vertical
 alignment: bottom if 0, top if 8, v-center if 4. Can insert additional
 small gap between point and string: horizontal if bit 16 is set, vertical
 if bit 32 is set (see the tutorial for an example).
-
-\subsecidx{plotterm}$(\var{term})$: sets terminal where high resolution
-plots go (this is currently only taken into account by the \kbd{gnuplot}
-graphical driver). Using the \kbd{gnuplot} driver, possible terminals are
-the same as in gnuplot. If \var{term} is "?", lists possible values.
-
-Terminal options can be appended to the terminal name and space; terminal
-size can be put immediately after the name, as in \kbd{"gif=300,200"}.
-Positive return value means success.
 
 \subsecidx{psdraw}$(\var{list})$: same as \kbd{plotdraw}, except that the
 output is a PostScript program appended to the \kbd{psfile}.

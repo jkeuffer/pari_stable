@@ -569,7 +569,7 @@ void PlotWindow::save( int id) {
 
 
 void
-rectdraw0(long *w, long *x, long *y, long lw, long do_free)
+rectdraw0(long *w, long *x, long *y, long lw)
 {
     if (fork()) return;  // parent process returns
 
@@ -599,7 +599,6 @@ rectdraw0(long *w, long *x, long *y, long lw, long do_free)
     win->show();
 #endif
     a.exec();
-    if (do_free) { free(w); free(x); free(y); }
     exit( 0);
 }
 
@@ -622,16 +621,3 @@ PARI_get_plot(long f)
     pari_plot.fheight = 9;           //   and height
     pari_plot.init    = 1;           // flag: pari_plot is set now!
 }
-
-long
-term_set(char *s) { (void)s; return 1; }
-
-long
-plot_outfile_set(char *s) {
-    
-//    Plotter::setPlotFile( s);
-    (void)s; return 1;
-}
-
-void
-set_pointsize(double d) { (void)d; }

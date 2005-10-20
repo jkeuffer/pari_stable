@@ -21,8 +21,7 @@ fastread=yes
 config_file=
 optimization=full
 target_host=
-which_graphic_lib=gnuplot-dynamic
-graphic_lib_dll=NULL
+which_graphic_lib=auto
 readline_enabledp=nil
 share_prefix=
 prefix=/usr/local
@@ -74,9 +73,8 @@ while test $# -gt 0; do
   -h|-help|--help|-\?)error=true;;
   -v|-verbhelp|--verbhelp)error=verb;;
   -s|--static) static=y;;
-  -graphic|--graphic) shift; which_graphic_lib=$1; graph_cmd=yes ;;
+  -graphic|--graphic) shift; which_graphic_lib=$1;;
   --graphic=*|--graphi=*|--graph=*|--grap=*|--gra=*|--gr=*|--g=*)
-	       graph_cmd=yes
 	       which_graphic_lib=`echo "$1" | sed -e 's/[-a-z]*=//'`;;
 
   --without-readline|--with-readline=no) without_readline=yes ;;
@@ -140,8 +138,7 @@ Options: some names can be abbreviated to one character (e.g -h = -help)
 Build Options:
   --host=<arch-osname>  target achitecture
   --kernel=<kern>       kernel used
-  --graphic=<gr>        graphic library used (default X11) (none X11 Qt gnuplot 
-	gnuplot-dynamic builtin.X11-gnuplot builtin.X11-gnuplot-dynamic)
+  --graphic=<gr>        graphic library used (default X11) (none X11 Qt fltk)
   --builddir=<dir>      directory where the object files will be created
 Additional developer options:
   -g              creates debugging version (in Oxxx.dbg)

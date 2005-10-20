@@ -31,7 +31,6 @@ static long current_color[NUMRECT];
 PariRect **rectgraph = NULL;
 PARI_plot pari_plot, pari_psplot;
 PARI_plot *pari_plot_engine = &pari_plot;
-PARI_plot pari_X11plot;			/* Used if BOTH_GNUPLOT_AND_X11 */
 long  rectpoint_itype = 0;
 long  rectline_itype  = 0;
 
@@ -762,11 +761,15 @@ rectpointtype(long ne, long type) /* code = ROt_PTT */
  }
 }
 
+/*FIXME: this function is a noop, since no graphic driver implement
+ * the ROt_PTS code. 
+ * ne==-1 is a legacy, meningless value.
+ */
 void
 rectpointsize(long ne, GEN size) /* code = ROt_PTS */
 {
  if (ne == -1) {
-     set_pointsize(gtodouble(size));	/* Immediate set */
+     /*do nothing*/
  } else {
      PariRect *e = check_rect_init(ne);
      RectObj *z = (RectObj*) gpmalloc(sizeof(RectObjPS));
@@ -1693,7 +1696,7 @@ rectplothrawin(long stringrect, long drawrect, dblPointList *data,
     if (flags & PLOT_POSTSCRIPT)
       postdraw0(w,wx,wy,2);
     else
-      rectdraw0(w,wx,wy,2, 0);
+      rectdraw0(w,wx,wy,2);
 
     killrect(drawrect); if (stringrect != drawrect) killrect(stringrect);
   }
@@ -1911,7 +1914,7 @@ gendraw(GEN list, long ps, long flag)
     ne = itos(win); check_rect(ne);
     w[i] = ne;
   }
-  if (ps) postdraw00(w,x,y,n,flag); else rectdraw0(w,x,y,n, 1);
+  if (ps) postdraw00(w,x,y,n,flag); else rectdraw0(w,x,y,n);
   free(x); free(y); free(w);
 }
 
