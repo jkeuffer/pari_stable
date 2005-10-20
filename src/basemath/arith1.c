@@ -615,8 +615,9 @@ gcarreparfait(GEN x)
         if (kronecker(a,q) == -1) { avma = av; return gen_0; }
       }
       /* kro(a,q) = 1, q odd: need to factor q */
-      p = (GEN)factor(q)[1]; l = lg(p) - 1;
-      /* kro(a,q) = 1, check all p|q but the last (product formula) */
+      p = (GEN)factor(q)[1]; l = lg(p);
+      /* kro(a,q) = 1, check all p|q 
+       * (can't use product formula in case v_p(q) is even for some p) */
       for (i=1; i<l; i++)
         if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
       return gen_1;

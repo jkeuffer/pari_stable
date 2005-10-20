@@ -47,6 +47,8 @@ YU = Yoshiaki Uchikawa
 Done for version 2.2.12 (released ??/??/2005):
   Fixed
     1- incorrect detection of EditLine library
+    2- issquare(Mod(2,9)) --> 1  [ should be 0 ]. Implicitly assumed
+       v_p(N) odd for all primes divising the modulus N.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
