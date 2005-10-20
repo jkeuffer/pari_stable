@@ -53,7 +53,7 @@ BA  3- poltschirnhaus(ffinit(2,4)) could return 0.
 BA  4- Configure -a did not propose fltk and Qt as graphic engine.
 
   Removed
-BA  1- gnuplot graphic engine (no more work)
+BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
