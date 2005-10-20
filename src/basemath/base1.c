@@ -282,7 +282,7 @@ tschirnhaus(GEN x)
     a = random_bits(3); if (a>=4) a -= 8; gel(p1,2) = stoi(a);
     u = caract2(x,p1,v); av2 = avma;
   }
-  while (lg(srgcd(u,derivpol(u))) > 3); /* while u not separable */
+  while (degpol(srgcd(u,derivpol(u)))); /* while u not separable */
   if (DEBUGLEVEL>1)
     fprintferr("Tschirnhaus transform. New pol: %Z",u);
   avma=av2; return gerepileupto(av,u);
