@@ -948,17 +948,32 @@ static GEN vcmp_k;
 static int vcmp_lk;
 static int (*vcmp_cmp)(GEN,GEN);
 
+#define icmp(a,b) ((a)>(b)?1:(a)<(b)?-1:0)
+
 int
 pari_compare_int(int *a,int *b)
 {
-  return *a - *b;
+  return icmp(*a,*b);
+}
+
+int pari_compare_lg(GEN x, GEN y)
+{
+  return icmp(lg(x),lg(y));
 }
 
 int
 pari_compare_long(long *a,long *b)
 {
-  return *a - *b;
+  return icmp(*a,*b);
 }
+
+static int
+longcmp(GEN x, GEN y)
+{
+  return icmp((long)x,(long)y);
+}
+
+#undef icmp
 
 static int
 veccmp(GEN x, GEN y)
@@ -971,12 +986,6 @@ veccmp(GEN x, GEN y)
     if (s) return s;
   }
   return 0;
-}
-
-static int
-longcmp(GEN x, GEN y)
-{
-  return ((long)x > (long)y)? 1: ((x == y)? 0: -1);
 }
 
 /* Sort x = vector of elts, using cmp to compare them.

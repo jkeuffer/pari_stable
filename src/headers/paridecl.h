@@ -748,6 +748,7 @@ GEN     matqpascal(long n, GEN q);
 GEN     modreverse_i(GEN a, GEN T);
 GEN     numtoperm(long n, GEN x);
 int     pari_compare_int(int *a,int *b);
+int     pari_compare_lg(GEN a,GEN b);
 int     pari_compare_long(long *a,long *b);
 GEN     permtonum(GEN x);
 GEN     polint(GEN xa, GEN ya, GEN x, GEN *dy);

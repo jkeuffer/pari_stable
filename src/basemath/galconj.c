@@ -1059,11 +1059,6 @@ testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
   return NULL;
 }
 
-int pari_compare_lg(GEN x, GEN y)
-{
-  return lg(x)-lg(y);
-}
-
 /* List of subgroups of (\ZZ/m\ZZ)^* whose order divide p, and return the list
  * of their elements */
 GEN
