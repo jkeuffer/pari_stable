@@ -167,7 +167,7 @@ if test -n "$readline"; then
   fi
   rm -f $exe $exe$exe_suff;
   case "$readline_version" in
-  *Editline*) readline=
+  *Editline*|*EditLine*) readline=
     echo "###"
     echo "### Editline wrapper detected, building without readline support"
     echo "###";;

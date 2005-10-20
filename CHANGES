@@ -44,6 +44,11 @@ TP = Thomas Papanikolaou
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
+Done for version 2.2.12 (released ??/??/2005):
+  Fixed
+    1- incorrect detection of EditLine library
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
   Fixed
     1- a()=b(1,) --> error message
