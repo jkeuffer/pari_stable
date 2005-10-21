@@ -581,7 +581,7 @@ gcarreparfait(GEN x)
       long w;
       a = gel(x,2); if (!signe(a)) return gen_1;
       av = avma;
-      q = absi(gel(x,1)); v = vali(q);
+      q = gel(x,1); v = vali(q);
       if (v) /* > 0 */
       {
         long dv;
@@ -604,7 +604,7 @@ gcarreparfait(GEN x)
       if (i==0)
       {
         GEN d = gcdii(a,q);
-        p = (GEN)factor(d)[1]; l = lg(p);
+        p = (GEN)decomp(d)[1]; l = lg(p);
         for (i=1; i<l; i++)
         {
           v = Z_pvalrem(a,gel(p,i),&p1);
@@ -612,12 +612,12 @@ gcarreparfait(GEN x)
           if (v < w && (v&1 || kronecker(p1,gel(p,i)) == -1))
             { avma = av; return gen_0; }
         }
+        a = modii(a, q);
         if (kronecker(a,q) == -1) { avma = av; return gen_0; }
       }
-      /* kro(a,q) = 1, q odd: need to factor q */
-      p = (GEN)factor(q)[1]; l = lg(p);
-      /* kro(a,q) = 1, check all p|q 
+      /* kro(a,q) = 1, q odd: need to factor q and check all p|q 
        * (can't use product formula in case v_p(q) is even for some p) */
+      p = (GEN)decomp(q)[1]; l = lg(p);
       for (i=1; i<l; i++)
         if (kronecker(a,gel(p,i)) == -1) { avma = av; return gen_0; }
       return gen_1;
