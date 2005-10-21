@@ -27,13 +27,48 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                                                                   **/
 /***********************************************************************/
 
+/* assume all primes up to 59359 are precomputed */
 GEN
 prime(long n)
 {
-  byteptr p = diffptr;
-  ulong prime = 0;
+  byteptr p;
+  ulong prime;
 
   if (n <= 0) err(talker, "n-th prime meaningless if n = %ld",n);
+  if (n < 1000) {
+    p = diffptr;
+    prime = 0;
+  } else if (n < 2000) {
+    n -= 1000; p = diffptr+1000;
+    prime = 7919;
+  } else if (n < 3000) {
+    n -= 2000; p = diffptr+2000;
+    prime = 17389;
+  } else if (n < 4000) {
+    n -= 3000; p = diffptr+3000;
+    prime = 27449;
+  } else if (n < 5000) {
+    n -= 4000; p = diffptr+4000;
+    prime = 37813;
+  } else if (n < 6000) {
+    n -= 5000; p = diffptr+5000;
+    prime = 48611;
+  } else if (n < 10000 || maxprime() < 500000) {
+    n -= 6000; p = diffptr+6000;
+    prime = 59359;
+  } else if (n < 20000) {
+    n -= 10000; p = diffptr+10000;
+    prime = 104729;
+  } else if (n < 30000) {
+    n -= 20000; p = diffptr+20000;
+    prime = 224737;
+  } else if (n < 40000) {
+    n -= 30000; p = diffptr+30000;
+    prime = 350377;
+  } else {
+    n -= 40000; p = diffptr+40000;
+    prime = 479909;
+  }
   while (n--) NEXT_PRIME_VIADIFF_CHECK(prime,p);
   return utoipos(prime);
 }
