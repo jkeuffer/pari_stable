@@ -1038,7 +1038,7 @@ static int
 do_switch(int noparen, int matchcomma)
 {
   const char *s = analyseur;
-  if (noparen || !*s || *s == ')' || separator(*s)) return 1;
+  if (noparen || *s == ')') return 1;
   if (*s == ',') /* we just read an arg, or first arg */
   {
     if (!matchcomma && s[-1] == '(') return 1; /* first arg */
