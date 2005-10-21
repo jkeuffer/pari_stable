@@ -111,6 +111,7 @@ AMD K6       266MHz  Linux-2.2.5    pgcc            5861    6001  2.0.16(16)IS
 AMD K6       233Mhz  Linux-2.2.14    gcc            6968    7158  2.0.18    QL
 IBM/Cyrix    200MHz  Linux-2.0.35    gcc           13190   13729  2.0.15    AP
 
+PentiumIV   3000MHz  Linux-2.6.11-1  gcc-3.4.3       291     296  2.2.11    PZ	
 PentiumM    1600MHz  Linux-2.6.8     gcc-3.3.4       461     460  2.2.8     JD  
 PentiumIV   2800MHz  Linux-2.4.18    gcc-3.2	     507     580  2.2.6	    IS	
 PentiumIV   2000MHz  Linux-2.4.20    gcc-3.3	     794     962  2.2.6 (42)ID
@@ -392,6 +393,7 @@ Contributors:
   NI = Nathaniel Irons
   PE = Philippe Elbaz-Vincent
   OT = Olivier Thibault
+  PZ = Paul Zimmermann
   QL = Qing Liu
   SC = Scott Chadde
   SH = Steve Harding
