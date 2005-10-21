@@ -40,16 +40,26 @@ charpoly0(GEN x, int v, long flag)
   err(flagerr,"charpoly"); return NULL; /* not reached */
 }
 
+/* (v - x)^d */
+static GEN
+caract_const(GEN x, long v, long d)
+{
+  pari_sp av = avma;
+  return gerepileupto(av, gpowgs(gadd(polx[v], gneg_i(x)), d));
+}
+
 static GEN
 caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
 {
   pari_sp av = avma;
-  long d;
-  GEN ch, L = leading_term(p);
+  long d = degpol(p), dx;
+  GEN ch, L;
 
-  if (!signe(x)) return monomial(gen_1, degpol(p), v);
-  if (typ(x) != t_POL)
-    return gerepileupto(av, gpowgs(gsub(polx[v], x), degpol(p)));
+  if (typ(x) != t_POL) return caract_const(x, v, d);
+  dx = degpol(x);
+  if (dx <= 0) return dx? monomial(gen_1, d, v): caract_const(gel(x,2), v, d);
+
+  L = leading_term(p);
   x = gneg_i(x);
   if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
   gel(x,2) = gadd(gel(x,2), polx[MAXVARN]);
@@ -61,8 +71,7 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
     else
       ch = gsubst(ch, MAXVARN, polx[v]);
   }
-
-  if (!gcmp1(L) && (d = degpol(x)) > 0) ch = gdiv(ch, gpowgs(L,d));
+  if (!gcmp1(L)) ch = gdiv(ch, gpowgs(L,d));
   return gerepileupto(av, ch);
 }
 
