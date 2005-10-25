@@ -54,6 +54,7 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     5- g()=local(x;f) -- oo-loop [#352]
     6- charpoly( Mod(a, b) ) --> wrong result when 'a' is not a
        t_POL or t_INT.
+    7- \p2051 log(exp(-1)) --> printing bug [#357]
 
   Changed
     1- speed up prime() by using checkpoints.

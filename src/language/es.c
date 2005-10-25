@@ -1187,13 +1187,23 @@ wr_float(pariout_t *T, GEN x, int f_format)
   }
 
   s = t = (char*)new_chunk(decdig + 1);
+  res--;
+  if (*res)
+  {
+    d = numdig(*res);
+    copart(t, *res, d); t += d;
+  }
+  else /* overflow when rounding */
+  {
+    d = 10;
+    *t++ = '1';
+    copart(t, 0, 9); t += 9;
+  }
+  decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
   l = ldec;
-  d = numdig(*--res);
-  copart(t, *res, d); t += d;
   while (--l > 0) { copart(t, *--res, 9); t += 9; }
   s[dec] = 0;
 
-  decdig = d + 9*(ldec-1); /* recompute: d may be 1 more */
   dif = decdig - beta; /* # of decimal digits in integer part */
   if (!f_format || dif > dec) wr_exp(T,s, dif-1);
   else if (dif > 0) wr_dec(s, dif);
