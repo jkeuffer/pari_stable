@@ -2763,9 +2763,11 @@ related to elliptic curves at the beginning of this section.
 \subsecidx{ellisoncurve}$(E,z)$: gives 1 (i.e.~true) if the point $z$ is on
 the elliptic curve $E$, 0 otherwise. If $E$ or $z$ have imprecise coefficients,
 an attempt is made to take this into account, i.e.~an imprecise equality is
-checked, not a precise one.
+checked, not a precise one. It is allowed for $z$ to be a vector of points
+in which case a vector (of the same type) is returned.
 
-\syn{oncurve}{E,z}, and the result is a \kbd{long}.
+\syn{ellisoncurve}{E,z}. Also available is \funs{oncurve}{E,z}
+which returns a \kbd{long} but does not accept vector of points.
 
 \subsecidx{ellj}$(x)$: elliptic $j$-invariant. $x$ must be a complex number
 with positive imaginary part, or convertible into a power series or a

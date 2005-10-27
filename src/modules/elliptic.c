@@ -676,7 +676,7 @@ oncurve(GEN e, GEN z)
   long pl, pr, ex, expx;
   pari_sp av;
 
-  checksell(e); checkpt(z); if (is_inf(z)) return 1; /* oo */
+  checkpt(z); if (is_inf(z)) return 1; /* oo */
   av = avma;
   LHS = ellLHS(e,z);
   RHS = ellRHS(e,gel(z,1)); x = gsub(LHS,RHS);
@@ -691,6 +691,23 @@ oncurve(GEN e, GEN z)
   pr = (expx < ex - bit_accuracy(pr) + 15
      || expx < ellexpo(e) - bit_accuracy(pr) + 5);
   avma = av; return pr;
+}
+
+GEN
+ellisoncurve(GEN e, GEN a)
+{
+  long i, tx = typ(a), lx = lg(a);
+
+  checksell(e); if (!is_vec_t(tx)) err(elliper1);
+  lx = lg(a); if (lx==1) return cgetg(1,tx);
+  tx = typ(a[1]);
+  if (is_vec_t(tx))
+  {
+    GEN z = cgetg(lx,tx);
+    for (i=1; i<lx; i++) gel(z,i) = ellisoncurve(e,gel(a,i));
+    return z;
+  }
+  return oncurve(e, a)? gen_1: gen_0;
 }
 
 GEN
@@ -3302,7 +3319,7 @@ exp4hellagm(GEN e, GEN z, long prec)
 GEN
 ellheight0(GEN e, GEN a, long flag, long prec)
 {
-  long lx, i, tx = typ(a);
+  long i, tx = typ(a), lx = lg(a);
   pari_sp av = avma;
   GEN Lp, x, y, z, phi2, psi2, psi3;
 

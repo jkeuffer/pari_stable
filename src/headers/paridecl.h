@@ -874,6 +874,7 @@ GEN     ellglobalred(GEN e1);
 GEN     ellheight0(GEN e, GEN a, long flag,long prec);
 GEN     ellidentify(GEN E);
 GEN     ellinit0(GEN x,long flag,long prec);
+GEN     ellisoncurve(GEN e, GEN z);
 GEN     elllocalred(GEN e, GEN p1);
 GEN     ellminimalmodel(GEN E, GEN *ptv);
 long    ellrootno(GEN e, GEN p);

@@ -59,9 +59,13 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
   Changed
     1- speed up prime() by using checkpoints.
     2- allow lists with vector entries in listsort (use lexsort)
+    3- allow vector of points in ellisoncurve()
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
+
+  Added
+    1- new library function ellisoncurve()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
