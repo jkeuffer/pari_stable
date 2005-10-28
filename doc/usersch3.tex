@@ -2317,20 +2317,27 @@ subexponential time in $D$ assuming the GRH.
 \idx{Buchmann-McCurley}'s sub-exponential algorithm for computing the class
 group of a quadratic order of discriminant $D$.
 
-This function should be used instead of \kbd{qfbclassno} or \kbd{quadregula}
-when $D<-10^{25}$, $D>10^{10}$, or when the \emph{structure} is wanted.
+This function should be used instead of \tet{qfbclassno} or \tet{quadregula}
+when $D<-10^{25}$, $D>10^{10}$, or when the \emph{structure} is wanted. It
+is a special case of \tet{bnfinit}, which is slower, but more robust.
 
 If $\fl$ is non-zero \emph{and} $D>0$, computes the narrow class group and
 regulator, instead of the ordinary (or wide) ones. In the current version
 \vers, this does not work at all: use the general function \tet{bnfnarrow}.
 
 Optional parameter \var{tech} is a row vector of the form
-$[c_1,c_2]$, where $c_1$ and $c_2$ are positive real numbers which
+$[c_1,c_2]$, where $c_1 \leq c_2$ are positive real numbers which
 control the execution time and the stack size. To get maximum speed,
-set $c_2=c$. To get a rigorous result (under \idx{GRH}) you must take
-$c_2=6$. Reasonable values for $c$ are between $0.1$ and $2$.
+set $c_2 = c_1$. To get a rigorous result (under \idx{GRH}) you must take
+$c_2=6$. Reasonable values for $c_1$ are between $0.1$ and $2$. More
+precisely, the algorithm will \emph{assume} that prime ideals of norm
+less than $c_2 (\log |D|)^2$ generate the class group, but the bulk of the
+work will be done with prime ideals of norm less than $c_1 (\log |D|)^2$.
+A larger $c_1$ means that relations are easier to find, but more relations
+are needed and the linear algebra will be harder. The default is $c_1 =
+c_2 = 0.2$, so the result is \emph{not} rigorously proven.
 
-The result of this function is a vector $v$ with 3 components if $D<0$, and
+The result is a vector $v$ with 3 components if $D<0$, and
 $4$ otherwise. The correspond respectively to
 
 \item $v[1]$: the class number
