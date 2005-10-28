@@ -2980,7 +2980,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   BORNE = gfloor(BORNE);
   if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) err(typeer, "minim0");
-  if (typ(x) != t_MAT) err(typeer,"minim0");
+  if (typ(a) != t_MAT) err(typeer,"minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
