@@ -2980,6 +2980,7 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
 
   BORNE = gfloor(BORNE);
   if (typ(BORNE) != t_INT || typ(STOCKMAX) != t_INT) err(typeer, "minim0");
+  if (typ(x) != t_MAT) err(typeer,"minim0");
 
   maxrank = 0; res = V = invp = NULL; /* gcc -Wall */
   switch(flag)
@@ -2992,6 +2993,8 @@ minim0(GEN a, GEN BORNE, GEN STOCKMAX, long flag)
     case min_VECSMALL:
     case min_VECSMALL2:
       maxrank = itos(BORNE);
+      if (maxrank <= 0) return cgetg(1, t_VECSMALL);
+
       res = const_vecsmall(maxrank, 0);
       if (flag == min_VECSMALL2) BORNE = shifti(BORNE,1);
       if (gcmp0(BORNE)) return res;
