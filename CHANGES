@@ -61,6 +61,7 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     1- speed up prime() by using checkpoints.
     2- allow lists with vector entries in listsort (use lexsort)
     3- allow vector of points in ellisoncurve()
+    4- tunings in quadclassunit (#298 / #355)
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

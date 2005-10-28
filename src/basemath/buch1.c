@@ -1649,7 +1649,11 @@ MORE:
       cbach /= 2; goto START;
 
     case fupb_RELAT:
-      if (++nrelsup <= 7 || cbach > 1) { need = min(KC, nrelsup); goto MORE; }
+      if (++nrelsup <= 7 || cbach > 1) {
+        need = min(KC, nrelsup); 
+        if (cbach > 1 && nsubFB < 3) nsubFB++;
+        goto MORE;
+      }
       goto START;
   }
   /* DONE */
