@@ -476,7 +476,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
 {
   const long limnorm = 400;
   long n, i, narch, nbp, maxnorm, minnorm, N, nbidnn, s, c, j, nbcand;
-  long first = 1, pr, rb, oldcpl = -1;
+  long first = 1, pr, rb, oldcpl = -1, iscyc = 0;
   pari_sp av = avma, av1;
   GEN rep, bnf, nf, f, arch, m, listid, idnormn, bnrm, ImC;
   GEN candD, bpr, indpr, sgp, p1, p2;
@@ -516,6 +516,9 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
    * If we cannot find a suitable conductor of norm < limnorm, stop */
   maxnorm = 50;
   minnorm = 1;
+
+  /* if the extension is cyclic then we _must_ find a suitable conductor */
+  if (lg((GEN)dtQ[2]) == 2) iscyc = 1;
 
   if (DEBUGLEVEL>1)
     fprintferr("Looking for a modulus of norm: ");
@@ -601,7 +604,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
     /* if necessary compute more ideals */
     minnorm = maxnorm;
     maxnorm <<= 1;
-    if (maxnorm > limnorm) return NULL;
+    if (!iscyc && maxnorm > limnorm) return NULL;
 
   }
 END:
