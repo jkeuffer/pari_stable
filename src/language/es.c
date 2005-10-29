@@ -140,6 +140,7 @@ filtre0(filtre_t *F)
       case RBRACE:
         if (!F->wait_for_brace) err(talker,"unexpected closing brace");
         F->more_input = 0; t--;
+        F->wait_for_brace = 0;
         break;
     }
   }
