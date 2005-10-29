@@ -62,6 +62,7 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     2- allow lists with vector entries in listsort (use lexsort)
     3- allow vector of points in ellisoncurve()
     4- tunings in quadclassunit (#298 / #355)
+    5- [Configure:] take CPPFLAGS into account
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
