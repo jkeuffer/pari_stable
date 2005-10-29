@@ -503,14 +503,11 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   }
 
   /* Initialization of the possible infinite part */
-  arch = cgetg(N+1, t_VEC);
-  for (i = 1; i <= N; i++) gel(arch,i) = gen_1;
+  arch = const_vec(N, gen_1);
 
   /* narch = (N == 2)? 1: N; -- if N=2, only one case is necessary */
   narch = N;
-
-  m = cgetg(3, t_VEC);
-  gel(m,2) = arch;
+  m = mkvec2(NULL, arch);
 
   /* go from minnorm up to maxnorm. If necessary, increase these values.
    * If we cannot find a suitable conductor of norm < limnorm, stop */
@@ -518,7 +515,7 @@ FindModulus(GEN bnr, GEN dtQ, long *newprec, long prec)
   minnorm = 1;
 
   /* if the extension is cyclic then we _must_ find a suitable conductor */
-  if (lg((GEN)dtQ[2]) == 2) iscyc = 1;
+  if (lg(dtQ[2]) == 2) iscyc = 1;
 
   if (DEBUGLEVEL>1)
     fprintferr("Looking for a modulus of norm: ");
@@ -628,8 +625,8 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   long ic, i, j, nz, N, nChar = lg(LCHI)-1;
   pari_sp av = avma, av2, lim;
   GEN sqrtnc, dc, cond, condZ, cond0, cond1, lambda, nf, T;
-  GEN cyc, *vN, *vB, diff, vt, idg, mu, idh, zid, *gen, z, *nchi;
-  GEN indW, W, classe, s0, *s, den, muslambda, beta2, sarch;
+  GEN cyc, vN, vB, diff, vt, idg, mu, idh, zid, gen, z, nchi;
+  GEN indW, W, classe, s0, s, den, muslambda, beta2, sarch;
   CHI_t **lC;
   GROUP_t G;
 
@@ -692,20 +689,22 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   /* compute a system of generators of (Ok/cond)^* cond1-positive */
   zid = zidealstarinitgen(nf, cond0);
   cyc = gmael(zid, 2, 2);
-  gen = (GEN*)gmael(zid, 2, 3);
+  gen = gmael(zid, 2, 3);
   nz = lg(gen) - 1;
 
-  nchi = (GEN*)cgetg(nChar+1, t_VEC);
-  for (ic = 1; ic <= nChar; ic++) nchi[ic] = cgetg(nz + 1, t_VECSMALL);
+  nchi = cgetg(nChar+1, t_VEC);
+  for (ic = 1; ic <= nChar; ic++) gel(nchi,ic) = cgetg(nz + 1, t_VECSMALL);
 
   for (i = 1; i <= nz; i++)
   {
     if (is_bigint(cyc[i]))
       err(talker,"conductor too large in ArtinNumber");
-    gen[i] = set_sign_mod_idele(nf, NULL,gen[i], cond,sarch);
-    classe = isprincipalray(bnr, gen[i]);
-    for (ic = 1; ic <= nChar; ic++)
-      nchi[ic][i] = (long)EvalChar_n(lC[ic], classe);
+    gel(gen,i) = set_sign_mod_idele(nf, NULL, gel(gen,i), cond,sarch);
+    classe = isprincipalray(bnr, gel(gen,i));
+    for (ic = 1; ic <= nChar; ic++) {
+      GEN n = gel(nchi,ic);
+      n[i] = (long)EvalChar_n(lC[ic], classe);
+    }
   }
 
   /* Sum chi(beta) * exp(2i * Pi * Tr(beta * mu / lambda) where beta
@@ -718,39 +717,35 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
   G.r = nz;
   G.j = const_vecsmall(nz, 0);
 
-  vN = (GEN*)cgetg(nChar+1, t_VEC);
-  for (ic = 1; ic <= nChar; ic++) vN[ic] = const_vecsmall(nz, 0);
+  vN = cgetg(nChar+1, t_VEC);
+  for (ic = 1; ic <= nChar; ic++) gel(vN,ic) = const_vecsmall(nz, 0);
 
   av2 = avma; lim = stack_lim(av2, 1);
-  vB = (GEN*)cgetg(nz+1, t_VEC);
-  for (i=1; i<=nz; i++) vB[i] = gen_1;
+  vB = const_vec(nz, gen_1);
 
   s0 = powgi(z, Rg_to_Fp(gmul(vt, muslambda), den)); /* for beta = 1 */
-  s = (GEN*)cgetg(nChar+1, t_VEC);
-  for (ic = 1; ic <= nChar; ic++) s[ic] = s0;
+  s = const_vec(nChar, s0);
 
   while ( (i = NextElt(&G)) )
   {
-    vB[i] = FpC_red(element_muli(nf, vB[i], gen[i]), condZ);
+    gel(vB,i) = FpC_red(element_muli(nf, gel(vB,i), gel(gen,i)), condZ);
     for (j=1; j<i; j++) vB[j] = vB[i];
 
     for (ic = 1; ic <= nChar; ic++)
     {
-      vN[ic][i] = (long)Fl_add((ulong)vN[ic][i], (ulong)nchi[ic][i],
-                               (ulong)lC[ic]->ord);
-      for (j=1; j<i; j++) vN[ic][j] = vN[ic][i];
+      GEN v = gel(vN,ic), n = gel(nchi,ic);
+      v[i] = (long)Fl_add(v[i], n[i], lC[ic]->ord);
+      for (j=1; j<i; j++) v[j] = v[i];
     }
 
-    vB[i]= set_sign_mod_idele(nf, NULL,vB[i], cond,sarch);
-    beta2 = element_mul(nf, vB[i], muslambda);
-
+    gel(vB,i) = set_sign_mod_idele(nf, NULL, gel(vB,i), cond,sarch);
+    beta2 = element_mul(nf, gel(vB,i), muslambda);
     
     s0 = powgi(z, Rg_to_Fp(gmul(vt, beta2), den));
     for (ic = 1; ic <= nChar; ic++)
     {
-      long ind = vN[ic][i];
-      GEN val = lC[ic]->val[ind];
-      s[ic] = gadd(s[ic], gmul(val, s0));
+      GEN n = gel(vN,ic), val = lC[ic]->val[ n[i] ];
+      gel(s,ic) = gadd(gel(s,ic), gmul(val, s0));
     }
 
     if (low_stack(lim, stack_lim(av2, 1)))
@@ -765,7 +760,7 @@ ArtinNumber(GEN bnr, GEN LCHI, long check, long prec)
 
   for (ic = 1; ic <= nChar; ic++)
   {
-    s0 = gmul(s[ic], EvalChar(lC[ic], classe));
+    s0 = gmul(gel(s,ic), EvalChar(lC[ic], classe));
     s0 = gdiv(s0, sqrtnc);
     if (check && - expo(subrs(gnorm(s0), 1)) < bit_accuracy(prec) >> 1)
       err(bugparier, "ArtinNumber");
