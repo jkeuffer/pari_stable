@@ -671,7 +671,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
  * 2 | index), hence the low order bit is not useful. So we hash
  * HASHBITS bits starting at bit 1, not bit 0 */
 #define HASHBITS 10
-const int HASHT = 1 << HASHBITS;
+const long HASHT = 1 << HASHBITS;
 
 static long
 hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
@@ -681,7 +681,7 @@ hash(long q) { return (q & ((1 << (HASHBITS+1)) - 1)) >> 1; }
  * subFB contains split p such that \prod p > sqrt(Disc)
  * powsubFB contains powers of forms in subFB */
 #define RANDOM_BITS 4
-static const int CBUCH = (1<<RANDOM_BITS)-1;
+static const long CBUCH = (1<<RANDOM_BITS)-1;
 
 static ulong limhash;
 static long KC, KC2, PRECREG;

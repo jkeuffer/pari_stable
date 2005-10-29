@@ -436,7 +436,7 @@ ordmax(GEN *cf, GEN p, long epsilon, GEN *ptdelta)
  *  2) discriminant of K (in *y).
  */
 static GEN
-allbase2(GEN f, int flag, GEN *dx, GEN *dK, GEN *ptw)
+allbase2(GEN f, long flag, GEN *dx, GEN *dK, GEN *ptw)
 {
   GEN w,w1,w2,a,pro,at,bt,b,da,db,q, *cf,*gptr[2];
   pari_sp av=avma,tetpil;
@@ -588,7 +588,7 @@ safe_Z_pvalrem(GEN x, GEN p, GEN *z)
  * taken to be the factorization of disc(f), then overwritten
  * [no consistency check] */
 GEN
-allbase(GEN f, int flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
+allbase(GEN f, long flag, GEN *dx, GEN *dK, GEN *index, GEN *ptw)
 {
   VOLATILE GEN w1, w2, a, da, p1, ordmax;
   VOLATILE long n, lw, i, j, k, l;
@@ -3588,7 +3588,7 @@ check_0(GEN B)
 
 static int
 do_SWAP(GEN I, GEN MC, GEN MCS, GEN h, GEN mu, GEN B, long kmax, long k,
-        const int alpha, long r1)
+        const long alpha, long r1)
 {
   GEN p1, p2, muf, mufc, Bf, temp;
   long i, j;
@@ -3675,7 +3675,7 @@ rnflllgram(GEN nf, GEN pol, GEN order,long prec)
   pari_sp av = avma, lim = stack_lim(av,2);
   long j, k, l, kmax, r1, lx, count = 0;
   GEN M, I, h, H, mth, MC, MPOL, MCS, B, mu, y;
-  const int alpha = 10, MAX_COUNT = 4;
+  const long alpha = 10, MAX_COUNT = 4;
 
   nf = checknf(nf); r1 = nf_get_r1(nf);
   check_ZKmodule(order, "rnflllgram");

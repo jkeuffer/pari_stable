@@ -331,7 +331,7 @@ downtoK(toK_s *T, GEN x)
 }
 
 static GEN
-no_sol(long all, int i)
+no_sol(long all, long i)
 {
   if (!all) err(talker,"bug%d in kummer",i);
   return cgetg(1,t_VEC);

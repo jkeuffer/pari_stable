@@ -79,8 +79,8 @@ GEN    readexpr_nobreak(char *t);
 char*  get_analyseur(void);
 void   set_analyseur(char *s);
 
-void term_color(int c);
-char *term_get_color(int c);
+void term_color(long c);
+char *term_get_color(long c);
 void hit_return(void);
 
 extern char *gp_function_name;
@@ -99,7 +99,7 @@ extern entree **functions_hash;    /* functions hashtable */
 extern entree **members_hash;      /* members hashtable */
 extern char   *helpmessages_basic[];
 extern entree functions_basic[];
-extern const int functions_tblsz;  /* hashcodes table size */
+extern const long functions_tblsz;  /* hashcodes table size */
 
 /* Variables containing the list of specific GP functions */
 extern char   *helpmessages_gp[];
@@ -107,7 +107,7 @@ extern entree  functions_gp[];
 extern entree  gp_member_list[];
 extern char   *helpmessages_highlevel[];
 extern entree  functions_highlevel[];
-extern int     gp_colors[];
+extern long     gp_colors[];
 extern int     disable_color;
 
 /* Variables containing the list of old PARI fonctions (up to 1.39.15) */
@@ -172,7 +172,7 @@ extern default_type gp_default_list[];
 #define MAX_PROMPT_LEN 128
 
 /* gp_colors */
-void decode_color(int n, int *c);
+void decode_color(long n, long *c);
 #define c_NONE 0xffffUL
 enum { c_ERR, c_HIST, c_PROMPT, c_INPUT, c_OUTPUT, c_HELP, c_TIME, c_LAST };
 

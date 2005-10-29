@@ -1520,9 +1520,8 @@ gbittest(GEN x, GEN n)
 static GEN
 ibittrunc(GEN x, long bits)
 {
-  int xl = lgefint(x) - 2;
-  int len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG);
-  int known_zero_words;
+  long known_zero_words, xl = lgefint(x) - 2;
+  long len_out = ((bits + BITS_IN_LONG - 1) >> TWOPOTBITS_IN_LONG);
 
   if (xl < len_out)
       return x;

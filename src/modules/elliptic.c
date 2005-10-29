@@ -1616,24 +1616,24 @@ localred_p(GEN e, GEN p, int minim)
 }
 
 /* return a_{ k,l } in Tate's notation, pl = p^l */
-static int
-aux(GEN ak, int q, int pl)
+static ulong
+aux(GEN ak, ulong q, ulong pl)
 {
-  return (int)umodiu(ak, q) / pl;
+  return umodiu(ak, q) / pl;
 }
 
-static int
-aux2(GEN ak, int p, GEN pl)
+static ulong
+aux2(GEN ak, ulong p, GEN pl)
 {
   pari_sp av = avma;
   ulong res = umodiu(diviiexact(ak, pl), p);
-  avma = av; return (int)res;
+  avma = av; return res;
 }
 
 /* number of distinct roots of X^3 + aX^2 + bX + c modulo p
  * if there's a multiple root, put it in *mult */
-static int
-numroots3(int a, int b, int c, int p, int *mult)
+static ulong
+numroots3(ulong a, ulong b, ulong c, ulong p, ulong *mult)
 {
   if (p == 2)
   {
@@ -1648,8 +1648,8 @@ numroots3(int a, int b, int c, int p, int *mult)
 }
 
 /* same for aX^2 +bX + c */
-static int
-numroots2(int a, int b, int c, int p, int *mult)
+static ulong
+numroots2(ulong a, ulong b, ulong c, ulong p, ulong *mult)
 {
   if (p == 2) { *mult = c; return b & 1 ? 2 : 1; }
   else { *mult = a * b; return (b * b - a * c) % 3 ? 2 : 1; }
@@ -1660,7 +1660,7 @@ static GEN
 localred_23(GEN e, long p)
 {
   long c, nu, nuD, r, s, t;
-  int a21, a42, a63, a32, a64, theroot, al, be, ga, p2, p3, p4, p5, p6;
+  ulong theroot, al, be, ga, p2, p3, p4, p5, p6, a21, a42, a63, a32, a64;
   GEN pk, p2k, pk1;
   GEN v;
 
@@ -1846,11 +1846,11 @@ ellintegralmodel(GEN e)
   for (k = 1; k < l; k++)
   {
     GEN p = gel(L,k);
-    int n = 0, m;
+    long n = 0, m;
     for (i = 1; i < 6; i++)
       if (!gcmp0(gel(a,i)))
       {
-        int r = (i == 5)? 6: i; /* a5 is missing */
+        long r = (i == 5)? 6: i; /* a5 is missing */
 	m = r * n + ggval(gel(a,i), p);
 	while (m < 0) { n++; m += r; }
       }
@@ -2257,7 +2257,7 @@ a2(GEN e)
   ulong a3 = Rg_to_Fl(gel(e,3), 2);
   ulong a4 = Rg_to_Fl(gel(e,4), 2);
   ulong a6 = Rg_to_Fl(gel(e,5), 2);
-  int N = 1; /* oo */
+  long N = 1; /* oo */
   if (!a3) N ++; /* x = 0, y=0 or 1 */
   else if (!a6) N += 2; /* x = 0, y arbitrary */
   if ((a3 ^ a1) == 0) N++; /* x = 1, y = 0 or 1 */
@@ -2884,7 +2884,7 @@ static GEN
 ap_j8000(GEN p)
 {
   GEN a, b;
-  int r = mod8(p);
+  long r = mod8(p);
   if (r != 1 && r != 3) return gen_0;
   (void)cornacchia2(utoipos(8),p, &a,&b);
   switch(Mod16(a)) {

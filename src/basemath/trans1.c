@@ -880,7 +880,7 @@ padic_sqrt(GEN x)
   y = cgetg(5,t_PADIC);
   pp = precp(x);
   mod = gel(x,3);
-  x   = gel(x,4); /* lift to int */
+  x   = gel(x,4); /* lift to t_INT */
   e >>= 1; av = avma;
   if (equaliu(p,2))
   {

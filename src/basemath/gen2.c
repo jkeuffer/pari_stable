@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                 */
 /*******************************************************************/
 
-/* small int prototype */
+/* small t_INT prototype */
 static long court_p[] = { evaltyp(t_INT) | _evallg(3),0,0 };
 
 GEN
@@ -536,7 +536,7 @@ gequalsg(long s, GEN x)
 /*******************************************************************/
 /*                                                                 */
 /*                          VALUATION                              */
-/*             p is either an int or a polynomial.                 */
+/*             p is either a t_INT or a t_POL.                     */
 /*  returns the largest exponent of p dividing x when this makes   */
 /*  sense : error for types real, integermod and polymod if p does */
 /*  not divide the modulus, q-adic if q!=p.                        */

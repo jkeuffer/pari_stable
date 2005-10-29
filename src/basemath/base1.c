@@ -174,7 +174,7 @@ get_primeid(GEN x)
 }
 
 GEN
-get_bnf(GEN x, int *t)
+get_bnf(GEN x, long *t)
 {
   switch(typ(x))
   {
@@ -208,7 +208,7 @@ get_bnf(GEN x, int *t)
 }
 
 GEN
-get_nf(GEN x, int *t)
+get_nf(GEN x, long *t)
 {
   switch(typ(x))
   {
@@ -291,7 +291,8 @@ tschirnhaus(GEN x)
 int
 gpolcomp(GEN p1, GEN p2)
 {
-  int s,j = lg(p1)-2;
+  long j = lg(p1)-2;
+  int s;
 
   if (lg(p2)-2 != j)
     err(bugparier,"gpolcomp (different degrees)");
@@ -1674,7 +1675,7 @@ polred0(GEN x, long flag, GEN fa)
 {
   pari_sp av = avma;
   GEN y, a;
-  int fl = 0;
+  long fl = 0;
 
   if (fa && gcmp0(fa)) fa = NULL; /* compatibility */
   if (flag & red_PARTIAL) fl |= nf_PARTIALFACT;
@@ -1813,8 +1814,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   CG_data *d = (CG_data*)chk->data;
   GEN V, S, inv, bound, M;
   long N = lg(U)-1, r1 = d->r1, r2 = (N-r1)>>1;
-  long i, prec, firstprim = 0;
-  int skipfirst = 0;
+  long i, prec, firstprim = 0, skipfirst = 0;
   pari_sp av;
 
   d->u = U;

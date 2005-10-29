@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 
 GEN
-charpoly0(GEN x, int v, long flag)
+charpoly0(GEN x, long v, long flag)
 {
   if (v<0) v = 0;
   switch(flag)
@@ -49,7 +49,7 @@ caract_const(GEN x, long v, long d)
 }
 
 static GEN
-caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
+caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
 {
   pari_sp av = avma;
   long d = degpol(p), dx;
@@ -77,12 +77,12 @@ caract2_i(GEN p, GEN x, int v, GEN (subres_f)(GEN,GEN,GEN*))
 
 /* return caract(Mod(x,p)) in variable v */
 GEN
-caract2(GEN p, GEN x, int v)
+caract2(GEN p, GEN x, long v)
 {
   return caract2_i(p,x,v, subresall);
 }
 GEN
-caractducos(GEN p, GEN x, int v)
+caractducos(GEN p, GEN x, long v)
 {
   return caract2_i(p,x,v, (GEN (*)(GEN,GEN,GEN*))resultantducos);
 }
@@ -132,7 +132,7 @@ easychar(GEN x, long v, GEN *py)
 }
 
 GEN
-caract(GEN x, int v)
+caract(GEN x, long v)
 {
   long k, n;
   pari_sp av=avma;
@@ -1551,7 +1551,7 @@ count(long **mat, long row, long len, long *firstnonzero)
 static int
 count2(long **mat, long row, long len)
 {
-  int j;
+  long j;
   for (j=len; j; j--)
     if (labs(mat[j][row]) == 1) return j;
   return 0;

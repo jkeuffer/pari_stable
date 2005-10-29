@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**                 PRINCIPAL VARIABLE NUMBER                      **/
 /**                                                                **/
 /********************************************************************/
-int
+long
 gvar(GEN x)
 {
   long i, v, w;
@@ -47,7 +47,7 @@ gvar(GEN x)
 }
 
 /* assume x POLMOD or RFRAC */
-static int
+static long
 _var2(GEN x)
 {
   long v = gvar2(gel(x,1));
@@ -55,7 +55,7 @@ _var2(GEN x)
   return v;
 }
 
-int
+long
 gvar2(GEN x)
 {
   long i, v, w;
@@ -77,7 +77,7 @@ gvar2(GEN x)
   return BIGINT;
 }
 
-int
+long
 gvar9(GEN x)
 {
   return (typ(x) == t_POLMOD)? _var2(x): gvar(x);

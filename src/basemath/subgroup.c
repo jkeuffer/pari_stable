@@ -58,7 +58,7 @@ typedef struct subgp_iter {
   GEN subq;/* subgrouplist(I) */
   GEN subqpart; /* J in subq s.t [I:J][Gp:Hp] <= indexbound */
   GEN bound; /* if != NULL, impose a "bound" on [G:H] (see boundtype) */
-  int boundtype;
+  long boundtype;
   long countsub; /* number of subgroups of type M (so far) */
   long count; /* number of p-subgroups so far [updated when M completed] */
   GEN expoI; /* exponent of I */

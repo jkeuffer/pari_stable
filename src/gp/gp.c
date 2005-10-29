@@ -239,7 +239,7 @@ compare_str(char **s1, char **s2) { return strcmp(*s1, *s2); }
  * list is a NULL terminated list of function names
  */
 void
-print_fun_list(char **list, int nbli)
+print_fun_list(char **list, long nbli)
 {
   long i=0, j=0, maxlen=0, nbcol,len, w = term_width();
   char **l;
@@ -273,11 +273,11 @@ print_fun_list(char **list, int nbli)
 }
 
 static void
-commands(int n)
+commands(long n)
 {
   const size_t LIST_LEN = 1023UL;
   size_t size = LIST_LEN, s = 0;
-  int i;
+  long i;
   entree *ep;
   char **list = (char **) gpmalloc((size+1)*sizeof(char *));
 
@@ -679,7 +679,7 @@ aide0(char *s, int flag)
 }
 
 void
-aide(char *s, int flag)
+aide(char *s, long flag)
 {
   if ((flag & h_RL) == 0)
   {
@@ -839,7 +839,7 @@ escape0(char *tch)
       if (*s++ == '=')
       {
         char *f = NULL;
-	int len = (s-tch) - 1;
+	long len = (s-tch) - 1;
 	if      (!strncmp(tch,"precision",len))    f = "realprecision";
 	else if (!strncmp(tch,"serieslength",len)) f = "seriesprecision";
 	else if (!strncmp(tch,"format",len))       f = "format";
@@ -1220,7 +1220,7 @@ gp_initrc(growarray *A, char *path)
   FILE *file = gprc_get(path);
   Buffer *b;
   filtre_t F;
-  VOLATILE int c = 0;
+  VOLATILE long c = 0;
 
   if (!file) return;
   b = new_buffer();
@@ -1710,18 +1710,18 @@ static void
 testuint(char *s, ulong *d) { if (s) *d = get_uint(s); }
 
 static char *
-read_arg(int *nread, char *t, long argc, char **argv)
+read_arg(long *nread, char *t, long argc, char **argv)
 {
-  int i = *nread;
+  long i = *nread;
   if (isdigit((int)*t)) return t;
   if (*t || i==argc) usage(argv[0]);
   *nread = i+1; return argv[i];
 }
 
 static char *
-read_arg_equal(int *nread, char *t, long argc, char **argv)
+read_arg_equal(long *nread, char *t, long argc, char **argv)
 {
-  int i = *nread;
+  long i = *nread;
   if (*t=='=' && isdigit((int)t[1])) return t+1;
   if (*t || i==argc) usage(argv[0]);
   *nread = i+1; return argv[i];
@@ -1739,7 +1739,7 @@ void
 read_opt(growarray *A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;
-  int i = 1, initrc = 1;
+  long i = 1, initrc = 1;
 
   (void)&p; (void)&b; (void)&s; /* -Wall gcc-2.95 */
 
@@ -1888,7 +1888,7 @@ static void
 prettyp_wait(void)
 {
   char *s = "                                                     \n";
-  int i = 400;
+  long i = 400;
 
   pariputs("\n\n"); pariflush(); /* start translation */
   while (--i) pariputs(s);

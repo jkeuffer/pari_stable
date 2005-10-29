@@ -364,8 +364,8 @@ Buchray(GEN bnf,GEN module,long flag)
   GEN nf, cyc, gen, Gen, u, clg, logs, p1, h, met, u1, u2, U, cycgen;
   GEN bigres, bid, cycbid, genbid, x, y, funits, H, El;
   long RU, Ri, j, ngen, lh;
-  const int add_gen = flag & nf_GEN;
-  const int do_init = flag & nf_INIT;
+  const long add_gen = flag & nf_GEN;
+  const long do_init = flag & nf_INIT;
   pari_sp av = avma;
 
   bnf = checkbnf(bnf); nf = checknf(bnf);

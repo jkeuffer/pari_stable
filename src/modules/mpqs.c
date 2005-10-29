@@ -821,7 +821,7 @@ mpqs_sieve_array_ctor(mpqs_handle_t *h)
 static void
 mpqs_poly_ctor(mpqs_handle_t *h)
 {
-  int i;
+  mpqs_int32_t i;
   long size_per = h->omega_A * sizeof(mpqs_per_A_prime_t);
 
   h->per_A_pr = (mpqs_per_A_prime_t *) gpmalloc(size_per);
@@ -1127,7 +1127,7 @@ mpqs_create_FB(mpqs_handle_t *h, ulong *f)
   /* temporary addition: ------------8<---------------------- */
   {
     double hitsum;
-    int j;
+    long j;
     for (j = 300; j <= 1000; j += 100)
     {
       hitsum = 0.;
@@ -1325,8 +1325,7 @@ mpqs_locate_A_range(mpqs_handle_t *h)
 static void
 mpqs_print_histo(mpqs_handle_t *h)
 {
-  int i;
-  long tot = 0;
+  long i, tot = 0;
 
   if (!h->do_histograms) return;
 
@@ -1385,9 +1384,8 @@ mpqs_print_histo(mpqs_handle_t *h)
 static int
 mpqs_eval_histograms(mpqs_handle_t *h)
 {
-  int i;
   long tot_full = 0, tot_lprl = 0, tot_drop = 0, total = 0;
-  long target_full;
+  long target_full, i;
   int th_full, th_base, th_drop;
   int th = h->sieve_threshold - 128;
 

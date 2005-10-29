@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                                                                       */
 /*************************************************************************/
 
-void aide(char *s, int flag);
+void aide(char *s, long flag);
 int  get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F);
 void gp_output(GEN z, gp_data *G);
 void hit_return(void);

@@ -779,7 +779,7 @@ intninfinf(void *E, GEN (*eval)(GEN, void*), GEN tab, long prec)
   return intninfinfintern(E, eval, tab, -1, prec);
 }
 
-/* general num int routine int_a^b f(t)dt, where a and b are coded as follows:
+/* general num integration routine int_a^b f(t)dt, where a and b are as follows:
  (1) a scalar : the scalar, no singularity worse than logarithmic at a.
  (2) [a, e] : the scalar a, singularity exponent -1 < e <= 0.
  (3) [1], [-1] : +\infty, -\infty, slowly decreasing function.

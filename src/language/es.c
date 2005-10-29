@@ -505,7 +505,7 @@ pariputsf(const char *format, ...)
 /* start printing in "color" c */
 /* terminal has to support ANSI color escape sequences */
 void
-term_color(int c)
+term_color(long c)
 {
   FILE *o_logfile = logfile;
 
@@ -516,7 +516,7 @@ term_color(int c)
 }
 
 void
-decode_color(int n, int *c)
+decode_color(long n, long *c)
 {
   c[1] = n & 0xf; n >>= 4; /* foreground */
   c[2] = n & 0xf; n >>= 4; /* background */
@@ -529,10 +529,10 @@ decode_color(int n, int *c)
 #define ESC  (0x1f & '[') /* C-[ = escape */
 
 char *
-term_get_color(int n)
+term_get_color(long n)
 {
   static char s[16];
-  int c[3], a;
+  long c[3], a;
 
   if (disable_color) return "";
   if (n == c_NONE || (a = gp_colors[n]) == c_NONE)
@@ -542,11 +542,11 @@ term_get_color(int n)
     decode_color(a,c);
     if (c[1]<8) c[1] += 30; else c[1] += 82;
     if (a & (1<<12)) /* transparent background */
-      sprintf(s, "%c[%d;%dm", ESC, c[0], c[1]);
+      sprintf(s, "%c[%ld;%ldm", ESC, c[0], c[1]);
     else
     {
       if (c[2]<8) c[2] += 40; else c[2] += 92;
-      sprintf(s, "%c[%d;%d;%dm", ESC, c[0], c[1], c[2]);
+      sprintf(s, "%c[%ld;%ld;%ldm", ESC, c[0], c[1], c[2]);
     }
   }
   return s;
@@ -840,7 +840,7 @@ PariOUT pariErr2Str = {errstr_putc, errstr_puts, outstr_flush, NULL};
 char *
 pari_strdup(const char *s)
 {
-  int n = strlen(s)+1;
+  long n = strlen(s)+1;
   char *t = gpmalloc(n);
   memcpy(t,s,n); return t;
 }
@@ -1073,7 +1073,7 @@ wr_intsgn(GEN x, int minus)
   pariputs( itostr(x, minus) ); avma = av;
 }
 
-/* write int. T->fieldw: field width (pad with ' ') */
+/* write integer. T->fieldw: field width (pad with ' ') */
 static void
 wr_int(pariout_t *T, GEN x, int addsign)
 {

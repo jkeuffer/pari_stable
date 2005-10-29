@@ -130,8 +130,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
 {
   GEN t,r;
   GEN *pt;
-  long s;
-  int sa, sb;
+  long s, sa, sb;
   ulong g;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
 

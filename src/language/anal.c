@@ -29,7 +29,7 @@ typedef GEN (*F1GEN)(GEN);
 
 /* for user functions */
 typedef struct gp_args {
-  int nloc, narg; /* # of local variables, # of format parameters */
+  long nloc, narg; /* # of local variables, # of format parameters */
   GEN *arg; /* values for these nloc + narg variables */
 } gp_args;
 
@@ -54,7 +54,7 @@ static void   skiptruc();
 static entree *entry();
 static entree *skipentry(void);
 
-static entree *installep(void *f,char *name,int l,int v,int add,entree **table);
+static entree *installep(void *f,char *name,long l,long v,long add,entree **table);
 #define VAR_POLS_LONGS	7 /* 4 words for polx, 3 for polun */
 #define SIZEOF_VAR_POLS	(VAR_POLS_LONGS*sizeof(long))
 
@@ -133,7 +133,7 @@ parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **
 	char *e, *id;
 	char *negated;			/* action found with 'no'-ID */
 	int negate;			/* Arg has 'no' prefix removed */
-	unsigned int l, action = 0, first = 1, singleton = 0;
+	unsigned long l, action = 0, first = 1, singleton = 0;
 	char b[80], *buf, *inibuf;
 
 	if (flag & PARSEMNU_ARG_WHITESP)
@@ -959,7 +959,7 @@ static void
 err_new_fun()
 {
   char s[LEN+1], *t;
-  int n;
+  long n;
 
   if (check_new_fun == NOT_CREATED_YET) check_new_fun = NULL;
   t = check_new_fun? check_new_fun->name: mark.identifier;
@@ -2566,7 +2566,7 @@ is_identifier(char *s)
 }
 
 static entree *
-installep(void *f, char *name, int len, int valence, int add, entree **table)
+installep(void *f, char *name, long len, long valence, long add, entree **table)
 {
   entree *ep = (entree *) gpmalloc(sizeof(entree) + add + len+1);
   const entree *ep1 = initial_value(ep);

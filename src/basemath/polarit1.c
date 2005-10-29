@@ -145,10 +145,10 @@ root_mod_2(GEN f)
 static GEN
 root_mod_4(GEN f)
 {
-  long no,ne;
+  long i, no, ne;
   int z0 = !signe(constant_term(f));
   int z2 = ((i_mod4(constant_term(f)) + 2*i_mod4(f[3])) & 3) == 0;
-  int i,z1,z3;
+  int z1, z3;
   GEN y,p;
 
   for (ne=0,i=2; i<lg(f); i+=2)
@@ -2294,7 +2294,7 @@ spec_FqXQ_pow(GEN x, GEN S, GEN T, GEN p)
 static long
 isabsolutepol(GEN f)
 {
-  int i, l = lg(f);
+  long i, l = lg(f);
   for(i=2; i<l; i++)
   {
     GEN c = gel(f,i);
@@ -2429,7 +2429,7 @@ FpX_factorff(GEN P,GEN l, GEN Q)
   for(i=1;i<n;i++)
   {
     GEN R = FpX_factorff_irred(gmael(F,1,i),Q,l);
-    int j, r = lg(R);
+    long j, r = lg(R);
     for (j=1;j<r;j++)
     {
       V[lfact] = R[j];

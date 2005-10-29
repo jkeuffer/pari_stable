@@ -193,7 +193,7 @@ dlclose(void *handle)
 }
 
 void*
-get_stack(double fraction, int min)
+get_stack(double fraction, long min)
 {
   int rc;
   TIB *tib;

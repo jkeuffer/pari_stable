@@ -363,7 +363,7 @@ GEN
 Flx_Fl_mul(GEN y, ulong x, ulong p)
 {
   GEN z;
-  int i, l;
+  long i, l;
   if (!x) return zero_Flx(y[1]);
   l = lg(y); z = cgetg(l, t_VECSMALL); z[1]=y[1]; 
   if (HIGHWORD(x | p))
@@ -1754,7 +1754,7 @@ GEN
 FlxqX_red(GEN z, GEN T, ulong p)
 {
   GEN res;
-  int i, l = lg(z);
+  long i, l = lg(z);
   res = cgetg(l,t_POL); res[1] = z[1];
   for(i=2;i<l;i++)
     gel(res,i) = Flx_rem(gel(z,i),T,p);
@@ -1799,7 +1799,7 @@ FlxqX_sqr(GEN x, GEN T, ulong p)
 GEN
 FlxqX_Flxq_mul(GEN P, GEN U, GEN T, ulong p)
 {
-  int i, lP = lg(P);
+  long i, lP = lg(P);
   GEN res = cgetg(lP,t_POL);
   res[1] = P[1];
   for(i=2; i<lP; i++)

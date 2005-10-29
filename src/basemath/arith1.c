@@ -179,7 +179,7 @@ gener_Fl_local(ulong p, GEN L0)
 {
   const pari_sp av = avma;
   const ulong q = p - 1;
-  int i, x, k ;
+  long i, x, k ;
   GEN L;
   if (p == 2) return 1;
 

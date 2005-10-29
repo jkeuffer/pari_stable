@@ -2111,7 +2111,7 @@ squfof(GEN n)
 		     a, b1, -c1, cnt, timer2());
 	if (a <= L1)
 	{ /* blacklisted? */
-	  int j;
+	  long j;
 	  for (j = 0; j < blp1; j++)
 	    if (a == blacklist1[j]) { a = 0; break; }
 	}
@@ -2153,7 +2153,7 @@ squfof(GEN n)
 		     a, b2, -c2, cnt, timer2());
 	if (a <= L2)
 	{ /* blacklisted? */
-	  int j;
+	  long j;
 	  for (j = 0; j < blp2; j++)
 	    if (a == blacklist2[j]) { a = 0; break; }
 	}
@@ -2394,8 +2394,8 @@ is_357_power(GEN x, GEN *pt, ulong *mask)
 ulong
 is_kth_power(GEN x, ulong p, GEN *pt, byteptr d)
 {
-  int j, k, init = 0;
-  long lx = lgefint(x);
+  int init = 0;
+  long j, k, lx = lgefint(x);
   ulong q, prkmodq, residue, elt;
   GEN y;
   byteptr d0;

@@ -697,7 +697,7 @@ GEN
 FpXX_red(GEN z, GEN p)
 {
   GEN res;
-  int i;
+  long i;
   res = cgetg(lg(z),t_POL); res[1] = z[1];
   for(i=2;i<lg(res);i++)
     if (typ(z[i])==t_INT)
@@ -759,7 +759,7 @@ FqX_red(GEN z, GEN T, GEN p) { return T? FpXQX_red(z, T, p): FpXX_red(z, p); }
 GEN
 FpXQX_red(GEN z, GEN T, GEN p)
 {
-  int i, l = lg(z);
+  long i, l = lg(z);
   GEN res = cgetg(l,t_POL); res[1] = z[1];
   for(i=2;i<l;i++)
     if (typ(z[i]) == t_INT)
@@ -798,7 +798,7 @@ FpXQX_sqr(GEN x, GEN T, GEN p)
 GEN
 FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
 {
-  int i, lP = lg(P);
+  long i, lP = lg(P);
   GEN res = cgetg(lP,t_POL); res[1] = P[1];
   for(i=2; i<lP; i++) gel(res,i) = Fq_mul(U,gel(P,i), T,p);
   return FpXQX_renormalize(res,lg(res));
@@ -806,7 +806,7 @@ FqX_Fq_mul(GEN P, GEN U, GEN T, GEN p)
 
 /* a X^d */
 GEN
-monomial(GEN a, int d, int v)
+monomial(GEN a, long d, long v)
 {
   long i, lP = d+3;
   GEN P;
@@ -824,7 +824,7 @@ monomial(GEN a, int d, int v)
   return P;
 }
 GEN
-monomialcopy(GEN a, int d, int v)
+monomialcopy(GEN a, long d, long v)
 {
   long i, lP = d+3;
   GEN P;
@@ -1195,9 +1195,8 @@ FqV_roots_to_pol(GEN V, GEN T, GEN p, long v)
 GEN
 FqV_red(GEN z, GEN T, GEN p)
 {
-  GEN res;
-  int i, l = lg(z);
-  res=cgetg(l,typ(z));
+  long i, l = lg(z);
+  GEN res = cgetg(l, typ(z));
   for(i=1;i<l;i++)
     if (typ(z[i]) == t_INT)
       gel(res,i) = modii(gel(z,i),p);
@@ -1404,7 +1403,7 @@ GEN
 FpXQ_ffisom_inv(GEN S,GEN T, GEN p)
 {
   pari_sp ltop = avma;
-  int n = degpol(T);
+  long n = degpol(T);
   GEN V, M = FpXQ_matrix_pow(S,n,n,T,p);
   V = FpM_invimage(M, col_ei(n, 2), p);
   return gerepileupto(ltop, gtopolyrev(V, varn(T)));
@@ -1687,7 +1686,7 @@ FpX_ffintersect(GEN P, GEN Q, long n, GEN l,GEN *SP, GEN *SQ, GEN MA, GEN MB)
   if (e)
   {
     GEN VP, VQ, Ay, By, lmun = addis(l,-1);
-    int i, j;
+    long i, j;
     MA = gaddmat(gen_m1,MA);
     MB = gaddmat(gen_m1,MB);
     Ay = polun[vp];
@@ -2796,7 +2795,7 @@ FlxV_eval(GEN b, ulong x, ulong p)
 
 /* as above, but don't care about degree drop */
 static GEN
-FlxV_eval_gen(GEN b, ulong x, ulong p, int *drop)
+FlxV_eval_gen(GEN b, ulong x, ulong p, long *drop)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2809,7 +2808,7 @@ FlxV_eval_gen(GEN b, ulong x, ulong p, int *drop)
 }
 
 static GEN
-vec_FpX_eval_gen(GEN b, GEN x, GEN p, int *drop)
+vec_FpX_eval_gen(GEN b, GEN x, GEN p, long *drop)
 {
   GEN z;
   long i, lb = lg(b);
@@ -2850,7 +2849,7 @@ ZY_ZXY_ResBound(GEN A, GEN B, GEN dB)
 static ulong
 FlX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
 {
-  int drop;
+  long drop;
   GEN ev = FlxV_eval_gen(b, n, p, &drop);
   ulong r = Flx_resultant(a, ev, p);
   if (drop && la != 1) r = Fl_mul(r, Fl_pow(la, drop,p),p);
@@ -2859,7 +2858,7 @@ FlX_eval_resultant(GEN a, GEN b, ulong n, ulong p, ulong la)
 static GEN
 FpX_eval_resultant(GEN a, GEN b, GEN n, GEN p, GEN la)
 {
-  int drop;
+  long drop;
   GEN ev = vec_FpX_eval_gen(b, n, p, &drop);
   GEN r = FpX_resultant(a, ev, p);
   if (drop && !gcmp1(la)) r = muliimod(r, Fp_powu(la, drop,p),p);
@@ -3159,7 +3158,7 @@ INIT:
       if (!b[lb-1] || degpol(a) < degA) continue; /* p | lc(A)lc(B) */
       if (checksqfree)
       { /* find degree list for generic Euclidean Remainder Sequence */
-        int goal = min(degpol(a), degpol(b)); /* longest possible */
+        long goal = min(degpol(a), degpol(b)); /* longest possible */
         for (n=1; n <= goal; n++) dglist[n] = 0;
         setlg(dglist, 1);
         for (n=0; n <= dres; n++)

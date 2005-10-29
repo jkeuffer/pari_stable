@@ -143,8 +143,7 @@ bezout(GEN a, GEN b, GEN *pu, GEN *pv)
   GEN t,u,u1,v,v1,d,d1,q,r;
   GEN *pt;
   pari_sp av, av1, lim;
-  long s;
-  int sa, sb;
+  long s, sa, sb;
   ulong g;
   ulong xu,xu1,xv,xv1;		/* Lehmer stage recurrence matrix */
   int lhmres;			/* Lehmer stage return value */

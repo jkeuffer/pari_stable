@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  endif
 #endif
 
-const int     functions_tblsz = 135; /* size of functions_hash          */
+const long functions_tblsz = 135; /* size of functions_hash          */
 /*      Variables statiques communes :         */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
 ulong   logstyle = logstyle_none;
@@ -38,7 +38,7 @@ GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
 GEN     primetab; /* private primetable */
 byteptr diffptr;
 char    *current_logfile, *current_psfile, *pari_datadir = NULL;
-int     gp_colors[c_LAST];
+long    gp_colors[c_LAST];
 int     disable_color = 1;
 
 entree  **varentries;
@@ -365,7 +365,7 @@ dowin32ctrlc()
 
 /* Initialize hashtable */
 static void
-init_hashtable(entree **table, int tblsz)
+init_hashtable(entree **table, long tblsz)
 {
   entree *ep, *ep1, *last;
   long i, v;
@@ -434,8 +434,8 @@ init_defaults(int force)
 }
 
 /* does elt belong to list, after position start (excluded) ? */
-static int
-list_isin(void **list, void *elt, int start)
+static long
+list_isin(void **list, void *elt, long start)
 {
   long indelt=0;
 
@@ -829,7 +829,7 @@ GEN
 reorder(GEN x)
 {
   long tx, lx, i, n, nvar;
-  int *var,*varsort,*t1;
+  long *var,*varsort,*t1;
   pari_sp av;
 
   if (!x) return polvar;
@@ -839,9 +839,9 @@ reorder(GEN x)
 
   av = avma;
   nvar = manage_var(manage_var_next,NULL);
-  varsort = (int *)new_chunk(lx);
-  var = (int *)new_chunk(lx);
-  t1 = (int *)new_chunk(nvar);
+  varsort = (long *)new_chunk(lx);
+  var = (long *)new_chunk(lx);
+  t1 = (long *)new_chunk(nvar);
 
   for (n=0; n<nvar; n++) t1[n] = 0;
   for (n=0; n<lx; n++)
@@ -853,7 +853,7 @@ reorder(GEN x)
     if (t1[i]) err(talker,"duplicate indeterminates in reorder");
     t1[i] = 1;
   }
-  qsort(varsort,lx,sizeof(int),(QSCOMP)pari_compare_int);
+  qsort(varsort,lx,sizeof(long),(QSCOMP)pari_compare_long);
 
   for (n=0; n<lx; n++)
   { /* variables are numbered 0,1 etc... while polvar starts at 1. */
@@ -941,7 +941,7 @@ disable_dbg(long val)
 void
 errcontext(char *msg, char *s, char *entry)
 {
-  int past = (s-entry);
+  long past = (s-entry);
   char str[STR_LEN + 2];
   char *buf, *t, *pre;
 

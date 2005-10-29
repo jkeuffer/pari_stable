@@ -446,7 +446,7 @@ Newton_exponents(long e)
  * flag = 1: return TreeLift structure
  * flag = 2: a = TreeLift structure, go on lifting, as flag = 1 otherwise */
 static GEN
-MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, int flag)
+MultiLift(GEN f, GEN a, GEN T, GEN p, long e0, long flag)
 {
   long l, i, e = e0, k = lg(a) - 1;
   GEN E, v, w, link;
@@ -1433,7 +1433,7 @@ DDF(GEN a, long hint, int fl)
   long chosenp, p, nfacp, np, nmax, ti = 0;
   pari_sp av = avma, av1;
   byteptr pt = diffptr;
-  const int MAXNP = 7;
+  const long MAXNP = 7;
   pari_timer T, T2;
 
   if (DEBUGLEVEL>2) { TIMERstart(&T); TIMERstart(&T2); }

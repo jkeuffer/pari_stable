@@ -965,13 +965,13 @@ _mul2n(GEN x, long e) { return e? gmul2n(x, e): x; }
  * h = base change matrix (from X0)
  * R = from QR factorization of Xs[1..k-1] */
 static int
-HRS(int MARKED, long k, int prim, long kmax, GEN X, GEN Xs, GEN h, GEN R,
+HRS(long MARKED, long k, int prim, long kmax, GEN X, GEN Xs, GEN h, GEN R,
     GEN Q, GEN E, GEN F)
 {
-  long e, i, N = lg(X[k]);
+  long e, i, N = lg(X[k]), rounds = 0;
   const long prec = MEDDEFAULTPREC; /* 128 bits */
   GEN q, tau2, rk;
-  int rounds = 0, overf;
+  int overf;
 
   E[k] = prim? E[k-1]: 0;
   F[k] = 0;
@@ -1055,7 +1055,7 @@ rescale_to_int(GEN x)
 }
 
 GEN
-lll_scaled(int MARKED, GEN X0, long D)
+lll_scaled(long MARKED, GEN X0, long D)
 {
   GEN delta, X, Xs, h, R, Q, E, F;
   long j, kmax = 1, k, N = lg(X0);
@@ -1148,8 +1148,9 @@ lllfp_marked(long *pMARKED, GEN x, long D, long flag, long prec, int gram)
 {
   GEN xinit,L,h,B,L1,delta, Q, H = NULL;
   long retry = 2, lx = lg(x), hx, l, i, j, k, k1, n, kmax, KMAX, MARKED;
+  long count, count_max = 8;
   pari_sp av0 = avma, av, lim;
-  int isexact, exact_can_leave, count, count_max = 8;
+  int isexact, exact_can_leave;
   const int in_place = (flag == 3);
 
   if (typ(x) != t_MAT) err(typeer,"lllfp");
@@ -1679,9 +1680,9 @@ lllintpartial_ip(GEN mat)
 /********************************************************************/
 
 static int
-check_condition(double beta, double tau, double rho, int d, int delta, int t)
+check_condition(double beta, double tau, double rho, long d, long delta, long t)
 {
-  int dim = d*delta + t;
+  long dim = d*delta + t;
   double cond = d*delta*(delta+1)/2 - beta*delta*dim
     + rho*delta*(delta - 1) / 2
     + rho * t * delta + tau*dim*(dim - 1)/2;
@@ -1693,7 +1694,7 @@ check_condition(double beta, double tau, double rho, int d, int delta, int t)
 }
 
 static void
-choose_params(GEN P, GEN N, GEN X, GEN B, int *pdelta, int *pt)
+choose_params(GEN P, GEN N, GEN X, GEN B, long *pdelta, long *pt)
 {
   long d = degpol(P);
   GEN P0 = leading_term(P);
@@ -1722,7 +1723,7 @@ choose_params(GEN P, GEN N, GEN X, GEN B, int *pdelta, int *pt)
 }
 
 static GEN 
-do_exhaustive(GEN P, GEN N, int x, GEN B) 
+do_exhaustive(GEN P, GEN N, long x, GEN B) 
 {
   GEN tst, sol = cget1(2*x + 2, t_VECSMALL);
   long j, l;
@@ -1747,7 +1748,7 @@ GEN
 zncoppersmith(GEN P0, GEN N, GEN X, GEN B)
 {
   GEN Q, R, N0, M, sh, short_pol, *Xpowers, z, r, sol, nsp, P, tst, Z;
-  int delta, i, j, row, d, l, dim, t, bnd = 10;
+  long delta, i, j, row, d, l, dim, t, bnd = 10;
   pari_sp av = avma;
 
   if (typ(P0) != t_POL || typ(N) != t_INT) err(typeer, "zncoppersmith");
@@ -3267,7 +3268,7 @@ smallvectors(GEN q, GEN BORNE, long stockmax, FP_chk_fun *CHECK)
   GEN norme1, normax1, borne1, borne2;
   GEN (*check)(void *,GEN) = CHECK? CHECK->f: NULL;
   void *data = CHECK? CHECK->data: NULL;
-  int skipfirst = CHECK? CHECK->skipfirst: 0;
+  long skipfirst = CHECK? CHECK->skipfirst: 0;
   int stockall = (stockmax < 0);
 
   if (DEBUGLEVEL)

@@ -368,7 +368,7 @@ GEN
 perm_identity(long l)
 {
   GEN perm = cgetg(l + 1, t_VECSMALL);
-  int i;
+  long i;
   for (i = 1; i <= l; i++) perm[i] = i;
   return perm;
 } 
@@ -377,7 +377,7 @@ GEN
 cyclicperm(long l, long d)
 {
   GEN perm = cgetg(l + 1, t_VECSMALL);
-  int i;
+  long i;
   for (i = 1;     i <= l-d; i++) perm[i] = i+d;
   for (i = l-d+1; i <= l; i++)   perm[i] = i-l+d;
   return perm;
@@ -389,7 +389,7 @@ GEN
 perm_mul(GEN s, GEN t)
 {
   GEN u;
-  int i, l = lg(s);
+  long i, l = lg(s);
   if (l < lg(t))
     err(talker, "First permutation shorter than second in perm_mul");
   u = cgetg(l, typ(s));
@@ -401,7 +401,7 @@ perm_mul(GEN s, GEN t)
 static GEN
 perm_mul_inplace(GEN s, GEN t)
 {
-  int i;
+  long i;
   for (i = 1; i < lg(s); i++) t[i] = s[t[i]];
   return t;
 }
@@ -429,9 +429,8 @@ perm_conj(GEN s, GEN t)
 static GEN
 vecperm_orbits_i(GEN v, long n)
 {
-  int j, k, l, m, o, p, flag;
+  long mj = 1, j, k, l, m, o, p, flag;
   GEN bit, cycle, cy;
-  long mj = 1;
   cycle = cgetg(n+1, t_VEC);
   bit = bitvec_alloc(n);
   for (k = 1, l = 1; k <= n;)
@@ -499,7 +498,7 @@ cyc_pow(GEN cyc, long exp)
   GEN c;
   for (r = j = 1; j < lg(cyc); j++)
   {
-    int n = lg(cyc[j]) - 1;
+    long n = lg(cyc[j]) - 1;
     r += cgcd(n, exp);
   }
   c = cgetg(r, t_VEC);
@@ -681,7 +680,7 @@ group_leftcoset(GEN G, GEN g)
   k = 1;
   for (i = 1; i < lg(gen); i++)
   {
-    int c = k * (ord[i] - 1);
+    long c = k * (ord[i] - 1);
     for (j = 1; j <= c; j++)
       gel(res,++k) = perm_mul(gel(res,j), gel(gen,i));
   }
@@ -701,7 +700,7 @@ group_rightcoset(GEN G, GEN g)
   k = 1;
   for (i = 1; i < lg(gen); i++)
   {
-    int c = k * (ord[i] - 1);
+    long c = k * (ord[i] - 1);
     for (j = 1; j <= c; j++)
       gel(res,++k) = perm_mul(gel(gen,i), gel(res,j));
   }

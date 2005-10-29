@@ -164,7 +164,7 @@ znstar_elts(long n, GEN H)
   sg[1] = 1;
   for (j = 1, l = 1; j < lg(gen); j++)
   {
-    int c = l * (ord[j] - 1);
+    long c = l * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
       sg[++l] = Fl_mul((ulong)sg[k], (ulong)gen[j], (ulong)n);
   }
@@ -191,7 +191,7 @@ long
 znstar_conductor(long n, GEN H)
 {
   pari_sp ltop=avma;
-  int i,j;
+  long i,j;
   GEN F = factoru(n), P = gel(F,1), E = gel(F,2); 
   long cnd=n;
   for(i=lg(gel(F,1))-1;i>0;i--)
@@ -549,7 +549,7 @@ galoiscyclo(long n, long v)
   gel(L,1) = z;
   for (j = 1, i = 1; j < lg(gen); j++)
   {
-    int     c = i * (ord[j] - 1);
+    long c = i * (ord[j] - 1);
     for (k = 1; k <= c; k++)	/* I like it */
       gel(L,++i) = Fp_pow(gel(L,k),gel(gen,j),le);
   }

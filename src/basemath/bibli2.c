@@ -624,7 +624,7 @@ setisset(GEN x)
 
 /* looks if y belongs to the set x and returns the index if yes, 0 if no */
 long
-gen_search(GEN x, GEN y, int flag, int (*cmp)(GEN,GEN))
+gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN))
 {
   long lx,j,li,ri,fl, tx = typ(x);
 
@@ -945,7 +945,7 @@ polymodrecip(GEN x)
 /**                                                                **/
 /********************************************************************/
 static GEN vcmp_k;
-static int vcmp_lk;
+static long vcmp_lk;
 static int (*vcmp_cmp)(GEN,GEN);
 
 #define icmp(a,b) ((a)>(b)?1:(a)<(b)?-1:0)
@@ -978,7 +978,7 @@ longcmp(GEN x, GEN y)
 static int
 veccmp(GEN x, GEN y)
 {
-  int i,s;
+  long i,s;
 
   for (i=1; i<vcmp_lk; i++)
   {
@@ -993,7 +993,7 @@ veccmp(GEN x, GEN y)
  *  flag & cmp_C  : as cmp_IND, but return permutation as vector of C-longs
  */
 GEN
-gen_sort(GEN x, int flag, int (*cmp)(GEN,GEN))
+gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
 {
   long i, j, indxt, ir, l, tx = typ(x), lx = lg(x);
   GEN q, y, indx;
@@ -1172,7 +1172,7 @@ cmp_vecint(GEN x, GEN y)
 int
 cmp_prime_over_p(GEN x, GEN y)
 {
-  int k = mael(x,4,2) - mael(y,4,2); /* diff. between residue degree */
+  long k = mael(x,4,2) - mael(y,4,2); /* diff. between residue degree */
   return k? ((k > 0)? 1: -1)
           : cmp_vecint(gel(x,2), gel(y,2));
 }

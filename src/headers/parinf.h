@@ -99,7 +99,7 @@ typedef struct FP_chk_fun {
   GEN (*f)(void *,GEN);
   GEN (*f_init)(struct FP_chk_fun*,GEN,GEN);
   void *data;
-  int skipfirst;
+  long skipfirst;
 } FP_chk_fun;
 
 GEN _initalg(GEN x, long flag, long prec);

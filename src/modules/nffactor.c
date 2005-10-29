@@ -141,7 +141,7 @@ nfroots(GEN nf,GEN pol)
 {
   pari_sp av = avma;
   GEN A,g, T;
-  int d;
+  long d;
 
   if (!nf) return nfrootsQ(pol);
 
@@ -1033,7 +1033,7 @@ init_proj(nflift_t *L, GEN nfT, GEN p)
 static void
 bestlift_init(long a, GEN nf, GEN pr, GEN C, nflift_t *L)
 {
-  const int D = 100;
+  const long D = 100;
   const double alpha = ((double)D-1) / D; /* LLL parameter */
   const long d = degpol(nf[1]);
   pari_sp av = avma;
@@ -1566,7 +1566,7 @@ nfrootsall_and_pr(GEN nf, GEN pol)
 /* return the characteristic polynomial of alpha over nf, where alpha
    is an element of the algebra nf[X]/(T) given as a polynomial in X */
 GEN
-rnfcharpoly(GEN nf,GEN T,GEN alpha,int v)
+rnfcharpoly(GEN nf, GEN T, GEN alpha, long v)
 {
   long vnf, vT, lT;
   pari_sp av = avma;

@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /**              INSERT PERMANENT OBJECT IN STRUCTURE              **/
 /**                                                                **/
 /********************************************************************/
-static const int OBJMAX = 2; /* maximum number of insertable objects */
+static const long OBJMAX = 2; /* maximum number of insertable objects */
 
 /* insert O in S [last position] */
 static void
@@ -50,7 +50,7 @@ get_extra_obj(GEN S, long K)
 }
 
 GEN
-check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
+check_and_build_obj(GEN S, long tag, GEN (*build)(GEN))
 {
   GEN O = get_extra_obj(S, tag);
   if (!O)
@@ -69,8 +69,8 @@ check_and_build_obj(GEN S, int tag, GEN (*build)(GEN))
 /*******************************************************************/
 #define SFB_MAX 3
 
-static const int RANDOM_BITS = 4;
-static const int MAXRELSUP = 50;
+static const long RANDOM_BITS = 4;
+static const long MAXRELSUP = 50;
 
 /* used by factor[elt|gen|gensimple] to return factorizations of smooth elts
  * HACK: MAX_FACTOR_LEN never checked, we assume default value is enough
@@ -114,7 +114,7 @@ enum { sfb_UNSUITABLE = -1, sfb_CHANGE = 1, sfb_INCREASE = 2 };
 
 typedef struct REL_t {
   GEN R; /* relation vector as t_VECSMALL */
-  int nz; /* index of first non-zero elt in R (hash) */
+  long nz; /* index of first non-zero elt in R (hash) */
   GEN m; /* pseudo-minimum yielding the relation */
   GEN ex; /* exponents of subFB elts used to find R */
   powFB_t *pow; /* powsubFB associated to ex [ shared between rels ] */
@@ -332,7 +332,7 @@ pre_allocate(RELCACHE_t *cache, size_t n)
 static void
 powFBgen(FB_t *F, RELCACHE_t *cache, GEN nf)
 {
-  const int a = 1<<RANDOM_BITS;
+  const long a = 1<<RANDOM_BITS;
   pari_sp av = avma;
   long i, j, c = 1, n = lg(F->subFB);
   GEN Id2, Alg, Ord;
@@ -1791,7 +1791,7 @@ small_norm(RELCACHE_t *cache, FB_t *F, double LOGD, GEN nf,
            long nbrelpid, double LIMC2)
 {
   const ulong mod_p = 27449UL;
-  const int BMULT = 8, maxtry_DEP  = 20, maxtry_FACT = 500;
+  const long BMULT = 8, maxtry_DEP  = 20, maxtry_FACT = 500;
   const double eps = 0.000001;
   double *y,*z,**q,*v, BOUND;
   pari_sp av;
@@ -2934,7 +2934,7 @@ buch(GEN *pnf, double cbach, double cbach2, long nbrelpid, long flun,
   GEN fu, zu, nf, D, A, W, R, Res, z, h, L_jid, PERM;
   GEN res, L, resc, B, C, lambda, dep, clg1, clg2, Vbase;
   char *precpb = NULL;
-  const int minsFB = 3;
+  const long minsFB = 3;
   RELCACHE_t cache;
   FB_t F;
 

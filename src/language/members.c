@@ -42,7 +42,7 @@ member_f(GEN x)
 GEN
 member_p(GEN x)
 {
-  int t; (void)get_nf(x,&t);
+  long t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gmael(x,2,1);
   x = get_primeid(x);
@@ -53,7 +53,7 @@ member_p(GEN x)
 GEN
 member_bid(GEN x)
 {
-  int t; (void)get_nf(x,&t);
+  long t; (void)get_nf(x,&t);
   switch(t) {
     case typ_BNR: return gel(x,2);
     case typ_BID: return x;
@@ -65,7 +65,7 @@ member_bid(GEN x)
 GEN
 member_bnf(GEN x)
 {
-  int t; x = get_bnf(x,&t);
+  long t; x = get_bnf(x,&t);
   if (!x) member_err("bnf");
   return x;
 }
@@ -73,7 +73,7 @@ member_bnf(GEN x)
 GEN
 member_nf(GEN x)
 {
-  int t; x = get_nf(x,&t);
+  long t; x = get_nf(x,&t);
   if (!x) member_err("nf");
   return x;
 }
@@ -82,7 +82,7 @@ member_nf(GEN x)
 GEN
 member_zk(GEN x)
 {
-  int t; GEN y = get_nf(x,&t);
+  long t; GEN y = get_nf(x,&t);
   if (!y)
   {
     switch(t)
@@ -98,7 +98,7 @@ member_zk(GEN x)
 GEN
 member_disc(GEN x) /* discriminant */
 {
-  int t; GEN y = get_nf(x,&t);
+  long t; GEN y = get_nf(x,&t);
   if (!y)
   {
     switch(t)
@@ -118,7 +118,7 @@ member_disc(GEN x) /* discriminant */
 GEN
 member_pol(GEN x) /* polynomial */
 {
-  int t; GEN y = get_nf(x,&t);
+  long t; GEN y = get_nf(x,&t);
   if (!y)
   {
     switch(t)
@@ -138,7 +138,7 @@ member_pol(GEN x) /* polynomial */
 GEN
 member_mod(GEN x) /* modulus */
 {
-  int t; (void)get_nf(x,&t);
+  long t; (void)get_nf(x,&t);
   switch(t) {
     case typ_GAL: return gmael(x,2,3);
     case typ_BNR: x = gel(x,2); /* fall through */
@@ -155,7 +155,7 @@ member_mod(GEN x) /* modulus */
 GEN
 member_sign(GEN x) /* signature */
 {
-  int t; GEN y = get_nf(x,&t);
+  long t; GEN y = get_nf(x,&t);
   if (!y)
   {
     if (t == typ_CLA) return gmael(x,1,2);
@@ -171,7 +171,7 @@ member_r2(GEN x) { return gel(member_sign(x), 2); }
 GEN
 member_index(GEN x)
 {
-  int t; GEN y = get_nf(x,&t);
+  long t; GEN y = get_nf(x,&t);
   if (!y) member_err("index");
   return gel(y,4);
 }
@@ -190,7 +190,7 @@ nfmats(GEN x)
 GEN
 member_t2(GEN x) /* T2 matrix */
 {
-  int t; x = nfmats(get_nf(x,&t));
+  long t; x = nfmats(get_nf(x,&t));
   if (!x) member_err("t2");
   return gram_matrix(gel(x,2));
 }
@@ -198,7 +198,7 @@ member_t2(GEN x) /* T2 matrix */
 GEN
 member_diff(GEN x) /* different */
 {
-  int t; x = nfmats(get_nf(x,&t));
+  long t; x = nfmats(get_nf(x,&t));
   if (!x) member_err("diff");
   return gel(x,5);
 }
@@ -206,7 +206,7 @@ member_diff(GEN x) /* different */
 GEN
 member_codiff(GEN x) /* codifferent */
 {
-  int t; GEN y = nfmats(get_nf(x,&t));
+  long t; GEN y = nfmats(get_nf(x,&t));
   if (!y) member_err("codiff");
   return gdiv(gel(y,6), absi(gel(x,3)));
 }
@@ -214,7 +214,7 @@ member_codiff(GEN x) /* codifferent */
 GEN
 member_roots(GEN x) /* roots */
 {
-  int t; GEN y = get_nf(x,&t);
+  long t; GEN y = get_nf(x,&t);
   if (!y)
   {
     if (t == typ_ELL && is_bigell(x)) return gel(x,14);
@@ -237,7 +237,7 @@ check_RES(GEN x, char *s)
 GEN
 member_clgp(GEN x) /* class group (3-component row vector) */
 {
-  int t; GEN y = get_bnf(x,&t);
+  long t; GEN y = get_bnf(x,&t);
   if (!y)
   {
     switch(t)
@@ -262,7 +262,7 @@ member_clgp(GEN x) /* class group (3-component row vector) */
 GEN
 member_reg(GEN x) /* regulator */
 {
-  int t; GEN y = get_bnf(x,&t);
+  long t; GEN y = get_bnf(x,&t);
   if (!y)
   {
     switch(t)
@@ -280,7 +280,7 @@ member_reg(GEN x) /* regulator */
 GEN
 member_fu(GEN x) /* fundamental units */
 {
-  int t; GEN y = get_bnf(x,&t);
+  long t; GEN y = get_bnf(x,&t);
   if (!y)
   {
     switch(t)
@@ -302,7 +302,7 @@ member_fu(GEN x) /* fundamental units */
 GEN
 member_tu(GEN x)
 {
-  int t; GEN y, bnf = get_bnf(x,&t), res = cgetg(3,t_VEC);
+  long t; GEN y, bnf = get_bnf(x,&t), res = cgetg(3,t_VEC);
   if (!bnf)
   {
     switch(t)
@@ -397,7 +397,7 @@ member_cyc(GEN clg) /* cyclic decomposition (SNF) of a group (of type clgp) */
 GEN
 member_gen(GEN x)
 {
-  int t;
+  long t;
   GEN y = get_primeid(x);
   if (y) return mkvec2(gel(y,1), gel(y,2));
   (void)get_nf(x,&t);
@@ -412,7 +412,7 @@ member_gen(GEN x)
 GEN
 member_group(GEN x)
 {
-  int t; (void)get_nf(x,&t);
+  long t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gel(x,6);
   member_err("group");
@@ -421,7 +421,7 @@ member_group(GEN x)
 GEN
 member_orders(GEN x)
 {
-  int t; (void)get_nf(x,&t);
+  long t; (void)get_nf(x,&t);
   if (t == typ_GAL)
     return gel(x,8);
   member_err("orders");

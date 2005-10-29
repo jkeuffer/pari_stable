@@ -27,7 +27,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 static int
 checktnf(GEN tnf)
 {
-  int n, R, S, T;
+  long n, R, S, T;
   if (typ(tnf)!=t_VEC || (lg(tnf)!=8 && lg(tnf)!=3)) return 0;
   if (typ(tnf[1]) != t_POL) return 0;
   if (lg(tnf) != 8) return 1; /* S=0 */
@@ -62,9 +62,9 @@ myround(GEN x, long dir)
 
 /* Returns the index of the largest element in a vector */
 static GEN
-_Vecmax(GEN Vec, int *ind)
+_Vecmax(GEN Vec, long *ind)
 {
-  int k, tno = 1, l = lg(Vec);
+  long k, tno = 1, l = lg(Vec);
   GEN tmax = gel(Vec,1);
   for (k = 2; k < l; k++)
     if (gcmp(gel(Vec,k),tmax) > 0) { tmax = gel(Vec,k); tno = k; }
@@ -75,14 +75,14 @@ _Vecmax(GEN Vec, int *ind)
 static GEN
 Vecmax(GEN v) { return _Vecmax(v, NULL); }
 
-static int
-Vecmaxind(GEN v) { int i; (void)_Vecmax(v, &i); return i; }
+static long
+Vecmaxind(GEN v) { long i; (void)_Vecmax(v, &i); return i; }
 
 static GEN
-tnf_get_roots(GEN poly, long prec, int S, int T)
+tnf_get_roots(GEN poly, long prec, long S, long T)
 {
   GEN R0 = roots(poly, prec), R = cgetg(lg(R0), t_COL);
-  int k;
+  long k;
 
   for (k=1; k<=S; k++) gel(R,k) = real_i(gel(R0,k));
   /* swap roots to get the usual order */
@@ -98,7 +98,7 @@ tnf_get_roots(GEN poly, long prec, int S, int T)
 static GEN
 LogHeight(GEN x, long prec)
 {
-  int i, n = lg(x)-1;
+  long i, n = lg(x)-1;
   GEN LH = gen_1;
   for (i=1; i<=n; i++) LH = gmul(LH, gmax(gen_1, gabs(gel(x,i), prec)));
   return gdivgs(glog(LH,prec), n);
@@ -115,7 +115,7 @@ absisqrtn(GEN x, long n, long prec) {
 static GEN
 get_emb(GEN x, GEN r, long prec)
 {
-  int l = lg(r), i, tx;
+  long l = lg(r), i, tx;
   GEN e, y = cgetg(l, t_COL);
 
   tx = typ(x);
@@ -133,7 +133,7 @@ get_emb(GEN x, GEN r, long prec)
 static GEN
 Conj_LH(GEN v, GEN *H, GEN r, long prec)
 {
-  int j, l = lg(v);
+  long j, l = lg(v);
   GEN e, M = (GEN)cgetg(l,t_MAT);
 
   (*H) = cgetg(l,t_COL);
@@ -151,7 +151,7 @@ static GEN logabs(GEN x, long prec) { return glog(gabs(x,prec), prec); }
 
 /* Computation of M, its inverse A and precision check (see paper) */
 static GEN
-T_A_Matrices(GEN MatFU, int r, GEN *eps5, long prec)
+T_A_Matrices(GEN MatFU, long r, GEN *eps5, long prec)
 {
   GEN A, p1, m1, IntM, nia, eps3, eps2;
   long e = bit_accuracy(prec);
@@ -190,7 +190,7 @@ static GEN
 inithue(GEN P, GEN bnf, long flag, long prec)
 {
   GEN MatFU, x0, tnf, tmp, gpmin, dP, csts, ALH, eps5, ro, c1, c2, Ind = gen_1;
-  int k,j, n = degpol(P);
+  long k,j, n = degpol(P);
   long s,t, prec_roots;
 
   if (!bnf)
@@ -268,7 +268,7 @@ inithue(GEN P, GEN bnf, long flag, long prec)
 typedef struct {
   GEN c10, c11, c13, c15, bak, NE, ALH, Ind, hal, MatFU, ro, Hmu;
   GEN delta, lambda, errdelta;
-  int r, iroot, deg;
+  long r, iroot, deg;
 } baker_s;
 
 /* Compute Baker's bound c9 and B_0, the bound for the b_i's. See Thm 2.3.1 */
@@ -277,7 +277,7 @@ Baker(baker_s *BS)
 {
   const long prec = DEFAULTPREC;
   GEN tmp, B0, hb0, c9 = gen_1, ro = BS->ro, ro0 = (GEN)ro[BS->iroot];
-  int k, i1, i2, r = BS->r;
+  long k, i1, i2, r = BS->r;
 
   switch (BS->iroot) {
     case 1: i1=2; i2=3; break;
@@ -414,7 +414,7 @@ LLL_1stPass(GEN *pB0, GEN kappa, baker_s *BS, GEN *pBx)
 static int
 new_sol(GEN z, GEN S)
 {
-  int i, l = lg(S);
+  long i, l = lg(S);
   for (i=1; i<l; i++)
     if (gequal(z,gel(S,i))) return 0;
   return 1;
@@ -477,9 +477,9 @@ GuessQi(GEN b, GEN c, GEN *eps)
 
 /* Check for not-so-small solutions */
 static GEN
-MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, int s, GEN c1) 
+MiddleSols(GEN *pS, GEN bound, GEN roo, GEN poly, GEN rhs, long s, GEN c1) 
 {
-  int j, k, d = degpol(poly); 
+  long j, k, d = degpol(poly); 
   GEN bndcf = sqrtnr(shiftr(c1,1), d - 2); 
 
   if (cmprr(bound, bndcf) == -1) return bound; 
@@ -668,10 +668,10 @@ init_get_B(long i1, long i2, GEN Delta, GEN Lambda, GEN eps5, baker_s *BS,
 }
 
 static GEN
-get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
+get_B0(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 {
   GEN B0 = Baker(BS);
-  int i2 = (i1 == 1)? 2: 1;
+  long i2 = (i1 == 1)? 2: 1;
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
     init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
@@ -680,7 +680,7 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     for (;;)
     {
       GEN oldB0 = B0, kappa = utoipos(10);
-      int cf;
+      long cf;
 
       for (cf = 0; cf < 10; cf++, kappa = mulis(kappa,10))
       {
@@ -714,10 +714,10 @@ get_B0(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 }
 
 static GEN
-get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
+get_Bx_LLL(long i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
 {
   GEN B0 = Baker(BS), Bx = NULL;
-  int i2 = (i1 == 1)? 2: 1;
+  long i2 = (i1 == 1)? 2: 1;
   for(;;) /* i2 from 1 to r unless r = 1 [then i2 = 2] */
   {
     init_get_B(i1,i2, Delta,Lambda,eps5, BS, prec);
@@ -726,7 +726,7 @@ get_Bx_LLL(int i1, GEN Delta, GEN Lambda, GEN eps5, long prec, baker_s *BS)
     for (;;)
     {
       GEN oldBx = Bx, kappa = utoipos(10);
-      int cf;
+      long cf;
 
       for (cf = 0; cf < 10; cf++, kappa = mulis(kappa,10))
       {
@@ -772,8 +772,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
 {
   GEN Vect, P, ro, bnf, MatFU, A, csts, dP, vecdP, Bx;
   GEN c1,c2,c3,c4,c10,c11,c13,c14,c15, x0, x1, x2, x3, b, zp1, tmp, eps5, Ind;
-  int iroot, ine, n, i, r;
-  long upb, bi1, Prec, prec, s,t;
+  long iroot, ine, n, i, r, upb, bi1, Prec, prec, s,t;
   baker_s BS;
   pari_sp av = avma;
 
@@ -865,7 +864,7 @@ LargeSols(GEN tnf, GEN rhs, GEN ne, GEN *pro, GEN *pS)
     {
       GEN Lambda, B0, c6, c8;
       GEN NE = gel(MatNE,ine), Vect2 = cgetg(r+1,t_COL);
-      int k, i1;
+      long k, i1;
 
       if (DEBUGLEVEL>1) fprintferr("  - norm sol. no %ld/%ld\n",ine,lg(ne)-1);
       for (k=1; k<=r; k++)
@@ -1053,7 +1052,7 @@ isintnorm_loop(long i)
 {
   if (S[i] == 0) /* sum u[i].f[i] = n[i], do another prime */
   {
-    int k;
+    long k;
     if (inext[i] == 0) { test_sol(i); return; }
 
     /* there are some primes left */

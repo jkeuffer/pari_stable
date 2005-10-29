@@ -183,7 +183,7 @@ do_strftime(const char *s, char *buf, long max)
 /**************************************************************************/
 
 static GEN
-sd_toggle(const char *v, int flag, char *s, int *ptn)
+sd_toggle(const char *v, long flag, char *s, int *ptn)
 {
   int state = *ptn;
   if (*v)
@@ -210,7 +210,7 @@ sd_toggle(const char *v, int flag, char *s, int *ptn)
 }
 
 static GEN
-sd_gptoggle(const char *v, int flag, char *s, ulong FLAG)
+sd_gptoggle(const char *v, long flag, char *s, ulong FLAG)
 {
   int n = (GP_DATA->flags & FLAG)? 1: 0, old = n;
   GEN z = sd_toggle(v, flag, s, &n);
@@ -240,7 +240,7 @@ sd_ulong_init(const char *v, char *s, ulong *ptn, ulong Min, ulong Max)
 }
 
 static GEN
-sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
+sd_ulong(const char *v, long flag, char *s, ulong *ptn, ulong Min, ulong Max,
            char **msg)
 {
   ulong n = *ptn;
@@ -266,7 +266,7 @@ sd_ulong(const char *v, int flag, char *s, ulong *ptn, ulong Min, ulong Max,
 }
 
 GEN
-sd_realprecision(const char *v, int flag)
+sd_realprecision(const char *v, long flag)
 {
   pariout_t *fmt = GP_DATA->fmt;
   if (*v)
@@ -290,14 +290,14 @@ sd_realprecision(const char *v, int flag)
 }
 
 GEN
-sd_seriesprecision(const char *v, int flag)
+sd_seriesprecision(const char *v, long flag)
 {
   char *msg[] = {NULL, "significant terms"};
   return sd_ulong(v,flag,"seriesprecision",&precdl, 1,LGBITS,msg);
 }
 
 GEN
-sd_format(const char *v, int flag)
+sd_format(const char *v, long flag)
 {
   pariout_t *fmt = GP_DATA->fmt;
   if (*v)
@@ -331,7 +331,8 @@ static long
 gp_get_color(char **st)
 {
   char *s, *v = *st;
-  int c, trans;
+  int trans;
+  long c;
   if (isdigit((int)*v))
     { c = atol(v); trans = 1; } /* color on transparent background */
   else
@@ -339,7 +340,7 @@ gp_get_color(char **st)
     if (*v == '[')
     {
       char *a[3];
-      int i = 0;
+      long i = 0;
       for (a[0] = s = ++v; *s && *s != ']'; s++)
         if (*s == ',') { *s = 0; a[++i] = s+1; }
       if (*s != ']') err(talker2,"expected character: ']'",s, *st);
@@ -359,7 +360,7 @@ gp_get_color(char **st)
 
 /* 1: error, 2: history, 3: prompt, 4: input, 5: output, 6: help, 7: timer */
 GEN
-sd_colors(char *v, int flag)
+sd_colors(char *v, long flag)
 {
   long c,l;
   if (*v && !(GP_DATA->flags & (EMACS|TEXMACS)))
@@ -383,7 +384,7 @@ sd_colors(char *v, int flag)
   if (flag == d_ACKNOWLEDGE || flag == d_RETURN)
   {
     char s[128], *t = s;
-    int col[3], n;
+    long col[3], n;
     for (*t=0,c=c_ERR; c < c_LAST; c++)
     {
       n = gp_colors[c];
@@ -395,12 +396,12 @@ sd_colors(char *v, int flag)
         if (n & (1<<12))
         {
           if (col[0])
-            sprintf(t,"[%d,,%d]",col[1],col[0]);
+            sprintf(t,"[%ld,,%ld]",col[1],col[0]);
           else
-            sprintf(t,"%d",col[1]);
+            sprintf(t,"%ld",col[1]);
         }
         else
-          sprintf(t,"[%d,%d,%d]",col[1],col[2],col[0]);
+          sprintf(t,"[%ld,%ld,%ld]",col[1],col[2],col[0]);
       }
       t += strlen(t);
       if (c < c_LAST - 1) { *t++=','; *t++=' '; }
@@ -412,7 +413,7 @@ sd_colors(char *v, int flag)
 }
 
 GEN
-sd_compatible(const char *v, int flag)
+sd_compatible(const char *v, long flag)
 {
   char *msg[] = {
     "(no backward compatibility)",
@@ -429,7 +430,7 @@ sd_compatible(const char *v, int flag)
 }
 
 GEN
-sd_secure(const char *v, int flag)
+sd_secure(const char *v, long flag)
 {
   if (*v && (GP_DATA->flags & SECURE))
   {
@@ -440,13 +441,13 @@ sd_secure(const char *v, int flag)
 }
 
 GEN
-sd_debug(const char *v, int flag)
+sd_debug(const char *v, long flag)
 { return sd_ulong(v,flag,"debug",&DEBUGLEVEL, 0,20,NULL); }
 
 ulong readline_state = DO_ARGS_COMPLETE;
 
 GEN
-sd_rl(const char *v, int flag)
+sd_rl(const char *v, long flag)
 {
   static const char * const msg[] = {NULL,
 	"(bits 0x2/0x4 control matched-insert/arg-complete)"};
@@ -463,23 +464,23 @@ sd_rl(const char *v, int flag)
 }
 
 GEN
-sd_debugfiles(const char *v, int flag)
+sd_debugfiles(const char *v, long flag)
 { return sd_ulong(v,flag,"debugfiles",&DEBUGFILES, 0,20,NULL); }
 
 GEN
-sd_debugmem(const char *v, int flag)
+sd_debugmem(const char *v, long flag)
 { return sd_ulong(v,flag,"debugmem",&DEBUGMEM, 0,20,NULL); }
 
 GEN
-sd_echo(const char *v, int flag)
+sd_echo(const char *v, long flag)
 { return sd_gptoggle(v,flag,"echo", ECHO); }
 
 GEN
-sd_lines(const char *v, int flag)
+sd_lines(const char *v, long flag)
 { return sd_ulong(v,flag,"lines",&(GP_DATA->lim_lines), 0,VERYBIGINT,NULL); }
 
 GEN
-sd_histsize(const char *v, int flag)
+sd_histsize(const char *v, long flag)
 {
   gp_hist *H = GP_DATA->hist;
   ulong n = H->size;
@@ -529,7 +530,7 @@ TeX_define2(const char *s, const char *def) {
 }
 
 GEN
-sd_log(const char *v, int flag)
+sd_log(const char *v, long flag)
 {
   static const char * const msg[] = {
       "(off)",
@@ -571,7 +572,7 @@ sd_log(const char *v, int flag)
 }
 
 GEN
-sd_TeXstyle(const char *v, int flag)
+sd_TeXstyle(const char *v, long flag)
 {
   static const char * const msg[] = { NULL,
 	"(bits 0x2/0x4 control output of \\left/\\PARIbreak)"};
@@ -581,7 +582,7 @@ sd_TeXstyle(const char *v, int flag)
 }
 
 GEN
-sd_output(const char *v, int flag)
+sd_output(const char *v, long flag)
 {
   char *msg[] = {"(raw)", "(prettymatrix)", "(prettyprint)",
                  "(external prettyprint)", NULL};
@@ -593,7 +594,7 @@ sd_output(const char *v, int flag)
 }
 
 GEN
-sd_parisize(const char *v, int flag)
+sd_parisize(const char *v, long flag)
 {
   ulong oldn = top-bot, n = oldn;
   GEN r = sd_ulong(v,flag,"parisize",&n, 10000,VERYBIGINT,NULL);
@@ -606,7 +607,7 @@ sd_parisize(const char *v, int flag)
 }
 
 GEN
-sd_primelimit(const char *v, int flag)
+sd_primelimit(const char *v, long flag)
 {
   ulong n = GP_DATA->primelimit;
   GEN r = sd_ulong(v,flag,"primelimit",&n, 0,2*(ulong)(VERYBIGINT-1024) + 1,NULL);
@@ -623,19 +624,19 @@ sd_primelimit(const char *v, int flag)
 }
 
 GEN
-sd_simplify(const char *v, int flag)
+sd_simplify(const char *v, long flag)
 { return sd_gptoggle(v,flag,"simplify", SIMPLIFY); }
 
 GEN
-sd_strictmatch(const char *v, int flag)
+sd_strictmatch(const char *v, long flag)
 { return sd_gptoggle(v,flag,"strictmatch", STRICTMATCH); }
 
 GEN
-sd_timer(const char *v, int flag)
+sd_timer(const char *v, long flag)
 { return sd_gptoggle(v,flag,"timer", CHRONO); }
 
 GEN
-sd_filename(const char *v, int flag, char *s, char **f)
+sd_filename(const char *v, long flag, char *s, char **f)
 {
   if (*v)
   {
@@ -653,7 +654,7 @@ sd_filename(const char *v, int flag, char *s, char **f)
 }
 
 GEN
-sd_logfile(const char *v, int flag)
+sd_logfile(const char *v, long flag)
 {
   GEN r = sd_filename(v, flag, "logfile", &current_logfile);
   if (*v && logfile)
@@ -669,15 +670,15 @@ sd_logfile(const char *v, int flag)
 }
 
 GEN
-sd_factor_add_primes(char *v, int flag)
+sd_factor_add_primes(char *v, long flag)
 { return sd_toggle(v,flag,"factor_add_primes", &factor_add_primes); }
 
 GEN
-sd_new_galois_format(char *v, int flag)
+sd_new_galois_format(char *v, long flag)
 { return sd_toggle(v,flag,"new_galois_format", &new_galois_format); }
 
 GEN
-sd_psfile(const char *v, int flag)
+sd_psfile(const char *v, long flag)
 { return sd_filename(v, flag, "psfile", &current_psfile); }
 
 static void
@@ -685,7 +686,7 @@ err_secure(char *d, char *v)
 { err(talker,"[secure mode]: can't modify '%s' default (to %s)",d,v); }
 
 GEN
-sd_help(char *v, int flag)
+sd_help(char *v, long flag)
 {
   const char *str;
   if (*v)
@@ -702,7 +703,7 @@ sd_help(char *v, int flag)
 }
 
 GEN
-sd_datadir(char *v, int flag)
+sd_datadir(char *v, long flag)
 {
   const char *str;
   if (*v)
@@ -718,7 +719,7 @@ sd_datadir(char *v, int flag)
 }
 
 GEN
-sd_path(char *v, int flag)
+sd_path(char *v, long flag)
 {
   gp_path *p = GP_DATA->path;
   if (*v)
@@ -735,7 +736,7 @@ sd_path(char *v, int flag)
 }
 
 GEN
-sd_prettyprinter(char *v, int flag)
+sd_prettyprinter(char *v, long flag)
 {
   gp_pp *pp = GP_DATA->pp;
   if (*v && !(GP_DATA->flags & TEXMACS))
@@ -773,7 +774,7 @@ sd_prettyprinter(char *v, int flag)
 }
 
 static GEN
-sd_prompt_set(const char *v, int flag, char *how, char *p)
+sd_prompt_set(const char *v, long flag, char *how, char *p)
 {
   if (*v)
   {
@@ -789,13 +790,13 @@ sd_prompt_set(const char *v, int flag, char *how, char *p)
 }
 
 GEN
-sd_prompt(const char *v, int flag)
+sd_prompt(const char *v, long flag)
 {
   return sd_prompt_set(v, flag, "", GP_DATA->prompt);
 }
 
 GEN
-sd_prompt_cont(const char *v, int flag)
+sd_prompt_cont(const char *v, long flag)
 {
   return sd_prompt_set(v, flag, "_cont", GP_DATA->prompt_cont);
 }
@@ -852,11 +853,11 @@ help_default(void)
   default_type *dft;
 
   for (dft=gp_default_list; dft->fun; dft++)
-    ((void (*)(const char*,int)) dft->fun)("", d_ACKNOWLEDGE);
+    ((void (*)(const char*,long)) dft->fun)("", d_ACKNOWLEDGE);
 }
 
 GEN
-setdefault(const char *s, const char *v, int flag)
+setdefault(const char *s, const char *v, long flag)
 {
   default_type *dft;
 
@@ -865,7 +866,7 @@ setdefault(const char *s, const char *v, int flag)
     if (!strcmp(s,dft->name))
     {
       if (flag == d_EXISTS) return gen_1;
-      return ((GEN (*)(const char*,int)) dft->fun)(v,flag);
+      return ((GEN (*)(const char*,long)) dft->fun)(v,flag);
     }
   if (flag == d_EXISTS) return gen_0;
   err(talker,"unknown default: %s",s);
