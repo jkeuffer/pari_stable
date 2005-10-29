@@ -679,6 +679,8 @@ incgam2(GEN s, GEN x, long prec)
     b = (i == t_INT)? addsi(-1,s): gaddsg(-1,z);
     s = z;
   }
+  y = gmul(gexp(gneg(x), prec), gpow(x,b,prec));
+  if (gcmp0(y)) return gerepileupto(av, y); /* underflow */
   x_s = gsub(x, s);
   av2 = avma; avlim = stack_lim(av2,3);
   S = gdiv(gaddsg(-n,s), gaddgs(x_s,n<<1));
@@ -691,7 +693,6 @@ incgam2(GEN s, GEN x, long prec)
       S = gerepileupto(av2, S);
     }
   }
-  y = gmul(gexp(gneg(x), prec), gpow(x,b,prec));
   return gerepileupto(av, gmul(y, gaddsg(1,S)));
 }
 
