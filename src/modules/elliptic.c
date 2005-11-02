@@ -1630,7 +1630,8 @@ aux2(GEN ak, ulong p, GEN pl)
   avma = av; return res;
 }
 
-/* number of distinct roots of X^3 + aX^2 + bX + c modulo p
+/* number of distinct roots of X^3 + aX^2 + bX + c modulo p = 2 or 3
+ * assume a,b,c in {0, 1} [ p = 2] or {0, 1, 2} [ p = 3 ]
  * if there's a multiple root, put it in *mult */
 static ulong
 numroots3(ulong a, ulong b, ulong c, ulong p, ulong *mult)
@@ -1638,13 +1639,15 @@ numroots3(ulong a, ulong b, ulong c, ulong p, ulong *mult)
   if (p == 2)
   {
     if ((c + a * b) & 1) return 3;
-    else { *mult = b; return (a + b) & 1 ? 2 : 1; }
+    *mult = b; return (a + b) & 1 ? 2 : 1;
   }
+  /* p = 3 */
+  if (!a) { *mult = -c; return b ? 3 : 1; }
+  *mult = a * b;
+  if (b == 2)
+    return (a + c) == 3 ? 2 : 3;
   else
-  {
-    if (a % 3) { *mult = a * b; return (a * b * (1 - b) + c) % 3 ? 3 : 2; }
-    else { *mult = -c; return b % 3 ? 3 : 1; }
-  }
+    return c ? 3 : 2;
 }
 
 /* same for aX^2 +bX + c */
@@ -1652,7 +1655,8 @@ static ulong
 numroots2(ulong a, ulong b, ulong c, ulong p, ulong *mult)
 {
   if (p == 2) { *mult = c; return b & 1 ? 2 : 1; }
-  else { *mult = a * b; return (b * b - a * c) % 3 ? 2 : 1; }
+  /* p = 3 */
+  *mult = a * b; return (b * b + 2 * a * c) % 3 ? 2 : 1;
 }
 
 /* p = 2 or 3 */
