@@ -318,7 +318,7 @@ test-all: $exec
 dotest-all::
 	@\$(DOTEST) $test_basic $test_extra
 EOT
-for i in $test_extra; do
+for i in $test_extra $test_extra_out; do
   cat >> $file << EOT
 test-$i: $exec
 	@\$(DOTEST) $i

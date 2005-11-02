@@ -1050,13 +1050,13 @@ lgcdii(ulong* d, ulong* d1,
   return res;
 }
 
-/* 1 / Mod(x,p) , or 0 if inverse doesn't exist. Assume x < p */
+/* 1 / Mod(x,p). Assume x < p */
 ulong
 Fl_inv(ulong x, ulong p)
 {
   long s;
   ulong xv, xv1, g = xgcduu(p, x, 1, &xv, &xv1, &s);
-  if (g != 1UL) return 0UL;
+  if (g != 1UL) err(invmoder, "%Z", gmodulcp(utoi(x), utoi(p)));
   xv = xv1 % p; if (s < 0) xv = p - xv;
   return xv;
 }

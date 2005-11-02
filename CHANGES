@@ -64,6 +64,8 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     4- tunings in quadclassunit (#298 / #355)
     5- [Configure:] take CPPFLAGS into account
     6- 'int' C type is now reserved for boolean values. Use 'long' instead.
+    7- Fl_inv and Fl_div now raise an error when divisor not invertible
+       [ used to return 0 ]
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

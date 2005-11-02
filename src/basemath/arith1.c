@@ -1830,7 +1830,6 @@ Fp_pows(GEN A, long k, GEN N)
     ulong a = umodiu(A, n);
     if (k < 0) {
       a = Fl_inv(a, n);
-      if (!a) err(invmoder, "%Z", gmodulcp(A, N));
       k = -k;
     }
     return utoi( Fl_pow(a, (ulong)k, n) );
@@ -1868,10 +1867,7 @@ Fp_pow(GEN A, GEN k, GEN N)
   {
     ulong n = N[2];
     ulong a = umodiu(A, n);
-    if (s < 0) {
-      a = Fl_inv(a, n);
-      if (!a) err(invmoder, "%Z", gmodulcp(A, N));
-    }
+    if (s < 0) a = Fl_inv(a, n);
     if (lgefint(k) == 3) return utoi(Fl_pow(a, (ulong)k[2], n));
     /* should not occur */
     if (a <= 1) return utoi(a); /* 0 or 1 */

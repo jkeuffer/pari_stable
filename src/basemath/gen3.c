@@ -572,8 +572,8 @@ gmodgs(GEN x, long y)
 
     case t_FRAC:
       u = (ulong)labs(y);
-      return utoi( Fl_mul(umodiu(gel(x,1), u),
-                          Fl_inv(umodiu(gel(x,2), u), u), u) );
+      return utoi( Fl_div(umodiu(gel(x,1), u),
+                          umodiu(gel(x,2), u), u) );
 
     case t_QUAD: z=cgetg(4,tx);
       copyifstack(x[1],z[1]);
