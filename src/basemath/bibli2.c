@@ -951,12 +951,7 @@ static int (*vcmp_cmp)(GEN,GEN);
 #define icmp(a,b) ((a)>(b)?1:(a)<(b)?-1:0)
 
 int
-pari_compare_int(int *a,int *b)
-{
-  return icmp(*a,*b);
-}
-
-int pari_compare_lg(GEN x, GEN y)
+pari_compare_lg(GEN x, GEN y)
 {
   return icmp(lg(x),lg(y));
 }
