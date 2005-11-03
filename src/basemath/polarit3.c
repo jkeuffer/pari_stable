@@ -340,7 +340,7 @@ FpXQ_invsafe(GEN x, GEN T, GEN p)
 
 /* Product of y and x in Z/pZ[X]/(T)
  * return lift(lift(Mod(x*y*Mod(1,p),T*Mod(1,p)))) */
-/* x and y must be poynomials in the same var as T.
+/* x and y must be polynomials in the same var as T.
  * t_INT are not allowed. Use Fq_mul instead.
  */
 GEN
