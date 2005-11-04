@@ -1174,12 +1174,6 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
 /**                             EXP(X) - 1                         **/
 /**                                                                **/
 /********************************************************************/
-#ifdef LONG_IS_64BIT
-#  define EXMAX 46
-#else
-#  define EXMAX 22
-#endif
-
 /* exp(|x|) - 1, assume x != 0 */
 GEN
 exp1r_abs(GEN x)
@@ -1189,7 +1183,6 @@ exp1r_abs(GEN x)
   pari_sp av2, av = avma;
   double a, b, beta, gama = 2.0 /* optimized for SUN3 */;
                                 /* KB: 3.0 is better for UltraSparc */
-  if (ex >= EXMAX) err(talker,"exponent too large in exp");
   beta = 5. + bit_accuracy_mul(l, LOG2);
   a = sqrt(beta/(gama*LOG2));
   b = (BITS_IN_LONG-1-ex)
@@ -1271,8 +1264,6 @@ mpexp(GEN x)
     if (l < 3) l = 3;
     return real_1(l);
   }
-  if (sx < 0 && expo(x) >= EXMAX)
-    return real_0_bit(- (long) ((1L<<EXMAX) / LOG2));
 
   l = lg(x);
   if (l <= max(EXPNEWTON_LIMIT, 1<<s)) return mpexp_basecase(x);
@@ -1298,7 +1289,6 @@ mpexp(GEN x)
   if (sh) setexpo(z, expo(z) + sh);
   avma = (pari_sp)z; return z;
 }
-#undef EXMAX
 
 static long
 exp_p_prec(GEN x)

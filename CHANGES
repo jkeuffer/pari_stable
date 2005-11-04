@@ -67,6 +67,9 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     6- 'int' C type is now reserved for boolean values. Use 'long' instead.
     7- Fl_inv and Fl_div now raise an error when divisor not invertible
        [ used to return 0 ]
+    8- removed the threshold that prevented exponent overflow in
+       exp(-10^10) and returnd 0. instead [ either return correct digits
+       or raise an exception ].
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
