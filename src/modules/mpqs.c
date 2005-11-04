@@ -2330,9 +2330,17 @@ mpqs_self_init(mpqs_handle_t *h)
      * further down in the common part of SI. */
     for (j = 3; (ulong)j <= size_of_FB; j++)
     {
-      ulong mb, tmp1, tmp2, m;
+      ulong mb, tmp1, tmp2, m, A2;
       p = (ulong)FB[j].fbe_p; m = h->M % p;
-      inv_A2 = Fl_inv(umodiu(p1, p), p); /* = 1/(2*A) mod p_j */
+      A2 = umodiu(p1, p);
+      if (!A2)
+      { /* FIXME: do we really need this ? */
+        FB[j].fbe_start1 = (mpqs_int32_t)m;
+        FB[j].fbe_start2 = (mpqs_int32_t)m;
+        for (i = 0; i < h->omega_A - 1; i++) MPQS_INV_A_H(i,j) = 0;
+        continue;
+      }
+      inv_A2 = Fl_inv(A2, p); /* = 1/(2*A) mod p_j */
       mb = umodiu(B, p); if (mb) mb = p - mb;
       /* mb = -B mod p */
       tmp1 = Fl_sub(mb, FB[j].fbe_sqrt_kN, p);
