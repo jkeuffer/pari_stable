@@ -118,7 +118,7 @@ rm -f gmon.out # created by Configure -pg
 cat << EOT
 ==========================================================================
 EOT
-cd $TOP
+cd "$TOP"
 if test ! -d $objdir; then mkdir -p $objdir; fi
 dflt_conf_file=$objdir/$dflt_conf_file
 
