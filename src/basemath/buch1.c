@@ -1651,7 +1651,7 @@ MORE:
     case fupb_RELAT:
       if (++nrelsup <= 7 || cbach > 1) {
         need = min(KC, nrelsup); 
-        if (cbach > 1 && nsubFB < 3) nsubFB++;
+        if (cbach > 1 && nsubFB < 3 && lg(vperm) > 3) nsubFB++;
         goto MORE;
       }
       goto START;
