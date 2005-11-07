@@ -76,9 +76,9 @@ fi
 if test -n "$with_gmp"; then
   . ./get_gmp  # $_gmp_list
 fi
+. ./get_graphic_lib # which_graphic_lib
 if test "$optimization" != profiling; then
   . ./get_X11  # X11, X11_INC, X11_LIBS
-  . ./get_graphic_lib # which_graphic_lib
   . ./get_fltk # FLTKDIR, FLTK_LIBS
   . ./get_Qt   # QTDIR, QTLIB
   . ./get_readline # $_readline_list (includes 'readline')
