@@ -983,6 +983,37 @@ veccmp(GEN x, GEN y)
   return 0;
 }
 
+static GEN
+gen_sortspec(GEN v, long n, int (*cmp)(GEN,GEN))
+{
+  long nx=n>>1, ny=n-nx;
+  long m, ix, iy;
+  GEN x, y;
+  GEN w=cgetg(n+1,t_VECSMALL);
+  if (n<=2)
+  {
+    if (n==1) 
+      w[1]=1;
+    else if (n==2)
+    {
+      if (cmp(gel(v,1),gel(v,2))<=0) { w[1]=1; w[2]=2; }
+      else { w[1]=2; w[2]=1; }
+    }
+    return w;
+  }
+  x=gen_sortspec(v,nx,cmp);
+  y=gen_sortspec(v+nx,ny,cmp);
+  for (m=1, ix=1, iy=1; ix<=nx && iy<=ny; )
+    if (cmp(gel(v,x[ix]), gel(v,y[iy]+nx))<=0)
+      w[m++]=x[ix++];
+    else
+      w[m++]=y[iy++]+nx;
+  for(;ix<=nx;) w[m++]=x[ix++];
+  for(;iy<=ny;) w[m++]=y[iy++]+nx;
+  avma = (pari_sp) w;
+  return w;
+}
+
 /* Sort x = vector of elts, using cmp to compare them.
  *  flag & cmp_IND: indirect sort: return permutation that would sort x
  *  flag & cmp_C  : as cmp_IND, but return permutation as vector of C-longs
@@ -990,63 +1021,49 @@ veccmp(GEN x, GEN y)
 GEN
 gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
 {
-  long i, j, indxt, ir, l, tx = typ(x), lx = lg(x);
-  GEN q, y, indx;
+  long i, j;
+  long tx = typ(x), lx = lg(x);
+  GEN y;
 
   if (tx == t_LIST) { lx = lgeflist(x)-1; tx = t_VEC; x++; }
   if (!is_matvec_t(tx) && tx != t_VECSMALL) err(typeer,"gen_sort");
   if      (flag & cmp_C)   tx = t_VECSMALL;
   else if (flag & cmp_IND) tx = t_VEC;
-  y = cgetg(lx, tx);
-  if (lx==1) return y;
-  if (lx==2)
+  if (lx<=2)
   {
-    if      (flag & cmp_C)   y[1] = 1;
-    else if (flag & cmp_IND) gel(y,1) = gen_1;
-    else if (tx == t_VECSMALL) y[1] = x[1];
-    else gel(y,1) = gcopy(gel(x,1)); 
-    return y;
+    y=cgetg(lx,tx);
+    if (lx==1) return y;
+    if (lx==2)
+    {
+      if      (flag & cmp_C)   y[1] = 1;
+      else if (flag & cmp_IND) gel(y,1) = gen_1;
+      else if (tx == t_VECSMALL) y[1] = x[1];
+      else gel(y,1) = gcopy(gel(x,1)); 
+      return y;
+    }
   }
   if (!cmp) cmp = &longcmp;
-  indx = (GEN) gpmalloc(lx*sizeof(long));
-  for (j=1; j<lx; j++) indx[j] = j;
 
-  ir = lx-1; l = (ir>>1)+1;
-  for(;;)
-  { /* HeapSort */
-    if (l > 1) indxt = indx[--l];
-    else
-    {
-      indxt = indx[ir]; indx[ir] = indx[1];
-      if (--ir == 1) break; /* DONE */
-    }
-    q = gel(x,indxt); i = l;
-    for (j=i<<1; j<=ir; j<<=1)
-    {
-      if (j<ir && cmp(gel(x,indx[j]), gel(x,indx[j+1])) < 0) j++;
-      if (cmp(q,gel(x,indx[j])) >= 0) break;
-
-      indx[i] = indx[j]; i = j;
-    }
-    indx[i] = indxt;
-  }
-  indx[1] = indxt;
+  y = gen_sortspec(x,lx-1,cmp);
 
   if (flag & cmp_REV)
   { /* reverse order */
-    GEN indy = (GEN) gpmalloc(lx*sizeof(long));
-    for (j=1; j<lx; j++) indy[j] = indx[lx-j];
-    free(indx); indx = indy;
+    for (j=1; j<=((lx-1)>>1); j++) 
+    {
+      long z=y[j];
+      y[j]=y[lx-j];
+      y[lx-j]=z;
+    }
   }
-  if (flag & cmp_C)
-    for (i=1; i<lx; i++) y[i] = indx[i];
-  else if (flag & cmp_IND)
-    for (i=1; i<lx; i++) gel(y,i) = utoipos(indx[i]);
+  if (flag & cmp_C) return y;
+  settyp(y,tx);
+  if (flag & cmp_IND)
+    for (i=1; i<lx; i++) gel(y,i) = utoipos(y[i]);
   else if (tx == t_VECSMALL)
-    for (i=1; i<lx; i++) y[i] = x[indx[i]];
-  else
-    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,indx[i]));
-  free(indx); return y;
+    for (i=1; i<lx; i++) y[i] = x[y[i]];
+  else 
+    for (i=1; i<lx; i++) gel(y,i) = gcopy(gel(x,y[i]));
+  return y;
 }
 
 #define sort_fun(flag) ((flag & cmp_LEX)? &lexcmp: &gcmp)
