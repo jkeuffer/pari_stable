@@ -1633,8 +1633,8 @@ aux2(GEN ak, ulong p, GEN pl)
 /* number of distinct roots of X^3 + aX^2 + bX + c modulo p = 2 or 3
  * assume a,b,c in {0, 1} [ p = 2] or {0, 1, 2} [ p = 3 ]
  * if there's a multiple root, put it in *mult */
-static ulong
-numroots3(ulong a, ulong b, ulong c, ulong p, ulong *mult)
+static long
+numroots3(long a, long b, long c, long p, long *mult)
 {
   if (p == 2)
   {
@@ -1651,12 +1651,12 @@ numroots3(ulong a, ulong b, ulong c, ulong p, ulong *mult)
 }
 
 /* same for aX^2 +bX + c */
-static ulong
-numroots2(ulong a, ulong b, ulong c, ulong p, ulong *mult)
+static long
+numroots2(long a, long b, long c, long p, long *mult)
 {
   if (p == 2) { *mult = c; return b & 1 ? 2 : 1; }
   /* p = 3 */
-  *mult = a * b; return (b * b + 2 * a * c) % 3 ? 2 : 1;
+  *mult = a * b; return (b * b - a * c) % 3 ? 2 : 1;
 }
 
 /* p = 2 or 3 */
@@ -1664,8 +1664,7 @@ static GEN
 localred_23(GEN e, long p)
 {
   long c, nu, nuD, r, s, t;
-  ulong theroot, al, be, ga, p2, p3, p4, p5, p6, a21, a42, a63, a32, a64;
-  GEN pk, p2k, pk1;
+  long theroot, p2, p3, p4, p5, p6, a21, a42, a63, a32, a64;
   GEN v;
 
   nuD = Z_lval(gel(e,12), (ulong)p);
@@ -1727,14 +1726,18 @@ localred_23(GEN e, long p)
     switch (numroots3(a21, a42, a63, p, &theroot))
     {
       case 3:
+        c = a63 ? 1: 2;
         if (p == 2)
-          c = 1 + (a63 == 0) + ((a21 + a42 + a63) & 1);
-        else
-          c = 1 + (a63 == 0) + (((1 + a21 + a42 + a63) % 3) == 0)
-                             + (((1 - a21 + a42 - a63) % 3) == 0);
+          c += ((a21 + a42 + a63) & 1);
+        else {
+          if (((1 + a21 + a42 + a63) % 3) == 0) c++;
+          if (((1 - a21 + a42 - a63) % 3) == 0) c++;
+        }
         return localred_result(nuD - 4, -1, c, v);
-            /* I0*  */
-      case 2: /* compute nu */
+      case 2: /* I0*  */
+      { /* compute nu */
+        GEN pk, pk1, p2k;
+        long al, be, ga;
         if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
             /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
         nu = 1;
@@ -1748,8 +1751,8 @@ localred_23(GEN e, long p)
           if (numroots2(al, be, ga, p, &theroot) == 2) break;
           if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, mulsi(theroot,pk));
           pk1 = pk;
-          pk  = mulsi(p, pk);
-          p2k = mulsi(p, p2k); nu++;
+          pk  = mului(p, pk);
+          p2k = mului(p, p2k); nu++;
 
           al = a21;
           be = aux2(gel(e,4), p, pk);
@@ -1763,9 +1766,9 @@ localred_23(GEN e, long p)
         else
           c = 3 + kross(be * be - al * ga, 3);
         return localred_result(nuD - 4 - nu, -4 - nu, c, v);
-            /* Inu* */
-      case 1:
-        if (theroot) cumule(&v, &e, gen_1, stoi(theroot * p), gen_0, gen_0);
+      }
+      case 1: /* Inu* */
+        if (theroot) cumule(&v, &e, gen_1, stoi(theroot*p), gen_0, gen_0);
             /* p | a1; p^2  | a2, a3; p^3 | a4; p^4 | a6 */
         a32 = aux(gel(e,3), p3, p2);
         a64 = aux(gel(e,5), p5, p4);
@@ -1778,7 +1781,7 @@ localred_23(GEN e, long p)
           return localred_result(nuD - 6, -4, c, v);
         }
             /* IV*  */
-        if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p*p));
+        if (theroot) cumule(&v, &e, gen_1, gen_0, gen_0, stoi(theroot*p2));
             /* p | a1; p^2 | a2; p^3 | a3, a4; p^5 | a6 */
         if (umodiu(gel(e,4), p4))
           return localred_result(nuD - 7, -3, 2, v);

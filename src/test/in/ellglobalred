@@ -1,0 +1,21 @@
+checkcond(N)=
+{ local(elist, e, count = 0);
+
+  elist = ellsearch(N);
+  for(i=1,#elist,
+    e = elist[i][2];
+    M = ellglobalred( ellinit(e, 1) )[1];
+    if (N != M,
+      count++; print(elist[i][2]," bad for N = ",N,
+                     " (extra = ", factor(M/N), ")")
+    )
+  ); count
+}
+
+checkconds(N1,N2)=
+{ local(count = 0);
+  for (N=N1,N2, count += checkcond(N));
+  print("Total number of bad curves: ",count);
+}
+
+checkconds(1,10^4)
