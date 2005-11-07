@@ -169,22 +169,51 @@ vecsmall_lengthen(GEN v, long n)
   return V;
 }
 
+/* Sort v[0]...v[n-1] and put result in w[0]...w[n-1]. 
+ * We accept v==w. w must be allocated.
+ */
+
+static void
+vecsmall_sortspec(GEN v, long n, GEN w)
+{
+  pari_sp ltop=avma;
+  long nx=n>>1, ny=n-nx;
+  long m, ix, iy;
+  GEN x, y;
+  if (n<=2)
+  {
+    if (n==1) 
+      w[0]=v[0];
+    else if (n==2)
+    {
+      long v0=v[0], v1=v[1];
+      if (v0<=v1) { w[0]=v0; w[1]=v1; }
+      else { w[0]=v1; w[1]=v0; }
+    }
+    return;
+  }
+  x=new_chunk(nx); y=new_chunk(ny);
+  vecsmall_sortspec(v,nx,x);
+  vecsmall_sortspec(v+nx,ny,y);
+  for (m=0, ix=0, iy=0; ix<nx && iy<ny; )
+    if (x[ix]<=y[iy])
+      w[m++]=x[ix++];
+    else
+      w[m++]=y[iy++];
+  for(;ix<nx;)
+    w[m++]=x[ix++];
+  for(;iy<ny;)
+    w[m++]=y[iy++];
+  avma=ltop;
+}
+
 /*in place sort.*/
 void
 vecsmall_sort(GEN V)
 {
-  long i,j,k,l,m;
-  for(l=1; l<lg(V); l<<=1)
-    for(j=1; (j>>1)<lg(V); j += l<<1)
-      for(k=j+l, i=j; i<k && k<j+(l<<1) && k<lg(V); )
-	if (V[i] > V[k])
-	{
-	  long z=V[k];
-	  for (m=k;m>i;m--) V[m] = V[m-1];
-	  V[i] = z; k++;
-	}
-	else
-	  i++;
+  long l=lg(V)-1;
+  if (l<=1) return;
+  vecsmall_sortspec(V+1,l,V+1);
 }
 
 /* assume V sorted */
