@@ -19,3 +19,5 @@ checkconds(N1,N2)=
 }
 
 checkconds(1,10^4)
+print("Total time spent: ",gettime);
+\q
