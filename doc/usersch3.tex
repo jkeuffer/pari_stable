@@ -2069,12 +2069,37 @@ $-1$).
 which returns a \kbd{long} should be used if $x$ is known to be of type
 integer.
 
-\subsecidx{issquare}$(x,\{\&n\})$: true (1) if $x$ is square, false (0) if
-not. $x$ can be of any type. If $n$ is given and an exact square root had to
-be computed in the checking process, puts that square root in $n$. This is in
-particular the case when $x$ is an integer or a polynomial. This is \emph{not}
-the case for intmods (use quadratic reciprocity) or series (only check the
-leading coefficient).
+\subsecidx{issquare}$(x,\{\&n\})$: true (1) if $x$ is a square, false (0)
+if not. What ``being a square'' means depends on the type of $x$: all
+\typ{COMPLEX} are squares, as well as all non-negative \typ{REAL}; for
+exact types such as \typ{INT}, \typ{FRAC} and \typ{INTMOD}, squares are
+numbers of the form $s^2$ with $s$ in $\Z$, $\Q$ and $\Z/N\Z$ respectively.
+\bprog
+    ? issquare(3)          \\ as an integer
+    %1 = 0
+    ? issquare(3.)         \\ as a real number
+    %2 = 1
+    ? issquare(Mod(7, 8))  \\ in Z/8Z
+    %3 = 0
+    ? issquare( 5 + O(13^4) )  \\ in Q_13
+    %4 = 0
+@eprog
+If $n$ is given and an exact square root had to be computed in
+the checking process, puts that square root in $n$. This is the case when
+$x$ is a \typ{INT}, \typ{FRAC}, \typ{POL} or \typ{RFRAC} (or a vector of
+such objects):
+\bprog
+    ? issquare(4, &n)
+    %1 = 1
+    ? n
+    %2 = 2
+    ? issquare([4, x^2], &n)
+    %3 = [1, 1]  \\ both are squares
+    ? n
+    %4 = [2, x]  \\ the square roots
+@eprog
+This will \emph{not} work for \typ{INTMOD} (use quadratic reciprocity) or
+\typ{SER} (only check the leading coefficient).
 
 \syn{gcarrecomplet}{x,\&n}. Also available is \funs{gcarreparfait}{x}.
 
