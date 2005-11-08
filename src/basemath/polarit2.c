@@ -87,32 +87,36 @@ polsym(GEN x, long n)
   return polsym_gen(x, NULL, n, NULL,NULL);
 }
 
-static int (*polcmp_coeff_cmp)(GEN,GEN);
-
 /* assume x and y are polynomials in the same variable whose coeffs can be
  * compared (used to sort polynomial factorizations)
  */
+
 static int
-polcmp(GEN x, GEN y)
+polcmp(void *data, GEN x, GEN y)
 {
+  int (*coeff_cmp)(GEN,GEN)=(int(*)(GEN,GEN))data;
   long i, lx = lg(x), ly = lg(y);
   int fl;
   if (lx > ly) return  1;
   if (lx < ly) return -1;
   for (i=lx-1; i>1; i--)
-    if ((fl = polcmp_coeff_cmp(gel(x,i), gel(y,i)))) return fl;
+    if ((fl = coeff_cmp(gel(x,i), gel(y,i)))) return fl;
   return 0;
 }
 
-/* sort polynomial factorization so that factors appear by increasing
- * degree, sorting coefficients according to cmp. In place */
+/* sort generic factorisation */
 GEN
-sort_factor(GEN y, int (*cmp)(GEN,GEN))
+sort_factor_gen_aux(GEN y, void *data, int (*cmp)(void *,GEN,GEN))
 {
-  int (*old)(GEN,GEN) = polcmp_coeff_cmp;
-  polcmp_coeff_cmp = cmp;
-  (void)sort_factor_gen(y,&polcmp);
-  polcmp_coeff_cmp = old; return y;
+  long n, i;
+  pari_sp av = avma;
+  GEN a,b,A,B,w;
+  a = gel(y,1); n = lg(a); A = new_chunk(n);
+  b = gel(y,2);            B = new_chunk(n);
+  w = gen_sort_aux(a, cmp_IND | cmp_C, data, cmp);
+  for (i=1; i<n; i++) { A[i] = a[w[i]]; B[i] = b[w[i]]; }
+  for (i=1; i<n; i++) { a[i] = A[i]; b[i] = B[i]; }
+  avma = av; return y;
 }
 
 /* sort generic factorisation */
@@ -131,25 +135,31 @@ sort_factor_gen(GEN y, int (*cmp)(GEN,GEN))
 }
 
 GEN
-sort_vecpol_gen(GEN a)
+sort_factor(GEN y,int (*cmp)(GEN,GEN))
+{
+  (void)sort_factor_gen_aux(y,(void*)cmp,polcmp);
+  return y;
+}
+
+GEN
+sort_vecpol_gen(GEN a, int (*cmp)(GEN,GEN))
 {
   long n, i;
   pari_sp av = avma;
   GEN A,w;
   n = lg(a); A = new_chunk(n);
-  w = gen_sort(a, cmp_IND | cmp_C, &polcmp);
+  w = gen_sort_aux(a, cmp_IND | cmp_C,(void*)cmp, polcmp);
   for (i=1; i<n; i++) A[i] = a[w[i]];
   for (i=1; i<n; i++) a[i] = A[i];
   avma = av; return a;
 }
 
+/*In place sort*/
 GEN
 sort_vecpol(GEN y, int (*cmp)(GEN,GEN))
 {
-  int (*old)(GEN,GEN) = polcmp_coeff_cmp;
-  polcmp_coeff_cmp = cmp;
-  (void)sort_vecpol_gen(y);
-  polcmp_coeff_cmp = old; return y;
+  (void)sort_vecpol_gen(y,cmp);
+  return y;
 }
 
 /* centered residue x mod p. po2 = shifti(p, -1) or NULL (euclidean residue) */

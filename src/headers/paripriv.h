@@ -36,6 +36,10 @@ GEN garith_proto(GEN f(GEN), GEN x, int do_error);
 GEN garith_proto2gs(GEN f(GEN,long), GEN x, long y);
 GEN trans_fix_arg(long *prec, GEN *s0, GEN *sig, pari_sp *av, GEN *res);
 GEN transc(GEN (*f) (GEN, long), GEN x, long prec);
+GEN sort_factor(GEN y, int (*cmp)(GEN,GEN));
+GEN sort_factor_gen(GEN y, int (*cmp)(GEN,GEN));
+GEN sort_factor_gen_aux(GEN y, void *data, int (*cmp)(void *,GEN,GEN));
+GEN sort_vecpol(GEN a, int (*cmp)(GEN,GEN));
 
 /* loops */
 GEN incloop(GEN a);

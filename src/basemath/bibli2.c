@@ -624,7 +624,7 @@ setisset(GEN x)
 
 /* looks if y belongs to the set x and returns the index if yes, 0 if no */
 long
-gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN))
+gen_search_aux(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN))
 {
   long lx,j,li,ri,fl, tx = typ(x);
 
@@ -639,7 +639,7 @@ gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN))
   li=1; ri=lx-1;
   do
   {
-    j = (ri+li)>>1; fl = cmp(gel(x,j),y);
+    j = (ri+li)>>1; fl = cmp(data,gel(x,j),y);
     if (!fl) return flag? 0: j;
     if (fl<0) li=j+1; else ri=j-1;
   } while (ri>=li);
@@ -647,6 +647,17 @@ gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN))
   return (fl<0)? j+1: j;
 }
 
+static int cmp_nodata(void *data, GEN x, GEN y)
+{
+  int (*cmp)(GEN,GEN)=(int (*)(GEN,GEN)) data;
+  return cmp(x,y);
+}
+
+long
+gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN))
+{
+  return gen_search_aux(x, y, flag, (void *)cmp, cmp_nodata);
+}
 
 long
 setsearch(GEN x, GEN y, long flag)
@@ -944,9 +955,6 @@ polymodrecip(GEN x)
 /**                           HEAPSORT                             **/
 /**                                                                **/
 /********************************************************************/
-static GEN vcmp_k;
-static long vcmp_lk;
-static int (*vcmp_cmp)(GEN,GEN);
 
 #define icmp(a,b) ((a)>(b)?1:(a)<(b)?-1:0)
 
@@ -970,21 +978,29 @@ pari_compare_small(GEN x, GEN y)
 
 #undef icmp
 
-static int
-veccmp(GEN x, GEN y)
+struct veccmp_s
 {
+  long lk;
+  GEN k;
+  int (*cmp)(GEN,GEN);
+};
+
+static int
+veccmp(void *data, GEN x, GEN y)
+{
+  struct veccmp_s *v=(struct veccmp_s *) data;
   long i,s;
 
-  for (i=1; i<vcmp_lk; i++)
+  for (i=1; i<v->lk; i++)
   {
-    s = vcmp_cmp(gel(x,vcmp_k[i]), gel(y,vcmp_k[i]));
+    s = v->cmp(gel(x,v->k[i]), gel(y,v->k[i]));
     if (s) return s;
   }
   return 0;
 }
 
 static GEN
-gen_sortspec(GEN v, long n, int (*cmp)(GEN,GEN))
+gen_sortspec(GEN v, long n, void *data, int (*cmp)(void*,GEN,GEN))
 {
   long nx=n>>1, ny=n-nx;
   long m, ix, iy;
@@ -996,15 +1012,15 @@ gen_sortspec(GEN v, long n, int (*cmp)(GEN,GEN))
       w[1]=1;
     else if (n==2)
     {
-      if (cmp(gel(v,1),gel(v,2))<=0) { w[1]=1; w[2]=2; }
+      if (cmp(data,gel(v,1),gel(v,2))<=0) { w[1]=1; w[2]=2; }
       else { w[1]=2; w[2]=1; }
     }
     return w;
   }
-  x=gen_sortspec(v,nx,cmp);
-  y=gen_sortspec(v+nx,ny,cmp);
+  x=gen_sortspec(v,nx,data,cmp);
+  y=gen_sortspec(v+nx,ny,data,cmp);
   for (m=1, ix=1, iy=1; ix<=nx && iy<=ny; )
-    if (cmp(gel(v,x[ix]), gel(v,y[iy]+nx))<=0)
+    if (cmp(data, gel(v,x[ix]), gel(v,y[iy]+nx))<=0)
       w[m++]=x[ix++];
     else
       w[m++]=y[iy++]+nx;
@@ -1019,7 +1035,7 @@ gen_sortspec(GEN v, long n, int (*cmp)(GEN,GEN))
  *  flag & cmp_C  : as cmp_IND, but return permutation as vector of C-longs
  */
 GEN
-gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
+gen_sort_aux(GEN x, long flag, void *data, int (*cmp)(void*,GEN,GEN))
 {
   long i, j;
   long tx = typ(x), lx = lg(x);
@@ -1043,7 +1059,7 @@ gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
     }
   }
 
-  y = gen_sortspec(x,lx-1,cmp);
+  y = gen_sortspec(x,lx-1,data,cmp);
 
   if (flag & cmp_REV)
   { /* reverse order */
@@ -1065,32 +1081,39 @@ gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
   return y;
 }
 
+GEN
+gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
+{
+  return gen_sort_aux(x, flag, (void *)cmp, cmp_nodata);
+}
+
 #define sort_fun(flag) ((flag & cmp_LEX)? &lexcmp: &gcmp)
 
 GEN
 gen_vecsort(GEN x, GEN k, long flag)
 {
   long i,j,l,t, lx = lg(x), tmp[2];
+  struct veccmp_s v;
 
   if (lx<=2) return gen_sort(x,flag,sort_fun(flag));
-  t = typ(k); vcmp_cmp = sort_fun(flag);
+  t = typ(k); v.cmp = sort_fun(flag);
   if (t==t_INT)
   {
     gel(tmp,1) = k; k = tmp;
-    vcmp_lk = 2;
+    v.lk = 2;
   }
   else
   {
     if (! is_vec_t(t)) err(talker,"incorrect lextype in vecsort");
-    vcmp_lk = lg(k);
+    v.lk = lg(k);
   }
   l = 0;
-  vcmp_k = (GEN)gpmalloc(vcmp_lk * sizeof(long));
-  for (i=1; i<vcmp_lk; i++)
+  v.k = (GEN)gpmalloc(v.lk * sizeof(long));
+  for (i=1; i<v.lk; i++)
   {
     j = itos(gel(k,i));
     if (j<=0) err(talker,"negative index in vecsort");
-    vcmp_k[i]=j; if (j>l) l=j;
+    v.k[i]=j; if (j>l) l=j;
   }
   t = typ(x);
   if (! is_matvec_t(t)) err(typeer,"vecsort");
@@ -1100,8 +1123,8 @@ gen_vecsort(GEN x, GEN k, long flag)
     if (! is_vec_t(t)) err(typeer,"vecsort");
     if (lg(gel(x,j)) <= l) err(talker,"index too large in vecsort");
   }
-  x = gen_sort(x, flag, veccmp);
-  free(vcmp_k); return x;
+  x = gen_sort_aux(x, flag, (void *) &v, veccmp);
+  free(v.k); return x;
 }
 
 GEN
