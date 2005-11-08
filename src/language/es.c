@@ -2809,11 +2809,21 @@ os_close(long fd)
   close(fd);
 #endif
 }
+typedef void (*pari_sighandler_t)(int);
 
-void
-(*os_signal(int sig, void (*f)(int)))(int)
+pari_sighandler_t
+os_signal(int sig, pari_sighandler_t f)
 {
-#ifdef WINCE
+#ifdef HAS_SIGACTION
+  struct sigaction sa, oldsa;
+
+  sa.sa_handler = f;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_NODEFER;
+
+  if (sigaction(sig, &sa, &oldsa)) return NULL;
+  return oldsa.sa_handler;
+#elif defined(WINCE)
   return SIG_IGN;
 #else
   return signal(sig,f);

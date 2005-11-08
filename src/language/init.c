@@ -312,7 +312,10 @@ static void
 pari_sighandler(int sig)
 {
   char *msg;
+#ifndef HAS_SIGACTION
+  /*SYSV reset the signal handler in the handler*/
   (void)os_signal(sig,pari_sighandler);
+#endif
   switch(sig)
   {
 #ifdef SIGBREAK

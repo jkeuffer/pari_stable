@@ -160,6 +160,10 @@ yes) echo '#define USE_GETRUSAGE 1' >> $file;;
      esac;;
 esac
 
+case $has_sigaction in
+yes) echo '#define HAS_SIGACTION' >> $file;;
+esac
+
 case "$has_sigrelse" in
 yes) echo '#define USE_SIGRELSE 1' >> $file;;
   *) case "$has_sigsetmask" in

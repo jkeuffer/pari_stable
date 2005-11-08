@@ -13,7 +13,7 @@ case "$osname" in
   *cygwin*) list='times ftime';; # getrusage based timer always returns 0
   *) list='getrusage times ftime';;
 esac; . ./look
-list='sigsetmask sigrelse'; . ./look
+list='sigaction sigsetmask sigrelse'; . ./look
 list=TIOCGWINSZ; . ./look
 list=getrlimit; . ./look
 list='stat opendir'; . ./look
