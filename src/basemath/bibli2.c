@@ -963,7 +963,7 @@ pari_compare_long(long *a,long *b)
 }
 
 static int
-longcmp(GEN x, GEN y)
+pari_compare_small(GEN x, GEN y)
 {
   return icmp((long)x,(long)y);
 }
@@ -1042,7 +1042,6 @@ gen_sort(GEN x, long flag, int (*cmp)(GEN,GEN))
       return y;
     }
   }
-  if (!cmp) cmp = &longcmp;
 
   y = gen_sortspec(x,lx-1,cmp);
 
@@ -1110,7 +1109,8 @@ vecsort0(GEN x, GEN k, long flag)
 {
   if (flag < 0 || flag >= cmp_C) err(flagerr,"vecsort");
   if (k) return gen_vecsort(x, k, flag);
-  return gen_sort(x, flag, (typ(x) == t_VECSMALL)?NULL: sort_fun(flag));
+  return gen_sort(x, flag, (typ(x) == t_VECSMALL)?
+                       pari_compare_small:sort_fun(flag));
 }
 
 GEN

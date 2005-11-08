@@ -2567,7 +2567,7 @@ apell1(GEN e, GEN p)
     if (!fg) { h = mulsi(s,B); goto FOUND; }
     pfinal = modBIL(p); av2 = avma;
 
-    p1 = gen_sort(tx, cmp_IND | cmp_C, NULL);
+    p1 = vecsmall_indexsort(tx);
     for (i=1; i<=s; i++) ti[i] = tx[p1[i]];
     for (i=1; i<=s; i++) { tx[i] = ti[i]; ti[i] = ty[p1[i]]; }
     for (i=1; i<=s; i++) { ty[i] = ti[i]; ti[i] = p1[i]; }

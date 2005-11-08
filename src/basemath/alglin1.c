@@ -2067,7 +2067,7 @@ gauss_pivot(GEN x0, GEN *dd, long *rr)
     for (k=1; k<=n; k++)
       d0[k] = isinexactreal(gel(x0,k))? -gexpo(gel(x0,k))
                                       : -(long)HIGHEXPOBIT;
-    d0 = gen_sort(d0, cmp_C|cmp_IND, NULL);
+    d0 = vecsmall_indexsort(d0);
     x0 = vecpermute(x0, d0);
   }
   else

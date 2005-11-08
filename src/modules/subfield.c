@@ -954,7 +954,7 @@ subfieldsall(GEN nf)
     l = lg(L);
     S = cgetg(l, t_VECSMALL);
     for (i=1; i<l; i++) S[i] = lg(gmael(L,i,1));
-    p = gen_sort(S, cmp_IND | cmp_C, NULL);
+    p = vecsmall_indexsort(S);
     return gerepilecopy(av,  vecpermute(L, p));
   }
 

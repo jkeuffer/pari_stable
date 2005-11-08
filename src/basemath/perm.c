@@ -216,6 +216,46 @@ vecsmall_sort(GEN V)
   vecsmall_sortspec(V+1,l,V+1);
 }
 
+static GEN
+vecsmall_indexsortspec(GEN v, long n)
+{
+  long nx=n>>1, ny=n-nx;
+  long m, ix, iy;
+  GEN x, y;
+  GEN w=cgetg(n+1,t_VECSMALL);
+  if (n<=2)
+  {
+    if (n==1)
+      w[1]=1;
+    else if (n==2)
+    {
+      if (v[1]<=v[2]) { w[1]=1; w[2]=2; }
+      else { w[1]=2; w[2]=1; }
+    }
+    return w;
+  }
+  x=vecsmall_indexsortspec(v,nx);
+  y=vecsmall_indexsortspec(v+nx,ny);
+  for (m=1, ix=1, iy=1; ix<=nx && iy<=ny; )
+    if (v[x[ix]] <= v[y[iy]+nx])
+      w[m++] = x[ix++];
+    else
+      w[m++] = y[iy++]+nx;
+  for(;ix<=nx;) w[m++]=x[ix++];
+  for(;iy<=ny;) w[m++]=y[iy++]+nx;
+  avma = (pari_sp) w;
+  return w;
+}
+
+/*indirect sort.*/
+GEN
+vecsmall_indexsort(GEN V)
+{
+  long l=lg(V)-1;
+  if (l==0) return V;
+  return vecsmall_indexsortspec(V,l);
+}
+
 /* assume V sorted */
 GEN
 vecsmall_uniq(GEN V)
