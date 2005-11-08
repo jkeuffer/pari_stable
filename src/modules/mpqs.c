@@ -2325,22 +2325,15 @@ mpqs_self_init(mpqs_handle_t *h)
      * initialize start1[i] with the first value p_i | Q(z1 + i p_j)
      * initialize start2[i] with the first value p_i | Q(z2 + i p_j)
      * The following loop "miraculously" does The Right Thing for the
-     * primes dividing k (where sqrt_kN is 0 mod p).  It does not do
-     * anything useful for the primes dividing A - those are handled
-     * further down in the common part of SI. */
+     * primes dividing k (where sqrt_kN is 0 mod p).  Primes dividing A
+     * are skipped here, and are handled further down in the common part
+     * of SI. */
     for (j = 3; (ulong)j <= size_of_FB; j++)
     {
-      ulong mb, tmp1, tmp2, m, A2;
+      ulong mb, tmp1, tmp2, m;
+      if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
       p = (ulong)FB[j].fbe_p; m = h->M % p;
-      A2 = umodiu(p1, p);
-      if (!A2)
-      { /* FIXME: do we really need this ? */
-        FB[j].fbe_start1 = (mpqs_int32_t)m;
-        FB[j].fbe_start2 = (mpqs_int32_t)m;
-        for (i = 0; i < h->omega_A - 1; i++) MPQS_INV_A_H(i,j) = 0;
-        continue;
-      }
-      inv_A2 = Fl_inv(A2, p); /* = 1/(2*A) mod p_j */
+      inv_A2 = Fl_inv(umodiu(p1, p), p); /* = 1/(2*A) mod p_j */
       mb = umodiu(B, p); if (mb) mb = p - mb;
       /* mb = -B mod p */
       tmp1 = Fl_sub(mb, FB[j].fbe_sqrt_kN, p);
@@ -2388,6 +2381,7 @@ mpqs_self_init(mpqs_handle_t *h)
     { /* j = 3 mod 4 */
       for (j = 3; (ulong)j <= size_of_FB; j++)
       {
+	if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
         p = (ulong)FB[j].fbe_p;
         FB[j].fbe_start1 = Fl_sub(FB[j].fbe_start1, MPQS_INV_A_H(v2,j), p);
         FB[j].fbe_start2 = Fl_sub(FB[j].fbe_start2, MPQS_INV_A_H(v2,j), p);
@@ -2398,6 +2392,7 @@ mpqs_self_init(mpqs_handle_t *h)
     { /* j = 1 mod 4 */
       for (j = 3; (ulong)j <= size_of_FB; j++)
       {
+	if (FB[j].fbe_flags & MPQS_FBE_DIVIDES_A) continue;
         p = (ulong)FB[j].fbe_p;
         FB[j].fbe_start1 = Fl_add(FB[j].fbe_start1, MPQS_INV_A_H(v2,j), p);
         FB[j].fbe_start2 = Fl_add(FB[j].fbe_start2, MPQS_INV_A_H(v2,j), p);
