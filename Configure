@@ -76,12 +76,15 @@ fi
 if test -n "$with_gmp"; then
   . ./get_gmp  # $_gmp_list
 fi
-. ./get_graphic_lib # which_graphic_lib
 if test "$optimization" != profiling; then
   . ./get_X11  # X11, X11_INC, X11_LIBS
+  . ./get_graphic_lib # which_graphic_lib
   . ./get_fltk # FLTKDIR, FLTK_LIBS
   . ./get_Qt   # QTDIR, QTLIB
+  echo "Hi-Res Graphics: $which_graphic_lib"
   . ./get_readline # $_readline_list (includes 'readline')
+else
+  which_graphic_lib=none  
 fi
 #############################################################################
 case $kernlvl1 in
@@ -97,7 +100,6 @@ fi
 . ./get_install # $_install_list
 . ./get_objdir  # objdir, cdobjdir
 . ./get_static  # static
-echo "Hi-Res Graphics: $which_graphic_lib"
 # For dynamic linking, before and after installing
 runpath="$libdir" 
 LDDYN="-L$libdir -lpari"
