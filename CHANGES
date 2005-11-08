@@ -57,6 +57,7 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     7- \p2051 log(exp(-1)) --> printing bug [#357]
     8- bad argument checks in qfrep() / qfminim() [#359]
     9- signed/unsigned confusion in ellglobalred (wrong results for p = 2, 3)
+   10- fix mkintn to work as documented (even when leading word is 0) 
 
   Changed
     1- speed up prime() by using checkpoints.

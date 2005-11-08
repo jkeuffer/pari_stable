@@ -2120,38 +2120,35 @@ trunc0(GEN x, GEN *pte)
 /*                                                                 */
 /*******************************************************************/
 
-/* return a_n B^n + ... + a_0, where B = 2^32. Assume n even if BIL=64 and
- * the a_i are 32bits integers */
+/* return a_(n-1) B^(n-1) + ... + a_0, where B = 2^32. 
+ * The a_i are 32bits integers */
 GEN
 mkintn(long n, ...)
 {
   va_list ap;
-  pari_sp av = avma;
   GEN x, y;
   long i;
-  int iszero = 1;
-  va_start(ap,n);
 #ifdef LONG_IS_64BIT
-  n >>= 1;
+  long e = (n&1);
+  n = (n+1) >> 1;
 #endif
+  va_start(ap,n);
   x = cgeti(n+2); 
   x[1] = evallgefint(n+2) | evalsigne(1);
   y = int_MSW(x);
   for (i=0; i <n; i++)
   {
 #ifdef LONG_IS_64BIT
-    ulong a = va_arg(ap, long);
+    ulong a = (e && !i)? 0: va_arg(ap, long);
     ulong b = va_arg(ap, long);
     *y = (a << 32) | b;
 #else
     *y = va_arg(ap, long);
 #endif
-    if (*y) iszero = 0;
     y = int_precW(y);
   }
   va_end(ap);
-  if (iszero) { avma = av; return gen_0; }
-  return x;
+  return int_normalize(x, 0);
 }
 
 /* 2^32 a + b */
@@ -2165,10 +2162,16 @@ u2toi(ulong a, ulong b)
   x[1] = evallgefint(3)|evalsigne(1);
   x[2] = ((a << 32) | b);
 #else
-  x = cgeti(4);
-  x[1] = evallgefint(4)|evalsigne(1);
-  *(int_MSW(x)) = (long)a;
-  *(int_LSW(x)) = (long)b;
+  if (a) {
+    x = cgeti(4);
+    x[1] = evallgefint(4)|evalsigne(1);
+    *(int_MSW(x)) = (long)a;
+    *(int_LSW(x)) = (long)b;
+  } else {
+    x = cgeti(3);
+    x[1] = evallgefint(3)|evalsigne(1);
+    x[2] = (long)b;
+  }
 #endif
   return x;
 }
