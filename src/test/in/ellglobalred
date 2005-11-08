@@ -1,23 +1,19 @@
-checkcond(N)=
-{ local(elist, e, count = 0);
-
-  elist = ellsearch(N);
-  for(i=1,#elist,
-    e = elist[i][2];
+check(L)=
+{ local(e);
+  N = L[1];
+  for(i=2,#L,
+    e = L[i][2];
     M = ellglobalred( ellinit(e, 1) )[1];
-    if (N != M,
-      count++; print(elist[i][2]," bad for N = ",N,
-                     " (extra = ", factor(M/N), ")")
-    )
-  ); count
+    if (N != M, print(e," bad for N = ",N))
+  );
 }
 
-checkconds(N1,N2)=
-{ local(count = 0);
-  for (N=N1,N2, count += checkcond(N));
-  print("Total number of bad curves: ",count);
+checkfile(n) =
+{ local(v);
+  v = read( Str(default(datadir,,1), "/elldata/ell", n) );
+  for (i = 1, #v, check(v[i]))
 }
+for (i = 0, 9, checkfile(i))
 
-checkconds(1,10^4)
 print("Total time spent: ",gettime);
 \q
