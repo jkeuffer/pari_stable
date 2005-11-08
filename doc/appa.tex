@@ -120,6 +120,12 @@ values computed by \kbd{Configure}:
 
 \kbd{LDFLAGS}: Flags for \kbd{LD}.
 
+\kbd{C\_INCLUDE\_PATH} is \emph{prepended} to the list of directories
+searched for include files. Note that adding \kbd{-I} flags 
+\kbd{CFLAGS} will \emph{not} be enough since \kbd{Configure} sometimes
+relies on find the include files and parsing them, and it does not 
+parse \kbd{CFLAGS} at this time.
+
 \noindent For instance, \kbd{Configure} may avoid \kbd{/bin/cc} on some
 architectures due to various problems which may have been fixed in your
 version of the compiler. You can try

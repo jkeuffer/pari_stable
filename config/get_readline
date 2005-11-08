@@ -31,7 +31,7 @@ if test -n "$readline"; then
       $cygtop/usr/include\
       $cygtop/H-${arch}-cygwin32/${arch}-cygwin32/include\
       ";;
-    *) incpth="\
+    *) incpth="`echo $C_INCLUDE_PATH | sed -e 's%\([^:]*\):*%\1 \1/readline %g'`\
       /usr/local/include/readline\
       /usr/include/readline\
       /opt/include/readline\

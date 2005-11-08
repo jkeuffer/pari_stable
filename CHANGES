@@ -41,6 +41,7 @@ RS = Ralf Stephan
 SG = Scott Garee
 TH = Teluhiko Hilano
 TP = Thomas Papanikolaou
+VL = Vincent Lefevre
 XR = Xavier Roblot
 YU = Yoshiaki Uchikawa
 
@@ -73,6 +74,7 @@ BA 11- [Linux] gp only accepts one SIGINT in batch mode [#251]
     8- removed the threshold that prevented exponent overflow in
        exp(-10^10) and returnd 0. instead [ either return correct digits
        or raise an exception ].
+VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
