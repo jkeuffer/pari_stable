@@ -7019,13 +7019,13 @@ is as explained above.
 \syn{extract}{x,y} or \funs{matextract}{x,y,z}.
 
 \subsecidx{vecsort}$(x,\{k\},\{\fl=0\})$: sorts the vector $x$ in ascending
-order, using the heapsort method. $x$ must be a vector, and its components
+order, using a mergesort method. $x$ must be a vector, and its components
 integers, reals, or fractions.
 
 If $k$ is present and is an integer, sorts according to the value of the
-$k$-th subcomponents of the components of~$x$. Note that heapsort is
-unstable, hence is allowed to swap "equal" entries (with respect to the
-sorting criterion).
+$k$-th subcomponents of the components of~$x$. Note that mergesort is
+stable, hence is the initial ordering of "equal" entries (with respect to
+the sorting criterion) is not changed.
 
 $k$ can also be a vector, in which case the sorting is done lexicographically
 according to the components listed in the vector $k$. For example, if
