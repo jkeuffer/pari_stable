@@ -915,16 +915,6 @@ gprl_input(char **endp, int first, input_method *IM, filtre_t *F)
   return t;
 }
 
-static void
-unblock_SIGINT(void)
-{
-#ifdef USE_SIGRELSE
-  sigrelse(SIGINT);
-#elif USE_SIGSETMASK
-  sigsetmask(0);
-#endif
-}
-
 /* request one line interactively.
  * Return 0: EOF
  *        1: got one line from readline or infile */
@@ -956,7 +946,6 @@ get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F)
 
     if (logfile) update_logfile(expand_prompt(IM.prompt, F), s);
   }
-  unblock_SIGINT(); /* bug in readline 2.0: need to unblock ^C */
   return 1;
 }
 #endif

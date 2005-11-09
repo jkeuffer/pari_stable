@@ -164,13 +164,6 @@ case $has_sigaction in
 yes) echo '#define HAS_SIGACTION' >> $file;;
 esac
 
-case "$has_sigrelse" in
-yes) echo '#define USE_SIGRELSE 1' >> $file;;
-  *) case "$has_sigsetmask" in
-     yes) echo '#define USE_SIGSETMASK 1' >> $file;;
-     esac;;
-esac
-
 case $has_dlopen in
 yes|builtin) cat >> $file << EOT
 #define HAS_DLOPEN
