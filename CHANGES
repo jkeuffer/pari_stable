@@ -80,6 +80,8 @@ BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
 
   Added
     1- new library function ellisoncurve()
+BA  2- library functions related to sorting: gen_sort_aux, gen_search_aux,
+       vecsmall_indexsort
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Done for version 2.2.11 (released 19/10/2005):
