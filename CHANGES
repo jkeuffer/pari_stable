@@ -60,6 +60,11 @@ BA  4- Configure -a did not propose fltk and Qt as graphic engine.
     9- fix mkintn to work as documented (even when leading word is 0) 
 BA 10- [Linux] gp only accepts one SIGINT in batch mode [#251]
        (initial patch JD).
+   11- contfrac(5/3.) was wrong: [1,2] instead of [1,1,2]. For t_REALs,
+       when the last partial quotients of a lower and upper bound differ 
+       by 1, always choose the largest of the two. [ Used to choose the
+       largest or smallest depending on the parity of the partial
+       quotient index. ] [#371]
 
   Changed
     1- speed up prime() by using checkpoints.

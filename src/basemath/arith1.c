@@ -2185,7 +2185,7 @@ Qsfcont(GEN x, GEN y, long k)
       if (cmpii(c, b) >= 0)
       { /* partial quotient too small */
         c = subii(c, b);
-        if (cmpii(c, b) < 0) i++; /* by 1 */
+        if (cmpii(c, b) < 0) { gel(z,i) = addis(gel(z,i),1); i++; } /* by 1 */
         break;
       }
       if ((i & 0xff) == 0) gerepileall(av, 2, &b, &c);
