@@ -2152,20 +2152,19 @@ icopy_lg(GEN x, long l)
   y = cgeti(l); affii(x, y); return y;
 }
 
-/* if y != NULL, stop as soon as partial quotients differ from y */
+/* continued fraction of a/b. If y != NULL, stop when partial quotients
+ * differ from y */
 static GEN
-Qsfcont(GEN x, GEN y, long k)
+Qsfcont(GEN a, GEN b, GEN y, long k)
 {
-  GEN  z, a, b, c;
-  long i, l, ly = lgefint(x[2]);
+  GEN  z, c;
+  long i, l, ly = lgefint(b);
 
   /* / log2( (1+sqrt(5)) / 2 )  */
   l = (long)(3 + bit_accuracy_mul(ly, 1.44042009041256));
   if (k > 0 && ++k > 0 && l > k) l = k; /* beware overflow */
   if ((ulong)l > LGBITS) l = LGBITS;
 
-  a = gel(x,1);
-  b = gel(x,2);
   z = cgetg(l,t_VEC);
   l--;
   if (y) {
@@ -2173,8 +2172,9 @@ Qsfcont(GEN x, GEN y, long k)
     if (l >= lg(y)) l = lg(y)-1;
     for (i = 1; i <= l; i++)
     {
-      z[i] = y[i];
-      c = b; if (!gcmp1(gel(z,i))) c = mulii(gel(z,i), b);
+      GEN q = gel(y,i);
+      gel(z,i) = q;
+      c = b; if (!gcmp1(q)) c = mulii(q, b);
       c = subii(a, c);
       if (signe(c) < 0)
       { /* partial quotient too large */
@@ -2185,7 +2185,11 @@ Qsfcont(GEN x, GEN y, long k)
       if (cmpii(c, b) >= 0)
       { /* partial quotient too small */
         c = subii(c, b);
-        if (cmpii(c, b) < 0) { gel(z,i) = addis(gel(z,i),1); i++; } /* by 1 */
+        if (cmpii(c, b) < 0) {
+          /* by 1. If next quotient is 1 in y, add 1 */
+          if (i < l && is_pm1(gel(y,i+1))) gel(z,i) = addis(q,1);
+          i++;
+        }
         break;
       }
       if ((i & 0xff) == 0) gerepileall(av, 2, &b, &c);
@@ -2230,13 +2234,13 @@ sfcont(GEN x, long k)
         if (e < 0) err(talker,"integral part not significant in sfcont");
         c = ishiftr_lg(x,lx,0);
         y = int2n(e);
-	a = Qsfcont(mkfrac(c, y), NULL, k);
-        b = mkfrac(addsi(signe(x), c), y);
-	return gerepilecopy(av, Qsfcont(b,a,k));
+	a = Qsfcont(c,y, NULL, k);
+        b = addsi(signe(x), c);
+	return gerepilecopy(av, Qsfcont(b,y, a, k));
 
       case t_FRAC:
         av = avma;
-        return gerepileupto(av, Qsfcont(x, NULL, k));
+        return gerepileupto(av, Qsfcont(gel(x,1),gel(x,2), NULL, k));
     }
     err(typeer,"sfcont");
   }
