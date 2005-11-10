@@ -2433,17 +2433,18 @@ int_read_more(GEN y, char **ps)
 }
 
 static long
-exponent()
+exponent(char **pts)
 {
+  char *s = *pts;
   long n;
   int nb;
-  switch(*++analyseur)
+  switch(*++s)
   {
-    case '-': analyseur++; n = -(long)number(&nb, &analyseur); break;
-    case '+': analyseur++; /* Fall through */
-    default: n = (long)number(&nb, &analyseur);
+    case '-': s++; n = -(long)number(&nb, &s); break;
+    case '+': s++; /* Fall through */
+    default: n = (long)number(&nb, &s);
   }
-  return n;
+  *pts = s; return n;
 }
 
 static GEN
@@ -2452,52 +2453,39 @@ real_0_digits(long n) {
   return real_0_bit(b);
 }
 
-GEN
-strtoi(char *s)
-{
-  int nb;
-  GEN y = utoi(number(&nb, &s));
-  if (nb == 9) y = int_read_more(y, &s);
-  return y;
-}
-
 static GEN
-constante()
+real_read(pari_sp av, char **s, GEN y, long PREC)
 {
-  pari_sp av = avma;
   long l, n = 0;
-  int nb;
-  GEN y = utoi(number(&nb, &analyseur));
-  if (nb == 9) y = int_read_more(y, &analyseur);
-  switch(*analyseur)
+  switch(**s)
   {
     default: return y; /* integer */
     case '.':
     {
-      char *old = ++analyseur;
-      if (isalpha((int)*analyseur))
+      char *old = ++*s;
+      if (isalpha((int)**s))
       {
-        if (*analyseur == 'E' || *analyseur == 'e') {
-          n = exponent();
+        if (**s == 'E' || **s == 'e') {
+          n = exponent(s);
           if (!signe(y)) { avma = av; return real_0_digits(n); }
           break;
         }
-        analyseur--; return y; /* member */
+        --*s; return y; /* member */
       }
-      y = int_read_more(y, &analyseur);
-      n = old - analyseur;
-      if (*analyseur != 'E' && *analyseur != 'e')
+      y = int_read_more(y, s);
+      n = old - *s;
+      if (**s != 'E' && **s != 'e')
       {
-        if (!signe(y)) { avma = av; return real_0(prec); }
+        if (!signe(y)) { avma = av; return real_0(PREC); }
         break;
       }
     }
     /* Fall through */
     case 'E': case 'e':
-      n += exponent();
+      n += exponent(s);
       if (!signe(y)) { avma = av; return real_0_digits(n); }
   }
-  l = lgefint(y); if (l < (long)prec) l = (long)prec;
+  l = lgefint(y); if (l < (long)PREC) l = (long)PREC;
   if (!n) return itor(y, l);
   y = itor(y, l+1);
   if (n > 0)
@@ -2505,6 +2493,36 @@ constante()
   else
     y = divrr(y, rpowuu(10UL, (ulong)-n, l+1));
   return gerepileuptoleaf(av, rtor(y, l));
+}
+
+static GEN
+int_read(char **s)
+{
+  int nb;
+  GEN y = utoi(number(&nb, s));
+  if (nb == 9) y = int_read_more(y, s);
+  return y;
+}
+
+GEN
+strtoi(char *s) { return int_read(&s); }
+
+GEN 
+strtor(char *s, long PREC)
+{
+  pari_sp av = avma;
+  GEN y = int_read(&s);
+  y = real_read(av, &s, y, PREC);
+  if (typ(y) == t_REAL) return y;
+  return gerepileuptoleaf(av, itor(y, PREC));
+}
+
+static GEN
+constante()
+{
+  pari_sp av = avma;
+  GEN y = int_read(&analyseur);
+  return real_read(av, &analyseur, y, prec);
 }
 
 /********************************************************************/

@@ -257,6 +257,7 @@ long    manage_var(long n, entree *ep);
 void    name_var(long n, char *s);
 GEN     strtoGENstr(const char *s);
 GEN     strtoi(char *s);
+GEN     strtor(char *s, long prec);
 GEN     type0(GEN x);
 
 /* Qfb.c */
