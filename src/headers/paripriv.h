@@ -13,6 +13,8 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+BEGINEXTERN
+
 /* for qsort */
 typedef int (*QSCOMP)(const void *, const void *);
 
@@ -347,6 +349,7 @@ GEN   gpreadseq(char *c, int strict);
 void  init_defaults(int force);
 void  init_graph(void);
 void  initout(int initerr);
+void  init80col(long n);
 char* itostr(GEN x, int minus);
 void  kill_from_hashlist(entree *ep, long n);
 void  member_err(char *s);
@@ -359,6 +362,10 @@ void  print_user_fun(entree *ep);
 void  print_user_member(entree *ep);
 void  print_all_user_fun(void);
 void  print_all_user_member(void);
+void  pop_val(entree *ep);
+void  push_val(entree *ep, GEN a);
+void  recover(int flag);
+int   term_height(void);
 int   term_width(void);
 void  texmacs_completion(char *s, long pos);
 void  var_make_safe();
@@ -496,3 +503,4 @@ typedef struct input_method {
 
 int input_loop(filtre_t *F, input_method *IM);
 char *file_input(char **s0, int junk, input_method *IM, filtre_t *F);
+ENDEXTERN

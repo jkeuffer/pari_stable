@@ -18,17 +18,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                      GP-SPECIFIC DECLARATIONS                         */
 /*                                                                       */
 /*************************************************************************/
+BEGINEXTERN
 
 void aide(char *s, long flag);
 int  get_line_from_readline(char *prompt, char *prompt_cont, filtre_t *F);
 void gp_output(GEN z, gp_data *G);
 void hit_return(void);
 void init_readline(void);
-void init80col(long n);
-void pari_addfunctions(module **modlist_p, entree *func, char **help);
-void recover(int flag);
-int  term_height(void);
-int  term_width(void);
 void update_logfile(const char *prompt, const char *s);
 
 /* aide() */
@@ -44,3 +40,5 @@ extern char *keyword_list[];
 #define DATA_BEGIN  ((char) 2)
 #define DATA_END    ((char) 5)
 #define DATA_ESCAPE ((char) 27)
+
+ENDEXTERN

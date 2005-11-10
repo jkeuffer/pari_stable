@@ -18,11 +18,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*                 Declarations specific to the analyzer                 */
 /*                                                                       */
 /*************************************************************************/
+BEGINEXTERN
+
 /* modules */
 typedef struct module {
   entree *func;
   char **help;
 } module;
+void  pari_addfunctions(module **modlist_p, entree *func, char **help);
 
 /* GP control structures */
 typedef struct {
@@ -35,9 +38,6 @@ GEN _gp_eval(GEN x, void *dat);
 #define EXPR_WRAP(ep, ch, call) \
 { GEN z; EXPR_START(ep, ch); z = call; EXPR_END(ep); return z; }
 #define EXPR_ARG &__E, &_gp_eval
-
-void push_val(entree *ep, GEN a);
-void pop_val(entree *ep);
 
 /* binary I/O */
 typedef struct GENbin {
@@ -212,3 +212,5 @@ GEN  return0(GEN x);
 void system0(char *cmd);
 GEN  trap0(char *e, char *f, char *r);
 int  whatnow(char *s, int silent);
+
+ENDEXTERN
