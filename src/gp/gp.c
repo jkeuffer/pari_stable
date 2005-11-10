@@ -1552,10 +1552,11 @@ gp_sighandler(int sig)
       pariFILE *f = GP_DATA->pp->file;
       if (f && pari_outfile == f->file)
       {
+        err(talker, "Broken Pipe, resetting file stack...");
         GP_DATA->pp->file = NULL; /* to avoid oo recursion on error */
         pari_outfile = stdout; pari_fclose(f);
       }
-      err(talker, "Broken Pipe, resetting file stack...");
+      /*Do not attempt to write to stdout in case it triggered the SIGPIPE*/
       return; /* not reached */
     }
 #endif
