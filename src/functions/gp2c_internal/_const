@@ -16,3 +16,8 @@ Class: gp2c_internal
 Description:
  (str):gen       readseq($1)
 
+Function: _const_real
+Class: gp2c_internal
+Description:
+ (str):real:prec       strtor($1, prec)
+
