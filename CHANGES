@@ -65,8 +65,7 @@ BA 10- [Linux] gp only accepts one SIGINT in batch mode [#251, #370]
        by 1, choose the one associated to the digits of x (followed by 
        infinitely many 0s) unless it was too small and the next partial
        quotient was 1. [#371]
-   12- bnfisintnorm: wrong sign for negative norms in fields of even degree
-       [#372]
+   12- bnfisintnorm: results could have a wrong sign [#372]
 
   Changed
     1- speed up prime() by using checkpoints.
