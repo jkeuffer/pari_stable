@@ -1199,7 +1199,7 @@ get_unit_1(GEN bnf, GEN *unit)
   for (i = 1; i < lg(v); i++)
   {
     GEN s = sum(gel(v,i), 1, lg(v[i])-1);
-    if (gcmp0(s)) {
+    if (!gcmp0(s)) {
       GEN fu = check_units(bnf, "bnfisintnorm");
       *unit = gel(fu,i); return 1;
     }
