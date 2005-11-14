@@ -82,6 +82,7 @@ BA 10- [Linux] gp only accepts one SIGINT in batch mode [#251, #370]
 VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
    10- [readline] remove old hack bypassing a bug in readline-2.0 [ did not
        release SIGINT ]: useless nowadays, and used deprecated functions.
+   11- export combine_factors [ needed by giac ]
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

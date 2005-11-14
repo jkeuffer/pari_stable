@@ -1333,7 +1333,7 @@ cmbf_precs(GEN q, GEN A, GEN B, long *pta, long *ptb, GEN *qa, GEN *qb)
 }
 
 /* use van Hoeij's knapsack algorithm */
-static GEN
+GEN
 combine_factors(GEN target, GEN famod, GEN p, long klim, long hint)
 {
   GEN la, B, A, res, L, pa, pb, listmod;

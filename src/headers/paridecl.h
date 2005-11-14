@@ -1507,6 +1507,7 @@ GEN     ZX_squff(GEN f, GEN *ex);
 GEN     centermod(GEN x, GEN p);
 GEN     centermod_i(GEN x, GEN p, GEN ps2);
 GEN     centermodii(GEN x, GEN p, GEN po2);
+GEN     combine_factors(GEN target, GEN famod, GEN p, long klim, long hint);
 GEN     concat_factor(GEN f, GEN g);
 GEN     content(GEN x);
 GEN     deg1_from_roots(GEN L, long v);
