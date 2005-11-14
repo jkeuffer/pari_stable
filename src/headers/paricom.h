@@ -145,11 +145,6 @@ enum manage_var_t {
 #  endif
 #endif
 
-#ifndef LONG_IS_64BIT
-#  undef labs
-#  define labs(x) abs(x)
-#endif
-
 #ifdef min
 #  undef min
 #endif
