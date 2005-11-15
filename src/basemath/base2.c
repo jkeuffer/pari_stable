@@ -1251,7 +1251,7 @@ fastvalpos(GEN a, GEN chi, GEN p, GEN ns, long E)
   GEN v, d, pp;
   long m, n = degpol(chi), j, c;
 
-  c = equalii(p, gen_2)? 2*n/3 : min(2*E, n);
+  c = equaliu(p, 2)? 2*n/3 : min(2*E, n);
   if (c < 2) c = 2;
   a = Q_remove_denom(a, &d);
   m = d? Z_pval(d, p): 0; /* >= 0 */
