@@ -1059,7 +1059,30 @@ SL2_div_mul_e1(GEN N, GEN M)
                     mulii(gcoeff(N, 2, 2), b));
   return p2;
 }
+/* Let M and N in SL_2(Z), return (N*[1,0;0,-1]*M^-1)[,1]
+ * 
+*/
+static GEN 
+SL2_swap_div_mul_e1(GEN N, GEN M)
+{
+  GEN b = gcoeff(M, 2, 1);
+  GEN d = gcoeff(M, 2, 2);
+  GEN p2 = cgetg(3, t_VEC);
+  gel(p2,1) = addii(mulii(gcoeff(N, 1, 1), d),
+                    mulii(gcoeff(N, 1, 2), b));
+  gel(p2,2) = addii(mulii(gcoeff(N, 2, 1), d),
+                    mulii(gcoeff(N, 2, 2), b));
+  return p2;
+}
 
+/*Test equality modulo GL2*/
+static int
+GL2_qfb_equal(GEN a, GEN b)
+{
+  return equalii(gel(a,1),gel(b,1))
+   && absi_equal(gel(a,2),gel(b,2))
+   &&    equalii(gel(a,3),gel(b,3));
+}
 
 static GEN
 qfbsolve_cornacchia(GEN c, GEN p, int swap)
@@ -1100,11 +1123,11 @@ qfbimagsolvep(GEN Q, GEN p)
     return gerepileupto(av, gmul(mkvec2(x,y), shallowtrans(N)));
   }
   b = redimagsl2(primeform(d, p, 0), &M);
-  if (   !   equalii(gel(a,1),gel(b,1))
-      || !absi_equal(gel(a,2),gel(b,2))
-      || !   equalii(gel(a,3),gel(b,3))) return gen_0;
-  x = SL2_div_mul_e1(N,M);
-  if (signe(gel(a,2)) != signe(gel(b,2))) gel(x,2) = negi(gel(x,2));
+  if (!GL2_qfb_equal(a,b)) return gen_0;
+  if (signe(gel(a,2))==signe(gel(b,2)))
+    x = SL2_div_mul_e1(N,M);
+  else
+    x = SL2_swap_div_mul_e1(N,M);
   return gerepilecopy(av, x);
 }
 
@@ -1174,20 +1197,24 @@ GEN
 qfbrealsolvep(GEN Q, GEN p)
 {
   pari_sp ltop = avma, btop, st_lim;
-  GEN N, P, M, d = qf_disc(Q);
+  GEN N, P, P1, P2, M, d = qf_disc(Q);
   if (kronecker(d, p) < 0) { avma = ltop; return gen_0; }
-  N = redrealsl2(Q);
+  M = N = redrealsl2(Q);
   P = primeform(d, p, DEFAULTPREC);
-  gel(P,2) = negi(gel(P,2));/*This form leads to a smaller solution*/
-  P = M = redrealsl2(P);
+  P1 = redrealsl2(P);
+  gel(P,2) = negi(gel(P,2));
+  P2 = redrealsl2(P);
   btop = avma; st_lim = stack_lim(btop, 1);
-  while (!gequal(gel(M,1), gel(N,1)))
+  while (!gequal(gel(M,1), gel(P1,1)) && !gequal(gel(M,1), gel(P2,1)))
   {
     M = redrealsl2step(M);
-    if (gequal(gel(M,1), gel(P,1))) { avma = ltop; return gen_0; }
+    if (gequal(gel(M,1), gel(N,1))) { avma = ltop; return gen_0; }
     if (low_stack(st_lim, stack_lim(btop, 1))) M = gerepileupto(btop, M);
   }
-  return gerepilecopy(ltop, SL2_div_mul_e1(gel(N,2),gel(M,2)));
+  if (gequal(gel(M,1),gel(P1,1)))
+    return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),gel(P1,2)));
+  else
+    return gerepilecopy(ltop, SL2_div_mul_e1(gel(M,2),gel(P2,2)));
 }
 
 GEN
