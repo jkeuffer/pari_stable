@@ -66,6 +66,7 @@ BA 10- [Linux] gp only accepts one SIGINT in batch mode [#251, #370]
        infinitely many 0s) unless it was too small and the next partial
        quotient was 1. [#371]
    12- bnfisintnorm: results could have a wrong sign [#372]
+   13- isprime(N,2): oo loop if N is a perfect square
 
   Changed
     1- speed up prime() by using checkpoints.
@@ -211,8 +212,8 @@ BA 74- exp(x) gave imprecise results at huge accuracies for expo(x) >> 1.
    80- besseljh(0,2^65) --> crash [#340]
 BA 81- [plotQt:] ^C while hi-res window is present would crash the session
    82- Strtex(Vecsmall) --> SEGV [#348]
-   83- infinite loop in zeta() [catastrophic cancellation in get_xinf() ]
-   84- infinite loop in nfdisc() [#350]
+   83- oo loop in zeta() [catastrophic cancellation in get_xinf() ]
+   84- oo loop in nfdisc() [#350]
    85- Mod(1,2)*x / (1/2) --> incorrect t_POL
    86- qfbsolve forgot some solutions: qfbsolve(Qfb(2,1,3),3) --> 0
    87- multiplying ideals could lead to factoring big integers (failsafe
@@ -1098,7 +1099,7 @@ BA 23- cos(2^2^22) --> precision too low [ idem sin, tan ]
    24- setrand(1504969109; quadclassunit(-403195) --> incorrect. Check against
        L-value too liberal; now allow quotient in [ 0.8, 1.3 ], not [0.75,1.5]
    25- TODO item: quadclassunit not reliable when fed non fundamental
-       discriminant (infinite loop [e.g quadclassunit(-352)], wrong result).
+       discriminant (oo loop [e.g quadclassunit(-352)], wrong result).
        [ fix: increase factor base ]
    26- sign of elleisnum(E, 6, 1) was wrong
 BA 27- [GMP kernel] factor(18295370635792208009) --> error
@@ -1140,7 +1141,7 @@ GN 50- Configure breaks if CFLAGS contains '/'  (invoke sed with '!' separator)
 IZ 51- [tex2mail:] line couldn't start with {...\over...} (required indent)
 IZ 52- [tex2mail:] \over wasn't allowed within \left( \right)
    53- ZX_QX_resultant (modular resultant with integer result): possible
-       infinite loop when the result is 0, and non trivial denominator.
+       oo loop when the result is 0, and non trivial denominator.
    54- elleta(E.omega) gave incorrect results [ conflicting normalizations ]
    55- typo in charpoly(t_MAT) [ stack overflow after garbage collection ]
    56- subst(y,x+y-x,y) --> 0  [ missing simplification ]
@@ -1285,7 +1286,7 @@ GH 15- polsturm(1, 0, 1) ---> error  [ return 0! ]
    29- typo in nilord() [lg-->lgefint]: nfdisc() didn't work on 64bit HP
    30- ellisoncurve(ellinit([0,0,0,0,1]),[1/2-sqrt(3)/2*I,0]) --> 0
    31- type 'gphelp' from command line: carriage return is missing
-   32- typo in LLL_cmbf() [ rare infinite loop in factor() over Z[X] ]
+   32- typo in LLL_cmbf() [ rare oo loop in factor() over Z[X] ]
 IS 33- [HPUX:] should compile with cc -Ae, not -Aa
    34- excessive memory usage in bnrstark() [ InitPrimes ]
    35- bessel[jk](t_SER) not implemented around a!=0, but gave (bogus) results
@@ -1340,7 +1341,7 @@ BA 60- add "const" keyword to allow building with g++
    71- bnrconductorofchar(0,0)--> SEGV [bad input]
    72- qfjacobi( non-square matrix )  --> SEGV [bad input]
    73- matmultodiagonal([;],matrix(0,1)); --> SEGV [bad input]
-   74- [GP, trap:] prevent infinite recursion if default exception handler
+   74- [GP, trap:] prevent oo recursion if default exception handler
        itself raises an exception
    75- allow qfbred(,2) [don't update Shanks's distance] also for definite
        forms [ignore flag].
@@ -1445,7 +1446,7 @@ BA  4- [Configure:] --builddir flag
 IZ  5- File README.os2
     6- Allow nfroots(, P) [ roots in Q ]
     7- routines Strexpand(), Strtex()
-IZ  8- detect infinite recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
+IZ  8- detect oo recursion on OS/2 [as on Unix systems] (cf STACK_CHECK)
 RS  9- routine numbpart()
 BA 10- GMP kernel
 BA 11- --kernel Configure option
@@ -1662,7 +1663,7 @@ BA 50- compilation problem on OSF (RTLD_GLOBAL undefined)
 BA 51- [X-Windows] hi-res plot: window not redrawn properly (BackingStore pb)
    52- problems with tex2mail output (wrong alignment, wrong colors)
    53- contfrac(sin(Pi/4),,2) --> impossible assignment
-   54- infinite recursion in gaffect(t_POL, scalar)
+   54- oo recursion in gaffect(t_POL, scalar)
    55- content([-1]) was -1 [ should be 1 ]
    56- stack corruption in u_FpV_polint (used by modular bivariate resultant)
    57- polroots() used too high a precision when checking errors a posteriori
@@ -2023,7 +2024,7 @@ BA 47- incorrect quoting in src/make_vi_tags (make ctags)
 MD 54- real(1 / (a+quadgen(...)*b)) was a / (a^2 + b^2)  [assumed quadgen(-4) !]
    55- wrong HNF (reduction not finished) when nblines >> nbcol [hnf(,0) only]
    56- rare problem in isprincipal (large non Galois base field)--> wrong
-       result (generators not required) or infinite loop.
+       result (generators not required) or oo loop.
    57- compatibility problems with readline-4.2 (build would fail)
 BA 58- pari format %Z (pariputsf) treated incorrectly on 64bit machines
 XR 59- typo in smallvectors (polredabs): possible oo loop
@@ -2311,7 +2312,7 @@ DE  7- typo in kernel/sparcv7/level0.S: err --> pari_err
       Ex: x;n;k;m; (n+m)==(k+1-k)*(n+m) was false.
    10- sumdiv(N,...) required single precision N
 BA 11- bound problems in nfgaloisconj()
-   12- infinite loop in do_agm()
+   12- oo loop in do_agm()
    13- "Warning: in Gauss lg(a)=1..." from isprincipalall0
    14- specific error for precision problems with p-adic ell. curves
 IZ 15- ploth() plots are 1/2-pixel off
@@ -2342,7 +2343,7 @@ XR 37- precision fixes in stark.c (inconsistencies 32/64 bit + early abort)
    38- bug in P*Q for polynomials over (non prime) finite fields if Q is
        defined over the prime field
 XR 39- [stark.c]: bugs in RecCoeff3, reduced memory use in ComputeArtinNumber
-   40- core dump on infinite recursion under GP
+   40- core dump on oo recursion under GP
    41- use appropriate precision in torselldoud (could be much too large)
    42- removeprimes(addprimes) didn't work
    43- (at least part of) numerical instability of LLL over R
@@ -2350,7 +2351,7 @@ XR 39- [stark.c]: bugs in RecCoeff3, reduced memory use in ComputeArtinNumber
 XR 45- inefficiencies in ComputeArtinNumber for large modulus
 HC 46- no GC in dirmul
    47- meaningless heap count for user functions
-   48- setrand(16);quadclassunit(48893) --> infinite loop
+   48- setrand(16);quadclassunit(48893) --> oo loop
    49- rnfpolred(bnfinit(y^2+1),x) --> SEGV
    50- float overflow in polroots (e.g polroots(x^3 + 2^1024*x + 1))
    51- charpoly(Mod(1,x^2+1)) --> SEGV
@@ -2570,7 +2571,7 @@ IS 11- obscure inlining bug (pgcc 1.1.3 -O3) in stark.c:ComputeKernel0()
    14- [1]~ * [[1]] --> SEGV
    15- lim=(av+ x * bot) >> y can overflow if large addresses are available
        (e.g Linux...). Use lim_stack() instead
-   16- algdep(I,1), lindep([I,1]) entered an infinite loop
+   16- algdep(I,1), lindep([I,1]) entered an oo loop
    17- removed the maxHastad (= 50) limit in algdep/lindep
    18- typo in polrootspadic(,,1) --> SEGV
    19- GC not frequent enough in idealval
@@ -2718,7 +2719,7 @@ OR 43- many problems in the emacs interface pari.el (introduced in 2.0.14)
    46- under readline, input lines of length > 2048 could trigger SEGV
    47- more thorough check in checkbid (accepted prime ideals->SEGV)
 GH 48- possible stack corruption in thueinit(totally real field)
-XR 49- various problems in bnrstark (infinite loop in fincke_pohst)
+XR 49- various problems in bnrstark (oo loop in fincke_pohst)
    50- in doc/Makefile: removed GNU-style make macros + put a missing TAB
    51- sloppy garbage collecting in hnfperm
    52- HPUX+cc: work around a compiler bug (wr_float)
@@ -2740,7 +2741,7 @@ GN 60- lllintpartial did not output the right matrix
    66- polrootsmod(x^6-10,25) --> SEGV (now error message)
    67- SEGV when renormalizing zero series in gdiv
 XR 68- unify precision choice in bnrstark (4 different formulae used...)
-GN 69- infinite loop in mpqs (64bits machines + harsh compiler) when more
+GN 69- oo loop in mpqs (64bits machines + harsh compiler) when more
        factors were found than were hoped for (1 <--> 1L)
 GN 70- SIGFPE in buchall (double didn't fit in 32-bit integer)
    71- also check sign in real0 (internal: called by gauss_pivot)
@@ -2857,7 +2858,7 @@ DE 32- many glitches in manual
    43- heap leak when using local()
    44- overflow in addssmod
    45- changed the syntax of round()
-   46- sqrt(1. + O(x)) --> infinite recursion
+   46- sqrt(1. + O(x)) --> oo recursion
 IZ 47- don't create GP variables when expanding strings
    48- internal variable 'parisize' not properly updated after allocatemem()
 IS 49- config/display didn't work properly with ActivePerl
@@ -3172,7 +3173,7 @@ GN 19- ispseudoprime(negative integer)
    22- compiles properly under DOS + EMX
 GN 23- Warnings from C++ compiler (include unistd.h and sys/ioctl.h where
        needed)
-   24- znprimroot(0) --> infinite loop
+   24- znprimroot(0) --> oo loop
 GN 25- various fixes in mpqs
 GN 26- add safety parentheses to macros in paricom.h
    27- polroots needed too much precision (two extra words)
@@ -3271,7 +3272,7 @@ Done for version 2.0.9 alpha (released 16/06/98):
    17- introduced in 2.0.8 (Added 3-): aliases/user function + <TAB> ==> SEGV
 GN 18- (t_RFRAC) ^ t_INT took an unreasonable amount of time
    19- prevent quick succession of ^C from corrupting memory in recover()
-   20- hyperu could enter an infinite loop due to round-off errors
+   20- hyperu could enter an oo loop due to round-off errors
 XR 21- matadjoint(Mat(n)) returned Mat(n), not Mat(1)
    22- matadjoint([;]) returned [[;]] (???)
    22- wrap some long error messages
@@ -3347,12 +3348,12 @@ GN  5- precprime sometimes missed a prime
     7- powering of zero series
     8- factorization of null matrices (SEGV)
     9- mateigen for non-diagonalizable matrices (SEGV)
-GN 10- infinite loops in some arithmetical functions when arg = big prime
+GN 10- oo loops in some arithmetical functions when arg = big prime
 GN 11- cleaned up paridecl.h
    12- gimag/greal for type t_RFRAC/t_RFRACN (fix: Terje Sparre Olsen)
 GN 13- ordinal numbers to number components seen through \x
 HC 14- lllgram: incorrect gabage collecting in first "warnmem"
-   15- theta(q exact, z) entered infinite loop
+   15- theta(q exact, z) entered oo loop
    16- typo in gdiventres (x<-->y in last line)
 MS 17- gtrunc for p-adics when valp(x) < 0
 MS 18- polresultant(u+v,u-v,v) => x + u;  polresultant(u+v,u-v) => 2*u
@@ -3430,9 +3431,9 @@ BH 24- changed kernel/ix86/level0asm.c (FUNBEGIN/FUNEND + ALIGN)
        setting "x" to some value is now safe
 IZ 31- nicer looking plot() function
    32- warnings while building for m68k arch
-   33- sqrt(Mod(1,2)) went into an infinite loop
+   33- sqrt(Mod(1,2)) went into an oo loop
    34- ?? did not resolve aliases
-   35- besselk near integers entered an infinite loop
+   35- besselk near integers entered an oo loop
    36- p-adic sqrt (bad valp)
    37- hnfmodid could output wrong results (wrong diagonal) and wreck the
        powering of prime ideals

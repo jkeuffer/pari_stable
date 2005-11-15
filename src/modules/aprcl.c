@@ -937,6 +937,7 @@ aprcl(GEN N)
       case 2: case 3: case 5: case 7: case 11: return gen_1;
       default: return _res(0,0);
     }
+  if (carreparfait(N)) return _res(0,0);
   t = compt(N);
   if (DEBUGLEVEL) fprintferr("Choosing t = %ld\n",t);
   et = e(t, &globfa);
