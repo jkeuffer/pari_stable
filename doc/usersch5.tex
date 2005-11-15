@@ -2871,6 +2871,10 @@ to \kbd{n} components.
 \fun{GEN}{vecsmall_lengthen}{GEN v, long n} lengthens the \typ{VECSMALL}
 \kbd{v} to \kbd{n} components. The extra components are not initialised.
 
+\fun{GEN}{vecsmall_indexsort}{GEN x} performs an indirect sort of the
+components of the \typ{VECSMALL} \kbd{x} and return a permutation stored in a
+\typ{VECSMALL}.
+
 \fun{void}{vecsmall_sort}{GEN v} sorts the \typ{VECSMALL} \kbd{v} in place.
 
 \fun{GEN}{vecsmall_uniq}{GEN v} given a sorted \typ{VECSMALL} \kbd{v}, return
