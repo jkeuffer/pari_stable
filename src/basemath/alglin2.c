@@ -239,6 +239,44 @@ adj(GEN x)
 
 /*******************************************************************/
 /*                                                                 */
+/*                       MINIMAL POLYNOMIAL                        */
+/*                                                                 */
+/*******************************************************************/
+
+static GEN 
+easymin(GEN x, long v)
+{
+  pari_sp ltop=avma;
+  GEN G, R, dR;
+  if (typ(x)==t_POLMOD && !issquarefree(gel(x,1)))
+    return NULL;
+  R=easychar(x, v, NULL);
+  if (!R) return R;
+  dR=derivpol(R);
+  if (!lgpol(dR)) {avma=ltop; return NULL;}
+  G=srgcd(R,dR);
+  G=gdiv(G,leading_term(G));
+  G=gdeuc(R,G);
+  return gerepileupto(ltop,G);
+}
+
+GEN
+minpoly(GEN x, long v)
+{
+  pari_sp ltop=avma;
+  GEN P;
+  if (v<0) v = 0;
+  P=easymin(x,v);
+  if (P) return P;
+  if (typ(x)==t_POLMOD)
+    return RgXQ_minpoly_naive(gel(x,2),gel(x,1));
+  if (typ(x)==t_MAT)
+    return gerepilecopy(ltop,gel(matfrobenius(x,1),1));
+  err(typeer,"minpoly"); return NULL; /* not reached */
+}
+
+/*******************************************************************/
+/*                                                                 */
 /*                       HESSENBERG FORM                           */
 /*                                                                 */
 /*******************************************************************/

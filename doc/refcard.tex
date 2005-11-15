@@ -17,8 +17,8 @@
 %% which I modified from his GNU emacs reference card
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\TITLE{Pari/GP reference card}
-\def\versionnumber{2.19}% Version of this reference card
-\def\PARIversion{2.2.11}% Version of PARI described on this reference card
+\def\versionnumber{2.20}% Version of this reference card
+\def\PARIversion{2.2.12}% Version of PARI described on this reference card
 \def\year{2005}
 \def\month{October}
 
@@ -506,12 +506,13 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{adjoint of the matrix $x$}{matadjoint$(x)$}
 \li{eigenvectors of matrix $x$}{mateigen$(x)$}
 \li{characteristic polynomial of $x$}{charpoly$(x,\{v\},\fl)$}
+\li{minimal polynomial of $x$}{minpoly$(x,\{v\})$}
 \li{trace of matrix $x$}{trace$(x)$}
 %
 \subsec{Constructors \& Special Matrices}
-\li{row vec.\ of \expr\ eval'ed at $1\le X\le n$}{vector$(n,\{X\},\{\expr\})$}
-\li{col.\ vec.\ of \expr\ eval'ed at $1\le X\le n$}{vectorv$(n,\{X\},\{\expr\})$}
-\li{matrix $1\le X\le m$, $1\le Y\le n$}{matrix$(m,n,\{X\},\{Y\},\{\expr\})$}
+\li{row vec.\ of \expr\ eval'ed at $1\le i\le n$}{vector$(n,\{i\},\{\expr\})$}
+\li{col.\ vec.\ of \expr\ eval'ed at $1\le i\le n$}{vectorv$(n,\{i\},\{\expr\})$}
+\li{matrix $1\le i\le m$, $1\le j\le n$}{matrix$(m,n,\{i\},\{j\},\{\expr\})$}
 \li{diagonal matrix whose diag. is $x$}{matdiagonal$(x)$}
 \li{$n\times n$ identity matrix}{matid$(n)$}
 \li{Hessenberg form of square matrix $x$}{mathess$(x)$}
@@ -559,7 +560,6 @@ $x$\%$y${\rm,} divrem$(x,y)$}
 \li{Dirichlet series multiplication / division}{dirmul{\rm,} dirdiv$(x,y)$}
 \li{Dirichlet Euler product ($b$ terms)}{direuler$(p\,$=$\;a,b,\expr)$}
 \subsec{$p$-adic Functions}
-\li{square of $x$, good for $2$-adics}{sqr$(x)$}
 \li{Teichmuller character of $x$}{teichmuller$(x)$}
 \li{Newton polygon of $f$ for prime $p$}{newtonpoly$(f,p)$}
 

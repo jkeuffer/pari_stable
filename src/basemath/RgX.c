@@ -929,3 +929,40 @@ RgXQ_u_pow(GEN x, ulong n, GEN T)
   y = leftright_pow_u(x, n, (void*)T, &_sqr, &_mul);
   return gerepileupto(av, y);
 }
+
+/* generates the list of powers of x of degree 0,1,2,...,l*/
+GEN
+RgXQ_powers(GEN x, long l, GEN T)
+{
+  GEN V=cgetg(l+2,t_VEC);
+  long i;
+  gel(V,1) = polun[varn(T)]; if (l==0) return V;
+  gel(V,2) = gcopy(x);       if (l==1) return V;
+  gel(V,3) = RgXQ_sqr(x,T);
+  if ((degpol(x)<<1) < degpol(T)) {
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = RgXQ_mul(gel(V,i-1),x,T);
+  } else { /* use squarings if degree(x) is large */
+    for(i = 4; i < l+2; i++)
+      gel(V,i) = (i&1)? RgXQ_sqr(gel(V, (i+1)>>1),T)
+                      : RgXQ_mul(gel(V, i-1),x,T);
+  }
+  return V;
+}
+
+GEN
+RgXQ_matrix_pow(GEN y, long n, long m, GEN P)
+{
+  return RgXV_to_RgM(RgXQ_powers(y,m-1,P),n);
+}
+
+GEN
+RgXQ_minpoly_naive(GEN y, GEN P)
+{
+  pari_sp ltop=avma;
+  long n=lgpol(P);
+  GEN M=ker(RgXQ_matrix_pow(y,n,n,P));
+  M=content(RgM_to_RgXV(M,varn(P)));
+  return gerepileupto(ltop,M);
+}
+

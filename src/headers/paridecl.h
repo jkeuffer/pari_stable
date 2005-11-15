@@ -225,6 +225,7 @@ GEN     matrixqz(GEN x, GEN pp);
 GEN     matrixqz0(GEN x, GEN pp);
 GEN     matrixqz2(GEN x);
 GEN     matrixqz3(GEN x);
+GEN     minpoly(GEN x, long v);
 GEN     signat(GEN a);
 GEN     smith(GEN x);
 GEN     smith2(GEN x);

@@ -245,6 +245,8 @@ GEN  ZY_ZXY_resultant(GEN A, GEN B0, long *lambda);
 GEN  RgXQ_u_pow(GEN x, ulong n, GEN T);
 GEN  RgX_gcd_simple(GEN x, GEN y);
 GEN  RgX_extgcd_simple(GEN a, GEN b, GEN *pu, GEN *pv);
+GEN  RgXQ_minpoly_naive(GEN y, GEN P);
+
 
 /* b') Chinese Remainder Theorem */
 GEN ZM_init_CRT(GEN Hp, ulong p);
