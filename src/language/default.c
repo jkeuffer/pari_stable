@@ -272,7 +272,8 @@ sd_realprecision(const char *v, long flag)
   if (*v)
   {
     ulong newnb = fmt->sigd;
-    sd_ulong_init(v, "realprecision", &newnb, 1,LGBITS);
+    sd_ulong_init(v, "realprecision", &newnb, 1,
+                  (ulong)bit_accuracy_mul(LGBITS, L2SL10));
     if (fmt->sigd == (long)newnb) return gnil;
     fmt->sigd = newnb;
     prec = (ulong)ndec2prec(newnb);
