@@ -494,6 +494,7 @@ powps(GEN x, long n)
   if (v == 0) mod = icopy(mod);
   else
   {
+    if (precp(x) == 1 && equaliu(p, 2)) v++;
     mod = mulii(mod, powiu(p,v));
     mod = gerepileuptoint((pari_sp)y, mod);
   }

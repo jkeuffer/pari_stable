@@ -69,6 +69,7 @@ BA 10- [Linux] gp only accepts one SIGINT in batch mode [#251, #370]
    13- isprime(N,2): oo loop if N is a perfect square
    14- \p n was limited to a value ~ 10 times smaller than the actual limit
 BA 15- qfbsolve fix 2.2.11-F86 was not sufficient.
+   16- (1 + O(2))^2 was less precise than sqr(1+O(2))
 
   Changed
     1- speed up prime() by using checkpoints.
