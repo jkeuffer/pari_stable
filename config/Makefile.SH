@@ -4,14 +4,14 @@ echo Extracting $file
 rm -f $file
 
 # Path to directories
-case "$config_dir" in /*) cfg=$config_dir ;; *) cfg=../$config_dir ;; esac
-case "$data_dir"   in /*) data=$data_dir ;;  *) data=../$data_dir ;; esac
-case "$doc_dir"    in /*) doc=$doc_dir ;;    *) doc=../$doc_dir ;; esac
-case "$desc_dir"   in /*) desc=$desc_dir ;;  *) desc=../$desc_dir ;; esac
-case "$emacs_dir"  in /*) emx=$emacs_dir ;;  *) emx=../$emacs_dir ;; esac
-case "$examples_dir" in /*) ex=$examples_dir ;; *) ex=../$examples_dir ;; esac
-case "$misc_dir"   in /*) misc=$misc_dir ;;  *) misc=../$misc_dir ;; esac
-case "$src_dir"    in /*) src=$src_dir ;;    *) src=../$src_dir ;; esac
+cfg=../$config_dir 
+data=../$data_dir 
+doc=../$doc_dir 
+desc=../$desc_dir 
+emx=../$emacs_dir 
+ex=../$examples_dir 
+misc=../$misc_dir 
+src=../$src_dir 
 
 #
 # File lists
@@ -151,6 +151,7 @@ cat > $file << EOT
 #  lost when Configure is run.
 #
 SHELL      = $make_sh
+PERL       = perl
 
 AS         = $AS
 ASFLAGS    = $ASFLAGS
@@ -250,7 +251,11 @@ CPLUSPLUS  = g++
 
 FLTKDIR    = $FLTKDIR
 
-TOPLDDYN     = -L$TOP/$objdir \$(RLLIBS)
+TOPLDDYN   = -L$TOP/$objdir \$(RLLIBS)
+# Description system
+DESC          = pari.desc
+DESC_HELP_GEN = $desc/gen_proto $desc/gen_help $desc/PARI/822.pm
+TMPSUF        = -$osname-$arch-$$.tmp
 
 DOTEST=$dotest
 
@@ -334,8 +339,10 @@ cleantest:
 	\$(RM) *.dif gp.out pari.ps
 cleanobj:
 	-\$(RM) *\$(_O) mp.c *.s pariinl.h parilvl0.h parilvl1.h libpari* tune* $exec
+cleandesc:
+	-\$(RM) $desc/\$(DESC) *\$(TMPSUF)
 
-clean: cleanobj cleantest cleanemacs
+clean: cleanobj cleantest cleanemacs cleandesc
 
 .headers: $HEADERS
 	@touch \$@
@@ -391,7 +398,6 @@ install-misc: $install_emacs_files
 
 install-cfg::
 	-mkdir -p \$(SYSDATADIR) \$(DATADIR)/PARI
-	\$(INSTALL_DATA) $desc/pari.desc   \$(DATADIR)
 	\$(INSTALL_DATA) $desc/PARI/822.pm \$(DATADIR)/PARI
 	\$(INSTALL_DATA) pari.cfg  \$(SYSDATADIR)
 
@@ -524,14 +530,38 @@ fi
 cat >> $file << EOT
 pariinl.h: parilvl0.h parilvl1.h
 	cat parilvl0.h parilvl1.h > pariinl.h
+EOT
+
+if test -n "$add_funclist"; then
+  cat >> $file << EOT
+desc:: $src/language/init.h $src/gp/gp_init.h $src/gp/highlvl.h $src/language/members.h
 
 $src/funclist::
-	@-cksum \`env LANG= ls -d $src/functions/*/* | grep -v CVS\` > $src/funclist.tmp
-	@-sh $cfg/mv-if-diff $src/funclist.tmp $src/funclist
-	@cd $desc && \$(MAKE)
+	@-cksum \`env LANG= ls -d $src/functions/*/* | grep -v CVS\` > funclist\$(TMPSUF)
+	@-sh $cfg/mv-if-diff funclist\$(TMPSUF) $src/funclist
 
-$src/gp/gp_init.h $src/gp/highlvl.h $src/language/init.h $src/language/members.h: $add_funclist
+$desc/\$(DESC): $src/funclist $desc/merge_822 $desc/PARI/822.pm
+	cd $desc && \$(PERL) merge_822 ../functions/*/* > def\$(TMPSUF)
+	mv $desc/def\$(TMPSUF) \$@
+
+$src/language/members.h: $desc/\$(DESC) $desc/gen_member
+	cd $desc && \$(PERL) gen_member \$(DESC) > members\$(TMPSUF)
+	mv $desc/members\$(TMPSUF) \$@
+
+$src/language/init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
+	cd $desc && \$(PERL) gen_proto basic \$(DESC) > init\$(TMPSUF) && \$(PERL) gen_help basic \$(DESC) >> init\$(TMPSUF)
+	mv $desc/init\$(TMPSUF) \$@
+
+$src/gp/gp_init.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
+	cd $desc && \$(PERL) gen_proto gp \$(DESC) > gp_init\$(TMPSUF) && \$(PERL) gen_help gp \$(DESC) >> gp_init\$(TMPSUF)
+	mv $desc/gp_init\$(TMPSUF) \$@
+
+$src/gp/highlvl.h: $desc/\$(DESC) \$(DESC_HELP_GEN)
+	cd $desc && \$(PERL) gen_proto highlevel \$(DESC) > highlvl\$(TMPSUF) && \$(PERL) gen_help  highlevel \$(DESC) >> highlvl\$(TMPSUF)
+	mv $desc/highlvl\$(TMPSUF) \$@
+
 EOT
+fi
 
 if test -s $src_dir/kernel/$kernlvl0/MakeLVL0.SH; then
   . $src_dir/kernel/$kernlvl0/MakeLVL0.SH

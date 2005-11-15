@@ -89,6 +89,7 @@ VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
     2- has_sigrelse.c & has_sigsetmask.c [ deprecated, unused after C-10 ]
+    3- src/desc/Makefile
 
   Added
     1- new library function ellisoncurve()
