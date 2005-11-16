@@ -397,9 +397,12 @@ install-misc: $install_emacs_files
 	\$(INSTALL_PROGRAM) $misc/xgp    \$(MISCDIR)
 
 install-cfg::
-	-mkdir -p \$(SYSDATADIR) \$(DATADIR)/PARI
-	\$(INSTALL_DATA) $desc/PARI/822.pm \$(DATADIR)/PARI
-	\$(INSTALL_DATA) pari.cfg  \$(SYSDATADIR)
+	-mkdir -p \$(SYSDATADIR)
+	-\$(INSTALL_DATA) pari.cfg \$(SYSDATADIR)
+	-if test -n "$add_funclist"; then\
+	   mkdir -p \$(DATADIR)/PARI;\
+	   \$(INSTALL_DATA) $desc/PARI/822.pm \$(DATADIR)/PARI;\
+	   \$(INSTALL_DATA) $desc/\$(DESC) \$(DATADIR); fi
 
 install-doc::
 	-mkdir -p \$(BINDIR) \$(DOCDIR)
