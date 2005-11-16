@@ -9,6 +9,7 @@ test_extra="\
   ellglobalred\
   galois\
   intnum\
+  qfbsolve\
   round4\
   stark\
 "
