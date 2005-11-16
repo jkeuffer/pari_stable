@@ -29,7 +29,7 @@ hit_return(void)
   if (GP_DATA->flags & (EMACS|TEXMACS)) return;
   pariputs("---- (type RETURN to continue) ----");
   /* if called from a readline callback, may be in a funny TTY mode,  */
-  do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r' && c != ' ');
+  do c = fgetc(stdin); while (c >= 0 && c != '\n' && c != '\r');
   pariputc('\n');
 }
 
