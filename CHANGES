@@ -90,6 +90,12 @@ VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
        release SIGINT ]: useless nowadays, and used deprecated functions.
    11- export combine_factors [ needed by giac ]
    12- do not alias labs to abs in paricom.h
+   13- randomize polredabs() to improve bound on difficult fields, e.g.
+       f(k) = {
+         p = polcompositum(x^6-3*k^3,x^6-3*k^3)[4];
+         polredabs(poltschirnhaus(poltschirnhaus(p)),16)
+       }
+       for k = 2, 5, 6, 8, ...
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

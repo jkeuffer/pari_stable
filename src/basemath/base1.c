@@ -1812,9 +1812,9 @@ static GEN
 chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
 {
   CG_data *d = (CG_data*)chk->data;
-  GEN V, S, inv, bound, M;
+  GEN P, V, S, inv, bound, M;
   long N = lg(U)-1, r1 = d->r1, r2 = (N-r1)>>1;
-  long i, prec, firstprim = 0, skipfirst = 0;
+  long i, j, prec, firstprim = 0, skipfirst = 0;
   pari_sp av;
 
   d->u = U;
@@ -1824,10 +1824,11 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
   S = cgetg(N+1, t_VECSMALL);
   for (i = 1; i <= N; i++)
   {
-    GEN P = get_polmin_w(d, i), B = T2_from_embed(gel(d->ZKembed,i), r1);
+    P = get_polmin_w(d, i);
     S[i] = degpol(P);
     if (S[i] == N)
     { /* primitive element */
+      GEN B = T2_from_embed(gel(d->ZKembed,i), r1);
       if (gcmp(B,bound) < 0) bound = B ;
       if (!firstprim) firstprim = i; /* index of first primitive element */
       if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Z\n",P);
@@ -1839,7 +1840,7 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
       { /* cycle basis vectors so that primitive elements come last */
         GEN u = d->u, e = d->ZKembed;
         GEN te = gel(e,i), tu = gel(u,i), tR = gel(R,i);
-        long j, tS = S[i];
+        long tS = S[i];
         for (j = i; j > firstprim; j--)
         {
           u[j] = u[j-1];
@@ -1852,6 +1853,22 @@ chk_gen_init(FP_chk_fun *chk, GEN R, GEN U)
         gel(R,firstprim) = tR;
         S[firstprim] = tS; firstprim++;
       }
+    }
+  }
+  if (!firstprim)
+  { /* try (a little) to find primitive elements to improve bound */
+    GEN x = cgetg(N+1, t_COL), e, B;
+    if (DEBUGLEVEL>1)
+      fprintferr("chk_gen_init: difficult field, trying random elements\n");
+    for (i = 0; i < 10; i++)
+    {
+      for (j = 1; j <= N; j++) gel(x,j) = stoi( (pari_rand31() % 7) - 3 );
+      e = gmul(d->ZKembed, x);
+      P = get_pol(d, e);
+      if (!ZX_is_squarefree(P)) continue;
+      if (DEBUGLEVEL>2) fprintferr("chk_gen_init: generator %Z\n",P);
+      B = T2_from_embed(e, r1);
+      if (gcmp(B,bound) < 0) bound = B ;
     }
   }
 
