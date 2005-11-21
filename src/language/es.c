@@ -3587,6 +3587,23 @@ pari_tmp_dir(void)
   return ".";
 }
 
+/* loop through 26^2 variants [suffix 'aa' to 'zz'] */
+static int
+get_file(char *buf)
+{
+  char c, d, *end = buf + strlen(buf) - 1;
+  for (d = 'a'; d <= 'z'; d++)
+  {
+    end[-1] = d;
+    for (c = 'a'; c <= 'z'; c++)
+    {
+      *end = c;
+      if (! pari_file_exists(buf)) return 1;
+    }
+  }
+  return 0;
+}
+
 /* Return a "unique filename" built from the string s, possibly the user id
  * and the process pid (on Unix systems). A "temporary" directory name is
  * prepended. The name returned is stored in a static buffer (gpmalloc'ed
@@ -3628,16 +3645,7 @@ pari_unique_filename(char *s)
     pre = buf + lpre; if (!s) return s;
   }
   sprintf(pre, "%.8s%s", s, post);
-  if (pari_file_exists(buf))
-  {
-    char c, *end = buf + strlen(buf) - 1;
-    for (c='a'; c<='z'; c++)
-    {
-      *end = c;
-      if (! pari_file_exists(buf)) break;
-    }
-    if (c > 'z')
-      err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
-  }
+  if (pari_file_exists(buf) && !get_file(buf))
+    err(talker,"couldn't find a suitable name for a tempfile (%s)",s);
   return buf;
 }
