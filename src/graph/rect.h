@@ -13,6 +13,8 @@ Check the License for details. You should have received a copy of it, along
 with the package; see the file 'COPYING'. If not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
+BEGINEXTERN
+
 #define PLOT_NAME_LEN 20
 #define NUMRECT 18
 
@@ -308,3 +310,5 @@ void gen_rectdraw0(struct plot_eng *eng, void *data, long *w, long *x, long *y, 
 /* architecture-dependent plot file (plotX.c ...) */
 void  PARI_get_plot(long fatal);
 void  rectdraw0(long *w, long *x, long *y, long lw);
+
+ENDEXTERN
