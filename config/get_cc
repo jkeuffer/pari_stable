@@ -116,7 +116,7 @@ if test -n "$__gnuc__"; then
       esac
     ;;
   esac
-  OPTFLAGS="$OPTFLAGS -DGCC_INLINE $warn -fno-strict-aliasing"
+  OPTFLAGS="$OPTFLAGS $warn -fno-strict-aliasing"
   DBGFLAGS=${DBGFLAGS:-"-g $warn"}
   # Specific optimisations for some architectures
   case "$arch" in

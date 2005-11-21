@@ -35,21 +35,26 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #  define ANYARG ...
 #  define BEGINEXTERN extern "C" {
 #  define ENDEXTERN }
-#  define INLINE inline
-#  ifdef __GNUC__
-#    define VOLATILE volatile
-#  endif
 #else
 #  define ANYARG
 #  define BEGINEXTERN
 #  define ENDEXTERN
-#  ifdef __GNUC__
-#    define VOLATILE __volatile__
-#    ifdef GCC_INLINE
-#      define INLINE __inline__ static
-#    endif
+#endif
+
+#ifndef DISABLE_INLINE
+#  ifdef __cplusplus
+#    define INLINE inline
+#  elif defined(__GNUC__)
+#    define INLINE __inline__ static
 #  endif
 #endif
+
+#ifndef DISABLE_VOLATILE
+#  ifdef __GNUC__
+#    define VOLATILE volatile
+#  endif
+#endif
+
 #ifndef VOLATILE
 #  define VOLATILE
 #endif
