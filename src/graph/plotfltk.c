@@ -172,7 +172,7 @@ int Plotter::handle(int event)
 }
 
 //
-// Implementation of the four architecture-dependent functions
+// Implementation of the two architecture-dependent functions
 // (from rect.h) requested by pari's plotting routines
 //
 
