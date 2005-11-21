@@ -168,6 +168,7 @@ GEN    utor(ulong s, long prec);
 long   vali(GEN x);
 GEN    zerocol(long n);
 GEN    zeromat(long m, long n);
+GEN    zeromatcopy(long m, long n);
 GEN    zeropadic(GEN p, long e);
 GEN    zeropol(long v);
 GEN    zeroser(long v, long e);
@@ -371,6 +372,14 @@ zeromat(long m, long n)
   GEN y = cgetg(n+1,t_MAT);
   GEN v = zerocol(m);
   long i; for (i=1; i<=n; i++) gel(y,i) = v;
+  return y;
+}
+/* matrix(m, n) */
+INLINE GEN
+zeromatcopy(long m, long n)
+{
+  GEN y = cgetg(n+1,t_MAT);
+  long i; for (i=1; i<=n; i++) gel(y,i) = zerocol(m);
   return y;
 }
 /* i-th vector in the standard basis */

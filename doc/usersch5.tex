@@ -2389,7 +2389,14 @@ set to \kbd{gen\_0}, but the \kbd{i}-th one which us set to \kbd{gen\_1}
 (\kbd{i}-th vector in the canonical basis).
 
 \fun{GEN}{zeromat}{long m, long n} creates a \typ{MAT} with \kbd{m} x \kbd{n}
-components set to \kbd{gen\_0}.
+components set to \kbd{gen\_0}. Note that the result allocates a
+\emph{single} column, so modifying an entry in one column modifies it in
+all columns. To fully allocate a matrix initialized with zero entries,
+use \kbd{zeromatcopy}.
+
+\fun{GEN}{zeromatcopy}{long m, long n} creates a \typ{MAT} with \kbd{m} x
+\kbd{n} components set to \kbd{gen\_0}. Note that 
+
 \smallskip
 See also next section for analogs of the following functions:
 
