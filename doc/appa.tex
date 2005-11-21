@@ -80,11 +80,67 @@ architecture and operating system, thus you can build GP for several
 different machines from the same source tree (the builds are
 independent and can be done simultaneously).
 
-\misctitle{Technical note:} The precise default destinations are as follows:
-the \kbd{gp} binary, the scripts \kbd{gphelp} and \kbd{tex2mail} go to
-\kbd{\$prefix/bin}. The pari library goes to \kbd{\$prefix/lib} and include
-files to \kbd{\$prefix/include/pari}. Other system-dependant data go to
-\kbd{\$prefix/lib/pari}.
+\misctitle{Technical note:} \kbd{Configure} accepts many other flags
+besides \kbd{--prefix}. See \kbd{Configure --help} for a complete list. In
+particular, there are sets of flags related to GNU MP (\kbd{--with-gmp*}) and
+GNU readline library (\kbd{--with-readline*}). Note that autodetection of GMP
+is \emph{disabled} by default, you probably want to enable it.
+
+Decide whether you agree with what \kbd{Configure} printed on your screen, in
+particular the architecture, compiler and optimization flags. Look for
+messages prepended by \kbd{\#\#\#}, which report genuine problems. If
+anything should have been found and was not, consider that \kbd{Configure}
+failed and follow the instructions in the next section. Look especially for
+the \kbd{gmp}, \kbd{readline} and \kbd{X11} libraries, and the \kbd{perl} and
+\kbd{gunzip} (or \kbd{zcat}) binaries.
+
+\subsec{Compilation:} To compile the GP binary and build the
+documentation, type
+
+\kbd{make all}
+
+\noindent To only compile the GP binary, type
+
+\kbd{make gp}
+
+\noindent in the toplevel directory. If your \kbd{make} program supports
+parallel make, you can speed up the process by going to the \kbd{O$xxx$}
+directory that \kbd{Configure} created and doing a parallel make here, for
+instance \kbd{make -j4} with GNU make. It should even work from the toplevel
+directory.
+
+\subsec{Basic tests:}
+
+To test the binary, type \kbd{make bench}. This will build a static
+executable (the default, built by \kbd{make gp} is probably dynamic) and
+run a series of comparative tests on those two. To test only the default
+binary, use \kbd{make dobench} which starts the bench immediately.
+
+The static binary should be slightly faster. In any case, this should not
+take more than a few seconds (user time) on modern machines. See the file
+\kbd{MACHINES} to get an idea of how much time comparable systems need.
+We would appreciate a short note in the same format in case your system is
+not listed and you nevertheless have a working GP executable.
+
+If a \kbd{[BUG]} message shows up, something went wrong. Probably with the
+installation procedure, but it may be a bug in the Pari system, in which
+case we would appreciate a report (see the last section)
+
+\section{Troubleshooting and fine tuning:} 
+In case the default \kbd{Configure} run fails miserably, try
+
+\kbd{./Configure -a}
+
+\noindent (interactive mode) and answer all the questions (there are not that
+many). Of course, \kbd{Configure} still provides defaults for each answer
+but if you accept them all, it will fail just the same, so be wary. In any
+case, we would appreciate a bug report (see the last section).
+
+\subsec{Installation directories:} The precise default destinations are as
+follows: the \kbd{gp} binary, the scripts \kbd{gphelp} and \kbd{tex2mail} go
+to \kbd{\$prefix/bin}. The pari library goes to \kbd{\$prefix/lib} and
+include files to \kbd{\$prefix/include/pari}. Other system-dependant data go
+to \kbd{\$prefix/lib/pari}.
 
 Architecture independent files go to various subdirectories of
 \kbd{\$share\_prefix}, which defaults to \kbd{\$prefix/share}, and can be
@@ -100,7 +156,7 @@ sample GP scripts and C code, extra packages like \kbd{elldata} or
 (manual pages), \kbd{--datadir} (other architecture-independent data), and
 finally \kbd{--sysdatadir} (other architecture-dependent data).
 
-\misctitle{Technical note 2:} \kbd{Configure} lets the following environment
+\subsec{Environment variables:} \kbd{Configure} lets the following environment
 variable override the defaults if set:
 
 \kbd{AS}: Assembler.
@@ -110,21 +166,6 @@ variable override the defaults if set:
 \kbd{DLLD}: Dynamic library linker.
 
 \kbd{LD}: Static linker.
-
-\noindent The contents of the following variables are \emph{appended} to the
-values computed by \kbd{Configure}:
-
-\kbd{CFLAGS}: Flags for \kbd{CC}.
-
-\kbd{CPPFLAGS}: Flags for \kbd{CC} (preprocessor).
-
-\kbd{LDFLAGS}: Flags for \kbd{LD}.
-
-\kbd{C\_INCLUDE\_PATH} is \emph{prepended} to the list of directories
-searched for include files. Note that adding \kbd{-I} flags 
-\kbd{CFLAGS} will \emph{not} be enough since \kbd{Configure} sometimes
-relies on find the include files and parsing them, and it does not 
-parse \kbd{CFLAGS} at this time.
 
 \noindent For instance, \kbd{Configure} may avoid \kbd{/bin/cc} on some
 architectures due to various problems which may have been fixed in your
@@ -136,17 +177,50 @@ version of the compiler. You can try
 compiler and run into trouble with a fussy \kbd{g++}, try to use
 \kbd{g++ -fpermissive}.
 
-\misctitle{Technical note 3:} \kbd{Configure} accepts many other flags
-besides the ones mentionned above. See \kbd{Configure --help} for a complete
-list. In particular, there are sets of flags related to GNU MP
-(\kbd{--with-gmp*}) and GNU readline library (\kbd{--with-readline*}).
-Note that autodetection of GMP is \emph{disabled} by default, you
-probably want to enable it.
 
-\misctitle{Technical note 4:} The multiprecision kernel can be fully
-specified via the \kbd{--kernel=\emph{fqkn}} switch. The PARI kernel is build
-from two kernels, called level 0 (L0, operation on words) and level 1 (L1,
-operation on multi-precision integer and real).
+\noindent The contents of the following variables are \emph{appended} to the
+values computed by \kbd{Configure}:
+
+\kbd{CFLAGS}: Flags for \kbd{CC}.
+
+\kbd{CPPFLAGS}: Flags for \kbd{CC} (preprocessor).
+
+\kbd{LDFLAGS}: Flags for \kbd{LD}.
+
+\kbd{C\_INCLUDE\_PATH} is \emph{prepended} to the list of directories
+searched for include files. Note that adding \kbd{-I} flags to
+\kbd{CFLAGS} will \emph{not} be enough since \kbd{Configure} sometimes
+relies on finding the include files and parsing them, and it does not 
+parse \kbd{CFLAGS} at this time.
+
+You may disable inlining by adding \kbd{-DDISABLE\_INLINE} to \kbd{CFLAGS},
+and prevent the use of the \kbd{volatile} keyword with
+\kbd{-DDISABLE\_VOLATILE}.
+
+\subsec{Debugging/profiling}: If you also want to debug the PARI library,
+
+\kbd{Configure -g}
+
+\noindent creates a directory \kbd{O$xxx$.dbg} containing a special
+\kbd{Makefile} ensuring that the GP and PARI library built there is
+suitable for debugging. If you want to
+profile GP or the library, using \kbd{gprof} for instance,
+
+\kbd{Configure -pg}
+
+\noindent will create an \kbd{O$xxx$.prf} directory where a suitable version
+of PARI can be built.
+
+The GP binary built above with \kbd{make all} or \kbd{make gp} is optimized.
+If you have run \kbd{Configure -g} or \kbd{-pg} and want to build a special
+purpose binary, you can \kbd{cd} to the \kbd{.dbg} or \kbd{.prf} directory
+and type \kbd{make gp} there. You can also invoke \kbd{make gp.dbg} or
+\kbd{make gp.prf} directly from the toplevel.
+
+\subsec{Multiprecision kernel:} The kernel can be fully specified via the
+\kbd{--kernel=\emph{fqkn}} switch. The PARI kernel is build from two kernels,
+called level 0 (L0, operation on words) and level 1 (L1, operation on
+multi-precision integer and real).
 
 \noindent Available kernels:
 
@@ -169,25 +243,6 @@ An alias stands for \kbd{\emph{name}-none}, but \kbd{gmp} stand for
 \kbd{auto-gmp}.
 
 \noindent$\bullet$ The default kernel is \kbd{auto-none}.
-
-
-\subsec{Troubleshooting and fine tuning:} Decide whether you agree with what
-\kbd{Configure} printed on your screen, in particular the architecture,
-compiler and optimization flags. Look for messages prepended by
-\kbd{\#\#\#}, which report genuine problems. If anything should have
-been found and was not, consider that \kbd{Configure} failed and follow the
-instructions below. Look especially for the \kbd{gmp}, \kbd{readline} and
-\kbd{X11} libraries, and the \kbd{perl} and \kbd{gunzip} (or \kbd{zcat})
-binaries.
-
-In case the default \kbd{Configure} run fails miserably, try
-
-\kbd{./Configure -a}
-
-\noindent (interactive mode) and answer all the questions (there are not that
-many). Of course, \kbd{Configure} still provides defaults for each answer
-but if you accept them all, it will fail just the same, so be wary. In any
-case, we would appreciate a bug report (see the last section).
 
 \subsec{Problems related to readline:}
 \kbd{Configure} does not try very hard to find the \kbd{readline} library and
@@ -224,58 +279,9 @@ link alluded above, you can create \kbd{readline-{\sl osname}-{\sl arch}},
 using the same naming conventions as for the \kbd{O$xxx$} directory,
 e.g \kbd{readline-linux-i686}.
 
-\subsec{Debugging/profiling}: If you also want to debug the PARI library,
+\subsec{Testing}
 
-\kbd{Configure -g}
-
-\noindent creates a directory \kbd{O$xxx$.dbg} containing a special
-\kbd{Makefile} ensuring that the GP and PARI library built there is
-suitable for debugging. If you want to
-profile GP or the library, using \kbd{gprof} for instance,
-
-\kbd{Configure -pg}
-
-\noindent will create an \kbd{O$xxx$.prf} directory where a suitable version
-of PARI can be built.
-
-\subsec{Compilation and tests:} To compile the GP binary and build the
-documentation, type
-
-\kbd{make all}
-
-\noindent To only compile the GP binary, type
-
-\kbd{make gp}
-
-\noindent in the toplevel directory. If your \kbd{make} program supports
-parallel make, you can speed up the process by going to the \kbd{O$xxx$}
-directory that \kbd{Configure} created and doing a parallel make here, for
-instance \kbd{make -j4} with GNU make. It may even work from the toplevel
-directory.
-
-The GP binary built above is optimized. If you have run \kbd{Configure -g} or
-\kbd{-pg} and want to build a special purpose binary, you can \kbd{cd} to the
-\kbd{.dbg} or \kbd{.prf} directory and type \kbd{make gp} there. You can also
-invoke \kbd{make gp.dbg} or \kbd{make gp.prf} directly from the toplevel.
-
-\subsubsec{Testing}
-
-To test the binary, type \kbd{make bench}. This will build a static
-executable (the default, built by \kbd{make gp} is probably dynamic) and
-run a series of comparative tests on those two. To test only the default
-binary, use \kbd{make dobench} which starts the bench immediately.
-
-The static binary should be slightly faster. In any case, this should not
-take more than a few seconds (user time) on modern machines. See the file
-\kbd{MACHINES} to get an idea of how much time comparable systems need. (We
-would appreciate a short note in the same format in case your system is not
-listed and you nevertheless have a working GP executable.)
-
-If a \kbd{[BUG]} message shows up, something went wrong. Probably with the
-installation procedure, but it may be a bug in the Pari system, in which
-case we would appreciate a report (see the last section)
-
-\misctitle{Known problems:}
+\subsubsec{Known problems:} if \kbd{BUG} shows up in \kbd{make bench}
 
 $\bullet$ \kbd{program}: the GP function \kbd{install} may not be available on
 your platform, triggering an error message (``not yet available for this
@@ -314,6 +320,8 @@ debugging one): it checks whether the inline assembler kernel seems to work,
 and provides simple diagnostics if it does not.
 
 \kbd{make test-all} runs all available test suites. Slow.
+
+
 
 \section{Installation} When everything looks fine, type
 
@@ -492,7 +500,7 @@ following form (BibTeX format):
 @@manual{PARI2,
     organization = "{The PARI~Group}",
     title        = "{PARI/GP, Version @vers}",
-    year         = 2004,
+    year         = 2005,
     address      = "Bordeaux",
     note         = "available from {\tt http://pari.math.u-bordeaux.fr/}"
 }
