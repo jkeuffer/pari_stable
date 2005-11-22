@@ -52,7 +52,7 @@ typedef struct {
   long n; /* first n cells occupied */
 } growarray;
 
-void
+static void
 grow_append(growarray *A, void *e)
 {
   if (A->n == A->len-1)
@@ -63,7 +63,7 @@ grow_append(growarray *A, void *e)
   A->v[A->n++] = e;
 }
 
-void
+static void
 grow_init(growarray *A)
 {
   A->len = 4;
@@ -1739,7 +1739,7 @@ init_trivial_stack()
   avma = top = bot + s;
 }
 
-void
+static void
 read_opt(growarray *A, long argc, char **argv)
 {
   char *b = NULL, *p = NULL, *s = NULL;

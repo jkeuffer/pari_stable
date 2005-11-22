@@ -369,7 +369,7 @@ dopsub(subgp_iter *T, GEN p, GEN indexsubq)
   }
 }
 
-void
+static void
 parse_bound(subgp_iter *T)
 {
   GEN b, B = T->bound;

@@ -940,7 +940,7 @@ mpqs_iterate_primes(ulong *p, byteptr primes_ptr)
 
 /* fill in the best-guess multiplier k for N. We force kN = 1 mod 4.
  * Caller should proceed to fill in kN */
-void
+static void
 mpqs_find_k(mpqs_handle_t *h)
 {
   pari_sp av = avma;

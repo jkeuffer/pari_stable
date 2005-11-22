@@ -1675,7 +1675,7 @@ typedef struct {
   ulong inv; /* inv = -N^(-1) mod B, */
 } montdata;
 
-void
+static void
 init_montdata(GEN N, montdata *s)
 {
   s->N = N;

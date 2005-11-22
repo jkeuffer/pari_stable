@@ -274,7 +274,7 @@ static cache_model_t cache_model = { CACHE_ARENA, CACHE_ALPHA, CACHE_CUTOFF };
    Assume that an independent region of FIXED_TO_CACHE bytes is accessed
    very often concurrently with the arena access.
  */
-ulong
+static ulong
 good_arena_size(ulong slow2_size, ulong total, ulong fixed_to_cache,
                 cache_model_t *cache_model, long model_type)
 {
