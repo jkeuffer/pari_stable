@@ -1026,7 +1026,7 @@ err_seek(long n)
 }
 
 /* untrapped error: kill all error handlers */
-void
+static void
 err_clean(void)
 {
   while (err_catch_stack)

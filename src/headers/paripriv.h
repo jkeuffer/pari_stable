@@ -50,11 +50,16 @@ GEN resetloop(GEN a, GEN b);
 GEN setloop(GEN a);
 
 /* multiprecision */
+GEN   icopy_spec(GEN x, long nx);
 GEN   addrex01(GEN x);
 GEN   addumului(ulong a, ulong b, GEN Y);
 void  affr_fixlg(GEN z, GEN y);
 GEN   cxnorm(GEN x);
+int   lgcdii(ulong* d, ulong* d1, ulong* u, ulong* u1, ulong* v, ulong* v1, ulong vmax);
+ulong rgcduu(ulong d, ulong d1, ulong vmax, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
+ulong xgcduu(ulong d, ulong d1, int f, ulong* v, ulong* v1, long *s);
 GEN   quadnorm(GEN x);
+ulong xxgcduu(ulong d, ulong d1, int f, ulong* u, ulong* u1, ulong* v, ulong* v1, long *s);
 GEN   divgsns(GEN x, long i);
 GEN   divrsns(GEN x, long i);
 GEN   init_remiimul(GEN M);
@@ -271,6 +276,8 @@ GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 #include "parinf.h"
 
 /* Allocation / gerepile */
+void   debug_stack(void);
+void   fill_stack(void);
 void   init_dalloc();
 double *dalloc(size_t n);
 void   gerepilecoeffs2(pari_sp av, GEN x, int n, GEN y, int o);

@@ -2878,7 +2878,7 @@ static char *last_filename = NULL;
 #ifdef HAS_OPENDIR
 /* slow, but more portable than stat + S_I[FS]DIR */
 #  include <dirent.h>
-int
+static int
 is_dir_opendir(char *name)
 {
   DIR *d = opendir(name);
@@ -2889,7 +2889,7 @@ is_dir_opendir(char *name)
 
 #ifdef HAS_STAT
 #include <sys/stat.h>
-int
+static int
 is_dir_stat(char *name)
 {
   struct stat buf; 
