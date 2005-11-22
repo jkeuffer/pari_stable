@@ -276,12 +276,12 @@ sd_realprecision(const char *v, long flag)
                   (ulong)bit_accuracy_mul(LGBITS, L2SL10));
     if (fmt->sigd == (long)newnb) return gnil;
     fmt->sigd = newnb;
-    prec = (ulong)ndec2prec(newnb);
+    precreal = (ulong)ndec2prec(newnb);
   }
   if (flag == d_RETURN) return stoi(fmt->sigd);
   if (flag == d_ACKNOWLEDGE)
   {
-    long n = (long)bit_accuracy_mul(prec, L2SL10);
+    long n = (long)bit_accuracy_mul(precreal, L2SL10);
     pariputsf("   realprecision = %ld significant digits", n);
     if (n != fmt->sigd)
       pariputsf(" (%ld digits displayed)", fmt->sigd);

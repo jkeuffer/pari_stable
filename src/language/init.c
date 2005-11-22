@@ -46,7 +46,7 @@ entree  **varentries;
 void    *global_err_data;
 long    *ordvar;
 ulong   DEBUGFILES, DEBUGLEVEL, DEBUGMEM, compatible;
-ulong   prec, precdl;
+ulong   precreal, precdl;
 ulong   init_opts = INIT_JMPm | INIT_SIGm;
 pari_sp bot = 0, top = 0, avma;
 size_t memused;
@@ -416,9 +416,9 @@ init_defaults(int force)
 
   GP_DATA = default_gp_data();
 #ifdef LONG_IS_64BIT
-  prec=4;
+  precreal = 4;
 #else
-  prec=5;
+  precreal = 5;
 #endif
 
   precdl = 16;

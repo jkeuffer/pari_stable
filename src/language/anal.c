@@ -1324,7 +1324,7 @@ facteur(void)
       case '^':
 	analyseur++; p1 = facteur();
         NO_BREAK("after ^", old);
-        x = gpow(x,p1,prec); break;
+        x = gpow(x,p1,precreal); break;
       case '\'':
 	analyseur++; x = deriv(x,gvar9(x)); break;
       case '~':
@@ -1807,7 +1807,7 @@ num_deriv(void *call, GEN argvec[])
   pari_sp av = avma;
   if (!is_const_t(typ(x))) err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
-  if (fpr == -2) fpr = prec-2;
+  if (fpr == -2) fpr = precreal-2;
   ex = gexpo(x);
   if (ex < 0) ex = 0; /* at 0 */
   pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
@@ -1831,7 +1831,7 @@ num_derivU(GEN p, GEN *arg, gp_args *f)
 
   if (!is_const_t(typ(x))) err(impl, "formal derivation");
   fpr = precision(x)-2; /* required final prec (in sig. words) */
-  if (fpr == -2) fpr = prec-2;
+  if (fpr == -2) fpr = precreal-2;
   ex = gexpo(x);
   if (ex < 0) ex = 0; /* at 0 */
   pr = (long)ceil(fpr * 1.5 + (ex / BITS_IN_LONG));
@@ -1938,7 +1938,7 @@ identifier(void)
       if (EpVALENCE(ep)) match('('); /* error */
 
       if (!*s || (!s[1] && *s == 'p'))
-	return ((GEN (*)(long))call)(prec);
+	return ((GEN (*)(long))call)(precreal);
       noparen=1; /* no argument, but valence is ok */
     }
     /* return type */
@@ -1957,7 +1957,7 @@ identifier(void)
       argvec[i++] = expr();
       NO_BREAK("here (reading arguments)", ch1);
     }
-    if (*s == 'p') { argvec[i++] = (GEN) prec; s++; }
+    if (*s == 'p') { argvec[i++] = (GEN) precreal; s++; }
 
     while (*s && *s != '\n')
       switch (*s++)
@@ -2064,7 +2064,7 @@ identifier(void)
           break;
 
 	case 'p': /* precision */
-	  argvec[i++] = (GEN) prec; break;
+	  argvec[i++] = (GEN) precreal; break;
 
 	case '=':
 	  match('='); matchcomma = 0; break;
@@ -2521,7 +2521,7 @@ constante()
 {
   pari_sp av = avma;
   GEN y = int_read(&analyseur);
-  return real_read(av, &analyseur, y, prec);
+  return real_read(av, &analyseur, y, precreal);
 }
 
 /********************************************************************/

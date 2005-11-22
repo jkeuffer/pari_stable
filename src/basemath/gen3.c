@@ -104,12 +104,12 @@ gpolvar(GEN x)
 static long
 prec0(long e) { return (e < 0)? 2 - (e >> TWOPOTBITS_IN_LONG): 2; }
 static long
-precreal(GEN x) { return signe(x) ? lg(x): prec0(expo(x)); }
+precREAL(GEN x) { return signe(x) ? lg(x): prec0(expo(x)); }
 /* t t_REAL, s an exact non-complex type. Return precision(|t| + |s|) */
 static long
 precrealexact(GEN t, GEN s) {
   long l, e = gexpo(s);
-  if (e == -(long)HIGHEXPOBIT) return precreal(t);
+  if (e == -(long)HIGHEXPOBIT) return precREAL(t);
   if (e < 0) e = 0;
   e -= expo(t);
   if (!signe(t)) return prec0(-e);
@@ -121,7 +121,7 @@ precision(GEN z)
 {
   long tx = typ(z), e, ex, ey, lz, lx, ly;
 
-  if (tx == t_REAL) return precreal(z);
+  if (tx == t_REAL) return precREAL(z);
   if (tx == t_COMPLEX)
   { /* ~ precision(|x| + |y|) */
     GEN x = gel(z,1), y = gel(z,2);
