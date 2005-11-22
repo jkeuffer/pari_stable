@@ -475,7 +475,7 @@ list_prepend(void ***listptr, void *elt)
  * same list in the same hashtable, which would only destroy user variables.
  * As it stands keep a complete history (instead of most recent changes).
  */
-int
+static int
 gp_init_entrees(module *modlist, entree **hash, int force)
 {
   static void **oldmodlist=NULL, **oldhash=NULL;
@@ -506,7 +506,7 @@ entree **funct_old_hash = NULL;
 entree **members_hash   = NULL;
 
 /* add to modlist the functions in func, with helpmsg help */
-void
+static void
 pari_addfunctions(module **modlist_p, entree *func, char **help)
 {
   module *modlist = *modlist_p;

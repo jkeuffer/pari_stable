@@ -1545,7 +1545,7 @@ expr_ass()
   return res;
 }
 
-F2GEN
+static F2GEN
 affect_block(GEN *res)
 {
   F2GEN f;
