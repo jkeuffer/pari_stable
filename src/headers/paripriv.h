@@ -268,72 +268,7 @@ GEN special_pivot(GEN x);
 GEN vandermondeinversemod(GEN L, GEN T, GEN den, GEN mod);
 GEN ZX_monic_factorpadic(GEN f, GEN p, long prec);
 
-/* Number fields */
-GEN    arch_mul(GEN x, GEN y);
-GEN    archstar_full_rk(GEN x, GEN bas, GEN v, GEN gen);
-GEN    bnrGetSurj(GEN bnr1, GEN bnr2);
-GEN    check_and_build_cycgen(GEN bnf);
-double check_bach(double cbach, double B);
-GEN    _checkbnf(GEN bnf);
-GEN    _checknf(GEN nf);
-void   check_ZKmodule(GEN x, char *s);
-void   dbg_rel(long s, GEN col);
-GEN    element_mulidid(GEN nf, long i, long j);
-GEN    element_powid_mod_p(GEN nf, long I, GEN n, GEN p);
-GEN    eltabstorel(GEN x, GEN T, GEN pol, GEN k);
-GEN    eltmulid_get_table(GEN nf, long i);
-GEN    eltreltoabs(GEN rnfeq, GEN x);
-GEN    galoisbig(GEN x, long prec);
-GEN    get_arch(GEN nf,GEN x,long prec);
-GEN    get_arch_real(GEN nf,GEN x,GEN *emb,long prec);
-GEN    get_bas_den(GEN bas);
-GEN    get_hnfid(GEN nf, GEN x);
-GEN    get_mul_table(GEN x,GEN bas,GEN invbas);
-GEN    get_nfindex(GEN bas);
-GEN    get_proj_modT(GEN basis, GEN T, GEN p);
-GEN    get_roots(GEN x,long r1,long prec);
-GEN    get_theta_abstorel(GEN T, GEN pol, GEN k);
-GEN    idealaddtoone_i(GEN nf, GEN x, GEN y);
-GEN    idealcoprime_fact(GEN nf, GEN x, GEN fy);
-GEN    idealhermite_aux(GEN nf, GEN x);
-GEN    idealsqrtn(GEN nf, GEN x, GEN gn, int strict);
-GEN    init_unif_mod_fZ(GEN L);
-GEN    init_units(GEN BNF);
-long   int_elt_val(GEN nf, GEN x, GEN p, GEN bp, GEN *t);
-GEN    make_integral(GEN nf, GEN L0, GEN f, GEN *listpr);
-GEN    maxord_i(GEN p, GEN f, long mf, GEN w, long flag);
-GEN    modprV(GEN z, GEN nf,GEN modpr);
-GEN    nfpol_to_Flx(GEN nf, GEN pol, ulong *ptp);
-GEN    nfreducemodideal_i(GEN x0,GEN ideal);
-GEN    nfrootsall_and_pr(GEN nf, GEN pol);
-GEN    norm_by_embed(long r1, GEN x);
-GEN    perm_to_arch(GEN nf, GEN archp);
-GEN    pidealprimeinv(GEN nf, GEN x);
-GEN    primedec_apply_kummer(GEN nf,GEN pol,long e,GEN p);
-GEN    prodid(GEN nf, GEN I);
-GEN    pr_norm(GEN pr);
-GEN    quadhilbertreal(GEN D, long prec);
-GEN    rnfallbase(GEN nf, GEN pol, GEN *pD, GEN *pd, GEN *pfi);
-GEN    _rnfequation(GEN A, GEN B, long *pk, GEN *pLPRS);
-GEN    special_anti_uniformizer(GEN nf, GEN pr);
-GEN    sqr_by_tab(GEN tab, GEN x);
-GEN    subgroupcondlist(GEN cyc, GEN bound, GEN listKer);
-GEN    T2_from_embed_norm(GEN x, long r1);
-void   testprimes(GEN bnf, ulong bound);
-GEN    to_Fp_simple(GEN nf, GEN x, GEN ffproj);
-GEN    unif_mod_fZ(GEN pr, GEN F);
-GEN    unnf_minus_x(GEN x);
-void   wr_rel(GEN col);
-GEN    zideallog_sgn(GEN nf, GEN x, GEN sgn, GEN bid);
-GEN    zlog_units(GEN nf, GEN U, GEN sgnU, GEN bid);
-GEN    zlog_units_noarch(GEN nf, GEN U, GEN bid);
-GEN    zsign_from_logarch(GEN Larch, GEN invpi, GEN archp);
-
-/* Dedekind zeta */
-GEN  zeta_get_limx(long r1, long r2, long bit);
-long zeta_get_i0(long r1, long r2, long bit, GEN limx);
-long zeta_get_N0(GEN C,  GEN limx);
-
+#include "parinf.h"
 
 /* Allocation / gerepile */
 void   init_dalloc();

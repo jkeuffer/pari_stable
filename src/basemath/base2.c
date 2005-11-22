@@ -19,7 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*******************************************************************/
 #include "pari.h"
 #include "paripriv.h"
-#include "parinf.h"
 
 /* FIXME: backward compatibility. Should use the proper nf_* equivalents */
 #define compat_PARTIAL 1
