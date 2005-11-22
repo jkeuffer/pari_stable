@@ -506,7 +506,7 @@ entree **funct_old_hash = NULL;
 entree **members_hash   = NULL;
 
 /* add to modlist the functions in func, with helpmsg help */
-static void
+void
 pari_addfunctions(module **modlist_p, entree *func, char **help)
 {
   module *modlist = *modlist_p;
