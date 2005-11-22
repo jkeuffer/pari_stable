@@ -8525,6 +8525,8 @@ their current values.\label{se:default}
 If \var{val} is omitted, prints the current value of default \var{key}.
 If $\fl$ is set, returns the result instead of printing it.
 
+\syn{default0}{key, val, \fl}, where \var{key} and \var{val} are \kbd{char *}.
+
 \subsubsecidx{error}$(\{\var{str}\}*)$: outputs its argument list (each of
 them interpreted as a string), then interrupts the running \kbd{gp} program,
 returning to the input prompt.
@@ -8538,6 +8540,8 @@ use only one argument, just by suppressing the commas.
 of an external command (i.e.~one you would type from your UNIX shell prompt).
 This command is immediately run and its input fed into \kbd{gp}, just as if read
 from a file.
+
+\syn{extern0}{str}, where \var{str} is a \kbd{char *}.
 
 \subsubsecidx{getheap}$()$: returns a two-component row vector giving the
 number of objects on the heap and the amount of memory they occupy in long
