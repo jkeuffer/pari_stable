@@ -3,6 +3,7 @@
 #  include <sys/types.h>
 #  include <unistd.h>
 #endif
-main() { struct stat buf; 
-  if (stat (".", &buf) || !(buf.st_mode & S_IFDIR)) exit(1);
+int main(void) { struct stat buf; 
+  if (stat (".", &buf) || !(buf.st_mode & S_IFDIR)) return 1;
+  return 0;
 }

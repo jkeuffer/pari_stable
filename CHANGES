@@ -72,6 +72,7 @@ BA 15- qfbsolve fix 2.2.11-F86 was not sufficient.
    16- (1 + O(2))^2 was less precise than sqr(1+O(2))
    17- in the extended help pager, typing ' ' then \n would skip
        one page [#375]
+BA 18- config/has_stat.c didn't work with g++
 
   Changed
     1- speed up prime() by using checkpoints.
@@ -102,7 +103,7 @@ VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
        the 'volatile' keyword
    16- let paripriv.h include parinf.h
    17- rename 'prec' -> 'precreal' [ from paripriv.h ]
-   18- define INLINE to 'inline static' for C++ compilers also
+BA 18- define INLINE to 'inline static' for C++ compilers also
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)
