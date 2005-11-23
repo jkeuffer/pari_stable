@@ -284,7 +284,7 @@ supnorm(GEN L, long prec)
   return B;
 }
 
-GEN
+static GEN
 galoisborne(GEN T, GEN dn, struct galois_borne *gb)
 {
   pari_sp ltop = avma, av2;
@@ -334,20 +334,23 @@ struct galois_lift
   GEN     TQ;
   struct galois_borne *gb;
 };
-/* Initialise la structure galois_lift */
-GEN makeLden(GEN L,GEN den, struct galois_borne *gb)
+
+static GEN 
+makeLden(GEN L,GEN den, struct galois_borne *gb)
 {
   pari_sp ltop=avma;
   long i,l=lg(L);
-  GEN Lden;
-  Lden=cgetg(l,t_VEC);
+  GEN Lden=cgetg(l,t_VEC);
   for (i=1;i<l;i++)
     gel(Lden,i) = mulii(gel(L,i),den);
   for (i=1;i<l;i++)
     gel(Lden,i) = modii(gel(Lden,i),gb->ladicsol);
   return gerepileupto(ltop,Lden);
 }
-void
+
+/* Initialize the structure galois_lift */
+
+static void
 initlift(GEN T, GEN den, GEN p, GEN L, GEN Lden, struct galois_borne *gb, struct galois_lift *gl)
 {
   pari_sp ltop, lbot;
@@ -436,7 +439,7 @@ monoratlift(GEN S, GEN q, GEN qm1old,struct galois_lift *gl, GEN frob)
   return 0;
 }
 
-GEN
+static GEN
 monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
 {
   pari_sp ltop, lbot;
@@ -501,15 +504,16 @@ monomorphismratlift(GEN P, GEN S, struct galois_lift *gl, GEN frob)
   return S;
 }
 /*
- * Soit T one polynome de \ZZ[X] , p one nombre premier , S\in\FF_p[X]/(T) tel
- * que T(S)=0 [p,T] Relever S en S_0 tel que T(S_0)=0 [T,p^e]
+ * Let T be a polynomial in \ZZ[X] , p a prime number, S\in\FF_p[X]/(T) so
+ * that T(S)=0 [p,T] Lift S in S_0 so that T(S_0)=0 [T,p^e]
  * Unclean stack.
  */
-GEN
+static GEN
 automorphismlift(GEN S, struct galois_lift *gl, GEN frob)
 {
   return  monomorphismratlift(gl->T, S, gl, frob);
 }
+
 GEN
 monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e)
 {
@@ -611,7 +615,7 @@ long polheadlong(GEN P, long n, GEN mod)
 /*
  * 
  */
-long
+static long
 frobeniusliftall(GEN sg, long el, GEN *psi, struct galois_lift *gl,
 		 struct galois_testlift *gt, GEN frob)
 {
@@ -898,7 +902,8 @@ static long muldiv(long a,long b,long c)
  * x: vector of choices, G: vector allowing linear access to elts of F. 
  * Choices multiple of e are not changed.
  * */
-GEN
+
+static GEN
 testpermutation(GEN F, GEN B, GEN x, long s, long e, long cut,
 		struct galois_test *td)
 {
@@ -1378,7 +1383,8 @@ struct galois_analysis
   enum ga_code group;
   byteptr primepointer; /* allow computing the primes following p */
 };
-void
+
+static void
 galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
 {
   pari_sp ltop=avma;
@@ -1583,7 +1589,7 @@ galoisanalysis(GEN T, struct galois_analysis *ga, long calcul_l)
 }
 
 /* Groupe A4 */
-GEN
+static GEN
 a4galoisgen(GEN T, struct galois_test *td)
 {
   pari_sp ltop = avma, av, av2;
@@ -1983,7 +1989,7 @@ s4releveauto(GEN misom,GEN Tmod,GEN Tp,GEN p,long a1,long a2,long a3,long a4,lon
   u5 = FpX_chinese_coprime(u4,u3,pu4,pu3,Tp,p);
   return gerepileupto(ltop,u5);
 }
-GEN
+static GEN
 s4galoisgen(struct galois_lift *gl)
 {
   struct galois_testlift gt;
@@ -2469,7 +2475,7 @@ galoisfindfrobenius(GEN T, GEN L, GEN den, struct galois_frobenius *gf,
   }
 }
 
-GEN
+static GEN
 galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 	  const struct galois_analysis *ga);
 static GEN
@@ -2583,7 +2589,7 @@ wpow(long s, long m, long e, long n)
   return w;
 }
 
-GEN
+static GEN
 galoisgen(GEN T, GEN L, GEN M, GEN den, struct galois_borne *gb,
 	  const struct galois_analysis *ga)
 {
