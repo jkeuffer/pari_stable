@@ -151,7 +151,7 @@ cat > $file << EOT
 #  lost when Configure is run.
 #
 SHELL      = $make_sh
-PERL       = perl
+PERL       = $perl
 
 AS         = $AS
 ASFLAGS    = $ASFLAGS
