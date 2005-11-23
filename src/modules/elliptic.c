@@ -173,8 +173,8 @@ ellprint(GEN e)
   GEN z;
   checksell(e);
   vx = fetch_var(); name_var(vx, "X");
-  vy = fetch_var(); name_var(vy, "Y"); z = mkvec2(polx[vx], polx[vy]);
-  fprintferr("%Z - (%Z)\n", ellLHS(e, z), ellRHS(e, polx[vx]));
+  vy = fetch_var(); name_var(vy, "Y"); z = mkvec2(pol_x[vx], pol_x[vy]);
+  fprintferr("%Z - (%Z)\n", ellLHS(e, z), ellRHS(e, pol_x[vx]));
   (void)delete_var();
   (void)delete_var(); avma = av;
 }
@@ -3520,7 +3520,7 @@ elltaniyama(GEN e, long prec)
     }
     else
     {
-      setlg(x, 9); gel(x,8) = polx[MAXVARN];
+      setlg(x, 9); gel(x,8) = pol_x[MAXVARN];
       w = derivser(x); setvalp(w,-2); /* 4v^3 + b2 x^2 + 2b4 x + b6 */
       s1 = gadd(gel(e,8), gmul(x, gadd(gmul2n(gel(e,7),1),
                                         gmul(x,gadd(gel(e,6),gmul2n(x,2))))));

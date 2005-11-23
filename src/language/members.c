@@ -88,7 +88,7 @@ member_zk(GEN x)
     switch(t)
     {
       case typ_CLA: return gmael(x,1,4);
-      case typ_Q: return mkvec2(gen_1, polx[varn(x[1])]);
+      case typ_Q: return mkvec2(gen_1, pol_x[varn(x[1])]);
     }
     member_err("zk");
   }

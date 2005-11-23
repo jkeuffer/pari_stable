@@ -335,14 +335,14 @@ zeropadic(GEN p, long e)
   y[1] = evalvalp(e) | evalprecp(0);
   return y;
 }
-/* O(polx[v]^e) */
+/* O(pol_x[v]^e) */
 INLINE GEN
 zeroser(long v, long e)
 {
   GEN x = cgetg(2, t_SER);
   x[1] = evalvalp(e) | evalvarn(v); return x;
 }
-/* 0 * polx[v] */
+/* 0 * pol_x[v] */
 INLINE GEN
 zeropol(long v)
 {

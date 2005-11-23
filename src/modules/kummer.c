@@ -677,7 +677,7 @@ invimsubgroup(GEN bnrz, GEN bnr, GEN subgroup, toK_s *T)
   GEN P,raycycz,rayclgpz,raygenz,U,polrel,StZk;
   GEN nf = checknf(bnr), nfz = checknf(bnrz), polz = gel(nfz,1);
 
-  polrel = polrelKzK(T, polx[varn(polz)]);
+  polrel = polrelKzK(T, pol_x[varn(polz)]);
   StZk = Stelt(nf, gel(nfz,7), polrel); 
   rayclgpz = gel(bnrz,5);
   raycycz = gel(rayclgpz,2); l = lg(raycycz);
@@ -903,7 +903,7 @@ _rnfkummer(GEN bnr, GEN subgroup, long all, long prec)
   bnr      = gel(p1,2); 
   subgroup = gel(p1,3);
   gell = get_gell(bnr,subgroup,all);
-  if (gcmp1(gell)) return polx[vnf];
+  if (gcmp1(gell)) return pol_x[vnf];
   if (!isprime(gell)) err(impl,"kummer for composite relative degree");
   if (dvdii(wk,gell)) return rnfkummersimple(bnr, subgroup, gell, all);
 

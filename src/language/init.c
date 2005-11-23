@@ -32,7 +32,7 @@ const long functions_tblsz = 135; /* size of functions_hash          */
 /*      Variables statiques communes :         */
 FILE    *pari_outfile, *errfile, *logfile, *infile;
 ulong   logstyle = logstyle_none;
-GEN     *polun, *polx;
+GEN     *pol_1, *pol_x;
 GEN     gnil, gen_0, gen_1, gen_m1, gen_2, ghalf, polvar, gi;
 GEN     gpi=NULL, geuler=NULL, bernzone=NULL;
 GEN     primetab; /* private primetable */
@@ -658,12 +658,12 @@ pari_init(size_t parisize, ulong maxprime)
   varentries = (entree**) gpmalloc((MAXVARN+1)*sizeof(entree*));
   ordvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
   polvar = (GEN) gpmalloc((MAXVARN+1)*sizeof(long));
-  polx  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
-  polun = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
+  pol_x  = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
+  pol_1 = (GEN*) gpmalloc((MAXVARN+1)*sizeof(GEN));
   polvar[0] = evaltyp(t_VEC) | evallg(1);
   for (u=0; u <= MAXVARN; u++) { ordvar[u] = u; varentries[u] = NULL; }
 
-  (void)fetch_var(); /* create polx/polun[MAXVARN] */
+  (void)fetch_var(); /* create pol_x/pol_1[MAXVARN] */
   primetab = (GEN) gpmalloc(1 * sizeof(long));
   primetab[0] = evaltyp(t_VEC) | evallg(1);
 
@@ -730,9 +730,9 @@ freeall(void)
   free((void*)varentries);
   free((void*)ordvar);
   free((void*)polvar);
-  free((void*)polx[MAXVARN]);
-  free((void*)polx);
-  free((void*)polun);
+  free((void*)pol_x[MAXVARN]);
+  free((void*)pol_x);
+  free((void*)pol_1);
   free((void*)primetab);
   free((void*)universal_constants);
 
@@ -861,7 +861,7 @@ reorder(GEN x)
   for (n=0; n<lx; n++)
   { /* variables are numbered 0,1 etc... while polvar starts at 1. */
     i = var[n];
-    gel(polvar, varsort[n]+1) = polx[i];
+    gel(polvar, varsort[n]+1) = pol_x[i];
     ordvar[i] = varsort[n];
   }
 

@@ -1475,7 +1475,7 @@ returns their product.
 
 \fun{GEN}{FpV_roots_to_pol}{GEN V, GEN p, long v}, \kbd{V} being a vector
 of \kbd{INT}s, returns the monic \kbd{FpX}
-$\prod_i (\kbd{polx[v]} - \kbd{V[i]})$.
+$\prod_i (\kbd{pol\_x[v]} - \kbd{V[i]})$.
 
 \fun{GEN}{FpX_chinese_coprime}{GEN x,GEN y, GEN Tx,GEN Ty, GEN Tz, GEN p}
 returns an \kbd{FpX}, congruent to \kbd{x} mod \kbd{Tx} and to \kbd{y} mod
@@ -1674,7 +1674,7 @@ coefficients are \kbd{ZX}s or \typ{INT}s, reduce them to \kbd{FpXQ}s.
 
 \fun{GEN}{FqV_roots_to_pol}{GEN V, GEN T, GEN p, long v},
 \kbd{V} being a vector of \kbd{Fq}s, returns the monic \kbd{FqX}
-$\prod_i (\kbd{polx[v]} - \kbd{V[i]})$.
+$\prod_i (\kbd{pol\_x[v]} - \kbd{V[i]})$.
 
 \subsubsec{Miscellaneous operations}
 
@@ -2329,7 +2329,7 @@ priorities: the above is an invalid object if $\kbd{varncmp(v, w)} \geq 0$.
 
 \fun{GEN}{RgXY_swap}{GEN P, long n, long w} converts the bivariate polynomial
 $\kbd{P}(u,v)$ (a \typ{POL} with \typ{POL} coefficients) to
-$P(\kbd{polx[w]},u)$, assuming \kbd{n} is an upper bound for
+$P(\kbd{pol\_x[w]},u)$, assuming \kbd{n} is an upper bound for
 $\deg_v(\kbd{P})$.
 
 \fun{GEN}{greffe}{GEN x, long l, int use\_stack} applied to a

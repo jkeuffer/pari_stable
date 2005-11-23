@@ -91,7 +91,7 @@ eltreltoabs(GEN rnfeq, GEN x)
   va = varn(polabs);
   if (varncmp(gvar(x), va) > 0) x = scalarpol(x,va);
   /* Mod(X - k alpha, polabs(X)), alpha root of the polynomial defining base */
-  teta = gadd(polx[va], gmulsg(-k,alpha));
+  teta = gadd(pol_x[va], gmulsg(-k,alpha));
   s = gen_0;
   for (i=lg(x)-1; i>1; i--)
   {
@@ -343,7 +343,7 @@ rnfbasistoalg(GEN rnf,GEN x)
 
     default: z = cgetg(3,t_POLMOD);
       gel(z,1) = gcopy(gel(rnf,1));
-      gel(z,2) = gmul(x,polun[varn(rnf[1])]); return z;
+      gel(z,2) = gmul(x,pol_1[varn(rnf[1])]); return z;
   }
 }
 
@@ -409,8 +409,8 @@ rnfelementreltoabs(GEN rnf,GEN x)
 GEN
 get_theta_abstorel(GEN T, GEN pol, GEN k)
 {
-  return gmodulcp(gadd(polx[varn(pol)],
-                       gmul(k, gmodulcp(polx[varn(T)],T))), pol);
+  return gmodulcp(gadd(pol_x[varn(pol)],
+                       gmul(k, gmodulcp(pol_x[varn(T)],T))), pol);
 }
 GEN
 eltabstorel(GEN x, GEN T, GEN pol, GEN k)

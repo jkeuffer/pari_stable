@@ -1152,7 +1152,7 @@ intnuminitgen(void *E, GEN (*eval)(GEN, void*), GEN a, GEN b, long m,
   }
   else
   {
-    tmpxw = gdiv(polx[0], gsubsg(1, eval(gadd(polx[0], zeroser(0, 4)), E)));
+    tmpxw = gdiv(pol_x[0], gsubsg(1, eval(gadd(pol_x[0], zeroser(0, 4)), E)));
     D.tabx0 = gprec_w(polcoeff0(tmpxw, 0, 0), precl);
     D.tabw0 = gprec_w(polcoeff0(tmpxw, 1, 0), precl);
   }

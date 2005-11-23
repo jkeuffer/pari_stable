@@ -1514,10 +1514,10 @@ rectsplines(long ne, double *x, double *y, long lx, long flag)
 
     xa++; ya++;
     if (flag & PLOT_PARAMETRIC) {
-      gel(quark_gen,1) = polint_i(tas, xa, polx[0], 4, NULL);
-      gel(quark_gen,2) = polint_i(tas, ya, polx[0], 4, NULL);
+      gel(quark_gen,1) = polint_i(tas, xa, pol_x[0], 4, NULL);
+      gel(quark_gen,2) = polint_i(tas, ya, pol_x[0], 4, NULL);
     } else {
-      quark_gen = polint_i(xa, ya, polx[0], 4, NULL);
+      quark_gen = polint_i(xa, ya, pol_x[0], 4, NULL);
       tas = xa;
     }
     rectploth(ne, var0,

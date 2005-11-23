@@ -165,10 +165,10 @@ quadhilbertimag(GEN D, GEN pq)
   ulong p, q;
 
   if (DEBUGLEVEL>1) (void)timer2();
-  if (cmpiu(D,11) <= 0) return polx[0];
+  if (cmpiu(D,11) <= 0) return pol_x[0];
   L = getallforms(D,&h,&z);
   if (DEBUGLEVEL>1) msgtimer("class number = %ld",h);
-  if (h == 1) { avma=av; return polx[0]; }
+  if (h == 1) { avma=av; return pol_x[0]; }
 
   get_pq(D, z, pq, &p, &q);
   e = 24 / cgcd((p%24 - 1) * (q%24 - 1), 24);
@@ -428,8 +428,8 @@ do_compo(GEN x, GEN y)
     if (signe(y[i])) gel(y,i) = monomial(gel(y,i), l-i-1, MAXVARN);
   for  (a = 0;; a = nexta(a))
   {
-    if (a) x = gsubst(x, 0, gaddsg(a, polx[0]));
-    z = gsubst(subres(x,y), MAXVARN, polx[0]);
+    if (a) x = gsubst(x, 0, gaddsg(a, pol_x[0]));
+    z = gsubst(subres(x,y), MAXVARN, pol_x[0]);
     if (issquarefree(z)) return z;
   }
 }
@@ -460,7 +460,7 @@ findquad(GEN a, GEN x, GEN p)
   if (!is_scalar_t(tu) || !is_scalar_t(tv))
     err(talker, "incorrect data in findquad");
   x = v;
-  if (!gcmp0(u)) x = gadd(gmul(u, polx[varn(a)]), x);
+  if (!gcmp0(u)) x = gadd(gmul(u, pol_x[varn(a)]), x);
   if (typ(x) == t_POL) x = gmodulcp(x,p);
   return gerepileupto(av, x);
 }
@@ -495,16 +495,16 @@ compocyclo(GEN nf, long m, long d)
   polLK = quadpoly(stoi(ell)); /* relative polynomial */
   res = rnfequation2(nf, polLK);
   vx = varn(nf[1]);
-  polL = gsubst(gel(res,1),0,polx[vx]); /* = charpoly(t) */
-  a = gsubst(lift(gel(res,2)), 0,polx[vx]);
-  b = gsub(polx[vx], gmul(gel(res,3), a));
+  polL = gsubst(gel(res,1),0,pol_x[vx]); /* = charpoly(t) */
+  a = gsubst(lift(gel(res,2)), 0,pol_x[vx]);
+  b = gsub(pol_x[vx], gmul(gel(res,3), a));
   nfL = initalg(polL, DEFAULTPREC);
   p1 = gcoeff(nffactor(nfL,p1),1,1);
   p2 = gcoeff(nffactor(nfL,p2),1,1);
   p3 = do_compo(p1,p2); /* relative equation over L */
   /* compute non trivial s in Gal(L / K) */
   sb= gneg(gadd(b, truecoeff(polLK,1))); /* s(b) = Tr(b) - b */
-  s = gadd(polx[vx], gsub(sb, b)); /* s(t) = t + s(b) - b */
+  s = gadd(pol_x[vx], gsub(sb, b)); /* s(t) = t + s(b) - b */
   p3 = gmul(p3, galoisapplypol(nfL, s, p3));
   return findquad_pol(gel(nf,1), a, p3);
 }
@@ -592,7 +592,7 @@ get_lambda(GEN bnr)
   P = treatspecialsigma(nf,f);
   if (P) return P;
 
-  w = gmodulcp(polx[varn(pol)], pol);
+  w = gmodulcp(pol_x[varn(pol)], pol);
   f2 = 2 * itos(gcoeff(f,1,1));
   u = getallrootsof1(bnf); lu = lg(u);
   for (i=1; i<lu; i++)
@@ -647,7 +647,7 @@ quadray(GEN D, GEN f, GEN flag, long prec)
     bnf = bnfinit0(pol, signe(D)>0?1:0, NULL, prec);
   }
   bnr = bnrinit0(bnf,f,1);
-  if (gcmp1(gmael(bnr,5,1))) { avma = av; return polx[0]; }
+  if (gcmp1(gmael(bnr,5,1))) { avma = av; return pol_x[0]; }
   if (signe(D) > 0)
     y = bnrstark(bnr,NULL,prec);
   else

@@ -728,7 +728,7 @@ static GEN
 autvec_TH(long pk, GEN z, GEN v, GEN C)
 {
   long i, lv = lg(v);
-  GEN s = polun[varn(C)];
+  GEN s = pol_1[varn(C)];
   for (i=1; i<lv; i++)
   {
     long y = v[i];
@@ -741,7 +741,7 @@ static GEN
 autvec_AL(long pk, GEN z, GEN v, Red *R)
 {
   const long r = umodiu(R->N, pk);
-  GEN s = polun[varn(R->C)];
+  GEN s = pol_1[varn(R->C)];
   long i, lv = lg(v);
   for (i=1; i<lv; i++)
   {

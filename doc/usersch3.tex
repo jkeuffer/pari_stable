@@ -478,25 +478,9 @@ rational function, or a power series.
 This function is not the same as $x$ \kbd{\%} $y$, the result of which is an
 integer or a polynomial.
 
-If $\fl$ is equal to $1$, the modulus of the created result is put on the
-heap and not on the stack, and hence becomes a permanent copy which cannot be
-erased later by garbage collecting (see \secref{se:garbage}). Functions
-will operate a little faster on such objects and memory consumption will be
-lower. On the other hand, care should be taken to avoid creating too many
-such objects.
+$\fl$ is obsolete and should not be used.
 
-In GP, the same effect can be obtained by assigning the object to a GP
-variable (the value of which is a permanent object for the duration of the
-relevant library function call, and is treated as such). This value is
-subject to garbage collection, since it will be deleted when the value
-changes. This is preferable and the above flag is only retained for
-compatibility reasons (it can still be useful in library mode).
-
-\syn{Mod0}{x,y,\fl}. Also available are
-
-\item for $\fl=1$: \funs{gmodulo}{x,y}.
-
-\item for $\fl=0$: \funs{gmodulcp}{x,y}.
+\syn{gmodulcp}{x,y}.
 
 \subsecidx{Pol}$(x,\{v=x\})$: transforms the object $x$ into a polynomial with
 main variable $v$. If $x$ is a scalar, this gives a constant polynomial. If
@@ -2979,8 +2963,7 @@ Optional \fl\ is (for now) only taken into account when $z$ is numeric, and
 means 0: compute only $\wp(z)$, 1: compute $[\wp(z),\wp'(z)]$.
 
 \syn{ellwp0}{E,z,\fl,\var{prec},\var{precdl}}. Also available is
-\funs{weipell}{E,\var{precdl}} for the power series (in
-$x=\kbd{polx[0]}$).
+\funs{weipell}{E,\var{precdl}} for the power series.
 
 \subsecidx{ellzeta}$(E,z)$: value of the Weierstrass $\zeta$ function of the
 lattice associated to $E$ as given by \kbd{ellinit} (alternatively, $E$ can
@@ -8601,8 +8584,8 @@ will do for instance).
 
 \subsubsecidxunix{install}$(\var{name},\var{code},\{\var{gpname}\},\{\var{lib}\})$:
 loads from dynamic library \var{lib} the function \var{name}. Assigns to it
-the name \var{gpname} in this \kbd{gp} session, with argument code \var{code} (see
-\secref{se:gp.interface} for an explanation of those). If \var{lib} is
+the name \var{gpname} in this \kbd{gp} session, with argument code \var{code}
+(see the Libpari Manual for an explanation of those). If \var{lib} is
 omitted, uses \kbd{libpari.so}. If \var{gpname} is omitted, uses
 \var{name}.\label{se:install}
 
@@ -8658,8 +8641,7 @@ other way round), as in the following example:
 
   When you kill a variable, all objects that used it become invalid. You
 can still display them, even though the killed variable will be printed in a
-funny way (following the same convention as used by the library function
-\kbd{fetch\_var}, see~\secref{se:vars}). For example:
+funny way. For example:
 
 \bprog
 ? a^2 + 1

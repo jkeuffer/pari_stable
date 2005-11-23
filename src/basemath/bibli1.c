@@ -2793,7 +2793,7 @@ algdep0(GEN x, long n, long bit, long prec)
 
   if (! is_scalar_t(tx)) err(typeer,"algdep0");
   if (tx==t_POLMOD) { y = forcecopy(gel(x,1)); setvarn(y,0); return y; }
-  if (gcmp0(x)) return polx[0];
+  if (gcmp0(x)) return pol_x[0];
   if (n <= 0)
   {
     if (!n) return gen_1;

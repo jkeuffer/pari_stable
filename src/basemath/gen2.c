@@ -658,7 +658,7 @@ ggval(GEN x, GEN p)
         vx = varn(x);
 	if (vp == vx)
 	{
-	  if ((p>=(GEN)polx && p <= (GEN)(polx+MAXVARN)) || ismonome(p))
+	  if ((p>=(GEN)pol_x && p <= (GEN)(pol_x+MAXVARN)) || ismonome(p))
             return polvaluation(x, NULL) / degpol(p);
 	  av = avma; limit=stack_lim(av,1);
 	  for (val=0; ; val++)
@@ -1448,7 +1448,7 @@ gaffect(GEN x, GEN y)
     {
       case t_POL:
 	vx = varn(y); ly = lg(y);
-	if (y==polun[vx] || y==polx[vx]) err(overwriter,"gaffect (polun/polx)");
+	if (y==pol_1[vx] || y==pol_x[vx]) err(overwriter,"gaffect (pol_1/pol_x)");
 	gaffect(x,gel(y,2)); for (i=3; i<ly; i++) gaffsg(0,gel(y,i));
         y[1] = gcmp0(x)? evalvarn(vx): evalsigne(1) | evalvarn(vx);
 	break;

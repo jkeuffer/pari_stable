@@ -45,7 +45,7 @@ static GEN
 caract_const(GEN x, long v, long d)
 {
   pari_sp av = avma;
-  return gerepileupto(av, gpowgs(gadd(polx[v], gneg_i(x)), d));
+  return gerepileupto(av, gpowgs(gadd(pol_x[v], gneg_i(x)), d));
 }
 
 static GEN
@@ -62,14 +62,14 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
   L = leading_term(p);
   x = gneg_i(x);
   if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
-  gel(x,2) = gadd(gel(x,2), polx[MAXVARN]);
+  gel(x,2) = gadd(gel(x,2), pol_x[MAXVARN]);
   ch = subres_f(p, x, NULL);
   if (v != MAXVARN)
   {
     if (typ(ch) == t_POL && varn(ch) == MAXVARN)
       setvarn(ch, v);
     else
-      ch = gsubst(ch, MAXVARN, polx[v]);
+      ch = gsubst(ch, MAXVARN, pol_x[v]);
   }
   if (!gcmp1(L)) ch = gdiv(ch, gpowgs(L,d));
   return gerepileupto(av, ch);
@@ -122,7 +122,7 @@ easychar(GEN x, long v, GEN *py)
       if (lx==1)
       {
 	if (py) *py = cgetg(1,t_MAT);
-	return polun[v];
+	return pol_1[v];
       }
       if (lg(x[1]) != lx) break;
       return NULL;
@@ -225,7 +225,7 @@ caradj(GEN x, long v, GEN *py)
   gel(p,2) = gerepileupto(av, forcecopy(gneg(t)));
   i = gvar2(p);
   if (i == v) err(talker,"incorrect variable in caradj");
-  if (i < v) p = gerepileupto(av0, poleval(p, polx[v]));
+  if (i < v) p = gerepileupto(av0, poleval(p, pol_x[v]));
   if (py) *py = (l & 1)? stackify(gneg(y)): forcecopy(y);
   gunclone(y); return p;
 }
@@ -332,7 +332,7 @@ carhess(GEN x, long v)
   if ((H = easychar(x,v,NULL))) return H;
 
   lx = lg(x); av = avma; y = cgetg(lx+1, t_VEC);
-  gel(y,1) = polun[v]; H = hess(x);
+  gel(y,1) = pol_1[v]; H = hess(x);
   X_h = monomial(gen_1, 1, v);
   for (r = 1; r < lx; r++)
   {

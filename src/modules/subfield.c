@@ -506,7 +506,7 @@ static GEN
 init_traces(GEN ff, GEN T, GEN p)
 {
   long N = degpol(T),i,j,k, r = lg(ff);
-  GEN Frob = FpXQ_matrix_pow(FpXQ_pow(polx[varn(T)],p, T,p), N,N, T,p);
+  GEN Frob = FpXQ_matrix_pow(FpXQ_pow(pol_x[varn(T)],p, T,p), N,N, T,p);
   GEN y,p1,p2,Trk,pow,pow1;
 
   k = degpol(ff[r-1]); /* largest degree in modular factorization */
@@ -540,9 +540,9 @@ static GEN
 interpol(GEN H, GEN T, GEN p)
 {
   long i, m = lg(H);
-  GEN X = polx[0],d,p1,p2,a;
+  GEN X = pol_x[0],d,p1,p2,a;
 
-  p1=polun[0]; p2=gen_1; a = gneg(constant_term(gel(H,1))); /* = D[1] */
+  p1=pol_1[0]; p2=gen_1; a = gneg(constant_term(gel(H,1))); /* = D[1] */
   for (i=2; i<m; i++)
   {
     d = constant_term(gel(H,i)); /* -D[i] */
@@ -680,7 +680,7 @@ compute_data(blockdata *B)
   roo = B->PD->roo;
   if (DATA) /* update (translate) an existing DATA */
   {
-    GEN Xm1 = gsub(polx[varn(pol)], gen_1);
+    GEN Xm1 = gsub(pol_x[varn(pol)], gen_1);
     GEN TR = addis(gel(DATA,5), 1);
     GEN mTR = negi(TR), interp, bezoutC;
 
@@ -697,7 +697,7 @@ compute_data(blockdata *B)
     interp  = gel(DATA,9);
     for (i=1; i<l; i++)
     {
-      if (degpol(interp[i]) > 0) /* do not turn polun[0] into gen_1 */
+      if (degpol(interp[i]) > 0) /* do not turn pol_1[0] into gen_1 */
       {
         p1 = TR_pol(gel(interp,i), gen_m1);
         gel(interp,i) = FpXX_red(p1, p);
@@ -893,8 +893,8 @@ subfields(GEN nf, GEN d0)
 
   pol = get_nfpol(nf, &nf); /* in order to treat trivial cases */
   v0 = varn(pol); N = degpol(pol);
-  if (d == N) return gerepilecopy(av, _subfield(pol, polx[v0]));
-  if (d == 1) return gerepilecopy(av, _subfield(polx[v0], pol));
+  if (d == N) return gerepilecopy(av, _subfield(pol, pol_x[v0]));
+  if (d == 1) return gerepilecopy(av, _subfield(pol_x[v0], pol));
   if (d < 1 || d > N || N % d) return cgetg(1,t_VEC);
 
   /* much easier if nf is Galois (WSS) */
@@ -965,7 +965,7 @@ subfieldsall(GEN nf)
   dg = divisors(utoipos(N)); ld = lg(dg)-1;
   if (DEBUGLEVEL) fprintferr("\n***** Entering subfields\n\npol = %Z\n",pol);
 
-  LSB = _subfield(pol, polx[0]);
+  LSB = _subfield(pol, pol_x[0]);
   if (ld > 2)
   {
     B.PD = &PD;
@@ -981,7 +981,7 @@ subfieldsall(GEN nf)
     }
     (void)delete_var(); /* from choose_prime */
   }
-  LSB = shallowconcat(LSB, _subfield(polx[0], pol));
+  LSB = shallowconcat(LSB, _subfield(pol_x[0], pol));
   if (DEBUGLEVEL) fprintferr("\n***** Leaving subfields\n\n");
   return fix_var(gerepilecopy(av, LSB), v0);
 }

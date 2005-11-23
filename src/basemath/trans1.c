@@ -295,10 +295,10 @@ puiss0(GEN x)
 
     case t_POLMOD:
       y = cgetg(3,t_POLMOD); copyifstack(x[1],y[1]);
-      gel(y,2) = polun[varn(x[1])]; return y;
+      gel(y,2) = pol_1[varn(x[1])]; return y;
 
     case t_POL: case t_SER: case t_RFRAC:
-      return polun[gvar(x)];
+      return pol_1[gvar(x)];
 
     case t_MAT:
       lx=lg(x); if (lx==1) return cgetg(1,t_MAT);

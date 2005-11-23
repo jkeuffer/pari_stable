@@ -39,8 +39,8 @@ tchebi(long n, long v) /* Assume 4*n < VERYBIGINT */
 
   if (v<0) v = 0;
   if (n < 0) n = -n;
-  if (n==0) return polun[v];
-  if (n==1) return polx[v];
+  if (n==0) return pol_1[v];
+  if (n==1) return pol_x[v];
 
   q = cgetg(n+3, t_POL); r = q + n+2;
   a = int2n(n-1);
@@ -81,11 +81,11 @@ legendre(long n, long v)
 
   if (v<0) v = 0;
   if (n < 0) err(talker,"negative degree in legendre");
-  if (n==0) return polun[v];
-  if (n==1) return polx[v];
+  if (n==0) return pol_1[v];
+  if (n==1) return pol_x[v];
 
-  p0=polun[v]; av=avma; lim=stack_lim(av,2);
-  p1=gmul2n(polx[v],1);
+  p0=pol_1[v]; av=avma; lim=stack_lim(av,2);
+  p1=gmul2n(pol_x[v],1);
   for (m=1; m<n; m++)
   {
     p2 = addmulXn(gmulsg(4*m+2,p1), gmulsg(-4*m,p0), 1);
@@ -112,7 +112,7 @@ cyclo(long n, long v)
 
   if (n <= 0) err(talker, "degree <= in cyclo");
   if (v<0) v = 0;
-  yn = yd = polun[0];
+  yn = yd = pol_1[0];
   for (d=1; d*d<=n; d++)
   {
     if (n%d) continue;
@@ -141,7 +141,7 @@ roots_to_pol_intern(GEN L, GEN a, long v, int plus)
 {
   long i,k,lx = lg(a), code;
   GEN p1,p2;
-  if (lx == 1) return polun[v];
+  if (lx == 1) return pol_1[v];
   p1 = cgetg(lx, t_VEC);
   code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<lx-1; i+=2)
@@ -174,7 +174,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
 {
   long i,k,lx = lg(a), code;
   GEN p1;
-  if (lx == 1) return polun[v];
+  if (lx == 1) return pol_1[v];
   p1 = cgetg(lx, t_VEC);
   code = evalsigne(1)|evalvarn(v);
   for (k=1,i=1; i<r1; i+=2)
@@ -185,7 +185,7 @@ roots_to_pol_r1r2(GEN a, long r1, long v)
     gel(p2,4) = gen_1; p2[1] = code;
   }
   if (i < r1+1)
-    gel(p1,k++) = gadd(polx[v], gneg(gel(a,i)));
+    gel(p1,k++) = gadd(pol_x[v], gneg(gel(a,i)));
   for (i=r1+1; i<lx; i++)
   {
     GEN p2 = cgetg(5,t_POL); gel(p1,k++) = p2;
@@ -576,7 +576,7 @@ polint(GEN xa, GEN ya, GEN x, GEN *ptdy)
     ya=gcopy(gel(ya,1)); if (ptdy) *ptdy = ya;
     return ya;
   }
-  if (!x) x = polx[0];
+  if (!x) x = pol_x[0];
   return polint_i(xa? xa+1: xa,ya+1,x,lx-1,ptdy);
 }
 
@@ -946,7 +946,7 @@ polymodrecip(GEN x)
   n = degpol(T); if (n <= 0) return gcopy(x);
   v = varn(T);
   y = cgetg(3,t_POLMOD);
-  gel(y,1) = (n==1)? gsub(polx[v], a): caract2(T, a, v);
+  gel(y,1) = (n==1)? gsub(pol_x[v], a): caract2(T, a, v);
   gel(y,2) = modreverse_i(a, T); return y;
 }
 

@@ -199,8 +199,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define lutoi   (long)utoi
 
 #define lhalf   (long)ghalf
-#define lpolx   (long)polx
-#define lpolun  (long)polun
+#define lpolx   (long)pol_x
+#define lpolun  (long)pol_1
 
 #ifdef lround /* in some Mac header */
 #  undef lround
@@ -213,6 +213,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 #define ldiv    (long)gdiv
 
 /*functions renamed*/
+#define pol1 pol_1
+#define polx pol_x
 #define coefs_to_col mkcoln
 #define coefs_to_int mkintn
 #define coefs_to_pol mkpoln

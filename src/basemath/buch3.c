@@ -858,10 +858,10 @@ compute_M0(GEN M_star,long N)
   long bitprec = 24;
 
   if (N == 2) return gmul2n(gsqr(gach(gmul2n(M_star,-1),0)), -1);
-  vM = fetch_var(); M = polx[vM];
-  vz = fetch_var(); Z = polx[vz];
-  vy = fetch_var(); Y = polx[vy];
-  vx = fetch_var(); X = polx[vx];
+  vM = fetch_var(); M = pol_x[vM];
+  vz = fetch_var(); Z = pol_x[vz];
+  vy = fetch_var(); Y = pol_x[vy];
+  vx = fetch_var(); X = pol_x[vx];
 
   M0 = NULL; m1 = N/3;
   for (n1=1; n1<=m1; n1++)
