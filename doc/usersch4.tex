@@ -1432,7 +1432,7 @@ This function raises an error if $s$ is already registered as a function name.
 on the fly as needed:
 
 \bprog
-GEN gy = gp_read_str("'y"); /*@Ccom returns pol_x[$v$], for some $v$ */
+GEN gy = gp_read_str("'y"); /*@Ccom returns pol\_x[$v$], for some $v$ */
 long v = varn(gy);
 @eprog\noindent
 But please note the quote \kbd{'y} in the above. Using \kbd{gp\_read\_str("y")}
