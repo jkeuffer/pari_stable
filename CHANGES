@@ -102,6 +102,7 @@ VL  9- honor C_INCLUDE_PATH in Configure (for get_readline)
        the 'volatile' keyword
    16- let paripriv.h include parinf.h
    17- rename 'prec' -> 'precreal' [ from paripriv.h ]
+   18- define INLINE to 'inline static' for C++ compilers also
 
   Removed
 BA  1- gnuplot graphic engine (complicated, did not work from gnuplot-4 on)

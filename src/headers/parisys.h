@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 
 #ifndef DISABLE_INLINE
 #  ifdef __cplusplus
-#    define INLINE inline
+#    define INLINE inline static
 #  elif defined(__GNUC__)
 #    define INLINE __inline__ static
 #  endif
