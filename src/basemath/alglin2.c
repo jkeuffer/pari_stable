@@ -59,7 +59,6 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
   dx = degpol(x);
   if (dx <= 0) return dx? monomial(gen_1, d, v): caract_const(gel(x,2), v, d);
 
-  L = leading_term(p);
   x = gneg_i(x);
   if (varn(x) == MAXVARN) { setvarn(x, 0); p = shallowcopy(p); setvarn(p, 0); }
   gel(x,2) = gadd(gel(x,2), pol_x[MAXVARN]);
@@ -71,7 +70,8 @@ caract2_i(GEN p, GEN x, long v, GEN (subres_f)(GEN,GEN,GEN*))
     else
       ch = gsubst(ch, MAXVARN, pol_x[v]);
   }
-  if (!gcmp1(L)) ch = gdiv(ch, gpowgs(L,d));
+  L = leading_term(ch);
+  if (!gcmp1(L)) ch = gdiv(ch, L);
   return gerepileupto(av, ch);
 }
 

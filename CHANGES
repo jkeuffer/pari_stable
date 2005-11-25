@@ -73,6 +73,7 @@ BA 15- qfbsolve fix 2.2.11-F86 was not sufficient.
    17- in the extended help pager, typing ' ' then \n would skip
        one page [#375]
 BA 18- config/has_stat.c didn't work with g++
+   19- charpoly/minpol(Mod(a,T)) was only monic if T was.
 
   Changed
     1- speed up prime() by using checkpoints.
