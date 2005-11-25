@@ -1239,6 +1239,38 @@ long    taille2(GEN x);
 long    timer(void);
 long    timer2(void);
 
+/* intnum.c */
+
+GEN     intcirc(void *E, GEN (*eval) (GEN, void *), GEN a, GEN R, GEN tab, long prec);
+GEN     intcirc0(entree *ep, GEN a, GEN R, char *ch, GEN tab, long prec);
+GEN     intfourcos0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
+GEN     intfourexp0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
+GEN     intfouriercos(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
+GEN     intfouriersin(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN x, GEN tab, long prec);
+GEN     intfoursin0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
+GEN     intfuncinit(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flag, long prec);
+GEN     intfuncinit0(entree *ep, GEN a, GEN b, char *ch, long flag, long m, long prec);
+GEN     intlaplaceinv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
+GEN     intlaplaceinv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec);
+GEN     intmellininv(void *E, GEN (*eval) (GEN, void *), GEN sig, GEN x, GEN tab, long prec);
+GEN     intmellininv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec);
+GEN     intmellininvshort(GEN sig, GEN x, GEN tab, long prec);
+GEN     intnum(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, GEN tab, long prec);
+GEN     intnum0(entree *ep, GEN a, GEN b, char *ch, GEN tab, long prec);
+GEN     intnuminit(GEN a, GEN b, long m, long prec);
+GEN     intnuminit0(GEN a, GEN b, GEN tab, long prec);
+GEN     intnuminitgen(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long m, long flext, long prec);
+GEN     intnuminitgen0(entree *ep, GEN a, GEN b, char *ch, long m, long flag, long prec);
+GEN     intnumromb(void *E, GEN (*eval) (GEN, void *), GEN a, GEN b, long flag, long prec);
+GEN     intnumromb0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec);
+long    intnumstep(long prec);
+GEN     sumnum(void *E, GEN (*f) (GEN, void *), GEN a, GEN sig, GEN tab, long flag, long prec);
+GEN     sumnum0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec);
+GEN     sumnumalt(void *E, GEN (*f) (GEN, void *), GEN a, GEN s, GEN tab, long flag, long prec);
+GEN     sumnumalt0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec);
+GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
+GEN     sumnuminit0(GEN a, GEN tab, long sgn, long prec);
+
 /* members.c */
 
 GEN     member_a1(GEN x);
@@ -1747,26 +1779,6 @@ void    forprime(entree *ep, GEN a, GEN b, char *ch);
 void    forstep(entree *ep, GEN a, GEN b, GEN s, char *ch);
 void    forvec(entree *ep, GEN x, char *ch, long flag);
 GEN     forvec_start(GEN x, long flag, GEN *d, GEN (**next)(GEN,GEN));
-GEN     intnum(void *E, GEN (*e)(GEN, void*), GEN a,GEN b, GEN tab, long prec);
-long    intnumstep(long prec);
-GEN     intnumromb0(entree *ep, GEN a, GEN b, char *ch, long flag, long prec);
-GEN     intnum0(entree *ep, GEN a, GEN b, char *ch, GEN tab, long prec);
-GEN     intcirc0(entree *ep, GEN a, GEN R, char *ch, GEN tab, long prec);
-GEN     intmellininv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec);
-GEN     intmellininvshort(GEN sig, GEN x, GEN tab, long prec);
-GEN     intlaplaceinv0(entree *ep, GEN sig, GEN x, char *ch, GEN tab, long prec);
-GEN     intnuminit(GEN a, GEN b, long m, long prec);
-GEN     intnuminitgen0(entree *ep, GEN a, GEN b, char *ch, long m, long flag, long prec);
-GEN     intfuncinit0(entree *ep, GEN a, GEN b, char *ch, long flag, long m, long prec);
-/* GEN     intnumdoub0(entree *epx, GEN a, GEN b, entree *epy, char *chc, char *chd, char *chf, GEN tabext, GEN tabint, long prec); */
-GEN     intfoursin0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
-GEN     intfourcos0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
-GEN     intfourexp0(entree *ep, GEN a, GEN b, GEN x, char *ch, GEN tab, long prec);
-GEN     sumnum(void *E, GEN (*f)(GEN,void*), GEN a,GEN sig,GEN tab,long flag,long prec);
-GEN     sumnum0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec);
-GEN     sumnumalt(void *E, GEN (*f)(GEN,void*),GEN a,GEN s,GEN tab,long flag,long prec);
-GEN     sumnumalt0(entree *ep, GEN a, GEN sig, char *ch, GEN tab, long flag, long prec);
-GEN     sumnuminit(GEN sig, long m, long sgn, long prec);
 GEN     matrice(GEN nlig, GEN ncol,entree *ep1, entree *ep2, char *ch);
 GEN     polzag(long n, long m);
 GEN     polzagreel(long n, long m, long prec);
