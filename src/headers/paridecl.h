@@ -133,8 +133,6 @@ GEN     deplin(GEN x);
 GEN     det(GEN a);
 GEN     det0(GEN a,long flag);
 GEN     det2(GEN a);
-GEN     dethnf(GEN x);
-GEN     dethnf_i(GEN mat);
 GEN     detint(GEN x);
 GEN     diagonal(GEN x);
 GEN     eigen(GEN x, long prec);
@@ -422,8 +420,6 @@ GEN     sumdivk(GEN n,long k);
 
 /* base1.c */
 
-GEN     bnfnewprec(GEN nf, long prec);
-GEN     bnrnewprec(GEN bnr, long prec);
 void    check_ZX(GEN x, char *s);
 void    check_ZXY(GEN x, char *s);
 GEN     check_units(GEN x, char *f);
@@ -436,6 +432,7 @@ GEN     checknf(GEN nf);
 GEN     checknfelt_mod(GEN nf, GEN x, char *s);
 void    checkprimeid(GEN bid);
 void    checkrnf(GEN rnf);
+GEN     dirzetak(GEN nf, GEN b);
 GEN     galois(GEN x, long prec);
 GEN     galoisapply(GEN nf, GEN aut, GEN x);
 GEN     get_bnf(GEN x, long *t);
@@ -529,13 +526,14 @@ GEN     algtobasis(GEN nf, GEN x);
 GEN     algtobasis_i(GEN nf,GEN x);
 GEN     arch_to_perm(GEN arch);
 GEN     basistoalg(GEN nf, GEN x);
+GEN     dethnf(GEN x);
+GEN     dethnf_i(GEN mat);
 GEN     element_div(GEN nf, GEN x, GEN y);
 GEN     element_inv(GEN nf, GEN x);
 GEN     element_invmodideal(GEN nf, GEN x, GEN ideal);
 GEN     element_mul(GEN nf,GEN x,GEN y);
 GEN     element_muli(GEN nf,GEN x,GEN y);
 GEN     element_mulid(GEN nf, GEN x, long i);
-GEN     element_mulvec(GEN nf, GEN x, GEN v);
 GEN     element_pow(GEN nf,GEN x,GEN k);
 GEN     element_pow_mod_p(GEN nf, GEN x, GEN n, GEN p);
 GEN     element_powmodideal(GEN nf,GEN x,GEN k,GEN ideal);
@@ -579,6 +577,7 @@ GEN     zsigns(GEN nf,GEN alpha);
 GEN     element_divmodpr(GEN nf, GEN x, GEN y, GEN modpr);
 GEN     element_invmodpr(GEN nf, GEN y, GEN modpr);
 GEN     element_mulmodpr(GEN nf, GEN x, GEN y, GEN modpr);
+GEN     element_mulvec(GEN nf, GEN x, GEN v);
 GEN     element_powmodpr(GEN nf, GEN x, GEN k, GEN modpr);
 GEN     element_reduce(GEN nf, GEN x, GEN ideal);
 GEN     ideal_two_elt(GEN nf, GEN ix);
@@ -725,7 +724,6 @@ GEN     convol(GEN x, GEN y);
 GEN     cyclo(long n, long v);
 GEN     dirdiv(GEN x, GEN y);
 GEN     dirmul(GEN x, GEN y);
-GEN     dirzetak(GEN nf, GEN b);
 long    gen_search(GEN x, GEN y, long flag, int (*cmp)(GEN,GEN));
 long    gen_search_aux(GEN x, GEN y, long flag, void *data, int (*cmp)(void*,GEN,GEN));
 GEN     gen_setminus(GEN set1, GEN set2, int (*cmp)(GEN,GEN));
@@ -787,6 +785,8 @@ GEN     quadray(GEN bnf, GEN f, GEN flag, long prec);
 GEN     bnfclassunit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfinit0(GEN P,long flag,GEN data,long prec);
 GEN     bnfmake(GEN sbnf,long prec);
+GEN     bnfnewprec(GEN nf, long prec);
+GEN     bnrnewprec(GEN bnr, long prec);
 GEN     buchall(GEN P, double bach, double bach2, long nbrelpid, long flun, long prec);
 GEN     buchfu(GEN bignf);
 GEN     check_and_build_obj(GEN S, long tag, GEN (*build)(GEN));
@@ -857,6 +857,16 @@ long    zpsolublenf(GEN bnf,GEN pol,GEN p);
 
 GEN default0(char *a, char *b, long flag);
 
+/* elldata.c */
+
+GEN     ellcondfile(long f);
+GEN     ellcondlist(long f);
+GEN     ellgenerators(GEN E);
+GEN     ellidentify(GEN E);
+long    ellnamecond(const char *s);
+GEN     ellsearch(GEN A);
+GEN     ellsearchcurve(GEN name);
+
 /* elliptic.c */
 
 GEN     addell(GEN e, GEN z1, GEN z2);
@@ -872,17 +882,13 @@ GEN     coordch(GEN e, GEN ch);
 GEN     ellap0(GEN e, GEN p, long flag);
 GEN     elleisnum(GEN om, long k, long flag, long prec);
 GEN     elleta(GEN om, long prec);
-GEN     ellgenerators(GEN e);
 GEN     ellglobalred(GEN e1);
 GEN     ellheight0(GEN e, GEN a, long flag,long prec);
-GEN     ellidentify(GEN E);
 GEN     ellinit0(GEN x,long flag,long prec);
 GEN     ellisoncurve(GEN e, GEN z);
 GEN     elllocalred(GEN e, GEN p1);
 GEN     ellminimalmodel(GEN E, GEN *ptv);
 long    ellrootno(GEN e, GEN p);
-GEN     ellsearch(GEN A);
-GEN     ellsearchcurve(GEN A);
 GEN     ellsigma(GEN om, GEN z, long flag, long prec);
 GEN     elltaniyama(GEN e, long prec);
 GEN     elltors0(GEN e, long flag);
@@ -1745,7 +1751,7 @@ int     isrealappr(GEN x, long l);
 GEN     roots(GEN x,long l);
 GEN     roots0(GEN x,long flag,long l);
 
-/*subcyclo.c */
+/* subcyclo.c */
 
 GEN     galoissubcyclo(GEN N, GEN sg, long flag, long v);
 GEN     polsubcyclo(long n, long d, long v);
@@ -1814,6 +1820,7 @@ GEN     thueinit(GEN pol, long flag, long prec);
 GEN     Pi2n(long n, long prec);
 GEN     PiI2(long prec);
 GEN     PiI2n(long n, long prec);
+GEN     agm(GEN x, GEN y, long prec);
 void    consteuler(long prec);
 void    constpi(long prec);
 GEN     exp_Ir(GEN x);
@@ -1870,7 +1877,6 @@ void    mpbern(long nomb, long prec);
 
 /* trans3.c */
 
-GEN     agm(GEN x, GEN y, long prec);
 GEN     dilog(GEN x, long prec);
 GEN     eint1(GEN x, long prec);
 GEN     eta(GEN x, long prec);
