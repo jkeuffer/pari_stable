@@ -2483,7 +2483,7 @@ dLQdec(pslqL2_M *Mbar, double **Pbar)
   }
 }
 
-void
+static void
 dprintvec(double *V, long m)
 {
   long i;
@@ -2492,7 +2492,7 @@ dprintvec(double *V, long m)
   fprintferr("%15.15e]\n",V[m]); pariflush();
 }
 
-void
+static void
 dprintmat(double **M, long r, long c)
 {
   long i, j;
