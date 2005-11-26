@@ -1900,7 +1900,7 @@ fill_stack(void)
 /*                               TIMER                             */
 /*                                                                 */
 /*******************************************************************/
-long
+static long
 _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 {
   long s  = Ticks / TickPerSecond;
