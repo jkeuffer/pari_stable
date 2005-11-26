@@ -69,8 +69,8 @@ typedef struct subgp_iter {
 #define len(x)      (x)[0]
 #define setlen(x,l) len(x)=(l)
 
-void
-printtyp(const long *typ)
+static void
+printtyp(const long *typ) /*Used only for ddebugging */
 {
   long i, l = len(typ);
   for (i=1; i<=l; i++) fprintferr(" %ld ",typ[i]);
