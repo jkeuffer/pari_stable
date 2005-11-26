@@ -194,6 +194,8 @@ GEN     QuickNormL2(GEN x,long prec);
 int     RgM_ishnf(GEN x);
 GEN     ZM_to_zm(GEN z);
 int     ZM_ishnf(GEN x);
+GEN     ZV_add(GEN x, GEN y);
+GEN     ZV_sub(GEN x, GEN y);
 GEN     ZV_to_nv(GEN z);
 GEN     adj(GEN x);
 GEN     assmat(GEN x);
