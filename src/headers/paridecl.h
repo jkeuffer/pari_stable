@@ -1735,6 +1735,8 @@ GEN     RgX_rescale(GEN P, GEN h);
 GEN     RgX_unscale(GEN P, GEN h);
 GEN     RgXQ_mul(GEN x,GEN y,GEN T);
 GEN     RgXQ_sqr(GEN x,GEN T);
+GEN     RgXQC_red(GEN P, GEN T);
+GEN     RgXQV_red(GEN P, GEN T);
 GEN     RgXQX_RgXQ_mul(GEN x, GEN y, GEN T);
 GEN     RgXQX_divrem(GEN x,GEN y,GEN T,GEN *r);
 GEN     RgXQX_mul(GEN x,GEN y,GEN T);

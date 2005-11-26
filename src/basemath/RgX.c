@@ -308,6 +308,24 @@ RgX_shift(GEN a, long n)
 }
 
 GEN
+RgXQC_red(GEN P, GEN T)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l, t_COL);
+  for (i=1; i<l; i++) gel(Q,i) = grem(gel(P,i), T);
+  return Q;
+}
+
+GEN
+RgXQV_red(GEN P, GEN T)
+{
+  long i, l = lg(P);
+  GEN Q = cgetg(l, t_VEC);
+  for (i=1; i<l; i++) gel(Q,i) = grem(gel(P,i), T);
+  return Q;
+}
+
+GEN
 RgXQX_red(GEN P, GEN T)
 {
   long i, l = lg(P);
@@ -315,15 +333,6 @@ RgXQX_red(GEN P, GEN T)
   Q[1] = P[1];
   for (i=2; i<l; i++) gel(Q,i) = grem(gel(P,i), T);
   return normalizepol_i(Q, l);
-}
-
-GEN
-RgXQV_red(GEN P, GEN T)
-{
-  long i, l = lg(P);
-  GEN Q = cgetg(l, typ(P));
-  for (i=1; i<l; i++) gel(Q,i) = grem(gel(P,i), T);
-  return Q;
 }
 
 /*******************************************************************/
