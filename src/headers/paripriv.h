@@ -646,16 +646,13 @@ void    writenamedGEN(GEN x, char *s, FILE *f);
 
 /* galconj.c */
 
-GEN     checkgroup(GEN g, GEN *S);
 GEN     fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod);
 GEN     fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, long x, long y);
 GEN     fixedfieldinclusion(GEN O, GEN PL);
 GEN     fixedfieldorbits(GEN O, GEN L);
 GEN     fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v);
-GEN     galois_group(GEN gal);
 GEN     galoisconj2pol(GEN x, long nbmax, long prec);
 GEN     galoiscosets(GEN O, GEN perm);
-GEN     galoisgrouptopol(GEN res, GEN L, GEN M, GEN den, GEN mod, long v);
 long    intheadlong(GEN x, GEN mod);
 long    isomborne(GEN P, GEN den, GEN p);
 GEN     listznstarelts(long m, long p);

@@ -1357,7 +1357,7 @@ permtopol(GEN p, GEN L, GEN M, GEN den, GEN mod, long x)
   return normalizepol_i(z,n+1);
 }
 
-GEN
+static GEN
 galoisgrouptopol( GEN res, GEN L, GEN M, GEN den, GEN mod, long v)
 {
   GEN aut = cgetg(lg(res), t_COL);

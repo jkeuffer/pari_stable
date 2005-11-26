@@ -998,6 +998,8 @@ void    writetex(const char *s, GEN g);
 /* galconj.c */
 
 GEN     checkgal(GEN gal);
+GEN     checkgroup(GEN g, GEN *S);
+GEN     galois_group(GEN gal);
 GEN     galoisconj(GEN nf);
 GEN     galoisconj0(GEN nf, long flag, GEN d, long prec);
 GEN     galoisconj2(GEN x, long nbmax, long prec);
