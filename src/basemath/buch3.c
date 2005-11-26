@@ -1821,7 +1821,7 @@ get_nz(GEN bnf, GEN ideal, GEN arch, long clhray)
   return nz;
 }
 
-GEN
+static GEN
 get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel)
 {
   long n, R1;

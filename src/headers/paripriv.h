@@ -529,7 +529,7 @@ GEN     ibitand(GEN x, GEN y);
 GEN     ibitnegimply(GEN x, GEN y);
 GEN     ibitor(GEN x, GEN y);
 GEN     ibitxor(GEN x, GEN y);
-byteptr  initprimes0(ulong maxnum, long *lenp, ulong *lastp);
+byteptr initprimes0(ulong maxnum, long *lenp, ulong *lastp);
 long    set_optimize(long what, GEN g);
 
 /* base1.c */
@@ -608,7 +608,6 @@ int     trunc_error(GEN x);
 
 /* buch3.c */
 
-GEN     get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel);
 GEN     minkowski_bound(GEN D, long N, long r2, long prec);
 
 /* elliptic.c */
