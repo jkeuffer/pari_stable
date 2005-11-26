@@ -1900,6 +1900,8 @@ fill_stack(void)
 /*                               TIMER                             */
 /*                                                                 */
 /*******************************************************************/
+
+#if !defined(USE_GETRUSAGE) && !defined(USE_FTIME)
 static long
 _get_time(pari_timer *T, long Ticks, long TickPerSecond)
 {
@@ -1909,6 +1911,7 @@ _get_time(pari_timer *T, long Ticks, long TickPerSecond)
   T->us = us;
   T->s  = s; return delay;
 }
+#endif
 
 #ifdef USE_TIMES
 
