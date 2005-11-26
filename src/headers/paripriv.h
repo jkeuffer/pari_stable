@@ -455,4 +455,395 @@ typedef struct input_method {
 
 int input_loop(filtre_t *F, input_method *IM);
 char *file_input(char **s0, int junk, input_method *IM, filtre_t *F);
+
+/* By files */
+
+/* Flx.c */
+
+GEN     FlxX_recipspec(GEN x, long l, long n, long vs);
+GEN     FlxX_sub(GEN x, GEN y, ulong p);
+GEN     FlxX_subspec(GEN x, GEN y, ulong p, long lx, long ly);
+GEN     FlxX_swap(GEN x, long n, long ws);
+GEN     FlxX_to_Kronecker(GEN P, GEN Q);
+GEN     FlxX_to_Kronecker_spec(GEN P, long lp, GEN Q);
+GEN     Flx_addshift(GEN x, GEN y, ulong p, long d);
+GEN     Flx_addspec(GEN x, GEN y, ulong p, long lx, long ly);
+GEN     Flx_even_odd_comb(GEN P, ulong u, ulong v, ulong p);
+GEN     Flx_mulspec(GEN a, GEN b, ulong p, long na, long nb);
+GEN     Flx_negspec(GEN x, ulong p, long l);
+GEN     Flx_recipspec(GEN x, long l, long n);
+GEN     Flx_sqrspec(GEN a, ulong p, long na);
+GEN     Flx_subspec(GEN x, GEN y, ulong p, long lx, long ly);
+GEN     FlxqX_from_Kronecker(GEN z, GEN T, ulong p);
+GEN     FlxqX_invmontgomery(GEN T, GEN Q, ulong p);
+GEN     FlxqX_mulspec(GEN x, GEN y, GEN T, ulong p, long lx, long ly);
+GEN     FlxqX_rem_montgomery(GEN x, GEN mg, GEN T, GEN Q, ulong p);
+
+/* Qfb.c */
+
+GEN     powimagraw(GEN x, long n);
+GEN     redimagsl2(GEN q, GEN *U);
+GEN     redrealsl2(GEN V);
+GEN     redrealsl2step(GEN A);
+GEN     sqcompimagraw(GEN x);
+GEN     sqcomprealraw(GEN x);
+
+/* RgX.c */
+
+GEN     RgXQ_matrix_pow(GEN y, long n, long m, GEN P);
+GEN     RgX_copy_spec(GEN x, long nx);
+GEN     zx_copy_spec(GEN x, long nx);
+
+/* alglin1.c */
+
+GEN     Flm_Fl_mul_inplace(GEN y, ulong x, ulong p);
+GEN     gauss_get_col(GEN a, GEN b, GEN p, long li);
+GEN     gauss_intern(GEN a, GEN b);
+void    vecselect_p(GEN A, GEN B, GEN p, long pari_init, long lB);
+
+/* alglin2.c */
+
+GEN     Frobeniusform(GEN V, long n);
+GEN     ZM_copy(GEN x);
+GEN     ZV_Z_mul(GEN X, GEN c);
+GEN     ZV_copy(GEN x);
+void    ZV_neg_ip(GEN M);
+GEN     hnf0(GEN A, int remove);
+GEN     hnf_special(GEN x, long remove);
+GEN     hnfall0(GEN A, long remove);
+
+/* anal.c */
+
+long unsigned int  parse_option_string(char *arg, char *tmplate, long flag, char **failure, char **failure_arg);
+GEN     readexpr(char *t);
+
+/* aprcl.c */
+
+GEN     aprcl(GEN N);
+
+/* arith1.c */
+
+GEN     Z_chinese_coprime(GEN a, GEN b, GEN A, GEN B, GEN C);
+GEN     bestappr_mod(GEN x, GEN A, GEN B);
+long    hilii(GEN x, GEN y, GEN p);
+long    krouu_s(ulong x, ulong y, long s);
+
+/* arith2.c */
+
+GEN     ibitand(GEN x, GEN y);
+GEN     ibitnegimply(GEN x, GEN y);
+GEN     ibitor(GEN x, GEN y);
+GEN     ibitxor(GEN x, GEN y);
+byteptr  initprimes0(ulong maxnum, long *lenp, ulong *lastp);
+long    set_optimize(long what, GEN g);
+
+/* base1.c */
+
+void    nfbasic_init(GEN x, long flag, GEN fa, nfbasic_t *T);
+GEN     nffromhnfbasis(GEN nf, GEN x);
+GEN     nftohnfbasis(GEN nf, GEN x);
+GEN     polgaloisnames(long a, long b);
+GEN     primitive_pol_to_monic(GEN pol, GEN *ptlead);
+
+/* base2.c */
+
+long    FpX_val(GEN x0, GEN t, GEN p, GEN *py);
+GEN     fast_respm(GEN f, GEN g, GEN p, long M);
+GEN     gen_if_principal(GEN bnf, GEN x);
+int     nfissquarefree(GEN nf, GEN x);
+GEN     nfreducemodpr_i(GEN x, GEN prh);
+GEN     polsymmodp(GEN g, GEN p);
+GEN     respm(GEN x, GEN y, GEN pm);
+GEN     rnfdet0(GEN nf, GEN x, GEN y);
+
+/* base3.c */
+
+GEN     FpXQ_gener(GEN T, GEN p);
+void    check_nfelt(GEN x, GEN *den);
+GEN     ff_PHlog(GEN a, GEN g, GEN T, GEN p);
+GEN     nf_PHlog(GEN nf, GEN a, GEN g, GEN pr);
+
+/* base4.c */
+
+GEN     arch_inv(GEN x);
+GEN     arch_pow(GEN x, GEN n);
+void    check_listpr(GEN x);
+GEN     factor_norm(GEN x);
+GEN     famat_to_nf(GEN nf, GEN f);
+long    val_norm(GEN x, GEN p, long *vz);
+
+/* base5.c */
+
+GEN     check_and_build_nfabs(GEN rnf);
+GEN     check_and_build_norms(GEN rnf);
+GEN     checkrnfeq(GEN x);
+GEN     hnfcenter_ip(GEN M);
+
+/* bibli1.c */
+
+GEN     gscal(GEN x, GEN y);
+GEN     lll_scaled(long MARKED, GEN X0, long D);
+GEN     lllall(GEN x, long D, int gram, long flag);
+GEN     lllintpartialall(GEN m, long flag);
+GEN     plindep(GEN x);
+GEN     pslq(GEN x);
+GEN     pslqL2(GEN x);
+GEN     sqscal(GEN x);
+
+/* bibli2.c */
+
+long    ZV_search(GEN x, GEN y);
+GEN     ZV_sort_uniq(GEN L);
+GEN     gen_vecsort(GEN x, GEN k, long flag);
+
+/* buch1.c */
+
+GEN     buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec);
+GEN     form_to_ideal(GEN x);
+GEN     getallforms(GEN D, long *pth, GEN *ptz);
+int     isoforder2(GEN form);
+
+/* buch2.c */
+
+GEN     check_and_build_matal(GEN bnf);
+GEN     extract_full_lattice(GEN x);
+GEN     init_red_mod_units(GEN bnf, long prec);
+GEN     isprincipalarch(GEN bnf, GEN col, GEN kNx, GEN e, GEN dx, long *pe);
+GEN     red_mod_units(GEN col, GEN z, long prec);
+int     trunc_error(GEN x);
+
+/* buch3.c */
+
+GEN     get_NR1D(long Nf, long clhray, long degk, long nz, GEN fadkabs, GEN idealrel);
+GEN     minkowski_bound(GEN D, long N, long r2, long prec);
+
+/* elliptic.c */
+
+GEN     CM_CardEFp(GEN E, GEN p);
+GEN     CM_ellap(GEN E, GEN p);
+GEN     apell1(GEN e, GEN p);
+void    checkpt(GEN z);
+void    ellprint(GEN e);
+GEN     hell(GEN e, GEN a, long prec);
+GEN     hell2(GEN e, GEN x, long prec);
+GEN     multi_invmod(GEN x, GEN p);
+GEN     ratroot(GEN p);
+GEN     weipell0(GEN e, long prec, long PREC);
+
+/* es.c */
+
+GEN     Str0(GEN g, long flag);
+void    bruti(GEN g, pariout_t *T, int addsign);
+const char * eng_ord(long i);
+char *  env_ok(char *s);
+void    matbruti(GEN g, pariout_t *T);
+int     pari_is_dir(char *name);
+GEN     readobj(FILE *f, int *ptc);
+void    sori(GEN g, pariout_t *T);
+void    texi(GEN g, pariout_t *T, int addsign);
+void    writeGEN(GEN x, FILE *f);
+void    writenamedGEN(GEN x, char *s, FILE *f);
+
+/* galconj.c */
+
+GEN     checkgroup(GEN g, GEN *S);
+GEN     fixedfieldfactmod(GEN Sp, GEN p, GEN Tmod);
+GEN     fixedfieldfactor(GEN L, GEN O, GEN perm, GEN M, GEN den, GEN mod, long x, long y);
+GEN     fixedfieldinclusion(GEN O, GEN PL);
+GEN     fixedfieldorbits(GEN O, GEN L);
+GEN     fixedfieldsympol(GEN O, GEN mod, GEN l, GEN p, long v);
+GEN     galois_group(GEN gal);
+GEN     galoisconj2pol(GEN x, long nbmax, long prec);
+GEN     galoiscosets(GEN O, GEN perm);
+GEN     galoisgrouptopol(GEN res, GEN L, GEN M, GEN den, GEN mod, long v);
+long    intheadlong(GEN x, GEN mod);
+long    isomborne(GEN P, GEN den, GEN p);
+GEN     listznstarelts(long m, long p);
+GEN     matheadlong(GEN W, GEN mod);
+GEN     matrixnorm(GEN M, long prec);
+GEN     monomorphismlift(GEN P, GEN S, GEN Q, GEN p, long e);
+long    polheadlong(GEN P, long n, GEN mod);
+GEN     sympol_aut_evalmod(GEN sym, long g, GEN sigma, GEN Tp, GEN p);
+GEN     sympol_eval(GEN v, GEN NS);
+GEN     vandermondeinverseprep(GEN L);
+
+/* galois.c */
+
+GEN     partitions(long n);
+GEN     polgaloisnamesbig(long n, long k);
+
+/* gen1.c */
+
+int     ff_poltype(GEN *x, GEN *p, GEN *pol);
+GEN     gred_frac2(GEN x1, GEN x2);
+GEN     gred_rfrac2(GEN x1, GEN x2);
+
+/* gen2.c */
+
+void    gopsg2z(GEN (*f) (GEN, GEN), long s, GEN y, GEN z);
+
+/* gen3.c */
+
+GEN     gsubst_expr(GEN pol, GEN from, GEN to);
+GEN     inv_ser(GEN b);
+GEN     mpinv(GEN b);
+GEN     mul_real(GEN x, GEN y);
+GEN     poltoser(GEN x, long v, long prec);
+GEN     qfbeval(GEN q, GEN x, GEN y);
+GEN     rfractoser(GEN x, long v, long prec);
+
+/* groupid.c */
+
+long    group_ident_i(GEN G, GEN S);
+long    group_ident_trans(GEN G, GEN S);
+long    groupelts_sumorders(GEN S);
+GEN     vecgroup_idxlist(GEN L, long order);
+long    vecgroup_sumorders(GEN L);
+
+/* ifactor1.c */
+
+GEN     ellfacteur(GEN n, int insist);
+long    ifac_decomp(GEN n, long hint);
+GEN     ifac_primary_factor(GEN *partial, long *exponent);
+void    ifac_realloc(GEN *partial, GEN *where, long new_lg);
+GEN     ifac_start(GEN n, long moebius, long hint);
+GEN     pollardbrent(GEN n);
+ulong   snextpr(ulong p, byteptr *d, long *rcn, long *q, long k);
+GEN     squfof(GEN n);
+
+/* init.c */
+
+void    err_recover(long numerr);
+GEN     gcopy_av(GEN x, GEN *AVMA);
+int     ok_gerepileupto(GEN x);
+
+/* mp.c */
+
+GEN     incneg(GEN a);
+
+/* nffactor.c */
+
+long    ZM_get_prec(GEN x);
+int     nfissplit(GEN nf, GEN x);
+
+/* perm.c */
+
+long    cosets_perm_search(GEN C, GEN p);
+GEN     group_export_GAP(GEN G);
+GEN     group_export_MAGMA(GEN G);
+GEN     perm_conj(GEN s, GEN t);
+GEN     perm_generate(GEN S, GEN H, long o);
+long    perm_relorder(GEN p, GEN S);
+GEN     perm_to_GAP(GEN p);
+GEN     quotient_subgroup_lift(GEN C, GEN H, GEN S);
+
+/* polarit1.c */
+
+GEN     Flx_Berlekamp_ker(GEN u, ulong p);
+GEN     FpX_Berlekamp_ker(GEN u, GEN p);
+GEN     FpX_factcantor(GEN f, GEN pp, long flag);
+GEN     FqX_Berlekamp_ker(GEN u, GEN T, GEN q, GEN p);
+GEN     FqX_rand(long d1, long v, GEN T, GEN p);
+long    FqX_split_Berlekamp(GEN *t, GEN q, GEN T, GEN p);
+GEN     Zp_appr(GEN f, GEN a);
+int     cmp_padic(GEN x, GEN y);
+GEN     factcantor0(GEN f, GEN pp, long flag);
+GEN     zrhqr(GEN a, long prec);
+
+/* polarit2.c */
+
+GEN     DDF_roots(GEN pol, GEN polp, GEN p);
+GEN     Q_divmuli_to_int(GEN x, GEN d, GEN n);
+long    checkdeflate(GEN x);
+void    factor_quad(GEN x, GEN res, long *ptcnt);
+GEN     factorback_aux(GEN fa, GEN e, GEN (*_mul) (void *, GEN, GEN), GEN (*_pow) (void *, GEN, GEN), void *data);
+GEN     matratlift(GEN M, GEN mod, GEN amax, GEN bmax, GEN denom);
+GEN     pseudodiv(GEN x, GEN y, GEN *ptr);
+long    s_centermod(long x, ulong pp, ulong pps2);
+GEN     sort_vecpol_gen(GEN a, int (*cmp) (GEN, GEN));
+GEN     sylvestermatrix_i(GEN x, GEN y);
+
+/* polarit3.c */
+
+GEN     Flm_Frobenius_pow(GEN M, long d, GEN T, ulong p);
+GEN     Flxq_matrix_pow(GEN y, long n, long m, GEN P, ulong l);
+GEN     FpM_Frobenius_pow(GEN M, long d, GEN T, GEN p);
+GEN     FpXQ_sqrtl(GEN a, GEN l, GEN T, GEN p, GEN q, long e, GEN r, GEN y, GEN m);
+GEN     FpXYQQ_pow(GEN x, GEN n, GEN S, GEN T, GEN p);
+GEN     FpX_compositum(GEN A, GEN B, GEN p);
+GEN     FpX_direct_compositum(GEN A, GEN B, GEN p);
+GEN     FpX_div_by_X_x(GEN a, GEN x, GEN p, GEN *r);
+GEN     FpX_gcd_check(GEN x, GEN y, GEN p);
+GEN     FpX_resultant(GEN a, GEN b, GEN p);
+GEN     RgX_to_FpXQX(GEN x, GEN T, GEN p);
+GEN     Rg_to_FpXQ(GEN x, GEN T, GEN p);
+int     ZX_incremental_CRT(GEN *ptH, GEN Hp, GEN q, GEN qp, ulong p);
+GEN     ZX_init_CRT(GEN Hp, ulong p, long v);
+ulong   ZY_ZXY_ResBound(GEN A, GEN B, GEN dB);
+int     Z_incremental_CRT(GEN *H, ulong Hp, GEN q, GEN qp, ulong p);
+GEN     ffinit_Artin_Shreier(GEN ip, long l);
+GEN     ffinit_rand(GEN p, long n);
+byteptr init_modular(ulong *p);
+GEN     polint_triv(GEN xa, GEN ya);
+
+/* rootpol.c */
+
+GEN     FFT(GEN x, GEN Omega);
+GEN     FFTinit(long k, long prec);
+
+/* subcyclo.c */
+
+GEN     bnr_to_znstar(GEN bnr, long *complex);
+GEN     galoiscyclo(long n, long v);
+GEN     subcyclo_complex_bound(pari_sp ltop, GEN V, long prec);
+GEN     subcyclo_complex_roots(long n, long real, long prec);
+GEN     subcyclo_cyclic(long n, long d, long m, long z, long g, GEN powz, GEN le);
+GEN     subcyclo_orbits(long n, GEN H, GEN O, GEN powz, GEN le);
+GEN     subcyclo_roots(long n, GEN zl);
+GEN     subcyclo_start(long n, long d, long o, GEN borne, long *ptr_val, long *ptr_l);
+GEN     znstar_bits(long n, GEN H);
+long    znstar_conductor(long n, GEN H);
+GEN     znstar_coset_bits(long n, GEN H, long c);
+void    znstar_coset_bits_inplace(long n, GEN H, GEN bits, long c);
+void    znstar_coset_func(long n, GEN H, void (*func) (void *, long), void *data, long c);
+GEN     znstar_cosets(long n, long phi_n, GEN H);
+GEN     znstar_elts(long n, GEN H);
+GEN     znstar_generate(long n, GEN V);
+GEN     znstar_hnf(GEN Z, GEN M);
+GEN     znstar_hnf_generators(GEN Z, GEN M);
+GEN     znstar_partial_bits(long n, GEN H, long d);
+GEN     znstar_partial_coset_bits(long n, GEN H, long d, long c);
+void    znstar_partial_coset_bits_inplace(long n, GEN H, GEN bits, long d, long c);
+void    znstar_partial_coset_func(long n, GEN H, void (*func) (void *, long), void *data, long d, long c);
+GEN     znstar_reduce_modulus(GEN H, long n);
+
+/* thue.c */
+
+GEN     bnfisintnormabs(GEN bnf, GEN a);
+
+/* trans1.c */
+
+GEN     constlog2(long prec);
+GEN     log2old(long prec);
+GEN     padic_sqrtn_ram(GEN x, long e);
+GEN     padic_sqrtn_unram(GEN x, GEN n, GEN *zetan);
+GEN     piold(long prec);
+GEN     rootsof1complex(GEN n, long prec);
+GEN     rootsof1padic(GEN n, GEN y);
+
+/* trans2.c */
+
+GEN     cxpsi(GEN s0, long prec);
+double  darg(double s, double t);
+
+/* trans3.c */
+
+GEN     bernreal_using_zeta(long n, GEN iz, long prec);
+GEN     czeta(GEN s0, long prec);
+GEN     inv_szeta_euler(long n, double lba, long prec);
+GEN     kbesselnew(GEN n, GEN z, long prec);
+GEN     polylogd0(long m, GEN x, long flag, long prec);
+GEN     twistpartialzeta(GEN p, GEN q, long f, long c, GEN va, GEN cff);
+GEN     wf1(GEN x, long prec);
+
 ENDEXTERN
