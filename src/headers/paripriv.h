@@ -600,7 +600,6 @@ GEN     gen_vecsort(GEN x, GEN k, long flag);
 GEN     buchquad(GEN D, double cbach, double cbach2, long RELSUP, long prec);
 GEN     form_to_ideal(GEN x);
 GEN     getallforms(GEN D, long *pth, GEN *ptz);
-int     isoforder2(GEN form);
 
 /* buch2.c */
 

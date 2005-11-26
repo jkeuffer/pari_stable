@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
 /*       Hilbert and Ray Class field using CM (Schertz)            */
 /*                                                                 */
 /*******************************************************************/
-int
+static int
 isoforder2(GEN form)
 {
   GEN a = gel(form,1), b = gel(form,2), c = gel(form,3);
