@@ -1,10 +1,10 @@
 Function: _stack_lim
 Class: gp2c_internal
 Description: 
- (ulong, small):ulong		 stack_lim($1, $2)
+ (pari_sp,small):pari_sp       stack_lim($1, $2)
 
 Function: _low_stack_lim
 Class: gp2c_internal
 Description:
- (ulong, ulong):bool  low_stack($1, stack_lim($2, 1))
+ (pari_sp,pari_sp):bool        low_stack($1, stack_lim($2, 1))
 

@@ -1,5 +1,5 @@
 Function: _avma
 Class: gp2c_internal
 Description: 
- ():ulong		avma
+ ():pari_sp		avma
 

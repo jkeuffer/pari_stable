@@ -1,9 +1,9 @@
 Function: _gerepileupto
 Class: gp2c_internal
 Description:
- (ulong, int):int               gerepileuptoint($1, $2)
- (ulong, mp):mp                 gerepileuptoleaf($1, $2)
- (ulong, vecsmall):vecsmall     gerepileuptoleaf($1, $2)
- (ulong, vec):vec               gerepilecopy($1, $2)
- (ulong, gen):gen               gerepileupto($1, $2)
+ (pari_sp, int):int               gerepileuptoint($1, $2)
+ (pari_sp, mp):mp                 gerepileuptoleaf($1, $2)
+ (pari_sp, vecsmall):vecsmall     gerepileuptoleaf($1, $2)
+ (pari_sp, vec):vec               gerepilecopy($1, $2)
+ (pari_sp, gen):gen               gerepileupto($1, $2)
 

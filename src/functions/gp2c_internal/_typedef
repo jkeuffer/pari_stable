@@ -56,7 +56,7 @@ Description:
  (bptr)         byteptr
  (func_GG)      func_GG
  (gptr)         GEN*[]
- (ulong)        pari_sp
+ (pari_sp)      pari_sp
  (typ)          long
  (nf)           GEN
  (bnf)          GEN
