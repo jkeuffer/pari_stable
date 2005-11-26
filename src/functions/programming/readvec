@@ -1,5 +1,4 @@
 Function: readvec
-Class: gp
 Section: programming
 C-Name: gp_readvec_file
 Prototype: D"",s,
