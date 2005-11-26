@@ -32,7 +32,7 @@ typedef struct {
   long m;
 } toK_s;
 
-long
+static long
 prank(GEN cyc, long ell)
 {
   long i;
