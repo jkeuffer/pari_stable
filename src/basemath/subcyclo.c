@@ -393,7 +393,7 @@ struct _subcyclo_orbits_s
   pari_sp ltop;
 };
 
-void
+static void
 _subcyclo_orbits(struct _subcyclo_orbits_s *data, long k)
 {
   GEN powz = data->powz;
