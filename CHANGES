@@ -81,7 +81,7 @@ BA 18- config/has_stat.c didn't work with g++
     3- allow vector of points in ellisoncurve()
     4- tunings in quadclassunit (#298 / #355)
     5- [Configure:] take CPPFLAGS into account
-    6- 'int' C type is now reserved for boolean values. Use 'long' instead.
+    6- 'int' C type is now reserved for -1/0/1 values. Use 'long' otherwise.
     7- Fl_inv and Fl_div now raise an error when divisor not invertible
        [ used to return 0 ]
     8- removed the threshold that prevented exponent overflow in
