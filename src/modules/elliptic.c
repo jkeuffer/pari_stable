@@ -1436,7 +1436,7 @@ weipell0(GEN e, long prec, long PREC)
 }
 
 /* assume x a t_POL */
-int
+static int
 is_simple_var(GEN x)
 {
   return (degpol(x) == 1 && gcmp0(gel(x,2)) && gcmp1(gel(x,3)));
