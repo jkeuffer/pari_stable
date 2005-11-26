@@ -1210,7 +1210,7 @@ GEN     cgetalloc(long t, size_t l);
 GEN     changevar(GEN x, GEN y);
 void    disable_dbg(long val);
 GEN     shallowcopy(GEN x);
-void    err(long numerr, ...);
+void    pari_err(long numerr, ...);
 void*   err_catch(long errnum, jmp_buf *penv);
 void    err_leave(void **v);
 GEN     forcecopy(GEN x);

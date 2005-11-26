@@ -1058,7 +1058,7 @@ err_recover(long numerr)
 }
 
 void
-err(long numerr, ...)
+pari_err(long numerr, ...)
 {
   char s[128], *ch1;
   int ret = 0;
