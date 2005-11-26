@@ -610,7 +610,7 @@ static mpqs_parameterset_t mpqs_parameters[] =
 /**                                                                 **/
 /*********************************************************************/
 
-char *i2str(GEN x) { return itostr(x, signe(x) < 0); }
+static char *i2str(GEN x) { return itostr(x, signe(x) < 0); }
 
 /* number of decimal digits of argument - for parameter choosing and for
  * diagnostics */
