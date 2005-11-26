@@ -238,14 +238,14 @@ typedef struct _intdata {
 #define TABxm(v) ((GEN*)v)[6]
 #define TABwm(v) ((GEN*)v)[7]
 
-int
+static int
 isinR(GEN z)
 {
   long tz = typ(z);
   return (tz == t_INT || tz == t_REAL || tz == t_FRAC);
 }
 
-int
+static int
 isinC(GEN z)
 {
   return (typ(z) == t_COMPLEX)? isinR(gel(z,1)) && isinR(gel(z,2)):
