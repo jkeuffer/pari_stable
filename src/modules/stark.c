@@ -48,7 +48,7 @@ typedef struct {
 /*                    Miscellaneous functions                       */
 /********************************************************************/
 /* exp(2iPi/den), assume den a t_INT */
-GEN
+static GEN
 InitRU(GEN den, long prec)
 {
   GEN c, s;
@@ -366,7 +366,7 @@ ComputeIndex2Subgroup(GEN bnr, GEN C)
   return gerepilecopy(av, subgrp);
 }
 
-GEN
+static GEN
 Order(GEN cyc, GEN x)
 {
   pari_sp av = avma;
@@ -1867,7 +1867,7 @@ RecCoeff2(GEN nf,  RC_data *d,  long prec)
 /* Attempts to find a polynomial with coefficients in nf such that
    its coefficients are close to those of pol at the place v and
    less than B at all the other places */
-GEN
+static GEN
 RecCoeff(GEN nf,  GEN pol,  long v, long prec)
 {
   long j, md, cl = degpol(pol);
