@@ -299,7 +299,6 @@ GEN   geni(void);
 void* get_stack(double fraction, long min);
 GEN   gpreadseq(char *c, int strict);
 void  init_defaults(int force);
-void  init_graph(void);
 void  initout(int initerr);
 void  init80col(long n);
 char* itostr(GEN x, int minus);
