@@ -1224,7 +1224,7 @@ Fl_sqrt(ulong a, ulong p)
  *
  * cf: LNCS 2286, pp 430-434 (2002)  [Gonzalo Tornaria] */
 
-GEN
+static GEN
 sqrt_Cipolla_sqr(void *data, GEN y)
 { 
   GEN u = gel(y,1), v = gel(y,2);
@@ -1237,7 +1237,7 @@ sqrt_Cipolla_sqr(void *data, GEN y)
   return mkvec2(u,v);
 }
 
-GEN
+static GEN
 sqrt_Cipolla_msqr(void *data, GEN y)
 { 
   GEN u = gel(y,1), v = gel(y,2);
