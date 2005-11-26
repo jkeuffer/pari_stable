@@ -963,14 +963,6 @@ factoru_pow(ulong n)
 /**                    BASIC ARITHMETIC FUNCTIONS                     **/
 /**                                                                   **/
 /***********************************************************************/
-extern long ifac_moebius(GEN n, long hint);
-extern long ifac_issquarefree(GEN n, long hint);
-extern long ifac_omega(GEN n, long hint);
-extern long ifac_bigomega(GEN n, long hint);
-extern GEN ifac_totient(GEN n, long hint);
-extern GEN ifac_numdiv(GEN n, long hint);
-extern GEN ifac_sumdiv(GEN n, long hint);
-extern GEN ifac_sumdivk(GEN n, long k, long hint);
 
 GEN
 gmu(GEN n) { return arith_proto(mu,n,1); }
