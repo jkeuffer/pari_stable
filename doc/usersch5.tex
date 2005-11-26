@@ -1781,6 +1781,8 @@ asymptotically efficient ($O(n^3)$ standard algorithms).
 \fun{GEN}{FpM_deplin}{GEN x, GEN p} returns a non-trivial kernel vector,
 or \kbd{NULL} if none exist.
 
+\fun{GEN}{FpM_gauss}{GEN a, GEN b, GEN p} as \kbd{gauss}
+
 \fun{GEN}{FpM_image}{GEN x, GEN p} as \kbd{image}
 
 \fun{GEN}{FpM_intersect}{GEN x, GEN y, GEN p} as \kbd{intersect}
@@ -1964,6 +1966,8 @@ $\kbd{l} = \kbd{lg(x)}$, in place.
 
 \fun{GEN}{Flm_deplin}{GEN x, ulong p}
 
+\fun{GEN}{Flm_gauss}{GEN a, GEN b, ulong p}
+ 
 \fun{GEN}{Flm_indexrank}{GEN x, ulong p}
 
 \fun{GEN}{Flm_inv}{GEN x, ulong p}

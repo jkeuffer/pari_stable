@@ -98,6 +98,7 @@ GEN     zero_Flx(long sv);
 
 GEN     Flm_Flc_mul(GEN x, GEN y, ulong p);
 GEN     Flm_deplin(GEN x, ulong p);
+GEN     Flm_gauss(GEN a, GEN b, ulong p);
 GEN     Flm_indexrank(GEN x, ulong p);
 GEN     Flm_inv(GEN x, ulong p);
 GEN     Flm_ker(GEN x, ulong p);
@@ -108,6 +109,7 @@ GEN     FpC_Fp_mul(GEN x, GEN y, GEN p);
 GEN     FpC_FpV_mul(GEN x, GEN y, GEN p);
 GEN     FpM_FpC_mul(GEN x, GEN y, GEN p);
 GEN     FpM_deplin(GEN x, GEN p);
+GEN     FpM_gauss(GEN a, GEN b, GEN p);
 GEN     FpM_image(GEN x, GEN p);
 GEN     FpM_intersect(GEN x, GEN y, GEN p);
 GEN     FpM_inv(GEN x, GEN p);
