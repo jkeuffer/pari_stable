@@ -56,7 +56,7 @@ matalgtobasis(GEN nf,GEN x)
   return z;
 }
 
-GEN
+static GEN
 _checkrnfeq(GEN x)
 {
   if (typ(x) == t_VEC)
