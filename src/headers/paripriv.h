@@ -318,9 +318,7 @@ void  push_val(entree *ep, GEN a);
 void  recover(int flag);
 int   term_height(void);
 int   term_width(void);
-void  texmacs_completion(char *s, long pos);
 void  var_make_safe();
-int   whatnow(char *s, int flag);
 void  whatnow_new_syntax(char *f, long n);
 
 /* defaults */
@@ -432,7 +430,6 @@ char *filtre(char *s, int flag);
 void check_filtre(filtre_t *F);
 
 gp_data *default_gp_data(void);
-char *color_prompt(char *prompt);
 GEN  gp_history(gp_hist *H, long p, char *old, char *entry);
 GEN  set_hist_entry(gp_hist *H, GEN x);
 

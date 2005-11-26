@@ -26,6 +26,8 @@ void gp_output(GEN z, gp_data *G);
 void hit_return(void);
 void init_readline(void);
 void update_logfile(const char *prompt, const char *s);
+void texmacs_completion(char *s, long pos);
+char *color_prompt(char *prompt);
 
 /* aide() */
 #define h_REGULAR 0
