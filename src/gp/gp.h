@@ -28,6 +28,7 @@ void init_readline(void);
 void update_logfile(const char *prompt, const char *s);
 void texmacs_completion(char *s, long pos);
 char *color_prompt(char *prompt);
+void print_fun_list(char **list, long nbli);
 
 /* aide() */
 #define h_REGULAR 0

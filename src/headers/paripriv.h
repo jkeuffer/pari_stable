@@ -308,7 +308,6 @@ int   pari_kernel_init(void);
 int   pari_last_was_newline(void);
 void  pari_set_last_newline(int last);
 void  print_functions_hash(const char *s);
-void  print_fun_list(char **matches, long nbli);
 void  print_user_fun(entree *ep);
 void  print_user_member(entree *ep);
 void  print_all_user_fun(void);
