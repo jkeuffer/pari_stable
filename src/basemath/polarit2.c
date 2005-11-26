@@ -2388,7 +2388,7 @@ ellpow(void *GEN x, GEN n) { return powell((GEN) ell, x, n); }
 #endif
 
 GEN
-_factorback(GEN fa, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(void*,GEN,GEN), void *data)
+factorback_aux(GEN fa, GEN e, GEN (*_mul)(void*,GEN,GEN), GEN (*_pow)(void*,GEN,GEN), void *data)
 {
   pari_sp av = avma;
   long k,l,lx,t = typ(fa);
@@ -2439,10 +2439,10 @@ factorback_i(GEN fa, GEN e, GEN OBJ, int red)
     if (e) {
       OBJ = _checknf(e); if (OBJ) e = NULL;
     }
-    if (!OBJ) return _factorback(fa, e, &_agmul, &_apowgi, NULL);
+    if (!OBJ) return factorback_aux(fa, e, &_agmul, &_apowgi, NULL);
   }
-  if (red) return _factorback(fa, e, &idmulred, &idpowred, OBJ);
-  else     return _factorback(fa, e, &idmul,    &idpow, OBJ);
+  if (red) return factorback_aux(fa, e, &idmulred, &idpowred, OBJ);
+  else     return factorback_aux(fa, e, &idmul,    &idpow, OBJ);
 }
 
 GEN
@@ -2452,7 +2452,7 @@ factorbackelt(GEN fa, GEN e, GEN nf)
   if (!nf) err(talker, "missing nf in factorbackelt");
 
   nf = checknf(nf);
-  return _factorback(fa, e, &eltmul, &eltpow, nf);
+  return factorback_aux(fa, e, &eltmul, &eltpow, nf);
 }
 
 GEN
