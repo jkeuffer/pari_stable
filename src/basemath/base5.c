@@ -51,7 +51,7 @@ matalgtobasis(GEN nf,GEN x)
   for (j=1; j<lx; j++)
   {
     c = cgetg(li,t_COL); gel(z,j) = c;
-    for (i=1; i<li; i++) gel(c,i) = _algtobasis_cp(nf, gcoeff(x,i,j));
+    for (i=1; i<li; i++) gel(c,i) = algtobasis_cp(nf, gcoeff(x,i,j));
   }
   return z;
 }
@@ -329,7 +329,7 @@ rnfbasistoalg(GEN rnf,GEN x)
   {
     case t_VEC: case t_COL:
       p1 = cgetg(lx,t_COL); nf = gel(rnf,10);
-      for (i=1; i<lx; i++) gel(p1,i) = _basistoalg(nf, gel(x,i));
+      for (i=1; i<lx; i++) gel(p1,i) = basistoalg_i(nf, gel(x,i));
       p1 = gmul(gmael(rnf,7,1), p1);
       return gerepileupto(av, gmodulcp(p1,gel(rnf,1)));
 

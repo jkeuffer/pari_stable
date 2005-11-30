@@ -546,8 +546,8 @@ GEN     zkmodprinit(GEN nf, GEN pr);
 
 int     RgV_isscalar(GEN x);
 GEN     _algtobasis(GEN nf, GEN x);
-GEN     _algtobasis_cp(GEN nf, GEN x);
-GEN     _basistoalg(GEN nf, GEN x);
+GEN     algtobasis_cp(GEN nf, GEN x);
+GEN     basistoalg_i(GEN nf, GEN x);
 GEN     algtobasis(GEN nf, GEN x);
 GEN     algtobasis_i(GEN nf,GEN x);
 GEN     arch_to_perm(GEN arch);
@@ -1088,7 +1088,6 @@ long    Z_pvalrem(GEN x, GEN p, GEN *py);
 
 /* gen3.c */
 
-GEN     _toser(GEN x);
 GEN     Mod0(GEN x, GEN y,long flag);
 GEN     ceil_safe(GEN x);
 GEN     ceilr(GEN x);
@@ -1190,6 +1189,7 @@ GEN     scalarser(GEN x, long v, long prec);
 GEN     simplify(GEN x);
 GEN     simplify_i(GEN x);
 GEN     tayl(GEN x, long v, long precdl);
+GEN     toser_i(GEN x);
 GEN     truecoeff(GEN x, long n);
 GEN     trunc0(GEN x, GEN *pte);
 GEN     u2toi(ulong a, ulong b);

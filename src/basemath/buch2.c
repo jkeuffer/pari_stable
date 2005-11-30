@@ -1370,11 +1370,11 @@ static GEN
 triv_gen(GEN nf, GEN x, long c, long flag)
 {
   GEN y;
-  if (flag & nf_GEN_IF_PRINCIPAL) return _algtobasis_cp(nf,x);
+  if (flag & nf_GEN_IF_PRINCIPAL) return algtobasis_cp(nf,x);
   if (!(flag & (nf_GEN|nf_GENMAT))) return zerocol(c);
   y = cgetg(3,t_VEC);
   gel(y,1) = zerocol(c);
-  gel(y,2) = _algtobasis_cp(nf,x); return y;
+  gel(y,2) = algtobasis_cp(nf,x); return y;
 }
 
 GEN

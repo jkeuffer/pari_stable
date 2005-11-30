@@ -134,7 +134,7 @@ gatan(GEN x, long prec)
     case t_INTMOD: case t_PADIC: err(typeer,"gatan");
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) err(negexper,"gatan");
       if (lg(y)==2) return gcopy(y);
       /* lg(y) > 2 */
@@ -194,7 +194,7 @@ gasin(GEN x, long prec)
 
     case t_INTMOD: case t_PADIC: err(typeer,"gasin");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
       /* lg(y) > 2*/
       if (valp(y) < 0) err(negexper,"gasin");
@@ -259,7 +259,7 @@ gacos(GEN x, long prec)
 
     case t_INTMOD: case t_PADIC: err(typeer,"gacos");
     case t_SER:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) err(negexper,"gacos");
       if (lg(y) > 2)
       {
@@ -391,7 +391,7 @@ gch(GEN x, long prec)
       return gerepileupto(av, gmul2n(p1,-1));
     case t_INTMOD: err(typeer,"gch");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y) && valp(y) == 0) return gcopy(y);
       p1 = gexp(y,prec); p1 = gadd(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
@@ -430,7 +430,7 @@ gsh(GEN x, long prec)
       return gerepileupto(av, gmul2n(p1,-1));
     case t_INTMOD: 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y) && valp(y) == 0) return gcopy(y);
       p1 = gexp(y, prec); p1 = gsub(p1, ginv(p1));
       return gerepileupto(av, gmul2n(p1,-1));
@@ -478,7 +478,7 @@ gth(GEN x, long prec)
       return gerepileupto(av, gaddsg(1,t));
     case t_INTMOD: err(typeer,"gth");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
       t = gexp(gmul2n(y, 1),prec);
       t = gdivsg(-2, gaddgs(t,1));
@@ -532,7 +532,7 @@ gash(GEN x, long prec)
       return gerepileupto(av, gadd(gneg_i(y), pureimag(p1)));
     case t_INTMOD: case t_PADIC: err(typeer,"gash");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
       if (valp(y) < 0) err(negexper,"gash");
 
@@ -590,7 +590,7 @@ gach(GEN x, long prec)
     case t_INTMOD: case t_PADIC: err(typeer,"gach");
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       v = valp(y);
       if (v < 0) err(negexper,"gach");
       if (gcmp0(y))
@@ -653,7 +653,7 @@ gath(GEN x, long prec)
 
     case t_INTMOD: case t_PADIC: err(typeer,"gath");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) < 0) err(negexper,"gath");
       p1 = gdiv(derivser(y), gsubsg(1,gsqr(y)));
       a = integ(p1, varn(y));
@@ -1373,7 +1373,7 @@ ggamma(GEN x, long prec)
     case t_PADIC: return gammap(x);
     case t_INTMOD: err(typeer,"ggamma");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       return gerepileupto(av, gexp(glngamma(y,prec),prec));
   }
   return transc(ggamma,x,prec);
@@ -1412,7 +1412,7 @@ glngamma(GEN x, long prec)
       return cxgamma(x, 1, prec);
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (valp(y)) err(negexper,"glngamma");
       p1 = gsubsg(1,y);
       if (!valp(p1)) err(impl,"lngamma around a!=1");

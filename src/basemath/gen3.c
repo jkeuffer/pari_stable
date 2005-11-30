@@ -2354,7 +2354,7 @@ rfractoser(GEN x, long v, long prec)
 }
 
 GEN
-_toser(GEN x)
+toser_i(GEN x)
 {
   switch(typ(x))
   {

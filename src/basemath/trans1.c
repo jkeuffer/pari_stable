@@ -253,7 +253,7 @@ transc(GEN (*f)(GEN,long), GEN x, long prec)
       return gerepile(av,tetpil,f(p1,prec));
 
     case t_POL: case t_RFRAC:
-      return gerepileupto(av, f(_toser(x), prec));
+      return gerepileupto(av, f(toser_i(x), prec));
 
     case t_VEC: case t_COL: case t_MAT:
       lx = lg(x); y = cgetg(lx,typ(x));
@@ -734,7 +734,7 @@ gpow(GEN x, GEN n, long prec)
     return y;
   }
   av = avma;
-  if (tx == t_POL || tx == t_RFRAC) { x = _toser(x); tx = t_SER; }
+  if (tx == t_POL || tx == t_RFRAC) { x = toser_i(x); tx = t_SER; }
   if (tx == t_SER)
   {
     long tn = typ(n);
@@ -958,7 +958,7 @@ gsqrt(GEN x, long prec)
       return padic_sqrt(x);
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       return gerepileupto(av, ser_powfrac(y, ghalf, prec));
   }
   return transc(gsqrt,x,prec);
@@ -1163,7 +1163,7 @@ gsqrtn(GEN x, GEN n, GEN *zetan, long prec)
     return gsqrtn(quadtoc(x, prec), n, zetan, prec);
 
   default:
-    av = avma; if (!(y = _toser(x))) break;
+    av = avma; if (!(y = toser_i(x))) break;
     return gerepileupto(av, ser_powfrac(y, ginv(n), prec));
   }
   err(typeer,"gsqrtn");
@@ -1433,7 +1433,7 @@ gexp(GEN x, long prec)
     {
       pari_sp av = avma;
       GEN y;
-      if (!(y = _toser(x))) break;
+      if (!(y = toser_i(x))) break;
       return gerepileupto(av, serexp(y,prec));
     }
   }
@@ -1530,7 +1530,7 @@ agm1(GEN x, long prec)
       return gerepilecopy(av,a1);
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       a1 = y; b1 = gen_1; l = lg(y)-2;
       l2 = 5-bit_accuracy(prec);
       do
@@ -1885,7 +1885,7 @@ glog(GEN x, long prec)
 
     case t_INTMOD: err(typeer,"glog");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (valp(y) || gcmp0(y)) err(talker,"log is not meromorphic at 0");
       p1 = integ(gdiv(derivser(y), y), varn(y)); /* log(y)' = y'/y */
       if (!gcmp1(gel(y,2))) p1 = gadd(p1, glog(gel(y,2),prec));
@@ -2043,7 +2043,7 @@ gcos(GEN x, long prec)
       return x;
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gaddsg(1,y);
       if (valp(y) < 0) err(negexper,"gcos");
       gsincos(y,&u,&v,prec);
@@ -2110,7 +2110,7 @@ gsin(GEN x, long prec)
       return x;
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
       if (valp(y) < 0) err(negexper,"gsin");
       gsincos(y,&u,&v,prec);
@@ -2202,7 +2202,7 @@ gsincos(GEN x, GEN *s, GEN *c, long prec)
       gerepileall(av, 2, s, c); return;
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) { *c = gaddsg(1,y); *s = gcopy(y); return; }
 
       ex = valp(y); lx = lg(y); ex2 = 2*ex+2;
@@ -2301,7 +2301,7 @@ gtan(GEN x, long prec)
     case t_INTMOD: err(typeer,"gtan");
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) return gcopy(y);
       if (valp(y) < 0) err(negexper,"gtan");
       gsincos(y,&s,&c,prec);
@@ -2348,7 +2348,7 @@ gcotan(GEN x, long prec)
     case t_INTMOD: err(typeer,"gcotan");
 
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (gcmp0(y)) err(talker,"0 argument in cotan");
       if (valp(y) < 0) err(negexper,"cotan"); /* fall through */
       gsincos(y,&s,&c,prec);

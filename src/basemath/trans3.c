@@ -122,7 +122,7 @@ jbesselintern(GEN n, GEN z, long flag, long prec)
 
     case t_PADIC: err(impl,"p-adic jbessel function");
     default:
-      if (!(y = _toser(z))) break;
+      if (!(y = toser_i(z))) break;
       if (isint(n,&ki)) n = stoi(labs(ki));
       return gerepilecopy(av, _jbessel(n,y,flag,lg(y)-2));
   }
@@ -218,7 +218,7 @@ jbesselh(GEN n, GEN z, long prec)
     case t_PADIC: err(impl,"p-adic jbesselh function");
     default:
       av = avma;
-      if (!(y = _toser(z))) break;
+      if (!(y = toser_i(z))) break;
       if (gcmp0(y)) return gpowgs(y,k);
       if (valp(y) < 0) err(negexper,"jbesselh");
       y = gprec(y, lg(y)-2 + (2*k+1)*valp(y));
@@ -483,7 +483,7 @@ kbesselintern(GEN n, GEN z, long flag, long prec)
 
     case t_PADIC: err(impl,"p-adic kbessel function");
     default:
-      if (!(y = _toser(z))) break;
+      if (!(y = toser_i(z))) break;
       if (isint(n,&ki))
       {
 	k = labs(ki);
@@ -2037,7 +2037,7 @@ gpolylog(long m, GEN x, long prec)
 
     case t_INTMOD: case t_PADIC: err(impl, "padic polylogarithm");
     default:
-      av = avma; if (!(y = _toser(x))) break;
+      av = avma; if (!(y = toser_i(x))) break;
       if (!m) { avma = av; return gneg(ghalf); }
       if (m==1) return gerepileupto(av, gneg( glog(gsub(gen_1,y),prec) ));
       if (gcmp0(y)) return gcopy(y);
@@ -2105,7 +2105,7 @@ qq(GEN x, long prec)
     x = upper_half(x, &prec);
     return gexp(gmul(mulcxI(x), Pi2n(1,prec)), prec); /* e(x) */
   }
-  if (! ( x = _toser(x)) ) err(talker,"bad argument for modular function");
+  if (! ( x = toser_i(x)) ) err(talker,"bad argument for modular function");
   return x;
 }
 

@@ -639,7 +639,7 @@ basistoalg(GEN nf, GEN x)
 }
 
 GEN
-_basistoalg(GEN nf, GEN x)
+basistoalg_i(GEN nf, GEN x)
 { return typ(x) == t_COL? basistoalg(nf, x): x; }
 GEN
 _algtobasis(GEN nf, GEN x)
@@ -657,7 +657,7 @@ _algtobasis(GEN nf, GEN x)
   return x;
 }
 GEN
-_algtobasis_cp(GEN nf, GEN x)
+algtobasis_cp(GEN nf, GEN x)
 { return typ(x) == t_COL? gcopy(x): algtobasis(nf, x); }
 
 /* gmul(A, RgX_to_RgV(x)), A t_MAT (or t_VEC) of compatible dimensions */
