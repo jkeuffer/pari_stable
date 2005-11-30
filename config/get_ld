@@ -31,7 +31,7 @@ fi
 if ($LDused -v 2>&1 | grep GNU > /dev/null); then GNULDused=yes; fi
 
 case "$osname-$arch" in
-  linux-*|cygwin*|freebsd-*|netbsd-*)
+  gnu*|linux-*|cygwin*|freebsd-*|netbsd-*)
     tmp=`./ldflags "$LDneedsWl" "-export-dynamic"`
     ldflags="$ldflags $tmp" ;;
   aix-*)  ldflags='-brtl' ;; # in case we link against a shared library

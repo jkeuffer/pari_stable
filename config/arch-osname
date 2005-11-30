@@ -60,7 +60,8 @@ if test -n "$myuname"; then
 	    sun4u)    arch=sparcv9;;
             i*pc) arch=ix86;;
 	    esac;;
-  gnu)      arch=`uname -m`;
+  gnu*)     # Cover GNU/Hurd, GNU/kFreeBSD and other GNU userland
+            arch=`uname -m`; 
             case $arch in i386-*) arch=i386;;esac;;
   esac
 fi
